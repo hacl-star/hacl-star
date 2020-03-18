@@ -21,7 +21,7 @@ open FStar.Tactics.Canon
 open Spec.P256.Lemmas
 open Lib.IntTypes.Intrinsics
 
-#reset-options "--z3rlimit 400"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 400"
 
 val eq0_u64: a: uint64 -> Tot (r: uint64 {if uint_v a = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0})
 
@@ -293,8 +293,7 @@ let add4_with_carry c x y result =
     
     cc
 
-
-#reset-options "--z3rlimit 400"
+#push-options "--z3rlimit 500"
 
 val add8: x: widefelem -> y: widefelem -> result: widefelem -> Stack uint64 
   (requires fun h -> live h x /\ live h y /\ live h result /\ eq_or_disjoint x result /\ eq_or_disjoint y result)
@@ -334,6 +333,7 @@ let add8 x y result =
 
     carry1
 
+#pop-options
 
 val add4_variables: x: felem -> cin: uint64 {uint_v cin <=1} ->  y0: uint64 -> y1: uint64 -> y2: uint64 -> y3: uint64 -> 
   result: felem -> 
@@ -595,6 +595,7 @@ let mul1_add f1 u2 f3 result =
   pop_frame();  
   c +! c3
 
+#push-options "--z3rlimit 600"
 
 val mul: f: felem -> r: felem -> out: widefelem
   -> Stack unit
@@ -654,15 +655,27 @@ let mul f r out =
   
   pop_frame()
 
+#pop-options
 
 val lemma_320: a: uint64 -> b: uint64 -> c: uint64 -> d: uint64 -> u: uint64 -> Lemma 
   (uint_v u * uint_v a +  (uint_v u * uint_v b) * pow2 64 + (uint_v u * uint_v c) * pow2 64 * pow2 64 + (uint_v u * uint_v d) * pow2 64 * pow2 64 * pow2 64 < pow2 320)
   
 let lemma_320 a b c d u = 
-  assert(uint_v u <= pow2 64 - 1);
-  assert(uint_v d <= pow2 64 - 1);
+  lemma_mult_le_left (uint_v d) (uint_v u) (pow2 64 - 1);
+  lemma_mult_le_right (uint_v u) (uint_v d) (pow2 64 - 1);
+
+  assert(uint_v u * uint_v a <= (pow2 64 - 1) * (pow2 64 - 1));
+  assert(uint_v u * uint_v d <= (pow2 64 - 1) * (pow2 64 - 1));
+  assert(uint_v u * uint_v c <= (pow2 64 - 1) * (pow2 64 - 1));
   assert(uint_v u * uint_v d <= (pow2 64 - 1) * (pow2 64 - 1));
 
+  assert (uint_v u * uint_v a +  (uint_v u * uint_v b) * pow2 64 + (uint_v u * uint_v c) * pow2 64 * pow2 64 + (uint_v u * uint_v d) * pow2 64 * pow2 64 * pow2 64 
+  <= (pow2 64 - 1) * (pow2 64 - 1) +  
+    ((pow2 64 - 1) * (pow2 64 - 1)) * pow2 64 + 
+    ((pow2 64 - 1) * (pow2 64 - 1)) * pow2 64 * pow2 64 + 
+    ((pow2 64 - 1) * (pow2 64 - 1)) * pow2 64 * pow2 64 * pow2 64);
+    
+  
   assert_norm((pow2 64 - 1) * (pow2 64 - 1) +  
     ((pow2 64 - 1) * (pow2 64 - 1)) * pow2 64 + 
     ((pow2 64 - 1) * (pow2 64 - 1)) * pow2 64 * pow2 64 + 
@@ -883,16 +896,10 @@ val lemma_320_1: a: nat -> b: nat -> c: nat {c < pow2 64} -> d: nat {d < pow2 25
 
 let lemma_320_1 a b c d e = 
   assert_norm ((pow2 64 - 1) * (pow2 256 - 1) + pow2 256 < pow2 320);
-  assert(c <= pow2 64 - 1);
-  assert(d <= pow2 256 - 1);
-  assert(c * d <= (pow2 64 - 1) * (pow2 256 - 1));
-  assert(c * d + e < pow2 320);
-  assert(b * pow2 256 < pow2 320);
-  lemma_div_lt_nat (b * pow2 256) 320 256;
-  assert(((b * pow2 256) / pow2 256) < pow2 64);
-  pow2_multiplication_division_lemma_1 b 256 256;
-  assert((b * pow2 256) / pow2 256 = b);
-  assert(b < pow2 64)
+  lemma_mult_le_left d c (pow2 64 - 1);
+  lemma_mult_le_right c d (pow2 256 - 1);
+  lemma_div_lt_nat (b * pow2 256) 320 256; 
+  pow2_multiplication_division_lemma_1 b 256 256
 
 
 let sq1 f f4 result memory tempBuffer = 
@@ -1198,7 +1205,6 @@ let sq3 f f4 result memory tempBuffer =
   c3 +! h_3 +! c4
 
 
-#reset-options "--z3rlimit 300"
 val sq: f: felem -> out: widefelem -> Stack unit
     (requires fun h -> live h out /\ live h f /\ eq_or_disjoint f out)
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\ wide_as_nat h1 out = as_nat h0 f * as_nat h0 f)
@@ -1357,7 +1363,6 @@ let shift_256_impl i o =
   assert_norm(pow2 64 * pow2 64 * pow2 64  * pow2 64 * pow2 64* pow2 64 * pow2 64 * pow2 64 = pow2 (8 * 64))
 
 
-#reset-options "--z3rlimit 200"
 inline_for_extraction noextract
 val mod64: a: widefelem -> Stack uint64 
   (requires fun h -> live h a) 
