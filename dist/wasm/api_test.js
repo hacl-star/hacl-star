@@ -1,4 +1,4 @@
-var api = require('./api.js')
+var HaclWasm = require('./api.js')
 var test_vectors = require('./api.json');
 var eq_array = function(a1, a2) {
   if (a1.length !== a2.length) {
@@ -96,11 +96,11 @@ async function checkTestVectors(func_sig, func, msg) {
   }
 }
 
-api.HaclWasm.checkIfInitialized().then(async function() {
+HaclWasm.checkIfInitialized().then(async function() {
   var tests = [];
   Promise.all(Object.keys(test_vectors).map(function(key_module) {
     Object.keys(test_vectors[key_module]).map(function(key_func) {
-      tests.push([test_vectors[key_module][key_func], api.HaclWasm[key_module][key_func], key_module + "." + key_func]);
+      tests.push([test_vectors[key_module][key_func], HaclWasm[key_module][key_func], key_module + "." + key_func]);
     })
   }))
   for (var i = 0; i < tests.length; i++) {

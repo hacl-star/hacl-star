@@ -4,8 +4,6 @@ var loader = require('./loader.js')
 var shell = require('./shell.js')
 var api_json = require('./api.json')
 
-// Beginning
-
 var HaclWasm = (function() {
   'use strict';
   var isInitialized = false
@@ -175,20 +173,6 @@ var HaclWasm = (function() {
     throw "Unimplemented !"
   }
 
-
-  const Curve25519_51 = {
-    ecdh: async function ecdh(
-      key,
-      input
-    ) {
-      await checkIfInitialized();
-      return callWithProto(api_json.Curve25519_51.ecdh, [
-        key,
-        input,
-      ]);
-    }
-  }
-
   var checkObj = {
     checkIfInitialized: checkIfInitialized,
   }
@@ -213,7 +197,6 @@ var HaclWasm = (function() {
   }
 })();
 
-if (typeof module !== "undefined")
-  module.exports = {
-    HaclWasm: HaclWasm,
-  }
+if (typeof module !== "undefined") {
+  module.exports = HaclWasm
+}
