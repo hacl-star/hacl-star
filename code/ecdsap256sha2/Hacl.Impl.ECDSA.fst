@@ -46,3 +46,6 @@ let decompressionNotCompressed b result =
 
 let decompressionCompressed b result = 
   Hacl.Impl.P256.Compression.decompressionCompressed b result
+
+let decompressionNotCompressed2 b result = 
+	Hacl.Impl.P256.Compression.decompressionNotCompressed2 b result
