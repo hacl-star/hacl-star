@@ -120,7 +120,7 @@ val frodo_sample_matrix:
   -> seedLen:size_nat
   -> seed:lbytes seedLen
   -> ctr:uint16
-  -> res:matrix n1 n2
+  -> matrix n1 n2
 let frodo_sample_matrix n1 n2 seedLen seed ctr =
   let res = Matrix.create n1 n2 in
   let r = frodo_prf_spec seedLen seed ctr (2 * n1 * n2) in

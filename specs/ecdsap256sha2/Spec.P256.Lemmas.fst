@@ -15,7 +15,7 @@ open FStar.Tactics.Canon
 
 
 noextract
-val pow: a:nat -> b:nat -> res:nat
+val pow: a:nat -> b:nat -> nat
 
 let rec pow a b =
   if b = 0 then 1
@@ -122,7 +122,7 @@ type elem (n:pos) = x:nat{x < n}
 
 let fmul (#n:pos) (x:elem n) (y:elem n) : elem n = (x * y) % n
 
-val exp: #n: pos -> a: elem n -> b: pos -> Tot (res: elem n) (decreases b)
+val exp: #n: pos -> a: elem n -> b: pos -> Tot (elem n) (decreases b)
 
 let rec exp #n a b =
   if b = 1 then a
@@ -131,26 +131,26 @@ let rec exp #n a b =
     else fmul a (exp (fmul a a) (b / 2))
 
 
-noextract 
-let modp_inv_prime (prime: pos {prime > 3}) (x: elem prime) : Tot (r: elem prime) = 
+noextract
+let modp_inv_prime (prime: pos {prime > 3}) (x: elem prime) : Tot (elem prime) =
   (exp #prime x (prime - 2)) % prime
 
 noextract
-let modp_inv2_prime (x: int) (p: nat {p > 3}) : Tot (r: elem p) = modp_inv_prime p (x % p)
+let modp_inv2_prime (x: int) (p: nat {p > 3}) : Tot (elem p) = modp_inv_prime p (x % p)
 
 noextract
-let modp_inv2 (x: nat) : Tot (r: elem prime256) = 
+let modp_inv2 (x: nat) : Tot (elem prime256) =
   modp_inv2_prime x prime256
 
 
 noextract
-let modp_inv2_pow (x: nat) : Tot (r: elem prime256) = 
+let modp_inv2_pow (x: nat) : Tot (elem prime256) =
    power_distributivity x (prime256 - 2) prime256;
    pow x (prime256 - 2) % prime256
 
 
 noextract
-let min_one_prime (prime: pos {prime > 3}) (x: int) : Tot (r: elem prime) = 
+let min_one_prime (prime: pos {prime > 3}) (x: int) : Tot (elem prime) =
   let p = x % prime in 
   exp #prime p (prime - 1)
 

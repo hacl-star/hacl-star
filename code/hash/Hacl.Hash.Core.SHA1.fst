@@ -52,7 +52,7 @@ let legacy_init s =
   )
 
 inline_for_extraction
-let w_t = (b: B.lbuffer (word SHA1) 80)
+let w_t = B.lbuffer (word SHA1) 80
 
 inline_for_extraction
 let block_t = (block: B.buffer uint8 { B.length block == block_length SHA1 } )
