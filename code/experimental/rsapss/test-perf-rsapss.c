@@ -451,19 +451,22 @@ int main() {
 
   //uint8_t plain[SIZE];
   //memset(plain,'P',SIZE);
+  uint8_t res = 1;
   uint8_t comp[256U];
   cycles a,b;
   clock_t t1,t2;
 
   ok = true;
   for (int j = 0; j < ROUNDS; j++) {
-    ok = ok && hacl_sign(2048U, test4_n, 24U, test4_e, 2048U, test4_d, 128U, test4_msg, 20U, test4_salt, comp);
+    hacl_sign(2048U, test4_n, 24U, test4_e, 2048U, test4_d, 128U, test4_msg, 20U, test4_salt, comp);
+    res = res ^ comp[0];
   }
 
   t1 = clock();
   a = cpucycles_begin();
   for (int j = 0; j < ROUNDS; j++) {
-    ok = ok && hacl_sign(2048U, test4_n, 24U, test4_e, 2048U, test4_d, 128U, test4_msg, 20U, test4_salt, comp);
+    hacl_sign(2048U, test4_n, 24U, test4_e, 2048U, test4_d, 128U, test4_msg, 20U, test4_salt, comp);
+    res = res ^ comp[0];
   }
   b = cpucycles_end();
   t2 = clock();
@@ -473,13 +476,15 @@ int main() {
 
 
   for (int j = 0; j < ROUNDS; j++) {
-    ok = ok && hacl_verify(2048U, test4_n, 24U, test4_e, 128U, test4_msg, 20U, comp);
+    int r = hacl_verify(2048U, test4_n, 24U, test4_e, 128U, test4_msg, 20U, comp);
+    res = res ^ r;
   }
 
   t1 = clock();
   a = cpucycles_begin();
   for (int j = 0; j < ROUNDS; j++) {
-    ok = ok && hacl_verify(2048U, test4_n, 24U, test4_e, 128U, test4_msg, 20U, comp);
+    int r = hacl_verify(2048U, test4_n, 24U, test4_e, 128U, test4_msg, 20U, comp);
+    res = res ^ r;
   }
   b = cpucycles_end();
   t2 = clock();
@@ -488,13 +493,15 @@ int main() {
 
 
   for (int j = 0; j < ROUNDS; j++) {
-    ok = ok && openssl_sign(privkey, test4_msg, 128U, comp, 256U);
+    openssl_sign(privkey, test4_msg, 128U, comp, 256U);
+    res = res ^ comp[0];
   }
 
   t1 = clock();
   a = cpucycles_begin();
   for (int j = 0; j < ROUNDS; j++) {
-    ok = ok && openssl_sign(privkey, test4_msg, 128U, comp, 256U);
+    openssl_sign(privkey, test4_msg, 128U, comp, 256U);
+    res = res ^ comp[0];
   }
   b = cpucycles_end();
   t2 = clock();
@@ -504,13 +511,15 @@ int main() {
 
 
   for (int j = 0; j < ROUNDS; j++) {
-    ok = ok && openssl_verify(pubkey, test4_msg, 128U, comp, 256U);
+    int r = openssl_verify(pubkey, test4_msg, 128U, comp, 256U);
+    res = res ^ r;
   }
 
   t1 = clock();
   a = cpucycles_begin();
   for (int j = 0; j < ROUNDS; j++) {
-    ok = ok && openssl_verify(pubkey, test4_msg, 128U, comp, 256U);
+    int r = openssl_verify(pubkey, test4_msg, 128U, comp, 256U);
+    res = res ^ r;
   }
   b = cpucycles_end();
   t2 = clock();
@@ -521,6 +530,7 @@ int main() {
   printf("\nHACL* RSAPSS verification\n"); print_time(diff2,cyc2);
   printf("\nOpenSSL RSAPSS signature\n"); print_time(diff3,cyc3);
   printf("\nOpenSSL RSAPSS verification\n"); print_time(diff4,cyc4);
+  printf ("\n res: %d \n",res);
 
   if (ok) return EXIT_SUCCESS;
   else return EXIT_FAILURE;
