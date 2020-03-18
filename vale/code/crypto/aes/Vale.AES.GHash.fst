@@ -240,11 +240,11 @@ let lemma_reverse_bytes_quad32_xor (a b:quad32) : Lemma
     Vale.Arch.TypesNative.reveal_ixor_all 32;
     lemma_small_logxor_32_8 a b
     in
-  let lemma_small_logxor_32_8 : (_:squash (forall (a b:nat8).{:pattern (logxor #32 a b)} logxor #32 a b < 0x100)) =
+  let lemma_small_logxor_32_8 : squash (forall (a b:nat8).{:pattern (logxor #32 a b)} logxor #32 a b < 0x100) =
     // FStar.Classical.forall_intro_2_with_pat didn't work; TODO: use new non-top-level SMTPat feature
     FStar.Classical.forall_intro_2 lemma_small_logxor_32_8
     in
-  let lemma_small_logxor_32_8 : (_:squash (forall (a b:nat8).{:pattern (nat32_xor a b)} nat32_xor a b < 0x100)) =
+  let lemma_small_logxor_32_8 : squash (forall (a b:nat8).{:pattern (nat32_xor a b)} nat32_xor a b < 0x100) =
     FStar.Classical.forall_intro_2 lemma_small_nat32_xor_32_8
     in
   let lemma_xor_mk4b (a0 a1 a2 a3 b0 b1 b2 b3:bv_t 32) : Lemma

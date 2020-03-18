@@ -24,5 +24,5 @@ let crypto_kem_enc state pk = Encaps.crypto_kem_enc state pk
 val crypto_kem_dec:
     ct:lbytes crypto_ciphertextbytes
   -> sk:lbytes crypto_secretkeybytes
-  -> ss:lbytes crypto_bytes
+  -> lbytes crypto_bytes
 let crypto_kem_dec ct sk = Decaps.crypto_kem_dec ct sk

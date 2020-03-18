@@ -626,7 +626,7 @@ let register_of_arg_i (i:reg_nat (if IA.win then 4 else 6)) : MS.reg_64 =
 //A partial inverse of the above function
 [@__reduce__]
 let arg_of_register (r:MS.reg_64)
-  : option (i:reg_nat (if IA.win then 4 else 6))
+  : option (reg_nat (if IA.win then 4 else 6))
   = let open MS in
     if IA.win then
        match r with
