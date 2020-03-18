@@ -623,16 +623,6 @@ let lemma_low_level0 o0 o1 o2 o3 f0 f1 f2 f3 u h2 c1 c2 c3 h3 h4 =
   assert(c3 + h4 < pow2 64)
 
 
-val lemma_ll0: a: int -> b: int -> c: int -> d: int -> Lemma (
-    (a + b * pow2 64 + c * pow2 64 * pow2 64 +  d * pow2 64 * pow2 64 * pow2 64) * pow2 256 == 
-    a * pow2 64 * pow2 64 * pow2 64 * pow2 64  +
-    b * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
-    c * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
-    d * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64)
-
-let lemma_ll0 a b c d = 
-  assert_norm (pow2 256 == pow2 64 * pow2 64 * pow2 64 * pow2 64)
-
 val lemma_pow_signature: a: nat -> prime: pos{prime > 3} ->  Lemma 
   (
     let p = a % prime in 

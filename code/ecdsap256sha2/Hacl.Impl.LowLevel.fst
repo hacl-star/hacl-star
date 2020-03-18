@@ -293,7 +293,6 @@ let add4_with_carry c x y result =
     
     cc
 
-#push-options "--z3rlimit 600"
 
 val add8: x: widefelem -> y: widefelem -> result: widefelem -> Stack uint64 
   (requires fun h -> live h x /\ live h y /\ live h result /\ eq_or_disjoint x result /\ eq_or_disjoint y result)
@@ -301,9 +300,11 @@ val add8: x: widefelem -> y: widefelem -> result: widefelem -> Stack uint64
     wide_as_nat h1 result + v c * pow2 512 == wide_as_nat h0 x + wide_as_nat h0 y)
 
 let add8 x y result = 
+  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
   let h0 = ST.get() in 
     let a0 = sub x (size 0) (size 4) in 
     let a1 = sub x (size 4) (size 4) in 
+    
     let b0 = sub y (size 0) (size 4) in 
     let b1 = sub y (size 4) (size 4) in 
 
@@ -311,29 +312,20 @@ let add8 x y result =
     let c1 = sub result (size 4) (size 4) in 
 
     let carry0 = add4 a0 b0 c0 in
-      let h1 = ST.get() in 
     let carry1 = add4_with_carry carry0 a1 b1 c1 in 
-      let h2 = ST.get() in 	
-      assert(as_nat h2 c1 =  - uint_v carry1 * pow2 256 + as_nat h1 a1 + as_nat h1 b1 + uint_v carry0);
-      assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
-      assert_norm (pow2 256 * pow2 256 = pow2 512);
-  
-      assert(Lib.Sequence.index (as_seq h2 result) 4 == Lib.Sequence.index (as_seq h2 c1) 0);
-      assert(Lib.Sequence.index (as_seq h2 result) 5 == Lib.Sequence.index (as_seq h2 c1) 1);
-      assert(Lib.Sequence.index (as_seq h2 result) 6 == Lib.Sequence.index (as_seq h2 c1) 2);
-      assert(Lib.Sequence.index (as_seq h2 result) 7 == Lib.Sequence.index (as_seq h2 c1) 3);
+      let h1 = ST.get() in 
+    calc (==)
+    {
+      wide_as_nat h0 x + wide_as_nat h0 y;
+      (==) {
+	assert_by_tactic (as_nat h0 a1 * pow2 256 + as_nat h0 b1 * pow2 256 = (as_nat h0 a1 + as_nat h0 b1) * pow2 256) canon} 
+      wide_as_nat h1 result + uint_v carry1 * pow2 256 * pow2 256;
+      (==) 
+      {assert_norm (pow2 256 * pow2 256 = pow2 512)}
+      wide_as_nat h1 result + uint_v carry1 * pow2 512;
+};
+  carry1
 
-      assert_by_tactic (as_nat h2 c1 * pow2 64 * pow2 64 * pow2 64 * pow2 64 == as_nat h2 c1 * pow2 256) canon;
-      assert_by_tactic (as_nat h2 a1 * pow2 64 * pow2 64 * pow2 64 * pow2 64 == as_nat h2 a1 * pow2 256) canon;
-  
-      assert_by_tactic ((- uint_v carry1 * pow2 256 + as_nat h1 a1 + as_nat h1 b1 + uint_v carry0) * pow2 256 == - uint_v carry1 * pow2 256 * pow2 256 + as_nat h1 a1 * pow2 256 + as_nat h1 b1 * pow2 256 + uint_v carry0 * pow2 256) canon;
-
-      lemma_ll0 (uint_v (Lib.Sequence.index (as_seq h0 a1) 0)) (uint_v (Lib.Sequence.index (as_seq h0 a1) 1)) (uint_v (Lib.Sequence.index (as_seq h0 a1) 2)) (uint_v (Lib.Sequence.index (as_seq h0 a1) 3));
-      lemma_ll0 (uint_v (Lib.Sequence.index (as_seq h0 b1) 0)) (uint_v (Lib.Sequence.index (as_seq h0 b1) 1)) (uint_v (Lib.Sequence.index (as_seq h0 b1) 2)) (uint_v (Lib.Sequence.index (as_seq h0 b1) 3));
-
-    carry1
-
-#pop-options
 
 val add4_variables: x: felem -> cin: uint64 {uint_v cin <=1} ->  y0: uint64 -> y1: uint64 -> y2: uint64 -> y3: uint64 -> 
   result: felem -> 
