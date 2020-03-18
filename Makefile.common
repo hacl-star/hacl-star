@@ -40,7 +40,11 @@ OUTPUT_DIR ?= obj
 
 FSTAR_INCLUDES = $(addprefix --include ,$(INCLUDES))
 
+ifeq ($(OTHERFLAGS),$(subst --admit_smt_queries true,,$(OTHERFLAGS)))
 FSTAR_HINTS ?= --use_hints --use_hint_hashes --record_hints
+else
+FSTAR_HINTS ?= --use_hints --use_hint_hashes
+endif
 
 # --trivial_pre_for_unannotated_effectful_fns false
 #   to not enforce trivial preconditions

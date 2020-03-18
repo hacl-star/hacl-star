@@ -75,7 +75,7 @@ type e_alg = G.erased alg
 val state_s: alg -> Type0
 
 // pointer to abstract implementation state
-let state alg = b:B.pointer (state_s alg)
+let state alg = B.pointer (state_s alg)
 
 // abstract freeable (deep) predicate; only needed for create/free pairs
 val freeable_s: #(a: alg) -> state_s a -> Type0

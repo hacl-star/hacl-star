@@ -22,7 +22,7 @@ let ( +% ) = fadd
 let ( -% ) = fsub
 let ( *% ) = fmul
 
-val fpow: a:elem -> b:pos -> Tot (res:elem) (decreases b)
+val fpow: a:elem -> b:pos -> Tot elem (decreases b)
 let rec fpow a b =
   if b = 1 then a
   else
