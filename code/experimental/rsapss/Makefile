@@ -23,20 +23,20 @@ dist/librsapss.a: dist/Makefile.basic
 SHA2_BUNDLE=-bundle Hacl.Hash.SHA2=Hacl.Hash.*
 RSAPSS_BUNDLE=-bundle Hacl.RSAPSS+Hacl.Bignum.Convert=Hacl.Bignum.*,Hacl.Bignum,Hacl.Impl.MGF,Hacl.Impl.RSAPSS[rename=Hacl_RSAPSS]
 
-HAND_WRITTEN_C_FILES = c/Hacl_Bignum_Base.c
+HAND_WRITTEN_C_FILES = c/hacl_bignum_base.h
 
-dist/Makefile.basic: $(filter-out %prims.krml,$(ALL_KRML_FILES)) $(HAND_WRITTEN_C_FILES)
+dist/Makefile.basic: $(filter-out %prims.krml,$(ALL_KRML_FILES))
 	mkdir -p $(dir $@)
 	cp $(HAND_WRITTEN_C_FILES) $(dir $@)
 	$(KRML) -tmpdir $(dir $@) -skip-compilation \
 	  $(filter %.krml,$^) \
-	  -bundle Hacl.Bignum.Base= \
+	  -drop Hacl.Bignum.Base \
 	  $(BASE_FLAGS) $(SHA2_BUNDLE) $(RSAPSS_BUNDLE) \
 	  -no-prefix 'Hacl.Test.RSAPSS' \
 	  -add-include '<stdbool.h>' \
 	  -add-include '<stdint.h>' \
+	  -add-include '"hacl_bignum_base.h"' \
 	  -add-include '"kremlin/internal/target.h"' \
-	  $(notdir $(HAND_WRITTEN_C_FILES)) \
 	  -o librsapss.a
 
 dist/%.o: dist/Makefile.basic
