@@ -293,7 +293,7 @@ let add4_with_carry c x y result =
     
     cc
 
-#push-options "--z3rlimit 500"
+#push-options "--z3rlimit 600"
 
 val add8: x: widefelem -> y: widefelem -> result: widefelem -> Stack uint64 
   (requires fun h -> live h x /\ live h y /\ live h result /\ eq_or_disjoint x result /\ eq_or_disjoint y result)
