@@ -16,12 +16,22 @@ let eq_u8_nCT a b =
   let open Lib.RawIntTypes in
   FStar.UInt8.(u8_to_UInt8 a =^ u8_to_UInt8 b)
 
+[@ CInline]
 val copy_conditional_u8: out: lbuffer uint8 (size 64) -> x: lbuffer uint8 (size 64) -> mask: uint8{uint_v mask = 0 \/ uint_v mask = pow2 8 - 1} -> Stack unit 
   (requires fun h -> live h out /\ live h x)
   (ensures fun h0 _ h1 -> modifies (loc out) h0 h1) 
 
 let copy_conditional_u8 out x mask = 
-  ()
+  [@inline_let]
+  let inv h1 (i: nat {i <= 64}) = True in
+  Lib.Loops.for 0ul 64ul inv 
+    (fun i -> 
+      let out_i = index out i in 
+      let x_i = index x i in 
+      let r_i = logxor out_i (logand mask (logxor out_i x_i)) in 
+      upd out i r_i
+    )
+      
 
 
 let decompressionNotCompressed b result = 
