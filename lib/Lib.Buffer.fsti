@@ -29,9 +29,9 @@ type buftype =
 inline_for_extraction
 let buffer_t (ty:buftype) (a:Type0) =
   match ty with
-  | IMMUT -> ib:IB.ibuffer a
-  | MUT -> b:B.buffer a
-  | CONST -> cb:CB.const_buffer a
+  | IMMUT -> IB.ibuffer a
+  | MUT -> B.buffer a
+  | CONST -> CB.const_buffer a
 
 (** Mutable buffer. Extracted as `a*` *)
 unfold let buffer (a:Type0) = buffer_t MUT a
@@ -310,7 +310,7 @@ inline_for_extraction noextract
 val createL_global:
     #a:Type0
   -> init:list a{normalize (List.Tot.length init <= max_size_t)} ->
-  ST (b:ilbuffer a (size (normalize_term (List.Tot.length init))))
+  ST (ilbuffer a (size (normalize_term (List.Tot.length init))))
     (requires fun h0 -> B.gcmalloc_of_list_pre #a HyperStack.root init)
     (ensures  fun h0 b h1 -> global_allocated b h0 h1 (Seq.of_list init) /\
                           recallable b /\
@@ -1034,7 +1034,7 @@ val mapiT:
   -> #b:Type
   -> clen:size_t
   -> o:lbuffer b clen
-  -> f:(i:size_t{v i < v clen} -> x:a -> r:b)
+  -> f:(i:size_t{v i < v clen} -> x:a -> b)
   -> i:lbuffer_t t a clen ->
   Stack unit
     (requires fun h0 -> live h0 o /\ live h0 i /\ eq_or_disjoint o i)

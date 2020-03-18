@@ -131,7 +131,7 @@ val vec_get: #t:v_inttype -> #w:width
   x:uint_t t SEC{x == index (vec_v v) (size_v i)}
 
 inline_for_extraction noextract
-val vec_add_mod: #t:v_inttype -> #w:width -> v1:vec_t t w -> v2:vec_t t w -> v3:vec_t t w
+val vec_add_mod: #t:v_inttype -> #w:width -> v1:vec_t t w -> v2:vec_t t w -> vec_t t w
 
 noextract
 val vec_add_mod_lemma: #t:v_inttype -> #w:width -> v1:vec_t t w -> v2:vec_t t w -> Lemma
@@ -148,14 +148,14 @@ inline_for_extraction noextract
 val vec_smul_mod: #t:v_inttype{t <> U128} -> #w:width -> v1:vec_t t w -> v2:uint_t t SEC -> v3:vec_t t w{vec_v v3 == map ( mul_mod v2 ) (vec_v v1)}
 
 inline_for_extraction noextract
-val vec_xor: #t:v_inttype -> #w:width -> v1:vec_t t w -> v2:vec_t t w -> v3:vec_t t w
+val vec_xor: #t:v_inttype -> #w:width -> v1:vec_t t w -> v2:vec_t t w -> vec_t t w
 
 val vec_xor_lemma: #t:v_inttype -> #w:width -> v1:vec_t t w -> v2:vec_t t w -> Lemma
   (ensures (vec_v (vec_xor v1 v2) == map2 ( ^. ) (vec_v v1) (vec_v v2)))
   [SMTPat (vec_v #t #w (vec_xor v1 v2))]
 
 inline_for_extraction noextract
-val vec_and: #t:v_inttype -> #w:width -> v1:vec_t t w -> v2:vec_t t w -> v3:vec_t t w
+val vec_and: #t:v_inttype -> #w:width -> v1:vec_t t w -> v2:vec_t t w -> vec_t t w
 
 val vec_and_lemma: #t:v_inttype -> #w:width -> v1:vec_t t w -> v2:vec_t t w -> Lemma
   (ensures (vec_v (vec_and v1 v2) == map2 ( &. ) (vec_v v1) (vec_v v2)))
@@ -165,7 +165,7 @@ inline_for_extraction noextract
 val vec_or: #t:v_inttype -> #w:width -> v1:vec_t t w -> v2:vec_t t w -> v3:vec_t t w{vec_v v3 == map2 ( |. ) (vec_v v1) (vec_v v2)}
 
 inline_for_extraction noextract
-val vec_not: #t:v_inttype -> #w:width -> v1:vec_t t w -> v2:vec_t t w
+val vec_not: #t:v_inttype -> #w:width -> v1:vec_t t w -> vec_t t w
 
 val vec_not_lemma: #t:v_inttype -> #w:width -> v1:vec_t t w -> Lemma
   (ensures (vec_v (vec_not v1) == map lognot (vec_v v1)))
@@ -183,7 +183,7 @@ val vec_shift_left: #t:v_inttype -> #w:width
 
 inline_for_extraction noextract
 val vec_rotate_right: #t:v_inttype -> #w:width
-  -> v1:vec_t t w -> s:rotval t{t <> U128 \/ uint_v s % 8 == 0} -> v2:vec_t t w
+  -> v1:vec_t t w -> s:rotval t{t <> U128 \/ uint_v s % 8 == 0} -> vec_t t w
 
 val vec_rotate_right_lemma: #t:v_inttype -> #w:width
   -> v1:vec_t t w -> s:rotval t{t <> U128 \/ uint_v s % 8 == 0} ->
@@ -293,7 +293,7 @@ val vec_shift_right_uint128_small2: v1:vec_t U64 4 -> s:shiftval U128{uint_v s %
 inline_for_extraction noextract
 val vec_permute2: #t:v_inttype -> v1:vec_t t 2
   -> i1:vec_index 2 -> i2:vec_index 2 ->
-  v2:vec_t t 2
+  vec_t t 2
 
 inline_for_extraction noextract
 val vec_permute2_lemma: #t:v_inttype -> v1:vec_t t 2
@@ -305,7 +305,7 @@ val vec_permute2_lemma: #t:v_inttype -> v1:vec_t t 2
 inline_for_extraction noextract
 val vec_permute4: #t:v_inttype -> v1:vec_t t 4
   -> i1:vec_index 4 -> i2:vec_index 4 -> i3:vec_index 4 -> i4:vec_index 4 ->
-  v2:vec_t t 4
+  vec_t t 4
 
 inline_for_extraction noextract
 val vec_permute4_lemma: #t:v_inttype -> v1:vec_t t 4
@@ -364,21 +364,21 @@ type uint8x16 = vec_t U8 16
 type uint8x32 = vec_t U8 32
 
 inline_for_extraction noextract
-val vec_aes_enc: key:uint8x16 -> state:uint8x16 -> res:uint8x16
+val vec_aes_enc: key:uint8x16 -> state:uint8x16 -> uint8x16
 
 val vec_aes_enc_lemma: key:uint8x16 -> state:uint8x16 -> Lemma
   (ensures (vec_v (vec_aes_enc key state) == Spec.AES.aes_enc (vec_v key) (vec_v state)))
   [SMTPat (vec_v (vec_aes_enc key state))]
 
 inline_for_extraction noextract
-val vec_aes_enc_last: key:uint8x16 -> state:uint8x16 -> res:uint8x16
+val vec_aes_enc_last: key:uint8x16 -> state:uint8x16 -> uint8x16
 
 val vec_aes_enc_last_lemma: key:uint8x16 -> state:uint8x16 -> Lemma
   (ensures (vec_v (vec_aes_enc_last key state) == Spec.AES.aes_enc_last (vec_v key) (vec_v state)))
   [SMTPat (vec_v (vec_aes_enc_last key state))]
 
 inline_for_extraction noextract
-val vec_aes_keygen_assist: s:uint8x16 -> rcon:uint8 -> res:uint8x16
+val vec_aes_keygen_assist: s:uint8x16 -> rcon:uint8 -> uint8x16
 
 val vec_aes_keygen_assist_lemma: s:uint8x16 -> rcon:uint8 -> Lemma
   (ensures (vec_v (vec_aes_keygen_assist s rcon) == Spec.AES.aes_keygen_assist rcon (vec_v s)))
