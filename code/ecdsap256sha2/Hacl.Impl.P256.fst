@@ -687,4 +687,34 @@ let secretToPublicWithoutNorm result scalar tempBuffer =
   pop_frame()  
 
 
-let computeYFromX x result sign = ()
+val uploadA: a: felem -> Stack unit
+  (requires fun h -> live h a)
+  (ensures fun h0 _ h1 -> modifies (loc a) h0 h1 /\ as_nat h1 a == aCoordinateP256 % prime256)
+
+let uploadA a = 
+  upd a (size 0) (u64 18446744073709551612);
+  upd a (size 1) (u64 4294967295);
+  upd a (size 2) (u64 0);
+  upd a (size 3) (u64 18446744069414584321);
+  assert_norm(18446744073709551612 + 4294967295 * pow2 64 + 18446744069414584321 * pow2 64 * pow2 64 * pow2 64 = aCoordinateP256 % prime256)
+  
+
+val uploadB: b: felem -> Stack unit 
+  (requires fun h -> live h b)
+  (ensures fun h0 _ h1 -> modifies (loc b) h0 h1 /\ as_nat h1 b == bCoordinateP256)
+
+let uploadB b = 
+  upd b (size 0) (u64 4309448131093880907);
+  upd b (size 1) (u64 7285987128567378166);
+  upd b (size 2) (u64 12964664127075681980);
+  upd b (size 3) (u64 6540974713487397863);
+  assert_norm (4309448131093880907 + 7285987128567378166 * pow2 64 + 12964664127075681980 * pow2 64 * pow2 64 + 6540974713487397863 * pow2 64 * pow2 64 * pow2 64 == 41058363725152142129326129780047268409114441015993725554835256314039467401291)
+
+
+let computeYFromX x result sign = 
+  ()
+  (*
+  push_frame();
+    let aCoordinateBuffer = create (size 4) (u64 0) in 
+    let bCoordinateBuffer = create (size 4) (u64 0) in 
+    
