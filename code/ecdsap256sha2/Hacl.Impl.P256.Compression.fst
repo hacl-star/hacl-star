@@ -7,6 +7,8 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
+open Hacl.Impl.P256
+
 open Spec.P256.Definitions
 
 
@@ -51,6 +53,17 @@ let decompressionNotCompressed2 b result =
   correctIdentifier
 
 
-
 let decompressionCompressed b result = 
-  (u64 0)
+  let compressedIdentifier = index b (size 0) in 
+  let correctIdentifier2 = eq_u8_nCT (u8 2) compressedIdentifier in 
+  let correctIdentifier3 = eq_u8_nCT (u8 3) compressedIdentifier in 
+  if correctIdentifier2 || correctIdentifier3 then 
+    begin
+      let x = sub b (size 1) (size 32) in 
+      copy x result;
+      computeYFromX x (sub result (size 32) (size 32)) correctIdentifier2;
+      true
+    end
+  else 
+    false
+  

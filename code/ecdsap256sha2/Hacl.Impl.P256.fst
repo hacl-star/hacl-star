@@ -685,3 +685,6 @@ let secretToPublicWithoutNorm result scalar tempBuffer =
     montgomery_ladder q basePoint scalar buff; 
     copy_point q result;
   pop_frame()  
+
+
+let computeYFromX x result sign = ()

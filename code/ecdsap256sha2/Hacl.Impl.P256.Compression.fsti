@@ -28,6 +28,6 @@ val decompressionNotCompressed2: b: notCompressedForm -> result: lbuffer uint8 (
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1)
 
 
-val decompressionCompressed: compressedForm -> result: point -> Stack bool 
-  (requires fun h -> True)
-  (ensures fun h0 _ h1 -> True)
+val decompressionCompressed: b: compressedForm -> result: lbuffer uint8 (size 64) -> Stack bool 
+  (requires fun h -> live h b /\ live h result /\ disjoint b result)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1)

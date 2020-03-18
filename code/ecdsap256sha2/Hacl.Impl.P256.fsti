@@ -226,3 +226,12 @@ val secretToPublicWithoutNorm: result: point -> scalar: lbuffer uint8 (size 32) 
 	let rN, _ = montgomery_ladder_spec (as_seq h0 scalar) ((0, 0, 0), basePoint) in 
 	rN == p1))  
 
+
+val computeYFromX: x: felem ->  result: felem -> sign: bool -> Stack unit 
+  (requires fun h -> live h x /\ live h result)
+  (ensures fun h0 _ h1 -> True)
+
+
+let computeYFromX x result sign = ()
+
+  
