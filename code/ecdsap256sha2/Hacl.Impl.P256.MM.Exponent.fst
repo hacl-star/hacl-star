@@ -168,6 +168,7 @@ val montgomery_ladder_power: a: felem -> scalar: ilbuffer uint8 (size 32) -> res
   Stack unit 
     (requires fun h -> live h a /\ live h scalar /\ live h result /\ as_nat h a < prime /\ disjoint a scalar)
     (ensures fun h0 _ h1 -> modifies (loc a |+| loc result) h0 h1 /\
+      as_nat h1 result < prime /\ 
       (
 	assert_norm (1 < prime256);
 	let r0D = pow_spec (as_seq h0 scalar) (fromDomain_ (as_nat h0 a)) in 

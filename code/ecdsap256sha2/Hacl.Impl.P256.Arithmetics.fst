@@ -24,7 +24,7 @@ open FStar.Mul
 
 #reset-options "--z3rlimit 100" 
 
-let cube a result = 
+let cube a result =
   let h0 = ST.get() in 
     montgomery_multiplication_buffer a a result;
     montgomery_multiplication_buffer result a result;
