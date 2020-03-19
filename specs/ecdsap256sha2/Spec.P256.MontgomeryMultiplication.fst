@@ -188,7 +188,7 @@ val lemma_exponen_spec: k:lseq uint8 32
     f1 == pow start1 (arithmetic_shift_right number newIndex + 1) % prime256
   )
 
-#push-options "--fuel 1"
+#push-options "--fuel 1 --z3rlimit 200"
 
 val lemma_exponen_spec_0: k:lseq uint8 32
   -> start:tuple2 nat_prime nat_prime {let st0, _ = start in st0 == 1} ->
@@ -207,9 +207,8 @@ let lemma_exponen_spec_0 k start =
   assert (arithmetic_shift_right number 256 == number / pow2 256);
   FStar.Math.Lemmas.lemma_div_lt_nat number 256 256;
   assert (arithmetic_shift_right number 256 == 0);
-  Lib.LoopCombinators.eq_repeati0 256 (_pow_step k) start;
-  admit()
-
+  Lib.LoopCombinators.eq_repeati0 256 (_pow_step k) start
+  
 #pop-options
 
 let rec lemma_exponen_spec k start index =
@@ -290,4 +289,5 @@ let rec lemma_exponen_spec k start index =
 let pow_spec k p =
   assert_norm (1 < prime256);
   let a, b = Lib.LoopCombinators.repeati 256 (_pow_step k) (1, p) in 
+  lemma_exponen_spec k (1, p) 256;
   a
