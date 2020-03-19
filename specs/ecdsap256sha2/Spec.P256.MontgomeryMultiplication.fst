@@ -6,6 +6,7 @@ open FStar.Mul
 
 open Spec.P256.Lemmas
 open Spec.P256.Definitions
+open Spec.P256
 
 
 open Lib.IntTypes
@@ -109,3 +110,36 @@ let substractionInDomain a b =
     == { }
     toDomain_ (fromDomain_ a - fromDomain_ b);
   }
+
+
+let ( *% ) a b = (a * b) % prime
+
+
+let _pow_step0 r0 r1 =
+  let r1 = r0 *% r1 in
+  let r0 = r0 *% r0 in
+  r0, r1
+
+
+let _pow_step1 r0 r1 =
+  let r0 = r0 *% r1 in
+  let r1 = r1 *% r1 in
+  (r0, r1)
+
+
+let conditional_swap_pow i p q =
+  if v i = 0 then (p, q) else (q, p)
+
+let lemma_swaped_steps p q = ()
+
+
+let _pow_step k i (p, q) =
+  let bit = 255 - i in
+  let bit = ith_bit k bit in
+  let open Lib.RawIntTypes in
+  if uint_to_nat bit = 0 then _pow_step0 p q else _pow_step1 p q
+
+
+let pow_spec k (p, q) =
+  let open Lib.LoopCombinators in
+  Lib.LoopCombinators.repeati 256 (_pow_step k) (p, q)

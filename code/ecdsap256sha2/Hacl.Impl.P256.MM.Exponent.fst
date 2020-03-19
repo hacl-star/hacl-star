@@ -22,52 +22,34 @@ open Hacl.Impl.P256.MontgomeryMultiplication
 open Spec.P256.MontgomeryMultiplication
 
 open Hacl.Impl.P256.LowLevel
+open Hacl.Impl.P256
 open Hacl.Impl.P256.Arithmetics
 
 open Spec.P256.Definitions
 open Spec.P256.Lemmas
-open Spec.P256.Ladder
 open Spec.P256
+open Spec.P256.Ladder
+open Spec.P256.MontgomeryMultiplication
 
+friend Spec.P256.MontgomeryMultiplication
 
-#set-options "--z3rlimit 200 --fuel 0 --ifuel 0" 
-
-(* This is a very very very very bad decision, but I don´t wanna do common spec right now *)
-
-inline_for_extraction noextract
-val scalar_bit:
-    #buf_type: buftype -> 
-    s:lbuffer_t buf_type uint8 (size 32)
-  -> n:size_t{v n < 256}
-  -> Stack uint64
-    (requires fun h0 -> live h0 s)
-    (ensures  fun h0 r h1 -> h0 == h1 /\
-      r == Spec.P256.ith_bit (as_seq h0 s) (v n) /\ v r <= 1)
-      
-let scalar_bit #buf_type s n =
-  let h0 = ST.get () in
-  mod_mask_lemma ((Lib.Sequence.index (as_seq h0 s) (v n / 8)) >>. (n %. 8ul)) 1ul;
-  assert_norm (1 = pow2 1 - 1);
-  assert (v (mod_mask #U8 #SEC 1ul) == v (u8 1));
-  to_u64 ((s.(n /. 8ul) >>. (n %. 8ul)) &. u8 1)
-
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
 [@ CInline]
 val cswap: bit:uint64{v bit <= 1} -> p:felem -> q:felem
   -> Stack unit
     (requires fun h ->
       as_nat h p < prime /\ as_nat h q < prime /\ 
-      live h p /\ live h q /\ (disjoint p q \/ p == q))
+      live h p /\ live h q /\ eq_or_disjoint p q)
     (ensures  fun h0 _ h1 ->
       modifies (loc p |+| loc q) h0 h1 /\
 	(
-	  let (r0, r1) = conditional_swap_exponent bit (as_nat h0 p) (as_nat h0 q) in 
+	  let (r0, r1) = conditional_swap_pow bit (as_nat h0 p) (as_nat h0 q) in 
 	  let pBefore = as_seq h0 p in let qBefore = as_seq h0 q in 
 	  let pAfter = as_seq h1 p in let qAfter = as_seq h1 q in 
-	  if uint_v bit = 0 then r0 == as_nat h0 p /\ r1 == as_nat h0 q else r0 == as_nat h0 q /\ r1 == as_nat h0 p) /\
 	  as_nat h1 p < prime /\ as_nat h1 q < prime /\
       (v bit == 1 ==> as_seq h1 p == as_seq h0 q /\ as_seq h1 q == as_seq h0 p) /\
-      (v bit == 0 ==> as_seq h1 p == as_seq h0 p /\ as_seq h1 q == as_seq h0 q))
+      (v bit == 0 ==> as_seq h1 p == as_seq h0 p /\ as_seq h1 q == as_seq h0 q)))
 
 
 let cswap bit p1 p2 =
@@ -91,7 +73,7 @@ let cswap bit p1 p2 =
       p2.(i) <- p2.(i) ^. dummy;
       lemma_cswap2_step bit ((as_seq h0 p1).[v i]) ((as_seq h0 p2).[v i])
     );
-  let h1 = ST.get () in
+  let h1 = ST.get () in 
   Lib.Sequence.eq_intro (as_seq h1 p1) (if v bit = 1 then as_seq h0 p2 else as_seq h0 p1);
   Lib.Sequence.eq_intro (as_seq h1 p2) (if v bit = 1 then as_seq h0 p1 else as_seq h0 p2)
 
@@ -113,21 +95,22 @@ let upload_one_montg_form b =
 
 inline_for_extraction noextract
 val montgomery_ladder_power_step0: a: felem -> b: felem -> Stack unit
-  (requires fun h -> live h a /\ live h b /\ as_nat h a < prime /\ as_nat h b < prime /\ disjoint a b )
-  (ensures fun h0 _ h1 -> modifies (loc a |+| loc b) h0 h1 /\ as_nat h1 a < prime /\ as_nat h1 b < prime /\
+  (requires fun h -> live h a /\ live h b /\ as_nat h a < prime /\ 
+    as_nat h b < prime /\ disjoint a b )
+  (ensures fun h0 _ h1 -> modifies (loc a |+| loc b) h0 h1 /\ 
+    as_nat h1 a < prime /\ as_nat h1 b < prime /\
     (
-      let (r0D, r1D) = _exp_step0 (fromDomain_ (as_nat h0 a)) (fromDomain_ (as_nat h0 b)) in 
-      r0D == fromDomain_ (as_nat h1 a) /\ r1D == fromDomain_ (as_nat h1 b)  /\
-      as_nat h1 a < prime /\ as_nat h1 b < prime
+      let (r0D, r1D) = _pow_step0 (fromDomain_ (as_nat h0 a)) (fromDomain_ (as_nat h0 b)) in 
+      r0D == fromDomain_ (as_nat h1 a) /\ r1D == fromDomain_ (as_nat h1 b)
     )
 )
 
 let montgomery_ladder_power_step0 a b = 
-    let h0 = ST.get() in 
+  let h0 = ST.get() in 
     montgomery_multiplication_buffer a b b;
-    lemmaToDomainAndBackIsTheSame (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 b) % prime);
-  montgomery_multiplication_buffer a a a ;
-    lemmaToDomainAndBackIsTheSame (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a) % prime)
+      lemmaToDomainAndBackIsTheSame (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 b) % prime);
+    montgomery_multiplication_buffer a a a ;
+      lemmaToDomainAndBackIsTheSame (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a) % prime)
 
 
 inline_for_extraction noextract
@@ -224,64 +207,3 @@ let square_root a  =
     montgomery_ladder_power a sqPower;
   pop_frame()
 
-
-
-val uploadA: a: felem -> Stack unit
-  (requires fun h -> live h a)
-  (ensures fun h0 _ h1 -> modifies (loc a) h0 h1 /\ as_nat h1 a == aCoordinateP256 % prime256)
-
-let uploadA a = 
-  upd a (size 0) (u64 18446744073709551612);
-  upd a (size 1) (u64 4294967295);
-  upd a (size 2) (u64 0);
-  upd a (size 3) (u64 18446744069414584321);
-  assert_norm(18446744073709551612 + 4294967295 * pow2 64 + 18446744069414584321 * pow2 64 * pow2 64 * pow2 64 = aCoordinateP256 % prime256)
-  
-
-val uploadB: b: felem -> Stack unit 
-  (requires fun h -> live h b)
-  (ensures fun h0 _ h1 -> modifies (loc b) h0 h1 /\ as_nat h1 b == bCoordinateP256)
-
-let uploadB b = 
-  upd b (size 0) (u64 4309448131093880907);
-  upd b (size 1) (u64 7285987128567378166);
-  upd b (size 2) (u64 12964664127075681980);
-  upd b (size 3) (u64 6540974713487397863);
-  assert_norm (4309448131093880907 + 7285987128567378166 * pow2 64 + 12964664127075681980 * pow2 64 * pow2 64 + 6540974713487397863 * pow2 64 * pow2 64 * pow2 64 == 41058363725152142129326129780047268409114441015993725554835256314039467401291)
-
-
-
-val computeYFromX: x: felem ->  result: felem -> sign: uint64 -> Stack unit 
-  (requires fun h -> live h x /\ live h result /\ as_nat h x < prime)
-  (ensures fun h0 _ h1 -> True)
-
-
-let computeYFromX x result sign = 
-  push_frame();
-    let aCoordinateBuffer = create (size 4) (u64 0) in 
-    let bCoordinateBuffer = create (size 4) (u64 0) in 
-   
-    uploadA aCoordinateBuffer;
-    uploadB bCoordinateBuffer;
-
-    montgomery_multiplication_buffer aCoordinateBuffer x aCoordinateBuffer;
-
-    cube x result;
-    p256_add result aCoordinateBuffer result;
-    p256_add result bCoordinateBuffer result;
-
-    uploadZeroImpl aCoordinateBuffer;
-    p256_sub aCoordinateBuffer result bCoordinateBuffer;
-
-    cmovznz4 sign bCoordinateBuffer result result;
-
-    square_root result;
-
-
-    admit();
-    
-
-
- pop_frame()   
-    
-    
