@@ -76,5 +76,4 @@ val _pow_step: k:lseq uint8 32 -> i:nat{i < 256} -> before:tuple2 nat_prime nat_
   -> tuple2 nat_prime nat_prime
 
 
-val pow_spec: k:lseq uint8 32  -> tuple2 nat_prime nat_prime
-  -> tuple2 nat_prime nat_prime
+val pow_spec: k:lseq uint8 32  -> nat_prime -> nat_prime

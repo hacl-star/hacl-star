@@ -4,6 +4,7 @@ open FStar.HyperStack.All
 open FStar.HyperStack
 module ST = FStar.HyperStack.ST
 
+open Lib.Sequence
 open Lib.IntTypes
 open Lib.Buffer
 
@@ -114,7 +115,7 @@ let montgomery_ladder_power_step0 a b =
 
 
 inline_for_extraction noextract
-val montgomery_ladder_power_step: a: felem -> b: felem -> scalar: lbuffer uint8 (size 32) ->   i:size_t{v i < 256} ->  Stack unit
+val montgomery_ladder_power_step: a: felem -> b: felem -> scalar: ilbuffer uint8 (size 32) ->   i:size_t{v i < 256} ->  Stack unit
   (requires fun h -> live h a  /\ live h b /\ live h scalar /\ as_nat h a < prime /\ as_nat h b < prime /\ disjoint a b)
   (ensures fun h0 _ h1 -> modifies (loc a |+| loc b) h0 h1  /\
     (
@@ -137,14 +138,14 @@ let montgomery_ladder_power_step a b scalar i =
 
 
 inline_for_extraction noextract 
-val _montgomery_ladder_power: a: felem -> b: felem -> scalar: lbuffer uint8 (size 32) -> Stack unit
+val _montgomery_ladder_power: a: felem -> b: felem -> scalar: ilbuffer uint8 (size 32) -> Stack unit
   (requires fun h -> live h a /\ live h b /\ live h scalar /\ as_nat h a < prime /\ 
     as_nat h b < prime /\ disjoint a b /\ disjoint a scalar /\ disjoint b scalar)
   (ensures fun h0 _ h1 -> modifies (loc a |+| loc b) h0 h1 /\ 
     (
       let a_ = fromDomain_ (as_nat h0 a) in 
       let b_ = fromDomain_ (as_nat h0 b) in 
-      let (r0D, r1D) = pow_spec (as_seq h0 scalar) (a_, b_) in 
+      let (r0D, r1D) = Lib.LoopCombinators.repeati 256 (_pow_step (as_seq h0 scalar)) (a_, b_) in 
       r0D == fromDomain_ (as_nat h1 a) /\ r1D == fromDomain_ (as_nat h1 b) /\
       as_nat h1 a < prime /\ as_nat h1 b < prime)
   )
@@ -167,13 +168,13 @@ let _montgomery_ladder_power a b scalar =
 	  Lib.LoopCombinators.unfold_repeati 256 (spec_exp h0) (acc h0) (uint_v i))
 
 
-val montgomery_ladder_power: a: felem -> scalar: lbuffer uint8 (size 32) -> result: felem -> 
+val montgomery_ladder_power: a: felem -> scalar: ilbuffer uint8 (size 32) -> result: felem -> 
   Stack unit 
     (requires fun h -> live h a /\ live h scalar /\ live h result /\ as_nat h a < prime /\ disjoint a scalar)
     (ensures fun h0 _ h1 -> modifies (loc a |+| loc result) h0 h1 /\
       (
 	assert_norm (1 < prime256);
-	let r0D, r1D = pow_spec (as_seq h0 scalar) (1, fromDomain_ (as_nat h0 a)) in 
+	let r0D = pow_spec (as_seq h0 scalar) (fromDomain_ (as_nat h0 a)) in 
 	r0D == fromDomain_ (as_nat h1 result)
       )
     )
@@ -182,37 +183,43 @@ val montgomery_ladder_power: a: felem -> scalar: lbuffer uint8 (size 32) -> resu
 let montgomery_ladder_power a scalar result = 
   assert_norm (1 < prime256);
   push_frame(); 
-    let h0 = ST.get() in 
       let p = create (size 4) (u64 0) in 
       upload_one_montg_form p; 
-   let h1 = ST.get() in 
       _montgomery_ladder_power p a scalar;
-   let h2 = ST.get() in 
      lemmaToDomainAndBackIsTheSame 1;  
     copy result p;
   pop_frame()  
 
 
-(* sqPower =  (prime + 1) // 4 *)
-val uploadSQpower: a: felem -> Stack unit 
-  (requires fun h -> live h a)
-  (ensures fun h0 _ h1 -> modifies (loc a) h0 h1 /\ as_nat h1 a == 28948022302589062190674361737351893382521535853822578548883407827216774463488)
-
-let uploadSQpower a = 
-  upd a (size 0) (u64 0);
-  upd a (size 1) (u64 1073741824);
-  upd a (size 2) (u64 4611686018427387904);
-  upd a (size 3) (u64 4611686017353646080)
+unfold let sqPower_list: list uint8 =
+ [
+   u8 0;  u8 0;  u8 0;  u8 0;   u8 0;   u8 0;   u8 0;   u8 0;
+   u8 0;  u8 0;  u8 0;  u8 64;  u8 0;   u8 0;   u8 0;   u8 0;
+   u8 0;  u8 0;  u8 0;  u8 0;   u8 0;   u8 0;   u8 0;   u8 64;
+   u8 0;  u8 0;  u8 0;  u8 192; u8 255; u8 255; u8 255; u8 63
+ ]
 
 
-val square_root: a: felem -> Stack unit 
-  (requires fun h -> True)
-  (ensures fun h0 _ h1 -> True)
+let sqPower_seq: s: lseq uint8 32{Lib.ByteSequence.nat_from_intseq_le s == (prime256 + 1) / 4} =
+  let open Lib.ByteSequence in 
+  assert_norm (List.Tot.length sqPower_list  == 32);
+  nat_from_intlist_seq_le 32 sqPower_list;
+  assert_norm (nat_from_intlist_le sqPower_list == (prime256 + 1) / 4);
+  of_list sqPower_list
 
-let square_root a  = 
+
+inline_for_extraction
+let sqPower_buffer: x: ilbuffer uint8 32ul {witnessed x sqPower_seq /\ recallable x} = 
+  createL_global sqPower_list
+
+
+val square_root: a: felem -> result: felem ->  Stack unit 
+  (requires fun h -> live h a /\ live h result /\ as_nat h a < prime)
+  (ensures fun h0 _ h1 -> modifies (loc a |+| loc result) h0 h1)
+
+let square_root a result = 
   push_frame();
-    let sqPower = create (size 4) (u64 0) in 
-    uploadSQpower sqPower;
-    montgomery_ladder_power a sqPower;
+    recall_contents sqPower_buffer sqPower_seq;
+    montgomery_ladder_power a sqPower_buffer result;
   pop_frame()
 
