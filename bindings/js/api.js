@@ -2,6 +2,68 @@ var fs = require('fs');
 var loader = require('./loader.js')
 var shell = require('./shell.js')
 var api_json = require('./api.json')
+const validateJSON = function(json) {
+  Object.keys(json).map(function(key_module) {
+    Object.keys(json[key_module]).map(function(key_func) {
+      var func_obj = json[key_module][key_func];
+      var obj_name = key_module + "." + key_func;
+      if (func_obj.module === undefined) {
+        throw Error("please provide a 'module' field for " + obj_name + " in api.json");
+      }
+      if (!(shell.my_modules.includes(func_obj.module))) {
+        throw Error(obj_name +".module='"+func_obj.module+"' of api.json should be listed in shell.js");
+      }
+      if (func_obj.name === undefined) {
+        throw Error("please provide a 'name' field for " + obj_name + " in api.json");
+      }
+      if (func_obj.args === undefined) {
+        throw Error("please provide a 'args' field for " + obj_name + " in api.json");
+      }
+      if (!Array.isArray(func_obj.args)) {
+        throw Error("the 'args' field for " + obj_name + " should be an array");
+      }
+      var length_args_available = [];
+      func_obj.args.map(function(arg, i) {
+        if (!(arg.kind === "input" || (arg.kind === "output"))) {
+          throw Error("in " + obj_name + ", argument #" + i + " should have a 'kind' that is 'output' or 'input'")
+        }
+        if (!(arg.type === "bool" || (arg.type === "int") || (arg.type === "buffer"))) {
+          throw Error("in " + obj_name + ", argument #" + i + " should have a 'kind' that is 'int', 'bool' or 'buffer'")
+        }
+        if (arg.type === "buffer") {
+          if (arg.size === undefined) {
+            throw Error("in " + obj_name + ", argument #" + i + " is a buffer and should have a 'size' field")
+          }
+        }
+        if (arg.kind === "input" && arg.type === "buffer") {
+          if (arg.interface_index === undefined) {
+              throw Error("in " + obj_name + ", argument #" + i + " is an input and should have a 'interface_index' field")
+          }
+        }
+        if ((arg.kind === "output" || (arg.kind === "input" && arg.interface_index !== undefined)) && arg.tests === undefined) {
+          throw Error("please provide a 'tests' field for argument #" + i + "of " + obj_name + " in api.json");
+        }
+        if ((arg.kind === "output" || (arg.kind === "input" && arg.interface_index !== undefined)) && !Array.isArray(arg.tests)) {
+          throw Error("the 'tests' field for argument #" + i + "of " + obj_name + " should be an array");
+        }
+        if (arg.type === "int" && arg.kind === "input") {
+          length_args_available.push(arg.name)
+        }
+      });
+      func_obj.args.map(function(arg, i) {
+        if (arg.type === "buffer" && typeof arg.size === "string") {
+          if (!length_args_available.includes(arg.size)) {
+            throw Error("incorrect 'size' field value ("+ arg.size +")for argument #" + i + "of " + obj_name + " in api.json")
+          }
+        }
+      });
+      if (func_obj.return === undefined) {
+        throw Error("please provide a 'return' field for " + obj_name + " in api.json");
+      }
+    })
+  });
+}
+validateJSON(api_json);
 
 var HaclWasm = (function() {
   'use strict';
@@ -84,9 +146,10 @@ var HaclWasm = (function() {
     return new Uint8Array(result);
   };
 
-  const callWithProto = function(proto, args) {
-    if (args.length != proto.args.filter(arg => arg.interface_index !== undefined).length) {
-      throw Error("wrong number of arguments to call the FStar function !")
+  const callWithProto = function(proto, args, loc_name) {
+    var expected_args_number = proto.args.filter(arg => arg.interface_index !== undefined).length;
+    if (args.length != expected_args_number) {
+      throw Error("wrong number of arguments to call the F*-wasm function " + loc_name + ": expected " + expected_args_number + ", got " + args.length)
     }
     let memory = new Uint32Array(Module.Kremlin.mem.buffer);
     let sp = memory[0];
