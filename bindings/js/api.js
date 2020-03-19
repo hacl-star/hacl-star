@@ -94,9 +94,9 @@ var HaclWasm = (function() {
     // Populating the variable length arguments by retrieving buffer lengths
     proto.args.map((arg) => {
       if (arg.type === "buffer") {
-        if ((arg.size.var_length !== undefined) && (arg.interface_index !== undefined)) {
+        if ((typeof arg.size === "string") && (arg.interface_index !== undefined)) {
           let func_arg = args[arg.interface_index];
-          var_lengths[arg.size.var_length] = func_arg.length;
+          var_lengths[arg.size] = func_arg.length;
         }
       }
     });
@@ -104,8 +104,8 @@ var HaclWasm = (function() {
     let args_pointers = proto.args.map((arg, i) => {
       if (arg.type === "buffer") {
         var size;
-        if (arg.size.var_length !== undefined) {
-          size = var_lengths[arg.size.var_length]
+        if (typeof arg.size === "string") {
+          size = var_lengths[arg.size]
         } else {
           size = arg.size;
         }
@@ -125,8 +125,8 @@ var HaclWasm = (function() {
       }
       if (arg.type === "bool" || arg.type === "int") {
         var value;
-        if (arg.var_length !== undefined) {
-          value = var_lengths[arg.var_length];
+        if (arg.interface_index === undefined) {
+          value = var_lengths[arg.name];
         } else {
           value = args[arg.interface_index];
         }
@@ -147,8 +147,8 @@ var HaclWasm = (function() {
     ).map(pointer => {
       let protoRet = proto.args[pointer.index];
       var size;
-      if (protoRet.size.var_length !== undefined) {
-        size = var_lengths[protoRet.size.var_length];
+      if (typeof protoRet.size === "string") {
+        size = var_lengths[protoRet.size];
       } else {
         size = protoRet.size;
       }
@@ -219,7 +219,7 @@ fs.writeFile("doc/readable_api.js", (function() {
         a1.interface_index - a2.interface_index
       }).map((arg) => {
         contents += " * @param {" + arg.type + "} " + arg.name
-        if (arg.type === "buffer" && arg.size.var_length === undefined) {
+        if (arg.type === "buffer" && typeof arg.size === "number") {
           contents += " - size " + arg.size
         }
         contents += "\n"
@@ -232,7 +232,7 @@ fs.writeFile("doc/readable_api.js", (function() {
         arg.kind === "output"
       ).map((arg) => {
         contents += " * @return {" + arg.type + "} " + arg.name
-        if (arg.type === "buffer" && arg.size.var_length === undefined) {
+        if (arg.type === "buffer" && typeof arg.size === "number") {
           contents += " - size " + arg.size
         }
         contents += "\n"
