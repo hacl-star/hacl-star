@@ -81,7 +81,7 @@ let cswap bit p1 p2 =
 inline_for_extraction noextract 
 val upload_one_montg_form: b: felem -> Stack unit
   (requires fun h -> live h b)
-  (ensures fun h0 _ h1 -> modifies (loc b) h0 h1 /\ as_nat h1 b == toDomain_ (1))
+  (ensures fun h0 _ h1 -> modifies (loc b) h0 h1 /\ as_nat h1 b == toDomain_ (1) /\ as_nat h1 b < prime)
 
 let upload_one_montg_form b =
   upd b (size 0) (u64 1);
@@ -120,7 +120,7 @@ val montgomery_ladder_power_step: a: felem -> b: felem -> scalar: lbuffer uint8 
     (
       let a_ = fromDomain_ (as_nat h0 a) in 
       let b_ = fromDomain_ (as_nat h0 b) in 
-      let (r0D, r1D) = _exp_step (as_seq h0 scalar) (uint_v i) (a_, b_) in 
+      let (r0D, r1D) = _pow_step (as_seq h0 scalar) (uint_v i) (a_, b_) in 
       r0D == fromDomain_ (as_nat h1 a) /\ r1D == fromDomain_ (as_nat h1 b) /\ 
       as_nat h1 a < prime /\ as_nat h1 b < prime 
     ) 
@@ -137,23 +137,23 @@ let montgomery_ladder_power_step a b scalar i =
 
 
 inline_for_extraction noextract 
-val _montgomery_ladder_power: a: felem -> b: felem -> scalar: ilbuffer uint8 (size 32) -> Stack unit
+val _montgomery_ladder_power: a: felem -> b: felem -> scalar: lbuffer uint8 (size 32) -> Stack unit
   (requires fun h -> live h a /\ live h b /\ live h scalar /\ as_nat h a < prime /\ 
-    as_nat h b < prime /\ disjoint a b /\disjoint a scalar /\ disjoint b scalar)
+    as_nat h b < prime /\ disjoint a b /\ disjoint a scalar /\ disjoint b scalar)
   (ensures fun h0 _ h1 -> modifies (loc a |+| loc b) h0 h1 /\ 
     (
       let a_ = fromDomain_ (as_nat h0 a) in 
       let b_ = fromDomain_ (as_nat h0 b) in 
-      let (r0D, r1D) = _exponent_spec (as_seq h0 scalar) (a_, b_) in 
+      let (r0D, r1D) = pow_spec (as_seq h0 scalar) (a_, b_) in 
       r0D == fromDomain_ (as_nat h1 a) /\ r1D == fromDomain_ (as_nat h1 b) /\
-      as_nat h1 a < prime /\ as_nat h1 b < prime )
+      as_nat h1 a < prime /\ as_nat h1 b < prime)
   )
 
   
 let _montgomery_ladder_power a b scalar = 
   let h0 = ST.get() in 
   [@inline_let]
-  let spec_exp h0  = _exp_step (as_seq h0 scalar) in 
+  let spec_exp h0  = _pow_step (as_seq h0 scalar) in 
   [@inline_let]
   let acc (h: mem) : GTot (tuple2 nat_prime nat_prime) = (fromDomain_ (as_nat h a), fromDomain_ (as_nat h b)) in 
   Lib.LoopCombinators.eq_repeati0 256 (spec_exp h0) (acc h0);
@@ -167,20 +167,29 @@ let _montgomery_ladder_power a b scalar =
 	  Lib.LoopCombinators.unfold_repeati 256 (spec_exp h0) (acc h0) (uint_v i))
 
 
-val montgomery_ladder_power: a: felem -> scalar: ilbuffer uint8 (size 32) ->  Stack unit 
-  (requires fun h -> live h a /\ as_nat h a < prime)
-  (ensures fun h0 _ h1 -> modifies (loc a) h0 h1
-)
+val montgomery_ladder_power: a: felem -> scalar: lbuffer uint8 (size 32) -> result: felem -> 
+  Stack unit 
+    (requires fun h -> live h a /\ live h scalar /\ live h result /\ as_nat h a < prime /\ disjoint a scalar)
+    (ensures fun h0 _ h1 -> modifies (loc a |+| loc result) h0 h1 /\
+      (
+	assert_norm (1 < prime256);
+	let r0D, r1D = pow_spec (as_seq h0 scalar) (1, fromDomain_ (as_nat h0 a)) in 
+	r0D == fromDomain_ (as_nat h1 result)
+      )
+    )
 
 
-let montgomery_ladder_power r scalar = 
+let montgomery_ladder_power a scalar result = 
+  assert_norm (1 < prime256);
   push_frame(); 
-    let p = create (size 4) (u64 0) in 
-    upload_one_montg_form p; 
-    recall_contents prime256_buffer (Lib.Sequence.of_list p256_prime_list);
-    _montgomery_ladder_power p r scalar;
-      lemmaToDomainAndBackIsTheSame 1;
-    copy r p;
+    let h0 = ST.get() in 
+      let p = create (size 4) (u64 0) in 
+      upload_one_montg_form p; 
+   let h1 = ST.get() in 
+      _montgomery_ladder_power p a scalar;
+   let h2 = ST.get() in 
+     lemmaToDomainAndBackIsTheSame 1;  
+    copy result p;
   pop_frame()  
 
 
