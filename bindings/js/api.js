@@ -1,5 +1,4 @@
 var fs = require('fs');
-var browser = require('./browser.js')
 var loader = require('./loader.js')
 var shell = require('./shell.js')
 var api_json = require('./api.json')

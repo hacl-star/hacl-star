@@ -744,6 +744,9 @@ dist/wasm/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree.*'
 dist/wasm/Makefile.basic: CTR_BUNDLE =
 dist/wasm/Makefile.basic: DEFAULT_FLAGS += -bundle 'EverCrypt,EverCrypt.*'
 
+dist/wasm/api.js: dist/wasm/Makefile.basic
+    cp bindings/js/* $(dir $<)
+
 # Compact distributions
 # ---------------------
 #
