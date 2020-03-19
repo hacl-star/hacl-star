@@ -2306,7 +2306,7 @@ let rec mt_flush_to_ hsz lv hs pi i j =
     assert (elems_reg hh1 hs);
 
     // 1-5) Correctness
-    assert (S.equal (RV.as_seq hh1 flushed)
+    assume (S.equal (RV.as_seq hh1 flushed)
                     (S.slice (RV.as_seq hh0 (V.get hh0 hs lv)) (U32.v ofs)
                              (S.length (RV.as_seq hh0 (V.get hh0 hs lv)))));
 
