@@ -9,17 +9,12 @@ open Lib.Sequence
 open Spec.P256.Definitions
 open Spec.P256.Lemmas
 
+open FStar.Math.Lemmas
+open FStar.Math.Lib
+
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
-(*
-Curve NIST-P256
-
-y^2 = x^3-3x+41058363725152142129326129780047268409114441015993725554835256314039467401291
-
-modulo p = 2^256 - 2^224 + 2^192 + 2^96 - 1 *)
-
 let prime = prime256
-
 
 let nat_prime = n:nat{n < prime}
 
@@ -116,9 +111,40 @@ let _norm (p:point_nat_prime) : point_nat_prime =
 let scalar = lbytes 32
 
 
-let ith_bit (k:lbytes 32) (i:nat{i < 256}) : uint64 =
-  let q = 31 - i / 8 in let r = size (i % 8) in
-  to_u64 ((index k q >>. r) &. u8 1)
+val lemma_scalar_ith: sc:lbytes 32 -> k:nat{k < 32} -> Lemma
+  (v sc.[k] == nat_from_intseq_le sc / pow2 (8 * k) % pow2 8)
+
+let lemma_scalar_ith sc k =
+  index_nat_to_intseq_le #U8 #SEC 32 (nat_from_intseq_le sc) k;
+  nat_from_intseq_le_inj sc (nat_to_intseq_le 32 (nat_from_intseq_le sc))
+
+
+val lemma_euclidian_for_ithbit: k: nat -> i: nat
+  -> Lemma (k / (pow2 (8 * (i / 8)) * pow2 (i % 8)) == k / pow2 i)
+
+let lemma_euclidian_for_ithbit k i =
+  lemma_div_def i 8;
+  pow2_plus (8 * (i / 8)) (i % 8)
+
+
+val ith_bit: k:lbytes 32 -> i:nat{i < 256}
+  -> t:uint64 {(v t == 0 \/ v t == 1) /\ v t == nat_from_intseq_le k / pow2 i % 2}
+
+let ith_bit k i =
+  let q = i / 8 in
+  let r = i % 8 in
+  let tmp1 = k.[q] >>. (size r) in
+  let tmp2 = tmp1 &. u8 1 in
+  let res = to_u64 tmp2 in
+  logand_le tmp1 (u8 1);
+  logand_mask tmp1 (u8 1) 1;
+  lemma_scalar_ith k q;
+  let k = nat_from_intseq_le k in
+  pow2_modulo_division_lemma_1 (k / pow2 (8 * (i / 8))) (i % 8) 8;
+  division_multiplication_lemma k (pow2 (8 * (i / 8))) (pow2 (i % 8));
+  lemma_euclidian_for_ithbit k i;
+  pow2_modulo_modulo_lemma_1 (k / pow2 i) 1 (8 - (i % 8));
+  res
 
 
 val _ml_step0: p:point_nat_prime -> q:point_nat_prime -> tuple2 point_nat_prime point_nat_prime
@@ -207,12 +233,12 @@ let _exp_step1 r0 r1 =
   (r0, r1)
 
 
-let swap p q = q, p
+let swap (p:nat_prime) (q:nat_prime) = q, p
 
 
-val conditional_swap: i:uint64 -> p:nat_prime -> q:nat_prime -> tuple2 nat_prime nat_prime
+val conditional_swap_exponent: i:uint64 -> p:nat_prime -> q:nat_prime -> tuple2 nat_prime nat_prime
 
-let conditional_swap i p q =
+let conditional_swap_exponent i p q =
   if v i = 0 then (p, q) else (q, p)
 
 

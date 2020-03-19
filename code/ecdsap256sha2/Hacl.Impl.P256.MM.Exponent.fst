@@ -32,6 +32,26 @@ open Spec.P256
 
 #set-options "--z3rlimit 200 --fuel 0 --ifuel 0" 
 
+(* This is a very very very very bad decision, but I don´t wanna do common spec right now *)
+
+inline_for_extraction noextract
+val scalar_bit:
+    #buf_type: buftype -> 
+    s:lbuffer_t buf_type uint8 (size 32)
+  -> n:size_t{v n < 256}
+  -> Stack uint64
+    (requires fun h0 -> live h0 s)
+    (ensures  fun h0 r h1 -> h0 == h1 /\
+      r == Spec.P256.ith_bit (as_seq h0 s) (v n) /\ v r <= 1)
+      
+let scalar_bit #buf_type s n =
+  let h0 = ST.get () in
+  mod_mask_lemma ((Lib.Sequence.index (as_seq h0 s) (v n / 8)) >>. (n %. 8ul)) 1ul;
+  assert_norm (1 = pow2 1 - 1);
+  assert (v (mod_mask #U8 #SEC 1ul) == v (u8 1));
+  to_u64 ((s.(n /. 8ul) >>. (n %. 8ul)) &. u8 1)
+
+
 [@ CInline]
 val cswap: bit:uint64{v bit <= 1} -> p:felem -> q:felem
   -> Stack unit
@@ -130,8 +150,7 @@ let montgomery_ladder_power_step a b scalar i =
   cswap bit a b;
   montgomery_ladder_power_step0 a b;
   cswap bit a b;
-    admit();
-    lemma_swaped_steps (fromDomain_ (as_nat h0 a)) (fromDomain_ (as_nat h0 b))
+  lemma_swaped_steps (fromDomain_ (as_nat h0 a)) (fromDomain_ (as_nat h0 b))
 
 
 inline_for_extraction noextract 
