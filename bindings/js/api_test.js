@@ -55,6 +55,9 @@ async function checkTestVectors(func_sig, func, msg) {
     number_of_tests = Math.min(number_of_tests, func_sig.return.tests.length);
   }
   console.log("Passing tests for " + msg)
+  if (number_of_tests === 0) {
+    console.warn("No tests for " + msg + "!")
+  }
   for (var t = 0; t < number_of_tests; t++) {
     let args = func_sig.args.filter(arg =>
       (arg.kind === "input") && (arg.tests !== undefined)
@@ -78,6 +81,7 @@ async function checkTestVectors(func_sig, func, msg) {
       arg.kind === "output"
     ).map((arg, i) => {
       var result_val;
+      var result_name = arg.name;
       if (func_sig.return.type !== "void") {
         result_val = result[i + 1];
       } else {
@@ -89,10 +93,10 @@ async function checkTestVectors(func_sig, func, msg) {
       }
       var result_val = postprocessing(arg.type, result_val);
       if (result_val !== arg.tests[t]) {
-        throw "Wrong return value ! Expecting " + arg.tests[t] + ", got " + result_val
+        throw "Wrong return value for "+ result_name +" ! Expecting " + arg.tests[t] + ", got " + result_val
       }
     })
-    console.log("Test " + t + " passed !");
+    console.log("Test #" + (t+1) + " passed !");
   }
 }
 

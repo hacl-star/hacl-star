@@ -153,7 +153,7 @@ var HaclWasm = (function() {
         size = protoRet.size;
       }
       let retBuf = new ArrayBuffer(size);
-      (new Uint8Array(retBuf)).set(read_memory(pointer.value, size))
+      (new Uint8Array(retBuf)).set(read_memory(pointer.value, size));
       return retBuf;
     });
     if (return_buffers.length == 1) {
@@ -222,6 +222,9 @@ fs.writeFile("doc/readable_api.js", (function() {
         if (arg.type === "buffer" && typeof arg.size === "number") {
           contents += " - size " + arg.size
         }
+        if (arg.type === "buffer" && typeof arg.size === "string") {
+          contents += " - size " + arg.size
+        }
         contents += "\n"
       });
       // Return info
@@ -233,6 +236,9 @@ fs.writeFile("doc/readable_api.js", (function() {
       ).map((arg) => {
         contents += " * @return {" + arg.type + "} " + arg.name
         if (arg.type === "buffer" && typeof arg.size === "number") {
+          contents += " - size " + arg.size
+        }
+        if (arg.type === "buffer" && typeof arg.size === "string") {
           contents += " - size " + arg.size
         }
         contents += "\n"
