@@ -7,6 +7,8 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
+open Spec.P256.Lemmas
+
 open Spec.P256.Definitions
 open Hacl.Impl.LowLevel
 open Hacl.Impl.P256
@@ -28,6 +30,7 @@ open Hacl.Hash.SHA2
 open Hacl.Impl.P256.Signature.Common
 open Lib.ByteSequence
 open Lib.IntVector.Intrinsics
+
 
 open FStar.Mul
 

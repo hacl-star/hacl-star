@@ -11,6 +11,7 @@ open Lib.Buffer
 
 open Spec.P256 
 open Spec.P256.Definitions
+open Spec.P256.Lemmas
 
 open Spec.ECDSA
 open Spec.ECDSAP256.Definition
@@ -59,29 +60,7 @@ let toUint64ChangeEndian i o =
   changeEndian o
 
 
-let lemma_core_0 a h = 
-  let k = as_seq h a in 
-  let z = nat_from_intseq_le k in 
-    nat_from_intseq_le_slice_lemma k 1;
-    nat_from_intseq_le_lemma0 (Seq.slice k 0 1);
-  let k1 = Seq.slice k 1 4 in 
-    nat_from_intseq_le_slice_lemma #_ #_ #3 k1 1;
-    nat_from_intseq_le_lemma0 (Seq.slice k1 0 1);
-  let k2 = Seq.slice k1 1 3 in 
-    nat_from_intseq_le_slice_lemma #_ #_ #2 k2 1;
-    nat_from_intseq_le_lemma0 (Seq.slice k2 0 1);
-    nat_from_intseq_le_lemma0 (Seq.slice k2 1 2)
-
-
-let lemma_core_1 a h= 
-  lemma_core_0 a h;
-  lemma_nat_from_to_intseq_le_preserves_value #U64 #SEC 4 (as_seq h a);
-  let n = nat_from_intseq_le (as_seq h a) in 
-  uints_to_bytes_le_nat_lemma #U64 #SEC 4 n;
-  lemma_nat_to_from_bytes_le_preserves_value #SEC (uints_to_bytes_le #U64 #SEC #4 (as_seq h a)) 32 (as_nat h a)
-
 #push-options "--ifuel 1"
-
 
 let bufferToJac p result = 
   let partPoint = sub result (size 0) (size 8) in 

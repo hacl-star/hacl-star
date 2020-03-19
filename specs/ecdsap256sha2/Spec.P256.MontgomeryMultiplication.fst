@@ -291,3 +291,7 @@ let pow_spec k p =
   let a, b = Lib.LoopCombinators.repeati 256 (_pow_step k) (1, p) in 
   lemma_exponen_spec k (1, p) 256;
   a
+
+
+let sq_root_spec a = 
+  pow a ((prime256 + 1) / 4) % prime256

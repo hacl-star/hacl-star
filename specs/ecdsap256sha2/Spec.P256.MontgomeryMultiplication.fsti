@@ -76,3 +76,5 @@ val _pow_step: k:lseq uint8 32 -> i:nat{i < 256} -> before:tuple2 nat_prime nat_
   -> tuple2 nat_prime nat_prime
 
 val pow_spec: k:lseq uint8 32 -> a:nat_prime -> Tot (r: nat_prime {r = pow a (Lib.ByteSequence.nat_from_bytes_le k) % prime256})
+
+val sq_root_spec: a: nat_prime -> Tot (r: nat_prime {r = pow a ((prime256 + 1) / 4) % prime256})

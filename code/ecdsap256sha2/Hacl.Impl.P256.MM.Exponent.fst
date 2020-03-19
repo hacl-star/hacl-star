@@ -9,11 +9,8 @@ open Lib.IntTypes
 open Lib.Buffer
 
 open FStar.Math.Lemmas
-open Hacl.Impl.P256.Math 
 
 open Hacl.Impl.LowLevel
-open FStar.Tactics
-open FStar.Tactics.Canon 
 
 open FStar.Mul
 
@@ -24,7 +21,6 @@ open Spec.P256.MontgomeryMultiplication
 
 open Hacl.Impl.P256.LowLevel
 open Hacl.Impl.P256
-open Hacl.Impl.P256.Arithmetics
 
 open Spec.P256.Definitions
 open Spec.P256.Lemmas
@@ -213,13 +209,9 @@ let sqPower_buffer: x: ilbuffer uint8 32ul {witnessed x sqPower_seq /\ recallabl
   createL_global sqPower_list
 
 
-val square_root: a: felem -> result: felem ->  Stack unit 
-  (requires fun h -> live h a /\ live h result /\ as_nat h a < prime)
-  (ensures fun h0 _ h1 -> modifies (loc a |+| loc result) h0 h1)
-
 let square_root a result = 
   push_frame();
     recall_contents sqPower_buffer sqPower_seq;
-    montgomery_ladder_power a sqPower_buffer result;
+    montgomery_ladder_power a sqPower_buffer result;  
   pop_frame()
 

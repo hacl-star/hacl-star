@@ -8,6 +8,8 @@ open Lib.IntTypes
 open Lib.Buffer
 open Lib.ByteSequence
 
+open Spec.P256.Lemmas
+
 open FStar.Mul
 open FStar.Math.Lemmas
 
