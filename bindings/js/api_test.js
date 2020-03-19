@@ -17,7 +17,11 @@ function buf2hex(buffer) {
 }
 
 function hex2buf(hexString) {
-  return new Uint8Array(hexString.match(/.{2}/g).map(byte => parseInt(byte, 16)));
+  if (hexString === "") {
+    return new Uint8Array(0);
+  } else {
+    return new Uint8Array(hexString.match(/.{2}/g).map(byte => parseInt(byte, 16)));
+  }
 }
 
 async function checkTestVectors(func_sig, func, msg) {
