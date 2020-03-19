@@ -162,6 +162,10 @@ var HaclWasm = (function() {
           var_lengths[arg.size] = func_arg.length;
         }
       }
+      if ((arg.type === "int") && (arg.interface_index !== undefined)) {
+        let func_arg = args[arg.interface_index];
+        var_lengths[arg.name] = func_arg;
+      }
     });
     // Retrieving all input buffers and allocating them in the Wasm memory
     let args_pointers = proto.args.map((arg, i) => {

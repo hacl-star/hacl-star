@@ -479,5 +479,128 @@
         "type": "void"
       }
     }
+  },
+  "Blake2": {
+    "blake2b": {
+      "module": "Hacl_Blake2b_32",
+      "name": "blake2b",
+      "args": [{
+          "type": "int",
+          "kind": "input",
+          "name": "output_len",
+          "interface_index": 0,
+          "tests": [
+            64, 64
+          ]
+        }, {
+          "name": "output",
+          "kind": "output",
+          "type": "buffer",
+          "size": "output_len",
+          "tests": [
+            "ba80a53f981c4d0d6a2797b69f12f6e94c212f14685ac4b74b12bb6fdbffa2d17d87c5392aab792dc252d5de4533cc9518d38aa8dbf1925ab92386edd4009923",
+            "e47bb6f20fbf14984f72a4c3cd9f3dc0d38928e536733ba7c5b153c71546584b7371f9b7070777b9a0947703409650fd04cfc9a5d561f99ed134ef262b03db94"
+          ]
+        },
+        {
+          "type": "int",
+          "kind": "input",
+          "name": "data_len"
+        }, {
+          "name": "data",
+          "kind": "input",
+          "type": "buffer",
+          "size": "data_len",
+          "interface_index": 1,
+          "tests": [
+            "616263",
+            "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+          ]
+        },
+        {
+          "type": "int",
+          "kind": "input",
+          "name": "key_len"
+        }, {
+          "name": "key",
+          "kind": "input",
+          "type": "buffer",
+          "size": "key_len",
+          "interface_index": 2,
+          "tests": [
+            "",
+            "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+          ]
+        }
+      ],
+      "return": {
+        "type": "void"
+      }
+    },
+    "blake2s": {
+      "module": "Hacl_Blake2s_32",
+      "name": "blake2s",
+      "args": [{
+          "type": "int",
+          "kind": "input",
+          "name": "output_len",
+          "interface_index": 0,
+          "tests": [
+            32,
+            32,
+            32,
+            32
+          ]
+        }, {
+          "name": "output",
+          "kind": "output",
+          "type": "buffer",
+          "size": "output_len",
+          "tests": [
+            "508c5e8c327c14e2e1a72ba34eeb452f37458b209ed63a294d999b4c86675982",
+            "40d15fee7c328830166ac3f918650f807e7e01e177258cdc0a39b11f598066f1",
+            "3fb735061abc519dfe979e54c1ee5bfad0a9d858b3315bad34bde999efd724dd",
+            "d12bf3732ef4af5c22fa90356af8fc50fcb40f8f2ea5c8594737a3b3d5abdbd7"
+          ]
+        },
+        {
+          "type": "int",
+          "kind": "input",
+          "name": "data_len"
+        }, {
+          "name": "data",
+          "kind": "input",
+          "type": "buffer",
+          "size": "data_len",
+          "interface_index": 1,
+          "tests": [
+            "616263",
+            "00",
+            "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfe",
+            "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fa"
+          ]
+        },
+        {
+          "type": "int",
+          "kind": "input",
+          "name": "key_len"
+        }, {
+          "name": "key",
+          "kind": "input",
+          "type": "buffer",
+          "size": "key_len",
+          "interface_index": 2,
+          "tests": [
+            "",
+            "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+            "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+            "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+          ]
+        }
+      ],
+      "return": {
+        "type": "void"
+      }
+    }
   }
 }
