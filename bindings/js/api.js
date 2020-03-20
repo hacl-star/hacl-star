@@ -1,8 +1,7 @@
 var fs = require('fs');
-var loader = require('./loader.js')
-var shell = require('./shell.js')
-var api_json = require('./api.json')
-
+var loader = require(require.resolve('./loader.js'))
+var shell = require(require.resolve('./shell.js'))
+var api_json = require(require.resolve('./api.json'))
 // The following function validates the contents of `api.json`. It is meant as
 // a helper when creating new binders, it provides explicit error messages.
 const validateJSON = function(json) {

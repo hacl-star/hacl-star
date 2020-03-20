@@ -1,5 +1,5 @@
-var HaclWasm = require('./api.js')
-var test_vectors = require('./api.json');
+var HaclWasm = require(require.resolve('./api.js'))
+var test_vectors = require(require.resolve('./api.json'));
 var eq_array = function(a1, a2) {
   if (a1.length !== a2.length) {
     return false

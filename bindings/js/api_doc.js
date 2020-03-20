@@ -1,4 +1,4 @@
-var api_json = require("./api.json");
+var api_json = require(require.resolve('./api.json'));
 var fs = require('fs');
 
 
