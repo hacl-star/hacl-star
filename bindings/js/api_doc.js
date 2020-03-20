@@ -1,4 +1,5 @@
-var api_json = require(require.resolve('./api.json'));
+var path = require('path');
+var api_json = require(path.resolve(__dirname, './api.json'));
 var fs = require('fs');
 
 
