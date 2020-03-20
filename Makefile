@@ -103,7 +103,7 @@ all:
 all-unstaged: compile-gcc-compatible compile-msvc-compatible compile-gcc64-only \
   compile-evercrypt-external-headers compile-c89-compatible compile-ccf \
   compile-portable-gcc-compatible compile-mozilla dist/linux/Makefile.basic \
-  bindings/wasm/INFO.txt \
+  dist/wasm/package.json \
 	dist/merkle-tree/Makefile.basic
 
 # Automatic staging.
@@ -121,7 +121,7 @@ all-unstaged: compile-gcc-compatible compile-msvc-compatible compile-gcc64-only 
 	cp $< $@
 
 test: test-staged
-test-unstaged: test-handwritten test-c test-ml vale_testInline
+test-unstaged: test-handwritten test-c test-ml vale_testInline test-wasm
 
 ifneq ($(OS),Windows_NT)
 test-unstaged: test-benchmark
@@ -708,6 +708,14 @@ WASM_FLAGS	=\
   -bundle Lib.Memzero \
   -minimal -wasm -d wasm
 
+dist/wasm/Makefile.basic: VALE_ASMS =
+dist/wasm/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
+dist/wasm/Makefile.basic: HAND_WRITTEN_H_FILES =
+dist/wasm/Makefile.basic: HACL_OLD_FILES =
+dist/wasm/Makefile.basic: HAND_WRITTEN_FILES =
+dist/wasm/Makefile.basic: TARGETCONFIG_FLAGS =
+dist/wasm/Makefile.basic: INTRINSIC_FLAGS =
+
 # Must appear early on because of the left-to-right semantics of -bundle flags.
 dist/wasm/Makefile.basic: HAND_WRITTEN_LIB_FLAGS = $(WASM_FLAGS)
 
@@ -744,10 +752,22 @@ dist/wasm/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree,MerkleTree.*'
 dist/wasm/Makefile.basic: CTR_BUNDLE =
 dist/wasm/Makefile.basic: DEFAULT_FLAGS += -bundle 'EverCrypt,EverCrypt.*'
 
-bindings/wasm/INFO.txt: dist/wasm/Makefile.basic
-	cp -f $(dir $<)/*.wasm bindings/js
-	cp -f $(dir $<)/loader.js bindings/js
-	cp -f $(dir $<)/shell.js bindings/js
+dist/wasm/package.json: dist/wasm/Makefile.basic $(wildcard bindings/js/*.js*)
+	cp $(filter-out %.basic,$^) $(dir $@)
+
+dist/wasm/doc/readable_api.js: dist/wasm/package.json
+	cd dist/wasm && \
+	mkdir -p doc && \
+	nodejs api_doc.js
+
+dist/wasm/doc/out/index.html: dist/wasm/doc/readable_api.js
+	jsdoc $< -d $(dir $@)
+
+wasm-doc: dist/wasm/doc/out/index.html
+
+test-wasm: dist/wasm/package.json
+	cd dist/wasm && \
+	nodejs api_test.js
 
 # Compact distributions
 # ---------------------

@@ -84,7 +84,7 @@ var HaclWasm = (function() {
   const checkIfInitialized = function() {
     if (isInitialized === false) {
       return Promise.all(shell.my_modules.map(m => {
-        var source = fs.readFileSync('./' + m + ".wasm");
+        var source = fs.readFileSync(require.resolve('./' + m + ".wasm"));
         return new Uint8Array(source)
       })).then(bufs => {
         return loader.link(my_imports, bufs.map((b, i) => ({
