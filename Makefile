@@ -103,7 +103,7 @@ all:
 all-unstaged: compile-gcc-compatible compile-msvc-compatible compile-gcc64-only \
   compile-evercrypt-external-headers compile-c89-compatible compile-ccf \
   compile-portable-gcc-compatible compile-mozilla dist/linux/Makefile.basic \
-  dist/wasm/Makefile.basic # TODO: no Makefile.basic is generated for wasm..
+  dist/wasm/api.js
 	dist/merkle-tree/Makefile.basic
 
 # Automatic staging.
@@ -745,7 +745,7 @@ dist/wasm/Makefile.basic: CTR_BUNDLE =
 dist/wasm/Makefile.basic: DEFAULT_FLAGS += -bundle 'EverCrypt,EverCrypt.*'
 
 dist/wasm/api.js: dist/wasm/Makefile.basic
-  cp bindings/js/* $(dir $<)
+	cp bindings/js/* $(dir $<)
 
 # Compact distributions
 # ---------------------
