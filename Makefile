@@ -103,7 +103,7 @@ all:
 all-unstaged: compile-gcc-compatible compile-msvc-compatible compile-gcc64-only \
   compile-evercrypt-external-headers compile-c89-compatible compile-ccf \
   compile-portable-gcc-compatible compile-mozilla dist/linux/Makefile.basic \
-  dist/wasm/api.js
+  bindings/wasm/INFO.txt \
 	dist/merkle-tree/Makefile.basic
 
 # Automatic staging.
@@ -740,12 +740,14 @@ dist/wasm/Makefile.basic: POLY_BUNDLE = \
   -bundle 'Hacl.Poly1305_128,Hacl.Poly1305_256,Hacl.Impl.Poly1305.*'
 
 # And Merkle trees
-dist/wasm/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree.*'
+dist/wasm/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree,MerkleTree.*'
 dist/wasm/Makefile.basic: CTR_BUNDLE =
 dist/wasm/Makefile.basic: DEFAULT_FLAGS += -bundle 'EverCrypt,EverCrypt.*'
 
-dist/wasm/api.js: dist/wasm/Makefile.basic
-	cp bindings/js/* $(dir $<)
+bindings/wasm/INFO.txt: dist/wasm/Makefile.basic
+	cp -f $(dir $<)/*.wasm bindings/js
+	cp -f $(dir $<)/loader.js bindings/js
+	cp -f $(dir $<)/shell.js bindings/js
 
 # Compact distributions
 # ---------------------
