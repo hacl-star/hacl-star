@@ -41,10 +41,10 @@ const validateJSON = function(json) {
           }
         }
         if ((arg.kind === "output" || (arg.kind === "input" && arg.interface_index !== undefined)) && arg.tests === undefined) {
-          throw Error("please provide a 'tests' field for argument #" + i + "of " + obj_name + " in api.json");
+          throw Error("please provide a 'tests' field for argument #" + i + " of " + obj_name + " in api.json");
         }
         if ((arg.kind === "output" || (arg.kind === "input" && arg.interface_index !== undefined)) && !Array.isArray(arg.tests)) {
-          throw Error("the 'tests' field for argument #" + i + "of " + obj_name + " should be an array");
+          throw Error("the 'tests' field for argument #" + i + " of " + obj_name + " should be an array");
         }
         if (arg.type === "int" && arg.kind === "input") {
           length_args_available.push(arg.name)
@@ -53,7 +53,7 @@ const validateJSON = function(json) {
       func_obj.args.map(function(arg, i) {
         if (arg.type === "buffer" && typeof arg.size === "string") {
           if (!length_args_available.includes(arg.size)) {
-            throw Error("incorrect 'size' field value ("+ arg.size +")for argument #" + i + "of " + obj_name + " in api.json")
+            throw Error("incorrect 'size' field value ("+ arg.size +")for argument #" + i + " of " + obj_name + " in api.json")
           }
         }
       });
