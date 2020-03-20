@@ -9,10 +9,12 @@ module IAEAD = Hacl.Impl.Instantiate.AEAD
 
 friend Hacl.Meta.HPKE
 
-let setupBaseI = hpke_setupBaseI_higher #cs IHK.hkdf_expand256 IHK.hkdf_extract256 IHash.hash_sha256 IDH.secret_to_public_c64 IDH.dh_c64
+#set-options "--fuel 0 --ifuel 0"
 
-let setupBaseR = hpke_setupBaseR_higher #cs IHK.hkdf_expand256 IHK.hkdf_extract256 IHash.hash_sha256 IDH.dh_c64 IDH.secret_to_public_c64
+let setupBaseI = hpke_setupBaseI_higher #cs True IHK.hkdf_expand256 IHK.hkdf_extract256 IHash.hash_sha256 IDH.secret_to_public_c64 IDH.dh_c64
 
-let sealBase = hpke_sealBase_higher #cs setupBaseI IAEAD.aead_encrypt_cp32
+let setupBaseR = hpke_setupBaseR_higher #cs True IHK.hkdf_expand256 IHK.hkdf_extract256 IHash.hash_sha256 IDH.dh_c64 IDH.secret_to_public_c64
 
-let openBase = hpke_openBase_higher #cs setupBaseR IAEAD.aead_decrypt_cp32
+let sealBase = hpke_sealBase_higher #cs True setupBaseI IAEAD.aead_encrypt_cp32
+
+let openBase = hpke_openBase_higher #cs True setupBaseR IAEAD.aead_decrypt_cp32
