@@ -142,7 +142,10 @@ let extra_state a = match a with
   | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 -> unit
 
 (* The working state *)
-let words_state a = m:Seq.seq (word a) {Seq.length m = state_word_length a} & extra_state a
+inline_for_extraction noextract
+let words_state' a = m:Seq.seq (word a) {Seq.length m = state_word_length a}
+
+let words_state a = words_state' a & extra_state a
 
 (* Number of words for final hash *)
 inline_for_extraction
