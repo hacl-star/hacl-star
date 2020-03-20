@@ -1,4 +1,4 @@
-module Hacl.Impl.Generic.DH
+module Hacl.HPKE.Interface.DH
 
 open FStar.HyperStack
 open FStar.HyperStack.All

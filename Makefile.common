@@ -111,7 +111,7 @@ FRODO_BUNDLE=-bundle 'Hacl.Frodo.KEM=Frodo.Params,Hacl.Impl.Frodo.*,Hacl.Impl.Ma
 # The only functions not marked as noextract should be in each of the Hacl.HPKE.{variants}
 # Each of these module should be extracted to a different file. Therefore, this variable
 # should remain empty, and overriden only when we do not want extraction of variants
-HPKE_BUNDLE=-bundle Hacl.Impl.Generic.*
+HPKE_BUNDLE=-bundle Hacl.HPKE.Interface.*
 
 # 3. OCaml
 

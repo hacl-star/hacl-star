@@ -1,4 +1,4 @@
-module Hacl.Impl.Generic.AEAD
+module Hacl.HPKE.Interface.AEAD
 
 open FStar.HyperStack
 open FStar.HyperStack.All
@@ -58,7 +58,23 @@ let aead_decrypt_st (a:AEAD.supported_alg) =
   )
 
 [@ Meta.Attribute.specialize]
-assume val aead_encrypt: #cs:S.ciphersuite -> aead_encrypt_st (S.aead_of_cs cs)
+val aead_encrypt: #cs:S.ciphersuite -> aead_encrypt_st (S.aead_of_cs cs)
 
 [@ Meta.Attribute.specialize]
-assume val aead_decrypt: #cs:S.ciphersuite -> aead_decrypt_st (S.aead_of_cs cs)
+val aead_decrypt: #cs:S.ciphersuite -> aead_decrypt_st (S.aead_of_cs cs)
+
+(** Instantiations of Chacha20Poly1305 **)
+inline_for_extraction noextract
+val aead_encrypt_cp32 : aead_encrypt_st AEAD.CHACHA20_POLY1305
+inline_for_extraction noextract
+val aead_decrypt_cp32 : aead_decrypt_st AEAD.CHACHA20_POLY1305
+
+inline_for_extraction noextract
+val aead_encrypt_cp128 : aead_encrypt_st AEAD.CHACHA20_POLY1305
+inline_for_extraction noextract
+val aead_decrypt_cp128 : aead_decrypt_st AEAD.CHACHA20_POLY1305
+
+inline_for_extraction noextract
+val aead_encrypt_cp256 : aead_encrypt_st AEAD.CHACHA20_POLY1305
+inline_for_extraction noextract
+val aead_decrypt_cp256 : aead_decrypt_st AEAD.CHACHA20_POLY1305

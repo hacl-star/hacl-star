@@ -1,4 +1,4 @@
-module Hacl.Impl.Generic.HKDF
+module Hacl.HPKE.Interface.HKDF
 
 module S = Spec.Agile.HPKE
 module HK = Hacl.HKDF

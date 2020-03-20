@@ -11,10 +11,10 @@ open FStar.Mul
 
 module S = Spec.Agile.HPKE
 module SDH = Spec.Agile.DH
-module DH = Hacl.Impl.Generic.DH
-module HKDF = Hacl.Impl.Generic.HKDF
-module AEAD = Hacl.Impl.Generic.AEAD
-module Hash = Hacl.Impl.Generic.Hash
+module DH = Hacl.HPKE.Interface.DH
+module HKDF = Hacl.HPKE.Interface.HKDF
+module AEAD = Hacl.HPKE.Interface.AEAD
+module Hash = Hacl.HPKE.Interface.Hash
 
 friend Spec.Agile.HPKE
 

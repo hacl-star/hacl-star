@@ -1,4 +1,4 @@
-module Hacl.Impl.Generic.Hash
+module Hacl.HPKE.Interface.Hash
 
 module S = Spec.Agile.HPKE
 module Hash = Hacl.Hash.Definitions

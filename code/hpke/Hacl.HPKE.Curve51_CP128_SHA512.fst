@@ -2,10 +2,10 @@ module Hacl.HPKE.Curve51_CP128_SHA512
 
 open Hacl.Meta.HPKE
 
-module IDH = Hacl.Impl.Generic.DH
-module IHK = Hacl.Impl.Generic.HKDF
-module IHash = Hacl.Impl.Generic.Hash
-module IAEAD = Hacl.Impl.Instantiate.AEAD
+module IDH = Hacl.HPKE.Interface.DH
+module IHK = Hacl.HPKE.Interface.HKDF
+module IHash = Hacl.HPKE.Interface.Hash
+module IAEAD = Hacl.HPKE.Interface.AEAD
 
 friend Hacl.Meta.HPKE
 
