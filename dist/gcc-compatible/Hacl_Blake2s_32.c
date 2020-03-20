@@ -563,49 +563,49 @@ Hacl_Blake2s_32_blake2s(
     blake2s_update_block(h, false, totlen, b1);
   }
   memset(b0, 0U, (uint32_t)64U * sizeof (b0[0U]));
-  uint32_t nb = ll / (uint32_t)64U;
-  uint32_t rem1 = ll % (uint32_t)64U;
+  uint32_t nb0 = ll / (uint32_t)64U;
+  uint32_t rem10 = ll % (uint32_t)64U;
   K___uint32_t_uint32_t scrut;
-  if (rem1 == (uint32_t)0U && nb > (uint32_t)0U)
+  if (rem10 == (uint32_t)0U && nb0 > (uint32_t)0U)
   {
-    uint32_t nb_ = nb - (uint32_t)1U;
+    uint32_t nb_ = nb0 - (uint32_t)1U;
     uint32_t rem_ = (uint32_t)64U;
     scrut = ((K___uint32_t_uint32_t){ .fst = nb_, .snd = rem_ });
   }
   else
   {
-    scrut = ((K___uint32_t_uint32_t){ .fst = nb, .snd = rem1 });
+    scrut = ((K___uint32_t_uint32_t){ .fst = nb0, .snd = rem10 });
   }
-  uint32_t nb0 = scrut.fst;
-  for (uint32_t i = (uint32_t)0U; i < nb0; i++)
+  uint32_t nb = scrut.fst;
+  uint32_t rem1 = scrut.snd;
+  for (uint32_t i = (uint32_t)0U; i < nb; i++)
   {
     uint64_t totlen = prev0 + (uint64_t)((i + (uint32_t)1U) * (uint32_t)64U);
     uint8_t *b = d + i * (uint32_t)64U;
     blake2s_update_block(h, false, totlen, b);
   }
-  uint32_t rem2 = ll % (uint32_t)64U;
-  uint8_t *last1 = d + ll - rem2;
+  uint8_t *last1 = d + ll - rem1;
   uint8_t last_block[64U] = { 0U };
-  memcpy(last_block, last1, rem2 * sizeof (last1[0U]));
+  memcpy(last_block, last1, rem1 * sizeof (last1[0U]));
   uint64_t totlen = prev0 + (uint64_t)ll;
   blake2s_update_block(h, true, totlen, last_block);
-  KRML_CHECK_SIZE(sizeof (uint8_t), (uint32_t)2U * (uint32_t)4U * (uint32_t)4U);
-  uint8_t b[(uint32_t)2U * (uint32_t)4U * (uint32_t)4U];
-  memset(b, 0U, (uint32_t)2U * (uint32_t)4U * (uint32_t)4U * sizeof (b[0U]));
-  uint8_t *uu____0 = b;
-  uint32_t *uu____1 = h + (uint32_t)0U * (uint32_t)4U;
+  uint32_t double_row = (uint32_t)2U * (uint32_t)4U * (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint8_t), double_row);
+  uint8_t full[double_row];
+  memset(full, 0U, double_row * sizeof (full[0U]));
+  uint8_t *first = full;
+  uint8_t *second = full + (uint32_t)4U * (uint32_t)4U;
+  uint32_t *row0 = h + (uint32_t)0U * (uint32_t)4U;
+  uint32_t *row1 = h + (uint32_t)1U * (uint32_t)4U;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
-    store32_le(uu____0 + i * (uint32_t)4U, uu____1[i]);
+    store32_le(first + i * (uint32_t)4U, row0[i]);
   }
-  uint8_t *uu____2 = b + (uint32_t)4U * (uint32_t)4U;
-  uint32_t *uu____3 = h + (uint32_t)1U * (uint32_t)4U;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
-    store32_le(uu____2 + i * (uint32_t)4U, uu____3[i]);
+    store32_le(second + i * (uint32_t)4U, row1[i]);
   }
-  uint8_t *final = b;
+  uint8_t *final = full;
   memcpy(output, final, nn * sizeof (final[0U]));
-  memset(b, 0U, (uint32_t)2U * (uint32_t)4U * (uint32_t)4U * sizeof (b[0U]));
 }
 
