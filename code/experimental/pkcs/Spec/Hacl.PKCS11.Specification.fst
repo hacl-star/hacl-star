@@ -1269,7 +1269,7 @@ let deviceAddSession  f d newSession =
 val attributeIsReadOnly: _CK_ATTRIBUTE -> Tot bool 
 
 let attributeIsReadOnly a = 
-    _ck_attribute_read_only a.aType
+    not (_ck_attribute_read_only a.aType)
 
 
 val attributesNotReadOnly: seq _CK_ATTRIBUTE -> Tot bool
@@ -1306,9 +1306,30 @@ let attributesTemplateComplete t mechanism attrs =
   match getRequiredAttributes with 
     |None -> false
     |Some a -> _attributesTemplateComplete allAttributes a 
-  
-  
 
+(* If the attribute values in the supplied template, together with any default attribute values and any attribute values contributed to the object by the object-creation function itself, are inconsistent, then the attempt should fail with the error code CKR_TEMPLATE_INCONSISTENT.   *)
+  
+(*One example of an inconsistent template would be using a template which specifies two different values for the same attribute.   *)
+
+val _attributesTemplateConsistent0: attrs: seq _CK_ATTRIBUTE -> Tot bool
+  (decreases (length attrs))
+
+let rec _attributesTemplateConsistent0 attrs = 
+  match length attrs with 
+  | 0 -> true
+  | 1 -> true
+  | _ -> 
+    let typeOfAttribute = (head attrs).aType in 
+    let r = find_l (fun x -> x.aType = typeOfAttribute) (tail attrs) in 
+    match r with 
+      |Some _ -> false
+      |None -> _attributesTemplateConsistent0 (tail attrs)
+  
+  
+val attributesTemplateConsistent0: attrs: seq _CK_ATTRIBUTE -> Tot bool
+
+let attributesTemplateConsistent0 attrs = 
+  _attributesTemplateConsistent0 attrs
 
 
 
