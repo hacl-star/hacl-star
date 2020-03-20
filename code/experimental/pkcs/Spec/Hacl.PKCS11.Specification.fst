@@ -9,6 +9,7 @@ open FStar.Seq.Base
 open FStar.Seq.Properties
 
 open PKCS11.Spec.Lemmas
+open Hacl.PKCS11.Lib
 
 
 (* #set-options "--z3rlimit 200 --lax"  *)
@@ -276,6 +277,12 @@ let _ck_attribute_get_len: _CK_ATTRIBUTE_TYPE -> Tot (a: option nat {Some? a ==>
   |CKA_KEY_GEN_MECHANISM -> Some 1
   |CKA_ALLOWED_MECHANISMS -> None
   |_ -> None
+
+
+(* by default all the attributes are read-only *)
+let _ck_attribute_read_only: _CK_ATTRIBUTE_TYPE -> Tot bool = function
+  |CKA_PRIVATE -> false
+  |_ -> true
 
 
 (*/* CK_ATTRIBUTE is a structure that includes the type, length
@@ -1233,11 +1240,26 @@ let deviceAddSession  f d newSession =
        one attribute - one value
 *)
 
+
+(* If the supplied template specifies a value for a read-only attribute, then the attempt should fail with the error code CKR_ATTRIBUTE_READ_ONLY.  Whether or not a given Cryptoki attribute is read-only is explicitly stated in the Cryptoki specification; however, a particular library and token may be even more restrictive than Cryptoki specifies *)
+
+val attributeIsReadOnly: _CK_ATTRIBUTE -> Tot bool 
+
+let attributeIsReadOnly a = 
+    _ck_attribute_read_only a.aType
+
+
+val attributesNotReadOnly: seq _CK_ATTRIBUTE -> Tot bool
+
+let attributesNotReadOnly s = 
+  for_all (fun x -> attributeIsReadOnly x) s
+
+
 val _CKS_GenerateKey: d: device ->  
   hSession: _CK_SESSION_HANDLE -> 
   pMechanism: _CK_MECHANISM_TYPE
     {isPresentOnDevice d pMechanism = true /\ isMechanismUsedForGenerateKey pMechanism d.supportedMechanisms} ->
-  pTemplate: seq _CK_ATTRIBUTE {checkedAttributes pTemplate} -> 
+  pTemplate: seq _CK_ATTRIBUTE {attributesNotReadOnly pTemplate /\ checkedAttributes pTemplate} -> 
   Tot(
     (handler: result _CK_OBJECT_HANDLE) & 
     (resultDevice : device 
