@@ -301,6 +301,11 @@ type _CK_ATTRIBUTE  =
     } 
     -> _CK_ATTRIBUTE
 
+
+(* default attribute values *)
+let defaultAttributes: seq _CK_ATTRIBUTE = Seq.empty
+
+
 assume val attrributesConsistent: attrs: seq _CK_ATTRIBUTE -> Tot bool
 
 
@@ -471,6 +476,17 @@ let isKeySecretKey k =
   index (getObjectAttributeClass k.ko.sto).pValue 0  = CKO_SECRET_KEY
     
 
+(* Returns a set of attributes that the object should have to be the type t 
+   Returns Some (...) if the type was recognized, otherwise returns None
+*)
+let getAttributesForType: t: Type0 -> option (seq _CK_ATTRIBUTE_TYPE) = function 
+  |_CKO_SECRET_KEY -> Some (seq_of_list 
+    [CKA_CLASS; CKA_TOKEN; CKA_PRIVATE; CKA_MODIFIABLE; CKA_LABEL; CKA_COPYABLE; CKA_DESTROYABLE;
+    CKA_KEY_TYPE; CKA_ID; CKA_END_DATE; CKA_DERIVED; CKA_LOCAL; CKA_KEY_GEN_MECHANISM; CKA_ALLOWED_MECHANISMS; CKA_SENSITIVE; CKA_ENCRYPT; CKA_DECRYPT; CKA_SIGN; CKA_VERIFY; 
+    CKA_WRAP; CKA_UNWRAP; CKA_EXTRACTABLE; CKA_ALWAYS_SENSITIVE; CKA_NEVER_EXTRACTABLE])
+  |_ -> None
+
+
 val castKeyToSecretKey: k: key_object {isKeySecretKey k} -> Tot _CKO_SECRET_KEY
 
 let castKeyToSecretKey k = SK k
@@ -484,6 +500,13 @@ type _CK_MECHANISM =
   | Mechanism: mechanismID: _CK_MECHANISM_TYPE -> 
     pParameters: seq FStar.UInt8.t -> 
     _CK_MECHANISM
+
+(* any attribute values contributed to the object by the object-creation function itself *)
+let getAttributesByMechanism : _CK_MECHANISM_TYPE -> Tot (seq _CK_ATTRIBUTE) = function
+  |CKM_AES_KEY_GEN -> Seq.empty
+  |_ -> Seq.empty
+
+
 
 
 type _SessionState = 
@@ -1233,7 +1256,7 @@ let deviceAddSession  f d newSession =
      1) Not type invalid (parsing)
      2) Not value invalid (parsing)
      3) Not read only 
-     4) Not incomplete -> fully specify object -> what's the full specification?
+     4) Not incomplete -> fully specify object?
      5) Incosistent: 
        two difference values for the sae attribute
        attributes for public/private keys instead of secret keys
@@ -1253,6 +1276,40 @@ val attributesNotReadOnly: seq _CK_ATTRIBUTE -> Tot bool
 
 let attributesNotReadOnly s = 
   for_all (fun x -> attributeIsReadOnly x) s
+
+
+(* If the attribute values in the supplied template, together with any default attribute values and any attribute values contributed to the object by the object-creation function itself, are insufficient to fully specify the object to create, then the attempt should fail with the error code CKR_TEMPLATE_INCOMPLETE. *)
+
+(* Takes one attribute and search for it in the attribute sequence. Returns true if found *)
+
+val __attributesTemplateComplete: toSearchSequence: seq _CK_ATTRIBUTE -> toFind: _CK_ATTRIBUTE_TYPE -> Tot bool
+
+let __attributesTemplateComplete toSearchSequence toFind = 
+  match find_l (fun x -> x.aType = toFind) toSearchSequence with 
+  |None -> false
+  |Some _ -> true
+
+(* The function searches for all the attributes in the sequence  *)
+val _attributesTemplateComplete: toSearchSequence: seq _CK_ATTRIBUTE -> toFinds: seq _CK_ATTRIBUTE_TYPE -> Tot bool
+
+let _attributesTemplateComplete toSearchSequence toFinds = 
+  for_all (__attributesTemplateComplete toSearchSequence) toFinds 
+
+
+val attributesTemplateComplete: t: Type0 ->  mechanism: _CK_MECHANISM -> attrs: seq _CK_ATTRIBUTE -> Tot bool
+
+let attributesTemplateComplete t mechanism attrs = 
+  let defAttr = defaultAttributes in 
+  let mechanismAttributes = getAttributesByMechanism mechanism.mechanismID in 
+  let allAttributes = append (append defaultAttributes mechanismAttributes) attrs in 
+  let getRequiredAttributes = getAttributesForType t in 
+  match getRequiredAttributes with 
+    |None -> false
+    |Some a -> _attributesTemplateComplete allAttributes a 
+  
+  
+
+
 
 
 val _CKS_GenerateKey: d: device ->  
