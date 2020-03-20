@@ -20,7 +20,7 @@ inline_for_extraction noextract
 let nonce_aead (cs:S.ciphersuite) = lbuffer uint8 (size (S.size_aead_nonce cs))
 
 inline_for_extraction noextract
-let setupBaseI_st (cs:S.ciphersuite) =
+let setupBaseI_st (cs:S.ciphersuite) (p:Type0) =
      o_pkE: key_dh_public cs
   -> o_k: key_aead cs
   -> o_n: nonce_aead cs
@@ -30,8 +30,7 @@ let setupBaseI_st (cs:S.ciphersuite) =
   -> info: lbuffer uint8 infolen
   -> Stack UInt32.t
      (requires fun h0 ->
-        (S.curve_of_cs cs = Spec.Agile.DH.DH_Curve25519 ==>
-          Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
+        p /\
         live h0 o_pkE /\ live h0 o_k /\ live h0 o_n /\
         live h0 skE /\ live h0 pkR /\ live h0 info /\
         disjoint o_pkE skE /\ disjoint o_pkE pkR /\ disjoint o_pkE info /\
@@ -50,7 +49,7 @@ let setupBaseI_st (cs:S.ciphersuite) =
      )
 
 inline_for_extraction noextract
-let setupBaseR_st (cs:S.ciphersuite) =
+let setupBaseR_st (cs:S.ciphersuite) (p:Type0) =
      o_key_aead: key_aead cs
   -> o_nonce_aead: nonce_aead cs
   -> pkE: key_dh_public cs
@@ -59,8 +58,7 @@ let setupBaseR_st (cs:S.ciphersuite) =
   -> info: lbuffer uint8 infolen
   -> Stack UInt32.t
      (requires fun h0 ->
-        (S.curve_of_cs cs = Spec.Agile.DH.DH_Curve25519 ==>
-          Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
+        p /\
         live h0 o_key_aead /\ live h0 o_nonce_aead /\
         live h0 pkE /\ live h0 skR /\ live h0 info /\
         disjoint o_key_aead o_nonce_aead)
@@ -76,7 +74,7 @@ let setupBaseR_st (cs:S.ciphersuite) =
      )
 
 inline_for_extraction noextract
-let sealBase_st (cs:S.ciphersuite) =
+let sealBase_st (cs:S.ciphersuite) (p:Type0) =
      skE: key_dh_secret cs
   -> pkR: key_dh_public cs
   -> mlen: size_t{v mlen <= S.max_length cs /\ v mlen + S.size_dh_public cs + 16 <= max_size_t}
@@ -86,8 +84,7 @@ let sealBase_st (cs:S.ciphersuite) =
   -> output: lbuffer uint8 (size (v mlen + S.size_dh_public cs + 16))
   -> Stack UInt32.t
        (requires fun h0 ->
-        (S.curve_of_cs cs = Spec.Agile.DH.DH_Curve25519 ==>
-         Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
+         p /\
          live h0 output /\ live h0 skE /\ live h0 pkR /\
          live h0 m /\ live h0 info /\
          disjoint output pkR /\ disjoint output info /\ disjoint output m /\ disjoint output skE)
@@ -100,7 +97,7 @@ let sealBase_st (cs:S.ciphersuite) =
        )
 
 inline_for_extraction noextract
-let openBase_st (cs:S.ciphersuite) =
+let openBase_st (cs:S.ciphersuite) (p:Type0) =
      pkE: key_dh_public cs
   -> skR: key_dh_secret cs
   -> mlen: size_t{S.size_dh_public cs + S.size_aead_tag cs <= v mlen /\ v mlen <= S.max_length cs}
@@ -110,8 +107,7 @@ let openBase_st (cs:S.ciphersuite) =
   -> output: lbuffer uint8 (size (v mlen - S.size_dh_public cs - S.size_aead_tag cs))
   -> Stack UInt32.t
        (requires fun h0 ->
-        (S.curve_of_cs cs = Spec.Agile.DH.DH_Curve25519 ==>
-          Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
+         p /\
          live h0 output /\ live h0 pkE /\ live h0 skR /\
          live h0 m /\ live h0 info /\
          disjoint output info /\ disjoint output m)
@@ -123,13 +119,13 @@ let openBase_st (cs:S.ciphersuite) =
          | _ -> False))
 
 noextract inline_for_extraction
-val setupBaseI: #cs:S.ciphersuite -> setupBaseI_st cs
+val setupBaseI: #cs:S.ciphersuite -> p:Type0 -> setupBaseI_st cs p
 
 noextract inline_for_extraction
-val setupBaseR: #cs:S.ciphersuite -> setupBaseR_st cs
+val setupBaseR: #cs:S.ciphersuite -> p:Type0 -> setupBaseR_st cs p
 
 noextract inline_for_extraction
-val sealBase: #cs:S.ciphersuite -> sealBase_st cs
+val sealBase: #cs:S.ciphersuite -> p:Type0 -> sealBase_st cs p
 
 noextract inline_for_extraction
-val openBase: #cs:S.ciphersuite -> openBase_st cs
+val openBase: #cs:S.ciphersuite -> p:Type0 -> openBase_st cs p

@@ -26,13 +26,13 @@ let nsize_public (a:DH.algorithm) =
   | DH.DH_P256 -> 64ul
 
 inline_for_extraction noextract
-let dh_st (a:DH.algorithm) =
+let dh_st (a:DH.algorithm) (p:Type0) =
      o:lbuffer uint8 (nsize_public a)
   -> k:lbuffer uint8 (nsize_key a)
   -> i:lbuffer uint8 (nsize_public a)
   -> Stack UInt32.t
      (requires fun h0 ->
-       (a = DH.DH_Curve25519 ==> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
+       p /\
        live h0 o /\ live h0 k /\ live h0 i /\
        disjoint o i /\ disjoint o k)
      (ensures fun h0 result h1 -> modifies (loc o) h0 h1 /\ (
@@ -43,12 +43,12 @@ let dh_st (a:DH.algorithm) =
        | _ -> False))
 
 inline_for_extraction noextract
-let secret_to_public_st (a: DH.algorithm) =
+let secret_to_public_st (a: DH.algorithm) (p:Type0) =
     o:lbuffer uint8 (nsize_public a)
   -> i:lbuffer uint8 (nsize_key a)
   -> Stack UInt32.t
     (requires fun h0 ->
-      (a = DH.DH_Curve25519 ==> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
+      p /\
       live h0 o /\ live h0 i /\ disjoint o i)
     (ensures  fun h0 result h1 -> modifies (loc o) h0 h1 /\
       (let output = DH.secret_to_public a (as_seq h0 i) in
@@ -58,19 +58,19 @@ let secret_to_public_st (a: DH.algorithm) =
       | _ -> False))
 
 [@ Meta.Attribute.specialize]
-assume val dh: #a:S.ciphersuite -> dh_st (S.curve_of_cs a)
+assume val dh: #a:S.ciphersuite -> p:Type0 -> dh_st (S.curve_of_cs a) p
 
 [@ Meta.Attribute.specialize]
-assume val secret_to_public: #a:S.ciphersuite -> secret_to_public_st (S.curve_of_cs a)
+assume val secret_to_public: #a:S.ciphersuite -> p:Type0 -> secret_to_public_st (S.curve_of_cs a) p
 
 (** Instantiations for Curve25519 **)
 
 inline_for_extraction noextract
-let secret_to_public_c51 : secret_to_public_st (DH.DH_Curve25519) = fun o i ->
+let secret_to_public_c51 : secret_to_public_st (DH.DH_Curve25519) True = fun o i ->
   Hacl.Curve25519_51.secret_to_public o i;
   0ul
 inline_for_extraction noextract
-let dh_c51 : dh_st (DH.DH_Curve25519) = fun o k i ->
+let dh_c51 : dh_st (DH.DH_Curve25519) True = fun o k i ->
   push_frame();
   let zeros = create 32ul (u8 0) in
   Hacl.Curve25519_51.scalarmult o k i;
@@ -78,13 +78,14 @@ let dh_c51 : dh_st (DH.DH_Curve25519) = fun o k i ->
   pop_frame();
   res
 
+let vale_p = Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)
 
 inline_for_extraction noextract
-let secret_to_public_c64 : secret_to_public_st (DH.DH_Curve25519) = fun o i ->
+let secret_to_public_c64 : secret_to_public_st (DH.DH_Curve25519) vale_p = fun o i ->
   Hacl.Curve25519_64.secret_to_public o i;
   0ul
 inline_for_extraction noextract
-let dh_c64 : dh_st (DH.DH_Curve25519) = fun o k i ->
+let dh_c64 : dh_st (DH.DH_Curve25519) vale_p = fun o k i ->
   push_frame();
   let zeros = create 32ul (u8 0) in
   Hacl.Curve25519_64.scalarmult o k i;
@@ -103,7 +104,7 @@ let change_error_code (r:uint64) : Pure UInt32.t
     Lib.RawIntTypes.u32_to_UInt32 r'
 
 inline_for_extraction noextract
-let secret_to_public_p256 : secret_to_public_st (DH.DH_P256) = fun o i ->
+let secret_to_public_p256 : secret_to_public_st (DH.DH_P256) True = fun o i ->
   let res = Hacl.Impl.P256.DH.ecp256dh_i o i in
   change_error_code res
 
@@ -120,7 +121,7 @@ let rec nat_from_bytes_le_zero_is_zero (n:size_nat{n >= 1}) (s:Lib.ByteSequence.
    )
 
 inline_for_extraction noextract
-let dh_p256 : dh_st (DH.DH_P256) = fun o k i ->
+let dh_p256 : dh_st (DH.DH_P256) True = fun o k i ->
   push_frame();
   let tmp = create (size 64) (u8 0) in
   (**) let h0 = HyperStack.ST.get() in
