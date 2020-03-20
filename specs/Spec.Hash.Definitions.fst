@@ -106,8 +106,8 @@ let word_t: hash_alg -> Tot inttype = function
   | SHA2_384 | SHA2_512 -> U64
 
 inline_for_extraction
-let word (a: hash_alg) = uint_t (word_t a) SEC
-
+let word (a: hash_alg) = match a with
+  | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 -> uint_t (word_t a) SEC
 
 (* In bytes *)
 let word_length: hash_alg -> Tot nat = function
@@ -137,8 +137,12 @@ let state_word_length a =
   | SHA1 -> 5
   | _ -> 8
 
+inline_for_extraction noextract
+let extra_state a = match a with
+  | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 -> unit
+
 (* The working state *)
-let words_state a = m:Seq.seq (word a) {Seq.length m = state_word_length a}
+let words_state a = m:Seq.seq (word a) {Seq.length m = state_word_length a} & extra_state a
 
 (* Number of words for final hash *)
 inline_for_extraction
