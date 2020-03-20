@@ -2220,7 +2220,7 @@ val mt_flush_to_:
                (U32.v i) (U32.v (Ghost.reveal j))))))
    (decreases (U32.v i))
 #restart-solver
-#push-options "--z3rlimit 800 --initial_fuel 1 --max_fuel 1"
+#push-options "--z3rlimit 800 --fuel 1 --ifuel 0 --retry 4"
 let rec mt_flush_to_ hsz lv hs pi i j =
   let hh0 = HST.get () in
 
@@ -2306,7 +2306,7 @@ let rec mt_flush_to_ hsz lv hs pi i j =
     assert (elems_reg hh1 hs);
 
     // 1-5) Correctness
-    assume (S.equal (RV.as_seq hh1 flushed)
+    assert (S.equal (RV.as_seq hh1 flushed)
                     (S.slice (RV.as_seq hh0 (V.get hh0 hs lv)) (U32.v ofs)
                              (S.length (RV.as_seq hh0 (V.get hh0 hs lv)))));
 
