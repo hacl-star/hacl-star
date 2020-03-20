@@ -745,7 +745,7 @@ dist/wasm/Makefile.basic: CTR_BUNDLE =
 dist/wasm/Makefile.basic: DEFAULT_FLAGS += -bundle 'EverCrypt,EverCrypt.*'
 
 dist/wasm/api.js: dist/wasm/Makefile.basic
-    cp bindings/js/* $(dir $<)
+  cp bindings/js/* $(dir $<)
 
 # Compact distributions
 # ---------------------
