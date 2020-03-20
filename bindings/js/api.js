@@ -2,6 +2,9 @@ var fs = require('fs');
 var loader = require('./loader.js')
 var shell = require('./shell.js')
 var api_json = require('./api.json')
+
+// The following function validates the contents of `api.json`. It is meant as
+// a helper when creating new binders, it provides explicit error messages.
 const validateJSON = function(json) {
   Object.keys(json).map(function(key_module) {
     Object.keys(json[key_module]).map(function(key_func) {
@@ -65,15 +68,19 @@ const validateJSON = function(json) {
 }
 validateJSON(api_json);
 
+// The module is encapsulated inside a closure to prevent anybody from accessing
+// the WebAssembly memory.
 var HaclWasm = (function() {
   'use strict';
   var isInitialized = false
   var Module = {}
 
-  // This object is passed at the wasm instantiation to link the missing
-  // `random_bytes` function, needed for generating new keyPairs.
+  // This object is passed at the wasm instantiation, it's required by the
+  // KreMLin-generated files. Since we don't need to import anything, it's empty.
   var my_imports = {}
 
+  // The WebAssembly modules have to be initialized before calling any function.
+  // This checks if it has been done already, and if not does it.
   const checkIfInitialized = function() {
     if (isInitialized === false) {
       return Promise.all(shell.my_modules.map(m => {
@@ -106,17 +113,24 @@ var HaclWasm = (function() {
   parameter to WebAssembly).
 
   In order to match the Javascript API with the actual calls to WebAssembly functions,
-  we make several assumptions on the functions exposed in the WebAssembly generated
-  from Low*:
-  - each variable length buffer argument is preceded by an additional argument,
-    its length;
-  - output buffers are always first in the list of arguments;
-  - if the Javascript function returns a variable length buffer, then the Low* function
-    should always return the length of the buffer as an integer.
+  we have to describe the correspondance between the two in the `api.json` file.
 
-  For functions that return a variable length buffer, the prototype has to be
-  initialized before each call with the maximum output length (that can
-  depend on some input variables).
+  The scheme of the JSON file is the following :
+  - `module`, this module name will be shown in the JS API
+    - `function`, this function name will be shown in the JS API
+      - `module`, the name of the WebAssembly file where to find the function
+      - 'name', the name of the WebAssembly export corresponding to the function
+      - 'args', the list of the WebAssembly arguments expected by the function
+        - 'name', the name of the argument which will be shown in the JS Doc
+        - 'kind', either `input` or `output` of the function
+        - 'type', either 'int' or 'boolean' or 'buffer'
+        - 'size', either an integer of a string which is the 'name' of another
+          argument of type 'int'
+        - 'interface_index', for all `input` that should appear in JS, position
+          inside the argument list of the JS function
+        - 'tests', a list of values for this arguments, each value corresponding
+          to a different test case
+      - 'return', the return type of the WebAssembly function
   */
 
   const CheckIfByteArray = function(candidate, length, name) {
@@ -204,11 +218,13 @@ var HaclWasm = (function() {
       }
       throw Error("Unimplemented !");
     });
+    // Calling the wasm function !
     let call_return = Module[proto.module][proto.module + "_" + proto.name](
       ...args_pointers.map(x => {
         return x.value;
       })
     );
+    // Populating the JS buffers returned with their values read from Wasm memory
     let return_buffers = args_pointers.filter(pointer =>
       proto.args[pointer.index].kind === "output"
     ).map(pointer => {
@@ -245,6 +261,7 @@ var HaclWasm = (function() {
 
   var api_obj = {};
 
+  // Creating object by mapping from api.json structure
   Object.keys(api_json).map(function(key_module) {
     Object.keys(api_json[key_module]).map(function(key_func) {
       if (api_obj[key_module] == null) {
