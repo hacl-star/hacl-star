@@ -76,7 +76,7 @@ inline_for_extraction noextract
 val point_compress:
      #cs:S.ciphersuite
   -> pk: key_dh_public cs
-  -> ST (lbuffer uint8 (DH.nsize_public (S.curve_of_cs cs)))
+  -> Stack (lbuffer uint8 (DH.nsize_public (S.curve_of_cs cs)))
     (requires fun h -> live h pk)
     (ensures fun h0 b h1 -> live h1 b /\ h0 == h1 /\
       (match S.curve_of_cs cs with
@@ -93,7 +93,7 @@ val point_decompress:
      #cs:S.ciphersuite
   -> b:lbuffer uint8 (DH.nsize_public (S.curve_of_cs cs))
   -> pk:key_dh_public cs
-  -> ST unit
+  -> Stack unit
     (requires fun h -> live h pk /\ live h b /\
       (match S.curve_of_cs cs with
        | SDH.DH_Curve25519 -> b == pk
@@ -114,7 +114,7 @@ val encap:
   -> o_pkE: key_dh_public cs
   -> skE: key_dh_secret cs
   -> pkR: key_dh_public cs
-  -> ST UInt32.t
+  -> Stack UInt32.t
     (requires fun h0 ->
       (S.curve_of_cs cs = Spec.Agile.DH.DH_Curve25519 ==>
         Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
@@ -149,7 +149,7 @@ val decap:
   -> o_pkR: key_dh_public cs
   -> pkE: key_dh_public cs
   -> skR: key_dh_secret cs
-  -> ST UInt32.t
+  -> Stack UInt32.t
     (requires fun h0 ->
       (S.curve_of_cs cs = Spec.Agile.DH.DH_Curve25519 ==>
         Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
@@ -172,7 +172,7 @@ let decap #cs o_pkR pkE skR =
 
 noextract inline_for_extraction
 val id_kem (cs:S.ciphersuite) (output:lbuffer uint8 2ul):
-  ST unit
+  Stack unit
   (requires fun h -> live h output)
   (ensures fun h0 _ h1 -> modifies (loc output) h0 h1 /\ as_seq h1 output `Seq.equal` S.id_kem cs)
 
@@ -184,7 +184,7 @@ let id_kem cs output =
 
 noextract inline_for_extraction
 val id_kdf (cs:S.ciphersuite) (output:lbuffer uint8 2ul):
-  ST unit
+  Stack unit
   (requires fun h -> live h output)
   (ensures fun h0 _ h1 -> modifies (loc output) h0 h1 /\ as_seq h1 output `Seq.equal` S.id_kdf cs)
 
@@ -196,7 +196,7 @@ let id_kdf cs output =
 
 noextract inline_for_extraction
 val id_aead (cs:S.ciphersuite) (output:lbuffer uint8 2ul):
-  ST unit
+  Stack unit
   (requires fun h -> live h output)
   (ensures fun h0 _ h1 -> modifies (loc output) h0 h1 /\ as_seq h1 output `Seq.equal` S.id_aead cs)
 
@@ -209,7 +209,7 @@ let id_aead cs output =
 
 noextract inline_for_extraction
 val id_of_cs (cs:S.ciphersuite) (output:lbuffer uint8 6ul):
-  ST unit
+  Stack unit
   (requires fun h -> live h output)
   (ensures fun h0 _ h1 -> modifies (loc output) h0 h1 /\ as_seq h1 output `Seq.equal` S.id_of_cs cs)
 
@@ -227,7 +227,7 @@ val build_context_default:
   -> pskID_hash:lbuffer uint8 (nhash_length cs)
   -> info_hash:lbuffer uint8 (nhash_length cs)
   -> output:lbuffer uint8 (size (7 + (3 * S.size_dh_public cs) + (2 * Spec.Agile.Hash.size_hash (S.hash_of_cs cs))))
-  -> ST unit
+  -> Stack unit
     (requires fun h0 ->
       live h0 pkE /\ live h0 pkR /\ live h0 pkI /\
       live h0 pskID_hash /\ live h0 info_hash /\ live h0 output /\
@@ -302,7 +302,7 @@ val ks_derive_default_aux:
   -> label_key:lbuffer uint8 8ul
   -> label_nonce:lbuffer uint8 10ul
   -> tmp:lbuffer uint8 (10ul +. context_len)
-  -> ST unit
+  -> Stack unit
        (requires fun h0 ->
          live h0 pkR /\ live h0 zz /\ live h0 pkE /\
          live h0 info /\ live h0 o_key /\ live h0 o_nonce /\
@@ -361,7 +361,7 @@ val ks_derive_default:
   -> info: lbuffer uint8 infolen
   -> o_key: key_aead cs
   -> o_nonce: nonce_aead cs
-  -> ST unit
+  -> Stack unit
        (requires fun h0 ->
          live h0 pkR /\ live h0 zz /\ live h0 pkE /\
          live h0 info /\ live h0 o_key /\ live h0 o_nonce /\
@@ -438,7 +438,7 @@ val sealBase_aux
      (zz:key_dh_public cs)
      (k:key_aead cs)
      (n:nonce_aead cs) :
-     ST UInt32.t
+     Stack UInt32.t
        (requires fun h0 ->
         (S.curve_of_cs cs = Spec.Agile.DH.DH_Curve25519 ==>
           Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
@@ -504,7 +504,7 @@ val openBase_aux
      (zz:key_dh_public cs)
      (k:key_aead cs)
      (n:nonce_aead cs) :
-     ST UInt32.t
+     Stack UInt32.t
        (requires fun h0 ->
         (S.curve_of_cs cs = Spec.Agile.DH.DH_Curve25519 ==>
          Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
@@ -538,7 +538,7 @@ let openBase_aux #cs skR inputlen input infolen info output zz k n =
   combine_error_codes res1 res2
 #pop-options
 
-#push-options "--z3rlimit 300 --fuel 0 --ifuel 0"
+#push-options "--z3rlimit 400 --fuel 0 --ifuel 0"
 [@ Meta.Attribute.specialize]
 let openBase #cs pkE skR mlen m infolen info output =
   push_frame();

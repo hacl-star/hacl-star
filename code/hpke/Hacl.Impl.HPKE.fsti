@@ -28,7 +28,7 @@ let setupBaseI_st (cs:S.ciphersuite) =
   -> pkR: key_dh_public cs
   -> infolen: size_t{v infolen <= S.max_info}
   -> info: lbuffer uint8 infolen
-  -> ST UInt32.t
+  -> Stack UInt32.t
      (requires fun h0 ->
         (S.curve_of_cs cs = Spec.Agile.DH.DH_Curve25519 ==>
           Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
@@ -57,7 +57,7 @@ let setupBaseR_st (cs:S.ciphersuite) =
   -> skR: key_dh_secret cs
   -> infolen: size_t{v infolen <= S.max_info}
   -> info: lbuffer uint8 infolen
-  -> ST UInt32.t
+  -> Stack UInt32.t
      (requires fun h0 ->
         (S.curve_of_cs cs = Spec.Agile.DH.DH_Curve25519 ==>
           Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
@@ -84,7 +84,7 @@ let sealBase_st (cs:S.ciphersuite) =
   -> infolen: size_t {v infolen <= S.max_info}
   -> info: lbuffer uint8 infolen
   -> output: lbuffer uint8 (size (v mlen + S.size_dh_public cs + 16))
-  -> ST UInt32.t
+  -> Stack UInt32.t
        (requires fun h0 ->
         (S.curve_of_cs cs = Spec.Agile.DH.DH_Curve25519 ==>
          Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
@@ -108,7 +108,7 @@ let openBase_st (cs:S.ciphersuite) =
   -> infolen: size_t {v infolen <= S.max_info}
   -> info: lbuffer uint8 infolen
   -> output: lbuffer uint8 (size (v mlen - S.size_dh_public cs - S.size_aead_tag cs))
-  -> ST UInt32.t
+  -> Stack UInt32.t
        (requires fun h0 ->
         (S.curve_of_cs cs = Spec.Agile.DH.DH_Curve25519 ==>
           Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
