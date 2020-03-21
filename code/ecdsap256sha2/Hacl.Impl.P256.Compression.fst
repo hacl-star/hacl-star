@@ -84,7 +84,7 @@ val computeYFromX: x: felem ->  result: felem -> sign: uint64 -> Stack unit
     (
       let xD = fromDomain_ (as_nat h0 x) in 
       if uint_v sign = 0 then 
-	as_nat h1 result = toDomain_ (sq_root_spec ((0 - (xD * xD * xD + Spec.P256.aCoordinateP256 * xD + Spec.P256.bCoordinateP256)) % prime256)) else
+	as_nat h1 result = toDomain_ ((0 - sq_root_spec ((xD * xD * xD + Spec.P256.aCoordinateP256 * xD + Spec.P256.bCoordinateP256) % prime256)) % prime256) else
 	as_nat h1 result = toDomain_ (sq_root_spec ((xD * xD * xD + Spec.P256.aCoordinateP256 * xD + Spec.P256.bCoordinateP256) % prime256)))
   )
 
@@ -185,7 +185,7 @@ val decompressionCompressed: b: compressedForm -> result: lbuffer uint8 (size 64
 	  (
 	    let y = 
 	      if uint_v id = 3 then 
-		sq_root_spec ((0 - (x * x * x + Spec.P256.aCoordinateP256 * x + Spec.P256.bCoordinateP256)) % prime256)
+		((0 - sq_root_spec ((x * x * x + Spec.P256.aCoordinateP256 * x + Spec.P256.bCoordinateP256) % prime256)) % prime256)
 	      else
 		sq_root_spec ((x * x * x + Spec.P256.aCoordinateP256 * x + Spec.P256.bCoordinateP256) % prime256) in 
 	    as_seq h1 (gsub result (size 0) (size 32)) == xSequence /\
