@@ -44,6 +44,9 @@ let toDomain value result =
   pop_frame()  
 
 
+let fromDomain f result = 
+  montgomery_multiplication_buffer_by_one f result  
+
 let pointToDomain p result = 
     let p_x = sub p (size 0) (size 4) in 
     let p_y = sub p (size 4) (size 4) in 
@@ -56,10 +59,6 @@ let pointToDomain p result =
     toDomain p_x r_x;
     toDomain p_y r_y;
     toDomain p_z r_z
-
-let fromDomain f result = 
-  montgomery_multiplication_buffer_by_one f result
-    
 
 let pointFromDomain p result = 
     let p_x = sub p (size 0) (size 4) in 

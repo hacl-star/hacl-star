@@ -22,11 +22,11 @@ friend Spec.P256.MontgomeryMultiplication
 
 open FStar.Mul
 
-#reset-options "--z3rlimit 100" 
+#set-options "--z3rlimit 200 --ifuel  0 --fuel 0" 
 
 let cube a result =
   let h0 = ST.get() in 
-    montgomery_multiplication_buffer a a result;
+    montgomery_square_buffer a result;
     montgomery_multiplication_buffer result a result;
  let h1 = ST.get() in 
 

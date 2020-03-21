@@ -27,11 +27,11 @@ open FStar.Math.Lemmas
 module B = LowStar.Buffer
 open FStar.Mul
 
-
 inline_for_extraction noextract 
 val toDomain: value: felem -> result: felem ->  Stack unit 
   (requires fun h ->  as_nat h value < prime /\ live h value /\live h result /\ eq_or_disjoint value result)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat h1 result = toDomain_ (as_nat h0 value))
+ 
  
 inline_for_extraction noextract
 val fromDomain: f: felem-> result: felem-> Stack unit 

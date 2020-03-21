@@ -80,6 +80,7 @@ let uploadB b =
 val computeYFromX: x: felem ->  result: felem -> sign: uint64 -> Stack unit 
   (requires fun h -> live h x /\ live h result /\ as_nat h x < prime256 /\ disjoint x result)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
+    as_nat h1 result < prime256 /\
     (
       let xD = fromDomain_ (as_nat h0 x) in 
       if uint_v sign = 0 then 
@@ -168,46 +169,93 @@ let lessThanPrime f =
     let less = eq_u64_nCT carry (u64 1) in 
   pop_frame();
     less
-    
+
+#push-options "--ifuel 3 --fuel 3"
 
 val decompressionCompressed: b: compressedForm -> result: lbuffer uint8 (size 64) -> Stack bool 
   (requires fun h -> live h b /\ live h result /\ disjoint b result)
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1)
-
+  (ensures fun h0 r h1 -> 
+    (
+      let id = Lib.Sequence.index (as_seq h0 b) 0 in 
+      let xSequence = Lib.Sequence.sub (as_seq h0 b) 1 32 in 
+      let x =  Lib.ByteSequence.nat_from_bytes_be xSequence in 
+      if uint_v id = 2 || uint_v id = 3 then
+	if x < prime256 then 
+	  r == true /\ 
+	  (
+	    let y = 
+	      if uint_v id = 3 then 
+		sq_root_spec ((0 - (x * x * x + Spec.P256.aCoordinateP256 * x + Spec.P256.bCoordinateP256)) % prime256)
+	      else
+		sq_root_spec ((x * x * x + Spec.P256.aCoordinateP256 * x + Spec.P256.bCoordinateP256) % prime256) in 
+	    as_seq h1 (gsub result (size 0) (size 32)) == xSequence /\
+	    as_seq h1 (gsub result (size 32) (size 32)) == Lib.ByteSequence.nat_to_bytes_be 32 y
+ )
+	else 
+	  r == false
+      else 
+	r == false) /\
+  modifies (loc result) h0 h1)
 
 let decompressionCompressed b result = 
   push_frame();
+    let h0 = ST.get() in 
     let temp = create (size 4) (u64 0) in 
-  
-  let compressedIdentifier = index b (size 0) in 
-  let correctIdentifier2 = eq_u8_nCT (u8 2) compressedIdentifier in 
-  let correctIdentifier3 = eq_u8_nCT (u8 3) compressedIdentifier in 
-  
-  if correctIdentifier2 || correctIdentifier3 then 
+    let temp2 = create (size 4) (u64 0) in 
+
+    let open Lib.RawIntTypes in 
+
+    let compressedIdentifier = index b (size 0) in 
+    let correctIdentifier2 = eq_mask (u8 2) compressedIdentifier in 
+      eq_mask_lemma (u8 2) compressedIdentifier;
+    let correctIdentifier3 = eq_mask (u8 3) compressedIdentifier in 
+      eq_mask_lemma (u8 3) compressedIdentifier;
+    let isIdentifierCorrect =  logor correctIdentifier2 correctIdentifier3 in 
+      logor_lemma correctIdentifier2 correctIdentifier3;
+
+    if u8_to_UInt8 isIdentifierCorrect = 255uy then 
     begin
       let x = sub b (size 1) (size 32) in 
-      copy x (sub result (size 0) (size 32));
+      copy (sub result (size 0) (size 32)) x;
 (*till here I am BIG-ENDIAN *)
       toUint64ChangeEndian x temp;
+
+	let h1 = ST.get() in 
+
+      Spec.P256.Lemmas.lemma_core_0 temp h1;
+      
       let lessThanPrimeXCoordinate = lessThanPrime temp in 
+	Spec.ECDSA.changeEndianLemma (Lib.ByteSequence.uints_from_bytes_be (as_seq h0 x));
+	Lib.ByteSequence.uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h0 x);
+
       if not (lessThanPrimeXCoordinate) then 
 	begin
-	  admit();
 	  pop_frame();
 	  false
 	end  
       else 
 	begin
 	  toDomain temp temp;
-	  computeYFromX temp (sub result (size 32) (size 32)) correctIdentifier2;
-	  fromDomain temp temp;
-	  toUint8 temp (sub result (size 32) (size 32));
+	  lemmaToDomain (as_nat h1 temp);
+	  computeYFromX temp temp2 (to_u64 correctIdentifier2);
+	  fromDomain temp2 temp2;
+	    let h4 = ST.get() in 
+
+	  changeEndian temp2;
+	  toUint8 temp2 (sub result (size 32) (size 32));
+
+	  Spec.P256.Lemmas.lemma_core_0 temp2 h4;
+	  
+	  Lib.ByteSequence.lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h4 temp2);
+	  Spec.ECDSA.changeEndian_le_be (as_nat h4 temp2);
+	
+	  pop_frame();
 	  true
 	end
     end
   else 
     begin
-      admit();
       pop_frame();
       false
     end
+ 

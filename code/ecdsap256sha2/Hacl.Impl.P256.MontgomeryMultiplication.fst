@@ -144,6 +144,7 @@ val montgomery_multiplication_buffer: a: felem -> b: felem -> result: felem ->  
   (requires (fun h -> live h a /\ as_nat h a < prime256 /\ live h b /\ live h result /\ as_nat h b < prime256)) 
   (ensures (fun h0 _ h1 -> 
     modifies (loc result) h0 h1 /\  
+    as_nat h1 result < prime256 /\
     as_nat h1 result = (as_nat h0 a * as_nat h0 b * modp_inv2_prime (pow2 256) prime256) % prime256 /\
     as_nat h1 result = toDomain_ (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 b) % prime256) /\
     as_nat h1 result = toDomain_ (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 b)))
@@ -194,6 +195,7 @@ val montgomery_square_buffer: a: felem -> result: felem ->  Stack unit
   (requires (fun h -> live h a /\ as_nat h a < prime256 /\ live h result)) 
   (ensures (fun h0 _ h1 -> 
     modifies (loc result) h0 h1 /\  
+    as_nat h1 result < prime256 /\ 
     as_nat h1 result = (as_nat h0 a * as_nat h0 a * modp_inv2_prime (pow2 256) prime256) % prime256 /\
     as_nat h1 result = toDomain_ (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a) % prime256) /\
     as_nat h1 result = toDomain_ (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a)))
