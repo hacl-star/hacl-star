@@ -105,9 +105,11 @@ let computeYFromX x result sign =
   let h6 = ST.get() in 
     lemmaFromDomain (as_nat h6 aCoordinateBuffer);
     assert_norm (0 * Spec.P256.Lemmas.modp_inv2 (pow2 256) % prime256 == 0);
-  p256_sub aCoordinateBuffer result bCoordinateBuffer;
-    cmovznz4 sign bCoordinateBuffer result result;
     square_root result result;
+    
+    p256_sub aCoordinateBuffer result bCoordinateBuffer;
+    
+    cmovznz4 sign bCoordinateBuffer result result;
 
   let h9 = ST.get() in 
     assert(modifies (loc aCoordinateBuffer |+| loc bCoordinateBuffer |+| loc result) h0 h9);
