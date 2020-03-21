@@ -33,6 +33,13 @@ val toDomain: value: felem -> result: felem ->  Stack unit
   (requires fun h ->  as_nat h value < prime /\ live h value /\live h result /\ eq_or_disjoint value result)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat h1 result = toDomain_ (as_nat h0 value))
  
+inline_for_extraction noextract
+val fromDomain: f: felem-> result: felem-> Stack unit 
+  (requires fun h -> live h f /\ live h result /\ as_nat h f < prime)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
+    as_nat h1 result = (as_nat h0 f * modp_inv2(pow2 256)) % prime /\ 
+    as_nat h1 result = fromDomain_ (as_nat h0 f))
+
 
 noextract 
 let point_x_as_nat (h: mem) (e: point) : GTot nat = 

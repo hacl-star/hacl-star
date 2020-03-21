@@ -1480,3 +1480,36 @@ val toUint8LE: i: felem ->  o: lbuffer uint8 (32ul) -> Stack unit
 let toUint8LE i o = 
   Lib.ByteBuffer.uints_to_bytes_le (size 4) o i
 
+open Lib.ByteBuffer
+
+
+val changeEndian: i:felem -> Stack unit 
+  (requires fun h -> live h i)
+  (ensures  fun h0 _ h1 -> modifies1 i h0 h1 /\ 
+    as_seq h1 i == Spec.ECDSA.changeEndian (as_seq h0 i) /\
+    as_nat h1 i < pow2 256
+  ) 
+
+let changeEndian i = 
+  assert_norm (pow2 64 * pow2 64 = pow2 (2 * 64));
+  assert_norm (pow2 (2 * 64) * pow2 64 = pow2 (3 * 64));
+  assert_norm (pow2 (3 * 64) * pow2 64 = pow2 (4 * 64));
+  let zero = index i (size 0) in 
+  let one = index i (size 1) in 
+  let two = index i (size 2) in 
+  let three = index i (size 3) in 
+  upd i (size 0) three;
+  upd i (size 1) two; 
+  upd i (size 2) one;
+  upd i (size 3) zero
+
+val toUint64ChangeEndian: i:lbuffer uint8 (size 32) -> o:felem -> Stack unit
+  (requires fun h -> live h i /\ live h o /\ disjoint i o)
+  (ensures  fun h0 _ h1 ->
+    modifies (loc o) h0 h1 /\
+    as_seq h1 o == Spec.ECDSA.changeEndian (Lib.ByteSequence.uints_from_bytes_be (as_seq h0 i))
+  )
+
+let toUint64ChangeEndian i o = 
+  Lib.ByteBuffer.uints_from_bytes_be o i;
+  changeEndian o

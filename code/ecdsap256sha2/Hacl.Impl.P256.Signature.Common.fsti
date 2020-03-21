@@ -27,19 +27,6 @@ val eq_u64_nCT: a:uint64 -> b:uint64 -> (r:bool{r == (uint_v a = uint_v b)})
 (* inline_for_extraction noextract *)
 val eq_0_u64: a: uint64 -> r:bool{r == (uint_v a = 0)}
 
-val changeEndian: i:felem -> Stack unit 
-  (requires fun h -> live h i)
-  (ensures  fun h0 _ h1 -> modifies1 i h0 h1 /\ 
-    as_seq h1 i == Spec.ECDSA.changeEndian (as_seq h0 i) /\
-    as_nat h1 i < pow2 256
-  ) 
-
-val toUint64ChangeEndian: i:lbuffer uint8 (size 32) -> o:felem -> Stack unit
-  (requires fun h -> live h i /\ live h o /\ disjoint i o)
-  (ensures  fun h0 _ h1 ->
-    modifies (loc o) h0 h1 /\
-    as_seq h1 o == Spec.ECDSA.changeEndian (uints_from_bytes_be (as_seq h0 i))
-  )
 
 val bufferToJac: p:lbuffer uint64 (size 8) -> result:point -> Stack unit
   (requires fun h -> live h p /\ live h result /\ disjoint p result)

@@ -147,20 +147,67 @@ let decompressionNotCompressed2 b result =
   copy_conditional_u8 result (sub b (size 1) (size 64)) correctIdentifier;
   correctIdentifier
 
+(* This code is not side channel resistant *)
+(* inline_for_extraction noextract *)
+val eq_u64_nCT: a:uint64 -> b:uint64 -> (r:bool{r == (uint_v a = uint_v b)})
+
+let eq_u64_nCT a b =
+  let open Lib.RawIntTypes in
+  FStar.UInt64.(u64_to_UInt64 a =^ u64_to_UInt64 b)
+
+
+val lessThanPrime: f: felem -> Stack bool
+  (requires fun h -> live h f)
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ r = (as_nat h0 f < prime256))
+
+let lessThanPrime f = 
+  push_frame();
+    let tempBuffer = create (size 4) (u64 0) in 
+    recall_contents prime256_buffer (Lib.Sequence.of_list p256_prime_list);
+    let carry = sub4_il f prime256_buffer tempBuffer in 
+    let less = eq_u64_nCT carry (u64 1) in 
+  pop_frame();
+    less
+    
+
+val decompressionCompressed: b: compressedForm -> result: lbuffer uint8 (size 64) -> Stack bool 
+  (requires fun h -> live h b /\ live h result /\ disjoint b result)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1)
+
 
 let decompressionCompressed b result = 
+  push_frame();
+    let temp = create (size 4) (u64 0) in 
+  
   let compressedIdentifier = index b (size 0) in 
   let correctIdentifier2 = eq_u8_nCT (u8 2) compressedIdentifier in 
   let correctIdentifier3 = eq_u8_nCT (u8 3) compressedIdentifier in 
+  
   if correctIdentifier2 || correctIdentifier3 then 
     begin
       let x = sub b (size 1) (size 32) in 
-      copy x result;
-      (* to domain *)
-      computeYFromX x (sub result (size 32) (size 32)) correctIdentifier2;
-      (* from Domain *)
-      true
+      copy x (sub result (size 0) (size 32));
+(*till here I am BIG-ENDIAN *)
+      toUint64ChangeEndian x temp;
+      let lessThanPrimeXCoordinate = lessThanPrime temp in 
+      if not (lessThanPrimeXCoordinate) then 
+	begin
+	  admit();
+	  pop_frame();
+	  false
+	end  
+      else 
+	begin
+	  toDomain temp temp;
+	  computeYFromX temp (sub result (size 32) (size 32)) correctIdentifier2;
+	  fromDomain temp temp;
+	  toUint8 temp (sub result (size 32) (size 32));
+	  true
+	end
     end
   else 
-    false
-  
+    begin
+      admit();
+      pop_frame();
+      false
+    end

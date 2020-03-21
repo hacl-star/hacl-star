@@ -57,13 +57,6 @@ let pointToDomain p result =
     toDomain p_y r_y;
     toDomain p_z r_z
 
-
-val fromDomain: f: felem-> result: felem-> Stack unit 
-  (requires fun h -> live h f /\ live h result /\ as_nat h f < prime)
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
-    as_nat h1 result = (as_nat h0 f * modp_inv2(pow2 256)) % prime /\ 
-    as_nat h1 result = fromDomain_ (as_nat h0 f))
-
 let fromDomain f result = 
   montgomery_multiplication_buffer_by_one f result
     
