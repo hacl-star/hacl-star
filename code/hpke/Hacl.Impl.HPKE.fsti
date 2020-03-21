@@ -119,13 +119,13 @@ let openBase_st (cs:S.ciphersuite) (p:Type0) =
          | _ -> False))
 
 noextract inline_for_extraction
-val setupBaseI: #cs:S.ciphersuite -> p:Type0 -> setupBaseI_st cs p
+val setupBaseI: #cs:S.ciphersuite -> setupBaseI_st cs True
 
 noextract inline_for_extraction
-val setupBaseR: #cs:S.ciphersuite -> p:Type0 -> setupBaseR_st cs p
+val setupBaseR: #cs:S.ciphersuite -> setupBaseR_st cs True
 
 noextract inline_for_extraction
-val sealBase: #cs:S.ciphersuite -> p:Type0 -> sealBase_st cs p
+val sealBase: #cs:S.ciphersuite -> sealBase_st cs True
 
 noextract inline_for_extraction
-val openBase: #cs:S.ciphersuite -> p:Type0 -> openBase_st cs p
+val openBase: #cs:S.ciphersuite -> openBase_st cs True

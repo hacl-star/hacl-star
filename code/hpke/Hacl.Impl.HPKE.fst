@@ -110,14 +110,12 @@ let point_decompress #cs b pk =
 noextract
 val encap:
      #cs:S.ciphersuite
-  -> p:Type0
   -> o_zz: key_dh_public cs
   -> o_pkE: key_dh_public cs
   -> skE: key_dh_secret cs
   -> pkR: key_dh_public cs
   -> Stack UInt32.t
     (requires fun h0 ->
-      p /\
       live h0 o_zz /\ live h0 o_pkE /\
       live h0 skE /\ live h0 pkR /\
       disjoint o_zz skE /\ disjoint o_zz pkR /\
@@ -133,11 +131,11 @@ val encap:
 
 #push-options "--z3rlimit 100 --fuel 0 --ifuel 0"
 [@ Meta.Attribute.inline_]
-let encap #cs p o_zz o_pkE skE pkR =
+let encap #cs o_zz o_pkE skE pkR =
   let o_pkE' = point_compress o_pkE in
   let o_zz' = point_compress o_zz in
-  let res1 = DH.secret_to_public #cs p o_pkE' skE in
-  let res2 = DH.dh #cs p o_zz' skE (point_compress pkR) in
+  let res1 = DH.secret_to_public #cs o_pkE' skE in
+  let res2 = DH.dh #cs o_zz' skE (point_compress pkR) in
   point_decompress o_zz' o_zz;
   point_decompress o_pkE' o_pkE;
   combine_error_codes res1 res2
@@ -146,13 +144,11 @@ let encap #cs p o_zz o_pkE skE pkR =
 noextract
 val decap:
      #cs:S.ciphersuite
-  -> p:Type0
   -> o_pkR: key_dh_public cs
   -> pkE: key_dh_public cs
   -> skR: key_dh_secret cs
   -> Stack UInt32.t
     (requires fun h0 ->
-      p /\
       live h0 o_pkR /\ live h0 pkE /\ live h0 skR /\
       disjoint o_pkR pkE /\ disjoint o_pkR skR)
     (ensures fun h0 result h1 -> modifies (loc o_pkR) h0 h1 /\
@@ -164,9 +160,9 @@ val decap:
     )
 
 [@ Meta.Attribute.inline_ ]
-let decap #cs p o_pkR pkE skR =
+let decap #cs o_pkR pkE skR =
   let o_pkR' = point_compress o_pkR in
-  let res = DH.dh #cs p o_pkR' skR (point_compress pkE) in
+  let res = DH.dh #cs o_pkR' skR (point_compress pkE) in
   point_decompress o_pkR' o_pkR;
   res
 
@@ -404,23 +400,23 @@ let ks_derive_default #cs pkR zz pkE infolen info o_key o_nonce =
 #set-options "--z3rlimit 100"
 
 [@ Meta.Attribute.specialize]
-let setupBaseI #cs p o_pkE o_k o_n skE pkR infolen info =
+let setupBaseI #cs o_pkE o_k o_n skE pkR infolen info =
   push_frame();
   let zz = create (nsize_dh_public cs) (u8 0) in
-  let res = encap p zz o_pkE skE pkR in
+  let res = encap zz o_pkE skE pkR in
   ks_derive_default pkR zz o_pkE infolen info o_k o_n;
   pop_frame();
   res
 
 [@ Meta.Attribute.specialize]
-let setupBaseR #cs p o_key_aead o_nonce_aead pkE skR infolen info =
+let setupBaseR #cs o_key_aead o_nonce_aead pkE skR infolen info =
   push_frame();
   let pkR = create (nsize_dh_public cs) (u8 0) in
   let pkR' = point_compress pkR in
   let zz = create (nsize_dh_public cs) (u8 0) in
-  let res1 = DH.secret_to_public #cs p pkR' skR in
+  let res1 = DH.secret_to_public #cs pkR' skR in
   point_decompress pkR' pkR;
-  let res2 = decap p zz pkE skR in
+  let res2 = decap zz pkE skR in
   ks_derive_default pkR zz pkE infolen info o_key_aead o_nonce_aead;
   pop_frame();
   combine_error_codes res1 res2
@@ -428,7 +424,6 @@ let setupBaseR #cs p o_key_aead o_nonce_aead pkE skR infolen info =
 noextract
 val sealBase_aux
      (#cs:S.ciphersuite)
-     (p:Type0)
      (skE: key_dh_secret cs)
      (pkR: key_dh_public cs)
      (mlen: size_t{v mlen <= S.max_length cs /\  v mlen + S.size_dh_public cs + 16 <= max_size_t})
@@ -441,7 +436,6 @@ val sealBase_aux
      (n:nonce_aead cs) :
      Stack UInt32.t
        (requires fun h0 ->
-         p /\
          live h0 output /\ live h0 skE /\ live h0 pkR /\
          live h0 m /\ live h0 info /\
          live h0 zz /\ live h0 k /\ live h0 n /\
@@ -463,11 +457,11 @@ val sealBase_aux
 
 noextract
 [@ Meta.Attribute.inline_]
-let sealBase_aux #cs p skE pkR mlen m infolen info output zz k n =
+let sealBase_aux #cs skE pkR mlen m infolen info output zz k n =
   assert (v (mlen +. 16ul) == v mlen + 16);
   assert (S.size_dh_public cs + v (mlen +. 16ul) == length output);
   let pkE:key_dh_public cs = sub output 0ul (nsize_dh_public cs) in
-  let res = setupBaseI p pkE k n skE pkR infolen info in
+  let res = setupBaseI pkE k n skE pkR infolen info in
   let dec = sub output (nsize_dh_public cs) (mlen +. 16ul) in
   AEAD.aead_encrypt #cs k n infolen info mlen m dec;
   let h2 = get() in
@@ -475,14 +469,14 @@ let sealBase_aux #cs p skE pkR mlen m infolen info output zz k n =
   res
 
 [@ Meta.Attribute.specialize]
-let sealBase #cs p skE pkR mlen m infolen info output =
+let sealBase #cs skE pkR mlen m infolen info output =
   (**) let hinit = get() in
   push_frame();
   (**) let h0 = get() in
   let zz = create (nsize_dh_public cs) (u8 0) in
   let k = create (nsize_aead_key cs) (u8 0) in
   let n = create (nsize_aead_nonce cs) (u8 0) in
-  let res = sealBase_aux #cs p skE pkR mlen m infolen info output zz k n in
+  let res = sealBase_aux #cs skE pkR mlen m infolen info output zz k n in
   (**) let h1 = get() in
   pop_frame();
   (**) let hf = get() in
@@ -495,7 +489,6 @@ let sealBase #cs p skE pkR mlen m infolen info output =
 noextract
 val openBase_aux
      (#cs:S.ciphersuite)
-     (p:Type0)
      (skR: key_dh_secret cs)
      (inputlen: size_t{S.size_dh_public cs + S.size_aead_tag cs <= v inputlen /\ v inputlen <= max_size_t})
      (input:lbuffer uint8 inputlen)
@@ -507,7 +500,6 @@ val openBase_aux
      (n:nonce_aead cs) :
      Stack UInt32.t
        (requires fun h0 ->
-         p /\
          live h0 output /\ live h0 skR /\
          live h0 input /\ live h0 info /\
          live h0 zz /\ live h0 k /\ live h0 n /\
@@ -526,26 +518,26 @@ val openBase_aux
 
 noextract
 [@ Meta.Attribute.inline_]
-let openBase_aux #cs p skR inputlen input infolen info output zz k n =
+let openBase_aux #cs skR inputlen input infolen info output zz k n =
   let pkE = sub input 0ul (nsize_dh_public cs) in
   let clen = inputlen -. nsize_dh_public cs in
   assert (v (clen -. 16ul) <= S.max_length cs);
   assert (v (clen -. 16ul) + 16 <= max_size_t);
   assert (length output == v (clen -. 16ul));
   let c = sub input (nsize_dh_public cs) clen in
-  let res1 = setupBaseR p k n pkE skR infolen info in
+  let res1 = setupBaseR k n pkE skR infolen info in
   let res2 = AEAD.aead_decrypt #cs k n infolen info (clen -. 16ul) output c in
   combine_error_codes res1 res2
 #pop-options
 
 #push-options "--z3rlimit 400 --fuel 0 --ifuel 0"
 [@ Meta.Attribute.specialize]
-let openBase #cs p pkE skR mlen m infolen info output =
+let openBase #cs pkE skR mlen m infolen info output =
   push_frame();
   let zz = create (nsize_dh_public cs) (u8 0) in
   let k = create (nsize_aead_key cs) (u8 0) in
   let n = create (nsize_aead_nonce cs) (u8 0) in
-  let z = openBase_aux #cs p skR mlen m infolen info output zz k n in
+  let z = openBase_aux #cs skR mlen m infolen info output zz k n in
   pop_frame();
   z
 #pop-options
