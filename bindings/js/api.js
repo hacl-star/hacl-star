@@ -144,12 +144,9 @@ var HaclWasm = (function() {
     }
   };
 
-  const malloc_array = function(array) {
+  const copy_array_to_stack = function(array) {
     let pointer = loader.reserve(Module.Kremlin.mem, array.length);
-    let memory = new Uint8Array(Module.Kremlin.mem.buffer);
-    for (let i = 0; i < array.length; i++) {
-      memory[pointer + i] = array[i];
-    }
+    (new Uint8Array(Module.Kremlin.mem.buffer)).set(array, pointer);
     return pointer;
   };
 
@@ -198,7 +195,7 @@ var HaclWasm = (function() {
           argByteBuffer = new Uint8Array(size);
         }
         CheckIfByteArray(argByteBuffer, size, proto.name);
-        let pointer = malloc_array(argByteBuffer);
+        let pointer = copy_array_to_stack(argByteBuffer);
         return {
           "value": pointer,
           "index": i
