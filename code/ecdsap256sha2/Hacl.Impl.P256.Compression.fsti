@@ -52,10 +52,13 @@ val decompressionCompressedForm: b: compressedForm -> result: lbuffer uint8 (siz
 	  r == true /\ 
 	  (
 	    let y = 
-	      if uint_v id = 3 then 
-		((0 - sq_root_spec ((x * x * x + Spec.P256.aCoordinateP256 * x + Spec.P256.bCoordinateP256) % prime256)) % prime256)
-	      else
-		sq_root_spec ((x * x * x + Spec.P256.aCoordinateP256 * x + Spec.P256.bCoordinateP256) % prime256) in 
+        let sq = sq_root_spec (((x * x * x + Spec.P256.aCoordinateP256 * x + Spec.P256.bCoordinateP256) % prime256)) in 
+          if (uint_v id) % 2 = (sq % 2) then 
+            sq
+          else
+	         (0 - sq) % prime256	
+  		
+		in 
 	    as_seq h1 (gsub result (size 0) (size 32)) == xSequence /\
 	    as_seq h1 (gsub result (size 32) (size 32)) == Lib.ByteSequence.nat_to_bytes_be 32 y
  )

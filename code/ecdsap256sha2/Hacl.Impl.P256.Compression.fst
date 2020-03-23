@@ -61,10 +61,15 @@ val computeYFromX: x: felem ->  result: felem -> sign: uint64 -> Stack unit
     as_nat h1 result < prime256 /\
     (
       let xD = fromDomain_ (as_nat h0 x) in 
-      if uint_v sign = 0 then 
-	as_nat h1 result = toDomain_ ((0 - sq_root_spec ((xD * xD * xD + Spec.P256.aCoordinateP256 * xD + Spec.P256.bCoordinateP256) % prime256)) % prime256) else
-	as_nat h1 result = toDomain_ (sq_root_spec ((xD * xD * xD + Spec.P256.aCoordinateP256 * xD + Spec.P256.bCoordinateP256) % prime256)))
+      let sqRootWithoutSign = sq_root_spec (((xD * xD * xD + Spec.P256.aCoordinateP256 * xD + Spec.P256.bCoordinateP256) % prime256)) in 
+      
+      if sqRootWithoutSign  % pow2 1 = uint_v sign then
+	as_nat h1 result = sqRootWithoutSign 
+      else
+	as_nat h1 result = (0 - sqRootWithoutSign) % prime256
   )
+)
+
 
 let computeYFromX x result sign = 
   push_frame();
@@ -74,42 +79,64 @@ let computeYFromX x result sign =
   let h0 = ST.get() in 
     uploadA aCoordinateBuffer;
     uploadB bCoordinateBuffer;
+    
     montgomery_multiplication_buffer aCoordinateBuffer x aCoordinateBuffer;
-    cube x result;
+  cube x result;
     p256_add result aCoordinateBuffer result;
     p256_add result bCoordinateBuffer result;
+
     uploadZeroImpl aCoordinateBuffer; 
 
   let h6 = ST.get() in 
+  
     lemmaFromDomain (as_nat h6 aCoordinateBuffer);
     assert_norm (0 * Spec.P256.Lemmas.modp_inv2 (pow2 256) % prime256 == 0);
     square_root result result;
-    
-    p256_sub aCoordinateBuffer result bCoordinateBuffer;
 
-    let flag = eq_mask (to_u64(logand result (u8 1))) sign in 
+  let h7 = ST.get() in 
+  
+    lemmaFromDomainToDomain (as_nat h7 result);
+    fromDomain result result; 
+
+  let h8 = ST.get() in 
+    p256_sub aCoordinateBuffer result bCoordinateBuffer; 
+
+  let h9 = ST.get() in 
+
+    let word = index result (size 0) in 
+    let bitToCheck = logand word (u64 1) in 
+      logand_mask word (u64 1) 1;
+
+    let flag = eq_mask bitToCheck sign in 
+      eq_mask_lemma bitToCheck sign;
+
+    let h10 = ST.get() in 
 
     cmovznz4 flag bCoordinateBuffer result result;
 
-  let h9 = ST.get() in 
+    Spec.P256.Lemmas.lemma_core_0 result h10;
+    Lib.ByteSequence.lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h10 result);
+    Lib.ByteSequence.index_nat_to_intseq_le #U64 #SEC 4 (as_nat h10 result) 0;
+
+    assume (uint_v (uint #U64 #SEC (as_nat h8 result % pow2 64)) == as_nat h8 result % pow2 64);
+
+    pow2_modulo_modulo_lemma_1 (as_nat h10 result) 1 64;
+
     assert(modifies (loc aCoordinateBuffer |+| loc bCoordinateBuffer |+| loc result) h0 h9);
-    lemmaFromDomainToDomain (as_nat h9 result);
     pop_frame();
 
   let x_ = fromDomain_ (as_nat h0 x) in
 
   calc (==) {
-    toDomain_ ((((x_ * x_ * x_ % prime256 + ((Spec.P256.aCoordinateP256 % prime256) * x_ % prime256)) % prime256) + Spec.P256.bCoordinateP256) % prime256);
+    ((((x_ * x_ * x_ % prime256 + ((Spec.P256.aCoordinateP256 % prime256) * x_ % prime256)) % prime256) + Spec.P256.bCoordinateP256) % prime256);
     (==) {lemma_mod_add_distr Spec.P256.bCoordinateP256 (x_ * x_ * x_ % prime256 + ((Spec.P256.aCoordinateP256 % prime256) * x_ % prime256)) prime256}
-    toDomain_ ((x_ * x_ * x_ % prime256 + (Spec.P256.aCoordinateP256 % prime256) * x_ % prime256 + Spec.P256.bCoordinateP256) % prime256);
+     ((x_ * x_ * x_ % prime256 + (Spec.P256.aCoordinateP256 % prime256) * x_ % prime256 + Spec.P256.bCoordinateP256) % prime256);
     (==) {lemma_mod_add_distr ((Spec.P256.aCoordinateP256 % prime256) * x_ % prime256 + Spec.P256.bCoordinateP256) (x_ * x_ * x_) prime256}
-    toDomain_ ((x_ * x_ * x_ + (Spec.P256.aCoordinateP256 % prime256) * x_ % prime256 + Spec.P256.bCoordinateP256) % prime256); 
+     ((x_ * x_ * x_ + (Spec.P256.aCoordinateP256 % prime256) * x_ % prime256 + Spec.P256.bCoordinateP256) % prime256); 
     (==) {lemma_mod_mul_distr_l Spec.P256.aCoordinateP256 x_ prime256}
-    toDomain_ ((x_ * x_ * x_ + Spec.P256.aCoordinateP256 * x_ % prime256 + Spec.P256.bCoordinateP256) % prime256); 
+    ((x_ * x_ * x_ + Spec.P256.aCoordinateP256 * x_ % prime256 + Spec.P256.bCoordinateP256) % prime256); 
     (==) {lemma_mod_add_distr (x_ * x_ * x_ + Spec.P256.bCoordinateP256) (Spec.P256.aCoordinateP256 * x_) prime256}
-    toDomain_ ((x_ * x_ * x_ + Spec.P256.aCoordinateP256 * x_ + Spec.P256.bCoordinateP256) % prime256); };
-
-  lemma_mod_sub_distr 0 (x_ * x_ * x_ + Spec.P256.aCoordinateP256 * x_ + Spec.P256.bCoordinateP256) prime256
+    ((x_ * x_ * x_ + Spec.P256.aCoordinateP256 * x_ + Spec.P256.bCoordinateP256) % prime256); }
 
 
 let decompressionNotCompressedForm b result = 
@@ -163,6 +190,7 @@ let decompressionCompressedForm b result =
 
       Spec.P256.Lemmas.lemma_core_0 temp h1;
       
+      
       let lessThanPrimeXCoordinate = lessThanPrime temp in 
 	Spec.ECDSA.changeEndianLemma (Lib.ByteSequence.uints_from_bytes_be (as_seq h0 x));
 	Lib.ByteSequence.uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h0 x);
@@ -176,9 +204,10 @@ let decompressionCompressedForm b result =
 	begin
 	  toDomain temp temp;
 	  lemmaToDomain (as_nat h1 temp);
-	  computeYFromX temp temp2 (to_u64 correctIdentifier2);
-	  fromDomain temp2 temp2;
+	  computeYFromX temp temp2 (to_u64 (logand compressedIdentifier (u8 1)));
+	  logand_mask compressedIdentifier (u8 1) 1;
 	    let h4 = ST.get() in 
+
 
 	  changeEndian temp2;
 	  toUint8 temp2 (sub result (size 32) (size 32));
