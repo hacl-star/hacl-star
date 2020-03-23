@@ -78,12 +78,10 @@ val compressionNotCompressedForm: b: lbuffer uint8 (size 64) -> result: notCompr
 	  let yResult = Lib.Sequence.sub (as_seq h1 result) 33 32 in 
 	uint_v id == 4 /\ 
 	xResult == x /\
-	yResult == y
+	yResult == y 
 	
       )
     )
-
-
 
 
 val compressionCompressedForm: b: lbuffer uint8 (size 64) -> result: compressedForm -> 

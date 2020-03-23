@@ -86,8 +86,10 @@ let computeYFromX x result sign =
     square_root result result;
     
     p256_sub aCoordinateBuffer result bCoordinateBuffer;
-    
-    cmovznz4 sign bCoordinateBuffer result result;
+
+    let flag = eq_mask (to_u64(logand result (u8 1))) sign in 
+
+    cmovznz4 flag bCoordinateBuffer result result;
 
   let h9 = ST.get() in 
     assert(modifies (loc aCoordinateBuffer |+| loc bCoordinateBuffer |+| loc result) h0 h9);
@@ -195,12 +197,12 @@ let decompressionCompressedForm b result =
       pop_frame();
       false
     end
- 
+
 
 let compressionNotCompressedForm b result = 
-  upd result (size 0) (u8 4);
-  admit();
-  copy (sub result (size 1) (size 64)) b
+  let to = sub result (size 1) (size 64) in 
+  copy to b;
+  upd result (size 0) (u8 4)
  
 
 let compressionCompressedForm b result = 
