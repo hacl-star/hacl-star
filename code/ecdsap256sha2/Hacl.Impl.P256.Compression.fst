@@ -30,24 +30,6 @@ let eq_u8_nCT a b =
   let open Lib.RawIntTypes in
   FStar.UInt8.(u8_to_UInt8 a =^ u8_to_UInt8 b)
 
-[@ CInline]
-val copy_conditional_u8: out: lbuffer uint8 (size 64) -> x: lbuffer uint8 (size 64) -> mask: uint8{uint_v mask = 0 \/ uint_v mask = pow2 8 - 1} -> Stack unit 
-  (requires fun h -> live h out /\ live h x)
-  (ensures fun h0 _ h1 -> modifies (loc out) h0 h1) 
-
-let copy_conditional_u8 out x mask = 
-  admit();
-  [@inline_let]
-  let inv h1 (i: nat {i <= 64}) = True in
-  Lib.Loops.for 0ul 64ul inv 
-    (fun i -> 
-      let out_i = index out i in 
-      let x_i = index x i in 
-      let r_i = logxor out_i (logand mask (logxor out_i x_i)) in 
-      upd out i r_i
-    )
-      
-
 val uploadA: a: felem -> Stack unit
   (requires fun h -> live h a)
   (ensures fun h0 _ h1 -> modifies (loc a) h0 h1 /\ 
@@ -131,10 +113,8 @@ let computeYFromX x result sign =
 
   lemma_mod_sub_distr 0 (x_ * x_ * x_ + Spec.P256.aCoordinateP256 * x_ + Spec.P256.bCoordinateP256) prime256
     
-    
 
-
-let decompressionNotCompressed b result = 
+let decompressionNotCompressedForm b result = 
   let compressionIdentifier = index b (size 0) in
   let correctIdentifier = eq_u8_nCT (u8 4) compressionIdentifier in 
   if correctIdentifier then 
@@ -142,13 +122,6 @@ let decompressionNotCompressed b result =
   admit();  
   correctIdentifier
 
-
-let decompressionNotCompressed2 b result = 
-  let compressionIdentifier = index b (size 0) in 
-  let correctIdentifier = eq_mask (u8 4) compressionIdentifier in 
-    eq_mask_lemma (u8 4) compressionIdentifier;
-  copy_conditional_u8 result (sub b (size 1) (size 64)) correctIdentifier;
-  correctIdentifier
 
 (* This code is not side channel resistant *)
 (* inline_for_extraction noextract *)
@@ -172,34 +145,9 @@ let lessThanPrime f =
   pop_frame();
     less
 
-#push-options "--ifuel 3 --fuel 3"
 
-val decompressionCompressed: b: compressedForm -> result: lbuffer uint8 (size 64) -> Stack bool 
-  (requires fun h -> live h b /\ live h result /\ disjoint b result)
-  (ensures fun h0 r h1 -> 
-    (
-      let id = Lib.Sequence.index (as_seq h0 b) 0 in 
-      let xSequence = Lib.Sequence.sub (as_seq h0 b) 1 32 in 
-      let x =  Lib.ByteSequence.nat_from_bytes_be xSequence in 
-      if uint_v id = 2 || uint_v id = 3 then
-	if x < prime256 then 
-	  r == true /\ 
-	  (
-	    let y = 
-	      if uint_v id = 3 then 
-		((0 - sq_root_spec ((x * x * x + Spec.P256.aCoordinateP256 * x + Spec.P256.bCoordinateP256) % prime256)) % prime256)
-	      else
-		sq_root_spec ((x * x * x + Spec.P256.aCoordinateP256 * x + Spec.P256.bCoordinateP256) % prime256) in 
-	    as_seq h1 (gsub result (size 0) (size 32)) == xSequence /\
-	    as_seq h1 (gsub result (size 32) (size 32)) == Lib.ByteSequence.nat_to_bytes_be 32 y
- )
-	else 
-	  r == false
-      else 
-	r == false) /\
-  modifies (loc result) h0 h1)
 
-let decompressionCompressed b result = 
+let decompressionCompressedForm b result = 
   push_frame();
     let h0 = ST.get() in 
     let temp = create (size 4) (u64 0) in 
