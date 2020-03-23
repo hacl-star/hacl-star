@@ -16,7 +16,7 @@ open Spec.P256.MontgomeryMultiplication
 
 
 let notCompressedForm = lbuffer uint8 (size 65)
-let compressedForm = lbuffer uint8 (size 64)
+let compressedForm = lbuffer uint8 (size 33)
 
 (* the name makes a lot of sense, doesnot it? *)
 
@@ -53,3 +53,9 @@ val decompressionCompressedForm: b: compressedForm -> result: lbuffer uint8 (siz
       else 
 	r == false) /\
   modifies (loc result) h0 h1)
+
+
+val compressionNotCompressedForm: b: lbuffer uint8 (size 64) -> result: notCompressedForm -> 
+  Stack unit 
+    (requires fun h -> live h b /\ live h result /\ disjoint b result)
+    (ensures fun h0 _ h1 -> True)
