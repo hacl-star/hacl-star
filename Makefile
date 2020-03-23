@@ -752,8 +752,9 @@ dist/wasm/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree,MerkleTree.*'
 dist/wasm/Makefile.basic: CTR_BUNDLE =
 dist/wasm/Makefile.basic: DEFAULT_FLAGS += -bundle 'EverCrypt,EverCrypt.*'
 
-dist/wasm/package.json: dist/wasm/Makefile.basic $(wildcard bindings/js/*.js*) bindings/js/*.md
-	cp $(filter-out %.basic,$^) $(dir $@)
+dist/wasm/package.json: dist/wasm/Makefile.basic $(wildcard bindings/js/*.js) bindings/js/README.md $(wildcard bindings/js/*.json) bindings/js/.npmignore
+	cp -f $(filter-out %.basic,$^) $(dir $@)
+	rm $(dir $@)/README
 
 dist/wasm/doc/readable_api.js: dist/wasm/package.json
 	cd dist/wasm && \
