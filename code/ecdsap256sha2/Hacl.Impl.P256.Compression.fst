@@ -31,7 +31,7 @@ val uploadA: a: felem -> Stack unit
   (ensures fun h0 _ h1 -> modifies (loc a) h0 h1 /\ 
     as_nat h1 a == toDomain_ (Spec.P256.aCoordinateP256 % prime256) /\
     as_nat h1 a < prime256
- )
+  )
 
 let uploadA a = 
   lemmaToDomain (Spec.P256.aCoordinateP256 % prime256);
@@ -44,7 +44,8 @@ let uploadA a =
 val uploadB: b: felem -> Stack unit 
   (requires fun h -> live h b)
   (ensures fun h0 _ h1 -> modifies (loc b) h0 h1 /\ as_nat h1 b < prime256 /\ 
-    as_nat h1 b == toDomain_ (Spec.P256.bCoordinateP256))
+    as_nat h1 b == toDomain_ (Spec.P256.bCoordinateP256)
+  )
 
 let uploadB b = 
   lemmaToDomain (Spec.P256.bCoordinateP256);
@@ -161,16 +162,14 @@ let lessThanPrime f =
   pop_frame();
     less
 
-
+#push-options "--z3rlimit 200"
 
 let decompressionCompressedForm b result = 
   push_frame();
     let h0 = ST.get() in 
     let temp = create (size 4) (u64 0) in 
     let temp2 = create (size 4) (u64 0) in 
-
     let open Lib.RawIntTypes in 
-
     let compressedIdentifier = index b (size 0) in 
     let correctIdentifier2 = eq_mask (u8 2) compressedIdentifier in 
       eq_mask_lemma (u8 2) compressedIdentifier;
@@ -183,14 +182,10 @@ let decompressionCompressedForm b result =
     begin
       let x = sub b (size 1) (size 32) in 
       copy (sub result (size 0) (size 32)) x;
-(*till here I am BIG-ENDIAN *)
       toUint64ChangeEndian x temp;
-
 	let h1 = ST.get() in 
-
       Spec.P256.Lemmas.lemma_core_0 temp h1;
-      
-      
+
       let lessThanPrimeXCoordinate = lessThanPrime temp in 
 	Spec.ECDSA.changeEndianLemma (Lib.ByteSequence.uints_from_bytes_be (as_seq h0 x));
 	Lib.ByteSequence.uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h0 x);
@@ -207,7 +202,6 @@ let decompressionCompressedForm b result =
 	  computeYFromX temp temp2 (to_u64 (logand compressedIdentifier (u8 1)));
 	  logand_mask compressedIdentifier (u8 1) 1;
 	    let h4 = ST.get() in 
-
 
 	  changeEndian temp2;
 	  toUint8 temp2 (sub result (size 32) (size 32));
@@ -227,6 +221,7 @@ let decompressionCompressedForm b result =
       false
     end
 
+#pop-options
 
 let compressionNotCompressedForm b result = 
   let to = sub result (size 1) (size 64) in 
@@ -235,9 +230,17 @@ let compressionNotCompressedForm b result =
  
 
 let compressionCompressedForm b result = 
-  let lastWordY = index b (size 63) in 
+  let open Lib.ByteSequence in 
+    let h0 = ST.get() in 
+  let y = sub b (size 32) (size 32) in
+  let lastWordY = index y (size 0) in 
+    lemma_uint_to_bytes_le_preserves_value (Lib.Sequence.index (as_seq h0 y) 0);
+    lemma_nat_from_to_intseq_le_preserves_value 32 (as_seq h0 y);
   let lastBitY = logand lastWordY (u8 1) in 
-    logand_le lastWordY (u8 1);
+    logand_mask lastWordY (u8 1) 1;
   let identifier = add lastBitY (u8 2) in 
+  copy (sub result (size 1) (size 32)) (sub b (size 0) (size 32)) ;
   upd result (size 0) identifier;
-  copy (sub result (size 1) (size 32)) (sub b (size 0) (size 32)) 
+    let n = (nat_from_intseq_le (as_seq h0 y)) in 
+    index_nat_to_intseq_le #U8 #SEC 32 (nat_from_bytes_le (as_seq h0 y)) 0;
+    pow2_modulo_modulo_lemma_1 (nat_from_intseq_le (as_seq h0 y)) 1 8
