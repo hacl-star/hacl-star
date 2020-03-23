@@ -735,8 +735,9 @@ ECDSA_BUNDLE = -bundle Hacl.Impl.ECDSA,Hacl.Impl.ECDSA,Hacl.Impl.ECDSA.*,Hacl.Im
 # No Vale Curve64; no "Local" Curve64 (local Makefile hack); only the slow 64
 # one
 dist/wasm/Makefile.basic: CURVE_BUNDLE = $(CURVE_BUNDLE_BASE) \
-  -bundle Hacl.Curve25519_64 \
-  -bundle Hacl.Curve25519_64_Local
+	-bundle 'Hacl.Curve25519_64_Slow' \
+  -bundle 'Hacl.Curve25519_64' \
+  -bundle 'Hacl.Curve25519_64_Local'
 
 # Disabling vectorized stuff
 dist/wasm/Makefile.basic: CHACHA20_BUNDLE += \
