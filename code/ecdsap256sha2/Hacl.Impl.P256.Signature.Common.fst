@@ -28,19 +28,11 @@ open FStar.Math.Lemmas
 open FStar.Mul
 
 open Hacl.Impl.P256.Arithmetics
+open Hacl.Impl.LowLevel.RawCmp
 open Spec.P256.MontgomeryMultiplication
 friend Spec.P256.MontgomeryMultiplication
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
-
-let eq_u64_nCT a b =
-  let open Lib.RawIntTypes in
-  FStar.UInt64.(u64_to_UInt64 a =^ u64_to_UInt64 b)
-
-
-let eq_0_u64 a = eq_u64_nCT a (u64 0)
-
-
 
 #push-options "--ifuel 1"
 

@@ -41,11 +41,18 @@ let ecdsa_p256_sha2_verify mLen m pubKey r s =
   ecdsa_verification pubKey r s mLen m
 
 
-let decompressionNotCompressed b result = 
-  Hacl.Impl.P256.Compression.decompressionNotCompressed b result
+let decompressionNotCompressedForm b result = 
+  Hacl.Impl.P256.Compression.decompressionNotCompressedForm b result
 
-let decompressionCompressed b result = 
-  Hacl.Impl.P256.Compression.decompressionCompressed b result
+let decompressionCompressedForm b result = 
+  Hacl.Impl.P256.Compression.decompressionCompressedForm b result
 
-let decompressionNotCompressed2 b result = 
-	Hacl.Impl.P256.Compression.decompressionNotCompressed2 b result
+
+let compressionNotCompressedForm b result = 
+  Hacl.Impl.P256.Compression.compressionNotCompressedForm b result
+
+
+let compressionCompressedForm b result = 
+  Hacl.Impl.P256.Compression.compressionCompressedForm b result
+
+ 

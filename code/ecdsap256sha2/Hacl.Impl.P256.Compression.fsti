@@ -58,4 +58,24 @@ val decompressionCompressedForm: b: compressedForm -> result: lbuffer uint8 (siz
 val compressionNotCompressedForm: b: lbuffer uint8 (size 64) -> result: notCompressedForm -> 
   Stack unit 
     (requires fun h -> live h b /\ live h result /\ disjoint b result)
-    (ensures fun h0 _ h1 -> True)
+    (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
+      (
+	let id = Lib.Sequence.index (as_seq h1 result) 0 in 
+	let x = Lib.Sequence.sub (as_seq h0 b) 0 32 in 
+	  let xResult = Lib.Sequence.sub (as_seq h1 result) 1 32 in 
+	let y = Lib.Sequence.sub (as_seq h0 b) 32 32 in 
+	  let yResult = Lib.Sequence.sub (as_seq h1 result) 33 32 in 
+	uint_v id == 4 /\ 
+	xResult == x /\
+	yResult == y
+	
+      )
+    )
+
+
+
+
+val compressionCompressedForm: b: lbuffer uint8 (size 64) -> result: compressedForm -> 
+  Stack unit 
+    (requires fun h -> live h b /\ live h result /\ disjoint b result)
+    (ensures fun h0 _ h1 -> modifies (loc result) h0 h1)

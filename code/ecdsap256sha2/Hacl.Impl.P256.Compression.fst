@@ -14,6 +14,8 @@ open Hacl.Impl.P256.MM.Exponent
 open Hacl.Impl.P256.MontgomeryMultiplication
 open Hacl.Impl.P256.Arithmetics
 
+open Hacl.Impl.LowLevel.RawCmp
+
 open Spec.P256.MontgomeryMultiplication
 
 open Spec.P256.Definitions
@@ -22,13 +24,7 @@ open FStar.Math.Lemmas
 
 open FStar.Mul
 
-#set-options "--z3rlimit 300 --ifuel 0 --fuel 0"
-
-val eq_u8_nCT: a:uint8 -> b:uint8 -> (r:bool{r == (uint_v a = uint_v b)})
-
-let eq_u8_nCT a b =
-  let open Lib.RawIntTypes in
-  FStar.UInt8.(u8_to_UInt8 a =^ u8_to_UInt8 b)
+#set-options "--z3rlimit 100 --ifuel 0 --fuel 0"
 
 val uploadA: a: felem -> Stack unit
   (requires fun h -> live h a)
@@ -123,15 +119,6 @@ let decompressionNotCompressedForm b result =
   correctIdentifier
 
 
-(* This code is not side channel resistant *)
-(* inline_for_extraction noextract *)
-val eq_u64_nCT: a:uint64 -> b:uint64 -> (r:bool{r == (uint_v a = uint_v b)})
-
-let eq_u64_nCT a b =
-  let open Lib.RawIntTypes in
-  FStar.UInt64.(u64_to_UInt64 a =^ u64_to_UInt64 b)
-
-
 val lessThanPrime: f: felem -> Stack bool
   (requires fun h -> live h f)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\ r = (as_nat h0 f < prime256))
@@ -209,3 +196,17 @@ let decompressionCompressedForm b result =
       false
     end
  
+
+let compressionNotCompressedForm b result = 
+  upd result (size 0) (u8 4);
+  admit();
+  copy (sub result (size 1) (size 64)) b
+ 
+
+let compressionCompressedForm b result = 
+  let lastWordY = index b (size 63) in 
+  let lastBitY = logand lastWordY (u8 1) in 
+    logand_le lastWordY (u8 1);
+  let identifier = add lastBitY (u8 2) in 
+  upd result (size 0) identifier;
+  copy (sub result (size 1) (size 32)) (sub b (size 0) (size 32)) 

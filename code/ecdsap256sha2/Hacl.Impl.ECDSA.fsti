@@ -77,16 +77,23 @@ val ecdsa_p256_sha2_verify:
       result == Spec.ECDSA.ecdsa_verification (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m))
 
 
-val decompressionNotCompressed: b: notCompressedForm -> result: lbuffer uint8 (size 64) -> Stack bool 
+val decompressionNotCompressedForm: b: notCompressedForm -> result: lbuffer uint8 (size 64) -> Stack bool 
   (requires fun h -> live h b /\ live h result)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1)
 
 
-val decompressionCompressed: compressedForm -> result: point -> Stack bool 
+val decompressionCompressedForm: compressedForm -> result: point -> Stack bool 
   (requires fun h -> True)
   (ensures fun h0 _ h1 -> True)
 
 
-val decompressionNotCompressed2: b: notCompressedForm -> result: lbuffer uint8 (size 64) -> Stack uint8
-  (requires fun h -> live h b /\ live h result /\ disjoint b result)
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1)
+
+val compressionNotCompressedForm: compressedForm -> result: point -> Stack unit 
+  (requires fun h -> True)
+  (ensures fun h0 _ h1 -> True)
+
+
+val compressionCompressedForm: b: lbuffer uint8 (size 64) -> result: compressedForm -> 
+  Stack unit 
+    (requires fun h -> live h b /\ live h result /\ disjoint b result)
+    (ensures fun h0 _ h1 -> modifies (loc result) h0 h1)

@@ -24,6 +24,7 @@ open Spec.P256.Lemmas
 
 open Hacl.Impl.P256.PointAdd
 open Hacl.Impl.P256.LowLevel
+open Hacl.Impl.LowLevel.RawCmp
 
 open Hacl.Hash.SHA2
 

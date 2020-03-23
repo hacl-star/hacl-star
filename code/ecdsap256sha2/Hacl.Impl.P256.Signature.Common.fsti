@@ -19,14 +19,6 @@ open Hacl.Impl.P256
 
 open FStar.Mul
 
-(* This code is not side channel resistant *)
-(* inline_for_extraction noextract *)
-val eq_u64_nCT: a:uint64 -> b:uint64 -> (r:bool{r == (uint_v a = uint_v b)})
-
-(* This code is not side channel resistant *)
-(* inline_for_extraction noextract *)
-val eq_0_u64: a: uint64 -> r:bool{r == (uint_v a = 0)}
-
 
 val bufferToJac: p:lbuffer uint64 (size 8) -> result:point -> Stack unit
   (requires fun h -> live h p /\ live h result /\ disjoint p result)
