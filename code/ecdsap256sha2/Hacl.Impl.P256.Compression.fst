@@ -108,14 +108,14 @@ let computeYFromX x result sign =
     toDomain_ ((x_ * x_ * x_ + Spec.P256.aCoordinateP256 * x_ + Spec.P256.bCoordinateP256) % prime256); };
 
   lemma_mod_sub_distr 0 (x_ * x_ * x_ + Spec.P256.aCoordinateP256 * x_ + Spec.P256.bCoordinateP256) prime256
-    
+
 
 let decompressionNotCompressedForm b result = 
+  let h0 = ST.get() in 
   let compressionIdentifier = index b (size 0) in
   let correctIdentifier = eq_u8_nCT (u8 4) compressionIdentifier in 
   if correctIdentifier then 
-    copy (sub b (size 1) (size 64)) result;
-  admit();  
+    copy result (sub b (size 1) (size 64));
   correctIdentifier
 
 
