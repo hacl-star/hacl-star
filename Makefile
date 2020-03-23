@@ -144,7 +144,7 @@ mozilla-ci-unstaged: compile-mozilla test-c
 # Not reusing the -staged automatic target so as to export NOSHORTLOG
 ci:
 	NOSHORTLOG=1 $(MAKE) vale-fst
-	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all-unstaged test-unstaged
+	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all-unstaged test-unstaged doc-wasm
 	$(MAKE) -C providers/quic_provider # needs a checkout of miTLS, only valid on CI
 	./tools/sloccount.sh
 
@@ -764,7 +764,11 @@ dist/wasm/doc/readable_api.js: dist/wasm/package.json
 dist/wasm/doc/out/index.html: dist/wasm/doc/readable_api.js
 	jsdoc $< -d $(dir $@)
 
-wasm-doc: dist/wasm/doc/out/index.html
+doc-wasm: dist/wasm/doc/out/index.html
+
+publish-test-wasm: dist/wasm/package.json
+	cd dist/wasm && \
+	npm publish --dry-run
 
 test-wasm: dist/wasm/package.json
 	cd dist/wasm && \
