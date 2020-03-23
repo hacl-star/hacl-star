@@ -1,5 +1,5 @@
 (library
  (name        evercrypt)
  (public_name evercrypt)
- (libraries evercrypt-ctypes bigstring)
+ (libraries evercrypt-ctypes bigstring zarith)
  (flags (:standard -warn-error -3)))

@@ -36,6 +36,8 @@ end
 module Hacl_Hash = Hacl_Hash_bindings.Bindings(Hacl_Hash_stubs)
 module Hacl_Spec = Hacl_Spec_bindings.Bindings(Hacl_Spec_stubs)
 
+let max_size_t = 4294967296
+
 module HashDefs = struct
   open Hacl_Spec
   type deprecated_alg =
@@ -60,6 +62,18 @@ module HashDefs = struct
     match alg with
     | Some alg -> assert (len = digest_len alg)
     | None -> ()
+  let max_input_len = max_size_t
+  let incremental_input_len = function
+    | Legacy SHA1
+    | Legacy MD5
+    | SHA2_224
+    | SHA2_256 -> Z.pow (Z.of_int 2) 61
+    | SHA2_384
+    | SHA2_512 -> Z.pow (Z.of_int 2) 125
+  let block_len alg =
+    UInt32.to_int (Hacl_Hash.hacl_Hash_Definitions_block_len (alg_definition alg))
+  let check_key_len alg len =
+    assert (len + block_len alg < max_input_len)
 end
 
 module type Chacha20_Poly1305_generic = sig

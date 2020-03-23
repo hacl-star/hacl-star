@@ -9,6 +9,7 @@ type 'a aead_test =
     test_pt: 'a; test_ct: 'a; test_tag: 'a
   }
 
+(* TODO: add tests for AES128_GCM, AES256_GCM *)
 let chacha20poly1305_test =
   { alg = EverCrypt.AEAD.CHACHA20_POLY1305; key_len = 32; msg_len = 114; iv_len = 12; ad_len = 12; tag_len = 16;
     test_key = Bytes.of_string "\x80\x81\x82\x83\x84\x85\x86\x87\x88\x89\x8a\x8b\x8c\x8d\x8e\x8f\x90\x91\x92\x93\x94\x95\x96\x97\x98\x99\x9a\x9b\x9c\x9d\x9e\x9f";

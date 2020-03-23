@@ -7,5 +7,5 @@ Longer description
 """
 maintainer: "Name <email>"
 authors: "Name <email>"
-depends: [ "ocaml" "evercrypt-ctypes" "bigstring"]
+depends: [ "ocaml" "evercrypt-ctypes" "bigstring" "zarith"]
 build: ["dune" "build" "-p" name "-j" jobs]
