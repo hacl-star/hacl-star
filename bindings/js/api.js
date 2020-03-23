@@ -239,6 +239,7 @@ var HaclWasm = (function() {
     if (return_buffers.length == 1) {
       return_buffers = return_buffers[0]
     }
+    // Resetting the stack pointer to its old value
     memory[0] = sp;
     if (proto.return.type === "bool") {
       return [call_return === 1, return_buffers];
