@@ -10,11 +10,11 @@ open Spec.Hash.Incremental
 open Spec.Hash.PadFinish
 
 val update_multi_zero (a: hash_alg) (h: words_state a): Lemma
-  (ensures (S.equal (update_multi a h S.empty) h))
+  (ensures ((update_multi a h S.empty) == h))
   [ SMTPat (update_multi a h S.empty) ]
 
 val update_multi_update (a: hash_alg) (h: words_state a) (input: bytes_block a): Lemma
-  (ensures (S.equal (update_multi a h input) (update a h input)))
+  (ensures ((update_multi a h input) == (update a h input)))
   [ SMTPat (update a h input) ]
 
 val update_multi_block (a: hash_alg) (h: words_state a) (input: bytes):
@@ -40,7 +40,7 @@ val update_multi_associative:
     ))
     (ensures (
       let input1, input2 = split_block a input (len / block_length a) in
-      S.equal (update_multi a (update_multi a h input1) input2)
+      (update_multi a (update_multi a h input1) input2) ==
         (update_multi a h input)))
     (decreases (
       %[ S.length input; len ]))
@@ -51,7 +51,7 @@ val update_multi_associative' (a: hash_alg)
   (input2: bytes_blocks a):
   Lemma (ensures (
     let input = S.append input1 input2 in
-    S.equal (update_multi a (update_multi a h input1) input2)
+    (update_multi a (update_multi a h input1) input2) ==
       (update_multi a h input)))
   [ SMTPat (update_multi a (update_multi a h input1) input2) ]
 

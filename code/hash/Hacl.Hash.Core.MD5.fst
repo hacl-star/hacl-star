@@ -34,9 +34,9 @@ let h0 (i: U32.t { U32.v i < 4 } ) : HST.Stack uint32
   (requires (fun _ -> True))
   (ensures (fun h res h' ->
     B.modifies B.loc_none h h' /\
-    res == Seq.index Spec.init (U32.v i)
+    res == Seq.index Spec.h0 (U32.v i)
   ))
-= IB.recall_contents _h0 Spec.init;
+= IB.recall_contents _h0 Spec.h0;
   B.index _h0 i
 
 inline_for_extraction
@@ -58,13 +58,13 @@ let seq_index_upd (#t: Type) (s: Seq.seq t) (i: nat) (v: t) (j: nat) : Lemma
 let legacy_init s =
   let h = HST.get () in
   let inv (h' : HS.mem) (i: nat) : GTot Type0 =
-    B.live h' s /\ B.modifies (B.loc_buffer s) h h' /\ i <= 4 /\ Seq.slice (B.as_seq h' s) 0 i == Seq.slice Spec.init 0 i
+    B.live h' s /\ B.modifies (B.loc_buffer s) h h' /\ i <= 4 /\ Seq.slice (B.as_seq h' s) 0 i == Seq.slice Spec.h0 0 i
   in
   C.Loops.for 0ul 4ul inv (fun i ->
     B.upd s i (h0 i);
     let h' = HST.get () in
     Seq.snoc_slice_index (B.as_seq h' s) 0 (U32.v i);
-    Seq.snoc_slice_index (Spec.init) 0 (U32.v i)
+    Seq.snoc_slice_index (Spec.h0) 0 (U32.v i)
   )
 
 inline_for_extraction
@@ -375,7 +375,7 @@ let update'
     (ensures (fun h0 _ h1 ->
       B.(modifies (loc_buffer abcd) h0 h1) /\
       B.live h1 abcd /\
-      B.as_seq h1 abcd == Spec.update (B.as_seq h0 abcd) (B.as_seq h0 x)))
+      B.as_seq h1 abcd == fst (Spec.update (B.as_seq h0 abcd, ()) (B.as_seq h0 x))))
 =
   let h0 = HST.get () in
   assert_norm (U32.v ia == Spec.ia);
@@ -398,7 +398,7 @@ let update'
     (d +. dd);
   let h1 = HST.get () in
   reveal_opaque (`%Spec.update) Spec.update;
-  assert (Seq.equal (B.as_seq h1 abcd) (Spec.update (B.as_seq h0 abcd) (B.as_seq h0 x)))
+  assert (Seq.equal (B.as_seq h1 abcd) (fst (Spec.update (B.as_seq h0 abcd, ()) (B.as_seq h0 x))))
 
 let legacy_update abcd x = update' abcd x
 
