@@ -51,6 +51,11 @@ static void dump_secret(const quic_secret *s)
 }
 #endif
 
+void MITLS_CALLCONV quic_crypto_init()
+{
+  EverCrypt_AutoConfig2_init();
+}
+
 #define CONVERT_ALG(a) \
   (a == TLS_hash_SHA256 ? Spec_Hash_Definitions_SHA2_256 : \
      (a == TLS_hash_SHA384 ? Spec_Hash_Definitions_SHA2_384 : Spec_Hash_Definitions_SHA2_512))
@@ -340,7 +345,7 @@ int MITLS_CALLCONV quic_crypto_decrypt(quic_key *key, unsigned char *plain, uint
   else if(key->alg == TLS_aead_CHACHA20_POLY1305)
   {
     r = 1 - EverCrypt_Chacha20Poly1305_aead_decrypt(key->key, iv, ad_len, (uint8_t*)ad,
-        plain_len, (uint8_t*)plain, cipher, (uint8_t*)(cipher+plain_len));
+        plain_len, (uint8_t*)plain, (uint8_t*)cipher, (uint8_t*)(cipher+plain_len));
   }
 
 #if DEBUG

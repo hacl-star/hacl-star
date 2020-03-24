@@ -4,7 +4,6 @@
 #include <string.h>
 #include <assert.h>
 
-#include "EverCrypt.h"
 #include "quic_provider.h"
 
 #ifndef CDECL
@@ -603,9 +602,7 @@ int CDECL main(int argc, char **argv)
     // Reference arguments to avoid compiler errors
     (void)argc;
     (void)argv;
-
-    EverCrypt_AutoConfig2_init();
-
+    quic_crypto_init();
     coverage();
     exhaustive();
 

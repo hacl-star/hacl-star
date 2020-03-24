@@ -12,6 +12,8 @@
 // Calling convention: all functions in this library return
 // 1 on success and 0 on failure.
 
+void MITLS_CALLCONV quic_crypto_init();
+
 // Unlike secrets, AEAD keys are kept abstract; they hide the
 // negotiated encryption algorithm and its expanded key materials;
 // they are allocated internally by quic_crypto_derive_key and must be
