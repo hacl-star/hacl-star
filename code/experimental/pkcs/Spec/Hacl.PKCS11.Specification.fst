@@ -485,7 +485,7 @@ let isKeySecretKey k =
 (* Returns a set of attributes that the object should have to be the type t 
    Returns Some (...) if the type was recognized, otherwise returns None
 *)
-let getAttributesForType: t: Type0 -> option (seq _CK_ATTRIBUTE_TYPE) = function 
+let getAttributesForType: t: _CK_OBJECT_CLASS -> option (seq _CK_ATTRIBUTE_TYPE) = function 
   |_CKO_SECRET_KEY -> Some (seq_of_list 
     [CKA_CLASS; CKA_TOKEN; CKA_PRIVATE; CKA_MODIFIABLE; CKA_LABEL; CKA_COPYABLE; CKA_DESTROYABLE;
     CKA_KEY_TYPE; CKA_ID; CKA_END_DATE; CKA_DERIVED; CKA_LOCAL; CKA_KEY_GEN_MECHANISM; CKA_ALLOWED_MECHANISMS; CKA_SENSITIVE; CKA_ENCRYPT; CKA_DECRYPT; CKA_SIGN; CKA_VERIFY; 
@@ -1302,12 +1302,18 @@ let _attributesTemplateComplete toSearchSequence toFinds =
   for_all (__attributesTemplateComplete toSearchSequence) toFinds 
 
 
-val attributesTemplateComplete: t: Type0 ->  mechanism: _CK_MECHANISM -> attrs: seq _CK_ATTRIBUTE -> Tot bool
+val combineAllAttributes: mechanism: _CK_MECHANISM -> attrs: seq _CK_ATTRIBUTE -> Tot (seq _CK_ATTRIBUTE)
 
-let attributesTemplateComplete t mechanism attrs = 
+let combineAllAttributes mechanism attrs  = 
   let defAttr = defaultAttributes in 
   let mechanismAttributes = getAttributesByMechanism mechanism.mechanismID in 
-  let allAttributes = append (append defaultAttributes mechanismAttributes) attrs in 
+  append (append defaultAttributes mechanismAttributes) attrs
+
+
+val attributesTemplateComplete: t: _CK_OBJECT_CLASS ->  mechanism: _CK_MECHANISM -> attrs: seq _CK_ATTRIBUTE -> Tot bool
+
+let attributesTemplateComplete t mechanism attrs = 
+  let allAttributes = combineAllAttributes mechanism attrs in 
   let getRequiredAttributes = getAttributesForType t in 
   match getRequiredAttributes with 
     |None -> false
@@ -1351,27 +1357,39 @@ let getCurveFromEncoded s =
   |_ -> None
 
 
-val mechanismSelectECDSA: a: _CK_ATTRIBUTE {CKA_EC_PARAMS? a.aType} -> Tot Type0
+val mechanismSelectECDSA: a: _CK_ATTRIBUTE {CKA_EC_PARAMS? a.aType} -> option (unit -> Tot (seq FStar.UInt8.t))
 
 let mechanismSelectECDSA a = 
+  let open Hacl.PKCS11.External in 
   let encodedCurve = a.pValue in 
-  
-  
+  let curveIdentifier = getCurveFromEncoded encodedCurve in 
+  match curveIdentifier with 
+  |Some id -> 
+    match id with 
+    |Curve25519 -> Some keyGenerationTemplateCurve25519 
+    |CurveP256 -> Some keyGenerationTemplateP256
+  | _ -> None
 
 
-val mechanismSelect: d: device ->  m: _CK_MECHANISM -> attrs: seq _CK_ATTRIBUTE -> Tot Type0
+val mechanismCreationSelect: d: device ->  m: _CK_MECHANISM -> attrs: seq _CK_ATTRIBUTE {exists (a: nat {a < Seq.length attrs}). (index attrs a).aType == CKA_EC_PARAMS}-> result (unit -> Tot (seq FStar.UInt8.t))
 
 
-let mechanismSelect d m attrs = 
-  let mechanismType = m.mechanismID in 
-  
-
-
-
-
-
-
-
+let mechanismCreationSelect d m attrs = 
+  let mechanismType = m.mechanismID in
+  match mechanismType with 
+  |CKM_EC_KEY_PAIR_GEN -> 
+    begin
+      let requiredAttribute = find_l (fun x -> x.aType = CKA_EC_PARAMS) attrs in 
+      assume (Some? requiredAttribute);
+      let requiredAttribute = match requiredAttribute with Some a -> a in 
+      let mechanism = mechanismSelectECDSA requiredAttribute in 
+      match mechanism with 
+      |None -> Inr CKR_DEVICE_ERROR
+      |Some a -> Inl a 
+    end
+  | _ -> Inr CKR_MECHANISM_INVALID
+    
+ 
 
 (* CK_PKCS11_FUNCTION_INFO(C_GenerateKey)
 #ifdef CK_NEED_ARG_LIST
@@ -1388,7 +1406,7 @@ let mechanismSelect d m attrs =
 val __CKS_GenerateKey: d: device ->  
   hSession: _CK_SESSION_HANDLE -> 
   pMechanism: _CK_MECHANISM ->
-  pTemplate: seq _CK_ATTRIBUTE -> 
+  pTemplate: seq _CK_ATTRIBUTE {exists (a: nat {a < Seq.length pTemplate}). (index pTemplate a).aType == CKA_EC_PARAMS} -> 
   Tot(
     (handler: result _CK_OBJECT_HANDLE) & 
     (resultDevice : device (*
@@ -1414,40 +1432,14 @@ val __CKS_GenerateKey: d: device ->
 
 
 let __CKS_GenerateKey d hSession pMechanism pTemplate = 
-  let 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  let mechanism = mechanismCreationSelect d pMechanism pTemplate in 
+  match mechanism with 
+  |Inl mechanism -> 
+    let rawKey = mechanism () in 
+    let attributesToGive = getAttributesForType CKO_SECRET_KEY in 
+    (|Inr CKR_ARGUMENTS_BAD, d|)
+  |Inr exp -> (|Inr exp, d|)
+  
 
 
 
