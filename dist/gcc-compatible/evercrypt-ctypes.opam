@@ -1,14 +1,28 @@
 opam-version: "2.0"
 name: "evercrypt-ctypes"
 version: "0.1"
-synopsis: "One-line description"
+maintainer: "Victor Dumitrescu <victor.dumitrescu@nomadic-labs.com>"
+authors: [ "Victor Dumitrescu <victor.dumitrescu@nomadic-labs.com>" ]
+homepage: "https://hacl-star.github.io/"
+bug-reports: "https://github.com/project-everest/hacl-star/issues"
+dev-repo: "git+https://github.com/project-everest/hacl-star.git"
+license: "Apache-2.0"
+synopsis: "Auto-generated low-level OCaml bindings for EverCrypt/HACL*"
 description: """
-Longer description
+This package contains a snapshot of the EverCrypt crypto provider and
+the HACL* library, along with automatically generated Ctypes bindings.
+For a higher-level idiomatic API see the `evercrypt` package, of
+which `evercrypt-ctypes` is a dependency.
 """
-maintainer: "Name <email>"
-authors: "Name <email>"
-depends: [ "ocaml" "ocamlfind" "ctypes" "ctypes-foreign"]
+depends: [
+  "ocaml" { >= "4.05.0" }
+  "ocamlfind"
+  "ctypes"
+  "ctypes-foreign"
+]
 build: [
   [make]
 ]
-install: [make "install-evercrypt-ctypes"]
+install: [
+  make "install-evercrypt-ctypes"
+]
