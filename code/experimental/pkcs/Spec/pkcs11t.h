@@ -364,7 +364,7 @@ typedef CK_ULONG          CK_KEY_TYPE;
 #define CKK_ARIA                0x00000026UL
 
 /* new for v2.40 */
-#define CKK_SHA512_224_HMAC     0x00000027UL_
+#define CKK_SHA512_224_HMAC     0x00000027UL
 #define CKK_SHA512_256_HMAC     0x00000028UL
 #define CKK_SHA512_T_HMAC       0x00000029UL
 

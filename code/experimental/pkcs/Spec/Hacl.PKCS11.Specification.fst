@@ -2,6 +2,8 @@ module Hacl.PKCS11.Specification
 
 
 open FStar.UInt32
+open FStar.UInt8
+
 open FStar.Seq
 open FStar.Option
 
@@ -10,6 +12,8 @@ open FStar.Seq.Properties
 
 open PKCS11.Spec.Lemmas
 open Hacl.PKCS11.Lib
+
+open Hacl.PKCS11.Types
 
 
 (* #set-options "--z3rlimit 200 --lax"  *)
@@ -172,7 +176,8 @@ type _CK_ATTRIBUTE_TYPE =
   |CKA_UNWRAP_TEMPLATE
   |CKA_ALWAYS_AUTHENTICATE
   |CKA_CHECK_VALUE
-  |CKA_
+  |CKA_EC_PARAMS 
+  
   (* and much more *)
 
 (*
@@ -253,6 +258,7 @@ let _ck_attribute_get_type: _CK_ATTRIBUTE_TYPE -> Tot Type0 = function
   |CKA_SIGN -> bool
   |CKA_SIGN_RECOVER -> bool
   |_ -> _CK_ULONG
+  |CKA_EC_PARAMS -> _CK_ULONG
   
 
 
@@ -1332,15 +1338,60 @@ let attributesTemplateConsistent0 attrs =
   _attributesTemplateConsistent0 attrs
 
 
+(* Mechanism Select *)
 
-val _CKS_GenerateKey: d: device ->  
+val getCurveFromEncoded: s: seq _CK_ULONG -> option _HACL_Curve_ID
+
+let getCurveFromEncoded s = 
+  let curve25519Representation = FStar.Seq.Properties.seq_of_list [0] in 
+  let curveP256Represtantation = FStar.Seq.Properties.seq_of_list [1] in
+  match s with 
+  |curve25519Representation -> Some Curve25519
+  |curveP256Representation -> Some CurveP256
+  |_ -> None
+
+
+val mechanismSelectECDSA: a: _CK_ATTRIBUTE {CKA_EC_PARAMS? a.aType} -> Tot Type0
+
+let mechanismSelectECDSA a = 
+  let encodedCurve = a.pValue in 
+  
+  
+
+
+val mechanismSelect: d: device ->  m: _CK_MECHANISM -> attrs: seq _CK_ATTRIBUTE -> Tot Type0
+
+
+let mechanismSelect d m attrs = 
+  let mechanismType = m.mechanismID in 
+  
+
+
+
+
+
+
+
+
+(* CK_PKCS11_FUNCTION_INFO(C_GenerateKey)
+#ifdef CK_NEED_ARG_LIST
+(
+  CK_SESSION_HANDLE    hSession,    /* the session's handle */
+  CK_MECHANISM_PTR     pMechanism,  /* key generation mech. */
+  CK_ATTRIBUTE_PTR     pTemplate,   /* template for new key */
+  CK_ULONG             ulCount,     /* # of attrs in template */
+  CK_OBJECT_HANDLE_PTR phKey        /* gets handle of new key */
+);
+#endif *)
+
+(* if all the preconditions are satisfied, we run this function *)
+val __CKS_GenerateKey: d: device ->  
   hSession: _CK_SESSION_HANDLE -> 
-  pMechanism: _CK_MECHANISM_TYPE
-    {isPresentOnDevice d pMechanism = true /\ isMechanismUsedForGenerateKey pMechanism d.supportedMechanisms} ->
-  pTemplate: seq _CK_ATTRIBUTE {attributesNotReadOnly pTemplate /\ checkedAttributes pTemplate} -> 
+  pMechanism: _CK_MECHANISM ->
+  pTemplate: seq _CK_ATTRIBUTE -> 
   Tot(
     (handler: result _CK_OBJECT_HANDLE) & 
-    (resultDevice : device 
+    (resultDevice : device (*
       {
 	if Inr? handler then 
 	  d = resultDevice else 
@@ -1357,24 +1408,47 @@ val _CKS_GenerateKey: d: device ->
 	  )
 	) /\
 	modifiesKeysM d resultDevice handler 
-      }
+      }*)
     ) 
   )
 
 
+let __CKS_GenerateKey d hSession pMechanism pTemplate = 
+  let 
 
 
-let _CKS_GenerateKey d hSession pMechanism pTemplate = 
-	let mechanism = mechanismGetFromDevice d pMechanism in 
-	let newKey = keyGeneration mechanism pTemplate in 
-	if Inr? newKey then 
-		let keyGenerationException = match newKey with Inr a -> a in 
-		let keyGenerationException = Inr keyGenerationException in 
-		(|keyGenerationException, d|)
-	else 
-		let key = (match newKey with Inl a -> a) in 
-		let (|d, h|) = deviceUpdateKey d key in 
-		(|Inl h, d|)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
