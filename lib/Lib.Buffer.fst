@@ -244,7 +244,7 @@ val loopi_blocks_f:
       Sequence.repeati_blocks_f (v blocksize) (as_seq h0 inp) spec_f (v nb) (v i) (as_seq h0 w))
 
 let loopi_blocks_f #a #b #blen bs inpLen inp spec_f f nb i w =
-  Math.Lemmas.lemma_mult_lt_right (v bs) (v i) (v nb);
+  Math.Lemmas.lemma_mult_le_right (v bs) (v i) (v nb);
   assert ((v i + 1) * v bs == v i * v bs + v bs);
   assert (v i * v bs + v bs <= v nb * v bs);
   assert (v nb * v bs <= v inpLen);
