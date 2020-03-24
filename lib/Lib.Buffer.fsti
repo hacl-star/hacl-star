@@ -42,6 +42,10 @@ unfold let ibuffer (a:Type0) = buffer_t IMMUT a
 (** Const buffer. Either one of the two above. Extracts as `const a*`. *)
 unfold let cbuffer (a:Type0) = buffer_t CONST a
 
+(** Global buffers are const immutable *)
+unfold let gbuffer (a:Type0) = c:cbuffer a{CB.qual_of c == CB.IMMUTABLE /\
+					   B.frameOf (CB.as_mbuf c) == HyperStack.root}
+
 let length (#t:buftype) (#a:Type0) (b:buffer_t t a) =
   match t with
   | MUT -> B.length (b <: buffer a)
@@ -55,6 +59,8 @@ let lbuffer_t (ty:buftype) (a:Type0) (len:size_t) =
 unfold let lbuffer (a:Type0) (len:size_t) = lbuffer_t MUT a len
 unfold let ilbuffer (a:Type0) (len:size_t) = lbuffer_t IMMUT a len
 unfold let clbuffer (a:Type0) (len:size_t) = lbuffer_t CONST a len
+unfold let glbuffer (a:Type0) (len:size_t) = c:clbuffer a len{CB.qual_of #a c == CB.IMMUTABLE /\
+							      B.frameOf (CB.as_mbuf #a c) == HyperStack.root}
 
 //val live: #t:buftype -> #a:Type0 -> h:HS.mem -> b:buffer_t t a -> Type
 let live (#t:buftype) (#a:Type0) (h:HS.mem) (b:buffer_t t a) : Type =
@@ -94,6 +100,13 @@ let mut_immut_disjoint #t #t' (b: buffer_t MUT t) (ib: buffer_t IMMUT t') (h: HS
 =
   IB.buffer_immutable_buffer_disjoint b ib h
 
+let mut_const_immut_disjoint #t #t' (b: buffer_t MUT t) (ib: buffer_t CONST t') (h: HS.mem):
+  Lemma
+    (requires (B.live h b /\ B.live h (CB.as_mbuf ib) /\ CB.qual_of #t' ib == CB.IMMUTABLE))
+    (ensures (B.loc_disjoint (loc b) (loc ib)))
+    [SMTPat (B.loc_disjoint (loc b) (loc ib)); SMTPat (B.live h b); SMTPat (B.live h (CB.as_mbuf ib))]
+=
+  IB.buffer_immutable_buffer_disjoint #t #t' b (CB.as_mbuf #t' ib) h
 
 (** Modifies nothing *)
 let modifies0 (h1 h2:HS.mem) =
@@ -249,16 +262,16 @@ val bget_as_seq:
     (ensures  bget #t #a #len h b i == Seq.index #a #(v len) (as_seq h b) i)
     [SMTPat (bget #t #a #len h b i)]
 
-  let stack_allocated (#a:Type0) (#len:size_t) (b:lbuffer a len)
+let stack_allocated (#a:Type0) (#len:size_t) (b:lbuffer a len)
                     (h0:mem) (h1:mem) (s:Seq.lseq a (v len)) =
   let b: B.buffer a = b in
   B.alloc_post_mem_common b h0 h1 s /\
   B.frameOf b = HS.get_tip h0 /\
   B.frameOf b <> HyperStack.root
 
-let global_allocated (#a:Type0) (#len:size_t) (b:ilbuffer a len)
+let global_allocated (#a:Type0) (#len:size_t) (b:glbuffer a len)
                     (h0:mem) (h1:mem) (s:Seq.lseq a (v len)) =
-  let b: ibuffer a = b in
+  let b: ibuffer a = CB.as_mbuf b in
   B.frameOf b == HyperStack.root /\
   B.alloc_post_mem_common b h0 h1 s
 
@@ -281,8 +294,8 @@ val recall:
 unfold private
 let cpred (#a:Type0) (s:Seq.seq a) : B.spred a = fun s1 -> FStar.Seq.equal s s1
 
-let witnessed (#a:Type0) (#len:size_t) (b:ilbuffer a len) (s:Seq.lseq a (v len)) =
-  B.witnessed (b <: ibuffer a) (cpred s)
+let witnessed (#a:Type0) (#len:size_t) (b:glbuffer a len) (s:Seq.lseq a (v len)) =
+  B.witnessed (CB.as_mbuf b) (cpred s)
 
 (** Allocate a stack fixed-length mutable buffer and initialize it to value [init] *)
 inline_for_extraction
@@ -305,12 +318,12 @@ val createL:
     (requires fun h0 -> B.alloca_of_list_pre #a init)
     (ensures  fun h0 b h1 -> live h1 b /\ stack_allocated b h0 h1 (Seq.of_list init))
 
-(** Allocate a global fixed-length immutable buffer initialized to value [init] *)
+(** Allocate a global fixed-length const immutable buffer initialized to value [init] *)
 inline_for_extraction noextract
 val createL_global:
     #a:Type0
   -> init:list a{normalize (List.Tot.length init <= max_size_t)} ->
-  ST (ilbuffer a (size (normalize_term (List.Tot.length init))))
+  ST (glbuffer a (size (normalize_term (List.Tot.length init))))
     (requires fun h0 -> B.gcmalloc_of_list_pre #a HyperStack.root init)
     (ensures  fun h0 b h1 -> global_allocated b h0 h1 (Seq.of_list init) /\
                           recallable b /\
@@ -323,7 +336,7 @@ inline_for_extraction noextract
 val recall_contents:
     #a:Type0
   -> #len:size_t{v len <= max_size_t}
-  -> b:ilbuffer a len
+  -> b:glbuffer a len
   -> s:Seq.lseq a (v len) ->
   ST unit
     (requires fun h0 -> (live h0 b \/ recallable b) /\ witnessed b s)

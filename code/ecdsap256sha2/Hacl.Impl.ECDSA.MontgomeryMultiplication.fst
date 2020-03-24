@@ -155,7 +155,7 @@ val montgomery_multiplication_one_round_proof:
 let montgomery_multiplication_one_round_proof t k0 round co = 
   mult_one_round_ecdsa_prime t prime_p256_order co k0
 
-#reset-options "--z3rlimit 600"
+#reset-options "--z3rlimit 700"
 
 val montgomery_multiplication_round: t: widefelem ->  round: widefelem -> k0: uint64 ->
   Stack unit 

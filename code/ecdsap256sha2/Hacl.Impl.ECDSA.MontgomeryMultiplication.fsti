@@ -21,7 +21,7 @@ noextract
 let prime = prime_p256_order
 
 inline_for_extraction
-let prime256order_buffer: x: ilbuffer uint64 (size 4)  
+let prime256order_buffer: x: glbuffer uint64 (size 4)  
   {witnessed #uint64 #(size 4) x 
   (Lib.Sequence.of_list p256_order_prime_list) /\ recallable x /\ 
   felem_seq_as_nat (Lib.Sequence.of_list (p256_order_prime_list)) == prime_p256_order} = 
@@ -29,12 +29,12 @@ let prime256order_buffer: x: ilbuffer uint64 (size 4)
 
 
 inline_for_extraction
-let order_inverse_buffer: x: ilbuffer uint8 32ul {witnessed x prime_p256_order_inverse_seq /\ recallable x} = 
+let order_inverse_buffer: x: glbuffer uint8 32ul {witnessed x prime_p256_order_inverse_seq /\ recallable x} = 
   createL_global prime_p256_order_inverse_list
 
 
 inline_for_extraction
-let order_buffer: x: ilbuffer uint8 32ul {witnessed x prime_p256_order_seq /\ recallable x} = 
+let order_buffer: x: glbuffer uint8 32ul {witnessed x prime_p256_order_seq /\ recallable x} = 
   createL_global prime_p256_order_list 
 
 

@@ -61,10 +61,10 @@ let createL #a init =
   B.alloca_of_list init
 
 let createL_global #a init =
-  IB.igcmalloc_of_list #a root init
+  CB.of_ibuffer (IB.igcmalloc_of_list #a root init)
 
 let recall_contents #a #len b s =
-  B.recall_p (b <: ibuffer a) (cpred s)
+  B.recall_p (CB.to_ibuffer b) (cpred s)
 
 (* JP: why triplicate the code? would it not extract if we just cast i to a monotonic buffer?! *)
 let copy #t #a #len o i =
