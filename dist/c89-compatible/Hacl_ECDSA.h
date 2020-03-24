@@ -36,6 +36,10 @@
 #include "Hacl_Hash.h"
 
 
+uint64_t Hacl_Impl_P256_DH_ecp256dh_i(uint8_t *result, uint8_t *scalar);
+
+uint64_t Hacl_Impl_P256_DH_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
+
 uint64_t
 Hacl_Impl_ECDSA_ecdsa_p256_sha2_sign(
   uint8_t *result,

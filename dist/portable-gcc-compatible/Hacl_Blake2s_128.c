@@ -28,16 +28,13 @@
 
 static inline void
 blake2s_update_block(
+  Lib_IntVector_Intrinsics_vec128 *wv,
   Lib_IntVector_Intrinsics_vec128 *hash,
   bool flag,
   uint64_t totlen,
   uint8_t *d
 )
 {
-  KRML_CHECK_SIZE(sizeof (Lib_IntVector_Intrinsics_vec128), (uint32_t)4U * (uint32_t)1U);
-  Lib_IntVector_Intrinsics_vec128 b[(uint32_t)4U * (uint32_t)1U];
-  for (uint32_t _i = 0U; _i < (uint32_t)4U * (uint32_t)1U; ++_i)
-    b[_i] = Lib_IntVector_Intrinsics_vec128_zero;
   Lib_IntVector_Intrinsics_vec128 mask = Lib_IntVector_Intrinsics_vec128_zero;
   uint32_t wv_14;
   if (flag)
@@ -54,8 +51,8 @@ blake2s_update_block(
       (uint32_t)(totlen >> (uint32_t)32U),
       wv_14,
       wv_15);
-  memcpy(b, hash, (uint32_t)4U * (uint32_t)1U * sizeof (hash[0U]));
-  Lib_IntVector_Intrinsics_vec128 *wv3 = b + (uint32_t)3U * (uint32_t)1U;
+  memcpy(wv, hash, (uint32_t)4U * (uint32_t)1U * sizeof (hash[0U]));
+  Lib_IntVector_Intrinsics_vec128 *wv3 = wv + (uint32_t)3U * (uint32_t)1U;
   wv3[0U] = Lib_IntVector_Intrinsics_vec128_xor(wv3[0U], mask);
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)10U; i++)
   {
@@ -128,12 +125,12 @@ blake2s_update_block(
     r20[0U] = Lib_IntVector_Intrinsics_vec128_load32s(u02, u111, u22, u32);
     uint32_t nb2 = (uint32_t)4U;
     uint8_t *b0 = d + s9 * nb2;
-    uint8_t *b13 = d + s11 * nb2;
+    uint8_t *b1 = d + s11 * nb2;
     uint8_t *b2 = d + s13 * nb2;
     uint8_t *b3 = d + s15 * nb2;
     uint32_t u13 = load32_le(b0);
     uint32_t u03 = u13;
-    uint32_t u14 = load32_le(b13);
+    uint32_t u14 = load32_le(b1);
     uint32_t u112 = u14;
     uint32_t u15 = load32_le(b2);
     uint32_t u23 = u15;
@@ -145,7 +142,7 @@ blake2s_update_block(
     Lib_IntVector_Intrinsics_vec128 *z = m_st + (uint32_t)2U * (uint32_t)1U;
     Lib_IntVector_Intrinsics_vec128 *w = m_st + (uint32_t)3U * (uint32_t)1U;
     uint32_t a = (uint32_t)0U;
-    uint32_t b14 = (uint32_t)1U;
+    uint32_t b4 = (uint32_t)1U;
     uint32_t c0 = (uint32_t)2U;
     uint32_t d10 = (uint32_t)3U;
     uint32_t r01 = Hacl_Impl_Blake2_Constants_rTable_S[0U];
@@ -153,41 +150,41 @@ blake2s_update_block(
     uint32_t r21 = Hacl_Impl_Blake2_Constants_rTable_S[2U];
     uint32_t r31 = Hacl_Impl_Blake2_Constants_rTable_S[3U];
     Lib_IntVector_Intrinsics_vec128 zz0 = Lib_IntVector_Intrinsics_vec128_zero;
-    Lib_IntVector_Intrinsics_vec128 *wv_a0 = b + a * (uint32_t)1U;
-    Lib_IntVector_Intrinsics_vec128 *wv_b0 = b + b14 * (uint32_t)1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_a0 = wv + a * (uint32_t)1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_b0 = wv + b4 * (uint32_t)1U;
     wv_a0[0U] = Lib_IntVector_Intrinsics_vec128_add32(wv_a0[0U], wv_b0[0U]);
     wv_a0[0U] = Lib_IntVector_Intrinsics_vec128_add32(wv_a0[0U], x[0U]);
-    Lib_IntVector_Intrinsics_vec128 *wv_a1 = b + d10 * (uint32_t)1U;
-    Lib_IntVector_Intrinsics_vec128 *wv_b1 = b + a * (uint32_t)1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_a1 = wv + d10 * (uint32_t)1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_b1 = wv + a * (uint32_t)1U;
     wv_a1[0U] = Lib_IntVector_Intrinsics_vec128_xor(wv_a1[0U], wv_b1[0U]);
     wv_a1[0U] = Lib_IntVector_Intrinsics_vec128_rotate_right32(wv_a1[0U], r01);
-    Lib_IntVector_Intrinsics_vec128 *wv_a2 = b + c0 * (uint32_t)1U;
-    Lib_IntVector_Intrinsics_vec128 *wv_b2 = b + d10 * (uint32_t)1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_a2 = wv + c0 * (uint32_t)1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_b2 = wv + d10 * (uint32_t)1U;
     wv_a2[0U] = Lib_IntVector_Intrinsics_vec128_add32(wv_a2[0U], wv_b2[0U]);
     wv_a2[0U] = Lib_IntVector_Intrinsics_vec128_add32(wv_a2[0U], zz0);
-    Lib_IntVector_Intrinsics_vec128 *wv_a3 = b + b14 * (uint32_t)1U;
-    Lib_IntVector_Intrinsics_vec128 *wv_b3 = b + c0 * (uint32_t)1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_a3 = wv + b4 * (uint32_t)1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_b3 = wv + c0 * (uint32_t)1U;
     wv_a3[0U] = Lib_IntVector_Intrinsics_vec128_xor(wv_a3[0U], wv_b3[0U]);
     wv_a3[0U] = Lib_IntVector_Intrinsics_vec128_rotate_right32(wv_a3[0U], r11);
-    Lib_IntVector_Intrinsics_vec128 *wv_a4 = b + a * (uint32_t)1U;
-    Lib_IntVector_Intrinsics_vec128 *wv_b4 = b + b14 * (uint32_t)1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_a4 = wv + a * (uint32_t)1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_b4 = wv + b4 * (uint32_t)1U;
     wv_a4[0U] = Lib_IntVector_Intrinsics_vec128_add32(wv_a4[0U], wv_b4[0U]);
     wv_a4[0U] = Lib_IntVector_Intrinsics_vec128_add32(wv_a4[0U], y[0U]);
-    Lib_IntVector_Intrinsics_vec128 *wv_a5 = b + d10 * (uint32_t)1U;
-    Lib_IntVector_Intrinsics_vec128 *wv_b5 = b + a * (uint32_t)1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_a5 = wv + d10 * (uint32_t)1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_b5 = wv + a * (uint32_t)1U;
     wv_a5[0U] = Lib_IntVector_Intrinsics_vec128_xor(wv_a5[0U], wv_b5[0U]);
     wv_a5[0U] = Lib_IntVector_Intrinsics_vec128_rotate_right32(wv_a5[0U], r21);
-    Lib_IntVector_Intrinsics_vec128 *wv_a6 = b + c0 * (uint32_t)1U;
-    Lib_IntVector_Intrinsics_vec128 *wv_b6 = b + d10 * (uint32_t)1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_a6 = wv + c0 * (uint32_t)1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_b6 = wv + d10 * (uint32_t)1U;
     wv_a6[0U] = Lib_IntVector_Intrinsics_vec128_add32(wv_a6[0U], wv_b6[0U]);
     wv_a6[0U] = Lib_IntVector_Intrinsics_vec128_add32(wv_a6[0U], zz0);
-    Lib_IntVector_Intrinsics_vec128 *wv_a7 = b + b14 * (uint32_t)1U;
-    Lib_IntVector_Intrinsics_vec128 *wv_b7 = b + c0 * (uint32_t)1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_a7 = wv + b4 * (uint32_t)1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_b7 = wv + c0 * (uint32_t)1U;
     wv_a7[0U] = Lib_IntVector_Intrinsics_vec128_xor(wv_a7[0U], wv_b7[0U]);
     wv_a7[0U] = Lib_IntVector_Intrinsics_vec128_rotate_right32(wv_a7[0U], r31);
-    Lib_IntVector_Intrinsics_vec128 *r12 = b + (uint32_t)1U * (uint32_t)1U;
-    Lib_IntVector_Intrinsics_vec128 *r22 = b + (uint32_t)2U * (uint32_t)1U;
-    Lib_IntVector_Intrinsics_vec128 *r32 = b + (uint32_t)3U * (uint32_t)1U;
+    Lib_IntVector_Intrinsics_vec128 *r12 = wv + (uint32_t)1U * (uint32_t)1U;
+    Lib_IntVector_Intrinsics_vec128 *r22 = wv + (uint32_t)2U * (uint32_t)1U;
+    Lib_IntVector_Intrinsics_vec128 *r32 = wv + (uint32_t)3U * (uint32_t)1U;
     Lib_IntVector_Intrinsics_vec128 v00 = r12[0U];
     Lib_IntVector_Intrinsics_vec128
     v1 =
@@ -216,7 +213,7 @@ blake2s_update_block(
         ((uint32_t)3U + (uint32_t)3U) % (uint32_t)4U);
     r32[0U] = v11;
     uint32_t a0 = (uint32_t)0U;
-    uint32_t b1 = (uint32_t)1U;
+    uint32_t b = (uint32_t)1U;
     uint32_t c = (uint32_t)2U;
     uint32_t d1 = (uint32_t)3U;
     uint32_t r0 = Hacl_Impl_Blake2_Constants_rTable_S[0U];
@@ -224,41 +221,41 @@ blake2s_update_block(
     uint32_t r23 = Hacl_Impl_Blake2_Constants_rTable_S[2U];
     uint32_t r33 = Hacl_Impl_Blake2_Constants_rTable_S[3U];
     Lib_IntVector_Intrinsics_vec128 zz = Lib_IntVector_Intrinsics_vec128_zero;
-    Lib_IntVector_Intrinsics_vec128 *wv_a = b + a0 * (uint32_t)1U;
-    Lib_IntVector_Intrinsics_vec128 *wv_b8 = b + b1 * (uint32_t)1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_a = wv + a0 * (uint32_t)1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_b8 = wv + b * (uint32_t)1U;
     wv_a[0U] = Lib_IntVector_Intrinsics_vec128_add32(wv_a[0U], wv_b8[0U]);
     wv_a[0U] = Lib_IntVector_Intrinsics_vec128_add32(wv_a[0U], z[0U]);
-    Lib_IntVector_Intrinsics_vec128 *wv_a8 = b + d1 * (uint32_t)1U;
-    Lib_IntVector_Intrinsics_vec128 *wv_b9 = b + a0 * (uint32_t)1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_a8 = wv + d1 * (uint32_t)1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_b9 = wv + a0 * (uint32_t)1U;
     wv_a8[0U] = Lib_IntVector_Intrinsics_vec128_xor(wv_a8[0U], wv_b9[0U]);
     wv_a8[0U] = Lib_IntVector_Intrinsics_vec128_rotate_right32(wv_a8[0U], r0);
-    Lib_IntVector_Intrinsics_vec128 *wv_a9 = b + c * (uint32_t)1U;
-    Lib_IntVector_Intrinsics_vec128 *wv_b10 = b + d1 * (uint32_t)1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_a9 = wv + c * (uint32_t)1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_b10 = wv + d1 * (uint32_t)1U;
     wv_a9[0U] = Lib_IntVector_Intrinsics_vec128_add32(wv_a9[0U], wv_b10[0U]);
     wv_a9[0U] = Lib_IntVector_Intrinsics_vec128_add32(wv_a9[0U], zz);
-    Lib_IntVector_Intrinsics_vec128 *wv_a10 = b + b1 * (uint32_t)1U;
-    Lib_IntVector_Intrinsics_vec128 *wv_b11 = b + c * (uint32_t)1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_a10 = wv + b * (uint32_t)1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_b11 = wv + c * (uint32_t)1U;
     wv_a10[0U] = Lib_IntVector_Intrinsics_vec128_xor(wv_a10[0U], wv_b11[0U]);
     wv_a10[0U] = Lib_IntVector_Intrinsics_vec128_rotate_right32(wv_a10[0U], r1);
-    Lib_IntVector_Intrinsics_vec128 *wv_a11 = b + a0 * (uint32_t)1U;
-    Lib_IntVector_Intrinsics_vec128 *wv_b12 = b + b1 * (uint32_t)1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_a11 = wv + a0 * (uint32_t)1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_b12 = wv + b * (uint32_t)1U;
     wv_a11[0U] = Lib_IntVector_Intrinsics_vec128_add32(wv_a11[0U], wv_b12[0U]);
     wv_a11[0U] = Lib_IntVector_Intrinsics_vec128_add32(wv_a11[0U], w[0U]);
-    Lib_IntVector_Intrinsics_vec128 *wv_a12 = b + d1 * (uint32_t)1U;
-    Lib_IntVector_Intrinsics_vec128 *wv_b13 = b + a0 * (uint32_t)1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_a12 = wv + d1 * (uint32_t)1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_b13 = wv + a0 * (uint32_t)1U;
     wv_a12[0U] = Lib_IntVector_Intrinsics_vec128_xor(wv_a12[0U], wv_b13[0U]);
     wv_a12[0U] = Lib_IntVector_Intrinsics_vec128_rotate_right32(wv_a12[0U], r23);
-    Lib_IntVector_Intrinsics_vec128 *wv_a13 = b + c * (uint32_t)1U;
-    Lib_IntVector_Intrinsics_vec128 *wv_b14 = b + d1 * (uint32_t)1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_a13 = wv + c * (uint32_t)1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_b14 = wv + d1 * (uint32_t)1U;
     wv_a13[0U] = Lib_IntVector_Intrinsics_vec128_add32(wv_a13[0U], wv_b14[0U]);
     wv_a13[0U] = Lib_IntVector_Intrinsics_vec128_add32(wv_a13[0U], zz);
-    Lib_IntVector_Intrinsics_vec128 *wv_a14 = b + b1 * (uint32_t)1U;
-    Lib_IntVector_Intrinsics_vec128 *wv_b = b + c * (uint32_t)1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_a14 = wv + b * (uint32_t)1U;
+    Lib_IntVector_Intrinsics_vec128 *wv_b = wv + c * (uint32_t)1U;
     wv_a14[0U] = Lib_IntVector_Intrinsics_vec128_xor(wv_a14[0U], wv_b[0U]);
     wv_a14[0U] = Lib_IntVector_Intrinsics_vec128_rotate_right32(wv_a14[0U], r33);
-    Lib_IntVector_Intrinsics_vec128 *r13 = b + (uint32_t)1U * (uint32_t)1U;
-    Lib_IntVector_Intrinsics_vec128 *r2 = b + (uint32_t)2U * (uint32_t)1U;
-    Lib_IntVector_Intrinsics_vec128 *r3 = b + (uint32_t)3U * (uint32_t)1U;
+    Lib_IntVector_Intrinsics_vec128 *r13 = wv + (uint32_t)1U * (uint32_t)1U;
+    Lib_IntVector_Intrinsics_vec128 *r2 = wv + (uint32_t)2U * (uint32_t)1U;
+    Lib_IntVector_Intrinsics_vec128 *r3 = wv + (uint32_t)3U * (uint32_t)1U;
     Lib_IntVector_Intrinsics_vec128 v0 = r13[0U];
     Lib_IntVector_Intrinsics_vec128
     v12 =
@@ -289,16 +286,14 @@ blake2s_update_block(
   }
   Lib_IntVector_Intrinsics_vec128 *s0 = hash + (uint32_t)0U * (uint32_t)1U;
   Lib_IntVector_Intrinsics_vec128 *s1 = hash + (uint32_t)1U * (uint32_t)1U;
-  Lib_IntVector_Intrinsics_vec128 *r0 = b + (uint32_t)0U * (uint32_t)1U;
-  Lib_IntVector_Intrinsics_vec128 *r1 = b + (uint32_t)1U * (uint32_t)1U;
-  Lib_IntVector_Intrinsics_vec128 *r2 = b + (uint32_t)2U * (uint32_t)1U;
-  Lib_IntVector_Intrinsics_vec128 *r3 = b + (uint32_t)3U * (uint32_t)1U;
+  Lib_IntVector_Intrinsics_vec128 *r0 = wv + (uint32_t)0U * (uint32_t)1U;
+  Lib_IntVector_Intrinsics_vec128 *r1 = wv + (uint32_t)1U * (uint32_t)1U;
+  Lib_IntVector_Intrinsics_vec128 *r2 = wv + (uint32_t)2U * (uint32_t)1U;
+  Lib_IntVector_Intrinsics_vec128 *r3 = wv + (uint32_t)3U * (uint32_t)1U;
   s0[0U] = Lib_IntVector_Intrinsics_vec128_xor(s0[0U], r0[0U]);
   s0[0U] = Lib_IntVector_Intrinsics_vec128_xor(s0[0U], r2[0U]);
   s1[0U] = Lib_IntVector_Intrinsics_vec128_xor(s1[0U], r1[0U]);
   s1[0U] = Lib_IntVector_Intrinsics_vec128_xor(s1[0U], r3[0U]);
-  for (uint32_t _i = 0U; _i < (uint32_t)4U * (uint32_t)1U; ++_i)
-    b[_i] = Lib_IntVector_Intrinsics_vec128_zero;
 }
 
 /* SNIPPET_END: blake2s_update_block */
@@ -315,10 +310,12 @@ Hacl_Blake2s_128_blake2s(
   uint8_t *k
 )
 {
-  KRML_CHECK_SIZE(sizeof (Lib_IntVector_Intrinsics_vec128), (uint32_t)4U * (uint32_t)1U);
-  Lib_IntVector_Intrinsics_vec128 h[(uint32_t)4U * (uint32_t)1U];
-  for (uint32_t _i = 0U; _i < (uint32_t)4U * (uint32_t)1U; ++_i)
-    h[_i] = Lib_IntVector_Intrinsics_vec128_zero;
+  uint32_t stlen = (uint32_t)4U * (uint32_t)1U;
+  Lib_IntVector_Intrinsics_vec128 stzero = Lib_IntVector_Intrinsics_vec128_zero;
+  KRML_CHECK_SIZE(sizeof (Lib_IntVector_Intrinsics_vec128), stlen);
+  Lib_IntVector_Intrinsics_vec128 b[stlen];
+  for (uint32_t _i = 0U; _i < stlen; ++_i)
+    b[_i] = stzero;
   uint64_t prev0;
   if (kk == (uint32_t)0U)
   {
@@ -328,11 +325,15 @@ Hacl_Blake2s_128_blake2s(
   {
     prev0 = (uint64_t)(uint32_t)64U;
   }
-  uint8_t b0[64U] = { 0U };
-  Lib_IntVector_Intrinsics_vec128 *r0 = h + (uint32_t)0U * (uint32_t)1U;
-  Lib_IntVector_Intrinsics_vec128 *r1 = h + (uint32_t)1U * (uint32_t)1U;
-  Lib_IntVector_Intrinsics_vec128 *r2 = h + (uint32_t)2U * (uint32_t)1U;
-  Lib_IntVector_Intrinsics_vec128 *r3 = h + (uint32_t)3U * (uint32_t)1U;
+  KRML_CHECK_SIZE(sizeof (Lib_IntVector_Intrinsics_vec128), stlen);
+  Lib_IntVector_Intrinsics_vec128 b1[stlen];
+  for (uint32_t _i = 0U; _i < stlen; ++_i)
+    b1[_i] = stzero;
+  uint8_t b20[64U] = { 0U };
+  Lib_IntVector_Intrinsics_vec128 *r0 = b + (uint32_t)0U * (uint32_t)1U;
+  Lib_IntVector_Intrinsics_vec128 *r1 = b + (uint32_t)1U * (uint32_t)1U;
+  Lib_IntVector_Intrinsics_vec128 *r2 = b + (uint32_t)2U * (uint32_t)1U;
+  Lib_IntVector_Intrinsics_vec128 *r3 = b + (uint32_t)3U * (uint32_t)1U;
   uint32_t iv0 = Hacl_Impl_Blake2_Constants_ivTable_S[0U];
   uint32_t iv1 = Hacl_Impl_Blake2_Constants_ivTable_S[1U];
   uint32_t iv2 = Hacl_Impl_Blake2_Constants_ivTable_S[2U];
@@ -349,47 +350,56 @@ Hacl_Blake2s_128_blake2s(
   r1[0U] = Lib_IntVector_Intrinsics_vec128_load32s(iv4, iv5, iv6, iv7);
   if (!(kk == (uint32_t)0U))
   {
-    memcpy(b0, k, kk * sizeof (k[0U]));
+    memcpy(b20, k, kk * sizeof (k[0U]));
     uint64_t totlen = (uint64_t)(uint32_t)0U + (uint64_t)(uint32_t)64U;
-    uint8_t *b1 = b0 + (uint32_t)0U * (uint32_t)64U;
-    blake2s_update_block(h, false, totlen, b1);
+    uint8_t *b3 = b20 + (uint32_t)0U * (uint32_t)64U;
+    blake2s_update_block(b1, b, false, totlen, b3);
   }
-  memset(b0, 0U, (uint32_t)64U * sizeof (b0[0U]));
-  uint32_t nb = ll / (uint32_t)64U;
-  uint32_t rem1 = ll % (uint32_t)64U;
+  memset(b20, 0U, (uint32_t)64U * sizeof (b20[0U]));
+  uint32_t nb0 = ll / (uint32_t)64U;
+  uint32_t rem10 = ll % (uint32_t)64U;
   K___uint32_t_uint32_t scrut;
-  if (rem1 == (uint32_t)0U && nb > (uint32_t)0U)
+  if (rem10 == (uint32_t)0U && nb0 > (uint32_t)0U)
   {
-    uint32_t nb_ = nb - (uint32_t)1U;
+    uint32_t nb_ = nb0 - (uint32_t)1U;
     uint32_t rem_ = (uint32_t)64U;
     scrut = ((K___uint32_t_uint32_t){ .fst = nb_, .snd = rem_ });
   }
   else
   {
-    scrut = ((K___uint32_t_uint32_t){ .fst = nb, .snd = rem1 });
+    scrut = ((K___uint32_t_uint32_t){ .fst = nb0, .snd = rem10 });
   }
-  uint32_t nb0 = scrut.fst;
-  for (uint32_t i = (uint32_t)0U; i < nb0; i++)
+  uint32_t nb = scrut.fst;
+  uint32_t rem1 = scrut.snd;
+  for (uint32_t i = (uint32_t)0U; i < nb; i++)
   {
     uint64_t totlen = prev0 + (uint64_t)((i + (uint32_t)1U) * (uint32_t)64U);
-    uint8_t *b = d + i * (uint32_t)64U;
-    blake2s_update_block(h, false, totlen, b);
+    uint8_t *b2 = d + i * (uint32_t)64U;
+    blake2s_update_block(b1, b, false, totlen, b2);
   }
-  uint32_t rem2 = ll % (uint32_t)64U;
-  uint8_t *last1 = d + ll - rem2;
-  uint8_t last_block[64U] = { 0U };
-  memcpy(last_block, last1, rem2 * sizeof (last1[0U]));
+  uint8_t b21[64U] = { 0U };
+  uint8_t *last1 = d + ll - rem1;
+  memcpy(b21, last1, rem1 * sizeof (last1[0U]));
   uint64_t totlen = prev0 + (uint64_t)ll;
-  blake2s_update_block(h, true, totlen, last_block);
-  KRML_CHECK_SIZE(sizeof (uint8_t), (uint32_t)2U * (uint32_t)4U * (uint32_t)4U);
-  uint8_t b[(uint32_t)2U * (uint32_t)4U * (uint32_t)4U];
-  memset(b, 0U, (uint32_t)2U * (uint32_t)4U * (uint32_t)4U * sizeof (b[0U]));
-  Lib_IntVector_Intrinsics_vec128_store_le(b, (h + (uint32_t)0U * (uint32_t)1U)[0U]);
-  Lib_IntVector_Intrinsics_vec128_store_le(b + (uint32_t)4U * (uint32_t)4U,
-    (h + (uint32_t)1U * (uint32_t)1U)[0U]);
-  uint8_t *final = b;
+  blake2s_update_block(b1, b, true, totlen, b21);
+  memset(b21, 0U, (uint32_t)64U * sizeof (b21[0U]));
+  uint32_t double_row = (uint32_t)2U * (uint32_t)4U * (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint8_t), double_row);
+  uint8_t b2[double_row];
+  memset(b2, 0U, double_row * sizeof (b2[0U]));
+  uint8_t *first = b2;
+  uint8_t *second = b2 + (uint32_t)4U * (uint32_t)4U;
+  Lib_IntVector_Intrinsics_vec128 *row0 = b + (uint32_t)0U * (uint32_t)1U;
+  Lib_IntVector_Intrinsics_vec128 *row1 = b + (uint32_t)1U * (uint32_t)1U;
+  Lib_IntVector_Intrinsics_vec128_store_le(first, row0[0U]);
+  Lib_IntVector_Intrinsics_vec128_store_le(second, row1[0U]);
+  uint8_t *final = b2;
   memcpy(output, final, nn * sizeof (final[0U]));
-  memset(b, 0U, (uint32_t)2U * (uint32_t)4U * (uint32_t)4U * sizeof (b[0U]));
+  memset(b2, 0U, double_row * sizeof (b2[0U]));
+  for (uint32_t _i = 0U; _i < stlen; ++_i)
+    b1[_i] = stzero;
+  for (uint32_t _i = 0U; _i < stlen; ++_i)
+    b[_i] = stzero;
 }
 
 /* SNIPPET_END: Hacl_Blake2s_128_blake2s */
