@@ -203,7 +203,7 @@ let ws a b ws =
       (**)   S.index (S.init (U32.v i) (SpecLemmas.ws a (block_words_be a h0 b))) (U32.v i - 2));
       (**) assert (t2 == SpecLemmas.ws a (block_words_be a h0 b) (U32.v i - 2));
 
-      let s1 = Spec._sigma1 a t2 in
+      let s1:uint_t (word_t a) SEC = Spec._sigma1 a t2 in
       let s0 = Spec._sigma0 a t15 in
       let w = s1 +. t7 +. s0 +. t16 in
       ws.(i) <- w;
@@ -270,7 +270,7 @@ let shuffle_core a block hash ws t =
 
   let w = ws.(t) in
 
-  let t1 = h0 +. (Spec._Sigma1 a e0) +. (Spec._Ch a e0 f0 g0) +. (k0 a).(t) +. w in
+  let t1:uint_t (word_t a) SEC = h0 +. (Spec._Sigma1 a e0) +. (Spec._Ch a e0 f0 g0) +. (k0 a).(t) +. w in
   let t2 = (Spec._Sigma0 a a0) +. (Spec._Maj a a0 b0 c0) in
 
   hash.(0ul) <- t1 +. t2;
@@ -366,9 +366,9 @@ let update a hash block =
   (**) let h2 = ST.get () in
   (**) assert (let block_w = words_of_bytes a #block_word_length (B.as_seq h1 block) in
 	       S.equal (B.as_seq h2 hash1) (Spec.shuffle a (B.as_seq h1 hash1) block_w));
-  C.Loops.in_place_map2 hash hash1 8ul ( +. );
+  C.Loops.in_place_map2 hash hash1 8ul ( (+. ) #(word_t a) #SEC );
   (**) let h3 = ST.get () in
-  (**) assert (S.equal (B.as_seq h3 hash) (Spec.update_pre a (B.as_seq h1 hash1) (B.as_seq h1 block)));
+  (**) assert (S.equal (B.as_seq h3 hash) (fst (Spec.update_pre a (B.as_seq h1 hash1, ()) (B.as_seq h1 block))));
   ST.pop_frame();
   (**) reveal_opaque (`%Spec.update) Spec.update
 
