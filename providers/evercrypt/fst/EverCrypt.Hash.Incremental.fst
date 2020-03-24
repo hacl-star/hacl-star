@@ -74,7 +74,7 @@ let invariant_s #a h s =
   S.length blocks + S.length rest = U64.v total_len /\
   S.length seen = U64.v total_len /\
   U64.v total_len < pow2 61 /\
-  S.equal (Hash.repr hash_state h) (Spec.Agile.Hash.update_multi a (Spec.Agile.Hash.init a) blocks) /\
+  S.equal (fst (Hash.repr hash_state h)) (fst (Spec.Agile.Hash.update_multi a (Spec.Agile.Hash.init a) blocks)) /\
   S.equal (S.slice (B.as_seq h buf_) 0 (U64.v total_len % block_length a)) rest
 
 #push-options "--max_ifuel 1"
@@ -173,7 +173,7 @@ let create_in a r =
   p
 #pop-options
 
-#push-options "--z3rlimit 100"
+#push-options "--z3rlimit 100 --fuel 0 --ifuel 1"
 
 let init a s =
   let open LowStar.BufferOps in
@@ -369,7 +369,7 @@ let update_small a p data len =
     S.length blocks + S.length rest = U64.v total_len /\
     S.length b = U64.v total_len /\
     U64.v total_len < pow2 61 /\
-    S.equal (Hash.repr hash_state h2) (Spec.Agile.Hash.update_multi a (Spec.Agile.Hash.init a) blocks) /\
+    S.equal (fst (Hash.repr hash_state h2)) (fst (Spec.Agile.Hash.update_multi a (Spec.Agile.Hash.init a) blocks)) /\
     S.equal (S.slice (B.as_seq h2 buf) 0 (U64.v total_len % block_length a)) rest
     );
   assert (hashed #a h2 p `S.equal` (S.append (G.reveal seen) (B.as_seq h0 data)));
@@ -450,7 +450,7 @@ let split_at_last_blocks (a: Hash.alg) (b: bytes) (d: bytes): Lemma
     blocks'';
   }
 
-#push-options "--z3rlimit 50"
+#push-options "--z3rlimit 50 --fuel 0 --ifuel 1"
 val update_empty_buf:
   a:e_alg -> (
   let a = G.reveal a in
@@ -523,7 +523,7 @@ let update_empty_buf a p data len =
 
 
 /// Case 3: we are given just enough data to end up on the boundary
-#push-options "--z3rlimit 200"
+#push-options "--z3rlimit 200 --fuel 0 --ifuel 1"
 val update_round:
   a:e_alg -> (
   let a = G.reveal a in
@@ -577,29 +577,29 @@ let update_round a p data len =
   (
     let open Spec.Agile.Hash in
     let blocks, rest = split_at_last a (G.reveal seen) in
-    assert (S.equal (Hash.repr hash_state h2)
-      (update_multi a (Hash.repr hash_state h1) (B.as_seq h1 buf0)));
+    assert (S.equal (fst (Hash.repr hash_state h2))
+      (fst (update_multi a (Hash.repr hash_state h1) (B.as_seq h1 buf0))));
     assert (S.equal (B.as_seq h0 buf1) (B.as_seq h1 buf1));
     assert (S.equal rest (B.as_seq h1 buf1));
     assert (S.equal (B.as_seq h0 data) (B.as_seq h1 data));
     assert (S.equal (B.as_seq h1 buf0) (S.append (B.as_seq h1 buf1) (B.as_seq h1 data)));
-    assert (S.equal (Hash.repr hash_state h2)
-      (update_multi a (Spec.Agile.Hash.init a)
-        (S.append blocks (B.as_seq h1 buf0))));
-    assert (S.equal (Hash.repr hash_state h2)
-      (update_multi a (Spec.Agile.Hash.init a)
-        (S.append blocks (S.append (B.as_seq h1 buf1) (B.as_seq h1 data)))));
+    assert (S.equal (fst (Hash.repr hash_state h2))
+      (fst (update_multi a (Spec.Agile.Hash.init a)
+        (S.append blocks (B.as_seq h1 buf0)))));
+    assert (S.equal (fst (Hash.repr hash_state h2))
+      (fst (update_multi a (Spec.Agile.Hash.init a)
+        (S.append blocks (S.append (B.as_seq h1 buf1) (B.as_seq h1 data))))));
     S.append_assoc blocks (B.as_seq h1 buf1) (B.as_seq h1 data);
-    assert (S.equal (Hash.repr hash_state h2)
-      (update_multi a (Spec.Agile.Hash.init a)
-        (S.append (S.append blocks (B.as_seq h1 buf1)) (B.as_seq h1 data))));
+    assert (S.equal (fst (Hash.repr hash_state h2))
+      (fst (update_multi a (Spec.Agile.Hash.init a)
+        (S.append (S.append blocks (B.as_seq h1 buf1)) (B.as_seq h1 data)))));
     assert (S.equal (S.append blocks rest) (G.reveal seen));
-    assert (S.equal (Hash.repr hash_state h2)
-      (update_multi a (Spec.Agile.Hash.init a)
-        (S.append (G.reveal seen) (B.as_seq h1 data))));
-    assert (S.equal (Hash.repr hash_state h2)
-      (update_multi a (Spec.Agile.Hash.init a)
-        (S.append (G.reveal seen) (B.as_seq h0 data))));
+    assert (S.equal (fst (Hash.repr hash_state h2))
+      (fst (update_multi a (Spec.Agile.Hash.init a)
+        (S.append (G.reveal seen) (B.as_seq h1 data)))));
+    assert (S.equal (fst (Hash.repr hash_state h2))
+      (fst (update_multi a (Spec.Agile.Hash.init a)
+        (S.append (G.reveal seen) (B.as_seq h0 data)))));
     split_at_last_block a (G.reveal seen) (B.as_seq h0 data);
     let blocks', rest' = split_at_last a (S.append (G.reveal seen) (B.as_seq h0 data)) in
     assert (S.equal rest' S.empty);
@@ -662,7 +662,7 @@ let total_len_leq_max_input_length
   | SHA2_384 | SHA2_512 -> assert_norm (pow2 61 < pow2 125 - 1)
 
 #restart-solver
-#reset-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 1"
 inline_for_extraction noextract
 let mk_finish a p dst =
   let open LowStar.BufferOps in

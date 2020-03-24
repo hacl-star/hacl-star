@@ -72,7 +72,7 @@ let invariant_s #a (s: state_s a) h =
 
 let repr #a s h: GTot _ =
   let s = B.get h s 0 in
-  B.as_seq h (p s)
+  B.as_seq h (p s), ()
 
 let alg_of_state a s =
   let open LowStar.BufferOps in
@@ -85,7 +85,7 @@ let alg_of_state a s =
   | SHA2_512_s _ -> SHA2_512
 
 let repr_eq (#a:alg) (r1 r2: Spec.Hash.Definitions.words_state a) =
-  Seq.equal r1 r2
+  Seq.equal (fst r1) (fst r2) /\ snd r1 == snd r2
 
 let fresh_is_disjoint l1 l2 h0 h1 = ()
 
@@ -123,6 +123,8 @@ let create_in a r =
 let create a =
   create_in a HS.root
 
+#push-options "--ifuel 1"
+
 let init #a s =
   match !*s with
   | MD5_s p -> Hacl.Hash.MD5.legacy_init p
@@ -131,6 +133,8 @@ let init #a s =
   | SHA2_256_s p -> Hacl.Hash.SHA2.init_256 p
   | SHA2_384_s p -> Hacl.Hash.SHA2.init_384 p
   | SHA2_512_s p -> Hacl.Hash.SHA2.init_512 p
+
+#pop-options
 
 friend Vale.SHA.SHA_helpers
 
@@ -151,12 +155,13 @@ let update_multi_256 s blocks n =
 
 inline_for_extraction noextract
 let update_multi_224 s blocks n =
+  assert_norm (words_state SHA2_224 == words_state SHA2_256);
   let h0 = ST.get () in
-  Spec.SHA2.Lemmas.update_multi_224_256 (B.as_seq h0 s) (B.as_seq h0 blocks);
+  Spec.SHA2.Lemmas.update_multi_224_256 (B.as_seq h0 s, ()) (B.as_seq h0 blocks);
   update_multi_256 s blocks n
 
 // Need to unroll the definition of update_multi once to prove that it's update
-#push-options "--max_fuel 1"
+#push-options "--max_fuel 1 --ifuel 1"
 let update #a s block =
   match !*s with
   | MD5_s p -> Hacl.Hash.MD5.legacy_update p block
@@ -166,6 +171,8 @@ let update #a s block =
   | SHA2_384_s p -> Hacl.Hash.SHA2.update_384 p block
   | SHA2_512_s p -> Hacl.Hash.SHA2.update_512 p block
 #pop-options
+
+#push-options "--ifuel 1"
 
 let update_multi #a s blocks len =
   match !*s with
@@ -188,12 +195,15 @@ let update_multi #a s blocks len =
       let n = len / block_len SHA2_512 in
       Hacl.Hash.SHA2.update_multi_512 p blocks n
 
+#pop-options
+
 // Re-using the higher-order stateful combinator to get an instance of
 // update_last that is capable of calling Vale under the hood
 let update_last_256 s prev_len input input_len =
   Hacl.Hash.MD.mk_update_last SHA2_256 update_multi_256 Hacl.Hash.SHA2.pad_256 s prev_len input input_len
 
 let update_last_224 s prev_len input input_len =
+  assert_norm (words_state SHA2_224 == words_state SHA2_256);
   [@inline_let]
   let l x y:
     Lemma
@@ -223,9 +233,9 @@ let update_last_st (#a:e_alg) =
   (ensures fun h0 _ h1 ->
     B.(modifies (loc_buffer p) h0 h1) /\
     (B.length last + Seq.length (Spec.Hash.PadFinish.pad a (v total_len))) % block_length a = 0 /\
-    B.as_seq h1 p ==
-      Spec.Agile.Hash.update_multi a (B.as_seq h0 p)
-        (Seq.append (B.as_seq h0 last) (Spec.Hash.PadFinish.pad a (v total_len))))
+    B.as_seq h1 p == fst (
+      Spec.Agile.Hash.update_multi a (B.as_seq h0 p, ())
+        (Seq.append (B.as_seq h0 last) (Spec.Hash.PadFinish.pad a (v total_len)))))
 
 inline_for_extraction
 val update_last_64 (a: e_alg{ G.reveal a <> SHA2_384 /\ G.reveal a <> SHA2_512 })
@@ -249,7 +259,7 @@ let update_last_128 a update_last p last total_len =
   update_last p prev_len last (Int.Cast.Full.uint64_to_uint32 input_len)
 #pop-options
 
-#push-options "--z3rlimit 50"
+#push-options "--z3rlimit 50 --ifuel 1"
 let update_last #a s last total_len =
   match !*s with
   | MD5_s p ->
@@ -266,6 +276,8 @@ let update_last #a s last total_len =
       update_last_128 a Hacl.Hash.SHA2.update_last_512 p last total_len
 #pop-options
 
+#push-options "--ifuel 1"
+
 let finish #a s dst =
   match !*s with
   | MD5_s p -> Hacl.Hash.MD5.legacy_finish p dst
@@ -274,6 +286,8 @@ let finish #a s dst =
   | SHA2_256_s p -> Hacl.Hash.SHA2.finish_256 p dst
   | SHA2_384_s p -> Hacl.Hash.SHA2.finish_384 p dst
   | SHA2_512_s p -> Hacl.Hash.SHA2.finish_512 p dst
+
+#pop-options
 
 let free #ea s =
   begin match !*s with
@@ -285,6 +299,8 @@ let free #ea s =
     | SHA2_512_s p -> B.free p
   end;
   B.free s
+
+#push-options "--ifuel 1"
 
 let copy #a s_src s_dst =
   match !*s_src with
@@ -318,6 +334,8 @@ let copy #a s_src s_dst =
       let s_dst: state SHA2_512 = s_dst in
       let p_dst = SHA2_512_s?.p !*s_dst in
       B.blit p_src 0ul p_dst 0ul 8ul
+
+#pop-options
 
 // A full one-shot hash that relies on vale at each multiplexing point
 let hash_256 input input_len dst =
