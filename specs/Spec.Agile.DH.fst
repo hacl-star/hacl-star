@@ -30,14 +30,6 @@ let prime (a:algorithm) =
   | DH_Curve25519 -> Spec.Curve25519.prime
   | DH_P256 -> Spec.P256.prime
 
-// BB. 2019/10/23: This needs confirmation !
-inline_for_extraction
-let order (a:algorithm) =
-  match a with
-  | DH_Curve25519 -> pow2 252 + 0x14def9dea2f79cd65812631a5cf5d3ed
-  | DH_P256 -> pow2 256 - 432420386565659656852420866394968145599
-
-
 /// Types
 
 type scalar (a:algorithm) = lbytes (size_key a)
