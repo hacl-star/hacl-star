@@ -67,8 +67,8 @@ let alloca_st (a: hash_alg) = unit -> ST.StackInline (state a)
     M.(modifies M.loc_none h0 h1) /\
     B.live h1 s /\
     B.frameOf s == HS.get_tip h0 /\
-    Seq.equal (B.as_seq h1 s) (Spec.Agile.Hash.init a) /\
-    LowStar.Monotonic.Buffer.alloc_post_mem_common s h0 h1 (Spec.Agile.Hash.init a)))
+    Seq.equal (B.as_seq h1 s) (fst (Spec.Agile.Hash.init a)) /\
+    LowStar.Monotonic.Buffer.alloc_post_mem_common s h0 h1 (fst (Spec.Agile.Hash.init a))))
 
 inline_for_extraction
 let init_st (a: hash_alg) = s:state a -> ST.Stack unit
@@ -76,7 +76,7 @@ let init_st (a: hash_alg) = s:state a -> ST.Stack unit
     B.live h s))
   (ensures (fun h0 _ h1 ->
     M.(modifies (loc_buffer s) h0 h1) /\
-    Seq.equal (B.as_seq h1 s) (Spec.Agile.Hash.init a)))
+    Seq.equal (B.as_seq h1 s) (fst (Spec.Agile.Hash.init a))))
 
 inline_for_extraction
 let update_st (a: hash_alg) =
@@ -87,7 +87,7 @@ let update_st (a: hash_alg) =
       B.live h s /\ B.live h block /\ B.disjoint s block))
     (ensures (fun h0 _ h1 ->
       M.(modifies (loc_buffer s) h0 h1) /\
-      Seq.equal (B.as_seq h1 s) (Spec.Agile.Hash.update a (B.as_seq h0 s) (B.as_seq h0 block))))
+      Seq.equal (B.as_seq h1 s) (fst (Spec.Agile.Hash.update a (B.as_seq h0 s, ()) (B.as_seq h0 block)))))
 
 inline_for_extraction
 let pad_st (a: hash_alg) = len:len_t a -> dst:B.buffer uint8 ->
@@ -113,7 +113,7 @@ let update_multi_st (a: hash_alg) =
     (ensures (fun h0 _ h1 ->
       B.(modifies (loc_buffer s) h0 h1) /\
       Seq.equal (B.as_seq h1 s)
-        (Spec.Agile.Hash.update_multi a (B.as_seq h0 s) (B.as_seq h0 blocks))))
+        (fst (Spec.Agile.Hash.update_multi a (B.as_seq h0 s, ()) (B.as_seq h0 blocks)))))
 
 inline_for_extraction
 let update_last_st (a: hash_alg) =
@@ -127,7 +127,7 @@ let update_last_st (a: hash_alg) =
     (ensures (fun h0 _ h1 ->
       B.(modifies (loc_buffer s) h0 h1) /\
       Seq.equal (B.as_seq h1 s)
-        (Spec.Hash.Incremental.update_last a (B.as_seq h0 s) (len_v a prev_len) (B.as_seq h0 input))))
+        (fst (Spec.Hash.Incremental.update_last a (B.as_seq h0 s, ()) (len_v a prev_len) (B.as_seq h0 input)))))
 
 inline_for_extraction
 let finish_st (a: hash_alg) = s:state a -> dst:hash_t a -> ST.Stack unit
@@ -137,7 +137,7 @@ let finish_st (a: hash_alg) = s:state a -> dst:hash_t a -> ST.Stack unit
     B.live h dst))
   (ensures (fun h0 _ h1 ->
     M.(modifies (loc_buffer dst) h0 h1) /\
-    Seq.equal (B.as_seq h1 dst) (Spec.Hash.PadFinish.finish a (B.as_seq h0 s))))
+    Seq.equal (B.as_seq h1 dst) (Spec.Hash.PadFinish.finish a (B.as_seq h0 s, ()))))
 
 inline_for_extraction
 let hash_st (a: hash_alg) =
