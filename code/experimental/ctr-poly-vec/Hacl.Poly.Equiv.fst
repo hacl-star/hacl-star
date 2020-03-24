@@ -6,6 +6,7 @@ open Lib.Sequence
 open Lib.ByteSequence
 
 open Hacl.Poly
+open Hacl.Poly.Lemmas
 
 module Loops = Lib.LoopCombinators
 module PLoops = Lib.Sequence.Lemmas
@@ -21,9 +22,8 @@ val lemma_repeat_blocks1:
   -> inp:seq a
   -> f:(lseq a bs -> b -> b)
   -> l:(len:size_nat{len == length inp % bs} -> s:lseq a len -> b -> c)
-  -> init:b ->
-  Lemma (
-    let len = length inp in
+  -> init:b -> Lemma
+   (let len = length inp in
     let nb = len / bs in
     let rem = len % bs in
     let inp0 = Seq.slice inp 0 (nb * bs) in
@@ -33,8 +33,36 @@ val lemma_repeat_blocks1:
     let acc = l rem last acc in
     repeat_blocks #a #b bs inp f l init == acc)
 
-let lemma_repeat_blocks1 #a #b #c bs inp f l init = admit()
+let lemma_repeat_blocks1 #a #b #c bs inp f l init =
+  let len = length inp in
+  let nb = len / bs in
+  let rem = len % bs in
+  let inp0 = Seq.slice inp 0 (nb * bs) in
+  Math.Lemmas.cancel_mul_mod nb bs;
+  let acc = repeat_blocks_multi bs inp0 f init in
+  lemma_repeat_blocks_multi bs inp0 f init;
+  Math.Lemmas.cancel_mul_div nb bs;
+  assert (acc == Loops.repeati nb (repeat_blocks_f bs inp0 f nb) init);
 
+  let last = Seq.slice inp (nb * bs) len in
+  let acc_f = l rem last acc in
+
+  let rb = repeat_blocks #a #b bs inp f l init in
+  lemma_repeat_blocks #a #b bs inp f l init;
+  let acc1 = Loops.repeati nb (repeat_blocks_f bs inp f nb) init in
+  assert (rb == l rem last acc1);
+
+  let aux (i:nat{i < nb}) (acc:b) : Lemma
+    (repeat_blocks_f bs inp0 f nb i acc == repeat_blocks_f bs inp f nb i acc) =
+    Math.Lemmas.lemma_mult_le_right bs (i + 1) nb;
+    Seq.Properties.slice_slice inp 0 (nb * bs) (i * bs) (i * bs + bs) in
+
+  Classical.forall_intro_2 aux;
+  PLoops.repeati_extensionality nb (repeat_blocks_f bs inp f nb) (repeat_blocks_f bs inp0 f nb) init
+
+
+
+let lanes = w:size_pos{w * blocksize <= max_size_t}
 
 val repeat_blocks_multi_vec_equiv_pre_lemma: #w:lanes -> r:felem -> b:block_v w -> acc_v0:felem_v w -> Lemma
   (let pre = create w (pow_w w r) in

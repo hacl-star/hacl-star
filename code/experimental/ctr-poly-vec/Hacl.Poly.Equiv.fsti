@@ -13,5 +13,5 @@ open Hacl.Poly
 ///  Specification equivalence lemma
 ///
 
-val poly_equivalence: #w:lanes -> text:bytes{w * blocksize <= length text} -> acc:felem -> r:felem -> Lemma
+val poly_equivalence: #w:lanes{w > 0} -> text:bytes{w * blocksize <= length text} -> acc:felem -> r:felem -> Lemma
   (poly_update_v #w text acc r == poly_update text acc r)

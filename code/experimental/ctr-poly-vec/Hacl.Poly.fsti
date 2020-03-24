@@ -53,7 +53,7 @@ let poly_update (text:bytes) (acc:felem) (r:felem) : felem =
 ///  PolyxN
 ///
 
-let lanes = w:size_pos{w * blocksize <= max_size_t}
+let lanes = w:size_nat{w * blocksize <= max_size_t}
 
 type felem_v (w:lanes) = lseq felem w
 
@@ -68,13 +68,13 @@ let encode_v (#w:lanes) (b:block_v w) : felem_v w =
     let b_i = Lib.Sequence.sub b (i * blocksize) blocksize in
     encode b_i)
 
-let load_acc_v (#w:lanes) (b:block_v w) (acc:felem) : felem_v w =
+let load_acc_v (#w:lanes{0 < w}) (b:block_v w) (acc:felem) : felem_v w =
   let acc_v = create w zero in
   let acc_v = upd acc_v 0 acc in
   fadd_v acc_v (encode_v b)
 
-let rec pow_w (w:pos) (r:felem) : felem =
-  if w = 1 then r else r *% pow_w (w - 1) r
+let rec pow_w (w:nat) (r:felem) : felem =
+  if w = 0 then one else r *% pow_w (w - 1) r
 
 let fsum_f (#w:lanes) (x:felem_v w) (i:nat{i < w}) (acc:felem) : felem =
   fadd acc x.[i]
@@ -96,7 +96,7 @@ let poly_update_last_v (#w:lanes) (r:felem) (len:nat{len < w * blocksize}) (b:lb
   let acc = normalize_v r acc_v in
   poly_update b acc r
 
-let poly_update_v (#w:lanes) (text:bytes{w * blocksize <= length text}) (acc:felem) (r:felem) : felem =
+let poly_update_v (#w:lanes{w > 0}) (text:bytes{w * blocksize <= length text}) (acc:felem) (r:felem) : felem =
   let len = length text in
   let blocksize_v = w * blocksize in
   let text0 = Seq.slice text 0 blocksize_v in
@@ -110,15 +110,16 @@ let poly_update_v (#w:lanes) (text:bytes{w * blocksize <= length text}) (acc:fel
   acc_v
 
 ///
-///  Poly evaluation properties
+///  Poly semiring properties
 ///
 
-val load_acc_v_lemma: #w:lanes -> b:block_v w -> acc0:felem -> r:felem -> Lemma
-  (FStar.Math.Lemmas.cancel_mul_mod w blocksize;
-   normalize_v r (load_acc_v b acc0) == repeat_blocks_multi blocksize b (poly_update1 r) acc0)
+val fadd_identity: a:felem -> Lemma (zero +% a == a)
+val fadd_commutativity: a:felem -> b:felem -> Lemma (a +% b == b +% a)
+val fadd_associativity: a:felem -> b:felem -> c:felem -> Lemma (a +% b +% c == a +% (b +% c))
 
+val fmul_identity: a:felem -> Lemma (one *% a == a)
+val fmul_commutativity: a:felem -> b:felem -> Lemma (a *% b == b *% a)
+val fmul_associativity: a:felem -> b:felem -> c:felem -> Lemma (a *% b *% c == a *% (b *% c))
 
-val poly_update_nblocks_lemma: #w:lanes -> r:felem -> b:block_v w -> acc_v0:felem_v w -> Lemma
-  (let pre = create w (pow_w w r) in
-  FStar.Math.Lemmas.cancel_mul_mod w blocksize;
-  normalize_v r (poly_update_nblocks #w pre b acc_v0) == repeat_blocks_multi blocksize b (poly_update1 r) (normalize_v r acc_v0))
+val fmul_zero_l: a:felem -> Lemma (zero *% a == zero)
+val fmul_add_distr_l: a:felem -> b:felem -> c:felem -> Lemma (a *% (b +% c) == a *% b +% a *% c)
