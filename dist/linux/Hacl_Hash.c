@@ -76,9 +76,6 @@ void Hacl_Hash_MD5_legacy_hash(u8 *input, u32 input_len, u8 *dst)
   Hacl_Hash_Core_MD5_legacy_finish(s, dst);
 }
 
-/*
- Top-level constant arrays for the MD5 algorithm. 
-*/
 static u32
 _h0[4U] = { (u32)0x67452301U, (u32)0xefcdab89U, (u32)0x98badcfeU, (u32)0x10325476U };
 
@@ -1733,9 +1730,6 @@ void Hacl_Hash_SHA1_legacy_hash(u8 *input, u32 input_len, u8 *dst)
   Hacl_Hash_Core_SHA1_legacy_finish(s, dst);
 }
 
-/*
- Top-level constant arrays for the MD5 algorithm. 
-*/
 static u32
 _h00[5U] =
   { (u32)0x67452301U, (u32)0xefcdab89U, (u32)0x98badcfeU, (u32)0x10325476U, (u32)0xc3d2e1f0U };
