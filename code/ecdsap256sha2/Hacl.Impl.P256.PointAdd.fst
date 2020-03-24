@@ -115,8 +115,8 @@ let move_from_jacobian_coordinates u1 u2 s1 s2 p q tempBuffer =
    let z2Cube = sub tempBuffer (size 8) (size 4) in 
    let z1Cube = sub tempBuffer (size 12) (size 4) in  
 
-   montgomery_multiplication_buffer qZ qZ z2Square;
-   montgomery_multiplication_buffer pZ pZ z1Square;
+   montgomery_square_buffer qZ z2Square;
+   montgomery_square_buffer pZ z1Square;
    montgomery_multiplication_buffer z2Square qZ z2Cube;
    
    montgomery_multiplication_buffer z1Square pZ z1Cube;
@@ -169,7 +169,7 @@ let compute_common_params_point_add h r uh hCube u1 u2 s1 s2 tempBuffer =
     let h1 = ST.get() in 
   p256_sub s2 s1 r; 
     let h2 = ST.get() in   
-  montgomery_multiplication_buffer h h temp;
+  montgomery_square_buffer h temp;
     let h3 = ST.get() in   
   montgomery_multiplication_buffer temp u1 uh;
   montgomery_multiplication_buffer temp h hCube;
@@ -198,7 +198,7 @@ let computeX3_point_add x3 hCube uh r tempBuffer =
   let rSquare = sub tempBuffer (size 0) (size 4) in 
   let rH = sub tempBuffer (size 4) (size 4) in 
   let twoUh = sub tempBuffer (size 8) (size 4) in 
-  montgomery_multiplication_buffer r r rSquare; 
+  montgomery_square_buffer r rSquare; 
     let h1 = ST.get() in 
   p256_sub rSquare hCube rH;
     let h2 = ST.get() in 

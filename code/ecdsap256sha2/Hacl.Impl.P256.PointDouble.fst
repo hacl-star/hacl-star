@@ -68,13 +68,13 @@ let point_double_compute_s_m p s m tempBuffer =
     let threeXx = sub tempBuffer (size 20) (size 4) in 
 
       let h0 = ST.get() in 
-    montgomery_multiplication_buffer py py yy; 
+    montgomery_square_buffer py yy; 
     montgomery_multiplication_buffer px yy xyy;
 
     quatre pz zzzz; 
     multByMinusThree zzzz minThreeZzzz;
       let h1 = ST.get() in 
-    montgomery_multiplication_buffer px px xx;
+    montgomery_square_buffer px xx;
     multByThree xx threeXx;
     p256_add minThreeZzzz threeXx m;
     multByFour xyy s;
@@ -116,7 +116,7 @@ let point_double_compute_x3 x3 s m tempBuffer =
    let mm = sub tempBuffer (size 4) (size 4) in 
      let h0 = ST.get() in 
    multByTwo s twoS;
-   montgomery_multiplication_buffer m m mm;
+   montgomery_square_buffer m mm;
    p256_sub mm twoS x3; 
      lemma_mod_add_distr (-((2 * fromDomain_ (as_nat h0 s) % prime256))) (fromDomain_ (as_nat h0 m) * fromDomain_ (as_nat h0 m))
      prime256;
