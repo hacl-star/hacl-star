@@ -35,7 +35,7 @@ val fsqr_s:
     (requires fun h ->
       live h out /\ live h f1 /\ live h tmp /\
       (disjoint out f1 \/ out == f1) /\
-      (disjoint out tmp \/ out == tmp) /\
+      (disjoint out tmp) /\
       disjoint tmp f1 /\
       fsquare_times_inv h f1)
     (ensures  fun h0 _ h1 ->
@@ -64,7 +64,7 @@ val fmul_s:
       live h out /\ live h f1 /\ live h f2 /\ live h tmp /\
       (disjoint out f1 \/ out == f1) /\
       (disjoint out f2 \/ out == f2) /\
-      (disjoint out tmp \/ out == tmp) /\
+      (disjoint out tmp) /\
       (disjoint f1 f2 \/ f1 == f2) /\
       disjoint f1 tmp /\
       disjoint f2 tmp /\
@@ -182,7 +182,7 @@ val finv:
     (requires fun h0 ->
       live h0 o /\ live h0 i /\ live h0 tmp /\
       disjoint o i /\ disjoint i tmp /\
-      (disjoint o tmp \/ o == tmp) /\
+      (disjoint o tmp) /\
       fsquare_times_inv h0 i)
     (ensures  fun h0 _ h1 ->
       modifies (loc o |+| loc tmp) h0 h1 /\
