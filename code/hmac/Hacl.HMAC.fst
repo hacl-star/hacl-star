@@ -123,21 +123,23 @@ let block_len_as_len (a: hash_alg):
   | MD5 | SHA1 | SHA2_224 | SHA2_256 -> uint32_to_uint64 (D.block_len a)
   | SHA2_384 | SHA2_512 -> uint64_to_uint128 (uint32_to_uint64 (D.block_len a))
 
+#push-options "--ifuel 1"
+
 inline_for_extraction noextract
 let part1 a init update_multi update_last finish s key data len =
   (**) key_and_data_fits a;
   (**) let h0 = ST.get () in
   init s;
   (**) let h1 = ST.get () in
-  (**) assert (B.as_seq h1 s `Seq.equal` Spec.Agile.Hash.init a);
+  (**) assert (B.as_seq h1 s `Seq.equal` fst (Spec.Agile.Hash.init a));
   update_multi s key 1ul;
   (**) let h2 = ST.get () in
-  (**) assert (B.as_seq h2 s `Seq.equal` Spec.Agile.Hash.(update_multi a (init a) (B.as_seq h0 key)));
+  (**) assert (B.as_seq h2 s `Seq.equal` (fst Spec.Agile.Hash.(update_multi a (init a) (B.as_seq h0 key))));
   update_last s (block_len_as_len a) data len;
   (**) let h3 = ST.get () in
-  (**) assert (B.as_seq h3 s `Seq.equal`
+  (**) assert (B.as_seq h3 s `Seq.equal` fst (
     Spec.Hash.Incremental.update_last a
-      (Spec.Agile.Hash.(update_multi a (init a) (B.as_seq h0 key))) (block_length a) (B.as_seq h0 data));
+      (Spec.Agile.Hash.(update_multi a (init a) (B.as_seq h0 key))) (block_length a) (B.as_seq h0 data)));
   let dst = B.sub key 0ul (D.hash_len a) in
   finish s dst;
   (**) let h4 = ST.get () in
@@ -173,6 +175,8 @@ let part1 a init update_multi update_last finish s key data len =
     }
   end
 
+#pop-options
+
 inline_for_extraction noextract
 val part2:
   a: hash_alg ->
@@ -197,22 +201,22 @@ val part2:
       B.as_seq h1 dst `Seq.equal`
         Spec.Agile.Hash.hash a (S.append (B.as_seq h0 key) (B.as_seq h0 data)))
 
-#set-options "--z3rlimit 80"
+#push-options "--z3rlimit 80 --ifuel 1"
 inline_for_extraction noextract
 let part2 a init update_multi update_last finish s dst key data len =
   (**) key_and_data_fits a;
   (**) let h0 = ST.get () in
   init s;
   (**) let h1 = ST.get () in
-  (**) assert (B.as_seq h1 s `Seq.equal` Spec.Agile.Hash.init a);
+  (**) assert (B.as_seq h1 s `Seq.equal` fst (Spec.Agile.Hash.init a));
   update_multi s key 1ul;
   (**) let h2 = ST.get () in
-  (**) assert (B.as_seq h2 s `Seq.equal` Spec.Agile.Hash.(update_multi a (init a) (B.as_seq h0 key)));
+  (**) assert (B.as_seq h2 s `Seq.equal` fst Spec.Agile.Hash.(update_multi a (init a) (B.as_seq h0 key)));
   update_last s (block_len_as_len a) data len;
   (**) let h3 = ST.get () in
-  (**) assert (B.as_seq h3 s `Seq.equal`
+  (**) assert (B.as_seq h3 s `Seq.equal` fst (
     Spec.Hash.Incremental.update_last a
-      (Spec.Agile.Hash.(update_multi a (init a) (B.as_seq h0 key))) (block_length a) (B.as_seq h0 data));
+      (Spec.Agile.Hash.(update_multi a (init a) (B.as_seq h0 key))) (block_length a) (B.as_seq h0 data)));
   finish s dst;
   (**) let h4 = ST.get () in
   begin
@@ -246,6 +250,8 @@ let part2 a init update_multi update_last finish s dst key data len =
       hash a (S.append (B.as_seq h0 key) (B.as_seq h0 data));
     }
   end
+
+#pop-options
 
 let block_len_positive (a: hash_alg): Lemma (D.block_len a > 0ul) = ()
 let hash_lt_block (a: hash_alg): Lemma (hash_length a < block_length a) = ()
