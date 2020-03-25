@@ -1481,9 +1481,20 @@ let __CKS_GenerateKey d hSession pMechanism pTemplate =
   |Inr exp -> (|Inr exp, d|)
   
 
+val _CKS_GenerateKey: d: device -> 
+  hSession: _CK_SESSION_HANDLE -> 
+  pMechanism: _CK_MECHANISM -> 
+  pTemplate: seq _CK_ATTRIBUTE -> 
+    Tot(
+    (handler: result _CK_OBJECT_HANDLE) & 
+    (resultDevice : device)
+  )
 
 
+let _CKS_GenerateKey d hSession pMechanism pTemplate = 
+  __CKS_GenerateKey d hSession pMechanism pTemplate
 
+(*
 assume val _sign: pData: seq FStar.UInt8.t ->  pMechanism: _CK_MECHANISM_TYPE -> key: _CK_OBJECT_HANDLE -> 
 	pSignature: option (seq UInt8.t) ->
 	pSignatureLen : _CK_ULONG ->
