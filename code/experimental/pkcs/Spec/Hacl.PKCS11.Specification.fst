@@ -22,6 +22,7 @@ open Hacl.PKCS11.Types
 
 
 (* Zero-level types *)
+type uint8_t = FStar.UInt8.t 
 type uint32_t = a: nat {a < pow2 32}
 
 (* First-level types *)
@@ -177,6 +178,7 @@ type _CK_ATTRIBUTE_TYPE =
   |CKA_ALWAYS_AUTHENTICATE
   |CKA_CHECK_VALUE
   |CKA_EC_PARAMS 
+  |CKA_VALUE
   
   (* and much more *)
 
@@ -259,6 +261,7 @@ let _ck_attribute_get_type: _CK_ATTRIBUTE_TYPE -> Tot Type0 = function
   |CKA_SIGN_RECOVER -> bool
   |_ -> _CK_ULONG
   |CKA_EC_PARAMS -> _CK_ULONG
+  |CKA_VALUE -> uint8_t 
   
 
 
@@ -491,6 +494,12 @@ let getAttributesForType: t: _CK_OBJECT_CLASS -> option (seq _CK_ATTRIBUTE_TYPE)
     CKA_KEY_TYPE; CKA_ID; CKA_END_DATE; CKA_DERIVED; CKA_LOCAL; CKA_KEY_GEN_MECHANISM; CKA_ALLOWED_MECHANISMS; CKA_SENSITIVE; CKA_ENCRYPT; CKA_DECRYPT; CKA_SIGN; CKA_VERIFY; 
     CKA_WRAP; CKA_UNWRAP; CKA_EXTRACTABLE; CKA_ALWAYS_SENSITIVE; CKA_NEVER_EXTRACTABLE])
   |_ -> None
+
+
+val _CKO_SECRET_KEY_Constructor: attrs: seq _CK_ATTRIBUTE -> Tot _CKO_SECRET_KEY
+
+let _CKO_SECRET_KEY_Constructor attrs = 
+  SK (Key (Storage (O attrs)))
 
 
 val castKeyToSecretKey: k: key_object {isKeySecretKey k} -> Tot _CKO_SECRET_KEY
@@ -1212,6 +1221,16 @@ assume val lemma_count: #ks: seq key_object -> #ms: seq _CK_MECHANISM -> #supM: 
     (requires (forall (i: nat{i < Seq.length s}). sessionEqual (index s i) (index s1 i)))
     (ensures (count f s = count f1 s1))
 
+(* The size should be checked *)
+
+val deviceAddKey: d: device -> key: key_object -> Tot ((resultDevice: device) & (handler: _CK_OBJECT_HANDLE))
+
+let deviceAddKey d key = 
+  let keysUpdated = snoc d.keys key in 
+  let handler = length keysUpdated in 
+  let updatedDevice = Device keysUpdated d.mechanisms d.supportedMechanisms d.objects d.subSessions in 
+  (|updatedDevice,  handler|)
+
 
 val deviceAddSession: f: (#ks: seq key_object -> #ms: seq _CK_MECHANISM -> #supM: seq _CKS_MECHANISM_INFO -> subSession ks ms supM -> bool) -> 
   d: device{count f d.subSessions = 0} -> 
@@ -1302,18 +1321,18 @@ let _attributesTemplateComplete toSearchSequence toFinds =
   for_all (__attributesTemplateComplete toSearchSequence) toFinds 
 
 
-val combineAllAttributes: mechanism: _CK_MECHANISM -> attrs: seq _CK_ATTRIBUTE -> Tot (seq _CK_ATTRIBUTE)
+val combineAllAttributes: mechanism: _CK_MECHANISM_TYPE -> attrs: seq _CK_ATTRIBUTE -> Tot (seq _CK_ATTRIBUTE)
 
 let combineAllAttributes mechanism attrs  = 
   let defAttr = defaultAttributes in 
-  let mechanismAttributes = getAttributesByMechanism mechanism.mechanismID in 
+  let mechanismAttributes = getAttributesByMechanism mechanism in 
   append (append defaultAttributes mechanismAttributes) attrs
 
 
 val attributesTemplateComplete: t: _CK_OBJECT_CLASS ->  mechanism: _CK_MECHANISM -> attrs: seq _CK_ATTRIBUTE -> Tot bool
 
 let attributesTemplateComplete t mechanism attrs = 
-  let allAttributes = combineAllAttributes mechanism attrs in 
+  let allAttributes = combineAllAttributes mechanism.mechanismID attrs in 
   let getRequiredAttributes = getAttributesForType t in 
   match getRequiredAttributes with 
     |None -> false
@@ -1389,7 +1408,24 @@ let mechanismCreationSelect d m attrs =
     end
   | _ -> Inr CKR_MECHANISM_INVALID
     
- 
+
+(* This function takes all the provided attributes (the mechanism attributes, provided attributes and default one) and return the sequence of attributes that are required to construct the type *)
+
+val _getRequiredAttributes: attrs: seq _CK_ATTRIBUTE -> typeToReturn: _CK_ATTRIBUTE_TYPE -> Tot (a: _CK_ATTRIBUTE {a.aType == typeToReturn})
+
+let _getRequiredAttributes attrs typeToReturn = 
+  match find_l (fun x -> x.aType = typeToReturn) attrs with Some a -> a
+
+
+val getRequiredAttributes: t: _CK_OBJECT_CLASS -> attrs: seq _CK_ATTRIBUTE-> Tot (seq _CK_ATTRIBUTE)
+
+let getRequiredAttributes t attrs  = 
+  let requiredAttributes = getAttributesForType t in 
+  match requiredAttributes with 
+  |Some requiredAttributes -> 
+    map (_getRequiredAttributes attrs) requiredAttributes
+  |None -> Seq.empty
+
 
 (* CK_PKCS11_FUNCTION_INFO(C_GenerateKey)
 #ifdef CK_NEED_ARG_LIST
@@ -1436,8 +1472,12 @@ let __CKS_GenerateKey d hSession pMechanism pTemplate =
   match mechanism with 
   |Inl mechanism -> 
     let rawKey = mechanism () in 
-    let attributesToGive = getAttributesForType CKO_SECRET_KEY in 
-    (|Inr CKR_ARGUMENTS_BAD, d|)
+    let allExistingAttributes = combineAllAttributes pMechanism.mechanismID pTemplate in 
+    let requiredAttributes = getRequiredAttributes CKO_SECRET_KEY allExistingAttributes in 
+    let valueAttribute = A CKA_VALUE rawKey in 
+    let key = _CKO_SECRET_KEY_Constructor (snoc requiredAttributes valueAttribute) in 
+    let (|updatedDevice, handler|) = deviceAddKey d key.sk in 
+    (|Inl handler, updatedDevice|)
   |Inr exp -> (|Inr exp, d|)
   
 

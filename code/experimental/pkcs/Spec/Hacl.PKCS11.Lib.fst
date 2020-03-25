@@ -2,7 +2,7 @@ module Hacl.PKCS11.Lib
 
 open FStar.Seq
 
-
+(* It is the same function as in FStar.Seq.Properties -> to replace *)
 val for_all: #a: eqtype -> f: (a -> bool) -> s: seq a -> 
   Tot (r: bool {r ==> (forall (i: nat {i < Seq.length s}). f (index s i))})
     (decreases (Seq.length s))
