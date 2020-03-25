@@ -38,8 +38,9 @@ val ecp256dh_r:
     (ensures fun h0 r h1 ->
       let pubKeyX = gsub pubKey (size 0) (size 32) in
       let pubKeyY = gsub pubKey (size 32) (size 32) in
-      let pointX, pointY, flag = 
+      let pointX, pointY, flag =
         ecp256_dh_r (as_seq h0 pubKeyX) (as_seq h0 pubKeyY) (as_seq h0 scalar) in
       r == flag /\
+      modifies (loc result) h0 h1 /\
       as_seq h1 (gsub result (size 0) (size 32)) == pointX /\
       as_seq h1 (gsub result (size 32) (size 32)) == pointY)
