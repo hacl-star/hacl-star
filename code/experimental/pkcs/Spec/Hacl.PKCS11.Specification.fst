@@ -192,6 +192,9 @@ typedef CK_ULONG          CK_OBJECT_CLASS;
 type _CK_OBJECT_CLASS = 
      (* This line is incorrect *)
   |CKO_OBJECT
+  |CKO_STORAGE
+  |CKO_KEY
+  
   |CKO_DATA
   |CKO_CERTIFICATE
   |CKO_PUBLIC_KEY
@@ -336,6 +339,8 @@ let isContaining #a f s =
 
 let getAttributesForType: t: _CK_OBJECT_CLASS -> seq _CK_ATTRIBUTE_TYPE = function 
   |CKO_OBJECT -> seq_of_list [CKA_CLASS]
+  |CKO_KEY -> seq_of_list [CKA_TOKEN; CKA_PRIVATE; CKA_MODIFIABLE; CKA_LABEL; CKA_COPYABLE; CKA_DESTROYABLE]
+  |CKO_STORAGE -> seq_of_list [CKA_KEY_TYPE; CKA_ID; CKA_END_DATE; CKA_DERIVED; CKA_LOCAL; CKA_KEY_GEN_MECHANISM; CKA_ALLOWED_MECHANISMS]
   |CKO_SECRET_KEY -> (seq_of_list 
     [CKA_CLASS; CKA_TOKEN; CKA_PRIVATE; CKA_MODIFIABLE; CKA_LABEL; CKA_COPYABLE; CKA_DESTROYABLE;
     CKA_KEY_TYPE; CKA_ID; CKA_END_DATE; CKA_DERIVED; CKA_LOCAL; CKA_KEY_GEN_MECHANISM; CKA_ALLOWED_MECHANISMS; CKA_SENSITIVE; CKA_ENCRYPT; CKA_DECRYPT; CKA_SIGN; CKA_VERIFY; 
@@ -392,9 +397,7 @@ val getObjectAttributeClass: obj: _object -> Tot (r: _CK_ATTRIBUTE {r.aType == C
 
 let getObjectAttributeClass obj = 
   let attributeClass = find_l (fun x -> x.aType = CKA_CLASS) obj.attrs in 
-  assert (_attributesCompleteToCreateType obj.attrs (getAttributesForType CKO_OBJECT));
-  assert (forall (i : nat { i < Seq.length (getAttributesForType CKO_OBJECT)}). contains (fun x -> x.aType = (index (getAttributesForType CKO_OBJECT) i)) obj.attrs);
-
+  
   assume (index (seq_of_list [CKA_CLASS]) 0 == CKA_CLASS);
 
   lemmaFindLExistIfSomeOp (fun x -> x.aType = CKA_CLASS) obj.attrs; 
@@ -447,14 +450,7 @@ let getObjectAttributeLocal obj =
 
 
 type storage = 
-  |Storage: sto: _object {
-    contains (fun x -> x.aType = CKA_TOKEN) sto.attrs /\
-    contains (fun x -> x.aType = CKA_PRIVATE) sto.attrs /\
-    contains (fun x -> x.aType = CKA_MODIFIABLE) sto.attrs /\
-    contains (fun x -> x.aType = CKA_LABEL) sto.attrs /\
-    contains (fun x -> x.aType = CKA_COPYABLE) sto.attrs /\
-    contains (fun x -> x.aType = CKA_DESTROYABLE) sto.attrs
-  } -> storage
+  |Storage: sto: _object {_attributesCompleteToCreateType sto.attrs (getAttributesForType CKO_STORAGE)} -> storage
 
 
 (* Key is an object such that the object has an attribute class such that the attribute value is OTP_KEY, PRIVATE KEY, PUBLIC KEY, or SECRET KEY *)
@@ -462,13 +458,7 @@ type key_object =
   |Key: ko: storage{
     (
       let attrs = ko.sto.attrs in 
-      contains (fun x -> x.aType = CKA_KEY_TYPE) attrs /\
-      contains (fun x -> x.aType = CKA_ID) attrs /\
-      contains (fun x -> x.aType = CKA_END_DATE) attrs /\
-      contains (fun x -> x.aType = CKA_DERIVED) attrs /\
-      contains (fun x -> x.aType = CKA_LOCAL) attrs /\
-      contains (fun x -> x.aType = CKA_KEY_GEN_MECHANISM) attrs /\
-      contains (fun x -> x.aType = CKA_ALLOWED_MECHANISMS) attrs 
+      _attributesCompleteToCreateType attrs (getAttributesForType CKO_KEY)
     )
   } -> key_object
 
@@ -477,14 +467,7 @@ type _CKO_PUBLIC_KEY =
   |PK: pko: key_object {
       (
 	let attrs = pko.ko.sto.attrs in 
-	contains (fun x -> x.aType = CKA_SUBJECT) attrs /\
-	contains (fun x -> x.aType = CKA_ENCRYPT) attrs /\
-	contains (fun x -> x.aType = CKA_VERIFY) attrs /\
-	contains (fun x -> x.aType = CKA_VERIFY_RECOVER) attrs /\
-	contains (fun x -> x.aType = CKA_WRAP) attrs /\
-	contains (fun x -> x.aType = CKA_TRUSTED) attrs /\
-	contains (fun x -> x.aType = CKA_WRAP_TEMPLATE) attrs /\
-	contains (fun x -> x.aType = CKA_PUBLIC_KEY_INFO) attrs /\
+	_attributesCompleteToCreateType attrs (getAttributesForType CKO_PUBLIC_KEY) /\
 	index (getObjectAttributeClass pko.ko.sto).pValue 0  = CKO_PUBLIC_KEY
       )
     } -> _CKO_PUBLIC_KEY
@@ -494,19 +477,7 @@ type _CKO_PRIVATE_KEY =
   |PrK: prko : key_object {
     (
       let attrs = prko.ko.sto.attrs in 
-      contains (fun x -> x.aType = CKA_SUBJECT) attrs /\
-      contains (fun x -> x.aType = CKA_SENSITIVE) attrs /\
-      contains (fun x -> x.aType = CKA_DECRYPT) attrs /\
-      contains (fun x -> x.aType = CKA_SIGN) attrs /\
-      contains (fun x -> x.aType = CKA_SIGN_RECOVER) attrs /\
-      contains (fun x -> x.aType = CKA_UNWRAP) attrs /\
-      contains (fun x -> x.aType = CKA_EXTRACTABLE) attrs /\ 
-      contains (fun x -> x.aType = CKA_ALWAYS_SENSITIVE) attrs /\
-      contains (fun x -> x.aType = CKA_NEVER_EXTRACTABLE) attrs /\
-      contains (fun x -> x.aType = CKA_WRAP_WITH_TRUSTED) attrs /\
-      contains (fun x -> x.aType = CKA_UNWRAP_TEMPLATE) attrs /\
-      contains (fun x -> x.aType = CKA_ALWAYS_AUTHENTICATE) attrs /\
-      contains (fun x -> x.aType = CKA_PUBLIC_KEY_INFO) attrs /\
+      _attributesCompleteToCreateType attrs (getAttributesForType CKO_PRIVATE_KEY) /\
       index (getObjectAttributeClass prko.ko.sto).pValue 0  = CKO_PRIVATE_KEY
       ) 
    } -> _CKO_PRIVATE_KEY
@@ -516,16 +487,7 @@ type _CKO_SECRET_KEY =
   |SK: sk: key_object {
     (
       let attrs = sk.ko.sto.attrs in 
-      contains (fun x -> x.aType = CKA_SENSITIVE) attrs /\
-      contains (fun x -> x.aType = CKA_ENCRYPT) attrs /\
-      contains (fun x -> x.aType = CKA_DECRYPT) attrs /\
-      contains (fun x -> x.aType = CKA_SIGN) attrs /\
-      contains (fun x -> x.aType = CKA_VERIFY) attrs /\
-      contains (fun x -> x.aType = CKA_WRAP) attrs /\
-      contains (fun x -> x.aType = CKA_UNWRAP) attrs /\
-      contains (fun x -> x.aType = CKA_EXTRACTABLE) attrs /\
-      contains (fun x -> x.aType = CKA_ALWAYS_SENSITIVE) attrs /\
-      contains (fun x -> x.aType = CKA_NEVER_EXTRACTABLE) attrs /\
+      _attributesCompleteToCreateType attrs (getAttributesForType CKO_SECRET_KEY) /\
       index (getObjectAttributeClass sk.ko.sto).pValue 0  = CKO_SECRET_KEY
     )
   } -> _CKO_SECRET_KEY
