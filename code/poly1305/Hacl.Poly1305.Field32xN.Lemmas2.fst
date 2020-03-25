@@ -358,7 +358,7 @@ val lemma_store_felem_lo:
    let lo = f0 |. (f1 <<. 26ul) |. (f2 <<. 52ul) in
    v lo == v f0 + v f1 * pow2 26 + (v f2 * pow2 52) % pow2 64)
 
-#push-options "--z3rlimit 100"
+#push-options "--z3rlimit 200"
 let lemma_store_felem_lo f lo =
   let (f0, f1, f2, f3, f4) = f in
   assert_norm (max26 = pow2 26 - 1);
