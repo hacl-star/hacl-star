@@ -14,6 +14,7 @@ open PKCS11.Spec.Lemmas
 open Hacl.PKCS11.Lib
 
 open Hacl.PKCS11.Types
+open Hacl.PKCS11.Lemmas
 
 
 (* #set-options "--z3rlimit 200 --lax"  *)
@@ -35,7 +36,7 @@ typedef unsigned long int CK_ULONG;
 type _CK_ULONG = uint32_t
 
 
-(* Second-level types"*)
+(* Second-level types*)
 
 (*
 /* CK_MECHANISM_TYPE is a value that identifies a mechanism
@@ -468,6 +469,19 @@ type temporalStorage =
   |Element: seq FStar.UInt8.t -> temporalStorage
 
 
+
+(* Returns a set of attributes that the object should have to be the type t 
+   Returns Some (...) if the type was recognized, otherwise returns None
+*)
+let getAttributesForType: t: _CK_OBJECT_CLASS -> option (seq _CK_ATTRIBUTE_TYPE) = function 
+  |_CKO_SECRET_KEY -> Some (seq_of_list 
+    [CKA_CLASS; CKA_TOKEN; CKA_PRIVATE; CKA_MODIFIABLE; CKA_LABEL; CKA_COPYABLE; CKA_DESTROYABLE;
+    CKA_KEY_TYPE; CKA_ID; CKA_END_DATE; CKA_DERIVED; CKA_LOCAL; CKA_KEY_GEN_MECHANISM; CKA_ALLOWED_MECHANISMS; CKA_SENSITIVE; CKA_ENCRYPT; CKA_DECRYPT; CKA_SIGN; CKA_VERIFY; 
+    CKA_WRAP; CKA_UNWRAP; CKA_EXTRACTABLE; CKA_ALWAYS_SENSITIVE; CKA_NEVER_EXTRACTABLE])
+  |_ -> None
+
+
+(* This method takes a key and returns wther it's a secret key *)
 val isKeySecretKey: k: key_object -> Tot bool
 
 let isKeySecretKey k = 
@@ -483,22 +497,47 @@ let isKeySecretKey k =
   Some? (find_l (fun x -> x.aType = CKA_ALWAYS_SENSITIVE) attrs) &&
   Some? (find_l (fun x -> x.aType = CKA_NEVER_EXTRACTABLE) attrs) &&
   index (getObjectAttributeClass k.ko.sto).pValue 0  = CKO_SECRET_KEY
-    
-
-(* Returns a set of attributes that the object should have to be the type t 
-   Returns Some (...) if the type was recognized, otherwise returns None
-*)
-let getAttributesForType: t: _CK_OBJECT_CLASS -> option (seq _CK_ATTRIBUTE_TYPE) = function 
-  |_CKO_SECRET_KEY -> Some (seq_of_list 
-    [CKA_CLASS; CKA_TOKEN; CKA_PRIVATE; CKA_MODIFIABLE; CKA_LABEL; CKA_COPYABLE; CKA_DESTROYABLE;
-    CKA_KEY_TYPE; CKA_ID; CKA_END_DATE; CKA_DERIVED; CKA_LOCAL; CKA_KEY_GEN_MECHANISM; CKA_ALLOWED_MECHANISMS; CKA_SENSITIVE; CKA_ENCRYPT; CKA_DECRYPT; CKA_SIGN; CKA_VERIFY; 
-    CKA_WRAP; CKA_UNWRAP; CKA_EXTRACTABLE; CKA_ALWAYS_SENSITIVE; CKA_NEVER_EXTRACTABLE])
-  |_ -> None
 
 
-val _CKO_SECRET_KEY_Constructor: attrs: seq _CK_ATTRIBUTE -> Tot _CKO_SECRET_KEY
+
+(*  Takes one attribute and search for it in the attribute sequence. Returns true if found *)
+(* Notion of being present: there exist an index n such that ... *)
+(* Notion of not being present: forall elements not function*)
+
+val __attributesCompleteToCreateType: toSearchSequence: seq _CK_ATTRIBUTE -> toFind: _CK_ATTRIBUTE_TYPE -> 
+  Tot (r: bool
+    {
+      r == true ==> (exists (a: nat {a < Seq.length toSearchSequence}). (index toSearchSequence a).aType == toFind) /\ 
+      r == false ==> (forall (a: nat {a < Seq.length toSearchSequence}). (index toSearchSequence a).aType <> toFind)
+    }
+  )
+
+let __attributesCompleteToCreateType toSearchSequence toFind = 
+  lemma_find_l_contains (fun x -> x.aType = toFind) toSearchSequence;
+  match find_l (fun x -> x.aType = toFind) toSearchSequence with 
+  |None -> find_l_none_no_index toSearchSequence (fun x -> x.aType = toFind); false
+  |Some _ -> lemmaFindLExistIfSome (fun x -> x.aType = toFind) toSearchSequence; true
+
+
+(* The function searches for all the attributes in the sequence  *)
+val _attributesCompleteToCreateType: toSearchSequence: seq _CK_ATTRIBUTE -> toFinds: seq _CK_ATTRIBUTE_TYPE -> Tot bool
+
+let _attributesCompleteToCreateType toSearchSequence toFinds = 
+  for_all (__attributesCompleteToCreateType toSearchSequence) toFinds 
+
+
+(* For being able to create a secret key, we need all the attributes to be given *)
+val _CKO_SECRET_KEY_Constructor: attrs: seq _CK_ATTRIBUTE {
+  let requiredAttributes = getAttributesForType CKO_SECRET_KEY in 
+  let requiredAttributes = match requiredAttributes with Some a -> a in 
+  _attributesCompleteToCreateType attrs requiredAttributes}
+  -> Tot _CKO_SECRET_KEY
 
 let _CKO_SECRET_KEY_Constructor attrs = 
+  let obj = O attrs in 
+  admit();
+
+
   SK (Key (Storage (O attrs)))
 
 
