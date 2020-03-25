@@ -319,20 +319,36 @@ let defaultAttributes: seq _CK_ATTRIBUTE = Seq.empty
 assume val attrributesConsistent: attrs: seq _CK_ATTRIBUTE -> Tot bool
 
 
+abstract let contains (#a:Type) (f: (a -> bool)) (s:seq a)  : Tot Type0 =
+  exists (k:nat{k < Seq.length s}). f (Seq.index s k)
+
+
+val isContaining: #a: Type -> f: (a -> bool) -> s: seq a -> Tot (r: bool {r == true ==> 
+  contains f s})
+
+let isContaining #a f s = 
+  match find_l f s with 
+  |Some _ -> lemmaFindLExistIfSome f s; true
+  |_ -> false
+
+
 type _object = 
   |O: 
     attrs: seq _CK_ATTRIBUTE 
-      (* Common attributes for all the classes*)
-      {Some? (find_l (fun x -> x.aType = CKA_CLASS) attrs) /\ attrributesConsistent attrs}  -> 
-    _object
+      {
+	contains (fun x -> x.aType = CKA_CLASS) attrs /\ 
+	attrributesConsistent attrs
+      }  -> 
+  _object
 
 
 (* The method takes an object and returns whether amongs its attributes there is one that is CKA_CLASS. If the attribute is found that the attribute is returned, otherwise the None is returned *)
 
-val getObjectAttributeClass: obj: _object -> Tot (r: _CK_ATTRIBUTE { r.aType == CKA_CLASS} )
+val getObjectAttributeClass: obj: _object -> Tot (r: _CK_ATTRIBUTE {r.aType == CKA_CLASS})
 
 let getObjectAttributeClass obj = 
   let attributeClass = find_l (fun x -> x.aType = CKA_CLASS) obj.attrs in 
+  lemmaFindLExistIfSomeOp (fun x -> x.aType = CKA_CLASS) obj.attrs; 
   match attributeClass with 
   Some a -> a
 
@@ -380,14 +396,15 @@ let getObjectAttributeLocal obj =
   find_l (fun x -> x.aType = CKA_LOCAL) obj.attrs
 
 
+
 type storage = 
   |Storage: sto: _object {
-    Some? (find_l (fun x -> x.aType = CKA_TOKEN) sto.attrs) /\
-    Some? (find_l (fun x -> x.aType = CKA_PRIVATE) sto.attrs) /\
-    Some? (find_l (fun x -> x.aType = CKA_MODIFIABLE) sto.attrs) /\
-    Some? (find_l (fun x -> x.aType = CKA_LABEL) sto.attrs) /\
-    Some? (find_l (fun x -> x.aType = CKA_COPYABLE) sto.attrs) /\
-    Some? (find_l (fun x -> x.aType = CKA_DESTROYABLE) sto.attrs)
+    contains (fun x -> x.aType = CKA_TOKEN) sto.attrs /\
+    contains (fun x -> x.aType = CKA_PRIVATE) sto.attrs /\
+    contains (fun x -> x.aType = CKA_MODIFIABLE) sto.attrs /\
+    contains (fun x -> x.aType = CKA_LABEL) sto.attrs /\
+    contains (fun x -> x.aType = CKA_COPYABLE) sto.attrs /\
+    contains (fun x -> x.aType = CKA_DESTROYABLE) sto.attrs
   } -> storage
 
 
@@ -396,13 +413,13 @@ type key_object =
   |Key: ko: storage{
     (
       let attrs = ko.sto.attrs in 
-      Some? (find_l (fun x -> x.aType = CKA_KEY_TYPE) attrs) /\
-      Some? (find_l (fun x -> x.aType = CKA_ID) attrs) /\
-      Some? (find_l (fun x -> x.aType = CKA_END_DATE) attrs) /\
-      Some? (find_l (fun x -> x.aType = CKA_DERIVED) attrs) /\
-      Some? (find_l (fun x -> x.aType = CKA_LOCAL) attrs) /\
-      Some? (find_l (fun x -> x.aType = CKA_KEY_GEN_MECHANISM) attrs) /\
-      Some? (find_l (fun x -> x.aType = CKA_ALLOWED_MECHANISMS) attrs) 
+      contains (fun x -> x.aType = CKA_KEY_TYPE) attrs /\
+      contains (fun x -> x.aType = CKA_ID) attrs /\
+      contains (fun x -> x.aType = CKA_END_DATE) attrs /\
+      contains (fun x -> x.aType = CKA_DERIVED) attrs /\
+      contains (fun x -> x.aType = CKA_LOCAL) attrs /\
+      contains (fun x -> x.aType = CKA_KEY_GEN_MECHANISM) attrs /\
+      contains (fun x -> x.aType = CKA_ALLOWED_MECHANISMS) attrs 
     )
   } -> key_object
 
@@ -411,14 +428,14 @@ type _CKO_PUBLIC_KEY =
   |PK: pko: key_object {
       (
 	let attrs = pko.ko.sto.attrs in 
-	Some? (find_l (fun x -> x.aType = CKA_SUBJECT) attrs) /\
-	Some? (find_l (fun x -> x.aType = CKA_ENCRYPT) attrs) /\
-	Some? (find_l (fun x -> x.aType = CKA_VERIFY) attrs) /\
-	Some? (find_l (fun x -> x.aType = CKA_VERIFY_RECOVER) attrs) /\
-	Some? (find_l (fun x -> x.aType = CKA_WRAP) attrs) /\
-	Some? (find_l (fun x -> x.aType = CKA_TRUSTED) attrs) /\
-	Some? (find_l (fun x -> x.aType = CKA_WRAP_TEMPLATE) attrs) /\
-	Some? (find_l (fun x -> x.aType = CKA_PUBLIC_KEY_INFO) attrs) /\
+	contains (fun x -> x.aType = CKA_SUBJECT) attrs /\
+	contains (fun x -> x.aType = CKA_ENCRYPT) attrs /\
+	contains (fun x -> x.aType = CKA_VERIFY) attrs /\
+	contains (fun x -> x.aType = CKA_VERIFY_RECOVER) attrs /\
+	contains (fun x -> x.aType = CKA_WRAP) attrs /\
+	contains (fun x -> x.aType = CKA_TRUSTED) attrs /\
+	contains (fun x -> x.aType = CKA_WRAP_TEMPLATE) attrs /\
+	contains (fun x -> x.aType = CKA_PUBLIC_KEY_INFO) attrs /\
 	index (getObjectAttributeClass pko.ko.sto).pValue 0  = CKO_PUBLIC_KEY
       )
     } -> _CKO_PUBLIC_KEY
@@ -428,19 +445,19 @@ type _CKO_PRIVATE_KEY =
   |PrK: prko : key_object {
     (
       let attrs = prko.ko.sto.attrs in 
-      Some? (find_l (fun x -> x.aType = CKA_SUBJECT) attrs) /\
-      Some? (find_l (fun x -> x.aType = CKA_SENSITIVE) attrs) /\
-      Some? (find_l (fun x -> x.aType = CKA_DECRYPT) attrs) /\
-      Some? (find_l (fun x -> x.aType = CKA_SIGN) attrs) /\
-      Some? (find_l (fun x -> x.aType = CKA_SIGN_RECOVER) attrs) /\
-      Some? (find_l (fun x -> x.aType = CKA_UNWRAP) attrs) /\
-      Some? (find_l (fun x -> x.aType = CKA_EXTRACTABLE) attrs) /\ 
-      Some? (find_l (fun x -> x.aType = CKA_ALWAYS_SENSITIVE) attrs) /\
-      Some? (find_l (fun x -> x.aType = CKA_NEVER_EXTRACTABLE) attrs) /\
-      Some? (find_l (fun x -> x.aType = CKA_WRAP_WITH_TRUSTED) attrs) /\
-      Some? (find_l (fun x -> x.aType = CKA_UNWRAP_TEMPLATE) attrs) /\
-      Some? (find_l (fun x -> x.aType = CKA_ALWAYS_AUTHENTICATE) attrs) /\
-      Some? (find_l (fun x -> x.aType = CKA_PUBLIC_KEY_INFO) attrs) /\
+      contains (fun x -> x.aType = CKA_SUBJECT) attrs /\
+      contains (fun x -> x.aType = CKA_SENSITIVE) attrs /\
+      contains (fun x -> x.aType = CKA_DECRYPT) attrs /\
+      contains (fun x -> x.aType = CKA_SIGN) attrs /\
+      contains (fun x -> x.aType = CKA_SIGN_RECOVER) attrs /\
+      contains (fun x -> x.aType = CKA_UNWRAP) attrs /\
+      contains (fun x -> x.aType = CKA_EXTRACTABLE) attrs /\ 
+      contains (fun x -> x.aType = CKA_ALWAYS_SENSITIVE) attrs /\
+      contains (fun x -> x.aType = CKA_NEVER_EXTRACTABLE) attrs /\
+      contains (fun x -> x.aType = CKA_WRAP_WITH_TRUSTED) attrs /\
+      contains (fun x -> x.aType = CKA_UNWRAP_TEMPLATE) attrs /\
+      contains (fun x -> x.aType = CKA_ALWAYS_AUTHENTICATE) attrs /\
+      contains (fun x -> x.aType = CKA_PUBLIC_KEY_INFO) attrs /\
       index (getObjectAttributeClass prko.ko.sto).pValue 0  = CKO_PRIVATE_KEY
       ) 
    } -> _CKO_PRIVATE_KEY
@@ -450,16 +467,16 @@ type _CKO_SECRET_KEY =
   |SK: sk: key_object {
     (
       let attrs = sk.ko.sto.attrs in 
-      Some? (find_l (fun x -> x.aType = CKA_SENSITIVE) attrs) /\
-      Some? (find_l (fun x -> x.aType = CKA_ENCRYPT) attrs) /\
-      Some? (find_l (fun x -> x.aType = CKA_DECRYPT) attrs) /\
-      Some? (find_l (fun x -> x.aType = CKA_SIGN) attrs) /\
-      Some? (find_l (fun x -> x.aType = CKA_VERIFY) attrs) /\
-      Some? (find_l (fun x -> x.aType = CKA_WRAP) attrs) /\
-      Some? (find_l (fun x -> x.aType = CKA_UNWRAP) attrs) /\
-      Some? (find_l (fun x -> x.aType = CKA_EXTRACTABLE) attrs) /\
-      Some? (find_l (fun x -> x.aType = CKA_ALWAYS_SENSITIVE) attrs) /\
-      Some? (find_l (fun x -> x.aType = CKA_NEVER_EXTRACTABLE) attrs) /\
+      contains (fun x -> x.aType = CKA_SENSITIVE) attrs /\
+      contains (fun x -> x.aType = CKA_ENCRYPT) attrs /\
+      contains (fun x -> x.aType = CKA_DECRYPT) attrs /\
+      contains (fun x -> x.aType = CKA_SIGN) attrs /\
+      contains (fun x -> x.aType = CKA_VERIFY) attrs /\
+      contains (fun x -> x.aType = CKA_WRAP) attrs /\
+      contains (fun x -> x.aType = CKA_UNWRAP) attrs /\
+      contains (fun x -> x.aType = CKA_EXTRACTABLE) attrs /\
+      contains (fun x -> x.aType = CKA_ALWAYS_SENSITIVE) attrs /\
+      contains (fun x -> x.aType = CKA_NEVER_EXTRACTABLE) attrs /\
       index (getObjectAttributeClass sk.ko.sto).pValue 0  = CKO_SECRET_KEY
     )
   } -> _CKO_SECRET_KEY
@@ -486,17 +503,17 @@ val isKeySecretKey: k: key_object -> Tot bool
 
 let isKeySecretKey k = 
   let attrs = k.ko.sto.attrs in 
-  Some? (find_l (fun x -> x.aType = CKA_SENSITIVE) attrs) &&
-  Some? (find_l (fun x -> x.aType = CKA_ENCRYPT) attrs) &&
-  Some? (find_l (fun x -> x.aType = CKA_DECRYPT) attrs) &&
-  Some? (find_l (fun x -> x.aType = CKA_SIGN) attrs) &&
-  Some? (find_l (fun x -> x.aType = CKA_VERIFY) attrs) &&
-  Some? (find_l (fun x -> x.aType = CKA_WRAP) attrs) &&
-  Some? (find_l (fun x -> x.aType = CKA_UNWRAP) attrs) &&
-  Some? (find_l (fun x -> x.aType = CKA_EXTRACTABLE) attrs) &&
-  Some? (find_l (fun x -> x.aType = CKA_ALWAYS_SENSITIVE) attrs) &&
-  Some? (find_l (fun x -> x.aType = CKA_NEVER_EXTRACTABLE) attrs) &&
-  index (getObjectAttributeClass k.ko.sto).pValue 0  = CKO_SECRET_KEY
+    contains (fun x -> x.aType = CKA_SENSITIVE) attrs &&
+    contains (fun x -> x.aType = CKA_ENCRYPT) attrs &&
+    contains (fun x -> x.aType = CKA_DECRYPT) attrs &&
+    contains (fun x -> x.aType = CKA_SIGN) attrs &&
+    contains (fun x -> x.aType = CKA_VERIFY) attrs &&
+    contains (fun x -> x.aType = CKA_WRAP) attrs &&
+    contains (fun x -> x.aType = CKA_UNWRAP) attrs &&
+    contains (fun x -> x.aType = CKA_EXTRACTABLE) attrs &&
+    contains (fun x -> x.aType = CKA_ALWAYS_SENSITIVE) attrs &&
+    contains (fun x -> x.aType = CKA_NEVER_EXTRACTABLE) attrs &&
+    index (getObjectAttributeClass k.ko.sto).pValue 0  = CKO_SECRET_KEY
 
 
 
@@ -504,26 +521,48 @@ let isKeySecretKey k =
 (* Notion of being present: there exist an index n such that ... *)
 (* Notion of not being present: forall elements not function*)
 
+
+#reset-options "--z3rlimit 300 --ifuel 1 --fuel 1"
+
+(*
 val __attributesCompleteToCreateType: toSearchSequence: seq _CK_ATTRIBUTE -> toFind: _CK_ATTRIBUTE_TYPE -> 
   Tot (r: bool
     {
-      r == true ==> (exists (a: nat {a < Seq.length toSearchSequence}). (index toSearchSequence a).aType == toFind) /\ 
-      r == false ==> (forall (a: nat {a < Seq.length toSearchSequence}). (index toSearchSequence a).aType <> toFind)
+      (*r == true <==> (exists (a: nat {a < Seq.length toSearchSequence}). (index toSearchSequence a).aType == toFind) /\ 
+      r == false <==> (forall (a: nat {a < Seq.length toSearchSequence}). (index toSearchSequence a).aType <> toFind)  /\ 
+      r == false <==> None? (find_l (fun x -> x.aType = toFind) toSearchSequence) /\ *)
+      r <==> contains (fun x -> x.aType = toFind) toSearchSequence) 
     }
   )
 
 let __attributesCompleteToCreateType toSearchSequence toFind = 
-  lemma_find_l_contains (fun x -> x.aType = toFind) toSearchSequence;
   match find_l (fun x -> x.aType = toFind) toSearchSequence with 
   |None -> find_l_none_no_index toSearchSequence (fun x -> x.aType = toFind); false
   |Some _ -> lemmaFindLExistIfSome (fun x -> x.aType = toFind) toSearchSequence; true
-
+  
 
 (* The function searches for all the attributes in the sequence  *)
-val _attributesCompleteToCreateType: toSearchSequence: seq _CK_ATTRIBUTE -> toFinds: seq _CK_ATTRIBUTE_TYPE -> Tot bool
+val _attributesCompleteToCreateType: toSearchSequence: seq _CK_ATTRIBUTE -> toFinds: seq _CK_ATTRIBUTE_TYPE -> Tot (r: bool
+  {
+    r == true ==> 
+      (forall (i: nat {i < Seq.length toFinds}). 
+	contains (fun x -> x.aType = (index toFinds i)) toSearchSequence))
+  }
+)
 
 let _attributesCompleteToCreateType toSearchSequence toFinds = 
-  for_all (__attributesCompleteToCreateType toSearchSequence) toFinds 
+  let f = (__attributesCompleteToCreateType toSearchSequence) in 
+  let r = for_all f toFinds in 
+  assert(r == true ==> (forall (i: nat {i < length toFinds}).
+    contains (fun x -> x.aType = (index toFinds i)) toSearchSequence) 
+  
+  
+  
+  ));
+
+
+
+  admit()
 
 
 (* For being able to create a secret key, we need all the attributes to be given *)
@@ -816,7 +855,7 @@ val lemma_isPresentOnDevice: s: seq _CK_MECHANISM -> f: (_CK_MECHANISM -> Tot bo
   (requires 
     (exists (a: nat {a < length s}). f (index s a)))
   (ensures
-    (Some? (find_l f s)))
+    (contains f s)))
   (decreases (length s))
 
 let rec lemma_isPresentOnDevice s f = 
@@ -833,7 +872,7 @@ val isPresentOnDevice: d: device -> pMechanism: _CK_MECHANISM_TYPE ->
   Tot (r: bool
     {r = true ==>
       (exists (a: nat{a < Seq.length d.mechanisms}). let m = Seq.index d.mechanisms a in m.mechanismID = pMechanism) /\ 
-      (Some? (find_l (fun x -> x.mechanismID = pMechanism) d.mechanisms))
+      (contains (fun x -> x.mechanismID = pMechanism) d.mechanisms))
     }
   )
 
