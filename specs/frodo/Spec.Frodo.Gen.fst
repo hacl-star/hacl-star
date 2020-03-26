@@ -32,7 +32,7 @@ val frodo_gen_matrix_cshake0:
   -> res_i:lbytes (2 * n)
   -> j:size_nat{j < n}
   -> res0:matrix n n
-  -> res1:matrix n n
+  -> matrix n n
 let frodo_gen_matrix_cshake0 n i res_i j res0 =
     res0.(i, j) <- uint_from_bytes_le (Seq.sub res_i (j * 2) 2)
 
@@ -42,7 +42,7 @@ val frodo_gen_matrix_cshake1:
   -> seed:lbytes seedLen
   -> i:size_nat{i < n}
   -> res:matrix n n
-  -> res1:matrix n n
+  -> matrix n n
 let frodo_gen_matrix_cshake1 n seedLen seed i res =
   let res_i = cshake128_frodo seedLen seed (u16 (256 + i)) (2 * n) in
   Loops.repeati_inductive' #(matrix n n) n
@@ -93,7 +93,7 @@ val frodo_gen_matrix_cshake_4x0:
   -> r3:lbytes (2 * n)
   -> j:size_nat{j < n}
   -> res0:matrix n n
-  -> res1:matrix n n
+  -> matrix n n
 let frodo_gen_matrix_cshake_4x0 n i r0 r1 r2 r3 j res0 =
   let res0 = res0.(4 * i + 0, j) <- uint_from_bytes_le (Seq.sub r0 (j * 2) 2) in
   let res0 = res0.(4 * i + 1, j) <- uint_from_bytes_le (Seq.sub r1 (j * 2) 2) in
@@ -107,7 +107,7 @@ val frodo_gen_matrix_cshake_4x1:
   -> seed:lbytes seedLen
   -> i:size_nat{i < n / 4}
   -> res:matrix n n
-  -> res1:matrix n n
+  -> matrix n n
 let frodo_gen_matrix_cshake_4x1 n seedLen seed i res =
   let ctr0 = 256 + 4 * i + 0 in
   let ctr1 = 256 + 4 * i + 1 in
@@ -162,7 +162,7 @@ val frodo_gen_matrix_aes:
     n:size_nat{n * n <= max_size_t /\ n < maxint U16}
   -> seedLen:size_nat{seedLen == 16}
   -> seed:lbytes seedLen
-  -> res:matrix n n
+  -> matrix n n
 let frodo_gen_matrix_aes n seedLen seed =
   let res = Matrix.create n n in
   let key = aes128_key_expansion seed in

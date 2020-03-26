@@ -21,7 +21,7 @@ open FStar.Tactics.Canon
 open Spec.P256.Lemmas
 open Lib.IntTypes.Intrinsics
 
-#reset-options "--z3rlimit 400"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 400"
 
 val eq0_u64: a: uint64 -> Tot (r: uint64 {if uint_v a = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0})
 
@@ -294,17 +294,17 @@ let add4_with_carry c x y result =
     cc
 
 
-#reset-options "--z3rlimit 400"
-
 val add8: x: widefelem -> y: widefelem -> result: widefelem -> Stack uint64 
   (requires fun h -> live h x /\ live h y /\ live h result /\ eq_or_disjoint x result /\ eq_or_disjoint y result)
   (ensures fun h0 c h1 -> modifies (loc result) h0 h1 /\ v c <= 1 /\ 
     wide_as_nat h1 result + v c * pow2 512 == wide_as_nat h0 x + wide_as_nat h0 y)
 
 let add8 x y result = 
+  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
   let h0 = ST.get() in 
     let a0 = sub x (size 0) (size 4) in 
     let a1 = sub x (size 4) (size 4) in 
+    
     let b0 = sub y (size 0) (size 4) in 
     let b1 = sub y (size 4) (size 4) in 
 
@@ -312,27 +312,19 @@ let add8 x y result =
     let c1 = sub result (size 4) (size 4) in 
 
     let carry0 = add4 a0 b0 c0 in
-      let h1 = ST.get() in 
     let carry1 = add4_with_carry carry0 a1 b1 c1 in 
-      let h2 = ST.get() in 	
-      assert(as_nat h2 c1 =  - uint_v carry1 * pow2 256 + as_nat h1 a1 + as_nat h1 b1 + uint_v carry0);
-      assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
-      assert_norm (pow2 256 * pow2 256 = pow2 512);
-  
-      assert(Lib.Sequence.index (as_seq h2 result) 4 == Lib.Sequence.index (as_seq h2 c1) 0);
-      assert(Lib.Sequence.index (as_seq h2 result) 5 == Lib.Sequence.index (as_seq h2 c1) 1);
-      assert(Lib.Sequence.index (as_seq h2 result) 6 == Lib.Sequence.index (as_seq h2 c1) 2);
-      assert(Lib.Sequence.index (as_seq h2 result) 7 == Lib.Sequence.index (as_seq h2 c1) 3);
-
-      assert_by_tactic (as_nat h2 c1 * pow2 64 * pow2 64 * pow2 64 * pow2 64 == as_nat h2 c1 * pow2 256) canon;
-      assert_by_tactic (as_nat h2 a1 * pow2 64 * pow2 64 * pow2 64 * pow2 64 == as_nat h2 a1 * pow2 256) canon;
-  
-      assert_by_tactic ((- uint_v carry1 * pow2 256 + as_nat h1 a1 + as_nat h1 b1 + uint_v carry0) * pow2 256 == - uint_v carry1 * pow2 256 * pow2 256 + as_nat h1 a1 * pow2 256 + as_nat h1 b1 * pow2 256 + uint_v carry0 * pow2 256) canon;
-
-      lemma_ll0 (uint_v (Lib.Sequence.index (as_seq h0 a1) 0)) (uint_v (Lib.Sequence.index (as_seq h0 a1) 1)) (uint_v (Lib.Sequence.index (as_seq h0 a1) 2)) (uint_v (Lib.Sequence.index (as_seq h0 a1) 3));
-      lemma_ll0 (uint_v (Lib.Sequence.index (as_seq h0 b1) 0)) (uint_v (Lib.Sequence.index (as_seq h0 b1) 1)) (uint_v (Lib.Sequence.index (as_seq h0 b1) 2)) (uint_v (Lib.Sequence.index (as_seq h0 b1) 3));
-
-    carry1
+      let h1 = ST.get() in 
+    calc (==)
+    {
+      wide_as_nat h0 x + wide_as_nat h0 y;
+      (==) {
+	assert_by_tactic (as_nat h0 a1 * pow2 256 + as_nat h0 b1 * pow2 256 = (as_nat h0 a1 + as_nat h0 b1) * pow2 256) canon} 
+      wide_as_nat h1 result + uint_v carry1 * pow2 256 * pow2 256;
+      (==) 
+      {assert_norm (pow2 256 * pow2 256 = pow2 512)}
+      wide_as_nat h1 result + uint_v carry1 * pow2 512;
+};
+  carry1
 
 
 val add4_variables: x: felem -> cin: uint64 {uint_v cin <=1} ->  y0: uint64 -> y1: uint64 -> y2: uint64 -> y3: uint64 -> 
@@ -596,6 +588,7 @@ let mul1_add f1 u2 f3 result =
   c +! c3
 
 
+
 val mul: f: felem -> r: felem -> out: widefelem
   -> Stack unit
     (requires fun h -> live h out /\ live h f /\ live h r)
@@ -654,15 +647,27 @@ let mul f r out =
   
   pop_frame()
 
+#pop-options
 
 val lemma_320: a: uint64 -> b: uint64 -> c: uint64 -> d: uint64 -> u: uint64 -> Lemma 
   (uint_v u * uint_v a +  (uint_v u * uint_v b) * pow2 64 + (uint_v u * uint_v c) * pow2 64 * pow2 64 + (uint_v u * uint_v d) * pow2 64 * pow2 64 * pow2 64 < pow2 320)
   
 let lemma_320 a b c d u = 
-  assert(uint_v u <= pow2 64 - 1);
-  assert(uint_v d <= pow2 64 - 1);
+  lemma_mult_le_left (uint_v d) (uint_v u) (pow2 64 - 1);
+  lemma_mult_le_right (uint_v u) (uint_v d) (pow2 64 - 1);
+
+  assert(uint_v u * uint_v a <= (pow2 64 - 1) * (pow2 64 - 1));
+  assert(uint_v u * uint_v d <= (pow2 64 - 1) * (pow2 64 - 1));
+  assert(uint_v u * uint_v c <= (pow2 64 - 1) * (pow2 64 - 1));
   assert(uint_v u * uint_v d <= (pow2 64 - 1) * (pow2 64 - 1));
 
+  assert (uint_v u * uint_v a +  (uint_v u * uint_v b) * pow2 64 + (uint_v u * uint_v c) * pow2 64 * pow2 64 + (uint_v u * uint_v d) * pow2 64 * pow2 64 * pow2 64 
+  <= (pow2 64 - 1) * (pow2 64 - 1) +  
+    ((pow2 64 - 1) * (pow2 64 - 1)) * pow2 64 + 
+    ((pow2 64 - 1) * (pow2 64 - 1)) * pow2 64 * pow2 64 + 
+    ((pow2 64 - 1) * (pow2 64 - 1)) * pow2 64 * pow2 64 * pow2 64);
+    
+  
   assert_norm((pow2 64 - 1) * (pow2 64 - 1) +  
     ((pow2 64 - 1) * (pow2 64 - 1)) * pow2 64 + 
     ((pow2 64 - 1) * (pow2 64 - 1)) * pow2 64 * pow2 64 + 
@@ -673,28 +678,18 @@ val lemma_320_64:a: uint64 -> b: uint64 -> c: uint64 -> d: uint64 -> e: uint64 -
   (uint_v u * uint_v a +  (uint_v u * uint_v b) * pow2 64 + (uint_v u * uint_v c) * pow2 64 * pow2 64 + (uint_v u * uint_v d) * pow2 64 * pow2 64 * pow2 64 + uint_v e  < pow2 320)
   
 let lemma_320_64 a b c d e u = 
-  assert(uint_v u <= pow2 64 - 1);
-  assert(uint_v a <= pow2 64 - 1);
-  assert(uint_v b <= pow2 64 - 1);
-  assert(uint_v c <= pow2 64 - 1);
-  assert(uint_v d <= pow2 64 - 1);
-  assert(uint_v e <= pow2 64 - 1);
 
-  assert(uint_v u *  uint_v a <= (pow2 64 - 1) * (pow2 64 - 1));
-  assert(uint_v u * uint_v b <= (pow2 64 - 1) * (pow2 64 - 1));
-  assert(uint_v u * uint_v c <= (pow2 64 - 1) * (pow2 64 - 1));
-  assert(uint_v u * uint_v d <= (pow2 64 - 1) * (pow2 64 - 1));
+  lemma_mult_le_left (uint_v a) (uint_v u) (pow2 64 - 1);
+  lemma_mult_le_right (uint_v u) (uint_v a) (pow2 64 - 1);  
   
+  lemma_mult_le_left (uint_v b) (uint_v u) (pow2 64 - 1);
+  lemma_mult_le_right (uint_v u) (uint_v b) (pow2 64 - 1);
 
-  assert(
-    (uint_v u * uint_v a) +  
-    (uint_v u * uint_v b) * pow2 64 + 
-    (uint_v u * uint_v c) * pow2 64 * pow2 64 + 
-    (uint_v u * uint_v d) * pow2 64 * pow2 64 * pow2 64 + uint_v e <= (
-  (pow2 64 - 1) * (pow2 64 - 1) + 
-  (pow2 64 - 1) * (pow2 64 - 1) * pow2 64 +
-  (pow2 64 - 1) * (pow2 64 - 1) * pow2 64 * pow2 64 + 
-  (pow2 64 - 1) * (pow2 64 - 1) * pow2 64 * pow2 64 * pow2 64 + (pow2 64 - 1)));
+  lemma_mult_le_left (uint_v c) (uint_v u) (pow2 64 - 1);
+  lemma_mult_le_right (uint_v u) (uint_v c) (pow2 64 - 1);  
+
+  lemma_mult_le_left (uint_v d) (uint_v u) (pow2 64 - 1);
+  lemma_mult_le_right (uint_v u) (uint_v d) (pow2 64 - 1);  
 
   assert_norm((pow2 64 - 1) * (pow2 64 - 1) +  
     ((pow2 64 - 1) * (pow2 64 - 1)) * pow2 64 + 
@@ -736,6 +731,7 @@ val sq0: f:  lbuffer uint64 (size 4) -> result: lbuffer uint64 (size 4) -> memor
       uint_v m4 + uint_v m5 * pow2 64 == uint_v f0 * uint_v f3
     )
  )
+
 
 
 let sq0 f result memory temp = 
@@ -883,16 +879,10 @@ val lemma_320_1: a: nat -> b: nat -> c: nat {c < pow2 64} -> d: nat {d < pow2 25
 
 let lemma_320_1 a b c d e = 
   assert_norm ((pow2 64 - 1) * (pow2 256 - 1) + pow2 256 < pow2 320);
-  assert(c <= pow2 64 - 1);
-  assert(d <= pow2 256 - 1);
-  assert(c * d <= (pow2 64 - 1) * (pow2 256 - 1));
-  assert(c * d + e < pow2 320);
-  assert(b * pow2 256 < pow2 320);
-  lemma_div_lt_nat (b * pow2 256) 320 256;
-  assert(((b * pow2 256) / pow2 256) < pow2 64);
-  pow2_multiplication_division_lemma_1 b 256 256;
-  assert((b * pow2 256) / pow2 256 = b);
-  assert(b < pow2 64)
+  lemma_mult_le_left d c (pow2 64 - 1);
+  lemma_mult_le_right c d (pow2 256 - 1);
+  lemma_div_lt_nat (b * pow2 256) 320 256; 
+  pow2_multiplication_division_lemma_1 b 256 256
 
 
 let sq1 f f4 result memory tempBuffer = 
@@ -1198,7 +1188,6 @@ let sq3 f f4 result memory tempBuffer =
   c3 +! h_3 +! c4
 
 
-#reset-options "--z3rlimit 300"
 val sq: f: felem -> out: widefelem -> Stack unit
     (requires fun h -> live h out /\ live h f /\ eq_or_disjoint f out)
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\ wide_as_nat h1 out = as_nat h0 f * as_nat h0 f)
@@ -1357,7 +1346,6 @@ let shift_256_impl i o =
   assert_norm(pow2 64 * pow2 64 * pow2 64  * pow2 64 * pow2 64* pow2 64 * pow2 64 * pow2 64 = pow2 (8 * 64))
 
 
-#reset-options "--z3rlimit 200"
 inline_for_extraction noextract
 val mod64: a: widefelem -> Stack uint64 
   (requires fun h -> live h a) 
@@ -1479,37 +1467,3 @@ val toUint8LE: i: felem ->  o: lbuffer uint8 (32ul) -> Stack unit
 
 let toUint8LE i o = 
   Lib.ByteBuffer.uints_to_bytes_le (size 4) o i
-
-open Lib.ByteBuffer
-
-
-val changeEndian: i:felem -> Stack unit 
-  (requires fun h -> live h i)
-  (ensures  fun h0 _ h1 -> modifies1 i h0 h1 /\ 
-    as_seq h1 i == Spec.ECDSA.changeEndian (as_seq h0 i) /\
-    as_nat h1 i < pow2 256
-  ) 
-
-let changeEndian i = 
-  assert_norm (pow2 64 * pow2 64 = pow2 (2 * 64));
-  assert_norm (pow2 (2 * 64) * pow2 64 = pow2 (3 * 64));
-  assert_norm (pow2 (3 * 64) * pow2 64 = pow2 (4 * 64));
-  let zero = index i (size 0) in 
-  let one = index i (size 1) in 
-  let two = index i (size 2) in 
-  let three = index i (size 3) in 
-  upd i (size 0) three;
-  upd i (size 1) two; 
-  upd i (size 2) one;
-  upd i (size 3) zero
-
-val toUint64ChangeEndian: i:lbuffer uint8 (size 32) -> o:felem -> Stack unit
-  (requires fun h -> live h i /\ live h o /\ disjoint i o)
-  (ensures  fun h0 _ h1 ->
-    modifies (loc o) h0 h1 /\
-    as_seq h1 o == Spec.ECDSA.changeEndian (Lib.ByteSequence.uints_from_bytes_be (as_seq h0 i))
-  )
-
-let toUint64ChangeEndian i o = 
-  Lib.ByteBuffer.uints_from_bytes_be o i;
-  changeEndian o
