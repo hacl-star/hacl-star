@@ -468,6 +468,19 @@ let checkCoordinates r s =
   then true
   else false
 
+open Spec.Hash.Definitions
+
+val hashSpec: a: hash_alg {SHA2_256? a \/ SHA2_384? a \/ SHA2_512? a} -> 
+  Tot (m: bytes {Seq.length m <= max_input_length a}  -> r: Lib.ByteSequence.lbytes (hash_length a))
+
+
+let hashSpec a = 
+  match a with 
+  |SHA2_256 -> Spec.Agile.Hash.hash Def.SHA2_256
+  |SHA2_384 -> Spec.Agile.Hash.hash Def.SHA2_384
+  |SHA2_512 -> Spec.Agile.Hash.hash Def.SHA2_512
+    
+
 
 val ecdsa_verification: publicKey:tuple2 nat nat -> r:nat -> s:nat
   -> mLen:size_nat{mLen < Def.(max_input_length SHA2_256)}

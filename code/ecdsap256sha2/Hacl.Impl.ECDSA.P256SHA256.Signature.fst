@@ -8,6 +8,7 @@ open Lib.IntTypes
 open Lib.Buffer
 open Lib.ByteSequence
 
+open Spec.ECDSA
 open Spec.P256.Lemmas
 
 open FStar.Mul
@@ -39,92 +40,50 @@ open Hacl.Hash.Definitions
 #set-options "--z3rlimit 100"
 
 
-inline_for_extraction noextract
-val hash: alg: hash_alg {SHA2_256? alg \/ SHA2_384? alg \/ SHA2_512? alg (* and blake one day *)}
+val ecdsa_signature_step12: alg: hash_alg {SHA2_256? alg \/ SHA2_384? alg \/ SHA2_512? alg (* and blake one day *)}
   ->  mLen: size_t -> m: lbuffer uint8 mLen -> result: felem -> Stack unit
   (requires fun h -> live h m /\ live h result )
-  (ensures fun h0 _ h1 -> True)
-
-let hash alg mLen m result = 
-  assert_norm (pow2 32 < pow2 61);
-  assert_norm (pow2 32 < pow2 125);
-  push_frame(); 
-  let mHash = create (hash_len alg) (u8 0) in    
-  (* 
-  Spec.ECDSA.changeEndianLemma (uints_from_bytes_be #U64 #_ #4 (as_seq h1 mHash));
-  uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 mHash);
-  somewhere here
-  
-  *)
-
-  match alg with 
-    |SHA2_256 -> begin
-      hash_256 m mLen mHash;
-      let cutMessage = sub mHash (size 0) (size 32) in 
-      toUint64ChangeEndian cutMessage result;
-      pop_frame()
-      end
-    |SHA2_384 -> begin 
-      hash_384 m mLen mHash; 
-      let cutMessage = sub mHash (size 0) (size 32) in 
-      toUint64ChangeEndian cutMessage result;
-      pop_frame()
-      end
-    |SHA2_512 -> begin
-      hash_512 m mLen mHash;
-      let cutMessage = sub mHash (size 0) (size 32) in 
-      toUint64ChangeEndian cutMessage result;
-      pop_frame()
-      end
-  
-
-(*
-
-Doesnot typecheck
-
-let hashF alg mLen m result = 
-  assert_norm (pow2 32 < pow2 61);
-  assert_norm (pow2 32 < pow2 125);
-  push_frame(); 
-  let h0 = ST.get() in
-  let mHash = create (hash_len alg) (u8 0) in   
-  match alg with 
-    |SHA2_256 -> begin
-      hash_256 m mLen mHash
-      end
-    |SHA2_384 -> begin 
-      hash_384 m mLen mHash
-      end
-    |SHA2_512 -> begin
-      hash_512 m mLen mHash
-      end;
-
-  let cutMessage = sub mHash (size 0) (size 32) in 
-  toUint64ChangeEndian cutMessage result;
-  pop_frame();
-   admit()
-  
-*)
-
-
-val ecdsa_signature_step12: alg: hash_alg ->  hashAsFelem: felem -> mLen: size_t -> m: lbuffer uint8 mLen -> Stack unit 
-  (requires fun h -> live h hashAsFelem /\ live h m)
-  (ensures fun h0 _ h1 -> modifies (loc hashAsFelem) h0 h1 /\
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
     (
       assert_norm (pow2 32 < pow2 61);
-      let hashM = H.hash Def.SHA2_256 (as_seq h0 m) in 
-      as_nat h1 hashAsFelem == nat_from_bytes_be hashM % prime_p256_order
-    ) 
+      assert_norm (pow2 32 < pow2 125);
+      let hashFun = hashSpec alg in 
+      let hashM = hashFun (as_seq h0 m) in 
+      let cutHashM = Lib.Sequence.sub hashM 0 32 in 
+      as_nat h1 result = nat_from_bytes_be cutHashM % prime_p256_order
+    )
   )
 
-let ecdsa_signature_step12 alg hashAsFelem mLen m  = 
+
+let ecdsa_signature_step12 alg mLen m result = 
   assert_norm (pow2 32 < pow2 61);
+  assert_norm (pow2 32 < pow2 125);
   push_frame(); 
-  let h0 = ST.get() in 
-    hash alg mLen m hashAsFelem;
+    let h0 = ST.get() in 
+  let sz: FStar.UInt32.t = hash_len alg in
+  let mHash = create sz (u8 0) in    
+  
+  begin
+  match alg with 
+    |SHA2_256 ->
+      hash_256 m mLen mHash
+    |SHA2_384 ->
+      hash_384 m mLen mHash
+    |SHA2_512 -> 
+      hash_512 m mLen mHash
+  end;
+  
+  let cutHash = sub mHash (size 0) (size 32) in 
+  toUint64ChangeEndian cutHash result;
+  
   let h1 = ST.get() in 
-      lemma_core_0 hashAsFelem h1;
-  reduction_prime_2prime_order hashAsFelem hashAsFelem;
+ 
+  reduction_prime_2prime_order result result;
+
+  lemma_core_0 result h1;
+  Spec.ECDSA.changeEndianLemma (uints_from_bytes_be #U64 #_ #4 (as_seq h1 cutHash));
+  uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 cutHash);
+
   pop_frame()
 
 
