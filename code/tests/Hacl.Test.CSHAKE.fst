@@ -23,12 +23,11 @@ val test_cshake128:
     (ensures  fun h0 r h1 -> True)
 let test_cshake128 msg_len msg ctr out_len expected =
   push_frame ();
-  let to_buffer #len (x:glbuffer uint8 len)  : ilbuffer uint8 len  = LowStar.ConstBuffer.to_ibuffer #uint8 x in
   let test = create out_len (u8 0) in
   let msg' = create msg_len (u8 0) in
   copy msg' msg;
   cshake128_frodo msg_len msg' ctr out_len test;
-  if not (result_compare_display out_len test (to_buffer expected)) then C.exit 255l;
+  if not (result_compare_display out_len (to_const test) expected) then C.exit 255l;
   pop_frame ()
 
 inline_for_extraction noextract

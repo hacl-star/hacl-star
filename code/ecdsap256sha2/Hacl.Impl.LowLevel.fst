@@ -587,7 +587,7 @@ let mul1_add f1 u2 f3 result =
   pop_frame();  
   c +! c3
 
-#push-options "--z3rlimit 700"
+#push-options "--z3rlimit 800"
 
 val mul: f: felem -> r: felem -> out: widefelem
   -> Stack unit
@@ -1088,6 +1088,7 @@ let sq2 f f4 result memory tempBuffer =
   c3 +! h_3 +! c4
 
 
+
 val sq3: f: felem -> f4: felem -> result: felem -> memory: lbuffer uint64 (size 12) -> temp: lbuffer uint64 (size 5) -> 
   Stack uint64 
   (requires fun h -> live h f /\ live h f4 /\ live h result /\ live h temp /\ live h memory /\ eq_or_disjoint f4 result /\ disjoint f4 memory /\ disjoint f4 temp /\ disjoint f result /\ disjoint temp result /\ disjoint memory temp /\ disjoint memory result /\
@@ -1118,6 +1119,7 @@ val sq3: f: felem -> f4: felem -> result: felem -> memory: lbuffer uint64 (size 
     )
   )
 
+#push-options "--z3rlimit 800"
 
 let sq3 f f4 result memory tempBuffer = 
   let h0 = ST.get() in 
@@ -1290,6 +1292,7 @@ let sq f out =
     assert(modifies (loc out) h4 h5);
   pop_frame()
 
+#pop-options
 
  val cmovznz4: cin: uint64 -> x: felem -> y: felem -> result: felem ->
   Stack unit

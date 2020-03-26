@@ -165,16 +165,14 @@ val test:
 let test msg_len msg pk sk expected_sig = admit();
   push_frame ();
 
-  let to_buffer cb = LowStar.ConstBuffer.to_ibuffer #uint8 cb in
-
   C.String.print (C.String.of_literal "\nSign:\n");
   let test_sig = create 64ul (u8 0) in
-  Ed25519.sign test_sig (to_buffer sk) msg_len (to_buffer msg);
-  print_compare_display 64ul test_sig expected_sig;
+  Ed25519.sign test_sig (const_to_lbuffer sk) msg_len (const_to_lbuffer msg);
+  print_compare_display 64ul (to_const test_sig) expected_sig;
 
 
   C.String.print (C.String.of_literal "Verify:\n");
-  let res = Ed25519.verify (to_buffer pk) msg_len (to_buffer msg) (to_buffer expected_sig) in
+  let res = Ed25519.verify (const_to_lbuffer pk) msg_len (const_to_lbuffer msg) (const_to_lbuffer expected_sig) in
  (if res then
     C.String.print (C.String.of_literal "Success!\n")
   else
@@ -183,8 +181,8 @@ let test msg_len msg pk sk expected_sig = admit();
 
   C.String.print (C.String.of_literal "Secret_to_public:\n");
   let pk' = create 32ul (u8 0) in
-  Ed25519.secret_to_public pk' (LowStar.ConstBuffer.to_buffer #uint8 sk);
-  print_compare_display 32ul pk pk';
+  Ed25519.secret_to_public pk' (const_to_lbuffer sk);
+  print_compare_display 32ul pk (to_const pk');
   pop_frame ()
 
 val main: unit -> St C.exit_code

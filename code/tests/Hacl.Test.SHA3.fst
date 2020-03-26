@@ -39,10 +39,10 @@ let test_sha3 msg_len msg expected224 expected256 expected384 expected512 =
   sha3_384 msg_len msg' test384;
   sha3_512 msg_len msg' test512;
 
-  if not (result_compare_display 28ul test224 expected224) then C.exit 255l;
-  if not (result_compare_display 32ul test256 expected256) then C.exit 255l;
-  if not (result_compare_display 48ul test384 expected384) then C.exit 255l;
-  if not (result_compare_display 64ul test512 expected512) then C.exit 255l;
+  if not (result_compare_display 28ul (to_const test224) expected224) then C.exit 255l;
+  if not (result_compare_display 32ul (to_const test256) expected256) then C.exit 255l;
+  if not (result_compare_display 48ul (to_const test384) expected384) then C.exit 255l;
+  if not (result_compare_display 64ul (to_const test512) expected512) then C.exit 255l;
   pop_frame()
 
 val test_shake128:
@@ -60,7 +60,7 @@ let test_shake128 msg_len msg out_len expected =
   copy msg' msg;
   let test = create out_len (u8 0) in
   shake128_hacl msg_len msg' out_len test;
-  if not (result_compare_display out_len test expected) then C.exit 255l;
+  if not (result_compare_display out_len (to_const test) expected) then C.exit 255l;
   pop_frame ()
 
 val test_shake256:
@@ -78,7 +78,7 @@ let test_shake256 msg_len msg out_len expected =
   copy msg' msg;
   let test = create out_len (u8 0) in
   shake256_hacl msg_len msg' out_len test;
-  if not (result_compare_display out_len test expected) then C.exit 255l;
+  if not (result_compare_display out_len (to_const test) expected) then C.exit 255l;
   pop_frame ()
 
 val u8: n:nat{n < 0x100} -> uint8

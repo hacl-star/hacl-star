@@ -10,7 +10,7 @@ open Lib.Buffer
 open Lib.PrintBuffer
 open Hacl.Hash.SHA2
 
-#reset-options "--z3rlimit 150 --max_fuel 1 --max_ifuel 1 --using_facts_from '* -FStar.Seq'"
+#reset-options "--z3rlimit 200 --max_fuel 2 --max_ifuel 2 --using_facts_from '* -FStar.Seq'"
 
 val test_sha2:
     msg_len:size_t
@@ -37,15 +37,19 @@ let test_sha2 msg_len msg expected224 expected256 expected384 expected512 =
   let test256 = create 32ul (u8 0) in
   let test384 = create 48ul (u8 0) in
   let test512 = create 64ul (u8 0) in
+  assert(length test224 == Spec.Hash.Definitions.hash_length Spec.Hash.Definitions.SHA2_224);
   hash_224 msg' msg_len test224;
-  hash_256 msg' msg_len test256;
-  hash_384 msg' msg_len test384;
-  hash_512 msg' msg_len test512;
+  assert(length test256 == Spec.Hash.Definitions.hash_length Spec.Hash.Definitions.SHA2_256);
+  hash_256 msg' msg_len (test256 <: buffer_t MUT uint8);
+  assert(length test384 == Spec.Hash.Definitions.hash_length Spec.Hash.Definitions.SHA2_384);
+  hash_384 msg' msg_len (test384 <: buffer_t MUT uint8);
+  assert(length test512 == Spec.Hash.Definitions.hash_length Spec.Hash.Definitions.SHA2_512);
+  hash_512 msg' msg_len (test512 <: buffer_t MUT uint8);
 
-  print_compare_display 28ul test224 expected224;
-  print_compare_display 32ul test256 expected256;
-  print_compare_display 48ul test384 expected384;
-  print_compare_display 64ul test512 expected512;
+  print_compare_display 28ul (to_const #uint8 #MUT test224) expected224;
+  print_compare_display 32ul (to_const test256) expected256;
+  print_compare_display 48ul (to_const test384) expected384;
+  print_compare_display 64ul (to_const test512) expected512;
   pop_frame()
 
 

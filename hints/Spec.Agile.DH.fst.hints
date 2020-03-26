@@ -1,5 +1,5 @@
 [
-  "˚@ﬂGvJlC≈\u0015\\9∫ˆ`_",
+  "µ‰ã∫îùç\u0010'\ræcXà å",
   [
     [
       "Spec.Agile.DH.size_key",
@@ -24,7 +24,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "24c93181c19ae79eed64e30c40b9e045"
+      "4bc8a71c25ab03e4028eb182c899ac54"
     ],
     [
       "Spec.Agile.DH.size_public",
@@ -50,7 +50,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "78d482c21f4105fa9a49da3d74272383"
+      "3495ff0d345192831541cb72b538fa6e"
     ],
     [
       "Spec.Agile.DH.prime",
@@ -64,21 +64,7 @@
         "fuel_guarded_inversion_Spec.Agile.DH.algorithm"
       ],
       0,
-      "0c2abd979bb11097dd5b39cb66ef78bf"
-    ],
-    [
-      "Spec.Agile.DH.order",
-      1,
-      2,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Spec.Agile.DH.DH_Curve25519",
-        "disc_equation_Spec.Agile.DH.DH_P256",
-        "fuel_guarded_inversion_Spec.Agile.DH.algorithm"
-      ],
-      0,
-      "8c0adfd6634d0b4d00f479a70cd67772"
+      "f297c138e05f8e125d79906d62b44c3e"
     ],
     [
       "Spec.Agile.DH.clamp",
@@ -87,7 +73,7 @@
       1,
       [ "@query", "assumption_Spec.Agile.DH.algorithm__uu___haseq" ],
       0,
-      "6bb04f949082aba23c0da209ec43be96"
+      "e18232a674b8f0e60e28562adf102346"
     ],
     [
       "Spec.Agile.DH.clamp",
@@ -96,7 +82,7 @@
       1,
       [ "@query", "assumption_Spec.Agile.DH.algorithm__uu___haseq" ],
       0,
-      "4cc2ad9a0098945ca9c8199730a92b3e"
+      "9c1690550fcdfd26d6b39a5d584cf31b"
     ],
     [
       "Spec.Agile.DH.clamp",
@@ -107,54 +93,14 @@
         "@MaxIFuel_assumption", "@query",
         "constructor_distinct_Spec.Agile.DH.DH_Curve25519",
         "disc_equation_Spec.Agile.DH.DH_Curve25519",
-        "equality_tok_Spec.Agile.DH.DH_P256@tok",
+        "equality_tok_Spec.Agile.DH.DH_Curve25519@tok",
         "equation_Lib.Sequence.lseq", "equation_Spec.Agile.DH.scalar",
         "equation_Spec.Agile.DH.size_key",
-        "fuel_guarded_inversion_Spec.Agile.DH.algorithm",
-        "refinement_interpretation_Tm_refine_9f39d862c04a0727f7dcc14ce89891ac",
+        "refinement_interpretation_Tm_refine_348df7b05282e4d51c99c6591007846e",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42"
       ],
       0,
-      "2760d8d11bb06905aeabc7dc889b6453"
-    ],
-    [
-      "Spec.Agile.DH.scalarmult",
-      1,
-      2,
-      1,
-      [ "@query", "assumption_Spec.Agile.DH.algorithm__uu___haseq" ],
-      0,
-      "10fb37ae5b92eee384947b8d17a493e8"
-    ],
-    [
-      "Spec.Agile.DH.scalarmult",
-      2,
-      2,
-      1,
-      [ "@query", "assumption_Spec.Agile.DH.algorithm__uu___haseq" ],
-      0,
-      "83a1e37abaf33cdd8f13593fa9c7d172"
-    ],
-    [
-      "Spec.Agile.DH.scalarmult",
-      3,
-      2,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "constructor_distinct_Spec.Agile.DH.DH_Curve25519",
-        "disc_equation_Spec.Agile.DH.DH_Curve25519",
-        "equality_tok_Spec.Agile.DH.DH_P256@tok",
-        "equation_Lib.Sequence.lseq", "equation_Spec.Agile.DH.scalar",
-        "equation_Spec.Agile.DH.serialized_point",
-        "equation_Spec.Agile.DH.size_key",
-        "equation_Spec.Agile.DH.size_public",
-        "fuel_guarded_inversion_Spec.Agile.DH.algorithm",
-        "refinement_interpretation_Tm_refine_9f39d862c04a0727f7dcc14ce89891ac",
-        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42"
-      ],
-      0,
-      "9e79fad95445f7d4953075fefb68da24"
+      "eb765675267db0a9125f9bad54c35d81"
     ],
     [
       "Spec.Agile.DH.dh",
@@ -193,7 +139,7 @@
         "typing_Spec.Agile.DH.size_public", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "3b112ed276fe684bbe65a82e6ff3825d"
+      "82b5abc23e9ca8276fb38705d7f757dc"
     ],
     [
       "Spec.Agile.DH.secret_to_public",
@@ -249,7 +195,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "bcbb47050371f0e57e360e65803ef996"
+      "3de0147420a08d278045fb676fb363dc"
     ]
   ]
 ]

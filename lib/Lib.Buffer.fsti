@@ -43,14 +43,26 @@ unfold let ibuffer (a:Type0) = buffer_t IMMUT a
 unfold let cbuffer (a:Type0) = buffer_t CONST a
 
 (** Global buffers are const immutable *)
-unfold let gbuffer (a:Type0) = c:cbuffer a{CB.qual_of c == CB.IMMUTABLE /\
-					   B.frameOf (CB.as_mbuf c) == HyperStack.root}
+unfold let gbuffer (a:Type0) = c:cbuffer a{CB.qual_of c == CB.IMMUTABLE}
 
 let length (#t:buftype) (#a:Type0) (b:buffer_t t a) =
   match t with
   | MUT -> B.length (b <: buffer a)
   | IMMUT -> IB.length (b <: ibuffer a)
   | CONST -> CB.length (b <: cbuffer a)
+
+let to_const #a #t (b:buffer_t t a) : r:cbuffer a {length r == length b}=
+  match t with
+  | MUT -> CB.of_buffer (b <: buffer a)
+  | IMMUT -> CB.of_ibuffer (b <: ibuffer a)
+  | CONST -> b <: cbuffer a
+
+let const_to_buffer #a (b:cbuffer a{CB.qual_of b == CB.MUTABLE}) : r:buffer a{length r == length b} =
+  CB.to_buffer b
+
+let const_to_ibuffer #a (b:cbuffer a{CB.qual_of b == CB.IMMUTABLE}) : r:ibuffer a{length r == length b} =
+  CB.to_ibuffer b
+
 
 inline_for_extraction
 let lbuffer_t (ty:buftype) (a:Type0) (len:size_t) =
@@ -59,8 +71,13 @@ let lbuffer_t (ty:buftype) (a:Type0) (len:size_t) =
 unfold let lbuffer (a:Type0) (len:size_t) = lbuffer_t MUT a len
 unfold let ilbuffer (a:Type0) (len:size_t) = lbuffer_t IMMUT a len
 unfold let clbuffer (a:Type0) (len:size_t) = lbuffer_t CONST a len
-unfold let glbuffer (a:Type0) (len:size_t) = c:clbuffer a len{CB.qual_of #a c == CB.IMMUTABLE /\
-							      B.frameOf (CB.as_mbuf #a c) == HyperStack.root}
+unfold let glbuffer (a:Type0) (len:size_t) = c:clbuffer a len{CB.qual_of #a c == CB.IMMUTABLE}
+
+let const_to_lbuffer #a #len (b:clbuffer a len{CB.qual_of (b <: cbuffer a) == CB.MUTABLE}) : r:lbuffer a len =
+  const_to_buffer #a b
+
+let const_to_ilbuffer #a #len (b:glbuffer a len)  : r:ilbuffer a len =
+  const_to_ibuffer #a b
 
 //val live: #t:buftype -> #a:Type0 -> h:HS.mem -> b:buffer_t t a -> Type
 let live (#t:buftype) (#a:Type0) (h:HS.mem) (b:buffer_t t a) : Type =
