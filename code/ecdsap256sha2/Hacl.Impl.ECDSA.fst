@@ -40,6 +40,13 @@ open Hacl.Hash.Definitions
 let ecdsa_p256_sha2_sign result mLen m privKey k = 
   ecdsa_signature SHA2_256 result mLen m privKey k
 
+let ecdsa_p256_sha2_384_sign result mLen m privKey k = 
+  ecdsa_signature SHA2_384 result mLen m privKey k
+
+let ecdsa_p256_sha2_512_sign result mLen m privKey k = 
+  ecdsa_signature SHA2_512 result mLen m privKey k
+
+
 let ecdsa_p256_sha2_verify mLen m pubKey r s =
   ecdsa_verification pubKey r s mLen m
 

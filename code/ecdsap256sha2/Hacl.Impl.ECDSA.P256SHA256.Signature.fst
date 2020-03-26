@@ -38,17 +38,66 @@ open Hacl.Hash.Definitions
 
 #set-options "--z3rlimit 100"
 
-val hashF: alg: hash_alg ->  mLen: size_t -> m: lbuffer uint8 mLen -> result: lbuffer uint8 (size 32) -> Stack unit
-  (requires fun h -> True)
+
+inline_for_extraction noextract
+val hash: alg: hash_alg {SHA2_256? alg \/ SHA2_384? alg \/ SHA2_512? alg (* and blake one day *)}
+  ->  mLen: size_t -> m: lbuffer uint8 mLen -> result: felem -> Stack unit
+  (requires fun h -> live h m /\ live h result )
   (ensures fun h0 _ h1 -> True)
+
+let hash alg mLen m result = 
+  assert_norm (pow2 32 < pow2 61);
+  assert_norm (pow2 32 < pow2 125);
+  push_frame(); 
+  let mHash = create (hash_len alg) (u8 0) in   
+  match alg with 
+    |SHA2_256 -> begin
+      hash_256 m mLen mHash;
+      let cutMessage = sub mHash (size 0) (size 32) in 
+      toUint64ChangeEndian cutMessage result;
+      pop_frame()
+      end
+    |SHA2_384 -> begin 
+      hash_384 m mLen mHash; 
+      let cutMessage = sub mHash (size 0) (size 32) in 
+      toUint64ChangeEndian cutMessage result;
+      pop_frame()
+      end
+    |SHA2_512 -> begin
+      hash_512 m mLen mHash;
+      let cutMessage = sub mHash (size 0) (size 32) in 
+      toUint64ChangeEndian cutMessage result;
+      pop_frame()
+      end
+  
+
+(*
+
+Doesnot typecheck
 
 let hashF alg mLen m result = 
   assert_norm (pow2 32 < pow2 61);
+  assert_norm (pow2 32 < pow2 125);
+  push_frame(); 
+  let h0 = ST.get() in
+  let mHash = create (hash_len alg) (u8 0) in   
   match alg with 
-      |SHA2_256 -> hash_256 m mLen result
-      |_ -> hash_256 m mLen result; 
+    |SHA2_256 -> begin
+      hash_256 m mLen mHash
+      end
+    |SHA2_384 -> begin 
+      hash_384 m mLen mHash
+      end
+    |SHA2_512 -> begin
+      hash_512 m mLen mHash
+      end;
+
+  let cutMessage = sub mHash (size 0) (size 32) in 
+  toUint64ChangeEndian cutMessage result;
+  pop_frame();
    admit()
   
+*)
 
 
 val ecdsa_signature_step12: alg: hash_alg ->  hashAsFelem: felem -> mLen: size_t -> m: lbuffer uint8 mLen -> Stack unit 
