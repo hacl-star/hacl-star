@@ -515,18 +515,21 @@ let ecdsa_verification publicKey r s mLen input =
   end
 
 val ecdsa_signature:
-    mLen:size_nat
+  alg: hash_alg {SHA2_256? alg \/ SHA2_384? alg \/ SHA2_512? alg}
+  -> mLen:size_nat
   -> input:lseq uint8 mLen
   -> privateKey:lseq uint8 32
   -> k:lseq uint8 32
   -> tuple3 nat nat uint64
 
-let ecdsa_signature mLen input privateKey k =
+let ecdsa_signature alg mLen input privateKey k =
   assert_norm (pow2 32 < pow2 61);
+  assert_norm (pow2 32 < pow2 125);
   let r, _ = montgomery_ladder_spec k ((0,0,0), basePoint) in
   let (xN, _, _) = _norm r in
-  let hashM = Spec.Agile.Hash.hash Def.SHA2_256 input in
-  let z = nat_from_bytes_be hashM % prime_p256_order in
+  let hashM = (hashSpec alg) input in
+  let cutHashM = sub hashM 0 32 in 
+  let z = nat_from_bytes_be cutHashM % prime_p256_order in
   let kFelem = nat_from_bytes_be k in
   let privateKeyFelem = nat_from_bytes_be privateKey in
   let resultR = xN % prime_p256_order in
