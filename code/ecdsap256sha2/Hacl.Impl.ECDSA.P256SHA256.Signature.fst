@@ -33,10 +33,25 @@ open Hacl.Impl.P256.Signature.Common
 module H = Spec.Agile.Hash
 module Def = Spec.Hash.Definitions
 
+open Spec.Hash.Definitions
+open Hacl.Hash.Definitions
 
 #set-options "--z3rlimit 100"
 
-val ecdsa_signature_step12: hashAsFelem: felem -> mLen: size_t -> m: lbuffer uint8 mLen -> Stack unit 
+val hashF: alg: hash_alg ->  mLen: size_t -> m: lbuffer uint8 mLen -> result: lbuffer uint8 (size 32) -> Stack unit
+  (requires fun h -> True)
+  (ensures fun h0 _ h1 -> True)
+
+let hashF alg mLen m result = 
+  assert_norm (pow2 32 < pow2 61);
+  match alg with 
+      |SHA2_256 -> hash_256 m mLen result
+      |_ -> hash_256 m mLen result; 
+   admit()
+  
+
+
+val ecdsa_signature_step12: alg: hash_alg ->  hashAsFelem: felem -> mLen: size_t -> m: lbuffer uint8 mLen -> Stack unit 
   (requires fun h -> live h hashAsFelem /\ live h m)
   (ensures fun h0 _ h1 -> modifies (loc hashAsFelem) h0 h1 /\
     (
@@ -46,12 +61,12 @@ val ecdsa_signature_step12: hashAsFelem: felem -> mLen: size_t -> m: lbuffer uin
     ) 
   )
 
-let ecdsa_signature_step12 hashAsFelem mLen m  = 
+let ecdsa_signature_step12 alg hashAsFelem mLen m  = 
   assert_norm (pow2 32 < pow2 61);
   push_frame(); 
   let h0 = ST.get() in
     let mHash = create (size 32) (u8 0) in   
-    hash_256 m mLen mHash;
+    hashF alg mLen m mHash;
     toUint64ChangeEndian mHash hashAsFelem;
   let h1 = ST.get() in 
       lemma_core_0 hashAsFelem h1;
@@ -169,7 +184,7 @@ let ecdsa_signature_step6 result kFelem z r da =
       lemma_mod_mul_distr_r br0 br1 prime_p256_order
 
 
-val ecdsa_signature_core: r: felem -> s: felem -> mLen: size_t -> m: lbuffer uint8 mLen ->  
+val ecdsa_signature_core: alg: hash_alg -> r: felem -> s: felem -> mLen: size_t -> m: lbuffer uint8 mLen ->  
   privKeyAsFelem: felem  -> 
   k: lbuffer uint8 (size 32) -> 
   Stack uint64
@@ -204,14 +219,14 @@ val ecdsa_signature_core: r: felem -> s: felem -> mLen: size_t -> m: lbuffer uin
     )
   )
 
-let ecdsa_signature_core r s mLen m privKeyAsFelem k = 
+let ecdsa_signature_core alg r s mLen m privKeyAsFelem k = 
   push_frame();
   let h0 = ST.get() in 
   let hashAsFelem = create (size 4) (u64 0) in     
   let tempBuffer = create (size 100) (u64 0) in 
   let kAsFelem = create (size 4) (u64 0) in 
   toUint64ChangeEndian k kAsFelem;
-  ecdsa_signature_step12 hashAsFelem mLen m;
+  ecdsa_signature_step12 alg hashAsFelem mLen m;
   let h1 = ST.get() in 
   lemma_core_0 kAsFelem h1;
   Spec.ECDSA.changeEndianLemma (uints_from_bytes_be (as_seq h0 k));
@@ -225,7 +240,7 @@ let ecdsa_signature_core r s mLen m privKeyAsFelem k =
   logor step5Flag sIsZero
 
 
-val ecdsa_signature: result: lbuffer uint8 (size 64) -> mLen: size_t -> m: lbuffer uint8 mLen ->
+val ecdsa_signature: alg: hash_alg -> result: lbuffer uint8 (size 64) -> mLen: size_t -> m: lbuffer uint8 mLen ->
   privKey: lbuffer uint8 (size 32) -> 
   k: lbuffer uint8 (size 32) -> 
   Stack uint64
@@ -251,7 +266,7 @@ val ecdsa_signature: result: lbuffer uint8 (size 64) -> mLen: size_t -> m: lbuff
 
 #reset-options "--z3rlimit 400"
 
-let ecdsa_signature result mLen m privKey k = 
+let ecdsa_signature alg result mLen m privKey k = 
   push_frame();
   let h0 = ST.get() in 
   assert_norm (pow2 32 < pow2 61); 
@@ -266,7 +281,7 @@ let ecdsa_signature result mLen m privKey k =
   lemma_core_0 privKeyAsFelem h1;
   Spec.ECDSA.changeEndianLemma (uints_from_bytes_be (as_seq h0 privKey));
   uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 privKey);    
-  let flag = ecdsa_signature_core r s mLen m privKeyAsFelem k in 
+  let flag = ecdsa_signature_core alg r s mLen m privKeyAsFelem k in 
 
   let h2 = ST.get() in 
   

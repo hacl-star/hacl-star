@@ -33,9 +33,12 @@ open Hacl.Impl.ECDSA.P256SHA256.Verification
 
 open Hacl.Impl.P256.Compression
 
+open Spec.Hash.Definitions
+open Hacl.Hash.Definitions
+
 
 let ecdsa_p256_sha2_sign result mLen m privKey k = 
-  ecdsa_signature result mLen m privKey k
+  ecdsa_signature SHA2_256 result mLen m privKey k
 
 let ecdsa_p256_sha2_verify mLen m pubKey r s =
   ecdsa_verification pubKey r s mLen m
