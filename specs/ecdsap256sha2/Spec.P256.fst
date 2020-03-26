@@ -124,24 +124,9 @@ let lemma_euclidian_for_ithbit k i =
   pow2_plus (8 * (i / 8)) (i % 8)
 
 
-val ith_bit: k:lbytes 32 -> i:nat{i < 256}
-  -> t:uint64 {(v t == 0 \/ v t == 1) /\ v t == nat_from_intseq_le k / pow2 i % 2}
-
-let ith_bit k i =
-  let q = i / 8 in
-  let r = i % 8 in
-  let tmp1 = k.[q] >>. (size r) in
-  let tmp2 = tmp1 &. u8 1 in
-  let res = to_u64 tmp2 in
-  logand_le tmp1 (u8 1);
-  logand_mask tmp1 (u8 1) 1;
-  lemma_scalar_ith k q;
-  let k = nat_from_intseq_le k in
-  pow2_modulo_division_lemma_1 (k / pow2 (8 * (i / 8))) (i % 8) 8;
-  division_multiplication_lemma k (pow2 (8 * (i / 8))) (pow2 (i % 8));
-  lemma_euclidian_for_ithbit k i;
-  pow2_modulo_modulo_lemma_1 (k / pow2 i) 1 (8 - (i % 8));
-  res
+let ith_bit (k:lbytes 32) (i:nat{i < 256}) : uint64 =
+  let q = 31 - i / 8 in let r = size (i % 8) in
+  to_u64 ((index k q >>. r) &. u8 1)
 
 
 val _ml_step0: p:point_nat_prime -> q:point_nat_prime -> tuple2 point_nat_prime point_nat_prime

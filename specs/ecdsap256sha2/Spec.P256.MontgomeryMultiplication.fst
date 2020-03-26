@@ -115,6 +115,28 @@ let substractionInDomain a b =
 let ( *% ) a b = (a * b) % prime
 
 
+open Lib.ByteSequence
+
+val ith_bit_power: k:lbytes 32 -> i:nat{i < 256}
+  -> t:uint64 {(v t == 0 \/ v t == 1) /\ v t == nat_from_intseq_le k / pow2 i % 2}
+
+let ith_bit_power k i =
+  let q = i / 8 in
+  let r = i % 8 in
+  let tmp1 = k.[q] >>. (size r) in
+  let tmp2 = tmp1 &. u8 1 in
+  let res = to_u64 tmp2 in
+  logand_le tmp1 (u8 1);
+  logand_mask tmp1 (u8 1) 1;
+  lemma_scalar_ith k q;
+  let k = nat_from_intseq_le k in
+  pow2_modulo_division_lemma_1 (k / pow2 (8 * (i / 8))) (i % 8) 8;
+  division_multiplication_lemma k (pow2 (8 * (i / 8))) (pow2 (i % 8));
+  lemma_euclidian_for_ithbit k i;
+  pow2_modulo_modulo_lemma_1 (k / pow2 i) 1 (8 - (i % 8));
+  res
+
+
 let _pow_step0 r0 r1 =
   let r1 = r0 *% r1 in
   let r0 = r0 *% r0 in
@@ -136,13 +158,13 @@ open Lib.ByteSequence
 
 let _pow_step k i (p, q) =
   let bit = 255 - i in
-  let bit = ith_bit k bit in
+  let bit = ith_bit_power k bit in
   let open Lib.RawIntTypes in
   if uint_to_nat bit = 0 then _pow_step0 p q else _pow_step1 p q
 
 
 
-val lemma_even: index:pos{index <= 256} -> k:lseq uint8 32 {v (ith_bit k (256 - index)) == 0} ->
+val lemma_even: index:pos{index <= 256} -> k:lseq uint8 32 {v (ith_bit_power k (256 - index)) == 0} ->
   Lemma (
     let number = nat_from_bytes_le k in
     let newIndex = 256 - index in
@@ -157,7 +179,7 @@ let lemma_even index k =
   FStar.Math.Lemmas.division_multiplication_lemma number (pow2 n) 2
 
 
-val lemma_odd: index:pos{index <= 256} -> k:lseq uint8 32 {uint_v (ith_bit k (256 - index)) == 1} ->
+val lemma_odd: index:pos{index <= 256} -> k:lseq uint8 32 {uint_v (ith_bit_power k (256 - index)) == 1} ->
   Lemma(
     let number = nat_from_intseq_le k in
     let n = 256 - index  in
@@ -223,7 +245,7 @@ let rec lemma_exponen_spec k start index =
     begin
     unfold_repeati 256 f start (index - 1);
     lemma_exponen_spec k start (index - 1);
-    let bitMask = uint_v (ith_bit k (256 - index)) in
+    let bitMask = uint_v (ith_bit_power k (256 - index)) in
     match bitMask with
       | 0 ->
         let a0 = pow st1 (arithmetic_shift_right number (256 - index + 1)) in
