@@ -118,9 +118,7 @@ let computeYFromX x result sign =
     Spec.P256.Lemmas.lemma_core_0 result h10;
     Lib.ByteSequence.lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h10 result);
     Lib.ByteSequence.index_nat_to_intseq_le #U64 #SEC 4 (as_nat h10 result) 0;
-
-    assume (uint_v (uint #U64 #SEC (as_nat h8 result % pow2 64)) == as_nat h8 result % pow2 64);
-
+    
     pow2_modulo_modulo_lemma_1 (as_nat h10 result) 1 64;
 
     assert(modifies (loc aCoordinateBuffer |+| loc bCoordinateBuffer |+| loc result) h0 h9);
@@ -162,7 +160,7 @@ let lessThanPrime f =
   pop_frame();
     less
 
-#push-options "--z3rlimit 200"
+#push-options "--z3rlimit 400"
 
 let decompressionCompressedForm b result = 
   push_frame();
@@ -196,22 +194,26 @@ let decompressionCompressedForm b result =
 	  false
 	end  
       else 
-	begin
+	begin 
 	  toDomain temp temp;
 	  lemmaToDomain (as_nat h1 temp);
 	  computeYFromX temp temp2 (to_u64 (logand compressedIdentifier (u8 1)));
 	  logand_mask compressedIdentifier (u8 1) 1;
 	    let h4 = ST.get() in 
-
+	    
 	  changeEndian temp2;
 	  toUint8 temp2 (sub result (size 32) (size 32));
+
+	    let h5 = ST.get() in 
 
 	  Spec.P256.Lemmas.lemma_core_0 temp2 h4;
 	  
 	  Lib.ByteSequence.lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h4 temp2);
 	  Spec.ECDSA.changeEndian_le_be (as_nat h4 temp2);
-	
-	  pop_frame();
+
+	  assert(as_seq h5 (gsub result (size 32) (size 32)) == Lib.ByteSequence.nat_to_bytes_be 32 (as_nat h4 temp2)); 
+
+	  pop_frame(); 
 	  true
 	end
     end
