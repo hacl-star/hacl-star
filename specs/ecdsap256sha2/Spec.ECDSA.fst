@@ -366,7 +366,6 @@ let prime_p256_order_seq: s:lseq uint8 32{nat_from_intseq_be s == prime_p256_ord
   assert_norm (nat_from_intlist_be prime_p256_order_list == prime_p256_order);
   of_list prime_p256_order_list
 
-open Spec.P256.Definitions
 
 val exponent_spec: a:nat_prime -> r:nat_prime{r = pow a (prime_p256_order - 2) % prime_p256_order}
 
@@ -455,9 +454,9 @@ val verifyQValidCurvePointSpec:
 
 let verifyQValidCurvePointSpec publicKey =
   let (x: nat), (y:nat), (z:nat) = publicKey in
-  x < prime256 &&
-  y < prime256 &&
-  z < prime256 &&
+  x < Spec.P256.Definitions.prime256 &&
+  y < Spec.P256.Definitions.prime256 &&
+  z < Spec.P256.Definitions.prime256 &&
   isPointOnCurve (x, y, z) &&
   isPointAtInfinity (scalar_multiplication prime_p256_order_seq publicKey)
 
@@ -468,14 +467,6 @@ let checkCoordinates r s =
   if r > 0 && r < prime_p256_order && s > 0 && s < prime_p256_order
   then true
   else false
-
-
-unfold
-let basePoint: point_nat_prime =
-  assert_norm (0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296 < prime256);
-  (0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296,
-   0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5,
-   1)
 
 
 val ecdsa_verification: publicKey:tuple2 nat nat -> r:nat -> s:nat
