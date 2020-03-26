@@ -282,7 +282,7 @@ val scalar_bit:
   -> Stack uint64
     (requires fun h0 -> live h0 s)
     (ensures  fun h0 r h1 -> h0 == h1 /\ r == ith_bit (as_seq h0 s) (v n) /\ v r <= 1)
-      
+
 let scalar_bit #buf_type s n =
   let h0 = ST.get () in
   mod_mask_lemma ((Lib.Sequence.index (as_seq h0 s) (31 - v n / 8)) >>. (n %. 8ul)) 1ul;
