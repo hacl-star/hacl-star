@@ -49,7 +49,14 @@ let hash alg mLen m result =
   assert_norm (pow2 32 < pow2 61);
   assert_norm (pow2 32 < pow2 125);
   push_frame(); 
-  let mHash = create (hash_len alg) (u8 0) in   
+  let mHash = create (hash_len alg) (u8 0) in    
+  (* 
+  Spec.ECDSA.changeEndianLemma (uints_from_bytes_be #U64 #_ #4 (as_seq h1 mHash));
+  uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 mHash);
+  somewhere here
+  
+  *)
+
   match alg with 
     |SHA2_256 -> begin
       hash_256 m mLen mHash;
@@ -113,15 +120,11 @@ val ecdsa_signature_step12: alg: hash_alg ->  hashAsFelem: felem -> mLen: size_t
 let ecdsa_signature_step12 alg hashAsFelem mLen m  = 
   assert_norm (pow2 32 < pow2 61);
   push_frame(); 
-  let h0 = ST.get() in
-    let mHash = create (size 32) (u8 0) in   
-    hashF alg mLen m mHash;
-    toUint64ChangeEndian mHash hashAsFelem;
+  let h0 = ST.get() in 
+    hash alg mLen m hashAsFelem;
   let h1 = ST.get() in 
       lemma_core_0 hashAsFelem h1;
   reduction_prime_2prime_order hashAsFelem hashAsFelem;
-  Spec.ECDSA.changeEndianLemma (uints_from_bytes_be #U64 #_ #4 (as_seq h1 mHash));
-  uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 mHash);
   pop_frame()
 
 
