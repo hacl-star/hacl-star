@@ -127,7 +127,7 @@ val ecdsa_p256_sha2_verify:
       let r = nat_from_bytes_be (as_seq h1 r) in
       let s = nat_from_bytes_be (as_seq h1 s) in
       modifies0 h0 h1 /\
-      result == Spec.ECDSA.ecdsa_verification (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m))
+      result == Spec.ECDSA.ecdsa_verification SHA2_256 (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m))
 
 
 

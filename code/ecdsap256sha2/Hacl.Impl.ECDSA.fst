@@ -48,7 +48,7 @@ let ecdsa_p256_sha2_512_sign result mLen m privKey k =
 
 
 let ecdsa_p256_sha2_verify mLen m pubKey r s =
-  ecdsa_verification pubKey r s mLen m
+  ecdsa_verification SHA2_256 pubKey r s mLen m
 
 
 let decompressionNotCompressedForm b result = 

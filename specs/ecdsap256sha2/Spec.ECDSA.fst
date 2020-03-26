@@ -481,13 +481,18 @@ let hashSpec a =
   |SHA2_512 -> Spec.Agile.Hash.hash Def.SHA2_512
     
 
+open Lib.ByteSequence 
 
-val ecdsa_verification: publicKey:tuple2 nat nat -> r:nat -> s:nat
-  -> mLen:size_nat{mLen < Def.(max_input_length SHA2_256)}
+val ecdsa_verification:
+  alg: hash_alg {SHA2_256? alg \/ SHA2_384? alg \/ SHA2_512? alg} 
+  -> publicKey:tuple2 nat nat -> r:nat -> s:nat
+  -> mLen:size_nat
   -> input:lseq uint8 mLen
   -> bool
 
-let ecdsa_verification publicKey r s mLen input =
+let ecdsa_verification alg publicKey r s mLen input =
+  assert_norm (pow2 32 < pow2 61);
+  assert_norm (pow2 32 < pow2 125);
   let publicJacobian = toJacobianCoordinates publicKey in
   if not (verifyQValidCurvePointSpec publicJacobian) then false
   else
@@ -495,10 +500,9 @@ let ecdsa_verification publicKey r s mLen input =
     if not (checkCoordinates r s) then false
     else
       begin
-      let open Lib.ByteSequence in
-
-      let hashM = Spec.Agile.Hash.hash Def.SHA2_256 input in
-      let hashNat = nat_from_bytes_be hashM % prime_p256_order in
+      let hashM = (hashSpec alg) input in
+      let cutHashM = sub hashM 0 32 in 
+      let hashNat = nat_from_bytes_be cutHashM % prime_p256_order in
 
       let u1 = nat_to_bytes_be 32 (pow s (prime_p256_order - 2) * hashNat % prime_p256_order) in
       let u2 = nat_to_bytes_be 32 (pow s (prime_p256_order - 2) * r % prime_p256_order) in
