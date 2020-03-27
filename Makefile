@@ -733,8 +733,9 @@ dist/wasm/Makefile.basic: FRODO_BUNDLE = -bundle Hacl.Frodo.KEM,Frodo.Params,Hac
 ECDSA_BUNDLE = -bundle Hacl.Impl.ECDSA,Hacl.Impl.ECDSA,Hacl.Impl.ECDSA.*,Hacl.Impl.P256.*,Hacl.Impl.P256,Hacl.Spec.P256.*,Hacl.Impl.SolinasReduction,Hacl.Impl.LowLevel
 
 # No Vale Curve64 no "Local" or "Slow" Curve64, only Curve51 (local Makefile hack)
-dist/wasm/Makefile.basic: CURVE_BUNDLE = $(CURVE_BUNDLE_BASE) \
-  -bundle 'Hacl.Curve25519_64_Slow' \
+dist/wasm/Makefile.basic: CURVE_BUNDLE = \
+	$(CURVE_BUNDLE_BASE) \
+  -drop 'Hacl.Curve25519_64_Slow' \ # TODO: use the right combination of bundles instead of drop.
   -bundle 'Hacl.Curve25519_64' \
   -bundle 'Hacl.Curve25519_64_Local'
 
