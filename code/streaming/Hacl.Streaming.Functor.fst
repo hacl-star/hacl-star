@@ -8,6 +8,7 @@ module Hacl.Streaming.Functor
 
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
+module ST = FStar.HyperStack.ST
 module HS = FStar.HyperStack
 module B = LowStar.Buffer
 module G = FStar.Ghost
@@ -59,6 +60,7 @@ let footprint #index (c: block index) (i: index) (m: HS.mem) (s: state c i) =
 
 /// Invariants
 
+noextract
 let bytes = S.seq uint8
 
 noextract
@@ -139,3 +141,121 @@ let invariant_loc_in_footprint #index c i s m =
   in
   ()
 #pop-options
+
+// TODO: move to fsti
+val seen: #index:Type0 -> c:block index -> i:index -> h:HS.mem -> s:state c i -> GTot bytes
+let seen #index c i h s =
+  G.reveal (State?.seen (B.deref h s))
+
+val frame_invariant: #index:Type0 -> c:block index -> i:index -> l:B.loc -> s:state c i -> h0:HS.mem -> h1:HS.mem -> Lemma
+  (requires (
+    invariant c i h0 s /\
+    B.loc_disjoint l (footprint c i h0 s) /\
+    B.modifies l h0 h1))
+  (ensures (
+    invariant c i h1 s /\
+    footprint c i h0 s == footprint c i h1 s))
+  [ SMTPat (invariant c i h1 s); SMTPat (B.modifies l h0 h1) ]
+
+let frame_invariant #index c i l s h0 h1 =
+  let state_s = B.deref h0 s in
+  let State block_state _ _ _ = state_s in
+  c.frame_invariant #i l block_state h0 h1
+
+val frame_seen: #index:Type0 -> c:block index -> i:index -> l:B.loc -> s:state c i -> h0:HS.mem -> h1:HS.mem -> Lemma
+  (requires (
+    invariant c i h0 s /\
+    B.loc_disjoint l (footprint c i h0 s) /\
+    B.modifies l h0 h1))
+  (ensures (seen c i h0 s == seen c i h1 s))
+  [ SMTPat (seen c i h1 s); SMTPat (B.modifies l h0 h1) ]
+
+let frame_seen #_ _ _ _ _ _ _ =
+  ()
+
+val frame_freeable: #index:Type0 -> c:block index -> i:index -> l:B.loc -> s:state c i -> h0:HS.mem -> h1:HS.mem -> Lemma
+  (requires (
+    invariant c i h0 s /\
+    freeable c i h0 s /\
+    B.loc_disjoint l (footprint c i h0 s) /\
+    B.modifies l h0 h1))
+  (ensures (freeable c i h1 s))
+  [ SMTPat (freeable c i h1 s); SMTPat (B.modifies l h0 h1) ]
+
+let frame_freeable #index c i l s h0 h1 =
+  let State block_state _ _ _ = B.deref h0 s in
+  c.frame_freeable #i l block_state h0 h1
+
+val create_in (#index: Type0) (c: block index) (i: index) (r: HS.rid): ST (state c i)
+  (requires (fun _ ->
+    HyperStack.ST.is_eternal_region r))
+  (ensures (fun h0 s h1 ->
+    invariant c i h1 s /\
+    seen c i h1 s == S.empty /\
+    B.(modifies loc_none h0 h1) /\
+    B.fresh_loc (footprint c i h1 s) h0 h1 /\
+    B.(loc_includes (loc_region_only true r) (footprint c i h1 s)) /\
+    freeable c i h1 s))
+
+let split_at_last_empty (block_length: pos): Lemma
+  (ensures (
+    let blocks, rest = split_at_last block_length S.empty in
+    S.equal blocks S.empty /\ S.equal rest S.empty))
+=
+  ()
+
+#push-options "--using_facts_from '*,-LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2'"
+let create_in #index c i r =
+  let aux (h:HS.mem) (s:c.state i): Lemma
+    (requires (c.invariant h s))
+    (ensures (B.loc_in (c.footprint #i h s) h))
+    [SMTPat (c.invariant h s)]
+  =
+    c.invariant_loc_in_footprint #i h s
+  in
+
+  (**) let h0 = ST.get () in
+
+  (**) B.loc_unused_in_not_unused_in_disjoint h0;
+  let buf = B.malloc r (Lib.IntTypes.u8 0) (c.block_len i) in
+  (**) let h1 = ST.get () in
+  (**) assert (B.fresh_loc (B.loc_buffer buf) h0 h1);
+  (**) B.loc_unused_in_not_unused_in_disjoint h1;
+
+  let hash_state = c.create_in i r in
+  (**) let h2 = ST.get () in
+  (**) assert (B.fresh_loc (c.footprint #i h2 hash_state) h0 h2);
+
+  let s = State hash_state buf 0UL (G.hide S.empty) in
+  (**) assert (B.fresh_loc (footprint_s c i h2 s) h0 h2);
+
+  (**) B.loc_unused_in_not_unused_in_disjoint h2;
+  let p = B.malloc r s 1ul in
+  (**) let h3 = ST.get () in
+  (**) c.frame_invariant B.loc_none hash_state h2 h3;
+  B.(modifies_only_not_unused_in loc_none h2 h3);
+  (**) assert (B.fresh_loc (B.loc_addr_of_buffer p) h0 h3);
+  (**) assert (B.fresh_loc (footprint_s c i h3 s) h0 h3);
+
+  c.init (G.hide i) hash_state;
+  (**) let h4 = ST.get () in
+  (**) assert (B.fresh_loc (c.footprint #i h4 hash_state) h0 h4);
+  (**) assert (B.fresh_loc (B.loc_buffer buf) h0 h4);
+  (**) c.update_multi_zero i (c.v h4 hash_state);
+  (**) split_at_last_empty (U32.v (c.block_len i));
+  (**) B.modifies_only_not_unused_in B.loc_none h0 h4;
+
+  (**) let h5 = ST.get () in
+  (**) assert (invariant c i h5 p);
+  (**) assert (seen c i h5 p == S.empty);
+  (**) assert B.(modifies loc_none h0 h5);
+  (**) assert (B.fresh_loc (footprint c i h5 p) h0 h5);
+  (**) assert B.(loc_includes (loc_region_only true r) (footprint c i h5 p));
+  (**) assert (freeable c i h5 p);
+
+  (**) assert (ST.equal_stack_domains h1 h5);
+  (**) assert (ST.equal_stack_domains h0 h1);
+
+  p
+#pop-options
+

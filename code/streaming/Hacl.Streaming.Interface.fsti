@@ -58,11 +58,26 @@ type block (index: Type0) =
     t i) ->
   finish_s: (i:index -> t i -> s:S.seq uint8 { S.length s = U32.v (output_len i) }) ->
 
+  /// Required lemmas... clients need to introduce these into their context via a local SMTPat.
+
+  update_multi_zero: (i:index -> h:t i -> Lemma
+    (ensures (update_multi_s i h S.empty == h))) ->
+
+  update_multi_associative: (i:index ->
+    h: t i ->
+    input1:S.seq uint8 { S.length input1 % U32.v (block_len i) = 0 } ->
+    input2:S.seq uint8 { S.length input2 % U32.v (block_len i) = 0 } ->
+    Lemma (ensures (
+      let input = S.append input1 input2 in
+      assert (S.length input == S.length input1 + S.length input2);
+      FStar.Math.Lemmas.modulo_distributivity (S.length input1) (S.length input2) (U32.v (block_len i));
+      update_multi_s i (update_multi_s i h input1) input2 ==
+        update_multi_s i h input))) ->
+
   // Adequate framing lemmas
   invariant_loc_in_footprint: (#i:index -> h:HS.mem -> s:state i -> Lemma
     (requires (invariant h s))
-    (ensures (B.loc_in (footprint #i h s) h))
-    [SMTPat (invariant h s)]) ->
+    (ensures (B.loc_in (footprint #i h s) h))) ->
 
   frame_invariant: (#i:index -> l:B.loc -> s:state i -> h0:HS.mem -> h1:HS.mem -> Lemma
     (requires (
@@ -73,6 +88,15 @@ type block (index: Type0) =
       invariant h1 s /\
       v h0 s == v h1 s /\
       footprint #i h1 s == footprint #i h0 s))) ->
+
+  frame_freeable: (#i:index -> l:B.loc -> s:state i -> h0:HS.mem -> h1:HS.mem -> Lemma
+    (requires (
+      invariant h0 s /\
+      freeable h0 s /\
+      B.loc_disjoint l (footprint #i h0 s) /\
+      B.modifies l h0 h1))
+    (ensures (
+      freeable h1 s))) ->
 
   // Stateful operations
   alloca: (i:index -> StackInline (state i)
@@ -203,10 +227,13 @@ let evercrypt_hash: block Spec.Hash.Definitions.hash_alg = Block
   Spec.Agile.Hash.update_multi
   Spec.Hash.Incremental.update_last
   Spec.Hash.PadFinish.finish
+  Spec.Hash.Lemmas.update_multi_zero
+  Spec.Hash.Lemmas.update_multi_associative'
   (fun #i h s -> EverCrypt.Hash.invariant_loc_in_footprint s h)
   (fun #i l s h0 h1 ->
     EverCrypt.Hash.frame_invariant l s h0 h1;
     EverCrypt.Hash.frame_invariant_implies_footprint_preservation l s h0 h1)
+  (fun #i l s h0 h1 -> ())
   EverCrypt.Hash.alloca
   EverCrypt.Hash.create_in
   (fun i -> EverCrypt.Hash.init #i)
@@ -233,7 +260,10 @@ let hacl_sha2_256: block unit =
     (fun () -> Spec.Agile.Hash.(update_multi SHA2_256))
     (fun () -> Spec.Hash.Incremental.(update_last SHA2_256))
     (fun () -> Spec.Hash.PadFinish.(finish SHA2_256))
+    (fun _ _ -> ())
+    (fun _ _ _ _ -> ())
     (fun #_ h s -> ())
+    (fun #_ l s h0 h1 -> ())
     (fun #_ l s h0 h1 -> ())
     (fun () -> B.alloca (Lib.IntTypes.u32 0) 8ul)
     (fun () r -> B.malloc r (Lib.IntTypes.u32 0) 8ul)
