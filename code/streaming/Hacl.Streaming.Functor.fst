@@ -272,3 +272,87 @@ let create_in #index c i r =
   p
 #pop-options
 
+val init: #index:Type0 -> c:block index -> i:G.erased index -> (
+  let i = G.reveal i in
+  s:state c i -> Stack unit
+  (requires (fun h0 ->
+    invariant c i h0 s))
+  (ensures (fun h0 _ h1 ->
+    preserves_freeable c i s h0 h1 /\
+    invariant c i h1 s /\
+    seen c i h1 s == S.empty /\
+    footprint c i h0 s == footprint c i h1 s /\
+    B.(modifies (footprint c i h0 s) h0 h1))))
+
+let init #index c i s =
+  let aux (h:HS.mem) (s:c.state i): Lemma
+    (requires (c.invariant h s))
+    (ensures (B.loc_in (c.footprint #i h s) h))
+    [SMTPat (c.invariant h s)]
+  =
+    c.invariant_loc_in_footprint #i h s
+  in
+  let aux l s h0 h1: Lemma
+    (requires
+      c.invariant h0 s /\
+      c.freeable h0 s /\
+      B.loc_disjoint l (c.footprint #i h0 s) /\
+      B.modifies l h0 h1)
+    (ensures (
+      c.freeable h1 s))
+    [ SMTPat (c.freeable h1 s); SMTPat (B.modifies l h0 h1) ]
+  =
+    c.frame_freeable #i l s h0 h1
+  in
+
+  let open LowStar.BufferOps in
+  let h1 = ST.get () in
+  let State hash_state buf _ _ = !*s in
+  // JP: figuring out the alg at run-time is useful, but entails a lot more
+  // proof difficulty; note the let-binding below, as well as the fact that
+  // implicit argument resolution basically no longer works after this...
+  let i = c.index_of_state i hash_state in
+  [@inline_let]
+  let hash_state: c.state i = hash_state in
+
+  c.init (G.hide i) hash_state;
+  let h2 = ST.get () in
+  c.update_multi_zero i (c.v h2 hash_state);
+  split_at_last_empty U32.(v (c.block_len i));
+
+  B.upd s 0ul (State hash_state buf 0UL (G.hide S.empty));
+  let h3 = ST.get () in
+  c.frame_invariant B.(loc_buffer s) hash_state h2 h3;
+
+  // This seems to cause insurmountable difficulties. Puzzled.
+  ST.lemma_equal_domains_trans h1 h2 h3;
+
+  // AR: 07/22: same old `Seq.equal` and `==` story
+  assert (Seq.equal (seen c i h3 s) Seq.empty);
+
+  assert (preserves_freeable c i s h1 h3);
+  //assert (hashed h3 s == S.empty);
+  assert (footprint c i h1 s == footprint c i h3 s);
+  assert (B.(modifies (footprint c i h1 s) h1 h3));
+  //assert (B.live h3 s);
+  //assert (B.(loc_disjoint (loc_addr_of_buffer s) (footprint_s h3 (B.deref h3 s))));
+  assert (
+    let h = h3 in
+    let s = B.get h3 s 0 in
+    let State hash_state buf_ total_len seen = s in
+    let seen = G.reveal seen in
+    let blocks, rest = split_at_last (U32.v (c.block_len i)) seen in
+
+    // Liveness and disjointness (administrative)
+    B.live h buf_ /\ c.invariant #i h hash_state /\
+    B.(loc_disjoint (loc_buffer buf_) (c.footprint h hash_state)) /\
+
+    // Formerly, the "hashes" predicate
+    S.length blocks + S.length rest = U64.v total_len /\
+    S.length seen = U64.v total_len /\
+    U64.v total_len < c.max_input_length i /\
+    // Note the double equals here, we now no longer know that this is a sequence.
+    c.v h hash_state == c.update_multi_s i (c.init_s i) blocks /\
+    S.equal (S.slice (B.as_seq h buf_) 0 (U64.v total_len % U32.v (c.block_len i))) rest
+  );
+  assert (invariant_s c i h3 (B.get h3 s 0))

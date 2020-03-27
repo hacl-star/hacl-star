@@ -63,6 +63,12 @@ type block (index: Type0) =
   freeable: (#i:index -> h:HS.mem -> p:state i -> Type) ->
   invariant: (#i:index -> h:HS.mem -> s:state i -> Type) ->
 
+  index_of_state: (i:G.erased index -> (
+    let i = G.reveal i in
+    s: state i -> Stack index
+    (fun h0 -> invariant h0 s)
+    (fun h0 i' h1 -> h0 == h1 /\ i' == i))) ->
+
   // A pure representation of a state
   t: (index -> Type0) ->
   v: (#i:index -> h:HS.mem -> s:state i -> GTot (t i)) ->
@@ -243,6 +249,7 @@ let evercrypt_hash: block Spec.Hash.Definitions.hash_alg =
     (fun #i h s -> EverCrypt.Hash.footprint s h)
     EverCrypt.Hash.freeable
     (fun #i h s -> EverCrypt.Hash.invariant s h)
+    EverCrypt.Hash.alg_of_state
     Spec.Hash.Definitions.words_state
     (fun #i h s -> EverCrypt.Hash.repr s h)
     Spec.Hash.Definitions.max_input_length
@@ -276,6 +283,7 @@ let hacl_sha2_256: block unit =
     (fun #_ h s -> B.loc_addr_of_buffer s)
     (fun #_ h s -> B.freeable s)
     (fun #_ h s -> B.live h s)
+    (fun _ _ -> ())
     (fun _ -> words_state SHA2_256)
     (fun #_ h s -> B.as_seq h s)
     (fun () -> max_input_length SHA2_256)
