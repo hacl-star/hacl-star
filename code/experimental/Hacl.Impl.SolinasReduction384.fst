@@ -15,7 +15,36 @@ module BV = FStar.BitVector
 module Seq = FStar.Seq
 
 
-#reset-options "--fuel 0 --ifuel 0 --z3rlimit 50"
+assume val p384_double: arg1: felem6_buffer -> out: felem6_buffer -> Stack unit 
+  (requires fun h -> live h arg1 /\ live h out /\ as_nat6 h arg1 < prime384 /\ as_nat6 h out < prime384)
+  (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+      as_nat6 h1 out = (2 * as_nat6 h0 arg1) % prime384 /\ 
+      as_nat6 h1 out < prime384
+      )
+  )   
+
+
+assume val p384_add: arg1: felem6_buffer -> arg2: felem6_buffer -> out: felem6_buffer -> Stack unit 
+  (requires fun h -> live h arg1 /\ live h arg2 /\ live h out /\ as_nat6 h arg1 < prime384 /\ as_nat6 h arg2 < prime384)
+  (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+      as_nat6 h1 out = (as_nat6 h0 arg1 + as_nat6 h0 arg2) % prime384 /\ 
+      as_nat6 h1 out < prime384
+      )
+  )   
+
+
+assume val p384_sub: arg1: felem6_buffer -> arg2: felem6_buffer -> out: felem6_buffer -> Stack unit 
+  (requires fun h -> live h arg1 /\ live h arg2 /\ live h out /\ as_nat6 h arg1 < prime384 /\ as_nat6 h arg2 < prime384)
+  (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    as_nat6 h1 out = (as_nat6 h0 arg1 - as_nat6 h0 arg2) % prime384 /\
+    as_nat6 h1 out < prime384
+    )
+  )
+
+
+
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 50"
+(* http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.46.2133&rep=rep1&type=pdf *)
 
 inline_for_extraction noextract
 val get_high_part: a:uint64 -> r:uint32{uint_v r == uint_v a / pow2 32}
@@ -173,8 +202,7 @@ val upl_fir_buffer: c21: uint32 -> c22: uint32 -> c23: uint32 -> o: lbuffer uint
 
 let upl_fir_buffer c21 c22 c23 o = 
   assert_norm (pow2 (1 * 32) * pow2 (2 * 32) = pow2 (3 * 32));
-  assert_norm (pow2 (2 * 32) * pow2 (2 * 32) = pow2 (4 * 32));
-  assert_norm (pow2 (3 * 32) * pow2 (2 * 32) = pow2 (5 * 32));
+  assert_norm (pow2 (2 * 32) * pow2 (2 * 32) = pow2 (4 * 32));  assert_norm (pow2 (3 * 32) * pow2 (2 * 32) = pow2 (5 * 32));
   assert_norm (pow2 (4 * 32) * pow2 (2 * 32) = pow2 (6 * 32));
   assert_norm (pow2 (5 * 32) * pow2 (2 * 32) = pow2 (7 * 32));
 
@@ -249,6 +277,191 @@ let upl_thi_buffer c12 c13 c14 c15 c16 c17 c18 c19 c20 c21 c22 c23 o =
   reduction_prime_2prime o o    
 
 
+val upl_forth_buffer: c12: uint32 -> c13: uint32 -> c14: uint32 -> c15: uint32 -> c16: uint32 -> c17: uint32 -> c18: uint32 -> c19: uint32-> c20: uint32 -> c23: uint32 -> 
+o: lbuffer uint64 (size 6) -> 
+  Stack unit 
+    (requires fun h -> live h o) 
+    (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\ 
+      as_nat6 h1 o = (v c23 * pow2 (1 * 32) + v c20 * pow2 (3 * 32) + v c12 * pow2 (4 * 32) + v c13 * pow2 (5 * 32) + v c14 * pow2 (6 * 32) + v c15 * pow2 (7 * 32) + v c16 * pow2 (8 * 32) + v c17 * pow2 (9 * 32) + v c18 * pow2 (10 * 32) + v c19 * pow2 (11 * 32)) % prime384)
+
+
+let upl_forth_buffer c12 c13 c14 c15 c16 c17 c18 c19 c20 c23 o = 
+  assert_norm (pow2 (1 * 32) * pow2 (2 * 32) = pow2 (3 * 32));
+  assert_norm (pow2 (2 * 32) * pow2 (2 * 32) = pow2 (4 * 32));
+  assert_norm (pow2 (3 * 32) * pow2 (2 * 32) = pow2 (5 * 32));
+  assert_norm (pow2 (4 * 32) * pow2 (2 * 32) = pow2 (6 * 32));
+  assert_norm (pow2 (5 * 32) * pow2 (2 * 32) = pow2 (7 * 32));
+  assert_norm (pow2 (6 * 32) * pow2 (2 * 32) = pow2 (8 * 32));
+  assert_norm (pow2 (7 * 32) * pow2 (2 * 32) = pow2 (9 * 32));
+  assert_norm (pow2 (8 * 32) * pow2 (2 * 32) = pow2 (10 * 32));
+  assert_norm (pow2 (9 * 32) * pow2 (2 * 32) = pow2 (11 * 32));
+
+  let b0 = store_high_low_u c23 (u32 0) in 
+  let b1 = store_high_low_u c20 (u32 0) in 
+  let b2 = store_high_low_u c13 c12 in 
+  let b3 = store_high_low_u c15 c14 in 
+  let b4 = store_high_low_u c17 c16 in 
+  let b5 = store_high_low_u c19 c18 in 
+
+  load_buffer b0 b1 b2 b3 b4 b5 o;
+  reduction_prime_2prime o o
+
+
+val upl_fif_buffer: c20: uint32 -> c21: uint32 -> c22: uint32 -> c23: uint32 -> 
+  o: lbuffer uint64 (size 6) -> 
+  Stack unit 
+    (requires fun h -> live h o)
+    (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\
+      as_nat6 h1 o = ((v c20 * pow2 (4 * 32) + v c21 * pow2 (5 * 32) + v c22 * pow2 (6 * 32) + v c23 * pow2 (7 * 32)) % prime384))
+     
+let upl_fif_buffer c20 c21 c22 c23 o = 
+  assert_norm (pow2 (1 * 32) * pow2 (2 * 32) = pow2 (3 * 32));
+  assert_norm (pow2 (2 * 32) * pow2 (2 * 32) = pow2 (4 * 32));
+  assert_norm (pow2 (3 * 32) * pow2 (2 * 32) = pow2 (5 * 32));
+  assert_norm (pow2 (4 * 32) * pow2 (2 * 32) = pow2 (6 * 32));
+  assert_norm (pow2 (5 * 32) * pow2 (2 * 32) = pow2 (7 * 32));
+  assert_norm (pow2 (6 * 32) * pow2 (2 * 32) = pow2 (8 * 32));
+  assert_norm (pow2 (7 * 32) * pow2 (2 * 32) = pow2 (9 * 32));
+  assert_norm (pow2 (8 * 32) * pow2 (2 * 32) = pow2 (10 * 32));
+  assert_norm (pow2 (9 * 32) * pow2 (2 * 32) = pow2 (11 * 32));
+
+  let b0 = store_high_low_u (u32 0) (u32 0) in 
+  let b1 = store_high_low_u (u32 0) (u32 0) in 
+  let b2 = store_high_low_u c21 c20 in 
+  let b3 = store_high_low_u c23 c22 in 
+  let b4 = store_high_low_u (u32 0) (u32 0) in 
+  let b5 = store_high_low_u (u32 0) (u32 0) in 
+
+  load_buffer b0 b1 b2 b3 b4 b5 o;
+  reduction_prime_2prime o o;
+      let h1 = ST.get() in 
+  assert_norm (pow2 (8 * 32) < prime384);
+  modulo_lemma (as_nat6 h1 o) prime384
+
+
+val upl_six_buffer: c20: uint32 -> c21: uint32 -> c22: uint32 -> c23: uint32 -> 
+  o: lbuffer uint64 (size 6) -> 
+  Stack unit 
+    (requires fun h -> live h o)
+    (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\
+      as_nat6 h1 o == (v c20 + v c21 * pow2 (3 * 32) + v c22 * pow2 (4 * 32) + v c23 * pow2 (5 * 32)) % prime384)
+
+let upl_six_buffer c20 c21 c22 c23 o =
+  assert_norm (pow2 (1 * 32) * pow2 (2 * 32) = pow2 (3 * 32));
+  assert_norm (pow2 (2 * 32) * pow2 (2 * 32) = pow2 (4 * 32));
+  assert_norm (pow2 (3 * 32) * pow2 (2 * 32) = pow2 (5 * 32));
+  assert_norm (pow2 (4 * 32) * pow2 (2 * 32) = pow2 (6 * 32));
+  assert_norm (pow2 (5 * 32) * pow2 (2 * 32) = pow2 (7 * 32));
+  assert_norm (pow2 (6 * 32) * pow2 (2 * 32) = pow2 (8 * 32));
+  assert_norm (pow2 (7 * 32) * pow2 (2 * 32) = pow2 (9 * 32));
+  assert_norm (pow2 (8 * 32) * pow2 (2 * 32) = pow2 (10 * 32));
+  assert_norm (pow2 (9 * 32) * pow2 (2 * 32) = pow2 (11 * 32));
+
+  let b0 = store_high_low_u (u32 0) c20 in 
+  let b1 = store_high_low_u c21 (u32 0) in 
+  let b2 = store_high_low_u c23 c22 in 
+  let b3 = store_high_low_u (u32 0) (u32 0) in 
+  let b4 = store_high_low_u (u32 0) (u32 0) in 
+  let b5 = store_high_low_u (u32 0) (u32 0) in 
+
+  load_buffer b0 b1 b2 b3 b4 b5 o;
+  reduction_prime_2prime o o;
+      let h1 = ST.get() in 
+  assert_norm (pow2 (6 * 32) < prime384);
+  modulo_lemma (as_nat6 h1 o) prime384
+
+
+val upl_sev_buffer: c12: uint32 -> c13: uint32 -> c14: uint32 -> c15: uint32 -> c16: uint32 -> c17: uint32 -> c18: uint32 -> c19: uint32 -> c20: uint32 -> c21: uint32 -> c22: uint32 -> c23: uint32 -> 
+  o: lbuffer uint64 (size 6) ->
+  Stack unit 
+    (requires fun h -> live h o)
+    (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\ 
+     as_nat6 h1 o = (v c23 + v c12 * pow2 (1 * 32) + v c13 * pow2 (2 * 32) + v c14 * pow2 (3 * 32) + v c15 * pow2 (4 * 32) + v c16 * pow2 (5 * 32) + v c17 * pow2 (6 * 32) + v c18 * pow2 (7 * 32) + v c19 * pow2 (8 * 32) + v c20 * pow2 (9 * 32) + v c21 * pow2 (10 * 32) + v c22 * pow2 (11 * 32)) % prime384)
+      
+let upl_sev_buffer c12 c13 c14 c15 c16 c17 c18 c19 c20 c21 c22 c23 o = 
+  assert_norm (pow2 (1 * 32) * pow2 (2 * 32) = pow2 (3 * 32));
+  assert_norm (pow2 (2 * 32) * pow2 (2 * 32) = pow2 (4 * 32));
+  assert_norm (pow2 (3 * 32) * pow2 (2 * 32) = pow2 (5 * 32));
+  assert_norm (pow2 (4 * 32) * pow2 (2 * 32) = pow2 (6 * 32));
+  assert_norm (pow2 (5 * 32) * pow2 (2 * 32) = pow2 (7 * 32));
+  assert_norm (pow2 (6 * 32) * pow2 (2 * 32) = pow2 (8 * 32));
+  assert_norm (pow2 (7 * 32) * pow2 (2 * 32) = pow2 (9 * 32));
+  assert_norm (pow2 (8 * 32) * pow2 (2 * 32) = pow2 (10 * 32));
+  assert_norm (pow2 (9 * 32) * pow2 (2 * 32) = pow2 (11 * 32));
+
+  let b0 = store_high_low_u c12 c23 in 
+  let b1 = store_high_low_u c14 c13 in 
+  let b2 = store_high_low_u c16 c15 in 
+  let b3 = store_high_low_u c18 c17 in 
+  let b4 = store_high_low_u c20 c19 in 
+  let b5 = store_high_low_u c22 c21 in 
+
+  load_buffer b0 b1 b2 b3 b4 b5 o;
+  reduction_prime_2prime o o
+
+
+val upl_eit_buffer: c20: uint32 -> c21: uint32 -> c22: uint32 -> c23: uint32 -> 
+  o: lbuffer uint64 (size 6) ->
+  Stack unit 
+    (requires fun h -> live h o)
+    (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\
+      as_nat6 h1 o = (v c20 * pow2 (1 * 32) + v c21 * pow2 (2 * 32) + v c22 * pow2 (3 * 32) + v c23 * pow2 (4 * 32)) % prime384)
+
+let upl_eit_buffer c20 c21 c22 c23 o = 
+  assert_norm (pow2 (1 * 32) * pow2 (2 * 32) = pow2 (3 * 32));
+  assert_norm (pow2 (2 * 32) * pow2 (2 * 32) = pow2 (4 * 32));
+  assert_norm (pow2 (3 * 32) * pow2 (2 * 32) = pow2 (5 * 32));
+  assert_norm (pow2 (4 * 32) * pow2 (2 * 32) = pow2 (6 * 32));
+  assert_norm (pow2 (5 * 32) * pow2 (2 * 32) = pow2 (7 * 32));
+  assert_norm (pow2 (6 * 32) * pow2 (2 * 32) = pow2 (8 * 32));
+  assert_norm (pow2 (7 * 32) * pow2 (2 * 32) = pow2 (9 * 32));
+  assert_norm (pow2 (8 * 32) * pow2 (2 * 32) = pow2 (10 * 32));
+  assert_norm (pow2 (9 * 32) * pow2 (2 * 32) = pow2 (11 * 32));
+
+  let b0 = store_high_low_u c20 (u32 0) in 
+  let b1 = store_high_low_u c22 c21 in 
+  let b2 = store_high_low_u (u32 0) c23 in 
+  let b3 = store_high_low_u (u32 0) (u32 0) in 
+  let b4 = store_high_low_u (u32 0) (u32 0) in 
+  let b5 = store_high_low_u (u32 0) (u32 0) in 
+
+  load_buffer b0 b1 b2 b3 b4 b5 o;
+  reduction_prime_2prime o o;
+      let h1 = ST.get() in 
+  assert_norm (pow2 (6 * 32) < prime384);
+  modulo_lemma (as_nat6 h1 o) prime384
+
+
+val upl_nin_buffer: c23: uint32 -> 
+  o: lbuffer uint64 (size 6) -> 
+  Stack unit 
+    (requires fun h -> live h o)
+    (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\
+      as_nat6 h1 o = (v c23 * pow2 (3 * 32) + v c23 * pow2 (4 * 32)) % prime384)
+
+let upl_nin_buffer c23 o = 
+  assert_norm (pow2 (1 * 32) * pow2 (2 * 32) = pow2 (3 * 32));
+  assert_norm (pow2 (2 * 32) * pow2 (2 * 32) = pow2 (4 * 32));
+  assert_norm (pow2 (3 * 32) * pow2 (2 * 32) = pow2 (5 * 32));
+  assert_norm (pow2 (4 * 32) * pow2 (2 * 32) = pow2 (6 * 32));
+  assert_norm (pow2 (5 * 32) * pow2 (2 * 32) = pow2 (7 * 32));
+  assert_norm (pow2 (6 * 32) * pow2 (2 * 32) = pow2 (8 * 32));
+  assert_norm (pow2 (7 * 32) * pow2 (2 * 32) = pow2 (9 * 32));
+  assert_norm (pow2 (8 * 32) * pow2 (2 * 32) = pow2 (10 * 32));
+  assert_norm (pow2 (9 * 32) * pow2 (2 * 32) = pow2 (11 * 32));
+
+  let b0 = store_high_low_u (u32 0) (u32 0) in 
+  let b1 = store_high_low_u c23 (u32 0) in 
+  let b2 = store_high_low_u (u32 0) c23 in 
+  let b3 = store_high_low_u (u32 0) (u32 0) in 
+  let b4 = store_high_low_u (u32 0) (u32 0) in 
+  let b5 = store_high_low_u (u32 0) (u32 0) in 
+
+  load_buffer b0 b1 b2 b3 b4 b5 o;
+  reduction_prime_2prime o o;
+      let h1 = ST.get() in 
+  assert_norm (pow2 (6 * 32) < prime384);
+  modulo_lemma (as_nat6 h1 o) prime384
 
 
 (* Not sure that FStar will manage to reason about such an input *)
@@ -257,42 +470,283 @@ val solinas_reduction_upload: c0: uint32 -> c1: uint32 ->  c2: uint32 ->  c3: ui
   c10: uint32 ->  c11: uint32 ->  c12: uint32 ->  c13: uint32 ->  c14: uint32 ->  c15: uint32 ->  
   c16: uint32 ->  c17: uint32 ->  c18: uint32 ->  c19: uint32 ->  c20: uint32 ->  c21: uint32 ->  
   c22: uint32 ->  c23: uint32 -> 
-  tempBuffer: lbuffer uint64 (size 36) -> 
+  tempBuffer: lbuffer uint64 (size 60) -> 
   Stack unit 
     (requires fun h -> live h tempBuffer) 
-    (ensures fun h0 _ h1 -> True)
+    (ensures fun h0 _ h1 -> modifies (loc tempBuffer) h0 h1 /\
+      (
+	let t0 = as_nat6 h1 (gsub tempBuffer (size 0) (size 6)) in
+        let t1 = as_nat6 h1 (gsub tempBuffer (size 6) (size 6)) in
+        let t2 = as_nat6 h1 (gsub tempBuffer (size 12) (size 6)) in
+        let t3 = as_nat6 h1 (gsub tempBuffer (size 18) (size 6)) in
+        let t4 = as_nat6 h1 (gsub tempBuffer (size 24) (size 6)) in
+        let t5 = as_nat6 h1 (gsub tempBuffer (size 30) (size 6)) in
+        let t6 = as_nat6 h1 (gsub tempBuffer (size 36) (size 6)) in
+        let t7 = as_nat6 h1 (gsub tempBuffer (size 42) (size 6)) in
+        let t8 = as_nat6 h1 (gsub tempBuffer (size 48) (size 6)) in
+	let t9 = as_nat6 h1 (gsub tempBuffer (size 54) (size 6)) in 
+	t0 = (v c0 + v c1 * pow2 (1 * 32) + v c2 * pow2 (2 * 32) + v c3 * pow2 (3 * 32) + v c4 * pow2 (4 * 32) + v c5 * pow2 (5 * 32) + v c6 * pow2 (6 * 32) + v c7 * pow2 (7 * 32) + v c8 * pow2 (8 * 32) + v c9 * pow2 (9 * 32) + v c10 * pow2 (10 * 32) + v c11 * pow2 (11 * 32)) % prime384 /\
+	t1 = (v c21 * pow2 (4 * 32) + v c22 * pow2 (5 * 32) + v c23 * pow2 (6 * 32)) % prime384 /\
+	t2 = (v c12 + v c13 * pow2 (1 * 32) + v c14 * pow2 (2 * 32) + v c15 * pow2 (3 * 32) + v c16 * pow2 (4 * 32) + v c17 * pow2 (5 * 32) + v c18 * pow2 (6 * 32) + v c19 * pow2 (7 * 32) + v c20 * pow2 (8 * 32) + v c21 * pow2 (9 * 32) + v c22 * pow2 (10 * 32) + v c23 * pow2 (11 * 32)) % prime384 /\
+	t3 = (v c21 + v c22 * pow2 (1 * 32) + v c23 * pow2 (2 * 32) + v c12 * pow2 (3 * 32) + v c13 * pow2 (4 * 32) + v c14 * pow2 (5 * 32) + v c15 * pow2 (6 * 32) + v c16 * pow2 (7 * 32) + v c17 * pow2 (8 * 32) + v c18 * pow2 (9 * 32) + v c19 * pow2 (10 * 32) + v c20 * pow2 (11 * 32)) % prime384 /\
+	t4 = (v c23 * pow2 (1 * 32) + v c20 * pow2 (3 * 32) + v c12 * pow2 (4 * 32) + v c13 * pow2 (5 * 32) + v c14 * pow2 (6 * 32) + v c15 * pow2 (7 * 32) + v c16 * pow2 (8 * 32) + v c17 * pow2 (9 * 32) + v c18 * pow2 (10 * 32) + v c19 * pow2 (11 * 32)) % prime384 /\
+	t5 = (v c20 * pow2 (4 * 32) + v c21 * pow2 (5 * 32) + v c22 * pow2 (6 * 32) + v c23 * pow2 (7 * 32)) % prime384 /\
+	t6 = (v c20 + v c21 * pow2 (3 * 32) + v c22 * pow2 (4 * 32) + v c23 * pow2 (5 * 32)) % prime384 /\
+	t7 = (v c23 + v c12 * pow2 (1 * 32) + v c13 * pow2 (2 * 32) + v c14 * pow2 (3 * 32) + v c15 * pow2 (4 * 32) + v c16 * pow2 (5 * 32) + v c17 * pow2 (6 * 32) + v c18 * pow2 (7 * 32) + v c19 * pow2 (8 * 32) + v c20 * pow2 (9 * 32) + v c21 * pow2 (10 * 32) + v c22 * pow2 (11 * 32)) % prime384 /\
+	t8 = (v c20 * pow2 (1 * 32) + v c21 * pow2 (2 * 32) + v c22 * pow2 (3 * 32) + v c23 * pow2 (4 * 32)) % prime384 /\
+	t9 = (v c23 * pow2 (3 * 32) + v c23 * pow2 (4 * 32)) % prime384
+      )
+  )
+    
 
 let solinas_reduction_upload c0 c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 c12 c13 c14 c15 c16 c17 c18 c19 c20 c21 c22 c23 tempBuffer = 
-  push_frame();
+  let t0 = sub tempBuffer (size 0) (size 6) in 
+  let t1 = sub tempBuffer (size 6) (size 6) in 
+  let t2 = sub tempBuffer (size 12) (size 6) in 
+  let t3 = sub tempBuffer (size 18) (size 6) in 
+  let t4 = sub tempBuffer (size 24) (size 6) in 
+  let t5 = sub tempBuffer (size 30) (size 6) in 
+  let t6 = sub tempBuffer (size 36) (size 6) in 
+  let t7 = sub tempBuffer (size 42) (size 6) in 
+  let t8 = sub tempBuffer (size 48) (size 6) in 
+  let t9 = sub tempBuffer (size 54) (size 6) in 
     
-    let t0 = sub tempBuffer (size 0) (size 6) in 
-    let t1 = sub tempBuffer (size 6) (size 6) in 
-    let t2 = sub tempBuffer (size 12) (size 6) in 
-    let t3 = sub tempBuffer (size 18) (size 6) in 
-    
-    upl_zer_buffer c0 c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 t0;
-    upl_fir_buffer c21 c22 c23 t1;
-    upl_sec_buffer c12 c13 c14 c15 c16 c17 c18 c19 c20 c21 c22 c23 t2;
-    upl_thi_buffer c12 c13 c14 c15 c16 c17 c18 c19 c20 c21 c22 c23 t3;
-  pop_frame()  
+  upl_zer_buffer c0 c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 t0;
+  upl_fir_buffer c21 c22 c23 t1;
+  upl_sec_buffer c12 c13 c14 c15 c16 c17 c18 c19 c20 c21 c22 c23 t2;
+  upl_thi_buffer c12 c13 c14 c15 c16 c17 c18 c19 c20 c21 c22 c23 t3;
+  upl_forth_buffer c12 c13 c14 c15 c16 c17 c18 c19 c20 c23 t4;
+  upl_fif_buffer c20 c21 c22 c23 t5;
+  upl_six_buffer c20 c21 c22 c23 t6;
+  upl_sev_buffer c12 c13 c14 c15 c16 c17 c18 c19 c20 c21 c22 c23 t7;
+  upl_eit_buffer c20 c21 c22 c23 t8;
+  upl_nin_buffer c23 t9
 
 
-
-
-
-
-val solinas_reduction_operations: tempBuffer: lbuffer uint64 (size 36) -> o: lbuffer uint64 (size 6) -> 
+val solinas_reduction_operations: tempBuffer: lbuffer uint64 (size 60) -> o: lbuffer uint64 (size 6) -> 
   Stack unit 
-    (requires fun h -> live h o /\ live h tempBuffer /\ disjoint tempBuffer o)
-    (ensures fun h0 _ h1 -> True)
+    (requires fun h -> live h o /\ live h tempBuffer /\ disjoint tempBuffer o /\
+      (
+          let t0 = as_nat6 h (gsub tempBuffer (size 0) (size 6)) in
+          let t1 = as_nat6 h (gsub tempBuffer (size 6) (size 6)) in
+          let t2 = as_nat6 h (gsub tempBuffer (size 12) (size 6)) in
+          let t3 = as_nat6 h (gsub tempBuffer (size 18) (size 6)) in
+          let t4 = as_nat6 h (gsub tempBuffer (size 24) (size 6)) in
+          let t5 = as_nat6 h (gsub tempBuffer (size 30) (size 6)) in
+          let t6 = as_nat6 h (gsub tempBuffer (size 36) (size 6)) in
+          let t7 = as_nat6 h (gsub tempBuffer (size 42) (size 6)) in
+          let t8 = as_nat6 h (gsub tempBuffer (size 48) (size 6)) in
+	  let t9 = as_nat6 h (gsub tempBuffer (size 54) (size 6)) in 
+          t0 < prime384 /\ t1 < prime384 /\ t2 < prime384 /\ t3 < prime384 /\ t4 < prime384 /\
+          t5 < prime384 /\ t6 < prime384 /\ t7 < prime384 /\ t8 < prime384 /\ t9 < prime384
+      ) 
+    )
+    (ensures fun h0 _ h1 -> modifies (loc tempBuffer |+| loc o) h0 h1 /\
+      (
+	let t0 = as_nat6 h0 (gsub tempBuffer (size 0) (size 6)) in
+        let t1 = as_nat6 h0 (gsub tempBuffer (size 6) (size 6)) in
+        let t2 = as_nat6 h0 (gsub tempBuffer (size 12) (size 6)) in
+        let t3 = as_nat6 h0 (gsub tempBuffer (size 18) (size 6)) in
+        let t4 = as_nat6 h0 (gsub tempBuffer (size 24) (size 6)) in
+        let t5 = as_nat6 h0 (gsub tempBuffer (size 30) (size 6)) in
+        let t6 = as_nat6 h0 (gsub tempBuffer (size 36) (size 6)) in
+        let t7 = as_nat6 h0 (gsub tempBuffer (size 42) (size 6)) in
+        let t8 = as_nat6 h0 (gsub tempBuffer (size 48) (size 6)) in
+	let t9 = as_nat6 h0 (gsub tempBuffer (size 54) (size 6)) in 
+	as_nat6 h1 o = (t0 + 2 * t1 + t2 + t3 + t4 + t5 + t6 - t7 - t8 - t9) % prime384
+      )
+    )
+    
 
-let solinas_reduction_operations tempBuffer o = ()
+let solinas_reduction_operations tempBuffer o = 
+  let t0 = sub tempBuffer (size 0) (size 6) in
+  let t1 = sub tempBuffer (size 6) (size 6) in
+  let t2 = sub tempBuffer (size 12) (size 6) in
+  let t3 = sub tempBuffer (size 18) (size 6) in
+  let t4 = sub tempBuffer (size 24) (size 6) in
+  let t5 = sub tempBuffer (size 30) (size 6) in
+  let t6 = sub tempBuffer (size 36) (size 6) in
+  let t7 = sub tempBuffer (size 42) (size 6) in
+  let t8 = sub tempBuffer (size 48) (size 6) in
+  let t9 = sub tempBuffer (size 54) (size 6) in 
+
+  let h0 = ST.get() in 
+
+  p384_double t1 t1;
+  p384_add t0 t1 t1;
+  p384_add t1 t2 t2;
+  p384_add t2 t3 t3;
+  p384_add t3 t4 t4;
+  p384_add t4 t5 t5;
+  p384_add t5 t6 t6;
+  p384_sub t6 t7 t7;
+  p384_sub t7 t8 t8;
+  p384_sub t8 t9 o;
+
+  let h1 = ST.get() in 
+  assert(as_nat6 h1 o = ((((((((((as_nat6 h1 t0 + (as_nat6 h0 t1 + as_nat6 h0 t1) % prime384) % prime384 + as_nat6 h0 t2) % prime384) + as_nat6 h0 t3) % prime384 + as_nat6 h0 t4) % prime384 + as_nat6 h0 t5) % prime384 + as_nat6 h0 t6) % prime384 - as_nat6 h0 t7) % prime384 - as_nat6 h0 t8) % prime384 - as_nat6 h0 t9) % prime384);
+
+  calc (==) {
+  as_nat6 h1 o;
+  (==) {}
+  ((((((((((as_nat6 h1 t0 + (as_nat6 h0 t1 + as_nat6 h0 t1) % prime384) % prime384 + as_nat6 h0 t2) % prime384) + as_nat6 h0 t3) % prime384 + as_nat6 h0 t4) % prime384 + as_nat6 h0 t5) % prime384 + as_nat6 h0 t6) % prime384 - as_nat6 h0 t7) % prime384 - as_nat6 h0 t8) % prime384 - as_nat6 h0 t9) % prime384;
+  (==)
+  {lemma_mod_add_distr (as_nat6 h1 t0) (as_nat6 h0 t1 + as_nat6 h0 t1) prime384}
+  ((((((((((as_nat6 h1 t0 + as_nat6 h0 t1 + as_nat6 h0 t1) % prime384 + as_nat6 h0 t2) % prime384) + as_nat6 h0 t3) % prime384 + as_nat6 h0 t4) % prime384 + as_nat6 h0 t5) % prime384 + as_nat6 h0 t6) % prime384 - as_nat6 h0 t7) % prime384 - as_nat6 h0 t8) % prime384 - as_nat6 h0 t9) % prime384;
+  (==) 
+  {lemma_mod_add_distr (as_nat6 h0 t2) (as_nat6 h1 t0 + as_nat6 h0 t1 + as_nat6 h0 t1) prime384}
+  (((((((((as_nat6 h1 t0 + as_nat6 h0 t1 + as_nat6 h0 t1 + as_nat6 h0 t2) % prime384) + as_nat6 h0 t3) % prime384 + as_nat6 h0 t4) % prime384 + as_nat6 h0 t5) % prime384 + as_nat6 h0 t6) % prime384 - as_nat6 h0 t7) % prime384 - as_nat6 h0 t8) % prime384 - as_nat6 h0 t9) % prime384;
+  (==)
+  {lemma_mod_add_distr (as_nat6 h0 t3) (as_nat6 h1 t0 + as_nat6 h0 t1 + as_nat6 h0 t1 + as_nat6 h0 t2) prime384}
+  (((((((as_nat6 h1 t0 + as_nat6 h0 t1 + as_nat6 h0 t1 + as_nat6 h0 t2 + as_nat6 h0 t3) % prime384 + as_nat6 h0 t4) % prime384 + as_nat6 h0 t5) % prime384 + as_nat6 h0 t6) % prime384 - as_nat6 h0 t7) % prime384 - as_nat6 h0 t8) % prime384 - as_nat6 h0 t9) % prime384;
+  (==)
+  {lemma_mod_add_distr (as_nat6 h0 t4) (as_nat6 h1 t0 + as_nat6 h0 t1 + as_nat6 h0 t1 + as_nat6 h0 t2 + as_nat6 h0 t3) prime384}
+  ((((((as_nat6 h1 t0 + as_nat6 h0 t1 + as_nat6 h0 t1 + as_nat6 h0 t2 + as_nat6 h0 t3 + as_nat6 h0 t4) % prime384 + as_nat6 h0 t5) % prime384 + as_nat6 h0 t6) % prime384 - as_nat6 h0 t7) % prime384 - as_nat6 h0 t8) % prime384 - as_nat6 h0 t9) % prime384;
+  (==) 
+  {lemma_mod_add_distr (as_nat6 h0 t5) (as_nat6 h1 t0 + as_nat6 h0 t1 + as_nat6 h0 t1 + as_nat6 h0 t2 + as_nat6 h0 t3 + as_nat6 h0 t4) prime384}
+  (((((as_nat6 h1 t0 + as_nat6 h0 t1 + as_nat6 h0 t1 + as_nat6 h0 t2 + as_nat6 h0 t3 + as_nat6 h0 t4 + as_nat6 h0 t5) % prime384 + as_nat6 h0 t6) % prime384 - as_nat6 h0 t7) % prime384 - as_nat6 h0 t8) % prime384 - as_nat6 h0 t9) % prime384;
+  (==) 
+  {lemma_mod_add_distr (as_nat6 h0 t6) (as_nat6 h1 t0 + as_nat6 h0 t1 + as_nat6 h0 t1 + as_nat6 h0 t2 + as_nat6 h0 t3 + as_nat6 h0 t4 + as_nat6 h0 t5) prime384}
+  ((((as_nat6 h1 t0 + as_nat6 h0 t1 + as_nat6 h0 t1 + as_nat6 h0 t2 + as_nat6 h0 t3 + as_nat6 h0 t4 + as_nat6 h0 t5 + as_nat6 h0 t6) % prime384 - as_nat6 h0 t7) % prime384 - as_nat6 h0 t8) % prime384 - as_nat6 h0 t9) % prime384;
+  (==)
+  {lemma_mod_add_distr (-as_nat6 h0 t7) (as_nat6 h1 t0 + as_nat6 h0 t1 + as_nat6 h0 t1 + as_nat6 h0 t2 + as_nat6 h0 t3 + as_nat6 h0 t4 + as_nat6 h0 t5 + as_nat6 h0 t6) prime384}
+  (((as_nat6 h1 t0 + as_nat6 h0 t1 + as_nat6 h0 t1 + as_nat6 h0 t2 + as_nat6 h0 t3 + as_nat6 h0 t4 + as_nat6 h0 t5 + as_nat6 h0 t6 - as_nat6 h0 t7) % prime384 - as_nat6 h0 t8) % prime384 - as_nat6 h0 t9) % prime384;
+  (==)
+  {lemma_mod_add_distr (- as_nat6 h0 t8) (as_nat6 h1 t0 + as_nat6 h0 t1 + as_nat6 h0 t1 + as_nat6 h0 t2 + as_nat6 h0 t3 + as_nat6 h0 t4 + as_nat6 h0 t5 + as_nat6 h0 t6 - as_nat6 h0 t7) prime384}
+  ((as_nat6 h1 t0 + as_nat6 h0 t1 + as_nat6 h0 t1 + as_nat6 h0 t2 + as_nat6 h0 t3 + as_nat6 h0 t4 + as_nat6 h0 t5 + as_nat6 h0 t6 - as_nat6 h0 t7 - as_nat6 h0 t8) % prime384 - as_nat6 h0 t9) % prime384;
+  (==)
+  {lemma_mod_add_distr (- as_nat6 h0 t9) (as_nat6 h1 t0 + as_nat6 h0 t1 + as_nat6 h0 t1 + as_nat6 h0 t2 + as_nat6 h0 t3 + as_nat6 h0 t4 + as_nat6 h0 t5 + as_nat6 h0 t6 - as_nat6 h0 t7 - as_nat6 h0 t8) prime384}
+  (as_nat6 h1 t0 + 2 * as_nat6 h0 t1 + as_nat6 h0 t2 + as_nat6 h0 t3 + as_nat6 h0 t4 + as_nat6 h0 t5 + as_nat6 h0 t6 - as_nat6 h0 t7 - as_nat6 h0 t8 - as_nat6 h0 t9) % prime384;}
+
+
+let _uint32 = n:nat{n < pow2 32}
+
+assume val solinas_reduction_mod:
+  c0_n: _uint32->
+  c1_n: _uint32 ->
+  c2_n: _uint32 ->
+  c3_n: _uint32 ->
+  c4_n: _uint32 ->
+  c5_n: _uint32 ->
+  c6_n: _uint32 ->
+  c7_n: _uint32 ->
+  c8_n: _uint32 ->
+  c9_n: _uint32 ->
+  c10_n: _uint32 ->
+  c11_n: _uint32 ->
+  c12_n: _uint32 ->
+  c13_n: _uint32 ->
+  c14_n: _uint32 ->
+  c15_n: _uint32 ->
+  c16_n: _uint32 -> 
+  c17_n: _uint32 -> 
+  c18_n: _uint32 -> 
+  c19_n: _uint32 -> 
+  c20_n: _uint32 -> 
+  c21_n: _uint32 -> 
+  c22_n: _uint32 -> 
+  c23_n: _uint32 ->
+  s0: nat {s0 = (c0_n + c1_n * pow2 (1 * 32) + c2_n * pow2 (2 * 32) + c3_n * pow2 (3 * 32) + c4_n * pow2 (4 * 32) + c5_n * pow2 (5 * 32) + c6_n * pow2 (6 * 32) + c7_n * pow2 (7 * 32) + c8_n * pow2 (8 * 32) + c9_n * pow2 (9 * 32) + c10_n * pow2 (10 * 32) + c11_n * pow2 (11 * 32)) % prime384} ->
+  s1: nat {s1 = (c21_n * pow2 (4 * 32) + c22_n * pow2 (5 * 32) + c23_n * pow2 (6 * 32)) % prime384} ->
+  s2: nat {s2 = (c12_n + c13_n * pow2 (1 * 32) + c14_n * pow2 (2 * 32) + c15_n * pow2 (3 * 32) + c16_n * pow2 (4 * 32) + c17_n * pow2 (5 * 32) + c18_n * pow2 (6 * 32) + c19_n * pow2 (7 * 32) + c20_n * pow2 (8 * 32) + c21_n * pow2 (9 * 32) + c22_n * pow2 (10 * 32) + c23_n * pow2 (11 * 32)) % prime384} ->
+  s3: nat {s3 = (c21_n + c22_n * pow2 (1 * 32) + c23_n * pow2 (2 * 32) + c12_n * pow2 (3 * 32) + c13_n * pow2 (4 * 32) + c14_n * pow2 (5 * 32) + c15_n * pow2 (6 * 32) + c16_n * pow2 (7 * 32) + c17_n * pow2 (8 * 32) + c18_n * pow2 (9 * 32) + c19_n * pow2 (10 * 32) + c20_n * pow2 (11 * 32)) % prime384} ->
+  s4: nat {s4 = (c23_n * pow2 (1 * 32) + c20_n * pow2 (3 * 32) + c12_n * pow2 (4 * 32) + c13_n * pow2 (5 * 32) + c14_n * pow2 (6 * 32) + c15_n * pow2 (7 * 32) + c16_n * pow2 (8 * 32) + c17_n * pow2 (9 * 32) + c18_n * pow2 (10 * 32) + c19_n * pow2 (11 * 32)) % prime384} ->
+  s5: nat {s5 = (c20_n * pow2 (4 * 32) + c21_n * pow2 (5 * 32) + c22_n * pow2 (6 * 32) + c23_n * pow2 (7 * 32)) % prime384} ->
+  s6: nat {s6 = (c20_n + c21_n * pow2 (3 * 32) + c22_n * pow2 (4 * 32) + c23_n * pow2 (5 * 32)) % prime384} ->
+  s7: nat {s7 = (c23_n + c12_n * pow2 (1 * 32) + c13_n * pow2 (2 * 32) + c14_n * pow2 (3 * 32) + c15_n * pow2 (4 * 32) + c16_n * pow2 (5 * 32) + c17_n * pow2 (6 * 32) + c18_n * pow2 (7 * 32) + c19_n * pow2 (8 * 32) + c20_n * pow2 (9 * 32) + c21_n * pow2 (10 * 32) + c22_n * pow2 (11 * 32)) % prime384} ->
+  s8: nat {s8 = (c20_n * pow2 (1 * 32) + c21_n * pow2 (2 * 32) + c22_n * pow2 (3 * 32) + c23_n * pow2 (4 * 32)) % prime384} ->
+  s9: nat {s9 = (c23_n * pow2 (3 * 32) + c23_n * pow2 (4 * 32)) % prime384} ->
+  n: int {n = (s0 + 2 * s1 + s2 + s3 + s4 + s5 + s6 - s7 - s8 - s9) % prime384} ->
+  Lemma (n % prime384 == (c0_n + c1_n * pow2 32 + c2_n * pow2 (2 * 32) + c3_n * pow2 (3 * 32) + c4_n * pow2 (4 * 32) + c5_n * pow2 (5 * 32) + c6_n * pow2 (6 * 32) + c7_n * pow2 (7 * 32) + c8_n * pow2 256 + c9_n * pow2 (9 * 32) + c10_n * pow2 (10 * 32)  + c11_n * pow2 (11 * 32) + c12_n * pow2 (12 * 32) + c13_n* pow2 (13 * 32) + c14_n * pow2 (14 * 32) + c15_n * pow2 (15 * 32) + c16_n * pow2 (16 * 32) + c17_n * pow2 (17 * 32) + c18_n * pow2 (18 * 32) + c19_n * pow2 (19 * 32) + c20_n * pow2 (20 * 32) + c21_n * pow2 (21 * 32) + c22_n * pow2 (22 * 32) + c23_n * pow2 (23 * 32)) % prime384)
+
+
+
+assume val lemma_opened: i:Lib.Sequence.lseq uint64 12 -> Lemma
+  (let open Lib.Sequence in
+   
+    let i0 = index i 0 in
+    let i1 = index i 1 in
+    let i2 = index i 2 in
+    let i3 = index i 3 in
+    let i4 = index i 4 in
+    let i5 = index i 5 in
+    let i6 = index i 6 in
+    let i7 = index i 7 in
+    let i8 = index i 8 in 
+    let i9 = index i 9 in 
+    let i10 = index i 10 in 
+    let i11 = index i 11 in 
+
+
+    let c0 = get_low_part i0 in
+    let c1 = get_high_part i0 in
+    let c2 = get_low_part i1 in
+    let c3 = get_high_part i1 in
+    let c4 = get_low_part i2 in
+    let c5 = get_high_part i2 in
+    let c6 = get_low_part i3 in
+    let c7 = get_high_part i3 in
+    let c8 = get_low_part i4 in
+    let c9 = get_high_part i4 in
+    let c10 = get_low_part i5 in
+    let c11 = get_high_part i5 in
+    let c12 = get_low_part i6 in
+    let c13 = get_high_part i6 in
+    let c14 = get_low_part i7 in
+    let c15 = get_high_part i7 in
+    let c16 = get_low_part i8 in 
+    let c17 = get_high_part i8 in 
+    let c18 = get_low_part i9 in 
+    let c19 = get_high_part i9 in 
+    let c20 = get_low_part i10 in 
+    let c21 = get_high_part i10 in 
+    let c22 = get_low_part i11 in 
+    let c23 = get_high_part i11 in 
+
+    seq_as_nat12 i = 
+     v c0  * pow2 (0 * 32) +
+     v c1  * pow2 (1 * 32) +
+     v c2  * pow2 (2 * 32) +
+     v c3  * pow2 (3 * 32) +
+     v c4  * pow2 (4 * 32) +
+     v c5  * pow2 (5 * 32) +
+     v c6  * pow2 (6 * 32) +
+     v c7  * pow2 (7 * 32) +
+     v c8  * pow2 (8 * 32) +
+     v c9  * pow2 (9 * 32) +
+     v c10 * pow2 (10 * 32) +
+     v c11 * pow2 (11 * 32) +
+     v c12 * pow2 (12 * 32) +
+     v c13 * pow2 (13 * 32) +
+     v c14 * pow2 (14 * 32) +
+     v c15 * pow2 (15 * 32) + 
+     v c16 * pow2 (16 * 32) + 
+     v c17 * pow2 (17 * 32) + 
+     v c18 * pow2 (18 * 32) + 
+     v c19 * pow2 (19 * 32) + 
+     v c20 * pow2 (20 * 32) + 
+     v c21 * pow2 (21 * 32) +
+     v c22 * pow2 (22 * 32) + 
+     v c23 * pow2 (23 * 32)
+  ) 
+
 
 
 let solinasReduction384Impl i o = 
   push_frame();
     let h0 = ST.get() in
-    let tempBuffer = create (size 36) (u64 0) in
+    let tempBuffer = create (size 60) (u64 0) in
+
+    let t0 = sub tempBuffer (size 0) (size 6) in 
+    let t1 = sub tempBuffer (size 6) (size 6) in 
+    let t2 = sub tempBuffer (size 12) (size 6) in 
+    let t3 = sub tempBuffer (size 18) (size 6) in 
+    let t4 = sub tempBuffer (size 24) (size 6) in 
+    let t5 = sub tempBuffer (size 30) (size 6) in 
+    let t6 = sub tempBuffer (size 36) (size 6) in 
+    let t7 = sub tempBuffer (size 42) (size 6) in 
+    let t8 = sub tempBuffer (size 48) (size 6) in 
+    let t9 = sub tempBuffer (size 54) (size 6) in 
     
     let i0 = i.(size 0) in
     let i1 = i.(size 1) in
@@ -333,8 +787,11 @@ let solinasReduction384Impl i o =
     let c23 = get_high_part i11 in 
 
     solinas_reduction_upload c0 c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 c12 c13 c14 c15 c16 c17 c18 c19 c20 c21 c22 c23 tempBuffer;
-
+      let h1 = ST.get() in 
     solinas_reduction_operations tempBuffer o;
-
-  admit();
-  pop_frame()
+      let h2 = ST.get() in  
+    solinas_reduction_mod (v c0) (v c1) (v c2) (v c3) (v c4) (v c5) (v c6) (v c7) (v c8) (v c9) (v c10) (v c11) (v c12) (v c13) (v c14) (v c15) (v c16) (v c17) (v c18) (v c19) (v c20) (v c21) (v c22) (v c23)
+    (as_nat6 h1 t0) (as_nat6 h1 t1) (as_nat6 h1 t2) (as_nat6 h1 t3) (as_nat6 h1 t4) (as_nat6 h1 t5) (as_nat6 h1 t6) (as_nat6 h1 t7) (as_nat6 h1 t8) (as_nat6 h1 t9) (as_nat6 h2 o); 
+    modulo_lemma (as_nat6 h2 o) prime384;
+    lemma_opened (as_seq h0 i);
+    pop_frame()
