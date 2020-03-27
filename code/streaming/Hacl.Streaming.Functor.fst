@@ -356,3 +356,56 @@ let init #index c i s =
     S.equal (S.slice (B.as_seq h buf_) 0 (U64.v total_len % U32.v (c.block_len i))) rest
   );
   assert (invariant_s c i h3 (B.get h3 s 0))
+
+unfold
+let update_pre
+  #index
+  (c: block index)
+  (i: index)
+  (s: state c i)
+  (data: B.buffer uint8)
+  (len: UInt32.t)
+  (h0: HS.mem)
+=
+  invariant c i h0 s /\
+  B.live h0 data /\
+  U32.v len = B.length data /\
+  S.length (seen c i h0 s) + U32.v len < c.max_input_length i /\
+  B.(loc_disjoint (loc_buffer data) (footprint c i h0 s))
+
+unfold
+let update_post
+  #index
+  (c: block index)
+  (i: index)
+  (s: state c i)
+  (data: B.buffer uint8)
+  (len: UInt32.t)
+  (h0 h1: HS.mem)
+=
+  preserves_freeable c i s h0 h1 /\
+  invariant c i h1 s /\
+  B.(modifies (footprint c i h0 s) h0 h1) /\
+  footprint c i h0 s == footprint c i h1 s /\
+  seen c i h1 s == seen c i h0 s `S.append` B.as_seq h0 data
+
+/// We keep the total length at run-time, on 64 bits, but require that it abides
+/// by the size requirements for the smaller hashes -- we're not interested at
+/// this stage in having an agile type for lengths that would be up to 2^125 for
+/// SHA384/512.
+
+inline_for_extraction noextract
+let rest #index (c: block index) (i: index)
+  (total_len: UInt64.t): (x:UInt32.t { U32.v x = U64.v total_len % U32.v (c.block_len i) })
+=
+  let open FStar.Int.Cast in
+  assert (uint32_to_uint64 (c.block_len i) <> 0UL);
+  uint64_to_uint32 (total_len `U64.rem` uint32_to_uint64 (c.block_len i))
+
+inline_for_extraction noextract
+let add_len #index (c: block index) (i: index) (total_len: UInt64.t) (len: UInt32.t):
+  Pure UInt64.t
+    (requires U64.v total_len + U32.v len < c.max_input_length i)
+    (ensures fun x -> U64.v x = U64.v total_len + U32.v len /\ U64.v x < c.max_input_length i)
+=
+  total_len `U64.add` Int.Cast.uint32_to_uint64 len

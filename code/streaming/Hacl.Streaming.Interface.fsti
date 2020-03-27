@@ -74,7 +74,7 @@ type block (index: Type0) =
   v: (#i:index -> h:HS.mem -> s:state i -> GTot (t i)) ->
 
   // Introducing a notion of blocks and final result.
-  max_input_length: (index -> pos) ->
+  max_input_length: (index -> x:nat { 0 < x /\ x < pow2 64 }) ->
   output_len: (index -> x:U32.t { U32.v x > 0 }) ->
   block_len: (index -> x:U32.t { U32.v x > 0 }) ->
 
@@ -241,6 +241,18 @@ type block (index: Type0) =
         v h1 s_dst == v h0 s_src))) ->
 
   block index
+(*
+/// Maximum input length, but fitting on a 64-bit integer (since the streaming
+/// module doesn't bother taking into account lengths that are greater than
+/// that).
+let max_input_length64 a: x:nat { 0 < x /\ x < pow2 64 /\ x <= Spec.Hash.Definitions.max_input_length a } =
+  let open Spec.Hash.Definitions in
+  let _ = allow_inversion hash_alg in
+  match a with
+  | MD5 | SHA1
+  | SHA2_224 | SHA2_256 -> assert_norm (0 < pow2 61 - 1 && pow2 61 < pow2 64); pow2 61 - 1
+  | SHA2_384 | SHA2_512 -> assert_norm (pow2 64 < pow2 125 - 1); pow2 64 - 1
+
 
 inline_for_extraction
 let evercrypt_hash: block Spec.Hash.Definitions.hash_alg =
@@ -252,7 +264,7 @@ let evercrypt_hash: block Spec.Hash.Definitions.hash_alg =
     EverCrypt.Hash.alg_of_state
     Spec.Hash.Definitions.words_state
     (fun #i h s -> EverCrypt.Hash.repr s h)
-    Spec.Hash.Definitions.max_input_length
+    max_input_length64
     Hacl.Hash.Definitions.hash_len
     Hacl.Hash.Definitions.block_len
     Spec.Agile.Hash.init
@@ -286,7 +298,7 @@ let hacl_sha2_256: block unit =
     (fun _ _ -> ())
     (fun _ -> words_state SHA2_256)
     (fun #_ h s -> B.as_seq h s)
-    (fun () -> max_input_length SHA2_256)
+    (fun () -> max_input_length64 SHA2_256)
     (fun () -> Hacl.Hash.Definitions.hash_len SHA2_256)
     (fun () -> Hacl.Hash.Definitions.block_len SHA2_256)
     (fun () -> Spec.Agile.Hash.(init SHA2_256))
@@ -314,3 +326,4 @@ let hacl_sha2_256: block unit =
     (fun _ s dst -> Hacl.Hash.SHA2.finish_256 s dst)
     (fun _ s -> B.free s)
     (fun _ src dst -> B.blit src 0ul dst 0ul 8ul)
+*)
