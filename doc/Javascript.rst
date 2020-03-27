@@ -1,5 +1,3 @@
-.. _javascript:
-
 Using the Javascript bindings of HACL*
 ======================================
 
@@ -10,6 +8,9 @@ source code using the KreMLin compiler.
 
 The `jsdoc` documentation of the package can be found `here <https://hacl-star.github.io/javascript_doc/>`_.
 Please note that the API is asynchronous (it uses promises).
+
+Example
+-------
 
 Here is a small example of how to use the library (with Node.js) :
 
