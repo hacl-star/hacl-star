@@ -1,11 +1,11 @@
 var fs = require('fs');
 var path = require('path');
-var loader = require(path.resolve( __dirname, './loader.js'))
-var shell = require(path.resolve( __dirname, './shell.js'))
-var api_json = require(path.resolve( __dirname, './api.json'))
+var loader = require(path.resolve(__dirname, './loader.js'));
+var shell = require(path.resolve(__dirname, './shell.js'));
+var api_json = require(path.resolve(__dirname, './api.json'));
 // The following function validates the contents of `api.json`. It is meant as
 // a helper when creating new binders, it provides explicit error messages.
-const validateJSON = function(json) {
+var validateJSON = function (json) {
   Object.keys(json).map(function(key_module) {
     Object.keys(json[key_module]).map(function(key_func) {
       var func_obj = json[key_module][key_func];
@@ -28,19 +28,19 @@ const validateJSON = function(json) {
       var length_args_available = [];
       func_obj.args.map(function(arg, i) {
         if (!(arg.kind === "input" || (arg.kind === "output"))) {
-          throw Error("in " + obj_name + ", argument #" + i + " should have a 'kind' that is 'output' or 'input'")
+          throw Error("in " + obj_name + ", argument #" + i + " should have a 'kind' that is 'output' or 'input'");
         }
         if (!(arg.type === "bool" || (arg.type === "int") || (arg.type === "buffer"))) {
-          throw Error("in " + obj_name + ", argument #" + i + " should have a 'kind' that is 'int', 'bool' or 'buffer'")
+          throw Error("in " + obj_name + ", argument #" + i + " should have a 'kind' that is 'int', 'bool' or 'buffer'");
         }
         if (arg.type === "buffer") {
           if (arg.size === undefined) {
-            throw Error("in " + obj_name + ", argument #" + i + " is a buffer and should have a 'size' field")
+            throw Error("in " + obj_name + ", argument #" + i + " is a buffer and should have a 'size' field");
           }
         }
         if (arg.kind === "input" && arg.type === "buffer") {
           if (arg.interface_index === undefined) {
-              throw Error("in " + obj_name + ", argument #" + i + " is an input and should have a 'interface_index' field")
+              throw Error("in " + obj_name + ", argument #" + i + " is an input and should have a 'interface_index' field");
           }
         }
         if ((arg.kind === "output" || (arg.kind === "input" && arg.interface_index !== undefined)) && arg.tests === undefined) {
@@ -50,13 +50,13 @@ const validateJSON = function(json) {
           throw Error("the 'tests' field for argument #" + i + " of " + obj_name + " should be an array");
         }
         if (arg.type === "int" && arg.kind === "input") {
-          length_args_available.push(arg.name)
+          length_args_available.push(arg.name);
         }
       });
       func_obj.args.map(function(arg, i) {
         if (arg.type === "buffer" && typeof arg.size === "string") {
           if (!length_args_available.includes(arg.size)) {
-            throw Error("incorrect 'size' field value ("+ arg.size +")for argument #" + i + " of " + obj_name + " in api.json")
+            throw Error("incorrect 'size' field value ("+ arg.size +")for argument #" + i + " of " + obj_name + " in api.json");
           }
         }
       });
@@ -72,12 +72,12 @@ validateJSON(api_json);
 // the WebAssembly memory.
 var HaclWasm = (function() {
   'use strict';
-  var isInitialized = false
-  var Module = {}
+  var isInitialized = false;
+  var Module = {};
 
   // This object is passed at the wasm instantiation, it's required by the
   // KreMLin-generated files. Since we don't need to import anything, it's empty.
-  var my_imports = {}
+  var my_imports = {};
 
   // The WebAssembly modules have to be initialized before calling any function.
   // This checks if it has been done already, and if not does it.
@@ -85,18 +85,18 @@ var HaclWasm = (function() {
     if (isInitialized === false) {
       return Promise.all(shell.my_modules.map(m => {
         var source = fs.readFileSync(path.resolve( __dirname, './' + m + ".wasm"));
-        return new Uint8Array(source)
+        return new Uint8Array(source);
       })).then(bufs => {
         return loader.link(my_imports, bufs.map((b, i) => ({
           buf: b,
           name: shell.my_modules[i]
-        })))
+        })));
       }).then(scope => {
         Module = scope;
         isInitialized = true;
       })
     } else {
-      return Promise.resolve()
+      return Promise.resolve();
     }
   }
 
@@ -160,7 +160,7 @@ var HaclWasm = (function() {
   const callWithProto = function(proto, args, loc_name) {
     var expected_args_number = proto.args.filter(arg => arg.interface_index !== undefined).length;
     if (args.length != expected_args_number) {
-      throw Error("wrong number of arguments to call the F*-wasm function " + loc_name + ": expected " + expected_args_number + ", got " + args.length)
+      throw Error("wrong number of arguments to call the F*-wasm function " + loc_name + ": expected " + expected_args_number + ", got " + args.length);
     }
     let memory = new Uint32Array(Module.Kremlin.mem.buffer);
     let sp = memory[0];
@@ -183,7 +183,7 @@ var HaclWasm = (function() {
       if (arg.type === "buffer") {
         var size;
         if (typeof arg.size === "string") {
-          size = var_lengths[arg.size]
+          size = var_lengths[arg.size];
         } else {
           size = arg.size;
         }
@@ -232,12 +232,10 @@ var HaclWasm = (function() {
       } else {
         size = protoRet.size;
       }
-      let retBuf = new ArrayBuffer(size);
-      (new Uint8Array(retBuf)).set(read_memory(pointer.value, size));
-      return retBuf;
+      return read_memory(pointer.value, size);
     });
     if (return_buffers.length == 1) {
-      return_buffers = return_buffers[0]
+      return_buffers = return_buffers[0];
     }
     // Resetting the stack pointer to its old value
     memory[0] = sp;
@@ -250,12 +248,12 @@ var HaclWasm = (function() {
     if (proto.return.type === "void") {
       return return_buffers;
     }
-    throw "Unimplemented !"
+    throw "Unimplemented !";
   }
 
   var checkObj = {
     checkIfInitialized: checkIfInitialized,
-  }
+  };
 
   var api_obj = {};
 
@@ -263,7 +261,7 @@ var HaclWasm = (function() {
   Object.keys(api_json).map(function(key_module) {
     Object.keys(api_json[key_module]).map(function(key_func) {
       if (api_obj[key_module] == null) {
-        api_obj[key_module] = {}
+        api_obj[key_module] = {};
       }
       api_obj[key_module][key_func] = async function() {
         var argumentArray = [...arguments];
@@ -275,7 +273,7 @@ var HaclWasm = (function() {
 
   return { ...checkObj,
     ...api_obj
-  }
+  };
 })();
 
 if (typeof module !== "undefined") {
