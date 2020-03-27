@@ -358,6 +358,7 @@ val lemma_store_felem_lo:
    let lo = f0 |. (f1 <<. 26ul) |. (f2 <<. 52ul) in
    v lo == v f0 + v f1 * pow2 26 + (v f2 * pow2 52) % pow2 64)
 
+#push-options "--z3rlimit 200"
 let lemma_store_felem_lo f lo =
   let (f0, f1, f2, f3, f4) = f in
   assert_norm (max26 = pow2 26 - 1);
@@ -372,7 +373,7 @@ let lemma_store_felem_lo f lo =
   assert (v f0 + v f1 * pow2 26 < pow2 52);
   assert (((v f2 * pow2 52) % pow2 64) % pow2 52 = 0);
   logor_disjoint (f0 |. (f1 <<. 26ul)) (f2 <<. 52ul) 52
-
+#pop-options
 
 val lemma_store_felem_hi: f:tup64_5 -> hi:uint64 ->
   Lemma
