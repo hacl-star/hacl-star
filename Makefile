@@ -733,10 +733,9 @@ dist/wasm/Makefile.basic: FRODO_BUNDLE = -bundle Hacl.Frodo.KEM,Frodo.Params,Hac
 ECDSA_BUNDLE = -bundle Hacl.Impl.ECDSA,Hacl.Impl.ECDSA,Hacl.Impl.ECDSA.*,Hacl.Impl.P256.*,Hacl.Impl.P256,Hacl.Spec.P256.*,Hacl.Impl.SolinasReduction,Hacl.Impl.LowLevel
 
 # No Vale Curve64 no "Local" or "Slow" Curve64, only Curve51 (local Makefile hack)
-# TODO: use the right combination of bundles instead of drop.
+dist/wasm/Makefile.basic: CURVE_BUNDLE_SLOW =
 dist/wasm/Makefile.basic: CURVE_BUNDLE = \
 	$(CURVE_BUNDLE_BASE) \
-  -drop 'Hacl.Curve25519_64_Slow' \
   -bundle 'Hacl.Curve25519_64' \
   -bundle 'Hacl.Curve25519_64_Local'
 
@@ -756,7 +755,7 @@ dist/wasm/Makefile.basic: DEFAULT_FLAGS += -bundle 'EverCrypt,EverCrypt.*'
 
 dist/wasm/package.json: dist/wasm/Makefile.basic $(wildcard bindings/js/*.js) bindings/js/README.md $(wildcard bindings/js/*.json) bindings/js/.npmignore
 	cp -f $(filter-out %.basic,$^) $(dir $@)
-	rm -f $(dir $@)README $(dir $@)main.html $(dir $@)main.js $(dir $@)browser.js $(wildcard $(dir $@)*.wast)
+	rm -f $(dir $@)README $(dir $@)main.html $(dir $@)main.js $(dir $@)browser.js $(dir $@)*.wast
 
 dist/wasm/doc/readable_api.js: dist/wasm/package.json
 	cd dist/wasm && \
