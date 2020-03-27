@@ -1527,6 +1527,31 @@ static void zero_buffer(uint64_t *p)
 
 /* SNIPPET_END: zero_buffer */
 
+/* SNIPPET_START: scalarMultiplicationL */
+
+static void
+scalarMultiplicationL(uint64_t *p, uint64_t *result, uint8_t *scalar, uint64_t *tempBuffer)
+{
+  uint64_t *q = tempBuffer;
+  zero_buffer(q);
+  uint64_t *buff = tempBuffer + (uint32_t)12U;
+  pointToDomain(p, result);
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)256U; i++)
+  {
+    uint32_t bit0 = (uint32_t)255U - i;
+    uint64_t
+    bit =
+      (uint64_t)(scalar[(uint32_t)31U - bit0 / (uint32_t)8U] >> bit0 % (uint32_t)8U & (uint8_t)1U);
+    cswap(bit, q, result);
+    point_add(q, result, result, buff);
+    point_double(q, q, buff);
+    cswap(bit, q, result);
+  }
+  norm(q, result, buff);
+}
+
+/* SNIPPET_END: scalarMultiplicationL */
+
 /* SNIPPET_START: scalarMultiplicationI */
 
 static void
@@ -1601,6 +1626,31 @@ scalarMultiplicationWithoutNorm(
 }
 
 /* SNIPPET_END: scalarMultiplicationWithoutNorm */
+
+/* SNIPPET_START: secretToPublic */
+
+static void secretToPublic(uint64_t *result, uint8_t *scalar, uint64_t *tempBuffer)
+{
+  uint64_t basePoint1[12U] = { 0U };
+  uploadBasePoint(basePoint1);
+  uint64_t *q = tempBuffer;
+  uint64_t *buff = tempBuffer + (uint32_t)12U;
+  zero_buffer(q);
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)256U; i++)
+  {
+    uint32_t bit0 = (uint32_t)255U - i;
+    uint64_t
+    bit =
+      (uint64_t)(scalar[(uint32_t)31U - bit0 / (uint32_t)8U] >> bit0 % (uint32_t)8U & (uint8_t)1U);
+    cswap(bit, q, basePoint1);
+    point_add(q, basePoint1, basePoint1, buff);
+    point_double(q, q, buff);
+    cswap(bit, q, basePoint1);
+  }
+  norm(q, result, buff);
+}
+
+/* SNIPPET_END: secretToPublic */
 
 /* SNIPPET_START: secretToPublicWithoutNorm */
 
@@ -1947,6 +1997,72 @@ static bool verifyQValidCurvePoint(uint64_t *pubKeyAsPoint, uint64_t *tempBuffer
 }
 
 /* SNIPPET_END: verifyQValidCurvePoint */
+
+/* SNIPPET_START: Hacl_Impl_P256_DH_ecp256dh_i */
+
+uint64_t Hacl_Impl_P256_DH_ecp256dh_i(uint8_t *result, uint8_t *scalar)
+{
+  uint64_t tempBuffer[100U] = { 0U };
+  uint64_t resultBuffer[12U] = { 0U };
+  uint64_t *resultBufferX = resultBuffer;
+  uint64_t *resultBufferY = resultBuffer + (uint32_t)4U;
+  uint8_t *resultX = result;
+  uint8_t *resultY = result + (uint32_t)32U;
+  secretToPublic(resultBuffer, scalar, tempBuffer);
+  uint64_t flag = isPointAtInfinityPrivate(resultBuffer);
+  changeEndian(resultBufferX);
+  changeEndian(resultBufferY);
+  toUint8(resultBufferX, resultX);
+  toUint8(resultBufferY, resultY);
+  return flag;
+}
+
+/* SNIPPET_END: Hacl_Impl_P256_DH_ecp256dh_i */
+
+/* SNIPPET_START: _ecp256dh_r */
+
+static uint64_t _ecp256dh_r(uint64_t *result, uint64_t *pubKey, uint8_t *scalar)
+{
+  uint64_t tempBuffer[100U] = { 0U };
+  uint64_t publicKeyBuffer[12U] = { 0U };
+  bufferToJac(pubKey, publicKeyBuffer);
+  bool publicKeyCorrect = verifyQValidCurvePoint(publicKeyBuffer, tempBuffer);
+  if (publicKeyCorrect)
+  {
+    scalarMultiplicationL(publicKeyBuffer, result, scalar, tempBuffer);
+    uint64_t flag = isPointAtInfinityPrivate(result);
+    return flag;
+  }
+  return (uint64_t)18446744073709551615U;
+}
+
+/* SNIPPET_END: _ecp256dh_r */
+
+/* SNIPPET_START: Hacl_Impl_P256_DH_ecp256dh_r */
+
+uint64_t Hacl_Impl_P256_DH_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar)
+{
+  uint64_t resultBufferFelem[12U] = { 0U };
+  uint64_t *resultBufferFelemX = resultBufferFelem;
+  uint64_t *resultBufferFelemY = resultBufferFelem + (uint32_t)4U;
+  uint8_t *resultX = result;
+  uint8_t *resultY = result + (uint32_t)32U;
+  uint64_t publicKeyAsFelem[8U] = { 0U };
+  uint64_t *publicKeyFelemX = publicKeyAsFelem;
+  uint64_t *publicKeyFelemY = publicKeyAsFelem + (uint32_t)4U;
+  uint8_t *pubKeyX = pubKey;
+  uint8_t *pubKeyY = pubKey + (uint32_t)32U;
+  toUint64ChangeEndian(pubKeyX, publicKeyFelemX);
+  toUint64ChangeEndian(pubKeyY, publicKeyFelemY);
+  uint64_t flag = _ecp256dh_r(resultBufferFelem, publicKeyAsFelem, scalar);
+  changeEndian(resultBufferFelemX);
+  changeEndian(resultBufferFelemY);
+  toUint8(resultBufferFelemX, resultX);
+  toUint8(resultBufferFelemY, resultY);
+  return flag;
+}
+
+/* SNIPPET_END: Hacl_Impl_P256_DH_ecp256dh_r */
 
 /* SNIPPET_START: cswap0 */
 
