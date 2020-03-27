@@ -233,9 +233,11 @@ let create_in #index c i r =
   let p = B.malloc r s 1ul in
   (**) let h3 = ST.get () in
   (**) c.frame_invariant B.loc_none hash_state h2 h3;
-  B.(modifies_only_not_unused_in loc_none h2 h3);
+  (**) B.(modifies_only_not_unused_in loc_none h2 h3);
   (**) assert (B.fresh_loc (B.loc_addr_of_buffer p) h0 h3);
   (**) assert (B.fresh_loc (footprint_s c i h3 s) h0 h3);
+  (**) c.frame_freeable B.loc_none hash_state h2 h3;
+  (**) assert (freeable c i h3 p);
 
   c.init (G.hide i) hash_state;
   (**) let h4 = ST.get () in
@@ -246,6 +248,17 @@ let create_in #index c i r =
   (**) B.modifies_only_not_unused_in B.loc_none h0 h4;
 
   (**) let h5 = ST.get () in
+  (**) assert (
+    let h = h5 in
+    let s = (B.get h5 p 0) in
+    let State hash_state buf_ total_len seen = s in
+    let seen = G.reveal seen in
+    let blocks, rest = split_at_last (U32.v (c.block_len i)) seen in
+    // JP: unclear why I need to assert this... but without it the proof doesn't
+    // go through.
+    U64.v total_len < c.max_input_length i /\
+    True
+  );
   (**) assert (invariant c i h5 p);
   (**) assert (seen c i h5 p == S.empty);
   (**) assert B.(modifies loc_none h0 h5);

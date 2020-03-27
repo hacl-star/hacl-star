@@ -25,6 +25,31 @@ let uint8 = Lib.IntTypes.uint8
 inline_for_extraction noextract
 let uint32 = Lib.IntTypes.uint32
 
+let concat_blocks_modulo (block_len: pos) (s1 s2: S.seq uint8): Lemma
+  (requires
+    S.length s1 % block_len = 0 /\
+    S.length s2 % block_len = 0)
+  (ensures
+    S.length (S.append s1 s2) % block_len = 0)
+=
+  let input = S.append s1 s2 in
+  let input1 = s1 in
+  let input2 = s2 in
+  calc (==) {
+    S.length input % block_len;
+  (==) { S.lemma_len_append input1 input2 }
+    (S.length input1 + S.length input2) % block_len;
+  (==) {
+    FStar.Math.Lemmas.modulo_distributivity (S.length input1) (S.length input2) (block_len)
+  }
+    (S.length input1 % block_len + S.length input2 % block_len) % block_len;
+  (==) { (* hyp *) }
+    0 % block_len;
+  (==) { }
+    0;
+  }
+
+
 /// The type class of block-based operations.
 /// Equipped with a generic index. May be unit if there's no agility, or hash algorithm for agility.
 inline_for_extraction noeq
@@ -43,7 +68,7 @@ type block (index: Type0) =
   v: (#i:index -> h:HS.mem -> s:state i -> GTot (t i)) ->
 
   // Introducing a notion of blocks and final result.
-  max_input_length: (index -> nat) ->
+  max_input_length: (index -> pos) ->
   output_len: (index -> x:U32.t { U32.v x > 0 }) ->
   block_len: (index -> x:U32.t { U32.v x > 0 }) ->
 
@@ -69,8 +94,7 @@ type block (index: Type0) =
     input2:S.seq uint8 { S.length input2 % U32.v (block_len i) = 0 } ->
     Lemma (ensures (
       let input = S.append input1 input2 in
-      assert (S.length input == S.length input1 + S.length input2);
-      FStar.Math.Lemmas.modulo_distributivity (S.length input1) (S.length input2) (U32.v (block_len i));
+      concat_blocks_modulo (U32.v (block_len i)) input1 input2;
       update_multi_s i (update_multi_s i h input1) input2 ==
         update_multi_s i h input))) ->
 
@@ -213,35 +237,36 @@ type block (index: Type0) =
   block index
 
 inline_for_extraction
-let evercrypt_hash: block Spec.Hash.Definitions.hash_alg = Block
-  EverCrypt.Hash.state
-  (fun #i h s -> EverCrypt.Hash.footprint s h)
-  EverCrypt.Hash.freeable
-  (fun #i h s -> EverCrypt.Hash.invariant s h)
-  Spec.Hash.Definitions.words_state
-  (fun #i h s -> EverCrypt.Hash.repr s h)
-  Spec.Hash.Definitions.max_input_length
-  Hacl.Hash.Definitions.hash_len
-  Hacl.Hash.Definitions.block_len
-  Spec.Agile.Hash.init
-  Spec.Agile.Hash.update_multi
-  Spec.Hash.Incremental.update_last
-  Spec.Hash.PadFinish.finish
-  Spec.Hash.Lemmas.update_multi_zero
-  Spec.Hash.Lemmas.update_multi_associative'
-  (fun #i h s -> EverCrypt.Hash.invariant_loc_in_footprint s h)
-  (fun #i l s h0 h1 ->
-    EverCrypt.Hash.frame_invariant l s h0 h1;
-    EverCrypt.Hash.frame_invariant_implies_footprint_preservation l s h0 h1)
-  (fun #i l s h0 h1 -> ())
-  EverCrypt.Hash.alloca
-  EverCrypt.Hash.create_in
-  (fun i -> EverCrypt.Hash.init #i)
-  (fun i -> EverCrypt.Hash.update_multi #i)
-  (fun i -> EverCrypt.Hash.update_last #i)
-  (fun i -> EverCrypt.Hash.finish #i)
-  (fun i -> EverCrypt.Hash.free #i)
-  (fun i -> EverCrypt.Hash.copy #i)
+let evercrypt_hash: block Spec.Hash.Definitions.hash_alg =
+  Block
+    EverCrypt.Hash.state
+    (fun #i h s -> EverCrypt.Hash.footprint s h)
+    EverCrypt.Hash.freeable
+    (fun #i h s -> EverCrypt.Hash.invariant s h)
+    Spec.Hash.Definitions.words_state
+    (fun #i h s -> EverCrypt.Hash.repr s h)
+    Spec.Hash.Definitions.max_input_length
+    Hacl.Hash.Definitions.hash_len
+    Hacl.Hash.Definitions.block_len
+    Spec.Agile.Hash.init
+    Spec.Agile.Hash.update_multi
+    Spec.Hash.Incremental.update_last
+    Spec.Hash.PadFinish.finish
+    Spec.Hash.Lemmas.update_multi_zero
+    Spec.Hash.Lemmas.update_multi_associative'
+    (fun #i h s -> EverCrypt.Hash.invariant_loc_in_footprint s h)
+    (fun #i l s h0 h1 ->
+      EverCrypt.Hash.frame_invariant l s h0 h1;
+      EverCrypt.Hash.frame_invariant_implies_footprint_preservation l s h0 h1)
+    (fun #i l s h0 h1 -> ())
+    EverCrypt.Hash.alloca
+    EverCrypt.Hash.create_in
+    (fun i -> EverCrypt.Hash.init #i)
+    (fun i -> EverCrypt.Hash.update_multi #i)
+    (fun i -> EverCrypt.Hash.update_last #i)
+    (fun i -> EverCrypt.Hash.finish #i)
+    (fun i -> EverCrypt.Hash.free #i)
+    (fun i -> EverCrypt.Hash.copy #i)
 
 inline_for_extraction
 let hacl_sha2_256: block unit =
