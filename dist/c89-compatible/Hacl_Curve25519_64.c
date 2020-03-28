@@ -106,7 +106,7 @@ static inline void cswap20(uint64_t bit, uint64_t *p1, uint64_t *p2)
   #endif
 }
 
-static const uint8_t g25519[32U] = { (uint8_t)9U };
+static uint8_t g25519[32U] = { (uint8_t)9U };
 
 static void point_add_and_double(uint64_t *q, uint64_t *p01_tmp1, uint64_t *tmp2)
 {

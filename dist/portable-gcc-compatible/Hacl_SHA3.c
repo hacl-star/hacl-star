@@ -26,7 +26,6 @@
 
 /* SNIPPET_START: Hacl_Impl_SHA3_keccak_rotc */
 
-const
 uint32_t
 Hacl_Impl_SHA3_keccak_rotc[24U] =
   {
@@ -40,7 +39,6 @@ Hacl_Impl_SHA3_keccak_rotc[24U] =
 
 /* SNIPPET_START: Hacl_Impl_SHA3_keccak_piln */
 
-const
 uint32_t
 Hacl_Impl_SHA3_keccak_piln[24U] =
   {
@@ -54,7 +52,6 @@ Hacl_Impl_SHA3_keccak_piln[24U] =
 
 /* SNIPPET_START: Hacl_Impl_SHA3_keccak_rndc */
 
-const
 uint64_t
 Hacl_Impl_SHA3_keccak_rndc[24U] =
   {

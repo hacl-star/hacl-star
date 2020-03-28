@@ -576,7 +576,7 @@ static inline void cswap2(u64 bit, u64 *p1, u64 *p2)
   }
 }
 
-static const u8 g25519[32U] = { (u8)9U };
+static u8 g25519[32U] = { (u8)9U };
 
 static void point_add_and_double(u64 *q, u64 *p01_tmp1, uint128_t *tmp2)
 {

@@ -26,7 +26,6 @@
 
 /* SNIPPET_START: Hacl_Impl_Chacha20_Vec_chacha20_constants */
 
-const
 uint32_t
 Hacl_Impl_Chacha20_Vec_chacha20_constants[4U] =
   { (uint32_t)0x61707865U, (uint32_t)0x3320646eU, (uint32_t)0x79622d32U, (uint32_t)0x6b206574U };
@@ -128,8 +127,7 @@ static inline void chacha20_core(uint32_t *k, uint32_t *ctx, uint32_t ctr)
 
 /* SNIPPET_START: chacha20_constants */
 
-static const
-uint32_t
+static uint32_t
 chacha20_constants[4U] =
   { (uint32_t)0x61707865U, (uint32_t)0x3320646eU, (uint32_t)0x79622d32U, (uint32_t)0x6b206574U };
 

@@ -24,7 +24,6 @@
 
 #include "Hacl_SHA3.h"
 
-const
 u32
 Hacl_Impl_SHA3_keccak_rotc[24U] =
   {
@@ -33,7 +32,6 @@ Hacl_Impl_SHA3_keccak_rotc[24U] =
     (u32)18U, (u32)39U, (u32)61U, (u32)20U, (u32)44U
   };
 
-const
 u32
 Hacl_Impl_SHA3_keccak_piln[24U] =
   {
@@ -42,7 +40,6 @@ Hacl_Impl_SHA3_keccak_piln[24U] =
     (u32)14U, (u32)22U, (u32)9U, (u32)6U, (u32)1U
   };
 
-const
 u64
 Hacl_Impl_SHA3_keccak_rndc[24U] =
   {

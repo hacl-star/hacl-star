@@ -36,7 +36,7 @@
 
 /* SNIPPET_START: Hacl_Impl_Chacha20_Vec_chacha20_constants */
 
-extern const uint32_t Hacl_Impl_Chacha20_Vec_chacha20_constants[4U];
+extern uint32_t Hacl_Impl_Chacha20_Vec_chacha20_constants[4U];
 
 /* SNIPPET_END: Hacl_Impl_Chacha20_Vec_chacha20_constants */
 
