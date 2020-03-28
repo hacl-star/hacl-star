@@ -24,7 +24,7 @@ val fsquare_times_inv: #s:field_spec -> h:mem -> f:felem s -> Type0
 let fsquare_times_inv #s h f =
   match s with
   | M51 -> C.f51_felem_fits h f (1, 2, 1, 1, 1)
-  | M64 -> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)
+  | M64 -> True
 
 val fsqr_s:
     #s:field_spec
@@ -35,7 +35,7 @@ val fsqr_s:
     (requires fun h ->
       live h out /\ live h f1 /\ live h tmp /\
       (disjoint out f1 \/ out == f1) /\
-      (disjoint out tmp \/ out == tmp) /\
+      (disjoint out tmp) /\
       disjoint tmp f1 /\
       fsquare_times_inv h f1)
     (ensures  fun h0 _ h1 ->
@@ -51,7 +51,7 @@ val fmuls_pre: #s:field_spec -> h:mem -> f1:felem s -> f2:felem s -> Type0
 let fmuls_pre #s h f1 f2 =
   match s with
   | M51 -> f51_felem_fits h f1 (1, 2, 1, 1, 1) /\ f51_felem_fits h f2 (1, 2, 1, 1, 1)
-  | M64 -> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)
+  | M64 -> True
 
 val fmul_s:
     #s:field_spec
@@ -64,7 +64,7 @@ val fmul_s:
       live h out /\ live h f1 /\ live h f2 /\ live h tmp /\
       (disjoint out f1 \/ out == f1) /\
       (disjoint out f2 \/ out == f2) /\
-      (disjoint out tmp \/ out == tmp) /\
+      (disjoint out tmp) /\
       (disjoint f1 f2 \/ f1 == f2) /\
       disjoint f1 tmp /\
       disjoint f2 tmp /\
@@ -182,7 +182,7 @@ val finv:
     (requires fun h0 ->
       live h0 o /\ live h0 i /\ live h0 tmp /\
       disjoint o i /\ disjoint i tmp /\
-      (disjoint o tmp \/ o == tmp) /\
+      (disjoint o tmp) /\
       fsquare_times_inv h0 i)
     (ensures  fun h0 _ h1 ->
       modifies (loc o |+| loc tmp) h0 h1 /\

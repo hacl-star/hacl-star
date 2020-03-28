@@ -1,6 +1,7 @@
 module Vale.Interop.X64
 open FStar.Mul
 open Vale.Interop.Base
+open Vale.Arch.HeapTypes_s
 open Vale.Arch.Heap
 module B = LowStar.Buffer
 module BS = Vale.X64.Machine_Semantics_s
@@ -83,7 +84,7 @@ let arg_as_nat64 (a:arg) : GTot MS.nat64 =
   | TD_Base TUInt64 ->
      UInt64.v x
   | TD_Buffer src _ _ ->
-    let b:b8 = Buffer (x <: B.buffer (base_typ_as_type src)) true in
+    let b:b8 = Buffer true (x <: B.buffer (base_typ_as_type src)) in
     global_addrs_map b
   | TD_ImmBuffer src _ _ -> global_addrs_map (imm_to_b8 src x)
 
@@ -135,25 +136,25 @@ let rec stack_of_args (max_arity:nat)
       BS.update_heap64 ptr v st1
 
 ////////////////////////////////////////////////////////////////////////////////
-let taint_map = b8 -> GTot MS.taint
+let taint_map = b8 -> GTot taint
 
-let upd_taint_map_b8 (taint:taint_map) (x:b8) (tnt:MS.taint)  : taint_map =
+let upd_taint_map_b8 (tm:taint_map) (x:b8) (tnt:taint) : taint_map =
    fun (y:b8) ->
      if StrongExcludedMiddle.strong_excluded_middle ((x <: b8) == y) then
         tnt
-     else taint y
+     else tm y
 
 [@__reduce__]
 let upd_taint_map_arg (a:arg) (tm:taint_map) : GTot taint_map =
     match a with
     | (| TD_Buffer _ _ {taint=tnt}, x |) ->
-      upd_taint_map_b8 tm (Buffer x true) tnt
+      upd_taint_map_b8 tm (Buffer true x) tnt
     | (| TD_ImmBuffer src _ {taint=tnt}, x |) ->
       upd_taint_map_b8 tm (imm_to_b8 src x) tnt
     | (| TD_Base _, _ |) ->
       tm
 
-let init_taint : taint_map = fun r -> MS.Public
+let init_taint : taint_map = fun r -> Public
 
 [@__reduce__]
 let mk_taint (as:arg_list_sb) (tm:taint_map) : GTot taint_map =
@@ -171,7 +172,7 @@ let taint_of_arg (a:arg) =
 let taint_arg_b8 (a:arg{Some? (taint_of_arg a)}) : GTot b8 =
   let (| tag, x |) = a in
   match tag with
-  | TD_Buffer src _ _ -> Buffer (x <: B.buffer (base_typ_as_type src)) true
+  | TD_Buffer src _ _ -> Buffer true (x <: B.buffer (base_typ_as_type src))
   | TD_ImmBuffer src _ _ -> imm_to_b8 src x
 
 let rec taint_arg_args_b8_mem (args:arg_list) (a:arg)
@@ -228,14 +229,14 @@ let create_initial_trusted_state
     // Spill additional arguments on the stack
     let stack = stack_of_args max_arity (List.Tot.length args) init_rsp args stack in
     let mem:interop_heap = mk_mem args h0 in
+    let memTaint = create_memtaint mem (args_b8 args) (mk_taint args init_taint) in
     let (s0:BS.machine_state) = {
       BS.ms_ok = true;
       BS.ms_regs = regs;
       BS.ms_flags = flags;
-      BS.ms_heap = heap_of_interop mem;
-      BS.ms_memTaint = create_memtaint mem (args_b8 args) (mk_taint args init_taint);
+      BS.ms_heap = heap_create_impl mem memTaint;
       BS.ms_stack = BS.Machine_stack init_rsp stack;
-      BS.ms_stackTaint = Map.const MS.Public;
+      BS.ms_stackTaint = Map.const Public;
       BS.ms_trace = [];
     } in
     (s0, mem)
@@ -280,14 +281,14 @@ let prediction_post
     (h0:mem_roots args)
     (s0:BS.machine_state)
     (rax_fuel_mem:(UInt64.t & nat & interop_heap)) =
-  let rax, fuel, final_mem = rax_fuel_mem in
+  let (rax, fuel, final_mem) = rax_fuel_mem in
   Some? (BS.machine_eval_code c fuel s0) /\ (
     let s1 = Some?.v (BS.machine_eval_code c fuel s0) in
     let h1 = hs_of_mem final_mem in
     FStar.HyperStack.ST.equal_domains h0 h1 /\
     B.modifies (loc_modified_args args) h0 h1 /\
     mem_roots_p h1 args /\
-    heap_get (heap_of_interop (mk_mem args h1)) == heap_get s1.BS.ms_heap /\
+    heap_create_machine (mk_mem args h1) == heap_get s1.BS.ms_heap /\
     calling_conventions s0 s1 regs_modified xmms_modified /\
     rax == return_val s1 /\
     post_rel h0 s0 rax_fuel_mem s1
@@ -625,7 +626,7 @@ let register_of_arg_i (i:reg_nat (if IA.win then 4 else 6)) : MS.reg_64 =
 //A partial inverse of the above function
 [@__reduce__]
 let arg_of_register (r:MS.reg_64)
-  : option (i:reg_nat (if IA.win then 4 else 6))
+  : option (reg_nat (if IA.win then 4 else 6))
   = let open MS in
     if IA.win then
        match r with

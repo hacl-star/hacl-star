@@ -48,7 +48,7 @@ function hacl_test() {
           cd dist
           r=true
           for a in *; do
-            if [[ $a != "kremlin" && $a != "vale" && $a != "linux" && -d $a ]]; then
+            if [[ $a != "kremlin" && $a != "vale" && $a != "linux" && $a != "merkle-tree" && -d $a ]]; then
               echo "Building snapshot: $a"
               make -C $a -j $threads || r=false
               echo
@@ -150,11 +150,11 @@ function refresh_doc() {
   git config --global user.name "Dzomo, the Everest Yak"
   git config --global user.email "everbld@microsoft.com"
 
-  git clone git@github.com:fstarlang/fstarlang.github.io fstarlang-github-io
+  git clone git@github.com:hacl-star/hacl-star.github.io website
 
-  (cd doc && ./ci.sh ../fstarlang-github-io/evercrypt/html/)
+  (cd doc && ./ci.sh ../website/)
 
-  pushd fstarlang-github-io && {
+  pushd website && {
     git add -A . &&
     if ! git diff --exit-code HEAD > /dev/null; then
         git commit -m "[CI] Refresh HACL & EverCrypt doc" &&
@@ -298,6 +298,10 @@ function exec_build() {
 export OCAMLRUNPARAM=b
 export OTHERFLAGS="--use_hints --query_stats"
 export MAKEFLAGS="$MAKEFLAGS -Otarget"
+if [[ "$OS" != "Windows_NT" ]]; then
+    export CC=gcc-7
+    export CXX=g++-7
+fi
 
 export_home FSTAR "$(pwd)/FStar"
 cd hacl-star

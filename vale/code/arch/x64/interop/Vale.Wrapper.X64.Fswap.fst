@@ -9,7 +9,7 @@ open Vale.Interop.Base
 let cswap2_e bit p0 p1 =
   DV.length_eq (get_downview p0);
   DV.length_eq (get_downview p1);
-  let x, _ = Vale.Stdcalls.X64.Fswap.cswap2_e bit p0 p1 () in
+  let (x, _) = Vale.Stdcalls.X64.Fswap.cswap2_e bit p0 p1 () in
   ()
 
 #pop-options

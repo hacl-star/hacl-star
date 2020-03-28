@@ -2,34 +2,31 @@ open Ctypes
 module Bindings(F:Cstubs.FOREIGN) =
   struct
     open F
-    include (Hacl_Spec_bindings.Bindings)(Hacl_Spec_stubs)
+    module Hacl_Spec_applied = (Hacl_Spec_bindings.Bindings)(Hacl_Spec_stubs)
+    open Hacl_Spec_applied
     let everCrypt_HMAC_compute_sha1 =
       foreign "EverCrypt_HMAC_compute_sha1"
-        ((ptr uint8_t) @->
-           ((ptr uint8_t) @->
-              (uint32_t @->
-                 ((ptr uint8_t) @-> (uint32_t @-> (returning void))))))
+        (ocaml_bytes @->
+           (ocaml_bytes @->
+              (uint32_t @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))))
       
     let everCrypt_HMAC_compute_sha2_256 =
       foreign "EverCrypt_HMAC_compute_sha2_256"
-        ((ptr uint8_t) @->
-           ((ptr uint8_t) @->
-              (uint32_t @->
-                 ((ptr uint8_t) @-> (uint32_t @-> (returning void))))))
+        (ocaml_bytes @->
+           (ocaml_bytes @->
+              (uint32_t @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))))
       
     let everCrypt_HMAC_compute_sha2_384 =
       foreign "EverCrypt_HMAC_compute_sha2_384"
-        ((ptr uint8_t) @->
-           ((ptr uint8_t) @->
-              (uint32_t @->
-                 ((ptr uint8_t) @-> (uint32_t @-> (returning void))))))
+        (ocaml_bytes @->
+           (ocaml_bytes @->
+              (uint32_t @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))))
       
     let everCrypt_HMAC_compute_sha2_512 =
       foreign "EverCrypt_HMAC_compute_sha2_512"
-        ((ptr uint8_t) @->
-           ((ptr uint8_t) @->
-              (uint32_t @->
-                 ((ptr uint8_t) @-> (uint32_t @-> (returning void))))))
+        (ocaml_bytes @->
+           (ocaml_bytes @->
+              (uint32_t @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))))
       
     let everCrypt_HMAC_is_supported_alg =
       foreign "EverCrypt_HMAC_is_supported_alg"
@@ -41,9 +38,9 @@ module Bindings(F:Cstubs.FOREIGN) =
     let everCrypt_HMAC_compute =
       foreign "EverCrypt_HMAC_compute"
         (spec_Hash_Definitions_hash_alg @->
-           ((ptr uint8_t) @->
-              ((ptr uint8_t) @->
+           (ocaml_bytes @->
+              (ocaml_bytes @->
                  (uint32_t @->
-                    ((ptr uint8_t) @-> (uint32_t @-> (returning void)))))))
+                    (ocaml_bytes @-> (uint32_t @-> (returning void)))))))
       
   end

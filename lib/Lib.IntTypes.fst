@@ -477,6 +477,15 @@ let logxor_lemma1 #t #l a b =
     v_extensionality a b;
     UInt.logxor_self #(bits t) (v a)
 
+let logxor_spec #t #l a b =
+  match t with
+  | U1 ->
+    assert_norm (u1 0 `logxor` u1 0 == u1 0 /\ u1 0 `logxor` u1 1 == u1 1);
+    assert_norm (u1 1 `logxor` u1 0 == u1 1 /\ u1 1 `logxor` u1 1 == u1 0);
+    assert_norm (0 `logxor_v #U1` 0 == 0 /\ 0 `logxor_v #U1` 1 == 1);
+    assert_norm (1 `logxor_v #U1` 0 == 1 /\ 1 `logxor_v #U1` 1 == 0)
+  | _ -> ()
+
 #pop-options
 
 [@(strict_on_arguments [0])]

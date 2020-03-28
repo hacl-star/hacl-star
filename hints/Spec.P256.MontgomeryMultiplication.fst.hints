@@ -1,0 +1,313 @@
+[
+  "¬à‚=Ž=IÁ‰_ñŽ.¸²J",
+  [
+    [
+      "Spec.P256.MontgomeryMultiplication.fromDomain_",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "equation_Spec.P256.Definitions.prime256",
+        "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_7d84b8f3dff73d3cc195fbe597f5a194",
+        "typing_Spec.P256.Definitions.prime256"
+      ],
+      0,
+      "a2fff97b1a8ab47228d2768a053b9046"
+    ],
+    [
+      "Spec.P256.MontgomeryMultiplication.fromDomainPoint",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_Prims.nat",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple3__1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple3__2",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple3__3"
+      ],
+      0,
+      "7a161325dfd670c43bc8ce5a803035a0"
+    ],
+    [
+      "Spec.P256.MontgomeryMultiplication.toDomain_",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_7d84b8f3dff73d3cc195fbe597f5a194"
+      ],
+      0,
+      "388e1037fac1662af08189233204717d"
+    ],
+    [
+      "Spec.P256.MontgomeryMultiplication.lemmaFromDomain",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "d854926b29eeaf8da4dc63142fa8a4b7"
+    ],
+    [
+      "Spec.P256.MontgomeryMultiplication.lemmaFromDomain",
+      2,
+      2,
+      1,
+      [ "@query", "equation_Spec.P256.MontgomeryMultiplication.fromDomain_" ],
+      0,
+      "0505f53a04b4a183bf624495f4379558"
+    ],
+    [
+      "Spec.P256.MontgomeryMultiplication.lemmaToDomain",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "0a292ef0fc06f29a0214551446ce810a"
+    ],
+    [
+      "Spec.P256.MontgomeryMultiplication.lemmaToDomain",
+      2,
+      2,
+      1,
+      [ "@query", "equation_Spec.P256.MontgomeryMultiplication.toDomain_" ],
+      0,
+      "1ffda2a5cbaa4f76a0a9eedf639dfb76"
+    ],
+    [
+      "Spec.P256.MontgomeryMultiplication.lemmaToDomainAndBackIsTheSame",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "7c4e04cf0247d079dda2b8a52e9e19bd"
+    ],
+    [
+      "Spec.P256.MontgomeryMultiplication.lemmaToDomainAndBackIsTheSame",
+      2,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Spec.P256.Definitions.prime256",
+        "equation_Spec.P256.MontgomeryMultiplication.prime", "int_inversion",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_7d84b8f3dff73d3cc195fbe597f5a194",
+        "refinement_interpretation_Tm_refine_ff2b90c8f94db4f4bcfea92159681cf1",
+        "typing_Spec.P256.Definitions.prime256"
+      ],
+      0,
+      "89bb2d7dbe90006fcbe87a23052fcdab"
+    ],
+    [
+      "Spec.P256.MontgomeryMultiplication.lemmaFromDomainToDomain",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Spec.P256.Definitions.prime256",
+        "equation_Spec.P256.MontgomeryMultiplication.prime", "int_inversion",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_7d84b8f3dff73d3cc195fbe597f5a194",
+        "refinement_interpretation_Tm_refine_ff2b90c8f94db4f4bcfea92159681cf1",
+        "typing_Spec.P256.Definitions.prime256"
+      ],
+      0,
+      "dfa71346fca077f6555f94e200dd52c0"
+    ],
+    [
+      "Spec.P256.MontgomeryMultiplication.lemmaFromDomainToDomainModuloPrime",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "d16075a6fb0c4a34994641eed3736738"
+    ],
+    [
+      "Spec.P256.MontgomeryMultiplication.lemmaFromDomainToDomainModuloPrime",
+      2,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Prims.pos", "equation_Spec.P256.Definitions.prime256",
+        "equation_Spec.P256.MontgomeryMultiplication.fromDomain_",
+        "equation_Spec.P256.MontgomeryMultiplication.toDomain_",
+        "int_inversion", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_7d84b8f3dff73d3cc195fbe597f5a194",
+        "typing_Spec.P256.Definitions.prime256"
+      ],
+      0,
+      "d004cbfe3470bbe0f1044477ddf1b28c"
+    ],
+    [
+      "Spec.P256.MontgomeryMultiplication.inDomain_mod_is_not_mod",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "0397fb33cadf25013b79933e7962a26f"
+    ],
+    [
+      "Spec.P256.MontgomeryMultiplication.inDomain_mod_is_not_mod",
+      2,
+      2,
+      1,
+      [
+        "@query", "equation_Spec.P256.MontgomeryMultiplication.toDomain_",
+        "primitive_Prims.op_Modulus"
+      ],
+      0,
+      "a993f84c716f66b07d9e8b38750b89cd"
+    ],
+    [
+      "Spec.P256.MontgomeryMultiplication.multiplicationInDomainNat",
+      1,
+      4,
+      2,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.unsigned",
+        "equation_Prims.nat", "equation_Spec.P256.Definitions.prime256",
+        "equation_with_fuel_Prims.pow2.fuel_instrumented", "int_typing",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_bef91fb8f30c6ed368faf74b3be171fb"
+      ],
+      0,
+      "48ca48d2148fefdff28e6a0cb0acfe8b"
+    ],
+    [
+      "Spec.P256.MontgomeryMultiplication.multiplicationInDomainNat",
+      2,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Spec.P256.Definitions.prime256",
+        "equation_Spec.P256.Lemmas.modp_inv2",
+        "equation_Spec.P256.MontgomeryMultiplication.prime",
+        "equation_Spec.P256.MontgomeryMultiplication.toDomain_",
+        "int_inversion", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_7d84b8f3dff73d3cc195fbe597f5a194",
+        "refinement_interpretation_Tm_refine_bef91fb8f30c6ed368faf74b3be171fb",
+        "typing_Spec.P256.Definitions.prime256"
+      ],
+      0,
+      "1f0f54607457ed998117512249c3047f"
+    ],
+    [
+      "Spec.P256.MontgomeryMultiplication.additionInDomain",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "8e3572f3dd346df7b08d5a52917ef36e"
+    ],
+    [
+      "Spec.P256.MontgomeryMultiplication.additionInDomain",
+      2,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.unsigned",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_Spec.P256.MontgomeryMultiplication.fromDomain_",
+        "equation_Spec.P256.MontgomeryMultiplication.prime",
+        "equation_Spec.P256.MontgomeryMultiplication.toDomain_",
+        "equation_with_fuel_Prims.pow2.fuel_instrumented", "int_inversion",
+        "int_typing", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_ff2b90c8f94db4f4bcfea92159681cf1",
+        "token_correspondence_Prims.pow2.fuel_instrumented"
+      ],
+      0,
+      "7a0596f6339806828e3b1560e97c8495"
+    ],
+    [
+      "Spec.P256.MontgomeryMultiplication.substractionInDomain",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "f0b0c1c10ae91eee3fd1ee601f816269"
+    ],
+    [
+      "Spec.P256.MontgomeryMultiplication.substractionInDomain",
+      2,
+      4,
+      2,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Spec.P256.Lemmas.exp.fuel_instrumented", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.S8",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.minint",
+        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
+        "equation_Prims.pos", "equation_Spec.P256.Definitions.prime256",
+        "equation_Spec.P256.Lemmas.elem", "equation_Spec.P256.Lemmas.fmul",
+        "equation_Spec.P256.Lemmas.modp_inv2",
+        "equation_Spec.P256.Lemmas.modp_inv2_prime",
+        "equation_Spec.P256.Lemmas.modp_inv_prime",
+        "equation_Spec.P256.MontgomeryMultiplication.fromDomain_",
+        "equation_Spec.P256.MontgomeryMultiplication.prime",
+        "equation_Spec.P256.MontgomeryMultiplication.toDomain_",
+        "equation_with_fuel_Prims.pow2.fuel_instrumented",
+        "equation_with_fuel_Spec.P256.Lemmas.exp.fuel_instrumented",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "int_typing", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Division", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_Minus", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_7d84b8f3dff73d3cc195fbe597f5a194",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "refinement_interpretation_Tm_refine_ff2b90c8f94db4f4bcfea92159681cf1",
+        "token_correspondence_Prims.pow2.fuel_instrumented",
+        "typing_Prims.pow2", "typing_Spec.P256.Lemmas.fmul",
+        "typing_Spec.P256.MontgomeryMultiplication.prime"
+      ],
+      0,
+      "937e136239854e7edb35336bdde0bc02"
+    ]
+  ]
+]

@@ -2,8 +2,11 @@ open Ctypes
 module Bindings(F:Cstubs.FOREIGN) =
   struct
     open F
-    include (Hacl_Spec_bindings.Bindings)(Hacl_Spec_stubs)
-    include (EverCrypt_Error_bindings.Bindings)(EverCrypt_Error_stubs)
+    module Hacl_Spec_applied = (Hacl_Spec_bindings.Bindings)(Hacl_Spec_stubs)
+    open Hacl_Spec_applied
+    module EverCrypt_Error_applied =
+      (EverCrypt_Error_bindings.Bindings)(EverCrypt_Error_stubs)
+    open EverCrypt_Error_applied
     type everCrypt_CTR_state_s = [ `everCrypt_CTR_state_s ] structure
     let (everCrypt_CTR_state_s : [ `everCrypt_CTR_state_s ] structure typ) =
       structure "EverCrypt_CTR_state_s_s" 
@@ -31,22 +34,21 @@ module Bindings(F:Cstubs.FOREIGN) =
       foreign "EverCrypt_CTR_create_in"
         (spec_Agile_Cipher_cipher_alg @->
            ((ptr (ptr everCrypt_CTR_state_s)) @->
-              ((ptr uint8_t) @->
-                 ((ptr uint8_t) @->
+              (ocaml_bytes @->
+                 (ocaml_bytes @->
                     (uint32_t @->
                        (uint32_t @-> (returning everCrypt_Error_error_code)))))))
       
     let everCrypt_CTR_init =
       foreign "EverCrypt_CTR_init"
         ((ptr everCrypt_CTR_state_s) @->
-           ((ptr uint8_t) @->
-              ((ptr uint8_t) @->
-                 (uint32_t @-> (uint32_t @-> (returning void))))))
+           (ocaml_bytes @->
+              (ocaml_bytes @-> (uint32_t @-> (uint32_t @-> (returning void))))))
       
     let everCrypt_CTR_update_block =
       foreign "EverCrypt_CTR_update_block"
         ((ptr everCrypt_CTR_state_s) @->
-           ((ptr uint8_t) @-> ((ptr uint8_t) @-> (returning void))))
+           (ocaml_bytes @-> (ocaml_bytes @-> (returning void))))
       
     let everCrypt_CTR_free =
       foreign "EverCrypt_CTR_free"

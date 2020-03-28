@@ -93,11 +93,11 @@ let vm_lemma'
       V.eval_code code va_s0 f va_s1 /\
       VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
       vm_post code dst src va_s0 va_s1 f /\
-      ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_immbuffer src) /\
-      ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer dst) /\
+      ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_immbuffer src) /\
+      ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer dst) /\
       ME.buffer_writeable (as_vale_buffer dst) /\
       ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer dst))
-                                ME.loc_none) va_s0.VS.vs_heap va_s1.VS.vs_heap
+                                ME.loc_none) (VS.vs_get_vale_heap va_s0) (VS.vs_get_vale_heap va_s1)
     ))
   = 
   let va_s1, f = VM.va_lemma_Memcpy code va_s0 IA.win (as_vale_buffer dst) (as_vale_immbuffer src) in
@@ -166,7 +166,7 @@ let memcpy_Test
 //      B.as_seq h1 dst == B.as_seq h1 src)
 //  by (T.dump "A") (* in case you want to look at the VC *)
   = IB.inhabited_immutable_buffer_is_distinct_from_buffer (UInt8.uint_to_t 0) src dst;
-    let x, _ = lowstar_Memcpy_normal_t dst src () in //This is a call to the interop wrapper
+    let (x, _) = lowstar_Memcpy_normal_t dst src () in //This is a call to the interop wrapper
     let h1 = get () in
     // let v = Vale.Interop.Views.up_view64 in
     // assert (DV.length_eq (get_downview dst);
@@ -207,7 +207,7 @@ let with_len (l:list 'a)
     (ensures fun m -> m==l /\ List.length m == normalize_term (List.length l))
   = l
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit_factor 2"
+#set-options "--max_fuel 0 --max_ifuel 1 --z3rlimit_factor 2"
 (* The vale lemma doesn't quite suffice to prove the modifies clause
    expected of the interop layer *)
 [@__reduce__]
@@ -223,6 +223,8 @@ let aesni_lemma'
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        aesni_post code va_s0 va_s1 f))
  = VC.va_lemma_Check_aesni_stdcall code va_s0 IA.win
+
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit_factor 2"
 
 (* Prove that vm_lemma' has the required type *)
 let aesni_lemma = as_t #(VSig.vale_sig_stdcall aesni_pre aesni_post) aesni_lemma'
@@ -260,7 +262,7 @@ let aesni_Test ()
     (ensures fun h0 ret_val h1 -> (UInt64.v ret_val) =!= 0 ==> aesni_enabled /\ pclmulqdq_enabled)
 //  by (T.dump "A") (* in case you want to look at the VC *)
   =
-  let x, _ = lowstar_aesni_normal_t () in //This is a call to the interop wrapper
+  let (x, _) = lowstar_aesni_normal_t () in //This is a call to the interop wrapper
   x
 
 
@@ -343,15 +345,15 @@ let ta_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        ta_post code arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 va_s0 va_s1 f /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_immbuffer arg0) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_immbuffer arg1) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_immbuffer arg2) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_immbuffer arg3) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_immbuffer arg4) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_immbuffer arg5) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_immbuffer arg6) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_immbuffer arg7) /\
-       ME.modifies ME.loc_none va_s0.VS.vs_heap va_s1.VS.vs_heap))
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_immbuffer arg0) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_immbuffer arg1) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_immbuffer arg2) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_immbuffer arg3) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_immbuffer arg4) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_immbuffer arg5) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_immbuffer arg6) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_immbuffer arg7) /\
+       ME.modifies ME.loc_none (VS.vs_get_vale_heap va_s0) (VS.vs_get_vale_heap va_s1)))
  =
  let va_s1, f = TA.va_lemma_Test code va_s0 IA.win
       (as_vale_immbuffer arg0)

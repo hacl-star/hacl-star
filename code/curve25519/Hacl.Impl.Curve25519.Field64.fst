@@ -96,7 +96,7 @@ val carry_pass_store:
     f:felem
  -> Stack unit
    (requires fun h ->
-      Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled) /\ live h f)
+     live h f)
    (ensures fun h0 _ h1 ->
      modifies (loc f) h0 h1 /\
      as_nat h1 f == S.as_nat4 (SC.carry_pass_store (as_tup4 h0 f)))
@@ -112,7 +112,6 @@ val store_felem:
   -> f:felem
   -> Stack unit
     (requires fun h ->
-      Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled) /\
       live h f /\ live h u64s /\ disjoint u64s f)
     (ensures  fun h0 _ h1 ->
       modifies (loc u64s |+| loc f) h0 h1 /\

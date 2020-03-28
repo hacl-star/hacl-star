@@ -144,7 +144,7 @@ static inline void cswap20(uint64_t bit, uint64_t *p1, uint64_t *p2)
 
 /* SNIPPET_START: g25519 */
 
-static uint8_t g25519[32U] = { (uint8_t)9U };
+static const uint8_t g25519[32U] = { (uint8_t)9U };
 
 /* SNIPPET_END: g25519 */
 

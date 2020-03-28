@@ -16,6 +16,9 @@ val ins_Mov64 : instr_dep [out op64] [op64] PreserveFlags eval_Mov64
 let eval_MovBe64 (src:nat64) : option nat64 = if movbe_enabled then Some (reverse_bytes_nat64 src) else None
 val ins_MovBe64 : instr_dep [out op64] [op64] PreserveFlags eval_MovBe64
 
+let eval_Bswap64 (dst:nat64) : option nat64 = Some (reverse_bytes_nat64 dst)
+val ins_Bswap64 : instr_dep [inOut op64] [] PreserveFlags eval_Bswap64
+
 let eval_Cmovc64 (dst src:nat64) (carry:bool) : option nat64 = Some (if carry then src else dst)
 val ins_Cmovc64 : instr_dep [inOut op64] [op64; opFlagsCf] PreserveFlags eval_Cmovc64
 
@@ -354,14 +357,17 @@ let eval_SHA256_msg2 (src1 src2:quad32) : option quad32 =
   if sha_enabled then Some (sha256_msg2_spec src1 src2) else None
 val ins_SHA256_msg2 : instr_dep [inOut opXmm] [opXmm] PreserveFlags eval_SHA256_msg2
 
+let eval_Ghost : option unit = Some ()
+val ins_Ghost : instr_dep [] [] PreserveFlags eval_Ghost
+
 let eval_Comment : option unit = Some ()
-val ins_Comment : string -> instr_dep [] [] PreserveFlags eval_Comment
+val ins_Comment (_:string) : instr_dep [] [] PreserveFlags eval_Comment
 
 let eval_LargeComment : option unit = Some ()
-val ins_LargeComment : string -> instr_dep [] [] PreserveFlags eval_LargeComment
+val ins_LargeComment (_:string) : instr_dep [] [] PreserveFlags eval_LargeComment
 
 let eval_Newline : option unit = Some ()
 val ins_Newline : instr_dep [] [] PreserveFlags eval_Newline
 
 let eval_Space : option unit = Some ()
-val ins_Space : nat -> instr_dep [] [] PreserveFlags eval_Space
+val ins_Space (_:nat) : instr_dep [] [] PreserveFlags eval_Space

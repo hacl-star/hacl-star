@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <stdbool.h>
+#include "Hacl_Chacha20.h"
 
 typedef uint64_t cycles;
 
@@ -17,7 +18,7 @@ static __inline__ cycles cpucycles_begin(void)
   asm volatile ( "rdtscp\n" : "=a" (rax), "=d" (rdx), "=c" (aux) : : );
   return (rdx << 32) + rax;
   //  unsigned hi, lo;
-  //__asm__ __volatile__ ("CPUID\n\t"  "RDTSC\n\t"  "mov %%edx, %0\n\t"  "mov %%eax, %1\n\t": "=r" (hi), "=r" (lo):: "%rax", "%rbx", "%rcx", "%rdx");
+  //__asm__ __volatile__ ("CPUID\n\t"  "RDTSC\n\t"  "mov %%edx, %0\n\t"  "mov %%eax, %1\n\t": "=r" (ohi), "=r" (lo):: "%rax", "%rbx", "%rcx", "%rdx");
   //return ( (uint64_t)lo)|( ((uint64_t)hi)<<32 );
 }
 
@@ -31,7 +32,6 @@ static __inline__ cycles cpucycles_end(void)
   //return ( (uint64_t)lo)|( ((uint64_t)hi)<<32 );
 }
 
-extern void Hacl_Chacha20_chacha20_encrypt(int in_len, uint8_t* out, uint8_t* in, uint8_t* k, uint8_t* n, uint32_t c);
 
 #define ROUNDS 16384
 #define SIZE   81920
@@ -124,5 +124,7 @@ int main() {
   printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)(b-a),(double)(b-a)/count);
   printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)(t2-t1),(double)(t2-t1)/count);
   printf("bw %8.2f MB/s\n",(double)count/(diff * 1000000.0));
-  
+
+  if (ok) return EXIT_SUCCESS;
+  else return EXIT_FAILURE;
 }

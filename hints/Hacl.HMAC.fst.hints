@@ -39,7 +39,7 @@
         "projection_inverse_FStar.Integers.Unsigned__0"
       ],
       0,
-      "a56492b895b28a1382b0be75ae58cf46"
+      "c51bae5da468b608f6bbb39bc0af5f5f"
     ],
     [
       "Hacl.HMAC.compute_st",
@@ -64,7 +64,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "4c00ef292b44619da359639ef7c72d35"
+      "06d478cf3014724236d64f5a6ccb21a0"
     ],
     [
       "Hacl.HMAC.uu___19",
@@ -73,7 +73,7 @@
       1,
       [ "@query" ],
       0,
-      "720eed776b6660ee9c0101ab4a67be9a"
+      "3b9ff5fbe54e2e58f88f9d56bfaba231"
     ],
     [
       "Hacl.HMAC.xor_bytes_inplace",
@@ -89,7 +89,7 @@
         "typing_LowStar.Buffer.trivial_preorder"
       ],
       0,
-      "3941a82be6009d538b8486e04fc592ba"
+      "d06dea10bac577b06a51df24a9f2e83e"
     ],
     [
       "Hacl.HMAC.xor_bytes_inplace",
@@ -98,7 +98,7 @@
       0,
       [ "@query" ],
       0,
-      "970bb32ca9cacb22e8ea495c8ea7c7d7"
+      "4dc98dca10a48b7023b4539769e0eba4"
     ],
     [
       "Hacl.HMAC.xor_bytes_inplace",
@@ -112,7 +112,7 @@
         "refinement_interpretation_Tm_refine_cfe562ce049cfd952f311212e2d19343"
       ],
       0,
-      "0b849a2942769f7c40c10abc8983c0d7"
+      "29a07a8f33319801719412b8d81feefc"
     ],
     [
       "Hacl.HMAC.wrap_key_st",
@@ -140,7 +140,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "c3186cf69df6e1c073f4505bf3b75730"
+      "abed18c5afbfe452235d729acc782691"
     ],
     [
       "Hacl.HMAC.helper_smtpat",
@@ -200,7 +200,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "d9818246c63fefad6e2b172ff51e9a7e"
+      "dfb13dd46548da614720b120663b784b"
     ],
     [
       "Hacl.HMAC.mk_wrap_key",
@@ -349,7 +349,7 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "6c26cfcd840afbd0992f77c071b7f59a"
+      "aef87ed300bfb3097a6d70394dc7ac70"
     ],
     [
       "Hacl.HMAC.part1",
@@ -360,14 +360,14 @@
         "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "b2t_def", "constructor_distinct_FStar.Integers.W16",
-        "constructor_distinct_FStar.Integers.W31",
         "constructor_distinct_FStar.Integers.W32",
+        "constructor_distinct_FStar.Integers.W64",
         "constructor_distinct_FStar.Integers.W8",
         "constructor_distinct_Lib.IntTypes.U1",
         "constructor_distinct_Lib.IntTypes.U64",
         "equality_tok_FStar.Integers.W16@tok",
-        "equality_tok_FStar.Integers.W31@tok",
         "equality_tok_FStar.Integers.W32@tok",
+        "equality_tok_FStar.Integers.W64@tok",
         "equality_tok_FStar.Integers.W8@tok",
         "equation_FStar.Pervasives.inversion", "equation_FStar.UInt.fits",
         "equation_FStar.UInt.max_int", "equation_FStar.UInt.size",
@@ -399,7 +399,7 @@
         "typing_LowStar.Monotonic.Buffer.as_seq"
       ],
       0,
-      "f23e7776e7ec8ca6ff64234ce674a242"
+      "516653aac8d19af3b5c223bbdc7ccc4a"
     ],
     [
       "Hacl.HMAC.block_len_as_len",
@@ -409,9 +409,8 @@
       [
         "@MaxIFuel_assumption", "@query",
         "constructor_distinct_FStar.Integers.W16",
-        "constructor_distinct_FStar.Integers.W31",
         "constructor_distinct_FStar.Integers.W32",
-        "constructor_distinct_FStar.Integers.W63",
+        "constructor_distinct_FStar.Integers.W64",
         "constructor_distinct_FStar.Integers.W8",
         "constructor_distinct_Lib.IntTypes.PUB",
         "constructor_distinct_Lib.IntTypes.U1",
@@ -433,9 +432,8 @@
         "disc_equation_Spec.Hash.Definitions.SHA2_384",
         "disc_equation_Spec.Hash.Definitions.SHA2_512",
         "equality_tok_FStar.Integers.W16@tok",
-        "equality_tok_FStar.Integers.W31@tok",
         "equality_tok_FStar.Integers.W32@tok",
-        "equality_tok_FStar.Integers.W63@tok",
+        "equality_tok_FStar.Integers.W64@tok",
         "equality_tok_FStar.Integers.W8@tok",
         "equality_tok_Lib.IntTypes.PUB@tok",
         "equality_tok_Lib.IntTypes.U128@tok",
@@ -448,6 +446,7 @@
         "equality_tok_Spec.Hash.Definitions.SHA2_384@tok",
         "equality_tok_Spec.Hash.Definitions.SHA2_512@tok",
         "equation_FStar.Int.Cast.Full.uint64_to_uint128",
+        "equation_FStar.Int.Cast.uint32_to_uint64",
         "equation_FStar.Pervasives.inversion",
         "equation_Hacl.Hash.Definitions.block_len",
         "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.pub_int_t",
@@ -474,7 +473,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_512@tok"
       ],
       0,
-      "7795eee7744647174b97c1368f3f81dd"
+      "d9a75e105925d420551bef26cc8365c0"
     ],
     [
       "Hacl.HMAC.part1",
@@ -483,7 +482,7 @@
       0,
       [ "@query" ],
       0,
-      "fe8d32432059597ba892555ec1e01ff6"
+      "4442837557f14218865f0f9d8041278b"
     ],
     [
       "Hacl.HMAC.part1",
@@ -666,7 +665,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_512@tok"
       ],
       0,
-      "d82e5cbd80840e46113b279fd01fee25"
+      "2f17fbc7f7ccb18ea1a888d19fa73773"
     ],
     [
       "Hacl.HMAC.part2",
@@ -695,7 +694,7 @@
         "typing_LowStar.Monotonic.Buffer.as_seq"
       ],
       0,
-      "5c09c92b79d5731e5019f018169a7acd"
+      "9f5bd3bcdbf95c32cbe1471b88f5e5b8"
     ],
     [
       "Hacl.HMAC.part2",
@@ -704,7 +703,7 @@
       0,
       [ "@query" ],
       0,
-      "1a1f40fecc0993b020fc9d48b68557b1"
+      "0ccb4350bd1939727c1e6fefe3d4ac59"
     ],
     [
       "Hacl.HMAC.part2",
@@ -859,7 +858,7 @@
         "typing_tok_Spec.Hash.Definitions.MD5@tok"
       ],
       0,
-      "c23bb66736bb7b0140acdeb165817892"
+      "0cfc42634d66dcb885d124435fee0b99"
     ],
     [
       "Hacl.HMAC.block_len_positive",
@@ -869,12 +868,12 @@
       [
         "@MaxIFuel_assumption", "@query", "b2t_def", "bool_inversion",
         "bool_typing", "constructor_distinct_FStar.Integers.W16",
-        "constructor_distinct_FStar.Integers.W31",
+        "constructor_distinct_FStar.Integers.W32",
         "constructor_distinct_FStar.Integers.W8",
         "constructor_distinct_Lib.IntTypes.PUB",
         "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_FStar.Integers.W16@tok",
-        "equality_tok_FStar.Integers.W31@tok",
+        "equality_tok_FStar.Integers.W32@tok",
         "equality_tok_FStar.Integers.W8@tok",
         "equality_tok_Lib.IntTypes.PUB@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
@@ -906,7 +905,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "90c03410a75fde47505732a15eba6ca7"
+      "09aeb1d1b32f5a9f4d400745626b4a28"
     ],
     [
       "Hacl.HMAC.hash_lt_block",
@@ -916,17 +915,15 @@
       [
         "@MaxIFuel_assumption", "@query",
         "constructor_distinct_FStar.Integers.W16",
-        "constructor_distinct_FStar.Integers.W31",
         "constructor_distinct_FStar.Integers.W32",
-        "constructor_distinct_FStar.Integers.W63",
+        "constructor_distinct_FStar.Integers.W64",
         "constructor_distinct_FStar.Integers.W8",
         "constructor_distinct_Lib.IntTypes.U1",
         "constructor_distinct_Lib.IntTypes.U128",
         "constructor_distinct_Lib.IntTypes.U64",
         "equality_tok_FStar.Integers.W16@tok",
-        "equality_tok_FStar.Integers.W31@tok",
         "equality_tok_FStar.Integers.W32@tok",
-        "equality_tok_FStar.Integers.W63@tok",
+        "equality_tok_FStar.Integers.W64@tok",
         "equality_tok_FStar.Integers.W8@tok",
         "equation_FStar.Pervasives.inversion",
         "equation_Spec.Hash.Definitions.block_length",
@@ -941,7 +938,7 @@
         "projection_inverse_FStar.Integers.Unsigned__0"
       ],
       0,
-      "b73a7a3c6b693dd5ee75ea695ba10a82"
+      "70af24cb3cd742f6d8ec4106ba689ba7"
     ],
     [
       "Hacl.HMAC.mk_compute",
@@ -971,7 +968,7 @@
         "projection_inverse_FStar.Integers.Unsigned__0"
       ],
       0,
-      "6c81795859f0f0ba9d8859355f649d06"
+      "e6817505e7e080dea043ce17db7e9a82"
     ],
     [
       "Hacl.HMAC.mk_compute",
@@ -1176,7 +1173,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "580195b5ff8113a80d0f0c146333d413"
+      "fb4aa209ea2f6339fbcc084a81ff462a"
     ]
   ]
 ]

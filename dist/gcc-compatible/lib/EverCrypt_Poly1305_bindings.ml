@@ -4,8 +4,7 @@ module Bindings(F:Cstubs.FOREIGN) =
     open F
     let everCrypt_Poly1305_poly1305 =
       foreign "EverCrypt_Poly1305_poly1305"
-        ((ptr uint8_t) @->
-           ((ptr uint8_t) @->
-              (uint32_t @-> ((ptr uint8_t) @-> (returning void)))))
+        (ocaml_bytes @->
+           (ocaml_bytes @-> (uint32_t @-> (ocaml_bytes @-> (returning void)))))
       
   end

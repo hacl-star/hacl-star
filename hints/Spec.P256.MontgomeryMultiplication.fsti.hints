@@ -1,0 +1,93 @@
+[
+  "¦,éLÍ6C\\mÍ\u001dømft¿",
+  [
+    [
+      "Spec.P256.MontgomeryMultiplication.lemmaFromDomain",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "071d7aa8157df58cfb6620b616a0061d"
+    ],
+    [
+      "Spec.P256.MontgomeryMultiplication.lemmaToDomain",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "f2b84fcb81186da2746cb681c043db5d"
+    ],
+    [
+      "Spec.P256.MontgomeryMultiplication.lemmaToDomainAndBackIsTheSame",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "d574346b00605dc877428e8975451cd2"
+    ],
+    [
+      "Spec.P256.MontgomeryMultiplication.lemmaFromDomainToDomainModuloPrime",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "3bef341e567d58d98cf6296a72bc10d6"
+    ],
+    [
+      "Spec.P256.MontgomeryMultiplication.inDomain_mod_is_not_mod",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "75021ba41833dd4f1d18e94da1844754"
+    ],
+    [
+      "Spec.P256.MontgomeryMultiplication.multiplicationInDomainNat",
+      1,
+      4,
+      2,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.unsigned",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_Spec.P256.Definitions.prime256",
+        "equation_with_fuel_Prims.pow2.fuel_instrumented", "int_inversion",
+        "int_typing", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_bef91fb8f30c6ed368faf74b3be171fb",
+        "typing_Prims.pow2"
+      ],
+      0,
+      "3041dc10619e8bcd5612113541c62520"
+    ],
+    [
+      "Spec.P256.MontgomeryMultiplication.additionInDomain",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "af22af708622b39501a8caf5d066bbc9"
+    ],
+    [
+      "Spec.P256.MontgomeryMultiplication.substractionInDomain",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "d38d9834ec66ed0f12a8ff44671a2756"
+    ]
+  ]
+]

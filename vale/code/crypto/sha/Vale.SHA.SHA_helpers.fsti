@@ -31,7 +31,7 @@ val reveal_word (u:unit) : Lemma (word == Lib.IntTypes.uint32)
 
 (* Input data. *)
 type byte = UInt8.t
-type bytes =  m:Seq.seq byte
+type bytes = Seq.seq byte
 
 (* Input data, multiple of a block length. *)
 let bytes_blocks =
@@ -52,12 +52,12 @@ val nat8_to_byte (b:nat8) : byte
 // Work around some limitations in Vale's support for dependent types
 
 //unfold let bytes_blocks256 = bytes_blocks SHA2_256
-unfold let repeat_range_vale (max:nat { max < size_k_w_256}) (block:block_w) (hash:hash256) =
+let repeat_range_vale (max:nat { max < size_k_w_256}) (block:block_w) (hash:hash256) =
   Spec.Loops.repeat_range 0 max (shuffle_core_opaque block) hash
 let lemma_repeat_range_0_vale (block:block_w) (hash:hash256)
   : Lemma (Spec.Loops.repeat_range 0 0 (shuffle_core_opaque block) hash == hash) =
   Spec.Loops.repeat_range_base 0 (shuffle_core_opaque block) hash
-unfold let update_multi_opaque_vale (hash:hash256) (blocks:bytes) : hash256 =
+let update_multi_opaque_vale (hash:hash256) (blocks:bytes) : hash256 =
   if length blocks % size_k_w_256 = 0 then let b:bytes_blocks = blocks in update_multi_opaque hash b else hash
 
 

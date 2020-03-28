@@ -1,5 +1,5 @@
 [
-  "§([{eπÜ¯+\u001cãç=\u0005Ÿ˘",
+  ":4Ø\f,ﬁIhX#º\u001aç\u0005ﬁ\u0000",
   [
     [
       "Vale.AES.X64.AES128.va_qcode_KeyExpansionRound",
@@ -8,7 +8,7 @@
       0,
       [ "@query" ],
       0,
-      "63d5f752f722677b5d67ca080de3b80f"
+      "ee9621bb1976ee30696a99cb99d9c6f0"
     ],
     [
       "Vale.AES.X64.AES128.va_lemma_KeyExpansionRound",
@@ -20,7 +20,7 @@
         "refinement_interpretation_Tm_refine_16e840d41dc3e4674df596a1eae33fed"
       ],
       0,
-      "1e3a47824f28e7b9212938f8b359449e"
+      "c222d0b7846874f913c8c5128268bb8b"
     ],
     [
       "Vale.AES.X64.AES128.va_lemma_KeyExpansionRound",
@@ -55,12 +55,12 @@
         "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.nat8",
         "equation_Vale.Def.Words_s.natN", "equation_Vale.Lib.Map16.get",
         "equation_Vale.X64.Decls.modifies_buffer_specific128",
+        "equation_Vale.X64.Decls.upd_register",
         "equation_Vale.X64.Decls.va_ensure_total",
         "equation_Vale.X64.Decls.va_require_total",
         "equation_Vale.X64.Decls.va_state_eq",
         "equation_Vale.X64.Decls.va_upd_flags",
         "equation_Vale.X64.Decls.va_upd_mem_heaplet",
-        "equation_Vale.X64.Decls.va_upd_reg",
         "equation_Vale.X64.Decls.va_upd_xmm",
         "equation_Vale.X64.Decls.validDstAddrs",
         "equation_Vale.X64.Decls.validDstAddrs128",
@@ -172,7 +172,7 @@
         "unit_typing"
       ],
       0,
-      "caf7934e1b85e7752e8a26e8ded78b02"
+      "a47ed68e115ae0b5cf824aeeefca603b"
     ],
     [
       "Vale.AES.X64.AES128.va_wp_KeyExpansionRound",
@@ -181,7 +181,7 @@
       0,
       [ "@query" ],
       0,
-      "d56f283d775776f5a112f0798d9c0bcb"
+      "a059d7794e768f7fe46dccfc78cbfb27"
     ],
     [
       "Vale.AES.X64.AES128.va_wpProof_KeyExpansionRound",
@@ -195,6 +195,7 @@
         "equation_Vale.AES.X64.AES128.va_wp_KeyExpansionRound",
         "equation_Vale.Arch.HeapImpl.heaplet_id",
         "equation_Vale.Arch.HeapImpl.vale_heaplets",
+        "equation_Vale.X64.Decls.upd_register",
         "equation_Vale.X64.Decls.va_ensure_total",
         "equation_Vale.X64.Decls.va_require_total",
         "equation_Vale.X64.Decls.va_state_eq",
@@ -202,7 +203,6 @@
         "equation_Vale.X64.Decls.va_upd_mem",
         "equation_Vale.X64.Decls.va_upd_mem_heaplet",
         "equation_Vale.X64.Decls.va_upd_ok",
-        "equation_Vale.X64.Decls.va_upd_reg",
         "equation_Vale.X64.Decls.va_upd_xmm",
         "equation_Vale.X64.Machine_s.n_reg_files",
         "equation_Vale.X64.Machine_s.n_regs",
@@ -270,7 +270,7 @@
         "unit_typing"
       ],
       0,
-      "b3074d07433a22f5c0d6fe8e900a1ab3"
+      "5b4819cb9d917d74ac2b7f96380ac32d"
     ],
     [
       "Vale.AES.X64.AES128.va_quick_KeyExpansionRound",
@@ -282,7 +282,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "875dd863244bd3f79f4c507a2cea16df"
+      "36b8c2f5392c6ba41612923900b9f35e"
     ],
     [
       "Vale.AES.X64.AES128.va_code_KeyExpansionRoundUnrolledRecursive",
@@ -301,7 +301,7 @@
         "projection_inverse_BoxInt_proj_0", "well-founded-ordering-on-nat"
       ],
       0,
-      "5f07050d6f474e88c6839bff4a0a20d7"
+      "953d48ef83a1aeaa687480a54d90d8cb"
     ],
     [
       "Vale.AES.X64.AES128.va_codegen_success_KeyExpansionRoundUnrolledRecursive",
@@ -322,7 +322,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "bb10784978894702e5e199722abcad7c"
+      "f287fa1b8482d3878217ef97d2e1d573"
     ],
     [
       "Vale.AES.X64.AES128.va_lemma_KeyExpansionRoundUnrolledRecursive",
@@ -334,7 +334,7 @@
         "refinement_interpretation_Tm_refine_9693710b533826ca8622bc2d2972a931"
       ],
       0,
-      "4e19a3cad4d6a4b18bf66649ff2e9b21"
+      "3c8d534256759355f0b7a4c245f3c449"
     ],
     [
       "Vale.AES.X64.AES128.va_lemma_KeyExpansionRoundUnrolledRecursive",
@@ -346,7 +346,7 @@
         "refinement_interpretation_Tm_refine_9693710b533826ca8622bc2d2972a931"
       ],
       0,
-      "4a8f6ca377e970b84b55a3a0c4ee9426"
+      "ef34ee67ea6a5006798aa2aef46c166d"
     ],
     [
       "Vale.AES.X64.AES128.va_lemma_KeyExpansionRoundUnrolledRecursive",
@@ -499,7 +499,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "15823c847655c2f19da52e538e05f04a"
+      "c8876ca379470f3e53991cfcd649fef7"
     ],
     [
       "Vale.AES.X64.AES128.va_wp_KeyExpansionRoundUnrolledRecursive",
@@ -508,7 +508,7 @@
       0,
       [ "@query" ],
       0,
-      "3408fc214a43bdcb8b8b8f7e9ef2764a"
+      "afa625a5d044d0a6e52d6a20d8cf357c"
     ],
     [
       "Vale.AES.X64.AES128.va_wpProof_KeyExpansionRoundUnrolledRecursive",
@@ -522,6 +522,7 @@
         "equation_Vale.AES.X64.AES128.va_wp_KeyExpansionRoundUnrolledRecursive",
         "equation_Vale.Arch.HeapImpl.heaplet_id",
         "equation_Vale.Arch.HeapImpl.vale_heaplets",
+        "equation_Vale.X64.Decls.upd_register",
         "equation_Vale.X64.Decls.va_ensure_total",
         "equation_Vale.X64.Decls.va_require_total",
         "equation_Vale.X64.Decls.va_state_eq",
@@ -529,7 +530,6 @@
         "equation_Vale.X64.Decls.va_upd_mem",
         "equation_Vale.X64.Decls.va_upd_mem_heaplet",
         "equation_Vale.X64.Decls.va_upd_ok",
-        "equation_Vale.X64.Decls.va_upd_reg",
         "equation_Vale.X64.Decls.va_upd_xmm",
         "equation_Vale.X64.Machine_s.n_reg_files",
         "equation_Vale.X64.Machine_s.n_regs",
@@ -599,7 +599,7 @@
         "unit_typing"
       ],
       0,
-      "b71b3b7533c22354d08d9dea69541ff3"
+      "fd6ec5ac1db3547d4ae54ecc6505e6e8"
     ],
     [
       "Vale.AES.X64.AES128.va_quick_KeyExpansionRoundUnrolledRecursive",
@@ -611,7 +611,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "54814ca14dab73c44f08289817d1ce2d"
+      "38e1c785b1f61d5946cdbf1b38ae8adc"
     ],
     [
       "Vale.AES.X64.AES128.va_qcode_KeyExpansion128Stdcall",
@@ -637,7 +637,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "e0be2f6116d54256b31e40a6fbb26ce0"
+      "a171d444c1dc64e2514a969ad8521deb"
     ],
     [
       "Vale.AES.X64.AES128.va_lemma_KeyExpansion128Stdcall",
@@ -673,7 +673,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt128@tok"
       ],
       0,
-      "5b21fcbe8fbd4a76b6cd5638a3af79d3"
+      "b89753785acc9b9e02c1d4fbcb30f4fc"
     ],
     [
       "Vale.AES.X64.AES128.va_lemma_KeyExpansion128Stdcall",
@@ -700,6 +700,7 @@
         "equation_Vale.Def.Words.Seq_s.seqn",
         "equation_Vale.Def.Words_s.nat32", "equation_Vale.Def.Words_s.nat64",
         "equation_Vale.Lib.Map16.get",
+        "equation_Vale.X64.Decls.upd_register",
         "equation_Vale.X64.Decls.va_ensure_total",
         "equation_Vale.X64.Decls.va_if",
         "equation_Vale.X64.Decls.va_require_total",
@@ -708,7 +709,6 @@
         "equation_Vale.X64.Decls.va_upd_mem",
         "equation_Vale.X64.Decls.va_upd_mem_heaplet",
         "equation_Vale.X64.Decls.va_upd_ok",
-        "equation_Vale.X64.Decls.va_upd_reg",
         "equation_Vale.X64.Decls.va_upd_reg64",
         "equation_Vale.X64.Decls.va_upd_xmm",
         "equation_Vale.X64.Decls.validDstAddrs",
@@ -826,7 +826,7 @@
         "unit_typing"
       ],
       0,
-      "da2a3891344ca206e1155d8547db9f1c"
+      "6acb01cba578986d7438f77e90ed5e62"
     ],
     [
       "Vale.AES.X64.AES128.va_wp_KeyExpansion128Stdcall",
@@ -862,7 +862,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt128@tok"
       ],
       0,
-      "bc99051be51e8a1d9c50d8b55126c058"
+      "0c7f9e81ef6a337bf669597b699e6732"
     ],
     [
       "Vale.AES.X64.AES128.va_wpProof_KeyExpansion128Stdcall",
@@ -880,6 +880,7 @@
         "equation_Vale.Arch.HeapImpl.heaplet_id",
         "equation_Vale.Arch.HeapImpl.vale_heaplets",
         "equation_Vale.Def.Words_s.nat64",
+        "equation_Vale.X64.Decls.upd_register",
         "equation_Vale.X64.Decls.va_ensure_total",
         "equation_Vale.X64.Decls.va_if",
         "equation_Vale.X64.Decls.va_require_total",
@@ -888,7 +889,6 @@
         "equation_Vale.X64.Decls.va_upd_mem",
         "equation_Vale.X64.Decls.va_upd_mem_heaplet",
         "equation_Vale.X64.Decls.va_upd_ok",
-        "equation_Vale.X64.Decls.va_upd_reg",
         "equation_Vale.X64.Decls.va_upd_reg64",
         "equation_Vale.X64.Decls.va_upd_xmm",
         "equation_Vale.X64.Decls.validDstAddrs",
@@ -963,7 +963,7 @@
         "typing_Vale.X64.State.update_reg", "unit_typing"
       ],
       0,
-      "aaaa25515c26764fd598eaaab8d983ca"
+      "bf4c972b56198e4aa91666431601741b"
     ],
     [
       "Vale.AES.X64.AES128.va_quick_KeyExpansion128Stdcall",
@@ -975,7 +975,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "4343a1f92900cf9f71b144bb8ad3c750"
+      "a9437e18077915272fe016abe8bd6e0c"
     ],
     [
       "Vale.AES.X64.AES128.va_lemma_AES128EncryptRound",
@@ -993,7 +993,7 @@
         "refinement_interpretation_Tm_refine_6cc211018e51b4c8cff23e448d890abc"
       ],
       0,
-      "61afe78a57321ffc087c934a2bfc2996"
+      "b880aff1ef6677ccfac957778e0d7cc2"
     ],
     [
       "Vale.AES.X64.AES128.va_lemma_AES128EncryptRound",
@@ -1016,12 +1016,12 @@
         "equation_Vale.Def.Types_s.quad32",
         "equation_Vale.Def.Words_s.nat32", "equation_Vale.Lib.Map16.get",
         "equation_Vale.X64.CPU_Features_s.sse_enabled",
+        "equation_Vale.X64.Decls.upd_register",
         "equation_Vale.X64.Decls.va_ensure_total",
         "equation_Vale.X64.Decls.va_require_total",
         "equation_Vale.X64.Decls.va_state_eq",
         "equation_Vale.X64.Decls.va_upd_flags",
         "equation_Vale.X64.Decls.va_upd_ok",
-        "equation_Vale.X64.Decls.va_upd_reg",
         "equation_Vale.X64.Decls.va_upd_xmm",
         "equation_Vale.X64.Decls.validSrcAddrs",
         "equation_Vale.X64.Decls.validSrcAddrs128",
@@ -1087,7 +1087,7 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "d4acdec19565150fbcd4cb69ff2de5f0"
+      "da5c7c43c772edee0ae8db8af5adcfec"
     ],
     [
       "Vale.AES.X64.AES128.va_wp_AES128EncryptRound",
@@ -1096,7 +1096,7 @@
       0,
       [ "@query" ],
       0,
-      "1db961667bd4668e1720fe89fa660676"
+      "f5a51a71cb633f8e8ce8024b0719e8ad"
     ],
     [
       "Vale.AES.X64.AES128.va_wpProof_AES128EncryptRound",
@@ -1112,12 +1112,12 @@
         "equation_Vale.Def.Types_s.quad32",
         "equation_Vale.Def.Words_s.nat32",
         "equation_Vale.X64.CPU_Features_s.sse_enabled",
+        "equation_Vale.X64.Decls.upd_register",
         "equation_Vale.X64.Decls.va_ensure_total",
         "equation_Vale.X64.Decls.va_require_total",
         "equation_Vale.X64.Decls.va_state_eq",
         "equation_Vale.X64.Decls.va_upd_flags",
         "equation_Vale.X64.Decls.va_upd_ok",
-        "equation_Vale.X64.Decls.va_upd_reg",
         "equation_Vale.X64.Decls.va_upd_xmm",
         "equation_Vale.X64.Machine_s.n_reg_files",
         "equation_Vale.X64.Machine_s.n_regs",
@@ -1179,7 +1179,7 @@
         "unit_typing"
       ],
       0,
-      "52b9c5762560a63c2075b2903e5ca60f"
+      "b855a05553ad702919b9e6a184461bce"
     ],
     [
       "Vale.AES.X64.AES128.va_quick_AES128EncryptRound",
@@ -1191,7 +1191,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "2ddcb3046c3cf6d8269a95f6ea4090b7"
+      "b7505d1644a7d1090114e2ad79276167"
     ],
     [
       "Vale.AES.X64.AES128.va_qcode_AES128EncryptBlock",
@@ -1205,7 +1205,7 @@
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c"
       ],
       0,
-      "ceedf0bf9f1cf4c004af14838aa528cf"
+      "ac2d023b7812b33c60f7b0472b1a1d48"
     ],
     [
       "Vale.AES.X64.AES128.va_lemma_AES128EncryptBlock",
@@ -1222,7 +1222,7 @@
         "refinement_interpretation_Tm_refine_74ee5d51291f0d079b5e144e2ec88f64"
       ],
       0,
-      "668ebbd301c5c35206d6b37fb6136db2"
+      "b147cae2c7f28ec720aad88b77d21b2e"
     ],
     [
       "Vale.AES.X64.AES128.va_lemma_AES128EncryptBlock",
@@ -1248,12 +1248,12 @@
         "equation_Vale.Def.Types_s.quad32",
         "equation_Vale.Def.Words_s.nat32", "equation_Vale.Lib.Map16.get",
         "equation_Vale.X64.CPU_Features_s.sse_enabled",
+        "equation_Vale.X64.Decls.upd_register",
         "equation_Vale.X64.Decls.va_ensure_total",
         "equation_Vale.X64.Decls.va_require_total",
         "equation_Vale.X64.Decls.va_state_eq",
         "equation_Vale.X64.Decls.va_upd_flags",
         "equation_Vale.X64.Decls.va_upd_ok",
-        "equation_Vale.X64.Decls.va_upd_reg",
         "equation_Vale.X64.Decls.va_upd_xmm",
         "equation_Vale.X64.Decls.validSrcAddrs",
         "equation_Vale.X64.Decls.validSrcAddrs128",
@@ -1320,7 +1320,7 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "f23177dcb6643057018eca4f21906cdd"
+      "6f83c527e1b977bb0670f7cd5beeeaf2"
     ],
     [
       "Vale.AES.X64.AES128.va_wp_AES128EncryptBlock",
@@ -1329,7 +1329,7 @@
       0,
       [ "@query", "projection_inverse_BoxInt_proj_0" ],
       0,
-      "abc7a5cca768db9b5f82a316a58d69d4"
+      "ef62922d93e00c5c9921d5dd10731f5e"
     ],
     [
       "Vale.AES.X64.AES128.va_wpProof_AES128EncryptBlock",
@@ -1344,12 +1344,12 @@
         "equation_Vale.AES.X64.AES128.va_wp_AES128EncryptBlock",
         "equation_Vale.Arch.HeapImpl.vale_heaplets",
         "equation_Vale.X64.CPU_Features_s.sse_enabled",
+        "equation_Vale.X64.Decls.upd_register",
         "equation_Vale.X64.Decls.va_ensure_total",
         "equation_Vale.X64.Decls.va_require_total",
         "equation_Vale.X64.Decls.va_state_eq",
         "equation_Vale.X64.Decls.va_upd_flags",
         "equation_Vale.X64.Decls.va_upd_ok",
-        "equation_Vale.X64.Decls.va_upd_reg",
         "equation_Vale.X64.Decls.va_upd_xmm",
         "equation_Vale.X64.Machine_s.n_reg_files",
         "equation_Vale.X64.Machine_s.n_regs",
@@ -1409,7 +1409,7 @@
         "typing_tok_Vale.AES.AES_s.AES_128@tok", "unit_typing"
       ],
       0,
-      "f54018c983e6582b5910cd9f5e7416e2"
+      "ffd49907260acaf3b2d16b822a062bdd"
     ],
     [
       "Vale.AES.X64.AES128.va_quick_AES128EncryptBlock",
@@ -1421,7 +1421,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "45efe47f1818b10e732bdc7bd21ec429"
+      "1874b5c91fa31e9adecc5ec08a074530"
     ],
     [
       "Vale.AES.X64.AES128.va_qcode_AES128EncryptBlockStdcall",
@@ -1435,7 +1435,7 @@
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c"
       ],
       0,
-      "afca2114d29710e9511c5d0ff5b3c505"
+      "9f8a3359d3b88ee32a42b2159c28c324"
     ],
     [
       "Vale.AES.X64.AES128.va_lemma_AES128EncryptBlockStdcall",
@@ -1455,7 +1455,7 @@
         "refinement_interpretation_Tm_refine_4d38686bf695f79f110ce5aef057279f"
       ],
       0,
-      "648e1194d12ebf41df90d4068a7f441b"
+      "99c748f2f4f39a7c9dcfb01ca4819ec6"
     ],
     [
       "Vale.AES.X64.AES128.va_lemma_AES128EncryptBlockStdcall",
@@ -1477,6 +1477,7 @@
         "equation_Vale.Def.Prop_s.prop0", "equation_Vale.Def.Types_s.quad32",
         "equation_Vale.Def.Words_s.nat32", "equation_Vale.Def.Words_s.nat64",
         "equation_Vale.Lib.Map16.get",
+        "equation_Vale.X64.Decls.upd_register",
         "equation_Vale.X64.Decls.va_ensure_total",
         "equation_Vale.X64.Decls.va_if",
         "equation_Vale.X64.Decls.va_require_total",
@@ -1485,7 +1486,6 @@
         "equation_Vale.X64.Decls.va_upd_mem",
         "equation_Vale.X64.Decls.va_upd_mem_heaplet",
         "equation_Vale.X64.Decls.va_upd_ok",
-        "equation_Vale.X64.Decls.va_upd_reg",
         "equation_Vale.X64.Decls.va_upd_reg64",
         "equation_Vale.X64.Decls.va_upd_xmm",
         "equation_Vale.X64.Decls.validDstAddrs",
@@ -1587,7 +1587,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt128@tok", "unit_typing"
       ],
       0,
-      "89329ba072c872ee9d64a4d60c5f28fe"
+      "f9ad7ace4e4b454bf3a11f704aed84a4"
     ],
     [
       "Vale.AES.X64.AES128.va_wp_AES128EncryptBlockStdcall",
@@ -1596,7 +1596,7 @@
       0,
       [ "@query", "projection_inverse_BoxInt_proj_0" ],
       0,
-      "56ba0f6d49d39641934307d83735af0f"
+      "916439f69f28b630dc3c4e3751611700"
     ],
     [
       "Vale.AES.X64.AES128.va_wpProof_AES128EncryptBlockStdcall",
@@ -1614,6 +1614,7 @@
         "equation_Vale.Arch.HeapImpl.vale_heaplets",
         "equation_Vale.Def.Words_s.nat64",
         "equation_Vale.X64.CPU_Features_s.sse_enabled",
+        "equation_Vale.X64.Decls.upd_register",
         "equation_Vale.X64.Decls.va_ensure_total",
         "equation_Vale.X64.Decls.va_if",
         "equation_Vale.X64.Decls.va_require_total",
@@ -1622,7 +1623,6 @@
         "equation_Vale.X64.Decls.va_upd_mem",
         "equation_Vale.X64.Decls.va_upd_mem_heaplet",
         "equation_Vale.X64.Decls.va_upd_ok",
-        "equation_Vale.X64.Decls.va_upd_reg",
         "equation_Vale.X64.Decls.va_upd_reg64",
         "equation_Vale.X64.Decls.va_upd_xmm",
         "equation_Vale.X64.Decls.validDstAddrs",
@@ -1694,7 +1694,7 @@
         "unit_typing"
       ],
       0,
-      "31589b71c88e6580094485240a58c994"
+      "53620dd0c233a3e5e20701521140f35f"
     ],
     [
       "Vale.AES.X64.AES128.va_quick_AES128EncryptBlockStdcall",
@@ -1706,7 +1706,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "91a03f7dce5c82ed0609af97c13b47b6"
+      "7c51d6798ea5dc5dc75e1f946d77ce4f"
     ]
   ]
 ]

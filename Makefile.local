@@ -1,6 +1,13 @@
 # A shared set of local definitions for local Makefiles. See curve25519/Makefile
 # for comments.
 
+ifeq (,$(filter %-in,$(MAKECMDGOALS)))
+ifeq (3.81,$(MAKE_VERSION))
+  $(error You seem to be using the OSX antiquated Make version. Hint: brew \
+    install make, then invoke gmake instead of make)
+endif
+endif
+
 HACL_HOME ?= .
 
 OUTPUT_DIR=$(HACL_HOME)/obj
@@ -13,6 +20,7 @@ include $(HACL_HOME)/Makefile.common
 FSTAR_ROOTS?=$(wildcard *.fst *.fsti)
 
 # This is the right way to ensure the .depend file always gets re-built.
+ifeq (,$(filter %-in,$(MAKECMDGOALS)))
 ifndef NODEPEND
 ifndef MAKE_RESTARTS
 .depend: .FORCE
@@ -26,6 +34,7 @@ endif
 endif
 
 include .depend
+endif
 
 %.checked: FSTAR_FLAGS=
 $(OUTPUT_DIR)/Vale.%.checked: FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
