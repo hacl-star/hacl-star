@@ -57,6 +57,8 @@ let as_nat_t_12 f =
 
 
 inline_for_extraction
+let felem4 = lbuffer uint64 (size 4)
+inline_for_extraction
 let felem6_buffer = lbuffer uint64 (size 6)
 inline_for_extraction 
 let felem12_buffer = lbuffer uint64 (size 12)
