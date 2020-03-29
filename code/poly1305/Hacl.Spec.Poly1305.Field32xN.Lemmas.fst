@@ -469,7 +469,8 @@ val lemma_fmul_r4_normalize51:
   Lemma
   (let v00 = vec_interleave_high_n 2 o o in
    let v10 = vec_add_mod o v00 in
-   let v20 = vec_add_mod v10 (vec_permute4 v10 1ul 1ul 1ul 1ul) in
+   let v10h = vec_interleave_high v10 v10 in
+   let v20 = vec_add_mod v10 v10h in
    felem_fits1 v20 (4 * m) /\
    (uint64xN_v v20).[0] == (uint64xN_v o).[0] + (uint64xN_v o).[1] + (uint64xN_v o).[2] + (uint64xN_v o).[3])
 
@@ -483,7 +484,10 @@ let lemma_fmul_r4_normalize51 #m o =
   FStar.Math.Lemmas.modulo_lemma (v o1 + v o3) (pow2 64);
   assert (v (vec_v v10).[0] == v o0 + v o2);
   assert (v (vec_v v10).[1] == v o1 + v o3);
-  let v20 = vec_add_mod v10 (vec_permute4 v10 1ul 1ul 1ul 1ul) in
+  let v10h = vec_interleave_high v10 v10 in
+  vec_interleave_high_lemma_uint64_4 v10 v10;
+  assert (v (vec_v v10h).[0] == v (vec_v v10).[1]);
+  let v20 = vec_add_mod v10 v10h in
   FStar.Math.Lemmas.modulo_lemma (v o0 + v o2 + v o1 + v o3) (pow2 64)
 
 
@@ -541,27 +545,32 @@ let fmul_r4_normalize51 fa =
   let (o0, o1, o2, o3, o4) = fa in
   let v00 = vec_interleave_high_n 2 o0 o0 in
   let v10 = vec_add_mod o0 v00 in
-  let v20 = vec_add_mod v10 (vec_permute4 v10 1ul 1ul 1ul 1ul) in
+  let v10h = vec_interleave_high v10 v10 in
+  let v20 = vec_add_mod v10 v10h in
   lemma_fmul_r4_normalize51 #1 o0;
 
   let v01 = vec_interleave_high_n 2 o1 o1 in
   let v11 = vec_add_mod o1 v01 in
-  let v21 = vec_add_mod v11 (vec_permute4 v11 1ul 1ul 1ul 1ul) in
+  let v11h = vec_interleave_high v11 v11 in 
+  let v21 = vec_add_mod v11 v11h in
   lemma_fmul_r4_normalize51 #2 o1;
 
   let v02 = vec_interleave_high_n 2 o2 o2 in
   let v12 = vec_add_mod o2 v02 in
-  let v22 = vec_add_mod v12 (vec_permute4 v12 1ul 1ul 1ul 1ul) in
+  let v12h = vec_interleave_high v12 v12 in 
+  let v22 = vec_add_mod v12 v12h in
   lemma_fmul_r4_normalize51 #1 o2;
 
   let v03 = vec_interleave_high_n 2 o3 o3 in
   let v13 = vec_add_mod o3 v03 in
-  let v23 = vec_add_mod v13 (vec_permute4 v13 1ul 1ul 1ul 1ul) in
+  let v13h = vec_interleave_high v13 v13 in 
+  let v23 = vec_add_mod v13 v13h in
   lemma_fmul_r4_normalize51 #1 o3;
 
   let v04 = vec_interleave_high_n 2 o4 o4 in
   let v14 = vec_add_mod o4 v04 in
-  let v24 = vec_add_mod v14 (vec_permute4 v14 1ul 1ul 1ul 1ul) in
+  let v14h = vec_interleave_high v14 v14 in 
+  let v24 = vec_add_mod v14 v14h in
   lemma_fmul_r4_normalize51 #2 o4;
   let res = (v20, v21, v22, v23, v24) in
   lemma_fmul_r4_normalize51_expand res fa;

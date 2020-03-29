@@ -165,13 +165,13 @@ let permr_row #a #m r1 n =
   | Spec.Blake2S,M256
   | Spec.Blake2S,M128 ->
     let v0 : vec_t U32 4 = r1.(0ul) in
-    let v1 : vec_t U32 4 = vec_permute4 #U32 v0 n0 n1 n2 n3 in
+    let v1 : vec_t U32 4 = vec_rotate_right_lanes #U32 v0 n0 in
     Lib.Sequence.(eq_intro (create4 (vec_v v0).[v n0] (vec_v v0).[v n1] (vec_v v0).[v n2] (vec_v v0).[v n3]) (Lib.Sequence.(createi 4 (fun i -> (vec_v v0).[(i+v n)%4]))));
     Lib.Sequence.(eq_intro (Spec.rotr (vec_v v0) (v n)) (Lib.Sequence.(createi 4 (fun i -> (vec_v v0).[(i+v n)%4]))));
     r1.(0ul) <- v1
   | Spec.Blake2B,M256 ->
     let v0 : vec_t U64 4 = r1.(0ul) in
-    let v1 : vec_t U64 4 = vec_permute4 #U64 v0 n0 n1 n2 n3 in
+    let v1 : vec_t U64 4 = vec_rotate_right_lanes #U64 v0 n0 in
     Lib.Sequence.(eq_intro (create4 (vec_v v0).[v n0] (vec_v v0).[v n1] (vec_v v0).[v n2] (vec_v v0).[v n3]) (Lib.Sequence.(createi 4 (fun i -> (vec_v v0).[(i+v n)%4]))));
     Lib.Sequence.(eq_intro (Spec.rotr (vec_v v0) (v n)) (Lib.Sequence.(createi 4 (fun i -> (vec_v v0).[(i+v n)%4]))));
     r1.(0ul) <- v1

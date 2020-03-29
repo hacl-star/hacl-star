@@ -328,6 +328,71 @@ let vec_interleave_high_n_lemma_uint32_8_4 v1 v2 = admit()
 let vec_interleave_high_n_lemma_uint64_4_2 v1 v2 = admit()
 let vec_shift_right_uint128_small2 v1 s = admit()
 
+(* Generic Permutations: Possible on Intel, but not on ARM.
+   So we comment this out and only leave interleaving and rotate_lanes functions in the API *)
+(*
+inline_for_extraction noextract
+val vec_permute2: #t:v_inttype -> v1:vec_t t 2
+  -> i1:vec_index 2 -> i2:vec_index 2 ->
+  vec_t t 2
+
+inline_for_extraction noextract
+val vec_permute2_lemma: #t:v_inttype -> v1:vec_t t 2
+  -> i1:vec_index 2 -> i2:vec_index 2 ->
+  Lemma (ensures (vec_v (vec_permute2 v1 i1 i2) == create2 (vec_v v1).[v i1] (vec_v v1).[v i2]))
+	[SMTPat (vec_v (vec_permute2 v1 i1 i2))]
+
+
+inline_for_extraction noextract
+val vec_permute4: #t:v_inttype -> v1:vec_t t 4
+  -> i1:vec_index 4 -> i2:vec_index 4 -> i3:vec_index 4 -> i4:vec_index 4 ->
+  vec_t t 4
+
+inline_for_extraction noextract
+val vec_permute4_lemma: #t:v_inttype -> v1:vec_t t 4
+  -> i1:vec_index 4 -> i2:vec_index 4 -> i3:vec_index 4 -> i4:vec_index 4 ->
+  Lemma (ensures (vec_v (vec_permute4 v1 i1 i2 i3 i4) == create4 (vec_v v1).[v i1] (vec_v v1).[v i2] (vec_v v1).[v i3] (vec_v v1).[v i4]))
+	[SMTPat (vec_v (vec_permute4 v1 i1 i2 i3 i4))]
+	 
+inline_for_extraction noextract
+val vec_permute8: #t:v_inttype -> v1:vec_t t 8
+  -> i1:vec_index 8 -> i2:vec_index 8 -> i3:vec_index 8 -> i4:vec_index 8
+  -> i5:vec_index 8 -> i6:vec_index 8 -> i7:vec_index 8 -> i8:vec_index 8 ->
+  v2:vec_t t 8{vec_v v2 == create8 (vec_v v1).[v i1] (vec_v v1).[v i2] (vec_v v1).[v i3] (vec_v v1).[v i4]
+                                   (vec_v v1).[v i5] (vec_v v1).[v i6] (vec_v v1).[v i7] (vec_v v1).[v i8]}
+
+inline_for_extraction noextract
+val vec_permute16: #t:v_inttype -> v1:vec_t t 16
+  -> i1:vec_index 16 -> i2:vec_index 16 -> i3:vec_index 16 -> i4:vec_index 16
+  -> i5:vec_index 16 -> i6:vec_index 16 -> i7:vec_index 16 -> i8:vec_index 16
+  -> i9:vec_index 16  -> i10:vec_index 16 -> i11:vec_index 16 -> i12:vec_index 16
+  -> i13:vec_index 16 -> i14:vec_index 16 -> i15:vec_index 16 -> i16:vec_index 16 ->
+  v2:vec_t t 16{let vv1 = vec_v v1 in
+    vec_v v2 == create16 vv1.[v i1] vv1.[v i2] vv1.[v i3] vv1.[v i4]
+                         vv1.[v i5] vv1.[v i6] vv1.[v i7] vv1.[v i8]
+                         vv1.[v i9] vv1.[v i10] vv1.[v i11] vv1.[v i12]
+                         vv1.[v i13] vv1.[v i14] vv1.[v i15] vv1.[v i16]}
+
+inline_for_extraction noextract
+val vec_permute32: #t:v_inttype -> v1:vec_t t 32
+  -> i1:vec_index 16 -> i2:vec_index 16 -> i3:vec_index 16 -> i4:vec_index 16
+  -> i5:vec_index 16 -> i6:vec_index 16 -> i7:vec_index 16 -> i8:vec_index 16
+  -> i9:vec_index 16 -> i10:vec_index 16 -> i11:vec_index 16 -> i12:vec_index 16
+  -> i13:vec_index 16 -> i14:vec_index 16 -> i15:vec_index 16 -> i16:vec_index 16
+  -> i17:vec_index 16 -> i18:vec_index 16 -> i19:vec_index 16 -> i20:vec_index 16
+  -> i21:vec_index 16 -> i22:vec_index 16 -> i23:vec_index 16 -> i24:vec_index 16
+  -> i25:vec_index 16 -> i26:vec_index 16 -> i27:vec_index 16 -> i28:vec_index 16
+  -> i29:vec_index 16 -> i30:vec_index 16 -> i31:vec_index 16 -> i32:vec_index 16 ->
+  v2:vec_t t 32{let vv1 = vec_v v1 in
+    vec_v v2 == create32 vv1.[v i1] vv1.[v i2] vv1.[v i3] vv1.[v i4]
+                         vv1.[v i5] vv1.[v i6] vv1.[v i7] vv1.[v i8]
+                         vv1.[v i9] vv1.[v i10] vv1.[v i11] vv1.[v i12]
+                         vv1.[v i13] vv1.[v i14] vv1.[v i15] vv1.[v i16]
+                         vv1.[v i17] vv1.[v i18] vv1.[v i19] vv1.[v i20]
+                         vv1.[v i21] vv1.[v i22] vv1.[v i23] vv1.[v i24]
+                         vv1.[v i25] vv1.[v i26] vv1.[v i27] vv1.[v i28]
+                         vv1.[v i29] vv1.[v i30] vv1.[v i31] vv1.[v i32]}
+
 let vec_permute2 #t v i1 i2 =
   match t with
   | U64 -> vec128_shuffle64 v i1 i2
@@ -345,6 +410,29 @@ let vec_permute4_lemma #t v i1 i2 i3 i4 = ()
 let vec_permute8 #t v i1 i2 i3 i4 i5 i6 i7 i8 = admit()
 let vec_permute16 #t = admit()
 let vec_permute32 #t = admit()
+*)
+
+let vec_rotate_right_lanes (#t:v_inttype) (#w:width) (x:vec_t t w) (y:rotval t) =
+  match t,w with
+  | U32,4 -> vec128_rotate_right_lanes32 x y
+  | U64,2 -> vec128_rotate_right_lanes64 x y
+  | U32,8 -> vec256_rotate_right_lanes32 x y
+  | U64,4 -> vec256_rotate_right_lanes64 x y
+  | _,_ ->  admit()
+
+let vec_rotate_right_lanes2_lemma (#t:v_inttype) (x:vec_t t 2) (y:size_t{v y <= 2}) = admit()
+let vec_rotate_right_lanes4_lemma (#t:v_inttype) (x:vec_t t 4) (y:size_t{v y <= 4}) = admit()
+
+let vec_rotate_left_lanes (#t:v_inttype) (#w:width) (x:vec_t t w) (y:size_t{v y <= w}) =
+  match w with
+  | 2 -> vec_rotate_right_lanes x (1ul -. y)
+  | 4 -> vec_rotate_right_lanes x (4ul -. y)
+  | 8 -> vec_rotate_right_lanes x (8ul -. y)
+  | 16 -> vec_rotate_right_lanes x (16ul -. y)
+  | 32 -> vec_rotate_right_lanes x (32ul -. y)
+
+let vec_rotate_left_lanes2_lemma (#t:v_inttype) (x:vec_t t 2) (y:size_t{v y <= 2}) = admit()
+let vec_rotate_left_lanes4_lemma (#t:v_inttype) (x:vec_t t 4) (y:size_t{v y <= 4}) = admit()
 
 let vec_aes_enc key state =
   ni_aes_enc key state
