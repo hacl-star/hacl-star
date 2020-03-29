@@ -103,8 +103,7 @@ all:
 all-unstaged: compile-gcc-compatible compile-msvc-compatible compile-gcc64-only \
   compile-evercrypt-external-headers compile-c89-compatible compile-ccf \
   compile-portable-gcc-compatible compile-mozilla dist/linux/Makefile.basic \
-  dist/wasm/package.json \
-	dist/merkle-tree/Makefile.basic
+  dist/wasm/package.json dist/merkle-tree/Makefile.basic
 
 # Automatic staging.
 %-staged: .last_vale_version
@@ -731,7 +730,7 @@ dist/wasm/Makefile.basic: HASH_BUNDLE += -bundle Hacl.HMAC_DRBG
 dist/wasm/Makefile.basic: FRODO_BUNDLE = -bundle Hacl.Frodo.KEM,Frodo.Params,Hacl.Impl.Frodo.*,Hacl.Impl.Matrix,Hacl.Frodo.*,Hacl.Keccak,Hacl.AES128
 
 # Doesn't work in Wasm because it uses assembler intrinsics
-ECDSA_BUNDLE = -bundle Hacl.Impl.ECDSA,Hacl.Impl.ECDSA,Hacl.Impl.ECDSA.*,Hacl.Impl.P256.*,Hacl.Impl.P256,Hacl.Spec.P256.*,Hacl.Impl.SolinasReduction,Hacl.Impl.LowLevel
+dist/wasm/Makefile.basic: ECDSA_BUNDLE = -bundle Hacl.Impl.ECDSA,Hacl.Impl.ECDSA,Hacl.Impl.ECDSA.*,Hacl.Impl.P256.*,Hacl.Impl.P256,Hacl.Spec.P256.*,Hacl.Impl.SolinasReduction,Hacl.Impl.LowLevel
 
 # No Vale Curve64 no "Local" or "Slow" Curve64, only Curve51 (local Makefile hack)
 dist/wasm/Makefile.basic: CURVE_BUNDLE_SLOW =
@@ -740,6 +739,13 @@ dist/wasm/Makefile.basic: CURVE_BUNDLE = \
   -bundle 'Hacl.Curve25519_64_Slow' \
   -bundle 'Hacl.Curve25519_64' \
   -bundle 'Hacl.Curve25519_64_Local'
+
+# Most HPKE variants don't work in Wasm, since they are either using Curve64,
+# P256 or vectorized chacha-poly, none of which are available in Wasm.
+dist/wasm/Makefile.basic: HPKE_BUNDLE += \
+  -bundle Hacl.HPKE.Curve51_CP32_SHA256= \
+  -bundle Hacl.HPKE.Curve51_CP32_SHA512= \
+  -bundle 'Hacl.HPKE.*'
 
 # Disabling vectorized stuff
 dist/wasm/Makefile.basic: CHACHA20_BUNDLE += \
