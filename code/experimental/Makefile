@@ -18,7 +18,7 @@ CFLAGS += -I ../../../lib/c -march=native -mtune=native -O3
 export CFLAGS
 
 dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
-	$(KRML) $^ -o libecdsa.a $(BASE_FLAGS)\
+	$(KRML) $^ -o libecdsa.a $(BASE_FLAGS) $(P384_BUNDLE)\
 	  -tmpdir dist \
 	  -add-include '"lib_intrinsics.h"' \
 	  -no-prefix 'Hacl.Test.ECDSA' \
