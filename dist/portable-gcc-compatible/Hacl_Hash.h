@@ -322,17 +322,5 @@ void Hacl_Hash_Core_SHA2_finish_512(uint64_t *s, uint8_t *dst);
 
 /* SNIPPET_END: Hacl_Hash_Core_SHA2_finish_512 */
 
-/* SNIPPET_START: Hacl_Hash_Core_SHA2_Constants_k224_256 */
-
-extern uint32_t Hacl_Hash_Core_SHA2_Constants_k224_256[64U];
-
-/* SNIPPET_END: Hacl_Hash_Core_SHA2_Constants_k224_256 */
-
-/* SNIPPET_START: Hacl_Hash_Core_SHA2_Constants_k384_512 */
-
-extern uint64_t Hacl_Hash_Core_SHA2_Constants_k384_512[80U];
-
-/* SNIPPET_END: Hacl_Hash_Core_SHA2_Constants_k384_512 */
-
 #define __Hacl_Hash_H_DEFINED
 #endif
