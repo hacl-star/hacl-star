@@ -736,7 +736,8 @@ ECDSA_BUNDLE = -bundle Hacl.Impl.ECDSA,Hacl.Impl.ECDSA,Hacl.Impl.ECDSA.*,Hacl.Im
 # No Vale Curve64 no "Local" or "Slow" Curve64, only Curve51 (local Makefile hack)
 dist/wasm/Makefile.basic: CURVE_BUNDLE_SLOW =
 dist/wasm/Makefile.basic: CURVE_BUNDLE = \
-	$(CURVE_BUNDLE_BASE) \
+  $(CURVE_BUNDLE_BASE) \
+  -bundle 'Hacl.Curve25519_64_Slow' \
   -bundle 'Hacl.Curve25519_64' \
   -bundle 'Hacl.Curve25519_64_Local'
 
