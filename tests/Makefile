@@ -2,7 +2,7 @@
 
 # Add GF128 tests once code/experimental/gf128 is promoted to code
 TARGETS = $(filter-out gf128-%, $(patsubst %.c,%.exe,$(wildcard *.c)))
-
+KREMLIN_HOME=../dist/kremlin
 CFLAGS += -I$(KREMLIN_HOME)/include -I../dist/gcc64-only \
   -I$(KREMLIN_HOME)/kremlib/dist/minimal \
   -I../secure_api/merkle_tree \
@@ -11,6 +11,11 @@ CFLAGS += -I$(KREMLIN_HOME)/include -I../dist/gcc64-only \
 all: $(TARGETS)
 
 test: $(patsubst %.exe,%.test,$(TARGETS))
+
+arm: chacha20-arm-test.exe poly1305-arm-test.exe blake2-arm-test.exe
+	./chacha20-arm-test.exe
+	./poly1305-arm-test.exe
+	./blake2-arm-test.exe
 
 # Dependency
 
@@ -37,6 +42,9 @@ poly1305-arm-test.exe: poly1305-arm-test.c
 
 blake2-arm-test.exe: blake2-arm-test.c
 	$(CC) $(CFLAGS) $(LDFLAGS) $^ ../dist/gcc64-only/Hacl_Blake2s_32.c  ../dist/gcc64-only/Hacl_Blake2b_32.c ../dist/gcc64-only/Hacl_Blake2s_128.c -o $@
+
+curve25519-arm-test.exe: curve25519-arm-test.c
+	$(CC) $(CFLAGS) $(LDFLAGS) $^ ../dist/gcc64-only/Hacl_Curve25519_51.c -o $@
 
 
 # Running tests
