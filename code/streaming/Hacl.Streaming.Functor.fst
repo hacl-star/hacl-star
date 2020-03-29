@@ -744,7 +744,7 @@ let update_empty_buf #index c i p data len =
   =
     c.update_multi_associative i h input1 input2
   in
-  
+
   let open LowStar.BufferOps in
   let s = !*p in
   let State hash_state buf total_len seen = s in
