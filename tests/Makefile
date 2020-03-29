@@ -29,6 +29,16 @@ curve64-rfc.exe: $(patsubst %.c,%.o,$(wildcard rfc7748_src/*.c))
 %.exe: %.o
 	$(CC) $(CFLAGS) $(LDFLAGS) $^ ../dist/gcc64-only/libevercrypt.a -o $@
 
+chacha20-arm-test.exe: chacha20-arm-test.c
+	$(CC) $(CFLAGS) $(LDFLAGS) $^ ../dist/gcc64-only/Hacl_Chacha20.c ../dist/gcc64-only/Hacl_Chacha20_Vec128.c -o $@
+
+poly1305-arm-test.exe: poly1305-arm-test.c
+	$(CC) $(CFLAGS) $(LDFLAGS) $^ ../dist/gcc64-only/Hacl_Poly1305_32.c ../dist/gcc64-only/Hacl_Poly1305_128.c -o $@
+
+blake2-arm-test.exe: blake2-arm-test.c
+	$(CC) $(CFLAGS) $(LDFLAGS) $^ ../dist/gcc64-only/Hacl_Blake2s_32.c  ../dist/gcc64-only/Hacl_Blake2b_32.c ../dist/gcc64-only/Hacl_Blake2s_128.c -o $@
+
+
 # Running tests
 
 %.test: %.exe
