@@ -437,6 +437,13 @@ typedef uint32x4_t Lib_IntVector_Intrinsics_vec128;
 #define Lib_IntVector_Intrinsics_vec128_rotate_right32(x0,x1)	\
   (vsriq_n_u32(vshlq_n_u32((x0),32-(x1)),(x0),(x1)))
 
+#define Lib_IntVector_Intrinsics_vec128_rotate_right_lanes32(x0, x1)	\
+  (vextq_u32(x0,x0,x1))
+
+#define Lib_IntVector_Intrinsics_vec128_rotate_right_lanes64(x0, x1)	\
+  (vextq_u64(x0,x0,x1))
+
+
 /*
 #define Lib_IntVector_Intrinsics_vec128_shuffle32(x0, x1, x2, x3, x4)	\
   (_mm_shuffle_epi32(x0, _MM_SHUFFLE(x1,x2,x3,x4)))
