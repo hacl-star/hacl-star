@@ -24,6 +24,7 @@
 
 #include "Hacl_Chacha20.h"
 
+const
 u32
 Hacl_Impl_Chacha20_Vec_chacha20_constants[4U] =
   { (u32)0x61707865U, (u32)0x3320646eU, (u32)0x79622d32U, (u32)0x6b206574U };
@@ -127,7 +128,8 @@ static inline void chacha20_core(u32 *k, u32 *ctx, u32 ctr)
   k[12U] = k[12U] + ctr_u32;
 }
 
-static u32
+static const
+u32
 chacha20_constants[4U] =
   { (u32)0x61707865U, (u32)0x3320646eU, (u32)0x79622d32U, (u32)0x6b206574U };
 
