@@ -71,7 +71,7 @@ let chacha20_core k ctx ctr =
 
 
 val chacha20_constants:
-  b:ilbuffer size_t 4ul{recallable b /\ witnessed b Spec.Chacha20.chacha20_constants}
+  b:glbuffer size_t 4ul{recallable b /\ witnessed b Spec.Chacha20.chacha20_constants}
 let chacha20_constants =
   [@ inline_let]
   let l = [Spec.c0;Spec.c1;Spec.c2;Spec.c3] in
@@ -96,7 +96,6 @@ val chacha20_init:
 let chacha20_init ctx k n ctr =
   let h0 = ST.get() in
   recall_contents chacha20_constants Spec.chacha20_constants;
-  mut_immut_disjoint ctx chacha20_constants (ST.get ());
   update_sub_f h0 ctx 0ul 4ul
     (fun h -> Lib.Sequence.map secret Spec.chacha20_constants)
     (fun _ -> mapT 4ul (sub ctx 0ul 4ul) secret chacha20_constants);

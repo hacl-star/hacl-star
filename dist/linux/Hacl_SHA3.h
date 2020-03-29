@@ -33,11 +33,11 @@
 #include "Hacl_Kremlib.h"
 
 
-extern u32 Hacl_Impl_SHA3_keccak_rotc[24U];
+extern const u32 Hacl_Impl_SHA3_keccak_rotc[24U];
 
-extern u32 Hacl_Impl_SHA3_keccak_piln[24U];
+extern const u32 Hacl_Impl_SHA3_keccak_piln[24U];
 
-extern u64 Hacl_Impl_SHA3_keccak_rndc[24U];
+extern const u64 Hacl_Impl_SHA3_keccak_rndc[24U];
 
 u64 Hacl_Impl_SHA3_rotl(u64 a, u32 b);
 

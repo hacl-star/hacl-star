@@ -130,7 +130,7 @@ static u64 add4_variables(u64 *x, u64 cin, u64 y0, u64 y1, u64 y2, u64 y3, u64 *
   return cc3;
 }
 
-static u64 sub4_il(u64 *x, u64 *y, u64 *result)
+static u64 sub4_il(u64 *x, const u64 *y, u64 *result)
 {
   u64 *r0 = result;
   u64 *r1 = result + (u32)1U;
@@ -171,7 +171,7 @@ static void mult64_0(u64 *x, u64 u, u64 *result, u64 *temp)
   mul64(f0, u, result, temp);
 }
 
-static void mult64_0il(u64 *x, u64 u, u64 *result, u64 *temp)
+static void mult64_0il(const u64 *x, u64 u, u64 *result, u64 *temp)
 {
   u64 f0 = x[0U];
   mul64(f0, u, result, temp);
@@ -186,7 +186,7 @@ static u64 mult64_c(u64 x, u64 u, u64 cin, u64 *result, u64 *temp)
   return Lib_IntTypes_Intrinsics_add_carry_u64(cin, l, h, result);
 }
 
-static u64 mul1_il(u64 *f, u64 u, u64 *result)
+static u64 mul1_il(const u64 *f, u64 u, u64 *result)
 {
   u64 temp = (u64)0U;
   u64 f1 = f[1U];
@@ -485,7 +485,7 @@ static void shift_256_impl(u64 *i, u64 *o)
   o[7U] = i[3U];
 }
 
-static void shortened_mul(u64 *a, u64 b, u64 *result)
+static void shortened_mul(const u64 *a, u64 b, u64 *result)
 {
   u64 *result04 = result;
   u64 c = mul1_il(a, b, result04);
@@ -526,7 +526,8 @@ static void toUint8(u64 *i, u8 *o)
     store64_be(o + i0 * (u32)8U, i[i0]);
 }
 
-static u64
+static const
+u64
 prime256_buffer[4U] =
   { (u64)0xffffffffffffffffU, (u64)0xffffffffU, (u64)0U, (u64)0xffffffff00000001U };
 
@@ -1295,7 +1296,7 @@ static void zero_buffer(u64 *p)
   p[11U] = (u64)0U;
 }
 
-static void scalarMultiplicationI(u64 *p, u64 *result, u8 *scalar, u64 *tempBuffer)
+static void scalarMultiplicationC(u64 *p, u64 *result, const u8 *scalar, u64 *tempBuffer)
 {
   u64 *q = tempBuffer;
   u64 *buff;
@@ -1379,7 +1380,8 @@ static void secretToPublicWithoutNorm(u64 *result, u8 *scalar, u64 *tempBuffer)
   copy_point(q, result);
 }
 
-static u64
+static const
+u64
 prime256order_buffer[4U] =
   {
     (u64)17562291160714782033U,
@@ -1388,7 +1390,8 @@ prime256order_buffer[4U] =
     (u64)18446744069414584320U
   };
 
-static u8
+static const
+u8
 order_inverse_buffer[32U] =
   {
     (u8)79U, (u8)37U, (u8)99U, (u8)252U, (u8)194U, (u8)202U, (u8)185U, (u8)243U, (u8)132U, (u8)158U,
@@ -1397,7 +1400,8 @@ order_inverse_buffer[32U] =
     (u8)255U, (u8)255U, (u8)255U
   };
 
-static u8
+static const
+u8
 order_buffer[32U] =
   {
     (u8)255U, (u8)255U, (u8)255U, (u8)255U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)255U, (u8)255U,
@@ -1598,7 +1602,7 @@ static bool isOrderCorrect(u64 *p, u64 *tempBuffer)
   u64 pBuffer[12U] = { 0U };
   bool result;
   memcpy(pBuffer, p, (u32)12U * sizeof (p[0U]));
-  scalarMultiplicationI(pBuffer, multResult, order_buffer, tempBuffer);
+  scalarMultiplicationC(pBuffer, multResult, order_buffer, tempBuffer);
   result = isPointAtInfinityPublic(multResult);
   return result;
 }
