@@ -382,8 +382,17 @@ typedef uint32x4_t Lib_IntVector_Intrinsics_vec128;
 #define Lib_IntVector_Intrinsics_vec128_gt32(x0, x1) \
   (vcgtq_u32(x0, x1))
 
+#define high32(x) \
+  (vmovn_u64(vshrq_n_u64(vreinterpretq_u64_u32(x0))))
+
+#define low32(x) \
+  (vmovn_u64(vreinterpretq_u64_u32(x0)))
+
+#define Lib_IntVector_Intrinsics_vec128_gt64(x0, x1) \
+  (vreinterpretq_u32_u64(vmovl_u32(vorr_u32(vcgt_u32(high32(x0),high32(x1)),vand_32(vceq_u32(high32(x0),high32(x1)),vcgt(low32(x0),low32(x1)))))))
+
 #define Lib_IntVector_Intrinsics_vec128_or(x0, x1) \
-  (voorq_u32(x0, x1))
+  (vorrq_u32(x0, x1))
 
 #define Lib_IntVector_Intrinsics_vec128_and(x0, x1) \
   (vandq_u32(x0, x1))
@@ -469,10 +478,10 @@ typedef uint32x4_t Lib_IntVector_Intrinsics_vec128;
   (vgetq_lane_u32(x0,x1))
 
 #define Lib_IntVector_Intrinsics_vec128_extract64(x0, x1)	\
-  (vreinterpretq_u32_u64(vgetq_lane_u64(vreinterpretq_u64_u32(x0),x1)))
+  (vgetq_lane_u64(vreinterpretq_u64_u32(x0),x1))
 
 #define Lib_IntVector_Intrinsics_vec128_zero  \
-  (vdup_n_u8(0))
+  (vdupq_n_u32(0))
 
 #define Lib_IntVector_Intrinsics_vec128_add64(x0, x1) \
   (vreinterpretq_u32_u64(vaddq_u64(vreinterpretq_u64_u32(x0), vreinterpretq_u64_u32(x1))))
@@ -481,10 +490,10 @@ typedef uint32x4_t Lib_IntVector_Intrinsics_vec128;
   (vreinterpretq_u32_u64(vsubq_u64(vreinterpretq_u64_u32(x0), vreinterpretq_u64_u32(x1))))
 
 #define Lib_IntVector_Intrinsics_vec128_mul64(x0, x1) \
-  (vmull_u32(vmovn_u64(x0), vmovn_u64(x1)))
+  (vreinterpretq_u32_u64(vmull_u32(vmovn_u64(vreinterpretq_u64_u32(x0)), vmovn_u64(vreinterpretq_u64_u32(x1)))))
 
 #define Lib_IntVector_Intrinsics_vec128_smul64(x0, x1) \
-  (vmull_u32(vmovn_u64(x0), vdupq_n_u64(x1)))
+  (vreinterpretq_u32_u64(vmull_n_u32(vmovn_u64(vreinterpretq_u64_u32(x0)), (uint32_t)x1)))
 
 #define Lib_IntVector_Intrinsics_vec128_add32(x0, x1) \
   (vaddq_u32(x0, x1))
