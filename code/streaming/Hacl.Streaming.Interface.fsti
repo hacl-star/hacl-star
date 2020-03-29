@@ -89,7 +89,9 @@ type block (index: Type0) =
     t i) ->
   finish_s: (i:index -> t i -> s:S.seq uint8 { S.length s = U32.v (output_len i) }) ->
 
-  /// Required lemmas... clients need to introduce these into their context via a local SMTPat.
+  // Required lemmas... clients need to introduce these into their context via a local SMTPat.
+  // Note: the way I authored update_multi_associative is terrible to work with,
+  // see comment starting with "GHA" in update_round.
 
   update_multi_zero: (i:index -> h:t i -> Lemma
     (ensures (update_multi_s i h S.empty == h))) ->

@@ -624,7 +624,7 @@ let update_small #index c i p data len =
 
 /// Case 2: we have no buffered data.
 
-#set-options "--z3rlimit 60"
+#push-options "--z3rlimit 60"
 let split_at_last_blocks #index (c: block index) (i: index) (b: bytes) (d: bytes): Lemma
   (requires (
     let blocks, rest = split_at_last c i b in
@@ -692,6 +692,7 @@ let split_at_last_blocks #index (c: block index) (i: index) (b: bytes) (d: bytes
   (S.equal) { }
     blocks'';
   }
+#pop-options
 
 #push-options "--z3rlimit 50"
 val update_empty_buf:
@@ -819,7 +820,7 @@ val update_round:
       update_post c i s data len h0 h1 /\
       U64.v (total_len_h c i h1 s) % U32.v (c.block_len i) = 0))
 
-(*let split_at_last_block #index (c: block index) (i: index) (b: bytes) (d: bytes): Lemma
+let split_at_last_block #index (c: block index) (i: index) (b: bytes) (d: bytes): Lemma
   (requires (
     let _, rest = split_at_last c i b in
     S.length rest + S.length d = U32.v (c.block_len i)))
@@ -828,8 +829,19 @@ val update_round:
     let blocks', rest' = split_at_last c i (S.append b d) in
     S.equal (S.append b d) blocks' /\ S.equal S.empty rest'))
 =
-   admit ()
+  let blocks, rest = split_at_last c i b in
 
+  calc (==) {
+    (S.length b + S.length d) % U32.v (c.block_len i);
+  (==) { S.lemma_len_append blocks rest }
+    (S.length blocks + S.length rest + S.length d) % U32.v (c.block_len i);
+  (==) { Math.Lemmas.modulo_distributivity (S.length blocks) (S.length rest + S.length d) (U32.v (c.block_len i)) }
+    (U32.v (c.block_len i)) % (U32.v (c.block_len i));
+  (==) { Math.Lemmas.multiple_modulo_lemma (U32.v (c.block_len i)) 1 }
+    0;
+  }
+
+#push-options "--z3rlimit 100"
 let update_round #index c i p data len =
   let aux (h:HS.mem) (s:c.state i): Lemma
     (requires (c.invariant h s))
@@ -850,16 +862,20 @@ let update_round #index c i p data len =
   =
     c.frame_freeable #i l s h0 h1
   in
-  let aux i h
-    (input1:S.seq uint8 { S.length input1 % U32.v (c.block_len i) = 0 })
-    (input2:S.seq uint8 { S.length input2 % U32.v (c.block_len i) = 0 }):
-    Lemma (ensures (
+  let aux h
+    (input1:S.seq uint8)
+    (input2:S.seq uint8):
+    Lemma (requires
+     S.length input1 % U32.v (c.block_len i) = 0 /\
+     S.length input2 % U32.v (c.block_len i) = 0)
+    (ensures (
       let input = S.append input1 input2 in
-      concat_blocks_modulo (U32.v (c.block_len i)) input1 input2;
+      S.length input % U32.v (c.block_len i) == 0 /\
       (==) (c.update_multi_s i (c.update_multi_s i h input1) input2)
         (c.update_multi_s i h input)))
     [ SMTPat (c.update_multi_s i (c.update_multi_s i h input1) input2) ]
   =
+    concat_blocks_modulo (U32.v (c.block_len i)) input1 input2;
     c.update_multi_associative i h input1 input2
   in
 
@@ -883,82 +899,84 @@ let update_round #index c i p data len =
   c.frame_invariant (B.loc_buffer buf_) hash_state h0 h1;
   c.update_multi (G.hide i) hash_state buf0 (c.block_len i);
   let h2 = ST.get () in
-  // JP: no clue why I had to go through all these manual steps.
-  (
-    let blocks, rest = split_at_last c i (G.reveal seen) in
-    assert ((==) (c.v h2 hash_state)
-      (c.update_multi_s i (c.v h1 hash_state) (B.as_seq h1 buf0)));
-    assert (S.equal (B.as_seq h0 buf1) (B.as_seq h1 buf1));
-    assert (S.equal rest (B.as_seq h1 buf1));
-    assert (S.equal (B.as_seq h0 data) (B.as_seq h1 data));
-    assert (S.equal (B.as_seq h1 buf0) (S.append (B.as_seq h1 buf1) (B.as_seq h1 data)));
-    assert ((==) (c.v h2 hash_state)
-      (c.update_multi_s i (c.init_s i)
-        (S.append blocks (B.as_seq h1 buf0))));
-    assert ((==) (c.v h2 hash_state)
-      (c.update_multi_s i (c.init_s i)
-        (S.append blocks (S.append (B.as_seq h1 buf1) (B.as_seq h1 data)))));
-    ()); admit ()
-    S.append_assoc blocks (B.as_seq h1 buf1) (B.as_seq h1 data);
-    assert (S.equal (c.v h2 hash_state)
-      (update_multi i (Spec.Agile.Hash.init i)
-        (S.append (S.append blocks (B.as_seq h1 buf1)) (B.as_seq h1 data))));
-    assert (S.equal (S.append blocks rest) (G.reveal seen));
-    assert (S.equal (c.v h2 hash_state)
-      (update_multi i (Spec.Agile.Hash.init i)
-        (S.append (G.reveal seen) (B.as_seq h1 data))));
-    assert (S.equal (c.v h2 hash_state)
-      (update_multi i (Spec.Agile.Hash.init i)
-        (S.append (G.reveal seen) (B.as_seq h0 data))));
-    split_at_last_block i (G.reveal seen) (B.as_seq h0 data);
-    let blocks', rest' = split_at_last i (S.append (G.reveal seen) (B.as_seq h0 data)) in
-    assert (S.equal rest' S.empty);
-    assert (B.live h2 buf_ /\
-      B.(loc_disjoint (loc_buffer buf_) (Hash.footprint hash_state h2)) /\
-      Hash.invariant hash_state h2);
-    ()
-  );
-  p *= (State hash_state buf_ (add_len total_len len)
+  (* Proof interlude *)
+  begin
+    let seen' = G.reveal seen `S.append` B.as_seq h0 data in
+    let blocks', rest' = split_at_last c i seen' in
+    let seen = G.reveal seen in
+    let blocks, rest = split_at_last c i seen in
+    assert (S.length blocks % U32.v (c.block_len i) = 0);
+    assert (S.length (rest `S.append` B.as_seq h0 data) % U32.v (c.block_len i) = 0);
+    calc (==) {
+      c.v h2 hash_state;
+    (==) { }
+      c.update_multi_s i (c.v h1 hash_state) (B.as_seq h1 buf0);
+    (==) { }
+      c.update_multi_s i (c.v h1 hash_state) (B.as_seq h0 buf1 `S.append` B.as_seq h0 data);
+    (==) { }
+      c.update_multi_s i (c.update_multi_s i (c.init_s i) blocks) (B.as_seq h0 buf1 `S.append` B.as_seq h0 data);
+    (==) { }
+      c.update_multi_s i (c.update_multi_s i (c.init_s i) blocks) (rest `S.append` B.as_seq h0 data);
+    (==) { aux (c.init_s i) blocks (rest `S.append` B.as_seq h0 data) }
+      // GHA!! The modulo proof obligation in the post-condition of the type
+      // classe's update_multi_associative lemma, for some reason, makes
+      // everything fail, so we rely on the local version of the lemma,
+      // rewritten to suit our needs... :'(
+      c.update_multi_s i (c.init_s i) (blocks `S.append` (rest `S.append` B.as_seq h0 data));
+    (==) { S.append_assoc blocks rest (B.as_seq h0 data) }
+      c.update_multi_s i (c.init_s i) (blocks `S.append` rest `S.append` B.as_seq h0 data);
+    (==) { }
+      c.update_multi_s i (c.init_s i) (seen `S.append` B.as_seq h0 data);
+    }
+  end;
+  p *= (State hash_state buf_ (add_len c i total_len len)
     (G.hide (G.reveal seen `S.append` B.as_seq h0 data)));
   let h3 = ST.get () in
-  Hash.frame_invariant (B.loc_buffer p) hash_state h2 h3;
-  Hash.frame_invariant_implies_footprint_preservation (B.loc_buffer p) hash_state h2 h3;
-  assert (hashed #i h3 p `S.equal` (S.append (G.reveal seen) (B.as_seq h0 data)))
+  c.frame_invariant (B.loc_buffer p) hash_state h2 h3;
+  assert (seen_pred c i h3 p `S.equal` (S.append (G.reveal seen) (B.as_seq h0 data)))
 #pop-options
 
-#push-options "--z3rlimit 200"
-let update a p data len =
+val update:
+  #index:Type0 ->
+  c:block index ->
+  i:G.erased index -> (
+  let i = G.reveal i in
+  s:state c i ->
+  data: B.buffer uint8 ->
+  len: UInt32.t ->
+  Stack unit
+    (requires fun h0 -> update_pre c i s data len h0)
+    (ensures fun h0 s' h1 -> update_post c i s data len h0 h1))
+
+let update #index c i p data len =
   let open LowStar.BufferOps in
   let s = !*p in
   let State hash_state buf_ total_len seen = s in
-  let a = Hash.alg_of_state a hash_state in
-  let sz = rest a total_len in
-  if len `U32.lt` (Hacl.Hash.Definitions.block_len a `U32.sub` sz) then
-    update_small (G.hide a) p data len
+  let i = c.index_of_state i hash_state in
+  let sz = rest c i total_len in
+  if len `U32.lt` (c.block_len i `U32.sub` sz) then
+    update_small c (G.hide i) p data len
   else if sz = 0ul then
-    update_empty_buf (G.hide a) p data len
+    update_empty_buf c (G.hide i) p data len
   else begin
     let h0 = ST.get () in
-    let diff = Hacl.Hash.Definitions.block_len a `U32.sub` sz in
+    let diff = c.block_len i `U32.sub` sz in
     let data1 = B.sub data 0ul diff in
     let data2 = B.sub data diff (len `U32.sub` diff) in
-    update_round (G.hide a) p data1 diff;
+    update_round c (G.hide i) p data1 diff;
     let h1 = ST.get () in
-    update_empty_buf (G.hide a) p data2 (len `U32.sub` diff);
+    update_empty_buf c (G.hide i) p data2 (len `U32.sub` diff);
     let h2 = ST.get () in
     (
       let seen = G.reveal seen in
-      assert (hashed #a h1 p `S.equal` (S.append seen (B.as_seq h0 data1)));
-      assert (hashed #a h2 p `S.equal` (S.append (S.append seen (B.as_seq h0 data1)) (B.as_seq h0 data2)));
+      assert (seen_pred c i h1 p `S.equal` (S.append seen (B.as_seq h0 data1)));
+      assert (seen_pred c i h2 p `S.equal` (S.append (S.append seen (B.as_seq h0 data1)) (B.as_seq h0 data2)));
       S.append_assoc seen (B.as_seq h0 data1) (B.as_seq h0 data2);
       assert (S.equal (S.append (B.as_seq h0 data1) (B.as_seq h0 data2)) (B.as_seq h0 data));
       assert (S.equal
         (S.append (S.append seen (B.as_seq h0 data1)) (B.as_seq h0 data2))
         (S.append seen (B.as_seq h0 data)));
-      assert (hashed #a h2 p `S.equal` (S.append seen (B.as_seq h0 data)));
+      assert (seen_pred c i h2 p `S.equal` (S.append seen (B.as_seq h0 data)));
       ()
     )
   end
-#pop-options
-
-*)
