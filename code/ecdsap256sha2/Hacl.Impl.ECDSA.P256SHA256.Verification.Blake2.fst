@@ -355,6 +355,8 @@ val compare_felem_bool: a: felem -> b: felem -> Stack bool
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\ r == (as_nat h0 a = as_nat h0 b))
 
 let compare_felem_bool a b   =
+  assert_norm (pow2 64 * pow2 64 == pow2 128);
+  assert_norm (pow2 128 * pow2 64 == pow2 192);
   let a_0 = index a (size 0) in
   let a_1 = index a (size 1) in
   let a_2 = index a (size 2) in
