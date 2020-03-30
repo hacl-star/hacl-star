@@ -3,7 +3,7 @@ module Spec.Hash.Lemmas0
 open Spec.Hash.Definitions
 
 (* A useful lemma for all the operations that involve going from bytes to bits. *)
-let max_input_size_len (a: hash_alg): Lemma
+let max_input_size_len (a: hash_alg{not (is_blake a)}): Lemma
   (ensures FStar.Mul.((max_input_length a) * 8 + 8 = pow2 (len_length a * 8)))
 =
   let open FStar.Mul in
