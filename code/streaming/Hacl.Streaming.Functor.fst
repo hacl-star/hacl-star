@@ -110,7 +110,7 @@ let invariant_s #index (c: block index) (i: index) h (s: state_s c i) =
   // Formerly, the "hashes" predicate
   S.length blocks + S.length rest = U64.v total_len /\
   S.length seen = U64.v total_len /\
-  U64.v total_len < c.max_input_length i /\
+  U64.v total_len <= c.max_input_length i /\
   // Note the double equals here, we now no longer know that this is a sequence.
   c.v h hash_state == c.update_multi_s i (c.init_s i) blocks /\
   S.equal (S.slice (B.as_seq h buf_) 0 (U64.v total_len % U32.v (c.block_len i))) rest
@@ -993,6 +993,7 @@ let update #index c i p data len =
 /// desired. See EverCrypt.Hash.Incremental for an example. Alternatively, we
 /// could provide a finish that relies on a heap allocation of abstract state
 /// and does not need to be specialized.
+inline_for_extraction noextract
 val mk_finish:
   #index:Type0 ->
   c:block index ->
@@ -1011,3 +1012,142 @@ val mk_finish:
       footprint c i h0 s == footprint c i h1 s /\
       B.(modifies (loc_union (loc_buffer dst) (footprint c i h0 s)) h0 h1) /\
       S.equal (B.as_seq h1 dst) (c.spec_s i (seen c i h0 s)))
+
+let mk_finish #index c i p dst =
+  let aux (h:HS.mem) (s:c.state i): Lemma
+    (requires (c.invariant h s))
+    (ensures (B.loc_in (c.footprint #i h s) h))
+    [SMTPat (c.invariant h s)]
+  =
+    c.invariant_loc_in_footprint #i h s
+  in
+  let aux l s h0 h1: Lemma
+    (requires
+      c.invariant h0 s /\
+      c.freeable h0 s /\
+      B.loc_disjoint l (c.footprint #i h0 s) /\
+      B.modifies l h0 h1)
+    (ensures (
+      c.freeable h1 s))
+    [ SMTPat (c.freeable h1 s); SMTPat (B.modifies l h0 h1) ]
+  =
+    c.frame_freeable #i l s h0 h1
+  in
+  let aux h
+    (input1:S.seq uint8)
+    (input2:S.seq uint8):
+    Lemma (requires
+     S.length input1 % U32.v (c.block_len i) = 0 /\
+     S.length input2 % U32.v (c.block_len i) = 0)
+    (ensures (
+      let input = S.append input1 input2 in
+      S.length input % U32.v (c.block_len i) == 0 /\
+      (==) (c.update_multi_s i (c.update_multi_s i h input1) input2)
+        (c.update_multi_s i h input)))
+    [ SMTPat (c.update_multi_s i (c.update_multi_s i h input1) input2) ]
+  =
+    concat_blocks_modulo (U32.v (c.block_len i)) input1 input2;
+    c.update_multi_associative i h input1 input2
+  in
+
+  let open LowStar.BufferOps in
+  let h0 = ST.get () in
+  let State hash_state buf_ total_len seen = !*p in
+
+  push_frame ();
+  let h1 = ST.get () in
+  c.frame_invariant B.loc_none hash_state h0 h1;
+  assert (c.invariant h1 hash_state);
+
+  let buf_ = B.sub buf_ 0ul (rest c i total_len) in
+  assert (
+    let r = rest c i total_len in
+    (U64.v total_len - U32.v r) % U32.v (c.block_len i) = 0);
+
+  let tmp_hash_state = c.alloca i in
+
+  let h2 = ST.get () in
+  assert (B.(loc_disjoint (c.footprint h2 tmp_hash_state) (c.footprint h1 hash_state)));
+  c.frame_invariant B.(loc_region_only false (HS.get_tip h2)) hash_state h1 h2;
+  assert (c.invariant h2 hash_state);
+  assert (c.invariant h2 tmp_hash_state);
+  assert (c.footprint h2 hash_state == c.footprint h1 hash_state);
+
+  c.copy (G.hide i) hash_state tmp_hash_state;
+
+  let h3 = ST.get () in
+  assert (c.footprint h2 tmp_hash_state == c.footprint h3 tmp_hash_state);
+  c.frame_invariant (c.footprint h2 tmp_hash_state) hash_state h2 h3;
+  assert (c.invariant h3 hash_state);
+  c.update_last (G.hide i) tmp_hash_state buf_ total_len;
+
+  let h4 = ST.get () in
+  c.frame_invariant (c.footprint h3 tmp_hash_state) hash_state h3 h4;
+  assert (c.invariant h4 hash_state);
+
+  c.finish (G.hide i) tmp_hash_state dst;
+
+  let h5 = ST.get () in
+  begin
+    let seen = G.reveal seen in
+    let block_length = U32.v (c.block_len i) in
+    let n = S.length seen / block_length in
+    let blocks, rest_ = S.split seen (n * block_length)  in
+    calc (S.equal) {
+      B.as_seq h5 dst;
+    (S.equal) { }
+      c.finish_s i (c.v h4 tmp_hash_state);
+    (S.equal) { }
+      c.finish_s i (
+        c.update_last_s i (c.v h3 tmp_hash_state) (n * block_length)
+          (S.slice (B.as_seq h3 buf_) 0 (U32.v (rest c i total_len))));
+    (S.equal) { }
+      c.finish_s i (
+        c.update_last_s i (c.v h3 tmp_hash_state) (n * block_length)
+          (S.slice (B.as_seq h0 buf_) 0 (U32.v (rest c i total_len))));
+    (S.equal) { }
+      c.finish_s i (
+        c.update_last_s i
+          (c.update_multi_s i (c.init_s i) (S.slice seen 0 (n * block_length)))
+          (n * block_length)
+          (S.slice (B.as_seq h0 buf_) 0 (U32.v (rest c i total_len))));
+    (S.equal) { c.spec_is_incremental i seen }
+      c.spec_s i seen;
+    }
+  end;
+
+  c.frame_invariant (B.loc_buffer dst) hash_state h4 h5;
+  assert (c.invariant h5 hash_state);
+
+  pop_frame ();
+  let h6 = ST.get () in
+  c.frame_invariant B.(loc_region_only false (HS.get_tip h5)) hash_state h5 h6;
+  assert (seen_pred c i h6 p `S.equal` (G.reveal seen));
+
+  // JP: this is not the right way to prove do this proof. Need to use
+  // modifies_fresh_frame_popped instead, see e.g.
+  // https://github.com/project-everest/everquic-crypto/blob/d812be94e9b1a77261f001c9accb2040b80b7c39/src/QUIC.Impl.fst#L1111
+  // for an example
+  let mloc = B.loc_union (B.loc_buffer dst) (footprint c i h0 p) in
+  B.modifies_remove_fresh_frame h0 h1 h6 mloc;
+  B.popped_modifies h5 h6;
+  assert (B.(modifies mloc h0 h6))
+
+val free:
+  #index:Type0 ->
+  c:block index ->
+  i:G.erased index -> (
+  let i = G.reveal i in
+  s:state c i ->
+  ST unit
+  (requires fun h0 ->
+    freeable c i h0 s /\
+    invariant c i h0 s)
+  (ensures fun h0 _ h1 ->
+    B.modifies (footprint c i h0 s) h0 h1))
+let free #index c i s =
+  let open LowStar.BufferOps in
+  let State hash_state buf _ _ = !*s in
+  c.free i hash_state;
+  B.free buf;
+  B.free s

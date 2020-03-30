@@ -200,7 +200,6 @@ type block (index: Type0) =
     last:B.buffer uint8 { B.len last < block_len i } ->
     total_len:U64.t {
       U64.v total_len <= max_input_length i /\
-      U64.v total_len - B.length last >= 0 /\
       (U64.v total_len - B.length last) % U32.v (block_len i) = 0 } ->
     Stack unit
     (requires fun h0 ->
