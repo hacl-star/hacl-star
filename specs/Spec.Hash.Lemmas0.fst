@@ -32,7 +32,9 @@ let pad_invariant_block (a: hash_alg) (blocks: nat) (rest: nat): Lemma
   //say x = block_length a, and y = rest + len_length a + 1, then we have to prove:
   //
   //(x - y) % x == (x - (blocks + y)) % x -- G
-
+  match a with
+  | Blake2S | Blake2B -> ()
+  | _ ->
   let x = block_length a in
   let y = rest + len_length a + 1 in
 
