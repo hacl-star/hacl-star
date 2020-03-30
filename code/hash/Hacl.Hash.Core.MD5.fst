@@ -22,7 +22,7 @@ let _t = IB.igcmalloc_of_list HS.root Spec.t_as_list
 
 noextract inline_for_extraction
 let legacy_alloca () =
-  B.alloca_of_list Spec.init_as_list
+  B.alloca_of_list Spec.init_as_list, ()
 
 (* We read values from constant buffers through accessors to isolate
    all recall/liveness issues away. Thus, clients will not need to
@@ -400,7 +400,9 @@ let update'
   reveal_opaque (`%Spec.update) Spec.update;
   assert (Seq.equal (B.as_seq h1 abcd) (fst (Spec.update (B.as_seq h0 abcd, ()) (B.as_seq h0 x))))
 
-let legacy_update abcd x = update' abcd x
+#push-options "--ifuel 1"
+let legacy_update abcd ev x = update' abcd x
+#pop-options
 
 let legacy_pad: pad_st MD5 = Hacl.Hash.PadFinish.pad MD5
 

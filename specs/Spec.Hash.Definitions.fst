@@ -48,6 +48,10 @@ let is_blake = function
   | Blake2S | Blake2B -> true
   | _ -> false
 
+let is_md = function
+  | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 -> true
+  | _ -> false
+
 let sha2_alg = a:hash_alg { is_sha2 a }
 let blake_alg = a:hash_alg { is_blake a }
 
