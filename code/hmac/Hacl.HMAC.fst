@@ -120,28 +120,28 @@ let block_len_as_len (a: hash_alg):
   let open FStar.Int.Cast.Full in
   assert_norm (128 < pow2 32);
   match a with
-  | MD5 | SHA1 | SHA2_224 | SHA2_256 -> uint32_to_uint64 (D.block_len a)
-  | SHA2_384 | SHA2_512 -> uint64_to_uint128 (uint32_to_uint64 (D.block_len a))
+  | MD5 | SHA1 | SHA2_224 | SHA2_256 | Blake2S -> uint32_to_uint64 (D.block_len a)
+  | SHA2_384 | SHA2_512 | Blake2B -> uint64_to_uint128 (uint32_to_uint64 (D.block_len a))
 
-#push-options "--ifuel 1"
+#push-options "--ifuel 2 --z3rlimit 100"
 
 inline_for_extraction noextract
 let part1 a init update_multi update_last finish s key data len =
   (**) key_and_data_fits a;
   (**) let h0 = ST.get () in
-  init s;
+  let ev = init s in
   (**) let h1 = ST.get () in
-  (**) assert (B.as_seq h1 s `Seq.equal` fst (Spec.Agile.Hash.init a));
-  update_multi s key 1ul;
+  (**) assert ((D.as_seq h1 s, ev) == Spec.Agile.Hash.init a);
+  let ev = update_multi s ev key 1ul in
   (**) let h2 = ST.get () in
-  (**) assert (B.as_seq h2 s `Seq.equal` (fst Spec.Agile.Hash.(update_multi a (init a) (B.as_seq h0 key))));
-  update_last s (block_len_as_len a) data len;
+  (**) assert ((D.as_seq h2 s, ev) == Spec.Agile.Hash.(update_multi a (init a) (B.as_seq h0 key)));
+  let ev = update_last s ev (block_len_as_len a) data len in
   (**) let h3 = ST.get () in
-  (**) assert (B.as_seq h3 s `Seq.equal` fst (
+  (**) assert ((D.as_seq h3 s, ev) ==
     Spec.Hash.Incremental.update_last a
-      (Spec.Agile.Hash.(update_multi a (init a) (B.as_seq h0 key))) (block_length a) (B.as_seq h0 data)));
+      (Spec.Agile.Hash.(update_multi a (init a) (B.as_seq h0 key))) (block_length a) (B.as_seq h0 data));
   let dst = B.sub key 0ul (D.hash_len a) in
-  finish s dst;
+  finish s ev dst;
   (**) let h4 = ST.get () in
   begin
     let open Spec.Hash.PadFinish in
@@ -201,23 +201,23 @@ val part2:
       B.as_seq h1 dst `Seq.equal`
         Spec.Agile.Hash.hash a (S.append (B.as_seq h0 key) (B.as_seq h0 data)))
 
-#push-options "--z3rlimit 80 --ifuel 1"
+#push-options "--z3rlimit 200 --ifuel 2"
 inline_for_extraction noextract
 let part2 a init update_multi update_last finish s dst key data len =
   (**) key_and_data_fits a;
   (**) let h0 = ST.get () in
-  init s;
+  let ev = init s in
   (**) let h1 = ST.get () in
-  (**) assert (B.as_seq h1 s `Seq.equal` fst (Spec.Agile.Hash.init a));
-  update_multi s key 1ul;
+  (**) assert ((D.as_seq h1 s, ev) == Spec.Agile.Hash.init a);
+  let ev = update_multi s ev key 1ul in
   (**) let h2 = ST.get () in
-  (**) assert (B.as_seq h2 s `Seq.equal` fst Spec.Agile.Hash.(update_multi a (init a) (B.as_seq h0 key)));
-  update_last s (block_len_as_len a) data len;
+  (**) assert ((D.as_seq h2 s, ev) == Spec.Agile.Hash.(update_multi a (init a) (B.as_seq h0 key)));
+  let ev = update_last s ev (block_len_as_len a) data len in
   (**) let h3 = ST.get () in
-  (**) assert (B.as_seq h3 s `Seq.equal` fst (
+  (**) assert ((D.as_seq h3 s, ev) ==
     Spec.Hash.Incremental.update_last a
-      (Spec.Agile.Hash.(update_multi a (init a) (B.as_seq h0 key))) (block_length a) (B.as_seq h0 data)));
-  finish s dst;
+      (Spec.Agile.Hash.(update_multi a (init a) (B.as_seq h0 key))) (block_length a) (B.as_seq h0 data));
+  finish s ev dst;
   (**) let h4 = ST.get () in
   begin
     let open Spec.Hash.PadFinish in
@@ -281,7 +281,7 @@ let mk_compute a hash alloca init update_multi update_last finish dst key key_le
   (**) S.lemma_eq_intro (B.as_seq h4 opad) (S.(xor (u8 0x5c) (wrap a (B.as_seq h0 key))));
   (**) S.lemma_eq_intro (B.as_seq h4 data) (B.as_seq h0 data);
 
-  let s = alloca () in
+  let s, _ = alloca () in
   part1 a init update_multi update_last finish s ipad data data_len;
   (**) key_and_data_fits a;
   (**) let h5 = ST.get () in
@@ -313,3 +313,11 @@ let compute_sha2_384: compute_st SHA2_384 =
 let compute_sha2_512: compute_st SHA2_512 =
   let open Hacl.Hash.SHA2 in
   mk_compute SHA2_512 hash_512 alloca_512 init_512 update_multi_512 update_last_512 finish_512
+
+let compute_blake2s: compute_st Blake2S =
+  let open Hacl.Hash.Blake2 in
+  mk_compute Blake2S hash_blake2s alloca_blake2s init_blake2s update_multi_blake2s update_last_blake2s finish_blake2s
+
+let compute_blake2b: compute_st Blake2B =
+  let open Hacl.Hash.Blake2 in
+  mk_compute Blake2B hash_blake2b alloca_blake2b init_blake2b update_multi_blake2b update_last_blake2b finish_blake2b

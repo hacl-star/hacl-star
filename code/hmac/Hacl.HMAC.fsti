@@ -58,3 +58,7 @@ val compute_sha2_256: compute_st SHA2_256
 val compute_sha2_384: compute_st SHA2_384
 
 val compute_sha2_512: compute_st SHA2_512
+
+val compute_blake2s: compute_st Blake2S
+
+val compute_blake2b: compute_st Blake2B
