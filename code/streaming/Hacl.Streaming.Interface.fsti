@@ -108,7 +108,8 @@ type block (index: Type0) =
       let input = S.append input1 input2 in
       concat_blocks_modulo (U32.v (block_len i)) input1 input2;
       update_multi_s i (update_multi_s i h input1) input2 ==
-        update_multi_s i h input))) ->
+        update_multi_s i h input))
+    [ SMTPat (update_multi_s i (update_multi_s i h input1) input2) ]) ->
 
   spec_is_incremental: (i:index ->
     input:S.seq uint8 { S.length input <= max_input_length i } ->
@@ -125,7 +126,8 @@ type block (index: Type0) =
   // Adequate framing lemmas
   invariant_loc_in_footprint: (#i:index -> h:HS.mem -> s:state i -> Lemma
     (requires (invariant h s))
-    (ensures (B.loc_in (footprint #i h s) h))) ->
+    (ensures (B.loc_in (footprint #i h s) h))
+    [ SMTPat (invariant h s) ]) ->
 
   frame_invariant: (#i:index -> l:B.loc -> s:state i -> h0:HS.mem -> h1:HS.mem -> Lemma
     (requires (
@@ -144,7 +146,8 @@ type block (index: Type0) =
       B.loc_disjoint l (footprint #i h0 s) /\
       B.modifies l h0 h1))
     (ensures (
-      freeable h1 s))) ->
+      freeable h1 s))
+    [ SMTPat (freeable h1 s); SMTPat (B.modifies l h0 h1) ]) ->
 
   // Stateful operations
   alloca: (i:index -> StackInline (state i)

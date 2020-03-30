@@ -88,13 +88,7 @@ let invariant_s #index (c: block index) (i: index) h (s: state_s c i (c.state i)
 #push-options "--max_ifuel 1"
 let invariant_loc_in_footprint #index c i s m =
   [@inline_let]
-  let aux (h:HS.mem) (s:c.state i): Lemma
-    (requires (c.invariant h s))
-    (ensures (B.loc_in (c.footprint #i h s) h))
-    [SMTPat (c.invariant h s)]
-  =
-    c.invariant_loc_in_footprint #i h s
-  in
+  let _ = c.invariant_loc_in_footprint #i in
   ()
 #pop-options
 
@@ -134,13 +128,7 @@ let split_at_last_empty #index (c: block index) (i: index): Lemma
 #push-options "--using_facts_from '*,-LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2'"
 let create_in #index c i t r =
   [@inline_let]
-  let aux (h:HS.mem) (s:c.state i): Lemma
-    (requires (c.invariant h s))
-    (ensures (B.loc_in (c.footprint #i h s) h))
-    [SMTPat (c.invariant h s)]
-  =
-    c.invariant_loc_in_footprint #i h s
-  in
+  let _ = c.invariant_loc_in_footprint #i in
 
   (**) let h0 = ST.get () in
 
@@ -202,26 +190,9 @@ let create_in #index c i t r =
 
 let init #index c i t s =
   [@inline_let]
-  let aux (h:HS.mem) (s:c.state i): Lemma
-    (requires (c.invariant h s))
-    (ensures (B.loc_in (c.footprint #i h s) h))
-    [SMTPat (c.invariant h s)]
-  =
-    c.invariant_loc_in_footprint #i h s
-  in
+  let _ = c.invariant_loc_in_footprint #i in
   [@inline_let]
-  let aux l s h0 h1: Lemma
-    (requires
-      c.invariant h0 s /\
-      c.freeable h0 s /\
-      B.loc_disjoint l (c.footprint #i h0 s) /\
-      B.modifies l h0 h1)
-    (ensures (
-      c.freeable h1 s))
-    [ SMTPat (c.freeable h1 s); SMTPat (B.modifies l h0 h1) ]
-  =
-    c.frame_freeable #i l s h0 h1
-  in
+  let _ = c.frame_freeable #i in
 
   let open LowStar.BufferOps in
   let h1 = ST.get () in
@@ -447,29 +418,13 @@ val update_small:
     (ensures fun h0 s' h1 ->
       update_post c i s data len h0 h1))
 
-#push-options "--z3rlimit 50"
+#push-options "--z3rlimit 60"
 let update_small #index c i t p data len =
   [@inline_let]
-  let aux (h:HS.mem) (s:c.state i): Lemma
-    (requires (c.invariant h s))
-    (ensures (B.loc_in (c.footprint #i h s) h))
-    [SMTPat (c.invariant h s)]
-  =
-    c.invariant_loc_in_footprint #i h s
-  in
+  let _ = c.invariant_loc_in_footprint #i in
   [@inline_let]
-  let aux l s h0 h1: Lemma
-    (requires
-      c.invariant h0 s /\
-      c.freeable h0 s /\
-      B.loc_disjoint l (c.footprint #i h0 s) /\
-      B.modifies l h0 h1)
-    (ensures (
-      c.freeable h1 s))
-    [ SMTPat (c.freeable h1 s); SMTPat (B.modifies l h0 h1) ]
-  =
-    c.frame_freeable #i l s h0 h1
-  in
+  let _ = c.frame_freeable #i in
+
   let open LowStar.BufferOps in
   let h00 = ST.get () in
   assert (invariant c i h00 p);
@@ -611,39 +566,11 @@ let seen_pred = seen
 
 let update_empty_buf #index c i t p data len =
   [@inline_let]
-  let aux (h:HS.mem) (s:c.state i): Lemma
-    (requires (c.invariant h s))
-    (ensures (B.loc_in (c.footprint #i h s) h))
-    [SMTPat (c.invariant h s)]
-  =
-    c.invariant_loc_in_footprint #i h s
-  in
+  let _ = c.invariant_loc_in_footprint #i in
   [@inline_let]
-  let aux l s h0 h1: Lemma
-    (requires
-      c.invariant h0 s /\
-      c.freeable h0 s /\
-      B.loc_disjoint l (c.footprint #i h0 s) /\
-      B.modifies l h0 h1)
-    (ensures (
-      c.freeable h1 s))
-    [ SMTPat (c.freeable h1 s); SMTPat (B.modifies l h0 h1) ]
-  =
-    c.frame_freeable #i l s h0 h1
-  in
+  let _ = c.frame_freeable #i in
   [@inline_let]
-  let aux i h
-    (input1:S.seq uint8 { S.length input1 % U32.v (c.block_len i) = 0 })
-    (input2:S.seq uint8 { S.length input2 % U32.v (c.block_len i) = 0 }):
-    Lemma (ensures (
-      let input = S.append input1 input2 in
-      concat_blocks_modulo (U32.v (c.block_len i)) input1 input2;
-      (==) (c.update_multi_s i (c.update_multi_s i h input1) input2)
-        (c.update_multi_s i h input)))
-    [ SMTPat (c.update_multi_s i (c.update_multi_s i h input1) input2) ]
-  =
-    c.update_multi_associative i h input1 input2
-  in
+  let _ = c.update_multi_associative i in
 
   let open LowStar.BufferOps in
   let s = !*p in
@@ -750,26 +677,9 @@ let split_at_last_block #index (c: block index) (i: index) (b: bytes) (d: bytes)
 #push-options "--z3rlimit 100"
 let update_round #index c i t p data len =
   [@inline_let]
-  let aux (h:HS.mem) (s:c.state i): Lemma
-    (requires (c.invariant h s))
-    (ensures (B.loc_in (c.footprint #i h s) h))
-    [SMTPat (c.invariant h s)]
-  =
-    c.invariant_loc_in_footprint #i h s
-  in
+  let _ = c.invariant_loc_in_footprint #i in
   [@inline_let]
-  let aux l s h0 h1: Lemma
-    (requires
-      c.invariant h0 s /\
-      c.freeable h0 s /\
-      B.loc_disjoint l (c.footprint #i h0 s) /\
-      B.modifies l h0 h1)
-    (ensures (
-      c.freeable h1 s))
-    [ SMTPat (c.freeable h1 s); SMTPat (B.modifies l h0 h1) ]
-  =
-    c.frame_freeable #i l s h0 h1
-  in
+  let _ = c.frame_freeable #i in
   [@inline_let]
   let aux h
     (input1:S.seq uint8)
@@ -883,26 +793,9 @@ let update #index c i t p data len =
 
 let mk_finish #index c i t p dst =
   [@inline_let]
-  let aux (h:HS.mem) (s:c.state i): Lemma
-    (requires (c.invariant h s))
-    (ensures (B.loc_in (c.footprint #i h s) h))
-    [SMTPat (c.invariant h s)]
-  =
-    c.invariant_loc_in_footprint #i h s
-  in
+  let _ = c.invariant_loc_in_footprint #i in
   [@inline_let]
-  let aux l s h0 h1: Lemma
-    (requires
-      c.invariant h0 s /\
-      c.freeable h0 s /\
-      B.loc_disjoint l (c.footprint #i h0 s) /\
-      B.modifies l h0 h1)
-    (ensures (
-      c.freeable h1 s))
-    [ SMTPat (c.freeable h1 s); SMTPat (B.modifies l h0 h1) ]
-  =
-    c.frame_freeable #i l s h0 h1
-  in
+  let _ = c.frame_freeable #i in
   [@inline_let]
   let aux h
     (input1:S.seq uint8)
