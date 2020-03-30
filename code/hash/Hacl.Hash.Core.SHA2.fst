@@ -76,7 +76,7 @@ let alloca a () =
     | SHA2_256 -> Constants.h256_l
     | SHA2_384 -> Constants.h384_l
     | SHA2_512 -> Constants.h512_l) in
-  B.alloca_of_list l
+  B.alloca_of_list l, ()
 
 #set-options "--max_fuel 0"
 
@@ -352,7 +352,7 @@ let zero (a: sha2_alg): word a =
 noextract inline_for_extraction
 val update: a:sha2_alg -> update_st a
 noextract inline_for_extraction
-let update a hash block =
+let update a hash ev block =
   (**) ST.push_frame ();
   (**) let h0 = ST.get () in
   let hash1: words_state a = B.alloca (zero a) 8ul in

@@ -47,26 +47,25 @@ let mod_sub_add a b c d p =
     (a - (c + d)) % p;
   }
 
-let pad0_length_mod (a: hash_alg) (base_len: nat) (len: nat): Lemma
+let pad0_length_mod (a: hash_alg{is_md a}) (base_len: nat) (len: nat): Lemma
   (requires base_len % block_length a = 0)
   (ensures  pad0_length a (base_len + len) = pad0_length a len)
 =
   mod_sub_add (block_length a) base_len len (len_length a + 1) (block_length a)
 
-let pad_length_mod (a: hash_alg) (base_len len: nat): Lemma
+let pad_length_mod (a: hash_alg{is_md a}) (base_len len: nat): Lemma
   (requires base_len % block_length a = 0)
   (ensures  pad_length a (base_len + len) = pad_length a len)
-=
-  pad0_length_mod a base_len len
+= pad0_length_mod a base_len len
 
-let pad_length_bound (a: hash_alg) (len: len_t a): Lemma
+let pad_length_bound (a: hash_alg{is_md a}) (len: len_t a): Lemma
   (pad_length a (len_v a len) <= 2 * block_length a)
 =
   ()
 
 (* Avoiding an ill-formed pattern error... *)
 noextract inline_for_extraction
-let len_add32 (a: hash_alg)
+let len_add32 (a: hash_alg{is_md a})
   (prev_len: len_t a)
   (input_len: U32.t { U32.v input_len + len_v a prev_len <= max_input_length a }):
   x:len_t a { len_v a x = len_v a prev_len + U32.v input_len }
@@ -84,15 +83,16 @@ let len_add32 (a: hash_alg)
 
 (** Iterated compression function. *)
 noextract inline_for_extraction
-let mk_update_multi a update s blocks n_blocks =
+let mk_update_multi a update s ev blocks n_blocks =
+  assert (extra_state a == unit);
   let h0 = ST.get () in
   let inv (h: HS.mem) (i: nat) =
     let i_block = block_length a * i in
     i <= U32.v n_blocks /\
     B.live h s /\ B.live h blocks /\
     B.(modifies (loc_buffer s) h0 h) /\
-    S.equal (B.as_seq h s)
-      (fst (Spec.Agile.Hash.update_multi a (B.as_seq h0 s, ()) (S.slice (B.as_seq h0 blocks) 0 i_block)))
+    (as_seq h s, ev) ==
+      (Spec.Agile.Hash.update_multi a (as_seq h0 s, ev) (S.slice (B.as_seq h0 blocks) 0 i_block))
   in
   let f (i:U32.t { U32.(0 <= v i /\ v i < v n_blocks)}): ST.Stack unit
     (requires (fun h -> inv h (U32.v i)))
@@ -102,7 +102,7 @@ let mk_update_multi a update s blocks n_blocks =
     let sz = block_len a in
     let blocks0 = B.sub blocks 0ul U32.(sz *^ i) in
     let block = B.sub blocks U32.(sz *^ i) sz in
-    update s block;
+    update s ev block;
     let h2 = ST.get () in
     assert (
       let s0 = B.as_seq h0 s in
@@ -119,13 +119,15 @@ let mk_update_multi a update s blocks n_blocks =
       S.equal s2 (fst (Spec.Agile.Hash.update_multi a (s1, ()) block)))
   in
   assert (B.length blocks = U32.v n_blocks * block_length a);
-  C.Loops.for 0ul n_blocks inv f
+  C.Loops.for 0ul n_blocks inv f;
+  ev
 
 #push-options "--max_fuel 0 --z3rlimit 1600"
 
 (** An arbitrary number of bytes, then padding. *)
 noextract inline_for_extraction
-let mk_update_last a update_multi pad s prev_len input input_len =
+let mk_update_last a update_multi pad s ev prev_len input input_len =
+  assert (extra_state a == unit);
   ST.push_frame ();
   let h0 = ST.get () in
 
@@ -140,7 +142,7 @@ let mk_update_last a update_multi pad s prev_len input input_len =
   assert (U32.v rest_len < block_length a);
   let rest = B.sub input blocks_len rest_len in
 
-  update_multi s blocks blocks_n;
+  update_multi s () blocks blocks_n;
 
   let h1 = ST.get () in
   assert (S.equal (B.as_seq h0 input) (S.append (B.as_seq h1 blocks) (B.as_seq h1 rest)));
@@ -175,7 +177,7 @@ let mk_update_last a update_multi pad s prev_len input input_len =
   assert (S.equal (B.as_seq h2 tmp_pad) (Spec.Hash.PadFinish.pad a (len_v a total_input_len)));
 
   (* Update multi those last few blocks *)
-  update_multi s tmp U32.(tmp_len /^ block_len a);
+  update_multi s () tmp U32.(tmp_len /^ block_len a);
 
   let h3 = ST.get () in
   assert (S.equal (B.as_seq h3 s)
@@ -193,7 +195,7 @@ let mk_update_last a update_multi pad s prev_len input input_len =
 #push-options "--max_ifuel 1"
 
 noextract inline_for_extraction
-let u32_to_len (a: hash_alg) (l: U32.t): l':len_t a { len_v a l' = U32.v l } =
+let u32_to_len (a: hash_alg{is_md a}) (l: U32.t): l':len_t a { len_v a l' = U32.v l } =
   match a with
   | SHA2_384 | SHA2_512 ->
     FStar.Int.Cast.Full.(uint64_to_uint128 (uint32_to_uint64 l))
@@ -204,16 +206,17 @@ let u32_to_len (a: hash_alg) (l: U32.t): l':len_t a { len_v a l' = U32.v l } =
 (** Complete hash. *)
 noextract inline_for_extraction
 let mk_hash a alloca update_multi update_last finish input input_len dst =
+  assert (extra_state a == unit);
   let h0 = ST.get () in
   ST.push_frame ();
-  let s = alloca () in
+  let s, _ = alloca () in
   let blocks_n = U32.(input_len /^ block_len a) in
   let blocks_len = U32.(blocks_n *^ block_len a) in
   let blocks = B.sub input 0ul blocks_len in
   let rest_len = U32.(input_len -^ blocks_len) in
   let rest = B.sub input blocks_len rest_len in
-  update_multi s blocks blocks_n;
-  update_last s (u32_to_len a blocks_len) rest rest_len;
-  finish s dst;
+  update_multi s () blocks blocks_n;
+  update_last s () (u32_to_len a blocks_len) rest rest_len;
+  finish s () dst;
   ST.pop_frame ();
   Spec.Hash.Lemmas.hash_is_hash_incremental a (B.as_seq h0 input)
