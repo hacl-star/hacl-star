@@ -820,6 +820,7 @@ val update_round:
       update_post c i s data len h0 h1 /\
       U64.v (total_len_h c i h1 s) % U32.v (c.block_len i) = 0))
 
+#push-options "--retry 2"
 let split_at_last_block #index (c: block index) (i: index) (b: bytes) (d: bytes): Lemma
   (requires (
     let _, rest = split_at_last c i b in
@@ -840,6 +841,7 @@ let split_at_last_block #index (c: block index) (i: index) (b: bytes) (d: bytes)
   (==) { Math.Lemmas.multiple_modulo_lemma (U32.v (c.block_len i)) 1 }
     0;
   }
+#pop-options
 
 #push-options "--z3rlimit 100"
 let update_round #index c i p data len =
@@ -980,3 +982,32 @@ let update #index c i p data len =
       ()
     )
   end
+
+/// A word of caution. Once partially applied to a type class, this function
+/// will generate a stack allocation at type ``state i`` via ``c.alloca``. If
+/// ``state`` is indexed over ``i``, then this function will not compile to C.
+/// (In other words: there's a reason why mk_finish does *NOT* take i ghostly.)
+///
+/// To work around this, it suffices to apply ``mk_finish`` to each possible
+/// value for the index, then to abstract over ``i`` again if agility is
+/// desired. See EverCrypt.Hash.Incremental for an example. Alternatively, we
+/// could provide a finish that relies on a heap allocation of abstract state
+/// and does not need to be specialized.
+val mk_finish:
+  #index:Type0 ->
+  c:block index ->
+  i:index ->
+  s:state c i ->
+  dst:B.buffer uint8 { B.len dst == c.output_len i } ->
+  Stack unit
+    (requires fun h0 ->
+      invariant c i h0 s /\
+      B.live h0 dst /\
+      B.(loc_disjoint (loc_buffer dst) (footprint c i h0 s)))
+    (ensures fun h0 s' h1 ->
+      preserves_freeable c i s h0 h1 /\
+      invariant c i h1 s /\
+      seen c i h0 s == seen c i h1 s /\
+      footprint c i h0 s == footprint c i h1 s /\
+      B.(modifies (loc_union (loc_buffer dst) (footprint c i h0 s)) h0 h1) /\
+      S.equal (B.as_seq h1 dst) (c.spec_s i (seen c i h0 s)))

@@ -89,6 +89,10 @@ type block (index: Type0) =
     t i) ->
   finish_s: (i:index -> t i -> s:S.seq uint8 { S.length s = U32.v (output_len i) }) ->
 
+  /// The specification in one shot.
+  spec_s: (i:index -> input:S.seq uint8 { S.length input <= max_input_length i } ->
+    output:S.seq uint8 { S.length output == U32.v (output_len i) }) ->
+
   // Required lemmas... clients need to introduce these into their context via a local SMTPat.
   // Note: the way I authored update_multi_associative is terrible to work with,
   // see comment starting with "GHA" in update_round.
@@ -105,6 +109,18 @@ type block (index: Type0) =
       concat_blocks_modulo (U32.v (block_len i)) input1 input2;
       update_multi_s i (update_multi_s i h input1) input2 ==
         update_multi_s i h input))) ->
+
+  spec_is_incremental: (i:index ->
+    input:S.seq uint8 { S.length input <= max_input_length i } ->
+    Lemma (ensures (
+      let open FStar.Mul in
+      let block_length = U32.v (block_len i) in
+      let n = S.length input / block_length in
+      let bs, l = S.split input (n * block_length) in
+      FStar.Math.Lemmas.multiple_modulo_lemma n block_length;
+      let hash = update_multi_s i (init_s i) bs in
+      let hash = update_last_s i hash (n * block_length) l in
+      finish_s i hash `S.equal` spec_s i input))) ->
 
   // Adequate framing lemmas
   invariant_loc_in_footprint: (#i:index -> h:HS.mem -> s:state i -> Lemma
@@ -243,6 +259,7 @@ type block (index: Type0) =
         v h1 s_dst == v h0 s_src))) ->
 
   block index
+
 (*
 /// Maximum input length, but fitting on a 64-bit integer (since the streaming
 /// module doesn't bother taking into account lengths that are greater than
@@ -273,8 +290,10 @@ let evercrypt_hash: block Spec.Hash.Definitions.hash_alg =
     Spec.Agile.Hash.update_multi
     Spec.Hash.Incremental.update_last
     Spec.Hash.PadFinish.finish
+    Spec.Agile.Hash.hash
     Spec.Hash.Lemmas.update_multi_zero
     Spec.Hash.Lemmas.update_multi_associative'
+    Spec.Hash.Lemmas.hash_is_hash_incremental
     (fun #i h s -> EverCrypt.Hash.invariant_loc_in_footprint s h)
     (fun #i l s h0 h1 ->
       EverCrypt.Hash.frame_invariant l s h0 h1;
@@ -307,8 +326,10 @@ let hacl_sha2_256: block unit =
     (fun () -> Spec.Agile.Hash.(update_multi SHA2_256))
     (fun () -> Spec.Hash.Incremental.(update_last SHA2_256))
     (fun () -> Spec.Hash.PadFinish.(finish SHA2_256))
+    (fun () s -> Spec.Agile.Hash.(hash SHA2_256 s))
     (fun _ _ -> ())
     (fun _ _ _ _ -> ())
+    (fun _ input -> Spec.Hash.Lemmas.hash_is_hash_incremental SHA2_256 input)
     (fun #_ h s -> ())
     (fun #_ l s h0 h1 -> ())
     (fun #_ l s h0 h1 -> ())
