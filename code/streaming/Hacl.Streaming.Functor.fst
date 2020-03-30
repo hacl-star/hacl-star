@@ -21,12 +21,6 @@ open FStar.HyperStack.ST
 open LowStar.BufferOps
 open FStar.Mul
 
-inline_for_extraction noextract
-let uint8 = Lib.IntTypes.uint8
-
-inline_for_extraction noextract
-let uint32 = Lib.IntTypes.uint32
-
 /// State machinery
 /// ===============
 
@@ -39,31 +33,18 @@ type state_s #index (c: block index) (i: index) =
     seen: G.erased (S.seq uint8) ->
     state_s #index c i
 
-// TODO: move to fsti
-let state #index (c: block index) (i: index) = B.pointer (state_s c i)
-
 let freeable #index (c: block index) (i: index) (h: HS.mem) (p: state c i) =
   B.freeable p /\ (
   let s = B.deref h p in
   let State hash_state buf _ _ = s in
   B.freeable buf /\ c.freeable h hash_state)
 
-let preserves_freeable #index (c: block index) (i: index) (s: state c i) (h0 h1: HS.mem): Type0 =
-  freeable c i h0 s ==> freeable c i h1 s
-
 let footprint_s #index (c: block index) (i: index) (h: HS.mem) (s: state_s c i) =
   let State block_state buf_ _ _ = s in
   B.(loc_union (loc_addr_of_buffer buf_) (c.footprint h block_state))
 
-// TODO: move to fsti
-let footprint #index (c: block index) (i: index) (m: HS.mem) (s: state c i) =
-  B.(loc_union (loc_addr_of_buffer s) (footprint_s c i m (B.deref m s)))
-
 /// Invariants
 /// ==========
-
-noextract
-let bytes = S.seq uint8
 
 noextract
 let split_at_last #index (c: block index) (i: index) (b: bytes):
@@ -84,20 +65,6 @@ let split_at_last #index (c: block index) (i: index) (b: bytes):
   assert (S.length b - n * U32.v (c.block_len i) < U32.v (c.block_len i));
   blocks, rest
 
-let loc_includes_union_l_footprint_s
-  #index
-  (c: block index)
-  (i: index)
-  (m: HS.mem)
-  (l1 l2: B.loc) (s: state_s c i)
-: Lemma
-  (requires (
-    B.loc_includes l1 (footprint_s c i m s) \/ B.loc_includes l2 (footprint_s c i m s)
-  ))
-  (ensures (B.loc_includes (B.loc_union l1 l2) (footprint_s c i m s)))
-  [SMTPat (B.loc_includes (B.loc_union l1 l2) (footprint_s c i m s))]
-= B.loc_includes_union_l l1 l2 (footprint_s c i m s)
-
 let invariant_s #index (c: block index) (i: index) h (s: state_s c i) =
   let State hash_state buf_ total_len seen = s in
   let seen = G.reveal seen in
@@ -115,23 +82,6 @@ let invariant_s #index (c: block index) (i: index) h (s: state_s c i) =
   c.v h hash_state == c.update_multi_s i (c.init_s i) blocks /\
   S.equal (S.slice (B.as_seq h buf_) 0 (U64.v total_len % U32.v (c.block_len i))) rest
 
-let invariant #index (c: block index) (i: index) (m: HS.mem) (s: state c i) =
-  B.live m s /\
-  B.(loc_disjoint (loc_addr_of_buffer s) (footprint_s c i m (B.deref m s))) /\
-  invariant_s c i m (B.get m s 0)
-
-val invariant_loc_in_footprint
-  (#index: Type0)
-  (c: block index)
-  (i: index)
-  (s: state c i)
-  (m: HS.mem)
-: Lemma
-  (requires (invariant c i m s))
-  (ensures (B.loc_in (footprint c i m s) m))
-  [SMTPat (invariant c i m s)]
-
-
 #push-options "--max_ifuel 1"
 let invariant_loc_in_footprint #index c i s m =
   let aux (h:HS.mem) (s:c.state i): Lemma
@@ -144,60 +94,23 @@ let invariant_loc_in_footprint #index c i s m =
   ()
 #pop-options
 
-// TODO: move to fsti
-val seen: #index:Type0 -> c:block index -> i:index -> h:HS.mem -> s:state c i -> GTot bytes
 let seen #index c i h s =
   G.reveal (State?.seen (B.deref h s))
-
-val frame_invariant: #index:Type0 -> c:block index -> i:index -> l:B.loc -> s:state c i -> h0:HS.mem -> h1:HS.mem -> Lemma
-  (requires (
-    invariant c i h0 s /\
-    B.loc_disjoint l (footprint c i h0 s) /\
-    B.modifies l h0 h1))
-  (ensures (
-    invariant c i h1 s /\
-    footprint c i h0 s == footprint c i h1 s))
-  [ SMTPat (invariant c i h1 s); SMTPat (B.modifies l h0 h1) ]
 
 let frame_invariant #index c i l s h0 h1 =
   let state_s = B.deref h0 s in
   let State block_state _ _ _ = state_s in
   c.frame_invariant #i l block_state h0 h1
 
-val frame_seen: #index:Type0 -> c:block index -> i:index -> l:B.loc -> s:state c i -> h0:HS.mem -> h1:HS.mem -> Lemma
-  (requires (
-    invariant c i h0 s /\
-    B.loc_disjoint l (footprint c i h0 s) /\
-    B.modifies l h0 h1))
-  (ensures (seen c i h0 s == seen c i h1 s))
-  [ SMTPat (seen c i h1 s); SMTPat (B.modifies l h0 h1) ]
-
 let frame_seen #_ _ _ _ _ _ _ =
   ()
-
-val frame_freeable: #index:Type0 -> c:block index -> i:index -> l:B.loc -> s:state c i -> h0:HS.mem -> h1:HS.mem -> Lemma
-  (requires (
-    invariant c i h0 s /\
-    freeable c i h0 s /\
-    B.loc_disjoint l (footprint c i h0 s) /\
-    B.modifies l h0 h1))
-  (ensures (freeable c i h1 s))
-  [ SMTPat (freeable c i h1 s); SMTPat (B.modifies l h0 h1) ]
 
 let frame_freeable #index c i l s h0 h1 =
   let State block_state _ _ _ = B.deref h0 s in
   c.frame_freeable #i l block_state h0 h1
 
-val create_in (#index: Type0) (c: block index) (i: index) (r: HS.rid): ST (state c i)
-  (requires (fun _ ->
-    HyperStack.ST.is_eternal_region r))
-  (ensures (fun h0 s h1 ->
-    invariant c i h1 s /\
-    seen c i h1 s == S.empty /\
-    B.(modifies loc_none h0 h1) /\
-    B.fresh_loc (footprint c i h1 s) h0 h1 /\
-    B.(loc_includes (loc_region_only true r) (footprint c i h1 s)) /\
-    freeable c i h1 s))
+/// Stateful API
+/// ============
 
 let split_at_last_empty #index (c: block index) (i: index): Lemma
   (ensures (
@@ -274,18 +187,6 @@ let create_in #index c i r =
   p
 #pop-options
 
-val init: #index:Type0 -> c:block index -> i:G.erased index -> (
-  let i = G.reveal i in
-  s:state c i -> Stack unit
-  (requires (fun h0 ->
-    invariant c i h0 s))
-  (ensures (fun h0 _ h1 ->
-    preserves_freeable c i s h0 h1 /\
-    invariant c i h1 s /\
-    seen c i h1 s == S.empty /\
-    footprint c i h0 s == footprint c i h1 s /\
-    B.(modifies (footprint c i h0 s) h0 h1))))
-
 let init #index c i s =
   let aux (h:HS.mem) (s:c.state i): Lemma
     (requires (c.invariant h s))
@@ -358,38 +259,6 @@ let init #index c i s =
     S.equal (S.slice (B.as_seq h buf_) 0 (U64.v total_len % U32.v (c.block_len i))) rest
   );
   assert (invariant_s c i h3 (B.get h3 s 0))
-
-unfold
-let update_pre
-  #index
-  (c: block index)
-  (i: index)
-  (s: state c i)
-  (data: B.buffer uint8)
-  (len: UInt32.t)
-  (h0: HS.mem)
-=
-  invariant c i h0 s /\
-  B.live h0 data /\
-  U32.v len = B.length data /\
-  S.length (seen c i h0 s) + U32.v len < c.max_input_length i /\
-  B.(loc_disjoint (loc_buffer data) (footprint c i h0 s))
-
-unfold
-let update_post
-  #index
-  (c: block index)
-  (i: index)
-  (s: state c i)
-  (data: B.buffer uint8)
-  (len: UInt32.t)
-  (h0 h1: HS.mem)
-=
-  preserves_freeable c i s h0 h1 /\
-  invariant c i h1 s /\
-  B.(modifies (footprint c i h0 s) h0 h1) /\
-  footprint c i h0 s == footprint c i h1 s /\
-  seen c i h1 s == seen c i h0 s `S.append` B.as_seq h0 data
 
 /// We keep the total length at run-time, on 64 bits, but require that it abides
 /// by the size requirements for the smaller hashes -- we're not interested at
@@ -820,7 +689,7 @@ val update_round:
       update_post c i s data len h0 h1 /\
       U64.v (total_len_h c i h1 s) % U32.v (c.block_len i) = 0))
 
-#push-options "--retry 2"
+#push-options "--retry 3"
 let split_at_last_block #index (c: block index) (i: index) (b: bytes) (d: bytes): Lemma
   (requires (
     let _, rest = split_at_last c i b in
@@ -938,18 +807,6 @@ let update_round #index c i p data len =
   assert (seen_pred c i h3 p `S.equal` (S.append (G.reveal seen) (B.as_seq h0 data)))
 #pop-options
 
-val update:
-  #index:Type0 ->
-  c:block index ->
-  i:G.erased index -> (
-  let i = G.reveal i in
-  s:state c i ->
-  data: B.buffer uint8 ->
-  len: UInt32.t ->
-  Stack unit
-    (requires fun h0 -> update_pre c i s data len h0)
-    (ensures fun h0 s' h1 -> update_post c i s data len h0 h1))
-
 let update #index c i p data len =
   let open LowStar.BufferOps in
   let s = !*p in
@@ -982,36 +839,6 @@ let update #index c i p data len =
       ()
     )
   end
-
-/// A word of caution. Once partially applied to a type class, this function
-/// will generate a stack allocation at type ``state i`` via ``c.alloca``. If
-/// ``state`` is indexed over ``i``, then this function will not compile to C.
-/// (In other words: there's a reason why mk_finish does *NOT* take i ghostly.)
-///
-/// To work around this, it suffices to apply ``mk_finish`` to each possible
-/// value for the index, then to abstract over ``i`` again if agility is
-/// desired. See EverCrypt.Hash.Incremental for an example. Alternatively, we
-/// could provide a finish that relies on a heap allocation of abstract state
-/// and does not need to be specialized.
-inline_for_extraction noextract
-val mk_finish:
-  #index:Type0 ->
-  c:block index ->
-  i:index ->
-  s:state c i ->
-  dst:B.buffer uint8 { B.len dst == c.output_len i } ->
-  Stack unit
-    (requires fun h0 ->
-      invariant c i h0 s /\
-      B.live h0 dst /\
-      B.(loc_disjoint (loc_buffer dst) (footprint c i h0 s)))
-    (ensures fun h0 s' h1 ->
-      preserves_freeable c i s h0 h1 /\
-      invariant c i h1 s /\
-      seen c i h0 s == seen c i h1 s /\
-      footprint c i h0 s == footprint c i h1 s /\
-      B.(modifies (loc_union (loc_buffer dst) (footprint c i h0 s)) h0 h1) /\
-      S.equal (B.as_seq h1 dst) (c.spec_s i (seen c i h0 s)))
 
 let mk_finish #index c i p dst =
   let aux (h:HS.mem) (s:c.state i): Lemma
@@ -1133,18 +960,6 @@ let mk_finish #index c i p dst =
   B.popped_modifies h5 h6;
   assert (B.(modifies mloc h0 h6))
 
-val free:
-  #index:Type0 ->
-  c:block index ->
-  i:G.erased index -> (
-  let i = G.reveal i in
-  s:state c i ->
-  ST unit
-  (requires fun h0 ->
-    freeable c i h0 s /\
-    invariant c i h0 s)
-  (ensures fun h0 _ h1 ->
-    B.modifies (footprint c i h0 s) h0 h1))
 let free #index c i s =
   let open LowStar.BufferOps in
   let State hash_state buf _ _ = !*s in
