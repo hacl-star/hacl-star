@@ -1,0 +1,931 @@
+{
+  "Curve25519_51": {
+    "ecdh": {
+      "module": "Hacl_Curve25519_51",
+      "name": "ecdh",
+      "args": [{
+          "type": "buffer",
+          "size": 32,
+          "kind": "output",
+          "name": "result",
+          "tests": [
+            "c3da55379de9c6908e94ea4df28d084f32eccf03491c71f754b4075577a28552",
+            "95cbde9476e8907d7aade45cb4b873f88b595a68799fa152e6f8f7647aac7957"
+          ]
+        },
+        {
+          "type": "buffer",
+          "size": 32,
+          "name": "scalar",
+          "kind": "input",
+          "interface_index": 0,
+          "tests": [
+            "a546e36bf0527c9d3b16154b82465edd62144c0ac1fc5a18506a2244ba449ac4",
+            "4b66e9d4d1b4673c5ad22691957d6af5c11b6421e0ea01d42ca4169e7918ba0d"
+          ]
+        },
+        {
+          "type": "buffer",
+          "size": 32,
+          "name": "input",
+          "kind": "input",
+          "interface_index": 1,
+          "tests": [
+            "e6db6867583030db3594c1a424b15f7c726624ec26b3353b10a903a6d0ab1c4c",
+            "e5210f12786811d3f4b7959d0538ae2c31dbe7106fc03c3efc4cd549c715a493"
+          ]
+        }
+      ],
+      "return": {
+        "type": "bool",
+        "tests": [
+          "true",
+          "true"
+        ]
+      }
+    },
+    "secret_to_public": {
+      "module": "Hacl_Curve25519_51",
+      "name": "secret_to_public",
+      "args": [{
+          "type": "buffer",
+          "size": 32,
+          "kind": "output",
+          "name": "result",
+          "tests": []
+        },
+        {
+          "type": "buffer",
+          "size": 32,
+          "name": "scalar",
+          "kind": "input",
+          "interface_index": 0,
+          "tests": []
+        }
+      ],
+      "return": {
+        "type": "void"
+      }
+    }
+  },
+  "Chacha20Poly1305": {
+    "aead_encrypt": {
+      "module": "Hacl_Chacha20Poly1305_32",
+      "name": "aead_encrypt",
+      "args": [{
+          "name": "key",
+          "kind": "input",
+          "type": "buffer",
+          "size": 32,
+          "interface_index": 0,
+          "tests": [
+            "808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9f"
+          ]
+        },
+        {
+          "name": "nonce",
+          "kind": "input",
+          "type": "buffer",
+          "size": 12,
+          "interface_index": 1,
+          "tests": [
+            "070000004041424344454647"
+          ]
+        },
+        {
+          "name": "alen",
+          "kind": "input",
+          "type": "int"
+        },
+        {
+          "name": "aad",
+          "kind": "input",
+          "type": "buffer",
+          "size": "alen",
+          "interface_index": 2,
+          "tests": [
+            "50515253c0c1c2c3c4c5c6c7"
+          ]
+        },
+        {
+          "name": "len",
+          "kind": "input",
+          "type": "int"
+        },
+        {
+          "name": "plaintext",
+          "kind": "input",
+          "type": "buffer",
+          "size": "len",
+          "interface_index": 3,
+          "tests": [
+            "4c616469657320616e642047656e746c656d656e206f662074686520636c617373206f66202739393a204966204920636f756c64206f6666657220796f75206f6e6c79206f6e652074697020666f7220746865206675747572652c2073756e73637265656e20776f756c642062652069742e"
+          ]
+        },
+        {
+          "name": "ciphertext",
+          "kind": "output",
+          "type": "buffer",
+          "size": "len",
+          "tests": [
+            "d31a8d34648e60db7b86afbc53ef7ec2a4aded51296e08fea9e2b5a736ee62d63dbea45e8ca9671282fafb69da92728b1a71de0a9e060b2905d6a5b67ecd3b3692ddbd7f2d778b8c9803aee328091b58fab324e4fad675945585808b4831d7bc3ff4def08e4b7a9de576d26586cec64b6116"
+          ]
+        },
+        {
+          "name": "mac",
+          "kind": "output",
+          "type": "buffer",
+          "size": 16,
+          "tests": [
+            "1ae10b594f09e26a7e902ecbd0600691"
+          ]
+        }
+      ],
+      "return": {
+        "type": "void"
+      }
+    },
+    "aead_decrypt": {
+      "module": "Hacl_Chacha20Poly1305_32",
+      "name": "aead_decrypt",
+      "args": [{
+          "name": "key",
+          "kind": "input",
+          "type": "buffer",
+          "size": 32,
+          "interface_index": 0,
+          "tests": [
+            "808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9f"
+          ]
+        },
+        {
+          "name": "nonce",
+          "kind": "input",
+          "type": "buffer",
+          "size": 12,
+          "interface_index": 1,
+          "tests": [
+            "070000004041424344454647"
+          ]
+        },
+        {
+          "name": "alen",
+          "kind": "input",
+          "type": "int"
+        },
+        {
+          "name": "aad",
+          "kind": "input",
+          "type": "buffer",
+          "size": "alen",
+          "interface_index": 2,
+          "tests": [
+            "50515253c0c1c2c3c4c5c6c7"
+          ]
+        },
+        {
+          "name": "len",
+          "kind": "input",
+          "type": "int"
+        },
+        {
+          "name": "plaintext",
+          "kind": "output",
+          "type": "buffer",
+          "size": "len",
+          "tests": [
+            "4c616469657320616e642047656e746c656d656e206f662074686520636c617373206f66202739393a204966204920636f756c64206f6666657220796f75206f6e6c79206f6e652074697020666f7220746865206675747572652c2073756e73637265656e20776f756c642062652069742e"
+          ]
+        },
+        {
+          "name": "ciphertext",
+          "kind": "input",
+          "type": "buffer",
+          "size": "len",
+          "interface_index": 3,
+          "tests": [
+            "d31a8d34648e60db7b86afbc53ef7ec2a4aded51296e08fea9e2b5a736ee62d63dbea45e8ca9671282fafb69da92728b1a71de0a9e060b2905d6a5b67ecd3b3692ddbd7f2d778b8c9803aee328091b58fab324e4fad675945585808b4831d7bc3ff4def08e4b7a9de576d26586cec64b6116"
+
+          ]
+        },
+        {
+          "name": "mac",
+          "kind": "input",
+          "type": "buffer",
+          "interface_index": 4,
+          "size": 16,
+          "tests": [
+            "1ae10b594f09e26a7e902ecbd0600691"
+          ]
+        }
+      ],
+      "return": {
+        "type": "bool",
+        "tests": [
+          true
+        ]
+      }
+    }
+  },
+  "Ed25519": {
+    "secret_to_public": {
+      "module": "Hacl_Ed25519",
+      "name": "secret_to_public",
+      "args": [{
+        "name": "pub",
+        "kind": "output",
+        "type": "buffer",
+        "size": 32,
+        "tests": [
+          "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+          "3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c",
+          "fc51cd8e6218a1a38da47ed00230f0580816ed13ba3303ac5deb911548908025",
+          "278117fc144c72340f67d0f2316e8386ceffbf2b2428c9c51fef7c597f1d426e"
+        ]
+      }, {
+        "name": "priv",
+        "kind": "input",
+        "type": "buffer",
+        "interface_index": 0,
+        "size": 32,
+        "tests": [
+          "9d61b19deffd5a60ba844af492ec2cc44449c5697b326919703bac031cae7f60",
+          "4ccd089b28ff96da9db6c346ec114e0f5b8a319f35aba624da8cf6ed4fb8a6fb",
+          "c5aa8df43f9f837bedb7442f31dcb7b166d38535076f094b85ce3a2e0b4458f7",
+          "f5e5767cf153319517630f226876b86c8160cc583bc013744c6bf255f5cc0ee5"
+        ]
+      }],
+      "return": {
+        "type": "void"
+      }
+    },
+    "sign": {
+      "module": "Hacl_Ed25519",
+      "name": "sign",
+      "args": [{
+        "name": "signature",
+        "kind": "output",
+        "type": "buffer",
+        "size": 64,
+        "tests": [
+          "e5564300c360ac729086e2cc806e828a84877f1eb8e5d974d873e065224901555fb8821590a33bacc61e39701cf9b46bd25bf5f0595bbe24655141438e7a100b",
+          "92a009a9f0d4cab8720e820b5f642540a2b27b5416503f8fb3762223ebdb69da085ac1e43e15996e458f3613d0f11d8c387b2eaeb4302aeeb00d291612bb0c00",
+          "6291d657deec24024827e69c3abe01a30ce548a284743a445e3680d7db5ac3ac18ff9b538d16f290ae67f760984dc6594a7c15e9716ed28dc027beceea1ec40a",
+          "0aab4c900501b3e24d7cdf4663326a3a87df5e4843b2cbdb67cbf6e460fec350aa5371b1508f9f4528ecea23c436d94b5e8fcd4f681e30a6ac00a9704a188a03"
+        ]
+      }, {
+        "name": "priv",
+        "kind": "input",
+        "type": "buffer",
+        "interface_index": 0,
+        "size": 32,
+        "tests": [
+          "9d61b19deffd5a60ba844af492ec2cc44449c5697b326919703bac031cae7f60",
+          "4ccd089b28ff96da9db6c346ec114e0f5b8a319f35aba624da8cf6ed4fb8a6fb",
+          "c5aa8df43f9f837bedb7442f31dcb7b166d38535076f094b85ce3a2e0b4458f7",
+          "f5e5767cf153319517630f226876b86c8160cc583bc013744c6bf255f5cc0ee5"
+        ]
+      }, {
+        "name": "len",
+        "kind": "input",
+        "type": "int"
+      }, {
+        "name": "message",
+        "kind": "input",
+        "type": "buffer",
+        "size": "len",
+        "interface_index": 1,
+        "tests": [
+          "",
+          "72",
+          "af82",
+          "08b8b2b733424243760fe426a4b54908632110a66c2f6591eabd3345e3e4eb98fa6e264bf09efe12ee50f8f54e9f77b1e355f6c50544e23fb1433ddf73be84d879de7c0046dc4996d9e773f4bc9efe5738829adb26c81b37c93a1b270b20329d658675fc6ea534e0810a4432826bf58c941efb65d57a338bbd2e26640f89ffbc1a858efcb8550ee3a5e1998bd177e93a7363c344fe6b199ee5d02e82d522c4feba15452f80288a821a579116ec6dad2b3b310da903401aa62100ab5d1a36553e06203b33890cc9b832f79ef80560ccb9a39ce767967ed628c6ad573cb116dbefefd75499da96bd68a8a97b928a8bbc103b6621fcde2beca1231d206be6cd9ec7aff6f6c94fcd7204ed3455c68c83f4a41da4af2b74ef5c53f1d8ac70bdcb7ed185ce81bd84359d44254d95629e9855a94a7c1958d1f8ada5d0532ed8a5aa3fb2d17ba70eb6248e594e1a2297acbbb39d502f1a8c6eb6f1ce22b3de1a1f40cc24554119a831a9aad6079cad88425de6bde1a9187ebb6092cf67bf2b13fd65f27088d78b7e883c8759d2c4f5c65adb7553878ad575f9fad878e80a0c9ba63bcbcc2732e69485bbc9c90bfbd62481d9089beccf80cfe2df16a2cf65bd92dd597b0707e0917af48bbb75fed413d238f5555a7a569d80c3414a8d0859dc65a46128bab27af87a71314f318c782b23ebfe808b82b0ce26401d2e22f04d83d1255dc51addd3b75a2b1ae0784504df543af8969be3ea7082ff7fc9888c144da2af58429ec96031dbcad3dad9af0dcbaaaf268cb8fcffead94f3c7ca495e056a9b47acdb751fb73e666c6c655ade8297297d07ad1ba5e43f1bca32301651339e22904cc8c42f58c30c04aafdb038dda0847dd988dcda6f3bfd15c4b4c4525004aa06eeff8ca61783aacec57fb3d1f92b0fe2fd1a85f6724517b65e614ad6808d6f6ee34dff7310fdc82aebfd904b01e1dc54b2927094b2db68d6f903b68401adebf5a7e08d78ff4ef5d63653a65040cf9bfd4aca7984a74d37145986780fc0b16ac451649de6188a7dbdf191f64b5fc5e2ab47b57f7f7276cd419c17a3ca8e1b939ae49e488acba6b965610b5480109c8b17b80e1b7b750dfc7598d5d5011fd2dcc5600a32ef5b52a1ecc820e308aa342721aac0943bf6686b64b2579376504ccc493d97e6aed3fb0f9cd71a43dd497f01f17c0e2cb3797aa2a2f256656168e6c496afc5fb93246f6b1116398a346f1a641f3b041e989f7914f90cc2c7fff357876e506b50d334ba77c225bc307ba537152f3f1610e4eafe595f6d9d90d11faa933a15ef1369546868a7f3a45a96768d40fd9d03412c091c6315cf4fde7cb68606937380db2eaaa707b4c4185c32eddcdd306705e4dc1ffc872eeee475a64dfac86aba41c0618983f8741c5ef68d3a101e8a3b8cac60c905c15fc910840b94c00a0b9d0"
+        ]
+      }],
+      "return": {
+        "type": "void"
+      }
+    },
+    "verify": {
+      "module": "Hacl_Ed25519",
+      "name": "verify",
+      "args": [{
+          "name": "pub",
+          "kind": "input",
+          "type": "buffer",
+          "interface_index": 0,
+          "size": 32,
+          "tests": [
+            "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+            "3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c",
+            "fc51cd8e6218a1a38da47ed00230f0580816ed13ba3303ac5deb911548908025",
+            "278117fc144c72340f67d0f2316e8386ceffbf2b2428c9c51fef7c597f1d426e"
+          ]
+        },
+        {
+          "name": "len",
+          "kind": "input",
+          "type": "int"
+        }, {
+          "name": "message",
+          "kind": "input",
+          "type": "buffer",
+          "size": "len",
+          "interface_index": 1,
+          "tests": [
+            "",
+            "72",
+            "af82",
+            "08b8b2b733424243760fe426a4b54908632110a66c2f6591eabd3345e3e4eb98fa6e264bf09efe12ee50f8f54e9f77b1e355f6c50544e23fb1433ddf73be84d879de7c0046dc4996d9e773f4bc9efe5738829adb26c81b37c93a1b270b20329d658675fc6ea534e0810a4432826bf58c941efb65d57a338bbd2e26640f89ffbc1a858efcb8550ee3a5e1998bd177e93a7363c344fe6b199ee5d02e82d522c4feba15452f80288a821a579116ec6dad2b3b310da903401aa62100ab5d1a36553e06203b33890cc9b832f79ef80560ccb9a39ce767967ed628c6ad573cb116dbefefd75499da96bd68a8a97b928a8bbc103b6621fcde2beca1231d206be6cd9ec7aff6f6c94fcd7204ed3455c68c83f4a41da4af2b74ef5c53f1d8ac70bdcb7ed185ce81bd84359d44254d95629e9855a94a7c1958d1f8ada5d0532ed8a5aa3fb2d17ba70eb6248e594e1a2297acbbb39d502f1a8c6eb6f1ce22b3de1a1f40cc24554119a831a9aad6079cad88425de6bde1a9187ebb6092cf67bf2b13fd65f27088d78b7e883c8759d2c4f5c65adb7553878ad575f9fad878e80a0c9ba63bcbcc2732e69485bbc9c90bfbd62481d9089beccf80cfe2df16a2cf65bd92dd597b0707e0917af48bbb75fed413d238f5555a7a569d80c3414a8d0859dc65a46128bab27af87a71314f318c782b23ebfe808b82b0ce26401d2e22f04d83d1255dc51addd3b75a2b1ae0784504df543af8969be3ea7082ff7fc9888c144da2af58429ec96031dbcad3dad9af0dcbaaaf268cb8fcffead94f3c7ca495e056a9b47acdb751fb73e666c6c655ade8297297d07ad1ba5e43f1bca32301651339e22904cc8c42f58c30c04aafdb038dda0847dd988dcda6f3bfd15c4b4c4525004aa06eeff8ca61783aacec57fb3d1f92b0fe2fd1a85f6724517b65e614ad6808d6f6ee34dff7310fdc82aebfd904b01e1dc54b2927094b2db68d6f903b68401adebf5a7e08d78ff4ef5d63653a65040cf9bfd4aca7984a74d37145986780fc0b16ac451649de6188a7dbdf191f64b5fc5e2ab47b57f7f7276cd419c17a3ca8e1b939ae49e488acba6b965610b5480109c8b17b80e1b7b750dfc7598d5d5011fd2dcc5600a32ef5b52a1ecc820e308aa342721aac0943bf6686b64b2579376504ccc493d97e6aed3fb0f9cd71a43dd497f01f17c0e2cb3797aa2a2f256656168e6c496afc5fb93246f6b1116398a346f1a641f3b041e989f7914f90cc2c7fff357876e506b50d334ba77c225bc307ba537152f3f1610e4eafe595f6d9d90d11faa933a15ef1369546868a7f3a45a96768d40fd9d03412c091c6315cf4fde7cb68606937380db2eaaa707b4c4185c32eddcdd306705e4dc1ffc872eeee475a64dfac86aba41c0618983f8741c5ef68d3a101e8a3b8cac60c905c15fc910840b94c00a0b9d0"
+          ]
+        },
+        {
+          "name": "signature",
+          "kind": "input",
+          "interface_index": 2,
+          "type": "buffer",
+          "size": 64,
+          "tests": [
+            "e5564300c360ac729086e2cc806e828a84877f1eb8e5d974d873e065224901555fb8821590a33bacc61e39701cf9b46bd25bf5f0595bbe24655141438e7a100b",
+            "92a009a9f0d4cab8720e820b5f642540a2b27b5416503f8fb3762223ebdb69da085ac1e43e15996e458f3613d0f11d8c387b2eaeb4302aeeb00d291612bb0c00",
+            "6291d657deec24024827e69c3abe01a30ce548a284743a445e3680d7db5ac3ac18ff9b538d16f290ae67f760984dc6594a7c15e9716ed28dc027beceea1ec40a",
+            "0aab4c900501b3e24d7cdf4663326a3a87df5e4843b2cbdb67cbf6e460fec350aa5371b1508f9f4528ecea23c436d94b5e8fcd4f681e30a6ac00a9704a188a03"
+          ]
+        }
+      ],
+      "return": {
+        "type": "bool",
+        "tests": [
+          true,
+          true,
+          true,
+          true
+        ]
+      }
+    }
+  },
+  "SHA2": {
+    "hash_512": {
+      "module": "Hacl_Hash",
+      "name": "SHA2_hash_512",
+      "args": [{
+          "name": "input",
+          "kind": "input",
+          "type": "buffer",
+          "size": "input_len",
+          "interface_index": 0,
+          "tests": [
+            "616263",
+            "",
+            "6162636462636465636465666465666765666768666768696768696a68696a6b696a6b6c6a6b6c6d6b6c6d6e6c6d6e6f6d6e6f706e6f7071",
+            "61626364656667686263646566676869636465666768696a6465666768696a6b65666768696a6b6c666768696a6b6c6d6768696a6b6c6d6e68696a6b6c6d6e6f696a6b6c6d6e6f706a6b6c6d6e6f70716b6c6d6e6f7071726c6d6e6f707172736d6e6f70717273746e6f707172737475"
+          ]
+        },
+        {
+          "name": "input_len",
+          "kind": "input",
+          "type": "int"
+        },
+        {
+          "name": "hash",
+          "kind": "output",
+          "type": "buffer",
+          "size": 64,
+          "tests": [
+            "ddaf35a193617abacc417349ae20413112e6fa4e89a97ea20a9eeee64b55d39a2192992a274fc1a836ba3c23a3feebbd454d4423643ce80e2a9ac94fa54ca49f",
+            "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e",
+            "204a8fc6dda82f0a0ced7beb8e08a41657c16ef468b228a8279be331a703c33596fd15c13b1b07f9aa1d3bea57789ca031ad85c7a71dd70354ec631238ca3445",
+            "8e959b75dae313da8cf4f72814fc143f8f7779c6eb9f7fa17299aeadb6889018501d289e4900f7e4331b99dec4b5433ac7d329eeb6dd26545e96e55b874be909"
+          ]
+        }
+      ],
+      "return": {
+        "type": "void"
+      }
+    },
+    "hash_384": {
+      "module": "Hacl_Hash",
+      "name": "SHA2_hash_384",
+      "args": [{
+          "name": "input",
+          "kind": "input",
+          "type": "buffer",
+          "size": "input_len",
+          "interface_index": 0,
+          "tests": [
+            "616263",
+            "",
+            "6162636462636465636465666465666765666768666768696768696a68696a6b696a6b6c6a6b6c6d6b6c6d6e6c6d6e6f6d6e6f706e6f7071",
+            "61626364656667686263646566676869636465666768696a6465666768696a6b65666768696a6b6c666768696a6b6c6d6768696a6b6c6d6e68696a6b6c6d6e6f696a6b6c6d6e6f706a6b6c6d6e6f70716b6c6d6e6f7071726c6d6e6f707172736d6e6f70717273746e6f707172737475"
+          ]
+        },
+        {
+          "name": "input_len",
+          "kind": "input",
+          "type": "int"
+        },
+        {
+          "name": "hash",
+          "kind": "output",
+          "type": "buffer",
+          "size": 48,
+          "tests": [
+            "cb00753f45a35e8bb5a03d699ac65007272c32ab0eded1631a8b605a43ff5bed8086072ba1e7cc2358baeca134c825a7",
+            "38b060a751ac96384cd9327eb1b1e36a21fdb71114be07434c0cc7bf63f6e1da274edebfe76f65fbd51ad2f14898b95b",
+            "3391fdddfc8dc7393707a65b1b4709397cf8b1d162af05abfe8f450de5f36bc6b0455a8520bc4e6f5fe95b1fe3c8452b",
+            "09330c33f71147e83d192fc782cd1b4753111b173b3b05d22fa08086e3b0f712fcc7c71a557e2db966c3e9fa91746039"
+          ]
+        }
+      ],
+      "return": {
+        "type": "void"
+      }
+    },
+    "hash_256": {
+      "module": "Hacl_Hash",
+      "name": "SHA2_hash_256",
+      "args": [{
+          "name": "input",
+          "kind": "input",
+          "type": "buffer",
+          "size": "input_len",
+          "interface_index": 0,
+          "tests": [
+            "616263",
+            "",
+            "6162636462636465636465666465666765666768666768696768696a68696a6b696a6b6c6a6b6c6d6b6c6d6e6c6d6e6f6d6e6f706e6f7071",
+            "61626364656667686263646566676869636465666768696a6465666768696a6b65666768696a6b6c666768696a6b6c6d6768696a6b6c6d6e68696a6b6c6d6e6f696a6b6c6d6e6f706a6b6c6d6e6f70716b6c6d6e6f7071726c6d6e6f707172736d6e6f70717273746e6f707172737475"
+          ]
+        },
+        {
+          "name": "input_len",
+          "kind": "input",
+          "type": "int"
+        },
+        {
+          "name": "hash",
+          "kind": "output",
+          "type": "buffer",
+          "size": 32,
+          "tests": [
+            "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+            "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1",
+            "cf5b16a778af8380036ce59e7b0492370b249b11e8f07a51afac45037afee9d1"
+          ]
+        }
+      ],
+      "return": {
+        "type": "void"
+      }
+    }
+  },
+  "Blake2": {
+    "blake2b": {
+      "module": "Hacl_Blake2b_32",
+      "name": "blake2b",
+      "args": [{
+          "type": "int",
+          "kind": "input",
+          "name": "output_len",
+          "interface_index": 0,
+          "tests": [
+            64, 64
+          ]
+        }, {
+          "name": "output",
+          "kind": "output",
+          "type": "buffer",
+          "size": "output_len",
+          "tests": [
+            "ba80a53f981c4d0d6a2797b69f12f6e94c212f14685ac4b74b12bb6fdbffa2d17d87c5392aab792dc252d5de4533cc9518d38aa8dbf1925ab92386edd4009923",
+            "e47bb6f20fbf14984f72a4c3cd9f3dc0d38928e536733ba7c5b153c71546584b7371f9b7070777b9a0947703409650fd04cfc9a5d561f99ed134ef262b03db94"
+          ]
+        },
+        {
+          "type": "int",
+          "kind": "input",
+          "name": "data_len"
+        }, {
+          "name": "data",
+          "kind": "input",
+          "type": "buffer",
+          "size": "data_len",
+          "interface_index": 1,
+          "tests": [
+            "616263",
+            "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+          ]
+        },
+        {
+          "type": "int",
+          "kind": "input",
+          "name": "key_len"
+        }, {
+          "name": "key",
+          "kind": "input",
+          "type": "buffer",
+          "size": "key_len",
+          "interface_index": 2,
+          "tests": [
+            "",
+            "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+          ]
+        }
+      ],
+      "return": {
+        "type": "void"
+      }
+    },
+    "blake2s": {
+      "module": "Hacl_Blake2s_32",
+      "name": "blake2s",
+      "args": [{
+          "type": "int",
+          "kind": "input",
+          "name": "output_len",
+          "interface_index": 0,
+          "tests": [
+            32,
+            32,
+            32,
+            32
+          ]
+        }, {
+          "name": "output",
+          "kind": "output",
+          "type": "buffer",
+          "size": "output_len",
+          "tests": [
+            "508c5e8c327c14e2e1a72ba34eeb452f37458b209ed63a294d999b4c86675982",
+            "40d15fee7c328830166ac3f918650f807e7e01e177258cdc0a39b11f598066f1",
+            "3fb735061abc519dfe979e54c1ee5bfad0a9d858b3315bad34bde999efd724dd",
+            "d12bf3732ef4af5c22fa90356af8fc50fcb40f8f2ea5c8594737a3b3d5abdbd7"
+          ]
+        },
+        {
+          "type": "int",
+          "kind": "input",
+          "name": "data_len"
+        }, {
+          "name": "data",
+          "kind": "input",
+          "type": "buffer",
+          "size": "data_len",
+          "interface_index": 1,
+          "tests": [
+            "616263",
+            "00",
+            "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfe",
+            "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fa"
+          ]
+        },
+        {
+          "type": "int",
+          "kind": "input",
+          "name": "key_len"
+        }, {
+          "name": "key",
+          "kind": "input",
+          "type": "buffer",
+          "size": "key_len",
+          "interface_index": 2,
+          "tests": [
+            "",
+            "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+            "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+            "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+          ]
+        }
+      ],
+      "return": {
+        "type": "void"
+      }
+    }
+  },
+  "SHA3": {
+    "hash_512": {
+      "module": "Hacl_SHA3",
+      "name": "sha3_512",
+      "args": [{
+          "name": "input_len",
+          "kind": "input",
+          "type": "int"
+        },
+        {
+          "name": "input",
+          "kind": "input",
+          "type": "buffer",
+          "size": "input_len",
+          "interface_index": 0,
+          "tests": [
+            "",
+            "616263",
+            "6162636462636465636465666465666765666768666768696768696a68696a6b696a6b6c6a6b6c6d6b6c6d6e6c6d6e6f6d6e6f706e6f7071",
+            "61626364656667686263646566676869636465666768696a6465666768696a6b65666768696a6b6c666768696a6b6c6d6768696a6b6c6d6e68696a6b6c6d6e6f696a6b6c6d6e6f706a6b6c6d6e6f70716b6c6d6e6f7071726c6d6e6f707172736d6e6f70717273746e6f707172737475"
+          ]
+        },
+        {
+          "name": "hash",
+          "kind": "output",
+          "type": "buffer",
+          "size": 64,
+          "tests": [
+            "a69f73cca23a9ac5c8b567dc185a756e97c982164fe25859e0d1dcc1475c80a615b2123af1f5f94c11e3e9402c3ac558f500199d95b6d3e301758586281dcd26",
+            "b751850b1a57168a5693cd924b6b096e08f621827444f70d884f5d0240d2712e10e116e9192af3c91a7ec57647e3934057340b4cf408d5a56592f8274eec53f0",
+            "04a371e84ecfb5b8b77cb48610fca8182dd457ce6f326a0fd3d7ec2f1e91636dee691fbe0c985302ba1b0d8dc78c086346b533b49c030d99a27daf1139d6e75e",
+            "afebb2ef542e6579c50cad06d2e578f9f8dd6881d7dc824d26360feebf18a4fa73e3261122948efcfd492e74e82e2189ed0fb440d187f382270cb455f21dd185"
+          ]
+        }
+      ],
+      "return": {
+        "type": "void"
+      }
+    },
+    "hash_384": {
+      "module": "Hacl_SHA3",
+      "name": "sha3_384",
+      "args": [{
+          "name": "input_len",
+          "kind": "input",
+          "type": "int"
+        },
+        {
+          "name": "input",
+          "kind": "input",
+          "type": "buffer",
+          "size": "input_len",
+          "interface_index": 0,
+          "tests": [
+            "",
+            "616263",
+            "6162636462636465636465666465666765666768666768696768696a68696a6b696a6b6c6a6b6c6d6b6c6d6e6c6d6e6f6d6e6f706e6f7071",
+            "61626364656667686263646566676869636465666768696a6465666768696a6b65666768696a6b6c666768696a6b6c6d6768696a6b6c6d6e68696a6b6c6d6e6f696a6b6c6d6e6f706a6b6c6d6e6f70716b6c6d6e6f7071726c6d6e6f707172736d6e6f70717273746e6f707172737475"
+          ]
+        },
+        {
+          "name": "hash",
+          "kind": "output",
+          "type": "buffer",
+          "size": 48,
+          "tests": [
+            "0c63a75b845e4f7d01107d852e4c2485c51a50aaaa94fc61995e71bbee983a2ac3713831264adb47fb6bd1e058d5f004",
+            "ec01498288516fc926459f58e2c6ad8df9b473cb0fc08c2596da7cf0e49be4b298d88cea927ac7f539f1edf228376d25",
+            "991c665755eb3a4b6bbdfb75c78a492e8c56a22c5c4d7e429bfdbc32b9d4ad5aa04a1f076e62fea19eef51acd0657c22",
+            "79407d3b5916b59c3e30b09822974791c313fb9ecc849e406f23592d04f625dc8c709b98b43b3852b337216179aa7fc7"
+          ]
+        }
+      ],
+      "return": {
+        "type": "void"
+      }
+    },
+    "hash_256": {
+      "module": "Hacl_SHA3",
+      "name": "sha3_256",
+      "args": [{
+          "name": "input_len",
+          "kind": "input",
+          "type": "int"
+        },
+        {
+          "name": "input",
+          "kind": "input",
+          "type": "buffer",
+          "size": "input_len",
+          "interface_index": 0,
+          "tests": [
+            "",
+            "616263",
+            "6162636462636465636465666465666765666768666768696768696a68696a6b696a6b6c6a6b6c6d6b6c6d6e6c6d6e6f6d6e6f706e6f7071",
+            "61626364656667686263646566676869636465666768696a6465666768696a6b65666768696a6b6c666768696a6b6c6d6768696a6b6c6d6e68696a6b6c6d6e6f696a6b6c6d6e6f706a6b6c6d6e6f70716b6c6d6e6f7071726c6d6e6f707172736d6e6f70717273746e6f707172737475"
+          ]
+        },
+        {
+          "name": "hash",
+          "kind": "output",
+          "type": "buffer",
+          "size": 32,
+          "tests": [
+            "a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a",
+            "3a985da74fe225b2045c172d6bd390bd855f086e3e9d525b46bfe24511431532",
+            "41c0dba2a9d6240849100376a8235e2c82e1b9998a999e21db32dd97496d3376",
+            "916f6061fe879741ca6469b43971dfdb28b1a32dc36cb3254e812be27aad1d18"
+          ]
+        }
+      ],
+      "return": {
+        "type": "void"
+      }
+    },
+    "hash_224": {
+      "module": "Hacl_SHA3",
+      "name": "sha3_224",
+      "args": [{
+          "name": "input_len",
+          "kind": "input",
+          "type": "int"
+        },
+        {
+          "name": "input",
+          "kind": "input",
+          "type": "buffer",
+          "size": "input_len",
+          "interface_index": 0,
+          "tests": [
+            "",
+            "616263",
+            "6162636462636465636465666465666765666768666768696768696a68696a6b696a6b6c6a6b6c6d6b6c6d6e6c6d6e6f6d6e6f706e6f7071",
+            "61626364656667686263646566676869636465666768696a6465666768696a6b65666768696a6b6c666768696a6b6c6d6768696a6b6c6d6e68696a6b6c6d6e6f696a6b6c6d6e6f706a6b6c6d6e6f70716b6c6d6e6f7071726c6d6e6f707172736d6e6f70717273746e6f707172737475"
+          ]
+        },
+        {
+          "name": "hash",
+          "kind": "output",
+          "type": "buffer",
+          "size": 28,
+          "tests": [
+            "6b4e03423667dbb73b6e15454f0eb1abd4597f9a1b078e3f5b5a6bc7",
+            "e642824c3f8cf24ad09234ee7d3c766fc9a3a5168d0c94ad73b46fdf",
+            "8a24108b154ada21c9fd5574494479ba5c7e7ab76ef264ead0fcce33",
+            "543e6868e1666c1a643630df77367ae5a62a85070a51c14cbf665cbc"
+          ]
+        }
+      ],
+      "return": {
+        "type": "void"
+      }
+    }
+  },
+  "HMAC": {
+    "sha256": {
+      "module": "Hacl_HMAC",
+      "name": "compute_sha2_256",
+      "args": [{
+          "name": "tag",
+          "kind": "output",
+          "type": "buffer",
+          "size": 32,
+          "tests": [
+            "b0344c61d8db38535ca8afceaf0bf12b881dc200c9833da726e9376c2e32cff7",
+            "5bdcc146bf60754e6a042426089575c75a003f089d2739839dec58b964ec3843",
+            "773ea91e36800e46854db8ebd09181a72959098b3ef8c122d9635514ced565fe",
+            "82558a389a443c0ea4cc819899f2083a85f0faa3e578f8077a2e3ff46729665b"
+          ]
+        },
+        {
+          "name": "key",
+          "kind": "input",
+          "type": "buffer",
+          "size": "key_len",
+          "interface_index": 0,
+          "tests": [
+            "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b",
+            "4a656665",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "0102030405060708090a0b0c0d0e0f10111213141516171819"
+          ]
+        }, {
+          "name": "key_len",
+          "kind": "input",
+          "type": "int"
+        }, {
+          "name": "data",
+          "kind": "input",
+          "type": "buffer",
+          "size": "data_len",
+          "interface_index": 1,
+          "tests": [
+            "4869205468657265",
+            "7768617420646f2079612077616e7420666f72206e6f7468696e673f",
+            "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+            "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd"
+          ]
+        }, {
+          "name": "data_len",
+          "kind": "input",
+          "type": "int"
+        }
+      ],
+      "return": {
+        "type": "void"
+      }
+    }
+  },
+  "HKDF": {
+    "extract_sha2_256": {
+      "module": "Hacl_HKDF",
+      "name": "extract_sha2_256",
+      "args": [{
+          "name": "prk",
+          "kind": "output",
+          "type": "buffer",
+          "size": 32,
+          "tests": [
+            "077709362c2e32df0ddc3f0dc47bba6390b6c73bb50f9c3122ec844ad7c2b3e5",
+            "06a6b88c5853361a06104c9ceb35b45cef760014904671014a193f40c15fc244",
+            "19ef24a32c717b167f33a91d6f648bdf96596776afdb6377ac434c1c293ccb04"
+          ]
+        },
+        {
+          "name": "salt",
+          "kind": "input",
+          "size": "salt_len",
+          "interface_index": 0,
+          "type": "buffer",
+          "tests": [
+            "000102030405060708090a0b0c",
+            "606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeaf",
+            ""
+          ]
+        },
+        {
+          "name": "salt_len",
+          "kind": "input",
+          "type": "int"
+        }, {
+          "name": "ikm",
+          "kind": "input",
+          "type": "buffer",
+          "size": "ikm_len",
+          "interface_index": 1,
+          "tests": [
+            "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b",
+            "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f",
+            "0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b"
+          ]
+        },
+        {
+          "name": "ikm_len",
+          "kind": "input",
+          "type": "int"
+        }
+      ],
+      "return": {
+        "type": "void"
+      }
+    },
+    "expand_sha2_256": {
+      "module": "Hacl_HKDF",
+      "name": "expand_sha2_256",
+      "args": [{
+          "name": "okm",
+          "kind": "output",
+          "type": "buffer",
+          "size": "len",
+          "tests": [
+            "3cb25f25faacd57a90434f64d0362f2a2d2d0a90cf1a5a4c5db02d56ecc4c5bf34007208d5b887185865",
+            "b11e398dc80327a1c8e7f78c596a49344f012eda2d4efad8a050cc4c19afa97c59045a99cac7827271cb41c65e590e09da3275600c2f09b8367793a9aca3db71cc30c58179ec3e87c14c01d5c1f3434f1d87",
+            "8da4e775a563c18f715f802a063c5a31b8a11f5c5ee1879ec3454e5f3c738d2d9d201395faa4b61a96c8"
+          ]
+        },
+        {
+          "name": "prk",
+          "kind": "input",
+          "type": "buffer",
+          "size": "prk_len",
+          "interface_index": 0,
+          "tests": [
+            "077709362c2e32df0ddc3f0dc47bba6390b6c73bb50f9c3122ec844ad7c2b3e5",
+            "06a6b88c5853361a06104c9ceb35b45cef760014904671014a193f40c15fc244",
+            "19ef24a32c717b167f33a91d6f648bdf96596776afdb6377ac434c1c293ccb04"
+          ]
+        },
+        {
+          "name": "prk_len",
+          "kind": "input",
+          "type": "int"
+        }, {
+          "name": "info",
+          "kind": "input",
+          "type": "buffer",
+          "size": "infolen",
+          "interface_index": 1,
+          "tests": [
+            "f0f1f2f3f4f5f6f7f8f9",
+            "b0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff",
+            ""
+          ]
+        },
+        {
+          "name": "infolen",
+          "kind": "input",
+          "type": "int"
+        }, {
+          "name": "len",
+          "kind": "input",
+          "type": "int",
+          "interface_index": 2,
+          "tests": [
+            42,
+            82,
+            42
+          ]
+        }
+      ],
+      "return": {
+        "type": "void"
+      }
+    }
+  }
+}

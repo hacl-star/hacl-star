@@ -103,7 +103,7 @@ all:
 all-unstaged: compile-gcc-compatible compile-msvc-compatible compile-gcc64-only \
   compile-evercrypt-external-headers compile-c89-compatible compile-ccf \
   compile-portable-gcc-compatible compile-mozilla dist/linux/Makefile.basic \
-	dist/merkle-tree/Makefile.basic
+  dist/wasm/package.json dist/merkle-tree/Makefile.basic
 
 # Automatic staging.
 %-staged: .last_vale_version
@@ -120,7 +120,7 @@ all-unstaged: compile-gcc-compatible compile-msvc-compatible compile-gcc64-only 
 	cp $< $@
 
 test: test-staged
-test-unstaged: test-handwritten test-c test-ml vale_testInline
+test-unstaged: test-handwritten test-c test-ml vale_testInline test-wasm
 
 ifneq ($(OS),Windows_NT)
 test-unstaged: test-benchmark
@@ -142,18 +142,10 @@ mozilla-ci-unstaged: compile-mozilla test-c
 
 # Not reusing the -staged automatic target so as to export NOSHORTLOG
 ci:
-	tools/blast-staticconfig.sh wasm
-	EVERCRYPT_CONFIG=wasm NOSHORTLOG=1 $(MAKE) wasm-staged
-	tools/blast-staticconfig.sh
 	NOSHORTLOG=1 $(MAKE) vale-fst
-	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all-unstaged test-unstaged
+	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all-unstaged test-unstaged doc-wasm
 	$(MAKE) -C providers/quic_provider # needs a checkout of miTLS, only valid on CI
 	./tools/sloccount.sh
-
-wasm: wasm-staged
-
-wasm-unstaged: dist/wasm/Makefile.basic
-	cd $(dir $<) && node main.js
 
 # Not reusing the -staged automatic target so as to export MIN_TEST
 min-test:
@@ -309,8 +301,6 @@ else ifeq ($(MAKECMDGOALS),all)
 else ifeq (,$(filter-out %-staged,$(MAKECMDGOALS)))
   SKIPDEPEND=1
 else ifeq (,$(filter-out %-verify,$(MAKECMDGOALS)))
-  SKIPDEPEND=1
-else ifeq ($(MAKECMDGOALS),wasm)
   SKIPDEPEND=1
 else ifeq ($(MAKECMDGOALS),ci)
   SKIPDEPEND=1
@@ -668,7 +658,6 @@ TARGETCONFIG_FLAGS = -add-include '"evercrypt_targetconfig.h"'
 E_HASH_BUNDLE=-bundle EverCrypt.Hash+EverCrypt.Hash.Incremental=[rename=EverCrypt_Hash]
 MERKLE_BUNDLE=-bundle 'MerkleTree+MerkleTree.EverCrypt+MerkleTree.Low+MerkleTree.Low.Serialization+MerkleTree.Low.Hashfunctions=MerkleTree.*[rename=MerkleTree]'
 CTR_BUNDLE=-bundle EverCrypt.CTR=EverCrypt.CTR.*
-# Disabled by default, overridden for wasm
 WASMSUPPORT_BUNDLE = -bundle WasmSupport
 
 BUNDLE_FLAGS	=\
@@ -705,32 +694,94 @@ DEFAULT_FLAGS = \
 # WASM distribution
 # -----------------
 #
-# Does something different and overrides pretty much everything.
+# We disable anything that is not pure Low*; no intrinsics; no EverCrypt
 
-# Should be fixed by having KreMLin better handle imported names
-WASM_STANDALONE=Prims LowStar.Endianness C.Endianness \
-  C.String TestLib C WasmSupport
+# TODO: the way externals are handled in Wasm is nuts and they should be in a
+# single module rather than require clients to do their surgical bundling.
+WASM_STANDALONE=Prims LowStar.Endianness C.Endianness C.String TestLib
 
-# Notes: only the functions reachable via Test.NoHeap are currently enabled.
 WASM_FLAGS	=\
   $(patsubst %,-bundle %,$(WASM_STANDALONE)) \
-  -no-prefix Test.NoHeap \
-  -bundle Test.NoHeap=Test,Test.* \
   -bundle FStar.* \
-  -bundle EverCrypt.*,Hacl.*,MerkleTree.*[rename=EverCrypt] \
   -bundle LowStar.* \
   -bundle Lib.RandomBuffer.System \
-  -bundle '\*[rename=Misc]' \
-  -minimal -wasm
+  -bundle Lib.Memzero \
+  -minimal -wasm -d wasm
 
-# Customizations for WASM.
-# - only keep definitions reachable from Test.NoHeap -- this indicates what we
-#   should retain for the WASM distribution.
-dist/wasm/Makefile.basic: TEST_FLAGS = -d wasm
+dist/wasm/Makefile.basic: VALE_ASMS =
+dist/wasm/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
+dist/wasm/Makefile.basic: HAND_WRITTEN_H_FILES =
+dist/wasm/Makefile.basic: HACL_OLD_FILES =
+dist/wasm/Makefile.basic: HAND_WRITTEN_FILES =
+dist/wasm/Makefile.basic: TARGETCONFIG_FLAGS =
+dist/wasm/Makefile.basic: INTRINSIC_FLAGS =
+
+# Must appear early on because of the left-to-right semantics of -bundle flags.
 dist/wasm/Makefile.basic: HAND_WRITTEN_LIB_FLAGS = $(WASM_FLAGS)
-dist/wasm/Makefile.basic: BUNDLE_FLAGS =
-dist/wasm/Makefile.basic: WASMSUPPORT_BUNDLE =
 
+# Overriding EverCrypt.Hash so that is it no longer a live root; it will be
+# eliminated via the -bundle EverCrypt.* below
+dist/wasm/Makefile.basic: E_HASH_BUNDLE =
+
+# Doesn't work in WASM because one function has some heap allocation
+dist/wasm/Makefile.basic: HASH_BUNDLE += -bundle Hacl.HMAC_DRBG
+
+# Doesn't work in WASM because un-materialized externals for AES128
+dist/wasm/Makefile.basic: FRODO_BUNDLE = -bundle Hacl.Frodo.KEM,Frodo.Params,Hacl.Impl.Frodo.*,Hacl.Impl.Matrix,Hacl.Frodo.*,Hacl.Keccak,Hacl.AES128
+
+# Doesn't work in Wasm because it uses assembler intrinsics
+dist/wasm/Makefile.basic: ECDSA_BUNDLE = -bundle Hacl.Impl.ECDSA,Hacl.Impl.ECDSA,Hacl.Impl.ECDSA.*,Hacl.Impl.P256.*,Hacl.Impl.P256,Hacl.Spec.P256.*,Hacl.Impl.SolinasReduction,Hacl.Impl.LowLevel
+
+# No Vale Curve64 no "Local" or "Slow" Curve64, only Curve51 (local Makefile hack)
+dist/wasm/Makefile.basic: CURVE_BUNDLE_SLOW =
+dist/wasm/Makefile.basic: CURVE_BUNDLE = \
+  $(CURVE_BUNDLE_BASE) \
+  -bundle 'Hacl.Curve25519_64_Slow' \
+  -bundle 'Hacl.Curve25519_64' \
+  -bundle 'Hacl.Curve25519_64_Local'
+
+# Most HPKE variants don't work in Wasm, since they are either using Curve64,
+# P256 or vectorized chacha-poly, none of which are available in Wasm.
+dist/wasm/Makefile.basic: HPKE_BUNDLE += \
+  -bundle Hacl.HPKE.Curve51_CP32_SHA256= \
+  -bundle Hacl.HPKE.Curve51_CP32_SHA512= \
+  -bundle 'Hacl.HPKE.*'
+
+# Disabling vectorized stuff
+dist/wasm/Makefile.basic: CHACHA20_BUNDLE += \
+  -bundle Hacl.Chacha20_Vec128,Hacl.Chacha20_Vec256
+dist/wasm/Makefile.basic: CHACHAPOLY_BUNDLE += \
+  -bundle Hacl.Chacha20Poly1305_128,Hacl.Chacha20Poly1305_256
+dist/wasm/Makefile.basic: POLY_BUNDLE = \
+  -bundle 'Hacl.Poly1305_32=Hacl.Impl.Poly1305.Field32xN_32' \
+  -bundle 'Hacl.Poly1305_128,Hacl.Poly1305_256,Hacl.Impl.Poly1305.*'
+
+# And Merkle trees
+dist/wasm/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree,MerkleTree.*'
+dist/wasm/Makefile.basic: CTR_BUNDLE =
+dist/wasm/Makefile.basic: DEFAULT_FLAGS += -bundle 'EverCrypt,EverCrypt.*'
+
+dist/wasm/package.json: dist/wasm/Makefile.basic $(wildcard bindings/js/*.js) bindings/js/README.md $(wildcard bindings/js/*.json) bindings/js/.npmignore
+	cp -f $(filter-out %.basic,$^) $(dir $@)
+	rm -f $(dir $@)README $(dir $@)main.html $(dir $@)main.js $(dir $@)browser.js $(dir $@)*.wast
+
+dist/wasm/doc/readable_api.js: dist/wasm/package.json
+	cd dist/wasm && \
+	mkdir -p doc && \
+	node api_doc.js
+
+dist/wasm/doc/out/index.html: dist/wasm/doc/readable_api.js
+	jsdoc $< -d $(dir $@)
+
+doc-wasm: dist/wasm/doc/out/index.html
+
+publish-test-wasm: dist/wasm/package.json
+	cd dist/wasm && \
+	npm publish --dry-run
+
+test-wasm: dist/wasm/package.json
+	cd dist/wasm && \
+	node api_test.js
 
 # Compact distributions
 # ---------------------
