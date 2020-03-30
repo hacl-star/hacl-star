@@ -188,50 +188,35 @@ EverCrypt_Hash_hash(
 
 typedef uint8_t *EverCrypt_Hash_Incremental_any_hash_t;
 
-typedef struct EverCrypt_Hash_Incremental_state_s_s EverCrypt_Hash_Incremental_state_s;
-
-bool
-EverCrypt_Hash_Incremental_uu___is_State(
-  Spec_Hash_Definitions_hash_alg a,
-  EverCrypt_Hash_Incremental_state_s projectee
-);
-
-EverCrypt_Hash_state_s
-*EverCrypt_Hash_Incremental___proj__State__item__hash_state(
-  Spec_Hash_Definitions_hash_alg a,
-  EverCrypt_Hash_Incremental_state_s projectee
-);
-
-uint8_t
-*EverCrypt_Hash_Incremental___proj__State__item__buf(
-  Spec_Hash_Definitions_hash_alg a,
-  EverCrypt_Hash_Incremental_state_s projectee
-);
-
-uint64_t
-EverCrypt_Hash_Incremental___proj__State__item__total_len(
-  Spec_Hash_Definitions_hash_alg a,
-  EverCrypt_Hash_Incremental_state_s projectee
-);
+typedef struct Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s__s
+Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s_;
 
 Spec_Hash_Definitions_hash_alg
-EverCrypt_Hash_Incremental_alg_of_state(EverCrypt_Hash_Incremental_state_s *s);
+EverCrypt_Hash_Incremental_alg_of_state(
+  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s_ *s
+);
 
-EverCrypt_Hash_Incremental_state_s
+Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s_
 *EverCrypt_Hash_Incremental_create_in(Spec_Hash_Definitions_hash_alg a);
 
-void EverCrypt_Hash_Incremental_init(EverCrypt_Hash_Incremental_state_s *s);
+void
+EverCrypt_Hash_Incremental_init(Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s_ *s);
 
 void
 EverCrypt_Hash_Incremental_update(
-  EverCrypt_Hash_Incremental_state_s *p1,
+  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s_ *s,
   uint8_t *data,
   uint32_t len
 );
 
-void EverCrypt_Hash_Incremental_finish(EverCrypt_Hash_Incremental_state_s *s, uint8_t *dst);
+void
+EverCrypt_Hash_Incremental_finish(
+  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s_ *s,
+  uint8_t *dst
+);
 
-void EverCrypt_Hash_Incremental_free(EverCrypt_Hash_Incremental_state_s *s);
+void
+EverCrypt_Hash_Incremental_free(Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s_ *s);
 
 #define __EverCrypt_Hash_H_DEFINED
 #endif

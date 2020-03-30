@@ -24,22 +24,25 @@ open FStar.Mul
 /// State machinery
 /// ===============
 
+/// Little bit of trickery here to make sure state_s is parameterized over
+/// something at Type0, not Type0 -> Type0 -- otherwise it wouldn't monomorphize
+/// in KreMLin.
 noeq
-type state_s #index (c: block index) (i: index) =
+type state_s #index (c: block index) (i: index) (t: Type0 { t == c.state i }) =
 | State:
-    block_state: c.state i ->
+    block_state: t ->
     buf: B.buffer Lib.IntTypes.uint8 { B.len buf = c.block_len i } ->
     total_len: UInt64.t ->
     seen: G.erased (S.seq uint8) ->
-    state_s #index c i
+    state_s #index c i t
 
-let freeable #index (c: block index) (i: index) (h: HS.mem) (p: state c i) =
+let freeable #index (c: block index) (i: index) (h: HS.mem) (p: state c i (c.state i)) =
   B.freeable p /\ (
   let s = B.deref h p in
   let State hash_state buf _ _ = s in
   B.freeable buf /\ c.freeable h hash_state)
 
-let footprint_s #index (c: block index) (i: index) (h: HS.mem) (s: state_s c i) =
+let footprint_s #index (c: block index) (i: index) (h: HS.mem) (s: state_s c i (c.state i)) =
   let State block_state buf_ _ _ = s in
   B.(loc_union (loc_addr_of_buffer buf_) (c.footprint h block_state))
 
@@ -65,7 +68,7 @@ let split_at_last #index (c: block index) (i: index) (b: bytes):
   assert (S.length b - n * U32.v (c.block_len i) < U32.v (c.block_len i));
   blocks, rest
 
-let invariant_s #index (c: block index) (i: index) h (s: state_s c i) =
+let invariant_s #index (c: block index) (i: index) h (s: state_s c i (c.state i)) =
   let State hash_state buf_ total_len seen = s in
   let seen = G.reveal seen in
   let blocks, rest = split_at_last c i seen in
@@ -84,6 +87,7 @@ let invariant_s #index (c: block index) (i: index) h (s: state_s c i) =
 
 #push-options "--max_ifuel 1"
 let invariant_loc_in_footprint #index c i s m =
+  [@inline_let]
   let aux (h:HS.mem) (s:c.state i): Lemma
     (requires (c.invariant h s))
     (ensures (B.loc_in (c.footprint #i h s) h))
@@ -101,8 +105,8 @@ let seen_bounded #index c i h s =
   ()
 
 let frame_invariant #index c i l s h0 h1 =
-  let state_s = B.deref h0 s in
-  let State block_state _ _ _ = state_s in
+  let state_t = B.deref h0 s in
+  let State block_state _ _ _ = state_t in
   c.frame_invariant #i l block_state h0 h1
 
 let frame_seen #_ _ _ _ _ _ _ =
@@ -115,7 +119,7 @@ let frame_freeable #index c i l s h0 h1 =
 /// Stateful API
 /// ============
 
-let index_of_state #index c i s =
+let index_of_state #index c i t s =
   let open LowStar.BufferOps in
   let State hash_state _ _ _ = !*s in
   c.index_of_state i hash_state
@@ -128,7 +132,8 @@ let split_at_last_empty #index (c: block index) (i: index): Lemma
   ()
 
 #push-options "--using_facts_from '*,-LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2'"
-let create_in #index c i r =
+let create_in #index c i t r =
+  [@inline_let]
   let aux (h:HS.mem) (s:c.state i): Lemma
     (requires (c.invariant h s))
     (ensures (B.loc_in (c.footprint #i h s) h))
@@ -195,7 +200,8 @@ let create_in #index c i r =
   p
 #pop-options
 
-let init #index c i s =
+let init #index c i t s =
+  [@inline_let]
   let aux (h:HS.mem) (s:c.state i): Lemma
     (requires (c.invariant h s))
     (ensures (B.loc_in (c.footprint #i h s) h))
@@ -203,6 +209,7 @@ let init #index c i s =
   =
     c.invariant_loc_in_footprint #i h s
   in
+  [@inline_let]
   let aux l s h0 h1: Lemma
     (requires
       c.invariant h0 s /\
@@ -231,7 +238,9 @@ let init #index c i s =
   c.update_multi_zero i (c.v h2 hash_state);
   split_at_last_empty c i;
 
-  B.upd s 0ul (State hash_state buf 0UL (G.hide S.empty));
+  [@ inline_let ]
+  let tmp: state_s c i t = State hash_state buf 0UL (G.hide S.empty) in
+  B.upd s 0ul tmp;
   let h3 = ST.get () in
   c.frame_invariant B.(loc_buffer s) hash_state h2 h3;
 
@@ -256,7 +265,7 @@ let init #index c i s =
 
     // Liveness and disjointness (administrative)
     B.live h buf_ /\ c.invariant #i h hash_state /\
-    B.(loc_disjoint (loc_buffer buf_) (c.footprint h hash_state)) /\
+    B.(loc_disjoint (loc_buffer buf_) (c.footprint #i h hash_state)) /\
 
     // Formerly, the "hashes" predicate
     S.length blocks + S.length rest = U64.v total_len /\
@@ -324,7 +333,7 @@ let add_len #index (c: block index) (i: index) (total_len: UInt64.t) (len: UInt3
 /// We split update into several versions, to all be simplified into a single
 /// large one at extraction-time.
 
-let total_len_h #index (c: block index) (i: index) h (p: state c i) =
+let total_len_h #index (c: block index) (i: index) h (p: state c i (c.state i)) =
   State?.total_len (B.deref h p)
 
 /// Case 1: we just need to grow the buffer, no call to the hash function.
@@ -427,7 +436,8 @@ val update_small:
   (c: block index) ->
   i:G.erased index -> (
   let i = G.reveal i in
-  s:state c i ->
+  t:Type0 { t == c.state i } ->
+  s:state c i t ->
   data: B.buffer uint8 ->
   len: UInt32.t ->
   Stack unit
@@ -438,7 +448,8 @@ val update_small:
       update_post c i s data len h0 h1))
 
 #push-options "--z3rlimit 50"
-let update_small #index c i p data len =
+let update_small #index c i t p data len =
+  [@inline_let]
   let aux (h:HS.mem) (s:c.state i): Lemma
     (requires (c.invariant h s))
     (ensures (B.loc_in (c.footprint #i h s) h))
@@ -446,6 +457,7 @@ let update_small #index c i p data len =
   =
     c.invariant_loc_in_footprint #i h s
   in
+  [@inline_let]
   let aux l s h0 h1: Lemma
     (requires
       c.invariant h0 s /\
@@ -480,7 +492,11 @@ let update_small #index c i p data len =
   assert (B.as_seq h1 data == B.as_seq h0 data);
 
   let total_len = add_len c i total_len len in
-  p *= (State hash_state buf total_len (G.hide (G.reveal seen_ `S.append` (B.as_seq h0 data))));
+  [@inline_let]
+  let tmp: state_s c i t =
+    State hash_state buf total_len (G.hide (G.reveal seen_ `S.append` (B.as_seq h0 data)))
+  in
+  p *= tmp;
   let h2 = ST.get () in
   assert (B.as_seq h2 data == B.as_seq h1 data);
   c.frame_invariant (B.loc_buffer p) hash_state h1 h2;
@@ -579,7 +595,8 @@ val update_empty_buf:
   c:block index ->
   i:G.erased index -> (
   let i = G.reveal i in
-  s:state c i ->
+  t:Type0 { t == c.state i } ->
+  s:state c i t ->
   data: B.buffer Lib.IntTypes.uint8 ->
   len: UInt32.t ->
   Stack unit
@@ -592,7 +609,8 @@ val update_empty_buf:
 inline_for_extraction noextract
 let seen_pred = seen
 
-let update_empty_buf #index c i p data len =
+let update_empty_buf #index c i t p data len =
+  [@inline_let]
   let aux (h:HS.mem) (s:c.state i): Lemma
     (requires (c.invariant h s))
     (ensures (B.loc_in (c.footprint #i h s) h))
@@ -600,6 +618,7 @@ let update_empty_buf #index c i p data len =
   =
     c.invariant_loc_in_footprint #i h s
   in
+  [@inline_let]
   let aux l s h0 h1: Lemma
     (requires
       c.invariant h0 s /\
@@ -612,6 +631,7 @@ let update_empty_buf #index c i p data len =
   =
     c.frame_freeable #i l s h0 h1
   in
+  [@inline_let]
   let aux i h
     (input1:S.seq uint8 { S.length input1 % U32.v (c.block_len i) = 0 })
     (input2:S.seq uint8 { S.length input2 % U32.v (c.block_len i) = 0 }):
@@ -656,8 +676,11 @@ let update_empty_buf #index c i p data len =
     (S.append (S.append (G.reveal seen) (B.as_seq h0 data1)) (B.as_seq h0 data2))
     (S.append (G.reveal seen) (S.append (B.as_seq h0 data1) (B.as_seq h0 data2))));
 
-  p *= (State hash_state buf (add_len c i total_len len)
-    (G.hide (G.reveal seen `S.append` B.as_seq h0 data)));
+  [@inline_let]
+  let tmp: state_s c i t = State hash_state buf (add_len c i total_len len)
+    (G.hide (G.reveal seen `S.append` B.as_seq h0 data))
+  in
+  p *= tmp;
   let h3 = ST.get () in
   c.frame_invariant (B.loc_buffer p) hash_state h2 h3;
 
@@ -687,7 +710,8 @@ val update_round:
   c:block index ->
   i:G.erased index -> (
   let i = G.reveal i in
-  s:state c i ->
+  t:Type0 { t == c.state i } ->
+  s:state c i (c.state i) ->
   data: B.buffer uint8 ->
   len: UInt32.t ->
   Stack unit
@@ -724,7 +748,8 @@ let split_at_last_block #index (c: block index) (i: index) (b: bytes) (d: bytes)
 #pop-options
 
 #push-options "--z3rlimit 100"
-let update_round #index c i p data len =
+let update_round #index c i t p data len =
+  [@inline_let]
   let aux (h:HS.mem) (s:c.state i): Lemma
     (requires (c.invariant h s))
     (ensures (B.loc_in (c.footprint #i h s) h))
@@ -732,6 +757,7 @@ let update_round #index c i p data len =
   =
     c.invariant_loc_in_footprint #i h s
   in
+  [@inline_let]
   let aux l s h0 h1: Lemma
     (requires
       c.invariant h0 s /\
@@ -744,6 +770,7 @@ let update_round #index c i p data len =
   =
     c.frame_freeable #i l s h0 h1
   in
+  [@inline_let]
   let aux h
     (input1:S.seq uint8)
     (input2:S.seq uint8):
@@ -811,31 +838,34 @@ let update_round #index c i p data len =
       c.update_multi_s i (c.init_s i) (seen `S.append` B.as_seq h0 data);
     }
   end;
-  p *= (State hash_state buf_ (add_len c i total_len len)
-    (G.hide (G.reveal seen `S.append` B.as_seq h0 data)));
+  [@inline_let]
+  let tmp: state_s c i t = State hash_state buf_ (add_len c i total_len len)
+    (G.hide (G.reveal seen `S.append` B.as_seq h0 data))
+  in
+  p *= tmp;
   let h3 = ST.get () in
   c.frame_invariant (B.loc_buffer p) hash_state h2 h3;
   assert (seen_pred c i h3 p `S.equal` (S.append (G.reveal seen) (B.as_seq h0 data)))
 #pop-options
 
-let update #index c i p data len =
+let update #index c i t p data len =
   let open LowStar.BufferOps in
   let s = !*p in
   let State hash_state buf_ total_len seen = s in
   let i = c.index_of_state i hash_state in
   let sz = rest c i total_len in
   if len `U32.lt` (c.block_len i `U32.sub` sz) then
-    update_small c (G.hide i) p data len
+    update_small c (G.hide i) t p data len
   else if sz = 0ul then
-    update_empty_buf c (G.hide i) p data len
+    update_empty_buf c (G.hide i) t p data len
   else begin
     let h0 = ST.get () in
     let diff = c.block_len i `U32.sub` sz in
     let data1 = B.sub data 0ul diff in
     let data2 = B.sub data diff (len `U32.sub` diff) in
-    update_round c (G.hide i) p data1 diff;
+    update_round c (G.hide i) t p data1 diff;
     let h1 = ST.get () in
-    update_empty_buf c (G.hide i) p data2 (len `U32.sub` diff);
+    update_empty_buf c (G.hide i) t p data2 (len `U32.sub` diff);
     let h2 = ST.get () in
     (
       let seen = G.reveal seen in
@@ -851,7 +881,8 @@ let update #index c i p data len =
     )
   end
 
-let mk_finish #index c i p dst =
+let mk_finish #index c i t p dst =
+  [@inline_let]
   let aux (h:HS.mem) (s:c.state i): Lemma
     (requires (c.invariant h s))
     (ensures (B.loc_in (c.footprint #i h s) h))
@@ -859,6 +890,7 @@ let mk_finish #index c i p dst =
   =
     c.invariant_loc_in_footprint #i h s
   in
+  [@inline_let]
   let aux l s h0 h1: Lemma
     (requires
       c.invariant h0 s /\
@@ -871,6 +903,7 @@ let mk_finish #index c i p dst =
   =
     c.frame_freeable #i l s h0 h1
   in
+  [@inline_let]
   let aux h
     (input1:S.seq uint8)
     (input2:S.seq uint8):
@@ -894,8 +927,8 @@ let mk_finish #index c i p dst =
 
   push_frame ();
   let h1 = ST.get () in
-  c.frame_invariant B.loc_none hash_state h0 h1;
-  assert (c.invariant h1 hash_state);
+  c.frame_invariant #i B.loc_none hash_state h0 h1;
+  assert (c.invariant #i h1 hash_state);
 
   let buf_ = B.sub buf_ 0ul (rest c i total_len) in
   assert (
@@ -905,23 +938,23 @@ let mk_finish #index c i p dst =
   let tmp_hash_state = c.alloca i in
 
   let h2 = ST.get () in
-  assert (B.(loc_disjoint (c.footprint h2 tmp_hash_state) (c.footprint h1 hash_state)));
-  c.frame_invariant B.(loc_region_only false (HS.get_tip h2)) hash_state h1 h2;
-  assert (c.invariant h2 hash_state);
-  assert (c.invariant h2 tmp_hash_state);
-  assert (c.footprint h2 hash_state == c.footprint h1 hash_state);
+  assert (B.(loc_disjoint (c.footprint #i h2 tmp_hash_state) (c.footprint #i h1 hash_state)));
+  c.frame_invariant #i B.(loc_region_only false (HS.get_tip h2)) hash_state h1 h2;
+  assert (c.invariant #i h2 hash_state);
+  assert (c.invariant #i h2 tmp_hash_state);
+  assert (c.footprint #i h2 hash_state == c.footprint #i h1 hash_state);
 
   c.copy (G.hide i) hash_state tmp_hash_state;
 
   let h3 = ST.get () in
   assert (c.footprint h2 tmp_hash_state == c.footprint h3 tmp_hash_state);
-  c.frame_invariant (c.footprint h2 tmp_hash_state) hash_state h2 h3;
-  assert (c.invariant h3 hash_state);
+  c.frame_invariant #i (c.footprint h2 tmp_hash_state) hash_state h2 h3;
+  assert (c.invariant #i h3 hash_state);
   c.update_last (G.hide i) tmp_hash_state buf_ total_len;
 
   let h4 = ST.get () in
-  c.frame_invariant (c.footprint h3 tmp_hash_state) hash_state h3 h4;
-  assert (c.invariant h4 hash_state);
+  c.frame_invariant #i (c.footprint h3 tmp_hash_state) hash_state h3 h4;
+  assert (c.invariant #i h4 hash_state);
 
   c.finish (G.hide i) tmp_hash_state dst;
 
@@ -954,12 +987,12 @@ let mk_finish #index c i p dst =
     }
   end;
 
-  c.frame_invariant (B.loc_buffer dst) hash_state h4 h5;
-  assert (c.invariant h5 hash_state);
+  c.frame_invariant #i (B.loc_buffer dst) hash_state h4 h5;
+  assert (c.invariant #i h5 hash_state);
 
   pop_frame ();
   let h6 = ST.get () in
-  c.frame_invariant B.(loc_region_only false (HS.get_tip h5)) hash_state h5 h6;
+  c.frame_invariant #i B.(loc_region_only false (HS.get_tip h5)) hash_state h5 h6;
   assert (seen_pred c i h6 p `S.equal` (G.reveal seen));
 
   // JP: this is not the right way to prove do this proof. Need to use
@@ -971,7 +1004,7 @@ let mk_finish #index c i p dst =
   B.popped_modifies h5 h6;
   assert (B.(modifies mloc h0 h6))
 
-let free #index c i s =
+let free #index c i t s =
   let open LowStar.BufferOps in
   let State hash_state buf _ _ = !*s in
   c.free i hash_state;

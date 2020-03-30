@@ -27,6 +27,7 @@ let uint32 = Lib.IntTypes.uint32
 /// Maximum input length, but fitting on a 64-bit integer (since the streaming
 /// module doesn't bother taking into account lengths that are greater than
 /// that).
+inline_for_extraction noextract
 let max_input_length64 a: x:nat { 0 < x /\ x < pow2 64 /\ x <= Spec.Hash.Definitions.max_input_length a } =
   let open Spec.Hash.Definitions in
   let _ = allow_inversion hash_alg in
@@ -35,11 +36,13 @@ let max_input_length64 a: x:nat { 0 < x /\ x < pow2 64 /\ x <= Spec.Hash.Definit
   | SHA2_224 | SHA2_256 -> assert_norm (0 < pow2 61 - 1 && pow2 61 < pow2 64); pow2 61 - 1
   | SHA2_384 | SHA2_512 -> assert_norm (pow2 64 < pow2 125 - 1); pow2 64 - 1
 
+let t = s:B.buffer uint32 { B.length s == Spec.Hash.Definitions.(state_word_length SHA2_256) }
+
 inline_for_extraction noextract
 let hacl_sha2_256: Hacl.Streaming.Interface.block unit =
   let open Spec.Hash.Definitions in
   Hacl.Streaming.Interface.Block
-    (fun _ -> s:B.buffer uint32 { B.length s == state_word_length SHA2_256})
+    (fun _ -> t)
     (fun #_ h s -> B.loc_addr_of_buffer s)
     (fun #_ h s -> B.freeable s)
     (fun #_ h s -> B.live h s)
@@ -86,8 +89,8 @@ let hacl_sha2_256: Hacl.Streaming.Interface.block unit =
 /// - we don't bother with using the abstraction feature since we verified
 ///   clients like miTLS go through EverCrypt.Hash.Incremental
 
-let create_in = F.create_in hacl_sha2_256 ()
-let init = F.init hacl_sha2_256 (G.hide ())
-let update = F.update hacl_sha2_256 (G.hide ())
-let finish = F.mk_finish hacl_sha2_256 ()
-let free = F.free hacl_sha2_256 (G.hide ())
+let create_in = F.create_in hacl_sha2_256 () t
+let init = F.init hacl_sha2_256 (G.hide ()) t
+let update = F.update hacl_sha2_256 (G.hide ()) t
+let finish = F.mk_finish hacl_sha2_256 () t
+let free = F.free hacl_sha2_256 (G.hide ()) t
