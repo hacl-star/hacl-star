@@ -35,7 +35,7 @@ module H = Spec.Agile.Hash
 module Def = Spec.Hash.Definitions
 
 open Spec.Blake2
-open Hacl.Blake2s_32
+open Hacl.Blake2b_32
 
 
 open Spec.Hash.Definitions
@@ -47,7 +47,7 @@ val ecdsa_signature_step12: mLen: size_t -> m: lbuffer uint8 mLen -> result: fel
   (requires fun h -> live h m /\ live h result )
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
     (
-      let hashM = Spec.Blake2.blake2s (as_seq h0 m) 0 Seq.Base.empty 32 in 
+      let hashM = Spec.Blake2.blake2b (as_seq h0 m) 0 Seq.Base.empty 32 in 
       as_nat h1 result = nat_from_bytes_be hashM % prime_p256_order
     )   
   )
@@ -57,7 +57,7 @@ let ecdsa_signature_step12 mLen m result =
   push_frame(); 
     let h0 = ST.get() in 
   let mHash = create (size 32) (u8 0) in    
-  blake2s (size 32) mHash mLen m (size 0) (null uint8);
+  blake2b (size 32) mHash mLen m (size 0) (null uint8);
   toUint64ChangeEndian mHash result;
   let h1 = ST.get() in 
   reduction_prime_2prime_order result result;

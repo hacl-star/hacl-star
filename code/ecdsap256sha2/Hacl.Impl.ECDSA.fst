@@ -32,14 +32,13 @@ open Hacl.Impl.P256.Signature.Common
 open Hacl.Impl.ECDSA.P256SHA256.Signature.Agile
 open Hacl.Impl.ECDSA.P256SHA256.Signature.Blake2
 
-open Hacl.Impl.ECDSA.P256SHA256.Verification
+open Hacl.Impl.ECDSA.P256SHA256.Verification.Agile
+open Hacl.Impl.ECDSA.P256SHA256.Verification.Blake2
 
 open Hacl.Impl.P256.Compression
 
 open Spec.Hash.Definitions
 open Hacl.Hash.Definitions
-
-open Hacl.Impl.ECDSA.P256SHA256.Signature.Blake2
 
 
 let ecdsa_p256_sha2_sign result mLen m privKey k = 
@@ -55,8 +54,11 @@ let ecdsa_signature_blake2 result mLen m privKey k =
   ecdsa_signature_blake2 result mLen m privKey k
 
 
-let ecdsa_p256_sha2_verify mLen m pubKey r s =
+let ecdsa_p256_sha2_verification mLen m pubKey r s =
   ecdsa_verification SHA2_256 pubKey r s mLen m
+
+let ecdsa_verification_blake2 mLen m pubKey r s =
+  ecdsa_verification_blake2 pubKey r s mLen m
 
 
 let decompressionNotCompressedForm b result = 

@@ -78,7 +78,7 @@ let test_sigver (vec:sigver_vector) : Stack unit (requires fun _ -> True) (ensur
     let qxy = B.alloca (u8 0) 64ul in
     B.blit qx 0ul qxy 0ul 32ul;
     B.blit qy 0ul qxy 32ul 32ul;
-    let result' = ecdsa_p256_sha2_verify msg_len msg qxy r s in
+    let result' = ecdsa_p256_sha2_verification msg_len msg qxy r s in
     if result' = result then ()
     else
       begin
@@ -185,7 +185,7 @@ let test_siggen (vec:siggen_vector) : Stack unit (requires fun _ -> True) (ensur
       let oks = compare_and_print (B.sub rs 32ul 32ul) s 32ul in
       if okr && oks then
         begin
-        let result = ecdsa_p256_sha2_verify msg_len msg qxy r s in
+        let result = ecdsa_p256_sha2_verification msg_len msg qxy r s in
         if not result then
           begin
           LowStar.Printf.(printf "FAIL: verification\n" done);
