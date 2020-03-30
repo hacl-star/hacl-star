@@ -46,6 +46,10 @@ let hmac_input_fits a =
     assert_norm (pow2 32 + block_length SHA2_384 <= max_input_length SHA2_384)
   | SHA2_512 ->
     assert_norm (pow2 32 + block_length SHA2_512 <= max_input_length SHA2_512)
+  | Blake2S ->
+    assert_norm (pow2 32 + block_length Blake2S <= max_input_length Blake2S)
+  | Blake2B ->
+    assert_norm (pow2 32 + block_length Blake2B <= max_input_length Blake2B)
 
 #push-options "--z3rlimit 300"
 
@@ -178,3 +182,15 @@ let expand_sha2_512: expand_st SHA2_512 =
 
 let extract_sha2_512: extract_st SHA2_512 =
   mk_extract SHA2_512 Hacl.HMAC.compute_sha2_512
+
+let expand_blake2s: expand_st Blake2S =
+  mk_expand Blake2S Hacl.HMAC.compute_blake2s
+
+let extract_blake2s: extract_st Blake2S =
+  mk_extract Blake2S Hacl.HMAC.compute_blake2s
+
+let expand_blake2b: expand_st Blake2B =
+  mk_expand Blake2B Hacl.HMAC.compute_blake2b
+
+let extract_blake2b: extract_st Blake2B =
+  mk_extract Blake2B Hacl.HMAC.compute_blake2b
