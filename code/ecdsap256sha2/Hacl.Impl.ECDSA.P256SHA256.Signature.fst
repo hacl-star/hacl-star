@@ -34,44 +34,30 @@ open Hacl.Impl.P256.Signature.Common
 module H = Spec.Agile.Hash
 module Def = Spec.Hash.Definitions
 
+open Hacl.Blake2s_32
+
 open Spec.Hash.Definitions
 open Hacl.Hash.Definitions
 
 #set-options "--z3rlimit 100"
 
 
-val ecdsa_signature_step12: alg: hash_alg {SHA2_256? alg \/ SHA2_384? alg \/ SHA2_512? alg (* and blake one day *)}
-  ->  mLen: size_t -> m: lbuffer uint8 mLen -> result: felem -> Stack unit
+val ecdsa_signature_step12: mLen: size_t -> m: lbuffer uint8 mLen -> result: felem -> Stack unit
   (requires fun h -> live h m /\ live h result )
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-    (
-      assert_norm (pow2 32 < pow2 61);
-      assert_norm (pow2 32 < pow2 125);
-      let hashM = (hashSpec alg) (as_seq h0 m) in 
-      let cutHashM = Lib.Sequence.sub hashM 0 32 in 
-      as_nat h1 result = nat_from_bytes_be cutHashM % prime_p256_order
-    )
-  )
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1)
 
 
-let ecdsa_signature_step12 alg mLen m result = 
-  assert_norm (pow2 32 < pow2 61);
-  assert_norm (pow2 32 < pow2 125);
+ (* -> kk: size_t{v kk <= Spec.max_key al /\ (if v kk = 0 then v ll <= max_size_t else v ll + Spec.size_block al <= max_size_t)}
+  -> k: lbuffer uint8 kk -> *)
+  
+let ecdsa_signature_step12 mLen m result = 
   push_frame(); 
     let h0 = ST.get() in 
-  let sz: FStar.UInt32.t = hash_len alg in
-  let mHash = create sz (u8 0) in    
-  
-  begin
-  match alg with 
-    |SHA2_256 ->
-      hash_256 m mLen mHash
-    |SHA2_384 ->
-      hash_384 m mLen mHash
-    |SHA2_512 -> 
-      hash_512 m mLen mHash
-  end;
-  
+  let mHash = create (size 32) (u8 0) in    
+
+  blake2s (size 32) mHash mLen m (size 0) (null uint8) ;
+  admit();
+
   let cutHash = sub mHash (size 0) (size 32) in 
   toUint64ChangeEndian cutHash result;
   
@@ -238,7 +224,7 @@ let ecdsa_signature_core alg r s mLen m privKeyAsFelem k =
   let tempBuffer = create (size 100) (u64 0) in 
   let kAsFelem = create (size 4) (u64 0) in 
   toUint64ChangeEndian k kAsFelem;
-  ecdsa_signature_step12 alg mLen m hashAsFelem;
+  ecdsa_signature_step12 mLen m hashAsFelem;
   let h1 = ST.get() in 
   lemma_core_0 kAsFelem h1;
   Spec.ECDSA.changeEndianLemma (uints_from_bytes_be (as_seq h0 k));

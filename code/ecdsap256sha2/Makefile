@@ -14,12 +14,19 @@ FSTAR_ROOTS += ../tests/Hacl.Test.ECDSA.fst
 
 #BASE_FLAGS+= -funroll-loops 4
 
-CFLAGS += -I ../../../lib/c -march=native -mtune=native -O3
+CFLAGS += -I ../../../lib/c -march=native -mtune=native -O3 
 export CFLAGS
 
 dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
-	$(KRML) $^ -o libecdsa.a $(BASE_FLAGS) $(ECDSA_BUNDLE) \
+	$(KRML) $^ -o libecdsa.a $(BASE_FLAGS)  $(ECDSA_BUNDLE) \
 	  -tmpdir dist \
+	  -funroll-loops 8 \
+	  -fbuiltin-uint128 \
+	  -I "../../../kremlin/include" \
+	  -I "../../lib/c" \
+	  -add-include '"kremlin/internal/target.h"' \
+	  -add-include '<stdbool.h>' \
+	  -add-include '"libintvector.h"' \
 	  -add-include '"lib_intrinsics.h"' \
 	  -no-prefix 'Hacl.Test.ECDSA' \
 	  -skip-compilation
@@ -33,6 +40,7 @@ dist/%.o: dist/Makefile.basic
 	$(MAKE) -C dist -f Makefile.basic $(notdir $@)
 
 dist/Hacl_Test_ECDSA.exe: dist/Hacl_Test_ECDSA.o \
+	-I dist -I ../../lib/c -I ../../../kremlin/include -I ../../../kremlin/kremlib/c \
 	$(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a dist/libecdsa.a
 
 %.exe:

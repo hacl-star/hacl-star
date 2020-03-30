@@ -56,6 +56,8 @@ unfold let lbuffer (a:Type0) (len:size_t) = lbuffer_t MUT a len
 unfold let ilbuffer (a:Type0) (len:size_t) = lbuffer_t IMMUT a len
 unfold let clbuffer (a:Type0) (len:size_t) = lbuffer_t CONST a len
 
+unfold let null (a: Type0) : lbuffer a (size 0) = B.null #a
+
 //val live: #t:buftype -> #a:Type0 -> h:HS.mem -> b:buffer_t t a -> Type
 let live (#t:buftype) (#a:Type0) (h:HS.mem) (b:buffer_t t a) : Type =
   match t with
