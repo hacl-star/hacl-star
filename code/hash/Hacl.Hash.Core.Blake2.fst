@@ -34,6 +34,10 @@ let update_blake2s s totlen block =
   ST.pop_frame();
   totlen +. u64 64
 
+let pad_blake2s = Hacl.Hash.PadFinish.pad Blake2S
+
+let finish_blake2s = Hacl.Hash.PadFinish.finish Blake2S
+
 let alloca_blake2b () =
   let h0 = ST.get() in
   let (s:CB2.state_p SB2.Blake2B CB2.M32) = Lib.Buffer.create 16ul (u64 0) in
@@ -53,3 +57,7 @@ let update_blake2b s totlen block =
   assert (128 == size_block Blake2B);
   ST.pop_frame();
   totlen +. u128 128
+
+let pad_blake2b = Hacl.Hash.PadFinish.pad Blake2B
+
+let finish_blake2b = Hacl.Hash.PadFinish.finish Blake2B

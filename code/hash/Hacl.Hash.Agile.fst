@@ -15,6 +15,8 @@ let alloca (a: hash_alg): alloca_st a =
   | SHA2_256 -> Hacl.Hash.Core.SHA2.alloca_256
   | SHA2_384 -> Hacl.Hash.Core.SHA2.alloca_384
   | SHA2_512 -> Hacl.Hash.Core.SHA2.alloca_512
+  | Blake2S -> Hacl.Hash.Core.Blake2.alloca_blake2s
+  | Blake2B -> Hacl.Hash.Core.Blake2.alloca_blake2b
 
 inline_for_extraction noextract
 let init (a: hash_alg): init_st a =
@@ -25,6 +27,9 @@ let init (a: hash_alg): init_st a =
   | SHA2_256 -> Hacl.Hash.Core.SHA2.init_256
   | SHA2_384 -> Hacl.Hash.Core.SHA2.init_384
   | SHA2_512 -> Hacl.Hash.Core.SHA2.init_512
+  | Blake2S -> Hacl.Hash.Core.Blake2.init_blake2s
+  | Blake2B -> Hacl.Hash.Core.Blake2.init_blake2b
+
 
 inline_for_extraction noextract
 let update (a: hash_alg): update_st a =
@@ -35,6 +40,9 @@ let update (a: hash_alg): update_st a =
   | SHA2_256 -> Hacl.Hash.Core.SHA2.update_256
   | SHA2_384 -> Hacl.Hash.Core.SHA2.update_384
   | SHA2_512 -> Hacl.Hash.Core.SHA2.update_512
+  | Blake2S -> Hacl.Hash.Core.Blake2.update_blake2s
+  | Blake2B -> Hacl.Hash.Core.Blake2.update_blake2b
+
 
 inline_for_extraction noextract
 let pad (a: hash_alg): pad_st a =
@@ -45,6 +53,9 @@ let pad (a: hash_alg): pad_st a =
   | SHA2_256 -> Hacl.Hash.Core.SHA2.pad_256
   | SHA2_384 -> Hacl.Hash.Core.SHA2.pad_384
   | SHA2_512 -> Hacl.Hash.Core.SHA2.pad_512
+  | Blake2S -> Hacl.Hash.Core.Blake2.pad_blake2s
+  | Blake2B -> Hacl.Hash.Core.Blake2.pad_blake2b
+
 
 inline_for_extraction noextract
 let finish (a: hash_alg): finish_st a =
@@ -55,3 +66,5 @@ let finish (a: hash_alg): finish_st a =
   | SHA2_256 -> Hacl.Hash.Core.SHA2.finish_256
   | SHA2_384 -> Hacl.Hash.Core.SHA2.finish_384
   | SHA2_512 -> Hacl.Hash.Core.SHA2.finish_512
+  | Blake2S -> Hacl.Hash.Core.Blake2.finish_blake2s
+  | Blake2B -> Hacl.Hash.Core.Blake2.finish_blake2b

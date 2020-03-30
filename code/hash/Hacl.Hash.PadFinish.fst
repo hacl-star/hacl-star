@@ -280,9 +280,9 @@ let hash_word_len (a: hash_alg): n:U32.t { U32.v n = hash_word_length a } =
 noextract inline_for_extraction
 let finish a s ev dst =
   match a with
-  | MD5 -> Lib.ByteBuffer.uints_to_bytes_le #U32 #SEC (hash_word_len a) dst (B.sub (fst s) 0ul (hash_word_len a))
+  | MD5 -> Lib.ByteBuffer.uints_to_bytes_le #U32 #SEC (hash_word_len a) dst (B.sub s 0ul (hash_word_len a))
   | Blake2S ->
     Hacl.Impl.Blake2.Generic.blake2_finish #Spec.Blake2.Blake2S #Hacl.Impl.Blake2.Core.M32 32ul dst s
   | Blake2B ->
     Hacl.Impl.Blake2.Generic.blake2_finish #Spec.Blake2.Blake2B #Hacl.Impl.Blake2.Core.M32 64ul dst s
-  | _ -> Lib.ByteBuffer.uints_to_bytes_be #(word_t a) #SEC (hash_word_len a) dst (B.sub (fst s) 0ul (hash_word_len a))
+  | _ -> Lib.ByteBuffer.uints_to_bytes_be #(word_t a) #SEC (hash_word_len a) dst (B.sub s 0ul (hash_word_len a))
