@@ -8,7 +8,7 @@
       0,
       [ "@query" ],
       0,
-      "003d8239af58a006123b8b4cc29a7d0a"
+      "e03cbd8c2ef7861ea44dd1df8b73685c"
     ],
     [
       "EverCrypt.CTR.Keys.vale_impl",
@@ -17,7 +17,7 @@
       0,
       [ "@query", "assumption_Spec.Cipher.Expansion.impl__uu___haseq" ],
       0,
-      "dc5f2aa1900bf06941c857a4b72c0d6f"
+      "77b26c3abdc0ba7233c0dbdb6a614387"
     ],
     [
       "EverCrypt.CTR.Keys.vale_alg_of_vale_impl",
@@ -40,7 +40,7 @@
         "refinement_interpretation_Tm_refine_c029c44ff4b4f840d75208dea95cad35"
       ],
       0,
-      "5917cbcd552328b2493bd642a672ce6a"
+      "decb27ce2c9c6b4725544f3c5e10d86d"
     ],
     [
       "EverCrypt.CTR.Keys.key_offset",
@@ -76,7 +76,7 @@
         "typing_EverCrypt.CTR.Keys.vale_alg_of_vale_impl", "unit_typing"
       ],
       0,
-      "f91db8b3f18208a84b754c933479c653"
+      "e782146a422762c5d2c9b5cd2856e9c6"
     ],
     [
       "EverCrypt.CTR.Keys.concrete_xkey_len",
@@ -120,19 +120,20 @@
         "equality_tok_Vale.AES.AES_s.AES_256@tok",
         "equation_EverCrypt.CTR.Keys.key_offset",
         "equation_EverCrypt.CTR.Keys.vale_alg_of_vale_impl",
-        "equation_FStar.Integers.int_t",
-        "equation_FStar.Pervasives.inversion", "equation_FStar.UInt.fits",
+        "equation_FStar.Integers.int_t", "equation_FStar.UInt.fits",
         "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
         "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
         "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.range",
         "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
-        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
-        "equation_Spec.Chacha20.size_key",
+        "equation_Prims.squash", "equation_Spec.AES.gf8",
+        "equation_Spec.AES.irred", "equation_Spec.Chacha20.size_key",
         "equation_Spec.Cipher.Expansion.cipher_alg_of_impl",
         "equation_Spec.Cipher.Expansion.concrete_xkey_length",
+        "equation_Spec.Cipher.Expansion.uu___30",
         "equation_Spec.Cipher.Expansion.vale_xkey_length",
         "equation_Spec.GaloisField.gf",
-        "fuel_guarded_inversion_Spec.Cipher.Expansion.impl", "int_typing",
+        "fuel_guarded_inversion_Spec.Cipher.Expansion.impl",
+        "function_token_typing_Spec.Cipher.Expansion.uu___30", "int_typing",
         "inversion-interp", "lemma_FStar.UInt.pow2_values",
         "lemma_FStar.UInt32.vu_inv", "primitive_Prims.op_Addition",
         "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
@@ -144,6 +145,7 @@
         "projection_inverse_FStar.Integers.Unsigned__0",
         "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_096dcb399122345db27f37346c43e5dc",
+        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
         "refinement_interpretation_Tm_refine_48486e77aa5457d9a27027fef170c244",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_55d0e7c52739a80eaeffbef97124b643",
@@ -159,7 +161,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "7353fd55ffb5afa189671eafacceb887"
+      "2b718ada47333a07ac36519865912d84"
     ],
     [
       "EverCrypt.CTR.Keys.aes_gcm_key_expansion",
@@ -208,7 +210,7 @@
         "unit_typing"
       ],
       0,
-      "a8be66ba393d75183ea22d0c33746e55"
+      "be4ef1e3ddd187154e1d35a2f757b9ba"
     ],
     [
       "EverCrypt.CTR.Keys.aes_gcm_keyhash_init",
@@ -258,7 +260,7 @@
         "unit_typing"
       ],
       0,
-      "c1ed4e50a916a9358196d5b2a02bb418"
+      "09f47d7c34e0f2fe639dc2ec54edf529"
     ],
     [
       "EverCrypt.CTR.Keys.vale_expand",
@@ -472,7 +474,7 @@
         "typing_tok_Vale.AES.AES_s.AES_256@tok"
       ],
       0,
-      "e55a2ef3f9ac3d6850266c659ecb756b"
+      "b983e3e2f3d6a245f6a3d630c1c64828"
     ]
   ]
 ]

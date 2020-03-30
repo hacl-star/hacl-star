@@ -450,10 +450,10 @@ void EverCrypt_Hash_init(EverCrypt_Hash_state_s *s)
 
 /* SNIPPET_END: EverCrypt_Hash_init */
 
-/* SNIPPET_START: EverCrypt_Hash_k224_256 */
+/* SNIPPET_START: k224_256 */
 
 static uint32_t
-EverCrypt_Hash_k224_256[64U] =
+k224_256[64U] =
   {
     (uint32_t)0x428a2f98U, (uint32_t)0x71374491U, (uint32_t)0xb5c0fbcfU, (uint32_t)0xe9b5dba5U,
     (uint32_t)0x3956c25bU, (uint32_t)0x59f111f1U, (uint32_t)0x923f82a4U, (uint32_t)0xab1c5ed5U,
@@ -473,7 +473,7 @@ EverCrypt_Hash_k224_256[64U] =
     (uint32_t)0x90befffaU, (uint32_t)0xa4506cebU, (uint32_t)0xbef9a3f7U, (uint32_t)0xc67178f2U
   };
 
-/* SNIPPET_END: EverCrypt_Hash_k224_256 */
+/* SNIPPET_END: k224_256 */
 
 /* SNIPPET_START: EverCrypt_Hash_update_multi_256 */
 
@@ -484,7 +484,7 @@ void EverCrypt_Hash_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n1)
   if (true && has_shaext1 && has_sse1)
   {
     uint64_t n2 = (uint64_t)n1;
-    uint64_t scrut = sha256_update(s, blocks, n2, EverCrypt_Hash_k224_256);
+    uint64_t scrut = sha256_update(s, blocks, n2, k224_256);
     return;
   }
   Hacl_Hash_SHA2_update_multi_256(s, blocks, n1);
