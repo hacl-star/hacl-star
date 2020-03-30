@@ -62,7 +62,7 @@ let chacha20_core #w k ctx ctr =
 
 
 val chacha20_constants:
-  b:ilbuffer size_t 4ul{recallable b /\ witnessed b Spec.Chacha20.chacha20_constants}
+  b:glbuffer size_t 4ul{recallable b /\ witnessed b Spec.Chacha20.chacha20_constants}
 let chacha20_constants =
   [@ inline_let]
   let l = [Spec.c0;Spec.c1;Spec.c2;Spec.c3] in

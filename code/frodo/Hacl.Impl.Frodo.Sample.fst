@@ -22,7 +22,7 @@ let cdf_seq: Seq.lseq uint16 (v cdf_table_len) =
   assert_norm (List.Tot.length cdf_list == v cdf_table_len);
   Seq.of_list cdf_list
 
-let cdf_table: b:ilbuffer uint16 cdf_table_len{recallable b /\ witnessed b cdf_seq} = 
+let cdf_table: b:glbuffer uint16 cdf_table_len{recallable b /\ witnessed b cdf_seq} = 
   createL_global cdf_list
 
 inline_for_extraction noextract
