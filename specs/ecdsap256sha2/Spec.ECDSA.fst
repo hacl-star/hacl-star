@@ -518,22 +518,47 @@ let ecdsa_verification alg publicKey r s mLen input =
     end
   end
 
-val ecdsa_signature:
+
+val ecdsa_signature_agile:
   alg: hash_alg {SHA2_256? alg \/ SHA2_384? alg \/ SHA2_512? alg}
   -> mLen:size_nat
-  -> input:lseq uint8 mLen
+  -> m:lseq uint8 mLen
   -> privateKey:lseq uint8 32
   -> k:lseq uint8 32
   -> tuple3 nat nat uint64
 
-let ecdsa_signature alg mLen input privateKey k =
+let ecdsa_signature_agile alg mLen m privateKey k =
   assert_norm (pow2 32 < pow2 61);
   assert_norm (pow2 32 < pow2 125);
   let r, _ = montgomery_ladder_spec k ((0,0,0), basePoint) in
   let (xN, _, _) = _norm r in
-  let hashM = (hashSpec alg) input in
+  let hashM = (hashSpec alg) m in
   let cutHashM = sub hashM 0 32 in 
   let z = nat_from_bytes_be cutHashM % prime_p256_order in
+  let kFelem = nat_from_bytes_be k in
+  let privateKeyFelem = nat_from_bytes_be privateKey in
+  let resultR = xN % prime_p256_order in
+  let resultS = (z + resultR * privateKeyFelem) * pow kFelem (prime_p256_order - 2) % prime_p256_order in
+    if resultR = 0 || resultS = 0 then
+      resultR, resultS, u64 (pow2 64 - 1)
+    else
+      resultR, resultS, u64 0
+
+
+val ecdsa_signature_blake2:
+    mLen:size_nat
+  -> m:lseq uint8 mLen
+  -> privateKey:lseq uint8 32
+  -> k:lseq uint8 32
+  -> tuple3 nat nat uint64
+
+let ecdsa_signature_blake2 mLen m privateKey k =
+  assert_norm (pow2 32 < pow2 61);
+  assert_norm (pow2 32 < pow2 125);
+  let r, _ = montgomery_ladder_spec k ((0,0,0), basePoint) in
+  let (xN, _, _) = _norm r in
+  let hashM = Spec.Blake2.blake2s m 0 Seq.Base.empty 32 in
+  let z = nat_from_bytes_be hashM % prime_p256_order in
   let kFelem = nat_from_bytes_be k in
   let privateKeyFelem = nat_from_bytes_be privateKey in
   let resultR = xN % prime_p256_order in

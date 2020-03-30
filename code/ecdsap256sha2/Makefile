@@ -24,6 +24,7 @@ dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
 	  -fbuiltin-uint128 \
 	  -I "../../../kremlin/include" \
 	  -I "../../lib/c" \
+	  -add-include '"/home/nkulatov/new2/kremlin/kremlin/include/kremlib.h"'\
 	  -add-include '"kremlin/internal/target.h"' \
 	  -add-include '<stdbool.h>' \
 	  -add-include '"libintvector.h"' \

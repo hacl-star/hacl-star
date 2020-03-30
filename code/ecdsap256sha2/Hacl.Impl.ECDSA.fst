@@ -28,13 +28,18 @@ open Hacl.Impl.ECDSA.MontgomeryMultiplication
 
 open Hacl.Impl.P256.Signature.Common
 
-open Hacl.Impl.ECDSA.P256SHA256.Signature
+
+open Hacl.Impl.ECDSA.P256SHA256.Signature.Agile
+open Hacl.Impl.ECDSA.P256SHA256.Signature.Blake2
+
 open Hacl.Impl.ECDSA.P256SHA256.Verification
 
 open Hacl.Impl.P256.Compression
 
 open Spec.Hash.Definitions
 open Hacl.Hash.Definitions
+
+open Hacl.Impl.ECDSA.P256SHA256.Signature.Blake2
 
 
 let ecdsa_p256_sha2_sign result mLen m privKey k = 
@@ -45,6 +50,9 @@ let ecdsa_p256_sha2_384_sign result mLen m privKey k =
 
 let ecdsa_p256_sha2_512_sign result mLen m privKey k = 
   ecdsa_signature SHA2_512 result mLen m privKey k
+
+let ecdsa_signature_blake2 result mLen m privKey k = 
+  ecdsa_signature_blake2 result mLen m privKey k
 
 
 let ecdsa_p256_sha2_verify mLen m pubKey r s =
