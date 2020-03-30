@@ -97,6 +97,9 @@ let invariant_loc_in_footprint #index c i s m =
 let seen #index c i h s =
   G.reveal (State?.seen (B.deref h s))
 
+let seen_bounded #index c i h s =
+  ()
+
 let frame_invariant #index c i l s h0 h1 =
   let state_s = B.deref h0 s in
   let State block_state _ _ _ = state_s in
@@ -111,6 +114,11 @@ let frame_freeable #index c i l s h0 h1 =
 
 /// Stateful API
 /// ============
+
+let index_of_state #index c i s =
+  let open LowStar.BufferOps in
+  let State hash_state _ _ _ = !*s in
+  c.index_of_state i hash_state
 
 let split_at_last_empty #index (c: block index) (i: index): Lemma
   (ensures (
@@ -308,8 +316,8 @@ let rest #index (c: block index) (i: index)
 inline_for_extraction noextract
 let add_len #index (c: block index) (i: index) (total_len: UInt64.t) (len: UInt32.t):
   Pure UInt64.t
-    (requires U64.v total_len + U32.v len < c.max_input_length i)
-    (ensures fun x -> U64.v x = U64.v total_len + U32.v len /\ U64.v x < c.max_input_length i)
+    (requires U64.v total_len + U32.v len <= c.max_input_length i)
+    (ensures fun x -> U64.v x = U64.v total_len + U32.v len /\ U64.v x <= c.max_input_length i)
 =
   total_len `U64.add` Int.Cast.uint32_to_uint64 len
 
@@ -393,7 +401,7 @@ let split_at_last_small #index (c: block index) (i: index) (b: bytes) (d: bytes)
 let add_len_small #index (c: block index) (i: index) (total_len: UInt64.t) (len: UInt32.t): Lemma
   (requires
     U32.v len < U32.v (c.block_len i) - U32.v (rest c i total_len) /\
-    U64.v total_len + U32.v len < c.max_input_length i)
+    U64.v total_len + U32.v len <= c.max_input_length i)
   (ensures (rest c i (add_len c i total_len len) = rest c i total_len `U32.add` len))
 =
   calc (==) {
@@ -413,6 +421,7 @@ let add_len_small #index (c: block index) (i: index) (total_len: UInt64.t) (len:
   }
 #pop-options
 
+inline_for_extraction noextract
 val update_small:
   #index:Type0 ->
   (c: block index) ->
@@ -480,7 +489,7 @@ let update_small #index c i p data len =
     let blocks, rest = split_at_last c i b in
     S.length blocks + S.length rest = U64.v total_len /\
     S.length b = U64.v total_len /\
-    U64.v total_len < c.max_input_length i /\
+    U64.v total_len <= c.max_input_length i /\
     (==) (c.v h2 hash_state) (c.update_multi_s i (c.init_s i) blocks) /\
     S.equal (S.slice (B.as_seq h2 buf) 0 (U64.v total_len % U32.v (c.block_len i))) rest
     );
@@ -564,6 +573,7 @@ let split_at_last_blocks #index (c: block index) (i: index) (b: bytes) (d: bytes
 #pop-options
 
 #push-options "--z3rlimit 50"
+inline_for_extraction noextract
 val update_empty_buf:
   #index:Type0 ->
   c:block index ->
@@ -671,6 +681,7 @@ let update_empty_buf #index c i p data len =
 
 /// Case 3: we are given just enough data to end up on the boundary
 #push-options "--z3rlimit 200"
+inline_for_extraction noextract
 val update_round:
   #index:Type0 ->
   c:block index ->

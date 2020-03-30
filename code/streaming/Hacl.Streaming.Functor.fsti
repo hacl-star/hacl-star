@@ -129,6 +129,12 @@ val invariant_loc_in_footprint
 
 val seen: #index:Type0 -> c:block index -> i:index -> h:HS.mem -> s:state c i -> GTot bytes
 
+val seen_bounded: #index:Type0 -> c:block index -> i:index -> h:HS.mem -> s:state c i -> Lemma
+  (requires (
+    invariant c i h s))
+  (ensures (
+    S.length (seen c i h s) <= c.max_input_length i))
+
 /// Framing
 /// =======
 ///
@@ -173,6 +179,18 @@ val frame_freeable: #index:Type0 -> c:block index -> i:index -> l:B.loc -> s:sta
 /// Stateful API
 /// ============
 
+inline_for_extraction noextract
+val index_of_state:
+  #index:Type0 ->
+  c:block index ->
+  i:G.erased index -> (
+  let i = G.reveal i in
+  s:state c i ->
+  Stack index
+  (fun h0 -> invariant c i h0 s)
+  (fun h0 i' h1 -> h0 == h1 /\ i' == i))
+
+inline_for_extraction noextract
 val create_in (#index: Type0) (c: block index) (i: index) (r: HS.rid): ST (state c i)
   (requires (fun _ ->
     HyperStack.ST.is_eternal_region r))
@@ -184,6 +202,7 @@ val create_in (#index: Type0) (c: block index) (i: index) (r: HS.rid): ST (state
     B.(loc_includes (loc_region_only true r) (footprint c i h1 s)) /\
     freeable c i h1 s))
 
+inline_for_extraction noextract
 val init: #index:Type0 -> c:block index -> i:G.erased index -> (
   let i = G.reveal i in
   s:state c i -> Stack unit
@@ -196,7 +215,7 @@ val init: #index:Type0 -> c:block index -> i:G.erased index -> (
     footprint c i h0 s == footprint c i h1 s /\
     B.(modifies (footprint c i h0 s) h0 h1))))
 
-unfold
+unfold noextract
 let update_pre
   #index
   (c: block index)
@@ -209,10 +228,10 @@ let update_pre
   invariant c i h0 s /\
   B.live h0 data /\
   U32.v len = B.length data /\
-  S.length (seen c i h0 s) + U32.v len < c.max_input_length i /\
+  S.length (seen c i h0 s) + U32.v len <= c.max_input_length i /\
   B.(loc_disjoint (loc_buffer data) (footprint c i h0 s))
 
-unfold
+unfold noextract
 let update_post
   #index
   (c: block index)
@@ -228,6 +247,7 @@ let update_post
   footprint c i h0 s == footprint c i h1 s /\
   seen c i h1 s == seen c i h0 s `S.append` B.as_seq h0 data
 
+inline_for_extraction noextract
 val update:
   #index:Type0 ->
   c:block index ->
@@ -267,10 +287,11 @@ val mk_finish:
       invariant c i h1 s /\
       seen c i h0 s == seen c i h1 s /\
       footprint c i h0 s == footprint c i h1 s /\
-      B.(modifies (loc_union (loc_buffer dst) (footprint c i h0 s)) h0 h1) /\
-      S.length (seen c i h0 s) <= c.max_input_length i /\
-      S.equal (B.as_seq h1 dst) (c.spec_s i (seen c i h0 s)))
+      B.(modifies (loc_union (loc_buffer dst) (footprint c i h0 s)) h0 h1) /\ (
+      seen_bounded c i h0 s;
+      S.equal (B.as_seq h1 dst) (c.spec_s i (seen c i h0 s))))
 
+inline_for_extraction noextract
 val free:
   #index:Type0 ->
   c:block index ->

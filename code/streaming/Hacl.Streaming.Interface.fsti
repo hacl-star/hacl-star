@@ -52,7 +52,7 @@ let concat_blocks_modulo (block_len: pos) (s1 s2: S.seq uint8): Lemma
 
 /// The type class of block-based operations.
 /// Equipped with a generic index. May be unit if there's no agility, or hash algorithm for agility.
-inline_for_extraction noeq
+inline_for_extraction noextract noeq
 type block (index: Type0) =
 | Block:
 
@@ -258,94 +258,3 @@ type block (index: Type0) =
         v h1 s_dst == v h0 s_src))) ->
 
   block index
-
-(*
-/// Maximum input length, but fitting on a 64-bit integer (since the streaming
-/// module doesn't bother taking into account lengths that are greater than
-/// that).
-let max_input_length64 a: x:nat { 0 < x /\ x < pow2 64 /\ x <= Spec.Hash.Definitions.max_input_length a } =
-  let open Spec.Hash.Definitions in
-  let _ = allow_inversion hash_alg in
-  match a with
-  | MD5 | SHA1
-  | SHA2_224 | SHA2_256 -> assert_norm (0 < pow2 61 - 1 && pow2 61 < pow2 64); pow2 61 - 1
-  | SHA2_384 | SHA2_512 -> assert_norm (pow2 64 < pow2 125 - 1); pow2 64 - 1
-
-
-inline_for_extraction
-let evercrypt_hash: block Spec.Hash.Definitions.hash_alg =
-  Block
-    EverCrypt.Hash.state
-    (fun #i h s -> EverCrypt.Hash.footprint s h)
-    EverCrypt.Hash.freeable
-    (fun #i h s -> EverCrypt.Hash.invariant s h)
-    EverCrypt.Hash.alg_of_state
-    Spec.Hash.Definitions.words_state
-    (fun #i h s -> EverCrypt.Hash.repr s h)
-    max_input_length64
-    Hacl.Hash.Definitions.hash_len
-    Hacl.Hash.Definitions.block_len
-    Spec.Agile.Hash.init
-    Spec.Agile.Hash.update_multi
-    Spec.Hash.Incremental.update_last
-    Spec.Hash.PadFinish.finish
-    Spec.Agile.Hash.hash
-    Spec.Hash.Lemmas.update_multi_zero
-    Spec.Hash.Lemmas.update_multi_associative'
-    Spec.Hash.Lemmas.hash_is_hash_incremental
-    (fun #i h s -> EverCrypt.Hash.invariant_loc_in_footprint s h)
-    (fun #i l s h0 h1 ->
-      EverCrypt.Hash.frame_invariant l s h0 h1;
-      EverCrypt.Hash.frame_invariant_implies_footprint_preservation l s h0 h1)
-    (fun #i l s h0 h1 -> ())
-    EverCrypt.Hash.alloca
-    EverCrypt.Hash.create_in
-    (fun i -> EverCrypt.Hash.init #i)
-    (fun i -> EverCrypt.Hash.update_multi #i)
-    (fun i -> EverCrypt.Hash.update_last #i)
-    (fun i -> EverCrypt.Hash.finish #i)
-    (fun i -> EverCrypt.Hash.free #i)
-    (fun i -> EverCrypt.Hash.copy #i)
-
-inline_for_extraction
-let hacl_sha2_256: block unit =
-  let open Spec.Hash.Definitions in
-  Block
-    (fun _ -> s:B.buffer uint32 { B.length s == state_word_length SHA2_256})
-    (fun #_ h s -> B.loc_addr_of_buffer s)
-    (fun #_ h s -> B.freeable s)
-    (fun #_ h s -> B.live h s)
-    (fun _ _ -> ())
-    (fun _ -> words_state SHA2_256)
-    (fun #_ h s -> B.as_seq h s)
-    (fun () -> max_input_length64 SHA2_256)
-    (fun () -> Hacl.Hash.Definitions.hash_len SHA2_256)
-    (fun () -> Hacl.Hash.Definitions.block_len SHA2_256)
-    (fun () -> Spec.Agile.Hash.(init SHA2_256))
-    (fun () -> Spec.Agile.Hash.(update_multi SHA2_256))
-    (fun () -> Spec.Hash.Incremental.(update_last SHA2_256))
-    (fun () -> Spec.Hash.PadFinish.(finish SHA2_256))
-    (fun () s -> Spec.Agile.Hash.(hash SHA2_256 s))
-    (fun _ _ -> ())
-    (fun _ _ _ _ -> ())
-    (fun _ input -> Spec.Hash.Lemmas.hash_is_hash_incremental SHA2_256 input)
-    (fun #_ h s -> ())
-    (fun #_ l s h0 h1 -> ())
-    (fun #_ l s h0 h1 -> ())
-    (fun () -> B.alloca (Lib.IntTypes.u32 0) 8ul)
-    (fun () r -> B.malloc r (Lib.IntTypes.u32 0) 8ul)
-    (fun _ s -> Hacl.Hash.SHA2.init_256 s)
-    (fun _ s blocks len -> Hacl.Hash.SHA2.update_multi_256 s blocks (len `U32.div` Hacl.Hash.Definitions.(block_len SHA2_256)))
-    (fun _ s last total_len ->
-      [@inline_let]
-      let block_len64 = 64UL in
-      assert_norm (U64.v block_len64 == block_length SHA2_256);
-      let last_len: len_t SHA2_256 = U64.(total_len `rem` block_len64) in
-      let prev_len = U64.(total_len `sub` last_len) in
-      let last_len = FStar.Int.Cast.Full.uint64_to_uint32 last_len in
-      assert (U64.v prev_len % block_length SHA2_256 = 0);
-      Hacl.Hash.SHA2.update_last_256 s prev_len last last_len)
-    (fun _ s dst -> Hacl.Hash.SHA2.finish_256 s dst)
-    (fun _ s -> B.free s)
-    (fun _ src dst -> B.blit src 0ul dst 0ul 8ul)
-*)
