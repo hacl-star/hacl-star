@@ -174,7 +174,7 @@ let test_siggen (vec:siggen_vector) : Stack unit (requires fun _ -> True) (ensur
   then C.exit (-1l)
   else
     begin
-    push_frame(); 
+    push_frame();
     let rs  = B.alloca (u8 0) 64ul in
     let qxy = B.alloca (u8 0) 64ul in
     B.blit qx 0ul qxy 0ul 32ul;
@@ -183,12 +183,10 @@ let test_siggen (vec:siggen_vector) : Stack unit (requires fun _ -> True) (ensur
     let flag = ecdsa_p256_sha2_sign rs msg_len msg d k in 
     if Lib.RawIntTypes.u64_to_UInt64 flag = 0uL then
       begin
-      assert(B.length (B.gsub rs 0ul 32ul) = 32);
-      assert(B.length (B.gsub rs 32ul 32ul) = 32);
       let okr = compare_and_print (B.sub rs 0ul 32ul) r 32ul in 
       let oks = compare_and_print (B.sub rs 32ul 32ul) s 32ul in 
       if okr && oks then
-        begin 
+        begin
         let result = ecdsa_p256_sha2_verification msg_len msg qxy r s in
         if not result then
           begin
