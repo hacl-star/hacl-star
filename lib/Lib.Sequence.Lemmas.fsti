@@ -114,6 +114,11 @@ val repeat_gen_blocks:
   c
 
 
+val len0_div_bs: blocksize:pos -> len:nat -> len0:nat -> Lemma
+  (requires len0 <= len /\ len0 % blocksize == 0)
+  (ensures  len0 / blocksize + (len - len0) / blocksize == len / blocksize)
+
+
 val repeat_gen_blocks_multi_split:
     #inp_t:Type0
   -> blocksize:size_pos
@@ -128,17 +133,19 @@ val repeat_gen_blocks_multi_split:
     let n0 = len0 / blocksize in
     let n1 = (len - len0) / blocksize in
     Math.Lemmas.cancel_mul_div n blocksize;
-    assert (n == len / blocksize);
-    assume (n0 + n1 == n);
+    len0_div_bs blocksize len len0;
+    assert (n == n0 + n1);
 
-    Math.Lemmas.modulo_addition_lemma len blocksize (- len0 / blocksize);
-    assert (len % blocksize == (len - len0) % blocksize);
     let a1 (i:nat{i <= n1}) = a (n0 + i) in
     let f1 (i:nat{i < n1}) = f (n0 + i) in
+    Math.Lemmas.modulo_addition_lemma len blocksize (- len0 / blocksize);
+    assert (len % blocksize == (len - len0) % blocksize);
 
+    let t0 = Seq.slice inp 0 len0 in
+    let t1 = Seq.slice inp len0 len in
+    let acc1 : a n0 = repeat_gen_blocks_multi blocksize n0 a t0 f acc0 in
     repeat_gen_blocks_multi blocksize n a inp f acc0 ==
-    repeat_gen_blocks_multi blocksize n1 a1 (Seq.slice inp len0 len) f1
-      (repeat_gen_blocks_multi blocksize n0 a (Seq.slice inp 0 len0) f acc0))
+    repeat_gen_blocks_multi blocksize n1 a1 t1 f1 acc1)
 
 
 val repeat_gen_blocks_split:
@@ -156,7 +163,8 @@ val repeat_gen_blocks_split:
     let n = len / blocksize in
     let n0 = len0 / blocksize in
     let n1 = (len - len0) / blocksize in
-    assume (n0 + n1 == n);
+    len0_div_bs blocksize len len0;
+    assert (n0 + n1 == n);
 
     let a1 (i:nat{i <= n1}) = a (n0 + i) in
     let f1 (i:nat{i < n1}) = f (n0 + i) in
