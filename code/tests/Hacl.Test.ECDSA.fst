@@ -142,6 +142,8 @@ let check_bound b =
       (x3 <. q2 || (x3 =. q2 && x4 <. q1)))))
 
 
+#push-options " --ifuel 1 --fuel 1"
+
 let test_siggen (vec:siggen_vector) : Stack unit (requires fun _ -> True) (ensures fun _ _ _ -> True) =
   let max_msg_len = 0 in
   let LB msg_len msg,
@@ -164,7 +166,7 @@ let test_siggen (vec:siggen_vector) : Stack unit (requires fun _ -> True) (ensur
     C.exit (-1l);
 
   let bound_k = check_bound k in
-  let bound_d = check_bound d in
+  let bound_d = check_bound d in 
 
   // We need to check this at runtime because Low*-ized vectors don't carry any refinements
   if not (bound_k && bound_d &&
@@ -172,19 +174,21 @@ let test_siggen (vec:siggen_vector) : Stack unit (requires fun _ -> True) (ensur
   then C.exit (-1l)
   else
     begin
-    push_frame();
+    push_frame(); 
     let rs  = B.alloca (u8 0) 64ul in
     let qxy = B.alloca (u8 0) 64ul in
     B.blit qx 0ul qxy 0ul 32ul;
-    B.blit qy 0ul qxy 32ul 32ul;
+    B.blit qy 0ul qxy 32ul 32ul; 
 
-    let flag = ecdsa_p256_sha2_sign rs msg_len msg d k in
+    let flag = ecdsa_p256_sha2_sign rs msg_len msg d k in 
     if Lib.RawIntTypes.u64_to_UInt64 flag = 0uL then
       begin
-      let okr = compare_and_print (B.sub rs 0ul 32ul) r 32ul in
-      let oks = compare_and_print (B.sub rs 32ul 32ul) s 32ul in
+      assert(B.length (B.gsub rs 0ul 32ul) = 32);
+      assert(B.length (B.gsub rs 32ul 32ul) = 32);
+      let okr = compare_and_print (B.sub rs 0ul 32ul) r 32ul in 
+      let oks = compare_and_print (B.sub rs 32ul 32ul) s 32ul in 
       if okr && oks then
-        begin
+        begin 
         let result = ecdsa_p256_sha2_verification msg_len msg qxy r s in
         if not result then
           begin
@@ -230,3 +234,5 @@ let main () : St C.exit_code =
   test_many C.String.(!$"[ECDSA SigVer]") test_sigver sigver_vectors_low;
   test_many C.String.(!$"[ECDSA SigGen]") test_siggen siggen_vectors_low;
   C.EXIT_SUCCESS
+
+#pop-options
