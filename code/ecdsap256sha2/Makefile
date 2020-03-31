@@ -14,33 +14,25 @@ FSTAR_ROOTS += ../tests/Hacl.Test.ECDSA.fst
 
 #BASE_FLAGS+= -funroll-loops 4
 
-CFLAGS += -I ../../../lib/c -march=native -mtune=native -O3 
+CFLAGS += -I ../../../lib/c -march=native -mtune=native -O3 -Wno-unused-function
 export CFLAGS
 
 dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
-	$(KRML) $^ -o libecdsa.a $(BASE_FLAGS)  $(ECDSA_BUNDLE) \
+	$(KRML) $^ -o libecdsa.a $(BASE_FLAGS) $(ECDSA_BUNDLE) \
 	  -tmpdir dist \
-	  -funroll-loops 8 \
-	  -I "../../../kremlin/include" \
-	  -I "../../lib/c" \
-	  -I "../../../kremlin/kremlib/dist/minimal"
-	  -add-include '"/home/nkulatov/new2/kremlin/kremlin/include/kremlib.h"'\
-	  -add-include '"kremlin/internal/target.h"' \
-	  -add-include '<stdbool.h>' \
-	  -add-include '"libintvector.h"' \
 	  -add-include '"lib_intrinsics.h"' \
 	  -no-prefix 'Hacl.Test.ECDSA' \
 	  -skip-compilation
 
 # An archive with all the compiled code in this directory.
 # We don't want Hacl_Test_ECDSA.o to be included so we redefine OBJS
-dist/libecdsa.a: dist/Hacl_ECDSA.o
+dist/libecdsa.a: dist/Hacl_Blake2b_32.o dist/Hacl_ECDSA.o
 	$(MAKE) -C dist -f Makefile.basic OBJS=$(notdir $^) $(notdir $@)
 
 dist/%.o: dist/Makefile.basic
 	$(MAKE) -C dist -f Makefile.basic $(notdir $@)
 
-dist/Hacl_Test_ECDSA.exe: dist/Hacl_Test_ECDSA.o \
+dist/Hacl_Test_ECDSA.exe: dist/Hacl_Blake2b_32.o dist/Hacl_ECDSA.o dist/Hacl_Test_ECDSA.o \
 	$(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a dist/libecdsa.a
 
 %.exe:
@@ -48,3 +40,5 @@ dist/Hacl_Test_ECDSA.exe: dist/Hacl_Test_ECDSA.o \
 
 clean-c:
 	$(MAKE) -C dist/ -f Makefile.basic clean
+
+
