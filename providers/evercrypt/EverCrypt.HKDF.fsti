@@ -13,14 +13,14 @@ open Lib.IntTypes
 
 /// Auxiliary lemmas
 
-let key_and_data_fits (a:hash_alg) : 
+let key_and_data_fits (a:hash_alg) :
   Lemma (block_length a + pow2 32 <= max_input_length a)
 =
   let open FStar.Mul in
   assert_norm (8 * 16 + pow2 32 < pow2 61);
   assert_norm (pow2 61 < pow2 125)
 
-let hash_block_length_fits (a:hash_alg) : 
+let hash_block_length_fits (a:hash_alg) :
   Lemma (hash_length a + pow2 32 + block_length a < max_input_length a)
 =
   let open FStar.Mul in
@@ -31,14 +31,14 @@ let hash_block_length_fits (a:hash_alg) :
 /// Duplicated from Hacl.HKDF because we don't want clients to depend on Hacl.HKDF
 
 inline_for_extraction
-let extract_st (a:hash_alg) = 
+let extract_st (a:hash_alg) =
   prk     : B.buffer uint8 ->
   salt    : B.buffer uint8 ->
   saltlen : pub_uint32 ->
   ikm     : B.buffer uint8 ->
-  ikmlen  : pub_uint32 -> 
+  ikmlen  : pub_uint32 ->
   Stack unit
-  (requires fun h0 -> 
+  (requires fun h0 ->
     B.live h0 prk /\ B.live h0 salt /\ B.live h0 ikm /\
     B.disjoint salt prk /\ B.disjoint ikm prk /\
     B.length prk == hash_length a /\
@@ -60,7 +60,7 @@ let expand_st (a:hash_alg) =
   infolen : pub_uint32 ->
   len     : pub_uint32 ->
   Stack unit
-  (requires fun h0 -> 
+  (requires fun h0 ->
     B.live h0 okm /\ B.live h0 prk /\ B.live h0 info /\
     B.disjoint okm prk /\
     v prklen == B.length prk /\
@@ -110,6 +110,22 @@ val expand_sha2_512: expand_st SHA2_512
 *)
 val extract_sha2_512: extract_st SHA2_512
 
+(** @type: true
+*)
+val expand_blake2s: expand_st Blake2S
+
+(** @type: true
+*)
+val extract_blake2s: extract_st Blake2S
+
+(** @type: true
+*)
+val expand_blake2b: expand_st Blake2B
+
+(** @type: true
+*)
+val extract_blake2b: extract_st Blake2B
+
 
 /// Agile versions that dynamically dispatch between the above four
 
@@ -122,7 +138,7 @@ val expand: a:EverCrypt.HMAC.supported_alg -> expand_st a
 val extract: a:EverCrypt.HMAC.supported_alg -> extract_st a
 
 [@(deprecated "expand")]
-let hkdf_expand a okm prk prklen info infolen len = 
+let hkdf_expand a okm prk prklen info infolen len =
   expand a okm prk prklen info infolen len
 
 [@(deprecated "extract")]
