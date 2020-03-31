@@ -160,12 +160,11 @@ val ecdsa_p256_sha2_verification:
 
 
 val ecdsa_verification_blake2:
-  alg: hash_alg {SHA2_256? alg \/ SHA2_384? alg \/ SHA2_512? alg}
+    mLen:size_t
+  -> m:lbuffer uint8 mLen
   -> pubKey:lbuffer uint8 (size 64)
   -> r:lbuffer uint8 (size 32)
-  -> s:lbuffer uint8 (size 32)
-  -> mLen:size_t
-  -> m:lbuffer uint8 mLen ->
+  -> s:lbuffer uint8 (size 32) ->
   Stack bool
     (requires fun h -> live h pubKey /\ live h r /\ live h s /\ live h m)
     (ensures fun h0 result h1 ->

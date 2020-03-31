@@ -41,7 +41,7 @@ open Hacl.Blake2b_32
 open Spec.Hash.Definitions
 open Hacl.Hash.Definitions
 
-#set-options "--z3rlimit 100"
+#set-options "--z3rlimit 100 --ifuel  0 --fuel 0"
 
 val ecdsa_signature_step12: mLen: size_t -> m: lbuffer uint8 mLen -> result: felem -> Stack unit
   (requires fun h -> live h m /\ live h result )
@@ -68,6 +68,7 @@ let ecdsa_signature_step12 mLen m result =
 
   pop_frame()
 
+#push-options "--ifuel 1"
 
 val ecdsa_signature_step45: x: felem -> k: lbuffer uint8 (size 32) -> tempBuffer: lbuffer uint64 (size 100) -> Stack uint64
   (requires fun h -> 
@@ -97,6 +98,7 @@ let ecdsa_signature_step45 x k tempBuffer =
   pop_frame();
     isZero_uint64_CT x
 
+#pop-options
 
 val lemma_power_step6: kInv: nat -> Lemma 
   (Spec.ECDSA.exponent_spec (fromDomain_ kInv) == toDomain_ (pow kInv (prime_p256_order - 2)))
@@ -120,8 +122,7 @@ let lemma_power_step6 kInv =
   lemmaToDomain (pow kInv (prime_p256_order - 2))
 
 
-#push-options "--z3rlimit 300"
-
+#push-options "--z3rlimit 300 --ifuel 1"
 
 val ecdsa_signature_step6: result: felem -> kFelem: felem -> z: felem -> r: felem -> da: felem -> Stack unit
   (requires fun h -> 
@@ -180,8 +181,6 @@ let ecdsa_signature_step6 result kFelem z r da =
       lemma_mod_mul_distr_r br0 br1 prime_p256_order
 
 
-#pop-options
-
 val ecdsa_signature_core: r: felem -> s: felem -> mLen: size_t -> m: lbuffer uint8 mLen ->  
   privKeyAsFelem: felem  -> 
   k: lbuffer uint8 (size 32) -> 
@@ -199,39 +198,39 @@ val ecdsa_signature_core: r: felem -> s: felem -> mLen: size_t -> m: lbuffer uin
   (ensures fun h0 flag h1 -> 
     modifies (loc r |+| loc s) h0 h1 /\
     (
-      let hashM = Spec.Blake2.blake2s (as_seq h0 m) 0 Seq.Base.empty 32  in 
+      let hashM = Spec.Blake2.blake2b (as_seq h0 m) 0 Seq.Base.empty 32  in 
       let z =  nat_from_bytes_be hashM % prime_p256_order in 
       let (rxN, ryN, rzN), _ = montgomery_ladder_spec (as_seq h0 k) ((0,0,0), basePoint) in 
       let (xN, _, _) = _norm (rxN, ryN, rzN) in 
       
       let kFelem = nat_from_bytes_be (as_seq h0 k) in 
-      as_nat h1 r == xN % prime_p256_order /\
+      as_nat h1 r == xN % prime_p256_order  /\ 
       as_nat h1 s == (z + (as_nat h1 r) * as_nat h0 privKeyAsFelem) * pow kFelem (prime_p256_order - 2) % prime_p256_order /\
       (
 	if as_nat h1 r = 0 || as_nat h1 s = 0 then 
 	  uint_v flag == pow2 64 - 1
 	else 
 	  uint_v flag == 0
-      )
-    )
+      ) 
+    )  
   )
 
 let ecdsa_signature_core r s mLen m privKeyAsFelem k = 
   push_frame();
   let h0 = ST.get() in 
-  let hashAsFelem = create (size 4) (u64 0) in     
-  let tempBuffer = create (size 100) (u64 0) in 
-  let kAsFelem = create (size 4) (u64 0) in 
-  toUint64ChangeEndian k kAsFelem;
+    let tempBuffer = create (size 108) (u64 0) in 
+       let hashAsFelem = sub tempBuffer (size 0) (size 4) in 
+       let signatComputationBuffer = sub tempBuffer (size 4) (size 100) in  
+       let kAsFelem = sub tempBuffer (size 104) (size 4) in 
+  toUint64ChangeEndian k kAsFelem; 
   ecdsa_signature_step12 mLen m hashAsFelem;
   let h1 = ST.get() in 
-  lemma_core_0 kAsFelem h1;
-  Spec.ECDSA.changeEndianLemma (uints_from_bytes_be (as_seq h0 k));
-  uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h0 k);
-  let step5Flag = ecdsa_signature_step45 r k tempBuffer in 
-  assert_norm (pow2 32 < pow2 61);
-  ecdsa_signature_step6 s kAsFelem hashAsFelem r privKeyAsFelem;  
-  let sIsZero = isZero_uint64_CT s in 
+      lemma_core_0 kAsFelem h1;
+      Spec.ECDSA.changeEndianLemma (uints_from_bytes_be (as_seq h0 k));
+      uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h0 k); 
+      let step5Flag = ecdsa_signature_step45 r k signatComputationBuffer in 
+      ecdsa_signature_step6 s kAsFelem hashAsFelem r privKeyAsFelem;  
+  let sIsZero = isZero_uint64_CT s in  
   logor_lemma step5Flag sIsZero;
   pop_frame(); 
   logor step5Flag sIsZero
@@ -261,7 +260,6 @@ val ecdsa_signature_blake2: result: lbuffer uint8 (size 64) -> mLen: size_t -> m
     )    
   )
 
-#reset-options "--z3rlimit 400"
 
 let ecdsa_signature_blake2 result mLen m privKey k = 
   push_frame();
@@ -298,3 +296,5 @@ let ecdsa_signature_blake2 result mLen m privKey k =
 
   pop_frame();
   flag  
+
+#pop-options

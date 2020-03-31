@@ -495,8 +495,7 @@ let ecdsa_verification_  pubKey r s mLen m =
 
 
 val ecdsa_verification_blake2:
-  alg: hash_alg {SHA2_256? alg \/ SHA2_384? alg \/ SHA2_512? alg}
-  -> pubKey:lbuffer uint8 (size 64)
+  pubKey:lbuffer uint8 (size 64)
   -> r:lbuffer uint8 (size 32)
   -> s:lbuffer uint8 (size 32)
   -> mLen:size_t
@@ -511,7 +510,7 @@ val ecdsa_verification_blake2:
       modifies0 h0 h1 /\
       result == Spec.ECDSA.ecdsa_verification_blake2 (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m))
 
-let ecdsa_verification_blake2 alg pubKey r s mLen m =
+let ecdsa_verification_blake2 pubKey r s mLen m =
   push_frame();
   let h0 = ST.get() in 
     let publicKeyAsFelem = create (size 8) (u64 0) in
