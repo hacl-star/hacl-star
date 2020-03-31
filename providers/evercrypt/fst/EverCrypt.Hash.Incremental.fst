@@ -74,7 +74,7 @@ let invariant_s #a h s =
   S.length blocks + S.length rest = U64.v total_len /\
   S.length seen = U64.v total_len /\
   U64.v total_len < pow2 61 /\
-  S.equal (fst (Hash.repr hash_state h)) (fst (Spec.Agile.Hash.update_multi a (Spec.Agile.Hash.init a) blocks)) /\
+  Hash.repr hash_state h == Spec.Agile.Hash.update_multi a (Spec.Agile.Hash.init a) blocks /\
   S.equal (S.slice (B.as_seq h buf_) 0 (U64.v total_len % block_length a)) rest
 
 #push-options "--max_ifuel 1"
@@ -88,7 +88,9 @@ let hashed (#a: Hash.alg) (h: HS.mem) (s: state a) =
   G.reveal (State?.seen (B.deref h s))
 
 let hash_fits #a h s =
-  assert_norm (pow2 61 < pow2 125)
+  assert_norm (pow2 61 < pow2 64);
+  assert_norm (pow2 61 < pow2 125);
+  assert_norm (pow2 61 < pow2 128)
 
 let alg_of_state a s =
   let open LowStar.BufferOps in
@@ -660,6 +662,8 @@ let total_len_leq_max_input_length
 = match a with
   | MD5 | SHA1 | SHA2_224 | SHA2_256 -> ()
   | SHA2_384 | SHA2_512 -> assert_norm (pow2 61 < pow2 125 - 1)
+  | Blake2S -> assert_norm (pow2 61 < pow2 64 - 1)
+  | Blake2B -> assert_norm (pow2 61 < pow2 128 - 1)
 
 #restart-solver
 #reset-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 1"
@@ -782,6 +786,8 @@ let finish_sha224: finish_st SHA2_224 = mk_finish SHA2_224
 let finish_sha256: finish_st SHA2_256 = mk_finish SHA2_256
 let finish_sha384: finish_st SHA2_384 = mk_finish SHA2_384
 let finish_sha512: finish_st SHA2_512 = mk_finish SHA2_512
+let finish_blake2s: finish_st Blake2S = mk_finish Blake2S
+let finish_blake2b: finish_st Blake2B = mk_finish Blake2B
 
 let finish a s dst =
   let open LowStar.BufferOps in
@@ -796,6 +802,8 @@ let finish a s dst =
   | SHA2_256 -> finish_sha256 s dst
   | SHA2_384 -> finish_sha384 s dst
   | SHA2_512 -> finish_sha512 s dst
+  | Blake2S -> finish_blake2s s dst
+  | Blake2B -> finish_blake2b s dst
 
 let free a s =
   let open LowStar.BufferOps in
