@@ -6,4 +6,3 @@ let _ =
    Format.printf "#include \"Hacl_HMAC.h\"\n");
   Cstubs.write_c Format.std_formatter ~prefix:""
     (module Hacl_HMAC_bindings.Bindings)
-  

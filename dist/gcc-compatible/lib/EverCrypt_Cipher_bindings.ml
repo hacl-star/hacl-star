@@ -9,5 +9,4 @@ module Bindings(F:Cstubs.FOREIGN) =
               (ocaml_bytes @->
                  (ocaml_bytes @->
                     (ocaml_bytes @-> (uint32_t @-> (returning void)))))))
-      
   end

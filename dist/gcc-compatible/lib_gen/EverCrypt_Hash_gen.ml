@@ -8,4 +8,3 @@ let _ =
    Format.printf "#include \"EverCrypt_Hash.h\"\n");
   Cstubs.write_c Format.std_formatter ~prefix:""
     (module EverCrypt_Hash_bindings.Bindings)
-  
