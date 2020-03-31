@@ -39,45 +39,9 @@ let max_input_length64 a: x:nat { 0 < x /\ x < pow2 64 /\ x <= max_input_length 
 
 let t = s:B.buffer uint32 { B.length s == state_word_length SHA2_256 }
 
-let concat_blocks_modulo (block_len: pos) (s1 s2: S.seq uint8): Lemma
-  (requires
-    S.length s1 % block_len = 0 /\
-    S.length s2 % block_len = 0)
-  (ensures
-    S.length (S.append s1 s2) % block_len = 0)
-=
-  let input = S.append s1 s2 in
-  let input1 = s1 in
-  let input2 = s2 in
-  calc (==) {
-    S.length input % block_len;
-  (==) { S.lemma_len_append input1 input2 }
-    (S.length input1 + S.length input2) % block_len;
-  (==) {
-    FStar.Math.Lemmas.modulo_distributivity (S.length input1) (S.length input2) (block_len)
-  }
-    (S.length input1 % block_len + S.length input2 % block_len) % block_len;
-  (==) { (* hyp *) }
-    0 % block_len;
-  (==) { }
-    0;
-  }
-
 // Local redefinition to have the shape desired by the type class.
-let update_multi_associative (i: hash_alg) (s: words_state i) (input1 input2: S.seq uint8):
-  Lemma
-  (requires (
-    S.length input1 % (block_length i) = 0 /\
-    S.length input2 % (block_length i) = 0))
-  (ensures (
-    let input = S.append input1 input2 in
-    S.length input % (block_length i) = 0 /\
-    Spec.Agile.Hash.(update_multi i (update_multi i s input1) input2 ==
-      update_multi i s input)))
-  [ SMTPat Spec.Agile.Hash.(update_multi i (update_multi i s input1) input2) ]
-=
-  concat_blocks_modulo (block_length i) input1 input2;
-  Spec.Hash.Lemmas.update_multi_associative' i s input1 input2
+let update_multi_associative (i: hash_alg) =
+  Spec.UpdateMulti.update_multi_associative (block_length i) (Spec.Agile.Hash.update i)
 
 inline_for_extraction noextract
 let hacl_sha2_256: Hacl.Streaming.Interface.block unit =
