@@ -46,7 +46,7 @@ let unfold_repeat_gen n a f acc0 i = ()
 
 let eq_repeat_gen0 n a f acc0 = ()
 
-let fixed_i f (i:nat) = f
+let repeat_gen_def n a f acc0 = ()
 
 let repeati #a n f acc0 =
   repeat_gen n (fixed_a a) f acc0
