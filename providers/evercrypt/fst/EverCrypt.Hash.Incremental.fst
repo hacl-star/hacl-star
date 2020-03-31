@@ -40,7 +40,7 @@ let evercrypt_hash: Hacl.Streaming.Interface.block Spec.Hash.Definitions.hash_al
     Spec.Hash.PadFinish.finish
     Spec.Agile.Hash.hash
     Spec.Hash.Lemmas.update_multi_zero
-    Spec.Hash.Lemmas.update_multi_associative'
+    (fun _ _ _ _ -> ()) // relying on the pattern in Hacl.Streaming.SHA256 here
     Spec.Hash.Lemmas.hash_is_hash_incremental
     (fun #i h s -> EverCrypt.Hash.invariant_loc_in_footprint s h)
     (fun #i l s h0 h1 ->

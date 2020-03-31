@@ -681,22 +681,7 @@ let update_round #index c i t p data len =
   [@inline_let]
   let _ = c.frame_freeable #i in
   [@inline_let]
-  let aux h
-    (input1:S.seq uint8)
-    (input2:S.seq uint8):
-    Lemma (requires
-     S.length input1 % U32.v (c.block_len i) = 0 /\
-     S.length input2 % U32.v (c.block_len i) = 0)
-    (ensures (
-      let input = S.append input1 input2 in
-      S.length input % U32.v (c.block_len i) == 0 /\
-      (==) (c.update_multi_s i (c.update_multi_s i h input1) input2)
-        (c.update_multi_s i h input)))
-    [ SMTPat (c.update_multi_s i (c.update_multi_s i h input1) input2) ]
-  =
-    concat_blocks_modulo (U32.v (c.block_len i)) input1 input2;
-    c.update_multi_associative i h input1 input2
-  in
+  let _ = c.update_multi_associative i in
 
   let open LowStar.BufferOps in
   let s = !*p in
@@ -736,11 +721,7 @@ let update_round #index c i t p data len =
       c.update_multi_s i (c.update_multi_s i (c.init_s i) blocks) (B.as_seq h0 buf1 `S.append` B.as_seq h0 data);
     (==) { }
       c.update_multi_s i (c.update_multi_s i (c.init_s i) blocks) (rest `S.append` B.as_seq h0 data);
-    (==) { aux (c.init_s i) blocks (rest `S.append` B.as_seq h0 data) }
-      // GHA!! The modulo proof obligation in the post-condition of the type
-      // classe's update_multi_associative lemma, for some reason, makes
-      // everything fail, so we rely on the local version of the lemma,
-      // rewritten to suit our needs... :'(
+    (==) { }
       c.update_multi_s i (c.init_s i) (blocks `S.append` (rest `S.append` B.as_seq h0 data));
     (==) { S.append_assoc blocks rest (B.as_seq h0 data) }
       c.update_multi_s i (c.init_s i) (blocks `S.append` rest `S.append` B.as_seq h0 data);
@@ -797,22 +778,7 @@ let mk_finish #index c i t p dst =
   [@inline_let]
   let _ = c.frame_freeable #i in
   [@inline_let]
-  let aux h
-    (input1:S.seq uint8)
-    (input2:S.seq uint8):
-    Lemma (requires
-     S.length input1 % U32.v (c.block_len i) = 0 /\
-     S.length input2 % U32.v (c.block_len i) = 0)
-    (ensures (
-      let input = S.append input1 input2 in
-      S.length input % U32.v (c.block_len i) == 0 /\
-      (==) (c.update_multi_s i (c.update_multi_s i h input1) input2)
-        (c.update_multi_s i h input)))
-    [ SMTPat (c.update_multi_s i (c.update_multi_s i h input1) input2) ]
-  =
-    concat_blocks_modulo (U32.v (c.block_len i)) input1 input2;
-    c.update_multi_associative i h input1 input2
-  in
+  let _ = c.update_multi_associative i in
 
   let open LowStar.BufferOps in
   let h0 = ST.get () in

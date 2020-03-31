@@ -24,23 +24,63 @@ let uint8 = Lib.IntTypes.uint8
 inline_for_extraction noextract
 let uint32 = Lib.IntTypes.uint32
 
+open Spec.Hash.Definitions
+
 /// Maximum input length, but fitting on a 64-bit integer (since the streaming
 /// module doesn't bother taking into account lengths that are greater than
 /// that).
 inline_for_extraction noextract
-let max_input_length64 a: x:nat { 0 < x /\ x < pow2 64 /\ x <= Spec.Hash.Definitions.max_input_length a } =
-  let open Spec.Hash.Definitions in
+let max_input_length64 a: x:nat { 0 < x /\ x < pow2 64 /\ x <= max_input_length a } =
   let _ = allow_inversion hash_alg in
   match a with
   | MD5 | SHA1
   | SHA2_224 | SHA2_256 -> assert_norm (0 < pow2 61 - 1 && pow2 61 < pow2 64); pow2 61 - 1
   | SHA2_384 | SHA2_512 -> assert_norm (pow2 64 < pow2 125 - 1); pow2 64 - 1
 
-let t = s:B.buffer uint32 { B.length s == Spec.Hash.Definitions.(state_word_length SHA2_256) }
+let t = s:B.buffer uint32 { B.length s == state_word_length SHA2_256 }
+
+let concat_blocks_modulo (block_len: pos) (s1 s2: S.seq uint8): Lemma
+  (requires
+    S.length s1 % block_len = 0 /\
+    S.length s2 % block_len = 0)
+  (ensures
+    S.length (S.append s1 s2) % block_len = 0)
+=
+  let input = S.append s1 s2 in
+  let input1 = s1 in
+  let input2 = s2 in
+  calc (==) {
+    S.length input % block_len;
+  (==) { S.lemma_len_append input1 input2 }
+    (S.length input1 + S.length input2) % block_len;
+  (==) {
+    FStar.Math.Lemmas.modulo_distributivity (S.length input1) (S.length input2) (block_len)
+  }
+    (S.length input1 % block_len + S.length input2 % block_len) % block_len;
+  (==) { (* hyp *) }
+    0 % block_len;
+  (==) { }
+    0;
+  }
+
+// Local redefinition to have the shape desired by the type class.
+let update_multi_associative (i: hash_alg) (s: words_state i) (input1 input2: S.seq uint8):
+  Lemma
+  (requires (
+    S.length input1 % (block_length i) = 0 /\
+    S.length input2 % (block_length i) = 0))
+  (ensures (
+    let input = S.append input1 input2 in
+    S.length input % (block_length i) = 0 /\
+    Spec.Agile.Hash.(update_multi i (update_multi i s input1) input2 ==
+      update_multi i s input)))
+  [ SMTPat Spec.Agile.Hash.(update_multi i (update_multi i s input1) input2) ]
+=
+  concat_blocks_modulo (block_length i) input1 input2;
+  Spec.Hash.Lemmas.update_multi_associative' i s input1 input2
 
 inline_for_extraction noextract
 let hacl_sha2_256: Hacl.Streaming.Interface.block unit =
-  let open Spec.Hash.Definitions in
   Hacl.Streaming.Interface.Block
     (fun _ -> t)
     (fun #_ h s -> B.loc_addr_of_buffer s)

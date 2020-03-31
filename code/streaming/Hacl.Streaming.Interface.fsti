@@ -25,31 +25,6 @@ let uint8 = Lib.IntTypes.uint8
 inline_for_extraction noextract
 let uint32 = Lib.IntTypes.uint32
 
-let concat_blocks_modulo (block_len: pos) (s1 s2: S.seq uint8): Lemma
-  (requires
-    S.length s1 % block_len = 0 /\
-    S.length s2 % block_len = 0)
-  (ensures
-    S.length (S.append s1 s2) % block_len = 0)
-=
-  let input = S.append s1 s2 in
-  let input1 = s1 in
-  let input2 = s2 in
-  calc (==) {
-    S.length input % block_len;
-  (==) { S.lemma_len_append input1 input2 }
-    (S.length input1 + S.length input2) % block_len;
-  (==) {
-    FStar.Math.Lemmas.modulo_distributivity (S.length input1) (S.length input2) (block_len)
-  }
-    (S.length input1 % block_len + S.length input2 % block_len) % block_len;
-  (==) { (* hyp *) }
-    0 % block_len;
-  (==) { }
-    0;
-  }
-
-
 /// The type class of block-based operations.
 /// Equipped with a generic index. May be unit if there's no agility, or hash algorithm for agility.
 inline_for_extraction noextract noeq
@@ -93,20 +68,22 @@ type block (index: Type0) =
   spec_s: (i:index -> input:S.seq uint8 { S.length input <= max_input_length i } ->
     output:S.seq uint8 { S.length output == U32.v (output_len i) }) ->
 
-  // Required lemmas... clients need to introduce these into their context via a local SMTPat.
-  // Note: the way I authored update_multi_associative is terrible to work with,
-  // see comment starting with "GHA" in update_round.
+  // Required lemmas... clients can enjoy them in their local contexts with the SMT pattern via a let-binding.
 
   update_multi_zero: (i:index -> h:t i -> Lemma
     (ensures (update_multi_s i h S.empty == h))) ->
 
   update_multi_associative: (i:index ->
     h: t i ->
-    input1:S.seq uint8 { S.length input1 % U32.v (block_len i) = 0 } ->
-    input2:S.seq uint8 { S.length input2 % U32.v (block_len i) = 0 } ->
-    Lemma (ensures (
+    input1:S.seq uint8 ->
+    input2:S.seq uint8 ->
+    Lemma
+    (requires (
+      S.length input1 % U32.v (block_len i) = 0 /\
+      S.length input2 % U32.v (block_len i) = 0))
+    (ensures (
       let input = S.append input1 input2 in
-      concat_blocks_modulo (U32.v (block_len i)) input1 input2;
+      S.length input % U32.v (block_len i) = 0 /\
       update_multi_s i (update_multi_s i h input1) input2 ==
         update_multi_s i h input))
     [ SMTPat (update_multi_s i (update_multi_s i h input1) input2) ]) ->
