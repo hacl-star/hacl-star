@@ -136,6 +136,7 @@ let lemma_power_step6 kInv =
   lemma_mod_mul_distr_r (pow kInv (prime_p256_order - 2)) (pow2 256) prime_p256_order;
   lemmaToDomain (pow kInv (prime_p256_order - 2))
 
+#push-options "--z3rlimit 300"
 
 val ecdsa_signature_step6: result: felem -> kFelem: felem -> z: felem -> r: felem -> da: felem -> Stack unit
   (requires fun h -> 
@@ -167,10 +168,10 @@ let ecdsa_signature_step6 result kFelem z r da =
   pop_frame();
       let br0 = as_nat h0 z + as_nat h0 r * as_nat h0 da in
       let br1 = pow (as_nat h0 kFelem) (prime_p256_order - 2) in 
-       
+
       lemmaFromDomain (as_nat h0 r * as_nat h0 da); 
       lemma_felem_add (as_nat h0 r * as_nat h0 da) (as_nat h0 z);
-      lemma_power_step6 (as_nat h0 kFelem);
+      lemma_power_step6 (as_nat h0 kFelem); 
 
       lemmaFromDomain (fromDomain_ br0);
       lemmaToDomain br1;
@@ -193,6 +194,7 @@ let ecdsa_signature_step6 result kFelem z r da =
       lemma_mod_mul_distr_r (br0 * br1) (modp_inv2_prime (pow2 256) prime_p256_order * pow2 256) prime_p256_order;
       lemma_mod_mul_distr_r br0 br1 prime_p256_order
 
+#pop-options
 
 val ecdsa_signature_core: alg: hash_alg {SHA2_256? alg \/ SHA2_384? alg \/ SHA2_512? alg}  -> r: felem -> s: felem -> mLen: size_t -> m: lbuffer uint8 mLen ->  
   privKeyAsFelem: felem  -> 

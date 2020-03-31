@@ -120,6 +120,9 @@ let lemma_power_step6 kInv =
   lemmaToDomain (pow kInv (prime_p256_order - 2))
 
 
+#push-options "--z3rlimit 300"
+
+
 val ecdsa_signature_step6: result: felem -> kFelem: felem -> z: felem -> r: felem -> da: felem -> Stack unit
   (requires fun h -> 
     live h result /\ live h kFelem /\ live h z /\ live h r /\ live h da /\
@@ -176,6 +179,8 @@ let ecdsa_signature_step6 result kFelem z r da =
       lemma_mod_mul_distr_r (br0 * br1) (modp_inv2_prime (pow2 256) prime_p256_order * pow2 256) prime_p256_order;
       lemma_mod_mul_distr_r br0 br1 prime_p256_order
 
+
+#pop-options
 
 val ecdsa_signature_core: r: felem -> s: felem -> mLen: size_t -> m: lbuffer uint8 mLen ->  
   privKeyAsFelem: felem  -> 
