@@ -175,7 +175,8 @@ frodo_gen_matrix_cshake(uint32_t n1, uint32_t seed_len, uint8_t *seed, uint16_t 
   }
 }
 
-static uint16_t
+static const
+uint16_t
 cdf_table[12U] =
   {
     (uint16_t)4727U, (uint16_t)13584U, (uint16_t)20864U, (uint16_t)26113U, (uint16_t)29434U,

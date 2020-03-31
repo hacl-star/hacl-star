@@ -260,12 +260,15 @@ val multByOrder: result: point ->  p: point -> tempBuffer: lbuffer uint64 (size 
       let x3, y3, z3 = point_x_as_nat h1 result, point_y_as_nat h1 result, point_z_as_nat h1 result in 
       x3 == xN /\ y3 == yN /\ z3 == zN 
     ) 
-  )
-
+  ) 
+#push-options "--z3rlimit 100"
 let multByOrder result p tempBuffer =
   recall_contents order_buffer prime_p256_order_seq;
+  assert (disjoint p order_buffer);
+  assert (disjoint result order_buffer);
+  assert (disjoint tempBuffer order_buffer);
   scalarMultiplication p result order_buffer tempBuffer
-
+#pop-options
 
 inline_for_extraction noextract
 val multByOrder2: result: point ->  p: point -> tempBuffer: lbuffer uint64 (size 100) -> Stack unit 

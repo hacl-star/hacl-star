@@ -21,7 +21,7 @@ open FStar.Tactics.Canon
 open Spec.P256.Lemmas
 open Lib.IntTypes.Intrinsics
 
-#set-options "--fuel 0 --ifuel 0 --z3rlimit 400"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 500"
 
 val eq0_u64: a: uint64 -> Tot (r: uint64 {if uint_v a = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0})
 
@@ -357,9 +357,9 @@ let add4_variables x cin y0 y1 y2 y3 result =
     assert(let r3_0 = as_seq h0 r3 in let r0_ = as_seq h0 result in Seq.index r0_ 3 == Seq.index r3_0 0);
     cc
 
-val sub4_il: x: felem -> y: ilbuffer uint64 (size 4) -> result: felem -> 
+val sub4_il: x: felem -> y: glbuffer uint64 (size 4) -> result: felem -> 
   Stack uint64
-    (requires fun h -> live h x /\ live h y /\ live h result /\ disjoint x result /\ disjoint y result)
+    (requires fun h -> live h x /\ live h y /\ live h result /\ disjoint x result /\ disjoint result y)
     (ensures fun h0 c h1 -> modifies1 result h0 h1 /\ v c <= 1 /\
       (
  	as_nat h1 result - v c * pow2 256 == as_nat h0 x  - as_nat_il h0 y /\
@@ -445,7 +445,7 @@ let mult64_0 x u result temp =
   mul64 f0 u result temp
 
 
-val mult64_0il: x: ilbuffer uint64 (size 4) -> u: uint64 -> result:  lbuffer uint64 (size 1) -> temp: lbuffer uint64 (size 1) -> Stack unit 
+val mult64_0il: x: glbuffer uint64 (size 4) -> u: uint64 -> result:  lbuffer uint64 (size 1) -> temp: lbuffer uint64 (size 1) -> Stack unit 
   (requires fun h -> live h x /\ live h result /\ live h temp /\ disjoint result temp)
   (ensures fun h0 _ h1 -> 
     let result_ = Seq.index (as_seq h1 result) 0 in 
@@ -475,7 +475,7 @@ let mult64_c x u cin result temp =
   add_carry_u64 cin l h result
 
 
-val mul1_il: f:  ilbuffer uint64 (size 4) -> u: uint64 -> result: lbuffer uint64 (size 4) -> Stack uint64
+val mul1_il: f:  glbuffer uint64 (size 4) -> u: uint64 -> result: lbuffer uint64 (size 4) -> Stack uint64
   (requires fun h -> live h result /\ live h f)
   (ensures fun h0 c h1 -> modifies (loc result) h0 h1 /\ 
     as_nat_il h0 f * uint_v u = uint_v c * pow2 256 + as_nat h1 result /\ 
@@ -587,7 +587,7 @@ let mul1_add f1 u2 f3 result =
   pop_frame();  
   c +! c3
 
-#push-options "--z3rlimit 600"
+#push-options "--z3rlimit 800"
 
 val mul: f: felem -> r: felem -> out: widefelem
   -> Stack unit
@@ -648,6 +648,8 @@ let mul f r out =
   pop_frame()
 
 #pop-options
+
+#set-options "--z3refresh"
 
 val lemma_320: a: uint64 -> b: uint64 -> c: uint64 -> d: uint64 -> u: uint64 -> Lemma 
   (uint_v u * uint_v a +  (uint_v u * uint_v b) * pow2 64 + (uint_v u * uint_v c) * pow2 64 * pow2 64 + (uint_v u * uint_v d) * pow2 64 * pow2 64 * pow2 64 < pow2 320)
@@ -1086,6 +1088,7 @@ let sq2 f f4 result memory tempBuffer =
   c3 +! h_3 +! c4
 
 
+
 val sq3: f: felem -> f4: felem -> result: felem -> memory: lbuffer uint64 (size 12) -> temp: lbuffer uint64 (size 5) -> 
   Stack uint64 
   (requires fun h -> live h f /\ live h f4 /\ live h result /\ live h temp /\ live h memory /\ eq_or_disjoint f4 result /\ disjoint f4 memory /\ disjoint f4 temp /\ disjoint f result /\ disjoint temp result /\ disjoint memory temp /\ disjoint memory result /\
@@ -1116,6 +1119,7 @@ val sq3: f: felem -> f4: felem -> result: felem -> memory: lbuffer uint64 (size 
     )
   )
 
+#push-options "--z3rlimit 800"
 
 let sq3 f f4 result memory tempBuffer = 
   let h0 = ST.get() in 
@@ -1288,6 +1292,7 @@ let sq f out =
     assert(modifies (loc out) h4 h5);
   pop_frame()
 
+#pop-options
 
  val cmovznz4: cin: uint64 -> x: felem -> y: felem -> result: felem ->
   Stack unit
@@ -1353,7 +1358,7 @@ val mod64: a: widefelem -> Stack uint64
 let mod64 a = index a (size 0)
 
 
-val shortened_mul: a: ilbuffer uint64 (size 4) -> b: uint64 -> result: widefelem -> Stack unit
+val shortened_mul: a: glbuffer uint64 (size 4) -> b: uint64 -> result: widefelem -> Stack unit
   (requires fun h -> live h a /\ live h result /\ wide_as_nat h result = 0)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
     as_nat_il h0 a * uint_v b = wide_as_nat h1 result /\ 
