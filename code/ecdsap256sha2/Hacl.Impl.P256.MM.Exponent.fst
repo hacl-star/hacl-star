@@ -111,7 +111,7 @@ let montgomery_ladder_power_step0 a b =
 
 
 inline_for_extraction noextract
-val montgomery_ladder_power_step: a: felem -> b: felem -> scalar: ilbuffer uint8 (size 32) ->   i:size_t{v i < 256} ->  Stack unit
+val montgomery_ladder_power_step: a: felem -> b: felem -> scalar: glbuffer uint8 (size 32) ->   i:size_t{v i < 256} ->  Stack unit
   (requires fun h -> live h a  /\ live h b /\ live h scalar /\ as_nat h a < prime /\ as_nat h b < prime /\ disjoint a b)
   (ensures fun h0 _ h1 -> modifies (loc a |+| loc b) h0 h1  /\
     (
@@ -134,7 +134,7 @@ let montgomery_ladder_power_step a b scalar i =
 
 
 inline_for_extraction noextract 
-val _montgomery_ladder_power: a: felem -> b: felem -> scalar: ilbuffer uint8 (size 32) -> Stack unit
+val _montgomery_ladder_power: a: felem -> b: felem -> scalar: glbuffer uint8 (size 32) -> Stack unit
   (requires fun h -> live h a /\ live h b /\ live h scalar /\ as_nat h a < prime /\ 
     as_nat h b < prime /\ disjoint a b /\ disjoint a scalar /\ disjoint b scalar)
   (ensures fun h0 _ h1 -> modifies (loc a |+| loc b) h0 h1 /\ 
@@ -164,7 +164,7 @@ let _montgomery_ladder_power a b scalar =
 	  Lib.LoopCombinators.unfold_repeati 256 (spec_exp h0) (acc h0) (uint_v i))
 
 
-val montgomery_ladder_power: a: felem -> scalar: ilbuffer uint8 (size 32) -> result: felem -> 
+val montgomery_ladder_power: a: felem -> scalar: glbuffer uint8 (size 32) -> result: felem -> 
   Stack unit 
     (requires fun h -> live h a /\ live h scalar /\ live h result /\ as_nat h a < prime /\ disjoint a scalar)
     (ensures fun h0 _ h1 -> modifies (loc a |+| loc result) h0 h1 /\
@@ -206,7 +206,7 @@ let sqPower_seq: s: lseq uint8 32{Lib.ByteSequence.nat_from_intseq_le s == (prim
 
 
 inline_for_extraction
-let sqPower_buffer: x: ilbuffer uint8 32ul {witnessed x sqPower_seq /\ recallable x} = 
+let sqPower_buffer: x: glbuffer uint8 32ul {witnessed x sqPower_seq /\ recallable x} = 
   createL_global sqPower_list
 
 
