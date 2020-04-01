@@ -19,7 +19,7 @@ let repeat_l_input #a (block_length:pos { block_length < pow2 32 })
 =
   ()
 
-#set-options "--z3rlimit 300"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 let rec update_multi_is_repeat_blocks #a block_length update update_last acc input input' =
   // Spec.UpdateMulti side
   let n_blocks = S.length input / block_length in

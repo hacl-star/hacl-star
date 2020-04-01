@@ -40,6 +40,11 @@ let repeat_l #a (block_length:pos { block_length < pow2 32 })
   update_last acc s
 
 #set-options "--max_fuel 0 --max_ifuel 0"
+/// Note that I am using a trick here to avoid reasoning about functional
+/// extensionality equality for the repeat_l helper... in a sense, I am proving
+/// as I go that repeat_l only depends on ``length input % block_length``, not
+/// on the nature of input itself. Clients will of course instantiate this lemma
+/// with input and input' being the same.
 val update_multi_is_repeat_blocks:
   #a:Type0 ->
   block_length:pos { block_length < pow2 32 } ->
