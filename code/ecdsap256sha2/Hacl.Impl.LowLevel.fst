@@ -21,7 +21,7 @@ open FStar.Tactics.Canon
 open Spec.P256.Lemmas
 open Lib.IntTypes.Intrinsics
 
-#set-options "--fuel 0 --ifuel 0 --z3rlimit 500"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 1000"
 
 val eq0_u64: a: uint64 -> Tot (r: uint64 {if uint_v a = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0})
 
@@ -700,7 +700,6 @@ let lemma_320_64 a b c d e u =
 
 
 
-#push-options "--z3rlimit 1000"
 val sq0: f:  lbuffer uint64 (size 4) -> result: lbuffer uint64 (size 4) -> memory: lbuffer uint64 (size 12) -> temp: lbuffer uint64 (size 5) -> Stack uint64
   (requires fun h -> live h result /\ live h f /\ live h memory /\ live h temp /\ disjoint result temp
     /\ disjoint result memory /\ disjoint memory temp 
@@ -735,6 +734,8 @@ val sq0: f:  lbuffer uint64 (size 4) -> result: lbuffer uint64 (size 4) -> memor
     )
  )
 
+
+#push-options "--z3rlimit 1500 --retry 3"
 
 let sq0 f result memory temp = 
   let h0 = ST.get() in 
