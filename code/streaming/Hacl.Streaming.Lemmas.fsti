@@ -23,6 +23,22 @@ let update_full #a
   assert (S.length rest < block_length);
   update_last (mk_update_multi block_length update acc blocks) rest
 
+/// Some helpers to flip the order of arguments
+let repeat_f #a (block_length:pos { block_length < pow2 32 })
+  (update: (a -> s:S.seq uint8 { S.length s = block_length } -> a))
+  (input: S.seq uint8 { S.length input = block_length }) (acc: a): a
+=
+  update acc input
+
+let repeat_l #a (block_length:pos { block_length < pow2 32 })
+  (update_last: (a -> s:S.seq uint8 { S.length s < block_length } -> a))
+  (input:S.seq uint8)
+  (l: Lib.IntTypes.size_nat { l == S.length input % block_length })
+  (s: Lib.Sequence.lseq uint8 l)
+  (acc: a): a
+=
+  update_last acc s
+
 #set-options "--max_fuel 0 --max_ifuel 0"
 val update_multi_is_repeat_blocks:
   #a:Type0 ->
@@ -31,13 +47,13 @@ val update_multi_is_repeat_blocks:
   update_last: (a -> s:S.seq uint8 { S.length s < block_length } -> a) ->
   acc:a ->
   input:S.seq uint8 ->
+  input':S.seq uint8 ->
   Lemma
+    (requires (
+      S.length input % block_length == S.length input' % block_length))
     (ensures (
-      let repeat_f = fun (input: S.seq uint8 { S.length input = block_length }) (acc: a) -> update acc input in
-      let repeat_l = fun (l: Lib.IntTypes.size_nat { l == S.length input % block_length })
-        (s: Lib.Sequence.lseq uint8 l) (acc: a) ->
-        update_last acc s
-      in
+      let repeat_f = repeat_f block_length update in
+      let repeat_l = repeat_l block_length update_last input' in
 
       Lib.Sequence.repeat_blocks #uint8 block_length input repeat_f repeat_l acc ==
       update_full block_length update update_last acc input))
