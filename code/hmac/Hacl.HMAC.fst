@@ -123,7 +123,7 @@ let block_len_as_len (a: hash_alg):
   | MD5 | SHA1 | SHA2_224 | SHA2_256 | Blake2S -> uint32_to_uint64 (D.block_len a)
   | SHA2_384 | SHA2_512 | Blake2B -> uint64_to_uint128 (uint32_to_uint64 (D.block_len a))
 
-#push-options "--ifuel 1 --z3rlimit 300"
+#push-options "--ifuel 1 --z3rlimit 400"
 
 inline_for_extraction noextract
 let part1 a init update_multi update_last finish s key data len =

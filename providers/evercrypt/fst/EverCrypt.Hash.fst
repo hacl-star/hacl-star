@@ -161,6 +161,8 @@ friend Vale.SHA.SHA_helpers
 let k224_256 =
   LowStar.ImmutableBuffer.igcmalloc_of_list HS.root Spec.SHA2.Constants.k224_256_l
 
+#push-options "--ifuel 1"
+
 // A new switch between HACL and Vale; can be used in place of Hacl.Hash.SHA2.update_256
 let update_multi_256 s ev blocks n =
   let has_shaext = AC.has_shaext () in
@@ -174,6 +176,7 @@ let update_multi_256 s ev blocks n =
     Vale.Wrapper.X64.Sha.sha256_update s blocks n k224_256
   end else
     Hacl.Hash.SHA2.update_multi_256 s () blocks n
+
 #pop-options
 
 inline_for_extraction noextract
