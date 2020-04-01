@@ -433,22 +433,30 @@ let repeat_blocks_multi_split #a #b blocksize len0 inp f acc0 =
   Math.Lemmas.cancel_mul_div n blocksize;
   len0_div_bs blocksize len len0;
   //assert (n == n0 + n1);
-
-  repeat_blocks_multi_is_repeat_gen_blocks_multi #a #b blocksize inp f acc0;
-  repeat_gen_blocks_multi_split #a blocksize len0 n (Loops.fixed_a b) inp (Loops.fixed_i f) acc0;
-
-  let a1 = shift_a n n0 n1 (Loops.fixed_a b) in
-  let f1 = shift_f blocksize n n0 n1 (Loops.fixed_a b) (Loops.fixed_i f) in
   Math.Lemmas.lemma_mod_sub_distr len len0 blocksize;
   //assert (len % blocksize == len1 % blocksize);
   Math.Lemmas.cancel_mul_mod n blocksize;
 
+  let a1 = shift_a n n0 n1 (Loops.fixed_a b) in
+  let f1 = shift_f blocksize n n0 n1 (Loops.fixed_a b) (Loops.fixed_i f) in
+
   let t0 = Seq.slice inp 0 len0 in
   let t1 = Seq.slice inp len0 len in
   let acc1 = repeat_gen_blocks_multi blocksize n0 (Loops.fixed_a b) t0 (Loops.fixed_i f) acc0 in
-  repeat_gen_blocks_multi_extensionality blocksize n1 t1 (Loops.fixed_a b) a1 (Loops.fixed_i f) f1 acc1;
-  repeat_blocks_multi_is_repeat_gen_blocks_multi #a #b blocksize t0 f acc0;
-  repeat_blocks_multi_is_repeat_gen_blocks_multi #a #b blocksize t1 f acc1
+
+  calc (==) {
+    repeat_blocks_multi blocksize inp f acc0;
+    (==) { repeat_blocks_multi_is_repeat_gen_blocks_multi #a #b blocksize inp f acc0 }
+    repeat_gen_blocks_multi blocksize n (Loops.fixed_a b) inp (Loops.fixed_i f) acc0;
+    (==) { repeat_gen_blocks_multi_split #a blocksize len0 n (Loops.fixed_a b) inp (Loops.fixed_i f) acc0 }
+    repeat_gen_blocks_multi blocksize n1 a1 t1 f1 acc1;
+    (==) { repeat_gen_blocks_multi_extensionality blocksize n1 t1 (Loops.fixed_a b) a1 (Loops.fixed_i f) f1 acc1 }
+    repeat_gen_blocks_multi blocksize n1 (Loops.fixed_a b) t1 (Loops.fixed_i f) acc1;
+    (==) { repeat_blocks_multi_is_repeat_gen_blocks_multi #a #b blocksize t1 f acc1 }
+    repeat_blocks_multi blocksize t1 f acc1;
+    (==) { repeat_blocks_multi_is_repeat_gen_blocks_multi #a #b blocksize t0 f acc0 }
+    repeat_blocks_multi blocksize t1 f (repeat_blocks_multi blocksize t0 f acc0);
+    }
 
 
 let repeat_blocks_split #a #b #c blocksize len0 inp f l acc0 =
