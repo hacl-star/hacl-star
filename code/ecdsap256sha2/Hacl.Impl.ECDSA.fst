@@ -41,6 +41,9 @@ open Spec.Hash.Definitions
 open Hacl.Hash.Definitions
 
 
+let secretToPublicU8 result scalar tempBuffer = 
+    Hacl.Impl.P256.secretToPublicU8 result scalar tempBuffer
+
 let ecdsa_p256_sha2_sign result mLen m privKey k = 
   ecdsa_signature SHA2_256 result mLen m privKey k
 

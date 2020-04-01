@@ -235,7 +235,9 @@ let compressionCompressedForm b result =
   let open Lib.ByteSequence in 
     let h0 = ST.get() in 
   let y = sub b (size 32) (size 32) in
-  let lastWordY = index y (size 0) in 
+  
+
+  let lastWordY = index y (size 31) in 
     lemma_uint_to_bytes_le_preserves_value (Lib.Sequence.index (as_seq h0 y) 0);
     lemma_nat_from_to_intseq_le_preserves_value 32 (as_seq h0 y);
   let lastBitY = logand lastWordY (u8 1) in 
