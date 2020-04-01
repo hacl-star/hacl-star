@@ -9,7 +9,7 @@ module S = FStar.Seq
 
 open FStar.Mul
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
 
 let uint8 = Lib.IntTypes.uint8
 
@@ -40,6 +40,7 @@ let concat_blocks_modulo (block_len: pos) (s1 s2: S.seq uint8): Lemma
 /// A helper that deals with the modulo proof obligation to make things go
 /// smoothly. Stolen from Spec.Agile.Hash, to be shared! Note: this version has
 /// a much more robust proof.
+#push-options "--z3cliopt smt.arith.nl=false"
 let split_block (block_length: pos)
   (blocks: S.seq uint8)
   (n: nat):
@@ -48,19 +49,49 @@ let split_block (block_length: pos)
       S.length blocks % block_length = 0 /\
       n <= S.length blocks / block_length)
     (ensures fun (l, r) ->
+      0 <= n * block_length /\
+      n * block_length <= S.length blocks /\
       S.length l % block_length = 0 /\
       S.length r % block_length = 0 /\
       l == fst (Seq.split blocks (FStar.Mul.(n * block_length))) /\
       r == snd (Seq.split blocks (FStar.Mul.(n * block_length))) /\
       S.append l r == blocks)
 =
-  let block, rem = S.split blocks FStar.Mul.(n * block_length) in
-  Math.Lemmas.modulo_distributivity (S.length rem) (S.length block) block_length;
+  Math.Lemmas.nat_times_nat_is_nat n block_length;
+  assert (0 <= n * block_length);
+  calc (<=) {
+    n * block_length;
+  (<=) { Math.Lemmas.lemma_mult_le_left block_length n (S.length blocks / block_length) }
+    (S.length blocks / block_length) * block_length;
+  (<=) { Math.Lemmas.euclidean_division_definition (S.length blocks) block_length }
+    S.length blocks;
+  };
+  let l, r = S.split blocks FStar.Mul.(n * block_length) in
+  Math.Lemmas.modulo_distributivity (S.length r) (S.length l) block_length;
   Math.Lemmas.multiple_modulo_lemma (S.length blocks / block_length) block_length ;
   Math.Lemmas.multiple_modulo_lemma n block_length;
-  Math.Lemmas.modulo_distributivity ((S.length blocks / block_length) * block_length) (- (S.length block)) block_length;
-  S.lemma_eq_intro (block `S.append` rem) blocks;
-  block, rem
+  Math.Lemmas.modulo_distributivity ((S.length blocks / block_length) * block_length) (- (S.length l)) block_length;
+  S.lemma_eq_intro (l `S.append` r) blocks;
+  assert (S.length l % block_length = 0);
+  calc (==) {
+    S.length r % block_length;
+  (==) { }
+    (S.length blocks - n * block_length) % block_length;
+  (==) { Math.Lemmas.modulo_distributivity (S.length blocks) (- (n * block_length)) block_length }
+    (S.length blocks % block_length + (- n * block_length) % block_length) % block_length;
+  (==) { Math.Lemmas.paren_mul_right (-1) n block_length }
+    (((- n) * block_length) % block_length) % block_length;
+  (==) { Math.Lemmas.multiple_modulo_lemma (-n) block_length }
+    0 % block_length;
+  (==) { Math.Lemmas.multiple_modulo_lemma 0 block_length }
+    0;
+  };
+  assert (S.length r % block_length = 0);
+  assert (l == fst (Seq.split blocks (FStar.Mul.(n * block_length))));
+  assert (r == snd (Seq.split blocks (FStar.Mul.(n * block_length))));
+  assert (S.append l r == blocks);
+  l, r
+#pop-options
 
 let update_t a block_length =
   a -> b:S.seq uint8 { S.length b = block_length } -> a
@@ -82,7 +113,7 @@ let rec mk_update_multi #a (block_length: pos)
     let acc = update acc block in
     mk_update_multi block_length update acc rem
 
-#push-options "--max_fuel 1"
+#push-options "--fuel 1"
 let update_multi_zero #a (block_length: pos)
   (update: update_t a block_length)
   (acc: a):
