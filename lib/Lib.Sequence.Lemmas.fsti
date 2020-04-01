@@ -7,7 +7,7 @@ open Lib.Sequence
 module Loops = Lib.LoopCombinators
 
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 
 val repeati_extensionality:
@@ -130,16 +130,18 @@ val repeat_gen_blocks_multi_split:
   -> acc0:a 0 ->
   Lemma
    (let len = length inp in
+    let len1 = len - len0 in
     let n0 = len0 / blocksize in
-    let n1 = (len - len0) / blocksize in
+    let n1 = len1 / blocksize in
     Math.Lemmas.cancel_mul_div n blocksize;
     len0_div_bs blocksize len len0;
     assert (n == n0 + n1);
 
     let a1 (i:nat{i <= n1}) = a (n0 + i) in
     let f1 (i:nat{i < n1}) = f (n0 + i) in
-    Math.Lemmas.modulo_addition_lemma len blocksize (- len0 / blocksize);
-    assert (len % blocksize == (len - len0) % blocksize);
+    Math.Lemmas.lemma_mod_sub_distr len len0 blocksize;
+    assert (len % blocksize == len1 % blocksize);
+    Math.Lemmas.cancel_mul_mod n blocksize;
 
     let t0 = Seq.slice inp 0 len0 in
     let t1 = Seq.slice inp len0 len in
@@ -154,25 +156,30 @@ val repeat_gen_blocks_split:
   -> blocksize:size_pos
   -> len0:nat{len0 % blocksize == 0}
   -> inp:seq inp_t{len0 <= length inp}
-  -> a:(i:nat{i <= length inp / blocksize} -> Type)
-  -> f:(i:nat{i < length inp / blocksize} -> lseq inp_t blocksize -> a i -> a (i + 1))
-  -> l:(i:nat{i == length inp / blocksize} -> len:size_nat{len == length inp % blocksize} -> lseq inp_t len -> a i -> c)
+  -> max:nat{length inp / blocksize <= max}
+  -> a:(i:nat{i <= max} -> Type)
+  -> f:(i:nat{i < max} -> lseq inp_t blocksize -> a i -> a (i + 1))
+  -> l:(i:nat{i <= max} -> len:size_nat{len < blocksize} -> lseq inp_t len -> a i -> c)
   -> acc0:a 0 ->
   Lemma
    (let len = length inp in
+    let len1 = len - len0 in
     let n = len / blocksize in
     let n0 = len0 / blocksize in
-    let n1 = (len - len0) / blocksize in
+    let n1 = len1 / blocksize in
     len0_div_bs blocksize len len0;
     assert (n0 + n1 == n);
 
     let a1 (i:nat{i <= n1}) = a (n0 + i) in
     let f1 (i:nat{i < n1}) = f (n0 + i) in
     let l1 (i:nat{i == n1}) = l n in
-    let acc : a n0 = repeat_gen_blocks_multi blocksize n0 a (Seq.slice inp 0 len0) f acc0 in
+    let t0 = Seq.slice inp 0 len0 in
+    let t1 = Seq.slice inp len0 len in
+
+    let acc : a n0 = repeat_gen_blocks_multi blocksize n0 a t0 f acc0 in
 
     repeat_gen_blocks blocksize inp a f l acc0 ==
-    repeat_gen_blocks blocksize (Seq.slice inp len0 len) a1 f1 l1 acc)
+    repeat_gen_blocks blocksize t1 a1 f1 l1 acc)
 
 
 let repeat_gen_blocks_multi_vec_equiv_pre
@@ -195,7 +202,9 @@ let repeat_gen_blocks_multi_vec_equiv_pre
   let fi (j:nat{j < w}) = f (i * w + j) in
   Math.Lemmas.cancel_mul_mod w blocksize;
   Math.Lemmas.cancel_mul_div w blocksize;
-  normalize_v (i + 1) (f_v i b_v acc_v) == repeat_gen_blocks_multi blocksize w ai b_v fi (normalize_v i acc_v)
+
+  normalize_v (i + 1) (f_v i b_v acc_v) ==
+  repeat_gen_blocks_multi blocksize w ai b_v fi (normalize_v i acc_v)
 
 
 val lemma_repeat_gen_blocks_multi_vec:
