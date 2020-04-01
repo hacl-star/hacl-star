@@ -1,9 +1,10 @@
 # A minimalistic Makefile for all testing options.
 
+KREMLIN_HOME?=../dist/kremlin
+
 # Add GF128 tests once code/experimental/gf128 is promoted to code
 TARGETS = $(filter-out gf128-%, $(patsubst %.c,%.exe,$(wildcard *.c)))
-KREMLIN_HOME=../dist/kremlin
-CFLAGS += -I$(KREMLIN_HOME)/include -I../dist/gcc64-only \
+CFLAGS = -I$(KREMLIN_HOME)/include -I../dist/gcc64-only \
   -I$(KREMLIN_HOME)/kremlib/dist/minimal \
   -I../secure_api/merkle_tree \
   -O3 -march=native -mtune=native
@@ -32,7 +33,7 @@ arm: chacha20-arm-test.exe poly1305-arm-test.exe blake2-arm-test.exe
 curve64-rfc.exe: $(patsubst %.c,%.o,$(wildcard rfc7748_src/*.c))
 
 %.exe: %.o
-	$(CC) $(CFLAGS) $(LDFLAGS) $^ ../dist/gcc64-only/libevercrypt.a -o $@
+	$(CC) $(CFLAGS) $(LDFLAGS) $^ ../dist/gcc64-only/libevercrypt.a -o $@ -lcrypto
 
 chacha20-arm-test.exe: chacha20-arm-test.c
 	$(CC) $(CFLAGS) $(LDFLAGS) $^ ../dist/gcc64-only/Hacl_Chacha20.c ../dist/gcc64-only/Hacl_Chacha20_Vec128.c -o $@

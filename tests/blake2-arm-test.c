@@ -456,7 +456,7 @@ int main()
     Hacl_Blake2s_32_blake2s(32,plain,SIZE,plain,0,NULL);
   }
   t2 = clock();
-  double tdiff3 = (double)(t2 - t1)/CLOCKS_PER_SEC;
+  clock_t tdiff3 = (t2 - t1);
 
   for (int j = 0; j < ROUNDS; j++) {
     Hacl_Blake2b_32_blake2b(64,plain,SIZE,plain,0,NULL);
@@ -466,7 +466,7 @@ int main()
     Hacl_Blake2b_32_blake2b(64,plain,SIZE,plain,0,NULL);
   }
   t2 = clock();
-  double tdiff4 = (double)(t2 - t1)/CLOCKS_PER_SEC;
+  clock_t tdiff4 = (t2 - t1);
 
   for (int j = 0; j < ROUNDS; j++) {
     Hacl_Blake2s_128_blake2s(32,plain,SIZE,plain,0,NULL);
@@ -476,20 +476,20 @@ int main()
     Hacl_Blake2s_128_blake2s(32,plain,SIZE,plain,0,NULL);
   }
   t2 = clock();
-  double tdiff5 = (double)(t2 - t1)/CLOCKS_PER_SEC;
+  clock_t tdiff5 = (t2 - t1);
 
   uint64_t count = ROUNDS * SIZE;
   printf("Blake2S (Vec 32-bit):\n");
   printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff3,(double)tdiff3/count);
-  printf("bw %8.2f MB/s\n",(double)count/(tdiff3 * 1000000.0));
+  printf("bw %8.2f MB/s\n",(double)count/((double)tdiff3/CLOCKS_PER_SEC * 1000000.0));
 
   printf("Blake2B (Vec 64-bit):\n");
   printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff4,(double)tdiff4/count);
-  printf("bw %8.2f MB/s\n",(double)count/(tdiff4 * 1000000.0));
+  printf("bw %8.2f MB/s\n",(double)count/((double)tdiff4/CLOCKS_PER_SEC * 1000000.0));
 
   printf("Blake2S (Vec 128-bit):\n");
   printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff5,(double)tdiff5/count);
-  printf("bw %8.2f MB/s\n",(double)count/(tdiff5 * 1000000.0));
+  printf("bw %8.2f MB/s\n",(double)count/((double)tdiff5/CLOCKS_PER_SEC * 1000000.0));
 
   if (all_ok) return EXIT_SUCCESS;
   else return EXIT_FAILURE;
