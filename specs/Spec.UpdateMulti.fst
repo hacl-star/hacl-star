@@ -9,7 +9,7 @@ module S = FStar.Seq
 
 open FStar.Mul
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
 let uint8 = Lib.IntTypes.uint8
 
