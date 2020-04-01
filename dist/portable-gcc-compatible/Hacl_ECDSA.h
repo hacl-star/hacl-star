@@ -33,7 +33,9 @@
 #define __Hacl_ECDSA_H
 
 #include "Hacl_Kremlib.h"
+#include "Hacl_Blake2b_32.h"
 #include "Hacl_Hash.h"
+#include "Hacl_Spec.h"
 
 
 /* SNIPPET_START: Hacl_Impl_P256_DH_ecp256dh_i */
@@ -48,6 +50,12 @@ uint64_t Hacl_Impl_P256_DH_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t 
 
 /* SNIPPET_END: Hacl_Impl_P256_DH_ecp256dh_r */
 
+/* SNIPPET_START: Hacl_Impl_ECDSA_secretToPublicU8 */
+
+void Hacl_Impl_ECDSA_secretToPublicU8(uint8_t *result, uint8_t *scalar, uint64_t *tempBuffer);
+
+/* SNIPPET_END: Hacl_Impl_ECDSA_secretToPublicU8 */
+
 /* SNIPPET_START: Hacl_Impl_ECDSA_ecdsa_p256_sha2_sign */
 
 uint64_t
@@ -61,18 +69,107 @@ Hacl_Impl_ECDSA_ecdsa_p256_sha2_sign(
 
 /* SNIPPET_END: Hacl_Impl_ECDSA_ecdsa_p256_sha2_sign */
 
-/* SNIPPET_START: Hacl_Impl_ECDSA_ecdsa_p256_sha2_verify */
+/* SNIPPET_START: Hacl_Impl_ECDSA_ecdsa_p256_sha2_384_sign */
+
+uint64_t
+Hacl_Impl_ECDSA_ecdsa_p256_sha2_384_sign(
+  uint8_t *result,
+  uint32_t mLen,
+  uint8_t *m,
+  uint8_t *privKey,
+  uint8_t *k
+);
+
+/* SNIPPET_END: Hacl_Impl_ECDSA_ecdsa_p256_sha2_384_sign */
+
+/* SNIPPET_START: Hacl_Impl_ECDSA_ecdsa_p256_sha2_512_sign */
+
+uint64_t
+Hacl_Impl_ECDSA_ecdsa_p256_sha2_512_sign(
+  uint8_t *result,
+  uint32_t mLen,
+  uint8_t *m,
+  uint8_t *privKey,
+  uint8_t *k
+);
+
+/* SNIPPET_END: Hacl_Impl_ECDSA_ecdsa_p256_sha2_512_sign */
+
+/* SNIPPET_START: Hacl_Impl_ECDSA_ecdsa_signature_blake2 */
+
+uint64_t
+Hacl_Impl_ECDSA_ecdsa_signature_blake2(
+  uint8_t *result,
+  uint32_t mLen,
+  uint8_t *m,
+  uint8_t *privKey,
+  uint8_t *k
+);
+
+/* SNIPPET_END: Hacl_Impl_ECDSA_ecdsa_signature_blake2 */
+
+/* SNIPPET_START: Hacl_Impl_ECDSA_ecdsa_p256_sha2_verification */
 
 bool
-Hacl_Impl_ECDSA_ecdsa_p256_sha2_verify(
+Hacl_Impl_ECDSA_ecdsa_p256_sha2_verification(
   uint32_t mLen,
   uint8_t *m,
   uint8_t *pubKey,
   uint8_t *r,
-  uint8_t *s1
+  uint8_t *s
 );
 
-/* SNIPPET_END: Hacl_Impl_ECDSA_ecdsa_p256_sha2_verify */
+/* SNIPPET_END: Hacl_Impl_ECDSA_ecdsa_p256_sha2_verification */
+
+/* SNIPPET_START: Hacl_Impl_ECDSA_ecdsa_verification_blake2 */
+
+bool
+Hacl_Impl_ECDSA_ecdsa_verification_blake2(
+  uint32_t mLen,
+  uint8_t *m,
+  uint8_t *pubKey,
+  uint8_t *r,
+  uint8_t *s
+);
+
+/* SNIPPET_END: Hacl_Impl_ECDSA_ecdsa_verification_blake2 */
+
+/* SNIPPET_START: Hacl_Impl_ECDSA_ecdsa_verification_blake2hl */
+
+bool
+Hacl_Impl_ECDSA_ecdsa_verification_blake2hl(
+  uint32_t mLen,
+  uint8_t *m,
+  uint8_t *pubKey,
+  uint8_t *r,
+  uint8_t *s
+);
+
+/* SNIPPET_END: Hacl_Impl_ECDSA_ecdsa_verification_blake2hl */
+
+/* SNIPPET_START: Hacl_Impl_ECDSA_decompressionNotCompressedForm */
+
+bool Hacl_Impl_ECDSA_decompressionNotCompressedForm(uint8_t *b, uint8_t *result);
+
+/* SNIPPET_END: Hacl_Impl_ECDSA_decompressionNotCompressedForm */
+
+/* SNIPPET_START: Hacl_Impl_ECDSA_decompressionCompressedForm */
+
+bool Hacl_Impl_ECDSA_decompressionCompressedForm(uint8_t *b, uint8_t *result);
+
+/* SNIPPET_END: Hacl_Impl_ECDSA_decompressionCompressedForm */
+
+/* SNIPPET_START: Hacl_Impl_ECDSA_compressionNotCompressedForm */
+
+void Hacl_Impl_ECDSA_compressionNotCompressedForm(uint8_t *b, uint8_t *result);
+
+/* SNIPPET_END: Hacl_Impl_ECDSA_compressionNotCompressedForm */
+
+/* SNIPPET_START: Hacl_Impl_ECDSA_compressionCompressedForm */
+
+void Hacl_Impl_ECDSA_compressionCompressedForm(uint8_t *b, uint8_t *result);
+
+/* SNIPPET_END: Hacl_Impl_ECDSA_compressionCompressedForm */
 
 #define __Hacl_ECDSA_H_DEFINED
 #endif

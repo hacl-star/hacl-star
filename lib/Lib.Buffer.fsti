@@ -79,6 +79,8 @@ let const_to_lbuffer #a #len (b:clbuffer a len{CB.qual_of (b <: cbuffer a) == CB
 let const_to_ilbuffer #a #len (b:glbuffer a len)  : r:ilbuffer a len =
   const_to_ibuffer #a b
 
+unfold let null (a: Type0) : lbuffer a (size 0) = B.null #a
+
 //val live: #t:buftype -> #a:Type0 -> h:HS.mem -> b:buffer_t t a -> Type
 let live (#t:buftype) (#a:Type0) (h:HS.mem) (b:buffer_t t a) : Type =
   match t with

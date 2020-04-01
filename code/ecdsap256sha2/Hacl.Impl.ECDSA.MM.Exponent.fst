@@ -70,12 +70,13 @@ let cswap bit p1 p2 =
 
 inline_for_extraction noextract
 val montgomery_ladder_exponent_step0: a: felem -> b: felem -> Stack unit
-  (requires fun h -> live h a /\ live h b /\ as_nat h a < prime /\ as_nat h b < prime /\ disjoint a b )
-  (ensures fun h0 _ h1 -> modifies (loc a |+| loc b) h0 h1 /\ as_nat h1 a < prime /\ as_nat h1 b < prime /\
+  (requires fun h -> live h a /\ live h b /\ 
+    as_nat h a < prime /\ as_nat h b < prime /\ disjoint a b)
+  (ensures fun h0 _ h1 -> modifies (loc a |+| loc b) h0 h1 /\ 
+    as_nat h1 a < prime /\ as_nat h1 b < prime /\
     (
       let (r0D, r1D) = _exp_step0 (fromDomain_ (as_nat h0 a)) (fromDomain_ (as_nat h0 b)) in 
-      r0D == fromDomain_ (as_nat h1 a) /\ r1D == fromDomain_ (as_nat h1 b)  /\
-      as_nat h1 a < prime /\ as_nat h1 b < prime
+      r0D == fromDomain_ (as_nat h1 a) /\ r1D == fromDomain_ (as_nat h1 b)
     )
 )
 

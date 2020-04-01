@@ -32,12 +32,34 @@
 #define __Hacl_ECDSA_H
 
 #include "Hacl_Kremlib.h"
+#include "Hacl_Blake2b_32.h"
 #include "Hacl_Hash.h"
+#include "Hacl_Spec.h"
 
+
+void Hacl_Impl_ECDSA_secretToPublicU8(u8 *result, u8 *scalar, u64 *tempBuffer);
 
 u64 Hacl_Impl_ECDSA_ecdsa_p256_sha2_sign(u8 *result, u32 mLen, u8 *m, u8 *privKey, u8 *k);
 
-bool Hacl_Impl_ECDSA_ecdsa_p256_sha2_verify(u32 mLen, u8 *m, u8 *pubKey, u8 *r, u8 *s1);
+u64 Hacl_Impl_ECDSA_ecdsa_p256_sha2_384_sign(u8 *result, u32 mLen, u8 *m, u8 *privKey, u8 *k);
+
+u64 Hacl_Impl_ECDSA_ecdsa_p256_sha2_512_sign(u8 *result, u32 mLen, u8 *m, u8 *privKey, u8 *k);
+
+u64 Hacl_Impl_ECDSA_ecdsa_signature_blake2(u8 *result, u32 mLen, u8 *m, u8 *privKey, u8 *k);
+
+bool Hacl_Impl_ECDSA_ecdsa_p256_sha2_verification(u32 mLen, u8 *m, u8 *pubKey, u8 *r, u8 *s);
+
+bool Hacl_Impl_ECDSA_ecdsa_verification_blake2(u32 mLen, u8 *m, u8 *pubKey, u8 *r, u8 *s);
+
+bool Hacl_Impl_ECDSA_ecdsa_verification_blake2hl(u32 mLen, u8 *m, u8 *pubKey, u8 *r, u8 *s);
+
+bool Hacl_Impl_ECDSA_decompressionNotCompressedForm(u8 *b, u8 *result);
+
+bool Hacl_Impl_ECDSA_decompressionCompressedForm(u8 *b, u8 *result);
+
+void Hacl_Impl_ECDSA_compressionNotCompressedForm(u8 *b, u8 *result);
+
+void Hacl_Impl_ECDSA_compressionCompressedForm(u8 *b, u8 *result);
 
 #define __Hacl_ECDSA_H_DEFINED
 #endif

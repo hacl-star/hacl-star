@@ -1,4 +1,4 @@
-module Hacl.Impl.ECDSA.P256SHA256.Verification
+module Hacl.Impl.ECDSA.P256SHA256.Verification.Hashless
 
 open FStar.HyperStack.All
 open FStar.HyperStack
@@ -6,6 +6,8 @@ module ST = FStar.HyperStack.ST
 
 open Lib.IntTypes
 open Lib.Buffer
+
+open Spec.P256.Lemmas
 
 open Spec.P256.Definitions
 open Hacl.Impl.LowLevel
@@ -22,6 +24,7 @@ open Spec.P256.Lemmas
 
 open Hacl.Impl.P256.PointAdd
 open Hacl.Impl.P256.LowLevel
+open Hacl.Impl.LowLevel.RawCmp
 
 open Hacl.Hash.SHA2
 
@@ -29,12 +32,20 @@ open Hacl.Impl.P256.Signature.Common
 open Lib.ByteSequence
 open Lib.IntVector.Intrinsics
 
+open Spec.Blake2
+open Hacl.Blake2b_32
+
+open Spec.Hash.Definitions
+open Hacl.Hash.Definitions
+
 open FStar.Mul
 
 module H = Spec.Agile.Hash
 module Def = Spec.Hash.Definitions
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 300"
+
+(* https://blenderartists.org/uploads/default/original/4X/8/e/b/8eb44765c0060fb9a6f6cbc0a7b1cd2dcd92dbc8.jpg *)
 
 (* This code is not side channel resistant *)
 inline_for_extraction noextract
@@ -89,30 +100,32 @@ let ecdsa_verification_step1 r s =
   isRCorrect && isSCorrect
 
 
-inline_for_extraction noextract
-val ecdsa_verification_step23: hashAsFelem : felem -> mLen: size_t -> m: lbuffer uint8 mLen -> Stack unit
-  (requires fun h -> live h hashAsFelem /\ live h m)
-  (ensures  fun h0 _ h1 -> modifies (loc hashAsFelem) h0 h1 /\
-  (
-      assert_norm (pow2 32 < pow2 61);
-      let hashM = H.hash Def.SHA2_256 (as_seq h0 m) in 
-      as_nat h1 hashAsFelem == nat_from_bytes_be hashM % prime_p256_order)
+val ecdsa_verification_step23: 
+  mLen: size_t -> m: lbuffer uint8 mLen -> result: felem -> Stack unit
+  (requires fun h -> live h m /\ live h result )
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
+    (
+     let hashM = Spec.Blake2.blake2b (as_seq h0 m) 0 Seq.Base.empty 32 in 
+      as_nat h1 result = nat_from_bytes_be hashM % prime_p256_order
+    )
   )
 
-let ecdsa_verification_step23 hashAsFelem mLen m =
-  push_frame();
-        assert_norm (pow2 32 < pow2 61);
-  let h0 = ST.get() in
-  let mHash = create (size 32) (u8 0) in
-  hash_256 m mLen mHash;
-  toUint64ChangeEndian mHash hashAsFelem;
-  let h1 = ST.get() in
-  lemma_core_0 hashAsFelem h1;
-  reduction_prime_2prime_order hashAsFelem hashAsFelem;
+
+let ecdsa_verification_step23 mLen m result = 
+  push_frame(); 
+    let h0 = ST.get() in 
+  let mHash = create (size 32) (u8 0) in    
+  (* blake2b (size 32) mHash mLen m (size 0) (null uint8);*)
+  toUint64ChangeEndian m result;
+  let h1 = ST.get() in 
+  reduction_prime_2prime_order result result;
+
+  lemma_core_0 result h1;
   Spec.ECDSA.changeEndianLemma (uints_from_bytes_be #U64 #_ #4 (as_seq h1 mHash));
   uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 mHash);
+admit();
   pop_frame()
-
+  
 
 inline_for_extraction noextract
 val ecdsa_verification_step4:
@@ -159,8 +172,8 @@ let ecdsa_verification_step4 bufferU1 bufferU2 r s hash =
     multPowerPartial s inverseS r u2;
   
   let h1 = ST.get() in 
-    changeEndian u1;
-    changeEndian u2;
+    Hacl.Impl.LowLevel.changeEndian u1;
+    Hacl.Impl.LowLevel.changeEndian u2;
     toUint8 u1 bufferU1;
     toUint8 u2 bufferU2;
   
@@ -344,6 +357,8 @@ val compare_felem_bool: a: felem -> b: felem -> Stack bool
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\ r == (as_nat h0 a = as_nat h0 b))
 
 let compare_felem_bool a b   =
+  assert_norm (pow2 64 * pow2 64 == pow2 128);
+  assert_norm (pow2 128 * pow2 64 == pow2 192);
   let a_0 = index a (size 0) in
   let a_1 = index a (size 1) in
   let a_2 = index a (size 2) in
@@ -361,7 +376,7 @@ let compare_felem_bool a b   =
 
 
 val ecdsa_verification_core:
-    publicKeyPoint:point
+  publicKeyPoint:point
   -> hashAsFelem:felem
   -> r:lbuffer uint64 (size 4)
   -> s:lbuffer uint64 (size 4)
@@ -394,9 +409,11 @@ val ecdsa_verification_core:
       modifies (loc publicKeyPoint |+| loc hashAsFelem |+| loc xBuffer |+| loc tempBuffer) h0 h1 /\
        (
          assert_norm (pow2 32 < pow2 61);
-	 let hashM = H.hash Def.SHA2_256 (as_seq h0 m) in 
-	 let hashNat = nat_from_bytes_be hashM % prime_p256_order in 
+	 assert_norm (pow2 32 < pow2 125);
 	 
+	 let hashM = Spec.Blake2.blake2b (as_seq h0 m) 0 Seq.Base.empty 32 in 
+	 let hashNat  = nat_from_bytes_be hashM % prime_p256_order in 
+
          let p0 = pow (as_nat h0 s) (prime_p256_order - 2) * hashNat % prime_p256_order in 
 	 let p1 = pow (as_nat h0 s) (prime_p256_order - 2) * as_nat h0 r % prime_p256_order in 
 
@@ -413,12 +430,11 @@ val ecdsa_verification_core:
   )
 
 let ecdsa_verification_core publicKeyBuffer hashAsFelem r s mLen m xBuffer tempBuffer =
-  assert_norm (pow2 32 < pow2 61 - 1);
   push_frame();
   let tempBufferU8 = create (size 64) (u8 0) in
   let bufferU1 = sub tempBufferU8 (size 0) (size 32) in
   let bufferU2 = sub tempBufferU8 (size 32) (size 32) in
-  ecdsa_verification_step23 hashAsFelem mLen m;
+  ecdsa_verification_step23 mLen m hashAsFelem;
   ecdsa_verification_step4  bufferU1 bufferU2 r s hashAsFelem;
   let r = ecdsa_verification_step5 xBuffer publicKeyBuffer bufferU1 bufferU2 tempBuffer in
   pop_frame();
@@ -427,7 +443,7 @@ let ecdsa_verification_core publicKeyBuffer hashAsFelem r s mLen m xBuffer tempB
 
 (* This code is not side channel resistant *)
 val ecdsa_verification_:
-    pubKey:lbuffer uint64 (size 8)
+  pubKey:lbuffer uint64 (size 8)
   -> r:lbuffer uint64 (size 4)
   -> s: lbuffer uint64 (size 4)
   -> mLen: size_t
@@ -435,16 +451,15 @@ val ecdsa_verification_:
   Stack bool
     (requires fun h -> live h pubKey /\ live h r /\ live h s /\ live h m)
     (ensures fun h0 result h1 ->
-      assert_norm (pow2 32 < pow2 61);
       let pubKeyX = as_nat h0 (gsub pubKey (size 0) (size 4)) in
       let pubKeyY = as_nat h0 (gsub pubKey (size 4) (size 4)) in
       let r = as_nat h0 r in
       let s = as_nat h0 s in
       modifies0 h0 h1 /\
-      result == Spec.ECDSA.ecdsa_verification (pubKeyX, pubKeyY) r s (v mLen) (as_seq h0 m))
+      result == Spec.ECDSA.ecdsa_verification_blake2 (pubKeyX, pubKeyY) r s (v mLen) (as_seq h0 m))
 
-let ecdsa_verification_ pubKey r s mLen m =
-  assert_norm (pow2 32 < pow2 61);
+
+let ecdsa_verification_  pubKey r s mLen m =
   push_frame();
   let tempBufferU64 = create (size 120) (u64 0) in
   let publicKeyBuffer = sub tempBufferU64 (size 0) (size 12) in
@@ -481,8 +496,8 @@ let ecdsa_verification_ pubKey r s mLen m =
         end
 
 
-val ecdsa_verification:
-    pubKey:lbuffer uint8 (size 64)
+val ecdsa_verification_blake2:
+  pubKey:lbuffer uint8 (size 64)
   -> r:lbuffer uint8 (size 32)
   -> s:lbuffer uint8 (size 32)
   -> mLen:size_t
@@ -490,16 +505,14 @@ val ecdsa_verification:
   Stack bool
     (requires fun h -> live h pubKey /\ live h r /\ live h s /\ live h m)
     (ensures fun h0 result h1 ->
-      assert_norm (pow2 32 < pow2 61);
       let publicKeyX = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))) in
       let publicKeyY = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 32) (size 32))) in
       let r = nat_from_bytes_be (as_seq h1 r) in
       let s = nat_from_bytes_be (as_seq h1 s) in
       modifies0 h0 h1 /\
-      result == Spec.ECDSA.ecdsa_verification (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m))
+      result == Spec.ECDSA.ecdsa_verification_blake2 (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m))
 
-let ecdsa_verification pubKey r s mLen m =
-  assert_norm (pow2 32 < pow2 61);
+let ecdsa_verification_blake2 pubKey r s mLen m =
   push_frame();
   let h0 = ST.get() in 
     let publicKeyAsFelem = create (size 8) (u64 0) in

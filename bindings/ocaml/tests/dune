@@ -9,6 +9,7 @@
         nacl_test
         drbg_test
         blake2_test
-        ecdsa_test)
+        ; ecdsa_test
+ )
  (libraries evercrypt)
  (flags (:standard -open Evercrypt -warn-error -3)))

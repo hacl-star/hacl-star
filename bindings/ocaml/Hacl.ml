@@ -309,26 +309,26 @@ module Blake2b_256 : Blake2b =
     let blake2b = Hacl_Blake2b_256.hacl_Blake2b_256_blake2b
   end)
 
-module ECDSA = struct
-  let get_result r =
-    if r = UInt64.zero then
-      true
-    else
-    if r = UInt64.max_int then
-      false
-    else
-      failwith "Unknown return value"
-  let sign signature priv msg k =
-    (* Hacl.Impl.ECDSA.P256SHA256.Signature.ecdsa_signature *)
-    assert (C.size signature = 64);
-    assert (C.size priv = 32);
-    assert (C.size k = 32);
-    assert (C.disjoint signature msg);
-    get_result @@ Hacl_ECDSA.hacl_Impl_ECDSA_ecdsa_p256_sha2_sign (C.ctypes_buf signature) (C.size_uint32 msg) (C.ctypes_buf msg) (C.ctypes_buf priv) (C.ctypes_buf k)
-  let verify pub msg signature =
-    (* Hacl.Impl.ECDSA.P256SHA256.Verification.ecdsa_verification *)
-    assert (C.size signature = 64);
-    assert (C.size pub = 64);
-    let r, s = Bytes.sub signature 0 32, Bytes.sub signature 32 32 in
-    Hacl_ECDSA.hacl_Impl_ECDSA_ecdsa_p256_sha2_verify (C.size_uint32 msg) (C.ctypes_buf msg) (C.ctypes_buf pub) (C.ctypes_buf r) (C.ctypes_buf s)
-end
+(* module ECDSA = struct
+ *   let get_result r =
+ *     if r = UInt64.zero then
+ *       true
+ *     else
+ *     if r = UInt64.max_int then
+ *       false
+ *     else
+ *       failwith "Unknown return value"
+ *   let sign signature priv msg k =
+ *     (\* Hacl.Impl.ECDSA.P256SHA256.Signature.ecdsa_signature *\)
+ *     assert (C.size signature = 64);
+ *     assert (C.size priv = 32);
+ *     assert (C.size k = 32);
+ *     assert (C.disjoint signature msg);
+ *     get_result @@ Hacl_ECDSA.hacl_Impl_ECDSA_ecdsa_p256_sha2_sign (C.ctypes_buf signature) (C.size_uint32 msg) (C.ctypes_buf msg) (C.ctypes_buf priv) (C.ctypes_buf k)
+ *   let verify pub msg signature =
+ *     (\* Hacl.Impl.ECDSA.P256SHA256.Verification.ecdsa_verification *\)
+ *     assert (C.size signature = 64);
+ *     assert (C.size pub = 64);
+ *     let r, s = Bytes.sub signature 0 32, Bytes.sub signature 32 32 in
+ *     Hacl_ECDSA.hacl_Impl_ECDSA_ecdsa_p256_sha2_verify (C.size_uint32 msg) (C.ctypes_buf msg) (C.ctypes_buf pub) (C.ctypes_buf r) (C.ctypes_buf s)
+ * end *)

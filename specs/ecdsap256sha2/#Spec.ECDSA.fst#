@@ -12,6 +12,8 @@ open Spec.Hash
 open Spec.P256
 
 module Def = Spec.Hash.Definitions
+open Spec.Blake2
+
 
 open FStar.Math.Lemmas
 open FStar.Math.Lib
@@ -334,6 +336,67 @@ let rec lemma_exponen_spec k start index =
         }
     end
 
+#push-options "--ifuel 1"
+
+val nat_from_intlist_le: #t:inttype{unsigned t} -> #l:secrecy_level -> list (uint_t t l) -> nat
+
+let rec nat_from_intlist_le #t #l = function
+  | [] -> 0
+  | hd :: tl -> v hd + pow2 (bits t) * nat_from_intlist_le tl
+
+val nat_from_intlist_be: #t:inttype{unsigned t} -> #l:secrecy_level -> list (uint_t t l) -> nat
+
+let rec nat_from_intlist_be #t #l = function
+  | [] -> 0
+  | hd :: tl -> pow2 (FStar.List.Tot.Base.length tl * bits t) * v hd + nat_from_intlist_be tl
+
+#pop-options
+
+#push-options "--fuel 1"
+
+val index_seq_of_list_cons: #a:Type -> x:a -> l:list a -> i:nat{i < List.Tot.length l} -> Lemma
+  (Seq.index (Seq.seq_of_list (x::l)) (i+1) == Seq.index (Seq.seq_of_list l) i)
+
+let index_seq_of_list_cons #a x l i =
+  assert (Seq.index (Seq.seq_of_list (x::l)) (i+1) == List.Tot.index (x::l) (i+1))
+
+val nat_from_intlist_seq_le: #t:inttype{unsigned t} -> #l:secrecy_level
+  -> len:size_nat -> b:list (uint_t t l){List.Tot.length b = len}
+  -> Lemma (nat_from_intlist_le b == nat_from_intseq_le (of_list b))
+
+let rec nat_from_intlist_seq_le #t #l len b =
+  match b with
+  | [] -> ()
+  | hd :: tl ->
+    begin
+    let s = of_list b in
+    Classical.forall_intro (index_seq_of_list_cons hd tl);
+    assert (equal (of_list tl) (slice s 1 len));
+    assert (index s 0 == List.Tot.index b 0);
+    nat_from_intseq_le_lemma0 (slice s 0 1);
+    nat_from_intseq_le_slice_lemma s 1;
+    nat_from_intlist_seq_le (len - 1) tl
+    end
+
+val nat_from_intlist_seq_be: #t: inttype {unsigned t} -> #l: secrecy_level
+  -> len: size_nat -> b: list (uint_t t l) {FStar.List.Tot.Base.length b = len}
+  -> Lemma (nat_from_intlist_be b == nat_from_intseq_be (of_list b))
+
+let rec nat_from_intlist_seq_be #t #l len b =
+  match b with
+  | [] -> ()
+  | hd :: tl ->
+    begin
+      let s = of_list b in
+      Classical.forall_intro (index_seq_of_list_cons hd tl);
+      assert (equal (of_list tl) (slice s 1 len));
+      assert (index s 0 == List.Tot.index b 0);
+      nat_from_intlist_seq_be (len - 1) tl;
+      nat_from_intseq_be_lemma0 (slice s 0 1);
+      nat_from_intseq_be_slice_lemma s 1
+      end
+
+#pop-options
 
 unfold let prime_p256_order_inverse_list: list uint8 =
  [
@@ -366,6 +429,7 @@ let prime_p256_order_seq: s:lseq uint8 32{nat_from_intseq_be s == prime_p256_ord
   assert_norm (nat_from_intlist_be prime_p256_order_list == prime_p256_order);
   of_list prime_p256_order_list
 
+open Spec.P256.Definitions
 
 val exponent_spec: a:nat_prime -> r:nat_prime{r = pow a (prime_p256_order - 2) % prime_p256_order}
 
@@ -454,9 +518,9 @@ val verifyQValidCurvePointSpec:
 
 let verifyQValidCurvePointSpec publicKey =
   let (x: nat), (y:nat), (z:nat) = publicKey in
-  x < Spec.P256.Definitions.prime256 &&
-  y < Spec.P256.Definitions.prime256 &&
-  z < Spec.P256.Definitions.prime256 &&
+  x < prime256 &&
+  y < prime256 &&
+  z < prime256 &&
   isPointOnCurve (x, y, z) &&
   isPointAtInfinity (scalar_multiplication prime_p256_order_seq publicKey)
 
@@ -468,31 +532,21 @@ let checkCoordinates r s =
   then true
   else false
 
-open Spec.Hash.Definitions
 
-val hashSpec: a: hash_alg {SHA2_256? a \/ SHA2_384? a \/ SHA2_512? a} -> 
-  Tot (m: bytes {Seq.length m <= max_input_length a}  -> r: Lib.ByteSequence.lbytes (hash_length a))
+unfold
+let basePoint: point_nat_prime =
+  assert_norm (0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296 < prime256);
+  (0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296,
+   0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5,
+   1)
 
 
-let hashSpec a = 
-  match a with 
-  |SHA2_256 -> Spec.Agile.Hash.hash Def.SHA2_256
-  |SHA2_384 -> Spec.Agile.Hash.hash Def.SHA2_384
-  |SHA2_512 -> Spec.Agile.Hash.hash Def.SHA2_512
-    
-
-open Lib.ByteSequence 
-
-val ecdsa_verification_agile:
-  alg: hash_alg {SHA2_256? alg \/ SHA2_384? alg \/ SHA2_512? alg} 
-  -> publicKey:tuple2 nat nat -> r:nat -> s:nat
-  -> mLen:size_nat
-  -> m:lseq uint8 mLen
+val ecdsa_verification: publicKey:tuple2 nat nat -> r:nat -> s:nat
+  -> mLen:size_nat{mLen < Def.(max_input_length SHA2_256)}
+  -> input:lseq uint8 mLen
   -> bool
 
-let ecdsa_verification_agile alg publicKey r s mLen m =
-  assert_norm (pow2 32 < pow2 61);
-  assert_norm (pow2 32 < pow2 125);
+let ecdsa_verification publicKey r s mLen input =
   let publicJacobian = toJacobianCoordinates publicKey in
   if not (verifyQValidCurvePointSpec publicJacobian) then false
   else
@@ -500,41 +554,12 @@ let ecdsa_verification_agile alg publicKey r s mLen m =
     if not (checkCoordinates r s) then false
     else
       begin
-      let hashM = (hashSpec alg) m in
-      let cutHashM = sub hashM 0 32 in 
-      let hashNat = nat_from_bytes_be cutHashM % prime_p256_order in
+      let open Lib.ByteSequence in
 
-      let u1 = nat_to_bytes_be 32 (pow s (prime_p256_order - 2) * hashNat % prime_p256_order) in
-      let u2 = nat_to_bytes_be 32 (pow s (prime_p256_order - 2) * r % prime_p256_order) in
-
-      let pointAtInfinity = (0, 0, 0) in
-      let u1D, _ = montgomery_ladder_spec u1 (pointAtInfinity, basePoint) in
-      let u2D, _ = montgomery_ladder_spec u2 (pointAtInfinity, publicJacobian) in
-
-      let sumPoints = _point_add u1D u2D in
-      let pointNorm = _norm sumPoints in
-      let x, y, z = pointNorm in
-      if Spec.P256.isPointAtInfinity pointNorm then false else x = r
-    end
-  end
-
-
-val ecdsa_verification_blake2:
-  publicKey:tuple2 nat nat -> r:nat -> s:nat
-  -> mLen:size_nat
-  -> m:lseq uint8 mLen
-  -> bool
-
-let ecdsa_verification_blake2 publicKey r s mLen m =
-  let publicJacobian = toJacobianCoordinates publicKey in
-  if not (verifyQValidCurvePointSpec publicJacobian) then false
-  else
-    begin
-    if not (checkCoordinates r s) then false
-    else
-      begin
+      let hashM = blake2b input 0 (
       
-      let hashM = Spec.Blake2.blake2b m 0 Seq.Base.empty 32 in
+      
+      input in
       let hashNat = nat_from_bytes_be hashM % prime_p256_order in
 
       let u1 = nat_to_bytes_be 32 (pow s (prime_p256_order - 2) * hashNat % prime_p256_order) in
@@ -551,47 +576,18 @@ let ecdsa_verification_blake2 publicKey r s mLen m =
     end
   end
 
-
-
-val ecdsa_signature_agile:
-  alg: hash_alg {SHA2_256? alg \/ SHA2_384? alg \/ SHA2_512? alg}
-  -> mLen:size_nat
-  -> m:lseq uint8 mLen
-  -> privateKey:lseq uint8 32
-  -> k:lseq uint8 32
-  -> tuple3 nat nat uint64
-
-let ecdsa_signature_agile alg mLen m privateKey k =
-  assert_norm (pow2 32 < pow2 61);
-  assert_norm (pow2 32 < pow2 125);
-  let r, _ = montgomery_ladder_spec k ((0,0,0), basePoint) in
-  let (xN, _, _) = _norm r in
-  let hashM = (hashSpec alg) m in
-  let cutHashM = sub hashM 0 32 in 
-  let z = nat_from_bytes_be cutHashM % prime_p256_order in
-  let kFelem = nat_from_bytes_be k in
-  let privateKeyFelem = nat_from_bytes_be privateKey in
-  let resultR = xN % prime_p256_order in
-  let resultS = (z + resultR * privateKeyFelem) * pow kFelem (prime_p256_order - 2) % prime_p256_order in
-    if resultR = 0 || resultS = 0 then
-      resultR, resultS, u64 (pow2 64 - 1)
-    else
-      resultR, resultS, u64 0
-
-
-val ecdsa_signature_blake2:
+val ecdsa_signature:
     mLen:size_nat
-  -> m:lseq uint8 mLen
+  -> input:lseq uint8 mLen
   -> privateKey:lseq uint8 32
   -> k:lseq uint8 32
   -> tuple3 nat nat uint64
 
-let ecdsa_signature_blake2 mLen m privateKey k =
+let ecdsa_signature mLen input privateKey k =
   assert_norm (pow2 32 < pow2 61);
-  assert_norm (pow2 32 < pow2 125);
   let r, _ = montgomery_ladder_spec k ((0,0,0), basePoint) in
   let (xN, _, _) = _norm r in
-  let hashM = Spec.Blake2.blake2b m 0 Seq.Base.empty 32 in
+  let hashM = Spec.Agile.Hash.hash Def.SHA2_256 input in
   let z = nat_from_bytes_be hashM % prime_p256_order in
   let kFelem = nat_from_bytes_be k in
   let privateKeyFelem = nat_from_bytes_be privateKey in

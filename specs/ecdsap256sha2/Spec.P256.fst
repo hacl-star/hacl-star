@@ -9,14 +9,10 @@ open Lib.Sequence
 open Spec.P256.Definitions
 open Spec.P256.Lemmas
 
+open FStar.Math.Lemmas
+open FStar.Math.Lib
+
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
-
-(*
-Curve NIST-P256
-
-y^2 = x^3-3x+41058363725152142129326129780047268409114441015993725554835256314039467401291
-
-modulo p = 2^256 - 2^224 + 2^192 + 2^96 - 1 *)
 
 let prime = prime256
 
@@ -112,6 +108,22 @@ let _norm (p:point_nat_prime) : point_nat_prime =
 let scalar = lbytes 32
 
 
+val lemma_scalar_ith: sc:lbytes 32 -> k:nat{k < 32} -> Lemma
+  (v sc.[k] == nat_from_intseq_le sc / pow2 (8 * k) % pow2 8)
+
+let lemma_scalar_ith sc k =
+  index_nat_to_intseq_le #U8 #SEC 32 (nat_from_intseq_le sc) k;
+  nat_from_intseq_le_inj sc (nat_to_intseq_le 32 (nat_from_intseq_le sc))
+
+
+val lemma_euclidian_for_ithbit: k: nat -> i: nat
+  -> Lemma (k / (pow2 (8 * (i / 8)) * pow2 (i % 8)) == k / pow2 i)
+
+let lemma_euclidian_for_ithbit k i =
+  lemma_div_def i 8;
+  pow2_plus (8 * (i / 8)) (i % 8)
+
+
 let ith_bit (k:lbytes 32) (i:nat{i < 256}) : uint64 =
   let q = 31 - i / 8 in let r = size (i % 8) in
   to_u64 ((index k q >>. r) &. u8 1)
@@ -181,3 +193,66 @@ let point_prime_to_coordinates (p:point_seq) =
 
 val toJacobianCoordinates: tuple2 nat nat -> tuple3 nat nat nat
 let toJacobianCoordinates (r0, r1) = (r0, r1, 1)
+
+
+#push-options "--ifuel 1"
+
+val nat_from_intlist_le: #t:inttype{unsigned t} -> #l:secrecy_level -> list (uint_t t l) -> nat
+
+let rec nat_from_intlist_le #t #l = function
+  | [] -> 0
+  | hd :: tl -> v hd + pow2 (bits t) * nat_from_intlist_le tl
+
+val nat_from_intlist_be: #t:inttype{unsigned t} -> #l:secrecy_level -> list (uint_t t l) -> nat
+
+let rec nat_from_intlist_be #t #l = function
+  | [] -> 0
+  | hd :: tl -> pow2 (FStar.List.Tot.Base.length tl * bits t) * v hd + nat_from_intlist_be tl
+
+#pop-options
+
+#push-options "--fuel 1"
+
+val index_seq_of_list_cons: #a:Type -> x:a -> l:list a -> i:nat{i < List.Tot.length l} -> Lemma
+  (Seq.index (Seq.seq_of_list (x::l)) (i+1) == Seq.index (Seq.seq_of_list l) i)
+
+let index_seq_of_list_cons #a x l i =
+  assert (Seq.index (Seq.seq_of_list (x::l)) (i+1) == List.Tot.index (x::l) (i+1))
+
+val nat_from_intlist_seq_le: #t:inttype{unsigned t} -> #l:secrecy_level
+  -> len:size_nat -> b:list (uint_t t l){List.Tot.length b = len}
+  -> Lemma (nat_from_intlist_le b == nat_from_intseq_le (of_list b))
+
+let rec nat_from_intlist_seq_le #t #l len b =
+  match b with
+  | [] -> ()
+  | hd :: tl ->
+    begin
+    let s = of_list b in
+    Classical.forall_intro (index_seq_of_list_cons hd tl);
+    assert (equal (of_list tl) (slice s 1 len));
+    assert (index s 0 == List.Tot.index b 0);
+    nat_from_intseq_le_lemma0 (slice s 0 1);
+    nat_from_intseq_le_slice_lemma s 1;
+    nat_from_intlist_seq_le (len - 1) tl
+    end
+
+val nat_from_intlist_seq_be: #t: inttype {unsigned t} -> #l: secrecy_level
+  -> len: size_nat -> b: list (uint_t t l) {FStar.List.Tot.Base.length b = len}
+  -> Lemma (nat_from_intlist_be b == nat_from_intseq_be (of_list b))
+
+let rec nat_from_intlist_seq_be #t #l len b =
+  match b with
+  | [] -> ()
+  | hd :: tl ->
+    begin
+      let s = of_list b in
+      Classical.forall_intro (index_seq_of_list_cons hd tl);
+      assert (equal (of_list tl) (slice s 1 len));
+      assert (index s 0 == List.Tot.index b 0);
+      nat_from_intlist_seq_be (len - 1) tl;
+      nat_from_intseq_be_lemma0 (slice s 0 1);
+      nat_from_intseq_be_slice_lemma s 1
+      end
+
+#pop-options

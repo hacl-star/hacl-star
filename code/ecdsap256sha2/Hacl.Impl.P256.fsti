@@ -27,12 +27,19 @@ open FStar.Math.Lemmas
 module B = LowStar.Buffer
 open FStar.Mul
 
-
 inline_for_extraction noextract 
 val toDomain: value: felem -> result: felem ->  Stack unit 
   (requires fun h ->  as_nat h value < prime /\ live h value /\live h result /\ eq_or_disjoint value result)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat h1 result = toDomain_ (as_nat h0 value))
  
+ 
+inline_for_extraction noextract
+val fromDomain: f: felem-> result: felem-> Stack unit 
+  (requires fun h -> live h f /\ live h result /\ as_nat h f < prime)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
+    as_nat h1 result = (as_nat h0 f * modp_inv2(pow2 256)) % prime /\ 
+    as_nat h1 result = fromDomain_ (as_nat h0 f))
+
 
 noextract 
 let point_x_as_nat (h: mem) (e: point) : GTot nat = 
@@ -209,6 +216,16 @@ val secretToPublic: result: point -> scalar: lbuffer uint8 (size 32) -> tempBuff
   )
 
 
+val secretToPublicU8: result: lbuffer uint8 (size 64) -> scalar: lbuffer uint8 (size 32) -> tempBuffer: lbuffer uint64 (size 100) ->
+  Stack unit
+    (requires fun h -> 
+      live h result /\ live h scalar /\ live h tempBuffer /\ 
+      LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer; loc scalar; loc result]
+    )
+  (
+    ensures fun h0 _ h1 -> modifies (loc result |+| loc tempBuffer) h0 h1 
+  )
+
 val secretToPublicWithoutNorm: result: point -> scalar: lbuffer uint8 (size 32) -> 
  tempBuffer: lbuffer uint64 (size 100) ->
   Stack unit
@@ -225,4 +242,3 @@ val secretToPublicWithoutNorm: result: point -> scalar: lbuffer uint8 (size 32) 
 	let p1 = fromDomainPoint(point_prime_to_coordinates (as_seq h1 result)) in 
 	let rN, _ = montgomery_ladder_spec (as_seq h0 scalar) ((0, 0, 0), basePoint) in 
 	rN == p1))  
-
