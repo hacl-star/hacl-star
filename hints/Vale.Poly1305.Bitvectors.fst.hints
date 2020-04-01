@@ -421,9 +421,15 @@
       2,
       1,
       0,
-      [ "@query" ],
+      [
+        "@MaxIFuel_assumption", "@query",
+        "projection_inverse_BoxBitVec128_proj_0",
+        "projection_inverse_BoxBitVec64_proj_0",
+        "refinement_interpretation_Tm_refine_c56804022554b54425861cac611cccb4",
+        "refinement_interpretation_Tm_refine_ec5c8ae42eac80d2d1b6d904c9523e69"
+      ],
       0,
-      "85bd38c65d8ee1b1afb09b64549ef434"
+      "2dd9488969e8ff68680e157b2202ab59"
     ],
     [
       "Vale.Poly1305.Bitvectors.uint_to_nat",
@@ -526,9 +532,16 @@
       2,
       1,
       0,
-      [ "@query" ],
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_Vale.Poly1305.Bitvectors.bv128_64_64",
+        "projection_inverse_BoxBitVec128_proj_0",
+        "projection_inverse_BoxBitVec64_proj_0",
+        "refinement_interpretation_Tm_refine_e86593445f6419d21e77060f88d51853",
+        "refinement_interpretation_Tm_refine_ec5c8ae42eac80d2d1b6d904c9523e69"
+      ],
       0,
-      "e5c4fe13acda1daf9db9ba723112932b"
+      "421d0dbe806879a49fafc7302f785188"
     ],
     [
       "Vale.Poly1305.Bitvectors.lowerUpper128u",
