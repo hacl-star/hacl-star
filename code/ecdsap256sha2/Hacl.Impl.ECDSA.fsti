@@ -35,6 +35,7 @@ open Hacl.Impl.ECDSA.P256SHA256.Signature.Agile
 open Hacl.Impl.ECDSA.P256SHA256.Signature.Blake2
 
 open Hacl.Impl.ECDSA.P256SHA256.Verification.Agile
+open Hacl.Impl.ECDSA.P256SHA256.Verification.Hashless
 
 open Spec.P256.MontgomeryMultiplication
 
@@ -186,6 +187,23 @@ val ecdsa_verification_blake2:
       modifies0 h0 h1 /\
       result == Spec.ECDSA.ecdsa_verification_blake2 (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m))
 
+
+val ecdsa_verification_blake2hl:
+  mLen:size_t
+  -> m:lbuffer uint8 mLen 
+  -> pubKey:lbuffer uint8 (size 64)
+  -> r:lbuffer uint8 (size 32)
+  -> s:lbuffer uint8 (size 32)
+  -> 
+  Stack bool
+    (requires fun h -> live h pubKey /\ live h r /\ live h s /\ live h m)
+    (ensures fun h0 result h1 ->
+      let publicKeyX = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))) in
+      let publicKeyY = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 32) (size 32))) in
+      let r = nat_from_bytes_be (as_seq h1 r) in
+      let s = nat_from_bytes_be (as_seq h1 s) in
+      modifies0 h0 h1 /\
+      result == Spec.ECDSA.ecdsa_verification_blake2 (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m))
 
 
 
