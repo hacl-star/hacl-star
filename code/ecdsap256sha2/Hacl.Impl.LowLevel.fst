@@ -700,6 +700,7 @@ let lemma_320_64 a b c d e u =
 
 
 
+#push-options "--z3rlimit 1000"
 val sq0: f:  lbuffer uint64 (size 4) -> result: lbuffer uint64 (size 4) -> memory: lbuffer uint64 (size 12) -> temp: lbuffer uint64 (size 5) -> Stack uint64
   (requires fun h -> live h result /\ live h f /\ live h memory /\ live h temp /\ disjoint result temp
     /\ disjoint result memory /\ disjoint memory temp 
@@ -820,6 +821,8 @@ let sq0 f result memory temp =
       uint_v f0 * uint_v f3 * pow2 64 * pow2 64 * pow2 64);
 
   r
+
+#pop-options
 
 val sq1: f: felem -> f4: felem -> result: felem -> memory: lbuffer uint64 (size 12) -> 
   temp: lbuffer uint64 (size 5) -> 
