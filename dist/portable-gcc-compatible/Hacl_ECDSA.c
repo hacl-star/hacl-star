@@ -169,7 +169,7 @@ add4_variables(
 
 /* SNIPPET_START: sub4_il */
 
-static uint64_t sub4_il(uint64_t *x, uint64_t *y, uint64_t *result)
+static uint64_t sub4_il(uint64_t *x, const uint64_t *y, uint64_t *result)
 {
   uint64_t *r0 = result;
   uint64_t *r1 = result + (uint32_t)1U;
@@ -226,7 +226,7 @@ static void mult64_0(uint64_t *x, uint64_t u, uint64_t *result, uint64_t *temp)
 
 /* SNIPPET_START: mult64_0il */
 
-static void mult64_0il(uint64_t *x, uint64_t u, uint64_t *result, uint64_t *temp)
+static void mult64_0il(const uint64_t *x, uint64_t u, uint64_t *result, uint64_t *temp)
 {
   uint64_t f0 = x[0U];
   mul64(f0, u, result, temp);
@@ -249,7 +249,7 @@ mult64_c(uint64_t x, uint64_t u, uint64_t cin, uint64_t *result, uint64_t *temp)
 
 /* SNIPPET_START: mul1_il */
 
-static uint64_t mul1_il(uint64_t *f, uint64_t u, uint64_t *result)
+static uint64_t mul1_il(const uint64_t *f, uint64_t u, uint64_t *result)
 {
   uint64_t temp = (uint64_t)0U;
   uint64_t f1 = f[1U];
@@ -532,7 +532,7 @@ static void shift_256_impl(uint64_t *i, uint64_t *o)
 
 /* SNIPPET_START: shortened_mul */
 
-static void shortened_mul(uint64_t *a, uint64_t b, uint64_t *result)
+static void shortened_mul(const uint64_t *a, uint64_t b, uint64_t *result)
 {
   uint64_t *result04 = result;
   uint64_t c = mul1_il(a, b, result04);
@@ -590,7 +590,8 @@ static void toUint8(uint64_t *i, uint8_t *o)
 
 /* SNIPPET_START: prime256_buffer */
 
-static uint64_t
+static const
+uint64_t
 prime256_buffer[4U] =
   {
     (uint64_t)0xffffffffffffffffU,
@@ -1527,10 +1528,10 @@ static void zero_buffer(uint64_t *p)
 
 /* SNIPPET_END: zero_buffer */
 
-/* SNIPPET_START: scalarMultiplicationI */
+/* SNIPPET_START: scalarMultiplicationL */
 
 static void
-scalarMultiplicationI(uint64_t *p, uint64_t *result, uint8_t *scalar, uint64_t *tempBuffer)
+scalarMultiplicationL(uint64_t *p, uint64_t *result, uint8_t *scalar, uint64_t *tempBuffer)
 {
   uint64_t *q = tempBuffer;
   zero_buffer(q);
@@ -1550,7 +1551,37 @@ scalarMultiplicationI(uint64_t *p, uint64_t *result, uint8_t *scalar, uint64_t *
   norm(q, result, buff);
 }
 
-/* SNIPPET_END: scalarMultiplicationI */
+/* SNIPPET_END: scalarMultiplicationL */
+
+/* SNIPPET_START: scalarMultiplicationC */
+
+static void
+scalarMultiplicationC(
+  uint64_t *p,
+  uint64_t *result,
+  const uint8_t *scalar,
+  uint64_t *tempBuffer
+)
+{
+  uint64_t *q = tempBuffer;
+  zero_buffer(q);
+  uint64_t *buff = tempBuffer + (uint32_t)12U;
+  pointToDomain(p, result);
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)256U; i++)
+  {
+    uint32_t bit0 = (uint32_t)255U - i;
+    uint64_t
+    bit =
+      (uint64_t)(scalar[(uint32_t)31U - bit0 / (uint32_t)8U] >> bit0 % (uint32_t)8U & (uint8_t)1U);
+    cswap(bit, q, result);
+    point_add(q, result, result, buff);
+    point_double(q, q, buff);
+    cswap(bit, q, result);
+  }
+  norm(q, result, buff);
+}
+
+/* SNIPPET_END: scalarMultiplicationC */
 
 /* SNIPPET_START: uploadBasePoint */
 
@@ -1602,6 +1633,31 @@ scalarMultiplicationWithoutNorm(
 
 /* SNIPPET_END: scalarMultiplicationWithoutNorm */
 
+/* SNIPPET_START: secretToPublic */
+
+static void secretToPublic(uint64_t *result, uint8_t *scalar, uint64_t *tempBuffer)
+{
+  uint64_t basePoint1[12U] = { 0U };
+  uploadBasePoint(basePoint1);
+  uint64_t *q = tempBuffer;
+  uint64_t *buff = tempBuffer + (uint32_t)12U;
+  zero_buffer(q);
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)256U; i++)
+  {
+    uint32_t bit0 = (uint32_t)255U - i;
+    uint64_t
+    bit =
+      (uint64_t)(scalar[(uint32_t)31U - bit0 / (uint32_t)8U] >> bit0 % (uint32_t)8U & (uint8_t)1U);
+    cswap(bit, q, basePoint1);
+    point_add(q, basePoint1, basePoint1, buff);
+    point_double(q, q, buff);
+    cswap(bit, q, basePoint1);
+  }
+  norm(q, result, buff);
+}
+
+/* SNIPPET_END: secretToPublic */
+
 /* SNIPPET_START: secretToPublicWithoutNorm */
 
 static void secretToPublicWithoutNorm(uint64_t *result, uint8_t *scalar, uint64_t *tempBuffer)
@@ -1629,7 +1685,8 @@ static void secretToPublicWithoutNorm(uint64_t *result, uint8_t *scalar, uint64_
 
 /* SNIPPET_START: prime256order_buffer */
 
-static uint64_t
+static const
+uint64_t
 prime256order_buffer[4U] =
   {
     (uint64_t)17562291160714782033U,
@@ -1642,7 +1699,8 @@ prime256order_buffer[4U] =
 
 /* SNIPPET_START: order_inverse_buffer */
 
-static uint8_t
+static const
+uint8_t
 order_inverse_buffer[32U] =
   {
     (uint8_t)79U, (uint8_t)37U, (uint8_t)99U, (uint8_t)252U, (uint8_t)194U, (uint8_t)202U,
@@ -1657,7 +1715,8 @@ order_inverse_buffer[32U] =
 
 /* SNIPPET_START: order_buffer */
 
-static uint8_t
+static const
+uint8_t
 order_buffer[32U] =
   {
     (uint8_t)255U, (uint8_t)255U, (uint8_t)255U, (uint8_t)255U, (uint8_t)0U, (uint8_t)0U,
@@ -1925,7 +1984,7 @@ static bool isOrderCorrect(uint64_t *p, uint64_t *tempBuffer)
   uint64_t multResult[12U] = { 0U };
   uint64_t pBuffer[12U] = { 0U };
   memcpy(pBuffer, p, (uint32_t)12U * sizeof (p[0U]));
-  scalarMultiplicationI(pBuffer, multResult, order_buffer, tempBuffer);
+  scalarMultiplicationC(pBuffer, multResult, order_buffer, tempBuffer);
   bool result = isPointAtInfinityPublic(multResult);
   return result;
 }
@@ -1947,6 +2006,72 @@ static bool verifyQValidCurvePoint(uint64_t *pubKeyAsPoint, uint64_t *tempBuffer
 }
 
 /* SNIPPET_END: verifyQValidCurvePoint */
+
+/* SNIPPET_START: Hacl_Impl_P256_DH_ecp256dh_i */
+
+uint64_t Hacl_Impl_P256_DH_ecp256dh_i(uint8_t *result, uint8_t *scalar)
+{
+  uint64_t tempBuffer[100U] = { 0U };
+  uint64_t resultBuffer[12U] = { 0U };
+  uint64_t *resultBufferX = resultBuffer;
+  uint64_t *resultBufferY = resultBuffer + (uint32_t)4U;
+  uint8_t *resultX = result;
+  uint8_t *resultY = result + (uint32_t)32U;
+  secretToPublic(resultBuffer, scalar, tempBuffer);
+  uint64_t flag = isPointAtInfinityPrivate(resultBuffer);
+  changeEndian(resultBufferX);
+  changeEndian(resultBufferY);
+  toUint8(resultBufferX, resultX);
+  toUint8(resultBufferY, resultY);
+  return flag;
+}
+
+/* SNIPPET_END: Hacl_Impl_P256_DH_ecp256dh_i */
+
+/* SNIPPET_START: _ecp256dh_r */
+
+static uint64_t _ecp256dh_r(uint64_t *result, uint64_t *pubKey, uint8_t *scalar)
+{
+  uint64_t tempBuffer[100U] = { 0U };
+  uint64_t publicKeyBuffer[12U] = { 0U };
+  bufferToJac(pubKey, publicKeyBuffer);
+  bool publicKeyCorrect = verifyQValidCurvePoint(publicKeyBuffer, tempBuffer);
+  if (publicKeyCorrect)
+  {
+    scalarMultiplicationL(publicKeyBuffer, result, scalar, tempBuffer);
+    uint64_t flag = isPointAtInfinityPrivate(result);
+    return flag;
+  }
+  return (uint64_t)18446744073709551615U;
+}
+
+/* SNIPPET_END: _ecp256dh_r */
+
+/* SNIPPET_START: Hacl_Impl_P256_DH_ecp256dh_r */
+
+uint64_t Hacl_Impl_P256_DH_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar)
+{
+  uint64_t resultBufferFelem[12U] = { 0U };
+  uint64_t *resultBufferFelemX = resultBufferFelem;
+  uint64_t *resultBufferFelemY = resultBufferFelem + (uint32_t)4U;
+  uint8_t *resultX = result;
+  uint8_t *resultY = result + (uint32_t)32U;
+  uint64_t publicKeyAsFelem[8U] = { 0U };
+  uint64_t *publicKeyFelemX = publicKeyAsFelem;
+  uint64_t *publicKeyFelemY = publicKeyAsFelem + (uint32_t)4U;
+  uint8_t *pubKeyX = pubKey;
+  uint8_t *pubKeyY = pubKey + (uint32_t)32U;
+  toUint64ChangeEndian(pubKeyX, publicKeyFelemX);
+  toUint64ChangeEndian(pubKeyY, publicKeyFelemY);
+  uint64_t flag = _ecp256dh_r(resultBufferFelem, publicKeyAsFelem, scalar);
+  changeEndian(resultBufferFelemX);
+  changeEndian(resultBufferFelemY);
+  toUint8(resultBufferFelemX, resultX);
+  toUint8(resultBufferFelemY, resultY);
+  return flag;
+}
+
+/* SNIPPET_END: Hacl_Impl_P256_DH_ecp256dh_r */
 
 /* SNIPPET_START: cswap0 */
 

@@ -154,10 +154,6 @@ void Hacl_Hash_Core_SHA2_finish_384(uint64_t *s, uint8_t *dst);
 
 void Hacl_Hash_Core_SHA2_finish_512(uint64_t *s, uint8_t *dst);
 
-extern uint32_t Hacl_Hash_Core_SHA2_Constants_k224_256[64U];
-
-extern uint64_t Hacl_Hash_Core_SHA2_Constants_k384_512[80U];
-
 uint32_t Hacl_Hash_Definitions_word_len(Spec_Hash_Definitions_hash_alg a);
 
 uint32_t Hacl_Hash_Definitions_block_len(Spec_Hash_Definitions_hash_alg a);

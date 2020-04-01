@@ -173,7 +173,7 @@ let create_in a r =
   p
 #pop-options
 
-#push-options "--z3rlimit 100"
+#push-options "--z3rlimit 100 --retry 3"
 
 let init a s =
   let open LowStar.BufferOps in

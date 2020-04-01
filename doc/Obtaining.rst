@@ -83,6 +83,8 @@ developments.  In addition to these use cases, the library developers
 and other HACL* users have also developed bindings for other programming languages:
 
 - OCaml: In a development branch, we have an OCaml wrapper for the full EverCrypt API
-- WebAssembly: The HACL* library has been compiled to `WebAssembly <https://github.com/Inria-Prosecco/hacl-wasm>`_
+- Javascript/WebAssembly: The HACL* library is compiled to WebAssembly using the KreMLin compiler,
+  and we also provide an idiomatic Javascript wrapper as a `Node.js package <https://www.npmjs.com/package/hacl-wasm>`_.
+  See also :doc:`Javascript`.
 
 Various users have also published Rust crates for HACL*, but these have not been vetted by the HACL maintainers.

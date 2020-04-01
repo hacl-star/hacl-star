@@ -34,7 +34,7 @@ let get_iv a s =
   recall_contents #(Spec.pub_word_t Spec.Blake2S) #8ul ivTable_S (Spec.ivTable Spec.Blake2S);
   recall_contents #(Spec.pub_word_t Spec.Blake2B) #8ul ivTable_B (Spec.ivTable Spec.Blake2B);
   [@inline_let]
-  let ivTable: (x:ilbuffer (Spec.pub_word_t a) 8ul{witnessed x (Spec.ivTable a) /\ recallable x}) =
+  let ivTable: (x:glbuffer (Spec.pub_word_t a) 8ul{witnessed x (Spec.ivTable a) /\ recallable x}) =
     match a with
     | Spec.Blake2S -> ivTable_S
     | Spec.Blake2B -> ivTable_B
@@ -79,7 +79,7 @@ let get_r a s =
   recall_contents #(rotval (Spec.wt Spec.Blake2B)) #4ul rTable_B (Spec.rTable Spec.Blake2B);
   let h0 = ST.get() in
   [@inline_let]
-  let rTable: (x:ilbuffer (rotval (Spec.wt a)) 4ul{witnessed x (Spec.rTable a) /\ recallable x}) =
+  let rTable: (x:glbuffer (rotval (Spec.wt a)) 4ul{witnessed x (Spec.rTable a) /\ recallable x}) =
     match a with
     | Spec.Blake2S -> rTable_S
     | Spec.Blake2B -> rTable_B
