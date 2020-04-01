@@ -9,7 +9,6 @@ module Loops = Lib.LoopCombinators
 
 #set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
-
 val repeati_extensionality:
     #a:Type0
   -> n:nat
@@ -89,6 +88,20 @@ val repeat_blocks_multi_is_repeat_gen_blocks_multi:
    Math.Lemmas.div_exact_r (length inp) blocksize;
    repeat_blocks_multi #a #b blocksize inp f acc0 ==
    repeat_gen_blocks_multi #a blocksize n (Loops.fixed_a b) inp (Loops.fixed_i f) acc0)
+
+
+val repeat_blocks_is_repeat_gen_blocks:
+    #a:Type0
+  -> #b:Type0
+  -> #c:Type0
+  -> blocksize:size_pos
+  -> inp:seq a
+  -> f:(lseq a blocksize -> b -> b)
+  -> l:(len:size_nat{len == length inp % blocksize} -> s:lseq a len -> b -> c)
+  -> acc0:b -> Lemma
+  (repeat_blocks #a #b #c blocksize inp f l acc0 ==
+   repeat_gen_blocks #a #c blocksize inp (Loops.fixed_a b)
+     (Loops.fixed_i f) (Loops.fixed_i l) acc0)
 
 
 let repeat_gen_blocks_map_f

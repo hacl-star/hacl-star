@@ -4,6 +4,7 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Sequence
 
+
 let rec repeati_extensionality #a n f g acc0 =
   if n = 0 then begin
     Loops.eq_repeati0 n f acc0;
@@ -78,6 +79,29 @@ let repeat_blocks_multi_is_repeat_gen_blocks_multi #a #b blocksize inp f acc0 =
   Classical.forall_intro_2 aux;
   repeat_gen_right_extensionality n 0 n (Loops.fixed_a b) (Loops.fixed_a b) f_rep f_gen acc0;
   Loops.repeat_gen_def n (Loops.fixed_a b) f_gen acc0
+
+
+let repeat_blocks_is_repeat_gen_blocks #a #b #c blocksize inp f l acc0 =
+  let len = length inp in
+  let nb = len / blocksize in
+  let rem = len % blocksize in
+
+  let blocks = Seq.slice inp 0 (nb * blocksize) in
+  Math.Lemmas.cancel_mul_div nb blocksize;
+  let f_rep_b = repeat_blocks_f blocksize blocks f nb in
+  let f_rep = repeat_blocks_f blocksize inp f nb in
+
+  let aux (i:nat{i < nb}) (acc:b) : Lemma (f_rep_b i acc == f_rep i acc) =
+    Math.Lemmas.lemma_mult_le_right blocksize (i + 1) nb;
+    Seq.Properties.slice_slice inp 0 (nb * blocksize) (i * blocksize) (i * blocksize + blocksize) in
+
+  Classical.forall_intro_2 aux;
+  repeati_extensionality nb f_rep f_rep_b acc0;
+  lemma_repeat_blocks #a #b #c blocksize inp f l acc0;
+  assert (Loops.repeati nb f_rep acc0 == Loops.repeati nb f_rep_b acc0);
+  Math.Lemmas.cancel_mul_mod nb blocksize;
+  lemma_repeat_blocks_multi blocksize blocks f acc0;
+  repeat_blocks_multi_is_repeat_gen_blocks_multi #a #b blocksize blocks f acc0
 
 
 let map_blocks_multi_is_repeat_gen_blocks_multi #a blocksize n inp f =
