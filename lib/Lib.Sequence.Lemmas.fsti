@@ -119,6 +119,16 @@ val len0_div_bs: blocksize:pos -> len:nat -> len0:nat -> Lemma
   (ensures  len0 / blocksize + (len - len0) / blocksize == len / blocksize)
 
 
+let shift_a (n:nat) (n0:nat) (n1:nat{n = n0 + n1}) (a:(i:nat{i <= n} -> Type)) (i:nat{i <= n1}) = a (n0 + i)
+
+let shift_f (#inp_t:Type0) (blocksize:size_pos) (n:nat) (n0:nat) (n1:nat{n = n0 + n1}) (a:(i:nat{i <= n} -> Type))
+  (f:(i:nat{i < n} -> lseq inp_t blocksize -> a i -> a (i + 1))) (i:nat{i < n1}) = f (n0 + i)
+
+let shift_l (#inp_t:Type0) (#c:Type0) (blocksize:size_pos) (max:nat) (n:nat{n <= max}) (n0:nat) (n1:nat{n = n0 + n1})
+  (a:(i:nat{i <= max} -> Type)) (l:(i:nat{i <= max} -> len:size_nat{len < blocksize} -> lseq inp_t len -> a i -> c)) (i:nat{i == n1}) = l n
+// l (n0 + i)
+
+
 val repeat_gen_blocks_multi_split:
     #inp_t:Type0
   -> blocksize:size_pos
@@ -135,19 +145,20 @@ val repeat_gen_blocks_multi_split:
     let n1 = len1 / blocksize in
     Math.Lemmas.cancel_mul_div n blocksize;
     len0_div_bs blocksize len len0;
-    assert (n == n0 + n1);
+    //assert (n == n0 + n1);
 
-    let a1 (i:nat{i <= n1}) = a (n0 + i) in
-    let f1 (i:nat{i < n1}) = f (n0 + i) in
+    let a1 = shift_a n n0 n1 a in
+    let f1 = shift_f blocksize n n0 n1 a f in
     Math.Lemmas.lemma_mod_sub_distr len len0 blocksize;
-    assert (len % blocksize == len1 % blocksize);
+    //assert (len % blocksize == len1 % blocksize);
     Math.Lemmas.cancel_mul_mod n blocksize;
 
     let t0 = Seq.slice inp 0 len0 in
     let t1 = Seq.slice inp len0 len in
-    let acc1 : a n0 = repeat_gen_blocks_multi blocksize n0 a t0 f acc0 in
+
     repeat_gen_blocks_multi blocksize n a inp f acc0 ==
-    repeat_gen_blocks_multi blocksize n1 a1 t1 f1 acc1)
+    repeat_gen_blocks_multi blocksize n1 a1 t1 f1
+      (repeat_gen_blocks_multi blocksize n0 a t0 f acc0))
 
 
 val repeat_gen_blocks_split:
@@ -170,9 +181,9 @@ val repeat_gen_blocks_split:
     len0_div_bs blocksize len len0;
     assert (n0 + n1 == n);
 
-    let a1 (i:nat{i <= n1}) = a (n0 + i) in
-    let f1 (i:nat{i < n1}) = f (n0 + i) in
-    let l1 (i:nat{i == n1}) = l n in
+    let a1 = shift_a n n0 n1 a in
+    let f1 = shift_f blocksize n n0 n1 a f in
+    let l1 = shift_l blocksize max n n0 n1 a l in
     let t0 = Seq.slice inp 0 len0 in
     let t1 = Seq.slice inp len0 len in
 
