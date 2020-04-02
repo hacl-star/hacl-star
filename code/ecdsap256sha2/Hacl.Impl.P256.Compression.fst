@@ -235,16 +235,14 @@ let compressionCompressedForm b result =
   let open Lib.ByteSequence in 
     let h0 = ST.get() in 
   let y = sub b (size 32) (size 32) in
-  
+    lemma_uint_to_bytes_be_preserves_value (Lib.Sequence.index (as_seq h0 y) 0);
+    lemma_nat_from_to_intseq_be_preserves_value 32 (as_seq h0 y);
 
   let lastWordY = index y (size 31) in 
-    lemma_uint_to_bytes_le_preserves_value (Lib.Sequence.index (as_seq h0 y) 0);
-    lemma_nat_from_to_intseq_le_preserves_value 32 (as_seq h0 y);
   let lastBitY = logand lastWordY (u8 1) in 
     logand_mask lastWordY (u8 1) 1;
   let identifier = add lastBitY (u8 2) in 
   copy (sub result (size 1) (size 32)) (sub b (size 0) (size 32)) ;
   upd result (size 0) identifier;
-    let n = (nat_from_intseq_le (as_seq h0 y)) in 
-    index_nat_to_intseq_le #U8 #SEC 32 (nat_from_bytes_le (as_seq h0 y)) 0;
-    pow2_modulo_modulo_lemma_1 (nat_from_intseq_le (as_seq h0 y)) 1 8
+    index_nat_to_intseq_be #U8 #SEC 32 (nat_from_bytes_be (as_seq h0 y)) 0;
+    pow2_modulo_modulo_lemma_1 (nat_from_intseq_be (as_seq h0 y)) 1 8

@@ -1550,8 +1550,6 @@ let sq f out =
     assert(modifies (loc out) h4 h5);
   pop_frame()
 
-#pop-options
-
  val cmovznz4: cin: uint64 -> x: felem -> y: felem -> result: felem ->
   Stack unit
     (requires fun h -> live h x /\ live h y /\ live h result /\ disjoint x result /\ eq_or_disjoint y result)
@@ -1609,6 +1607,7 @@ let shift_256_impl i o =
     upd o (size 7) i.(size 3);
 
   lemma_shift_256 (v (Lib.Sequence.index (as_seq h0 i) 0)) (v (Lib.Sequence.index (as_seq h0 i) 1)) (v (Lib.Sequence.index (as_seq h0 i) 2)) (v (Lib.Sequence.index (as_seq h0 i) 3))
+
 
 
 inline_for_extraction noextract
@@ -1757,7 +1756,6 @@ let changeEndian i =
   upd i (size 2) one;
   upd i (size 3) zero
 
-
 val toUint64ChangeEndian: i:lbuffer uint8 (size 32) -> o:felem -> Stack unit
   (requires fun h -> live h i /\ live h o /\ disjoint i o)
   (ensures  fun h0 _ h1 ->
@@ -1768,3 +1766,6 @@ val toUint64ChangeEndian: i:lbuffer uint8 (size 32) -> o:felem -> Stack unit
 let toUint64ChangeEndian i o = 
   Lib.ByteBuffer.uints_from_bytes_be o i;
   changeEndian o
+
+  
+#pop-options

@@ -86,7 +86,7 @@ val compressionCompressedForm: b: lbuffer uint8 (size 64) -> result: compressedF
         let x = Lib.Sequence.sub (as_seq h0 b) 0 32 in 
 	  let xResult = Lib.Sequence.sub (as_seq h1 result) 1 32 in 
         let y = Lib.Sequence.sub (as_seq h0 b) 32 32 in 
-        uint_v identifier == (Lib.ByteSequence.nat_from_intseq_le y % pow2 1)  + 2 /\
+        uint_v identifier == (Lib.ByteSequence.nat_from_intseq_be y % pow2 1)  + 2 /\
 	x == xResult	
       )  
   )
