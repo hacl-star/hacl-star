@@ -29,26 +29,11 @@ let repeati_right_extensionality #a n lo_g hi_g f g acc0 =
   repeat_gen_right_extensionality n lo_g hi_g (Loops.fixed_a a) (Loops.fixed_a a) f g acc0
 
 
-val repeat_gen_blocks_f:
-    #inp_t:Type0
-  -> blocksize:size_pos
-  -> n:nat
-  -> a:(i:nat{i <= n} -> Type)
-  -> inp:seq inp_t{length inp == n * blocksize}
-  -> f:(i:nat{i < n} -> lseq inp_t blocksize -> a i -> a (i + 1))
-  -> i:nat{i < n}
-  -> acc:a i ->
-  a (i + 1)
-
-let repeat_gen_blocks_f #inp_t blocksize n a inp f i acc =
-  Math.Lemmas.lemma_mult_le_right blocksize (i + 1) n;
-  let block = Seq.slice inp (i * blocksize) (i * blocksize + blocksize) in
-  f i block acc
-
-
 let repeat_gen_blocks_multi #inp_t blocksize n a inp f acc0 =
   Loops.repeat_gen n a (repeat_gen_blocks_f blocksize n a inp f) acc0
 
+
+let lemma_repeat_gen_blocks_multi #inp_t blocksize n a inp f acc0 = ()
 
 let repeat_gen_blocks #inp_t #c blocksize inp a f l acc0 =
   let len = length inp in
@@ -59,6 +44,9 @@ let repeat_gen_blocks #inp_t #c blocksize inp a f l acc0 =
   Math.Lemmas.cancel_mul_div nb blocksize;
   let acc = repeat_gen_blocks_multi #inp_t blocksize nb a blocks f acc0 in
   l nb rem last acc
+
+
+let lemma_repeat_gen_blocks #inp_t #c blocksize inp a f l acc0 = ()
 
 
 let repeat_gen_blocks_multi_extensionality #inp_t blocksize n inp a_f a_g f g acc0 =
@@ -151,15 +139,14 @@ let map_blocks_is_repeat_gen #a blocksize inp f l =
   map_blocks_multi_is_repeat_gen_blocks_multi #a blocksize nb blocks f
 
 
-#set-options "--z3rlimit 100"
-
 let len0_div_bs blocksize len len0 =
+  let k = len0 / blocksize in
   calc (==) {
-    len0 / blocksize + (len - len0) / blocksize;
+    k + (len - len0) / blocksize;
     == { Math.Lemmas.lemma_div_exact len0 blocksize }
-    len0 / blocksize + (len - len0 / blocksize * blocksize) / blocksize;
-    == { Math.Lemmas.lemma_div_plus len (- len0 / blocksize) blocksize }
-    len0 / blocksize + len / blocksize + (- len0 / blocksize);
+    k + (len - k * blocksize) / blocksize;
+    == { Math.Lemmas.division_sub_lemma len blocksize k }
+    k + len / blocksize - k;
     == { }
     len / blocksize;
   }
@@ -206,6 +193,8 @@ let aux_repeat_bf_s0 #inp_t blocksize len0 n a inp f i acc =
   Seq.slice_slice inp 0 len0 (i * blocksize) (i * blocksize + blocksize);
   assert (repeat_bf_s0 i acc == f i block acc)
 
+
+#set-options "--z3rlimit 100"
 
 val aux_repeat_bf_s1:
     #inp_t:Type0

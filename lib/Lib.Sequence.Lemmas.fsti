@@ -54,6 +54,21 @@ val repeati_right_extensionality:
     Loops.repeat_right lo_g (lo_g + n) (Loops.fixed_a a) g acc0)
 
 
+let repeat_gen_blocks_f
+  (#inp_t:Type0)
+  (blocksize:size_pos)
+  (n:nat)
+  (a:(i:nat{i <= n} -> Type))
+  (inp:seq inp_t{length inp == n * blocksize})
+  (f:(i:nat{i < n} -> lseq inp_t blocksize -> a i -> a (i + 1)))
+  (i:nat{i < n})
+  (acc:a i) : a (i + 1)
+=
+  Math.Lemmas.lemma_mult_le_right blocksize (i + 1) n;
+  let block = Seq.slice inp (i * blocksize) (i * blocksize + blocksize) in
+  f i block acc
+
+
 val repeat_gen_blocks_multi:
     #inp_t:Type0
   -> blocksize:size_pos
@@ -63,6 +78,18 @@ val repeat_gen_blocks_multi:
   -> f:(i:nat{i < n} -> lseq inp_t blocksize -> a i -> a (i + 1))
   -> acc0:a 0 ->
   a n
+
+
+val lemma_repeat_gen_blocks_multi:
+    #inp_t:Type0
+  -> blocksize:size_pos
+  -> n:nat
+  -> a:(i:nat{i <= n} -> Type)
+  -> inp:seq inp_t{length inp == n * blocksize}
+  -> f:(i:nat{i < n} -> lseq inp_t blocksize -> a i -> a (i + 1))
+  -> acc0:a 0 -> Lemma
+  (repeat_gen_blocks_multi #inp_t blocksize n a inp f acc0 ==
+   Loops.repeat_gen n a (repeat_gen_blocks_f blocksize n a inp f) acc0)
 
 
 val repeat_gen_blocks:
@@ -75,6 +102,27 @@ val repeat_gen_blocks:
   -> l:(i:nat{i == length inp / blocksize} -> len:size_nat{len == length inp % blocksize} -> lseq inp_t len -> a i -> c)
   -> acc0:a 0 ->
   c
+
+
+val lemma_repeat_gen_blocks:
+    #inp_t:Type0
+  -> #c:Type0
+  -> blocksize:size_pos
+  -> inp:seq inp_t
+  -> a:(i:nat{i <= length inp / blocksize} -> Type)
+  -> f:(i:nat{i < length inp / blocksize} -> lseq inp_t blocksize -> a i -> a (i + 1))
+  -> l:(i:nat{i == length inp / blocksize} -> len:size_nat{len == length inp % blocksize} -> lseq inp_t len -> a i -> c)
+  -> acc0:a 0 ->
+  Lemma
+   (let len = length inp in
+    let nb = len / blocksize in
+    let rem = len % blocksize in
+    let blocks = Seq.slice inp 0 (nb * blocksize) in
+    let last = Seq.slice inp (nb * blocksize) len in
+    Math.Lemmas.cancel_mul_div nb blocksize;
+    let acc = repeat_gen_blocks_multi #inp_t blocksize nb a blocks f acc0 in
+    repeat_gen_blocks blocksize inp a f l acc0 == l nb rem last acc)
+
 
 
 val repeat_gen_blocks_multi_extensionality:
