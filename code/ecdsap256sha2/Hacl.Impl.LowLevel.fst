@@ -293,6 +293,7 @@ let add4_with_carry c x y result =
     
     cc
 
+#push-options "--z3rlimit 200"
 
 val add8: x: widefelem -> y: widefelem -> result: widefelem -> Stack uint64 
   (requires fun h -> live h x /\ live h y /\ live h result /\ eq_or_disjoint x result /\ eq_or_disjoint y result)
@@ -334,6 +335,7 @@ let add8 x y result =
    
   carry1
 
+#pop-options
 
 val add4_variables: x: felem -> cin: uint64 {uint_v cin <=1} ->  y0: uint64 -> y1: uint64 -> y2: uint64 -> y3: uint64 -> 
   result: felem -> 
@@ -963,9 +965,9 @@ val sq0: f:  lbuffer uint64 (size 4) -> result: lbuffer uint64 (size 4) -> memor
 
 val sq0_0: f: lbuffer uint64 (size 4) -> result: lbuffer uint64 (size 4) -> memory: lbuffer uint64 (size 12) -> temp: lbuffer uint64 (size 1) -> Stack uint64
   (requires fun h -> live h result /\ live h f /\ live h memory /\ live h temp /\ disjoint result temp /\ disjoint result memory /\ disjoint memory temp )
-  (ensures fun h0 c h1 -> 
+  (ensures fun h0 c h1 -> modifies (loc result |+| loc temp |+| loc memory) h0 h1 /\
     (
-
+      
       let memory = as_seq h1 memory in 
       let m0 = Lib.Sequence.index memory 0 in 
       let m1 = Lib.Sequence.index memory 1 in 
@@ -986,7 +988,9 @@ val sq0_0: f: lbuffer uint64 (size 4) -> result: lbuffer uint64 (size 4) -> memo
       uint_v f0 * uint_v f0 + uint_v f0 * uint_v f1 * pow2 64 /\
 
       uint_v m0 + uint_v m1 * pow2 64 == uint_v f0 * uint_v f1 /\
-      uint_v m2 + uint_v m3 * pow2 64 == uint_v f0 * uint_v f2 
+      uint_v m2 + uint_v m3 * pow2 64 == uint_v f0 * uint_v f2 /\
+
+      uint_v c <= 1
    )
 )
 
@@ -1027,6 +1031,11 @@ let sq0_0 f result memory temp =
   add_carry_u64 c1 l h_1 o2
 
 
+val lemma_distr_4: a: int -> b: int -> c: int -> d: int -> e: int -> Lemma (
+  a * b + a * c * pow2 64 + a * d * pow2 64 * pow2 64 + a * e * pow2 64 * pow2 64 * pow2 64 == a * (b + c * pow2 64 + d * pow2 64 * pow2 64 + e * pow2 64 * pow2 64 * pow2 64))
+
+let lemma_distr_4 a b c e d = ()
+
 
 let sq0 f result memory temp = 
   let h0 = ST.get() in 
@@ -1037,81 +1046,42 @@ let sq0 f result memory temp =
   assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 320); 
 
   let f0 = index f (size 0) in 
+  let f1 = index f (size 1) in 
+  let f2 = index f (size 2) in 
   let f3 = index f (size 3) in 
-  
-  let o3 = sub result (size 3) (size 1) in 
 
+  let o0 = sub result (size 0) (size 3) in 
+  let o3 = sub result (size 3) (size 1) in
+  
   let temp = sub temp (size 0) (size 1) in 
 
-(*
-
-  mul64 f0 f0 o0 temp;
- 
-  let h_0 = index temp (size 0) in 
-  mul64 f0 f1 o1 temp;
-  let l = index o1 (size 0) in   
-  upd memory (size 0) l;
-  upd memory (size 1) (index temp (size 0));  
-    
-  let c1 = add_carry_u64 (u64 0) l h_0 o1 in 
-  
-  let h_1 = index temp (size 0) in 
-  
-
-  mul64 f0 f2 o2 temp; 
-  let l = index o2 (size 0) in   
-  upd memory (size 2) l;
-  upd memory (size 3) (index temp (size 0));
-*)
   let c2 = sq0_0 f result memory temp in 
-
-  let h_2 = index temp (size 0) in 
+  let h_2 = index temp (size 0) in
 
   mul64 f0 f3 o3 temp;
-  let l = index o3 (size 0) in     
+  let l = index o3 (size 0) in    
+
+    let h2 = ST.get() in 
+ 
   upd memory (size 4) l;
   upd memory (size 5) (index temp (size 0));
-  let c3 = add_carry_u64 c2 l h_2 o3 in
-  
-  let h5 = ST.get() in 
+  let c3 = add_carry_u64 c2 l h_2 o3 in 
   let temp0 = index temp (size 0) in
-  let r = c3 +! temp0 in 
-(*
-  assert(uint_v (Lib.Sequence.index (as_seq h5 o0) 0) + uint_v h_0 * pow2 64 = uint_v f0 * uint_v f0);
-  assert(uint_v (Lib.Sequence.index (as_seq h5 o1) 0) + uint_v c1 * pow2 64 + uint_v h_1 * pow2 64 - uint_v h_0 = uint_v f0 * uint_v f1);
-  assert(uint_v (Lib.Sequence.index (as_seq h5 o2) 0) + uint_v c2 * pow2 64 - uint_v h_1 - uint_v c1 + uint_v h_2 * pow2 64 = uint_v f0 * uint_v f2);
-  assert(uint_v (Lib.Sequence.index (as_seq h5 o3) 0) + uint_v c3 * pow2 64 - uint_v c2 - uint_v h_2 + uint_v temp0 * pow2 64 = uint_v f0 * uint_v f3);
 
-  lemma_320 f0 f0 f1 f2 f3;
+  assert(Lib.Sequence.index (as_seq h2 result) 2 == Lib.Sequence.index (as_seq h2 o0) 2);
+  assert(Lib.Sequence.index (as_seq h2 result) 1 == Lib.Sequence.index (as_seq h2 o0) 1);
+  assert(Lib.Sequence.index (as_seq h2 result) 0 == Lib.Sequence.index (as_seq h2 o0) 0);
 
+  distributivity_add_left  (v c3) (uint_v temp0) (pow2 64 * pow2 64 * pow2 64 * pow2 64);
+  lemma_distr_4 (v f0) (v f0) (v f1) (v f2) (v f3);
+  
+   lemma_mult_le_left (as_nat h0 f) (v f0) (pow2 64);
+   lemma_mult_le_left (v f0) (as_nat h0 f) (pow2 256);
 
-  calc (==) {
-    uint_v f0 * as_nat h0 f;
-    (==)
-      {
-	  assert(as_nat h0 f ==  uint_v f0 +  uint_v f1 * pow2 64 + uint_v f2 * pow2 64 * pow2 64 + 
-	  uint_v f3 * pow2 64 * pow2 64 * pow2 64)
-      }
-    uint_v f0 * (uint_v f0 +  uint_v f1 * pow2 64 + uint_v f2 * pow2 64 * pow2 64 + uint_v f3 * pow2 64 * pow2 64 * pow2 64);
-      (==)
-      {
-	assert_by_tactic (uint_v f0 * (uint_v f0 +  uint_v f1 * pow2 64 + uint_v f2 * pow2 64 * pow2 64 + uint_v f3 * pow2 64 * pow2 64 * pow2 64) == uint_v f0 * uint_v f0 +  uint_v f0 * uint_v f1 * pow2 64 + uint_v f0 * uint_v f2 * pow2 64 * pow2 64 + uint_v f0 * uint_v f3 * pow2 64 * pow2 64 * pow2 64) canon}
-    
-    uint_v f0 * uint_v f0 +  uint_v f0 * uint_v f1 * pow2 64 + uint_v f0 * uint_v f2 * pow2 64 * pow2 64 + uint_v f0 * uint_v f3 * pow2 64 * pow2 64 * pow2 64;};
+   lemma_div_lt_nat (v c3 + uint_v temp0) 320 256;
+   
+  c3 +! temp0
 
-    assert(
-      uint_v (Lib.Sequence.index (as_seq h5 o0) 0) +
-      uint_v (Lib.Sequence.index (as_seq h5 o1) 0) * pow2 64 +             
-      uint_v (Lib.Sequence.index (as_seq h5 o2) 0) * pow2 64 * pow2 64 + 
-      uint_v (Lib.Sequence.index (as_seq h5 o3) 0) * pow2 64 * pow2 64 * pow2 64 + 
-      uint_v r * pow2 64 * pow2 64 * pow2 64 * pow2 64  =
-
-      uint_v f0 * uint_v f0 +  
-      uint_v f0 * uint_v f1 * pow2 64 + 
-      uint_v f0 * uint_v f2 * pow2 64 * pow2 64 + 
-      uint_v f0 * uint_v f3 * pow2 64 * pow2 64 * pow2 64);
-*)
-  r
 
 val sq1: f: felem -> f4: felem -> result: felem -> memory: lbuffer uint64 (size 12) -> 
   temp: lbuffer uint64 (size 5) -> 
