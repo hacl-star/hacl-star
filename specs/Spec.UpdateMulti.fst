@@ -38,8 +38,8 @@ let concat_blocks_modulo (block_len: pos) (s1 s2: S.seq uint8): Lemma
   }
 
 /// A helper that deals with the modulo proof obligation to make things go
-/// smoothly. Stolen from Spec.Agile.Hash, to be shared! Note: this version has
-/// a much more robust proof.
+/// smoothly. Originally in Spec.Agile.Hash, now generic, with a much more
+/// robust proof.
 #push-options "--z3cliopt smt.arith.nl=false"
 let split_block (block_length: pos)
   (blocks: S.seq uint8)

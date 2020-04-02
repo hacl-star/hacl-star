@@ -34,16 +34,20 @@ type state_s #index (c: block index) (i: index) (t: Type0 { t == c.state i }) =
     buf: B.buffer Lib.IntTypes.uint8 { B.len buf = c.block_len i } ->
     total_len: UInt64.t ->
     seen: G.erased (S.seq uint8) ->
+    // Stupid name conflict on overloaded projectors leads to inscrutable
+    // interleaving errors. Need a field name that does not conflict with the
+    // one in Hacl.Streaming.Interface. Sigh!!
+    e_key: G.erased (c.t_key i) ->
     state_s #index c i t
 
 let freeable #index (c: block index) (i: index) (h: HS.mem) (p: state c i (c.state i)) =
   B.freeable p /\ (
   let s = B.deref h p in
-  let State hash_state buf _ _ = s in
+  let State hash_state buf _ _ _ = s in
   B.freeable buf /\ c.freeable h hash_state)
 
 let footprint_s #index (c: block index) (i: index) (h: HS.mem) (s: state_s c i (c.state i)) =
-  let State block_state buf_ _ _ = s in
+  let State block_state buf_ _ _ _ = s in
   B.(loc_union (loc_addr_of_buffer buf_) (c.footprint h block_state))
 
 /// Invariants
@@ -69,7 +73,7 @@ let split_at_last #index (c: block index) (i: index) (b: bytes):
   blocks, rest
 
 let invariant_s #index (c: block index) (i: index) h (s: state_s c i (c.state i)) =
-  let State hash_state buf_ total_len seen = s in
+  let State hash_state buf_ total_len seen key = s in
   let seen = G.reveal seen in
   let blocks, rest = split_at_last c i seen in
 
@@ -82,7 +86,7 @@ let invariant_s #index (c: block index) (i: index) h (s: state_s c i (c.state i)
   S.length seen = U64.v total_len /\
   U64.v total_len <= c.max_input_length i /\
   // Note the double equals here, we now no longer know that this is a sequence.
-  c.v h hash_state == c.update_multi_s i (c.init_s i) blocks /\
+  c.v h hash_state == c.update_multi_s i (c.init_s i (G.reveal key)) blocks /\
   S.equal (S.slice (B.as_seq h buf_) 0 (U64.v total_len % U32.v (c.block_len i))) rest
 
 #push-options "--max_ifuel 1"
@@ -98,16 +102,19 @@ let seen #index c i h s =
 let seen_bounded #index c i h s =
   ()
 
+let key #index c i s =
+  G.reveal (State?.e_key s)
+
 let frame_invariant #index c i l s h0 h1 =
   let state_t = B.deref h0 s in
-  let State block_state _ _ _ = state_t in
+  let State block_state _ _ _ _ = state_t in
   c.frame_invariant #i l block_state h0 h1
 
 let frame_seen #_ _ _ _ _ _ _ =
   ()
 
 let frame_freeable #index c i l s h0 h1 =
-  let State block_state _ _ _ = B.deref h0 s in
+  let State block_state _ _ _ _ = B.deref h0 s in
   c.frame_freeable #i l block_state h0 h1
 
 /// Stateful API
@@ -115,7 +122,7 @@ let frame_freeable #index c i l s h0 h1 =
 
 let index_of_state #index c i t s =
   let open LowStar.BufferOps in
-  let State hash_state _ _ _ = !*s in
+  let State hash_state _ _ _ _ = !*s in
   c.index_of_state i hash_state
 
 let split_at_last_empty #index (c: block index) (i: index): Lemma
@@ -126,7 +133,7 @@ let split_at_last_empty #index (c: block index) (i: index): Lemma
   ()
 
 #push-options "--using_facts_from '*,-LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2'"
-let create_in #index c i t r =
+let create_in #index c i t k r =
   [@inline_let]
   let _ = c.invariant_loc_in_footprint #i in
 
@@ -137,12 +144,14 @@ let create_in #index c i t r =
   (**) let h1 = ST.get () in
   (**) assert (B.fresh_loc (B.loc_buffer buf) h0 h1);
   (**) B.loc_unused_in_not_unused_in_disjoint h1;
+  (**) B.(modifies_only_not_unused_in loc_none h0 h1);
 
   let hash_state = c.create_in i r in
   (**) let h2 = ST.get () in
   (**) assert (B.fresh_loc (c.footprint #i h2 hash_state) h0 h2);
+  (**) B.(modifies_only_not_unused_in loc_none h1 h2);
 
-  let s = State hash_state buf 0UL (G.hide S.empty) in
+  let s = State hash_state buf 0UL (G.hide S.empty) (G.hide (c.v_key h0 k)) in
   (**) assert (B.fresh_loc (footprint_s c i h2 s) h0 h2);
 
   (**) B.loc_unused_in_not_unused_in_disjoint h2;
@@ -154,20 +163,23 @@ let create_in #index c i t r =
   (**) assert (B.fresh_loc (footprint_s c i h3 s) h0 h3);
   (**) c.frame_freeable B.loc_none hash_state h2 h3;
   (**) assert (freeable c i h3 p);
+  (**) assert (c.v_key h2 k == c.v_key h3 k);
+  admit ()
 
-  c.init (G.hide i) hash_state;
+  c.init (G.hide i) k hash_state;
   (**) let h4 = ST.get () in
   (**) assert (B.fresh_loc (c.footprint #i h4 hash_state) h0 h4);
   (**) assert (B.fresh_loc (B.loc_buffer buf) h0 h4);
   (**) c.update_multi_zero i (c.v h4 hash_state);
   (**) split_at_last_empty c i;
   (**) B.modifies_only_not_unused_in B.loc_none h0 h4;
+  (**) assert (c.v h4 hash_state == c.init_s i (c.v_key h3 k));
 
   (**) let h5 = ST.get () in
   (**) assert (
     let h = h5 in
     let s = (B.get h5 p 0) in
-    let State hash_state buf_ total_len seen = s in
+    let State hash_state buf_ total_len seen _ = s in
     let seen = G.reveal seen in
     let blocks, rest = split_at_last c i seen in
     // JP: unclear why I need to assert this... but without it the proof doesn't
