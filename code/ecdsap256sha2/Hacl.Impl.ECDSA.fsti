@@ -40,17 +40,6 @@ open Hacl.Impl.ECDSA.P256SHA256.Verification.Hashless
 open Spec.P256.MontgomeryMultiplication
 
 
-val secretToPublicU8: result: lbuffer uint8 (size 64) -> scalar: lbuffer uint8 (size 32) -> tempBuffer: lbuffer uint64 (size 100) ->
-  Stack unit
-    (requires fun h -> 
-      live h result /\ live h scalar /\ live h tempBuffer /\ 
-      LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer; loc scalar; loc result]
-    )
-  (
-    ensures fun h0 _ h1 -> modifies (loc result |+| loc tempBuffer) h0 h1 
-  )
-
-
 val ecdsa_p256_sha2_sign: result: lbuffer uint8 (size 64) -> mLen: size_t -> m: lbuffer uint8 mLen ->
   privKey: lbuffer uint8 (size 32) -> 
   k: lbuffer uint8 (size 32) -> 
