@@ -21,7 +21,7 @@ open FStar.Tactics.Canon
 open Spec.P256.Lemmas
 open Lib.IntTypes.Intrinsics
 
-#set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
 
 val eq0_u64: a: uint64 -> Tot (r: uint64 {if uint_v a = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0})
 
@@ -293,8 +293,6 @@ let add4_with_carry c x y result =
     
     cc
 
-#push-options "--z3rlimit 200"
-
 val add8: x: widefelem -> y: widefelem -> result: widefelem -> Stack uint64 
   (requires fun h -> live h x /\ live h y /\ live h result /\ eq_or_disjoint x result /\ eq_or_disjoint y result)
   (ensures fun h0 c h1 -> modifies (loc result) h0 h1 /\ v c <= 1 /\ 
@@ -335,7 +333,6 @@ let add8 x y result =
    
   carry1
 
-#pop-options
 
 val add4_variables: x: felem -> cin: uint64 {uint_v cin <=1} ->  y0: uint64 -> y1: uint64 -> y2: uint64 -> y3: uint64 -> 
   result: felem -> 
@@ -678,8 +675,6 @@ let lemma_powers () =
    assert_norm(pow2 64 * pow2 64 * pow2 64  * pow2 64 * pow2 64* pow2 64 * pow2 64 * pow2 64 = pow2 (8 * 64))
 
 
-#push-options "--z3rlimit 200"
-
 let mul f r out =
   lemma_powers ();
   push_frame();
@@ -866,7 +861,6 @@ let mul f r out =
  
     pop_frame()
 
-#pop-options
 
 val lemma_320: a: uint64 -> b: uint64 -> c: uint64 -> d: uint64 -> u: uint64 -> Lemma 
   (uint_v u * uint_v a +  (uint_v u * uint_v b) * pow2 64 + (uint_v u * uint_v c) * pow2 64 * pow2 64 + (uint_v u * uint_v d) * pow2 64 * pow2 64 * pow2 64 < pow2 320)
@@ -989,7 +983,6 @@ val sq0_0: f: lbuffer uint64 (size 4) -> result: lbuffer uint64 (size 4) -> memo
    )
 )
 
-
 let sq0_0 f result memory temp = 
     let h0 = ST.get() in 
   
@@ -1076,6 +1069,7 @@ let sq0 f result memory temp =
    lemma_div_lt_nat (v c3 + uint_v temp0) 320 256;
    
   c3 +! temp0
+
 
 
 val sq1: f: felem -> f4: felem -> result: felem -> memory: lbuffer uint64 (size 12) -> 
@@ -1586,7 +1580,6 @@ val lemma_shift_256: a: int -> b: int -> c: int -> d: int -> Lemma (
 
 let lemma_shift_256 a b c d = ()
 
-#push-options "--z3rlimit 200"
 
 val shift_256_impl: i: felem -> o: lbuffer uint64 (size 8) -> 
   Stack unit 
@@ -1767,5 +1760,3 @@ let toUint64ChangeEndian i o =
   Lib.ByteBuffer.uints_from_bytes_be o i;
   changeEndian o
 
-  
-#pop-options
