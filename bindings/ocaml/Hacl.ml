@@ -332,3 +332,13 @@ module Blake2b_256 : Blake2b =
  *     let r, s = Bytes.sub signature 0 32, Bytes.sub signature 32 32 in
  *     Hacl_ECDSA.hacl_Impl_ECDSA_ecdsa_p256_sha2_verify (C.size_uint32 msg) (C.ctypes_buf msg) (C.ctypes_buf pub) (C.ctypes_buf r) (C.ctypes_buf s)
  * end *)
+
+module ECDSA_test = struct
+  let compress_c p out = Hacl_ECDSA.hacl_Impl_ECDSA_compressionCompressedForm (C.ctypes_buf p) (C.ctypes_buf out)
+  let compress_n p out = Hacl_ECDSA.hacl_Impl_ECDSA_compressionNotCompressedForm (C.ctypes_buf p) (C.ctypes_buf out)
+  let decompress_c p out = Hacl_ECDSA.hacl_Impl_ECDSA_decompressionCompressedForm (C.ctypes_buf p) (C.ctypes_buf out)
+  let decompress_n p out = Hacl_ECDSA.hacl_Impl_ECDSA_decompressionNotCompressedForm (C.ctypes_buf p) (C.ctypes_buf out)
+  let verify pub msg signature =
+    let r, s = Bytes.sub signature 0 32, Bytes.sub signature 32 32 in
+    Hacl_ECDSA.hacl_Impl_ECDSA_ecdsa_verification_blake2hl (C.size_uint32 msg) (C.ctypes_buf msg) (C.ctypes_buf pub) (C.ctypes_buf r) (C.ctypes_buf s)
+end

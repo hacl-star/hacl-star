@@ -80,3 +80,11 @@ module Blake2b_256 : Blake2b
  *   val verify : Bytes.t -> Bytes.t -> Bytes.t -> bool
  * end *)
 
+module ECDSA_test : sig
+  val compress_c : Bytes.t -> Bytes.t -> unit
+  val compress_n : Bytes.t -> Bytes.t -> unit
+  val decompress_c : Bytes.t -> Bytes.t -> bool
+  val decompress_n : Bytes.t -> Bytes.t -> bool
+  val verify : Bytes.t -> Bytes.t -> Bytes.t -> bool
+end
+
