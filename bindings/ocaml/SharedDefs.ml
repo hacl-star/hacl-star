@@ -19,7 +19,7 @@ module CBytes : Buffer with type t = Bytes.t and type buf = Bytes.t Ctypes.ocaml
   let ctypes_buf = Ctypes.ocaml_bytes_start
   let size = Bytes.length
   let equal = Bytes.equal
-  let disjoint b1 b2 = b1 <> b2
+  let disjoint b1 b2 = b1 != b2
 end
 
 module CBigstring : Buffer with type t = Bigstring.t and type buf = uint8 Ctypes_static.ptr = struct
