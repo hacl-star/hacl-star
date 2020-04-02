@@ -9,6 +9,7 @@ module Bindings(F:Cstubs.FOREIGN) =
               (ocaml_bytes @->
                  (ocaml_bytes @->
                     (ocaml_bytes @-> (uint32_t @-> (returning void)))))))
+      
     let hacl_Chacha20_Vec256_chacha20_decrypt_256 =
       foreign "Hacl_Chacha20_Vec256_chacha20_decrypt_256"
         (uint32_t @->
@@ -16,4 +17,5 @@ module Bindings(F:Cstubs.FOREIGN) =
               (ocaml_bytes @->
                  (ocaml_bytes @->
                     (ocaml_bytes @-> (uint32_t @-> (returning void)))))))
+      
   end
