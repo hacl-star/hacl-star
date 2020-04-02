@@ -13,7 +13,7 @@
         "fuel_guarded_inversion_Spec.Agile.DH.algorithm"
       ],
       0,
-      "ac6b2ebe41e8c460ffef6dfe8c588abc"
+      "916ea44da5e75f697fea8e4152c36790"
     ],
     [
       "Hacl.HPKE.Interface.DH.nsize_public",
@@ -27,7 +27,7 @@
         "fuel_guarded_inversion_Spec.Agile.DH.algorithm"
       ],
       0,
-      "ba456cb44541909a54b956c3fa2e86dc"
+      "fa8af04a7532b222572102a994c614d2"
     ],
     [
       "Hacl.HPKE.Interface.DH.dh_st",
@@ -97,7 +97,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "29fe8681ba57f476146db020900248a7"
+      "44a44c0e71a9fb0d623c7c5e45accb9f"
     ],
     [
       "Hacl.HPKE.Interface.DH.secret_to_public_st",
@@ -151,7 +151,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "1c88a7968f99b79b45820800d645ad7d"
+      "f166def9c1b7585101deaa753ec9c727"
     ],
     [
       "Hacl.HPKE.Interface.DH.secret_to_public_c51",
@@ -183,7 +183,7 @@
         "typing_LowStar.Monotonic.Buffer.as_seq"
       ],
       0,
-      "8ba95697b545b18850bc43d459603410"
+      "48fde66ce2d2f6a4c635d90c72429a5d"
     ],
     [
       "Hacl.HPKE.Interface.DH.dh_c51",
@@ -375,7 +375,7 @@
         "typing_tok_Spec.Agile.DH.DH_Curve25519@tok"
       ],
       0,
-      "397b080d5739e3baf7e3df032878995a"
+      "f053ae4382ae1859861e0c58dd3bd1c9"
     ],
     [
       "Hacl.HPKE.Interface.DH.secret_to_public_c64",
@@ -411,7 +411,7 @@
         "typing_LowStar.Monotonic.Buffer.as_seq"
       ],
       0,
-      "9f3e39981a79d9bfd57b30392e9f4727"
+      "deb2fec8b92544eef3f4a954be08c8b8"
     ],
     [
       "Hacl.HPKE.Interface.DH.dh_c64",
@@ -606,7 +606,7 @@
         "typing_tok_Spec.Agile.DH.DH_Curve25519@tok"
       ],
       0,
-      "75259f0d2e398ced8f7af6eabf4365f2"
+      "e16f4436d1d926c57bf3fc7d37e635bc"
     ],
     [
       "Hacl.HPKE.Interface.DH.change_error_code",
@@ -661,7 +661,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "1abd7c1b65ccf2d7612d92972905fdf8"
+      "e0bda43481633010e16b6bcd725d16e7"
     ],
     [
       "Hacl.HPKE.Interface.DH.secret_to_public_p256",
@@ -799,7 +799,7 @@
         "typing_tok_Spec.Agile.DH.DH_P256@tok"
       ],
       0,
-      "947808f4259330d9c3df3e6f27c1fdc0"
+      "ef2dbab315ae9595db37ce6ccb3b39d1"
     ],
     [
       "Hacl.HPKE.Interface.DH.nat_from_bytes_le_zero_is_zero",
@@ -839,7 +839,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "f874e509304ae6a88754f260174cc929"
+      "93b12b196d836fcaadc2ba759b5d870b"
     ],
     [
       "Hacl.HPKE.Interface.DH.nat_from_bytes_le_zero_is_zero",
@@ -875,6 +875,8 @@
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
+        "refinement_interpretation_Tm_refine_0f7f5bcf08e8db1ef86bd2d55b0d74fb",
+        "refinement_interpretation_Tm_refine_11888fecf812f197898447624c24e106",
         "refinement_interpretation_Tm_refine_14e58bf2ebe4b8342ba0b27074cab16f",
         "refinement_interpretation_Tm_refine_2b9ac1d6c43e9e240d84837e7e466c45",
         "refinement_interpretation_Tm_refine_35a0739c434508f48d0bb1d5cd5df9e8",
@@ -899,7 +901,8 @@
         "typing_Lib.IntTypes.minint", "typing_Lib.IntTypes.mk_int",
         "typing_Lib.IntTypes.v", "typing_Lib.Sequence.create",
         "typing_Lib.Sequence.index", "typing_Lib.Sequence.slice",
-        "typing_Spec.AES.gf8", "typing_Spec.AES.irred",
+        "typing_Lib.Sequence.sub", "typing_Spec.AES.gf8",
+        "typing_Spec.AES.irred",
         "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok",
         "well-founded-ordering-on-nat"
@@ -928,7 +931,7 @@
         "projection_inverse_FStar.Integers.Unsigned__0"
       ],
       0,
-      "81c3b94b1a95679eab78d71cc0b7fded"
+      "aa1a387f3019e3ceda485d2bf7a48db4"
     ],
     [
       "Hacl.HPKE.Interface.DH.nat_from_bytes_le_zero_is_zero",
@@ -937,7 +940,7 @@
       1,
       [ "@query" ],
       0,
-      "7989238c9edc7410a4032a7f67529074"
+      "b8a6c3cef5277ecb53d46428bc3201dd"
     ],
     [
       "Hacl.HPKE.Interface.DH.dh_p256",
@@ -1168,7 +1171,7 @@
         "typing_tok_Spec.Agile.DH.DH_P256@tok"
       ],
       0,
-      "671ce63cadc421d3746b536dff1fdd7d"
+      "b205fb32f422b5f87c459ed345a18ef9"
     ]
   ]
 ]
