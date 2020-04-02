@@ -929,45 +929,40 @@ let lemma_320_64 a b c d e u =
 
 
 val sq0: f:  lbuffer uint64 (size 4) -> result: lbuffer uint64 (size 4) -> memory: lbuffer uint64 (size 12) -> temp: lbuffer uint64 (size 5) -> Stack uint64
-  (requires fun h -> live h result /\ live h f /\ live h memory /\ live h temp /\ disjoint result temp
-    /\ disjoint result memory /\ disjoint memory temp 
+  (requires fun h -> live h result /\ live h f /\ live h memory /\ live h temp /\ 
+    disjoint result temp /\ disjoint result memory /\ disjoint memory temp 
   )
   (ensures fun h0 c h1 -> modifies (loc result |+| loc memory |+| loc temp) h0 h1 /\ 
     (
       let f0 = Lib.Sequence.index (as_seq h0 f) 0 in 
-      as_nat h1 result + uint_v c * pow2 64 * pow2 64 * pow2 64 * pow2 64  = uint_v f0 * as_nat h0 f
-
-    ) /\
-
-
-    (
-
-      let f = as_seq h0 f in 
-      let f0 = Lib.Sequence.index f 0 in 
-      let f1 = Lib.Sequence.index f 1 in 
-      let f2 = Lib.Sequence.index f 2 in 
-      let f3 = Lib.Sequence.index f 3 in 
+      as_nat h1 result + uint_v c * pow2 64 * pow2 64 * pow2 64 * pow2 64  = uint_v f0 * as_nat h0 f) /\
+      (
+	let f = as_seq h0 f in 
+	let f0 = Lib.Sequence.index f 0 in 
+	let f1 = Lib.Sequence.index f 1 in 
+	let f2 = Lib.Sequence.index f 2 in 
+	let f3 = Lib.Sequence.index f 3 in 
     
-      let memory = as_seq h1 memory in 
-      let m0 = Lib.Sequence.index memory 0 in 
-      let m1 = Lib.Sequence.index memory 1 in 
-      let m2 = Lib.Sequence.index memory 2 in 
-      let m3 = Lib.Sequence.index memory 3 in 
-      let m4 = Lib.Sequence.index memory 4 in 
-      let m5 = Lib.Sequence.index memory 5 in 
+	let memory = as_seq h1 memory in 
+	let m0 = Lib.Sequence.index memory 0 in 
+	let m1 = Lib.Sequence.index memory 1 in 
+	let m2 = Lib.Sequence.index memory 2 in 
+	let m3 = Lib.Sequence.index memory 3 in 
+	let m4 = Lib.Sequence.index memory 4 in 
+	let m5 = Lib.Sequence.index memory 5 in 
 
-      uint_v m0 + uint_v m1 * pow2 64 == uint_v f0 * uint_v f1 /\
-      uint_v m2 + uint_v m3 * pow2 64 == uint_v f0 * uint_v f2 /\
-      uint_v m4 + uint_v m5 * pow2 64 == uint_v f0 * uint_v f3
-    )
- )
+	uint_v m0 + uint_v m1 * pow2 64 == uint_v f0 * uint_v f1 /\
+	uint_v m2 + uint_v m3 * pow2 64 == uint_v f0 * uint_v f2 /\
+	uint_v m4 + uint_v m5 * pow2 64 == uint_v f0 * uint_v f3
+      )
+  )
 
 
 val sq0_0: f: lbuffer uint64 (size 4) -> result: lbuffer uint64 (size 4) -> memory: lbuffer uint64 (size 12) -> temp: lbuffer uint64 (size 1) -> Stack uint64
-  (requires fun h -> live h result /\ live h f /\ live h memory /\ live h temp /\ disjoint result temp /\ disjoint result memory /\ disjoint memory temp )
+  (requires fun h -> live h result /\ live h f /\ live h memory /\ live h temp /\
+    disjoint result temp /\ disjoint result memory /\ disjoint memory temp)
   (ensures fun h0 c h1 -> modifies (loc result |+| loc temp |+| loc memory) h0 h1 /\
-    (
-      
+    ( 
       let memory = as_seq h1 memory in 
       let m0 = Lib.Sequence.index memory 0 in 
       let m1 = Lib.Sequence.index memory 1 in 
@@ -1086,25 +1081,27 @@ let sq0 f result memory temp =
 val sq1: f: felem -> f4: felem -> result: felem -> memory: lbuffer uint64 (size 12) -> 
   temp: lbuffer uint64 (size 5) -> 
   Stack uint64 
-  (requires fun h -> live h f /\ live h f4 /\ live h result /\ live h temp /\ eq_or_disjoint f4 result /\ disjoint f4 memory /\ disjoint f4 temp /\ disjoint f result /\ live h memory /\ disjoint temp result /\ disjoint memory temp /\ disjoint memory result /\
-  (
-    let f = as_seq h f in 
-    let f0 = Lib.Sequence.index f 0 in 
-    let f1 = Lib.Sequence.index f 1 in 
-    let f2 = Lib.Sequence.index f 2 in 
-    let f3 = Lib.Sequence.index f 3 in 
+  (requires fun h -> live h f /\ live h f4 /\ live h result /\ live h temp /\ 
+    eq_or_disjoint f4 result /\ disjoint f4 memory /\ disjoint f4 temp /\ 
+    disjoint f result /\ live h memory /\ disjoint temp result /\ disjoint memory temp /\ disjoint memory result /\
+    (
+      let f = as_seq h f in 
+      let f0 = Lib.Sequence.index f 0 in 
+      let f1 = Lib.Sequence.index f 1 in 
+      let f2 = Lib.Sequence.index f 2 in 
+      let f3 = Lib.Sequence.index f 3 in 
     
-    let memory = as_seq h memory in 
-    let m0 = Lib.Sequence.index memory 0 in 
-    let m1 = Lib.Sequence.index memory 1 in 
-    let m2 = Lib.Sequence.index memory 2 in 
-    let m3 = Lib.Sequence.index memory 3 in 
-    let m4 = Lib.Sequence.index memory 4 in 
-    let m5 = Lib.Sequence.index memory 5 in 
+      let memory = as_seq h memory in 
+      let m0 = Lib.Sequence.index memory 0 in 
+      let m1 = Lib.Sequence.index memory 1 in 
+      let m2 = Lib.Sequence.index memory 2 in 
+      let m3 = Lib.Sequence.index memory 3 in 
+      let m4 = Lib.Sequence.index memory 4 in 
+      let m5 = Lib.Sequence.index memory 5 in 
 
-    uint_v m0 + uint_v m1 * pow2 64 == uint_v f0 * uint_v f1 /\
-    uint_v m2 + uint_v m3 * pow2 64 == uint_v f0 * uint_v f2 /\
-    uint_v m4 + uint_v m5 * pow2 64 == uint_v f0 * uint_v f3
+      uint_v m0 + uint_v m1 * pow2 64 == uint_v f0 * uint_v f1 /\
+      uint_v m2 + uint_v m3 * pow2 64 == uint_v f0 * uint_v f2 /\
+      uint_v m4 + uint_v m5 * pow2 64 == uint_v f0 * uint_v f3
     ) 
   )
   (ensures fun h0 c h1 -> modifies (loc result |+| loc memory |+| loc temp) h0 h1 /\
@@ -1137,6 +1134,7 @@ val sq1: f: felem -> f4: felem -> result: felem -> memory: lbuffer uint64 (size 
       as_nat h1 result + uint_v c * pow2 256 = uint_v f1 * as_nat h0 f + as_nat h0 f4
     ) 
   )
+
 
 val lemma_320_1: a: nat -> b: nat -> c: nat {c < pow2 64} -> d: nat {d < pow2 256} -> e: nat {e < pow2 256 /\ a + b * pow2 256 = c * d + e}  -> Lemma (b < pow2 64)
 
@@ -1350,7 +1348,6 @@ let sq2 f f4 result memory tempBuffer =
   c3 +! h_3 +! c4
 
 
-
 val sq3: f: felem -> f4: felem -> result: felem -> memory: lbuffer uint64 (size 12) -> temp: lbuffer uint64 (size 5) -> 
   Stack uint64 
   (requires fun h -> live h f /\ live h f4 /\ live h result /\ live h temp /\ live h memory /\ eq_or_disjoint f4 result /\ disjoint f4 memory /\ disjoint f4 temp /\ disjoint f result /\ disjoint temp result /\ disjoint memory temp /\ disjoint memory result /\
@@ -1381,7 +1378,6 @@ val sq3: f: felem -> f4: felem -> result: felem -> memory: lbuffer uint64 (size 
     )
   )
 
-#push-options "--z3rlimit 800"
 
 let sq3 f f4 result memory tempBuffer = 
   let h0 = ST.get() in 
@@ -1583,33 +1579,36 @@ let cmovznz4 cin x y r =
     cmovznz4_lemma cin (Seq.index x 2) (Seq.index y 2);
     cmovznz4_lemma cin (Seq.index x 3) (Seq.index y 3)
 
+val lemma_shift_256: a: int -> b: int -> c: int -> d: int -> Lemma (
+    a * pow2 64 * pow2 64 * pow2 64 * pow2 64 + 
+    b * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 + 
+    c * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64  + 
+    d * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 ==
+    (a + b * pow2 64 + c * pow2 64 * pow2 64 + d * pow2 64 * pow2 64 * pow2 64) * pow2 64 * pow2 64 * pow2 64 * pow2 64)
+
+let lemma_shift_256 a b c d = ()
+
+#push-options "--z3rlimit 200"
 
 val shift_256_impl: i: felem -> o: lbuffer uint64 (size 8) -> 
   Stack unit 
     (requires fun h -> live h i /\ live h o /\ disjoint i o)
-    (ensures fun h0 _ h1 -> modifies1 o h0 h1 /\ 
-      (
-	let o = as_seq h1 o in 
-	felem_seq_as_nat_8 o == as_nat h0 i * pow2 256 
-      )
-    )
+    (ensures fun h0 _ h1 -> modifies1 o h0 h1 /\ wide_as_nat h1 o == as_nat h0 i * pow2 256)
 
 let shift_256_impl i o = 
-  upd o (size 0) (u64 0);
-  upd o (size 1) (u64 0);
-  upd o (size 2) (u64 0);
-  upd o (size 3) (u64 0);
-  upd o (size 4) i.(size 0);
-  upd o (size 5) i.(size 1);
-  upd o (size 6) i.(size 2);
-  upd o (size 7) i.(size 3);
-
-  assert_norm(pow2 64 * pow2 64 * pow2 64 = pow2 192);
   assert_norm(pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
-  assert_norm(pow2 64 * pow2 64 * pow2 64  * pow2 64 * pow2 64= pow2 (5 * 64));
-  assert_norm(pow2 64 * pow2 64 * pow2 64  * pow2 64 * pow2 64 * pow2 64 = pow2 (6 * 64));
-  assert_norm(pow2 64 * pow2 64 * pow2 64  * pow2 64 * pow2 64* pow2 64 * pow2 64 = pow2 (7 * 64));
-  assert_norm(pow2 64 * pow2 64 * pow2 64  * pow2 64 * pow2 64* pow2 64 * pow2 64 * pow2 64 = pow2 (8 * 64))
+
+  let h0 = ST.get() in 
+    upd o (size 0) (u64 0);
+    upd o (size 1) (u64 0);
+    upd o (size 2) (u64 0);
+    upd o (size 3) (u64 0);
+    upd o (size 4) i.(size 0);
+    upd o (size 5) i.(size 1);
+    upd o (size 6) i.(size 2);
+    upd o (size 7) i.(size 3);
+
+  lemma_shift_256 (v (Lib.Sequence.index (as_seq h0 i) 0)) (v (Lib.Sequence.index (as_seq h0 i) 1)) (v (Lib.Sequence.index (as_seq h0 i) 2)) (v (Lib.Sequence.index (as_seq h0 i) 3))
 
 
 inline_for_extraction noextract
