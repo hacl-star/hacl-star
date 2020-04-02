@@ -603,7 +603,7 @@ REQUIRED_BUNDLES = \
   -bundle 'EverCrypt.Spec.*'
 
 REQUIRED_FLAGS	= \
-	$(REQUIRED_BUNDLES) \
+  $(REQUIRED_BUNDLES) \
   -drop EverCrypt.TargetConfig \
   -library 'Vale.Stdcalls.*' \
   -no-prefix 'Vale.Stdcalls.*' \
@@ -652,7 +652,7 @@ E_HASH_BUNDLE=-bundle EverCrypt.Hash+EverCrypt.Hash.Incremental=[rename=EverCryp
 MERKLE_BUNDLE=-bundle 'MerkleTree+MerkleTree.EverCrypt+MerkleTree.Low+MerkleTree.Low.Serialization+MerkleTree.Low.Hashfunctions=MerkleTree.*[rename=MerkleTree]'
 CTR_BUNDLE=-bundle EverCrypt.CTR=EverCrypt.CTR.*
 WASMSUPPORT_BUNDLE = -bundle WasmSupport
-LEGACY_BUNDLE = -bundle EverCrypt
+LEGACY_BUNDLE = -bundle EverCrypt[rename=EverCrypt_Legacy]
 
 BUNDLE_FLAGS	=\
   $(HASH_BUNDLE) \
@@ -810,7 +810,7 @@ dist/mitls/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES = \
 #
 # - MerkleTree doesn't compile in C89 mode (FIXME?)
 # - Use C89 versions of ancient HACL code
-dist/c89-compatible/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree.*'
+dist/c89-compatible/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree.*,MerkleTree'
 dist/c89-compatible/Makefile.basic: DEFAULT_FLAGS += \
   -fc89 -ccopt -std=c89 -ccopt -Wno-typedef-redefinition
 dist/c89-compatible/Makefile.basic: HACL_OLD_FILES := $(subst -c,-c89,$(HACL_OLD_FILES))
@@ -827,7 +827,7 @@ dist/c89-compatible/Makefile.basic: HACL_OLD_FILES := $(subst -c,-c89,$(HACL_OLD
 #    inline assembly version of those names
 # ii) the same order of arguments between, say, Field64.Vale.fadd and
 #     Vale.Inline.Fadd.fadd
-dist/linux/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree.*'
+dist/linux/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree.*,MerkleTree'
 dist/linux/Makefile.basic: TARGETCONFIG_FLAGS =
 dist/linux/Makefile.basic: DEFAULT_FLAGS += \
   -fc89-scope -fbuiltin-uint128 -flinux-ints -ccopt -Wno-typedef-redefinition
@@ -896,7 +896,7 @@ dist/mozilla/Makefile.basic: SALSA20_BUNDLE = -bundle Hacl.Salsa20
 dist/mozilla/Makefile.basic: ED_BUNDLE = -bundle Hacl.Ed25519
 dist/mozilla/Makefile.basic: NACLBOX_BUNDLE = -bundle Hacl.NaCl
 dist/mozilla/Makefile.basic: E_HASH_BUNDLE =
-dist/mozilla/Makefile.basic: MERKLE_BUNDLE = -bundle MerkleTree.*
+dist/mozilla/Makefile.basic: MERKLE_BUNDLE = -bundle MerkleTree.*,MerkleTree
 dist/mozilla/Makefile.basic: CTR_BUNDLE =
 dist/mozilla/Makefile.basic: BLAKE2_BUNDLE = -bundle Hacl.Impl.Blake2.*,Hacl.Blake2b_256,Hacl.Blake2s_128,Hacl.Blake2b_32,Hacl.Blake2s_32
 dist/mozilla/Makefile.basic: SHA3_BUNDLE = -bundle Hacl.SHA3
@@ -980,7 +980,7 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt \
 	  $(filter %.krml,$^) \
 	  -silent \
 	  -ccopt -Wno-unused \
-	  -warn-error @4-6+22 \
+	  -warn-error @2@4-6@15@18@21 \
 	  -fparentheses \
 	  $(notdir $(HACL_OLD_FILES)) \
 	  $(notdir $(HAND_WRITTEN_FILES)) \
