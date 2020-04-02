@@ -48,6 +48,18 @@ val lemma_repeati_vec:
     Loops.repeati (w * n) f (normalize_v acc_v0))
 
 
+let shift_aw (w:pos) (n:nat) (a:(i:nat{i <= n * w} -> Type)) (i:nat{i < n}) (j:nat{j <= w}) =
+  Math.Lemmas.lemma_mult_le_right w (i + 1) n;
+  a (i * w + j)
+
+
+let shift_fw (#inp_t:Type0) (w:pos) (blocksize:size_pos) (n:nat) (a:(i:nat{i <= n * w} -> Type))
+  (f:(i:nat{i < n * w} -> lseq inp_t blocksize -> a i -> a (i + 1))) (i:nat{i < n}) (j:nat{j < w})
+ =
+  Math.Lemmas.lemma_mult_le_right w (i + 1) n;
+  f (i * w + j)
+
+
 let repeat_gen_blocks_multi_vec_equiv_pre
   (#inp_t:Type0)
   (w:size_pos)
@@ -64,8 +76,8 @@ let repeat_gen_blocks_multi_vec_equiv_pre
   : prop
 =
   Math.Lemmas.lemma_mult_le_right w (i + 1) n;
-  let ai (j:nat{j <= w}) = a (i * w + j) in
-  let fi (j:nat{j < w}) = f (i * w + j) in
+  let ai = shift_aw w n a i in
+  let fi = shift_fw w blocksize n a f i in
   Math.Lemmas.cancel_mul_mod w blocksize;
   Math.Lemmas.cancel_mul_div w blocksize;
 
@@ -98,12 +110,11 @@ let repeat_blocks_multi_vec_equiv_pre
   (#b:Type0)
   (#b_vec:Type0)
   (w:size_pos)
-  (blocksize:size_pos)
-  (blocksize_v:size_pos{blocksize_v == w * blocksize})
+  (blocksize:size_pos{w * blocksize <= max_size_t})
   (f:(lseq a blocksize -> b -> b))
-  (f_v:(lseq a blocksize_v -> b_vec -> b_vec))
+  (f_v:(lseq a (w * blocksize) -> b_vec -> b_vec))
   (normalize_v:(b_vec -> b))
-  (b_v:lseq a blocksize_v)
+  (b_v:lseq a (w * blocksize))
   (acc_v:b_vec)
   : prop
 =
@@ -125,7 +136,7 @@ val lemma_repeat_blocks_multi_vec:
   Lemma
   (requires
     (forall (b_v:lseq a (w * blocksize)) (acc_v:b_vec).
-      repeat_blocks_multi_vec_equiv_pre w blocksize (w * blocksize) f f_v normalize_v b_v acc_v))
+      repeat_blocks_multi_vec_equiv_pre w blocksize f f_v normalize_v b_v acc_v))
   (ensures
     normalize_v (repeat_blocks_multi #a #b_vec (w * blocksize) inp f_v acc_v0) ==
     repeat_blocks_multi #a #b blocksize inp f (normalize_v acc_v0))
