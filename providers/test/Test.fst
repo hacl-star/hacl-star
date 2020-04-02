@@ -39,6 +39,8 @@ type block_cipher_vector = block_cipher * vec8 * vec8 * vec8
 
 module HST = FStar.HyperStack.ST
 
+// JP: disabling legacy tests
+(*
 val test_one_aes_ecb : block_cipher -> block_cipher_vector -> Stack unit (fun _ -> True) (fun _ _ _ -> True)
 let test_one_aes_ecb block0 v =
     let block, (LB key_len key), (LB plain_len plain), (LB cipher_len cipher) = v in
@@ -71,6 +73,7 @@ let test_one_aes_ecb block0 v =
       TestLib.compare_and_print !$"of AES128 block" cipher cipher' 16ul;
       pop_frame()
     end
+*)
 
 /// Test drivers
 
