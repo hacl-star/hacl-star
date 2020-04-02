@@ -215,17 +215,6 @@ val secretToPublic: result: point -> scalar: lbuffer uint8 (size 32) -> tempBuff
     )
   )
 
-
-val secretToPublicU8: result: lbuffer uint8 (size 64) -> scalar: lbuffer uint8 (size 32) -> tempBuffer: lbuffer uint64 (size 100) ->
-  Stack unit
-    (requires fun h -> 
-      live h result /\ live h scalar /\ live h tempBuffer /\ 
-      LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer; loc scalar; loc result]
-    )
-  (
-    ensures fun h0 _ h1 -> modifies (loc result |+| loc tempBuffer) h0 h1 
-  )
-
 val secretToPublicWithoutNorm: result: point -> scalar: lbuffer uint8 (size 32) -> 
  tempBuffer: lbuffer uint64 (size 100) ->
   Stack unit

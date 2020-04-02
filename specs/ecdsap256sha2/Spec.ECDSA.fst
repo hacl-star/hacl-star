@@ -552,6 +552,37 @@ let ecdsa_verification_blake2 publicKey r s mLen m =
   end
 
 
+val ecdsa_verification_without_hash:
+  publicKey:tuple2 nat nat -> r:nat -> s:nat
+  -> m:lseq uint8 32
+  -> bool
+
+let ecdsa_verification_without_hash publicKey r s m =
+  let publicJacobian = toJacobianCoordinates publicKey in
+  if not (verifyQValidCurvePointSpec publicJacobian) then false
+  else
+    begin
+    if not (checkCoordinates r s) then false
+    else
+      begin
+      
+      let hashNat = nat_from_bytes_be m % prime_p256_order in
+
+      let u1 = nat_to_bytes_be 32 (pow s (prime_p256_order - 2) * hashNat % prime_p256_order) in
+      let u2 = nat_to_bytes_be 32 (pow s (prime_p256_order - 2) * r % prime_p256_order) in
+
+      let pointAtInfinity = (0, 0, 0) in
+      let u1D, _ = montgomery_ladder_spec u1 (pointAtInfinity, basePoint) in
+      let u2D, _ = montgomery_ladder_spec u2 (pointAtInfinity, publicJacobian) in
+
+      let sumPoints = _point_add u1D u2D in
+      let pointNorm = _norm sumPoints in
+      let x, y, z = pointNorm in
+      if Spec.P256.isPointAtInfinity pointNorm then false else x = r
+    end
+  end
+
+
 
 val ecdsa_signature_agile:
   alg: hash_alg {SHA2_256? alg \/ SHA2_384? alg \/ SHA2_512? alg}

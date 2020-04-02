@@ -665,39 +665,6 @@ let secretToPublic result scalar tempBuffer =
   pop_frame()
 
 
-
-let secretToPublicU8 result scalar tempBuffer = 
-  push_frame();
-  let tempBuffer = create (size 100) (u64 0) in
-  let resultBuffer = create (size 12) (u64 0) in
-  let resultBufferX = sub resultBuffer (size 0) (size 4) in
-  let resultBufferY = sub resultBuffer (size 4) (size 4) in
-  let resultX = sub result (size 0) (size 32) in
-  let resultY = sub result (size 32) (size 32) in
-
-  secretToPublic resultBuffer scalar tempBuffer;
-
-  let h0 = ST.get() in
-  changeEndian resultBufferX;
-  changeEndian resultBufferY;
-
-  toUint8 resultBufferX resultX;
-  toUint8 resultBufferY resultY;
-
-  let open Lib.ByteSequence in 
-  let open Spec.P256.Lemmas in 
-  lemma_core_0 resultBufferX h0;
-  lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h0 resultBufferX);
-  Spec.ECDSA.changeEndian_le_be (as_nat h0 resultBufferX);
-
-  lemma_core_0 resultBufferY h0;
-  lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h0 resultBufferY);
-  Spec.ECDSA.changeEndian_le_be (as_nat h0 resultBufferY);
-  pop_frame()
-
-
-
-
 let secretToPublicWithoutNorm result scalar tempBuffer = 
     push_frame(); 
       let basePoint = create (size 12) (u64 0) in 

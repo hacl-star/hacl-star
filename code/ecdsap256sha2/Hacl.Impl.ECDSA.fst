@@ -63,8 +63,8 @@ let ecdsa_p256_sha2_verification mLen m pubKey r s =
 let ecdsa_verification_blake2 mLen m pubKey r s =
   Hacl.Impl.ECDSA.P256SHA256.Verification.Blake2.ecdsa_verification_blake2 pubKey r s mLen m
 
-let ecdsa_verification_blake2hl mLen m pubKey r s =
-  Hacl.Impl.ECDSA.P256SHA256.Verification.Hashless.ecdsa_verification_blake2 pubKey r s mLen m
+let ecdsa_verification_blake2hl m pubKey r s =
+  Hacl.Impl.ECDSA.P256SHA256.Verification.Hashless.ecdsa_verification_without_hash pubKey r s m
 
 let decompressionNotCompressedForm b result = 
   Hacl.Impl.P256.Compression.decompressionNotCompressedForm b result
