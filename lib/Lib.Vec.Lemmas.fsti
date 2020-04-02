@@ -70,7 +70,7 @@ let repeat_gen_blocks_multi_vec_equiv_pre
   Math.Lemmas.cancel_mul_div w blocksize;
 
   normalize_v (i + 1) (f_v i b_v acc_v) ==
-  repeat_gen_blocks_multi blocksize w ai b_v fi (normalize_v i acc_v)
+  repeat_gen_blocks_multi blocksize w b_v ai fi (normalize_v i acc_v)
 
 
 val lemma_repeat_gen_blocks_multi_vec:
@@ -89,8 +89,8 @@ val lemma_repeat_gen_blocks_multi_vec:
     (forall (i:nat{i < n}) (b_v:lseq inp_t (w * blocksize)) (acc_v:a_vec i).
       repeat_gen_blocks_multi_vec_equiv_pre w blocksize n a a_vec f f_v normalize_v i b_v acc_v))
   (ensures
-    normalize_v n (repeat_gen_blocks_multi (w * blocksize) n a_vec inp f_v acc_v0) ==
-    repeat_gen_blocks_multi blocksize (n * w) a inp f (normalize_v 0 acc_v0))
+    normalize_v n (repeat_gen_blocks_multi (w * blocksize) n inp a_vec f_v acc_v0) ==
+    repeat_gen_blocks_multi blocksize (n * w) inp a f (normalize_v 0 acc_v0))
 
 
 let repeat_blocks_multi_vec_equiv_pre

@@ -58,8 +58,8 @@ let repeat_gen_blocks_f
   (#inp_t:Type0)
   (blocksize:size_pos)
   (n:nat)
-  (a:(i:nat{i <= n} -> Type))
   (inp:seq inp_t{length inp == n * blocksize})
+  (a:(i:nat{i <= n} -> Type))
   (f:(i:nat{i < n} -> lseq inp_t blocksize -> a i -> a (i + 1)))
   (i:nat{i < n})
   (acc:a i) : a (i + 1)
@@ -73,8 +73,8 @@ val repeat_gen_blocks_multi:
     #inp_t:Type0
   -> blocksize:size_pos
   -> n:nat
-  -> a:(i:nat{i <= n} -> Type)
   -> inp:seq inp_t{length inp == n * blocksize}
+  -> a:(i:nat{i <= n} -> Type)
   -> f:(i:nat{i < n} -> lseq inp_t blocksize -> a i -> a (i + 1))
   -> acc0:a 0 ->
   a n
@@ -84,12 +84,12 @@ val lemma_repeat_gen_blocks_multi:
     #inp_t:Type0
   -> blocksize:size_pos
   -> n:nat
-  -> a:(i:nat{i <= n} -> Type)
   -> inp:seq inp_t{length inp == n * blocksize}
+  -> a:(i:nat{i <= n} -> Type)
   -> f:(i:nat{i < n} -> lseq inp_t blocksize -> a i -> a (i + 1))
   -> acc0:a 0 -> Lemma
-  (repeat_gen_blocks_multi #inp_t blocksize n a inp f acc0 ==
-   Loops.repeat_gen n a (repeat_gen_blocks_f blocksize n a inp f) acc0)
+  (repeat_gen_blocks_multi #inp_t blocksize n inp a f acc0 ==
+   Loops.repeat_gen n a (repeat_gen_blocks_f blocksize n inp a f) acc0)
 
 
 val repeat_gen_blocks:
@@ -120,7 +120,7 @@ val lemma_repeat_gen_blocks:
     let blocks = Seq.slice inp 0 (nb * blocksize) in
     let last = Seq.slice inp (nb * blocksize) len in
     Math.Lemmas.cancel_mul_div nb blocksize;
-    let acc = repeat_gen_blocks_multi #inp_t blocksize nb a blocks f acc0 in
+    let acc = repeat_gen_blocks_multi #inp_t blocksize nb blocks a f acc0 in
     repeat_gen_blocks blocksize inp a f l acc0 == l nb rem last acc)
 
 
@@ -139,8 +139,8 @@ val repeat_gen_blocks_multi_extensionality:
     (forall (i:nat{i <= n}). a_f i == a_g i) /\
     (forall (i:nat{i < n}) (block:lseq inp_t blocksize) (acc:a_f i). f i block acc == g i block acc))
   (ensures
-    repeat_gen_blocks_multi #inp_t blocksize n a_f inp f acc0 ==
-    repeat_gen_blocks_multi #inp_t blocksize n a_g inp g acc0)
+    repeat_gen_blocks_multi #inp_t blocksize n inp a_f f acc0 ==
+    repeat_gen_blocks_multi #inp_t blocksize n inp a_g g acc0)
 
 
 val repeat_gen_blocks_extensionality:
@@ -177,7 +177,7 @@ val repeat_blocks_multi_is_repeat_gen_blocks_multi:
   (let n = length inp / blocksize in
    Math.Lemmas.div_exact_r (length inp) blocksize;
    repeat_blocks_multi #a #b blocksize inp f acc0 ==
-   repeat_gen_blocks_multi #a blocksize n (Loops.fixed_a b) inp (Loops.fixed_i f) acc0)
+   repeat_gen_blocks_multi #a blocksize n inp (Loops.fixed_a b) (Loops.fixed_i f) acc0)
 
 
 val repeat_blocks_is_repeat_gen_blocks:
@@ -213,8 +213,8 @@ val map_blocks_multi_is_repeat_gen_blocks_multi:
   -> inp:seq a{length inp == n * blocksize}
   -> f:(i:nat{i < n} -> lseq a blocksize -> lseq a blocksize) -> Lemma
   (map_blocks_multi #a blocksize n n inp f ==
-   repeat_gen_blocks_multi #a blocksize n
-     (map_blocks_a a blocksize n) inp
+   repeat_gen_blocks_multi #a blocksize n inp
+     (map_blocks_a a blocksize n)
      (repeat_gen_blocks_map_f blocksize n f)
      Seq.empty)
 
@@ -268,8 +268,8 @@ val repeat_gen_blocks_multi_split:
   -> blocksize:size_pos
   -> len0:nat{len0 % blocksize == 0}
   -> n:nat
-  -> a:(i:nat{i <= n} -> Type)
   -> inp:seq inp_t{len0 <= length inp /\ length inp == n * blocksize}
+  -> a:(i:nat{i <= n} -> Type)
   -> f:(i:nat{i < n} -> lseq inp_t blocksize -> a i -> a (i + 1))
   -> acc0:a 0 ->
   Lemma
@@ -290,10 +290,10 @@ val repeat_gen_blocks_multi_split:
     let t0 = Seq.slice inp 0 len0 in
     let t1 = Seq.slice inp len0 len in
 
-    let acc : a n0 = repeat_gen_blocks_multi blocksize n0 a t0 f acc0 in
+    let acc : a n0 = repeat_gen_blocks_multi blocksize n0 t0 a f acc0 in
 
-    repeat_gen_blocks_multi blocksize n a inp f acc0 ==
-    repeat_gen_blocks_multi blocksize n1 a1 t1 f1 acc)
+    repeat_gen_blocks_multi blocksize n inp a f acc0 ==
+    repeat_gen_blocks_multi blocksize n1 t1 a1 f1 acc)
 
 
 val repeat_gen_blocks_split:
@@ -322,7 +322,7 @@ val repeat_gen_blocks_split:
     let t0 = Seq.slice inp 0 len0 in
     let t1 = Seq.slice inp len0 len in
 
-    let acc : a n0 = repeat_gen_blocks_multi blocksize n0 a t0 f acc0 in
+    let acc : a n0 = repeat_gen_blocks_multi blocksize n0 t0 a f acc0 in
 
     repeat_gen_blocks blocksize inp a f l acc0 ==
     repeat_gen_blocks blocksize t1 a1 f1 l1 acc)
