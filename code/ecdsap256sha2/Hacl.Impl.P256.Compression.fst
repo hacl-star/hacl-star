@@ -160,7 +160,7 @@ let lessThanPrime f =
   pop_frame();
     less
 
-#push-options "--z3rlimit 400"
+#push-options "--z3rlimit 500"
 
 let decompressionCompressedForm b result = 
   push_frame();
