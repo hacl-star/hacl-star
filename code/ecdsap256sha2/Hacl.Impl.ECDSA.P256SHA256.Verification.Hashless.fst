@@ -111,8 +111,7 @@ val ecdsa_verification_step23:
 
 
 let ecdsa_verification_step23 m result = 
-  push_frame(); 
-    let h0 = ST.get() in 
+  let h0 = ST.get() in 
   toUint64ChangeEndian m result;
     let h1 = ST.get() in 
   reduction_prime_2prime_order result result;
@@ -120,9 +119,7 @@ let ecdsa_verification_step23 m result =
   lemma_core_0 result h1;
     
   Spec.ECDSA.changeEndianLemma (uints_from_bytes_be #U64 #_ #4 (as_seq h0 m));
-  uints_from_bytes_be_nat_lemma #U64 #SEC #4 (as_seq h0 m);
-
-  pop_frame()
+  uints_from_bytes_be_nat_lemma #U64 #SEC #4 (as_seq h0 m)
   
 
 inline_for_extraction noextract
