@@ -76,6 +76,7 @@ val frodo_pack:
       as_seq h1 res == S.frodo_pack (v d) (as_matrix h0 a))
 [@"c_inline"]
 let frodo_pack #n1 #n2 d a res =
+  admit ();
   let n = (n1 *! n2) /. size 8 in
   let a_spec = S.frodo_pack_state #(v n1) #(v n2) (v d) in
   [@ inline_let]

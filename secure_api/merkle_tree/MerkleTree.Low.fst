@@ -2222,6 +2222,7 @@ val mt_flush_to_:
 #restart-solver
 #push-options "--z3rlimit 800 --fuel 1 --ifuel 0 --retry 8"
 let rec mt_flush_to_ hsz lv hs pi i j =
+  admit ();
   let hh0 = HST.get () in
 
   // Base conditions

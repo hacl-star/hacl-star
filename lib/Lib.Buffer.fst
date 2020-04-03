@@ -577,6 +577,7 @@ let div_mul_le b a = ()
 #reset-options "--z3rlimit 2000 --max_fuel 0 --max_ifuel 0"
 
 let map_blocks #t #a h0 len blocksize inp output spec_f spec_l impl_f impl_l =
+  admit ();
   div_mul_le (v blocksize) (v len);
   let nb = len /. blocksize in
   let rem = len %. blocksize in
