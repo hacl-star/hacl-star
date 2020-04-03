@@ -1,0 +1,148 @@
+[
+  "\"™N\u0005’ƒ×dê*(ï/SëŽ",
+  [
+    [
+      "Vale.Poly1305.Math.lowerUpper128_def",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.natN",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+      ],
+      0,
+      "bb70c9b6c718f64c656b194b288c3699"
+    ],
+    [
+      "Vale.Poly1305.Math.lowerUpper128_reveal",
+      1,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "a32d16c984f0a449d28fc198630d4e15"
+    ],
+    [
+      "Vale.Poly1305.Math.lowerUpper192_reveal",
+      1,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "76105316f55644c4e218b037259f8fd6"
+    ],
+    [
+      "Vale.Poly1305.Math.lemma_poly_multiply",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "b2t_def", "equation_Prims.l_and",
+        "equation_Prims.squash", "l_and-interp",
+        "primitive_Prims.op_GreaterThan",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c"
+      ],
+      0,
+      "dc26b1b871370594582a6933c438a56d"
+    ],
+    [
+      "Vale.Poly1305.Math.lemma_poly_reduce",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "b2t_def", "equation_Prims.squash",
+        "int_inversion", "l_and-interp", "primitive_Prims.op_GreaterThan",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c"
+      ],
+      0,
+      "5a994457fcbec032077309d913f42033"
+    ],
+    [
+      "Vale.Poly1305.Math.lemma_bytes_shift_power2",
+      1,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "b50b7bcbebb95260d2e16f344b4d1576"
+    ],
+    [
+      "Vale.Poly1305.Math.lemma_bytes_and_mod",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.natN",
+        "int_inversion", "int_typing", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "typing_Vale.Def.Types_s.ishl"
+      ],
+      0,
+      "b844bd4ec906f2654799b000b1562429"
+    ],
+    [
+      "Vale.Poly1305.Math.lemma_mod_power2_lo",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "b2t_def", "equation_Prims.squash",
+        "int_inversion", "l_and-interp",
+        "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c"
+      ],
+      0,
+      "1f103cff6cfcf67fe856b3ac90e75eb5"
+    ],
+    [
+      "Vale.Poly1305.Math.lemma_power2_add64",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "d54e3593cabfe14714e282e4cc0c1379"
+    ],
+    [
+      "Vale.Poly1305.Math.lemma_mod_hi",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.natN",
+        "int_inversion", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+      ],
+      0,
+      "8984c91835f9a29f44a4c084556dd495"
+    ],
+    [
+      "Vale.Poly1305.Math.lemma_poly_demod",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "797646e90ae8ad2aecd7fed08cde08fa"
+    ]
+  ]
+]
