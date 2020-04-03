@@ -37,5 +37,4 @@ let test (v: Bytes.t curve25519_test) t scalarmult ecdh =
 let _ =
   List.iter (fun v -> test v "EverCrypt.Curve25519" EverCrypt.Curve25519.scalarmult EverCrypt.Curve25519.ecdh) tests;
   List.iter (fun v -> test v "Hacl.Curve25519_51" Hacl.Curve25519_51.scalarmult Hacl.Curve25519_51.ecdh) tests;
-  List.iter (fun v -> test v "Hacl.Curve25519_64" Hacl.Curve25519_64.scalarmult Hacl.Curve25519_64.ecdh) tests;
-  List.iter (fun v -> test v "Hacl.Curve25519_64_Slow" Hacl.Curve25519_64_Slow.scalarmult Hacl.Curve25519_64_Slow.ecdh) tests
+  List.iter (fun v -> test v "Hacl.Curve25519_64" Hacl.Curve25519_64.scalarmult Hacl.Curve25519_64.ecdh) tests

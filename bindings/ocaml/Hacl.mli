@@ -1,9 +1,9 @@
-open Unsigned
-
 open SharedDefs
 
+module C = CBytes
+
 module RandomBuffer : sig
-  val randombytes : Bytes.t -> bool
+  val randombytes : C.t -> bool
 end
 
 module Chacha20_Poly1305_32 : Chacha20_Poly1305
@@ -12,14 +12,6 @@ module Chacha20_Poly1305_256 : Chacha20_Poly1305
 
 module Curve25519_51 : Curve25519
 module Curve25519_64 : Curve25519
-module Curve25519_64_Slow : Curve25519
-
-module Curve25519_51_Internal : sig
-  include Curve25519
-  val fadd : Bigstring.t -> Bigstring.t -> Bigstring.t -> unit
-  val fsub : Bigstring.t -> Bigstring.t -> Bigstring.t -> unit
-  val fmul1 : Bigstring.t -> Bigstring.t -> uint64 -> unit
-end
 
 module Ed25519 : EdDSA
 
@@ -33,9 +25,9 @@ module SHA3_256 : HashFunction
 module SHA3_384 : HashFunction
 module SHA3_512 : HashFunction
 module Keccak : sig
-  val keccak : int -> int -> int -> Bytes.t -> Bytes.t -> unit
-  val shake128 : Bytes.t -> Bytes.t -> unit
-  val shake256 : Bytes.t -> Bytes.t -> unit
+  val keccak : int -> int -> int -> C.t -> C.t -> unit
+  val shake128 : C.t -> C.t -> unit
+  val shake256 : C.t -> C.t -> unit
 end
 
 module MD5 : HashFunction [@@deprecated]
@@ -53,22 +45,22 @@ module HKDF_SHA2_256 : HKDF
 module HKDF_SHA2_512 : HKDF
 
 module NaCl : sig
-  val box_beforenm : Bytes.t -> Bytes.t -> Bytes.t -> bool
+  val box_beforenm : C.t -> C.t -> C.t -> bool
   module Easy : sig
-    val box : Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> bool
-    val box_open : Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> bool
-    val box_afternm : Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> bool
-    val box_open_afternm : Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> bool
-    val secretbox : Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> bool
-    val secretbox_open : Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> bool
+    val box : C.t -> C.t -> C.t -> C.t -> C.t -> bool
+    val box_open : C.t -> C.t -> C.t -> C.t -> C.t -> bool
+    val box_afternm : C.t -> C.t -> C.t -> C.t -> bool
+    val box_open_afternm : C.t -> C.t -> C.t -> C.t -> bool
+    val secretbox : C.t -> C.t -> C.t -> C.t -> bool
+    val secretbox_open : C.t -> C.t -> C.t -> C.t -> bool
   end
   module Detached : sig
-    val box : Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> bool
-    val box_open : Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> bool
-    val box_afternm : Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> bool
-    val box_open_afternm : Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> bool
-    val secretbox : Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> bool
-    val secretbox_open : Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> bool
+    val box : C.t -> C.t -> C.t -> C.t -> C.t -> C.t -> bool
+    val box_open : C.t -> C.t -> C.t -> C.t -> C.t -> C.t -> bool
+    val box_afternm : C.t -> C.t -> C.t -> C.t -> C.t -> bool
+    val box_open_afternm : C.t -> C.t -> C.t -> C.t -> C.t -> bool
+    val secretbox : C.t -> C.t -> C.t -> C.t -> C.t -> bool
+    val secretbox_open : C.t -> C.t -> C.t -> C.t -> C.t -> bool
   end
 end
 
@@ -76,7 +68,7 @@ module Blake2b_32 : Blake2b
 module Blake2b_256 : Blake2b
 
 module ECDSA : sig
-  val sign : Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> bool
-  val verify : Bytes.t -> Bytes.t -> Bytes.t -> bool
+  val sign : C.t -> C.t -> C.t -> C.t -> bool
+  val verify : C.t -> C.t -> C.t -> bool
 end
 

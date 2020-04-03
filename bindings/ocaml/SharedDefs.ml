@@ -1,6 +1,5 @@
 open Unsigned
 
-open Ctypes
 
 module type Buffer = sig
   type t
@@ -22,15 +21,17 @@ module CBytes : Buffer with type t = Bytes.t and type buf = Bytes.t Ctypes.ocaml
   let disjoint b1 b2 = b1 != b2
 end
 
-module CBigstring : Buffer with type t = Bigstring.t and type buf = uint8 Ctypes_static.ptr = struct
-  type t = Bigstring.t
-  type buf = uint8 Ctypes_static.ptr
-  let size_uint32 b = Unsigned.UInt32.of_int (Bigstring.size b)
-  let ctypes_buf b = from_voidp uint8_t (to_voidp (bigarray_start array1 b))
-  let size = Bigstring.size
-  let equal = Bigstring.equal
-  let disjoint _ _ = true (* TODO: use https://github.com/ocaml/ocaml/pull/8618 once merged *)
-end
+(* VD: temporarely disable, eliminate dependency on bigstring *)
+(* module CBigstring : Buffer with type t = Bigstring.t and type buf = uint8 Ctypes_static.ptr = struct
+ *   open Ctypes
+ *   type t = Bigstring.t
+ *   type buf = uint8 Ctypes_static.ptr
+ *   let size_uint32 b = Unsigned.UInt32.of_int (Bigstring.size b)
+ *   let ctypes_buf b = from_voidp uint8_t (to_voidp (bigarray_start array1 b))
+ *   let size = Bigstring.size
+ *   let equal = Bigstring.equal
+ *   let disjoint _ _ = true (\* TODO: use https://github.com/ocaml/ocaml/pull/8618 once merged *\)
+ * end *)
 
 
 module Hacl_Hash = Hacl_Hash_bindings.Bindings(Hacl_Hash_stubs)

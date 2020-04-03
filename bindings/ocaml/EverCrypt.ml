@@ -165,8 +165,8 @@ module Hash = struct
     everCrypt_Hash_Incremental_free st
   let hash alg dst input =
     assert (C.size input < max_input_len);
-    assert (CBytes.size dst = digest_len alg);
-    assert (CBytes.disjoint dst input);
+    assert (C.size dst = digest_len alg);
+    assert (C.disjoint dst input);
     everCrypt_Hash_hash (alg_definition alg) (C.ctypes_buf dst) (C.ctypes_buf input) (C.size_uint32 input)
 end
 

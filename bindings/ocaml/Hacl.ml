@@ -60,23 +60,6 @@ module Curve25519_64 : Curve25519 =
     let ecdh = Hacl_Curve25519_64.hacl_Curve25519_64_ecdh
   end)
 
-module Curve25519_64_Slow : Curve25519 =
-  Make_Curve25519 (struct
-    let secret_to_public = Hacl_Curve25519_64_Slow.hacl_Curve25519_64_Slow_secret_to_public
-    let scalarmult = Hacl_Curve25519_64_Slow.hacl_Curve25519_64_Slow_scalarmult
-    let ecdh = Hacl_Curve25519_64_Slow.hacl_Curve25519_64_Slow_ecdh
-  end)
-
-(* TODO: needs testing *)
-module Curve25519_51_Internal = struct
-  open Ctypes
-  include Curve25519_51
-  let uint64_ptr buf = from_voidp uint64_t (to_voidp (bigarray_start array1 buf))
-  let fadd out f1 f2 = Hacl_Curve25519_51.hacl_Impl_Curve25519_Field51_fadd (uint64_ptr out) (uint64_ptr f1) (uint64_ptr f2)
-  let fsub out f1 f2 = Hacl_Curve25519_51.hacl_Impl_Curve25519_Field51_fsub (uint64_ptr out) (uint64_ptr f1) (uint64_ptr f2)
-  let fmul1 out f1 f2 = Hacl_Curve25519_51.hacl_Impl_Curve25519_Field51_fmul1 (uint64_ptr out) (uint64_ptr f1) f2
-end
-
 module Ed25519 : EdDSA =
   Make_EdDSA (struct
   let secret_to_public = Hacl_Ed25519.hacl_Ed25519_secret_to_public
@@ -309,6 +292,7 @@ module Blake2b_256 : Blake2b =
     let blake2b = Hacl_Blake2b_256.hacl_Blake2b_256_blake2b
   end)
 
+(* WIP, will update along with chages to ECDSA *)
 module ECDSA = struct
   let get_result r =
     if r = UInt64.zero then

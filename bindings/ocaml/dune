@@ -1,5 +1,8 @@
 (library
  (name        hacl_star)
  (public_name hacl-star)
- (libraries hacl-star-raw bigstring zarith)
+ (libraries hacl-star-raw
+            ; bigstring
+            zarith
+ )
  (flags (:standard -warn-error -3)))

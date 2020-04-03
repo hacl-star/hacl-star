@@ -11,7 +11,7 @@ synopsis: "OCaml API for EverCrypt/HACL*"
 depends: [
   "ocaml" { >= "4.05.0" }
   "hacl-star-raw"
-  "bigstring"
+  # "bigstring"
   "zarith"
 ]
 build: [
