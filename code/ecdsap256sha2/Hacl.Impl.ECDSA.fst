@@ -61,6 +61,9 @@ let ecdsa_verif_without_hash m pubKey r s =
   Hacl.Impl.ECDSA.P256SHA256.Verification.Hashless.ecdsa_verification_without_hash pubKey r s m
 
 
+let verifyQ pubKey = 
+    Hacl.Impl.P256.Signature.Common.verifyQ pubKey
+
 
 let decompressionNotCompressedForm b result = 
   Hacl.Impl.P256.Compression.decompressionNotCompressedForm b result
