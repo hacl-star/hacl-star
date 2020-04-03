@@ -736,7 +736,6 @@ val sq0: f:  lbuffer uint64 (size 4) -> result: lbuffer uint64 (size 4) -> memor
 
 
 #push-options "--z3rlimit 1000"
-
 let sq0 f result memory temp = 
   let h0 = ST.get() in 
   

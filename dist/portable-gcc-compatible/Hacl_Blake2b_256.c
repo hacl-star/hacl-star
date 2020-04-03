@@ -187,30 +187,15 @@ blake2b_update_block(
     Lib_IntVector_Intrinsics_vec256 *r32 = wv + (uint32_t)3U * (uint32_t)1U;
     Lib_IntVector_Intrinsics_vec256 v00 = r12[0U];
     Lib_IntVector_Intrinsics_vec256
-    v1 =
-      Lib_IntVector_Intrinsics_vec256_shuffle64(v00,
-        (uint32_t)1U,
-        ((uint32_t)1U + (uint32_t)1U) % (uint32_t)4U,
-        ((uint32_t)1U + (uint32_t)2U) % (uint32_t)4U,
-        ((uint32_t)1U + (uint32_t)3U) % (uint32_t)4U);
+    v1 = Lib_IntVector_Intrinsics_vec256_rotate_right_lanes64(v00, (uint32_t)1U);
     r12[0U] = v1;
     Lib_IntVector_Intrinsics_vec256 v01 = r22[0U];
     Lib_IntVector_Intrinsics_vec256
-    v10 =
-      Lib_IntVector_Intrinsics_vec256_shuffle64(v01,
-        (uint32_t)2U,
-        ((uint32_t)2U + (uint32_t)1U) % (uint32_t)4U,
-        ((uint32_t)2U + (uint32_t)2U) % (uint32_t)4U,
-        ((uint32_t)2U + (uint32_t)3U) % (uint32_t)4U);
+    v10 = Lib_IntVector_Intrinsics_vec256_rotate_right_lanes64(v01, (uint32_t)2U);
     r22[0U] = v10;
     Lib_IntVector_Intrinsics_vec256 v02 = r32[0U];
     Lib_IntVector_Intrinsics_vec256
-    v11 =
-      Lib_IntVector_Intrinsics_vec256_shuffle64(v02,
-        (uint32_t)3U,
-        ((uint32_t)3U + (uint32_t)1U) % (uint32_t)4U,
-        ((uint32_t)3U + (uint32_t)2U) % (uint32_t)4U,
-        ((uint32_t)3U + (uint32_t)3U) % (uint32_t)4U);
+    v11 = Lib_IntVector_Intrinsics_vec256_rotate_right_lanes64(v02, (uint32_t)3U);
     r32[0U] = v11;
     uint32_t a0 = (uint32_t)0U;
     uint32_t b = (uint32_t)1U;
@@ -258,30 +243,15 @@ blake2b_update_block(
     Lib_IntVector_Intrinsics_vec256 *r3 = wv + (uint32_t)3U * (uint32_t)1U;
     Lib_IntVector_Intrinsics_vec256 v0 = r13[0U];
     Lib_IntVector_Intrinsics_vec256
-    v12 =
-      Lib_IntVector_Intrinsics_vec256_shuffle64(v0,
-        (uint32_t)3U,
-        ((uint32_t)3U + (uint32_t)1U) % (uint32_t)4U,
-        ((uint32_t)3U + (uint32_t)2U) % (uint32_t)4U,
-        ((uint32_t)3U + (uint32_t)3U) % (uint32_t)4U);
+    v12 = Lib_IntVector_Intrinsics_vec256_rotate_right_lanes64(v0, (uint32_t)3U);
     r13[0U] = v12;
     Lib_IntVector_Intrinsics_vec256 v03 = r2[0U];
     Lib_IntVector_Intrinsics_vec256
-    v13 =
-      Lib_IntVector_Intrinsics_vec256_shuffle64(v03,
-        (uint32_t)2U,
-        ((uint32_t)2U + (uint32_t)1U) % (uint32_t)4U,
-        ((uint32_t)2U + (uint32_t)2U) % (uint32_t)4U,
-        ((uint32_t)2U + (uint32_t)3U) % (uint32_t)4U);
+    v13 = Lib_IntVector_Intrinsics_vec256_rotate_right_lanes64(v03, (uint32_t)2U);
     r2[0U] = v13;
     Lib_IntVector_Intrinsics_vec256 v04 = r3[0U];
     Lib_IntVector_Intrinsics_vec256
-    v14 =
-      Lib_IntVector_Intrinsics_vec256_shuffle64(v04,
-        (uint32_t)1U,
-        ((uint32_t)1U + (uint32_t)1U) % (uint32_t)4U,
-        ((uint32_t)1U + (uint32_t)2U) % (uint32_t)4U,
-        ((uint32_t)1U + (uint32_t)3U) % (uint32_t)4U);
+    v14 = Lib_IntVector_Intrinsics_vec256_rotate_right_lanes64(v04, (uint32_t)1U);
     r3[0U] = v14;
   }
   Lib_IntVector_Intrinsics_vec256 *s0 = hash + (uint32_t)0U * (uint32_t)1U;
