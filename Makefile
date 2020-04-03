@@ -103,7 +103,7 @@ all:
 all-unstaged: compile-gcc-compatible compile-msvc-compatible compile-gcc64-only \
   compile-evercrypt-external-headers compile-c89-compatible compile-ccf \
   compile-portable-gcc-compatible compile-mozilla dist/linux/Makefile.basic \
-  dist/wasm/package.json dist/merkle-tree/Makefile.basic
+  dist/wasm/package.json dist/merkle-tree/Makefile.basic compile-mitls
 
 # Automatic staging.
 %-staged: .last_vale_version
@@ -576,13 +576,6 @@ HAND_WRITTEN_FILES 	= $(wildcard $(LIB_DIR)/c/*.c) \
 # Always copied into the destination directory, not passed to kremlin.
 HAND_WRITTEN_H_FILES	= $(wildcard $(LIB_DIR)/c/*.h)
 
-# Possibly overridden, and not passed to kremlin, meaning that they don't end up
-# in the Makefile.basic list of C source files. They're added manually in
-# dist/Makefile (see ifneq tests).
-HAND_WRITTEN_OPTIONAL_FILES = \
-  $(addprefix providers/evercrypt/c/evercrypt_,openssl.c bcrypt.c)
-
-
 # Flags that we always include. These are not meant to be overridden and
 # provide: -library (for vale interop); -no-prefix (for correct vale interop
 # names; for correct Merkle Tree function names used by C tests); -bundle (to
@@ -610,7 +603,7 @@ REQUIRED_BUNDLES = \
   -bundle 'EverCrypt.Spec.*'
 
 REQUIRED_FLAGS	= \
-	$(REQUIRED_BUNDLES) \
+  $(REQUIRED_BUNDLES) \
   -drop EverCrypt.TargetConfig \
   -library 'Vale.Stdcalls.*' \
   -no-prefix 'Vale.Stdcalls.*' \
@@ -659,6 +652,7 @@ E_HASH_BUNDLE=-bundle EverCrypt.Hash+EverCrypt.Hash.Incremental=[rename=EverCryp
 MERKLE_BUNDLE=-bundle 'MerkleTree+MerkleTree.EverCrypt+MerkleTree.Low+MerkleTree.Low.Serialization+MerkleTree.Low.Hashfunctions=MerkleTree.*[rename=MerkleTree]'
 CTR_BUNDLE=-bundle EverCrypt.CTR=EverCrypt.CTR.*
 WASMSUPPORT_BUNDLE = -bundle WasmSupport
+LEGACY_BUNDLE = -bundle EverCrypt[rename=EverCrypt_Legacy]
 
 BUNDLE_FLAGS	=\
   $(HASH_BUNDLE) \
@@ -677,7 +671,8 @@ BUNDLE_FLAGS	=\
   $(WASMSUPPORT_BUNDLE) \
   $(CTR_BUNDLE) \
   $(FRODO_BUNDLE) \
-  $(HPKE_BUNDLE)
+  $(HPKE_BUNDLE) \
+  $(LEGACY_BUNDLE)
 
 DEFAULT_FLAGS = \
   $(HAND_WRITTEN_LIB_FLAGS) \
@@ -798,13 +793,24 @@ dist/msvc-compatible/Makefile.basic: DEFAULT_FLAGS += -falloca -ftail-calls
 
 dist/gcc64-only/Makefile.basic: DEFAULT_FLAGS += -fbuiltin-uint128
 
+# miTLS
+# -----
+dist/mitls/Makefile.basic: DEFAULT_FLAGS += -falloca -ftail-calls
+dist/mitls/Makefile.basic: LEGACY_BUNDLE =
+
+# Not passed to kremlin, meaning that they don't end up in the Makefile.basic
+# list of C source files. They're added manually in dist/Makefile (see ifneq
+# tests).
+dist/mitls/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES = \
+  $(addprefix providers/evercrypt/c/evercrypt_,openssl.c bcrypt.c)
+
 
 # C89 distribution
 # ----------------
 #
 # - MerkleTree doesn't compile in C89 mode (FIXME?)
 # - Use C89 versions of ancient HACL code
-dist/c89-compatible/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree.*'
+dist/c89-compatible/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree.*,MerkleTree'
 dist/c89-compatible/Makefile.basic: DEFAULT_FLAGS += \
   -fc89 -ccopt -std=c89 -ccopt -Wno-typedef-redefinition
 dist/c89-compatible/Makefile.basic: HACL_OLD_FILES := $(subst -c,-c89,$(HACL_OLD_FILES))
@@ -821,7 +827,7 @@ dist/c89-compatible/Makefile.basic: HACL_OLD_FILES := $(subst -c,-c89,$(HACL_OLD
 #    inline assembly version of those names
 # ii) the same order of arguments between, say, Field64.Vale.fadd and
 #     Vale.Inline.Fadd.fadd
-dist/linux/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree.*'
+dist/linux/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree.*,MerkleTree'
 dist/linux/Makefile.basic: TARGETCONFIG_FLAGS =
 dist/linux/Makefile.basic: DEFAULT_FLAGS += \
   -fc89-scope -fbuiltin-uint128 -flinux-ints -ccopt -Wno-typedef-redefinition
@@ -858,7 +864,6 @@ dist/ccf/Makefile.basic: \
     -bundle EverCrypt.AutoConfig2= \
     -bundle Hacl.Poly1305_32,Hacl.Poly1305_128,Hacl.Poly1305_256,Hacl.Impl.Poly1305.Field32xN_32,Hacl.Impl.Poly1305.Field32xN_128,Hacl.Impl.Poly1305.Field32xN_256[rename=Hacl_Poly1305] \
     -bundle Hacl.*[rename=Hacl_Leftovers] \
-    -bundle EverCrypt \
     -bundle EverCrypt.Hacl \
     -bundle EverCrypt.Helpers \
     -bundle EverCrypt.Poly1305 \
@@ -891,7 +896,7 @@ dist/mozilla/Makefile.basic: SALSA20_BUNDLE = -bundle Hacl.Salsa20
 dist/mozilla/Makefile.basic: ED_BUNDLE = -bundle Hacl.Ed25519
 dist/mozilla/Makefile.basic: NACLBOX_BUNDLE = -bundle Hacl.NaCl
 dist/mozilla/Makefile.basic: E_HASH_BUNDLE =
-dist/mozilla/Makefile.basic: MERKLE_BUNDLE = -bundle MerkleTree.*
+dist/mozilla/Makefile.basic: MERKLE_BUNDLE = -bundle MerkleTree.*,MerkleTree
 dist/mozilla/Makefile.basic: CTR_BUNDLE =
 dist/mozilla/Makefile.basic: BLAKE2_BUNDLE = -bundle Hacl.Impl.Blake2.*,Hacl.Blake2b_256,Hacl.Blake2s_128,Hacl.Blake2b_32,Hacl.Blake2s_32
 dist/mozilla/Makefile.basic: SHA3_BUNDLE = -bundle Hacl.SHA3
@@ -901,7 +906,7 @@ dist/mozilla/Makefile.basic: ECDSA_BUNDLE =
 dist/mozilla/Makefile.basic: FRODO_BUNDLE = -bundle Hacl.Frodo.*,Hacl.SHA3,Hacl.Keccak,Frodo.Params
 dist/mozilla/Makefile.basic: \
   BUNDLE_FLAGS += \
-    -bundle EverCrypt,EverCrypt.* \
+    -bundle EverCrypt.* \
     -bundle Hacl.Impl.*,Hacl.Bignum25519.*,Hacl.Bignum25519 \
     -bundle Hacl.Chacha20.Vec32
 dist/mozilla/Makefile.basic: VALE_ASMS := $(filter dist/vale/curve25519-%,$(VALE_ASMS))
@@ -975,7 +980,7 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt \
 	  $(filter %.krml,$^) \
 	  -silent \
 	  -ccopt -Wno-unused \
-	  -warn-error @4-6+22 \
+	  -warn-error @2@4-6@15@18@21 \
 	  -fparentheses \
 	  $(notdir $(HACL_OLD_FILES)) \
 	  $(notdir $(HAND_WRITTEN_FILES)) \
