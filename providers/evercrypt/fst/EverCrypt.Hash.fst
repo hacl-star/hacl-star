@@ -236,6 +236,7 @@ val update_last_64 (a: e_alg{ G.reveal a <> SHA2_384 /\ G.reveal a <> SHA2_512 }
   update_last_st #a
 inline_for_extraction
 let update_last_64 a update_last p last total_len =
+  admit ();
   let input_len = total_len % Int.Cast.Full.uint32_to_uint64 (block_len MD5) in
   let prev_len = total_len - input_len in
   update_last p prev_len last (Int.Cast.Full.uint64_to_uint32 input_len)

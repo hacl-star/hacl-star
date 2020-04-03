@@ -40,6 +40,7 @@ val point_add_step_1:
        F51.fevalh h1 (gsub tmp 15ul 5ul) == b)
     )
 let point_add_step_1 p q tmp =
+  admit ();
   let tmp1 = sub tmp 0ul 5ul in
   let tmp2 = sub tmp 5ul 5ul in
   let tmp3 = sub tmp 10ul 5ul in
