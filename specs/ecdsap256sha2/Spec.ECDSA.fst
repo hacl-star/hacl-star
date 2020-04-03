@@ -632,3 +632,23 @@ let ecdsa_signature_blake2 mLen m privateKey k =
       resultR, resultS, u64 (pow2 64 - 1)
     else
       resultR, resultS, u64 0
+
+
+val ecdsa_signature_without_hash:
+    m:lseq uint8 32
+  -> privateKey:lseq uint8 32
+  -> k:lseq uint8 32
+  -> tuple3 nat nat uint64
+
+let ecdsa_signature_without_hash m privateKey k =
+  let r, _ = montgomery_ladder_spec k ((0,0,0), basePoint) in
+  let (xN, _, _) = _norm r in
+  let z = nat_from_bytes_be m % prime_p256_order in 
+  let kFelem = nat_from_bytes_be k in
+  let privateKeyFelem = nat_from_bytes_be privateKey in
+  let resultR = xN % prime_p256_order in
+  let resultS = (z + resultR * privateKeyFelem) * pow kFelem (prime_p256_order - 2) % prime_p256_order in
+    if resultR = 0 || resultS = 0 then
+      resultR, resultS, u64 (pow2 64 - 1)
+    else
+      resultR, resultS, u64 0
