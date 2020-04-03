@@ -1,5 +1,5 @@
 opam-version: "2.0"
-name: "evercrypt-ctypes"
+name: "hacl-star-raw"
 version: "0.1"
 maintainer: "Victor Dumitrescu <victor.dumitrescu@nomadic-labs.com>"
 authors: [ "Victor Dumitrescu <victor.dumitrescu@nomadic-labs.com>" ]
@@ -11,8 +11,8 @@ synopsis: "Auto-generated low-level OCaml bindings for EverCrypt/HACL*"
 description: """
 This package contains a snapshot of the EverCrypt crypto provider and
 the HACL* library, along with automatically generated Ctypes bindings.
-For a higher-level idiomatic API see the `evercrypt` package, of
-which `evercrypt-ctypes` is a dependency.
+For a higher-level idiomatic API see the `hacl-star` package, of
+which `hacl-star-raw` is a dependency.
 """
 depends: [
   "ocaml" { >= "4.05.0" }
@@ -24,5 +24,5 @@ build: [
   [make]
 ]
 install: [
-  make "install-evercrypt-ctypes"
+  make "install-hacl-star-raw"
 ]

@@ -171,7 +171,7 @@ CTYPES_DEPS += lib/Lib_RandomBuffer_System_stubs.cmx lib/Lib_RandomBuffer_System
 libocamlevercrypt.cmxa: $(ALL_BINDINGS) $(ALL_ML_STUBS) $(ALL_C_STUBS) libevercrypt.$(SO)
 	ocamlfind mklib -o ocamlevercrypt $(CTYPES_DEPS) $(ALL_C_STUBS) libevercrypt.a -ccopt -L. -cclib -levercrypt $(MLLDFLAGS)
 
-install-evercrypt-ctypes:
-	ocamlfind install evercrypt-ctypes META *\.* lib/* lib_gen/*
+install-hacl-star-raw:
+	ocamlfind install hacl-star-raw META *\.* lib/* lib_gen/*
 
 endif
