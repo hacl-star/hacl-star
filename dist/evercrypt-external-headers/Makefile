@@ -101,10 +101,10 @@ OCAMLDEP=ocamlfind dep -I lib -slash
 CFLAGS += -I "$(shell ocamlfind query ctypes)" -I "$(shell ocamlfind c -where)"
 
 # Just names.
-ALL_OCAML=$(patsubst lib_gen/%_gen.ml,%,$(wildcard lib_gen/*_gen.ml)) Lib_RandomBuffer_System
+ALL_OCAML=$(patsubst lib_gen/%_gen.ml,%,$(wildcard lib_gen/*_gen.ml))
 
 ALL_BINDINGS=$(patsubst %,lib/%_bindings.cmx,$(ALL_OCAML))
-ALL_GENERATORS=$(patsubst %.ml,%.exe,$(wildcard lib_gen/*_gen.ml)) lib_gen/Lib_RandomBuffer_System_gen.exe
+ALL_GENERATORS=$(patsubst %.ml,%.exe,$(wildcard lib_gen/*_gen.ml))
 ALL_ML_STUBS=$(patsubst %,lib/%_stubs.cmx,$(ALL_OCAML))
 ALL_C_STUBS=$(patsubst %,lib/%_c_stubs.o,$(ALL_OCAML))
 
@@ -134,14 +134,6 @@ include ctypes.depend
 
 all: libocamlevercrypt.cmxa
 
-lib/Lib_RandomBuffer_System_bindings.cmx:
-	$(OCAMLOPT) -c Lib_RandomBuffer_System_bindings.ml -o lib/Lib_RandomBuffer_System_bindings.cmx
-
-lib_gen/Lib_RandomBuffer_System_gen.cmx: lib/Lib_RandomBuffer_System_bindings.cmx
-	$(OCAMLOPT) -c Lib_RandomBuffer_System_gen.ml lib/Lib_RandomBuffer_System_bindings.cmx -o lib_gen/Lib_RandomBuffer_System_gen.cmx
-
-lib_gen/Lib_RandomBuffer_System_gen.exe: lib/Lib_RandomBuffer_System_bindings.cmx lib_gen/Lib_RandomBuffer_System_gen.cmx
-
 lib_gen/%_gen.exe: libevercrypt.a
 	$(OCAMLOPT) $(filter-out %.a,$^) libevercrypt.a -o $@ $(MLLDFLAGS)
 
@@ -162,16 +154,7 @@ endif
 lib/%_stubs.ml lib/%_c_stubs.c: lib_gen/%_gen.exe
 	$(DY)PATH=.:$(OPENSSL_HOME):$$$(DY)PATH $<
 
-# Compiling these files raises the pointer sign warning because the Ctypes declaration for bytes expects a char*, not a uint8_t*
-# Can be remove once ctypes is upgraded to 0.17
-lib/%_c_stubs.o: CFLAGS += -Wno-pointer-sign
-
-CTYPES_DEPS += lib/Lib_RandomBuffer_System_stubs.cmx lib/Lib_RandomBuffer_System_bindings.cmx
-
 libocamlevercrypt.cmxa: $(ALL_BINDINGS) $(ALL_ML_STUBS) $(ALL_C_STUBS) libevercrypt.$(SO)
-	ocamlfind mklib -o ocamlevercrypt $(CTYPES_DEPS) $(ALL_C_STUBS) libevercrypt.a -ccopt -L. -cclib -levercrypt $(MLLDFLAGS)
-
-install-hacl-star-raw:
-	ocamlfind install hacl-star-raw META *\.* lib/* lib_gen/*
+	ocamlfind mklib -o ocamlevercrypt $(filter-out %.so,$^) libevercrypt.a $(MLLDFLAGS)
 
 endif

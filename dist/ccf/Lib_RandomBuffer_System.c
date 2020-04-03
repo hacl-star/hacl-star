@@ -34,20 +34,21 @@ bool read_random_bytes(uint32_t len, uint8_t *buf) {
 #include <unistd.h>
 
 bool read_random_bytes(uint32_t len, uint8_t *buf) {
-#ifdef SYS_getrandom
-  ssize_t res = syscall(SYS_getrandom, buf, (size_t)len, 0);
-  if (res == -1) {
-    return false;
-  }
-#else // !defined(SYS_getrandom)
   int fd = open("/dev/urandom", O_RDONLY);
   if (fd == -1) {
+    /* printf("Cannot open /dev/urandom\n"); */
     return false;
   }
-  ssize_t res = read(fd, buf, (uint64_t)len);
+  bool pass = true;
+  uint64_t res = read(fd, buf, (uint64_t)len);
+  if (res != (uint64_t)len) {
+    /* printf("Error on reading, expected %" PRIu32 " bytes, got %" PRIu64 */
+    /*        " bytes\n", */
+    /*        len, res); */
+    pass = false;
+  }
   close(fd);
-#endif // defined(SYS_getrandom)
-  return ((size_t)res == (size_t)len);
+  return pass;
 }
 
 #endif
