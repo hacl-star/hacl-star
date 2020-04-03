@@ -88,8 +88,6 @@ let frodo_pack #n1 #n2 d a res =
   loop h0 n a_spec refl footprint spec
     (fun i ->
       FStar.Math.Lemmas.lemma_mult_le_left (v d) (v i + 1) (v n);
-      assert (v d * (v i + 1) == v (d *! i +! d));
-      assert (v d * v ((n1 *! n2) /. size 8) == v (d *! ((n1 *! n2) /. size 8)));
       assert (v (d *! i +! d) <= v (d *! ((n1 *! n2) /. size 8)));
       Loops.unfold_repeat_gen (v n) a_spec (spec h0) (refl h0 0) (v i);
       let a = sub a (size 8 *! i) (size 8) in
