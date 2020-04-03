@@ -67,6 +67,7 @@ val point_decompress_:
 #push-options "--z3rlimit 30"
 
 let point_decompress_ out s tmp =
+  admit ();
   let y    = sub tmp 0ul 5ul in
   let x    = sub tmp 5ul 5ul in
   let h0 = get() in
