@@ -101,7 +101,7 @@ let repeat_gen_blocks_vec_equiv_pre
   (a_vec:(i:nat{i <= n} -> Type))
   (f:(i:nat{i < w * n + w} -> lseq inp_t blocksize -> a i -> a (i + 1)))
   (l:(i:nat{i <= w * n + w} -> len:nat{len < blocksize} -> lseq inp_t len -> a i -> c))
-  (l_v:(i:nat{i == n} -> len:nat{len < w * blocksize} -> lseq inp_t len -> a_vec i -> c))
+  (l_v:(i:nat{i <= n} -> len:nat{len < w * blocksize} -> lseq inp_t len -> a_vec i -> c))
   (normalize_v:(i:nat{i <= n} -> a_vec i -> a (w * i)))
   (rem:nat{rem < w * blocksize})
   (b_v:lseq inp_t rem)
@@ -124,7 +124,7 @@ val lemma_repeat_gen_blocks_vec:
   -> f:(i:nat{i < w * n + w} -> lseq inp_t blocksize -> a i -> a (i + 1))
   -> l:(i:nat{i <= w * n + w} -> len:nat{len < blocksize} -> lseq inp_t len -> a i -> c)
   -> f_v:(i:nat{i < n} -> lseq inp_t (w * blocksize) -> a_vec i -> a_vec (i + 1))
-  -> l_v:(i:nat{i == n} -> len:nat{len < w * blocksize} -> lseq inp_t len -> a_vec i -> c)
+  -> l_v:(i:nat{i <= n} -> len:nat{len < w * blocksize} -> lseq inp_t len -> a_vec i -> c)
   -> normalize_v:(i:nat{i <= n} -> a_vec i -> a (w * i))
   -> acc_v0:a_vec 0 -> Lemma
   (requires
@@ -184,7 +184,6 @@ let repeat_blocks_vec_equiv_pre
   (blocksize:size_pos{w * blocksize <= max_size_t})
   (f:(lseq a blocksize -> b -> b))
   (l:(len:nat{len < blocksize} -> lseq a len -> b -> c))
-  (f_v:(lseq a (w * blocksize) -> b_vec -> b_vec))
   (l_v:(len:nat{len < w * blocksize} -> lseq a len -> b_vec -> c))
   (normalize_v:(b_vec -> b))
   (rem:nat{rem < w * blocksize})
@@ -215,7 +214,7 @@ val lemma_repeat_blocks_vec:
     (forall (b_v:lseq a (w * blocksize)) (acc_v:b_vec).
       repeat_blocks_multi_vec_equiv_pre w blocksize f f_v normalize_v b_v acc_v) /\
     (forall (rem:nat{rem < w * blocksize}) (b_v:lseq a rem) (acc_v:b_vec).
-      repeat_blocks_vec_equiv_pre w blocksize f l f_v l_v normalize_v rem b_v acc_v))
+      repeat_blocks_vec_equiv_pre w blocksize f l l_v normalize_v rem b_v acc_v))
   (ensures
     repeat_blocks (w * blocksize) inp f_v l_v acc_v0 ==
     repeat_blocks blocksize inp f l (normalize_v acc_v0))

@@ -351,13 +351,13 @@ let repeat_gen_blocks_split #inp_t #c blocksize len0 hi mi inp a f l acc0 = admi
 // Start of repeat_blocks-related properties
 ////////////////////////
 
-let repeat_blocks_multi_is_repeat_gen_blocks_multi #a #b blocksize inp f acc0 =
+let repeat_blocks_multi_is_repeat_gen_blocks_multi #a #b hi blocksize inp f acc0 =
   let len = length inp in
   let n = len / blocksize in
   Math.Lemmas.div_exact_r len blocksize;
 
   let f_rep = repeat_blocks_f blocksize inp f n in
-  let f_gen = repeat_gen_blocks_f blocksize 0 n n inp (Loops.fixed_a b) (Loops.fixed_i f) in
+  let f_gen = repeat_gen_blocks_f blocksize 0 hi n inp (Loops.fixed_a b) (Loops.fixed_i f) in
 
   let aux (i:nat{i < n}) (acc:b) : Lemma (f_rep i acc == f_gen i acc) = () in
 
@@ -373,7 +373,7 @@ let repeat_blocks_multi_is_repeat_gen_blocks_multi #a #b blocksize inp f acc0 =
     }
 
 
-let repeat_blocks_is_repeat_gen_blocks #a #b #c blocksize inp f l acc0 =
+let repeat_blocks_is_repeat_gen_blocks #a #b #c hi blocksize inp f l acc0 =
   let len = length inp in
   let nb = len / blocksize in
   //let rem = len % blocksize in
@@ -396,8 +396,8 @@ let repeat_blocks_is_repeat_gen_blocks #a #b #c blocksize inp f l acc0 =
     Loops.repeati nb f_rep_b acc0;
     (==) { lemma_repeat_blocks_multi blocksize blocks f acc0 }
     repeat_blocks_multi blocksize blocks f acc0;
-    (==) { repeat_blocks_multi_is_repeat_gen_blocks_multi #a #b blocksize blocks f acc0 }
-    repeat_gen_blocks_multi blocksize 0 nb nb blocks (Loops.fixed_a b) (Loops.fixed_i f) acc0;
+    (==) { repeat_blocks_multi_is_repeat_gen_blocks_multi #a #b hi blocksize blocks f acc0 }
+    repeat_gen_blocks_multi blocksize 0 hi nb blocks (Loops.fixed_a b) (Loops.fixed_i f) acc0;
   }
 
 
@@ -419,25 +419,18 @@ let repeat_blocks_multi_split #a #b blocksize len0 inp f acc0 =
   let acc1 = repeat_gen_blocks_multi blocksize 0 n n0 t0 (Loops.fixed_a b) (Loops.fixed_i f) acc0 in
 
   calc (==) {
-    repeat_gen_blocks_multi blocksize 0 n n0 t0 (Loops.fixed_a b) (Loops.fixed_i f) acc0;
-    (==) { repeat_gen_blocks_multi_extensionality blocksize 0 n n0 n0 t0
-            (Loops.fixed_a b) (Loops.fixed_a b) (Loops.fixed_i f) (Loops.fixed_i f) acc0 }
-    repeat_gen_blocks_multi blocksize 0 n0 n0 t0 (Loops.fixed_a b) (Loops.fixed_i f) acc0;
-    (==) { repeat_blocks_multi_is_repeat_gen_blocks_multi #a #b blocksize t0 f acc0 }
-    repeat_blocks_multi blocksize t0 f acc0;
-    };
-
-  calc (==) {
     repeat_blocks_multi blocksize inp f acc0;
-    (==) { repeat_blocks_multi_is_repeat_gen_blocks_multi #a #b blocksize inp f acc0 }
+    (==) { repeat_blocks_multi_is_repeat_gen_blocks_multi #a #b n blocksize inp f acc0 }
     repeat_gen_blocks_multi blocksize 0 n n inp (Loops.fixed_a b) (Loops.fixed_i f) acc0;
     (==) { repeat_gen_blocks_multi_split #a blocksize len0 0 n n inp (Loops.fixed_a b) (Loops.fixed_i f) acc0 }
     repeat_gen_blocks_multi blocksize n0 n n1 t1 (Loops.fixed_a b) (Loops.fixed_i f) acc1;
     (==) { repeat_gen_blocks_multi_extensionality_zero blocksize n0 n n1 n1 t1
             (Loops.fixed_a b) (Loops.fixed_a b) (Loops.fixed_i f) (Loops.fixed_i f) acc1 }
     repeat_gen_blocks_multi blocksize 0 n1 n1 t1 (Loops.fixed_a b) (Loops.fixed_i f) acc1;
-    (==) { repeat_blocks_multi_is_repeat_gen_blocks_multi #a #b blocksize t1 f acc1 }
+    (==) { repeat_blocks_multi_is_repeat_gen_blocks_multi #a #b n1 blocksize t1 f acc1 }
     repeat_blocks_multi blocksize t1 f acc1;
+    (==) { repeat_blocks_multi_is_repeat_gen_blocks_multi #a #b n blocksize t0 f acc0 }
+    repeat_blocks_multi blocksize t1 f (repeat_blocks_multi blocksize t0 f acc0);
     }
 
 
@@ -458,25 +451,18 @@ let repeat_blocks_split #a #b #c blocksize len0 inp f l acc0 =
   let blocks = Seq.slice t1 0 (n1 * blocksize) in
 
   calc (==) {
-    repeat_gen_blocks_multi blocksize 0 n n0 t0 (Loops.fixed_a b) (Loops.fixed_i f) acc0;
-    (==) { repeat_gen_blocks_multi_extensionality blocksize 0 n n0 n0 t0
-            (Loops.fixed_a b) (Loops.fixed_a b) (Loops.fixed_i f) (Loops.fixed_i f) acc0 }
-    repeat_gen_blocks_multi blocksize 0 n0 n0 t0 (Loops.fixed_a b) (Loops.fixed_i f) acc0;
-    (==) { repeat_blocks_multi_is_repeat_gen_blocks_multi #a #b blocksize t0 f acc0 }
-    repeat_blocks_multi blocksize t0 f acc0;
-    };
-
-  calc (==) {
     repeat_blocks blocksize inp f l acc0;
-    (==) {  repeat_blocks_is_repeat_gen_blocks blocksize inp f l acc0 }
+    (==) {  repeat_blocks_is_repeat_gen_blocks n blocksize inp f l acc0 }
     repeat_gen_blocks blocksize 0 n inp (Loops.fixed_a b) (Loops.fixed_i f) (Loops.fixed_i l) acc0;
     (==) { repeat_gen_blocks_split #a #c blocksize len0 n 0 inp (Loops.fixed_a b) (Loops.fixed_i f) (Loops.fixed_i l) acc0 }
     repeat_gen_blocks blocksize n0 n t1 (Loops.fixed_a b) (Loops.fixed_i f) (Loops.fixed_i l) acc1;
     (==) { repeat_gen_blocks_multi_extensionality_zero blocksize n0 n n1 n1 blocks
             (Loops.fixed_a b) (Loops.fixed_a b) (Loops.fixed_i f)  (Loops.fixed_i f) acc1 }
     repeat_gen_blocks blocksize 0 n1 t1 (Loops.fixed_a b) (Loops.fixed_i f) (Loops.fixed_i l) acc1;
-    (==) { repeat_blocks_is_repeat_gen_blocks #a #b #c blocksize t1 f l acc1 }
+    (==) { repeat_blocks_is_repeat_gen_blocks #a #b #c n1 blocksize t1 f l acc1 }
     repeat_blocks blocksize t1 f l acc1;
+    (==) { repeat_blocks_multi_is_repeat_gen_blocks_multi #a #b n blocksize t0 f acc0 }
+    repeat_blocks blocksize t1 f l (repeat_blocks_multi blocksize t0 f acc0);
     }
 
 ////////////////////////

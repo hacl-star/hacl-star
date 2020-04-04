@@ -279,28 +279,29 @@ val repeat_gen_blocks_split:
 val repeat_blocks_multi_is_repeat_gen_blocks_multi:
     #a:Type0
   -> #b:Type0
+  -> hi:nat
   -> blocksize:size_pos
-  -> inp:seq a{length inp % blocksize = 0}
+  -> inp:seq a{length inp % blocksize = 0 /\ length inp / blocksize <= hi}
   -> f:(lseq a blocksize -> b -> b)
   -> acc0:b -> Lemma
   (let n = length inp / blocksize in
    Math.Lemmas.div_exact_r (length inp) blocksize;
    repeat_blocks_multi #a #b blocksize inp f acc0 ==
-   repeat_gen_blocks_multi #a blocksize 0 n n inp (Loops.fixed_a b) (Loops.fixed_i f) acc0)
+   repeat_gen_blocks_multi #a blocksize 0 hi n inp (Loops.fixed_a b) (Loops.fixed_i f) acc0)
 
 
 val repeat_blocks_is_repeat_gen_blocks:
     #a:Type0
   -> #b:Type0
   -> #c:Type0
+  -> hi:nat
   -> blocksize:size_pos
-  -> inp:seq a
+  -> inp:seq a{length inp / blocksize <= hi}
   -> f:(lseq a blocksize -> b -> b)
-  -> l:(len:size_nat{len == length inp % blocksize} -> s:lseq a len -> b -> c)
+  -> l:(len:nat{len < blocksize} -> s:lseq a len -> b -> c)
   -> acc0:b -> Lemma
-  (let n = length inp / blocksize in
-   repeat_blocks #a #b #c blocksize inp f l acc0 ==
-   repeat_gen_blocks #a #c blocksize 0 n inp
+  (repeat_blocks #a #b #c blocksize inp f l acc0 ==
+   repeat_gen_blocks #a #c blocksize 0 hi inp
      (Loops.fixed_a b) (Loops.fixed_i f) (Loops.fixed_i l) acc0)
 
 
@@ -329,7 +330,7 @@ val repeat_blocks_split:
   -> len0:nat{len0 % blocksize = 0}
   -> inp:seq a{len0 <= length inp}
   -> f:(lseq a blocksize -> b -> b)
-  -> l:(len:size_nat{len < blocksize} -> s:lseq a len -> b -> c)
+  -> l:(len:nat{len < blocksize} -> s:lseq a len -> b -> c)
   -> acc0:b ->
   Lemma
    (let len = length inp in
@@ -390,7 +391,7 @@ val map_blocks_acc:
   -> hi:nat
   -> inp:seq a{mi + length inp / blocksize <= hi}
   -> f:(i:nat{i < hi} -> lseq a blocksize -> lseq a blocksize)
-  -> l:(i:nat{i == mi + length inp / blocksize} -> rem:size_nat{rem < blocksize} -> lseq a rem -> lseq a rem)
+  -> l:(i:nat{i == mi + length inp / blocksize} -> rem:nat{rem < blocksize} -> lseq a rem -> lseq a rem)
   -> acc0:map_blocks_a a blocksize hi mi ->
   out:seq a {length out == length acc0 + length inp}
 
@@ -417,7 +418,7 @@ val map_blocks_acc_is_repeat_gen:
   -> hi:nat
   -> inp:seq a{mi + length inp / blocksize <= hi}
   -> f:(i:nat{i < hi} -> lseq a blocksize -> lseq a blocksize)
-  -> l:(i:nat{i == mi + length inp / blocksize} -> rem:size_nat{rem < blocksize} -> lseq a rem -> lseq a rem)
+  -> l:(i:nat{i == mi + length inp / blocksize} -> rem:nat{rem < blocksize} -> lseq a rem -> lseq a rem)
   -> acc0:map_blocks_a a blocksize hi mi ->
   Lemma
   (map_blocks_acc #a blocksize mi hi inp f l acc0 ==
