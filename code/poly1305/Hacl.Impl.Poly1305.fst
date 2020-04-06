@@ -54,19 +54,28 @@ let state_inv_t #s h ctx =
 
 
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --record_options"
-let reveal_ctx_inv #s ctx h0 h1 =
+let reveal_ctx_inv' #s ctx ctx' h0 h1 =
   let acc_b = gsub ctx 0ul (nlimb s) in
+  let acc_b' = gsub ctx' 0ul (nlimb s) in
   let r_b = gsub ctx (nlimb s) (nlimb s) in
+  let r_b' = gsub ctx' (nlimb s) (nlimb s) in
   let precom_b = gsub ctx (nlimb s) (precomplen s) in
+  let precom_b' = gsub ctx' (nlimb s) (precomplen s) in
   as_seq_gsub h0 ctx 0ul (nlimb s);
   as_seq_gsub h1 ctx 0ul (nlimb s);
   as_seq_gsub h0 ctx (nlimb s) (nlimb s);
   as_seq_gsub h1 ctx (nlimb s) (nlimb s);
   as_seq_gsub h0 ctx (nlimb s) (precomplen s);
   as_seq_gsub h1 ctx (nlimb s) (precomplen s);
-  assert (as_seq h0 acc_b == as_seq h1 acc_b);
-  assert (as_seq h0 r_b == as_seq h1 r_b);
-  assert (as_seq h0 precom_b == as_seq h1 precom_b)
+  as_seq_gsub h0 ctx' 0ul (nlimb s);
+  as_seq_gsub h1 ctx' 0ul (nlimb s);
+  as_seq_gsub h0 ctx' (nlimb s) (nlimb s);
+  as_seq_gsub h1 ctx' (nlimb s) (nlimb s);
+  as_seq_gsub h0 ctx' (nlimb s) (precomplen s);
+  as_seq_gsub h1 ctx' (nlimb s) (precomplen s);
+  assert (as_seq h0 acc_b == as_seq h1 acc_b');
+  assert (as_seq h0 r_b == as_seq h1 r_b');
+  assert (as_seq h0 precom_b == as_seq h1 precom_b')
 
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq' --record_options"

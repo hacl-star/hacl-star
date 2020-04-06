@@ -4,8 +4,9 @@ open FStar.HyperStack.ST
 open FStar.Integers
 
 /// This is the interface that the streaming functor expects from a block-based
-/// API. This interface is made abstract using the classic framing lemma and
-/// invariant preservation technique (see EverCrypt).
+/// API. We need to be abstract vis à vis the state representations of the
+/// underlying block-based API. For that, we use classic framing lemma and
+/// invariant preservation techniques used in EverCrypt and elsewhere.
 
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
@@ -97,28 +98,76 @@ let stateful_unused: stateful unit =
     (fun #_ l s h0 h1 -> ())
 
 type key_management =
-  | None
-  | Init
-  | InitFinish
+  | Erased
+  | Runtime
+
+inline_for_extraction noextract
+let optional_key #index (i: index) (km: key_management) (key: stateful index) =
+  allow_inversion key_management;
+  match km with
+  | Erased -> G.erased (key.t i)
+  | Runtime -> key.s i
+
+inline_for_extraction noextract
+let optional_t #index
+  (i: index)
+  (km: key_management)
+  (key: stateful index)
+  (h: HS.mem)
+  (k: optional_key i km key):
+  GTot (key.t i)
+=
+  allow_inversion key_management;
+  match km with
+  | Erased -> G.reveal k
+  | Runtime -> key.v i h k
+
+inline_for_extraction noextract
+let key_s #index
+  (i: index)
+  (km: key_management)
+  (key: stateful index)
+  (k: optional_key i km key):
+  Pure (key.s i)
+    (requires km == Runtime)
+    (ensures fun _ -> True)
+=
+  k
 
 /// The type class of block-based operations. Equipped with a generic index. May
-/// be unit if there's no agility, or hash algorithm for agility.
+/// be unit if there's no agility, or hash algorithm for agility. The streaming
+/// functor will take instances of this type class to generate corresponding
+/// streaming APIs.
 ///
-/// The first index determines the role of the key:
+/// The value of `km` is a tweaking knob that influences both *the shape of the
+/// block-based API*, i.e. the interface description encoded in the type class
+/// that follows, and the resulting run-time key management performed by the
+/// streaming API, once generated.
 ///
-/// - None: no key is used by this algorithm (e.g. hash)
-/// - Init: a key is needed at initialization-time (e.g. blake2, keyed hash
-///   functionality). Implementation retains a ghost key.
-/// - InitFinish: a key is needed at initialization-time and at the end of
-///   processing (e.g. poly1305). Implementation retains key at run-time.
+/// - Erased: a key is needed (only) at initialization-time (e.g. blake2, keyed
+///   hash functionality). Streaming state retains a ghost key.
+/// - Runtime: a key is needed both at initialization-time and at the end of
+///   processing (e.g. poly1305). Streaming state retains key at run-time.
 ///
-/// Two things to note. First, we could always do the latter but this would
-/// retain useless state in the first two cases. Second, this distinction is
-/// only relevant for low-level functions, as spec functions just need to ignore
-/// their arguments.
+/// Some remarks.
+/// - For algorithms that don't need a key at all (e.g. hash) it suffices to
+///   pass stateful_unused for the key. (Kremlin unit argument elimination will
+///   do the rest).
+/// - The Runtime API is more general, and we could just dismiss `km` and always
+///   choose to keep the key at run-time in the streaming state, except this is
+///   un-necessary and inefficient.
+/// - `km` influences the shape of the finish stateful function below:
+///   the interface must advertise km = Runtime if its finish function wants to
+///   reeive the actual key.
+///
+/// No such indexing occurs for spec-level functions, because they are always
+/// free to ignore superfluous arguments, and the shape of the API does not
+/// matter.
 inline_for_extraction noextract noeq
 type block (index: Type0) =
 | Block:
+
+  km: key_management ->
 
   // Low-level types
   state: stateful index ->
@@ -204,6 +253,7 @@ type block (index: Type0) =
       B.(loc_includes (loc_region_only true r) (state.footprint #i h1 s)) /\
       state.freeable #i h1 s))) ->
 
+
   init: (i:G.erased index -> (
     let i = G.reveal i in
     k: key.s i ->
@@ -261,18 +311,26 @@ type block (index: Type0) =
   finish: (
     i: G.erased index -> (
     let i = G.reveal i in
+    k: optional_key i km key ->
     s:state.s i ->
     dst:B.buffer uint8 { B.len dst = output_len i } ->
     Stack unit
     (requires fun h0 ->
+      allow_inversion key_management;
       state.invariant #i h0 s /\
       B.live h0 dst /\
-      B.(loc_disjoint (state.footprint #i h0 s) (loc_buffer dst)))
+      B.(loc_disjoint (state.footprint #i h0 s) (loc_buffer dst)) /\ (
+      match km with
+      | Erased -> True
+      | Runtime ->
+          key.invariant #i h0 k /\
+          B.(loc_disjoint (key.footprint #i h0 k) (loc_buffer dst)) /\
+          B.(loc_disjoint (key.footprint #i h0 k) (state.footprint #i h0 s))))
     (ensures fun h0 _ h1 ->
       state.invariant #i h1 s /\
       B.(modifies (loc_buffer dst) h0 h1) /\
       state.footprint #i h0 s == state.footprint #i h1 s /\
-      B.as_seq h1 dst == finish_s i (state.v i h0 s) /\
+      B.as_seq h1 dst == finish_s i (optional_t i km key h0 k) (state.v i h0 s) /\
       (state.freeable #i h0 s ==> state.freeable #i h1 s)))) ->
 
   free: (
