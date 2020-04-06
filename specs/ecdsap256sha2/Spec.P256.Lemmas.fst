@@ -464,11 +464,27 @@ let lemma_mul_nat5 a b c d e = ()
 val modulo_distributivity_mult2: a: int -> b: int -> c: int -> d: pos -> Lemma (((a % d) * (b % d) * c) % d = (a * b * c)% d)
 
 let modulo_distributivity_mult2 a b c d = 
-  lemma_mod_mul_distr_l a ((b % d) * c) d;
-    assert((a % d * ((b % d) * c)) % d == (a * ((b % d) * c)) % d);
-    assert_by_tactic (a * ((b % d) * c) == (b % d) * a * c) canon;
-  lemma_mod_mul_distr_l b (a * c) d
+  calc (==) 
+  {
+    ((a % d) * (b % d) * c) % d;
+    (==) 
+    {assert_by_tactic (((a % d) * (b % d) * c) == ((a % d) * ((b % d) * c))) canon}
+    ((a % d) * ((b % d) * c)) % d;
+    (==)
+    {lemma_mod_mul_distr_l a ((b % d) * c) d}
+    (a * ((b % d) * c)) % d; 
+    (==) 
+    {assert_by_tactic (a * ((b % d) * c) == (a * (b % d) * c)) canon}
+    (a * (b % d) * c) % d; 
+    (==)
+    {assert_by_tactic (a * (b % d) * c == (b % d) * (a * c)) canon}
 
+    ((b % d) * (a * c)) % d;
+    (==) 
+    {lemma_mod_mul_distr_l b (a * c) d; assert_by_tactic (b * (a * c) == a * b * c) canon }
+    (a * b * c) % d; 
+  }
+  
 
 val lemma_minus_distr (a: int) (b: int): Lemma ((a % prime256 - b % prime256) % prime256 = (a - b) %prime256)
 
