@@ -89,7 +89,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "c3c8fedb270e08cd982654dd17fc6ab4"
+      "384a5e0554cff9915a1b0632f5605e41"
     ],
     [
       "Spec.P256.Lemmas.pow_plus",
@@ -147,7 +147,7 @@
         "refinement_interpretation_Tm_refine_e7a259576bfd3d6fe3f80a385f38d18f"
       ],
       0,
-      "0bd7df7b4301b631083fc427af6ea35c"
+      "8a32d995dab1405aa1ab0d7cfc9dcd33"
     ],
     [
       "Spec.P256.Lemmas.power_distributivity",
@@ -309,7 +309,7 @@
         "refinement_interpretation_Tm_refine_a514d8965ffaaba9ddfc30465a8efa5b"
       ],
       0,
-      "a2f7c7e3a1e52edb7052acac3066d377"
+      "765bb2921a607ec484cc36afafae18fa"
     ],
     [
       "Spec.P256.Lemmas.power_mult",
@@ -787,7 +787,7 @@
         "refinement_interpretation_Tm_refine_e39eff67be239ccc8bd9d7c31f5eb7ce"
       ],
       0,
-      "a14b0a6c92d795126ad21bcb5777f6e3"
+      "632bb5e5b8daf20dcc050921f689c2dc"
     ],
     [
       "Spec.P256.Lemmas.lemma_pow_double",
@@ -1308,7 +1308,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "38ded4ca6771cac233632ee0f82d8cf7"
+      "e4a3e228dc04aa44f810a9c63722a39f"
     ],
     [
       "Spec.P256.Lemmas.lemma_brackets1",
@@ -1531,19 +1531,20 @@
       "Spec.P256.Lemmas.modulo_distributivity_mult2",
       2,
       2,
-      1,
+      2,
       [
         "@MaxIFuel_assumption", "@query",
         "constructor_distinct_Lib.IntTypes.S16",
         "constructor_distinct_Lib.IntTypes.S8",
-        "constructor_distinct_Lib.IntTypes.U32", "equation_Prims.pos",
-        "int_inversion", "primitive_Prims.op_Modulus",
-        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "equation_Lib.IntTypes.bits", "equation_Prims.pos", "int_inversion",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "true_interp"
       ],
       0,
-      "400e6c3c26ff9463799941b8bcdbbe79"
+      "0fa63cd8d9557c2273a427bf5d1f8e1e"
     ],
     [
       "Spec.P256.Lemmas.lemma_minus_distr",

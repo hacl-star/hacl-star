@@ -56,7 +56,7 @@
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec"
       ],
       0,
-      "f9958cbaae31675a1afabc0c0b28d39a"
+      "84671e3db00356694d867c5079852d0f"
     ],
     [
       "MerkleTree.Low.Datastructures.hash_r_repr",
@@ -262,7 +262,7 @@
         "typing_Prims.pow2", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "5a51c0dcdb7d91f044b837a924cb42dc"
+      "f5d435b5825cf38398c79c28fb9e1f58"
     ],
     [
       "MerkleTree.Low.Datastructures.hash_r_free",
@@ -334,7 +334,7 @@
         "true_interp"
       ],
       0,
-      "b63683bb6d5f5ebc3b3899b0bb080f23"
+      "2b71a7762087e4c8fd2c9f7b41578946"
     ],
     [
       "MerkleTree.Low.Datastructures.hash_copy",
@@ -456,7 +456,7 @@
         "token_correspondence_MerkleTree.Low.Datastructures.hash_region_of"
       ],
       0,
-      "542b79394aee34527f9a30d3285ab978"
+      "fc5b1f5d0beb12a956769d5e7e0fe5ad"
     ],
     [
       "MerkleTree.Low.Datastructures.hash_vec_r_inv_reg",
@@ -506,7 +506,7 @@
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec"
       ],
       0,
-      "ff218702b7167f8fc7332498cf46abd5"
+      "a580131cb0da0677787f96e476d766f0"
     ],
     [
       "MerkleTree.Low.Datastructures.hash_vec_r_repr",
@@ -565,7 +565,7 @@
         "typing_MerkleTree.Low.Datastructures.hreg"
       ],
       0,
-      "29b9a551b03f1b0722973d00a5df670e"
+      "7f74cb8aad02d8768f7cc839a0313e05"
     ],
     [
       "MerkleTree.Low.Datastructures.hash_vec_irepr",
@@ -587,7 +587,7 @@
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec"
       ],
       0,
-      "f2dcdf9cf61f1800053c50977ac19887"
+      "1f18f155c20d741b134e2b199132c777"
     ],
     [
       "MerkleTree.Low.Datastructures.hash_vec_r_alloc",
@@ -741,7 +741,7 @@
         "typing_MerkleTree.Low.Datastructures.hreg"
       ],
       0,
-      "855e081651688629dfdeb0d44dce180e"
+      "ca65d45f16952285bda05b4d4fa4400c"
     ],
     [
       "MerkleTree.Low.Datastructures.hash_vec_r_free",
@@ -801,7 +801,7 @@
         "typing_MerkleTree.Low.Datastructures.hash"
       ],
       0,
-      "a5c523ab3ddf8f3cca90c10b4529a923"
+      "45305bd5af051a5cf69f8702b075d1c6"
     ],
     [
       "MerkleTree.Low.Datastructures.hvreg",
@@ -822,7 +822,7 @@
         "refinement_kinding_Tm_refine_56b4e6db87090880a4837304bb2a2909"
       ],
       0,
-      "900d41a9985f0645ecfc083b4eb1bbbb"
+      "0498f59d791cf7d20b26f6863459f795"
     ],
     [
       "MerkleTree.Low.Datastructures.hash_vec_rv_inv_r_inv",
@@ -876,7 +876,7 @@
         "typing_MerkleTree.Low.Datastructures.hash"
       ],
       0,
-      "5505c7e76fca92c059983b73f52263d1"
+      "25a770982cd94e6fb9f3df8331dd6934"
     ],
     [
       "MerkleTree.Low.Datastructures.hash_vv_rv_inv_r_inv",
@@ -922,8 +922,7 @@
         "equation_MerkleTree.Low.Datastructures.hreg",
         "equation_MerkleTree.Low.Datastructures.hvreg",
         "function_token_typing_LowStar.Regional.__proj__Rgl__item__r_inv",
-        "function_token_typing_LowStar.Regional.rg_inv", "int_inversion",
-        "int_typing", "lemma_FStar.Ghost.reveal_hide",
+        "int_inversion", "int_typing", "lemma_FStar.Ghost.reveal_hide",
         "lemma_FStar.UInt32.uv_inv",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
         "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThan",
@@ -947,7 +946,7 @@
         "typing_MerkleTree.Low.Datastructures.hash"
       ],
       0,
-      "ed1b37caa8e967237e972724fcf9f33f"
+      "ebdfb62a1d9a786cad19fbbe10a609c9"
     ],
     [
       "MerkleTree.Low.Datastructures.hash_vv_rv_inv_disjoint",
@@ -1268,9 +1267,11 @@
         "equation_LowStar.RVector.rs_elems_inv",
         "equation_LowStar.RVector.rv_elems_inv",
         "equation_LowStar.RVector.rv_inv",
+        "equation_LowStar.RVector.rv_itself_inv",
         "equation_LowStar.RVector.rvector",
         "equation_LowStar.Regional.rg_inv", "equation_LowStar.Vector.as_seq",
-        "equation_LowStar.Vector.forall_seq", "equation_LowStar.Vector.get",
+        "equation_LowStar.Vector.forall_seq",
+        "equation_LowStar.Vector.freeable", "equation_LowStar.Vector.get",
         "equation_LowStar.Vector.size_of",
         "equation_LowStar.Vector.uint32_t", "equation_LowStar.Vector.vector",
         "equation_MerkleTree.Low.Datastructures.hash",
@@ -1288,10 +1289,11 @@
         "equation_MerkleTree.New.High.hashes", "equation_Prims.nat",
         "fuel_guarded_inversion_LowStar.Vector.vector_str", "int_inversion",
         "int_typing", "lemma_FStar.Ghost.reveal_hide",
-        "lemma_FStar.Seq.Base.lemma_index_slice",
-        "lemma_FStar.UInt32.uv_inv",
+        "lemma_FStar.Seq.Base.lemma_len_slice", "lemma_FStar.UInt32.uv_inv",
         "lemma_LowStar.Monotonic.Buffer.as_seq_gsub",
+        "lemma_LowStar.Monotonic.Buffer.freeable_length",
         "lemma_LowStar.Monotonic.Buffer.length_as_seq",
+        "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
         "lemma_LowStar.RVector.as_seq_seq_index",
         "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
@@ -1310,7 +1312,6 @@
         "projection_inverse_LowStar.Regional.Rgl_repr",
         "refinement_interpretation_Tm_refine_03e0ee7c990720bc4bd1c73dc60b1ac5",
         "refinement_interpretation_Tm_refine_3396f1d518ffeb2163c25c13fcb1de13",
-        "refinement_interpretation_Tm_refine_35a0739c434508f48d0bb1d5cd5df9e8",
         "refinement_interpretation_Tm_refine_3daf37ab3cd19c1e74e63f8f5e0fb16a",
         "refinement_interpretation_Tm_refine_4097c547095e70012031c1b6bbc9fb12",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
@@ -1318,13 +1319,13 @@
         "refinement_interpretation_Tm_refine_5a88c51956f007f77dee75dd2a07bb5a",
         "refinement_interpretation_Tm_refine_69d1d206ddafb5a6092734ed6446bcfd",
         "refinement_interpretation_Tm_refine_7108b467000c99be927e4d94496382d1",
+        "refinement_interpretation_Tm_refine_81407705a0828c2c1b1976675443f647",
         "refinement_interpretation_Tm_refine_90a1661541e4f009452ab107b47b5955",
         "refinement_interpretation_Tm_refine_9a4f5366055910237954d85f232cccf4",
         "refinement_interpretation_Tm_refine_9ff867c004d0e891d59193a1c818b2a7",
         "refinement_interpretation_Tm_refine_adefc58894388886573cb41ee073aed9",
         "refinement_interpretation_Tm_refine_b793c488ad500e6b09ecca7df8a04085",
         "refinement_interpretation_Tm_refine_b913a3f691ca99086652e0a655e72f17",
-        "refinement_interpretation_Tm_refine_d3d07693cd71377864ef84dc97d10ec1",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
         "refinement_kinding_Tm_refine_56b4e6db87090880a4837304bb2a2909",
         "token_correspondence_LowStar.Regional.__proj__Rgl__item__r_repr",
