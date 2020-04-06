@@ -294,9 +294,9 @@ EverCrypt_HMAC_compute_sha2_512(
   Hacl_Hash_Core_SHA2_finish_512(s, dst);
 }
 
-bool EverCrypt_HMAC_is_supported_alg(Spec_Hash_Definitions_hash_alg uu___0_5843)
+bool EverCrypt_HMAC_is_supported_alg(Spec_Hash_Definitions_hash_alg uu___0_6237)
 {
-  switch (uu___0_5843)
+  switch (uu___0_6237)
   {
     case Spec_Hash_Definitions_SHA1:
       {

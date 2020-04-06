@@ -858,9 +858,9 @@ bool EverCrypt_uu___is_TDES_EDE_CBC(EverCrypt_block_cipher_alg projectee)
   }
 }
 
-uint32_t EverCrypt_block_cipher_keyLen(EverCrypt_block_cipher_alg uu___0_9512)
+uint32_t EverCrypt_block_cipher_keyLen(EverCrypt_block_cipher_alg uu___0_9949)
 {
-  switch (uu___0_9512)
+  switch (uu___0_9949)
   {
     case EverCrypt_AES128_CBC:
       {
@@ -882,9 +882,9 @@ uint32_t EverCrypt_block_cipher_keyLen(EverCrypt_block_cipher_alg uu___0_9512)
   }
 }
 
-uint32_t EverCrypt_block_cipher_blockLen(EverCrypt_block_cipher_alg uu___1_9522)
+uint32_t EverCrypt_block_cipher_blockLen(EverCrypt_block_cipher_alg uu___1_9960)
 {
-  switch (uu___1_9522)
+  switch (uu___1_9960)
   {
     case EverCrypt_AES128_CBC:
       {
@@ -1018,9 +1018,9 @@ bool EverCrypt_uu___is_AES256_CCM8(EverCrypt_aead_alg projectee)
 
 KRML_DEPRECATED("Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")
 
-uint32_t EverCrypt_aead_keyLen(EverCrypt_aead_alg uu___2_9629)
+uint32_t EverCrypt_aead_keyLen(EverCrypt_aead_alg uu___2_10068)
 {
-  switch (uu___2_9629)
+  switch (uu___2_10068)
   {
     case EverCrypt_AES128_GCM:
       {
@@ -1060,9 +1060,9 @@ uint32_t EverCrypt_aead_keyLen(EverCrypt_aead_alg uu___2_9629)
 
 KRML_DEPRECATED("Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")
 
-uint32_t EverCrypt_aead_tagLen(EverCrypt_aead_alg uu___3_9643)
+uint32_t EverCrypt_aead_tagLen(EverCrypt_aead_alg uu___3_10083)
 {
-  switch (uu___3_9643)
+  switch (uu___3_10083)
   {
     case EverCrypt_AES128_CCM8:
       {

@@ -394,14 +394,14 @@ typedef uint32x4_t Lib_IntVector_Intrinsics_vec128;
 #define Lib_IntVector_Intrinsics_vec128_gt32(x0, x1) \
   (vcgtq_u32(x0, x1))
 
-#define high32(x) \
-  (vmovn_u64(vshrq_n_u64(vreinterpretq_u64_u32(x0))))
+#define high32(x0) \
+  (vmovn_u64(vshrq_n_u64(vreinterpretq_u64_u32(x0),32)))
 
-#define low32(x) \
+#define low32(x0) \
   (vmovn_u64(vreinterpretq_u64_u32(x0)))
 
 #define Lib_IntVector_Intrinsics_vec128_gt64(x0, x1) \
-  (vreinterpretq_u32_u64(vmovl_u32(vorr_u32(vcgt_u32(high32(x0),high32(x1)),vand_32(vceq_u32(high32(x0),high32(x1)),vcgt(low32(x0),low32(x1)))))))
+  (vreinterpretq_u32_u64(vmovl_u32(vorr_u32(vcgt_u32(high32(x0),high32(x1)),vand_u32(vceq_u32(high32(x0),high32(x1)),vcgt_u32(low32(x0),low32(x1)))))))
 
 #define Lib_IntVector_Intrinsics_vec128_or(x0, x1) \
   (vorrq_u32(x0, x1))
@@ -436,6 +436,13 @@ typedef uint32x4_t Lib_IntVector_Intrinsics_vec128;
 
 #define Lib_IntVector_Intrinsics_vec128_rotate_right32(x0,x1)	\
   (vsriq_n_u32(vshlq_n_u32((x0),32-(x1)),(x0),(x1)))
+
+#define Lib_IntVector_Intrinsics_vec128_rotate_right_lanes32(x0, x1)	\
+  (vextq_u32(x0,x0,x1))
+
+#define Lib_IntVector_Intrinsics_vec128_rotate_right_lanes64(x0, x1)	\
+  (vextq_u64(x0,x0,x1))
+
 
 /*
 #define Lib_IntVector_Intrinsics_vec128_shuffle32(x0, x1, x2, x3, x4)	\

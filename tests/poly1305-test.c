@@ -31,9 +31,9 @@ static __inline__ cycles cpucycles_end(void)
   //return ( (uint64_t)lo)|( ((uint64_t)hi)<<32 );
 }
 
-extern void Hacl_Poly1305_32_poly1305_mac(uint8_t* out, int in_len, uint8_t* in, uint8_t* k);
-extern void Hacl_Poly1305_128_poly1305_mac(uint8_t* out, int in_len, uint8_t* in, uint8_t* k);
-extern void Hacl_Poly1305_256_poly1305_mac(uint8_t* out, int in_len, uint8_t* in, uint8_t* k);
+#include "Hacl_Poly1305_32.h"
+#include "Hacl_Poly1305_128.h"
+#include "Hacl_Poly1305_256.h"
 
 #define ROUNDS 100000
 #define SIZE   16384

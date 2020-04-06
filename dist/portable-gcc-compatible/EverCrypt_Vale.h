@@ -120,13 +120,13 @@ extern void __stdcall old_aes128_key_expansion(uint8_t *key_ptr, uint8_t *expand
 
 /* SNIPPET_START: old_gcm128_encrypt */
 
-extern void __stdcall old_gcm128_encrypt(gcm_args *uu____343);
+extern void __stdcall old_gcm128_encrypt(gcm_args *uu____363);
 
 /* SNIPPET_END: old_gcm128_encrypt */
 
 /* SNIPPET_START: old_gcm128_decrypt */
 
-extern uint32_t __stdcall old_gcm128_decrypt(gcm_args *uu____357);
+extern uint32_t __stdcall old_gcm128_decrypt(gcm_args *uu____378);
 
 /* SNIPPET_END: old_gcm128_decrypt */
 
@@ -138,13 +138,13 @@ extern void __stdcall old_aes256_key_expansion(uint8_t *key_ptr, uint8_t *expand
 
 /* SNIPPET_START: old_gcm256_encrypt */
 
-extern void __stdcall old_gcm256_encrypt(gcm_args *uu____389);
+extern void __stdcall old_gcm256_encrypt(gcm_args *uu____411);
 
 /* SNIPPET_END: old_gcm256_encrypt */
 
 /* SNIPPET_START: old_gcm256_decrypt */
 
-extern uint32_t __stdcall old_gcm256_decrypt(gcm_args *uu____403);
+extern uint32_t __stdcall old_gcm256_decrypt(gcm_args *uu____426);
 
 /* SNIPPET_END: old_gcm256_decrypt */
 
