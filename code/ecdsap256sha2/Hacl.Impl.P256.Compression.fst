@@ -160,7 +160,8 @@ let lessThanPrime f =
   pop_frame();
     less
 
-#push-options "--z3rlimit 600"
+#push-options "--z3rlimit 200"
+
 
 let decompressionCompressedForm b result = 
   push_frame();
@@ -179,6 +180,7 @@ let decompressionCompressedForm b result =
 
     if u8_to_UInt8 isIdentifierCorrect = 255uy then 
     begin
+
       let x = sub b (size 1) (size 32) in 
       copy (sub result (size 0) (size 32)) x;
       toUint64ChangeEndian x t0;
@@ -198,21 +200,42 @@ let decompressionCompressedForm b result =
 	begin 
 	  toDomain t0 t0;
 	  lemmaToDomain (as_nat h1 t0);
-	  computeYFromX t0 t1 (to_u64 (logand compressedIdentifier (u8 1)));
+	    let h2 = ST.get() in 
+	    assert(as_nat h2 t0 =  (toDomain_ (Lib.ByteSequence.nat_from_intseq_le (Spec.ECDSA.changeEndian (Lib.ByteSequence.uints_from_bytes_be (as_seq h0 x))))));
+
+	  let identifierBit = to_u64 (logand compressedIdentifier (u8 1)) in 
 	  logand_mask compressedIdentifier (u8 1) 1;
-	    let h4 = ST.get() in 
-	    
+	  computeYFromX t0 t1 identifierBit;
+	  lemmaToDomainAndBackIsTheSame (Lib.ByteSequence.nat_from_intseq_be (as_seq h0 x));
+
+	    let h3 = ST.get() in 
+	    assert(    
+	      let xD = Lib.ByteSequence.nat_from_intseq_be (as_seq h0 x) in 
+	      let sqRootWithoutSign = sq_root_spec (((xD * xD * xD + Spec.P256.aCoordinateP256 * xD + Spec.P256.bCoordinateP256) % prime256)) in 
+	      if sqRootWithoutSign  % pow2 1 = uint_v identifierBit then
+		 as_nat h3 t1 = sqRootWithoutSign 
+	      else
+		as_nat h3 t1 = (0 - sqRootWithoutSign) % prime256);
+    
 	  changeEndian t1;
-	  toUint8 t1 (sub result (size 32) (size 32));
+	  toUint8 t1 (sub result (size 32) (size 32)); 
+	   let h5 = ST.get() in 
+	   assert(as_seq h5 (gsub result (size 32) (size 32)) == Lib.ByteSequence.uints_to_bytes_be (Spec.ECDSA.changeEndian (as_seq h3 t1)));
 
-	    let h5 = ST.get() in 
-
-	  Spec.P256.Lemmas.lemma_core_0 t1 h4;
+	  Spec.P256.Lemmas.lemma_core_0 t1 h3;
 	  
-	  Lib.ByteSequence.lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h4 t1);
-	  Spec.ECDSA.changeEndian_le_be (as_nat h4 t1);
+	  Lib.ByteSequence.lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h3 t1);
+	  Spec.ECDSA.changeEndian_le_be (as_nat h3 t1);
+	  
+	  assert(   
+	      let xD = Lib.ByteSequence.nat_from_intseq_be (as_seq h0 x) in 
+	      let sqRootWithoutSign = sq_root_spec (((xD * xD * xD + Spec.P256.aCoordinateP256 * xD + Spec.P256.bCoordinateP256) % prime256)) in 
+	      let to = as_seq h5 (gsub result (size 32) (size 32)) in 
+	      if sqRootWithoutSign  % pow2 1 = uint_v identifierBit then
+		 to == Lib.ByteSequence.nat_to_bytes_be 32 sqRootWithoutSign 
+	      else
+		to == Lib.ByteSequence.nat_to_bytes_be 32 ((0 - sqRootWithoutSign) % prime256)); 
 
-	  assert(as_seq h5 (gsub result (size 32) (size 32)) == Lib.ByteSequence.nat_to_bytes_be 32 (as_nat h4 t1)); 
 
 	  pop_frame(); 
 	  true
@@ -225,6 +248,7 @@ let decompressionCompressedForm b result =
     end
 
 #pop-options
+
 
 let compressionNotCompressedForm b result = 
   let to = sub result (size 1) (size 64) in 
