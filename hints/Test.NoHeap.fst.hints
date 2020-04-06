@@ -20,7 +20,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "d2fccb87eb06ad1a32b829936c639648"
+      "f21a2558bf517df3cb0a4ffea308f22c"
     ],
     [
       "Test.NoHeap.test_one_hash",
@@ -112,7 +112,6 @@
         "lemma_FStar.Set.mem_complement", "lemma_FStar.Set.mem_intersect",
         "lemma_FStar.Set.mem_singleton", "lemma_FStar.UInt.pow2_values",
         "lemma_FStar.UInt32.uv_inv", "lemma_FStar.UInt32.vu_inv",
-        "lemma_Lib.IntTypes.pow2_3",
         "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
         "lemma_LowStar.Monotonic.Buffer.as_addr_gsub",
         "lemma_LowStar.Monotonic.Buffer.frameOf_gsub",
@@ -173,11 +172,12 @@
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
         "refinement_interpretation_Tm_refine_f26bb5dc19f91f0905f7dd2e5ef81aa3",
         "refinement_kinding_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "token_correspondence_Prims.pow2.fuel_instrumented", "true_interp",
-        "typing_C.String.__proj__S__item__s", "typing_C.String.length",
-        "typing_C.String.strlen", "typing_FStar.Map.contains",
-        "typing_FStar.Map.domain", "typing_FStar.Map.restrict",
-        "typing_FStar.Map.upd", "typing_FStar.Monotonic.Heap.emp",
+        "true_interp", "typing_C.String.__proj__S__item__s",
+        "typing_C.String.length", "typing_C.String.strlen",
+        "typing_FStar.Map.contains", "typing_FStar.Map.domain",
+        "typing_FStar.Map.restrict", "typing_FStar.Map.upd",
+        "typing_FStar.Monotonic.Heap.emp",
+        "typing_FStar.Monotonic.HyperHeap.color",
         "typing_FStar.Monotonic.HyperHeap.rid",
         "typing_FStar.Monotonic.HyperHeap.root",
         "typing_FStar.Monotonic.HyperStack.get_hmap",
@@ -205,7 +205,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "unit_inversion", "unit_typing"
       ],
       0,
-      "2534e239d72362c0657b5d6b1c3560df"
+      "53eebdd90ca7c9cda7e78fa3aa6d811e"
     ],
     [
       "Test.NoHeap.keysized",
@@ -265,7 +265,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "d85cf943274deefd62c7835333cffdd9"
+      "e14dfd22107faf6e9ea09f61f54b907f"
     ],
     [
       "Test.NoHeap.test_one_hmac",
@@ -420,7 +420,7 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "9ae8cd5664b215e73f36d7e40889bbf5"
+      "ef1aa9fb134f05574373d0f16a20f94a"
     ],
     [
       "Test.NoHeap.test_one_hmac_drbg",
@@ -571,7 +571,7 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "76e32b8e2112a008c2a9fef03256804e"
+      "711724067d1457afd4f78b4ee3664b3d"
     ],
     [
       "Test.NoHeap.test_one_hkdf",
@@ -755,7 +755,7 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "c1c7ad09c42d9a2e52c6bfda987613cd"
+      "6dc5a70c3ea9a0c0f30e7ce72823210b"
     ],
     [
       "Test.NoHeap.test_one_chacha20",
@@ -908,7 +908,7 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "14943d37f7937ea9a8be7358d79f5b03"
+      "4f8be02363631e570459b0db832a8224"
     ],
     [
       "Test.NoHeap.test_one_poly1305",
@@ -1035,7 +1035,7 @@
         "unit_inversion"
       ],
       0,
-      "4b352b63c50b32511ab8a31a484da387"
+      "0a85f26d900bd134fc860701f266d570"
     ],
     [
       "Test.NoHeap.test_poly1305",
@@ -1185,7 +1185,7 @@
         "typing_Spec.Poly1305.size_key", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "67b8dfbbc03846e066988e67d24fcf99"
+      "8e045d59074767653e11aa7418332be6"
     ],
     [
       "Test.NoHeap.test_curve25519",
@@ -1366,7 +1366,7 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "f764c40b19221feef01acee7af55b2cb"
+      "599124ac8cf918e1accf7dc0c39fc0a7"
     ],
     [
       "Test.NoHeap.test_chacha20poly1305",
