@@ -86,5 +86,9 @@ module ECDSA_test : sig
   val decompress_c : Bytes.t -> Bytes.t -> bool
   val decompress_n : Bytes.t -> Bytes.t -> bool
   val verify : Bytes.t -> Bytes.t -> Bytes.t -> bool
+  val sign_with_k : Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> bool
+  val dh_initiator : Bytes.t -> Bytes.t -> bool
+  val reduction : Bytes.t -> Bytes.t -> unit
+  val valid_pk : Bytes.t -> bool
 end
 
