@@ -32,9 +32,6 @@ open Hacl.Impl.P256.Signature.Common
 open Lib.ByteSequence
 open Lib.IntVector.Intrinsics
 
-open Spec.Blake2
-open Hacl.Blake2b_32
-
 open Spec.Hash.Definitions
 open Hacl.Hash.Definitions
 

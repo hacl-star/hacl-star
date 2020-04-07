@@ -26,13 +26,13 @@ dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
 
 # An archive with all the compiled code in this directory.
 # We don't want Hacl_Test_ECDSA.o to be included so we redefine OBJS
-dist/libecdsa.a: dist/Hacl_Blake2b_32.o dist/Hacl_ECDSA.o
+dist/libecdsa.a: dist/Hacl_ECDSA.o
 	$(MAKE) -C dist -f Makefile.basic OBJS=$(notdir $^) $(notdir $@)
 
 dist/%.o: dist/Makefile.basic
 	$(MAKE) -C dist -f Makefile.basic $(notdir $@)
 
-dist/Hacl_Test_ECDSA.exe: dist/Hacl_Blake2b_32.o dist/Hacl_ECDSA.o dist/Hacl_Test_ECDSA.o \
+dist/Hacl_Test_ECDSA.exe: dist/Hacl_ECDSA.o dist/Hacl_Test_ECDSA.o \
 	$(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a dist/libecdsa.a
 
 %.exe:

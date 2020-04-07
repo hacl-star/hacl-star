@@ -32,7 +32,6 @@ open Hacl.Impl.P256.Signature.Common
 open Hacl.Impl.P256.Compression
 
 open Hacl.Impl.ECDSA.P256SHA256.Signature.Agile
-open Hacl.Impl.ECDSA.P256SHA256.Signature.Blake2
 
 open Hacl.Impl.ECDSA.P256SHA256.Verification.Agile
 open Hacl.Impl.ECDSA.P256SHA256.Verification.Hashless
@@ -59,31 +58,6 @@ val ecdsa_sign_p256_sha2: result: lbuffer uint8 (size 64) -> mLen: size_t -> m: 
       let resultR = gsub result (size 0) (size 32) in 
       let resultS = gsub result (size 32) (size 32) in 
       let r, s, flagSpec = Spec.ECDSA.ecdsa_signature_agile SHA2_256 (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in 
-      as_seq h1 resultR == nat_to_bytes_be 32 r /\
-      as_seq h1 resultS == nat_to_bytes_be 32 s /\
-      flag == flagSpec 
-    )    
-  )
-
-
-val ecdsa_sign_p256_blake2: result: lbuffer uint8 (size 64) -> mLen: size_t -> m: lbuffer uint8 mLen ->
-  privKey: lbuffer uint8 (size 32) -> 
-  k: lbuffer uint8 (size 32) -> 
-  Stack uint64
-  (requires fun h -> 
-    live h result /\ live h m /\ live h privKey /\ live h k /\
-    disjoint result m /\
-    disjoint result privKey /\
-    disjoint result k /\
-    nat_from_bytes_be (as_seq h privKey) < prime_p256_order /\
-    nat_from_bytes_be (as_seq h k) < prime_p256_order
-  )
-  (ensures fun h0 flag h1 -> 
-    modifies (loc result) h0 h1 /\
-     (assert_norm (pow2 32 < pow2 61);
-      let resultR = gsub result (size 0) (size 32) in 
-      let resultS = gsub result (size 32) (size 32) in 
-      let r, s, flagSpec = Spec.ECDSA.ecdsa_signature_blake2 (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in 
       as_seq h1 resultR == nat_to_bytes_be 32 r /\
       as_seq h1 resultS == nat_to_bytes_be 32 s /\
       flag == flagSpec 
@@ -134,23 +108,6 @@ val ecdsa_verif_p256_sha2:
       let s = nat_from_bytes_be (as_seq h1 s) in
       modifies0 h0 h1 /\
       result == Spec.ECDSA.ecdsa_verification_agile SHA2_256 (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m))
-
-
-val ecdsa_verif_blake2:
-    mLen:size_t
-  -> m:lbuffer uint8 mLen
-  -> pubKey:lbuffer uint8 (size 64)
-  -> r:lbuffer uint8 (size 32)
-  -> s:lbuffer uint8 (size 32) ->
-  Stack bool
-    (requires fun h -> live h pubKey /\ live h r /\ live h s /\ live h m)
-    (ensures fun h0 result h1 ->
-      let publicKeyX = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))) in
-      let publicKeyY = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 32) (size 32))) in
-      let r = nat_from_bytes_be (as_seq h1 r) in
-      let s = nat_from_bytes_be (as_seq h1 s) in
-      modifies0 h0 h1 /\
-      result == Spec.ECDSA.ecdsa_verification_blake2 (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m))
 
 
 val ecdsa_verif_without_hash:
