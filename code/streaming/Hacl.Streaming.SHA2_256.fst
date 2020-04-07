@@ -12,7 +12,7 @@ module G = FStar.Ghost
 module S = FStar.Seq
 module U32 = FStar.UInt32
 module U64 = FStar.UInt64
-module F = Hacl.Streaming.Functor
+//module F = Hacl.Streaming.Functor
 
 open LowStar.BufferOps
 open FStar.Mul
@@ -48,10 +48,9 @@ let hacl_sha2_256: Hacl.Streaming.Interface.block unit =
   [@inline_let]
   let b = stateful_buffer (word SHA2_256) (state_word_length SHA2_256) in
   Block
+    Erased
     b
     stateful_unused
-    stateful_unused.s stateful_unused.t stateful_unused.v
-    b.s b.t b.v
 
     (fun () -> max_input_length64 SHA2_256)
     (fun () -> Hacl.Hash.Definitions.hash_len SHA2_256)
@@ -60,7 +59,7 @@ let hacl_sha2_256: Hacl.Streaming.Interface.block unit =
     (fun () _ -> Spec.Agile.Hash.(init SHA2_256))
     (fun () -> Spec.Agile.Hash.(update_multi SHA2_256))
     (fun () -> Spec.Hash.Incremental.(update_last SHA2_256))
-    (fun () -> Spec.Hash.PadFinish.(finish SHA2_256))
+    (fun () _ -> Spec.Hash.PadFinish.(finish SHA2_256))
     (fun () _ s -> Spec.Agile.Hash.(hash SHA2_256 s))
 
     (fun _ _ -> ())
@@ -81,7 +80,7 @@ let hacl_sha2_256: Hacl.Streaming.Interface.block unit =
       let last_len = FStar.Int.Cast.Full.uint64_to_uint32 last_len in
       assert (U64.v prev_len % block_length SHA2_256 = 0);
       Hacl.Hash.SHA2.update_last_256 s prev_len last last_len)
-    (fun _ s dst -> Hacl.Hash.SHA2.finish_256 s dst)
+    (fun _ _ s dst -> Hacl.Hash.SHA2.finish_256 s dst)
     (fun _ (s: s) -> B.free s)
     (fun _ (src dst: s) -> B.blit src 0ul dst 0ul 8ul)
 

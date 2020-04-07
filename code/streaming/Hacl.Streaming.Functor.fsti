@@ -15,6 +15,7 @@ module G = FStar.Ghost
 module S = FStar.Seq
 module U32 = FStar.UInt32
 module U64 = FStar.UInt64
+module I = Hacl.Streaming.Interface
 
 open Hacl.Streaming.Interface
 open FStar.HyperStack.ST
@@ -140,10 +141,22 @@ val seen_bounded: #index:Type0 -> c:block index -> i:index -> h:HS.mem -> s:stat
   (ensures (
     S.length (seen c i h s) <= c.max_input_length i))
 
-/// Note that the key only depends on state_s and not the memory! This allows
-/// clients to conclude that the key remains the same for every modification
-/// that does not touch the functor state.
-val key: #index:Type0 -> c:block index -> i:index -> s:state_s c i (c.state.s i) -> GTot (c.key.t i)
+/// A fine design point here... There are two styles that have been used in
+/// EverCrypt and throughout for key management.
+///
+/// The first one keeps an erased key in the state_s and therefore clients
+/// "know" that the value of the key depends only on the state_s (*not* on a
+/// memory) and hence can conclude that the key remains the same *as long as
+/// the modified footprints are footprint_s*. This essentially means that you
+/// cannot "reallocate" the abstract struct. This works for simple cases like
+/// EverCrypt.AEAD.
+///
+/// Here, we definitely reallocate the abstract struct to functionally update
+/// the size of the buffer, so we don't bother and reveal everywhere that the
+/// key remains the same (i.e. we specify it fully just like ``seen``).
+///
+/// Note: annotating the projector because of an interleaving bug.
+val key: #index:Type0 -> c:block index -> i:index -> h:HS.mem -> s:state c i (c.state.s i) -> GTot (c.key.t i)
 
 /// Framing
 /// =======
@@ -210,17 +223,19 @@ val create_in:
   k:c.key.s i ->
   r: HS.rid ->
   ST (state c i t)
-  (requires (fun _ ->
+  (requires (fun h0 ->
+    c.key.invariant #i h0 k /\
     HyperStack.ST.is_eternal_region r))
   (ensures (fun h0 s h1 ->
     invariant c i h1 s /\
     seen c i h1 s == S.empty /\
-    key c i (B.deref h1 s) == c.v_key h0 k /\
+    key c i h1 s == c.key.v i h0 k /\
     B.(modifies loc_none h0 h1) /\
     B.fresh_loc (footprint c i h1 s) h0 h1 /\
     B.(loc_includes (loc_region_only true r) (footprint c i h1 s)) /\
     freeable c i h1 s))
 
+/// Note: this is more like a "reinit" function so that clients can reuse the state.
 inline_for_extraction noextract
 val init:
   #index:Type0 ->
@@ -228,16 +243,18 @@ val init:
   i:G.erased index -> (
   let i = G.reveal i in
   t:Type0 { t == c.state.s i } ->
-  k:c.key i ->
+  k:c.key.s i ->
   s:state c i t ->
   Stack unit
   (requires (fun h0 ->
+    c.key.invariant #i h0 k /\
+    B.loc_disjoint (c.key.footprint #i h0 k) (footprint c i h0 s) /\
     invariant c i h0 s))
   (ensures (fun h0 _ h1 ->
     preserves_freeable c i s h0 h1 /\
     invariant c i h1 s /\
     seen c i h1 s == S.empty /\
-    key c i (B.deref h1 s) == c.v_key h0 k /\
+    key c i h1 s == c.key.v i h0 k /\
     footprint c i h0 s == footprint c i h1 s /\
     B.(modifies (footprint c i h0 s) h0 h1))))
 
@@ -272,7 +289,7 @@ let update_post
   B.(modifies (footprint c i h0 s) h0 h1) /\
   footprint c i h0 s == footprint c i h1 s /\
   seen c i h1 s == seen c i h0 s `S.append` B.as_seq h0 data /\
-  key c i (B.deref h1 s) == key c i (B.deref h0 s)
+  key c i h1 s == key c i h0 s
 
 inline_for_extraction noextract
 val update:
@@ -315,10 +332,11 @@ val mk_finish:
       preserves_freeable c i s h0 h1 /\
       invariant c i h1 s /\
       seen c i h0 s == seen c i h1 s /\
+      key c i h1 s == key c i h0 s /\
       footprint c i h0 s == footprint c i h1 s /\
       B.(modifies (loc_union (loc_buffer dst) (footprint c i h0 s)) h0 h1) /\ (
       seen_bounded c i h0 s;
-      S.equal (B.as_seq h1 dst) (c.spec_s i (key c i (B.deref h0 s)) (seen c i h0 s))))
+      S.equal (B.as_seq h1 dst) (c.spec_s i (key c i h0 s) (seen c i h0 s))))
 
 inline_for_extraction noextract
 val free:

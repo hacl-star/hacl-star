@@ -110,9 +110,9 @@ let optional_key #index (i: index) (km: key_management) (key: stateful index) =
 
 inline_for_extraction noextract
 let optional_t #index
-  (i: index)
-  (km: key_management)
-  (key: stateful index)
+  (#i: index)
+  (#km: key_management)
+  (#key: stateful index)
   (h: HS.mem)
   (k: optional_key i km key):
   GTot (key.t i)
@@ -121,18 +121,6 @@ let optional_t #index
   match km with
   | Erased -> G.reveal k
   | Runtime -> key.v i h k
-
-inline_for_extraction noextract
-let key_s #index
-  (i: index)
-  (km: key_management)
-  (key: stateful index)
-  (k: optional_key i km key):
-  Pure (key.s i)
-    (requires km == Runtime)
-    (ensures fun _ -> True)
-=
-  k
 
 /// The type class of block-based operations. Equipped with a generic index. May
 /// be unit if there's no agility, or hash algorithm for agility. The streaming
@@ -330,7 +318,7 @@ type block (index: Type0) =
       state.invariant #i h1 s /\
       B.(modifies (loc_buffer dst) h0 h1) /\
       state.footprint #i h0 s == state.footprint #i h1 s /\
-      B.as_seq h1 dst == finish_s i (optional_t i km key h0 k) (state.v i h0 s) /\
+      B.as_seq h1 dst == finish_s i (optional_t h0 k) (state.v i h0 s) /\
       (state.freeable #i h0 s ==> state.freeable #i h1 s)))) ->
 
   free: (

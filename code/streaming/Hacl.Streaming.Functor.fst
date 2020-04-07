@@ -28,7 +28,7 @@ open FStar.Mul
 /// something at Type0, not Type0 -> Type0 -- otherwise it wouldn't monomorphize
 /// in KreMLin.
 noeq
-type state_s #index (c: block index) (i: index) (t: Type0 { t == c.state i }) =
+type state_s #index (c: block index) (i: index) (t: Type0 { t == c.state.s i }) =
 | State:
     block_state: t ->
     buf: B.buffer Lib.IntTypes.uint8 { B.len buf = c.block_len i } ->
@@ -37,18 +37,66 @@ type state_s #index (c: block index) (i: index) (t: Type0 { t == c.state i }) =
     // Stupid name conflict on overloaded projectors leads to inscrutable
     // interleaving errors. Need a field name that does not conflict with the
     // one in Hacl.Streaming.Interface. Sigh!!
-    e_key: G.erased (c.t_key i) ->
+    maybe_key: optional_key i c.km c.key ->
     state_s #index c i t
 
-let freeable #index (c: block index) (i: index) (h: HS.mem) (p: state c i (c.state i)) =
+let optional_freeable #index
+  (#i: index)
+  (#km: key_management)
+  (#key: stateful index)
+  (h: HS.mem)
+  (k: optional_key i km key)
+=
+  allow_inversion key_management;
+  match km with
+  | Erased -> True
+  | Runtime -> key.freeable #i h k
+
+let optional_invariant #index
+  (#i: index)
+  (#km: key_management)
+  (#key: stateful index)
+  (h: HS.mem)
+  (k: optional_key i km key)
+=
+  allow_inversion key_management;
+  match km with
+  | Erased -> True
+  | Runtime -> key.invariant #i h k
+
+let optional_footprint #index
+  (#i: index)
+  (#km: key_management)
+  (#key: stateful index)
+  (h: HS.mem)
+  (k: optional_key i km key)
+=
+  allow_inversion key_management;
+  match km with
+  | Erased -> B.loc_none
+  | Runtime -> key.footprint #i h k
+
+let optional_reveal #index
+  (#i: index)
+  (#km: key_management)
+  (#key: stateful index)
+  (h: HS.mem)
+  (k: optional_key i km key)
+=
+  allow_inversion key_management;
+  match km with
+  | Erased -> G.reveal k
+  | Runtime -> key.v i h k
+
+let freeable #index (c: block index) (i: index) (h: HS.mem) (p: state c i (c.state.s i)) =
   B.freeable p /\ (
   let s = B.deref h p in
-  let State hash_state buf _ _ _ = s in
-  B.freeable buf /\ c.freeable h hash_state)
+  let State block_state buf _ _ maybe_key = s in
+  B.freeable buf /\ c.state.freeable h block_state /\ optional_freeable h maybe_key)
 
-let footprint_s #index (c: block index) (i: index) (h: HS.mem) (s: state_s c i (c.state i)) =
-  let State block_state buf_ _ _ _ = s in
-  B.(loc_union (loc_addr_of_buffer buf_) (c.footprint h block_state))
+let footprint_s #index (c: block index) (i: index) (h: HS.mem) (s: state_s c i (c.state.s i)) =
+  let State block_state buf_ _ _ maybe_key = s in
+  B.(loc_addr_of_buffer buf_ `loc_union` c.state.footprint h block_state `loc_union` optional_footprint h maybe_key)
 
 /// Invariants
 /// ==========
@@ -72,27 +120,31 @@ let split_at_last #index (c: block index) (i: index) (b: bytes):
   assert (S.length b - n * U32.v (c.block_len i) < U32.v (c.block_len i));
   blocks, rest
 
-let invariant_s #index (c: block index) (i: index) h (s: state_s c i (c.state i)) =
-  let State hash_state buf_ total_len seen key = s in
+let invariant_s #index (c: block index) (i: index) h (s: state_s c i (c.state.s i)) =
+  let State block_state buf_ total_len seen key = s in
   let seen = G.reveal seen in
   let blocks, rest = split_at_last c i seen in
 
   // Liveness and disjointness (administrative)
-  B.live h buf_ /\ c.invariant #i h hash_state /\
-  B.(loc_disjoint (loc_buffer buf_) (c.footprint h hash_state)) /\
+  B.live h buf_ /\ c.state.invariant #i h block_state /\ optional_invariant h key /\
+  B.(loc_disjoint (loc_buffer buf_) (c.state.footprint h block_state)) /\
+  B.(loc_disjoint (loc_buffer buf_) (optional_footprint h key)) /\
+  B.(loc_disjoint (optional_footprint h key) (c.state.footprint h block_state)) /\
 
   // Formerly, the "hashes" predicate
   S.length blocks + S.length rest = U64.v total_len /\
   S.length seen = U64.v total_len /\
   U64.v total_len <= c.max_input_length i /\
   // Note the double equals here, we now no longer know that this is a sequence.
-  c.v h hash_state == c.update_multi_s i (c.init_s i (G.reveal key)) blocks /\
+  c.state.v i h block_state == c.update_multi_s i (c.init_s i (optional_reveal h key)) blocks /\
   S.equal (S.slice (B.as_seq h buf_) 0 (U64.v total_len % U32.v (c.block_len i))) rest
 
 #push-options "--max_ifuel 1"
 let invariant_loc_in_footprint #index c i s m =
   [@inline_let]
-  let _ = c.invariant_loc_in_footprint #i in
+  let _ = c.state.invariant_loc_in_footprint #i in
+  [@inline_let]
+  let _ = c.key.invariant_loc_in_footprint #i in
   ()
 #pop-options
 
@@ -102,8 +154,8 @@ let seen #index c i h s =
 let seen_bounded #index c i h s =
   ()
 
-let key #index c i s =
-  G.reveal (State?.e_key s)
+let key #index c i h s =
+  optional_reveal h (State?.maybe_key (B.deref h s))
 
 let frame_invariant #index c i l s h0 h1 =
   let state_t = B.deref h0 s in
@@ -122,8 +174,8 @@ let frame_freeable #index c i l s h0 h1 =
 
 let index_of_state #index c i t s =
   let open LowStar.BufferOps in
-  let State hash_state _ _ _ _ = !*s in
-  c.index_of_state i hash_state
+  let State block_state _ _ _ _ = !*s in
+  c.index_of_state i block_state
 
 let split_at_last_empty #index (c: block index) (i: index): Lemma
   (ensures (
@@ -146,40 +198,40 @@ let create_in #index c i t k r =
   (**) B.loc_unused_in_not_unused_in_disjoint h1;
   (**) B.(modifies_only_not_unused_in loc_none h0 h1);
 
-  let hash_state = c.create_in i r in
+  let block_state = c.create_in i r in
   (**) let h2 = ST.get () in
-  (**) assert (B.fresh_loc (c.footprint #i h2 hash_state) h0 h2);
+  (**) assert (B.fresh_loc (c.footprint #i h2 block_state) h0 h2);
   (**) B.(modifies_only_not_unused_in loc_none h1 h2);
 
-  let s = State hash_state buf 0UL (G.hide S.empty) (G.hide (c.v_key h0 k)) in
+  let s = State block_state buf 0UL (G.hide S.empty) (G.hide (c.v_key h0 k)) in
   (**) assert (B.fresh_loc (footprint_s c i h2 s) h0 h2);
 
   (**) B.loc_unused_in_not_unused_in_disjoint h2;
   let p = B.malloc r s 1ul in
   (**) let h3 = ST.get () in
-  (**) c.frame_invariant B.loc_none hash_state h2 h3;
+  (**) c.frame_invariant B.loc_none block_state h2 h3;
   (**) B.(modifies_only_not_unused_in loc_none h2 h3);
   (**) assert (B.fresh_loc (B.loc_addr_of_buffer p) h0 h3);
   (**) assert (B.fresh_loc (footprint_s c i h3 s) h0 h3);
-  (**) c.frame_freeable B.loc_none hash_state h2 h3;
+  (**) c.frame_freeable B.loc_none block_state h2 h3;
   (**) assert (freeable c i h3 p);
   (**) assert (c.v_key h2 k == c.v_key h3 k);
   admit ()
 
-  c.init (G.hide i) k hash_state;
+  c.init (G.hide i) k block_state;
   (**) let h4 = ST.get () in
-  (**) assert (B.fresh_loc (c.footprint #i h4 hash_state) h0 h4);
+  (**) assert (B.fresh_loc (c.footprint #i h4 block_state) h0 h4);
   (**) assert (B.fresh_loc (B.loc_buffer buf) h0 h4);
-  (**) c.update_multi_zero i (c.v h4 hash_state);
+  (**) c.update_multi_zero i (c.v h4 block_state);
   (**) split_at_last_empty c i;
   (**) B.modifies_only_not_unused_in B.loc_none h0 h4;
-  (**) assert (c.v h4 hash_state == c.init_s i (c.v_key h3 k));
+  (**) assert (c.v h4 block_state == c.init_s i (c.v_key h3 k));
 
   (**) let h5 = ST.get () in
   (**) assert (
     let h = h5 in
     let s = (B.get h5 p 0) in
-    let State hash_state buf_ total_len seen _ = s in
+    let State block_state buf_ total_len seen _ = s in
     let seen = G.reveal seen in
     let blocks, rest = split_at_last c i seen in
     // JP: unclear why I need to assert this... but without it the proof doesn't
@@ -208,24 +260,24 @@ let init #index c i t s =
 
   let open LowStar.BufferOps in
   let h1 = ST.get () in
-  let State hash_state buf _ _ = !*s in
+  let State block_state buf _ _ = !*s in
   // JP: figuring out the alg at run-time is useful, but entails a lot more
   // proof difficulty; note the let-binding below, as well as the fact that
   // implicit argument resolution basically no longer works after this...
-  let i = c.index_of_state i hash_state in
+  let i = c.index_of_state i block_state in
   [@inline_let]
-  let hash_state: c.state i = hash_state in
+  let block_state: c.state i = block_state in
 
-  c.init (G.hide i) hash_state;
+  c.init (G.hide i) block_state;
   let h2 = ST.get () in
-  c.update_multi_zero i (c.v h2 hash_state);
+  c.update_multi_zero i (c.v h2 block_state);
   split_at_last_empty c i;
 
   [@ inline_let ]
-  let tmp: state_s c i t = State hash_state buf 0UL (G.hide S.empty) in
+  let tmp: state_s c i t = State block_state buf 0UL (G.hide S.empty) in
   B.upd s 0ul tmp;
   let h3 = ST.get () in
-  c.frame_invariant B.(loc_buffer s) hash_state h2 h3;
+  c.frame_invariant B.(loc_buffer s) block_state h2 h3;
 
   // This seems to cause insurmountable difficulties. Puzzled.
   ST.lemma_equal_domains_trans h1 h2 h3;
@@ -242,20 +294,20 @@ let init #index c i t s =
   assert (
     let h = h3 in
     let s = B.get h3 s 0 in
-    let State hash_state buf_ total_len seen = s in
+    let State block_state buf_ total_len seen = s in
     let seen = G.reveal seen in
     let blocks, rest = split_at_last c i seen in
 
     // Liveness and disjointness (administrative)
-    B.live h buf_ /\ c.invariant #i h hash_state /\
-    B.(loc_disjoint (loc_buffer buf_) (c.footprint #i h hash_state)) /\
+    B.live h buf_ /\ c.invariant #i h block_state /\
+    B.(loc_disjoint (loc_buffer buf_) (c.footprint #i h block_state)) /\
 
     // Formerly, the "hashes" predicate
     S.length blocks + S.length rest = U64.v total_len /\
     S.length seen = U64.v total_len /\
     U64.v total_len < c.max_input_length i /\
     // Note the double equals here, we now no longer know that this is a sequence.
-    c.v h hash_state == c.update_multi_s i (c.init_s i) blocks /\
+    c.v h block_state == c.update_multi_s i (c.init_s i) blocks /\
     S.equal (S.slice (B.as_seq h buf_) 0 (U64.v total_len % U32.v (c.block_len i))) rest
   );
   assert (invariant_s c i h3 (B.get h3 s 0))
@@ -441,10 +493,10 @@ let update_small #index c i t p data len =
   let h00 = ST.get () in
   assert (invariant c i h00 p);
   let s = !*p in
-  let State hash_state buf total_len seen_ = s in
-  let i = c.index_of_state i hash_state in
+  let State block_state buf total_len seen_ = s in
+  let i = c.index_of_state i block_state in
   [@inline_let]
-  let hash_state: c.state i = hash_state in
+  let block_state: c.state i = block_state in
 
   let sz = rest c i total_len in
   add_len_small c i total_len len;
@@ -455,25 +507,25 @@ let update_small #index c i t p data len =
   B.blit data 0ul buf2 0ul len;
   let h1 = ST.get () in
   split_at_last_small c i (G.reveal seen_) (B.as_seq h0 data);
-  c.frame_invariant (B.loc_buffer buf) hash_state h0 h1;
+  c.frame_invariant (B.loc_buffer buf) block_state h0 h1;
   assert (B.as_seq h1 data == B.as_seq h0 data);
 
   let total_len = add_len c i total_len len in
   [@inline_let]
   let tmp: state_s c i t =
-    State hash_state buf total_len (G.hide (G.reveal seen_ `S.append` (B.as_seq h0 data)))
+    State block_state buf total_len (G.hide (G.reveal seen_ `S.append` (B.as_seq h0 data)))
   in
   p *= tmp;
   let h2 = ST.get () in
   assert (B.as_seq h2 data == B.as_seq h1 data);
-  c.frame_invariant (B.loc_buffer p) hash_state h1 h2;
+  c.frame_invariant (B.loc_buffer p) block_state h1 h2;
   assert (
     let b = S.append (G.reveal seen_) (B.as_seq h0 data) in
     let blocks, rest = split_at_last c i b in
     S.length blocks + S.length rest = U64.v total_len /\
     S.length b = U64.v total_len /\
     U64.v total_len <= c.max_input_length i /\
-    (==) (c.v h2 hash_state) (c.update_multi_s i (c.init_s i) blocks) /\
+    (==) (c.v h2 block_state) (c.update_multi_s i (c.init_s i) blocks) /\
     S.equal (S.slice (B.as_seq h2 buf) 0 (U64.v total_len % U32.v (c.block_len i))) rest
     );
   assert (seen c i h2 p `S.equal` (S.append (G.reveal seen_) (B.as_seq h0 data)));
@@ -586,10 +638,10 @@ let update_empty_buf #index c i t p data len =
 
   let open LowStar.BufferOps in
   let s = !*p in
-  let State hash_state buf total_len seen = s in
-  let i = c.index_of_state i hash_state in
+  let State block_state buf total_len seen = s in
+  let i = c.index_of_state i block_state in
   [@inline_let]
-  let hash_state: c.state i = hash_state in
+  let block_state: c.state i = block_state in
   let sz = rest c i total_len in
   let h0 = ST.get () in
   assert (
@@ -602,13 +654,13 @@ let update_empty_buf #index c i t p data len =
   let data2_len = len `U32.sub` data1_len in
   let data1 = B.sub data 0ul data1_len in
   let data2 = B.sub data data1_len data2_len in
-  c.update_multi (G.hide i) hash_state data1 data1_len;
+  c.update_multi (G.hide i) block_state data1 data1_len;
 
   let dst = B.sub buf 0ul data2_len in
   let h1 = ST.get () in
   B.blit data2 0ul dst 0ul data2_len;
   let h2 = ST.get () in
-  c.frame_invariant (B.loc_buffer buf) hash_state h1 h2;
+  c.frame_invariant (B.loc_buffer buf) block_state h1 h2;
 
   S.append_assoc (G.reveal seen) (B.as_seq h0 data1) (B.as_seq h0 data2);
   assert (S.equal
@@ -616,12 +668,12 @@ let update_empty_buf #index c i t p data len =
     (S.append (G.reveal seen) (S.append (B.as_seq h0 data1) (B.as_seq h0 data2))));
 
   [@inline_let]
-  let tmp: state_s c i t = State hash_state buf (add_len c i total_len len)
+  let tmp: state_s c i t = State block_state buf (add_len c i total_len len)
     (G.hide (G.reveal seen `S.append` B.as_seq h0 data))
   in
   p *= tmp;
   let h3 = ST.get () in
-  c.frame_invariant (B.loc_buffer p) hash_state h2 h3;
+  c.frame_invariant (B.loc_buffer p) block_state h2 h3;
 
   // After careful diagnosis, this is the difficult proof obligation that sends
   // z3 off the rails.
@@ -697,10 +749,10 @@ let update_round #index c i t p data len =
 
   let open LowStar.BufferOps in
   let s = !*p in
-  let State hash_state buf_ total_len seen = s in
-  let i = c.index_of_state i hash_state in
+  let State block_state buf_ total_len seen = s in
+  let i = c.index_of_state i block_state in
   [@inline_let]
-  let hash_state: c.state i = hash_state in
+  let block_state: c.state i = block_state in
   let h0 = ST.get () in
   let sz = rest c i total_len in
   let diff = c.block_len i `U32.sub` sz in
@@ -712,8 +764,8 @@ let update_round #index c i t p data len =
   B.blit data 0ul buf2 0ul diff;
   let h1 = ST.get () in
   assert (S.equal (B.as_seq h1 buf0) (S.append (B.as_seq h1 buf1) (B.as_seq h1 data)));
-  c.frame_invariant (B.loc_buffer buf_) hash_state h0 h1;
-  c.update_multi (G.hide i) hash_state buf0 (c.block_len i);
+  c.frame_invariant (B.loc_buffer buf_) block_state h0 h1;
+  c.update_multi (G.hide i) block_state buf0 (c.block_len i);
   let h2 = ST.get () in
   (* Proof interlude *)
   begin
@@ -724,11 +776,11 @@ let update_round #index c i t p data len =
     assert (S.length blocks % U32.v (c.block_len i) = 0);
     assert (S.length (rest `S.append` B.as_seq h0 data) % U32.v (c.block_len i) = 0);
     calc (==) {
-      c.v h2 hash_state;
+      c.v h2 block_state;
     (==) { }
-      c.update_multi_s i (c.v h1 hash_state) (B.as_seq h1 buf0);
+      c.update_multi_s i (c.v h1 block_state) (B.as_seq h1 buf0);
     (==) { }
-      c.update_multi_s i (c.v h1 hash_state) (B.as_seq h0 buf1 `S.append` B.as_seq h0 data);
+      c.update_multi_s i (c.v h1 block_state) (B.as_seq h0 buf1 `S.append` B.as_seq h0 data);
     (==) { }
       c.update_multi_s i (c.update_multi_s i (c.init_s i) blocks) (B.as_seq h0 buf1 `S.append` B.as_seq h0 data);
     (==) { }
@@ -742,20 +794,20 @@ let update_round #index c i t p data len =
     }
   end;
   [@inline_let]
-  let tmp: state_s c i t = State hash_state buf_ (add_len c i total_len len)
+  let tmp: state_s c i t = State block_state buf_ (add_len c i total_len len)
     (G.hide (G.reveal seen `S.append` B.as_seq h0 data))
   in
   p *= tmp;
   let h3 = ST.get () in
-  c.frame_invariant (B.loc_buffer p) hash_state h2 h3;
+  c.frame_invariant (B.loc_buffer p) block_state h2 h3;
   assert (seen_pred c i h3 p `S.equal` (S.append (G.reveal seen) (B.as_seq h0 data)))
 #pop-options
 
 let update #index c i t p data len =
   let open LowStar.BufferOps in
   let s = !*p in
-  let State hash_state buf_ total_len seen = s in
-  let i = c.index_of_state i hash_state in
+  let State block_state buf_ total_len seen = s in
+  let i = c.index_of_state i block_state in
   let sz = rest c i total_len in
   if len `U32.lt` (c.block_len i `U32.sub` sz) then
     update_small c (G.hide i) t p data len
@@ -794,40 +846,40 @@ let mk_finish #index c i t p dst =
 
   let open LowStar.BufferOps in
   let h0 = ST.get () in
-  let State hash_state buf_ total_len seen = !*p in
+  let State block_state buf_ total_len seen = !*p in
 
   push_frame ();
   let h1 = ST.get () in
-  c.frame_invariant #i B.loc_none hash_state h0 h1;
-  assert (c.invariant #i h1 hash_state);
+  c.frame_invariant #i B.loc_none block_state h0 h1;
+  assert (c.invariant #i h1 block_state);
 
   let buf_ = B.sub buf_ 0ul (rest c i total_len) in
   assert (
     let r = rest c i total_len in
     (U64.v total_len - U32.v r) % U32.v (c.block_len i) = 0);
 
-  let tmp_hash_state = c.alloca i in
+  let tmp_block_state = c.alloca i in
 
   let h2 = ST.get () in
-  assert (B.(loc_disjoint (c.footprint #i h2 tmp_hash_state) (c.footprint #i h1 hash_state)));
-  c.frame_invariant #i B.(loc_region_only false (HS.get_tip h2)) hash_state h1 h2;
-  assert (c.invariant #i h2 hash_state);
-  assert (c.invariant #i h2 tmp_hash_state);
-  assert (c.footprint #i h2 hash_state == c.footprint #i h1 hash_state);
+  assert (B.(loc_disjoint (c.footprint #i h2 tmp_block_state) (c.footprint #i h1 block_state)));
+  c.frame_invariant #i B.(loc_region_only false (HS.get_tip h2)) block_state h1 h2;
+  assert (c.invariant #i h2 block_state);
+  assert (c.invariant #i h2 tmp_block_state);
+  assert (c.footprint #i h2 block_state == c.footprint #i h1 block_state);
 
-  c.copy (G.hide i) hash_state tmp_hash_state;
+  c.copy (G.hide i) block_state tmp_block_state;
 
   let h3 = ST.get () in
-  assert (c.footprint h2 tmp_hash_state == c.footprint h3 tmp_hash_state);
-  c.frame_invariant #i (c.footprint h2 tmp_hash_state) hash_state h2 h3;
-  assert (c.invariant #i h3 hash_state);
-  c.update_last (G.hide i) tmp_hash_state buf_ total_len;
+  assert (c.footprint h2 tmp_block_state == c.footprint h3 tmp_block_state);
+  c.frame_invariant #i (c.footprint h2 tmp_block_state) block_state h2 h3;
+  assert (c.invariant #i h3 block_state);
+  c.update_last (G.hide i) tmp_block_state buf_ total_len;
 
   let h4 = ST.get () in
-  c.frame_invariant #i (c.footprint h3 tmp_hash_state) hash_state h3 h4;
-  assert (c.invariant #i h4 hash_state);
+  c.frame_invariant #i (c.footprint h3 tmp_block_state) block_state h3 h4;
+  assert (c.invariant #i h4 block_state);
 
-  c.finish (G.hide i) tmp_hash_state dst;
+  c.finish (G.hide i) tmp_block_state dst;
 
   let h5 = ST.get () in
   begin
@@ -838,14 +890,14 @@ let mk_finish #index c i t p dst =
     calc (S.equal) {
       B.as_seq h5 dst;
     (S.equal) { }
-      c.finish_s i (c.v h4 tmp_hash_state);
+      c.finish_s i (c.v h4 tmp_block_state);
     (S.equal) { }
       c.finish_s i (
-        c.update_last_s i (c.v h3 tmp_hash_state) (n * block_length)
+        c.update_last_s i (c.v h3 tmp_block_state) (n * block_length)
           (S.slice (B.as_seq h3 buf_) 0 (U32.v (rest c i total_len))));
     (S.equal) { }
       c.finish_s i (
-        c.update_last_s i (c.v h3 tmp_hash_state) (n * block_length)
+        c.update_last_s i (c.v h3 tmp_block_state) (n * block_length)
           (S.slice (B.as_seq h0 buf_) 0 (U32.v (rest c i total_len))));
     (S.equal) { }
       c.finish_s i (
@@ -858,12 +910,12 @@ let mk_finish #index c i t p dst =
     }
   end;
 
-  c.frame_invariant #i (B.loc_buffer dst) hash_state h4 h5;
-  assert (c.invariant #i h5 hash_state);
+  c.frame_invariant #i (B.loc_buffer dst) block_state h4 h5;
+  assert (c.invariant #i h5 block_state);
 
   pop_frame ();
   let h6 = ST.get () in
-  c.frame_invariant #i B.(loc_region_only false (HS.get_tip h5)) hash_state h5 h6;
+  c.frame_invariant #i B.(loc_region_only false (HS.get_tip h5)) block_state h5 h6;
   assert (seen_pred c i h6 p `S.equal` (G.reveal seen));
 
   // JP: this is not the right way to prove do this proof. Need to use
@@ -877,7 +929,7 @@ let mk_finish #index c i t p dst =
 
 let free #index c i t s =
   let open LowStar.BufferOps in
-  let State hash_state buf _ _ = !*s in
-  c.free i hash_state;
+  let State block_state buf _ _ = !*s in
+  c.free i block_state;
   B.free buf;
   B.free s
