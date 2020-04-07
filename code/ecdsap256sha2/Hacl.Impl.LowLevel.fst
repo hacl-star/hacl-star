@@ -1445,50 +1445,49 @@ let sq f out =
   push_frame();
       assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
 
-  let wb = create (size 25) (u64 0) in 
+  let wb = create (size 17) (u64 0) in 
   
-  let temp = sub wb (size 0) (size 8) in 
-  let tb = sub wb (size 8) (size 5) in 
-  let memory = sub wb (size 13) (size 12) in 
+  let tb = sub wb (size 0) (size 5) in 
+  let memory = sub wb (size 5) (size 12) in 
    
   let f0 = f.(0ul) in
   let f1 = f.(1ul) in
   let f2 = f.(2ul) in
   let f3 = f.(3ul) in
-  let b0 = sub temp (size 0) (size 4) in
+  let b0 = sub out (size 0) (size 4) in
     
     let h0 = ST.get() in
   let c0 = sq0 f b0 memory tb in 
  
-    upd temp (size 4) c0;
+    upd out (size 4) c0;
     let h1 = ST.get() in
 
-    let bk0 = sub temp (size 0) (size 1) in 
-    assert(Lib.Sequence.index (as_seq h1 bk0) 0 == Lib.Sequence.index (as_seq h1 temp) 0); 
+    let bk0 = sub out (size 0) (size 1) in 
+    assert(Lib.Sequence.index (as_seq h1 bk0) 0 == Lib.Sequence.index (as_seq h1 out) 0); 
 
-  let b1 = sub temp (size 1) (size 4) in
+  let b1 = sub out (size 1) (size 4) in
   let c1 = sq1 f b1 b1 memory tb in 
-    upd temp (size 5) c1; 
+    upd out (size 5) c1; 
     let h2 = ST.get() in 
     
-    let bk1 = sub temp (size 0) (size 2) in 
-    assert(Lib.Sequence.index (as_seq h2 bk1) 0 == Lib.Sequence.index (as_seq h2 temp) 0);
-    assert(Lib.Sequence.index (as_seq h2 bk1) 1 == Lib.Sequence.index (as_seq h2 temp) 1);
+    let bk1 = sub out (size 0) (size 2) in 
+    assert(Lib.Sequence.index (as_seq h2 bk1) 0 == Lib.Sequence.index (as_seq h2 out) 0);
+    assert(Lib.Sequence.index (as_seq h2 bk1) 1 == Lib.Sequence.index (as_seq h2 out) 1);
 
-  let b2 = sub temp (size 2) (size 4) in 
+  let b2 = sub out (size 2) (size 4) in 
   let c2 = sq2 f b2 b2 memory tb in 
-    upd temp (size 6) c2;
+    upd out (size 6) c2;
 
     let h3 = ST.get() in 
-     let bk2 = sub temp (size 0) (size 3) in 
+     let bk2 = sub out (size 0) (size 3) in 
      
-    assert(Lib.Sequence.index (as_seq h3 bk2) 0 == Lib.Sequence.index (as_seq h3 temp) 0);
-    assert(Lib.Sequence.index (as_seq h3 bk2) 1 == Lib.Sequence.index (as_seq h3 temp) 1);
-    assert(Lib.Sequence.index (as_seq h3 bk2) 2 == Lib.Sequence.index (as_seq h3 temp) 2);
+    assert(Lib.Sequence.index (as_seq h3 bk2) 0 == Lib.Sequence.index (as_seq h3 out) 0);
+    assert(Lib.Sequence.index (as_seq h3 bk2) 1 == Lib.Sequence.index (as_seq h3 out) 1);
+    assert(Lib.Sequence.index (as_seq h3 bk2) 2 == Lib.Sequence.index (as_seq h3 out) 2);
 
-  let b3 = sub temp (size 3) (size 4) in 
+  let b3 = sub out (size 3) (size 4) in 
   let c3 = sq3 f b3 b3 memory tb in 
-    upd temp (size 7) c3;
+    upd out (size 7) c3;
 
     let h4 = ST.get() in 
 
@@ -1500,20 +1499,20 @@ let sq f out =
     
 
     as_nat h4 b3  * pow2 64 * pow2 64 * pow2 64 + 
-    uint_v (Lib.Sequence.index (as_seq h4 temp) 7) * pow2 64 * pow2 64 * pow2 64 * pow2 64  * pow2 64 * pow2 64 * pow2 64 +
-    uint_v (Lib.Sequence.index (as_seq h4 temp) 2) * pow2 64 * pow2 64 + 
-    uint_v (Lib.Sequence.index (as_seq h4 temp) 1) * pow2 64 + 
-    uint_v (Lib.Sequence.index (as_seq h4 temp) 0));
+    uint_v (Lib.Sequence.index (as_seq h4 out) 7) * pow2 64 * pow2 64 * pow2 64 * pow2 64  * pow2 64 * pow2 64 * pow2 64 +
+    uint_v (Lib.Sequence.index (as_seq h4 out) 2) * pow2 64 * pow2 64 + 
+    uint_v (Lib.Sequence.index (as_seq h4 out) 1) * pow2 64 + 
+    uint_v (Lib.Sequence.index (as_seq h4 out) 0));
 
 
     calc (==) {
     as_nat h4 b3  * pow2 64 * pow2 64 * pow2 64 + 
-    uint_v (Lib.Sequence.index (as_seq h4 temp) 7) * pow2 64 * pow2 64 * pow2 64 * pow2 64  * pow2 64 * pow2 64 * pow2 64 +
-    uint_v (Lib.Sequence.index (as_seq h4 temp) 2) * pow2 64 * pow2 64 + 
-    uint_v (Lib.Sequence.index (as_seq h4 temp) 1) * pow2 64 + 
-    uint_v (Lib.Sequence.index (as_seq h4 temp) 0);
+    uint_v (Lib.Sequence.index (as_seq h4 out) 7) * pow2 64 * pow2 64 * pow2 64 * pow2 64  * pow2 64 * pow2 64 * pow2 64 +
+    uint_v (Lib.Sequence.index (as_seq h4 out) 2) * pow2 64 * pow2 64 + 
+    uint_v (Lib.Sequence.index (as_seq h4 out) 1) * pow2 64 + 
+    uint_v (Lib.Sequence.index (as_seq h4 out) 0);
     (==) {}
-    wide_as_nat h4 temp;};
+    wide_as_nat h4 out;};
 
   calc (==)
     {
@@ -1531,14 +1530,9 @@ let sq f out =
     uint_v f3 * as_nat h0 f * pow2 64 * pow2 64 * pow2 64;
     };
 
-
-  copy out temp; 
-    let h5 = ST.get() in 
-    assert(modifies (loc wb) h0 h4);
-    assert(modifies (loc out) h4 h5);
   pop_frame()
 
- val cmovznz4: cin: uint64 -> x: felem -> y: felem -> result: felem ->
+val cmovznz4: cin: uint64 -> x: felem -> y: felem -> result: felem ->
   Stack unit
     (requires fun h -> live h x /\ live h y /\ live h result /\ disjoint x result /\ eq_or_disjoint y result)
     (ensures fun h0 _ h1 -> modifies1 result h0 h1 /\ 
