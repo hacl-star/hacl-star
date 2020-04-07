@@ -73,7 +73,8 @@ type stateful (index: Type0) =
     (ensures (
       invariant h1 s /\
       v i h0 s == v i h1 s /\
-      footprint #i h1 s == footprint #i h0 s))) ->
+      footprint #i h1 s == footprint #i h0 s))
+    [ SMTPat (invariant h1 s); SMTPat (B.modifies l h0 h1) ]) ->
 
   frame_freeable: (#i:index -> l:B.loc -> s:s i -> h0:HS.mem -> h1:HS.mem -> Lemma
     (requires (
