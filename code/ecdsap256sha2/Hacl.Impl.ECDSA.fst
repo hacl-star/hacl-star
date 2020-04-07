@@ -80,3 +80,5 @@ let compressionCompressedForm b result =
   Hacl.Impl.P256.Compression.compressionCompressedForm b result
 
  
+
+let reduction_8_32 x result = Hacl.Impl.ECDSA.Reduction.reduction_8_32 x result 
