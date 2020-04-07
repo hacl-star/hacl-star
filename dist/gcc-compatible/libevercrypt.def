@@ -158,18 +158,18 @@ EXPORTS
   Hacl_Blake2b_32_blake2b
   Hacl_Impl_P256_DH_ecp256dh_i
   Hacl_Impl_P256_DH_ecp256dh_r
-  Hacl_Impl_ECDSA_secretToPublicU8
-  Hacl_Impl_ECDSA_ecdsa_p256_sha2_sign
-  Hacl_Impl_ECDSA_ecdsa_p256_sha2_384_sign
-  Hacl_Impl_ECDSA_ecdsa_p256_sha2_512_sign
-  Hacl_Impl_ECDSA_ecdsa_signature_blake2
-  Hacl_Impl_ECDSA_ecdsa_p256_sha2_verification
-  Hacl_Impl_ECDSA_ecdsa_verification_blake2
-  Hacl_Impl_ECDSA_ecdsa_verification_blake2hl
+  Hacl_Impl_ECDSA_ecdsa_sign_p256_sha2
+  Hacl_Impl_ECDSA_ecdsa_sign_p256_blake2
+  Hacl_Impl_ECDSA_ecdsa_sign_p256_without_hash
+  Hacl_Impl_ECDSA_ecdsa_verif_p256_sha2
+  Hacl_Impl_ECDSA_ecdsa_verif_blake2
+  Hacl_Impl_ECDSA_ecdsa_verif_without_hash
+  Hacl_Impl_ECDSA_verifyQ
   Hacl_Impl_ECDSA_decompressionNotCompressedForm
   Hacl_Impl_ECDSA_decompressionCompressedForm
   Hacl_Impl_ECDSA_compressionNotCompressedForm
   Hacl_Impl_ECDSA_compressionCompressedForm
+  Hacl_Impl_ECDSA_Reduction_reduction_8_32
   Hacl_Ed25519_sign
   Hacl_Ed25519_verify
   Hacl_Ed25519_secret_to_public
@@ -378,6 +378,7 @@ EXPORTS
   Hacl_HPKE_P256_CP32_SHA256_setupBaseR
   Hacl_HPKE_P256_CP32_SHA256_sealBase
   Hacl_HPKE_P256_CP32_SHA256_openBase
+  Hacl_Blake2bUnkeyed_blake2b_32_u
   Hacl_Blake2s_128_blake2s
   Hacl_HPKE_Curve64_CP32_SHA256_setupBaseI
   Hacl_HPKE_Curve64_CP32_SHA256_setupBaseR
@@ -401,77 +402,6 @@ EXPORTS
   EverCrypt_AEAD_encrypt
   EverCrypt_AEAD_decrypt
   EverCrypt_AEAD_free
-  __proj__Mkgcm_args__item__plain
-  __proj__Mkgcm_args__item__plain_len
-  __proj__Mkgcm_args__item__aad
-  __proj__Mkgcm_args__item__aad_len
-  __proj__Mkgcm_args__item__iv
-  __proj__Mkgcm_args__item__expanded_key
-  __proj__Mkgcm_args__item__cipher
-  __proj__Mkgcm_args__item__tag
-  EverCrypt_random_init
-  EverCrypt_random_sample
-  EverCrypt_random_cleanup
-  EverCrypt_uu___is_AES128_OPENSSL
-  EverCrypt___proj__AES128_OPENSSL__item__st
-  EverCrypt_uu___is_AES128_BCRYPT
-  EverCrypt___proj__AES128_BCRYPT__item__st
-  EverCrypt_uu___is_AES128_VALE
-  EverCrypt___proj__AES128_VALE__item__w
-  EverCrypt___proj__AES128_VALE__item__sbox
-  EverCrypt_uu___is_AES128_HACL
-  EverCrypt___proj__AES128_HACL__item__w
-  EverCrypt___proj__AES128_HACL__item__sbox
-  EverCrypt_aes128_create
-  EverCrypt_aes128_compute
-  EverCrypt_aes128_free
-  EverCrypt_uu___is_AES256_OPENSSL
-  EverCrypt___proj__AES256_OPENSSL__item__st
-  EverCrypt_uu___is_AES256_BCRYPT
-  EverCrypt___proj__AES256_BCRYPT__item__st
-  EverCrypt_uu___is_AES256_HACL
-  EverCrypt___proj__AES256_HACL__item__w
-  EverCrypt___proj__AES256_HACL__item__sbox
-  EverCrypt_aes256_create
-  EverCrypt_aes256_compute
-  EverCrypt_aes256_free
-  EverCrypt_aes128_gcm_encrypt
-  EverCrypt_aes128_gcm_decrypt
-  EverCrypt_aes256_gcm_encrypt
-  EverCrypt_aes256_gcm_decrypt
-  EverCrypt_uu___is_AES128_CBC
-  EverCrypt_uu___is_AES256_CBC
-  EverCrypt_uu___is_TDES_EDE_CBC
-  EverCrypt_block_cipher_keyLen
-  EverCrypt_block_cipher_blockLen
-  EverCrypt_uu___is_RC4_128
-  EverCrypt_uu___is_AES128_GCM
-  EverCrypt_uu___is_AES256_GCM
-  EverCrypt_uu___is_CHACHA20_POLY1305
-  EverCrypt_uu___is_AES128_CCM
-  EverCrypt_uu___is_AES256_CCM
-  EverCrypt_uu___is_AES128_CCM8
-  EverCrypt_uu___is_AES256_CCM8
-  EverCrypt_aead_keyLen
-  EverCrypt_aead_tagLen
-  EverCrypt_aead_ivLen
-  EverCrypt_aead_create
-  EverCrypt_aead_encrypt
-  EverCrypt_aead_decrypt
-  EverCrypt_aead_free
-  EverCrypt_dh_load_group
-  EverCrypt_dh_free_group
-  EverCrypt_dh_keygen
-  EverCrypt_dh_compute
-  EverCrypt_uu___is_ECC_P256
-  EverCrypt_uu___is_ECC_P384
-  EverCrypt_uu___is_ECC_P521
-  EverCrypt_uu___is_ECC_X25519
-  EverCrypt_uu___is_ECC_X448
-  EverCrypt_ecdh_load_curve
-  EverCrypt_ecdh_free_curve
-  EverCrypt_ecdh_keygen
-  EverCrypt_ecdh_compute
   EverCrypt_HMAC_compute_sha1
   EverCrypt_HMAC_compute_sha2_256
   EverCrypt_HMAC_compute_sha2_384
@@ -534,3 +464,11 @@ EXPORTS
   EverCrypt_Curve25519_scalarmult
   EverCrypt_Curve25519_ecdh
   EverCrypt_Cipher_chacha20
+  __proj__Mkgcm_args__item__plain
+  __proj__Mkgcm_args__item__plain_len
+  __proj__Mkgcm_args__item__aad
+  __proj__Mkgcm_args__item__aad_len
+  __proj__Mkgcm_args__item__iv
+  __proj__Mkgcm_args__item__expanded_key
+  __proj__Mkgcm_args__item__cipher
+  __proj__Mkgcm_args__item__tag

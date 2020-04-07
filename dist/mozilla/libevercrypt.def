@@ -1,6 +1,7 @@
 LIBRARY libevercrypt
 
 EXPORTS
+  Hacl_Blake2b_32_blake2b
   Hacl_Chacha20_chacha20_encrypt
   Hacl_Chacha20_chacha20_decrypt
   Hacl_Curve25519_64_scalarmult
@@ -28,6 +29,7 @@ EXPORTS
   Hacl_Poly1305_256_poly1305_update
   Hacl_Poly1305_256_poly1305_finish
   Hacl_Poly1305_256_poly1305_mac
+  Hacl_Blake2bUnkeyed_blake2b_32_u
   Hacl_Chacha20_Vec128_chacha20_encrypt_128
   Hacl_Chacha20_Vec128_chacha20_decrypt_128
   Hacl_Chacha20Poly1305_128_aead_encrypt

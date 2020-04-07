@@ -42,10 +42,8 @@ uint64_t Hacl_Impl_P256_DH_ecp256dh_i(uint8_t *result, uint8_t *scalar);
 
 uint64_t Hacl_Impl_P256_DH_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
 
-void Hacl_Impl_ECDSA_secretToPublicU8(uint8_t *result, uint8_t *scalar, uint64_t *tempBuffer);
-
 uint64_t
-Hacl_Impl_ECDSA_ecdsa_p256_sha2_sign(
+Hacl_Impl_ECDSA_ecdsa_sign_p256_sha2(
   uint8_t *result,
   uint32_t mLen,
   uint8_t *m,
@@ -54,7 +52,7 @@ Hacl_Impl_ECDSA_ecdsa_p256_sha2_sign(
 );
 
 uint64_t
-Hacl_Impl_ECDSA_ecdsa_p256_sha2_384_sign(
+Hacl_Impl_ECDSA_ecdsa_sign_p256_blake2(
   uint8_t *result,
   uint32_t mLen,
   uint8_t *m,
@@ -63,25 +61,15 @@ Hacl_Impl_ECDSA_ecdsa_p256_sha2_384_sign(
 );
 
 uint64_t
-Hacl_Impl_ECDSA_ecdsa_p256_sha2_512_sign(
+Hacl_Impl_ECDSA_ecdsa_sign_p256_without_hash(
   uint8_t *result,
-  uint32_t mLen,
-  uint8_t *m,
-  uint8_t *privKey,
-  uint8_t *k
-);
-
-uint64_t
-Hacl_Impl_ECDSA_ecdsa_signature_blake2(
-  uint8_t *result,
-  uint32_t mLen,
   uint8_t *m,
   uint8_t *privKey,
   uint8_t *k
 );
 
 bool
-Hacl_Impl_ECDSA_ecdsa_p256_sha2_verification(
+Hacl_Impl_ECDSA_ecdsa_verif_p256_sha2(
   uint32_t mLen,
   uint8_t *m,
   uint8_t *pubKey,
@@ -90,7 +78,7 @@ Hacl_Impl_ECDSA_ecdsa_p256_sha2_verification(
 );
 
 bool
-Hacl_Impl_ECDSA_ecdsa_verification_blake2(
+Hacl_Impl_ECDSA_ecdsa_verif_blake2(
   uint32_t mLen,
   uint8_t *m,
   uint8_t *pubKey,
@@ -99,13 +87,9 @@ Hacl_Impl_ECDSA_ecdsa_verification_blake2(
 );
 
 bool
-Hacl_Impl_ECDSA_ecdsa_verification_blake2hl(
-  uint32_t mLen,
-  uint8_t *m,
-  uint8_t *pubKey,
-  uint8_t *r,
-  uint8_t *s
-);
+Hacl_Impl_ECDSA_ecdsa_verif_without_hash(uint8_t *m, uint8_t *pubKey, uint8_t *r, uint8_t *s);
+
+bool Hacl_Impl_ECDSA_verifyQ(uint8_t *pubKey);
 
 bool Hacl_Impl_ECDSA_decompressionNotCompressedForm(uint8_t *b, uint8_t *result);
 

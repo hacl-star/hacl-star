@@ -6,8 +6,8 @@ open Lib.IntTypes
 
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
 
-let wrap 
-  (a: hash_alg) 
+let wrap
+  (a: hash_alg)
   (key: bytes{Seq.length key <= max_input_length a})
   : lbytes (block_length a)
 =
@@ -22,7 +22,7 @@ let xor (x: uint8) (v: bytes) : lbytes (Seq.length v) =
 
 let rec xor_lemma (x: uint8) (v: bytes) : Lemma
   (ensures xor x v == Spec.Loops.seq_map2 logxor (Seq.create (Seq.length v) x) v)
-  (decreases (Seq.length v)) 
+  (decreases (Seq.length v))
 =
   let l = Seq.length v in
   if l > 0 then (

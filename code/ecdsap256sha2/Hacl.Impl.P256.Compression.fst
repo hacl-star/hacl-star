@@ -160,13 +160,14 @@ let lessThanPrime f =
   pop_frame();
     less
 
-#push-options "--z3rlimit 400"
+#push-options "--z3rlimit 600"
 
 let decompressionCompressedForm b result = 
   push_frame();
     let h0 = ST.get() in 
-    let temp = create (size 4) (u64 0) in 
-    let temp2 = create (size 4) (u64 0) in 
+    let temp = create (size 8) (u64 0) in 
+      let t0 = sub temp (size 0) (size 4) in 
+      let t1 = sub temp (size 4) (size 4) in 
     let open Lib.RawIntTypes in 
     let compressedIdentifier = index b (size 0) in 
     let correctIdentifier2 = eq_mask (u8 2) compressedIdentifier in 
@@ -180,11 +181,11 @@ let decompressionCompressedForm b result =
     begin
       let x = sub b (size 1) (size 32) in 
       copy (sub result (size 0) (size 32)) x;
-      toUint64ChangeEndian x temp;
+      toUint64ChangeEndian x t0;
 	let h1 = ST.get() in 
-      Spec.P256.Lemmas.lemma_core_0 temp h1;
+      Spec.P256.Lemmas.lemma_core_0 t0 h1;
 
-      let lessThanPrimeXCoordinate = lessThanPrime temp in 
+      let lessThanPrimeXCoordinate = lessThanPrime t0 in 
 	Spec.ECDSA.changeEndianLemma (Lib.ByteSequence.uints_from_bytes_be (as_seq h0 x));
 	Lib.ByteSequence.uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h0 x);
 
@@ -195,23 +196,23 @@ let decompressionCompressedForm b result =
 	end  
       else 
 	begin 
-	  toDomain temp temp;
-	  lemmaToDomain (as_nat h1 temp);
-	  computeYFromX temp temp2 (to_u64 (logand compressedIdentifier (u8 1)));
+	  toDomain t0 t0;
+	  lemmaToDomain (as_nat h1 t0);
+	  computeYFromX t0 t1 (to_u64 (logand compressedIdentifier (u8 1)));
 	  logand_mask compressedIdentifier (u8 1) 1;
 	    let h4 = ST.get() in 
 	    
-	  changeEndian temp2;
-	  toUint8 temp2 (sub result (size 32) (size 32));
+	  changeEndian t1;
+	  toUint8 t1 (sub result (size 32) (size 32));
 
 	    let h5 = ST.get() in 
 
-	  Spec.P256.Lemmas.lemma_core_0 temp2 h4;
+	  Spec.P256.Lemmas.lemma_core_0 t1 h4;
 	  
-	  Lib.ByteSequence.lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h4 temp2);
-	  Spec.ECDSA.changeEndian_le_be (as_nat h4 temp2);
+	  Lib.ByteSequence.lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h4 t1);
+	  Spec.ECDSA.changeEndian_le_be (as_nat h4 t1);
 
-	  assert(as_seq h5 (gsub result (size 32) (size 32)) == Lib.ByteSequence.nat_to_bytes_be 32 (as_nat h4 temp2)); 
+	  assert(as_seq h5 (gsub result (size 32) (size 32)) == Lib.ByteSequence.nat_to_bytes_be 32 (as_nat h4 t1)); 
 
 	  pop_frame(); 
 	  true
@@ -235,16 +236,14 @@ let compressionCompressedForm b result =
   let open Lib.ByteSequence in 
     let h0 = ST.get() in 
   let y = sub b (size 32) (size 32) in
-  
+    lemma_uint_to_bytes_be_preserves_value (Lib.Sequence.index (as_seq h0 y) 0);
+    lemma_nat_from_to_intseq_be_preserves_value 32 (as_seq h0 y);
 
   let lastWordY = index y (size 31) in 
-    lemma_uint_to_bytes_le_preserves_value (Lib.Sequence.index (as_seq h0 y) 0);
-    lemma_nat_from_to_intseq_le_preserves_value 32 (as_seq h0 y);
   let lastBitY = logand lastWordY (u8 1) in 
     logand_mask lastWordY (u8 1) 1;
   let identifier = add lastBitY (u8 2) in 
   copy (sub result (size 1) (size 32)) (sub b (size 0) (size 32)) ;
   upd result (size 0) identifier;
-    let n = (nat_from_intseq_le (as_seq h0 y)) in 
-    index_nat_to_intseq_le #U8 #SEC 32 (nat_from_bytes_le (as_seq h0 y)) 0;
-    pow2_modulo_modulo_lemma_1 (nat_from_intseq_le (as_seq h0 y)) 1 8
+    index_nat_to_intseq_be #U8 #SEC 32 (nat_from_bytes_be (as_seq h0 y)) 0;
+    pow2_modulo_modulo_lemma_1 (nat_from_intseq_be (as_seq h0 y)) 1 8

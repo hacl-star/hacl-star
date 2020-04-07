@@ -50,16 +50,10 @@ uint64_t Hacl_Impl_P256_DH_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t 
 
 /* SNIPPET_END: Hacl_Impl_P256_DH_ecp256dh_r */
 
-/* SNIPPET_START: Hacl_Impl_ECDSA_secretToPublicU8 */
-
-void Hacl_Impl_ECDSA_secretToPublicU8(uint8_t *result, uint8_t *scalar, uint64_t *tempBuffer);
-
-/* SNIPPET_END: Hacl_Impl_ECDSA_secretToPublicU8 */
-
-/* SNIPPET_START: Hacl_Impl_ECDSA_ecdsa_p256_sha2_sign */
+/* SNIPPET_START: Hacl_Impl_ECDSA_ecdsa_sign_p256_sha2 */
 
 uint64_t
-Hacl_Impl_ECDSA_ecdsa_p256_sha2_sign(
+Hacl_Impl_ECDSA_ecdsa_sign_p256_sha2(
   uint8_t *result,
   uint32_t mLen,
   uint8_t *m,
@@ -67,12 +61,12 @@ Hacl_Impl_ECDSA_ecdsa_p256_sha2_sign(
   uint8_t *k
 );
 
-/* SNIPPET_END: Hacl_Impl_ECDSA_ecdsa_p256_sha2_sign */
+/* SNIPPET_END: Hacl_Impl_ECDSA_ecdsa_sign_p256_sha2 */
 
-/* SNIPPET_START: Hacl_Impl_ECDSA_ecdsa_p256_sha2_384_sign */
+/* SNIPPET_START: Hacl_Impl_ECDSA_ecdsa_sign_p256_blake2 */
 
 uint64_t
-Hacl_Impl_ECDSA_ecdsa_p256_sha2_384_sign(
+Hacl_Impl_ECDSA_ecdsa_sign_p256_blake2(
   uint8_t *result,
   uint32_t mLen,
   uint8_t *m,
@@ -80,38 +74,24 @@ Hacl_Impl_ECDSA_ecdsa_p256_sha2_384_sign(
   uint8_t *k
 );
 
-/* SNIPPET_END: Hacl_Impl_ECDSA_ecdsa_p256_sha2_384_sign */
+/* SNIPPET_END: Hacl_Impl_ECDSA_ecdsa_sign_p256_blake2 */
 
-/* SNIPPET_START: Hacl_Impl_ECDSA_ecdsa_p256_sha2_512_sign */
+/* SNIPPET_START: Hacl_Impl_ECDSA_ecdsa_sign_p256_without_hash */
 
 uint64_t
-Hacl_Impl_ECDSA_ecdsa_p256_sha2_512_sign(
+Hacl_Impl_ECDSA_ecdsa_sign_p256_without_hash(
   uint8_t *result,
-  uint32_t mLen,
   uint8_t *m,
   uint8_t *privKey,
   uint8_t *k
 );
 
-/* SNIPPET_END: Hacl_Impl_ECDSA_ecdsa_p256_sha2_512_sign */
+/* SNIPPET_END: Hacl_Impl_ECDSA_ecdsa_sign_p256_without_hash */
 
-/* SNIPPET_START: Hacl_Impl_ECDSA_ecdsa_signature_blake2 */
-
-uint64_t
-Hacl_Impl_ECDSA_ecdsa_signature_blake2(
-  uint8_t *result,
-  uint32_t mLen,
-  uint8_t *m,
-  uint8_t *privKey,
-  uint8_t *k
-);
-
-/* SNIPPET_END: Hacl_Impl_ECDSA_ecdsa_signature_blake2 */
-
-/* SNIPPET_START: Hacl_Impl_ECDSA_ecdsa_p256_sha2_verification */
+/* SNIPPET_START: Hacl_Impl_ECDSA_ecdsa_verif_p256_sha2 */
 
 bool
-Hacl_Impl_ECDSA_ecdsa_p256_sha2_verification(
+Hacl_Impl_ECDSA_ecdsa_verif_p256_sha2(
   uint32_t mLen,
   uint8_t *m,
   uint8_t *pubKey,
@@ -119,12 +99,12 @@ Hacl_Impl_ECDSA_ecdsa_p256_sha2_verification(
   uint8_t *s
 );
 
-/* SNIPPET_END: Hacl_Impl_ECDSA_ecdsa_p256_sha2_verification */
+/* SNIPPET_END: Hacl_Impl_ECDSA_ecdsa_verif_p256_sha2 */
 
-/* SNIPPET_START: Hacl_Impl_ECDSA_ecdsa_verification_blake2 */
+/* SNIPPET_START: Hacl_Impl_ECDSA_ecdsa_verif_blake2 */
 
 bool
-Hacl_Impl_ECDSA_ecdsa_verification_blake2(
+Hacl_Impl_ECDSA_ecdsa_verif_blake2(
   uint32_t mLen,
   uint8_t *m,
   uint8_t *pubKey,
@@ -132,20 +112,20 @@ Hacl_Impl_ECDSA_ecdsa_verification_blake2(
   uint8_t *s
 );
 
-/* SNIPPET_END: Hacl_Impl_ECDSA_ecdsa_verification_blake2 */
+/* SNIPPET_END: Hacl_Impl_ECDSA_ecdsa_verif_blake2 */
 
-/* SNIPPET_START: Hacl_Impl_ECDSA_ecdsa_verification_blake2hl */
+/* SNIPPET_START: Hacl_Impl_ECDSA_ecdsa_verif_without_hash */
 
 bool
-Hacl_Impl_ECDSA_ecdsa_verification_blake2hl(
-  uint32_t mLen,
-  uint8_t *m,
-  uint8_t *pubKey,
-  uint8_t *r,
-  uint8_t *s
-);
+Hacl_Impl_ECDSA_ecdsa_verif_without_hash(uint8_t *m, uint8_t *pubKey, uint8_t *r, uint8_t *s);
 
-/* SNIPPET_END: Hacl_Impl_ECDSA_ecdsa_verification_blake2hl */
+/* SNIPPET_END: Hacl_Impl_ECDSA_ecdsa_verif_without_hash */
+
+/* SNIPPET_START: Hacl_Impl_ECDSA_verifyQ */
+
+bool Hacl_Impl_ECDSA_verifyQ(uint8_t *pubKey);
+
+/* SNIPPET_END: Hacl_Impl_ECDSA_verifyQ */
 
 /* SNIPPET_START: Hacl_Impl_ECDSA_decompressionNotCompressedForm */
 

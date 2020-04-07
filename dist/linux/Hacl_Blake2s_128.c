@@ -217,31 +217,22 @@ blake2s_update_block(
                                     Lib_IntVector_Intrinsics_vec128 v00 = r13[0U];
                                     Lib_IntVector_Intrinsics_vec128
                                     v1 =
-                                      Lib_IntVector_Intrinsics_vec128_shuffle32(v00,
-                                        (u32)1U,
-                                        ((u32)1U + (u32)1U) % (u32)4U,
-                                        ((u32)1U + (u32)2U) % (u32)4U,
-                                        ((u32)1U + (u32)3U) % (u32)4U);
+                                      Lib_IntVector_Intrinsics_vec128_rotate_right_lanes32(v00,
+                                        (u32)1U);
                                     r13[0U] = v1;
                                     {
                                       Lib_IntVector_Intrinsics_vec128 v01 = r23[0U];
                                       Lib_IntVector_Intrinsics_vec128
                                       v10 =
-                                        Lib_IntVector_Intrinsics_vec128_shuffle32(v01,
-                                          (u32)2U,
-                                          ((u32)2U + (u32)1U) % (u32)4U,
-                                          ((u32)2U + (u32)2U) % (u32)4U,
-                                          ((u32)2U + (u32)3U) % (u32)4U);
+                                        Lib_IntVector_Intrinsics_vec128_rotate_right_lanes32(v01,
+                                          (u32)2U);
                                       r23[0U] = v10;
                                       {
                                         Lib_IntVector_Intrinsics_vec128 v02 = r33[0U];
                                         Lib_IntVector_Intrinsics_vec128
                                         v11 =
-                                          Lib_IntVector_Intrinsics_vec128_shuffle32(v02,
-                                            (u32)3U,
-                                            ((u32)3U + (u32)1U) % (u32)4U,
-                                            ((u32)3U + (u32)2U) % (u32)4U,
-                                            ((u32)3U + (u32)3U) % (u32)4U);
+                                          Lib_IntVector_Intrinsics_vec128_rotate_right_lanes32(v02,
+                                            (u32)3U);
                                         r33[0U] = v11;
                                         {
                                           u32 a0 = (u32)0U;
@@ -350,33 +341,24 @@ blake2s_update_block(
                                                           v0 = r14[0U];
                                                           Lib_IntVector_Intrinsics_vec128
                                                           v12 =
-                                                            Lib_IntVector_Intrinsics_vec128_shuffle32(v0,
-                                                              (u32)3U,
-                                                              ((u32)3U + (u32)1U) % (u32)4U,
-                                                              ((u32)3U + (u32)2U) % (u32)4U,
-                                                              ((u32)3U + (u32)3U) % (u32)4U);
+                                                            Lib_IntVector_Intrinsics_vec128_rotate_right_lanes32(v0,
+                                                              (u32)3U);
                                                           r14[0U] = v12;
                                                           {
                                                             Lib_IntVector_Intrinsics_vec128
                                                             v03 = r2[0U];
                                                             Lib_IntVector_Intrinsics_vec128
                                                             v13 =
-                                                              Lib_IntVector_Intrinsics_vec128_shuffle32(v03,
-                                                                (u32)2U,
-                                                                ((u32)2U + (u32)1U) % (u32)4U,
-                                                                ((u32)2U + (u32)2U) % (u32)4U,
-                                                                ((u32)2U + (u32)3U) % (u32)4U);
+                                                              Lib_IntVector_Intrinsics_vec128_rotate_right_lanes32(v03,
+                                                                (u32)2U);
                                                             r2[0U] = v13;
                                                             {
                                                               Lib_IntVector_Intrinsics_vec128
                                                               v04 = r3[0U];
                                                               Lib_IntVector_Intrinsics_vec128
                                                               v14 =
-                                                                Lib_IntVector_Intrinsics_vec128_shuffle32(v04,
-                                                                  (u32)1U,
-                                                                  ((u32)1U + (u32)1U) % (u32)4U,
-                                                                  ((u32)1U + (u32)2U) % (u32)4U,
-                                                                  ((u32)1U + (u32)3U) % (u32)4U);
+                                                                Lib_IntVector_Intrinsics_vec128_rotate_right_lanes32(v04,
+                                                                  (u32)1U);
                                                               r3[0U] = v14;
                                                             }
                                                           }

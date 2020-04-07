@@ -2220,7 +2220,7 @@ val mt_flush_to_:
                (U32.v i) (U32.v (Ghost.reveal j))))))
    (decreases (U32.v i))
 #restart-solver
-#push-options "--z3rlimit 800 --fuel 1 --ifuel 0 --retry 8"
+#push-options "--z3rlimit 1500 --fuel 1 --ifuel 0 --retry 8"
 let rec mt_flush_to_ hsz lv hs pi i j =
   let hh0 = HST.get () in
 

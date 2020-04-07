@@ -80,14 +80,13 @@ EXPORTS
   Hacl_Curve25519_51_secret_to_public
   Hacl_Curve25519_51_ecdh
   Hacl_Blake2b_32_blake2b
-  Hacl_Impl_ECDSA_secretToPublicU8
-  Hacl_Impl_ECDSA_ecdsa_p256_sha2_sign
-  Hacl_Impl_ECDSA_ecdsa_p256_sha2_384_sign
-  Hacl_Impl_ECDSA_ecdsa_p256_sha2_512_sign
-  Hacl_Impl_ECDSA_ecdsa_signature_blake2
-  Hacl_Impl_ECDSA_ecdsa_p256_sha2_verification
-  Hacl_Impl_ECDSA_ecdsa_verification_blake2
-  Hacl_Impl_ECDSA_ecdsa_verification_blake2hl
+  Hacl_Impl_ECDSA_ecdsa_sign_p256_sha2
+  Hacl_Impl_ECDSA_ecdsa_sign_p256_blake2
+  Hacl_Impl_ECDSA_ecdsa_sign_p256_without_hash
+  Hacl_Impl_ECDSA_ecdsa_verif_p256_sha2
+  Hacl_Impl_ECDSA_ecdsa_verif_blake2
+  Hacl_Impl_ECDSA_ecdsa_verif_without_hash
+  Hacl_Impl_ECDSA_verifyQ
   Hacl_Impl_ECDSA_decompressionNotCompressedForm
   Hacl_Impl_ECDSA_decompressionCompressedForm
   Hacl_Impl_ECDSA_compressionNotCompressedForm
@@ -136,6 +135,7 @@ EXPORTS
   Hacl_Chacha20_Vec32_chacha20_decrypt_32
   Hacl_Blake2b_256_blake2b
   Hacl_Blake2s_32_blake2s
+  Hacl_Blake2bUnkeyed_blake2b_32_u
   Hacl_Blake2s_128_blake2s
   Hacl_Chacha20_Vec128_chacha20_encrypt_128
   Hacl_Chacha20_Vec128_chacha20_decrypt_128

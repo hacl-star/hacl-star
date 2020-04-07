@@ -552,6 +552,37 @@ let ecdsa_verification_blake2 publicKey r s mLen m =
   end
 
 
+val ecdsa_verification_without_hash:
+  publicKey:tuple2 nat nat -> r:nat -> s:nat
+  -> m:lseq uint8 32
+  -> bool
+
+let ecdsa_verification_without_hash publicKey r s m =
+  let publicJacobian = toJacobianCoordinates publicKey in
+  if not (verifyQValidCurvePointSpec publicJacobian) then false
+  else
+    begin
+    if not (checkCoordinates r s) then false
+    else
+      begin
+      
+      let hashNat = nat_from_bytes_be m % prime_p256_order in
+
+      let u1 = nat_to_bytes_be 32 (pow s (prime_p256_order - 2) * hashNat % prime_p256_order) in
+      let u2 = nat_to_bytes_be 32 (pow s (prime_p256_order - 2) * r % prime_p256_order) in
+
+      let pointAtInfinity = (0, 0, 0) in
+      let u1D, _ = montgomery_ladder_spec u1 (pointAtInfinity, basePoint) in
+      let u2D, _ = montgomery_ladder_spec u2 (pointAtInfinity, publicJacobian) in
+
+      let sumPoints = _point_add u1D u2D in
+      let pointNorm = _norm sumPoints in
+      let x, y, z = pointNorm in
+      if Spec.P256.isPointAtInfinity pointNorm then false else x = r
+    end
+  end
+
+
 
 val ecdsa_signature_agile:
   alg: hash_alg {SHA2_256? alg \/ SHA2_384? alg \/ SHA2_512? alg}
@@ -593,6 +624,26 @@ let ecdsa_signature_blake2 mLen m privateKey k =
   let (xN, _, _) = _norm r in
   let hashM = Spec.Blake2.blake2b m 0 Seq.Base.empty 32 in
   let z = nat_from_bytes_be hashM % prime_p256_order in
+  let kFelem = nat_from_bytes_be k in
+  let privateKeyFelem = nat_from_bytes_be privateKey in
+  let resultR = xN % prime_p256_order in
+  let resultS = (z + resultR * privateKeyFelem) * pow kFelem (prime_p256_order - 2) % prime_p256_order in
+    if resultR = 0 || resultS = 0 then
+      resultR, resultS, u64 (pow2 64 - 1)
+    else
+      resultR, resultS, u64 0
+
+
+val ecdsa_signature_without_hash:
+    m:lseq uint8 32
+  -> privateKey:lseq uint8 32
+  -> k:lseq uint8 32
+  -> tuple3 nat nat uint64
+
+let ecdsa_signature_without_hash m privateKey k =
+  let r, _ = montgomery_ladder_spec k ((0,0,0), basePoint) in
+  let (xN, _, _) = _norm r in
+  let z = nat_from_bytes_be m % prime_p256_order in 
   let kFelem = nat_from_bytes_be k in
   let privateKeyFelem = nat_from_bytes_be privateKey in
   let resultR = xN % prime_p256_order in
