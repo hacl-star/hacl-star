@@ -1,39 +1,23 @@
 module Spec.P256.Ladder
 
-open FStar.HyperStack.All
-open FStar.HyperStack
-module ST = FStar.HyperStack.ST
-
 open Lib.IntTypes
-open Lib.Buffer
 
 open Spec.P256.Definitions
-open Spec.P256.MontgomeryMultiplication
-open Spec.P256.MontgomeryMultiplication.PointAdd 
-open Spec.P256.MontgomeryMultiplication.PointDouble
 open Spec.P256
 
-
 open FStar.Math.Lemmas
-open Lib.Sequence
-open Lib.ByteSequence
 
-#reset-options " --z3rlimit 100"
 
-val swap: p: point_prime -> q: point_prime -> Tot (r: tuple2 point_prime point_prime {let pNew, qNew = r in 
-  pNew == q /\ qNew == p})
-
-let swap p q = (q, p)
-
+#set-options " --z3rlimit 100 --fuel 0 --ifuel 0"
 
 val conditional_swap: i: uint64 -> p: point_prime -> q: point_prime -> Tot (r: tuple2 point_prime point_prime
   {
     let pNew, qNew = r in 
-    if uint_v i = 0 then pNew == p /\ qNew == q
+    if uint_v i = 0 then 
+      pNew == p /\ qNew == q
     else
-      let p1, q1 = swap p q in 
-      p1 == pNew /\ q1 == qNew
- }
+      pNew == q /\ qNew == p
+  }
 )
 
 let conditional_swap i p q = 
@@ -54,6 +38,7 @@ val lemma_cswap2_step:
       let p1' = p1 ^. dummy in
       let p2' = p2 ^. dummy in
       if v bit = 1 then p1' == p2 /\ p2' == p1 else p1' == p1 /\ p2' == p2)
+
 let lemma_cswap2_step bit p1 p2 =
   let mask = u64 0 -. bit in
   assert (v bit == 0 ==> v mask == 0);

@@ -173,8 +173,8 @@ val lemma_pow_unfold: a: nat -> b: pos -> Lemma (a * pow a (b - 1) == pow a b)
 let lemma_pow_unfold a b = ()
 
 
-val lemma_mul_ass3: a: nat -> b: nat -> c: nat -> Lemma (a * b * c == a * c * b)
-let lemma_mul_ass3 a b c = ()
+val lemma_mul_associativity_3: a: nat -> b: nat -> c: nat -> Lemma (a * b * c == a * c * b)
+let lemma_mul_associativity_3 a b c = ()
 
 
 val lemma_pow_double: a: nat -> b: nat -> Lemma (pow (a * a) b == pow a (b + b))
@@ -250,11 +250,6 @@ val modulo_distributivity_mult_last_two: a: int -> b: int -> c: int -> d: int ->
 let modulo_distributivity_mult_last_two a b c d e f =
   assert_by_tactic (a * b * c * d * e == a * b * c * (d * e)) canon;
   lemma_mod_mul_distr_r (a * b * c) (d * e) f
-
-
-val lemma_mod_twice : a:int -> p:pos -> Lemma ((a % p) % p == a % p)
-
-let lemma_mod_twice a p = lemma_mod_mod (a % p) a p
 
 
 val lemma_multiplication_to_same_number: a: nat -> b: nat ->c: nat -> prime: pos ->  
@@ -370,21 +365,6 @@ val lemma_brackets : a: int -> b: int -> c: int -> Lemma (a * b * c = a * (b * c
 
 let lemma_brackets a b c = ()
 
-
-val lemma_brackets_l: a: int -> b: int -> c: int -> Lemma (a * b * c = (a * b) * c)
-
-let lemma_brackets_l a b c = ()
-
-
-val lemma_brackets1: a: int -> b: int -> c: int -> Lemma (a * (b * c) = b * (a * c))
-
-let lemma_brackets1 a b c = ()
-
-
-val lemma_brackets5: a: nat -> b: nat -> c: nat -> d: nat -> e: nat -> Lemma (a * b * c * d * e = a * b * c * (d * e))
-
-let lemma_brackets5 a b c d e = ()
-
 val lemma_brackets4 : a: int -> b: int -> c: int -> d: nat -> Lemma (a * b * c * d = a * (b * c * d))
 
 let lemma_brackets4 a b c d = ()
@@ -393,50 +373,11 @@ val lemma_brackets5_0 : a: int -> b: int -> c: int -> d: nat ->e: nat ->  Lemma 
 
 let lemma_brackets5_0 a b c d e= ()
 
-val lemma_brackets5_twice: a: int -> b: int -> c: int -> d: int -> e: int -> Lemma (a * b * c * d * e = (a * d) * (b * e) * c)
-
-let lemma_brackets5_twice a b c d e = 
-  assert_by_tactic (a * b * c * d * e == (a * d) * (b * e) * c) canon
-
-
-val lemma_distr_mult : a: nat -> b: nat -> c: nat -> d: nat -> e: nat -> Lemma (a * b * c * d * e = a * b * d * c * e) 
-
-let lemma_distr_mult a b c d e = ()
-
 
 val lemma_twice_brackets: a: int -> b: int -> c: int -> d: int -> e: int -> f: int -> h: int-> Lemma (
   (a * b * c) * (d * e * f) * h = a * b * c * d * e * f * h)
 
 let lemma_twice_brackets a b c d e f h = ()
-
-
-val lemma_distr_mult7: a: int -> b: int -> c: int -> d: int -> e: int -> f: int -> h: int-> Lemma (
-  a * b * c * d * e * f * h = a * b * d * e * f * h * c)
-
-let lemma_distr_mult7 a b c d e f h = ()
-
-
-val lemma_prime_as_wide_nat: a: felem8 {wide_as_nat4 a < 2 * prime256} -> Lemma (
-  let (t0, t1, t2, t3, t4, t5, t6, t7) = a in 
-  uint_v t7 = 0 /\ uint_v t6 = 0 /\ uint_v t5 = 0 /\ (uint_v t4 = 0 \/ uint_v t4 = 1) /\
-  as_nat4 (t0, t1, t2, t3) + uint_v t4 * pow2 256 = wide_as_nat4 a)
-
-let lemma_prime_as_wide_nat (t0, t1, t2, t3, t4, t5, t6, t7) = 
-   assert_norm(pow2 64 * pow2 64 = pow2 128);
-   assert_norm(pow2 64 * pow2 64 * pow2 64 = pow2 192);
-   assert_norm(pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
-   assert_norm(pow2 64 * pow2 64 * pow2 64  * pow2 64 * pow2 64= pow2 320);
-   assert_norm(pow2 64 * pow2 64 * pow2 64  * pow2 64 * pow2 64 * pow2 64 = pow2 (6 * 64));
-   assert_norm(pow2 64 * pow2 64 * pow2 64  * pow2 64 * pow2 64* pow2 64 * pow2 64 = pow2 (7 * 64));
-   assert_norm (2 * prime256 < 2 * pow2 256);
-   
-   assert(
-     v t0 + v t1 * pow2 64 + v t2 * pow2 64 * pow2 64 +
-     v t3 * pow2 64 * pow2 64 * pow2 64 +
-     v t4 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
-     v t5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
-     v t6 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
-     v t7 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 < 2 * pow2 256)
 
 
 val lemma_mul_nat2: a: nat -> b: nat -> Lemma (a * b >= 0)
@@ -578,7 +519,6 @@ let lemma_eq_funct_ a b =
     lemma_eq_funct a b 
 
 
-(* updates *)
 let mul_lemma_1 (a: nat) (c: nat) (b: pos) : Lemma (requires (a < c)) (ensures (a * b < c * b)) = ()
 
 let mul_lemma_ (a: nat) (b: nat) (c: nat) : Lemma (requires (a < c /\ b < c)) (ensures (a * b < c * c)) = ()
@@ -588,8 +528,6 @@ let mul_lemma_2 (a: nat) (c: nat) (b: pos) : Lemma (requires (a <= c)) (ensures 
 let mul_lemma_3 (a: nat) (c: nat) (b: nat) (d: nat) : Lemma (requires (a < c && b < d)) (ensures (a * b < c * d)) = ()
 
 let mul_lemma_4 (a: nat) (b: nat) (c: nat) (d: nat) : Lemma (requires (a <= c && b <= d)) (ensures (a * b <= c * d)) = ()
-
-let dist_lemma_0 (a: nat) (b: nat) (c: nat) (d: nat) (e: nat) : Lemma (a * b + a * c + a * d + a * e == a * (b + c + d + e)) = ()
 
 
 val lemma_low_level0: o0: nat -> o1: nat -> o2: nat -> o3: nat -> f0: nat  ->  f1: nat -> f2: nat -> 
@@ -623,21 +561,6 @@ let lemma_low_level0 o0 o1 o2 o3 f0 f1 f2 f3 u h2 c1 c2 c3 h3 h4 =
   assert((c3 + h4) * pow2 256 < pow2 320);
   assert(c3 + h4 < pow2 64)
 
-
-val lemma_pow_signature: a: nat -> prime: pos{prime > 3} ->  Lemma 
-  (
-    let p = a % prime in 
-    let p1 = pow p (prime - 2) % prime in 
-    let p2 = pow p1 (prime - 2) % prime in 
-    p2 == pow (pow a (prime - 2)) (prime - 2) % prime
-  )
-
-let lemma_pow_signature a prime = 
-  let p = a % prime in 
-  let p1 = pow p (prime - 2) % prime in 
-    power_distributivity a (prime - 2) prime;
-  let p2 = pow p1 (prime - 2) % prime in 
-    power_distributivity (pow a (prime - 2)) (prime - 2) prime
 
 
 open Lib.Buffer
