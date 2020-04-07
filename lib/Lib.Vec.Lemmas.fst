@@ -351,6 +351,18 @@ let lemma_repeat_blocks_vec #a #b #b_vec #c w blocksize inp f l f_v l_v normaliz
 // Start of proof of map_blocks_multi_vec lemma
 ////////////////////////
 
+let lemma_f_map_ind w blocksize n i k =
+  calc (<) {
+    w * i + k / blocksize;
+    (<) { div_mul_lt blocksize k w }
+    w * i + w;
+    (==) { Math.Lemmas.distributivity_add_right w i 1 }
+    w * (i + 1);
+    (<=) { Math.Lemmas.lemma_mult_le_left w (i + 1) n }
+    w * n;
+    }
+
+
 val normalize_v_map:
     #a:Type
   -> w:size_pos
@@ -378,8 +390,8 @@ let map_blocks_multi_vec_equiv_pre
   (acc_v:map_blocks_a a (w * blocksize) n i)
   : prop
  =
-  Math.Lemmas.cancel_mul_div w blocksize;
-  Math.Lemmas.cancel_mul_mod w blocksize;
+  //Math.Lemmas.cancel_mul_div w blocksize;
+  //Math.Lemmas.cancel_mul_mod w blocksize;
   Math.Lemmas.lemma_mult_le_right w (i + 1) n;
 
   repeat_gen_blocks_map_f #a (w * blocksize) n f_v i b_v acc_v `Seq.equal`
@@ -390,7 +402,7 @@ let map_blocks_multi_vec_equiv_pre
 // map_blocks_multi_acc blocksize (w * i) (w * n) w b_v f acc_v
 
 
-val lemma_map_blocks_multi_vec_equiv_pre_j:
+val lemma_map_blocks_multi_vec_equiv_pre_k:
     #a:Type
   -> w:size_pos
   -> blocksize:size_pos{w * blocksize <= max_size_t}
@@ -404,7 +416,7 @@ val lemma_map_blocks_multi_vec_equiv_pre_j:
   -> acc_v:map_blocks_a a (w * blocksize) n i ->
   Lemma (map_blocks_multi_vec_equiv_pre #a w blocksize n hi_f f f_v i b_v acc_v)
 
-let lemma_map_blocks_multi_vec_equiv_pre_j #a w blocksize n hi_f f f_v i b_v pre acc_v =
+let lemma_map_blocks_multi_vec_equiv_pre_k #a w blocksize n hi_f f f_v i b_v pre acc_v =
   //let lp = repeat_gen_blocks_map_f #a (w * blocksize) n f_v i b_v acc_v in
   //assert (lp == Seq.append acc_v (f_v i b_v));
 
@@ -412,16 +424,18 @@ let lemma_map_blocks_multi_vec_equiv_pre_j #a w blocksize n hi_f f f_v i b_v pre
   let f_sh = f_shift blocksize (w * i) hi_f w f in
 
   let aux (k:nat{k < w * blocksize}) : Lemma (Seq.index (f_v i b_v) k == Seq.index (map_blocks_multi blocksize w w b_v f_sh) k) =
-    let map_k = map_blocks_multi blocksize w w b_v f_sh in
-    index_map_blocks_multi blocksize w w b_v f_sh k;
+    Math.Lemmas.cancel_mul_div w blocksize;
+    let block = get_block_s #a #(w * blocksize) blocksize b_v k in
     let j = k / blocksize in // j < w
     div_mul_lt blocksize k w;
-    Math.Lemmas.lemma_mult_le_right blocksize (j + 1) w;
-    let block = sub b_v (j * blocksize) blocksize in
-    assert (Seq.index map_k k == Seq.index (f_sh j block) (k % blocksize));
-    assert (map_blocks_multi_vec_equiv_pre_k w blocksize n hi_f f f_v i b_v k);
-    assert (Seq.index map_k k == (f_v i b_v).[k]);
-    () in
+
+    calc (==) {
+      Seq.index (map_blocks_multi blocksize w w b_v f_sh) k;
+      (==) { index_map_blocks_multi blocksize w w b_v f_sh k }
+      Seq.index (f_sh j block) (k % blocksize);
+      (==) { assert (map_blocks_multi_vec_equiv_pre_k w blocksize n hi_f f f_v i b_v k) }
+      Seq.index (f_v i b_v) k;
+    } in
 
   calc (==) {
     map_blocks_multi_acc blocksize (w * i) hi_f w b_v f acc_v;
@@ -456,7 +470,7 @@ val lemma_map_blocks_multi_vec_equiv_pre:
      (normalize_v_map #a w blocksize n) i b_v acc_v)
 
 let lemma_map_blocks_multi_vec_equiv_pre #a w blocksize n hi_f f f_v pre i b_v acc_v =
-  lemma_map_blocks_multi_vec_equiv_pre_j #a w blocksize n hi_f f f_v i b_v pre acc_v;
+  lemma_map_blocks_multi_vec_equiv_pre_k #a w blocksize n hi_f f f_v i b_v pre acc_v;
   Math.Lemmas.cancel_mul_div w blocksize;
   Math.Lemmas.cancel_mul_mod w blocksize;
   Math.Lemmas.lemma_mult_le_right w (i + 1) n;
@@ -499,8 +513,59 @@ let lemma_map_blocks_multi_vec #a w blocksize n inp f f_v =
 // End of proof of map_blocks_multi_vec lemma
 ////////////////////////
 
+let map_blocks_vec_equiv_pre
+  (#a:Type)
+  (w:size_pos)
+  (blocksize:size_pos{w * blocksize <= max_size_t})
+  (n:nat)
+  (f:(i:nat{i < w * n + w} -> lseq a blocksize -> lseq a blocksize))
+  (l:(i:nat{i <= w * n + w} -> rem:nat{rem < blocksize} -> lseq a rem -> lseq a rem))
+  (l_v:(i:nat{i <= n} -> rem:nat{rem < w * blocksize} -> lseq a rem -> lseq a rem))
+  (rem:nat{rem < w * blocksize})
+  (b_v:lseq a rem)
+  (acc_v:map_blocks_a a (w * blocksize) n n)
+  : prop
+ =
+  //Math.Lemmas.small_mod rem (w * blocksize);
+  //Math.Lemmas.small_div rem (w * blocksize);
+  repeat_gen_blocks_map_l_length (w * blocksize) n l_v n rem b_v acc_v;
 
-(*)
+  repeat_gen_blocks_map_l (w * blocksize) n l_v n rem b_v acc_v `Seq.equal`
+  map_blocks_acc blocksize (w * n) (w * n + w) b_v f l acc_v
+
+
+val lemma_map_blocks_vec_equiv_pre_k:
+    #a:Type
+  -> w:size_pos
+  -> blocksize:size_pos{w * blocksize <= max_size_t}
+  -> n:nat
+  -> f:(i:nat{i < w * n + w} -> lseq a blocksize -> lseq a blocksize)
+  -> l:(i:nat{i <= w * n + w} -> rem:nat{rem < blocksize} -> lseq a rem -> lseq a rem)
+  -> l_v:(i:nat{i <= n} -> rem:nat{rem < w * blocksize} -> lseq a rem -> lseq a rem)
+  -> rem:nat{rem < w * blocksize}
+  -> b_v:lseq a rem
+  -> pre:squash (forall (rem:nat{rem < w * blocksize}) (b_v:lseq a rem) (k:nat{k < rem}).
+      map_blocks_vec_equiv_pre_k w blocksize n f l l_v rem b_v k)
+  -> acc_v:map_blocks_a a (w * blocksize) n n ->
+  Lemma (map_blocks_vec_equiv_pre w blocksize n f l l_v rem b_v acc_v)
+
+let lemma_map_blocks_vec_equiv_pre_k #a w blocksize n f l l_v rem b_v pre acc_v =
+  //let lp = repeat_gen_blocks_map_l (w * blocksize) n l_v n rem b_v acc_v in
+  //assert (lp == (if rem > 0 then Seq.append acc_v (l_v n rem b_v) else acc_v));
+    
+  let nb = rem / blocksize in
+  let f_sh = f_shift blocksize (w * n) (w * n + w) nb f in
+  let l_sh = l_shift blocksize (w * n) (w * n + w) nb l in
+
+  calc (==) {
+    map_blocks_acc blocksize (w * n) (w * n + w) b_v f l acc_v;
+    (==) { map_blocks_acc_is_map_blocks blocksize (w * n) (w * n + w) b_v f l acc_v}
+    Seq.append acc_v (map_blocks blocksize b_v f_sh l_sh);
+    };  admit()
+
+
+
+
 val lemma_map_blocks_vec_equiv_pre:
     #a:Type
   -> w:size_pos
@@ -509,8 +574,8 @@ val lemma_map_blocks_vec_equiv_pre:
   -> f:(i:nat{i < w * n + w} -> lseq a blocksize -> lseq a blocksize)
   -> l:(i:nat{i <= w * n + w} -> rem:nat{rem < blocksize} -> lseq a rem -> lseq a rem)
   -> l_v:(i:nat{i <= n} -> rem:nat{rem < w * blocksize} -> lseq a rem -> lseq a rem)
-  -> pre:squash (forall (rem:nat{rem < w * blocksize}) (b_v:lseq a rem) (acc_v:map_blocks_a a (w * blocksize) n n).
-      map_blocks_vec_equiv_pre w blocksize n f l l_v rem b_v acc_v)
+  -> pre:squash (forall (rem:nat{rem < w * blocksize}) (b_v:lseq a rem) (k:nat{k < rem}).
+      map_blocks_vec_equiv_pre_k w blocksize n f l l_v rem b_v k)
   -> rem:nat{rem < w * blocksize}
   -> b_v:lseq a rem
   -> acc_v:map_blocks_a a (w * blocksize) n n ->
@@ -524,7 +589,7 @@ val lemma_map_blocks_vec_equiv_pre:
       (normalize_v_map #a w blocksize n) rem b_v acc_v)
 
 let lemma_map_blocks_vec_equiv_pre #a w blocksize n f l l_v pre rem b_v acc_v =
-  assert (map_blocks_vec_equiv_pre w blocksize n f l l_v rem b_v acc_v);
+  lemma_map_blocks_vec_equiv_pre_k #a w blocksize n f l l_v rem b_v pre acc_v;
   Math.Lemmas.small_mod rem (w * blocksize);
   Math.Lemmas.small_div rem (w * blocksize);
   map_blocks_acc_is_repeat_gen_blocks blocksize (w * n) (w * n + w) b_v f l acc_v
