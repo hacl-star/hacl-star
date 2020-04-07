@@ -11,6 +11,7 @@ open FStar.Integers
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
 module HS = FStar.HyperStack
+module ST = FStar.HyperStack.ST
 module B = LowStar.Buffer
 module G = FStar.Ghost
 module S = FStar.Seq
@@ -26,8 +27,23 @@ let uint8 = Lib.IntTypes.uint8
 inline_for_extraction noextract
 let uint32 = Lib.IntTypes.uint32
 
-/// The type class of stateful types.
-/// Needs to obey framing principles. Standard notion of footprint & invariant.
+/// The type class of stateful types: a low-level representation, a high-level
+/// value, and a ``v`` function to switch between the two.
+///
+/// The low-level representation needs to abide by all the important framing
+/// principles to allow clients to efficiently work with a ``stateful index``.
+///
+/// More interestingly, we require some extra operations that arise in the
+/// process of manipulating instances of this type class:
+/// - the ability to allocate on the stack (useful for temporaries)
+/// - the ability to allocate on the heap (useful for retaining a copy of a stateful)
+/// - the ability to copy
+/// - a predicate that captures the fact that the invariant depends only on the
+///   footprint of the stateful, i.e. does not rely on some gcmalloc'd global
+///   state in the global scope.
+///
+/// This may seem like a lot but actually most low-level representations satisfy
+/// these principles!
 inline_for_extraction noextract noeq
 type stateful (index: Type0) =
 | Stateful:
@@ -69,20 +85,72 @@ type stateful (index: Type0) =
       freeable h1 s))
     [ SMTPat (freeable h1 s); SMTPat (B.modifies l h0 h1) ]) ->
 
+  // Stateful operations
+  alloca: (i:index -> StackInline (s i)
+    (requires (fun _ -> True))
+    (ensures (fun h0 s h1 ->
+      invariant #i h1 s /\
+      B.(modifies loc_none h0 h1) /\
+      B.fresh_loc (footprint #i h1 s) h0 h1 /\
+      B.(loc_includes (loc_region_only true (HS.get_tip h1)) (footprint #i h1 s))))) ->
+
+  create_in: (i:index ->
+    r:HS.rid ->
+    ST (s i)
+    (requires (fun h0 ->
+      HyperStack.ST.is_eternal_region r))
+    (ensures (fun h0 s h1 ->
+      invariant #i h1 s /\
+      B.(modifies loc_none h0 h1) /\
+      B.fresh_loc (footprint #i h1 s) h0 h1 /\
+      B.(loc_includes (loc_region_only true r) (footprint #i h1 s)) /\
+      freeable #i h1 s))) ->
+
+  free: (
+    i: G.erased index -> (
+    let i = G.reveal i in
+    s:s i -> ST unit
+    (requires fun h0 ->
+      freeable #i h0 s /\
+      invariant #i h0 s)
+    (ensures fun h0 _ h1 ->
+      B.(modifies (footprint #i h0 s) h0 h1)))) ->
+
+  copy: (
+    i:G.erased index -> (
+    let i = G.reveal i in
+    s_src:s i ->
+    s_dst:s i ->
+    Stack unit
+      (requires (fun h0 ->
+        invariant #i h0 s_src /\
+        invariant #i h0 s_dst /\
+        B.(loc_disjoint (footprint #i h0 s_src) (footprint #i h0 s_dst))))
+      (ensures fun h0 _ h1 ->
+        B.(modifies (footprint #i h0 s_dst) h0 h1) /\
+        footprint #i h0 s_dst == footprint #i h1 s_dst /\
+        (freeable #i h0 s_dst ==> freeable #i h1 s_dst) /\
+        invariant #i h1 s_dst /\
+        v i h1 s_dst == v i h0 s_src))) ->
+
   stateful index
 
 inline_for_extraction noextract
-let stateful_buffer (a: Type) (l: nat): stateful unit =
+let stateful_buffer (a: Type) (l: UInt32.t { UInt32.v l > 0 }) (zero: a): stateful unit =
   Stateful
-    (fun _ -> b:B.buffer a { B.length b == l })
+    (fun _ -> b:B.buffer a { B.len b == l })
     (fun #_ h s -> B.loc_addr_of_buffer s)
     (fun #_ h s -> B.freeable s)
     (fun #_ h s -> B.live h s)
-    (fun _ -> s:S.seq a { S.length s == l })
+    (fun _ -> s:S.seq a { S.length s == UInt32.v l })
     (fun _ h s -> B.as_seq h s)
     (fun #_ h s -> ())
     (fun #_ l s h0 h1 -> ())
     (fun #_ l s h0 h1 -> ())
+    (fun () -> B.alloca zero l)
+    (fun () r -> B.malloc r zero l)
+    (fun _ s -> B.free s)
+    (fun _ s_src s_dst -> B.blit s_src 0ul s_dst 0ul l)
 
 inline_for_extraction noextract
 let stateful_unused: stateful unit =
@@ -96,6 +164,10 @@ let stateful_unused: stateful unit =
     (fun #_ h s -> ())
     (fun #_ l s h0 h1 -> ())
     (fun #_ l s h0 h1 -> ())
+    (fun () -> ())
+    (fun () r -> ())
+    (fun _ s -> ())
+    (fun _ _ _ -> ())
 
 type key_management =
   | Erased
@@ -221,26 +293,6 @@ type block (index: Type0) =
     (fun h0 -> state.invariant #i h0 s)
     (fun h0 i' h1 -> h0 == h1 /\ i' == i))) ->
 
-  alloca: (i:index -> StackInline (state.s i)
-    (requires (fun _ -> True))
-    (ensures (fun h0 s h1 ->
-      state.invariant #i h1 s /\
-      B.(modifies loc_none h0 h1) /\
-      B.fresh_loc (state.footprint #i h1 s) h0 h1 /\
-      B.(loc_includes (loc_region_only true (HS.get_tip h1)) (state.footprint #i h1 s))))) ->
-
-  create_in: (i:index ->
-    r:HS.rid ->
-    ST (state.s i)
-    (requires (fun h0 ->
-      HyperStack.ST.is_eternal_region r))
-    (ensures (fun h0 s h1 ->
-      state.invariant #i h1 s /\
-      B.(modifies loc_none h0 h1) /\
-      B.fresh_loc (state.footprint #i h1 s) h0 h1 /\
-      B.(loc_includes (loc_region_only true r) (state.footprint #i h1 s)) /\
-      state.freeable #i h1 s))) ->
-
 
   init: (i:G.erased index -> (
     let i = G.reveal i in
@@ -320,32 +372,5 @@ type block (index: Type0) =
       state.footprint #i h0 s == state.footprint #i h1 s /\
       B.as_seq h1 dst == finish_s i (optional_t h0 k) (state.v i h0 s) /\
       (state.freeable #i h0 s ==> state.freeable #i h1 s)))) ->
-
-  free: (
-    i: G.erased index -> (
-    let i = G.reveal i in
-    s:state.s i -> ST unit
-    (requires fun h0 ->
-      state.freeable #i h0 s /\
-      state.invariant #i h0 s)
-    (ensures fun h0 _ h1 ->
-      B.(modifies (state.footprint #i h0 s) h0 h1)))) ->
-
-  copy: (
-    i:G.erased index -> (
-    let i = G.reveal i in
-    s_src:state.s i ->
-    s_dst:state.s i ->
-    Stack unit
-      (requires (fun h0 ->
-        state.invariant #i h0 s_src /\
-        state.invariant #i h0 s_dst /\
-        B.(loc_disjoint (state.footprint #i h0 s_src) (state.footprint #i h0 s_dst))))
-      (ensures fun h0 _ h1 ->
-        B.(modifies (state.footprint #i h0 s_dst) h0 h1) /\
-        state.footprint #i h0 s_dst == state.footprint #i h1 s_dst /\
-        (state.freeable #i h0 s_dst ==> state.freeable #i h1 s_dst) /\
-        state.invariant #i h1 s_dst /\
-        state.v i h1 s_dst == state.v i h0 s_src))) ->
 
   block index

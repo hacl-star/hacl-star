@@ -156,7 +156,7 @@ val seen_bounded: #index:Type0 -> c:block index -> i:index -> h:HS.mem -> s:stat
 /// key remains the same (i.e. we specify it fully just like ``seen``).
 ///
 /// Note: annotating the projector because of an interleaving bug.
-val key: #index:Type0 -> c:block index -> i:index -> h:HS.mem -> s:state c i (c.state.s i) -> GTot (c.key.t i)
+val key: #index:Type0 -> c:block index -> i:index -> h:HS.mem -> s:state c i (c.state.s i) -> GTot (c.key.I.t i)
 
 /// Framing
 /// =======

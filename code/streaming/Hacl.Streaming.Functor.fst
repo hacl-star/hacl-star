@@ -88,6 +88,19 @@ let optional_reveal #index
   | Erased -> G.reveal k
   | Runtime -> key.v i h k
 
+let optional_hide #index
+  (#i: index)
+  (#km: key_management)
+  (#key: stateful index)
+  (h: HS.mem)
+  (k: key.s i):
+  optional_key i km key
+=
+  allow_inversion key_management;
+  match km with
+  | Erased -> G.hide (key.v i h k)
+  | Runtime -> k
+
 let freeable #index (c: block index) (i: index) (h: HS.mem) (p: state c i (c.state.s i)) =
   B.freeable p /\ (
   let s = B.deref h p in
@@ -159,15 +172,23 @@ let key #index c i h s =
 
 let frame_invariant #index c i l s h0 h1 =
   let state_t = B.deref h0 s in
-  let State block_state _ _ _ _ = state_t in
-  c.frame_invariant #i l block_state h0 h1
+  let State block_state _ _ _ maybe_key = state_t in
+  c.state.frame_invariant #i l block_state h0 h1;
+  allow_inversion key_management;
+  match c.km with
+  | Erased -> ()
+  | Runtime -> c.key.frame_invariant #i l maybe_key h0 h1
 
 let frame_seen #_ _ _ _ _ _ _ =
   ()
 
 let frame_freeable #index c i l s h0 h1 =
-  let State block_state _ _ _ _ = B.deref h0 s in
-  c.frame_freeable #i l block_state h0 h1
+  let State block_state _ _ _ maybe_key = B.deref h0 s in
+  c.state.frame_freeable #i l block_state h0 h1;
+  allow_inversion key_management;
+  match c.km with
+  | Erased -> ()
+  | Runtime -> c.key.frame_freeable #i l maybe_key h0 h1
 
 /// Stateful API
 /// ============
@@ -187,7 +208,10 @@ let split_at_last_empty #index (c: block index) (i: index): Lemma
 #push-options "--using_facts_from '*,-LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2'"
 let create_in #index c i t k r =
   [@inline_let]
-  let _ = c.invariant_loc_in_footprint #i in
+  let _ = c.state.invariant_loc_in_footprint #i in
+  [@inline_let]
+  let _ = c.key.invariant_loc_in_footprint #i in
+  allow_inversion key_management;
 
   (**) let h0 = ST.get () in
 
@@ -200,32 +224,37 @@ let create_in #index c i t k r =
 
   let block_state = c.create_in i r in
   (**) let h2 = ST.get () in
-  (**) assert (B.fresh_loc (c.footprint #i h2 block_state) h0 h2);
+  (**) assert (B.fresh_loc (c.state.footprint #i h2 block_state) h0 h2);
   (**) B.(modifies_only_not_unused_in loc_none h1 h2);
 
-  let s = State block_state buf 0UL (G.hide S.empty) (G.hide (c.v_key h0 k)) in
+  (*let k: optional_key i c.km c.key =
+    match c.km with
+    | Runtime ->
+       let k = *)
+
+  let s = State block_state buf 0UL (G.hide S.empty) (optional_hide h0 k) in
+  // need to copy the key here... TODO
   (**) assert (B.fresh_loc (footprint_s c i h2 s) h0 h2);
 
   (**) B.loc_unused_in_not_unused_in_disjoint h2;
   let p = B.malloc r s 1ul in
   (**) let h3 = ST.get () in
-  (**) c.frame_invariant B.loc_none block_state h2 h3;
+  (**) c.state.frame_invariant B.loc_none block_state h2 h3;
   (**) B.(modifies_only_not_unused_in loc_none h2 h3);
   (**) assert (B.fresh_loc (B.loc_addr_of_buffer p) h0 h3);
   (**) assert (B.fresh_loc (footprint_s c i h3 s) h0 h3);
-  (**) c.frame_freeable B.loc_none block_state h2 h3;
+  (**) c.state.frame_freeable B.loc_none block_state h2 h3;
   (**) assert (freeable c i h3 p);
-  (**) assert (c.v_key h2 k == c.v_key h3 k);
-  admit ()
+  (**) assert (c.key.v i h2 k == c.key.v h3 k);
 
   c.init (G.hide i) k block_state;
   (**) let h4 = ST.get () in
-  (**) assert (B.fresh_loc (c.footprint #i h4 block_state) h0 h4);
+  (**) assert (B.fresh_loc (c.state.footprint #i h4 block_state) h0 h4);
   (**) assert (B.fresh_loc (B.loc_buffer buf) h0 h4);
-  (**) c.update_multi_zero i (c.v h4 block_state);
+  (**) c.update_multi_zero i (c.state.v h4 block_state);
   (**) split_at_last_empty c i;
   (**) B.modifies_only_not_unused_in B.loc_none h0 h4;
-  (**) assert (c.v h4 block_state == c.init_s i (c.v_key h3 k));
+  (**) assert (c.state.v h4 block_state == c.init_s i (c.key.v h3 k));
 
   (**) let h5 = ST.get () in
   (**) assert (
