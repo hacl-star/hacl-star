@@ -922,49 +922,53 @@ let update #index c i t p data len =
   end
 
 let mk_finish #index c i t p dst =
-  [@inline_let]
-  let _ = c.invariant_loc_in_footprint #i in
-  [@inline_let]
-  let _ = c.frame_freeable #i in
-  [@inline_let]
-  let _ = c.update_multi_associative i in
+  [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
+  [@inline_let] let _ = c.state.frame_freeable #i in
+  [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
+  [@inline_let] let _ = c.key.frame_freeable #i in
+  [@inline_let] let _ = c.update_multi_associative i in
+  [@inline_let] let _ = allow_inversion key_management in
+
 
   let open LowStar.BufferOps in
   let h0 = ST.get () in
-  let State block_state buf_ total_len seen = !*p in
+  let State block_state buf_ total_len seen k' = !*p in
 
   push_frame ();
   let h1 = ST.get () in
-  c.frame_invariant #i B.loc_none block_state h0 h1;
-  assert (c.invariant #i h1 block_state);
+  c.state.frame_invariant #i B.loc_none block_state h0 h1;
+  c.state.frame_freeable #i B.loc_none block_state h0 h1;
+  optional_frame B.loc_none k' h0 h1;
 
   let buf_ = B.sub buf_ 0ul (rest c i total_len) in
   assert (
     let r = rest c i total_len in
     (U64.v total_len - U32.v r) % U32.v (c.block_len i) = 0);
 
-  let tmp_block_state = c.alloca i in
+  let tmp_block_state = c.state.alloca i in
 
   let h2 = ST.get () in
-  assert (B.(loc_disjoint (c.footprint #i h2 tmp_block_state) (c.footprint #i h1 block_state)));
-  c.frame_invariant #i B.(loc_region_only false (HS.get_tip h2)) block_state h1 h2;
-  assert (c.invariant #i h2 block_state);
-  assert (c.invariant #i h2 tmp_block_state);
-  assert (c.footprint #i h2 block_state == c.footprint #i h1 block_state);
+  assert (B.(loc_disjoint (c.state.footprint #i h2 tmp_block_state) (c.state.footprint #i h1 block_state)));
+  B.modifies_only_not_unused_in B.loc_none h1 h2;
+  c.state.frame_invariant #i B.loc_none block_state h1 h2;
+  c.state.frame_freeable #i B.loc_none block_state h1 h2;
+  optional_frame B.loc_none k' h1 h2;
 
-  c.copy (G.hide i) block_state tmp_block_state;
+  c.state.copy (G.hide i) block_state tmp_block_state;
 
   let h3 = ST.get () in
-  assert (c.footprint h2 tmp_block_state == c.footprint h3 tmp_block_state);
-  c.frame_invariant #i (c.footprint h2 tmp_block_state) block_state h2 h3;
-  assert (c.invariant #i h3 block_state);
+  c.state.frame_invariant #i (c.state.footprint h2 tmp_block_state) block_state h2 h3;
+  c.state.frame_freeable #i (c.state.footprint h2 tmp_block_state) block_state h2 h3;
+  optional_frame (c.state.footprint h2 tmp_block_state) k' h2 h3;
+
   c.update_last (G.hide i) tmp_block_state buf_ total_len;
 
   let h4 = ST.get () in
-  c.frame_invariant #i (c.footprint h3 tmp_block_state) block_state h3 h4;
-  assert (c.invariant #i h4 block_state);
+  c.state.frame_invariant #i (c.state.footprint h3 tmp_block_state) block_state h3 h4;
+  c.state.frame_freeable #i (c.state.footprint h3 tmp_block_state) block_state h3 h4;
+  optional_frame (c.state.footprint h3 tmp_block_state) k' h3 h4;
 
-  c.finish (G.hide i) tmp_block_state dst;
+  c.finish (G.hide i) k' tmp_block_state dst;
 
   let h5 = ST.get () in
   begin
@@ -972,35 +976,39 @@ let mk_finish #index c i t p dst =
     let block_length = U32.v (c.block_len i) in
     let n = S.length seen / block_length in
     let blocks, rest_ = S.split seen (n * block_length)  in
+    let k = optional_reveal h0 k' in
     calc (S.equal) {
       B.as_seq h5 dst;
     (S.equal) { }
-      c.finish_s i (c.v h4 tmp_block_state);
+      c.finish_s i k (c.state.v i h4 tmp_block_state);
     (S.equal) { }
-      c.finish_s i (
-        c.update_last_s i (c.v h3 tmp_block_state) (n * block_length)
+      c.finish_s i k (
+        c.update_last_s i (c.state.v i h3 tmp_block_state) (n * block_length)
           (S.slice (B.as_seq h3 buf_) 0 (U32.v (rest c i total_len))));
     (S.equal) { }
-      c.finish_s i (
-        c.update_last_s i (c.v h3 tmp_block_state) (n * block_length)
+      c.finish_s i k (
+        c.update_last_s i (c.state.v i h3 tmp_block_state) (n * block_length)
           (S.slice (B.as_seq h0 buf_) 0 (U32.v (rest c i total_len))));
     (S.equal) { }
-      c.finish_s i (
+      c.finish_s i k (
         c.update_last_s i
-          (c.update_multi_s i (c.init_s i) (S.slice seen 0 (n * block_length)))
+          (c.update_multi_s i (c.init_s i k) (S.slice seen 0 (n * block_length)))
           (n * block_length)
           (S.slice (B.as_seq h0 buf_) 0 (U32.v (rest c i total_len))));
-    (S.equal) { c.spec_is_incremental i seen }
-      c.spec_s i seen;
+    (S.equal) { c.spec_is_incremental i k seen }
+      c.spec_s i k seen;
     }
   end;
 
-  c.frame_invariant #i (B.loc_buffer dst) block_state h4 h5;
-  assert (c.invariant #i h5 block_state);
+  c.state.frame_invariant #i (B.loc_buffer dst) block_state h4 h5;
+  c.state.frame_freeable #i (B.loc_buffer dst) block_state h4 h5;
+  optional_frame (B.loc_buffer dst) k' h4 h5;
 
   pop_frame ();
   let h6 = ST.get () in
-  c.frame_invariant #i B.(loc_region_only false (HS.get_tip h5)) block_state h5 h6;
+  c.state.frame_invariant #i B.(loc_region_only false (HS.get_tip h5)) block_state h5 h6;
+  c.state.frame_freeable #i B.(loc_region_only false (HS.get_tip h5)) block_state h5 h6;
+  optional_frame B.(loc_region_only false (HS.get_tip h5)) k' h5 h6;
   assert (seen_pred c i h6 p `S.equal` (G.reveal seen));
 
   // JP: this is not the right way to prove do this proof. Need to use
@@ -1013,8 +1021,17 @@ let mk_finish #index c i t p dst =
   assert (B.(modifies mloc h0 h6))
 
 let free #index c i t s =
+  let _ = allow_inversion key_management in
   let open LowStar.BufferOps in
-  let State block_state buf _ _ = !*s in
-  c.free i block_state;
+  let State block_state buf _ _ k' = !*s in
+  let h0 = ST.get () in
+  begin match c.km with
+  | Runtime -> c.key.free i k'
+  | Erased -> ()
+  end;
+  let h1 = ST.get () in
+  c.state.frame_freeable #i (optional_footprint h0 k') block_state h0 h1;
+  c.state.frame_invariant #i (optional_footprint h0 k') block_state h0 h1;
+  c.state.free i block_state;
   B.free buf;
   B.free s

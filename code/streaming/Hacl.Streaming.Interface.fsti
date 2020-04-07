@@ -154,7 +154,7 @@ let stateful_buffer (a: Type) (l: UInt32.t { UInt32.v l > 0 }) (zero: a): statef
     (fun _ s_src s_dst -> B.blit s_src 0ul s_dst 0ul l)
 
 inline_for_extraction noextract
-let stateful_unused: stateful unit =
+let stateful_unused (t: Type0): stateful t =
   Stateful
     (fun _ -> unit)
     (fun #_ h s -> B.loc_none)
@@ -165,8 +165,8 @@ let stateful_unused: stateful unit =
     (fun #_ h s -> ())
     (fun #_ l s h0 h1 -> ())
     (fun #_ l s h0 h1 -> ())
-    (fun () -> ())
-    (fun () r -> ())
+    (fun _ -> ())
+    (fun _ r -> ())
     (fun _ s -> ())
     (fun _ _ _ -> ())
 

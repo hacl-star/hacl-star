@@ -292,6 +292,28 @@ val update:
     (requires fun h0 -> update_pre c i s data len h0)
     (ensures fun h0 s' h1 -> update_post c i s data len h0 h1))
 
+inline_for_extraction noextract
+let finish_st
+  #index
+  (c: block index)
+  (i: index)
+  (t: Type0 { t == c.state.s i }) =
+  s:state c i t ->
+  dst:B.buffer uint8 { B.len dst == c.output_len i } ->
+  Stack unit
+    (requires fun h0 ->
+      invariant c i h0 s /\
+      B.live h0 dst /\
+      B.(loc_disjoint (loc_buffer dst) (footprint c i h0 s)))
+    (ensures fun h0 s' h1 ->
+      invariant c i h1 s /\
+      seen c i h0 s == seen c i h1 s /\
+      key c i h1 s == key c i h0 s /\
+      footprint c i h0 s == footprint c i h1 s /\
+      B.(modifies (loc_union (loc_buffer dst) (footprint c i h0 s)) h0 h1) /\ (
+      seen_bounded c i h0 s;
+      S.equal (B.as_seq h1 dst) (c.spec_s i (key c i h0 s) (seen c i h0 s))))
+
 /// A word of caution. Once partially applied to a type class, this function
 /// will generate a stack allocation at type ``state i`` via ``c.alloca``. If
 /// ``state`` is indexed over ``i``, then this function will not compile to C.
@@ -308,21 +330,7 @@ val mk_finish:
   c:block index ->
   i:index ->
   t:Type0 { t == c.state.s i } ->
-  s:state c i t ->
-  dst:B.buffer uint8 { B.len dst == c.output_len i } ->
-  Stack unit
-    (requires fun h0 ->
-      invariant c i h0 s /\
-      B.live h0 dst /\
-      B.(loc_disjoint (loc_buffer dst) (footprint c i h0 s)))
-    (ensures fun h0 s' h1 ->
-      invariant c i h1 s /\
-      seen c i h0 s == seen c i h1 s /\
-      key c i h1 s == key c i h0 s /\
-      footprint c i h0 s == footprint c i h1 s /\
-      B.(modifies (loc_union (loc_buffer dst) (footprint c i h0 s)) h0 h1) /\ (
-      seen_bounded c i h0 s;
-      S.equal (B.as_seq h1 dst) (c.spec_s i (key c i h0 s) (seen c i h0 s))))
+  finish_st c i t
 
 inline_for_extraction noextract
 val free:

@@ -12,7 +12,7 @@ module G = FStar.Ghost
 module S = FStar.Seq
 module U32 = FStar.UInt32
 module U64 = FStar.UInt64
-//module F = Hacl.Streaming.Functor
+module F = Hacl.Streaming.Functor
 
 open LowStar.BufferOps
 open FStar.Mul
@@ -36,21 +36,21 @@ let max_input_length64 a: x:nat { 0 < x /\ x < pow2 64 /\ x <= max_input_length 
   | SHA2_224 | SHA2_256 -> assert_norm (0 < pow2 61 - 1 && pow2 61 < pow2 64); pow2 61 - 1
   | SHA2_384 | SHA2_512 -> assert_norm (pow2 64 < pow2 125 - 1); pow2 64 - 1
 
-let s = s:B.buffer uint32 { B.length s == state_word_length SHA2_256 }
-
 // Local redefinition to have the shape desired by the type class.
 let update_multi_associative (i: hash_alg) =
   Spec.UpdateMulti.update_multi_associative (block_length i) (Spec.Agile.Hash.update i)
 
+open Hacl.Streaming.Interface
+
 inline_for_extraction noextract
-let hacl_sha2_256: Hacl.Streaming.Interface.block unit =
-  let open Hacl.Streaming.Interface in
-  [@inline_let]
-  let b = stateful_buffer (word SHA2_256) (state_word_length SHA2_256) in
+let b = stateful_buffer (word SHA2_256) (Hacl.Hash.Definitions.hash_word_len SHA2_256) (Lib.IntTypes.u32 0)
+
+inline_for_extraction noextract
+let hacl_sha2_256: block unit =
   Block
     Erased
     b
-    stateful_unused
+    (stateful_unused unit)
 
     (fun () -> max_input_length64 SHA2_256)
     (fun () -> Hacl.Hash.Definitions.hash_len SHA2_256)
@@ -67,8 +67,6 @@ let hacl_sha2_256: Hacl.Streaming.Interface.block unit =
     (fun _ _ input -> Spec.Hash.Lemmas.hash_is_hash_incremental SHA2_256 input)
 
     (fun _ _ -> ())
-    (fun () -> (B.alloca (Lib.IntTypes.u32 0) 8ul <: s))
-    (fun () r -> (B.malloc r (Lib.IntTypes.u32 0) 8ul) <: s)
     (fun _ _ s -> Hacl.Hash.SHA2.init_256 s)
     (fun _ s blocks len -> Hacl.Hash.SHA2.update_multi_256 s blocks (len `U32.div` Hacl.Hash.Definitions.(block_len SHA2_256)))
     (fun _ s last total_len ->
@@ -81,8 +79,6 @@ let hacl_sha2_256: Hacl.Streaming.Interface.block unit =
       assert (U64.v prev_len % block_length SHA2_256 = 0);
       Hacl.Hash.SHA2.update_last_256 s prev_len last last_len)
     (fun _ _ s dst -> Hacl.Hash.SHA2.finish_256 s dst)
-    (fun _ (s: s) -> B.free s)
-    (fun _ (src dst: s) -> B.blit src 0ul dst 0ul 8ul)
 
 /// An instantiation of the streaming functor for a specialized hash algorithm.
 ///
@@ -93,8 +89,8 @@ let hacl_sha2_256: Hacl.Streaming.Interface.block unit =
 /// - we don't bother with using the abstraction feature since we verified
 ///   clients like miTLS go through EverCrypt.Hash.Incremental
 
-let create_in = F.create_in hacl_sha2_256 () t
-let init = F.init hacl_sha2_256 (G.hide ()) t
-let update = F.update hacl_sha2_256 (G.hide ()) t
-let finish = F.mk_finish hacl_sha2_256 () t
-let free = F.free hacl_sha2_256 (G.hide ()) t
+let create_in = F.create_in hacl_sha2_256 () (b.s ())
+let init = F.init hacl_sha2_256 (G.hide ()) (b.s ())
+let update = F.update hacl_sha2_256 (G.hide ()) (b.s ())
+let finish = F.mk_finish hacl_sha2_256 () (b.s ())
+let free = F.free hacl_sha2_256 (G.hide ()) (b.s ())

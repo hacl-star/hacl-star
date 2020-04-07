@@ -147,7 +147,3 @@ let poly1305_32: I.block unit =
       let h1 = ST.get () in
       P.reveal_ctx_inv' (as_lib src) (as_lib dst) h0 h1
     )
-
-// Make sure SHA256 update last works
-// Update functor to deal with key
-// Do proof of spec equivalence lemma

@@ -17,31 +17,21 @@ module Hash = EverCrypt.Hash
 
 open FStar.HyperStack.ST
 open Spec.Hash.Definitions
-friend Spec.Agile.Hash
+open Hacl.Streaming.Interface
 
 #set-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
 
-inline_for_extraction noextract
-let evercrypt_hash: Hacl.Streaming.Interface.block Spec.Hash.Definitions.hash_alg =
-  Hacl.Streaming.Interface.Block
+let agile_state: stateful hash_alg =
+  Stateful
     EverCrypt.Hash.state
+
     (fun #i h s -> EverCrypt.Hash.footprint s h)
     EverCrypt.Hash.freeable
     (fun #i h s -> EverCrypt.Hash.invariant s h)
-    EverCrypt.Hash.alg_of_state
+
     Spec.Hash.Definitions.words_state
-    (fun #i h s -> EverCrypt.Hash.repr s h)
-    Hacl.Streaming.SHA256.max_input_length64
-    Hacl.Hash.Definitions.hash_len
-    Hacl.Hash.Definitions.block_len
-    Spec.Agile.Hash.init
-    Spec.Agile.Hash.update_multi
-    Spec.Hash.Incremental.update_last
-    Spec.Hash.PadFinish.finish
-    Spec.Agile.Hash.hash
-    Spec.Hash.Lemmas.update_multi_zero
-    (fun _ _ _ _ -> ()) // relying on the pattern in Hacl.Streaming.SHA256 here
-    Spec.Hash.Lemmas.hash_is_hash_incremental
+    (fun i h s -> EverCrypt.Hash.repr s h)
+
     (fun #i h s -> EverCrypt.Hash.invariant_loc_in_footprint s h)
     (fun #i l s h0 h1 ->
       EverCrypt.Hash.frame_invariant l s h0 h1;
@@ -49,44 +39,48 @@ let evercrypt_hash: Hacl.Streaming.Interface.block Spec.Hash.Definitions.hash_al
     (fun #i l s h0 h1 -> ())
     EverCrypt.Hash.alloca
     EverCrypt.Hash.create_in
-    (fun i -> EverCrypt.Hash.init #i)
-    (fun i -> EverCrypt.Hash.update_multi #i)
-    (fun i -> EverCrypt.Hash.update_last #i)
-    (fun i -> EverCrypt.Hash.finish #i)
     (fun i -> EverCrypt.Hash.free #i)
     (fun i -> EverCrypt.Hash.copy #i)
 
-let state_s a = F.state_s evercrypt_hash a (EverCrypt.Hash.state a)
+inline_for_extraction noextract
+let evercrypt_hash: block hash_alg =
+  Block
+    Erased
+    agile_state
+    (stateful_unused hash_alg)
 
-let freeable #a = F.freeable evercrypt_hash a
+    Hacl.Streaming.SHA2_256.max_input_length64
+    Hacl.Hash.Definitions.hash_len
+    Hacl.Hash.Definitions.block_len
 
-let footprint_s #a = F.footprint_s evercrypt_hash a
+    (fun a _ -> Spec.Agile.Hash.init a)
+    Spec.Agile.Hash.update_multi
+    Spec.Hash.Incremental.update_last
+    (fun a _ -> Spec.Hash.PadFinish.finish a)
 
-let invariant_s #a = F.invariant_s evercrypt_hash a
+    (fun a _ -> Spec.Agile.Hash.hash a)
 
-let invariant_loc_in_footprint #a = F.invariant_loc_in_footprint evercrypt_hash a
+    Spec.Hash.Lemmas.update_multi_zero
+    (fun _ _ _ _ -> ()) // relying on the pattern in Hacl.Streaming.SHA256 here
+    (fun a _ -> Spec.Hash.Lemmas.hash_is_hash_incremental a)
 
-let hashed #a = F.seen evercrypt_hash a
-
-let hash_fits #a = F.seen_bounded evercrypt_hash a
-
-let alg_of_state a = F.index_of_state evercrypt_hash a (EverCrypt.Hash.state a)
-
-let frame_invariant #i = F.frame_invariant evercrypt_hash i
-
-let frame_hashed #i = F.frame_seen evercrypt_hash i
-
-let frame_freeable #a = F.frame_freeable evercrypt_hash a
+    EverCrypt.Hash.alg_of_state
+    (fun i _ -> EverCrypt.Hash.init #i)
+    (fun i -> EverCrypt.Hash.update_multi #i)
+    (fun i -> EverCrypt.Hash.update_last #i)
+    (fun i _ -> EverCrypt.Hash.finish #i)
 
 let create_in a = F.create_in evercrypt_hash a (EverCrypt.Hash.state a)
 
-let init a = F.init evercrypt_hash a (EverCrypt.Hash.state a)
+let init (a: hash_alg) = F.init evercrypt_hash a (EverCrypt.Hash.state a) ()
 
-let update i s data len =
+let update (i: G.erased hash_alg) =
   let _ = allow_inversion Spec.Agile.Hash.hash_alg in
   assert_norm (pow2 61 - 1 < pow2 64);
   assert_norm (pow2 64 < pow2 125 - 1);
-  F.update evercrypt_hash i (EverCrypt.Hash.state i) s data len
+  F.update evercrypt_hash i (EverCrypt.Hash.state i)
+
+let finish_st a = F.finish_st evercrypt_hash a (EverCrypt.Hash.state a)
 
 /// The wrapper pattern, to ensure that the stack-allocated state is properly
 /// monomorphized.
@@ -97,6 +91,9 @@ let finish_sha256: finish_st SHA2_256 = F.mk_finish evercrypt_hash SHA2_256 (Eve
 let finish_sha384: finish_st SHA2_384 = F.mk_finish evercrypt_hash SHA2_384 (EverCrypt.Hash.state SHA2_384)
 let finish_sha512: finish_st SHA2_512 = F.mk_finish evercrypt_hash SHA2_512 (EverCrypt.Hash.state SHA2_512)
 
+let alg_of_state (a: G.erased hash_alg) = F.index_of_state evercrypt_hash a (EverCrypt.Hash.state a)
+
+val finish: a:G.erased hash_alg -> finish_st a
 let finish a s dst =
   let a = alg_of_state a s in
   match a with
@@ -107,4 +104,4 @@ let finish a s dst =
   | SHA2_384 -> finish_sha384 s dst
   | SHA2_512 -> finish_sha512 s dst
 
-let free i = F.free evercrypt_hash i (EverCrypt.Hash.state i)
+let free (i: G.erased hash_alg) = F.free evercrypt_hash i (EverCrypt.Hash.state i)
