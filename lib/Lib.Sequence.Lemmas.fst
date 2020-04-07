@@ -545,6 +545,39 @@ let repeat_blocks_split #a #b #c blocksize len0 inp f l acc0 =
 // End of repeat_blocks-related properties
 ////////////////////////
 
+let map_blocks_multi_extensionality #a blocksize max n inp f g =
+  let a_map = map_blocks_a a blocksize max in
+  let acc0 : a_map 0 = Seq.empty #a in
+
+  calc (==) {
+    map_blocks_multi blocksize max n inp f;
+    (==) { lemma_map_blocks_multi blocksize max n inp f }
+    Loops.repeat_gen n a_map (map_blocks_f #a blocksize max inp f) acc0;
+    (==) { Loops.repeat_gen_def n a_map (map_blocks_f #a blocksize max inp f) acc0 }
+    Loops.repeat_right 0 n a_map (map_blocks_f #a blocksize max inp f) acc0;
+    (==) { repeat_right_extensionality n 0 a_map a_map
+      (map_blocks_f #a blocksize max inp f) (map_blocks_f #a blocksize max inp g) acc0 }
+    Loops.repeat_right 0 n a_map (map_blocks_f #a blocksize max inp g) acc0;
+    (==) { Loops.repeat_gen_def n a_map (map_blocks_f #a blocksize max inp g) acc0 }
+    Loops.repeat_gen n a_map (map_blocks_f #a blocksize max inp g) acc0;
+    (==) { lemma_map_blocks_multi blocksize max n inp g }
+    map_blocks_multi blocksize max n inp g;
+    }
+
+
+let map_blocks_extensionality #a blocksize inp f l_f g l_g =
+  let len = length inp in
+  let n = len / blocksize in
+  let rem = len % blocksize in
+  let blocks = Seq.slice inp 0 (n * blocksize) in
+  let block_l = Seq.slice inp (n * blocksize) len in
+  let acc = map_blocks_multi blocksize n n blocks f in
+
+  lemma_map_blocks blocksize inp f l_f;
+  lemma_map_blocks blocksize inp g l_g;
+  map_blocks_multi_extensionality #a blocksize n n blocks f g
+
+
 let repeat_gen_blocks_map_l_length #a blocksize hi l i rem block_l acc = ()
 
 
@@ -643,82 +676,18 @@ let map_blocks_multi_acc_is_map_blocks_multi #a blocksize mi hi n inp f acc0 =
 let map_blocks_acc_is_map_blocks #a blocksize mi hi inp f l acc0 =
   let len = length inp in
   let n = len / blocksize in
-  let rem = len % blocksize in
+  //let rem = len % blocksize in
   Math.Lemmas.cancel_mul_div n blocksize;
   let blocks = Seq.slice inp 0 (n * blocksize) in
-  let block_l = Seq.slice inp (n * blocksize) len in
+  //let block_l = Seq.slice inp (n * blocksize) len in
   let acc = map_blocks_multi_acc #a blocksize mi hi n blocks f acc0 in
-  let lp = map_blocks_acc blocksize mi hi inp f l acc0 in
+  //let lp = map_blocks_acc blocksize mi hi inp f l acc0 in
 
   let f_sh = f_shift blocksize mi hi n f in
   let l_sh = l_shift blocksize mi hi n l in
-  let rp = map_blocks #a blocksize inp f_sh l_sh in
+  //let rp = map_blocks #a blocksize inp f_sh l_sh in
   lemma_map_blocks #a blocksize inp f_sh l_sh;
   map_blocks_multi_acc_is_map_blocks_multi #a blocksize mi hi n blocks f acc0
-
-
-val map_blocks_multi_extensionality:
-    #a:Type0
-  -> blocksize:size_pos
-  -> max:nat
-  -> n:nat{n <= max}
-  -> inp:seq a{length inp == max * blocksize}
-  -> f:(i:nat{i < max} -> lseq a blocksize -> lseq a blocksize)
-  -> g:(i:nat{i < max} -> lseq a blocksize -> lseq a blocksize) ->
-  Lemma
-    (requires
-      (forall (i:nat{i < max}) (b_v:lseq a blocksize). f i b_v == g i b_v))
-    (ensures
-      map_blocks_multi blocksize max n inp f ==
-      map_blocks_multi blocksize max n inp g)
-
-let map_blocks_multi_extensionality #a blocksize max n inp f g =
-  let a_map = map_blocks_a a blocksize max in
-  let acc0 : a_map 0 = Seq.empty #a in
-
-  calc (==) {
-    map_blocks_multi blocksize max n inp f;
-    (==) { lemma_map_blocks_multi blocksize max n inp f }
-    Loops.repeat_gen n a_map (map_blocks_f #a blocksize max inp f) acc0;
-    (==) { Loops.repeat_gen_def n a_map (map_blocks_f #a blocksize max inp f) acc0 }
-    Loops.repeat_right 0 n a_map (map_blocks_f #a blocksize max inp f) acc0;
-    (==) { repeat_right_extensionality n 0 a_map a_map
-      (map_blocks_f #a blocksize max inp f) (map_blocks_f #a blocksize max inp g) acc0 }
-    Loops.repeat_right 0 n a_map (map_blocks_f #a blocksize max inp g) acc0;
-    (==) { Loops.repeat_gen_def n a_map (map_blocks_f #a blocksize max inp g) acc0 }
-    Loops.repeat_gen n a_map (map_blocks_f #a blocksize max inp g) acc0;
-    (==) { lemma_map_blocks_multi blocksize max n inp g }
-    map_blocks_multi blocksize max n inp g;
-    }
-
-
-val map_blocks_extensionality:
-    #a:Type0
-  -> blocksize:size_pos
-  -> inp:seq a
-  -> f:(block (length inp) blocksize -> lseq a blocksize -> lseq a blocksize)
-  -> l_f:(last (length inp) blocksize -> rem:size_nat{rem < blocksize} -> s:lseq a rem -> lseq a rem)
-  -> g:(block (length inp) blocksize -> lseq a blocksize -> lseq a blocksize)
-  -> l_g:(last (length inp) blocksize -> rem:size_nat{rem < blocksize} -> s:lseq a rem -> lseq a rem) ->
-  Lemma
-    (requires
-     (let n = length inp / blocksize in
-      (forall (i:nat{i < n}) (b_v:lseq a blocksize). f i b_v == g i b_v) /\
-      (forall (rem:nat{rem < blocksize}) (b_v:lseq a rem). l_f n rem b_v == l_g n rem b_v)))
-    (ensures
-      map_blocks blocksize inp f l_f == map_blocks blocksize inp g l_g)
-
-let map_blocks_extensionality #a blocksize inp f l_f g l_g =
-  let len = length inp in
-  let n = len / blocksize in
-  let rem = len % blocksize in
-  let blocks = Seq.slice inp 0 (n * blocksize) in
-  let block_l = Seq.slice inp (n * blocksize) len in
-  let acc = map_blocks_multi blocksize n n blocks f in
-
-  lemma_map_blocks blocksize inp f l_f;
-  lemma_map_blocks blocksize inp g l_g;
-  map_blocks_multi_extensionality #a blocksize n n blocks f g
 
 
 let map_blocks_multi_acc_is_map_blocks_multi0 #a blocksize hi n inp f =
@@ -755,4 +724,22 @@ let map_blocks_acc_is_map_blocks0 #a blocksize hi inp f l =
     map_blocks #a blocksize inp f_sh l_sh;
     (==) { map_blocks_extensionality #a blocksize inp f l f_sh l_sh }
     map_blocks #a blocksize inp f l;
+    }
+
+
+let map_blocks_is_empty #a blocksize hi inp f l =
+  let len = length inp in
+  let nb = len / blocksize in
+  let rem = len % blocksize in
+  let blocks = Seq.slice inp 0 (nb * blocksize) in
+
+  assert (rem == 0);
+  calc (==) {
+    map_blocks blocksize inp f l;
+    (==) { lemma_map_blocks blocksize inp f l }
+    map_blocks_multi #a blocksize nb nb blocks f;
+    (==) { lemma_map_blocks_multi blocksize nb nb blocks f }
+    Loops.repeat_gen nb (map_blocks_a a blocksize nb) (map_blocks_f #a blocksize nb inp f) Seq.empty;
+    (==) { Loops.eq_repeat_gen0 nb (map_blocks_a a blocksize nb) (map_blocks_f #a blocksize nb inp f) Seq.empty }
+    Seq.empty;
     }

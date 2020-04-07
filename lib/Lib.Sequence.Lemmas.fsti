@@ -9,6 +9,38 @@ module Loops = Lib.LoopCombinators
 
 #set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
+let get_block_s
+  (#a:Type)
+  (#len:nat)
+  (blocksize:size_pos)
+  (inp:seq a{length inp == len})
+  (i:nat{i < len / blocksize * blocksize}) :
+  lseq a blocksize
+=
+  calc (<=) {
+    (i / blocksize + 1) * blocksize;
+    (<=) { div_mul_lt blocksize i (len / blocksize) }
+    len / blocksize * blocksize;
+    (<=) { Math.Lemmas.multiply_fractions len blocksize }
+    len;
+  };
+  let j = i / blocksize in
+  let b: lseq a blocksize = Seq.slice inp (j * blocksize) ((j + 1) * blocksize) in
+  b
+
+
+let get_last_s
+  (#a:Type)
+  (#len:nat)
+  (blocksize:size_pos)
+  (inp:seq a{length inp == len}) :
+  lseq a (len % blocksize)
+=
+  let rem = len % blocksize in
+  let b: lseq a rem = Seq.slice inp (len - rem) len in
+  b
+
+
 val repeati_extensionality:
     #a:Type0
   -> n:nat
@@ -371,6 +403,39 @@ val repeat_blocks_split:
 ///  When `acc` = Seq.empty, map_blocks == map_blocks_acc
 ///
 
+val map_blocks_multi_extensionality:
+    #a:Type0
+  -> blocksize:size_pos
+  -> max:nat
+  -> n:nat{n <= max}
+  -> inp:seq a{length inp == max * blocksize}
+  -> f:(i:nat{i < max} -> lseq a blocksize -> lseq a blocksize)
+  -> g:(i:nat{i < max} -> lseq a blocksize -> lseq a blocksize) ->
+  Lemma
+    (requires
+      (forall (i:nat{i < max}) (b_v:lseq a blocksize). f i b_v == g i b_v))
+    (ensures
+      map_blocks_multi blocksize max n inp f ==
+      map_blocks_multi blocksize max n inp g)
+
+
+val map_blocks_extensionality:
+    #a:Type0
+  -> blocksize:size_pos
+  -> inp:seq a
+  -> f:(block (length inp) blocksize -> lseq a blocksize -> lseq a blocksize)
+  -> l_f:(last (length inp) blocksize -> rem:size_nat{rem < blocksize} -> s:lseq a rem -> lseq a rem)
+  -> g:(block (length inp) blocksize -> lseq a blocksize -> lseq a blocksize)
+  -> l_g:(last (length inp) blocksize -> rem:size_nat{rem < blocksize} -> s:lseq a rem -> lseq a rem) ->
+  Lemma
+    (requires
+     (let n = length inp / blocksize in
+      (forall (i:nat{i < n}) (b_v:lseq a blocksize). f i b_v == g i b_v) /\
+      (forall (rem:nat{rem < blocksize}) (b_v:lseq a rem). l_f n rem b_v == l_g n rem b_v)))
+    (ensures
+      map_blocks blocksize inp f l_f == map_blocks blocksize inp g l_g)
+
+
 let repeat_gen_blocks_map_f
   (#a:Type0)
   (blocksize:size_pos)
@@ -536,6 +601,17 @@ val map_blocks_acc_is_map_blocks0:
   Lemma
    (map_blocks_acc #a blocksize 0 hi inp f l Seq.empty `Seq.equal`
     map_blocks #a blocksize inp f l)
+
+
+val map_blocks_is_empty:
+    #a:Type0
+  -> blocksize:size_pos
+  -> hi:nat
+  -> inp:seq a{length inp == 0}
+  -> f:(i:nat{i < hi} -> lseq a blocksize -> lseq a blocksize)
+  -> l:(i:nat{i <= hi} -> rem:nat{rem < blocksize} -> lseq a rem -> lseq a rem) ->
+  Lemma (map_blocks #a blocksize inp f l == Seq.empty)
+
 
 
 (*
