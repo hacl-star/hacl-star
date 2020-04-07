@@ -534,6 +534,56 @@ let map_blocks_vec_equiv_pre
   map_blocks_acc blocksize (w * n) (w * n + w) b_v f l acc_v
 
 
+val lemma_map_blocks_vec_equiv_pre_k_aux:
+    #a:Type
+  -> w:size_pos
+  -> blocksize:size_pos{w * blocksize <= max_size_t}
+  -> n:nat
+  -> f:(i:nat{i < w * n + w} -> lseq a blocksize -> lseq a blocksize)
+  -> l:(i:nat{i <= w * n + w} -> rem:nat{rem < blocksize} -> lseq a rem -> lseq a rem)
+  -> l_v:(i:nat{i <= n} -> rem:nat{rem < w * blocksize} -> lseq a rem -> lseq a rem)
+  -> rem:nat{rem < w * blocksize}
+  -> b_v:lseq a rem
+  -> pre:squash (forall (rem:nat{rem < w * blocksize}) (b_v:lseq a rem) (k:nat{k < rem}).
+      map_blocks_vec_equiv_pre_k w blocksize n f l l_v rem b_v k)
+  -> k:nat{k < rem} ->
+  Lemma
+   (let nb = rem / blocksize in
+    let f_sh = f_shift blocksize (w * n) (w * n + w) nb f in
+    let l_sh = l_shift blocksize (w * n) (w * n + w) nb l in
+    Seq.index (l_v n rem b_v) k == Seq.index (map_blocks blocksize b_v f_sh l_sh) k)
+
+let lemma_map_blocks_vec_equiv_pre_k_aux #a w blocksize n f l l_v rem b_v pre k =
+  let nb = rem / blocksize in
+  let f_sh = f_shift blocksize (w * n) (w * n + w) nb f in
+  let l_sh = l_shift blocksize (w * n) (w * n + w) nb l in
+
+  let j = w * n + k / blocksize in
+  div_mul_lt blocksize k w;
+
+  if k < rem / blocksize * blocksize then begin
+    let block = get_block_s #a #rem blocksize b_v k in
+    calc (==) {
+      Seq.index (map_blocks blocksize b_v f_sh l_sh) k;
+      (==) { index_map_blocks blocksize b_v f_sh l_sh k }
+      Seq.index (f j block) (k % blocksize);
+      (==) { assert (map_blocks_vec_equiv_pre_k w blocksize n f l l_v rem b_v k) }
+      Seq.index (l_v n rem b_v) k;
+    }  end
+  else begin
+    let block_l = get_last_s #_ #rem blocksize b_v in
+    mod_div_lt blocksize k rem;
+    calc (==) {
+      Seq.index (map_blocks blocksize b_v f_sh l_sh) k;
+      (==) { index_map_blocks blocksize b_v f_sh l_sh k }
+      Seq.index (l_sh (rem / blocksize) (rem % blocksize) block_l) (k % blocksize);
+      (==) { div_interval blocksize (rem / blocksize) k }
+      Seq.index (l j (rem % blocksize) block_l) (k % blocksize);
+      (==) { assert (map_blocks_vec_equiv_pre_k w blocksize n f l l_v rem b_v k) }
+      Seq.index (l_v n rem b_v) k;
+    } end
+
+
 val lemma_map_blocks_vec_equiv_pre_k:
     #a:Type
   -> w:size_pos
@@ -549,21 +599,35 @@ val lemma_map_blocks_vec_equiv_pre_k:
   -> acc_v:map_blocks_a a (w * blocksize) n n ->
   Lemma (map_blocks_vec_equiv_pre w blocksize n f l l_v rem b_v acc_v)
 
+
 let lemma_map_blocks_vec_equiv_pre_k #a w blocksize n f l l_v rem b_v pre acc_v =
-  //let lp = repeat_gen_blocks_map_l (w * blocksize) n l_v n rem b_v acc_v in
-  //assert (lp == (if rem > 0 then Seq.append acc_v (l_v n rem b_v) else acc_v));
-    
   let nb = rem / blocksize in
   let f_sh = f_shift blocksize (w * n) (w * n + w) nb f in
   let l_sh = l_shift blocksize (w * n) (w * n + w) nb l in
 
-  calc (==) {
-    map_blocks_acc blocksize (w * n) (w * n + w) b_v f l acc_v;
-    (==) { map_blocks_acc_is_map_blocks blocksize (w * n) (w * n + w) b_v f l acc_v}
-    Seq.append acc_v (map_blocks blocksize b_v f_sh l_sh);
-    };  admit()
-
-
+  if rem = 0 then begin
+    calc (==) {
+      map_blocks_acc blocksize (w * n) (w * n + w) b_v f l acc_v;
+      (==) { map_blocks_acc_is_map_blocks blocksize (w * n) (w * n + w) b_v f l acc_v}
+      Seq.append acc_v (map_blocks blocksize b_v f_sh l_sh);
+      (==) { map_blocks_is_empty blocksize nb b_v f_sh l_sh }
+      Seq.append acc_v Seq.empty;
+      (==) { Seq.Base.append_empty_r acc_v }
+      acc_v;
+      (==) { }
+      repeat_gen_blocks_map_l (w * blocksize) n l_v n rem b_v acc_v;
+      } end
+  else begin
+    calc (==) {
+      map_blocks_acc blocksize (w * n) (w * n + w) b_v f l acc_v;
+      (==) { map_blocks_acc_is_map_blocks blocksize (w * n) (w * n + w) b_v f l acc_v}
+      Seq.append acc_v (map_blocks blocksize b_v f_sh l_sh);
+      (==) { Classical.forall_intro (lemma_map_blocks_vec_equiv_pre_k_aux #a w blocksize n f l l_v rem b_v ());
+             Seq.lemma_eq_intro (l_v n rem b_v) (map_blocks blocksize b_v f_sh l_sh) }
+      Seq.append acc_v (l_v n rem b_v);
+      (==) { }
+      repeat_gen_blocks_map_l (w * blocksize) n l_v n rem b_v acc_v;
+      } end
 
 
 val lemma_map_blocks_vec_equiv_pre:
