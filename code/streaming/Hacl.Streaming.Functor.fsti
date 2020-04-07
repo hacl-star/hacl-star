@@ -5,6 +5,9 @@ module Hacl.Streaming.Functor
 /// compared to the previous streaming module specialized for hashes: the type
 /// of the index, and a type class for that index. Then, as usual, a given value
 /// for the index as a parameter.
+///
+/// This streaming API only allocates its internal state on the heap, no support
+/// for allocation on the stack via StackInline.
 
 #set-options "--max_fuel 0 --max_ifuel 0"
 
@@ -41,11 +44,6 @@ val state_s (#index: Type0) (c: block index) (i: index) (t: Type0 { t == c.state
 /// welcome to instantiate it directly with ``c.state i``.
 let state #index (c: block index) (i: index) (t: Type0 { t == c.state.s i }) = B.pointer (state_s c i t)
 
-val freeable (#index: Type0) (c: block index) (i: index) (h: HS.mem) (p: state c i (c.state.s i)): Type0
-
-let preserves_freeable #index (c: block index) (i: index) (s: state c i (c.state.s i)) (h0 h1: HS.mem): Type0 =
-  freeable c i h0 s ==> freeable c i h1 s
-
 val footprint_s (#index: Type0) (c: block index) (i: index) (h: HS.mem) (s: state_s c i (c.state.s i)): GTot B.loc
 
 let footprint (#index: Type0) (c: block index) (i: index) (m: HS.mem) (s: state c i (c.state.s i)) =
@@ -74,6 +72,7 @@ let loc_includes_union_l_footprint_s
 val invariant_s (#index: Type0) (c: block index) (i: index) (h: HS.mem) (s: state_s c i (c.state.s i)): Type0
 
 let invariant #index (c: block index) (i: index) (m: HS.mem) (s: state c i (c.state.s i)) =
+  B.freeable s /\
   B.live m s /\
   B.(loc_disjoint (loc_addr_of_buffer s) (footprint_s c i m (B.deref m s))) /\
   invariant_s c i m (B.get m s 0)
@@ -189,15 +188,6 @@ val frame_seen: #index:Type0 -> c:block index -> i:index -> l:B.loc -> s:state c
   (ensures (seen c i h0 s == seen c i h1 s))
   [ SMTPat (seen c i h1 s); SMTPat (B.modifies l h0 h1) ]
 
-val frame_freeable: #index:Type0 -> c:block index -> i:index -> l:B.loc -> s:state c i (c.state.s i) -> h0:HS.mem -> h1:HS.mem -> Lemma
-  (requires (
-    invariant c i h0 s /\
-    freeable c i h0 s /\
-    B.loc_disjoint l (footprint c i h0 s) /\
-    B.modifies l h0 h1))
-  (ensures (freeable c i h1 s))
-  [ SMTPat (freeable c i h1 s); SMTPat (B.modifies l h0 h1) ]
-
 
 /// Stateful API
 /// ============
@@ -232,8 +222,7 @@ val create_in:
     key c i h1 s == c.key.v i h0 k /\
     B.(modifies loc_none h0 h1) /\
     B.fresh_loc (footprint c i h1 s) h0 h1 /\
-    B.(loc_includes (loc_region_only true r) (footprint c i h1 s)) /\
-    freeable c i h1 s))
+    B.(loc_includes (loc_region_only true r) (footprint c i h1 s))))
 
 /// Note: this is more like a "reinit" function so that clients can reuse the state.
 inline_for_extraction noextract
@@ -251,7 +240,6 @@ val init:
     B.loc_disjoint (c.key.footprint #i h0 k) (footprint c i h0 s) /\
     invariant c i h0 s))
   (ensures (fun h0 _ h1 ->
-    preserves_freeable c i s h0 h1 /\
     invariant c i h1 s /\
     seen c i h1 s == S.empty /\
     key c i h1 s == c.key.v i h0 k /\
@@ -284,7 +272,6 @@ let update_post
   (len: UInt32.t)
   (h0 h1: HS.mem)
 =
-  preserves_freeable c i s h0 h1 /\
   invariant c i h1 s /\
   B.(modifies (footprint c i h0 s) h0 h1) /\
   footprint c i h0 s == footprint c i h1 s /\
@@ -329,7 +316,6 @@ val mk_finish:
       B.live h0 dst /\
       B.(loc_disjoint (loc_buffer dst) (footprint c i h0 s)))
     (ensures fun h0 s' h1 ->
-      preserves_freeable c i s h0 h1 /\
       invariant c i h1 s /\
       seen c i h0 s == seen c i h1 s /\
       key c i h1 s == key c i h0 s /\
@@ -348,7 +334,6 @@ val free:
   s:state c i t ->
   ST unit
   (requires fun h0 ->
-    freeable c i h0 s /\
     invariant c i h0 s)
   (ensures fun h0 _ h1 ->
     B.modifies (footprint c i h0 s) h0 h1))
