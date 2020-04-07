@@ -19,7 +19,7 @@ open Hacl.Impl.LowLevel
 open Hacl.Impl.P256
 open Hacl.Impl.P256.Signature.Common
 
-#set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
 
 let ecp256dh_i result scalar =
   push_frame();
@@ -46,7 +46,7 @@ let ecp256dh_i result scalar =
 
   lemma_core_0 resultBufferY h0;
   lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h0 resultBufferY);
-  changeEndian_le_be (as_nat h0 resultBufferY);
+  changeEndian_le_be (as_nat h0 resultBufferY); 
   pop_frame();
   flag
 
