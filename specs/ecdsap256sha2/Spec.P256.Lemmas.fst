@@ -486,26 +486,11 @@ let modulo_distributivity_mult2 a b c d =
   }
 
 
-val lemma_minus_distr (a: int) (b: int): Lemma ((a % prime256 - b % prime256) % prime256 = (a - b) %prime256)
+val lemma_minus_distr (a: int) (b: int): Lemma ((a % prime256 - b % prime256) % prime256 = (a - b) % prime256)
 
 let lemma_minus_distr a b = 
   lemma_mod_sub_distr (a % prime256) b prime256;
   lemma_mod_add_distr (- b) a prime256
-
-
-val lemma_mod_sub_distr (a:int) (b:int) (n:pos) : Lemma ((a - b % n) % n = (a - b) % n)
-
-let lemma_mod_sub_distr (a:int) (b:int) (n:pos) =
-  lemma_div_mod b n;
-  distributivity_sub_left 0 (b / n) n;
-  lemma_mod_plus (a - (b % n)) (-(b / n)) n
-
-
-val lemma_mod_add_distr (a:int) (b:int) (n:pos) : Lemma ((a + b % n) % n = (a + b) % n)
-
-let lemma_mod_add_distr (a:int) (b:int) (n:pos) =
-  lemma_div_mod b n;
-  lemma_mod_plus (a + (b % n)) (b / n) n
 
 
 val lemma_xor_copy_cond: a: uint64 -> b: uint64 -> mask: uint64{uint_v mask = 0 \/ uint_v mask = pow2 64 -1} -> Lemma(
