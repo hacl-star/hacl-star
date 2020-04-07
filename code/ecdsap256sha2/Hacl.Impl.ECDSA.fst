@@ -42,12 +42,24 @@ open Hacl.Hash.Definitions
 let ecdsa_sign_p256_sha2 result mLen m privKey k = 
   ecdsa_signature SHA2_256 result mLen m privKey k
 
+let ecdsa_sign_p256_sha384 result mLen m privKey k = 
+  ecdsa_signature SHA2_384 result mLen m privKey k
+
+let ecdsa_sign_p256_sha512 result mLen m privKey k = 
+  ecdsa_signature SHA2_512 result mLen m privKey k
+
 let ecdsa_sign_p256_without_hash result m privKey k = 
   Hacl.Impl.ECDSA.P256SHA256.Signature.Hashless.ecdsa_signature_without_hash result m privKey k
 
 
 let ecdsa_verif_p256_sha2 mLen m pubKey r s = 
   Hacl.Impl.ECDSA.P256SHA256.Verification.Agile.ecdsa_verification SHA2_256 pubKey r s mLen m
+
+  let ecdsa_verif_p256_sha384 mLen m pubKey r s = 
+  Hacl.Impl.ECDSA.P256SHA256.Verification.Agile.ecdsa_verification SHA2_384 pubKey r s mLen m
+
+  let ecdsa_verif_p256_sha512 mLen m pubKey r s = 
+  Hacl.Impl.ECDSA.P256SHA256.Verification.Agile.ecdsa_verification SHA2_512 pubKey r s mLen m
 
 let ecdsa_verif_without_hash m pubKey r s =
   Hacl.Impl.ECDSA.P256SHA256.Verification.Hashless.ecdsa_verification_without_hash pubKey r s m

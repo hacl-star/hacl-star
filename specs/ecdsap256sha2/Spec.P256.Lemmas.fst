@@ -11,8 +11,8 @@ open Spec.P256.Definitions
 open FStar.Tactics 
 open FStar.Tactics.Canon 
 
-#reset-options " --z3rlimit 100" 
 
+#set-options " --z3rlimit 100" 
 
 noextract
 val pow: a:nat -> b:nat -> nat
@@ -22,7 +22,8 @@ let rec pow a b =
   else a * (pow a (b - 1))
 
 noextract
-val modulo_distributivity_mult: a: int -> b: int -> c: pos -> Lemma ((a * b) % c = ((a % c) * (b % c)) % c)
+val modulo_distributivity_mult: a: int -> b: int -> c: pos -> 
+  Lemma ((a * b) % c = ((a % c) * (b % c)) % c)
 
 let modulo_distributivity_mult a b c = 
   lemma_mod_mul_distr_l a b c;
@@ -34,11 +35,13 @@ val power_one: a: nat -> Lemma (pow 1 a == 1)
 let rec power_one a = 
   match a with 
   | 0 -> assert_norm (pow 1 0 == 1)
-  | _ -> power_one (a - 1)
+  | _ -> power_one (a - 1) 
 
 
 noextract
-val pow_plus: a: nat -> b: nat -> c: nat -> Lemma (ensures (pow a b * pow a c = pow a (b + c))) (decreases b)
+val pow_plus: a: nat -> b: nat -> c: nat -> 
+  Lemma (ensures (pow a b * pow a c = pow a (b + c))) 
+  (decreases b)
 
 let rec pow_plus a b c = 
   match b with 
@@ -82,8 +85,8 @@ let rec power_mult a b c =
 
 
 noextract
-val log_and: a: uint64 -> b: uint64{uint_v b == 0 \/ uint_v b == pow2 64 - 1} -> Lemma (
-  if uint_v b = 0 then uint_v (logand a b) == 0 else uint_v (logand a b) == uint_v a)
+val log_and: a: uint64 -> b: uint64{uint_v b == 0 \/ uint_v b == pow2 64 - 1} ->
+  Lemma (if uint_v b = 0 then uint_v (logand a b) == 0 else uint_v (logand a b) == uint_v a)
 
 let log_and a b = 
   logand_lemma b a;
@@ -140,6 +143,7 @@ let modp_inv2_prime (x: int) (p: nat {p > 3}) : Tot (elem p) = modp_inv_prime p 
 
 noextract
 let modp_inv2 (x: nat) : Tot (elem prime256) =
+  assert_norm(prime256 > 3);
   modp_inv2_prime x prime256
 
 

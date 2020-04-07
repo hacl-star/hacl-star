@@ -12,8 +12,8 @@ open FStar.Mul
 
 
 noextract
-let prime256: (a: pos {a < pow2 256}) =
-  assert_norm (pow2 256 - pow2 224 + pow2 192 + pow2 96 -1 > 0);
+let prime256: (a: pos {a > 3 && a < pow2 256}) =
+  assert_norm (pow2 256 - pow2 224 + pow2 192 + pow2 96 -1 > 3);
   assert_norm (pow2 256 - pow2 224 + pow2 192 + pow2 96 -1 < pow2 256);
   pow2 256 - pow2 224 + pow2 192 + pow2 96 -1
 

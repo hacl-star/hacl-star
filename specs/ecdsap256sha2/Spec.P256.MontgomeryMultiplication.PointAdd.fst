@@ -8,7 +8,6 @@ open Spec.P256.Definitions
 open Lib.Sequence
 
 open Spec.P256.MontgomeryMultiplication
-open Lib.Loops
 open FStar.Mul
 open Spec.P256
 
@@ -16,7 +15,7 @@ open Spec.P256.MontgomeryMultiplication.PointDouble
 
 let prime = prime256
 
-#reset-options "--z3rlimit 500"  
+#set-options "--z3rlimit 300 --fuel 0 --ifuel 0"  
 
 noextract       
 val lemma_pointAddToSpecification: 
@@ -112,7 +111,7 @@ let lemma_point_add_0 a b c =
 
 
 val lemma_point_add_1: a: int -> b: int -> c: int -> d: int -> e: int -> Lemma
-  ((((a % prime256) - b) * c - d * (e % prime256)) % prime256 ==((a - b) * c - d * e) % prime256)
+  ((((a % prime256) - b) * c - d * (e % prime256)) % prime256 == ((a - b) * c - d * e) % prime256)
 
 let lemma_point_add_1 a b c d e = 
   lemma_mod_add_distr (- d * (e % prime256)) (((a % prime256) - b) * c) prime256;

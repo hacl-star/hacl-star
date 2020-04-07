@@ -16,75 +16,6 @@ module Def = Spec.Hash.Definitions
 open FStar.Math.Lemmas
 open FStar.Math.Lib
 
-(*
-// Sage scratchpad
-
-def toB(x):
-    for i in range(4):
-        print(((x >> i * 64) % (2 ** 64)))
-
-qx = 0xe424dc61d4bb3cb7ef4344a7f8957a0c5134e16f7a67c074f82e6e12f49abf3c
-qy = 0x970eed7aa2bc48651545949de1dddaf0127e5965ac85d1243d6f60e7dfaee927
-
-primeOrder = 115792089210356248762697446949407573529996955224135760342422259061068512044369
-
-R = 0xbf96b99aa49c705c910be33142017c642ff540c76349b9dab72f981fd9347f4f
-S = 0x17c55095819089c2e03b9cd415abdf12444e323075d98f31920b9e0f57ec871c
-z = 18096356966075357844 + 13937533974375268201 * 2**64 + 2811996616035378163 * 2**128 + 15112091478601597678 * 2**192
-
-u1 = (inverse_mod(S, primeOrder) * z) % primeOrder
-u2 = (inverse_mod(S, primeOrder) * R) % primeOrder
-
-prime = Zmod(Integer(115792089210356248762697446949407573530086143415290314195533631308867097853951))
-p2 = 41058363725152142129326129780047268409114441015993725554835256314039467401291
-
-c = EllipticCurve(prime, [-3, p2])
-basePoint = c(0x6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296, 0x4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5)
-pk = c(qx, qy)
-
-u1g = basePoint * u1
-u2Q = pk * u2
-x1 = (u1g + u2Q).xy()[0]
-print(x1 == R)
-print(Integer(x1) % primeOrder)
-print(Integer(R) % primeOrder)
-
-#############
-
-z = 1330795747694424120 + 14316922599628991228 * 2**64 + 308854472678183009 * 2**128 + 16765196972424757399 * 2 **192
-z = 0x44acf6b7e36c1342c2c5897204fe09504e1e2efb1a900377dbc4e7a6a133ec56
-d = 0x519b423d715f8b581f4fa8ee59f4771a5b44c8130b4e3eacca54a56dda72b464
-k = 0x94a1bbb14b906a61a280f245f9e93c7f3b4a6247824f5d33b9670787642a68de
-r = 0xf3ac8061b514795b8843e3d6629527ed2afd6b1f6a555a7acabb5e6f79c8c2ac
-
-order = 115792089210356248762697446949407573529996955224135760342422259061068512044369
-km = inverse_mod(k, order)
-s = (km * (z + r * d)) % order
-s_ = 0x8bf77819ca05a6b2786c76262bf7371cef97b218e96f175a3ccdda2acc058903
-
-print(hex(s))
-print(s_)
-
-qx = 0x1ccbe91c075fc7f4f033bfa248db8fccd3565de94bbfb12f3c59ff46c271bf83
-qy = 0xce4014c68811f9a21a1fdb2c0e6113e06db7ca93b7404e78dc7ccd5ca89a4ca9
-
-primeOrder = 115792089210356248762697446949407573529996955224135760342422259061068512044369
-
-u1 = (inverse_mod(s, primeOrder) * z) % primeOrder
-u2 = (inverse_mod(s, primeOrder) * r) % primeOrder
-
-prime = Zmod(Integer(115792089210356248762697446949407573530086143415290314195533631308867097853951))
-p2 = 41058363725152142129326129780047268409114441015993725554835256314039467401291
-
-c = EllipticCurve(prime, [-3, p2])
-basePoint = c(0x6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296, 0x4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5)
-pk = c(qx, qy)
-
-u1g = basePoint * u1
-u2Q = pk * u2
-x1 = (u1g + u2Q).xy()[0]
-print(int(x1) % primeOrder == r)
-*)
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
@@ -98,11 +29,6 @@ val lemma_scalar_ith: sc:lbytes 32 -> k:nat{k < 32} -> Lemma
 
 let lemma_scalar_ith sc k =
   index_nat_to_intseq_le #U8 #SEC 32 (nat_from_intseq_le sc) k;
-  //assert (Seq.index (nat_to_intseq_le #U8 #SEC 32 (nat_from_intseq_le sc)) k ==
-  //        uint #U8 #SEC (nat_from_intseq_le sc / pow2 (8 * k) % pow2 8));
-  //assert (
-  //  nat_from_intseq_le sc ==
-  //  nat_from_intseq_le (nat_to_intseq_le #U8 #SEC 32 (nat_from_intseq_le sc)));
   nat_from_intseq_le_inj sc (nat_to_intseq_le 32 (nat_from_intseq_le sc))
 
 
@@ -154,7 +80,6 @@ let _exp_step1 r0 r1 =
 
 
 let swap p q = q, p
-
 
 val conditional_swap: i:uint64 -> p:nat_prime -> q:nat_prime -> tuple2 nat_prime nat_prime
 

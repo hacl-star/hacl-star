@@ -4,10 +4,11 @@ include $(HACL_HOME)/Makefile.common
 UNZIP = unzip -o
 WGET  = wget
 PROB  = 1
+SHAVersion = 0
 
 Spec.ECDSA.Test.Vectors.fst: Spec.ECDSA.Test.Vectors.fstp SigVer.rsp SigGen.txt
 	cat $< > $@
-	python3 cavp_parse.py --prob $(PROB) $(wordlist 2,3,$^) >> $@
+	python3 cavp_parse.py --prob $(PROB) --sha $(SHAVersion) $(wordlist 2,3,$^) >> $@
 
 SigVer.rsp SigGen.txt: 186-4ecdsatestvectors.zip
 	$(UNZIP) $^ 186-4ecdsatestvectors/$@

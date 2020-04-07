@@ -14,20 +14,34 @@ module B = LowStar.Buffer
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
 noextract
-let sigver_vectors_tmp = List.Tot.map
+let sigver_vectors256_tmp = List.Tot.map
   (fun x -> h x.msg, h x.qx, h x.qy, h x.r, h x.s, x.result)
-  sigver_vectors
+  sigver_vectors_sha2_256
 
 noextract
-let siggen_vectors_tmp = List.Tot.map
+let sigver_vectors384_tmp = List.Tot.map
+  (fun x -> h x.msg, h x.qx, h x.qy, h x.r, h x.s, x.result)
+  sigver_vectors_sha2_384
+
+
+noextract
+let siggen_vectors256_tmp = List.Tot.map
   (fun x -> h x.msg', h x.d, h x.qx', h x.qy', h x.k, h x.r', h x.s')
-  siggen_vectors
+  siggen_vectors_sha2_256
 
-%splice[sigver_vectors_low]
-  (lowstarize_toplevel "sigver_vectors_tmp" "sigver_vectors_low")
 
-%splice[siggen_vectors_low]
-  (lowstarize_toplevel "siggen_vectors_tmp" "siggen_vectors_low")
+
+%splice[sigver_vectors256_low]
+  (lowstarize_toplevel "sigver_vectors256_tmp" "sigver_vectors256_low")
+
+%splice[sigver_vectors384_low]
+  (lowstarize_toplevel "sigver_vectors384_tmp" "sigver_vectors384_low")
+
+
+%splice[siggen_vectors256_low]
+  (lowstarize_toplevel "siggen_vectors256_tmp" "siggen_vectors256_low")
+
+
 
 // Cheap alternative to friend Lib.IntTypes needed because Test.Lowstarize uses UInt8.t
 assume val declassify_uint8: squash (uint8 == UInt8.t)
@@ -55,7 +69,7 @@ let compare_and_print b1 b2 len =
   pop_frame();
   b
 
-let test_sigver (vec:sigver_vector) : Stack unit (requires fun _ -> True) (ensures fun _ _ _ -> True) =
+let test_sigver256 (vec:sigver_vector) : Stack unit (requires fun _ -> True) (ensures fun _ _ _ -> True) =
   let max_msg_len = 0 in
   let LB msg_len msg,
       LB qx_len qx,
@@ -79,6 +93,40 @@ let test_sigver (vec:sigver_vector) : Stack unit (requires fun _ -> True) (ensur
     B.blit qx 0ul qxy 0ul 32ul;
     B.blit qy 0ul qxy 32ul 32ul;
     let result' = ecdsa_verif_p256_sha2 msg_len msg qxy r s in
+    if result' = result then ()
+    else
+      begin
+      LowStar.Printf.(printf "FAIL\n" done);
+      C.exit 1l
+      end;
+    pop_frame()
+    end
+
+
+let test_sigver384 (vec:sigver_vector) : Stack unit (requires fun _ -> True) (ensures fun _ _ _ -> True) =
+  let max_msg_len = 0 in
+  let LB msg_len msg,
+      LB qx_len qx,
+      LB qy_len qy,
+      LB r_len r,
+      LB s_len s,
+      result = vec
+  in
+  B.recall msg;
+  B.recall qx;
+  B.recall qy;
+  B.recall r;
+  B.recall s;
+  // We need to check this at runtime because Low*-ized vectors don't carry any refinements
+  if not (qx_len = 32ul && qy_len = 32ul && r_len = 32ul && s_len = 32ul)
+  then C.exit (-1l)
+  else
+    begin
+    push_frame();
+    let qxy = B.alloca (u8 0) 64ul in
+    B.blit qx 0ul qxy 0ul 32ul;
+    B.blit qy 0ul qxy 32ul 32ul;
+    let result' = ecdsa_verif_p256_sha384 msg_len msg qxy r s in
     if result' = result then ()
     else
       begin
@@ -229,8 +277,10 @@ let test_many #a (label:C.String.t)
 
 
 let main () : St C.exit_code =
-  test_many C.String.(!$"[ECDSA SigVer]") test_sigver sigver_vectors_low;
-  test_many C.String.(!$"[ECDSA SigGen]") test_siggen siggen_vectors_low;
+  test_many C.String.(!$"[ECDSA SigVer]") test_sigver256 sigver_vectors256_low;
+  test_many C.String.(!$"[ECDSA SigGen]") test_siggen siggen_vectors256_low;
+  test_many C.String.(!$"[ECDSA SigVer]") test_sigver384 sigver_vectors384_low;
+
   C.EXIT_SUCCESS
 
 #pop-options
