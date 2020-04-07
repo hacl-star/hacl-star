@@ -69,113 +69,111 @@ let len_div_bs_w_n w blocksize n =
 // Start of proof of lemma_repeat_gen_blocks_multi_vec
 ////////////////////////
 
-val repeat_gen_blocks_slice:
-    #inp_t:Type0
-  -> w:size_pos
-  -> blocksize:size_pos{w * blocksize <= max_size_t}
-  -> n:nat
-  -> hi_f:nat{w * n <= hi_f}
-  -> inp:seq inp_t{length inp == n * (w * blocksize)}
-  -> a:(i:nat{i <= hi_f} -> Type)
-  -> a_vec:(i:nat{i <= n} -> Type)
-  -> f:(i:nat{i < hi_f} -> lseq inp_t blocksize -> a i -> a (i + 1))
-  -> f_v:(i:nat{i < n} -> lseq inp_t (w * blocksize) -> a_vec i -> a_vec (i + 1))
-  -> normalize_v:(i:nat{i <= n} -> a_vec i -> a (w * i))
-  -> i:nat{i < n}
-  -> acc_v:a_vec i ->
-  Lemma
-   (let blocksize_v = w * blocksize in
-    Math.Lemmas.lemma_mult_le_right blocksize_v (i + 1) n;
-    let b_v = Seq.slice inp (i * blocksize_v) ((i + 1) * blocksize_v) in
+// val repeat_gen_blocks_slice:
+//     #inp_t:Type0
+//   -> w:size_pos
+//   -> blocksize:size_pos{w * blocksize <= max_size_t}
+//   -> n:nat
+//   -> hi_f:nat{w * n <= hi_f}
+//   -> inp:seq inp_t{length inp == n * (w * blocksize)}
+//   -> a:(i:nat{i <= hi_f} -> Type)
+//   -> a_vec:(i:nat{i <= n} -> Type)
+//   -> f:(i:nat{i < hi_f} -> lseq inp_t blocksize -> a i -> a (i + 1))
+//   -> f_v:(i:nat{i < n} -> lseq inp_t (w * blocksize) -> a_vec i -> a_vec (i + 1))
+//   -> i:nat{i < n}
+//   -> acc:a (w * i) ->
+//   Lemma
+//    (len_div_bs_w_n w blocksize n;
+//     let blocksize_v = w * blocksize in
+//     Math.Lemmas.lemma_mult_le_right blocksize_v (i + 1) n;
+//     let b_v = Seq.slice inp (i * blocksize_v) ((i + 1) * blocksize_v) in
 
-    Math.Lemmas.lemma_mult_le_right w (i + 1) n;
-    let f_rep_s = repeat_gen_blocks_f blocksize (w * i) hi_f w b_v a f in
-    len_div_bs_w_n w blocksize n;
-    let f_rep   = repeat_gen_blocks_f blocksize 0 (w * n) (w * n) inp a f in
+//     Math.Lemmas.lemma_mult_le_right w (i + 1) n;
+//     let f_rep_s = repeat_gen_blocks_f blocksize (w * i) hi_f w b_v a f in
+//     let f_rep   = repeat_gen_blocks_f blocksize 0 (w * n) (w * n) inp a f in
 
-    let acc = normalize_v i acc_v in
-    Loops.repeat_right (w * i) (w * i + w) a f_rep acc ==
-    Loops.repeat_right (w * i) (w * i + w) a f_rep_s acc)
+//     Loops.repeat_right (w * i) (w * i + w) a f_rep acc ==
+//     Loops.repeat_right (w * i) (w * i + w) a f_rep_s acc)
 
-let repeat_gen_blocks_slice #inp_t w blocksize n hi_f inp a a_vec f f_v normalize_v i acc_v =
-  admit()
+// let repeat_gen_blocks_slice #inp_t w blocksize n hi_f inp a a_vec f f_v i acc =
+//   admit()
 
 
-val repeat_gen_blocks_multi_vec_step:
-    #inp_t:Type0
-  -> w:size_pos
-  -> blocksize:size_pos{w * blocksize <= max_size_t}
-  -> n:nat
-  -> hi_f:nat{w * n <= hi_f}
-  -> inp:seq inp_t{length inp == n * (w * blocksize)}
-  -> a:(i:nat{i <= hi_f} -> Type)
-  -> a_vec:(i:nat{i <= n} -> Type)
-  -> f:(i:nat{i < hi_f} -> lseq inp_t blocksize -> a i -> a (i + 1))
-  -> f_v:(i:nat{i < n} -> lseq inp_t (w * blocksize) -> a_vec i -> a_vec (i + 1))
-  -> normalize_v:(i:nat{i <= n} -> a_vec i -> a (w * i))
-  -> pre:squash(forall (i:nat{i < n}) (b_v:lseq inp_t (w * blocksize)) (acc_v:a_vec i).
-      repeat_gen_blocks_multi_vec_equiv_pre w blocksize n hi_f a a_vec f f_v normalize_v i b_v acc_v)
-  -> i:nat{i < n}
-  -> acc_v:a_vec i ->
-  Lemma
-   (let blocksize_v = w * blocksize in
-    len_div_bs_w_n w blocksize n;
+// val repeat_gen_blocks_multi_vec_step:
+//     #inp_t:Type0
+//   -> w:size_pos
+//   -> blocksize:size_pos{w * blocksize <= max_size_t}
+//   -> n:nat
+//   -> hi_f:nat{w * n <= hi_f}
+//   -> inp:seq inp_t{length inp == n * (w * blocksize)}
+//   -> a:(i:nat{i <= hi_f} -> Type)
+//   -> a_vec:(i:nat{i <= n} -> Type)
+//   -> f:(i:nat{i < hi_f} -> lseq inp_t blocksize -> a i -> a (i + 1))
+//   -> f_v:(i:nat{i < n} -> lseq inp_t (w * blocksize) -> a_vec i -> a_vec (i + 1))
+//   -> normalize_v:(i:nat{i <= n} -> a_vec i -> a (w * i))
+//   -> pre:squash(forall (i:nat{i < n}) (b_v:lseq inp_t (w * blocksize)) (acc_v:a_vec i).
+//       repeat_gen_blocks_multi_vec_equiv_pre w blocksize n hi_f a a_vec f f_v normalize_v i b_v acc_v)
+//   -> i:nat{i < n}
+//   -> acc_v:a_vec i ->
+//   Lemma
+//    (let blocksize_v = w * blocksize in
+//     len_div_bs_w_n w blocksize n;
 
-    let f_rep_v = repeat_gen_blocks_f blocksize_v 0 n n inp a_vec f_v in
-    let f_rep   = repeat_gen_blocks_f blocksize 0 (w * n) (w * n) inp a f in
-    Math.Lemmas.lemma_mult_le_right w (i + 1) n;
+//     let f_rep_v = repeat_gen_blocks_f blocksize_v 0 n n inp a_vec f_v in
+//     let f_rep   = repeat_gen_blocks_f blocksize 0 (w * n) (w * n) inp a f in
+//     Math.Lemmas.lemma_mult_le_right w (i + 1) n;
 
-    normalize_v (i + 1) (f_rep_v i acc_v) ==
-    Loops.repeat_right (w * i) (w * i + w) a f_rep (normalize_v i acc_v))
+//     normalize_v (i + 1) (f_rep_v i acc_v) ==
+//     Loops.repeat_right (w * i) (w * i + w) a f_rep (normalize_v i acc_v))
 
-let repeat_gen_blocks_multi_vec_step #inp_t w blocksize n hi_f inp a a_vec f f_v normalize_v pre i acc_v = admit();
-  let blocksize_v = w * blocksize in
-  len_div_bs_w_n w blocksize n;
+// let repeat_gen_blocks_multi_vec_step #inp_t w blocksize n hi_f inp a a_vec f f_v normalize_v pre i acc_v = admit();
+//   let blocksize_v = w * blocksize in
+//   len_div_bs_w_n w blocksize n;
 
-  let f_rep_v = repeat_gen_blocks_f blocksize_v 0 n n inp a_vec f_v in
-  let f_rep   = repeat_gen_blocks_f blocksize 0 (w * n) (w * n) inp a f in
-  Math.Lemmas.lemma_mult_le_right blocksize_v (i + 1) n;
-  let b_v = Seq.slice inp (i * blocksize_v) ((i + 1) * blocksize_v) in
+//   let f_rep_v = repeat_gen_blocks_f blocksize_v 0 n n inp a_vec f_v in
+//   let f_rep   = repeat_gen_blocks_f blocksize 0 (w * n) (w * n) inp a f in
+//   Math.Lemmas.lemma_mult_le_right blocksize_v (i + 1) n;
+//   let b_v = Seq.slice inp (i * blocksize_v) ((i + 1) * blocksize_v) in
 
-  Math.Lemmas.lemma_mult_le_right w (i + 1) n;
-  Math.Lemmas.cancel_mul_mod w blocksize;
-  Math.Lemmas.cancel_mul_div w blocksize;
+//   Math.Lemmas.lemma_mult_le_right w (i + 1) n;
+//   Math.Lemmas.cancel_mul_mod w blocksize;
+//   Math.Lemmas.cancel_mul_div w blocksize;
 
-  calc (==) {
-    normalize_v (i + 1) (f_rep_v i acc_v);
-    (==) { }
-    normalize_v (i + 1) (f_v i b_v acc_v);
-    (==) { assert (repeat_gen_blocks_multi_vec_equiv_pre w blocksize n hi_f a a_vec f f_v normalize_v i b_v acc_v) }
-    repeat_gen_blocks_multi blocksize (w * i) hi_f w b_v a f (normalize_v i acc_v);
-    (==) { lemma_repeat_gen_blocks_multi blocksize (w * i) hi_f w b_v a f (normalize_v i acc_v) }
-    Loops.repeat_right (w * i) (w * i + w) a (repeat_gen_blocks_f blocksize (w * i) hi_f w b_v a f) (normalize_v i acc_v);
-    (==) { repeat_gen_blocks_slice #inp_t w blocksize n hi_f inp a a_vec f f_v normalize_v i acc_v }
-    Loops.repeat_right (w * i) (w * i + w) a f_rep (normalize_v i acc_v);
-  }
+//   calc (==) {
+//     normalize_v (i + 1) (f_rep_v i acc_v);
+//     (==) { }
+//     normalize_v (i + 1) (f_v i b_v acc_v);
+//     (==) { assert (repeat_gen_blocks_multi_vec_equiv_pre w blocksize n hi_f a a_vec f f_v normalize_v i b_v acc_v) }
+//     repeat_gen_blocks_multi blocksize (w * i) hi_f w b_v a f (normalize_v i acc_v);
+//     (==) { lemma_repeat_gen_blocks_multi blocksize (w * i) hi_f w b_v a f (normalize_v i acc_v) }
+//     Loops.repeat_right (w * i) (w * i + w) a (repeat_gen_blocks_f blocksize (w * i) hi_f w b_v a f) (normalize_v i acc_v);
+//     (==) { repeat_gen_blocks_slice #inp_t w blocksize n hi_f inp a a_vec f f_v normalize_v i acc_v }
+//     Loops.repeat_right (w * i) (w * i + w) a f_rep (normalize_v i acc_v);
+//   }
 
 
-let lemma_repeat_gen_blocks_multi_vec #inp_t w blocksize n hi_f inp a a_vec f f_v normalize_v acc_v0 = admit();
-  let len = length inp in
-  let blocksize_v = w * blocksize in
+let lemma_repeat_gen_blocks_multi_vec #inp_t w blocksize n hi_f inp a a_vec f f_v normalize_v acc_v0 = admit()
+  // let len = length inp in
+  // let blocksize_v = w * blocksize in
 
-  let nb = len / blocksize in
-  len_div_bs_w_n w blocksize n;
+  // let nb = len / blocksize in
+  // len_div_bs_w_n w blocksize n;
 
-  let f_rep_v = repeat_gen_blocks_f blocksize_v 0 n n inp a_vec f_v in
-  let f_rep   = repeat_gen_blocks_f blocksize 0 (w * n) (w * n) inp a f in
+  // let f_rep_v = repeat_gen_blocks_f blocksize_v 0 n n inp a_vec f_v in
+  // let f_rep   = repeat_gen_blocks_f blocksize 0 (w * n) (w * n) inp a f in
 
-  calc (==) {
-    normalize_v n (repeat_gen_blocks_multi blocksize_v 0 n n inp a_vec f_v acc_v0);
-    (==) { lemma_repeat_gen_blocks_multi blocksize_v 0 n n inp a_vec f_v acc_v0 }
-    normalize_v n (Loops.repeat_right 0 n a_vec f_rep_v acc_v0);
-    (==) { Classical.forall_intro_2 (repeat_gen_blocks_multi_vec_step w blocksize n hi_f inp a a_vec f f_v normalize_v ());
-           lemma_repeat_gen_vec w n a a_vec normalize_v f_rep f_rep_v acc_v0 }
-    Loops.repeat_right 0 (w * n) a f_rep (normalize_v 0 acc_v0);
-    (==) { lemma_repeat_gen_blocks_multi blocksize 0 (w * n) (w * n) inp a f (normalize_v 0 acc_v0) }
-    repeat_gen_blocks_multi blocksize 0 (w * n) (w * n) inp a f (normalize_v 0 acc_v0);
-    (==) { repeat_gen_blocks_multi_extensionality blocksize 0 (w * n) hi_f (w * n) inp a a f f (normalize_v 0 acc_v0) }
-    repeat_gen_blocks_multi blocksize 0 hi_f (w * n) inp a f (normalize_v 0 acc_v0);
-  }
+  // calc (==) {
+  //   normalize_v n (repeat_gen_blocks_multi blocksize_v 0 n n inp a_vec f_v acc_v0);
+  //   (==) { lemma_repeat_gen_blocks_multi blocksize_v 0 n n inp a_vec f_v acc_v0 }
+  //   normalize_v n (Loops.repeat_right 0 n a_vec f_rep_v acc_v0);
+  //   (==) { Classical.forall_intro_2 (repeat_gen_blocks_multi_vec_step w blocksize n hi_f inp a a_vec f f_v normalize_v ());
+  //          lemma_repeat_gen_vec w n a a_vec normalize_v f_rep f_rep_v acc_v0 }
+  //   Loops.repeat_right 0 (w * n) a f_rep (normalize_v 0 acc_v0);
+  //   (==) { lemma_repeat_gen_blocks_multi blocksize 0 (w * n) (w * n) inp a f (normalize_v 0 acc_v0) }
+  //   repeat_gen_blocks_multi blocksize 0 (w * n) (w * n) inp a f (normalize_v 0 acc_v0);
+  //   (==) { repeat_gen_blocks_multi_extensionality_zero blocksize 0 (w * n) hi_f (w * n) inp a a f f (normalize_v 0 acc_v0) }
+  //   repeat_gen_blocks_multi blocksize 0 hi_f (w * n) inp a f (normalize_v 0 acc_v0);
+  // }
 
 
 ////////////////////////
@@ -265,17 +263,22 @@ let lemma_repeat_blocks_multi_vec #a #b #b_vec w blocksize inp f f_v normalize_v
   let nw = len / blocksize_v in
   len_div_bs_w w blocksize len;
   assert (nw * w == len / blocksize);
+  Math.Lemmas.cancel_mul_mod (nw * w) blocksize;
+  Math.Lemmas.cancel_mul_div (nw * w) blocksize;
+
+  let acc0 = normalize_v acc_v0 in
 
   calc (==) {
     normalize_v (repeat_blocks_multi #a #b_vec blocksize_v inp f_v acc_v0);
     (==) { repeat_blocks_multi_is_repeat_gen_blocks_multi nw blocksize_v inp f_v acc_v0 }
     normalize_v (repeat_gen_blocks_multi blocksize_v 0 nw nw inp (Loops.fixed_a b_vec) (Loops.fixed_i f_v) acc_v0);
-    (==) { Classical.forall_intro_3 (lemma_repeat_blocks_multi_vec_equiv_pre w blocksize nw (w * nw) f f_v normalize_v ());
-           lemma_repeat_gen_blocks_multi_vec w blocksize nw (w * nw) inp (Loops.fixed_a b) (Loops.fixed_a b_vec)
-              (Loops.fixed_i f) (Loops.fixed_i f_v) (Loops.fixed_i normalize_v) acc_v0 }
-    repeat_gen_blocks_multi blocksize 0 (nw * w) (nw * w) inp (Loops.fixed_a b) (Loops.fixed_i f) (normalize_v acc_v0);
-    (==) { repeat_blocks_multi_is_repeat_gen_blocks_multi (nw * w) blocksize inp f (normalize_v acc_v0) }
-    repeat_blocks_multi blocksize inp f (normalize_v acc_v0);
+    (==) {
+      Classical.forall_intro_3 (lemma_repeat_blocks_multi_vec_equiv_pre w blocksize nw (w * nw) f f_v normalize_v ());
+      lemma_repeat_gen_blocks_multi_vec w blocksize nw (w * nw) inp (Loops.fixed_a b) (Loops.fixed_a b_vec)
+	(Loops.fixed_i f) (Loops.fixed_i f_v) (Loops.fixed_i normalize_v) acc_v0 }
+    repeat_gen_blocks_multi blocksize 0 (nw * w) (nw * w) inp (Loops.fixed_a b) (Loops.fixed_i f) acc0;
+    (==) { repeat_blocks_multi_is_repeat_gen_blocks_multi (nw * w) blocksize inp f acc0 }
+    repeat_blocks_multi blocksize inp f acc0;
     }
 
 
@@ -303,26 +306,24 @@ val lemma_repeat_blocks_vec_equiv_pre:
      (Loops.fixed_i normalize_v) rem b_v acc_v)
 
 let lemma_repeat_blocks_vec_equiv_pre #a #b #b_vec #c w blocksize n f l l_v normalize_v pre rem b_v acc_v =
-  assert (repeat_blocks_vec_equiv_pre w blocksize f l l_v normalize_v rem b_v acc_v);
-  //assert (l_v rem b_v acc_v == repeat_blocks blocksize b_v f l (normalize_v acc_v));
-  let acc0 = normalize_v acc_v in
   let nb_rem = rem / blocksize in
-  let blocks = Seq.slice b_v 0 (nb_rem * blocksize) in
-  let last = Seq.slice b_v (nb_rem * blocksize) rem in
-  Math.Lemmas.cancel_mul_div nb_rem blocksize;
-  Math.Lemmas.cancel_mul_div nb_rem blocksize;
   div_mul_lt blocksize rem w;
+  assert (nb_rem < w);
+
+  let acc0 = normalize_v acc_v in
 
   calc (==) {
+    Loops.fixed_i l_v n rem b_v acc_v;
+    (==) { }
+    l_v rem b_v acc_v;
+    (==) { assert (repeat_blocks_vec_equiv_pre w blocksize f l l_v normalize_v rem b_v acc_v) }
     repeat_blocks blocksize b_v f l acc0;
-    (==) { repeat_blocks_is_repeat_gen_blocks #a #b #c nb_rem blocksize b_v f l acc0 }
+    (==) { repeat_blocks_is_repeat_gen_blocks nb_rem blocksize b_v f l acc0 }
     repeat_gen_blocks blocksize 0 nb_rem b_v (Loops.fixed_a b) (Loops.fixed_i f) (Loops.fixed_i l) acc0;
-    (==) { lemma_repeat_gen_blocks blocksize 0 nb_rem b_v (Loops.fixed_a b) (Loops.fixed_i f) (Loops.fixed_i l) acc0 }
-    l (rem % blocksize) last (repeat_gen_blocks_multi blocksize 0 nb_rem nb_rem blocks (Loops.fixed_a b) (Loops.fixed_i f) acc0);
-    (==) { repeat_gen_blocks_multi_extensionality_zero blocksize (w * n) (w * n + w) nb_rem nb_rem blocks
-           (Loops.fixed_a b) (Loops.fixed_a b) (Loops.fixed_i f) (Loops.fixed_i f) acc0 }
-    l (rem % blocksize) last (repeat_gen_blocks_multi blocksize (w * n) (w * n + w) nb_rem blocks (Loops.fixed_a b) (Loops.fixed_i f) acc0);
-    (==) { lemma_repeat_gen_blocks blocksize (w * n) (w * n + w) b_v (Loops.fixed_a b) (Loops.fixed_i f) (Loops.fixed_i l) acc0  }
+    (==) { repeat_gen_blocks_extensionality_zero blocksize (w * n) (w * n + w) nb_rem nb_rem b_v
+           (Loops.fixed_a b) (Loops.fixed_a b)
+	   (Loops.fixed_i f) (Loops.fixed_i l)
+	   (Loops.fixed_i f) (Loops.fixed_i l) acc0 }
     repeat_gen_blocks blocksize (w * n) (w * n + w) b_v (Loops.fixed_a b) (Loops.fixed_i f) (Loops.fixed_i l) acc0;
     }
 
@@ -401,7 +402,7 @@ let lemma_map_blocks_multi_vec #a w blocksize n inp f f_v =
 
   calc (==) {
     map_blocks_multi blocksize_v n n inp f_v;
-    (==) { map_blocks_multi_is_map_blocks_multi_acc blocksize_v n inp f_v }
+    (==) { map_blocks_multi_acc_is_map_blocks_multi0 blocksize_v n n inp f_v }
     map_blocks_multi_acc blocksize_v 0 n n inp f_v Seq.empty;
     (==) { map_blocks_multi_acc_is_repeat_gen_blocks_multi blocksize_v 0 n n inp f_v Seq.empty }
     repeat_gen_blocks_multi blocksize_v 0 n n inp
@@ -418,8 +419,8 @@ let lemma_map_blocks_multi_vec #a w blocksize n inp f f_v =
      (repeat_gen_blocks_map_f blocksize (w * n) f) Seq.empty;
     (==) { map_blocks_multi_acc_is_repeat_gen_blocks_multi blocksize 0 (w * n) (w * n) inp f Seq.empty }
     map_blocks_multi_acc blocksize 0 (w * n) (w * n) inp f Seq.empty;
-    (==) { map_blocks_multi_is_map_blocks_multi_acc blocksize (w * n) inp f }
-     map_blocks_multi blocksize (w * n) (w * n) inp f;
+    (==) { map_blocks_multi_acc_is_map_blocks_multi0 blocksize (w * n) (w * n) inp f }
+    map_blocks_multi blocksize (w * n) (w * n) inp f;
   }
 
 
@@ -487,5 +488,5 @@ let lemma_map_blocks_vec #a w blocksize inp n f l f_v l_v =
     map_blocks_acc blocksize 0 (w * n + w) inp f l Seq.empty;
   };
 
-  map_blocks_is_map_blocks_acc blocksize_v inp n f_v l_v;
-  map_blocks_is_map_blocks_acc blocksize inp (w * n + w) f l
+  map_blocks_acc_is_map_blocks0 blocksize_v n inp f_v l_v;
+  map_blocks_acc_is_map_blocks0 blocksize (w * n + w) inp f l

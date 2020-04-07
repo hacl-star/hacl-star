@@ -514,6 +514,30 @@ val map_blocks_acc_is_map_blocks:
     Seq.append acc0 (map_blocks #a blocksize inp (f_shift blocksize mi hi n f) (l_shift blocksize mi hi n l)))
 
 
+val map_blocks_multi_acc_is_map_blocks_multi0:
+    #a:Type0
+  -> blocksize:size_pos
+  -> hi:nat
+  -> n:nat{n <= hi}
+  -> inp:seq a{length inp == n * blocksize}
+  -> f:(i:nat{i < hi} -> lseq a blocksize -> lseq a blocksize) ->
+  Lemma
+   (map_blocks_multi_acc blocksize 0 hi n inp f Seq.empty `Seq.equal`
+    map_blocks_multi blocksize n n inp f)
+
+
+val map_blocks_acc_is_map_blocks0:
+    #a:Type0
+  -> blocksize:size_pos
+  -> hi:nat
+  -> inp:seq a{length inp / blocksize <= hi}
+  -> f:(i:nat{i < hi} -> lseq a blocksize -> lseq a blocksize)
+  -> l:(i:nat{i <= hi} -> rem:nat{rem < blocksize} -> lseq a rem -> lseq a rem) ->
+  Lemma
+   (map_blocks_acc #a blocksize 0 hi inp f l Seq.empty `Seq.equal`
+    map_blocks #a blocksize inp f l)
+
+
 (*
 //Now it's possible to prove the following lemma:
 
