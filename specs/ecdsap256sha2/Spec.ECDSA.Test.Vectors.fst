@@ -724,5 +724,5 @@ type vec_SigGen = {
     k    = "dac00c462bc85bf39c31b5e01df33e2ec1569e6efcb334bf18f0951992ac6160";
     r'   = "6e7ff8ec7a5c48e0877224a9fa8481283de45fcbee23b4c252b0c622442c26ad";
     s'   = "3dfac320b9c873318117da6bd856000a392b815659e5aa2a6a1852ccb2501df3";
-  }; 
+  };
 ]
