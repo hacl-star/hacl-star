@@ -108,7 +108,7 @@ POLY_BUNDLE=-bundle 'Hacl.Poly1305_32=Hacl.Impl.Poly1305.Field32xN_32' \
   -bundle 'Hacl.Poly1305_128=Hacl.Impl.Poly1305.Field32xN_128' \
   -bundle 'Hacl.Poly1305_256=Hacl.Impl.Poly1305.Field32xN_256'
 NACLBOX_BUNDLE=-bundle Hacl.NaCl=Hacl.Impl.SecretBox,Hacl.Impl.Box
-ECDSA_BUNDLE= -static-header Hacl.Impl.Blake2.Constants -bundle Hacl.Impl.ECDSA=Hacl.Impl.ECDSA,Hacl.Impl.ECDSA.*,Hacl.Impl.P256.*,Hacl.Hash.SHA2,Hacl.Hash.Core.SHA2,Hacl.Hash.Core.SHA2.Constants,Hacl.Hash.Definitions,Hacl.Impl.P256,Hacl.Spec.P256.*,Hacl.Impl.SolinasReduction,Hacl.Impl.LowLevel,Hacl.Impl.LowLevel.RawCmp[rename=Hacl_ECDSA] $(BLAKE2_BUNDLE) -bundle Hacl.Blake2bUnkeyed=Hacl.Blake2bUnkeyed[rename=Hacl_ECDSA_Blake2U]
+ECDSA_BUNDLE= -bundle Hacl.Impl.ECDSA=Hacl.Impl.ECDSA,Hacl.Impl.ECDSA.*,Hacl.Impl.P256.*,Hacl.Hash.SHA2,Hacl.Hash.Core.SHA2,Hacl.Hash.Core.SHA2.Constants,Hacl.Hash.Definitions,Hacl.Impl.P256,Hacl.Spec.P256.*,Hacl.Impl.SolinasReduction,Hacl.Impl.LowLevel,Hacl.Impl.LowLevel.RawCmp[rename=Hacl_ECDSA] $(BLAKE2_BUNDLE) -bundle Hacl.Blake2bUnkeyed=Hacl.Blake2bUnkeyed[rename=Hacl_ECDSA_Blake2U]
 FRODO_BUNDLE=-bundle 'Hacl.Frodo.KEM=Frodo.Params,Hacl.Impl.Frodo.*,Hacl.Impl.Matrix,Hacl.Frodo.*,Hacl.Keccak'
 # The only functions not marked as noextract should be in each of the Hacl.HPKE.{variants}
 # Each of these module should be extracted to a different file. Therefore, this variable
