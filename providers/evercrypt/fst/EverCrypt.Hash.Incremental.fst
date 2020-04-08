@@ -72,7 +72,7 @@ let evercrypt_hash: block hash_alg =
 
 let create_in a = F.create_in evercrypt_hash a (EverCrypt.Hash.state a)
 
-let init (a: hash_alg) = F.init evercrypt_hash a (EverCrypt.Hash.state a) ()
+let init (a: G.erased hash_alg) = F.init evercrypt_hash a (EverCrypt.Hash.state a) ()
 
 let update (i: G.erased hash_alg) =
   let _ = allow_inversion Spec.Agile.Hash.hash_alg in
@@ -105,3 +105,10 @@ let finish a s dst =
   | SHA2_512 -> finish_sha512 s dst
 
 let free (i: G.erased hash_alg) = F.free evercrypt_hash i (EverCrypt.Hash.state i)
+
+/// Finally, a few helpers predicates to make things easier for clients...
+
+let state (a: hash_alg) = F.state evercrypt_hash a (EverCrypt.Hash.state a)
+
+let hashed #a (h: HS.mem) (s: state a) =
+  F.seen evercrypt_hash a h s
