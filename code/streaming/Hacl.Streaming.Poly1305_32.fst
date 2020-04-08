@@ -6,7 +6,7 @@ module G = FStar.Ghost
 module S = FStar.Seq
 module U32 = FStar.UInt32
 module U64 = FStar.UInt64
-//module F = Hacl.Streaming.Functor
+module F = Hacl.Streaming.Functor
 module I = Hacl.Streaming.Interface
 module P = Hacl.Impl.Poly1305
 module F32xN = Hacl.Spec.Poly1305.Field32xN
@@ -103,23 +103,27 @@ let stateful_poly1305_ctx32: I.stateful unit =
 /// Interlude for painful spec equivalence proofs
 /// =============================================
 
+inline_for_extraction noextract
 let block = (block: S.seq uint8 { S.length block = Spec.Poly1305.size_block })
 
-let init = Spec.Poly1305.poly1305_init
-
-let update (acc, r) (block: block) =
+inline_for_extraction noextract
+let update_ (acc, r) (block: block) =
   Spec.Poly1305.poly1305_update1 r Spec.Poly1305.size_block block acc, r
 
+inline_for_extraction noextract
 let update' r acc (block: block) =
   Spec.Poly1305.poly1305_update1 r Spec.Poly1305.size_block block acc
 
+inline_for_extraction noextract
 let update_multi =
-  Spec.UpdateMulti.mk_update_multi Spec.Poly1305.size_block update
+  Spec.UpdateMulti.mk_update_multi Spec.Poly1305.size_block update_
 
+inline_for_extraction noextract
 let update_multi' r =
   Spec.UpdateMulti.mk_update_multi Spec.Poly1305.size_block (update' r)
 
 #push-options "--fuel 1"
+inline_for_extraction noextract
 let rec with_or_without_r (acc r: Spec.Poly1305.felem) (blocks: S.seq uint8):
   Lemma
     (requires
@@ -136,24 +140,29 @@ let rec with_or_without_r (acc r: Spec.Poly1305.felem) (blocks: S.seq uint8):
     with_or_without_r acc r rem
 #pop-options
 
+inline_for_extraction noextract
 let update_last (acc, r) (input: S.seq uint8 { S.length input < Spec.Poly1305.size_block }) =
   if S.length input = 0 then
     acc, r
   else
     Spec.Poly1305.poly1305_update1 r (S.length input) input acc, r
 
+inline_for_extraction noextract
 let update_last' r acc (input: S.seq uint8 { S.length input < Spec.Poly1305.size_block }) =
   if S.length input = 0 then
     acc
   else
     Spec.Poly1305.poly1305_update1 r (S.length input) input acc
 
-let finish k (acc, r) =
+inline_for_extraction noextract
+let finish_ k (acc, r) =
   Spec.Poly1305.poly1305_finish k acc
 
+inline_for_extraction noextract
 let spec k input =
   Spec.Poly1305.poly1305_mac input k
 
+inline_for_extraction noextract
 let repeat_l_update
   (input: S.seq uint8)
   (r: Spec.Poly1305.felem)
@@ -167,6 +176,7 @@ let repeat_l_update
 =
   ()
 
+inline_for_extraction noextract
 let repeat_f_update
   (input: S.seq uint8)
   (r: Spec.Poly1305.felem)
@@ -262,9 +272,9 @@ val poly_is_incremental:
     let n = S.length input / block_length in
     let bs, l = S.split input (n * block_length) in
     FStar.Math.Lemmas.multiple_modulo_lemma n block_length;
-    let hash = update_multi (init key) bs in
+    let hash = update_multi (Spec.Poly1305.poly1305_init key) bs in
     let hash = update_last hash l in
-    finish key hash `S.equal` spec key input))
+    finish_ key hash `S.equal` spec key input))
 
 let poly_is_incremental key input =
   let open Hacl.Streaming.Lemmas in
@@ -273,9 +283,9 @@ let poly_is_incremental key input =
   let n = S.length input / block_length in
   let bs, l = S.split input (n * block_length) in
   FStar.Math.Lemmas.multiple_modulo_lemma n block_length;
-  let acc, r = init key in
+  let acc, r = Spec.Poly1305.poly1305_init key in
   calc (S.equal) {
-    finish key (update_last (update_multi (acc, r) bs) l);
+    finish_ key (update_last (update_multi (acc, r) bs) l);
   (S.equal) { with_or_without_r acc r bs }
     Spec.Poly1305.poly1305_finish key (update_last' r (update_multi' r acc bs) l);
   (S.equal) { update_full_is_repeat_blocks block_length (update' r) (update_last' r) acc input input }
@@ -311,15 +321,15 @@ let poly1305_32: I.block unit =
     (fun () -> 16ul)
     (fun () -> 16ul)
 
-    (fun () -> init)
+    (fun () -> Spec.Poly1305.poly1305_init)
     (fun () x y -> update_multi x y)
     (fun () x _ y -> update_last x y)
-    (fun () -> finish)
+    (fun () -> finish_)
 
     (fun () -> spec)
 
-    (fun () -> Spec.UpdateMulti.update_multi_zero Spec.Poly1305.size_block update)
-    (fun () -> Spec.UpdateMulti.update_multi_associative Spec.Poly1305.size_block update)
+    (fun () -> Spec.UpdateMulti.update_multi_zero Spec.Poly1305.size_block update_)
+    (fun () -> Spec.UpdateMulti.update_multi_associative Spec.Poly1305.size_block update_)
     (fun () -> poly_is_incremental)
 
     (fun _ _ -> ())
@@ -361,3 +371,12 @@ let poly1305_32: I.block unit =
       assert B.(loc_disjoint (loc_buffer s) (loc_buffer dst));
       P.reveal_ctx_inv (as_lib s) h0 h5
     )
+
+/// The hardest part is done, just the instantiations now
+/// =====================================================
+
+let create_in = F.create_in poly1305_32 () t
+let init = F.init poly1305_32 (G.hide ()) t
+let update = F.update poly1305_32 (G.hide ()) t
+let finish = F.mk_finish poly1305_32 () t
+let free = F.free poly1305_32 (G.hide ()) t

@@ -21,6 +21,7 @@ open Hacl.Streaming.Interface
 
 #set-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
 
+inline_for_extraction noextract
 let agile_state: stateful hash_alg =
   Stateful
     EverCrypt.Hash.state
@@ -80,6 +81,7 @@ let update (i: G.erased hash_alg) =
   assert_norm (pow2 64 < pow2 125 - 1);
   F.update evercrypt_hash i (EverCrypt.Hash.state i)
 
+inline_for_extraction noextract
 let finish_st a = F.finish_st evercrypt_hash a (EverCrypt.Hash.state a)
 
 /// The wrapper pattern, to ensure that the stack-allocated state is properly

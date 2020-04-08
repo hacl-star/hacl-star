@@ -19,7 +19,7 @@ let repeat_l_input #a (block_length:pos { block_length < pow2 32 })
 =
   ()
 
-#set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 150"
 let rec update_full_is_repeat_blocks #a block_length update update_last acc input input' =
   // Spec.UpdateMulti side
   let n_blocks = S.length input / block_length in
@@ -55,6 +55,7 @@ let rec update_full_is_repeat_blocks #a block_length update update_last acc inpu
   end else begin
     let head, tail = Spec.UpdateMulti.split_block block_length blocks 1 in
     assert (S.length head % block_length = 0);
+
     S.lemma_eq_intro (head `S.append` tail `S.append` rest) input;
     S.lemma_eq_intro (head `S.append` (tail `S.append` rest)) input;
     S.lemma_eq_intro (S.slice input 0 block_length) head;
@@ -70,6 +71,9 @@ let rec update_full_is_repeat_blocks #a block_length update update_last acc inpu
     (==) { Math.Lemmas.division_addition_lemma (S.length input) block_length (-1) }
       n_blocks - 1;
     };
+    // After a detailed investigation with quake, the two calls below seem to be
+    // flaky. Probably worth doing a detailed proof of these two in case this
+    // proof breaks in the future.
     S.lemma_eq_intro (fst (S.split (tail `S.append` rest) ((n_blocks - 1) * block_length))) tail;
     S.lemma_eq_intro (snd (S.split (tail `S.append` rest) ((n_blocks - 1) * block_length))) rest;
     assert (S.length (tail `S.append` rest) % block_length == S.length input % block_length);
