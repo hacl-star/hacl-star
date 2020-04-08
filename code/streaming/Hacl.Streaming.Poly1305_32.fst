@@ -181,6 +181,42 @@ let repeat_f_update
 =
   ()
 
+val update_last_is_update
+  (input: S.seq uint8)
+  (acc: Spec.Poly1305.felem)
+  (r: Spec.Poly1305.felem):
+  Lemma
+    (requires (S.length input < Spec.Poly1305.size_block))
+    (ensures (update_last (acc, r) input == (Spec.Poly1305.poly1305_update input acc r, r)))
+
+let update_last_is_update input acc r =
+  let open Hacl.Streaming.Lemmas in
+  let block_length = Spec.Poly1305.size_block in
+  assert_norm (block_length < pow2 32);
+  calc (==) {
+    update_last (acc, r) input;
+  (==) { }
+    update_last' r acc input, r;
+  (==) { Spec.UpdateMulti.update_multi_zero Spec.Poly1305.size_block (update' r) acc }
+    update_last' r (update_multi' r acc S.empty) input, r;
+  (==) { update_full_is_repeat_blocks block_length (update' r) (update_last' r) acc input input }
+    Lib.Sequence.repeat_blocks #uint8 #Spec.Poly1305.felem block_length input
+      (repeat_f block_length (update' r))
+      (repeat_l block_length (update_last' r) input)
+      acc, r;
+  (==) { repeat_blocks_extensionality block_length input
+      (repeat_f block_length (update' r))
+      Spec.Poly1305.(poly1305_update1 r size_block)
+      (repeat_l block_length (update_last' r) input)
+      Spec.Poly1305.(poly1305_update_last r)
+      acc
+  }
+    Lib.Sequence.repeat_blocks #uint8 #Spec.Poly1305.felem block_length input
+      Spec.Poly1305.(poly1305_update1 r size_block)
+      Spec.Poly1305.(poly1305_update_last r)
+      acc, r;
+  }
+
 val update_multi_is_update
   (input: S.seq uint8)
   (acc: Spec.Poly1305.felem)
@@ -297,7 +333,11 @@ let poly1305_32: I.block unit =
       P.poly1305_update #M32 s len blocks
     )
     (fun _ s last total_len ->
-      admit ();
+      let h0 = ST.get () in
+      begin
+        let acc, r = P.as_get_acc h0 (as_lib s), P.as_get_r h0 (as_lib s) in
+        update_last_is_update (B.as_seq h0 last) acc r
+      end;
       let len = FStar.Int.Cast.Full.uint64_to_uint32 (total_len `U64.rem` 16UL) in
       if len <> 0ul then
         P.poly1305_update #M32 s len last)
