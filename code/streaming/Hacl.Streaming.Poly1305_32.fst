@@ -16,6 +16,7 @@ open LowStar.BufferOps
 open FStar.Mul
 
 /// Opening a bunch of modules for Poly1305
+/// =======================================
 
 inline_for_extraction noextract
 let uint8 = Lib.IntTypes.uint8
@@ -24,6 +25,11 @@ inline_for_extraction noextract
 let uint32 = Lib.IntTypes.uint32
 
 open Hacl.Impl.Poly1305.Fields
+
+/// An instance of the stateful type class for poly1305 state
+/// =========================================================
+///
+/// We use a custom view that separates r and acc, to respect abstraction boundaries established by Poly1305.
 
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
@@ -93,6 +99,9 @@ let stateful_poly1305_ctx32: I.stateful unit =
       let h1 = ST.get () in
       P.reveal_ctx_inv' (as_lib src) (as_lib dst) h0 h1
     )
+
+/// Interlude for painful spec equivalence proofs
+/// =============================================
 
 let block = (block: S.seq uint8 { S.length block = Spec.Poly1305.size_block })
 
@@ -172,6 +181,42 @@ let repeat_f_update
 =
   ()
 
+val update_multi_is_update
+  (input: S.seq uint8)
+  (acc: Spec.Poly1305.felem)
+  (r: Spec.Poly1305.felem):
+  Lemma
+    (requires (S.length input % Spec.Poly1305.size_block = 0))
+    (ensures (update_multi (acc, r) input == (Spec.Poly1305.poly1305_update input acc r, r)))
+
+let update_multi_is_update input acc r =
+  let open Hacl.Streaming.Lemmas in
+  let block_length = Spec.Poly1305.size_block in
+  assert_norm (block_length < pow2 32);
+  calc (==) {
+    update_multi (acc, r) input;
+  (==) { with_or_without_r acc r input }
+    update_multi' r acc input, r;
+  (==) { }
+    update_last' r (update_multi' r acc input) S.empty, r;
+  (==) { update_full_is_repeat_blocks block_length (update' r) (update_last' r) acc input input }
+    Lib.Sequence.repeat_blocks #uint8 #Spec.Poly1305.felem block_length input
+      (repeat_f block_length (update' r))
+      (repeat_l block_length (update_last' r) input)
+      acc, r;
+  (==) { repeat_blocks_extensionality block_length input
+      (repeat_f block_length (update' r))
+      Spec.Poly1305.(poly1305_update1 r size_block)
+      (repeat_l block_length (update_last' r) input)
+      Spec.Poly1305.(poly1305_update_last r)
+      acc
+  }
+    Lib.Sequence.repeat_blocks #uint8 #Spec.Poly1305.felem block_length input
+      Spec.Poly1305.(poly1305_update1 r size_block)
+      Spec.Poly1305.(poly1305_update_last r)
+      acc, r;
+  }
+
 val poly_is_incremental:
   key: S.seq uint8 { S.length key = 32 } ->
   input:S.seq uint8 { S.length input <= pow2 32 - 1 } ->
@@ -215,6 +260,9 @@ let poly_is_incremental key input =
       acc);
   }
 
+/// The block instance for poly1305!
+/// ================================
+
 inline_for_extraction noextract
 let poly1305_32: I.block unit =
   I.Block
@@ -240,11 +288,19 @@ let poly1305_32: I.block unit =
 
     (fun _ _ -> ())
     (fun _ k s -> P.poly1305_init #M32 s k)
-    (fun _ s blocks len -> P.poly1305_update #M32 s len blocks; admit ())
+    (fun _ s blocks len ->
+      let h0 = ST.get () in
+      begin
+        let acc, r = P.as_get_acc h0 (as_lib s), P.as_get_r h0 (as_lib s) in
+        update_multi_is_update (B.as_seq h0 blocks) acc r
+      end;
+      P.poly1305_update #M32 s len blocks
+    )
     (fun _ s last total_len ->
       admit ();
       let len = FStar.Int.Cast.Full.uint64_to_uint32 (total_len `U64.rem` 16UL) in
-      P.poly1305_update #M32 s len last)
+      if len <> 0ul then
+        P.poly1305_update #M32 s len last)
     (fun _ k s dst ->
       let h0 = ST.get () in
       ST.push_frame ();
