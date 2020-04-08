@@ -145,6 +145,33 @@ let finish k (acc, r) =
 let spec k input =
   Spec.Poly1305.poly1305_mac input k
 
+let repeat_l_update
+  (input: S.seq uint8)
+  (r: Spec.Poly1305.felem)
+  (l: Lib.IntTypes.size_nat { l == S.length input % Spec.Poly1305.size_block })
+  (s: Lib.Sequence.lseq uint8 l)
+  (acc: Spec.Poly1305.felem): Lemma
+    (ensures (
+      Hacl.Streaming.Lemmas.repeat_l Spec.Poly1305.size_block (update_last' r) input l s acc ==
+      Spec.Poly1305.poly1305_update_last r l s acc))
+    [ SMTPat (Hacl.Streaming.Lemmas.repeat_l Spec.Poly1305.size_block (update_last' r) input l s acc) ]
+=
+  ()
+
+let repeat_f_update
+  (input: S.seq uint8)
+  (r: Spec.Poly1305.felem)
+  (acc: Spec.Poly1305.felem)
+  (i: nat { i < S.length input / Spec.Poly1305.size_block }):
+  Lemma
+    (ensures (
+      let bs = Spec.Poly1305.size_block in
+      let nb = S.length input / bs in
+      Lib.Sequence.repeat_blocks_f bs input (Hacl.Streaming.Lemmas.repeat_f bs (update' r)) nb i acc ==
+      Lib.Sequence.repeat_blocks_f bs input (Spec.Poly1305.poly1305_update1 r bs) nb i acc))
+=
+  ()
+
 val poly_is_incremental:
   key: S.seq uint8 { S.length key = 32 } ->
   input:S.seq uint8 { S.length input <= pow2 32 - 1 } ->
@@ -166,23 +193,27 @@ let poly_is_incremental key input =
   let bs, l = S.split input (n * block_length) in
   FStar.Math.Lemmas.multiple_modulo_lemma n block_length;
   let acc, r = init key in
-  assume (repeat_f block_length (update' r) == Spec.Poly1305.(poly1305_update1 r size_block));
   calc (S.equal) {
     finish key (update_last (update_multi (acc, r) bs) l);
   (S.equal) { with_or_without_r acc r bs }
     Spec.Poly1305.poly1305_finish key (update_last' r (update_multi' r acc bs) l);
-  (S.equal) { update_multi_is_repeat_blocks block_length (update' r) (update_last' r) acc input input }
+  (S.equal) { update_full_is_repeat_blocks block_length (update' r) (update_last' r) acc input input }
     Spec.Poly1305.poly1305_finish key (Lib.Sequence.repeat_blocks #uint8 #Spec.Poly1305.felem block_length input
       (repeat_f block_length (update' r))
       (repeat_l block_length (update_last' r) input)
       acc);
-  (S.equal) { }
-    Spec.Poly1305.poly1305_finish key (Lib.Sequence.repeat_blocks #uint8 #Spec.Poly1305.felem block_length input
+  (S.equal) { repeat_blocks_extensionality block_length input
+      (repeat_f block_length (update' r))
       Spec.Poly1305.(poly1305_update1 r size_block)
       (repeat_l block_length (update_last' r) input)
+      Spec.Poly1305.(poly1305_update_last r)
+      acc
+  }
+    Spec.Poly1305.poly1305_finish key (Lib.Sequence.repeat_blocks #uint8 #Spec.Poly1305.felem block_length input
+      Spec.Poly1305.(poly1305_update1 r size_block)
+      Spec.Poly1305.(poly1305_update_last r)
       acc);
-  };
-  admit ()
+  }
 
 inline_for_extraction noextract
 let poly1305_32: I.block unit =

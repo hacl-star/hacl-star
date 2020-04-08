@@ -20,7 +20,7 @@ let repeat_l_input #a (block_length:pos { block_length < pow2 32 })
   ()
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
-let rec update_multi_is_repeat_blocks #a block_length update update_last acc input input' =
+let rec update_full_is_repeat_blocks #a block_length update update_last acc input input' =
   // Spec.UpdateMulti side
   let n_blocks = S.length input / block_length in
   let blocks, rest = S.split input (n_blocks * block_length) in
@@ -82,7 +82,7 @@ let rec update_multi_is_repeat_blocks #a block_length update update_last acc inp
       update_last (mk_update_multi block_length update (update acc head) tail) rest;
     (==) { }
       update_full block_length update update_last (update acc head) (tail `S.append` rest);
-    (==) { update_multi_is_repeat_blocks #a block_length update update_last (update acc head) (tail `S.append` rest) input' }
+    (==) { update_full_is_repeat_blocks #a block_length update update_last (update acc head) (tail `S.append` rest) input' }
       Lib.Sequence.repeat_blocks #uint8 block_length (tail `S.append` rest) repeat_f repeat_l (update acc head);
     (==) { }
       Lib.Sequence.repeat_blocks #uint8 block_length (tail `S.append` rest) repeat_f repeat_l (repeat_f head acc);
@@ -101,3 +101,18 @@ let rec update_multi_is_repeat_blocks #a block_length update update_last acc inp
       Lib.Sequence.repeat_blocks #uint8 block_length input repeat_f repeat_l acc;
     }
   end
+
+let repeat_blocks_extensionality #a #b bs inp f1 f2 l1 l2 init =
+  // Naming things
+  let len = length inp in
+  let nb = len / bs in
+  let rem = len % bs in
+  let acc1 = Lib.LoopCombinators.repeati nb (repeat_blocks_f bs inp f1 nb) init in
+  let acc2 = Lib.LoopCombinators.repeati nb (repeat_blocks_f bs inp f2 nb) init in
+  let last = Seq.slice inp (nb * bs) len in
+  let acc1' = l1 rem last acc1 in
+  let acc2' = l2 rem last acc2 in
+  Lib.Sequence.lemma_repeat_blocks bs inp f1 l1 init;
+  Lib.Sequence.lemma_repeat_blocks bs inp f2 l2 init;
+  Lib.Sequence.Lemmas.repeati_extensionality nb (repeat_blocks_f bs inp f1 nb)
+    (repeat_blocks_f bs inp f2 nb) init
