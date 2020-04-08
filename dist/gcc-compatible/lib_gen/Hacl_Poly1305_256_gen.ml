@@ -8,3 +8,4 @@ let _ =
    Format.printf "#include \"Hacl_Poly1305_256.h\"\n");
   Cstubs.write_c Format.std_formatter ~prefix:""
     (module Hacl_Poly1305_256_bindings.Bindings)
+  

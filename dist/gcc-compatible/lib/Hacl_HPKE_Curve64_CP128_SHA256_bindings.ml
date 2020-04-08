@@ -10,6 +10,7 @@ module Bindings(F:Cstubs.FOREIGN) =
                  (ocaml_bytes @->
                     (ocaml_bytes @->
                        (uint32_t @-> (ocaml_bytes @-> (returning uint32_t))))))))
+      
     let hacl_HPKE_Curve64_CP128_SHA256_setupBaseR =
       foreign "Hacl_HPKE_Curve64_CP128_SHA256_setupBaseR"
         (ocaml_bytes @->
@@ -17,6 +18,7 @@ module Bindings(F:Cstubs.FOREIGN) =
               (ocaml_bytes @->
                  (ocaml_bytes @->
                     (uint32_t @-> (ocaml_bytes @-> (returning uint32_t)))))))
+      
     let hacl_HPKE_Curve64_CP128_SHA256_sealBase =
       foreign "Hacl_HPKE_Curve64_CP128_SHA256_sealBase"
         (ocaml_bytes @->
@@ -26,6 +28,7 @@ module Bindings(F:Cstubs.FOREIGN) =
                     (uint32_t @->
                        (ocaml_bytes @->
                           (ocaml_bytes @-> (returning uint32_t))))))))
+      
     let hacl_HPKE_Curve64_CP128_SHA256_openBase =
       foreign "Hacl_HPKE_Curve64_CP128_SHA256_openBase"
         (ocaml_bytes @->
@@ -35,4 +38,5 @@ module Bindings(F:Cstubs.FOREIGN) =
                     (uint32_t @->
                        (ocaml_bytes @->
                           (ocaml_bytes @-> (returning uint32_t))))))))
+      
   end

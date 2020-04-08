@@ -8,3 +8,4 @@ let _ =
    Format.printf "#include \"Hacl_HPKE_Curve64_CP128_SHA512.h\"\n");
   Cstubs.write_c Format.std_formatter ~prefix:""
     (module Hacl_HPKE_Curve64_CP128_SHA512_bindings.Bindings)
+  
