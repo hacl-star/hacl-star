@@ -1470,10 +1470,23 @@ mt_flush_to_(
   {
     uint32_t ofs = oi - opi;
     LowStar_Vector_vector_str___uint8_t_ hvec = index__LowStar_Vector_vector_str__uint8_t_(hs, lv);
-    LowStar_Vector_vector_str___uint8_t_ flushed;
+    if (!(ofs == (uint32_t)0U))
+    {
+      free_elems___uint8_t__uint32_t((
+          (regional__uint32_t__uint8_t_){
+            .state = hsz,
+            .dummy = NULL,
+            .r_alloc = hash_r_alloc,
+            .r_free = hash_r_free
+          }
+        ),
+        hvec,
+        ofs - (uint32_t)1U);
+    }
+    LowStar_Vector_vector_str___uint8_t_ frv;
     if (ofs >= hvec.sz)
     {
-      flushed =
+      frv =
         (
           (LowStar_Vector_vector_str___uint8_t_){
             .sz = (uint32_t)0U,
@@ -1484,7 +1497,7 @@ mt_flush_to_(
     }
     else if (ofs == (uint32_t)0U)
     {
-      flushed = hvec;
+      frv = hvec;
     }
     else
     {
@@ -1494,9 +1507,10 @@ mt_flush_to_(
         uint8_t *uu____0 = hvec.vs[ofs + i];
         hvec.vs[(uint32_t)0U + i] = uu____0;
       }
-      flushed =
+      frv =
         ((LowStar_Vector_vector_str___uint8_t_){ .sz = n_shifted, .cap = hvec.cap, .vs = hvec.vs });
     }
+    LowStar_Vector_vector_str___uint8_t_ flushed = frv;
     assign__LowStar_Vector_vector_str__uint8_t__uint32_t(hs, lv, flushed);
     mt_flush_to_(hsz, lv + (uint32_t)1U, hs, pi / (uint32_t)2U, i1 / (uint32_t)2U);
     return;
