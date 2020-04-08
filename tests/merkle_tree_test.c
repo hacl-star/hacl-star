@@ -6,7 +6,7 @@
 #include "MerkleTree.h"
 #include "merkle_tree_test.h"
 
-static char hs[32U+1];
+static char hs[64U+1];
 
 static const uint32_t hash_size = 32;
 

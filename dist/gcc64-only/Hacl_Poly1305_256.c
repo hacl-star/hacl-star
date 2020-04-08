@@ -582,57 +582,32 @@ Hacl_Impl_Poly1305_Field32xN_256_fmul_r4_normalize(
   v00 = Lib_IntVector_Intrinsics_vec256_interleave_high128(o0, o0);
   Lib_IntVector_Intrinsics_vec256 v10 = Lib_IntVector_Intrinsics_vec256_add64(o0, v00);
   Lib_IntVector_Intrinsics_vec256
-  v20 =
-    Lib_IntVector_Intrinsics_vec256_add64(v10,
-      Lib_IntVector_Intrinsics_vec256_shuffle64(v10,
-        (uint32_t)1U,
-        (uint32_t)1U,
-        (uint32_t)1U,
-        (uint32_t)1U));
+  v10h = Lib_IntVector_Intrinsics_vec256_interleave_high64(v10, v10);
+  Lib_IntVector_Intrinsics_vec256 v20 = Lib_IntVector_Intrinsics_vec256_add64(v10, v10h);
   Lib_IntVector_Intrinsics_vec256
   v01 = Lib_IntVector_Intrinsics_vec256_interleave_high128(o10, o10);
   Lib_IntVector_Intrinsics_vec256 v11 = Lib_IntVector_Intrinsics_vec256_add64(o10, v01);
   Lib_IntVector_Intrinsics_vec256
-  v21 =
-    Lib_IntVector_Intrinsics_vec256_add64(v11,
-      Lib_IntVector_Intrinsics_vec256_shuffle64(v11,
-        (uint32_t)1U,
-        (uint32_t)1U,
-        (uint32_t)1U,
-        (uint32_t)1U));
+  v11h = Lib_IntVector_Intrinsics_vec256_interleave_high64(v11, v11);
+  Lib_IntVector_Intrinsics_vec256 v21 = Lib_IntVector_Intrinsics_vec256_add64(v11, v11h);
   Lib_IntVector_Intrinsics_vec256
   v02 = Lib_IntVector_Intrinsics_vec256_interleave_high128(o20, o20);
   Lib_IntVector_Intrinsics_vec256 v12 = Lib_IntVector_Intrinsics_vec256_add64(o20, v02);
   Lib_IntVector_Intrinsics_vec256
-  v22 =
-    Lib_IntVector_Intrinsics_vec256_add64(v12,
-      Lib_IntVector_Intrinsics_vec256_shuffle64(v12,
-        (uint32_t)1U,
-        (uint32_t)1U,
-        (uint32_t)1U,
-        (uint32_t)1U));
+  v12h = Lib_IntVector_Intrinsics_vec256_interleave_high64(v12, v12);
+  Lib_IntVector_Intrinsics_vec256 v22 = Lib_IntVector_Intrinsics_vec256_add64(v12, v12h);
   Lib_IntVector_Intrinsics_vec256
   v03 = Lib_IntVector_Intrinsics_vec256_interleave_high128(o30, o30);
   Lib_IntVector_Intrinsics_vec256 v13 = Lib_IntVector_Intrinsics_vec256_add64(o30, v03);
   Lib_IntVector_Intrinsics_vec256
-  v23 =
-    Lib_IntVector_Intrinsics_vec256_add64(v13,
-      Lib_IntVector_Intrinsics_vec256_shuffle64(v13,
-        (uint32_t)1U,
-        (uint32_t)1U,
-        (uint32_t)1U,
-        (uint32_t)1U));
+  v13h = Lib_IntVector_Intrinsics_vec256_interleave_high64(v13, v13);
+  Lib_IntVector_Intrinsics_vec256 v23 = Lib_IntVector_Intrinsics_vec256_add64(v13, v13h);
   Lib_IntVector_Intrinsics_vec256
   v04 = Lib_IntVector_Intrinsics_vec256_interleave_high128(o40, o40);
   Lib_IntVector_Intrinsics_vec256 v14 = Lib_IntVector_Intrinsics_vec256_add64(o40, v04);
   Lib_IntVector_Intrinsics_vec256
-  v24 =
-    Lib_IntVector_Intrinsics_vec256_add64(v14,
-      Lib_IntVector_Intrinsics_vec256_shuffle64(v14,
-        (uint32_t)1U,
-        (uint32_t)1U,
-        (uint32_t)1U,
-        (uint32_t)1U));
+  v14h = Lib_IntVector_Intrinsics_vec256_interleave_high64(v14, v14);
+  Lib_IntVector_Intrinsics_vec256 v24 = Lib_IntVector_Intrinsics_vec256_add64(v14, v14h);
   Lib_IntVector_Intrinsics_vec256
   l = Lib_IntVector_Intrinsics_vec256_add64(v20, Lib_IntVector_Intrinsics_vec256_zero);
   Lib_IntVector_Intrinsics_vec256

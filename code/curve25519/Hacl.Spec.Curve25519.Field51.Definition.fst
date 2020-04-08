@@ -77,7 +77,7 @@ let ( *^ ) (x:scale64) (y:scale64_5) : scale128_5 =
    x * y4 ,
    x * y5)
 
-abstract
+[@"opaque_to_smt"]
 let pow51: (pow51: pos { pow2 64 == 8192 * pow51 /\ pow2 128 == 67108864 * pow51 * pow51 /\ pow51 == pow2 51 }) =
   let pow51: pos = normalize_term (pow2 51) in
   assert_norm (pow51 > 0);
