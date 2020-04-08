@@ -264,18 +264,23 @@ bool print_result(uint8_t* comp, uint8_t* exp, int len) {
 
 bool print_test(uint8_t* in, int in_len, uint8_t* exp224, uint8_t* exp256, uint8_t* exp384, uint8_t* exp512){
   uint8_t comp[64] = {0};
-
-  Hacl_Hash_SHA2_hash_224(in,in_len,comp);
-  printf("SHA2-224 (32-bit) Result:\n");
-  bool ok = print_result(comp, exp224,28);
-
+  bool ok = true;
+  
   Hacl_Hash_SHA2_hash_256(in,in_len,comp);
-  printf("SHA2-256 (32-bit) Result:\n");
+  printf("OLD SHA2-256 (32-bit) Result:\n");
+  ok = print_result(comp, exp256,32) && ok;
+
+  Hacl_Impl_SHA2_Core_sha256(comp,in_len,in);
+  printf("NEW SHA2-256 (32-bit) Result:\n");
   ok = print_result(comp, exp256,32) && ok;
 
   ossl_sha2(comp,in,in_len);
   printf("OpenSSL SHA2-256 (32-bit) Result:\n");
   ok = print_result(comp, exp256,32) && ok;
+
+  Hacl_Hash_SHA2_hash_224(in,in_len,comp);
+  printf("SHA2-224 (32-bit) Result:\n");
+  ok = print_result(comp, exp224,28) && ok;
 
   Hacl_Hash_SHA2_hash_384(in,in_len,comp);
   printf("SHA2-384 (32-bit) Result:\n");
@@ -313,7 +318,7 @@ int main()
   b = cpucycles_end();
   t2 = clock();
   double cdiff1 = b - a;
-  double tdiff1 = (double)(t2 - t1)/CLOCKS_PER_SEC;
+  double tdiff1 = (double)(t2 - t1);
 
   for (int j = 0; j < ROUNDS; j++) {
     Hacl_Hash_SHA2_hash_256(plain,SIZE,plain);
@@ -326,7 +331,20 @@ int main()
   b = cpucycles_end();
   t2 = clock();
   double cdiff2 = b - a;
-  double tdiff2 = (double)(t2 - t1)/CLOCKS_PER_SEC;
+  double tdiff2 = (double)(t2 - t1);
+
+  for (int j = 0; j < ROUNDS; j++) {
+    Hacl_Impl_SHA2_Core_sha256(plain,SIZE,plain);
+  }
+  t1 = clock();
+  a = cpucycles_begin();
+  for (int j = 0; j < ROUNDS; j++) {
+    Hacl_Impl_SHA2_Core_sha256(plain,SIZE,plain);
+  }
+  b = cpucycles_end();
+  t2 = clock();
+  double cdiff2n = b - a;
+  double tdiff2n = (double)(t2 - t1);
 
   for (int j = 0; j < ROUNDS; j++) {
     ossl_sha2(plain,plain,SIZE);
@@ -339,7 +357,7 @@ int main()
   b = cpucycles_end();
   t2 = clock();
   double cdiff2a = b - a;
-  double tdiff2a = (double)(t2 - t1)/CLOCKS_PER_SEC;
+  double tdiff2a = (double)(t2 - t1);
 
   for (int j = 0; j < ROUNDS; j++) {
     Hacl_Hash_SHA2_hash_384(plain,SIZE,plain);
@@ -352,7 +370,7 @@ int main()
   b = cpucycles_end();
   t2 = clock();
   double cdiff3 = b - a;
-  double tdiff3 = (double)(t2 - t1)/CLOCKS_PER_SEC;
+  double tdiff3 = (double)(t2 - t1);
 
   for (int j = 0; j < ROUNDS; j++) {
     Hacl_Hash_SHA2_hash_512(plain,SIZE,plain);
@@ -368,9 +386,10 @@ int main()
   double tdiff4 = (double)(t2 - t1)/CLOCKS_PER_SEC;
   
   uint8_t res = plain[0];
-  printf("SHA2-224 (32-bit) PERF: %d\n",(int)res); print_time(tdiff1,cdiff1);
-  printf("SHA2-256 (32-bit) PERF: %d\n",(int)res); print_time(tdiff2,cdiff2);
+  printf("OLD SHA2-256 (32-bit) PERF: %d\n",(int)res); print_time(tdiff2,cdiff2);
+  printf("NEW SHA2-256 (32-bit) PERF: %d\n",(int)res); print_time(tdiff2n,cdiff2n);
   printf("OpenSSL SHA2-256 (32-bit) PERF: %d\n",(int)res); print_time(tdiff2a,cdiff2a);
+  printf("SHA2-224 (32-bit) PERF: %d\n",(int)res); print_time(tdiff1,cdiff1);
   printf("SHA2-384 (32-bit) PERF: %d\n",(int)res); print_time(tdiff3,cdiff3);
   printf("SHA2-512 (32-bit) PERF: %d\n",(int)res); print_time(tdiff4,cdiff4);
 
