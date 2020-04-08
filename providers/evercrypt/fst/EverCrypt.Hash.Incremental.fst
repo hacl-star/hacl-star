@@ -71,29 +71,29 @@ let evercrypt_hash: block hash_alg =
     (fun i -> EverCrypt.Hash.update_last #i)
     (fun i _ -> EverCrypt.Hash.finish #i)
 
-let create_in a = F.create_in evercrypt_hash a (EverCrypt.Hash.state a)
+let create_in a = F.create_in evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit)
 
-let init (a: G.erased hash_alg) = F.init evercrypt_hash a (EverCrypt.Hash.state a) ()
+let init (a: G.erased hash_alg) = F.init evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit) ()
 
 let update (i: G.erased hash_alg) =
   let _ = allow_inversion Spec.Agile.Hash.hash_alg in
   assert_norm (pow2 61 - 1 < pow2 64);
   assert_norm (pow2 64 < pow2 125 - 1);
-  F.update evercrypt_hash i (EverCrypt.Hash.state i)
+  F.update evercrypt_hash i (EverCrypt.Hash.state i) (G.erased unit)
 
 inline_for_extraction noextract
-let finish_st a = F.finish_st evercrypt_hash a (EverCrypt.Hash.state a)
+let finish_st a = F.finish_st evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit)
 
 /// The wrapper pattern, to ensure that the stack-allocated state is properly
 /// monomorphized.
-let finish_md5: finish_st MD5 = F.mk_finish evercrypt_hash MD5 (EverCrypt.Hash.state MD5)
-let finish_sha1: finish_st SHA1 = F.mk_finish evercrypt_hash SHA1 (EverCrypt.Hash.state SHA1)
-let finish_sha224: finish_st SHA2_224 = F.mk_finish evercrypt_hash SHA2_224 (EverCrypt.Hash.state SHA2_224)
-let finish_sha256: finish_st SHA2_256 = F.mk_finish evercrypt_hash SHA2_256 (EverCrypt.Hash.state SHA2_256)
-let finish_sha384: finish_st SHA2_384 = F.mk_finish evercrypt_hash SHA2_384 (EverCrypt.Hash.state SHA2_384)
-let finish_sha512: finish_st SHA2_512 = F.mk_finish evercrypt_hash SHA2_512 (EverCrypt.Hash.state SHA2_512)
+let finish_md5: finish_st MD5 = F.mk_finish evercrypt_hash MD5 (EverCrypt.Hash.state MD5) (G.erased unit)
+let finish_sha1: finish_st SHA1 = F.mk_finish evercrypt_hash SHA1 (EverCrypt.Hash.state SHA1) (G.erased unit)
+let finish_sha224: finish_st SHA2_224 = F.mk_finish evercrypt_hash SHA2_224 (EverCrypt.Hash.state SHA2_224) (G.erased unit)
+let finish_sha256: finish_st SHA2_256 = F.mk_finish evercrypt_hash SHA2_256 (EverCrypt.Hash.state SHA2_256) (G.erased unit)
+let finish_sha384: finish_st SHA2_384 = F.mk_finish evercrypt_hash SHA2_384 (EverCrypt.Hash.state SHA2_384) (G.erased unit)
+let finish_sha512: finish_st SHA2_512 = F.mk_finish evercrypt_hash SHA2_512 (EverCrypt.Hash.state SHA2_512) (G.erased unit)
 
-let alg_of_state (a: G.erased hash_alg) = F.index_of_state evercrypt_hash a (EverCrypt.Hash.state a)
+let alg_of_state (a: G.erased hash_alg) = F.index_of_state evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit)
 
 val finish: a:G.erased hash_alg -> finish_st a
 let finish a s dst =
@@ -106,11 +106,11 @@ let finish a s dst =
   | SHA2_384 -> finish_sha384 s dst
   | SHA2_512 -> finish_sha512 s dst
 
-let free (i: G.erased hash_alg) = F.free evercrypt_hash i (EverCrypt.Hash.state i)
+let free (i: G.erased hash_alg) = F.free evercrypt_hash i (EverCrypt.Hash.state i) (G.erased unit)
 
 /// Finally, a few helpers predicates to make things easier for clients...
 
-let state (a: hash_alg) = F.state evercrypt_hash a (EverCrypt.Hash.state a)
+let state (a: hash_alg) = F.state evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit)
 
 let hashed #a (h: HS.mem) (s: state a) =
   F.seen evercrypt_hash a h s

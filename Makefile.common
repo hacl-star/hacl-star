@@ -114,6 +114,7 @@ FRODO_BUNDLE=-bundle 'Hacl.Frodo.KEM=Frodo.Params,Hacl.Impl.Frodo.*,Hacl.Impl.Ma
 # Each of these module should be extracted to a different file. Therefore, this variable
 # should remain empty, and overriden only when we do not want extraction of variants
 HPKE_BUNDLE=-bundle Hacl.HPKE.Interface.*
+STREAMING_BUNDLE=-bundle Hacl.Streaming.Interface,Hacl.Streaming.Lemmas
 
 # 3. OCaml
 
