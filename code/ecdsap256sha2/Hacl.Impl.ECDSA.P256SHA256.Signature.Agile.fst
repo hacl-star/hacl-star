@@ -39,7 +39,7 @@ open Hacl.Hash.Definitions
 
 #set-options "--z3rlimit 100"
 
-
+inline_for_extraction noextract
 val ecdsa_signature_step12: alg: hash_alg {SHA2_256? alg \/ SHA2_384? alg \/ SHA2_512? alg (* and blake one day *)}
   ->  mLen: size_t -> m: lbuffer uint8 mLen -> result: felem -> Stack unit
   (requires fun h -> live h m /\ live h result )
@@ -86,6 +86,7 @@ let ecdsa_signature_step12 alg mLen m result =
   pop_frame()
 
 
+inline_for_extraction
 val ecdsa_signature_step45: x: felem -> k: lbuffer uint8 (size 32) -> tempBuffer: lbuffer uint64 (size 100) -> Stack uint64
   (requires fun h -> 
     live h x /\ live h k /\ live h tempBuffer /\ 
@@ -138,6 +139,7 @@ let lemma_power_step6 kInv =
 
 #push-options "--z3rlimit 300"
 
+inline_for_extraction
 val ecdsa_signature_step6: result: felem -> kFelem: felem -> z: felem -> r: felem -> da: felem -> Stack unit
   (requires fun h -> 
     live h result /\ live h kFelem /\ live h z /\ live h r /\ live h da /\
@@ -253,7 +255,7 @@ let ecdsa_signature_core alg r s mLen m privKeyAsFelem k =
   pop_frame(); 
   logor step5Flag sIsZero
 
-
+inline_for_extraction noextract
 val ecdsa_signature: alg: hash_alg {SHA2_256? alg \/ SHA2_384? alg \/ SHA2_512? alg} -> result: lbuffer uint8 (size 64) -> mLen: size_t -> m: lbuffer uint8 mLen ->
   privKey: lbuffer uint8 (size 32) -> 
   k: lbuffer uint8 (size 32) -> 

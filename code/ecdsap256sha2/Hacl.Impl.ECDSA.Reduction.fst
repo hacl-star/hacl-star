@@ -18,6 +18,7 @@ open Lib.ByteSequence
 
 #set-options "--z3rlimit 100 --ifuel 0 --fuel 0"
 
+inline_for_extraction
 val reduction_8_32: x: lbuffer uint8 (size 32) -> result: lbuffer uint8 (size 32) -> 
   Stack unit 
     (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result)

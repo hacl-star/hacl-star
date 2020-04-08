@@ -72,7 +72,7 @@ val verifyQValidCurvePoint: pubKeyAsPoint:point
     modifies (loc tempBuffer) h0 h1 /\
     r == verifyQValidCurvePointSpec (point_prime_to_coordinates (as_seq h0 pubKeyAsPoint)))
 
-
+inline_for_extraction
 val verifyQ: 
   pubKey: lbuffer uint8 (size 64) ->
   Stack bool

@@ -519,7 +519,7 @@ let ecdsa_verification_  pubKey r s m =
         result
         end
 
-
+inline_for_extraction
 val ecdsa_verification_without_hash:
   pubKey:lbuffer uint8 (size 64)
   -> r:lbuffer uint8 (size 32)

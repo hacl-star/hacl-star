@@ -95,7 +95,7 @@ let ecdsa_verification_step1 r s =
   let isSCorrect = isMoreThanZeroLessThanOrderMinusOne s in
   isRCorrect && isSCorrect
 
-
+inline_for_extraction
 val ecdsa_verification_step23: alg: hash_alg {SHA2_256? alg \/ SHA2_384? alg \/ SHA2_512? alg (* and blake one day *)}
   ->  mLen: size_t -> m: lbuffer uint8 mLen -> result: felem -> Stack unit
   (requires fun h -> live h m /\ live h result )
@@ -389,7 +389,7 @@ let compare_felem_bool a b  =
   eq_u64_nCT a_2 b_2 &&
   eq_u64_nCT a_3 b_3
 
-
+inline_for_extraction
 val ecdsa_verification_core:
   alg: hash_alg {SHA2_256? alg \/ SHA2_384? alg \/ SHA2_512? alg}
   -> publicKeyPoint:point
@@ -461,6 +461,7 @@ let ecdsa_verification_core alg publicKeyBuffer hashAsFelem r s mLen m xBuffer t
 
 
 (* This code is not side channel resistant *)
+inline_for_extraction
 val ecdsa_verification_:
   alg: hash_alg {SHA2_256? alg \/ SHA2_384? alg \/ SHA2_512? alg}
   -> pubKey:lbuffer uint64 (size 8)
@@ -519,7 +520,7 @@ let ecdsa_verification_ alg pubKey r s mLen m =
         result
         end
 
-
+inline_for_extraction
 val ecdsa_verification:
   alg: hash_alg {SHA2_256? alg \/ SHA2_384? alg \/ SHA2_512? alg}
   -> pubKey:lbuffer uint8 (size 64)

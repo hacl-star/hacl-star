@@ -33,6 +33,7 @@ open Hacl.Impl.P256.Signature.Common
 
 #set-options "--z3rlimit 100 --ifuel 1 --fuel 1"
 
+inline_for_extraction
 val ecdsa_signature_step12: m: lbuffer uint8 (size 32) -> result: felem -> Stack unit
   (requires fun h -> live h m /\ live h result /\ disjoint m result)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
@@ -53,7 +54,7 @@ let ecdsa_signature_step12 m result =
   Spec.ECDSA.changeEndianLemma (uints_from_bytes_be #U64 #_ #4 (as_seq h0 m));
   uints_from_bytes_be_nat_lemma #U64 #SEC #4 (as_seq h0 m)
 
-
+inline_for_extraction
 val ecdsa_signature_step45: x: felem -> k: lbuffer uint8 (size 32) -> tempBuffer: lbuffer uint64 (size 100) -> Stack uint64
   (requires fun h -> 
     live h x /\ live h k /\ live h tempBuffer /\ 
@@ -71,6 +72,7 @@ val ecdsa_signature_step45: x: felem -> k: lbuffer uint8 (size 32) -> tempBuffer
       )
     )
   )
+
 
 let ecdsa_signature_step45 x k tempBuffer = 
   push_frame();
@@ -105,7 +107,7 @@ let lemma_power_step6 kInv =
   lemmaToDomain (pow kInv (prime_p256_order - 2))
 
 #push-options "--z3rlimit 300"
-
+inline_for_extraction
 val ecdsa_signature_step6: result: felem -> kFelem: felem -> z: felem -> r: felem -> da: felem -> Stack unit
   (requires fun h -> 
     live h result /\ live h kFelem /\ live h z /\ live h r /\ live h da /\
@@ -164,7 +166,7 @@ let ecdsa_signature_step6 result kFelem z r da =
 
 #pop-options
 
-
+inline_for_extraction
 val ecdsa_signature_core: r: felem -> s: felem -> m: lbuffer uint8 (size 32) ->  
   privKeyAsFelem: felem  -> 
   k: lbuffer uint8 (size 32) -> 
@@ -217,7 +219,7 @@ let ecdsa_signature_core r s m privKeyAsFelem k =
   pop_frame(); 
   logor step5Flag sIsZero
 
-
+inline_for_extraction
 val ecdsa_signature_without_hash: result: lbuffer uint8 (size 64) -> m: lbuffer uint8 (size 32) ->
   privKey: lbuffer uint8 (size 32) -> 
   k: lbuffer uint8 (size 32) -> 
