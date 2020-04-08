@@ -29,7 +29,10 @@ open FStar.Mul
 /// something at Type0, not Type0 -> Type0 -- otherwise it wouldn't monomorphize
 /// in KreMLin.
 noeq
-type state_s #index (c: block index) (i: index) (t: Type0 { t == c.state.s i }) =
+type state_s #index (c: block index) (i: index)
+  (t: Type0 { t == c.state.s i })
+  (t': Type0 { t' == optional_key i c.km c.key })
+=
 | State:
     block_state: t ->
     buf: B.buffer Lib.IntTypes.uint8 { B.len buf = c.block_len i } ->
@@ -38,8 +41,8 @@ type state_s #index (c: block index) (i: index) (t: Type0 { t == c.state.s i }) 
     // Stupid name conflict on overloaded projectors leads to inscrutable
     // interleaving errors. Need a field name that does not conflict with the
     // one in Hacl.Streaming.Interface. Sigh!!
-    maybe_key: optional_key i c.km c.key ->
-    state_s #index c i t
+    maybe_key: t' ->
+    state_s #index c i t t'
 
 let optional_freeable #index
   (#i: index)
@@ -128,7 +131,7 @@ let optional_frame #index
       key.frame_invariant #i l s h0 h1;
       key.frame_freeable #i l s h0 h1
 
-let footprint_s #index (c: block index) (i: index) (h: HS.mem) (s: state_s c i (c.state.s i)) =
+let footprint_s #index (c: block index) (i: index) (h: HS.mem) s =
   let State block_state buf_ _ _ maybe_key = s in
   B.(loc_addr_of_buffer buf_ `loc_union` c.state.footprint h block_state `loc_union` optional_footprint h maybe_key)
 
@@ -154,7 +157,7 @@ let split_at_last #index (c: block index) (i: index) (b: bytes):
   assert (S.length b - n * U32.v (c.block_len i) < U32.v (c.block_len i));
   blocks, rest
 
-let invariant_s #index (c: block index) (i: index) h (s: state_s c i (c.state.s i)) =
+let invariant_s #index (c: block index) (i: index) h s =
   let State block_state buf_ total_len seen key = s in
   let seen = G.reveal seen in
   let blocks, rest = split_at_last c i seen in
@@ -210,7 +213,7 @@ let frame_seen #_ _ _ _ _ _ _ =
 /// Stateful API
 /// ============
 
-let index_of_state #index c i t s =
+let index_of_state #index c i t t' s =
   let open LowStar.BufferOps in
   let State block_state _ _ _ _ = !*s in
   c.index_of_state i block_state
@@ -222,7 +225,7 @@ let split_at_last_empty #index (c: block index) (i: index): Lemma
 =
   ()
 
-let create_in #index c i t k r =
+let create_in #index c i t t' k r =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
   allow_inversion key_management;
@@ -324,7 +327,7 @@ let create_in #index c i t k r =
 
   p
 
-let init #index c i t k s =
+let init #index c i t t' k s =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.state.frame_freeable #i in
   [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
@@ -340,7 +343,7 @@ let init #index c i t k s =
 
   c.init (G.hide i) k block_state;
   (**) let h2 = ST.get () in
-  (**) optional_frame (c.state.footprint #i h1 block_state) k' h1 h2;
+  (**) optional_frame #_ #i #c.km #c.key (c.state.footprint #i h1 block_state) k' h1 h2;
   (**) c.key.frame_invariant (c.state.footprint #i h1 block_state) k h1 h2;
   (**) c.update_multi_zero i (c.state.v i h2 block_state);
   (**) split_at_last_empty c i;
@@ -361,11 +364,11 @@ let init #index c i t k s =
   (**) let h2 = ST.get () in
 
   [@ inline_let ]
-  let tmp: state_s c i t = State block_state buf 0UL (G.hide S.empty) k' in
+  let tmp: state_s c i t t' = State block_state buf 0UL (G.hide S.empty) k' in
   B.upd s 0ul tmp;
   (**) let h3 = ST.get () in
   (**) c.state.frame_invariant B.(loc_buffer s) block_state h2 h3;
-  (**) optional_frame B.(loc_buffer s) k' h2 h3;
+  (**) optional_frame #_ #i #c.km #c.key B.(loc_buffer s) k' h2 h3;
 
   // This seems to cause insurmountable difficulties. Puzzled.
   ST.lemma_equal_domains_trans h1 h2 h3;
@@ -448,7 +451,7 @@ let add_len #index (c: block index) (i: index) (total_len: UInt64.t) (len: UInt3
 /// We split update into several versions, to all be simplified into a single
 /// large one at extraction-time.
 
-let total_len_h #index (c: block index) (i: index) h (p: state c i (c.state.s i)) =
+let total_len_h #index (c: block index) (i: index) h (p: state' c i) =
   State?.total_len (B.deref h p)
 
 /// Case 1: we just need to grow the buffer, no call to the hash function.
@@ -550,7 +553,8 @@ val update_small:
   i:G.erased index -> (
   let i = G.reveal i in
   t:Type0 { t == c.state.s i } ->
-  s:state c i t ->
+  t':Type0 { t' == optional_key i c.km c.key } ->
+  s:state c i t t' ->
   data: B.buffer uint8 ->
   len: UInt32.t ->
   Stack unit
@@ -561,7 +565,7 @@ val update_small:
       update_post c i s data len h0 h1))
 
 #push-options "--z3rlimit 60"
-let update_small #index c i t p data len =
+let update_small #index c i t t' p data len =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.state.frame_freeable #i in
   [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
@@ -586,19 +590,19 @@ let update_small #index c i t p data len =
   let h1 = ST.get () in
   split_at_last_small c i (G.reveal seen_) (B.as_seq h0 data);
   c.state.frame_invariant (B.loc_buffer buf) block_state h0 h1;
-  optional_frame (B.loc_buffer buf) k' h0 h1;
+  optional_frame #_ #i #c.km #c.key (B.loc_buffer buf) k' h0 h1;
   assert (B.as_seq h1 data == B.as_seq h0 data);
 
   let total_len = add_len c i total_len len in
   [@inline_let]
-  let tmp: state_s c i t =
+  let tmp: state_s c i t t' =
     State #index #c #i block_state buf total_len (G.hide (G.reveal seen_ `S.append` (B.as_seq h0 data))) k'
   in
   p *= tmp;
   let h2 = ST.get () in
   assert (B.as_seq h2 data == B.as_seq h1 data);
   c.state.frame_invariant (B.loc_buffer p) block_state h1 h2;
-  optional_frame (B.loc_buffer p) k' h1 h2;
+  optional_frame #_ #i #c.km #c.key (B.loc_buffer p) k' h1 h2;
   assert (
     let b = S.append (G.reveal seen_) (B.as_seq h0 data) in
     let blocks, rest = split_at_last c i b in
@@ -693,7 +697,8 @@ val update_empty_buf:
   i:G.erased index -> (
   let i = G.reveal i in
   t:Type0 { t == c.state.s i } ->
-  s:state c i t ->
+  t':Type0 { t' == optional_key i c.km c.key } ->
+  s:state c i t t' ->
   data: B.buffer Lib.IntTypes.uint8 ->
   len: UInt32.t ->
   Stack unit
@@ -706,7 +711,7 @@ val update_empty_buf:
 inline_for_extraction noextract
 let seen_pred = seen
 
-let update_empty_buf #index c i t p data len =
+let update_empty_buf #index c i t t' p data len =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.state.frame_freeable #i in
   [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
@@ -733,14 +738,14 @@ let update_empty_buf #index c i t p data len =
   let data2 = B.sub data data1_len data2_len in
   c.update_multi (G.hide i) block_state data1 data1_len;
   let h01 = ST.get () in
-  optional_frame (c.state.footprint h0 block_state) k' h0 h01;
+  optional_frame #_ #i #c.km #c.key (c.state.footprint h0 block_state) k' h0 h01;
 
   let dst = B.sub buf 0ul data2_len in
   let h1 = ST.get () in
   B.blit data2 0ul dst 0ul data2_len;
   let h2 = ST.get () in
   c.state.frame_invariant (B.loc_buffer buf) block_state h1 h2;
-  optional_frame (B.loc_buffer buf) k' h1 h2;
+  optional_frame #_ #i #c.km #c.key (B.loc_buffer buf) k' h1 h2;
 
   S.append_assoc (G.reveal seen) (B.as_seq h0 data1) (B.as_seq h0 data2);
   assert (S.equal
@@ -748,13 +753,13 @@ let update_empty_buf #index c i t p data len =
     (S.append (G.reveal seen) (S.append (B.as_seq h0 data1) (B.as_seq h0 data2))));
 
   [@inline_let]
-  let tmp: state_s c i t = State #index #c #i block_state buf (add_len c i total_len len)
+  let tmp: state_s c i t t' = State #index #c #i block_state buf (add_len c i total_len len)
     (G.hide (G.reveal seen `S.append` B.as_seq h0 data)) k'
   in
   p *= tmp;
   let h3 = ST.get () in
   c.state.frame_invariant (B.loc_buffer p) block_state h2 h3;
-  optional_frame (B.loc_buffer p) k' h2 h3;
+  optional_frame #_ #i #c.km #c.key (B.loc_buffer p) k' h2 h3;
 
   // After careful diagnosis, this is the difficult proof obligation that sends
   // z3 off the rails.
@@ -782,7 +787,8 @@ val update_round:
   i:G.erased index -> (
   let i = G.reveal i in
   t:Type0 { t == c.state.s i } ->
-  s:state c i (c.state.s i) ->
+  t':Type0 { t' == optional_key i c.km c.key } ->
+  s:state c i t t' ->
   data: B.buffer uint8 ->
   len: UInt32.t ->
   Stack unit
@@ -819,7 +825,7 @@ let split_at_last_block #index (c: block index) (i: index) (b: bytes) (d: bytes)
 #pop-options
 
 #push-options "--z3rlimit 200"
-let update_round #index c i t p data len =
+let update_round #index c i t t' p data len =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.key.frame_freeable #i in
@@ -845,10 +851,10 @@ let update_round #index c i t p data len =
   assert (S.equal (B.as_seq h1 buf0) (S.append (B.as_seq h1 buf1) (B.as_seq h1 data)));
   c.state.frame_invariant (B.loc_buffer buf_) block_state h0 h1;
   c.state.frame_freeable (B.loc_buffer buf_) block_state h0 h1;
-  optional_frame (B.loc_buffer buf_) k' h0 h1;
+  optional_frame #_ #i #c.km #c.key (B.loc_buffer buf_) k' h0 h1;
   c.update_multi (G.hide i) block_state buf0 (c.block_len i);
   let h2 = ST.get () in
-  optional_frame (c.state.footprint h1 block_state) k' h1 h2;
+  optional_frame #_ #i #c.km #c.key (c.state.footprint h1 block_state) k' h1 h2;
   (* Proof interlude *)
   begin
     let seen' = G.reveal seen `S.append` B.as_seq h0 data in
@@ -857,7 +863,7 @@ let update_round #index c i t p data len =
     let blocks, rest = split_at_last c i seen in
     assert (S.length blocks % U32.v (c.block_len i) = 0);
     assert (S.length (rest `S.append` B.as_seq h0 data) % U32.v (c.block_len i) = 0);
-    let init = c.init_s i (optional_reveal h0 k') in
+    let init = c.init_s i (optional_reveal #_ #i #c.km #c.key h0 k') in
     calc (==) {
       c.state.v i h2 block_state;
     (==) { }
@@ -877,35 +883,35 @@ let update_round #index c i t p data len =
     }
   end;
   [@inline_let]
-  let tmp: state_s c i t = State #index #c #i block_state buf_ (add_len c i total_len len)
+  let tmp: state_s c i t t' = State #index #c #i block_state buf_ (add_len c i total_len len)
     (G.hide (G.reveal seen `S.append` B.as_seq h0 data)) k'
   in
   p *= tmp;
   let h3 = ST.get () in
   c.state.frame_invariant (B.loc_buffer p) block_state h2 h3;
   c.state.frame_freeable (B.loc_buffer p) block_state h2 h3;
-  optional_frame (B.loc_buffer p) k' h2 h3;
+  optional_frame #_ #i #c.km #c.key (B.loc_buffer p) k' h2 h3;
   assert (seen_pred c i h3 p `S.equal` (S.append (G.reveal seen) (B.as_seq h0 data)))
 #pop-options
 
-let update #index c i t p data len =
+let update #index c i t t' p data len =
   let open LowStar.BufferOps in
   let s = !*p in
   let State block_state buf_ total_len seen k' = s in
   let i = c.index_of_state i block_state in
   let sz = rest c i total_len in
   if len `U32.lt` (c.block_len i `U32.sub` sz) then
-    update_small c (G.hide i) t p data len
+    update_small c (G.hide i) t t' p data len
   else if sz = 0ul then
-    update_empty_buf c (G.hide i) t p data len
+    update_empty_buf c (G.hide i) t t' p data len
   else begin
     let h0 = ST.get () in
     let diff = c.block_len i `U32.sub` sz in
     let data1 = B.sub data 0ul diff in
     let data2 = B.sub data diff (len `U32.sub` diff) in
-    update_round c (G.hide i) t p data1 diff;
+    update_round c (G.hide i) t t' p data1 diff;
     let h1 = ST.get () in
-    update_empty_buf c (G.hide i) t p data2 (len `U32.sub` diff);
+    update_empty_buf c (G.hide i) t t' p data2 (len `U32.sub` diff);
     let h2 = ST.get () in
     (
       let seen = G.reveal seen in
@@ -921,7 +927,7 @@ let update #index c i t p data len =
     )
   end
 
-let mk_finish #index c i t p dst =
+let mk_finish #index c i t t' p dst =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.state.frame_freeable #i in
   [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
@@ -938,7 +944,7 @@ let mk_finish #index c i t p dst =
   let h1 = ST.get () in
   c.state.frame_invariant #i B.loc_none block_state h0 h1;
   c.state.frame_freeable #i B.loc_none block_state h0 h1;
-  optional_frame B.loc_none k' h0 h1;
+  optional_frame #_ #i #c.km #c.key B.loc_none k' h0 h1;
 
   let buf_ = B.sub buf_ 0ul (rest c i total_len) in
   assert (
@@ -952,21 +958,21 @@ let mk_finish #index c i t p dst =
   B.modifies_only_not_unused_in B.loc_none h1 h2;
   c.state.frame_invariant #i B.loc_none block_state h1 h2;
   c.state.frame_freeable #i B.loc_none block_state h1 h2;
-  optional_frame B.loc_none k' h1 h2;
+  optional_frame #_ #i #c.km #c.key B.loc_none k' h1 h2;
 
   c.state.copy (G.hide i) block_state tmp_block_state;
 
   let h3 = ST.get () in
   c.state.frame_invariant #i (c.state.footprint h2 tmp_block_state) block_state h2 h3;
   c.state.frame_freeable #i (c.state.footprint h2 tmp_block_state) block_state h2 h3;
-  optional_frame (c.state.footprint h2 tmp_block_state) k' h2 h3;
+  optional_frame #_ #i #c.km #c.key (c.state.footprint h2 tmp_block_state) k' h2 h3;
 
   c.update_last (G.hide i) tmp_block_state buf_ total_len;
 
   let h4 = ST.get () in
   c.state.frame_invariant #i (c.state.footprint h3 tmp_block_state) block_state h3 h4;
   c.state.frame_freeable #i (c.state.footprint h3 tmp_block_state) block_state h3 h4;
-  optional_frame (c.state.footprint h3 tmp_block_state) k' h3 h4;
+  optional_frame #_ #i #c.km #c.key (c.state.footprint h3 tmp_block_state) k' h3 h4;
 
   c.finish (G.hide i) k' tmp_block_state dst;
 
@@ -976,7 +982,7 @@ let mk_finish #index c i t p dst =
     let block_length = U32.v (c.block_len i) in
     let n = S.length seen / block_length in
     let blocks, rest_ = S.split seen (n * block_length)  in
-    let k = optional_reveal h0 k' in
+    let k = optional_reveal #_ #i #c.km #c.key h0 k' in
     calc (S.equal) {
       B.as_seq h5 dst;
     (S.equal) { }
@@ -1002,13 +1008,13 @@ let mk_finish #index c i t p dst =
 
   c.state.frame_invariant #i (B.loc_buffer dst) block_state h4 h5;
   c.state.frame_freeable #i (B.loc_buffer dst) block_state h4 h5;
-  optional_frame (B.loc_buffer dst) k' h4 h5;
+  optional_frame #_ #i #c.km #c.key (B.loc_buffer dst) k' h4 h5;
 
   pop_frame ();
   let h6 = ST.get () in
   c.state.frame_invariant #i B.(loc_region_only false (HS.get_tip h5)) block_state h5 h6;
   c.state.frame_freeable #i B.(loc_region_only false (HS.get_tip h5)) block_state h5 h6;
-  optional_frame B.(loc_region_only false (HS.get_tip h5)) k' h5 h6;
+  optional_frame #_ #i #c.km #c.key B.(loc_region_only false (HS.get_tip h5)) k' h5 h6;
   assert (seen_pred c i h6 p `S.equal` (G.reveal seen));
 
   // JP: this is not the right way to prove do this proof. Need to use
@@ -1020,7 +1026,7 @@ let mk_finish #index c i t p dst =
   B.popped_modifies h5 h6;
   assert (B.(modifies mloc h0 h6))
 
-let free #index c i t s =
+let free #index c i t t' s =
   let _ = allow_inversion key_management in
   let open LowStar.BufferOps in
   let State block_state buf _ _ k' = !*s in
@@ -1030,8 +1036,8 @@ let free #index c i t s =
   | Erased -> ()
   end;
   let h1 = ST.get () in
-  c.state.frame_freeable #i (optional_footprint h0 k') block_state h0 h1;
-  c.state.frame_invariant #i (optional_footprint h0 k') block_state h0 h1;
+  c.state.frame_freeable #i (optional_footprint #index #i #c.km #c.key h0 k') block_state h0 h1;
+  c.state.frame_invariant #i (optional_footprint #index #i #c.km #c.key h0 k') block_state h0 h1;
   c.state.free i block_state;
   B.free buf;
   B.free s

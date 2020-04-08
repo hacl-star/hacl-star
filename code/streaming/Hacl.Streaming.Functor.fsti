@@ -35,18 +35,31 @@ let uint32 = Lib.IntTypes.uint32
 /// ===============
 
 [@CAbstractStruct]
-val state_s (#index: Type0) (c: block index) (i: index) (t: Type0 { t == c.state.s i }): Type0
+val state_s (#index: Type0) (c: block index) (i: index)
+  (t: Type0 { t == c.state.s i })
+  (t': Type0 { t' == optional_key i c.km c.key }):
+  Type0
+
+inline_for_extraction noextract
+let state_s' c i = state_s c i (c.state.s i) (optional_key i c.km c.key)
 
 /// State is equipped with a superfluous type-level parameter to ensure ML-like
 /// prenex polymorphism and hence low-level monomorphization via KreMLin.
 ///
 /// Run-time functions MUST take t as a parameter. Proof-level functions are
 /// welcome to instantiate it directly with ``c.state i``.
-let state #index (c: block index) (i: index) (t: Type0 { t == c.state.s i }) = B.pointer (state_s c i t)
+let state #index (c: block index) (i: index)
+  (t: Type0 { t == c.state.s i })
+  (t': Type0 { t' == optional_key i c.km c.key })
+=
+  B.pointer (state_s c i t t')
 
-val footprint_s (#index: Type0) (c: block index) (i: index) (h: HS.mem) (s: state_s c i (c.state.s i)): GTot B.loc
+inline_for_extraction noextract
+let state' c i = state c i (c.state.s i) (optional_key i c.km c.key)
 
-let footprint (#index: Type0) (c: block index) (i: index) (m: HS.mem) (s: state c i (c.state.s i)) =
+val footprint_s (#index: Type0) (c: block index) (i: index) (h: HS.mem) (s: state_s' c i): GTot B.loc
+
+let footprint (#index: Type0) (c: block index) (i: index) (m: HS.mem) (s: state' c i) =
   B.(loc_union (loc_addr_of_buffer s) (footprint_s c i m (B.deref m s)))
 
 /// Invariants
@@ -60,7 +73,7 @@ let loc_includes_union_l_footprint_s
   (c: block index)
   (i: index)
   (m: HS.mem)
-  (l1 l2: B.loc) (s: state_s c i (c.state.s i))
+  (l1 l2: B.loc) (s: state_s' c i)
 : Lemma
   (requires (
     B.loc_includes l1 (footprint_s c i m s) \/ B.loc_includes l2 (footprint_s c i m s)
@@ -69,9 +82,9 @@ let loc_includes_union_l_footprint_s
   [SMTPat (B.loc_includes (B.loc_union l1 l2) (footprint_s c i m s))]
 = B.loc_includes_union_l l1 l2 (footprint_s c i m s)
 
-val invariant_s (#index: Type0) (c: block index) (i: index) (h: HS.mem) (s: state_s c i (c.state.s i)): Type0
+val invariant_s (#index: Type0) (c: block index) (i: index) (h: HS.mem) (s: state_s' c i): Type0
 
-let invariant #index (c: block index) (i: index) (m: HS.mem) (s: state c i (c.state.s i)) =
+let invariant #index (c: block index) (i: index) (m: HS.mem) (s: state' c i) =
   B.freeable s /\
   B.live m s /\
   B.(loc_disjoint (loc_addr_of_buffer s) (footprint_s c i m (B.deref m s))) /\
@@ -81,7 +94,7 @@ val invariant_loc_in_footprint
   (#index: Type0)
   (c: block index)
   (i: index)
-  (s: state c i (c.state.s i))
+  (s: state' c i)
   (m: HS.mem)
 : Lemma
   (requires (invariant c i m s))
@@ -132,9 +145,9 @@ val invariant_loc_in_footprint
 ///
 ///                                            JP (20190607)
 
-val seen: #index:Type0 -> c:block index -> i:index -> h:HS.mem -> s:state c i (c.state.s i) -> GTot bytes
+val seen: #index:Type0 -> c:block index -> i:index -> h:HS.mem -> s:state' c i -> GTot bytes
 
-val seen_bounded: #index:Type0 -> c:block index -> i:index -> h:HS.mem -> s:state c i (c.state.s i) -> Lemma
+val seen_bounded: #index:Type0 -> c:block index -> i:index -> h:HS.mem -> s:state' c i -> Lemma
   (requires (
     invariant c i h s))
   (ensures (
@@ -155,7 +168,7 @@ val seen_bounded: #index:Type0 -> c:block index -> i:index -> h:HS.mem -> s:stat
 /// key remains the same (i.e. we specify it fully just like ``seen``).
 ///
 /// Note: annotating the projector because of an interleaving bug.
-val key: #index:Type0 -> c:block index -> i:index -> h:HS.mem -> s:state c i (c.state.s i) -> GTot (c.key.I.t i)
+val key: #index:Type0 -> c:block index -> i:index -> h:HS.mem -> s:state' c i -> GTot (c.key.I.t i)
 
 /// Framing
 /// =======
@@ -169,8 +182,10 @@ val key: #index:Type0 -> c:block index -> i:index -> h:HS.mem -> s:state c i (c.
 /// lemmas for invariant and hashed could be bundled together. If we committed
 /// to always heap allocating, then we could conceivably have a single framing
 /// lemma.
+///
+/// TODO: frame_key!
 
-val frame_invariant: #index:Type0 -> c:block index -> i:index -> l:B.loc -> s:state c i (c.state.s i) -> h0:HS.mem -> h1:HS.mem -> Lemma
+val frame_invariant: #index:Type0 -> c:block index -> i:index -> l:B.loc -> s:state' c i -> h0:HS.mem -> h1:HS.mem -> Lemma
   (requires (
     invariant c i h0 s /\
     B.loc_disjoint l (footprint c i h0 s) /\
@@ -180,7 +195,7 @@ val frame_invariant: #index:Type0 -> c:block index -> i:index -> l:B.loc -> s:st
     footprint c i h0 s == footprint c i h1 s))
   [ SMTPat (invariant c i h1 s); SMTPat (B.modifies l h0 h1) ]
 
-val frame_seen: #index:Type0 -> c:block index -> i:index -> l:B.loc -> s:state c i (c.state.s i) -> h0:HS.mem -> h1:HS.mem -> Lemma
+val frame_seen: #index:Type0 -> c:block index -> i:index -> l:B.loc -> s:state' c i -> h0:HS.mem -> h1:HS.mem -> Lemma
   (requires (
     invariant c i h0 s /\
     B.loc_disjoint l (footprint c i h0 s) /\
@@ -199,7 +214,8 @@ val index_of_state:
   i:G.erased index -> (
   let i = G.reveal i in
   t:Type0 { t == c.state.s i } ->
-  s:state c i t ->
+  t':Type0 { t' == optional_key i c.km c.key } ->
+  s:state c i t t' ->
   Stack index
   (fun h0 -> invariant c i h0 s)
   (fun h0 i' h1 -> h0 == h1 /\ i' == i))
@@ -210,9 +226,10 @@ val create_in:
   c:block index ->
   i:index ->
   t:Type0 { t == c.state.s i } ->
+  t':Type0 { t' == optional_key i c.km c.key } ->
   k:c.key.s i ->
   r: HS.rid ->
-  ST (state c i t)
+  ST (state c i t t')
   (requires (fun h0 ->
     c.key.invariant #i h0 k /\
     HyperStack.ST.is_eternal_region r))
@@ -232,8 +249,9 @@ val init:
   i:G.erased index -> (
   let i = G.reveal i in
   t:Type0 { t == c.state.s i } ->
+  t':Type0 { t' == optional_key i c.km c.key } ->
   k:c.key.s i ->
-  s:state c i t ->
+  s:state c i t t' ->
   Stack unit
   (requires (fun h0 ->
     c.key.invariant #i h0 k /\
@@ -251,7 +269,7 @@ let update_pre
   #index
   (c: block index)
   (i: index)
-  (s: state c i (c.state.s i))
+  (s: state' c i)
   (data: B.buffer uint8)
   (len: UInt32.t)
   (h0: HS.mem)
@@ -267,7 +285,7 @@ let update_post
   #index
   (c: block index)
   (i: index)
-  (s: state c i (c.state.s i))
+  (s: state' c i)
   (data: B.buffer uint8)
   (len: UInt32.t)
   (h0 h1: HS.mem)
@@ -285,7 +303,8 @@ val update:
   i:G.erased index -> (
   let i = G.reveal i in
   t:Type0 { t == c.state.s i } ->
-  s:state c i t ->
+  t':Type0 { t' == optional_key i c.km c.key } ->
+  s:state c i t t' ->
   data: B.buffer uint8 ->
   len: UInt32.t ->
   Stack unit
@@ -297,8 +316,9 @@ let finish_st
   #index
   (c: block index)
   (i: index)
-  (t: Type0 { t == c.state.s i }) =
-  s:state c i t ->
+  (t: Type0 { t == c.state.s i })
+  (t':Type0 { t' == optional_key i c.km c.key }) =
+  s:state c i t t' ->
   dst:B.buffer uint8 { B.len dst == c.output_len i } ->
   Stack unit
     (requires fun h0 ->
@@ -330,7 +350,8 @@ val mk_finish:
   c:block index ->
   i:index ->
   t:Type0 { t == c.state.s i } ->
-  finish_st c i t
+  t':Type0 { t' == optional_key i c.km c.key } ->
+  finish_st c i t t'
 
 inline_for_extraction noextract
 val free:
@@ -339,7 +360,8 @@ val free:
   i:G.erased index -> (
   let i = G.reveal i in
   t:Type0 { t == c.state.s i } ->
-  s:state c i t ->
+  t':Type0 { t' == optional_key i c.km c.key } ->
+  s:state c i t t' ->
   ST unit
   (requires fun h0 ->
     invariant c i h0 s)

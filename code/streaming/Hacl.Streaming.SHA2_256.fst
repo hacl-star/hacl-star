@@ -89,8 +89,8 @@ let hacl_sha2_256: block unit =
 /// - we don't bother with using the abstraction feature since we verified
 ///   clients like miTLS go through EverCrypt.Hash.Incremental
 
-let create_in = F.create_in hacl_sha2_256 () (b.s ())
-let init = F.init hacl_sha2_256 (G.hide ()) (b.s ())
-let update = F.update hacl_sha2_256 (G.hide ()) (b.s ())
-let finish = F.mk_finish hacl_sha2_256 () (b.s ())
-let free = F.free hacl_sha2_256 (G.hide ()) (b.s ())
+let create_in = F.create_in hacl_sha2_256 () (b.s ()) (G.erased unit)
+let init = F.init hacl_sha2_256 (G.hide ()) (b.s ()) (G.erased unit)
+let update = F.update hacl_sha2_256 (G.hide ()) (b.s ()) (G.erased unit)
+let finish = F.mk_finish hacl_sha2_256 () (b.s ()) (G.erased unit)
+let free = F.free hacl_sha2_256 (G.hide ()) (b.s ()) (G.erased unit)

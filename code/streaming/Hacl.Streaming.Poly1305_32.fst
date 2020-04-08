@@ -375,8 +375,8 @@ let poly1305_32: I.block unit =
 /// The hardest part is done, just the instantiations now
 /// =====================================================
 
-let create_in = F.create_in poly1305_32 () t
-let init = F.init poly1305_32 (G.hide ()) t
-let update = F.update poly1305_32 (G.hide ()) t
-let finish = F.mk_finish poly1305_32 () t
-let free = F.free poly1305_32 (G.hide ()) t
+let create_in = F.create_in poly1305_32 () t (k.I.s ())
+let init = F.init poly1305_32 (G.hide ()) t (k.I.s ())
+let update = F.update poly1305_32 (G.hide ()) t (k.I.s ())
+let finish = F.mk_finish poly1305_32 () t (k.I.s ())
+let free = F.free poly1305_32 (G.hide ()) t (k.I.s ())
