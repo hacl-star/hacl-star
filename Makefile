@@ -672,6 +672,7 @@ BUNDLE_FLAGS	=\
   $(CTR_BUNDLE) \
   $(FRODO_BUNDLE) \
   $(HPKE_BUNDLE) \
+  $(STREAMING_BUNDLE) \
   $(LEGACY_BUNDLE)
 
 DEFAULT_FLAGS = \
@@ -750,6 +751,8 @@ dist/wasm/Makefile.basic: CHACHAPOLY_BUNDLE += \
 dist/wasm/Makefile.basic: POLY_BUNDLE = \
   -bundle 'Hacl.Poly1305_32=Hacl.Impl.Poly1305.Field32xN_32' \
   -bundle 'Hacl.Poly1305_128,Hacl.Poly1305_256,Hacl.Impl.Poly1305.*'
+
+dist/wasm/Makefile.basic: STREAMING_BUNDLE = -bundle Hacl.Streaming.*
 
 # And Merkle trees
 dist/wasm/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree,MerkleTree.*'
@@ -840,6 +843,7 @@ dist/linux/Makefile.basic: HAND_WRITTEN_FILES := $(filter-out providers/evercryp
 dist/linux/Makefile.basic: HAND_WRITTEN_H_FILES := $(filter-out %/evercrypt_targetconfig.h,$(HAND_WRITTEN_H_FILES))
 dist/linux/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
 dist/linux/Makefile.basic: BASE_FLAGS := $(filter-out -fcurly-braces,$(BASE_FLAGS))
+dist/linux/Makefile.basic: STREAMING_BUNDLE = -bundle Hacl.Streaming.*
 dist/linux/Makefile.basic: CURVE_BUNDLE = \
   $(CURVE_BUNDLE_BASE) \
   -bundle Hacl.Curve25519_64_Local \
@@ -903,6 +907,7 @@ dist/mozilla/Makefile.basic: SHA3_BUNDLE = -bundle Hacl.SHA3
 dist/mozilla/Makefile.basic: HASH_BUNDLE = -bundle Hacl.Hash.*,Hacl.HKDF,Hacl.HMAC,Hacl.HMAC_DRBG
 dist/mozilla/Makefile.basic: HPKE_BUNDLE = -bundle 'Hacl.HPKE.*'
 dist/mozilla/Makefile.basic: ECDSA_BUNDLE =
+dist/mozilla/Makefile.basic: STREAMING_BUNDLE = -bundle Hacl.Streaming.*
 dist/mozilla/Makefile.basic: FRODO_BUNDLE = -bundle Hacl.Frodo.*,Hacl.SHA3,Hacl.Keccak,Frodo.Params
 dist/mozilla/Makefile.basic: \
   BUNDLE_FLAGS += \
