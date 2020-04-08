@@ -264,6 +264,9 @@ bool print_result(uint8_t* comp, uint8_t* exp, int len) {
 
 bool print_test(uint8_t* in, int in_len, uint8_t* exp224, uint8_t* exp256, uint8_t* exp384, uint8_t* exp512){
   uint8_t comp[64] = {0};
+  uint8_t comp1[64] = {0};
+  uint8_t comp2[64] = {0};
+  uint8_t comp3[64] = {0};
   bool ok = true;
   
   Hacl_Hash_SHA2_hash_256(in,in_len,comp);
@@ -273,6 +276,13 @@ bool print_test(uint8_t* in, int in_len, uint8_t* exp224, uint8_t* exp256, uint8
   Hacl_Impl_SHA2_Core_sha256(comp,in_len,in);
   printf("NEW SHA2-256 (32-bit) Result:\n");
   ok = print_result(comp, exp256,32) && ok;
+
+  Hacl_Impl_SHA2_Core_sha256_4(comp,comp1,comp2,comp3,in_len,in,in,in,in);
+  printf("VEC4 SHA2-256 (32-bit) Result:\n");
+  ok = print_result(comp, exp256,32) && ok;
+  ok = print_result(comp1, exp256,32) && ok;
+  ok = print_result(comp2, exp256,32) && ok;
+  ok = print_result(comp3, exp256,32) && ok;
 
   ossl_sha2(comp,in,in_len);
   printf("OpenSSL SHA2-256 (32-bit) Result:\n");
@@ -347,6 +357,19 @@ int main()
   double tdiff2n = (double)(t2 - t1);
 
   for (int j = 0; j < ROUNDS; j++) {
+    Hacl_Impl_SHA2_Core_sha256_4(plain,plain+32,plain+64,plain+96,SIZE,plain,plain,plain,plain);
+  }
+  t1 = clock();
+  a = cpucycles_begin();
+  for (int j = 0; j < ROUNDS; j++) {
+    Hacl_Impl_SHA2_Core_sha256_4(plain,plain+32,plain+64,plain+96,SIZE,plain,plain,plain,plain);
+  }
+  b = cpucycles_end();
+  t2 = clock();
+  double cdiff2v = b - a;
+  double tdiff2v = (double)(t2 - t1);
+
+  for (int j = 0; j < ROUNDS; j++) {
     ossl_sha2(plain,plain,SIZE);
   }
   t1 = clock();
@@ -388,11 +411,11 @@ int main()
   uint8_t res = plain[0];
   printf("OLD SHA2-256 (32-bit) PERF: %d\n",(int)res); print_time(tdiff2,cdiff2);
   printf("NEW SHA2-256 (32-bit) PERF: %d\n",(int)res); print_time(tdiff2n,cdiff2n);
+  printf("VEC4 SHA2-256 (32-bit) PERF: %d\n",(int)res); print_time(tdiff2v,cdiff2v);
   printf("OpenSSL SHA2-256 (32-bit) PERF: %d\n",(int)res); print_time(tdiff2a,cdiff2a);
   printf("SHA2-224 (32-bit) PERF: %d\n",(int)res); print_time(tdiff1,cdiff1);
   printf("SHA2-384 (32-bit) PERF: %d\n",(int)res); print_time(tdiff3,cdiff3);
   printf("SHA2-512 (32-bit) PERF: %d\n",(int)res); print_time(tdiff4,cdiff4);
-
   if (ok) return EXIT_SUCCESS;
   else return EXIT_FAILURE;
 }

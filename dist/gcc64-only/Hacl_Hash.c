@@ -1824,15 +1824,16 @@ void Hacl_Hash_Core_SHA2_update_256(uint32_t *hash1, uint8_t *block)
 {
   uint32_t hash11[8U] = { 0U };
   uint32_t computed_ws[64U] = { 0U };
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
   {
-    if (i < (uint32_t)16U)
     {
       uint8_t *b = block + i * (uint32_t)4U;
       uint32_t u = load32_be(b);
       computed_ws[i] = u;
     }
-    else
+  }
+  for (uint32_t i = (uint32_t)16U; i < (uint32_t)64U; i++)
+  {
     {
       uint32_t t16 = computed_ws[i - (uint32_t)16U];
       uint32_t t15 = computed_ws[i - (uint32_t)15U];
@@ -1868,14 +1869,14 @@ void Hacl_Hash_Core_SHA2_update_256(uint32_t *hash1, uint8_t *block)
       +
         ((e0 >> (uint32_t)6U | e0 << (uint32_t)26U)
         ^ ((e0 >> (uint32_t)11U | e0 << (uint32_t)21U) ^ (e0 >> (uint32_t)25U | e0 << (uint32_t)7U)))
-      + ((e0 & f0) ^ (~e0 & g0))
+      + (((f0 ^ g0) & e0) ^ g0)
       + k224_256[i]
       + w;
     uint32_t
     t2 =
       ((a0 >> (uint32_t)2U | a0 << (uint32_t)30U)
       ^ ((a0 >> (uint32_t)13U | a0 << (uint32_t)19U) ^ (a0 >> (uint32_t)22U | a0 << (uint32_t)10U)))
-      + ((a0 & b0) ^ ((a0 & c0) ^ (b0 & c0)));
+      + (((c0 ^ b0) & (a0 ^ b0)) ^ b0);
     hash11[0U] = t1 + t2;
     hash11[1U] = a0;
     hash11[2U] = b0;

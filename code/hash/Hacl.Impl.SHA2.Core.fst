@@ -290,6 +290,49 @@ let load_ws1 #a #m b ws =
       ws.(i) <- Lib.IntVector.vec_load_be (word_t a) 1 (sub b (i *. word_len a) (word_len a)))
 
 inline_for_extraction
+val load_ws4 (#a: sha2_alg) (#m:m_spec{lanes a m = 4})
+        (b0: block_t a) (b1: block_t a)  (b2: block_t a)  (b3: block_t a) (ws: ws_t a m):
+    Stack unit
+    (requires (fun h ->
+      live h b0 /\ live h b1 /\ live h b2 /\ live h b3 /\ live h ws /\ disjoint b0 ws /\ disjoint b1 ws  /\ disjoint b2 ws /\ disjoint b3 ws))
+    (ensures (fun h0 _ h1 ->
+      modifies (loc ws) h0 h1))
+let load_ws4 #a #m b0 b1 b2 b3 ws =
+    admit();
+    let h0 = ST.get() in
+    loop_nospec #h0 4ul ws (fun i ->
+      ws.(4ul *. i) <- Lib.IntVector.vec_load_be (word_t a) 4 (sub b0 (4ul *. i *. word_len a) (4ul *. word_len a)));
+    let h0 = ST.get() in
+    loop_nospec #h0 4ul ws (fun i ->
+      ws.(4ul *. i +. 1ul) <- Lib.IntVector.vec_load_be (word_t a) 4 (sub b1 (4ul *. i *. word_len a) (4ul *. word_len a)));
+    let h0 = ST.get() in
+    loop_nospec #h0 4ul ws (fun i ->
+      ws.(4ul *. i +. 2ul) <- Lib.IntVector.vec_load_be (word_t a) 4 (sub b2 (4ul *. i *. word_len a) (4ul *. word_len a)));
+    let h0 = ST.get() in
+    loop_nospec #h0 4ul ws (fun i ->
+      ws.(4ul *. i +. 3ul) <- Lib.IntVector.vec_load_be (word_t a) 4 (sub b3 (4ul *. i *. word_len a) (4ul *. word_len a)));
+    let h0 = ST.get() in
+    loop_nospec #h0 4ul ws (fun i ->
+      let ws0 = ws.(4ul*.i+.0ul) in
+      let ws1 = ws.(4ul*.i+.1ul) in
+      let ws2 = ws.(4ul*.i+.2ul) in
+      let ws3 = ws.(4ul*.i+.3ul) in
+      ws.(4ul*.i) <- vec_interleave_low ws0 ws1;
+      ws.(4ul*.i+.1ul) <- vec_interleave_high ws0 ws1;
+      ws.(4ul*.i+.2ul) <- vec_interleave_low ws2 ws3;
+      ws.(4ul*.i+.3ul) <- vec_interleave_high ws2 ws3;
+      let ws0 = ws.(4ul*.i+.0ul) in
+      let ws1 = ws.(4ul*.i+.1ul) in
+      let ws2 = ws.(4ul*.i+.2ul) in
+      let ws3 = ws.(4ul*.i+.3ul) in
+      ws.(4ul*.i) <- vec_interleave_low_n 2 ws0 ws2;
+      ws.(4ul*.i+.1ul) <- vec_interleave_high_n 2 ws0 ws2;
+      ws.(4ul*.i+.2ul) <- vec_interleave_low_n 2 ws1 ws3;
+      ws.(4ul*.i+.3ul) <- vec_interleave_high_n 2 ws1 ws3)
+    
+
+
+inline_for_extraction
 val ws_next (#a: sha2_alg) (#m:m_spec)
             (k:size_t{size_v k > 0 /\ size_v k < size_v (num_rounds16 a)}) (ws: ws_t a m):
     Stack unit
@@ -354,7 +397,12 @@ let update1_t (a:sha2_alg) (m:m_spec{lanes a m = 1}) = b:block_t a -> hash:state
     Stack unit
     (requires (fun h -> live h b /\ live h hash /\ disjoint b hash))
     (ensures (fun h0 _ h1 -> modifies1 hash h0 h1))
-    
+
+let update4_t (a:sha2_alg) (m:m_spec{lanes a m = 4}) = b0:block_t a -> b1:block_t a -> b2:block_t a -> b3:block_t a -> hash:state_t a m ->
+    Stack unit
+    (requires (fun h -> live h b0 /\ live h b1 /\ live h b2 /\ live h b3 /\ live h hash /\ disjoint b0 hash /\ disjoint b1 hash /\ disjoint b2 hash /\ disjoint b3 hash))
+    (ensures (fun h0 _ h1 -> modifies1 hash h0 h1))
+
 inline_for_extraction
 val update1: #a:sha2_alg -> #m:m_spec{lanes a m = 1} -> update1_t a m
 let update1 #a #m b hash =
@@ -363,6 +411,18 @@ let update1 #a #m b hash =
   copy hash_old hash;
   let ws = create 16ul (zero_element a m) in
   load_ws1 b ws;
+  shuffle ws hash;
+  map2T 8ul hash (+|) hash hash_old; 
+  pop_frame()
+
+inline_for_extraction
+val update4: #a:sha2_alg -> #m:m_spec{lanes a m = 4} -> update4_t a m
+let update4 #a #m b0 b1 b2 b3 hash =
+  push_frame ();
+  let hash_old = create 8ul (zero_element a m) in
+  copy hash_old hash;
+  let ws = create 16ul (zero_element a m) in
+  load_ws4 b0 b1 b2 b3 ws;
   shuffle ws hash;
   map2T 8ul hash (+|) hash hash_old; 
   pop_frame()
@@ -399,6 +459,63 @@ let update1_last #a #m upd totlen len b hash =
   pop_frame()
 
 inline_for_extraction
+val update4_last: #a:sha2_alg -> #m:m_spec{lanes a m = 4} ->
+                  upd: update4_t a m ->
+                  totlen:len_t a ->
+                  len:size_t{v len < block_length a} ->
+                  b0:lbuffer uint8 len ->
+                  b1:lbuffer uint8 len ->
+                  b2:lbuffer uint8 len ->
+                  b3:lbuffer uint8 len ->
+                  hash:state_t a m ->
+    Stack unit
+    (requires (fun h -> live h b0 /\ live h b1 /\ live h b2 /\ live h b3 /\ live h hash /\ disjoint b0 hash /\ disjoint b1 hash /\ disjoint b2 hash /\ disjoint b3 hash))
+    (ensures (fun h0 _ h1 -> modifies1 hash h0 h1))
+
+#push-options "--z3rlimit 200"
+let update4_last #a #m upd totlen len b0 b1 b2 b3 hash =
+  push_frame ();
+  admit();
+  let last = create (8ul *. block_len a) (u8 0) in
+  let last0 = sub last 0ul (2ul *. block_len a) in
+  let last1 = sub last (2ul *. block_len a) (2ul *. block_len a) in
+  let last2 = sub last (4ul *. block_len a) (2ul *. block_len a) in
+  let last3 = sub last (6ul *. block_len a) (2ul *. block_len a) in
+  copy (sub last0 0ul len) b0;
+  copy (sub last1 0ul len) b1;
+  copy (sub last2 0ul len) b2;
+  copy (sub last3 0ul len) b3;
+  last0.(len) <- u8 0x80;
+  last1.(len) <- u8 0x80;
+  last2.(len) <- u8 0x80;
+  last3.(len) <- u8 0x80;
+  let total_len_bits = secret (shift_left #(len_int_type a) totlen 3ul) in 
+  let blocks = padded_blocks a len in
+  let fin = blocks *. block_len a in
+  let len_buf0 = sub last0 (fin -. len_len a) (len_len a) in
+  let len_buf1 = sub last1 (fin -. len_len a) (len_len a) in
+  let len_buf2 = sub last2 (fin -. len_len a) (len_len a) in
+  let len_buf3 = sub last3 (fin -. len_len a) (len_len a) in
+  Lib.ByteBuffer.uint_to_bytes_be #(len_int_type a) len_buf0 total_len_bits;
+  Lib.ByteBuffer.uint_to_bytes_be #(len_int_type a) len_buf1 total_len_bits;
+  Lib.ByteBuffer.uint_to_bytes_be #(len_int_type a) len_buf2 total_len_bits;
+  Lib.ByteBuffer.uint_to_bytes_be #(len_int_type a) len_buf3 total_len_bits;
+  let last00 = sub last0 0ul (block_len a) in
+  let last10 = sub last1 0ul (block_len a) in
+  let last20 = sub last2 0ul (block_len a) in
+  let last30 = sub last3 0ul (block_len a) in
+  upd last00 last10 last20 last30 hash;
+  if blocks >. 1ul then (
+    let last01 = sub last0 (block_len a) (block_len a) in
+    let last11 = sub last1 (block_len a) (block_len a) in
+    let last21 = sub last2 (block_len a) (block_len a) in
+    let last31 = sub last3 (block_len a) (block_len a) in
+    upd last01 last11 last21 last31 hash
+  );
+  pop_frame()
+#pop-options
+
+inline_for_extraction
 val finish1: #a:sha2_alg -> #m:m_spec{lanes a m = 1} ->
              b:lbuffer uint8 (hash_len a) -> hash:state_t a m ->
     Stack unit
@@ -408,6 +525,37 @@ let finish1 #a #m b hash =
   let h0 = ST.get() in
   loop_nospec #h0 (hash_word_len a) b (fun i ->
        vec_store_be (sub b (i *. word_len a) (word_len a)) hash.(i))
+
+inline_for_extraction
+val finish4: #a:sha2_alg -> #m:m_spec{lanes a m = 4} ->
+             b0:lbuffer uint8 (hash_len a) ->
+             b1:lbuffer uint8 (hash_len a) ->
+             b2:lbuffer uint8 (hash_len a) ->
+             b3:lbuffer uint8 (hash_len a) ->
+             hash:state_t a m ->
+    Stack unit
+    (requires (fun h -> live h b0 /\ live h b1 /\ live h b2 /\ live h b3 /\ live h hash /\ disjoint b0 hash /\ disjoint b1 hash /\ disjoint b2 hash /\ disjoint b3 hash))
+    (ensures (fun h0 _ h1 -> modifies (loc b0 |+| loc b1 |+| loc b2 |+| loc b3) h0 h1))
+let finish4 #a #m b0 b1 b2 b3 hash =
+  push_frame();
+  admit();
+  let hbuf = create (4ul *. 8ul *. word_len a) (u8 0) in 
+  let h0 = ST.get() in
+  loop_nospec #h0 8ul hbuf (fun i ->
+       vec_store_be (sub hbuf (4ul *. i *. word_len a) (4ul *. word_len a)) hash.(i));
+  let h0 = ST.get() in
+  loop_nospec #h0 (hash_word_len a) b0 (fun i ->
+       copy (sub b0 (i *. word_len a) (word_len a)) (sub hbuf (4ul*.i*.word_len a) (word_len a)));
+  let h0 = ST.get() in
+  loop_nospec #h0 (hash_word_len a) b1 (fun i ->
+       copy (sub b1 (i *. word_len a) (word_len a)) (sub hbuf (4ul*.i*.word_len a+.word_len a) (word_len a)));
+  let h0 = ST.get() in
+  loop_nospec #h0 (hash_word_len a) b2 (fun i ->
+       copy (sub b2 (i *. word_len a) (word_len a)) (sub hbuf (4ul*.i*.word_len a+.2ul*.word_len a) (word_len a)));
+  let h0 = ST.get() in
+  loop_nospec #h0 (hash_word_len a) b3 (fun i ->
+       copy (sub b3 (i *. word_len a) (word_len a)) (sub hbuf (4ul*.i*.word_len a+.3ul*.word_len a) (word_len a)));
+  pop_frame()
 
 inline_for_extraction
 val hash1: #a:sha2_alg -> upd:update1_t a M32 -> h:lbuffer uint8 (hash_len a) ->
@@ -429,6 +577,45 @@ let hash1 #a upd h len b =
     finish1 h st;
     pop_frame()
 
+inline_for_extraction
+val hash4: #a:sha2_alg -> #m:m_spec{lanes a m == 4} -> upd:update4_t a m ->
+           r0:lbuffer uint8 (hash_len a) ->
+           r1:lbuffer uint8 (hash_len a) ->
+           r2:lbuffer uint8 (hash_len a) ->
+           r3:lbuffer uint8 (hash_len a) ->
+           len:size_t ->
+           b0:lbuffer uint8 len ->
+           b1:lbuffer uint8 len ->
+           b2:lbuffer uint8 len ->
+           b3:lbuffer uint8 len ->
+    Stack unit
+    (requires (fun h0 -> live h0 b0 /\ live h0 b1 /\ live h0 b2 /\ live h0 b3 /\
+                       live h0 r0 /\ live h0 r1 /\ live h0 r2 /\ live h0 r3))
+    (ensures (fun h0 _ h1 -> modifies (loc r0 |+| loc r1 |+| loc r2 |+| loc r3) h0 h1))
+let hash4 #a #m upd r0 r1 r2 r3 len b0 b1 b2 b3 =
+    push_frame();
+    let st = alloc a m in
+    init st;
+    [@inline_let]
+    let spec h i acc = acc in
+    admit();
+    let h0 = ST.get() in
+    loop1 h0 (len /. block_len a) st spec
+      (fun i -> 
+        let bl0 = sub b0 (i*. block_len a) (block_len a) in
+        let bl1 = sub b1 (i*. block_len a) (block_len a) in
+        let bl2 = sub b2 (i*. block_len a) (block_len a) in
+        let bl3 = sub b3 (i*. block_len a) (block_len a) in
+        upd bl0 bl1 bl2 bl3 st); 
+    let rem = len %. block_len a in
+    let bl0 = sub b0 (len -. rem) rem in
+    let bl1 = sub b1 (len -. rem) rem in
+    let bl2 = sub b2 (len -. rem) rem in
+    let bl3 = sub b3 (len -. rem) rem in
+    update4_last upd len rem bl0 bl1 bl2 bl3 st;
+    finish4 r0 r1 r2 r3 st;
+    pop_frame()
+
 [@CInline]
 val sha256_update1: b:block_t SHA2_256 -> hash:state_t SHA2_256 M32 ->
     Stack unit
@@ -437,6 +624,19 @@ val sha256_update1: b:block_t SHA2_256 -> hash:state_t SHA2_256 M32 ->
 let sha256_update1 b hash = update1 #SHA2_256 #M32 b hash
 
 let sha256 hash len b = hash1 #SHA2_256 sha256_update1 hash len b
+
+[@CInline]
+val sha256_update4: b0:block_t SHA2_256 ->
+                    b1:block_t SHA2_256 ->
+                    b2:block_t SHA2_256 ->
+                    b3:block_t SHA2_256 ->
+                    hash:state_t SHA2_256 M128 ->
+    Stack unit
+    (requires (fun h -> live h b0 /\ live h b1 /\ live h b2 /\ live h b3 /\ live h hash /\ disjoint b0 hash /\ disjoint b1 hash /\ disjoint b2 hash /\ disjoint b3 hash))
+    (ensures (fun h0 _ h1 -> modifies1 hash h0 h1))
+let sha256_update4 b0 b1 b2 b3 hash = update4 #SHA2_256 #M128 b0 b1 b2 b3 hash
+
+let sha256_4 r0 r1 r2 r3 len b0 b1 b2 b3 = hash4 #SHA2_256 sha256_update4 r0 r1 r2 r3 len b0 b1 b2 b3
 
 (*
 noextract inline_for_extraction

@@ -12,7 +12,7 @@ include ../../Makefile.local
 
 #BASE_FLAGS+= -funroll-loops 4
 
-CFLAGS += -I../../../lib/c -march=native -mtune=native -O3
+CFLAGS += -I../../../lib/c -I../../lib/c -march=native -mtune=native -O3
 export CFLAGS
 
 # CUSTOMIZE HERE: how to produce binary objects
@@ -22,6 +22,7 @@ dist/libhash.a: dist/Makefile.basic
 
 dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
 	$(KRML) $^ -o libhash.a $(BASE_FLAGS) $(HASH_BUNDLE) -bundle Hacl.Impl.SHA2.Core=* \
+	  -add-include '"libintvector.h"' \
 	  -tmpdir dist \
 	  -skip-compilation
 
