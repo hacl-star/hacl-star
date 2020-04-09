@@ -9,7 +9,7 @@ open Lib.Sequence
 open Lib.Buffer
 open Lib.NTuple
 
-unfold let multibuf (lanes:flen) (len:size_t) = 
+inline_for_extraction let multibuf (lanes:flen) (len:size_t) = 
     ntuple (lbuffer uint8 len) lanes
 
 let disjoint_multi #lanes #len #a #len' (b:multibuf lanes len) (b':lbuffer a len') =
