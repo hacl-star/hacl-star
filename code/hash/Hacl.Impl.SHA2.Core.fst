@@ -8,7 +8,7 @@ open Lib.IntTypes
 open Lib.Sequence
 open Lib.Buffer
 open Lib.IntVector
-module GTup = Lib.GenTuple
+module NTup = Lib.NTuple
 open Lib.MultiBuffer
 open Spec.Hash.Definitions
 open Hacl.Hash.Definitions
@@ -352,7 +352,7 @@ let load_ws #a #m b ws =
                  (lbuffer uint8 (block_len a) &
                  (lbuffer uint8 (block_len a) &
                   lbuffer uint8 (block_len a) ))
-                 = b <: GTup.gtup (lbuffer uint8 (block_len a)) 4 in
+                 = b <: NTup.ntuple (lbuffer uint8 (block_len a)) 4 in
          let (b0,(b1,(b2,b3))) = b in
 //         let b0 = b.(|0|) in
 //         let b1 = b.(|1|) in
