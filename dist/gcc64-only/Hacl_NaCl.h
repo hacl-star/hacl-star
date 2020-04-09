@@ -43,7 +43,7 @@ Hacl_NaCl_crypto_secretbox_detached(
   uint8_t *tag,
   uint8_t *m,
   uint32_t mlen,
-  uint8_t *n1,
+  uint8_t *n,
   uint8_t *k
 );
 
@@ -53,19 +53,19 @@ Hacl_NaCl_crypto_secretbox_open_detached(
   uint8_t *c,
   uint8_t *tag,
   uint32_t mlen,
-  uint8_t *n1,
+  uint8_t *n,
   uint8_t *k
 );
 
 uint32_t
-Hacl_NaCl_crypto_secretbox_easy(uint8_t *c, uint8_t *m, uint32_t mlen, uint8_t *n1, uint8_t *k);
+Hacl_NaCl_crypto_secretbox_easy(uint8_t *c, uint8_t *m, uint32_t mlen, uint8_t *n, uint8_t *k);
 
 uint32_t
 Hacl_NaCl_crypto_secretbox_open_easy(
   uint8_t *m,
   uint8_t *c,
   uint32_t clen,
-  uint8_t *n1,
+  uint8_t *n,
   uint8_t *k
 );
 
@@ -77,7 +77,7 @@ Hacl_NaCl_crypto_box_detached_afternm(
   uint8_t *tag,
   uint8_t *m,
   uint32_t mlen,
-  uint8_t *n1,
+  uint8_t *n,
   uint8_t *k
 );
 
@@ -87,7 +87,7 @@ Hacl_NaCl_crypto_box_detached(
   uint8_t *tag,
   uint8_t *m,
   uint32_t mlen,
-  uint8_t *n1,
+  uint8_t *n,
   uint8_t *pk,
   uint8_t *sk
 );
@@ -98,7 +98,7 @@ Hacl_NaCl_crypto_box_open_detached_afternm(
   uint8_t *c,
   uint8_t *tag,
   uint32_t mlen,
-  uint8_t *n1,
+  uint8_t *n,
   uint8_t *k
 );
 
@@ -108,7 +108,7 @@ Hacl_NaCl_crypto_box_open_detached(
   uint8_t *c,
   uint8_t *tag,
   uint32_t mlen,
-  uint8_t *n1,
+  uint8_t *n,
   uint8_t *pk,
   uint8_t *sk
 );
@@ -118,7 +118,7 @@ Hacl_NaCl_crypto_box_easy_afternm(
   uint8_t *c,
   uint8_t *m,
   uint32_t mlen,
-  uint8_t *n1,
+  uint8_t *n,
   uint8_t *k
 );
 
@@ -127,7 +127,7 @@ Hacl_NaCl_crypto_box_easy(
   uint8_t *c,
   uint8_t *m,
   uint32_t mlen,
-  uint8_t *n1,
+  uint8_t *n,
   uint8_t *pk,
   uint8_t *sk
 );
@@ -137,7 +137,7 @@ Hacl_NaCl_crypto_box_open_easy_afternm(
   uint8_t *m,
   uint8_t *c,
   uint32_t clen,
-  uint8_t *n1,
+  uint8_t *n,
   uint8_t *k
 );
 
@@ -146,7 +146,7 @@ Hacl_NaCl_crypto_box_open_easy(
   uint8_t *m,
   uint8_t *c,
   uint32_t clen,
-  uint8_t *n1,
+  uint8_t *n,
   uint8_t *pk,
   uint8_t *sk
 );

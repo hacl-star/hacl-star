@@ -52,7 +52,7 @@ uint8_t
 Spec_Agile_AEAD_alg EverCrypt_AEAD_alg_of_state(EverCrypt_AEAD_state_s *s);
 
 EverCrypt_Error_error_code
-EverCrypt_AEAD_create_in(Spec_Agile_AEAD_alg a, EverCrypt_AEAD_state_s **dst, uint8_t *k1);
+EverCrypt_AEAD_create_in(Spec_Agile_AEAD_alg a, EverCrypt_AEAD_state_s **dst, uint8_t *k);
 
 EverCrypt_Error_error_code
 EverCrypt_AEAD_encrypt(

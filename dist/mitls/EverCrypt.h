@@ -40,7 +40,7 @@
 
 uint32_t EverCrypt_random_init();
 
-void EverCrypt_random_sample(uint32_t len, uint8_t *out1);
+void EverCrypt_random_sample(uint32_t len, uint8_t *out);
 
 void EverCrypt_random_cleanup();
 
@@ -77,11 +77,11 @@ typedef EverCrypt_aes128_key_s *EverCrypt_aes128_key;
 
 KRML_DEPRECATED("Please use EverCrypt_CTR.h (from C) or EverCrypt.CTR.fsti (from F*) ")
 
-EverCrypt_aes128_key_s *EverCrypt_aes128_create(uint8_t *k1);
+EverCrypt_aes128_key_s *EverCrypt_aes128_create(uint8_t *k);
 
 KRML_DEPRECATED("Please use EverCrypt_CTR.h (from C) or EverCrypt.CTR.fsti (from F*) ")
 
-void EverCrypt_aes128_compute(EverCrypt_aes128_key_s *k1, uint8_t *plain, uint8_t *cipher);
+void EverCrypt_aes128_compute(EverCrypt_aes128_key_s *k, uint8_t *plain, uint8_t *cipher);
 
 KRML_DEPRECATED("Please use EverCrypt_CTR.h (from C) or EverCrypt.CTR.fsti (from F*) ")
 
@@ -113,11 +113,11 @@ typedef EverCrypt_aes256_key_s *EverCrypt_aes256_key;
 
 KRML_DEPRECATED("Please use EverCrypt_CTR.h (from C) or EverCrypt.CTR.fsti (from F*) ")
 
-EverCrypt_aes256_key_s *EverCrypt_aes256_create(uint8_t *k1);
+EverCrypt_aes256_key_s *EverCrypt_aes256_create(uint8_t *k);
 
 KRML_DEPRECATED("Please use EverCrypt_CTR.h (from C) or EverCrypt.CTR.fsti (from F*) ")
 
-void EverCrypt_aes256_compute(EverCrypt_aes256_key_s *k1, uint8_t *plain, uint8_t *cipher);
+void EverCrypt_aes256_compute(EverCrypt_aes256_key_s *k, uint8_t *plain, uint8_t *cipher);
 
 KRML_DEPRECATED("Please use EverCrypt_CTR.h (from C) or EverCrypt.CTR.fsti (from F*) ")
 
@@ -253,7 +253,7 @@ typedef EverCrypt__aead_state *EverCrypt_aead_state;
 
 KRML_DEPRECATED("Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")
 
-EverCrypt__aead_state *EverCrypt_aead_create(EverCrypt_aead_alg alg, uint8_t *k1);
+EverCrypt__aead_state *EverCrypt_aead_create(EverCrypt_aead_alg alg, uint8_t *k);
 
 KRML_DEPRECATED("Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")
 
@@ -317,7 +317,7 @@ EverCrypt_dh_compute(
   EverCrypt__dh_state *st,
   uint8_t *public,
   uint32_t public_len,
-  uint8_t *out1
+  uint8_t *out
 );
 
 #define EverCrypt_ECC_P256 0
@@ -349,14 +349,14 @@ typedef EverCrypt__ecdh_state EverCrypt_ecdh_state_s;
 
 typedef EverCrypt__ecdh_state *EverCrypt_ecdh_state;
 
-EverCrypt__ecdh_state *EverCrypt_ecdh_load_curve(EverCrypt_ec_curve g1);
+EverCrypt__ecdh_state *EverCrypt_ecdh_load_curve(EverCrypt_ec_curve g);
 
 void EverCrypt_ecdh_free_curve(EverCrypt__ecdh_state *st);
 
 void EverCrypt_ecdh_keygen(EverCrypt__ecdh_state *st, uint8_t *outx, uint8_t *outy);
 
 uint32_t
-EverCrypt_ecdh_compute(EverCrypt__ecdh_state *st, uint8_t *inx, uint8_t *iny, uint8_t *out1);
+EverCrypt_ecdh_compute(EverCrypt__ecdh_state *st, uint8_t *inx, uint8_t *iny, uint8_t *out);
 
 #define __EverCrypt_H_DEFINED
 #endif

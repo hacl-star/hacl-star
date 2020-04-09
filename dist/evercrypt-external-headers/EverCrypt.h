@@ -68,7 +68,7 @@ typedef uint8_t EverCrypt_Error_error_code;
 
 extern uint32_t EverCrypt_random_init();
 
-extern void EverCrypt_random_sample(uint32_t len, uint8_t *out1);
+extern void EverCrypt_random_sample(uint32_t len, uint8_t *out);
 
 extern void EverCrypt_random_cleanup();
 
@@ -107,12 +107,12 @@ typedef EverCrypt_aes128_key_s *EverCrypt_aes128_key;
 
 KRML_DEPRECATED("Please use EverCrypt_CTR.h (from C) or EverCrypt.CTR.fsti (from F*) ")
 
-extern EverCrypt_aes128_key_s *EverCrypt_aes128_create(uint8_t *k1);
+extern EverCrypt_aes128_key_s *EverCrypt_aes128_create(uint8_t *k);
 
 KRML_DEPRECATED("Please use EverCrypt_CTR.h (from C) or EverCrypt.CTR.fsti (from F*) ")
 
 extern void
-EverCrypt_aes128_compute(EverCrypt_aes128_key_s *k1, uint8_t *plain, uint8_t *cipher);
+EverCrypt_aes128_compute(EverCrypt_aes128_key_s *k, uint8_t *plain, uint8_t *cipher);
 
 KRML_DEPRECATED("Please use EverCrypt_CTR.h (from C) or EverCrypt.CTR.fsti (from F*) ")
 
@@ -146,12 +146,12 @@ typedef EverCrypt_aes256_key_s *EverCrypt_aes256_key;
 
 KRML_DEPRECATED("Please use EverCrypt_CTR.h (from C) or EverCrypt.CTR.fsti (from F*) ")
 
-extern EverCrypt_aes256_key_s *EverCrypt_aes256_create(uint8_t *k1);
+extern EverCrypt_aes256_key_s *EverCrypt_aes256_create(uint8_t *k);
 
 KRML_DEPRECATED("Please use EverCrypt_CTR.h (from C) or EverCrypt.CTR.fsti (from F*) ")
 
 extern void
-EverCrypt_aes256_compute(EverCrypt_aes256_key_s *k1, uint8_t *plain, uint8_t *cipher);
+EverCrypt_aes256_compute(EverCrypt_aes256_key_s *k, uint8_t *plain, uint8_t *cipher);
 
 KRML_DEPRECATED("Please use EverCrypt_CTR.h (from C) or EverCrypt.CTR.fsti (from F*) ")
 
@@ -287,7 +287,7 @@ typedef EverCrypt__aead_state *EverCrypt_aead_state;
 
 KRML_DEPRECATED("Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")
 
-extern EverCrypt__aead_state *EverCrypt_aead_create(EverCrypt_aead_alg alg, uint8_t *k1);
+extern EverCrypt__aead_state *EverCrypt_aead_create(EverCrypt_aead_alg alg, uint8_t *k);
 
 KRML_DEPRECATED("Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")
 
@@ -351,7 +351,7 @@ EverCrypt_dh_compute(
   EverCrypt__dh_state *st,
   uint8_t *public,
   uint32_t public_len,
-  uint8_t *out1
+  uint8_t *out
 );
 
 #define EverCrypt_ECC_P256 0
@@ -383,14 +383,14 @@ typedef EverCrypt__ecdh_state EverCrypt_ecdh_state_s;
 
 typedef EverCrypt__ecdh_state *EverCrypt_ecdh_state;
 
-extern EverCrypt__ecdh_state *EverCrypt_ecdh_load_curve(EverCrypt_ec_curve g1);
+extern EverCrypt__ecdh_state *EverCrypt_ecdh_load_curve(EverCrypt_ec_curve g);
 
 extern void EverCrypt_ecdh_free_curve(EverCrypt__ecdh_state *st);
 
 extern void EverCrypt_ecdh_keygen(EverCrypt__ecdh_state *st, uint8_t *outx, uint8_t *outy);
 
 extern uint32_t
-EverCrypt_ecdh_compute(EverCrypt__ecdh_state *st, uint8_t *inx, uint8_t *iny, uint8_t *out1);
+EverCrypt_ecdh_compute(EverCrypt__ecdh_state *st, uint8_t *inx, uint8_t *iny, uint8_t *out);
 
 typedef struct EverCrypt_AEAD_state_s_s EverCrypt_AEAD_state_s;
 
@@ -783,7 +783,7 @@ extern EverCrypt_Hash_state_s *EverCrypt_Hash_create(Spec_Hash_Definitions_hash_
 
 extern void EverCrypt_Hash_init(EverCrypt_Hash_state_s *a);
 
-extern void EverCrypt_Hash_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n1);
+extern void EverCrypt_Hash_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n);
 
 extern void EverCrypt_Hash_update(EverCrypt_Hash_state_s *a, uint8_t *s);
 
@@ -798,7 +798,7 @@ EverCrypt_Hash_update_last_256(
   uint32_t input_len
 );
 
-extern void EverCrypt_Hash_update_last(EverCrypt_Hash_state_s *a, uint8_t *s, uint64_t last1);
+extern void EverCrypt_Hash_update_last(EverCrypt_Hash_state_s *a, uint8_t *s, uint64_t last);
 
 extern void EverCrypt_Hash_finish(EverCrypt_Hash_state_s *a, uint8_t *s);
 
@@ -857,7 +857,7 @@ extern void EverCrypt_Hash_Incremental_init(EverCrypt_Hash_Incremental_state_s *
 extern void
 EverCrypt_Hash_Incremental_update(
   EverCrypt_Hash_Incremental_state_s *a,
-  uint8_t *p1,
+  uint8_t *p,
   uint32_t data
 );
 
@@ -882,7 +882,7 @@ EverCrypt_Poly1305_poly1305(uint8_t *dst, uint8_t *src, uint32_t len, uint8_t *k
 extern void
 EverCrypt_Chacha20Poly1305_aead_encrypt(
   uint8_t *k,
-  uint8_t *n1,
+  uint8_t *n,
   uint32_t aadlen,
   uint8_t *aad,
   uint32_t mlen,
@@ -894,7 +894,7 @@ EverCrypt_Chacha20Poly1305_aead_encrypt(
 extern uint32_t
 EverCrypt_Chacha20Poly1305_aead_decrypt(
   uint8_t *k,
-  uint8_t *n1,
+  uint8_t *n,
   uint32_t aadlen,
   uint8_t *aad,
   uint32_t mlen,

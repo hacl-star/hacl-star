@@ -157,21 +157,21 @@ Hacl_Impl_SHA3_absorb(
 )
 {
   uint32_t nb = inputByteLen / rateInBytes;
-  uint32_t rem1 = inputByteLen % rateInBytes;
+  uint32_t rem = inputByteLen % rateInBytes;
   for (uint32_t i = (uint32_t)0U; i < nb; i++)
   {
     uint8_t *block = input + i * rateInBytes;
     Hacl_Impl_SHA3_loadState(rateInBytes, block, s);
     Hacl_Impl_SHA3_state_permute(s);
   }
-  uint8_t *last1 = input + nb * rateInBytes;
+  uint8_t *last = input + nb * rateInBytes;
   KRML_CHECK_SIZE(sizeof (uint8_t), rateInBytes);
   uint8_t b[rateInBytes];
   memset(b, 0U, rateInBytes * sizeof (b[0U]));
-  memcpy(b, last1, rem1 * sizeof (last1[0U]));
-  b[rem1] = delimitedSuffix;
+  memcpy(b, last, rem * sizeof (last[0U]));
+  b[rem] = delimitedSuffix;
   Hacl_Impl_SHA3_loadState(rateInBytes, b, s);
-  if (!((delimitedSuffix & (uint8_t)0x80U) == (uint8_t)0U) && rem1 == rateInBytes - (uint32_t)1U)
+  if (!((delimitedSuffix & (uint8_t)0x80U) == (uint8_t)0U) && rem == rateInBytes - (uint32_t)1U)
   {
     Hacl_Impl_SHA3_state_permute(s);
   }
@@ -195,14 +195,14 @@ Hacl_Impl_SHA3_squeeze(
 {
   uint32_t outBlocks = outputByteLen / rateInBytes;
   uint32_t remOut = outputByteLen % rateInBytes;
-  uint8_t *last1 = output + outputByteLen - remOut;
+  uint8_t *last = output + outputByteLen - remOut;
   uint8_t *blocks = output;
   for (uint32_t i = (uint32_t)0U; i < outBlocks; i++)
   {
     Hacl_Impl_SHA3_storeState(rateInBytes, s, blocks + i * rateInBytes);
     Hacl_Impl_SHA3_state_permute(s);
   }
-  Hacl_Impl_SHA3_storeState(remOut, s, last1);
+  Hacl_Impl_SHA3_storeState(remOut, s, last);
 }
 
 void
