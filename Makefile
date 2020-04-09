@@ -120,7 +120,7 @@ all-unstaged: compile-gcc-compatible compile-msvc-compatible compile-gcc64-only 
 	cp $< $@
 
 test: test-staged
-test-unstaged: test-handwritten test-c test-ml vale_testInline test-wasm
+test-unstaged: test-handwritten test-c test-ml vale_testInline test-wasm test-bindings-ocaml
 
 ifneq ($(OS),Windows_NT)
 test-unstaged: test-benchmark
@@ -793,6 +793,10 @@ dist/gcc-compatible/Makefile.basic: DEFAULT_FLAGS += \
   -ctypes EverCrypt.*,Hacl.*
 dist/gcc-compatible/Makefile.basic: HAND_WRITTEN_ML_FILES += \
   $(wildcard lib/ml/*_bindings.ml) $(wildcard lib/ml/*_gen.ml)
+
+test-bindings-ocaml: dist/gcc-compatible/libevercrypt.so
+	cd dist/gcc-compatible && make install-hacl-star-raw
+	cd bindings/ocaml && dune runtest
 
 dist/msvc-compatible/Makefile.basic: DEFAULT_FLAGS += -falloca -ftail-calls
 
