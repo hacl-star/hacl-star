@@ -17,38 +17,10 @@ open Hacl.PKCS11.Types
 open Hacl.PKCS11.Lemmas
 
 
-(* #set-options "--z3rlimit 200 --lax"  *)
-
 #set-options "--z3rlimit 300"
 
 
-(* Zero-level types *)
-type uint8_t = FStar.UInt8.t 
-type uint32_t = a: nat {a < pow2 32}
-
-(* First-level types *)
-
-(* 
-/* an unsigned value, at least 32 bits long */
-typedef unsigned long int CK_ULONG; 
-*)
-
-type _CK_ULONG = uint32_t
-
-
 (* Second-level types*)
-
-(*
-/* CK_MECHANISM_TYPE is a value that identifies a mechanism
- * type */
-typedef CK_ULONG          CK_MECHANISM_TYPE;*)
-type _CK_MECHANISM_TYPE = 
-  |CKM_RSA_PKCS_KEY_PAIR_GEN
-  |CKM_DSA
-  |CKM_EC_KEY_PAIR_GEN
-  |CKM_ECDSA
-  |CKM_AES_KEY_GEN
-  (* and traditionally much more *)
 
 
 (*/* at least 32 bits; each bit is a Boolean flag */
@@ -136,103 +108,6 @@ let isMechanismUsedForVerification mechanism =
   isBitFlagSet mechanismInfo.flags CKF_VERIFY
 
 
-(*
-/* CK_ATTRIBUTE_TYPE is a value that identifies an attribute
- * type */
-typedef CK_ULONG          CK_ATTRIBUTE_TYPE;
-*)
-type _CK_ATTRIBUTE_TYPE = 
-  |CKA_CLASS
-  |CKA_PRIVATE
-  |CKA_KEY_TYPE
-  |CKA_SIGN
-  |CKA_VERIFY
-  |CKA_LOCAL
-  |CKA_SECRET_KEY
-  |CKA_TOKEN
-  |CKA_MODIFIABLE
-  |CKA_LABEL
-  |CKA_COPYABLE
-  |CKA_DESTROYABLE
-  |CKA_ID
-  |CKA_START_DATE
-  |CKA_END_DATE
-  |CKA_DERIVED
-  |CKA_KEY_GEN_MECHANISM
-  |CKA_ALLOWED_MECHANISMS
-  |CKA_SUBJECT
-  |CKA_ENCRYPT
-  |CKA_VERIFY_RECOVER
-  |CKA_WRAP
-  |CKA_TRUSTED
-  |CKA_WRAP_TEMPLATE
-  |CKA_PUBLIC_KEY_INFO
-  |CKA_SENSITIVE
-  |CKA_DECRYPT
-  |CKA_SIGN_RECOVER
-  |CKA_UNWRAP
-  |CKA_EXTRACTABLE
-  |CKA_ALWAYS_SENSITIVE
-  |CKA_NEVER_EXTRACTABLE
-  |CKA_WRAP_WITH_TRUSTED
-  |CKA_UNWRAP_TEMPLATE
-  |CKA_ALWAYS_AUTHENTICATE
-  |CKA_CHECK_VALUE
-  |CKA_EC_PARAMS 
-  |CKA_VALUE
-  
-  (* and much more *)
-
-(*
-/* CK_OBJECT_CLASS is a value that identifies the classes (or
- * types) of objects that Cryptoki recognizes.  It is defined
- * as follows: */
-typedef CK_ULONG          CK_OBJECT_CLASS;
-*)
-
-(* /* The following classes of objects are defined: */
-#define CKO_DATA              0x00000000UL
-#define CKO_CERTIFICATE       0x00000001UL
-#define CKO_PUBLIC_KEY        0x00000002UL
-#define CKO_PRIVATE_KEY       0x00000003UL
-#define CKO_SECRET_KEY        0x00000004UL
-#define CKO_HW_FEATURE        0x00000005UL
-#define CKO_DOMAIN_PARAMETERS 0x00000006UL
-#define CKO_MECHANISM         0x00000007UL
-#define CKO_OTP_KEY           0x00000008UL
-
-#define CKO_VENDOR_DEFINED    0x80000000UL
-*)
-
-type _CK_OBJECT_CLASS = 
-  |CKO_DATA
-  |CKO_CERTIFICATE
-  |CKO_PUBLIC_KEY
-  |CKO_PRIVATE_KEY
-  |CKO_SECRET_KEY
-  |CKO_HW_FEATURE
-  |CKO_DOMAIN_PARAMETERS
-  |CKO_MECHANISM
-  |CKO_OTP_KEY
-  |CKO_VENDOR_DEFINED
-
-
-type _CK_OBJECT_CLASS_EXTENDED = 
-  |CKO_OBJECT
-  |CKO_STORAGE
-  |CKO_KEY
-
-
-(* /* CK_KEY_TYPE is a value that identifies a key type */
-typedef CK_ULONG          CK_KEY_TYPE;
-*)
-type _CK_KEY_TYPE = 
-  |CKK_RSA
-  |CKK_DSA
-  |CKK_DH
-  |CKK_EC 
-  (*and much more *)
-
 
 (* /* CK_OBJECT_CLASS is a value that identifies the classes (or
  * types) of objects that Cryptoki recognizes.  It is defined
@@ -248,66 +123,10 @@ typedef CK_ULONG          CK_SESSION_HANDLE;
 type _CK_SESSION_HANDLE = _CK_ULONG
 	
 
-
-let _ck_attribute_get_type: _CK_ATTRIBUTE_TYPE -> Tot Type0 = function
-  |CKA_CLASS -> _CK_OBJECT_CLASS
-  |CKA_SIGN -> bool
-  |CKA_VERIFY -> bool
-  |CKA_LOCAL -> bool
-  |CKA_TOKEN -> bool
-  |CKA_PRIVATE -> bool
-  |CKA_MODIFIABLE -> bool
-  |CKA_LABEL -> uint32_t
-  |CKA_COPYABLE -> bool
-  |CKA_DESTROYABLE -> bool
-  |CKA_KEY_TYPE -> _CK_KEY_TYPE
-  |CKA_ID -> uint32_t
-  |CKA_START_DATE -> uint32_t
-  |CKA_END_DATE -> uint32_t
-  |CKA_DERIVED -> bool
-  |CKA_LOCAL -> bool
-  |CKA_KEY_GEN_MECHANISM -> _CK_MECHANISM_TYPE
-  |CKA_ALLOWED_MECHANISMS -> _CK_MECHANISM_TYPE
-  |CKA_SUBJECT -> uint32_t 
-  |CKA_ENCRYPT -> bool 
-  |CKA_DECRYPT -> bool
-  |CKA_VERIFY -> bool
-  |CKA_VERIFY_RECOVER -> bool
-  |CKA_WRAP -> bool
-  |CKA_TRUSTED -> bool
-  |CKA_WRAP_TEMPLATE -> _CK_ATTRIBUTE_TYPE
-  |CKA_PUBLIC_KEY_INFO -> uint32_t
-  |CKA_SENSITIVE -> bool
-  |CKA_DECRYPT -> bool
-  |CKA_SIGN -> bool
-  |CKA_SIGN_RECOVER -> bool
-  |_ -> _CK_ULONG
-  |CKA_EC_PARAMS -> _CK_ULONG
-  |CKA_VALUE -> uint8_t 
   
 
 
-(* I am not sure that the length is stated for all possible types *)
-let _ck_attribute_get_len: _CK_ATTRIBUTE_TYPE -> Tot (a: option nat {Some? a ==> (match a with Some a -> a) < pow2 32}) = function
-  |CKA_CLASS -> Some 1
-  |CKA_SIGN -> Some 1
-  |CKA_VERIFY -> Some 1
-  |CKA_LOCAL -> Some 1
-  |CKA_TOKEN -> Some 1
-  |CKA_PRIVATE -> Some 1 
-  |CKA_MODIFIABLE -> Some 1
-  |CKA_COPYABLE -> Some 1
-  |CKA_LABEL -> None
-  |CKA_DESTROYABLE -> Some 1
-  |CKA_KEY_TYPE -> Some 1 
-  |CKA_ID -> None
-  |CKA_START_DATE -> Some 3
-  |CKA_END_DATE -> Some 3
-  |CKA_DERIVED -> Some 1
-  |CKA_LOCAL -> Some 1
-  |CKA_KEY_GEN_MECHANISM -> Some 1
-  |CKA_ALLOWED_MECHANISMS -> None
-  |_ -> None
+
 
 
 (* by default all the attributes are read-only *)
@@ -316,21 +135,6 @@ let _ck_attribute_read_only: _CK_ATTRIBUTE_TYPE -> Tot bool = function
   |_ -> true
 
 
-(*/* CK_ATTRIBUTE is a structure that includes the type, length
- * and value of an attribute */
-*)
-
-type _CK_ATTRIBUTE  = 
-  |A: 
-    aType: _CK_ATTRIBUTE_TYPE -> pValue: seq (_ck_attribute_get_type aType) 
-    {
-      let len = _ck_attribute_get_len aType in 
-      if Some? len then 
-	length pValue = (match len with Some a -> a)
-      else 
-	True
-    } 
-    -> _CK_ATTRIBUTE
 
 
 (* default attribute values *)
@@ -349,41 +153,12 @@ let isContaining #a f s =
   |_ -> false
 
 
-let getAttributesForTypeExtended: t: _CK_OBJECT_CLASS_EXTENDED -> seq _CK_ATTRIBUTE_TYPE = function
-  |CKO_OBJECT -> seq_of_list [CKA_CLASS]
-  |CKO_KEY -> seq_of_list [CKA_TOKEN; CKA_PRIVATE; CKA_MODIFIABLE; CKA_LABEL; CKA_COPYABLE; CKA_DESTROYABLE]
-  |CKO_STORAGE -> seq_of_list [CKA_KEY_TYPE; CKA_ID; CKA_END_DATE; CKA_DERIVED; CKA_LOCAL; CKA_KEY_GEN_MECHANISM; CKA_ALLOWED_MECHANISMS]
-
-let getAttributesForType: t: _CK_OBJECT_CLASS -> seq _CK_ATTRIBUTE_TYPE = function 
-  |CKO_SECRET_KEY -> (seq_of_list 
-    [CKA_CLASS; CKA_TOKEN; CKA_PRIVATE; CKA_MODIFIABLE; CKA_LABEL; CKA_COPYABLE; CKA_DESTROYABLE;
-    CKA_KEY_TYPE; CKA_ID; CKA_END_DATE; CKA_DERIVED; CKA_LOCAL; CKA_KEY_GEN_MECHANISM; CKA_ALLOWED_MECHANISMS; CKA_SENSITIVE; CKA_ENCRYPT; CKA_DECRYPT; CKA_SIGN; CKA_VERIFY; 
-    CKA_WRAP; CKA_UNWRAP; CKA_EXTRACTABLE; CKA_ALWAYS_SENSITIVE; CKA_NEVER_EXTRACTABLE])
-  |_ -> Seq.empty
-
 
 
 (*  Takes one attribute and search for it in the attribute sequence. Returns true if found *)
 (* Notion of being present: there exist an index n such that ... *)
 (* Notion of not being present: forall elements not function*)
 
-
-(* The function searches for all the attributes in the sequence  *)
-val _attributesAllPresent: toSearchSequence: seq _CK_ATTRIBUTE -> toFinds: seq _CK_ATTRIBUTE_TYPE -> Tot (r: bool
-  {
-    r == true ==> 
-      (forall (i: nat {i < Seq.length toFinds}). 
-	contains (fun x -> x.aType = (index toFinds i)) toSearchSequence)
-  }
-)
-
-let _attributesAllPresent toSearchSequence toFinds = 
-  let __attributesAllPresent y toFind : r: bool 
-  {r == true <==> contains (fun x -> x.aType = toFind) y} = 
-    match find_l (fun x -> x.aType = toFind) y with 
-    |None -> find_l_none_no_index y (fun x -> x.aType = toFind); false
-    |Some _ -> lemmaFindLExistIfSome (fun x -> x.aType = toFind) y; true in   
-  for_all (__attributesAllPresent toSearchSequence) toFinds 
 
 
 type _object = 
@@ -476,6 +251,13 @@ let isKeySecretKey k =
   _attributesAllPresent attrs (getAttributesForType CKO_SECRET_KEY)
 
 
+val isKeyPublicKey: k: key_object -> Tot bool
+
+let isKeyPublicKey k = 
+  let attrs = k.ko.sto.attrs in 
+  _attributesAllPresent attrs (getAttributesForType CKO_PUBLIC_KEY)
+  
+
 val isKeyPrivateKey: k: key_object -> Tot bool
 
 let isKeyPrivateKey k = 
@@ -485,53 +267,29 @@ let isKeyPrivateKey k =
 
 (* The method takes an object and returns whether it supports signing *)
 
-assume val supportsSigning: key: key_object -> Tot (r: bool
-  {
-    let attrs = key.ko.sto.attrs in 
-    let r'= 
-      if isKeySecretKey key then 
-	let sign = find_l (fun x -> x.aType = CKA_SIGN) attrs in 
-	assume (Some? sign);  
-	let sign:bool = 
-	  match sign with |Some sign -> index sign.pValue 0 in 
-	sign
-      else if isKeyPrivateKey key then 
-	let sign = find_l (fun x -> x.aType = CKA_SIGN) attrs in 
-	assume (Some? sign);
-	let sign: bool = 
-	  match sign with |Some sign -> index sign.pValue 0 in 
-	sign
-      else
-	false
-    in 
-    r' == r
-  }
-)
+val supportsSigning: key: key_object -> Tot Type0
+
+let supportsSigning key = 
+  let attrs = key.ko.sto.attrs in 
+  (isKeySecretKey key \/ isKeyPrivateKey key) /\
+  (
+    let sign = find_l (fun x -> x.aType = CKA_SIGN) attrs in 
+    assume (Some? sign);  
+    match sign with |Some sign -> index sign.pValue 0 == true
+  )
 
 
-assume val supportsVerification: key: key_object -> Tot (r: bool
-  {
-    let attrs = key.ko.sto.attrs in 
-    let r'= 
-      if isKeySecretKey key then 
-	let sign = find_l (fun x -> x.aType = CKA_SIGN) attrs in 
-	assume (Some? sign);  
-	let sign:bool = 
-	  match sign with |Some sign -> index sign.pValue 0 in 
-	sign
-      else if isKeyPrivateKey key then 
-	let sign = find_l (fun x -> x.aType = CKA_SIGN) attrs in 
-	assume (Some? sign);
-	let sign: bool = 
-	  match sign with |Some sign -> index sign.pValue 0 in 
-	sign
-      else
-	false
-    in 
-    r' == r
-  }
-)
-      
+val supportsVerifying: key: key_object -> Tot Type0
+
+let supportsVerifying key = 
+  let attrs = key.ko.sto.attrs in 
+  (isKeySecretKey key \/ isKeyPublicKey key) /\
+  (
+    let verify = find_l (fun x -> x.aType = CKA_VERIFY) attrs in 
+    assume (Some? verify);  
+    match verify with |Some verify -> index verify.pValue 0 == true
+  )
+  
 
 
 (*  Takes one attribute and search for it in the attribute sequence. Returns true if found *)
@@ -547,6 +305,8 @@ val _CKO_SECRET_KEY_Constructor: attrs: seq _CK_ATTRIBUTE {
   -> Tot _CKO_SECRET_KEY
 
 let _CKO_SECRET_KEY_Constructor attrs = 
+  let test = O attrs in 
+
   admit();
   SK (Key (Storage (O attrs)))
 
@@ -610,7 +370,7 @@ type subSession (k: seq key_object) (m: seq _CK_MECHANISM) (supMech: seq _CKS_ME
     (* The identifier of the key used for the operation *)
     (* The key requirement: present in the device and to be a signature key *)
     keyHandler: _CK_OBJECT_HANDLE {Seq.length k > keyHandler /\
-	supportsVerification (index k keyHandler)
+	supportsVerifying (index k keyHandler)
     } -> 
     (* Temporal space for the verification *)
     temp: option temporalStorage -> subSession k m supMech
