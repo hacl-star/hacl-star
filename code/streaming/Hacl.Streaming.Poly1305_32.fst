@@ -333,14 +333,14 @@ let poly1305_32: I.block unit =
     (fun () -> poly_is_incremental)
 
     (fun _ _ -> ())
-    (fun _ k s -> P.poly1305_init #M32 s k)
+    (fun _ k s -> Hacl.Poly1305_32.poly1305_init s k)
     (fun _ s blocks len ->
       let h0 = ST.get () in
       begin
         let acc, r = P.as_get_acc h0 (as_lib s), P.as_get_r h0 (as_lib s) in
         update_multi_is_update (B.as_seq h0 blocks) acc r
       end;
-      P.poly1305_update #M32 s len blocks
+      Hacl.Poly1305_32.poly1305_update s len blocks
     )
     (fun _ s last total_len ->
       let h0 = ST.get () in
@@ -350,7 +350,7 @@ let poly1305_32: I.block unit =
       end;
       let len = FStar.Int.Cast.Full.uint64_to_uint32 (total_len `U64.rem` 16UL) in
       if len <> 0ul then
-        P.poly1305_update #M32 s len last)
+        Hacl.Poly1305_32.poly1305_update s len last)
     (fun _ k s dst ->
       let h0 = ST.get () in
       ST.push_frame ();
@@ -362,7 +362,7 @@ let poly1305_32: I.block unit =
       let h3 = ST.get () in
       B.modifies_only_not_unused_in B.loc_none h1 h3;
       P.reveal_ctx_inv' (as_lib s) (as_lib tmp) h0 h3;
-      P.poly1305_finish #M32 dst k tmp;
+      Hacl.Poly1305_32.poly1305_finish dst k tmp;
       let h4 = ST.get () in
       ST.pop_frame ();
       let h5 = ST.get () in
