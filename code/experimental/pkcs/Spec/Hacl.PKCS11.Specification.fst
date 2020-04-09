@@ -407,35 +407,6 @@ let getObjectAttributeClass obj =
   Some a -> a
 
 
-(* The method takes an object and returns whether it supports signing *)
-
-val getObjectAttributeSign: obj: _object -> Tot (r: option _CK_ATTRIBUTE
-  {Some? r ==>
-    (
-      let a = (match r with Some a -> a) in 
-      a.aType == CKA_SIGN
-    )
-  }
-)
-
-let getObjectAttributeSign obj = 
-  find_l (fun x -> x.aType = CKA_SIGN) obj.attrs
-
-
-
-val getObjectAttributeVerify: obj: _object -> Tot (r: option _CK_ATTRIBUTE
-  {Some? r ==>
-    (
-      let a = (match r with Some a -> a) in 
-      a.aType == CKA_VERIFY
-    )
-  }
-)
-
-let getObjectAttributeVerify obj = 
-  find_l (fun x -> x.aType = CKA_VERIFY) obj.attrs
-
-
 val getObjectAttributeLocal: obj: _object -> Tot (r: option _CK_ATTRIBUTE
   {
     Some? r ==>
@@ -452,7 +423,8 @@ let getObjectAttributeLocal obj =
 
 
 type storage = 
-  |Storage: sto: _object {_attributesCompleteToCreateType sto.attrs (getAttributesForType CKO_STORAGE)} -> storage
+  |Storage: sto: _object 
+    {_attributesAllPresent sto.attrs (getAttributesForTypeExtended CKO_STORAGE)} -> storage
 
 
 (* Key is an object such that the object has an attribute class such that the attribute value is OTP_KEY, PRIVATE KEY, PUBLIC KEY, or SECRET KEY *)
@@ -460,7 +432,7 @@ type key_object =
   |Key: ko: storage{
     (
       let attrs = ko.sto.attrs in 
-      _attributesCompleteToCreateType attrs (getAttributesForType CKO_KEY)
+      _attributesAllPresent attrs (getAttributesForTypeExtended CKO_KEY)
     )
   } -> key_object
 
@@ -469,8 +441,7 @@ type _CKO_PUBLIC_KEY =
   |PK: pko: key_object {
       (
 	let attrs = pko.ko.sto.attrs in 
-	_attributesCompleteToCreateType attrs (getAttributesForType CKO_PUBLIC_KEY) /\
-	index (getObjectAttributeClass pko.ko.sto).pValue 0  = CKO_PUBLIC_KEY
+	_attributesAllPresent attrs (getAttributesForType CKO_PUBLIC_KEY)
       )
     } -> _CKO_PUBLIC_KEY
 
@@ -479,8 +450,7 @@ type _CKO_PRIVATE_KEY =
   |PrK: prko : key_object {
     (
       let attrs = prko.ko.sto.attrs in 
-      _attributesCompleteToCreateType attrs (getAttributesForType CKO_PRIVATE_KEY) /\
-      index (getObjectAttributeClass prko.ko.sto).pValue 0  = CKO_PRIVATE_KEY
+      _attributesAllPresent attrs (getAttributesForType CKO_PRIVATE_KEY)
       ) 
    } -> _CKO_PRIVATE_KEY
 
@@ -489,8 +459,7 @@ type _CKO_SECRET_KEY =
   |SK: sk: key_object {
     (
       let attrs = sk.ko.sto.attrs in 
-      _attributesCompleteToCreateType attrs (getAttributesForType CKO_SECRET_KEY) /\
-      index (getObjectAttributeClass sk.ko.sto).pValue 0  = CKO_SECRET_KEY
+      _attributesAllPresent attrs (getAttributesForType CKO_SECRET_KEY)
     )
   } -> _CKO_SECRET_KEY
 
@@ -499,32 +468,47 @@ type temporalStorage =
   |Element: seq FStar.UInt8.t -> temporalStorage
 
 
-
-(* Returns a set of attributes that the object should have to be the type t 
-   Returns Some (...) if the type was recognized, otherwise returns None
-
-   There is a logical distinction between type is not supported (it might happen) and the type returned no element
-   
-*)
-
-
 (* This method takes a key and returns wther it's a secret key *)
 val isKeySecretKey: k: key_object -> Tot bool
 
 let isKeySecretKey k = 
   let attrs = k.ko.sto.attrs in 
-  isContaining (fun x -> x.aType = CKA_SENSITIVE) attrs &&
-  isContaining (fun x -> x.aType = CKA_ENCRYPT) attrs &&
-  isContaining (fun x -> x.aType = CKA_DECRYPT) attrs &&
-  isContaining (fun x -> x.aType = CKA_SIGN) attrs &&
-  isContaining (fun x -> x.aType = CKA_VERIFY) attrs &&
-  isContaining (fun x -> x.aType = CKA_WRAP) attrs &&
-  isContaining (fun x -> x.aType = CKA_UNWRAP) attrs &&
-  isContaining (fun x -> x.aType = CKA_EXTRACTABLE) attrs &&
-  isContaining (fun x -> x.aType = CKA_ALWAYS_SENSITIVE) attrs &&
-  isContaining (fun x -> x.aType = CKA_NEVER_EXTRACTABLE) attrs &&
-  index (getObjectAttributeClass k.ko.sto).pValue 0  = CKO_SECRET_KEY
+  _attributesAllPresent attrs (getAttributesForType CKO_SECRET_KEY)
 
+
+val isKeyPrivateKey: k: key_object -> Tot bool
+
+let isKeyPrivateKey k = 
+  let attrs = k.ko.sto.attrs in 
+  _attributesAllPresent attrs (getAttributesForType CKO_PRIVATE_KEY)
+
+
+(* The method takes an object and returns whether it supports signing *)
+(* The method could only take a private key or a secret key *)
+
+assume val supportsSigning: key: key_object -> Tot (r: bool
+  {
+    let attrs = key.ko.sto.attrs in 
+    let r'= 
+      if isKeySecretKey key then 
+	let sign = find_l (fun x -> x.aType = CKA_SIGN) attrs in 
+	assume (Some? sign);  
+	let sign:bool = 
+	  match sign with |Some sign -> index sign.pValue 0 in 
+	sign
+      else if isKeyPrivateKey key then 
+	let sign = find_l (fun x -> x.aType = CKA_SIGN) attrs in 
+	assume (Some? sign);
+	let sign: bool = 
+	  match sign with |Some sign -> index sign.pValue 0 in 
+	sign
+      else
+	false
+    in 
+    r' == r
+  }
+)
+      
 
 
 (*  Takes one attribute and search for it in the attribute sequence. Returns true if found *)
