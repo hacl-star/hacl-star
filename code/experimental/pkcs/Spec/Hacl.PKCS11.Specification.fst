@@ -484,9 +484,32 @@ let isKeyPrivateKey k =
 
 
 (* The method takes an object and returns whether it supports signing *)
-(* The method could only take a private key or a secret key *)
 
 assume val supportsSigning: key: key_object -> Tot (r: bool
+  {
+    let attrs = key.ko.sto.attrs in 
+    let r'= 
+      if isKeySecretKey key then 
+	let sign = find_l (fun x -> x.aType = CKA_SIGN) attrs in 
+	assume (Some? sign);  
+	let sign:bool = 
+	  match sign with |Some sign -> index sign.pValue 0 in 
+	sign
+      else if isKeyPrivateKey key then 
+	let sign = find_l (fun x -> x.aType = CKA_SIGN) attrs in 
+	assume (Some? sign);
+	let sign: bool = 
+	  match sign with |Some sign -> index sign.pValue 0 in 
+	sign
+      else
+	false
+    in 
+    r' == r
+  }
+)
+
+
+assume val supportsVerification: key: key_object -> Tot (r: bool
   {
     let attrs = key.ko.sto.attrs in 
     let r'= 
@@ -520,16 +543,11 @@ assume val supportsSigning: key: key_object -> Tot (r: bool
 
 val _CKO_SECRET_KEY_Constructor: attrs: seq _CK_ATTRIBUTE {
     let requiredAttributes = getAttributesForType CKO_SECRET_KEY in 
-    _attributesCompleteToCreateType attrs requiredAttributes}
+    _attributesAllPresent attrs requiredAttributes}
   -> Tot _CKO_SECRET_KEY
 
 let _CKO_SECRET_KEY_Constructor attrs = 
-  assume (contains (fun x -> x.aType = CKA_CLASS) attrs);
-  
-  let obj = O attrs in 
   admit();
-
-
   SK (Key (Storage (O attrs)))
 
 
@@ -576,15 +594,7 @@ type subSession (k: seq key_object) (m: seq _CK_MECHANISM) (supMech: seq _CKS_ME
     (* The identifier of the key used for the operation *)
     (* The key requirement: present in the device and to be a signature key *)
     keyHandler: _CK_OBJECT_HANDLE{Seq.length k > keyHandler /\
-      (
-	let referencedKey = index k keyHandler in 
-	let supportsSigning = getObjectAttributeSign referencedKey.ko.sto in 
-	Some? supportsSigning /\
-	(
-	  let signingAttributeValue = index (match supportsSigning with Some a -> a).pValue 0 in 
-	  signingAttributeValue == true
-	)
-      )
+      supportsSigning (index k keyHandler) 
     } -> 
     (* Temporal space for the signature *)
     temp: option temporalStorage -> subSession k m supMech
@@ -600,15 +610,7 @@ type subSession (k: seq key_object) (m: seq _CK_MECHANISM) (supMech: seq _CKS_ME
     (* The identifier of the key used for the operation *)
     (* The key requirement: present in the device and to be a signature key *)
     keyHandler: _CK_OBJECT_HANDLE {Seq.length k > keyHandler /\
-      (
-	let referencedKey = index k keyHandler in 
-	let supportsVerification = getObjectAttributeVerify referencedKey.ko.sto in 
-	Some? supportsVerification /\
-	(
-	  let verificationAttributeValue = index (match supportsVerification with Some a -> a).pValue 0 in 
-	  verificationAttributeValue == true
-	)
-      )
+	supportsVerification (index k keyHandler)
     } -> 
     (* Temporal space for the verification *)
     temp: option temporalStorage -> subSession k m supMech
