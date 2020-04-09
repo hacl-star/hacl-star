@@ -189,12 +189,22 @@ type _CK_ATTRIBUTE_TYPE =
  * as follows: */
 typedef CK_ULONG          CK_OBJECT_CLASS;
 *)
+
+(* /* The following classes of objects are defined: */
+#define CKO_DATA              0x00000000UL
+#define CKO_CERTIFICATE       0x00000001UL
+#define CKO_PUBLIC_KEY        0x00000002UL
+#define CKO_PRIVATE_KEY       0x00000003UL
+#define CKO_SECRET_KEY        0x00000004UL
+#define CKO_HW_FEATURE        0x00000005UL
+#define CKO_DOMAIN_PARAMETERS 0x00000006UL
+#define CKO_MECHANISM         0x00000007UL
+#define CKO_OTP_KEY           0x00000008UL
+
+#define CKO_VENDOR_DEFINED    0x80000000UL
+*)
+
 type _CK_OBJECT_CLASS = 
-     (* This line is incorrect *)
-  |CKO_OBJECT
-  |CKO_STORAGE
-  |CKO_KEY
-  
   |CKO_DATA
   |CKO_CERTIFICATE
   |CKO_PUBLIC_KEY
@@ -205,6 +215,12 @@ type _CK_OBJECT_CLASS =
   |CKO_MECHANISM
   |CKO_OTP_KEY
   |CKO_VENDOR_DEFINED
+
+
+type _CK_OBJECT_CLASS_EXTENDED = 
+  |CKO_OBJECT
+  |CKO_STORAGE
+  |CKO_KEY
 
 
 (* /* CK_KEY_TYPE is a value that identifies a key type */
@@ -324,12 +340,8 @@ let defaultAttributes: seq _CK_ATTRIBUTE = Seq.empty
 assume val attrributesConsistent: attrs: seq _CK_ATTRIBUTE -> Tot bool
 
 
-abstract let contains (#a:Type) (f: (a -> bool)) (s:seq a)  : Tot Type0 =
-  exists (k:nat{k < Seq.length s}). f (Seq.index s k)
-
-
 val isContaining: #a: Type -> f: (a -> bool) -> s: seq a -> Tot (r: bool {r == true ==> 
-  contains f s})
+  Hacl.PKCS11.Lib.contains f s})
 
 let isContaining #a f s = 
   match find_l f s with 
@@ -337,10 +349,12 @@ let isContaining #a f s =
   |_ -> false
 
 
-let getAttributesForType: t: _CK_OBJECT_CLASS -> seq _CK_ATTRIBUTE_TYPE = function 
+let getAttributesForTypeExtended: t: _CK_OBJECT_CLASS_EXTENDED -> seq _CK_ATTRIBUTE_TYPE = function
   |CKO_OBJECT -> seq_of_list [CKA_CLASS]
   |CKO_KEY -> seq_of_list [CKA_TOKEN; CKA_PRIVATE; CKA_MODIFIABLE; CKA_LABEL; CKA_COPYABLE; CKA_DESTROYABLE]
   |CKO_STORAGE -> seq_of_list [CKA_KEY_TYPE; CKA_ID; CKA_END_DATE; CKA_DERIVED; CKA_LOCAL; CKA_KEY_GEN_MECHANISM; CKA_ALLOWED_MECHANISMS]
+
+let getAttributesForType: t: _CK_OBJECT_CLASS -> seq _CK_ATTRIBUTE_TYPE = function 
   |CKO_SECRET_KEY -> (seq_of_list 
     [CKA_CLASS; CKA_TOKEN; CKA_PRIVATE; CKA_MODIFIABLE; CKA_LABEL; CKA_COPYABLE; CKA_DESTROYABLE;
     CKA_KEY_TYPE; CKA_ID; CKA_END_DATE; CKA_DERIVED; CKA_LOCAL; CKA_KEY_GEN_MECHANISM; CKA_ALLOWED_MECHANISMS; CKA_SENSITIVE; CKA_ENCRYPT; CKA_DECRYPT; CKA_SIGN; CKA_VERIFY; 
@@ -354,21 +368,8 @@ let getAttributesForType: t: _CK_OBJECT_CLASS -> seq _CK_ATTRIBUTE_TYPE = functi
 (* Notion of not being present: forall elements not function*)
 
 
-val __attributesCompleteToCreateType: toSearchSequence: seq _CK_ATTRIBUTE -> toFind: _CK_ATTRIBUTE_TYPE -> 
-  Tot (r: bool 
-    { 
-      r == true <==> contains (fun x -> x.aType = toFind) toSearchSequence 
-    }
-  )
-
-let __attributesCompleteToCreateType toSearchSequence toFind = 
-  match find_l (fun x -> x.aType = toFind) toSearchSequence with 
-  |None -> find_l_none_no_index toSearchSequence (fun x -> x.aType = toFind); false
-  |Some _ -> lemmaFindLExistIfSome (fun x -> x.aType = toFind) toSearchSequence; true
-  
-
 (* The function searches for all the attributes in the sequence  *)
-val _attributesCompleteToCreateType: toSearchSequence: seq _CK_ATTRIBUTE -> toFinds: seq _CK_ATTRIBUTE_TYPE -> Tot (r: bool
+val _attributesAllPresent: toSearchSequence: seq _CK_ATTRIBUTE -> toFinds: seq _CK_ATTRIBUTE_TYPE -> Tot (r: bool
   {
     r == true ==> 
       (forall (i: nat {i < Seq.length toFinds}). 
@@ -376,30 +377,31 @@ val _attributesCompleteToCreateType: toSearchSequence: seq _CK_ATTRIBUTE -> toFi
   }
 )
 
-let _attributesCompleteToCreateType toSearchSequence toFinds = 
-  for_all (__attributesCompleteToCreateType toSearchSequence) toFinds 
+let _attributesAllPresent toSearchSequence toFinds = 
+  let __attributesAllPresent y toFind : r: bool 
+  {r == true <==> contains (fun x -> x.aType = toFind) y} = 
+    match find_l (fun x -> x.aType = toFind) y with 
+    |None -> find_l_none_no_index y (fun x -> x.aType = toFind); false
+    |Some _ -> lemmaFindLExistIfSome (fun x -> x.aType = toFind) y; true in   
+  for_all (__attributesAllPresent toSearchSequence) toFinds 
 
 
 type _object = 
   |O: 
     attrs: seq _CK_ATTRIBUTE 
       {
-	_attributesCompleteToCreateType attrs (getAttributesForType CKO_OBJECT) 
+	_attributesAllPresent attrs (getAttributesForTypeExtended CKO_OBJECT) 
 	 (* /\
 	attrributesConsistent attrs *)
       }  -> 
   _object
 
 
-(* The method takes an object and returns whether amongs its attributes there is one that is CKA_CLASS. If the attribute is found that the attribute is returned, otherwise the None is returned *)
-
 val getObjectAttributeClass: obj: _object -> Tot (r: _CK_ATTRIBUTE {r.aType == CKA_CLASS})
 
 let getObjectAttributeClass obj = 
   let attributeClass = find_l (fun x -> x.aType = CKA_CLASS) obj.attrs in 
-  
-  assume (index (seq_of_list [CKA_CLASS]) 0 == CKA_CLASS);
-
+  lemma_index_0_elem #_CK_ATTRIBUTE_TYPE CKA_CLASS;
   lemmaFindLExistIfSomeOp (fun x -> x.aType = CKA_CLASS) obj.attrs; 
   match attributeClass with 
   Some a -> a
@@ -529,39 +531,11 @@ let isKeySecretKey k =
 (* Notion of being present: there exist an index n such that ... *)
 (* Notion of not being present: forall elements not function*)
 
-
-val __attributesCompleteToCreateType: toSearchSequence: seq _CK_ATTRIBUTE -> toFind: _CK_ATTRIBUTE_TYPE -> 
-  Tot (r: bool 
-    { 
-      r == true <==> contains (fun x -> x.aType = toFind) toSearchSequence 
-    }
-  )
-
-let __attributesCompleteToCreateType toSearchSequence toFind = 
-  match find_l (fun x -> x.aType = toFind) toSearchSequence with 
-  |None -> find_l_none_no_index toSearchSequence (fun x -> x.aType = toFind); false
-  |Some _ -> lemmaFindLExistIfSome (fun x -> x.aType = toFind) toSearchSequence; true
-  
-
-(* The function searches for all the attributes in the sequence  *)
-val _attributesCompleteToCreateType: toSearchSequence: seq _CK_ATTRIBUTE -> toFinds: seq _CK_ATTRIBUTE_TYPE -> Tot (r: bool
-  {
-    r == true ==> 
-      (forall (i: nat {i < Seq.length toFinds}). 
-	contains (fun x -> x.aType = (index toFinds i)) toSearchSequence)
-  }
-)
-
-let _attributesCompleteToCreateType toSearchSequence toFinds = 
-  for_all (__attributesCompleteToCreateType toSearchSequence) toFinds 
-
-
 (* For being able to create a secret key, we need all the attributes to be given *)
 
 
 val _CKO_SECRET_KEY_Constructor: attrs: seq _CK_ATTRIBUTE {
     let requiredAttributes = getAttributesForType CKO_SECRET_KEY in 
-    let requiredAttributes = match requiredAttributes with Some a -> a in 
     _attributesCompleteToCreateType attrs requiredAttributes}
   -> Tot _CKO_SECRET_KEY
 
@@ -850,7 +824,7 @@ val lemma_isPresentOnDevice: s: seq _CK_MECHANISM -> f: (_CK_MECHANISM -> Tot bo
   (requires 
     (exists (a: nat {a < length s}). f (index s a)))
   (ensures
-    (contains f s)))
+    (contains f s))
   (decreases (length s))
 
 let rec lemma_isPresentOnDevice s f = 
@@ -867,7 +841,7 @@ val isPresentOnDevice: d: device -> pMechanism: _CK_MECHANISM_TYPE ->
   Tot (r: bool
     {r = true ==>
       (exists (a: nat{a < Seq.length d.mechanisms}). let m = Seq.index d.mechanisms a in m.mechanismID = pMechanism) /\ 
-      (contains (fun x -> x.mechanismID = pMechanism) d.mechanisms))
+      (contains (fun x -> x.mechanismID = pMechanism) d.mechanisms)
     }
   )
 
@@ -1407,9 +1381,7 @@ val attributesTemplateComplete: t: _CK_OBJECT_CLASS ->  mechanism: _CK_MECHANISM
 let attributesTemplateComplete t mechanism attrs = 
   let allAttributes = combineAllAttributes mechanism.mechanismID attrs in 
   let getRequiredAttributes = getAttributesForType t in 
-  match getRequiredAttributes with 
-    |None -> false
-    |Some a -> _attributesTemplateComplete allAttributes a 
+  _attributesTemplateComplete allAttributes getRequiredAttributes
 
 (* If the attribute values in the supplied template, together with any default attribute values and any attribute values contributed to the object by the object-creation function itself, are inconsistent, then the attempt should fail with the error code CKR_TEMPLATE_INCONSISTENT.   *)
   
@@ -1494,10 +1466,7 @@ val getRequiredAttributes: t: _CK_OBJECT_CLASS -> attrs: seq _CK_ATTRIBUTE-> Tot
 
 let getRequiredAttributes t attrs  = 
   let requiredAttributes = getAttributesForType t in 
-  match requiredAttributes with 
-  |Some requiredAttributes -> 
-    map (_getRequiredAttributes attrs) requiredAttributes
-  |None -> Seq.empty
+  map (_getRequiredAttributes attrs) requiredAttributes
 
 
 (* CK_PKCS11_FUNCTION_INFO(C_GenerateKey)

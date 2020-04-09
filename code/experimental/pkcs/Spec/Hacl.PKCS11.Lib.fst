@@ -3,13 +3,6 @@ module Hacl.PKCS11.Lib
 open FStar.Seq
 
 
-let for_all
-  (#a: Type)
-  (f: (a -> Tot bool))
-  (l: seq a): Tot (b: bool {(b == true <==> (forall (i: nat {i < Seq.length l} ) . f (index l i) == true))})
-= None? (seq_find (fun i -> not (f i)) l)
-
-
 val for_all2: #a: eqtype -> #b: eqtype -> f: (a -> b -> bool) -> s: seq a -> s1: seq b {Seq.length s = Seq.length s1} -> 
   Tot bool (decreases (Seq.length s))
 
@@ -28,3 +21,8 @@ assume val map: #a: eqtype -> #b: eqtype -> f: (a -> b) ->  s: seq a ->
   Tot (r: seq b{Seq.length s = Seq.length r /\
     (forall (i: nat {i < Seq.length s}). index r i = f (index s i))})
   (decreases (Seq.length s))
+
+
+
+let contains (#a:Type) (f: (a -> bool)) (s:seq a)  : Tot Type0 =
+  exists (k:nat{k < Seq.length s}). f (Seq.index s k)

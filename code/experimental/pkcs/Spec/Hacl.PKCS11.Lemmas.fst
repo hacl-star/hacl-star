@@ -18,10 +18,12 @@ let rec lemmaFindLExistIfSome #a f s =
     lemmaFindLExistIfSome f (tail s)
 
 
-assume val lemmaIfExistAndNotFirst: #a: Type -> f: (a -> bool) -> s: seq a -> 
+val lemmaIfExistAndNotFirst: #a: Type -> f: (a -> bool) -> s: seq a -> 
   Lemma 
     (requires (exists (a: nat {a < Seq.length s}). f (index s a) /\ not (f (head s))))
     (ensures (exists (a: nat {a < Seq.length (tail s)}). f (index (tail s) a)))
+
+let lemmaIfExistAndNotFirst #a f s = admit()
 
 
 val lemmaFindLExistIfSomeOp: #a: Type -> f: (a -> bool) -> s: seq a -> 
@@ -40,3 +42,8 @@ let rec lemmaFindLExistIfSomeOp #a f s  =
 	lemmaIfExistAndNotFirst f s;
 	lemmaFindLExistIfSomeOp #a f (tail s)
     end
+
+
+val lemma_index_0_elem: #a: Type0 -> p: a -> Lemma (index (seq_of_list [p]) 0 == p)
+
+let lemma_index_0_elem #a p = admit()
