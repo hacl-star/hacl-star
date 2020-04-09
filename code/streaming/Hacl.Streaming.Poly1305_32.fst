@@ -162,35 +162,6 @@ inline_for_extraction noextract
 let spec k input =
   Spec.Poly1305.poly1305_mac input k
 
-inline_for_extraction noextract
-let repeat_l_update
-  (input: S.seq uint8)
-  (r: Spec.Poly1305.felem)
-  (l: Lib.IntTypes.size_nat { l == S.length input % Spec.Poly1305.size_block })
-  (s: Lib.Sequence.lseq uint8 l)
-  (acc: Spec.Poly1305.felem): Lemma
-    (ensures (
-      Hacl.Streaming.Lemmas.repeat_l Spec.Poly1305.size_block (update_last' r) input l s acc ==
-      Spec.Poly1305.poly1305_update_last r l s acc))
-    [ SMTPat (Hacl.Streaming.Lemmas.repeat_l Spec.Poly1305.size_block (update_last' r) input l s acc) ]
-=
-  ()
-
-inline_for_extraction noextract
-let repeat_f_update
-  (input: S.seq uint8)
-  (r: Spec.Poly1305.felem)
-  (acc: Spec.Poly1305.felem)
-  (i: nat { i < S.length input / Spec.Poly1305.size_block }):
-  Lemma
-    (ensures (
-      let bs = Spec.Poly1305.size_block in
-      let nb = S.length input / bs in
-      Lib.Sequence.repeat_blocks_f bs input (Hacl.Streaming.Lemmas.repeat_f bs (update' r)) nb i acc ==
-      Lib.Sequence.repeat_blocks_f bs input (Spec.Poly1305.poly1305_update1 r bs) nb i acc))
-=
-  ()
-
 val update_last_is_update
   (input: S.seq uint8)
   (acc: Spec.Poly1305.felem)
