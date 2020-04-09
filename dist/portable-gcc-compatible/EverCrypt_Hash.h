@@ -246,13 +246,13 @@ void EverCrypt_Hash_init(EverCrypt_Hash_state_s *s);
 
 /* SNIPPET_START: EverCrypt_Hash_update_multi_256 */
 
-void EverCrypt_Hash_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n1);
+void EverCrypt_Hash_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n);
 
 /* SNIPPET_END: EverCrypt_Hash_update_multi_256 */
 
 /* SNIPPET_START: EverCrypt_Hash_update */
 
-void EverCrypt_Hash_update(EverCrypt_Hash_state_s *s, uint8_t *block1);
+void EverCrypt_Hash_update(EverCrypt_Hash_state_s *s, uint8_t *block);
 
 /* SNIPPET_END: EverCrypt_Hash_update */
 
@@ -276,7 +276,7 @@ EverCrypt_Hash_update_last_256(
 
 /* SNIPPET_START: EverCrypt_Hash_update_last */
 
-void EverCrypt_Hash_update_last(EverCrypt_Hash_state_s *s, uint8_t *last1, uint64_t total_len);
+void EverCrypt_Hash_update_last(EverCrypt_Hash_state_s *s, uint8_t *last, uint64_t total_len);
 
 /* SNIPPET_END: EverCrypt_Hash_update_last */
 
@@ -398,7 +398,7 @@ void EverCrypt_Hash_Incremental_init(EverCrypt_Hash_Incremental_state_s *s);
 
 void
 EverCrypt_Hash_Incremental_update(
-  EverCrypt_Hash_Incremental_state_s *p1,
+  EverCrypt_Hash_Incremental_state_s *p,
   uint8_t *data,
   uint32_t len
 );

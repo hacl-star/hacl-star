@@ -86,13 +86,13 @@ blake2s_update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, u
     uint32_t u0 = load32_le(b00);
     uint32_t u00 = u0;
     uint32_t u1 = load32_le(b10);
-    uint32_t u11 = u1;
+    uint32_t u10 = u1;
     uint32_t u2 = load32_le(b20);
     uint32_t u20 = u2;
     uint32_t u3 = load32_le(b30);
     uint32_t u30 = u3;
     r00[0U] = u00;
-    r00[1U] = u11;
+    r00[1U] = u10;
     r00[2U] = u20;
     r00[3U] = u30;
     uint32_t nb0 = (uint32_t)4U;
@@ -103,13 +103,13 @@ blake2s_update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, u
     uint32_t u4 = load32_le(b01);
     uint32_t u01 = u4;
     uint32_t u5 = load32_le(b11);
-    uint32_t u110 = u5;
+    uint32_t u11 = u5;
     uint32_t u6 = load32_le(b21);
     uint32_t u21 = u6;
     uint32_t u7 = load32_le(b31);
     uint32_t u31 = u7;
     r10[0U] = u01;
-    r10[1U] = u110;
+    r10[1U] = u11;
     r10[2U] = u21;
     r10[3U] = u31;
     uint32_t nb1 = (uint32_t)4U;
@@ -120,13 +120,13 @@ blake2s_update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, u
     uint32_t u8 = load32_le(b02);
     uint32_t u02 = u8;
     uint32_t u9 = load32_le(b12);
-    uint32_t u111 = u9;
-    uint32_t u10 = load32_le(b22);
-    uint32_t u22 = u10;
-    uint32_t u12 = load32_le(b32);
-    uint32_t u32 = u12;
+    uint32_t u12 = u9;
+    uint32_t u13 = load32_le(b22);
+    uint32_t u22 = u13;
+    uint32_t u14 = load32_le(b32);
+    uint32_t u32 = u14;
     r20[0U] = u02;
-    r20[1U] = u111;
+    r20[1U] = u12;
     r20[2U] = u22;
     r20[3U] = u32;
     uint32_t nb2 = (uint32_t)4U;
@@ -134,16 +134,16 @@ blake2s_update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, u
     uint8_t *b1 = d + s11 * nb2;
     uint8_t *b2 = d + s13 * nb2;
     uint8_t *b3 = d + s15 * nb2;
-    uint32_t u13 = load32_le(b0);
-    uint32_t u03 = u13;
-    uint32_t u14 = load32_le(b1);
-    uint32_t u112 = u14;
-    uint32_t u15 = load32_le(b2);
-    uint32_t u23 = u15;
+    uint32_t u15 = load32_le(b0);
+    uint32_t u03 = u15;
+    uint32_t u16 = load32_le(b1);
+    uint32_t u17 = u16;
+    uint32_t u18 = load32_le(b2);
+    uint32_t u23 = u18;
     uint32_t u = load32_le(b3);
     uint32_t u33 = u;
     r30[0U] = u03;
-    r30[1U] = u112;
+    r30[1U] = u17;
     r30[2U] = u23;
     r30[3U] = u33;
     uint32_t *x = m_st + (uint32_t)0U * (uint32_t)4U;
@@ -574,9 +574,9 @@ Hacl_Blake2s_32_blake2s(
   }
   memset(b20, 0U, (uint32_t)64U * sizeof (b20[0U]));
   uint32_t nb0 = ll / (uint32_t)64U;
-  uint32_t rem10 = ll % (uint32_t)64U;
+  uint32_t rem0 = ll % (uint32_t)64U;
   K___uint32_t_uint32_t scrut;
-  if (rem10 == (uint32_t)0U && nb0 > (uint32_t)0U)
+  if (rem0 == (uint32_t)0U && nb0 > (uint32_t)0U)
   {
     uint32_t nb_ = nb0 - (uint32_t)1U;
     uint32_t rem_ = (uint32_t)64U;
@@ -584,10 +584,10 @@ Hacl_Blake2s_32_blake2s(
   }
   else
   {
-    scrut = ((K___uint32_t_uint32_t){ .fst = nb0, .snd = rem10 });
+    scrut = ((K___uint32_t_uint32_t){ .fst = nb0, .snd = rem0 });
   }
   uint32_t nb = scrut.fst;
-  uint32_t rem1 = scrut.snd;
+  uint32_t rem = scrut.snd;
   for (uint32_t i = (uint32_t)0U; i < nb; i++)
   {
     uint64_t totlen = prev0 + (uint64_t)((i + (uint32_t)1U) * (uint32_t)64U);
@@ -595,8 +595,8 @@ Hacl_Blake2s_32_blake2s(
     blake2s_update_block(b1, b, false, totlen, b2);
   }
   uint8_t b21[64U] = { 0U };
-  uint8_t *last1 = d + ll - rem1;
-  memcpy(b21, last1, rem1 * sizeof (last1[0U]));
+  uint8_t *last = d + ll - rem;
+  memcpy(b21, last, rem * sizeof (last[0U]));
   uint64_t totlen = prev0 + (uint64_t)ll;
   blake2s_update_block(b1, b, true, totlen, b21);
   memset(b21, 0U, (uint32_t)64U * sizeof (b21[0U]));

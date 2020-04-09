@@ -95,13 +95,13 @@ static inline void blake2b_update_block(u64 *wv, u64 *hash, bool flag, uint128_t
             u64 u0 = load64_le(b00);
             u64 u00 = u0;
             u64 u1 = load64_le(b10);
-            u64 u11 = u1;
+            u64 u10 = u1;
             u64 u2 = load64_le(b20);
             u64 u20 = u2;
             u64 u3 = load64_le(b30);
             u64 u30 = u3;
             r01[0U] = u00;
-            r01[1U] = u11;
+            r01[1U] = u10;
             r01[2U] = u20;
             r01[3U] = u30;
             {
@@ -113,13 +113,13 @@ static inline void blake2b_update_block(u64 *wv, u64 *hash, bool flag, uint128_t
               u64 u4 = load64_le(b01);
               u64 u01 = u4;
               u64 u5 = load64_le(b11);
-              u64 u110 = u5;
+              u64 u11 = u5;
               u64 u6 = load64_le(b21);
               u64 u21 = u6;
               u64 u7 = load64_le(b31);
               u64 u31 = u7;
               r12[0U] = u01;
-              r12[1U] = u110;
+              r12[1U] = u11;
               r12[2U] = u21;
               r12[3U] = u31;
               {
@@ -131,13 +131,13 @@ static inline void blake2b_update_block(u64 *wv, u64 *hash, bool flag, uint128_t
                 u64 u8 = load64_le(b02);
                 u64 u02 = u8;
                 u64 u9 = load64_le(b12);
-                u64 u111 = u9;
-                u64 u10 = load64_le(b22);
-                u64 u22 = u10;
-                u64 u12 = load64_le(b32);
-                u64 u32 = u12;
+                u64 u12 = u9;
+                u64 u13 = load64_le(b22);
+                u64 u22 = u13;
+                u64 u14 = load64_le(b32);
+                u64 u32 = u14;
                 r21[0U] = u02;
-                r21[1U] = u111;
+                r21[1U] = u12;
                 r21[2U] = u22;
                 r21[3U] = u32;
                 {
@@ -146,16 +146,16 @@ static inline void blake2b_update_block(u64 *wv, u64 *hash, bool flag, uint128_t
                   u8 *b1 = d + s11 * nb2;
                   u8 *b2 = d + s13 * nb2;
                   u8 *b3 = d + s15 * nb2;
-                  u64 u13 = load64_le(b0);
-                  u64 u03 = u13;
-                  u64 u14 = load64_le(b1);
-                  u64 u112 = u14;
-                  u64 u15 = load64_le(b2);
-                  u64 u23 = u15;
+                  u64 u15 = load64_le(b0);
+                  u64 u03 = u15;
+                  u64 u16 = load64_le(b1);
+                  u64 u17 = u16;
+                  u64 u18 = load64_le(b2);
+                  u64 u23 = u18;
                   u64 u = load64_le(b3);
                   u64 u33 = u;
                   r31[0U] = u03;
-                  r31[1U] = u112;
+                  r31[1U] = u17;
                   r31[2U] = u23;
                   r31[3U] = u33;
                   {
@@ -818,10 +818,10 @@ void Hacl_Blake2b_32_blake2b(u32 nn, u8 *output, u32 ll, u8 *d, u32 kk, u8 *k)
           u64 kk_shift_8;
           u64 iv0_;
           u32 nb0;
-          u32 rem10;
+          u32 rem0;
           K___u32_u32 scrut;
           u32 nb;
-          u32 rem1;
+          u32 rem;
           r2[0U] = iv0;
           r2[1U] = iv1;
           r2[2U] = iv2;
@@ -851,17 +851,17 @@ void Hacl_Blake2b_32_blake2b(u32 nn, u8 *output, u32 ll, u8 *d, u32 kk, u8 *k)
           }
           memset(b20, 0U, (u32)128U * sizeof (b20[0U]));
           nb0 = ll / (u32)128U;
-          rem10 = ll % (u32)128U;
-          if (rem10 == (u32)0U && nb0 > (u32)0U)
+          rem0 = ll % (u32)128U;
+          if (rem0 == (u32)0U && nb0 > (u32)0U)
           {
             u32 nb_ = nb0 - (u32)1U;
             u32 rem_ = (u32)128U;
             scrut = ((K___u32_u32){ .fst = nb_, .snd = rem_ });
           }
           else
-            scrut = ((K___u32_u32){ .fst = nb0, .snd = rem10 });
+            scrut = ((K___u32_u32){ .fst = nb0, .snd = rem0 });
           nb = scrut.fst;
-          rem1 = scrut.snd;
+          rem = scrut.snd;
           {
             u32 i;
             for (i = (u32)0U; i < nb; i++)
@@ -873,10 +873,10 @@ void Hacl_Blake2b_32_blake2b(u32 nn, u8 *output, u32 ll, u8 *d, u32 kk, u8 *k)
           }
           {
             u8 b21[128U] = { 0U };
-            u8 *last1 = d + ll - rem1;
+            u8 *last = d + ll - rem;
             uint128_t totlen;
             u32 double_row;
-            memcpy(b21, last1, rem1 * sizeof (last1[0U]));
+            memcpy(b21, last, rem * sizeof (last[0U]));
             totlen = prev0 + (uint128_t)(u64)ll;
             blake2b_update_block(b1, b, true, totlen, b21);
             memset(b21, 0U, (u32)128U * sizeof (b21[0U]));
