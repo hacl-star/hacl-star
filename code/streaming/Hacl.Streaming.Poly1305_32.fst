@@ -69,7 +69,7 @@ let stateful_poly1305_ctx32: I.stateful unit =
       let h0 = ST.get () in
       let dummy_key = B.alloca (Lib.IntTypes.u8 0) 32ul in
       let r = B.alloca (F32xN.zero 1) 25ul in
-      P.poly1305_init #M32 (as_lib r) (as_lib_k dummy_key);
+      Hacl.Poly1305_32.poly1305_init (as_lib r) (as_lib_k dummy_key);
       let h1 = ST.get () in
       B.modifies_only_not_unused_in B.loc_none h0 h1;
       r)
@@ -81,7 +81,7 @@ let stateful_poly1305_ctx32: I.stateful unit =
       let h11 = ST.get () in
       let r = B.malloc r (F32xN.zero 1) 25ul in
       let h12 = ST.get () in
-      P.poly1305_init #M32 (as_lib r) (as_lib_k dummy_key);
+      Hacl.Poly1305_32.poly1305_init (as_lib r) (as_lib_k dummy_key);
       let h2 = ST.get () in
       B.modifies_only_not_unused_in B.loc_none h1 h11;
       B.modifies_only_not_unused_in B.loc_none h11 h12;
