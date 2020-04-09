@@ -93,13 +93,13 @@ void Hacl_Hash_Core_SHA2_init_384(u64 *s);
 
 void Hacl_Hash_Core_SHA2_init_512(u64 *s);
 
-void Hacl_Hash_Core_SHA2_update_224(u32 *hash1, u8 *block);
+void Hacl_Hash_Core_SHA2_update_224(u32 *hash, u8 *block);
 
-void Hacl_Hash_Core_SHA2_update_256(u32 *hash1, u8 *block);
+void Hacl_Hash_Core_SHA2_update_256(u32 *hash, u8 *block);
 
-void Hacl_Hash_Core_SHA2_update_384(u64 *hash1, u8 *block);
+void Hacl_Hash_Core_SHA2_update_384(u64 *hash, u8 *block);
 
-void Hacl_Hash_Core_SHA2_update_512(u64 *hash1, u8 *block);
+void Hacl_Hash_Core_SHA2_update_512(u64 *hash, u8 *block);
 
 void Hacl_Hash_Core_SHA2_pad_224(u64 len, u8 *dst);
 

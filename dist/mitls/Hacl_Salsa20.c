@@ -89,7 +89,7 @@ static inline void salsa20_core(uint32_t *k, uint32_t *ctx, uint32_t ctr)
   k[8U] = k[8U] + ctr_u32;
 }
 
-static inline void salsa20_key_block0(uint8_t *out, uint8_t *key, uint8_t *n1)
+static inline void salsa20_key_block0(uint8_t *out, uint8_t *key, uint8_t *n)
 {
   uint32_t ctx[16U] = { 0U };
   uint32_t k[16U] = { 0U };
@@ -107,7 +107,7 @@ static inline void salsa20_key_block0(uint8_t *out, uint8_t *key, uint8_t *n1)
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)2U; i++)
   {
     uint32_t *os = n32;
-    uint8_t *bj = n1 + i * (uint32_t)4U;
+    uint8_t *bj = n + i * (uint32_t)4U;
     uint32_t u = load32_le(bj);
     uint32_t r = u;
     uint32_t x = r;
@@ -137,7 +137,7 @@ salsa20_encrypt(
   uint8_t *out,
   uint8_t *text,
   uint8_t *key,
-  uint8_t *n1,
+  uint8_t *n,
   uint32_t ctr
 )
 {
@@ -156,7 +156,7 @@ salsa20_encrypt(
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)2U; i++)
   {
     uint32_t *os = n32;
-    uint8_t *bj = n1 + i * (uint32_t)4U;
+    uint8_t *bj = n + i * (uint32_t)4U;
     uint32_t u = load32_le(bj);
     uint32_t r = u;
     uint32_t x = r;
@@ -174,9 +174,9 @@ salsa20_encrypt(
   memcpy(ctx + (uint32_t)11U, k10, (uint32_t)4U * sizeof (k10[0U]));
   ctx[15U] = (uint32_t)0x6b206574U;
   uint32_t k[16U] = { 0U };
-  uint32_t rem1 = len % (uint32_t)64U;
+  uint32_t rem = len % (uint32_t)64U;
   uint32_t nb = len / (uint32_t)64U;
-  uint32_t rem2 = len % (uint32_t)64U;
+  uint32_t rem1 = len % (uint32_t)64U;
   for (uint32_t i0 = (uint32_t)0U; i0 < nb; i0++)
   {
     uint8_t *uu____0 = out + i0 * (uint32_t)64U;
@@ -204,12 +204,12 @@ salsa20_encrypt(
       store32_le(uu____0 + i * (uint32_t)4U, bl[i]);
     }
   }
-  if (rem2 > (uint32_t)0U)
+  if (rem1 > (uint32_t)0U)
   {
     uint8_t *uu____2 = out + nb * (uint32_t)64U;
     uint8_t *uu____3 = text + nb * (uint32_t)64U;
     uint8_t plain[64U] = { 0U };
-    memcpy(plain, uu____3, rem1 * sizeof (uu____3[0U]));
+    memcpy(plain, uu____3, rem * sizeof (uu____3[0U]));
     uint32_t k1[16U] = { 0U };
     salsa20_core(k1, ctx, nb);
     uint32_t bl[16U] = { 0U };
@@ -232,7 +232,7 @@ salsa20_encrypt(
     {
       store32_le(plain + i * (uint32_t)4U, bl[i]);
     }
-    memcpy(uu____2, plain, rem1 * sizeof (plain[0U]));
+    memcpy(uu____2, plain, rem * sizeof (plain[0U]));
   }
 }
 
@@ -242,7 +242,7 @@ salsa20_decrypt(
   uint8_t *out,
   uint8_t *cipher,
   uint8_t *key,
-  uint8_t *n1,
+  uint8_t *n,
   uint32_t ctr
 )
 {
@@ -261,7 +261,7 @@ salsa20_decrypt(
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)2U; i++)
   {
     uint32_t *os = n32;
-    uint8_t *bj = n1 + i * (uint32_t)4U;
+    uint8_t *bj = n + i * (uint32_t)4U;
     uint32_t u = load32_le(bj);
     uint32_t r = u;
     uint32_t x = r;
@@ -279,9 +279,9 @@ salsa20_decrypt(
   memcpy(ctx + (uint32_t)11U, k10, (uint32_t)4U * sizeof (k10[0U]));
   ctx[15U] = (uint32_t)0x6b206574U;
   uint32_t k[16U] = { 0U };
-  uint32_t rem1 = len % (uint32_t)64U;
+  uint32_t rem = len % (uint32_t)64U;
   uint32_t nb = len / (uint32_t)64U;
-  uint32_t rem2 = len % (uint32_t)64U;
+  uint32_t rem1 = len % (uint32_t)64U;
   for (uint32_t i0 = (uint32_t)0U; i0 < nb; i0++)
   {
     uint8_t *uu____0 = out + i0 * (uint32_t)64U;
@@ -309,12 +309,12 @@ salsa20_decrypt(
       store32_le(uu____0 + i * (uint32_t)4U, bl[i]);
     }
   }
-  if (rem2 > (uint32_t)0U)
+  if (rem1 > (uint32_t)0U)
   {
     uint8_t *uu____2 = out + nb * (uint32_t)64U;
     uint8_t *uu____3 = cipher + nb * (uint32_t)64U;
     uint8_t plain[64U] = { 0U };
-    memcpy(plain, uu____3, rem1 * sizeof (uu____3[0U]));
+    memcpy(plain, uu____3, rem * sizeof (uu____3[0U]));
     uint32_t k1[16U] = { 0U };
     salsa20_core(k1, ctx, nb);
     uint32_t bl[16U] = { 0U };
@@ -337,11 +337,11 @@ salsa20_decrypt(
     {
       store32_le(plain + i * (uint32_t)4U, bl[i]);
     }
-    memcpy(uu____2, plain, rem1 * sizeof (plain[0U]));
+    memcpy(uu____2, plain, rem * sizeof (plain[0U]));
   }
 }
 
-static inline void hsalsa20(uint8_t *out, uint8_t *key, uint8_t *n1)
+static inline void hsalsa20(uint8_t *out, uint8_t *key, uint8_t *n)
 {
   uint32_t ctx[16U] = { 0U };
   uint32_t k32[8U] = { 0U };
@@ -358,7 +358,7 @@ static inline void hsalsa20(uint8_t *out, uint8_t *key, uint8_t *n1)
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
     uint32_t *os = n32;
-    uint8_t *bj = n1 + i * (uint32_t)4U;
+    uint8_t *bj = n + i * (uint32_t)4U;
     uint32_t u = load32_le(bj);
     uint32_t r = u;
     uint32_t x = r;
@@ -395,11 +395,11 @@ Hacl_Salsa20_salsa20_encrypt(
   uint8_t *out,
   uint8_t *text,
   uint8_t *key,
-  uint8_t *n1,
+  uint8_t *n,
   uint32_t ctr
 )
 {
-  salsa20_encrypt(len, out, text, key, n1, ctr);
+  salsa20_encrypt(len, out, text, key, n, ctr);
 }
 
 void
@@ -408,20 +408,20 @@ Hacl_Salsa20_salsa20_decrypt(
   uint8_t *out,
   uint8_t *cipher,
   uint8_t *key,
-  uint8_t *n1,
+  uint8_t *n,
   uint32_t ctr
 )
 {
-  salsa20_decrypt(len, out, cipher, key, n1, ctr);
+  salsa20_decrypt(len, out, cipher, key, n, ctr);
 }
 
-void Hacl_Salsa20_salsa20_key_block0(uint8_t *out, uint8_t *key, uint8_t *n1)
+void Hacl_Salsa20_salsa20_key_block0(uint8_t *out, uint8_t *key, uint8_t *n)
 {
-  salsa20_key_block0(out, key, n1);
+  salsa20_key_block0(out, key, n);
 }
 
-void Hacl_Salsa20_hsalsa20(uint8_t *out, uint8_t *key, uint8_t *n1)
+void Hacl_Salsa20_hsalsa20(uint8_t *out, uint8_t *key, uint8_t *n)
 {
-  hsalsa20(out, key, n1);
+  hsalsa20(out, key, n);
 }
 

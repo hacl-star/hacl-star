@@ -622,7 +622,7 @@ static void point_double(u64 *nq, u64 *tmp1, u64 *tmp2)
   fmul2_(nq, dc, ab, tmp2);
 }
 
-static void montgomery_ladder(u64 *out, u8 *key, u64 *init1)
+static void montgomery_ladder(u64 *out, u8 *key, u64 *init)
 {
   u64 tmp2[16U] = { 0U };
   u64 p01_tmp1_swap[33U] = { 0U };
@@ -636,11 +636,11 @@ static void montgomery_ladder(u64 *out, u8 *key, u64 *init1)
   u64 *p01_tmp11;
   u64 *nq10;
   u64 *nq_p11;
-  u64 *swap1;
+  u64 *swap;
   u64 sw0;
   u64 *nq1;
   u64 *tmp1;
-  memcpy(p11, init1, (u32)8U * sizeof (init1[0U]));
+  memcpy(p11, init, (u32)8U * sizeof (init[0U]));
   x0 = p03;
   z0 = p03 + (u32)4U;
   x0[0U] = (u64)1U;
@@ -655,26 +655,26 @@ static void montgomery_ladder(u64 *out, u8 *key, u64 *init1)
   p01_tmp11 = p01_tmp1_swap;
   nq10 = p01_tmp1_swap;
   nq_p11 = p01_tmp1_swap + (u32)8U;
-  swap1 = p01_tmp1_swap + (u32)32U;
+  swap = p01_tmp1_swap + (u32)32U;
   cswap2_((u64)1U, nq10, nq_p11);
-  point_add_and_double(init1, p01_tmp11, tmp2);
-  swap1[0U] = (u64)1U;
+  point_add_and_double(init, p01_tmp11, tmp2);
+  swap[0U] = (u64)1U;
   {
     u32 i;
     for (i = (u32)0U; i < (u32)251U; i++)
     {
       u64 *p01_tmp12 = p01_tmp1_swap;
-      u64 *swap2 = p01_tmp1_swap + (u32)32U;
+      u64 *swap1 = p01_tmp1_swap + (u32)32U;
       u64 *nq2 = p01_tmp12;
       u64 *nq_p12 = p01_tmp12 + (u32)8U;
       u64 bit = (u64)(key[((u32)253U - i) / (u32)8U] >> ((u32)253U - i) % (u32)8U & (u8)1U);
-      u64 sw = swap2[0U] ^ bit;
+      u64 sw = swap1[0U] ^ bit;
       cswap2_(sw, nq2, nq_p12);
-      point_add_and_double(init1, p01_tmp12, tmp2);
-      swap2[0U] = bit;
+      point_add_and_double(init, p01_tmp12, tmp2);
+      swap1[0U] = bit;
     }
   }
-  sw0 = swap1[0U];
+  sw0 = swap[0U];
   cswap2_(sw0, nq10, nq_p11);
   nq1 = p01_tmp1;
   tmp1 = p01_tmp1 + (u32)16U;
@@ -684,11 +684,11 @@ static void montgomery_ladder(u64 *out, u8 *key, u64 *init1)
   memcpy(out, p0, (u32)8U * sizeof (p0[0U]));
 }
 
-static void fsquare_times(u64 *o, u64 *inp, u64 *tmp, u32 n1)
+static void fsquare_times(u64 *o, u64 *inp, u64 *tmp, u32 n)
 {
   u32 i;
   fsqr_(o, inp);
-  for (i = (u32)0U; i < n1 - (u32)1U; i++)
+  for (i = (u32)0U; i < n - (u32)1U; i++)
     fsqr_(o, o);
 }
 
@@ -801,7 +801,7 @@ static void encode_point(u8 *o, u64 *i)
 
 void Hacl_Curve25519_64_Slow_scalarmult(u8 *out, u8 *priv, u8 *pub)
 {
-  u64 init1[8U] = { 0U };
+  u64 init[8U] = { 0U };
   u64 tmp[4U] = { 0U };
   u64 tmp3;
   u64 *x;
@@ -820,8 +820,8 @@ void Hacl_Curve25519_64_Slow_scalarmult(u8 *out, u8 *priv, u8 *pub)
   }
   tmp3 = tmp[3U];
   tmp[3U] = tmp3 & (u64)0x7fffffffffffffffU;
-  x = init1;
-  z = init1 + (u32)4U;
+  x = init;
+  z = init + (u32)4U;
   z[0U] = (u64)1U;
   z[1U] = (u64)0U;
   z[2U] = (u64)0U;
@@ -830,8 +830,8 @@ void Hacl_Curve25519_64_Slow_scalarmult(u8 *out, u8 *priv, u8 *pub)
   x[1U] = tmp[1U];
   x[2U] = tmp[2U];
   x[3U] = tmp[3U];
-  montgomery_ladder(init1, priv, init1);
-  encode_point(out, init1);
+  montgomery_ladder(init, priv, init);
+  encode_point(out, init);
 }
 
 void Hacl_Curve25519_64_Slow_secret_to_public(u8 *pub, u8 *priv)
@@ -851,7 +851,7 @@ void Hacl_Curve25519_64_Slow_secret_to_public(u8 *pub, u8 *priv)
 
 bool Hacl_Curve25519_64_Slow_ecdh(u8 *out, u8 *priv, u8 *pub)
 {
-  u8 zeros1[32U] = { 0U };
+  u8 zeros[32U] = { 0U };
   Hacl_Curve25519_64_Slow_scalarmult(out, priv, pub);
   {
     u8 res = (u8)255U;
@@ -861,7 +861,7 @@ bool Hacl_Curve25519_64_Slow_ecdh(u8 *out, u8 *priv, u8 *pub)
       u32 i;
       for (i = (u32)0U; i < (u32)32U; i++)
       {
-        u8 uu____0 = FStar_UInt8_eq_mask(out[i], zeros1[i]);
+        u8 uu____0 = FStar_UInt8_eq_mask(out[i], zeros[i]);
         res = uu____0 & res;
       }
     }

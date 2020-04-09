@@ -60,7 +60,7 @@ Hacl_Curve25519_51_fsquare_times(
   uint64_t *o,
   uint64_t *inp,
   FStar_UInt128_uint128 *tmp,
-  uint32_t n1
+  uint32_t n
 );
 
 void Hacl_Curve25519_51_finv(uint64_t *o, uint64_t *i, FStar_UInt128_uint128 *tmp);
