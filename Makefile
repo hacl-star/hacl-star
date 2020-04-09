@@ -794,7 +794,7 @@ dist/gcc-compatible/Makefile.basic: DEFAULT_FLAGS += \
 dist/gcc-compatible/Makefile.basic: HAND_WRITTEN_ML_FILES += \
   $(wildcard lib/ml/*_bindings.ml) $(wildcard lib/ml/*_gen.ml)
 
-test-bindings-ocaml: dist/gcc-compatible/libevercrypt.so
+test-bindings-ocaml: compile-gcc-compatible
 	cd dist/gcc-compatible && make install-hacl-star-raw
 	cd bindings/ocaml && dune runtest
 
