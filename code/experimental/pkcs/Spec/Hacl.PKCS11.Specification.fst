@@ -16,6 +16,9 @@ open Hacl.PKCS11.Lib
 open Hacl.PKCS11.Types
 open Hacl.PKCS11.Lemmas
 
+open Hacl.PKCS11.Attributes.API
+open Hacl.PKCS11.Lemmas.ObjectTree
+
 
 #set-options "--z3rlimit 300"
 
@@ -122,12 +125,6 @@ typedef CK_ULONG          CK_SESSION_HANDLE;
 *)
 type _CK_SESSION_HANDLE = _CK_ULONG
 	
-
-  
-
-
-
-
 
 (* by default all the attributes are read-only *)
 let _ck_attribute_read_only: _CK_ATTRIBUTE_TYPE -> Tot bool = function
@@ -305,6 +302,8 @@ val _CKO_SECRET_KEY_Constructor: attrs: seq _CK_ATTRIBUTE {
   -> Tot _CKO_SECRET_KEY
 
 let _CKO_SECRET_KEY_Constructor attrs = 
+  lemmaSecretKeyIsObject attrs;
+  
   let test = O attrs in 
 
   admit();
