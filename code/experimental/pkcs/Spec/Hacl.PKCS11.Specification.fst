@@ -19,6 +19,7 @@ open Hacl.PKCS11.Lemmas
 open Hacl.PKCS11.Attributes.API
 open Hacl.PKCS11.Lemmas.ObjectTree
 
+open Hacl.PKCS11.External
 
 #set-options "--z3rlimit 300"
 
@@ -324,7 +325,7 @@ type _CK_MECHANISM =
 
 
 (* any attribute values contributed to the object by the object-creation function itself *)
-let getAttributesByMechanism : _CK_MECHANISM_TYPE -> Tot (seq _CK_ATTRIBUTE_TYPE) = function
+let getAttributesByMechanism : _CK_MECHANISM_TYPE -> Tot (seq _CK_ATTRIBUTE) = function
   |CKM_AES_KEY_GEN -> Seq.empty
   |_ -> Seq.empty
 
@@ -332,7 +333,6 @@ let getRequiredAttributesByMechanism: _CK_MECHANISM_TYPE
   -> Tot (seq _CK_ATTRIBUTE_TYPE) = function
   |CKM_EC_KEY_PAIR_GEN -> seq_of_list [CKA_EC_PARAMS]
   |_ -> Seq.empty
-
 
 
 type _SessionState = 
@@ -1091,51 +1091,66 @@ let attributesNotReadOnly s =
 
 (* If the attribute values in the supplied template, together with any default attribute values and any attribute values contributed to the object by the object-creation function itself, are insufficient to fully specify the object to create, then the attempt should fail with the error code CKR_TEMPLATE_INCOMPLETE. *)
 
-(* Takes one attribute and search for it in the attribute sequence. Returns true if found *)
-
-val __attributesTemplateComplete: toSearchSequence: seq _CK_ATTRIBUTE -> toFind: _CK_ATTRIBUTE_TYPE -> Tot bool
-
-let __attributesTemplateComplete toSearchSequence toFind = 
-  match find_l (fun x -> x.aType = toFind) toSearchSequence with 
-  |None -> false
-  |Some _ -> true
 
 (* The function searches for all the attributes in the sequence  *)
-val _attributesTemplateComplete: toSearchSequence: seq _CK_ATTRIBUTE -> toFinds: seq _CK_ATTRIBUTE_TYPE -> Tot bool
+val _attributesTemplateComplete: toSearchSequence: seq _CK_ATTRIBUTE 
+  -> toFinds: seq _CK_ATTRIBUTE_TYPE
+  -> Tot (r: bool 
+    {
+      r == true ==> (forall (i: nat {i < Seq.length toFinds}). Hacl.PKCS11.Lib.contains (fun x -> x.aType = (index toFinds i)) toSearchSequence)
+    }
+   )
 
 let _attributesTemplateComplete toSearchSequence toFinds = 
+  let __attributesTemplateComplete toSearchSequence toFind = 
+  match find_l (fun x -> x.aType = toFind) toSearchSequence with 
+  |None -> false
+  |Some _ -> true in 
   for_all (__attributesTemplateComplete toSearchSequence) toFinds 
 
 
 val combineAllProvidedAttributes: 
   mechanism: _CK_MECHANISM_TYPE 
-  -> attrs: seq _CK_ATTRIBUTE 
+  -> pTemplate: seq _CK_ATTRIBUTE 
   -> Tot (seq _CK_ATTRIBUTE)
 
-let combineAllProvidedAttributes mechanism attrs  = 
+let combineAllProvidedAttributes mechanism pTemplate  = 
   let defAttr = defaultAttributes in 
   let mechanismAttributes = getAttributesByMechanism mechanism in 
-  append (append defaultAttributes mechanismAttributes) attrs
+  append (append defaultAttributes mechanismAttributes) pTemplate
 
 
 val combineAllRequiredAttributes: 
   mechanism: _CK_MECHANISM_TYPE 
   -> t: _CK_OBJECT_CLASS 
-  -> Tot (seq _CK_ATTRIBUTE)
+  -> Tot (seq _CK_ATTRIBUTE_TYPE)
 
 let combineAllRequiredAttributes mechanism t = 
+  let mechanismRequiredAttributes = getRequiredAttributesByMechanism mechanism in 
+  let attributesToConstructType = getAttributesForType t in 
+  append mechanismRequiredAttributes attributesToConstructType
 
 
 val attributesTemplateComplete: 
   t: _CK_OBJECT_CLASS 
-  ->  mechanism: _CK_MECHANISM 
-  -> attrs: seq _CK_ATTRIBUTE 
-  -> Tot bool
+  -> mechanism: _CK_MECHANISM 
+  -> pTemplate: seq _CK_ATTRIBUTE 
+  -> Tot (r: bool
+    {
+      (
+	let requiredAttributes = append (getRequiredAttributesByMechanism mechanism.mechanismID) (getAttributesForType t) in 
+	let providedAttributes = append (append defaultAttributes (getAttributesByMechanism mechanism.mechanismID)) pTemplate in 
+	r == true ==> (forall (i: nat {i < Seq.length requiredAttributes}). Hacl.PKCS11.Lib.contains 
+	  (fun x -> x.aType = (index requiredAttributes i)) providedAttributes)
+      )
+    }
+  )
 
 let attributesTemplateComplete t mechanism attrs = 
-  let allAttributes = combineAllProvidedAttributes mechanism.mechanismID attrs in 
-  let getRequiredAttributes = getAttributesForType t in 
-  _attributesTemplateComplete allAttributes getRequiredAttributes
+  let allProvidedAttributes = combineAllProvidedAttributes mechanism.mechanismID attrs in 
+  let allRequiredAttributes = combineAllRequiredAttributes mechanism.mechanismID t in 
+  _attributesTemplateComplete allProvidedAttributes allRequiredAttributes
+
 
 (* If the attribute values in the supplied template, together with any default attribute values and any attribute values contributed to the object by the object-creation function itself, are inconsistent, then the attempt should fail with the error code CKR_TEMPLATE_INCONSISTENT.   *)
   
@@ -1178,7 +1193,6 @@ let getCurveFromEncoded s =
 val mechanismSelectECDSA: a: _CK_ATTRIBUTE {CKA_EC_PARAMS? a.aType} -> option (unit -> Tot (seq FStar.UInt8.t))
 
 let mechanismSelectECDSA a = 
-  let open Hacl.PKCS11.External in 
   let encodedCurve = a.pValue in 
   let curveIdentifier = getCurveFromEncoded encodedCurve in 
   match curveIdentifier with 

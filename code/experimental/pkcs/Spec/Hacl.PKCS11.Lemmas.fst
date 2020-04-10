@@ -58,3 +58,12 @@ val containsFindL: #a: Type -> f: (a -> Tot bool) -> s: seq a ->
     [SMTPat (contains f s)]
 
 let containsFindL #a f s = admit()
+
+
+val containsFindL1: #a: Type -> f: (a -> Tot bool) -> s: seq a -> 
+  Lemma
+    (requires (Some? (find_l f s)))
+    (ensures (contains f s))
+    [SMTPat (find_l f s)]
+
+let containsFindL1 #a f s = admit()
