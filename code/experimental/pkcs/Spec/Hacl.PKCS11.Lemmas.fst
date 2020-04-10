@@ -1,7 +1,8 @@
 module Hacl.PKCS11.Lemmas
 
 open FStar.Seq
-
+open Hacl.PKCS11.Lib
+open Hacl.PKCS11.Types
 
 
 val lemmaFindLExistIfSome: #a: Type -> f: (a -> bool) -> s: seq a -> Lemma
@@ -48,3 +49,12 @@ let rec lemmaFindLExistIfSomeOp #a f s  =
 val lemma_index_0_elem: #a: Type0 -> p: a -> Lemma (index (seq_of_list [p]) 0 == p)
 
 let lemma_index_0_elem #a p = admit()
+
+
+val containsFindL: #a: Type -> f: (a -> Tot bool) -> s: seq a -> 
+  Lemma
+    (requires (contains f s))
+    (ensures Some? (find_l f s))
+    [SMTPat (contains f s)]
+
+let containsFindL #a f s = admit()

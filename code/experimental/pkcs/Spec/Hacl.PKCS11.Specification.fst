@@ -322,11 +322,16 @@ type _CK_MECHANISM =
     pParameters: seq FStar.UInt8.t -> 
     _CK_MECHANISM
 
+
 (* any attribute values contributed to the object by the object-creation function itself *)
-let getAttributesByMechanism : _CK_MECHANISM_TYPE -> Tot (seq _CK_ATTRIBUTE) = function
+let getAttributesByMechanism : _CK_MECHANISM_TYPE -> Tot (seq _CK_ATTRIBUTE_TYPE) = function
   |CKM_AES_KEY_GEN -> Seq.empty
   |_ -> Seq.empty
 
+let getRequiredAttributesByMechanism: _CK_MECHANISM_TYPE 
+  -> Tot (seq _CK_ATTRIBUTE_TYPE) = function
+  |CKM_EC_KEY_PAIR_GEN -> seq_of_list [CKA_EC_PARAMS]
+  |_ -> Seq.empty
 
 
 
@@ -601,7 +606,8 @@ let isPresentOnDevice d pMechanism =
       false	  
 
 
-val mechanismGetFromDevice: d: device -> pMechanism: _CK_MECHANISM_TYPE{isPresentOnDevice d pMechanism = true} -> 
+val mechanismGetFromDevice: d: device -> 
+  pMechanism: _CK_MECHANISM_TYPE{isPresentOnDevice d pMechanism = true} -> 
   Tot (m: _CK_MECHANISM {m.mechanismID = pMechanism})
 
 let mechanismGetFromDevice d pMechanism = 
@@ -611,17 +617,6 @@ let mechanismGetFromDevice d pMechanism =
 
 
 assume val checkedAttributes: pTemplate : seq _CK_ATTRIBUTE -> Tot bool
-
-(* external function that returns well formed  *)
-assume val keyGeneration: mechanismID: _CK_MECHANISM -> 
-  pTemplate: seq _CK_ATTRIBUTE ->
-  Tot (r: result (k: _CKO_SECRET_KEY
-    {
-      let attributeLocal = getObjectAttributeLocal k.sk.ko.sto in 
-      index (match attributeLocal with Some a -> a).pValue 0 == true
-    }
-  )
-)
 
 
 (* compares two sessions -> The sessions are equal iff the elements are equal. 
@@ -858,6 +853,7 @@ let deviceUpdateKey d newKey =
     lemma_append keysPrevious newKey;
   let sessionsUpdated = updateSession d keysNew mechanismsPrevious supportedMechanismsPrevious d.subSessions in
   let resultDevice = Device keysNew mechanismsPrevious supportedMechanismsPrevious objectsPrevious sessionsUpdated in 
+  admit();
   (|resultDevice, handler|)
 
 
@@ -1111,18 +1107,33 @@ let _attributesTemplateComplete toSearchSequence toFinds =
   for_all (__attributesTemplateComplete toSearchSequence) toFinds 
 
 
-val combineAllAttributes: mechanism: _CK_MECHANISM_TYPE -> attrs: seq _CK_ATTRIBUTE -> Tot (seq _CK_ATTRIBUTE)
+val combineAllProvidedAttributes: 
+  mechanism: _CK_MECHANISM_TYPE 
+  -> attrs: seq _CK_ATTRIBUTE 
+  -> Tot (seq _CK_ATTRIBUTE)
 
-let combineAllAttributes mechanism attrs  = 
+let combineAllProvidedAttributes mechanism attrs  = 
   let defAttr = defaultAttributes in 
   let mechanismAttributes = getAttributesByMechanism mechanism in 
   append (append defaultAttributes mechanismAttributes) attrs
 
 
-val attributesTemplateComplete: t: _CK_OBJECT_CLASS ->  mechanism: _CK_MECHANISM -> attrs: seq _CK_ATTRIBUTE -> Tot bool
+val combineAllRequiredAttributes: 
+  mechanism: _CK_MECHANISM_TYPE 
+  -> t: _CK_OBJECT_CLASS 
+  -> Tot (seq _CK_ATTRIBUTE)
+
+let combineAllRequiredAttributes mechanism t = 
+
+
+val attributesTemplateComplete: 
+  t: _CK_OBJECT_CLASS 
+  ->  mechanism: _CK_MECHANISM 
+  -> attrs: seq _CK_ATTRIBUTE 
+  -> Tot bool
 
 let attributesTemplateComplete t mechanism attrs = 
-  let allAttributes = combineAllAttributes mechanism.mechanismID attrs in 
+  let allAttributes = combineAllProvidedAttributes mechanism.mechanismID attrs in 
   let getRequiredAttributes = getAttributesForType t in 
   _attributesTemplateComplete allAttributes getRequiredAttributes
 
@@ -1178,7 +1189,10 @@ let mechanismSelectECDSA a =
   | _ -> None
 
 
-val mechanismCreationSelect: d: device ->  m: _CK_MECHANISM -> attrs: seq _CK_ATTRIBUTE {exists (a: nat {a < Seq.length attrs}). (index attrs a).aType == CKA_EC_PARAMS}-> result (unit -> Tot (seq FStar.UInt8.t))
+val mechanismCreationSelect: d: device 
+  -> pMechanism: _CK_MECHANISM 
+  -> attrs: seq _CK_ATTRIBUTE {attributesTemplateComplete CKO_SECRET_KEY pMechanism attrs}
+  ->  result (unit -> Tot (seq FStar.UInt8.t))
 
 
 let mechanismCreationSelect d m attrs = 
@@ -1224,10 +1238,12 @@ let getRequiredAttributes t attrs  =
 #endif *)
 
 (* if all the preconditions are satisfied, we run this function *)
+
+
 val __CKS_GenerateKey: d: device ->  
   hSession: _CK_SESSION_HANDLE -> 
   pMechanism: _CK_MECHANISM ->
-  pTemplate: seq _CK_ATTRIBUTE {exists (a: nat {a < Seq.length pTemplate}). (index pTemplate a).aType == CKA_EC_PARAMS} -> 
+  pTemplate: seq _CK_ATTRIBUTE {attributesTemplateComplete CKO_SECRET_KEY pMechanism pTemplate} -> 
   Tot(
     (handler: result _CK_OBJECT_HANDLE) & 
     (resultDevice : device (*
@@ -1254,6 +1270,7 @@ val __CKS_GenerateKey: d: device ->
 
 let __CKS_GenerateKey d hSession pMechanism pTemplate = 
   let mechanism = mechanismCreationSelect d pMechanism pTemplate in 
+  admit();
   match mechanism with 
   |Inl mechanism -> 
     let rawKey = mechanism () in 
@@ -1264,7 +1281,7 @@ let __CKS_GenerateKey d hSession pMechanism pTemplate =
     let (|updatedDevice, handler|) = deviceAddKey d key.sk in 
     (|Inl handler, updatedDevice|)
   |Inr exp -> (|Inr exp, d|)
-  
+
 
 val _CKS_GenerateKey: d: device -> 
   hSession: _CK_SESSION_HANDLE -> 
@@ -1277,6 +1294,7 @@ val _CKS_GenerateKey: d: device ->
 
 
 let _CKS_GenerateKey d hSession pMechanism pTemplate = 
+  admit();
   __CKS_GenerateKey d hSession pMechanism pTemplate
 
 (*
