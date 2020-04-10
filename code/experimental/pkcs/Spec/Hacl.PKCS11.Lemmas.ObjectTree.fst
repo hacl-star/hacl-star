@@ -18,3 +18,28 @@ assume val lemmaSecretKeyIsObject: attrs: seq _CK_ATTRIBUTE -> Lemma
   )
 
 
+assume val lemmaSecretKeyIsStorage : attrs: seq _CK_ATTRIBUTE -> Lemma
+  (requires 
+    (
+      let requiredAttributes = getAttributesForType CKO_SECRET_KEY in 
+      _attributesAllPresent attrs requiredAttributes))
+  (ensures
+    (
+      let requiredAttributesStorage = getAttributesForTypeExtended CKO_STORAGE in 
+      _attributesAllPresent attrs requiredAttributesStorage
+    )
+  )
+
+
+assume val lemmaSecretKeyIsKey : attrs: seq _CK_ATTRIBUTE -> Lemma
+  (requires 
+    (
+      let requiredAttributes = getAttributesForType CKO_SECRET_KEY in 
+      _attributesAllPresent attrs requiredAttributes))
+  (ensures
+    (
+      let requiredAttributesKey = getAttributesForTypeExtended CKO_KEY in 
+      _attributesAllPresent attrs requiredAttributesKey
+    )
+  )
+

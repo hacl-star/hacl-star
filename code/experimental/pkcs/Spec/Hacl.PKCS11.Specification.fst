@@ -303,10 +303,8 @@ val _CKO_SECRET_KEY_Constructor: attrs: seq _CK_ATTRIBUTE {
 
 let _CKO_SECRET_KEY_Constructor attrs = 
   lemmaSecretKeyIsObject attrs;
-  
-  let test = O attrs in 
-
-  admit();
+  lemmaSecretKeyIsStorage attrs;
+  lemmaSecretKeyIsKey attrs;
   SK (Key (Storage (O attrs)))
 
 
