@@ -24,7 +24,7 @@ dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
 	$(KRML) $^ -o libhash.a $(BASE_FLAGS) $(HASH_BUNDLE) -bundle Hacl.Impl.SHA2.Core=* \
 	  -add-include '"libintvector.h"' \
 	  -tmpdir dist \
-	  -skip-compilation
+	  -skip-compilation -dast
 
 dist/sha2-test.exe: $(HACL_HOME)/tests/sha2-test.o dist/libhash.a
 

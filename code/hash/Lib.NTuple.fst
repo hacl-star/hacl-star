@@ -55,6 +55,15 @@ let createi (#a:Type0) (len:flen) (f:(i:nat{i < len} -> a)) : ntuple a len =
   normalize_term (createi_ #a 0 len f)
 
 inline_for_extraction noextract
+let rec gcreatei_ (#a:Type0) (min:nat) (max:flen{max > min}) (f:(i:nat{i < max} -> GTot a)) : GTot (ntuple_ a (max - min)) (decreases (max - min)) =
+  if min + 1 = max then f min
+  else f min, gcreatei_ #a (min+1) max f
+
+inline_for_extraction
+let gcreatei (#a:Type0) (len:flen) (f:(i:nat{i < len} -> GTot a)) : GTot (ntuple a len) =
+  normalize_term (gcreatei_ #a 0 len f)
+
+inline_for_extraction noextract
 let rec createi_lemma_ (#a:Type0) (min:nat) (max:flen{max > min}) (f:(i:nat{i < max} -> a)) (i:nat{i < max - min}) :
     Lemma (ensures (index #a #(max - min) (createi_ #a min max f) i == f (min+i))) (decreases i) =
     if i = 0 then ()
@@ -65,6 +74,18 @@ let createi_lemma (#a:Type0) (len:flen) (f:(i:nat{i < len} -> a)) (i:nat{i < len
     Lemma (index (createi #a len f) i == f i)
 	  [SMTPat (index (createi #a len f) i)] =
     createi_lemma_ #a 0 len f i
+
+inline_for_extraction noextract
+let rec gcreatei_lemma_ (#a:Type0) (min:nat) (max:flen{max > min}) (f:(i:nat{i < max} -> GTot a)) (i:nat{i < max - min}) :
+    Lemma (ensures (index #a #(max - min) (gcreatei_ #a min max f) i == f (min+i))) (decreases i) =
+    if i = 0 then ()
+    else gcreatei_lemma_ #a (min+1) max f (i-1)
+
+inline_for_extraction noextract
+let gcreatei_lemma (#a:Type0) (len:flen) (f:(i:nat{i < len} -> GTot a)) (i:nat{i < len}) :
+    Lemma (index (gcreatei #a len f) i == f i)
+	  [SMTPat (index (gcreatei #a len f) i)] =
+    gcreatei_lemma_ #a 0 len f i
 
 inline_for_extraction
 let to_lseq (#a:Type0) (#len:flen) (l:ntuple a len) : Lib.Sequence.lseq a len =
@@ -181,8 +202,23 @@ let mapi (#a:Type) (#b:Type) (#len:flen) (f:(i:nat{i < len} -> a -> b)) (s:ntupl
   normalize_term (createi len (fun i -> f i (index s i)))
 
 inline_for_extraction
+let gmapi (#a:Type) (#b:Type) (#len:flen) (f:(i:nat{i < len} -> a -> GTot b)) (s:ntuple a len) : GTot (ntuple b len) =
+  normalize_term (gcreatei len (fun i -> f i (index s i)))
+
+inline_for_extraction
 let map (#a:Type) (#b:Type) (#len:flen) (f:a -> b) (s:ntuple a len) : ntuple b len =
   normalize_term (createi len (fun i -> f (index s i)))
+
+inline_for_extraction
+let gmap (#a:Type) (#b:Type) (#len:flen) (f:a -> GTot b) (s:ntuple a len) : GTot (ntuple b len) =
+  normalize_term (gcreatei len (fun i -> f (index s i)))
+
+inline_for_extraction
+let gmap_lemma (#a:Type) (#b:Type) (#len:flen) (f:a -> GTot b) (s:ntuple a len) (i:nat{i < len}):
+  Lemma (index (gmap #a #b #len f s) i == f (index s i))
+        [SMTPat (index (gmap #a #b #len f s) i)] =
+  gcreatei_lemma #b len (fun i -> f (index s i)) i
+
 
 inline_for_extraction
 let map2i (#a:Type) (#b:Type) (#c:Type) (#len:flen) (f:(i:nat{i < len} -> a -> b -> c)) (s1:ntuple a len)  (s2:ntuple b len) : ntuple c len =
