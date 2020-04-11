@@ -145,15 +145,51 @@ let shuffle_core_spec_lemma_l #a #m k_t ws_t st l =
   shuffle_core_pre_create8_lemma a k_t (vec_v ws_t).[l] (state_spec_v_l st l)
 
 
+#push-options "--z3rlimit 100"
 val ws_next_inner_lemma_l:
     #a:sha2_alg
   -> #m:m_spec
   -> i:size_nat{i < 16}
   -> ws:ws_spec a m
   -> l:nat{l < lanes a m} ->
-  Lemma ((ws_spec_v (ws_next_inner i ws)).[l] == Spec.ws_next_inner a i (ws_spec_v ws).[l])
+  Lemma (ws_spec_v_l (ws_next_inner i ws) l == Spec.ws_next_inner a i (ws_spec_v_l ws l))
 
-let ws_next_inner_lemma_l #a #m i ws = admit()
+let ws_next_inner_lemma_l #a #m i ws l =
+  eq_intro #(word a) #16
+    (ws_spec_v_l (ws_next_inner i ws) l)
+    (Spec.ws_next_inner a i (ws_spec_v_l ws l))
+#pop-options
+
+
+val ws_next_lemma_loop:
+    #a:sha2_alg
+  -> #m:m_spec
+  -> ws:ws_spec a m
+  -> l:nat{l < lanes a m}
+  -> n:nat{n <= 16} ->
+  Lemma
+   (ws_spec_v_l (repeati n (ws_next_inner #a #m) ws) l ==
+    repeati n (Spec.ws_next_inner a) (ws_spec_v_l ws l))
+
+let rec ws_next_lemma_loop #a #m ws l n =
+  let lp = repeati n (ws_next_inner #a #m) ws in
+  let rp = repeati n (Spec.ws_next_inner a) (ws_spec_v_l ws l) in
+
+  if n = 0 then begin
+    eq_repeati0 n (ws_next_inner #a #m) ws;
+    eq_repeati0 n (Spec.ws_next_inner a) (ws_spec_v_l ws l);
+    ws_next_inner_lemma_l 0 ws l end
+  else begin
+    let lp0 = repeati (n - 1) (ws_next_inner #a #m) ws in
+    let rp0 = repeati (n - 1) (Spec.ws_next_inner a) (ws_spec_v_l ws l) in
+    ws_next_lemma_loop #a #m ws l (n - 1);
+    //assert (ws_spec_v_l lp0 l == rp0);
+    unfold_repeati n (ws_next_inner #a #m) ws (n - 1);
+    unfold_repeati n (Spec.ws_next_inner a) (ws_spec_v_l ws l) (n - 1);
+    //assert (lp == ws_next_inner #a #m (n - 1) lp0);
+    //assert (rp == Spec.ws_next_inner a (n - 1) rp0);
+    ws_next_inner_lemma_l (n - 1) lp0 l;
+    () end
 
 
 val ws_next_lemma_l:
@@ -161,9 +197,9 @@ val ws_next_lemma_l:
   -> #m:m_spec
   -> ws:ws_spec a m
   -> l:nat{l < lanes a m} ->
-  Lemma ((ws_spec_v (ws_next #a #m ws)).[l] == Spec.ws_next a (ws_spec_v ws).[l])
+  Lemma (ws_spec_v_l (ws_next #a #m ws) l == Spec.ws_next a (ws_spec_v_l ws l))
 
-let ws_next_lemma_l #a #m ws l = admit()
+let ws_next_lemma_l #a #m ws l = ws_next_lemma_loop #a #m ws l 16
 
 
 val shuffle_inner_lemma_l:
