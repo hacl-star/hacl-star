@@ -36,7 +36,7 @@
 
 /* SNIPPET_START: Lib_RandomBuffer_System_randombytes */
 
-extern bool Lib_RandomBuffer_System_randombytes(uint8_t *buf1, uint32_t len);
+extern bool Lib_RandomBuffer_System_randombytes(uint8_t *buf, uint32_t len);
 
 /* SNIPPET_END: Lib_RandomBuffer_System_randombytes */
 
