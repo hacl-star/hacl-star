@@ -217,7 +217,7 @@ let tup4 #a (#l:lanes_t{l = 4}) (t:ntuple a l) : a & (a & (a & a)) =
   t <: ntuple a 4
 
 inline_for_extraction
-let from_tup4 #a (#l:lanes_t{l = 4}) (t:a & (a & (a & a))) : ntuple a l =
+let from_tup4 #a (#l:lanes_t{l = 4}) (t:a & (a & (a & a))) : r:ntuple a l =
   assert (ntuple a l == ntuple a 4);
   t <: ntuple a 4
 
@@ -406,7 +406,7 @@ let update_last (#a:sha2_alg) (#m:m_spec) (totlen:len_t a)
   else st
 
 noextract
-let transpose_hash4 (#a:sha2_alg) (#m:m_spec{lanes a m == 4})
+let transpose_state4 (#a:sha2_alg) (#m:m_spec{lanes a m == 4})
                     (st:state_spec a m) : state_spec a m =
     let st0 = st.[0] in
     let st1 = st.[1] in
@@ -418,52 +418,56 @@ let transpose_hash4 (#a:sha2_alg) (#m:m_spec{lanes a m == 4})
     let st7 = st.[7] in
     let (st0,st1,st2,st3) = transpose4x4 (st0,st1,st2,st3) in
     let (st4,st5,st6,st7) = transpose4x4 (st4,st5,st6,st7) in
-    create8 st0 st1 st2 st3 st4 st5 st6 st7 
+    create8 st0 st4 st1 st5 st2 st6 st3 st7 
 
 noextract
-let transpose_hash (#a:sha2_alg) (#m:m_spec) (st:state_spec a m) : state_spec a m =
+let transpose_state (#a:sha2_alg) (#m:m_spec) (st:state_spec a m) : state_spec a m =
   match lanes a m with
   | 1 -> st
-  | 4 -> transpose_hash4 #a #m st
+  | 4 -> transpose_state4 #a #m st
   | _ -> admit()
-  
+
+let store_state_inner (#a:sha2_alg) (#m:m_spec) (st:state_spec a m) (i:nat{i < 8})
+                      (hseq: lseq uint8 (lanes a m * 8 * word_length a)) :
+                      lseq uint8 (lanes a m * 8 * word_length a) =
+    update_sub hseq (i * lanes a m * word_length a) (lanes a m * word_length a)
+                    (vec_to_bytes_be st.[i])
+
 noextract
-let finish1 (#a:sha2_alg) (#m:m_spec{lanes a m == 1})
-           (st:state_spec a m) : multiseq (lanes a m) (hash_length a) =
-    let h = create (8 * word_length a) (u8 0) in
-    let h = repeati 8 (fun i h -> 
-                    update_sub h (i * word_length a) (word_length a)
-                      (vec_to_bytes_be st.[i])) h in
-    let hsub = sub h 0 (hash_length a) in
+let store_state (#a:sha2_alg) (#m:m_spec) (st:state_spec a m) :
+                lseq uint8 (lanes a m * 8 * word_length a) =
+    let st = transpose_state st in
+    let h = create (lanes a m * 8 * word_length a) (u8 0) in
+    let h = repeati 8 (store_state_inner #a #m st) h in
+    h
+                
+noextract
+let emit1 (#a:sha2_alg) (#m:m_spec{lanes a m == 1})
+          (hseq:lseq uint8 (lanes a m * 8 * word_length a)):
+          multiseq (lanes a m) (hash_length a) =
+    let hsub = sub hseq 0 (hash_length a) in
     hsub <: multiseq 1 (hash_length a)
 
 #push-options "--z3rlimit 100"
 noextract
-let finish4 (#a:sha2_alg) (#m:m_spec{lanes a m == 4})
-           (st:state_spec a m) : multiseq 4 (hash_length a) =
-    let st = transpose_hash4 st in
-    let h = create (8 * 4 * word_length a) (u8 0) in
-    let h = repeati 8 (fun i h -> 
-                    update_sub h (i * 4 * word_length a) (4 * word_length a)
-                      (vec_to_bytes_be st.[i])) h in
-    let h0 = sub h 0 (8 * word_length a) in
-    let h1 = sub h (8 * word_length a) (8 * word_length a) in
-    let h2 = sub h (16 * word_length a) (8 * word_length a) in
-    let h3 = sub h (24 * word_length a) (8 * word_length a) in
-    let hsub0 : lseq uint8 (hash_length a) = sub h0 0 (hash_length a) in
-    let hsub1 : lseq uint8 (hash_length a) = sub h1 0 (hash_length a) in
-    let hsub2 : lseq uint8 (hash_length a) = sub h2 0 (hash_length a) in
-    let hsub3 : lseq uint8 (hash_length a) = sub h3 0 (hash_length a) in
-    let hsub : multiseq 4 (hash_length a) = (hsub0,(hsub1,(hsub2,hsub3))) in
+let emit4 (#a:sha2_alg) (#m:m_spec{lanes a m == 4})
+          (hseq:lseq uint8 (lanes a m * 8 * word_length a)):
+          multiseq (lanes a m) (hash_length a) =
+    let h0 = sub hseq 0 (hash_length a) in
+    let h1 = sub hseq (8 * word_length a) (hash_length a) in
+    let h2 = sub hseq (16 * word_length a) (hash_length a) in
+    let h3 = sub hseq (24 * word_length a) (hash_length a) in
+    let hsub : multiseq 4 (hash_length a) = (h0,(h1,(h2,h3))) in
     hsub <: multiseq 4 (hash_length a)
 #pop-options
 
 noextract
-let finish (#a:sha2_alg) (#m:m_spec)
-           (st:state_spec a m) : multiseq (lanes a m) (hash_length a) =
+let emit (#a:sha2_alg) (#m:m_spec)
+          (hseq:lseq uint8 (lanes a m * 8 * word_length a)):
+          multiseq (lanes a m) (hash_length a) =
     match lanes a m with
-    | 1 -> finish1 st
-    | 4 -> finish4 st
+    | 1 -> emit1 #a #m hseq
+    | 4 -> emit4 #a #m hseq
     | _ -> admit()
 
 #push-options "--z3rlimit 200 --max_ifuel 2 --max_fuel 2"
@@ -500,34 +504,35 @@ let get_multilast_spec (#a:sha2_alg) (#m:m_spec)
            let ms: multiseq 4 rem = (bl0,(bl1,(bl2,bl3))) in
            ms <: multiseq 4 rem
     | _ -> admit()
+
+noextract
+let hash (#a:sha2_alg) (#m:m_spec) (len:size_nat) (b:multiseq (lanes a m) len) =
+    let len' : len_t a = mk_int #(len_int_type a) #PUB len in
+    let st = init a m in
+    let blocks = len / block_length a in
+    let rem = len % block_length a in
+    let st = repeati blocks (fun i st ->
+      let mb = get_multiblock_spec len b i in
+      update mb st) st in
+    let mb = get_multilast_spec #a #m len b in
+    let st = update_last len' rem mb st in
+    let hseq = store_state st in
+    emit hseq
 #pop-options                       
 
 noextract
-let hash (#a:sha2_alg) (#m:m_spec) (len:len_t a{len_v a len <= max_size_t}) (b:multiseq (lanes a m) (len_v a len)) =
-    let ls = len_v a len in
-    let st = init a m in
-        let blocks = ls / block_length a in
-    let rem = ls % block_length a in
-    let st = repeati blocks (fun i st ->
-      let mb = get_multiblock_spec ls b i in
-      update mb st) st in
-    let mb = get_multilast_spec #a #m ls b in
-    let st = update_last len rem mb st in
-    finish st
-
-noextract
 let sha256 (len:size_nat) (b:lseq uint8 len) =
-  hash #SHA2_256 #M32 (mk_int #U64 #PUB len) b
+  hash #SHA2_256 #M32 len b
 
 noextract
 let sha256_4 (len:size_nat) (b:multiseq 4 len) =
-  hash #SHA2_256 #M128 (mk_int #U64 #PUB len) b
+  hash #SHA2_256 #M128 len b
 
 noextract
 let sha512 (len:size_nat) (b:lseq uint8 len) =
-  hash #SHA2_512 #M32 (mk_int #U128 #PUB len) b
+  hash #SHA2_512 #M32 len b
 
 noextract
   let sha512_4 (len:size_nat) (b:multiseq 4 len) =
-  hash #SHA2_512 #M256 (mk_int #U128 #PUB len) b
+  hash #SHA2_512 #M256 len b
 
