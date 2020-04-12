@@ -174,7 +174,9 @@ noextract
 let multiseq (lanes:lanes_t) (len:size_nat) =
   ntuple (lseq uint8 len) lanes
 
-
+unfold let multiblock_spec (a:sha2_alg) (m:m_spec) =
+  multiseq (lanes a m) (block_length a)
+  
 noextract
 let load_vecij (#a:sha2_alg) (#m:m_spec) (b:multiblock_spec a m) (i:nat{i < 16}) : element_t a m =
   let l = lanes a m in

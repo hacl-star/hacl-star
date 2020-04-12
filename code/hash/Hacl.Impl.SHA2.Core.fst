@@ -5,6 +5,7 @@ open FStar.HyperStack
 open FStar.HyperStack.All
 
 open Lib.IntTypes
+open Lib.NTuple
 open Lib.Sequence
 open Lib.Buffer
 open Lib.IntVector
@@ -626,12 +627,12 @@ val emit4: #a:sha2_alg -> #m:m_spec{lanes a m = 4} ->
                            SpecVec.emit4 #a #m (as_seq h0 hbuf)))
 #push-options "--z3rlimit 200"
 let emit4 #a #m hbuf result =
+  admit();
   let (b0,(b1,(b2,b3))) = NTup.tup4 result in
   copy b0 (sub hbuf 0ul (hash_len a));
   copy b1 (sub hbuf (8ul *. word_len a) (hash_len a));
   copy b2 (sub hbuf (16ul *. word_len a) (hash_len a));
-  copy b3 (sub hbuf (24ul *. word_len a) (hash_len a));
-  admit()
+  copy b3 (sub hbuf (24ul *. word_len a) (hash_len a))
 #pop-options
 
 
