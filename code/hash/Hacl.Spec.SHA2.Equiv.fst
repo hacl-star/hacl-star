@@ -15,52 +15,47 @@ module LSeq = Lib.Sequence
 
 #set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
-val _Ch_lemma: #a:sha2_alg -> #m:m_spec -> x:element_t a m -> y:element_t a m -> z:element_t a m ->
-  Lemma (forall (l:nat{l < lanes a m}).{:pattern (vec_v (_Ch x y z)).[l]}
-    (vec_v (_Ch #a #m x y z)).[l] == Spec._Ch a (vec_v x).[l] (vec_v y).[l] (vec_v z).[l])
+let _Ch_lemma #a #m x y z :
+  Lemma (vec_v (_Ch #a #m x y z) ==
+    LSeq.createi (lanes a m) (fun i -> Spec._Ch a (vec_v x).[i] (vec_v y).[i] (vec_v z).[i]))
   [SMTPat (_Ch x y z)]
+ =
+  LSeq.eq_intro (vec_v (_Ch #a #m x y z))
+    (LSeq.createi (lanes a m) (fun i -> Spec._Ch a (vec_v x).[i] (vec_v y).[i] (vec_v z).[i]))
 
-let _Ch_lemma #a #m x y z = ()
 
-
-val _Maj_lemma: #a:sha2_alg -> #m:m_spec -> x:element_t a m -> y:element_t a m -> z:element_t a m ->
-  Lemma (forall (l:nat{l < lanes a m}).{:pattern (vec_v (_Maj x y z)).[l]}
-    (vec_v (_Maj #a #m x y z)).[l] == Spec._Maj a (vec_v x).[l] (vec_v y).[l] (vec_v z).[l])
+let _Maj_lemma #a #m x y z :
+  Lemma (vec_v (_Maj #a #m x y z) ==
+    LSeq.createi (lanes a m) (fun i -> Spec._Maj a (vec_v x).[i] (vec_v y).[i] (vec_v z).[i]))
   [SMTPat (_Maj x y z)]
+ =
+  LSeq.eq_intro (vec_v (_Maj #a #m x y z))
+    (LSeq.createi (lanes a m) (fun i -> Spec._Maj a (vec_v x).[i] (vec_v y).[i] (vec_v z).[i]))
 
-let _Maj_lemma #a #m x y z = ()
 
-
-val _Sigma0_lemma: #a:sha2_alg -> #m:m_spec -> x:element_t a m ->
-  Lemma (forall (l:nat{l < lanes a m}).{:pattern (vec_v (_Sigma0 x)).[l]}
-    (vec_v (_Sigma0 #a #m x)).[l] == Spec._Sigma0 a (vec_v x).[l])
+let _Sigma0_lemma #a #m x :
+  Lemma (vec_v (_Sigma0 #a #m x) == LSeq.map (Spec._Sigma0 a) (vec_v x))
   [SMTPat (_Sigma0 x)]
+ =
+  LSeq.eq_intro (vec_v (_Sigma0 #a #m x)) (LSeq.map (Spec._Sigma0 a) (vec_v x))
 
-let _Sigma0_lemma #a #m x = ()
-
-
-val _Sigma1_lemma: #a:sha2_alg -> #m:m_spec -> x:element_t a m ->
-  Lemma (forall (l:nat{l < lanes a m}).{:pattern (vec_v (_Sigma1 x)).[l]}
-    (vec_v (_Sigma1 #a #m x)).[l] == Spec._Sigma1 a (vec_v x).[l])
+let _Sigma1_lemma #a #m x :
+  Lemma (vec_v (_Sigma1 #a #m x) == LSeq.map (Spec._Sigma1 a) (vec_v x))
   [SMTPat (_Sigma1 x)]
+ =
+  LSeq.eq_intro (vec_v (_Sigma1 #a #m x)) (LSeq.map (Spec._Sigma1 a) (vec_v x))
 
-let _Sigma1_lemma #a #m x = ()
-
-
-val _sigma0_lemma: #a:sha2_alg -> #m:m_spec -> x:element_t a m ->
-  Lemma (forall (l:nat{l < lanes a m}).{:pattern (vec_v (_sigma0 x)).[l]}
-    (vec_v (_sigma0 #a #m x)).[l] == Spec._sigma0 a (vec_v x).[l])
+let _sigma0_lemma #a #m x :
+  Lemma (vec_v (_sigma0 #a #m x) == LSeq.map (Spec._sigma0 a) (vec_v x))
   [SMTPat (_sigma0 x)]
+ =
+  LSeq.eq_intro (vec_v (_sigma0 #a #m x)) (LSeq.map (Spec._sigma0 a) (vec_v x))
 
-let _sigma0_lemma #a #m x = ()
-
-
-val _sigma1_lemma: #a:sha2_alg -> #m:m_spec -> x:element_t a m ->
-  Lemma (forall (l:nat{l < lanes a m}).{:pattern (vec_v (_sigma1 x)).[l]}
-    (vec_v (_sigma1 #a #m x)).[l] == Spec._sigma1 a (vec_v x).[l])
+let _sigma1_lemma #a #m x :
+  Lemma (vec_v (_sigma1 #a #m x) == LSeq.map (Spec._sigma1 a) (vec_v x))
   [SMTPat (_sigma1 x)]
-
-let _sigma1_lemma #a #m x = ()
+ =
+  LSeq.eq_intro (vec_v (_sigma1 #a #m x)) (LSeq.map (Spec._sigma1 a) (vec_v x))
 
 
 val seq_of_list_is_create8: #a:Type -> x0:a -> x1:a -> x2:a -> x3:a -> x4:a -> x5:a -> x6:a -> x7:a ->
@@ -111,22 +106,6 @@ let shuffle_core_pre_create8_lemma a k_t ws_t hash =
   seq_of_list_is_create8 (t1 +. t2) a0 b0 c0 (d0 +. t1) e0 f0 g0
 
 
-
-noextract
-let state_spec_v_l (#a:sha2_alg) (#m:m_spec) (st:state_spec a m) (l:nat{l < lanes a m}) : words_state a =
-  create8
-    (vec_v st.[0]).[l] (vec_v st.[1]).[l] (vec_v st.[2]).[l] (vec_v st.[3]).[l]
-    (vec_v st.[4]).[l] (vec_v st.[5]).[l] (vec_v st.[6]).[l] (vec_v st.[7]).[l]
-
-noextract
-let ws_spec_v_l (#a:sha2_alg) (#m:m_spec) (st:ws_spec a m) (l:nat{l < lanes a m}) : lseq (word a) 16 =
-  create16
-    (vec_v st.[0]).[l] (vec_v st.[1]).[l] (vec_v st.[2]).[l] (vec_v st.[3]).[l]
-    (vec_v st.[4]).[l] (vec_v st.[5]).[l] (vec_v st.[6]).[l] (vec_v st.[7]).[l]
-    (vec_v st.[8]).[l] (vec_v st.[9]).[l] (vec_v st.[10]).[l] (vec_v st.[11]).[l]
-    (vec_v st.[12]).[l] (vec_v st.[13]).[l] (vec_v st.[14]).[l] (vec_v st.[15]).[l]
-
-
 val shuffle_core_spec_lemma_l:
     #a:sha2_alg
   -> #m:m_spec
@@ -135,30 +114,28 @@ val shuffle_core_spec_lemma_l:
   -> st:state_spec a m
   -> l:nat{l < lanes a m} ->
   Lemma
-   (state_spec_v_l (shuffle_core_spec k_t ws_t st) l ==
-    Spec.shuffle_core_pre a k_t (vec_v ws_t).[l] (state_spec_v_l st l))
+   ((state_spec_v (shuffle_core_spec k_t ws_t st)).[l] ==
+    Spec.shuffle_core_pre a k_t (vec_v ws_t).[l] (state_spec_v st).[l])
 
 let shuffle_core_spec_lemma_l #a #m k_t ws_t st l =
   eq_intro #(word a) #(state_word_length a)
-    (state_spec_v_l (shuffle_core_spec k_t ws_t st) l)
-    (shuffle_core_pre_create8 a k_t (vec_v ws_t).[l] (state_spec_v_l st l));
-  shuffle_core_pre_create8_lemma a k_t (vec_v ws_t).[l] (state_spec_v_l st l)
+    (state_spec_v (shuffle_core_spec k_t ws_t st)).[l]
+    (shuffle_core_pre_create8 a k_t (vec_v ws_t).[l] (state_spec_v st).[l]);
+  shuffle_core_pre_create8_lemma a k_t (vec_v ws_t).[l] (state_spec_v st).[l]
 
 
-#push-options "--z3rlimit 100"
 val ws_next_inner_lemma_l:
     #a:sha2_alg
   -> #m:m_spec
   -> i:size_nat{i < 16}
   -> ws:ws_spec a m
   -> l:nat{l < lanes a m} ->
-  Lemma (ws_spec_v_l (ws_next_inner i ws) l == Spec.ws_next_inner a i (ws_spec_v_l ws l))
+  Lemma ((ws_spec_v (ws_next_inner i ws)).[l] == Spec.ws_next_inner a i (ws_spec_v ws).[l])
 
 let ws_next_inner_lemma_l #a #m i ws l =
   eq_intro #(word a) #16
-    (ws_spec_v_l (ws_next_inner i ws) l)
-    (Spec.ws_next_inner a i (ws_spec_v_l ws l))
-#pop-options
+    (ws_spec_v (ws_next_inner i ws)).[l]
+    (Spec.ws_next_inner a i (ws_spec_v ws).[l])
 
 
 val ws_next_lemma_loop:
@@ -168,24 +145,24 @@ val ws_next_lemma_loop:
   -> l:nat{l < lanes a m}
   -> n:nat{n <= 16} ->
   Lemma
-   (ws_spec_v_l (repeati n (ws_next_inner #a #m) ws) l ==
-    repeati n (Spec.ws_next_inner a) (ws_spec_v_l ws l))
+   ((ws_spec_v (repeati n (ws_next_inner #a #m) ws)).[l] ==
+    repeati n (Spec.ws_next_inner a) (ws_spec_v ws).[l])
 
 let rec ws_next_lemma_loop #a #m ws l n =
   let lp = repeati n (ws_next_inner #a #m) ws in
-  let rp = repeati n (Spec.ws_next_inner a) (ws_spec_v_l ws l) in
+  let rp = repeati n (Spec.ws_next_inner a) (ws_spec_v ws).[l] in
 
   if n = 0 then begin
     eq_repeati0 n (ws_next_inner #a #m) ws;
-    eq_repeati0 n (Spec.ws_next_inner a) (ws_spec_v_l ws l);
+    eq_repeati0 n (Spec.ws_next_inner a) (ws_spec_v ws).[l];
     ws_next_inner_lemma_l 0 ws l end
   else begin
     let lp0 = repeati (n - 1) (ws_next_inner #a #m) ws in
-    let rp0 = repeati (n - 1) (Spec.ws_next_inner a) (ws_spec_v_l ws l) in
+    let rp0 = repeati (n - 1) (Spec.ws_next_inner a) (ws_spec_v ws).[l] in
     ws_next_lemma_loop #a #m ws l (n - 1);
-    //assert (ws_spec_v_l lp0 l == rp0);
+    //assert ((ws_spec_v lp0).[l] == rp0);
     unfold_repeati n (ws_next_inner #a #m) ws (n - 1);
-    unfold_repeati n (Spec.ws_next_inner a) (ws_spec_v_l ws l) (n - 1);
+    unfold_repeati n (Spec.ws_next_inner a) (ws_spec_v ws).[l] (n - 1);
     //assert (lp == ws_next_inner #a #m (n - 1) lp0);
     //assert (rp == Spec.ws_next_inner a (n - 1) rp0);
     ws_next_inner_lemma_l (n - 1) lp0 l;
@@ -197,7 +174,7 @@ val ws_next_lemma_l:
   -> #m:m_spec
   -> ws:ws_spec a m
   -> l:nat{l < lanes a m} ->
-  Lemma (ws_spec_v_l (ws_next #a #m ws) l == Spec.ws_next a (ws_spec_v_l ws l))
+  Lemma ((ws_spec_v (ws_next #a #m ws)).[l] == Spec.ws_next a (ws_spec_v ws).[l])
 
 let ws_next_lemma_l #a #m ws l = ws_next_lemma_loop #a #m ws l 16
 
@@ -210,9 +187,45 @@ val shuffle_inner_lemma_l:
   -> j:size_nat{j < 16}
   -> st:state_spec a m
   -> l:nat{l < lanes a m} ->
-  Lemma ((state_spec_v (shuffle_inner ws i j st)).[l] == Spec.shuffle_inner a (ws_spec_v ws).[l] i j (state_spec_v st).[l])
+  Lemma
+    ((state_spec_v (shuffle_inner ws i j st)).[l] ==
+     Spec.shuffle_inner a (ws_spec_v ws).[l] i j (state_spec_v st).[l])
 
-let shuffle_inner_lemma_l #a #m ws i j st l = admit()
+let shuffle_inner_lemma_l #a #m ws i j st l =
+  let k_t = Seq.index (Spec.k0 a) (16 * i + j) in
+  let ws_t = ws.[j] in
+  shuffle_core_spec_lemma_l k_t ws_t st l
+
+
+val shuffle_inner_loop_lemma:
+    #a:sha2_alg
+  -> #m:m_spec
+  -> i:size_nat{i < Spec.num_rounds16 a}
+  -> ws0:ws_spec a m
+  -> st0:state_spec a m
+  -> l:nat{l < lanes a m}
+  -> n:nat{n <= 16} ->
+  Lemma
+    ((state_spec_v (repeati n (shuffle_inner ws0 i) st0)).[l] ==
+     repeati n (Spec.shuffle_inner a (ws_spec_v ws0).[l] i) (state_spec_v st0).[l])
+
+let rec shuffle_inner_loop_lemma #a #m i ws0 st0 l n =
+  let f_sc = Spec.shuffle_inner a (ws_spec_v ws0).[l] i in
+  let lp = repeati n (shuffle_inner ws0 i) st0 in
+  let rp = repeati n f_sc (state_spec_v st0).[l] in
+
+  if n = 0 then begin
+    eq_repeati0 n (shuffle_inner ws0 i) st0;
+    eq_repeati0 n f_sc (state_spec_v st0).[l];
+    shuffle_inner_lemma_l #a #m ws0 i n st0 l end
+  else begin
+    let lp0 = repeati (n - 1) (shuffle_inner ws0 i) st0 in
+    let rp0 = repeati (n - 1) f_sc (state_spec_v st0).[l] in
+    shuffle_inner_loop_lemma #a #m i ws0 st0 l (n - 1);
+    assert ((state_spec_v lp0).[l] == rp0);
+    unfold_repeati n (shuffle_inner ws0 i) st0 (n - 1);
+    unfold_repeati n f_sc (state_spec_v st0).[l] (n - 1);
+    shuffle_inner_lemma_l #a #m ws0 i (n - 1) lp0 l end
 
 
 val shuffle_inner_loop_lemma_l:
@@ -227,7 +240,40 @@ val shuffle_inner_loop_lemma_l:
    let (ws, st) = Spec.shuffle_inner_loop a i ((ws_spec_v ws0).[l], (state_spec_v st0).[l]) in
    (ws_spec_v ws1).[l] == ws /\ (state_spec_v st1).[l] == st)
 
-let shuffle_inner_loop_lemma_l #a #m i (ws0, st0) = admit()
+let shuffle_inner_loop_lemma_l #a #m i (ws0, st0) l =
+  shuffle_inner_loop_lemma #a #m i ws0 st0 l 16;
+  ws_next_lemma_l ws0 l
+
+
+val shuffle_loop_lemma:
+    #a:sha2_alg
+  -> #m:m_spec
+  -> ws0:ws_spec a m
+  -> st0:state_spec a m
+  -> l:nat{l < lanes a m}
+  -> n:nat{n <= Spec.num_rounds16 a} ->
+  Lemma
+   (let (ws_v, st_v) = repeati n (shuffle_inner_loop #a #m) (ws0, st0) in
+    let (ws, st) = repeati n (Spec.shuffle_inner_loop a) ((ws_spec_v ws0).[l], (state_spec_v st0).[l]) in
+    (ws_spec_v ws_v).[l] == ws /\ (state_spec_v st_v).[l] == st)
+
+let rec shuffle_loop_lemma #a #m ws0 st0 l n =
+  let (ws_v, st_v) = repeati n (shuffle_inner_loop #a #m) (ws0, st0) in
+  let acc0 = ((ws_spec_v ws0).[l], (state_spec_v st0).[l]) in
+  let (ws, st) = repeati n (Spec.shuffle_inner_loop a) acc0 in
+
+  if n = 0 then begin
+    eq_repeati0 n (shuffle_inner_loop #a #m) (ws0, st0);
+    eq_repeati0 n (Spec.shuffle_inner_loop a) acc0;
+    shuffle_inner_loop_lemma_l #a #m n (ws0, st0) l end
+  else begin
+    let (ws_v1, st_v1) = repeati (n - 1) (shuffle_inner_loop #a #m) (ws0, st0) in
+    let (ws1, st1) = repeati (n - 1) (Spec.shuffle_inner_loop a) acc0 in
+    shuffle_loop_lemma #a #m ws0 st0 l (n - 1);
+    //assert ((ws_spec_v ws_v1).[l] == ws1 /\ (state_spec_v st_v1).[l] == st1);
+    unfold_repeati n (shuffle_inner_loop #a #m) (ws0, st0) (n - 1);
+    unfold_repeati n (Spec.shuffle_inner_loop a) acc0 (n - 1);
+    shuffle_inner_loop_lemma_l #a #m (n - 1) (ws_v1, st_v1) l end
 
 
 val shuffle_lemma_l:
@@ -236,9 +282,11 @@ val shuffle_lemma_l:
   -> ws:ws_spec a m
   -> st:state_spec a m
   -> l:nat{l < lanes a m} ->
-  Lemma ((state_spec_v (shuffle ws st)).[l] == Spec.shuffle a (ws_spec_v ws).[l] (state_spec_v st).[l])
+  Lemma ((state_spec_v (shuffle ws st)).[l] ==
+    Spec.shuffle a (ws_spec_v ws).[l] (state_spec_v st).[l])
 
-let shuffle_lemma_l #a #m ws st l = admit()
+let shuffle_lemma_l #a #m ws st l =
+  shuffle_loop_lemma #a #m ws st l (Spec.num_rounds16 a)
 
 
 val init_lemma_l: a:sha2_alg -> m:m_spec -> l:nat{l < lanes a m} ->
