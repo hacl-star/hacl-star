@@ -125,15 +125,20 @@ let ws_spec (a:sha2_alg) (m:m_spec) = lseq (element_t a m) 16
 
 noextract
 let state_spec_v (#a:sha2_alg) (#m:m_spec) (st:state_spec a m) : lseq (words_state a) (lanes a m) =
-  let st_seq_seq = LSeq.map vec_v st in
-  let res = createi #(words_state a) (lanes a m) (fun i -> map (fun x -> x.[i]) st_seq_seq) in
-  res
+  createi #(words_state a) (lanes a m) (fun i ->
+    create8
+      (vec_v st.[0]).[i] (vec_v st.[1]).[i] (vec_v st.[2]).[i] (vec_v st.[3]).[i]
+      (vec_v st.[4]).[i] (vec_v st.[5]).[i] (vec_v st.[6]).[i] (vec_v st.[7]).[i])
 
 noextract
 let ws_spec_v (#a:sha2_alg) (#m:m_spec) (st:ws_spec a m) : lseq (lseq (word a) 16) (lanes a m) =
-  let st_seq_seq = LSeq.map vec_v st in
-  let res = createi #(lseq (word a) 16) (lanes a m) (fun i -> map (fun x -> x.[i]) st_seq_seq) in
-  res
+  createi #(lseq (word a) 16) (lanes a m) (fun i ->
+    create16
+      (vec_v st.[0]).[i] (vec_v st.[1]).[i] (vec_v st.[2]).[i] (vec_v st.[3]).[i]
+      (vec_v st.[4]).[i] (vec_v st.[5]).[i] (vec_v st.[6]).[i] (vec_v st.[7]).[i]
+      (vec_v st.[8]).[i] (vec_v st.[9]).[i] (vec_v st.[10]).[i] (vec_v st.[11]).[i]
+      (vec_v st.[12]).[i] (vec_v st.[13]).[i] (vec_v st.[14]).[i] (vec_v st.[15]).[i])
+
 
 noextract
 val shuffle_core_spec: #a: sha2_alg -> #m:m_spec ->
