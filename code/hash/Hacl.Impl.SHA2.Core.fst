@@ -640,7 +640,6 @@ let update_last #a #m upd totlen len b hash =
   let h2 = ST.get () in
   assert (modifies (loc last) h1 h2);
   assert (disjoint last hash);
-//  assume (disjoint_multi last0 hash);
 //  assume (disjoint_multi last1 hash);
   upd last0 hash;
   let h3 = ST.get() in
@@ -748,39 +747,80 @@ let store_state #a #m st hbuf =
   )
 #pop-options
 
+noextract
+let emit1_spec (#a:sha2_alg) (#m:m_spec{lanes a m == 1})
+          (hseq:lseq uint8 (lanes a m * 8 * word_length a)):
+          multiseq (lanes a m) (hash_length a) =
+    let hsub = Lib.Sequence.sub hseq 0 (hash_length a) in
+    ntup1 hsub
 
+
+noextract
+let emit1_lemma (#a:sha2_alg) (#m:m_spec{lanes a m == 1})
+                (hseq:lseq uint8 (lanes a m * 8 * word_length a)):
+                Lemma (emit1_spec #a #m hseq ==
+                       SpecVec.emit #a #m hseq) =
+    Lib.NTuple.eq_intro (emit1_spec #a #m hseq) (SpecVec.emit #a #m hseq)
+
+                       
 inline_for_extraction
 val emit1: #a:sha2_alg -> #m:m_spec{lanes a m = 1} ->
              hbuf: lbuffer uint8 (8ul *. word_len a) ->
-             result:lbuffer uint8 (hash_len a) ->
+             result:multibuf (lanes a m) (hash_len a) ->
     Stack unit
-    (requires (fun h -> live h result /\ live h hbuf /\ disjoint result hbuf))
-    (ensures (fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-                           (as_seq h1 result <: multiseq 1 (hash_length a)) ==
-                           SpecVec.emit1 #a #m (as_seq h0 hbuf)))
+    (requires (fun h -> live_multi h result /\ live h hbuf /\
+                      internally_disjoint result /\ disjoint_multi result hbuf))
+    (ensures (fun h0 _ h1 -> modifies_multi result h0 h1 /\
+                           as_seq_multi h1 result ==
+                           SpecVec.emit #a #m (as_seq h0 hbuf)))
 let emit1 #a #m hbuf result =
-  copy result (sub hbuf 0ul (hash_len a))
+  let h0 = ST.get() in
+  copy result.(|0|) (sub hbuf 0ul (hash_len a));
+  let h1 = ST.get() in
+  Lib.NTuple.eq_intro (as_seq_multi h1 result) (emit1_spec #a #m (as_seq h0 hbuf));
+  emit1_lemma #a #m (as_seq h0 hbuf);
+  assume (modifies_multi result h0 h1)
+
+
+noextract
+let emit4_spec (#a:sha2_alg) (#m:m_spec{lanes a m == 4})
+          (hseq:lseq uint8 (lanes a m * 8 * word_length a)):
+          multiseq (lanes a m) (hash_length a) =
+    let open Lib.Sequence in
+    let h0 = sub hseq 0 (hash_length a) in
+    let h1 = sub hseq (8 * word_length a) (hash_length a) in
+    let h2 = sub hseq (16 * word_length a) (hash_length a) in
+    let h3 = sub hseq (24 * word_length a) (hash_length a) in
+    let hsub : multiseq 4 (hash_length a) = ntup4 (h0,(h1,(h2,h3))) in
+    hsub
+
+noextract
+let emit4_lemma (#a:sha2_alg) (#m:m_spec{lanes a m == 4})
+                (hseq:lseq uint8 (lanes a m * 8 * word_length a)):
+                Lemma (emit4_spec #a #m hseq ==
+                       SpecVec.emit #a #m hseq) =
+    Lib.NTuple.eq_intro (emit4_spec #a #m hseq) (SpecVec.emit #a #m hseq)
 
 inline_for_extraction
 val emit4: #a:sha2_alg -> #m:m_spec{lanes a m = 4} ->
              hbuf: lbuffer uint8 (size (lanes a m) *. 8ul *. word_len a) ->
              result:multibuf (lanes a m) (hash_len a) ->
     Stack unit
-    (requires (fun h -> live_multi h result /\ live h hbuf /\ disjoint_multi result hbuf /\
-                      (let (b0,(b1,(b2,b3))) = NTup.tup4 result in
-                       disjoint b0 b1 /\
-                       disjoint b0 b2 /\
-                       disjoint b0 b3 /\
-                       disjoint b1 b2 /\
-                       disjoint b1 b3 /\
-                       disjoint b2 b3)))
+    (requires (fun h -> live_multi h result /\ live h hbuf /\
+                      internally_disjoint result  /\ disjoint_multi result hbuf))
     (ensures (fun h0 _ h1 -> modifies_multi result h0 h1 /\
                            as_seq_multi h1 result ==
-                           SpecVec.emit4 #a #m (as_seq h0 hbuf)))
+                           SpecVec.emit #a #m (as_seq h0 hbuf)))
 #push-options "--z3rlimit 200"
 let emit4 #a #m hbuf result =
   let h0 = ST.get() in
   let (b0,(b1,(b2,b3))) = NTup.tup4 result in
+  assert (disjoint b0 b1);
+  assert (disjoint b0 b2);
+  assert (disjoint b0 b3);
+  assert (disjoint b1 b2);
+  assert (disjoint b1 b3);
+  assert (disjoint b2 b3);
   copy b0 (sub hbuf 0ul (hash_len a));
   copy b1 (sub hbuf (8ul *. word_len a) (hash_len a));
   copy b2 (sub hbuf (16ul *. word_len a) (hash_len a));
@@ -792,6 +832,8 @@ let emit4 #a #m hbuf result =
   assert (as_seq h1 b3 == Lib.Sequence.sub (as_seq h0 hbuf) (24 * word_length a) (hash_length a));
   NTup.eq_intro (as_seq_multi h1 result) (NTup.ntup4 (as_seq h1 b0, (as_seq h1 b1, (as_seq h1 b2, as_seq h1 b3))));
   assert (modifies (loc b0 |+| loc b1 |+| loc b2 |+| loc b3) h0 h1);
+  assert (as_seq_multi h1 result == emit4_spec #a #m (as_seq h0 hbuf));
+  emit4_lemma #a #m (as_seq h0 hbuf);
   assume (modifies_multi result h0 h1);
   ()
 #pop-options
@@ -802,12 +844,12 @@ val emit: #a:sha2_alg -> #m:m_spec ->
           hbuf: lbuffer uint8 (size (lanes a m) *. 8ul *. word_len a) ->
           result:multibuf (lanes a m) (hash_len a) ->
     Stack unit
-    (requires (fun h -> live_multi h result /\ live h hbuf /\ disjoint_multi result hbuf))
+    (requires (fun h -> live_multi h result /\ live h hbuf /\
+                      internally_disjoint result /\ disjoint_multi result hbuf))
     (ensures (fun h0 _ h1 -> modifies_multi result h0 h1 /\
                            as_seq_multi h1 result ==
                            SpecVec.emit #a #m (as_seq h0 hbuf)))
 let emit #a #m hbuf result =
-  admit();
   match lanes a m with
   | 1 -> emit1 #a #m hbuf result
   | 4 -> emit4 #a #m hbuf result
@@ -824,15 +866,25 @@ val get_multiblock: #a:sha2_alg -> #m:m_spec ->
                                            SpecVec.get_multiblock_spec (v len) (as_seq_multi h0 b) (v i)))
 
 let get_multiblock #a #m len b i =
-  admit();
+  let h0 = ST.get() in
   match lanes a m with
-  | 1 -> sub (b <: lbuffer uint8 len) (i *. block_len a) (block_len a)
+  | 1 -> let b0 = NTup.tup1 b in
+         let b' = sub b0 (i *. block_len a) (block_len a) in
+         let mb' = NTup.ntup1 b' in
+         let h1 = ST.get() in
+         NTup.eq_intro (as_seq_multi h1 mb') 
+                       (SpecVec.get_multiblock_spec #a #m (v len) (as_seq_multi h0 b) (v i));
+         mb'
   | 4 -> let (b0,(b1,(b2,b3))) = NTup.tup4 b in
-         let bl0 : lbuffer uint8 (block_len a) = sub (b0 <: lbuffer uint8 len) (i *. block_len a) (block_len a) in
-         let bl1 : lbuffer uint8 (block_len a) = sub (b1 <: lbuffer uint8 len) (i *. block_len a) (block_len a) in
-         let bl2 : lbuffer uint8 (block_len a) = sub (b2 <: lbuffer uint8 len) (i *. block_len a) (block_len a) in
-         let bl3 : lbuffer uint8 (block_len a) = sub (b3 <: lbuffer uint8 len) (i *. block_len a) (block_len a) in
-         NTup.ntup4 (bl0, (bl1, (bl2, bl3)))
+         let bl0 = sub b0 (i *. block_len a) (block_len a) in
+         let bl1 = sub b1 (i *. block_len a) (block_len a) in
+         let bl2 = sub b2 (i *. block_len a) (block_len a) in
+         let bl3 = sub b3 (i *. block_len a) (block_len a) in
+         let mb = NTup.ntup4 (bl0, (bl1, (bl2, bl3))) in
+         let h1 = ST.get() in
+         NTup.eq_intro (as_seq_multi h1 mb) 
+                       (SpecVec.get_multiblock_spec #a #m (v len) (as_seq_multi h0 b) (v i));
+         mb
   | _ -> admit()
 
 
@@ -845,36 +897,28 @@ val get_multilast: #a:sha2_alg -> #m:m_spec ->
                             as_seq_multi h1 r ==
                             SpecVec.get_multilast_spec #a #m (v len) (as_seq_multi h0 b)))
 
-#push-options "--z3rlimit 200"
+#push-options "--z3rlimit 300"
 let get_multilast #a #m len b =
-  admit();
   let h0 = ST.get() in
   let rem = len %. block_len a in
+  assert (v (len -! rem) == v len - v rem);
   match lanes a m with
-  | 1 -> sub (b <: lbuffer uint8 len) (len -. rem) rem
-  | 4 -> let (b0,(b1,(b2,b3))) = NTup.tup4 b in
-         let bl0 = sub (b0 <: lbuffer uint8 len) (len -! rem) rem in
-         let bl1 = sub (b1 <: lbuffer uint8 len) (len -! rem) rem in
-         let bl2 = sub (b2 <: lbuffer uint8 len) (len -! rem) rem in
-         let bl3 = sub (b3 <: lbuffer uint8 len) (len -! rem) rem in
-         let mb : multibuf 4 rem = NTup.ntup4 (bl0, (bl1, (bl2, bl3))) in
-         assert (v (len -! rem) = v len - v rem);
+  | 1 -> let b0 = NTup.tup1 b in
+         let b' = sub b0 (len -! rem) rem in
+         let mb' = NTup.ntup1 b' in
          let h1 = ST.get() in
-         assert (as_seq h1 bl0 == Lib.Sequence.sub (as_seq h0 b0) (v len - v rem) (v rem));
-         assert (as_seq h1 bl1 == Lib.Sequence.sub (as_seq h0 b1) (v len - v rem) (v rem));
-         assert (as_seq h1 bl2 == Lib.Sequence.sub (as_seq h0 b2) (v len - v rem) (v rem));
-         assert (as_seq h1 bl3 == Lib.Sequence.sub (as_seq h0 b3) (v len - v rem) (v rem));
-         assert (as_seq_multi h1 mb == (as_seq h1 bl0, (as_seq h1 bl1, (as_seq h1 bl2, as_seq h1 bl3))));
-         assert (h0 == h1);
-         assert (live_multi h1 mb);
-         Lib.NTuple.eq_intro (as_seq_multi h1 mb) (SpecVec.get_multilast_spec #a #m (v len) (as_seq_multi h0 b));
-         assert (Lib.NTuple.equal
-                       (as_seq_multi h1 mb)
-                       (SpecVec.get_multilast_spec #a #m (v len) (as_seq_multi h0 b)));
-         Lib.NTuple.eq_elim (as_seq_multi h1 mb) (SpecVec.get_multilast_spec #a #m (v len) (as_seq_multi h0 b));
-         assert ((as_seq_multi h1 mb) ==
-                 (SpecVec.get_multilast_spec #a #m (v len) (as_seq_multi h0 b)));
-         admit();
+         NTup.eq_intro (as_seq_multi h1 mb') 
+                       (SpecVec.get_multilast_spec #a #m (v len) (as_seq_multi h0 b));
+         mb'
+  | 4 -> let (b0,(b1,(b2,b3))) = NTup.tup4 b in
+         let bl0 = sub b0 (len -! rem) rem in
+         let bl1 = sub b1 (len -! rem) rem in
+         let bl2 = sub b2 (len -! rem) rem in
+         let bl3 = sub b3 (len -! rem) rem in
+         let mb = NTup.ntup4 (bl0, (bl1, (bl2, bl3))) in
+         let h1 = ST.get() in
+         NTup.eq_intro (as_seq_multi h1 mb) 
+                       (SpecVec.get_multilast_spec #a #m (v len) (as_seq_multi h0 b));
          mb
   | _ -> admit()
 #pop-options

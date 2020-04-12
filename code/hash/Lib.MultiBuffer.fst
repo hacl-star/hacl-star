@@ -12,6 +12,9 @@ open Lib.NTuple
 inline_for_extraction let multibuf (lanes:flen) (len:size_t) = 
     ntuple (lbuffer uint8 len) lanes
 
+let internally_disjoint #lanes #len (b:multibuf lanes len) =
+  forall i j. (i < lanes /\ j < lanes /\ i <> j) ==> disjoint b.(|i|) b.(|j|)
+
 let disjoint_multi #lanes #len #a #len' (b:multibuf lanes len) (b':lbuffer a len') =
   forall i. i < lanes ==> disjoint b.(|i|) b'
 

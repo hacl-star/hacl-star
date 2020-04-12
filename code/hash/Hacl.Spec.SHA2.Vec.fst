@@ -328,33 +328,6 @@ let load_last4 (#a:sha2_alg) (#m:m_spec{lanes a m == 4})
     let mb0 = ntup4 (l00, (l10, (l20, l30))) in
     let mb1 = ntup4 (l01, (l11, (l21, l31))) in
     (mb0, mb1)
-
-
-
-(*
-    let last0 = update_sub last0 0 len b.(|0|) in
-    let last1 = update_sub last1 0 len b.(|1|) in
-    let last2 = update_sub last2 0 len b.(|2|) in
-    let last3 = update_sub last3 0 len b.(|3|) in
-    let last0 = last0.[len] <- u8 0x80 in
-    let last1 = last1.[len] <- u8 0x80 in
-    let last2 = last2.[len] <- u8 0x80 in
-    let last3 = last3.[len] <- u8 0x80 in
-    let last0 = update_sub last0 (fin - len_length a) (len_length a) totlen_seq in
-    let last1 = update_sub last1 (fin - len_length a) (len_length a) totlen_seq in
-    let last2 = update_sub last2 (fin - len_length a) (len_length a) totlen_seq in
-    let last3 = update_sub last3 (fin - len_length a) (len_length a) totlen_seq in
-    let l00 = sub last0 0 (block_length a) in
-    let l10 = sub last1 0 (block_length a) in
-    let l20 = sub last2 0 (block_length a) in
-    let l30 = sub last3 0 (block_length a) in
-    let l01 = sub last0 (block_length a) (block_length a) in
-    let l11 = sub last1 (block_length a) (block_length a) in
-    let l21 = sub last2 (block_length a) (block_length a) in
-    let l31 = sub last3 (block_length a) (block_length a) in
-    let mb0 = (l00, (l10, (l20, l30))) in
-    let mb1 = (l01, (l11, (l21, l31))) in
-    (ntup4 mb0, ntup4 mb1) *)
 #pop-options
 
 noextract
@@ -420,67 +393,28 @@ let store_state (#a:sha2_alg) (#m:m_spec) (st:state_spec a m) :
     h
 
 noextract
-let emit1 (#a:sha2_alg) (#m:m_spec{lanes a m == 1})
-          (hseq:lseq uint8 (lanes a m * 8 * word_length a)):
-          multiseq (lanes a m) (hash_length a) =
-    let hsub = sub hseq 0 (hash_length a) in
-    hsub <: multiseq 1 (hash_length a)
-
-
-noextract
-let emit4 (#a:sha2_alg) (#m:m_spec{lanes a m == 4})
-          (hseq:lseq uint8 (lanes a m * 8 * word_length a)):
-          multiseq (lanes a m) (hash_length a) =
-    let h0 = sub hseq 0 (hash_length a) in
-    let h1 = sub hseq (8 * word_length a) (hash_length a) in
-    let h2 = sub hseq (16 * word_length a) (hash_length a) in
-    let h3 = sub hseq (24 * word_length a) (hash_length a) in
-    let hsub : multiseq 4 (hash_length a) = (h0,(h1,(h2,h3))) in
-    hsub <: multiseq 4 (hash_length a)
-
-
-noextract
 let emit (#a:sha2_alg) (#m:m_spec)
-          (hseq:lseq uint8 (lanes a m * 8 * word_length a)):
-          multiseq (lanes a m) (hash_length a) =
-    match lanes a m with
-    | 1 -> emit1 #a #m hseq
-    | 4 -> emit4 #a #m hseq
-    | _ -> admit()
+         (hseq:lseq uint8 (lanes a m * 8 * word_length a)):
+         multiseq (lanes a m) (hash_length a) =
+    Lib.NTuple.createi (lanes a m)
+      (fun i -> sub hseq (i * 8 * word_length a) (hash_length a))
 
 noextract
 let get_multiblock_spec (#a:sha2_alg) (#m:m_spec)
                         (len:size_nat) (b:multiseq (lanes a m) len)
                         (i:size_nat{i < len / block_length a})
                         : multiseq (lanes a m) (block_length a) =
-    match lanes a m with
-    | 1 -> let r = sub #_ #len  (b <: multiseq 1 len) (i * block_length a) (block_length a) in
-           r <: multiseq 1 (block_length a)
-    | 4 -> let (b0,(b1,(b2,b3))) = tup4 b in
-           let bl0 = sub (b0 <: lseq uint8 len) (i * block_length a) (block_length a) in
-           let bl1 = sub (b1 <: lseq uint8 len) (i * block_length a) (block_length a) in
-           let bl2 = sub (b2 <: lseq uint8 len) (i * block_length a) (block_length a) in
-           let bl3 = sub (b3 <: lseq uint8 len) (i * block_length a) (block_length a) in
-           let ms: multiseq 4 (block_length a) = (bl0,(bl1,(bl2,bl3))) in
-           ms <: multiseq 4 (block_length a)
-    | _ -> admit()
+
+    Lib.NTuple.createi #(lseq uint8 (block_length a)) (lanes a m)
+      (fun j -> sub b.(|j|) (i * block_length a) (block_length a))
 
 noextract
 let get_multilast_spec (#a:sha2_alg) (#m:m_spec)
                         (len:size_nat) (b:multiseq (lanes a m) len)
                         : multiseq (lanes a m) (len % block_length a) =
     let rem = len % block_length a in
-    match lanes a m with
-    | 1 -> let r = sub #_ #len  (b <: multiseq 1 len) (len - rem) (rem) in
-           r <: multiseq 1 rem
-    | 4 -> let (b0,(b1,(b2,b3))) = tup4 b in
-           let bl0 = sub (b0 <: lseq uint8 len) (len - rem) rem in
-           let bl1 = sub (b1 <: lseq uint8 len) (len - rem) rem in
-           let bl2 = sub (b2 <: lseq uint8 len) (len - rem) rem in
-           let bl3 = sub (b3 <: lseq uint8 len) (len - rem) rem in
-           let ms: multiseq 4 rem = (bl0,(bl1,(bl2,bl3))) in
-           ms <: multiseq 4 rem
-    | _ -> admit()
+    Lib.NTuple.createi #(lseq uint8 rem) (lanes a m)
+      (fun j -> sub b.(|j|) (len - rem) rem)
 
 noextract
 let hash (#a:sha2_alg) (#m:m_spec) (len:size_nat) (b:multiseq (lanes a m) len) =
@@ -495,7 +429,6 @@ let hash (#a:sha2_alg) (#m:m_spec) (len:size_nat) (b:multiseq (lanes a m) len) =
     let st = update_last len' rem mb st in
     let hseq = store_state st in
     emit hseq
-
 
 noextract
 let sha256 (len:size_nat) (b:lseq uint8 len) =
