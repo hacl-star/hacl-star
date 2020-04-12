@@ -1,22 +1,25 @@
 module Hacl.Impl.SHA2.Core
 
 open FStar.Mul
-module ST = FStar.HyperStack.ST
 open FStar.HyperStack
 open FStar.HyperStack.All
+
 open Lib.IntTypes
 open Lib.Sequence
 open Lib.Buffer
 open Lib.IntVector
-module NTup = Lib.NTuple
 open Lib.MultiBuffer
+
 open Spec.Hash.Definitions
 open Hacl.Hash.Definitions
+
+module ST = FStar.HyperStack.ST
+module NTup = Lib.NTuple
 module Constants = Spec.SHA2.Constants
-module Spec = Spec.SHA2
-friend Hacl.Spec.SHA2.Vec
+module Spec = Hacl.Spec.SHA2
 module SpecVec = Hacl.Spec.SHA2.Vec
 open Hacl.Spec.SHA2.Vec
+
 #reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
 
 (** Top-level constant arrays for the SHA2 algorithms. *)
