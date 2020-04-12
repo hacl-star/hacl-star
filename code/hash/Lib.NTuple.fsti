@@ -28,6 +28,16 @@ inline_for_extraction noextract
 val index (#a:Type0) (#len:flen) (s:ntuple a len) (i:nat{i < len}) : a
 
 inline_for_extraction noextract
+val index_fst_lemma (#a:Type0) (#len:flen) (s:ntuple a len) :
+  Lemma (fst s == index s 0)
+        [SMTPat (fst s)]
+        
+inline_for_extraction noextract
+val index_rest_lemma (#a:Type0) (#len:flen{len > 1}) (s:ntuple a len) (i:nat{i < len - 1}) :
+  Lemma (index s (i + 1)  == index (rest s) i)
+        [SMTPat (index (rest s) i)]
+
+inline_for_extraction noextract
 val createi (#a:Type0) (len:flen) (f:(i:nat{i < len} -> a)) : ntuple a len
 
 inline_for_extraction noextract

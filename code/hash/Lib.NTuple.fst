@@ -35,6 +35,16 @@ let index (#a:Type0) (#len:flen) (s:ntuple a len) (i:nat{i < len}) =
   normalize_term (index_ s i)
 
 inline_for_extraction noextract
+let index_fst_lemma #a #len s = ()
+
+#push-options "--max_fuel 2"
+inline_for_extraction noextract
+let rec index_rest_lemma #a #len s i =
+  if len = 1 then ()
+  else admit ()
+#pop-options
+
+inline_for_extraction noextract
 let rec createi_ (#a:Type0) (min:nat) (max:flen{max > min}) (f:(i:nat{i < max} -> a)) : Tot (ntuple_ a (max - min)) (decreases (max - min)) =
   if min + 1 = max then f min
   else f min, createi_ #a (min+1) max f

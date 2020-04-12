@@ -441,7 +441,7 @@ let finish (#a:sha2_alg) (#m:m_spec) (st:state_spec a m) :
     
 noextract
 let hash (#a:sha2_alg) (#m:m_spec) (len:size_nat) (b:multiseq (lanes a m) len) =
-    let len' : len_t a = mk_int #(len_int_type a) #PUB len in
+    let len' : len_t a = Lib.IntTypes.cast #U32 #PUB (len_int_type a) PUB (size len) in
     let st = init a m in
     let st = update_nblocks #a #m len b st in
     let rem = len % block_length a in

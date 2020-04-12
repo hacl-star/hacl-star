@@ -26,7 +26,9 @@ val sha256_4: r0:lbuffer uint8 32ul ->
               b3:lbuffer uint8 len ->
     Stack unit
     (requires (fun h0 -> live h0 b0 /\ live h0 b1 /\ live h0 b2 /\ live h0 b3 /\ 
-                       live h0 r0 /\ live h0 r1 /\ live h0 r2 /\ live h0 r3))
+                       live h0 r0 /\ live h0 r1 /\ live h0 r2 /\ live h0 r3 /\
+                       disjoint r0 r1 /\ disjoint r0 r2 /\ disjoint r0 r3 /\
+                       disjoint r1 r2 /\ disjoint r1 r3 /\ disjoint r2 r3))
     (ensures (fun h0 _ h1 -> modifies (loc r0 |+| loc r1 |+| loc r2 |+| loc r3) h0 h1))
 
 

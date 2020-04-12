@@ -18,13 +18,24 @@ let internally_disjoint #lanes #len (b:multibuf lanes len) =
 let disjoint_multi #lanes #len #a #len' (b:multibuf lanes len) (b':lbuffer a len') =
   forall i. i < lanes ==> disjoint b.(|i|) b'
 
-let rec loc_multi_ #lanes #len (b:multibuf lanes len) : GTot LowStar.Buffer.loc =
-  if lanes = 1 then loc (b <: lbuffer uint8 len)
-  else let b0 = fst b in
-       let br = rest b in
-       loc b0 |+| loc_multi_ br
+let rec loc_multi_ (#lanes:flen) #len  (i:nat{i < lanes}) (b:multibuf lanes len)
+                   : GTot LowStar.Buffer.loc (decreases (lanes - i)) =
+  if i = lanes - 1 then loc (b.(|i|))
+  else loc b.(|i|) |+| loc_multi_ (i+1) b 
 
-let loc_multi #lanes #len b = normalize_term (loc_multi_ #lanes #len b)
+let loc_multi #lanes #len b = normalize_term (loc_multi_ #lanes #len 0 b)
+
+#push-options "--max_fuel 2"
+let loc_multi1 (#lanes:flen{lanes = 1}) (#len:size_t) (b:multibuf lanes len)  :
+  Lemma (loc_multi #lanes #len b == loc b.(|0|)) = ()
+#pop-options
+
+#push-options "--max_fuel 5 --max_ifuel 4 --z3rlimit 100"
+let loc_multi4 (#lanes:flen{lanes = 4}) (#len:size_t) (b:multibuf lanes len)  :
+  Lemma (loc_multi #lanes #len b == 
+         (loc b.(|0|) |+| loc b.(|1|) |+| loc b.(|2|) |+| loc b.(|3|))) = 
+  admit()
+#pop-options
 
 let disjoint_multi_multi #lanes #len #len' (b:multibuf lanes len) (b':multibuf lanes len') =
   forall i. i < lanes ==> disjoint b.(|i|) b'.(|i|)

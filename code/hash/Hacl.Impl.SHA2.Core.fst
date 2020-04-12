@@ -782,7 +782,7 @@ let emit1 #a #m hbuf result =
   let h1 = ST.get() in
   Lib.NTuple.eq_intro (as_seq_multi h1 result) (emit1_spec #a #m (as_seq h0 hbuf));
   emit1_lemma #a #m (as_seq h0 hbuf);
-  assume (modifies_multi result h0 h1)
+  assert (modifies_multi result h0 h1)
 
 
 noextract
@@ -837,7 +837,8 @@ let emit4 #a #m hbuf result =
   assert (modifies (loc b0 |+| loc b1 |+| loc b2 |+| loc b3) h0 h1);
   assert (as_seq_multi h1 result == emit4_spec #a #m (as_seq h0 hbuf));
   emit4_lemma #a #m (as_seq h0 hbuf);
-  assume (modifies_multi result h0 h1);
+  loc_multi4 result;
+  assert (modifies_multi result h0 h1);
   ()
 #pop-options
 
@@ -858,6 +859,10 @@ let emit #a #m hbuf result =
   | 4 -> emit4 #a #m hbuf result
   | _ -> admit()
 
+noextract
+let preserves_disjoint_multi #lanes #len #len' (b:multibuf lanes len) (r:multibuf lanes len') =
+    (forall a l (x:lbuffer a l). disjoint_multi b x ==> disjoint_multi r x)
+
 inline_for_extraction
 val get_multiblock: #a:sha2_alg -> #m:m_spec ->
                     len:size_t -> b:multibuf (lanes a m) len ->
@@ -865,7 +870,7 @@ val get_multiblock: #a:sha2_alg -> #m:m_spec ->
                     Stack (multibuf (lanes a m) (block_len a))
                     (requires (fun h -> live_multi h b))
                     (ensures (fun h0 r h1 -> h0 == h1 /\ live_multi h1 r /\
-                                           (forall l (x:lbuffer uint8 l). disjoint_multi b x ==> disjoint_multi r x) /\
+                                           preserves_disjoint_multi b r /\
                                            as_seq_multi h1 r ==
                                            SpecVec.get_multiblock_spec (v len) (as_seq_multi h0 b) (v i)))
 
@@ -898,7 +903,7 @@ val get_multilast: #a:sha2_alg -> #m:m_spec ->
                    Stack (multibuf (lanes a m) (len %. block_len a))
                    (requires (fun h -> live_multi h b))
                    (ensures (fun h0 r h1 -> h0 == h1 /\ live_multi h1 r /\
-                            (forall l (x:lbuffer uint8 l). disjoint_multi b x ==> disjoint_multi r x) /\
+                            preserves_disjoint_multi b r /\
                             as_seq_multi h1 r ==
                             SpecVec.get_multilast_spec #a #m (v len) (as_seq_multi h0 b)))
 
@@ -946,11 +951,13 @@ let update_nblocks #a #m upd len b st =
       (fun h -> SpecVec.update_block #a #m (v len) (as_seq_multi h0 b))
       (fun i -> 
         Lib.LoopCombinators.unfold_repeati (v blocks) (SpecVec.update_block #a #m (v len) (as_seq_multi h0 b)) (as_seq h0 st) (v i);
+        let h0' = ST.get() in
         let mb = get_multiblock len b i in
         upd mb st;
         let h1 = ST.get() in
         assert (modifies (loc st) h0 h1);
-        admit())
+        NTup.eq_intro (as_seq_multi h0' b) (as_seq_multi h0 b);
+        assert (as_seq h1 st == SpecVec.update_block #a #m (v len) (as_seq_multi h0 b) (v i) (as_seq h0' st)))
 #pop-options
 
 inline_for_extraction
@@ -960,21 +967,29 @@ val finish: #a:sha2_alg -> #m:m_spec ->
             Stack unit
             (requires (fun h0 -> live_multi h0 h /\ internally_disjoint h /\
                                live h0 st /\ disjoint_multi h st))
-            (ensures (fun h0 _ h1 -> modifies (loc st |+| loc_multi h) h0 h1 /\
+            (ensures (fun h0 _ h1 -> modifies (loc_multi h |+| loc st) h0 h1 /\
                                    as_seq_multi h1 h ==
                                    SpecVec.finish #a #m (as_seq h0 st)))
 
 #push-options "--z3rlimit 100"
 let finish #a #m st h =
+  let h0 = ST.get() in
   push_frame();
   let hbuf = create (size (lanes a m) *. 8ul *. word_len a) (u8 0) in
+  let h1 = ST.get() in
   store_state st hbuf;
   emit hbuf h;
-  admit();
-  pop_frame()
+  let h2 = ST.get() in
+  assert (modifies (loc_multi h |+| loc st |+| loc hbuf) h1 h2);
+  assert (as_seq_multi h2 h == SpecVec.finish #a #m (as_seq h0 st));
+  pop_frame();
+  let h3 = ST.get() in
+  assert (modifies (loc_multi h |+| loc st) h0 h3);
+  NTup.eq_intro (as_seq_multi h2 h) (as_seq_multi h3 h);
+  assert (as_seq_multi h2 h == as_seq_multi h3 h);
+  assert (as_seq_multi h3 h == SpecVec.finish #a #m (as_seq h0 st))
 #pop-options
 
-#push-options "--z3rlimit 300"
 
 inline_for_extraction
 val hash: #a:sha2_alg -> #m:m_spec -> upd:update_t a m ->
@@ -986,28 +1001,44 @@ val hash: #a:sha2_alg -> #m:m_spec -> upd:update_t a m ->
     (ensures (fun h0 _ h1 -> modifies_multi h h0 h1 /\
                            as_seq_multi h1 h ==
                            SpecVec.hash #a #m (v len) (as_seq_multi h0 b)))
-#push-options "--z3rlimit 300"
+
+#push-options "--z3rlimit 500"
 let hash #a #m upd h len b =
+    let init_h0 = ST.get() in
     push_frame();
     let h0 = ST.get() in
+    NTup.eq_intro (as_seq_multi h0 b) (as_seq_multi init_h0 b);
     let st = alloc a m in
     init #a #m st;
     let h1 = ST.get() in
     assert (modifies (loc st) h0 h1);
+    assert (as_seq h1 st == SpecVec.init a m);
+    NTup.eq_intro (as_seq_multi h1 b) (as_seq_multi h0 b);
     let rem = len %. block_len a in
     let len' : len_t a = Lib.IntTypes.cast #U32 #PUB (len_int_type a) PUB len in
     update_nblocks #a #m upd len b st;
     let h2 = ST.get() in
     assert (modifies (loc st) h0 h2);
+    assert (as_seq h2 st == SpecVec.update_nblocks (v len) (as_seq_multi h0 b) (as_seq h1 st));
+    NTup.eq_intro (as_seq_multi h2 b) (as_seq_multi h0 b);
     let lb: multibuf (lanes a m) rem = get_multilast len b in
-    assume (disjoint_multi lb st);
-    update_last #a #m upd len' rem lb st;
     let h3 = ST.get() in
-    assert (modifies (loc st) h0 h3);
-    finish #a #m st h;
+    assert (h2 == h3);
+    assert (as_seq_multi h3 lb == SpecVec.get_multilast_spec #a #m (v len) (as_seq_multi h2 b)); 
+    assert (preserves_disjoint_multi b lb);
+    assert (disjoint_multi lb st);
+    update_last #a #m upd len' rem lb st;
     let h4 = ST.get() in
-    admit();
-    pop_frame()
+    assert (modifies (loc st) h0 h4);
+    assert (as_seq h4 st == SpecVec.update_last len' (v rem) (as_seq_multi h3 lb) (as_seq h3 st));
+    finish #a #m st h;
+    let h5 = ST.get() in
+    assert (modifies (loc_multi h |+| loc st) h0 h5);
+    assert (as_seq_multi h5 h == SpecVec.finish #a #m (as_seq h4 st));
+    assert (as_seq_multi h5 h == SpecVec.hash #a #m (v len) (as_seq_multi h0 b));
+    pop_frame();
+    let h6 = ST.get() in
+    NTup.eq_intro (as_seq_multi h6 h) (as_seq_multi h5 h)
 #pop-options
 
 
@@ -1019,29 +1050,34 @@ val sha256_update1: b:multibuf (lanes SHA2_256 M32) (block_len SHA2_256) -> hash
     Stack unit
     (requires (fun h -> live_multi h b /\ live h hash))
     (ensures (fun h0 _ h1 -> modifies (loc hash) h0 h1 /\
-                           as_seq h1 hash == Hacl.Spec.SHA2.Vec.update #SHA2_256 #M32 (as_seq_multi h0 b) (as_seq h0 hash)))
+                           as_seq h1 hash == SpecVec.update #SHA2_256 #M32 (as_seq_multi h0 b) (as_seq h0 hash)))
 let sha256_update1 b hash = update #SHA2_256 #M32 b hash
 
-let sha256 h len b = admit(); hash #SHA2_256 #M32 sha256_update1 h len (b <: lbuffer uint8 len)
+let sha256 h len b =
+  let b = ntup1 b in
+  let h = ntup1 h in
+  hash #SHA2_256 #M32 (sha256_update1 <: update_t SHA2_256 M32) h len b
 
 [@CInline]
 val sha256_update4: b:multibuf (lanes SHA2_256 M128) (block_len SHA2_256) ->
                     hash:state_t SHA2_256 M128 ->
     Stack unit
-    (requires (fun h -> live_multi h b /\ live h hash))// /\ disjoint_multi b hash))
+    (requires (fun h -> live_multi h b /\ live h hash))
     (ensures (fun h0 _ h1 -> modifies1 hash h0 h1 /\
                            as_seq h1 hash == Hacl.Spec.SHA2.Vec.update #SHA2_256 #M128 (as_seq_multi h0 b) (as_seq h0 hash)))
 
 let sha256_update4 b hash =
   update #SHA2_256 #M128 b hash
 
-#push-options "--z3rlimit 200"
+#push-options "--z3rlimit 400"
 let sha256_4 r0 r1 r2 r3 len b0 b1 b2 b3 =
-  let ib : multibuf 4 len = NTup.ntup4 (b0,(b1,(b2,b3))) in
-  let rb : multibuf 4 (hash_len SHA2_256) = NTup.ntup4 (r0,(r1,(r2,r3))) in
+  let ib = NTup.ntup4 (b0,(b1,(b2,b3))) in
+  let rb = NTup.ntup4 (r0,(r1,(r2,r3))) in
   let h0 = ST.get() in
-  admit();
   assert (live_multi h0 ib);
+  assert (live_multi h0 rb);
+  assert (internally_disjoint rb);
+  loc_multi4 rb;
   hash #SHA2_256 #M128 sha256_update4 rb len ib
 #pop-options
 
