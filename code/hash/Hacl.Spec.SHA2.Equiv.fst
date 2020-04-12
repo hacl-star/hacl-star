@@ -12,6 +12,8 @@ open Spec.Hash.Definitions
 module Constants = Spec.SHA2.Constants
 module Spec = Hacl.Spec.SHA2
 module LSeq = Lib.Sequence
+module BSeq = Lib.ByteSequence
+
 
 #set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
@@ -292,7 +294,206 @@ let shuffle_lemma_l #a #m ws st l =
 val init_lemma_l: a:sha2_alg -> m:m_spec -> l:nat{l < lanes a m} ->
   Lemma ((state_spec_v (init a m)).[l] == Spec.init a)
 
-let init_lemma_l a m l = admit()
+let init_lemma_l a m l =
+  eq_intro #(word a) #(state_word_length a)
+    (state_spec_v (init a m)).[l] (Spec.init a)
+
+
+val load_blocks_lemma_ij:
+    #a:sha2_alg
+  -> #m:m_spec
+  -> b:multiblock_spec a m
+  -> j:nat{j < lanes a m}
+  -> i:nat{i < 16} ->
+  Lemma (let l = lanes a m in
+    (vec_v (load_blocks b).[i]).[j] ==
+    BSeq.uint_from_bytes_be (sub b.(|i % l|) ((i / l * l + j) * word_length a) (word_length a)))
+
+let load_blocks_lemma_ij #a #m b j i =
+  let l = lanes a m in
+  let idx_i = i % l in
+  let idx_j = i / l in
+
+  let blocksize = word_length a in
+  let blocksize_l = l * blocksize in
+  let b_j = sub b.(|idx_i|) (idx_j * blocksize_l) blocksize_l in
+
+  //assert ((load_blocks b).[i] == vec_from_bytes_be (word_t a) l b_j);
+  assert (vec_v ((load_blocks b).[i]) == BSeq.uints_from_bytes_be b_j);
+  BSeq.index_uints_from_bytes_be #(word_t a) #SEC #(lanes a m) b_j j;
+  assert ((vec_v ((load_blocks b).[i])).[j] ==
+    BSeq.uint_from_bytes_be (sub b_j (j * blocksize) blocksize));
+
+  calc (==) {
+    idx_j * blocksize_l + j * blocksize;
+    (==) { Math.Lemmas.paren_mul_right idx_j l blocksize;
+      Math.Lemmas.distributivity_add_left (idx_j * l) j blocksize }
+    (idx_j * l + j) * blocksize;
+  };
+
+  Seq.Properties.slice_slice b.(|idx_i|)
+    (idx_j * blocksize_l) (idx_j * blocksize_l + blocksize_l)
+    (j * blocksize) (j * blocksize + blocksize);
+
+  assert ((vec_v ((load_blocks b).[i])).[j] ==
+    BSeq.uint_from_bytes_be (sub b.(|idx_i|) ((idx_j * l + j) * blocksize) blocksize))
+
+
+noextract
+let transpose4x4_lseq (#t:v_inttype) (vs:lseq (vec_t t 4) 4) : lseq (vec_t t 4) 4 =
+  let (v0,v1,v2,v3) = (vs.[0],vs.[1],vs.[2],vs.[3]) in
+  let (v0'',v1'',v2'',v3'') = transpose4x4 (v0,v1,v2,v3) in
+  create4 v0'' v1'' v2'' v3''
+
+// this lemma is proven in code/chacha20/Hacl.Spec.Chacha20.Lemmas for t = U32
+val transpose4x4_lemma: #t:v_inttype -> vs:lseq (vec_t t 4) 4 ->
+  Lemma ((forall (i:nat{i < 4}) (j:nat{j < 4}).
+    (vec_v (transpose4x4_lseq vs).[i]).[j] == (vec_v vs.[j]).[i]))
+let transpose4x4_lemma #t vs = admit()
+
+
+val transpose_ws4_lemma:
+    #a:sha2_alg
+  -> #m:m_spec{lanes a m == 4}
+  -> ws:ws_spec a m
+  -> i:nat{i < 4} ->
+  Lemma
+   (sub (transpose_ws4 ws) (i * lanes a m) (lanes a m) ==
+    transpose4x4_lseq (sub ws (i * lanes a m) (lanes a m)))
+
+let transpose_ws4_lemma #a #m ws i =
+  eq_intro
+    (sub (transpose_ws4 ws) (i * lanes a m) (lanes a m))
+     (transpose4x4_lseq (sub ws (i * lanes a m) (lanes a m)))
+
+
+val transpose_ws4_lemma_ij:
+    #a:sha2_alg
+  -> #m:m_spec{lanes a m == 4} // lanes a m * lanes a m = 16
+  -> ws:ws_spec a m
+  -> j:nat{j < lanes a m}
+  -> i:nat{i < 16} ->
+  Lemma
+   (let l = lanes a m in
+    (vec_v (transpose_ws4 ws).[i]).[j] == (vec_v ws.[i / l * l + j]).[i % l])
+
+let transpose_ws4_lemma_ij #a #m ws j i =
+  let l = lanes a m in
+  let i_sub = i / l in
+  let j_sub = i % l in
+  assert (i_sub * l + j_sub == i);
+
+  let vs = sub ws (i_sub * lanes a m) (lanes a m) in
+  transpose_ws4_lemma #a #m ws i_sub;
+  //assert ((transpose_ws4 ws).[i] == (sub (transpose_ws4 ws) (i_sub * l) l).[j_sub]);
+  //assert ((transpose_ws4 ws).[i] == (transpose4x4_lseq vs).[j_sub]);
+  assert ((vec_v (transpose_ws4 ws).[i]).[j] == (vec_v (transpose4x4_lseq vs).[j_sub]).[j]);
+  transpose4x4_lemma vs;
+  //assert ((vec_v (transpose_ws4 ws).[i]).[j] == (vec_v vs.[j]).[j_sub]);
+  assert ((vec_v (transpose_ws4 ws).[i]).[j] == (vec_v ws.[i_sub * lanes a m + j]).[j_sub])
+
+
+val transpose_ws_lemma_ij:
+    #a:sha2_alg
+  -> #m:m_spec
+  -> ws:ws_spec a m
+  -> j:nat{j < lanes a m}
+  -> i:nat{i < 16} ->
+  Lemma
+   (let l = lanes a m in
+    ((ws_spec_v (transpose_ws ws)).[j]).[i] == (vec_v ws.[i / l * l + j]).[i % l])
+
+let transpose_ws_lemma_ij #a #m ws j i =
+  assert (((ws_spec_v (transpose_ws ws)).[j]).[i] == (vec_v (transpose_ws ws).[i]).[j]);
+  match lanes a m with
+  | 1 -> ()
+  | 4 -> transpose_ws4_lemma_ij #a #m ws j i
+  | _ -> admit()
+
+
+val load_blocks_lemma_ij_subst:
+    #a:sha2_alg
+  -> #m:m_spec
+  -> b:multiblock_spec a m
+  -> j:nat{j < lanes a m}
+  -> i:nat{i < 16} ->
+  Lemma (let l = lanes a m in
+    (vec_v (load_blocks b).[i / l * l + j]).[i % l] ==
+    BSeq.uint_from_bytes_be (sub b.(|j|) (i * word_length a) (word_length a)))
+
+let load_blocks_lemma_ij_subst #a #m b j i =
+  let l = lanes a m in
+  let i_new = i / l * l + j in
+  let j_new = i % l in
+  load_blocks_lemma_ij #a #m b j_new i_new;
+  //assert (
+    //(vec_v (load_blocks b).[i_new]).[j_new] ==
+    //BSeq.uint_from_bytes_be (sub b.(|i_new % l|) ((i_new / l * l + j_new) * word_length a) (word_length a)));
+
+  calc (==) {
+    i_new % l;
+    (==) { }
+    (i / l * l + j) % l;
+    (==) { Math.Lemmas.modulo_addition_lemma j l (i / l) }
+    j % l;
+    (==) { Math.Lemmas.small_mod j l }
+    j;
+    };
+
+  calc (==) {
+    i_new / l * l + j_new;
+    (==) { }
+    (i / l * l + j) / l * l + i % l;
+    (==) { Math.Lemmas.division_addition_lemma j l (i / l) }
+    (i / l + j / l) * l + i % l;
+    (==) { Math.Lemmas.distributivity_add_left (i / l) (j / l) l }
+    i / l * l + j / l * l + i % l;
+    (==) { Math.Lemmas.euclidean_division_definition i l }
+    i + j / l * l;
+    (==) { Math.Lemmas.small_div j l }
+    i;
+    }
+
+
+val load_ws_lemma_l:
+    #a:sha2_alg
+  -> #m:m_spec
+  -> b:multiblock_spec a m
+  -> j:nat{j < lanes a m} ->
+  Lemma
+    ((ws_spec_v (load_ws b)).[j] ==
+      BSeq.uints_from_bytes_be #(word_t a) #SEC b.(|j|))
+
+let load_ws_lemma_l #a #m b j =
+  let lp = (ws_spec_v (load_ws b)).[j] in
+  let rp = BSeq.uints_from_bytes_be #(word_t a) #SEC #16 b.(|j|) in
+
+  let aux (i:nat{i < 16}) : Lemma (lp.[i] == rp.[i]) =
+    let l = lanes a m in
+    BSeq.index_uints_from_bytes_be #(word_t a) #SEC #16 b.(|j|) i;
+    assert (rp.[i] == BSeq.uint_from_bytes_be (sub b.(|j|) (i * word_length a) (word_length a)));
+
+    assert (lp.[i] == ((ws_spec_v (transpose_ws (load_blocks b))).[j]).[i]);
+    transpose_ws_lemma_ij (load_blocks b) j i;
+    load_blocks_lemma_ij_subst #a #m b j i in
+
+  Classical.forall_intro aux;
+  eq_intro lp rp
+
+
+val state_spec_v_map2_add:
+    #a:sha2_alg
+  -> #m:m_spec
+  -> st1:state_spec a m
+  -> st2:state_spec a m
+  -> l:nat{l < lanes a m} ->
+  Lemma ((state_spec_v (map2 (+|) st1 st2)).[l] ==
+    map2 #_ #_ #_ #8 (+.) (state_spec_v st1).[l] (state_spec_v st2).[l])
+
+let state_spec_v_map2_add #a #m st1 st2 l =
+  eq_intro
+    (state_spec_v (map2 (+|) st1 st2)).[l]
+    (map2 #_ #_ #_ #8 (+.) (state_spec_v st1).[l] (state_spec_v st2).[l])
 
 
 val update_lemma_l:
@@ -301,9 +502,18 @@ val update_lemma_l:
   -> b:multiblock_spec a m
   -> st:state_spec a m
   -> l:nat{l < lanes a m} ->
-  Lemma ((state_spec_v (update b st)).[l] == Spec.update a b.(|l|) (state_spec_v st).[l])
+  Lemma ((state_spec_v (update b st)).[l] ==
+    Spec.update a b.(|l|) (state_spec_v st).[l])
 
-let update_lemma_l #a #m b st l = admit()
+let update_lemma_l #a #m b st l =
+  let ws = load_ws b in
+  load_ws_lemma_l b l;
+
+  let st1 = shuffle ws st in
+  shuffle_lemma_l ws st l;
+
+  let res = map2 (+|) st1 st in
+  state_spec_v_map2_add #a #m st1 st l
 
 
 val update_last_lemma_l:

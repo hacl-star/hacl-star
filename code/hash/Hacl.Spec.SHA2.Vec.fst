@@ -14,8 +14,6 @@ module LSeq = Lib.Sequence
 
 #set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
-#set-options "--z3rlimit 50 --max_ifuel 0 --max_fuel 0"
-
 noextract
 type m_spec =
   | M32
@@ -196,7 +194,6 @@ let get_wsi (#a:sha2_alg) (#m:m_spec) (b:multiblock_spec a m) (i:nat{i < 16}) : 
 
 noextract
 let load_blocks (#a:sha2_alg) (#m:m_spec) (b:multiblock_spec a m) : ws_spec a m =
-  let l = lanes a m in
   createi 16 (get_wsi #a #m b)
 
 noextract
@@ -426,7 +423,7 @@ let update_block (#a:sha2_alg) (#m:m_spec) (len:size_nat) (b:multiseq (lanes a m
                  (i:nat{i < len / block_length a}) (st:state_spec a m) : state_spec a m =
   let mb = get_multiblock_spec len b i in
   update mb st
-  
+
 noextract
 let update_nblocks (#a:sha2_alg) (#m:m_spec) (len:size_nat) (b:multiseq (lanes a m) len) (st:state_spec a m) : state_spec a m =
     let blocks = len / block_length a in
@@ -438,7 +435,7 @@ let finish (#a:sha2_alg) (#m:m_spec) (st:state_spec a m) :
          multiseq (lanes a m) (hash_length a) =
     let hseq = store_state st in
     emit hseq
-    
+
 noextract
 let hash (#a:sha2_alg) (#m:m_spec) (len:size_nat) (b:multiseq (lanes a m) len) =
     let len' : len_t a = mk_int #(len_int_type a) #PUB len in
