@@ -254,3 +254,27 @@ let index_map2_lemma (#a:Type) (#b:Type) (#c:Type) (#len:flen) (f:a -> b -> c) (
   createi_lemma len (fun i -> f (index s1 i) (index s2 i)) i
 
 
+#set-options "--max_ifuel 16 --max_fuel 16"
+
+inline_for_extraction noextract
+let ntup1_lemma (#a:Type0) (#l:flen{l = 1}) (t:a) =
+  assert (ntuple a l == ntuple a 1)
+
+inline_for_extraction noextract
+let tup1_lemma (#a:Type0) (#l:flen{l = 1}) (t:ntuple a l) =
+  assert (ntuple a l == ntuple a 1)
+
+
+inline_for_extraction noextract
+let ntup4_lemma (#a:Type0) (#l:flen{l = 4}) (t:a & (a & (a & a))) =
+  assert (ntuple a l == ntuple a 4)
+
+
+inline_for_extraction noextract
+let tup4_lemma (#a:Type0) (#l:flen{l = 4}) (t:ntuple a l) =
+  assert (ntuple a l == ntuple a 4);
+  let (x0,(x1,(x2,x3))) = tup4 t in
+  let t' : ntuple a 4 = (x0,(x1,(x2,x3))) in
+  assert (t == t')
+
+
