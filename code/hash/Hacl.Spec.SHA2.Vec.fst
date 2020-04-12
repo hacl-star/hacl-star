@@ -422,18 +422,32 @@ let get_multilast_spec (#a:sha2_alg) (#m:m_spec)
       (fun j -> sub b.(|j|) (len - rem) rem)
 
 noextract
+let update_block (#a:sha2_alg) (#m:m_spec) (len:size_nat) (b:multiseq (lanes a m) len)
+                 (i:nat{i < len / block_length a}) (st:state_spec a m) : state_spec a m =
+  let mb = get_multiblock_spec len b i in
+  update mb st
+  
+noextract
+let update_nblocks (#a:sha2_alg) (#m:m_spec) (len:size_nat) (b:multiseq (lanes a m) len) (st:state_spec a m) : state_spec a m =
+    let blocks = len / block_length a in
+    let st = repeati blocks (update_block #a #m len b) st in
+    st
+
+noextract
+let finish (#a:sha2_alg) (#m:m_spec) (st:state_spec a m) :
+         multiseq (lanes a m) (hash_length a) =
+    let hseq = store_state st in
+    emit hseq
+    
+noextract
 let hash (#a:sha2_alg) (#m:m_spec) (len:size_nat) (b:multiseq (lanes a m) len) =
     let len' : len_t a = mk_int #(len_int_type a) #PUB len in
     let st = init a m in
-    let blocks = len / block_length a in
+    let st = update_nblocks #a #m len b st in
     let rem = len % block_length a in
-    let st = repeati blocks (fun i st ->
-      let mb = get_multiblock_spec len b i in
-      update mb st) st in
     let mb = get_multilast_spec #a #m len b in
     let st = update_last len' rem mb st in
-    let hseq = store_state st in
-    emit hseq
+    finish st
 
 noextract
 let sha256 (len:size_nat) (b:lseq uint8 len) =

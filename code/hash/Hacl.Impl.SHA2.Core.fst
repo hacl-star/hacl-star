@@ -21,7 +21,7 @@ module Spec = Hacl.Spec.SHA2
 module SpecVec = Hacl.Spec.SHA2.Vec
 open Hacl.Spec.SHA2.Vec
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
 
 (** Top-level constant arrays for the SHA2 algorithms. *)
 
@@ -296,6 +296,7 @@ val transpose_ws4 (#a: sha2_alg) (#m:m_spec{lanes a m == 4}) (ws: ws_t a m):
                            SpecVec.transpose_ws (as_seq h0 ws)))
 
 let transpose_ws4 #a #m ws =
+  let h0 = ST.get() in
   let (ws0,ws1,ws2,ws3) = transpose4x4 (ws.(0ul),ws.(1ul),ws.(2ul),ws.(3ul)) in
   let (ws4,ws5,ws6,ws7) = transpose4x4 (ws.(4ul),ws.(5ul),ws.(6ul),ws.(7ul)) in
   let (ws8,ws9,ws10,ws11) = transpose4x4 (ws.(8ul),ws.(9ul),ws.(10ul),ws.(11ul)) in
@@ -316,7 +317,9 @@ let transpose_ws4 #a #m ws =
   ws.(13ul) <- ws13;
   ws.(14ul) <- ws14;
   ws.(15ul) <- ws15;
-  admit()
+  let h1 = ST.get() in
+  eq_intro (as_seq h1 ws) (SpecVec.transpose_ws (as_seq h0 ws))
+
 
 inline_for_extraction
 val transpose_ws (#a: sha2_alg) (#m:m_spec) (ws: ws_t a m):
@@ -862,6 +865,7 @@ val get_multiblock: #a:sha2_alg -> #m:m_spec ->
                     Stack (multibuf (lanes a m) (block_len a))
                     (requires (fun h -> live_multi h b))
                     (ensures (fun h0 r h1 -> h0 == h1 /\ live_multi h1 r /\
+                                           (forall l (x:lbuffer uint8 l). disjoint_multi b x ==> disjoint_multi r x) /\
                                            as_seq_multi h1 r ==
                                            SpecVec.get_multiblock_spec (v len) (as_seq_multi h0 b) (v i)))
 
@@ -894,6 +898,7 @@ val get_multilast: #a:sha2_alg -> #m:m_spec ->
                    Stack (multibuf (lanes a m) (len %. block_len a))
                    (requires (fun h -> live_multi h b))
                    (ensures (fun h0 r h1 -> h0 == h1 /\ live_multi h1 r /\
+                            (forall l (x:lbuffer uint8 l). disjoint_multi b x ==> disjoint_multi r x) /\
                             as_seq_multi h1 r ==
                             SpecVec.get_multilast_spec #a #m (v len) (as_seq_multi h0 b)))
 
@@ -924,38 +929,95 @@ let get_multilast #a #m len b =
 #pop-options
 
 inline_for_extraction
+val update_nblocks: #a:sha2_alg -> #m:m_spec -> upd:update_t a m ->
+                    len:size_t -> b:multibuf (lanes a m) len ->
+                    st:state_t a m ->
+                    Stack unit
+                    (requires (fun h0 -> live_multi h0 b /\ live h0 st /\ disjoint_multi b st))
+                    (ensures (fun h0 _ h1 -> modifies (loc st) h0 h1 /\
+                                           as_seq h1 st ==
+                                           SpecVec.update_nblocks #a #m (v len)
+                                             (as_seq_multi h0 b) (as_seq h0 st)))
+#push-options "--z3rlimit 200"
+let update_nblocks #a #m upd len b st =
+    let blocks = len /. block_len a in
+    let h0 = ST.get() in
+    loop1 h0 blocks st
+      (fun h -> SpecVec.update_block #a #m (v len) (as_seq_multi h0 b))
+      (fun i -> 
+        Lib.LoopCombinators.unfold_repeati (v blocks) (SpecVec.update_block #a #m (v len) (as_seq_multi h0 b)) (as_seq h0 st) (v i);
+        let mb = get_multiblock len b i in
+        upd mb st;
+        let h1 = ST.get() in
+        assert (modifies (loc st) h0 h1);
+        admit())
+#pop-options
+
+inline_for_extraction
+val finish: #a:sha2_alg -> #m:m_spec ->
+            st:state_t a m ->
+            h:multibuf (lanes a m) (hash_len a) ->
+            Stack unit
+            (requires (fun h0 -> live_multi h0 h /\ internally_disjoint h /\
+                               live h0 st /\ disjoint_multi h st))
+            (ensures (fun h0 _ h1 -> modifies (loc st |+| loc_multi h) h0 h1 /\
+                                   as_seq_multi h1 h ==
+                                   SpecVec.finish #a #m (as_seq h0 st)))
+
+#push-options "--z3rlimit 100"
+let finish #a #m st h =
+  push_frame();
+  let hbuf = create (size (lanes a m) *. 8ul *. word_len a) (u8 0) in
+  store_state st hbuf;
+  emit hbuf h;
+  admit();
+  pop_frame()
+#pop-options
+
+#push-options "--z3rlimit 300"
+
+inline_for_extraction
 val hash: #a:sha2_alg -> #m:m_spec -> upd:update_t a m ->
           h:multibuf (lanes a m) (hash_len a) ->
           len:size_t ->
           b:multibuf (lanes a m) len ->
     Stack unit
-    (requires (fun h0 -> live_multi h0 b /\ live_multi h0 h))
+    (requires (fun h0 -> live_multi h0 b /\ live_multi h0 h /\ internally_disjoint h))
     (ensures (fun h0 _ h1 -> modifies_multi h h0 h1 /\
                            as_seq_multi h1 h ==
                            SpecVec.hash #a #m (v len) (as_seq_multi h0 b)))
+#push-options "--z3rlimit 300"
 let hash #a #m upd h len b =
     push_frame();
+    let h0 = ST.get() in
     let st = alloc a m in
     init #a #m st;
-    let h0 = ST.get() in
-    loop_nospec #h0 (len /. block_len a) st
-      (fun i -> 
-        let mb: multibuf (lanes a m) (block_len a) = get_multiblock len b i in
-        upd mb st); 
+    let h1 = ST.get() in
+    assert (modifies (loc st) h0 h1);
     let rem = len %. block_len a in
-    let mb: multibuf (lanes a m) rem = get_multilast len b in
     let len' : len_t a = Lib.IntTypes.cast #U32 #PUB (len_int_type a) PUB len in
+    update_nblocks #a #m upd len b st;
+    let h2 = ST.get() in
+    assert (modifies (loc st) h0 h2);
+    let lb: multibuf (lanes a m) rem = get_multilast len b in
+    assume (disjoint_multi lb st);
+    update_last #a #m upd len' rem lb st;
+    let h3 = ST.get() in
+    assert (modifies (loc st) h0 h3);
+    finish #a #m st h;
+    let h4 = ST.get() in
     admit();
-    update_last #a #m upd len' rem mb st;
-    let hbuf = create (size (lanes a m) *. 8ul *. word_len a) (u8 0) in
-    store_state st hbuf;
-    emit hbuf h;
     pop_frame()
+#pop-options
+
+
+
+
 
 [@CInline]
 val sha256_update1: b:multibuf (lanes SHA2_256 M32) (block_len SHA2_256) -> hash:state_t SHA2_256 M32 ->
     Stack unit
-    (requires (fun h -> live_multi h b /\ live h hash))// /\ disjoint_multi b hash))
+    (requires (fun h -> live_multi h b /\ live h hash))
     (ensures (fun h0 _ h1 -> modifies (loc hash) h0 h1 /\
                            as_seq h1 hash == Hacl.Spec.SHA2.Vec.update #SHA2_256 #M32 (as_seq_multi h0 b) (as_seq h0 hash)))
 let sha256_update1 b hash = update #SHA2_256 #M32 b hash
