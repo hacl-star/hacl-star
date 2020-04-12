@@ -74,7 +74,7 @@ KRML = $(KREMLIN_HOME)/krml
 BASE_FLAGS = \
   -no-prefix 'Hacl.Frodo.Random' \
   -bundle Hacl.Spec.*,Spec.*[rename=Hacl_Spec] \
-  -bundle Lib.*[rename=Hacl_Lib] \
+  -bundle 'Lib.*[rename=Hacl_Lib]' \
   -drop Lib.IntVector.Intrinsics \
   -drop Lib.IntTypes.Intrinsics \
   -fparentheses -fno-shadow -fcurly-braces -fnoreturn-else \

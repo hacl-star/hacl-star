@@ -4,19 +4,7 @@ open FStar.Mul
 open Lib.IntTypes
 
 #set-options "--z3rlimit 15 --max_ifuel 2 --max_fuel 2"
-
-/// Fixed and bounded length sequences, implemented using tuples
-
-unfold let max_ntuple_len = 16
-unfold let flen = n:pos{n <= max_ntuple_len}
-
-noextract
-  let rec ntuple_ (a:Type0) (len:flen) =
-  if len = 1 then a
-  else a & ntuple_ a (len-1)
-
-inline_for_extraction noextract
-let ntuple (a:Type0) (len:flen) = normalize_term (ntuple_ a len)
+let max_ntuple_len = max_size_t
 
 unfold let length (#a:Type0) (#len:flen) (s: ntuple a len) : flen = len
 
@@ -39,9 +27,10 @@ let rest (#a:Type0) (#len:flen{len > 1}) (s:ntuple a len) : ntuple a (len - 1) =
 inline_for_extraction noextract
 let rec index_ (#a:Type0) (#len:flen) (s:ntuple a len) (i:nat{i < len}) =
   if i = 0 then fst s
-  else index_ #a #(len-1) (rest s) (i-1)
+  else (assert (len > 1);
+        index_ #a #(len-1) (rest s) (i-1))
 
-inline_for_extraction
+inline_for_extraction noextract
 let index (#a:Type0) (#len:flen) (s:ntuple a len) (i:nat{i < len}) =
   normalize_term (index_ s i)
 
@@ -50,7 +39,7 @@ let rec createi_ (#a:Type0) (min:nat) (max:flen{max > min}) (f:(i:nat{i < max} -
   if min + 1 = max then f min
   else f min, createi_ #a (min+1) max f
 
-inline_for_extraction
+inline_for_extraction noextract
 let createi (#a:Type0) (len:flen) (f:(i:nat{i < len} -> a)) : ntuple a len =
   normalize_term (createi_ #a 0 len f)
 
@@ -59,7 +48,7 @@ let rec gcreatei_ (#a:Type0) (min:nat) (max:flen{max > min}) (f:(i:nat{i < max} 
   if min + 1 = max then f min
   else f min, gcreatei_ #a (min+1) max f
 
-inline_for_extraction
+inline_for_extraction noextract
 let gcreatei (#a:Type0) (len:flen) (f:(i:nat{i < len} -> GTot a)) : GTot (ntuple a len) =
   normalize_term (gcreatei_ #a 0 len f)
 
@@ -87,15 +76,15 @@ let gcreatei_lemma (#a:Type0) (len:flen) (f:(i:nat{i < len} -> GTot a)) (i:nat{i
 	  [SMTPat (index (gcreatei #a len f) i)] =
     gcreatei_lemma_ #a 0 len f i
 
-inline_for_extraction
+inline_for_extraction noextract
 let to_lseq (#a:Type0) (#len:flen) (l:ntuple a len) : Lib.Sequence.lseq a len =
     normalize_term (Lib.Sequence.createi len (index l))
 
-inline_for_extraction
-let from_lseq (#a:Type0) (#len:flen) (s:Lib.Sequence.lseq a len) : l:ntuple a len =
+inline_for_extraction noextract
+let from_lseq (#a:Type0) (#len:flen) (s:Lib.Sequence.lseq a len) : ntuple a len =
     normalize_term (createi #a len (Lib.Sequence.index s))
 
-inline_for_extraction
+inline_for_extraction noextract
 let create (#a:Type0) (len:flen) (init:a) =
   normalize_term (createi #a len (fun i -> init))
 
@@ -112,22 +101,33 @@ let rec concat_ (#a:Type0) (#len0:flen) (#len1:flen{len0 + len1 <= max_ntuple_le
 	if len0 = 1 then s0,s1
 	else fst s0, concat_ (rest s0) s1
 
-inline_for_extraction
+inline_for_extraction noextract
 let concat (#a:Type0) (#len0:flen) (#len1:flen{len0 + len1 <= max_ntuple_len})
 		(s0:ntuple a len0) (s1:ntuple a len1) : ntuple a (len0 + len1) =
 	concat_ s0 s1
 
+
 inline_for_extraction noextract
-let rec concat_lemma1 (#a:Type0) (#len0:flen) (#len1:flen{len0 + len1 <= max_ntuple_len})
-		(s0:ntuple a len0) (s1:ntuple a len1) (i:nat{i < len0}) :
-		Lemma (index (concat s0 s1) i == index s0 i) =
+val concat_lemma1 (#a:Type0) (#len0:flen) (#len1:flen)
+		(s0:ntuple a len0) (s1:ntuple a len1) (i:nat):
+		Lemma (requires (len0 + len1 <= max_ntuple_len /\ i < len0))
+                      (ensures (index (concat s0 s1) i == index s0 i))
+inline_for_extraction noextract
+let rec concat_lemma1 (#a:Type0) (#len0:flen) (#len1)
+		(s0:ntuple a len0) (s1:ntuple a len1) (i:nat) =
 	if i = 0 then ()
 	else concat_lemma1 (rest s0) s1 (i-1)
 
+
 inline_for_extraction noextract
-let rec concat_lemma2 (#a:Type0) (#len0:flen) (#len1:flen{len0 + len1 <= max_ntuple_len})
-		(s0:ntuple a len0) (s1:ntuple a len1) (i:nat{i >= len0 /\ i < len0 + len1}) :
-		Lemma (index (concat s0 s1) i == index s1 (i-len0)) =
+val concat_lemma2 (#a:Type0) (#len0:flen) (#len1:flen)
+		(s0:ntuple a len0) (s1:ntuple a len1) (i:nat) :
+		Lemma 
+                  (requires (len0 + len1 <= max_ntuple_len /\ i >= len0 /\ i < len0 + len1))
+                  (ensures (index (concat s0 s1) i == index s1 (i-len0)))
+inline_for_extraction noextract
+let rec concat_lemma2 (#a:Type0) (#len0:flen) (#len1:flen)
+		(s0:ntuple a len0) (s1:ntuple a len1) (i:nat) =
 	if i = 0 then ()
 	else
 	  if len0 = 1 then ()
@@ -135,29 +135,30 @@ let rec concat_lemma2 (#a:Type0) (#len0:flen) (#len1:flen{len0 + len1 <= max_ntu
 
 inline_for_extraction noextract
 let concat_lemma (#a:Type0) (#len0:flen) (#len1:flen)
-		 (s0:ntuple a len0) (s1:ntuple a len1) (i:nat):
-		Lemma (requires (len0 + len1 <= max_ntuple_len /\ i < len0 + len1))
-		      (ensures ((i < len0 ==> index (concat s0 s1) i == index s0 i) /\
-			        (i >= len0 ==> index (concat s0 s1) i == index s1 (i-len0))))
-		[SMTPat (index (concat s0 s1) i)] =
+		 (s0:ntuple a len0) (s1:ntuple a len1) (i:nat) =
 		  if i < len0 then concat_lemma1 s0 s1 i
 		  else concat_lemma2 s0 s1 i
 
-abstract
-type equal (#a:Type) (#len:flen) (s1:ntuple a len) (s2:ntuple a len) =
-  forall (i:size_nat{i < len}).{:pattern (index s1 i); (index s2 i)} index s1 i == index s2 i
+inline_for_extraction noextract
+let equal (#a:Type) (#len:flen) (s1:ntuple a len) (s2:ntuple a len) =
+  (forall (i:size_nat{i < len}).{:pattern (index s1 i); (index s2 i)} index s1 i == index s2 i)
 
-val eq_intro: #a:Type -> #len:flen -> s1:ntuple a len -> s2:ntuple a len ->
-  Lemma
-  (requires forall i. {:pattern index s1 i; index s2 i} index s1 i == index s2 i)
-  (ensures equal s1 s2)
-  [SMTPat (equal s1 s2)]
-
-val eq_elim: #a:Type -> #len:flen -> s1:ntuple a len -> s2:ntuple a len ->
-  Lemma
-  (requires equal s1 s2)
-  (ensures  s1 == s2)
-  [SMTPat (equal s1 s2)]
+let eq_intro #a #len s1 s2 = ()
+let rec eq_elim #a #len s1 s2 =
+  if len = 1 then (
+    assert (s1 == index s1 0);
+    assert (s2 == index s2 0))
+  else 
+    let f1 = fst s1 in
+    let f2 = fst s1 in
+    assert (f1 == f2);
+    let r1 = rest s1 in
+    let r2 = rest s2 in
+    assert (forall i. i < len - 1 ==> index r1 i == index s1 (i+1));
+    assert (forall i. i < len - 1 ==> index r2 i == index s2 (i+1));
+    assert (forall i. i < len ==> index s1 i == index s2 i);
+    eq_intro r1 r2;
+    eq_elim #a #(len-1) r1 r2
 
 (** Updating an element of a fixed-length Sequence *)
 
@@ -168,8 +169,7 @@ let rec upd_ (#a:Type) (#len:flen) (s:ntuple a len) (i:nat{i < len}) (x:a) : ntu
     else x,rest s
   else fst s,upd_ #a #(len-1) (rest s) (i-1) x
 
-inline_for_extraction
-val upd: #a:Type -> #len:flen -> s:ntuple a len -> i:nat{i < len} -> x:a -> ntuple a len
+inline_for_extraction noextract
 let upd (#a:Type) (#len:flen) (s:ntuple a len) (i:nat{i < len}) (x:a) : ntuple a len = 
   normalize_term (upd_ s i x)
 
@@ -181,53 +181,76 @@ let rec upd_lemma (#a:Type0) (#len:flen) (s:ntuple a len) (i:nat{i < len}) (x:a)
   else if i = 0 then ()
        else upd_lemma #a #(len-1) (rest s) (i-1) x (j-1)
 
-inline_for_extraction
+inline_for_extraction noextract
 let sub (#a:Type) (#len:flen) (s:ntuple a len) (start:nat) (n:flen{start + n <= len}) : ntuple a n =
   normalize_term (createi n (fun i -> index s (start + i)))
 
-inline_for_extraction
+inline_for_extraction noextract
+let index_sub_lemma (#a:Type) (#len:flen) (s:ntuple a len) (start:nat) (n:flen{start + n <= len}) (i:nat{i < n}) =
+  createi_lemma n (fun i -> index s (start + i)) i
+
+inline_for_extraction noextract
 let slice (#a:Type) (#len:flen) (s:ntuple a len) (start:nat) (fin:flen{start < fin /\ fin <= len}) : ntuple a (fin - start) =
   normalize_term (sub s start (fin - start))
 
-inline_for_extraction
+inline_for_extraction noextract
 let update_sub (#a:Type) (#len:flen) (s:ntuple a len) (start:nat) (n:flen{start + n <= len}) (x:ntuple a n) : ntuple a len =
   normalize_term (createi len (fun i -> if i < start || i >= start+n then index s i else index x (i - start)))
+
+inline_for_extraction noextract
+let index_update_sub_lemma (#a:Type) (#len:flen) (s:ntuple a len) (start:nat) (n:flen{start + n <= len}) (x:ntuple a n) (i:nat{i < n}) =
+  createi_lemma len (fun i -> if i < start || i >= start+n then index s i else index x (i - start)) i
 
 inline_for_extraction
 let update_slice (#a:Type) (#len:flen) (s:ntuple a len) (start:nat) (fin:flen{start < fin /\ fin <= len}) (x:ntuple a (fin - start)) : ntuple a len =
   normalize_term (update_sub s start (fin - start) x)
 
-inline_for_extraction
+inline_for_extraction noextract
 let mapi (#a:Type) (#b:Type) (#len:flen) (f:(i:nat{i < len} -> a -> b)) (s:ntuple a len) : ntuple b len =
   normalize_term (createi len (fun i -> f i (index s i)))
 
-inline_for_extraction
+inline_for_extraction noextract
+let index_mapi_lemma (#a:Type) (#b:Type) (#len:flen) (f:(i:nat{i < len} -> a -> b)) (s:ntuple a len) (i:nat{i < len}) =
+  createi_lemma len (fun i -> f i (index s i)) i
+  
+inline_for_extraction noextract
 let gmapi (#a:Type) (#b:Type) (#len:flen) (f:(i:nat{i < len} -> a -> GTot b)) (s:ntuple a len) : GTot (ntuple b len) =
   normalize_term (gcreatei len (fun i -> f i (index s i)))
 
-inline_for_extraction
+inline_for_extraction noextract
+let index_gmapi_lemma (#a:Type) (#b:Type) (#len:flen) (f:(i:nat{i < len} -> a -> GTot b)) (s:ntuple a len) (i:nat{i < len}) =
+  gcreatei_lemma len (fun i -> f i (index s i)) i
+
+inline_for_extraction noextract
 let map (#a:Type) (#b:Type) (#len:flen) (f:a -> b) (s:ntuple a len) : ntuple b len =
   normalize_term (createi len (fun i -> f (index s i)))
 
-inline_for_extraction
+inline_for_extraction noextract
+let index_map_lemma (#a:Type) (#b:Type) (#len:flen) (f:a -> b) (s:ntuple a len) (i:nat{i < len}) =
+  createi_lemma len (fun i -> f (index s i)) i
+
+inline_for_extraction noextract
 let gmap (#a:Type) (#b:Type) (#len:flen) (f:a -> GTot b) (s:ntuple a len) : GTot (ntuple b len) =
   normalize_term (gcreatei len (fun i -> f (index s i)))
 
-inline_for_extraction
-let gmap_lemma (#a:Type) (#b:Type) (#len:flen) (f:a -> GTot b) (s:ntuple a len) (i:nat{i < len}):
-  Lemma (index (gmap #a #b #len f s) i == f (index s i))
-        [SMTPat (index (gmap #a #b #len f s) i)] =
-  gcreatei_lemma #b len (fun i -> f (index s i)) i
+inline_for_extraction noextract
+let index_gmap_lemma (#a:Type) (#b:Type) (#len:flen) (f:a -> GTot b) (s:ntuple a len) (i:nat{i < len}) =
+  gcreatei_lemma len (fun i -> f (index s i)) i
 
-
-inline_for_extraction
+inline_for_extraction noextract
 let map2i (#a:Type) (#b:Type) (#c:Type) (#len:flen) (f:(i:nat{i < len} -> a -> b -> c)) (s1:ntuple a len)  (s2:ntuple b len) : ntuple c len =
   normalize_term (createi len (fun i -> f i (index s1 i) (index s2 i)))
+  
+inline_for_extraction noextract
+let index_map2i_lemma (#a:Type) (#b:Type) (#c:Type) (#len:flen) (f:(i:nat{i < len} -> a -> b -> c)) (s1:ntuple a len)  (s2:ntuple b len) (i:nat{i < len}) =
+  createi_lemma len (fun i -> f i (index s1 i) (index s2 i)) i
 
-inline_for_extraction
+inline_for_extraction noextract
 let map2 (#a:Type) (#b:Type) (#c:Type) (#len:flen) (f:a -> b -> c) (s1:ntuple a len)  (s2:ntuple b len) : ntuple c len =
   normalize_term (createi len (fun i -> f (index s1 i) (index s2 i)))
 
-unfold let op_Lens_Access #a #len = index #a #len
-unfold let op_Lens_Assignment #a #len = upd #a #len
+inline_for_extraction noextract
+let index_map2_lemma (#a:Type) (#b:Type) (#c:Type) (#len:flen) (f:a -> b -> c) (s1:ntuple a len)  (s2:ntuple b len) (i:nat{i < len}) =
+  createi_lemma len (fun i -> f (index s1 i) (index s2 i)) i
+
 

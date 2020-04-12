@@ -21,7 +21,7 @@ dist/libhash.a: dist/Makefile.basic
 	$(MAKE) -C dist -f Makefile.basic
 
 dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
-	$(KRML) $^ -o libhash.a $(BASE_FLAGS) $(HASH_BUNDLE) -bundle Hacl.Impl.SHA2.Core=* \
+	$(KRML) $^ -o libhash.a $(BASE_FLAGS) $(HASH_BUNDLE)  -bundle Hacl.Impl.SHA2.Core=* \
 	  -add-include '"libintvector.h"' \
 	  -tmpdir dist \
 	  -skip-compilation -dast

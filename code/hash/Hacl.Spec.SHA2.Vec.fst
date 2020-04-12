@@ -12,6 +12,8 @@ module Spec = Spec.SHA2
 friend Spec.SHA2
 friend Spec.SHA2.Lemmas
 
+#set-options "--z3rlimit 50 --max_ifuel 0 --max_fuel 0"
+
 noextract
 type m_spec =
   | M32
@@ -210,22 +212,10 @@ let num_rounds16 (a:sha2_alg) : n:size_t{v n > 0 /\ 16 * v n == Spec.size_k_w a}
 noextract
 let multiseq (lanes:lanes_t) (len:size_nat) =
   ntuple (lseq uint8 len) lanes
-
-inline_for_extraction
-let tup4 #a (#l:lanes_t{l = 4}) (t:ntuple a l) : a & (a & (a & a)) =
-  assert (ntuple a l == ntuple a 4);
-  t <: ntuple a 4
-
-inline_for_extraction
-let from_tup4 #a (#l:lanes_t{l = 4}) (t:a & (a & (a & a))) : r:ntuple a l =
-  assert (ntuple a l == ntuple a 4);
-  t <: ntuple a 4
-
 noextract
-let multiblock_spec (a:sha2_alg) (m:m_spec) =
+unfold let multiblock_spec (a:sha2_alg) (m:m_spec) =
   multiseq (lanes a m) (block_length a)
 
-#push-options "--z3rlimit 100"
 noextract
 let load_vecij (#a:sha2_alg) (#m:m_spec) (b:multiblock_spec a m) (i:nat{i < 16}) : element_t a m =
   let l = lanes a m in
@@ -236,7 +226,6 @@ noextract
 let load_blocks (#a:sha2_alg) (#m:m_spec) (b:multiblock_spec a m) : ws_spec a m =
   let l = lanes a m in
   createi 16 (load_vecij #a #m b)
-#pop-options
 
 noextract
 let transpose_ws1 (#a:sha2_alg) (#m:m_spec{lanes a m == 1}) (ws:ws_spec a m) : ws_spec a m = ws
@@ -332,17 +321,18 @@ noextract
 let load_last1 (#a:sha2_alg) (#m:m_spec{lanes a m == 1})
                (totlen_seq:lseq uint8 (len_length a))
                (fin:size_nat{fin == block_length a \/ fin == 2 * block_length a})
-               (len:size_nat{len < block_length a}) (b:multiseq 1 len) :
-               multiseq 1 (block_length a) & multiseq 1 (block_length a) =
+               (len:size_nat{len < block_length a}) (b:multiseq (lanes a m) len) :
+               multiseq (lanes a m) (block_length a) & multiseq (lanes a m) (block_length a) =
+    let b = b.(|0|) in
     let last = create (2 * block_length a) (u8 0) in
     let last = update_sub last 0 len b in
     let last = last.[len] <- u8 0x80 in
     let last = update_sub last (fin - len_length a) (len_length a) totlen_seq in
-    let b0 = sub last 0 (block_length a) in
-    let b1 = sub last (block_length a) (block_length a) in
+    let b0 : multiseq 1 (block_length a) = sub last 0 (block_length a) in
+    let b1 : multiseq 1 (block_length a) = sub last (block_length a) (block_length a) in
     (b0, b1)
 
-#push-options "--z3rlimit 200"
+#push-options "--z3rlimit 100"
 noextract
 let load_last4 (#a:sha2_alg) (#m:m_spec{lanes a m == 4})
                (totlen_seq:lseq uint8 (len_length a))
@@ -374,9 +364,9 @@ let load_last4 (#a:sha2_alg) (#m:m_spec{lanes a m == 4})
     let l11 = sub last1 (block_length a) (block_length a) in
     let l21 = sub last2 (block_length a) (block_length a) in
     let l31 = sub last3 (block_length a) (block_length a) in
-    let mb0:multiseq 4 (block_length a) = (l00, (l10, (l20, l30))) in
-    let mb1:multiseq 4 (block_length a) = (l01, (l11, (l21, l31))) in
-    (from_tup4 mb0, from_tup4 mb1)
+    let mb0 = (l00, (l10, (l20, l30))) in
+    let mb1 = (l01, (l11, (l21, l31))) in
+    (ntup4 mb0, ntup4 mb1)
 #pop-options
 
 noextract
@@ -448,7 +438,6 @@ let emit1 (#a:sha2_alg) (#m:m_spec{lanes a m == 1})
     let hsub = sub hseq 0 (hash_length a) in
     hsub <: multiseq 1 (hash_length a)
 
-#push-options "--z3rlimit 100"
 noextract
 let emit4 (#a:sha2_alg) (#m:m_spec{lanes a m == 4})
           (hseq:lseq uint8 (lanes a m * 8 * word_length a)):
@@ -459,7 +448,6 @@ let emit4 (#a:sha2_alg) (#m:m_spec{lanes a m == 4})
     let h3 = sub hseq (24 * word_length a) (hash_length a) in
     let hsub : multiseq 4 (hash_length a) = (h0,(h1,(h2,h3))) in
     hsub <: multiseq 4 (hash_length a)
-#pop-options
 
 noextract
 let emit (#a:sha2_alg) (#m:m_spec)
@@ -469,8 +457,7 @@ let emit (#a:sha2_alg) (#m:m_spec)
     | 1 -> emit1 #a #m hseq
     | 4 -> emit4 #a #m hseq
     | _ -> admit()
-
-#push-options "--z3rlimit 200 --max_ifuel 2 --max_fuel 2"
+    
 noextract
 let get_multiblock_spec (#a:sha2_alg) (#m:m_spec)
                         (len:size_nat) (b:multiseq (lanes a m) len)
@@ -518,7 +505,6 @@ let hash (#a:sha2_alg) (#m:m_spec) (len:size_nat) (b:multiseq (lanes a m) len) =
     let st = update_last len' rem mb st in
     let hseq = store_state st in
     emit hseq
-#pop-options                       
 
 noextract
 let sha256 (len:size_nat) (b:lseq uint8 len) =

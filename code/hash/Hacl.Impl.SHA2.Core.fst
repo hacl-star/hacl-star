@@ -68,9 +68,6 @@ unfold let state_t (a:sha2_alg) (m:m_spec) =
 unfold let block_t (a:sha2_alg) =
   lbuffer uint8 (block_len a)
 
-inline_for_extraction let multiblock (a:sha2_alg) (m:m_spec) =
-   multibuf (lanes a m) (block_len a)
-
 inline_for_extraction
 let ws_t (a:sha2_alg) (m:m_spec) =
   lbuffer (element_t a m) 16ul
@@ -134,7 +131,7 @@ let set_wsi #a #m ws i b bi =
 
 inline_for_extraction
 val load_blocks1 (#a: sha2_alg) (#m:m_spec{lanes a m == 1})
-                (b: multiblock a m) (ws: ws_t a m):
+                 (b: multibuf (lanes a m) (block_len a)) (ws: ws_t a m):
     Stack unit
     (requires (fun h -> live_multi h b /\ live h ws /\ disjoint_multi b ws))
     (ensures (fun h0 _ h1 -> modifies (loc ws) h0 h1 /\
@@ -142,7 +139,7 @@ val load_blocks1 (#a: sha2_alg) (#m:m_spec{lanes a m == 1})
                            SpecVec.load_blocks (as_seq_multi h0 b)))
 let load_blocks1 #a #m b ws =
   let h0 = ST.get() in
-  let b:lbuffer uint8 (block_len a) = b in
+  let b = b.(|0|) in
   set_wsi ws 0ul b 0ul;
   set_wsi ws 1ul b 1ul;
   set_wsi ws 2ul b 2ul;
@@ -163,17 +160,20 @@ let load_blocks1 #a #m b ws =
 
 inline_for_extraction
 val load_blocks4 (#a: sha2_alg) (#m:m_spec{lanes a m == 4})
-                 (b: multiblock a m) (ws: ws_t a m):
+                 (b: multibuf (lanes a m) (block_len a)) (ws: ws_t a m):
     Stack unit
     (requires (fun h -> live_multi h b /\ live h ws /\ disjoint_multi b ws))
     (ensures (fun h0 _ h1 -> modifies (loc ws) h0 h1 /\
                            as_seq h1 ws ==
                            SpecVec.load_blocks (as_seq_multi h0 b)))
-
-#push-options "--max_fuel 4"
 let load_blocks4 #a #m b ws =
   let h0 = ST.get() in
-  let (b0,(b1,(b2,b3))) = tup4 b in
+  let (b0,(b1,(b2,b3))) = NTup.tup4 b in
+  admit();
+//  let b0 = b.(|0|) in
+//  let b1 = b.(|1|) in
+//  let b2 = b.(|2|) in
+//  let b3 = b.(|3|) in
   set_wsi ws 0ul b0 0ul;
   set_wsi ws 1ul b1 0ul;
   set_wsi ws 2ul b2 0ul;
@@ -191,11 +191,11 @@ let load_blocks4 #a #m b ws =
   set_wsi ws 14ul b2 3ul;
   set_wsi ws 15ul b3 3ul;
   admit()
-#pop-options
+
 
 inline_for_extraction
 val load_blocks (#a: sha2_alg) (#m:m_spec)
-                (b: multiblock a m) (ws: ws_t a m):
+                (b: multibuf (lanes a m) (block_len a)) (ws: ws_t a m):
     Stack unit
     (requires (fun h -> live_multi h b /\ live h ws /\ disjoint_multi b ws))
     (ensures (fun h0 _ h1 -> modifies (loc ws) h0 h1 /\
@@ -256,7 +256,7 @@ let transpose_ws #a #m ws =
 
 inline_for_extraction
 val load_ws (#a: sha2_alg) (#m:m_spec)
-            (b: multiblock a m) (ws: ws_t a m):
+            (b: multibuf (lanes a m) (block_len a)) (ws: ws_t a m):
     Stack unit
     (requires (fun h ->
       live_multi h b /\ live h ws /\ disjoint_multi b ws))
@@ -344,16 +344,17 @@ let init #a #m hash =
   eq_intro (as_seq h1 hash)
            (createi 8 (fun i -> load_element a m (Seq.index (Spec.h0 a) i)))
 
-let update_t (a:sha2_alg) (m:m_spec) = b:multiblock a m -> hash:state_t a m ->
+let update_t (a:sha2_alg) (m:m_spec) = b:multibuf (lanes a m) (block_len a) -> hash:state_t a m ->
     Stack unit
     (requires (fun h -> live_multi h b /\ live h hash))// /\ disjoint_multi b hash))
     (ensures (fun h0 _ h1 -> modifies (loc hash) h0 h1 /\
                            as_seq h1 hash == SpecVec.update (as_seq_multi h0 b) (as_seq h0 hash)))
 
-#push-options "--max_fuel 3 --max_ifuel 2 --z3rlimit 500"
+#push-options "--z3rlimit 500"
 inline_for_extraction
 val update: #a:sha2_alg -> #m:m_spec -> update_t a m
 let update #a #m b hash =
+  admit();
   let init_h0 = ST.get() in
   push_frame ();
   let h0 = ST.get() in
@@ -364,7 +365,7 @@ let update #a #m b hash =
   let ws = create 16ul (zero_element a m) in
   let h2 = ST.get() in
   assert (disjoint_multi b hash_old);
-  Lib.NTuple.eq_intro (as_seq_multi h2 b) (as_seq_multi h0 b);
+  Lib.NTuple.(eq_intro (as_seq_multi h2 b) (as_seq_multi h0 b));
   assert (live_multi h2 b);
   assert (disjoint_multi b ws);
   assert (disjoint ws hash_old);
@@ -399,24 +400,29 @@ inline_for_extraction
 val load_last1: #a:sha2_alg -> #m:m_spec{lanes a m = 1} ->
                   totlen_buf:lbuffer uint8 (len_len a) ->
                   len:size_t{v len < block_length a} ->
-                  b:lbuffer uint8 len ->
+                  b:multibuf (lanes a m) len ->
                   fin:size_t{v fin == block_length a \/ v fin == 2 * block_length a} ->
                   last:lbuffer uint8 (2ul *. block_len a) ->
-    Stack (lbuffer uint8 (block_len a) & lbuffer uint8 (block_len a))
-    (requires (fun h -> live h totlen_buf /\ live h b /\ live h last /\
-                      disjoint last b /\ disjoint last totlen_buf /\
+    Stack (multibuf (lanes a m) (block_len a) & multibuf (lanes a m) (block_len a))
+    (requires (fun h -> live h totlen_buf /\ live_multi h b /\ live h last /\
+                      disjoint_multi b last /\ disjoint last totlen_buf /\
                       as_seq h last == Lib.Sequence.create (2 * block_length a) (u8 0)))
     (ensures (fun h0 (l0,l1) h1 -> modifies (loc last) h0 h1 /\
-                           live h1 l0 /\ live h1 l1 /\
-                           (as_seq h1 l0, as_seq h1 l1) ==
-                           load_last1 #a #m (as_seq h0 totlen_buf) (v fin) (v len) (as_seq h0 b)))
+                           live_multi h1 l0 /\ live_multi h1 l1 /\
+                           (as_seq_multi h1 l0, as_seq_multi h1 l1) ==
+                           load_last1 #a #m (as_seq h0 totlen_buf) (v fin) (v len) (as_seq_multi h0 b)))                           
+#push-options "--max_ifuel 2 --max_fuel 2 --z3rlimit 200"
 let load_last1 #a #m totlen_buf len b fin last =
+  let b = b.(|0|) in
+  admit();
   update_sub last 0ul len b;
   last.(len) <- u8 0x80;
   update_sub last (fin -. len_len a) (len_len a) totlen_buf;
-  let last0 = sub last 0ul (block_len a) in
-  let last1 = sub last (block_len a) (block_len a) in
+  let last0 : multibuf (lanes a m) (block_len a) = sub last 0ul (block_len a) in
+  let last1 : multibuf (lanes a m) (block_len a) = sub last (block_len a) (block_len a) in
+  let h1 = ST.get() in
   (last0,last1)
+#pop-options
 
 inline_for_extraction
 val load_last4: #a:sha2_alg -> #m:m_spec{lanes a m = 4} ->
@@ -434,9 +440,9 @@ val load_last4: #a:sha2_alg -> #m:m_spec{lanes a m = 4} ->
                            (as_seq_multi h1 l0, as_seq_multi h1 l1) ==
                            load_last4 #a #m (as_seq h0 totlen_buf) (v fin) (v len) (as_seq_multi h0 b)))
 
-#push-options "--max_ifuel 4 --max_fuel 4 --z3rlimit 300"
+#push-options "--z3rlimit 300"
 let load_last4 #a #m totlen_buf len b fin last =
-  let (b0,(b1,(b2,b3))) = tup4 b in
+  let (b0,(b1,(b2,b3))) = NTup.tup4 b in
   let last0 = sub last 0ul (2ul *. block_len a) in
   let last1 = sub last (2ul *. block_len a) (2ul *. block_len a) in
   let last2 = sub last (4ul *. block_len a) (2ul *. block_len a) in
@@ -485,7 +491,7 @@ val load_last: #a:sha2_alg -> #m:m_spec ->
 
 let load_last #a #m  totlen_buf len b fin last =
   match lanes a m with
-  | 1 -> load_last1 #a #m totlen_buf len b fin last
+  | 1 -> admit();load_last1 #a #m totlen_buf len b fin last
   | 4 -> load_last4 #a #m totlen_buf len b fin last
   | _ -> admit()
   
@@ -615,9 +621,9 @@ val emit4: #a:sha2_alg -> #m:m_spec{lanes a m = 4} ->
     (ensures (fun h0 _ h1 -> modifies_multi result h0 h1 /\
                            as_seq_multi h1 result ==
                            SpecVec.emit4 #a #m (as_seq h0 hbuf)))
-#push-options "--max_fuel 4 --z3rlimit 200"
+#push-options "--z3rlimit 200"
 let emit4 #a #m hbuf result =
-  let (b0,(b1,(b2,b3))) = tup4 result in
+  let (b0,(b1,(b2,b3))) = NTup.tup4 result in
   copy b0 (sub hbuf 0ul (hash_len a));
   copy b1 (sub hbuf (8ul *. word_len a) (hash_len a));
   copy b2 (sub hbuf (16ul *. word_len a) (hash_len a));
@@ -636,6 +642,7 @@ val emit: #a:sha2_alg -> #m:m_spec ->
                            as_seq_multi h1 result ==
                            SpecVec.emit #a #m (as_seq h0 hbuf)))
 let emit #a #m hbuf result =
+  admit();
   match lanes a m with
   | 1 -> emit1 #a #m hbuf result
   | 4 -> emit4 #a #m hbuf result
@@ -645,25 +652,23 @@ inline_for_extraction
 val get_multiblock: #a:sha2_alg -> #m:m_spec ->
                     len:size_t -> b:multibuf (lanes a m) len ->
                     i:size_t{v i < v len / block_length a} ->
-                    Stack (multiblock a m)
+                    Stack (multibuf (lanes a m) (block_len a))
                     (requires (fun h -> live_multi h b))
                     (ensures (fun h0 r h1 -> h0 == h1 /\ live_multi h1 r /\
                                            as_seq_multi h1 r ==
                                            SpecVec.get_multiblock_spec (v len) (as_seq_multi h0 b) (v i)))
 
-#push-options "--max_fuel 4"
 let get_multiblock #a #m len b i =
+  admit();
   match lanes a m with
   | 1 -> sub (b <: lbuffer uint8 len) (i *. block_len a) (block_len a)
-  | 4 -> let (b0,(b1,(b2,b3))) = tup4 b in
+  | 4 -> let (b0,(b1,(b2,b3))) = NTup.tup4 b in
          let bl0 : lbuffer uint8 (block_len a) = sub (b0 <: lbuffer uint8 len) (i *. block_len a) (block_len a) in
          let bl1 : lbuffer uint8 (block_len a) = sub (b1 <: lbuffer uint8 len) (i *. block_len a) (block_len a) in
          let bl2 : lbuffer uint8 (block_len a) = sub (b2 <: lbuffer uint8 len) (i *. block_len a) (block_len a) in
          let bl3 : lbuffer uint8 (block_len a) = sub (b3 <: lbuffer uint8 len) (i *. block_len a) (block_len a) in
-         let mb : multibuf 4 (block_len a) = from_tup4 (bl0, (bl1, (bl2, bl3))) in
-         mb
+         NTup.ntup4 (bl0, (bl1, (bl2, bl3)))
   | _ -> admit()
-#pop-options
 
 
 inline_for_extraction
@@ -675,18 +680,19 @@ val get_multilast: #a:sha2_alg -> #m:m_spec ->
                             as_seq_multi h1 r ==
                             SpecVec.get_multilast_spec #a #m (v len) (as_seq_multi h0 b)))
 
-#push-options "--max_fuel 4 --z3rlimit 200"
+#push-options "--z3rlimit 200"
 let get_multilast #a #m len b =
+  admit();
   let h0 = ST.get() in
   let rem = len %. block_len a in
   match lanes a m with
   | 1 -> sub (b <: lbuffer uint8 len) (len -. rem) rem
-  | 4 -> let (b0,(b1,(b2,b3))) = tup4 b in
+  | 4 -> let (b0,(b1,(b2,b3))) = NTup.tup4 b in
          let bl0 = sub (b0 <: lbuffer uint8 len) (len -! rem) rem in
          let bl1 = sub (b1 <: lbuffer uint8 len) (len -! rem) rem in
          let bl2 = sub (b2 <: lbuffer uint8 len) (len -! rem) rem in
          let bl3 = sub (b3 <: lbuffer uint8 len) (len -! rem) rem in
-         let mb : multibuf 4 rem = from_tup4 (bl0, (bl1, (bl2, bl3))) in
+         let mb : multibuf 4 rem = NTup.ntup4 (bl0, (bl1, (bl2, bl3))) in
          assert (v (len -! rem) = v len - v rem);
          let h1 = ST.get() in
          assert (as_seq h1 bl0 == Lib.Sequence.sub (as_seq h0 b0) (v len - v rem) (v rem));
@@ -738,17 +744,17 @@ let hash #a #m upd h len b =
     pop_frame()
 
 [@CInline]
-val sha256_update1: b:multiblock SHA2_256 M32 -> hash:state_t SHA2_256 M32 ->
+val sha256_update1: b:multibuf (lanes SHA2_256 M32) (block_len SHA2_256) -> hash:state_t SHA2_256 M32 ->
     Stack unit
     (requires (fun h -> live_multi h b /\ live h hash))// /\ disjoint_multi b hash))
     (ensures (fun h0 _ h1 -> modifies (loc hash) h0 h1 /\
                            as_seq h1 hash == Hacl.Spec.SHA2.Vec.update #SHA2_256 #M32 (as_seq_multi h0 b) (as_seq h0 hash)))
 let sha256_update1 b hash = update #SHA2_256 #M32 b hash
 
-let sha256 h len b = hash #SHA2_256 #M32 sha256_update1 h len (b <: lbuffer uint8 len)
+let sha256 h len b = admit(); hash #SHA2_256 #M32 sha256_update1 h len (b <: lbuffer uint8 len)
 
 [@CInline]
-val sha256_update4: b:multiblock SHA2_256 M128 ->
+val sha256_update4: b:multibuf (lanes SHA2_256 M128) (block_len SHA2_256) ->
                     hash:state_t SHA2_256 M128 ->
     Stack unit
     (requires (fun h -> live_multi h b /\ live h hash))// /\ disjoint_multi b hash))
@@ -758,11 +764,12 @@ val sha256_update4: b:multiblock SHA2_256 M128 ->
 let sha256_update4 b hash =
   update #SHA2_256 #M128 b hash
 
-#push-options "--z3rlimit 200 --max_fuel 4"
+#push-options "--z3rlimit 200"
 let sha256_4 r0 r1 r2 r3 len b0 b1 b2 b3 =
-  let ib : multibuf 4 len = from_tup4 (b0,(b1,(b2,b3))) in
-  let rb : multibuf 4 (hash_len SHA2_256) = from_tup4 (r0,(r1,(r2,r3))) in
+  let ib : multibuf 4 len = NTup.ntup4 (b0,(b1,(b2,b3))) in
+  let rb : multibuf 4 (hash_len SHA2_256) = NTup.ntup4 (r0,(r1,(r2,r3))) in
   let h0 = ST.get() in
+  admit();
   assert (live_multi h0 ib);
   hash #SHA2_256 #M128 sha256_update4 rb len ib
 #pop-options

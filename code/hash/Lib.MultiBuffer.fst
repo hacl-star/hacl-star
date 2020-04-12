@@ -40,9 +40,10 @@ let multiseq (lanes:flen) (len:size_nat) =
 let as_seq_multi #lanes #len (h:mem) (b:multibuf lanes len) : GTot (multiseq lanes (v len)) =
     gmap (as_seq h) b
 
-let as_seq_multi_lemma #lanes #len h b:
-  Lemma (forall i. i < lanes ==> (as_seq_multi #lanes #len h b).(|i|) == as_seq h b.(|i|))
-        [SMTPat (as_seq_multi #lanes #len h b)] = ()
+let as_seq_multi_lemma (#lanes:flen) #len h b (i:nat{i < lanes}):
+  Lemma ((as_seq_multi #lanes #len h b).(|i|) == as_seq h b.(|i|))
+        [SMTPat (as_seq_multi #lanes #len h b).(|i|)] =
+        index_gmap_lemma (as_seq h) b i
   
 
 
