@@ -21,6 +21,8 @@ open Hacl.PKCS11.Lemmas.ObjectTree
 
 open Hacl.PKCS11.External
 
+module L = Hacl.PKCS11.Lib 
+
 #set-options "--z3rlimit 300"
 
 
@@ -1094,36 +1096,60 @@ let attributesNotReadOnly s =
 
 (* The function searches for all the attributes in the sequence  *)
 
-let _attributesTemplateComplete (toSearchSequence : seq _CK_ATTRIBUTE) (toFinds : seq _CK_ATTRIBUTE_TYPE) = 
-  (forall (i: nat {i < Seq.length toFinds}). Hacl.PKCS11.Lib.contains (fun x -> x.aType = (index toFinds i)) toSearchSequence)
 
-
-val combineAllProvidedAttributes: 
+val combineAllProvidedAttributes:
   mechanism: _CK_MECHANISM_TYPE 
   -> pTemplate: seq _CK_ATTRIBUTE 
-  -> Tot (seq _CK_ATTRIBUTE)
+  -> Tot (s: seq _CK_ATTRIBUTE
+    {
+      forall (i: nat). i < Seq.length defaultAttributes /\ L.contains (fun x -> x = (index defaultAttributes i)) s /\
+      (forall (i: nat). i < Seq.length pTemplate /\ L.contains (fun x -> x = (index pTemplate i)) s) /\
+      (forall (i: nat). i < Seq.length (getAttributesByMechanism mechanism) /\ L.contains (fun x -> x = (index (getAttributesByMechanism mechanism) i)) s)
+    }
+  )
 
 let combineAllProvidedAttributes mechanism pTemplate  = 
-  let defAttr = defaultAttributes in 
   let mechanismAttributes = getAttributesByMechanism mechanism in 
-  append (append defaultAttributes mechanismAttributes) pTemplate
+  lemmaContainsSelf mechanismAttributes;
+  lemmaContainsSelf defaultAttributes;
+  lemmaContainsSelf pTemplate;
+
+  assert(forall (i: nat). i < Seq.length defaultAttributes /\ L.contains (fun x -> x = (index defaultAttributes i)) mechanismAttributes);
+  admit();
+  let s = append (append defaultAttributes mechanismAttributes) pTemplate in 
+  s
 
 
-val combineAllRequiredAttributes: 
+val combineAllRequiredAttributes:
   mechanism: _CK_MECHANISM_TYPE 
   -> t: _CK_OBJECT_CLASS 
-  -> Tot (seq _CK_ATTRIBUTE_TYPE)
+  -> Tot (s: seq _CK_ATTRIBUTE_TYPE
+    {
+      (
+	forall (i: nat {i < length (getRequiredAttributesByMechanism mechanism)}). 
+	 L.contains (fun x -> x = (index (getRequiredAttributesByMechanism mechanism) i)) s /\
+	 (
+	   forall (i: nat {i < length (getAttributesForType t)}). 
+	   L.contains (fun x -> x = (index (getAttributesForType t) i)) s
+	 )
+      )
+    }
+)    
 
 let combineAllRequiredAttributes mechanism t = 
   let mechanismRequiredAttributes = getRequiredAttributesByMechanism mechanism in 
   let attributesToConstructType = getAttributesForType t in 
-  append mechanismRequiredAttributes attributesToConstructType
+  let s = append mechanismRequiredAttributes attributesToConstructType in 
+  assert(forall (i: nat {i < length mechanismRequiredAttributes}). L.contains (fun x -> x = (index mechanismRequiredAttributes i)) mechanismRequiredAttributes);
+  admit();
+  s
 
 
-let attributesTemplateComplete (t : _CK_OBJECT_CLASS) (mechanism : _CK_MECHANISM) (attrs : seq _CK_ATTRIBUTE) = 
-  let allProvidedAttributes = combineAllProvidedAttributes mechanism.mechanismID attrs in 
-  let allRequiredAttributes = combineAllRequiredAttributes mechanism.mechanismID t in 
-  _attributesTemplateComplete allProvidedAttributes allRequiredAttributes
+let attributesTemplateComplete (t : _CK_OBJECT_CLASS) (pMechanism : _CK_MECHANISM) (pTemplate : seq _CK_ATTRIBUTE) = 
+  let allProvidedAttributes = combineAllProvidedAttributes pMechanism.mechanismID pTemplate in 
+  let allRequiredAttributes = combineAllRequiredAttributes pMechanism.mechanismID t in 
+  forall (i: nat {i < Seq.length allRequiredAttributes}). Hacl.PKCS11.Lib.contains (fun x -> x.aType = (index allRequiredAttributes i)) allProvidedAttributes
+
 
 
 (* If the attribute values in the supplied template, together with any default attribute values and any attribute values contributed to the object by the object-creation function itself, are inconsistent, then the attempt should fail with the error code CKR_TEMPLATE_INCONSISTENT.   *)
@@ -1177,28 +1203,29 @@ let mechanismSelectECDSA a =
   | _ -> None
 
 
+val test: unit  
+  -> pMechanism: _CK_MECHANISM 
+  -> pTemplate: seq _CK_ATTRIBUTE {attributesTemplateComplete CKO_SECRET_KEY pMechanism pTemplate}
+  -> Tot (r: bool {r == true ==> attributesTemplateComplete CKO_SECRET_KEY pMechanism pTemplate})
+
+
 val mechanismCreationSelect: d: device 
   -> pMechanism: _CK_MECHANISM 
-  -> pTemplate: seq _CK_ATTRIBUTE {attributesTemplateComplete CKO_SECRET_KEY pMechanism pTemplate == true}
+  -> pTemplate: seq _CK_ATTRIBUTE {attributesTemplateComplete CKO_SECRET_KEY pMechanism pTemplate}
   -> result (unit -> Tot (seq FStar.UInt8.t))
+
+module L = Hacl.PKCS11.Lib 
 
 
 let mechanismCreationSelect d pMechanism pTemplate = 
+  let open Hacl.PKCS11.Lib in 
   match pMechanism.mechanismID with 
   |CKM_EC_KEY_PAIR_GEN -> 
     begin
-      let requiredAttribute = find_l (fun x -> x.aType = CKA_EC_PARAMS) pTemplate in 
-      assert(attributesTemplateComplete CKO_SECRET_KEY pMechanism pTemplate);
 
-      assert(
-	let requiredAttributes = append (getRequiredAttributesByMechanism pMechanism.mechanismID) (getAttributesForType CKO_SECRET_KEY) in 
-	let providedAttributes = append (append defaultAttributes (getAttributesByMechanism pMechanism.mechanismID)) pTemplate in 
-	true ==> (forall (i: nat {i < Seq.length requiredAttributes}). Hacl.PKCS11.Lib.contains 
-	  (fun x -> x.aType = (index requiredAttributes i)) providedAttributes)
-      );
-      admit();
-      assert (Some? requiredAttribute);
-      admit();
+      let allProvidedAttributes = combineAllProvidedAttributes pMechanism.mechanismID pTemplate in
+      let requiredAttribute = find_l (fun x -> x.aType = CKA_EC_PARAMS) allProvidedAttributes in  
+      assume(Hacl.PKCS11.Lib.contains (fun x -> x.aType = CKA_EC_PARAMS) allProvidedAttributes);
       let requiredAttribute = match requiredAttribute with Some a -> a in 
       let mechanism = mechanismSelectECDSA requiredAttribute in 
       match mechanism with 

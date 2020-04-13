@@ -30,7 +30,7 @@ let lemmaIfExistAndNotFirst #a f s = admit()
 
 val lemmaFindLExistIfSomeOp: #a: Type -> f: (a -> bool) -> s: seq a -> 
   Lemma
-    (requires (exists (a: nat {a < Seq.length s}). f (index s a)))
+    (requires (exists (k: nat). k < Seq.length s /\ f (index s k)))
     (ensures (Some? (find_l f s)))
     (decreases (Seq.length s))
 
@@ -48,7 +48,7 @@ let rec lemmaFindLExistIfSomeOp #a f s  =
 
 val lemma_index_0_elem: #a: Type0 -> p: a -> Lemma (index (seq_of_list [p]) 0 == p)
 
-let lemma_index_0_elem #a p = admit()
+let lemma_index_0_elem #a p = FStar.Seq.Properties.lemma_seq_of_list_induction [p]
 
 
 val containsFindL: #a: Type -> f: (a -> Tot bool) -> s: seq a -> 
@@ -57,8 +57,8 @@ val containsFindL: #a: Type -> f: (a -> Tot bool) -> s: seq a ->
     (ensures Some? (find_l f s))
     [SMTPat (contains f s)]
 
-let containsFindL #a f s = admit()
-
+let containsFindL #a f s = 
+  lemmaFindLExistIfSomeOp #a f s
 
 val containsFindL1: #a: Type -> f: (a -> Tot bool) -> s: seq a -> 
   Lemma
@@ -66,4 +66,13 @@ val containsFindL1: #a: Type -> f: (a -> Tot bool) -> s: seq a ->
     (ensures (contains f s))
     [SMTPat (find_l f s)]
 
-let containsFindL1 #a f s = admit()
+let containsFindL1 #a f s = 
+  lemmaFindLExistIfSome f s 
+
+
+val lemmaContainsSelf: #a: eqtype -> s: seq a -> Lemma
+  (
+    forall (i: nat). i < Seq.length s /\ contains (fun x -> x = (index s i)) s
+  )
+
+let lemmaContainsSelf #a s = admit()

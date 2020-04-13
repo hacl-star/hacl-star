@@ -24,5 +24,22 @@ assume val map: #a: eqtype -> #b: eqtype -> f: (a -> b) ->  s: seq a ->
 
 
 
-let contains (#a:Type) (f: (a -> bool)) (s:seq a)  : Tot Type0 =
-  exists (k:nat{k < Seq.length s}). f (Seq.index s k)
+let contains (#a:Type) (f: (a -> bool)) (s:seq a) : Tot Type0 =
+  exists (k:nat). k < Seq.length s /\  f (Seq.index s k) 
+
+
+val containsLemma: #a: eqtype -> s: seq a {length s > 0} -> Lemma 
+  (
+    forall (i: nat). i < Seq.length s /\ contains (fun x -> x = (index s i)) s
+  )
+
+let rec containsLemma #a s = 
+  let open FStar.Classical in 
+
+  let x: n: nat {n > 10} = 11 in 
+  give_witness x; 
+
+  admit();
+  assert(forall (k: nat {k < length s}).  (fun x -> x = (index s k)) (index s k));
+  assume(exists (k: nat). k < length s /\ (fun x -> x = (index s k)) (index s k));
+  admit()
