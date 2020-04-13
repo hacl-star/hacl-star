@@ -1108,16 +1108,19 @@ val combineAllProvidedAttributes:
     }
   )
 
+
 let combineAllProvidedAttributes mechanism pTemplate  = 
   let mechanismAttributes = getAttributesByMechanism mechanism in 
   lemmaContainsSelf mechanismAttributes;
-  lemmaContainsSelf defaultAttributes;
-  lemmaContainsSelf pTemplate;
+  (*lemmaContainsSelf defaultAttributes;
+  lemmaContainsSelf pTemplate; *)
+(*
+  lemmaContains3 defaultAttributes mechanismAttributes pTemplate 
+    (fun i x -> x = (index defaultAttributes i))
+    (fun i x -> x = (index pTemplate i))
+    (fun i x -> x = (index pTemplate i)); *)
 
-  assert(forall (i: nat). i < Seq.length defaultAttributes /\ L.contains (fun x -> x = (index defaultAttributes i)) mechanismAttributes);
-  admit();
-  let s = append (append defaultAttributes mechanismAttributes) pTemplate in 
-  s
+  append (append defaultAttributes mechanismAttributes) pTemplate
 
 
 val combineAllRequiredAttributes:
