@@ -198,7 +198,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "47fb117bd8ad3569f4b1ef29bff85d58"
+      "9d214882675ab4156e68c70467e1a050"
     ],
     [
       "Vale.Poly1305.CallingFromLowStar.lemma_block",
@@ -212,7 +212,6 @@
         "FStar.List.Tot.Base_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
         "FStar.Seq.Base_interpretation_Tm_arrow_44bb45ed5c2534b346e0f58ea5033251",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "Vale.Poly1305.Spec_s_interpretation_Tm_arrow_6c528cb178c0356159679935f3a11594",
         "Vale.Wrapper.X64.Poly_interpretation_Tm_arrow_5a4474f45e63b90b15f8984b71304f18",
         "b2t_def", "bool_inversion", "bool_typing",
         "constructor_distinct_Lib.IntTypes.PUB",
@@ -256,7 +255,6 @@
         "equation_Vale.Lib.Seqs_s.seq_map",
         "equation_Vale.Poly1305.Equiv.block_fun",
         "equation_Vale.Poly1305.Util.seqTo128",
-        "equation_Vale.Poly1305.Util.t_seqTo128",
         "equation_Vale.Wrapper.X64.Poly.uint64_to_nat_seq",
         "equation_with_fuel_Prims.pow2.fuel_instrumented",
         "function_token_typing_FStar.Monotonic.Heap.heap",
@@ -332,7 +330,6 @@
         "typing_LowStar.Monotonic.Buffer.len", "typing_Prims.pow2",
         "typing_Spec.Poly1305.size_block", "typing_Spec.Poly1305.size_key",
         "typing_Tm_abs_12f0bbc5cd2aeb167bc7e771b588a4ca",
-        "typing_Tm_abs_55d622e5d8cb2002c7f2c749786e2ff9",
         "typing_Tm_abs_b75a325c492b27b697a8d2ee1ccf7bda",
         "typing_Vale.Arch.BufferFriend.of_bytes",
         "typing_Vale.Interop.Types.get_downview",
@@ -342,7 +339,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "b256dadb4db148b6b56767428b123eee"
+      "5514e1412ceb1117f77177aa36fa0937"
     ],
     [
       "Vale.Poly1305.CallingFromLowStar.lemma_block_extra",
@@ -379,7 +376,6 @@
         "equation_Prims.nat", "equation_Prims.pos", "equation_Prims.squash",
         "equation_Spec.Poly1305.size_block",
         "equation_Spec.Poly1305.size_key",
-        "equation_Vale.Def.Words_s.nat128", "equation_Vale.Def.Words_s.natN",
         "equation_Vale.Interop.Types.base_typ_as_type",
         "equation_Vale.Interop.Views.up_view64",
         "equation_Vale.Poly1305.Equiv.block_fun",
@@ -407,9 +403,7 @@
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
         "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
         "refinement_interpretation_Tm_refine_1ba8fd8bb363097813064c67740b2de5",
-        "refinement_interpretation_Tm_refine_1c9b64d2cdeaf3e33a52853818c7ca69",
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
-        "refinement_interpretation_Tm_refine_39da8d7cdb2d7ea7cf111e9b89716bbe",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_72530680bea79807d75cb9d6e7632258",
@@ -417,7 +411,6 @@
         "refinement_interpretation_Tm_refine_782420a2054fd965084564ef5ff53609",
         "refinement_interpretation_Tm_refine_81407705a0828c2c1b1976675443f647",
         "refinement_interpretation_Tm_refine_b4bdf318770a50314f929956d8d89da5",
-        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
         "refinement_interpretation_Tm_refine_d3d07693cd71377864ef84dc97d10ec1",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
@@ -431,9 +424,8 @@
         "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.as_seq",
         "typing_LowStar.Monotonic.Buffer.len",
-        "typing_Spec.Poly1305.size_block", "typing_Spec.Poly1305.size_key",
-        "typing_Vale.Arch.BufferFriend.to_bytes",
-        "typing_Vale.Poly1305.Equiv.block_fun"
+        "typing_LowStar.Monotonic.Buffer.length",
+        "typing_Spec.Poly1305.size_block", "typing_Spec.Poly1305.size_key"
       ],
       0,
       "27b87d3e39c8c711fbcfcdff8038956a"
