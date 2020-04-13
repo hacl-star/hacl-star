@@ -460,12 +460,9 @@ let update #a #m b hash =
   map2T 8ul hash (+|) hash hash_old; 
   let h5 = ST.get() in
   assert (modifies (loc hash |+| (loc ws |+| loc hash_old)) h0 h5);
+  reveal_opaque (`%SpecVec.update) (SpecVec.update #a #m);
   assert (as_seq h5 hash == SpecVec.update (as_seq_multi h0 b) (as_seq h0 hash));
-  pop_frame();
-  let h6 = ST.get() in
-  assert (modifies (loc hash) h0 h6);
-  assert (as_seq h6 hash == SpecVec.update (as_seq_multi h0 b) (as_seq h0 hash));
-  ()
+  pop_frame()
 #pop-options
 
 inline_for_extraction
@@ -487,7 +484,7 @@ val load_last_blocks: #a:sha2_alg ->
                       as_seq h last == Lib.Sequence.create (2 * block_length a) (u8 0)))
     (ensures (fun h0 (l0,l1) h1 -> modifies (loc last) h0 h1 /\
                            live h1 l0 /\ live h1 l1 /\
-                           (forall (r:buffer uint8). disjoint last r ==> (disjoint l0 r /\ disjoint l1 r)) /\
+                           (forall a l (r:lbuffer a l). disjoint last r ==> (disjoint l0 r /\ disjoint l1 r)) /\
                            (as_seq h1 l0, as_seq h1 l1) ==
                            SpecVec.load_last_blocks #a (as_seq h0 totlen_buf) (v fin) (v len) (as_seq h0 b)))
 #push-options "--z3rlimit 200"
@@ -503,6 +500,10 @@ let load_last_blocks #a totlen_buf len b fin last =
   (last0,last1)
 #pop-options
 
+noextract
+let preserves_sub_disjoint_multi #lanes #len #len' (b:lbuffer uint8 len) (r:multibuf lanes len') =
+    (forall a l (x:lbuffer a l). disjoint b x ==> disjoint_multi r x)
+    
 inline_for_extraction
 val load_last1: #a:sha2_alg -> #m:m_spec{lanes a m = 1} ->
                   totlen_buf:lbuffer uint8 (len_len a) ->
@@ -516,10 +517,11 @@ val load_last1: #a:sha2_alg -> #m:m_spec{lanes a m = 1} ->
                       as_seq h last == Lib.Sequence.create (2 * block_length a) (u8 0)))
     (ensures (fun h0 (l0,l1) h1 -> modifies (loc last) h0 h1 /\
                            live_multi h1 l0 /\ live_multi h1 l1 /\
-                           (forall l (r:lbuffer uint8 l). disjoint last r ==> (disjoint_multi l0 r /\ disjoint_multi l1 r)) /\
+                           preserves_sub_disjoint_multi last l0 /\
+                           preserves_sub_disjoint_multi last l1 /\
                            (as_seq_multi h1 l0, as_seq_multi h1 l1) ==
                            SpecVec.load_last1 #a #m (as_seq h0 totlen_buf) (v fin) (v len) (as_seq_multi h0 b)))                           
-#push-options "--z3rlimit 200"
+#push-options "--z3rlimit 250"
 let load_last1 #a #m totlen_buf len b fin last =
   let h0 = ST.get() in
   let b = b.(|0|) in
@@ -547,7 +549,8 @@ val load_last4: #a:sha2_alg -> #m:m_spec{lanes a m = 4} ->
                       as_seq h last == Lib.Sequence.create (lanes a m * 2 * block_length a) (u8 0)))
     (ensures (fun h0 (l0,l1) h1 -> modifies (loc last) h0 h1 /\
                            live_multi h1 l0 /\ live_multi h1 l1 /\
-                           (forall l (r:lbuffer uint8 l). disjoint last r ==> (disjoint_multi l0 r /\ disjoint_multi l1 r)) /\
+                           preserves_sub_disjoint_multi last l0 /\
+                           preserves_sub_disjoint_multi last l1 /\
                            (as_seq_multi h1 l0, as_seq_multi h1 l1) ==
                            load_last4 #a #m (as_seq h0 totlen_buf) (v fin) (v len) (as_seq_multi h0 b)))
 
@@ -602,12 +605,13 @@ val load_last: #a:sha2_alg -> #m:m_spec ->
                       as_seq h last == Lib.Sequence.create (lanes a m * 2 * block_length a) (u8 0)))
     (ensures (fun h0 (l0,l1) h1 -> modifies (loc last) h0 h1 /\
                            live_multi h1 l0 /\ live_multi h1 l1 /\
-                           (forall l (r:lbuffer uint8 l).{:pattern (disjoint_multi l0 r)} disjoint last r ==> disjoint_multi l0 r) /\
-                           (forall l (r:lbuffer uint8 l).{:pattern (disjoint_multi l1 r)} disjoint last r ==> disjoint_multi l1 r) /\
+                           (forall a l (r:lbuffer a l).{:pattern (disjoint_multi l0 r)} disjoint last r ==> disjoint_multi l0 r) /\
+                           (forall a l (r:lbuffer a l).{:pattern (disjoint_multi l1 r)} disjoint last r ==> disjoint_multi l1 r) /\     
                            (as_seq_multi h1 l0, as_seq_multi h1 l1) ==
                            SpecVec.load_last #a #m (as_seq h0 totlen_buf) (v fin) (v len) (as_seq_multi h0 b)))
 
 let load_last #a #m  totlen_buf len b fin last =
+  reveal_opaque (`%SpecVec.load_last) (SpecVec.load_last #a #m);
   match lanes a m with
   | 1 -> load_last1 #a #m totlen_buf len b fin last
   | 4 -> load_last4 #a #m totlen_buf len b fin last
@@ -626,41 +630,46 @@ val update_last: #a:sha2_alg -> #m:m_spec ->
                            as_seq h1 hash ==
                            SpecVec.update_last totlen (v len) (as_seq_multi h0 b) (as_seq h0 hash)))
 
-#push-options "--z3rlimit 400"
+#push-options "--z3rlimit 350"
 let update_last #a #m upd totlen len b hash =
   let h0 = ST.get() in
   push_frame ();
+  let h1 = ST.get() in
+  let blocks = padded_blocks a len in
+  let fin = blocks *. block_len a in
   let last = create (size (lanes a m) *. 2ul *. block_len a) (u8 0) in
   let totlen_buf = create (len_len a) (u8 0) in
   let total_len_bits = secret (shift_left #(len_int_type a) totlen 3ul) in 
   Lib.ByteBuffer.uint_to_bytes_be #(len_int_type a) totlen_buf total_len_bits;
-  let h1 = ST.get () in
-  assert (as_seq h1 totlen_buf ==
-          Lib.ByteSequence.uint_to_bytes_be #(len_int_type a) total_len_bits);
-  let blocks = padded_blocks a len in
-  let fin = blocks *. block_len a in
-  let (last0,last1) = load_last #a #m totlen_buf len b fin last in
   let h2 = ST.get () in
-  assert (modifies (loc last) h1 h2);
-  assert (disjoint last hash);
-//  assume (disjoint_multi last1 hash);
+  NTup.eq_intro (as_seq_multi h2 b) (as_seq_multi h0 b);
+  assert (as_seq h2 totlen_buf ==
+          Lib.ByteSequence.uint_to_bytes_be #(len_int_type a) total_len_bits);
+  let (last0,last1) = load_last #a #m totlen_buf len b fin last in
+  let h3 = ST.get () in
+  assert ((as_seq_multi h3 last0, as_seq_multi h3 last1) ==
+          SpecVec.load_last #a #m (as_seq h2 totlen_buf) (v fin) (v len) (as_seq_multi h2 b));
+  assert (disjoint_multi last1 hash);
   upd last0 hash;
-  let h3 = ST.get() in
-  assert (modifies (loc last |+| loc hash) h0 h3);
-  assert (as_seq h3 hash == SpecVec.update (as_seq_multi h2 last0) (as_seq h0 hash));
-//  NTup.eq_intro (as_seq_multi h3 last1) (as_seq_multi h2 last1);
+  let h4 = ST.get() in
+  assert (modifies (loc hash |+| loc last |+| loc totlen_buf) h1 h3);
+  assert (as_seq h4 hash == SpecVec.update (as_seq_multi h3 last0) (as_seq h3 hash));
+  NTup.eq_intro (as_seq_multi h4 last1) (as_seq_multi h3 last1);
   assert (v blocks > 1 ==> blocks >. 1ul);
+  assert (blocks >. 1ul ==> v blocks > 1);
+  assert (not (blocks >. 1ul) ==> not (v blocks > 1));
   if blocks >. 1ul then (
     upd last1 hash;
-    let h4 = ST.get() in
-    assert (as_seq h4 hash == SpecVec.update (as_seq_multi h3 last1) (as_seq h3 hash));
-    assert (modifies (loc last |+| loc hash) h0 h4);
-    admit();
+    let h5 = ST.get() in
+    assert (as_seq h5 hash == SpecVec.update (as_seq_multi h4 last1) (as_seq h4 hash));
+    assert (modifies (loc hash |+| loc last |+| loc totlen_buf) h1 h5);
+    assert (as_seq h5 hash == SpecVec.update_last totlen (v len) (as_seq_multi h0 b) (as_seq h0 hash));
     pop_frame()
   ) else (
-    let h5 = ST.get() in
-    assert (modifies (loc last |+| loc hash) h0 h5);
-    admit();
+    let h6 = ST.get() in
+    assert (h4 == h6);
+    assert (modifies (loc hash |+| loc totlen_buf |+| loc last) h1 h6);
+    assert (as_seq h6 hash == SpecVec.update_last totlen (v len) (as_seq_multi h0 b) (as_seq h0 hash));
     pop_frame())
 #pop-options
 

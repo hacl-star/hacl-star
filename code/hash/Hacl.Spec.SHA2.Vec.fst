@@ -274,6 +274,7 @@ noextract
 let init (a:sha2_alg) (m:m_spec) : state_spec a m =
   createi 8 (fun i -> load_element a m (Seq.index (Spec.h0 a) i))
 
+[@"opaque_to_smt"]
 noextract
 let update (#a:sha2_alg) (#m:m_spec) (b:multiblock_spec a m) (st:state_spec a m): state_spec a m =
   let st_old = st in
@@ -332,6 +333,7 @@ let load_last4 (#a:sha2_alg) (#m:m_spec{lanes a m == 4})
     (mb0, mb1)
 #pop-options
 
+[@"opaque_to_smt"]
 noextract
 let load_last (#a:sha2_alg) (#m:m_spec) (totlen_seq:lseq uint8 (len_length a))
               (fin:nat{fin == block_length a \/ fin == 2 * block_length a})
