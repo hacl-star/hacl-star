@@ -1,8 +1,8 @@
-module Lib.ByteVector
+module Lib.IntVector.Serialize
 
 // the proofs are the same as in Lib.ByteSequence and Lib.ByteBuffer
 
-#set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 noextract
 val vecs_from_bytes_le_f:
@@ -84,8 +84,6 @@ let index_vecs_to_bytes_be #vt #w #len vl i =
   index_generate_blocks (numbytes vt * w) len len
     (vecs_to_bytes_be_f #vt #w #len vl) i
 
-
-#set-options "--z3rlimit 50 --max_fuel 1 --max_ifuel 1"
 
 let vecs_load_le #vt #w #len o i =
   let h0 = ST.get () in

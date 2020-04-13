@@ -1,4 +1,4 @@
-module Lib.ByteVector
+module Lib.IntVector.Serialize
 
 open FStar.Mul
 open Lib.Sequence
