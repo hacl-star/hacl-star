@@ -1129,10 +1129,10 @@ val combineAllRequiredAttributes:
   -> Tot (s: seq _CK_ATTRIBUTE_TYPE
     {
       (
-	forall (i: nat {i < length (getRequiredAttributesByMechanism mechanism)}). 
+	forall (i: nat). i < length (getRequiredAttributesByMechanism mechanism) /\
 	 L.contains (fun x -> x = (index (getRequiredAttributesByMechanism mechanism) i)) s /\
 	 (
-	   forall (i: nat {i < length (getAttributesForType t)}). 
+	   forall (i: nat). i < length (getAttributesForType t) /\ 
 	   L.contains (fun x -> x = (index (getAttributesForType t) i)) s
 	 )
       )
@@ -1142,10 +1142,9 @@ val combineAllRequiredAttributes:
 let combineAllRequiredAttributes mechanism t = 
   let mechanismRequiredAttributes = getRequiredAttributesByMechanism mechanism in 
   let attributesToConstructType = getAttributesForType t in 
-  let s = append mechanismRequiredAttributes attributesToConstructType in 
-  assert(forall (i: nat {i < length mechanismRequiredAttributes}). L.contains (fun x -> x = (index mechanismRequiredAttributes i)) mechanismRequiredAttributes);
-  admit();
-  s
+  lemmaContainsSelf mechanismRequiredAttributes;
+  lemmaContainsSelf attributesToConstructType;
+  append mechanismRequiredAttributes attributesToConstructType
 
 
 let attributesTemplateComplete (t : _CK_OBJECT_CLASS) (pMechanism : _CK_MECHANISM) (pTemplate : seq _CK_ATTRIBUTE) = 

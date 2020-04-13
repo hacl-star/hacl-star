@@ -78,13 +78,14 @@ val lemmaContainsSelf: #a: eqtype -> s: seq a -> Lemma
 let lemmaContainsSelf #a s = admit()
 
 
+(*
 val lemmaContainsAppend: #a: eqtype -> s: seq a -> s1: seq a -> f: (a -> Tot bool) -> Lemma
   (requires (contains f s))
   (ensures (let sUpdated = append s s1 in contains f sUpdated))
 
 let lemmaContainsAppend #a s s1 f = admit()
-
-
+*)
+(*
 val lemmaContains2: #a: eqtype -> 
   s: seq a -> s1: seq a ->
   f: (a -> Tot bool) -> f1: (a -> Tot bool) -> 
@@ -106,3 +107,4 @@ val lemmaContains3: #a: eqtype ->
     contains (f2 i) (append (append s s1) s2)))
 
 let lemmaContains3 #a s s1 s2 f f1 f2 = admit()
+*)
