@@ -668,6 +668,8 @@ let lemma_powers () =
    assert_norm(pow2 64 * pow2 64 * pow2 64  * pow2 64 * pow2 64* pow2 64 * pow2 64 * pow2 64 = pow2 (8 * 64))
 
 
+#push-options "--z3rlimit 300"
+
 val mul: f: felem -> r: felem -> out: widefelem -> 
   Stack unit
     (requires fun h -> live h out /\ live h f /\ live h r /\ disjoint r out)
@@ -855,6 +857,7 @@ let mul f r out =
     as_nat h0 r * as_nat h0 f; 
     }
 
+#pop-options
 
 val lemma_320: a: uint64 -> b: uint64 -> c: uint64 -> d: uint64 -> u: uint64 -> Lemma 
   (uint_v u * uint_v a +  (uint_v u * uint_v b) * pow2 64 + (uint_v u * uint_v c) * pow2 64 * pow2 64 + (uint_v u * uint_v d) * pow2 64 * pow2 64 * pow2 64 < pow2 320)
