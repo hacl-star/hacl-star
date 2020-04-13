@@ -4,6 +4,8 @@ open FStar.Mul
 open Lib.Sequence
 open Lib.IntTypes
 
+#set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
+
 let v_inttype = t:inttype{unsigned t /\ ~(U1? t)}
 
 let width = n:size_nat{n == 1 \/ n == 2 \/ n == 4 \/ n == 8 \/ n == 16 \/ n == 32}
@@ -387,22 +389,49 @@ let ( >>>| ) #t #w = vec_rotate_right #t #w
 inline_for_extraction noextract
 let ( <<<| ) #t #w = vec_rotate_left #t #w
 
-open Lib.ByteSequence
+module BSeq = Lib.ByteSequence
+module LSeq = Lib.Sequence
+
+inline_for_extraction noextract
+val vec_from_bytes_le: vt:v_inttype -> w:width -> b:lseq uint8 (numbytes vt * w) -> vec_t vt w
+
+val vec_from_bytes_le_lemma: vt:v_inttype -> w:width -> b:lseq uint8 (numbytes vt * w) ->
+  Lemma (vec_v (vec_from_bytes_le vt w b) == BSeq.uints_from_bytes_le b)
+  [SMTPat (vec_v (vec_from_bytes_le vt w b))]
+
+inline_for_extraction noextract
+val vec_from_bytes_be: vt:v_inttype -> w:width -> b:lseq uint8 (numbytes vt * w) -> vec_t vt w
+
+val vec_from_bytes_be_lemma: vt:v_inttype -> w:width -> b:lseq uint8 (numbytes vt * w) ->
+  Lemma (vec_v (vec_from_bytes_be vt w b) == BSeq.uints_from_bytes_be b)
+  [SMTPat (vec_v (vec_from_bytes_be vt w b))]
+
+inline_for_extraction noextract
+val vec_to_bytes_le: #vt:v_inttype -> #w:width -> v:vec_t vt w -> lseq uint8 (numbytes vt * w)
+
+val vec_to_bytes_le_lemma: #vt:v_inttype -> #w:width -> v:vec_t vt w ->
+  Lemma (vec_to_bytes_le #vt #w v == BSeq.uints_to_bytes_le (vec_v v))
+  [SMTPat (vec_to_bytes_le #vt #w v)]
+
+inline_for_extraction noextract
+val vec_to_bytes_be: #vt:v_inttype -> #w:width -> v:vec_t vt w -> lseq uint8 (numbytes vt * w)
+
+val vec_to_bytes_be_lemma: #vt:v_inttype -> #w:width -> v:vec_t vt w ->
+  Lemma (vec_to_bytes_be #vt #w v == BSeq.uints_to_bytes_be (vec_v v))
+  [SMTPat (vec_to_bytes_be #vt #w v)]
+
+
 open Lib.Buffer
 open FStar.HyperStack
 open FStar.HyperStack.ST
-
-inline_for_extraction noextract
-val vec_from_bytes_le: vt:v_inttype -> w:width -> b:lseq uint8 ((numbytes vt) * w) -> v:vec_t vt w{vec_v v == uints_from_bytes_le b}
-
-inline_for_extraction noextract
-val vec_from_bytes_be: vt:v_inttype -> w:width -> b:lseq uint8 ((numbytes vt) * w) -> v:vec_t vt w{vec_v v == uints_from_bytes_be b}
+module B = Lib.Buffer
+module ST = FStar.HyperStack.ST
 
 inline_for_extraction noextract
 val vec_load_le:
     vt:v_inttype
   -> w:width
-  -> b:Lib.Buffer.lbuffer uint8 (size (numbytes vt) *! size w) ->
+  -> b:lbuffer uint8 (size (numbytes vt) *! size w) ->
   Stack (vec_t vt w)
     (requires fun h -> live h b)
     (ensures  fun h0 r h1 -> h1 == h0 /\ r == vec_from_bytes_le vt w (as_seq h0 b))
@@ -411,22 +440,17 @@ inline_for_extraction noextract
 val vec_load_be:
     vt:v_inttype
   -> w:width
-  -> b:Lib.Buffer.lbuffer uint8 (size (numbytes vt) *! size w) ->
+  -> b:lbuffer uint8 (size (numbytes vt) *! size w) ->
   Stack (vec_t vt w)
     (requires fun h -> live h b)
     (ensures  fun h0 r h1 -> h1 == h0 /\ r == vec_from_bytes_be vt w (as_seq h0 b))
 
-inline_for_extraction noextract
-val vec_to_bytes_le: #vt:v_inttype -> #w:width -> v:vec_t vt w -> b:lseq uint8 ((numbytes vt) * w){b == uints_to_bytes_le (vec_v v)}
-
-inline_for_extraction noextract
-val vec_to_bytes_be: #vt:v_inttype -> #w:width -> v:vec_t vt w -> b:lseq uint8 ((numbytes vt) * w){b == uints_to_bytes_be (vec_v v)}
 
 inline_for_extraction noextract
 val vec_store_le:
     #vt:v_inttype
   -> #w:width
-  -> b:Lib.Buffer.lbuffer uint8 (size (numbytes vt) *! size w)
+  -> b:lbuffer uint8 (size (numbytes vt) *! size w)
   -> v:vec_t vt w ->
   Stack unit
     (requires fun h -> live h b)
@@ -436,7 +460,7 @@ inline_for_extraction noextract
 val vec_store_be:
     #vt:v_inttype
   -> #w:width
-  -> b:Lib.Buffer.lbuffer uint8 (size (numbytes vt) *! size w)
+  -> b:lbuffer uint8 (size (numbytes vt) *! size w)
   -> v:vec_t vt w ->
   Stack unit
     (requires fun h -> live h b)

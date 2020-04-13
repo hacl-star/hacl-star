@@ -74,7 +74,7 @@ let vec_load4 #t x0 x1 x2 x3 =
 
 let vec_load8 #t x0 x1 x2 x3 x4 x5 x6 x7 =
   match t with
-  | U32 -> vec256_load32s x0 x1 x2 x3 x4 x5 x6 x7 
+  | U32 -> vec256_load32s x0 x1 x2 x3 x4 x5 x6 x7
 
 let vec_load16 #a x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 = admit()
 let vec_load32 #a x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15  = admit()
@@ -353,7 +353,7 @@ val vec_permute4_lemma: #t:v_inttype -> v1:vec_t t 4
   -> i1:vec_index 4 -> i2:vec_index 4 -> i3:vec_index 4 -> i4:vec_index 4 ->
   Lemma (ensures (vec_v (vec_permute4 v1 i1 i2 i3 i4) == create4 (vec_v v1).[v i1] (vec_v v1).[v i2] (vec_v v1).[v i3] (vec_v v1).[v i4]))
 	[SMTPat (vec_v (vec_permute4 v1 i1 i2 i3 i4))]
-	 
+
 inline_for_extraction noextract
 val vec_permute8: #t:v_inttype -> v1:vec_t t 8
   -> i1:vec_index 8 -> i2:vec_index 8 -> i3:vec_index 8 -> i4:vec_index 8
@@ -462,7 +462,15 @@ let vec_clmul_hi_hi x y =
   ni_clmul x y (u8 0x11)
 
 let vec_from_bytes_le t w b = admit()
+let vec_from_bytes_le_lemma t w b = admit()
 let vec_from_bytes_be t w b = admit()
+let vec_from_bytes_be_lemma t w b = admit()
+
+let vec_to_bytes_le #vt #w v = admit()
+let vec_to_bytes_le_lemma #vt #w v = admit()
+let vec_to_bytes_be #vt #w v = admit()
+let vec_to_bytes_be_lemma #vt #w v = admit()
+
 
 let vec_load_le t w b =
   match t,w with
@@ -481,8 +489,6 @@ let vec_load_be t w b =
   | U32,4 -> vec128_load32_be b
   | U64,2 -> vec128_load64_be b
 
-let vec_to_bytes_le #vt #w v = admit()
-let vec_to_bytes_be #vt #w v = admit()
 
 let vec_store_le #t #w b v =
   match t,w with
