@@ -1,6 +1,8 @@
 module Lib.ByteVector
 
-// the proofs are the same as in Lib.ByteSequence and Lib.Buffer
+// the proofs are the same as in Lib.ByteSequence and Lib.ByteBuffer
+
+#set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
 
 noextract
 val vecs_from_bytes_le_f:
@@ -112,6 +114,8 @@ let vecs_load_be #vt #w #len o i =
   let h1 = ST.get () in
   eq_intro (as_seq h1 o) (vecs_from_bytes_be vt w (v len) (as_seq h0 i))
 
+
+#set-options "--z3rlimit 100"
 
 let vecs_store_le #vt #w #len o i =
   let h0 = ST.get () in
