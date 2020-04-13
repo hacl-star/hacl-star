@@ -267,20 +267,31 @@ let emit (a:sha2_alg) (h:lseq uint8 (8 * word_length a)) : Tot (lseq uint8 (hash
   sub h 0 (hash_length a)
 
 
-let hash (#a:sha2_alg) (len:size_nat) (b:lseq uint8 len) =
-  let len' = mk_int #(len_int_type a) #PUB len in
-  let st = init a in
-  let blocks = len / block_length a in
-  let rem = len % block_length a in
-  let st = Lib.LoopCombinators.repeati blocks
-  (fun i st ->
-    let mb = sub b (i * block_length a) (block_length a) in
-    update a mb st) st in
-  let mb = sub b (len - rem) rem in
-  let st = update_last a len' rem mb st in
+let finish (a:sha2_alg) (st:words_state a) : Tot (lseq uint8 (hash_length a)) =
   let hseq = store_state a st in
   emit a hseq
 
+
+let update_block (a:sha2_alg) (len:size_nat) (b:lseq uint8 len)
+  (i:nat{i < len / block_length a}) (st:words_state a) : words_state a
+ =
+  let mb = sub b (i * block_length a) (block_length a) in
+  update a mb st
+
+
+let update_nblocks (a:sha2_alg) (len:size_nat) (b:lseq uint8 len) (st:words_state a) : words_state a =
+  let blocks = len / block_length a in
+  Lib.LoopCombinators.repeati blocks (update_block a len b) st
+
+
+let hash (#a:sha2_alg) (len:size_nat) (b:lseq uint8 len) =
+  let len' : len_t a = Lib.IntTypes.cast #U32 #PUB (len_int_type a) PUB (size len) in
+  let st = init a in
+  let st = update_nblocks a len b st in
+  let rem = len % block_length a in
+  let mb = sub b (len - rem) rem in
+  let st = update_last a len' rem mb st in
+  finish a st
 
 let sha224 (len:size_nat) (b:lseq uint8 len) =
   hash #SHA2_224 len b

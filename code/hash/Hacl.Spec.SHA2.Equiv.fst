@@ -506,6 +506,7 @@ val update_lemma_l:
     Spec.update a b.(|l|) (state_spec_v st).[l])
 
 let update_lemma_l #a #m b st l =
+  reveal_opaque (`%update) (update #a #m);
   let ws = load_ws b in
   load_ws_lemma_l b l;
 
@@ -514,6 +515,27 @@ let update_lemma_l #a #m b st l =
 
   let res = map2 (+|) st1 st in
   state_spec_v_map2_add #a #m st1 st l
+
+
+val load_last_lemma_l:
+    #a:sha2_alg
+  -> #m:m_spec
+  -> totlen_seq:lseq uint8 (len_length a)
+  -> fin:nat{fin == block_length a \/ fin == 2 * block_length a}
+  -> len:size_nat{len < block_length a}
+  -> b:multiseq (lanes a m) len
+  -> l:nat{l < lanes a m} ->
+  Lemma
+   (let (b0_v, b1_v) = load_last totlen_seq fin len b in
+    let (b0, b1) = Spec.load_last a totlen_seq fin len b.(|l|) in
+    b0_v.(|l|) == b0 /\ b1_v.(|l|) == b1)
+
+let load_last_lemma_l #a #m totlen_seq fin len b l =
+  reveal_opaque (`%load_last) (load_last #a #m);
+  match lanes a m with
+  | 1 -> ()
+  | 4 -> ()
+  | _ -> admit()
 
 
 val update_last_lemma_l:
@@ -527,7 +549,117 @@ val update_last_lemma_l:
   Lemma ((state_spec_v (update_last totlen len b st)).[l] ==
     Spec.update_last a totlen len b.(|l|) (state_spec_v st).[l])
 
-let update_last_lemma_l #a #m totlen len b st l = admit()
+let update_last_lemma_l #a #m totlen len b st0 l =
+  let blocks = padded_blocks a len in
+  let fin : size_nat = blocks * block_length a in
+  let total_len_bits = secret (shift_left #(len_int_type a) totlen 3ul) in
+  let totlen_seq = Lib.ByteSequence.uint_to_bytes_be #(len_int_type a) total_len_bits in
+  let (b0,b1) = load_last #a #m totlen_seq fin len b in
+  load_last_lemma_l #a #m totlen_seq fin len b l;
+  let st = update b0 st0 in
+  update_lemma_l b0 st0 l;
+  update_lemma_l b1 st l
+
+
+val store_state_lemma_l:
+    #a:sha2_alg
+  -> #m:m_spec
+  -> st:state_spec a m
+  -> l:nat{l < lanes a m} ->
+  Lemma
+    (sub (store_state st) (l * (8 * word_length a)) (8 * word_length a) ==
+     Spec.store_state a (state_spec_v st).[l])
+
+let store_state_lemma_l #a #m st l = admit()
+
+(*
+let store_state (a:sha2_alg) (hashw:words_state a) : Tot (lseq uint8 (8 * word_length a)) =
+  Lib.ByteSequence.uints_to_bytes_be #(word_t a) #SEC #8 hashw
+*)
+
+
+// val emit_lemma_l:
+//     #a:sha2_alg
+//   -> #m:m_spec
+//   -> hseq:lseq uint8 (lanes a m * 8 * word_length a)
+//   -> l:nat{l < lanes a m} ->
+//   Lemma ((emit hseq).(|l|) == Spec.emit a (sub hseq (l * (8 * word_length a)) (8 * word_length a)))
+
+// let emit_lemma_l #a #m hseq l = ()
+
+
+val finish_lemma_l:
+    #a:sha2_alg
+  -> #m:m_spec
+  -> st:state_spec a m
+  -> l:nat{l < lanes a m} ->
+  Lemma ((finish st).(|l|) == Spec.finish a (state_spec_v st).[l])
+
+let finish_lemma_l #a #m st l =
+  store_state_lemma_l #a #m st l
+
+
+val update_block_lemma_l:
+    #a:sha2_alg
+  -> #m:m_spec
+  -> len:size_nat
+  -> b:multiseq (lanes a m) len
+  -> i:nat{i < len / block_length a}
+  -> st:state_spec a m
+  -> l:nat{l < lanes a m} ->
+  Lemma
+   ((state_spec_v (update_block len b i st)).[l] ==
+    Spec.update_block a len b.(|l|) i (state_spec_v st).[l])
+
+let update_block_lemma_l #a #m len b i st l =
+  let mb = get_multiblock_spec len b i in
+  update_lemma_l mb st l
+
+
+val update_nblocks_loop_lemma:
+    #a:sha2_alg
+  -> #m:m_spec
+  -> len:size_nat
+  -> b:multiseq (lanes a m) len
+  -> st:state_spec a m
+  -> l:nat{l < lanes a m}
+  -> n:nat{n <= len / block_length a } ->
+  Lemma
+   ((state_spec_v (repeati n (update_block #a #m len b) st)).[l] ==
+    repeati n (Spec.update_block a len b.(|l|)) (state_spec_v st).[l])
+
+let rec update_nblocks_loop_lemma #a #m len b st l n =
+  let lp = repeati n (update_block #a #m len b) st in
+  let f_sc = Spec.update_block a len b.(|l|) in
+  let rp = repeati n f_sc (state_spec_v st).[l] in
+
+  if n = 0 then begin
+    eq_repeati0 n (update_block #a #m len b) st;
+    eq_repeati0 n f_sc (state_spec_v st).[l] end
+  else begin
+    let lp1 = repeati (n - 1) (update_block #a #m len b) st in
+    let rp1 = repeati (n - 1) f_sc (state_spec_v st).[l] in
+    update_nblocks_loop_lemma #a #m len b st l (n - 1);
+    assert ((state_spec_v lp1).[l] == rp1);
+    unfold_repeati n (update_block #a #m len b) st (n - 1);
+    unfold_repeati n f_sc (state_spec_v st).[l] (n - 1);
+    update_block_lemma_l #a #m len b (n - 1) lp1 l end
+
+
+val update_nblocks_lemma_l:
+    #a:sha2_alg
+  -> #m:m_spec
+  -> len:size_nat
+  -> b:multiseq (lanes a m) len
+  -> st:state_spec a m
+  -> l:nat{l < lanes a m} ->
+  Lemma
+   ((state_spec_v (update_nblocks len b st)).[l] ==
+    Spec.update_nblocks a len b.(|l|) (state_spec_v st).[l])
+
+let update_nblocks_lemma_l #a #m len b st l =
+  let blocks = len / block_length a in
+  update_nblocks_loop_lemma #a #m len b st l blocks
 
 
 val hash_lemma_l:
@@ -538,4 +670,26 @@ val hash_lemma_l:
   -> l:nat{l < lanes a m} ->
   Lemma ((hash #a #m len b).(|l|) == Spec.hash len b.(|l|))
 
-let hash_lemma_l #a #m len b l = admit()
+let hash_lemma_l #a #m len b l =
+  let len' : len_t a = Lib.IntTypes.cast #U32 #PUB (len_int_type a) PUB (size len) in
+  let st0 = init a m in
+  init_lemma_l a m l;
+  let st1 = update_nblocks #a #m len b st0 in
+  update_nblocks_lemma_l #a #m len b st0 l;
+  let rem = len % block_length a in
+  let mb = get_multilast_spec #a #m len b in
+  let st = update_last len' rem mb st1 in
+  update_last_lemma_l len' rem mb st1 l;
+  finish_lemma_l st l
+
+
+val hash_lemma:
+    #a:sha2_alg
+  -> #m:m_spec
+  -> len:size_nat
+  -> b:multiseq (lanes a m) len ->
+  Lemma (forall (l:nat{l < lanes a m}).
+    (hash #a #m len b).(|l|) == Spec.hash len b.(|l|))
+
+let hash_lemma #a #m len b =
+  Classical.forall_intro (hash_lemma_l #a #m len b)
