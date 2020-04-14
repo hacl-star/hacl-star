@@ -48,7 +48,7 @@ bool print_result(uint8_t* comp, uint8_t* exp) {
     printf("%02x",exp[i]);
   printf("\n");
   bool ok = true;
-  for (int i = 0; i < 16; i++)
+  for (int i = 0; i < 114; i++)
     ok = ok & (exp[i] == comp[i]);
   if (ok) printf("Success!\n");
   else printf("**FAILED**\n");

@@ -5,6 +5,7 @@ open Lib.IntTypes
 open Lib.NTuple
 open Lib.Sequence
 open Lib.IntVector
+open Lib.IntVector.Serialize
 open Lib.LoopCombinators
 
 open Hacl.Spec.SHA2.Vec
@@ -126,6 +127,7 @@ let shuffle_core_spec_lemma_l #a #m k_t ws_t st l =
   shuffle_core_pre_create8_lemma a k_t (vec_v ws_t).[l] (state_spec_v st).[l]
 
 
+#push-options "--z3rlimit 100"
 val ws_next_inner_lemma_l:
     #a:sha2_alg
   -> #m:m_spec
@@ -138,7 +140,7 @@ let ws_next_inner_lemma_l #a #m i ws l =
   eq_intro #(word a) #16
     (ws_spec_v (ws_next_inner i ws)).[l]
     (Spec.ws_next_inner a i (ws_spec_v ws).[l])
-
+#pop-options
 
 val ws_next_lemma_loop:
     #a:sha2_alg

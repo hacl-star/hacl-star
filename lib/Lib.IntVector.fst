@@ -18,6 +18,8 @@ let vec_t t w =
   | U8,32 -> vec256
   | U32,8 -> vec256
   | U64,4 -> vec256
+  | U32,16 -> vec512
+  | U64,8 -> vec512
   | _,_ -> admit()
 
 let vec_v #t #w x = admit()
@@ -35,6 +37,8 @@ let vec_zero (t:v_inttype) (w:width) =
   | U32,8
   | U64,4
   | U128,2 -> vec256_zero
+  | U32,16 -> vec512_zero
+  | U64,8 -> vec512_zero
 
 let vec_counter (t:v_inttype) (w:width) =
   match t,w with
@@ -45,6 +49,8 @@ let vec_counter (t:v_inttype) (w:width) =
   | U32,8 -> vec256_load32s (u32 0) (u32 1) (u32 2) (u32 3) (u32 4) (u32 5) (u32 6) (u32 7)
   | U64,4 -> vec256_load64s (u64 0) (u64 1) (u64 2) (u64 3)
   | U128,2 -> vec256_load128s (u128 0) (u128 1)
+  | U32,16 -> vec512_load32s (u32 0) (u32 1) (u32 2) (u32 3) (u32 4) (u32 5) (u32 6) (u32 7) (u32 8) (u32 9) (u32 10) (u32 11) (u32 12) (u32 13) (u32 14) (u32 15)
+  | U64,8 -> vec512_load64s (u64 0) (u64 1) (u64 2) (u64 3) (u64 4) (u64 5) (u64 6) (u64 7)
 
 let create2 #a x0 x1 = admit()
 let create4 #a x0 x1 x2 x3 = admit()
@@ -61,6 +67,8 @@ let vec_load (#t:v_inttype) (x:uint_t t SEC) (w:width) =
   | U32,8 -> vec256_load32 x
   | U64,4 -> vec256_load64 x
   | U128,2 -> vec256_load128 x
+  | U32,16 -> vec512_load32 x
+  | U64,8 -> vec512_load64 x
 
 let vec_load2 #t x0 x1 =
   match t with
@@ -90,6 +98,8 @@ let vec_set (#t:v_inttype) (#w:width) (v:vec_t t w) (i:vec_index w) (x:uint_t t 
   | U8,32 -> vec256_insert8 v x i
   | U32,8 -> vec256_insert32 v x i
   | U64,4 -> vec256_insert64 v x i
+  | U32,16 -> vec512_insert32 v x i
+  | U64,8 -> vec512_insert64 v x i
 
 let vec_get (#t:v_inttype) (#w:width) (v:vec_t t w) (i:vec_index w) =
   match t,w with
@@ -100,6 +110,8 @@ let vec_get (#t:v_inttype) (#w:width) (v:vec_t t w) (i:vec_index w) =
   | U8,32 -> vec256_extract8 v i
   | U32,8 -> vec256_extract32 v i
   | U64,4 -> vec256_extract64 v i
+  | U32,16 -> vec512_extract32 v i
+  | U64,8 -> vec512_extract64 v i
 
 let vec_add_mod (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
   match t,w with
@@ -109,6 +121,8 @@ let vec_add_mod (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
   | U32,8 -> vec256_add32 x y
   | U64,4 -> vec256_add64 x y
   | U128,2 -> admit()
+  | U32,16 -> vec512_add32 x y
+  | U64,8 -> vec512_add64 x y
 
 let vec_add_mod_lemma (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) = ()
 
@@ -120,7 +134,8 @@ let vec_sub_mod (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
   | U32,8 -> vec256_sub32 x y
   | U64,4 -> vec256_sub64 x y
   | U128,2 -> admit()
-
+  | U32,16 -> vec512_sub32 x y
+  | U64,8 ->  vec512_sub64 x y
 
 let vec_mul_mod (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
   match t,w with
@@ -130,7 +145,8 @@ let vec_mul_mod (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
   | U32,8 -> vec256_mul32 x y
   | U64,4 -> vec256_mul64 x y
   | U128,2 -> admit()
-
+  | U32,16 -> vec512_mul32 x y
+  | U64,8 -> vec512_mul64 x y
 
 let vec_smul_mod (#t:v_inttype) (#w:width) (x:vec_t t w) (y:uint_t t SEC) =
   match t,w with
@@ -140,6 +156,8 @@ let vec_smul_mod (#t:v_inttype) (#w:width) (x:vec_t t w) (y:uint_t t SEC) =
   | U32,8 -> vec256_smul32 x y
   | U64,4 -> vec256_smul64 x y
   | U128,2 -> admit()
+  | U32,16 -> vec512_smul32 x y
+  | U64,8 -> vec512_smul64 x y
 
 let vec_xor (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
   match t,w with
@@ -152,6 +170,8 @@ let vec_xor (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
   | U32,8 -> vec256_xor x y
   | U64,4 -> vec256_xor x y
   | U128,2 -> admit()
+  | U32,16 -> vec512_xor x y
+  | U64,8 -> vec512_xor x y
 
 let vec_xor_lemma (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) = ()
 
@@ -166,6 +186,8 @@ let vec_and (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
   | U32,8 -> vec256_and x y
   | U64,4 -> vec256_and x y
   | U128,2 -> admit()
+  | U32,16 -> vec512_and x y
+  | U64,8 -> vec512_and x y
 
 let vec_and_lemma (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) = ()
 
@@ -180,6 +202,8 @@ let vec_or (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
   | U32,8 -> vec256_or x y
   | U64,4 -> vec256_or x y
   | U128,2 -> admit()
+  | U32,16 -> vec512_or x y
+  | U64,8 -> vec512_or x y
 
 let vec_not (#t:v_inttype) (#w:width) (x:vec_t t w) =
   match t,w with
@@ -192,6 +216,8 @@ let vec_not (#t:v_inttype) (#w:width) (x:vec_t t w) =
   | U32,8 -> vec256_lognot x
   | U64,4 -> vec256_lognot x
   | U128,2 -> admit()
+  | U32,16 -> vec512_lognot x
+  | U64,8 -> vec512_lognot x
 
 let vec_not_lemma (#t:v_inttype) (#w:width) (x:vec_t t w) = ()
 
@@ -204,6 +230,8 @@ let vec_shift_right (#t:v_inttype) (#w:width) (x:vec_t t w) (y:shiftval t) =
   | U32,8 -> vec256_shift_right32 x y
   | U64,4 -> vec256_shift_right64 x y
   | U128,2 -> vec256_shift_right x y
+  | U32,16 -> vec512_shift_right32 x y
+  | U64,8 -> vec512_shift_right64 x y
 
 let vec_shift_left (#t:v_inttype) (#w:width) (x:vec_t t w) (y:shiftval t) =
   match t,w with
@@ -214,6 +242,8 @@ let vec_shift_left (#t:v_inttype) (#w:width) (x:vec_t t w) (y:shiftval t) =
   | U32,8 -> vec256_shift_left32 x y
   | U64,4 -> vec256_shift_left64 x y
   | U128,2 -> vec256_shift_left x y
+  | U32,16 -> vec512_shift_left32 x y
+  | U64,8 -> vec512_shift_left64 x y
 
 let vec_rotate_right (#t:v_inttype) (#w:width) (x:vec_t t w) (y:rotval t) =
   match t,w with
@@ -228,6 +258,7 @@ let vec_rotate_left (#t:v_inttype) (#w:width) (x:vec_t t w) (y:rotval t) =
   match t,w with
   | U32,4 -> vec128_rotate_left32 x y
   | U32,8 -> vec256_rotate_left32 x y
+  | U32,16 -> vec512_rotate_left32 x y
   | _,_ ->  vec_or (vec_shift_left x y) (vec_shift_right x (size (bits t) -. y))
 
 
@@ -240,6 +271,7 @@ let vec_eq_mask (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
   | U32,8 -> vec256_eq32 x y
   | U64,4 -> vec256_eq64 x y
   | U128,2 -> admit()
+  | U64,8 -> vec512_eq64 x y
 
 let vec_neq_mask (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
   vec_not (vec_eq_mask #t #w x y)
@@ -253,6 +285,7 @@ let vec_lt_mask (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
   | U32,8 -> vec256_gt32 y x
   | U64,4 -> vec256_gt64 y x
   | U128,2 -> admit()
+  | U64,8 -> vec512_gt64 y x
 
 let vec_gt_mask (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
   vec_lt_mask #t #w y x
@@ -265,67 +298,100 @@ let vec_gte_mask (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
 
 let cast #t #w t' w' v = v
 
-let vec_interleave_low (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
+inline_for_extraction noextract
+let vec_interleave_low_ (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
   match t,w with
   | _,1 -> x
   | U32,4 -> vec128_interleave_low32 x y
   | U64,2 -> vec128_interleave_low64 x y
   | U32,8 -> vec256_interleave_low32 x y
+  | U32,16 -> vec512_interleave_low32 x y
   | U64,4 -> vec256_interleave_low64 x y
   | U128,2 -> vec256_interleave_low128 x y
+  | U64,8 -> vec512_interleave_low64 x y
 
 let vec_interleave_low_n (#t:v_inttype) (#w:width) (n:width) (x:vec_t t w) (y:vec_t t w) =
   match t,w,n with
   | _,1,_ -> x
+  | _,_,1 -> vec_interleave_low_ x y
   | U32,4,2 -> vec128_interleave_low64 x y
-  //cast U32 4 (vec_interleave_low (cast U64 2 x) (cast U64 2 y))
-  | U32,8,4 -> vec256_interleave_low64 x y
-  //cast U32 8 (vec_interleave_low (cast U64 4 x) (cast U64 4 y))
-  | U32,8,2 -> vec256_interleave_low128 x y
-  //cast U32 8 (vec_interleave_low (cast U128 2 x) (cast U128 2 y))
+  | U32,8,2 -> vec256_interleave_low64 x y
+  | U32,8,4 -> vec256_interleave_low128 x y
+  | U32,16,2 -> vec512_interleave_low64 x y
+  | U32,16,4 -> vec512_interleave_low128 x y
+  | U32,16,8 -> vec512_interleave_low256 x y
   | U64,4,2 -> vec256_interleave_low128 x y
-  //cast U64 4 (vec_interleave_low (cast U128 2 x) (cast U128 2 y))
+  | U64,8,4 -> vec512_interleave_low256 x y
+  | U64,8,2 -> vec512_interleave_low128 x y
   | _ -> admit()
 
+let vec_interleave_low_lemma1 #t #w v1 v2 = ()
 let vec_interleave_low_lemma2 #t v1 v2 = admit()
 let vec_interleave_low_lemma_uint32_4 v1 v2 = admit()
-let vec_interleave_low_lemma_uint32_8 v1 v2 = admit()
-let vec_interleave_low_lemma_uint64_4 v1 v2 = admit()
 let vec_interleave_low_n_lemma_uint32_4_2 v1 v2 = admit()
+
+let vec_interleave_low_lemma_uint32_8 v1 v2 = admit()
 let vec_interleave_low_n_lemma_uint32_8_2 v1 v2 = admit()
 let vec_interleave_low_n_lemma_uint32_8_4 v1 v2 = admit()
-let vec_interleave_low_n_lemma_uint64_4_2 v1 v2 = admit()
 
-let vec_interleave_high (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
+let vec_interleave_low_lemma_uint32_16 v1 v2 = admit()
+let vec_interleave_low_n_lemma_uint32_16_2 v1 v2 = admit()
+let vec_interleave_low_n_lemma_uint32_16_4 v1 v2 = admit()
+let vec_interleave_low_n_lemma_uint32_16_8 v1 v2 = admit()
+
+let vec_interleave_low_lemma_uint64_4 v1 v2 = admit()
+let vec_interleave_low_n_lemma_uint64_4_2 v1 v2 = admit()
+let vec_interleave_low_lemma_uint64_8 v1 v2 = admit()
+let vec_interleave_low_n_lemma_uint64_8_2 v1 v2 = admit()
+let vec_interleave_low_n_lemma_uint64_8_4 v1 v2 = admit()
+
+inline_for_extraction noextract
+let vec_interleave_high_ (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
   match t,w with
   | _,1 -> x
   | U32,4 -> vec128_interleave_high32 x y
   | U64,2 -> vec128_interleave_high64 x y
   | U32,8 -> vec256_interleave_high32 x y
+  | U32,16 -> vec512_interleave_high32 x y
   | U64,4 -> vec256_interleave_high64 x y
   | U128,2 -> vec256_interleave_high128 x y
+  | U64,8 -> vec512_interleave_high64 x y
 
 let vec_interleave_high_n (#t:v_inttype) (#w:width) (n:width) (x:vec_t t w) (y:vec_t t w) =
   match t,w,n with
   | _,1,_ -> x
+  | _,_,1 -> vec_interleave_high_ x y
   | U32,4,2 -> vec128_interleave_high64 x y
-  //cast U32 4 (vec_interleave_high (cast U64 2 x) (cast U64 2 y))
-  | U32,8,4 -> vec256_interleave_high64 x y
-  //cast U32 8 (vec_interleave_high (cast U64 4 x) (cast U64 4 y))
-  | U32,8,2 -> vec256_interleave_high128 x y
-  //cast U32 8 (vec_interleave_high (cast U128 2 x) (cast U128 2 y))
+  | U32,8,2 -> vec256_interleave_high64 x y
+  | U32,8,4 -> vec256_interleave_high128 x y
+  | U32,16,2 -> vec512_interleave_high64 x y
+  | U32,16,4 -> vec512_interleave_high128 x y
+  | U32,16,8 -> vec512_interleave_high256 x y
   | U64,4,2 -> vec256_interleave_high128 x y
-  //cast U64 4 (vec_interleave_high (cast U128 2 x) (cast U128 2 y))
+  | U64,8,4 -> vec512_interleave_high256 x y
+  | U64,8,2 -> vec512_interleave_high128 x y
   | _ -> admit()
 
+let vec_interleave_high_lemma1 #t #w v1 v2 = ()
 let vec_interleave_high_lemma2 #t v1 v2 = admit()
 let vec_interleave_high_lemma_uint32_4 v1 v2 = admit()
-let vec_interleave_high_lemma_uint32_8 v1 v2 = admit()
-let vec_interleave_high_lemma_uint64_4 v1 v2 = admit()
 let vec_interleave_high_n_lemma_uint32_4_2 v1 v2 = admit()
+
+let vec_interleave_high_lemma_uint32_8 v1 v2 = admit()
 let vec_interleave_high_n_lemma_uint32_8_2 v1 v2 = admit()
 let vec_interleave_high_n_lemma_uint32_8_4 v1 v2 = admit()
+
+let vec_interleave_high_lemma_uint32_16 v1 v2 = admit()
+let vec_interleave_high_n_lemma_uint32_16_2 v1 v2 = admit()
+let vec_interleave_high_n_lemma_uint32_16_4 v1 v2 = admit()
+let vec_interleave_high_n_lemma_uint32_16_8 v1 v2 = admit()
+
+let vec_interleave_high_lemma_uint64_4 v1 v2 = admit()
 let vec_interleave_high_n_lemma_uint64_4_2 v1 v2 = admit()
+let vec_interleave_high_lemma_uint64_8 v1 v2 = admit()
+let vec_interleave_high_n_lemma_uint64_8_2 v1 v2 = admit()
+let vec_interleave_high_n_lemma_uint64_8_4 v1 v2 = admit()
+
 let vec_shift_right_uint128_small2 v1 s = admit()
 
 (* Generic Permutations: Possible on Intel, but not on ARM.
@@ -481,6 +547,8 @@ let vec_load_le t w b =
   | U32,8 -> vec256_load_le b
   | U64,4 -> vec256_load_le b
   | U128,2 -> vec256_load_le b
+  | U32,16 -> vec512_load_le b
+  | U64,8 -> vec512_load_le b
 
 let vec_load_be t w b =
   match t,w with
@@ -499,6 +567,8 @@ let vec_store_le #t #w b v =
   | U32,8 -> vec256_store_le b v
   | U64,4 -> vec256_store_le b v
   | U128,2 -> vec256_store_le b v
+  | U32,16 -> vec512_store_le b v
+  | U64,8 -> vec512_store_le b v
 
 let vec_store_be #t #w b v =
   match t,w with
