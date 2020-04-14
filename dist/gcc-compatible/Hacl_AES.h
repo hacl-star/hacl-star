@@ -43,15 +43,15 @@ typedef uint32_t Crypto_Symmetric_AES_idx_16;
 
 typedef uint8_t *Crypto_Symmetric_AES_sbox;
 
-void Crypto_Symmetric_AES_mk_sbox(uint8_t *sbox);
+void Crypto_Symmetric_AES_mk_sbox(uint8_t *sbox1);
 
-void Crypto_Symmetric_AES_mk_inv_sbox(uint8_t *sbox);
+void Crypto_Symmetric_AES_mk_inv_sbox(uint8_t *sbox1);
 
-void Crypto_Symmetric_AES_cipher(uint8_t *out, uint8_t *input, uint8_t *w, uint8_t *sbox);
+void Crypto_Symmetric_AES_cipher(uint8_t *out, uint8_t *input, uint8_t *w, uint8_t *sbox1);
 
-void Crypto_Symmetric_AES_keyExpansion(uint8_t *key, uint8_t *w, uint8_t *sbox);
+void Crypto_Symmetric_AES_keyExpansion(uint8_t *key, uint8_t *w, uint8_t *sbox1);
 
-void Crypto_Symmetric_AES_inv_cipher(uint8_t *out, uint8_t *input, uint8_t *w, uint8_t *sbox);
+void Crypto_Symmetric_AES_inv_cipher(uint8_t *out, uint8_t *input, uint8_t *w, uint8_t *sbox1);
 
 typedef uint8_t *Crypto_Symmetric_AES128_bytes;
 
@@ -67,16 +67,16 @@ typedef uint32_t Crypto_Symmetric_AES128_idx_16;
 
 typedef uint8_t *Crypto_Symmetric_AES128_sbox;
 
-void Crypto_Symmetric_AES128_mk_sbox(uint8_t *sbox);
+void Crypto_Symmetric_AES128_mk_sbox(uint8_t *sbox1);
 
-void Crypto_Symmetric_AES128_mk_inv_sbox(uint8_t *sbox);
+void Crypto_Symmetric_AES128_mk_inv_sbox(uint8_t *sbox1);
 
-void Crypto_Symmetric_AES128_cipher(uint8_t *out, uint8_t *input, uint8_t *w, uint8_t *sbox);
+void Crypto_Symmetric_AES128_cipher(uint8_t *out, uint8_t *input, uint8_t *w, uint8_t *sbox1);
 
-void Crypto_Symmetric_AES128_keyExpansion(uint8_t *key, uint8_t *w, uint8_t *sbox);
+void Crypto_Symmetric_AES128_keyExpansion(uint8_t *key, uint8_t *w, uint8_t *sbox1);
 
 void
-Crypto_Symmetric_AES128_inv_cipher(uint8_t *out, uint8_t *input, uint8_t *w, uint8_t *sbox);
+Crypto_Symmetric_AES128_inv_cipher(uint8_t *out, uint8_t *input, uint8_t *w, uint8_t *sbox1);
 
 #define __Hacl_AES_H_DEFINED
 #endif

@@ -98,12 +98,12 @@ blake2b_update_block(
             u64 u0 = load64_le(b00);
             u64 u00 = u0;
             u64 u1 = load64_le(b10);
-            u64 u11 = u1;
+            u64 u10 = u1;
             u64 u2 = load64_le(b20);
             u64 u20 = u2;
             u64 u3 = load64_le(b30);
             u64 u30 = u3;
-            r01[0U] = Lib_IntVector_Intrinsics_vec256_load64s(u00, u11, u20, u30);
+            r01[0U] = Lib_IntVector_Intrinsics_vec256_load64s(u00, u10, u20, u30);
             {
               u32 nb0 = (u32)8U;
               u8 *b01 = d + s1 * nb0;
@@ -113,12 +113,12 @@ blake2b_update_block(
               u64 u4 = load64_le(b01);
               u64 u01 = u4;
               u64 u5 = load64_le(b11);
-              u64 u110 = u5;
+              u64 u11 = u5;
               u64 u6 = load64_le(b21);
               u64 u21 = u6;
               u64 u7 = load64_le(b31);
               u64 u31 = u7;
-              r11[0U] = Lib_IntVector_Intrinsics_vec256_load64s(u01, u110, u21, u31);
+              r11[0U] = Lib_IntVector_Intrinsics_vec256_load64s(u01, u11, u21, u31);
               {
                 u32 nb1 = (u32)8U;
                 u8 *b02 = d + s8 * nb1;
@@ -128,27 +128,27 @@ blake2b_update_block(
                 u64 u8 = load64_le(b02);
                 u64 u02 = u8;
                 u64 u9 = load64_le(b12);
-                u64 u111 = u9;
-                u64 u10 = load64_le(b22);
-                u64 u22 = u10;
-                u64 u12 = load64_le(b32);
-                u64 u32 = u12;
-                r21[0U] = Lib_IntVector_Intrinsics_vec256_load64s(u02, u111, u22, u32);
+                u64 u12 = u9;
+                u64 u13 = load64_le(b22);
+                u64 u22 = u13;
+                u64 u14 = load64_le(b32);
+                u64 u32 = u14;
+                r21[0U] = Lib_IntVector_Intrinsics_vec256_load64s(u02, u12, u22, u32);
                 {
                   u32 nb2 = (u32)8U;
                   u8 *b0 = d + s9 * nb2;
                   u8 *b1 = d + s11 * nb2;
                   u8 *b2 = d + s13 * nb2;
                   u8 *b3 = d + s15 * nb2;
-                  u64 u13 = load64_le(b0);
-                  u64 u03 = u13;
-                  u64 u14 = load64_le(b1);
-                  u64 u112 = u14;
-                  u64 u15 = load64_le(b2);
-                  u64 u23 = u15;
+                  u64 u15 = load64_le(b0);
+                  u64 u03 = u15;
+                  u64 u16 = load64_le(b1);
+                  u64 u17 = u16;
+                  u64 u18 = load64_le(b2);
+                  u64 u23 = u18;
                   u64 u = load64_le(b3);
                   u64 u33 = u;
-                  r31[0U] = Lib_IntVector_Intrinsics_vec256_load64s(u03, u112, u23, u33);
+                  r31[0U] = Lib_IntVector_Intrinsics_vec256_load64s(u03, u17, u23, u33);
                   {
                     Lib_IntVector_Intrinsics_vec256 *x = m_st + (u32)0U * (u32)1U;
                     Lib_IntVector_Intrinsics_vec256 *y = m_st + (u32)1U * (u32)1U;
@@ -217,31 +217,22 @@ blake2b_update_block(
                                     Lib_IntVector_Intrinsics_vec256 v00 = r13[0U];
                                     Lib_IntVector_Intrinsics_vec256
                                     v1 =
-                                      Lib_IntVector_Intrinsics_vec256_shuffle64(v00,
-                                        (u32)1U,
-                                        ((u32)1U + (u32)1U) % (u32)4U,
-                                        ((u32)1U + (u32)2U) % (u32)4U,
-                                        ((u32)1U + (u32)3U) % (u32)4U);
+                                      Lib_IntVector_Intrinsics_vec256_rotate_right_lanes64(v00,
+                                        (u32)1U);
                                     r13[0U] = v1;
                                     {
                                       Lib_IntVector_Intrinsics_vec256 v01 = r23[0U];
                                       Lib_IntVector_Intrinsics_vec256
                                       v10 =
-                                        Lib_IntVector_Intrinsics_vec256_shuffle64(v01,
-                                          (u32)2U,
-                                          ((u32)2U + (u32)1U) % (u32)4U,
-                                          ((u32)2U + (u32)2U) % (u32)4U,
-                                          ((u32)2U + (u32)3U) % (u32)4U);
+                                        Lib_IntVector_Intrinsics_vec256_rotate_right_lanes64(v01,
+                                          (u32)2U);
                                       r23[0U] = v10;
                                       {
                                         Lib_IntVector_Intrinsics_vec256 v02 = r33[0U];
                                         Lib_IntVector_Intrinsics_vec256
                                         v11 =
-                                          Lib_IntVector_Intrinsics_vec256_shuffle64(v02,
-                                            (u32)3U,
-                                            ((u32)3U + (u32)1U) % (u32)4U,
-                                            ((u32)3U + (u32)2U) % (u32)4U,
-                                            ((u32)3U + (u32)3U) % (u32)4U);
+                                          Lib_IntVector_Intrinsics_vec256_rotate_right_lanes64(v02,
+                                            (u32)3U);
                                         r33[0U] = v11;
                                         {
                                           u32 a0 = (u32)0U;
@@ -350,33 +341,24 @@ blake2b_update_block(
                                                           v0 = r14[0U];
                                                           Lib_IntVector_Intrinsics_vec256
                                                           v12 =
-                                                            Lib_IntVector_Intrinsics_vec256_shuffle64(v0,
-                                                              (u32)3U,
-                                                              ((u32)3U + (u32)1U) % (u32)4U,
-                                                              ((u32)3U + (u32)2U) % (u32)4U,
-                                                              ((u32)3U + (u32)3U) % (u32)4U);
+                                                            Lib_IntVector_Intrinsics_vec256_rotate_right_lanes64(v0,
+                                                              (u32)3U);
                                                           r14[0U] = v12;
                                                           {
                                                             Lib_IntVector_Intrinsics_vec256
                                                             v03 = r2[0U];
                                                             Lib_IntVector_Intrinsics_vec256
                                                             v13 =
-                                                              Lib_IntVector_Intrinsics_vec256_shuffle64(v03,
-                                                                (u32)2U,
-                                                                ((u32)2U + (u32)1U) % (u32)4U,
-                                                                ((u32)2U + (u32)2U) % (u32)4U,
-                                                                ((u32)2U + (u32)3U) % (u32)4U);
+                                                              Lib_IntVector_Intrinsics_vec256_rotate_right_lanes64(v03,
+                                                                (u32)2U);
                                                             r2[0U] = v13;
                                                             {
                                                               Lib_IntVector_Intrinsics_vec256
                                                               v04 = r3[0U];
                                                               Lib_IntVector_Intrinsics_vec256
                                                               v14 =
-                                                                Lib_IntVector_Intrinsics_vec256_shuffle64(v04,
-                                                                  (u32)1U,
-                                                                  ((u32)1U + (u32)1U) % (u32)4U,
-                                                                  ((u32)1U + (u32)2U) % (u32)4U,
-                                                                  ((u32)1U + (u32)3U) % (u32)4U);
+                                                                Lib_IntVector_Intrinsics_vec256_rotate_right_lanes64(v04,
+                                                                  (u32)1U);
                                                               r3[0U] = v14;
                                                             }
                                                           }
@@ -463,10 +445,10 @@ void Hacl_Blake2b_256_blake2b(u32 nn, u8 *output, u32 ll, u8 *d, u32 kk, u8 *k)
           u64 kk_shift_8;
           u64 iv0_;
           u32 nb0;
-          u32 rem10;
+          u32 rem0;
           K___u32_u32 scrut;
           u32 nb;
-          u32 rem1;
+          u32 rem;
           r2[0U] = Lib_IntVector_Intrinsics_vec256_load64s(iv0, iv1, iv2, iv3);
           r3[0U] = Lib_IntVector_Intrinsics_vec256_load64s(iv4, iv5, iv6, iv7);
           kk_shift_8 = (u64)kk << (u32)8U;
@@ -484,17 +466,17 @@ void Hacl_Blake2b_256_blake2b(u32 nn, u8 *output, u32 ll, u8 *d, u32 kk, u8 *k)
           }
           memset(b20, 0U, (u32)128U * sizeof (b20[0U]));
           nb0 = ll / (u32)128U;
-          rem10 = ll % (u32)128U;
-          if (rem10 == (u32)0U && nb0 > (u32)0U)
+          rem0 = ll % (u32)128U;
+          if (rem0 == (u32)0U && nb0 > (u32)0U)
           {
             u32 nb_ = nb0 - (u32)1U;
             u32 rem_ = (u32)128U;
             scrut = ((K___u32_u32){ .fst = nb_, .snd = rem_ });
           }
           else
-            scrut = ((K___u32_u32){ .fst = nb0, .snd = rem10 });
+            scrut = ((K___u32_u32){ .fst = nb0, .snd = rem0 });
           nb = scrut.fst;
-          rem1 = scrut.snd;
+          rem = scrut.snd;
           {
             u32 i;
             for (i = (u32)0U; i < nb; i++)
@@ -506,10 +488,10 @@ void Hacl_Blake2b_256_blake2b(u32 nn, u8 *output, u32 ll, u8 *d, u32 kk, u8 *k)
           }
           {
             u8 b21[128U] = { 0U };
-            u8 *last1 = d + ll - rem1;
+            u8 *last = d + ll - rem;
             uint128_t totlen;
             u32 double_row;
-            memcpy(b21, last1, rem1 * sizeof (last1[0U]));
+            memcpy(b21, last, rem * sizeof (last[0U]));
             totlen = prev0 + (uint128_t)(u64)ll;
             blake2b_update_block(b1, b, true, totlen, b21);
             memset(b21, 0U, (u32)128U * sizeof (b21[0U]));

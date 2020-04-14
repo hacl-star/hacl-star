@@ -92,7 +92,7 @@ EverCrypt_OpenSSL_aes256_gcm_decrypt(
 
 typedef uint8_t EverCrypt_OpenSSL_alg;
 
-extern FStar_Dyn_dyn EverCrypt_OpenSSL_aead_create(EverCrypt_OpenSSL_alg alg, uint8_t *key);
+extern FStar_Dyn_dyn EverCrypt_OpenSSL_aead_create(EverCrypt_OpenSSL_alg alg1, uint8_t *key);
 
 extern void
 EverCrypt_OpenSSL_aead_encrypt(

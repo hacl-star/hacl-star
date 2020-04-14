@@ -33,13 +33,13 @@
 #include "Hacl_Kremlib.h"
 
 
-void Hacl_Salsa20_salsa20_encrypt(u32 len, u8 *out, u8 *text, u8 *key, u8 *n1, u32 ctr);
+void Hacl_Salsa20_salsa20_encrypt(u32 len, u8 *out, u8 *text, u8 *key, u8 *n, u32 ctr);
 
-void Hacl_Salsa20_salsa20_decrypt(u32 len, u8 *out, u8 *cipher, u8 *key, u8 *n1, u32 ctr);
+void Hacl_Salsa20_salsa20_decrypt(u32 len, u8 *out, u8 *cipher, u8 *key, u8 *n, u32 ctr);
 
-void Hacl_Salsa20_salsa20_key_block0(u8 *out, u8 *key, u8 *n1);
+void Hacl_Salsa20_salsa20_key_block0(u8 *out, u8 *key, u8 *n);
 
-void Hacl_Salsa20_hsalsa20(u8 *out, u8 *key, u8 *n1);
+void Hacl_Salsa20_hsalsa20(u8 *out, u8 *key, u8 *n);
 
 #define __Hacl_Salsa20_H_DEFINED
 #endif

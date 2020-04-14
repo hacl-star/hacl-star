@@ -73,73 +73,73 @@ EverCrypt_Hash_state_s;
 
 bool
 EverCrypt_Hash_uu___is_MD5_s(
-  Spec_Hash_Definitions_hash_alg uu____151,
+  Spec_Hash_Definitions_hash_alg uu____159,
   EverCrypt_Hash_state_s projectee
 );
 
 uint32_t
 *EverCrypt_Hash___proj__MD5_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____179,
+  Spec_Hash_Definitions_hash_alg uu____189,
   EverCrypt_Hash_state_s projectee
 );
 
 bool
 EverCrypt_Hash_uu___is_SHA1_s(
-  Spec_Hash_Definitions_hash_alg uu____202,
+  Spec_Hash_Definitions_hash_alg uu____213,
   EverCrypt_Hash_state_s projectee
 );
 
 uint32_t
 *EverCrypt_Hash___proj__SHA1_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____230,
+  Spec_Hash_Definitions_hash_alg uu____243,
   EverCrypt_Hash_state_s projectee
 );
 
 bool
 EverCrypt_Hash_uu___is_SHA2_224_s(
-  Spec_Hash_Definitions_hash_alg uu____253,
+  Spec_Hash_Definitions_hash_alg uu____267,
   EverCrypt_Hash_state_s projectee
 );
 
 uint32_t
 *EverCrypt_Hash___proj__SHA2_224_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____281,
+  Spec_Hash_Definitions_hash_alg uu____297,
   EverCrypt_Hash_state_s projectee
 );
 
 bool
 EverCrypt_Hash_uu___is_SHA2_256_s(
-  Spec_Hash_Definitions_hash_alg uu____304,
+  Spec_Hash_Definitions_hash_alg uu____321,
   EverCrypt_Hash_state_s projectee
 );
 
 uint32_t
 *EverCrypt_Hash___proj__SHA2_256_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____332,
+  Spec_Hash_Definitions_hash_alg uu____351,
   EverCrypt_Hash_state_s projectee
 );
 
 bool
 EverCrypt_Hash_uu___is_SHA2_384_s(
-  Spec_Hash_Definitions_hash_alg uu____355,
+  Spec_Hash_Definitions_hash_alg uu____375,
   EverCrypt_Hash_state_s projectee
 );
 
 uint64_t
 *EverCrypt_Hash___proj__SHA2_384_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____383,
+  Spec_Hash_Definitions_hash_alg uu____405,
   EverCrypt_Hash_state_s projectee
 );
 
 bool
 EverCrypt_Hash_uu___is_SHA2_512_s(
-  Spec_Hash_Definitions_hash_alg uu____406,
+  Spec_Hash_Definitions_hash_alg uu____429,
   EverCrypt_Hash_state_s projectee
 );
 
 uint64_t
 *EverCrypt_Hash___proj__SHA2_512_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____434,
+  Spec_Hash_Definitions_hash_alg uu____459,
   EverCrypt_Hash_state_s projectee
 );
 
@@ -151,9 +151,9 @@ EverCrypt_Hash_state_s *EverCrypt_Hash_create(Spec_Hash_Definitions_hash_alg a);
 
 void EverCrypt_Hash_init(EverCrypt_Hash_state_s *s);
 
-void EverCrypt_Hash_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n1);
+void EverCrypt_Hash_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n);
 
-void EverCrypt_Hash_update(EverCrypt_Hash_state_s *s, uint8_t *block1);
+void EverCrypt_Hash_update(EverCrypt_Hash_state_s *s, uint8_t *block);
 
 void EverCrypt_Hash_update_multi(EverCrypt_Hash_state_s *s, uint8_t *blocks, uint32_t len);
 
@@ -165,7 +165,7 @@ EverCrypt_Hash_update_last_256(
   uint32_t input_len
 );
 
-void EverCrypt_Hash_update_last(EverCrypt_Hash_state_s *s, uint8_t *last1, uint64_t total_len);
+void EverCrypt_Hash_update_last(EverCrypt_Hash_state_s *s, uint8_t *last, uint64_t total_len);
 
 void EverCrypt_Hash_finish(EverCrypt_Hash_state_s *s, uint8_t *dst);
 
@@ -223,7 +223,7 @@ void EverCrypt_Hash_Incremental_init(EverCrypt_Hash_Incremental_state_s *s);
 
 void
 EverCrypt_Hash_Incremental_update(
-  EverCrypt_Hash_Incremental_state_s *p1,
+  EverCrypt_Hash_Incremental_state_s *p,
   uint8_t *data,
   uint32_t len
 );
