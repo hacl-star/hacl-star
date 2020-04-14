@@ -64,6 +64,7 @@ let transpose8x8 #t vs =
   | _ -> admit()
 
 
+inline_for_extraction noextract
 val transpose16x16_uint32_lseq: #t:v_inttype{t == U32} -> vs:lseq (vec_t t 16) 16 -> lseq (vec_t t 16) 16
 let transpose16x16_uint32_lseq #t vs =
   let (v0,v1,v2,v3,v4,v5,v6,v7) = (vs.[0],vs.[1],vs.[2],vs.[3],vs.[4],vs.[5],vs.[6],vs.[7]) in
