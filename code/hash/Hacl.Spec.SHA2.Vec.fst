@@ -11,6 +11,8 @@ open Spec.Hash.Definitions
 module Constants = Spec.SHA2.Constants
 module Spec = Hacl.Spec.SHA2
 module LSeq = Lib.Sequence
+module VecTranspose = Lib.IntVector.Transpose
+
 
 #set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
@@ -199,26 +201,12 @@ let load_blocks (#a:sha2_alg) (#m:m_spec) (b:multiblock_spec a m) : ws_spec a m 
 noextract
 let transpose_ws1 (#a:sha2_alg) (#m:m_spec{lanes a m == 1}) (ws:ws_spec a m) : ws_spec a m = ws
 
-inline_for_extraction
-let transpose4x4 #vt (vs : (vec_t vt 4 & vec_t vt 4 & vec_t vt 4 & vec_t vt 4)) :
-                       (vec_t vt 4 & vec_t vt 4 & vec_t vt 4 & vec_t vt 4) =
-    let (v0,v1,v2,v3) = vs in
-    let v0' = vec_interleave_low v0 v1 in
-    let v1' = vec_interleave_high v0 v1 in
-    let v2' = vec_interleave_low v2 v3 in
-    let v3' = vec_interleave_high v2 v3 in
-    let v0'' = vec_interleave_low_n 2 v0' v2' in
-    let v1'' = vec_interleave_high_n 2 v0' v2' in
-    let v2'' = vec_interleave_low_n 2 v1' v3' in
-    let v3'' = vec_interleave_high_n 2 v1' v3' in
-    (v0'',v1'',v2'',v3'')
-
 noextract
 let transpose_ws4 (#a:sha2_alg) (#m:m_spec{lanes a m == 4}) (ws:ws_spec a m) : ws_spec a m =
-    let (ws0,ws1,ws2,ws3) = transpose4x4 (ws.[0], ws.[1], ws.[2], ws.[3]) in
-    let (ws4,ws5,ws6,ws7) = transpose4x4 (ws.[4], ws.[5], ws.[6], ws.[7]) in
-    let (ws8,ws9,ws10,ws11) = transpose4x4 (ws.[8], ws.[9], ws.[10], ws.[11]) in
-    let (ws12,ws13,ws14,ws15) = transpose4x4 (ws.[12], ws.[13], ws.[14], ws.[15]) in
+    let (ws0,ws1,ws2,ws3) = VecTranspose.transpose4x4 (ws.[0], ws.[1], ws.[2], ws.[3]) in
+    let (ws4,ws5,ws6,ws7) = VecTranspose.transpose4x4 (ws.[4], ws.[5], ws.[6], ws.[7]) in
+    let (ws8,ws9,ws10,ws11) = VecTranspose.transpose4x4 (ws.[8], ws.[9], ws.[10], ws.[11]) in
+    let (ws12,ws13,ws14,ws15) = VecTranspose.transpose4x4 (ws.[12], ws.[13], ws.[14], ws.[15]) in
     create16 ws0 ws1 ws2 ws3 ws4 ws5 ws6 ws7 ws8 ws9 ws10 ws11 ws12 ws13 ws14 ws15
 
 noextract
@@ -371,8 +359,8 @@ let transpose_state4 (#a:sha2_alg) (#m:m_spec{lanes a m == 4})
     let st5 = st.[5] in
     let st6 = st.[6] in
     let st7 = st.[7] in
-    let (st0,st1,st2,st3) = transpose4x4 (st0,st1,st2,st3) in
-    let (st4,st5,st6,st7) = transpose4x4 (st4,st5,st6,st7) in
+    let (st0,st1,st2,st3) = VecTranspose.transpose4x4 (st0,st1,st2,st3) in
+    let (st4,st5,st6,st7) = VecTranspose.transpose4x4 (st4,st5,st6,st7) in
     create8 st0 st4 st1 st5 st2 st6 st3 st7
 
 noextract

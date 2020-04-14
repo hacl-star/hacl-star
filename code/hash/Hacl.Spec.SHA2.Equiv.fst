@@ -9,10 +9,10 @@ open Lib.LoopCombinators
 
 open Hacl.Spec.SHA2.Vec
 open Spec.Hash.Definitions
-module Constants = Spec.SHA2.Constants
 module Spec = Hacl.Spec.SHA2
 module LSeq = Lib.Sequence
 module BSeq = Lib.ByteSequence
+module VecTranspose = Lib.IntVector.Transpose
 
 
 #set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
@@ -339,19 +339,7 @@ let load_blocks_lemma_ij #a #m b j i =
     BSeq.uint_from_bytes_be (sub b.(|idx_i|) ((idx_j * l + j) * blocksize) blocksize))
 
 
-noextract
-let transpose4x4_lseq (#t:v_inttype) (vs:lseq (vec_t t 4) 4) : lseq (vec_t t 4) 4 =
-  let (v0,v1,v2,v3) = (vs.[0],vs.[1],vs.[2],vs.[3]) in
-  let (v0'',v1'',v2'',v3'') = transpose4x4 (v0,v1,v2,v3) in
-  create4 v0'' v1'' v2'' v3''
-
-// this lemma is proven in code/chacha20/Hacl.Spec.Chacha20.Lemmas for t = U32
-val transpose4x4_lemma: #t:v_inttype -> vs:lseq (vec_t t 4) 4 ->
-  Lemma ((forall (i:nat{i < 4}) (j:nat{j < 4}).
-    (vec_v (transpose4x4_lseq vs).[i]).[j] == (vec_v vs.[j]).[i]))
-let transpose4x4_lemma #t vs = admit()
-
-
+#push-options "--max_ifuel 1"
 val transpose_ws4_lemma:
     #a:sha2_alg
   -> #m:m_spec{lanes a m == 4}
@@ -359,12 +347,13 @@ val transpose_ws4_lemma:
   -> i:nat{i < 4} ->
   Lemma
    (sub (transpose_ws4 ws) (i * lanes a m) (lanes a m) ==
-    transpose4x4_lseq (sub ws (i * lanes a m) (lanes a m)))
+    VecTranspose.transpose4x4_lseq (sub ws (i * lanes a m) (lanes a m)))
 
 let transpose_ws4_lemma #a #m ws i =
   eq_intro
     (sub (transpose_ws4 ws) (i * lanes a m) (lanes a m))
-     (transpose4x4_lseq (sub ws (i * lanes a m) (lanes a m)))
+     (VecTranspose.transpose4x4_lseq (sub ws (i * lanes a m) (lanes a m)))
+#pop-options
 
 
 val transpose_ws4_lemma_ij:
@@ -387,8 +376,8 @@ let transpose_ws4_lemma_ij #a #m ws j i =
   transpose_ws4_lemma #a #m ws i_sub;
   //assert ((transpose_ws4 ws).[i] == (sub (transpose_ws4 ws) (i_sub * l) l).[j_sub]);
   //assert ((transpose_ws4 ws).[i] == (transpose4x4_lseq vs).[j_sub]);
-  assert ((vec_v (transpose_ws4 ws).[i]).[j] == (vec_v (transpose4x4_lseq vs).[j_sub]).[j]);
-  transpose4x4_lemma vs;
+  assert ((vec_v (transpose_ws4 ws).[i]).[j] == (vec_v (VecTranspose.transpose4x4_lseq vs).[j_sub]).[j]);
+  VecTranspose.transpose4x4_lemma vs;
   //assert ((vec_v (transpose_ws4 ws).[i]).[j] == (vec_v vs.[j]).[j_sub]);
   assert ((vec_v (transpose_ws4 ws).[i]).[j] == (vec_v ws.[i_sub * lanes a m + j]).[j_sub])
 

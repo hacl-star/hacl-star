@@ -11,6 +11,8 @@ open Lib.ByteBuffer
 open Lib.IntVector
 
 module Spec = Hacl.Spec.Chacha20.Vec
+module VecTranspose = Lib.IntVector.Transpose
+
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
@@ -83,10 +85,10 @@ val transpose4: st:state 4 ->
       as_seq h1 st == Spec.transpose4 (as_seq h0 st)))
 let transpose4 st =
   let h0 = ST.get() in
-  let (v0,v1,v2,v3) = Spec.transpose4x4 (st.(0ul),st.(1ul),st.(2ul),st.(3ul)) in
-  let (v4,v5,v6,v7) = Spec.transpose4x4 (st.(4ul),st.(5ul),st.(6ul),st.(7ul)) in
-  let (v8,v9,v10,v11) = Spec.transpose4x4 (st.(8ul),st.(9ul),st.(10ul),st.(11ul)) in
-  let (v12,v13,v14,v15) = Spec.transpose4x4 (st.(12ul),st.(13ul),st.(14ul),st.(15ul)) in
+  let (v0,v1,v2,v3) = VecTranspose.transpose4x4 (st.(0ul),st.(1ul),st.(2ul),st.(3ul)) in
+  let (v4,v5,v6,v7) = VecTranspose.transpose4x4 (st.(4ul),st.(5ul),st.(6ul),st.(7ul)) in
+  let (v8,v9,v10,v11) = VecTranspose.transpose4x4 (st.(8ul),st.(9ul),st.(10ul),st.(11ul)) in
+  let (v12,v13,v14,v15) = VecTranspose.transpose4x4 (st.(12ul),st.(13ul),st.(14ul),st.(15ul)) in
   st.(0ul) <- v0;
   st.(1ul) <- v4;
   st.(2ul) <- v8;
@@ -117,8 +119,8 @@ val transpose8: st:state 8 ->
       as_seq h1 st == Spec.transpose8 (as_seq h0 st)))
 let transpose8 st =
   let h0 = ST.get() in
-  let (v0,v1,v2,v3,v4,v5,v6,v7) = Spec.transpose8x8 (st.(0ul),st.(1ul),st.(2ul),st.(3ul),st.(4ul),st.(5ul),st.(6ul),st.(7ul)) in
-  let (v8,v9,v10,v11,v12,v13,v14,v15) = Spec.transpose8x8 (st.(8ul),st.(9ul),st.(10ul),st.(11ul),st.(12ul),st.(13ul),st.(14ul),st.(15ul)) in
+  let (v0,v1,v2,v3,v4,v5,v6,v7) = VecTranspose.transpose8x8 (st.(0ul),st.(1ul),st.(2ul),st.(3ul),st.(4ul),st.(5ul),st.(6ul),st.(7ul)) in
+  let (v8,v9,v10,v11,v12,v13,v14,v15) = VecTranspose.transpose8x8 (st.(8ul),st.(9ul),st.(10ul),st.(11ul),st.(12ul),st.(13ul),st.(14ul),st.(15ul)) in
   let h1 = ST.get() in
   assert (modifies (loc st)  h0 h1);
   st.(0ul) <- v0;
