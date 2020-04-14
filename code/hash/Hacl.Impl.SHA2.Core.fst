@@ -737,29 +737,10 @@ val store_state: #a:sha2_alg -> #m:m_spec->
     (ensures (fun h0 _ h1 -> modifies (loc st |+| loc hbuf) h0 h1 /\
                            as_seq h1 hbuf ==
                            SpecVec.store_state #a #m (as_seq h0 st)))
-#push-options "--z3rlimit 100"
 let store_state #a #m st hbuf =
   transpose_state st;
-  let h0 = ST.get() in
-  loop1 h0 8ul hbuf
-  (fun h -> SpecVec.store_state_inner #a #m (as_seq h0 st))
-  (fun i ->
-    Lib.LoopCombinators.unfold_repeati 8 (SpecVec.store_state_inner #a #m (as_seq h0 st))
-                                         (as_seq h0 hbuf) (v i);
-    let h1 = ST.get() in
-    let lwords = size (lanes a m) *. word_len a in
-    assert (v lwords = lanes a m * word_length a);
-    update_sub_f h1 hbuf (i *. lwords) lwords
-      (fun h -> vec_to_bytes_be (as_seq h0 st).[v i])
-      (fun _ -> vec_store_be (sub hbuf (i *. lwords) (lwords)) st.(i));
-    let h2 = ST.get() in
-    assert (as_seq h2 hbuf ==
-            Lib.Sequence.update_sub (as_seq h1 hbuf) (v i * v lwords) (v lwords)
-                                    (vec_to_bytes_be (as_seq h1 st).[v i]));
-    assert (as_seq h2 hbuf ==
-            SpecVec.store_state_inner #a #m (as_seq h1 st) (v i) (as_seq h1 hbuf))
-  )
-#pop-options
+  Lib.IntVector.Serialize.vecs_store_be hbuf st
+
 
 noextract
 let emit1_spec (#a:sha2_alg) (#m:m_spec{lanes a m == 1})

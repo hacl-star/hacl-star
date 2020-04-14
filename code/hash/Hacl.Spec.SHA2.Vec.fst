@@ -370,19 +370,11 @@ let transpose_state (#a:sha2_alg) (#m:m_spec) (st:state_spec a m) : state_spec a
   | 4 -> transpose_state4 #a #m st
   | _ -> admit()
 
-let store_state_inner (#a:sha2_alg) (#m:m_spec) (st:state_spec a m) (i:nat{i < 8})
-                      (hseq: lseq uint8 (lanes a m * 8 * word_length a)) :
-                      lseq uint8 (lanes a m * 8 * word_length a) =
-    update_sub hseq (i * lanes a m * word_length a) (lanes a m * word_length a)
-                    (vec_to_bytes_be st.[i])
-
 noextract
 let store_state (#a:sha2_alg) (#m:m_spec) (st:state_spec a m) :
                 lseq uint8 (lanes a m * 8 * word_length a) =
     let st = transpose_state st in
-    let h = create (lanes a m * 8 * word_length a) (u8 0) in
-    let h = repeati 8 (store_state_inner #a #m st) h in
-    h
+    Lib.IntVector.Serialize.vecs_to_bytes_be st
 
 noextract
 let emit (#a:sha2_alg) (#m:m_spec)
