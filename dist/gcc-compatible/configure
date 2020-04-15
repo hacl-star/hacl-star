@@ -45,7 +45,7 @@ detect_x64 () {
 }
 
 detect_arm () {
-  [[ $(uname -m | cut -c 1-3) == "arm" ]] || [[ $(uname -m | cut -c 1-5) == "aarch64" ]];
+  [[ $(uname -m | cut -c 1-3) == "arm" ]] || [[ $(uname -m | cut -c 1-7) == "aarch64" ]];
 }
 
 detect_arm_cc () {
