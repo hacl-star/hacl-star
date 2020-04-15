@@ -24,6 +24,9 @@ endif
 CFLAGS 	+= $(USER_CFLAGS)
 
 SOURCES += $(ALL_C_FILES) $(USER_C_FILES)
+ifneq (,$(BLACKLIST))
+  SOURCES := $(filter-out $(BLACKLIST),$(SOURCES))
+endif
 OBJS 	+= $(patsubst %.c,%.o,$(SOURCES))
 
 all: $(USER_TARGET)
