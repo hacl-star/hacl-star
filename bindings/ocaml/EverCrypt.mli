@@ -50,7 +50,6 @@ module Hash : sig
   val init : HashDefs.alg -> t
   val update : t -> C.t -> unit
   val finish : t -> C.t -> unit
-  val free : t -> unit
   val hash : HashDefs.alg -> C.t -> C.t -> unit
 end
 

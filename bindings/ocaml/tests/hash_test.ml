@@ -133,7 +133,6 @@ let test_agile (v: Bytes.t hash_test) =
   let st = Hash.init (alg_definition v.alg) in
   Hash.update st v.plaintext;
   Hash.finish st output;
-  Hash.free st;
   if Bytes.compare output v.expected = 0 then
     test_result Success "incremental hash"
   else

@@ -89,8 +89,13 @@ module AEAD = struct
     | AES256_GCM -> spec_Agile_AEAD_alg_Spec_Agile_AEAD_AES256_GCM
     | CHACHA20_POLY1305 -> spec_Agile_AEAD_alg_Spec_Agile_AEAD_CHACHA20_POLY1305
   let init alg key : t result =
+    at_exit Gc.full_major;
     assert (C.size key = key_length alg);
-    let st = allocate (ptr everCrypt_AEAD_state_s) (from_voidp everCrypt_AEAD_state_s null) in
+    let st = allocate
+        ~finalise:(fun st -> everCrypt_AEAD_free (!@ st))
+        (ptr everCrypt_AEAD_state_s)
+        (from_voidp everCrypt_AEAD_state_s null)
+    in
     match UInt8.to_int (everCrypt_AEAD_create_in (alg_definition alg) st (C.ctypes_buf key)) with
     | 0 -> Success (alg, st)
     | n -> error n
@@ -148,10 +153,12 @@ module Hash = struct
 
   type t = alg * Z.t ref * everCrypt_Hash_Incremental_state_s ptr
   let init alg =
+    at_exit Gc.full_major;
     let alg_spec = alg_definition alg in
     let st = everCrypt_Hash_Incremental_create_in alg_spec in
     everCrypt_Hash_Incremental_init st;
     let incr_len = ref Z.zero in
+    Gc.finalise everCrypt_Hash_Incremental_free st;
     (alg, incr_len, st)
   let update (alg, incr_len, st) data =
     assert (C.size data < max_input_len);
@@ -161,8 +168,6 @@ module Hash = struct
   let finish (alg, _, st) dst =
     assert (C.size dst = digest_len alg);
     everCrypt_Hash_Incremental_finish st (C.ctypes_buf dst)
-  let free (_, _, st) =
-    everCrypt_Hash_Incremental_free st
   let hash alg dst input =
     assert (C.size input < max_input_len);
     assert (C.size dst = digest_len alg);

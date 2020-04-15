@@ -101,15 +101,18 @@ OCAMLDEP=ocamlfind dep -I lib -slash
 CFLAGS += -I "$(shell ocamlfind query ctypes)" -I "$(shell ocamlfind c -where)"
 
 # Just names.
-ALL_OCAML=$(patsubst lib_gen/%_gen.ml,%,$(wildcard lib_gen/*_gen.ml)) Lib_RandomBuffer_System
+ALL_OCAML=$(patsubst lib_gen/%_gen.ml,%,$(wildcard lib_gen/*_gen.ml))
 
 ALL_BINDINGS=$(patsubst %,lib/%_bindings.cmx,$(ALL_OCAML))
-ALL_GENERATORS=$(patsubst %.ml,%.exe,$(wildcard lib_gen/*_gen.ml)) lib_gen/Lib_RandomBuffer_System_gen.exe
+ALL_GENERATORS=$(patsubst %.ml,%.exe,$(wildcard lib_gen/*_gen.ml))
 ALL_ML_STUBS=$(patsubst %,lib/%_stubs.cmx,$(ALL_OCAML))
 ALL_C_STUBS=$(patsubst %,lib/%_c_stubs.o,$(ALL_OCAML))
 
 include .depend.ocaml
 include ctypes.depend
+
+lib_gen/Lib_RandomBuffer_System_gen.cmx: lib/Lib_RandomBuffer_System_bindings.cmx
+lib_gen/Lib_RandomBuffer_System_gen.exe: lib/Lib_RandomBuffer_System_bindings.cmx lib_gen/Lib_RandomBuffer_System_gen.cmx
 
 .depend.ocaml:
 	$(OCAMLDEP) $(wildcard lib/*.ml) $(wildcard lib_gen/*.ml) > $@
@@ -133,14 +136,6 @@ include ctypes.depend
 %.exe:
 
 all: libocamlevercrypt.cmxa
-
-lib/Lib_RandomBuffer_System_bindings.cmx:
-	$(OCAMLOPT) -c Lib_RandomBuffer_System_bindings.ml -o lib/Lib_RandomBuffer_System_bindings.cmx
-
-lib_gen/Lib_RandomBuffer_System_gen.cmx: lib/Lib_RandomBuffer_System_bindings.cmx
-	$(OCAMLOPT) -c Lib_RandomBuffer_System_gen.ml lib/Lib_RandomBuffer_System_bindings.cmx -o lib_gen/Lib_RandomBuffer_System_gen.cmx
-
-lib_gen/Lib_RandomBuffer_System_gen.exe: lib/Lib_RandomBuffer_System_bindings.cmx lib_gen/Lib_RandomBuffer_System_gen.cmx
 
 lib_gen/%_gen.exe: libevercrypt.a
 	$(OCAMLOPT) $(filter-out %.a,$^) libevercrypt.a -o $@ $(MLLDFLAGS)

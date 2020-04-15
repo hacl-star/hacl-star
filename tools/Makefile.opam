@@ -6,6 +6,10 @@
 # 	* bindings/ocaml/hacl-star.opam
 # 	* dist/gcc-compatible/hacl-star-raw.opam
 # 	* dist/gcc-compatible/META
+#
+# Once the archive is generated and checked in, it can be published using
+#   `opam publish https://github.com/project-everest/hacl-star/raw/master/bindings/ocaml/archive/hacl-star.XX.tar.gz`
+# This will generate a pull request in github.com/ocaml/opam-repository
 
 VERSION=$(subst version: ,,$(shell grep "^version: " ../bindings/ocaml/hacl-star.opam))
 ARCHIVE=$(subst VER,$(VERSION),hacl-star.VER.tar.gz)
