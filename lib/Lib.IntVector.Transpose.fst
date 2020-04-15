@@ -96,3 +96,19 @@ let transpose16x16 #t (vs0,(vs1,(vs2,(vs3,(vs4,(vs5,(vs6,(vs7,(vs8,(vs9,(vs10,(v
 let transpose4x4_lemma #t vs = admit()
 let transpose8x8_lemma #t vs = admit()
 let transpose16x16_lemma #t vs = admit()
+
+
+val vec_interleave_low_n_lemma: #t:v_inttype -> #w:width -> n:width{w % n == 0} -> v1:vec_t t w -> v2:vec_t t w -> l:nat{l < w} -> Lemma
+  ((vec_v (vec_interleave_low_n n v1 v2)).[l] == (if l % (2 * n) < n then Seq.index (vec_v v1) l else Seq.index (vec_v v2) (l - n)))
+let vec_interleave_low_n_lemma #t #w n v1 v2 l =
+  match (t, w, n) with
+  | (U32, 4, 2) -> vec_interleave_low_n_lemma_uint32_4_2 v1 v2
+  | (U32, 8, 2) -> vec_interleave_low_n_lemma_uint32_8_2 v1 v2
+  | (U32, 8, 4) -> vec_interleave_low_n_lemma_uint32_8_4 v1 v2
+  | (U32, 16, 2) -> vec_interleave_low_n_lemma_uint32_16_2 v1 v2
+  | (U32, 16, 4) -> vec_interleave_low_n_lemma_uint32_16_4 v1 v2
+  | (U32, 16, 8) -> vec_interleave_low_n_lemma_uint32_16_8 v1 v2
+  | (U64, 4, 2) -> vec_interleave_low_n_lemma_uint64_4_2 v1 v2
+  | (U64, 8, 2) -> vec_interleave_low_n_lemma_uint64_8_2 v1 v2
+  | (U64, 8, 4) -> vec_interleave_low_n_lemma_uint64_8_4 v1 v2
+  | _ -> admit()
