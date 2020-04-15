@@ -60,7 +60,6 @@ endif
 ifneq (,$(wildcard EverCrypt_OpenSSL.h))
   CFLAGS	+= -I $(OPENSSL_HOME)/include
   LDFLAGS 	+= -L$(OPENSSL_HOME) -lcrypto
-  MLLDFLAGS     += -ccopt -L$(OPENSSL_HOME) -cclib -lcrypto
 ifneq ($(OS),Windows_NT)
   LDFLAGS	+= -ldl -lpthread
 endif
@@ -138,7 +137,7 @@ lib_gen/Lib_RandomBuffer_System_gen.exe: lib/Lib_RandomBuffer_System_bindings.cm
 all: libocamlevercrypt.cmxa
 
 lib_gen/%_gen.exe: libevercrypt.a
-	$(OCAMLOPT) $(filter-out %.a,$^) libevercrypt.a -o $@ $(MLLDFLAGS)
+	$(OCAMLOPT) $(filter-out %.a,$^) libevercrypt.a -o $@
 
 %.cmx: %.ml
 	$(OCAMLOPT) -c $^ -o $@
@@ -164,7 +163,7 @@ lib/%_c_stubs.o: CFLAGS += -Wno-pointer-sign
 CTYPES_DEPS += lib/Lib_RandomBuffer_System_stubs.cmx lib/Lib_RandomBuffer_System_bindings.cmx
 
 libocamlevercrypt.cmxa: $(ALL_BINDINGS) $(ALL_ML_STUBS) $(ALL_C_STUBS) libevercrypt.$(SO)
-	ocamlfind mklib -o ocamlevercrypt $(CTYPES_DEPS) $(ALL_C_STUBS) libevercrypt.a -ccopt -L. -cclib -levercrypt $(MLLDFLAGS)
+	ocamlfind mklib -o ocamlevercrypt $(CTYPES_DEPS) $(ALL_C_STUBS) -ccopt -L. -cclib -levercrypt
 
 install-hacl-star-raw:
 	ocamlfind install hacl-star-raw META $(wildcard lib/*.ml lib/*.cmx lib/*.cmi *.cmxa *.a *.so *.dll)

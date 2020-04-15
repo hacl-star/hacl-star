@@ -60,7 +60,6 @@ endif
 ifneq (,$(wildcard EverCrypt_OpenSSL.h))
   CFLAGS	+= -I $(OPENSSL_HOME)/include
   LDFLAGS 	+= -L$(OPENSSL_HOME) -lcrypto
-  MLLDFLAGS     += -ccopt -L$(OPENSSL_HOME) -cclib -lcrypto
 ifneq ($(OS),Windows_NT)
   LDFLAGS	+= -ldl -lpthread
 endif
@@ -111,6 +110,9 @@ ALL_C_STUBS=$(patsubst %,lib/%_c_stubs.o,$(ALL_OCAML))
 include .depend.ocaml
 include ctypes.depend
 
+lib_gen/Lib_RandomBuffer_System_gen.cmx: lib/Lib_RandomBuffer_System_bindings.cmx
+lib_gen/Lib_RandomBuffer_System_gen.exe: lib/Lib_RandomBuffer_System_bindings.cmx lib_gen/Lib_RandomBuffer_System_gen.cmx
+
 .depend.ocaml:
 	$(OCAMLDEP) $(wildcard lib/*.ml) $(wildcard lib_gen/*.ml) > $@
 
@@ -135,7 +137,7 @@ include ctypes.depend
 all: libocamlevercrypt.cmxa
 
 lib_gen/%_gen.exe: libevercrypt.a
-	$(OCAMLOPT) $(filter-out %.a,$^) libevercrypt.a -o $@ $(MLLDFLAGS)
+	$(OCAMLOPT) $(filter-out %.a,$^) libevercrypt.a -o $@
 
 %.cmx: %.ml
 	$(OCAMLOPT) -c $^ -o $@
@@ -154,7 +156,16 @@ endif
 lib/%_stubs.ml lib/%_c_stubs.c: lib_gen/%_gen.exe
 	$(DY)PATH=.:$(OPENSSL_HOME):$$$(DY)PATH $<
 
+# Compiling these files raises the pointer sign warning because the Ctypes declaration for bytes expects a char*, not a uint8_t*
+# Can be remove once ctypes is upgraded to 0.17
+lib/%_c_stubs.o: CFLAGS += -Wno-pointer-sign
+
+CTYPES_DEPS += lib/Lib_RandomBuffer_System_stubs.cmx lib/Lib_RandomBuffer_System_bindings.cmx
+
 libocamlevercrypt.cmxa: $(ALL_BINDINGS) $(ALL_ML_STUBS) $(ALL_C_STUBS) libevercrypt.$(SO)
-	ocamlfind mklib -o ocamlevercrypt $(filter-out %.so,$^) libevercrypt.a $(MLLDFLAGS)
+	ocamlfind mklib -o ocamlevercrypt $(CTYPES_DEPS) $(ALL_C_STUBS) -ccopt -L. -cclib -levercrypt
+
+install-hacl-star-raw:
+	ocamlfind install hacl-star-raw META $(wildcard lib/*.ml lib/*.cmx lib/*.cmi *.cmxa *.a *.so *.dll)
 
 endif
