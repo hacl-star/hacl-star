@@ -552,21 +552,121 @@ let update_last_lemma_l #a #m totlen len b st0 l =
   update_lemma_l b1 st l
 
 
+#push-options "--max_ifuel 1"
+val transpose_state4_lemma:
+    #a:sha2_alg
+  -> #m:m_spec{lanes a m == 4}
+  -> st:state_spec a m
+  -> j:nat{j < lanes a m}
+  -> i:nat{i < 8 * word_length a} ->
+  Lemma
+   (let l = lanes a m in
+    let ind = 8 * j + i / word_length a in
+    (Seq.index (vec_v (transpose_state st).[ind / l])) (ind % l) ==
+    (Seq.index (state_spec_v st).[j] (i / word_length a)))
+
+let transpose_state4_lemma #a #m st j i =
+  let r0 = VecTranspose.transpose4x4_lseq (sub st 0 4) in
+  VecTranspose.transpose4x4_lemma (sub st 0 4);
+  let r1 = VecTranspose.transpose4x4_lseq (sub st 4 4) in
+  VecTranspose.transpose4x4_lemma (sub st 4 4)
+#pop-options
+
+
+val transpose_state_lemma_ij:
+    #a:sha2_alg
+  -> #m:m_spec
+  -> st:state_spec a m
+  -> j:nat{j < lanes a m}
+  -> i:nat{i < 8 * word_length a} ->
+  Lemma
+   (let l = lanes a m in
+    let ind = 8 * j + i / word_length a in
+    (Seq.index (vec_v (transpose_state st).[ind / l])) (ind % l) ==
+    (Seq.index (state_spec_v st).[j] (i / word_length a)))
+
+let transpose_state_lemma_ij #a #m st j i =
+  match lanes a m with
+  | 1 -> ()
+  | 4 -> transpose_state4_lemma #a #m st j i
+  | _ -> admit()
+
+
+val store_state_lemma_ij:
+    #a:sha2_alg
+  -> #m:m_spec
+  -> st:state_spec a m
+  -> j:nat{j < lanes a m}
+  -> i:nat{i < 8 * word_length a} ->
+  Lemma
+   ((store_state st).[j * (8 * word_length a) + i] ==
+    (BSeq.uint_to_bytes_be (Seq.index (state_spec_v st).[j] (i / word_length a))).[i % word_length a])
+
+let store_state_lemma_ij #a #m st j i =
+  let st1 = transpose_state st in
+  let j_v = j * (8 * word_length a) + i in
+  let blocksize_v = word_length a * lanes a m in
+
+  calc (==) { // j_v % blocksize_v / word_length a
+    (j * (8 * word_length a) + i) % blocksize_v / word_length a;
+    (==) { Math.Lemmas.modulo_division_lemma (j * (8 * word_length a) + i) (word_length a) (lanes a m) }
+    (j * (8 * word_length a) + i) / word_length a % lanes a m;
+    (==) { Math.Lemmas.paren_mul_right j 8 (word_length a);
+           Math.Lemmas.division_addition_lemma i (word_length a) (8 * j) }
+    (8 * j + i / word_length a) % lanes a m;
+    };
+
+  calc (==) { // j_v / blocksize_v
+    (j * (8 * word_length a) + i) / (word_length a * lanes a m);
+    (==) { Math.Lemmas.division_multiplication_lemma (j * (8 * word_length a) + i) (word_length a) (lanes a m) }
+    (j * (8 * word_length a) + i) / word_length a / lanes a m;
+    (==) { Math.Lemmas.paren_mul_right j 8 (word_length a);
+           Math.Lemmas.division_addition_lemma i (word_length a) (8 * j) }
+    (8 * j + i / word_length a) / lanes a m;
+    };
+
+  calc (==) {
+    Seq.index (store_state st) j_v;
+    (==) { index_vecs_to_bytes_be #(word_t a) #(lanes a m) #8 st1 j_v }
+    (BSeq.uints_to_bytes_be (vec_v st1.[j_v / blocksize_v])).[j_v % blocksize_v];
+    (==) { BSeq.index_uints_to_bytes_be (vec_v st1.[j_v / blocksize_v]) (j_v % blocksize_v) }
+    (BSeq.uint_to_bytes_be
+      (Seq.index (vec_v st1.[j_v / blocksize_v]) (j_v % blocksize_v / word_length a))).[(j_v % blocksize_v) % word_length a];
+    (==) { Math.Lemmas.modulo_modulo_lemma j_v (word_length a) (lanes a m) }
+    (BSeq.uint_to_bytes_be
+      (Seq.index (vec_v st1.[j_v / blocksize_v]) (j_v % blocksize_v / word_length a))).[j_v % word_length a];
+    (==) { transpose_state_lemma_ij #a #m st j i }
+    (BSeq.uint_to_bytes_be (Seq.index (state_spec_v st).[j] (i / word_length a))).[j_v % word_length a];
+    (==) { Math.Lemmas.paren_mul_right j 8 (word_length a);
+           Math.Lemmas.modulo_addition_lemma i (word_length a) (j * 8) }
+    (BSeq.uint_to_bytes_be (Seq.index (state_spec_v st).[j] (i / word_length a))).[i % word_length a];
+    }
+
+
 val store_state_lemma_l:
     #a:sha2_alg
   -> #m:m_spec
   -> st:state_spec a m
   -> l:nat{l < lanes a m} ->
   Lemma
-    (sub (store_state st) (l * (8 * word_length a)) (8 * word_length a) ==
-     Spec.store_state a (state_spec_v st).[l])
+   (sub (store_state st) (l * (8 * word_length a)) (8 * word_length a) ==
+    Spec.store_state a (state_spec_v st).[l])
 
-let store_state_lemma_l #a #m st l = admit()
+let store_state_lemma_l #a #m st l =
+  let st_l : words_state a = (state_spec_v st).[l] in
+  let rp = Spec.store_state a st_l in
+  let lp = store_state st in
 
-(*
-let store_state (a:sha2_alg) (hashw:words_state a) : Tot (lseq uint8 (8 * word_length a)) =
-  Lib.ByteSequence.uints_to_bytes_be #(word_t a) #SEC #8 hashw
-*)
+  let aux (i:nat{i < 8 * word_length a}) : Lemma (lp.[l * (8 * word_length a) + i] == rp.[i]) =
+    //assert (rp == BSeq.uints_to_bytes_be #(word_t a) #SEC #8 st_l);
+    BSeq.index_uints_to_bytes_be #(word_t a) #SEC #8 st_l i;
+    assert (rp.[i] == (BSeq.uint_to_bytes_be (Seq.index st_l (i / word_length a))).[i % word_length a]);
+    store_state_lemma_ij #a #m st l i in
+
+  Classical.forall_intro aux;
+  eq_intro
+    (sub (store_state st) (l * (8 * word_length a)) (8 * word_length a))
+    (Spec.store_state a (state_spec_v st).[l])
 
 
 // val emit_lemma_l:
