@@ -125,17 +125,17 @@ let chacha20_init (#w:lanes) (k:key) (n:nonce) (ctr0:counter) : state w =
 let transpose1 (st:state 1) : state 1 = st
 
 let transpose4 (st:state 4) : state 4 =
-  let (v0,(v1,(v2,v3))) = VecTranspose.transposewxw #U32 #4 (st.[0],(st.[1],(st.[2],st.[3]))) in
-  let (v4,(v5,(v6,v7))) = VecTranspose.transposewxw #U32 #4 (st.[4],(st.[5],(st.[6],st.[7]))) in
-  let (v8,(v9,(v10,v11))) = VecTranspose.transposewxw #U32 #4 (st.[8],(st.[9],(st.[10],st.[11]))) in
-  let (v12,(v13,(v14,v15))) = VecTranspose.transposewxw #U32 #4 (st.[12],(st.[13],(st.[14],st.[15]))) in
+  let (v0,(v1,(v2,v3))) = VecTranspose.transpose4x4 #U32 (st.[0],(st.[1],(st.[2],st.[3]))) in
+  let (v4,(v5,(v6,v7))) = VecTranspose.transpose4x4 #U32 (st.[4],(st.[5],(st.[6],st.[7]))) in
+  let (v8,(v9,(v10,v11))) = VecTranspose.transpose4x4 #U32 (st.[8],(st.[9],(st.[10],st.[11]))) in
+  let (v12,(v13,(v14,v15))) = VecTranspose.transpose4x4 #U32 (st.[12],(st.[13],(st.[14],st.[15]))) in
   create16 v0 v4 v8 v12 v1 v5 v9 v13 v2 v6 v10 v14 v3 v7 v11 v15
 
 let transpose8 (st:state 8) : state 8 =
   let (v0,(v1,(v2,(v3,(v4,(v5,(v6,v7))))))) =
-    VecTranspose.transposewxw #U32 #8 (st.[0],(st.[1],(st.[2],(st.[3],(st.[4],(st.[5],(st.[6],st.[7]))))))) in
+    VecTranspose.transpose8x8 #U32 (st.[0],(st.[1],(st.[2],(st.[3],(st.[4],(st.[5],(st.[6],st.[7]))))))) in
   let (v8,(v9,(v10,(v11,(v12,(v13,(v14,v15))))))) =
-    VecTranspose.transposewxw #U32 #8 (st.[8],(st.[9],(st.[10],(st.[11],(st.[12],(st.[13],(st.[14],st.[15]))))))) in
+    VecTranspose.transpose8x8 #U32 (st.[8],(st.[9],(st.[10],(st.[11],(st.[12],(st.[13],(st.[14],st.[15]))))))) in
   create16 v0 v8 v1 v9 v2 v10 v3 v11 v4 v12 v5 v13 v6 v14 v7 v15
 
 let transpose (#w:lanes) (st:state w) : state w =
