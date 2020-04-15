@@ -788,6 +788,8 @@ test-wasm: dist/wasm/package.json
 # Customizations for regular, msvc and gcc flavors.
 dist/gcc-compatible/Makefile.basic: DEFAULT_FLAGS += \
   -ctypes EverCrypt.*,Hacl.*
+dist/gcc-compatible/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES = \
+  dist/configure
 
 dist/msvc-compatible/Makefile.basic: DEFAULT_FLAGS += -falloca -ftail-calls
 
