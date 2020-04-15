@@ -72,6 +72,8 @@ if detect_arm; then
   echo "... detected ARM platform"
   echo "... $(uname -m) does not support 256-bit arithmetic"
   echo "BLACKLIST += $(ls *CP256*.c *_256.c *_Vec256.c | xargs)" >> Makefile.config
+  echo "... $(uname -m) does not support legacy vale stubs"
+  echo "BLACKLIST += evercrypt_vale_stubs.c" >> Makefile.config
   echo "CFLAGS += -DLib_IntVector_Intrinsics_vec256=\"void *\"" >> Makefile.config
   if detect_arm_cc; then
     echo "... cc can cross-compile to ARM64 with SIMD"
