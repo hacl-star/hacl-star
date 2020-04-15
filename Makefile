@@ -796,6 +796,8 @@ dist/gcc-compatible/Makefile.basic: HAND_WRITTEN_ML_BINDINGS += \
   $(wildcard lib/ml/*_bindings.ml)
 dist/gcc-compatible/Makefile.basic: HAND_WRITTEN_ML_GEN += \
   $(wildcard lib/ml/*_gen.ml)
+dist/gcc-compatible/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES += \
+  dist/META
 
 test-bindings-ocaml: compile-gcc-compatible
 	cd dist/gcc-compatible && make install-hacl-star-raw
@@ -986,8 +988,8 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt \
 	mkdir -p $(dir $@)
 	[ x"$(HACL_OLD_FILES)" != x ] && cp $(HACL_OLD_FILES) $(patsubst %.c,%.h,$(HACL_OLD_FILES)) $(dir $@) || true
 	[ x"$(HAND_WRITTEN_FILES)$(HAND_WRITTEN_H_FILES)" != x ] && cp $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(dir $@) || true
-	[ x"$(HAND_WRITTEN_ML_BINDINGS)" != x ] && cp $(HAND_WRITTEN_ML_BINDINGS) $(dir $@)lib/ || true
-	[ x"$(HAND_WRITTEN_ML_GEN)" != x ] && cp $(HAND_WRITTEN_ML_GEN) $(dir $@)lib_gen/ || true
+	[ x"$(HAND_WRITTEN_ML_BINDINGS)" != x ] && mkdir -p $(dir $@)/lib && cp $(HAND_WRITTEN_ML_BINDINGS) $(dir $@)lib/ || true
+	[ x"$(HAND_WRITTEN_ML_GEN)" != x ] && mkdir -p $(dir $@)/lib_gen && cp $(HAND_WRITTEN_ML_GEN) $(dir $@)lib_gen/ || true
 	[ x"$(VALE_ASMS)" != x ] && cp $(VALE_ASMS) $(dir $@) || true
 	$(KRML) $(DEFAULT_FLAGS) \
 	  -tmpdir $(dir $@) -skip-compilation \
