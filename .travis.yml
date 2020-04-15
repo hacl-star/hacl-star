@@ -4,5 +4,5 @@ arch: arm64
 dist: bionic
 script:
   - cd dist/gcc-compatible && ./configure
-  - make -C dist/gcc-compatible -j
-  - make -C tests arm -j
+  - make -j
+  - make -C ../../tests arm -j
