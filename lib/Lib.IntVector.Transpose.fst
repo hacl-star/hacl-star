@@ -108,7 +108,31 @@ let vec_interleave_low_n_lemma #t #w n v1 v2 l =
   | (U32, 16, 2) -> vec_interleave_low_n_lemma_uint32_16_2 v1 v2
   | (U32, 16, 4) -> vec_interleave_low_n_lemma_uint32_16_4 v1 v2
   | (U32, 16, 8) -> vec_interleave_low_n_lemma_uint32_16_8 v1 v2
+  | (U64, 4, 1) -> vec_interleave_low_lemma_uint64_4 v1 v2
   | (U64, 4, 2) -> vec_interleave_low_n_lemma_uint64_4_2 v1 v2
+  | (U64, 8, 1) -> vec_interleave_low_lemma_uint64_8 v1 v2
   | (U64, 8, 2) -> vec_interleave_low_n_lemma_uint64_8_2 v1 v2
   | (U64, 8, 4) -> vec_interleave_low_n_lemma_uint64_8_4 v1 v2
+  | _ -> admit()
+
+
+val vec_interleave_high_n_lemma: #t:v_inttype -> #w:width -> n:width{w % n == 0} -> v1:vec_t t w -> v2:vec_t t w -> l:nat{l < w} -> Lemma
+  ((vec_v (vec_interleave_high_n n v1 v2)).[l] ==
+    (if l % (2 * n) < n
+     then begin assume (l + n < w); Seq.index (vec_v v1) (l + n) end
+     else Seq.index (vec_v v2) l))
+
+let vec_interleave_high_n_lemma #t #w n v1 v2 l =
+  match (t, w, n) with
+  | (U32, 4, 2) -> vec_interleave_high_n_lemma_uint32_4_2 v1 v2
+  | (U32, 8, 2) -> vec_interleave_high_n_lemma_uint32_8_2 v1 v2
+  | (U32, 8, 4) -> vec_interleave_high_n_lemma_uint32_8_4 v1 v2
+  | (U32, 16, 2) -> vec_interleave_high_n_lemma_uint32_16_2 v1 v2
+  | (U32, 16, 4) -> vec_interleave_high_n_lemma_uint32_16_4 v1 v2
+  | (U32, 16, 8) -> vec_interleave_high_n_lemma_uint32_16_8 v1 v2
+  | (U64, 4, 1) -> vec_interleave_high_lemma_uint64_4 v1 v2
+  | (U64, 4, 2) -> vec_interleave_high_n_lemma_uint64_4_2 v1 v2
+  | (U64, 8, 1) -> vec_interleave_high_lemma_uint64_8 v1 v2
+  | (U64, 8, 2) -> vec_interleave_high_n_lemma_uint64_8_2 v1 v2
+  | (U64, 8, 4) -> vec_interleave_high_n_lemma_uint64_8_4 v1 v2
   | _ -> admit()
