@@ -45,22 +45,36 @@ let transpose8x8_uint32 (vs0,(vs1,(vs2,(vs3,(vs4,(vs5,(vs6,vs7))))))) =
     Lib.NTuple.createi 8 (transposewxw_uint32_f_l #8 3 2 4 (vs0,(vs1,(vs2,(vs3,(vs4,(vs5,(vs6,vs7)))))))) in
   (vs0,(vs2,(vs1,(vs3,(vs4,(vs6,(vs5,vs7)))))))
 
+
+inline_for_extraction noextract
+val transpose16x16_uint32_01: ntuple (vec_t U32 16) 16 -> ntuple (vec_t U32 16) 16
+let transpose16x16_uint32_01 (vs0,(vs1,(vs2,(vs3,(vs4,(vs5,(vs6,(vs7,(vs8,(vs9,(vs10,(vs11,(vs12,(vs13,(vs14,vs15))))))))))))))) =
+  let (vs0,(vs1,(vs2,(vs3,(vs4,(vs5,(vs6,(vs7,(vs8,(vs9,(vs10,(vs11,(vs12,(vs13,(vs14,vs15))))))))))))))) =
+    Lib.NTuple.createi 16 (transposewxw_uint32_f_l #16 4 0 1 (vs0,(vs1,(vs2,(vs3,(vs4,(vs5,(vs6,(vs7,(vs8,(vs9,(vs10,(vs11,(vs12,(vs13,(vs14,vs15)))))))))))))))) in
+
+  let (vs0,(vs1,(vs2,(vs3,(vs4,(vs5,(vs6,(vs7,(vs8,(vs9,(vs10,(vs11,(vs12,(vs13,(vs14,vs15))))))))))))))) =
+    Lib.NTuple.createi 16 (transposewxw_uint32_f_l #16 4 1 2 (vs0,(vs1,(vs2,(vs3,(vs4,(vs5,(vs6,(vs7,(vs8,(vs9,(vs10,(vs11,(vs12,(vs13,(vs14,vs15)))))))))))))))) in
+
+  (vs0,(vs1,(vs2,(vs3,(vs4,(vs5,(vs6,(vs7,(vs8,(vs9,(vs10,(vs11,(vs12,(vs13,(vs14,vs15)))))))))))))))
+
+
+inline_for_extraction noextract
+val transpose16x16_uint32_23: ntuple (vec_t U32 16) 16 -> ntuple (vec_t U32 16) 16
+let transpose16x16_uint32_23 (vs0,(vs1,(vs2,(vs3,(vs4,(vs5,(vs6,(vs7,(vs8,(vs9,(vs10,(vs11,(vs12,(vs13,(vs14,vs15))))))))))))))) =
+  let (vs0,(vs1,(vs2,(vs3,(vs4,(vs5,(vs6,(vs7,(vs8,(vs9,(vs10,(vs11,(vs12,(vs13,(vs14,vs15))))))))))))))) =
+    Lib.NTuple.createi 16 (transposewxw_uint32_f_l #16 4 2 4 (vs0,(vs1,(vs2,(vs3,(vs4,(vs5,(vs6,(vs7,(vs8,(vs9,(vs10,(vs11,(vs12,(vs13,(vs14,vs15)))))))))))))))) in
+
+  let (vs0,(vs1,(vs2,(vs3,(vs4,(vs5,(vs6,(vs7,(vs8,(vs9,(vs10,(vs11,(vs12,(vs13,(vs14,vs15))))))))))))))) =
+    Lib.NTuple.createi 16 (transposewxw_uint32_f_l #16 4 3 8 (vs0,(vs1,(vs2,(vs3,(vs4,(vs5,(vs6,(vs7,(vs8,(vs9,(vs10,(vs11,(vs12,(vs13,(vs14,vs15)))))))))))))))) in
+  (vs0,(vs2,(vs1,(vs3,(vs4,(vs6,(vs5,(vs7,(vs8,(vs10,(vs9,(vs11,(vs12,(vs14,(vs13,vs15)))))))))))))))
+
+
 inline_for_extraction noextract
 val transpose16x16_uint32: ntuple (vec_t U32 16) 16 -> ntuple (vec_t U32 16) 16
-let transpose16x16_uint32 (vs0,(vs1,(vs2,(vs3,(vs4,(vs5,(vs6,(vs7,(vs8,(vs9,(vs10,(vs11,(vs12,(vs13,(vs14,vs15))))))))))))))) = admit()
-  // let (vs0,(vs1,(vs2,(vs3,(vs4,(vs5,(vs6,(vs7,(vs8,(vs9,(vs10,(vs11,(vs12,(vs13,(vs14,vs15))))))))))))))) =
-  //   Lib.NTuple.createi 16 (transposewxw_uint32_f_l #16 4 0 1 (vs0,(vs1,(vs2,(vs3,(vs4,(vs5,(vs6,(vs7,(vs8,(vs9,(vs10,(vs11,(vs12,(vs13,(vs14,vs15)))))))))))))))) in
-
-  // let (vs0,(vs1,(vs2,(vs3,(vs4,(vs5,(vs6,(vs7,(vs8,(vs9,(vs10,(vs11,(vs12,(vs13,(vs14,vs15))))))))))))))) =
-  //   Lib.NTuple.createi 16 (transposewxw_uint32_f_l #16 4 1 2 (vs0,(vs1,(vs2,(vs3,(vs4,(vs5,(vs6,(vs7,(vs8,(vs9,(vs10,(vs11,(vs12,(vs13,(vs14,vs15)))))))))))))))) in
-
-  // let (vs0,(vs1,(vs2,(vs3,(vs4,(vs5,(vs6,(vs7,(vs8,(vs9,(vs10,(vs11,(vs12,(vs13,(vs14,vs15))))))))))))))) =
-  //   Lib.NTuple.createi 16 (transposewxw_uint32_f_l #16 4 2 4 (vs0,(vs1,(vs2,(vs3,(vs4,(vs5,(vs6,(vs7,(vs8,(vs9,(vs10,(vs11,(vs12,(vs13,(vs14,vs15)))))))))))))))) in
-
-  // let (vs0,(vs1,(vs2,(vs3,(vs4,(vs5,(vs6,(vs7,(vs8,(vs9,(vs10,(vs11,(vs12,(vs13,(vs14,vs15))))))))))))))) =
-  //   Lib.NTuple.createi 16 (transposewxw_uint32_f_l #16 4 3 8 (vs0,(vs1,(vs2,(vs3,(vs4,(vs5,(vs6,(vs7,(vs8,(vs9,(vs10,(vs11,(vs12,(vs13,(vs14,vs15)))))))))))))))) in
-
-  // (vs0,(vs2,(vs1,(vs3,(vs4,(vs6,(vs5,(vs7,(vs8,(vs10,(vs9,(vs11,(vs12,(vs14,(vs13,vs15)))))))))))))))
+let transpose16x16_uint32 (vs0,(vs1,(vs2,(vs3,(vs4,(vs5,(vs6,(vs7,(vs8,(vs9,(vs10,(vs11,(vs12,(vs13,(vs14,vs15))))))))))))))) =
+  let (vs0,(vs1,(vs2,(vs3,(vs4,(vs5,(vs6,(vs7,(vs8,(vs9,(vs10,(vs11,(vs12,(vs13,(vs14,vs15))))))))))))))) =
+    transpose16x16_uint32_01 (vs0,(vs1,(vs2,(vs3,(vs4,(vs5,(vs6,(vs7,(vs8,(vs9,(vs10,(vs11,(vs12,(vs13,(vs14,vs15))))))))))))))) in
+  transpose16x16_uint32_23 (vs0,(vs1,(vs2,(vs3,(vs4,(vs5,(vs6,(vs7,(vs8,(vs9,(vs10,(vs11,(vs12,(vs13,(vs14,vs15)))))))))))))))
 
 
 let transpose4x4 #t (vs0,(vs1,(vs2,vs3))) =
