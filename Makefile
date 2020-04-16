@@ -1082,7 +1082,7 @@ CFLAGS += -Wall -Wextra -g \
 	  ,[LD $*],$(call to-obj-dir,$@))
 
 ifeq ($(OS),Windows_NT)
-  LD_EXTRA = PATH="$(OPENSSL_HOME):$(shell cygpath -u \"$$(ocamlfind c -where)\")/../stublibs:$$PATH"
+  LD_EXTRA = PATH="$(OPENSSL_HOME):$(shell cygpath -u $$(ocamlfind c -where))/../stublibs:$$PATH"
 else ifeq ($(shell uname -s),Darwin)
   LD_EXTRA = DYLD_LIBRARY_PATH="$(OPENSSL_HOME)"
 else
