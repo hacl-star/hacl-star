@@ -223,7 +223,7 @@ let map2 #a #b #c #len f s1 s2 =
 let index_map2_lemma #a #b #c #len f s1 s2 i =
   createi_lemma len (fun i -> f (index s1 i) (index s2 i)) i
 
-#set-options "--max_fuel 4"
+#set-options "--z3rlimit 50 --fuel 16"
 
 let ntup1_lemma #a #l t =
   assert (ntuple a l == ntuple a 1)
@@ -232,10 +232,19 @@ let tup1_lemma #a #l t =
   assert (ntuple a l == ntuple a 1)
 
 let ntup4_lemma #a #l t =
-  assert (ntuple a l == ntuple a 4)
+  assert_norm (ntuple a l == ntuple a 4)
 
 let tup4_lemma #a #l t =
-  assert (ntuple a l == ntuple a 4);
-  let (x0,(x1,(x2,x3))) = tup4 t in
-  let t' : ntuple a 4 = (x0,(x1,(x2,x3))) in
-  assert (t == t')
+  assert_norm (ntuple a l == ntuple a 4)
+
+let ntup8_lemma #a #l t =
+  assert_norm (ntuple a l == ntuple a 8)
+
+let tup8_lemma #a #l t =
+  assert_norm (ntuple a l == ntuple a 8)
+
+let ntup16_lemma #a #l t =
+  assert_norm (ntuple a l == ntuple a 16)
+
+let tup16_lemma #a #l t =
+  assert_norm (ntuple a l == ntuple a 16)
