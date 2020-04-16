@@ -801,7 +801,7 @@ dist/gcc-compatible/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES += \
 
 test-bindings-ocaml: compile-gcc-compatible
 	cd dist/gcc-compatible && make install-hacl-star-raw
-	cd bindings/ocaml && dune runtest
+	cd bindings/ocaml && $(LD_EXTRA) dune runtest
 
 dist/msvc-compatible/Makefile.basic: DEFAULT_FLAGS += -falloca -ftail-calls
 
@@ -1082,7 +1082,7 @@ CFLAGS += -Wall -Wextra -g \
 	  ,[LD $*],$(call to-obj-dir,$@))
 
 ifeq ($(OS),Windows_NT)
-  LD_EXTRA = PATH="$(OPENSSL_HOME):$$PATH"
+  LD_EXTRA = PATH="$(OPENSSL_HOME):$(shell cygpath -u \"$$(ocamlfind c -where)\")/../stublibs:$$PATH"
 else ifeq ($(shell uname -s),Darwin)
   LD_EXTRA = DYLD_LIBRARY_PATH="$(OPENSSL_HOME)"
 else
