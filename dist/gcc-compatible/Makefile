@@ -26,7 +26,7 @@ KREMLIN_HOME ?= ../kremlin
 # 1. The usual pseudo auto-configuration
 
 UNAME		= $(shell uname)
-MARCH		= x86_64
+MARCH		= $(shell uname -m)
 ifeq ($(UNAME),Darwin)
   VARIANT	= -darwin
   SO		= so
@@ -73,14 +73,18 @@ endif
 
 OBJS 		+= $(patsubst %.S,%.o,$(wildcard *-$(MARCH)$(VARIANT).S))
 
+-include Makefile.config
 include Makefile.basic
 
 CFLAGS		+= -Wno-parentheses -Wno-deprecated-declarations -g -std=gnu11 -O3
 
 %_c_stubs.o: CFLAGS += -Wno-pointer-sign
 
-Hacl_Blake2s_128.o Hacl_Poly1305_128.o Hacl_Chacha20_Vec128.o Hacl_Chacha20Poly1305_128.o: CFLAGS += -mavx
-Hacl_Blake2b_256.o Hacl_Poly1305_256.o Hacl_Chacha20_Vec256.o Hacl_Chacha20Poly1305_256.o: CFLAGS += -mavx -mavx2
+CFLAGS_128 ?= -mavx
+CFLAGS_256 ?= -mavx -mavx2
+
+Hacl_Blake2s_128.o Hacl_Poly1305_128.o Hacl_Chacha20_Vec128.o Hacl_Chacha20Poly1305_128.o: CFLAGS += $(CFLAGS_128)
+Hacl_Blake2b_256.o Hacl_Poly1305_256.o Hacl_Chacha20_Vec256.o Hacl_Chacha20Poly1305_256.o: CFLAGS += $(CFLAGS_256)
 
 all: libevercrypt.$(SO)
 
@@ -88,8 +92,9 @@ libevercrypt.$(SO): $(OBJS)
 	$(CC) $(CFLAGS) -shared -o $@ $^ $(LDFLAGS)
 
 # 4. Compilation of OCaml bindings; conditional on the presence of the lib_gen
-# folder.
+# folder, possibly disabled by configure.
 
+ifeq (,$(DISABLE_OCAML_BINDINGS))
 ifneq (,$(wildcard lib_gen))
 
 .PRECIOUS: %.cmx
@@ -168,4 +173,5 @@ libocamlevercrypt.cmxa: $(ALL_BINDINGS) $(ALL_ML_STUBS) $(ALL_C_STUBS) libevercr
 install-hacl-star-raw:
 	ocamlfind install hacl-star-raw META $(wildcard lib/*.ml lib/*.cmx lib/*.cmi *.cmxa *.a *.so *.dll)
 
+endif
 endif

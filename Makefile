@@ -797,7 +797,7 @@ dist/gcc-compatible/Makefile.basic: HAND_WRITTEN_ML_BINDINGS += \
 dist/gcc-compatible/Makefile.basic: HAND_WRITTEN_ML_GEN += \
   $(wildcard lib/ml/*_gen.ml)
 dist/gcc-compatible/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES += \
-  dist/META
+  dist/META dist/configure
 
 test-bindings-ocaml: compile-gcc-compatible
 	cd dist/gcc-compatible && make install-hacl-star-raw

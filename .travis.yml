@@ -1,0 +1,8 @@
+language: c
+os: linux
+arch: arm64
+dist: bionic
+script:
+  - cd dist/gcc-compatible && ./configure
+  - make -j
+  - make -C ../../tests arm -j
