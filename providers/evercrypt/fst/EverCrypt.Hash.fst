@@ -142,7 +142,7 @@ let k224_256 =
 let update_multi_256 s blocks n =
   let has_shaext = AC.has_shaext () in
   let has_sse = AC.has_sse () in
-  if SC.vale && has_shaext && has_sse then begin
+  if EverCrypt.TargetConfig.x64 && (SC.vale && has_shaext && has_sse) then begin
     let n = Int.Cast.Full.uint32_to_uint64 n in
     B.recall k224_256;
     IB.recall_contents k224_256 Spec.SHA2.Constants.k224_256;
