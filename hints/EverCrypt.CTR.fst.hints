@@ -1,5 +1,5 @@
 [
-  "\u0000\u001bª®‹\ft\rz◊’ÆÍ~ï ",
+  "™îzaçù5÷ÖÃ≥ªdπ}`",
   [
     [
       "EverCrypt.CTR.nonce_upper_bound",
@@ -1123,8 +1123,8 @@
         "refinement_interpretation_Tm_refine_f10315e12d7a82715dc69dbc7dc872a6",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
         "true_interp", "typing_EverCrypt.CTR.Keys.concrete_xkey_len",
-        "typing_FStar.UInt32.uint_to_t", "typing_FStar.UInt32.v",
-        "typing_Lib.IntTypes.minint",
+        "typing_EverCrypt.TargetConfig.x64", "typing_FStar.UInt32.uint_to_t",
+        "typing_FStar.UInt32.v", "typing_Lib.IntTypes.minint",
         "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.as_seq",
         "typing_LowStar.Monotonic.Buffer.len",
@@ -1137,10 +1137,11 @@
         "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_tok_Lib.IntTypes.U8@tok",
         "typing_tok_Spec.Cipher.Expansion.Vale_AES128@tok",
-        "typing_tok_Spec.Cipher.Expansion.Vale_AES256@tok"
+        "typing_tok_Spec.Cipher.Expansion.Vale_AES256@tok", "unit_inversion",
+        "unit_typing"
       ],
       0,
-      "54945dea01be04411ff7722e08826aa6"
+      "7be1b00716817578fa1ba39a9039ceca"
     ],
     [
       "EverCrypt.CTR.init",
@@ -1909,8 +1910,9 @@
         "equality_tok_Spec.Agile.Cipher.CHACHA20@tok",
         "equality_tok_Spec.Cipher.Expansion.Vale_AES128@tok",
         "equality_tok_Spec.Cipher.Expansion.Vale_AES256@tok",
-        "equation_EverCrypt.CTR.Keys.uint8", "equation_EverCrypt.CTR.e_alg",
-        "equation_EverCrypt.CTR.footprint_s",
+        "equation_EverCrypt.CTR.Keys.uint8",
+        "equation_EverCrypt.CTR.cpu_features_invariant",
+        "equation_EverCrypt.CTR.e_alg", "equation_EverCrypt.CTR.footprint_s",
         "equation_EverCrypt.CTR.invariant",
         "equation_EverCrypt.CTR.invariant_s",
         "equation_EverCrypt.CTR.nonce_upper_bound",
@@ -2012,8 +2014,9 @@
         "refinement_interpretation_Tm_refine_f8baffb8cd8aa8f0ee18caedcdd0792e",
         "refinement_interpretation_Tm_refine_fc1f69e4229a94f85b0de30f1747a8d3",
         "refinement_kinding_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "true_interp", "typing_FStar.Ghost.reveal",
-        "typing_FStar.Map.contains", "typing_FStar.Monotonic.HyperHeap.rid",
+        "true_interp", "typing_EverCrypt.TargetConfig.x64",
+        "typing_FStar.Ghost.reveal", "typing_FStar.Map.contains",
+        "typing_FStar.Monotonic.HyperHeap.rid",
         "typing_FStar.Monotonic.HyperHeap.root",
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
@@ -2030,10 +2033,10 @@
         "typing_LowStar.Monotonic.Buffer.loc_addresses",
         "typing_LowStar.Monotonic.Buffer.loc_none", "typing_Spec.AES.gf8",
         "typing_Spec.GaloisField.__proj__GF__item__t",
-        "typing_tok_Lib.Buffer.MUT@tok"
+        "typing_tok_Lib.Buffer.MUT@tok", "unit_inversion", "unit_typing"
       ],
       0,
-      "410ee87e073f61b004a6c3b7c47fa279"
+      "a614517f2e15b19d8f439fa6157e29d5"
     ],
     [
       "EverCrypt.CTR.free",

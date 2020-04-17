@@ -197,6 +197,7 @@ encrypt_aes128_gcm(
   uint8_t *tag
 )
 {
+  #if EVERCRYPT_TARGETCONFIG_X64
   if (s == NULL)
   {
     return EverCrypt_Error_InvalidKey;
@@ -297,6 +298,13 @@ encrypt_aes128_gcm(
     inout_b,
     (uint32_t)(uint64_t)plain_len % (uint32_t)16U * sizeof (inout_b[0U]));
   return EverCrypt_Error_Success;
+  #else
+  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "statically unreachable");
+  KRML_HOST_EXIT(255U);
+  #endif
 }
 
 static EverCrypt_Error_error_code
@@ -312,6 +320,7 @@ encrypt_aes256_gcm(
   uint8_t *tag
 )
 {
+  #if EVERCRYPT_TARGETCONFIG_X64
   if (s == NULL)
   {
     return EverCrypt_Error_InvalidKey;
@@ -412,6 +421,13 @@ encrypt_aes256_gcm(
     inout_b,
     (uint32_t)(uint64_t)plain_len % (uint32_t)16U * sizeof (inout_b[0U]));
   return EverCrypt_Error_Success;
+  #else
+  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "statically unreachable");
+  KRML_HOST_EXIT(255U);
+  #endif
 }
 
 EverCrypt_Error_error_code
@@ -474,6 +490,7 @@ decrypt_aes128_gcm(
   uint8_t *dst
 )
 {
+  #if EVERCRYPT_TARGETCONFIG_X64
   if (s == NULL)
   {
     return EverCrypt_Error_InvalidKey;
@@ -584,6 +601,13 @@ decrypt_aes128_gcm(
     return EverCrypt_Error_Success;
   }
   return EverCrypt_Error_AuthenticationFailure;
+  #else
+  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "statically unreachable");
+  KRML_HOST_EXIT(255U);
+  #endif
 }
 
 static EverCrypt_Error_error_code
@@ -599,6 +623,7 @@ decrypt_aes256_gcm(
   uint8_t *dst
 )
 {
+  #if EVERCRYPT_TARGETCONFIG_X64
   if (s == NULL)
   {
     return EverCrypt_Error_InvalidKey;
@@ -709,6 +734,13 @@ decrypt_aes256_gcm(
     return EverCrypt_Error_Success;
   }
   return EverCrypt_Error_AuthenticationFailure;
+  #else
+  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "statically unreachable");
+  KRML_HOST_EXIT(255U);
+  #endif
 }
 
 EverCrypt_Error_error_code
