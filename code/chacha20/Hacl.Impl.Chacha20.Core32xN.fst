@@ -12,9 +12,9 @@ open Lib.IntVector
 
 module Spec = Hacl.Spec.Chacha20.Vec
 module VecTranspose = Lib.IntVector.Transpose
+module LSeq = Lib.Sequence
 
-
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 let lanes = Spec.lanes
 
@@ -69,6 +69,40 @@ val sum_state:
       as_seq h1 st == Spec.sum_state (as_seq h0 st) (as_seq h0 ost)))
 let sum_state #w st ost =  map2T (size 16) st ( +| ) st ost
 
+
+inline_for_extraction noextract
+val create16_st: #w:lanes -> st:state w ->
+  v0:uint32xN w -> v1:uint32xN w -> v2:uint32xN w -> v3:uint32xN w ->
+  v4:uint32xN w -> v5:uint32xN w -> v6:uint32xN w -> v7:uint32xN w ->
+  v8:uint32xN w -> v9:uint32xN w -> v10:uint32xN w -> v11:uint32xN w ->
+  v12:uint32xN w -> v13:uint32xN w -> v14:uint32xN w -> v15:uint32xN w ->
+  Stack unit
+    (requires fun h -> live h st)
+    (ensures  fun h0 _ h1 -> modifies (loc st) h0 h1 /\
+      as_seq h1 st == create16 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15)
+
+let create16_st #w st v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 =
+  let h0 = ST.get () in
+  st.(0ul) <- v0;
+  st.(1ul) <- v1;
+  st.(2ul) <- v2;
+  st.(3ul) <- v3;
+  st.(4ul) <- v4;
+  st.(5ul) <- v5;
+  st.(6ul) <- v6;
+  st.(7ul) <- v7;
+  st.(8ul) <- v8;
+  st.(9ul) <- v9;
+  st.(10ul) <- v10;
+  st.(11ul) <- v11;
+  st.(12ul) <- v12;
+  st.(13ul) <- v13;
+  st.(14ul) <- v14;
+  st.(15ul) <- v15;
+  let h1 = ST.get () in
+  assert (LSeq.equal (as_seq h1 st) (create16 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15))
+
+
 inline_for_extraction noextract
 val transpose1: st:state 1 ->
   Stack unit
@@ -84,32 +118,12 @@ val transpose4: st:state 4 ->
     (ensures (fun h0 _ h1 -> modifies (loc st) h0 h1 /\
       as_seq h1 st == Spec.transpose4 (as_seq h0 st)))
 let transpose4 st =
-  let h0 = ST.get() in
   let (v0,v1,v2,v3) = VecTranspose.transpose4x4 (st.(0ul),st.(1ul),st.(2ul),st.(3ul)) in
   let (v4,v5,v6,v7) = VecTranspose.transpose4x4 (st.(4ul),st.(5ul),st.(6ul),st.(7ul)) in
   let (v8,v9,v10,v11) = VecTranspose.transpose4x4 (st.(8ul),st.(9ul),st.(10ul),st.(11ul)) in
   let (v12,v13,v14,v15) = VecTranspose.transpose4x4 (st.(12ul),st.(13ul),st.(14ul),st.(15ul)) in
-  st.(0ul) <- v0;
-  st.(1ul) <- v4;
-  st.(2ul) <- v8;
-  st.(3ul) <- v12;
-  st.(4ul) <- v1;
-  st.(5ul) <- v5;
-  st.(6ul) <- v9;
-  st.(7ul) <- v13;
-  let h1 = ST.get() in
-  assert (modifies (loc st) h0 h1);
-  st.(8ul) <- v2;
-  st.(9ul) <- v6;
-  st.(10ul) <- v10;
-  st.(11ul) <- v14;
-  st.(12ul) <- v3;
-  st.(13ul) <- v7;
-  st.(14ul) <- v11;
-  st.(15ul) <- v15;
-  let h1 = ST.get() in
-  assert (modifies (loc st) h0 h1);
-  assert (Lib.Sequence.equal (as_seq h1 st) (Spec.transpose4 (as_seq h0 st)))
+  create16_st st v0 v4 v8 v12 v1 v5 v9 v13 v2 v6 v10 v14 v3 v7 v11 v15
+
 
 inline_for_extraction noextract
 val transpose8: st:state 8 ->
@@ -118,33 +132,9 @@ val transpose8: st:state 8 ->
     (ensures (fun h0 _ h1 -> modifies (loc st) h0 h1 /\
       as_seq h1 st == Spec.transpose8 (as_seq h0 st)))
 let transpose8 st =
-  let h0 = ST.get() in
   let (v0,v1,v2,v3,v4,v5,v6,v7) = VecTranspose.transpose8x8 (st.(0ul),st.(1ul),st.(2ul),st.(3ul),st.(4ul),st.(5ul),st.(6ul),st.(7ul)) in
   let (v8,v9,v10,v11,v12,v13,v14,v15) = VecTranspose.transpose8x8 (st.(8ul),st.(9ul),st.(10ul),st.(11ul),st.(12ul),st.(13ul),st.(14ul),st.(15ul)) in
-  let h1 = ST.get() in
-  assert (modifies (loc st)  h0 h1);
-  st.(0ul) <- v0;
-  st.(1ul) <- v8;
-  st.(2ul) <- v1;
-  st.(3ul) <- v9;
-  st.(4ul) <- v2;
-  st.(5ul) <- v10;
-  st.(6ul) <- v3;
-  st.(7ul) <- v11;
-  st.(8ul) <- v4;
-  let h1 = ST.get() in
-  assert (modifies (loc st)  h0 h1);
-  st.(9ul) <- v12;
-  st.(10ul) <- v5;
-  st.(11ul) <- v13;
-  st.(12ul) <- v6;
-  st.(13ul) <- v14;
-  st.(14ul) <- v7;
-  st.(15ul) <- v15;
-  let h1 = ST.get() in
-  assert (modifies (loc st)  h0 h1);
-  assert (Lib.Sequence.equal (as_seq h1 st) (create16 v0 v8 v1 v9 v2 v10 v3 v11 v4 v12 v5 v13 v6 v14 v7 v15));
-  assert (Lib.Sequence.equal (as_seq h1 st) (Spec.transpose8 (as_seq h0 st)))
+  create16_st st v0 v8 v1 v9 v2 v10 v3 v11 v4 v12 v5 v13 v6 v14 v7 v15
 
 inline_for_extraction noextract
 val transpose:
