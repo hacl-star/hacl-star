@@ -53,9 +53,13 @@ let vec_counter (t:v_inttype) (w:width) =
   | U64,8 -> vec512_load64s (u64 0) (u64 1) (u64 2) (u64 3) (u64 4) (u64 5) (u64 6) (u64 7)
 
 let create2 #a x0 x1 = admit()
+let create2_lemma #a x0 x1 = admit()
 let create4 #a x0 x1 x2 x3 = admit()
+let create4_lemma #a x0 x1 x2 x3 = admit()
 let create8 #a x0 x1 x2 x3 x4 x5 x6 x7 = admit()
+let create8_lemma #a x0 x1 x2 x3 x4 x5 x6 x7 = admit()
 let create16 #a x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 = admit()
+let create16_lemma #a x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 = admit()
 let create32 #a x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15  = admit()
 
 let vec_load (#t:v_inttype) (x:uint_t t SEC) (w:width) =

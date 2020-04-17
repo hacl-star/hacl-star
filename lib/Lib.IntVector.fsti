@@ -29,32 +29,42 @@ inline_for_extraction noextract
 val vec_counter: t:v_inttype -> w:width -> v:vec_t t w{vec_v v == createi w mk_int}
 
 inline_for_extraction noextract
-val create2: #a:Type
-  -> x0:a -> x1:a ->
-  s:lseq a 2{
-    s.[0] == x0 /\ s.[1] == x1}
+val create2: #a:Type -> x0:a -> x1:a -> lseq a 2
+
+val create2_lemma: #a:Type -> x0:a -> x1:a ->
+  Lemma (let s = create2 x0 x1 in
+    s.[0] == x0 /\ s.[1] == x1)
+  [SMTPat (create2 #a x0 x1)]
 
 inline_for_extraction noextract
-val create4: #a:Type
-  -> x0:a -> x1:a -> x2:a -> x3:a ->
-  s:lseq a 4{
+val create4: #a:Type -> x0:a -> x1:a -> x2:a -> x3:a -> lseq a 4
+
+val create4_lemma: #a:Type -> x0:a -> x1:a -> x2:a -> x3:a ->
+  Lemma (let s = create4 x0 x1 x2 x3 in
     s.[0] == x0 /\ s.[1] == x1 /\
-    s.[2] == x2 /\ s.[3] == x3}
+    s.[2] == x2 /\ s.[3] == x3)
+  [SMTPat (create4 #a x0 x1 x2 x3)]
 
 inline_for_extraction noextract
-val create8: #a:Type
-  -> x0:a -> x1:a -> x2:a -> x3:a -> x4:a -> x5:a -> x6:a -> x7:a ->
-  s:lseq a 8{
+val create8: #a:Type -> x0:a -> x1:a -> x2:a -> x3:a -> x4:a -> x5:a -> x6:a -> x7:a -> lseq a 8
+
+val create8_lemma: #a:Type -> x0:a -> x1:a -> x2:a -> x3:a -> x4:a -> x5:a -> x6:a -> x7:a ->
+  Lemma (let s = create8 x0 x1 x2 x3 x4 x5 x6 x7 in
     s.[0] == x0 /\ s.[1] == x1 /\
     s.[2] == x2 /\ s.[3] == x3 /\
     s.[4] == x4 /\ s.[5] == x5 /\
-    s.[6] == x6 /\ s.[7] == x7}
+    s.[6] == x6 /\ s.[7] == x7)
+  [SMTPat (create8 #a x0 x1 x2 x3 x4 x5 x6 x7)]
 
 inline_for_extraction noextract
 val create16: #a:Type
   -> x0:a -> x1:a -> x2:a -> x3:a -> x4:a -> x5:a -> x6:a -> x7:a
+  -> x8:a -> x9:a -> x10:a -> x11:a -> x12:a -> x13:a -> x14:a -> x15:a -> lseq a 16
+
+val create16_lemma: #a:Type
+  -> x0:a -> x1:a -> x2:a -> x3:a -> x4:a -> x5:a -> x6:a -> x7:a
   -> x8:a -> x9:a -> x10:a -> x11:a -> x12:a -> x13:a -> x14:a -> x15:a ->
-  s:lseq a 16{
+  Lemma (let s = create16 x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 in
     s.[0] == x0 /\ s.[1] == x1 /\
     s.[2] == x2 /\ s.[3] == x3 /\
     s.[4] == x4 /\ s.[5] == x5 /\
@@ -62,7 +72,9 @@ val create16: #a:Type
     s.[8] == x8 /\ s.[9] == x9 /\
     s.[10] == x10 /\ s.[11] == x11 /\
     s.[12] == x12 /\ s.[13] == x13 /\
-    s.[14] == x14 /\ s.[15] == x15}
+    s.[14] == x14 /\ s.[15] == x15)
+  [SMTPat (create16 #a x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15)]
+
 
 inline_for_extraction noextract
 val create32: #a:Type

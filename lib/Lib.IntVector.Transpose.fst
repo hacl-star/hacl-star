@@ -1,7 +1,13 @@
 module Lib.IntVector.Transpose
 
+module Loops = Lib.LoopCombinators
+
+
 #set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
+///
+///  transpose4x4
+///
 
 inline_for_extraction noextract
 val transpose4x4_uint32: #t:v_inttype{t == U32} -> vec_t4 t -> vec_t4 t
@@ -24,6 +30,9 @@ let transpose4x4 #t vs =
   | U32 -> transpose4x4_uint32 #t vs
   | _ -> admit()
 
+///
+///   transpose8x8
+///
 
 inline_for_extraction noextract
 val transpose8x8_uint32: #t:v_inttype{t == U32} -> vec_t8 t -> vec_t8 t
@@ -57,7 +66,6 @@ let transpose8x8_uint32 #t vs =
   let v7''' = vec_interleave_high_n 4 v3'' v7'' in
   (v0''',v2''',v4''',v6''',v1''',v3''',v5''',v7''')
 
-
 let transpose8x8 #t vs =
   match t with
   | U32 -> transpose8x8_uint32 #t vs
@@ -65,10 +73,9 @@ let transpose8x8 #t vs =
 
 
 inline_for_extraction noextract
-val transpose16x16_uint32_lseq: #t:v_inttype{t == U32} -> vs:lseq (vec_t t 16) 16 -> lseq (vec_t t 16) 16
-let transpose16x16_uint32_lseq #t vs =
-  let (v0,v1,v2,v3,v4,v5,v6,v7) = (vs.[0],vs.[1],vs.[2],vs.[3],vs.[4],vs.[5],vs.[6],vs.[7]) in
-  let (v8,v9,v10,v11,v12,v13,v14,v15) = (vs.[8],vs.[9],vs.[10],vs.[11],vs.[12],vs.[13],vs.[14],vs.[15]) in
+val transpose16x16_uint32: #t:v_inttype{t == U32} -> vs:(vec_t16 t & vec_t16 t) -> (vec_t16 t & vec_t16 t)
+let transpose16x16_uint32 #t vs =
+  let ((v0,v1,v2,v3,v4,v5,v6,v7),(v8,v9,v10,v11,v12,v13,v14,v15)) = vs in
 
   let v0' = vec_interleave_low v0 v1 in
   let v1' = vec_interleave_high v0 v1 in
@@ -136,178 +143,270 @@ let transpose16x16_uint32_lseq #t vs =
   let v7 = vec_interleave_low_n 8 v7' v15' in
   let v15 = vec_interleave_high_n 8 v7' v15' in
 
-  create16 v0 v2 v1 v3 v4 v6 v5 v7 v8 v10 v9 v11 v12 v14 v13 v15
+  (v0,v2,v1,v3,v4,v6,v5,v7), (v8,v10,v9,v11,v12,v14,v13,v15)
 
 
-let transpose16x16_lseq #t vs =
+let transpose16x16 #t vs =
   match t with
-  | U32 -> transpose16x16_uint32_lseq #t vs
+  | U32 -> transpose16x16_uint32 #t vs
   | _ -> admit()
 
 
+///
+///  generic transpose
+///
 
-val transpose4x4_uint32_lemma_ij: #t:v_inttype{t == U32}
-  -> vs:lseq (vec_t t 4) 4 -> i:nat{i < 4} -> j:nat{j < 4} ->
-  Lemma ((vec_v (transpose4x4_lseq vs).[i]).[j] == (vec_v vs.[j]).[i])
+inline_for_extraction noextract
+val transposewxw_uint32_f_l:
+    #w:width
+  -> n:nat{pow2 n == w}
+  -> i:nat{i < n}
+  -> lseq (vec_t U32 w) w
+  -> l:nat{l < w} ->
+  vec_t U32 w
 
-let transpose4x4_uint32_lemma_ij #t vs i j =
-  let (v0,v1,v2,v3) = (vs.[0],vs.[1],vs.[2],vs.[3]) in
-  let v0' = vec_interleave_low v0 v1 in
-  vec_interleave_low_lemma_uint32_4 v0 v1;
-  let v1' = vec_interleave_high v0 v1 in
-  vec_interleave_high_lemma_uint32_4 v0 v1;
-  let v2' = vec_interleave_low v2 v3 in
-  vec_interleave_low_lemma_uint32_4 v2 v3;
-  let v3' = vec_interleave_high v2 v3 in
-  vec_interleave_high_lemma_uint32_4 v2 v3;
+let transposewxw_uint32_f_l #w n i vs l =
+  Math.Lemmas.pow2_multiplication_modulo_lemma_1 1 i n;
+  if l % (2 * pow2 i) < pow2 i
+  then begin
+    assume (l + pow2 i < w);
+    vec_interleave_low_n (pow2 i) vs.[l] vs.[l + pow2 i] end
+  else
+    vec_interleave_high_n (pow2 i) vs.[l - pow2 i] vs.[l]
 
-  let v0'' = vec_interleave_low_n 2 v0' v2' in
-  vec_interleave_low_n_lemma_uint32_4_2 v0' v2';
-  let v1'' = vec_interleave_high_n 2 v0' v2' in
-  vec_interleave_high_n_lemma_uint32_4_2 v0' v2';
-  let v2'' = vec_interleave_low_n 2 v1' v3' in
-  vec_interleave_low_n_lemma_uint32_4_2 v1' v3';
-  let v3'' = vec_interleave_high_n 2 v1' v3' in
-  vec_interleave_high_n_lemma_uint32_4_2 v1' v3';
-  let res = create4 v0'' v1'' v2'' v3'' in
-  ()
+
+inline_for_extraction noextract
+val transposewxw_uint32_f: #w:width -> n:nat{pow2 n == w} -> i:nat{i < n} -> lseq (vec_t U32 w) w -> lseq (vec_t U32 w) w
+let transposewxw_uint32_f #w n i vs =
+  createi w (transposewxw_uint32_f_l #w n i vs)
+
+val transposewxw_uint32_lseq: #w:width -> n:nat{pow2 n == w} -> vs:lseq (vec_t U32 w) w -> lseq (vec_t U32 w) w
+let transposewxw_uint32_lseq #w n vs =
+  Loops.repeati n (transposewxw_uint32_f #w n) vs
+
+///
+///  transposewxw_lseq lemmas
+///
+val transpose4x4_lseq_is_transposewxw_uint32: vs:lseq (vec_t U32 4) 4 ->
+  Lemma
+   (let r = transposewxw_uint32_lseq 2 vs in
+    create4 r.[0] r.[2] r.[1] r.[3] `Seq.equal` transpose4x4_lseq #U32 vs)
+
+let transpose4x4_lseq_is_transposewxw_uint32 vs0 =
+  let n = 2 in
+  Loops.unfold_repeati n (transposewxw_uint32_f #4 n) vs0 1;
+  Loops.unfold_repeati n (transposewxw_uint32_f #4 n) vs0 0;
+  Loops.eq_repeati0 n (transposewxw_uint32_f #4 n) vs0
+
+
+#push-options "--fuel 1"
+val transpose8x8_lseq_is_transposewxw_uint32: vs:lseq (vec_t U32 8) 8 ->
+  Lemma
+   (let r = transposewxw_uint32_lseq 3 vs in
+    create8 r.[0] r.[2] r.[1] r.[3] r.[4] r.[6] r.[5] r.[7] `Seq.equal` transpose8x8_lseq #U32 vs)
+
+let transpose8x8_lseq_is_transposewxw_uint32 vs0 =
+  let n = 3 in
+  Loops.unfold_repeati n (transposewxw_uint32_f #8 n) vs0 2;
+  Loops.unfold_repeati n (transposewxw_uint32_f #8 n) vs0 1;
+  Loops.unfold_repeati n (transposewxw_uint32_f #8 n) vs0 0;
+  Loops.eq_repeati0 n (transposewxw_uint32_f #8 n) vs0;
+  //let r = transposewxw_uint32_lseq 3 vs0 in
+  //eq_intro (create8 r.[0] r.[2] r.[1] r.[3] r.[4] r.[6] r.[5] r.[7]) (transpose8x8_lseq #U32 vs0)
+  admit()
+#pop-options
+
+
+#push-options "--fuel 1"
+val transpose16x16_lseq_is_transposewxw_uint32: vs:lseq (vec_t U32 16) 16 ->
+  Lemma
+   (let r = transposewxw_uint32_lseq 4 vs in
+    create16 r.[0] r.[2] r.[1] r.[3] r.[4] r.[6] r.[5] r.[7] r.[8] r.[10] r.[9] r.[11] r.[12] r.[14] r.[13] r.[15]
+      `Seq.equal` transpose16x16_lseq #U32 vs)
+
+let transpose16x16_lseq_is_transposewxw_uint32 vs0 =
+  let n = 4 in
+  Loops.unfold_repeati n (transposewxw_uint32_f #16 n) vs0 3;
+  Loops.unfold_repeati n (transposewxw_uint32_f #16 n) vs0 2;
+  Loops.unfold_repeati n (transposewxw_uint32_f #16 n) vs0 1;
+  Loops.unfold_repeati n (transposewxw_uint32_f #16 n) vs0 0;
+  Loops.eq_repeati0 n (transposewxw_uint32_f #16 n) vs0;
+  let r = transposewxw_uint32_lseq n vs0 in
+  let res_wxw = create16 r.[0] r.[2] r.[1] r.[3] r.[4] r.[6] r.[5] r.[7] r.[8] r.[10] r.[9] r.[11] r.[12] r.[14] r.[13] r.[15] in
+  let res = transpose16x16_lseq #U32 vs0 in
+  //eq_intro res_wxw res;
+  admit()
+#pop-options
+
+val transpose4x4_lemma_ij: vs:lseq (vec_t U32 4) 4 -> i:nat{i < 4} -> j:nat{j < 4} ->
+  Lemma ((vec_v (transpose4x4_lseq #U32 vs).[i]).[j] == (vec_v vs.[j]).[i])
+
+let transpose4x4_lemma_ij vs0 i j =
+  transpose4x4_lseq_is_transposewxw_uint32 vs0;
+  let n = 2 in
+  let r = transposewxw_uint32_lseq 2 vs0 in
+  Loops.unfold_repeati n (transposewxw_uint32_f #4 n) vs0 1;
+  Loops.unfold_repeati n (transposewxw_uint32_f #4 n) vs0 0;
+  Loops.eq_repeati0 n (transposewxw_uint32_f #4 n) vs0;
+
+  let res0 = transposewxw_uint32_f 2 0 vs0 in
+  let res1 = transposewxw_uint32_f 2 1 res0 in
+
+  vec_interleave_low_n_lemma_uint32_4_2 res0.[0] res0.[2];
+  vec_interleave_high_n_lemma_uint32_4_2 res0.[0] res0.[2];
+  vec_interleave_low_n_lemma_uint32_4_2 res0.[1] res0.[3];
+  vec_interleave_high_n_lemma_uint32_4_2 res0.[1] res0.[3];
+
+  vec_interleave_low_lemma_uint32_4 vs0.[0] vs0.[1];
+  vec_interleave_high_lemma_uint32_4 vs0.[0] vs0.[1];
+  vec_interleave_low_lemma_uint32_4 vs0.[2] vs0.[3];
+  vec_interleave_high_lemma_uint32_4 vs0.[2] vs0.[3]
+
+
+val transpose8x8_lemma_ij: vs:lseq (vec_t U32 8) 8 -> i:nat{i < 8} -> j:nat{j < 8} ->
+  Lemma ((vec_v (transpose8x8_lseq #U32 vs).[i]).[j] == (vec_v vs.[j]).[i])
+
+let transpose8x8_lemma_ij vs0 i j =
+  transpose8x8_lseq_is_transposewxw_uint32 vs0;
+  let n = 3 in
+  Loops.unfold_repeati n (transposewxw_uint32_f #8 n) vs0 2;
+  Loops.unfold_repeati n (transposewxw_uint32_f #8 n) vs0 1;
+  Loops.unfold_repeati n (transposewxw_uint32_f #8 n) vs0 0;
+  Loops.eq_repeati0 n (transposewxw_uint32_f #8 n) vs0;
+
+  let res0 = transposewxw_uint32_f n 0 vs0 in
+  let res1 = transposewxw_uint32_f n 1 res0 in
+  let res2 = transposewxw_uint32_f n 2 res1 in
+
+  vec_interleave_low_n_lemma_uint32_8_4 res1.[0] res1.[4];
+  vec_interleave_low_n_lemma_uint32_8_4 res1.[1] res1.[5];
+  vec_interleave_low_n_lemma_uint32_8_4 res1.[2] res1.[6];
+  vec_interleave_low_n_lemma_uint32_8_4 res1.[3] res1.[7];
+  vec_interleave_high_n_lemma_uint32_8_4 res1.[0] res1.[4];
+  vec_interleave_high_n_lemma_uint32_8_4 res1.[1] res1.[5];
+  vec_interleave_high_n_lemma_uint32_8_4 res1.[2] res1.[6];
+  vec_interleave_high_n_lemma_uint32_8_4 res1.[3] res1.[7];
+
+  vec_interleave_low_n_lemma_uint32_8_2 res0.[0] res0.[2];
+  vec_interleave_low_n_lemma_uint32_8_2 res0.[1] res0.[3];
+  vec_interleave_low_n_lemma_uint32_8_2 res0.[4] res0.[6];
+  vec_interleave_low_n_lemma_uint32_8_2 res0.[5] res0.[7];
+  vec_interleave_high_n_lemma_uint32_8_2 res0.[0] res0.[2];
+  vec_interleave_high_n_lemma_uint32_8_2 res0.[1] res0.[3];
+  vec_interleave_high_n_lemma_uint32_8_2 res0.[4] res0.[6];
+  vec_interleave_high_n_lemma_uint32_8_2 res0.[5] res0.[7];
+
+  vec_interleave_low_lemma_uint32_8 vs0.[0] vs0.[1];
+  vec_interleave_low_lemma_uint32_8 vs0.[2] vs0.[3];
+  vec_interleave_low_lemma_uint32_8 vs0.[4] vs0.[5];
+  vec_interleave_low_lemma_uint32_8 vs0.[6] vs0.[7];
+  vec_interleave_high_lemma_uint32_8 vs0.[0] vs0.[1];
+  vec_interleave_high_lemma_uint32_8 vs0.[2] vs0.[3];
+  vec_interleave_high_lemma_uint32_8 vs0.[4] vs0.[5];
+  vec_interleave_high_lemma_uint32_8 vs0.[6] vs0.[7]
+
+
+val transpose16x16_lemma_ij: vs:lseq (vec_t U32 16) 16 -> i:nat{i < 16} -> j:nat{j < 16} ->
+  Lemma ((vec_v (transpose16x16_lseq #U32 vs).[i]).[j] == (vec_v vs.[j]).[i])
+
+let transpose16x16_lemma_ij vs0 i j =
+  transpose16x16_lseq_is_transposewxw_uint32 vs0;
+
+  Loops.unfold_repeati 4 (transposewxw_uint32_f 4) vs0 3;
+  Loops.unfold_repeati 4 (transposewxw_uint32_f 4) vs0 2;
+  Loops.unfold_repeati 4 (transposewxw_uint32_f 4) vs0 1;
+  Loops.unfold_repeati 4 (transposewxw_uint32_f 4) vs0 0;
+  Loops.eq_repeati0 4 (transposewxw_uint32_f 4) vs0;
+
+  let res0 = transposewxw_uint32_f 4 0 vs0 in
+  let res1 = transposewxw_uint32_f 4 1 res0 in
+  let res2 = transposewxw_uint32_f 4 2 res1 in
+  let res3 = transposewxw_uint32_f 4 3 res2 in
+
+ vec_interleave_low_n_lemma_uint32_16_8 res2.[0] res2.[8];
+  vec_interleave_low_n_lemma_uint32_16_8 res2.[1] res2.[9];
+  vec_interleave_low_n_lemma_uint32_16_8 res2.[2] res2.[10];
+  vec_interleave_low_n_lemma_uint32_16_8 res2.[3] res2.[11];
+  vec_interleave_low_n_lemma_uint32_16_8 res2.[4] res2.[12];
+  vec_interleave_low_n_lemma_uint32_16_8 res2.[5] res2.[13];
+  vec_interleave_low_n_lemma_uint32_16_8 res2.[6] res2.[14];
+  vec_interleave_low_n_lemma_uint32_16_8 res2.[7] res2.[15];
+
+  vec_interleave_high_n_lemma_uint32_16_8 res2.[0] res2.[8];
+  vec_interleave_high_n_lemma_uint32_16_8 res2.[1] res2.[9];
+  vec_interleave_high_n_lemma_uint32_16_8 res2.[2] res2.[10];
+  vec_interleave_high_n_lemma_uint32_16_8 res2.[3] res2.[11];
+  vec_interleave_high_n_lemma_uint32_16_8 res2.[4] res2.[12];
+  vec_interleave_high_n_lemma_uint32_16_8 res2.[5] res2.[13];
+  vec_interleave_high_n_lemma_uint32_16_8 res2.[6] res2.[14];
+  vec_interleave_high_n_lemma_uint32_16_8 res2.[7] res2.[15];
+
+  vec_interleave_low_n_lemma_uint32_16_4 res1.[0] res1.[4];
+  vec_interleave_low_n_lemma_uint32_16_4 res1.[1] res1.[5];
+  vec_interleave_low_n_lemma_uint32_16_4 res1.[2] res1.[6];
+  vec_interleave_low_n_lemma_uint32_16_4 res1.[3] res1.[7];
+  vec_interleave_low_n_lemma_uint32_16_4 res1.[8] res1.[12];
+  vec_interleave_low_n_lemma_uint32_16_4 res1.[9] res1.[13];
+  vec_interleave_low_n_lemma_uint32_16_4 res1.[10] res1.[14];
+  vec_interleave_low_n_lemma_uint32_16_4 res1.[11] res1.[15];
+
+  vec_interleave_high_n_lemma_uint32_16_4 res1.[0] res1.[4];
+  vec_interleave_high_n_lemma_uint32_16_4 res1.[1] res1.[5];
+  vec_interleave_high_n_lemma_uint32_16_4 res1.[2] res1.[6];
+  vec_interleave_high_n_lemma_uint32_16_4 res1.[3] res1.[7];
+  vec_interleave_high_n_lemma_uint32_16_4 res1.[8] res1.[12];
+  vec_interleave_high_n_lemma_uint32_16_4 res1.[9] res1.[13];
+  vec_interleave_high_n_lemma_uint32_16_4 res1.[10] res1.[14];
+  vec_interleave_high_n_lemma_uint32_16_4 res1.[11] res1.[15];
+
+  vec_interleave_low_n_lemma_uint32_16_2 res0.[0] res0.[2];
+  vec_interleave_low_n_lemma_uint32_16_2 res0.[1] res0.[3];
+  vec_interleave_low_n_lemma_uint32_16_2 res0.[4] res0.[6];
+  vec_interleave_low_n_lemma_uint32_16_2 res0.[5] res0.[7];
+  vec_interleave_low_n_lemma_uint32_16_2 res0.[8] res0.[10];
+  vec_interleave_low_n_lemma_uint32_16_2 res0.[9] res0.[11];
+  vec_interleave_low_n_lemma_uint32_16_2 res0.[12] res0.[14];
+  vec_interleave_low_n_lemma_uint32_16_2 res0.[13] res0.[15];
+
+  vec_interleave_high_n_lemma_uint32_16_2 res0.[0] res0.[2];
+  vec_interleave_high_n_lemma_uint32_16_2 res0.[1] res0.[3];
+  vec_interleave_high_n_lemma_uint32_16_2 res0.[4] res0.[6];
+  vec_interleave_high_n_lemma_uint32_16_2 res0.[5] res0.[7];
+  vec_interleave_high_n_lemma_uint32_16_2 res0.[8] res0.[10];
+  vec_interleave_high_n_lemma_uint32_16_2 res0.[9] res0.[11];
+  vec_interleave_high_n_lemma_uint32_16_2 res0.[12] res0.[14];
+  vec_interleave_high_n_lemma_uint32_16_2 res0.[13] res0.[15];
+
+  vec_interleave_low_lemma_uint32_16 vs0.[0] vs0.[1];
+  vec_interleave_low_lemma_uint32_16 vs0.[2] vs0.[3];
+  vec_interleave_low_lemma_uint32_16 vs0.[4] vs0.[5];
+  vec_interleave_low_lemma_uint32_16 vs0.[6] vs0.[7];
+  vec_interleave_low_lemma_uint32_16 vs0.[8] vs0.[9];
+  vec_interleave_low_lemma_uint32_16 vs0.[10] vs0.[11];
+  vec_interleave_low_lemma_uint32_16 vs0.[12] vs0.[13];
+  vec_interleave_low_lemma_uint32_16 vs0.[14] vs0.[15];
+
+  vec_interleave_high_lemma_uint32_16 vs0.[0] vs0.[1];
+  vec_interleave_high_lemma_uint32_16 vs0.[2] vs0.[3];
+  vec_interleave_high_lemma_uint32_16 vs0.[4] vs0.[5];
+  vec_interleave_high_lemma_uint32_16 vs0.[6] vs0.[7];
+  vec_interleave_high_lemma_uint32_16 vs0.[8] vs0.[9];
+  vec_interleave_high_lemma_uint32_16 vs0.[10] vs0.[11];
+  vec_interleave_high_lemma_uint32_16 vs0.[12] vs0.[13];
+  vec_interleave_high_lemma_uint32_16 vs0.[14] vs0.[15]
 
 
 let transpose4x4_lemma #t vs =
   match t with
-  | U32 -> Classical.forall_intro_2 (transpose4x4_uint32_lemma_ij vs)
+  | U32 -> Classical.forall_intro_2 (transpose4x4_lemma_ij vs)
   | _ -> admit()
-
-
-unfold
-let op_Array_Access (#t:v_inttype) (#w:width) (a:vec_t t w) i = (vec_v a).[i]
-
-
-val transpose8x8_uint32_lemma_ij: #t:v_inttype{t == U32}
-  -> vs:lseq (vec_t t 8) 8 -> i:nat{i < 8} -> j:nat{j < 8} ->
-  Lemma ((vec_v (transpose8x8_lseq vs).[i]).[j] == (vec_v vs.[j]).[i])
-
-let transpose8x8_uint32_lemma_ij #t vs i j =
-  let (v0,v1,v2,v3,v4,v5,v6,v7) = (vs.[0],vs.[1],vs.[2],vs.[3],vs.[4],vs.[5],vs.[6],vs.[7]) in
-  let v0' = vec_interleave_low v0 v1 in
-  vec_interleave_low_lemma_uint32_8 v0 v1;
-  let r0: lseq uint32 8 = create8 v0.(0) v1.(0) v0.(1) v1.(1) v0.(4) v1.(4) v0.(5) v1.(5) in
-  assert (vec_v v0' == r0);
-  let v1' = vec_interleave_high v0 v1 in
-  vec_interleave_high_lemma_uint32_8 v0 v1;
-  let r1: lseq uint32 8 = create8 v0.(2) v1.(2) v0.(3) v1.(3) v0.(6) v1.(6) v0.(7) v1.(7) in
-  assert (vec_v v1' == r1);
-  let v2' = vec_interleave_low v2 v3 in
-  vec_interleave_low_lemma_uint32_8 v2 v3;
-  let r2: lseq uint32 8 = create8 v2.(0) v3.(0) v2.(1) v3.(1) v2.(4) v3.(4) v2.(5) v3.(5) in
-  assert (vec_v v2' == r2);
-  let v3' = vec_interleave_high v2 v3 in
-  vec_interleave_high_lemma_uint32_8 v2 v3;
-  let r3: lseq uint32 8 = create8 v2.(2) v3.(2) v2.(3) v3.(3) v2.(6) v3.(6) v2.(7) v3.(7) in
-  assert (vec_v v3' == r3);
-  let v4' = vec_interleave_low v4 v5 in
-  vec_interleave_low_lemma_uint32_8 v4 v5;
-  let r4: lseq uint32 8 = create8 v4.(0) v5.(0) v4.(1) v5.(1) v4.(4) v5.(4) v4.(5) v5.(5) in
-  assert (vec_v v4' == r4);
-  let v5' = vec_interleave_high v4 v5 in
-  vec_interleave_high_lemma_uint32_8 v4 v5;
-  let r5: lseq uint32 8 = create8 v4.(2) v5.(2) v4.(3) v5.(3) v4.(6) v5.(6) v4.(7) v5.(7) in
-  assert (vec_v v5' == r5);
-  let v6' = vec_interleave_low v6 v7 in
-  vec_interleave_low_lemma_uint32_8 v6 v7;
-  let r6: lseq uint32 8 = create8 v6.(0) v7.(0) v6.(1) v7.(1) v6.(4) v7.(4) v6.(5) v7.(5) in
-  assert (vec_v v6' == r6);
-  let v7' = vec_interleave_high v6 v7 in
-  vec_interleave_high_lemma_uint32_8 v6 v7;
-  let r7: lseq uint32 8 = create8 v6.(2) v7.(2) v6.(3) v7.(3) v6.(6) v7.(6) v6.(7) v7.(7) in
-  assert (vec_v v7' == r7);
-
-  let v0'' = vec_interleave_low_n 2 v0' v2' in
-  vec_interleave_low_n_lemma_uint32_8_2 v0' v2';
-  let r0': lseq uint32 8 = create8 v0.(0) v1.(0) v2.(0) v3.(0) v0.(4) v1.(4) v2.(4) v3.(4) in
-  assert (vec_v v0'' == r0');
-
-  let v1'' = vec_interleave_high_n 2 v0' v2' in
-  vec_interleave_high_n_lemma_uint32_8_2 v0' v2';
-  let r1': lseq uint32 8 = create8 v0.(1) v1.(1) v2.(1) v3.(1) v0.(5) v1.(5) v2.(5) v3.(5) in
-  assert (vec_v v1'' == r1');
-
-  let v2'' = vec_interleave_low_n 2 v1' v3' in
-  vec_interleave_low_n_lemma_uint32_8_2 v1' v3';
-  let r2': lseq uint32 8 = create8 v0.(2) v1.(2) v2.(2) v3.(2) v0.(6) v1.(6) v2.(6) v3.(6) in
-  assert (vec_v v2'' == r2');
-
-  let v3'' = vec_interleave_high_n 2 v1' v3' in
-  vec_interleave_high_n_lemma_uint32_8_2 v1' v3';
-  let r3': lseq uint32 8 = create8 v0.(3) v1.(3) v2.(3) v3.(3) v0.(7) v1.(7) v2.(7) v3.(7) in
-  assert (vec_v v3'' == r3');
-
-  let v4'' = vec_interleave_low_n 2 v4' v6' in
-  vec_interleave_low_n_lemma_uint32_8_2 v4' v6';
-  let r4': lseq uint32 8 = create8 v4.(0) v5.(0) v6.(0) v7.(0) v4.(4) v5.(4) v6.(4) v7.(4) in
-  assert (vec_v v4'' == r4');
-
-  let v5'' = vec_interleave_high_n 2 v4' v6' in
-  vec_interleave_high_n_lemma_uint32_8_2 v4' v6';
-  let r5': lseq uint32 8 = create8 v4.(1) v5.(1) v6.(1) v7.(1) v4.(5) v5.(5) v6.(5) v7.(5) in
-  assert (vec_v v5'' == r5');
-
-  let v6'' = vec_interleave_low_n 2 v5' v7' in
-  vec_interleave_low_n_lemma_uint32_8_2 v5' v7';
-  let r6': lseq uint32 8 = create8 v4.(2) v5.(2) v6.(2) v7.(2) v4.(6) v5.(6) v6.(6) v7.(6) in
-  assert (vec_v v6'' == r6');
-
-  let v7'' = vec_interleave_high_n 2 v5' v7' in
-  vec_interleave_high_n_lemma_uint32_8_2 v5' v7';
-  let r7': lseq uint32 8 = create8 v4.(3) v5.(3) v6.(3) v7.(3) v4.(7) v5.(7) v6.(7) v7.(7) in
-  assert (vec_v v7'' == r7');
-
-  let v0''' = vec_interleave_low_n 4 v0'' v4'' in
-  vec_interleave_low_n_lemma_uint32_8_4 v0'' v4'';
-  let r0'': lseq uint32 8 = create8 v0.(0) v1.(0) v2.(0) v3.(0) v4.(0) v5.(0) v6.(0) v7.(0) in
-  assert (vec_v v0''' == r0'');
-
-  let v1''' = vec_interleave_high_n 4 v0'' v4'' in
-  vec_interleave_high_n_lemma_uint32_8_4 v0'' v4'';
-  let r1'': lseq uint32 8 = create8 v0.(4) v1.(4) v2.(4) v3.(4) v4.(4) v5.(4) v6.(4) v7.(4) in
-  assert (vec_v v1''' == r1'');
-
-  let v2''' = vec_interleave_low_n 4 v1'' v5'' in
-  vec_interleave_low_n_lemma_uint32_8_4 v1'' v5'';
-  let r2'': lseq uint32 8 = create8 v0.(1) v1.(1) v2.(1) v3.(1) v4.(1) v5.(1) v6.(1) v7.(1) in
-  assert (vec_v v2''' == r2'');
-
-  let v3''' = vec_interleave_high_n 4 v1'' v5'' in
-  vec_interleave_high_n_lemma_uint32_8_4 v1'' v5'';
-  let r3'': lseq uint32 8 = create8 v0.(5) v1.(5) v2.(5) v3.(5) v4.(5) v5.(5) v6.(5) v7.(5) in
-  assert (vec_v v3''' == r3'');
-
-  let v4''' = vec_interleave_low_n 4 v2'' v6'' in
-  vec_interleave_low_n_lemma_uint32_8_4 v2'' v6'';
-  let r4'': lseq uint32 8 = create8 v0.(2) v1.(2) v2.(2) v3.(2) v4.(2) v5.(2) v6.(2) v7.(2) in
-  assert (vec_v v4''' == r4'');
-
-  let v5''' = vec_interleave_high_n 4 v2'' v6'' in
-  vec_interleave_high_n_lemma_uint32_8_4 v2'' v6'';
-  let r5'': lseq uint32 8 = create8 v0.(6) v1.(6) v2.(6) v3.(6) v4.(6) v5.(6) v6.(6) v7.(6) in
-  assert (vec_v v5''' == r5'');
-
-  let v6''' = vec_interleave_low_n 4 v3'' v7'' in
-  vec_interleave_low_n_lemma_uint32_8_4 v3'' v7'';
-  let r6'': lseq uint32 8 = create8 v0.(3) v1.(3) v2.(3) v3.(3) v4.(3) v5.(3) v6.(3) v7.(3) in
-  assert (vec_v v6''' == r6'');
-
-  let v7''' = vec_interleave_high_n 4 v3'' v7'' in
-  vec_interleave_high_n_lemma_uint32_8_4 v3'' v7'';
-  let r7'': lseq uint32 8 = create8 v0.(7) v1.(7) v2.(7) v3.(7) v4.(7) v5.(7) v6.(7) v7.(7) in
-  assert (vec_v v7''' == r7'');
-  let res = create8 v0''' v2''' v4''' v6''' v1''' v3''' v5''' v7''' in
-  ()
-
 
 let transpose8x8_lemma #t vs =
   match t with
-  | U32 -> Classical.forall_intro_2 (transpose8x8_uint32_lemma_ij vs)
+  | U32 -> Classical.forall_intro_2 (transpose8x8_lemma_ij vs)
   | _ -> admit()
 
-let transpose16x16_lemma #t vs = admit()
+let transpose16x16_lemma #t vs =
+  match t with
+  | U32 -> Classical.forall_intro_2 (transpose16x16_lemma_ij vs)
+  | _ -> admit()
