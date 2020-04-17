@@ -8,7 +8,7 @@ open Lib.IntVector.Transpose
 
 open Hacl.Spec.Chacha20.Vec
 
-#set-options "--z3rlimit 50 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
+#set-options "--z3rlimit 50 --fuel 0 --ifuel 1"
 
 /// (vec_v (transpose #w k).[i / w]).[i % w] == ((transpose_state k).[i / 16]).[i % 16]
 
@@ -51,3 +51,4 @@ let transpose_lemma_index #w k i =
   | 1 -> ()
   | 4 -> transpose4_lemma k i
   | 8 -> transpose8_lemma k i
+  | 16 -> transpose16x16_lemma k

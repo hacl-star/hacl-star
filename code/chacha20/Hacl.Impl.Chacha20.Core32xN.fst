@@ -137,6 +137,20 @@ let transpose8 st =
   create16_st st v0 v8 v1 v9 v2 v10 v3 v11 v4 v12 v5 v13 v6 v14 v7 v15
 
 inline_for_extraction noextract
+val transpose16: st:state 16 ->
+  Stack unit
+    (requires (fun h -> live h st))
+    (ensures (fun h0 _ h1 -> modifies (loc st) h0 h1 /\
+      as_seq h1 st == Spec.transpose16 (as_seq h0 st)))
+let transpose16 st =
+  let (v0,v1,v2,v3,v4,v5,v6,v7) = (st.(0ul),st.(1ul),st.(2ul),st.(3ul),st.(4ul),st.(5ul),st.(6ul),st.(7ul)) in
+  let (v8,v9,v10,v11,v12,v13,v14,v15) = (st.(8ul),st.(9ul),st.(10ul),st.(11ul),st.(12ul),st.(13ul),st.(14ul),st.(15ul)) in
+  let ((r0,r1,r2,r3,r4,r5,r6,r7),(r8,r9,r10,r11,r12,r13,r14,r15)) =
+    VecTranspose.transpose16x16 ((v0,v1,v2,v3,v4,v5,v6,v7), (v8,v9,v10,v11,v12,v13,v14,v15)) in
+  create16_st st r0 r1 r2 r3 r4 r5 r6 r7 r8 r9 r10 r11 r12 r13 r14 r15
+
+
+inline_for_extraction noextract
 val transpose:
     #w:lanes
   -> st:state w ->
@@ -149,6 +163,7 @@ let transpose #w st =
   | 1 -> transpose1 st
   | 4 -> transpose4 st
   | 8 -> transpose8 st
+  | 16 -> transpose16 st
 
 inline_for_extraction noextract
 val xor_block:
