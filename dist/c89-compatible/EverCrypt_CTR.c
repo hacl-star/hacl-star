@@ -261,18 +261,22 @@ EverCrypt_CTR_init(
   {
     case Spec_Cipher_Expansion_Vale_AES128:
       {
+        #if EVERCRYPT_TARGETCONFIG_X64
         uint8_t *keys_b = ek;
         uint8_t *hkeys_b = ek + (uint32_t)176U;
         uint64_t scrut = aes128_key_expansion(k, keys_b);
         uint64_t scrut1 = aes128_keyhash_init(keys_b, hkeys_b);
+        #endif
         break;
       }
     case Spec_Cipher_Expansion_Vale_AES256:
       {
+        #if EVERCRYPT_TARGETCONFIG_X64
         uint8_t *keys_b = ek;
         uint8_t *hkeys_b = ek + (uint32_t)240U;
         uint64_t scrut = aes256_key_expansion(k, keys_b);
         uint64_t scrut1 = aes256_keyhash_init(keys_b, hkeys_b);
+        #endif
         break;
       }
     case Spec_Cipher_Expansion_Hacl_CHACHA20:
@@ -304,122 +308,112 @@ void EverCrypt_CTR_update_block(EverCrypt_CTR_state_s *p, uint8_t *dst, uint8_t 
   uint8_t *iv = scrut0.iv;
   uint8_t *ek = scrut0.xkey;
   uint32_t c0 = scrut0.ctr;
-  EverCrypt_CTR_state_s scrut1;
-  uint32_t c010;
-  uint8_t *ek10;
-  uint32_t iv_len10;
-  uint8_t *iv10;
-  EverCrypt_CTR_state_s scrut2;
-  uint32_t c01;
-  uint8_t *ek1;
-  uint32_t iv_len1;
-  uint8_t *iv1;
   switch (i)
   {
     case Spec_Cipher_Expansion_Vale_AES128:
       {
-        scrut1 = *p;
-        c010 = scrut1.ctr;
-        ek10 = scrut1.xkey;
-        iv_len10 = scrut1.iv_len;
-        iv10 = scrut1.iv;
+        #if EVERCRYPT_TARGETCONFIG_X64
+        EverCrypt_CTR_state_s scrut1 = *p;
+        uint32_t c01 = scrut1.ctr;
+        uint8_t *ek1 = scrut1.xkey;
+        uint32_t iv_len1 = scrut1.iv_len;
+        uint8_t *iv1 = scrut1.iv;
+        uint8_t ctr_block[16U] = { 0U };
+        FStar_UInt128_uint128 uu____0;
+        FStar_UInt128_uint128 c;
+        uint8_t *uu____1;
+        memcpy(ctr_block, iv1, iv_len1 * sizeof (iv1[0U]));
+        uu____0 = load128_be(ctr_block);
+        c = FStar_UInt128_add_mod(uu____0, FStar_UInt128_uint64_to_uint128((uint64_t)c01));
+        store128_le(ctr_block, c);
+        uu____1 = ek1;
         {
-          uint8_t ctr_block[16U] = { 0U };
-          FStar_UInt128_uint128 uu____0;
-          FStar_UInt128_uint128 c;
-          uint8_t *uu____1;
-          memcpy(ctr_block, iv10, iv_len10 * sizeof (iv10[0U]));
-          uu____0 = load128_be(ctr_block);
-          c = FStar_UInt128_add_mod(uu____0, FStar_UInt128_uint64_to_uint128((uint64_t)c010));
-          store128_le(ctr_block, c);
-          uu____1 = ek10;
-          {
-            uint8_t inout_b[16U] = { 0U };
-            uint32_t num_blocks = (uint32_t)(uint64_t)16U / (uint32_t)16U;
-            uint32_t num_bytes_ = num_blocks * (uint32_t)16U;
-            uint8_t *in_b_ = src;
-            uint8_t *out_b_ = dst;
-            uint64_t scrut;
-            uint32_t c1;
-            memcpy(inout_b,
-              src + num_bytes_,
-              (uint32_t)(uint64_t)16U % (uint32_t)16U * sizeof (src[0U]));
-            scrut =
-              gctr128_bytes(in_b_,
-                (uint64_t)16U,
-                out_b_,
-                inout_b,
-                uu____1,
-                ctr_block,
-                (uint64_t)num_blocks);
-            memcpy(dst + num_bytes_,
+          uint8_t inout_b[16U] = { 0U };
+          uint32_t num_blocks = (uint32_t)(uint64_t)16U / (uint32_t)16U;
+          uint32_t num_bytes_ = num_blocks * (uint32_t)16U;
+          uint8_t *in_b_ = src;
+          uint8_t *out_b_ = dst;
+          uint64_t scrut;
+          uint32_t c1;
+          memcpy(inout_b,
+            src + num_bytes_,
+            (uint32_t)(uint64_t)16U % (uint32_t)16U * sizeof (src[0U]));
+          scrut =
+            gctr128_bytes(in_b_,
+              (uint64_t)16U,
+              out_b_,
               inout_b,
-              (uint32_t)(uint64_t)16U % (uint32_t)16U * sizeof (inout_b[0U]));
-            c1 = c010 + (uint32_t)1U;
-            {
-              EverCrypt_CTR_state_s lit;
-              lit.i = Spec_Cipher_Expansion_Vale_AES128;
-              lit.iv = iv10;
-              lit.iv_len = iv_len10;
-              lit.xkey = ek10;
-              lit.ctr = c1;
-              *p = lit;
-            }
+              uu____1,
+              ctr_block,
+              (uint64_t)num_blocks);
+          memcpy(dst + num_bytes_,
+            inout_b,
+            (uint32_t)(uint64_t)16U % (uint32_t)16U * sizeof (inout_b[0U]));
+          c1 = c01 + (uint32_t)1U;
+          {
+            EverCrypt_CTR_state_s lit;
+            lit.i = Spec_Cipher_Expansion_Vale_AES128;
+            lit.iv = iv1;
+            lit.iv_len = iv_len1;
+            lit.xkey = ek1;
+            lit.ctr = c1;
+            *p = lit;
           }
         }
+        #endif
         break;
       }
     case Spec_Cipher_Expansion_Vale_AES256:
       {
-        scrut2 = *p;
-        c01 = scrut2.ctr;
-        ek1 = scrut2.xkey;
-        iv_len1 = scrut2.iv_len;
-        iv1 = scrut2.iv;
+        #if EVERCRYPT_TARGETCONFIG_X64
+        EverCrypt_CTR_state_s scrut1 = *p;
+        uint32_t c01 = scrut1.ctr;
+        uint8_t *ek1 = scrut1.xkey;
+        uint32_t iv_len1 = scrut1.iv_len;
+        uint8_t *iv1 = scrut1.iv;
+        uint8_t ctr_block[16U] = { 0U };
+        FStar_UInt128_uint128 uu____2;
+        FStar_UInt128_uint128 c;
+        uint8_t *uu____3;
+        memcpy(ctr_block, iv1, iv_len1 * sizeof (iv1[0U]));
+        uu____2 = load128_be(ctr_block);
+        c = FStar_UInt128_add_mod(uu____2, FStar_UInt128_uint64_to_uint128((uint64_t)c01));
+        store128_le(ctr_block, c);
+        uu____3 = ek1;
         {
-          uint8_t ctr_block[16U] = { 0U };
-          FStar_UInt128_uint128 uu____2;
-          FStar_UInt128_uint128 c;
-          uint8_t *uu____3;
-          memcpy(ctr_block, iv1, iv_len1 * sizeof (iv1[0U]));
-          uu____2 = load128_be(ctr_block);
-          c = FStar_UInt128_add_mod(uu____2, FStar_UInt128_uint64_to_uint128((uint64_t)c01));
-          store128_le(ctr_block, c);
-          uu____3 = ek1;
-          {
-            uint8_t inout_b[16U] = { 0U };
-            uint32_t num_blocks = (uint32_t)(uint64_t)16U / (uint32_t)16U;
-            uint32_t num_bytes_ = num_blocks * (uint32_t)16U;
-            uint8_t *in_b_ = src;
-            uint8_t *out_b_ = dst;
-            uint64_t scrut;
-            uint32_t c1;
-            memcpy(inout_b,
-              src + num_bytes_,
-              (uint32_t)(uint64_t)16U % (uint32_t)16U * sizeof (src[0U]));
-            scrut =
-              gctr256_bytes(in_b_,
-                (uint64_t)16U,
-                out_b_,
-                inout_b,
-                uu____3,
-                ctr_block,
-                (uint64_t)num_blocks);
-            memcpy(dst + num_bytes_,
+          uint8_t inout_b[16U] = { 0U };
+          uint32_t num_blocks = (uint32_t)(uint64_t)16U / (uint32_t)16U;
+          uint32_t num_bytes_ = num_blocks * (uint32_t)16U;
+          uint8_t *in_b_ = src;
+          uint8_t *out_b_ = dst;
+          uint64_t scrut;
+          uint32_t c1;
+          memcpy(inout_b,
+            src + num_bytes_,
+            (uint32_t)(uint64_t)16U % (uint32_t)16U * sizeof (src[0U]));
+          scrut =
+            gctr256_bytes(in_b_,
+              (uint64_t)16U,
+              out_b_,
               inout_b,
-              (uint32_t)(uint64_t)16U % (uint32_t)16U * sizeof (inout_b[0U]));
-            c1 = c01 + (uint32_t)1U;
-            {
-              EverCrypt_CTR_state_s lit;
-              lit.i = Spec_Cipher_Expansion_Vale_AES256;
-              lit.iv = iv1;
-              lit.iv_len = iv_len1;
-              lit.xkey = ek1;
-              lit.ctr = c1;
-              *p = lit;
-            }
+              uu____3,
+              ctr_block,
+              (uint64_t)num_blocks);
+          memcpy(dst + num_bytes_,
+            inout_b,
+            (uint32_t)(uint64_t)16U % (uint32_t)16U * sizeof (inout_b[0U]));
+          c1 = c01 + (uint32_t)1U;
+          {
+            EverCrypt_CTR_state_s lit;
+            lit.i = Spec_Cipher_Expansion_Vale_AES256;
+            lit.iv = iv1;
+            lit.iv_len = iv_len1;
+            lit.xkey = ek1;
+            lit.ctr = c1;
+            *p = lit;
           }
         }
+        #endif
         break;
       }
     case Spec_Cipher_Expansion_Hacl_CHACHA20:

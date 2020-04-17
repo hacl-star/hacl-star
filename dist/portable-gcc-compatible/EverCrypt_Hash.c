@@ -481,12 +481,14 @@ void EverCrypt_Hash_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n)
 {
   bool has_shaext = EverCrypt_AutoConfig2_has_shaext();
   bool has_sse = EverCrypt_AutoConfig2_has_sse();
+  #if EVERCRYPT_TARGETCONFIG_X64
   if (true && has_shaext && has_sse)
   {
     uint64_t n1 = (uint64_t)n;
     uint64_t scrut = sha256_update(s, blocks, n1, k224_256);
     return;
   }
+  #endif
   Hacl_Hash_SHA2_update_multi_256(s, blocks, n);
 }
 
