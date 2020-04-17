@@ -93,6 +93,9 @@ let transpose8x8 #t vs =
   | U32 -> transpose8x8_uint32 #t vs
   | _ -> admit()
 
+///
+///  transpose16x16
+///
 
 inline_for_extraction noextract
 val transpose16x16_uint32_0: #t:v_inttype{t == U32} -> vs:(vec_t16 t & vec_t16 t) -> (vec_t16 t & vec_t16 t)
@@ -225,6 +228,32 @@ let transpose16x16 #t vs =
 ///  generic transpose
 ///
 
+val lemma_l_plus_pow2i_lt: #w:pos -> n:nat{pow2 n == w} -> i:nat{i < n} -> l:nat{l < w} -> Lemma
+  (requires l % (2 * pow2 i) < pow2 i)
+  (ensures  l + pow2 i < w)
+
+let lemma_l_plus_pow2i_lt #w n i l =
+  let pow2i1 = pow2 (i + 1) in
+
+  calc (<) {
+    l + pow2 i;
+    (==) { Math.Lemmas.euclidean_division_definition l pow2i1 }
+    l / pow2i1 * pow2i1 + l % pow2i1 + pow2 i;
+    (==) { Math.Lemmas.pow2_plus 1 i }
+    l / pow2i1 * pow2i1 + l % (2 * pow2 i) + pow2 i;
+    (<) { assert (l % (2 * pow2 i) < pow2 i) }
+    l / pow2i1 * pow2i1 + pow2 i + pow2 i;
+    (==) { Math.Lemmas.pow2_double_sum i }
+    l / pow2i1 * pow2i1 + pow2i1;
+    (==) { Math.Lemmas.distributivity_add_left (l / pow2i1) 1 pow2i1 }
+    (l / pow2i1 + 1) * pow2i1;
+    (<=) { Math.Lemmas.lemma_div_lt_nat l n (i + 1) }
+    pow2 (n - i - 1) * pow2 (i + 1);
+    (==) { Math.Lemmas.pow2_plus (n - i - 1) (i + 1) }
+    pow2 n;
+  }
+
+
 inline_for_extraction noextract
 val transposewxw_uint32_f_l:
     #w:width
@@ -238,7 +267,7 @@ let transposewxw_uint32_f_l #w n i vs l =
   Math.Lemmas.pow2_multiplication_modulo_lemma_1 1 i n;
   if l % (2 * pow2 i) < pow2 i
   then begin
-    assume (l + pow2 i < w);
+    lemma_l_plus_pow2i_lt #w n i l;
     vec_interleave_low_n (pow2 i) vs.[l] vs.[l + pow2 i] end
   else
     vec_interleave_high_n (pow2 i) vs.[l - pow2 i] vs.[l]
