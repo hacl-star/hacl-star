@@ -77,9 +77,6 @@ OBJS 		+= $(patsubst %.S,%.o,$(wildcard *-$(MARCH)$(VARIANT).S))
 include Makefile.basic
 
 CFLAGS		+= -Wno-parentheses -Wno-deprecated-declarations -g -std=gnu11 -O3
-
-%_c_stubs.o: CFLAGS += -Wno-pointer-sign
-
 CFLAGS_128 ?= -mavx
 CFLAGS_256 ?= -mavx -mavx2
 
@@ -139,7 +136,7 @@ lib_gen/Lib_RandomBuffer_System_gen.exe: lib/Lib_RandomBuffer_System_bindings.cm
 # https://www.gnu.org/software/make/manual/html_node/Canceling-Rules.html
 %.exe:
 
-all: libocamlevercrypt.cmxa
+all: ocamlevercrypt.cmxa
 
 lib_gen/%_gen.exe: libevercrypt.a
 	$(OCAMLOPT) $(filter-out %.a,$^) libevercrypt.a -o $@
@@ -159,7 +156,7 @@ else
 endif
 
 lib/%_stubs.ml lib/%_c_stubs.c: lib_gen/%_gen.exe
-	$(DY)PATH=.:$(OPENSSL_HOME):$$$(DY)PATH $<
+	$<
 
 # Compiling these files raises the pointer sign warning because the Ctypes declaration for bytes expects a char*, not a uint8_t*
 # Can be remove once ctypes is upgraded to 0.17
@@ -167,8 +164,8 @@ lib/%_c_stubs.o: CFLAGS += -Wno-pointer-sign
 
 CTYPES_DEPS += lib/Lib_RandomBuffer_System_stubs.cmx lib/Lib_RandomBuffer_System_bindings.cmx
 
-libocamlevercrypt.cmxa: $(ALL_BINDINGS) $(ALL_ML_STUBS) $(ALL_C_STUBS) libevercrypt.a
-	ocamlfind mklib -o ocamlevercrypt $(CTYPES_DEPS) $(ALL_C_STUBS) libevercrypt.a
+ocamlevercrypt.cmxa: $(ALL_BINDINGS) $(ALL_ML_STUBS) $(ALL_C_STUBS) libevercrypt.$(SO)
+	ocamlfind mklib -o ocamlevercrypt $(CTYPES_DEPS) $(ALL_C_STUBS) -ccopt -L. -cclib -levercrypt
 
 install-hacl-star-raw:
 	ocamlfind install hacl-star-raw META $(wildcard lib/*.ml lib/*.cmx lib/*.cmi *.cmxa *.a *.so *.dll)

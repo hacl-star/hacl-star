@@ -77,9 +77,6 @@ OBJS 		+= $(patsubst %.S,%.o,$(wildcard *-$(MARCH)$(VARIANT).S))
 include Makefile.basic
 
 CFLAGS		+= -Wno-parentheses -Wno-deprecated-declarations -g -std=gnu11 -O3
-
-%_c_stubs.o: CFLAGS += -Wno-pointer-sign
-
 CFLAGS_128 ?= -mavx
 CFLAGS_256 ?= -mavx -mavx2
 
