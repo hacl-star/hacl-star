@@ -27,19 +27,19 @@ inline_for_extraction noextract
 val transpose16x16: #t:v_inttype -> vec_t16 t & vec_t16 t -> vec_t16 t & vec_t16 t
 
 
-noextract
+inline_for_extraction noextract
 let transpose4x4_lseq (#t:v_inttype) (vs:lseq (vec_t t 4) 4) : lseq (vec_t t 4) 4 =
   let (v0,v1,v2,v3) = (vs.[0],vs.[1],vs.[2],vs.[3]) in
   let (r0,r1,r2,r3) = transpose4x4 (v0,v1,v2,v3) in
   create4 r0 r1 r2 r3
 
-noextract
+inline_for_extraction noextract
 let transpose8x8_lseq (#t:v_inttype) (vs:lseq (vec_t t 8) 8) : lseq (vec_t t 8) 8 =
   let (v0,v1,v2,v3,v4,v5,v6,v7) = (vs.[0],vs.[1],vs.[2],vs.[3],vs.[4],vs.[5],vs.[6],vs.[7]) in
   let (r0,r1,r2,r3,r4,r5,r6,r7) = transpose8x8 (v0,v1,v2,v3,v4,v5,v6,v7) in
   create8 r0 r1 r2 r3 r4 r5 r6 r7
 
-noextract
+inline_for_extraction noextract
 let transpose16x16_lseq (#t:v_inttype) (vs:lseq (vec_t t 16) 16) : lseq (vec_t t 16) 16 =
   let (v0,v1,v2,v3,v4,v5,v6,v7) = (vs.[0],vs.[1],vs.[2],vs.[3],vs.[4],vs.[5],vs.[6],vs.[7]) in
   let (v8,v9,v10,v11,v12,v13,v14,v15) = (vs.[8],vs.[9],vs.[10],vs.[11],vs.[12],vs.[13],vs.[14],vs.[15]) in
