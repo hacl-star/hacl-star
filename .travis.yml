@@ -15,7 +15,7 @@ jobs:
         - sudo apt update -qq --yes && sudo apt install -qq --yes opam aspcud ocaml
         - opam init --yes
         - eval $(opam config env)
-        - opam install --yes ctypes ctypes.foreign dune
+        - opam install --yes ctypes ctypes-foreign dune
     - name: clang 7 / full tests
       os: linux
       compiler: clang
