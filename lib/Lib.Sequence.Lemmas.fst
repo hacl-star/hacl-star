@@ -108,19 +108,19 @@ let split_len_lemma0 blocksize n len0 =
   let n0 = len0 / blocksize in
   let n1 = len1 / blocksize in
   Math.Lemmas.cancel_mul_mod n blocksize;
-  assert (len % blocksize = 0);
+  //assert (len % blocksize = 0);
 
   Math.Lemmas.lemma_mod_sub_distr len len0 blocksize;
-  assert (len % blocksize = len1 % blocksize);
+  //assert (len1 % blocksize = 0);
 
-  Math.Lemmas.cancel_mul_div n0 blocksize;
-  assert (n0 * blocksize = len0);
+  Math.Lemmas.lemma_div_exact len0 blocksize;
+  //assert (n0 * blocksize = len0);
 
-  Math.Lemmas.cancel_mul_div n1 blocksize;
-  assert (n1 * blocksize = len1);
+  Math.Lemmas.lemma_div_exact len1 blocksize;
+  //assert (n1 * blocksize = len1);
 
-  len0_div_bs blocksize len len0;
-  assert (n0 + n1 = n)
+  len0_div_bs blocksize len len0
+  //assert (n0 + n1 = n)
 
 
 let split_len_lemma blocksize len len0 =
@@ -130,13 +130,13 @@ let split_len_lemma blocksize len len0 =
   let n = len / blocksize in
 
   Math.Lemmas.lemma_mod_sub_distr len len0 blocksize;
-  assert (len % blocksize = len1 % blocksize);
+  //assert (len % blocksize = len1 % blocksize);
 
-  Math.Lemmas.cancel_mul_div n0 blocksize;
-  assert (n0 * blocksize = len0);
+  Math.Lemmas.lemma_div_exact len0 blocksize;
+  //assert (n0 * blocksize = len0);
 
-  len0_div_bs blocksize len len0;
-  assert (n0 + n1 = n)
+  len0_div_bs blocksize len len0
+  //assert (n0 + n1 = n)
 
 ////////////////////////
 // Start of proof of repeat_gen_blocks_multi_split lemma
@@ -370,7 +370,7 @@ let len0_le_len_fraction blocksize len len0 =
   Math.Lemmas.lemma_div_le len0 len blocksize;
   Math.Lemmas.lemma_mult_le_right blocksize (len0 / blocksize) (len / blocksize)
 
-
+#push-options "--z3rlimit 100"
 let repeat_gen_blocks_split #inp_t #c blocksize len0 hi mi inp a f l acc0 =
   let len = length inp in
   let len1 = len - len0 in
@@ -379,6 +379,7 @@ let repeat_gen_blocks_split #inp_t #c blocksize len0 hi mi inp a f l acc0 =
   let n1 = len1 / blocksize in
   len0_le_len_fraction blocksize len len0;
   split_len_lemma blocksize len len0;
+  split_len_lemma0 blocksize n len0;
 
   let t0 = Seq.slice inp 0 len0 in
   let t1 = Seq.slice inp len0 len in
@@ -403,7 +404,7 @@ let repeat_gen_blocks_split #inp_t #c blocksize len0 hi mi inp a f l acc0 =
     (==) { slice_slice_last #inp_t blocksize len0 inp }
     l (mi + n) (len % blocksize) (Seq.slice inp (n * blocksize) len) acc1;
     }
-
+#pop-options
 
 ////////////////////////
 // Start of repeat_blocks-related properties
@@ -612,14 +613,17 @@ val map_blocks_multi_acc_is_map_blocks_multi_:
   -> f:(i:nat{i < hi_f} -> lseq a blocksize -> lseq a blocksize)
   -> acc0:map_blocks_a a blocksize hi_f mi ->
   Lemma
-   (let f_gen = repeat_gen_blocks_f blocksize mi hi_f hi_g inp
-    (map_blocks_a a blocksize hi_f) (repeat_gen_blocks_map_f blocksize hi_f f) in
+   (let a_f = map_blocks_a a blocksize hi_f in
+    let a_g = map_blocks_a a blocksize hi_g in
+    let f_gen_map = repeat_gen_blocks_map_f blocksize hi_f f in
+    let f_gen = repeat_gen_blocks_f blocksize mi hi_f hi_g inp a_f f_gen_map in
 
     let f_map = map_blocks_f #a blocksize hi_g inp (f_shift blocksize mi hi_f hi_g f) in
 
-    Loops.repeat_right mi (mi + n) (map_blocks_a a blocksize hi_f) f_gen acc0 ==
-    Seq.append acc0 (Loops.repeat_right 0 n (map_blocks_a a blocksize hi_g) f_map (Seq.empty #a)))
+    Loops.repeat_right mi (mi + n) a_f f_gen acc0 ==
+    Seq.append acc0 (Loops.repeat_right 0 n a_g f_map (Seq.empty #a)))
 
+#push-options "--z3rlimit 100"
 let rec map_blocks_multi_acc_is_map_blocks_multi_ #a blocksize mi hi_f hi_g n inp f acc0 =
   let a_f = map_blocks_a a blocksize hi_f in
   let a_g = map_blocks_a a blocksize hi_g in
@@ -638,20 +642,21 @@ let rec map_blocks_multi_acc_is_map_blocks_multi_ #a blocksize mi hi_f hi_g n in
   else begin
     let lp1 = Loops.repeat_right mi (mi + n - 1) a_f f_gen acc0 in
     let rp1 = Loops.repeat_right 0 (n - 1) a_g f_map (Seq.empty #a) in
-    map_blocks_multi_acc_is_map_blocks_multi_ #a blocksize mi hi_f hi_g (n - 1) inp f acc0;
-    assert (lp1 == Seq.append acc0 rp1);
-    Loops.unfold_repeat_right mi (mi + n) a_f f_gen acc0 (mi + n - 1);
-    Loops.unfold_repeat_right 0 n a_g f_map (Seq.empty #a) (n - 1);
     let block = Seq.slice inp ((n - 1) * blocksize) (n * blocksize) in
-    //assert (lp == f_gen (mi + n - 1) lp1);
-    //assert (lp == Seq.append lp1 (f (mi + n - 1) block));
-    //assert (rp == f_map (n - 1) rp1);
-    //assert (rp == Seq.append rp1 (f (mi + n - 1) block));
-    //assert (Seq.append acc0 rp == Seq.append acc0 (Seq.append rp1 (f (mi + n - 1) block)));
-    //assert (lp == Seq.append (Seq.append acc0 rp1) (f (mi + n - 1) block));
-    Seq.Base.append_assoc acc0 rp1 (f (mi + n - 1) block);
-    () end
+    Loops.unfold_repeat_right 0 n a_g f_map (Seq.empty #a) (n - 1);
+    assert (rp == f_map (n - 1) rp1);
+    assert (rp == Seq.append rp1 (f (mi + n - 1) block));
 
+    calc (==) {
+      Loops.repeat_right mi (mi + n) a_f f_gen acc0;
+      (==) { Loops.unfold_repeat_right mi (mi + n) a_f f_gen acc0 (mi + n - 1) }
+      Seq.append lp1 (f (mi + n - 1) block);
+      (==) { map_blocks_multi_acc_is_map_blocks_multi_ #a blocksize mi hi_f hi_g (n - 1) inp f acc0 }
+      Seq.append (Seq.append acc0 rp1) (f (mi + n - 1) block);
+      (==) { Seq.Base.append_assoc acc0 rp1 (f (mi + n - 1) block) }
+      Seq.append acc0 (Seq.append rp1 (f (mi + n - 1) block));
+      } end
+#pop-options
 
 let map_blocks_multi_acc_is_map_blocks_multi #a blocksize mi hi n inp f acc0 =
   let f_map = repeat_gen_blocks_map_f blocksize hi f in

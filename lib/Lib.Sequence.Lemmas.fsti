@@ -17,13 +17,7 @@ let get_block_s
   (i:nat{i < len / blocksize * blocksize}) :
   lseq a blocksize
 =
-  calc (<=) {
-    (i / blocksize + 1) * blocksize;
-    (<=) { div_mul_lt blocksize i (len / blocksize) }
-    len / blocksize * blocksize;
-    (<=) { Math.Lemmas.multiply_fractions len blocksize }
-    len;
-  };
+  div_mul_lt blocksize i (len / blocksize);
   let j = i / blocksize in
   let b: lseq a blocksize = Seq.slice inp (j * blocksize) ((j + 1) * blocksize) in
   b
@@ -397,6 +391,7 @@ val repeat_blocks_multi_split:
   -> acc0:b ->
   Lemma
    (let len = length inp in
+    Math.Lemmas.lemma_div_exact len blocksize;
     split_len_lemma0 blocksize (len / blocksize) len0;
 
     repeat_blocks_multi blocksize inp f acc0 ==
