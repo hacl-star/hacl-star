@@ -14,8 +14,8 @@ script:
   - cd dist/gcc-compatible && ./configure
   - make -j
   - if [ "$(uname -m | cut -c 1-7)" == "aarch64" ]; then make -C ../../tests arm -j; else make -C ../../tests -j test; fi
-  - git clone https://github.com/fstarlang/kremlin -b protz_ci --depth 10
   - cd ../test/c/
-  - make -C kremlin/dist/kremlib/generic
+  - git clone https://github.com/fstarlang/kremlin -b protz_ci --depth 10
+  - make -C kremlin/dist/kremlib/generic -f Makefile.basic
   - export KREMLIN_HOME=$(pwd)/kremlin
   - make -j
