@@ -1,16 +1,28 @@
 language: c
 jobs:
   include:
-  - os: linux
-    arch: arm64
-    dist: bionic
-  - os: linux
-    compiler: gcc
-  - os: linux
-    compiler: clang
-  - os: osx
-    osx_image: xcode10.1
-  - os: osx
-    osx_image: xcode11.3
+    - name: aarch64 / arm minimal tests
+      os: linux
+      arch: arm64
+      dist: bionic
+    - name: gcc 5.4 / full tests
+      os: linux
+      compiler: gcc
+    - name: gcc 7 / full tests / OPAM package install
+      dist: bionic
+      install:
+        - sudo apt install opam
+        - opam init --yes
+        - eval $(opam config env)
+        - opam install --yes ctypes ctypes.foreign dune
+    - name: clang 7 / full tests
+      os: linux
+      compiler: clang
+    - name: xcode 10 / full tests
+      os: osx
+      osx_image: xcode10.1
+    - name: xcode 11 / full tests
+      os: osx
+      osx_image: xcode11.3
 script:
   - .ci/script.sh
