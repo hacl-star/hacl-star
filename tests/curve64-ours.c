@@ -10,6 +10,7 @@
 #include <time.h>
 
 #include "Hacl_Curve25519_64.h"
+#include "EverCrypt_AutoConfig2.h"
 
 typedef __attribute__((aligned(32))) uint8_t X25519_KEY[32];
 
@@ -39,6 +40,11 @@ static __inline__ cycles cpucycles_end(void)
 #define SIZE   1
 
 int main() {
+  EverCrypt_AutoConfig2_init();
+  if (!EverCrypt_AutoConfig2_has_adx() || !EverCrypt_AutoConfig2_has_bmi2()) {
+    printf("No support for ADX/BMI2, exiting\n");
+    return 0;
+  }
   X25519_KEY pub, priv, key;
   uint64_t res = 0;
   cycles a,b;

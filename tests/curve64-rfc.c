@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <time.h>
+#include "EverCrypt_AutoConfig2.h"
 
 typedef __attribute__((aligned(32))) uint8_t X25519_KEY[32];
 
@@ -39,6 +40,11 @@ extern void x25519_shared_secret_x64(uint8_t* sec, uint8_t* priv, uint8_t* pub);
 #define SIZE   1
 
 int main() {
+  EverCrypt_AutoConfig2_init();
+  if (!EverCrypt_AutoConfig2_has_adx() || !EverCrypt_AutoConfig2_has_bmi2()) {
+    printf("No support for ADX/BMI2, exiting\n");
+    return 0;
+  }
   X25519_KEY pub, priv, key;
   uint64_t res = 0;
   cycles a,b;
