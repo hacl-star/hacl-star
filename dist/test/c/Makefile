@@ -10,11 +10,15 @@ CFLAGS += -D'LowStar_Printf_print_lmbuffer_u8(X, Y)=for (size_t i = 0; i < X; ++
 
 SED=$(shell which gsed && echo gsed || echo sed)
 
+all:
+	$(MAKE) hack
+	$(MAKE) all_
+
 hack:
 	$(SED) -i 's/extern void LowStar_Printf_.*//g' *.c
 	$(SED) -i 's/extern void C_String_printf.*//g' *.c
 
-all: $(patsubst %.c,%.test,$(SOURCES))
+all_: $(patsubst %.c,%.test,$(SOURCES))
 
 %.exe: %.o ../../gcc-compatible/libevercrypt.a
 	$(CC) $(CFLAGS) $^ -o $@

@@ -130,6 +130,7 @@ endif
 # Test should be renamed into Test.EverCrypt
 test-c: $(subst .,_,$(patsubst %.fst,test-c-%,$(notdir $(wildcard code/tests/*.fst)))) \
   test-c-Test
+	cp dist/Makefile.test dist/test/c/
 
 # Any file in specs/tests is taken to contain a `val test: unit -> bool` function.
 test-ml: $(subst .,_,$(patsubst %.fst,test-ml-%,$(notdir $(wildcard specs/tests/*.fst))))
@@ -1025,11 +1026,8 @@ dist/evercrypt-external-headers/Makefile.basic: $(ALL_KRML_FILES)
 # cause races on shared files (e.g. Makefile.basic, etc.) -- to be investigated.
 # In the meanwhile, we at least try to copy the header for intrinsics just once.
 
-dist/test/c/lib_intrinsics.h:
-	mkdir -p $(dir $@) && cp $(HACL_HOME)/lib/c/lib_intrinsics.h $@
-
 .PRECIOUS: dist/test/c/%.c
-dist/test/c/%.c: $(ALL_KRML_FILES) dist/test/c/lib_intrinsics.h
+dist/test/c/%.c: $(ALL_KRML_FILES)
 	$(KRML) -silent \
 	  -tmpdir $(dir $@) -skip-compilation \
 	  -no-prefix $(subst _,.,$*) \
@@ -1077,6 +1075,7 @@ CFLAGS += -Wall -Wextra -g \
 	# Linking with full kremlib since tests may use TestLib, etc.
 	$(call run-with-log,\
 	  $(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ \
+	    -Idist/gcc-compatible \
 	    dist/gcc-compatible/libevercrypt.a -lcrypto $(LDFLAGS) \
 	    $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a \
 	  ,[LD $*],$(call to-obj-dir,$@))
