@@ -123,18 +123,6 @@ let same_down_up_buffer_length src b =
   DV.length_eq db;
   FStar.Math.Lemmas.cancel_mul_div (B.length b) (view_n src)
 
-val lemma_mult_lt_right: a:pos -> b:nat -> c:nat -> Lemma
-  (requires (b < c))
-  (ensures  (b * a < c * a))
-let lemma_mult_lt_right a b c =
-  assert (c <> 0);
-  if b = 0 then (
-    assert (0 * a == 0);
-    FStar.Math.Lemmas.pos_times_pos_is_pos c a
-  ) else (
-    FStar.Math.Lemmas.lemma_mult_lt_left a b c
-  )
-
 let down_up_buffer_read_reveal src h s b i =
   let db = get_downview b in
   let n:pos = view_n src in
@@ -143,7 +131,7 @@ let down_up_buffer_read_reveal src h s b i =
   same_down_up_buffer_length src b;
   UV.length_eq ub;
   UV.get_sel h ub i;
-  lemma_mult_lt_right n i (DV.length db / n);
+  FStar.Math.Lemmas.lemma_mult_lt_right n i (DV.length db / n);
   FStar.Math.Lemmas.multiply_fractions (DV.length db) n;
   FStar.Math.Lemmas.nat_times_nat_is_nat i n;
   assert (low_buffer_read src src h b i ==
