@@ -356,6 +356,8 @@ uint8_t blake2b_test13_expected[64] = {
 
 int main()
 {
+  EverCrypt_AutoConfig2_init();
+
   uint8_t comp_s[64] = {0};
   uint8_t comp_b[64] = {0};
   bool all_ok = true;
@@ -461,39 +463,40 @@ int main()
   else printf("FAILED!\n");
   all_ok = all_ok && ok;
 
-  printf("testing blake2b vec-256:\n");
-  Hacl_Blake2b_256_blake2b(64,comp_b,blake2b_test1_size_plaintext,blake2b_test1_plaintext,blake2b_test1_size_key,blake2b_test1_key);
-  printf("computed:");
-  for (int i = 0; i < 64; i++)
-    printf("%02x",comp_b[i]);
-  printf("\n");
-  printf("expected:");
-  for (int i = 0; i < 64; i++)
-    printf("%02x",blake2b_test1_expected[i]);
-  printf("\n");
-  ok = true;
-  for (int i = 0; i < 64; i++)
-    ok = ok & (blake2b_test1_expected[i] == comp_b[i]);
-  if (ok) printf("Success!\n");
-  else printf("FAILED!\n");
-  all_ok = all_ok && ok;
+  if (EverCrypt_AutoConfig2_has_avx2()) {
+    printf("testing blake2b vec-256:\n");
+    Hacl_Blake2b_256_blake2b(64,comp_b,blake2b_test1_size_plaintext,blake2b_test1_plaintext,blake2b_test1_size_key,blake2b_test1_key);
+    printf("computed:");
+    for (int i = 0; i < 64; i++)
+      printf("%02x",comp_b[i]);
+    printf("\n");
+    printf("expected:");
+    for (int i = 0; i < 64; i++)
+      printf("%02x",blake2b_test1_expected[i]);
+    printf("\n");
+    ok = true;
+    for (int i = 0; i < 64; i++)
+      ok = ok & (blake2b_test1_expected[i] == comp_b[i]);
+    if (ok) printf("Success!\n");
+    else printf("FAILED!\n");
+    all_ok = all_ok && ok;
 
-  Hacl_Blake2b_256_blake2b(64,comp_s,blake2b_test13_size_plaintext,blake2b_test13_plaintext,blake2b_test13_size_key,blake2b_test13_key);
-  printf("computed:");
-  for (int i = 0; i < 64; i++)
-    printf("%02x",comp_s[i]);
-  printf("\n");
-  printf("expected:");
-  for (int i = 0; i < 64; i++)
-    printf("%02x",blake2b_test13_expected[i]);
-  printf("\n");
-  ok = true;
-  for (int i = 0; i < 64; i++)
-    ok = ok & (blake2b_test13_expected[i] == comp_s[i]);
-  if (ok) printf("Success!\n");
-  else printf("FAILED!\n");
-  all_ok = all_ok && ok;
-
+    Hacl_Blake2b_256_blake2b(64,comp_s,blake2b_test13_size_plaintext,blake2b_test13_plaintext,blake2b_test13_size_key,blake2b_test13_key);
+    printf("computed:");
+    for (int i = 0; i < 64; i++)
+      printf("%02x",comp_s[i]);
+    printf("\n");
+    printf("expected:");
+    for (int i = 0; i < 64; i++)
+      printf("%02x",blake2b_test13_expected[i]);
+    printf("\n");
+    ok = true;
+    for (int i = 0; i < 64; i++)
+      ok = ok & (blake2b_test13_expected[i] == comp_s[i]);
+    if (ok) printf("Success!\n");
+    else printf("FAILED!\n");
+    all_ok = all_ok && ok;
+  }
 
   uint64_t len = SIZE;
   uint8_t plain[SIZE];
@@ -539,8 +542,6 @@ int main()
   t2 = clock();
   double cdiff5 = b - a;
   double tdiff5 = (double)(t2 - t1)/CLOCKS_PER_SEC;
-
-  EverCrypt_AutoConfig2_init();
 
   if (EverCrypt_AutoConfig2_has_avx2()) {
     for (int j = 0; j < ROUNDS; j++) {
