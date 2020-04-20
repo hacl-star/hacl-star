@@ -6,7 +6,13 @@ jobs:
     dist: bionic
   - os: linux
     dist: bionic
+    compiler:
+      - clang
+      - gcc
   - os: osx
+    compiler:
+      - clang
+      - gcc
     script:
       - brew install openssl
       - export CFLAGS="-I/usr/local/Cellar/openssl@1.1/1.1.1d/include/"
