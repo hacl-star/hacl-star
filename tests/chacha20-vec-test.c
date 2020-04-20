@@ -58,6 +58,8 @@ bool print_result(uint8_t* comp, uint8_t* exp) {
 
 
 int main() {
+  EverCrypt_AutoConfig2_init();
+
   int in_len = 114;
   uint8_t in[114] = {
     0x4c, 0x61, 0x64, 0x69, 0x65, 0x73, 0x20, 0x61,
@@ -112,9 +114,11 @@ int main() {
   printf("Chacha20 (128-bit) Result:\n");
   ok = ok && print_result(comp,exp);
 
-  Hacl_Chacha20_Vec256_chacha20_encrypt_256(in_len,comp,in,k,n,1);
-  printf("Chacha20 (256-bit) Result:\n");
-  ok = ok && print_result(comp,exp);
+  if (EverCrypt_AutoConfig2_has_avx2()) {
+    Hacl_Chacha20_Vec256_chacha20_encrypt_256(in_len,comp,in,k,n,1);
+    printf("Chacha20 (256-bit) Result:\n");
+    ok = ok && print_result(comp,exp);
+  }
 
   uint64_t len = SIZE;
   uint8_t plain[SIZE];
@@ -159,8 +163,6 @@ int main() {
   t2 = clock();
   double diff2 = (double)(t2 - t1)/CLOCKS_PER_SEC;
   uint64_t cyc2 = b - a;
-
-  EverCrypt_AutoConfig2_init();
 
   if (EverCrypt_AutoConfig2_has_avx2()) {
     memset(plain,'P',SIZE);

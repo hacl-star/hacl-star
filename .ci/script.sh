@@ -8,8 +8,11 @@ set -o pipefail
 # other configuration.
 for p in /usr/local/Cellar/openssl@1.1/*; do export CFLAGS="-I$p/include/"; export LDFLAGS="-L$p/lib"; done
 
+# Running without OCaml -- need to configure
 cd dist/gcc-compatible && ./configure
+
 make -j
+
 if [[ "$(uname -m | cut -c 1-7)" == "aarch64" ]]; then
   make -C ../../tests arm -j
 else
@@ -20,6 +23,6 @@ else
   cd ../test/c/
   git clone https://github.com/fstarlang/kremlin -b protz_ci --depth 10
   export KREMLIN_HOME=$(pwd)/kremlin
-  make -C kremlin/kremlib/dist/generic -f Makefile.basic
-  make -j
+  make -C kremlin/kremlib/dist/generic -f Makefile.basic -j
+  make -j -k
 fi
