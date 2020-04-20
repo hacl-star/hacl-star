@@ -14,8 +14,7 @@ jobs:
     install:
       - brew install openssl@1.1.1f
 script:
-  - export CFLAGS="-I/usr/local/Cellar/openssl@1.1/1.1.1f/include/"
-  - export LDFLAGS="-L/usr/local/Cellar/openssl@1.1/1.1.1f/lib"
+  - for p in /usr/local/Cellar/openssl@1.1/*; do export CFLAGS="-I$p/include/"; export LDFLAGS="-L$p/lib"; done
   - cd dist/gcc-compatible && ./configure
   - make -j
   - if [ "$(uname -m | cut -c 1-7)" == "aarch64" ]; then make -C ../../tests arm -j; else make -C ../../tests -j test; fi
