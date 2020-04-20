@@ -102,6 +102,42 @@ let len0_div_bs blocksize len len0 =
   }
 
 
+let split_len_lemma0 blocksize n len0 =
+  let len = n * blocksize in
+  let len1 = len - len0 in
+  let n0 = len0 / blocksize in
+  let n1 = len1 / blocksize in
+  Math.Lemmas.cancel_mul_mod n blocksize;
+  assert (len % blocksize = 0);
+
+  Math.Lemmas.lemma_mod_sub_distr len len0 blocksize;
+  assert (len % blocksize = len1 % blocksize);
+
+  Math.Lemmas.cancel_mul_div n0 blocksize;
+  assert (n0 * blocksize = len0);
+
+  Math.Lemmas.cancel_mul_div n1 blocksize;
+  assert (n1 * blocksize = len1);
+
+  len0_div_bs blocksize len len0;
+  assert (n0 + n1 = n)
+
+
+let split_len_lemma blocksize len len0 =
+  let len1 = len - len0 in
+  let n0 = len0 / blocksize in
+  let n1 = len1 / blocksize in
+  let n = len / blocksize in
+
+  Math.Lemmas.lemma_mod_sub_distr len len0 blocksize;
+  assert (len % blocksize = len1 % blocksize);
+
+  Math.Lemmas.cancel_mul_div n0 blocksize;
+  assert (n0 * blocksize = len0);
+
+  len0_div_bs blocksize len len0;
+  assert (n0 + n1 = n)
+
 ////////////////////////
 // Start of proof of repeat_gen_blocks_multi_split lemma
 ////////////////////////
@@ -121,9 +157,7 @@ val aux_repeat_bf_s0:
   Lemma
    (let len = length inp in
     let n0 = len0 / blocksize in
-    Math.Lemmas.cancel_mul_div n blocksize;
-    Math.Lemmas.cancel_mul_div n0 blocksize;
-    len0_div_bs blocksize len len0;
+    split_len_lemma0 blocksize n len0;
 
     let t0 = Seq.slice inp 0 len0 in
     let repeat_bf_s0 = repeat_gen_blocks_f blocksize mi hi n0 t0 a f in
@@ -134,9 +168,7 @@ val aux_repeat_bf_s0:
 let aux_repeat_bf_s0 #inp_t blocksize len0 mi hi n inp a f i acc =
   let len = length inp in
   let n0 = len0 / blocksize in
-  Math.Lemmas.cancel_mul_div n blocksize;
-  len0_div_bs blocksize len len0;
-  //assert (n == n0 + (len - len0) / blocksize);
+  split_len_lemma0 blocksize n len0;
 
   let t0 = Seq.slice inp 0 len0 in
   let repeat_bf_s0 = repeat_gen_blocks_f blocksize mi hi n0 t0 a f in
@@ -169,17 +201,9 @@ val aux_repeat_bf_s1:
     let len1 = len - len0 in
     let n0 = len0 / blocksize in
     let n1 = len1 / blocksize in
-    Math.Lemmas.cancel_mul_div n blocksize;
-    Math.Lemmas.cancel_mul_div n0 blocksize;
-    Math.Lemmas.cancel_mul_div n1 blocksize;
-    len0_div_bs blocksize len len0;
-    //assert (n == n0 + n1);
+    split_len_lemma0 blocksize n len0;
 
     let t1 = Seq.slice inp len0 len in
-    Math.Lemmas.lemma_mod_sub_distr len len0 blocksize;
-    //assert (len % blocksize == len1 % blocksize);
-    Math.Lemmas.cancel_mul_mod n blocksize;
-
     let repeat_bf_s1 = repeat_gen_blocks_f blocksize (mi + n0) hi n1 t1 a f in
     let repeat_bf_t  = repeat_gen_blocks_f blocksize mi hi n inp a f in
 
@@ -190,17 +214,9 @@ let aux_repeat_bf_s1 #inp_t blocksize len0 mi hi n inp a f i acc =
   let len1 = len - len0 in
   let n0 = len0 / blocksize in
   let n1 = len1 / blocksize in
-  Math.Lemmas.cancel_mul_div n blocksize;
-  Math.Lemmas.cancel_mul_div n0 blocksize;
-  Math.Lemmas.cancel_mul_div n1 blocksize;
-  len0_div_bs blocksize len len0;
-  //assert (n == n0 + n1);
+  split_len_lemma0 blocksize n len0;
 
   let t1 = Seq.slice inp len0 len in
-  Math.Lemmas.lemma_mod_sub_distr len len0 blocksize;
-  //assert (len % blocksize == len1 % blocksize);
-  Math.Lemmas.cancel_mul_mod n blocksize;
-
   let repeat_bf_s1 = repeat_gen_blocks_f blocksize (mi + n0) hi n1 t1 a f in
   let repeat_bf_t  = repeat_gen_blocks_f blocksize mi hi n inp a f in
 
@@ -210,7 +226,6 @@ let aux_repeat_bf_s1 #inp_t blocksize len0 mi hi n inp a f i acc =
   assert (repeat_bf_t i acc == f i block acc);
 
   let i_b1 = i - mi - n0 in
-
   calc (<=) {
     i_b1 * blocksize + blocksize;
     (<=) { Math.Lemmas.lemma_mult_le_right blocksize (i_b1 + 1) n1 }
@@ -236,13 +251,7 @@ let repeat_gen_blocks_multi_split #inp_t blocksize len0 mi hi n inp a f acc0 =
   let len1 = len - len0 in
   let n0 = len0 / blocksize in
   let n1 = len1 / blocksize in
-  Math.Lemmas.cancel_mul_div n blocksize;
-  len0_div_bs blocksize len len0;
-  //assert (n0 + n1 == n);
-
-  Math.Lemmas.lemma_mod_sub_distr len len0 blocksize;
-  //assert (len % blocksize == len1 % blocksize);
-  Math.Lemmas.cancel_mul_mod n blocksize;
+  split_len_lemma0 blocksize n len0;
 
   let t0 = Seq.slice inp 0 len0 in
   let t1 = Seq.slice inp len0 len in
@@ -297,11 +306,8 @@ val repeat_gen_blocks_multi_split_slice:
     let n = len / blocksize in
     let n0 = len0 / blocksize in
     let n1 = len1 / blocksize in
-    len0_div_bs blocksize len len0;
-
-    Math.Lemmas.lemma_mod_sub_distr (n * blocksize) len0 blocksize;
-    Math.Lemmas.cancel_mul_mod n blocksize;
-    //assert ((n * blocksize - len0) % blocksize == 0);
+    split_len_lemma blocksize len len0;
+    split_len_lemma0 blocksize n len0;
 
     let blocks = Seq.slice inp 0 (n * blocksize) in
     let t0 = Seq.slice inp 0 len0 in
@@ -312,16 +318,11 @@ val repeat_gen_blocks_multi_split_slice:
     repeat_gen_blocks_multi blocksize (mi + n0) hi n1 t1 a f acc1)
 
 let repeat_gen_blocks_multi_split_slice #inp_t blocksize len0 mi hi inp a f acc0 =
-  let n = length inp / blocksize in
-  let len = n * blocksize in
-  Math.Lemmas.cancel_mul_div n blocksize;
-  assert (length inp / blocksize == len / blocksize);
-  let blocks = Seq.slice inp 0 len in
-
-  //let len1 = len - len0 in
-  len0_div_bs blocksize len len0;
-  len0_div_bs blocksize (length inp) len0;
-  //assert (len1 / blocksize == (length inp - len0) / blocksize)
+  let len = length inp in
+  let n = len / blocksize in
+  split_len_lemma blocksize len len0;
+  let blocks = Seq.slice inp 0 (n * blocksize) in
+  split_len_lemma0 blocksize n len0;
   repeat_gen_blocks_multi_split blocksize len0 mi hi n blocks a f acc0
 
 
@@ -345,13 +346,10 @@ let slice_slice_last #inp_t blocksize len0 inp =
   let n = len / blocksize in
   let n0 = len0 / blocksize in
   let n1 = len1 / blocksize in
-  len0_div_bs blocksize len len0;
-
-  let t1 = Seq.slice inp len0 len in
 
   calc (==) {
     len0 + n1 * blocksize;
-    (==) { }
+    (==) { len0_div_bs blocksize len len0 }
     len0 + (n - n0) * blocksize;
     (==) { Math.Lemmas.distributivity_sub_left n n0 blocksize }
     len0 + n * blocksize - n0 * blocksize;
@@ -359,17 +357,28 @@ let slice_slice_last #inp_t blocksize len0 inp =
     n * blocksize;
   };
 
+  let t1 = Seq.slice inp len0 len in
   Seq.slice_slice inp len0 len (n1 * blocksize) len1
 
 
-let repeat_gen_blocks_split #inp_t #c blocksize len0 hi mi inp a f l acc0 = admit();
+val len0_le_len_fraction: blocksize:pos -> len:nat -> len0:nat ->
+  Lemma
+  (requires len0 <= len /\ len0 % blocksize = 0)
+  (ensures  len0 <= len / blocksize * blocksize)
+
+let len0_le_len_fraction blocksize len len0 =
+  Math.Lemmas.lemma_div_le len0 len blocksize;
+  Math.Lemmas.lemma_mult_le_right blocksize (len0 / blocksize) (len / blocksize)
+
+
+let repeat_gen_blocks_split #inp_t #c blocksize len0 hi mi inp a f l acc0 =
   let len = length inp in
   let len1 = len - len0 in
   let n = len / blocksize in
   let n0 = len0 / blocksize in
   let n1 = len1 / blocksize in
-  len0_div_bs blocksize len len0;
-  //assert (mi + n0 <= hi);
+  len0_le_len_fraction blocksize len len0;
+  split_len_lemma blocksize len len0;
 
   let t0 = Seq.slice inp 0 len0 in
   let t1 = Seq.slice inp len0 len in
@@ -380,15 +389,19 @@ let repeat_gen_blocks_split #inp_t #c blocksize len0 hi mi inp a f l acc0 = admi
   let acc1 = repeat_gen_blocks_multi blocksize (mi + n0) hi n1 blocks1 a f acc in
 
   calc (==) {
+    repeat_gen_blocks_multi blocksize (mi + n0) hi n1 blocks1 a f acc;
+    (==) { repeat_gen_blocks_multi_split_slice #inp_t blocksize len0 mi hi inp a f acc0 }
+    repeat_gen_blocks_multi blocksize mi hi n (Seq.slice inp 0 (n * blocksize)) a f acc0;
+    };
+
+  calc (==) {
     repeat_gen_blocks blocksize (mi + n0) hi t1 a f l acc;
-    (==) { assert (n0 + n1 == n) }
+    (==) { len0_div_bs blocksize len len0 }
     l (mi + n) (len1 % blocksize) (Seq.slice t1 (n1 * blocksize) len1) acc1;
     (==) { Math.Lemmas.lemma_mod_sub_distr len len0 blocksize }
     l (mi + n) (len % blocksize) (Seq.slice t1 (n1 * blocksize) len1) acc1;
     (==) { slice_slice_last #inp_t blocksize len0 inp }
     l (mi + n) (len % blocksize) (Seq.slice inp (n * blocksize) len) acc1;
-    (==) { repeat_gen_blocks_multi_split_slice #inp_t blocksize len0 mi hi inp a f acc0 }
-    repeat_gen_blocks blocksize mi hi inp a f l acc0;
     }
 
 
@@ -399,7 +412,6 @@ let repeat_gen_blocks_split #inp_t #c blocksize len0 hi mi inp a f l acc0 = admi
 let lemma_repeat_blocks_via_multi #a #b #c blocksize inp f l acc0 =
   let len = length inp in
   let nb = len / blocksize in
-  //let rem = len % blocksize in
 
   let blocks = Seq.slice inp 0 (nb * blocksize) in
   Math.Lemmas.cancel_mul_div nb blocksize;
@@ -502,7 +514,7 @@ let repeat_blocks_multi_split #a #b blocksize len0 inp f acc0 = admit();
     }
 
 
-let repeat_blocks_split #a #b #c blocksize len0 inp f l acc0 =
+let repeat_blocks_split #a #b #c blocksize len0 inp f l acc0 = admit();
   let len = length inp in
   let len1 = len - len0 in
   let n = len / blocksize in
