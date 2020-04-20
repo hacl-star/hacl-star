@@ -106,13 +106,13 @@ blake2b_update_block(
             uint64_t u0 = load64_le(b00);
             uint64_t u00 = u0;
             uint64_t u1 = load64_le(b10);
-            uint64_t u11 = u1;
+            uint64_t u10 = u1;
             uint64_t u2 = load64_le(b20);
             uint64_t u20 = u2;
             uint64_t u3 = load64_le(b30);
             uint64_t u30 = u3;
             r01[0U] = u00;
-            r01[1U] = u11;
+            r01[1U] = u10;
             r01[2U] = u20;
             r01[3U] = u30;
             {
@@ -124,13 +124,13 @@ blake2b_update_block(
               uint64_t u4 = load64_le(b01);
               uint64_t u01 = u4;
               uint64_t u5 = load64_le(b11);
-              uint64_t u110 = u5;
+              uint64_t u11 = u5;
               uint64_t u6 = load64_le(b21);
               uint64_t u21 = u6;
               uint64_t u7 = load64_le(b31);
               uint64_t u31 = u7;
               r12[0U] = u01;
-              r12[1U] = u110;
+              r12[1U] = u11;
               r12[2U] = u21;
               r12[3U] = u31;
               {
@@ -142,13 +142,13 @@ blake2b_update_block(
                 uint64_t u8 = load64_le(b02);
                 uint64_t u02 = u8;
                 uint64_t u9 = load64_le(b12);
-                uint64_t u111 = u9;
-                uint64_t u10 = load64_le(b22);
-                uint64_t u22 = u10;
-                uint64_t u12 = load64_le(b32);
-                uint64_t u32 = u12;
+                uint64_t u12 = u9;
+                uint64_t u13 = load64_le(b22);
+                uint64_t u22 = u13;
+                uint64_t u14 = load64_le(b32);
+                uint64_t u32 = u14;
                 r21[0U] = u02;
-                r21[1U] = u111;
+                r21[1U] = u12;
                 r21[2U] = u22;
                 r21[3U] = u32;
                 {
@@ -157,16 +157,16 @@ blake2b_update_block(
                   uint8_t *b1 = d + s11 * nb2;
                   uint8_t *b2 = d + s13 * nb2;
                   uint8_t *b3 = d + s15 * nb2;
-                  uint64_t u13 = load64_le(b0);
-                  uint64_t u03 = u13;
-                  uint64_t u14 = load64_le(b1);
-                  uint64_t u112 = u14;
-                  uint64_t u15 = load64_le(b2);
-                  uint64_t u23 = u15;
+                  uint64_t u15 = load64_le(b0);
+                  uint64_t u03 = u15;
+                  uint64_t u16 = load64_le(b1);
+                  uint64_t u17 = u16;
+                  uint64_t u18 = load64_le(b2);
+                  uint64_t u23 = u18;
                   uint64_t u = load64_le(b3);
                   uint64_t u33 = u;
                   r31[0U] = u03;
-                  r31[1U] = u112;
+                  r31[1U] = u17;
                   r31[2U] = u23;
                   r31[3U] = u33;
                   {
@@ -932,10 +932,10 @@ Hacl_Blake2b_32_blake2b(
           uint64_t kk_shift_8;
           uint64_t iv0_;
           uint32_t nb0;
-          uint32_t rem10;
+          uint32_t rem0;
           K___uint32_t_uint32_t scrut;
           uint32_t nb;
-          uint32_t rem1;
+          uint32_t rem;
           r2[0U] = iv0;
           r2[1U] = iv1;
           r2[2U] = iv2;
@@ -968,8 +968,8 @@ Hacl_Blake2b_32_blake2b(
           }
           memset(b20, 0U, (uint32_t)128U * sizeof (b20[0U]));
           nb0 = ll / (uint32_t)128U;
-          rem10 = ll % (uint32_t)128U;
-          if (rem10 == (uint32_t)0U && nb0 > (uint32_t)0U)
+          rem0 = ll % (uint32_t)128U;
+          if (rem0 == (uint32_t)0U && nb0 > (uint32_t)0U)
           {
             uint32_t nb_ = nb0 - (uint32_t)1U;
             uint32_t rem_ = (uint32_t)128U;
@@ -982,11 +982,11 @@ Hacl_Blake2b_32_blake2b(
           {
             K___uint32_t_uint32_t lit;
             lit.fst = nb0;
-            lit.snd = rem10;
+            lit.snd = rem0;
             scrut = lit;
           }
           nb = scrut.fst;
-          rem1 = scrut.snd;
+          rem = scrut.snd;
           {
             uint32_t i;
             for (i = (uint32_t)0U; i < nb; i++)
@@ -1001,10 +1001,10 @@ Hacl_Blake2b_32_blake2b(
           }
           {
             uint8_t b21[128U] = { 0U };
-            uint8_t *last1 = d + ll - rem1;
+            uint8_t *last = d + ll - rem;
             FStar_UInt128_uint128 totlen;
             uint32_t double_row;
-            memcpy(b21, last1, rem1 * sizeof (last1[0U]));
+            memcpy(b21, last, rem * sizeof (last[0U]));
             totlen = FStar_UInt128_add_mod(prev0, FStar_UInt128_uint64_to_uint128((uint64_t)ll));
             blake2b_update_block(b1, b, true, totlen, b21);
             memset(b21, 0U, (uint32_t)128U * sizeof (b21[0U]));

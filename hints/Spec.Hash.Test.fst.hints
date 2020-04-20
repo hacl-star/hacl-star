@@ -18,7 +18,7 @@
         "fuel_guarded_inversion_Spec.Hash.Definitions.hash_alg"
       ],
       0,
-      "8ee9cb8908a1ff8274c75bbd76a825bf"
+      "c4104d67f22bd1925363ea4aabb44d4d"
     ],
     [
       "Spec.Hash.Test.vec",
@@ -37,7 +37,7 @@
         "fuel_guarded_inversion_Spec.Hash.Definitions.hash_alg"
       ],
       0,
-      "505820adeca4223148d501dccb5ad11f"
+      "2979fb07d7e51f121d4831f4f82a432e"
     ],
     [
       "Spec.Hash.Test.vec",
@@ -45,13 +45,15 @@
       2,
       1,
       [
-        "@query", "assumption_FStar.UInt8.t__uu___haseq",
+        "@MaxIFuel_assumption", "@query",
         "assumption_Prims.list__uu___haseq",
         "assumption_Spec.Hash.Definitions.hash_alg__uu___haseq",
-        "function_token_typing_FStar.UInt8.t"
+        "equation_Prims.eqtype",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "typing_FStar.UInt8.t"
       ],
       0,
-      "e11e66c4ba5a61d49856173bf0cb9224"
+      "c896d814967bc98fbc783ab1b81db0f3"
     ],
     [
       "Spec.Hash.Test.__proj__Vec__item__plain",
@@ -64,7 +66,7 @@
         "projection_inverse_Spec.Hash.Test.Vec_a"
       ],
       0,
-      "00e19e30ecb98e0955ac2a67993e2e08"
+      "a79c1f9cb5cc842e721392acee1ebc59"
     ],
     [
       "Spec.Hash.Test.__proj__Vec__item__hash",
@@ -77,7 +79,7 @@
         "projection_inverse_Spec.Hash.Test.Vec_a"
       ],
       0,
-      "e47e94ddde2ab4c8e3ed33d1f027f5e4"
+      "9c74800d5924dedc8cd3587df318dae0"
     ]
   ]
 ]

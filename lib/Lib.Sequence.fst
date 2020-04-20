@@ -19,6 +19,9 @@ let of_list #a l = Seq.seq_of_list #a l
 let of_list_index #a l i =
   Seq.lemma_seq_of_list_index #a l i
 
+let equal #a #len s1 s2 =
+  forall (i:size_nat{i < len}).{:pattern (index s1 i); (index s2 i)} index s1 i == index s2 i
+
 let eq_intro #a #len s1 s2 =
   assert (forall (i:nat{i < len}).{:pattern (Seq.index s1 i); (Seq.index s2 i)}
     index s1 i == index s2 i);
