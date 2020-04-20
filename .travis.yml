@@ -8,14 +8,14 @@ jobs:
   - os: osx
     osx_image: xcode10.1
     install:
-      - brew install openssl@1.1.1d
+      - brew install openssl@1.1.1f
   - os: osx
     osx_image: xcode11.3
     install:
-      - brew install openssl@1.1.1d
+      - brew install openssl@1.1.1f
 script:
-  - export CFLAGS="-I/usr/local/Cellar/openssl@1.1/1.1.1d/include/"
-  - export LDFLAGS="-L/usr/local/Cellar/openssl@1.1/1.1.1d/lib"
+  - export CFLAGS="-I/usr/local/Cellar/openssl@1.1/1.1.1f/include/"
+  - export LDFLAGS="-L/usr/local/Cellar/openssl@1.1/1.1.1f/lib"
   - cd dist/gcc-compatible && ./configure
   - make -j
   - if [ "$(uname -m | cut -c 1-7)" == "aarch64" ]; then make -C ../../tests arm -j; else make -C ../../tests -j test; fi
