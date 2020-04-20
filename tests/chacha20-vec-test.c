@@ -11,6 +11,7 @@
 #include "Hacl_Chacha20_Vec32.h"
 #include "Hacl_Chacha20_Vec128.h"
 #include "Hacl_Chacha20_Vec256.h"
+#include "EverCrypt_AutoConfig2.h"
 
 typedef uint64_t cycles;
 
@@ -159,28 +160,32 @@ int main() {
   double diff2 = (double)(t2 - t1)/CLOCKS_PER_SEC;
   uint64_t cyc2 = b - a;
 
+  EverCrypt_AutoConfig2_init();
 
-  memset(plain,'P',SIZE);
-  memset(key,'K',16);
-  memset(nonce,'N',12);
+  if (EverCrypt_AutoConfig2_has_avx2()) {
+    memset(plain,'P',SIZE);
+    memset(key,'K',16);
+    memset(nonce,'N',12);
 
-  for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Chacha20_Vec256_chacha20_encrypt_256(SIZE,plain,plain,key,nonce,1);
+    for (int j = 0; j < ROUNDS; j++) {
+      Hacl_Chacha20_Vec256_chacha20_encrypt_256(SIZE,plain,plain,key,nonce,1);
+    }
+
+    t1 = clock();
+    a = cpucycles_begin();
+    for (int j = 0; j < ROUNDS; j++) {
+      Hacl_Chacha20_Vec256_chacha20_encrypt_256(SIZE,plain,plain,key,nonce,1);
+    }
+    b = cpucycles_end();
+    t2 = clock();
   }
-
-  t1 = clock();
-  a = cpucycles_begin();
-  for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Chacha20_Vec256_chacha20_encrypt_256(SIZE,plain,plain,key,nonce,1);
-  }
-  b = cpucycles_end();
-  t2 = clock();
   double diff3 = (double)(t2 - t1)/CLOCKS_PER_SEC;
   uint64_t cyc3 = b - a;
 
   printf("32-bit Chacha20\n"); print_time(diff1,cyc1);
   printf("128-bit Chacha20\n"); print_time(diff2,cyc2);
-  printf("256-bit Chacha20\n"); print_time(diff3,cyc3);
+  if (EverCrypt_AutoConfig2_has_avx2())
+    printf("256-bit Chacha20\n"); print_time(diff3,cyc3);
 
   if (ok) return EXIT_SUCCESS;
   else return EXIT_FAILURE;

@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <time.h>
+#include "EverCrypt_AutoConfig2.h"
 
 typedef uint64_t cycles;
 
@@ -73,13 +74,17 @@ bool print_test(int in_len, uint8_t* in, uint8_t* key, uint8_t* exp){
   printf("Poly1305 (128-bit) Result:\n");
   ok = ok && print_result(comp, exp);
 
-  Hacl_Poly1305_256_poly1305_mac(comp,in_len,in,key);
-  printf("Poly1305 (256-bit) Result:\n");
-  ok = ok && print_result(comp, exp);
+  if (EverCrypt_AutoConfig2_has_avx2()) {
+    Hacl_Poly1305_256_poly1305_mac(comp,in_len,in,key);
+    printf("Poly1305 (256-bit) Result:\n");
+    ok = ok && print_result(comp, exp);
+  }
   return ok;
 }
 
 int main() {
+  EverCrypt_AutoConfig2_init();
+
   int in_len = 34;
   uint8_t in[34] = {
     0x43, 0x72, 0x79, 0x70, 0x74, 0x6f, 0x67, 0x72, 0x61, 0x70, 0x68, 0x69, 0x63, 0x20, 0x46, 0x6f,
@@ -195,26 +200,30 @@ int main() {
   cycles cdiff2 = b - a;
 
 
-  memset(plain,'P',SIZE);
-  memset(key,'K',16);
-  for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Poly1305_256_poly1305_mac(plain,SIZE,plain,key);
-  }
+  if (EverCrypt_AutoConfig2_has_avx2()) {
+    memset(plain,'P',SIZE);
+    memset(key,'K',16);
+    for (int j = 0; j < ROUNDS; j++) {
+      Hacl_Poly1305_256_poly1305_mac(plain,SIZE,plain,key);
+    }
 
-  t1 = clock();
-  a = cpucycles_begin();
-  for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Poly1305_256_poly1305_mac(tag,SIZE,plain,key);
-    res ^= tag[0] ^ tag[15];
+    t1 = clock();
+    a = cpucycles_begin();
+    for (int j = 0; j < ROUNDS; j++) {
+      Hacl_Poly1305_256_poly1305_mac(tag,SIZE,plain,key);
+      res ^= tag[0] ^ tag[15];
+    }
+    b = cpucycles_end();
+    t2 = clock();
   }
-  b = cpucycles_end();
-  t2 = clock();
   clock_t tdiff3 = t2 - t1;
   cycles cdiff3 = b - a;
 
   printf("Poly1305 (32-bit) PERF: %d\n",(int)res); print_time(tdiff1,cdiff1);
   printf("Poly1305 (128-bit) PERF:\n"); print_time(tdiff2,cdiff2);
-  printf("Poly1305 (256-bit) PERF:\n"); print_time(tdiff3,cdiff3);
+  if (EverCrypt_AutoConfig2_has_avx2()) {
+    printf("Poly1305 (256-bit) PERF:\n"); print_time(tdiff3,cdiff3);
+  }
 
   if (ok) return EXIT_SUCCESS;
   else return EXIT_FAILURE;

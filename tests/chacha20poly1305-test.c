@@ -12,6 +12,7 @@
 #include "Hacl_Chacha20Poly1305_32.h"
 #include "Hacl_Chacha20Poly1305_128.h"
 #include "Hacl_Chacha20Poly1305_256.h"
+#include "EverCrypt_AutoConfig2.h"
 
 #define ROUNDS 100000
 #define SIZE   16384
@@ -37,20 +38,6 @@ static __inline__ cycles cpucycles_end(void)
   //__asm__ __volatile__ ("RDTSCP\n\t"  "mov %%edx, %0\n\t"  "mov %%eax, %1\n\t"  "CPUID\n\t": "=r" (hi), "=r" (lo)::     "%rax", "%rbx", "%rcx", "%rdx");
   //return ( (uint64_t)lo)|( ((uint64_t)hi)<<32 );
 }
-
-extern void
-Hacl_Chacha20Poly1305_32_aead_encrypt(uint8_t *k, uint8_t *n1, uint32_t aadlen, uint8_t *aad, uint32_t mlen, uint8_t *m, uint8_t *cipher, uint8_t *mac);
-extern void
-Hacl_Chacha20Poly1305_128_aead_encrypt(uint8_t *k, uint8_t *n1, uint32_t aadlen, uint8_t *aad, uint32_t mlen, uint8_t *m, uint8_t *cipher, uint8_t *mac);
-extern void
-Hacl_Chacha20Poly1305_256_aead_encrypt(uint8_t *k, uint8_t *n1, uint32_t aadlen, uint8_t *aad, uint32_t mlen, uint8_t *m, uint8_t *cipher, uint8_t *mac);
-
-extern uint32_t
-Hacl_Chacha20Poly1305_32_aead_decrypt(uint8_t *k, uint8_t *n1, uint32_t aadlen, uint8_t *aad, uint32_t mlen, uint8_t *m, uint8_t *cipher, uint8_t *mac);
-extern uint32_t
-Hacl_Chacha20Poly1305_128_aead_decrypt(uint8_t *k, uint8_t *n1, uint32_t aadlen, uint8_t *aad, uint32_t mlen, uint8_t *m, uint8_t *cipher, uint8_t *mac);
-extern uint32_t
-Hacl_Chacha20Poly1305_256_aead_decrypt(uint8_t *k, uint8_t *n1, uint32_t aadlen, uint8_t *aad, uint32_t mlen, uint8_t *m, uint8_t *cipher, uint8_t *mac);
 
 uint8_t
 aead_plaintext[114] = {
@@ -148,31 +135,35 @@ int main(){
     printf("\nFailure !\n");
   }
 
-  res = 0;
-  printf("Testing HACL* Hacl_Chacha20Poly1305 (256-bit)\n");
-  Hacl_Chacha20Poly1305_256_aead_encrypt(aead_key, aead_nonce, 12, aead_aad, 114, aead_plaintext, ciphertext, mac);
-  res = memcmp(ciphertext, aead_ciphertext, 114 * sizeof (uint8_t));
-  if (res != 0){
-    printf("AEAD (Chacha20) failed on RFC test of size 114\n.");
-  }
-  res = memcmp(mac, aead_mac, 16 * sizeof (uint8_t));
-  if (res != 0){
-    printf("AEAD (Poly1305) failed on RFC test of size 114\n.");
-  }
+  EverCrypt_AutoConfig2_init();
 
-  res = Hacl_Chacha20Poly1305_256_aead_decrypt(aead_key, aead_nonce, 12, aead_aad, 114, plaintext, aead_ciphertext, aead_mac);
-  if (res != 0){
-    printf("AEAD Decrypt (Chacha20/Poly1305) failed on RFC test of size 114\n.");
-  }
-  res = memcmp(plaintext, aead_plaintext, 114 * sizeof (uint8_t));
-  if (res != 0){
-    printf("AEAD Decrypt (Chacha20/Poly1305) failed on RFC test of size 114\n.");
-  }
+  if (EverCrypt_AutoConfig2_has_avx2()) {
+    res = 0;
+    printf("Testing HACL* Hacl_Chacha20Poly1305 (256-bit)\n");
+    Hacl_Chacha20Poly1305_256_aead_encrypt(aead_key, aead_nonce, 12, aead_aad, 114, aead_plaintext, ciphertext, mac);
+    res = memcmp(ciphertext, aead_ciphertext, 114 * sizeof (uint8_t));
+    if (res != 0){
+      printf("AEAD (Chacha20) failed on RFC test of size 114\n.");
+    }
+    res = memcmp(mac, aead_mac, 16 * sizeof (uint8_t));
+    if (res != 0){
+      printf("AEAD (Poly1305) failed on RFC test of size 114\n.");
+    }
 
-  if (res == 0){
-    printf("\nSuccess !\n");
-  } else {
-    printf("\nFailure !\n");
+    res = Hacl_Chacha20Poly1305_256_aead_decrypt(aead_key, aead_nonce, 12, aead_aad, 114, plaintext, aead_ciphertext, aead_mac);
+    if (res != 0){
+      printf("AEAD Decrypt (Chacha20/Poly1305) failed on RFC test of size 114\n.");
+    }
+    res = memcmp(plaintext, aead_plaintext, 114 * sizeof (uint8_t));
+    if (res != 0){
+      printf("AEAD Decrypt (Chacha20/Poly1305) failed on RFC test of size 114\n.");
+    }
+
+    if (res == 0){
+      printf("\nSuccess !\n");
+    } else {
+      printf("\nFailure !\n");
+    }
   }
 
 
@@ -219,20 +210,22 @@ int main(){
   clock_t tdiff2 = t2 - t1;
   cycles cdiff2 = b - a;
 
-  memset(plain,'P',SIZE);
-  memset(aead_key,'K',32);
-  for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Chacha20Poly1305_256_aead_encrypt(aead_key, aead_nonce, 12, aead_aad, SIZE, plain, cipher, tag);
-  }
+  if (EverCrypt_AutoConfig2_has_avx2()) {
+    memset(plain,'P',SIZE);
+    memset(aead_key,'K',32);
+    for (int j = 0; j < ROUNDS; j++) {
+      Hacl_Chacha20Poly1305_256_aead_encrypt(aead_key, aead_nonce, 12, aead_aad, SIZE, plain, cipher, tag);
+    }
 
-  t1 = clock();
-  a = cpucycles_begin();
-  for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Chacha20Poly1305_256_aead_encrypt(aead_key, aead_nonce, 12, aead_aad, SIZE, plain, cipher, tag);
-    res ^= tag[0] ^ tag[15];
+    t1 = clock();
+    a = cpucycles_begin();
+    for (int j = 0; j < ROUNDS; j++) {
+      Hacl_Chacha20Poly1305_256_aead_encrypt(aead_key, aead_nonce, 12, aead_aad, SIZE, plain, cipher, tag);
+      res ^= tag[0] ^ tag[15];
+    }
+    b = cpucycles_end();
+    t2 = clock();
   }
-  b = cpucycles_end();
-  t2 = clock();
   clock_t tdiff3 = t2 - t1;
   cycles cdiff3 = b - a;
 
@@ -274,21 +267,23 @@ int main(){
   clock_t tdiff5 = t2 - t1;
   cycles cdiff5 = b - a;
 
-  res1 = 0;
-  for (int j = 0; j < ROUNDS; j++) {
-    res1 = Hacl_Chacha20Poly1305_256_aead_decrypt(aead_key, aead_nonce, 12, aead_aad, SIZE, plain, cipher, tag);
-    res1 ^= res1;
-  }
+  if (EverCrypt_AutoConfig2_has_avx2()) {
+    res1 = 0;
+    for (int j = 0; j < ROUNDS; j++) {
+      res1 = Hacl_Chacha20Poly1305_256_aead_decrypt(aead_key, aead_nonce, 12, aead_aad, SIZE, plain, cipher, tag);
+      res1 ^= res1;
+    }
 
-  res1 = 0;
-  t1 = clock();
-  a = cpucycles_begin();
-  for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Chacha20Poly1305_256_aead_decrypt(aead_key, aead_nonce, 12, aead_aad, SIZE, plain, cipher, tag);
-    res1 ^= res1;
+    res1 = 0;
+    t1 = clock();
+    a = cpucycles_begin();
+    for (int j = 0; j < ROUNDS; j++) {
+      Hacl_Chacha20Poly1305_256_aead_decrypt(aead_key, aead_nonce, 12, aead_aad, SIZE, plain, cipher, tag);
+      res1 ^= res1;
+    }
+    b = cpucycles_end();
+    t2 = clock();
   }
-  b = cpucycles_end();
-  t2 = clock();
   clock_t tdiff6 = t2 - t1;
   cycles cdiff6 = b - a;
   printf ("\n res1: %i \n", res1);
@@ -303,10 +298,12 @@ int main(){
   printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff2,(double)tdiff2/count);
   printf("bw %8.2f MB/s\n",(double)count/(((double)tdiff2 / CLOCKS_PER_SEC) * 1000000.0));
 
-  printf("Chacha20Poly1305 Encrypt (256-bit) PERF:\n");
-  printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff3,(double)cdiff3/count);
-  printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff3,(double)tdiff3/count);
-  printf("bw %8.2f MB/s\n",(double)count/(((double)tdiff3 / CLOCKS_PER_SEC) * 1000000.0));
+  if (EverCrypt_AutoConfig2_has_avx2()) {
+    printf("Chacha20Poly1305 Encrypt (256-bit) PERF:\n");
+    printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff3,(double)cdiff3/count);
+    printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff3,(double)tdiff3/count);
+    printf("bw %8.2f MB/s\n",(double)count/(((double)tdiff3 / CLOCKS_PER_SEC) * 1000000.0));
+  }
 
   printf("\n\nChacha20Poly1305 Decrypt (32-bit) PERF:\n");
   printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff4,(double)cdiff4/count);
@@ -318,9 +315,11 @@ int main(){
   printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff5,(double)tdiff5/count);
   printf("bw %8.2f MB/s\n",(double)count/(((double)tdiff5 / CLOCKS_PER_SEC) * 1000000.0));
 
-  printf("Chacha20Poly1305 Decrypt (256-bit) PERF:\n");
-  printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff6,(double)cdiff6/count);
-  printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff6,(double)tdiff6/count);
-  printf("bw %8.2f MB/s\n",(double)count/(((double)tdiff6 / CLOCKS_PER_SEC) * 1000000.0));
+  if (EverCrypt_AutoConfig2_has_avx2()) {
+    printf("Chacha20Poly1305 Decrypt (256-bit) PERF:\n");
+    printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff6,(double)cdiff6/count);
+    printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff6,(double)tdiff6/count);
+    printf("bw %8.2f MB/s\n",(double)count/(((double)tdiff6 / CLOCKS_PER_SEC) * 1000000.0));
+  }
 
 }

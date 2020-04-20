@@ -12,6 +12,7 @@
 #include "Hacl_Blake2b_32.h"
 #include "Hacl_Blake2s_128.h"
 #include "Hacl_Blake2b_256.h"
+#include "EverCrypt_AutoConfig2.h"
 
 typedef uint64_t cycles;
 
@@ -539,16 +540,20 @@ int main()
   double cdiff5 = b - a;
   double tdiff5 = (double)(t2 - t1)/CLOCKS_PER_SEC;
 
-  for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Blake2b_256_blake2b(64,plain,SIZE,plain,0,NULL);
+  EverCrypt_AutoConfig2_init();
+
+  if (EverCrypt_AutoConfig2_has_avx2()) {
+    for (int j = 0; j < ROUNDS; j++) {
+      Hacl_Blake2b_256_blake2b(64,plain,SIZE,plain,0,NULL);
+    }
+    t1 = clock();
+    a = cpucycles_begin();
+    for (int j = 0; j < ROUNDS; j++) {
+      Hacl_Blake2b_256_blake2b(64,plain,SIZE,plain,0,NULL);
+    }
+    b = cpucycles_end();
+    t2 = clock();
   }
-  t1 = clock();
-  a = cpucycles_begin();
-  for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Blake2b_256_blake2b(64,plain,SIZE,plain,0,NULL);
-  }
-  b = cpucycles_end();
-  t2 = clock();
   double cdiff6 = b - a;
   double tdiff6 = (double)(t2 - t1)/CLOCKS_PER_SEC;
 
@@ -568,10 +573,12 @@ int main()
   printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff5,(double)tdiff5/count);
   printf("bw %8.2f MB/s\n",(double)count/(tdiff5 * 1000000.0));
 
-  printf("Blake2B (Vec 256-bit):\n");
-  printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff6,(double)cdiff6/count);
-  printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff6,(double)tdiff6/count);
-  printf("bw %8.2f MB/s\n",(double)count/(tdiff6 * 1000000.0));
+  if (EverCrypt_AutoConfig2_has_avx2()) {
+    printf("Blake2B (Vec 256-bit):\n");
+    printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff6,(double)cdiff6/count);
+    printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff6,(double)tdiff6/count);
+    printf("bw %8.2f MB/s\n",(double)count/(tdiff6 * 1000000.0));
+  }
 
   if (all_ok) return EXIT_SUCCESS;
   else return EXIT_FAILURE;

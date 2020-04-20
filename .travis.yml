@@ -5,10 +5,20 @@ jobs:
     arch: arm64
     dist: bionic
   - os: linux
-    dist: bionic
   - os: osx
+    install:
+      - brew install openssl
+      - brew list openssl
+  - os: osx
+    osx_image: xcode10.1
+    install:
+      - brew install openssl
+      - brew list openssl
   - os: osx
     osx_image: xcode11.3
+    install:
+      - brew install openssl
+      - brew list openssl
 script:
   - export CFLAGS="-I/usr/local/Cellar/openssl@1.1/1.1.1d/include/"
   - export LDFLAGS="-L/usr/local/Cellar/openssl@1.1/1.1.1d/lib"
