@@ -19,4 +19,4 @@ script:
   - cd dist/gcc-compatible && ./configure
   - make -j
   - if [ "$(uname -m | cut -c 1-7)" == "aarch64" ]; then make -C ../../tests arm -j; else make -C ../../tests -j test; fi
-  - make -C dist/test/c -j
+  - make -C ../test/c -j
