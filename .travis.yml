@@ -11,7 +11,7 @@ jobs:
     - name: gcc 7 / full tests / OPAM package install
       dist: bionic
       install:
-        - sudo apt install opam
+        - sudo apt update -q --yes && sudo apt install opam -q --yes
         - opam init --yes
         - eval $(opam config env)
         - opam install --yes ctypes ctypes.foreign dune
