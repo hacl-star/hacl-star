@@ -8,11 +8,11 @@ jobs:
     - name: gcc 5.4 / full tests
       os: linux
       compiler: gcc
-    - name: gcc 7 / full tests / OPAM package install
+    - name: gcc 7 / full tests / ocaml 4.09.1 / ocaml tests
       dist: bionic
       install:
-        - sudo apt update -q --yes && sudo apt install opam -q --yes
-        - opam init --yes
+        - sudo apt update -qq --yes && sudo apt install -qq --yes opam aspcud
+        - opam init --yes --comp=4.09.1
         - eval $(opam config env)
         - opam install --yes ctypes ctypes.foreign dune
     - name: clang 7 / full tests
