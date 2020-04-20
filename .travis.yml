@@ -1,8 +1,13 @@
 language: c
-os: linux
-arch: arm64
-dist: bionic
+jobs:
+  include:
+  - os: linux
+    arch: arm64
+    dist: bionic
+  - os: linux
+    dist: bionic
+  - os: osx
 script:
   - cd dist/gcc-compatible && ./configure
   - make -j
-  - make -C ../../tests arm -j
+  - if [ "$(uname -m | cut -c 1-7)" == "aarch64" ]; then make -C ../../tests arm -j; else make -C ../../tests -j; fi
