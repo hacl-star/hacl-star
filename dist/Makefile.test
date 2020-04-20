@@ -8,7 +8,7 @@ CFLAGS += -D'LowStar_Printf_print_string(X)=printf(X)'
 CFLAGS += -D'LowStar_Printf_print_u32(X)=printf("%"PRIu32, X)'
 CFLAGS += -D'LowStar_Printf_print_lmbuffer_u8(X, Y)=for (size_t i = 0; i < X; ++i) printf("%"PRIu8, (Y)[i])'
 
-SED=$(shell which gsed && echo gsed || echo sed)
+SED=$(shell which gsed && echo gsed || echo sed)
 
 all:
 	$(MAKE) hack
