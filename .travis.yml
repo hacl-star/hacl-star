@@ -13,6 +13,7 @@ jobs:
       install:
         - sudo add-apt-repository -y ppa:avsm/ppa
         - sudo apt update -qq --yes && sudo apt install -qq --yes opam aspcud ocaml
+        - opam switch create 4.09.1
         - opam init --yes
         - eval $(opam config env)
         - opam install --yes ctypes ctypes-foreign dune zarith
