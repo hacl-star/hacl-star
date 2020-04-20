@@ -1,6 +1,7 @@
 # Just for CI
 
 SOURCES = $(wildcard *.c)
+CFLAGS += -I../../gcc-compatible
 CFLAGS += -I../../kremlin/include
 CFLAGS += -I../../kremlin/kremlib/dist/minimal
 CFLAGS += -D'C_String_print(X)=printf(X)'
