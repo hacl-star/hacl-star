@@ -7,15 +7,15 @@ jobs:
   - os: linux
   - os: osx
     osx_image: xcode10.1
-    install:
-      - brew install openssl@1.1.1f
   - os: osx
     osx_image: xcode11.3
-    install:
-      - brew install openssl@1.1.1f
 script:
   - for p in /usr/local/Cellar/openssl@1.1/*; do export CFLAGS="-I$p/include/"; export LDFLAGS="-L$p/lib"; done
   - cd dist/gcc-compatible && ./configure
   - make -j
   - if [ "$(uname -m | cut -c 1-7)" == "aarch64" ]; then make -C ../../tests arm -j; else make -C ../../tests -j test; fi
-  - make -C ../test/c -j
+  - git clone https://github.com/fstarlang/kremlin -b protz_ci --depth 10
+  - cd ../test/c/
+  - make -C kremlin/dist/kremlib/generic
+  - export KREMLIN_HOME=$(pwd)/kremlin
+  - make -j

@@ -1,29 +1,21 @@
-# Just for CI
+# Only exercised by Travis CI. This requires a full kremlib to be setup. Regular
+# CI regenerates these files and compiles them from the main Makefile. It would
+# be nice to delegate building & running C tests to this Makefile from the main
+# Makefile for the purposes of sharing.
 
 SOURCES = $(wildcard *.c)
 CFLAGS += -I../../gcc-compatible
 CFLAGS += -I../../kremlin/include
 CFLAGS += -I../../kremlin/kremlib/dist/minimal
-CFLAGS += -D'C_String_print(X)=printf(X)'
-CFLAGS += -D'LowStar_Printf_print_string(X)=printf(X)'
-CFLAGS += -D'LowStar_Printf_print_u32(X)=printf("%"PRIu32, X)'
-CFLAGS += -D'LowStar_Printf_print_lmbuffer_u8(X, Y)=for (size_t i = 0; i < X; ++i) printf("%"PRIu8, (Y)[i])'
 
-SED=$(shell which gsed && echo gsed || echo sed)
+all: $(patsubst %.c,%.test,$(SOURCES))
 
-all:
-	$(MAKE) hack
-	$(MAKE) all_
-
-hack:
-	$(SED) -i 's/extern void LowStar_Printf_.*//g' *.c
-	$(SED) -i 's/extern void C_String_printf.*//g' *.c
-
-all_: $(patsubst %.c,%.test,$(SOURCES))
-
-%.exe: %.o ../../gcc-compatible/libevercrypt.a
-	$(CC) $(CFLAGS) $^ -o $@
+%.exe: %.o ../../gcc-compatible/libevercrypt.a $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a
+	$(CC) $^ -o $@
 
 .PHONY: .test
 %.test: %.exe
 	./$<
+
+clean:
+	rm -rf *.o *.d *.exe
