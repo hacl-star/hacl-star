@@ -6,18 +6,12 @@ jobs:
     dist: bionic
   - os: linux
     dist: bionic
-    compiler:
-      - clang
-      - gcc
   - os: osx
-    compiler:
-      - clang
-      - gcc
-    script:
-      - brew install openssl
-      - export CFLAGS="-I/usr/local/Cellar/openssl@1.1/1.1.1d/include/"
-      - export LDFLAGS="-L/usr/local/Cellar/openssl@1.1/1.1.1d/lib"
+  - os: osx
+    osx_image: xcode11.3
 script:
+  - export CFLAGS="-I/usr/local/Cellar/openssl@1.1/1.1.1d/include/"
+  - export LDFLAGS="-L/usr/local/Cellar/openssl@1.1/1.1.1d/lib"
   - cd dist/gcc-compatible && ./configure
   - make -j
   - if [ "$(uname -m | cut -c 1-7)" == "aarch64" ]; then make -C ../../tests arm -j; else make -C ../../tests -j test; fi
