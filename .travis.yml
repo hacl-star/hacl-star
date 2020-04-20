@@ -16,6 +16,6 @@ script:
   - if [ "$(uname -m | cut -c 1-7)" == "aarch64" ]; then make -C ../../tests arm -j; else make -C ../../tests -j test; fi
   - cd ../test/c/
   - git clone https://github.com/fstarlang/kremlin -b protz_ci --depth 10
-  - make -C kremlin/kremlib/dist/generic -f Makefile.basic
   - export KREMLIN_HOME=$(pwd)/kremlin
+  - make -C kremlin/kremlib/dist/generic -f Makefile.basic
   - make -j

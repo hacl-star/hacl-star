@@ -1066,7 +1066,7 @@ LDFLAGS 	+= -L$(OPENSSL_HOME)
 CFLAGS += -Wall -Wextra -g \
   -Wno-int-conversion -Wno-unused-parameter \
   -O3 -march=native -mtune=native -I$(KREMLIN_HOME)/kremlib/dist/minimal \
-  -I$(KREMLIN_HOME)/include
+  -I$(KREMLIN_HOME)/include -Idist/gcc-compatible
 
 # FIXME there's a kremlin error that generates a void* -- can't use -Werror
 # Need the libraries to be present and compiled.
@@ -1075,7 +1075,6 @@ CFLAGS += -Wall -Wextra -g \
 	# Linking with full kremlib since tests may use TestLib, etc.
 	$(call run-with-log,\
 	  $(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ \
-	    -Idist/gcc-compatible \
 	    dist/gcc-compatible/libevercrypt.a -lcrypto $(LDFLAGS) \
 	    $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a \
 	  ,[LD $*],$(call to-obj-dir,$@))
@@ -1106,6 +1105,7 @@ test-handwritten: compile-gcc64-only
 
 obj/vale_testInline.exe: vale/code/test/TestInline.c obj/vale_testInline.h
 	$(CC) $(CFLAGS) $(LDFLAGS) $< -Iobj -o $@
+
 vale_testInline: obj/vale_testInline.exe
 	@echo "Testing Vale inline assembly printer"
 	$<
