@@ -69,7 +69,7 @@ detect_broken_xcode () {
   cat > $file <<EOF
 #include <inttypes.h>
 
-static inline void fsqr2 (uint64_t *out, uint64_t *f, uint64_t *tmp) 
+extern void fsqr2 (uint64_t *out, uint64_t *f, uint64_t *tmp) 
 {
   asm volatile(
     // Step 1: Compute all partial products
