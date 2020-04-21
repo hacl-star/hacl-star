@@ -81,7 +81,7 @@ extern void fsqr2 (uint64_t *out, uint64_t *f, uint64_t *tmp)
     "  mulxq 8(%1), %%r11, %%rbx;"     "  adcx %%rcx, %%r11;"    // f[1]*f[3]
     "  mulxq 16(%1), %%rax, %%r13;"    "  adcx %%rax, %%rbx;"    // f[2]*f[3]
     "  movq 8(%1), %%rdx;"             "  adcx %%r15, %%r13;"    // f1
-    "  mulxq 16(%1), %%rax, %%rcx;"    "  mov $0, %%r14;"        // f[2]*f[1]
+    "  mulxq 16(%1), %%rax, %%rcx;"    "  mov \$0, %%r14;"        // f[2]*f[1]
 
     // Step 2: Compute two parallel carry chains
     "  xor %%r15, %%r15;"
@@ -121,7 +121,7 @@ extern void fsqr2 (uint64_t *out, uint64_t *f, uint64_t *tmp)
     "  mulxq 40(%1), %%r11, %%rbx;"     "  adcx %%rcx, %%r11;"    // f[1]*f[3]
     "  mulxq 48(%1), %%rax, %%r13;"    "  adcx %%rax, %%rbx;"    // f[2]*f[3]
     "  movq 40(%1), %%rdx;"             "  adcx %%r15, %%r13;"    // f1
-    "  mulxq 48(%1), %%rax, %%rcx;"    "  mov $0, %%r14;"        // f[2]*f[1]
+    "  mulxq 48(%1), %%rax, %%rcx;"    "  mov \$0, %%r14;"        // f[2]*f[1]
 
     // Step 2: Compute two parallel carry chains
     "  xor %%r15, %%r15;"
@@ -157,7 +157,7 @@ extern void fsqr2 (uint64_t *out, uint64_t *f, uint64_t *tmp)
     "  mov %0, %2;"
 
     // Step 1: Compute dst + carry == tmp_hi * 38 + tmp_lo
-    "  mov $38, %%rdx;"
+    "  mov \$38, %%rdx;"
     "  mulxq 32(%1), %%r8, %%r13;"
     "  xor %%rcx, %%rcx;"
     "  adoxq 0(%1), %%r8;"
@@ -184,13 +184,13 @@ extern void fsqr2 (uint64_t *out, uint64_t *f, uint64_t *tmp)
     "  movq %%r11, 24(%2);"
 
     // Step 3: Fold the carry bit back in; guaranteed not to carry at this point
-    "  mov $0, %%rax;"
+    "  mov \$0, %%rax;"
     "  cmovc %%rdx, %%rax;"
     "  add %%rax, %%r8;"
     "  movq %%r8, 0(%2);"
 
     // Step 1: Compute dst + carry == tmp_hi * 38 + tmp_lo
-    "  mov $38, %%rdx;"
+    "  mov \$38, %%rdx;"
     "  mulxq 96(%1), %%r8, %%r13;"
     "  xor %%rcx, %%rcx;"
     "  adoxq 64(%1), %%r8;"
@@ -217,7 +217,7 @@ extern void fsqr2 (uint64_t *out, uint64_t *f, uint64_t *tmp)
     "  movq %%r11, 56(%2);"
 
     // Step 3: Fold the carry bit back in; guaranteed not to carry at this point
-    "  mov $0, %%rax;"
+    "  mov \$0, %%rax;"
     "  cmovc %%rdx, %%rax;"
     "  add %%rax, %%r8;"
     "  movq %%r8, 32(%2);"
@@ -227,7 +227,7 @@ extern void fsqr2 (uint64_t *out, uint64_t *f, uint64_t *tmp)
   );
 }
 EOF
-  cc -O3 -c $file -o /dev/null
+  cc -march=native -O3 -c $file -o /dev/null
 }
 
 # Main auto-detection
