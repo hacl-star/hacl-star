@@ -141,7 +141,7 @@ let valid_mem_operand128 (addr:int) (t:taint) (s_mem:vale_heap) (layout:vale_hea
 let valid_operand (o:operand64) (s:vale_state) : prop0 =
   Vale.X64.State.valid_src_operand o s /\
   ( match o with
-    | OMem (m, t) -> valid_mem_operand64 (eval_maddr m s) t (M.get_vale_heap s.vs_heap) s.vs_heap.vf_layout
+    | OMem (m, t, _) -> valid_mem_operand64 (eval_maddr m s) t (M.get_vale_heap s.vs_heap) s.vs_heap.vf_layout
     | OStack (m, t) -> S.valid_taint_stack64 (eval_maddr m s) t s.vs_stackTaint
     | _ -> True
   )
@@ -150,7 +150,7 @@ let valid_operand (o:operand64) (s:vale_state) : prop0 =
 let valid_operand128 (o:operand128) (s:vale_state) : prop0 =
   Vale.X64.State.valid_src_operand128 o s /\
   ( match o with
-    | OMem (m, t) -> valid_mem_operand128 (eval_maddr m s) t (M.get_vale_heap s.vs_heap) s.vs_heap.vf_layout
+    | OMem (m, t, _) -> valid_mem_operand128 (eval_maddr m s) t (M.get_vale_heap s.vs_heap) s.vs_heap.vf_layout
     | OStack (m, t) -> S.valid_taint_stack128 (eval_maddr m s) t s.vs_stackTaint
     | _ -> True
   )
@@ -179,9 +179,9 @@ val va_fuel_default : unit -> va_fuel
 [@va_qattr]
 unfold let va_opr_code_Mem64 (h:heaplet_id) (o:operand64) (offset:int) (t:taint) : operand64 =
   match o with
-  | OConst n -> OMem (MConst (n + offset), t)
-  | OReg r -> OMem (MReg (Reg 0 r) offset, t)
-  | _ -> OMem (MConst 42, t)
+  | OConst n -> OMem (MConst (n + offset), t, h)
+  | OReg r -> OMem (MReg (Reg 0 r) offset, t, h)
+  | _ -> OMem (MConst 42, t, h)
 
 [@va_qattr]
 unfold let va_opr_code_Stack (o:operand64) (offset:int) (t:taint) : operand64 =
@@ -193,8 +193,8 @@ unfold let va_opr_code_Stack (o:operand64) (offset:int) (t:taint) : operand64 =
 [@va_qattr]
 unfold let va_opr_code_Mem128 (h:heaplet_id) (o:operand64) (offset:int) (t:taint) : operand128 =
   match o with
-  | OReg r -> OMem (MReg (Reg 0 r) offset, t)
-  | _ -> OMem (MConst 42, t)
+  | OReg r -> OMem (MReg (Reg 0 r) offset, t, h)
+  | _ -> OMem (MConst 42, t, h)
 
 val taint_at (memTaint:M.memtaint) (addr:int) : taint
 
@@ -267,7 +267,7 @@ let update_operand (o:operand64) (sM:va_state) (sK:va_state) : va_state =
   match o with
   | OConst n -> sK
   | OReg r -> va_update_reg64 r sM sK
-  | OMem (m, _) -> va_update_mem sM sK
+  | OMem (m, _, _) -> va_update_mem sM sK
   | OStack (m, _) -> va_update_stack sM sK
 
 [@va_qattr] unfold
@@ -309,7 +309,7 @@ let va_upd_operand_dst_opr64 (o:operand64) (v:nat64) (s:vale_state) =
   match o with
   | OConst n -> s
   | OReg r -> update_reg_64 r v s
-  | OMem (m, _) -> s // TODO: support destination memory operands
+  | OMem (m, _, _) -> s // TODO: support destination memory operands
   | OStack (m, _) -> s // TODO: support destination stack operands
 
 [@va_qattr]
@@ -317,7 +317,7 @@ let va_upd_operand_reg_opr64 (o:operand64) (v:nat64) (s:vale_state) =
   match o with
   | OConst n -> s
   | OReg r -> update_reg_64 r v s
-  | OMem (m, _) -> s
+  | OMem (m, _, _) -> s
   | OStack (m, _) -> s
 
 [@va_qattr]

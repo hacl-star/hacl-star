@@ -49,12 +49,13 @@ type maddr:eqtype =
   | MIndex: base:reg -> scale:int -> index:reg -> offset:int -> maddr
 
 type tmaddr:eqtype = maddr & taint
+type tmhaddr:eqtype = maddr & taint & heaplet_id
 
 [@va_qattr]
 type operand (tc tr:eqtype) : eqtype =
   | OConst: n:tc -> operand tc tr
   | OReg: r:tr -> operand tc tr
-  | OMem: m:tmaddr -> operand tc tr
+  | OMem: m:tmhaddr -> operand tc tr
   | OStack: m:tmaddr -> operand tc tr
 
 [@va_qattr]

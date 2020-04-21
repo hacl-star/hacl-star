@@ -26,7 +26,7 @@ let safe_mov_mov_elim (is:list ins) : Tot bool =
       match src2 with
       | OConst _ -> true
       | OReg rs2 -> not (rs2 = rd)
-      | OStack (m, _) | OMem (m, _) ->
+      | OStack (m, _) | OMem (m, _, _) ->
         match m with
         | MConst _ -> true
         | _ -> false // TODO: Can we relax this restriction?

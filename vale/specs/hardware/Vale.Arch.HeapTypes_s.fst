@@ -15,3 +15,5 @@ type taint:eqtype =
   | Secret
 
 type memTaint_t = (m:Map.t int taint{Set.equal (Map.domain m) (Set.complement Set.empty)})
+
+let heaplet_id = n:nat{n < 16}

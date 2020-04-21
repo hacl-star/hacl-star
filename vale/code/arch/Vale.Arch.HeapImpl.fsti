@@ -13,8 +13,6 @@ Note: the untrusted memory definitions are split among 3 modules:
 This splitting is done to avoid circular module dependencies.
 *)
 
-let heaplet_id = n:nat{n < 16}
-
 val buffer (t:base_typ) : Type0
 
 type mutability = | Mutable | Immutable

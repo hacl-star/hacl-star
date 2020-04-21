@@ -32,6 +32,7 @@ let rec check_if_consumes_fixed_time_args
   =
   allow_inversion maddr;
   allow_inversion tmaddr;
+  allow_inversion tmhaddr;
   match args with
   | [] -> true
   | (IOpEx i)::args ->
@@ -83,6 +84,7 @@ let rec check_if_consumes_fixed_time_outs
   =
   allow_inversion maddr;
   allow_inversion tmaddr;
+  allow_inversion tmhaddr;
   allow_inversion operand64;
   allow_inversion operand128;
   match outs with
@@ -116,6 +118,7 @@ let rec lemma_args_taint
   =
   allow_inversion maddr;
   allow_inversion tmaddr;
+  allow_inversion tmhaddr;
   allow_inversion operand64;
   allow_inversion operand128;
   match args with
@@ -161,6 +164,7 @@ let rec lemma_inouts_taint
   =
   allow_inversion maddr;
   allow_inversion tmaddr;
+  allow_inversion tmhaddr;
   allow_inversion operand64;
   allow_inversion operand128;
   match inouts with
@@ -401,6 +405,7 @@ let lemma_instr_set_taints_explicit
   =
   allow_inversion maddr;
   allow_inversion tmaddr;
+  allow_inversion tmhaddr;
   lemma_preserve_valid64 (heap_get s1_orig.S.ms_heap) (heap_get s1.S.ms_heap);
   lemma_preserve_valid64 (heap_get s2_orig.S.ms_heap) (heap_get s2.S.ms_heap);
   lemma_preserve_valid128 (heap_get s1_orig.S.ms_heap) (heap_get s1.S.ms_heap);
@@ -435,6 +440,7 @@ let lemma_instr_set_taints_implicit
   =
   allow_inversion maddr;
   allow_inversion tmaddr;
+  allow_inversion tmhaddr;
   allow_inversion operand64;
   allow_inversion operand128;
   lemma_preserve_valid64 (heap_get s1_orig.S.ms_heap) (heap_get s1.S.ms_heap);
@@ -735,7 +741,7 @@ let lemma_push_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
         let aux () : Lemma  (v1 == v2)
           = match src with
           | OConst _ | OReg _ -> ()
-          | OMem (_, _) | OStack (_, _) -> S.get_heap_val64_reveal ()
+          | OMem (_, _, _) | OStack (_, _) -> S.get_heap_val64_reveal ()
         in
         aux()
       )
@@ -762,6 +768,7 @@ let lemma_pop_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
       =
       allow_inversion maddr;
       allow_inversion tmaddr;
+      allow_inversion tmhaddr;
       let BC.Pop dst t_stk = ins in
       let s1' = Some?.v (machine_eval_code code fuel s1) in
       let s2' = Some?.v (machine_eval_code code fuel s2) in

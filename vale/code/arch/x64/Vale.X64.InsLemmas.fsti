@@ -12,7 +12,7 @@ module BC = Vale.X64.Bytes_Code_s
 module S = Vale.X64.Machine_Semantics_s
 let has_taint128 (o:operand128) (t:taint) : bool =
   match o with
-  | OMem (_, t') | OStack (_, t') -> t = t'
+  | OMem (_, t', _) | OStack (_, t') -> t = t'
   | _ -> true
 
 val lemma_valid_src_operand64_and_taint (o:operand64) (s:vale_state) : Lemma

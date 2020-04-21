@@ -14,7 +14,7 @@ friend Vale.X64.Decls
 let lemma_valid_src_operand64_and_taint o s =
   let h = get_vale_heap s.vs_heap in
   match o with
-  | OMem (m, t) ->
+  | OMem (m, t, _) ->
     let addr = eval_maddr m s in
     let aux (b:buffer64) (i:int) : Lemma
       (requires valid_buf_maddr64 addr h s.vs_heap.vf_layout b i t)
@@ -30,7 +30,7 @@ let lemma_valid_src_operand64_and_taint o s =
 let lemma_valid_src_operand128_and_taint o s =
   let h = get_vale_heap s.vs_heap in
   match o with
-  | OMem (m, t) ->
+  | OMem (m, t, _) ->
     let addr = eval_maddr m s in
     let aux (b:buffer128) (i:int) : Lemma
       (requires valid_buf_maddr128 addr h s.vs_heap.vf_layout b i t)

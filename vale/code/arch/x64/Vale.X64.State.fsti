@@ -55,7 +55,7 @@ let eval_operand (o:operand64) (s:vale_state) : GTot nat64 =
   match o with
   | OConst n -> n
   | OReg r -> eval_reg_64 r s
-  | OMem (m, _) -> eval_mem (eval_maddr m s) s
+  | OMem (m, _, _) -> eval_mem (eval_maddr m s) s
   | OStack (m, _) -> eval_stack (eval_maddr m s) s
 
 [@va_qattr]
@@ -63,7 +63,7 @@ let eval_operand128 (o:operand128) (s:vale_state) : GTot Vale.Def.Types_s.quad32
   match o with
   | OConst c -> c
   | OReg r -> eval_reg_xmm r s
-  | OMem (m, _) -> eval_mem128 (eval_maddr m s) s
+  | OMem (m, _, _) -> eval_mem128 (eval_maddr m s) s
   | OStack (m, _) -> eval_stack128 (eval_maddr m s) s
 
 [@va_qattr]
@@ -95,7 +95,7 @@ let update_stack64 (ptr:int) (v:nat64) (s:vale_state) : GTot vale_state =
 //  match o with
 //  | OConst n -> sM
 //  | OReg r -> update_reg (Reg 0 r) v sM
-//  | OMem (m, _) -> update_mem (eval_maddr m sM) v sM
+//  | OMem (m, _, _) -> update_mem (eval_maddr m sM) v sM
 //  | OStack (m, _) -> update_stack64 (eval_maddr m sM) v sM
 
 [@va_qattr]
@@ -111,7 +111,7 @@ let valid_src_operand (o:operand64) (s:vale_state) : prop0 =
   match o with
   | OConst c -> True
   | OReg r -> True
-  | OMem (m, _) -> valid_maddr m s
+  | OMem (m, _, _) -> valid_maddr m s
   | OStack (m, _) -> valid_src_stack64 (eval_maddr m s) s.vs_stack
 
 [@va_qattr]
@@ -119,7 +119,7 @@ let valid_src_operand128 (o:operand128) (s:vale_state) : prop0 =
   match o with
   | OConst _ -> False
   | OReg _ -> True
-  | OMem (m, _) -> valid_maddr128 m s
+  | OMem (m, _, _) -> valid_maddr128 m s
   | OStack (m, _) -> valid_src_stack128 (eval_maddr m s) s.vs_stack
 
 [@va_qattr]

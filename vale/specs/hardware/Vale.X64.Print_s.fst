@@ -94,7 +94,7 @@ let print_operand (o:operand64) (p:printer) : string =
       if 0 <= n && n < pow2_64 then p.const n
       else "!!! INVALID constant: " ^ string_of_int n ^ " !!!"
   | OReg r -> print_reg64 r p
-  | OMem (m, _) | OStack (m, _) -> print_maddr m "qword" print_reg_int p
+  | OMem (m, _, _) | OStack (m, _) -> print_maddr m "qword" print_reg_int p
 
 let print_operand32 (o:operand64) (p:printer) : string =
   match o with
@@ -102,7 +102,7 @@ let print_operand32 (o:operand64) (p:printer) : string =
       if 0 <= n && n < pow2_32 then p.const n
       else "!!! INVALID constant: " ^ string_of_int n ^ " !!!"
   | OReg r -> print_reg32 r p
-  | OMem (m, _) | OStack (m, _) -> print_maddr m "dword" print_reg_int p
+  | OMem (m, _, _) | OStack (m, _) -> print_maddr m "dword" print_reg_int p
 
 let print_small_operand (o:operand64) (p:printer) : string =
   match o with
@@ -122,7 +122,7 @@ let print_mov128_op (o:operand128) (p:printer) : string =
   match o with
   | OConst _ -> "!!! INVALID xmm constants not allowed !!!"
   | OReg x -> print_xmm x p
-  | OMem (m, _) | OStack (m, _) -> print_maddr m "xmmword" print_reg_int p
+  | OMem (m, _, _) | OStack (m, _) -> print_maddr m "xmmword" print_reg_int p
 
 assume val print_any: 'a -> string
 

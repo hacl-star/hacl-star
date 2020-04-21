@@ -86,7 +86,7 @@ let rec lemma_eq_instr_write_outputs
   use_machine_state_equal ();
   lemma_heap_ignore_ghost_machine s1.BS.ms_heap s2.BS.ms_heap;
   lemma_heap_ignore_ghost_machine s1_orig.BS.ms_heap s2_orig.BS.ms_heap;
-  allow_inversion tmaddr;
+  allow_inversion tmhaddr;
   match outs with
   | [] -> ()
   | (_, i)::outs ->
@@ -150,6 +150,7 @@ let eval_code_eq_ins (i:BS.ins) (f:fuel) (s1 s2:machine_state) : Lemma
     use_machine_state_equal ();
     lemma_heap_ignore_ghost_machine s1.BS.ms_heap s2.BS.ms_heap;
     allow_inversion tmaddr;
+    allow_inversion tmhaddr;
     ()
   )
 

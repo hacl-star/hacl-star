@@ -52,6 +52,7 @@ let lemma_load_buffer_read128 h b i =
 #restart-solver
 let lemma_to_eval_operand s o =
   allow_inversion tmaddr;
+  allow_inversion tmhaddr;
   allow_inversion maddr
 
 #reset-options "--initial_fuel 2 --max_fuel 2"

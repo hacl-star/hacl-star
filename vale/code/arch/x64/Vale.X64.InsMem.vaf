@@ -207,7 +207,7 @@ procedure Load64_buffer(
         ghost b:buffer64, ghost index:int)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr_annotate(I.ins_Mov64, S.AnnotateMov64(), dst, OMem(tuple(MReg(get_reg(src), offset), t))))}
+    {:instruction mk_ins(make_instr_annotate(I.ins_Mov64, S.AnnotateMov64(), dst, OMem(tuple(MReg(get_reg(src), offset), t, h))))}
     reads
         memLayout;
     requires
@@ -226,7 +226,7 @@ procedure Store64_buffer(
         ghost b:buffer64, ghost index:int)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr_annotate(Vale.X64.Instructions_s.ins_Mov64, S.AnnotateMov64(), OMem(tuple(MReg(get_reg(dst), offset), t)), src))}
+    {:instruction mk_ins(make_instr_annotate(Vale.X64.Instructions_s.ins_Mov64, S.AnnotateMov64(), OMem(tuple(MReg(get_reg(dst), offset), t, h)), src))}
     reads
         memLayout;
     modifies
@@ -247,7 +247,7 @@ procedure LoadBe64_buffer(
         ghost b:buffer64, ghost index:int)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr_annotate(I.ins_MovBe64, S.AnnotateMovbe64(), dst, OMem(tuple(MReg(get_reg(src), offset), t))))}
+    {:instruction mk_ins(make_instr_annotate(I.ins_MovBe64, S.AnnotateMovbe64(), dst, OMem(tuple(MReg(get_reg(src), offset), t, h))))}
     reads
         memLayout;
     requires
@@ -267,7 +267,7 @@ procedure StoreBe64_buffer(
         ghost b:buffer64, ghost index:int)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr_annotate(I.ins_MovBe64, S.AnnotateMovbe64(), OMem(tuple(MReg(get_reg(dst), offset), t)), src))}
+    {:instruction mk_ins(make_instr_annotate(I.ins_MovBe64, S.AnnotateMovbe64(), OMem(tuple(MReg(get_reg(dst), offset), t, h)), src))}
     reads
         memLayout;
     modifies

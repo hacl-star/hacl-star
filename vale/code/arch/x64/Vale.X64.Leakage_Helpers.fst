@@ -48,7 +48,7 @@ let operand_taint (rf:reg_file_id) (o:operand_rf rf) (ts:analysis_taints) : tain
   match o with
   | OConst _ -> Public
   | OReg r -> sel ts.rts (Reg rf r)
-  | OMem (_, t) | OStack (_, t) -> t
+  | OMem (_, t, _) | OStack (_, t) -> t
 
 [@instr_attr]
 let operand_taint_explicit
@@ -126,12 +126,12 @@ let maddr_does_not_use_secrets (addr:maddr) (ts:analysis_taints) : bool =
 let operand_does_not_use_secrets (#tc #tr:eqtype) (o:operand tc tr) (ts:analysis_taints) : bool =
   match o with
   | OConst _ | OReg _ -> true
-  | OMem (m, _) | OStack (m, _) -> maddr_does_not_use_secrets m ts
+  | OMem (m, _, _) | OStack (m, _) -> maddr_does_not_use_secrets m ts
 
 let operand_taint_allowed (#tc #tr:eqtype) (o:operand tc tr) (t_data:taint) : bool =
   match o with
   | OConst _ | OReg _ -> true
-  | OMem (_, t_operand) | OStack (_, t_operand) -> t_operand = Secret || t_data = Public
+  | OMem (_, t_operand, _) | OStack (_, t_operand) -> t_operand = Secret || t_data = Public
 
 let set_taint (rf:reg_file_id) (dst:operand_rf rf) (ts:analysis_taints) (t:taint) : analysis_taints =
   match dst with
