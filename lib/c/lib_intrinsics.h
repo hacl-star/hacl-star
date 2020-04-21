@@ -14,7 +14,7 @@
 
    See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=81294
 */
-#if defined(__GNUC__) && !defined (__clang__) \
+#if defined(__GNUC__) && !defined (__clang__) && \
   (__GNUC__ < 7 || (__GNUC__ == 7 && (__GNUC_MINOR__ < 2)))
 
 #define Lib_IntTypes_Intrinsics_sub_borrow_u64(x1, x2, x3, x4) \
