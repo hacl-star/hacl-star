@@ -252,15 +252,17 @@ if detect_arm; then
 fi
 
 if ! detect_x64; then
-  echo "$(uname -m) does not support inline x64 assembly, disabling Curve64"
+  echo "$(uname -m) does not support x64 assembly, disabling Curve64"
   echo "BLACKLIST += Hacl_Curve25519_64.c $(ls Hacl_HPKE_Curve64_*.c | xargs)" >> Makefile.config
   echo "$(uname -m) does not support _addcarry_u64, disabling ECDSA"
   echo "BLACKLIST += Hacl_ECDSA.c $(ls Hacl_HPKE_P256_*.c | xargs)" >> Makefile.config
 else
   if ! detect_broken_xcode; then
-    echo "register allocation seems broken (are you using XCode 10.1?)"
+    echo -n "register allocation seems broken (are you using XCode 10.1?)... "
     echo "disabling inline assembly"
     echo "#define BROKEN_INLINE_ASM 1" >> config.h
+  else
+    echo "... compiler can compile inline assembly"
   fi
 fi
 
