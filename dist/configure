@@ -110,11 +110,11 @@ if ! detect_x64; then
   echo "$(uname -m) does not support _addcarry_u64, disabling ECDSA"
   echo "BLACKLIST += Hacl_ECDSA.c $(ls Hacl_HPKE_P256_*.c | xargs)" >> Makefile.config
 else
-  if ! detect_broken_xcode; then
+  if detect_broken_xcode; then
     echo -n "found broken XCode version, known to refuse to compile our inline ASM, disabling "
     echo "#define BROKEN_INLINE_ASM 1" >> config.h
   else
-    echo "... compiler can compile inline assembly"
+    echo "... not using known buggy Apple LLVM build"
   fi
 fi
 
