@@ -1031,7 +1031,7 @@ dist/test/c/%.c: $(ALL_KRML_FILES)
 	$(KRML) -silent \
 	  -tmpdir $(dir $@) -skip-compilation \
 	  -no-prefix $(subst _,.,$*) \
-	  -library Hacl.Impl.*,Lib.*,Spec.*,EverCrypt,EverCrypt.* \
+	  -library Hacl.Impl.*,EverCrypt,EverCrypt.* \
 	  -fparentheses -fcurly-braces -fno-shadow \
 	  -minimal -add-include '"kremlib.h"' \
 	  -bundle '*[rename=$*]' $(KRML_EXTRA) $(filter %.krml,$^)
