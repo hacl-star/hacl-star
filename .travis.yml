@@ -5,11 +5,11 @@ jobs:
       os: linux
       arch: arm64
       dist: bionic
-    - name: gcc 5.4 / full tests
+    - name: gcc 7 / full tests
       os: linux
       compiler: gcc
-    - name: gcc 7 / full tests / ocaml 4.05.1 / ocaml tests
       dist: bionic
+    - name: gcc 5.4 / full tests / ocaml 4.09.1 / ocaml tests
       install:
         - sudo add-apt-repository -y ppa:avsm/ppa
         - sudo apt update -qq --yes && sudo apt install -qq --yes opam aspcud ocaml
