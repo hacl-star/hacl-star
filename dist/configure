@@ -65,169 +65,22 @@ EOF
 }
 
 detect_broken_xcode () {
-  local file=$(mktemp /tmp/testasm.XXXXXXX).c
-  cat > $file <<EOF
-#include <inttypes.h>
-
-extern void fsqr2 (uint64_t *out, uint64_t *f, uint64_t *tmp) 
-{
-  asm volatile(
-    // Step 1: Compute all partial products
-    "  movq 0(%1), %%rdx;"                                       // f[0]
-    "  mulxq 8(%1), %%r8, %%r14;"      "  xor %%r15, %%r15;"     // f[1]*f[0]
-    "  mulxq 16(%1), %%r9, %%r10;"     "  adcx %%r14, %%r9;"     // f[2]*f[0]
-    "  mulxq 24(%1), %%rax, %%rcx;"    "  adcx %%rax, %%r10;"    // f[3]*f[0]
-    "  movq 24(%1), %%rdx;"                                      // f[3]
-    "  mulxq 8(%1), %%r11, %%rbx;"     "  adcx %%rcx, %%r11;"    // f[1]*f[3]
-    "  mulxq 16(%1), %%rax, %%r13;"    "  adcx %%rax, %%rbx;"    // f[2]*f[3]
-    "  movq 8(%1), %%rdx;"             "  adcx %%r15, %%r13;"    // f1
-    "  mulxq 16(%1), %%rax, %%rcx;"    "  mov \$0, %%r14;"        // f[2]*f[1]
-
-    // Step 2: Compute two parallel carry chains
-    "  xor %%r15, %%r15;"
-    "  adox %%rax, %%r10;"
-    "  adcx %%r8, %%r8;"
-    "  adox %%rcx, %%r11;"
-    "  adcx %%r9, %%r9;"
-    "  adox %%r15, %%rbx;"
-    "  adcx %%r10, %%r10;"
-    "  adox %%r15, %%r13;"
-    "  adcx %%r11, %%r11;"
-    "  adox %%r15, %%r14;"
-    "  adcx %%rbx, %%rbx;"
-    "  adcx %%r13, %%r13;"
-    "  adcx %%r14, %%r14;"
-
-    // Step 3: Compute intermediate squares
-    "  movq 0(%1), %%rdx;"     "  mulx %%rdx, %%rax, %%rcx;"    // f[0]^2
-                               "  movq %%rax, 0(%2);"
-    "  add %%rcx, %%r8;"       "  movq %%r8, 8(%2);"
-    "  movq 8(%1), %%rdx;"     "  mulx %%rdx, %%rax, %%rcx;"    // f[1]^2
-    "  adcx %%rax, %%r9;"      "  movq %%r9, 16(%2);"
-    "  adcx %%rcx, %%r10;"     "  movq %%r10, 24(%2);"
-    "  movq 16(%1), %%rdx;"    "  mulx %%rdx, %%rax, %%rcx;"    // f[2]^2
-    "  adcx %%rax, %%r11;"     "  movq %%r11, 32(%2);"
-    "  adcx %%rcx, %%rbx;"     "  movq %%rbx, 40(%2);"
-    "  movq 24(%1), %%rdx;"    "  mulx %%rdx, %%rax, %%rcx;"    // f[3]^2
-    "  adcx %%rax, %%r13;"     "  movq %%r13, 48(%2);"
-    "  adcx %%rcx, %%r14;"     "  movq %%r14, 56(%2);"
-
-    // Step 1: Compute all partial products
-    "  movq 32(%1), %%rdx;"                                       // f[0]
-    "  mulxq 40(%1), %%r8, %%r14;"      "  xor %%r15, %%r15;"     // f[1]*f[0]
-    "  mulxq 48(%1), %%r9, %%r10;"     "  adcx %%r14, %%r9;"     // f[2]*f[0]
-    "  mulxq 56(%1), %%rax, %%rcx;"    "  adcx %%rax, %%r10;"    // f[3]*f[0]
-    "  movq 56(%1), %%rdx;"                                      // f[3]
-    "  mulxq 40(%1), %%r11, %%rbx;"     "  adcx %%rcx, %%r11;"    // f[1]*f[3]
-    "  mulxq 48(%1), %%rax, %%r13;"    "  adcx %%rax, %%rbx;"    // f[2]*f[3]
-    "  movq 40(%1), %%rdx;"             "  adcx %%r15, %%r13;"    // f1
-    "  mulxq 48(%1), %%rax, %%rcx;"    "  mov \$0, %%r14;"        // f[2]*f[1]
-
-    // Step 2: Compute two parallel carry chains
-    "  xor %%r15, %%r15;"
-    "  adox %%rax, %%r10;"
-    "  adcx %%r8, %%r8;"
-    "  adox %%rcx, %%r11;"
-    "  adcx %%r9, %%r9;"
-    "  adox %%r15, %%rbx;"
-    "  adcx %%r10, %%r10;"
-    "  adox %%r15, %%r13;"
-    "  adcx %%r11, %%r11;"
-    "  adox %%r15, %%r14;"
-    "  adcx %%rbx, %%rbx;"
-    "  adcx %%r13, %%r13;"
-    "  adcx %%r14, %%r14;"
-
-    // Step 3: Compute intermediate squares
-    "  movq 32(%1), %%rdx;"     "  mulx %%rdx, %%rax, %%rcx;"    // f[0]^2
-                               "  movq %%rax, 64(%2);"
-    "  add %%rcx, %%r8;"       "  movq %%r8, 72(%2);"
-    "  movq 40(%1), %%rdx;"     "  mulx %%rdx, %%rax, %%rcx;"    // f[1]^2
-    "  adcx %%rax, %%r9;"      "  movq %%r9, 80(%2);"
-    "  adcx %%rcx, %%r10;"     "  movq %%r10, 88(%2);"
-    "  movq 48(%1), %%rdx;"    "  mulx %%rdx, %%rax, %%rcx;"    // f[2]^2
-    "  adcx %%rax, %%r11;"     "  movq %%r11, 96(%2);"
-    "  adcx %%rcx, %%rbx;"     "  movq %%rbx, 104(%2);"
-    "  movq 56(%1), %%rdx;"    "  mulx %%rdx, %%rax, %%rcx;"    // f[3]^2
-    "  adcx %%rax, %%r13;"     "  movq %%r13, 112(%2);"
-    "  adcx %%rcx, %%r14;"     "  movq %%r14, 120(%2);"
-
-    // Line up pointers
-    "  mov %2, %1;"
-    "  mov %0, %2;"
-
-    // Step 1: Compute dst + carry == tmp_hi * 38 + tmp_lo
-    "  mov \$38, %%rdx;"
-    "  mulxq 32(%1), %%r8, %%r13;"
-    "  xor %%rcx, %%rcx;"
-    "  adoxq 0(%1), %%r8;"
-    "  mulxq 40(%1), %%r9, %%rbx;"
-    "  adcx %%r13, %%r9;"
-    "  adoxq 8(%1), %%r9;"
-    "  mulxq 48(%1), %%r10, %%r13;"
-    "  adcx %%rbx, %%r10;"
-    "  adoxq 16(%1), %%r10;"
-    "  mulxq 56(%1), %%r11, %%rax;"
-    "  adcx %%r13, %%r11;"
-    "  adoxq 24(%1), %%r11;"
-    "  adcx %%rcx, %%rax;"
-    "  adox %%rcx, %%rax;"
-    "  imul %%rdx, %%rax;"
-
-    // Step 2: Fold the carry back into dst
-    "  add %%rax, %%r8;"
-    "  adcx %%rcx, %%r9;"
-    "  movq %%r9, 8(%2);"
-    "  adcx %%rcx, %%r10;"
-    "  movq %%r10, 16(%2);"
-    "  adcx %%rcx, %%r11;"
-    "  movq %%r11, 24(%2);"
-
-    // Step 3: Fold the carry bit back in; guaranteed not to carry at this point
-    "  mov \$0, %%rax;"
-    "  cmovc %%rdx, %%rax;"
-    "  add %%rax, %%r8;"
-    "  movq %%r8, 0(%2);"
-
-    // Step 1: Compute dst + carry == tmp_hi * 38 + tmp_lo
-    "  mov \$38, %%rdx;"
-    "  mulxq 96(%1), %%r8, %%r13;"
-    "  xor %%rcx, %%rcx;"
-    "  adoxq 64(%1), %%r8;"
-    "  mulxq 104(%1), %%r9, %%rbx;"
-    "  adcx %%r13, %%r9;"
-    "  adoxq 72(%1), %%r9;"
-    "  mulxq 112(%1), %%r10, %%r13;"
-    "  adcx %%rbx, %%r10;"
-    "  adoxq 80(%1), %%r10;"
-    "  mulxq 120(%1), %%r11, %%rax;"
-    "  adcx %%r13, %%r11;"
-    "  adoxq 88(%1), %%r11;"
-    "  adcx %%rcx, %%rax;"
-    "  adox %%rcx, %%rax;"
-    "  imul %%rdx, %%rax;"
-
-    // Step 2: Fold the carry back into dst
-    "  add %%rax, %%r8;"
-    "  adcx %%rcx, %%r9;"
-    "  movq %%r9, 40(%2);"
-    "  adcx %%rcx, %%r10;"
-    "  movq %%r10, 48(%2);"
-    "  adcx %%rcx, %%r11;"
-    "  movq %%r11, 56(%2);"
-
-    // Step 3: Fold the carry bit back in; guaranteed not to carry at this point
-    "  mov \$0, %%rax;"
-    "  cmovc %%rdx, %%rax;"
-    "  add %%rax, %%r8;"
-    "  movq %%r8, 32(%2);"
-  : "+&r" (out), "+&r" (f), "+&r" (tmp)
-  : 
-  : "%rax", "%rbx", "%rcx", "%rdx", "%r8", "%r9", "%r10", "%r11", "%r13", "%r14", "%r15", "memory", "cc"
-  );
-}
-EOF
-  cc -O3 -c $file -o /dev/null
+  # For posterity, here are a list of things that don't work
+  # - checking if cc will compile curve25519-inline.h
+  # - checking if cc will compile fsqr2 as is
+  # - checking if cc will compile fsqr2 marked as extern
+  # - checking if cc will compile fsqr2 as is with an extern caller in the file to
+  # prevent it from being eliminated
+  #
+  # In short, I couldn't figure out a minimal testcase for the error:
+  #   ./curve25519-inline.h:595:5: error: inline assembly requires more registers than available
+  #
+  # Furthermore, this error only seems to happen on the exact config Travis
+  # uses.
+  # - Installing XCode 10.0 (for MacOS 10.14, Catalina) does not give me the right LLVM build
+  # - Installing XCode 10.1 (for MacOS 10.14, Catalina) does not give me the right LLVM build
+  # - Installing XCode 10.3 (for MacOS 10.14, Catalina) bails because my OSX is too recent
+  cc --version | grep -q clang-1000.11.45.5
 }
 
 # Main auto-detection
@@ -258,8 +111,7 @@ if ! detect_x64; then
   echo "BLACKLIST += Hacl_ECDSA.c $(ls Hacl_HPKE_P256_*.c | xargs)" >> Makefile.config
 else
   if ! detect_broken_xcode; then
-    echo -n "register allocation seems broken (are you using XCode 10.1?)... "
-    echo "disabling inline assembly"
+    echo -n "found broken XCode version, known to refuse to compile our inline ASM, disabling "
     echo "#define BROKEN_INLINE_ASM 1" >> config.h
   else
     echo "... compiler can compile inline assembly"
