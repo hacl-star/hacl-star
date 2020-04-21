@@ -22,7 +22,7 @@ else
   # Extracted C tests -- need full kremlib, don't work on ARM because of
   # intrinsics for x86 in cpu cycle count routines in testlib.c
   pushd dist/test/c/
-  git clone https://github.com/fstarlang/kremlin -b protz_ci --depth 10
+  git clone https://github.com/fstarlang/kremlin --depth 10
   export KREMLIN_HOME=$(pwd)/kremlin
   make -C kremlin/kremlib/dist/generic -f Makefile.basic -j
   make -j -k
