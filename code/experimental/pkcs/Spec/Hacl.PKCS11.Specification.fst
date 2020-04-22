@@ -507,52 +507,21 @@ type exception_t =
 type result 'a = either 'a exception_t
 
 
-val isPresentOnDeviceL: d: device -> pMechanism: _CK_MECHANISM_TYPE -> Tot Type0
+val mechanismPresentOnDevice: d: device -> pMechanism: _CK_MECHANISM_TYPE -> Tot Type0
 
-let isPresentOnDeviceL d pMechanism = 
+let mechanismPresentOnDevice d pMechanism = 
   L.contains (fun x -> x.mechanismID = pMechanism) d.mechanisms
 
 
-val isPresentOnDevice_: d: device -> pMechanism: _CK_MECHANISM_TYPE -> counter: nat {counter < Seq.length d.mechanisms} -> 
-  Tot (r: bool 
-    {
-      r ==> (exists (a: nat {a < Seq.length d.mechanisms}). 
-	let m = Seq.index d.mechanisms a in 
-	m.mechanismID = pMechanism)
-    }
-  )
-  (decreases (length d.mechanisms - counter))
+val isMechanismPresentOnDevice: d: device -> pMechanism: _CK_MECHANISM_TYPE -> 
+  Tot (r: bool{r <==> mechanismPresentOnDevice d pMechanism})
 
-let rec isPresentOnDevice_ d pMechanism counter = 
-  let m = index d.mechanisms counter in 
-  if m.mechanismID = pMechanism then 
-     true 
-  else if counter = length d.mechanisms - 1 
-    then false
-  else 
-    isPresentOnDevice_ d pMechanism (counter + 1)
-
-
-val isPresentOnDevice: d: device -> pMechanism: _CK_MECHANISM_TYPE -> 
-  Tot (r: bool{r ==> isPresentOnDeviceL d pMechanism})
-
-
-let isPresentOnDevice d pMechanism =
-  admit();
-  if Seq.length d.mechanisms = 0 
-    then false 
-  else
-    let r = isPresentOnDevice_ d pMechanism 0 in 
-    if r = true then begin
-      (* lemma_isPresentOnDevice (d.mechanisms) (fun x -> x.mechanismID = pMechanism); *)
-      true
-      end
-    else 
-      false	  
+let isMechanismPresentOnDevice d pMechanism =
+  isContaining (fun x -> x.mechanismID = pMechanism) d.mechanisms
 
 
 val mechanismGetFromDevice: d: device -> 
-  pMechanism: _CK_MECHANISM_TYPE{isPresentOnDeviceL d pMechanism} -> 
+  pMechanism: _CK_MECHANISM_TYPE{mechanismPresentOnDevice d pMechanism} -> 
   Tot (m: _CK_MECHANISM {m.mechanismID = pMechanism})
 
 let mechanismGetFromDevice d pMechanism = 
@@ -1128,6 +1097,8 @@ let mechanismSelectECDSA a =
   | _ -> None
 
 
+module L = Hacl.PKCS11.Lib 
+
 val isAttributeTemplateComplete: pMechanism: _CK_MECHANISM -> pTemplate: seq _CK_ATTRIBUTE -> o: _CK_OBJECT_CLASS ->
   Tot (r: bool 
     {
@@ -1142,12 +1113,9 @@ let isAttributeTemplateComplete pMechanism pTemplate o =
 
 
 val mechanismCreationSelect: d: device 
-  -> pMechanism: _CK_MECHANISM 
+  -> pMechanism: _CK_MECHANISM {mechanismPresentOnDevice d pMechanism.mechanismID }
   -> pTemplate: seq _CK_ATTRIBUTE {attributesTemplateComplete CKO_SECRET_KEY pMechanism pTemplate}
   -> result (unit -> Tot (seq FStar.UInt8.t))
-
-module L = Hacl.PKCS11.Lib 
-
 
 let mechanismCreationSelect d pMechanism pTemplate = 
   let open Hacl.PKCS11.Lib in 
@@ -1157,7 +1125,7 @@ let mechanismCreationSelect d pMechanism pTemplate =
 
       let allProvidedAttributes = combineAllProvidedAttributes pMechanism.mechanismID pTemplate in
       let requiredAttribute = find_l (fun x -> x.aType = CKA_EC_PARAMS) allProvidedAttributes in  
-      assume(Hacl.PKCS11.Lib.contains (fun x -> x.aType = CKA_EC_PARAMS) allProvidedAttributes);
+      assume(L.contains (fun x -> x.aType = CKA_EC_PARAMS) allProvidedAttributes);
       let requiredAttribute = match requiredAttribute with Some a -> a in 
       let mechanism = mechanismSelectECDSA requiredAttribute in 
       match mechanism with 
@@ -1198,7 +1166,7 @@ let getRequiredAttributes t attrs  =
 
 val __CKS_GenerateKey: d: device ->  
   hSession: _CK_SESSION_HANDLE -> 
-  pMechanism: _CK_MECHANISM ->
+  pMechanism: _CK_MECHANISM {mechanismPresentOnDevice d pMechanism.mechanismID} ->
   pTemplate: seq _CK_ATTRIBUTE {attributesTemplateComplete CKO_SECRET_KEY pMechanism pTemplate} -> 
   Tot(
     (handler: result _CK_OBJECT_HANDLE) & 
@@ -1225,7 +1193,7 @@ val __CKS_GenerateKey: d: device ->
 
 
 let __CKS_GenerateKey d hSession pMechanism pTemplate = 
-  let mechanism = mechanismCreationSelect d pMechanism pTemplate in 
+  let mechanism = mechanismCreationSelect d pMechanism pTemplate in
   admit();
   match mechanism with 
   |Inl mechanism -> 
@@ -1250,6 +1218,9 @@ val _CKS_GenerateKey: d: device ->
 
 
 let _CKS_GenerateKey d hSession pMechanism pTemplate = 
+  let mechanismPresent = isMechanismPresentOnDevice d pMechanism.mechanismID in 
+  if mechanismPresent = false then 
+    (|Inr CKR_MECHANISM_INVALID, d|) else
   let complete = isAttributeTemplateComplete pMechanism pTemplate CKO_SECRET_KEY in 
   if complete = false then 
      (|Inr CKR_TEMPLATE_INCOMPLETE, d|)
