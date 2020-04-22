@@ -2,6 +2,7 @@ LIBRARY libevercrypt
 
 EXPORTS
   LowStar_Vector_new_capacity
+  Spec_Cipher_Expansion_cipher_alg_of_impl
   Hacl_Hash_MD5_legacy_update_multi
   Hacl_Hash_MD5_legacy_update_last
   Hacl_Hash_MD5_legacy_hash
@@ -44,6 +45,10 @@ EXPORTS
   Hacl_Hash_Core_SHA2_finish_256
   Hacl_Hash_Core_SHA2_finish_384
   Hacl_Hash_Core_SHA2_finish_512
+  Hacl_Hash_Definitions_word_len
+  Hacl_Hash_Definitions_block_len
+  Hacl_Hash_Definitions_hash_word_len
+  Hacl_Hash_Definitions_hash_len
   EverCrypt_AutoConfig2_has_shaext
   EverCrypt_AutoConfig2_has_aesni
   EverCrypt_AutoConfig2_has_pclmulqdq
@@ -74,7 +79,6 @@ EXPORTS
   EverCrypt_AutoConfig2_disable_hacl
   EverCrypt_AutoConfig2_disable_openssl
   EverCrypt_AutoConfig2_disable_bcrypt
-  Spec_Cipher_Expansion_cipher_alg_of_impl
   EverCrypt_Hash_string_of_alg
   EverCrypt_Hash_uu___is_MD5_s
   EverCrypt_Hash___proj__MD5_s__item__p
@@ -170,47 +174,81 @@ EXPORTS
   Hacl_NaCl_crypto_box_easy
   Hacl_NaCl_crypto_box_open_easy_afternm
   Hacl_NaCl_crypto_box_open_easy
-  hash_r_free
-  hash_copy
-  hash_vec_r_free
-  hash_2
-  uu___is_MT
-  __proj__MT__item__offset
-  __proj__MT__item__i
-  __proj__MT__item__j
-  __proj__MT__item__hs
-  __proj__MT__item__rhs_ok
-  __proj__MT__item__rhs
-  __proj__MT__item__mroot
-  __proj__MT__item__hash_fun
-  merkle_tree_conditions
-  offset_of
-  mt_free
-  mt_insert_pre
-  mt_insert
+  mt_init_hash
+  mt_free_hash
+  mt_init_path
+  mt_free_path
+  mt_get_path_length
+  mt_get_path_step
+  mt_get_path_step_pre
   mt_create_custom
-  mt_create
-  init_path
-  clear_path
-  free_path
-  mt_get_root_pre
+  mt_free
+  mt_insert
+  mt_insert_pre
   mt_get_root
-  path_insert
-  mt_get_path_pre
+  mt_get_root_pre
   mt_get_path
-  mt_flush_to_pre
-  mt_flush_to
-  mt_flush_pre
+  mt_get_path_pre
   mt_flush
-  mt_retract_to_pre
+  mt_flush_pre
+  mt_flush_to
+  mt_flush_to_pre
   mt_retract_to
-  mt_verify_pre
+  mt_retract_to_pre
   mt_verify
+  mt_verify_pre
   mt_serialize_size
   mt_serialize
   mt_deserialize
   mt_serialize_path
   mt_deserialize_path
+  mt_sha256_compress
+  mt_create
+  MerkleTree_Low_uu___is_MT
+  MerkleTree_Low___proj__MT__item__hash_size
+  MerkleTree_Low___proj__MT__item__offset
+  MerkleTree_Low___proj__MT__item__i
+  MerkleTree_Low___proj__MT__item__j
+  MerkleTree_Low___proj__MT__item__hs
+  MerkleTree_Low___proj__MT__item__rhs_ok
+  MerkleTree_Low___proj__MT__item__rhs
+  MerkleTree_Low___proj__MT__item__mroot
+  MerkleTree_Low___proj__MT__item__hash_fun
+  MerkleTree_Low_merkle_tree_conditions
+  MerkleTree_Low_offset_of
+  MerkleTree_Low_mt_free
+  MerkleTree_Low_mt_insert_pre
+  MerkleTree_Low_mt_insert
+  MerkleTree_Low_mt_create_custom
+  MerkleTree_Low_uu___is_Path
+  MerkleTree_Low___proj__Path__item__hash_size
+  MerkleTree_Low___proj__Path__item__hashes
+  MerkleTree_Low_init_path
+  MerkleTree_Low_clear_path
+  MerkleTree_Low_free_path
+  MerkleTree_Low_mt_get_root_pre
+  MerkleTree_Low_mt_get_root
+  MerkleTree_Low_path_insert
+  MerkleTree_Low_mt_get_path_length
+  MerkleTree_Low_mt_get_path_step_pre
+  MerkleTree_Low_mt_get_path_step
+  MerkleTree_Low_mt_get_path_pre
+  MerkleTree_Low_mt_get_path
+  MerkleTree_Low_mt_flush_to_pre
+  MerkleTree_Low_mt_flush_to
+  MerkleTree_Low_mt_flush_pre
+  MerkleTree_Low_mt_flush
+  MerkleTree_Low_mt_retract_to_pre
+  MerkleTree_Low_mt_retract_to
+  MerkleTree_Low_mt_verify_pre
+  MerkleTree_Low_mt_verify
+  MerkleTree_Low_Serialization_mt_serialize_size
+  MerkleTree_Low_Serialization_mt_serialize
+  MerkleTree_Low_Serialization_mt_deserialize
+  MerkleTree_Low_Serialization_mt_serialize_path
+  MerkleTree_Low_Serialization_mt_deserialize_path
+  MerkleTree_Low_Hashfunctions_init_hash
+  MerkleTree_Low_Hashfunctions_free_hash
   EverCrypt_Error_uu___is_Success
   EverCrypt_Error_uu___is_UnsupportedAlgorithm
   EverCrypt_Error_uu___is_InvalidKey

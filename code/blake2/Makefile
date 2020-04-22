@@ -5,6 +5,7 @@ HACL_HOME=../..
 all: dist/Makefile.basic
 
 test: all
+	dist/blake2-test.exe
 
 # Defines rules for producing .checked, .krml, .depend, etc.
 include ../../Makefile.local
@@ -28,8 +29,8 @@ dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
 	  -add-include '"libintvector.h"' \
 	  -skip-compilation
 
-dist/blake2.exe: dist/Makefile.basic blake2-test.c
-	$(CC) -O3 -march=native -mtune=native -I dist -I ../../lib/c -I ../../../kremlin/include -I ../../../kremlin/kremlib/c -I ../../../kremlin/kremlib/dist/minimal  dist/Hacl_Blake2s_32.c dist/Hacl_Blake2b_32.c  dist/Hacl_Blake2s_128.c dist/Hacl_Blake2b_256.c blake2-test.c -o dist/blake2.exe
+dist/blake2.exe: dist/Makefile.basic $(HACL_HOME)/tests/blake2-test.c
+	$(CC) -O3 -march=native -mtune=native -I dist -I ../../lib/c -I ../../../kremlin/include -I ../../../kremlin/kremlib/c -I ../../../kremlin/kremlib/dist/minimal  dist/Hacl_Blake2s_32.c dist/Hacl_Blake2b_32.c  dist/Hacl_Blake2s_128.c dist/Hacl_Blake2b_256.c $(HACL_HOME)/tests/blake2-test.c -o dist/blake2.exe
 
 clean-c:
 	$(MAKE) -C dist/ -f Makefile.basic clean

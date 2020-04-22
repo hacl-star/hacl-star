@@ -1,16 +1,23 @@
 # A minimalistic Makefile for all testing options.
+# Note: on OSX, this necessitates a recent OpenSSL, possibly installed by brew,
+# so I had to do:
+# export CFLAGS="-I/usr/local/Cellar/openssl@1.1/1.1.1d/include/"
+# export LDFLAGS="-L/usr/local/Cellar/openssl@1.1/1.1.1d/lib"
+
+KREMLIN_HOME?=../dist/kremlin
 
 # Add GF128 tests once code/experimental/gf128 is promoted to code
 TARGETS = $(filter-out gf128-%, $(patsubst %.c,%.exe,$(wildcard *.c)))
-
-CFLAGS += -I$(KREMLIN_HOME)/include -I../dist/gcc64-only \
+CFLAGS := -I$(KREMLIN_HOME)/include -I../dist/gcc-compatible \
   -I$(KREMLIN_HOME)/kremlib/dist/minimal \
   -I../secure_api/merkle_tree \
-  -O3 -march=native -mtune=native
+  -O3 -march=native -mtune=native $(CFLAGS)
 
 all: $(TARGETS)
 
 test: $(patsubst %.exe,%.test,$(TARGETS))
+
+arm: chacha20-arm-test.test poly1305-arm-test.test blake2-arm-test.test
 
 # Dependency
 
@@ -27,7 +34,7 @@ test: $(patsubst %.exe,%.test,$(TARGETS))
 curve64-rfc.exe: $(patsubst %.c,%.o,$(wildcard rfc7748_src/*.c))
 
 %.exe: %.o
-	$(CC) $(CFLAGS) $(LDFLAGS) $^ ../dist/gcc64-only/libevercrypt.a -o $@
+	$(CC) $(CFLAGS) $(LDFLAGS) $^ ../dist/gcc-compatible/libevercrypt.a -o $@ -lcrypto
 
 # Running tests
 

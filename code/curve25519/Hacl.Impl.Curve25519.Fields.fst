@@ -56,7 +56,6 @@ val store_felem:
   -> f:felem s
   -> Stack unit
     (requires fun h ->
-      (s = M64 ==> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
       live h f /\ live h b /\ disjoint f b /\ state_inv_t h f)
     (ensures  fun h0 _ h1 ->
       modifies (loc b |+| loc f) h0 h1 /\

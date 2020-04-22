@@ -284,7 +284,7 @@ let poly1305_update1_f #s pre nb len text i acc=
   update1 #s pre block acc
 
 
-#push-options "--max_fuel 1"
+#push-options "--z3rlimit 100 --max_fuel 1"
 inline_for_extraction noextract
 val poly1305_update_scalar:
     #s:field_spec

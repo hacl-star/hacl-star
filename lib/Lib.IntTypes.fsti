@@ -537,6 +537,16 @@ val logxor_lemma1: #t:inttype -> #l:secrecy_level -> a:int_t t l -> b:int_t t l 
   (requires range (v a) U1 /\ range (v b) U1)
   (ensures  range (v (a `logxor` b)) U1)
 
+let logxor_v (#t:inttype) (a:range_t t) (b:range_t t) : range_t t =
+  match t with
+  | S8 | S16 | S32 | S64 | S128 -> Int.logxor #(bits t) a b
+  | _ -> UInt.logxor #(bits t) a b
+
+val logxor_spec: #t:inttype -> #l:secrecy_level
+  -> a:int_t t l
+  -> b:int_t t l
+  -> Lemma (v (a `logxor` b) == v a `logxor_v` v b)
+
 [@(strict_on_arguments [0])]
 inline_for_extraction
 val logand: #t:inttype -> #l:secrecy_level

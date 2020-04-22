@@ -224,9 +224,9 @@ let mul64_wide_5 a b =
     = if v a = 0 || v b = 0 then () else
       calc (<) {
        v a * v b <: int;
-       (<) { Math.Lemmas.lemma_mult_lt_left (v a) (v b) (pow2 56) }
+       (<) { Math.Lemmas.lemma_mult_le_left (v a) (v b) (pow2 56) }
        v a * pow2 56;
-       (<) { Math.Lemmas.lemma_mult_lt_right (pow2 56) (v a) (pow2 56) }
+       (<) { Math.Lemmas.lemma_mult_le_right (pow2 56) (v a) (pow2 56) }
        pow2 56 * pow2 56;
        (==) { assert_norm (pow2 56 * pow2 56 == pow2 112) }
        pow2 112;
@@ -821,7 +821,7 @@ let barrett_reduction5 (t0, t1, t2, t3, t4, t5, t6, t7, t8, t9) =
   assert (as_nat5 (q0, q1, q2, q3, q4) < pow2 264);
 
   let (qmu0', qmu1', qmu2', qmu3', qmu4', qmu5', qmu6', qmu7', qmu8', qmu9') = mul_5 (q0, q1, q2, q3, q4) (mu0, mu1, mu2, mu3, mu4) in
-  FStar.Math.Lemmas.lemma_mult_lt_right (pow2 512 / S.q) (as_nat5 (q0, q1, q2, q3, q4)) (pow2 264);
+  FStar.Math.Lemmas.lemma_mult_le_right (pow2 512 / S.q) (as_nat5 (q0, q1, q2, q3, q4)) (pow2 264);
   assert (wide_as_nat5 (qmu0', qmu1', qmu2', qmu3', qmu4', qmu5', qmu6', qmu7', qmu8', qmu9') <= pow2 512 / S.q * pow2 264);
   assert_norm (pow2 512 / S.q * pow2 264 < pow2 528);
 

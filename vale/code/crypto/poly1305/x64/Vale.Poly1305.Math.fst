@@ -133,7 +133,7 @@ let lemma_poly_bits64 () =
     forall_intro_2 (lemma_and_commutes_nat)
 
 let lemma_mul_strict_upper_bound (x:int) (x_bound:int) (y:int) (y_bound:int) =
-  lemma_mult_lt_right y x x_bound;
+  lemma_mult_le_right y x x_bound;
   if x_bound = 0 || y_bound = 0 then ()
   else
     if y = 0 then
@@ -236,7 +236,7 @@ let lemma_mul_pos_pos_is_pos_inverse (x:pos) (y:int) :
   if y = 0 then assert_norm (0*x == 0)
   else if y < 0 then
     begin
-      lemma_mult_lt_right x y 0;
+      lemma_mult_le_right x y 0;
       assert_norm (y*x <= 0)
     end
   else ()

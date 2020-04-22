@@ -119,12 +119,18 @@ let split_at_last_empty (a: Hash.alg): Lemma
 =
   ()
 
+/// I'm very confused as to why the hint is non-replayable for this one. Bad
+/// interaction between allow_inversion and ifuel 0 for replaying hints...?
+let block_len_nonzero a: Lemma (U32.v (Hacl.Hash.Definitions.block_len a) > 0) =
+  ()
+
 #restart-solver
 #push-options "--z3rlimit 40 --using_facts_from '*,-LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2'"
 let create_in a r =
   (**) let h0 = ST.get () in
 
   (**) B.loc_unused_in_not_unused_in_disjoint h0;
+  (**) block_len_nonzero a;
   let buf = B.malloc r (Lib.IntTypes.u8 0) (Hacl.Hash.Definitions.block_len a) in
   (**) let h1 = ST.get () in
   (**) assert (B.fresh_loc (B.loc_buffer buf) h0 h1);
@@ -167,7 +173,7 @@ let create_in a r =
   p
 #pop-options
 
-#push-options "--z3rlimit 100"
+#push-options "--z3rlimit 100 --retry 3"
 
 let init a s =
   let open LowStar.BufferOps in

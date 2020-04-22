@@ -17,7 +17,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "ffe524261419f387dbc72fd33d57fa81"
+      "581693facb406d50a786233684b72d00"
     ],
     [
       "Vale.Curve25519.FastUtil_helpers.lemma_sub2",
@@ -42,7 +42,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "6cd43ba1bc318ba39b38a254472bc916"
+      "fa94fa42555b7a48e24da045407a21a0"
     ],
     [
       "Vale.Curve25519.FastUtil_helpers.lemma_pow2_int_23",
@@ -56,7 +56,7 @@
         "int_inversion", "int_typing", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "e00b12d2b12e9ea25252041de76146ef"
+      "fc8a87fbb206ddd414c893bb8acad133"
     ],
     [
       "Vale.Curve25519.FastUtil_helpers.lemma_pow2_int_34",
@@ -71,7 +71,7 @@
         "typing_Vale.Curve25519.FastUtil_helpers.pow2int_four"
       ],
       0,
-      "a97bbd4c7140cc875352ab8ce397d671"
+      "727a20c590619048a006347f70daf97f"
     ],
     [
       "Vale.Curve25519.FastUtil_helpers.lemma_sub3",
@@ -85,7 +85,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "d08581c9a29b213569e75599a3bb9b06"
+      "712f6fe1b1a37124e921457028c74628"
     ],
     [
       "Vale.Curve25519.FastUtil_helpers.lemma_sub3",
@@ -103,43 +103,11 @@
         "true_interp"
       ],
       0,
-      "f4dcd9d9058f2cd11a65b81af0547e1e"
+      "06cf35608b40ee6f3796e771f158048f"
     ],
     [
       "Vale.Curve25519.FastUtil_helpers.lemma_sub3",
       3,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
-        "equation_Vale.Curve25519.FastUtil_helpers.sub_carry",
-        "equation_Vale.Curve25519.Fast_defs.bit",
-        "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.natN",
-        "int_inversion", "int_typing", "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
-        "refinement_interpretation_Tm_refine_1443269d7eadc969721b34d6f64e8860",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_548c05480199a0cca35a3fd3322151fe",
-        "refinement_interpretation_Tm_refine_a3acfd6805ff36eae3bce4fb321c9713",
-        "refinement_interpretation_Tm_refine_b51b45ce195a33a465eab411d92fdae9",
-        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
-      ],
-      0,
-      "b0eaebfe24ce7b025c8df010f6190f98"
-    ],
-    [
-      "Vale.Curve25519.FastUtil_helpers.lemma_sub3",
-      4,
-      0,
-      0,
-      [ "@query" ],
-      0,
-      "a2095342c8857b4b1088feefadc5b930"
-    ],
-    [
-      "Vale.Curve25519.FastUtil_helpers.lemma_sub3",
-      5,
       0,
       0,
       [
@@ -150,7 +118,38 @@
         "refinement_interpretation_Tm_refine_548c05480199a0cca35a3fd3322151fe"
       ],
       0,
-      "e33be551fbf65f34fc352cd1d10fb0d6"
+      "eb6895accffcf3d236aafc6a4a972132"
+    ],
+    [
+      "Vale.Curve25519.FastUtil_helpers.lemma_sub3",
+      4,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "ede01dccf3ef27b5a1009b465bc5b9e4"
+    ],
+    [
+      "Vale.Curve25519.FastUtil_helpers.lemma_sub3",
+      5,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Vale.Curve25519.FastUtil_helpers.sub_carry",
+        "equation_Vale.Curve25519.Fast_defs.bit",
+        "equation_Vale.Def.Words_s.nat64", "int_inversion", "int_typing",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
+        "refinement_interpretation_Tm_refine_1443269d7eadc969721b34d6f64e8860",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_548c05480199a0cca35a3fd3322151fe",
+        "refinement_interpretation_Tm_refine_a3acfd6805ff36eae3bce4fb321c9713",
+        "refinement_interpretation_Tm_refine_b51b45ce195a33a465eab411d92fdae9"
+      ],
+      0,
+      "9589c207f59c036659c3e43517a1151a"
     ],
     [
       "Vale.Curve25519.FastUtil_helpers.lemma_sub",
@@ -164,7 +163,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "44f2215d5c1a5cb9b13a80260c70aa8d"
+      "b2f451374dbe708de520b065047762f0"
     ],
     [
       "Vale.Curve25519.FastUtil_helpers.lemma_sub",
@@ -182,43 +181,11 @@
         "true_interp"
       ],
       0,
-      "32798ebfe5fb840ce2ce8f5cfd0d6864"
+      "aa51d510c121de48e1aa79434a079978"
     ],
     [
       "Vale.Curve25519.FastUtil_helpers.lemma_sub",
       3,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
-        "equation_Vale.Curve25519.FastUtil_helpers.sub_carry",
-        "equation_Vale.Curve25519.Fast_defs.bit",
-        "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.natN",
-        "int_inversion", "int_typing", "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
-        "refinement_interpretation_Tm_refine_1443269d7eadc969721b34d6f64e8860",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_a3acfd6805ff36eae3bce4fb321c9713",
-        "refinement_interpretation_Tm_refine_a415f19ed81e26742f6055320e3cb3d0",
-        "refinement_interpretation_Tm_refine_b51b45ce195a33a465eab411d92fdae9",
-        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
-      ],
-      0,
-      "38850672df6ae5637b4973ade5763915"
-    ],
-    [
-      "Vale.Curve25519.FastUtil_helpers.lemma_sub",
-      4,
-      0,
-      0,
-      [ "@query" ],
-      0,
-      "7413811cf9a1f654cc601e34ee512aed"
-    ],
-    [
-      "Vale.Curve25519.FastUtil_helpers.lemma_sub",
-      5,
       0,
       0,
       [
@@ -230,7 +197,38 @@
         "refinement_interpretation_Tm_refine_a415f19ed81e26742f6055320e3cb3d0"
       ],
       0,
-      "80bc69230410a0931603ba631eb36a2e"
+      "4fc71fb26d83429bd6b8e2669ed55871"
+    ],
+    [
+      "Vale.Curve25519.FastUtil_helpers.lemma_sub",
+      4,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "1c7927dc1028b8d80577d9ca1757d54e"
+    ],
+    [
+      "Vale.Curve25519.FastUtil_helpers.lemma_sub",
+      5,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Vale.Curve25519.FastUtil_helpers.sub_carry",
+        "equation_Vale.Curve25519.Fast_defs.bit",
+        "equation_Vale.Def.Words_s.nat64", "int_inversion", "int_typing",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
+        "refinement_interpretation_Tm_refine_1443269d7eadc969721b34d6f64e8860",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_a3acfd6805ff36eae3bce4fb321c9713",
+        "refinement_interpretation_Tm_refine_a415f19ed81e26742f6055320e3cb3d0",
+        "refinement_interpretation_Tm_refine_b51b45ce195a33a465eab411d92fdae9"
+      ],
+      0,
+      "15349bf3de536ee42e19d4634a3357de"
     ]
   ]
 ]

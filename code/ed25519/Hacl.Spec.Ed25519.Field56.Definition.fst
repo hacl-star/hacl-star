@@ -7,14 +7,14 @@ open Lib.IntTypes
 
 let felem5 = (uint64 * uint64 * uint64 * uint64 * uint64)
 
-abstract
+[@"opaque_to_smt"]
 let pow32: (pow32: pos { pow32 == pow2 32 }) =
   let pow32: pos = normalize_term (pow2 32) in
   assert_norm (pow32 == pow2 32);
   pow32
 
 
-abstract
+[@"opaque_to_smt"]
 let pow56: (pow56: pos { pow56 == pow2 56 }) =
   let pow56: pos = normalize_term (pow2 56) in
   assert_norm (pow56 == pow2 56);

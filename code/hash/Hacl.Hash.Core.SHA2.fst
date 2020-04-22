@@ -60,7 +60,8 @@ let index_h (a: sha2_alg) (i: U32.t): ST.Stack (word a)
     | SHA2_384 -> B.recall h384; IB.recall_contents h384 Constants.h384; h384.(i)
     | SHA2_512 -> B.recall h512; IB.recall_contents h512 Constants.h512; h512.(i)
 
-open Hacl.Hash.Core.SHA2.Constants
+let k224_256 = IB.igcmalloc_of_list HS.root Constants.k224_256_l
+let k384_512 = IB.igcmalloc_of_list HS.root Constants.k384_512_l
 
 (** Alloca *)
 

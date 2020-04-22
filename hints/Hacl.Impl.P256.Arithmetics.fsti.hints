@@ -1,0 +1,88 @@
+[
+  "çÊ™ŸXd2jÔ\u000fø/b‡â",
+  [
+    [
+      "Hacl.Impl.P256.Arithmetics.quatre",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Prims.nat", "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "9296d177ee896183dddfd795e7cf0865"
+    ],
+    [
+      "Hacl.Impl.P256.Arithmetics.multByTwo",
+      1,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.S8",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "9f3e532688603505542aa9dc49ebcb24"
+    ],
+    [
+      "Hacl.Impl.P256.Arithmetics.multByThree",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "d24acefc6586109c3bfced0edaeb78a6"
+    ],
+    [
+      "Hacl.Impl.P256.Arithmetics.multByFour",
+      1,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.S8",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "ed5264e7329c10f053228488a2b12401"
+    ],
+    [
+      "Hacl.Impl.P256.Arithmetics.multByEight",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "ab8fd439419599213ede9f1fc68bc2f1"
+    ],
+    [
+      "Hacl.Impl.P256.Arithmetics.multByMinusThree",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "32a9443a52e659b4ab5524a41dd9b48d"
+    ]
+  ]
+]

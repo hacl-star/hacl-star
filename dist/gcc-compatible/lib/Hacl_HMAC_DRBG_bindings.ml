@@ -40,25 +40,25 @@ module Bindings(F:Cstubs.FOREIGN) =
         (spec_Hash_Definitions_hash_alg @->
            (hacl_HMAC_DRBG_state @->
               (uint32_t @->
-                 ((ptr uint8_t) @->
+                 (ocaml_bytes @->
                     (uint32_t @->
-                       ((ptr uint8_t) @->
-                          (uint32_t @-> ((ptr uint8_t) @-> (returning void)))))))))
+                       (ocaml_bytes @->
+                          (uint32_t @-> (ocaml_bytes @-> (returning void)))))))))
       
     let hacl_HMAC_DRBG_reseed =
       foreign "Hacl_HMAC_DRBG_reseed"
         (spec_Hash_Definitions_hash_alg @->
            (hacl_HMAC_DRBG_state @->
               (uint32_t @->
-                 ((ptr uint8_t) @->
-                    (uint32_t @-> ((ptr uint8_t) @-> (returning void)))))))
+                 (ocaml_bytes @->
+                    (uint32_t @-> (ocaml_bytes @-> (returning void)))))))
       
     let hacl_HMAC_DRBG_generate =
       foreign "Hacl_HMAC_DRBG_generate"
         (spec_Hash_Definitions_hash_alg @->
-           ((ptr uint8_t) @->
+           (ocaml_bytes @->
               (hacl_HMAC_DRBG_state @->
                  (uint32_t @->
-                    (uint32_t @-> ((ptr uint8_t) @-> (returning bool)))))))
+                    (uint32_t @-> (ocaml_bytes @-> (returning bool)))))))
       
   end

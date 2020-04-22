@@ -26,6 +26,9 @@ let ( +% ) (a b:pfelem) : pfelem = (a + b) % prime
 //[@(strict_on_arguments [0;1])]
 let ( *% ) (a b:pfelem) : pfelem = (a * b) % prime
 
+//[@(strict_on_arguments [0])]
+let ( ~% ) (a:pfelem) : pfelem = (-a) % prime
+
 val add_identity: a:pfelem -> Lemma (zero +% a == a)
 let add_identity a = normalize_term_spec prime
 
@@ -107,12 +110,18 @@ let mul_add_distr a b c =
 val mul_zero_l: mult_zero_l_lemma pfelem pfelem_add_cm pfelem_mul_cm
 let mul_zero_l a = assert_norm (forall x. zero *% x == zero)
 
+val add_opp (a:pfelem) : Lemma (a +% ~%a == zero)
+let add_opp a =
+  FStar.Math.Lemmas.lemma_mod_add_distr a (-a) prime;
+  FStar.Math.Lemmas.small_mod 0 prime
+
 [@canon_attr]
-let pfelem_cr : cr pfelem = CR pfelem_add_cm pfelem_mul_cm mul_add_distr mul_zero_l
+let pfelem_cr : cr pfelem = 
+  CR pfelem_add_cm pfelem_mul_cm ( ~% ) add_opp mul_add_distr mul_zero_l
 
 open FStar.Tactics
 
-let poly_semiring () : Tac unit = canon_semiring pfelem_cr
+let poly_semiring () : Tac unit = canon_semiring pfelem_cr; trefl()
 
 
 /// Lemmas

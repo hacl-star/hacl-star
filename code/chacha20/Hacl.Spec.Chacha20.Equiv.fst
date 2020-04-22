@@ -504,6 +504,8 @@ let get_last_s
   b
 
 
+#push-options "--using_facts_from 'Prims' --fuel 0 --ifuel 0"
+
 val lemma_i_div_bs: w:pos -> bs:pos -> bs_v:pos{bs_v = w * bs} -> i:nat ->
   Lemma (w * (i / bs_v) + i % bs_v / bs == i / bs)
 let lemma_i_div_bs w bs bs_v i =
@@ -519,13 +521,11 @@ let lemma_i_div_bs w bs bs_v i =
     i / bs;
   }
 
-
 val lemma_i_div_bs1: w:pos -> bs:pos -> bs_v:pos{bs_v == w * bs} -> len:nat -> i:nat{len / bs_v * bs_v <= i /\ i < len} ->
   Lemma (w * (len / bs_v) + i % bs_v / bs == i / bs)
 let lemma_i_div_bs1 w bs bs_v len i =
   div_interval bs_v (len / bs_v) i;
   lemma_i_div_bs w bs bs_v i
-
 
 val lemma_i_div_bs2: w:pos -> bs:pos -> bs_v:pos{bs_v == w * bs} -> len:nat -> i:nat{len / bs * bs <= i /\ i < len} ->
   Lemma (w * (len / bs_v) + i % bs_v / bs == len / bs)
@@ -536,32 +536,28 @@ let lemma_i_div_bs2 w bs bs_v len i =
   assert (i / bs_v == len / bs_v);
   lemma_i_div_bs w bs bs_v i
 
-
 val lemma_slice_slice_f_vec_f_aux1: w:pos -> bs:pos -> bs_v:nat{bs_v == w * bs} -> i:nat ->
   Lemma (i / bs_v * bs_v + i % bs_v / bs * bs == i / bs * bs)
 let lemma_slice_slice_f_vec_f_aux1 w bs bs_v i =
   FStar.Math.Lemmas.distributivity_add_left (i / bs_v * w) ((i % bs_v) / bs) bs;
-  lemma_i_div_bs w bs bs_v i
-
+  lemma_i_div_bs w bs bs_v i;
+  FStar.Math.Lemmas.paren_mul_right (i / bs_v) w bs
 
 val lemma_slice_slice_f_vec_f_aux2: w:pos -> bs:pos -> bs_v:nat{bs_v == w * bs} -> i:nat ->
   Lemma (i / bs_v * bs_v + (i % bs_v / bs + 1) * bs == (i / bs + 1) * bs)
 let lemma_slice_slice_f_vec_f_aux2 w bs bs_v i =
   lemma_slice_slice_f_vec_f_aux1 w bs bs_v i
 
-
 val lemma_slice_slice_f_vec_f_aux3: w:pos -> bs:pos -> bs_v:nat{bs_v == w * bs} -> i:nat ->
   Lemma ((i % bs_v / bs + 1) * bs <= bs_v)
 let lemma_slice_slice_f_vec_f_aux3 w bs bs_v i =
   FStar.Math.Lemmas.modulo_division_lemma i bs w
-
 
 val lemma_slice_slice_f_vec_f_aux4: w:pos -> bs:pos -> bs_v:nat{bs_v == w * bs}
   -> len:nat -> i:nat{i < len / bs_v * bs_v} ->
   Lemma ((i / bs_v + 1) * bs_v <= len)
 let lemma_slice_slice_f_vec_f_aux4 w bs bs_v len i =
   div_mul_lt bs_v i (len / bs_v)
-
 
 val lemma_slice_slice_g_vec_f_aux1: w:pos -> bs:pos -> bs_v:nat{bs_v == w * bs}
   -> len:nat -> i:nat{len / bs_v * bs_v <= i /\ i < len / bs * bs} ->
@@ -579,7 +575,6 @@ let lemma_slice_slice_g_vec_f_aux1 w bs bs_v len i =
     i / bs * bs;
   }
 
-
 val lemma_slice_slice_g_vec_f_aux2: w:pos -> bs:pos -> bs_v:nat{bs_v == w * bs}
   -> len:nat -> i:nat{len / bs_v * bs_v <= i /\ i < len / bs * bs} ->
   Lemma (len - len % bs_v + (i % bs_v / bs + 1) * bs == (i / bs + 1) * bs)
@@ -587,7 +582,6 @@ let lemma_slice_slice_g_vec_f_aux2 w bs bs_v len i =
   FStar.Math.Lemmas.distributivity_add_left (i % bs_v / bs) 1 bs;
   lemma_slice_slice_g_vec_f_aux1 w bs bs_v len i;
   FStar.Math.Lemmas.distributivity_add_left (i / bs) 1 bs
-
 
 val lemma_slice_slice_g_vec_f_aux3: w:pos -> bs:pos -> bs_v:nat{bs_v == w * bs}
   -> len:nat -> i:nat{len / bs_v * bs_v <= i /\ i < len / bs * bs} ->
@@ -599,7 +593,6 @@ let lemma_slice_slice_g_vec_f_aux3 w bs bs_v len i =
   assert (i % bs_v / bs * bs + bs == i / bs * bs + bs - len + len % bs_v);
   div_mul_lt bs i (len / bs);
   assert ((i / bs + 1) * bs <= len)
-
 
 val lemma_slice_slice_g_vec_f_aux4: w:pos -> bs:pos -> bs_v:nat{bs_v == w * bs}
   -> len:nat -> i:nat{len / bs_v * bs_v <= i /\ i < len / bs * bs} ->
@@ -614,7 +607,6 @@ let lemma_slice_slice_g_vec_f_aux4 w bs bs_v len i =
   FStar.Math.Lemmas.euclidean_division_definition i bs_v;
   assert (i - i % bs_v + (len % bs_v) / bs * bs == len / bs * bs);
   assert (i - len / bs * bs + (len % bs_v) / bs * bs == i % bs_v)
-
 
 val lemma_slice_slice_g_vec_g_aux: w:pos -> bs:pos -> bs_v:nat{bs_v == w * bs}
   -> len:nat -> i:nat{len / bs * bs <= i /\ i < len} ->
@@ -631,7 +623,7 @@ let lemma_slice_slice_g_vec_g_aux w bs bs_v len i =
   FStar.Math.Lemmas.euclidean_division_definition i bs_v;
   assert (i - i % bs_v + (len % bs_v) / bs * bs == len / bs * bs);
   assert (i - len / bs * bs + (len % bs_v) / bs * bs == i % bs_v)
-
+#pop-options
 
 #reset-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 0"
 

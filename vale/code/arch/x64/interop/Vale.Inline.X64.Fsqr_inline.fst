@@ -113,13 +113,13 @@ let fsqr_lemma = as_t #(VSig.vale_sig fsqr_regs_modified fsqr_xmms_modified fsqr
 let code_Fsqr = FW.va_code_Fsqr ()
 
 let of_reg (r:MS.reg_64) : option (IX64.reg_nat 3) = match r with
-  | 1 -> Some 0 // rbx
+  | 12 -> Some 0 // r12
   | 4 -> Some 1 // rsi
   | 5 -> Some 2 // rdi
   | _ -> None
 
 let of_arg (i:IX64.reg_nat 3) : MS.reg_64 = match i with
-  | 0 -> MS.rRbx
+  | 0 -> MS.rR12
   | 1 -> MS.rRsi
   | 2 -> MS.rRdi
 

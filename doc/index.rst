@@ -55,6 +55,7 @@ or EverCrypt, initiate a conversation with the `HACL* maintainers <mailto:hacl-s
    EverCryptDoc
    API
    Applications
+   Javascript
 
 
 Indices and tables

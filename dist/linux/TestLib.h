@@ -33,54 +33,33 @@
 
 
 
-/*
- Prevent F* from removing the use of a variable. 
-*/
-extern void TestLib_touch(s32 uu____11);
+extern void TestLib_touch(s32 uu____12);
 
-/*
- Check that the two arguments are equal. 
-*/
-extern void TestLib_check(bool uu____26);
+extern void TestLib_check(bool uu____28);
 
-extern void TestLib_check8(s8 uu____48, s8 uu____49);
+extern void TestLib_check8(s8 uu____52, s8 uu____53);
 
-extern void TestLib_check16(s16 uu____70, s16 uu____71);
+extern void TestLib_check16(s16 uu____78, s16 uu____79);
 
-extern void TestLib_check32(s32 uu____92, s32 uu____93);
+extern void TestLib_check32(s32 uu____104, s32 uu____105);
 
-extern void TestLib_check64(s64 uu____114, s64 uu____115);
+extern void TestLib_check64(s64 uu____130, s64 uu____131);
 
-extern void TestLib_checku8(u8 uu____136, u8 uu____137);
+extern void TestLib_checku8(u8 uu____156, u8 uu____157);
 
-extern void TestLib_checku16(u16 uu____158, u16 uu____159);
+extern void TestLib_checku16(u16 uu____182, u16 uu____183);
 
-extern void TestLib_checku32(u32 uu____180, u32 uu____181);
+extern void TestLib_checku32(u32 uu____208, u32 uu____209);
 
-extern void TestLib_checku64(u64 uu____202, u64 uu____203);
+extern void TestLib_checku64(u64 uu____234, u64 uu____235);
 
-/*
- A test routine that takes a string as its first argument; two buffers to
- * compare; the length of the buffers; and exits the program if there is a
- * failure. 
-*/
-extern void TestLib_compare_and_print(C_String_t uu____242, u8 *b1, u8 *b2, u32 l);
+extern void TestLib_compare_and_print(C_String_t uu____279, u8 *b1, u8 *b2, u32 l);
 
-/*
- This function is for testing purposes only: this is an unmanaged, raw
- * pointer that cannot be freed. 
-*/
 extern u8 *TestLib_unsafe_malloc(u32 l);
 
-/*
- Prints: "got error code %d" where %d is the first argument 
-*/
-extern void TestLib_perr(u32 uu____281);
+extern void TestLib_perr(u32 uu____326);
 
-/*
- A human-readable debug message specialized for [clock_t] 
-*/
-extern void TestLib_print_clock_diff(clock_t uu____302, clock_t uu____303);
+extern void TestLib_print_clock_diff(clock_t uu____348, clock_t uu____349);
 
 KRML_DEPRECATED("p_null from TestLib; use LowStar.Buffer.null instead")
 
@@ -98,9 +77,9 @@ extern TestLib_cycles TestLib_cpucycles();
 
 extern void
 TestLib_print_cycles_per_round(
-  TestLib_cycles uu____378,
-  TestLib_cycles uu____379,
-  u32 uu____380
+  TestLib_cycles uu____434,
+  TestLib_cycles uu____435,
+  u32 uu____436
 );
 
 #define __TestLib_H_DEFINED

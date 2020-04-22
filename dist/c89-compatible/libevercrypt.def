@@ -1,6 +1,7 @@
 LIBRARY libevercrypt
 
 EXPORTS
+  Spec_Cipher_Expansion_cipher_alg_of_impl
   Hacl_Hash_MD5_legacy_update_multi
   Hacl_Hash_MD5_legacy_update_last
   Hacl_Hash_MD5_legacy_hash
@@ -43,6 +44,10 @@ EXPORTS
   Hacl_Hash_Core_SHA2_finish_256
   Hacl_Hash_Core_SHA2_finish_384
   Hacl_Hash_Core_SHA2_finish_512
+  Hacl_Hash_Definitions_word_len
+  Hacl_Hash_Definitions_block_len
+  Hacl_Hash_Definitions_hash_word_len
+  Hacl_Hash_Definitions_hash_len
   EverCrypt_AutoConfig2_has_shaext
   EverCrypt_AutoConfig2_has_aesni
   EverCrypt_AutoConfig2_has_pclmulqdq
@@ -73,7 +78,6 @@ EXPORTS
   EverCrypt_AutoConfig2_disable_hacl
   EverCrypt_AutoConfig2_disable_openssl
   EverCrypt_AutoConfig2_disable_bcrypt
-  Spec_Cipher_Expansion_cipher_alg_of_impl
   EverCrypt_Hash_string_of_alg
   EverCrypt_Hash_uu___is_MD5_s
   EverCrypt_Hash___proj__MD5_s__item__p
@@ -150,6 +154,10 @@ EXPORTS
   Hacl_Curve25519_51_scalarmult
   Hacl_Curve25519_51_secret_to_public
   Hacl_Curve25519_51_ecdh
+  Hacl_Impl_P256_DH_ecp256dh_i
+  Hacl_Impl_P256_DH_ecp256dh_r
+  Hacl_Impl_ECDSA_ecdsa_p256_sha2_sign
+  Hacl_Impl_ECDSA_ecdsa_p256_sha2_verify
   Hacl_Ed25519_sign
   Hacl_Ed25519_verify
   Hacl_Ed25519_secret_to_public
@@ -208,6 +216,22 @@ EXPORTS
   Hacl_Frodo_KEM_crypto_kem_keypair
   Hacl_Frodo_KEM_crypto_kem_enc
   Hacl_Frodo_KEM_crypto_kem_dec
+  Hacl_Chacha20_Vec128_chacha20_encrypt_128
+  Hacl_Chacha20_Vec128_chacha20_decrypt_128
+  Hacl_Chacha20Poly1305_128_aead_encrypt
+  Hacl_Chacha20Poly1305_128_aead_decrypt
+  Hacl_HMAC_legacy_compute_sha1
+  Hacl_HMAC_compute_sha2_256
+  Hacl_HMAC_compute_sha2_384
+  Hacl_HMAC_compute_sha2_512
+  Hacl_HKDF_expand_sha2_256
+  Hacl_HKDF_extract_sha2_256
+  Hacl_HKDF_expand_sha2_512
+  Hacl_HKDF_extract_sha2_512
+  Hacl_HPKE_Curve51_CP128_SHA512_setupBaseI
+  Hacl_HPKE_Curve51_CP128_SHA512_setupBaseR
+  Hacl_HPKE_Curve51_CP128_SHA512_sealBase
+  Hacl_HPKE_Curve51_CP128_SHA512_openBase
   Hacl_Blake2b_32_blake2b
   Hacl_Chacha20_Vec32_chacha20_encrypt_32
   Hacl_Chacha20_Vec32_chacha20_decrypt_32
@@ -216,19 +240,71 @@ EXPORTS
   EverCrypt_Ed25519_secret_to_public
   EverCrypt_Ed25519_expand_keys
   EverCrypt_Ed25519_sign_expanded
-  Hacl_Blake2b_256_blake2b
-  Hacl_Blake2s_32_blake2s
-  Hacl_Blake2s_128_blake2s
-  Hacl_Chacha20_Vec128_chacha20_encrypt_128
-  Hacl_Chacha20_Vec128_chacha20_decrypt_128
-  Hacl_Chacha20Poly1305_128_aead_encrypt
-  Hacl_Chacha20Poly1305_128_aead_decrypt
-  Hacl_Chacha20Poly1305_32_aead_encrypt
-  Hacl_Chacha20Poly1305_32_aead_decrypt
+  Hacl_HPKE_Curve64_CP128_SHA512_setupBaseI
+  Hacl_HPKE_Curve64_CP128_SHA512_setupBaseR
+  Hacl_HPKE_Curve64_CP128_SHA512_sealBase
+  Hacl_HPKE_Curve64_CP128_SHA512_openBase
+  Hacl_HPKE_P256_CP128_SHA256_setupBaseI
+  Hacl_HPKE_P256_CP128_SHA256_setupBaseR
+  Hacl_HPKE_P256_CP128_SHA256_sealBase
+  Hacl_HPKE_P256_CP128_SHA256_openBase
   Hacl_Chacha20_Vec256_chacha20_encrypt_256
   Hacl_Chacha20_Vec256_chacha20_decrypt_256
   Hacl_Chacha20Poly1305_256_aead_encrypt
   Hacl_Chacha20Poly1305_256_aead_decrypt
+  Hacl_HPKE_Curve51_CP256_SHA512_setupBaseI
+  Hacl_HPKE_Curve51_CP256_SHA512_setupBaseR
+  Hacl_HPKE_Curve51_CP256_SHA512_sealBase
+  Hacl_HPKE_Curve51_CP256_SHA512_openBase
+  Hacl_HPKE_Curve64_CP256_SHA512_setupBaseI
+  Hacl_HPKE_Curve64_CP256_SHA512_setupBaseR
+  Hacl_HPKE_Curve64_CP256_SHA512_sealBase
+  Hacl_HPKE_Curve64_CP256_SHA512_openBase
+  Hacl_HPKE_Curve51_CP128_SHA256_setupBaseI
+  Hacl_HPKE_Curve51_CP128_SHA256_setupBaseR
+  Hacl_HPKE_Curve51_CP128_SHA256_sealBase
+  Hacl_HPKE_Curve51_CP128_SHA256_openBase
+  Hacl_HPKE_Curve64_CP128_SHA256_setupBaseI
+  Hacl_HPKE_Curve64_CP128_SHA256_setupBaseR
+  Hacl_HPKE_Curve64_CP128_SHA256_sealBase
+  Hacl_HPKE_Curve64_CP128_SHA256_openBase
+  Hacl_Chacha20Poly1305_32_aead_encrypt
+  Hacl_Chacha20Poly1305_32_aead_decrypt
+  Hacl_HPKE_Curve51_CP32_SHA256_setupBaseI
+  Hacl_HPKE_Curve51_CP32_SHA256_setupBaseR
+  Hacl_HPKE_Curve51_CP32_SHA256_sealBase
+  Hacl_HPKE_Curve51_CP32_SHA256_openBase
+  Hacl_HPKE_Curve64_CP256_SHA256_setupBaseI
+  Hacl_HPKE_Curve64_CP256_SHA256_setupBaseR
+  Hacl_HPKE_Curve64_CP256_SHA256_sealBase
+  Hacl_HPKE_Curve64_CP256_SHA256_openBase
+  Hacl_Blake2b_256_blake2b
+  Hacl_Blake2s_32_blake2s
+  Hacl_HPKE_Curve51_CP32_SHA512_setupBaseI
+  Hacl_HPKE_Curve51_CP32_SHA512_setupBaseR
+  Hacl_HPKE_Curve51_CP32_SHA512_sealBase
+  Hacl_HPKE_Curve51_CP32_SHA512_openBase
+  Hacl_HPKE_P256_CP256_SHA256_setupBaseI
+  Hacl_HPKE_P256_CP256_SHA256_setupBaseR
+  Hacl_HPKE_P256_CP256_SHA256_sealBase
+  Hacl_HPKE_P256_CP256_SHA256_openBase
+  Hacl_HPKE_P256_CP32_SHA256_setupBaseI
+  Hacl_HPKE_P256_CP32_SHA256_setupBaseR
+  Hacl_HPKE_P256_CP32_SHA256_sealBase
+  Hacl_HPKE_P256_CP32_SHA256_openBase
+  Hacl_Blake2s_128_blake2s
+  Hacl_HPKE_Curve64_CP32_SHA256_setupBaseI
+  Hacl_HPKE_Curve64_CP32_SHA256_setupBaseR
+  Hacl_HPKE_Curve64_CP32_SHA256_sealBase
+  Hacl_HPKE_Curve64_CP32_SHA256_openBase
+  Hacl_HPKE_Curve64_CP32_SHA512_setupBaseI
+  Hacl_HPKE_Curve64_CP32_SHA512_setupBaseR
+  Hacl_HPKE_Curve64_CP32_SHA512_sealBase
+  Hacl_HPKE_Curve64_CP32_SHA512_openBase
+  Hacl_HPKE_Curve51_CP256_SHA256_setupBaseI
+  Hacl_HPKE_Curve51_CP256_SHA256_setupBaseR
+  Hacl_HPKE_Curve51_CP256_SHA256_sealBase
+  Hacl_HPKE_Curve51_CP256_SHA256_openBase
   EverCrypt_Chacha20Poly1305_aead_encrypt
   EverCrypt_Chacha20Poly1305_aead_decrypt
   EverCrypt_AEAD_uu___is_Ek
@@ -239,77 +315,6 @@ EXPORTS
   EverCrypt_AEAD_encrypt
   EverCrypt_AEAD_decrypt
   EverCrypt_AEAD_free
-  __proj__Mkgcm_args__item__plain
-  __proj__Mkgcm_args__item__plain_len
-  __proj__Mkgcm_args__item__aad
-  __proj__Mkgcm_args__item__aad_len
-  __proj__Mkgcm_args__item__iv
-  __proj__Mkgcm_args__item__expanded_key
-  __proj__Mkgcm_args__item__cipher
-  __proj__Mkgcm_args__item__tag
-  EverCrypt_random_init
-  EverCrypt_random_sample
-  EverCrypt_random_cleanup
-  EverCrypt_uu___is_AES128_OPENSSL
-  EverCrypt___proj__AES128_OPENSSL__item__st
-  EverCrypt_uu___is_AES128_BCRYPT
-  EverCrypt___proj__AES128_BCRYPT__item__st
-  EverCrypt_uu___is_AES128_VALE
-  EverCrypt___proj__AES128_VALE__item__w
-  EverCrypt___proj__AES128_VALE__item__sbox
-  EverCrypt_uu___is_AES128_HACL
-  EverCrypt___proj__AES128_HACL__item__w
-  EverCrypt___proj__AES128_HACL__item__sbox
-  EverCrypt_aes128_create
-  EverCrypt_aes128_compute
-  EverCrypt_aes128_free
-  EverCrypt_uu___is_AES256_OPENSSL
-  EverCrypt___proj__AES256_OPENSSL__item__st
-  EverCrypt_uu___is_AES256_BCRYPT
-  EverCrypt___proj__AES256_BCRYPT__item__st
-  EverCrypt_uu___is_AES256_HACL
-  EverCrypt___proj__AES256_HACL__item__w
-  EverCrypt___proj__AES256_HACL__item__sbox
-  EverCrypt_aes256_create
-  EverCrypt_aes256_compute
-  EverCrypt_aes256_free
-  EverCrypt_aes128_gcm_encrypt
-  EverCrypt_aes128_gcm_decrypt
-  EverCrypt_aes256_gcm_encrypt
-  EverCrypt_aes256_gcm_decrypt
-  EverCrypt_uu___is_AES128_CBC
-  EverCrypt_uu___is_AES256_CBC
-  EverCrypt_uu___is_TDES_EDE_CBC
-  EverCrypt_block_cipher_keyLen
-  EverCrypt_block_cipher_blockLen
-  EverCrypt_uu___is_RC4_128
-  EverCrypt_uu___is_AES128_GCM
-  EverCrypt_uu___is_AES256_GCM
-  EverCrypt_uu___is_CHACHA20_POLY1305
-  EverCrypt_uu___is_AES128_CCM
-  EverCrypt_uu___is_AES256_CCM
-  EverCrypt_uu___is_AES128_CCM8
-  EverCrypt_uu___is_AES256_CCM8
-  EverCrypt_aead_keyLen
-  EverCrypt_aead_tagLen
-  EverCrypt_aead_ivLen
-  EverCrypt_aead_create
-  EverCrypt_aead_encrypt
-  EverCrypt_aead_decrypt
-  EverCrypt_aead_free
-  EverCrypt_dh_load_group
-  EverCrypt_dh_free_group
-  EverCrypt_dh_keygen
-  EverCrypt_dh_compute
-  EverCrypt_uu___is_ECC_P256
-  EverCrypt_uu___is_ECC_P384
-  EverCrypt_uu___is_ECC_P521
-  EverCrypt_uu___is_ECC_X25519
-  EverCrypt_uu___is_ECC_X448
-  EverCrypt_ecdh_load_curve
-  EverCrypt_ecdh_free_curve
-  EverCrypt_ecdh_keygen
-  EverCrypt_ecdh_compute
   EverCrypt_HMAC_compute_sha1
   EverCrypt_HMAC_compute_sha2_256
   EverCrypt_HMAC_compute_sha2_384
@@ -328,14 +333,6 @@ EXPORTS
   EverCrypt_HKDF_extract
   EverCrypt_HKDF_hkdf_expand
   EverCrypt_HKDF_hkdf_extract
-  Hacl_HMAC_legacy_compute_sha1
-  Hacl_HMAC_compute_sha2_256
-  Hacl_HMAC_compute_sha2_384
-  Hacl_HMAC_compute_sha2_512
-  Hacl_HKDF_expand_sha2_256
-  Hacl_HKDF_extract_sha2_256
-  Hacl_HKDF_expand_sha2_512
-  Hacl_HKDF_extract_sha2_512
   Hacl_HMAC_DRBG_min_length
   Hacl_HMAC_DRBG_uu___is_State
   Hacl_HMAC_DRBG___proj__State__item__k
@@ -380,3 +377,11 @@ EXPORTS
   EverCrypt_Curve25519_scalarmult
   EverCrypt_Curve25519_ecdh
   EverCrypt_Cipher_chacha20
+  __proj__Mkgcm_args__item__plain
+  __proj__Mkgcm_args__item__plain_len
+  __proj__Mkgcm_args__item__aad
+  __proj__Mkgcm_args__item__aad_len
+  __proj__Mkgcm_args__item__iv
+  __proj__Mkgcm_args__item__expanded_key
+  __proj__Mkgcm_args__item__cipher
+  __proj__Mkgcm_args__item__tag

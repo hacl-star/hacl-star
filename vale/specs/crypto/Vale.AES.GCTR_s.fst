@@ -15,7 +15,7 @@ open FStar.Seq
 // length plain < pow2_32 <= spec max of 2**39 - 256;
 let is_gctr_plain_LE (p:seq nat8) : prop0 = length p < pow2_32
 type gctr_plain_LE:eqtype = p:seq nat8 { is_gctr_plain_LE p }
-type gctr_plain_internal_LE:eqtype = p:seq quad32
+type gctr_plain_internal_LE:eqtype = seq quad32
 
 let inc32 (cb:quad32) (i:int) : quad32 =
   Mkfour ((cb.lo0 + i) % pow2_32) cb.lo1 cb.hi2 cb.hi3

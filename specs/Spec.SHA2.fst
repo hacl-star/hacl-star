@@ -134,7 +134,7 @@ val _sigma1: a:sha2_alg -> x:(word a) -> Tot (word a)
 inline_for_extraction
 let _sigma1 a x = (x >>>. (op0 a).e3) ^. (x >>>. (op0 a).e4) ^. (x >>. (op0 a).e5)
 
-let h0: a:sha2_alg -> Tot (m:words_state a) = function
+let h0: a:sha2_alg -> Tot (words_state a) = function
   | SHA2_224 -> C.h224
   | SHA2_256 -> C.h256
   | SHA2_384 -> C.h384

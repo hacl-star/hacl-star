@@ -71,7 +71,7 @@ procedure Fast_mul1(inline offset:nat, ghost inA_b:buffer64)
         d3 @= r11;
 
         tmp0 @= rcx;
-        tmp1 @= r12;
+        tmp1 @= rbx;
         tmp2 @= r13;
 
         carry @= rax;
@@ -130,13 +130,13 @@ procedure Fast_add_after_mul1(ghost dst_b:buffer64, ghost inB_b:buffer64)
         b2 := buffer64_read(inB_b, 2, heap0);
         b3 := buffer64_read(inB_b, 3, heap0);
 
-        a := pow2_five(r8, r10, r12, r14, rax);
+        a := pow2_five(r8, r10, rbx, r14, rax);
         b := pow2_four(b0, b1, b2, b3);
     reads
         dst_ptr; inB_ptr; r14; memLayout;
 
     modifies
-        rax; r8; r9; r10; r11; r12; r13; r15;
+        rax; r8; r9; r10; r11; rbx; r13; r15;
         heap0; efl;
 
     requires
@@ -171,7 +171,7 @@ procedure Fast_add_after_mul1(ghost dst_b:buffer64, ghost inB_b:buffer64)
     Store64_buffer(heap0, dst_ptr, r11,  8, Secret, dst_b, 1);
 
     Load64_buffer(heap0, r13, inB_ptr, 16, Secret, inB_b, 2);     /* B[2] */
-    Adcx64Wrap(r13, r12);
+    Adcx64Wrap(r13, rbx);
     Store64_buffer(heap0, dst_ptr, r13, 16, Secret, dst_b, 2);
 
     Load64_buffer(heap0, r15, inB_ptr, 24, Secret, inB_b, 3);     /* B[3] */
@@ -196,7 +196,7 @@ procedure Fast_add_after_mul1_regs(ghost inB_b:buffer64)
         carry @= rax;
         tmp0 @= rcx;
         tmp1 @= rdx;
-        tmp2 @= r12;
+        tmp2 @= rbx;
         tmp3 @= r13;
 
         b0 := buffer64_read(inB_b, 0, heap0);
@@ -269,7 +269,7 @@ procedure Fast_mul1_add(inline offset:nat, ghost inA_b:buffer64)
         d3 @= r11;
 
         tmp0 @= r13;
-        tmp1 @= r12;
+        tmp1 @= rbx;
 
         carry @= rax;
         zero  @= rcx;
@@ -499,7 +499,7 @@ procedure Carry_wide(inline offset:nat, ghost dst_b:buffer64, ghost inA_b:buffer
 
     modifies
         rax; rcx; rdx;
-        tmp0; tmp1; tmp2; tmp3; r12; r13;
+        tmp0; tmp1; tmp2; tmp3; rbx; r13;
         heap0; efl;
 
     requires
@@ -552,7 +552,7 @@ procedure Carry_wide_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:
         inA_in := (if win then rdx else rsi);
     reads memLayout;
     modifies
-        rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15;
+        rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r13; r14; r15;
         rsp; efl; heap0;
     requires
         adx_enabled && bmi2_enabled;
@@ -585,13 +585,11 @@ procedure Carry_wide_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:
 
         rbx == old(rbx);
         rsi == old(rsi);
-        r12 == old(r12);
         r13 == old(r13);
         r14 == old(r14);
         rsp == old(rsp);
 {
     // Store callee-save registers
-    Push(r12);
     Push(r13);
 
     // Line up the rest of the arguments
@@ -609,7 +607,6 @@ procedure Carry_wide_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:
         Pop(rsi);
     }
     Pop(r13);
-    Pop(r12);
 }
 */
 
@@ -866,7 +863,7 @@ procedure Fadd_stdcall(
         inA_in := (if win then rdx else rsi);
         inB_in := (if win then r8 else rdx);
     modifies
-        rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
+        rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r13; r14; r15;
         efl; heap0; memLayout; stack; stackTaint;
     requires
         rsp == init_rsp(stack);
@@ -911,13 +908,11 @@ procedure Fadd_stdcall(
         win ==>  rdi == old(rdi);
         win ==>  rsi == old(rsi);
         win ==>  rsp == old(rsp);
-        win ==>  r12 == old(r12);
         win ==>  r13 == old(r13);
         win ==>  r14 == old(r14);
         win ==>  r15 == old(r15);
         !win ==>  rbx == old(rbx);
         !win ==>  rbp == old(rbp);
-        !win ==>  r12 == old(r12);
         !win ==>  r13 == old(r13);
         !win ==>  r14 == old(r14);
         !win ==>  r15 == old(r15);
@@ -1025,7 +1020,7 @@ procedure Fsub_stdcall(
         inA_in := (if win then rdx else rsi);
         inB_in := (if win then r8 else rdx);
     modifies
-        rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
+        rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r13; r14; r15;
         efl; heap0; memLayout; stack; stackTaint;
     requires
         rsp == init_rsp(stack);
@@ -1070,13 +1065,11 @@ procedure Fsub_stdcall(
         win ==>  rdi == old(rdi);
         win ==>  rsi == old(rsi);
         win ==>  rsp == old(rsp);
-        win ==>  r12 == old(r12);
         win ==>  r13 == old(r13);
         win ==>  r14 == old(r14);
         win ==>  r15 == old(r15);
         !win ==>  rbx == old(rbx);
         !win ==>  rbp == old(rbp);
-        !win ==>  r12 == old(r12);
         !win ==>  r13 == old(r13);
         !win ==>  r14 == old(r14);
         !win ==>  r15 == old(r15);
@@ -1131,7 +1124,7 @@ procedure Fmul1(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB:nat64)
     modifies
         rax; rcx; b;
         tmp0; tmp1; tmp2; tmp3;
-        r12; r13;
+        rbx; r13;
         heap0; memLayout; efl;
 
     requires
@@ -1184,7 +1177,7 @@ procedure Fmul1_stdcall(
         dst_in := (if win then rcx else rdi);
         inA_in := (if win then rdx else rsi);
     modifies
-        rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
+        rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r13; r14; r15;
         efl; heap0; memLayout; stack; stackTaint;
     requires
         rsp == init_rsp(stack);
@@ -1225,13 +1218,11 @@ procedure Fmul1_stdcall(
         win ==>  rdi == old(rdi);
         win ==>  rsi == old(rsi);
         win ==>  rsp == old(rsp);
-        win ==>  r12 == old(r12);
         win ==>  r13 == old(r13);
         win ==>  r14 == old(r14);
         win ==>  r15 == old(r15);
         !win ==>  rbx == old(rbx);
         !win ==>  rbp == old(rbp);
-        !win ==>  r12 == old(r12);
         !win ==>  r13 == old(r13);
         !win ==>  r14 == old(r14);
         !win ==>  r15 == old(r15);
@@ -1240,8 +1231,8 @@ procedure Fmul1_stdcall(
 {
     // Store callee-save registers
     Push_Secret(rdi);
-    Push_Secret(r12);
     Push_Secret(r13);
+    Push_Secret(rbx);
 
     // Line up the rest of the arguments
     inline if (win)
@@ -1258,7 +1249,8 @@ procedure Fmul1_stdcall(
     {
         Pop_Secret(rsi);
     }
+
+    Pop_Secret(rbx);
     Pop_Secret(r13);
-    Pop_Secret(r12);
     Pop_Secret(rdi);
 }

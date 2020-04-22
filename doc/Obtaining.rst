@@ -45,6 +45,14 @@ cross-compilers. The `dist/compact-msvc` distribution works with the Microsoft
 compilers, but we provide no build support (i.e. no Visual Studio project, no
 NMake-compatible makefile).
 
+.. note::
+
+  The ``gcc-compatible`` distribution also features OCaml bindings to our code.
+  These require a valid OCaml setup, including packages ctypes, ctypes-foreign
+  and bigstring, usually obtained via OPAM. You can easily disable building
+  these bindings by removing the ``lib_gen`` directory in
+  ``dist/gcc-compatible``.
+
 Integrating the code
 --------------------
 
@@ -83,6 +91,8 @@ developments.  In addition to these use cases, the library developers
 and other HACL* users have also developed bindings for other programming languages:
 
 - OCaml: In a development branch, we have an OCaml wrapper for the full EverCrypt API
-- WebAssembly: The HACL* library has been compiled to `WebAssembly <https://github.com/Inria-Prosecco/hacl-wasm>`_
+- Javascript/WebAssembly: The HACL* library is compiled to WebAssembly using the KreMLin compiler,
+  and we also provide an idiomatic Javascript wrapper as a `Node.js package <https://www.npmjs.com/package/hacl-wasm>`_.
+  See also :doc:`Javascript`.
 
 Various users have also published Rust crates for HACL*, but these have not been vetted by the HACL maintainers.

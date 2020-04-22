@@ -84,7 +84,7 @@ let repeati_inductive #a n pred f x0 =
 
 let repeati_inductive_repeat_gen #a n pred f x0 =
   let a' i = x:a{pred i x} in
-  let f' (i:nat{i < n}) (x:a' i) : y:a' (i + 1) = f i x in
+  let f' (i:nat{i < n}) (x:a' i) : a' (i + 1) = f i x in
   repeat_left_right 0 n (fun i -> x:a{pred i x}) f x0;
   assert_norm (repeati_inductive n pred f x0 == repeat_right 0 n (fun i -> a' i) f' x0);
   assert (repeat_gen n (fun i -> x:a{pred i x}) f x0 == repeat_right 0 n a' f' x0);

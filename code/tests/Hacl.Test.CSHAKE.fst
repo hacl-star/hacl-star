@@ -14,10 +14,10 @@ open Hacl.SHA3
 
 val test_cshake128:
      msg_len:size_t{v msg_len > 0}
-  -> msg:ilbuffer uint8 msg_len
+  -> msg:glbuffer uint8 msg_len
   -> ctr:uint16
   -> out_len:size_t{size_v out_len > 0}
-  -> expected:ilbuffer uint8 out_len
+  -> expected:glbuffer uint8 out_len
   -> Stack unit
     (requires fun h -> live h msg /\ live h expected)
     (ensures  fun h0 r h1 -> True)
@@ -27,7 +27,7 @@ let test_cshake128 msg_len msg ctr out_len expected =
   let msg' = create msg_len (u8 0) in
   copy msg' msg;
   cshake128_frodo msg_len msg' ctr out_len test;
-  if not (result_compare_display out_len test expected) then C.exit 255l;
+  if not (result_compare_display out_len (to_const test) expected) then C.exit 255l;
   pop_frame ()
 
 inline_for_extraction noextract
@@ -37,7 +37,7 @@ let u8 n = u8 n
 //
 // Test1_cSHAKE128
 //
-let test1_plaintext: b:ilbuffer uint8 16ul{ recallable b } =
+let test1_plaintext: b:glbuffer uint8 16ul{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8
@@ -46,7 +46,7 @@ let test1_plaintext: b:ilbuffer uint8 16ul{ recallable b } =
   assert_norm (List.Tot.length l == 16);
   createL_global l
 
-let test1_expected: b:ilbuffer uint8 64ul{ recallable b } =
+let test1_expected: b:glbuffer uint8 64ul{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8

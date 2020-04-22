@@ -64,70 +64,66 @@ module Bindings(F:Cstubs.FOREIGN) =
     let everCrypt_DRBG_instantiate_sha1 =
       foreign "EverCrypt_DRBG_instantiate_sha1"
         ((ptr everCrypt_DRBG_state_s) @->
-           ((ptr uint8_t) @-> (uint32_t @-> (returning bool))))
+           (ocaml_bytes @-> (uint32_t @-> (returning bool))))
       
     let everCrypt_DRBG_instantiate_sha2_256 =
       foreign "EverCrypt_DRBG_instantiate_sha2_256"
         ((ptr everCrypt_DRBG_state_s) @->
-           ((ptr uint8_t) @-> (uint32_t @-> (returning bool))))
+           (ocaml_bytes @-> (uint32_t @-> (returning bool))))
       
     let everCrypt_DRBG_instantiate_sha2_384 =
       foreign "EverCrypt_DRBG_instantiate_sha2_384"
         ((ptr everCrypt_DRBG_state_s) @->
-           ((ptr uint8_t) @-> (uint32_t @-> (returning bool))))
+           (ocaml_bytes @-> (uint32_t @-> (returning bool))))
       
     let everCrypt_DRBG_instantiate_sha2_512 =
       foreign "EverCrypt_DRBG_instantiate_sha2_512"
         ((ptr everCrypt_DRBG_state_s) @->
-           ((ptr uint8_t) @-> (uint32_t @-> (returning bool))))
+           (ocaml_bytes @-> (uint32_t @-> (returning bool))))
       
     let everCrypt_DRBG_reseed_sha1 =
       foreign "EverCrypt_DRBG_reseed_sha1"
         ((ptr everCrypt_DRBG_state_s) @->
-           ((ptr uint8_t) @-> (uint32_t @-> (returning bool))))
+           (ocaml_bytes @-> (uint32_t @-> (returning bool))))
       
     let everCrypt_DRBG_reseed_sha2_256 =
       foreign "EverCrypt_DRBG_reseed_sha2_256"
         ((ptr everCrypt_DRBG_state_s) @->
-           ((ptr uint8_t) @-> (uint32_t @-> (returning bool))))
+           (ocaml_bytes @-> (uint32_t @-> (returning bool))))
       
     let everCrypt_DRBG_reseed_sha2_384 =
       foreign "EverCrypt_DRBG_reseed_sha2_384"
         ((ptr everCrypt_DRBG_state_s) @->
-           ((ptr uint8_t) @-> (uint32_t @-> (returning bool))))
+           (ocaml_bytes @-> (uint32_t @-> (returning bool))))
       
     let everCrypt_DRBG_reseed_sha2_512 =
       foreign "EverCrypt_DRBG_reseed_sha2_512"
         ((ptr everCrypt_DRBG_state_s) @->
-           ((ptr uint8_t) @-> (uint32_t @-> (returning bool))))
+           (ocaml_bytes @-> (uint32_t @-> (returning bool))))
       
     let everCrypt_DRBG_generate_sha1 =
       foreign "EverCrypt_DRBG_generate_sha1"
-        ((ptr uint8_t) @->
+        (ocaml_bytes @->
            ((ptr everCrypt_DRBG_state_s) @->
-              (uint32_t @->
-                 ((ptr uint8_t) @-> (uint32_t @-> (returning bool))))))
+              (uint32_t @-> (ocaml_bytes @-> (uint32_t @-> (returning bool))))))
       
     let everCrypt_DRBG_generate_sha2_256 =
       foreign "EverCrypt_DRBG_generate_sha2_256"
-        ((ptr uint8_t) @->
+        (ocaml_bytes @->
            ((ptr everCrypt_DRBG_state_s) @->
-              (uint32_t @->
-                 ((ptr uint8_t) @-> (uint32_t @-> (returning bool))))))
+              (uint32_t @-> (ocaml_bytes @-> (uint32_t @-> (returning bool))))))
       
     let everCrypt_DRBG_generate_sha2_384 =
       foreign "EverCrypt_DRBG_generate_sha2_384"
-        ((ptr uint8_t) @->
+        (ocaml_bytes @->
            ((ptr everCrypt_DRBG_state_s) @->
-              (uint32_t @->
-                 ((ptr uint8_t) @-> (uint32_t @-> (returning bool))))))
+              (uint32_t @-> (ocaml_bytes @-> (uint32_t @-> (returning bool))))))
       
     let everCrypt_DRBG_generate_sha2_512 =
       foreign "EverCrypt_DRBG_generate_sha2_512"
-        ((ptr uint8_t) @->
+        (ocaml_bytes @->
            ((ptr everCrypt_DRBG_state_s) @->
-              (uint32_t @->
-                 ((ptr uint8_t) @-> (uint32_t @-> (returning bool))))))
+              (uint32_t @-> (ocaml_bytes @-> (uint32_t @-> (returning bool))))))
       
     let everCrypt_DRBG_uninstantiate_sha1 =
       foreign "EverCrypt_DRBG_uninstantiate_sha1"
@@ -148,19 +144,18 @@ module Bindings(F:Cstubs.FOREIGN) =
     let everCrypt_DRBG_instantiate =
       foreign "EverCrypt_DRBG_instantiate"
         ((ptr everCrypt_DRBG_state_s) @->
-           ((ptr uint8_t) @-> (uint32_t @-> (returning bool))))
+           (ocaml_bytes @-> (uint32_t @-> (returning bool))))
       
     let everCrypt_DRBG_reseed =
       foreign "EverCrypt_DRBG_reseed"
         ((ptr everCrypt_DRBG_state_s) @->
-           ((ptr uint8_t) @-> (uint32_t @-> (returning bool))))
+           (ocaml_bytes @-> (uint32_t @-> (returning bool))))
       
     let everCrypt_DRBG_generate =
       foreign "EverCrypt_DRBG_generate"
-        ((ptr uint8_t) @->
+        (ocaml_bytes @->
            ((ptr everCrypt_DRBG_state_s) @->
-              (uint32_t @->
-                 ((ptr uint8_t) @-> (uint32_t @-> (returning bool))))))
+              (uint32_t @-> (ocaml_bytes @-> (uint32_t @-> (returning bool))))))
       
     let everCrypt_DRBG_uninstantiate =
       foreign "EverCrypt_DRBG_uninstantiate"

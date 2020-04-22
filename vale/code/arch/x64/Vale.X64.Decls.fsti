@@ -557,7 +557,7 @@ val lemma_valid_cmp_gt : s:va_state -> o1:operand64{ not (OMem? o1 || OStack? o1
 
 val va_compute_merge_total (f0:va_fuel) (fM:va_fuel) : va_fuel
 
-val va_lemma_merge_total (b0:va_codes) (s0:va_state) (f0:va_fuel) (sM:va_state) (fM:va_fuel) (sN:va_state) : Ghost (fN:va_fuel)
+val va_lemma_merge_total (b0:va_codes) (s0:va_state) (f0:va_fuel) (sM:va_state) (fM:va_fuel) (sN:va_state) : Ghost va_fuel
   (requires
     Cons? b0 /\
     eval_code (Cons?.hd b0) s0 f0 sM /\
@@ -627,7 +627,7 @@ val va_lemma_whileFalse_total (b:ocmp) (c:va_code) (s0:va_state) (sW:va_state) (
     eval_code (While b c) s0 f1 s1
   )
 
-val va_lemma_whileMerge_total (c:va_code) (s0:va_state) (f0:va_fuel) (sM:va_state) (fM:va_fuel) (sN:va_state) : Ghost (fN:va_fuel)
+val va_lemma_whileMerge_total (c:va_code) (s0:va_state) (f0:va_fuel) (sM:va_state) (fM:va_fuel) (sN:va_state) : Ghost va_fuel
   (requires While? c /\ (
     let cond = While?.whileCond c in
     sN.vs_ok /\
