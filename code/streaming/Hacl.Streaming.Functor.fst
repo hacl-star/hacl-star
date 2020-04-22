@@ -41,7 +41,7 @@ type state_s #index (c: block index) (i: index)
     // Stupid name conflict on overloaded projectors leads to inscrutable
     // interleaving errors. Need a field name that does not conflict with the
     // one in Hacl.Streaming.Interface. Sigh!!
-    maybe_key: t' ->
+    p_key: t' ->
     state_s #index c i t t'
 
 let optional_freeable #index
@@ -132,8 +132,8 @@ let optional_frame #index
       key.frame_freeable #i l s h0 h1
 
 let footprint_s #index (c: block index) (i: index) (h: HS.mem) s =
-  let State block_state buf_ _ _ maybe_key = s in
-  B.(loc_addr_of_buffer buf_ `loc_union` c.state.footprint h block_state `loc_union` optional_footprint h maybe_key)
+  let State block_state buf_ _ _ p_key = s in
+  B.(loc_addr_of_buffer buf_ `loc_union` c.state.footprint h block_state `loc_union` optional_footprint h p_key)
 
 /// Invariants
 /// ==========
@@ -193,19 +193,19 @@ let seen_bounded #index c i h s =
   ()
 
 let key #index c i h s =
-  optional_reveal h (State?.maybe_key (B.deref h s))
+  optional_reveal h (State?.p_key (B.deref h s))
 
 let frame_invariant #index c i l s h0 h1 =
   let state_t = B.deref h0 s in
-  let State block_state _ _ _ maybe_key = state_t in
+  let State block_state _ _ _ p_key = state_t in
   c.state.frame_invariant #i l block_state h0 h1;
   c.state.frame_freeable #i l block_state h0 h1;
   allow_inversion key_management;
   match c.km with
   | Erased -> ()
   | Runtime ->
-      c.key.frame_freeable #i l maybe_key h0 h1;
-      c.key.frame_invariant #i l maybe_key h0 h1
+      c.key.frame_freeable #i l p_key h0 h1;
+      c.key.frame_invariant #i l p_key h0 h1
 
 let frame_seen #_ _ _ _ _ _ _ =
   ()
@@ -619,7 +619,7 @@ let update_small #index c i t t' p data len =
 
 /// Case 2: we have no buffered data.
 
-#push-options "--z3rlimit 80"
+#push-options "--z3rlimit 100"
 let split_at_last_blocks #index (c: block index) (i: index) (b: bytes) (d: bytes): Lemma
   (requires (
     let blocks, rest = split_at_last c i b in

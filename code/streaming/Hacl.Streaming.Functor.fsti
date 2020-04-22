@@ -9,7 +9,7 @@ module Hacl.Streaming.Functor
 /// This streaming API only allocates its internal state on the heap, no support
 /// for allocation on the stack via StackInline.
 
-#set-options "--max_fuel 0 --max_ifuel 0"
+#set-options "--fuel 0 --ifuel 0"
 
 module ST = FStar.HyperStack.ST
 module HS = FStar.HyperStack

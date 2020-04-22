@@ -75,4 +75,3 @@ let poly1305_mac (msg:bytes) (k:key) : Tot tag =
   let acc, r = poly1305_init k in
   let acc = poly1305_update msg acc r in
   poly1305_finish k acc
-
