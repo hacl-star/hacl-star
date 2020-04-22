@@ -230,7 +230,8 @@ let rec lemma_lower_code (c:code) (fuel:nat) (s:machine_state) :
         ~(erroring_option_state (machine_eval_code c fuel s))))
     (ensures (
         machine_eval_code c fuel s ==
-        machine_eval_code (lower_code c) fuel s)) =
+        machine_eval_code (lower_code c) fuel s))
+    (decreases %[fuel; c]) =
   match c with
   | Ins _ -> ()
   | Block l ->
@@ -249,7 +250,9 @@ let rec lemma_lower_code (c:code) (fuel:nat) (s:machine_state) :
     );
     lemma_lower_if cc (lower_code t) (lower_code f) fuel s
   | While c b ->
-    admit ()
+    lemma_lower_code_while_body c b fuel s;
+    if not s.ms_ok then lemma_not_ok_propagate_code (While c b) fuel s else ();
+    lemma_lower_while c (lower_code b) fuel s
   | Unstructured blocks ->
     admit ()
 
@@ -259,7 +262,8 @@ and lemma_lower_codes (cs:codes) (fuel:nat) (s:machine_state) :
         ~(erroring_option_state (machine_eval_codes cs fuel s))))
     (ensures (
         machine_eval_codes cs fuel s ==
-        machine_eval_codes (lower_codes cs) fuel s)) =
+        machine_eval_codes (lower_codes cs) fuel s))
+    (decreases %[fuel; cs]) =
   match cs with
   | [] -> ()
   | h :: t ->
@@ -267,3 +271,20 @@ and lemma_lower_codes (cs:codes) (fuel:nat) (s:machine_state) :
     if not s1.ms_ok then lemma_not_ok_propagate_codes t fuel s1 else ();
     lemma_lower_code h fuel s;
     lemma_lower_codes t fuel s1
+
+and lemma_lower_code_while_body (cond:ocmp) (body:code) (fuel:nat) (s:machine_state) :
+  Lemma
+    (requires (
+        ~(erroring_option_state (machine_eval_while cond body fuel s))))
+    (ensures (
+        machine_eval_while cond body fuel s ==
+        machine_eval_while cond (lower_code body) fuel s))
+    (decreases %[fuel; body]) =
+  // assert (fuel > 0);
+  let (s1, b) = machine_eval_ocmp s cond in
+  if not b then () else (
+    let Some s2 = machine_eval_code body (fuel - 1) s1 in
+    lemma_lower_code body (fuel - 1) s1;
+    // assert (s2.ms_ok);
+    lemma_lower_code_while_body cond body (fuel - 1) s2
+  )
