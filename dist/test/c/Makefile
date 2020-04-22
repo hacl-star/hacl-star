@@ -7,11 +7,12 @@ SOURCES = $(wildcard *.c)
 CFLAGS += -I../../gcc-compatible
 CFLAGS += -I../../kremlin/include
 CFLAGS += -I../../kremlin/kremlib/dist/minimal
+CFLAGS += -O3
 
 all: $(patsubst %.c,%.test,$(SOURCES))
 
 %.exe: %.o ../../gcc-compatible/libevercrypt.a $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a
-	$(CC) $^ -o $@
+	$(CC) $(CFLAGS) $^ -o $@
 
 .PHONY: .test
 %.test: %.exe
