@@ -1151,7 +1151,7 @@ let lemma_instruction_exchange (i1 i2 : ins) (s1 s2 : machine_state) :
 /// Not-ok states lead to erroring states upon execution
 
 #push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
-let rec lemma_not_ok_propagate_code (c:code') (fuel:nat) (s:machine_state) :
+let rec lemma_not_ok_propagate_code (c:code) (fuel:nat) (s:machine_state) :
   Lemma
     (requires (not s.ms_ok))
     (ensures (erroring_option_state (machine_eval_code c fuel s)))
@@ -1165,8 +1165,17 @@ let rec lemma_not_ok_propagate_code (c:code') (fuel:nat) (s:machine_state) :
     if b then lemma_not_ok_propagate_code ifTrue fuel s' else lemma_not_ok_propagate_code ifFalse fuel s'
   | While _ _ ->
     lemma_not_ok_propagate_while c fuel s
+  | Unstructured blocks ->
+    let n = 0 in
+    if n >= List.Tot.length blocks then () else (
+      let (c, j) = list_index blocks n in
+      match machine_eval_code c fuel s with
+      | None -> ()
+      | Some s1 ->
+        lemma_not_ok_propagate_code c fuel s
+    )
 
-and lemma_not_ok_propagate_codes (l:codes') (fuel:nat) (s:machine_state) :
+and lemma_not_ok_propagate_codes (l:codes) (fuel:nat) (s:machine_state) :
   Lemma
     (requires (not s.ms_ok))
     (ensures (erroring_option_state (machine_eval_codes l fuel s)))
@@ -1179,7 +1188,7 @@ and lemma_not_ok_propagate_codes (l:codes') (fuel:nat) (s:machine_state) :
     | None -> ()
     | Some s -> lemma_not_ok_propagate_codes xs fuel s
 
-and lemma_not_ok_propagate_while (c:code'{While? c}) (fuel:nat) (s:machine_state) :
+and lemma_not_ok_propagate_while (c:code{While? c}) (fuel:nat) (s:machine_state) :
   Lemma
     (requires (not s.ms_ok))
     (ensures (erroring_option_state (machine_eval_code c fuel s)))
