@@ -222,3 +222,27 @@ type _CK_ATTRIBUTE  =
 	True
     } 
     -> _CK_ATTRIBUTE
+
+
+
+(*/* at least 32 bits; each bit is a Boolean flag */
+typedef CK_ULONG          CK_FLAGS;
+*)
+type _CK_FLAGS_BITS = 
+  |CKF_HW
+  |CKF_SIGN
+  |CKF_VERIFY
+  |CKF_GENERATE
+  |CKF_GENERATE_KEY_PAIR
+
+
+(* Experemental implementation *)
+let _ck_flags_bits_get_bit: _CK_FLAGS_BITS -> Tot nat = function
+  |CKF_HW -> 0
+  |CKF_SIGN -> 1
+  |CKF_VERIFY -> 2
+  |CKF_GENERATE -> 3
+  |CKF_GENERATE_KEY_PAIR -> 4
+
+
+type _CK_FLAGS = _CK_ULONG

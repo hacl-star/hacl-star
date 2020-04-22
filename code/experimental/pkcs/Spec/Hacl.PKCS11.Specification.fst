@@ -26,31 +26,6 @@ module L = Hacl.PKCS11.Lib
 #set-options "--z3rlimit 300"
 
 
-(* Second-level types*)
-
-
-(*/* at least 32 bits; each bit is a Boolean flag */
-typedef CK_ULONG          CK_FLAGS;
-*)
-type _CK_FLAGS_BITS = 
-  |CKF_HW
-  |CKF_SIGN
-  |CKF_VERIFY
-  |CKF_GENERATE
-  |CKF_GENERATE_KEY_PAIR
-
-
-(* Experemental implementation *)
-let _ck_flags_bits_get_bit: _CK_FLAGS_BITS -> Tot nat = function
-  |CKF_HW -> 0
-  |CKF_SIGN -> 1
-  |CKF_VERIFY -> 2
-  |CKF_GENERATE -> 3
-  |CKF_GENERATE_KEY_PAIR -> 4
-
-
-type _CK_FLAGS = _CK_ULONG
-
 (* Not to laugh, I forgot how to write it for nats *)
 assume val logand: nat -> nat -> nat
 
@@ -532,6 +507,12 @@ type exception_t =
 type result 'a = either 'a exception_t
 
 
+val isPresentOnDeviceL: d: device -> pMechanism: _CK_MECHANISM_TYPE -> Tot Type0
+
+let isPresentOnDeviceL d pMechanism = 
+  L.contains (fun x -> x.mechanismID = pMechanism) d.mechanisms
+
+
 val isPresentOnDevice_: d: device -> pMechanism: _CK_MECHANISM_TYPE -> counter: nat {counter < Seq.length d.mechanisms} -> 
   Tot (r: bool 
     {
@@ -552,56 +533,18 @@ let rec isPresentOnDevice_ d pMechanism counter =
     isPresentOnDevice_ d pMechanism (counter + 1)
 
 
-val lemma_isPresentOnDevice_aux: s: seq _CK_MECHANISM -> f: (_CK_MECHANISM -> Tot bool) ->
-  Lemma
-    (requires 
-      (exists (a: nat {a < length s}). f (index s a)) /\ not (f (head s)))
-    (ensures 
-      exists (a: nat {a < length (tail s)}). f (index (tail s) a))
-  (decreases (length s))
-
-let rec lemma_isPresentOnDevice_aux s f = 
-  if length s = 0 then ()
-  else 
-    begin
-      assert(not (f (head s)));
-      admit();
-      lemma_isPresentOnDevice_aux (tail s) f
-    end
-
-
-val lemma_isPresentOnDevice: s: seq _CK_MECHANISM -> f: (_CK_MECHANISM -> Tot bool) -> Lemma 
-  (requires 
-    (exists (a: nat {a < length s}). f (index s a)))
-  (ensures
-    (contains f s))
-  (decreases (length s))
-
-let rec lemma_isPresentOnDevice s f = 
-  if Seq.length s = 0 then ()
-  else
-    if f (head s) then ()
-    else 
-      begin
-	lemma_isPresentOnDevice_aux s f;
-	lemma_isPresentOnDevice (tail s) f
-      end
-
 val isPresentOnDevice: d: device -> pMechanism: _CK_MECHANISM_TYPE -> 
-  Tot (r: bool
-    {r = true ==>
-      (exists (a: nat{a < Seq.length d.mechanisms}). let m = Seq.index d.mechanisms a in m.mechanismID = pMechanism) /\ 
-      (contains (fun x -> x.mechanismID = pMechanism) d.mechanisms)
-    }
-  )
+  Tot (r: bool{r ==> isPresentOnDeviceL d pMechanism})
+
 
 let isPresentOnDevice d pMechanism =
+  admit();
   if Seq.length d.mechanisms = 0 
     then false 
   else
     let r = isPresentOnDevice_ d pMechanism 0 in 
     if r = true then begin
-      lemma_isPresentOnDevice (d.mechanisms) (fun x -> x.mechanismID = pMechanism);
+      (* lemma_isPresentOnDevice (d.mechanisms) (fun x -> x.mechanismID = pMechanism); *)
       true
       end
     else 
@@ -609,7 +552,7 @@ let isPresentOnDevice d pMechanism =
 
 
 val mechanismGetFromDevice: d: device -> 
-  pMechanism: _CK_MECHANISM_TYPE{isPresentOnDevice d pMechanism = true} -> 
+  pMechanism: _CK_MECHANISM_TYPE{isPresentOnDeviceL d pMechanism} -> 
   Tot (m: _CK_MECHANISM {m.mechanismID = pMechanism})
 
 let mechanismGetFromDevice d pMechanism = 
@@ -711,7 +654,7 @@ let rec _updateSession d ks ms supM sessions counter alreadySeq =
   else 
     _updateSession d ks ms supM sessions (counter + 1) updatedSeq	
 
-
+(* Objects check is missing *)
 val updateSession: d: device -> ks: seq key_object -> 
   ms: seq _CK_MECHANISM{ms == d.mechanisms} -> 
   supM: seq _CKS_MECHANISM_INFO {supM == d.supportedMechanisms} -> 
@@ -831,32 +774,6 @@ let modifiesSessionsE dBefore dAfter i =
 
 NB: the key is added to the end of the list
 *)
-val deviceUpdateKey: d: device {Seq.length d.keys < pow2 32 - 1} -> newKey: key_object ->
-  Tot (resultDevice: device
-    {
-      Seq.length resultDevice.keys = Seq.length d.keys + 1 /\
-      Seq.length d.subSessions = Seq.length resultDevice.subSessions
-    } &
-    (handler: _CK_OBJECT_HANDLE
-      {
-	handler < Seq.length resultDevice.keys /\ 
-	Seq.index resultDevice.keys handler = newKey /\
-	modifiesKeysM d resultDevice handler
-      }
-    )
-  )
-
-let deviceUpdateKey d newKey = 
-  let mechanismsPrevious, keysPrevious, objectsPrevious, supportedMechanismsPrevious = d.mechanisms, d.keys, d.objects, d.supportedMechanisms in 
-  
-  let newKey = Seq.create 1 newKey in 
-  let keysNew = Seq.append keysPrevious newKey in
-  let handler = Seq.length keysNew - 1 in 
-    lemma_append keysPrevious newKey;
-  let sessionsUpdated = updateSession d keysNew mechanismsPrevious supportedMechanismsPrevious d.subSessions in
-  let resultDevice = Device keysNew mechanismsPrevious supportedMechanismsPrevious objectsPrevious sessionsUpdated in 
-  admit();
-  (|resultDevice, handler|)
 
 
 (* This method takes a device, a function f and deletes all the elements that satisfy that function *)
@@ -1011,13 +928,19 @@ assume val lemma_count: #ks: seq key_object -> #ms: seq _CK_MECHANISM -> #supM: 
 
 (* The size should be checked *)
 
-val deviceAddKey: d: device -> key: key_object -> Tot ((resultDevice: device) & (handler: _CK_OBJECT_HANDLE))
+
+val deviceAddKey: d: device -> key: key_object -> Tot ((handler: result _CK_OBJECT_HANDLE) & (resultDevice: device))
 
 let deviceAddKey d key = 
+  if length d.keys = pow2 32 - 1 then 
+    (|Inr CKR_DEVICE_ERROR, d|)
+  else begin
   let keysUpdated = snoc d.keys key in 
   let handler = length keysUpdated in 
-  let updatedDevice = Device keysUpdated d.mechanisms d.supportedMechanisms d.objects d.subSessions in 
-  (|updatedDevice,  handler|)
+  let sessionUpdated = updateSession d keysUpdated d.mechanisms d.supportedMechanisms  d.subSessions in 
+  let updatedDevice = Device keysUpdated d.mechanisms d.supportedMechanisms d.objects sessionUpdated in 
+  (|Inl handler, updatedDevice|)
+  end
 
 
 val deviceAddSession: f: (#ks: seq key_object -> #ms: seq _CK_MECHANISM -> #supM: seq _CKS_MECHANISM_INFO -> subSession ks ms supM -> bool) -> 
@@ -1205,10 +1128,17 @@ let mechanismSelectECDSA a =
   | _ -> None
 
 
-val test: unit  
-  -> pMechanism: _CK_MECHANISM 
-  -> pTemplate: seq _CK_ATTRIBUTE {attributesTemplateComplete CKO_SECRET_KEY pMechanism pTemplate}
-  -> Tot (r: bool {r == true ==> attributesTemplateComplete CKO_SECRET_KEY pMechanism pTemplate})
+val isAttributeTemplateComplete: pMechanism: _CK_MECHANISM -> pTemplate: seq _CK_ATTRIBUTE -> o: _CK_OBJECT_CLASS ->
+  Tot (r: bool 
+    {
+      r == true <==> attributesTemplateComplete o pMechanism pTemplate
+    }
+  )
+
+let isAttributeTemplateComplete pMechanism pTemplate o = 
+  let allProvidedAttributes = combineAllProvidedAttributes pMechanism.mechanismID pTemplate in 
+  let allRequiredAttributes = combineAllRequiredAttributes pMechanism.mechanismID o in 
+  for_all (fun x -> isContaining (fun y -> y.aType = x) allProvidedAttributes) allRequiredAttributes
 
 
 val mechanismCreationSelect: d: device 
@@ -1300,12 +1230,12 @@ let __CKS_GenerateKey d hSession pMechanism pTemplate =
   match mechanism with 
   |Inl mechanism -> 
     let rawKey = mechanism () in 
-    let allExistingAttributes = combineAllAttributes pMechanism.mechanismID pTemplate in 
+    let allExistingAttributes = combineAllProvidedAttributes pMechanism.mechanismID pTemplate in 
     let requiredAttributes = getRequiredAttributes CKO_SECRET_KEY allExistingAttributes in 
     let valueAttribute = A CKA_VALUE rawKey in 
     let key = _CKO_SECRET_KEY_Constructor (snoc requiredAttributes valueAttribute) in 
-    let (|updatedDevice, handler|) = deviceAddKey d key.sk in 
-    (|Inl handler, updatedDevice|)
+    let (|handler, updatedDevice|) = deviceAddKey d key.sk in 
+    (|handler, updatedDevice|)
   |Inr exp -> (|Inr exp, d|)
 
 
@@ -1320,8 +1250,11 @@ val _CKS_GenerateKey: d: device ->
 
 
 let _CKS_GenerateKey d hSession pMechanism pTemplate = 
-  admit();
-  __CKS_GenerateKey d hSession pMechanism pTemplate
+  let complete = isAttributeTemplateComplete pMechanism pTemplate CKO_SECRET_KEY in 
+  if complete = false then 
+     (|Inr CKR_TEMPLATE_INCOMPLETE, d|)
+  else
+    __CKS_GenerateKey d hSession pMechanism pTemplate
 
 (*
 assume val _sign: pData: seq FStar.UInt8.t ->  pMechanism: _CK_MECHANISM_TYPE -> key: _CK_OBJECT_HANDLE -> 
