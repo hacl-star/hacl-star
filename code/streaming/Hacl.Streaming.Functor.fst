@@ -619,7 +619,7 @@ let update_small #index c i t t' p data len =
 
 /// Case 2: we have no buffered data.
 
-#push-options "--z3rlimit 60"
+#push-options "--z3rlimit 80"
 let split_at_last_blocks #index (c: block index) (i: index) (b: bytes) (d: bytes): Lemma
   (requires (
     let blocks, rest = split_at_last c i b in
