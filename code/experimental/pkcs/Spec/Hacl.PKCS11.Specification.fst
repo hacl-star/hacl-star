@@ -1084,7 +1084,9 @@ let getCurveFromEncoded s =
   |_ -> None
 
 
-val mechanismSelectECDSA: a: _CK_ATTRIBUTE {CKA_EC_PARAMS? a.aType} -> option (unit -> Tot (seq FStar.UInt8.t))
+(* There could be some parameters that are not supported, in this case we return curve-not-supported *)
+
+val mechanismSelectECDSA: a: _CK_ATTRIBUTE {CKA_EC_PARAMS? a.aType} -> Tot (result (unit -> Tot (seq FStar.UInt8.t)))
 
 let mechanismSelectECDSA a = 
   let encodedCurve = a.pValue in 
@@ -1092,9 +1094,9 @@ let mechanismSelectECDSA a =
   match curveIdentifier with 
   |Some id -> 
     match id with 
-    |Curve25519 -> Some keyGenerationTemplateCurve25519 
-    |CurveP256 -> Some keyGenerationTemplateP256
-  | _ -> None
+    |Curve25519 -> Inl keyGenerationTemplateCurve25519
+    |CurveP256 -> Inl keyGenerationTemplateP256
+  | _ -> Inr CKR_CURVE_NOT_SUPPORTED
 
 
 module L = Hacl.PKCS11.Lib 
@@ -1112,25 +1114,20 @@ let isAttributeTemplateComplete pMechanism pTemplate o =
   for_all (fun x -> isContaining (fun y -> y.aType = x) allProvidedAttributes) allRequiredAttributes
 
 
-val mechanismCreationSelect: d: device 
-  -> pMechanism: _CK_MECHANISM {mechanismPresentOnDevice d pMechanism.mechanismID }
+val mechanismCreationSelect: d: device
+  -> pMechanism: _CK_MECHANISM {mechanismPresentOnDevice d pMechanism.mechanismID} 
   -> pTemplate: seq _CK_ATTRIBUTE {attributesTemplateComplete CKO_SECRET_KEY pMechanism pTemplate}
   -> result (unit -> Tot (seq FStar.UInt8.t))
 
 let mechanismCreationSelect d pMechanism pTemplate = 
-  let open Hacl.PKCS11.Lib in 
-  match pMechanism.mechanismID with 
+  match pMechanism.mechanismID with (* This is where the mechanismPresent is used *)
   |CKM_EC_KEY_PAIR_GEN -> 
     begin
-
       let allProvidedAttributes = combineAllProvidedAttributes pMechanism.mechanismID pTemplate in
       let requiredAttribute = find_l (fun x -> x.aType = CKA_EC_PARAMS) allProvidedAttributes in  
-      assume(L.contains (fun x -> x.aType = CKA_EC_PARAMS) allProvidedAttributes);
       let requiredAttribute = match requiredAttribute with Some a -> a in 
       let mechanism = mechanismSelectECDSA requiredAttribute in 
-      match mechanism with 
-      |None -> Inr CKR_DEVICE_ERROR
-      |Some a -> Inl a 
+      mechanism
     end
   | _ -> Inr CKR_MECHANISM_INVALID
     
