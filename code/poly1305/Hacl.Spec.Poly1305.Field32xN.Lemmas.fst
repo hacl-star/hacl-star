@@ -595,14 +595,16 @@ val fmul_r4_normalize5_lemma:
     (feval5 out).[0] == Vec.normalize_4 (feval5 r).[0] (feval5 acc)))
   [SMTPat (fmul_r4_normalize5 acc r r_5 r4)]
 
+#restart-solver
+#push-options "--z3rlimit 500"
 let fmul_r4_normalize5_lemma acc fr fr_5 fr4 =
-  let fr2 = fmul_r5 fr fr fr_5 in
-  let fr3 = fmul_r5 fr2 fr fr_5 in
+  let fr2 = fmul_r5 #4 fr fr fr_5 in
+  let fr3 = fmul_r5 #4 fr2 fr fr_5 in
   let out = fmul_r4_normalize50 acc fr fr2 fr3 fr4 in
   let v2 = fmul_r4_normalize51 out in
   let res = carry_full_felem5 v2 in
   carry_full_felem5_lemma v2
-
+#pop-options
 
 val load_felem5_lemma:
     #w:lanes
