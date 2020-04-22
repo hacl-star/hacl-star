@@ -651,13 +651,18 @@ let mul f r out =
 
 #set-options "--z3refresh"
 
-#push-options "--z3rlimit 800"
 val lemma_320: a: uint64 -> b: uint64 -> c: uint64 -> d: uint64 -> u: uint64 -> Lemma 
   (uint_v u * uint_v a +  (uint_v u * uint_v b) * pow2 64 + (uint_v u * uint_v c) * pow2 64 * pow2 64 + (uint_v u * uint_v d) * pow2 64 * pow2 64 * pow2 64 < pow2 320)
   
 let lemma_320 a b c d u = 
   lemma_mult_le_left (uint_v d) (uint_v u) (pow2 64 - 1);
   lemma_mult_le_right (uint_v u) (uint_v d) (pow2 64 - 1);
+  lemma_mult_le_left (uint_v a) (uint_v u) (pow2 64 - 1);
+  lemma_mult_le_right (uint_v u) (uint_v a) (pow2 64 - 1);
+  lemma_mult_le_left (uint_v b) (uint_v u) (pow2 64 - 1);
+  lemma_mult_le_right (uint_v u) (uint_v b) (pow2 64 - 1);
+  lemma_mult_le_left (uint_v c) (uint_v u) (pow2 64 - 1);
+  lemma_mult_le_right (uint_v u) (uint_v c) (pow2 64 - 1);
 
   assert(uint_v u * uint_v a <= (pow2 64 - 1) * (pow2 64 - 1));
   assert(uint_v u * uint_v d <= (pow2 64 - 1) * (pow2 64 - 1));
@@ -675,7 +680,6 @@ let lemma_320 a b c d u =
     ((pow2 64 - 1) * (pow2 64 - 1)) * pow2 64 + 
     ((pow2 64 - 1) * (pow2 64 - 1)) * pow2 64 * pow2 64 + 
     ((pow2 64 - 1) * (pow2 64 - 1)) * pow2 64 * pow2 64 * pow2 64 < pow2 320)
-#pop-options
 
 
 val lemma_320_64:a: uint64 -> b: uint64 -> c: uint64 -> d: uint64 -> e: uint64 -> u: uint64 -> Lemma 
