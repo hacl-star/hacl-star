@@ -223,3 +223,47 @@ and lower_unstructured (blocks:list ublock) : list ublock =
   | [] -> []
   | (c, j) :: t ->
     (lower_code c, j) :: lower_unstructured t
+
+let rec lemma_lower_code (c:code) (fuel:nat) (s:machine_state) :
+  Lemma
+    (requires (
+        ~(erroring_option_state (machine_eval_code c fuel s))))
+    (ensures (
+        machine_eval_code c fuel s ==
+        machine_eval_code (lower_code c) fuel s)) =
+  match c with
+  | Ins _ -> ()
+  | Block l ->
+    lemma_lower_codes l fuel s
+  | IfElse cc t f ->
+    let (s1, b) = machine_eval_ocmp s cc in
+    if s1.ms_ok then () else (
+      lemma_not_ok_propagate_code t fuel s1;
+      lemma_not_ok_propagate_code f fuel s1
+    );
+    assert (s1.ms_ok);
+    if b then (
+      lemma_lower_code t fuel s1
+    ) else (
+      lemma_lower_code f fuel s1
+    );
+    lemma_lower_if cc (lower_code t) (lower_code f) fuel s
+  | While c b ->
+    admit ()
+  | Unstructured blocks ->
+    admit ()
+
+and lemma_lower_codes (cs:codes) (fuel:nat) (s:machine_state) :
+  Lemma
+    (requires (
+        ~(erroring_option_state (machine_eval_codes cs fuel s))))
+    (ensures (
+        machine_eval_codes cs fuel s ==
+        machine_eval_codes (lower_codes cs) fuel s)) =
+  match cs with
+  | [] -> ()
+  | h :: t ->
+    let Some s1 = machine_eval_code h fuel s in
+    if not s1.ms_ok then lemma_not_ok_propagate_codes t fuel s1 else ();
+    lemma_lower_code h fuel s;
+    lemma_lower_codes t fuel s1
