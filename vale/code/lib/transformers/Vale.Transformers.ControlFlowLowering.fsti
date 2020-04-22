@@ -224,6 +224,27 @@ and lower_unstructured (blocks:list ublock) : list ublock =
   | (c, j) :: t ->
     (lower_code c, j) :: lower_unstructured t
 
+let rec lemma_lower_unstructured_length (blocks:list ublock) :
+  Lemma
+    (List.Tot.length (lower_unstructured blocks) = List.Tot.length blocks) =
+  match blocks with
+  | [] -> ()
+  | _ :: t -> lemma_lower_unstructured_length t
+
+let rec lemma_lower_unstructured_index (blocks:list ublock) (n:nat) :
+  Lemma
+    (requires (n < List.Tot.length blocks))
+    (ensures (
+        (List.Tot.length (lower_unstructured blocks) == List.Tot.length blocks) /\
+        (let c1, j1 = list_index blocks n in
+         let c2, j2 = list_index (lower_unstructured blocks) n in
+         (c2 == lower_code c1) /\ (j1 == j2)))) =
+  lemma_lower_unstructured_length blocks;
+  let (c, j) :: t = blocks in
+  if n = 0 then () else (
+    lemma_lower_unstructured_index t (n - 1)
+  )
+
 let rec lemma_lower_code (c:code) (fuel:nat) (s:machine_state) :
   Lemma
     (requires (
@@ -254,7 +275,7 @@ let rec lemma_lower_code (c:code) (fuel:nat) (s:machine_state) :
     if not s.ms_ok then lemma_not_ok_propagate_code (While c b) fuel s else ();
     lemma_lower_while c (lower_code b) fuel s
   | Unstructured blocks ->
-    admit ()
+    lemma_lower_unstructured blocks 0 fuel s
 
 and lemma_lower_codes (cs:codes) (fuel:nat) (s:machine_state) :
   Lemma
@@ -287,4 +308,25 @@ and lemma_lower_code_while_body (cond:ocmp) (body:code) (fuel:nat) (s:machine_st
     lemma_lower_code body (fuel - 1) s1;
     // assert (s2.ms_ok);
     lemma_lower_code_while_body cond body (fuel - 1) s2
+  )
+
+and lemma_lower_unstructured (blocks:list ublock) (n:nat) (fuel:nat) (s:machine_state) :
+  Lemma
+    (requires (
+        ~(erroring_option_state (machine_eval_unstructured blocks n fuel s))))
+    (ensures (
+        machine_eval_unstructured blocks n fuel s ==
+        machine_eval_unstructured (lower_unstructured blocks) n fuel s))
+    (decreases %[fuel; blocks; remaining_blocks blocks n]) =
+  lemma_lower_unstructured_length blocks;
+  if n >= List.Tot.length blocks then () else (
+    let (c, j) = list_index blocks n in
+    lemma_lower_unstructured_index blocks n;
+    let Some s1 = machine_eval_code c fuel s in
+    lemma_lower_code c fuel s;
+    let (s2, jump_taken) = machine_eval_jump_condition s1 j.jump_cond in
+    let n' = if jump_taken then j.jump_target else n + 1 in
+    let fuel':int = if n < n' then fuel else fuel - 1 in
+    // assert (fuel' >= 0);
+    lemma_lower_unstructured blocks n' fuel' s2
   )
