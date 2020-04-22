@@ -801,7 +801,7 @@ val update_round:
       update_post c i s data len h0 h1 /\
       U64.v (total_len_h c i h1 s) % U32.v (c.block_len i) = 0))
 
-#push-options "--retry 3"
+#push-options "--z3cliopt smt.arith.nl=false"
 let split_at_last_block #index (c: block index) (i: index) (b: bytes) (d: bytes): Lemma
   (requires (
     let _, rest = split_at_last c i b in
@@ -812,14 +812,20 @@ let split_at_last_block #index (c: block index) (i: index) (b: bytes) (d: bytes)
     S.equal (S.append b d) blocks' /\ S.equal S.empty rest'))
 =
   let blocks, rest = split_at_last c i b in
+    let blocks', rest' = split_at_last c i (S.append b d) in
 
   calc (==) {
     (S.length b + S.length d) % U32.v (c.block_len i);
   (==) { S.lemma_len_append blocks rest }
     (S.length blocks + S.length rest + S.length d) % U32.v (c.block_len i);
   (==) { Math.Lemmas.modulo_distributivity (S.length blocks) (S.length rest + S.length d) (U32.v (c.block_len i)) }
-    (U32.v (c.block_len i)) % (U32.v (c.block_len i));
+    ((S.length blocks) % U32.v (c.block_len i) + (S.length rest + S.length d) % U32.v (c.block_len i))
+      % U32.v (c.block_len i);
   (==) { Math.Lemmas.multiple_modulo_lemma (U32.v (c.block_len i)) 1 }
+    ((S.length blocks) % U32.v (c.block_len i)) % U32.v (c.block_len i);
+  (==) { }
+    0 % U32.v (c.block_len i);
+  (==) { Math.Lemmas.small_modulo_lemma_1 0 (U32.v (c.block_len i)) }
     0;
   }
 #pop-options
