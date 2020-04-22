@@ -1167,7 +1167,7 @@ val __CKS_GenerateKey: d: device ->
   pTemplate: seq _CK_ATTRIBUTE {attributesTemplateComplete CKO_SECRET_KEY pMechanism pTemplate} -> 
   Tot(
     (handler: result _CK_OBJECT_HANDLE) & 
-    (resultDevice : device (*
+    (resultDevice : device 
       {
 	if Inr? handler then 
 	  d = resultDevice else 
@@ -1179,24 +1179,24 @@ val __CKS_GenerateKey: d: device ->
 	  let newCreatedKey = Seq.index resultDevice.keys handler in 
 	  isKeySecretKey newCreatedKey /\
 	  (
-	    let attributeLocal = getObjectAttributeLocal newCreatedKey.ko.sto  in 
+	    let attributeLocal = getObjectAttributeLocal newCreatedKey.ko.sto in 
+	    Some? attributeLocal /\ 
 	    index (match attributeLocal with Some a -> a).pValue 0 == true
-	  )
+	  ) 
 	) /\
 	modifiesKeysM d resultDevice handler 
-      }*)
+      }
     ) 
   )
 
 
 let __CKS_GenerateKey d hSession pMechanism pTemplate = 
   let mechanism = mechanismCreationSelect d pMechanism pTemplate in
-  admit();
   match mechanism with 
   |Inl mechanism -> 
     let rawKey = mechanism () in 
     let allExistingAttributes = combineAllProvidedAttributes pMechanism.mechanismID pTemplate in 
-    let requiredAttributes = getRequiredAttributes CKO_SECRET_KEY allExistingAttributes in 
+    let requiredAttributes = getRequiredAttributes CKO_SECRET_KEY allExistingAttributes in admit();
     let valueAttribute = A CKA_VALUE rawKey in 
     let key = _CKO_SECRET_KEY_Constructor (snoc requiredAttributes valueAttribute) in 
     let (|handler, updatedDevice|) = deviceAddKey d key.sk in 
