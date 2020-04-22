@@ -146,3 +146,26 @@ val lemma_mov_mov_elim :
          (equiv_states va_sM va_sM') /\
          (va_ensure_total transformed va_s0 va_sM' va_fM') /\
          (va_get_ok va_sM')))
+
+/// Transformation to eliminate all structured [IfElse] and [While]
+/// nodes, and replace with [Unstructured] jumps.
+
+val control_flow_lowering :
+  orig:va_code ->
+  va_transformation_result
+
+val lemma_control_flow_lowering :
+  orig:va_code ->
+  transformed:va_code ->
+  va_s0:va_state -> va_sM:va_state -> va_fM:va_fuel ->
+  Ghost (va_state & va_fuel)
+    (requires (
+        (va_require_total transformed (control_flow_lowering orig).result va_s0) /\
+        (va_get_ok va_s0) /\
+        (va_ensure_total orig va_s0 va_sM va_fM) /\
+        (va_get_ok va_sM)))
+    (ensures (fun (va_sM', va_fM') ->
+         (va_fM' == va_fM) /\
+         (equiv_states va_sM va_sM') /\
+         (va_ensure_total transformed va_s0 va_sM' va_fM') /\
+         (va_get_ok va_sM')))

@@ -19,6 +19,7 @@ friend Vale.X64.StateLemmas
 module IR = Vale.Transformers.InstructionReorder
 module PH = Vale.Transformers.PeepHole
 module ME = Vale.Transformers.MovbeElim
+module CFL = Vale.Transformers.ControlFlowLowering
 
 unfold
 let transformation_result_of_possibly_codes (c:possibly codes) (if_fail:code) =
@@ -130,3 +131,21 @@ let mov_mov_elim =
 
 let lemma_mov_mov_elim =
   PH.lemma_peephole_transform Vale.Transformers.MovMovElim.mov_mov_elim_ph
+
+/// Transformation to eliminate all structured [IfElse] and [While]
+/// nodes, and replace with [Unstructured] jumps.
+
+let control_flow_lowering orig =
+  if code_modifies_ghost orig then {
+    success = ffalse "code directly modifies ghost state (via ins_Ghost instruction)";
+    result = orig;
+  } else {
+    success = ttrue;
+    result = CFL.lower_code orig;
+  }
+
+let lemma_control_flow_lowering orig transformed va_s0 va_sM va_fM =
+  if code_modifies_ghost orig then (va_sM, va_fM) else (
+    CFL.lemma_lower_code orig va_fM (state_to_S va_s0);
+    va_sM, va_fM
+  )
