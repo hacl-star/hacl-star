@@ -280,8 +280,8 @@ and print_code (c:code) (n:int) (p:printer) : string & int =
     let cmp = print_cmp cond n1 p in
     (jmp ^ label1 ^ body_str ^ label2 ^ cmp, n')
   | Unstructured blocks ->
-    print_unstructured blocks n n p
-and print_unstructured (blocks:list ublock) (orig_n n:int) (p:printer) : string & int =
+    print_unstructured blocks (List.Tot.length blocks) n n p
+and print_unstructured (blocks:list ublock) (orig_num_blocks orig_n n:int) (p:printer) : string & int =
   allow_inversion ublock;
   match blocks with
   | [] -> ("L" ^ string_of_int n ^ ":\n", n + 1)
@@ -289,14 +289,15 @@ and print_unstructured (blocks:list ublock) (orig_n n:int) (p:printer) : string 
     let label = "L" ^ string_of_int n ^ ":\n" in
     let body, n = print_code c n p in
     let jmp = (
-      let jump_target = orig_n + j.jump_target in
+      (* Perform a saturation at [orig_num_blocks] due to definition in semantics. *)
+      let jump_target = orig_n + min j.jump_target orig_num_blocks in
       match j.jump_cond with
       | JNever -> ""
       | JAlways -> "  jmp L" ^ string_of_int jump_target ^ "\n"
       | JIfTrue cond -> print_cmp cond jump_target p
       | JIfFalse cond -> print_cmp (cmp_not cond) jump_target p
     ) in
-    let rest, n = print_unstructured tl orig_n n p in
+    let rest, n = print_unstructured tl orig_num_blocks orig_n n p in
     (label ^ body ^ jmp ^ rest, n)
 
 let print_header (p:printer) =
