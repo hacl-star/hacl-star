@@ -38,6 +38,12 @@ val reveal_ctx_inv: #s:field_spec -> ctx:poly1305_ctx s -> h0:mem -> h1:mem ->
     state_inv_t h1 ctx)
 
 
+val ctx_inv_zeros: #s:field_spec -> ctx:poly1305_ctx s -> h:mem ->
+  Lemma
+  (requires as_seq h ctx == Lib.Sequence.create (v (nlimb s +! precomplen s)) (limb_zero s))
+  (ensures  state_inv_t #s h ctx)
+
+
 inline_for_extraction noextract
 let poly1305_init_st (s:field_spec) =
     ctx:poly1305_ctx s
