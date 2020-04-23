@@ -4,6 +4,10 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Sequence
 
+#set-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 0 \
+  --using_facts_from '-* +Prims +FStar.Pervasives +FStar.Math.Lemmas +FStar.Seq \
+    +Lib.IntTypes +Lib.Sequence +Lib.Sequence.Lemmas +Lib.LoopCombinators'"
+
 
 let rec repeati_extensionality #a n f g acc0 =
   if n = 0 then begin
@@ -480,6 +484,7 @@ let repeat_blocks_multi_split #a #b blocksize len0 inp f acc0 =
   let n = len / blocksize in
   let n0 = len0 / blocksize in
   let n1 = len1 / blocksize in
+  len0_le_len_fraction blocksize len len0;
   split_len_lemma0 blocksize n len0;
 
   let t0 = Seq.slice inp 0 len0 in
@@ -623,7 +628,7 @@ val map_blocks_multi_acc_is_map_blocks_multi_:
     Loops.repeat_right mi (mi + n) a_f f_gen acc0 ==
     Seq.append acc0 (Loops.repeat_right 0 n a_g f_map (Seq.empty #a)))
 
-#push-options "--z3rlimit 100"
+#push-options "--z3rlimit 150"
 let rec map_blocks_multi_acc_is_map_blocks_multi_ #a blocksize mi hi_f hi_g n inp f acc0 =
   let a_f = map_blocks_a a blocksize hi_f in
   let a_g = map_blocks_a a blocksize hi_g in
