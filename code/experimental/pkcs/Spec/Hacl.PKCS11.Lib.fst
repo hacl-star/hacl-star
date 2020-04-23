@@ -3,6 +3,17 @@ module Hacl.PKCS11.Lib
 open FStar.Seq
 
 
+
+let for_all
+  (#a: Type)
+  (f: (a -> Tot bool))
+  (l: seq a)
+: Pure bool
+  (requires True)
+  (ensures (fun b -> (b == true <==> (forall (i: nat). i < Seq.length l /\ f (index l i) == true))))
+= None? (seq_find (fun i -> not (f i)) l)
+
+
 val for_all2: #a: eqtype -> #b: eqtype -> f: (a -> b -> bool) -> s: seq a -> s1: seq b {Seq.length s = Seq.length s1} -> 
   Tot bool (decreases (Seq.length s))
 

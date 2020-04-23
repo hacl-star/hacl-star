@@ -21,7 +21,7 @@ open Hacl.PKCS11.Lemmas.ObjectTree
 
 open Hacl.PKCS11.External
 
-module L = Hacl.PKCS11.Lib 
+open  Hacl.PKCS11.Lib 
 
 #set-options "--z3rlimit 300"
 
@@ -274,17 +274,6 @@ let supportsVerifying key =
 (* For being able to create a secret key, we need all the attributes to be given *)
 
 
-val _CKO_SECRET_KEY_Constructor: attrs: seq _CK_ATTRIBUTE {
-    let requiredAttributes = getAttributesForType CKO_SECRET_KEY in 
-    _attributesAllPresent attrs requiredAttributes}
-  -> Tot _CKO_SECRET_KEY
-
-let _CKO_SECRET_KEY_Constructor attrs = 
-  lemmaSecretKeyIsObject attrs;
-  lemmaSecretKeyIsStorage attrs;
-  lemmaSecretKeyIsKey attrs;
-  SK (Key (Storage (O attrs)))
-
 
 val castKeyToSecretKey: k: key_object {isKeySecretKey k} -> Tot _CKO_SECRET_KEY
 
@@ -510,7 +499,7 @@ type result 'a = either 'a exception_t
 val mechanismPresentOnDevice: d: device -> pMechanism: _CK_MECHANISM_TYPE -> Tot Type0
 
 let mechanismPresentOnDevice d pMechanism = 
-  L.contains (fun x -> x.mechanismID = pMechanism) d.mechanisms
+  contains (fun x -> x.mechanismID = pMechanism) d.mechanisms
 
 
 val isMechanismPresentOnDevice: d: device -> pMechanism: _CK_MECHANISM_TYPE -> 
@@ -975,13 +964,28 @@ let deviceAddSession  f d newSession =
 val attributesNotReadOnly: seq _CK_ATTRIBUTE -> Type0
 
 let attributesNotReadOnly s = 
-  forall (i : nat {i < length s}). (not (_ck_attribute_read_only (index s i).aType))
+  forall (i : nat). i < length s /\ (not (_ck_attribute_read_only (index s i).aType))
 
     
 val areAttributesNotReadOnly: s: seq _CK_ATTRIBUTE -> Tot (r: bool {r <==> attributesNotReadOnly s})
 
 let areAttributesNotReadOnly s = 
   for_all (fun x -> not (_ck_attribute_read_only x.aType)) s 
+
+
+
+val _CKO_SECRET_KEY_Constructor: attrs: seq _CK_ATTRIBUTE {
+    let requiredAttributes = getAttributesForType CKO_SECRET_KEY in 
+    _attributesAllPresent attrs requiredAttributes /\ 
+    attributesNotReadOnly attrs
+    }
+  -> Tot _CKO_SECRET_KEY
+
+let _CKO_SECRET_KEY_Constructor attrs = 
+  lemmaSecretKeyIsObject attrs;
+  lemmaSecretKeyIsStorage attrs;
+  lemmaSecretKeyIsKey attrs;
+  SK (Key (Storage (O attrs)))
 
 
 (* If the attribute values in the supplied template, together with any default attribute values and any attribute values contributed to the object by the object-creation function itself, are insufficient to fully specify the object to create, then the attempt should fail with the error code CKR_TEMPLATE_INCOMPLETE. *)
@@ -995,9 +999,9 @@ val combineAllProvidedAttributes:
   -> pTemplate: seq _CK_ATTRIBUTE 
   -> Tot (s: seq _CK_ATTRIBUTE
     {
-      forall (i: nat). i < Seq.length defaultAttributes /\ L.contains (fun x -> x = (index defaultAttributes i)) s /\
-      (forall (i: nat). i < Seq.length pTemplate /\ L.contains (fun x -> x = (index pTemplate i)) s) /\
-      (forall (i: nat). i < Seq.length (getAttributesByMechanism mechanism) /\ L.contains (fun x -> x = (index (getAttributesByMechanism mechanism) i)) s)
+      forall (i: nat). i < Seq.length defaultAttributes /\ contains (fun x -> x = (index defaultAttributes i)) s /\
+      (forall (i: nat). i < Seq.length pTemplate /\ contains (fun x -> x = (index pTemplate i)) s) /\
+      (forall (i: nat). i < Seq.length (getAttributesByMechanism mechanism) /\ contains (fun x -> x = (index (getAttributesByMechanism mechanism) i)) s)
     }
   )
 
@@ -1015,10 +1019,10 @@ val combineAllRequiredAttributes:
     {
       (
 	forall (i: nat). i < length (getRequiredAttributesByMechanism mechanism) /\
-	 L.contains (fun x -> x = (index (getRequiredAttributesByMechanism mechanism) i)) s /\
+	 contains (fun x -> x = (index (getRequiredAttributesByMechanism mechanism) i)) s /\
 	 (
 	   forall (i: nat). i < length (getAttributesForType t) /\ 
-	   L.contains (fun x -> x = (index (getAttributesForType t) i)) s
+	   contains (fun x -> x = (index (getAttributesForType t) i)) s
 	 )
       )
     }
@@ -1035,7 +1039,7 @@ let combineAllRequiredAttributes mechanism t =
 let attributesTemplateComplete (t : _CK_OBJECT_CLASS) (pMechanism : _CK_MECHANISM) (pTemplate : seq _CK_ATTRIBUTE) = 
   let allProvidedAttributes = combineAllProvidedAttributes pMechanism.mechanismID pTemplate in 
   let allRequiredAttributes = combineAllRequiredAttributes pMechanism.mechanismID t in 
-  forall (i: nat {i < Seq.length allRequiredAttributes}). Hacl.PKCS11.Lib.contains (fun x -> x.aType = (index allRequiredAttributes i)) allProvidedAttributes
+  forall (i: nat {i < Seq.length allRequiredAttributes}). contains (fun x -> x.aType = (index allRequiredAttributes i)) allProvidedAttributes
 
 
 
@@ -1090,9 +1094,6 @@ let mechanismSelectECDSA a =
     |Curve25519 -> Inl keyGenerationTemplateCurve25519
     |CurveP256 -> Inl keyGenerationTemplateP256
   | _ -> Inr CKR_CURVE_NOT_SUPPORTED
-
-
-module L = Hacl.PKCS11.Lib 
 
 val isAttributeTemplateComplete: pMechanism: _CK_MECHANISM -> pTemplate: seq _CK_ATTRIBUTE -> o: _CK_OBJECT_CLASS ->
   Tot (r: bool 
@@ -1191,7 +1192,7 @@ let __CKS_GenerateKey d hSession pMechanism pTemplate =
   |Inl mechanism -> 
     let rawKey = mechanism () in 
     let allExistingAttributes = combineAllProvidedAttributes pMechanism.mechanismID pTemplate in 
-    let requiredAttributes = getRequiredAttributes CKO_SECRET_KEY allExistingAttributes in admit();
+    let requiredAttributes = getRequiredAttributes CKO_SECRET_KEY allExistingAttributes in 
     let valueAttribute = A CKA_VALUE rawKey in 
     let key = _CKO_SECRET_KEY_Constructor (snoc requiredAttributes valueAttribute) in 
     let (|handler, updatedDevice|) = deviceAddKey d key.sk in 
