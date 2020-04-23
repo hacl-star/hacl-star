@@ -78,26 +78,56 @@ let reveal_ctx_inv' #s ctx ctx' h0 h1 =
   assert (as_seq h0 precom_b == as_seq h1 precom_b')
 
 
+val fmul_precomp_inv_zeros: #s:field_spec -> precomp_b:lbuffer (limb s) (precomplen s) -> h:mem ->
+  Lemma
+  (requires as_seq h precomp_b == Lib.Sequence.create (v (precomplen s)) (limb_zero s))
+  (ensures  F32xN.fmul_precomp_r_pre #(width s) h precomp_b)
+
+let fmul_precomp_inv_zeros #s precomp_b h =
+  let r_b = gsub precomp_b 0ul (nlimb s) in
+  let r_b5 = gsub precomp_b (nlimb s) (nlimb s) in
+  as_seq_gsub h precomp_b 0ul (nlimb s);
+  as_seq_gsub h precomp_b (nlimb s) (nlimb s);
+
+  Hacl.Spec.Poly1305.Field32xN.Lemmas.precomp_r5_zeros (width s);
+  LSeq.eq_intro (feval h r_b) (LSeq.create (width s) 0);
+  LSeq.eq_intro (feval h r_b5) (LSeq.create (width s) 0);
+  assert (F32xN.as_tup5 #(width s) h r_b5 == F32xN.precomp_r5 (F32xN.as_tup5 h r_b))
+
+
+val precomp_inv_zeros: #s:field_spec -> precomp_b:lbuffer (limb s) (precomplen s) -> h:mem ->
+  Lemma
+  (requires as_seq h precomp_b == Lib.Sequence.create (v (precomplen s)) (limb_zero s))
+  (ensures  F32xN.load_precompute_r_post #(width s) h precomp_b)
+
+let precomp_inv_zeros #s precomp_b h =
+  let r_b = gsub precomp_b 0ul (nlimb s) in
+  let rn_b = gsub precomp_b (2ul *! nlimb s) (nlimb s) in
+  let rn_b5 = gsub precomp_b (3ul *! nlimb s) (nlimb s) in
+  as_seq_gsub h precomp_b 0ul (nlimb s);
+  as_seq_gsub h precomp_b (2ul *! nlimb s) (nlimb s);
+  as_seq_gsub h precomp_b (3ul *! nlimb s) (nlimb s);
+
+  fmul_precomp_inv_zeros #s precomp_b h;
+
+  Hacl.Spec.Poly1305.Field32xN.Lemmas.precomp_r5_zeros (width s);
+  LSeq.eq_intro (feval h r_b) (LSeq.create (width s) 0);
+  LSeq.eq_intro (feval h rn_b) (LSeq.create (width s) 0);
+  LSeq.eq_intro (feval h rn_b5) (LSeq.create (width s) 0);
+  assert (F32xN.as_tup5 #(width s) h rn_b5 == F32xN.precomp_r5 (F32xN.as_tup5 h rn_b));
+  assert (feval h rn_b == Vec.compute_rw (feval h r_b).[0])
+
+
 let ctx_inv_zeros #s ctx h =
   // ctx = [acc_b; r_b; r_b5; rn_b; rn_b5]
   let acc_b = gsub ctx 0ul (nlimb s) in
-  let r_b = gsub ctx (nlimb s) (nlimb s) in
-  let r_b5 = gsub ctx (2ul *! nlimb s) (nlimb s) in
-  let rn_b = gsub ctx (3ul *! nlimb s) (nlimb s) in
-  let rn_b5 = gsub ctx (4ul *! nlimb s) (nlimb s) in
   as_seq_gsub h ctx 0ul (nlimb s);
-  as_seq_gsub h ctx (nlimb s) (nlimb s);
-  as_seq_gsub h ctx (2ul *! nlimb s) (nlimb s);
-  as_seq_gsub h ctx (3ul *! nlimb s) (nlimb s);
-  as_seq_gsub h ctx (4ul *! nlimb s) (nlimb s);
-
   LSeq.eq_intro (feval h acc_b) (LSeq.create (width s) 0);
-  LSeq.eq_intro (feval h r_b) (LSeq.create (width s) 0);
-  LSeq.eq_intro (feval h r_b5) (LSeq.create (width s) 0);
-  LSeq.eq_intro (feval h rn_b) (LSeq.create (width s) 0);
-  LSeq.eq_intro (feval h rn_b5) (LSeq.create (width s) 0);
+  assert (felem_fits h acc_b (2, 2, 2, 2, 2));
 
-  Hacl.Spec.Poly1305.Field32xN.Lemmas.precomp_r5_zeros (width s)
+  let precomp_b = gsub ctx (nlimb s) (precomplen s) in
+  LSeq.eq_intro (as_seq h precomp_b) (Lib.Sequence.create (v (precomplen s)) (limb_zero s));
+  precomp_inv_zeros #s precomp_b h
 
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq' --record_options"
