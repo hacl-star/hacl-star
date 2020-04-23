@@ -111,7 +111,6 @@ let _ck_attribute_read_only: _CK_ATTRIBUTE_TYPE -> Tot bool = function
 
 
 
-
 (* default attribute values *)
 let defaultAttributes: seq _CK_ATTRIBUTE = Seq.empty
 
@@ -119,15 +118,12 @@ let defaultAttributes: seq _CK_ATTRIBUTE = Seq.empty
 assume val attrributesConsistent: attrs: seq _CK_ATTRIBUTE -> Tot bool
 
 
-val isContaining: #a: Type -> f: (a -> bool) -> s: seq a -> Tot (r: bool {r == true ==> 
-  Hacl.PKCS11.Lib.contains f s})
+val isContaining: #a: Type -> f: (a -> bool) -> s: seq a -> Tot (r: bool {r == true <==> Hacl.PKCS11.Lib.contains f s})
 
 let isContaining #a f s = 
   match find_l f s with 
   |Some _ -> lemmaFindLExistIfSome f s; true
   |_ -> false
-
-
 
 
 (*  Takes one attribute and search for it in the attribute sequence. Returns true if found *)
@@ -153,8 +149,7 @@ let getObjectAttributeClass obj =
   let attributeClass = find_l (fun x -> x.aType = CKA_CLASS) obj.attrs in 
   lemma_index_0_elem #_CK_ATTRIBUTE_TYPE CKA_CLASS;
   lemmaFindLExistIfSomeOp (fun x -> x.aType = CKA_CLASS) obj.attrs; 
-  match attributeClass with 
-  Some a -> a
+  Some?.v attributeClass
 
 
 val getObjectAttributeLocal: obj: _object -> Tot (r: option _CK_ATTRIBUTE
@@ -250,7 +245,7 @@ let supportsSigning key =
   (
     let sign = find_l (fun x -> x.aType = CKA_SIGN) attrs in 
     assume (Some? sign);  
-    match sign with |Some sign -> index sign.pValue 0 == true
+    index (Some?.v sign).pValue 0 == true
   )
 
 
@@ -262,7 +257,7 @@ let supportsVerifying key =
   (
     let verify = find_l (fun x -> x.aType = CKA_VERIFY) attrs in 
     assume (Some? verify);  
-    match verify with |Some verify -> index verify.pValue 0 == true
+    index (Some?.v verify).pValue 0 == true
   )
   
 
@@ -514,10 +509,7 @@ val mechanismGetFromDevice: d: device ->
   Tot (m: _CK_MECHANISM {m.mechanismID = pMechanism})
 
 let mechanismGetFromDevice d pMechanism = 
-  let m = find_l (fun x -> x.mechanismID = pMechanism) d.mechanisms in 
-  match m with 
-  Some m -> m
-
+  Some?.v (find_l (fun x -> x.mechanismID = pMechanism) d.mechanisms)
 
 assume val checkedAttributes: pTemplate : seq _CK_ATTRIBUTE -> Tot bool
 
@@ -611,6 +603,7 @@ let rec _updateSession d ks ms supM sessions counter alreadySeq =
     updatedSeq 
   else 
     _updateSession d ks ms supM sessions (counter + 1) updatedSeq	
+
 
 (* Objects check is missing *)
 val updateSession: d: device -> ks: seq key_object -> 
@@ -859,10 +852,9 @@ let deviceUpdateSessionChangeStorage #ks #ms #supM f d storage =
   let mechanismsPrevious, keysPrevious, objectsPrevious, supportedMechanismsPrevious = d.mechanisms, d.keys, d.objects, d.supportedMechanisms in 
 
   let sessionsPrevious = d.subSessions in 
-  
-  let sessionToChange = find_l (f #d.keys) sessionsPrevious in 
-    countMore0IsSome sessionsPrevious (f #d.keys #d.mechanisms);
-  let sessionToChange = match sessionToChange with | Some a -> a in 
+      countMore0IsSome sessionsPrevious (f #d.keys #d.mechanisms);
+  let sessionToChange = Some?.v (find_l (f #d.keys) sessionsPrevious) in 
+
   let sessionChanged = subSessionSetStorage sessionToChange (Some storage) in 
     assert(Signature? sessionToChange == Signature? sessionChanged);
 
@@ -892,13 +884,14 @@ val deviceAddKey: d: device -> key: key_object -> Tot ((handler: result _CK_OBJE
 let deviceAddKey d key = 
   if length d.keys = pow2 32 - 1 then 
     (|Inr CKR_DEVICE_ERROR, d|)
-  else begin
-  let keysUpdated = snoc d.keys key in 
-  let handler = length keysUpdated in 
-  let sessionUpdated = updateSession d keysUpdated d.mechanisms d.supportedMechanisms  d.subSessions in 
-  let updatedDevice = Device keysUpdated d.mechanisms d.supportedMechanisms d.objects sessionUpdated in 
-  (|Inl handler, updatedDevice|)
-  end
+  else 
+    begin
+      let keysUpdated = snoc d.keys key in 
+      let handler = length keysUpdated in 
+      let sessionUpdated = updateSession d keysUpdated d.mechanisms d.supportedMechanisms  d.subSessions in 
+      let updatedDevice = Device keysUpdated d.mechanisms d.supportedMechanisms d.objects sessionUpdated in 
+      (|Inl handler, updatedDevice|)
+    end
 
 
 val deviceAddSession: f: (#ks: seq key_object -> #ms: seq _CK_MECHANISM -> #supM: seq _CKS_MECHANISM_INFO -> subSession ks ms supM -> bool) -> 
@@ -974,11 +967,12 @@ let areAttributesNotReadOnly s =
 
 
 
-val _CKO_SECRET_KEY_Constructor: attrs: seq _CK_ATTRIBUTE {
+val _CKO_SECRET_KEY_Constructor: attrs: seq _CK_ATTRIBUTE 
+  {
     let requiredAttributes = getAttributesForType CKO_SECRET_KEY in 
     _attributesAllPresent attrs requiredAttributes /\ 
     attributesNotReadOnly attrs
-    }
+  }
   -> Tot _CKO_SECRET_KEY
 
 let _CKO_SECRET_KEY_Constructor attrs = 
@@ -999,9 +993,9 @@ val combineAllProvidedAttributes:
   -> pTemplate: seq _CK_ATTRIBUTE 
   -> Tot (s: seq _CK_ATTRIBUTE
     {
-      forall (i: nat). i < Seq.length defaultAttributes /\ contains (fun x -> x = (index defaultAttributes i)) s /\
-      (forall (i: nat). i < Seq.length pTemplate /\ contains (fun x -> x = (index pTemplate i)) s) /\
-      (forall (i: nat). i < Seq.length (getAttributesByMechanism mechanism) /\ contains (fun x -> x = (index (getAttributesByMechanism mechanism) i)) s)
+      forall (i: nat). i < Seq.length defaultAttributes /\ contains (fun x -> x = (index defaultAttributes i)) s /\ (
+      forall (i: nat). i < Seq.length pTemplate /\ contains (fun x -> x = (index pTemplate i)) s) /\ (
+      forall (i: nat). i < Seq.length (getAttributesByMechanism mechanism) /\ contains (fun x -> x = (index (getAttributesByMechanism mechanism) i)) s)
     }
   )
 
@@ -1047,19 +1041,21 @@ let attributesTemplateComplete (t : _CK_OBJECT_CLASS) (pMechanism : _CK_MECHANIS
   
 (*One example of an inconsistent template would be using a template which specifies two different values for the same attribute.   *)
 
+(* for all attributes that have the same type, the values are the same *)
+val attributeConsistent0: attr: _CK_ATTRIBUTE -> s: seq _CK_ATTRIBUTE  -> Type0
+
+let attributeConsistent0 attr s  = 
+  let allAttributesSameType = map (fun x -> x.aType = attr.aType) s in
+  
+    True
+   
+  
+
 val _attributesTemplateConsistent0: attrs: seq _CK_ATTRIBUTE -> Tot bool
   (decreases (length attrs))
 
 let rec _attributesTemplateConsistent0 attrs = 
-  match length attrs with 
-  | 0 -> true
-  | 1 -> true
-  | _ -> 
-    let typeOfAttribute = (head attrs).aType in 
-    let r = find_l (fun x -> x.aType = typeOfAttribute) (tail attrs) in 
-    match r with 
-      |Some _ -> false
-      |None -> _attributesTemplateConsistent0 (tail attrs)
+  let allElement = 
   
   
 val attributesTemplateConsistent0: attrs: seq _CK_ATTRIBUTE -> Tot bool
@@ -1094,6 +1090,7 @@ let mechanismSelectECDSA a =
     |Curve25519 -> Inl keyGenerationTemplateCurve25519
     |CurveP256 -> Inl keyGenerationTemplateP256
   | _ -> Inr CKR_CURVE_NOT_SUPPORTED
+
 
 val isAttributeTemplateComplete: pMechanism: _CK_MECHANISM -> pTemplate: seq _CK_ATTRIBUTE -> o: _CK_OBJECT_CLASS ->
   Tot (r: bool 
@@ -1131,6 +1128,7 @@ let mechanismCreationSelect d pMechanism pTemplate =
 val _getRequiredAttributes: attrs: seq _CK_ATTRIBUTE -> typeToReturn: _CK_ATTRIBUTE_TYPE -> Tot (a: _CK_ATTRIBUTE {a.aType == typeToReturn})
 
 let _getRequiredAttributes attrs typeToReturn = 
+  admit();
   match find_l (fun x -> x.aType = typeToReturn) attrs with Some a -> a
 
 

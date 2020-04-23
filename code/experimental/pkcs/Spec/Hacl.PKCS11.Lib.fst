@@ -39,18 +39,42 @@ let contains (#a:Type) (f: (a -> bool)) (s:seq a) : Tot Type0 =
   exists (k:nat). k < Seq.length s /\  f (Seq.index s k) 
 
 
+#set-options "--z3rlimit 300"
+
+
 val containsLemma: #a: eqtype -> s: seq a {length s > 0} -> Lemma 
   (
     forall (i: nat). i < Seq.length s /\ contains (fun x -> x = (index s i)) s
   )
 
-let rec containsLemma #a s = 
-  let open FStar.Classical in 
+let rec containsLemma #a s = admit()
 
-  let x: n: nat {n > 10} = 11 in 
-  give_witness x; 
+val takeOne: #a: eqtype -> 
+  f: (a -> Tot bool) ->
+  s: seq a ->   
+  counter: nat {counter <= length s}-> 
+  seqToPut: seq a {(forall (i: nat {i < length seqToPut}) . f (index seqToPut i))} -> 
+  Tot (r: seq a {forall (i: nat {i < Seq.length r}). f (index r i)})
+  (decreases (length s - counter))
+  
 
-  admit();
-  assert(forall (k: nat {k < length s}).  (fun x -> x = (index s k)) (index s k));
-  assume(exists (k: nat). k < length s /\ (fun x -> x = (index s k)) (index s k));
-  admit()
+let rec takeOne #a f s counter seqToPut = 
+  let _takeOne f s counter seqToPut = 
+      let element = index s counter in 
+      if f element then 
+	snoc seqToPut element
+      else 
+	seqToPut in 
+  if counter = length s then seqToPut 
+  else
+    begin
+    let seqToPutForCurrent = _takeOne f s counter seqToPut in 
+    takeOne f s (counter + 1) seqToPutForCurrent
+    end
+
+val takeAll: #a: eqtype -> f: (a -> Tot bool) -> s: seq a -> Tot (r: seq a {forall (i: nat {i < length r}). f (index r i)})
+
+let takeAll #a f s = 
+  let s = Seq.empty in 
+  let counter = 0 in 
+  takeOne f s counter s
