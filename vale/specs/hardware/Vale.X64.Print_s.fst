@@ -287,7 +287,7 @@ and print_unstructured (blocks:list ublock) (orig_num_blocks orig_n n:int) (p:pr
   | [] -> ("L" ^ string_of_int n ^ ":\n", n + 1)
   | (c, j) :: tl ->
     let label = "L" ^ string_of_int n ^ ":\n" in
-    let body, n = print_code c n p in
+    let body, n = print_code c (n + 1) p in
     let jmp = (
       (* Perform a saturation at [orig_num_blocks] due to definition in semantics. *)
       let jump_target = orig_n + min j.jump_target orig_num_blocks in
