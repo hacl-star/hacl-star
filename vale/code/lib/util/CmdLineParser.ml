@@ -71,6 +71,14 @@ let parse_cmdline :
       else failwith ("method " ^ name ^ " does not satisfy taint analysis on" ^ if windows then "Windows" else "Linux")
     ) l in
 
+    (* Perform control flow lowering *)
+    let l = List.map (fun (name, code, nbr_args, return_public) ->
+                let lowered_code windows =
+                  Vale_Transformers_ControlFlowLowering.lower_code
+                    (code windows) in
+                (name, lowered_code, nbr_args, return_public)
+              ) l in
+
     (* Extract and print assembly code *)
     Vale_X64_Decls.print_header printer;
     let _ = List.fold_left (fun label_count (name, code, _, _) ->
