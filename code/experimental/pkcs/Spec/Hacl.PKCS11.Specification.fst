@@ -971,16 +971,17 @@ let deviceAddSession  f d newSession =
 
 (* If the supplied template specifies a value for a read-only attribute, then the attempt should fail with the error code CKR_ATTRIBUTE_READ_ONLY.  Whether or not a given Cryptoki attribute is read-only is explicitly stated in the Cryptoki specification; however, a particular library and token may be even more restrictive than Cryptoki specifies *)
 
-val attributeIsReadOnly: _CK_ATTRIBUTE -> Tot bool 
 
-let attributeIsReadOnly a = 
-    not (_ck_attribute_read_only a.aType)
-
-
-val attributesNotReadOnly: seq _CK_ATTRIBUTE -> Tot bool
+val attributesNotReadOnly: seq _CK_ATTRIBUTE -> Type0
 
 let attributesNotReadOnly s = 
-  for_all (fun x -> attributeIsReadOnly x) s
+  forall (i : nat {i < length s}). (not (_ck_attribute_read_only (index s i).aType))
+
+    
+val areAttributesNotReadOnly: s: seq _CK_ATTRIBUTE -> Tot (r: bool {r <==> attributesNotReadOnly s})
+
+let areAttributesNotReadOnly s = 
+  for_all (fun x -> not (_ck_attribute_read_only x.aType)) s 
 
 
 (* If the attribute values in the supplied template, together with any default attribute values and any attribute values contributed to the object by the object-creation function itself, are insufficient to fully specify the object to create, then the attempt should fail with the error code CKR_TEMPLATE_INCOMPLETE. *)
@@ -1004,14 +1005,6 @@ val combineAllProvidedAttributes:
 let combineAllProvidedAttributes mechanism pTemplate  = 
   let mechanismAttributes = getAttributesByMechanism mechanism in 
   lemmaContainsSelf mechanismAttributes;
-  (*lemmaContainsSelf defaultAttributes;
-  lemmaContainsSelf pTemplate; *)
-(*
-  lemmaContains3 defaultAttributes mechanismAttributes pTemplate 
-    (fun i x -> x = (index defaultAttributes i))
-    (fun i x -> x = (index pTemplate i))
-    (fun i x -> x = (index pTemplate i)); *)
-
   append (append defaultAttributes mechanismAttributes) pTemplate
 
 
@@ -1164,7 +1157,9 @@ let getRequiredAttributes t attrs  =
 val __CKS_GenerateKey: d: device ->  
   hSession: _CK_SESSION_HANDLE -> 
   pMechanism: _CK_MECHANISM {mechanismPresentOnDevice d pMechanism.mechanismID} ->
-  pTemplate: seq _CK_ATTRIBUTE {attributesTemplateComplete CKO_SECRET_KEY pMechanism pTemplate} -> 
+  pTemplate: seq _CK_ATTRIBUTE 
+    {attributesTemplateComplete CKO_SECRET_KEY pMechanism pTemplate /\ 
+    attributesNotReadOnly pTemplate} -> 
   Tot(
     (handler: result _CK_OBJECT_HANDLE) & 
     (resultDevice : device 
@@ -1220,7 +1215,10 @@ let _CKS_GenerateKey d hSession pMechanism pTemplate =
     (|Inr CKR_MECHANISM_INVALID, d|) else
   let complete = isAttributeTemplateComplete pMechanism pTemplate CKO_SECRET_KEY in 
   if complete = false then 
-     (|Inr CKR_TEMPLATE_INCOMPLETE, d|)
+     (|Inr CKR_TEMPLATE_INCOMPLETE, d|) else
+  let notReadOnly = areAttributesNotReadOnly pTemplate in 
+    if notReadOnly = false then 
+    (|Inr CKR_ATTRIBUTE_READ_ONLY, d|)
   else
     __CKS_GenerateKey d hSession pMechanism pTemplate
 
