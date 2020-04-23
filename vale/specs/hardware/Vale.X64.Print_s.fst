@@ -279,8 +279,25 @@ and print_code (c:code) (n:int) (p:printer) : string & int =
     let label2 = p.align() ^ " 16\nL" ^ string_of_int n2 ^ ":\n" in
     let cmp = print_cmp cond n1 p in
     (jmp ^ label1 ^ body_str ^ label2 ^ cmp, n')
-  | Unstructured _ ->
-    ("** NOT IMPLEMENTED **", n)
+  | Unstructured blocks ->
+    print_unstructured blocks n n p
+and print_unstructured (blocks:list ublock) (orig_n n:int) (p:printer) : string & int =
+  allow_inversion ublock;
+  match blocks with
+  | [] -> ("L" ^ string_of_int n ^ ":\n", n + 1)
+  | (c, j) :: tl ->
+    let label = "L" ^ string_of_int n ^ ":\n" in
+    let body, n = print_code c n p in
+    let jmp = (
+      let jump_target = orig_n + j.jump_target in
+      match j.jump_cond with
+      | JNever -> ""
+      | JAlways -> "  jmp L" ^ string_of_int jump_target ^ "\n"
+      | JIfTrue cond -> print_cmp cond jump_target p
+      | JIfFalse cond -> print_cmp (cmp_not cond) jump_target p
+    ) in
+    let rest, n = print_unstructured tl orig_n n p in
+    (label ^ body ^ jmp ^ rest, n)
 
 let print_header (p:printer) =
   print_string (p.header())
