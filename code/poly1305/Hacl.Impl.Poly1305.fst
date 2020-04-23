@@ -78,6 +78,28 @@ let reveal_ctx_inv' #s ctx ctx' h0 h1 =
   assert (as_seq h0 precom_b == as_seq h1 precom_b')
 
 
+let ctx_inv_zeros #s ctx h =
+  // ctx = [acc_b; r_b; r_b5; rn_b; rn_b5]
+  let acc_b = gsub ctx 0ul (nlimb s) in
+  let r_b = gsub ctx (nlimb s) (nlimb s) in
+  let r_b5 = gsub ctx (2ul *! nlimb s) (nlimb s) in
+  let rn_b = gsub ctx (3ul *! nlimb s) (nlimb s) in
+  let rn_b5 = gsub ctx (4ul *! nlimb s) (nlimb s) in
+  as_seq_gsub h ctx 0ul (nlimb s);
+  as_seq_gsub h ctx (nlimb s) (nlimb s);
+  as_seq_gsub h ctx (2ul *! nlimb s) (nlimb s);
+  as_seq_gsub h ctx (3ul *! nlimb s) (nlimb s);
+  as_seq_gsub h ctx (4ul *! nlimb s) (nlimb s);
+
+  LSeq.eq_intro (feval h acc_b) (LSeq.create (width s) 0);
+  LSeq.eq_intro (feval h r_b) (LSeq.create (width s) 0);
+  LSeq.eq_intro (feval h r_b5) (LSeq.create (width s) 0);
+  LSeq.eq_intro (feval h rn_b) (LSeq.create (width s) 0);
+  LSeq.eq_intro (feval h rn_b5) (LSeq.create (width s) 0);
+
+  Hacl.Spec.Poly1305.Field32xN.Lemmas.precomp_r5_zeros (width s)
+
+
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq' --record_options"
 
 inline_for_extraction noextract
