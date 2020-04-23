@@ -7,8 +7,10 @@ open Lib.Sequence.Lemmas
 
 module Loops = Lib.LoopCombinators
 
+#set-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 0 \
+  --using_facts_from '-* +Prims +FStar.Math.Lemmas +FStar.Seq \
+    +Lib.IntTypes +Lib.Sequence +Lib.Sequence.Lemmas +Lib.Vec.Lemmas'"
 
-#set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 val lemma_repeat_gen_vec:
     w:pos
