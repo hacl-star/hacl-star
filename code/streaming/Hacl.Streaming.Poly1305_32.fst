@@ -166,7 +166,7 @@ val update_last_is_update
     (ensures (update_last (acc, r) input == (Spec.Poly1305.poly1305_update input acc r, r)))
 
 let update_last_is_update input acc r =
-  let open Hacl.Streaming.Lemmas in
+  let open Lib.UpdateMulti.Lemmas in
   let block_length = Spec.Poly1305.size_block in
   assert_norm (block_length < pow2 32);
   calc (==) {
@@ -202,7 +202,7 @@ val update_multi_is_update
     (ensures (update_multi (acc, r) input == (Spec.Poly1305.poly1305_update input acc r, r)))
 
 let update_multi_is_update input acc r =
-  let open Hacl.Streaming.Lemmas in
+  let open Lib.UpdateMulti.Lemmas in
   let block_length = Spec.Poly1305.size_block in
   assert_norm (block_length < pow2 32);
   calc (==) {
@@ -237,7 +237,7 @@ val poly_is_incremental:
     finish_ key hash `S.equal` spec key input))
 
 let poly_is_incremental key input =
-  let open Hacl.Streaming.Lemmas in
+  let open Lib.UpdateMulti.Lemmas in
   let block_length = Spec.Poly1305.size_block in
   assert_norm (block_length < pow2 32);
   let n = S.length input / block_length in
