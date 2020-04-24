@@ -40,7 +40,7 @@ let test_incremental_api (): St unit =
   let b1 = B.alloca_of_list [ u8 0x00; u8 0x01; u8 0x02; u8 0x04 ] in
   let b2 = B.alloca_of_list [ u8 0x05; u8 0x06; u8 0x07; u8 0x08 ] in
 
-  let st = HI.create_in SHA2_256 () HyperStack.root in
+  let st = HI.create_in SHA2_256 HyperStack.root in
   HI.init (G.hide SHA2_256) st;
   let h0 = ST.get () in
   assert B.(loc_disjoint (S.footprint HI.evercrypt_hash SHA2_256 h0 st) (loc_buffer b1));
