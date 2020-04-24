@@ -71,7 +71,7 @@ let evercrypt_hash: block hash_alg =
     (fun i -> EverCrypt.Hash.update_last #i)
     (fun i _ -> EverCrypt.Hash.finish #i)
 
-let create_in a = F.create_in evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit)
+let create_in a = F.create_in evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit) ()
 
 let init (a: G.erased hash_alg) = F.init evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit) ()
 
