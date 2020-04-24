@@ -28,7 +28,7 @@ let update_multi
   (hash:words_state a)
   (blocks:bytes_blocks a)
 =
-  Spec.UpdateMulti.mk_update_multi (block_length a) (update a) hash blocks
+  Lib.UpdateMulti.mk_update_multi (block_length a) (update a) hash blocks
 
 (* As defined in the NIST standard; pad, then update, then finish. *)
 let hash (a:hash_alg) (input:bytes{S.length input <= max_input_length a})

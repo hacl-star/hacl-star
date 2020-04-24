@@ -16,7 +16,7 @@ friend Spec.Agile.Hash
 
 (** Lemmas about the behavior of update_multi / update_last *)
 
-let update_multi_zero (a: hash_alg) = Spec.UpdateMulti.update_multi_zero (block_length a) (Spec.Agile.Hash.update a)
+let update_multi_zero (a: hash_alg) = Lib.UpdateMulti.update_multi_zero (block_length a) (Spec.Agile.Hash.update a)
 
 let update_multi_update (a: hash_alg) (h: words_state a) (input: bytes_block a): Lemma
   (ensures (S.equal (update_multi a h input) (update a h input)))
@@ -32,7 +32,7 @@ let update_multi_associative (a: hash_alg)
     S.equal (update_multi a (update_multi a h input1) input2)
       (update_multi a h input)))
 =
-  Spec.UpdateMulti.update_multi_associative (block_length a) (Spec.Agile.Hash.update a) h input1 input2
+  Lib.UpdateMulti.update_multi_associative (block_length a) (Spec.Agile.Hash.update a) h input1 input2
 
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
 
@@ -43,7 +43,7 @@ let hash_is_hash_incremental (a: hash_alg) (input: bytes { S.length input <= max
   let n = S.length input / block_length a in
   let padding = pad a (S.length input) in
   let padded_input = input `S.append` padding in
-  let blocks, rest = Spec.UpdateMulti.split_block (block_length a) padded_input n in
+  let blocks, rest = Lib.UpdateMulti.split_block (block_length a) padded_input n in
   let blocks', rest' = S.split input (n * block_length a) in
   S.lemma_eq_intro blocks blocks';
   S.lemma_eq_intro (rest' `S.append` padding) rest;

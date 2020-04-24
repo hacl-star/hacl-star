@@ -21,7 +21,7 @@ let repeat_l_input #a (block_length:pos { block_length < pow2 32 })
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 150"
 let rec update_full_is_repeat_blocks #a block_length update update_last acc input input' =
-  // Spec.UpdateMulti side
+  // Lib.UpdateMulti side
   let n_blocks = S.length input / block_length in
   let blocks, rest = S.split input (n_blocks * block_length) in
 
@@ -44,7 +44,7 @@ let rec update_full_is_repeat_blocks #a block_length update update_last acc inpu
   assert (S.length blocks % block_length = 0);
 
   if S.length input < block_length then begin
-    Spec.UpdateMulti.update_multi_zero block_length update acc;
+    Lib.UpdateMulti.update_multi_zero block_length update acc;
     Math.Lemmas.small_mod (S.length input) block_length;
     S.lemma_eq_intro input rest;
     assert (update_full block_length update update_last acc input == update_last acc input);
@@ -53,7 +53,7 @@ let rec update_full_is_repeat_blocks #a block_length update update_last acc inpu
     assert (repeat_final_acc == update_last acc input);
     assert (repeat_final_acc == update_full block_length update update_last acc input)
   end else begin
-    let head, tail = Spec.UpdateMulti.split_block block_length blocks 1 in
+    let head, tail = Lib.UpdateMulti.split_block block_length blocks 1 in
     assert (S.length head % block_length = 0);
 
     S.lemma_eq_intro (head `S.append` tail `S.append` rest) input;

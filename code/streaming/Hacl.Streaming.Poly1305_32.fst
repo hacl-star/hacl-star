@@ -100,8 +100,20 @@ let stateful_poly1305_ctx32: I.stateful unit =
       P.reveal_ctx_inv' (as_lib src) (as_lib dst) h0 h1
     )
 
-/// Interlude for painful spec equivalence proofs
-/// =============================================
+/// Interlude for spec equivalence proofs
+/// =====================================
+///
+/// A quick explanation about this proof of equivalence. At the spec level,
+/// ``poly1305_update`` needs both ``r`` and the accumulator ``acc``. This thus
+/// makes poly1305 update a function of two arguments. However, the streaming
+/// facility is constructed over specifications that take one single argument.
+/// Not a problem! We carry the pair ``(r, acc)`` as our "streaming functor
+/// accumulator", and we now have to show that a specification in terms of
+/// ``update (update (r, acc) init)`` is the same as poly1305. For that, we need
+/// to do a little proof of equivalence to show first that this is the same as
+/// ``(update r) ((update r) acc)`` (note that the update function now becomes a
+/// partial application), then use the update-multi-repeat conversion lemma to
+/// get the original specification of poly1305.
 
 inline_for_extraction noextract
 let block = (block: S.seq uint8 { S.length block = Spec.Poly1305.size_block })
@@ -116,11 +128,11 @@ let update' r acc (block: block) =
 
 inline_for_extraction noextract
 let update_multi =
-  Spec.UpdateMulti.mk_update_multi Spec.Poly1305.size_block update_
+  Lib.UpdateMulti.mk_update_multi Spec.Poly1305.size_block update_
 
 inline_for_extraction noextract
 let update_multi' r =
-  Spec.UpdateMulti.mk_update_multi Spec.Poly1305.size_block (update' r)
+  Lib.UpdateMulti.mk_update_multi Spec.Poly1305.size_block (update' r)
 
 #push-options "--fuel 1"
 inline_for_extraction noextract
@@ -135,7 +147,7 @@ let rec with_or_without_r (acc r: Spec.Poly1305.felem) (blocks: S.seq uint8):
   if S.length blocks = 0 then
     ()
   else
-    let block, rem = Spec.UpdateMulti.split_block Spec.Poly1305.size_block blocks 1 in
+    let block, rem = Lib.UpdateMulti.split_block Spec.Poly1305.size_block blocks 1 in
     let acc = update' r acc block in
     with_or_without_r acc r rem
 #pop-options
@@ -178,7 +190,7 @@ let update_last_is_update input acc r =
     update_last (acc, r) input;
   (==) { }
     update_last' r acc input, r;
-  (==) { Spec.UpdateMulti.update_multi_zero Spec.Poly1305.size_block (update' r) acc }
+  (==) { Lib.UpdateMulti.update_multi_zero Spec.Poly1305.size_block (update' r) acc }
     update_last' r (update_multi' r acc S.empty) input, r;
   (==) { update_full_is_repeat_blocks block_length (update' r) (update_last' r) acc input input }
     Lib.Sequence.repeat_blocks #uint8 #Spec.Poly1305.felem block_length input
@@ -299,8 +311,8 @@ let poly1305_32: I.block unit =
 
     (fun () -> spec)
 
-    (fun () -> Spec.UpdateMulti.update_multi_zero Spec.Poly1305.size_block update_)
-    (fun () -> Spec.UpdateMulti.update_multi_associative Spec.Poly1305.size_block update_)
+    (fun () -> Lib.UpdateMulti.update_multi_zero Spec.Poly1305.size_block update_)
+    (fun () -> Lib.UpdateMulti.update_multi_associative Spec.Poly1305.size_block update_)
     (fun () -> poly_is_incremental)
 
     (fun _ _ -> ())

@@ -2,7 +2,7 @@ module Hacl.Streaming.Lemmas
 
 module S = FStar.Seq
 
-open Spec.UpdateMulti
+open Lib.UpdateMulti
 open FStar.Mul
 
 let uint8 = Lib.IntTypes.uint8

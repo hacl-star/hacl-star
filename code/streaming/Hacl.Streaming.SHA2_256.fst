@@ -38,7 +38,7 @@ let max_input_length64 a: x:nat { 0 < x /\ x < pow2 64 /\ x <= max_input_length 
 
 // Local redefinition to have the shape desired by the type class.
 let update_multi_associative (i: hash_alg) =
-  Spec.UpdateMulti.update_multi_associative (block_length i) (Spec.Agile.Hash.update i)
+  Lib.UpdateMulti.update_multi_associative (block_length i) (Spec.Agile.Hash.update i)
 
 open Hacl.Streaming.Interface
 

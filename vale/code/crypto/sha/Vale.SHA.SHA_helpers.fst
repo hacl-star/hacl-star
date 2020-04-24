@@ -901,7 +901,7 @@ let rec lemma_update_multi_equiv_vale (hash hash':hash256) (quads:seq quad32) (r
     let bytes_pivot = (num_blocks - 1) * 64 in
 
     // Use associativity of update_multi to rearrange recursion to better match update_multi_quads' recursion
-    let input1,input2 = Spec.UpdateMulti.split_block block_length blocks (bytes_pivot / 64) in
+    let input1,input2 = Lib.UpdateMulti.split_block block_length blocks (bytes_pivot / 64) in
 
     let h_bytes1 = update_multi SHA2_256 hash input1 in
     let h_bytes2 = update_multi SHA2_256 h_bytes1 input2 in

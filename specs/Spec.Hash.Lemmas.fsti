@@ -17,9 +17,9 @@ val update_multi_update (a: hash_alg) (h: words_state a) (input: bytes_block a):
   (ensures (S.equal (update_multi a h input) (update a h input)))
   [ SMTPat (update a h input) ]
 
-/// Legacy formulation of this lemma. See Spec.UpdateMulti for a more generic
+/// Legacy formulation of this lemma. See Lib.UpdateMulti for a more generic
 /// version that avoids a delicate proof obligation in the post-condition -- use
-/// the version from Spec.UpdateMulti whenever possible.
+/// the version from Lib.UpdateMulti whenever possible.
 val update_multi_associative (a: hash_alg)
   (h: words_state a)
   (input1: bytes_blocks a)

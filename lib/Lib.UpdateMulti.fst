@@ -1,4 +1,4 @@
-module Spec.UpdateMulti
+module Lib.UpdateMulti
 
 /// This module defines a generic update_multi combinator, used in various
 /// places, including hashes and the streaming functor. See
