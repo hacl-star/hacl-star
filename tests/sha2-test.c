@@ -12,6 +12,7 @@
 #include <openssl/sha.h>
 
 #include "sha2_vectors.h"
+#include "test_helpers.h"
 
 typedef uint64_t cycles;
 
@@ -55,20 +56,7 @@ void print_time(clock_t tdiff, cycles cdiff){
 }
 
 bool print_result(uint8_t* comp, uint8_t* exp, int len) {
-  printf("computed:");
-  for (int i = 0; i < len; i++)
-    printf("%02x",comp[i]);
-  printf("\n");
-  printf("expected:");
-  for (int i = 0; i < len; i++)
-    printf("%02x",exp[i]);
-  printf("\n");
-  bool ok = true;
-  for (int i = 0; i < len; i++)
-    ok = ok & (exp[i] == comp[i]);
-  if (ok) printf("Success!\n");
-  else printf("**FAILED**\n");
-  return ok;
+  return compare_and_print(len, comp, exp);
 }
 
 bool print_test(uint8_t* in, int in_len, uint8_t* exp224, uint8_t* exp256, uint8_t* exp384, uint8_t* exp512){
@@ -100,69 +88,33 @@ bool print_test(uint8_t* in, int in_len, uint8_t* exp224, uint8_t* exp256, uint8
 int main()
 {
 
-//
-// Test 1
-//
+  uint32_t test1_plaintext_len = vectors[0].input_len;
+  uint8_t *test1_plaintext = vectors[0].input;
+  uint8_t *test1_expected224 = vectors[0].tag_224;
+  uint8_t *test1_expected256 = vectors[0].tag_256;
+  uint8_t *test1_expected384 = vectors[0].tag_384;
+  uint8_t *test1_expected512 = vectors[0].tag_512;
 
-uint32_t test1_plaintext_len = vectors[0].input_len;
+  uint32_t test2_plaintext_len = vectors[1].input_len;
+  uint8_t *test2_plaintext = vectors[1].input;
+  uint8_t *test2_expected224 = vectors[1].tag_224;
+  uint8_t *test2_expected256 = vectors[1].tag_256;
+  uint8_t *test2_expected384 = vectors[1].tag_384;
+  uint8_t *test2_expected512 = vectors[1].tag_512;
 
-uint8_t *test1_plaintext = vectors[0].input;
+  uint32_t test3_plaintext_len = vectors[2].input_len;
+  uint8_t *test3_plaintext = vectors[2].input;
+  uint8_t *test3_expected224 = vectors[2].tag_224;
+  uint8_t *test3_expected256 = vectors[2].tag_256;
+  uint8_t *test3_expected384 = vectors[2].tag_384;
+  uint8_t *test3_expected512 = vectors[2].tag_512;
 
-uint8_t *test1_expected224 = vectors[0].tag_224;
-
-uint8_t *test1_expected256 = vectors[0].tag_256;
-
-uint8_t *test1_expected384 = vectors[0].tag_384;
-
-uint8_t *test1_expected512 = vectors[0].tag_512;
-
-//
-// Test 2
-//
-
-uint32_t test2_plaintext_len = vectors[1].input_len;
-
-uint8_t *test2_plaintext = vectors[1].input;
-
-uint8_t *test2_expected224 = vectors[1].tag_224;
-
-uint8_t *test2_expected256 = vectors[1].tag_256;
-
-uint8_t *test2_expected384 = vectors[1].tag_384;
-
-uint8_t *test2_expected512 = vectors[1].tag_512;
-
-//
-// Test 3
-//
-
-uint32_t test3_plaintext_len = vectors[2].input_len;
-
-uint8_t *test3_plaintext = vectors[2].input;
-
-uint8_t *test3_expected224 = vectors[2].tag_224;
-
-uint8_t *test3_expected256 = vectors[2].tag_256;
-
-uint8_t *test3_expected384 = vectors[2].tag_384;
-
-uint8_t *test3_expected512 = vectors[2].tag_512;
-
-//
-// Test 4
-//
-
-uint32_t test4_plaintext_len = vectors[3].input_len;
-
-uint8_t *test4_plaintext = vectors[3].input;
-
-uint8_t *test4_expected224 = vectors[3].tag_224;
-
-uint8_t *test4_expected256 = vectors[3].tag_256;
-
-uint8_t *test4_expected384 = vectors[3].tag_384;
-
-uint8_t *test4_expected512 = vectors[3].tag_512;
+  uint32_t test4_plaintext_len = vectors[3].input_len;
+  uint8_t *test4_plaintext = vectors[3].input;
+  uint8_t *test4_expected224 = vectors[3].tag_224;
+  uint8_t *test4_expected256 = vectors[3].tag_256;
+  uint8_t *test4_expected384 = vectors[3].tag_384;
+  uint8_t *test4_expected512 = vectors[3].tag_512;
 
   bool ok = print_test(test1_plaintext,test1_plaintext_len,test1_expected224,test1_expected256,test1_expected384,test1_expected512);
   ok = print_test(test2_plaintext,test2_plaintext_len,test2_expected224,test2_expected256,test2_expected384,test2_expected512) && ok;
