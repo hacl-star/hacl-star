@@ -1105,7 +1105,7 @@ test-c-%: dist/test/c/%.test
 # C tests (from C files) #
 ##########################
 
-test-handwritten: compile-gcc64-only
+test-handwritten: compile-gcc64-only compile-gcc-compatible
 	$(LD_EXTRA) KREMLIN_HOME="$(KREMLIN_HOME)" \
 	  LDFLAGS="$(LDFLAGS)" CFLAGS="$(CFLAGS)" \
 	  $(MAKE) -C tests test
