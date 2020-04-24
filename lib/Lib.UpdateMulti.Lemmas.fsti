@@ -1,4 +1,4 @@
-module Hacl.Streaming.Lemmas
+module Lib.UpdateMulti.Lemmas
 
 module S = FStar.Seq
 

@@ -2,7 +2,7 @@ module Lib.UpdateMulti
 
 /// This module defines a generic update_multi combinator, used in various
 /// places, including hashes and the streaming functor. See
-/// Hacl.Streaming.Lemmas for an equivalence between update_multi and the
+/// Lib.UpdateMulti.Lemmas for an equivalence between update_multi and the
 /// Lib-style repeat combinators.
 
 module S = FStar.Seq
