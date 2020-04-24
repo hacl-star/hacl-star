@@ -83,6 +83,7 @@ let frodo_sample r =
 
 #set-options "--max_fuel 0"
 
+#push-options "--z3rlimit 100"
 inline_for_extraction noextract
 val frodo_sample_matrix1:
     n1:size_t
@@ -107,6 +108,7 @@ let frodo_sample_matrix1 n1 n2 r i res =
     let resij = sub r (size 2 *! (n2 *! i +! j)) (size 2) in
     mset res i j (frodo_sample (uint_from_bytes_le #U16 resij))
   )
+#pop-options
 
 val frodo_sample_matrix:
     n1:size_t

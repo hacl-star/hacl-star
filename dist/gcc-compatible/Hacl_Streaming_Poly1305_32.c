@@ -29,14 +29,14 @@ typedef struct Hacl_Streaming_Functor_state_s___uint64_t___uint8_t__s
   uint64_t *block_state;
   uint8_t *buf;
   uint64_t total_len;
-  uint8_t *maybe_key;
+  uint8_t *p_key;
 }
 Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_;
 
 Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_
 *Hacl_Streaming_Poly1305_32_create_in(uint8_t *k1)
 {
-  uint8_t *buf1 = KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint8_t));
+  uint8_t *buf = KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint8_t));
   uint8_t dummy_key[32U] = { 0U };
   uint64_t *r1 = KRML_HOST_CALLOC((uint32_t)25U, sizeof (uint64_t));
   Hacl_Poly1305_32_poly1305_init(r1, dummy_key);
@@ -45,7 +45,7 @@ Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_
   memcpy(k_, k1, (uint32_t)32U * sizeof (k1[0U]));
   uint8_t *k_0 = k_;
   Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_
-  s = { .block_state = block_state, .buf = buf1, .total_len = (uint64_t)0U, .maybe_key = k_0 };
+  s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U, .p_key = k_0 };
   KRML_CHECK_SIZE(sizeof (Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_), (uint32_t)1U);
   Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_
   *p = KRML_HOST_MALLOC(sizeof (Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_));
@@ -61,8 +61,8 @@ Hacl_Streaming_Poly1305_32_init(
 )
 {
   Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_ scrut = *s;
-  uint8_t *k_ = scrut.maybe_key;
-  uint8_t *buf1 = scrut.buf;
+  uint8_t *k_ = scrut.p_key;
+  uint8_t *buf = scrut.buf;
   uint64_t *block_state = scrut.block_state;
   Hacl_Poly1305_32_poly1305_init(block_state, k1);
   memcpy(k_, k1, (uint32_t)32U * sizeof (k1[0U]));
@@ -71,9 +71,9 @@ Hacl_Streaming_Poly1305_32_init(
     (
       (Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_){
         .block_state = block_state,
-        .buf = buf1,
+        .buf = buf,
         .total_len = (uint64_t)0U,
-        .maybe_key = k_1
+        .p_key = k_1
       }
     );
 }
@@ -93,12 +93,12 @@ Hacl_Streaming_Poly1305_32_update(
   {
     Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_ s1 = *p;
     uint64_t *block_state1 = s1.block_state;
-    uint8_t *buf1 = s1.buf;
+    uint8_t *buf = s1.buf;
     uint64_t total_len1 = s1.total_len;
-    uint8_t *k_1 = s1.maybe_key;
+    uint8_t *k_1 = s1.p_key;
     uint64_t x = total_len1 % (uint64_t)(uint32_t)16U;
     uint32_t sz1 = (uint32_t)x;
-    uint8_t *buf2 = buf1 + sz1;
+    uint8_t *buf2 = buf + sz1;
     memcpy(buf2, data, len * sizeof (data[0U]));
     uint64_t total_len2 = total_len1 + (uint64_t)len;
     *p
@@ -106,9 +106,9 @@ Hacl_Streaming_Poly1305_32_update(
       (
         (Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_){
           .block_state = block_state1,
-          .buf = buf1,
+          .buf = buf,
           .total_len = total_len2,
-          .maybe_key = k_1
+          .p_key = k_1
         }
       );
     return;
@@ -117,25 +117,25 @@ Hacl_Streaming_Poly1305_32_update(
   {
     Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_ s1 = *p;
     uint64_t *block_state1 = s1.block_state;
-    uint8_t *buf1 = s1.buf;
+    uint8_t *buf = s1.buf;
     uint64_t total_len1 = s1.total_len;
-    uint8_t *k_1 = s1.maybe_key;
+    uint8_t *k_1 = s1.p_key;
     uint32_t n_blocks = len / (uint32_t)16U;
     uint32_t data1_len = n_blocks * (uint32_t)16U;
     uint32_t data2_len = len - data1_len;
     uint8_t *data1 = data;
     uint8_t *data2 = data + data1_len;
     Hacl_Poly1305_32_poly1305_update(block_state1, data1_len, data1);
-    uint8_t *dst = buf1;
+    uint8_t *dst = buf;
     memcpy(dst, data2, data2_len * sizeof (data2[0U]));
     *p
     =
       (
         (Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_){
           .block_state = block_state1,
-          .buf = buf1,
+          .buf = buf,
           .total_len = total_len1 + (uint64_t)len,
-          .maybe_key = k_1
+          .p_key = k_1
         }
       );
     return;
@@ -147,7 +147,7 @@ Hacl_Streaming_Poly1305_32_update(
   uint64_t *block_state10 = s1.block_state;
   uint8_t *buf_1 = s1.buf;
   uint64_t total_len10 = s1.total_len;
-  uint8_t *k_1 = s1.maybe_key;
+  uint8_t *k_1 = s1.p_key;
   uint64_t x = total_len10 % (uint64_t)(uint32_t)16U;
   uint32_t sz1 = (uint32_t)x;
   uint32_t diff1 = (uint32_t)16U - sz1;
@@ -162,30 +162,30 @@ Hacl_Streaming_Poly1305_32_update(
         .block_state = block_state10,
         .buf = buf_1,
         .total_len = total_len10 + (uint64_t)diff,
-        .maybe_key = k_1
+        .p_key = k_1
       }
     );
   Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_ s10 = *p;
   uint64_t *block_state1 = s10.block_state;
-  uint8_t *buf1 = s10.buf;
+  uint8_t *buf = s10.buf;
   uint64_t total_len1 = s10.total_len;
-  uint8_t *k_10 = s10.maybe_key;
+  uint8_t *k_10 = s10.p_key;
   uint32_t n_blocks = (len - diff) / (uint32_t)16U;
   uint32_t data1_len = n_blocks * (uint32_t)16U;
   uint32_t data2_len = len - diff - data1_len;
   uint8_t *data11 = data2;
   uint8_t *data21 = data2 + data1_len;
   Hacl_Poly1305_32_poly1305_update(block_state1, data1_len, data11);
-  uint8_t *dst = buf1;
+  uint8_t *dst = buf;
   memcpy(dst, data21, data2_len * sizeof (data21[0U]));
   *p
   =
     (
       (Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_){
         .block_state = block_state1,
-        .buf = buf1,
+        .buf = buf,
         .total_len = total_len1 + (uint64_t)(len - diff),
-        .maybe_key = k_10
+        .p_key = k_10
       }
     );
 }
@@ -200,7 +200,7 @@ Hacl_Streaming_Poly1305_32_finish(
   uint64_t *block_state = scrut.block_state;
   uint8_t *buf_ = scrut.buf;
   uint64_t total_len = scrut.total_len;
-  uint8_t *k_ = scrut.maybe_key;
+  uint8_t *k_ = scrut.p_key;
   uint8_t *buf_1 = buf_;
   uint8_t dummy_key[32U] = { 0U };
   uint64_t r[25U] = { 0U };
@@ -220,12 +220,12 @@ Hacl_Streaming_Poly1305_32_finish(
 void Hacl_Streaming_Poly1305_32_free(Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_ *s)
 {
   Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_ scrut = *s;
-  uint8_t *k_ = scrut.maybe_key;
-  uint8_t *buf1 = scrut.buf;
+  uint8_t *k_ = scrut.p_key;
+  uint8_t *buf = scrut.buf;
   uint64_t *block_state = scrut.block_state;
   KRML_HOST_FREE(k_);
   KRML_HOST_FREE(block_state);
-  KRML_HOST_FREE(buf1);
+  KRML_HOST_FREE(buf);
   KRML_HOST_FREE(s);
 }
 
