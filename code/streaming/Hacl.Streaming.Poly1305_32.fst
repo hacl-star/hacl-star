@@ -66,31 +66,14 @@ let stateful_poly1305_ctx32: I.stateful unit =
       B.modifies_buffer_elim (as_raw s) l h0 h1)
     (fun #_ _ _ _ _ -> ())
     (fun () ->
-      let h0 = ST.get () in
-      let dummy_key = B.alloca (Lib.IntTypes.u8 0) 32ul in
       let r = B.alloca (F32xN.zero 1) 25ul in
-      Hacl.Poly1305_32.poly1305_init (as_lib r) (as_lib_k dummy_key);
       let h1 = ST.get () in
-      B.modifies_only_not_unused_in B.loc_none h0 h1;
+      P.ctx_inv_zeros #M32 r h1;
       r)
     (fun () r ->
-      let h0 = ST.get () in
-      ST.push_frame ();
-      let h1 = ST.get () in
-      let dummy_key = B.alloca (Lib.IntTypes.u8 0) 32ul in
-      let h11 = ST.get () in
       let r = B.malloc r (F32xN.zero 1) 25ul in
-      let h12 = ST.get () in
-      Hacl.Poly1305_32.poly1305_init (as_lib r) (as_lib_k dummy_key);
-      let h2 = ST.get () in
-      B.modifies_only_not_unused_in B.loc_none h1 h11;
-      B.modifies_only_not_unused_in B.loc_none h11 h12;
-      B.modifies_only_not_unused_in B.(loc_buffer r) h12 h12;
-      ST.pop_frame ();
-      let h3 = ST.get () in
-      B.modifies_fresh_frame_popped h0 h1 B.(loc_buffer r) h2 h3;
-      B.modifies_only_not_unused_in B.loc_none h0 h3;
-      P.reveal_ctx_inv (as_lib r) h2 h3;
+      let h1 = ST.get () in
+      P.ctx_inv_zeros #M32 r h1;
       r)
     (fun _ s -> B.free s)
     (fun _ src dst ->
