@@ -13,34 +13,14 @@ open FStar.Mul
 
 let uint8 = Lib.IntTypes.uint8
 
-let concat_blocks_modulo (block_len: pos) (s1 s2: S.seq uint8): Lemma
-  (requires
-    S.length s1 % block_len = 0 /\
-    S.length s2 % block_len = 0)
-  (ensures
-    S.length (S.append s1 s2) % block_len = 0)
-=
-  let input = S.append s1 s2 in
-  let input1 = s1 in
-  let input2 = s2 in
-  calc (==) {
-    S.length input % block_len;
-  (==) { S.lemma_len_append input1 input2 }
-    (S.length input1 + S.length input2) % block_len;
-  (==) {
-    FStar.Math.Lemmas.modulo_distributivity (S.length input1) (S.length input2) (block_len)
-  }
-    (S.length input1 % block_len + S.length input2 % block_len) % block_len;
-  (==) { (* hyp *) }
-    0 % block_len;
-  (==) { }
-    0;
-  }
+/// Specification
+/// =============
+
+#push-options "--z3cliopt smt.arith.nl=false"
 
 /// A helper that deals with the modulo proof obligation to make things go
 /// smoothly. Originally in Spec.Agile.Hash, now generic, with a much more
 /// robust proof.
-#push-options "--z3cliopt smt.arith.nl=false"
 let split_block (block_length: pos)
   (blocks: S.seq uint8)
   (n: nat):
@@ -112,6 +92,50 @@ let rec mk_update_multi #a (block_length: pos)
     let block, rem = split_block block_length blocks 1 in
     let acc = update acc block in
     mk_update_multi block_length update acc rem
+
+let update_full #a
+  (block_length:pos)
+  (update: a -> (s:S.seq uint8 { S.length s = block_length }) -> a)
+  (update_last: a -> (s:S.seq uint8 { S.length s < block_length }) -> a)
+  (acc: a)
+  (input: S.seq uint8)
+=
+  let n_blocks = S.length input / block_length in
+  let blocks, rest = S.split input (n_blocks * block_length) in
+  assert (S.length rest = S.length input % block_length);
+  Math.Lemmas.multiple_modulo_lemma n_blocks block_length;
+  assert (S.length blocks % block_length = 0);
+  assert (S.length rest < block_length);
+  update_last (mk_update_multi block_length update acc blocks) rest
+
+/// Lemmas
+/// ======
+
+#push-options "--z3cliopt smt.arith.nl=false"
+let concat_blocks_modulo (block_len: pos) (s1 s2: S.seq uint8): Lemma
+  (requires
+    S.length s1 % block_len = 0 /\
+    S.length s2 % block_len = 0)
+  (ensures
+    S.length (S.append s1 s2) % block_len = 0)
+=
+  let input = S.append s1 s2 in
+  let input1 = s1 in
+  let input2 = s2 in
+  calc (==) {
+    S.length input % block_len;
+  (==) { S.lemma_len_append input1 input2 }
+    (S.length input1 + S.length input2) % block_len;
+  (==) {
+    FStar.Math.Lemmas.modulo_distributivity (S.length input1) (S.length input2) (block_len)
+  }
+    (S.length input1 % block_len + S.length input2 % block_len) % block_len;
+  (==) { (* hyp *) }
+    0 % block_len;
+  (==) { FStar.Math.Lemmas.small_mod 0 block_len }
+    0;
+  }
+#pop-options
 
 #push-options "--fuel 1"
 let update_multi_zero #a (block_length: pos)

@@ -81,11 +81,11 @@ let rec update_full_is_repeat_blocks #a block_length update update_last acc inpu
     norm_spec [zeta; iota; primops; delta_only [`%mk_update_multi]]
       (mk_update_multi block_length update acc (head `S.append` tail));
     calc (==) {
-      update_full block_length update update_last acc input;
+      Lib.UpdateMulti.update_full block_length update update_last acc input;
     (==) { }
       update_last (mk_update_multi block_length update (update acc head) tail) rest;
     (==) { }
-      update_full block_length update update_last (update acc head) (tail `S.append` rest);
+      Lib.UpdateMulti.update_full block_length update update_last (update acc head) (tail `S.append` rest);
     (==) { update_full_is_repeat_blocks #a block_length update update_last (update acc head) (tail `S.append` rest) input' }
       Lib.Sequence.repeat_blocks #uint8 block_length (tail `S.append` rest) repeat_f repeat_l (update acc head);
     (==) { }

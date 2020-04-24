@@ -250,13 +250,7 @@ val poly_is_incremental:
   key: S.seq uint8 { S.length key = 32 } ->
   input:S.seq uint8 { S.length input <= pow2 32 - 1 } ->
   Lemma (ensures (
-    let open FStar.Mul in
-    let block_length = Spec.Poly1305.size_block in
-    let n = S.length input / block_length in
-    let bs, l = S.split input (n * block_length) in
-    FStar.Math.Lemmas.multiple_modulo_lemma n block_length;
-    let hash = update_multi (Spec.Poly1305.poly1305_init key) bs in
-    let hash = update_last hash l in
+    let hash = Lib.UpdateMulti.update_full Spec.Poly1305.size_block update_ update_last (Spec.Poly1305.poly1305_init key) input in
     finish_ key hash `S.equal` spec key input))
 
 let poly_is_incremental key input =
