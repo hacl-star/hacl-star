@@ -21,6 +21,7 @@ open Hacl.Streaming.Interface
 open FStar.HyperStack.ST
 open LowStar.BufferOps
 open FStar.Mul
+open Hacl.Streaming.Spec
 
 /// State machinery
 /// ===============
@@ -43,6 +44,9 @@ type state_s #index (c: block index) (i: index)
     // one in Hacl.Streaming.Interface. Sigh!!
     p_key: t' ->
     state_s #index c i t t'
+
+/// Defining a series of helpers to deal with the indexed type of the key. This
+/// makes proofs easier.
 
 let optional_freeable #index
   (#i: index)
@@ -138,25 +142,6 @@ let footprint_s #index (c: block index) (i: index) (h: HS.mem) s =
 /// Invariants
 /// ==========
 
-noextract
-let split_at_last #index (c: block index) (i: index) (b: bytes):
-  Pure (bytes & bytes)
-    (requires True)
-    (ensures (fun (blocks, rest) ->
-      S.length rest < U32.v (c.block_len i) /\
-      S.length rest = S.length b % U32.v (c.block_len i) /\
-      S.equal (S.append blocks rest) b /\
-      S.length blocks % U32.v (c.block_len i) = 0))
-=
-  let n = S.length b / U32.v (c.block_len i) in
-  let blocks, rest = S.split b (n * U32.v (c.block_len i)) in
-  assert (S.length blocks = n * U32.v (c.block_len i));
-  FStar.Math.Lemmas.multiple_modulo_lemma n (U32.v (c.block_len i));
-  assert ((n * U32.v (c.block_len i)) % U32.v (c.block_len i) = 0);
-  assert (S.length rest = S.length b - n * U32.v (c.block_len i));
-  assert (S.length b - n * U32.v (c.block_len i) < U32.v (c.block_len i));
-  blocks, rest
-
 let invariant_s #index (c: block index) (i: index) h s =
   let State block_state buf_ total_len seen key = s in
   let seen = G.reveal seen in
@@ -217,13 +202,6 @@ let index_of_state #index c i t t' s =
   let open LowStar.BufferOps in
   let State block_state _ _ _ _ = !*s in
   c.index_of_state i block_state
-
-let split_at_last_empty #index (c: block index) (i: index): Lemma
-  (ensures (
-    let blocks, rest = split_at_last c i S.empty in
-    S.equal blocks S.empty /\ S.equal rest S.empty))
-=
-  ()
 
 let create_in #index c i t t' k r =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
@@ -395,11 +373,13 @@ let init #index c i t t' k s =
   );
   assert (invariant_s c i h3 (B.get h3 s 0))
 
-/// We keep the total length at run-time, on 64 bits, but require that it abides
-/// by the size requirements for the smaller hashes -- we're not interested at
-/// this stage in having an agile type for lengths that would be up to 2^125 for
-/// SHA384/512.
+/// Some helpers to minimize modulo-reasoning
+/// =========================================
 
+/// The ``rest`` function below allows computing, based ``total_len`` stored in
+/// the state, the length of useful data currently stored in ``buf``.
+/// Unsurprisingly, there's a fair amount of modulo reasoning here because of
+/// 64-bit-to-32-bit conversions, so we do them once and for all in a helper.
 #push-options "--z3cliopt smt.arith.nl=false"
 let mod_block_len_bound #index (c: block index) (i: index)
   (total_len: U64.t): Lemma
@@ -440,6 +420,8 @@ let rest #index (c: block index) (i: index)
   r
 #pop-options
 
+/// We always add 32-bit lengths to 64-bit lengths. Having a helper for that allows
+/// doing modulo reasoning once and for all.
 inline_for_extraction noextract
 let add_len #index (c: block index) (i: index) (total_len: UInt64.t) (len: UInt32.t):
   Pure UInt64.t
@@ -447,80 +429,6 @@ let add_len #index (c: block index) (i: index) (total_len: UInt64.t) (len: UInt3
     (ensures fun x -> U64.v x = U64.v total_len + U32.v len /\ U64.v x <= c.max_input_length i)
 =
   total_len `U64.add` Int.Cast.uint32_to_uint64 len
-
-/// We split update into several versions, to all be simplified into a single
-/// large one at extraction-time.
-
-let total_len_h #index (c: block index) (i: index) h (p: state' c i) =
-  State?.total_len (B.deref h p)
-
-/// Case 1: we just need to grow the buffer, no call to the hash function.
-
-let split_at_last_small #index (c: block index) (i: index) (b: bytes) (d: bytes): Lemma
-  (requires (
-    let _, rest = split_at_last c i b in
-    S.length rest + S.length d < U32.v (c.block_len i)))
-  (ensures (
-    let blocks, rest = split_at_last c i b in
-    let blocks', rest' = split_at_last c i (S.append b d) in
-    S.equal blocks blocks' /\ S.equal (S.append rest d) rest'))
-=
-  let blocks, rest = split_at_last c i b in
-  let blocks', rest' = split_at_last c i (S.append b d) in
-  let l = U32.v (c.block_len i) in
-
-  (* Looking at the definition of split_at_last, blocks depends only on S.length b / l. *)
-  calc (==) {
-    S.length b / l;
-  (==) { S.lemma_len_append blocks rest }
-    (S.length blocks + S.length rest) / l;
-  (==) { Math.Lemmas.lemma_div_exact (S.length blocks) l }
-    (l * (S.length blocks / l) + S.length rest) / l;
-  (==) { }
-    (S.length rest + (S.length blocks / l) * l) / l;
-  (==) { Math.Lemmas.lemma_div_plus (S.length rest) (S.length blocks / l) l }
-    (S.length rest) / l + (S.length blocks / l);
-  (==) { Math.Lemmas.small_div (S.length rest) l }
-    S.length blocks / l;
-  };
-
-  calc (==) {
-    S.length (S.append b d) / l;
-  (==) { S.lemma_len_append b d; S.lemma_len_append blocks rest }
-    (S.length blocks + S.length rest + S.length d) / l;
-  (==) { Math.Lemmas.lemma_div_exact (S.length blocks) l }
-    (l * (S.length blocks / l) + (S.length rest + S.length d)) / l;
-  (==) { }
-    ((S.length rest + S.length d) + (S.length blocks / l) * l) / l;
-  (==) { Math.Lemmas.lemma_div_plus (S.length rest + S.length d) (S.length blocks / l) l }
-    (S.length rest + S.length d) / l + (S.length blocks / l);
-  (==) { Math.Lemmas.small_div (S.length rest + S.length d) l }
-    S.length blocks / l;
-  };
-
-  assert (S.equal blocks blocks');
-
-  calc (S.equal) {
-    rest `S.append` d;
-  (S.equal) { (* definition *) }
-    S.slice b ((S.length b / l) * l) (S.length b) `S.append` d;
-  (S.equal) { }
-    S.slice (S.append b d) ((S.length b / l) * l) (S.length b) `S.append` d;
-  (S.equal) { (* above *) }
-    S.slice (S.append b d) ((S.length (S.append b d) / l) * l) (S.length b) `S.append` d;
-  (S.equal) { (* ? *) }
-    S.slice (S.append b d) ((S.length (S.append b d) / l) * l) (S.length b)
-    `S.append`
-    S.slice (S.append b d) (S.length b) (S.length (S.append b d));
-  (S.equal) { S.lemma_split (S.append b d) ((S.length (S.append b d) / l) * l) }
-    S.slice (S.append b d) ((S.length (S.append b d) / l) * l) (S.length b + S.length d);
-  (S.equal) { S.lemma_len_append b d }
-    S.slice (S.append b d) ((S.length (S.append b d) / l) * l) (S.length (S.append b d));
-  (S.equal) { }
-    rest';
-  };
-
-  ()
 
 #push-options "--z3cliopt smt.arith.nl=false"
 let add_len_small #index (c: block index) (i: index) (total_len: UInt64.t) (len: UInt32.t): Lemma
@@ -545,6 +453,12 @@ let add_len_small #index (c: block index) (i: index) (total_len: UInt64.t) (len:
     U32.v (rest c i total_len) + U32.v len;
   }
 #pop-options
+
+/// Beginning of the three sub-cases (see Hacl.Streaming.Spec)
+/// ==========================================================
+
+let total_len_h #index (c: block index) (i: index) h (p: state' c i) =
+  State?.total_len (B.deref h p)
 
 inline_for_extraction noextract
 val update_small:
@@ -620,76 +534,6 @@ let update_small #index c i t t' p data len =
 /// Case 2: we have no buffered data.
 
 #push-options "--z3rlimit 100"
-let split_at_last_blocks #index (c: block index) (i: index) (b: bytes) (d: bytes): Lemma
-  (requires (
-    let blocks, rest = split_at_last c i b in
-    S.equal rest S.empty))
-  (ensures (
-    let blocks, rest = split_at_last c i b in
-    let blocks', rest' = split_at_last c i d in
-    let blocks'', rest'' = split_at_last c i (S.append b d) in
-    S.equal blocks'' (S.append blocks blocks') /\
-    S.equal rest' rest''))
-=
-  let blocks, rest = split_at_last c i b in
-  let blocks', rest' = split_at_last c i d in
-  let blocks'', rest'' = split_at_last c i (S.append b d) in
-  let b' = S.append blocks rest in
-  let d' = S.append blocks' rest' in
-  let l = U32.v (c.block_len i) in
-  calc (S.equal) {
-    rest';
-  (S.equal) { }
-    snd (split_at_last c i d);
-  (S.equal) { }
-    S.slice d ((S.length d / l) * l) (S.length d);
-  (S.equal) { }
-    S.slice (S.append b d) (S.length b + (S.length d / l) * l) (S.length b + S.length d);
-  (S.equal) { }
-    S.slice (S.append b d) (S.length b + (S.length d / l) * l) (S.length (S.append b d));
-  (S.equal) { Math.Lemmas.div_exact_r (S.length b) l }
-    // For some reason this doesn't go through with the default rlimit, even
-    // though this is a direct rewriting based on the application of the lemma
-    // above.
-    S.slice (S.append b d) ((S.length b / l) * l + (S.length d / l) * l) (S.length (S.append b d));
-  (S.equal) { Math.Lemmas.distributivity_add_left (S.length b / l) (S.length d / l) l }
-    S.slice (S.append b d) ((S.length b / l + S.length d / l) * l) (S.length (S.append b d));
-  (S.equal) { Math.Lemmas.lemma_div_plus (S.length d) (S.length b / l) l }
-    S.slice (S.append b d) (((S.length b + S.length d) / l) * l) (S.length (S.append b d));
-  (S.equal) { }
-    snd (S.split (S.append b d) (((S.length (S.append b d)) / l) * l));
-  (S.equal) { }
-    rest'';
-  };
-
-  calc (S.equal) {
-    S.append blocks blocks';
-  (S.equal) { (* rest = S.empty *) }
-    S.append (S.append blocks rest) blocks';
-  (S.equal) { }
-    S.append b blocks';
-  (S.equal) { }
-    S.append b (fst (split_at_last c i d));
-  (S.equal) { (* definition of split_at_last *) }
-    S.append b (fst (S.split d ((S.length d / l) * l)));
-  (S.equal) { (* definition of split *) }
-    S.append b (S.slice d 0 ((S.length d / l) * l));
-  (S.equal) { }
-    S.slice (S.append b d) 0 (S.length b + (S.length d / l) * l);
-  (S.equal) { Math.Lemmas.div_exact_r (S.length b) l }
-    S.slice (S.append b d) 0 ((S.length b / l) * l + (S.length d / l) * l);
-  (S.equal) { Math.Lemmas.distributivity_add_left (S.length b / l) (S.length d / l) l }
-    S.slice (S.append b d) 0 ((S.length b / l + S.length d / l) * l);
-  (S.equal) { Math.Lemmas.lemma_div_plus (S.length d) (S.length b / l) l }
-    S.slice (S.append b d) 0 (((S.length b + S.length d) / l) * l);
-  (S.equal) { }
-    fst (S.split (S.append b d) (((S.length (S.append b d)) / l) * l));
-  (S.equal) { }
-    blocks'';
-  }
-#pop-options
-
-#push-options "--z3rlimit 50"
 inline_for_extraction noextract
 val update_empty_buf:
   #index:Type0 ->
@@ -801,35 +645,6 @@ val update_round:
       update_post c i s data len h0 h1 /\
       U64.v (total_len_h c i h1 s) % U32.v (c.block_len i) = 0))
 
-#push-options "--z3cliopt smt.arith.nl=false"
-let split_at_last_block #index (c: block index) (i: index) (b: bytes) (d: bytes): Lemma
-  (requires (
-    let _, rest = split_at_last c i b in
-    S.length rest + S.length d = U32.v (c.block_len i)))
-  (ensures (
-    let blocks, rest = split_at_last c i b in
-    let blocks', rest' = split_at_last c i (S.append b d) in
-    S.equal (S.append b d) blocks' /\ S.equal S.empty rest'))
-=
-  let blocks, rest = split_at_last c i b in
-    let blocks', rest' = split_at_last c i (S.append b d) in
-
-  calc (==) {
-    (S.length b + S.length d) % U32.v (c.block_len i);
-  (==) { S.lemma_len_append blocks rest }
-    (S.length blocks + S.length rest + S.length d) % U32.v (c.block_len i);
-  (==) { Math.Lemmas.modulo_distributivity (S.length blocks) (S.length rest + S.length d) (U32.v (c.block_len i)) }
-    ((S.length blocks) % U32.v (c.block_len i) + (S.length rest + S.length d) % U32.v (c.block_len i))
-      % U32.v (c.block_len i);
-  (==) { Math.Lemmas.multiple_modulo_lemma (U32.v (c.block_len i)) 1 }
-    ((S.length blocks) % U32.v (c.block_len i)) % U32.v (c.block_len i);
-  (==) { }
-    0 % U32.v (c.block_len i);
-  (==) { Math.Lemmas.small_modulo_lemma_1 0 (U32.v (c.block_len i)) }
-    0;
-  }
-#pop-options
-
 #push-options "--z3rlimit 200"
 let update_round #index c i t t' p data len =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
@@ -899,6 +714,9 @@ let update_round #index c i t t' p data len =
   optional_frame #_ #i #c.km #c.key (B.loc_buffer p) k' h2 h3;
   assert (seen_pred c i h3 p `S.equal` (S.append (G.reveal seen) (B.as_seq h0 data)))
 #pop-options
+
+/// General update function, as a decomposition of the three sub-cases
+/// ==================================================================
 
 let update #index c i t t' p data len =
   let open LowStar.BufferOps in

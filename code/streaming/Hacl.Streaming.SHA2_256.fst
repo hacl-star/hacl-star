@@ -27,7 +27,13 @@ open Spec.Hash.Definitions
 
 /// Maximum input length, but fitting on a 64-bit integer (since the streaming
 /// module doesn't bother taking into account lengths that are greater than
-/// that).
+/// that). The comment previously was:
+///
+/// Note that we keep the total length at run-time, on 64 bits, but require that
+/// it abides by the size requirements for the smaller hashes -- we're not
+/// interested at this stage in having an agile type for lengths that would be
+/// up to 2^125 for SHA384/512.
+
 inline_for_extraction noextract
 let max_input_length64 a: x:nat { 0 < x /\ x < pow2 64 /\ x <= max_input_length a } =
   let _ = allow_inversion hash_alg in
