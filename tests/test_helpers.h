@@ -1,7 +1,7 @@
 // This header contains test helpers to avoid ridiculous copy-paste between
 // various test files. Keep everything in there static inline.
 
-#pragma "once"
+#pragma once
 
 static inline bool compare_and_print(size_t len, uint8_t* comp, uint8_t* exp) {
   printf("computed:");
