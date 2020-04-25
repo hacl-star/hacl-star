@@ -81,7 +81,7 @@ function fetch_and_make_kremlin() {
 # By default, kremlin master works against F* stable. Can also be overridden.
 function fetch_kremlin() {
     if [ ! -d kremlin ]; then
-        git clone https://github.com/FStarLang/kremlin kremlin
+        git clone https://github.com/FStarLang/kremlin kremlin || return 1
     fi
     cd kremlin
     git fetch origin
@@ -104,7 +104,7 @@ function fetch_and_make_mlcrypto() {
 
 function fetch_mlcrypto() {
     if [ ! -d mlcrypto ]; then
-        git clone https://github.com/project-everest/MLCrypto mlcrypto
+        git clone https://github.com/project-everest/MLCrypto mlcrypto || return 1
     fi
     cd mlcrypto
     git fetch origin
@@ -124,7 +124,7 @@ function fetch_mlcrypto() {
 # By default, mitls-fstar master works against F* stable. Can also be overridden.
 function fetch_mitls() {
     if [ ! -d mitls-fstar ]; then
-        git clone https://github.com/mitls/mitls-fstar mitls-fstar
+        git clone https://github.com/mitls/mitls-fstar mitls-fstar || return 1
     fi
     cd mitls-fstar
     git fetch origin

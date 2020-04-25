@@ -66,6 +66,8 @@ let frodo_gen_matrix_cshake1 n seed_len seed r i res =
     frodo_gen_matrix_cshake0 n i r j res
   )
 
+#restart-solver
+#push-options "--z3rlimit 100"
 val frodo_gen_matrix_cshake:
     n:size_t{0 < v n /\ 2 * v n <= max_size_t /\ 256 + v n < maxint U16 /\ v n * v n <= max_size_t}
   -> seed_len:size_t{v seed_len > 0}
@@ -96,6 +98,7 @@ let frodo_gen_matrix_cshake n seed_len seed res =
     frodo_gen_matrix_cshake1 n seed_len seed r i res
   );
   pop_frame ()
+#pop-options
 
 inline_for_extraction noextract private
 val frodo_gen_matrix_cshake_4x0:
