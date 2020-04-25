@@ -19,7 +19,7 @@ let repeat_f #a (block_length:pos { block_length < pow2 32 })
 let repeat_l #a (block_length:pos { block_length < pow2 32 })
   (update_last: (a -> s:S.seq uint8 { S.length s < block_length } -> a))
   (input:S.seq uint8)
-  (l: Lib.IntTypes.size_nat { l == S.length input % block_length })
+  (l: Lib.IntTypes.size_nat { l < block_length })
   (s: Lib.Sequence.lseq uint8 l)
   (acc: a): a
 =
