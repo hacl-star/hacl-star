@@ -14,7 +14,6 @@
 #include "sha2_vectors.h"
 #include "test_helpers.h"
 
-typedef uint64_t cycles;
 
 void ossl_sha2(uint8_t* hash, uint8_t* input, int len){
   SHA256_CTX ctx;
@@ -28,32 +27,10 @@ void ossl_sha2(uint8_t* hash, uint8_t* input, int len){
    //EVP_CIPHER_CTX_free(ctx);
 }
 
-static __inline__ cycles cpucycles_begin(void)
-{
-  uint64_t rax,rdx,aux;
-  asm volatile ( "rdtscp\n" : "=a" (rax), "=d" (rdx), "=c" (aux) : : );
-  return (rdx << 32) + rax;
-}
-
-static __inline__ cycles cpucycles_end(void)
-{
-  uint64_t rax,rdx,aux;
-  asm volatile ( "rdtscp\n" : "=a" (rax), "=d" (rdx), "=c" (aux) : : );
-  return (rdx << 32) + rax;
-}
-
-
 
 #define ROUNDS 16384
 #define SIZE   16384
 
-
-void print_time(clock_t tdiff, cycles cdiff){
-  uint64_t count = ROUNDS * SIZE;
-  printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff,(double)cdiff/count);
-  printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff,(double)tdiff/count);
-  printf("bw %8.2f MB/s\n",(double)count/(((double)tdiff / CLOCKS_PER_SEC) * 1000000.0));
-}
 
 bool print_result(uint8_t* comp, uint8_t* exp, int len) {
   return compare_and_print(len, comp, exp);
@@ -138,7 +115,7 @@ int main()
   b = cpucycles_end();
   t2 = clock();
   double cdiff1 = b - a;
-  double tdiff1 = (double)(t2 - t1)/CLOCKS_PER_SEC;
+  double tdiff1 = t2 - t1;
 
   for (int j = 0; j < ROUNDS; j++) {
     Hacl_Hash_SHA2_hash_256(plain,SIZE,plain);
@@ -151,7 +128,7 @@ int main()
   b = cpucycles_end();
   t2 = clock();
   double cdiff2 = b - a;
-  double tdiff2 = (double)(t2 - t1)/CLOCKS_PER_SEC;
+  double tdiff2 = t2 - t1;
 
   for (int j = 0; j < ROUNDS; j++) {
     ossl_sha2(plain,plain,SIZE);
@@ -164,7 +141,7 @@ int main()
   b = cpucycles_end();
   t2 = clock();
   double cdiff2a = b - a;
-  double tdiff2a = (double)(t2 - t1)/CLOCKS_PER_SEC;
+  double tdiff2a = t2 - t1;
 
   for (int j = 0; j < ROUNDS; j++) {
     Hacl_Hash_SHA2_hash_384(plain,SIZE,plain);
@@ -177,7 +154,7 @@ int main()
   b = cpucycles_end();
   t2 = clock();
   double cdiff3 = b - a;
-  double tdiff3 = (double)(t2 - t1)/CLOCKS_PER_SEC;
+  double tdiff3 = t2 - t1;
 
   for (int j = 0; j < ROUNDS; j++) {
     Hacl_Hash_SHA2_hash_512(plain,SIZE,plain);
@@ -190,16 +167,16 @@ int main()
   b = cpucycles_end();
   t2 = clock();
   double cdiff4 = b - a;
-  double tdiff4 = (double)(t2 - t1)/CLOCKS_PER_SEC;
-  
+  double tdiff4 = t2 - t1;
+
   uint8_t res = plain[0];
-  printf("SHA2-224 (32-bit) PERF: %d\n",(int)res); print_time(tdiff1,cdiff1);
-  printf("SHA2-256 (32-bit) PERF: %d\n",(int)res); print_time(tdiff2,cdiff2);
-  printf("OpenSSL SHA2-256 (32-bit) PERF: %d\n",(int)res); print_time(tdiff2a,cdiff2a);
-  printf("SHA2-384 (32-bit) PERF: %d\n",(int)res); print_time(tdiff3,cdiff3);
-  printf("SHA2-512 (32-bit) PERF: %d\n",(int)res); print_time(tdiff4,cdiff4);
+  uint64_t count = ROUNDS * SIZE;
+  printf("SHA2-224 (32-bit) PERF: %d\n",(int)res); print_time(count,tdiff1,cdiff1);
+  printf("SHA2-256 (32-bit) PERF: %d\n",(int)res); print_time(count,tdiff2,cdiff2);
+  printf("OpenSSL SHA2-256 (32-bit) PERF: %d\n",(int)res); print_time(count,tdiff2a,cdiff2a);
+  printf("SHA2-384 (32-bit) PERF: %d\n",(int)res); print_time(count,tdiff3,cdiff3);
+  printf("SHA2-512 (32-bit) PERF: %d\n",(int)res); print_time(count,tdiff4,cdiff4);
 
   if (ok) return EXIT_SUCCESS;
   else return EXIT_FAILURE;
 }
-

@@ -16,32 +16,8 @@
 #include "test_helpers.h"
 #include "chacha20_vectors.h"
 
-typedef uint64_t cycles;
-
-static __inline__ cycles cpucycles_begin(void)
-{
-  uint64_t rax,rdx,aux;
-  asm volatile ( "rdtscp\n" : "=a" (rax), "=d" (rdx), "=c" (aux) : : );
-  return (rdx << 32) + rax;
-}
-
-static __inline__ cycles cpucycles_end(void)
-{
-  uint64_t rax,rdx,aux;
-  asm volatile ( "rdtscp\n" : "=a" (rax), "=d" (rdx), "=c" (aux) : : );
-  return (rdx << 32) + rax;
-}
-
-
 #define ROUNDS 100000
 #define SIZE   8192
-
-void print_time(clock_t tdiff, cycles cdiff){
-  uint64_t count = ROUNDS * SIZE;
-  printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff,(double)cdiff/count);
-  printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff,(double)tdiff/count);
-  printf("bw %8.2f MB/s\n",(double)count/(((double)tdiff / CLOCKS_PER_SEC) * 1000000.0));
-}
 
 
 bool print_result(int in_len, uint8_t* comp, uint8_t* exp) {
@@ -139,9 +115,10 @@ int main() {
   double diff3 = t2 - t1;
   uint64_t cyc3 = b - a;
 
-  printf("32-bit Chacha20\n"); print_time(diff1,cyc1);
-  printf("128-bit Chacha20\n"); print_time(diff2,cyc2);
-  printf("256-bit Chacha20\n"); print_time(diff3,cyc3);
+  uint64_t count = ROUNDS * SIZE;
+  printf("32-bit Chacha20\n"); print_time(count,diff1,cyc1);
+  printf("128-bit Chacha20\n"); print_time(count,diff2,cyc2);
+  printf("256-bit Chacha20\n"); print_time(count,diff3,cyc3);
 
   if (ok) return EXIT_SUCCESS;
   else return EXIT_FAILURE;

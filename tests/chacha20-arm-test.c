@@ -18,11 +18,6 @@
 #define ROUNDS 100000
 #define SIZE   8192
 
-void print_time(double tdiff, uint64_t cdiff){
-  uint64_t count = ROUNDS * SIZE;
-  printf("bw %8.2f MB/s\n",(double)count/(tdiff * 1000000.0));
-}
-
 
 bool print_result(int in_len, uint8_t* comp, uint8_t* exp) {
   return compare_and_print(in_len, comp, exp);
@@ -73,7 +68,7 @@ int main() {
     Hacl_Chacha20_chacha20_encrypt(SIZE,plain,plain,key,nonce,1);
   }
   t2 = clock();
-  double diff1 = (double)(t2 - t1)/CLOCKS_PER_SEC;
+  double diff1 = t2 - t1;
 
 
   memset(plain,'P',SIZE);
@@ -89,11 +84,11 @@ int main() {
     Hacl_Chacha20_Vec128_chacha20_encrypt_128(SIZE,plain,plain,key,nonce,1);
   }
   t2 = clock();
-  double diff2 = (double)(t2 - t1)/CLOCKS_PER_SEC;
+  double diff2 = t2 - t1;
 
-
-  printf("32-bit Chacha20\n"); print_time(diff1,0);
-  printf("128-bit Chacha20\n"); print_time(diff2,0);
+  uint64_t count = ROUNDS * SIZE;
+  printf("32-bit Chacha20\n"); print_time(count,diff1,0);
+  printf("128-bit Chacha20\n"); print_time(count,diff2,0);
 
   if (ok) return EXIT_SUCCESS;
   else return EXIT_FAILURE;

@@ -9,28 +9,6 @@
 #include <stdbool.h>
 #include <time.h>
 
-typedef uint64_t cycles;
-
-static __inline__ cycles cpucycles_begin(void)
-{
-  uint64_t rax,rdx,aux;
-  asm volatile ( "rdtscp\n" : "=a" (rax), "=d" (rdx), "=c" (aux) : : );
-  return (rdx << 32) + rax;
-  //  unsigned hi, lo;
-  //__asm__ __volatile__ ("CPUID\n\t"  "RDTSC\n\t"  "mov %%edx, %0\n\t"  "mov %%eax, %1\n\t": "=r" (hi), "=r" (lo):: "%rax", "%rbx", "%rcx", "%rdx");
-  //return ( (uint64_t)lo)|( ((uint64_t)hi)<<32 );
-}
-
-static __inline__ cycles cpucycles_end(void)
-{
-  uint64_t rax,rdx,aux;
-  asm volatile ( "rdtscp\n" : "=a" (rax), "=d" (rdx), "=c" (aux) : : );
-  return (rdx << 32) + rax;
-  //  unsigned hi, lo;
-  //__asm__ __volatile__ ("RDTSCP\n\t"  "mov %%edx, %0\n\t"  "mov %%eax, %1\n\t"  "CPUID\n\t": "=r" (hi), "=r" (lo)::     "%rax", "%rbx", "%rcx", "%rdx");
-  //return ( (uint64_t)lo)|( ((uint64_t)hi)<<32 );
-}
-
 #include "Hacl_Poly1305_32.h"
 #include "Hacl_Poly1305_128.h"
 #include "Hacl_Poly1305_256.h"
@@ -40,13 +18,6 @@ static __inline__ cycles cpucycles_end(void)
 
 #define ROUNDS 100000
 #define SIZE   16384
-
-void print_time(clock_t tdiff, cycles cdiff){
-  uint64_t count = ROUNDS * SIZE;
-  printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff,(double)cdiff/count);
-  printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff,(double)tdiff/count);
-  printf("bw %8.2f MB/s\n",(double)count/(((double)tdiff / CLOCKS_PER_SEC) * 1000000.0));
-}
 
 bool print_result(uint8_t* comp, uint8_t* exp) {
   return compare_and_print(16, comp, exp);
@@ -148,9 +119,10 @@ int main() {
   clock_t tdiff3 = t2 - t1;
   cycles cdiff3 = b - a;
 
-  printf("Poly1305 (32-bit) PERF: %d\n",(int)res); print_time(tdiff1,cdiff1);
-  printf("Poly1305 (128-bit) PERF:\n"); print_time(tdiff2,cdiff2);
-  printf("Poly1305 (256-bit) PERF:\n"); print_time(tdiff3,cdiff3);
+  uint64_t count = ROUNDS * SIZE;
+  printf("Poly1305 (32-bit) PERF: %d\n",(int)res); print_time(count,tdiff1,cdiff1);
+  printf("Poly1305 (128-bit) PERF:\n"); print_time(count,tdiff2,cdiff2);
+  printf("Poly1305 (256-bit) PERF:\n"); print_time(count,tdiff3,cdiff3);
 
   if (ok) return EXIT_SUCCESS;
   else return EXIT_FAILURE;

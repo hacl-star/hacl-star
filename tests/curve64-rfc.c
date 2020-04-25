@@ -14,39 +14,10 @@
 
 typedef __attribute__((aligned(32))) uint8_t X25519_KEY[32];
 
-typedef uint64_t cycles;
-
-static __inline__ cycles cpucycles_begin(void)
-{
-  uint64_t rax,rdx,aux;
-  asm volatile ( "rdtscp\n" : "=a" (rax), "=d" (rdx), "=c" (aux) : : );
-  return (rdx << 32) + rax;
-  //  unsigned hi, lo;
-  //__asm__ __volatile__ ("CPUID\n\t"  "RDTSC\n\t"  "mov %%edx, %0\n\t"  "mov %%eax, %1\n\t": "=r" (hi), "=r" (lo):: "%rax", "%rbx", "%rcx", "%rdx");
-  //return ( (uint64_t)lo)|( ((uint64_t)hi)<<32 );
-}
-
-static __inline__ cycles cpucycles_end(void)
-{
-  uint64_t rax,rdx,aux;
-  asm volatile ( "rdtscp\n" : "=a" (rax), "=d" (rdx), "=c" (aux) : : );
-  return (rdx << 32) + rax;
-  //  unsigned hi, lo;
-  //__asm__ __volatile__ ("RDTSCP\n\t"  "mov %%edx, %0\n\t"  "mov %%eax, %1\n\t"  "CPUID\n\t": "=r" (hi), "=r" (lo)::     "%rax", "%rbx", "%rcx", "%rdx");
-  //return ( (uint64_t)lo)|( ((uint64_t)hi)<<32 );
-}
-
 extern void x25519_shared_secret_x64(uint8_t* sec, uint8_t* priv, uint8_t* pub);
 
 #define ROUNDS 100000
 #define SIZE   1
-
-void print_time(clock_t tdiff, cycles cdiff){
-  uint64_t count = ROUNDS * SIZE;
-  printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff,(double)cdiff/count);
-  printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff,(double)tdiff/count);
-  printf("bw %8.2f MB/s\n",(double)count/(((double)tdiff / CLOCKS_PER_SEC) * 1000000.0));
-}
 
 
 bool print_result(int in_len, uint8_t* comp, uint8_t* exp) {
@@ -98,9 +69,10 @@ int main() {
   clock_t tdiff1 = t2 - t1;
   cycles cdiff1 = b - a;
 
+  uint64_t count = ROUNDS * SIZE;  
   double time = (((double)tdiff1) / CLOCKS_PER_SEC);
   double nsigs = ((double)ROUNDS) / time;
-  printf("Curve25519 (RFC7748 Original) PERF:\n"); print_time(tdiff1,cdiff1);
+  printf("Curve25519 (RFC7748 Original) PERF:\n"); print_time(count,tdiff1,cdiff1);
   printf("smult %8.2f mul/s\n",nsigs);
 
   if (ok) return EXIT_SUCCESS;

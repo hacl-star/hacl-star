@@ -18,11 +18,6 @@
 #define ROUNDS 100000
 #define SIZE   16384
 
-void print_time(clock_t tdiff, int cdiff){
-  uint64_t count = ROUNDS * SIZE;
-  printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff,(double)tdiff/count);
-  printf("bw %8.2f MB/s\n",(double)count/(((double)tdiff / CLOCKS_PER_SEC) * 1000000.0));
-}
 
 bool print_result(uint8_t* comp, uint8_t* exp) {
   return compare_and_print(16, comp, exp);
@@ -97,8 +92,9 @@ int main() {
   t2 = clock();
   clock_t tdiff2 = t2 - t1;
 
-  printf("Poly1305 (32-bit) PERF: %d\n",(int)res); print_time(tdiff1,0);
-  printf("Poly1305 (128-bit) PERF:\n"); print_time(tdiff2,0);
+  uint64_t count = ROUNDS * SIZE;
+  printf("Poly1305 (32-bit) PERF: %d\n",(int)res); print_time(count,tdiff1,0);
+  printf("Poly1305 (128-bit) PERF:\n"); print_time(count,tdiff2,0);
 
   if (ok) return EXIT_SUCCESS;
   else return EXIT_FAILURE;

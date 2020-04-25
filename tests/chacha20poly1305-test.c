@@ -16,38 +16,8 @@
 #include "test_helpers.h"
 #include "chacha20poly1305_vectors.h"
 
-
-typedef uint64_t cycles;
-
-static __inline__ cycles cpucycles_begin(void)
-{
-  uint64_t rax,rdx,aux;
-  asm volatile ( "rdtscp\n" : "=a" (rax), "=d" (rdx), "=c" (aux) : : );
-  return (rdx << 32) + rax;
-  //  unsigned hi, lo;
-  //__asm__ __volatile__ ("CPUID\n\t"  "RDTSC\n\t"  "mov %%edx, %0\n\t"  "mov %%eax, %1\n\t": "=r" (hi), "=r" (lo):: "%rax", "%rbx", "%rcx", "%rdx");
-  //return ( (uint64_t)lo)|( ((uint64_t)hi)<<32 );
-}
-
-static __inline__ cycles cpucycles_end(void)
-{
-  uint64_t rax,rdx,aux;
-  asm volatile ( "rdtscp\n" : "=a" (rax), "=d" (rdx), "=c" (aux) : : );
-  return (rdx << 32) + rax;
-  //  unsigned hi, lo;
-  //__asm__ __volatile__ ("RDTSCP\n\t"  "mov %%edx, %0\n\t"  "mov %%eax, %1\n\t"  "CPUID\n\t": "=r" (hi), "=r" (lo)::     "%rax", "%rbx", "%rcx", "%rdx");
-  //return ( (uint64_t)lo)|( ((uint64_t)hi)<<32 );
-}
-
 #define ROUNDS 100000
 #define SIZE   16384
-
-void print_time(clock_t tdiff, cycles cdiff){
-  uint64_t count = ROUNDS * SIZE;
-  printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff,(double)cdiff/count);
-  printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff,(double)tdiff/count);
-  printf("bw %8.2f MB/s\n",(double)count/(((double)tdiff / CLOCKS_PER_SEC) * 1000000.0));
-}
 
 bool print_result(int in_len, uint8_t* comp, uint8_t* exp) {
   return compare_and_print(in_len, comp, exp);
@@ -116,7 +86,6 @@ int main(){
   uint8_t tag[16];
   cycles a,b;
   clock_t t1,t2;
-  uint64_t count = ROUNDS * SIZE;
 
   memset(plain,'P',SIZE);
   memset(aead_key,'K',32);
@@ -230,12 +199,13 @@ int main(){
   printf ("\n res1: %i \n", res1);
 
 
-  printf("Chacha20Poly1305 Encrypt (32-bit) PERF:\n");  print_time(tdiff1,cdiff1);
-  printf("Chacha20Poly1305 Encrypt (128-bit) PERF:\n"); print_time(tdiff2,cdiff2);
-  printf("Chacha20Poly1305 Encrypt (256-bit) PERF:\n"); print_time(tdiff3,cdiff3);
-  printf("Chacha20Poly1305 Decrypt (32-bit) PERF:\n");  print_time(tdiff4,cdiff4);
-  printf("Chacha20Poly1305 Decrypt (128-bit) PERF:\n"); print_time(tdiff5,cdiff5);
-  printf("Chacha20Poly1305 Decrypt (256-bit) PERF:\n"); print_time(tdiff6,cdiff6);
+  uint64_t count = ROUNDS * SIZE;
+  printf("Chacha20Poly1305 Encrypt (32-bit) PERF:\n");  print_time(count,tdiff1,cdiff1);
+  printf("Chacha20Poly1305 Encrypt (128-bit) PERF:\n"); print_time(count,tdiff2,cdiff2);
+  printf("Chacha20Poly1305 Encrypt (256-bit) PERF:\n"); print_time(count,tdiff3,cdiff3);
+  printf("Chacha20Poly1305 Decrypt (32-bit) PERF:\n");  print_time(count,tdiff4,cdiff4);
+  printf("Chacha20Poly1305 Decrypt (128-bit) PERF:\n"); print_time(count,tdiff5,cdiff5);
+  printf("Chacha20Poly1305 Decrypt (256-bit) PERF:\n"); print_time(count,tdiff6,cdiff6);
 
   if (ok) return EXIT_SUCCESS;
   else return EXIT_FAILURE;
