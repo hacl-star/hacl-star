@@ -92,11 +92,12 @@ let ( >>| ) (#a:sha2_alg) (#m:m_spec): element_t a m -> shiftval (word_t a) -> e
 
 inline_for_extraction
 val _Ch: #a:sha2_alg -> #m:m_spec -> element_t a m -> element_t a m -> element_t a m -> element_t a m
-let _Ch #a #m x y z = (x &| y) ^| (~| x &| z) //TODO: Ch(e,f,g)=((f^g)&e)^g
+let _Ch #a #m x y z = (x &| y) ^| (~| x &| z) //Alternative: Ch(e,f,g)=((f^g)&e)^g  - does not appear to make a perf diff
+
 
 inline_for_extraction
 val _Maj: #a:sha2_alg -> #m:m_spec -> element_t a m -> element_t a m -> element_t a m -> element_t a m
-let _Maj #a #m x y z = (x &| y) ^| ((x &| z) ^| (y &| z)) // TODO: Maj(a,b,c) = Ch(a^b,c,b)
+let _Maj #a #m x y z = (x &| y) ^| ((x &| z) ^| (y &| z)) // Alternative: Maj(a,b,c) = Ch(a^b,c,b) - does not appear to make a perf diff
 
 inline_for_extraction
 val _Sigma0: #a:sha2_alg -> #m:m_spec -> element_t a m -> element_t a m
