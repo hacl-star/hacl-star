@@ -267,6 +267,10 @@ bool print_test(uint8_t* in, int in_len, uint8_t* exp224, uint8_t* exp256, uint8
   uint8_t comp1[64] = {0};
   uint8_t comp2[64] = {0};
   uint8_t comp3[64] = {0};
+  uint8_t comp4[64] = {0};
+  uint8_t comp5[64] = {0};
+  uint8_t comp6[64] = {0};
+  uint8_t comp7[64] = {0};
   bool ok = true;
   
   Hacl_Hash_SHA2_hash_256(in,in_len,comp);
@@ -283,6 +287,17 @@ bool print_test(uint8_t* in, int in_len, uint8_t* exp224, uint8_t* exp256, uint8
   ok = print_result(comp1, exp256,32) && ok;
   ok = print_result(comp2, exp256,32) && ok;
   ok = print_result(comp3, exp256,32) && ok;
+
+  Hacl_Impl_SHA2_Core_sha256_8(comp,comp1,comp2,comp3,comp4,comp5,comp6,comp7,in_len,in,in,in,in,in,in,in,in);
+  printf("VEC8 SHA2-256 (32-bit) Result:\n");
+  ok = print_result(comp, exp256,32) && ok;
+  ok = print_result(comp1, exp256,32) && ok;
+  ok = print_result(comp2, exp256,32) && ok;
+  ok = print_result(comp3, exp256,32) && ok;
+  ok = print_result(comp4, exp256,32) && ok;
+  ok = print_result(comp5, exp256,32) && ok;
+  ok = print_result(comp6, exp256,32) && ok;
+  ok = print_result(comp7, exp256,32) && ok;
 
   ossl_sha2(comp,in,in_len);
   printf("OpenSSL SHA2-256 (32-bit) Result:\n");
@@ -370,6 +385,19 @@ int main()
   double tdiff2v = (double)(t2 - t1);
 
   for (int j = 0; j < ROUNDS; j++) {
+    Hacl_Impl_SHA2_Core_sha256_8(plain,plain+32,plain+64,plain+96,plain+128,plain+160,plain+192,plain+224,SIZE,plain,plain,plain,plain,plain,plain,plain,plain);
+  }
+  t1 = clock();
+  a = cpucycles_begin();
+  for (int j = 0; j < ROUNDS; j++) {
+    Hacl_Impl_SHA2_Core_sha256_8(plain,plain+32,plain+64,plain+96,plain+128,plain+160,plain+192,plain+224,SIZE,plain,plain,plain,plain,plain,plain,plain,plain);
+  }
+  b = cpucycles_end();
+  t2 = clock();
+  double cdiff2v8 = b - a;
+  double tdiff2v8 = (double)(t2 - t1);
+
+  for (int j = 0; j < ROUNDS; j++) {
     ossl_sha2(plain,plain,SIZE);
   }
   t1 = clock();
@@ -412,6 +440,7 @@ int main()
   printf("OLD SHA2-256 (32-bit) PERF: %d\n",(int)res); print_time(tdiff2,cdiff2);
   printf("NEW SHA2-256 (32-bit) PERF: %d\n",(int)res); print_time(tdiff2n,cdiff2n);
   printf("VEC4 SHA2-256 (32-bit) PERF: %d\n",(int)res); print_time(tdiff2v,cdiff2v);
+  printf("VEC8 SHA2-256 (32-bit) PERF: %d\n",(int)res); print_time(tdiff2v8,cdiff2v8);
   printf("OpenSSL SHA2-256 (32-bit) PERF: %d\n",(int)res); print_time(tdiff2a,cdiff2a);
   printf("SHA2-224 (32-bit) PERF: %d\n",(int)res); print_time(tdiff1,cdiff1);
   printf("SHA2-384 (32-bit) PERF: %d\n",(int)res); print_time(tdiff3,cdiff3);

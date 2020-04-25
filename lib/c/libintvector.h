@@ -291,8 +291,22 @@ typedef __m256i Lib_IntVector_Intrinsics_vec256;
 #define Lib_IntVector_Intrinsics_vec256_load_le(x0) \
   (_mm256_loadu_si256((__m256i*)(x0)))
 
+#define Lib_IntVector_Intrinsics_vec256_load32_be(x0)		\
+  (_mm256_shuffle_epi8(_mm256_loadu_si256((__m256i*)(x0)), _mm256_set_epi8(12, 13, 14, 15, 8, 9, 10, 11, 4, 5, 6, 7, 0, 1, 2, 3, 12, 13, 14, 15, 8, 9, 10, 11, 4, 5, 6, 7, 0, 1, 2, 3)))
+
+#define Lib_IntVector_Intrinsics_vec256_load64_be(x0)		\
+  (_mm256_shuffle_epi8(_mm256_loadu_si256((__m256i*)(x0)), _mm256_set_epi8(8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7)))
+
+
 #define Lib_IntVector_Intrinsics_vec256_store_le(x0, x1) \
   (_mm256_storeu_si256((__m256i*)(x0), x1))
+
+#define Lib_IntVector_Intrinsics_vec256_store32_be(x0, x1)	\
+  (_mm256_storeu_si256((__m256i*)(x0), _mm256_shuffle_epi8(x1, _mm256_set_epi8(12, 13, 14, 15, 8, 9, 10, 11, 4, 5, 6, 7, 0, 1, 2, 3, 12, 13, 14, 15, 8, 9, 10, 11, 4, 5, 6, 7, 0, 1, 2, 3))))
+
+#define Lib_IntVector_Intrinsics_vec256_store64_be(x0, x1)	\
+  (_mm256_storeu_si256((__m256i*)(x0), _mm256_shuffle_epi8(x1, _mm256_set_epi8(8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7))))
+
 
 #define Lib_IntVector_Intrinsics_vec256_insert8(x0, x1, x2)	\
   (_mm256_insert_epi8(x0, x1, x2))

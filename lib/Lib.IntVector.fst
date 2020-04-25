@@ -547,7 +547,7 @@ let vec_load_le t w b =
   | U128,1 -> vec128_load_le b
   | _,1 -> Lib.ByteBuffer.uint_from_bytes_le #t #SEC b
   | U32,4 -> vec128_load_le b
-  | U64,2 -> vec128_load_le b
+  | U64,2 -> vec128_load_le 
   | U32,8 -> vec256_load_le b
   | U64,4 -> vec256_load_le b
   | U128,2 -> vec256_load_le b
@@ -560,6 +560,11 @@ let vec_load_be t w b =
   | _,1 -> Lib.ByteBuffer.uint_from_bytes_be #t #SEC b
   | U32,4 -> vec128_load32_be b
   | U64,2 -> vec128_load64_be b
+  | U32,8 -> vec256_load32_be b
+  | U64,4 -> vec256_load64_be b
+  | U128,2 -> admit()//vec256_load_be b
+  | U32,16 -> admit() // vec512_load_be b
+  | U64,8 -> admit() //vec512_load_be b
 
 
 let vec_store_le #t #w b v =
@@ -580,3 +585,8 @@ let vec_store_be #t #w b v =
   | _,1 -> Lib.ByteBuffer.uint_to_bytes_be #t #SEC b v
   | U32,4 -> vec128_store32_be b v
   | U64,2 -> vec128_store64_be b v
+  | U32,8 -> vec256_store32_be b v
+  | U64,4 -> vec256_store64_be b v
+  | U128,2 -> admit() //vec256_store_be b v
+  | U32,16 -> admit()//vec512_store_be b v
+  | U64,8 -> admit()//vec512_store_be b v

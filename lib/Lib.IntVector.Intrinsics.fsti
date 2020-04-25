@@ -266,12 +266,32 @@ val vec256_load_be: b:lbuffer uint8 32ul -> ST vec256
 			   (ensures (fun h0 _ h1 ->  h1 == h0))
 
 noextract
+val vec256_load32_be: b:lbuffer uint8 32ul -> ST vec256
+			   (requires (fun h -> live h b))
+			   (ensures (fun h0 _ h1 ->  h1 == h0))
+
+noextract
+val vec256_load64_be: b:lbuffer uint8 32ul -> ST vec256
+			   (requires (fun h -> live h b))
+			   (ensures (fun h0 _ h1 ->  h1 == h0))
+
+noextract
 val vec256_store_le: b:lbuffer uint8 32ul -> vec256 -> ST unit
 			   (requires (fun h -> live h b))
 			   (ensures (fun h0 _ h1 ->  live h1 b /\ modifies (loc b) h0 h1))
 
 noextract
 val vec256_store_be: b:lbuffer uint8 32ul -> vec256 -> ST unit
+			   (requires (fun h -> live h b))
+			   (ensures (fun h0 _ h1 ->  live h1 b /\ modifies (loc b) h0 h1))
+
+noextract
+val vec256_store32_be: b:lbuffer uint8 32ul -> vec256 -> ST unit
+			   (requires (fun h -> live h b))
+			   (ensures (fun h0 _ h1 ->  live h1 b /\ modifies (loc b) h0 h1))
+
+noextract
+val vec256_store64_be: b:lbuffer uint8 32ul -> vec256 -> ST unit
 			   (requires (fun h -> live h b))
 			   (ensures (fun h0 _ h1 ->  live h1 b /\ modifies (loc b) h0 h1))
 

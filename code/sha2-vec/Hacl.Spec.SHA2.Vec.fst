@@ -210,10 +210,17 @@ let transpose_ws4 (#a:sha2_alg) (#m:m_spec{lanes a m == 4}) (ws:ws_spec a m) : w
     create16 ws0 ws1 ws2 ws3 ws4 ws5 ws6 ws7 ws8 ws9 ws10 ws11 ws12 ws13 ws14 ws15
 
 noextract
+let transpose_ws8 (#a:sha2_alg) (#m:m_spec{lanes a m == 8}) (ws:ws_spec a m) : ws_spec a m =
+    let (ws0,ws1,ws2,ws3,ws4,ws5,ws6,ws7) = VecTranspose.transpose8x8 (ws.[0], ws.[1], ws.[2], ws.[3], ws.[4], ws.[5], ws.[6], ws.[7]) in
+    let (ws8,ws9,ws10,ws11,ws12,ws13,ws14,ws15) = VecTranspose.transpose8x8 (ws.[8], ws.[9], ws.[10], ws.[11], ws.[12], ws.[13], ws.[14], ws.[15]) in
+    create16 ws0 ws1 ws2 ws3 ws4 ws5 ws6 ws7 ws8 ws9 ws10 ws11 ws12 ws13 ws14 ws15
+
+noextract
 let transpose_ws (#a:sha2_alg) (#m:m_spec) (ws:ws_spec a m) : ws_spec a m =
   match lanes a m with
   | 1 -> transpose_ws1 #a #m ws
   | 4 -> transpose_ws4 #a #m ws
+  | 8 -> transpose_ws8 #a #m ws
   | _ -> admit()
 
 
@@ -319,6 +326,32 @@ let load_last4 (#a:sha2_alg) (#m:m_spec{lanes a m == 4})
     let mb0 = ntup4 (l00, (l10, (l20, l30))) in
     let mb1 = ntup4 (l01, (l11, (l21, l31))) in
     (mb0, mb1)
+
+noextract
+let load_last8 (#a:sha2_alg) (#m:m_spec{lanes a m == 8})
+               (totlen_seq:lseq uint8 (len_length a))
+               (fin:size_nat{fin == block_length a \/ fin == 2 * block_length a})
+               (len:size_nat{len < block_length a}) (b:multiseq (lanes a m) len) :
+               multiseq (lanes a m) (block_length a) & multiseq (lanes a m) (block_length a) =
+    let b0 = b.(|0|) in
+    let b1 = b.(|1|) in
+    let b2 = b.(|2|) in
+    let b3 = b.(|3|) in
+    let b4 = b.(|4|) in
+    let b5 = b.(|5|) in
+    let b6 = b.(|6|) in
+    let b7 = b.(|7|) in
+    let (l00,l01) = load_last_blocks #a totlen_seq fin len b0 in
+    let (l10,l11) = load_last_blocks #a totlen_seq fin len b1 in
+    let (l20,l21) = load_last_blocks #a totlen_seq fin len b2 in
+    let (l30,l31) = load_last_blocks #a totlen_seq fin len b3 in
+    let (l40,l41) = load_last_blocks #a totlen_seq fin len b4 in
+    let (l50,l51) = load_last_blocks #a totlen_seq fin len b5 in
+    let (l60,l61) = load_last_blocks #a totlen_seq fin len b6 in
+    let (l70,l71) = load_last_blocks #a totlen_seq fin len b7 in
+    let mb0 = ntup8 (l00, (l10, (l20, (l30, (l40, (l50, (l60, l70))))))) in
+    let mb1 = ntup8 (l01, (l11, (l21, (l31, (l41, (l51, (l61, l71))))))) in
+    (mb0, mb1)
 #pop-options
 
 [@"opaque_to_smt"]
@@ -328,10 +361,9 @@ let load_last (#a:sha2_alg) (#m:m_spec) (totlen_seq:lseq uint8 (len_length a))
               (len:size_nat{len < block_length a}) (b:multiseq (lanes a m) len) :
               multiseq (lanes a m) (block_length a) & multiseq (lanes a m) (block_length a) =
     match lanes a m with
-    | 1 -> let (b0,b1) = load_last1 #a #m totlen_seq fin len b in
-           (b0,b1)
-    | 4 -> let (b0,b1) = load_last4 #a #m totlen_seq fin len b in
-           (b0,b1)
+    | 1 -> load_last1 #a #m totlen_seq fin len b
+    | 4 -> load_last4 #a #m totlen_seq fin len b
+    | 8 -> load_last8 #a #m totlen_seq fin len b
     | _ -> admit()
 
 noextract
@@ -364,10 +396,25 @@ let transpose_state4 (#a:sha2_alg) (#m:m_spec{lanes a m == 4})
     create8 st0 st4 st1 st5 st2 st6 st3 st7
 
 noextract
+let transpose_state8 (#a:sha2_alg) (#m:m_spec{lanes a m == 8})
+                    (st:state_spec a m) : state_spec a m =
+    let st0 = st.[0] in
+    let st1 = st.[1] in
+    let st2 = st.[2] in
+    let st3 = st.[3] in
+    let st4 = st.[4] in
+    let st5 = st.[5] in
+    let st6 = st.[6] in
+    let st7 = st.[7] in
+    let (st0,st1,st2,st3,st4,st5,st6,st7) = VecTranspose.transpose8x8 (st0,st1,st2,st3,st4,st5,st6,st7) in
+    create8 st0 st4 st1 st5 st2 st6 st3 st7
+
+noextract
 let transpose_state (#a:sha2_alg) (#m:m_spec) (st:state_spec a m) : state_spec a m =
   match lanes a m with
   | 1 -> st
   | 4 -> transpose_state4 #a #m st
+  | 8 -> transpose_state8 #a #m st
   | _ -> admit()
 
 noextract

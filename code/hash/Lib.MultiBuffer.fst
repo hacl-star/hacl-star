@@ -37,6 +37,14 @@ let loc_multi4 (#lanes:flen{lanes = 4}) (#len:size_t) (b:multibuf lanes len)  :
   admit()
 #pop-options
 
+#push-options "--max_fuel 8 --max_ifuel 8 --z3rlimit 100"
+let loc_multi8 (#lanes:flen{lanes = 8}) (#len:size_t) (b:multibuf lanes len)  :
+  Lemma (loc_multi #lanes #len b == 
+         (loc b.(|0|) |+| loc b.(|1|) |+| loc b.(|2|) |+| loc b.(|3|) |+|
+          loc b.(|4|) |+| loc b.(|5|) |+| loc b.(|6|) |+| loc b.(|7|))) = 
+  admit()
+#pop-options
+
 let disjoint_multi_multi #lanes #len #len' (b:multibuf lanes len) (b':multibuf lanes len') =
   forall i. i < lanes ==> disjoint b.(|i|) b'.(|i|)
 
