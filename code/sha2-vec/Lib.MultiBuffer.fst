@@ -9,6 +9,25 @@ open Lib.Sequence
 open Lib.Buffer
 open Lib.NTuple
 
+let live4 #a #len (h:mem) (b0 b1 b2 b3: lbuffer a len) =
+  live h b0 /\ live h b1 /\ live h b2 /\ live h b3
+
+let live8 #a #len (h:mem) (b0 b1 b2 b3 b4 b5 b6 b7: lbuffer a len) =
+  live h b0 /\ live h b1 /\ live h b2 /\ live h b3 /\ live h b4 /\ live h b5 /\ live h b6 /\ live h b7
+
+let internally_disjoint4 #len #a (b0 b1 b2 b3: lbuffer a len) =
+  disjoint b0 b1 /\ disjoint b0 b2 /\ disjoint b0 b3 /\
+  disjoint b1 b2 /\ disjoint b1 b3 /\ disjoint b2 b3
+
+let internally_disjoint8 #len #a (b0 b1 b2 b3 b4 b5 b6 b7: lbuffer a len) =
+  disjoint b0 b1 /\ disjoint b0 b2 /\ disjoint b0 b3 /\ disjoint b0 b4 /\ disjoint b0 b5 /\ disjoint b0 b6 /\ disjoint b0 b7 /\
+  disjoint b1 b2 /\ disjoint b1 b3 /\ disjoint b1 b4 /\ disjoint b1 b5 /\ disjoint b1 b6 /\ disjoint b1 b7 /\
+  disjoint b2 b3 /\ disjoint b2 b4 /\ disjoint b2 b5 /\ disjoint b2 b6 /\ disjoint b2 b7 /\
+  disjoint b3 b4 /\ disjoint b3 b5 /\ disjoint b3 b6 /\ disjoint b3 b7 /\
+  disjoint b4 b5 /\ disjoint b4 b6 /\ disjoint b4 b7 /\
+  disjoint b5 b6 /\ disjoint b5 b7 /\
+  disjoint b6 b7
+  
 inline_for_extraction let multibuf (lanes:flen) (len:size_t) = 
     ntuple (lbuffer uint8 len) lanes
 
@@ -17,6 +36,7 @@ let internally_disjoint #lanes #len (b:multibuf lanes len) =
 
 let disjoint_multi #lanes #len #a #len' (b:multibuf lanes len) (b':lbuffer a len') =
   forall i. i < lanes ==> disjoint b.(|i|) b'
+
 
 let rec loc_multi_ (#lanes:flen) #len  (i:nat{i < lanes}) (b:multibuf lanes len)
                    : GTot LowStar.Buffer.loc (decreases (lanes - i)) =
@@ -50,6 +70,7 @@ let disjoint_multi_multi #lanes #len #len' (b:multibuf lanes len) (b':multibuf l
 
 let live_multi #lanes #len (h:mem) (b:multibuf lanes len) =
   forall i. i < lanes ==> live h b.(|i|)
+
 
 let modifies_multi #lanes #len (b:multibuf lanes len) (h0:mem) (h1:mem) =
   modifies (loc_multi b) h0 h1
