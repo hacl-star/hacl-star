@@ -16,6 +16,7 @@ module L = FStar.List.Tot
 (* See fsti *)
 type location : eqtype =
   | ALocMem : location
+  | ALocHeaplet : heaplet_id -> location
   | ALocStack: location
   | ALocReg : reg -> location
   | ALocCf : location
@@ -36,6 +37,10 @@ let disjoint_location a1 a2 =
   | ALocMem, ALocMem -> ffalse "memory not disjoint from itself"
   | ALocStack, ALocStack -> ffalse "stack not disjoint from itself"
   | ALocMem, ALocStack | ALocStack, ALocMem -> ttrue
+  | ALocHeaplet _, ALocStack | ALocStack, ALocHeaplet _ -> ttrue
+  | ALocHeaplet _, ALocMem | ALocMem, ALocHeaplet _ -> ttrue
+  | ALocHeaplet h1, ALocHeaplet h2 ->
+    (h1 <> h2) /- ("heaplet " ^ string_of_int h1 ^ " not disjoint from itself")
   | ALocReg r1, ALocReg r2 ->
     (r1 <> r2) /- ("register " ^ aux_print_reg_from_location a1 ^ " not disjoint from itself")
   | ALocReg _, _ | _, ALocReg _ -> ttrue
@@ -50,6 +55,7 @@ let downgrade_val_raise_val_u0_u1 #a x = FStar.Universe.downgrade_val_raise_val 
 let location_val_t a =
   match a with
   | ALocMem -> heap_impl
+  | ALocHeaplet _ -> FStar.Universe.raise_t machine_heap
   | ALocStack -> FStar.Universe.raise_t (machine_stack & memTaint_t)
   | ALocReg r -> FStar.Universe.raise_t (t_reg r)
   | ALocCf -> FStar.Universe.raise_t flag_val_t
@@ -59,6 +65,7 @@ let location_val_t a =
 let location_val_eqt a =
   match a with
   | ALocMem -> unit
+  | ALocHeaplet _ -> unit
   | ALocStack -> unit
   | ALocReg r -> t_reg r
   | ALocCf -> flag_val_t
@@ -68,6 +75,7 @@ let location_val_eqt a =
 let eval_location a s =
   match a with
   | ALocMem -> s.ms_heap
+  | ALocHeaplet h -> FStar.Universe.raise_val (heap_get_heaplet s.ms_heap h)
   | ALocStack -> FStar.Universe.raise_val (s.ms_stack, s.ms_stackTaint)
   | ALocReg r -> FStar.Universe.raise_val (eval_reg r s)
   | ALocCf -> FStar.Universe.raise_val (cf s.ms_flags)
@@ -79,6 +87,8 @@ let update_location a v s =
   | ALocMem ->
     let v = coerce v in
     { s with ms_heap = v }
+  | ALocHeaplet _ ->
+    admit () // TODO:FIXME
   | ALocStack ->
     let v = FStar.Universe.downgrade_val (coerce v) in
     { s with ms_stack = fst v ; ms_stackTaint = snd v }
@@ -93,7 +103,8 @@ let update_location a v s =
     { s with ms_flags = FStar.FunctionalExtensionality.on_dom flag (fun f -> if f = fOverflow then v else s.ms_flags f) }
 
 (* See fsti *)
-let lemma_locations_truly_disjoint a a_change v s = ()
+let lemma_locations_truly_disjoint a a_change v s =
+  admit () // TODO:FIXME
 
 (* See fsti *)
 let lemma_locations_complete s1 s2 flags ok trace =

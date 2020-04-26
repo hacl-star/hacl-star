@@ -27,3 +27,5 @@ val heap_create_machine (ih:interop_heap) : Ghost machine_heap
 val heap_create_impl (ih:interop_heap) (mt:memTaint_t) : Ghost heap_impl
   (requires True)
   (ensures fun hi -> heap_get hi == heap_create_machine ih /\ heap_taint hi == mt)
+
+val heap_get_heaplet (hi:heap_impl) (k:int) : machine_heap

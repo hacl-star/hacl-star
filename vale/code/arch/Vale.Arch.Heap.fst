@@ -46,3 +46,6 @@ let heap_create_impl ih mt =
     vf_heap = vh;
     vf_heaplets = empty_vale_heaplets vh;
   }
+
+let heap_get_heaplet hi k =
+  (Map16.sel hi.vf_heaplets k).mh
