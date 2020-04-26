@@ -818,53 +818,71 @@ EverCrypt_Hash_hash(
   uint32_t len
 );
 
-typedef uint8_t *EverCrypt_Hash_Incremental_any_hash_t;
+typedef struct Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s_____s
+Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____;
 
-typedef struct EverCrypt_Hash_Incremental_state_s_s EverCrypt_Hash_Incremental_state_s;
-
-extern bool
-EverCrypt_Hash_Incremental_uu___is_State(
-  Spec_Hash_Definitions_hash_alg a,
-  EverCrypt_Hash_Incremental_state_s projectee
-);
-
-extern EverCrypt_Hash_state_s
-*EverCrypt_Hash_Incremental___proj__State__item__hash_state(
-  Spec_Hash_Definitions_hash_alg a,
-  EverCrypt_Hash_Incremental_state_s projectee
-);
-
-extern uint8_t
-*EverCrypt_Hash_Incremental___proj__State__item__buf(
-  Spec_Hash_Definitions_hash_alg a,
-  EverCrypt_Hash_Incremental_state_s projectee
-);
-
-extern uint64_t
-EverCrypt_Hash_Incremental___proj__State__item__total_len(
-  Spec_Hash_Definitions_hash_alg a,
-  EverCrypt_Hash_Incremental_state_s projectee
-);
-
-extern Spec_Hash_Definitions_hash_alg
-EverCrypt_Hash_Incremental_alg_of_state(EverCrypt_Hash_Incremental_state_s *a);
-
-extern EverCrypt_Hash_Incremental_state_s
+extern Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____
 *EverCrypt_Hash_Incremental_create_in(Spec_Hash_Definitions_hash_alg a);
 
-extern void EverCrypt_Hash_Incremental_init(EverCrypt_Hash_Incremental_state_s *a);
+extern void
+EverCrypt_Hash_Incremental_init(Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *a);
 
 extern void
 EverCrypt_Hash_Incremental_update(
-  EverCrypt_Hash_Incremental_state_s *a,
+  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *i,
   uint8_t *p,
   uint32_t data
 );
 
 extern void
-EverCrypt_Hash_Incremental_finish(EverCrypt_Hash_Incremental_state_s *a, uint8_t *s);
+EverCrypt_Hash_Incremental_finish_md5(
+  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *p,
+  uint8_t *dst
+);
 
-extern void EverCrypt_Hash_Incremental_free(EverCrypt_Hash_Incremental_state_s *a);
+extern void
+EverCrypt_Hash_Incremental_finish_sha1(
+  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *p,
+  uint8_t *dst
+);
+
+extern void
+EverCrypt_Hash_Incremental_finish_sha224(
+  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *p,
+  uint8_t *dst
+);
+
+extern void
+EverCrypt_Hash_Incremental_finish_sha256(
+  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *p,
+  uint8_t *dst
+);
+
+extern void
+EverCrypt_Hash_Incremental_finish_sha384(
+  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *p,
+  uint8_t *dst
+);
+
+extern void
+EverCrypt_Hash_Incremental_finish_sha512(
+  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *p,
+  uint8_t *dst
+);
+
+extern Spec_Hash_Definitions_hash_alg
+EverCrypt_Hash_Incremental_alg_of_state(
+  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *a
+);
+
+extern void
+EverCrypt_Hash_Incremental_finish(
+  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *a,
+  uint8_t *s
+);
+
+extern void
+EverCrypt_Hash_Incremental_free(Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *i);
 
 extern void
 EverCrypt_Cipher_chacha20(
