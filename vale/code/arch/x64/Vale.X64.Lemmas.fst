@@ -22,6 +22,9 @@ let rec lemma_eq_instr_apply_eval_args
   =
   let open BS in
   lemma_heap_ignore_ghost_machine s1.BS.ms_heap s2.BS.ms_heap;
+  allow_inversion operand64;
+  allow_inversion operand128;
+  allow_inversion tmhaddr;
   match args with
   | [] -> ()
   | i::args ->
@@ -49,6 +52,9 @@ let rec lemma_eq_instr_apply_eval_inouts
   =
   let open BS in
   lemma_heap_ignore_ghost_machine s1.BS.ms_heap s2.BS.ms_heap;
+  allow_inversion operand64;
+  allow_inversion operand128;
+  allow_inversion tmhaddr;
   match inouts with
   | [] -> lemma_eq_instr_apply_eval_args outs args f oprs s1 s2
   | (Out, i)::inouts ->
@@ -138,6 +144,7 @@ let eval_code_eq_instr (inst:BS.ins) (f:fuel) (s1 s2:machine_state) : Lemma
   reveal_opaque (`%BS.machine_eval_code_ins) BS.machine_eval_code_ins;
   eval_ins_eq_instr inst ({s1 with BS.ms_trace = []}) ({s2 with BS.ms_trace = []})
 
+#reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 400"
 #restart-solver
 let eval_code_eq_ins (i:BS.ins) (f:fuel) (s1 s2:machine_state) : Lemma
   (requires state_eq_S true s1 s2)

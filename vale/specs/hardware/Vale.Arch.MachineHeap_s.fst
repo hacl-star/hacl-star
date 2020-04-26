@@ -7,11 +7,12 @@ open Vale.Def.Words_s
 open Vale.Def.Words.Two_s
 open Vale.Def.Words.Four_s
 open Vale.Def.Types_s
+open Vale.Arch.HeapTypes_s
 
 unfold let (.[]) = Map.sel
 unfold let (.[]<-) = Map.upd
 
-let machine_heap = Map.t int nat8
+unfold let machine_heap = machine_heap
 
 let is_machine_heap_update (mh mh':machine_heap) =
   Set.equal (Map.domain mh) (Map.domain mh') /\

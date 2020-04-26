@@ -20,7 +20,7 @@ let lemma_valid_src_operand64_and_taint o s =
       (requires valid_buf_maddr64 addr h s.vs_heap.vf_layout b i t)
       (ensures S.valid_src_operand64_and_taint o (state_to_S s))
       =
-      lemma_heap_get_heap s.vs_heap;
+      lemma_heap_heaplet_domain s.vs_heap;
       lemma_valid_taint64 b (full_heap_taint s.vs_heap) h i t
       in
     Classical.forall_intro_2 (fun b i -> (fun b -> Classical.move_requires (aux b)) b i)
@@ -30,13 +30,13 @@ let lemma_valid_src_operand64_and_taint o s =
 let lemma_valid_src_operand128_and_taint o s =
   let h = get_vale_heap s.vs_heap in
   match o with
-  | OMem (m, t, _) ->
+  | OMem (m, t, k) ->
     let addr = eval_maddr m s in
     let aux (b:buffer128) (i:int) : Lemma
       (requires valid_buf_maddr128 addr h s.vs_heap.vf_layout b i t)
       (ensures S.valid_src_operand128_and_taint o (state_to_S s))
       =
-      lemma_heap_get_heap s.vs_heap;
+      lemma_heap_heaplet_domain s.vs_heap;
       lemma_valid_taint128 b (full_heap_taint s.vs_heap) h i t
       in
     Classical.forall_intro_2 (fun b i -> (fun b -> Classical.move_requires (aux b)) b i)

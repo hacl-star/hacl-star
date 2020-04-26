@@ -26,6 +26,7 @@ let list_live mem (ptrs:list b8) =
   forall (p:b8).{:pattern (L.memP p ptrs)} L.memP p ptrs ==> B.live mem p.bsrc
 
 assume val global_addrs_map : addr_map
+assume val global_length_map (b:b8) : (n:nat{n == DV.length (get_downview b.bsrc)}) // note that like global_addrs_map, this can only be used for proofs, not for Low* code, because it has no C implementation
 
 let mk_addr_map (ptrs:list b8{list_disjoint_or_eq ptrs}) : GTot addr_map =
   global_addrs_map

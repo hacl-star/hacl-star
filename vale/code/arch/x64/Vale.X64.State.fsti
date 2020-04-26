@@ -111,7 +111,8 @@ let valid_src_operand (o:operand64) (s:vale_state) : prop0 =
   match o with
   | OConst c -> True
   | OReg r -> True
-  | OMem (m, _, _) -> valid_maddr m s
+  | OMem (m, _, k) ->
+    valid_maddr m s /\ heaplets64 (eval_maddr m s) k s.vs_heap.vf_layout.vl_heaplet_domains
   | OStack (m, _) -> valid_src_stack64 (eval_maddr m s) s.vs_stack
 
 [@va_qattr]
@@ -119,7 +120,8 @@ let valid_src_operand128 (o:operand128) (s:vale_state) : prop0 =
   match o with
   | OConst _ -> False
   | OReg _ -> True
-  | OMem (m, _, _) -> valid_maddr128 m s
+  | OMem (m, _, k) ->
+    valid_maddr128 m s /\ heaplets128 (eval_maddr m s) k s.vs_heap.vf_layout.vl_heaplet_domains
   | OStack (m, _) -> valid_src_stack128 (eval_maddr m s) s.vs_stack
 
 [@va_qattr]

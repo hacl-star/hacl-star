@@ -9,6 +9,8 @@ let heap_impl = vale_full_heap
 
 let heap_get hi = hi.vf_heap.mh
 
+let heap_heaplet_domains hi = hi.vf_layout.vl_heaplet_domains
+
 let heap_taint hi = hi.vf_layout.vl_taint
 
 // Update heaplet k with mh', but only for the addresses that k owns (addresses not owned by k remain unmodified)
@@ -38,7 +40,7 @@ let one_heaplet (ih:interop_heap) (id:option heaplet_id) : GTot vale_heap =
 
 let heap_create_impl ih mt =
   let vh = one_heaplet ih None in
-  let layout = {vl_inner = empty_vale_heap_layout_inner vh; vl_taint = mt;} in
+  let layout = {vl_inner = empty_vale_heap_layout_inner vh; vl_taint = mt; vl_heaplet_domains = None} in
   {
     vf_layout = layout;
     vf_heap = vh;

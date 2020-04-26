@@ -395,7 +395,9 @@ let valid_layout_buffer (#t:base_typ) (b:buffer t) (layout:vale_heap_layout) (h:
   valid_layout_buffer_id t b layout (get_heaplet_id h) write
 
 // Initial memory state
-val is_initial_heap (layout:vale_heap_layout) (h:vale_heap) : prop0
+val is_initial_heap_def (layout:vale_heap_layout) (h:vale_heap) : prop0 // REVIEW: this should be named is_initial_heap
+let is_initial_heap (layout:vale_heap_layout) (h:vale_heap) =           // REVIEW: this should be named something else
+  is_initial_heap_def layout h /\ layout.vl_heaplet_domains == None
 
 // Invariant that is always true in Vale procedures
 val mem_inv (h:vale_full_heap) : prop0

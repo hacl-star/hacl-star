@@ -12,11 +12,13 @@ val heap_impl : Type u#1
 
 val heap_get (hi:heap_impl) : machine_heap
 
+val heap_heaplet_domains (hi:heap_impl) : option (int -> option heaplet_id)
+
 val heap_taint (hi:heap_impl) : memTaint_t
 
 val heap_upd (hi:heap_impl) (mh':machine_heap) (mt':memTaint_t) : Pure heap_impl
   (requires is_machine_heap_update (heap_get hi) mh')
-  (ensures fun hi -> heap_get hi == mh' /\ heap_taint hi == mt')
+  (ensures fun hi' -> heap_get hi' == mh' /\ heap_taint hi' == mt' /\ heap_heaplet_domains hi' == heap_heaplet_domains hi)
 
 val heap_create_machine (ih:interop_heap) : Ghost machine_heap
   (requires True)

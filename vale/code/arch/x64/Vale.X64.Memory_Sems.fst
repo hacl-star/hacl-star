@@ -57,26 +57,26 @@ let buffer_info_has_addr_opt (bi:option buffer_info) (a:int) =
   | Some bi -> buffer_info_has_addr bi a
 
 #set-options "--z3rlimit 100"
-let rec make_owns_rec (h:vale_heap) (bs:Seq.seq buffer_info) (n:nat{n <= Seq.length bs}) :
-  GTot ((int -> option (n:nat{n < Seq.length bs})) & (heaplet_id -> Set.set int))
+let rec make_owns_rec (bs:Seq.seq buffer_info) (n:nat{n <= Seq.length bs}) :
+  Tot ((int -> option (n:nat{n < Seq.length bs})) & (heaplet_id -> Set.set int))
   =
   if n = 0 then ((fun _ -> None), (fun _ -> Set.empty)) else
-  let (m0, s0) = make_owns_rec h bs (n - 1) in
+  let (m0, s0) = make_owns_rec bs (n - 1) in
   let bi = Seq.index bs (n - 1) in
   let b = bi.bi_buffer in
   let hi = bi.bi_heaplet in
   let addr = Vale.Interop.Heap_s.global_addrs_map b in
-  let len = DV.length (get_downview b.bsrc) in
+  let len = Vale.Interop.Heap_s.global_length_map b in
   let s_b = set_of_range addr len in
   let s i = if i = hi then Set.union (s0 i) s_b else s0 i in
   let m a = if addr <= a && a < addr + len then Some (n - 1) else m0 a in
   (m, s)
 
 [@"opaque_to_smt"]
-let make_owns (h:vale_heap) (bs:Seq.seq buffer_info) (n:nat{n <= Seq.length bs}) :
-  GTot ((int -> option (n:nat{n < Seq.length bs})) & (heaplet_id -> Set.set int))
+let make_owns (bs:Seq.seq buffer_info) (n:nat{n <= Seq.length bs}) :
+  Tot ((int -> option (n:nat{n < Seq.length bs})) & (heaplet_id -> Set.set int))
   =
-  make_owns_rec h bs n
+  make_owns_rec bs n
 
 let rec lemma_make_owns (h:vale_heap) (bs:Seq.seq buffer_info) (n:nat) : Lemma
   (requires
@@ -86,7 +86,7 @@ let rec lemma_make_owns (h:vale_heap) (bs:Seq.seq buffer_info) (n:nat) : Lemma
       i1 < Seq.length bs /\ i2 < Seq.length bs ==> buffer_info_disjoint (Seq.index bs i1) (Seq.index bs i2))
   )
   (ensures (
-    let (m, s) = make_owns h bs n in
+    let (m, s) = make_owns bs n in
     (forall (i:heaplet_id) (a:int).{:pattern Set.mem a (s i)}
       (Set.mem a (s i) <==> Option.mapTot (fun n -> (Seq.index bs n).bi_heaplet) (m a) == Some i) /\
       (Set.mem a (s i) ==> buffer_info_has_addr_opt (Option.mapTot (fun n -> Seq.index bs n) (m a)) a) /\
@@ -98,8 +98,8 @@ let rec lemma_make_owns (h:vale_heap) (bs:Seq.seq buffer_info) (n:nat) : Lemma
   =
   reveal_opaque (`%make_owns) make_owns;
   if n = 0 then () else
-  let _ = make_owns h bs (n - 1) in
-  let (m, s) = make_owns h bs n in
+  let _ = make_owns bs (n - 1) in
+  let (m, s) = make_owns bs n in
   lemma_make_owns h bs (n - 1);
   let bi = Seq.index bs (n - 1) in
   let b = bi.bi_buffer in
@@ -153,12 +153,17 @@ let lemma_loc_mutable_buffers (l:list buffer_info) : Lemma
   lemma_list_to_seq l;
   lemma_loc_mutable_buffers_rec l (list_to_seq l) 0
 
+let create_heaplet_domains buffers =
+  let bs = list_to_seq buffers in
+  let (hmap, hsets) = make_owns bs (Seq.length bs) in
+  fun a -> Option.mapTot (fun n -> (Seq.index bs n).bi_heaplet) (hmap a)
+
 let create_heaplets buffers h1 =
   let bs = list_to_seq buffers in
   let modloc = loc_mutable_buffers buffers in
   let layout1 = h1.vf_layout in
   let layin1 = layout1.vl_inner in
-  let (hmap, hsets) = make_owns h1.vf_heap bs (Seq.length bs) in
+  let (hmap, hsets) = make_owns bs (Seq.length bs) in
   let hmap a = Option.mapTot (fun n -> (Seq.index bs n).bi_heaplet) (hmap a) in
   let l = {
     vl_heaplets_initialized = true;
@@ -583,6 +588,8 @@ let equiv_load_mem64 ptr h =
 //  low_lemma_valid_mem64 b i h;
 //  Vale.Arch.MachineHeap.same_domain_update64 (buffer_addr b h + scale8 i) v (get_heap h)
 
+let lemma_heap_heaplet_domain vfh = ()
+
 open Vale.X64.BufferViewStore
 
 let low_lemma_store_mem64_aux
@@ -635,6 +642,8 @@ let valid_state_store_mem64_aux i v h =
 
 let low_lemma_load_mem64_full b i vfh t hid =
   reveal_opaque (`%valid_layout_buffer_id) valid_layout_buffer_id;
+  reveal_opaque (`%heaplets64) heaplets64;
+  in_bounds64 vfh.vf_heap b i;
   ()
 
 #push-options "--z3rlimit 20"
@@ -705,6 +714,7 @@ let lemma_is_full_update
   ()
 
 let low_lemma_store_mem64_full b i v vfh t hid =
+  reveal_opaque (`%heaplets64) heaplets64;
   let (h, mt, hk) = (vfh.vf_heap, vfh.vf_layout.vl_taint, Map16.get vfh.vf_heaplets hid) in
   let ptr = buffer_addr b hk + scale8 i in
   let mh' = S.update_heap64 ptr v (heap_get (coerce vfh)) in
@@ -974,6 +984,8 @@ let valid_state_store_mem128_aux i v h =
 
 let low_lemma_load_mem128_full b i vfh t hid =
   reveal_opaque (`%valid_layout_buffer_id) valid_layout_buffer_id;
+  reveal_opaque (`%heaplets64) heaplets64;
+  in_bounds128 vfh.vf_heap b i;
   ()
 
 let low_lemma_store_mem128 b i v h =
@@ -990,6 +1002,7 @@ let low_lemma_store_mem128 b i v h =
   I.update_buffer_up_mem (_ih h) b heap heap'
 
 let low_lemma_store_mem128_full b i v vfh t hid =
+  reveal_opaque (`%heaplets64) heaplets64;
   let (h, mt, hk) = (vfh.vf_heap, vfh.vf_layout.vl_taint, Map16.get vfh.vf_heaplets hid) in
   let ptr = buffer_addr b hk + scale16 i in
   let mh' = S.update_heap128 ptr v (heap_get (coerce vfh)) in
@@ -1067,7 +1080,9 @@ let update_heap128_lo (ptr:int) (v:quad32) (mem:S.machine_heap) : Lemma
 
 let low_lemma_load_mem128_lo_hi_full b i vfh t hid =
   reveal_opaque (`%valid_layout_buffer_id) valid_layout_buffer_id;
+  reveal_opaque (`%heaplets64) heaplets64;
   low_lemma_valid_mem128_64 b i vfh.vf_heap;
+  in_bounds128 vfh.vf_heap b i;
   ()
 
 let low_lemma_store_mem128_lo64 b i v h =
@@ -1083,6 +1098,7 @@ let low_lemma_store_mem128_lo64 b i v h =
   insert_nat64_reveal ()
 
 let low_lemma_store_mem128_lo64_full b i v vfh t hid =
+  reveal_opaque (`%heaplets64) heaplets64;
   let (h, mt, hk) = (vfh.vf_heap, vfh.vf_layout.vl_taint, Map16.get vfh.vf_heaplets hid) in
   let v' = insert_nat64 (buffer_read b i hk) v 0 in
   let ptr = buffer_addr b hk + scale16 i in
@@ -1124,6 +1140,7 @@ let low_lemma_store_mem128_hi64 b i v h =
 
 let low_lemma_store_mem128_hi64_full b i v vfh t hid =
   reveal_opaque (`%valid_layout_buffer_id) valid_layout_buffer_id;
+  reveal_opaque (`%heaplets64) heaplets64;
   let (h, mt, hk) = (vfh.vf_heap, vfh.vf_layout.vl_taint, Map16.get vfh.vf_heaplets hid) in
   let v' = insert_nat64 (buffer_read b i h) v 1 in
   let ptr = buffer_addr b hk + scale16 i in

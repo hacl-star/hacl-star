@@ -86,6 +86,8 @@ let destroy_heaplets_this (s:vale_state) : Ghost vale_state
   (ensures fun _ -> True)
   =
   {s with vs_heap = Vale.X64.Memory_Sems.destroy_heaplets s.vs_heap}
+
+let create_heaplet_domains buffers = Vale.X64.Memory_Sems.create_heaplet_domains buffers
 #endverbatim
 
 #verbatim{:interface}
@@ -119,6 +121,11 @@ unfold let declare_buffer64 (b:buffer TUInt64) (hid:heaplet_id) (t:taint) (mut:m
 unfold let declare_buffer128 (b:buffer TUInt128) (hid:heaplet_id) (t:taint) (mut:mutability) : buffer_info =
   Mkbuffer_info TUInt128 b hid t mut
 
+let create_heaplet_domains_t = int -> option heaplet_id
+val create_heaplet_domains (buffers:list buffer_info) : create_heaplet_domains_t
+let create_pre (layout:vale_heap_layout) (buffers:list buffer_info) =
+  match layout.vl_heaplet_domains with None -> True | Some d -> d == create_heaplet_domains buffers
+
 let create_post (layout:vale_heap_layout) (bs:Seq.seq buffer_info) =
   forall (i:nat).{:pattern Seq.index bs i} i < Seq.length bs ==> (
     let Mkbuffer_info t b hid _ mut = Seq.index bs i in
@@ -137,6 +144,7 @@ function norm_loc(l:loc):loc extern;
 function trigger_create_heaplet(h:heaplet_id):prop extern;
 function declare_buffer64(b:buffer64, hid:heaplet_id, t:taint, mut:mutability):buffer_info extern;
 function declare_buffer128(b:buffer128, hid:heaplet_id, t:taint, mut:mutability):buffer_info extern;
+function create_pre(layout:vale_heap_layout, buffers:list(buffer_info)):prop extern;
 function create_post(layout:vale_heap_layout, bs:Seq.seq(buffer_info)):prop extern;
 ghost procedure Vale.X64.StateLemmas.use_machine_state_equal() extern;
 
@@ -157,7 +165,8 @@ procedure CreateHeaplets(ghost buffers:list(buffer_info))
     modifies
         memLayout;
     requires
-        is_initial_heap(memLayout, mem);
+        is_initial_heap_def(memLayout, mem);
+        create_pre(memLayout, buffers);
         norm_list(list_to_seq_post(buffers, bs, 0)) ==> init_heaplets_req(mem, bs);
     ensures
         norm_list(list_to_seq_post(buffers, bs, 0));

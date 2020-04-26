@@ -119,6 +119,9 @@ unfold let loc_buffer(#t:M.base_typ) (b:M.buffer t) = M.loc_buffer #t b
 unfold let locs_disjoint = M.locs_disjoint
 unfold let loc_union = M.loc_union
 
+val valid_heaplet_index64 (ptr:int) (k:heaplet_id) (m:option (int -> option heaplet_id)) : bool
+val valid_heaplet_index128 (ptr:int) (k:heaplet_id) (m:option (int -> option heaplet_id)) : bool
+
 let valid_buf_maddr64 (addr:int) (s_mem:vale_heap) (layout:vale_heap_layout) (b:M.buffer64) (index:int) (t:taint) : prop0 =
   valid_src_addr s_mem b index /\
   M.valid_taint_buf64 b s_mem layout.vl_taint t /\
@@ -141,7 +144,9 @@ let valid_mem_operand128 (addr:int) (t:taint) (s_mem:vale_heap) (layout:vale_hea
 let valid_operand (o:operand64) (s:vale_state) : prop0 =
   Vale.X64.State.valid_src_operand o s /\
   ( match o with
-    | OMem (m, t, _) -> valid_mem_operand64 (eval_maddr m s) t (M.get_vale_heap s.vs_heap) s.vs_heap.vf_layout
+    | OMem (m, t, k) ->
+      valid_mem_operand64 (eval_maddr m s) t (M.get_vale_heap s.vs_heap) s.vs_heap.vf_layout /\
+      valid_heaplet_index64 (eval_maddr m s) k s.vs_heap.vf_layout.vl_heaplet_domains
     | OStack (m, t) -> S.valid_taint_stack64 (eval_maddr m s) t s.vs_stackTaint
     | _ -> True
   )
@@ -150,7 +155,9 @@ let valid_operand (o:operand64) (s:vale_state) : prop0 =
 let valid_operand128 (o:operand128) (s:vale_state) : prop0 =
   Vale.X64.State.valid_src_operand128 o s /\
   ( match o with
-    | OMem (m, t, _) -> valid_mem_operand128 (eval_maddr m s) t (M.get_vale_heap s.vs_heap) s.vs_heap.vf_layout
+    | OMem (m, t, k) ->
+      valid_mem_operand128 (eval_maddr m s) t (M.get_vale_heap s.vs_heap) s.vs_heap.vf_layout /\
+      valid_heaplet_index128 (eval_maddr m s) k s.vs_heap.vf_layout.vl_heaplet_domains
     | OStack (m, t) -> S.valid_taint_stack128 (eval_maddr m s) t s.vs_stackTaint
     | _ -> True
   )

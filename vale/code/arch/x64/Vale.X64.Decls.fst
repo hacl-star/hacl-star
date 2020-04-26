@@ -39,6 +39,9 @@ let get_reason p =
 let mul_nat_helper x y =
   FStar.Math.Lemmas.nat_times_nat_is_nat x y
 
+let valid_heaplet_index64 ptr k m = heaplets64 ptr k m
+let valid_heaplet_index128 ptr k m = heaplets128 ptr k m
+
 let va_fuel_default () = 0
 
 let lemma_opr_Mem64 (id:heaplet_id) (s:va_state) (base:operand64) (offset:int) (b:M.buffer64) (index:int) (t:taint) : Lemma

@@ -26,6 +26,7 @@ val lemma_heap_ignore_ghost_machine (h1 h2:heap_impl) : Lemma
   (ensures
     heap_get h1 == heap_get h2 /\
     heap_taint h1 == heap_taint h2 /\
+    heap_heaplet_domains h1 == heap_heaplet_domains h2 /\
     (forall (mh':machine_heap) (mt':memTaint_t).{:pattern heap_upd h1 mh' mt'; heap_upd h2 mh' mt'}
       is_machine_heap_update (heap_get h1) mh' /\ is_machine_heap_update (heap_get h2) mh' ==>
       heap_ignore_ghost_machine (heap_upd h1 mh' mt') == heap_ignore_ghost_machine (heap_upd h2 mh' mt')))
