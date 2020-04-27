@@ -74,6 +74,7 @@ val frodo_pack:
     (ensures  fun h0 _ h1 ->
       modifies1 res h0 h1 /\
       as_seq h1 res == S.frodo_pack (v d) (as_matrix h0 a))
+#push-options "--z3rlimit 200"
 [@"c_inline"]
 let frodo_pack #n1 #n2 d a res =
   let n = (n1 *! n2) /. size 8 in
@@ -96,6 +97,7 @@ let frodo_pack #n1 #n2 d a res =
       let h = ST.get() in
       lemma_split (refl h (v i + 1)) (v d * v i)
     )
+#pop-options
 
 
 /// Unpack

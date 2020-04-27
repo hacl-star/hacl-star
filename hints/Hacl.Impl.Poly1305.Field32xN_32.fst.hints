@@ -40,7 +40,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "0cb10c448633a010fbddebd3f1e2ef2c"
+      "bdeb94b7aa6fa7fec4b0243b00476992"
     ],
     [
       "Hacl.Impl.Poly1305.Field32xN_32.load_acc1",
@@ -55,7 +55,7 @@
         "typing_Spec.Poly1305.size_block"
       ],
       0,
-      "a7902977c6a181f6a2c62e8adfa23c02"
+      "749f366976de4fe87da566371a2e598b"
     ],
     [
       "Hacl.Impl.Poly1305.Field32xN_32.load_acc1",
@@ -117,7 +117,8 @@
         "equation_Prims.nat", "equation_Spec.AES.elem",
         "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
         "equation_Spec.GaloisField.felem", "equation_Spec.GaloisField.gf",
-        "equation_Spec.Poly1305.felem", "equation_Spec.Poly1305.size_key",
+        "equation_Spec.Poly1305.felem", "equation_Spec.Poly1305.size_block",
+        "equation_Spec.Poly1305.size_key",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.int",
@@ -138,12 +139,15 @@
         "lemma_FStar.Set.lemma_equal_intro",
         "lemma_FStar.Set.mem_complement", "lemma_FStar.Set.mem_intersect",
         "lemma_FStar.Set.mem_singleton", "lemma_FStar.Set.mem_subset",
-        "lemma_FStar.UInt32.uv_inv", "lemma_FStar.UInt32.vu_inv",
-        "lemma_Lib.IntTypes.mul_lemma", "lemma_Lib.Sequence.eq_elim",
+        "lemma_FStar.UInt.pow2_values", "lemma_FStar.UInt32.uv_inv",
+        "lemma_FStar.UInt32.vu_inv", "lemma_Lib.IntTypes.mul_lemma",
+        "lemma_Lib.IntTypes.v_injective", "lemma_Lib.Sequence.eq_elim",
         "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
         "lemma_LowStar.Monotonic.Buffer.fresh_frame_loc_not_unused_in_disjoint",
         "lemma_LowStar.Monotonic.Buffer.fresh_frame_modifies",
         "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
+        "lemma_LowStar.Monotonic.Buffer.length_null_1",
+        "lemma_LowStar.Monotonic.Buffer.length_null_2",
         "lemma_LowStar.Monotonic.Buffer.live_loc_not_unused_in",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_includes_r",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_none_r",
@@ -211,8 +215,8 @@
         "typing_FStar.UInt32.v",
         "typing_Hacl.Spec.Poly1305.Field32xN.uint64xN",
         "typing_Lib.Buffer.length", "typing_Lib.Buffer.loc",
-        "typing_Lib.IntTypes.mk_int", "typing_Lib.IntTypes.v",
-        "typing_LowStar.Buffer.trivial_preorder",
+        "typing_Lib.IntTypes.mk_int", "typing_Lib.IntTypes.mul",
+        "typing_Lib.IntTypes.v", "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.address_liveness_insensitive_locs",
         "typing_LowStar.Monotonic.Buffer.as_addr",
         "typing_LowStar.Monotonic.Buffer.frameOf",
@@ -222,11 +226,12 @@
         "typing_LowStar.Monotonic.Buffer.loc_not_unused_in",
         "typing_LowStar.Monotonic.Buffer.loc_regions",
         "typing_LowStar.Monotonic.Buffer.loc_union",
-        "typing_Spec.Poly1305.size_key", "typing_tok_Lib.Buffer.MUT@tok",
-        "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
+        "typing_Spec.Poly1305.size_block", "typing_Spec.Poly1305.size_key",
+        "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.PUB@tok",
+        "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "ab9b4c59ec65f5d400932ed5cc4feb03"
+      "72029bd8ce35c943fbe9f1f74cfc51a5"
     ],
     [
       "Hacl.Impl.Poly1305.Field32xN_32.fmul_r1_normalize",
@@ -263,7 +268,7 @@
         "typing_Spec.Poly1305.size_key", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "25c64a96a4378080919d00fb3cb0778d"
+      "c5f356f4d48520d5049e56fc6128e851"
     ],
     [
       "Hacl.Impl.Poly1305.Field32xN_32.fmul_r1_normalize",
@@ -277,7 +282,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "3b44de4eafb1aaf5c2d68cdc851625cd"
+      "83c3c6ef20457859c77cdcf508a8c7ab"
     ],
     [
       "Hacl.Impl.Poly1305.Field32xN_32.fmul_r1_normalize",
@@ -401,7 +406,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "0f73c65f1493ca9e63b401d2d505474b"
+      "0566864332e83503e456d197305e882c"
     ]
   ]
 ]

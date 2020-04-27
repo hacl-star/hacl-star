@@ -693,7 +693,7 @@ let load_last4 #a #m totlen_buf len b fin last =
 
 inline_for_extraction
 val load_last8: #a:sha2_alg -> #m:m_spec{lanes a m = 8} -> load_last_t a m
-#push-options "--z3rlimit 500"
+#push-options "--z3rlimit 600"
 let load_last8 #a #m totlen_buf len b fin last =
   let h0 = ST.get() in
   let (b0,(b1,(b2,(b3,(b4,(b5,(b6,b7))))))) = NTup.tup8 b in
@@ -1041,7 +1041,7 @@ val emit8: #a:sha2_alg -> #m:m_spec{lanes a m = 8} ->
     (ensures (fun h0 _ h1 -> modifies_multi result h0 h1 /\
                            as_seq_multi h1 result ==
                            SpecVec.emit #a #m (as_seq h0 hbuf)))
-#push-options "--z3rlimit 500"
+#push-options "--z3rlimit 700"
 let emit8 #a #m hbuf result =
   let h0 = ST.get() in
   let (b0,(b1,(b2,(b3,(b4,(b5,(b6,b7))))))) = NTup.tup8 result in

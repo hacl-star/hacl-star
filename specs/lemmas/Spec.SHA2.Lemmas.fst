@@ -217,6 +217,6 @@ let rec update_multi_224_256 hash blocks =
   if S.length blocks = 0 then
     ()
   else
-    let block, rem = Spec.Agile.Hash.split_block SHA2_256 blocks 1 in
+    let block, rem = Lib.UpdateMulti.split_block (block_length SHA2_256) blocks 1 in
     update_224_256 hash block;
     update_multi_224_256 (update SHA2_224 hash block) rem
