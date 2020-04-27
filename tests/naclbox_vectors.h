@@ -1,12 +1,5 @@
 #pragma once
 
-// This is cleaner than defining things in the main function, and also allows
-// for-looping over the vectors right than copy-pasting N test bodies.
-//
-// This can be easily moved to a header to be shared between naclbox tests to
-// avoid duplication.
-
-
 #define MACBYTES   16
 #define NONCEBYTES 24
 #define KEYBYTES   32

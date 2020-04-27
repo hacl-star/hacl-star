@@ -57,56 +57,14 @@ bool print_test2s(int in_len, uint8_t* in, int key_len, uint8_t* key, int exp_le
 
 int main()
 {
-  int in_len = vectors2b[0].input_len;
-  uint8_t *in = vectors2b[0].input;
-  int key_len = vectors2b[0].key_len;
-  uint8_t *key = vectors2b[0].key;
-  int exp_len = vectors2b[0].expected_len;
-  uint8_t *exp = vectors2b[0].expected;
+  bool ok = true;
+  for (int i = 0; i < sizeof(vectors2b)/sizeof(blake2_test_vector); ++i) {
+    ok &= print_test2b(vectors2b[i].input_len,vectors2b[i].input,vectors2b[i].key_len,vectors2b[i].key,vectors2b[i].expected_len,vectors2b[i].expected);
+  }
 
-  int in_len1 = vectors2b[1].input_len;
-  uint8_t *in1 = vectors2b[1].input;
-  int key_len1 = vectors2b[1].key_len;
-  uint8_t *key1 = vectors2b[1].key;
-  int exp_len1 = vectors2b[1].expected_len;
-  uint8_t *exp1 = vectors2b[1].expected;
-
-  bool ok = print_test2b(in_len,in,key_len,key,exp_len,exp);
-  ok = print_test2b(in_len1,in1,key_len1,key1,exp_len1,exp1) && ok;
-
-  int in_len2 = vectors2s[0].input_len;
-  uint8_t *in2 = vectors2s[0].input;
-  int key_len2 = vectors2s[0].key_len;
-  uint8_t *key2 = vectors2s[0].key;
-  int exp_len2 = vectors2s[0].expected_len;
-  uint8_t *exp2 = vectors2s[0].expected;
-
-  int in_len3 = vectors2s[1].input_len;
-  uint8_t *in3 = vectors2s[1].input;
-  int key_len3 = vectors2s[1].key_len;
-  uint8_t *key3 = vectors2s[1].key;
-  int exp_len3 = vectors2s[1].expected_len;
-  uint8_t *exp3 = vectors2s[1].expected;
-
-  int in_len4 = vectors2s[2].input_len;
-  uint8_t *in4 = vectors2s[2].input;
-  int key_len4 = vectors2s[2].key_len;
-  uint8_t *key4 = vectors2s[2].key;
-  int exp_len4 = vectors2s[2].expected_len;
-  uint8_t *exp4 = vectors2s[2].expected;
-
-  int in_len5 = vectors2s[3].input_len;
-  uint8_t *in5 = vectors2s[3].input;
-  int key_len5 = vectors2s[3].key_len;
-  uint8_t *key5 = vectors2s[3].key;
-  int exp_len5 = vectors2s[3].expected_len;
-  uint8_t *exp5 = vectors2s[3].expected;
-
-  ok = print_test2s(in_len2,in2,key_len2,key2,exp_len2,exp2) && ok;
-  ok = print_test2s(in_len3,in3,key_len3,key3,exp_len3,exp3) && ok;
-  ok = print_test2s(in_len4,in4,key_len4,key4,exp_len4,exp4) && ok;
-  ok = print_test2s(in_len5,in5,key_len5,key5,exp_len5,exp5) && ok;
-
+  for (int i = 0; i < sizeof(vectors2s)/sizeof(blake2_test_vector); ++i) {
+    ok &= print_test2s(vectors2s[i].input_len,vectors2s[i].input,vectors2s[i].key_len,vectors2s[i].key,vectors2s[i].expected_len,vectors2s[i].expected);
+  }
 
   uint64_t len = SIZE;
   uint8_t plain[SIZE];

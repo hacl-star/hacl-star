@@ -1,10 +1,5 @@
 #pragma once
 
-// This is cleaner than defining things in the main function, and also allows
-// for-looping over the vectors right than copy-pasting N test bodies.
-//
-// This can be easily moved to a header to be shared between curve25519 tests to
-// avoid duplication.
 typedef struct {
   uint8_t scalar[32];
   uint8_t public[32];

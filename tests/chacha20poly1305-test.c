@@ -69,19 +69,18 @@ bool print_test(int in_len, uint8_t* in, uint8_t* key, uint8_t* nonce, int aad_l
 }
 
 int main(){
-  int in_len = vectors[0].input_len;
-  uint8_t *in = vectors[0].input;
-  uint8_t *aead_key = vectors[0].key;
-  uint8_t *aead_nonce = vectors[0].nonce;
-  int aad_len = vectors[0].aad_len;
-  uint8_t *aead_aad = vectors[0].aad;
-  uint8_t *exp_mac = vectors[0].tag;
-  uint8_t *exp_cipher = vectors[0].cipher;
-
-  bool ok = print_test(in_len,in,aead_key,aead_nonce,aad_len,aead_aad,exp_mac,exp_cipher);
+  bool ok = true;
+  for (int i = 0; i < sizeof(vectors)/sizeof(chacha20poly1305_test_vector); ++i) {
+    ok &= print_test(vectors[i].input_len,vectors[i].input,vectors[i].key,vectors[i].nonce,vectors[i].aad_len,vectors[i].aad,vectors[i].tag,vectors[i].cipher);
+  }
 
   uint8_t plain[SIZE];
   uint8_t cipher[SIZE];
+  uint8_t aead_key[32];
+  uint8_t aead_nonce[12];
+  int aad_len = 12;
+  uint8_t aead_aad[aad_len];
+
   int res = 0;
   uint8_t tag[16];
   cycles a,b;

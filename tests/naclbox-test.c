@@ -71,15 +71,10 @@ bool print_test(int in_len, uint8_t* in, uint8_t* nonce, uint8_t* sk1, uint8_t* 
 
 int main()
 {
-  int in_len = vectors[0].input_len;
-  uint8_t *in = vectors[0].input;
-  uint8_t *nonce = vectors[0].nonce;
-  uint8_t *sk1 = vectors[0].secretkey1;
-  uint8_t *sk2 = vectors[0].secretkey2;
-  uint8_t *cipher = vectors[0].cipher;
-  uint8_t *mac = vectors[0].mac;
-
-  bool ok = print_test(in_len,in,nonce,sk1,sk2,cipher,mac);
+  bool ok = true;
+  for (int i = 0; i < sizeof(vectors)/sizeof(naclbox_test_vector); ++i) {
+    ok &= print_test(vectors[i].input_len,vectors[i].input,vectors[i].nonce,vectors[i].secretkey1,vectors[i].secretkey2,vectors[i].cipher,vectors[i].mac);
+  }
 
   if (ok) return EXIT_SUCCESS;
   else return EXIT_FAILURE;

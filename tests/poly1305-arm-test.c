@@ -39,26 +39,13 @@ bool print_test(int in_len, uint8_t* in, uint8_t* key, uint8_t* exp){
 }
 
 int main() {
-  int in_len = vectors[0].input_len;
-  uint8_t *in = vectors[0].input;
-  uint8_t *key = vectors[0].key;
-  uint8_t *exp = vectors[0].tag;
-
-  int in_len2 = vectors[1].input_len;
-  uint8_t *in2 = vectors[1].input;
-  uint8_t *key2 = vectors[1].key;
-  uint8_t *exp2 = vectors[1].tag;
-
-  int in_len3 = vectors[2].input_len;
-  uint8_t *in3 = vectors[2].input;
-  uint8_t *key3 = vectors[2].key;
-  uint8_t *exp3 = vectors[2].tag;
-
-  bool ok = print_test(in_len,in,key,exp);
-  ok = print_test(in_len2,in2,key2,exp2) && ok;
-  ok = print_test(in_len3,in3,key3,exp3) && ok;
+  bool ok = true;
+  for (int i = 0; i < sizeof(vectors)/sizeof(poly1305_test_vector); ++i) {
+    ok &= print_test(vectors[i].input_len,vectors[i].input,vectors[i].key,vectors[i].tag);
+  }
 
   uint8_t plain[SIZE];
+  uint8_t key[32];
   uint64_t res = 0;
   uint8_t tag[16];
   clock_t t1,t2;

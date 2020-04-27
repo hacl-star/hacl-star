@@ -1,10 +1,5 @@
 #pragma once
 
-// This is cleaner than defining things in the main function, and also allows
-// for-looping over the vectors right than copy-pasting N test bodies.
-//
-// This can be easily moved to a header to be shared between blake2 tests to
-// avoid duplication.
 typedef struct {
   uint8_t *input;
   size_t input_len;
@@ -12,16 +7,7 @@ typedef struct {
   size_t key_len;
   uint8_t *expected;
   size_t expected_len;
-} blake2b_test_vector;
-
-typedef struct {
-  uint8_t *input;
-  size_t input_len;
-  uint8_t *key;
-  size_t key_len;
-  uint8_t *expected;
-  size_t expected_len;
-} blake2s_test_vector;
+} blake2_test_vector;
 
 
 static uint8_t input2b1[44] = {
@@ -259,7 +245,7 @@ static uint8_t expected2s8[32] = {
 
 
 
-static blake2b_test_vector vectors2b[] = {
+static blake2_test_vector vectors2b[] = {
   {
     .input = input2b1,
     .input_len = sizeof(input2b1)/sizeof(uint8_t),
@@ -278,7 +264,7 @@ static blake2b_test_vector vectors2b[] = {
   }
 };
 
-static blake2s_test_vector vectors2s[] = {
+static blake2_test_vector vectors2s[] = {
   {
     .input = input2s1,
     .input_len = sizeof(input2s1)/sizeof(uint8_t),
@@ -318,5 +304,5 @@ static blake2s_test_vector vectors2s[] = {
     .key_len = sizeof(key2s8)/sizeof(uint8_t),
     .expected = expected2s8,
     .expected_len = sizeof(expected2s8)/sizeof(uint8_t),
-  }  
+  }
 };

@@ -44,13 +44,10 @@ bool print_test(int in_len, uint8_t* in, uint8_t* key, uint8_t* nonce, uint8_t* 
 
 
 int main() {
-  int in_len = vectors[0].input_len;
-  uint8_t *in = vectors[0].input;
-  uint8_t *k = vectors[0].key;
-  uint8_t *n = vectors[0].nonce;
-  uint8_t *exp = vectors[0].cipher;
-
-  bool ok = print_test(in_len,in,k,n,exp);
+  bool ok = true;
+  for (int i = 0; i < sizeof(vectors)/sizeof(chacha20_test_vector); ++i) {
+    ok &= print_test(vectors[i].input_len,vectors[i].input,vectors[i].key,vectors[i].nonce,vectors[i].cipher);
+  }
 
   uint64_t len = SIZE;
   uint8_t plain[SIZE];

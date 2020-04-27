@@ -23,7 +23,7 @@ int main() {
   // the streaming API with various lengths. Otherwise, in an exemplary test,
   // one would write a for-loop over the test vectors.
 
-  uint8_t tag[32] = {};
+  uint8_t tag[16] = {};
   poly1305_test_vector *v = vectors;
 
   poly1305_state *s = Hacl_Streaming_Poly1305_32_create_in(v->key);

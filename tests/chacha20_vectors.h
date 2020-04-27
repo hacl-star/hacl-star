@@ -1,10 +1,5 @@
 #pragma once
 
-// This is cleaner than defining things in the main function, and also allows
-// for-looping over the vectors right than copy-pasting N test bodies.
-//
-// This can be easily moved to a header to be shared between chacha20 tests to
-// avoid duplication.
 typedef struct {
   uint8_t *input;
   size_t input_len;

@@ -62,41 +62,12 @@ bool print_test(uint8_t* in, int in_len, uint8_t* exp224, uint8_t* exp256, uint8
   return ok;
 }
 
-int main()
-{
+int main(){
 
-  uint32_t test1_plaintext_len = vectors[0].input_len;
-  uint8_t *test1_plaintext = vectors[0].input;
-  uint8_t *test1_expected224 = vectors[0].tag_224;
-  uint8_t *test1_expected256 = vectors[0].tag_256;
-  uint8_t *test1_expected384 = vectors[0].tag_384;
-  uint8_t *test1_expected512 = vectors[0].tag_512;
-
-  uint32_t test2_plaintext_len = vectors[1].input_len;
-  uint8_t *test2_plaintext = vectors[1].input;
-  uint8_t *test2_expected224 = vectors[1].tag_224;
-  uint8_t *test2_expected256 = vectors[1].tag_256;
-  uint8_t *test2_expected384 = vectors[1].tag_384;
-  uint8_t *test2_expected512 = vectors[1].tag_512;
-
-  uint32_t test3_plaintext_len = vectors[2].input_len;
-  uint8_t *test3_plaintext = vectors[2].input;
-  uint8_t *test3_expected224 = vectors[2].tag_224;
-  uint8_t *test3_expected256 = vectors[2].tag_256;
-  uint8_t *test3_expected384 = vectors[2].tag_384;
-  uint8_t *test3_expected512 = vectors[2].tag_512;
-
-  uint32_t test4_plaintext_len = vectors[3].input_len;
-  uint8_t *test4_plaintext = vectors[3].input;
-  uint8_t *test4_expected224 = vectors[3].tag_224;
-  uint8_t *test4_expected256 = vectors[3].tag_256;
-  uint8_t *test4_expected384 = vectors[3].tag_384;
-  uint8_t *test4_expected512 = vectors[3].tag_512;
-
-  bool ok = print_test(test1_plaintext,test1_plaintext_len,test1_expected224,test1_expected256,test1_expected384,test1_expected512);
-  ok = print_test(test2_plaintext,test2_plaintext_len,test2_expected224,test2_expected256,test2_expected384,test2_expected512) && ok;
-  ok = print_test(test3_plaintext,test3_plaintext_len,test3_expected224,test3_expected256,test3_expected384,test3_expected512) && ok;
-  ok = print_test(test4_plaintext,test4_plaintext_len,test4_expected224,test4_expected256,test4_expected384,test4_expected512) && ok;
+  bool ok = true;
+  for (int i = 0; i < sizeof(vectors)/sizeof(sha2_test_vector); ++i) {
+    ok &= print_test(vectors[i].input,vectors[i].input_len,vectors[i].tag_224,vectors[i].tag_256,vectors[i].tag_384,vectors[i].tag_512);
+  }
 
   uint64_t len = SIZE;
   uint8_t plain[SIZE];

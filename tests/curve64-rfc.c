@@ -35,17 +35,10 @@ bool print_test(uint8_t* scalar, uint8_t* pub, uint8_t* exp){
 
 
 int main() {
-  uint8_t *scalar0 = vectors[0].scalar;
-  uint8_t *pub0 = vectors[0].public;
-  uint8_t *exp0 = vectors[0].secret;
-
-  uint8_t *scalar1 = vectors[1].scalar;
-  uint8_t *pub1 = vectors[1].public;
-  uint8_t *exp1 = vectors[1].secret;
-
-  bool ok = print_test(scalar0,pub0,exp0);
-  ok = print_test(scalar1,pub1,exp1) && ok;
-
+  bool ok = true;
+  for (int i = 0; i < sizeof(vectors)/sizeof(curve25519_test_vector); ++i) {
+    ok &= print_test(vectors[i].scalar,vectors[i].public,vectors[i].secret);
+  }
 
   X25519_KEY pub, priv, key;
   uint64_t res = 0;
@@ -69,7 +62,7 @@ int main() {
   clock_t tdiff1 = t2 - t1;
   cycles cdiff1 = b - a;
 
-  uint64_t count = ROUNDS * SIZE;  
+  uint64_t count = ROUNDS * SIZE;
   double time = (((double)tdiff1) / CLOCKS_PER_SEC);
   double nsigs = ((double)ROUNDS) / time;
   printf("Curve25519 (RFC7748 Original) PERF:\n"); print_time(count,tdiff1,cdiff1);
