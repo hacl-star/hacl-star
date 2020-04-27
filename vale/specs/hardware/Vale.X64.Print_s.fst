@@ -280,14 +280,18 @@ and print_code (c:code) (n:int) (p:printer) : string & int =
     let cmp = print_cmp cond n1 p in
     (jmp ^ label1 ^ body_str ^ label2 ^ cmp, n')
   | Unstructured blocks ->
-    print_unstructured blocks (List.Tot.length blocks) n n p
+    let l = List.Tot.length blocks in
+    print_unstructured blocks l n (n + l + 1) p
 and print_unstructured (blocks:list ublock) (orig_num_blocks orig_n n:int) (p:printer) : string & int =
+  (* All blocks are numbered b/w [orig_n] and [orig_n + orig_num_blocks]. That is, [orig_num_blocks + 1] labels in total.
+     All values for [n] are strictly greater than the last label [orig_n + orig_num_blocks]. *)
   allow_inversion ublock;
   match blocks with
-  | [] -> ("L" ^ string_of_int n ^ ":\n", n + 1)
+  | [] -> ("L" ^ string_of_int (orig_n + orig_num_blocks) ^ ":\n", n)
   | (c, j) :: tl ->
-    let label = "L" ^ string_of_int n ^ ":\n" in
-    let body, n = print_code c (n + 1) p in
+    let i = orig_num_blocks - List.Tot.length blocks in
+    let label = "L" ^ string_of_int (orig_n + i) ^ ":\n" in
+    let body, n = print_code c n p in
     let jmp = (
       (* Perform a saturation at [orig_num_blocks] due to definition in semantics. *)
       let jump_target = orig_n + min j.jump_target orig_num_blocks in
