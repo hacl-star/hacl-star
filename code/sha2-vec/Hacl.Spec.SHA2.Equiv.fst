@@ -13,10 +13,10 @@ open Spec.Hash.Definitions
 module Spec = Hacl.Spec.SHA2
 module LSeq = Lib.Sequence
 module BSeq = Lib.ByteSequence
-module VecTranspose = Lib.IntVector.Transpose
+module Lemmas = Hacl.Spec.SHA2.Lemmas
 
 
-#set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 let _Ch_lemma #a #m x y z :
   Lemma (vec_v (_Ch #a #m x y z) ==
@@ -341,67 +341,6 @@ let load_blocks_lemma_ij #a #m b j i =
     BSeq.uint_from_bytes_be (sub b.(|idx_i|) ((idx_j * l + j) * blocksize) blocksize))
 
 
-#push-options "--max_ifuel 1"
-val transpose_ws4_lemma:
-    #a:sha2_alg
-  -> #m:m_spec{lanes a m == 4}
-  -> ws:ws_spec a m
-  -> i:nat{i < 4} ->
-  Lemma
-   (sub (transpose_ws4 ws) (i * lanes a m) (lanes a m) ==
-    VecTranspose.transpose4x4_lseq (sub ws (i * lanes a m) (lanes a m)))
-
-let transpose_ws4_lemma #a #m ws i =
-  eq_intro
-    (sub (transpose_ws4 ws) (i * lanes a m) (lanes a m))
-     (VecTranspose.transpose4x4_lseq (sub ws (i * lanes a m) (lanes a m)))
-#pop-options
-
-
-val transpose_ws4_lemma_ij:
-    #a:sha2_alg
-  -> #m:m_spec{lanes a m == 4} // lanes a m * lanes a m = 16
-  -> ws:ws_spec a m
-  -> j:nat{j < lanes a m}
-  -> i:nat{i < 16} ->
-  Lemma
-   (let l = lanes a m in
-    (vec_v (transpose_ws4 ws).[i]).[j] == (vec_v ws.[i / l * l + j]).[i % l])
-
-let transpose_ws4_lemma_ij #a #m ws j i =
-  let l = lanes a m in
-  let i_sub = i / l in
-  let j_sub = i % l in
-  assert (i_sub * l + j_sub == i);
-
-  let vs = sub ws (i_sub * lanes a m) (lanes a m) in
-  transpose_ws4_lemma #a #m ws i_sub;
-  //assert ((transpose_ws4 ws).[i] == (sub (transpose_ws4 ws) (i_sub * l) l).[j_sub]);
-  //assert ((transpose_ws4 ws).[i] == (transpose4x4_lseq vs).[j_sub]);
-  assert ((vec_v (transpose_ws4 ws).[i]).[j] == (vec_v (VecTranspose.transpose4x4_lseq vs).[j_sub]).[j]);
-  VecTranspose.transpose4x4_lemma vs;
-  //assert ((vec_v (transpose_ws4 ws).[i]).[j] == (vec_v vs.[j]).[j_sub]);
-  assert ((vec_v (transpose_ws4 ws).[i]).[j] == (vec_v ws.[i_sub * lanes a m + j]).[j_sub])
-
-
-val transpose_ws_lemma_ij:
-    #a:sha2_alg
-  -> #m:m_spec
-  -> ws:ws_spec a m
-  -> j:nat{j < lanes a m}
-  -> i:nat{i < 16} ->
-  Lemma
-   (let l = lanes a m in
-    ((ws_spec_v (transpose_ws ws)).[j]).[i] == (vec_v ws.[i / l * l + j]).[i % l])
-
-let transpose_ws_lemma_ij #a #m ws j i =
-  assert (((ws_spec_v (transpose_ws ws)).[j]).[i] == (vec_v (transpose_ws ws).[i]).[j]);
-  match lanes a m with
-  | 1 -> ()
-  | 4 -> transpose_ws4_lemma_ij #a #m ws j i
-  | _ -> admit()
-
-
 val load_blocks_lemma_ij_subst:
     #a:sha2_alg
   -> #m:m_spec
@@ -451,9 +390,7 @@ val load_ws_lemma_l:
   -> #m:m_spec
   -> b:multiblock_spec a m
   -> j:nat{j < lanes a m} ->
-  Lemma
-    ((ws_spec_v (load_ws b)).[j] ==
-      BSeq.uints_from_bytes_be #(word_t a) #SEC b.(|j|))
+  Lemma ((ws_spec_v (load_ws b)).[j] == BSeq.uints_from_bytes_be #(word_t a) #SEC b.(|j|))
 
 let load_ws_lemma_l #a #m b j =
   let lp = (ws_spec_v (load_ws b)).[j] in
@@ -465,7 +402,7 @@ let load_ws_lemma_l #a #m b j =
     assert (rp.[i] == BSeq.uint_from_bytes_be (sub b.(|j|) (i * word_length a) (word_length a)));
 
     assert (lp.[i] == ((ws_spec_v (transpose_ws (load_blocks b))).[j]).[i]);
-    transpose_ws_lemma_ij (load_blocks b) j i;
+    Lemmas.transpose_ws_lemma_ij (load_blocks b) j i;
     load_blocks_lemma_ij_subst #a #m b j i in
 
   Classical.forall_intro aux;
@@ -526,6 +463,7 @@ let load_last_lemma_l #a #m totlen_seq fin len b l =
   match lanes a m with
   | 1 -> ()
   | 4 -> ()
+  | 8 -> ()
   | _ -> admit()
 
 
@@ -550,46 +488,6 @@ let update_last_lemma_l #a #m totlen len b st0 l =
   let st = update b0 st0 in
   update_lemma_l b0 st0 l;
   update_lemma_l b1 st l
-
-
-#push-options "--max_ifuel 1"
-val transpose_state4_lemma:
-    #a:sha2_alg
-  -> #m:m_spec{lanes a m == 4}
-  -> st:state_spec a m
-  -> j:nat{j < lanes a m}
-  -> i:nat{i < 8 * word_length a} ->
-  Lemma
-   (let l = lanes a m in
-    let ind = 8 * j + i / word_length a in
-    (Seq.index (vec_v (transpose_state st).[ind / l])) (ind % l) ==
-    (Seq.index (state_spec_v st).[j] (i / word_length a)))
-
-let transpose_state4_lemma #a #m st j i =
-  let r0 = VecTranspose.transpose4x4_lseq (sub st 0 4) in
-  VecTranspose.transpose4x4_lemma (sub st 0 4);
-  let r1 = VecTranspose.transpose4x4_lseq (sub st 4 4) in
-  VecTranspose.transpose4x4_lemma (sub st 4 4)
-#pop-options
-
-
-val transpose_state_lemma_ij:
-    #a:sha2_alg
-  -> #m:m_spec
-  -> st:state_spec a m
-  -> j:nat{j < lanes a m}
-  -> i:nat{i < 8 * word_length a} ->
-  Lemma
-   (let l = lanes a m in
-    let ind = 8 * j + i / word_length a in
-    (Seq.index (vec_v (transpose_state st).[ind / l])) (ind % l) ==
-    (Seq.index (state_spec_v st).[j] (i / word_length a)))
-
-let transpose_state_lemma_ij #a #m st j i =
-  match lanes a m with
-  | 1 -> ()
-  | 4 -> transpose_state4_lemma #a #m st j i
-  | _ -> admit()
 
 
 val store_state_lemma_ij:
@@ -635,7 +533,7 @@ let store_state_lemma_ij #a #m st j i =
     (==) { Math.Lemmas.modulo_modulo_lemma j_v (word_length a) (lanes a m) }
     (BSeq.uint_to_bytes_be
       (Seq.index (vec_v st1.[j_v / blocksize_v]) (j_v % blocksize_v / word_length a))).[j_v % word_length a];
-    (==) { transpose_state_lemma_ij #a #m st j i }
+    (==) { Lemmas.transpose_state_lemma_ij #a #m st j i }
     (BSeq.uint_to_bytes_be (Seq.index (state_spec_v st).[j] (i / word_length a))).[j_v % word_length a];
     (==) { Math.Lemmas.paren_mul_right j 8 (word_length a);
            Math.Lemmas.modulo_addition_lemma i (word_length a) (j * 8) }
@@ -784,4 +682,3 @@ val hash_lemma:
 
 let hash_lemma #a #m len b =
   Classical.forall_intro (hash_lemma_l #a #m len b)
-  
