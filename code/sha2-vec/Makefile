@@ -1,4 +1,4 @@
-bundHACL_HOME=../..
+HACL_HOME=../..
 
 # CUSTOMIZE HERE: determine what is the main target of this Makefile, e.g. a C
 # test, a Low* test, or just a binary archive (like libcurve.a).
@@ -12,7 +12,7 @@ include ../../Makefile.local
 
 #BASE_FLAGS+= -funroll-loops 4
 
-CFLAGS += -I../../../lib/c -I../../lib/c -march=native -mtune=native -O3
+CFLAGS += -I../../../lib/c -I../../lib/c -I ../hash/dist -march=native -mtune=native -O3
 export CFLAGS
 
 # CUSTOMIZE HERE: how to produce binary objects
