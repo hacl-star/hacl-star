@@ -34,7 +34,6 @@ bool print_test(int in_len, uint8_t* in, uint8_t* key, uint8_t* exp){
   printf("Poly1305 (128-bit) Result:\n");
   ok = ok && print_result(comp, exp);
 
-  ok = ok && print_result(comp, exp);
   return ok;
 }
 
