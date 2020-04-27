@@ -19,16 +19,14 @@ noeq type vale_heap_layout_inner : Type u#1 = {
   vl_heaplets_initialized:bool;
   vl_heaplet_map:int -> option heaplet_id; // each address is owned by at most one heaplet
   vl_heaplet_sets:heaplet_id -> Set.set int; // addresses owned by each heaplet (redundant with vl_heaplet_map, but convenient)
-  vl_old_heap:vale_heap;
   vl_buffers:Seq.seq buffer_info;
   vl_mod_loc:LowStar.Modifies.loc;
 }
 
-let empty_vale_heap_layout_inner (h:vale_heap) : vale_heap_layout_inner = {
+let empty_vale_heap_layout_inner : vale_heap_layout_inner = {
   vl_heaplets_initialized = false;
   vl_heaplet_map = (fun _ -> None);
   vl_heaplet_sets = (fun _ -> Set.empty);
-  vl_old_heap = h;
   vl_buffers = Seq.empty;
   vl_mod_loc = LowStar.Modifies.loc_none;
 }

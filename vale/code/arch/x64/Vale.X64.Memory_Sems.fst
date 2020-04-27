@@ -169,7 +169,6 @@ let create_heaplets buffers h1 =
     vl_heaplets_initialized = true;
     vl_heaplet_map = hmap;
     vl_heaplet_sets = hsets;
-    vl_old_heap = h1.vf_heap;
     vl_buffers = bs;
     vl_mod_loc = modloc;
   } in

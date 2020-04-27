@@ -721,9 +721,9 @@ let inv_buffer_info (bi:buffer_info) (owners:heaplet_id -> Set.set int) (h:vale_
     buffer_addr b h <= i /\ i < buffer_addr b h + DV.length (get_downview b.bsrc) ==> Set.mem i owns) /\
   True
 
-let inv_heaplets (layout:vale_heap_layout_inner) (h:vale_heap) (hs:vale_heaplets) (mt:memTaint_t) =
+let inv_heaplets (layout:vale_heap_layout_inner) (h:vale_heap) (hs:vale_heaplets) (mt:memTaint_t) (old_heap:vale_heap) =
   let bs = layout.vl_buffers in
-  modifies layout.vl_mod_loc layout.vl_old_heap h /\  // modifies for entire heap
+  modifies layout.vl_mod_loc old_heap h /\  // modifies for entire heap
   (forall (i:heaplet_id).{:pattern layout.vl_heaplet_sets i}
     forall (a:int).{:pattern Set.mem a (layout.vl_heaplet_sets i) \/ layout.vl_heaplet_map a}
       layout.vl_heaplet_map a == Some i <==> Set.mem a (layout.vl_heaplet_sets i)
@@ -737,7 +737,7 @@ let inv_heaplets (layout:vale_heap_layout_inner) (h:vale_heap) (hs:vale_heaplets
   True
 
 let is_initial_heap_def layout h =
-  h == layout.vl_inner.vl_old_heap /\
+  h == layout.vl_old_heap /\
   not layout.vl_inner.vl_heaplets_initialized
 
 let mem_inv h =
@@ -754,13 +754,12 @@ let mem_inv h =
   (if h.vf_layout.vl_inner.vl_heaplets_initialized
     then
       inv_heaplets h.vf_layout.vl_inner h.vf_heap
-        h.vf_heaplets h.vf_layout.vl_taint
+        h.vf_heaplets h.vf_layout.vl_taint h.vf_layout.vl_old_heap
     else
-      h.vf_heaplets == empty_vale_heaplets h.vf_layout.vl_inner.vl_old_heap
+      h.vf_heaplets == empty_vale_heaplets h.vf_layout.vl_old_heap
   )
 
 let layout_heaplets_initialized layout = layout.vl_heaplets_initialized
-let layout_old_heap layout = layout.vl_old_heap
 let layout_modifies_loc layout = layout.vl_mod_loc
 let layout_buffers layout = layout.vl_buffers
 

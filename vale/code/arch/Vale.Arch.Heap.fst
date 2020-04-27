@@ -45,7 +45,7 @@ let one_heaplet (ih:interop_heap) (id:option heaplet_id) : GTot vale_heap =
 
 let heap_create_impl ih mt =
   let vh = one_heaplet ih None in
-  let layout = {vl_inner = empty_vale_heap_layout_inner vh; vl_taint = mt; vl_heaplet_domains = None} in
+  let layout = {vl_inner = empty_vale_heap_layout_inner; vl_taint = mt; vl_heaplet_domains = None; vl_old_heap = vh} in
   {
     vf_layout = layout;
     vf_heap = vh;

@@ -170,9 +170,9 @@ procedure CreateHeaplets(ghost buffers:list(buffer_info))
     ensures
         norm_list(list_to_seq_post(buffers, bs, 0));
         layout_modifies_loc(memLayout.vl_inner) == norm_loc(loc_mutable_buffers(buffers));
-        layout_old_heap(memLayout.vl_inner) == old(mem);
         layout_buffers(memLayout.vl_inner) == bs;
         layout_heaplets_initialized(memLayout.vl_inner);
+        memLayout.vl_old_heap == old(memLayout.vl_old_heap);
         memLayout.vl_taint == old(memLayout.vl_taint);
         create_post(memLayout, bs);
         heaplet_id_is_none(mem);
@@ -199,7 +199,7 @@ procedure DestroyHeaplets()
     requires
         layout_heaplets_initialized(memLayout.vl_inner);
     ensures
-        modifies_mem(layout_modifies_loc(old(memLayout).vl_inner), layout_old_heap(old(memLayout).vl_inner), mem);
+        modifies_mem(layout_modifies_loc(old(memLayout).vl_inner), old(memLayout).vl_old_heap, mem);
         memLayout.vl_taint == old(memLayout.vl_taint);
         heaplet_id_is_none(mem);
         forall(h:heaplet_id){trigger_create_heaplet(h)} trigger_create_heaplet(h) ==>

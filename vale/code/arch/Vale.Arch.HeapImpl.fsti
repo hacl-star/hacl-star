@@ -33,6 +33,7 @@ noeq type vale_heap_layout : Type u#1 = {
   vl_inner:vale_heap_layout_inner;
   vl_taint:memTaint_t;
   vl_heaplet_domains:option t_heaplet_domains; // for reordering transformer, non-ghost version of vl_inner.vl_heaplet_map and vl_inner.vl_heaplet_sets
+  vl_old_heap:vale_heap;
 }
 
 let vale_heaplets = Map16.map16 vale_heap

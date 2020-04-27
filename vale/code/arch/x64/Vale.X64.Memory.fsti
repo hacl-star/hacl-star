@@ -397,14 +397,13 @@ let valid_layout_buffer (#t:base_typ) (b:buffer t) (layout:vale_heap_layout) (h:
 // Initial memory state
 val is_initial_heap_def (layout:vale_heap_layout) (h:vale_heap) : prop0 // REVIEW: this should be named is_initial_heap
 let is_initial_heap (layout:vale_heap_layout) (h:vale_heap) =           // REVIEW: this should be named something else
-  is_initial_heap_def layout h /\ layout.vl_heaplet_domains == None
+  is_initial_heap_def layout h /\ layout.vl_heaplet_domains == None /\ layout.vl_old_heap == h
 
 // Invariant that is always true in Vale procedures
 val mem_inv (h:vale_full_heap) : prop0
 
 // Layout data
 val layout_heaplets_initialized (layout:vale_heap_layout_inner) : bool
-val layout_old_heap (layout:vale_heap_layout_inner) : vale_heap
 val layout_modifies_loc (layout:vale_heap_layout_inner) : loc
 val layout_buffers (layout:vale_heap_layout_inner) : Seq.seq buffer_info
 

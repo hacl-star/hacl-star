@@ -7,12 +7,12 @@ open Vale.Arch.HeapImpl
 
 val lemma_heap_impl : squash (heap_impl == vale_full_heap)
 
-val empty_vale_heap_layout_inner (h:vale_heap) : vale_heap_layout_inner
+val empty_vale_heap_layout_inner : vale_heap_layout_inner
 val empty_vale_heaplets (h:vale_heap) : vale_heaplets
 
 let heap_ignore_ghost (vfh:vale_full_heap) : vale_full_heap =
   {vfh with
-    vf_layout = {vfh.vf_layout with vl_inner = empty_vale_heap_layout_inner vfh.vf_heap};
+    vf_layout = {vfh.vf_layout with vl_inner = empty_vale_heap_layout_inner};
     vf_heaplets = (match vfh.vf_layout.vl_heaplet_domains with
       | None -> empty_vale_heaplets vfh.vf_heap // ghost heaplets
       | Some _ -> vfh.vf_heaplets); // nonghost heaplets
