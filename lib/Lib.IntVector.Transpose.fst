@@ -433,6 +433,7 @@ let transpose8x8_lemma_ij vs0 i j =
   vec_interleave_high_lemma_uint32_8 vs0.[6] vs0.[7]
 
 
+#push-options "--z3rlimit 100"
 val transpose16x16_lemma_ij: vs:lseq (vec_t U32 16) 16 -> i:nat{i < 16} -> j:nat{j < 16} ->
   Lemma ((vec_v (transpose16x16_lseq #U32 vs).[i]).[j] == (vec_v vs.[j]).[i])
 
@@ -450,7 +451,7 @@ let transpose16x16_lemma_ij vs0 i j =
   let res2 = transposewxw_uint32_f 4 2 res1 in
   let res3 = transposewxw_uint32_f 4 3 res2 in
 
- vec_interleave_low_n_lemma_uint32_16_8 res2.[0] res2.[8];
+  vec_interleave_low_n_lemma_uint32_16_8 res2.[0] res2.[8];
   vec_interleave_low_n_lemma_uint32_16_8 res2.[1] res2.[9];
   vec_interleave_low_n_lemma_uint32_16_8 res2.[2] res2.[10];
   vec_interleave_low_n_lemma_uint32_16_8 res2.[3] res2.[11];
@@ -521,6 +522,7 @@ let transpose16x16_lemma_ij vs0 i j =
   vec_interleave_high_lemma_uint32_16 vs0.[10] vs0.[11];
   vec_interleave_high_lemma_uint32_16 vs0.[12] vs0.[13];
   vec_interleave_high_lemma_uint32_16 vs0.[14] vs0.[15]
+#pop-options
 
 
 let transpose4x4_lemma #t vs =
