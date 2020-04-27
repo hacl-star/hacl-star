@@ -265,6 +265,7 @@ let vec_rotate_left (#t:v_inttype) (#w:width) (x:vec_t t w) (y:rotval t) =
   | U32,16 -> vec512_rotate_left32 x y
   | _,_ ->  vec_or (vec_shift_left x y) (vec_shift_right x (size (bits t) -. y))
 
+let vec_rotate_left_lemma #t #w x y = ()
 
 let vec_eq_mask (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
   match t,w with
@@ -547,7 +548,7 @@ let vec_load_le t w b =
   | U128,1 -> vec128_load_le b
   | _,1 -> Lib.ByteBuffer.uint_from_bytes_le #t #SEC b
   | U32,4 -> vec128_load_le b
-  | U64,2 -> vec128_load_le 
+  | U64,2 -> vec128_load_le b
   | U32,8 -> vec256_load_le b
   | U64,4 -> vec256_load_le b
   | U128,2 -> vec256_load_le b

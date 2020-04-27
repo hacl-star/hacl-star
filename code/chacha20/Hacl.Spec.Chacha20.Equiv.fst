@@ -12,7 +12,7 @@ module Lemmas = Hacl.Spec.Chacha20.Lemmas
 open Hacl.Spec.Chacha20.Vec
 
 
-#set-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 val line_lemma_i:
     #w:lanes
@@ -20,8 +20,15 @@ val line_lemma_i:
   -> s:rotval U32 -> m:state w
   -> i:nat{i < w} ->
   Lemma ((transpose_state (line #w a b d s m)).[i] `Seq.equal` Scalar.line a b d s (transpose_state #w m).[i])
-let line_lemma_i #w a b d s m i =
-  eq_intro (transpose_state (line #w a b d s m)).[i] (Scalar.line a b d s (transpose_state #w m).[i])
+
+let line_lemma_i #w a b d s m0 i =
+  let m0_s = (transpose_state #w m0).[i] in
+  let m1 = m0.[a] <- m0.[a] +| m0.[b] in
+  let m1_s = m0_s.[a] <- m0_s.[a] +. m0_s.[b]  in
+  eq_intro (transpose_state m1).[i] m1_s;
+  let m2 = m1.[d] <- (m1.[d] ^| m1.[a]) <<<| s in
+  let m2_s = m1_s.[d] <- (m1_s.[d] ^. m1_s.[a]) <<<. s in
+  eq_intro (transpose_state m2).[i] m2_s
 
 
 #set-options "--z3rlimit 50"
