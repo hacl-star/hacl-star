@@ -44,6 +44,8 @@ static bool cpu_has_movbe[1U] = { false };
 
 static bool cpu_has_rdrand[1U] = { false };
 
+static bool cpu_has_neon[1U] = { false };
+
 static bool user_wants_hacl[1U] = { true };
 
 static bool user_wants_vale[1U] = { true };
@@ -100,6 +102,13 @@ bool EverCrypt_AutoConfig2_has_movbe()
 bool EverCrypt_AutoConfig2_has_rdrand()
 {
   return cpu_has_rdrand[0U];
+}
+
+bool EverCrypt_AutoConfig2_has_vec_128()
+{
+  bool b1 = cpu_has_neon[0U];
+  bool b2 = cpu_has_avx[0U];
+  return b1 || b2;
 }
 
 bool EverCrypt_AutoConfig2_wants_vale()
@@ -186,6 +195,10 @@ void EverCrypt_AutoConfig2_init()
       }
     }
   }
+  #endif
+  #if EVERCRYPT_TARGETCONFIG_AARCH32 || EVERCRYPT_TARGETCONFIG_AARCH64
+  bool b = EverCrypt_Arm_check_neon();
+  cpu_has_neon[0U] = b;
   #endif
   user_wants_hacl[0U] = true;
   user_wants_vale[0U] = true;

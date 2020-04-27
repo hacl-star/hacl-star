@@ -37,7 +37,7 @@ EverCrypt_Chacha20Poly1305_aead_encrypt(
 )
 {
   bool avx2 = EverCrypt_AutoConfig2_has_avx2();
-  bool avx = EverCrypt_AutoConfig2_has_avx();
+  bool has_vec_128 = EverCrypt_AutoConfig2_has_vec_128();
   #if EVERCRYPT_TARGETCONFIG_X64
   if (avx2)
   {
@@ -46,7 +46,14 @@ EverCrypt_Chacha20Poly1305_aead_encrypt(
   }
   #endif
   #if EVERCRYPT_TARGETCONFIG_X64
-  if (avx)
+  if (has_vec_128)
+  {
+    Hacl_Chacha20Poly1305_128_aead_encrypt(k, n, aadlen, aad, mlen, m, cipher, tag);
+    return;
+  }
+  #endif
+  #if EVERCRYPT_TARGETCONFIG_AARCH32 || EVERCRYPT_TARGETCONFIG_AARCH64
+  if (has_vec_128)
   {
     Hacl_Chacha20Poly1305_128_aead_encrypt(k, n, aadlen, aad, mlen, m, cipher, tag);
     return;
@@ -68,7 +75,7 @@ EverCrypt_Chacha20Poly1305_aead_decrypt(
 )
 {
   bool avx2 = EverCrypt_AutoConfig2_has_avx2();
-  bool avx = EverCrypt_AutoConfig2_has_avx();
+  bool has_vec_128 = EverCrypt_AutoConfig2_has_vec_128();
   #if EVERCRYPT_TARGETCONFIG_X64
   if (avx2)
   {
@@ -76,7 +83,13 @@ EverCrypt_Chacha20Poly1305_aead_decrypt(
   }
   #endif
   #if EVERCRYPT_TARGETCONFIG_X64
-  if (avx)
+  if (has_vec_128)
+  {
+    return Hacl_Chacha20Poly1305_128_aead_decrypt(k, n, aadlen, aad, mlen, m, cipher, tag);
+  }
+  #endif
+  #if EVERCRYPT_TARGETCONFIG_AARCH32 || EVERCRYPT_TARGETCONFIG_AARCH64
+  if (has_vec_128)
   {
     return Hacl_Chacha20Poly1305_128_aead_decrypt(k, n, aadlen, aad, mlen, m, cipher, tag);
   }

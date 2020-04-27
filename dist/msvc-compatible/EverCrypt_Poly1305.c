@@ -55,7 +55,7 @@ static void poly1305_vale(uint8_t *dst, uint8_t *src, uint32_t len, uint8_t *key
 void EverCrypt_Poly1305_poly1305(uint8_t *dst, uint8_t *src, uint32_t len, uint8_t *key)
 {
   bool avx2 = EverCrypt_AutoConfig2_has_avx2();
-  bool avx = EverCrypt_AutoConfig2_has_avx();
+  bool vec_128 = EverCrypt_AutoConfig2_has_vec_128();
   bool vale = EverCrypt_AutoConfig2_wants_vale();
   #if EVERCRYPT_TARGETCONFIG_X64
   if (avx2)
@@ -65,7 +65,14 @@ void EverCrypt_Poly1305_poly1305(uint8_t *dst, uint8_t *src, uint32_t len, uint8
   }
   #endif
   #if EVERCRYPT_TARGETCONFIG_X64
-  if (avx)
+  if (vec_128)
+  {
+    Hacl_Poly1305_128_poly1305_mac(dst, len, src, key);
+    return;
+  }
+  #endif
+  #if EVERCRYPT_TARGETCONFIG_AARCH32 || EVERCRYPT_TARGETCONFIG_AARCH64
+  if (vec_128)
   {
     Hacl_Poly1305_128_poly1305_mac(dst, len, src, key);
     return;

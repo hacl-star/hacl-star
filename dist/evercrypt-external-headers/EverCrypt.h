@@ -455,6 +455,8 @@ extern bool EverCrypt_AutoConfig2_has_movbe();
 
 extern bool EverCrypt_AutoConfig2_has_rdrand();
 
+extern bool EverCrypt_AutoConfig2_has_vec_128();
+
 extern bool EverCrypt_AutoConfig2_wants_vale();
 
 extern bool EverCrypt_AutoConfig2_wants_hacl();

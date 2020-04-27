@@ -30,6 +30,7 @@
 #ifndef __EverCrypt_AutoConfig2_H
 #define __EverCrypt_AutoConfig2_H
 
+#include "EverCrypt_Arm.h"
 #include "Vale.h"
 
 
@@ -52,6 +53,8 @@ bool EverCrypt_AutoConfig2_has_sse();
 bool EverCrypt_AutoConfig2_has_movbe();
 
 bool EverCrypt_AutoConfig2_has_rdrand();
+
+bool EverCrypt_AutoConfig2_has_vec_128();
 
 bool EverCrypt_AutoConfig2_wants_vale();
 

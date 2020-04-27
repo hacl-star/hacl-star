@@ -75,6 +75,7 @@ if detect_arm; then
   echo "... $(uname -m) does not support legacy vale stubs"
   echo "BLACKLIST += evercrypt_vale_stubs.c" >> Makefile.config
   echo "CFLAGS += -DLib_IntVector_Intrinsics_vec256=\"void *\"" >> Makefile.config
+  echo "USER_C_FILES += evercrypt_arm.c" >> Makefile.config
   if detect_arm_cc; then
     echo "... cc can cross-compile to ARM64 with SIMD"
     echo "CFLAGS_128 = -march=armv8-a+simd" >> Makefile.config
