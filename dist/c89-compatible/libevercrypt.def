@@ -106,14 +106,16 @@ EXPORTS
   EverCrypt_Hash_hash_256
   EverCrypt_Hash_hash_224
   EverCrypt_Hash_hash
-  EverCrypt_Hash_Incremental_uu___is_State
-  EverCrypt_Hash_Incremental___proj__State__item__hash_state
-  EverCrypt_Hash_Incremental___proj__State__item__buf
-  EverCrypt_Hash_Incremental___proj__State__item__total_len
-  EverCrypt_Hash_Incremental_alg_of_state
   EverCrypt_Hash_Incremental_create_in
   EverCrypt_Hash_Incremental_init
   EverCrypt_Hash_Incremental_update
+  EverCrypt_Hash_Incremental_finish_md5
+  EverCrypt_Hash_Incremental_finish_sha1
+  EverCrypt_Hash_Incremental_finish_sha224
+  EverCrypt_Hash_Incremental_finish_sha256
+  EverCrypt_Hash_Incremental_finish_sha384
+  EverCrypt_Hash_Incremental_finish_sha512
+  EverCrypt_Hash_Incremental_alg_of_state
   EverCrypt_Hash_Incremental_finish
   EverCrypt_Hash_Incremental_free
   Hacl_Impl_SHA3_rotl
@@ -278,6 +280,11 @@ EXPORTS
   Hacl_HPKE_Curve64_CP256_SHA256_setupBaseR
   Hacl_HPKE_Curve64_CP256_SHA256_sealBase
   Hacl_HPKE_Curve64_CP256_SHA256_openBase
+  Hacl_Streaming_Poly1305_32_create_in
+  Hacl_Streaming_Poly1305_32_init
+  Hacl_Streaming_Poly1305_32_update
+  Hacl_Streaming_Poly1305_32_finish
+  Hacl_Streaming_Poly1305_32_free
   Hacl_Blake2b_256_blake2b
   Hacl_Blake2s_32_blake2s
   Hacl_HPKE_Curve51_CP32_SHA512_setupBaseI
@@ -301,6 +308,11 @@ EXPORTS
   Hacl_HPKE_Curve64_CP32_SHA512_setupBaseR
   Hacl_HPKE_Curve64_CP32_SHA512_sealBase
   Hacl_HPKE_Curve64_CP32_SHA512_openBase
+  Hacl_Streaming_SHA2_256_create_in
+  Hacl_Streaming_SHA2_256_init
+  Hacl_Streaming_SHA2_256_update
+  Hacl_Streaming_SHA2_256_finish
+  Hacl_Streaming_SHA2_256_free
   Hacl_HPKE_Curve51_CP256_SHA256_setupBaseI
   Hacl_HPKE_Curve51_CP256_SHA256_setupBaseR
   Hacl_HPKE_Curve51_CP256_SHA256_sealBase

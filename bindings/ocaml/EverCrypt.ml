@@ -151,7 +151,7 @@ module Hash = struct
   open HashDefs
   open EverCrypt_Hash
 
-  type t = alg * Z.t ref * everCrypt_Hash_Incremental_state_s ptr
+  type t = alg * Z.t ref * hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ ptr
   let init alg =
     at_exit Gc.full_major;
     let alg_spec = alg_definition alg in

@@ -55,6 +55,20 @@ let precomp_r5_fits_lemma2 #w r =
   FStar.Classical.forall_intro (precomp_r5_as_tup64 #w r)
 
 
+val precomp_r5_zeros: w:lanes -> Lemma
+  (let r = (zero w, zero w, zero w, zero w, zero w) in
+   precomp_r5 r == (zero w, zero w, zero w, zero w, zero w))
+
+let precomp_r5_zeros w =
+  let r = (zero w, zero w, zero w, zero w, zero w) in
+  let (r0, r1, r2, r3, r4) = precomp_r5 r in
+
+  let aux (i:nat{i < w}) : Lemma ((vec_v (vec_smul_mod (zero w) (u64 5))).[i] == u64 0) = () in
+  Classical.forall_intro aux;
+  eq_intro (vec_v (vec_smul_mod (zero w) (u64 5))) (vec_v (zero w));
+  vecv_extensionality (vec_smul_mod (zero w) (u64 5)) (zero w)
+
+
 val fadd5_fits_lemma:
     #w:lanes
   -> f1:felem5 w{felem_fits5 f1 (2,2,2,2,2)}
