@@ -45,6 +45,8 @@ let cpu_has_movbe: cached_flag Vale.X64.CPU_Features_s.movbe_enabled =
   B.gcmalloc_of_list HS.root [ false ]
 let cpu_has_rdrand: cached_flag Vale.X64.CPU_Features_s.rdrand_enabled =
   B.gcmalloc_of_list HS.root [ false ]
+let cpu_has_neon: cached_flag EverCrypt.Arm.has_neon =
+  B.gcmalloc_of_list HS.root [ false ]
 
 let user_wants_hacl: eternal_pointer bool = B.gcmalloc_of_list HS.root [ SC.hacl ]
 let user_wants_vale: eternal_pointer bool = B.gcmalloc_of_list HS.root [ SC.vale ]
@@ -67,6 +69,13 @@ let has_sse = mk_getter cpu_has_sse
 let has_movbe = mk_getter cpu_has_movbe
 let has_rdrand = mk_getter cpu_has_rdrand
 
+let has_vec_128 () =
+  B.recall cpu_has_neon;
+  B.recall cpu_has_avx;
+  let b1 = B.index cpu_has_neon 0ul in
+  let b2 = B.index cpu_has_avx 0ul in
+  b1 || b2
+
 let wants_vale () = B.recall user_wants_vale; B.index user_wants_vale 0ul
 let wants_hacl () = B.recall user_wants_hacl; B.index user_wants_hacl 0ul
 let wants_openssl () = B.recall user_wants_openssl; B.index user_wants_openssl 0ul
@@ -82,6 +91,7 @@ let fp_cpu_flags () =
   B.loc_buffer cpu_has_adx `B.loc_union`
   B.loc_buffer cpu_has_sse `B.loc_union`
   B.loc_buffer cpu_has_movbe `B.loc_union`
+  B.loc_buffer cpu_has_neon `B.loc_union`
   B.loc_buffer cpu_has_rdrand
 
 let fp () =
@@ -101,6 +111,7 @@ let recall () =
   B.recall cpu_has_adx;
   B.recall cpu_has_sse;
   B.recall cpu_has_movbe;
+  B.recall cpu_has_neon;
   B.recall cpu_has_rdrand;
   B.recall user_wants_hacl;
   B.recall user_wants_vale;
@@ -214,7 +225,7 @@ val init_cpu_flags: unit -> Stack unit
     B.modifies (fp_cpu_flags ()) h0 h1))
 
 let init_cpu_flags () =
-  if EverCrypt.TargetConfig.x64 then
+  if EverCrypt.TargetConfig.x64 then begin
     if SC.vale then begin
       init_aesni_flags ();
       init_shaext_flags ();
@@ -225,6 +236,11 @@ let init_cpu_flags () =
       init_movbe_flags ();
       init_rdrand_flags ()
     end
+  end;
+  if EverCrypt.TargetConfig.(aarch32 || aarch64) then
+    let b = EverCrypt.Arm.check_neon () in
+    B.recall cpu_has_neon;
+    B.upd cpu_has_neon 0ul b
 
 #set-options "--z3rlimit 50"
 let init () =

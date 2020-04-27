@@ -32,6 +32,12 @@ val has_sse: getter Vale.X64.CPU_Features_s.sse_enabled
 val has_movbe: getter Vale.X64.CPU_Features_s.movbe_enabled
 val has_rdrand: getter Vale.X64.CPU_Features_s.rdrand_enabled
 
+val has_vec_128: unit -> Stack bool
+  (requires fun _ -> True)
+  (ensures fun h0 b h1 ->
+    h0 == h1 /\ ( b ==> (
+    Vale.X64.CPU_Features_s.avx_enabled || EverCrypt.Arm.has_neon)))
+
 val wants_vale: unit ->
   Stack bool (requires fun _ -> True) (ensures fun h0 _ h1 -> B.(modifies loc_none h0 h1))
 val wants_hacl: unit ->

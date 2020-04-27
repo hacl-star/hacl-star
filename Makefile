@@ -573,6 +573,9 @@ HAND_WRITTEN_C		= Lib.PrintBuffer Lib.RandomBuffer.System
 HAND_WRITTEN_FILES 	= $(wildcard $(LIB_DIR)/c/*.c) \
   $(addprefix providers/evercrypt/c/evercrypt_,vale_stubs.c)
 
+# Always copied into the destination directory, not passed by kremlin.
+HAND_WRITTEN_OPTIONAL_FILES = providers/evercrypt/c/evercrypt_arm.c
+
 # Always copied into the destination directory, not passed to kremlin.
 HAND_WRITTEN_H_FILES	= $(wildcard $(LIB_DIR)/c/*.h)
 

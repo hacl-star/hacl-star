@@ -15,12 +15,15 @@ module Spec = Spec.Chacha20Poly1305
 
 let aead_encrypt k n aadlen aad mlen m cipher tag =
   let avx2 = EverCrypt.AutoConfig2.has_avx2 () in
-  let avx = EverCrypt.AutoConfig2.has_avx () in
+  let has_vec_128 = EverCrypt.AutoConfig2.has_vec_128 () in
 
   if EverCrypt.TargetConfig.x64 && avx2 then begin
     Hacl.Chacha20Poly1305_256.aead_encrypt k n aadlen aad mlen m cipher tag
 
-  end else if EverCrypt.TargetConfig.x64 && avx then begin
+  end else if EverCrypt.TargetConfig.x64 && has_vec_128 then begin
+    Hacl.Chacha20Poly1305_128.aead_encrypt k n aadlen aad mlen m cipher tag
+
+  end else if EverCrypt.TargetConfig.(aarch32 || aarch64) && has_vec_128 then begin
     Hacl.Chacha20Poly1305_128.aead_encrypt k n aadlen aad mlen m cipher tag
 
   end else begin
@@ -29,12 +32,15 @@ let aead_encrypt k n aadlen aad mlen m cipher tag =
 
 let aead_decrypt k n aadlen aad mlen m cipher tag =
   let avx2 = EverCrypt.AutoConfig2.has_avx2 () in
-  let avx = EverCrypt.AutoConfig2.has_avx () in
+  let has_vec_128 = EverCrypt.AutoConfig2.has_vec_128 () in
 
   if EverCrypt.TargetConfig.x64 && avx2 then begin
     Hacl.Chacha20Poly1305_256.aead_decrypt k n aadlen aad mlen m cipher tag
 
-  end else if EverCrypt.TargetConfig.x64 && avx then begin
+  end else if EverCrypt.TargetConfig.x64 && has_vec_128 then begin
+    Hacl.Chacha20Poly1305_128.aead_decrypt k n aadlen aad mlen m cipher tag
+
+  end else if EverCrypt.TargetConfig.(aarch32 || aarch64) && has_vec_128 then begin
     Hacl.Chacha20Poly1305_128.aead_decrypt k n aadlen aad mlen m cipher tag
 
   end else begin
