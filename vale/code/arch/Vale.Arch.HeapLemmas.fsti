@@ -13,7 +13,9 @@ val empty_vale_heaplets (h:vale_heap) : vale_heaplets
 let heap_ignore_ghost (vfh:vale_full_heap) : vale_full_heap =
   {vfh with
     vf_layout = {vfh.vf_layout with vl_inner = empty_vale_heap_layout_inner vfh.vf_heap};
-    vf_heaplets = empty_vale_heaplets vfh.vf_heap;
+    vf_heaplets = (match vfh.vf_layout.vl_heaplet_domains with
+      | None -> empty_vale_heaplets vfh.vf_heap // ghost heaplets
+      | Some _ -> vfh.vf_heaplets); // nonghost heaplets
   }
 
 unfold let coerce (#b #a:Type) (x:a{a == b}) : b = x

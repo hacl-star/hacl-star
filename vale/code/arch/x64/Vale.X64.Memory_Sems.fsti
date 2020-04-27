@@ -4,6 +4,7 @@ open FStar.Mul
 open Vale.Def.Prop_s
 open Vale.Def.Types_s
 open Vale.Arch.Types
+open Vale.Arch.HeapTypes_s
 open Vale.Arch.HeapImpl
 open Vale.Arch.Heap
 open Vale.Arch.MachineHeap_s
@@ -56,8 +57,7 @@ let is_full_update (vfh:vale_full_heap) (h':vale_heap) (hid:heaplet_id) (mh':mac
   )
 
 // Can be called from interop to initialize vl_heaplet_domains to satisfy lemma_create_heaplets's precondition
-let create_heaplet_domains_t = int -> option heaplet_id
-val create_heaplet_domains (buffers:list buffer_info) : create_heaplet_domains_t
+val create_heaplet_domains (buffers:list buffer_info) : t_heaplet_domains
 
 val create_heaplets (buffers:list buffer_info) (h1:vale_full_heap) : GTot vale_full_heap
 

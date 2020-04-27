@@ -121,8 +121,7 @@ unfold let declare_buffer64 (b:buffer TUInt64) (hid:heaplet_id) (t:taint) (mut:m
 unfold let declare_buffer128 (b:buffer TUInt128) (hid:heaplet_id) (t:taint) (mut:mutability) : buffer_info =
   Mkbuffer_info TUInt128 b hid t mut
 
-let create_heaplet_domains_t = int -> option heaplet_id
-val create_heaplet_domains (buffers:list buffer_info) : create_heaplet_domains_t
+val create_heaplet_domains (buffers:list buffer_info) : t_heaplet_domains
 let create_pre (layout:vale_heap_layout) (buffers:list buffer_info) =
   match layout.vl_heaplet_domains with None -> True | Some d -> d == create_heaplet_domains buffers
 

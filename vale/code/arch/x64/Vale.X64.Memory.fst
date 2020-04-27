@@ -744,7 +744,8 @@ let mem_inv h =
   h.vf_heap.heapletId == None /\
   ( match h.vf_layout.vl_heaplet_domains with
     | None -> True
-    | Some d ->
+    | Some (d, s) ->
+      s == h.vf_layout.vl_inner.vl_heaplet_sets /\
       (forall (i:int).{:pattern d i \/ h.vf_layout.vl_inner.vl_heaplet_map i}
         let k = h.vf_layout.vl_inner.vl_heaplet_map i in
         Some? k ==> d i == k)

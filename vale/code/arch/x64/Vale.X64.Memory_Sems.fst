@@ -156,7 +156,7 @@ let lemma_loc_mutable_buffers (l:list buffer_info) : Lemma
 let create_heaplet_domains buffers =
   let bs = list_to_seq buffers in
   let (hmap, hsets) = make_owns bs (Seq.length bs) in
-  fun a -> Option.mapTot (fun n -> (Seq.index bs n).bi_heaplet) (hmap a)
+  ((fun a -> Option.mapTot (fun n -> (Seq.index bs n).bi_heaplet) (hmap a)), hsets)
 
 let create_heaplets buffers h1 =
   let bs = list_to_seq buffers in

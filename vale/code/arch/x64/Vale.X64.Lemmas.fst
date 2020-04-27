@@ -8,7 +8,7 @@ open Vale.X64.Bytes_Code_s
 module BS = Vale.X64.Machine_Semantics_s
 module ME = Vale.X64.Memory
 
-#reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 100"
+#reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 400"
 
 #restart-solver
 let rec lemma_eq_instr_apply_eval_args

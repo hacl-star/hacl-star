@@ -12,7 +12,7 @@ val heap_impl : Type u#1
 
 val heap_get (hi:heap_impl) : machine_heap
 
-val heap_heaplet_domains (hi:heap_impl) : option (int -> option heaplet_id)
+val heap_heaplet_domains (hi:heap_impl) : option t_heaplet_domains
 
 val heap_taint (hi:heap_impl) : memTaint_t
 

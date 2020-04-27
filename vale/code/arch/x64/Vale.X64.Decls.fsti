@@ -119,8 +119,8 @@ unfold let loc_buffer(#t:M.base_typ) (b:M.buffer t) = M.loc_buffer #t b
 unfold let locs_disjoint = M.locs_disjoint
 unfold let loc_union = M.loc_union
 
-val valid_heaplet_index64 (ptr:int) (k:heaplet_id) (m:option (int -> option heaplet_id)) : bool
-val valid_heaplet_index128 (ptr:int) (k:heaplet_id) (m:option (int -> option heaplet_id)) : bool
+val valid_heaplet_index64 (ptr:int) (k:heaplet_id) (m:option t_heaplet_domains) : bool
+val valid_heaplet_index128 (ptr:int) (k:heaplet_id) (m:option t_heaplet_domains) : bool
 
 let valid_buf_maddr64 (addr:int) (s_mem:vale_heap) (layout:vale_heap_layout) (b:M.buffer64) (index:int) (t:taint) : prop0 =
   valid_src_addr s_mem b index /\
