@@ -433,7 +433,7 @@ let transpose8x8_lemma_ij vs0 i j =
   vec_interleave_high_lemma_uint32_8 vs0.[6] vs0.[7]
 
 
-#push-options "--z3rlimit 100"
+#push-options "--z3rlimit 200"
 val transpose16x16_lemma_ij: vs:lseq (vec_t U32 16) 16 -> i:nat{i < 16} -> j:nat{j < 16} ->
   Lemma ((vec_v (transpose16x16_lseq #U32 vs).[i]).[j] == (vec_v vs.[j]).[i])
 
