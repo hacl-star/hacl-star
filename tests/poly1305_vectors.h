@@ -1,15 +1,10 @@
 #pragma once
 
-// This is cleaner than defining things in the main function, and also allows
-// for-looping over the vectors right than copy-pasting N test bodies.
-//
-// This can be easily moved to a header to be shared between poly1305 tests to
-// avoid duplication.
 typedef struct {
   uint8_t *input;
   size_t input_len;
   uint8_t key[32];
-  uint8_t tag[32];
+  uint8_t tag[16];
 } poly1305_test_vector;
 
 static uint8_t input1[34] = {

@@ -14,7 +14,6 @@
 #include "sha2_vectors.h"
 #include "test_helpers.h"
 
-typedef uint64_t cycles;
 
 void ossl_sha2(uint8_t* hash, uint8_t* input, int len){
   SHA256_CTX ctx;
@@ -28,32 +27,10 @@ void ossl_sha2(uint8_t* hash, uint8_t* input, int len){
    //EVP_CIPHER_CTX_free(ctx);
 }
 
-static __inline__ cycles cpucycles_begin(void)
-{
-  uint64_t rax,rdx,aux;
-  asm volatile ( "rdtscp\n" : "=a" (rax), "=d" (rdx), "=c" (aux) : : );
-  return (rdx << 32) + rax;
-}
-
-static __inline__ cycles cpucycles_end(void)
-{
-  uint64_t rax,rdx,aux;
-  asm volatile ( "rdtscp\n" : "=a" (rax), "=d" (rdx), "=c" (aux) : : );
-  return (rdx << 32) + rax;
-}
-
-
 
 #define ROUNDS 16384
 #define SIZE   16384
 
-
-void print_time(clock_t tdiff, cycles cdiff){
-  uint64_t count = ROUNDS * SIZE;
-  printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff,(double)cdiff/count);
-  printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff,(double)tdiff/count);
-  printf("bw %8.2f MB/s\n",(double)count/(((double)tdiff / CLOCKS_PER_SEC) * 1000000.0));
-}
 
 bool print_result(uint8_t* comp, uint8_t* exp, int len) {
   return compare_and_print(len, comp, exp);
@@ -85,41 +62,12 @@ bool print_test(uint8_t* in, int in_len, uint8_t* exp224, uint8_t* exp256, uint8
   return ok;
 }
 
-int main()
-{
+int main(){
 
-  uint32_t test1_plaintext_len = vectors[0].input_len;
-  uint8_t *test1_plaintext = vectors[0].input;
-  uint8_t *test1_expected224 = vectors[0].tag_224;
-  uint8_t *test1_expected256 = vectors[0].tag_256;
-  uint8_t *test1_expected384 = vectors[0].tag_384;
-  uint8_t *test1_expected512 = vectors[0].tag_512;
-
-  uint32_t test2_plaintext_len = vectors[1].input_len;
-  uint8_t *test2_plaintext = vectors[1].input;
-  uint8_t *test2_expected224 = vectors[1].tag_224;
-  uint8_t *test2_expected256 = vectors[1].tag_256;
-  uint8_t *test2_expected384 = vectors[1].tag_384;
-  uint8_t *test2_expected512 = vectors[1].tag_512;
-
-  uint32_t test3_plaintext_len = vectors[2].input_len;
-  uint8_t *test3_plaintext = vectors[2].input;
-  uint8_t *test3_expected224 = vectors[2].tag_224;
-  uint8_t *test3_expected256 = vectors[2].tag_256;
-  uint8_t *test3_expected384 = vectors[2].tag_384;
-  uint8_t *test3_expected512 = vectors[2].tag_512;
-
-  uint32_t test4_plaintext_len = vectors[3].input_len;
-  uint8_t *test4_plaintext = vectors[3].input;
-  uint8_t *test4_expected224 = vectors[3].tag_224;
-  uint8_t *test4_expected256 = vectors[3].tag_256;
-  uint8_t *test4_expected384 = vectors[3].tag_384;
-  uint8_t *test4_expected512 = vectors[3].tag_512;
-
-  bool ok = print_test(test1_plaintext,test1_plaintext_len,test1_expected224,test1_expected256,test1_expected384,test1_expected512);
-  ok = print_test(test2_plaintext,test2_plaintext_len,test2_expected224,test2_expected256,test2_expected384,test2_expected512) && ok;
-  ok = print_test(test3_plaintext,test3_plaintext_len,test3_expected224,test3_expected256,test3_expected384,test3_expected512) && ok;
-  ok = print_test(test4_plaintext,test4_plaintext_len,test4_expected224,test4_expected256,test4_expected384,test4_expected512) && ok;
+  bool ok = true;
+  for (int i = 0; i < sizeof(vectors)/sizeof(sha2_test_vector); ++i) {
+    ok &= print_test(vectors[i].input,vectors[i].input_len,vectors[i].tag_224,vectors[i].tag_256,vectors[i].tag_384,vectors[i].tag_512);
+  }
 
   uint64_t len = SIZE;
   uint8_t plain[SIZE];
@@ -138,7 +86,7 @@ int main()
   b = cpucycles_end();
   t2 = clock();
   double cdiff1 = b - a;
-  double tdiff1 = (double)(t2 - t1)/CLOCKS_PER_SEC;
+  double tdiff1 = t2 - t1;
 
   for (int j = 0; j < ROUNDS; j++) {
     Hacl_Hash_SHA2_hash_256(plain,SIZE,plain);
@@ -151,7 +99,7 @@ int main()
   b = cpucycles_end();
   t2 = clock();
   double cdiff2 = b - a;
-  double tdiff2 = (double)(t2 - t1)/CLOCKS_PER_SEC;
+  double tdiff2 = t2 - t1;
 
   for (int j = 0; j < ROUNDS; j++) {
     ossl_sha2(plain,plain,SIZE);
@@ -164,7 +112,7 @@ int main()
   b = cpucycles_end();
   t2 = clock();
   double cdiff2a = b - a;
-  double tdiff2a = (double)(t2 - t1)/CLOCKS_PER_SEC;
+  double tdiff2a = t2 - t1;
 
   for (int j = 0; j < ROUNDS; j++) {
     Hacl_Hash_SHA2_hash_384(plain,SIZE,plain);
@@ -177,7 +125,7 @@ int main()
   b = cpucycles_end();
   t2 = clock();
   double cdiff3 = b - a;
-  double tdiff3 = (double)(t2 - t1)/CLOCKS_PER_SEC;
+  double tdiff3 = t2 - t1;
 
   for (int j = 0; j < ROUNDS; j++) {
     Hacl_Hash_SHA2_hash_512(plain,SIZE,plain);
@@ -190,16 +138,16 @@ int main()
   b = cpucycles_end();
   t2 = clock();
   double cdiff4 = b - a;
-  double tdiff4 = (double)(t2 - t1)/CLOCKS_PER_SEC;
-  
+  double tdiff4 = t2 - t1;
+
   uint8_t res = plain[0];
-  printf("SHA2-224 (32-bit) PERF: %d\n",(int)res); print_time(tdiff1,cdiff1);
-  printf("SHA2-256 (32-bit) PERF: %d\n",(int)res); print_time(tdiff2,cdiff2);
-  printf("OpenSSL SHA2-256 (32-bit) PERF: %d\n",(int)res); print_time(tdiff2a,cdiff2a);
-  printf("SHA2-384 (32-bit) PERF: %d\n",(int)res); print_time(tdiff3,cdiff3);
-  printf("SHA2-512 (32-bit) PERF: %d\n",(int)res); print_time(tdiff4,cdiff4);
+  uint64_t count = ROUNDS * SIZE;
+  printf("SHA2-224 (32-bit) PERF: %d\n",(int)res); print_time(count,tdiff1,cdiff1);
+  printf("SHA2-256 (32-bit) PERF: %d\n",(int)res); print_time(count,tdiff2,cdiff2);
+  printf("OpenSSL SHA2-256 (32-bit) PERF: %d\n",(int)res); print_time(count,tdiff2a,cdiff2a);
+  printf("SHA2-384 (32-bit) PERF: %d\n",(int)res); print_time(count,tdiff3,cdiff3);
+  printf("SHA2-512 (32-bit) PERF: %d\n",(int)res); print_time(count,tdiff4,cdiff4);
 
   if (ok) return EXIT_SUCCESS;
   else return EXIT_FAILURE;
 }
-

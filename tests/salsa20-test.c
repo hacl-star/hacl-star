@@ -9,32 +9,15 @@
 #include <time.h>
 #include <stdbool.h>
 
-typedef uint64_t cycles;
-
-static __inline__ cycles cpucycles_begin(void)
-{
-  uint64_t rax,rdx,aux;
-  asm volatile ( "rdtscp\n" : "=a" (rax), "=d" (rdx), "=c" (aux) : : );
-  return (rdx << 32) + rax;
-  //  unsigned hi, lo;
-  //__asm__ __volatile__ ("CPUID\n\t"  "RDTSC\n\t"  "mov %%edx, %0\n\t"  "mov %%eax, %1\n\t": "=r" (hi), "=r" (lo):: "%rax", "%rbx", "%rcx", "%rdx");
-  //return ( (uint64_t)lo)|( ((uint64_t)hi)<<32 );
-}
-
-static __inline__ cycles cpucycles_end(void)
-{
-  uint64_t rax,rdx,aux;
-  asm volatile ( "rdtscp\n" : "=a" (rax), "=d" (rdx), "=c" (aux) : : );
-  return (rdx << 32) + rax;
-  //  unsigned hi, lo;
-  //__asm__ __volatile__ ("RDTSCP\n\t"  "mov %%edx, %0\n\t"  "mov %%eax, %1\n\t"  "CPUID\n\t": "=r" (hi), "=r" (lo)::     "%rax", "%rbx", "%rcx", "%rdx");
-  //return ( (uint64_t)lo)|( ((uint64_t)hi)<<32 );
-}
-
-extern void Hacl_Salsa20_salsa20_encrypt(int in_len, uint8_t* out, uint8_t* in, uint8_t* k, uint8_t* n, uint32_t c);
+#include "Hacl_Salsa20.h"
+#include "test_helpers.h"
 
 #define ROUNDS 16384
 #define SIZE   81920
+
+bool print_result(int in_len, uint8_t* comp, uint8_t* exp) {
+  return compare_and_print(in_len, comp, exp);
+}
 
 int main() {
   int in_len = 512;
@@ -69,63 +52,20 @@ int main() {
     };
 
   uint8_t comp[512] = {0};
-  bool ok;
+
+  printf("Salsa20 Result\n");
   Hacl_Salsa20_salsa20_encrypt(in_len,comp,in,k,n,0);
-  printf("computed1:");
-  for (int i = 0; i < 64; i++)
-    printf("%02x",comp[i]);
-  printf("\n");
-  printf("expected1:");
-  for (int i = 0; i < 64; i++)
-    printf("%02x",exp1[i]);
-  printf("\n");
-  ok = true;
-  for (int i = 0; i < 64; i++)
-    ok = ok & (exp1[i] == comp[i]);
-  if (ok) printf("Success!\n");
-  else printf("FAILED!\n");
+  printf("computed1:\n");
+  bool ok = print_result(64,comp,exp1);
 
-  printf("computed2:");
-  for (int i = 0; i < 64; i++)
-    printf("%02x",comp[192+i]);
-  printf("\n");
-  printf("expected2:");
-  for (int i = 0; i < 64; i++)
-    printf("%02x",exp2[i]);
-  printf("\n");
-  ok = true;
-  for (int i = 0; i < 64; i++)
-    ok = ok & (exp2[i] == comp[192+i]);
-  if (ok) printf("Success!\n");
-  else printf("FAILED!\n");
+  printf("computed2:\n");
+  ok = ok && print_result(64,comp+192,exp2);
 
-  printf("computed3:");
-  for (int i = 0; i < 64; i++)
-    printf("%02x",comp[256+i]);
-  printf("\n");
-  printf("expected3:");
-  for (int i = 0; i < 64; i++)
-    printf("%02x",exp3[i]);
-  printf("\n");
-  ok = true;
-  for (int i = 0; i < 64; i++)
-    ok = ok & (exp3[i] == comp[256+i]);
-  if (ok) printf("Success!\n");
-  else printf("FAILED!\n");
+  printf("computed3:\n");
+  ok = ok && print_result(64,comp+256,exp3);
 
-  printf("computed4:");
-  for (int i = 0; i < 64; i++)
-    printf("%02x",comp[448+i]);
-  printf("\n");
-  printf("expected4:");
-  for (int i = 0; i < 64; i++)
-    printf("%02x",exp4[i]);
-  printf("\n");
-  ok = true;
-  for (int i = 0; i < 64; i++)
-    ok = ok & (exp4[i] == comp[448+i]);
-  if (ok) printf("Success!\n");
-  else printf("FAILED!\n");
+  printf("computed4:\n");
+  ok = ok && print_result(64,comp+448,exp4);
 
   uint64_t len = SIZE;
   uint8_t plain[SIZE];
@@ -148,11 +88,11 @@ int main() {
   }
   b = cpucycles_end();
   t2 = clock();
-  double diff = (double)(t2 - t1)/CLOCKS_PER_SEC;
+  double tdiff = t2 - t1;
+  cycles cdiff = b - a;
 
   uint64_t count = ROUNDS * SIZE;
-  printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)(b-a),(double)(b-a)/count);
-  printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)(t2-t1),(double)(t2-t1)/count);
-  printf("bw %8.2f MB/s\n",(double)count/(diff * 1000000.0));
-  
+  printf("Salsa20 PERF\n"); print_time(count,tdiff,cdiff);
+  if (ok) return EXIT_SUCCESS;
+  else return EXIT_FAILURE;
 }
