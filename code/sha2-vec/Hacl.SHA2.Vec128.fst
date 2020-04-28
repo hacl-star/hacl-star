@@ -12,7 +12,7 @@ open Lib.MultiBuffer
 open Spec.Hash.Definitions
 open Hacl.Hash.Definitions
 open Hacl.Spec.SHA2.Vec
-open Hacl.Impl.SHA2.Core
+open Hacl.Impl.SHA2.Generic
 
 module ST = FStar.HyperStack.ST
 module Spec = Hacl.Spec.SHA2
