@@ -17,7 +17,7 @@ all: $(TARGETS)
 
 test: $(patsubst %.exe,%.test,$(TARGETS))
 
-arm: chacha20-arm-test.test poly1305-arm-test.test blake2-arm-test.test
+arm: chacha20-arm-test.test poly1305-arm-test.test blake2-arm-test.test curve25519-arm-test.test
 
 # Dependency
 
