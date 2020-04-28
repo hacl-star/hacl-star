@@ -9,6 +9,7 @@ open Lib.IntTypes
 open Lib.Buffer
 open Lib.ByteBuffer
 open Lib.IntVector
+open Lib.CreateN
 
 module Spec = Hacl.Spec.Chacha20.Vec
 module VecTranspose = Lib.IntVector.Transpose
@@ -71,39 +72,6 @@ let sum_state #w st ost =  map2T (size 16) st ( +| ) st ost
 
 
 inline_for_extraction noextract
-val create16_st: #w:lanes -> st:state w ->
-  v0:uint32xN w -> v1:uint32xN w -> v2:uint32xN w -> v3:uint32xN w ->
-  v4:uint32xN w -> v5:uint32xN w -> v6:uint32xN w -> v7:uint32xN w ->
-  v8:uint32xN w -> v9:uint32xN w -> v10:uint32xN w -> v11:uint32xN w ->
-  v12:uint32xN w -> v13:uint32xN w -> v14:uint32xN w -> v15:uint32xN w ->
-  Stack unit
-    (requires fun h -> live h st)
-    (ensures  fun h0 _ h1 -> modifies (loc st) h0 h1 /\
-      as_seq h1 st == create16 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15)
-
-let create16_st #w st v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 =
-  let h0 = ST.get () in
-  st.(0ul) <- v0;
-  st.(1ul) <- v1;
-  st.(2ul) <- v2;
-  st.(3ul) <- v3;
-  st.(4ul) <- v4;
-  st.(5ul) <- v5;
-  st.(6ul) <- v6;
-  st.(7ul) <- v7;
-  st.(8ul) <- v8;
-  st.(9ul) <- v9;
-  st.(10ul) <- v10;
-  st.(11ul) <- v11;
-  st.(12ul) <- v12;
-  st.(13ul) <- v13;
-  st.(14ul) <- v14;
-  st.(15ul) <- v15;
-  let h1 = ST.get () in
-  assert (LSeq.equal (as_seq h1 st) (create16 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15))
-
-
-inline_for_extraction noextract
 val transpose1: st:state 1 ->
   Stack unit
     (requires (fun h -> live h st))
@@ -122,7 +90,7 @@ let transpose4 st =
   let (v4,v5,v6,v7) = VecTranspose.transpose4x4 (st.(4ul),st.(5ul),st.(6ul),st.(7ul)) in
   let (v8,v9,v10,v11) = VecTranspose.transpose4x4 (st.(8ul),st.(9ul),st.(10ul),st.(11ul)) in
   let (v12,v13,v14,v15) = VecTranspose.transpose4x4 (st.(12ul),st.(13ul),st.(14ul),st.(15ul)) in
-  create16_st st v0 v4 v8 v12 v1 v5 v9 v13 v2 v6 v10 v14 v3 v7 v11 v15
+  create16_st #(uint32xN 4) st v0 v4 v8 v12 v1 v5 v9 v13 v2 v6 v10 v14 v3 v7 v11 v15
 
 
 inline_for_extraction noextract
@@ -134,7 +102,7 @@ val transpose8: st:state 8 ->
 let transpose8 st =
   let (v0,v1,v2,v3,v4,v5,v6,v7) = VecTranspose.transpose8x8 (st.(0ul),st.(1ul),st.(2ul),st.(3ul),st.(4ul),st.(5ul),st.(6ul),st.(7ul)) in
   let (v8,v9,v10,v11,v12,v13,v14,v15) = VecTranspose.transpose8x8 (st.(8ul),st.(9ul),st.(10ul),st.(11ul),st.(12ul),st.(13ul),st.(14ul),st.(15ul)) in
-  create16_st st v0 v8 v1 v9 v2 v10 v3 v11 v4 v12 v5 v13 v6 v14 v7 v15
+  create16_st #(uint32xN 8) st v0 v8 v1 v9 v2 v10 v3 v11 v4 v12 v5 v13 v6 v14 v7 v15
 
 inline_for_extraction noextract
 val transpose:
