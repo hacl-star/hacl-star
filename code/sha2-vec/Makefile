@@ -28,6 +28,8 @@ dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
 
 dist/sha2-test.exe: $(HACL_HOME)/tests/sha2-test.o dist/libsha2vec.a $(HACL_HOME)/code/hash/dist/libhash.a
 
+dist/sha2-vec-test.exe: $(HACL_HOME)/tests/sha2-vec-test.o dist/libsha2vec.a $(HACL_HOME)/code/hash/dist/libhash.a
+
 %.exe:
 	$(CC) $(CFLAGS) $^ -o $@ -lcrypto
 
