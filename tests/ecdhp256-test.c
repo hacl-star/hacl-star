@@ -38,12 +38,12 @@ int main()
 	{
 
 		printf("ECDH Responder Test %d\n", i );
-		memcpy(pk, i_vectors[0].publicKeyX1,  32);
-		memcpy(pk+32, i_vectors[0].publicKeyY1,  32);
+		memcpy(pk, i_vectors[i].publicKeyX1,  32);
+		memcpy(pk+32, i_vectors[i].publicKeyY1,  32);
 	   
-	    uint64_t success = Hacl_Impl_P256_DH_ecp256dh_r(result, pk, i_vectors[0].privateKey);
+	    uint64_t success = Hacl_Impl_P256_DH_ecp256dh_r(result, pk, i_vectors[i].privateKey);
 	    ok = ok && (success == 0);
-	    ok = ok && compare_and_print(32, result, i_vectors[0].expectedResult);
+	    ok = ok && compare_and_print(32, result, i_vectors[i].expectedResult);
 	}
 
 
