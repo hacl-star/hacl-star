@@ -9,16 +9,11 @@
 #include <stdbool.h>
 #include <time.h>
 
-
 #include "ecdhp256-tvs.h"
-
 #include "test_helpers.h"
-
-
 
 int main()
 {
-
 	uint8_t* result = (uint8_t*) malloc (sizeof (uint8_t) * 64);
 	bool ok = true;
 
@@ -46,9 +41,6 @@ int main()
 	    ok = ok && compare_and_print(32, result, i_vectors[i].expectedResult);
 	}
 
-
   	if (ok) return EXIT_SUCCESS;
   	else return EXIT_FAILURE;
-
-
 }
