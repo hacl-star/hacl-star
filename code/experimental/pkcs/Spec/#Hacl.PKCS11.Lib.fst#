@@ -44,17 +44,16 @@ let contains (#a:Type) (f: (a -> bool)) (s:seq a) : Tot Type0 =
 
 val containsLemma: #a: eqtype -> s: seq a {length s > 0} -> Lemma 
   (
-    forall (i: nat). i < Seq.length s ==> contains (fun x -> x = (index s i)) s
+    forall (i: nat). i < Seq.length s /\ contains (fun x -> x = (index s i)) s
   )
 
 let rec containsLemma #a s = admit()
-
 
 val takeOne: #a: eqtype -> 
   f: (a -> Tot bool) ->
   s: seq a ->   
   counter: nat {counter <= length s}-> 
-  seqToPut: seq a {(forall (i: nat {i < length seqToPut}) . f (index seqToPut i))} -> 
+  seqToPut: seq a {(forall (i: nat {i < length seqToPut}).  f (index seqToPut i))} -> 
   Tot (r: seq a {forall (i: nat {i < Seq.length r}). f (index r i)})
   (decreases (length s - counter))
   

@@ -72,11 +72,10 @@ let containsFindL1 #a f s =
 
 val lemmaContainsSelf: #a: eqtype -> s: seq a -> Lemma
   (
-    forall (i: nat). i < Seq.length s /\ contains (fun x -> x = (index s i)) s
+    forall (i: nat). i < Seq.length s ==> contains (fun x -> x = (index s i)) s
   )
 
-let lemmaContainsSelf #a s = admit()
-
+let lemmaContainsSelf #a s = ()
 
 (*
 val lemmaContainsAppend: #a: eqtype -> s: seq a -> s1: seq a -> f: (a -> Tot bool) -> Lemma

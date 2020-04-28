@@ -1051,11 +1051,8 @@ let attributeConsistent0 attr s  =
    
   
 
-val _attributesTemplateConsistent0: attrs: seq _CK_ATTRIBUTE -> Tot bool
+assume val _attributesTemplateConsistent0: attrs: seq _CK_ATTRIBUTE -> Tot bool
   (decreases (length attrs))
-
-let rec _attributesTemplateConsistent0 attrs = 
-  let allElement = 
   
   
 val attributesTemplateConsistent0: attrs: seq _CK_ATTRIBUTE -> Tot bool
@@ -1212,14 +1209,30 @@ let _CKS_GenerateKey d hSession pMechanism pTemplate =
   let mechanismPresent = isMechanismPresentOnDevice d pMechanism.mechanismID in 
   if mechanismPresent = false then 
     (|Inr CKR_MECHANISM_INVALID, d|) else
-  let complete = isAttributeTemplateComplete pMechanism pTemplate CKO_SECRET_KEY in 
+    begin
+    assert(attributesTemplateComplete CKO_SECRET_KEY pMechanism pTemplate);
+    assert(
+    attributesNotReadOnly pTemplate );
+ (* let complete = isAttributeTemplateComplete pMechanism pTemplate CKO_SECRET_KEY in 
   if complete = false then 
-     (|Inr CKR_TEMPLATE_INCOMPLETE, d|) else
+     (|Inr CKR_TEMPLATE_INCOMPLETE, d|) else 
   let notReadOnly = areAttributesNotReadOnly pTemplate in 
     if notReadOnly = false then 
-    (|Inr CKR_ATTRIBUTE_READ_ONLY, d|)
-  else
+    (|Inr CKR_ATTRIBUTE_READ_ONLY, d|) 
+  else *)
     __CKS_GenerateKey d hSession pMechanism pTemplate
+    end
+
+
+let test (p: seq _CK_ATTRIBUTE) (pMechanism: _CK_MECHANISM) = 
+  let allRequiredAttributes = combineAllRequiredAttributes pMechanism.mechanismID CKO_SECRET_KEY in 
+  let allProvidedAttributes = combineAllProvidedAttributes pMechanism.mechanismID p in 
+  
+  assert(  forall (i: nat).  i < Seq.length allRequiredAttributes ==> contains (fun x -> x.aType = (index allRequiredAttributes i)) allProvidedAttributes
+);
+  assert(length (combineAllRequiredAttributes pMechanism.mechanismID CKO_SECRET_KEY) > 0);
+  assert(attributesTemplateComplete CKO_SECRET_KEY pMechanism p)
+
 
 (*
 assume val _sign: pData: seq FStar.UInt8.t ->  pMechanism: _CK_MECHANISM_TYPE -> key: _CK_OBJECT_HANDLE -> 
