@@ -870,17 +870,17 @@ let transpose_state8 #a #m st =
   let st7 = st.(7ul) in
   let (st0',st1',st2',st3',st4',st5',st6',st7') = VecTranspose.transpose8x8 (st0,st1,st2,st3,st4,st5,st6,st7) in
   st.(0ul) <- st0';
-  st.(1ul) <- st4';
-  st.(2ul) <- st1';
-  st.(3ul) <- st5';
-  st.(4ul) <- st2';
-  st.(5ul) <- st6';
-  st.(6ul) <- st3';
+  st.(1ul) <- st1';
+  st.(2ul) <- st2';
+  st.(3ul) <- st3';
+  st.(4ul) <- st4';
+  st.(5ul) <- st5';
+  st.(6ul) <- st6';
   st.(7ul) <- st7';
   let h1 = ST.get() in
-  Lib.Sequence.eq_intro (as_seq h1 st) (create8 st0' st4' st1' st5' st2' st6' st3' st7');
+  Lib.Sequence.eq_intro (as_seq h1 st) (create8 st0' st1' st2' st3' st4' st5' st6' st7');
   Lib.Sequence.eq_intro (as_seq h0 st) (create8 st0 st1 st2 st3 st4 st5 st6 st7);
-  Lib.Sequence.eq_intro (create8 st0' st4' st1' st5' st2' st6' st3' st7')
+  Lib.Sequence.eq_intro (create8 st0' st1' st2' st3' st4' st5' st6' st7')
                         (SpecVec.transpose_state8 (create8 st0 st1 st2 st3 st4 st5 st6 st7));
   ()
 #pop-options

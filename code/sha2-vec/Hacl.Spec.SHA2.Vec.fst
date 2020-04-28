@@ -408,7 +408,7 @@ let transpose_state8 (#a:sha2_alg) (#m:m_spec{lanes a m == 8})
     let st6 = st.[6] in
     let st7 = st.[7] in
     let (st0,st1,st2,st3,st4,st5,st6,st7) = VecTranspose.transpose8x8 (st0,st1,st2,st3,st4,st5,st6,st7) in
-    create8 st0 st4 st1 st5 st2 st6 st3 st7
+    create8 st0 st1 st2 st3 st4 st5 st6 st7
 
 noextract
 let transpose_state (#a:sha2_alg) (#m:m_spec) (st:state_spec a m) : state_spec a m =

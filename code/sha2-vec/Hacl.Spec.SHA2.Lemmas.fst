@@ -115,11 +115,7 @@ let transpose_state8_lemma #a #m st j i =
   let l = lanes a m in
   let ind = 8 * j + i / word_length a in
   let r0 = transpose8x8_lseq st in
-  transpose8x8_lemma st;
-  assert (
-    Seq.index (vec_v r0.[ind / l]) (ind % l) ==
-    Seq.index (state_spec_v st).[j] (i / word_length a));
-  admit()
+  transpose8x8_lemma st
 
 
 val transpose_state_lemma_ij:
