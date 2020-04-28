@@ -6,13 +6,14 @@ open FStar.HyperStack.All
 
 open Lib.IntTypes
 open Lib.NTuple
-open Lib.Sequence
 open Lib.Buffer
 open Lib.IntVector
 open Lib.MultiBuffer
 
 open Spec.Hash.Definitions
 open Hacl.Hash.Definitions
+open Hacl.Spec.SHA2.Vec
+
 
 module ST = FStar.HyperStack.ST
 module NTup = Lib.NTuple
@@ -20,7 +21,7 @@ module Constants = Spec.SHA2.Constants
 module Spec = Hacl.Spec.SHA2
 module SpecVec = Hacl.Spec.SHA2.Vec
 module VecTranspose = Lib.IntVector.Transpose
-open Hacl.Spec.SHA2.Vec
+module LSeq = Lib.Sequence
 
 
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
@@ -35,6 +36,7 @@ let h384 : x:glbuffer uint64 8ul{witnessed x Constants.h384 /\ recallable x} =
   createL_global Constants.h384_l
 let h512 : x:glbuffer uint64 8ul{witnessed x Constants.h512 /\ recallable x} =
   createL_global Constants.h512_l
+
 
 noextract inline_for_extraction
 let index_h0 (a: sha2_alg) (i: size_t) : Stack (word a)
@@ -51,8 +53,10 @@ let index_h0 (a: sha2_alg) (i: size_t) : Stack (word a)
 
 let k224_256 : x:glbuffer uint32 64ul{witnessed x Constants.k224_256 /\ recallable x} =
   createL_global Constants.k224_256_l
+
 let k384_512 : x:glbuffer uint64 80ul{witnessed x Constants.k384_512 /\ recallable x} =
   createL_global Constants.k384_512_l
+
 
 noextract inline_for_extraction
 let index_k0 (a:sha2_alg) (i:size_t) : Stack (word a)
@@ -68,8 +72,6 @@ let index_k0 (a:sha2_alg) (i:size_t) : Stack (word a)
       recall_contents k384_512 Constants.k384_512;
       k384_512.(i)
 
-unfold let state_t (a:sha2_alg) (m:m_spec) =
-  lbuffer (element_t a m) 8ul
 
 unfold let block_t (a:sha2_alg) =
   lbuffer uint8 (block_len a)
@@ -121,7 +123,7 @@ let shuffle_core #a #m k_t ws_t st =
   st.(6ul) <- g1;
   st.(7ul) <- h1;
   let h1 = ST.get() in
-  eq_intro (as_seq h1 st)
+  LSeq.eq_intro (as_seq h1 st)
            (shuffle_core_spec k_t ws_t (as_seq hp0 st))
 #pop-options
 
@@ -130,7 +132,7 @@ val set_wsi (#a:sha2_alg) (#m:m_spec) (ws:ws_t a m) (i:size_t{v i < 16}) (b:lbuf
             Stack unit
             (requires (fun h -> live h b /\ live h ws /\ disjoint b ws))
             (ensures (fun h0 _ h1 -> modifies (loc ws) h0 h1 /\
-                                    as_seq h1 ws == Lib.Sequence.upd (as_seq h0 ws) (v i)
+                                    as_seq h1 ws == LSeq.upd (as_seq h0 ws) (v i)
                                                     (SpecVec.load_elementi #a #m (as_seq h0 b) (v bi))))
 #push-options "--z3rlimit 100"
 let set_wsi #a #m ws i b bi =
@@ -164,7 +166,7 @@ let load_blocks_spec1 (#a:sha2_alg) (#m:m_spec{lanes a m == 1}) (b:multiblock_sp
 noextract
 let load_blocks_spec1_lemma (#a:sha2_alg) (#m:m_spec{lanes a m == 1}) (b:multiblock_spec a m) :
   Lemma (SpecVec.load_blocks b == load_blocks_spec1 b) =
-  eq_intro (SpecVec.load_blocks b) (load_blocks_spec1 b)
+  LSeq.eq_intro (SpecVec.load_blocks b) (load_blocks_spec1 b)
 
 inline_for_extraction
 val load_blocks1 (#a: sha2_alg) (#m:m_spec{lanes a m == 1})
@@ -198,7 +200,7 @@ let load_blocks1 #a #m ib ws =
   set_wsi ws 15ul b 15ul;
   let h1 = ST.get() in
   assert (modifies (loc ws) h0 h1);
-  eq_intro (as_seq h1 ws) (load_blocks_spec1 (as_seq_multi h0 ib));
+  LSeq.eq_intro (as_seq h1 ws) (load_blocks_spec1 (as_seq_multi h0 ib));
   load_blocks_spec1_lemma #a #m (as_seq_multi h0 ib);
   assert (as_seq h1 ws == load_blocks_spec1 (as_seq_multi h0 ib));
   assert (as_seq h1 ws == SpecVec.load_blocks (as_seq_multi h0 ib))
@@ -232,7 +234,7 @@ let load_blocks_spec4 (#a:sha2_alg) (#m:m_spec{lanes a m == 4}) (b:multiblock_sp
 noextract
 let load_blocks_spec4_lemma (#a:sha2_alg) (#m:m_spec{lanes a m == 4}) (b:multiblock_spec a m) :
   Lemma (SpecVec.load_blocks b == load_blocks_spec4 b) =
-  eq_intro (SpecVec.load_blocks b) (load_blocks_spec4 b)
+  LSeq.eq_intro (SpecVec.load_blocks b) (load_blocks_spec4 b)
 
 inline_for_extraction
 val load_blocks4 (#a: sha2_alg) (#m:m_spec{lanes a m == 4})
@@ -266,7 +268,7 @@ let load_blocks4 #a #m ib ws =
   set_wsi ws 15ul b3 3ul;
   let h1 = ST.get() in
   assert (modifies (loc ws) h0 h1);
-  eq_intro (as_seq h1 ws) (load_blocks_spec4 (as_seq_multi h0 ib));
+  LSeq.eq_intro (as_seq h1 ws) (load_blocks_spec4 (as_seq_multi h0 ib));
   load_blocks_spec4_lemma #a #m (as_seq_multi h0 ib);
   assert (as_seq h1 ws == load_blocks_spec4 (as_seq_multi h0 ib));
   assert (as_seq h1 ws == SpecVec.load_blocks (as_seq_multi h0 ib));
@@ -305,7 +307,7 @@ let load_blocks_spec8 (#a:sha2_alg) (#m:m_spec{lanes a m == 8}) (b:multiblock_sp
 noextract
 let load_blocks_spec8_lemma (#a:sha2_alg) (#m:m_spec{lanes a m == 8}) (b:multiblock_spec a m) :
   Lemma (SpecVec.load_blocks b == load_blocks_spec8 b) =
-  eq_intro (SpecVec.load_blocks b) (load_blocks_spec8 b)
+  LSeq.eq_intro (SpecVec.load_blocks b) (load_blocks_spec8 b)
 
 inline_for_extraction
 val load_blocks8 (#a: sha2_alg) (#m:m_spec{lanes a m == 8})
@@ -339,7 +341,7 @@ let load_blocks8 #a #m ib ws =
   set_wsi ws 15ul b7 1ul;
   let h1 = ST.get() in
   assert (modifies (loc ws) h0 h1);
-  eq_intro (as_seq h1 ws) (load_blocks_spec8 (as_seq_multi h0 ib));
+  LSeq.eq_intro (as_seq h1 ws) (load_blocks_spec8 (as_seq_multi h0 ib));
   load_blocks_spec8_lemma #a #m (as_seq_multi h0 ib);
   assert (as_seq h1 ws == load_blocks_spec8 (as_seq_multi h0 ib));
   assert (as_seq h1 ws == SpecVec.load_blocks (as_seq_multi h0 ib));
@@ -394,7 +396,7 @@ let transpose_ws4 #a #m ws =
   ws.(14ul) <- ws14;
   ws.(15ul) <- ws15;
   let h1 = ST.get() in
-  eq_intro (as_seq h1 ws) (SpecVec.transpose_ws (as_seq h0 ws))
+  LSeq.eq_intro (as_seq h1 ws) (SpecVec.transpose_ws (as_seq h0 ws))
 
 inline_for_extraction
 val transpose_ws8 (#a: sha2_alg) (#m:m_spec{lanes a m == 8}) (ws: ws_t a m):
@@ -425,7 +427,7 @@ let transpose_ws8 #a #m ws =
   ws.(14ul) <- ws14;
   ws.(15ul) <- ws15;
   let h1 = ST.get() in
-  eq_intro (as_seq h1 ws) (SpecVec.transpose_ws8 (as_seq h0 ws))
+  LSeq.eq_intro (as_seq h1 ws) (SpecVec.transpose_ws8 (as_seq h0 ws))
 
 
 
@@ -518,12 +520,6 @@ val alloc: a:sha2_alg -> m:m_spec ->
     (ensures (fun h0 b h1 -> live h1 b /\ stack_allocated b h0 h1 (Seq.create 8 (zero_element a m))))
 let alloc a m = Lib.Buffer.create 8ul (zero_element a m)
 
-inline_for_extraction
-val init: #a:sha2_alg -> #m:m_spec -> hash:state_t a m ->
-    Stack unit
-    (requires (fun h -> live h hash))
-    (ensures (fun h0 _ h1 -> modifies1 hash h0 h1 /\
-                           as_seq h1 hash == SpecVec.init a m))
 let init #a #m hash =
   let h0 = ST.get() in
   fill h0 8ul hash
@@ -531,18 +527,10 @@ let init #a #m hash =
   (fun i -> let hi = index_h0 a i in
           load_element a m hi);
   let h1 = ST.get() in
-  eq_intro (as_seq h1 hash)
-           (createi 8 (fun i -> load_element a m (Seq.index (Spec.h0 a) i)))
-
-let update_t (a:sha2_alg) (m:m_spec) = b:multibuf (lanes a m) (block_len a) -> hash:state_t a m ->
-    Stack unit
-    (requires (fun h -> live_multi h b /\ live h hash))
-    (ensures (fun h0 _ h1 -> modifies (loc hash) h0 h1 /\
-                           as_seq h1 hash == SpecVec.update (as_seq_multi h0 b) (as_seq h0 hash)))
+  LSeq.eq_intro (as_seq h1 hash)
+           (LSeq.createi 8 (fun i -> load_element a m (Seq.index (Spec.h0 a) i)))
 
 #push-options "--z3rlimit 200"
-inline_for_extraction
-val update: #a:sha2_alg -> #m:m_spec -> update_t a m
 let update #a #m b hash =
   let h0 = ST.get() in
   push_frame ();
@@ -590,7 +578,7 @@ val load_last_blocks: #a:sha2_alg ->
     Stack (lbuffer uint8 (block_len a) & lbuffer uint8 (block_len a))
     (requires (fun h -> live h totlen_buf /\ live h b /\ live h last /\
                       disjoint b last /\ disjoint last totlen_buf /\
-                      as_seq h last == Lib.Sequence.create (2 * block_length a) (u8 0)))
+                      as_seq h last == LSeq.create (2 * block_length a) (u8 0)))
     (ensures (fun h0 (l0,l1) h1 -> modifies (loc last) h0 h1 /\
                            live h1 l0 /\ live h1 l1 /\
                            (forall a l (r:lbuffer a l). disjoint last r ==> (disjoint l0 r /\ disjoint l1 r)) /\
@@ -622,7 +610,7 @@ let load_last_t (a:sha2_alg) (m:m_spec) =
     Stack (multibuf (lanes a m) (block_len a) & multibuf (lanes a m) (block_len a))
       (requires (fun h -> live h totlen_buf /\ live_multi h b /\ live h last /\
                       disjoint_multi b last /\ disjoint last totlen_buf /\
-                      as_seq h last == Lib.Sequence.create (lanes a m * 2 * block_length a) (u8 0)))
+                      as_seq h last == LSeq.create (lanes a m * 2 * block_length a) (u8 0)))
       (ensures (fun h0 (l0,l1) h1 -> modifies (loc last) h0 h1 /\
                            live_multi h1 l0 /\ live_multi h1 l1 /\
                            preserves_sub_disjoint_multi last l0 /\
@@ -662,10 +650,10 @@ let load_last4 #a #m totlen_buf len b fin last =
   let last3 = sub last (6ul *. block_len a) (2ul *. block_len a) in
   let h1 = ST.get() in
   assert (disjoint last0 last1);
-  eq_intro (as_seq h1 last0) (Lib.Sequence.create (2 * block_length a) (u8 0));
-  eq_intro (as_seq h1 last1) (Lib.Sequence.create (2 * block_length a) (u8 0));
-  eq_intro (as_seq h1 last2) (Lib.Sequence.create (2 * block_length a) (u8 0));
-  eq_intro (as_seq h1 last3) (Lib.Sequence.create (2 * block_length a) (u8 0));
+  LSeq.eq_intro (as_seq h1 last0) (LSeq.create (2 * block_length a) (u8 0));
+  LSeq.eq_intro (as_seq h1 last1) (LSeq.create (2 * block_length a) (u8 0));
+  LSeq.eq_intro (as_seq h1 last2) (LSeq.create (2 * block_length a) (u8 0));
+  LSeq.eq_intro (as_seq h1 last3) (LSeq.create (2 * block_length a) (u8 0));
   let (l00,l01) = load_last_blocks #a totlen_buf len b0 fin last0 in
   let (l10,l11) = load_last_blocks #a totlen_buf len b1 fin last1 in
   let (l20,l21) = load_last_blocks #a totlen_buf len b2 fin last2 in
@@ -708,14 +696,14 @@ let load_last8 #a #m totlen_buf len b fin last =
   assert (internally_disjoint8 last0 last1 last2 last3 last4 last5 last6 last7);
   let h1 = ST.get() in
   assert (h0 == h1);
-  eq_intro (as_seq h1 last0) (Lib.Sequence.create (2 * block_length a) (u8 0));
-  eq_intro (as_seq h1 last1) (Lib.Sequence.create (2 * block_length a) (u8 0));
-  eq_intro (as_seq h1 last2) (Lib.Sequence.create (2 * block_length a) (u8 0));
-  eq_intro (as_seq h1 last3) (Lib.Sequence.create (2 * block_length a) (u8 0));
-  eq_intro (as_seq h1 last4) (Lib.Sequence.create (2 * block_length a) (u8 0));
-  eq_intro (as_seq h1 last5) (Lib.Sequence.create (2 * block_length a) (u8 0));
-  eq_intro (as_seq h1 last6) (Lib.Sequence.create (2 * block_length a) (u8 0));
-  eq_intro (as_seq h1 last7) (Lib.Sequence.create (2 * block_length a) (u8 0));
+  LSeq.eq_intro (as_seq h1 last0) (LSeq.create (2 * block_length a) (u8 0));
+  LSeq.eq_intro (as_seq h1 last1) (LSeq.create (2 * block_length a) (u8 0));
+  LSeq.eq_intro (as_seq h1 last2) (LSeq.create (2 * block_length a) (u8 0));
+  LSeq.eq_intro (as_seq h1 last3) (LSeq.create (2 * block_length a) (u8 0));
+  LSeq.eq_intro (as_seq h1 last4) (LSeq.create (2 * block_length a) (u8 0));
+  LSeq.eq_intro (as_seq h1 last5) (LSeq.create (2 * block_length a) (u8 0));
+  LSeq.eq_intro (as_seq h1 last6) (LSeq.create (2 * block_length a) (u8 0));
+  LSeq.eq_intro (as_seq h1 last7) (LSeq.create (2 * block_length a) (u8 0));
   let (l00,l01) = load_last_blocks #a totlen_buf len b0 fin last0 in
   let (l10,l11) = load_last_blocks #a totlen_buf len b1 fin last1 in
   let h2 = ST.get() in assert (modifies (loc last0 |+| loc last1) h0 h2);
@@ -757,19 +745,6 @@ let load_last #a #m  totlen_buf len b fin last =
   | 4 -> load_last4 #a #m totlen_buf len b fin last
   | 8 -> load_last8 #a #m totlen_buf len b fin last
   | _ -> admit()
-
-inline_for_extraction
-val update_last: #a:sha2_alg -> #m:m_spec ->
-                  upd: update_t a m ->
-                  totlen:len_t a ->
-                  len:size_t{v len < block_length a} ->
-                  b:multibuf (lanes a m) len ->
-                  hash:state_t a m ->
-    Stack unit
-    (requires (fun h -> live_multi h b /\ live h hash /\ disjoint_multi b hash))
-    (ensures (fun h0 _ h1 -> modifies (loc hash) h0 h1 /\
-                           as_seq h1 hash ==
-                           SpecVec.update_last totlen (v len) (as_seq_multi h0 b) (as_seq h0 hash)))
 
 #push-options "--z3rlimit 350"
 let update_last #a #m upd totlen len b hash =
@@ -844,9 +819,9 @@ let transpose_state4 #a #m st =
   st.(6ul) <- st3';
   st.(7ul) <- st7';
   let h1 = ST.get() in
-  Lib.Sequence.eq_intro (as_seq h1 st) (create8 st0' st4' st1' st5' st2' st6' st3' st7');
-  Lib.Sequence.eq_intro (as_seq h0 st) (create8 st0 st1 st2 st3 st4 st5 st6 st7);
-  Lib.Sequence.eq_intro (create8 st0' st4' st1' st5' st2' st6' st3' st7')
+  LSeq.eq_intro (as_seq h1 st) (create8 st0' st4' st1' st5' st2' st6' st3' st7');
+  LSeq.eq_intro (as_seq h0 st) (create8 st0 st1 st2 st3 st4 st5 st6 st7);
+  LSeq.eq_intro (create8 st0' st4' st1' st5' st2' st6' st3' st7')
                         (SpecVec.transpose_state4 (create8 st0 st1 st2 st3 st4 st5 st6 st7));
   ()
 
@@ -878,9 +853,9 @@ let transpose_state8 #a #m st =
   st.(6ul) <- st6';
   st.(7ul) <- st7';
   let h1 = ST.get() in
-  Lib.Sequence.eq_intro (as_seq h1 st) (create8 st0' st1' st2' st3' st4' st5' st6' st7');
-  Lib.Sequence.eq_intro (as_seq h0 st) (create8 st0 st1 st2 st3 st4 st5 st6 st7);
-  Lib.Sequence.eq_intro (create8 st0' st1' st2' st3' st4' st5' st6' st7')
+  LSeq.eq_intro (as_seq h1 st) (create8 st0' st1' st2' st3' st4' st5' st6' st7');
+  LSeq.eq_intro (as_seq h0 st) (create8 st0 st1 st2 st3 st4 st5 st6 st7);
+  LSeq.eq_intro (create8 st0' st1' st2' st3' st4' st5' st6' st7')
                         (SpecVec.transpose_state8 (create8 st0 st1 st2 st3 st4 st5 st6 st7));
   ()
 #pop-options
@@ -907,7 +882,7 @@ val store_state: #a:sha2_alg -> #m:m_spec->
                  hbuf:lbuffer uint8 (size (lanes a m) *. 8ul *. word_len a) ->
     Stack unit
     (requires (fun h -> live h hbuf /\ live h st /\ disjoint hbuf st /\
-                      as_seq h hbuf == Lib.Sequence.create (lanes a m * 8 * word_length a) (u8 0)))
+                      as_seq h hbuf == LSeq.create (lanes a m * 8 * word_length a) (u8 0)))
     (ensures (fun h0 _ h1 -> modifies (loc st |+| loc hbuf) h0 h1 /\
                            as_seq h1 hbuf ==
                            SpecVec.store_state #a #m (as_seq h0 st)))
@@ -918,15 +893,15 @@ let store_state #a #m st hbuf =
 
 noextract
 let emit1_spec (#a:sha2_alg) (#m:m_spec{lanes a m == 1})
-          (hseq:lseq uint8 (lanes a m * 8 * word_length a)):
+          (hseq:LSeq.lseq uint8 (lanes a m * 8 * word_length a)):
           multiseq (lanes a m) (hash_length a) =
-    let hsub = Lib.Sequence.sub hseq 0 (hash_length a) in
+    let hsub = LSeq.sub hseq 0 (hash_length a) in
     ntup1 hsub
 
 
 noextract
 let emit1_lemma (#a:sha2_alg) (#m:m_spec{lanes a m == 1})
-                (hseq:lseq uint8 (lanes a m * 8 * word_length a)):
+                (hseq:LSeq.lseq uint8 (lanes a m * 8 * word_length a)):
                 Lemma (emit1_spec #a #m hseq ==
                        SpecVec.emit #a #m hseq) =
     Lib.NTuple.eq_intro (emit1_spec #a #m hseq) (SpecVec.emit #a #m hseq)
@@ -953,7 +928,7 @@ let emit1 #a #m hbuf result =
 
 noextract
 let emit4_spec (#a:sha2_alg) (#m:m_spec{lanes a m == 4})
-          (hseq:lseq uint8 (lanes a m * 8 * word_length a)):
+          (hseq:LSeq.lseq uint8 (lanes a m * 8 * word_length a)):
           multiseq (lanes a m) (hash_length a) =
     let open Lib.Sequence in
     let h0 = sub hseq 0 (hash_length a) in
@@ -965,7 +940,7 @@ let emit4_spec (#a:sha2_alg) (#m:m_spec{lanes a m == 4})
 
 noextract
 let emit4_lemma (#a:sha2_alg) (#m:m_spec{lanes a m == 4})
-                (hseq:lseq uint8 (lanes a m * 8 * word_length a)):
+                (hseq:LSeq.lseq uint8 (lanes a m * 8 * word_length a)):
                 Lemma (emit4_spec #a #m hseq ==
                        SpecVec.emit #a #m hseq) =
     Lib.NTuple.eq_intro (emit4_spec #a #m hseq) (SpecVec.emit #a #m hseq)
@@ -995,10 +970,10 @@ let emit4 #a #m hbuf result =
   copy b2 (sub hbuf (16ul *. word_len a) (hash_len a));
   copy b3 (sub hbuf (24ul *. word_len a) (hash_len a));
   let h1 = ST.get() in
-  assert (as_seq h1 b0 == Lib.Sequence.sub (as_seq h0 hbuf) 0 (hash_length a));
-  assert (as_seq h1 b1 == Lib.Sequence.sub (as_seq h0 hbuf) (8 * word_length a) (hash_length a));
-  assert (as_seq h1 b2 == Lib.Sequence.sub (as_seq h0 hbuf) (16 * word_length a) (hash_length a));
-  assert (as_seq h1 b3 == Lib.Sequence.sub (as_seq h0 hbuf) (24 * word_length a) (hash_length a));
+  assert (as_seq h1 b0 == LSeq.sub (as_seq h0 hbuf) 0 (hash_length a));
+  assert (as_seq h1 b1 == LSeq.sub (as_seq h0 hbuf) (8 * word_length a) (hash_length a));
+  assert (as_seq h1 b2 == LSeq.sub (as_seq h0 hbuf) (16 * word_length a) (hash_length a));
+  assert (as_seq h1 b3 == LSeq.sub (as_seq h0 hbuf) (24 * word_length a) (hash_length a));
   NTup.eq_intro (as_seq_multi h1 result) (NTup.ntup4 (as_seq h1 b0, (as_seq h1 b1, (as_seq h1 b2, as_seq h1 b3))));
   assert (modifies (loc b0 |+| loc b1 |+| loc b2 |+| loc b3) h0 h1);
   assert (as_seq_multi h1 result == emit4_spec #a #m (as_seq h0 hbuf));
@@ -1010,7 +985,7 @@ let emit4 #a #m hbuf result =
 
 noextract
 let emit8_spec (#a:sha2_alg) (#m:m_spec{lanes a m == 8})
-          (hseq:lseq uint8 (lanes a m * 8 * word_length a)):
+          (hseq:LSeq.lseq uint8 (lanes a m * 8 * word_length a)):
           multiseq (lanes a m) (hash_length a) =
     let open Lib.Sequence in
     let h0 = sub hseq 0 (hash_length a) in
@@ -1026,7 +1001,7 @@ let emit8_spec (#a:sha2_alg) (#m:m_spec{lanes a m == 8})
 
 noextract
 let emit8_lemma (#a:sha2_alg) (#m:m_spec{lanes a m == 8})
-                (hseq:lseq uint8 (lanes a m * 8 * word_length a)):
+                (hseq:LSeq.lseq uint8 (lanes a m * 8 * word_length a)):
                 Lemma (emit8_spec #a #m hseq ==
                        SpecVec.emit #a #m hseq) =
     Lib.NTuple.eq_intro (emit8_spec #a #m hseq) (SpecVec.emit #a #m hseq)
@@ -1057,14 +1032,14 @@ let emit8 #a #m hbuf result =
   copy b6 (sub hbuf (48ul *. word_len a) (hash_len a));
   copy b7 (sub hbuf (56ul *. word_len a) (hash_len a));
   let h1 = ST.get() in
-  assert (as_seq h1 b0 == Lib.Sequence.sub (as_seq h0 hbuf) 0 (hash_length a));
-  assert (as_seq h1 b1 == Lib.Sequence.sub (as_seq h0 hbuf) (8 * word_length a) (hash_length a));
-  assert (as_seq h1 b2 == Lib.Sequence.sub (as_seq h0 hbuf) (16 * word_length a) (hash_length a));
-  assert (as_seq h1 b3 == Lib.Sequence.sub (as_seq h0 hbuf) (24 * word_length a) (hash_length a));
-  assert (as_seq h1 b4 == Lib.Sequence.sub (as_seq h0 hbuf) (32 * word_length a) (hash_length a));
-  assert (as_seq h1 b5 == Lib.Sequence.sub (as_seq h0 hbuf) (40 * word_length a) (hash_length a));
-  assert (as_seq h1 b6 == Lib.Sequence.sub (as_seq h0 hbuf) (48 * word_length a) (hash_length a));
-  assert (as_seq h1 b7 == Lib.Sequence.sub (as_seq h0 hbuf) (56 * word_length a) (hash_length a));
+  assert (as_seq h1 b0 == LSeq.sub (as_seq h0 hbuf) 0 (hash_length a));
+  assert (as_seq h1 b1 == LSeq.sub (as_seq h0 hbuf) (8 * word_length a) (hash_length a));
+  assert (as_seq h1 b2 == LSeq.sub (as_seq h0 hbuf) (16 * word_length a) (hash_length a));
+  assert (as_seq h1 b3 == LSeq.sub (as_seq h0 hbuf) (24 * word_length a) (hash_length a));
+  assert (as_seq h1 b4 == LSeq.sub (as_seq h0 hbuf) (32 * word_length a) (hash_length a));
+  assert (as_seq h1 b5 == LSeq.sub (as_seq h0 hbuf) (40 * word_length a) (hash_length a));
+  assert (as_seq h1 b6 == LSeq.sub (as_seq h0 hbuf) (48 * word_length a) (hash_length a));
+  assert (as_seq h1 b7 == LSeq.sub (as_seq h0 hbuf) (56 * word_length a) (hash_length a));
   NTup.eq_intro (as_seq_multi h1 result)
     (NTup.ntup8 (as_seq h1 b0, (as_seq h1 b1, (as_seq h1 b2, (as_seq h1 b3, (as_seq h1 b4, (as_seq h1 b5, (as_seq h1 b6, as_seq h1 b7))))))));
   assert (modifies (loc b0 |+| loc b1 |+| loc b2 |+| loc b3 |+| loc b4 |+| loc b5 |+| loc b6 |+| loc b7) h0 h1);
@@ -1093,20 +1068,6 @@ let emit #a #m hbuf result =
   | 8 -> emit8 #a #m hbuf result
   | _ -> admit()
 
-noextract
-let preserves_disjoint_multi #lanes #len #len' (b:multibuf lanes len) (r:multibuf lanes len') =
-    (forall a l (x:lbuffer a l). disjoint_multi b x ==> disjoint_multi r x)
-
-inline_for_extraction
-val get_multiblock: #a:sha2_alg -> #m:m_spec ->
-                    len:size_t -> b:multibuf (lanes a m) len ->
-                    i:size_t{v i < v len / block_length a} ->
-                    Stack (multibuf (lanes a m) (block_len a))
-                    (requires (fun h -> live_multi h b))
-                    (ensures (fun h0 r h1 -> h0 == h1 /\ live_multi h1 r /\
-                                           preserves_disjoint_multi b r /\
-                                           as_seq_multi h1 r ==
-                                           SpecVec.get_multiblock_spec (v len) (as_seq_multi h0 b) (v i)))
 
 let get_multiblock #a #m len b i =
   let h0 = ST.get() in
@@ -1145,15 +1106,6 @@ let get_multiblock #a #m len b i =
   | _ -> admit()
 
 
-inline_for_extraction
-val get_multilast: #a:sha2_alg -> #m:m_spec ->
-                   len:size_t -> b:multibuf (lanes a m) len ->
-                   Stack (multibuf (lanes a m) (len %. block_len a))
-                   (requires (fun h -> live_multi h b))
-                   (ensures (fun h0 r h1 -> h0 == h1 /\ live_multi h1 r /\
-                            preserves_disjoint_multi b r /\
-                            as_seq_multi h1 r ==
-                            SpecVec.get_multilast_spec #a #m (v len) (as_seq_multi h0 b)))
 
 #push-options "--z3rlimit 300"
 let get_multilast #a #m len b =
@@ -1195,16 +1147,6 @@ let get_multilast #a #m len b =
   | _ -> admit()
 #pop-options
 
-inline_for_extraction
-val update_nblocks: #a:sha2_alg -> #m:m_spec -> upd:update_t a m ->
-                    len:size_t -> b:multibuf (lanes a m) len ->
-                    st:state_t a m ->
-                    Stack unit
-                    (requires (fun h0 -> live_multi h0 b /\ live h0 st /\ disjoint_multi b st))
-                    (ensures (fun h0 _ h1 -> modifies (loc st) h0 h1 /\
-                                           as_seq h1 st ==
-                                           SpecVec.update_nblocks #a #m (v len)
-                                             (as_seq_multi h0 b) (as_seq h0 st)))
 #push-options "--z3rlimit 200"
 let update_nblocks #a #m upd len b st =
     let blocks = len /. block_len a in
@@ -1222,16 +1164,6 @@ let update_nblocks #a #m upd len b st =
         assert (as_seq h1 st == SpecVec.update_block #a #m (v len) (as_seq_multi h0 b) (v i) (as_seq h0' st)))
 #pop-options
 
-inline_for_extraction
-val finish: #a:sha2_alg -> #m:m_spec ->
-            st:state_t a m ->
-            h:multibuf (lanes a m) (hash_len a) ->
-            Stack unit
-            (requires (fun h0 -> live_multi h0 h /\ internally_disjoint h /\
-                               live h0 st /\ disjoint_multi h st))
-            (ensures (fun h0 _ h1 -> modifies (loc_multi h |+| loc st) h0 h1 /\
-                                   as_seq_multi h1 h ==
-                                   SpecVec.finish #a #m (as_seq h0 st)))
 
 #push-options "--z3rlimit 100"
 let finish #a #m st h =
@@ -1252,17 +1184,6 @@ let finish #a #m st h =
   assert (as_seq_multi h3 h == SpecVec.finish #a #m (as_seq h0 st))
 #pop-options
 
-
-inline_for_extraction
-val hash: #a:sha2_alg -> #m:m_spec -> upd:update_t a m ->
-          h:multibuf (lanes a m) (hash_len a) ->
-          len:size_t ->
-          b:multibuf (lanes a m) len ->
-    Stack unit
-    (requires (fun h0 -> live_multi h0 b /\ live_multi h0 h /\ internally_disjoint h))
-    (ensures (fun h0 _ h1 -> modifies_multi h h0 h1 /\
-                           as_seq_multi h1 h ==
-                           SpecVec.hash #a #m (v len) (as_seq_multi h0 b)))
 
 #push-options "--z3rlimit 500"
 let hash #a #m upd h len b =
@@ -1301,91 +1222,4 @@ let hash #a #m upd h len b =
     pop_frame();
     let h6 = ST.get() in
     NTup.eq_intro (as_seq_multi h6 h) (as_seq_multi h5 h)
-#pop-options
-
-
-
-
-
-[@CInline]
-val sha256_update1: b:multibuf (lanes SHA2_256 M32) (block_len SHA2_256) -> hash:state_t SHA2_256 M32 ->
-    Stack unit
-    (requires (fun h -> live_multi h b /\ live h hash))
-    (ensures (fun h0 _ h1 -> modifies (loc hash) h0 h1 /\
-                           as_seq h1 hash == SpecVec.update #SHA2_256 #M32 (as_seq_multi h0 b) (as_seq h0 hash)))
-let sha256_update1 b hash = update #SHA2_256 #M32 b hash
-
-let sha256 h len b =
-  let h0 = ST.get() in
-  let b = ntup1 b in
-  let h = ntup1 h in
-  hash #SHA2_256 #M32 (sha256_update1 <: update_t SHA2_256 M32) h len b;
-  let h1 = ST.get() in
-  Hacl.Spec.SHA2.Equiv.hash_lemma #SHA2_256 #M32 (v len) (as_seq_multi h0 b);
-  let hash0 = tup1 h in
-  assert ((as_seq_multi h1 h).(|0|) == as_seq h1 hash0)
-
-[@CInline]
-val sha256_update4: b:multibuf (lanes SHA2_256 M128) (block_len SHA2_256) ->
-                    hash:state_t SHA2_256 M128 ->
-    Stack unit
-    (requires (fun h -> live_multi h b /\ live h hash))
-    (ensures (fun h0 _ h1 -> modifies1 hash h0 h1 /\
-                           as_seq h1 hash == Hacl.Spec.SHA2.Vec.update #SHA2_256 #M128 (as_seq_multi h0 b) (as_seq h0 hash)))
-
-let sha256_update4 b hash =
-  update #SHA2_256 #M128 b hash
-
-#push-options "--z3rlimit 400"
-let sha256_4 r0 r1 r2 r3 len b0 b1 b2 b3 =
-  let h0 = ST.get() in
-  let ib = NTup.ntup4 (b0,(b1,(b2,b3))) in
-  let rb = NTup.ntup4 (r0,(r1,(r2,r3))) in
-  let h0 = ST.get() in
-  assert (live_multi h0 ib);
-  assert (live_multi h0 rb);
-  assert (internally_disjoint rb);
-  loc_multi4 rb;
-  hash #SHA2_256 #M128 sha256_update4 rb len ib;
-  let h1 = ST.get() in
-  Hacl.Spec.SHA2.Equiv.hash_lemma #SHA2_256 #M128 (v len) (as_seq_multi h0 ib);
-  assert ((as_seq_multi h1 rb).(|0|) == as_seq h1 r0);
-  assert ((as_seq_multi h1 rb).(|1|) == as_seq h1 r1);
-  assert ((as_seq_multi h1 rb).(|2|) == as_seq h1 r2);
-  assert ((as_seq_multi h1 rb).(|3|) == as_seq h1 r3)
-#pop-options
-
-
-[@CInline]
-val sha256_update8: b:multibuf (lanes SHA2_256 M256) (block_len SHA2_256) ->
-                    hash:state_t SHA2_256 M256 ->
-    Stack unit
-    (requires (fun h -> live_multi h b /\ live h hash))
-    (ensures (fun h0 _ h1 -> modifies1 hash h0 h1 /\
-                           as_seq h1 hash == Hacl.Spec.SHA2.Vec.update #SHA2_256 #M256 (as_seq_multi h0 b) (as_seq h0 hash)))
-
-let sha256_update8 b hash =
-  update #SHA2_256 #M256 b hash
-
-#push-options "--z3rlimit 500"
-let sha256_8 r0 r1 r2 r3 r4 r5 r6 r7 len b0 b1 b2 b3 b4 b5 b6 b7 =
-  let h0 = ST.get() in
-  let ib = NTup.ntup8 (b0,(b1,(b2,(b3,(b4,(b5,(b6,b7))))))) in
-  let rb = NTup.ntup8 (r0,(r1,(r2,(r3,(r4,(r5,(r6,r7))))))) in
-  let h0 = ST.get() in
-  assert (live_multi h0 ib);
-  assert (live_multi h0 rb);
-  assert (internally_disjoint rb);
-  loc_multi8 rb;
-  hash #SHA2_256 #M256 sha256_update8 rb len ib;
-  let h1 = ST.get() in
-  Hacl.Spec.SHA2.Equiv.hash_lemma #SHA2_256 #M256 (v len) (as_seq_multi h0 ib);
-  assert ((as_seq_multi h1 rb).(|0|) == as_seq h1 r0);
-  assert ((as_seq_multi h1 rb).(|1|) == as_seq h1 r1);
-  assert ((as_seq_multi h1 rb).(|2|) == as_seq h1 r2);
-  assert ((as_seq_multi h1 rb).(|3|) == as_seq h1 r3);
-  assert ((as_seq_multi h1 rb).(|4|) == as_seq h1 r4);
-  assert ((as_seq_multi h1 rb).(|5|) == as_seq h1 r5);
-  assert ((as_seq_multi h1 rb).(|6|) == as_seq h1 r6);
-  assert ((as_seq_multi h1 rb).(|7|) == as_seq h1 r7)
 #pop-options
