@@ -17,6 +17,9 @@
 #include "test_helpers.h"
 #include "poly1305_vectors.h"
 
+#include "test_helpers.h"
+#include "poly1305_vectors.h"
+
 #define ROUNDS 100000
 #define SIZE   16384
 
@@ -44,8 +47,11 @@ bool print_test(int in_len, uint8_t* in, uint8_t* key, uint8_t* exp){
 }
 
 int main() {
+<<<<<<< HEAD
   EverCrypt_AutoConfig2_init();
 
+=======
+>>>>>>> origin/master
   bool ok = true;
   for (int i = 0; i < sizeof(vectors)/sizeof(poly1305_test_vector); ++i) {
     ok &= print_test(vectors[i].input_len,vectors[i].input,vectors[i].key,vectors[i].tag);
@@ -116,9 +122,13 @@ int main() {
   uint64_t count = ROUNDS * SIZE;
   printf("Poly1305 (32-bit) PERF: %d\n",(int)res); print_time(count,tdiff1,cdiff1);
   printf("Poly1305 (128-bit) PERF:\n"); print_time(count,tdiff2,cdiff2);
+<<<<<<< HEAD
   if (EverCrypt_AutoConfig2_has_avx2()) {
     printf("Poly1305 (256-bit) PERF:\n"); print_time(count,tdiff3,cdiff3);
   }
+=======
+  printf("Poly1305 (256-bit) PERF:\n"); print_time(count,tdiff3,cdiff3);
+>>>>>>> origin/master
 
   if (ok) return EXIT_SUCCESS;
   else return EXIT_FAILURE;

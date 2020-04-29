@@ -15,6 +15,10 @@
 #  error This file only works with the MSVC compiler
 #endif
 
+/* JP: need to rip out HAS_OPTIMIZED since the header guards in types.h are now
+ * done properly and only include this file when we know for sure we are on
+ * 64-bit MSVC. */
+
 #if defined(_M_X64) && !defined(KRML_VERIFIED_UINT128)
 #define HAS_OPTIMIZED 1
 #else

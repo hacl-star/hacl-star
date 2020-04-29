@@ -172,6 +172,7 @@ val lemma_bytes_and_mod6: x: uint_t 64 ->
 val lemma_bytes_and_mod7: x: uint_t 64 ->
   Lemma (logand #64 x  (0x100000000000000 - 1) == x % 0x100000000000000)
 
+#push-options "--z3cliopt smt.arith.nl=true"
 let lemma_bytes_and_mod0 x =
   assert_by_tactic (logand #64 x (0x1 - 1) == mod #64 x 0x1) bv_tac
 
@@ -194,6 +195,7 @@ let lemma_bytes_and_mod6 x =
 
 let lemma_bytes_and_mod7 x =
   assert_by_tactic (logand #64 x (0x100000000000000 - 1) == mod #64 x 0x100000000000000) bv_tac
+#pop-options
 
 let lemma_bytes_and_mod (x:nat64) (y:nat64) =
   reveal_iand_all 64;

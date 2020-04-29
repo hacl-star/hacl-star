@@ -11,7 +11,10 @@
 
 #include "test_helpers.h"
 #include "curve25519_vectors.h"
+<<<<<<< HEAD
 #include "EverCrypt_AutoConfig2.h"
+=======
+>>>>>>> origin/master
 
 typedef __attribute__((aligned(32))) uint8_t X25519_KEY[32];
 
@@ -34,6 +37,7 @@ bool print_test(uint8_t* scalar, uint8_t* pub, uint8_t* exp){
   return ok;
 }
 
+<<<<<<< HEAD
 
 int main() {
   EverCrypt_AutoConfig2_init();
@@ -46,6 +50,15 @@ int main() {
     ok &= print_test(vectors[i].scalar,vectors[i].public,vectors[i].secret);
   }
 
+=======
+
+int main() {
+  bool ok = true;
+  for (int i = 0; i < sizeof(vectors)/sizeof(curve25519_test_vector); ++i) {
+    ok &= print_test(vectors[i].scalar,vectors[i].public,vectors[i].secret);
+  }
+
+>>>>>>> origin/master
   X25519_KEY pub, priv, key;
   uint64_t res = 0;
   cycles a,b;

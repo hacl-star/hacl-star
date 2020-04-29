@@ -322,75 +322,24 @@ EverCrypt_Hash_hash(
 
 /* SNIPPET_END: EverCrypt_Hash_hash */
 
-/* SNIPPET_START: EverCrypt_Hash_Incremental_any_hash_t */
+/* SNIPPET_START: Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ */
 
-typedef uint8_t *EverCrypt_Hash_Incremental_any_hash_t;
+typedef struct Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s_____s
+Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____;
 
-/* SNIPPET_END: EverCrypt_Hash_Incremental_any_hash_t */
-
-/* SNIPPET_START: EverCrypt_Hash_Incremental_state_s */
-
-typedef struct EverCrypt_Hash_Incremental_state_s_s EverCrypt_Hash_Incremental_state_s;
-
-/* SNIPPET_END: EverCrypt_Hash_Incremental_state_s */
-
-/* SNIPPET_START: EverCrypt_Hash_Incremental_uu___is_State */
-
-bool
-EverCrypt_Hash_Incremental_uu___is_State(
-  Spec_Hash_Definitions_hash_alg a,
-  EverCrypt_Hash_Incremental_state_s projectee
-);
-
-/* SNIPPET_END: EverCrypt_Hash_Incremental_uu___is_State */
-
-/* SNIPPET_START: EverCrypt_Hash_Incremental___proj__State__item__hash_state */
-
-EverCrypt_Hash_state_s
-*EverCrypt_Hash_Incremental___proj__State__item__hash_state(
-  Spec_Hash_Definitions_hash_alg a,
-  EverCrypt_Hash_Incremental_state_s projectee
-);
-
-/* SNIPPET_END: EverCrypt_Hash_Incremental___proj__State__item__hash_state */
-
-/* SNIPPET_START: EverCrypt_Hash_Incremental___proj__State__item__buf */
-
-uint8_t
-*EverCrypt_Hash_Incremental___proj__State__item__buf(
-  Spec_Hash_Definitions_hash_alg a,
-  EverCrypt_Hash_Incremental_state_s projectee
-);
-
-/* SNIPPET_END: EverCrypt_Hash_Incremental___proj__State__item__buf */
-
-/* SNIPPET_START: EverCrypt_Hash_Incremental___proj__State__item__total_len */
-
-uint64_t
-EverCrypt_Hash_Incremental___proj__State__item__total_len(
-  Spec_Hash_Definitions_hash_alg a,
-  EverCrypt_Hash_Incremental_state_s projectee
-);
-
-/* SNIPPET_END: EverCrypt_Hash_Incremental___proj__State__item__total_len */
-
-/* SNIPPET_START: EverCrypt_Hash_Incremental_alg_of_state */
-
-Spec_Hash_Definitions_hash_alg
-EverCrypt_Hash_Incremental_alg_of_state(EverCrypt_Hash_Incremental_state_s *s);
-
-/* SNIPPET_END: EverCrypt_Hash_Incremental_alg_of_state */
+/* SNIPPET_END: Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ */
 
 /* SNIPPET_START: EverCrypt_Hash_Incremental_create_in */
 
-EverCrypt_Hash_Incremental_state_s
+Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____
 *EverCrypt_Hash_Incremental_create_in(Spec_Hash_Definitions_hash_alg a);
 
 /* SNIPPET_END: EverCrypt_Hash_Incremental_create_in */
 
 /* SNIPPET_START: EverCrypt_Hash_Incremental_init */
 
-void EverCrypt_Hash_Incremental_init(EverCrypt_Hash_Incremental_state_s *s);
+void
+EverCrypt_Hash_Incremental_init(Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *s);
 
 /* SNIPPET_END: EverCrypt_Hash_Incremental_init */
 
@@ -398,22 +347,96 @@ void EverCrypt_Hash_Incremental_init(EverCrypt_Hash_Incremental_state_s *s);
 
 void
 EverCrypt_Hash_Incremental_update(
-  EverCrypt_Hash_Incremental_state_s *p,
+  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *p,
   uint8_t *data,
   uint32_t len
 );
 
 /* SNIPPET_END: EverCrypt_Hash_Incremental_update */
 
+/* SNIPPET_START: EverCrypt_Hash_Incremental_finish_md5 */
+
+void
+EverCrypt_Hash_Incremental_finish_md5(
+  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *p,
+  uint8_t *dst
+);
+
+/* SNIPPET_END: EverCrypt_Hash_Incremental_finish_md5 */
+
+/* SNIPPET_START: EverCrypt_Hash_Incremental_finish_sha1 */
+
+void
+EverCrypt_Hash_Incremental_finish_sha1(
+  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *p,
+  uint8_t *dst
+);
+
+/* SNIPPET_END: EverCrypt_Hash_Incremental_finish_sha1 */
+
+/* SNIPPET_START: EverCrypt_Hash_Incremental_finish_sha224 */
+
+void
+EverCrypt_Hash_Incremental_finish_sha224(
+  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *p,
+  uint8_t *dst
+);
+
+/* SNIPPET_END: EverCrypt_Hash_Incremental_finish_sha224 */
+
+/* SNIPPET_START: EverCrypt_Hash_Incremental_finish_sha256 */
+
+void
+EverCrypt_Hash_Incremental_finish_sha256(
+  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *p,
+  uint8_t *dst
+);
+
+/* SNIPPET_END: EverCrypt_Hash_Incremental_finish_sha256 */
+
+/* SNIPPET_START: EverCrypt_Hash_Incremental_finish_sha384 */
+
+void
+EverCrypt_Hash_Incremental_finish_sha384(
+  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *p,
+  uint8_t *dst
+);
+
+/* SNIPPET_END: EverCrypt_Hash_Incremental_finish_sha384 */
+
+/* SNIPPET_START: EverCrypt_Hash_Incremental_finish_sha512 */
+
+void
+EverCrypt_Hash_Incremental_finish_sha512(
+  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *p,
+  uint8_t *dst
+);
+
+/* SNIPPET_END: EverCrypt_Hash_Incremental_finish_sha512 */
+
+/* SNIPPET_START: EverCrypt_Hash_Incremental_alg_of_state */
+
+Spec_Hash_Definitions_hash_alg
+EverCrypt_Hash_Incremental_alg_of_state(
+  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *s
+);
+
+/* SNIPPET_END: EverCrypt_Hash_Incremental_alg_of_state */
+
 /* SNIPPET_START: EverCrypt_Hash_Incremental_finish */
 
-void EverCrypt_Hash_Incremental_finish(EverCrypt_Hash_Incremental_state_s *s, uint8_t *dst);
+void
+EverCrypt_Hash_Incremental_finish(
+  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *s,
+  uint8_t *dst
+);
 
 /* SNIPPET_END: EverCrypt_Hash_Incremental_finish */
 
 /* SNIPPET_START: EverCrypt_Hash_Incremental_free */
 
-void EverCrypt_Hash_Incremental_free(EverCrypt_Hash_Incremental_state_s *s);
+void
+EverCrypt_Hash_Incremental_free(Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *s);
 
 /* SNIPPET_END: EverCrypt_Hash_Incremental_free */
 

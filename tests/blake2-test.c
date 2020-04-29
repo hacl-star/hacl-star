@@ -34,11 +34,17 @@ bool print_test2b(int in_len, uint8_t* in, int key_len, uint8_t* key, int exp_le
   printf("testing blake2b vec-32:\n");
   bool ok = print_result(exp_len,comp,exp);
 
+<<<<<<< HEAD
   if (EverCrypt_AutoConfig2_has_avx2()) {
     Hacl_Blake2b_256_blake2b(exp_len,comp,in_len,in,key_len,key);
     printf("testing blake2b vec-256:\n");
     ok = ok && print_result(exp_len,comp,exp);
   }
+=======
+  Hacl_Blake2b_256_blake2b(exp_len,comp,in_len,in,key_len,key);
+  printf("testing blake2b vec-256:\n");
+  ok = ok && print_result(exp_len,comp,exp);
+>>>>>>> origin/master
   return ok;
 }
 
@@ -60,7 +66,10 @@ bool print_test2s(int in_len, uint8_t* in, int key_len, uint8_t* key, int exp_le
 
 int main()
 {
+<<<<<<< HEAD
   EverCrypt_AutoConfig2_init();
+=======
+>>>>>>> origin/master
   bool ok = true;
   for (int i = 0; i < sizeof(vectors2b)/sizeof(blake2_test_vector); ++i) {
     ok &= print_test2b(vectors2b[i].input_len,vectors2b[i].input,vectors2b[i].key_len,vectors2b[i].key,vectors2b[i].expected_len,vectors2b[i].expected);
@@ -118,6 +127,7 @@ int main()
   double tdiff3 = t2 - t1;
 
 
+<<<<<<< HEAD
   if (EverCrypt_AutoConfig2_has_avx2()) {
     for (int j = 0; j < ROUNDS; j++) {
       Hacl_Blake2b_256_blake2b(64,plain,SIZE,plain,0,NULL);
@@ -130,6 +140,18 @@ int main()
     b = cpucycles_end();
     t2 = clock();
   }
+=======
+  for (int j = 0; j < ROUNDS; j++) {
+    Hacl_Blake2b_256_blake2b(64,plain,SIZE,plain,0,NULL);
+  }
+  t1 = clock();
+  a = cpucycles_begin();
+  for (int j = 0; j < ROUNDS; j++) {
+    Hacl_Blake2b_256_blake2b(64,plain,SIZE,plain,0,NULL);
+  }
+  b = cpucycles_end();
+  t2 = clock();
+>>>>>>> origin/master
   uint64_t cdiff4 = b - a;
   double tdiff4 = t2 - t1;
 
@@ -137,11 +159,16 @@ int main()
   printf("Blake2S (Vec 32-bit):\n"); print_time(count,tdiff1,cdiff1);
   printf("Blake2B (Vec 64-bit):\n"); print_time(count,tdiff2,cdiff2);
   printf("Blake2S (Vec 128-bit):\n"); print_time(count,tdiff3,cdiff3);
+<<<<<<< HEAD
 
   if (EverCrypt_AutoConfig2_has_avx2()) {
     printf("Blake2B (Vec 256-bit):\n"); print_time(count,tdiff4,cdiff4);
   }
 
+=======
+  printf("Blake2B (Vec 256-bit):\n"); print_time(count,tdiff4,cdiff4);
+
+>>>>>>> origin/master
   if (ok) return EXIT_SUCCESS;
   else return EXIT_FAILURE;
 }
