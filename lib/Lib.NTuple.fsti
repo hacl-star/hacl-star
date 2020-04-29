@@ -213,9 +213,7 @@ val tup4_lemma (#a:Type0) (#l:flen{l = 4}) (t:ntuple a l) :
 inline_for_extraction noextract
 let ntup8 #a (#l:flen{l = 8}) (t:a & (a & (a & (a & (a & (a & (a & a))))))) : ntuple a l =
   assert (ntuple a l == ntuple a 8);
-  let (x0,(x1,(x2,(x3,(x4,(x5,(x6,x7))))))) = t in
-  let t' : ntuple a 8 = (x0,(x1,(x2,(x3,(x4,(x5,(x6,x7))))))) in
-  t' 
+  (t <: ntuple a 8)
 
 val ntup8_lemma (#a:Type0) (#l:flen{l == 8}) (t:a & (a & (a & (a & (a & (a & (a & a))))))) :
   Lemma

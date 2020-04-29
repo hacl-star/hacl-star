@@ -22,6 +22,7 @@ module SpecVec = Hacl.Spec.SHA2.Vec
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 [@CInline]
+private
 val sha256_update8: update_vec_t SHA2_256 M256
 let sha256_update8 b hash = update #SHA2_256 #M256 b hash
 
