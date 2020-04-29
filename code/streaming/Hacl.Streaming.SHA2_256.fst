@@ -52,7 +52,9 @@ open Hacl.Streaming.Interface
 
 inline_for_extraction noextract
 let b = stateful_buffer (word SHA2_256) (Hacl.Hash.Definitions.hash_word_len SHA2_256) (Lib.IntTypes.u32 0)
-(*
+
+#push-options "--ifuel 1"
+
 inline_for_extraction noextract
 let hacl_sha2_256: block unit =
   Block
@@ -64,10 +66,10 @@ let hacl_sha2_256: block unit =
     (fun () -> Hacl.Hash.Definitions.hash_len SHA2_256)
     (fun () -> Hacl.Hash.Definitions.block_len SHA2_256)
 
-    (fun () _ -> Spec.Agile.Hash.(init SHA2_256))
-    (fun () -> Spec.Agile.Hash.(update_multi SHA2_256))
-    (fun () -> Spec.Hash.Incremental.(update_last SHA2_256))
-    (fun () _ -> Spec.Hash.PadFinish.(finish SHA2_256))
+    (fun () _ -> fst (Spec.Agile.Hash.(init SHA2_256)))
+    (fun () acc blocks -> fst Spec.Agile.Hash.(update_multi SHA2_256 (acc, ()) blocks))
+    (fun () acc prevlen input -> fst Spec.Hash.Incremental.(update_last SHA2_256 (acc, ()) prevlen input))
+    (fun () _ acc -> Spec.Hash.PadFinish.(finish SHA2_256 (acc, ())))
     (fun () _ s -> Spec.Agile.Hash.(hash SHA2_256 s))
 
     (fun _ _ -> ())
@@ -102,4 +104,3 @@ let init = F.init hacl_sha2_256 (G.hide ()) (b.s ()) (G.erased unit)
 let update = F.update hacl_sha2_256 (G.hide ()) (b.s ()) (G.erased unit)
 let finish = F.mk_finish hacl_sha2_256 () (b.s ()) (G.erased unit)
 let free = F.free hacl_sha2_256 (G.hide ()) (b.s ()) (G.erased unit)
-*)
