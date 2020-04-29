@@ -8,7 +8,7 @@ open Spec.Curve25519
 open Hacl.Spec.Curve25519.Field51.Definition
 open Hacl.Spec.Curve25519.Field51.Lemmas
 
-#reset-options "--z3rlimit 50  --using_facts_from '* -FStar.Seq'"
+#reset-options "--z3rlimit 50 --fuel 0 --ifuel 0 --using_facts_from '* -FStar.Seq'"
 
 inline_for_extraction noextract
 val fadd5:
@@ -228,6 +228,7 @@ let mul_inv_t (f:felem5) =
     felem_fits5 f (1, 2, 1, 1, 1) /\ v o1 % pow2 51 < 8192
   else felem_fits5 f (1, 1, 1, 1, 1)
 
+#push-options "--ifuel 1"
 val lemma_mul_inv:
     f:felem5{felem_fits5 f (1, 1, 1, 1, 1)}
   -> cin:uint64{v cin < pow2 51}
@@ -242,6 +243,7 @@ val lemma_mul_inv:
      else felem_fits5 out (1, 1, 1, 1, 1))
 let lemma_mul_inv f cin =
   assert_norm (pow51 = pow2 51)
+#pop-options
 
 inline_for_extraction noextract
 val carry_wide5:
@@ -317,7 +319,7 @@ let fmul15 (f10, f11, f12, f13, f14) f2 =
   let res = carry_wide5 (tmp_w0, tmp_w1, tmp_w2, tmp_w3, tmp_w4) in
 
   FStar.Math.Lemmas.lemma_mod_mul_distr_l (as_nat5 (f10, f11, f12, f13, f14)) (uint_v f2) prime;
-  
+
   assert (feval res == feval_wide (tmp_w0, tmp_w1, tmp_w2, tmp_w3, tmp_w4));
   assert (feval res == (wide_as_nat5 (tmp_w0, tmp_w1, tmp_w2, tmp_w3, tmp_w4)) % prime);
   assert (feval res == (v f2 * as_nat5 (f10, f11, f12, f13, f14)) % prime);
@@ -341,9 +343,29 @@ let fmul15 (f10, f11, f12, f13, f14) f2 =
 //     f4 (u64 0, u64 0, u64 0, u64 19 *. f4, u64 0) (o0, o1, o2, o3, o4) in
 //   (o0, o1, o2, o3, o4)
 
-#set-options "--z3rlimit 150 --max_fuel 0"
 
-#push-options "--max_ifuel 0"
+inline_for_extraction noextract
+val mul64_wide_add3:
+    #m0:scale64 -> #m1:scale64 -> #m2:scale64
+  -> #m3:scale64 -> #m4:scale64 -> #m5:scale64
+  -> a0:uint64{felem_fits1 a0 m0}
+  -> a1:uint64{felem_fits1 a1 m1}
+  -> b0:uint64{felem_fits1 b0 m2}
+  -> b1:uint64{felem_fits1 b1 m3}
+  -> c0:uint64{felem_fits1 c0 m4}
+  -> c1:uint64{felem_fits1 c1 m5} ->
+  Pure uint128
+  (requires m0 * m1 + m2 * m3 + m4 * m5 < 8192)
+  (ensures fun res ->
+    felem_wide_fits1 res (m0 * m1 + m2 * m3 + m4 * m5) /\
+    v res == v a0 * v a1 + v b0 * v b1 + v c0 * v c1)
+
+let mul64_wide_add3 #m0 #m1 #m2 #m3 #m4 #m5 a0 a1 b0 b1 c0 c1 =
+  assert_norm (pow2 13 = 8192);
+  mul64_wide_add3_lemma #m0 #m1 #m2 #m3 #m4 #m5 a0 a1 b0 b1 c0 c1;
+  mul64_wide a0 a1 +! mul64_wide b0 b1 +! mul64_wide c0 c1
+
+
 inline_for_extraction noextract
 val fsqr_felem5:
     f:felem5{felem_fits5 f (9, 10, 9, 9, 9)}
@@ -353,26 +375,23 @@ val fsqr_felem5:
       felem_wide_fits5 out (6579, 4797, 3340, 1881, 423) /\
       feval_wide out == fmul (feval f) (feval f))
 let fsqr_felem5 (f0, f1, f2, f3, f4) =
+  assert_norm (pow2 13 = 8192);
   let d0 = u64 2 *! f0 in
   let d1 = u64 2 *! f1 in
   let d2 = u64 38 *! f2 in
   let d3 = u64 19 *! f3 in
   let d419 = u64 19 *! f4 in
   let d4 = u64 2 *! d419 in
-  assert_norm (6579 < pow2 13);
-  mul64_wide_add3_lemma #9 #9 #342 #10 #342 #9 f0 f0 d4 f1 d2 f3;
-  let s0 = mul64_wide f0 f0 +! mul64_wide d4 f1 +! mul64_wide d2 f3 in
-  mul64_wide_add3_lemma #18 #10 #342 #9 #171 #9 d0 f1 d4 f2 d3 f3;
-  let s1 = mul64_wide d0 f1 +! mul64_wide d4 f2 +! mul64_wide d3 f3 in
-  mul64_wide_add3_lemma #18 #9 #10 #10 #342 #9 d0 f2 f1 f1 d4 f3;
-  let s2 = mul64_wide d0 f2 +! mul64_wide f1 f1 +! mul64_wide d4 f3 in
-  mul64_wide_add3_lemma #18 #9 #20 #9 #9 #171 d0 f3 d1 f2 f4 d419;
-  let s3 = mul64_wide d0 f3 +! mul64_wide d1 f2 +! mul64_wide f4 d419 in
-  mul64_wide_add3_lemma #18 #9 #20 #9 #9 #9 d0 f4 d1 f3 f2 f2;
-  let s4 = mul64_wide d0 f4 +! mul64_wide d1 f3 +! mul64_wide f2 f2 in
+
+  let s0 = mul64_wide_add3 #9 #9 #342 #10 #342 #9 f0 f0 d4 f1 d2 f3 in
+  let s1 = mul64_wide_add3 #18 #10 #342 #9 #171 #9 d0 f1 d4 f2 d3 f3 in
+  let s2 = mul64_wide_add3 #18 #9 #10 #10 #342 #9 d0 f2 f1 f1 d4 f3 in
+  let s3 = mul64_wide_add3 #18 #9 #20 #9 #9 #171 d0 f3 d1 f2 f4 d419 in
+  let s4 = mul64_wide_add3 #18 #9 #20 #9 #9 #9 d0 f4 d1 f3 f2 f2 in
+
   lemma_fmul_fsqr5 (f0, f1, f2, f3, f4);
   (s0, s1, s2, s3, s4)
-#pop-options
+
 
 inline_for_extraction noextract
 val fsqr5:

@@ -139,12 +139,21 @@ val eq_repeat_gen0:
   -> acc0:a 0
   -> Lemma (repeat_gen 0 a f acc0 == acc0)
 
+val repeat_gen_def:
+    n:nat
+  -> a:(i:nat{i <= n} -> Type)
+  -> f:(i:nat{i < n} -> a i -> a (i + 1))
+  -> acc0:a 0
+  -> Lemma (repeat_gen n a f acc0 == repeat_right 0 n a f acc0)
+
 
 (**
 * Repetition with a fixed accumulator type
 *)
 
 let fixed_a (a:Type) (i:nat) = a
+
+let fixed_i f (i:nat) = f
 
 val repeati:
     #a:Type
