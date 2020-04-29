@@ -180,7 +180,7 @@ let update_last_is_update input acc r =
       (repeat_f block_length (update' r))
       (repeat_l block_length (update_last' r) input)
       acc, r;
-  (==) { repeat_blocks_extensionality block_length input
+  (==) { Lib.Sequence.Lemmas.repeat_blocks_extensionality block_length input
       (repeat_f block_length (update' r))
       Spec.Poly1305.(poly1305_update1 r size_block)
       (repeat_l block_length (update_last' r) input)
@@ -216,7 +216,7 @@ let update_multi_is_update input acc r =
       (repeat_f block_length (update' r))
       (repeat_l block_length (update_last' r) input)
       acc, r;
-  (==) { repeat_blocks_extensionality block_length input
+  (==) { Lib.Sequence.Lemmas.repeat_blocks_extensionality block_length input
       (repeat_f block_length (update' r))
       Spec.Poly1305.(poly1305_update1 r size_block)
       (repeat_l block_length (update_last' r) input)
@@ -253,7 +253,7 @@ let poly_is_incremental key input =
       (repeat_f block_length (update' r))
       (repeat_l block_length (update_last' r) input)
       acc);
-  (S.equal) { repeat_blocks_extensionality block_length input
+  (S.equal) { Lib.Sequence.Lemmas.repeat_blocks_extensionality block_length input
       (repeat_f block_length (update' r))
       Spec.Poly1305.(poly1305_update1 r size_block)
       (repeat_l block_length (update_last' r) input)

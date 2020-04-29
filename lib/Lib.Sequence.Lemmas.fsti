@@ -6,7 +6,7 @@ open Lib.Sequence
 
 module Loops = Lib.LoopCombinators
 
-#set-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 0 \
+#set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 \
   --using_facts_from '-* +Prims +FStar.Math.Lemmas +FStar.Seq +Lib.IntTypes +Lib.Sequence +Lib.Sequence.Lemmas'"
 
 
@@ -99,7 +99,7 @@ val repeati_right_extensionality:
     Loops.repeat_right lo_g (lo_g + n) (Loops.fixed_a a) g acc0)
 
 ///
-///  `repeat_gen_blocks` is defined here to prove all the properties
+///   `repeat_gen_blocks` is defined here to prove all the properties
 ///   needed for `map_blocks` and `repeat_blocks` once
 ///
 
@@ -238,13 +238,6 @@ val repeat_gen_blocks_extensionality_zero:
     repeat_gen_blocks blocksize 0 hi_g inp a_g g l_g acc0)
 
 
-///
-///  Lemma
-///   (repeat_gen_blocks blocksize 0 hi inp a f l acc0 ==
-///     repeat_gen_blocks blocksize n0 hi (Seq.slice inp len0 (len - len0)) a f l
-///       (repeat_gen_blocks_multi blocksize 0 hi n0 (Seq.slice inp 0 len0) a f acc0)
-///
-
 val len0_div_bs: blocksize:pos -> len:nat -> len0:nat ->
   Lemma
   (requires len0 <= len /\ len0 % blocksize == 0)
@@ -326,10 +319,28 @@ val repeat_gen_blocks_split:
     repeat_gen_blocks blocksize mi hi inp a f l acc0 ==
     repeat_gen_blocks blocksize (mi + n0) hi t1 a f l acc)
 
+///
+///  Properties related to the repeat_blocks combinator
+///
 
-///
-///  Lemma (`repeat_blocks` == `repeat_gen_blocks`)
-///
+val repeat_blocks_extensionality:
+    #a:Type0
+  -> #b:Type0
+  -> #c:Type0
+  -> blocksize:size_pos
+  -> inp:seq a
+  -> f1:(lseq a blocksize -> b -> b)
+  -> f2:(lseq a blocksize -> b -> b)
+  -> l1:(len:nat{len < blocksize} -> s:lseq a len -> b -> c)
+  -> l2:(len:nat{len < blocksize} -> s:lseq a len -> b -> c)
+  -> acc0:b ->
+  Lemma
+  (requires
+    (forall (block:lseq a blocksize) (acc:b). f1 block acc == f2 block acc) /\
+    (forall (rem:nat{rem < blocksize}) (last:lseq a rem) (acc:b). l1 rem last acc == l2 rem last acc))
+  (ensures
+    repeat_blocks blocksize inp f1 l1 acc0 == repeat_blocks blocksize inp f2 l2 acc0)
+
 
 val lemma_repeat_blocks_via_multi:
     #a:Type0
@@ -419,8 +430,7 @@ val repeat_blocks_split:
       (repeat_blocks_multi blocksize (Seq.slice inp 0 len0) f acc0))
 
 ///
-///  New definition of `map_blocks` that takes extra parameter `acc`.
-///  When `acc` = Seq.empty, map_blocks == map_blocks_acc
+///  Properties related to the map_blocks combinator
 ///
 
 val map_blocks_multi_extensionality:
@@ -455,6 +465,10 @@ val map_blocks_extensionality:
   (ensures
     map_blocks blocksize inp f l_f == map_blocks blocksize inp g l_g)
 
+///
+///   New definition of `map_blocks` that takes extra parameter `acc`.
+///   When `acc` = Seq.empty, map_blocks == map_blocks_acc
+///
 
 let repeat_gen_blocks_map_f
   (#a:Type0)

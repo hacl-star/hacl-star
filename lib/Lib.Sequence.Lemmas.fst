@@ -414,6 +414,26 @@ let repeat_gen_blocks_split #inp_t #c blocksize len0 hi mi inp a f l acc0 =
 // Start of repeat_blocks-related properties
 ////////////////////////
 
+let repeat_blocks_extensionality #a #b #c blocksize inp f1 f2 l1 l2 acc0 =
+  let len = length inp in
+  let nb = len / blocksize in
+
+  let f_rep1 = repeat_blocks_f blocksize inp f1 nb in
+  let f_rep2 = repeat_blocks_f blocksize inp f2 nb in
+
+  let acc1 = Loops.repeati nb f_rep1 acc0 in
+  let acc2 = Loops.repeati nb f_rep2 acc0 in
+  lemma_repeat_blocks blocksize inp f1 l1 acc0;
+  lemma_repeat_blocks blocksize inp f2 l2 acc0;
+
+  let aux (i:nat{i < nb}) (acc:b) : Lemma (f_rep1 i acc == f_rep2 i acc) =
+    Math.Lemmas.lemma_mult_le_right blocksize (i + 1) nb;
+    Seq.Properties.slice_slice inp 0 (nb * blocksize) (i * blocksize) (i * blocksize + blocksize) in
+
+  Classical.forall_intro_2 aux;
+  repeati_extensionality nb f_rep1 f_rep2 acc0
+
+
 let lemma_repeat_blocks_via_multi #a #b #c blocksize inp f l acc0 =
   let len = length inp in
   let nb = len / blocksize in

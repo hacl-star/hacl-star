@@ -49,31 +49,3 @@ val update_full_is_repeat_blocks:
       Lib.Sequence.repeat_blocks #uint8 block_length input repeat_f repeat_l acc ==
       Lib.UpdateMulti.update_full block_length update update_last acc input))
     (decreases (S.length input))
-
-open Lib.IntTypes
-open Lib.Sequence
-
-val repeat_blocks_extensionality:
-  #a:Type0 ->
-  #b:Type0 ->
-  bs:size_pos ->
-  inp:seq a ->
-  f1:(lseq a bs -> b -> b) ->
-  f2:(lseq a bs -> b -> b) ->
-  l1:(len:size_nat{len == length inp % bs} -> s:lseq a len -> b -> b) ->
-  l2:(len:size_nat{len == length inp % bs} -> s:lseq a len -> b -> b) ->
-  init:b ->
-  Lemma
-    (requires (
-      let nb = length inp / bs in (
-      // condition for f1/f2
-      forall (i:nat{i < nb}) (acc: b). {:pattern repeat_blocks_f bs inp f1 nb i acc}
-      repeat_blocks_f bs inp f1 nb i acc == repeat_blocks_f bs inp f2 nb i acc) /\ (
-      // condition for l1/l2
-      let rem = length inp % bs in
-      let last = Seq.slice inp (nb * bs) (length inp) in
-      forall (acc: b). {:pattern l1 rem last acc }
-      l1 rem last acc == l2 rem last acc)
-    ))
-    (ensures
-      repeat_blocks bs inp f1 l1 init == repeat_blocks bs inp f2 l2 init)
