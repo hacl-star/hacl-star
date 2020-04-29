@@ -26,7 +26,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "8f5613957a9a2adbbce2a59761966568"
+      "4eff4a0b6e11b04a6d31238b33050b35"
     ],
     [
       "Vale.Transformers.MovbeElim.lemma_movbe_is_mov_bswap",
@@ -46,7 +46,7 @@
         "@fuel_correspondence_Vale.X64.Machine_Semantics_s.instr_apply_eval_inouts.fuel_instrumented",
         "@fuel_correspondence_Vale.X64.Machine_Semantics_s.instr_write_outputs.fuel_instrumented",
         "@query",
-        "FStar.FunctionalExtensionality_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
+        "FStar.List.Tot.Base_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
         "FStar.Pervasives.Native_pretyping_b53dbd183c526bc5d0f20d7b966ae125",
         "Prims_pretyping_f8666440faa91836cc5a13998af863fc",
         "Vale.X64.InsLemmas_interpretation_Tm_arrow_58c2fb65ed3db4d5a34de70801b2172d",
@@ -84,7 +84,8 @@
         "equality_tok_Vale.X64.Instruction_s.PreserveFlags@tok",
         "equation_FStar.Option.mapTot",
         "equation_FStar.Pervasives.Native.fst",
-        "equation_FStar.Pervasives.Native.snd", "equation_Prims.eqtype",
+        "equation_FStar.Pervasives.Native.snd",
+        "equation_FStar.Pervasives.pattern", "equation_Prims.eqtype",
         "equation_Prims.nat", "equation_Vale.Def.Words_s.nat64",
         "equation_Vale.Def.Words_s.natN",
         "equation_Vale.Transformers.InstructionReorder.equiv_states",
@@ -126,8 +127,8 @@
         "equation_with_fuel_Vale.X64.Machine_Semantics_s.instr_apply_eval_inouts.fuel_instrumented",
         "equation_with_fuel_Vale.X64.Machine_Semantics_s.instr_write_outputs.fuel_instrumented",
         "fuel_guarded_inversion_Vale.X64.Machine_Semantics_s.machine_state",
+        "function_token_typing_FStar.Pervasives.pattern",
         "function_token_typing_Prims.int",
-        "function_token_typing_Prims.unit",
         "function_token_typing_Vale.Def.Words_s.nat64",
         "function_token_typing_Vale.X64.Instruction_s.instr_out",
         "function_token_typing_Vale.X64.Instructions_s.eval_MovBe64",
@@ -198,6 +199,7 @@
         "token_correspondence_Vale.X64.Machine_Semantics_s.machine_eval_ins_st",
         "typing_FStar.Option.mapTot", "typing_FStar.Pervasives.Native.fst",
         "typing_FStar.Pervasives.Native.snd",
+        "typing_FStar.Pervasives.Native.uu___is_None",
         "typing_FStar.Pervasives.Native.uu___is_Some",
         "typing_Tm_abs_1f8554feb4e341dd48008944c1adcafb",
         "typing_Tm_abs_342cdb3350d9f379a7c34e7ae187d821",
@@ -229,7 +231,7 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "b9b7c6f6e4e33e58cf35665cff0a0085"
+      "6daae2c4a44708e5cb80bb53eaa1ce5c"
     ],
     [
       "Vale.Transformers.MovbeElim.movbe_elim_correct",
@@ -246,8 +248,7 @@
         "@fuel_correspondence_Vale.X64.Instruction_s.instr_operands_t.fuel_instrumented",
         "@fuel_correspondence_Vale.X64.Instruction_s.instr_operands_t_args.fuel_instrumented",
         "@query",
-        "FStar.FunctionalExtensionality_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
-        "Prims_pretyping_f8666440faa91836cc5a13998af863fc",
+        "FStar.List.Tot.Base_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
         "Vale.X64.InsLemmas_interpretation_Tm_arrow_47dee342cdbd71ca2734b02af594fd3d",
         "Vale.X64.InsLemmas_interpretation_Tm_arrow_58c2fb65ed3db4d5a34de70801b2172d",
         "Vale.X64.InsLemmas_interpretation_Tm_arrow_634199ec481ced163b475c858b9d7093",
@@ -275,7 +276,8 @@
         "equality_tok_Vale.X64.Instruction_s.Out@tok",
         "equality_tok_Vale.X64.Instruction_s.PreserveFlags@tok",
         "equation_FStar.Pervasives.Native.fst",
-        "equation_FStar.Pervasives.Native.snd", "equation_Prims.eq2",
+        "equation_FStar.Pervasives.Native.snd",
+        "equation_FStar.Pervasives.pattern", "equation_Prims.eq2",
         "equation_Prims.eqtype", "equation_Prims.nat",
         "equation_Prims.squash", "equation_Vale.Def.Words_s.nat64",
         "equation_Vale.Def.Words_s.natN",
@@ -302,8 +304,8 @@
         "equation_with_fuel_Vale.X64.Instruction_s.instr_operands_t_args.fuel_instrumented",
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple2",
         "fuel_guarded_inversion_Vale.X64.Machine_Semantics_s.machine_state",
+        "function_token_typing_FStar.Pervasives.pattern",
         "function_token_typing_Prims.int",
-        "function_token_typing_Prims.unit",
         "function_token_typing_Vale.X64.InsLemmas.make_instr",
         "function_token_typing_Vale.X64.Instruction_s.instr_out",
         "function_token_typing_Vale.X64.Machine_Semantics_s.ins",
@@ -375,7 +377,7 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "0a02ee35d8dfd3582ffa7bde0a8abd6f"
+      "fb7cfdd0d5f2d5f33ec3ebb8ddb5399d"
     ],
     [
       "Vale.Transformers.MovbeElim.movbe_elim_ph",
@@ -402,7 +404,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "bc39fa1ea782a928e45dd5135d3e7805"
+      "58824f2911cb1e704f34f20c26761419"
     ],
     [
       "Vale.Transformers.MovbeElim.lemma_movbe_is_mov_bswap",
@@ -421,7 +423,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "eedc0a773dad52aa41a0de06b457f7ea"
+      "4c207153fdda590c61cade4b2b47b59a"
     ]
   ]
 ]

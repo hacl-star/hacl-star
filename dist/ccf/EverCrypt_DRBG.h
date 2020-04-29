@@ -62,49 +62,49 @@ typedef struct EverCrypt_DRBG_state_s_s EverCrypt_DRBG_state_s;
 
 bool
 EverCrypt_DRBG_uu___is_SHA1_s(
-  Spec_Hash_Definitions_hash_alg uu____164,
+  Spec_Hash_Definitions_hash_alg uu____170,
   EverCrypt_DRBG_state_s projectee
 );
 
 Hacl_HMAC_DRBG_state
 EverCrypt_DRBG___proj__SHA1_s__item___0(
-  Spec_Hash_Definitions_hash_alg uu____207,
+  Spec_Hash_Definitions_hash_alg uu____213,
   EverCrypt_DRBG_state_s projectee
 );
 
 bool
 EverCrypt_DRBG_uu___is_SHA2_256_s(
-  Spec_Hash_Definitions_hash_alg uu____239,
+  Spec_Hash_Definitions_hash_alg uu____245,
   EverCrypt_DRBG_state_s projectee
 );
 
 Hacl_HMAC_DRBG_state
 EverCrypt_DRBG___proj__SHA2_256_s__item___0(
-  Spec_Hash_Definitions_hash_alg uu____282,
+  Spec_Hash_Definitions_hash_alg uu____288,
   EverCrypt_DRBG_state_s projectee
 );
 
 bool
 EverCrypt_DRBG_uu___is_SHA2_384_s(
-  Spec_Hash_Definitions_hash_alg uu____314,
+  Spec_Hash_Definitions_hash_alg uu____320,
   EverCrypt_DRBG_state_s projectee
 );
 
 Hacl_HMAC_DRBG_state
 EverCrypt_DRBG___proj__SHA2_384_s__item___0(
-  Spec_Hash_Definitions_hash_alg uu____357,
+  Spec_Hash_Definitions_hash_alg uu____363,
   EverCrypt_DRBG_state_s projectee
 );
 
 bool
 EverCrypt_DRBG_uu___is_SHA2_512_s(
-  Spec_Hash_Definitions_hash_alg uu____389,
+  Spec_Hash_Definitions_hash_alg uu____395,
   EverCrypt_DRBG_state_s projectee
 );
 
 Hacl_HMAC_DRBG_state
 EverCrypt_DRBG___proj__SHA2_512_s__item___0(
-  Spec_Hash_Definitions_hash_alg uu____432,
+  Spec_Hash_Definitions_hash_alg uu____438,
   EverCrypt_DRBG_state_s projectee
 );
 
@@ -170,7 +170,7 @@ bool
 EverCrypt_DRBG_generate_sha1(
   uint8_t *output,
   EverCrypt_DRBG_state_s *st,
-  uint32_t n1,
+  uint32_t n,
   uint8_t *additional_input,
   uint32_t additional_input_len
 );
@@ -179,7 +179,7 @@ bool
 EverCrypt_DRBG_generate_sha2_256(
   uint8_t *output,
   EverCrypt_DRBG_state_s *st,
-  uint32_t n1,
+  uint32_t n,
   uint8_t *additional_input,
   uint32_t additional_input_len
 );
@@ -188,7 +188,7 @@ bool
 EverCrypt_DRBG_generate_sha2_384(
   uint8_t *output,
   EverCrypt_DRBG_state_s *st,
-  uint32_t n1,
+  uint32_t n,
   uint8_t *additional_input,
   uint32_t additional_input_len
 );
@@ -197,7 +197,7 @@ bool
 EverCrypt_DRBG_generate_sha2_512(
   uint8_t *output,
   EverCrypt_DRBG_state_s *st,
-  uint32_t n1,
+  uint32_t n,
   uint8_t *additional_input,
   uint32_t additional_input_len
 );
@@ -228,7 +228,7 @@ bool
 EverCrypt_DRBG_generate(
   uint8_t *output,
   EverCrypt_DRBG_state_s *st,
-  uint32_t n1,
+  uint32_t n,
   uint8_t *additional_input,
   uint32_t additional_input_len
 );

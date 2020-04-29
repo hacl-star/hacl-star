@@ -564,23 +564,28 @@ let fmul_r4_normalize5 (a0, a1, a2, a3, a4) (r10, r11, r12, r13, r14) (r150, r15
 
   let v00 = vec_interleave_high_n 2 o0 o0 in
   let v10 = vec_add_mod o0 v00 in
-  let v20 = vec_add_mod v10 (vec_permute4 v10 1ul 1ul 1ul 1ul) in
+  let v10h = vec_interleave_high v10 v10 in
+  let v20 = vec_add_mod v10 v10h in
 
   let v01 = vec_interleave_high_n 2 o1 o1 in
   let v11 = vec_add_mod o1 v01 in
-  let v21 = vec_add_mod v11 (vec_permute4 v11 1ul 1ul 1ul 1ul) in
+  let v11h = vec_interleave_high v11 v11 in 
+  let v21 = vec_add_mod v11 v11h in
 
   let v02 = vec_interleave_high_n 2 o2 o2 in
   let v12 = vec_add_mod o2 v02 in
-  let v22 = vec_add_mod v12 (vec_permute4 v12 1ul 1ul 1ul 1ul) in
+  let v12h = vec_interleave_high v12 v12 in 
+  let v22 = vec_add_mod v12 v12h in
 
   let v03 = vec_interleave_high_n 2 o3 o3 in
   let v13 = vec_add_mod o3 v03 in
-  let v23 = vec_add_mod v13 (vec_permute4 v13 1ul 1ul 1ul 1ul) in
+  let v13h = vec_interleave_high v13 v13 in 
+  let v23 = vec_add_mod v13 v13h in
 
   let v04 = vec_interleave_high_n 2 o4 o4 in
   let v14 = vec_add_mod o4 v04 in
-  let v24 = vec_add_mod v14 (vec_permute4 v14 1ul 1ul 1ul 1ul) in
+  let v14h = vec_interleave_high v14 v14 in 
+  let v24 = vec_add_mod v14 v14h in
   carry_full_felem5 (v20, v21, v22, v23, v24)
 
 noextract

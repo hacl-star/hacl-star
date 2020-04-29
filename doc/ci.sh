@@ -21,7 +21,7 @@ make html
 cp -R _build/html/* $1
 
 mkdir -p $1/javascript_doc
-cp -R dist/wasm/doc/out/* $1/javascript_doc
+cp -R ../dist/wasm/doc/out/* $1/javascript_doc
 
 cd $1
 rm -rf static && mv _static static

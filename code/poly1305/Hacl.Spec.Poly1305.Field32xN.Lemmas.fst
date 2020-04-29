@@ -55,6 +55,20 @@ let precomp_r5_fits_lemma2 #w r =
   FStar.Classical.forall_intro (precomp_r5_as_tup64 #w r)
 
 
+val precomp_r5_zeros: w:lanes -> Lemma
+  (let r = (zero w, zero w, zero w, zero w, zero w) in
+   precomp_r5 r == (zero w, zero w, zero w, zero w, zero w))
+
+let precomp_r5_zeros w =
+  let r = (zero w, zero w, zero w, zero w, zero w) in
+  let (r0, r1, r2, r3, r4) = precomp_r5 r in
+
+  let aux (i:nat{i < w}) : Lemma ((vec_v (vec_smul_mod (zero w) (u64 5))).[i] == u64 0) = () in
+  Classical.forall_intro aux;
+  eq_intro (vec_v (vec_smul_mod (zero w) (u64 5))) (vec_v (zero w));
+  vecv_extensionality (vec_smul_mod (zero w) (u64 5)) (zero w)
+
+
 val fadd5_fits_lemma:
     #w:lanes
   -> f1:felem5 w{felem_fits5 f1 (2,2,2,2,2)}
@@ -469,7 +483,8 @@ val lemma_fmul_r4_normalize51:
   Lemma
   (let v00 = vec_interleave_high_n 2 o o in
    let v10 = vec_add_mod o v00 in
-   let v20 = vec_add_mod v10 (vec_permute4 v10 1ul 1ul 1ul 1ul) in
+   let v10h = vec_interleave_high v10 v10 in
+   let v20 = vec_add_mod v10 v10h in
    felem_fits1 v20 (4 * m) /\
    (uint64xN_v v20).[0] == (uint64xN_v o).[0] + (uint64xN_v o).[1] + (uint64xN_v o).[2] + (uint64xN_v o).[3])
 
@@ -483,7 +498,10 @@ let lemma_fmul_r4_normalize51 #m o =
   FStar.Math.Lemmas.modulo_lemma (v o1 + v o3) (pow2 64);
   assert (v (vec_v v10).[0] == v o0 + v o2);
   assert (v (vec_v v10).[1] == v o1 + v o3);
-  let v20 = vec_add_mod v10 (vec_permute4 v10 1ul 1ul 1ul 1ul) in
+  let v10h = vec_interleave_high v10 v10 in
+  vec_interleave_high_lemma_uint64_4 v10 v10;
+  assert (v (vec_v v10h).[0] == v (vec_v v10).[1]);
+  let v20 = vec_add_mod v10 v10h in
   FStar.Math.Lemmas.modulo_lemma (v o0 + v o2 + v o1 + v o3) (pow2 64)
 
 
@@ -541,27 +559,32 @@ let fmul_r4_normalize51 fa =
   let (o0, o1, o2, o3, o4) = fa in
   let v00 = vec_interleave_high_n 2 o0 o0 in
   let v10 = vec_add_mod o0 v00 in
-  let v20 = vec_add_mod v10 (vec_permute4 v10 1ul 1ul 1ul 1ul) in
+  let v10h = vec_interleave_high v10 v10 in
+  let v20 = vec_add_mod v10 v10h in
   lemma_fmul_r4_normalize51 #1 o0;
 
   let v01 = vec_interleave_high_n 2 o1 o1 in
   let v11 = vec_add_mod o1 v01 in
-  let v21 = vec_add_mod v11 (vec_permute4 v11 1ul 1ul 1ul 1ul) in
+  let v11h = vec_interleave_high v11 v11 in 
+  let v21 = vec_add_mod v11 v11h in
   lemma_fmul_r4_normalize51 #2 o1;
 
   let v02 = vec_interleave_high_n 2 o2 o2 in
   let v12 = vec_add_mod o2 v02 in
-  let v22 = vec_add_mod v12 (vec_permute4 v12 1ul 1ul 1ul 1ul) in
+  let v12h = vec_interleave_high v12 v12 in 
+  let v22 = vec_add_mod v12 v12h in
   lemma_fmul_r4_normalize51 #1 o2;
 
   let v03 = vec_interleave_high_n 2 o3 o3 in
   let v13 = vec_add_mod o3 v03 in
-  let v23 = vec_add_mod v13 (vec_permute4 v13 1ul 1ul 1ul 1ul) in
+  let v13h = vec_interleave_high v13 v13 in 
+  let v23 = vec_add_mod v13 v13h in
   lemma_fmul_r4_normalize51 #1 o3;
 
   let v04 = vec_interleave_high_n 2 o4 o4 in
   let v14 = vec_add_mod o4 v04 in
-  let v24 = vec_add_mod v14 (vec_permute4 v14 1ul 1ul 1ul 1ul) in
+  let v14h = vec_interleave_high v14 v14 in 
+  let v24 = vec_add_mod v14 v14h in
   lemma_fmul_r4_normalize51 #2 o4;
   let res = (v20, v21, v22, v23, v24) in
   lemma_fmul_r4_normalize51_expand res fa;
@@ -586,14 +609,16 @@ val fmul_r4_normalize5_lemma:
     (feval5 out).[0] == Vec.normalize_4 (feval5 r).[0] (feval5 acc)))
   [SMTPat (fmul_r4_normalize5 acc r r_5 r4)]
 
+#restart-solver
+#push-options "--z3rlimit 500"
 let fmul_r4_normalize5_lemma acc fr fr_5 fr4 =
-  let fr2 = fmul_r5 fr fr fr_5 in
-  let fr3 = fmul_r5 fr2 fr fr_5 in
+  let fr2 = fmul_r5 #4 fr fr fr_5 in
+  let fr3 = fmul_r5 #4 fr2 fr fr_5 in
   let out = fmul_r4_normalize50 acc fr fr2 fr3 fr4 in
   let v2 = fmul_r4_normalize51 out in
   let res = carry_full_felem5 v2 in
   carry_full_felem5_lemma v2
-
+#pop-options
 
 val load_felem5_lemma:
     #w:lanes

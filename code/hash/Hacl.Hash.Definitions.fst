@@ -74,7 +74,7 @@ let hash_len (a: hash_alg): n:size_t { v n = hash_length a } =
   | Blake2S -> 32ul
   | Blake2B -> 64ul
 
-inline_for_extraction
+noextract inline_for_extraction
 let blocks_t (a: hash_alg) =
   b:B.buffer uint8 { B.length b % block_length a = 0 }
 
@@ -83,7 +83,7 @@ let hash_t (a: hash_alg) = b:B.buffer uint8 { B.length b = hash_length a }
 
 (** The types of all stateful operations for a hash algorithm. *)
 
-inline_for_extraction
+noextract inline_for_extraction
 let alloca_st (a: hash_alg) = unit -> ST.StackInline (state a & extra_state a)
   (requires (fun h ->
     HS.is_stack_region (HS.get_tip h)))
@@ -96,7 +96,7 @@ let alloca_st (a: hash_alg) = unit -> ST.StackInline (state a & extra_state a)
     Map.domain (HS.get_hmap h1) `Set.equal` Map.domain (HS.get_hmap h0) /\
     (HS.get_tip h1) == (HS.get_tip h0)))
 
-inline_for_extraction
+noextract inline_for_extraction
 let init_st (a: hash_alg) = s:state a -> ST.Stack (extra_state a)
   (requires (fun h ->
     B.live h s))
@@ -104,7 +104,7 @@ let init_st (a: hash_alg) = s:state a -> ST.Stack (extra_state a)
     M.(modifies (loc_buffer s) h0 h1) /\
     (as_seq h1 s, v) == Spec.Agile.Hash.init a))
 
-inline_for_extraction
+noextract inline_for_extraction
 let update_st (a: hash_alg) =
   s:state a ->
   v:extra_state a ->
@@ -116,7 +116,7 @@ let update_st (a: hash_alg) =
       M.(modifies (loc_buffer s) h0 h1) /\
       (as_seq h1 s, v') == (Spec.Agile.Hash.update a (as_seq h0 s, v) (B.as_seq h0 block))))
 
-inline_for_extraction
+noextract inline_for_extraction
 let pad_st (a: hash_alg) = len:len_t a -> dst:B.buffer uint8 ->
   ST.Stack unit
     (requires (fun h ->
@@ -129,7 +129,7 @@ let pad_st (a: hash_alg) = len:len_t a -> dst:B.buffer uint8 ->
 
 // Note: we cannot take more than 4GB of data because we are currently
 // constrained by the size of buffers...
-inline_for_extraction
+noextract inline_for_extraction
 let update_multi_st (a: hash_alg) =
   s:state a ->
   ev:extra_state a ->
@@ -142,7 +142,7 @@ let update_multi_st (a: hash_alg) =
       B.(modifies (loc_buffer s) h0 h1) /\
       (as_seq h1 s, ev') == Spec.Agile.Hash.update_multi a (as_seq h0 s, ev) (B.as_seq h0 blocks)))
 
-inline_for_extraction
+noextract inline_for_extraction
 let update_last_st (a: hash_alg) =
   s:state a ->
   ev:extra_state a ->
@@ -156,7 +156,7 @@ let update_last_st (a: hash_alg) =
       B.(modifies (loc_buffer s) h0 h1) /\
       (as_seq h1 s, ev') == Spec.Hash.Incremental.update_last a (as_seq h0 s, ev) (len_v a prev_len) (B.as_seq h0 input)))
 
-inline_for_extraction
+noextract inline_for_extraction
 let finish_st (a: hash_alg) = s:state a -> ev:extra_state a -> dst:hash_t a -> ST.Stack unit
   (requires (fun h ->
     B.live h s /\ B.live h dst /\ B.disjoint s dst))
@@ -164,7 +164,7 @@ let finish_st (a: hash_alg) = s:state a -> ev:extra_state a -> dst:hash_t a -> S
     M.(modifies (loc_buffer dst) h0 h1) /\
     Seq.equal (B.as_seq h1 dst) (Spec.Hash.PadFinish.finish a (as_seq h0 s, ev))))
 
-inline_for_extraction
+noextract inline_for_extraction
 let hash_st (a: hash_alg) =
   input:B.buffer uint8 ->
   input_len:size_t { B.length input = v input_len } ->

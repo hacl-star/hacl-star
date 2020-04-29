@@ -65,7 +65,7 @@ let to_blake_alg (a:blake_alg) = match a with
 
 // BB. Needs to be renamed...
 inline_for_extraction noextract
-let max_input_length: hash_alg -> Tot nat = function
+let max_input_length: hash_alg -> Tot pos = function
   | MD5 | SHA1
   | SHA2_224 | SHA2_256 -> pow2 61 - 1
   | SHA2_384 | SHA2_512 -> pow2 125 - 1

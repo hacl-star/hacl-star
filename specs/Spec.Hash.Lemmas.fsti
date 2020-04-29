@@ -17,35 +17,10 @@ val update_multi_update (a: hash_alg) (h: words_state a) (input: bytes_block a):
   (ensures ((update_multi a h input) == (update a h input)))
   [ SMTPat (update a h input) ]
 
-val update_multi_block (a: hash_alg) (h: words_state a) (input: bytes):
-  Lemma
-    (requires (
-      S.length input % block_length a = 0 /\
-      block_length a <= S.length input
-    ))
-    (ensures (
-      let input1, input2 = split_block a input 1 in
-      (update_multi a (update_multi a h input1) input2) == (update_multi a h input)))
-
-val update_multi_associative:
-  a: hash_alg ->
-  h: words_state a ->
-  input: bytes ->
-  len: nat ->
-  Lemma
-    (requires (
-      len % block_length a = 0 /\
-      S.length input % block_length a = 0 /\
-      len <= S.length input
-    ))
-    (ensures (
-      let input1, input2 = split_block a input (len / block_length a) in
-      (update_multi a (update_multi a h input1) input2) ==
-        (update_multi a h input)))
-    (decreases (
-      %[ S.length input; len ]))
-
-val update_multi_associative' (a: hash_alg)
+/// Legacy formulation of this lemma. See Lib.UpdateMulti for a more generic
+/// version that avoids a delicate proof obligation in the post-condition -- use
+/// the version from Lib.UpdateMulti whenever possible.
+val update_multi_associative (a: hash_alg)
   (h: words_state a)
   (input1: bytes_blocks a)
   (input2: bytes_blocks a):

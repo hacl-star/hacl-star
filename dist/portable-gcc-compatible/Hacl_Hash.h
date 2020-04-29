@@ -32,6 +32,7 @@
 #define __Hacl_Hash_H
 
 #include "Hacl_Kremlib.h"
+#include "Hacl_Spec.h"
 
 
 /* SNIPPET_START: Hacl_Hash_MD5_legacy_update_multi */
@@ -252,25 +253,25 @@ void Hacl_Hash_Core_SHA2_init_512(uint64_t *s);
 
 /* SNIPPET_START: Hacl_Hash_Core_SHA2_update_224 */
 
-void Hacl_Hash_Core_SHA2_update_224(uint32_t *hash1, uint8_t *block);
+void Hacl_Hash_Core_SHA2_update_224(uint32_t *hash, uint8_t *block);
 
 /* SNIPPET_END: Hacl_Hash_Core_SHA2_update_224 */
 
 /* SNIPPET_START: Hacl_Hash_Core_SHA2_update_256 */
 
-void Hacl_Hash_Core_SHA2_update_256(uint32_t *hash1, uint8_t *block);
+void Hacl_Hash_Core_SHA2_update_256(uint32_t *hash, uint8_t *block);
 
 /* SNIPPET_END: Hacl_Hash_Core_SHA2_update_256 */
 
 /* SNIPPET_START: Hacl_Hash_Core_SHA2_update_384 */
 
-void Hacl_Hash_Core_SHA2_update_384(uint64_t *hash1, uint8_t *block);
+void Hacl_Hash_Core_SHA2_update_384(uint64_t *hash, uint8_t *block);
 
 /* SNIPPET_END: Hacl_Hash_Core_SHA2_update_384 */
 
 /* SNIPPET_START: Hacl_Hash_Core_SHA2_update_512 */
 
-void Hacl_Hash_Core_SHA2_update_512(uint64_t *hash1, uint8_t *block);
+void Hacl_Hash_Core_SHA2_update_512(uint64_t *hash, uint8_t *block);
 
 /* SNIPPET_END: Hacl_Hash_Core_SHA2_update_512 */
 
@@ -321,6 +322,30 @@ void Hacl_Hash_Core_SHA2_finish_384(uint64_t *s, uint8_t *dst);
 void Hacl_Hash_Core_SHA2_finish_512(uint64_t *s, uint8_t *dst);
 
 /* SNIPPET_END: Hacl_Hash_Core_SHA2_finish_512 */
+
+/* SNIPPET_START: Hacl_Hash_Definitions_word_len */
+
+uint32_t Hacl_Hash_Definitions_word_len(Spec_Hash_Definitions_hash_alg a);
+
+/* SNIPPET_END: Hacl_Hash_Definitions_word_len */
+
+/* SNIPPET_START: Hacl_Hash_Definitions_block_len */
+
+uint32_t Hacl_Hash_Definitions_block_len(Spec_Hash_Definitions_hash_alg a);
+
+/* SNIPPET_END: Hacl_Hash_Definitions_block_len */
+
+/* SNIPPET_START: Hacl_Hash_Definitions_hash_word_len */
+
+uint32_t Hacl_Hash_Definitions_hash_word_len(Spec_Hash_Definitions_hash_alg a);
+
+/* SNIPPET_END: Hacl_Hash_Definitions_hash_word_len */
+
+/* SNIPPET_START: Hacl_Hash_Definitions_hash_len */
+
+uint32_t Hacl_Hash_Definitions_hash_len(Spec_Hash_Definitions_hash_alg a);
+
+/* SNIPPET_END: Hacl_Hash_Definitions_hash_len */
 
 #define __Hacl_Hash_H_DEFINED
 #endif

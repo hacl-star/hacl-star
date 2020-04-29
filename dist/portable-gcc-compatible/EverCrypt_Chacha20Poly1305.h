@@ -42,7 +42,7 @@
 void
 EverCrypt_Chacha20Poly1305_aead_encrypt(
   uint8_t *k,
-  uint8_t *n1,
+  uint8_t *n,
   uint32_t aadlen,
   uint8_t *aad,
   uint32_t mlen,
@@ -58,7 +58,7 @@ EverCrypt_Chacha20Poly1305_aead_encrypt(
 uint32_t
 EverCrypt_Chacha20Poly1305_aead_decrypt(
   uint8_t *k,
-  uint8_t *n1,
+  uint8_t *n,
   uint32_t aadlen,
   uint8_t *aad,
   uint32_t mlen,

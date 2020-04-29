@@ -18,7 +18,7 @@
         "typing_Spec.Hash.Definitions.is_sha2"
       ],
       0,
-      "c8b5a4b4c3bdb63108c4519da20076f9"
+      "2389f3016182340599f76ab687265188"
     ],
     [
       "Spec.SHA2.word_n",
@@ -37,7 +37,7 @@
         "typing_Spec.Hash.Definitions.is_sha2"
       ],
       0,
-      "8fd234a27dc1b20b5e19b76824858f13"
+      "17342728ad2d9960768ceee8de1bedf5"
     ],
     [
       "Spec.SHA2.to_word",
@@ -79,7 +79,7 @@
         "typing_Spec.Hash.Definitions.is_sha2"
       ],
       0,
-      "5b8122de7728996502da948760f3cf5e"
+      "b7086b3d0e6bddf9a6fa14520a05c204"
     ],
     [
       "Spec.SHA2.v'",
@@ -111,7 +111,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "896740a87084edca0cdbbc62871b25ed"
+      "2b9941119f7172446e8930fcdcfa89a5"
     ],
     [
       "Spec.SHA2.k_w",
@@ -125,7 +125,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "80eed2ff8ac078edbb2ba5ced252bc5d"
+      "54d38bce67b9a50732f4f8f8175fcf0d"
     ],
     [
       "Spec.SHA2.ops",
@@ -133,15 +133,17 @@
       2,
       1,
       [
-        "@query", "assumption_FStar.UInt32.t__uu___haseq",
+        "@MaxIFuel_assumption", "@query",
         "constructor_distinct_Lib.IntTypes.PUB",
         "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_Lib.IntTypes.PUB@tok",
         "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.int_t",
-        "equation_Lib.IntTypes.pub_int_t"
+        "equation_Lib.IntTypes.pub_int_t", "equation_Prims.eqtype",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "typing_FStar.UInt32.t"
       ],
       0,
-      "2b8f0d9e65c6f63fc082c0c2d695aca5"
+      "1a59a7ec2913dbc9e86a56aab2bc9f0d"
     ],
     [
       "Spec.SHA2.op0",
@@ -160,7 +162,7 @@
         "typing_Spec.Hash.Definitions.is_sha2"
       ],
       0,
-      "3536d72069443bd9ef0e61c1f8ce3e3a"
+      "f6b61a80c952e4b0e33b76c84f07ec37"
     ],
     [
       "Spec.SHA2.op_Plus_Dot",
@@ -196,7 +198,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "dfd83f4e1cb1b78cdf32819e68e5d18a"
+      "5d1c1200caec4b1b972128465eb5c7a5"
     ],
     [
       "Spec.SHA2.op_Hat_Dot",
@@ -227,7 +229,7 @@
         "typing_Spec.Hash.Definitions.is_sha2"
       ],
       0,
-      "37e438027855f081be05fc5c41a988ca"
+      "6702c4abff2f4b0f473c18b78cbde9ec"
     ],
     [
       "Spec.SHA2.op_Amp_Dot",
@@ -258,7 +260,7 @@
         "typing_Spec.Hash.Definitions.is_sha2"
       ],
       0,
-      "fd294fe436f700e010dde267bfe36f2c"
+      "aa4122ab9e1204e78781a1c377f5abf5"
     ],
     [
       "Spec.SHA2.op_Tilde_Dot",
@@ -289,7 +291,7 @@
         "typing_Spec.Hash.Definitions.is_sha2"
       ],
       0,
-      "37a03f636a3f917de9e2f86032b7dea6"
+      "d34481b61e82fc77ad0803b4445a83f3"
     ],
     [
       "Spec.SHA2.op_Greater_Greater_Greater_Dot",
@@ -325,7 +327,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "3b818aa2914d7421d3777f71f905e4c6"
+      "b152518fc5fda617c8bfb19daea9aac7"
     ],
     [
       "Spec.SHA2.op_Greater_Greater_Dot",
@@ -356,7 +358,7 @@
         "typing_Spec.Hash.Definitions.is_sha2"
       ],
       0,
-      "f5a4cc844dfeb9ff67557f57e01fb5d7"
+      "d551f01b04c75212677188adc93c67f3"
     ],
     [
       "Spec.SHA2._Sigma0",
@@ -414,7 +416,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "952f281a0be7cd13c82dbd74d32d0a0e"
+      "c180da4b3a843f3f641ab7f95a78e85a"
     ],
     [
       "Spec.SHA2._Sigma1",
@@ -471,7 +473,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "c644aff61e81550d3bd3d2c4225b3104"
+      "08c93204e9603e736ebd3d6212aef50a"
     ],
     [
       "Spec.SHA2._sigma0",
@@ -530,7 +532,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "27c0efdb968984a476589d743be38e37"
+      "99235f3e9f8d07ae682a8ccc581ab0df"
     ],
     [
       "Spec.SHA2._sigma1",
@@ -589,7 +591,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "5c007f4e0868c0c3035e22dab0b53784"
+      "e484c8ab598585c59a2f551114e2fbc3"
     ],
     [
       "Spec.SHA2.h0",
@@ -628,7 +630,7 @@
         "typing_Spec.SHA2.Constants.h512_l"
       ],
       0,
-      "d34460a036f6967c809ef7c042e61968"
+      "1efae317317c52d183cef20557030396"
     ],
     [
       "Spec.SHA2.k0",
@@ -667,7 +669,7 @@
         "typing_Spec.SHA2.Constants.k384_512_l"
       ],
       0,
-      "404c87adeddcae863563b30ff266f2cf"
+      "c9b0aebc7494795dee3b6f6f30244a1d"
     ],
     [
       "Spec.SHA2.k0",
@@ -681,7 +683,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "09c87a5435ed2ee957f48046c49a727a"
+      "34733afa937eefbc185a6f9429ca87db"
     ],
     [
       "Spec.SHA2.shuffle_core_pre_",
@@ -711,7 +713,7 @@
         "typing_Spec.SHA2.k0"
       ],
       0,
-      "b7c84c28e16fefcb7accf2891f2434fd"
+      "6d905901ae5515815c1b8437cb46fd58"
     ],
     [
       "Spec.SHA2.ws_pre_inner",
@@ -746,7 +748,7 @@
         "typing_Spec.SHA2._sigma1"
       ],
       0,
-      "ac56d2cad435ed249977dc05afa9a2c9"
+      "d5ff685cff3fe26d7393cdc2de7e1140"
     ],
     [
       "Spec.SHA2.ws_pre_",
@@ -765,7 +767,7 @@
         "typing_Spec.SHA2.size_k_w", "typing_Spec.SHA2.word_n"
       ],
       0,
-      "294930c8c1e2800bee941c486fa72ec7"
+      "f7b2cad7e50ba569ee893cabedfc0ff7"
     ],
     [
       "Spec.SHA2.shuffle_pre",
@@ -783,7 +785,7 @@
         "typing_Spec.SHA2.ws_pre"
       ],
       0,
-      "ad314433f22a0544dae1c8ea71fe31a5"
+      "f01a4adf40fe530c6a204b9182b19efe"
     ],
     [
       "Spec.SHA2.update_pre",
@@ -824,7 +826,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "b59bc03b9c4aaf30e64928d39e39871f"
+      "bb7f75d72e631175b0ba70fb614e7ed9"
     ],
     [
       "Spec.SHA2.finish",
@@ -833,7 +835,7 @@
       1,
       [ "@query" ],
       0,
-      "f024c163de171faaff11ac24d6d0f0be"
+      "42a3f6654f15c79672968e82287ef4db"
     ]
   ]
 ]

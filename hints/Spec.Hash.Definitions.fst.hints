@@ -1,5 +1,5 @@
 [
-  "ß?\u0014‡{Ô≤\u0001'∆Poú Æ¯",
+  "∞'∂µ5\u0011…’‘˜\bã‡´∏ç",
   [
     [
       "Spec.Hash.Definitions.max_input_length",
@@ -7,8 +7,9 @@
       2,
       1,
       [
-        "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
         "disc_equation_Spec.Hash.Definitions.MD5",
         "disc_equation_Spec.Hash.Definitions.SHA1",
         "disc_equation_Spec.Hash.Definitions.SHA2_224",
@@ -16,15 +17,16 @@
         "disc_equation_Spec.Hash.Definitions.SHA2_384",
         "disc_equation_Spec.Hash.Definitions.SHA2_512", "equation_Prims.nat",
         "equation_Prims.pos",
+        "equation_with_fuel_Prims.pow2.fuel_instrumented",
         "fuel_guarded_inversion_Spec.Hash.Definitions.hash_alg",
-        "int_typing", "primitive_Prims.op_Subtraction",
-        "projection_inverse_BoxInt_proj_0",
+        "int_typing", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "typing_Prims.pow2"
+        "token_correspondence_Prims.pow2.fuel_instrumented"
       ],
       0,
-      "7d2e8c96357be118b4697142e565b1de"
+      "25b7c9b405c1fe38f4d28f407edd0cf2"
     ],
     [
       "Spec.Hash.Definitions.len_int_type",
@@ -42,7 +44,7 @@
         "fuel_guarded_inversion_Spec.Hash.Definitions.hash_alg"
       ],
       0,
-      "6e0e6ceb1973090bdd03852266fdb12f"
+      "81b64e9c53720f014227b74c1dadcb77"
     ],
     [
       "Spec.Hash.Definitions.nat_to_len",
@@ -58,7 +60,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "9de38e6c18e5322140dfc97669b7674d"
+      "19a896713352d823aa1d6c69874d5e93"
     ],
     [
       "Spec.Hash.Definitions.len_t",
@@ -76,7 +78,7 @@
         "fuel_guarded_inversion_Spec.Hash.Definitions.hash_alg"
       ],
       0,
-      "9e4c45b81dd0d908c8d6c18181106ace"
+      "5f58ba69907424823806a97acc7033d9"
     ],
     [
       "Spec.Hash.Definitions.len_v",
@@ -107,7 +109,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "578a814db5bf5a2031d55ec0b89fc122"
+      "ecccdcb61b54961eaaab5f4c08f6a338"
     ],
     [
       "Spec.Hash.Definitions.len_length",
@@ -125,7 +127,7 @@
         "fuel_guarded_inversion_Spec.Hash.Definitions.hash_alg"
       ],
       0,
-      "1ea492add66c78d6d637c2f55f686ee8"
+      "0bba6debc8f23761979bdc6156001dee"
     ],
     [
       "Spec.Hash.Definitions.len_len",
@@ -168,7 +170,7 @@
         "typing_Spec.Hash.Definitions.len_length"
       ],
       0,
-      "d6d1ebf2f1755873ec79b63d83b1bdb1"
+      "83fd303355d1a1e59415e0ab5c0d3b11"
     ],
     [
       "Spec.Hash.Definitions.len_len",
@@ -177,7 +179,7 @@
       1,
       [ "@query" ],
       0,
-      "dd2e8400929cc4b2a33db9fdea4908cd"
+      "c3afdaeb1d31b87e10317fd6fa817775"
     ],
     [
       "Spec.Hash.Definitions.word_t",
@@ -195,7 +197,7 @@
         "fuel_guarded_inversion_Spec.Hash.Definitions.hash_alg"
       ],
       0,
-      "af7273b06629e1c1e240e1c6ecfbc544"
+      "77574da4c611f0e3974937287b37f82d"
     ],
     [
       "Spec.Hash.Definitions.word",
@@ -214,7 +216,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "6bc92822535624d69b8c1f14cd0227f1"
+      "88f0e1eca2fc10f76da7b456d2df3bf9"
     ],
     [
       "Spec.Hash.Definitions.word_length",
@@ -232,7 +234,7 @@
         "fuel_guarded_inversion_Spec.Hash.Definitions.hash_alg"
       ],
       0,
-      "84813ba51338b74efec451541286d311"
+      "4a7c49d5c8b26ca4ce8eb38deb800f09"
     ],
     [
       "Spec.Hash.Definitions.hash_word_length",
@@ -250,7 +252,7 @@
         "fuel_guarded_inversion_Spec.Hash.Definitions.hash_alg"
       ],
       0,
-      "bea176e38294fde100741c51d47240ad"
+      "cc256d23592449199066526ae7a00e23"
     ],
     [
       "Spec.Hash.Definitions.pad0_length",
@@ -272,7 +274,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "9d6f93b80171e6d7a1e75a05622c0cb6"
+      "23b3cbff1da6fa76e20aa357123bd421"
     ],
     [
       "Spec.Hash.Definitions.pad_length",
@@ -297,7 +299,7 @@
         "typing_Spec.Hash.Definitions.pad0_length"
       ],
       0,
-      "f58670dc3afac182a3d194718655494f"
+      "9d9c3e354bfd55b730f3e2273aab0126"
     ],
     [
       "Spec.Hash.Definitions.bytes_of_words",
@@ -347,7 +349,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "a9e9c5aa72c409f07dbb8d6cada4ae59"
+      "ed9728170690f11fba377c86a6b9aa55"
     ],
     [
       "Spec.Hash.Definitions.bytes_of_words",
@@ -374,7 +376,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "48475a54fbb5fb4c4639739b3926d07e"
+      "1863d64a2f18294bb8d1fcda4b259b24"
     ],
     [
       "Spec.Hash.Definitions.words_of_bytes",
@@ -425,7 +427,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "19d630bbb939d500c4159df86d133555"
+      "6e11777c6b037315e26a7dfd2321fdaf"
     ],
     [
       "Spec.Hash.Definitions.words_of_bytes",
@@ -452,7 +454,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "e5a26a785a6ba929606053ce04559638"
+      "05b832bfedb907ea7ca9f9af69c2990a"
     ],
     [
       "Spec.Hash.Definitions.bytes_blocks",
@@ -468,7 +470,7 @@
         "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "7a29fadde3d7c2f3508c7e789c0236c0"
+      "756088e8f179fafec84451a7e2891332"
     ],
     [
       "Spec.Hash.Definitions.pad_t",
@@ -484,7 +486,7 @@
         "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "518111829b3fd9be0c7a02b9a0754f91"
+      "804368417cb64c079e1c6358c1f4ec12"
     ]
   ]
 ]

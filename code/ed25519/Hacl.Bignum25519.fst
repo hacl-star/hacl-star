@@ -278,7 +278,8 @@ let carry_top b =
          };
   calc (<) {
     v b0 + 19 * (v b4 / pow2 51);
-    (<) { Math.Lemmas.lemma_div_lt_nat (v b4) 64 51 }
+    (<) { Math.Lemmas.lemma_div_lt_nat (v b4) 64 51;  //(v b4 / pow2 51) < (pow2 13)
+          Math.Lemmas.lemma_mult_lt_left 19 (v b4 / pow2 51) (pow2 13) }  //(19 * (v b4 / pow2 51)) < (19 * (pow2 13)) }
     v b0 + 19 * (pow2 13);
     (<=) { }
     pow2 51 + 19 * pow2 13;

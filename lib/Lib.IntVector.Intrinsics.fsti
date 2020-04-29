@@ -63,6 +63,11 @@ noextract
 val vec128_shuffle64: vec128 -> size_t -> size_t -> vec128
 
 noextract
+val vec128_rotate_right_lanes32: vec128 -> size_t -> vec128
+noextract
+val vec128_rotate_right_lanes64: vec128 -> size_t -> vec128
+
+noextract
 val vec128_load128: u:uint128 -> vec128
 
 noextract
@@ -223,6 +228,13 @@ noextract
 val vec256_shuffle64: vec256 -> size_t -> size_t -> size_t -> size_t -> vec256
 noextract
 val vec256_shuffle32: vec256 -> size_t -> size_t -> size_t -> size_t -> size_t -> size_t -> size_t -> size_t -> vec256
+
+noextract
+val vec256_rotate_right_lanes32: vec256 -> size_t -> vec256
+noextract
+val vec256_rotate_right_lanes64: vec256 -> size_t -> vec256
+noextract
+val vec256_rotate_right_lanes128: vec256 -> size_t -> vec256
 
 noextract
 val vec256_load64: x:uint64 -> vec256

@@ -670,7 +670,7 @@ static void point_double(uint64_t *nq, uint64_t *tmp1, uint64_t *tmp2)
   fmul2_(nq, dc, ab, tmp2);
 }
 
-static void montgomery_ladder(uint64_t *out, uint8_t *key, uint64_t *init1)
+static void montgomery_ladder(uint64_t *out, uint8_t *key, uint64_t *init)
 {
   uint64_t tmp2[16U] = { 0U };
   uint64_t p01_tmp1_swap[33U] = { 0U };
@@ -678,7 +678,7 @@ static void montgomery_ladder(uint64_t *out, uint8_t *key, uint64_t *init1)
   uint64_t *p01 = p01_tmp1_swap;
   uint64_t *p03 = p01;
   uint64_t *p11 = p01 + (uint32_t)8U;
-  memcpy(p11, init1, (uint32_t)8U * sizeof (init1[0U]));
+  memcpy(p11, init, (uint32_t)8U * sizeof (init[0U]));
   uint64_t *x0 = p03;
   uint64_t *z0 = p03 + (uint32_t)4U;
   x0[0U] = (uint64_t)1U;
@@ -693,14 +693,14 @@ static void montgomery_ladder(uint64_t *out, uint8_t *key, uint64_t *init1)
   uint64_t *p01_tmp11 = p01_tmp1_swap;
   uint64_t *nq1 = p01_tmp1_swap;
   uint64_t *nq_p11 = p01_tmp1_swap + (uint32_t)8U;
-  uint64_t *swap1 = p01_tmp1_swap + (uint32_t)32U;
+  uint64_t *swap = p01_tmp1_swap + (uint32_t)32U;
   cswap2_((uint64_t)1U, nq1, nq_p11);
-  point_add_and_double(init1, p01_tmp11, tmp2);
-  swap1[0U] = (uint64_t)1U;
+  point_add_and_double(init, p01_tmp11, tmp2);
+  swap[0U] = (uint64_t)1U;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)251U; i++)
   {
     uint64_t *p01_tmp12 = p01_tmp1_swap;
-    uint64_t *swap2 = p01_tmp1_swap + (uint32_t)32U;
+    uint64_t *swap1 = p01_tmp1_swap + (uint32_t)32U;
     uint64_t *nq2 = p01_tmp12;
     uint64_t *nq_p12 = p01_tmp12 + (uint32_t)8U;
     uint64_t
@@ -709,12 +709,12 @@ static void montgomery_ladder(uint64_t *out, uint8_t *key, uint64_t *init1)
       / (uint32_t)8U]
       >> ((uint32_t)253U - i) % (uint32_t)8U
       & (uint8_t)1U);
-    uint64_t sw = swap2[0U] ^ bit;
+    uint64_t sw = swap1[0U] ^ bit;
     cswap2_(sw, nq2, nq_p12);
-    point_add_and_double(init1, p01_tmp12, tmp2);
-    swap2[0U] = bit;
+    point_add_and_double(init, p01_tmp12, tmp2);
+    swap1[0U] = bit;
   }
-  uint64_t sw = swap1[0U];
+  uint64_t sw = swap[0U];
   cswap2_(sw, nq1, nq_p11);
   uint64_t *nq10 = p01_tmp1;
   uint64_t *tmp1 = p01_tmp1 + (uint32_t)16U;
@@ -724,10 +724,10 @@ static void montgomery_ladder(uint64_t *out, uint8_t *key, uint64_t *init1)
   memcpy(out, p0, (uint32_t)8U * sizeof (p0[0U]));
 }
 
-static void fsquare_times(uint64_t *o, uint64_t *inp, uint64_t *tmp, uint32_t n1)
+static void fsquare_times(uint64_t *o, uint64_t *inp, uint64_t *tmp, uint32_t n)
 {
   fsqr_(o, inp);
-  for (uint32_t i = (uint32_t)0U; i < n1 - (uint32_t)1U; i++)
+  for (uint32_t i = (uint32_t)0U; i < n - (uint32_t)1U; i++)
   {
     fsqr_(o, o);
   }
@@ -818,7 +818,7 @@ static void encode_point(uint8_t *o, uint64_t *i)
 
 void Hacl_Curve25519_64_Slow_scalarmult(uint8_t *out, uint8_t *priv, uint8_t *pub)
 {
-  uint64_t init1[8U] = { 0U };
+  uint64_t init[8U] = { 0U };
   uint64_t tmp[4U] = { 0U };
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
@@ -831,8 +831,8 @@ void Hacl_Curve25519_64_Slow_scalarmult(uint8_t *out, uint8_t *priv, uint8_t *pu
   }
   uint64_t tmp3 = tmp[3U];
   tmp[3U] = tmp3 & (uint64_t)0x7fffffffffffffffU;
-  uint64_t *x = init1;
-  uint64_t *z = init1 + (uint32_t)4U;
+  uint64_t *x = init;
+  uint64_t *z = init + (uint32_t)4U;
   z[0U] = (uint64_t)1U;
   z[1U] = (uint64_t)0U;
   z[2U] = (uint64_t)0U;
@@ -841,8 +841,8 @@ void Hacl_Curve25519_64_Slow_scalarmult(uint8_t *out, uint8_t *priv, uint8_t *pu
   x[1U] = tmp[1U];
   x[2U] = tmp[2U];
   x[3U] = tmp[3U];
-  montgomery_ladder(init1, priv, init1);
-  encode_point(out, init1);
+  montgomery_ladder(init, priv, init);
+  encode_point(out, init);
 }
 
 void Hacl_Curve25519_64_Slow_secret_to_public(uint8_t *pub, uint8_t *priv)
@@ -859,12 +859,12 @@ void Hacl_Curve25519_64_Slow_secret_to_public(uint8_t *pub, uint8_t *priv)
 
 bool Hacl_Curve25519_64_Slow_ecdh(uint8_t *out, uint8_t *priv, uint8_t *pub)
 {
-  uint8_t zeros1[32U] = { 0U };
+  uint8_t zeros[32U] = { 0U };
   Hacl_Curve25519_64_Slow_scalarmult(out, priv, pub);
   uint8_t res = (uint8_t)255U;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)32U; i++)
   {
-    uint8_t uu____0 = FStar_UInt8_eq_mask(out[i], zeros1[i]);
+    uint8_t uu____0 = FStar_UInt8_eq_mask(out[i], zeros[i]);
     res = uu____0 & res;
   }
   uint8_t z = res;
