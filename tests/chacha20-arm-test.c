@@ -8,90 +8,43 @@
 #include <unistd.h>
 #include <time.h>
 #include <stdbool.h>
+
 #include "Hacl_Chacha20.h"
 #include "Hacl_Chacha20_Vec128.h"
 
+#include "test_helpers.h"
+#include "chacha20_vectors.h"
 
 #define ROUNDS 100000
 #define SIZE   8192
 
-void print_time(double tdiff, uint64_t cdiff){
-  uint64_t count = ROUNDS * SIZE;
-  printf("bw %8.2f MB/s\n",(double)count/(tdiff * 1000000.0));
+
+bool print_result(int in_len, uint8_t* comp, uint8_t* exp) {
+  return compare_and_print(in_len, comp, exp);
 }
 
-bool print_result(uint8_t* comp, uint8_t* exp) {
-  printf("computed:");
-  for (int i = 0; i < 114; i++)
-    printf("%02x",comp[i]);
-  printf("\n");
-  printf("expected:");
-  for (int i = 0; i < 114; i++)
-    printf("%02x",exp[i]);
-  printf("\n");
-  bool ok = true;
-  for (int i = 0; i < 16; i++)
-    ok = ok & (exp[i] == comp[i]);
-  if (ok) printf("Success!\n");
-  else printf("**FAILED**\n");
+
+bool print_test(int in_len, uint8_t* in, uint8_t* key, uint8_t* nonce, uint8_t* exp){
+  uint8_t comp[in_len];
+  memset(comp, 0, in_len);
+
+  Hacl_Chacha20_chacha20_encrypt(in_len,comp,in,key,nonce,1);
+  printf("Chacha20 (32-bit) Result:\n");
+  bool ok = print_result(in_len,comp,exp);
+
+  Hacl_Chacha20_Vec128_chacha20_encrypt_128(in_len,comp,in,key,nonce,1);
+  printf("Chacha20 (128-bit) Result:\n");
+  ok = ok && print_result(in_len,comp,exp);
+
   return ok;
 }
 
 
 int main() {
-  int in_len = 114;
-  uint8_t in[114] = {
-    0x4c, 0x61, 0x64, 0x69, 0x65, 0x73, 0x20, 0x61,
-    0x6e, 0x64, 0x20, 0x47, 0x65, 0x6e, 0x74, 0x6c,
-    0x65, 0x6d, 0x65, 0x6e, 0x20, 0x6f, 0x66, 0x20,
-    0x74, 0x68, 0x65, 0x20, 0x63, 0x6c, 0x61, 0x73,
-    0x73, 0x20, 0x6f, 0x66, 0x20, 0x27, 0x39, 0x39,
-    0x3a, 0x20, 0x49, 0x66, 0x20, 0x49, 0x20, 0x63,
-    0x6f, 0x75, 0x6c, 0x64, 0x20, 0x6f, 0x66, 0x66,
-    0x65, 0x72, 0x20, 0x79, 0x6f, 0x75, 0x20, 0x6f,
-    0x6e, 0x6c, 0x79, 0x20, 0x6f, 0x6e, 0x65, 0x20,
-    0x74, 0x69, 0x70, 0x20, 0x66, 0x6f, 0x72, 0x20,
-    0x74, 0x68, 0x65, 0x20, 0x66, 0x75, 0x74, 0x75,
-    0x72, 0x65, 0x2c, 0x20, 0x73, 0x75, 0x6e, 0x73,
-    0x63, 0x72, 0x65, 0x65, 0x6e, 0x20, 0x77, 0x6f,
-    0x75, 0x6c, 0x64, 0x20, 0x62, 0x65, 0x20, 0x69,
-    0x74, 0x2e
-  };
-  uint8_t k[32] = {
-    0,   1,  2,  3,  4,  5,  6,  7,
-    8,   9, 10, 11, 12, 13, 14, 15,
-    16, 17, 18, 19, 20, 21, 22, 23,
-    24, 25, 26, 27, 28, 29, 30, 31
-  };
-  uint8_t n[12] = {
-    0, 0, 0, 0, 0, 0, 0, 0x4a, 0, 0, 0, 0
-  };
-  uint8_t exp[114] = {
-    0x6e, 0x2e, 0x35, 0x9a, 0x25, 0x68, 0xf9, 0x80,
-    0x41, 0xba, 0x07, 0x28, 0xdd, 0x0d, 0x69, 0x81,
-    0xe9, 0x7e, 0x7a, 0xec, 0x1d, 0x43, 0x60, 0xc2,
-    0x0a, 0x27, 0xaf, 0xcc, 0xfd, 0x9f, 0xae, 0x0b,
-    0xf9, 0x1b, 0x65, 0xc5, 0x52, 0x47, 0x33, 0xab,
-    0x8f, 0x59, 0x3d, 0xab, 0xcd, 0x62, 0xb3, 0x57,
-    0x16, 0x39, 0xd6, 0x24, 0xe6, 0x51, 0x52, 0xab,
-    0x8f, 0x53, 0x0c, 0x35, 0x9f, 0x08, 0x61, 0xd8,
-    0x07, 0xca, 0x0d, 0xbf, 0x50, 0x0d, 0x6a, 0x61,
-    0x56, 0xa3, 0x8e, 0x08, 0x8a, 0x22, 0xb6, 0x5e,
-    0x52, 0xbc, 0x51, 0x4d, 0x16, 0xcc, 0xf8, 0x06,
-    0x81, 0x8c, 0xe9, 0x1a, 0xb7, 0x79, 0x37, 0x36,
-    0x5a, 0xf9, 0x0b, 0xbf, 0x74, 0xa3, 0x5b, 0xe6,
-    0xb4, 0x0b, 0x8e, 0xed, 0xf2, 0x78, 0x5e, 0x42,
-    0x87, 0x4d
-  };
-  uint8_t comp[114] = {0};
-
-  Hacl_Chacha20_chacha20_encrypt(in_len,comp,in,k,n,1);
-  printf("Chacha20 (32-bit) Result:\n");
-  bool ok = print_result(comp,exp);
-
-  Hacl_Chacha20_Vec128_chacha20_encrypt_128(in_len,comp,in,k,n,1);
-  printf("Chacha20 (128-bit) Result:\n");
-  ok = ok && print_result(comp,exp);
+  bool ok = true;
+  for (int i = 0; i < sizeof(vectors)/sizeof(chacha20_test_vector); ++i) {
+    ok &= print_test(vectors[i].input_len,vectors[i].input,vectors[i].key,vectors[i].nonce,vectors[i].cipher);
+  }
 
   uint64_t len = SIZE;
   uint8_t plain[SIZE];
@@ -112,7 +65,7 @@ int main() {
     Hacl_Chacha20_chacha20_encrypt(SIZE,plain,plain,key,nonce,1);
   }
   t2 = clock();
-  double diff1 = (double)(t2 - t1)/CLOCKS_PER_SEC;
+  double diff1 = t2 - t1;
 
 
   memset(plain,'P',SIZE);
@@ -128,11 +81,11 @@ int main() {
     Hacl_Chacha20_Vec128_chacha20_encrypt_128(SIZE,plain,plain,key,nonce,1);
   }
   t2 = clock();
-  double diff2 = (double)(t2 - t1)/CLOCKS_PER_SEC;
+  double diff2 = t2 - t1;
 
-
-  printf("32-bit Chacha20\n"); print_time(diff1,0);
-  printf("128-bit Chacha20\n"); print_time(diff2,0);
+  uint64_t count = ROUNDS * SIZE;
+  printf("32-bit Chacha20\n"); print_time(count,diff1,0);
+  printf("128-bit Chacha20\n"); print_time(count,diff2,0);
 
   if (ok) return EXIT_SUCCESS;
   else return EXIT_FAILURE;

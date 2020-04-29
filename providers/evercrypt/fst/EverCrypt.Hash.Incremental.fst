@@ -19,6 +19,9 @@ open FStar.HyperStack.ST
 open Spec.Hash.Definitions
 open Hacl.Streaming.Interface
 
+include Spec.Hash.Definitions
+include Hacl.Hash.Definitions
+
 #set-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
 
 inline_for_extraction noextract
