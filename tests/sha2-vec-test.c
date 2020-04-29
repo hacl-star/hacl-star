@@ -6,7 +6,6 @@
 #include <sys/stat.h>
 #include <stdbool.h>
 
-
 #include "Hacl_SHA2_Scalar32.h"
 #include "Hacl_SHA2_Vec128.h"
 #include "Hacl_SHA2_Vec256.h"
@@ -14,6 +13,20 @@
 #include "sha2_vectors.h"
 #include "sha2vec_vectors.h"
 #include "test_helpers.h"
+
+#include <openssl/sha.h>
+
+void ossl_sha2(uint8_t* hash, uint8_t* input, int len){
+  SHA256_CTX ctx;
+  SHA256_Init(&ctx);
+  SHA256_Update(&ctx,input,len);
+  SHA256_Final(hash,&ctx);
+   //ctx = EVP_CIPHER_CTX_new();
+   //EVP_EncryptInit_ex(ctx, EVP_chacha20(), NULL, key, nonce);
+   //EVP_EncryptUpdate(ctx, cipher, &clen, plain, len);
+   //EVP_EncryptFinal_ex(ctx, cipher + clen, &clen);
+   //EVP_CIPHER_CTX_free(ctx);
+}
 
 #define ROUNDS 16384
 #define SIZE   16384
@@ -27,7 +40,11 @@ bool print_test1(uint8_t* in, int in_len, uint8_t* exp256){
   uint8_t comp[32] = {0};
   Hacl_SHA2_Scalar32_sha256(comp,in_len,in);
   printf("NEW SHA2-256 (32-bit) Result:\n");
-  bool ok = print_result(comp,exp256, 32);
+  bool ok = print_result(comp,exp256,32);
+
+  ossl_sha2(comp,in,in_len);
+  printf("OpenSSL SHA2-256 (32-bit) Result:\n");
+  ok = print_result(comp,exp256,32) && ok;
 
   return ok;
 }
@@ -142,11 +159,26 @@ int main()
   double tdiff2v8 = (double)(t2 - t1);
 
 
+  for (int j = 0; j < ROUNDS; j++) {
+    ossl_sha2(plain,plain,SIZE);
+  }
+  t1 = clock();
+  a = cpucycles_begin();
+  for (int j = 0; j < ROUNDS; j++) {
+    ossl_sha2(plain,plain,SIZE);
+  }
+  b = cpucycles_end();
+  t2 = clock();
+  double cdiff2a = b - a;
+  double tdiff2a = (double)(t2 - t1);
+
+
   uint8_t res = plain[0];
   uint64_t count = ROUNDS * SIZE;
   printf("NEW SHA2-256 (32-bit) PERF: %d\n",(int)res); print_time(count,tdiff2n,cdiff2n);
   printf("VEC4 SHA2-256 (32-bit) PERF: %d\n",(int)res); print_time(count,tdiff2v,cdiff2v);
   printf("VEC8 SHA2-256 (32-bit) PERF: %d\n",(int)res); print_time(count,tdiff2v8,cdiff2v8);
+  printf("OpenSSL SHA2-256 (32-bit) PERF: %d\n",(int)res); print_time(count,tdiff2a,cdiff2a);
 
   if (ok) return EXIT_SUCCESS;
   else return EXIT_FAILURE;
