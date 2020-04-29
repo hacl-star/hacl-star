@@ -139,8 +139,6 @@ let kb_equiv_lemma #w k n c0 c i =
 ///  Vectorised-related lemmas
 ///
 
-#set-options "--z3rlimit 200"
-
 val line_lemma_i:
     #w:lanes
   -> a:idx -> b:idx -> d:idx
@@ -148,11 +146,15 @@ val line_lemma_i:
   -> i:nat{i < w} ->
   Lemma ((transpose_state (line #w a b d s m)).[i] `Seq.equal` Scalar.line a b d s (transpose_state #w m).[i])
 
-let line_lemma_i #w a b d s m i =
-  eq_intro (transpose_state (line #w a b d s m)).[i] (Scalar.line a b d s (transpose_state #w m).[i])
+let line_lemma_i #w a b d s m0 i =
+  let m0_s = (transpose_state #w m0).[i] in
+  let m1 = m0.[a] <- m0.[a] +| m0.[b] in
+  let m1_s = m0_s.[a] <- m0_s.[a] +. m0_s.[b]  in
+  eq_intro (transpose_state m1).[i] m1_s;
+  let m2 = m1.[d] <- (m1.[d] ^| m1.[a]) <<<| s in
+  let m2_s = m1_s.[d] <- (m1_s.[d] ^. m1_s.[a]) <<<. s in
+  eq_intro (transpose_state m2).[i] m2_s
 
-
-#set-options "--z3rlimit 50"
 
 val quarter_round_lemma_i:
     #w:lanes
