@@ -60,3 +60,36 @@ let sha256_8 r0 r1 r2 r3 r4 r5 r6 r7 len b0 b1 b2 b3 b4 b5 b6 b7 =
   assert ((as_seq_multi h1 rb).(|5|) == as_seq h1 r5);
   assert ((as_seq_multi h1 rb).(|6|) == as_seq h1 r6);
   assert ((as_seq_multi h1 rb).(|7|) == as_seq h1 r7)
+
+
+[@CInline]
+private
+val sha512_update4: update_vec_t SHA2_512 M256
+let sha512_update4 b hash = update #SHA2_512 #M256 b hash
+
+
+val sha512_4 (r0 r1 r2 r3 : lbuffer uint8 64ul) (len:size_t) (b0 b1 b2 b3 : lbuffer uint8 len) :
+  Stack unit
+  (requires fun h0 -> live4 h0 b0 b1 b2 b3 /\ live4 h0 r0 r1 r2 r3 /\ internally_disjoint4 r0 r1 r2 r3)
+  (ensures  fun h0 _ h1 -> modifies (loc r0 |+| loc r1 |+| loc r2 |+| loc r3) h0 h1 /\
+    as_seq h1 r0 == Spec.hash #SHA2_512 (v len) (as_seq h0 b0) /\
+    as_seq h1 r1 == Spec.hash #SHA2_512 (v len) (as_seq h0 b1) /\
+    as_seq h1 r2 == Spec.hash #SHA2_512 (v len) (as_seq h0 b2) /\
+    as_seq h1 r3 == Spec.hash #SHA2_512 (v len) (as_seq h0 b3))
+
+let sha512_4 r0 r1 r2 r3 len b0 b1 b2 b3 =
+  let h0 = ST.get() in
+  let ib = ntup4 (b0,(b1,(b2,b3))) in
+  let rb = ntup4 (r0,(r1,(r2,r3))) in
+  let h0 = ST.get() in
+  assert (live_multi h0 ib);
+  assert (live_multi h0 rb);
+  assert (internally_disjoint rb);
+  loc_multi4 rb;
+  hash #SHA2_512 #M256 sha512_update4 rb len ib;
+  let h1 = ST.get() in
+  Hacl.Spec.SHA2.Equiv.hash_lemma #SHA2_512 #M256 (v len) (as_seq_multi h0 ib);
+  assert ((as_seq_multi h1 rb).(|0|) == as_seq h1 r0);
+  assert ((as_seq_multi h1 rb).(|1|) == as_seq h1 r1);
+  assert ((as_seq_multi h1 rb).(|2|) == as_seq h1 r2);
+  assert ((as_seq_multi h1 rb).(|3|) == as_seq h1 r3)

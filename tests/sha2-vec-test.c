@@ -71,6 +71,23 @@ bool print_test4(uint8_t* in, uint8_t* in1, uint8_t* in2, uint8_t* in3, int in_l
   return ok;
 }
 
+bool print_test4_512(uint8_t* in, uint8_t* in1, uint8_t* in2, uint8_t* in3, int in_len, uint8_t* exp, uint8_t* exp1, uint8_t* exp2, uint8_t* exp3){
+  uint8_t comp[64] = {0};
+  uint8_t comp1[64] = {0};
+  uint8_t comp2[64] = {0};
+  uint8_t comp3[64] = {0};
+
+  Hacl_SHA2_Vec256_sha512_4(comp,comp1,comp2,comp3,in_len,in,in1,in2,in3);
+  printf("VEC4 SHA2-512 (32-bit) Result:\n");
+  bool ok = print_result(comp, exp,64);
+  ok = print_result(comp1,exp1,64) && ok;
+  ok = print_result(comp2,exp2,64) && ok;
+  ok = print_result(comp3,exp3,64) && ok;
+
+  return ok;
+}
+
+
 bool print_test8(uint8_t* in, uint8_t* in1, uint8_t* in2, uint8_t* in3, uint8_t* in4, uint8_t* in5, uint8_t* in6, uint8_t* in7, int in_len,
 		 uint8_t* exp, uint8_t* exp1, uint8_t* exp2, uint8_t* exp3, uint8_t* exp4, uint8_t* exp5, uint8_t* exp6, uint8_t* exp7){
   uint8_t comp[32] = {0};
@@ -113,6 +130,8 @@ int main()
 		    vectors_vec[0].tag_256,vectors_vec[1].tag_256,vectors_vec[2].tag_256,vectors_vec[3].tag_256,
 		    vectors_vec[4].tag_256,vectors_vec[5].tag_256,vectors_vec[6].tag_256,vectors_vec[7].tag_256);
 
+  ok &= print_test4_512(vectors_vec[0].input,vectors_vec[1].input,vectors_vec[2].input,vectors_vec[3].input,vectors_vec[0].input_len,
+			vectors_vec[0].tag_512,vectors_vec[1].tag_512,vectors_vec[2].tag_512,vectors_vec[3].tag_512);
 
   uint64_t len = SIZE;
   uint8_t plain[SIZE];
