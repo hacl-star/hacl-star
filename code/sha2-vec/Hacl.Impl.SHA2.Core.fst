@@ -83,6 +83,7 @@ let load_blocks_spec1_lemma (#a:sha2_alg) (#m:m_spec{lanes a m == 1}) (b:multibl
   LSeq.eq_intro (SpecVec.load_blocks b) (load_blocks_spec1 b)
 
 
+#push-options "--z3rlimit 100"
 inline_for_extraction noextract
 val load_blocks1: #a:sha2_alg -> #m:m_spec{lanes a m == 1}
   -> b:multibuf (lanes a m) (block_len a)
@@ -119,6 +120,7 @@ let load_blocks1 #a #m ib ws =
   load_blocks_spec1_lemma #a #m (as_seq_multi h0 ib);
   assert (as_seq h1 ws == load_blocks_spec1 (as_seq_multi h0 ib));
   assert (as_seq h1 ws == SpecVec.load_blocks (as_seq_multi h0 ib))
+#pop-options
 
 
 noextract

@@ -337,7 +337,7 @@ let f_lseq16 (#t:v_inttype) (vs:lseq (vec_t t 16) 16)
     f ((v0,v1,v2,v3,v4,v5,v6,v7), (v8,v9,v10,v11,v12,v13,v14,v15)) in
   create16 r0 r1 r2 r3 r4 r5 r6 r7 r8 r9 r10 r11 r12 r13 r14 r15
 
-
+#push-options "--z3rlimit 100"
 val transpose16x16_lseq_is_transposewxw_uint32: vs:lseq (vec_t U32 16) 16 ->
   Lemma
    (let r = transposewxw_uint32_lseq 4 vs in
@@ -363,7 +363,7 @@ let transpose16x16_lseq_is_transposewxw_uint32 vs0 =
   eq_intro res3 (f_lseq16 res2 transpose16x16_uint32_3);
   let res = create16 r.[0] r.[2] r.[1] r.[3] r.[4] r.[6] r.[5] r.[7] r.[8] r.[10] r.[9] r.[11] r.[12] r.[14] r.[13] r.[15] in
   eq_intro res (f_lseq16 vs0 transpose16x16_uint32)
-
+#pop-options
 
 val transpose4x4_lemma_ij: vs:lseq (vec_t U32 4) 4 -> i:nat{i < 4} -> j:nat{j < 4} ->
   Lemma ((vec_v (transpose4x4_lseq #U32 vs).[i]).[j] == (vec_v vs.[j]).[i])
