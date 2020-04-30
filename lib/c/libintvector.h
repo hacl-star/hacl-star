@@ -487,6 +487,16 @@ typedef __m512i Lib_IntVector_Intrinsics_vec512;
 #define Lib_IntVector_Intrinsics_vec512_store_le(x0, x1) \
   (_mm512_storeu_si512((__m512i*)(x0), x1))
 
+#define Lib_IntVector_Intrinsics_vec512_load64_be(x0) \
+  (_mm512_shuffle_epi8(_mm512_loadu_si512((__m512i*)(x0)), \
+		       _mm512_set_epi8(8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7, \
+				       8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7)))
+
+#define Lib_IntVector_Intrinsics_vec512_store64_be(x0, x1) \
+  (_mm512_storeu_si512((__m512i*)(x0), _mm512_shuffle_epi8(x1, \
+		       _mm512_set_epi8(8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7, \
+				       8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7))))
+
 #define Lib_IntVector_Intrinsics_vec512_interleave_low32(x1, x2) \
   (_mm512_unpacklo_epi32(x1, x2))
 
