@@ -36,15 +36,21 @@ bool print_result(uint8_t* comp, uint8_t* exp, int len) {
   return compare_and_print(len, comp, exp);
 }
 
-bool print_test1(uint8_t* in, int in_len, uint8_t* exp256){
-  uint8_t comp[32] = {0};
-  Hacl_SHA2_Scalar32_sha256(comp,in_len,in);
-  printf("NEW SHA2-256 (32-bit) Result:\n");
-  bool ok = print_result(comp,exp256,32);
+bool print_test1(uint8_t* in, int in_len, uint8_t* exp256, uint8_t* exp512){
+  uint8_t comp256[32] = {0};
+  uint8_t comp512[64] = {0};
 
-  ossl_sha2(comp,in,in_len);
+  Hacl_SHA2_Scalar32_sha256(comp256,in_len,in);
+  printf("NEW SHA2-256 (32-bit) Result:\n");
+  bool ok = print_result(comp256,exp256,32);
+
+  Hacl_SHA2_Scalar32_sha512(comp512,in_len,in);
+  printf("NEW SHA2-512 (32-bit) Result:\n");
+  ok = print_result(comp512,exp512,64) && ok;
+
+  ossl_sha2(comp256,in,in_len);
   printf("OpenSSL SHA2-256 (32-bit) Result:\n");
-  ok = print_result(comp,exp256,32) && ok;
+  ok = print_result(comp256,exp256,32) && ok;
 
   return ok;
 }
@@ -95,7 +101,7 @@ int main()
 {
   bool ok = true;
   for (int i = 0; i < sizeof(vectors)/sizeof(sha2_test_vector); ++i) {
-    ok &= print_test1(vectors[i].input,vectors[i].input_len,vectors[i].tag_256);
+    ok &= print_test1(vectors[i].input,vectors[i].input_len,vectors[i].tag_256,vectors[i].tag_512);
   }
 
 
