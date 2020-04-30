@@ -600,10 +600,10 @@ typedef uint32x4_t Lib_IntVector_Intrinsics_vec128;
 */
 
 #define Lib_IntVector_Intrinsics_vec128_load32_be(x0)		\
-  (vrev32q_u8(vld1q_u32((const uint32_t*)(x0))))
+  (vreinterpretq_u32_u8(vrev32q_u8(vreinterpretq_u8_u32(vld1q_u32((const uint32_t*)(x0))))))
 
 #define Lib_IntVector_Intrinsics_vec128_load64_be(x0)		\
-  (vreinterpretq_u32_u64(vrev64q_u8(vld1q_u32((const uint32_t*)(x0)))))
+  (vreinterpretq_u32_u8(vrev64q_u8(vreinterpretq_u8_u32(vld1q_u32((const uint32_t*)(x0))))))
 
 /*
 #define Lib_IntVector_Intrinsics_vec128_store_be(x0, x1)	\
@@ -611,10 +611,10 @@ typedef uint32x4_t Lib_IntVector_Intrinsics_vec128;
 */
 
 #define Lib_IntVector_Intrinsics_vec128_store32_be(x0, x1)	\
-  (vst1q_u32((uint32_t*)(x0),(vrev32q_u8(x1))))
+  (vst1q_u32((uint32_t*)(x0),(vreinterpretq_u32_u8(vrev32q_u8(vreinterpretq_u8_u32(x1))))))
 
 #define Lib_IntVector_Intrinsics_vec128_store64_be(x0, x1)	\
-  (vst1q_u32((uint32_t*)(x0),(vrev64q_u8(x1))))
+  (vst1q_u32((uint32_t*)(x0),(vreinterpretq_u32_u8(vrev64q_u8(vreinterpretq_u8_u32(x1))))))
 
 #define Lib_IntVector_Intrinsics_vec128_insert8(x0, x1, x2)	\
   (vsetq_lane_u8(x1,x0,x2))
