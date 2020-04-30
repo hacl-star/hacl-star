@@ -26,7 +26,7 @@ type counter = size_nat
 type subblock = b:bytes{length b <= size_block}
 
 // Internally, blocks are represented as 16 x 4-byte integers
-let lanes = n:width{n == 1 \/ n == 4 \/ n == 8}
+let lanes = n:width{n == 1 \/ n == 4 \/ n == 8 \/ n == 16}
 inline_for_extraction
 let uint32xN (w:lanes) = vec_t U32 w
 type state (w:lanes) = lseq (uint32xN w) 16
@@ -137,11 +137,15 @@ let transpose8 (st:state 8) : state 8 =
   let (v8,v9,v10,v11,v12,v13,v14,v15) = VecTranspose.transpose8x8 (st.[8],st.[9],st.[10],st.[11],st.[12],st.[13],st.[14],st.[15]) in
   create16 v0 v8 v1 v9 v2 v10 v3 v11 v4 v12 v5 v13 v6 v14 v7 v15
 
+let transpose16 (st:state 16) : state 16 =
+  VecTranspose.transpose16x16_lseq st
+
 let transpose (#w:lanes) (st:state w) : state w =
   match w with
   | 1 -> transpose1 st
   | 4 -> transpose4 st
   | 8 -> transpose8 st
+  | 16 -> transpose16 st
 
 // let store_block0 (#w:lanes) (st:state w) : Tot block1 =
 //   let bl = create 64 (u8 0) in
