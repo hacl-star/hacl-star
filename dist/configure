@@ -68,6 +68,8 @@ EOF
 
 echo -n > Makefile.config
 
+echo "BLACKLIST += $(ls *CP512*.c *_512.c *_Vec512.c | xargs)" >> Makefile.config
+
 if detect_arm; then
   echo "... detected ARM platform"
   echo "... $(uname -m) does not support 256-bit arithmetic"

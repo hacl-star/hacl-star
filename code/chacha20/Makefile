@@ -13,8 +13,11 @@ include ../../Makefile.local
 
 #BASE_FLAGS+= -funroll-loops 4
 
-CFLAGS += -I../../../lib/c -march=native -mtune=native -O3
+CFLAGS += -I../../../lib/c -I../../lib/c -march=native -mtune=native -O3
 export CFLAGS
+
+BLACKLIST += Hacl_Chacha20_Vec512.c Hacl_Chacha20_Vec512.h
+export BLACKLIST
 
 # CUSTOMIZE HERE: how to produce binary objects
 # An archive with all the compiled code in this directory.
