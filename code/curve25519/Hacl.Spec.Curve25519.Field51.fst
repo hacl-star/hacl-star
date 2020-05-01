@@ -85,10 +85,12 @@ val mul_wide64:
   -> x:uint64{felem_fits1 x m1}
   -> y:uint64{felem_fits1 y m2 /\ m1 * m2 <= 67108864}
   -> z:uint128{uint_v z == uint_v x * uint_v y /\ felem_wide_fits1 z (m1 * m2)}
+#push-options "--z3rlimit 100"
 let mul_wide64 #m1 #m2 x y =
   assert (v x * v y <= m1 * max51 * m2 * max51);
   assert (v x * v y <= m1 * m2 * max51 * max51);
   mul64_wide x y
+#pop-options
 
 inline_for_extraction noextract
 val smul_felem5:
