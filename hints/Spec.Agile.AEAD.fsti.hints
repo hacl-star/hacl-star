@@ -8,7 +8,7 @@
       0,
       [ "@query" ],
       0,
-      "836f950902fd8f98d7fe1ca992a16cee"
+      "f813fff871d4f69ad65b6660cdf63346"
     ],
     [
       "Spec.Agile.AEAD.cipher_alg_of_supported_alg",
@@ -26,7 +26,7 @@
         "typing_Spec.Agile.AEAD.is_supported_alg"
       ],
       0,
-      "68d1e83ad8844417334658a00bc22b32"
+      "9ddaefc3ffb0cdf9df7ea486f4f7158c"
     ],
     [
       "Spec.Agile.AEAD.key_length",
@@ -36,6 +36,9 @@
       [
         "@MaxIFuel_assumption", "@query", "bool_inversion",
         "constructor_distinct_Lib.IntTypes.U8",
+        "constructor_distinct_Spec.Agile.AEAD.AES128_GCM",
+        "constructor_distinct_Spec.Agile.AEAD.AES256_GCM",
+        "constructor_distinct_Spec.Agile.AEAD.CHACHA20_POLY1305",
         "disc_equation_Spec.Agile.AEAD.AES128_CCM",
         "disc_equation_Spec.Agile.AEAD.AES128_CCM8",
         "disc_equation_Spec.Agile.AEAD.AES128_GCM",
@@ -44,23 +47,27 @@
         "disc_equation_Spec.Agile.AEAD.AES256_GCM",
         "disc_equation_Spec.Agile.AEAD.CHACHA20_POLY1305",
         "equality_tok_Lib.IntTypes.U1@tok",
-        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.unsigned",
-        "equation_Prims.squash", "equation_Spec.AES.gf8",
-        "equation_Spec.AES.irred",
+        "equality_tok_Lib.IntTypes.U8@tok",
+        "equality_tok_Spec.Agile.AEAD.AES128_GCM@tok",
+        "equality_tok_Spec.Agile.AEAD.AES256_GCM@tok",
+        "equality_tok_Spec.Agile.AEAD.CHACHA20_POLY1305@tok",
+        "equation_Lib.IntTypes.unsigned", "equation_Prims.squash",
+        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
         "equation_Spec.Agile.AEAD.is_supported_alg",
         "equation_Spec.Agile.AEAD.uu___2", "equation_Spec.GaloisField.gf",
         "fuel_guarded_inversion_Spec.Agile.AEAD.alg",
         "function_token_typing_Spec.Agile.AEAD.uu___2", "inversion-interp",
         "proj_equation_Spec.GaloisField.GF_t",
-        "projection_inverse_BoxBool_proj_0",
         "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
         "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
         "typing_Spec.AES.gf8", "typing_Spec.Agile.AEAD.is_supported_alg",
-        "typing_Spec.GaloisField.__proj__GF__item__t"
+        "typing_Spec.GaloisField.__proj__GF__item__t",
+        "typing_tok_Spec.Agile.AEAD.AES256_GCM@tok",
+        "typing_tok_Spec.Agile.AEAD.CHACHA20_POLY1305@tok"
       ],
       0,
-      "e7e6e6500e77be5b5ed2063567836275"
+      "015a9788ce61d416925c36b286ba280d"
     ],
     [
       "Spec.Agile.AEAD.tag_length",
@@ -82,7 +89,7 @@
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c"
       ],
       0,
-      "cc5f42252f8f6b7f9c741ddcb079d9cd"
+      "0017f880f59f6e44bd700783a42135dc"
     ],
     [
       "Spec.Agile.AEAD.iv_length",
@@ -107,7 +114,7 @@
         "typing_Spec.Agile.AEAD.is_supported_alg"
       ],
       0,
-      "7b74b0686f54efe0dc274dfa1102c9a8"
+      "6abf8338c0fbddb42ec1e42ba5198f57"
     ],
     [
       "Spec.Agile.AEAD.max_length",
@@ -143,7 +150,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "6a8be541c89f3c20c917e023cd339854"
+      "7da28e44456b9e86a13d82ee1959c06c"
     ],
     [
       "Spec.Agile.AEAD.lbytes",
@@ -152,7 +159,7 @@
       0,
       [ "@query" ],
       0,
-      "65c3a2ba4b19abc8c862f9061901d71b"
+      "da501f75564273460b8d12cf9f3046f5"
     ],
     [
       "Spec.Agile.AEAD.correctness",
@@ -172,7 +179,7 @@
         "typing_Spec.Agile.AEAD.encrypt"
       ],
       0,
-      "49b89fe8f38caaeb10e04863ae2d6116"
+      "caf034f2163be0dc1c755cb1ea408056"
     ]
   ]
 ]
