@@ -29,6 +29,15 @@ dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
 	  -tmpdir dist \
 	  -skip-compilation
 
+$(HACL_HOME)/tests/tests-openssl/sha256-mb/sha256-mb-x86_64.o: $(HACL_HOME)/tests/tests-openssl/sha256-mb/sha256-mb-x86_64.s
+	$(CC) -c $(HACL_HOME)/tests/tests-openssl/sha256-mb/sha256-mb-x86_64.s -o $@
+
+dist/sha2-mb-test.exe: $(HACL_HOME)/tests/tests-openssl/sha256-mb/sha256-mb-x86_64.o dist/libsha2vec.a
+	$(CC) $(CFLAGS) -I $(HACL_HOME)/tests/tests-openssl/sha2-mb -I $(HACL_HOME)/tests \
+	$(HACL_HOME)/tests/tests-openssl/sha256-mb/hash_simd.c $(HACL_HOME)/tests/tests-openssl/sha2-vec-test.c $^ \
+	-o $@ -lcrypto
+
+
 dist/sha2-vec-test.exe: $(HACL_HOME)/tests/sha2-vec-test.o dist/libsha2vec.a
 
 %.exe:
