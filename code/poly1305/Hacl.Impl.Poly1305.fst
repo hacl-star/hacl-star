@@ -564,8 +564,8 @@ let poly1305_update32 ctx len text =
 
 
 inline_for_extraction noextract
-val poly1305_update_128_256: #s:field_spec { s = M128 || s = M256 } -> poly1305_update_st s
-let poly1305_update_128_256 #s ctx len text =
+val poly1305_update_128_256_512: #s:field_spec { s = M128 || s = M256 || s = M512 } -> poly1305_update_st s
+let poly1305_update_128_256_512 #s ctx len text =
   let pre = get_precomp_r ctx in
   let acc = get_acc ctx in
   let h0 = ST.get () in
@@ -579,7 +579,7 @@ inline_for_extraction noextract
 let poly1305_update #s =
   match s with
   | M32 -> poly1305_update32
-  | _ -> poly1305_update_128_256 #s
+  | _ -> poly1305_update_128_256_512 #s
 
 #set-options "--z3rlimit 150"
 

@@ -10,8 +10,11 @@ test: all
 # Defines rules for producing .checked, .krml, .depend, etc.
 include ../../Makefile.local
 
-CFLAGS += -I../../../lib/c -march=native -mtune=native -O3
+CFLAGS += -I../../../lib/c -I../../lib/c -march=native -mtune=native -O3
 export CFLAGS
+
+BLACKLIST += Hacl_Impl_Poly1305_Field32xN_512.c Hacl_Impl_Poly1305_Field32xN_512.h Hacl_Poly1305_512.c Hacl_Poly1305_512.h
+export BLACKLIST
 
 # CUSTOMIZE HERE: how to produce binary objects
 # An archive with all the compiled code in this directory.

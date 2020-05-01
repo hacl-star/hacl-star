@@ -549,6 +549,48 @@ let load_precompute_r4 p r0 r1 =
   precompute_shift_reduce rn_5 rn
 
 inline_for_extraction noextract
+val load_precompute_r8:
+    p:precomp_r 8
+  -> r0:uint64
+  -> r1:uint64
+  -> Stack unit
+    (requires fun h -> live h p)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc p) h0 h1 /\
+      load_precompute_r_post h1 p /\
+     (assert_norm (pow2 64 * pow2 64 = pow2 128);
+      feval h1 (gsub p 0ul 5ul) ==
+        LSeq.create 8 (uint_v r1 * pow2 64 + uint_v r0)))
+let load_precompute_r8 p r0 r1 =
+  let r = sub p 0ul 5ul in
+  let r5 = sub p 5ul 5ul in
+  let rn = sub p 10ul 5ul in
+  let rn_5 = sub p 15ul 5ul in
+
+  let r_vec0 = vec_load r0 8 in
+  let r_vec1 = vec_load r1 8 in
+
+  let h0 = ST.get () in
+  load_felem r r_vec0 r_vec1;
+  let h1 = ST.get () in
+  LSeq.eq_intro
+    (LSeq.createi #Vec.pfelem 8 (fun i -> (uint64xN_v r_vec1).[i] * pow2 64 + (uint64xN_v r_vec0).[i]))
+    (LSeq.create 8 (uint_v r1 * pow2 64 + uint_v r0));
+  assert (feval h1 r == LSeq.create 8 (uint_v r1 * pow2 64 + uint_v r0));
+
+  precompute_shift_reduce r5 r;
+
+  fmul_r rn r r r5; // rn = r * r
+  precompute_shift_reduce rn_5 rn;
+  fmul_r rn rn rn rn_5; // rn = (r * r) * (r * r)
+  precompute_shift_reduce rn_5 rn;
+  fmul_r rn rn rn rn_5; // rn = ((r * r) * (r * r)) * ((r * r) * (r * r))
+  let h3 = ST.get () in
+  LSeq.eq_intro (feval h3 rn) (Vec.compute_rw (feval h1 r).[0]);
+  precompute_shift_reduce rn_5 rn
+
+
+inline_for_extraction noextract
 val load_precompute_r:
     #w:lanes
   -> p:precomp_r w
@@ -567,7 +609,7 @@ let load_precompute_r #w p r0 r1 =
   | 1 -> load_precompute_r1 p r0 r1
   | 2 -> load_precompute_r2 p r0 r1
   | 4 -> load_precompute_r4 p r0 r1
-
+  | 8 -> load_precompute_r8 p r0 r1
 #pop-options
 
 inline_for_extraction noextract
@@ -580,7 +622,7 @@ val load_felem1_le:
       modifies (loc f) h0 h1 /\
       felem_fits h1 f (1, 1, 1, 1, 1) /\
       felem_less h1 f (pow2 128) /\
-      feval h1 f == Vec.load_elem1 (as_seq h0 b))
+      feval h1 f == Vec.load_elem #1 (as_seq h0 b))
 let load_felem1_le f b =
   let h0 = ST.get () in
   let lo = vec_load_le U64 1 (sub b 0ul 8ul) in
@@ -589,7 +631,9 @@ let load_felem1_le f b =
   load_felem f lo hi;
   let h1 = ST.get () in
   uints_from_bytes_le_lemma64_1 (as_seq h0 b);
-  LSeq.eq_intro (feval h1 f) (Vec.load_elem1 (as_seq h0 b))
+  Seq.Properties.slice_length (as_seq h0 b);
+  assert (as_seq h0 b == LSeq.sub (as_seq h0 b) 0 16);
+  LSeq.eq_intro (feval h1 f) (Vec.load_elem #1 (as_seq h0 b))
 
 inline_for_extraction noextract
 val load_felem2_le:
@@ -601,7 +645,7 @@ val load_felem2_le:
       modifies (loc f) h0 h1 /\
       felem_fits h1 f (1, 1, 1, 1, 1) /\
       felem_less h1 f (pow2 128) /\
-      feval h1 f == Vec.load_elem2 (as_seq h0 b))
+      feval h1 f == Vec.load_elem #2 (as_seq h0 b))
 let load_felem2_le f b =
   let h0 = ST.get () in
   let b1 = vec_load_le U64 2 (sub b 0ul 16ul) in
@@ -613,7 +657,7 @@ let load_felem2_le f b =
   vec_interleave_low_lemma2 b1 b2;
   vec_interleave_high_lemma2 b1 b2;
   uints_from_bytes_le_lemma64_2 (as_seq h0 b);
-  LSeq.eq_intro (feval h1 f) (Vec.load_elem2 (as_seq h0 b))
+  LSeq.eq_intro (feval h1 f) (Vec.load_elem #2 (as_seq h0 b))
 
 inline_for_extraction noextract
 val load_felem4_le:
@@ -625,7 +669,7 @@ val load_felem4_le:
       modifies (loc f) h0 h1 /\
       felem_fits h1 f (1, 1, 1, 1, 1) /\
       felem_less h1 f (pow2 128) /\
-      feval h1 f == Vec.load_elem4 (as_seq h0 b))
+      feval h1 f == Vec.load_elem #4 (as_seq h0 b))
 let load_felem4_le f b =
   let h0 = ST.get () in
   let lo = vec_load_le U64 4 (sub b 0ul 32ul) in
@@ -638,6 +682,31 @@ let load_felem4_le f b =
   f.(3ul) <- o3;
   f.(4ul) <- o4
 
+inline_for_extraction noextract
+val load_felem8_le:
+    f:felem 8
+  -> b:lbuffer uint8 128ul
+  -> Stack unit
+    (requires fun h -> live h f /\ live h b)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc f) h0 h1 /\
+      felem_fits h1 f (1, 1, 1, 1, 1) /\
+      felem_less h1 f (pow2 128) /\
+      feval h1 f == Vec.load_elem #8 (as_seq h0 b))
+let load_felem8_le f b =
+  let h0 = ST.get () in
+  let b1 = vec_load_le U64 8 (sub b 0ul 64ul) in
+  let b2 = vec_load_le U64 8 (sub b 64ul 64ul) in
+  let lo0 = vec_interleave_low_n 4 b1 b2 in
+  let hi0 = vec_interleave_high_n 4 b1 b2 in
+  let lo1 = vec_interleave_low_n 2 lo0 hi0 in
+  let hi1 = vec_interleave_high_n 2 lo0 hi0 in
+  let lo = vec_interleave_low lo1 hi1 in
+  let hi = vec_interleave_high lo1 hi1 in
+  load_felem f lo hi;
+  let h1 = ST.get () in
+  admit()
+  //LSeq.eq_intro (feval h1 f) (Vec.load_elem #8 (as_seq h0 b))
 
 inline_for_extraction noextract
 val load_felems_le:
@@ -656,6 +725,7 @@ let load_felems_le #w f b =
   | 1 -> load_felem1_le f b
   | 2 -> load_felem2_le f b
   | 4 -> load_felem4_le f b
+  | 8 -> load_felem8_le f b
 
 inline_for_extraction noextract
 val load_blocks:

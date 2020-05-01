@@ -10,6 +10,7 @@ open Lib.Buffer
 open Hacl.Impl.Poly1305.Field32xN_32
 open Hacl.Impl.Poly1305.Field32xN_128
 open Hacl.Impl.Poly1305.Field32xN_256
+open Hacl.Impl.Poly1305.Field32xN_512
 open Hacl.Impl.Poly1305.Field32xN
 
 module ST = FStar.HyperStack.ST
@@ -28,6 +29,7 @@ type field_spec =
   | M32
   | M128
   | M256
+  | M512
 
 unfold noextract
 let width (s:field_spec) : Vec.lanes =
@@ -35,6 +37,7 @@ let width (s:field_spec) : Vec.lanes =
   | M32  -> 1
   | M128 -> 2
   | M256 -> 4
+  | M512 -> 8
 
 unfold noextract
 let limb (s:field_spec) =
@@ -42,6 +45,7 @@ let limb (s:field_spec) =
   | M32  -> F32xN.uint64xN 1
   | M128 -> F32xN.uint64xN 2
   | M256 -> F32xN.uint64xN 4
+  | M512 -> F32xN.uint64xN 8
 
 unfold noextract
 let limb_zero (s:field_spec) : limb s=
@@ -49,6 +53,7 @@ let limb_zero (s:field_spec) : limb s=
   | M32  -> F32xN.zero 1
   | M128 -> F32xN.zero 2
   | M256 -> F32xN.zero 4
+  | M512 -> F32xN.zero 8
 
 unfold noextract
 let wide (s:field_spec) =
@@ -56,6 +61,7 @@ let wide (s:field_spec) =
   | M32  -> F32xN.uint64xN 1
   | M128 -> F32xN.uint64xN 2
   | M256 -> F32xN.uint64xN 4
+  | M512 -> F32xN.uint64xN 8
 
 unfold noextract
 let nlimb (s:field_spec) : size_t =
@@ -63,6 +69,7 @@ let nlimb (s:field_spec) : size_t =
   | M32  -> 5ul
   | M128 -> 5ul
   | M256 -> 5ul
+  | M512 -> 5ul
 
 unfold noextract
 let blocklen (s:field_spec) : r:size_t{0 < v r /\ v r == width s * S.size_block} =
@@ -70,6 +77,7 @@ let blocklen (s:field_spec) : r:size_t{0 < v r /\ v r == width s * S.size_block}
   | M32  -> 16ul
   | M128 -> 32ul
   | M256 -> 64ul
+  | M512 -> 128ul
 
 unfold noextract
 let nelem (s:field_spec) : size_t =
@@ -77,6 +85,7 @@ let nelem (s:field_spec) : size_t =
   | M32  -> 1ul
   | M128 -> 2ul
   | M256 -> 4ul
+  | M512 -> 8ul
 
 unfold noextract
 let precomplen (s:field_spec) : size_t =
@@ -84,6 +93,7 @@ let precomplen (s:field_spec) : size_t =
   | M32  -> 20ul
   | M128 -> 20ul
   | M256 -> 20ul
+  | M512 -> 20ul
 
 inline_for_extraction noextract
 type felem (s:field_spec) = lbuffer (limb s) (nlimb s)
@@ -98,6 +108,7 @@ let felem_fits #s h f m =
   | M32  -> F32xN.felem_fits #1 h f m
   | M128 -> F32xN.felem_fits #2 h f m
   | M256 -> F32xN.felem_fits #4 h f m
+  | M512 -> F32xN.felem_fits #8 h f m
 
 noextract
 val fas_nat: #s:field_spec -> h:mem -> e:felem s -> GTot (LSeq.lseq nat (width s))
@@ -106,6 +117,7 @@ let fas_nat #s h e =
   | M32  -> F32xN.fas_nat #1 h e
   | M128 -> F32xN.fas_nat #2 h e
   | M256 -> F32xN.fas_nat #4 h e
+  | M512 -> F32xN.fas_nat #8 h e
 
 noextract
 val feval: #s:field_spec -> h:mem -> e:felem s -> GTot (LSeq.lseq S.felem (width s))
@@ -114,6 +126,7 @@ let feval #s h e =
   | M32  -> F32xN.feval #1 h e
   | M128 -> F32xN.feval #2 h e
   | M256 -> F32xN.feval #4 h e
+  | M512 -> F32xN.feval #8 h e
 
 unfold noextract
 let op_String_Access #a #len = LSeq.index #a #len
@@ -139,6 +152,7 @@ let create_felem s =
   | M32  -> (F32xN.create_felem 1) <: felem s
   | M128 -> (F32xN.create_felem 2) <: felem s
   | M256 -> (F32xN.create_felem 4) <: felem s
+  | M512 -> (F32xN.create_felem 8) <: felem s
 
 
 inline_for_extraction noextract
@@ -159,6 +173,7 @@ let load_felem_le #s f b =
   | M32  -> F32xN.load_felem_le #1 f b
   | M128 -> F32xN.load_felem_le #2 f b
   | M256 -> F32xN.load_felem_le #4 f b
+  | M512 -> F32xN.load_felem_le #8 f b
 
 
 inline_for_extraction noextract
@@ -179,6 +194,7 @@ let load_felems_le #s f b =
   | M32  -> F32xN.load_felems_le #1 f b
   | M128 -> F32xN.load_felems_le #2 f b
   | M256 -> F32xN.load_felems_le #4 f b
+  | M512 -> F32xN.load_felems_le #8 f b
 
 
 inline_for_extraction noextract
@@ -200,6 +216,7 @@ let load_acc #s acc b =
   | M32 -> Field32xN_32.load_acc1 acc b
   | M128 -> Field32xN_128.load_acc2 acc b
   | M256 -> Field32xN_256.load_acc4 acc b
+  | M512 -> Field32xN_512.load_acc8 acc b
 
 
 inline_for_extraction noextract
@@ -223,6 +240,7 @@ let set_bit #s f i =
   | M32  -> F32xN.set_bit #1 f i
   | M128 -> F32xN.set_bit #2 f i
   | M256 -> F32xN.set_bit #4 f i
+  | M512 -> F32xN.set_bit #8 f i
 
 
 inline_for_extraction noextract
@@ -244,6 +262,7 @@ let set_bit128 #s f =
   | M32  -> F32xN.set_bit128 #1 f
   | M128 -> F32xN.set_bit128 #2 f
   | M256 -> F32xN.set_bit128 #4 f
+  | M512 -> F32xN.set_bit128 #8 f
 
 
 inline_for_extraction noextract
@@ -262,6 +281,7 @@ let set_zero #s f =
   | M32  -> F32xN.set_zero #1 f
   | M128 -> F32xN.set_zero #2 f
   | M256 -> F32xN.set_zero #4 f
+  | M512 -> F32xN.set_zero #8 f
 
 
 inline_for_extraction noextract
@@ -280,6 +300,7 @@ let reduce_felem #s f =
   | M32  -> F32xN.reduce_felem #1 f
   | M128 -> F32xN.reduce_felem #2 f
   | M256 -> F32xN.reduce_felem #4 f
+  | M512 -> F32xN.reduce_felem #8 f
 
 
 inline_for_extraction noextract
@@ -302,6 +323,7 @@ let load_precompute_r #s p r0 r1 =
   | M32  -> F32xN.load_precompute_r #1 p r0 r1
   | M128 -> F32xN.load_precompute_r #2 p r0 r1
   | M256 -> F32xN.load_precompute_r #4 p r0 r1
+  | M512 -> F32xN.load_precompute_r #8 p r0 r1
 
 
 inline_for_extraction noextract
@@ -327,6 +349,7 @@ let fadd_mul_r #s out f1 precomp =
   | M32  -> F32xN.fadd_mul_r #1 out f1 precomp
   | M128 -> F32xN.fadd_mul_r #2 out f1 precomp
   | M256 -> F32xN.fadd_mul_r #4 out f1 precomp
+  | M512 -> F32xN.fadd_mul_r #8 out f1 precomp
 
 
 inline_for_extraction noextract
@@ -354,6 +377,7 @@ let fmul_rn #s out f1 precomp =
   | M32  -> F32xN.fmul_rn #1 out f1 precomp
   | M128 -> F32xN.fmul_rn #2 out f1 precomp
   | M256 -> F32xN.fmul_rn #4 out f1 precomp
+  | M512 -> F32xN.fmul_rn #8 out f1 precomp
 
 
 inline_for_extraction noextract
@@ -377,6 +401,8 @@ let fmul_rn_normalize #s out precomp =
   | M32  -> Field32xN_32.fmul_r1_normalize out precomp
   | M128 -> Field32xN_128.fmul_r2_normalize out precomp
   | M256 -> Field32xN_256.fmul_r4_normalize out precomp
+  | M512 -> Field32xN_512.fmul_r8_normalize out precomp
+
 
 inline_for_extraction noextract
 val fadd:
@@ -399,6 +425,7 @@ let fadd #s out f1 f2 =
   | M32  -> F32xN.fadd #1 out f1 f2
   | M128 -> F32xN.fadd #2 out f1 f2
   | M256 -> F32xN.fadd #4 out f1 f2
+  | M512 -> F32xN.fadd #8 out f1 f2
 
 
 inline_for_extraction noextract
@@ -416,6 +443,7 @@ let uints64_from_felem_le #s f =
   | M32  -> F32xN.uints64_from_felem_le #1 f
   | M128 -> F32xN.uints64_from_felem_le #2 f
   | M256 -> F32xN.uints64_from_felem_le #4 f
+  | M512 -> F32xN.uints64_from_felem_le #8 f
 
 
 inline_for_extraction noextract

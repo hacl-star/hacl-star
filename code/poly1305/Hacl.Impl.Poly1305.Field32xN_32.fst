@@ -31,13 +31,13 @@ val load_acc1:
     (ensures  fun h0 _ h1 ->
       modifies (loc acc) h0 h1 /\
       felem_fits h1 acc (3, 3, 3, 3, 3) /\
-      feval h1 acc == Vec.load_acc1 (as_seq h0 b) (feval h0 acc).[0])
+      feval h1 acc == Vec.load_acc (as_seq h0 b) (feval h0 acc).[0])
 
 [@CInline]
 let load_acc1 acc b =
   push_frame();
   let h0 = ST.get () in
-  LSeq.eq_intro (feval h0 acc) (LSeq.create 1 (feval h0 acc).[0]);
+  LSeq.eq_intro (feval h0 acc) (LSeq.upd (LSeq.create 1 0) 0 (feval h0 acc).[0]);
   let e = create 5ul (zero 1) in
   load_blocks e b;
   fadd acc acc e;
@@ -56,7 +56,7 @@ val fmul_r1_normalize:
       modifies (loc out) h0 h1 /\
       felem_fits h1 out (2, 2, 2, 2, 2) /\
      (let r = feval h0 (gsub p 0ul 5ul) in
-      (feval h1 out).[0] == Vec.normalize_1 r.[0] (feval h0 out)))
+      (feval h1 out).[0] == Vec.normalize_n r.[0] (feval h0 out)))
 [@CInline]
 let fmul_r1_normalize out p =
   let r = sub p 0ul 5ul in

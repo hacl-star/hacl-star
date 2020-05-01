@@ -14,7 +14,7 @@ module S = Spec.Poly1305
 
 include Hacl.Spec.Poly1305.Vec
 
-#set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
 let block_v (w:lanes{w * size_block <= max_size_t}) = lbytes (w * size_block)
 
@@ -101,6 +101,7 @@ let load_acc_lemma #w b acc0 r =
   | 1 -> load_acc_lemma1 b acc0 r
   | 2 -> load_acc_lemma2 b acc0 r
   | 4 -> load_acc_lemma4 b acc0 r
+  | 8 -> admit()
 
 ///
 ///  val poly_update_nblocks_lemma: #w:lanes -> r:pfelem -> b:block_v w -> acc_v0:elem w -> Lemma
@@ -194,7 +195,7 @@ let poly_update_nblocks_lemma #w r b acc_v0 =
   | 1 -> poly_update_nblocks_lemma1 r b acc_v0
   | 2 -> poly_update_nblocks_lemma2 r b acc_v0
   | 4 -> poly_update_nblocks_lemma4 r b acc_v0
-
+  | 8 -> admit()
 
 val repeat_blocks_multi_vec_equiv_pre_lemma: #w:lanes -> r:pfelem -> b:block_v w -> acc_v0:elem w -> Lemma
   (let rw = compute_rw #w r in

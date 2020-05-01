@@ -230,6 +230,7 @@ let load_tup64_4_compact lo hi =
   let o4 = hi >>. 40ul in
   (o0, o1, o2, o3, o4)
 
+#push-options "--z3rlimit 100"
 val load_tup64_4_compact_lemma_f2_mod: lo:uint64 -> hi:uint64 -> Lemma
   ((v lo / pow2 52 + (v hi % pow2 14) * pow2 12) % pow2 26 == v lo / pow2 52 + (v hi % pow2 14) * pow2 12)
 let load_tup64_4_compact_lemma_f2_mod lo hi =
@@ -244,7 +245,7 @@ let load_tup64_4_compact_lemma_f2_mod lo hi =
   };
   assert (v lo / pow2 52 + (v hi % pow2 14) * pow2 12 < pow2 26);
   Math.Lemmas.small_modulo_lemma_1 (v lo / pow2 52 + (v hi % pow2 14) * pow2 12) (pow2 26)
-
+#pop-options
 
 val load_tup64_4_compact_lemma_f2: lo:uint64 -> hi:uint64 -> Lemma
   (let t3 = (lo >>. 48ul) |. (hi <<. 16ul) in

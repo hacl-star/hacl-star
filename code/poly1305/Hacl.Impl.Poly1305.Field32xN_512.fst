@@ -1,4 +1,4 @@
-module Hacl.Impl.Poly1305.Field32xN_128
+module Hacl.Impl.Poly1305.Field32xN_512
 
 open FStar.HyperStack
 open FStar.HyperStack.All
@@ -19,10 +19,9 @@ open Hacl.Impl.Poly1305.Field32xN
 
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50 --using_facts_from '* -FStar.Seq'"
 
-
-val load_acc2:
-    acc:felem 2
-  -> b:lbuffer uint8 32ul
+val load_acc8:
+    acc:felem 8
+  -> b:lbuffer uint8 128ul
   -> Stack unit
     (requires fun h ->
       live h acc /\ live h b /\ disjoint acc b /\
@@ -31,10 +30,9 @@ val load_acc2:
       modifies (loc acc) h0 h1 /\
       felem_fits h1 acc (3, 3, 3, 3, 3) /\
       feval h1 acc == Vec.load_acc (as_seq h0 b) (feval h0 acc).[0])
-
-let load_acc2 acc b =
+let load_acc8 acc b =
   push_frame();
-  let e = create 5ul (zero 2) in
+  let e = create 5ul (zero 8) in
   load_blocks e b;
 
   let acc0 = acc.(0ul) in
@@ -58,9 +56,9 @@ let load_acc2 acc b =
   pop_frame()
 
 
-val fmul_r2_normalize:
-    out:felem 2
-  -> p:precomp_r 2
+val fmul_r8_normalize:
+    out:felem 8
+  -> p:precomp_r 8
   -> Stack unit
     (requires fun h ->
       live h out /\ live h p /\
@@ -71,10 +69,10 @@ val fmul_r2_normalize:
       felem_fits h1 out (2, 2, 2, 2, 2) /\
      (let r = feval h0 (gsub p 0ul 5ul) in
       (feval h1 out).[0] == Vec.normalize_n r.[0] (feval h0 out)))
-
-let fmul_r2_normalize out p =
+let fmul_r8_normalize out p =
   let r = sub p 0ul 5ul in
-  let r2 = sub p 10ul 5ul in
+  let r_5 = sub p 5ul 5ul in
+  let r8 = sub p 10ul 5ul in
 
   let a0 = out.(0ul) in
   let a1 = out.(1ul) in
@@ -88,16 +86,22 @@ let fmul_r2_normalize out p =
   let r13 = r.(3ul) in
   let r14 = r.(4ul) in
 
-  let r20 = r2.(0ul) in
-  let r21 = r2.(1ul) in
-  let r22 = r2.(2ul) in
-  let r23 = r2.(3ul) in
-  let r24 = r2.(4ul) in
+  let r150 = r_5.(0ul) in
+  let r151 = r_5.(1ul) in
+  let r152 = r_5.(2ul) in
+  let r153 = r_5.(3ul) in
+  let r154 = r_5.(4ul) in
 
-  let (o0, o1, o2, o3, o4) =
-    fmul_r2_normalize5 (a0, a1, a2, a3, a4) (r10, r11, r12, r13, r14) (r20, r21, r22, r23, r24) in
+  let r80 = r8.(0ul) in
+  let r81 = r8.(1ul) in
+  let r82 = r8.(2ul) in
+  let r83 = r8.(3ul) in
+  let r84 = r8.(4ul) in
+
+  let (o0, o1, o2, o3, o4) = fmul_r8_normalize5 (a0, a1, a2, a3, a4) (r10, r11, r12, r13, r14)
+    (r150, r151, r152, r153, r154) (r80, r81, r82, r83, r84) in
   out.(0ul) <- o0;
   out.(1ul) <- o1;
   out.(2ul) <- o2;
   out.(3ul) <- o3;
-  out.(4ul) <- o4
+  out.(4ul) <- o4; admit()

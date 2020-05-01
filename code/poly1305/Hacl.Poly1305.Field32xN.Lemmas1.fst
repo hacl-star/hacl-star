@@ -108,7 +108,7 @@ let carry26_wide_lemma_i #w #m l cin i =
   FStar.Math.Lemmas.pow2_modulo_modulo_lemma_1 (v l') 26 32;
   FStar.Math.Lemmas.euclidean_division_definition (v l') (pow2 26)
 
-
+#push-options "--z3rlimit 300"
 val carry26_wide_fits_lemma:
     #w:lanes
   -> #m:scale64
@@ -130,7 +130,16 @@ let carry26_wide_fits_lemma #w #m l cin =
     carry26_wide_lemma_i #w #m l cin 1;
     carry26_wide_lemma_i #w #m l cin 2;
     carry26_wide_lemma_i #w #m l cin 3
-
+  | 8 ->
+    carry26_wide_lemma_i #w #m l cin 0;
+    carry26_wide_lemma_i #w #m l cin 1;
+    carry26_wide_lemma_i #w #m l cin 2;
+    carry26_wide_lemma_i #w #m l cin 3;
+    carry26_wide_lemma_i #w #m l cin 4;
+    carry26_wide_lemma_i #w #m l cin 5;
+    carry26_wide_lemma_i #w #m l cin 6;
+    carry26_wide_lemma_i #w #m l cin 7
+#pop-options
 
 val carry26_wide_eval_lemma:
     #w:lanes
@@ -157,6 +166,15 @@ let carry26_wide_eval_lemma #w #m l cin =
     carry26_wide_lemma_i #w #m l cin 1;
     carry26_wide_lemma_i #w #m l cin 2;
     carry26_wide_lemma_i #w #m l cin 3
+  | 8 ->
+    carry26_wide_lemma_i #w #m l cin 0;
+    carry26_wide_lemma_i #w #m l cin 1;
+    carry26_wide_lemma_i #w #m l cin 2;
+    carry26_wide_lemma_i #w #m l cin 3;
+    carry26_wide_lemma_i #w #m l cin 4;
+    carry26_wide_lemma_i #w #m l cin 5;
+    carry26_wide_lemma_i #w #m l cin 6;
+    carry26_wide_lemma_i #w #m l cin 7
 
 val carry26_lemma_i:
     #w:lanes
@@ -207,6 +225,15 @@ let carry26_fits_lemma #w m ml l cin =
     carry26_lemma_i #w m ml l cin 1;
     carry26_lemma_i #w m ml l cin 2;
     carry26_lemma_i #w m ml l cin 3
+  | 8 ->
+    carry26_lemma_i #w m ml l cin 0;
+    carry26_lemma_i #w m ml l cin 1;
+    carry26_lemma_i #w m ml l cin 2;
+    carry26_lemma_i #w m ml l cin 3;
+    carry26_lemma_i #w m ml l cin 4;
+    carry26_lemma_i #w m ml l cin 5;
+    carry26_lemma_i #w m ml l cin 6;
+    carry26_lemma_i #w m ml l cin 7
 
 
 val carry26_eval_lemma:
@@ -233,6 +260,15 @@ let carry26_eval_lemma #w m ml l cin =
     carry26_lemma_i #w m ml l cin 1;
     carry26_lemma_i #w m ml l cin 2;
     carry26_lemma_i #w m ml l cin 3
+  | 8 ->
+    carry26_lemma_i #w m ml l cin 0;
+    carry26_lemma_i #w m ml l cin 1;
+    carry26_lemma_i #w m ml l cin 2;
+    carry26_lemma_i #w m ml l cin 3;
+    carry26_lemma_i #w m ml l cin 4;
+    carry26_lemma_i #w m ml l cin 5;
+    carry26_lemma_i #w m ml l cin 6;
+    carry26_lemma_i #w m ml l cin 7
 
 
 val carry_wide_felem5_fits_lemma0:
@@ -623,7 +659,15 @@ let subtract_p5_felem5_lemma #w f =
     subtract_p5_felem5_lemma_i #w f 1;
     subtract_p5_felem5_lemma_i #w f 2;
     subtract_p5_felem5_lemma_i #w f 3
-
+  | 8 ->
+    subtract_p5_felem5_lemma_i #w f 0;
+    subtract_p5_felem5_lemma_i #w f 1;
+    subtract_p5_felem5_lemma_i #w f 2;
+    subtract_p5_felem5_lemma_i #w f 3;
+    subtract_p5_felem5_lemma_i #w f 4;
+    subtract_p5_felem5_lemma_i #w f 5;
+    subtract_p5_felem5_lemma_i #w f 6;
+    subtract_p5_felem5_lemma_i #w f 7
 
 noextract
 let acc_inv_t (#w:lanes) (acc:felem5 w) : Type0 =
@@ -677,7 +721,16 @@ let acc_inv_lemma #w acc cin =
     acc_inv_lemma_i #w acc cin 1;
     acc_inv_lemma_i #w acc cin 2;
     acc_inv_lemma_i #w acc cin 3
-
+  | 8 ->
+    acc_inv_lemma_i #w acc cin 0;
+    acc_inv_lemma_i #w acc cin 1;
+    acc_inv_lemma_i #w acc cin 2;
+    acc_inv_lemma_i #w acc cin 3;
+    acc_inv_lemma_i #w acc cin 4;
+    acc_inv_lemma_i #w acc cin 5;
+    acc_inv_lemma_i #w acc cin 6;
+    acc_inv_lemma_i #w acc cin 7
+    
 val carry_full_felem5_fits_lemma0: #w:lanes -> f:felem5 w{felem_fits5 f (8, 8, 8, 8, 8)} ->
   Lemma (let (f0, f1, f2, f3, f4) = f in
     let tmp0,c0 = carry26 f0 (zero w) in
@@ -1015,7 +1068,15 @@ let carry_reduce_felem5_fits_lemma #w f =
     carry_reduce_felem5_fits_lemma_i #w f 1;
     carry_reduce_felem5_fits_lemma_i #w f 2;
     carry_reduce_felem5_fits_lemma_i #w f 3
-
+  | 8 ->
+    carry_reduce_felem5_fits_lemma_i #w f 0;
+    carry_reduce_felem5_fits_lemma_i #w f 1;
+    carry_reduce_felem5_fits_lemma_i #w f 2;
+    carry_reduce_felem5_fits_lemma_i #w f 3;
+    carry_reduce_felem5_fits_lemma_i #w f 4;
+    carry_reduce_felem5_fits_lemma_i #w f 5;
+    carry_reduce_felem5_fits_lemma_i #w f 6;
+    carry_reduce_felem5_fits_lemma_i #w f 7
 
 val carry_reduce_felem5_lemma:
     #w:lanes

@@ -165,7 +165,15 @@ let smul_felem5_fits_lemma1 #w #m1 #m2 u1 f2 =
     smul_felem5_fits_lemma_i #w #m1 #m2 u1 f2 1;
     smul_felem5_fits_lemma_i #w #m1 #m2 u1 f2 2;
     smul_felem5_fits_lemma_i #w #m1 #m2 u1 f2 3
-
+  | 8 ->
+    smul_felem5_fits_lemma_i #w #m1 #m2 u1 f2 0;
+    smul_felem5_fits_lemma_i #w #m1 #m2 u1 f2 1;
+    smul_felem5_fits_lemma_i #w #m1 #m2 u1 f2 2;
+    smul_felem5_fits_lemma_i #w #m1 #m2 u1 f2 3;
+    smul_felem5_fits_lemma_i #w #m1 #m2 u1 f2 4;
+    smul_felem5_fits_lemma_i #w #m1 #m2 u1 f2 5;
+    smul_felem5_fits_lemma_i #w #m1 #m2 u1 f2 6;
+    smul_felem5_fits_lemma_i #w #m1 #m2 u1 f2 7
 
 val smul_felem5_fits_lemma:
     #w:lanes
@@ -302,7 +310,15 @@ let smul_add_felem5_fits_lemma1 #w #m1 #m2 #m3 u1 f2 acc1 =
     smul_add_felem5_fits_lemma_i #w #m1 #m2 #m3 u1 f2 acc1 1;
     smul_add_felem5_fits_lemma_i #w #m1 #m2 #m3 u1 f2 acc1 2;
     smul_add_felem5_fits_lemma_i #w #m1 #m2 #m3 u1 f2 acc1 3
-
+  | 8 ->
+    smul_add_felem5_fits_lemma_i #w #m1 #m2 #m3 u1 f2 acc1 0;
+    smul_add_felem5_fits_lemma_i #w #m1 #m2 #m3 u1 f2 acc1 1;
+    smul_add_felem5_fits_lemma_i #w #m1 #m2 #m3 u1 f2 acc1 2;
+    smul_add_felem5_fits_lemma_i #w #m1 #m2 #m3 u1 f2 acc1 3;
+    smul_add_felem5_fits_lemma_i #w #m1 #m2 #m3 u1 f2 acc1 4;
+    smul_add_felem5_fits_lemma_i #w #m1 #m2 #m3 u1 f2 acc1 5;
+    smul_add_felem5_fits_lemma_i #w #m1 #m2 #m3 u1 f2 acc1 6;
+    smul_add_felem5_fits_lemma_i #w #m1 #m2 #m3 u1 f2 acc1 7
 
 val smul_add_felem5_fits_lemma:
     #w:lanes
