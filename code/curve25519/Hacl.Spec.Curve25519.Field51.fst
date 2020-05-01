@@ -85,8 +85,16 @@ val mul_wide64:
   -> x:uint64{felem_fits1 x m1}
   -> y:uint64{felem_fits1 y m2 /\ m1 * m2 <= 67108864}
   -> z:uint128{uint_v z == uint_v x * uint_v y /\ felem_wide_fits1 z (m1 * m2)}
-#push-options "--z3rlimit 100"
+#push-options "--z3rlimit 5"
 let mul_wide64 #m1 #m2 x y =
+  let open FStar.Math.Lemmas in
+  lemma_mult_le_left (v x) (v y) (m2 * max51);  //v x * v y <= v x * (m2 * max51)
+  lemma_mult_le_right (m2 * max51) (v x) (m1 * max51); // v x * (m2 * max51) <= (m1 * max51) * (m2 * max51)
+  paren_mul_right (m1 * max51) m2 max51;  //(m1 * max51) * (m2 * max51) = ((m1 * max51) * m2) * max51
+  paren_mul_right m1 max51 m2;  //(m1 * max51) * m2 = m1 * (max51 * m2)
+  swap_mul max51 m2;  //max51 * m2 = m2 * max51
+  paren_mul_right m1 m2 max51;  //m1 * (m2 * max51) = (m1 * m2) * max51
+  paren_mul_right (m1 * m2) max51 max51;  //((m1 * m2) * max51) * max51 = (m1 * m2) * (max51 * max51)
   assert (v x * v y <= m1 * max51 * m2 * max51);
   assert (v x * v y <= m1 * m2 * max51 * max51);
   mul64_wide x y
