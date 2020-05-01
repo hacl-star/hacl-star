@@ -82,7 +82,6 @@ CFLAGS_256 ?= -mavx -mavx2
 
 Hacl_Blake2s_128.o Hacl_Poly1305_128.o Hacl_Chacha20_Vec128.o Hacl_Chacha20Poly1305_128.o Hacl_SHA2_Vec128.o: CFLAGS += $(CFLAGS_128)
 Hacl_Blake2b_256.o Hacl_Poly1305_256.o Hacl_Chacha20_Vec256.o Hacl_Chacha20Poly1305_256.o Hacl_SHA2_Vec256.o: CFLAGS += $(CFLAGS_256)
-BLACKLIST += Hacl_Chacha20_Vec512.c Hacl_Chacha20_Vec512.h Hacl_SHA2_Vec512.c Hacl_SHA2_Vec512.h
 
 all: libevercrypt.$(SO)
 

@@ -184,6 +184,11 @@ EXPORTS
   Hacl_Poly1305_256_poly1305_update
   Hacl_Poly1305_256_poly1305_finish
   Hacl_Poly1305_256_poly1305_mac
+  Hacl_Poly1305_512_poly1305_init
+  Hacl_Poly1305_512_poly1305_update1
+  Hacl_Poly1305_512_poly1305_update
+  Hacl_Poly1305_512_poly1305_finish
+  Hacl_Poly1305_512_poly1305_mac
   Hacl_NaCl_crypto_secretbox_detached
   Hacl_NaCl_crypto_secretbox_open_detached
   Hacl_NaCl_crypto_secretbox_easy
@@ -235,6 +240,8 @@ EXPORTS
   Hacl_HPKE_Curve51_CP128_SHA512_sealBase
   Hacl_HPKE_Curve51_CP128_SHA512_openBase
   Hacl_Blake2b_32_blake2b
+  Hacl_SHA2_Vec256_sha256_8
+  Hacl_SHA2_Vec256_sha512_4
   Hacl_Chacha20_Vec32_chacha20_encrypt_32
   Hacl_Chacha20_Vec32_chacha20_decrypt_32
   EverCrypt_Ed25519_sign
@@ -242,6 +249,7 @@ EXPORTS
   EverCrypt_Ed25519_secret_to_public
   EverCrypt_Ed25519_expand_keys
   EverCrypt_Ed25519_sign_expanded
+  Hacl_SHA2_Vec512_sha512_8
   Hacl_HPKE_Curve64_CP128_SHA512_setupBaseI
   Hacl_HPKE_Curve64_CP128_SHA512_setupBaseR
   Hacl_HPKE_Curve64_CP128_SHA512_sealBase
@@ -258,6 +266,10 @@ EXPORTS
   Hacl_HPKE_Curve51_CP256_SHA512_setupBaseR
   Hacl_HPKE_Curve51_CP256_SHA512_sealBase
   Hacl_HPKE_Curve51_CP256_SHA512_openBase
+  Hacl_SHA2_Scalar32_sha256
+  Hacl_SHA2_Scalar32_sha512
+  Hacl_Chacha20_Vec512_chacha20_encrypt_512
+  Hacl_Chacha20_Vec512_chacha20_decrypt_512
   Hacl_HPKE_Curve64_CP256_SHA512_setupBaseI
   Hacl_HPKE_Curve64_CP256_SHA512_setupBaseR
   Hacl_HPKE_Curve64_CP256_SHA512_sealBase
@@ -270,6 +282,7 @@ EXPORTS
   Hacl_HPKE_Curve64_CP128_SHA256_setupBaseR
   Hacl_HPKE_Curve64_CP128_SHA256_sealBase
   Hacl_HPKE_Curve64_CP128_SHA256_openBase
+  Hacl_SHA2_Vec128_sha256_4
   Hacl_Chacha20Poly1305_32_aead_encrypt
   Hacl_Chacha20Poly1305_32_aead_decrypt
   Hacl_HPKE_Curve51_CP32_SHA256_setupBaseI

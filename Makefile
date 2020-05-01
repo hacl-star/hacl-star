@@ -750,14 +750,14 @@ dist/wasm/Makefile.basic: HPKE_BUNDLE += \
 
 # Disabling vectorized stuff
 dist/wasm/Makefile.basic: CHACHA20_BUNDLE += \
-  -bundle Hacl.Chacha20_Vec128,Hacl.Chacha20_Vec256
+  -bundle Hacl.Chacha20_Vec128,Hacl.Chacha20_Vec256,Hacl.Chacha20_Vec512
 dist/wasm/Makefile.basic: CHACHAPOLY_BUNDLE += \
   -bundle Hacl.Chacha20Poly1305_128,Hacl.Chacha20Poly1305_256
 dist/wasm/Makefile.basic: POLY_BUNDLE = \
   -bundle 'Hacl.Poly1305_32=Hacl.Impl.Poly1305.Field32xN_32' \
-  -bundle 'Hacl.Poly1305_128,Hacl.Poly1305_256,Hacl.Impl.Poly1305.*'
+  -bundle 'Hacl.Poly1305_128,Hacl.Poly1305_256,Hacl.Poly1305_512,Hacl.Impl.Poly1305.*'
 dist/wasm/Makefile.basic: SHA2VEC_BUNDLE += \
-  -bundle Hacl.SHA2_Vec128,Hacl.SHA2_Vec256
+  -bundle Hacl.SHA2_Vec128,Hacl.SHA2_Vec256,Hacl.SHA2_Vec512
 
 dist/wasm/Makefile.basic: STREAMING_BUNDLE = -bundle Hacl.Streaming.*
 
@@ -888,7 +888,7 @@ dist/ccf/Makefile.basic: \
   DEFAULT_FLAGS += \
     -fbuiltin-uint128 \
     -bundle EverCrypt.AutoConfig2= \
-    -bundle Hacl.Poly1305_32,Hacl.Poly1305_128,Hacl.Poly1305_256,Hacl.Impl.Poly1305.Field32xN_32,Hacl.Impl.Poly1305.Field32xN_128,Hacl.Impl.Poly1305.Field32xN_256[rename=Hacl_Poly1305] \
+    -bundle Hacl.Poly1305_32,Hacl.Poly1305_128,Hacl.Poly1305_256,Hacl.Poly1305_512,Hacl.Impl.Poly1305.Field32xN_32,Hacl.Impl.Poly1305.Field32xN_128,Hacl.Impl.Poly1305.Field32xN_256,Hacl.Impl.Poly1305.Field32xN_512[rename=Hacl_Poly1305] \
     -bundle Hacl.*[rename=Hacl_Leftovers] \
     -bundle EverCrypt.Hacl \
     -bundle EverCrypt.Helpers \
@@ -925,7 +925,7 @@ dist/mozilla/Makefile.basic: E_HASH_BUNDLE =
 dist/mozilla/Makefile.basic: MERKLE_BUNDLE = -bundle MerkleTree.*,MerkleTree
 dist/mozilla/Makefile.basic: CTR_BUNDLE =
 dist/mozilla/Makefile.basic: BLAKE2_BUNDLE = -bundle Hacl.Impl.Blake2.*,Hacl.Blake2b_256,Hacl.Blake2s_128,Hacl.Blake2b_32,Hacl.Blake2s_32
-dist/mozilla/Makefile.basic: SHA2VEC_BUNDLE = -bundle Hacl.Impl.SHA2.*,Hacl.SHA2_Vec256,Hacl.SHA2_Vec128,Hacl.SHA2_Scalar32
+dist/mozilla/Makefile.basic: SHA2VEC_BUNDLE = -bundle Hacl.Impl.SHA2.*,Hacl.SHA2_Vec512,Hacl.SHA2_Vec256,Hacl.SHA2_Vec128,Hacl.SHA2_Scalar32
 dist/mozilla/Makefile.basic: SHA3_BUNDLE = -bundle Hacl.SHA3
 dist/mozilla/Makefile.basic: HASH_BUNDLE = -bundle Hacl.Hash.*,Hacl.HKDF,Hacl.HMAC,Hacl.HMAC_DRBG
 dist/mozilla/Makefile.basic: HPKE_BUNDLE = -bundle 'Hacl.HPKE.*'

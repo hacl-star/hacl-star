@@ -377,14 +377,22 @@ Hacl_Chacha20_Vec256_chacha20_encrypt_256(
           Lib_IntVector_Intrinsics_vec256 v5_20 = v5_2;
           Lib_IntVector_Intrinsics_vec256 v6_20 = v6_2;
           Lib_IntVector_Intrinsics_vec256 v7_20 = v7_2;
-          Lib_IntVector_Intrinsics_vec256 v0 = v0_20;
-          Lib_IntVector_Intrinsics_vec256 v1 = v2_20;
-          Lib_IntVector_Intrinsics_vec256 v2 = v1_20;
-          Lib_IntVector_Intrinsics_vec256 v3 = v3_20;
-          Lib_IntVector_Intrinsics_vec256 v4 = v4_20;
-          Lib_IntVector_Intrinsics_vec256 v5 = v6_20;
-          Lib_IntVector_Intrinsics_vec256 v6 = v5_20;
-          Lib_IntVector_Intrinsics_vec256 v7 = v7_20;
+          Lib_IntVector_Intrinsics_vec256 v0_3 = v0_20;
+          Lib_IntVector_Intrinsics_vec256 v1_3 = v1_20;
+          Lib_IntVector_Intrinsics_vec256 v2_3 = v2_20;
+          Lib_IntVector_Intrinsics_vec256 v3_3 = v3_20;
+          Lib_IntVector_Intrinsics_vec256 v4_3 = v4_20;
+          Lib_IntVector_Intrinsics_vec256 v5_3 = v5_20;
+          Lib_IntVector_Intrinsics_vec256 v6_3 = v6_20;
+          Lib_IntVector_Intrinsics_vec256 v7_3 = v7_20;
+          Lib_IntVector_Intrinsics_vec256 v0 = v0_3;
+          Lib_IntVector_Intrinsics_vec256 v1 = v2_3;
+          Lib_IntVector_Intrinsics_vec256 v2 = v1_3;
+          Lib_IntVector_Intrinsics_vec256 v3 = v3_3;
+          Lib_IntVector_Intrinsics_vec256 v4 = v4_3;
+          Lib_IntVector_Intrinsics_vec256 v5 = v6_3;
+          Lib_IntVector_Intrinsics_vec256 v6 = v5_3;
+          Lib_IntVector_Intrinsics_vec256 v7 = v7_3;
           Lib_IntVector_Intrinsics_vec256 v01 = k[8U];
           Lib_IntVector_Intrinsics_vec256 v110 = k[9U];
           Lib_IntVector_Intrinsics_vec256 v21 = k[10U];
@@ -394,45 +402,45 @@ Hacl_Chacha20_Vec256_chacha20_encrypt_256(
           Lib_IntVector_Intrinsics_vec256 v61 = k[14U];
           Lib_IntVector_Intrinsics_vec256 v71 = k[15U];
           Lib_IntVector_Intrinsics_vec256
-          v0_3 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v01, v110);
+          v0_4 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v01, v110);
           Lib_IntVector_Intrinsics_vec256
-          v1_3 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v01, v110);
+          v1_4 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v01, v110);
           Lib_IntVector_Intrinsics_vec256
-          v2_3 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v21, v31);
+          v2_4 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v21, v31);
           Lib_IntVector_Intrinsics_vec256
-          v3_3 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v21, v31);
+          v3_4 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v21, v31);
           Lib_IntVector_Intrinsics_vec256
-          v4_3 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v41, v51);
+          v4_4 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v41, v51);
           Lib_IntVector_Intrinsics_vec256
-          v5_3 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v41, v51);
+          v5_4 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v41, v51);
           Lib_IntVector_Intrinsics_vec256
-          v6_3 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v61, v71);
+          v6_4 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v61, v71);
           Lib_IntVector_Intrinsics_vec256
-          v7_3 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v61, v71);
-          Lib_IntVector_Intrinsics_vec256 v0_4 = v0_3;
-          Lib_IntVector_Intrinsics_vec256 v1_4 = v1_3;
-          Lib_IntVector_Intrinsics_vec256 v2_4 = v2_3;
-          Lib_IntVector_Intrinsics_vec256 v3_4 = v3_3;
-          Lib_IntVector_Intrinsics_vec256 v4_4 = v4_3;
-          Lib_IntVector_Intrinsics_vec256 v5_4 = v5_3;
-          Lib_IntVector_Intrinsics_vec256 v6_4 = v6_3;
-          Lib_IntVector_Intrinsics_vec256 v7_4 = v7_3;
+          v7_4 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v61, v71);
+          Lib_IntVector_Intrinsics_vec256 v0_5 = v0_4;
+          Lib_IntVector_Intrinsics_vec256 v1_5 = v1_4;
+          Lib_IntVector_Intrinsics_vec256 v2_5 = v2_4;
+          Lib_IntVector_Intrinsics_vec256 v3_5 = v3_4;
+          Lib_IntVector_Intrinsics_vec256 v4_5 = v4_4;
+          Lib_IntVector_Intrinsics_vec256 v5_5 = v5_4;
+          Lib_IntVector_Intrinsics_vec256 v6_5 = v6_4;
+          Lib_IntVector_Intrinsics_vec256 v7_5 = v7_4;
           Lib_IntVector_Intrinsics_vec256
-          v0_11 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v0_4, v2_4);
+          v0_11 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v0_5, v2_5);
           Lib_IntVector_Intrinsics_vec256
-          v2_11 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v0_4, v2_4);
+          v2_11 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v0_5, v2_5);
           Lib_IntVector_Intrinsics_vec256
-          v1_11 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v1_4, v3_4);
+          v1_11 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v1_5, v3_5);
           Lib_IntVector_Intrinsics_vec256
-          v3_11 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v1_4, v3_4);
+          v3_11 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v1_5, v3_5);
           Lib_IntVector_Intrinsics_vec256
-          v4_11 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v4_4, v6_4);
+          v4_11 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v4_5, v6_5);
           Lib_IntVector_Intrinsics_vec256
-          v6_11 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v4_4, v6_4);
+          v6_11 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v4_5, v6_5);
           Lib_IntVector_Intrinsics_vec256
-          v5_11 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v5_4, v7_4);
+          v5_11 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v5_5, v7_5);
           Lib_IntVector_Intrinsics_vec256
-          v7_11 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v5_4, v7_4);
+          v7_11 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v5_5, v7_5);
           Lib_IntVector_Intrinsics_vec256 v0_12 = v0_11;
           Lib_IntVector_Intrinsics_vec256 v1_12 = v1_11;
           Lib_IntVector_Intrinsics_vec256 v2_12 = v2_11;
@@ -465,14 +473,22 @@ Hacl_Chacha20_Vec256_chacha20_encrypt_256(
           Lib_IntVector_Intrinsics_vec256 v5_22 = v5_21;
           Lib_IntVector_Intrinsics_vec256 v6_22 = v6_21;
           Lib_IntVector_Intrinsics_vec256 v7_22 = v7_21;
-          Lib_IntVector_Intrinsics_vec256 v8 = v0_22;
-          Lib_IntVector_Intrinsics_vec256 v9 = v2_22;
-          Lib_IntVector_Intrinsics_vec256 v10 = v1_22;
-          Lib_IntVector_Intrinsics_vec256 v11 = v3_22;
-          Lib_IntVector_Intrinsics_vec256 v12 = v4_22;
-          Lib_IntVector_Intrinsics_vec256 v13 = v6_22;
-          Lib_IntVector_Intrinsics_vec256 v14 = v5_22;
-          Lib_IntVector_Intrinsics_vec256 v15 = v7_22;
+          Lib_IntVector_Intrinsics_vec256 v0_6 = v0_22;
+          Lib_IntVector_Intrinsics_vec256 v1_6 = v1_22;
+          Lib_IntVector_Intrinsics_vec256 v2_6 = v2_22;
+          Lib_IntVector_Intrinsics_vec256 v3_6 = v3_22;
+          Lib_IntVector_Intrinsics_vec256 v4_6 = v4_22;
+          Lib_IntVector_Intrinsics_vec256 v5_6 = v5_22;
+          Lib_IntVector_Intrinsics_vec256 v6_6 = v6_22;
+          Lib_IntVector_Intrinsics_vec256 v7_6 = v7_22;
+          Lib_IntVector_Intrinsics_vec256 v8 = v0_6;
+          Lib_IntVector_Intrinsics_vec256 v9 = v2_6;
+          Lib_IntVector_Intrinsics_vec256 v10 = v1_6;
+          Lib_IntVector_Intrinsics_vec256 v11 = v3_6;
+          Lib_IntVector_Intrinsics_vec256 v12 = v4_6;
+          Lib_IntVector_Intrinsics_vec256 v13 = v6_6;
+          Lib_IntVector_Intrinsics_vec256 v14 = v5_6;
+          Lib_IntVector_Intrinsics_vec256 v15 = v7_6;
           k[0U] = v0;
           k[1U] = v8;
           k[2U] = v1;
@@ -597,14 +613,22 @@ Hacl_Chacha20_Vec256_chacha20_encrypt_256(
           Lib_IntVector_Intrinsics_vec256 v5_20 = v5_2;
           Lib_IntVector_Intrinsics_vec256 v6_20 = v6_2;
           Lib_IntVector_Intrinsics_vec256 v7_20 = v7_2;
-          Lib_IntVector_Intrinsics_vec256 v0 = v0_20;
-          Lib_IntVector_Intrinsics_vec256 v1 = v2_20;
-          Lib_IntVector_Intrinsics_vec256 v2 = v1_20;
-          Lib_IntVector_Intrinsics_vec256 v3 = v3_20;
-          Lib_IntVector_Intrinsics_vec256 v4 = v4_20;
-          Lib_IntVector_Intrinsics_vec256 v5 = v6_20;
-          Lib_IntVector_Intrinsics_vec256 v6 = v5_20;
-          Lib_IntVector_Intrinsics_vec256 v7 = v7_20;
+          Lib_IntVector_Intrinsics_vec256 v0_3 = v0_20;
+          Lib_IntVector_Intrinsics_vec256 v1_3 = v1_20;
+          Lib_IntVector_Intrinsics_vec256 v2_3 = v2_20;
+          Lib_IntVector_Intrinsics_vec256 v3_3 = v3_20;
+          Lib_IntVector_Intrinsics_vec256 v4_3 = v4_20;
+          Lib_IntVector_Intrinsics_vec256 v5_3 = v5_20;
+          Lib_IntVector_Intrinsics_vec256 v6_3 = v6_20;
+          Lib_IntVector_Intrinsics_vec256 v7_3 = v7_20;
+          Lib_IntVector_Intrinsics_vec256 v0 = v0_3;
+          Lib_IntVector_Intrinsics_vec256 v1 = v2_3;
+          Lib_IntVector_Intrinsics_vec256 v2 = v1_3;
+          Lib_IntVector_Intrinsics_vec256 v3 = v3_3;
+          Lib_IntVector_Intrinsics_vec256 v4 = v4_3;
+          Lib_IntVector_Intrinsics_vec256 v5 = v6_3;
+          Lib_IntVector_Intrinsics_vec256 v6 = v5_3;
+          Lib_IntVector_Intrinsics_vec256 v7 = v7_3;
           Lib_IntVector_Intrinsics_vec256 v01 = k[8U];
           Lib_IntVector_Intrinsics_vec256 v110 = k[9U];
           Lib_IntVector_Intrinsics_vec256 v21 = k[10U];
@@ -614,45 +638,45 @@ Hacl_Chacha20_Vec256_chacha20_encrypt_256(
           Lib_IntVector_Intrinsics_vec256 v61 = k[14U];
           Lib_IntVector_Intrinsics_vec256 v71 = k[15U];
           Lib_IntVector_Intrinsics_vec256
-          v0_3 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v01, v110);
+          v0_4 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v01, v110);
           Lib_IntVector_Intrinsics_vec256
-          v1_3 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v01, v110);
+          v1_4 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v01, v110);
           Lib_IntVector_Intrinsics_vec256
-          v2_3 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v21, v31);
+          v2_4 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v21, v31);
           Lib_IntVector_Intrinsics_vec256
-          v3_3 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v21, v31);
+          v3_4 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v21, v31);
           Lib_IntVector_Intrinsics_vec256
-          v4_3 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v41, v51);
+          v4_4 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v41, v51);
           Lib_IntVector_Intrinsics_vec256
-          v5_3 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v41, v51);
+          v5_4 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v41, v51);
           Lib_IntVector_Intrinsics_vec256
-          v6_3 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v61, v71);
+          v6_4 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v61, v71);
           Lib_IntVector_Intrinsics_vec256
-          v7_3 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v61, v71);
-          Lib_IntVector_Intrinsics_vec256 v0_4 = v0_3;
-          Lib_IntVector_Intrinsics_vec256 v1_4 = v1_3;
-          Lib_IntVector_Intrinsics_vec256 v2_4 = v2_3;
-          Lib_IntVector_Intrinsics_vec256 v3_4 = v3_3;
-          Lib_IntVector_Intrinsics_vec256 v4_4 = v4_3;
-          Lib_IntVector_Intrinsics_vec256 v5_4 = v5_3;
-          Lib_IntVector_Intrinsics_vec256 v6_4 = v6_3;
-          Lib_IntVector_Intrinsics_vec256 v7_4 = v7_3;
+          v7_4 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v61, v71);
+          Lib_IntVector_Intrinsics_vec256 v0_5 = v0_4;
+          Lib_IntVector_Intrinsics_vec256 v1_5 = v1_4;
+          Lib_IntVector_Intrinsics_vec256 v2_5 = v2_4;
+          Lib_IntVector_Intrinsics_vec256 v3_5 = v3_4;
+          Lib_IntVector_Intrinsics_vec256 v4_5 = v4_4;
+          Lib_IntVector_Intrinsics_vec256 v5_5 = v5_4;
+          Lib_IntVector_Intrinsics_vec256 v6_5 = v6_4;
+          Lib_IntVector_Intrinsics_vec256 v7_5 = v7_4;
           Lib_IntVector_Intrinsics_vec256
-          v0_11 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v0_4, v2_4);
+          v0_11 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v0_5, v2_5);
           Lib_IntVector_Intrinsics_vec256
-          v2_11 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v0_4, v2_4);
+          v2_11 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v0_5, v2_5);
           Lib_IntVector_Intrinsics_vec256
-          v1_11 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v1_4, v3_4);
+          v1_11 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v1_5, v3_5);
           Lib_IntVector_Intrinsics_vec256
-          v3_11 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v1_4, v3_4);
+          v3_11 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v1_5, v3_5);
           Lib_IntVector_Intrinsics_vec256
-          v4_11 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v4_4, v6_4);
+          v4_11 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v4_5, v6_5);
           Lib_IntVector_Intrinsics_vec256
-          v6_11 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v4_4, v6_4);
+          v6_11 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v4_5, v6_5);
           Lib_IntVector_Intrinsics_vec256
-          v5_11 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v5_4, v7_4);
+          v5_11 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v5_5, v7_5);
           Lib_IntVector_Intrinsics_vec256
-          v7_11 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v5_4, v7_4);
+          v7_11 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v5_5, v7_5);
           Lib_IntVector_Intrinsics_vec256 v0_12 = v0_11;
           Lib_IntVector_Intrinsics_vec256 v1_12 = v1_11;
           Lib_IntVector_Intrinsics_vec256 v2_12 = v2_11;
@@ -685,14 +709,22 @@ Hacl_Chacha20_Vec256_chacha20_encrypt_256(
           Lib_IntVector_Intrinsics_vec256 v5_22 = v5_21;
           Lib_IntVector_Intrinsics_vec256 v6_22 = v6_21;
           Lib_IntVector_Intrinsics_vec256 v7_22 = v7_21;
-          Lib_IntVector_Intrinsics_vec256 v8 = v0_22;
-          Lib_IntVector_Intrinsics_vec256 v9 = v2_22;
-          Lib_IntVector_Intrinsics_vec256 v10 = v1_22;
-          Lib_IntVector_Intrinsics_vec256 v11 = v3_22;
-          Lib_IntVector_Intrinsics_vec256 v12 = v4_22;
-          Lib_IntVector_Intrinsics_vec256 v13 = v6_22;
-          Lib_IntVector_Intrinsics_vec256 v14 = v5_22;
-          Lib_IntVector_Intrinsics_vec256 v15 = v7_22;
+          Lib_IntVector_Intrinsics_vec256 v0_6 = v0_22;
+          Lib_IntVector_Intrinsics_vec256 v1_6 = v1_22;
+          Lib_IntVector_Intrinsics_vec256 v2_6 = v2_22;
+          Lib_IntVector_Intrinsics_vec256 v3_6 = v3_22;
+          Lib_IntVector_Intrinsics_vec256 v4_6 = v4_22;
+          Lib_IntVector_Intrinsics_vec256 v5_6 = v5_22;
+          Lib_IntVector_Intrinsics_vec256 v6_6 = v6_22;
+          Lib_IntVector_Intrinsics_vec256 v7_6 = v7_22;
+          Lib_IntVector_Intrinsics_vec256 v8 = v0_6;
+          Lib_IntVector_Intrinsics_vec256 v9 = v2_6;
+          Lib_IntVector_Intrinsics_vec256 v10 = v1_6;
+          Lib_IntVector_Intrinsics_vec256 v11 = v3_6;
+          Lib_IntVector_Intrinsics_vec256 v12 = v4_6;
+          Lib_IntVector_Intrinsics_vec256 v13 = v6_6;
+          Lib_IntVector_Intrinsics_vec256 v14 = v5_6;
+          Lib_IntVector_Intrinsics_vec256 v15 = v7_6;
           k[0U] = v0;
           k[1U] = v8;
           k[2U] = v1;
@@ -844,14 +876,22 @@ Hacl_Chacha20_Vec256_chacha20_decrypt_256(
           Lib_IntVector_Intrinsics_vec256 v5_20 = v5_2;
           Lib_IntVector_Intrinsics_vec256 v6_20 = v6_2;
           Lib_IntVector_Intrinsics_vec256 v7_20 = v7_2;
-          Lib_IntVector_Intrinsics_vec256 v0 = v0_20;
-          Lib_IntVector_Intrinsics_vec256 v1 = v2_20;
-          Lib_IntVector_Intrinsics_vec256 v2 = v1_20;
-          Lib_IntVector_Intrinsics_vec256 v3 = v3_20;
-          Lib_IntVector_Intrinsics_vec256 v4 = v4_20;
-          Lib_IntVector_Intrinsics_vec256 v5 = v6_20;
-          Lib_IntVector_Intrinsics_vec256 v6 = v5_20;
-          Lib_IntVector_Intrinsics_vec256 v7 = v7_20;
+          Lib_IntVector_Intrinsics_vec256 v0_3 = v0_20;
+          Lib_IntVector_Intrinsics_vec256 v1_3 = v1_20;
+          Lib_IntVector_Intrinsics_vec256 v2_3 = v2_20;
+          Lib_IntVector_Intrinsics_vec256 v3_3 = v3_20;
+          Lib_IntVector_Intrinsics_vec256 v4_3 = v4_20;
+          Lib_IntVector_Intrinsics_vec256 v5_3 = v5_20;
+          Lib_IntVector_Intrinsics_vec256 v6_3 = v6_20;
+          Lib_IntVector_Intrinsics_vec256 v7_3 = v7_20;
+          Lib_IntVector_Intrinsics_vec256 v0 = v0_3;
+          Lib_IntVector_Intrinsics_vec256 v1 = v2_3;
+          Lib_IntVector_Intrinsics_vec256 v2 = v1_3;
+          Lib_IntVector_Intrinsics_vec256 v3 = v3_3;
+          Lib_IntVector_Intrinsics_vec256 v4 = v4_3;
+          Lib_IntVector_Intrinsics_vec256 v5 = v6_3;
+          Lib_IntVector_Intrinsics_vec256 v6 = v5_3;
+          Lib_IntVector_Intrinsics_vec256 v7 = v7_3;
           Lib_IntVector_Intrinsics_vec256 v01 = k[8U];
           Lib_IntVector_Intrinsics_vec256 v110 = k[9U];
           Lib_IntVector_Intrinsics_vec256 v21 = k[10U];
@@ -861,45 +901,45 @@ Hacl_Chacha20_Vec256_chacha20_decrypt_256(
           Lib_IntVector_Intrinsics_vec256 v61 = k[14U];
           Lib_IntVector_Intrinsics_vec256 v71 = k[15U];
           Lib_IntVector_Intrinsics_vec256
-          v0_3 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v01, v110);
+          v0_4 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v01, v110);
           Lib_IntVector_Intrinsics_vec256
-          v1_3 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v01, v110);
+          v1_4 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v01, v110);
           Lib_IntVector_Intrinsics_vec256
-          v2_3 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v21, v31);
+          v2_4 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v21, v31);
           Lib_IntVector_Intrinsics_vec256
-          v3_3 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v21, v31);
+          v3_4 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v21, v31);
           Lib_IntVector_Intrinsics_vec256
-          v4_3 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v41, v51);
+          v4_4 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v41, v51);
           Lib_IntVector_Intrinsics_vec256
-          v5_3 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v41, v51);
+          v5_4 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v41, v51);
           Lib_IntVector_Intrinsics_vec256
-          v6_3 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v61, v71);
+          v6_4 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v61, v71);
           Lib_IntVector_Intrinsics_vec256
-          v7_3 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v61, v71);
-          Lib_IntVector_Intrinsics_vec256 v0_4 = v0_3;
-          Lib_IntVector_Intrinsics_vec256 v1_4 = v1_3;
-          Lib_IntVector_Intrinsics_vec256 v2_4 = v2_3;
-          Lib_IntVector_Intrinsics_vec256 v3_4 = v3_3;
-          Lib_IntVector_Intrinsics_vec256 v4_4 = v4_3;
-          Lib_IntVector_Intrinsics_vec256 v5_4 = v5_3;
-          Lib_IntVector_Intrinsics_vec256 v6_4 = v6_3;
-          Lib_IntVector_Intrinsics_vec256 v7_4 = v7_3;
+          v7_4 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v61, v71);
+          Lib_IntVector_Intrinsics_vec256 v0_5 = v0_4;
+          Lib_IntVector_Intrinsics_vec256 v1_5 = v1_4;
+          Lib_IntVector_Intrinsics_vec256 v2_5 = v2_4;
+          Lib_IntVector_Intrinsics_vec256 v3_5 = v3_4;
+          Lib_IntVector_Intrinsics_vec256 v4_5 = v4_4;
+          Lib_IntVector_Intrinsics_vec256 v5_5 = v5_4;
+          Lib_IntVector_Intrinsics_vec256 v6_5 = v6_4;
+          Lib_IntVector_Intrinsics_vec256 v7_5 = v7_4;
           Lib_IntVector_Intrinsics_vec256
-          v0_11 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v0_4, v2_4);
+          v0_11 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v0_5, v2_5);
           Lib_IntVector_Intrinsics_vec256
-          v2_11 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v0_4, v2_4);
+          v2_11 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v0_5, v2_5);
           Lib_IntVector_Intrinsics_vec256
-          v1_11 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v1_4, v3_4);
+          v1_11 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v1_5, v3_5);
           Lib_IntVector_Intrinsics_vec256
-          v3_11 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v1_4, v3_4);
+          v3_11 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v1_5, v3_5);
           Lib_IntVector_Intrinsics_vec256
-          v4_11 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v4_4, v6_4);
+          v4_11 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v4_5, v6_5);
           Lib_IntVector_Intrinsics_vec256
-          v6_11 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v4_4, v6_4);
+          v6_11 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v4_5, v6_5);
           Lib_IntVector_Intrinsics_vec256
-          v5_11 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v5_4, v7_4);
+          v5_11 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v5_5, v7_5);
           Lib_IntVector_Intrinsics_vec256
-          v7_11 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v5_4, v7_4);
+          v7_11 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v5_5, v7_5);
           Lib_IntVector_Intrinsics_vec256 v0_12 = v0_11;
           Lib_IntVector_Intrinsics_vec256 v1_12 = v1_11;
           Lib_IntVector_Intrinsics_vec256 v2_12 = v2_11;
@@ -932,14 +972,22 @@ Hacl_Chacha20_Vec256_chacha20_decrypt_256(
           Lib_IntVector_Intrinsics_vec256 v5_22 = v5_21;
           Lib_IntVector_Intrinsics_vec256 v6_22 = v6_21;
           Lib_IntVector_Intrinsics_vec256 v7_22 = v7_21;
-          Lib_IntVector_Intrinsics_vec256 v8 = v0_22;
-          Lib_IntVector_Intrinsics_vec256 v9 = v2_22;
-          Lib_IntVector_Intrinsics_vec256 v10 = v1_22;
-          Lib_IntVector_Intrinsics_vec256 v11 = v3_22;
-          Lib_IntVector_Intrinsics_vec256 v12 = v4_22;
-          Lib_IntVector_Intrinsics_vec256 v13 = v6_22;
-          Lib_IntVector_Intrinsics_vec256 v14 = v5_22;
-          Lib_IntVector_Intrinsics_vec256 v15 = v7_22;
+          Lib_IntVector_Intrinsics_vec256 v0_6 = v0_22;
+          Lib_IntVector_Intrinsics_vec256 v1_6 = v1_22;
+          Lib_IntVector_Intrinsics_vec256 v2_6 = v2_22;
+          Lib_IntVector_Intrinsics_vec256 v3_6 = v3_22;
+          Lib_IntVector_Intrinsics_vec256 v4_6 = v4_22;
+          Lib_IntVector_Intrinsics_vec256 v5_6 = v5_22;
+          Lib_IntVector_Intrinsics_vec256 v6_6 = v6_22;
+          Lib_IntVector_Intrinsics_vec256 v7_6 = v7_22;
+          Lib_IntVector_Intrinsics_vec256 v8 = v0_6;
+          Lib_IntVector_Intrinsics_vec256 v9 = v2_6;
+          Lib_IntVector_Intrinsics_vec256 v10 = v1_6;
+          Lib_IntVector_Intrinsics_vec256 v11 = v3_6;
+          Lib_IntVector_Intrinsics_vec256 v12 = v4_6;
+          Lib_IntVector_Intrinsics_vec256 v13 = v6_6;
+          Lib_IntVector_Intrinsics_vec256 v14 = v5_6;
+          Lib_IntVector_Intrinsics_vec256 v15 = v7_6;
           k[0U] = v0;
           k[1U] = v8;
           k[2U] = v1;
@@ -1064,14 +1112,22 @@ Hacl_Chacha20_Vec256_chacha20_decrypt_256(
           Lib_IntVector_Intrinsics_vec256 v5_20 = v5_2;
           Lib_IntVector_Intrinsics_vec256 v6_20 = v6_2;
           Lib_IntVector_Intrinsics_vec256 v7_20 = v7_2;
-          Lib_IntVector_Intrinsics_vec256 v0 = v0_20;
-          Lib_IntVector_Intrinsics_vec256 v1 = v2_20;
-          Lib_IntVector_Intrinsics_vec256 v2 = v1_20;
-          Lib_IntVector_Intrinsics_vec256 v3 = v3_20;
-          Lib_IntVector_Intrinsics_vec256 v4 = v4_20;
-          Lib_IntVector_Intrinsics_vec256 v5 = v6_20;
-          Lib_IntVector_Intrinsics_vec256 v6 = v5_20;
-          Lib_IntVector_Intrinsics_vec256 v7 = v7_20;
+          Lib_IntVector_Intrinsics_vec256 v0_3 = v0_20;
+          Lib_IntVector_Intrinsics_vec256 v1_3 = v1_20;
+          Lib_IntVector_Intrinsics_vec256 v2_3 = v2_20;
+          Lib_IntVector_Intrinsics_vec256 v3_3 = v3_20;
+          Lib_IntVector_Intrinsics_vec256 v4_3 = v4_20;
+          Lib_IntVector_Intrinsics_vec256 v5_3 = v5_20;
+          Lib_IntVector_Intrinsics_vec256 v6_3 = v6_20;
+          Lib_IntVector_Intrinsics_vec256 v7_3 = v7_20;
+          Lib_IntVector_Intrinsics_vec256 v0 = v0_3;
+          Lib_IntVector_Intrinsics_vec256 v1 = v2_3;
+          Lib_IntVector_Intrinsics_vec256 v2 = v1_3;
+          Lib_IntVector_Intrinsics_vec256 v3 = v3_3;
+          Lib_IntVector_Intrinsics_vec256 v4 = v4_3;
+          Lib_IntVector_Intrinsics_vec256 v5 = v6_3;
+          Lib_IntVector_Intrinsics_vec256 v6 = v5_3;
+          Lib_IntVector_Intrinsics_vec256 v7 = v7_3;
           Lib_IntVector_Intrinsics_vec256 v01 = k[8U];
           Lib_IntVector_Intrinsics_vec256 v110 = k[9U];
           Lib_IntVector_Intrinsics_vec256 v21 = k[10U];
@@ -1081,45 +1137,45 @@ Hacl_Chacha20_Vec256_chacha20_decrypt_256(
           Lib_IntVector_Intrinsics_vec256 v61 = k[14U];
           Lib_IntVector_Intrinsics_vec256 v71 = k[15U];
           Lib_IntVector_Intrinsics_vec256
-          v0_3 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v01, v110);
+          v0_4 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v01, v110);
           Lib_IntVector_Intrinsics_vec256
-          v1_3 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v01, v110);
+          v1_4 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v01, v110);
           Lib_IntVector_Intrinsics_vec256
-          v2_3 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v21, v31);
+          v2_4 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v21, v31);
           Lib_IntVector_Intrinsics_vec256
-          v3_3 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v21, v31);
+          v3_4 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v21, v31);
           Lib_IntVector_Intrinsics_vec256
-          v4_3 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v41, v51);
+          v4_4 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v41, v51);
           Lib_IntVector_Intrinsics_vec256
-          v5_3 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v41, v51);
+          v5_4 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v41, v51);
           Lib_IntVector_Intrinsics_vec256
-          v6_3 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v61, v71);
+          v6_4 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v61, v71);
           Lib_IntVector_Intrinsics_vec256
-          v7_3 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v61, v71);
-          Lib_IntVector_Intrinsics_vec256 v0_4 = v0_3;
-          Lib_IntVector_Intrinsics_vec256 v1_4 = v1_3;
-          Lib_IntVector_Intrinsics_vec256 v2_4 = v2_3;
-          Lib_IntVector_Intrinsics_vec256 v3_4 = v3_3;
-          Lib_IntVector_Intrinsics_vec256 v4_4 = v4_3;
-          Lib_IntVector_Intrinsics_vec256 v5_4 = v5_3;
-          Lib_IntVector_Intrinsics_vec256 v6_4 = v6_3;
-          Lib_IntVector_Intrinsics_vec256 v7_4 = v7_3;
+          v7_4 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v61, v71);
+          Lib_IntVector_Intrinsics_vec256 v0_5 = v0_4;
+          Lib_IntVector_Intrinsics_vec256 v1_5 = v1_4;
+          Lib_IntVector_Intrinsics_vec256 v2_5 = v2_4;
+          Lib_IntVector_Intrinsics_vec256 v3_5 = v3_4;
+          Lib_IntVector_Intrinsics_vec256 v4_5 = v4_4;
+          Lib_IntVector_Intrinsics_vec256 v5_5 = v5_4;
+          Lib_IntVector_Intrinsics_vec256 v6_5 = v6_4;
+          Lib_IntVector_Intrinsics_vec256 v7_5 = v7_4;
           Lib_IntVector_Intrinsics_vec256
-          v0_11 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v0_4, v2_4);
+          v0_11 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v0_5, v2_5);
           Lib_IntVector_Intrinsics_vec256
-          v2_11 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v0_4, v2_4);
+          v2_11 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v0_5, v2_5);
           Lib_IntVector_Intrinsics_vec256
-          v1_11 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v1_4, v3_4);
+          v1_11 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v1_5, v3_5);
           Lib_IntVector_Intrinsics_vec256
-          v3_11 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v1_4, v3_4);
+          v3_11 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v1_5, v3_5);
           Lib_IntVector_Intrinsics_vec256
-          v4_11 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v4_4, v6_4);
+          v4_11 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v4_5, v6_5);
           Lib_IntVector_Intrinsics_vec256
-          v6_11 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v4_4, v6_4);
+          v6_11 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v4_5, v6_5);
           Lib_IntVector_Intrinsics_vec256
-          v5_11 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v5_4, v7_4);
+          v5_11 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v5_5, v7_5);
           Lib_IntVector_Intrinsics_vec256
-          v7_11 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v5_4, v7_4);
+          v7_11 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v5_5, v7_5);
           Lib_IntVector_Intrinsics_vec256 v0_12 = v0_11;
           Lib_IntVector_Intrinsics_vec256 v1_12 = v1_11;
           Lib_IntVector_Intrinsics_vec256 v2_12 = v2_11;
@@ -1152,14 +1208,22 @@ Hacl_Chacha20_Vec256_chacha20_decrypt_256(
           Lib_IntVector_Intrinsics_vec256 v5_22 = v5_21;
           Lib_IntVector_Intrinsics_vec256 v6_22 = v6_21;
           Lib_IntVector_Intrinsics_vec256 v7_22 = v7_21;
-          Lib_IntVector_Intrinsics_vec256 v8 = v0_22;
-          Lib_IntVector_Intrinsics_vec256 v9 = v2_22;
-          Lib_IntVector_Intrinsics_vec256 v10 = v1_22;
-          Lib_IntVector_Intrinsics_vec256 v11 = v3_22;
-          Lib_IntVector_Intrinsics_vec256 v12 = v4_22;
-          Lib_IntVector_Intrinsics_vec256 v13 = v6_22;
-          Lib_IntVector_Intrinsics_vec256 v14 = v5_22;
-          Lib_IntVector_Intrinsics_vec256 v15 = v7_22;
+          Lib_IntVector_Intrinsics_vec256 v0_6 = v0_22;
+          Lib_IntVector_Intrinsics_vec256 v1_6 = v1_22;
+          Lib_IntVector_Intrinsics_vec256 v2_6 = v2_22;
+          Lib_IntVector_Intrinsics_vec256 v3_6 = v3_22;
+          Lib_IntVector_Intrinsics_vec256 v4_6 = v4_22;
+          Lib_IntVector_Intrinsics_vec256 v5_6 = v5_22;
+          Lib_IntVector_Intrinsics_vec256 v6_6 = v6_22;
+          Lib_IntVector_Intrinsics_vec256 v7_6 = v7_22;
+          Lib_IntVector_Intrinsics_vec256 v8 = v0_6;
+          Lib_IntVector_Intrinsics_vec256 v9 = v2_6;
+          Lib_IntVector_Intrinsics_vec256 v10 = v1_6;
+          Lib_IntVector_Intrinsics_vec256 v11 = v3_6;
+          Lib_IntVector_Intrinsics_vec256 v12 = v4_6;
+          Lib_IntVector_Intrinsics_vec256 v13 = v6_6;
+          Lib_IntVector_Intrinsics_vec256 v14 = v5_6;
+          Lib_IntVector_Intrinsics_vec256 v15 = v7_6;
           k[0U] = v0;
           k[1U] = v8;
           k[2U] = v1;

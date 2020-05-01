@@ -107,7 +107,8 @@ BLAKE2_BUNDLE=-bundle Hacl.Impl.Blake2.Constants -static-header Hacl.Impl.Blake2
 ED_BUNDLE=-bundle 'Hacl.Ed25519=Hacl.Impl.Ed25519.*,Hacl.Impl.BignumQ.Mul,Hacl.Impl.Load56,Hacl.Impl.SHA512.ModQ,Hacl.Impl.Store56,Hacl.Bignum25519'
 POLY_BUNDLE=-bundle 'Hacl.Poly1305_32=Hacl.Impl.Poly1305.Field32xN_32' \
   -bundle 'Hacl.Poly1305_128=Hacl.Impl.Poly1305.Field32xN_128' \
-  -bundle 'Hacl.Poly1305_256=Hacl.Impl.Poly1305.Field32xN_256'
+  -bundle 'Hacl.Poly1305_256=Hacl.Impl.Poly1305.Field32xN_256' \
+  -bundle 'Hacl.Poly1305_512=Hacl.Impl.Poly1305.Field32xN_512'
 NACLBOX_BUNDLE=-bundle Hacl.NaCl=Hacl.Impl.SecretBox,Hacl.Impl.Box
 ECDSA_BUNDLE=-bundle Hacl.Impl.ECDSA=Hacl.Impl.ECDSA,Hacl.Impl.ECDSA.*,Hacl.Impl.P256.*,Hacl.Hash.SHA2,Hacl.Hash.Core.SHA2,Hacl.Hash.Core.SHA2.Constants,Hacl.Hash.Definitions,Hacl.Impl.P256,Hacl.Spec.P256.*,Hacl.Impl.SolinasReduction,Hacl.Impl.LowLevel[rename=Hacl_ECDSA]
 FRODO_BUNDLE=-bundle 'Hacl.Frodo.KEM=Frodo.Params,Hacl.Impl.Frodo.*,Hacl.Impl.Matrix,Hacl.Frodo.*,Hacl.Keccak'
