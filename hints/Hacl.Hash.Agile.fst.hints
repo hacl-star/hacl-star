@@ -24,7 +24,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "ede7a42ebc1e54f0b1b0c6ef5e91c281"
+      "33124b8b059fe07044049bba3f4d4bbb"
     ],
     [
       "Hacl.Hash.Agile.init",
@@ -56,7 +56,7 @@
         "refinement_interpretation_Tm_refine_9d89425f931bd52cd64f1b28f88f4ad2"
       ],
       0,
-      "a32376f02978a8a8d1d2e15b95c310ea"
+      "30ac4fed892a7aa66874997eb01c291e"
     ],
     [
       "Hacl.Hash.Agile.update",
@@ -88,7 +88,7 @@
         "refinement_interpretation_Tm_refine_fdaf1d0e98b161e8e368c15419142c32"
       ],
       0,
-      "1417ab9c08ec799b7f7cab85eeb8f4d0"
+      "69dab6a6e3331bfec927ab45706ea5cc"
     ],
     [
       "Hacl.Hash.Agile.pad",
@@ -97,6 +97,12 @@
       1,
       [
         "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Spec.Hash.Definitions.MD5",
+        "constructor_distinct_Spec.Hash.Definitions.SHA1",
+        "constructor_distinct_Spec.Hash.Definitions.SHA2_224",
+        "constructor_distinct_Spec.Hash.Definitions.SHA2_256",
+        "constructor_distinct_Spec.Hash.Definitions.SHA2_384",
+        "constructor_distinct_Spec.Hash.Definitions.SHA2_512",
         "disc_equation_Spec.Hash.Definitions.MD5",
         "disc_equation_Spec.Hash.Definitions.SHA1",
         "disc_equation_Spec.Hash.Definitions.SHA2_224",
@@ -110,7 +116,6 @@
         "equality_tok_Spec.Hash.Definitions.SHA2_384@tok",
         "equality_tok_Spec.Hash.Definitions.SHA2_512@tok",
         "fuel_guarded_inversion_Spec.Hash.Definitions.hash_alg",
-        "projection_inverse_BoxBool_proj_0",
         "refinement_interpretation_Tm_refine_341e0c2a9e84074c0f5ac57d54787ce8",
         "refinement_interpretation_Tm_refine_4b073be95c3132a5dab0a508b378f4c3",
         "refinement_interpretation_Tm_refine_6dafce4a55f75938429e8c9a216a6372",
@@ -120,7 +125,7 @@
         "refinement_interpretation_Tm_refine_deffad6fe70e988c4549a89f6cdb0cf6"
       ],
       0,
-      "0d4d560254319ea5fe06a9c787d4c14b"
+      "b45ed6d57efc040f40b47bc9a2a1a202"
     ],
     [
       "Hacl.Hash.Agile.finish",
@@ -152,7 +157,7 @@
         "refinement_interpretation_Tm_refine_8f5ba2aa9434bb05bf964b4b1b9894db"
       ],
       0,
-      "11ab701320c2e5d6e10ddf0951a2bf47"
+      "1144cd71dab6d4b2e83c51556e1cde7e"
     ]
   ]
 ]
