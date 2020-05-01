@@ -177,6 +177,7 @@ val load_row: #a:Spec.alg -> #m:m_spec -> r1:row_p a m -> ws:lbuffer (word_t a) 
 
 inline_for_extraction
 let size_row al = 4ul *. size (Spec.size_word al)
+
 inline_for_extraction
 val store_row: #a:Spec.alg -> #m:m_spec -> b:lbuffer uint8 (size_row a) -> r:row_p a m ->
 	  Stack unit
@@ -184,13 +185,12 @@ val store_row: #a:Spec.alg -> #m:m_spec -> b:lbuffer uint8 (size_row a) -> r:row
 	  (ensures (fun h0 _ h1 -> modifies (loc b) h0 h1 /\
 			        as_seq h1 b == Lib.ByteSequence.uints_to_bytes_le (row_v h0 r)))
 
-
 inline_for_extraction
 let size_block (a:Spec.alg) : x:size_t{v x = 16 * Spec.size_word a} =
+  Spec.alg_inversion_lemma a;
   match a with
   | Spec.Blake2.Blake2S -> 64ul
   | Spec.Blake2.Blake2B -> 128ul
-
 
 inline_for_extraction
 type block_p (a:Spec.alg) = lbuffer uint8 (size_block a)

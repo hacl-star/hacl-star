@@ -13,6 +13,8 @@ type alg =
   | Blake2S
   | Blake2B
 
+let alg_inversion_lemma (a:alg) : Lemma (a == Blake2S \/ a == Blake2B) = ()
+
 inline_for_extraction
 let wt (a:alg) : t:inttype{unsigned t} =
   match a with
