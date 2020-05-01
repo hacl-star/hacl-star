@@ -741,6 +741,7 @@ val sq0: f:  lbuffer uint64 (size 4) -> result: lbuffer uint64 (size 4) -> memor
  )
 
 
+#restart-solver
 #push-options "--z3rlimit 1000"
 let sq0 f result memory temp = 
   let h0 = ST.get() in 
@@ -790,6 +791,7 @@ let sq0 f result memory temp =
   
   let h5 = ST.get() in 
   let temp0 = index temp (size 0) in
+  assert (Lib.IntTypes.range (Lib.IntTypes.v c3 + Lib.IntTypes.v temp0) (Lib.IntTypes.U64));
   let r = c3 +! temp0 in 
 
   assert(uint_v (Lib.Sequence.index (as_seq h5 o0) 0) + uint_v h_0 * pow2 64 = uint_v f0 * uint_v f0);
@@ -825,7 +827,6 @@ let sq0 f result memory temp =
       uint_v f0 * uint_v f1 * pow2 64 + 
       uint_v f0 * uint_v f2 * pow2 64 * pow2 64 + 
       uint_v f0 * uint_v f3 * pow2 64 * pow2 64 * pow2 64);
-
   r
 
 #pop-options
