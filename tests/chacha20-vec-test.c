@@ -18,7 +18,7 @@
 #include "chacha20_vectors.h"
 
 #define ROUNDS 100000
-#define SIZE   8192
+#define SIZE   16384
 
 
 bool print_result(int in_len, uint8_t* comp, uint8_t* exp) {
