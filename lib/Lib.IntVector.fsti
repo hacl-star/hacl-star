@@ -432,39 +432,6 @@ type uint8x16 = vec_t U8 16
 type uint8x32 = vec_t U8 32
 
 inline_for_extraction noextract
-val vec_aes_enc: key:uint8x16 -> state:uint8x16 -> uint8x16
-
-val vec_aes_enc_lemma: key:uint8x16 -> state:uint8x16 -> Lemma
-  (ensures (vec_v (vec_aes_enc key state) == Spec.AES.aes_enc (vec_v key) (vec_v state)))
-  [SMTPat (vec_v (vec_aes_enc key state))]
-
-inline_for_extraction noextract
-val vec_aes_enc_last: key:uint8x16 -> state:uint8x16 -> uint8x16
-
-val vec_aes_enc_last_lemma: key:uint8x16 -> state:uint8x16 -> Lemma
-  (ensures (vec_v (vec_aes_enc_last key state) == Spec.AES.aes_enc_last (vec_v key) (vec_v state)))
-  [SMTPat (vec_v (vec_aes_enc_last key state))]
-
-inline_for_extraction noextract
-val vec_aes_keygen_assist: s:uint8x16 -> rcon:uint8 -> uint8x16
-
-val vec_aes_keygen_assist_lemma: s:uint8x16 -> rcon:uint8 -> Lemma
-  (ensures (vec_v (vec_aes_keygen_assist s rcon) == Spec.AES.aes_keygen_assist rcon (vec_v s)))
-  [SMTPat (vec_v (vec_aes_keygen_assist s rcon))]
-
-inline_for_extraction noextract
-val vec_clmul_lo_lo: uint128x1 -> uint128x1 -> uint128x1
-
-inline_for_extraction noextract
-val vec_clmul_lo_hi: uint128x1 -> uint128x1 -> uint128x1
-
-inline_for_extraction noextract
-val vec_clmul_hi_lo: uint128x1 -> uint128x1 -> uint128x1
-
-inline_for_extraction noextract
-val vec_clmul_hi_hi: uint128x1 -> uint128x1 -> uint128x1
-
-inline_for_extraction noextract
 let ( +| ) #t #w = vec_add_mod #t #w
 inline_for_extraction noextract
 let ( -| ) #t #w = vec_sub_mod #t #w
@@ -563,3 +530,105 @@ val vec_store_be:
   Stack unit
     (requires fun h -> live h b)
     (ensures  fun h0 r h1 -> h1 == h0 /\ as_seq h1 b == vec_to_bytes_be v)
+
+(*** Non-Portable Operations *)
+(* Generic Permutations: Possible on Intel, but not on ARM.
+   So using the following is only recommended for code that runs exclusively on Intel *)
+
+inline_for_extraction noextract
+val vec_permute2: #t:v_inttype -> v1:vec_t t 2
+  -> i1:vec_index 2 -> i2:vec_index 2 ->
+  vec_t t 2
+
+inline_for_extraction noextract
+val vec_permute2_lemma: #t:v_inttype -> v1:vec_t t 2
+  -> i1:vec_index 2 -> i2:vec_index 2 ->
+  Lemma (ensures (vec_v (vec_permute2 v1 i1 i2) == create2 (vec_v v1).[v i1] (vec_v v1).[v i2]))
+	[SMTPat (vec_v (vec_permute2 v1 i1 i2))]
+
+
+inline_for_extraction noextract
+val vec_permute4: #t:v_inttype -> v1:vec_t t 4
+  -> i1:vec_index 4 -> i2:vec_index 4 -> i3:vec_index 4 -> i4:vec_index 4 ->
+  vec_t t 4
+
+inline_for_extraction noextract
+val vec_permute4_lemma: #t:v_inttype -> v1:vec_t t 4
+  -> i1:vec_index 4 -> i2:vec_index 4 -> i3:vec_index 4 -> i4:vec_index 4 ->
+  Lemma (ensures (vec_v (vec_permute4 v1 i1 i2 i3 i4) == create4 (vec_v v1).[v i1] (vec_v v1).[v i2] (vec_v v1).[v i3] (vec_v v1).[v i4]))
+	[SMTPat (vec_v (vec_permute4 v1 i1 i2 i3 i4))]
+
+inline_for_extraction noextract
+val vec_permute8: #t:v_inttype -> v1:vec_t t 8
+  -> i1:vec_index 8 -> i2:vec_index 8 -> i3:vec_index 8 -> i4:vec_index 8
+  -> i5:vec_index 8 -> i6:vec_index 8 -> i7:vec_index 8 -> i8:vec_index 8 ->
+  v2:vec_t t 8{vec_v v2 == create8 (vec_v v1).[v i1] (vec_v v1).[v i2] (vec_v v1).[v i3] (vec_v v1).[v i4]
+                                   (vec_v v1).[v i5] (vec_v v1).[v i6] (vec_v v1).[v i7] (vec_v v1).[v i8]}
+
+inline_for_extraction noextract
+val vec_permute16: #t:v_inttype -> v1:vec_t t 16
+  -> i1:vec_index 16 -> i2:vec_index 16 -> i3:vec_index 16 -> i4:vec_index 16
+  -> i5:vec_index 16 -> i6:vec_index 16 -> i7:vec_index 16 -> i8:vec_index 16
+  -> i9:vec_index 16  -> i10:vec_index 16 -> i11:vec_index 16 -> i12:vec_index 16
+  -> i13:vec_index 16 -> i14:vec_index 16 -> i15:vec_index 16 -> i16:vec_index 16 ->
+  v2:vec_t t 16{let vv1 = vec_v v1 in
+    vec_v v2 == create16 vv1.[v i1] vv1.[v i2] vv1.[v i3] vv1.[v i4]
+                         vv1.[v i5] vv1.[v i6] vv1.[v i7] vv1.[v i8]
+                         vv1.[v i9] vv1.[v i10] vv1.[v i11] vv1.[v i12]
+                         vv1.[v i13] vv1.[v i14] vv1.[v i15] vv1.[v i16]}
+
+inline_for_extraction noextract
+val vec_permute32: #t:v_inttype -> v1:vec_t t 32
+  -> i1:vec_index 16 -> i2:vec_index 16 -> i3:vec_index 16 -> i4:vec_index 16
+  -> i5:vec_index 16 -> i6:vec_index 16 -> i7:vec_index 16 -> i8:vec_index 16
+  -> i9:vec_index 16 -> i10:vec_index 16 -> i11:vec_index 16 -> i12:vec_index 16
+  -> i13:vec_index 16 -> i14:vec_index 16 -> i15:vec_index 16 -> i16:vec_index 16
+  -> i17:vec_index 16 -> i18:vec_index 16 -> i19:vec_index 16 -> i20:vec_index 16
+  -> i21:vec_index 16 -> i22:vec_index 16 -> i23:vec_index 16 -> i24:vec_index 16
+  -> i25:vec_index 16 -> i26:vec_index 16 -> i27:vec_index 16 -> i28:vec_index 16
+  -> i29:vec_index 16 -> i30:vec_index 16 -> i31:vec_index 16 -> i32:vec_index 16 ->
+  v2:vec_t t 32{let vv1 = vec_v v1 in
+    vec_v v2 == create32 vv1.[v i1] vv1.[v i2] vv1.[v i3] vv1.[v i4]
+                         vv1.[v i5] vv1.[v i6] vv1.[v i7] vv1.[v i8]
+                         vv1.[v i9] vv1.[v i10] vv1.[v i11] vv1.[v i12]
+                         vv1.[v i13] vv1.[v i14] vv1.[v i15] vv1.[v i16]
+                         vv1.[v i17] vv1.[v i18] vv1.[v i19] vv1.[v i20]
+                         vv1.[v i21] vv1.[v i22] vv1.[v i23] vv1.[v i24]
+                         vv1.[v i25] vv1.[v i26] vv1.[v i27] vv1.[v i28]
+                         vv1.[v i29] vv1.[v i30] vv1.[v i31] vv1.[v i32]}
+
+
+
+inline_for_extraction noextract
+val vec_aes_enc: key:uint8x16 -> state:uint8x16 -> uint8x16
+
+val vec_aes_enc_lemma: key:uint8x16 -> state:uint8x16 -> Lemma
+  (ensures (vec_v (vec_aes_enc key state) == Spec.AES.aes_enc (vec_v key) (vec_v state)))
+  [SMTPat (vec_v (vec_aes_enc key state))]
+
+inline_for_extraction noextract
+val vec_aes_enc_last: key:uint8x16 -> state:uint8x16 -> uint8x16
+
+val vec_aes_enc_last_lemma: key:uint8x16 -> state:uint8x16 -> Lemma
+  (ensures (vec_v (vec_aes_enc_last key state) == Spec.AES.aes_enc_last (vec_v key) (vec_v state)))
+  [SMTPat (vec_v (vec_aes_enc_last key state))]
+
+inline_for_extraction noextract
+val vec_aes_keygen_assist: s:uint8x16 -> rcon:uint8 -> uint8x16
+
+val vec_aes_keygen_assist_lemma: s:uint8x16 -> rcon:uint8 -> Lemma
+  (ensures (vec_v (vec_aes_keygen_assist s rcon) == Spec.AES.aes_keygen_assist rcon (vec_v s)))
+  [SMTPat (vec_v (vec_aes_keygen_assist s rcon))]
+
+inline_for_extraction noextract
+val vec_clmul_lo_lo: uint128x1 -> uint128x1 -> uint128x1
+
+inline_for_extraction noextract
+val vec_clmul_lo_hi: uint128x1 -> uint128x1 -> uint128x1
+
+inline_for_extraction noextract
+val vec_clmul_hi_lo: uint128x1 -> uint128x1 -> uint128x1
+
+inline_for_extraction noextract
+val vec_clmul_hi_hi: uint128x1 -> uint128x1 -> uint128x1
+
