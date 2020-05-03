@@ -252,6 +252,9 @@ let g1 (a:alg) (wv:state a) (i:row_idx) (j:row_idx) (r:rotval (wt a)) : Tot (sta
 let g2 (a:alg) (wv:state a) (i:row_idx) (j:row_idx) (x:row a) : Tot (state a) =
   wv.[i] <- (wv.[i] +| wv.[j] +| x)
 
+let g2z (a:alg) (wv:state a) (i:row_idx) (j:row_idx) : Tot (state a) =
+  wv.[i] <- (wv.[i] +| wv.[j])
+
 
 val blake2_mixing:
     a:alg
@@ -268,11 +271,11 @@ let blake2_mixing al wv x y =
   let rt = rTable al in
   let wv = g2 al wv a b x in
   let wv = g1 al wv d a rt.[0] in
-  let wv = g2 al wv c d (zero_row al) in
+  let wv = g2z al wv c d in
   let wv = g1 al wv b c rt.[1] in
   let wv = g2 al wv a b y in
   let wv = g1 al wv d a rt.[2] in
-  let wv = g2 al wv c d (zero_row al) in
+  let wv = g2z al wv c d in
   let wv = g1 al wv b c rt.[3] in
   wv
 

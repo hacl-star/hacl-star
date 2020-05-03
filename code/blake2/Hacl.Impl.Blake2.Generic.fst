@@ -141,6 +141,22 @@ let g2 #al #m wv a b x =
   let h1 = ST.get() in
   Lib.Sequence.eq_intro (state_v  h1 wv) (Spec.g2 al (state_v h0 wv) (v a) (v b) (row_v h0 x))
 
+#push-options "--z3rlimit 100 --max_fuel 1 --max_ifuel 1"
+inline_for_extraction noextract
+val g2z: #al:Spec.alg -> #m:m_spec -> wv:state_p al m -> a:index_t -> b:index_t ->
+  Stack unit
+    (requires (fun h -> live h wv /\ a <> b))
+    (ensures  (fun h0 _ h1 -> modifies (loc wv) h0 h1
+                         /\ state_v h1 wv == Spec.g2z al (state_v h0 wv) (v a) (v b)))
+
+let g2z #al #m wv a b =
+  let h0 = ST.get() in
+  let wv_a = rowi wv a in
+  let wv_b = rowi wv b in
+  add_row wv_a wv_b;
+  let h1 = ST.get() in
+  Lib.Sequence.eq_intro (state_v  h1 wv) (Spec.g2z al (state_v h0 wv) (v a) (v b))
+
 inline_for_extraction noextract
 val blake2_mixing : #al:Spec.alg -> #m:m_spec -> wv:state_p al m -> x:row_p al m -> y:row_p al m ->
   Stack unit
@@ -159,15 +175,14 @@ let blake2_mixing #al #m wv x y =
   let r1 = get_r al (size 1) in
   let r2 = get_r al (size 2) in
   let r3 = get_r al (size 3) in
-  let zz = alloc_row al m in
   let h1 = ST.get() in
   g2 wv a b x;
   g1 wv d a r0;
-  g2 wv c d zz;
+  g2z wv c d;
   g1 wv b c r1;
   g2 wv a b y;
   g1 wv d a r2;
-  g2 wv c d zz;
+  g2z wv c d;
   g1 wv b c r3;
   let h2 = ST.get() in
   pop_frame ();
