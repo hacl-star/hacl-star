@@ -20,7 +20,7 @@ open FStar.Mul
 
 #set-options "--fuel 0 --ifuel 0"
 
-#push-options "--fuel 1 --ifuel 1 --z3rlimit 50"
+#push-options "--fuel 1 --ifuel 1 --z3rlimit 100"
 
 noextract inline_for_extraction
 val mk_update_multi: a:hash_alg{is_blake a} -> update:update_st a -> update_multi_st a
@@ -70,7 +70,107 @@ let mk_update_multi a update s ev blocks n_blocks =
   C.Loops.for 0ul n_blocks inv f;
   add_extra_i a ev n_blocks
 
+noextract inline_for_extraction
+val mk_update_last: a:hash_alg{is_blake a} -> update_multi_st a -> update_last_st a
 
+let mk_update_last a update_multi s ev prev_len input input_len =
+  ST.push_frame ();
+  let h0 = ST.get () in
+
+  (* Get a series of complete blocks. *)
+  let blocks_n = U32.(input_len /^ block_len a) in
+  let blocks_len = U32.(blocks_n *^ block_len a) in
+  assert (U32.v blocks_len % block_length a = 0);
+  let blocks = B.sub input 0ul blocks_len in
+
+  let ev' = update_multi s ev blocks blocks_n in
+
+  let h1 = ST.get () in
+
+  assert (S.equal (as_seq h1 s) (fst (Spec.Agile.Hash.update_multi a (as_seq h0 s, ev) (B.as_seq h0 blocks))));
+
+  let rest_len = U32.(input_len -^ blocks_len) in
+
+  calc (==) {
+    v rest_len % block_length a;
+    (==) { }
+    ((v input_len - v blocks_len) % pow2 64) % block_length a;
+    (==) {
+      assert_norm (block_length Blake2S == pow2 6);
+      assert_norm (block_length Blake2B == pow2 7);
+      FStar.Math.Lemmas.pow2_modulo_modulo_lemma_1 (v input_len - v blocks_len) 6 64;
+      FStar.Math.Lemmas.pow2_modulo_modulo_lemma_1 (v input_len - v blocks_len) 6 64
+      }
+    (v input_len - v blocks_len) % block_length a;
+    (==) { FStar.Math.Lemmas.lemma_mod_sub_distr (v input_len) (v blocks_len) (block_length a) }
+    v input_len % block_length a;
+  };
+
+  calc (==) {
+    (block_length a - (len_v a prev_len + v input_len) ) % block_length a;
+    (==) { FStar.Math.Lemmas.lemma_mod_sub_distr (block_length a - v input_len) (len_v a prev_len) (block_length a) }
+    (block_length a - v input_len) % block_length a;
+    (==) { FStar.Math.Lemmas.lemma_mod_sub_distr (block_length a) (v input_len) (block_length a) }
+    (block_length a - (v input_len % block_length a)) % block_length a;
+    (==) { }
+    (block_length a - (v rest_len % block_length a)) % block_length a;
+    (==) { FStar.Math.Lemmas.lemma_mod_sub_distr (block_length a) (v rest_len) (block_length a) }
+    (block_length a - v rest_len) % block_length a;
+  };
+
+  (* The rest that doesn't make up a complete block *)
+  if rest_len = 0ul then
+    (assert (Spec.Hash.PadFinish.pad a (len_v a prev_len + v input_len) `Seq.equal` Seq.empty);
+     assert (S.equal
+      (B.as_seq h0 input `Seq.append` (Spec.Hash.PadFinish.pad a (len_v a prev_len + v input_len)))
+      (B.as_seq h1 blocks));
+    ST.pop_frame();
+    ev'
+    )
+  else (
+    let rest = B.sub input blocks_len rest_len in
+
+
+    let pad_len = U32.(block_len a -^ rest_len) in
+
+    let tmp = B.alloca (Lib.IntTypes.u8 0) (block_len a) in
+    let tmp_rest = B.sub tmp 0ul rest_len in
+    let tmp_pad = B.sub tmp rest_len pad_len in
+    B.blit rest 0ul tmp_rest 0ul rest_len;
+
+    calc (==) {
+      (block_length a - (len_v a prev_len + v input_len) ) % block_length a;
+      (==) { }
+      (block_length a - v rest_len) % block_length a;
+      (==) { FStar.Math.Lemmas.small_mod (block_length a - v rest_len) (block_length a) }
+      block_length a - v rest_len;
+      (==) { assert_norm (block_length a <= pow2 32); FStar.Math.Lemmas.small_mod (block_length a - v rest_len) (pow2 32) }
+      v pad_len;
+    };
+
+    let h2 = ST.get() in
+
+    calc (==) {
+      B.as_seq h0 blocks `Seq.append` B.as_seq h2 tmp;
+      (==) { assert (Seq.equal (B.as_seq h2 tmp) (B.as_seq h2 tmp_rest `Seq.append` B.as_seq h2 tmp_pad)) }
+      B.as_seq h0 blocks `Seq.append` (B.as_seq h2 tmp_rest `Seq.append` B.as_seq h2 tmp_pad);
+      (==) { Seq.append_assoc (B.as_seq h0 blocks) (B.as_seq h2 tmp_rest) (B.as_seq h2 tmp_pad) }
+      (B.as_seq h0 blocks `Seq.append` B.as_seq h2 tmp_rest) `Seq.append` B.as_seq h2 tmp_pad;
+      (==) { assert (S.equal (B.as_seq h0 input) (S.append (B.as_seq h0 blocks) (B.as_seq h2 tmp_rest))) }
+      B.as_seq h0 input `Seq.append` B.as_seq h2 tmp_pad;
+      (==) { assert (B.as_seq h2 tmp_pad `S.equal` Spec.Hash.PadFinish.pad a (len_v a prev_len + v input_len)) }
+      B.as_seq h0 input `Seq.append` Spec.Hash.PadFinish.pad a (len_v a prev_len + v input_len);
+    };
+
+    let ev_f = update_multi s ev' tmp 1ul in
+
+    let h3 = ST.get() in
+
+    Spec.Hash.Lemmas.update_multi_associative a (as_seq h0 s, ev) (B.as_seq h0 blocks) (B.as_seq h2 tmp);
+
+    ST.pop_frame();
+    ev_f
+  )
 #pop-options
 
 let update_multi_blake2s: update_multi_st Blake2S =
@@ -79,9 +179,9 @@ let update_multi_blake2b: update_multi_st Blake2B =
   mk_update_multi Blake2B update_blake2b
 
 let update_last_blake2s: update_last_st Blake2S =
-  admit()
+  mk_update_last Blake2S update_multi_blake2s
 let update_last_blake2b: update_last_st Blake2B =
-  admit()
+  mk_update_last Blake2B update_multi_blake2b
 
 let lemma_blake2_hash_equivalence
   (a:hash_alg{is_blake a}) (d:bytes{Seq.length d <= max_input_length a})
