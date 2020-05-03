@@ -224,12 +224,12 @@ let undiag #a #m wv =
 
 
 inline_for_extraction
-val gather_state: #a:Spec.alg -> #ms:m_spec -> st:state_p a ms -> m:lbuffer uint8 (size_block a) -> start:size_t{v start <= 144} -> Stack unit
+val gather_state: #a:Spec.alg -> #ms:m_spec -> st:state_p a ms -> m:block_w a -> start:size_t{v start <= 144} -> Stack unit
 		  (requires (fun h -> live h st /\ live h m /\ disjoint st m))
 		  (ensures (fun h0 _ h1 -> modifies (loc st) h0 h1 /\
 					state_v h1 st == Spec.gather_state a (as_seq h0 m) (v start)))
 
-#push-options "--z3rlimit 150"
+#push-options "--z3rlimit 200"
 let gather_state #a #ms st m start =
   let h0 = ST.get() in
   let r0 = rowi st 0ul in
@@ -265,7 +265,7 @@ let gather_state #a #ms st m start =
   Lib.Sequence.eq_intro (state_v h5 st) (Spec.gather_state a (as_seq h0 m) (v start))
 
 inline_for_extraction noextract
-val blake2_round : #al:Spec.alg -> #ms:m_spec -> wv:state_p al ms ->  m:lbuffer uint8 (size_block al) -> i:size_t ->
+val blake2_round : #al:Spec.alg -> #ms:m_spec -> wv:state_p al ms ->  m:block_w al -> i:size_t ->
   Stack unit
     (requires (fun h -> live h wv /\ live h m /\ disjoint wv m))
     (ensures  (fun h0 _ h1 -> modifies (loc wv) h0 h1
@@ -298,6 +298,19 @@ let blake2_round #al #ms wv m i =
   blake2_mixing wv z w;
   undiag wv;
   pop_frame ()
+
+inline_for_extraction noextract
+val blake2_compress0:
+    #al:Spec.alg
+  -> m_s: block_p al
+  -> m_w: block_w al
+  -> Stack unit
+    (requires (fun h -> live h m_s /\ live h m_w /\ disjoint m_s m_w))
+    (ensures  (fun h0 _ h1 -> modifies (loc m_w) h0 h1
+                         /\ as_seq h1 m_w == Spec.blake2_compress0 al (as_seq h0 m_s)))
+
+let blake2_compress0 #al m_s m_w =
+  uints_from_bytes_le m_w m_s
 
 inline_for_extraction noextract
 val blake2_compress1:
@@ -336,7 +349,7 @@ val blake2_compress2 :
   #al:Spec.alg
   -> #ms:m_spec
   -> wv: state_p al ms
-  -> m: block_p al ->
+  -> m: block_w al ->
   Stack unit
     (requires (fun h -> live h wv /\ live h m /\ disjoint wv m))
     (ensures  (fun h0 _ h1 -> modifies1 wv h0 h1
@@ -423,9 +436,13 @@ inline_for_extraction noextract
 val blake2_compress: #al:Spec.alg -> #ms:m_spec -> compress_t al ms
 
 let blake2_compress #al #ms wv s m offset flag =
-    blake2_compress1 wv s offset flag;
-    blake2_compress2 wv m;
-    blake2_compress3 s wv
+  push_frame();
+  let m_w = create 16ul (Spec.zero al) in
+  blake2_compress0 #al m m_w;
+  blake2_compress1 wv s offset flag;
+  blake2_compress2 wv m_w;
+  blake2_compress3 s wv;
+  pop_frame()
 
 inline_for_extraction noextract
 let blake2_update_block_t (al:Spec.alg) (ms:m_spec) =
