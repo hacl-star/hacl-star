@@ -20,7 +20,7 @@ open FStar.Mul
 
 #set-options "--fuel 0 --ifuel 0"
 
-#push-options "--fuel 1 --ifuel 1 --z3rlimit 100"
+#push-options "--fuel 1 --ifuel 1 --z3rlimit 200"
 
 noextract inline_for_extraction
 val mk_update_multi: a:hash_alg{is_blake a} -> update:update_st a -> update_multi_st a
