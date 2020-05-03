@@ -180,7 +180,7 @@ let extra_state a = match a with
   // We use uints to avoid reasoning about max bounds.
   // In practice, we never have overflows because of restrictions on length of buffers
   | Blake2S -> uint_t U64 SEC
-  | Blake2B -> uint_t U128 SEC
+  | Blake2B -> uint_t U64 SEC
 
 (* The working state *)
 inline_for_extraction noextract

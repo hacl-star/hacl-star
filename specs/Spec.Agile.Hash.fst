@@ -16,7 +16,7 @@ let init a =
   | SHA1 ->
       Spec.SHA1.init
   | Blake2S -> Spec.Blake2.blake2_init Spec.Blake2.Blake2S 0 Seq.empty 32, u64 0
-  | Blake2B -> Spec.Blake2.blake2_init Spec.Blake2.Blake2B 0 Seq.empty 64, u128 0
+  | Blake2B -> Spec.Blake2.blake2_init Spec.Blake2.Blake2B 0 Seq.empty 64, u64 0
 
 let update a =
   match a with
@@ -34,10 +34,10 @@ let update a =
        totlen +. u64 (size_block a))
   | Blake2B -> fun h l ->
       let blake_state, totlen = h in
-      (Spec.Blake2.blake2_update_block Spec.Blake2.Blake2B false (v #U128 #SEC totlen) l blake_state,
+      (Spec.Blake2.blake2_update_block Spec.Blake2.Blake2B false (v #U64 #SEC totlen) l blake_state,
       // We should never have overflows given the restriction on buffer lengths, so
       // this should be equivalent to a nat addition
-       totlen +. u128 (size_block a))
+       totlen +. u64 (size_block a))
 
 
 let update_multi
