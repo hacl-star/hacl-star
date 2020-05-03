@@ -120,7 +120,7 @@ let alloca a =
     | SHA2_384 -> SHA2_384_s (B.alloca 0UL 8ul)
     | SHA2_512 -> SHA2_512_s (B.alloca 0UL 8ul)
     | Blake2S -> Blake2S_s (B.alloca 0ul 16ul) 0uL
-    | Blake2B -> Blake2B_s (B.alloca 0uL 16ul) (FStar.UInt128.uint64_to_uint128 0uL)
+    | Blake2B -> Blake2B_s (B.alloca 0uL 16ul) 0uL
   in
   B.alloca s 1ul
 
@@ -134,7 +134,7 @@ let create_in a r =
     | SHA2_384 -> SHA2_384_s (B.malloc r 0UL 8ul)
     | SHA2_512 -> SHA2_512_s (B.malloc r 0UL 8ul)
     | Blake2S -> Blake2S_s (B.malloc r 0ul 16ul) 0uL
-    | Blake2B -> Blake2B_s (B.malloc r 0uL 16ul) (FStar.UInt128.uint64_to_uint128 0uL)
+    | Blake2B -> Blake2B_s (B.malloc r 0uL 16ul) 0uL
   in
   B.malloc r s 1ul
 
