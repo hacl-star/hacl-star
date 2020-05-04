@@ -3,15 +3,80 @@ module Spec.Blake2.Lemmas
 open Lib.IntTypes
 
 open Spec.Hash.Lemmas
-open Lib.UpdateMulti
 open FStar.Mul
 
 friend Spec.Agile.Hash
 
+#push-options "--fuel 0 --ifuel 0"
+
+module B2 = Spec.Blake2
+
+/// Proving spec equivalence
+
+#push-options "--z3rlimit 10"
+
+let lemma_update_multi
+  (a:hash_alg{is_blake a})
+  (d:bytes{Seq.length d <= max_input_length a})
+  (h:words_state a)
+  : Lemma
+    (requires (snd h) == u64 0)
+    (ensures (
+      let padding = Spec.Hash.PadFinish.pad a (Seq.length d) in
+      fst (Spec.Agile.Hash.update_multi a h (d `Seq.append` padding)) ==
+      B2.blake2_update_blocks (to_blake_alg a) 0 d (fst h)))
+  = let padding = Spec.Hash.PadFinish.pad a (Seq.length d) in
+    let (nb, rem) = B2.split (to_blake_alg a) (Seq.length d) in
+    assert (nb * block_length a + rem == Seq.length d);
+    let blocks = Seq.slice d 0 (nb * block_length a) in
+    let rest = Seq.slice d (nb * block_length a) (Seq.length d) in
+    let h_ag1 = Spec.Agile.Hash.update_multi a h blocks in
+    let h_ag_f = Spec.Agile.Hash.update_multi a h (d `Seq.append` padding) in
+    let h_b1 = Lib.LoopCombinators.repeati nb (B2.blake2_update1 (to_blake_alg a) 0 d) (fst h) in
+
+    let padded_rest = rest `Seq.append` padding in
+    assume (Seq.length padded_rest % block_length a == 0);
+    let aux1 () : Lemma (h_ag_f == Spec.Agile.Hash.update_multi a h_ag1 padded_rest)
+      =
+        assert (d `Seq.equal` (blocks `Seq.append` rest));
+        Seq.append_assoc blocks rest padding;
+        Spec.Hash.Lemmas.update_multi_associative a h blocks padded_rest
+        // AF: Using calc as follows here seems to send F* off the rails. Maybe it struggles type-checking at each step?
+        //   calc (==) {
+        //   h_ag_f <: words_state a;
+        //   (==) { }
+        //   Spec.Agile.Hash.update_multi a h (d `Seq.append` padding);
+        //   (==) { assert (d `Seq.equal` (blocks `Seq.append` rest)) }
+        //   Spec.Agile.Hash.update_multi a h ((blocks `Seq.append` rest) `Seq.append` padding);
+        //   (==) { Seq.append_assoc blocks rest padding }
+        //   Spec.Agile.Hash.update_multi a h (blocks `Seq.append` (rest `Seq.append` padding));
+        //   (==) { Spec.Hash.Lemmas.update_multi_associative a h blocks padded_rest }
+        //   Spec.Agile.Hash.update_multi a (Spec.Agile.Hash.update_multi a h blocks) padded_rest;
+        //   (==) { assert (Spec.Agile.Hash.update_multi a h blocks == h_ag1) }
+        //   Spec.Agile.Hash.update_multi a h_ag1 padded_rest;
+        // }
+
+    in aux1 ();
+
+    assume (h_b1 == fst h_ag1);
+    assert (B2.blake2_update_blocks (to_blake_alg a) 0 d (fst h) ==
+      B2.blake2_update_last (to_blake_alg a) 0 rem d h_b1);
+
+    assume (B2.blake2_update_last (to_blake_alg a) 0 rem d (fst h_ag1) ==
+     fst (Spec.Agile.Hash.update_multi a h_ag1 padded_rest))
+
+
+let lemma_blake2_hash_equivalence
+  (a:hash_alg{is_blake a}) (d:bytes{Seq.length d <= max_input_length a})
+  : Lemma
+    (B2.blake2 (to_blake_alg a) d 0 Seq.empty (B2.max_output (to_blake_alg a)) ==
+     Spec.Agile.Hash.hash a d)
+  = lemma_update_multi a d (Spec.Agile.Hash.init a)
+
+#pop-options
+
 // AF: These proofs were extremely brittle when trying to do them directly on add_extra_i
 // The workaround here is overly verbose, but seems to add stability
-
-#push-options "--fuel 0 --ifuel 0"
 
 noextract inline_for_extraction
 let add_extra_i (a:hash_alg{is_blake a}) (ev:extra_state a) (i:U32.t) : extra_state a =
@@ -82,7 +147,7 @@ let rec lemma_update_s a h i input =
   let ev' = snd h' in
   if i = 0 then add_extra_s_zero ev
   else
-    let block, rem = split_block (block_length a) input 1 in
+    let block, rem = Lib.UpdateMulti.split_block (block_length a) input 1 in
     let h_mid = update a h block in
     let h_f = update_multi a h_mid rem in
 

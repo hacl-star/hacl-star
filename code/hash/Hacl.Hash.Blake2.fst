@@ -183,13 +183,6 @@ let update_last_blake2s: update_last_st Blake2S =
 let update_last_blake2b: update_last_st Blake2B =
   mk_update_last Blake2B update_multi_blake2b
 
-let lemma_blake2_hash_equivalence
-  (a:hash_alg{is_blake a}) (d:bytes{Seq.length d <= max_input_length a})
-  : Lemma
-    (Spec.blake2 (to_blake_alg a) d 0 Seq.empty (Spec.max_output (to_blake_alg a)) ==
-     Spec.Agile.Hash.hash a d)
-  = admit()
-
 let hash_blake2s: hash_st Blake2S = fun input input_len dst ->
   let h0 = ST.get() in
   Hacl.Blake2s_32.blake2s 32ul dst input_len input 0ul (B.null #uint8);
