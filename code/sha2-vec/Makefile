@@ -10,7 +10,7 @@ test: all
 # Defines rules for producing .checked, .krml, .depend, etc.
 include ../../Makefile.local
 
-BASE_FLAGS+= -funroll-loops 5
+BASE_FLAGS+= -funroll-loops 5 -fbuiltin-uint128
 
 CFLAGS += -I../../../lib/c -I../../lib/c -I ../hash/dist -march=native -mtune=native -O3
 export CFLAGS
@@ -35,13 +35,13 @@ $(HACL_HOME)/tests/tests-openssl/sha256-mb/sha256-mb-x86_64.o: $(HACL_HOME)/test
 dist/sha2-mb-test.exe: $(HACL_HOME)/tests/tests-openssl/sha256-mb/sha256-mb-x86_64.o dist/libsha2vec.a
 	$(CC) $(CFLAGS) -I $(HACL_HOME)/tests/tests-openssl/sha2-mb -I $(HACL_HOME)/tests \
 	$(HACL_HOME)/tests/tests-openssl/sha256-mb/hash_simd.c $(HACL_HOME)/tests/tests-openssl/sha2-vec-test.c $^ \
-	-o $@ -lcrypto
+	-o $@ ../../../openssl/libcrypto.a
 
 
 dist/sha2-vec-test.exe: $(HACL_HOME)/tests/sha2-vec-test.o dist/libsha2vec.a
 
 %.exe:
-	$(CC) $(CFLAGS) $^ -o $@ -lcrypto
+	$(CC) $(CFLAGS) $^ -o $@ ../../../openssl/libcrypto.a
 
 clean-c:
 	$(MAKE) -C dist/ -f Makefile.basic clean

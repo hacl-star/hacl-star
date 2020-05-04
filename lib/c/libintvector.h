@@ -631,7 +631,7 @@ typedef uint32x4_t Lib_IntVector_Intrinsics_vec128;
   (vshlq_n_u32(x0, x1))
 
 #define Lib_IntVector_Intrinsics_vec128_shift_right32(x0, x1) \
-  (vreinterpretq_u32_u64(vshrq_n_u64(vreinterpretq_u64_u32(x0), x1)))
+  (vshrq_n_u32(x0, x1))
 
 #define Lib_IntVector_Intrinsics_vec128_rotate_left32_16(x1)	\
   (vreinterpretq_u32_u16(vrev32q_u16(vreinterpretq_u16_u32(x1))))
