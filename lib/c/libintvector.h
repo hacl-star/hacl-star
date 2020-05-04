@@ -275,7 +275,10 @@ typedef __m256i Lib_IntVector_Intrinsics_vec256;
   (_mm256_rol_epi32(x0,x1))
 #else
 #define Lib_IntVector_Intrinsics_vec256_rotate_left32(x0,x1)	\
-  ((x1 == 8? Lib_IntVector_Intrinsics_vec256_rotate_left32_8(x0) : (x1 == 16? Lib_IntVector_Intrinsics_vec256_rotate_left32_16(x0) : _mm256_or_si256(_mm256_slli_epi32(x0,x1),_mm256_srli_epi32(x0,32-(x1))))))
+  ((x1 == 8? Lib_IntVector_Intrinsics_vec256_rotate_left32_8(x0) : \
+   (x1 == 16? Lib_IntVector_Intrinsics_vec256_rotate_left32_16(x0) : \
+   (x1 == 24? Lib_IntVector_Intrinsics_vec256_rotate_left32_24(x0) : \
+   _mm256_or_si256(_mm256_slli_epi32(x0,x1),_mm256_srli_epi32(x0,32-(x1)))))))
 #endif
 
 #if defined(__AVX512F__)
@@ -634,15 +637,15 @@ typedef uint32x4_t Lib_IntVector_Intrinsics_vec128;
   (vreinterpretq_u32_u16(vrev32q_u16(vreinterpretq_u16_u32(x1))))
 
 #define Lib_IntVector_Intrinsics_vec128_rotate_left32(x0,x1)	\
-  (((x1) == 8? Lib_IntVector_Intrinsics_vec128_rotate_left32_16(x0) : \
-               vsriq_n_u32(vshlq_n_u32((x0),(x1)),(x0),32-(x1))))
+  (((x1) == 16? Lib_IntVector_Intrinsics_vec128_rotate_left32_16(x0) : \
+                vsriq_n_u32(vshlq_n_u32((x0),(x1)),(x0),32-(x1))))
 
 #define Lib_IntVector_Intrinsics_vec128_rotate_right32_16(x1)	\
   (vreinterpretq_u32_u16(vrev32q_u16(vreinterpretq_u16_u32(x1))))
 
 #define Lib_IntVector_Intrinsics_vec128_rotate_right32(x0,x1)	\
-  (((x1) == 8? Lib_IntVector_Intrinsics_vec128_rotate_right32_16(x0) : \
-               vsriq_n_u32(vshlq_n_u32((x0),32-(x1)),(x0),(x1))))
+  (((x1) == 16? Lib_IntVector_Intrinsics_vec128_rotate_right32_16(x0) : \
+                vsriq_n_u32(vshlq_n_u32((x0),32-(x1)),(x0),(x1))))
 
 #define Lib_IntVector_Intrinsics_vec128_rotate_right_lanes32(x0, x1)	\
   (vextq_u32(x0,x0,x1))
