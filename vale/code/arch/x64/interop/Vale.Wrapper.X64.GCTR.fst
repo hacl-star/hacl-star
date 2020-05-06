@@ -202,7 +202,7 @@ let gctr128_bytes_stdcall' key in_b num_bytes out_b inout_b keys_b ctr_b num_blo
       }
 
   in lemma_uv_key ();
-  let x, _ = gctr128_bytes key in_b num_bytes out_b inout_b keys_b ctr_b num_blocks () in
+  let (x, _) = gctr128_bytes key in_b num_bytes out_b inout_b keys_b ctr_b num_blocks () in
 
   let h1 = get() in
 
@@ -255,7 +255,7 @@ let gctr256_bytes_stdcall' key in_b num_bytes out_b inout_b keys_b ctr_b num_blo
       }
 
   in lemma_uv_key ();
-  let x, _ = gctr256_bytes key in_b num_bytes out_b inout_b keys_b ctr_b num_blocks () in
+  let (x, _) = gctr256_bytes key in_b num_bytes out_b inout_b keys_b ctr_b num_blocks () in
 
   let h1 = get() in
 

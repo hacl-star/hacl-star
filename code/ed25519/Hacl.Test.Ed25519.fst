@@ -15,7 +15,7 @@ let u8 n = u8 n
 //
 // Test1
 //
-let msg1: b:ilbuffer uint8 0ul{ recallable b } =
+let msg1: b:glbuffer uint8 0ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -23,7 +23,7 @@ let msg1: b:ilbuffer uint8 0ul{ recallable b } =
   assert_norm (List.Tot.length l == 0);
   createL_global l
 
-let sk1: b:ilbuffer uint8 32ul{ recallable b } =
+let sk1: b:glbuffer uint8 32ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -34,7 +34,7 @@ let sk1: b:ilbuffer uint8 32ul{ recallable b } =
   assert_norm (List.Tot.length l == 32);
   createL_global l
 
-let pk1: b:ilbuffer uint8 32ul{ recallable b } =
+let pk1: b:glbuffer uint8 32ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -45,7 +45,7 @@ let pk1: b:ilbuffer uint8 32ul{ recallable b } =
   assert_norm (List.Tot.length l == 32);
   createL_global l
 
-let sig1: b:ilbuffer uint8 64ul{ recallable b } =
+let sig1: b:glbuffer uint8 64ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -62,7 +62,7 @@ let sig1: b:ilbuffer uint8 64ul{ recallable b } =
 //
 // Test2
 //
-let msg2: b:ilbuffer uint8 1ul{ recallable b } =
+let msg2: b:glbuffer uint8 1ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -70,7 +70,7 @@ let msg2: b:ilbuffer uint8 1ul{ recallable b } =
   assert_norm (List.Tot.length l == 1);
   createL_global l
 
-let sk2: b:ilbuffer uint8 32ul{ recallable b } =
+let sk2: b:glbuffer uint8 32ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -81,7 +81,7 @@ let sk2: b:ilbuffer uint8 32ul{ recallable b } =
   assert_norm (List.Tot.length l == 32);
   createL_global l
 
-let pk2: b:ilbuffer uint8 32ul{ recallable b } =
+let pk2: b:glbuffer uint8 32ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -92,7 +92,7 @@ let pk2: b:ilbuffer uint8 32ul{ recallable b } =
   assert_norm (List.Tot.length l == 32);
   createL_global l
 
-let sig2: b:ilbuffer uint8 64ul{ recallable b } =
+let sig2: b:glbuffer uint8 64ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -109,7 +109,7 @@ let sig2: b:ilbuffer uint8 64ul{ recallable b } =
 //
 // Test3
 //
-let msg3: b:ilbuffer uint8 2ul{ recallable b } =
+let msg3: b:glbuffer uint8 2ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -117,7 +117,7 @@ let msg3: b:ilbuffer uint8 2ul{ recallable b } =
   assert_norm (List.Tot.length l == 2);
   createL_global l
 
-let sk3: b:ilbuffer uint8 32ul{ recallable b } =
+let sk3: b:glbuffer uint8 32ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -128,7 +128,7 @@ let sk3: b:ilbuffer uint8 32ul{ recallable b } =
   assert_norm (List.Tot.length l == 32);
   createL_global l
 
-let pk3: b:ilbuffer uint8 32ul{ recallable b } =
+let pk3: b:glbuffer uint8 32ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -139,7 +139,7 @@ let pk3: b:ilbuffer uint8 32ul{ recallable b } =
   assert_norm (List.Tot.length l == 32);
   createL_global l
 
-let sig3: b:ilbuffer uint8 64ul{ recallable b } =
+let sig3: b:glbuffer uint8 64ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -154,10 +154,10 @@ let sig3: b:ilbuffer uint8 64ul{ recallable b } =
 
 val test:
      msg_len:size_t
-  -> msg:ilbuffer uint8 msg_len
-  -> pk:ilbuffer uint8 32ul
-  -> sk:ilbuffer uint8 32ul
-  -> expected_sig:ilbuffer uint8 64ul
+  -> msg:glbuffer uint8 msg_len
+  -> pk:glbuffer uint8 32ul
+  -> sk:glbuffer uint8 32ul
+  -> expected_sig:glbuffer uint8 64ul
   -> Stack unit
     (requires fun h ->
       live h msg /\ live h expected_sig /\ live h pk /\ live h sk)
@@ -167,12 +167,12 @@ let test msg_len msg pk sk expected_sig = admit();
 
   C.String.print (C.String.of_literal "\nSign:\n");
   let test_sig = create 64ul (u8 0) in
-  Ed25519.sign test_sig sk msg_len msg;
-  print_compare_display 64ul test_sig expected_sig;
+  Ed25519.sign test_sig (const_to_lbuffer sk) msg_len (const_to_lbuffer msg);
+  print_compare_display 64ul (to_const test_sig) expected_sig;
 
 
   C.String.print (C.String.of_literal "Verify:\n");
-  let res = Ed25519.verify pk msg_len msg expected_sig in
+  let res = Ed25519.verify (const_to_lbuffer pk) msg_len (const_to_lbuffer msg) (const_to_lbuffer expected_sig) in
  (if res then
     C.String.print (C.String.of_literal "Success!\n")
   else
@@ -181,8 +181,8 @@ let test msg_len msg pk sk expected_sig = admit();
 
   C.String.print (C.String.of_literal "Secret_to_public:\n");
   let pk' = create 32ul (u8 0) in
-  Ed25519.secret_to_public pk' sk;
-  print_compare_display 32ul pk pk';
+  Ed25519.secret_to_public pk' (const_to_lbuffer sk);
+  print_compare_display 32ul pk (to_const pk');
   pop_frame ()
 
 val main: unit -> St C.exit_code

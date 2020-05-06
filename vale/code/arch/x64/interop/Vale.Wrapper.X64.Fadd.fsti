@@ -23,7 +23,7 @@ let as_nat (b:B.buffer UInt64.t{B.length b == 4}) (h:HS.mem) : GTot nat =
   pow2_four s0 s1 s2 s3
 
 inline_for_extraction
-val add1
+val add_scalar_e
   (out:u256)
   (f1:u256)
   (f2:UInt64.t)
@@ -38,7 +38,7 @@ val add1
     as_nat out h1 + pow2_256 * UInt64.v c == as_nat f1 h0 + UInt64.v f2)
 
 inline_for_extraction
-val fadd
+val fadd_e
   (out:u256)
   (f1:u256)
   (f2:u256)

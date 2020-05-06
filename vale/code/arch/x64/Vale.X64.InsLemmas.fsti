@@ -1,6 +1,7 @@
 module Vale.X64.InsLemmas
 
 open FStar.Mul
+open Vale.Arch.HeapImpl
 open Vale.X64.Machine_s
 open Vale.X64.Instruction_s
 open Vale.X64.State
@@ -13,26 +14,6 @@ let has_taint128 (o:operand128) (t:taint) : bool =
   match o with
   | OMem (_, t') | OStack (_, t') -> t = t'
   | _ -> true
-
-val lemma_valid_buf_maddr64 (h:vale_heap) (memTaint:memTaint_t) (b:buffer64) (i:int) (t:taint) : Lemma
-  (requires valid_buffer_read h b i /\ valid_taint_buf64 b h memTaint t)
-  (ensures valid_buf_maddr64 (buffer_addr b h + 8 * i) h memTaint b i t)
-  [SMTPat (valid_buffer_read h b i); SMTPat (valid_taint_buf64 b h memTaint t)]
-
-val lemma_valid_buf_maddr128 (h:vale_heap) (memTaint:memTaint_t) (b:buffer128) (i:int) (t:taint) : Lemma
-  (requires valid_buffer_read h b i /\ valid_taint_buf128 b h memTaint t)
-  (ensures valid_buf_maddr128 (buffer_addr b h + 16 * i) h memTaint b i t)
-  [SMTPat (valid_buffer_read h b i); SMTPat (valid_taint_buf128 b h memTaint t)]
-
-//val lemma_valid_taint64_operand (m:maddr) (t:taint) (s:va_state) : Lemma
-//  (requires valid_operand (OMem (m, t)) s)
-//  (ensures taint_at s.vs_memTaint (eval_maddr m s) == t)
-//  [SMTPat (eval_maddr m s); SMTPat (OMem #int #reg (m, t))]
-
-//val lemma_valid_taint128_operand (m:maddr) (t:taint) (s:va_state) : Lemma
-//  (requires valid_operand128 (OMem (m, t)) s)
-//  (ensures taint_at s.vs_memTaint (eval_maddr m s) == t)
-//  [SMTPat (eval_maddr m s); SMTPat (OMem #int #reg (m, t))]
 
 val lemma_valid_src_operand64_and_taint (o:operand64) (s:vale_state) : Lemma
   (requires valid_operand o s)

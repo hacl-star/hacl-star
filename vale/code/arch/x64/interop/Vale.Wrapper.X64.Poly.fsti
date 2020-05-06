@@ -21,7 +21,7 @@ let uint64 = UInt64.t
 noextract
 let uint64_to_nat_seq
       (b:Seq.seq UInt64.t)
-    : (s:Seq.lseq nat64 (Seq.length b))
+    : Seq.lseq nat64 (Seq.length b)
     = Seq.init (Seq.length b) (fun (i:nat{i < Seq.length b}) -> (UInt64.v (Seq.index b i) <: nat64))
 
 let math_aux (b:uint8_p) (n:nat) : Lemma

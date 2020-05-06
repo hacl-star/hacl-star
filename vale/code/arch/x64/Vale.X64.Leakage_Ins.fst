@@ -16,6 +16,13 @@ unfold let obs_args = S.obs_args
 unfold let obs_inouts = S.obs_inouts
 unfold let machine_eval_code = S.machine_eval_code
 
+let reveal_machine_eval_code_ins (i:S.ins) (s:S.machine_state) : Lemma
+  (requires True)
+  (ensures S.machine_eval_code_ins i s == S.machine_eval_code_ins_def i s)
+  [SMTPat (S.machine_eval_code_ins i s)]
+  =
+  reveal_opaque (`%S.machine_eval_code_ins) S.machine_eval_code_ins
+
 let rec check_if_consumes_fixed_time_args
     (args:list instr_operand) (oprs:instr_operands_t_args args) (ts:analysis_taints)
   : Pure bool
@@ -364,20 +371,6 @@ let lemma_preserve_valid128 (m m':S.machine_heap) : Lemma
   (requires Set.equal (Map.domain m) (Map.domain m'))
   (ensures (forall (i:int).{:pattern (S.valid_addr128 i m')}
     S.valid_addr128 i m ==> S.valid_addr128 i m'))
-  =
-  reveal_opaque (`%S.valid_addr128) S.valid_addr128
-
-let lemma_is_machine_heap_update64 (ptr:int) (v:nat64) (mh:machine_heap) : Lemma
-  (requires S.valid_addr64 ptr mh)
-  (ensures is_machine_heap_update mh (S.update_heap64 ptr v mh))
-  [SMTPat (S.update_heap64 ptr v mh)]
-  =
-  reveal_opaque (`%valid_addr64) valid_addr64
-
-let lemma_is_machine_heap_update128 (ptr:int) (v:quad32) (mh:machine_heap) : Lemma
-  (requires S.valid_addr128 ptr mh)
-  (ensures is_machine_heap_update mh (S.update_heap128 ptr v mh))
-  [SMTPat (S.update_heap128 ptr v mh)]
   =
   reveal_opaque (`%S.valid_addr128) S.valid_addr128
 
@@ -837,7 +830,7 @@ let lemma_vpxor_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
 #reset-options "--initial_ifuel 1 --max_ifuel 1 --initial_fuel 1 --max_fuel 1 --z3rlimit 20"
 
 let lemma_ins_leakage_free ts ins =
-  let b, ts' = check_if_ins_consumes_fixed_time ins ts in
+  let (b, ts') = check_if_ins_consumes_fixed_time ins ts in
   match ins with
   | BC.Instr _ _ (S.AnnotateXor64 _) -> lemma_xor_leakage_free ts ins
   | BC.Instr _ _ (S.AnnotatePxor _) -> lemma_pxor_leakage_free ts ins

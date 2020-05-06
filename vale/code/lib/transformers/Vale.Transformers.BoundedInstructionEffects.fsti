@@ -117,7 +117,7 @@ val lemma_machine_eval_code_Ins_bounded_effects :
     (requires (safely_bounded i))
     (ensures (
         (bounded_effects (rw_set_of_ins i)
-           (fun s -> (), (Some?.v (machine_eval_code (Ins i) fuel s))))))
+           (fun s -> (), (Some?.v (machine_eval_code_ins_def i s))))))
 
 (** The evaluation of a comparison [o] depends solely upon its
     locations, given by [locations_of_ocmp o] *)

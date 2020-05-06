@@ -35,6 +35,6 @@ let pad (a:hash_alg)
 (** Extracting the hash, which we call "finish" *)
 
 (* Unflatten the hash from the sequence of words to bytes up to the correct size *)
-let finish (a:hash_alg) (hashw:words_state a): Tot (hash:lbytes (hash_length a)) =
+let finish (a:hash_alg) (hashw:words_state a): Tot (lbytes (hash_length a)) =
   let hash_final_w = S.slice hashw 0 (hash_word_length a) in
   bytes_of_words a #(hash_word_length a) hash_final_w

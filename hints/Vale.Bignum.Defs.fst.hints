@@ -8,7 +8,7 @@
       0,
       [ "@query" ],
       0,
-      "009bf353d0ed9f201594b016670c046e"
+      "2ce02e3257c00615b60e0e110a99a646"
     ],
     [
       "Vale.Bignum.Defs.lemma_mul_n_bound",
@@ -22,7 +22,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "effc66cdb995a212ba84468ecb4dc6dc"
+      "014b7012486a9fbe6f192bd672f87674"
     ],
     [
       "Vale.Bignum.Defs.lemma_mul_div_n_lt",
@@ -36,7 +36,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "059c56efd325e63b9450ce25ffba5980"
+      "3ac7a015a1b30917e5e1038d1f273c60"
     ],
     [
       "Vale.Bignum.Defs.lemma_mul_div_n_lt",
@@ -54,7 +54,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "f7627d35afed431c5499a25b4ea0faa5"
+      "2729727a4f1eb0ecb49c425f95705cd3"
     ],
     [
       "Vale.Bignum.Defs.lemma_mul_div_n",
@@ -67,7 +67,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "98a85af83cd5dd21b6f606caa91910d9"
+      "42e9be39bd5122717de2a21a6a76251b"
     ],
     [
       "Vale.Bignum.Defs.lemma_mul_div_n",
@@ -80,7 +80,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "da560e561b4bc7170306c86deff3f54a"
+      "94744f95bf3ed9d3978fbbd422390387"
     ],
     [
       "Vale.Bignum.Defs.lemma_mul_div_n",
@@ -93,7 +93,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "51a2fcd5ed62f545f2be9445a4dbda5f"
+      "c127f333347d34344ce975c0b4851886"
     ],
     [
       "Vale.Bignum.Defs.add_lo_def",
@@ -110,7 +110,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "ed733f62d583d98fbba8a7c2894207ac"
+      "e24e5779524ca6223e5d907b00425e2b"
     ],
     [
       "Vale.Bignum.Defs.reveal_add_lo",
@@ -119,7 +119,7 @@
       0,
       [ "@query", "equation_Vale.Bignum.Defs.add_lo" ],
       0,
-      "88cc8fc1a08e1bf9a467538e35ef642c"
+      "9f17bd4791971c371f124b331c7a9167"
     ],
     [
       "Vale.Bignum.Defs.reveal_add_lo_all",
@@ -128,7 +128,7 @@
       0,
       [ "@query", "equation_Vale.Bignum.Defs.add_lo" ],
       0,
-      "4b8c02e912177c06bde07f34a29b9509"
+      "6fcb1f42d1da9466ee830a80d67e672c"
     ],
     [
       "Vale.Bignum.Defs.reveal_add_hi",
@@ -137,7 +137,7 @@
       0,
       [ "@query", "equation_Vale.Bignum.Defs.add_hi" ],
       0,
-      "a6d121bc0783ede607ab9c4275f975d8"
+      "de90c09d5a01d1b1a2eb7085f5324d03"
     ],
     [
       "Vale.Bignum.Defs.reveal_add_hi_all",
@@ -146,7 +146,33 @@
       0,
       [ "@query", "equation_Vale.Bignum.Defs.add_hi" ],
       0,
-      "b2c04e0301604fd00cc715d7c349475c"
+      "a8cdbae38032815161f4584b40a76d25"
+    ],
+    [
+      "Vale.Bignum.Defs.add_lo_hi",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "88b36ba91d31428105da8ed61bb931e3"
+    ],
+    [
+      "Vale.Bignum.Defs.add_lo_hi",
+      2,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "cf03c1847250a93c7815a6541e0c4faa"
     ],
     [
       "Vale.Bignum.Defs.mul_lo_def",
@@ -159,7 +185,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "9cbf01efcd736bd41db5fb33cdcdf8a0"
+      "06182983e923a00f844415ebd7b4d066"
     ],
     [
       "Vale.Bignum.Defs.mul_lo_def",
@@ -172,7 +198,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "8ce41f9cf52214475479e8de8f4fece9"
+      "817fdd51c797996cf6241beb93d4ecc1"
     ],
     [
       "Vale.Bignum.Defs.mul_lo",
@@ -185,7 +211,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "0ac2f2e24025a50d64ff456520bfdf71"
+      "091f9afa5bf8731d5e49704709250ec7"
     ],
     [
       "Vale.Bignum.Defs.mul_lo",
@@ -198,7 +224,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "80018a1c8ccca0ce482b40796f9f1dea"
+      "138423376abf27670d8048ca6aa6b75f"
     ],
     [
       "Vale.Bignum.Defs.reveal_mul_lo",
@@ -212,7 +238,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "11d1481072838ca4f36541569d9d7923"
+      "ee839bea243dd0e82626e4a153ea7224"
     ],
     [
       "Vale.Bignum.Defs.reveal_mul_lo",
@@ -221,7 +247,7 @@
       0,
       [ "@query", "equation_Vale.Bignum.Defs.mul_lo" ],
       0,
-      "4769198d63896bac343bd74b37163dcc"
+      "c9d1486f6e54ec3a12050804750e58d8"
     ],
     [
       "Vale.Bignum.Defs.reveal_mul_lo_all",
@@ -235,7 +261,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "06ad6df37e70ccd15a525661203c4a16"
+      "4bf991a8020b60cf55ccef1d33c8f0e9"
     ],
     [
       "Vale.Bignum.Defs.reveal_mul_lo_all",
@@ -244,7 +270,7 @@
       0,
       [ "@query", "equation_Vale.Bignum.Defs.mul_lo" ],
       0,
-      "557530c7f3b496c680fa491b2f3d75bc"
+      "ff56170c93b140cd50844a1c86e0ddd8"
     ],
     [
       "Vale.Bignum.Defs.mul_hi_def",
@@ -257,7 +283,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "6d4a06345137b7025d5774d9ca8fb08c"
+      "9666a0a14a1f4ae44f35a89ead5f3aa0"
     ],
     [
       "Vale.Bignum.Defs.mul_hi_def",
@@ -270,7 +296,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "05063d9417212082f314d4ad9c95b817"
+      "484666e0b8a36053c344754781b4c3e9"
     ],
     [
       "Vale.Bignum.Defs.mul_hi",
@@ -283,7 +309,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "5209d909c2d596293f108df51553da8a"
+      "331d2e3b9b348b1fcdf6fc7d7c4fae33"
     ],
     [
       "Vale.Bignum.Defs.mul_hi",
@@ -296,7 +322,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "bfd782b0e752d8fa30a851b3229dd960"
+      "15fb30e1a1952fa147478efe4fcbb0e6"
     ],
     [
       "Vale.Bignum.Defs.reveal_mul_hi",
@@ -310,7 +336,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "05c249a241e982d07d1bffa6cc487163"
+      "aebd38ed0d66656ee2ea36c7d21e4daf"
     ],
     [
       "Vale.Bignum.Defs.reveal_mul_hi",
@@ -319,7 +345,7 @@
       0,
       [ "@query", "equation_Vale.Bignum.Defs.mul_hi" ],
       0,
-      "d491d83efb6d48b3db7dc7bfa936482f"
+      "a3a1bb7858483def4cefb7e47acf0752"
     ],
     [
       "Vale.Bignum.Defs.reveal_mul_hi_all",
@@ -333,7 +359,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "499faab2e1226da79fcee1fce280a835"
+      "74f33260c9fcb14ca12afb5f17123fe1"
     ],
     [
       "Vale.Bignum.Defs.reveal_mul_hi_all",
@@ -342,7 +368,7 @@
       0,
       [ "@query", "equation_Vale.Bignum.Defs.mul_hi" ],
       0,
-      "844342bcd80ead0f2620d1c7f6ce337c"
+      "f251e243dec09922929628dfb4852eec"
     ],
     [
       "Vale.Bignum.Defs.sum_seq_left",
@@ -363,7 +389,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "aecc50f9db62a58c66a28544a09e56a2"
+      "1dfed60ce1899aad8500bc0b8b9365fd"
     ],
     [
       "Vale.Bignum.Defs.sum_seq_right",
@@ -387,7 +413,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "493969788c63079b66c6033dd17d3891"
+      "b3436f78f4e1a0ec9de6824c962d5363"
     ],
     [
       "Vale.Bignum.Defs.pow_int",
@@ -407,7 +433,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "62a06945fa91baf51d8dc09e97dba1d4"
+      "6de71473683a1165a541bd347b7f689f"
     ],
     [
       "Vale.Bignum.Defs.sum_pow_seq_left",
@@ -435,7 +461,7 @@
         "typing_Vale.Def.Words_s.natN"
       ],
       0,
-      "fefe977d15b3c40205d94d7786c83013"
+      "082e5918f9db8b3db0d43772f690ddf4"
     ],
     [
       "Vale.Bignum.Defs.sum_pow_seq",
@@ -444,7 +470,7 @@
       0,
       [ "@query" ],
       0,
-      "8eeddd5127c11099203a2ddf8784e8ef"
+      "07cfa543f325d106edb1ba4433b9796f"
     ]
   ]
 ]

@@ -7,17 +7,18 @@ open Vale.X64.Machine_s
 open Vale.Def.PossiblyMonad
 open Vale.X64.Decls
 
-open Vale.Def.PossiblyMonad
-
 open Vale.X64.State
 
 open Vale.X64.Lemmas
 open Vale.X64.StateLemmas
+open Vale.Arch.HeapLemmas
 
 friend Vale.X64.Decls
 friend Vale.X64.StateLemmas
 
 module IR = Vale.Transformers.InstructionReorder
+module PH = Vale.Transformers.PeepHole
+module ME = Vale.Transformers.MovbeElim
 
 unfold
 let transformation_result_of_possibly_codes (c:possibly codes) (if_fail:code) =
@@ -46,6 +47,7 @@ let prints_to_same_code (c1 c2:code) : pbool =
 (* See fsti *)
 let reorder orig hint =
   transformation_result_of_possibly_codes (
+    if code_modifies_ghost orig then Err "code directly modifies ghost state (via ins_Ghost instruction)" else
     let orig' = IR.purge_empty_codes [orig] in
     ts <-- IR.find_transformation_hints orig' [hint];
     transformed <-- IR.perform_reordering_with_hints ts orig';
@@ -72,6 +74,7 @@ let lemma_IR_equiv_states_to_equiv_states (s1 s2:machine_state) :
 
 (* See fsti *)
 let lemma_reorder orig hint transformed va_s0 va_sM va_fM =
+  if code_modifies_ghost orig then (va_sM, va_fM) else
   let orig' = IR.purge_empty_codes [orig] in
   match IR.find_transformation_hints orig' [hint] with
   | Err _ -> va_sM, va_fM
@@ -109,3 +112,19 @@ let check_if_same_printed_code orig hint =
 (* See fsti *)
 let lemma_check_if_same_printed_code orig hint transformed va_s0 va_sM va_fM =
   va_sM, va_fM
+
+/// Peephole Transformation to replace movbes -> mov + bswap.
+
+let movbe_elim =
+  PH.peephole_transform ME.movbe_elim_ph
+
+let lemma_movbe_elim =
+  PH.lemma_peephole_transform ME.movbe_elim_ph
+
+/// Transformation to replace mov + mov -> mov.
+
+let mov_mov_elim =
+  PH.peephole_transform Vale.Transformers.MovMovElim.mov_mov_elim_ph
+
+let lemma_mov_mov_elim =
+  PH.lemma_peephole_transform Vale.Transformers.MovMovElim.mov_mov_elim_ph

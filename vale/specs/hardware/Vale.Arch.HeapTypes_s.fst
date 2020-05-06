@@ -10,3 +10,8 @@ type base_typ:eqtype =
   | TUInt64
   | TUInt128
 
+type taint:eqtype =
+  | Public
+  | Secret
+
+type memTaint_t = (m:Map.t int taint{Set.equal (Map.domain m) (Set.complement Set.empty)})

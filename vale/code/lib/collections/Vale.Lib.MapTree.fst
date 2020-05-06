@@ -132,7 +132,7 @@ let rec lemma_get_put_other (#a:eqtype) (#b:Type) (is_le:a -> a -> bool) (t:tree
 
 #push-options "--max_fuel 1 --max_ifuel 2"
 noeq
-type map' a b =
+type map' (a:eqtype) b =
   | Map :
     is_le:(a -> a -> bool) ->
     t:tree a b ->

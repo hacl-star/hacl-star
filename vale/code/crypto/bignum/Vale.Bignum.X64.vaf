@@ -1,7 +1,7 @@
 include "../../arch/x64/Vale.X64.InsBasic.vaf"
 include "../../arch/x64/Vale.X64.InsMem.vaf"
 include "../../arch/x64/Vale.X64.InsStack.vaf"
-include{:/*TODO*/fstar}{:open} "FStar.Seq.Base"
+include{:fstar}{:open} "FStar.Seq.Base"
 include{:fstar}{:open} "Vale.Def.Words_s"
 include{:fstar}{:open} "Vale.Def.Types_s"
 include{:fstar}{:open} "Vale.Arch.Types"

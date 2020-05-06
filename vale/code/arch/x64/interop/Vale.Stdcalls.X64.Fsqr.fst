@@ -12,7 +12,7 @@ let lowstar_Fsqr : lowstar_Fsqr_t  =
     fsqr_dom
     (W.mk_prediction code_Fsqr fsqr_dom [] (fsqr_lemma code_Fsqr IA.win))
 
-let fsqr = as_normal_t #lowstar_Fsqr_t lowstar_Fsqr
+let fsqr_e = as_normal_t #lowstar_Fsqr_t lowstar_Fsqr
 
 (* And here's the fsqr2 wrapper itself *)
 let lowstar_Fsqr2 : lowstar_Fsqr2_t  =
@@ -22,4 +22,4 @@ let lowstar_Fsqr2 : lowstar_Fsqr2_t  =
     fsqr_dom
     (W.mk_prediction code_Fsqr2 fsqr_dom [] (fsqr2_lemma code_Fsqr2 IA.win))
 
-let fsqr2 = as_normal_t #lowstar_Fsqr2_t lowstar_Fsqr2
+let fsqr2_e = as_normal_t #lowstar_Fsqr2_t lowstar_Fsqr2

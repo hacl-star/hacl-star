@@ -2,8 +2,11 @@ open Ctypes
 module Bindings(F:Cstubs.FOREIGN) =
   struct
     open F
-    include (Hacl_Spec_bindings.Bindings)(Hacl_Spec_stubs)
-    include (EverCrypt_Error_bindings.Bindings)(EverCrypt_Error_stubs)
+    module Hacl_Spec_applied = (Hacl_Spec_bindings.Bindings)(Hacl_Spec_stubs)
+    open Hacl_Spec_applied
+    module EverCrypt_Error_applied =
+      (EverCrypt_Error_bindings.Bindings)(EverCrypt_Error_stubs)
+    open EverCrypt_Error_applied
     type everCrypt_AEAD_state_s = [ `everCrypt_AEAD_state_s ] structure
     let (everCrypt_AEAD_state_s : [ `everCrypt_AEAD_state_s ] structure typ)
       = structure "EverCrypt_AEAD_state_s_s" 
@@ -20,32 +23,32 @@ module Bindings(F:Cstubs.FOREIGN) =
       foreign "EverCrypt_AEAD_create_in"
         (spec_Agile_AEAD_alg @->
            ((ptr (ptr everCrypt_AEAD_state_s)) @->
-              ((ptr uint8_t) @-> (returning everCrypt_Error_error_code))))
+              (ocaml_bytes @-> (returning everCrypt_Error_error_code))))
       
     let everCrypt_AEAD_encrypt =
       foreign "EverCrypt_AEAD_encrypt"
         ((ptr everCrypt_AEAD_state_s) @->
-           ((ptr uint8_t) @->
+           (ocaml_bytes @->
               (uint32_t @->
-                 ((ptr uint8_t) @->
+                 (ocaml_bytes @->
                     (uint32_t @->
-                       ((ptr uint8_t) @->
+                       (ocaml_bytes @->
                           (uint32_t @->
-                             ((ptr uint8_t) @->
-                                ((ptr uint8_t) @->
+                             (ocaml_bytes @->
+                                (ocaml_bytes @->
                                    (returning everCrypt_Error_error_code))))))))))
       
     let everCrypt_AEAD_decrypt =
       foreign "EverCrypt_AEAD_decrypt"
         ((ptr everCrypt_AEAD_state_s) @->
-           ((ptr uint8_t) @->
+           (ocaml_bytes @->
               (uint32_t @->
-                 ((ptr uint8_t) @->
+                 (ocaml_bytes @->
                     (uint32_t @->
-                       ((ptr uint8_t) @->
+                       (ocaml_bytes @->
                           (uint32_t @->
-                             ((ptr uint8_t) @->
-                                ((ptr uint8_t) @->
+                             (ocaml_bytes @->
+                                (ocaml_bytes @->
                                    (returning everCrypt_Error_error_code))))))))))
       
     let everCrypt_AEAD_free =

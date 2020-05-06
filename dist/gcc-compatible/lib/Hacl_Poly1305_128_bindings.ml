@@ -6,8 +6,7 @@ module Bindings(F:Cstubs.FOREIGN) =
       foreign_value "Hacl_Poly1305_128_blocklen" uint32_t 
     let hacl_Poly1305_128_poly1305_mac =
       foreign "Hacl_Poly1305_128_poly1305_mac"
-        ((ptr uint8_t) @->
-           (uint32_t @->
-              ((ptr uint8_t) @-> ((ptr uint8_t) @-> (returning void)))))
+        (ocaml_bytes @->
+           (uint32_t @-> (ocaml_bytes @-> (ocaml_bytes @-> (returning void)))))
       
   end

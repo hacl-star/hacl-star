@@ -1,2 +1,0 @@
-Merkle Tree API
-===============

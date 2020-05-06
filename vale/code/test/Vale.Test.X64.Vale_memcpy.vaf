@@ -5,6 +5,7 @@ include "../arch/x64/Vale.X64.InsVector.vaf"
 module Vale.Test.X64.Vale_memcpy
 #verbatim{:interface}{:implementation}
 
+open Vale.Arch.HeapImpl
 open Vale.X64.Machine_s
 open Vale.X64.Memory
 open Vale.X64.State
@@ -17,74 +18,68 @@ open Vale.X64.QuickCodes
 #set-options "--z3rlimit 20"
 #endverbatim
 
+procedure InnerMemcpy(ghost dst:buffer64, ghost src:buffer64)
+    {:quick}
+    reads
+        rdx;
+        memLayout; heap0;
+    modifies
+        rax; rcx; r9;
+        heap1;
+    requires
+        validSrcAddrs64(heap0, rdx, src, 2, memLayout, Secret);
+        validDstAddrs64(heap1, rcx, dst, 2, memLayout, Secret);
+        buffer_length(src) == 2;
+        buffer_length(dst) == 2;
+    ensures
+        buffer_as_seq(heap1, dst) == buffer_as_seq(heap0, src);
+        modifies_mem(loc_buffer(dst), old(heap1), heap1);
+{
+    Load64_buffer(heap0, rax, rdx, 0, Secret, src, 0);
+    Load64_buffer(heap0, r9, rdx, 8, Secret, src, 1);
+    Store64_buffer(heap1, rcx, rax, 0, Secret, dst, 0);
+    Store64_buffer(heap1, rcx, r9, 8, Secret, dst, 1);
+    assert(Seq.equal(buffer_as_seq(heap1, dst), buffer_as_seq(heap0, src)));
+}
+
 procedure Memcpy(inline win:bool, ghost dst:buffer64, ghost src:buffer64)
     {:public}
     {:exportSpecs}
     {:quick}
+    reads
+        rdx; rsi; rdi;
+        heap0;
+    modifies
+        rax; rcx; r9;
+        memLayout; heap1;
     requires
+        is_initial_heap(memLayout, mem);
         locs_disjoint(list(loc_buffer(dst), loc_buffer(src)));
-        buffer_readable(mem, dst);
-        buffer_readable(mem, src);
-        buffer_writeable(dst);
-        valid_taint_buf64(dst, mem, memTaint, Secret);
-        valid_taint_buf64(src, mem, memTaint, Secret);
+        validSrcAddrs64(mem, (if win then rdx else rsi), src, 2, memLayout, Secret);
+        validDstAddrs64(mem, (if win then rcx else rdi), dst, 2, memLayout, Secret);
         buffer_length(src) == 2;
         buffer_length(dst) == 2;
-        win ==> rcx == buffer_addr(dst, mem);
-        win ==> rdx == buffer_addr(src, mem);
-        !win ==> rdi == buffer_addr(dst, mem);
-        !win ==> rsi == buffer_addr(src, mem);
     ensures
-        rsp == old(rsp);
-
-        win ==>  rbx == old(rbx);
-        win ==>  rbp == old(rbp);
-        win ==>  rdi == old(rdi);
-        win ==>  rsi == old(rsi);
-        win ==>  rsp == old(rsp);
-        win ==>  r12 == old(r12);
-        win ==>  r13 == old(r13);
-        win ==>  r14 == old(r14);
-        win ==>  r15 == old(r15);
-        !win ==>  rbx == old(rbx);
-        !win ==>  rbp == old(rbp);
-        !win ==>  r12 == old(r12);
-        !win ==>  r13 == old(r13);
-        !win ==>  r14 == old(r14);
-        !win ==>  r15 == old(r15);
-        win ==>  xmm6 == old(xmm6);
-        win ==>  xmm7 == old(xmm7);
-        win ==>  xmm8 == old(xmm8);
-        win ==>  xmm9 == old(xmm9);
-        win ==>  xmm10 == old(xmm10);
-        win ==>  xmm11 == old(xmm11);
-        win ==>  xmm12 == old(xmm12);
-        win ==>  xmm13 == old(xmm13);
-        win ==>  xmm14 == old(xmm14);
-        win ==>  xmm15 == old(xmm15);
-
         buffer_as_seq(mem, dst) == buffer_as_seq(mem, src);
     //    forall(i) 0 <= i && i < 2 ==> buffer64_read(dst, i, mem) == buffer64_read(src, i, mem);
         modifies_mem(loc_buffer(dst), old(mem), mem);
-    reads memTaint;
-    modifies
-        rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
-        xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
-        efl; mem;
 {
+    CreateHeaplets(list(
+        declare_buffer64(src, 0, Secret, Immutable),
+        declare_buffer64(dst, 1, Secret, Mutable)));
+
     inline if (win)
     {
-        Load64_buffer(rax, rdx, 0, Secret, src, 0);
-        Load64_buffer(r9, rdx, 8, Secret, src, 1);
-        Store64_buffer(rcx, rax, 0, Secret, dst, 0);
-        Store64_buffer(rcx, r9, 8, Secret, dst, 1);
+        InnerMemcpy(dst, src);
     }
     else
     {
-        Load64_buffer(rax, rsi, 0, Secret, src, 0);
-        Load64_buffer(rcx, rsi, 8, Secret, src, 1);
-        Store64_buffer(rdi, rax, 0, Secret, dst, 0);
-        Store64_buffer(rdi, rcx, 8, Secret, dst, 1);
+        Mov64(rax, Mem64(heap0, rsi, 0, src, 0, Secret));
+        Mov64(rcx, Mem64(heap0, rsi, 8, src, 1, Secret));
+        Store64_buffer(heap1, rdi, rax, 0, Secret, dst, 0);
+        Store64_buffer(heap1, rdi, rcx, 8, Secret, dst, 1);
     }
-    assert(Seq.equal(buffer_as_seq(mem, dst), buffer_as_seq(mem, src)));
+    assert(Seq.equal(buffer_as_seq(heap1, dst), buffer_as_seq(heap0, src)));
+
+    DestroyHeaplets();
 }

@@ -11,14 +11,16 @@ FSTAR_ROOTS += $(wildcard tests/*.fst) $(wildcard alternative/*.fst) $(wildcard 
 .PHONY: all-tests
 all-tests: $(subst .,_,$(patsubst %.fst,test-ml-%,$(notdir $(wildcard tests/*.fst))))
 
-.PRECIOUS: specs/tests/%_AutoTest.ml
-specs/tests/%_AutoTest.ml:
+.PRECIOUS: tests/%_AutoTest.ml
+tests/%_AutoTest.ml:
 	echo "if not ($*.test ()) then (print_endline \"$* failed\"; exit 1)" > $@
 
-.PRECIOUS: specs/tests/%.exe
-specs/tests/%.exe: $(ALL_CMX_FILES) specs/tests/%_AutoTest.ml
+%.exe:
+
+.PRECIOUS: tests/%.exe
+tests/%.exe: $(ALL_CMX_FILES) tests/%_AutoTest.ml
 	$(OCAMLOPT) $^ -o $@
 
 .PHONY: test-ml-%
-test-ml-%: specs/tests/%.exe
+test-ml-%: tests/%.exe
 	$<

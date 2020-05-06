@@ -25,10 +25,9 @@ open Vale.X64.InsVector
 open Vale.X64.QuickCode
 open Vale.X64.QuickCodes
 open Vale.X64.CPU_Features_s
+#reset-options "--z3rlimit 30"
 #endverbatim
 
-
-#reset-options "--z3rlimit 30"
 procedure Callee_save_registers(inline win:bool)
     {:public}
     {:quick}

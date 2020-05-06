@@ -1,5 +1,5 @@
 [
-  "¶%0Û)ø∞E,ñØ\u0001r\u0004\u0010—",
+  "d’ô„\u001cùoÖæ˘]\u0017Ê\u0018{ä",
   [
     [
       "Hacl.Spec.Poly1305.Lemmas.pfelem",
@@ -13,7 +13,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "99a32840d84a24cb996704e3af84d3c8"
+      "b07de444bea330383502d29168e5954c"
     ],
     [
       "Hacl.Spec.Poly1305.Lemmas.zero",
@@ -27,7 +27,7 @@
         "typing_Hacl.Spec.Poly1305.Lemmas.prime"
       ],
       0,
-      "9d38e9ae9b718aa5a4b9b01c29199c0c"
+      "66fbd1cd39136551e4f3db61eb3c1c6f"
     ],
     [
       "Hacl.Spec.Poly1305.Lemmas.one",
@@ -36,7 +36,7 @@
       0,
       [ "@query", "projection_inverse_BoxInt_proj_0" ],
       0,
-      "4203a1c2d1044637db9add4bd6a83de6"
+      "2ccecc4867dcf76a42119c32df1a3773"
     ],
     [
       "Hacl.Spec.Poly1305.Lemmas.op_Plus_Percent",
@@ -55,7 +55,7 @@
         "typing_Hacl.Spec.Poly1305.Lemmas.prime"
       ],
       0,
-      "f6ad1e60d24bc5026e8d99434c35601c"
+      "4c2babdb1546c582a69f03b227a2fffc"
     ],
     [
       "Hacl.Spec.Poly1305.Lemmas.op_Star_Percent",
@@ -74,7 +74,26 @@
         "typing_Hacl.Spec.Poly1305.Lemmas.prime"
       ],
       0,
-      "ed2ead91487f644cc268a4b0bc3607c2"
+      "f7cc0f92eeae641db55a4ab3775a8c36"
+    ],
+    [
+      "Hacl.Spec.Poly1305.Lemmas.op_Tilde_Percent",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_Hacl.Spec.Poly1305.Lemmas.pfelem",
+        "equation_Hacl.Spec.Poly1305.Lemmas.prime", "equation_Prims.nat",
+        "equation_Prims.pos", "primitive_Prims.op_Modulus",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_050542d050b31782e2f5a256a21d1330",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "typing_Hacl.Spec.Poly1305.Lemmas.prime"
+      ],
+      0,
+      "f3ed385988aacc901672ccf4c07ec0ec"
     ],
     [
       "Hacl.Spec.Poly1305.Lemmas.add_identity",
@@ -94,7 +113,7 @@
         "typing_Hacl.Spec.Poly1305.Lemmas.zero"
       ],
       0,
-      "b6f7b873c907a03478cb540e0d91c235"
+      "25791a0797c13978fe39e24294d8f9ef"
     ],
     [
       "Hacl.Spec.Poly1305.Lemmas.mul_identity",
@@ -114,7 +133,7 @@
         "typing_Hacl.Spec.Poly1305.Lemmas.op_Star_Percent"
       ],
       0,
-      "b710774fb35c7c3425b4d75566dcf61d"
+      "81209fedfa8ebabefa01d89136994b6a"
     ],
     [
       "Hacl.Spec.Poly1305.Lemmas.add_associativity",
@@ -132,7 +151,7 @@
         "typing_Hacl.Spec.Poly1305.Lemmas.op_Plus_Percent"
       ],
       0,
-      "62d00b2c7b6329e69c9c79943a5ede7b"
+      "e7dd77a0dd79204e6591620ad74794c0"
     ],
     [
       "Hacl.Spec.Poly1305.Lemmas.add_commutativity",
@@ -144,7 +163,7 @@
         "primitive_Prims.op_Addition"
       ],
       0,
-      "75db7163ecf5fc39e018405847e793d0"
+      "6eedec4b2286ca91501c02a642b65e80"
     ],
     [
       "Hacl.Spec.Poly1305.Lemmas.mul_associativity",
@@ -165,7 +184,7 @@
         "typing_Hacl.Spec.Poly1305.Lemmas.prime"
       ],
       0,
-      "d55dc5240d908dbe0d2d299ad2b5455a"
+      "d02fcd1a043a5b14b23065421b467098"
     ],
     [
       "Hacl.Spec.Poly1305.Lemmas.mul_commutativity",
@@ -177,7 +196,7 @@
         "primitive_Prims.op_Multiply"
       ],
       0,
-      "6521b3bb2b8353403c7c09945a42ed3a"
+      "01e760ee1f21e6627c3c10a630794c6e"
     ],
     [
       "Hacl.Spec.Poly1305.Lemmas.mul_add_distr",
@@ -204,7 +223,7 @@
         "token_correspondence_FStar.Algebra.CommMonoid.__proj__CM__item__mult"
       ],
       0,
-      "abe30cb87eec68cca7f93438090f91c0"
+      "824c1e525692de6f9fca1c2968e61d34"
     ],
     [
       "Hacl.Spec.Poly1305.Lemmas.mul_zero_l",
@@ -230,7 +249,45 @@
         "token_correspondence_FStar.Algebra.CommMonoid.__proj__CM__item__mult"
       ],
       0,
-      "6d2bf3cc740b684d530c28804237745d"
+      "84a9905dd39c16eefe4fec14b3c3dda2"
+    ],
+    [
+      "Hacl.Spec.Poly1305.Lemmas.add_opp",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_Hacl.Spec.Poly1305.Lemmas.op_Plus_Percent",
+        "equation_Hacl.Spec.Poly1305.Lemmas.op_Tilde_Percent",
+        "equation_Hacl.Spec.Poly1305.Lemmas.prime",
+        "equation_Hacl.Spec.Poly1305.Lemmas.zero", "equation_Prims.pos",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Minus",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "typing_Hacl.Spec.Poly1305.Lemmas.prime"
+      ],
+      0,
+      "2aa6db168cf56962e4f45bc7c6d00218"
+    ],
+    [
+      "Hacl.Spec.Poly1305.Lemmas.pfelem_cr",
+      1,
+      0,
+      0,
+      [
+        "@query", "equation_Hacl.Spec.Poly1305.Lemmas.op_Tilde_Percent",
+        "equation_Hacl.Spec.Poly1305.Lemmas.pfelem",
+        "equation_Hacl.Spec.Poly1305.Lemmas.pfelem_add_cm",
+        "function_token_typing_Hacl.Spec.Poly1305.Lemmas.op_Plus_Percent",
+        "proj_equation_FStar.Algebra.CommMonoid.CM_mult",
+        "proj_equation_FStar.Algebra.CommMonoid.CM_unit",
+        "projection_inverse_FStar.Algebra.CommMonoid.CM_mult",
+        "projection_inverse_FStar.Algebra.CommMonoid.CM_unit",
+        "token_correspondence_FStar.Algebra.CommMonoid.__proj__CM__item__mult"
+      ],
+      0,
+      "dbf81ffbf26939a754017e771cf848dd"
     ],
     [
       "Hacl.Spec.Poly1305.Lemmas.poly_update_repeat_blocks_multi_lemma2_simplify",
@@ -239,7 +296,7 @@
       0,
       [ "@query", "true_interp" ],
       0,
-      "1a562c2ceae03e55031271620d4ef1c0"
+      "30fc45d204eba10d3ae6ff418315a3d0"
     ],
     [
       "Hacl.Spec.Poly1305.Lemmas.poly_update_repeat_blocks_multi_lemma2_simplify",
@@ -253,7 +310,7 @@
         "typing_Hacl.Spec.Poly1305.Lemmas.prime"
       ],
       0,
-      "555d5da5fec0ba6883174d5c59b3d401"
+      "c86e7713bc6df5214ccb4c28ccb6f8e0"
     ],
     [
       "Hacl.Spec.Poly1305.Lemmas.poly_update_repeat_blocks_multi_lemma4_simplify",
@@ -266,7 +323,7 @@
         "true_interp"
       ],
       0,
-      "9f547d2496d2dc7ea969a7d806748eb1"
+      "0ea07e5e164eef06d1b57d9e2a7ef66e"
     ],
     [
       "Hacl.Spec.Poly1305.Lemmas.poly_update_repeat_blocks_multi_lemma4_simplify",
@@ -280,7 +337,7 @@
         "typing_Hacl.Spec.Poly1305.Lemmas.prime"
       ],
       0,
-      "004502df8e1905e4f02f33dca658bddd"
+      "a3f5efa4616ee1c03d081603b35c1c18"
     ],
     [
       "Hacl.Spec.Poly1305.Lemmas.poly_update_multi_lemma_load2_simplify",
@@ -289,7 +346,7 @@
       0,
       [ "@query", "true_interp" ],
       0,
-      "19d4eb837e118366b3502a2cf2afa63b"
+      "6a63eac37d8d33fa242cea0b409f0397"
     ],
     [
       "Hacl.Spec.Poly1305.Lemmas.poly_update_multi_lemma_load2_simplify",
@@ -303,7 +360,7 @@
         "typing_Hacl.Spec.Poly1305.Lemmas.prime"
       ],
       0,
-      "28e2e896f75e2a1bda6d05ff13b07251"
+      "b6b0b787fc5fa6a0fd516bad98a7f73e"
     ],
     [
       "Hacl.Spec.Poly1305.Lemmas.poly_update_multi_lemma_load4_simplify",
@@ -312,7 +369,7 @@
       0,
       [ "@query", "true_interp" ],
       0,
-      "ff3c4cc5c320bbb4ecb492d960753809"
+      "2579a1816e8e1d2a84c18457623cabe0"
     ],
     [
       "Hacl.Spec.Poly1305.Lemmas.poly_update_multi_lemma_load4_simplify",
@@ -326,7 +383,7 @@
         "typing_Hacl.Spec.Poly1305.Lemmas.prime"
       ],
       0,
-      "ae3c7958118184fd6c3f149e0f13480b"
+      "d91aeb07f8483a87a8bf7a62603e0a75"
     ]
   ]
 ]

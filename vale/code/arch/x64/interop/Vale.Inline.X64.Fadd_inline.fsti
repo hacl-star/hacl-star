@@ -22,7 +22,7 @@ let as_nat (b:B.buffer UInt64.t{B.length b == 4}) (h:HS.mem) : GTot nat =
   let s3 = UInt64.v (Seq.index s 3) in
   pow2_four s0 s1 s2 s3
 
-val add1_inline
+val add_scalar
   (out:u256)
   (f1:u256)
   (f2:UInt64.t)
@@ -36,7 +36,7 @@ val add1_inline
     B.modifies (B.loc_buffer out) h0 h1 /\
     as_nat out h1 + pow2_256 * UInt64.v c == as_nat f1 h0 + UInt64.v f2)
 
-val fadd_inline
+val fadd
   (out:u256)
   (f1:u256)
   (f2:u256)
@@ -51,7 +51,7 @@ val fadd_inline
       B.modifies (B.loc_buffer out) h0 h1 /\
       (as_nat out h1) % prime == (as_nat f1 h0 + as_nat f2 h0) % prime)
 
-val fsub_inline
+val fsub
   (out:u256)
   (f1:u256)
   (f2:u256)

@@ -163,6 +163,7 @@ let correct_down_p_frame (mem:interop_heap) (heap:machine_heap) (p:b8) : Lemma
     let contents = DV.as_seq (hs_of_mem mem) b in
     let addr = addrs_of_mem mem p in
     let new_heap = write_vale_mem contents length addr 0 heap in
+    reveal_opaque (`%addr_map_pred) addr_map_pred;
     Classical.forall_intro (Classical.move_requires (frame_write_vale_mem contents length addr 0 heap))
   in
   Classical.forall_intro aux
@@ -482,6 +483,7 @@ let rec update_buffer_up_mem_aux
     let aux2 () : Lemma
       (requires hd =!= b)
       (ensures DV.as_seq mem db == get_seq_heap h2 addrs hd) =
+      reveal_opaque (`%addr_map_pred) addr_map_pred;
       get_seq_heap_as_seq h1 h2 m hd
     in Classical.move_requires aux2 ();
     update_buffer_up_mem_aux h1 h2 tl (hd::accu) b (InteropHeap ptrs addrs m')

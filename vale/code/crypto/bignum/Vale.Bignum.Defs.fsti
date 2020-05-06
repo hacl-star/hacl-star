@@ -30,6 +30,9 @@ val reveal_add_hi (#n:nat) (a b:natN n) (c:nat1) : Lemma (add_hi a b c == add_hi
 val reveal_add_hi_all (_:unit) : Lemma
   (forall (n:nat) (a b:natN n) (c:nat1).{:pattern add_hi a b c} add_hi a b c == add_hi_def a b c)
 
+let add_lo_hi (#n:pos) (a b:natN n) (c:nat1) : natN n & nat1 =
+  (add_lo a b c, add_hi a b c)
+
 let mul_lo_def (#n:pos) (a b:natN n) : natN n =
   (a * b) % n
 

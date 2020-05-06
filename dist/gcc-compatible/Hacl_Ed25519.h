@@ -36,13 +36,13 @@
 #include "Hacl_Curve25519_51.h"
 
 
-void Hacl_Ed25519_sign(uint8_t *signature, uint8_t *secret1, uint32_t len, uint8_t *msg);
+void Hacl_Ed25519_sign(uint8_t *signature, uint8_t *priv, uint32_t len, uint8_t *msg);
 
-bool Hacl_Ed25519_verify(uint8_t *output, uint32_t len, uint8_t *msg, uint8_t *signature);
+bool Hacl_Ed25519_verify(uint8_t *pub, uint32_t len, uint8_t *msg, uint8_t *signature);
 
-void Hacl_Ed25519_secret_to_public(uint8_t *output, uint8_t *secret1);
+void Hacl_Ed25519_secret_to_public(uint8_t *pub, uint8_t *priv);
 
-void Hacl_Ed25519_expand_keys(uint8_t *ks, uint8_t *secret1);
+void Hacl_Ed25519_expand_keys(uint8_t *ks, uint8_t *priv);
 
 void Hacl_Ed25519_sign_expanded(uint8_t *signature, uint8_t *ks, uint32_t len, uint8_t *msg);
 

@@ -16,7 +16,7 @@ open Hacl.Spec.Curve25519.Field64.Core
 #set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
 
 [@CInline]
-let add1 out f1 f2 =
+let add1_ out f1 f2 =
   let f10 = f1.(0ul) in
   let f11 = f1.(1ul) in
   let f12 = f1.(2ul) in
@@ -30,7 +30,7 @@ let add1 out f1 f2 =
   carry
 
 [@CInline]
-let fadd out f1 f2 =
+let fadd_ out f1 f2 =
   let f10 = f1.(0ul) in
   let f11 = f1.(1ul) in
   let f12 = f1.(2ul) in
@@ -49,7 +49,7 @@ let fadd out f1 f2 =
   out.(3ul) <- o3
 
 [@CInline]
-let fsub out f1 f2 =
+let fsub_ out f1 f2 =
   let f10 = f1.(0ul) in
   let f11 = f1.(1ul) in
   let f12 = f1.(2ul) in
@@ -68,7 +68,7 @@ let fsub out f1 f2 =
   out.(3ul) <- o3
 
 [@CInline]
-let fmul out f1 f2 tmp =
+let fmul_ out f1 f2 tmp =
   let f10 = f1.(0ul) in
   let f11 = f1.(1ul) in
   let f12 = f1.(2ul) in
@@ -87,18 +87,18 @@ let fmul out f1 f2 tmp =
   out.(3ul) <- o3
 
 [@CInline]
-let fmul2 out f1 f2 tmp =
+let fmul2_ out f1 f2 tmp =
   let out1 = B.sub out 0ul 4ul in
   let out2 = B.sub out 4ul 4ul in
   let f11 = B.sub f1 0ul 4ul in
   let f12 = B.sub f1 4ul 4ul in
   let f21 = B.sub f2 0ul 4ul in
   let f22 = B.sub f2 4ul 4ul in
-  fmul out1 f11 f21 tmp;
-  fmul out2 f12 f22 tmp
+  fmul_ out1 f11 f21 tmp;
+  fmul_ out2 f12 f22 tmp
 
 [@CInline]
-let fmul1 out f1 f2 =
+let fmul1_ out f1 f2 =
   let f10 = f1.(0ul) in
   let f11 = f1.(1ul) in
   let f12 = f1.(2ul) in
@@ -111,15 +111,15 @@ let fmul1 out f1 f2 =
   out.(3ul) <- o3
 
 [@CInline]
-let fsqr out f1 tmp =
+let fsqr_ out f1 tmp =
   push_frame ();
   let tmp = create 16ul (u64 0) in
-  fmul out f1 f1 tmp;
+  fmul_ out f1 f1 tmp;
   pop_frame ()
 
 [@CInline]
-let fsqr2 out f tmp =
-  fmul2 out f f tmp
+let fsqr2_ out f tmp =
+  fmul2_ out f f tmp
 
 val lemma_cswap2_step:
     bit:uint64{v bit <= 1}
@@ -146,7 +146,7 @@ let lemma_cswap2_step bit p1 p2 =
   logxor_lemma p2 p1
 
 [@CInline]
-let cswap2 bit p1 p2 =
+let cswap2_ bit p1 p2 =
   let h0 = ST.get () in
   let mask = u64 0 -. bit in
 

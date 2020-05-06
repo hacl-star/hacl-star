@@ -14,7 +14,7 @@ include "../../../arch/x64/Vale.X64.InsBasic.vaf"
 include "../../../arch/x64/Vale.X64.InsMem.vaf"
 include "../../../arch/x64/Vale.X64.InsStack.vaf"
 include "../../../crypto/bignum/Vale.Bignum.X64.vaf"
-include{:/*TODO*/fstar}{:open} "FStar.Seq.Base"
+include{:fstar}{:open} "FStar.Seq.Base"
 include{:fstar}{:open} "Vale.Def.Words_s"
 include{:fstar}{:open} "Vale.Def.Types_s"
 include{:fstar}{:open} "Vale.Arch.Types"
@@ -67,7 +67,7 @@ let make_seq9 (#a:Type0) (v0 v1 v2 v3 v4 v5 v6 v7 v8:a) : seq a =
     if i = 7 then v7 else
     v8)
 
-let operand_reg8 (n:nat) : va_operand = oreg (Reg 0 (8 + n % 8))
+let operand_reg8 (n:nat) : operand64 = oreg (Reg 0 (8 + n % 8))
 #endverbatim
 
 function init_ys(a:nat64, bs:seq(nat64)):seq(nat64) extern;
@@ -101,38 +101,39 @@ ghost procedure lemma_scale_add(
     {:infer_spec}
     extern;
 
-function operand_reg8(n:nat):va_operand extern;
-
-#reset-options "--z3rlimit 80 --max_fuel 1 --max_ifuel 0"
+function operand_reg8(n:nat):operand64 extern;
 
 // Multiply 1-word value "b" by 8-word value "a"
 procedure MulAdd18(
-    inout r0:reg_opr64,
-    inout r1:reg_opr64,
-    inout r2:reg_opr64,
-    inout r3:reg_opr64,
-    inout r4:reg_opr64,
-    inout r5:reg_opr64,
-    inout r6:reg_opr64,
-    inout r7:reg_opr64,
-    ghost regRotate:nat,
-    ghost bA:buffer64,
-    ghost bB:buffer64,
-    ghost bD:buffer64)
+        inout r0:reg_opr64,
+        inout r1:reg_opr64,
+        inout r2:reg_opr64,
+        inout r3:reg_opr64,
+        inout r4:reg_opr64,
+        inout r5:reg_opr64,
+        inout r6:reg_opr64,
+        inout r7:reg_opr64,
+        ghost regRotate:nat,
+        ghost bA:buffer64,
+        ghost bB:buffer64,
+        ghost bD:buffer64)
+    {:options z3rlimit(80), max_fuel(1), max_ifuel(0)}
     lets
         pD @= rdi; pA @= rcx; pB @= rsi; T0 @= rax; T1 @= rbx;
-        as := s64(mem, bA);
+        as := s64(heap0, bA);
         rs:seq(nat64) := make_seq9(r0, r1, r2, r3, r4, r5, r6, r7, 0);
-    reads pD; pA; pB;
-    modifies T0; T1; rdx; efl; mem; memTaint;
+    reads
+        pD; pA; pB;
+    modifies
+        T0; T1; rdx; efl; heap0; memLayout;
     requires/ensures
         valid_cf(efl) && flag_cf(efl) == 0;
         valid_of(efl) && flag_of(efl) == 0;
     requires
         adx_enabled && bmi2_enabled;
-        validDstAddrs64(mem, pA, bA, 8, memTaint, Public);
-        validSrcAddrs64(mem, pB, bB, 1, memTaint, Public);
-        validDstAddrs64(mem, pD, bD, 1, memTaint, Public);
+        validDstAddrs64(heap0, pA, bA, 8, memLayout, Public);
+        validSrcAddrs64(heap0, pB, bB, 1, memLayout, Public);
+        validDstAddrs64(heap0, pD, bD, 1, memLayout, Public);
         length(as) == 8;
         @r0 == operand_reg8(regRotate + 0);
         @r1 == operand_reg8(regRotate + 1);
@@ -143,47 +144,47 @@ procedure MulAdd18(
         @r6 == operand_reg8(regRotate + 6);
         @r7 == operand_reg8(regRotate + 7);
     lets
-        b := buffer64_read(bB, 0, mem);
-        d := buffer64_read(bD, 0, mem);
+        b := buffer64_read(bB, 0, heap0);
+        d := buffer64_read(bD, 0, heap0);
     ensures
-        let xs:seq(nat64) := make_seq9(buffer64_read(bD, 0, mem), r1, r2, r3, r4, r5, r6, r7, r0);
+        let xs:seq(nat64) := make_seq9(buffer64_read(bD, 0, heap0), r1, r2, r3, r4, r5, r6, r7, r0);
         sum_pow_seq(xs) == sum_pow_seq(rs) + b * sum_pow_seq(as) + d;
 {
     reveal_add_lo_all();
-    Mov64(rdx, Mem(pB, 0, bB, 0, Public));
-    Adox_64(r0, Mem(pD, 0, bD, 0, Public));
+    Mov64(rdx, Mem64(heap0, pB, 0, bB, 0, Public));
+    Adox_64(r0, Mem64(heap0, pD, 0, bD, 0, Public));
 
-    Mulx_64(T1, T0, Mem(pA, 0 * 8, bA, 0, Public));
+    Mulx_64(T1, T0, Mem64(heap0, pA, 0 * 8, bA, 0, Public));
     Adcx_64(r0, T0);
     Adox_64(r1, T1);
 
-    Mulx_64(T1, T0, Mem(pA, 1 * 8, bA, 1, Public));
+    Mulx_64(T1, T0, Mem64(heap0, pA, 1 * 8, bA, 1, Public));
     Adcx_64(r1, T0);
     Adox_64(r2, T1);
 
-    Mulx_64(T1, T0, Mem(pA, 2 * 8, bA, 2, Public));
+    Mulx_64(T1, T0, Mem64(heap0, pA, 2 * 8, bA, 2, Public));
     Adcx_64(r2, T0);
     Adox_64(r3, T1);
 
-    Mulx_64(T1, T0, Mem(pA, 3 * 8, bA, 3, Public));
+    Mulx_64(T1, T0, Mem64(heap0, pA, 3 * 8, bA, 3, Public));
     Adcx_64(r3, T0);
     Adox_64(r4, T1);
 
-    Mulx_64(T1, T0, Mem(pA, 4 * 8, bA, 4, Public));
+    Mulx_64(T1, T0, Mem64(heap0, pA, 4 * 8, bA, 4, Public));
     Adcx_64(r4, T0);
     Adox_64(r5, T1);
 
-    Mulx_64(T1, T0, Mem(pA, 5 * 8, bA, 5, Public));
+    Mulx_64(T1, T0, Mem64(heap0, pA, 5 * 8, bA, 5, Public));
     Adcx_64(r5, T0);
     Adox_64(r6, T1);
 
-    Mulx_64(T1, T0, Mem(pA, 6 * 8, bA, 6, Public));
+    Mulx_64(T1, T0, Mem64(heap0, pA, 6 * 8, bA, 6, Public));
     Adcx_64(r6, T0);
     Adox_64(r7, T1);
 
-    Mulx_64(T1, T0, Mem(pA, 7 * 8, bA, 7, Public));
+    Mulx_64(T1, T0, Mem64(heap0, pA, 7 * 8, bA, 7, Public));
     Adcx_64(r7, T0);
-    Store64_buffer(pD, r0, 0, Public, bD, 0);
+    Store64_buffer(heap0, pD, r0, 0, Public, bD, 0);
 
     Mov64(r0, 0);
     Adcx_64(r0, r0);
@@ -193,7 +194,7 @@ procedure MulAdd18(
     let ys := init_ys(b, as);
     let zs := init_zs(b, as, d);
     let qs := seq_add(rs, zs, 0)._1;
-    let xs:seq(nat64) := make_seq9(buffer64_read(bD, 0, mem), r1, r2, r3, r4, r5, r6, r7, r0);
+    let xs:seq(nat64) := make_seq9(buffer64_read(bD, 0, heap0), r1, r2, r3, r4, r5, r6, r7, r0);
     lemma_seq_add_is_norm(rs, zs, 0, l + 1);
     lemma_seq_add_is_norm(qs, ys, 0, l + 1);
     lemma_scale_add(l, b, d, as, rs, ys, zs, qs, xs);

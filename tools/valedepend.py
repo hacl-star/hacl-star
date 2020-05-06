@@ -75,10 +75,9 @@ def depends(target, source):
 
 def find_fsti(module):
     for d in inc_dirs:
-        if os.path.isfile(os.path.join(d, module + '.fsti')):
-            return norm(os.path.join(d, module + '.fsti'))
-        elif os.path.isfile(os.path.join(d, module + '.fst')):
-            return norm(os.path.join(d, module + '.fst'))
+        for suffix in ('.fsti', '.fst', '.fsti.checked', '.fst.checked'):
+            if os.path.isfile(os.path.join(d, module + suffix)):
+                return norm(os.path.join(d, module + suffix.replace('.checked', '')))
     raise Exception('Could not find fst/fsti for dependency ' + module)
 
 def find_checked_file(fst_file):

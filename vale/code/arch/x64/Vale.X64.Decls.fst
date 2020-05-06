@@ -41,22 +41,52 @@ let mul_nat_helper x y =
 
 let va_fuel_default () = 0
 
-let va_opr_lemma_Mem s base offset b index t =
+let lemma_opr_Mem64 (id:heaplet_id) (s:va_state) (base:operand64) (offset:int) (b:M.buffer64) (index:int) (t:taint) : Lemma
+  (requires (
+    let h = Map16.sel s.vs_heap.vf_heaplets id in
+    M.mem_inv s.vs_heap /\
+    OReg? base /\
+    valid_src_addr h b index /\
+    M.valid_layout_buffer b (s.vs_heap.vf_layout) h false /\
+    M.valid_taint_buf64 b h (full_heap_taint s.vs_heap) t /\
+    eval_operand base s + offset == M.buffer_addr b h + 8 * index
+  ))
+  (ensures (
+    let h = Map16.sel s.vs_heap.vf_heaplets id in
+    valid_operand (va_opr_code_Mem64 id base offset t) s /\
+    M.load_mem64 (M.buffer_addr b h + 8 * index) (s.vs_heap.vf_heap) == M.buffer_read b index h
+  ))
+  =
+  Vale.X64.Memory_Sems.low_lemma_load_mem64_full b index s.vs_heap t id;
   let h = M.get_vale_heap s.vs_heap in
-  let t = va_opr_code_Mem base offset t in
+  let t = va_opr_code_Mem64 id base offset t in
   M.lemma_valid_mem64 b index h;
   let OMem (m, t) = t in
-  assert (valid_buf_maddr64 (eval_maddr m s) h s.vs_memTaint b index t);
+  assert (valid_buf_maddr64 (eval_maddr m s) h s.vs_heap.vf_layout b index t);
   M.lemma_load_mem64 b index h
 
-let va_opr_lemma_Stack s base offset t = ()
-
-let va_opr_lemma_Mem128 s base offset t b index =
+let lemma_opr_Mem128 (id:heaplet_id) (s:va_state) (base:operand64) (offset:int) (t:taint) (b:M.buffer128) (index:int) : Lemma
+  (requires (
+    let h = Map16.sel s.vs_heap.vf_heaplets id in
+    M.mem_inv s.vs_heap /\
+    OReg? base /\
+    valid_src_addr h b index /\
+    M.valid_layout_buffer b (s.vs_heap.vf_layout) h false /\
+    M.valid_taint_buf128 b h (full_heap_taint s.vs_heap) t /\
+    eval_operand base s + offset == M.buffer_addr b h + 16 * index
+  ))
+  (ensures (
+    let h = Map16.sel s.vs_heap.vf_heaplets id in
+    valid_operand128 (va_opr_code_Mem128 id base offset t) s /\
+    M.load_mem128 (M.buffer_addr b h + 16 * index) (M.get_vale_heap s.vs_heap) == M.buffer_read b index h
+  ))
+  =
+  Vale.X64.Memory_Sems.low_lemma_load_mem128_full b index s.vs_heap t id;
   let h = M.get_vale_heap s.vs_heap in
-  let t = va_opr_code_Mem128 base offset t in
+  let t = va_opr_code_Mem128 id base offset t in
   M.lemma_valid_mem128 b index h;
   let OMem (m, t) = t in
-  assert (valid_buf_maddr128 (eval_maddr m s) h s.vs_memTaint b index t);
+  assert (valid_buf_maddr128 (eval_maddr m s) h s.vs_heap.vf_layout b index t);
   M.lemma_load_mem128 b index h
 
 let taint_at memTaint addr = Map.sel memTaint addr
@@ -70,8 +100,19 @@ let va_cmp_gt o1 o2 = BC.OGt o1 o2
 
 let eval_code = Lemmas.eval_code
 let eval_while_inv = Lemmas.eval_while_inv
+
+let va_ins_lemma (c0:va_code) (s0:va_state) : Lemma
+  (requires True)
+  (ensures
+    (forall (i:ins) (s:BS.machine_state).{:pattern (BS.machine_eval_code_ins i s)}
+      BS.machine_eval_code_ins i s == BS.machine_eval_code_ins_def i s)
+  )
+  =
+  reveal_opaque (`%BS.machine_eval_code_ins) BS.machine_eval_code_ins
+
 let eval_ocmp = Lemmas.eval_ocmp
 let valid_ocmp = Lemmas.valid_ocmp
+let havoc_flags = Lemmas.havoc_flags
 
 unfold let va_eval_ins = Lemmas.eval_ins
 

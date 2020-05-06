@@ -9,7 +9,7 @@ open FStar.Mul
 open Vale.Wrapper.X64.Fadd
 
 inline_for_extraction
-val fsqr
+val fsqr_e
   (tmp:u512)
   (f1:u256)
   (out:u256)
@@ -26,7 +26,7 @@ val fsqr
       (as_nat out h1) % prime == (as_nat f1 h0 * as_nat f1 h0) % prime)
 
 inline_for_extraction
-val fsqr2
+val fsqr2_e
   (tmp:u1024)
   (f1:u512)
   (out:u512)

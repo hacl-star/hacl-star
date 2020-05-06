@@ -23,19 +23,10 @@ module Vale.Transformers.Transform
 open Vale.X64.Machine_s
 open Vale.Def.PossiblyMonad
 open Vale.X64.Decls
+open Vale.Transformers.Common
 
-/// Common definitions amongst transformations.
-
-let equiv_states (s1 s2:va_state) =
-  let open Vale.X64.State in
-  s1.vs_ok == s2.vs_ok /\
-  Vale.X64.Regs.equal s1.vs_regs s2.vs_regs /\
-  Vale.X64.Flags.sel fCarry s1.vs_flags == Vale.X64.Flags.sel fCarry s2.vs_flags /\
-  Vale.X64.Flags.sel fOverflow s1.vs_flags == Vale.X64.Flags.sel fOverflow s2.vs_flags /\
-  s1.vs_heap == s2.vs_heap /\
-  s1.vs_stack == s2.vs_stack /\
-  s1.vs_memTaint == s2.vs_memTaint /\
-  s1.vs_stackTaint == s2.vs_stackTaint
+(* Re-expose [equiv_states], so that Common doesn't need to be imported *)
+unfold let equiv_states (s1 s2:va_state) = equiv_states s1 s2
 
 /// The Instruction Reordering Transformation
 
@@ -91,6 +82,62 @@ val lemma_check_if_same_printed_code :
   Ghost (va_state & va_fuel)
     (requires (
         (va_require_total transformed (check_if_same_printed_code orig hint).result va_s0) /\
+        (va_get_ok va_s0) /\
+        (va_ensure_total orig va_s0 va_sM va_fM) /\
+        (va_get_ok va_sM)))
+    (ensures (fun (va_sM', va_fM') ->
+         (va_fM' == va_fM) /\
+         (equiv_states va_sM va_sM') /\
+         (va_ensure_total transformed va_s0 va_sM' va_fM') /\
+         (va_get_ok va_sM')))
+
+/// Transformation to replace movbes -> mov + bswap.
+///
+/// The movbe instruction does not exist on some older generations of
+/// the processor. This transform replaces movbe with the semantically
+/// equivalent mov + bswap.
+
+val movbe_elim :
+  orig:va_code ->
+  va_transformation_result
+
+val lemma_movbe_elim :
+  orig:va_code ->
+  transformed:va_code ->
+  va_s0:va_state -> va_sM:va_state -> va_fM:va_fuel ->
+  Ghost (va_state & va_fuel)
+    (requires (
+        (va_require_total transformed (movbe_elim orig).result va_s0) /\
+        (va_get_ok va_s0) /\
+        (va_ensure_total orig va_s0 va_sM va_fM) /\
+        (va_get_ok va_sM)))
+    (ensures (fun (va_sM', va_fM') ->
+         (va_fM' == va_fM) /\
+         (equiv_states va_sM va_sM') /\
+         (va_ensure_total transformed va_s0 va_sM' va_fM') /\
+         (va_get_ok va_sM')))
+
+/// Transformation to replace mov + mov -> mov.
+///
+/// This transformation exists simply as a demonstration of the
+/// capability of the peephole transformer to support many-to-*
+/// peephole transformations. In practice, it just behaves as a
+/// trivially-dead code eliminator, where trivially dead means that a
+/// mov into a location is immediately superceded by another move into
+/// that same location, such that that move is independent of the
+/// first.
+
+val mov_mov_elim :
+  orig:va_code ->
+  va_transformation_result
+
+val lemma_mov_mov_elim :
+  orig:va_code ->
+  transformed:va_code ->
+  va_s0:va_state -> va_sM:va_state -> va_fM:va_fuel ->
+  Ghost (va_state & va_fuel)
+    (requires (
+        (va_require_total transformed (mov_mov_elim orig).result va_s0) /\
         (va_get_ok va_s0) /\
         (va_ensure_total orig va_s0 va_sM va_fM) /\
         (va_get_ok va_sM)))

@@ -9,7 +9,7 @@ open FStar.Mul
 open Vale.Wrapper.X64.Fadd
 
 inline_for_extraction
-val fmul
+val fmul_e
   (tmp:u512)
   (f1:u256)
   (out:u256)
@@ -30,7 +30,7 @@ val fmul
       (as_nat out h1) % prime == (as_nat f1 h0 * as_nat f2 h0) % prime)
 
 inline_for_extraction
-val fmul2
+val fmul2_e
   (tmp:u1024)
   (f1:u512)
   (out:u512)
@@ -58,7 +58,7 @@ val fmul2
       (as_nat out1 h1) % prime == (as_nat f11 h0 * as_nat f21 h0) % prime))
 
 inline_for_extraction
-val fmul1
+val fmul_scalar_e
   (out:u256)
   (f1:u256)
   (f2:UInt64.t{UInt64.v f2 < 131072})

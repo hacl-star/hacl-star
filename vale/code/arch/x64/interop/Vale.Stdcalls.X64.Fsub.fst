@@ -12,5 +12,5 @@ let lowstar_Fsub : lowstar_Fsub_t  =
     dom
     (W.mk_prediction code_Fsub dom [] (fsub_lemma code_Fsub IA.win))
 
-let fsub_ //: normal lowstar_Fsub_t
+let fsub_e //: normal lowstar_Fsub_t
   = as_normal_t #lowstar_Fsub_t lowstar_Fsub

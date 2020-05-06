@@ -4,6 +4,8 @@ module Hacl.Meta.Curve25519
 
 friend Hacl.Impl.Curve25519.Generic
 
+let _ = ()
+
 // Hacl_Meta_Curve25519_addanddouble_point_add_and_double_higher
 //   (needs: Hacl_Impl_Curve25519_Fields_Core_fmul, Hacl_Impl_Curve25519_Fields_Core_fsqr2, Hacl_Impl_Curve25519_Fields_Core_fmul1, Hacl_Impl_Curve25519_Fields_Core_fmul2, Hacl_Impl_Curve25519_Fields_Core_fsub, Hacl_Impl_Curve25519_Fields_Core_fadd)
 // Hacl_Meta_Curve25519_addanddouble_point_double_higher

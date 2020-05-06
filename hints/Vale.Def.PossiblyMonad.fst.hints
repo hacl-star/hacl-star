@@ -8,7 +8,7 @@
       0,
       [ "@query" ],
       0,
-      "6c135c0b5659a8270d6a15828c565d34"
+      "0600f401b4290be69349dd13287a1a5c"
     ],
     [
       "Vale.Def.PossiblyMonad.__proj__Ok__item__v",
@@ -22,7 +22,7 @@
         "refinement_interpretation_Tm_refine_b5897378ea5da63410484e6e03401e97"
       ],
       0,
-      "2079b5b8b87c8e7054bb6e370000d48b"
+      "aa187ecdb9cba6a427c41c3264308192"
     ],
     [
       "Vale.Def.PossiblyMonad.__proj__Err__item__reason",
@@ -36,7 +36,7 @@
         "refinement_interpretation_Tm_refine_4284ca70e3cdd80d7a3f9c2a27913ec4"
       ],
       0,
-      "5b2130db45eb7cc2f164d646e40729ca"
+      "f8c1c8ac9e5fd0ad85f82f63ab0d8ce8"
     ],
     [
       "Vale.Def.PossiblyMonad.bind",
@@ -50,7 +50,7 @@
         "fuel_guarded_inversion_Vale.Def.PossiblyMonad.possibly"
       ],
       0,
-      "4710934d5f88ec0053e46bebac9d916d"
+      "a5c473f2c6157a0abd3729aaa0bbe0cc"
     ],
     [
       "Vale.Def.PossiblyMonad.loosen",
@@ -67,7 +67,7 @@
         "refinement_interpretation_Tm_refine_fa44f965d7758db557d71572e63f5b7c"
       ],
       0,
-      "798e912cfcc64546d6784c7fba2ae863"
+      "c41da0a0e3e25d8782eed433b020f435"
     ],
     [
       "Vale.Def.PossiblyMonad.tighten",
@@ -76,16 +76,18 @@
       1,
       [
         "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Vale.Def.PossiblyMonad.Ok",
         "disc_equation_Vale.Def.PossiblyMonad.Err",
         "disc_equation_Vale.Def.PossiblyMonad.Ok",
         "fuel_guarded_inversion_Vale.Def.PossiblyMonad.possibly",
         "proj_equation_Vale.Def.PossiblyMonad.Ok_v",
         "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_Vale.Def.PossiblyMonad.Ok__a",
         "projection_inverse_Vale.Def.PossiblyMonad.Ok_v",
         "refinement_interpretation_Tm_refine_74e51f5a60113bab8cc13a3888f12e56"
       ],
       0,
-      "cdf1d049e38b4eed987562e04a8640bf"
+      "01b1ea513bd0f876c6bcfe83b837a150"
     ],
     [
       "Vale.Def.PossiblyMonad.op_Slash_Plus_Greater",
@@ -99,7 +101,7 @@
         "fuel_guarded_inversion_Vale.Def.PossiblyMonad.possibly"
       ],
       0,
-      "1e756871775ad8f0f72380f054e52591"
+      "41810d1eebf011a46ed7aff4a32c17ad"
     ],
     [
       "Vale.Def.PossiblyMonad.op_Slash_Plus_Less",
@@ -113,7 +115,7 @@
         "fuel_guarded_inversion_Vale.Def.PossiblyMonad.possibly"
       ],
       0,
-      "8eb5f69e464830b95d00a7bc8f970935"
+      "3bc5b861a6b1161016b8fd959b26daa6"
     ],
     [
       "Vale.Def.PossiblyMonad.op_Amp_Amp_Dot",
@@ -127,7 +129,7 @@
         "fuel_guarded_inversion_Vale.Def.PossiblyMonad.possibly"
       ],
       0,
-      "3f77ecdaba65ba2c84b026aaabc6d176"
+      "daaa2ea2143667bfcb046016702cf6e9"
     ],
     [
       "Vale.Def.PossiblyMonad.op_Bar_Bar_Dot",
@@ -141,7 +143,7 @@
         "fuel_guarded_inversion_Vale.Def.PossiblyMonad.possibly"
       ],
       0,
-      "46a60ea272729ae037fcc51bbb73fdd4"
+      "201de9b085fc17e7a4f811d31af7f443"
     ],
     [
       "Vale.Def.PossiblyMonad.for_all",
@@ -155,7 +157,7 @@
         "fuel_guarded_inversion_Prims.list", "subterm_ordering_Prims.Cons"
       ],
       0,
-      "a7aea58ac61c40dfd3db9b405ea48e24"
+      "48aa2ab9f38bd9091dad26e7f8ac046f"
     ],
     [
       "Vale.Def.PossiblyMonad.lemma_for_all_intro",
@@ -194,7 +196,7 @@
         "subterm_ordering_Prims.Cons", "unit_inversion", "unit_typing"
       ],
       0,
-      "615933cfd19e4de2c87be515d73e07fe"
+      "335fec9637f1608c6d0d28ecdf6c1d94"
     ],
     [
       "Vale.Def.PossiblyMonad.lemma_for_all_elim",
@@ -228,7 +230,7 @@
         "subterm_ordering_Prims.Cons", "unit_inversion", "unit_typing"
       ],
       0,
-      "ad10af94e4ac22e66677a455bcaabc4b"
+      "a23fa8c18e5d7b97c772bf149d5aa68f"
     ],
     [
       "Vale.Def.PossiblyMonad.possibly",
@@ -237,7 +239,7 @@
       0,
       [ "@query" ],
       0,
-      "bba325dcdcaff5f9b6ec098980560318"
+      "5cda0b74f7478f0a6b9df221b0538664"
     ],
     [
       "Vale.Def.PossiblyMonad.__proj__Ok__item__v",
@@ -251,7 +253,7 @@
         "refinement_interpretation_Tm_refine_b5897378ea5da63410484e6e03401e97"
       ],
       0,
-      "b7c072cf5b1a86d9c5b79925a207da69"
+      "fc7f4780ad1a066a1e05218f8893b480"
     ],
     [
       "Vale.Def.PossiblyMonad.__proj__Err__item__reason",
@@ -265,7 +267,7 @@
         "refinement_interpretation_Tm_refine_4284ca70e3cdd80d7a3f9c2a27913ec4"
       ],
       0,
-      "2a1227d8414fe7f60425d507bcee4157"
+      "ca7d98adf66e5040a30ebf8bfe923424"
     ],
     [
       "Vale.Def.PossiblyMonad.bind",
@@ -279,7 +281,7 @@
         "fuel_guarded_inversion_Vale.Def.PossiblyMonad.possibly"
       ],
       0,
-      "db25c9f34dc54f10595f5cda7d14e7e2"
+      "eeb3883874c6c5a2ddba66e839544efc"
     ],
     [
       "Vale.Def.PossiblyMonad.loosen",
@@ -296,7 +298,7 @@
         "refinement_interpretation_Tm_refine_fa44f965d7758db557d71572e63f5b7c"
       ],
       0,
-      "c984186d394113755253d43d2156db09"
+      "c170fa148db4f4387ce12532e993dfd4"
     ],
     [
       "Vale.Def.PossiblyMonad.tighten",
@@ -305,16 +307,18 @@
       1,
       [
         "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Vale.Def.PossiblyMonad.Ok",
         "disc_equation_Vale.Def.PossiblyMonad.Err",
         "disc_equation_Vale.Def.PossiblyMonad.Ok",
         "fuel_guarded_inversion_Vale.Def.PossiblyMonad.possibly",
         "proj_equation_Vale.Def.PossiblyMonad.Ok_v",
         "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_Vale.Def.PossiblyMonad.Ok__a",
         "projection_inverse_Vale.Def.PossiblyMonad.Ok_v",
         "refinement_interpretation_Tm_refine_74e51f5a60113bab8cc13a3888f12e56"
       ],
       0,
-      "e58959d40115db8da4530bb183a64a2a"
+      "dce186e2e3378c74369c947e70a83fb5"
     ],
     [
       "Vale.Def.PossiblyMonad.op_Slash_Plus_Greater",
@@ -328,7 +332,7 @@
         "fuel_guarded_inversion_Vale.Def.PossiblyMonad.possibly"
       ],
       0,
-      "c75a4a55ee70b5d0cf8f46fe301b149f"
+      "43714e7d579a628f5ea08038ff6c7be2"
     ],
     [
       "Vale.Def.PossiblyMonad.op_Slash_Plus_Less",
@@ -342,7 +346,7 @@
         "fuel_guarded_inversion_Vale.Def.PossiblyMonad.possibly"
       ],
       0,
-      "f3958e622df813008edbbe98228adab4"
+      "74d79d816f81ad292c2a96b9ac50984b"
     ],
     [
       "Vale.Def.PossiblyMonad.op_Amp_Amp_Dot",
@@ -356,7 +360,7 @@
         "fuel_guarded_inversion_Vale.Def.PossiblyMonad.possibly"
       ],
       0,
-      "8de0ddfe06800434eec91aa76e808a05"
+      "a618092d5063b8023a9a0f9a65acc585"
     ],
     [
       "Vale.Def.PossiblyMonad.op_Bar_Bar_Dot",
@@ -370,7 +374,7 @@
         "fuel_guarded_inversion_Vale.Def.PossiblyMonad.possibly"
       ],
       0,
-      "ae86665db553794d2a2ba41421f72296"
+      "01a701e7c1081285db62754932f6b4cd"
     ],
     [
       "Vale.Def.PossiblyMonad.for_all",
@@ -384,7 +388,7 @@
         "fuel_guarded_inversion_Prims.list", "subterm_ordering_Prims.Cons"
       ],
       0,
-      "cde363ca39959a9cb426e878e7b521aa"
+      "b6ac1c295b635920d457e829f95bd915"
     ]
   ]
 ]

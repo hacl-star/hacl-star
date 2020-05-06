@@ -91,12 +91,12 @@ let add1_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions va_s0 va_s1 add1_regs_modified add1_xmms_modified /\
        add1_post code out f1 f2 va_s0 va_s1 f /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer f1) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer out) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer f1) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer out) /\
        ME.buffer_writeable (as_vale_buffer out) /\
        ME.buffer_writeable (as_vale_buffer f1) /\
        ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
-                                 ME.loc_none) va_s0.VS.vs_heap va_s1.VS.vs_heap
+                                 ME.loc_none) (VS.vs_get_vale_heap va_s0) (VS.vs_get_vale_heap va_s1)
  )) =
    let va_s1, f = FU.va_lemma_Fast_add1 code va_s0 (as_vale_buffer out) (as_vale_buffer f1) (UInt64.v f2) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;
@@ -155,14 +155,24 @@ let lowstar_add1_normal_t : normal lowstar_add1_t
 
 open Vale.AsLowStar.MemoryHelpers
 
-let add1_inline out f1 f2
+let add_scalar out f1 f2
   = DV.length_eq (get_downview out);
     DV.length_eq (get_downview f1);
-    let x, _ = lowstar_add1_normal_t out f1 f2 () in
+    let (x, _) = lowstar_add1_normal_t out f1 f2 () in
     x
 
+let add1_comments : list string =
+  ["Computes the addition of four-element f1 with value in f2"; "and returns the carry (if any)"]
+
+let add1_names (n:nat) =
+  match n with
+  | 0 -> "out"
+  | 1 -> "f1"
+  | 2 -> "f2"
+  | _ -> ""
+
 let add1_code_inline () : FStar.All.ML int =
-  PR.print_inline "add1_inline" 0 (Some "carry_r") (List.length dom) dom code_add1 of_arg add1_regs_modified
+  PR.print_inline "add_scalar" 0 (Some "carry_r") (List.length dom) dom add1_names code_add1 of_arg add1_regs_modified add1_comments
 
 
 [@__reduce__]
@@ -217,14 +227,14 @@ let fadd_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions va_s0 va_s1 fadd_regs_modified fadd_xmms_modified /\
        fadd_post code out f1 f2 va_s0 va_s1 f /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer out) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer f1) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer f2) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer out) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer f1) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer f2) /\
        ME.buffer_writeable (as_vale_buffer out) /\
        ME.buffer_writeable (as_vale_buffer f1) /\
        ME.buffer_writeable (as_vale_buffer f2) /\
        ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
-                                 ME.loc_none) va_s0.VS.vs_heap va_s1.VS.vs_heap
+                                 ME.loc_none) (VS.vs_get_vale_heap va_s0) (VS.vs_get_vale_heap va_s1)
  )) =
    let va_s1, f = FH.va_lemma_Fadd code va_s0 (as_vale_buffer out) (as_vale_buffer f1) (as_vale_buffer f2) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;
@@ -269,15 +279,24 @@ let lowstar_fadd : lowstar_fadd_t  =
 let lowstar_fadd_normal_t : normal lowstar_fadd_t
   = as_normal_t #lowstar_fadd_t lowstar_fadd
 
-let fadd_inline out f1 f2
+let fadd out f1 f2
   = DV.length_eq (get_downview out);
     DV.length_eq (get_downview f1);
     DV.length_eq (get_downview f2);
-    let x, _ = lowstar_fadd_normal_t out f1 f2 () in
+    let (x, _) = lowstar_fadd_normal_t out f1 f2 () in
     ()
 
+let fadd_comments : list string = ["Computes the field addition of two field elements"]
+
+let fadd_names (n:nat) =
+  match n with
+  | 0 -> "out"
+  | 1 -> "f1"
+  | 2 -> "f2"
+  | _ -> ""
+
 let fadd_code_inline () : FStar.All.ML int =
-  PR.print_inline "fadd_inline" 0 None (List.length fadd_dom) fadd_dom code_Fadd of_arg fadd_regs_modified
+  PR.print_inline "fadd" 0 None (List.length fadd_dom) fadd_dom fadd_names code_Fadd of_arg fadd_regs_modified fadd_comments
 
 [@__reduce__]
 let fsub_dom: IX64.arity_ok_stdcall td =
@@ -331,14 +350,14 @@ let fsub_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions va_s0 va_s1 fsub_regs_modified fsub_xmms_modified /\
        fsub_post code out f1 f2 va_s0 va_s1 f /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer out) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer f1) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer f2) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer out) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer f1) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer f2) /\
        ME.buffer_writeable (as_vale_buffer out) /\
        ME.buffer_writeable (as_vale_buffer f1) /\
        ME.buffer_writeable (as_vale_buffer f2) /\
        ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
-                                 ME.loc_none) va_s0.VS.vs_heap va_s1.VS.vs_heap
+                                 ME.loc_none) (VS.vs_get_vale_heap va_s0) (VS.vs_get_vale_heap va_s1)
  )) =
    let va_s1, f = FH.va_lemma_Fsub code va_s0 (as_vale_buffer out) (as_vale_buffer f1) (as_vale_buffer f2) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;
@@ -383,12 +402,21 @@ let lowstar_Fsub : lowstar_Fsub_t  =
 let lowstar_Fsub_normal_t : normal lowstar_Fsub_t
   = as_normal_t #lowstar_Fsub_t lowstar_Fsub
 
-let fsub_inline out f1 f2
+let fsub out f1 f2
   = DV.length_eq (get_downview out);
     DV.length_eq (get_downview f1);
     DV.length_eq (get_downview f2);
-    let x, _ = lowstar_Fsub_normal_t out f1 f2 () in
+    let (x, _) = lowstar_Fsub_normal_t out f1 f2 () in
     ()
 
+let fsub_comments : list string = ["Computes the field substraction of two field elements"]
+
+let fsub_names (n:nat) =
+  match n with
+  | 0 -> "out"
+  | 1 -> "f1"
+  | 2 -> "f2"
+  | _ -> ""
+
 let fsub_code_inline () : FStar.All.ML int =
-  PR.print_inline "fsub_inline" 0 None (List.length fsub_dom) fsub_dom code_Fsub of_arg fsub_regs_modified
+  PR.print_inline "fsub" 0 None (List.length fsub_dom) fsub_dom fsub_names code_Fsub of_arg fsub_regs_modified fsub_comments

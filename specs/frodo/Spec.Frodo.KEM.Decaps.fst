@@ -114,7 +114,7 @@ let crypto_kem_dec_ss ct sk g mu_decode bp_matrix c_matrix =
 val crypto_kem_dec:
     ct:lbytes crypto_ciphertextbytes
   -> sk:lbytes crypto_secretkeybytes
-  -> ss:lbytes crypto_bytes
+  -> lbytes crypto_bytes
 let crypto_kem_dec ct sk =
   expand_crypto_secretkeybytes ();
   let bp_matrix, c_matrix = get_bp_c_matrices ct in

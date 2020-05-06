@@ -24,11 +24,11 @@
 
 #include "EverCrypt_AEAD.h"
 
-/* SNIPPET_START: EverCrypt_AEAD_alg_of_vale_impl */
+/* SNIPPET_START: alg_of_vale_impl */
 
-static Spec_Agile_AEAD_alg EverCrypt_AEAD_alg_of_vale_impl(Spec_Cipher_Expansion_impl i1)
+static Spec_Agile_AEAD_alg alg_of_vale_impl(Spec_Cipher_Expansion_impl i)
 {
-  switch (i1)
+  switch (i)
   {
     case Spec_Cipher_Expansion_Vale_AES128:
       {
@@ -46,7 +46,7 @@ static Spec_Agile_AEAD_alg EverCrypt_AEAD_alg_of_vale_impl(Spec_Cipher_Expansion
   }
 }
 
-/* SNIPPET_END: EverCrypt_AEAD_alg_of_vale_impl */
+/* SNIPPET_END: alg_of_vale_impl */
 
 /* SNIPPET_START: EverCrypt_AEAD_state_s */
 
@@ -118,40 +118,40 @@ Spec_Agile_AEAD_alg EverCrypt_AEAD_alg_of_state(EverCrypt_AEAD_state_s *s)
 
 /* SNIPPET_END: EverCrypt_AEAD_alg_of_state */
 
-/* SNIPPET_START: EverCrypt_AEAD_create_in_chacha20_poly1305 */
+/* SNIPPET_START: create_in_chacha20_poly1305 */
 
 static EverCrypt_Error_error_code
-EverCrypt_AEAD_create_in_chacha20_poly1305(EverCrypt_AEAD_state_s **dst, uint8_t *k1)
+create_in_chacha20_poly1305(EverCrypt_AEAD_state_s **dst, uint8_t *k)
 {
   uint8_t *ek = KRML_HOST_CALLOC((uint32_t)32U, sizeof (uint8_t));
   KRML_CHECK_SIZE(sizeof (EverCrypt_AEAD_state_s), (uint32_t)1U);
   EverCrypt_AEAD_state_s *p = KRML_HOST_MALLOC(sizeof (EverCrypt_AEAD_state_s));
   p[0U] = ((EverCrypt_AEAD_state_s){ .impl = Spec_Cipher_Expansion_Hacl_CHACHA20, .ek = ek });
-  memcpy(ek, k1, (uint32_t)32U * sizeof k1[0U]);
+  memcpy(ek, k, (uint32_t)32U * sizeof (k[0U]));
   dst[0U] = p;
   return EverCrypt_Error_Success;
 }
 
-/* SNIPPET_END: EverCrypt_AEAD_create_in_chacha20_poly1305 */
+/* SNIPPET_END: create_in_chacha20_poly1305 */
 
-/* SNIPPET_START: EverCrypt_AEAD_create_in_aes128_gcm */
+/* SNIPPET_START: create_in_aes128_gcm */
 
 static EverCrypt_Error_error_code
-EverCrypt_AEAD_create_in_aes128_gcm(EverCrypt_AEAD_state_s **dst, uint8_t *k1)
+create_in_aes128_gcm(EverCrypt_AEAD_state_s **dst, uint8_t *k)
 {
-  Spec_Agile_AEAD_alg a = EverCrypt_AEAD_alg_of_vale_impl(Spec_Cipher_Expansion_Vale_AES128);
-  bool has_aesni1 = EverCrypt_AutoConfig2_has_aesni();
-  bool has_pclmulqdq1 = EverCrypt_AutoConfig2_has_pclmulqdq();
-  bool has_avx1 = EverCrypt_AutoConfig2_has_avx();
-  bool has_sse1 = EverCrypt_AutoConfig2_has_sse();
-  bool has_movbe1 = EverCrypt_AutoConfig2_has_movbe();
+  Spec_Agile_AEAD_alg a = alg_of_vale_impl(Spec_Cipher_Expansion_Vale_AES128);
+  bool has_aesni = EverCrypt_AutoConfig2_has_aesni();
+  bool has_pclmulqdq = EverCrypt_AutoConfig2_has_pclmulqdq();
+  bool has_avx = EverCrypt_AutoConfig2_has_avx();
+  bool has_sse = EverCrypt_AutoConfig2_has_sse();
+  bool has_movbe = EverCrypt_AutoConfig2_has_movbe();
   #if EVERCRYPT_TARGETCONFIG_X64
-  if (has_aesni1 && has_pclmulqdq1 && has_avx1 && has_sse1 && has_movbe1)
+  if (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe)
   {
     uint8_t *ek = KRML_HOST_CALLOC((uint32_t)480U, sizeof (uint8_t));
     uint8_t *keys_b = ek;
     uint8_t *hkeys_b = ek + (uint32_t)176U;
-    uint64_t scrut = aes128_key_expansion(k1, keys_b);
+    uint64_t scrut = aes128_key_expansion(k, keys_b);
     uint64_t scrut0 = aes128_keyhash_init(keys_b, hkeys_b);
     KRML_CHECK_SIZE(sizeof (EverCrypt_AEAD_state_s), (uint32_t)1U);
     EverCrypt_AEAD_state_s *p = KRML_HOST_MALLOC(sizeof (EverCrypt_AEAD_state_s));
@@ -163,26 +163,26 @@ EverCrypt_AEAD_create_in_aes128_gcm(EverCrypt_AEAD_state_s **dst, uint8_t *k1)
   return EverCrypt_Error_UnsupportedAlgorithm;
 }
 
-/* SNIPPET_END: EverCrypt_AEAD_create_in_aes128_gcm */
+/* SNIPPET_END: create_in_aes128_gcm */
 
-/* SNIPPET_START: EverCrypt_AEAD_create_in_aes256_gcm */
+/* SNIPPET_START: create_in_aes256_gcm */
 
 static EverCrypt_Error_error_code
-EverCrypt_AEAD_create_in_aes256_gcm(EverCrypt_AEAD_state_s **dst, uint8_t *k1)
+create_in_aes256_gcm(EverCrypt_AEAD_state_s **dst, uint8_t *k)
 {
-  Spec_Agile_AEAD_alg a = EverCrypt_AEAD_alg_of_vale_impl(Spec_Cipher_Expansion_Vale_AES256);
-  bool has_aesni1 = EverCrypt_AutoConfig2_has_aesni();
-  bool has_pclmulqdq1 = EverCrypt_AutoConfig2_has_pclmulqdq();
-  bool has_avx1 = EverCrypt_AutoConfig2_has_avx();
-  bool has_sse1 = EverCrypt_AutoConfig2_has_sse();
-  bool has_movbe1 = EverCrypt_AutoConfig2_has_movbe();
+  Spec_Agile_AEAD_alg a = alg_of_vale_impl(Spec_Cipher_Expansion_Vale_AES256);
+  bool has_aesni = EverCrypt_AutoConfig2_has_aesni();
+  bool has_pclmulqdq = EverCrypt_AutoConfig2_has_pclmulqdq();
+  bool has_avx = EverCrypt_AutoConfig2_has_avx();
+  bool has_sse = EverCrypt_AutoConfig2_has_sse();
+  bool has_movbe = EverCrypt_AutoConfig2_has_movbe();
   #if EVERCRYPT_TARGETCONFIG_X64
-  if (has_aesni1 && has_pclmulqdq1 && has_avx1 && has_sse1 && has_movbe1)
+  if (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe)
   {
     uint8_t *ek = KRML_HOST_CALLOC((uint32_t)544U, sizeof (uint8_t));
     uint8_t *keys_b = ek;
     uint8_t *hkeys_b = ek + (uint32_t)240U;
-    uint64_t scrut = aes256_key_expansion(k1, keys_b);
+    uint64_t scrut = aes256_key_expansion(k, keys_b);
     uint64_t scrut0 = aes256_keyhash_init(keys_b, hkeys_b);
     KRML_CHECK_SIZE(sizeof (EverCrypt_AEAD_state_s), (uint32_t)1U);
     EverCrypt_AEAD_state_s *p = KRML_HOST_MALLOC(sizeof (EverCrypt_AEAD_state_s));
@@ -194,26 +194,26 @@ EverCrypt_AEAD_create_in_aes256_gcm(EverCrypt_AEAD_state_s **dst, uint8_t *k1)
   return EverCrypt_Error_UnsupportedAlgorithm;
 }
 
-/* SNIPPET_END: EverCrypt_AEAD_create_in_aes256_gcm */
+/* SNIPPET_END: create_in_aes256_gcm */
 
 /* SNIPPET_START: EverCrypt_AEAD_create_in */
 
 EverCrypt_Error_error_code
-EverCrypt_AEAD_create_in(Spec_Agile_AEAD_alg a, EverCrypt_AEAD_state_s **dst, uint8_t *k1)
+EverCrypt_AEAD_create_in(Spec_Agile_AEAD_alg a, EverCrypt_AEAD_state_s **dst, uint8_t *k)
 {
   switch (a)
   {
     case Spec_Agile_AEAD_AES128_GCM:
       {
-        return EverCrypt_AEAD_create_in_aes128_gcm(dst, k1);
+        return create_in_aes128_gcm(dst, k);
       }
     case Spec_Agile_AEAD_AES256_GCM:
       {
-        return EverCrypt_AEAD_create_in_aes256_gcm(dst, k1);
+        return create_in_aes256_gcm(dst, k);
       }
     case Spec_Agile_AEAD_CHACHA20_POLY1305:
       {
-        return EverCrypt_AEAD_create_in_chacha20_poly1305(dst, k1);
+        return create_in_chacha20_poly1305(dst, k);
       }
     default:
       {
@@ -224,10 +224,10 @@ EverCrypt_AEAD_create_in(Spec_Agile_AEAD_alg a, EverCrypt_AEAD_state_s **dst, ui
 
 /* SNIPPET_END: EverCrypt_AEAD_create_in */
 
-/* SNIPPET_START: EverCrypt_AEAD_encrypt_aes128_gcm */
+/* SNIPPET_START: encrypt_aes128_gcm */
 
 static EverCrypt_Error_error_code
-EverCrypt_AEAD_encrypt_aes128_gcm(
+encrypt_aes128_gcm(
   EverCrypt_AEAD_state_s *s,
   uint8_t *iv,
   uint32_t iv_len,
@@ -239,11 +239,12 @@ EverCrypt_AEAD_encrypt_aes128_gcm(
   uint8_t *tag
 )
 {
+  #if EVERCRYPT_TARGETCONFIG_X64
   if (s == NULL)
   {
     return EverCrypt_Error_InvalidKey;
   }
-  Spec_Agile_AEAD_alg a = EverCrypt_AEAD_alg_of_vale_impl(Spec_Cipher_Expansion_Vale_AES128);
+  Spec_Agile_AEAD_alg a = alg_of_vale_impl(Spec_Cipher_Expansion_Vale_AES128);
   if (iv_len == (uint32_t)0U)
   {
     return EverCrypt_Error_InvalidIVLength;
@@ -258,7 +259,7 @@ EverCrypt_AEAD_encrypt_aes128_gcm(
   uint32_t len = iv_len / (uint32_t)16U;
   uint32_t bytes_len = len * (uint32_t)16U;
   uint8_t *iv_b = iv;
-  memcpy(tmp_iv, iv + bytes_len, iv_len % (uint32_t)16U * sizeof iv[0U]);
+  memcpy(tmp_iv, iv + bytes_len, iv_len % (uint32_t)16U * sizeof (iv[0U]));
   uint64_t
   uu____0 = compute_iv_stdcall(iv_b, (uint64_t)iv_len, (uint64_t)len, tmp_iv, tmp_iv, hkeys_b);
   uint8_t *inout_b = scratch_b;
@@ -271,8 +272,8 @@ EverCrypt_AEAD_encrypt_aes128_gcm(
   uint8_t *auth_b_ = ad;
   memcpy(inout_b,
     plain + plain_len_,
-    (uint32_t)(uint64_t)plain_len % (uint32_t)16U * sizeof plain[0U]);
-  memcpy(abytes_b, ad + auth_len_, (uint32_t)(uint64_t)ad_len % (uint32_t)16U * sizeof ad[0U]);
+    (uint32_t)(uint64_t)plain_len % (uint32_t)16U * sizeof (plain[0U]));
+  memcpy(abytes_b, ad + auth_len_, (uint32_t)(uint64_t)ad_len % (uint32_t)16U * sizeof (ad[0U]));
   uint64_t len128x6 = (uint64_t)plain_len / (uint64_t)96U * (uint64_t)96U;
   if (len128x6 / (uint64_t)16U >= (uint64_t)18U)
   {
@@ -337,16 +338,23 @@ EverCrypt_AEAD_encrypt_aes128_gcm(
   }
   memcpy(cipher + (uint32_t)(uint64_t)plain_len / (uint32_t)16U * (uint32_t)16U,
     inout_b,
-    (uint32_t)(uint64_t)plain_len % (uint32_t)16U * sizeof inout_b[0U]);
+    (uint32_t)(uint64_t)plain_len % (uint32_t)16U * sizeof (inout_b[0U]));
   return EverCrypt_Error_Success;
+  #else
+  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "statically unreachable");
+  KRML_HOST_EXIT(255U);
+  #endif
 }
 
-/* SNIPPET_END: EverCrypt_AEAD_encrypt_aes128_gcm */
+/* SNIPPET_END: encrypt_aes128_gcm */
 
-/* SNIPPET_START: EverCrypt_AEAD_encrypt_aes256_gcm */
+/* SNIPPET_START: encrypt_aes256_gcm */
 
 static EverCrypt_Error_error_code
-EverCrypt_AEAD_encrypt_aes256_gcm(
+encrypt_aes256_gcm(
   EverCrypt_AEAD_state_s *s,
   uint8_t *iv,
   uint32_t iv_len,
@@ -358,11 +366,12 @@ EverCrypt_AEAD_encrypt_aes256_gcm(
   uint8_t *tag
 )
 {
+  #if EVERCRYPT_TARGETCONFIG_X64
   if (s == NULL)
   {
     return EverCrypt_Error_InvalidKey;
   }
-  Spec_Agile_AEAD_alg a = EverCrypt_AEAD_alg_of_vale_impl(Spec_Cipher_Expansion_Vale_AES256);
+  Spec_Agile_AEAD_alg a = alg_of_vale_impl(Spec_Cipher_Expansion_Vale_AES256);
   if (iv_len == (uint32_t)0U)
   {
     return EverCrypt_Error_InvalidIVLength;
@@ -377,7 +386,7 @@ EverCrypt_AEAD_encrypt_aes256_gcm(
   uint32_t len = iv_len / (uint32_t)16U;
   uint32_t bytes_len = len * (uint32_t)16U;
   uint8_t *iv_b = iv;
-  memcpy(tmp_iv, iv + bytes_len, iv_len % (uint32_t)16U * sizeof iv[0U]);
+  memcpy(tmp_iv, iv + bytes_len, iv_len % (uint32_t)16U * sizeof (iv[0U]));
   uint64_t
   uu____0 = compute_iv_stdcall(iv_b, (uint64_t)iv_len, (uint64_t)len, tmp_iv, tmp_iv, hkeys_b);
   uint8_t *inout_b = scratch_b;
@@ -390,8 +399,8 @@ EverCrypt_AEAD_encrypt_aes256_gcm(
   uint8_t *auth_b_ = ad;
   memcpy(inout_b,
     plain + plain_len_,
-    (uint32_t)(uint64_t)plain_len % (uint32_t)16U * sizeof plain[0U]);
-  memcpy(abytes_b, ad + auth_len_, (uint32_t)(uint64_t)ad_len % (uint32_t)16U * sizeof ad[0U]);
+    (uint32_t)(uint64_t)plain_len % (uint32_t)16U * sizeof (plain[0U]));
+  memcpy(abytes_b, ad + auth_len_, (uint32_t)(uint64_t)ad_len % (uint32_t)16U * sizeof (ad[0U]));
   uint64_t len128x6 = (uint64_t)plain_len / (uint64_t)96U * (uint64_t)96U;
   if (len128x6 / (uint64_t)16U >= (uint64_t)18U)
   {
@@ -456,11 +465,18 @@ EverCrypt_AEAD_encrypt_aes256_gcm(
   }
   memcpy(cipher + (uint32_t)(uint64_t)plain_len / (uint32_t)16U * (uint32_t)16U,
     inout_b,
-    (uint32_t)(uint64_t)plain_len % (uint32_t)16U * sizeof inout_b[0U]);
+    (uint32_t)(uint64_t)plain_len % (uint32_t)16U * sizeof (inout_b[0U]));
   return EverCrypt_Error_Success;
+  #else
+  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "statically unreachable");
+  KRML_HOST_EXIT(255U);
+  #endif
 }
 
-/* SNIPPET_END: EverCrypt_AEAD_encrypt_aes256_gcm */
+/* SNIPPET_END: encrypt_aes256_gcm */
 
 /* SNIPPET_START: EverCrypt_AEAD_encrypt */
 
@@ -482,35 +498,17 @@ EverCrypt_AEAD_encrypt(
     return EverCrypt_Error_InvalidKey;
   }
   EverCrypt_AEAD_state_s scrut = *s;
-  Spec_Cipher_Expansion_impl i1 = scrut.impl;
+  Spec_Cipher_Expansion_impl i = scrut.impl;
   uint8_t *ek = scrut.ek;
-  switch (i1)
+  switch (i)
   {
     case Spec_Cipher_Expansion_Vale_AES128:
       {
-        return
-          EverCrypt_AEAD_encrypt_aes128_gcm(s,
-            iv,
-            iv_len,
-            ad,
-            ad_len,
-            plain,
-            plain_len,
-            cipher,
-            tag);
+        return encrypt_aes128_gcm(s, iv, iv_len, ad, ad_len, plain, plain_len, cipher, tag);
       }
     case Spec_Cipher_Expansion_Vale_AES256:
       {
-        return
-          EverCrypt_AEAD_encrypt_aes256_gcm(s,
-            iv,
-            iv_len,
-            ad,
-            ad_len,
-            plain,
-            plain_len,
-            cipher,
-            tag);
+        return encrypt_aes256_gcm(s, iv, iv_len, ad, ad_len, plain, plain_len, cipher, tag);
       }
     case Spec_Cipher_Expansion_Hacl_CHACHA20:
       {
@@ -531,10 +529,10 @@ EverCrypt_AEAD_encrypt(
 
 /* SNIPPET_END: EverCrypt_AEAD_encrypt */
 
-/* SNIPPET_START: EverCrypt_AEAD_decrypt_aes128_gcm */
+/* SNIPPET_START: decrypt_aes128_gcm */
 
 static EverCrypt_Error_error_code
-EverCrypt_AEAD_decrypt_aes128_gcm(
+decrypt_aes128_gcm(
   EverCrypt_AEAD_state_s *s,
   uint8_t *iv,
   uint32_t iv_len,
@@ -546,6 +544,7 @@ EverCrypt_AEAD_decrypt_aes128_gcm(
   uint8_t *dst
 )
 {
+  #if EVERCRYPT_TARGETCONFIG_X64
   if (s == NULL)
   {
     return EverCrypt_Error_InvalidKey;
@@ -554,7 +553,7 @@ EverCrypt_AEAD_decrypt_aes128_gcm(
   {
     return EverCrypt_Error_InvalidIVLength;
   }
-  Spec_Agile_AEAD_alg a = EverCrypt_AEAD_alg_of_vale_impl(Spec_Cipher_Expansion_Vale_AES128);
+  Spec_Agile_AEAD_alg a = alg_of_vale_impl(Spec_Cipher_Expansion_Vale_AES128);
   EverCrypt_AEAD_state_s scrut = *s;
   uint8_t *ek = scrut.ek;
   uint8_t *scratch_b = ek + (uint32_t)304U;
@@ -565,7 +564,7 @@ EverCrypt_AEAD_decrypt_aes128_gcm(
   uint32_t len = iv_len / (uint32_t)16U;
   uint32_t bytes_len = len * (uint32_t)16U;
   uint8_t *iv_b = iv;
-  memcpy(tmp_iv, iv + bytes_len, iv_len % (uint32_t)16U * sizeof iv[0U]);
+  memcpy(tmp_iv, iv + bytes_len, iv_len % (uint32_t)16U * sizeof (iv[0U]));
   uint64_t
   uu____0 = compute_iv_stdcall(iv_b, (uint64_t)iv_len, (uint64_t)len, tmp_iv, tmp_iv, hkeys_b);
   uint8_t *inout_b = scratch_b;
@@ -578,8 +577,8 @@ EverCrypt_AEAD_decrypt_aes128_gcm(
   uint8_t *auth_b_ = ad;
   memcpy(inout_b,
     cipher + cipher_len_,
-    (uint32_t)(uint64_t)cipher_len % (uint32_t)16U * sizeof cipher[0U]);
-  memcpy(abytes_b, ad + auth_len_, (uint32_t)(uint64_t)ad_len % (uint32_t)16U * sizeof ad[0U]);
+    (uint32_t)(uint64_t)cipher_len % (uint32_t)16U * sizeof (cipher[0U]));
+  memcpy(abytes_b, ad + auth_len_, (uint32_t)(uint64_t)ad_len % (uint32_t)16U * sizeof (ad[0U]));
   uint64_t len128x6 = (uint64_t)cipher_len / (uint64_t)96U * (uint64_t)96U;
   uint64_t c;
   if (len128x6 / (uint64_t)16U >= (uint64_t)6U)
@@ -649,21 +648,28 @@ EverCrypt_AEAD_decrypt_aes128_gcm(
   }
   memcpy(dst + (uint32_t)(uint64_t)cipher_len / (uint32_t)16U * (uint32_t)16U,
     inout_b,
-    (uint32_t)(uint64_t)cipher_len % (uint32_t)16U * sizeof inout_b[0U]);
+    (uint32_t)(uint64_t)cipher_len % (uint32_t)16U * sizeof (inout_b[0U]));
   uint64_t r = c;
   if (r == (uint64_t)0U)
   {
     return EverCrypt_Error_Success;
   }
   return EverCrypt_Error_AuthenticationFailure;
+  #else
+  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "statically unreachable");
+  KRML_HOST_EXIT(255U);
+  #endif
 }
 
-/* SNIPPET_END: EverCrypt_AEAD_decrypt_aes128_gcm */
+/* SNIPPET_END: decrypt_aes128_gcm */
 
-/* SNIPPET_START: EverCrypt_AEAD_decrypt_aes256_gcm */
+/* SNIPPET_START: decrypt_aes256_gcm */
 
 static EverCrypt_Error_error_code
-EverCrypt_AEAD_decrypt_aes256_gcm(
+decrypt_aes256_gcm(
   EverCrypt_AEAD_state_s *s,
   uint8_t *iv,
   uint32_t iv_len,
@@ -675,6 +681,7 @@ EverCrypt_AEAD_decrypt_aes256_gcm(
   uint8_t *dst
 )
 {
+  #if EVERCRYPT_TARGETCONFIG_X64
   if (s == NULL)
   {
     return EverCrypt_Error_InvalidKey;
@@ -683,7 +690,7 @@ EverCrypt_AEAD_decrypt_aes256_gcm(
   {
     return EverCrypt_Error_InvalidIVLength;
   }
-  Spec_Agile_AEAD_alg a = EverCrypt_AEAD_alg_of_vale_impl(Spec_Cipher_Expansion_Vale_AES256);
+  Spec_Agile_AEAD_alg a = alg_of_vale_impl(Spec_Cipher_Expansion_Vale_AES256);
   EverCrypt_AEAD_state_s scrut = *s;
   uint8_t *ek = scrut.ek;
   uint8_t *scratch_b = ek + (uint32_t)368U;
@@ -694,7 +701,7 @@ EverCrypt_AEAD_decrypt_aes256_gcm(
   uint32_t len = iv_len / (uint32_t)16U;
   uint32_t bytes_len = len * (uint32_t)16U;
   uint8_t *iv_b = iv;
-  memcpy(tmp_iv, iv + bytes_len, iv_len % (uint32_t)16U * sizeof iv[0U]);
+  memcpy(tmp_iv, iv + bytes_len, iv_len % (uint32_t)16U * sizeof (iv[0U]));
   uint64_t
   uu____0 = compute_iv_stdcall(iv_b, (uint64_t)iv_len, (uint64_t)len, tmp_iv, tmp_iv, hkeys_b);
   uint8_t *inout_b = scratch_b;
@@ -707,8 +714,8 @@ EverCrypt_AEAD_decrypt_aes256_gcm(
   uint8_t *auth_b_ = ad;
   memcpy(inout_b,
     cipher + cipher_len_,
-    (uint32_t)(uint64_t)cipher_len % (uint32_t)16U * sizeof cipher[0U]);
-  memcpy(abytes_b, ad + auth_len_, (uint32_t)(uint64_t)ad_len % (uint32_t)16U * sizeof ad[0U]);
+    (uint32_t)(uint64_t)cipher_len % (uint32_t)16U * sizeof (cipher[0U]));
+  memcpy(abytes_b, ad + auth_len_, (uint32_t)(uint64_t)ad_len % (uint32_t)16U * sizeof (ad[0U]));
   uint64_t len128x6 = (uint64_t)cipher_len / (uint64_t)96U * (uint64_t)96U;
   uint64_t c;
   if (len128x6 / (uint64_t)16U >= (uint64_t)6U)
@@ -778,16 +785,23 @@ EverCrypt_AEAD_decrypt_aes256_gcm(
   }
   memcpy(dst + (uint32_t)(uint64_t)cipher_len / (uint32_t)16U * (uint32_t)16U,
     inout_b,
-    (uint32_t)(uint64_t)cipher_len % (uint32_t)16U * sizeof inout_b[0U]);
+    (uint32_t)(uint64_t)cipher_len % (uint32_t)16U * sizeof (inout_b[0U]));
   uint64_t r = c;
   if (r == (uint64_t)0U)
   {
     return EverCrypt_Error_Success;
   }
   return EverCrypt_Error_AuthenticationFailure;
+  #else
+  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "statically unreachable");
+  KRML_HOST_EXIT(255U);
+  #endif
 }
 
-/* SNIPPET_END: EverCrypt_AEAD_decrypt_aes256_gcm */
+/* SNIPPET_END: decrypt_aes256_gcm */
 
 /* SNIPPET_START: EverCrypt_AEAD_decrypt */
 
@@ -809,35 +823,17 @@ EverCrypt_AEAD_decrypt(
     return EverCrypt_Error_InvalidKey;
   }
   EverCrypt_AEAD_state_s scrut = *s;
-  Spec_Cipher_Expansion_impl i1 = scrut.impl;
+  Spec_Cipher_Expansion_impl i = scrut.impl;
   uint8_t *ek = scrut.ek;
-  switch (i1)
+  switch (i)
   {
     case Spec_Cipher_Expansion_Vale_AES128:
       {
-        return
-          EverCrypt_AEAD_decrypt_aes128_gcm(s,
-            iv,
-            iv_len,
-            ad,
-            ad_len,
-            cipher,
-            cipher_len,
-            tag,
-            dst);
+        return decrypt_aes128_gcm(s, iv, iv_len, ad, ad_len, cipher, cipher_len, tag, dst);
       }
     case Spec_Cipher_Expansion_Vale_AES256:
       {
-        return
-          EverCrypt_AEAD_decrypt_aes256_gcm(s,
-            iv,
-            iv_len,
-            ad,
-            ad_len,
-            cipher,
-            cipher_len,
-            tag,
-            dst);
+        return decrypt_aes256_gcm(s, iv, iv_len, ad, ad_len, cipher, cipher_len, tag, dst);
       }
     case Spec_Cipher_Expansion_Hacl_CHACHA20:
       {

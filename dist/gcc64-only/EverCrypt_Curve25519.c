@@ -24,17 +24,17 @@
 
 #include "EverCrypt_Curve25519.h"
 
-inline static bool EverCrypt_Curve25519_has_adx_bmi2()
+static inline bool has_adx_bmi2()
 {
-  bool has_bmi21 = EverCrypt_AutoConfig2_has_bmi2();
-  bool has_adx1 = EverCrypt_AutoConfig2_has_adx();
-  return has_bmi21 && has_adx1;
+  bool has_bmi2 = EverCrypt_AutoConfig2_has_bmi2();
+  bool has_adx = EverCrypt_AutoConfig2_has_adx();
+  return has_bmi2 && has_adx;
 }
 
 void EverCrypt_Curve25519_secret_to_public(uint8_t *pub, uint8_t *priv)
 {
   #if EVERCRYPT_TARGETCONFIG_X64
-  if (EverCrypt_Curve25519_has_adx_bmi2())
+  if (has_adx_bmi2())
   {
     Hacl_Curve25519_64_secret_to_public(pub, priv);
     return;
@@ -46,7 +46,7 @@ void EverCrypt_Curve25519_secret_to_public(uint8_t *pub, uint8_t *priv)
 void EverCrypt_Curve25519_scalarmult(uint8_t *shared, uint8_t *my_priv, uint8_t *their_pub)
 {
   #if EVERCRYPT_TARGETCONFIG_X64
-  if (EverCrypt_Curve25519_has_adx_bmi2())
+  if (has_adx_bmi2())
   {
     Hacl_Curve25519_64_scalarmult(shared, my_priv, their_pub);
     return;
@@ -58,7 +58,7 @@ void EverCrypt_Curve25519_scalarmult(uint8_t *shared, uint8_t *my_priv, uint8_t 
 bool EverCrypt_Curve25519_ecdh(uint8_t *shared, uint8_t *my_priv, uint8_t *their_pub)
 {
   #if EVERCRYPT_TARGETCONFIG_X64
-  if (EverCrypt_Curve25519_has_adx_bmi2())
+  if (has_adx_bmi2())
   {
     return Hacl_Curve25519_64_ecdh(shared, my_priv, their_pub);
   }

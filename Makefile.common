@@ -1,6 +1,13 @@
 # This Makefile can be safely included from sub-directories for the purposes of
 # defining the .fst-in targets, as long as the sub-directory defines HACL_HOME.
 
+# Define a newline variable for error messages.
+# The two empty lines are needed.
+define newline
+
+
+endef
+
 HACL_HOME 	?= .
 
 # Put your local configuration (e.g. HACL_HOME, KREMLIN_HOME, etc.) in
@@ -33,7 +40,11 @@ OUTPUT_DIR ?= obj
 
 FSTAR_INCLUDES = $(addprefix --include ,$(INCLUDES))
 
+ifeq ($(OTHERFLAGS),$(subst --admit_smt_queries true,,$(OTHERFLAGS)))
 FSTAR_HINTS ?= --use_hints --use_hint_hashes --record_hints
+else
+FSTAR_HINTS ?= --use_hints --use_hint_hashes
+endif
 
 # --trivial_pre_for_unannotated_effectful_fns false
 #   to not enforce trivial preconditions
@@ -44,10 +55,12 @@ FSTAR_HINTS ?= --use_hints --use_hint_hashes --record_hints
 # 241: corrupt cache file AND stale cache file (argh!) we wish to make the
 #      former fatal, and the latter non-fatal if it's the file we're about to
 #      verify... see https://github.com/FStarLang/FStar/issues/1652
+# 332: abstract keyword
 FSTAR_NO_FLAGS = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_HINTS) \
   --odir $(OUTPUT_DIR) --cache_checked_modules $(FSTAR_INCLUDES) --cmi \
   --already_cached 'Prims FStar LowStar C Spec.Loops TestLib WasmSupport' --warn_error '+241@247-272' \
-  --cache_dir $(OUTPUT_DIR) --trivial_pre_for_unannotated_effectful_fns false
+  --cache_dir $(OUTPUT_DIR) --trivial_pre_for_unannotated_effectful_fns false \
+  --warn_error @332
 
 FSTAR = $(FSTAR_NO_FLAGS) $(OTHERFLAGS)
 
@@ -63,6 +76,7 @@ BASE_FLAGS = \
   -bundle Hacl.Spec.*,Spec.*[rename=Hacl_Spec] \
   -bundle Lib.*[rename=Hacl_Lib] \
   -drop Lib.IntVector.Intrinsics \
+  -drop Lib.IntTypes.Intrinsics \
   -fparentheses -fno-shadow -fcurly-braces -fnoreturn-else \
   -bundle Prims,C.Failure,C,C.String,C.Loops,Spec.Loops,C.Endianness,FStar.*,LowStar.*[rename=Hacl_Kremlib] \
   -bundle 'Meta.*' \
@@ -83,17 +97,24 @@ CURVE_BUNDLE_LOCAL=-bundle Hacl.Curve25519_64_Local=Hacl.Impl.Curve25519.Field64
 CURVE_BUNDLE=-bundle Hacl.Curve25519_64=Hacl.Impl.Curve25519.Field64.Vale \
   $(CURVE_BUNDLE_BASE) -bundle Hacl.Curve25519_64_Local
 
-HASH_BUNDLE=-bundle Hacl.Hash.MD5+Hacl.Hash.Core.MD5+Hacl.Hash.SHA1+Hacl.Hash.Core.SHA1+Hacl.Hash.SHA2+Hacl.Hash.Core.SHA2+Hacl.Hash.Core.SHA2.Constants=Hacl.Hash.*[rename=Hacl_Hash]
+HASH_BUNDLE=-bundle Hacl.Hash.MD5+Hacl.Hash.Core.MD5+Hacl.Hash.SHA1+Hacl.Hash.Core.SHA1+Hacl.Hash.SHA2+Hacl.Hash.Core.SHA2+Hacl.Hash.Definitions=Hacl.Hash.*[rename=Hacl_Hash]
 SHA3_BUNDLE=-bundle Hacl.Impl.SHA3+Hacl.SHA3=[rename=Hacl_SHA3]
 CHACHA20_BUNDLE=-bundle Hacl.Chacha20=Hacl.Impl.Chacha20,Hacl.Impl.Chacha20.*
 SALSA20_BUNDLE=-bundle Hacl.Salsa20=Hacl.Impl.Salsa20,Hacl.Impl.Salsa20.*,Hacl.Impl.HSalsa20
 CHACHAPOLY_BUNDLE=-bundle Hacl.Impl.Chacha20Poly1305
+BLAKE2_BUNDLE=-bundle Hacl.Impl.Blake2.Constants -static-header Hacl.Impl.Blake2.Constants -bundle 'Hacl.Impl.Blake2.\*'
 ED_BUNDLE=-bundle 'Hacl.Ed25519=Hacl.Impl.Ed25519.*,Hacl.Impl.BignumQ.Mul,Hacl.Impl.Load56,Hacl.Impl.SHA512.ModQ,Hacl.Impl.Store56,Hacl.Bignum25519'
 POLY_BUNDLE=-bundle 'Hacl.Poly1305_32=Hacl.Impl.Poly1305.Field32xN_32' \
   -bundle 'Hacl.Poly1305_128=Hacl.Impl.Poly1305.Field32xN_128' \
   -bundle 'Hacl.Poly1305_256=Hacl.Impl.Poly1305.Field32xN_256'
 NACLBOX_BUNDLE=-bundle Hacl.NaCl=Hacl.Impl.SecretBox,Hacl.Impl.Box
+ECDSA_BUNDLE=-bundle Hacl.Impl.ECDSA=Hacl.Impl.ECDSA,Hacl.Impl.ECDSA.*,Hacl.Impl.P256.*,Hacl.Hash.SHA2,Hacl.Hash.Core.SHA2,Hacl.Hash.Core.SHA2.Constants,Hacl.Hash.Definitions,Hacl.Impl.P256,Hacl.Spec.P256.*,Hacl.Impl.SolinasReduction,Hacl.Impl.LowLevel[rename=Hacl_ECDSA]
 FRODO_BUNDLE=-bundle 'Hacl.Frodo.KEM=Frodo.Params,Hacl.Impl.Frodo.*,Hacl.Impl.Matrix,Hacl.Frodo.*,Hacl.Keccak'
+# The only functions not marked as noextract should be in each of the Hacl.HPKE.{variants}
+# Each of these module should be extracted to a different file. Therefore, this variable
+# should remain empty, and overriden only when we do not want extraction of variants
+HPKE_BUNDLE=-bundle Hacl.HPKE.Interface.*
+STREAMING_BUNDLE=-bundle Hacl.Streaming.Interface,Hacl.Streaming.Lemmas
 
 # 3. OCaml
 

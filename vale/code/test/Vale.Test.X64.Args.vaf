@@ -4,7 +4,7 @@ include "../arch/x64/Vale.X64.InsVector.vaf"
 
 module Vale.Test.X64.Args
 #verbatim{:interface}{:implementation}
-
+open Vale.Arch.HeapImpl
 open Vale.X64.Machine_s
 open Vale.X64.Memory
 open Vale.X64.Stack_i
@@ -30,8 +30,14 @@ procedure Test(inline win:bool,
     {:public}
     {:quick}
     {:exportSpecs}
+    modifies
+        // These lines are for demonstration purposes only; do not copy and paste all of them unless you need all of them:
+        rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
+        xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
+        efl; heap0; memLayout;
     requires
         rsp == init_rsp(stack);
+        is_initial_heap(memLayout, mem);
         win ==> valid_src_stack64(rsp + 32 + 8 + 0, stack);
         win ==> valid_src_stack64(rsp + 32 + 8 + 8, stack);
         win ==> valid_src_stack64(rsp + 32 + 8 + 16, stack);
@@ -39,64 +45,48 @@ procedure Test(inline win:bool,
         !win ==> valid_src_stack64(rsp + 8 + 0, stack);
         !win ==> valid_src_stack64(rsp + 8 + 8, stack);
 
-        buffer_readable(mem, arg0);
-        buffer_readable(mem, arg1);
-        buffer_readable(mem, arg2);
-        buffer_readable(mem, arg3);
-        buffer_readable(mem, arg4);
-        buffer_readable(mem, arg5);
-        buffer_readable(mem, arg6);
-        buffer_readable(mem, arg7);
-        win ==> rcx == buffer_addr(arg0, mem);
-        win ==> rdx == buffer_addr(arg1, mem);
-        win ==> r8 == buffer_addr(arg2, mem);
-        win ==> r9 == buffer_addr(arg3, mem);
-        win ==> load_stack64(rsp + 32 + 8 + 0, stack) == buffer_addr(arg4, mem);
-        win ==> load_stack64(rsp + 32 + 8 + 8, stack) == buffer_addr(arg5, mem);
-        win ==> load_stack64(rsp + 32 + 8 + 16, stack) == buffer_addr(arg6, mem);
-        win ==> load_stack64(rsp + 32 + 8 + 24, stack) == buffer_addr(arg7, mem);
-        !win ==> rdi == buffer_addr(arg0, mem);
-        !win ==> rsi == buffer_addr(arg1, mem);
-        !win ==> rdx == buffer_addr(arg2, mem);
-        !win ==> rcx == buffer_addr(arg3, mem);
-        !win ==> r8 == buffer_addr(arg4, mem);
-        !win ==> r9 == buffer_addr(arg5, mem);
-        !win ==> load_stack64(rsp + 8 + 0, stack) == buffer_addr(arg6, mem);
-        !win ==> load_stack64(rsp + 8 + 8, stack) == buffer_addr(arg7, mem);
+        validSrcAddrs64(mem, (if win then rcx else rdi), arg0, 0, memLayout, Secret);
+        validSrcAddrs64(mem, (if win then rdx else rsi), arg1, 0, memLayout, Secret);
+        validSrcAddrs64(mem, (if win then r8 else rdx), arg2, 0, memLayout, Secret);
+        validSrcAddrs64(mem, (if win then r9 else rcx), arg3, 0, memLayout, Secret);
+        validSrcAddrs64(mem, (if win then load_stack64(rsp + 32 + 8 + 0, stack) else r8), arg4, 0, memLayout, Secret);
+        validSrcAddrs64(mem, (if win then load_stack64(rsp + 32 + 8 + 8, stack) else r9), arg5, 0, memLayout, Secret);
+        validSrcAddrs64(mem, (if win then load_stack64(rsp + 32 + 8 + 16, stack) else load_stack64(rsp + 8 + 0, stack)), arg6, 0, memLayout, Secret);
+        validSrcAddrs64(mem, (if win then load_stack64(rsp + 32 + 8 + 24, stack) else load_stack64(rsp + 8 + 8, stack)), arg7, 0, memLayout, Secret);
     ensures
+        // These lines are for demonstration purposes only; do not copy and paste all of them unless you need all of them:
         rsp == old(rsp);
-
-        win ==>  rbx == old(rbx);
-        win ==>  rbp == old(rbp);
-        win ==>  rdi == old(rdi);
-        win ==>  rsi == old(rsi);
-        win ==>  r12 == old(r12);
-        win ==>  r13 == old(r13);
-        win ==>  r14 == old(r14);
-        win ==>  r15 == old(r15);
-        !win ==>  rbx == old(rbx);
-        !win ==>  rbp == old(rbp);
-        !win ==>  r12 == old(r12);
-        !win ==>  r13 == old(r13);
-        !win ==>  r14 == old(r14);
-        !win ==>  r15 == old(r15);
-        win ==>  xmm6 == old(xmm6);
-        win ==>  xmm7 == old(xmm7);
-        win ==>  xmm8 == old(xmm8);
-        win ==>  xmm9 == old(xmm9);
-        win ==>  xmm10 == old(xmm10);
-        win ==>  xmm11 == old(xmm11);
-        win ==>  xmm12 == old(xmm12);
-        win ==>  xmm13 == old(xmm13);
-        win ==>  xmm14 == old(xmm14);
-        win ==>  xmm15 == old(xmm15);
-
-        modifies_none(old(mem), mem);
-    reads
-    modifies
-        rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
-        xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
-        efl; mem;
+        rbx == old(rbx);
+        rbp == old(rbp);
+        r12 == old(r12);
+        r13 == old(r13);
+        r14 == old(r14);
+        r15 == old(r15);
+        win ==> rdi == old(rdi);
+        win ==> rsi == old(rsi);
+        win ==> xmm6 == old(xmm6);
+        win ==> xmm7 == old(xmm7);
+        win ==> xmm8 == old(xmm8);
+        win ==> xmm9 == old(xmm9);
+        win ==> xmm10 == old(xmm10);
+        win ==> xmm11 == old(xmm11);
+        win ==> xmm12 == old(xmm12);
+        win ==> xmm13 == old(xmm13);
+        win ==> xmm14 == old(xmm14);
+        win ==> xmm15 == old(xmm15);
+        modifies_mem(loc_none, old(mem), mem); // note: not needed; for demonstration purposes only
 {
-        Mov64(rax, rbx);
+    CreateHeaplets(list(
+        declare_buffer64(arg0, 0, Secret, Immutable),
+        declare_buffer64(arg1, 0, Secret, Immutable),
+        declare_buffer64(arg2, 0, Secret, Immutable),
+        declare_buffer64(arg3, 0, Secret, Immutable),
+        declare_buffer64(arg4, 0, Secret, Immutable),
+        declare_buffer64(arg5, 0, Secret, Immutable),
+        declare_buffer64(arg6, 0, Secret, Immutable),
+        declare_buffer64(arg7, 0, Secret, Immutable)));
+
+    Mov64(rax, rbx);
+
+    DestroyHeaplets(); // note: not needed if you don't modify memory; for demonstration purposes only
 }

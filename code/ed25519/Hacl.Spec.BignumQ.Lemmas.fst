@@ -886,7 +886,7 @@ let lemma_barrett_reduce'' (u:nat) (z:nat) (x:nat) (q:nat) : Lemma
   )
 
 
-
+#restart-solver
 #reset-options "--z3rlimit 600 --max_fuel 0 --max_ifuel 0"
 
 let lemma_barrett_reduce' x =

@@ -107,7 +107,7 @@ let compute_iv_stdcall' iv iv_b num_bytes len j0_b iv_extra_b hkeys_b =
   bounded_buffer_addrs_all TUInt8 TUInt128 h0 iv_b;
   bounded_buffer_addrs_all TUInt8 TUInt128 h0 hkeys_b;
 
-  let x, _ = compute_iv_stdcall iv iv_b num_bytes len j0_b iv_extra_b hkeys_b () in
+  let (x, _) = compute_iv_stdcall iv iv_b num_bytes len j0_b iv_extra_b hkeys_b () in
 
   ()
 #pop-options

@@ -110,7 +110,7 @@ let int64_to_uint128 a = int128_to_uint128 (int64_to_int128 a)
 val int128_to_uint64: a:Int128.t -> b:UInt64.t{UInt64.v b == Int128.v a % pow2 64}
 let int128_to_uint64 a = Int.Cast.Full.uint128_to_uint64 (int128_to_uint128 a)
 
-#push-options "--z3rlimit 700"
+#push-options "--z3rlimit 800"
 
 [@(strict_on_arguments [0;2])]
 let cast #t #l t' l' u =
@@ -476,6 +476,15 @@ let logxor_lemma1 #t #l a b =
   | 1, 1 ->
     v_extensionality a b;
     UInt.logxor_self #(bits t) (v a)
+
+let logxor_spec #t #l a b =
+  match t with
+  | U1 ->
+    assert_norm (u1 0 `logxor` u1 0 == u1 0 /\ u1 0 `logxor` u1 1 == u1 1);
+    assert_norm (u1 1 `logxor` u1 0 == u1 1 /\ u1 1 `logxor` u1 1 == u1 0);
+    assert_norm (0 `logxor_v #U1` 0 == 0 /\ 0 `logxor_v #U1` 1 == 1);
+    assert_norm (1 `logxor_v #U1` 0 == 1 /\ 1 `logxor_v #U1` 1 == 0)
+  | _ -> ()
 
 #pop-options
 

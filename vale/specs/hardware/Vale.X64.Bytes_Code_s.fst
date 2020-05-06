@@ -3,6 +3,8 @@ module Vale.X64.Bytes_Code_s
 open FStar.Mul
 open Vale.X64.Machine_s
 open Vale.X64.Instruction_s
+open Vale.Arch.HeapTypes_s
+open Vale.Arch.Heap
 
 type instr_annotation_t = instr_t_record -> Type0
 
@@ -14,7 +16,6 @@ noeq type instruction_t (a:instr_annotation_t) =
       annotation:a i ->
       instruction_t a
   // Stack operations
-  // TODO: taint analysis for these
   | Push       : src:operand64 -> t:taint -> instruction_t a
   | Pop        : dst:operand64 -> t:taint -> instruction_t a
   | Alloc      : n:nat64 -> instruction_t a

@@ -133,7 +133,7 @@ let lemma_poly_bits64 () =
     forall_intro_2 (lemma_and_commutes_nat)
 
 let lemma_mul_strict_upper_bound (x:int) (x_bound:int) (y:int) (y_bound:int) =
-  lemma_mult_lt_right y x x_bound;
+  lemma_mult_le_right y x x_bound;
   if x_bound = 0 || y_bound = 0 then ()
   else
     if y = 0 then
@@ -172,6 +172,7 @@ val lemma_bytes_and_mod6: x: uint_t 64 ->
 val lemma_bytes_and_mod7: x: uint_t 64 ->
   Lemma (logand #64 x  (0x100000000000000 - 1) == x % 0x100000000000000)
 
+#push-options "--z3cliopt smt.arith.nl=true"
 let lemma_bytes_and_mod0 x =
   assert_by_tactic (logand #64 x (0x1 - 1) == mod #64 x 0x1) bv_tac
 
@@ -194,6 +195,7 @@ let lemma_bytes_and_mod6 x =
 
 let lemma_bytes_and_mod7 x =
   assert_by_tactic (logand #64 x (0x100000000000000 - 1) == mod #64 x 0x100000000000000) bv_tac
+#pop-options
 
 let lemma_bytes_and_mod (x:nat64) (y:nat64) =
   reveal_iand_all 64;
@@ -236,7 +238,7 @@ let lemma_mul_pos_pos_is_pos_inverse (x:pos) (y:int) :
   if y = 0 then assert_norm (0*x == 0)
   else if y < 0 then
     begin
-      lemma_mult_lt_right x y 0;
+      lemma_mult_le_right x y 0;
       assert_norm (y*x <= 0)
     end
   else ()

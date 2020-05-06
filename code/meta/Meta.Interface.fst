@@ -95,8 +95,71 @@ let is_implicit = function
   | Q_Implicit -> true
   | _ -> false
 
+let rec push_pre (inv_bv: bv) (t: term): Tac term =
+  match inspect t with
+  | Tv_Arrow bv c ->
+      let c =
+        match inspect_comp c with
+        | C_Eff us e a args ->
+            if string_of_name e = "FStar_HyperStack_ST_Stack" then
+              let args =
+                match args with
+                | (pre, qual) :: rest ->
+                    let pre =
+                      match inspect pre with
+                      | Tv_Abs h body ->
+                          let body = mk_app (`( /\ )) [ pack (Tv_Var inv_bv), Q_Explicit; body, Q_Explicit ] in
+                          pack (Tv_Abs h body)
+                      | _ ->
+                          fail "impossible: argument to ST.Stack not a fun"
+                    in
+                    (pre, qual) :: rest
+                | _ ->
+                    fail ("impossible: effect not fully applied " ^ string_of_name e)
+              in
+              C_Eff us e a args
+            else
+              fail ("rewritten function has an unknown effect: " ^ string_of_name e)
+        | C_Total t decr ->
+            C_Total (push_pre inv_bv t) decr
+        | _ ->
+            fail ("rewritten type is neither a Tot or a stateful arrow: " ^ term_to_string t)
+      in
+      let c = pack_comp c in
+      pack (Tv_Arrow bv c)
+  | _ ->
+      fail ("not just an arrow: " ^ term_to_string t)
+
+let rec to_reduce t: Tac _ =
+  match fst (collect_app t) with
+  | Tv_FVar fv ->
+      [ fv_to_string fv ]
+  | Tv_Arrow bv c ->
+      begin match inspect_comp c with
+      | C_Total t _ ->
+          to_reduce t
+      | _ ->
+          []
+      end
+  | _ ->
+      []
+
+let lambda_over_p (inv_bv: bv) (t: term): Tac term =
+  pack (Tv_Abs (pack_binder inv_bv Q_Explicit) t)
+
+let lambda_over_only_p (inv_bv: bv) (f_typ: term): Tac term =
+  let fvs = to_reduce f_typ in
+  print ("Names to reduce in " ^ term_to_string f_typ ^ ": " ^ String.concat ", " fvs);
+  let f_typ = norm_term_env (top_env ()) [ delta_only (to_reduce f_typ) ] f_typ in
+  lambda_over_p inv_bv (push_pre inv_bv f_typ)
+
 // transforms #i:i -> t i into fun #i:i -> t i
-let lambda_over_index (st: state) (f_name: name) (f_typ: term): Tac term =
+let lambda_over_index_and_p (st: state) (f_name: name) (f_typ: term) (inv_bv: bv): Tac term =
+  // this is a source of inefficiency... previously we could let this be a
+  // user-defined abbreviation, such as cswap2_t
+  let fvs = to_reduce f_typ in
+  print ("Names to reduce in " ^ term_to_string f_typ ^ ": " ^ String.concat ", " fvs);
+  let f_typ = norm_term_env (top_env ()) [ delta_only (to_reduce f_typ) ] f_typ in
   match inspect f_typ with
   | Tv_Arrow bv c ->
       let bv, qual = inspect_binder bv in
@@ -107,6 +170,11 @@ let lambda_over_index (st: state) (f_name: name) (f_typ: term): Tac term =
       let f_typ =
         match inspect_comp c with
         | C_Total t _ ->
+            // ... -> ... (requires p) ...
+            let t = push_pre inv_bv t in
+            // fun p:Type. ... -> ... (requires p) ...
+            let t = lambda_over_p inv_bv t in
+            // fun #i:index -> fun p:Type. ... -> ... (requires p) ...
             pack (Tv_Abs (pack_binder bv Q_Implicit) t)
         | _ ->
             fail ("The first arrow of " ^ string_of_name f_name ^ " is impure")
@@ -115,13 +183,6 @@ let lambda_over_index (st: state) (f_name: name) (f_typ: term): Tac term =
   | _ ->
       fail (string_of_name f_name ^ "is expected to have \
         an arrow type with the index as a first argument")
-
-let rec in_namespace (n: name) (ns: list string): Tot bool =
-  match n, ns with
-  | _ :: _, [] -> true
-  | [], _ :: _ -> false
-  | [], [] -> false
-  | n :: ns, n' :: ns' -> n = n' && in_namespace ns ns'
 
 let must: _ -> Tac _ = function
   | Some x -> x
@@ -152,7 +213,7 @@ let binder_is_legit f_name t_i binder: Tac bool =
       not implicit but has the index type");
   right_type && implicit
 
-#push-options "--z3rlimit 100"
+#push-options "--z3rlimit 200"
 let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list sigelt) =
   if (List.Tot.existsb (fun (name, _) -> name = f_name) st.seen) then
     let _ = print (st.indent ^ "Already visited " ^ string_of_name f_name) in
@@ -166,7 +227,7 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
     let f = match f with Some f -> f | None -> fail "unexpected: name not in the environment" in
     if not (has_attr f (`Meta.Attribute.specialize) || has_attr f (`Meta.Attribute.inline_)) then
       let _ = print (st.indent ^ "Not visiting " ^ string_of_name f_name) in
-      // We want to user to specify which nodes should be traversed, otherwise,
+      // We want the user to specify which nodes should be traversed, otherwise,
       // we'd end up visiting the entire F* standard library.
       st, []
     else
@@ -183,8 +244,8 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
         let st = { st with indent = st.indent ^ "  " } in
         let new_name = suffix_name f_name "_higher" in
 
-        // The function must be of the form fun (x: index) -> ...
-        // We recognize and distinguish this index.
+        // The function may be of the form fun (x: index) -> ...
+        // We recognize and distinguish this index, if present.
         let index_bv, index_name, f_body =
           match inspect f_body with
           | Tv_Abs binder f_body' ->
@@ -194,15 +255,28 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
                 print (st.indent ^ "Found " ^ name ^ ", index of type " ^ term_to_string t);
                 Some bv, name, f_body'
               end else
+                // It can be convenient to specialize over a function without
+                // the index as a parameter. In Curve, this is used to
+                // specialize over store_felem64, a function that is already
+                // specialized for the M64 value of the index, but that still
+                // admits multiple implementations.
                 None, "", f_body
           | _ ->
               fail (string_of_name f_name ^ "is expected to be a function!")
         in
 
+        let inv_bv: bv = pack_bv ({
+          bv_ppname = "p";
+          bv_index = 355;
+          bv_sort = `Type0;
+        }) in
+
         let st, new_body, new_args, new_sigelts =
           match index_bv with
-          | Some index_bv -> visit_body t_i (Some (pack (Tv_Var index_bv))) st [] f_body
-          | _ -> visit_body t_i None st [] f_body
+          | Some index_bv ->
+              visit_body t_i (Some (pack (Tv_Var index_bv))) (pack (Tv_Var inv_bv)) st [] f_body
+          | _ ->
+              visit_body t_i None (pack (Tv_Var inv_bv)) st [] f_body
         in
         let st = { st with indent = old_indent } in
 
@@ -218,12 +292,13 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
         let f_typ, f_typ_typ, has_index =
           match index_bv with
           | Some index_bv ->
-              lambda_over_index st f_name f_typ,
-              mk_tot_arr [ pack_binder index_bv Q_Implicit ] (`Type0),
+              lambda_over_index_and_p st f_name f_typ inv_bv,
+              mk_tot_arr [ pack_binder index_bv Q_Implicit ] (
+                mk_tot_arr [ pack_binder inv_bv Q_Explicit ] (`Type0)),
               true
           | _ ->
-              f_typ,
-              (`Type0),
+              lambda_over_only_p inv_bv f_typ,
+              mk_tot_arr [ pack_binder inv_bv Q_Explicit ] (`Type0),
               false
         in
         print (st.indent ^ "  let " ^ string_of_name f_typ_name ^ ": " ^
@@ -263,7 +338,7 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
 
         // Fast-path; just register the function as being a specialize node
         // but don't rewrite it or splice a new declaration.
-        if List.length new_args = 0 then begin
+        if false && List.length new_args = 0 then begin
           if not (has_inline_for_extraction f) then
             fail (string_of_name f_name ^ " should be inline_for_extraction");
           if not (Specialize? m) then
@@ -286,21 +361,23 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
           // Declaration for the new resulting function. We need to construct
           // the actual type of ``f``.
           // BUG: without the eta-expansion around mk_binder, "tactic got stuck".
+          let new_body = pack (Tv_Abs (pack_binder inv_bv Q_Explicit) new_body) in
           let new_body =
             match index_bv with
             | Some index_bv -> pack (Tv_Abs (pack_binder index_bv Q_Implicit) new_body)
             | _ -> new_body
           in
           let new_typ =
+            let new_binders = List.Tot.map (fun x -> mk_binder x) new_bvs in
+            let new_binders = pack_binder inv_bv Q_Explicit :: new_binders in
+            let app_inv (t: term): Tac term = pack (Tv_App t (pack (Tv_Var inv_bv), Q_Explicit)) in
             match index_bv with
             | Some index_bv ->
                 mk_tot_arr
-                  (pack_binder index_bv Q_Implicit :: List.Tot.map (fun x -> mk_binder x) new_bvs)
-                  (pack (Tv_App f_typ (pack (Tv_Var index_bv), Q_Implicit)))
+                  (pack_binder index_bv Q_Implicit :: new_binders)
+                  (app_inv (pack (Tv_App f_typ (pack (Tv_Var index_bv), Q_Implicit))))
             | _ ->
-                mk_tot_arr
-                  (List.Tot.map (fun x -> mk_binder x) new_bvs)
-                  f_typ
+                mk_tot_arr new_binders (app_inv f_typ)
           in
           let se = pack_sigelt (Sg_Let false (pack_fv new_name) [] new_typ new_body) in
           let se = set_sigelt_quals [ NoExtract; Inline_for_extraction ] se in
@@ -319,6 +396,12 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
 
       | _ ->
           if has_attr f (`Meta.Attribute.specialize) then
+            let inv_bv: bv = pack_bv ({
+              bv_ppname = "p";
+              bv_index = 355;
+              bv_sort = `Type0;
+            }) in
+
             // Assuming that this is a val, but we can't inspect it. Let's work around this.
             let t = pack (Tv_FVar (pack_fv f_name)) in
             let f_typ = tc (top_env ()) t in
@@ -326,11 +409,11 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
               match inspect f_typ with
               | Tv_Arrow bv _ ->
                   if binder_is_legit f_name t_i bv then
-                    lambda_over_index st f_name f_typ, true
+                    lambda_over_index_and_p st f_name f_typ inv_bv, true
                   else
-                    f_typ, false
+                    lambda_over_only_p inv_bv f_typ, false
               | _ ->
-                  f_typ, false // fail (string_of_name f_name ^ " does not have an arrow type")
+                  lambda_over_only_p inv_bv f_typ, false // fail (string_of_name f_name ^ " does not have an arrow type")
             in
             print (st.indent ^ "  Registering " ^ string_of_name f_name ^ " with type " ^
               term_to_string f_typ);
@@ -339,17 +422,27 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
           else
             st, []
 
-and visit_many (t_i: term) (index_bv: option term) (st: state) (bvs: list (name & bv)) (es: list term):
+and visit_many (t_i: term)
+  (index_bv: option term)
+  (inv_bv: term)
+  (st: state)
+  (bvs: list (name & bv))
+  (es: list term):
   Tac (state & list term & list (name & bv) & list sigelt)
 =
   let st, es, bvs, ses = fold_left (fun (st, es, bvs, ses) e ->
-    let st, e, bvs, ses' = visit_body t_i index_bv st bvs e in
+    let st, e, bvs, ses' = visit_body t_i index_bv inv_bv st bvs e in
     st, e :: es, bvs, ses @ ses'
   ) (st, [], bvs, []) es in
   let es = List.Tot.rev es in
   st, es, bvs, ses
 
-and visit_body (t_i: term) (index_bv: option term) (st: state) (bvs: list (name & bv)) (e: term):
+and visit_body (t_i: term)
+  (index_bv: option term)
+  (inv_bv: term)
+  (st: state) // state-passing
+  (bvs: list (name & bv)) // state-passing
+  (e: term):
   Tac (state & term & list (name & bv) & list sigelt)
 =
   // st is state that is threaded through
@@ -362,7 +455,7 @@ and visit_body (t_i: term) (index_bv: option term) (st: state) (bvs: list (name 
 
       // Recursively visit arguments
       let es, qs = List.Pure.split es in
-      let st, es, bvs, ses = visit_many t_i index_bv st bvs es in
+      let st, es, bvs, ses = visit_many t_i index_bv inv_bv st bvs es in
       let es = zip es qs in
 
       // If this is an application ...
@@ -372,6 +465,8 @@ and visit_body (t_i: term) (index_bv: option term) (st: state) (bvs: list (name 
           let fv = inspect_fv fv in
           let st, ses' = visit_function t_i st fv in
           let ses = ses @ ses' in
+          // visit_function fills out st.seen with an entry for this lid, if
+          // this is something we wish to rewrite
           begin match List.Tot.assoc fv st.seen with
           | Some (has_index, _, map, fns) ->
               print (st.indent ^ "Rewriting application of " ^ string_of_name fv);
@@ -412,6 +507,7 @@ and visit_body (t_i: term) (index_bv: option term) (st: state) (bvs: list (name 
                     let typ =
                       if needs_index then pack (Tv_App typ (must index_arg, Q_Implicit)) else typ
                     in
+                    let typ = pack (Tv_App typ (inv_bv, Q_Explicit)) in
                     let bv: bv = pack_bv ({
                       bv_ppname = "arg_" ^ string_of_name name;
                       bv_index = 42;
@@ -430,6 +526,7 @@ and visit_body (t_i: term) (index_bv: option term) (st: state) (bvs: list (name 
                     term :: extra_args, bvs
                   ) ([], bvs) fns in
                   let extra_args = List.rev extra_args in
+                  let extra_args = (inv_bv, Q_Explicit) :: extra_args in
                   let extra_args =
                     // Inline nodes retain their index (if any).
                     if has_index then (must index_bv, Q_Implicit) :: extra_args else extra_args
@@ -459,30 +556,30 @@ and visit_body (t_i: term) (index_bv: option term) (st: state) (bvs: list (name 
       st, e, bvs, []
 
   | Tv_Abs b e ->
-      let st, e, bvs, ses = visit_body t_i index_bv st bvs e in
+      let st, e, bvs, ses = visit_body t_i index_bv inv_bv st bvs e in
       let e = pack (Tv_Abs b e) in
       st, e, bvs, ses
 
   | Tv_Match scrut branches ->
-      let st, scrut, bvs, ses = visit_body t_i index_bv st bvs scrut in
+      let st, scrut, bvs, ses = visit_body t_i index_bv inv_bv st bvs scrut in
       let pats, es = List.Tot.split branches in
-      let st, es, bvs, ses' = visit_many t_i index_bv st bvs es in
+      let st, es, bvs, ses' = visit_many t_i index_bv inv_bv st bvs es in
       let branches = zip pats es in
       st, pack (Tv_Match scrut branches), bvs, ses @ ses'
 
   | Tv_Let r attrs bv e1 e2 ->
-      let st, e1, bvs, ses = visit_body t_i index_bv st bvs e1 in
-      let st, e2, bvs, ses' = visit_body t_i index_bv st bvs e2 in
+      let st, e1, bvs, ses = visit_body t_i index_bv inv_bv st bvs e1 in
+      let st, e2, bvs, ses' = visit_body t_i index_bv inv_bv st bvs e2 in
       let e = pack (Tv_Let r attrs bv e1 e2) in
       st, e, bvs, ses @ ses'
 
   | Tv_AscribedT e t tac ->
-      let st, e, bvs, ses = visit_body t_i index_bv st bvs e in
+      let st, e, bvs, ses = visit_body t_i index_bv inv_bv st bvs e in
       let e = pack (Tv_AscribedT e t tac) in
       st, e, bvs, ses
 
   | Tv_AscribedC e c tac ->
-      let st, e, bvs, ses = visit_body t_i index_bv st bvs e in
+      let st, e, bvs, ses = visit_body t_i index_bv inv_bv st bvs e in
       let e = pack (Tv_AscribedC e c tac) in
       st, e, bvs, ses
 

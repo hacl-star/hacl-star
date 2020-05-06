@@ -26,12 +26,12 @@ KREMLIN_HOME ?= ../kremlin
 # 1. The usual pseudo auto-configuration
 
 UNAME		= $(shell uname)
-MARCH		= x86_64
+MARCH		= $(shell uname -m)
 ifeq ($(UNAME),Darwin)
   VARIANT	= -darwin
   SO		= so
 else ifeq ($(UNAME),Linux)
-  CFLAGS	+= -fPIC -fstack-check
+  CFLAGS	+= -fPIC
   VARIANT	= -linux
   SO 		= so
   LDFLAGS	+= -Xlinker -z -Xlinker noexecstack -Xlinker --unresolved-symbols=report-all
@@ -60,7 +60,6 @@ endif
 ifneq (,$(wildcard EverCrypt_OpenSSL.h))
   CFLAGS	+= -I $(OPENSSL_HOME)/include
   LDFLAGS 	+= -L$(OPENSSL_HOME) -lcrypto
-  MLLDFLAGS     += -ccopt -L$(OPENSSL_HOME) -cclib -lcrypto
 ifneq ($(OS),Windows_NT)
   LDFLAGS	+= -ldl -lpthread
 endif
@@ -74,12 +73,15 @@ endif
 
 OBJS 		+= $(patsubst %.S,%.o,$(wildcard *-$(MARCH)$(VARIANT).S))
 
+-include Makefile.config
 include Makefile.basic
 
 CFLAGS		+= -Wno-parentheses -Wno-deprecated-declarations -g -std=gnu11 -O3
+CFLAGS_128 ?= -mavx
+CFLAGS_256 ?= -mavx -mavx2
 
-Hacl_Poly1305_128.o Hacl_Chacha20_Vec128.o Hacl_Chacha20Poly1305_128.o: CFLAGS += -mavx
-Hacl_Poly1305_256.o Hacl_Chacha20_Vec256.o Hacl_Chacha20Poly1305_256.o: CFLAGS += -mavx -mavx2
+Hacl_Blake2s_128.o Hacl_Poly1305_128.o Hacl_Chacha20_Vec128.o Hacl_Chacha20Poly1305_128.o: CFLAGS += $(CFLAGS_128)
+Hacl_Blake2b_256.o Hacl_Poly1305_256.o Hacl_Chacha20_Vec256.o Hacl_Chacha20Poly1305_256.o: CFLAGS += $(CFLAGS_256)
 
 all: libevercrypt.$(SO)
 
@@ -87,8 +89,9 @@ libevercrypt.$(SO): $(OBJS)
 	$(CC) $(CFLAGS) -shared -o $@ $^ $(LDFLAGS)
 
 # 4. Compilation of OCaml bindings; conditional on the presence of the lib_gen
-# folder.
+# folder, possibly disabled by configure.
 
+ifeq (,$(DISABLE_OCAML_BINDINGS))
 ifneq (,$(wildcard lib_gen))
 
 .PRECIOUS: %.cmx
@@ -108,6 +111,9 @@ ALL_C_STUBS=$(patsubst %,lib/%_c_stubs.o,$(ALL_OCAML))
 
 include .depend.ocaml
 include ctypes.depend
+
+lib_gen/Lib_RandomBuffer_System_gen.cmx: lib/Lib_RandomBuffer_System_bindings.cmx
+lib_gen/Lib_RandomBuffer_System_gen.exe: lib/Lib_RandomBuffer_System_bindings.cmx lib_gen/Lib_RandomBuffer_System_gen.cmx
 
 .depend.ocaml:
 	$(OCAMLDEP) $(wildcard lib/*.ml) $(wildcard lib_gen/*.ml) > $@
@@ -130,10 +136,10 @@ include ctypes.depend
 # https://www.gnu.org/software/make/manual/html_node/Canceling-Rules.html
 %.exe:
 
-all: libocamlevercrypt.cmxa
+all: ocamlevercrypt.cmxa
 
 lib_gen/%_gen.exe: libevercrypt.a
-	$(OCAMLOPT) $(filter-out %.a,$^) libevercrypt.a -o $@ $(MLLDFLAGS)
+	$(OCAMLOPT) $(filter-out %.a,$^) libevercrypt.a -o $@
 
 %.cmx: %.ml
 	$(OCAMLOPT) -c $^ -o $@
@@ -150,9 +156,19 @@ else
 endif
 
 lib/%_stubs.ml lib/%_c_stubs.c: lib_gen/%_gen.exe
-	$(DY)PATH=.:$(OPENSSL_HOME):$$$(DY)PATH $<
+	$<
 
-libocamlevercrypt.cmxa: $(ALL_BINDINGS) $(ALL_ML_STUBS) $(ALL_C_STUBS) libevercrypt.$(SO)
-	ocamlfind mklib -o ocamlevercrypt $(filter-out %.so,$^) libevercrypt.a $(MLLDFLAGS)
+# Compiling these files raises the pointer sign warning because the Ctypes declaration for bytes expects a char*, not a uint8_t*
+# Can be remove once ctypes is upgraded to 0.17
+lib/%_c_stubs.o: CFLAGS += -Wno-pointer-sign
 
+CTYPES_DEPS += lib/Lib_RandomBuffer_System_stubs.cmx lib/Lib_RandomBuffer_System_bindings.cmx
+
+ocamlevercrypt.cmxa: $(ALL_BINDINGS) $(ALL_ML_STUBS) $(ALL_C_STUBS) libevercrypt.$(SO)
+	ocamlfind mklib -o ocamlevercrypt $(CTYPES_DEPS) $(ALL_C_STUBS) -ccopt -L. -cclib -levercrypt
+
+install-hacl-star-raw:
+	ocamlfind install hacl-star-raw META $(wildcard lib/*.ml lib/*.cmx lib/*.cmi *.cmxa *.a *.so *.dll)
+
+endif
 endif

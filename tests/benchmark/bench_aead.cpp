@@ -609,7 +609,7 @@ class JCChacha20Poly1305EncryptBM : public AEADBenchmark
       uint8_t block[64];
       libjc_avx2_chacha20_avx2((uint64_t*)block, (uint64_t*)nonce.data(), 64, (uint64_t*)key, (uint64_t*)iv_zero, 0);
 
-      #ifdef _DEBUG
+      #if 0
       uint8_t ec_block[64];
       Hacl_Impl_Chacha20_chacha20_encrypt(64, ec_block, nonce.data(), key, iv_zero, 0);
       check_eq(block, ec_block, 64);
@@ -622,7 +622,7 @@ class JCChacha20Poly1305EncryptBM : public AEADBenchmark
       //    ciphertext = chacha20_encrypt(key, 1, nonce, plaintext)
       uint8_t ciphertext[msg_len];
       libjc_avx2_chacha20_avx2((uint64_t*)ciphertext, (uint64_t*)plain, msg_len, (uint64_t*)key, (uint64_t*)nonce.data(), 1);
-      #ifdef _DEBUG
+      #if 0
       uint8_t ec_ciphertext[msg_len];
       Hacl_Impl_Chacha20_chacha20_encrypt(msg_len, ec_ciphertext, plain, key, nonce.data(), 1);
       check_eq(ciphertext, ec_ciphertext, msg_len);

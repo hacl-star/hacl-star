@@ -41,6 +41,7 @@ let gcm_encrypt_cipher_length alg key iv plain auth: Lemma
 // TODO remove me once seq_uint8_to_seq_nat8 takes Lib.IntTypes.uint8
 friend Lib.IntTypes
 
+#push-options "--z3rlimit 20"
 let encrypt #a kv iv ad plain =
   match a with
   | CHACHA20_POLY1305 ->
@@ -66,6 +67,7 @@ let encrypt #a kv iv ad plain =
       // one more spec discrepancy: Vale returns the cipher and tag separated,
       // while HACL* bundles them together; another arbitrary choice here
       Seq.append cipher tag
+#pop-options
 
 #push-options "--max_ifuel 1"
 let gcm_decrypt_cipher_length alg key iv plain auth tag: Lemma

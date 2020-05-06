@@ -3,7 +3,7 @@ include "../../../arch/x64/Vale.X64.InsMem.vaf"
 include "../../../arch/x64/Vale.X64.InsVector.vaf"
 include "../../../arch/x64/Vale.X64.InsAes.vaf"
 include "Vale.AES.X64.GF128_Mul.vaf"
-include{:/*TODO*/fstar}{:open} "FStar.Seq.Base"
+include{:fstar}{:open} "FStar.Seq.Base"
 include{:fstar}{:open} "Vale.Def.Words_s"
 include{:fstar}{:open} "Vale.Def.Types_s"
 include{:fstar}{:open} "Vale.Arch.Types"
@@ -53,6 +53,7 @@ open Vale.X64.InsAes
 open Vale.X64.QuickCode
 open Vale.X64.QuickCodes
 open Vale.X64.CPU_Features_s
+#reset-options "--z3rlimit 30"
 #endverbatim
 
 #verbatim{:interface}
@@ -68,8 +69,6 @@ let get_last_slice_workaround (s:seq quad32) (start_pos end_pos:int)  =
 //  else
 //    create 1 (Mkfour 0 0 0 0)
 #endverbatim
-
-#reset-options "--z3rlimit 30"
 
 ///////////////////////////
 // GHash
@@ -129,13 +128,13 @@ procedure Compute_ghash_incremental_register()
     ghash_incremental_reveal();
 }
 
+/* Seems to be unused
 procedure Compute_ghash_incremental(ghost in_b:buffer128)
-    {:public}
     {:quick}
     lets in_ptr @= rax; len @= rcx; io @= xmm1; mask @= xmm8; h @= xmm11;
     reads
         in_ptr; len; h; mask;
-        mem; memTaint;
+        heap0; memLayout;
 
     modifies
         rdx; r9; r12;
@@ -147,14 +146,14 @@ procedure Compute_ghash_incremental(ghost in_b:buffer128)
     requires
         // GHash reqs
         pclmulqdq_enabled && avx_enabled && sse_enabled;
-        len > 0 ==> validSrcAddrs128(mem, in_ptr, in_b, len, memTaint, Secret);
+        len > 0 ==> validSrcAddrs128(heap0, in_ptr, in_b, len, memLayout, Secret);
         len > 0 ==> in_ptr  + 16 * len < pow2_64;
         len > 0 ==> buffer_length(in_b) == len;
         mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
 
     ensures
         len == 0 ==> rdx == old(rdx) /\ r9 == old(r9) /\ xmm1 == old(xmm1) /\ io == old(io);
-        len > 0 ==> length(buffer128_as_seq(mem, in_b)) > 0 /\ io == ghash_incremental(reverse_bytes_quad32(h), old(io), buffer128_as_seq(mem, in_b));
+        len > 0 ==> length(buffer128_as_seq(heap0, in_b)) > 0 /\ io == ghash_incremental(reverse_bytes_quad32(h), old(io), buffer128_as_seq(heap0, in_b));
 {
     if (len != 0) {
         Mov64(rdx, 0);
@@ -169,7 +168,7 @@ procedure Compute_ghash_incremental(ghost in_b:buffer128)
                 //////////////////// From requires //////////////////////
                 // GHash reqs
                 pclmulqdq_enabled && avx_enabled && sse_enabled;
-                validSrcAddrs128(mem, in_ptr, in_b, len, memTaint, Secret);
+                validSrcAddrs128(heap0, in_ptr, in_b, len, memLayout, Secret);
                 in_ptr  + 16 * len < pow2_64;
                 len > 0;
                 buffer_length(in_b) == len;
@@ -177,12 +176,12 @@ procedure Compute_ghash_incremental(ghost in_b:buffer128)
 
                 //////////////////// Postcondition goals //////////////////////
                 rdx == 0 ==> io == old(io);
-                rdx > 0 ==> io == ghash_incremental(reverse_bytes_quad32(h), old(io), slice(buffer128_as_seq(mem, in_b), 0, rdx));
+                rdx > 0 ==> io == ghash_incremental(reverse_bytes_quad32(h), old(io), slice(buffer128_as_seq(heap0, in_b), 0, rdx));
 
             decreases
                 len - rdx;
         {
-            Load128_buffer(xmm2, r9, 0, Secret, in_b, rdx);
+            Load128_buffer(heap0, xmm2, r9, 0, Secret, in_b, rdx);
             Pxor(io, xmm2);        // Y_i := Y_{i-1} ^ x
             Mov128(xmm2, h);       // xmm2 := H
 
@@ -200,7 +199,7 @@ procedure Compute_ghash_incremental_partial(ghost in_b:buffer128)
     lets in_ptr @= rax; len @= rcx; io @= xmm1; mask @= xmm8; h @= xmm11;
     reads
         in_ptr; len; h; mask;
-        mem; memTaint;
+        heap0; memLayout;
 
     modifies
         rdx; r9; r12;
@@ -210,14 +209,14 @@ procedure Compute_ghash_incremental_partial(ghost in_b:buffer128)
     requires
         // GHash reqs
         pclmulqdq_enabled && avx_enabled && sse_enabled;
-        len > 0 ==> validSrcAddrs128(mem, in_ptr, in_b, len, memTaint, Secret);
+        len > 0 ==> validSrcAddrs128(heap0, in_ptr, in_b, len, memLayout, Secret);
         len > 0 ==> in_ptr  + 16 * len < pow2_64;
         len > 0 ==> buffer_length(in_b) >= len;
         mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
 
     ensures
         len == 0 ==> rdx == old(rdx) /\ r9 == in_ptr /\ xmm1 == old(xmm1) /\ io == old(io);
-        let input := slice(buffer128_as_seq(mem, in_b), 0, old(len));
+        let input := slice(buffer128_as_seq(heap0, in_b), 0, old(len));
         len > 0 ==> length(input) > 0 /\ io == ghash_incremental(reverse_bytes_quad32(h), old(io), input);
         r9 == in_ptr + 16 * len;
 {
@@ -234,7 +233,7 @@ procedure Compute_ghash_incremental_partial(ghost in_b:buffer128)
                 //////////////////// From requires //////////////////////
                 // GHash reqs
                 pclmulqdq_enabled && avx_enabled && sse_enabled;
-                validSrcAddrs128(mem, in_ptr, in_b, len, memTaint, Secret);
+                validSrcAddrs128(heap0, in_ptr, in_b, len, memLayout, Secret);
                 in_ptr  + 16 * len < pow2_64;
                 len > 0;
                 buffer_length(in_b) >= len;
@@ -242,12 +241,12 @@ procedure Compute_ghash_incremental_partial(ghost in_b:buffer128)
 
                 //////////////////// Postcondition goals //////////////////////
                 rdx == 0 ==> io == old(io);
-                rdx > 0 ==> io == ghash_incremental(reverse_bytes_quad32(h), old(io), slice(buffer128_as_seq(mem, in_b), 0, rdx));
+                rdx > 0 ==> io == ghash_incremental(reverse_bytes_quad32(h), old(io), slice(buffer128_as_seq(heap0, in_b), 0, rdx));
 
             decreases
                 len - rdx;
         {
-            Load128_buffer(xmm2, r9, 0, Secret, in_b, rdx);
+            Load128_buffer(heap0, xmm2, r9, 0, Secret, in_b, rdx);
             Pxor(io, xmm2);        // Y_i := Y_{i-1} ^ x
             Mov128(xmm2, h);       // xmm2 := H
 
@@ -260,7 +259,6 @@ procedure Compute_ghash_incremental_partial(ghost in_b:buffer128)
     }
 }
 
-#reset-options "--z3rlimit 10"
 // Purely proof work to show that when there are no extra bytes, there's no work left to do
 procedure Ghash_incremental_bytes_no_extra(
         ghost in_b:buffer128,
@@ -269,23 +267,22 @@ procedure Ghash_incremental_bytes_no_extra(
         ghost num_bytes:nat64,
         ghost io:quad32,
         ghost h:quad32)
-    {:public}
     {:quick exportOnly}
-    reads mem; memTaint;
+    reads heap0; memLayout;
     requires
         // GHash reqs
-        num_bytes > 0 ==> validSrcAddrs128(mem, old_in_ptr, in_b, bytes_to_quad_size(num_bytes), memTaint, Secret);
+        num_bytes > 0 ==> validSrcAddrs128(heap0, old_in_ptr, in_b, bytes_to_quad_size(num_bytes), memLayout, Secret);
         num_bytes > 0 ==> old_in_ptr  + 16 * bytes_to_quad_size(num_bytes) < pow2_64;
         buffer_length(in_b) == bytes_to_quad_size(num_bytes);
 
         //len == 0 ==> rdx == old(rdx) /\ r9 == old(r9) /\ xmm1 == old(xmm1) /\ io == old(io);
-        let input := slice(buffer128_as_seq(mem, in_b), 0, num_bytes / 16);
+        let input := slice(buffer128_as_seq(heap0, in_b), 0, num_bytes / 16);
         num_bytes > 0 ==> length(input) > 0 /\ io == ghash_incremental(h, old_io, input);
 
         // Extra reqs
         num_bytes % 16 == 0;
     ensures
-        let input_bytes := slice(le_seq_quad32_to_bytes(buffer128_as_seq(mem, in_b)), 0, num_bytes);
+        let input_bytes := slice(le_seq_quad32_to_bytes(buffer128_as_seq(heap0, in_b)), 0, num_bytes);
         let padded_bytes := pad_to_128_bits(input_bytes);
         let input_quads := le_bytes_to_seq_quad32(padded_bytes);
         num_bytes > 0 ==> length(input_quads) > 0 /\
@@ -294,29 +291,29 @@ procedure Ghash_incremental_bytes_no_extra(
     let num_blocks := num_bytes / 16;
 
     // Precondition variables
-    let input := slice(buffer128_as_seq(mem, in_b), 0, num_blocks);
+    let input := slice(buffer128_as_seq(heap0, in_b), 0, num_blocks);
 
     // Postcondition variables
-    let input_bytes := slice(le_seq_quad32_to_bytes(buffer128_as_seq(mem, in_b)), 0, num_bytes);
+    let input_bytes := slice(le_seq_quad32_to_bytes(buffer128_as_seq(heap0, in_b)), 0, num_bytes);
     let padded_bytes := pad_to_128_bits(input_bytes);
     let input_quads := le_bytes_to_seq_quad32(padded_bytes);
 
     // We want to show: input_quads == input
 
-    no_extra_bytes_helper(buffer128_as_seq(mem, in_b), num_bytes);
+    no_extra_bytes_helper(buffer128_as_seq(heap0, in_b), num_bytes);
         // ==> input_bytes == slice (le_seq_quad32_to_bytes in_b) 0 num_bytes == le_seq_quad32_to_bytes in_b
-    assert input_bytes == le_seq_quad32_to_bytes(buffer128_as_seq(mem, in_b));
+    assert input_bytes == le_seq_quad32_to_bytes(buffer128_as_seq(heap0, in_b));
     assert pad_to_128_bits(input_bytes) == input_bytes;
     assert input_quads == le_bytes_to_seq_quad32(input_bytes);
 
-    //slice_commutes_le_seq_quad32_to_bytes0(buffer128_as_seq(mem, in_b), num_blocks);
+    //slice_commutes_le_seq_quad32_to_bytes0(buffer128_as_seq(heap0, in_b), num_blocks);
 
-//    input_quads == le_bytes_to_seq_quad32(le_seq_quad32_to_bytes(buffer128_as_seq(mem, in_b)))
-    //le_bytes_to_seq_quad32_to_bytes(slice(buffer128_as_seq(mem, in_b), 0, num_blocks));
-    le_bytes_to_seq_quad32_to_bytes(buffer128_as_seq(mem, in_b));
-//    input_quads == buffer128_as_seq(mem, in_b)
+//    input_quads == le_bytes_to_seq_quad32(le_seq_quad32_to_bytes(buffer128_as_seq(heap0, in_b)))
+    //le_bytes_to_seq_quad32_to_bytes(slice(buffer128_as_seq(heap0, in_b), 0, num_blocks));
+    le_bytes_to_seq_quad32_to_bytes(buffer128_as_seq(heap0, in_b));
+//    input_quads == buffer128_as_seq(heap0, in_b)
 //
-    assert input == buffer128_as_seq(mem, in_b);
+    assert input == buffer128_as_seq(heap0, in_b);
 }
 
 
@@ -328,16 +325,15 @@ procedure Ghash_incremental_bytes_no_extra(
  *     Note that a switch statement will likely be much more efficient than a 16-way if/else,
  *     but Vale currently doesn't support switch statements
  */
-#reset-options "--z3rlimit 40"
 procedure Compute_pad_to_128_bits()
     {:quick}
+    {:options z3rlimit(40)}
     lets io @= xmm2; num_bytes @= rax; tmp @= rcx; mask @= rdx;
-
     reads num_bytes;
     modifies io; tmp; mask; efl;
     requires 
-      sse_enabled;
-      0 < num_bytes < 16;
+        sse_enabled;
+        0 < num_bytes < 16;
     ensures
         let padded_bytes := pad_to_128_bits(slice(le_quad32_to_bytes(old(io)), 0, old(num_bytes)));
         length(padded_bytes) = 16 && io = le_bytes_to_quad32(padded_bytes);
@@ -392,12 +388,10 @@ procedure Compute_pad_to_128_bits()
     }
 }
 
-#reset-options "--z3rlimit 10"
 procedure Ghash_incremental_bytes_register(
         ghost total_bytes:nat,
         ghost old_hash:quad32,
         ghost completed_quads:seq(quad32))
-    {:public}
     {:quick}
     lets num_bytes @= rax; io @= xmm1; input_quad @= xmm2; mask @= xmm8; h @= xmm11;
 
@@ -444,18 +438,16 @@ procedure Ghash_incremental_bytes_register(
     lemma_ghash_incremental_bytes_extra_helper_alt(reverse_bytes_quad32(h), old_hash, old(io), io, completed_quads, final_quad, final_quad_padded, total_bytes);
 }
 
-#reset-options "--z3rlimit 10"
 procedure Ghash_incremental_bytes_extra(
         ghost in_b:buffer128,
         ghost orig_in_ptr:nat64,
         ghost old_io:quad32,
         ghost orig_num_bytes:nat64)
-    {:public}
     {:quick}
     lets in_ptr @= r9; num_bytes @= rax; io @= xmm1; mask @= xmm8; h @= xmm11;
 
     reads
-        num_bytes; h; mask; in_ptr; mem; memTaint;
+        num_bytes; h; mask; in_ptr; heap0; memLayout;
 
     modifies
         rcx; rdx; r12;
@@ -465,7 +457,7 @@ procedure Ghash_incremental_bytes_extra(
         xmm2; xmm3; xmm4; xmm5; xmm6;
 
     requires/ensures
-        orig_num_bytes > 0 ==> validSrcAddrs128(mem, orig_in_ptr, in_b, bytes_to_quad_size(orig_num_bytes), memTaint, Secret);
+        orig_num_bytes > 0 ==> validSrcAddrs128(heap0, orig_in_ptr, in_b, bytes_to_quad_size(orig_num_bytes), memLayout, Secret);
     requires
         // GHash reqs
         pclmulqdq_enabled && avx_enabled && sse_enabled;
@@ -474,7 +466,7 @@ procedure Ghash_incremental_bytes_extra(
         mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
 
         //len == 0 ==> rdx == old(rdx) /\ r9 == old(r9) /\ xmm1 == old(xmm1) /\ io == old(io);
-        let input := slice(buffer128_as_seq(mem, in_b), 0, orig_num_bytes / 16);
+        let input := slice(buffer128_as_seq(heap0, in_b), 0, orig_num_bytes / 16);
         io == ghash_incremental0(reverse_bytes_quad32(h), old_io, input);
 
         // Extra reqs
@@ -486,7 +478,7 @@ procedure Ghash_incremental_bytes_extra(
         in_ptr  == orig_in_ptr  + 16 * num_blocks;
 
     ensures
-        let input_bytes := slice(le_seq_quad32_to_bytes(buffer128_as_seq(mem, in_b)), 0, orig_num_bytes);
+        let input_bytes := slice(le_seq_quad32_to_bytes(buffer128_as_seq(heap0, in_b)), 0, orig_num_bytes);
         let padded_bytes := pad_to_128_bits(input_bytes);
         let input_quads := le_bytes_to_seq_quad32(padded_bytes);
         orig_num_bytes > 0 ==> length(input_quads) > 0 /\
@@ -494,7 +486,7 @@ procedure Ghash_incremental_bytes_extra(
 {
     let num_blocks := orig_num_bytes / 16;
 
-    Load128_buffer(xmm2, in_ptr, 0, Secret, in_b, num_blocks);
+    Load128_buffer(heap0, xmm2, in_ptr, 0, Secret, in_b, num_blocks);
     let final_quad := xmm2;
 
     Compute_pad_to_128_bits();
@@ -502,17 +494,15 @@ procedure Ghash_incremental_bytes_extra(
 
     Compute_ghash_incremental_register();
 
-    lemma_ghash_incremental_bytes_extra_helper(reverse_bytes_quad32(h), old_io, old(io), io, buffer128_as_seq(mem, in_b), final_quad, final_quad_padded, orig_num_bytes);
+    lemma_ghash_incremental_bytes_extra_helper(reverse_bytes_quad32(h), old_io, old(io), io, buffer128_as_seq(heap0, in_b), final_quad, final_quad_padded, orig_num_bytes);
 }
 
-#reset-options "--z3rlimit 10"
 procedure Ghash_incremental_bytes(ghost in_b:buffer128)
-    {:public}
     {:quick}
     lets in_ptr @= rax; num_bytes @= r11; io @= xmm1; mask @= xmm8; h @= xmm11;
 
     reads
-        num_bytes; h; mask; mem; memTaint;
+        num_bytes; h; mask; heap0; memLayout;
 
     modifies
         in_ptr; rcx; rdx; r9; r12;
@@ -522,7 +512,7 @@ procedure Ghash_incremental_bytes(ghost in_b:buffer128)
         xmm2; xmm3; xmm4; xmm5; xmm6;
 
     requires/ensures
-        num_bytes > 0 ==> validSrcAddrs128(mem, old(in_ptr), in_b, bytes_to_quad_size(num_bytes), memTaint, Secret);
+        num_bytes > 0 ==> validSrcAddrs128(heap0, old(in_ptr), in_b, bytes_to_quad_size(num_bytes), memLayout, Secret);
     requires
         // GHash reqs
         pclmulqdq_enabled && avx_enabled && sse_enabled;
@@ -533,7 +523,7 @@ procedure Ghash_incremental_bytes(ghost in_b:buffer128)
     ensures
         num_bytes == 0 ==> rdx == old(rdx) /\ r9 == old(r9) /\ xmm1 == old(xmm1) /\ io == old(io);
 
-        let input_bytes := slice(le_seq_quad32_to_bytes(buffer128_as_seq(mem, in_b)), 0, num_bytes);
+        let input_bytes := slice(le_seq_quad32_to_bytes(buffer128_as_seq(heap0, in_b)), 0, num_bytes);
         let padded_bytes := pad_to_128_bits(input_bytes);
         let input_quads := le_bytes_to_seq_quad32(padded_bytes);
         num_bytes > 0 ==> length(input_quads) > 0 /\
@@ -568,7 +558,7 @@ procedure Ghash_core(ghost in_b:buffer128)
 
     reads
         in_ptr; len; h; mask;
-        mem; memTaint;
+        heap0; memLayout;
 
     modifies
         rdx; r9; r12;
@@ -579,19 +569,20 @@ procedure Ghash_core(ghost in_b:buffer128)
     requires
         // GHash reqs
         pclmulqdq_enabled && avx_enabled && sse_enabled;
-        len > 0 ==> validSrcAddrs128(mem, in_ptr, in_b, len, memTaint, Secret);
+        len > 0 ==> validSrcAddrs128(heap0, in_ptr, in_b, len, memLayout, Secret);
         len > 0 ==> in_ptr  + 16 * len < pow2_64;
         len > 0 ==> buffer_length(in_b) == len;
         mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
 
     ensures
         len == 0 ==> rdx == old(rdx) /\ r9 == old(r9) /\ xmm1 == old(xmm1) /\ output == old(output);
-        len > 0 ==> length(buffer128_as_seq(mem, in_b)) > 0 /\
-                    output == ghash_LE(reverse_bytes_quad32(h), #ghash_plain_LE(buffer128_as_seq(mem, in_b)));
+        len > 0 ==> length(buffer128_as_seq(heap0, in_b)) > 0 /\
+                    output == ghash_LE(reverse_bytes_quad32(h), #ghash_plain_LE(buffer128_as_seq(heap0, in_b)));
 {
     if (len != 0) {
         Compute_Y0();
         Compute_ghash_incremental(in_b);
-        ghash_incremental_to_ghash(reverse_bytes_quad32(h), buffer128_as_seq(mem, in_b));
+        ghash_incremental_to_ghash(reverse_bytes_quad32(h), buffer128_as_seq(heap0, in_b));
     }
 }
+*/

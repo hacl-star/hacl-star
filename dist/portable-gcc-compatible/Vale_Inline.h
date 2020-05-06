@@ -34,59 +34,59 @@
 
 
 
-/* SNIPPET_START: cswap2_inline */
+/* SNIPPET_START: cswap2 */
 
-extern void cswap2_inline(uint64_t bit, uint64_t *p0, uint64_t *p1);
+static inline void cswap2(uint64_t bit, uint64_t *p0, uint64_t *p1);
 
-/* SNIPPET_END: cswap2_inline */
+/* SNIPPET_END: cswap2 */
 
-/* SNIPPET_START: fsqr_inline */
+/* SNIPPET_START: fsqr */
 
-extern void fsqr_inline(uint64_t *tmp, uint64_t *f1, uint64_t *out1);
+static inline void fsqr(uint64_t *out, uint64_t *f1, uint64_t *tmp);
 
-/* SNIPPET_END: fsqr_inline */
+/* SNIPPET_END: fsqr */
 
-/* SNIPPET_START: fsqr2_inline */
+/* SNIPPET_START: fsqr2 */
 
-extern void fsqr2_inline(uint64_t *tmp, uint64_t *f1, uint64_t *out1);
+static inline void fsqr2(uint64_t *out, uint64_t *f1, uint64_t *tmp);
 
-/* SNIPPET_END: fsqr2_inline */
+/* SNIPPET_END: fsqr2 */
 
-/* SNIPPET_START: fmul_inline */
+/* SNIPPET_START: fmul */
 
-extern void fmul_inline(uint64_t *tmp, uint64_t *f1, uint64_t *out1, uint64_t *f2);
+static inline void fmul(uint64_t *out, uint64_t *f1, uint64_t *f2, uint64_t *tmp);
 
-/* SNIPPET_END: fmul_inline */
+/* SNIPPET_END: fmul */
 
-/* SNIPPET_START: fmul2_inline */
+/* SNIPPET_START: fmul2 */
 
-extern void fmul2_inline(uint64_t *tmp, uint64_t *f1, uint64_t *out1, uint64_t *f2);
+static inline void fmul2(uint64_t *out, uint64_t *f1, uint64_t *f2, uint64_t *tmp);
 
-/* SNIPPET_END: fmul2_inline */
+/* SNIPPET_END: fmul2 */
 
-/* SNIPPET_START: fmul1_inline */
+/* SNIPPET_START: fmul_scalar */
 
-extern void fmul1_inline(uint64_t *out1, uint64_t *f1, uint64_t f2);
+static inline void fmul_scalar(uint64_t *out, uint64_t *f1, uint64_t f2);
 
-/* SNIPPET_END: fmul1_inline */
+/* SNIPPET_END: fmul_scalar */
 
-/* SNIPPET_START: add1_inline */
+/* SNIPPET_START: add_scalar */
 
-extern uint64_t add1_inline(uint64_t *out1, uint64_t *f1, uint64_t f2);
+static inline uint64_t add_scalar(uint64_t *out, uint64_t *f1, uint64_t f2);
 
-/* SNIPPET_END: add1_inline */
+/* SNIPPET_END: add_scalar */
 
-/* SNIPPET_START: fadd_inline */
+/* SNIPPET_START: fadd */
 
-extern void fadd_inline(uint64_t *out1, uint64_t *f1, uint64_t *f2);
+static inline void fadd(uint64_t *out, uint64_t *f1, uint64_t *f2);
 
-/* SNIPPET_END: fadd_inline */
+/* SNIPPET_END: fadd */
 
-/* SNIPPET_START: fsub_inline */
+/* SNIPPET_START: fsub */
 
-extern void fsub_inline(uint64_t *out1, uint64_t *f1, uint64_t *f2);
+static inline void fsub(uint64_t *out, uint64_t *f1, uint64_t *f2);
 
-/* SNIPPET_END: fsub_inline */
+/* SNIPPET_END: fsub */
 
 #define __Vale_Inline_H_DEFINED
 #endif

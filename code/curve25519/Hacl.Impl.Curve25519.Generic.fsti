@@ -10,37 +10,37 @@ open Hacl.Impl.Curve25519.Fields
 module S = Spec.Curve25519
 
 inline_for_extraction noextract
-let scalarmult_st (s:field_spec) =
+let scalarmult_st (s:field_spec) (p: Type0) =
     o:lbuffer uint8 32ul
   -> k:lbuffer uint8 32ul
   -> i:lbuffer uint8 32ul
   -> Stack unit
     (requires fun h0 ->
-      (s = M64 ==> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
+      p /\
       live h0 o /\ live h0 k /\ live h0 i /\
       disjoint o i /\ disjoint o k)
     (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1 /\
       as_seq h1 o == S.scalarmult (as_seq h0 k) (as_seq h0 i))
 
 inline_for_extraction noextract
-let secret_to_public_st (s: field_spec) =
+let secret_to_public_st (s: field_spec) (p: Type0) =
     o:lbuffer uint8 32ul
   -> i:lbuffer uint8 32ul
   -> Stack unit
     (requires fun h0 ->
-      (s = M64 ==> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
+      p /\
       live h0 o /\ live h0 i /\ disjoint o i)
     (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1 /\
       as_seq h1 o == S.secret_to_public (as_seq h0 i))
 
 inline_for_extraction noextract
-let ecdh_st (s:field_spec) =
+let ecdh_st (s:field_spec) (p: Type0) =
     o:lbuffer uint8 32ul
   -> k:lbuffer uint8 32ul
   -> i:lbuffer uint8 32ul
   -> Stack bool
     (requires fun h0 ->
-      (s = M64 ==> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
+      p /\
       live h0 o /\ live h0 k /\ live h0 i /\
       disjoint o i /\ disjoint o k)
     (ensures  fun h0 r h1 -> modifies (loc o) h0 h1 /\

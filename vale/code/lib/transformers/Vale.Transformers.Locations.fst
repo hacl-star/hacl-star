@@ -1,5 +1,6 @@
 module Vale.Transformers.Locations
 
+open Vale.Arch.HeapTypes_s
 open Vale.Arch.Heap
 open Vale.X64.Bytes_Code_s
 open Vale.X64.Instruction_s
@@ -48,7 +49,7 @@ let downgrade_val_raise_val_u0_u1 #a x = FStar.Universe.downgrade_val_raise_val 
 (* See fsti *)
 let location_val_t a =
   match a with
-  | ALocMem -> heap_impl & memTaint_t
+  | ALocMem -> heap_impl
   | ALocStack -> FStar.Universe.raise_t (machine_stack & memTaint_t)
   | ALocReg r -> FStar.Universe.raise_t (t_reg r)
   | ALocCf -> FStar.Universe.raise_t flag_val_t
@@ -66,7 +67,7 @@ let location_val_eqt a =
 (* See fsti *)
 let eval_location a s =
   match a with
-  | ALocMem -> s.ms_heap, s.ms_memTaint
+  | ALocMem -> s.ms_heap
   | ALocStack -> FStar.Universe.raise_val (s.ms_stack, s.ms_stackTaint)
   | ALocReg r -> FStar.Universe.raise_val (eval_reg r s)
   | ALocCf -> FStar.Universe.raise_val (cf s.ms_flags)
@@ -77,7 +78,7 @@ let update_location a v s =
   match a with
   | ALocMem ->
     let v = coerce v in
-    { s with ms_heap = fst v ; ms_memTaint = snd v }
+    { s with ms_heap = v }
   | ALocStack ->
     let v = FStar.Universe.downgrade_val (coerce v) in
     { s with ms_stack = fst v ; ms_stackTaint = snd v }
@@ -111,7 +112,6 @@ let lemma_locations_complete s1 s2 flags ok trace =
   assert (cf s1.ms_flags == cf s2.ms_flags);
   assert (FStar.FunctionalExtensionality.feq s1.ms_flags s2.ms_flags);
   assert (s1.ms_heap == s2.ms_heap);
-  assert (s1.ms_memTaint == s2.ms_memTaint);
   assert (s1.ms_stack == s2.ms_stack);
   assert (s1.ms_stackTaint == s2.ms_stackTaint);
   assert (s1.ms_trace == s2.ms_trace)
