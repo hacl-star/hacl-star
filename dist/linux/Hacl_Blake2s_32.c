@@ -26,492 +26,419 @@
 
 static inline void blake2s_update_block(u32 *wv, u32 *hash, bool flag, u64 totlen, u8 *d)
 {
-  u32 mask[4U] = { 0U };
-  u32 wv_14;
-  if (flag)
-    wv_14 = (u32)0xFFFFFFFFU;
-  else
-    wv_14 = (u32)0U;
+  u32 m_w[16U] = { 0U };
   {
-    u32 wv_15 = (u32)0U;
-    u32 *wv3;
-    u32 *s00;
-    u32 *s16;
-    u32 *r00;
-    u32 *r10;
-    u32 *r20;
-    u32 *r30;
-    u32 i0;
-    mask[0U] = (u32)totlen;
-    mask[1U] = (u32)(totlen >> (u32)32U);
-    mask[2U] = wv_14;
-    mask[3U] = wv_15;
-    memcpy(wv, hash, (u32)4U * (u32)4U * sizeof (hash[0U]));
-    wv3 = wv + (u32)3U * (u32)4U;
+    u32 i;
+    for (i = (u32)0U; i < (u32)16U; i++)
     {
-      u32 i;
-      for (i = (u32)0U; i < (u32)4U; i++)
-      {
-        u32 *os = wv3;
-        u32 x = wv3[i] ^ mask[i];
-        os[i] = x;
-      }
+      u32 *os = m_w;
+      u8 *bj = d + i * (u32)4U;
+      u32 u = load32_le(bj);
+      u32 r = u;
+      u32 x = r;
+      os[i] = x;
     }
+  }
+  {
+    u32 mask[4U] = { 0U };
+    u32 wv_14;
+    if (flag)
+      wv_14 = (u32)0xFFFFFFFFU;
+    else
+      wv_14 = (u32)0U;
     {
-      u32 i1;
-      for (i1 = (u32)0U; i1 < (u32)10U; i1++)
+      u32 wv_15 = (u32)0U;
+      u32 *wv3;
+      u32 *s00;
+      u32 *s16;
+      u32 *r00;
+      u32 *r10;
+      u32 *r20;
+      u32 *r30;
+      mask[0U] = (u32)totlen;
+      mask[1U] = (u32)(totlen >> (u32)32U);
+      mask[2U] = wv_14;
+      mask[3U] = wv_15;
+      memcpy(wv, hash, (u32)4U * (u32)4U * sizeof (hash[0U]));
+      wv3 = wv + (u32)3U * (u32)4U;
       {
-        u32 start_idx = i1 % (u32)10U * (u32)16U;
-        KRML_CHECK_SIZE(sizeof (u32), (u32)4U * (u32)4U);
+        u32 i;
+        for (i = (u32)0U; i < (u32)4U; i++)
         {
-          u32 m_st[(u32)4U * (u32)4U];
-          memset(m_st, 0U, (u32)4U * (u32)4U * sizeof (m_st[0U]));
+          u32 *os = wv3;
+          u32 x = wv3[i] ^ mask[i];
+          os[i] = x;
+        }
+      }
+      {
+        u32 i0;
+        for (i0 = (u32)0U; i0 < (u32)10U; i0++)
+        {
+          u32 start_idx = i0 % (u32)10U * (u32)16U;
+          KRML_CHECK_SIZE(sizeof (u32), (u32)4U * (u32)4U);
           {
-            u32 *r01 = m_st + (u32)0U * (u32)4U;
-            u32 *r12 = m_st + (u32)1U * (u32)4U;
-            u32 *r21 = m_st + (u32)2U * (u32)4U;
-            u32 *r31 = m_st + (u32)3U * (u32)4U;
-            u32 s0 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx];
-            u32 s1 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (u32)1U];
-            u32 s2 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (u32)2U];
-            u32 s3 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (u32)3U];
-            u32 s4 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (u32)4U];
-            u32 s5 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (u32)5U];
-            u32 s6 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (u32)6U];
-            u32 s7 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (u32)7U];
-            u32 s8 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (u32)8U];
-            u32 s9 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (u32)9U];
-            u32 s10 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (u32)10U];
-            u32 s11 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (u32)11U];
-            u32 s12 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (u32)12U];
-            u32 s13 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (u32)13U];
-            u32 s14 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (u32)14U];
-            u32 s15 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (u32)15U];
-            u32 nb = (u32)4U;
-            u8 *b00 = d + s0 * nb;
-            u8 *b10 = d + s2 * nb;
-            u8 *b20 = d + s4 * nb;
-            u8 *b30 = d + s6 * nb;
-            u32 u0 = load32_le(b00);
-            u32 u00 = u0;
-            u32 u1 = load32_le(b10);
-            u32 u10 = u1;
-            u32 u2 = load32_le(b20);
-            u32 u20 = u2;
-            u32 u3 = load32_le(b30);
-            u32 u30 = u3;
-            r01[0U] = u00;
-            r01[1U] = u10;
-            r01[2U] = u20;
-            r01[3U] = u30;
+            u32 m_st[(u32)4U * (u32)4U];
+            memset(m_st, 0U, (u32)4U * (u32)4U * sizeof (m_st[0U]));
             {
-              u32 nb0 = (u32)4U;
-              u8 *b01 = d + s1 * nb0;
-              u8 *b11 = d + s3 * nb0;
-              u8 *b21 = d + s5 * nb0;
-              u8 *b31 = d + s7 * nb0;
-              u32 u4 = load32_le(b01);
-              u32 u01 = u4;
-              u32 u5 = load32_le(b11);
-              u32 u11 = u5;
-              u32 u6 = load32_le(b21);
-              u32 u21 = u6;
-              u32 u7 = load32_le(b31);
-              u32 u31 = u7;
-              r12[0U] = u01;
-              r12[1U] = u11;
-              r12[2U] = u21;
-              r12[3U] = u31;
+              u32 *r01 = m_st + (u32)0U * (u32)4U;
+              u32 *r12 = m_st + (u32)1U * (u32)4U;
+              u32 *r21 = m_st + (u32)2U * (u32)4U;
+              u32 *r31 = m_st + (u32)3U * (u32)4U;
+              u32 s0 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx];
+              u32 s1 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (u32)1U];
+              u32 s2 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (u32)2U];
+              u32 s3 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (u32)3U];
+              u32 s4 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (u32)4U];
+              u32 s5 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (u32)5U];
+              u32 s6 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (u32)6U];
+              u32 s7 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (u32)7U];
+              u32 s8 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (u32)8U];
+              u32 s9 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (u32)9U];
+              u32 s10 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (u32)10U];
+              u32 s11 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (u32)11U];
+              u32 s12 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (u32)12U];
+              u32 s13 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (u32)13U];
+              u32 s14 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (u32)14U];
+              u32 s15 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (u32)15U];
+              u32 uu____0 = m_w[s2];
+              u32 uu____1 = m_w[s4];
+              u32 uu____2 = m_w[s6];
+              r01[0U] = m_w[s0];
+              r01[1U] = uu____0;
+              r01[2U] = uu____1;
+              r01[3U] = uu____2;
               {
-                u32 nb1 = (u32)4U;
-                u8 *b02 = d + s8 * nb1;
-                u8 *b12 = d + s10 * nb1;
-                u8 *b22 = d + s12 * nb1;
-                u8 *b32 = d + s14 * nb1;
-                u32 u8 = load32_le(b02);
-                u32 u02 = u8;
-                u32 u9 = load32_le(b12);
-                u32 u12 = u9;
-                u32 u13 = load32_le(b22);
-                u32 u22 = u13;
-                u32 u14 = load32_le(b32);
-                u32 u32 = u14;
-                r21[0U] = u02;
-                r21[1U] = u12;
-                r21[2U] = u22;
-                r21[3U] = u32;
+                u32 uu____3 = m_w[s3];
+                u32 uu____4 = m_w[s5];
+                u32 uu____5 = m_w[s7];
+                r12[0U] = m_w[s1];
+                r12[1U] = uu____3;
+                r12[2U] = uu____4;
+                r12[3U] = uu____5;
                 {
-                  u32 nb2 = (u32)4U;
-                  u8 *b0 = d + s9 * nb2;
-                  u8 *b1 = d + s11 * nb2;
-                  u8 *b2 = d + s13 * nb2;
-                  u8 *b3 = d + s15 * nb2;
-                  u32 u15 = load32_le(b0);
-                  u32 u03 = u15;
-                  u32 u16 = load32_le(b1);
-                  u32 u17 = u16;
-                  u32 u18 = load32_le(b2);
-                  u32 u23 = u18;
-                  u32 u = load32_le(b3);
-                  u32 u33 = u;
-                  r31[0U] = u03;
-                  r31[1U] = u17;
-                  r31[2U] = u23;
-                  r31[3U] = u33;
+                  u32 uu____6 = m_w[s10];
+                  u32 uu____7 = m_w[s12];
+                  u32 uu____8 = m_w[s14];
+                  r21[0U] = m_w[s8];
+                  r21[1U] = uu____6;
+                  r21[2U] = uu____7;
+                  r21[3U] = uu____8;
                   {
-                    u32 *x = m_st + (u32)0U * (u32)4U;
-                    u32 *y = m_st + (u32)1U * (u32)4U;
-                    u32 *z = m_st + (u32)2U * (u32)4U;
-                    u32 *w = m_st + (u32)3U * (u32)4U;
-                    u32 a = (u32)0U;
-                    u32 b4 = (u32)1U;
-                    u32 c0 = (u32)2U;
-                    u32 d10 = (u32)3U;
-                    u32 r02 = Hacl_Impl_Blake2_Constants_rTable_S[0U];
-                    u32 r13 = Hacl_Impl_Blake2_Constants_rTable_S[1U];
-                    u32 r22 = Hacl_Impl_Blake2_Constants_rTable_S[2U];
-                    u32 r32 = Hacl_Impl_Blake2_Constants_rTable_S[3U];
-                    u32 zz0[4U] = { 0U };
-                    u32 *wv_a0 = wv + a * (u32)4U;
-                    u32 *wv_b0 = wv + b4 * (u32)4U;
+                    u32 uu____9 = m_w[s11];
+                    u32 uu____10 = m_w[s13];
+                    u32 uu____11 = m_w[s15];
+                    r31[0U] = m_w[s9];
+                    r31[1U] = uu____9;
+                    r31[2U] = uu____10;
+                    r31[3U] = uu____11;
                     {
-                      u32 i;
-                      for (i = (u32)0U; i < (u32)4U; i++)
-                      {
-                        u32 *os = wv_a0;
-                        u32 x1 = wv_a0[i] + wv_b0[i];
-                        os[i] = x1;
-                      }
-                    }
-                    {
-                      u32 i;
-                      for (i = (u32)0U; i < (u32)4U; i++)
-                      {
-                        u32 *os = wv_a0;
-                        u32 x1 = wv_a0[i] + x[i];
-                        os[i] = x1;
-                      }
-                    }
-                    {
-                      u32 *wv_a1 = wv + d10 * (u32)4U;
-                      u32 *wv_b1 = wv + a * (u32)4U;
+                      u32 *x = m_st + (u32)0U * (u32)4U;
+                      u32 *y = m_st + (u32)1U * (u32)4U;
+                      u32 *z = m_st + (u32)2U * (u32)4U;
+                      u32 *w = m_st + (u32)3U * (u32)4U;
+                      u32 a = (u32)0U;
+                      u32 b0 = (u32)1U;
+                      u32 c0 = (u32)2U;
+                      u32 d10 = (u32)3U;
+                      u32 r02 = Hacl_Impl_Blake2_Constants_rTable_S[0U];
+                      u32 r13 = Hacl_Impl_Blake2_Constants_rTable_S[1U];
+                      u32 r22 = Hacl_Impl_Blake2_Constants_rTable_S[2U];
+                      u32 r32 = Hacl_Impl_Blake2_Constants_rTable_S[3U];
+                      u32 *wv_a0 = wv + a * (u32)4U;
+                      u32 *wv_b0 = wv + b0 * (u32)4U;
                       {
                         u32 i;
                         for (i = (u32)0U; i < (u32)4U; i++)
                         {
-                          u32 *os = wv_a1;
-                          u32 x1 = wv_a1[i] ^ wv_b1[i];
+                          u32 *os = wv_a0;
+                          u32 x1 = wv_a0[i] + wv_b0[i];
                           os[i] = x1;
                         }
                       }
                       {
-                        u32 *r110 = wv_a1;
+                        u32 i;
+                        for (i = (u32)0U; i < (u32)4U; i++)
+                        {
+                          u32 *os = wv_a0;
+                          u32 x1 = wv_a0[i] + x[i];
+                          os[i] = x1;
+                        }
+                      }
+                      {
+                        u32 *wv_a1 = wv + d10 * (u32)4U;
+                        u32 *wv_b1 = wv + a * (u32)4U;
                         {
                           u32 i;
                           for (i = (u32)0U; i < (u32)4U; i++)
                           {
-                            u32 *os = r110;
-                            u32 x1 = r110[i];
-                            u32 x10 = x1 >> r02 | x1 << ((u32)32U - r02);
-                            os[i] = x10;
+                            u32 *os = wv_a1;
+                            u32 x1 = wv_a1[i] ^ wv_b1[i];
+                            os[i] = x1;
                           }
                         }
                         {
-                          u32 *wv_a2 = wv + c0 * (u32)4U;
-                          u32 *wv_b2 = wv + d10 * (u32)4U;
+                          u32 *r110 = wv_a1;
                           {
                             u32 i;
                             for (i = (u32)0U; i < (u32)4U; i++)
                             {
-                              u32 *os = wv_a2;
-                              u32 x1 = wv_a2[i] + wv_b2[i];
-                              os[i] = x1;
+                              u32 *os = r110;
+                              u32 x1 = r110[i];
+                              u32 x10 = x1 >> r02 | x1 << ((u32)32U - r02);
+                              os[i] = x10;
                             }
                           }
                           {
-                            u32 i;
-                            for (i = (u32)0U; i < (u32)4U; i++)
-                            {
-                              u32 *os = wv_a2;
-                              u32 x1 = wv_a2[i] + zz0[i];
-                              os[i] = x1;
-                            }
-                          }
-                          {
-                            u32 *wv_a3 = wv + b4 * (u32)4U;
-                            u32 *wv_b3 = wv + c0 * (u32)4U;
+                            u32 *wv_a2 = wv + c0 * (u32)4U;
+                            u32 *wv_b2 = wv + d10 * (u32)4U;
                             {
                               u32 i;
                               for (i = (u32)0U; i < (u32)4U; i++)
                               {
-                                u32 *os = wv_a3;
-                                u32 x1 = wv_a3[i] ^ wv_b3[i];
+                                u32 *os = wv_a2;
+                                u32 x1 = wv_a2[i] + wv_b2[i];
                                 os[i] = x1;
                               }
                             }
                             {
-                              u32 *r111 = wv_a3;
+                              u32 *wv_a3 = wv + b0 * (u32)4U;
+                              u32 *wv_b3 = wv + c0 * (u32)4U;
                               {
                                 u32 i;
                                 for (i = (u32)0U; i < (u32)4U; i++)
                                 {
-                                  u32 *os = r111;
-                                  u32 x1 = r111[i];
-                                  u32 x10 = x1 >> r13 | x1 << ((u32)32U - r13);
-                                  os[i] = x10;
+                                  u32 *os = wv_a3;
+                                  u32 x1 = wv_a3[i] ^ wv_b3[i];
+                                  os[i] = x1;
                                 }
                               }
                               {
-                                u32 *wv_a4 = wv + a * (u32)4U;
-                                u32 *wv_b4 = wv + b4 * (u32)4U;
+                                u32 *r111 = wv_a3;
                                 {
                                   u32 i;
                                   for (i = (u32)0U; i < (u32)4U; i++)
                                   {
-                                    u32 *os = wv_a4;
-                                    u32 x1 = wv_a4[i] + wv_b4[i];
-                                    os[i] = x1;
+                                    u32 *os = r111;
+                                    u32 x1 = r111[i];
+                                    u32 x10 = x1 >> r13 | x1 << ((u32)32U - r13);
+                                    os[i] = x10;
                                   }
                                 }
                                 {
-                                  u32 i;
-                                  for (i = (u32)0U; i < (u32)4U; i++)
-                                  {
-                                    u32 *os = wv_a4;
-                                    u32 x1 = wv_a4[i] + y[i];
-                                    os[i] = x1;
-                                  }
-                                }
-                                {
-                                  u32 *wv_a5 = wv + d10 * (u32)4U;
-                                  u32 *wv_b5 = wv + a * (u32)4U;
+                                  u32 *wv_a4 = wv + a * (u32)4U;
+                                  u32 *wv_b4 = wv + b0 * (u32)4U;
                                   {
                                     u32 i;
                                     for (i = (u32)0U; i < (u32)4U; i++)
                                     {
-                                      u32 *os = wv_a5;
-                                      u32 x1 = wv_a5[i] ^ wv_b5[i];
+                                      u32 *os = wv_a4;
+                                      u32 x1 = wv_a4[i] + wv_b4[i];
                                       os[i] = x1;
                                     }
                                   }
                                   {
-                                    u32 *r112 = wv_a5;
+                                    u32 i;
+                                    for (i = (u32)0U; i < (u32)4U; i++)
+                                    {
+                                      u32 *os = wv_a4;
+                                      u32 x1 = wv_a4[i] + y[i];
+                                      os[i] = x1;
+                                    }
+                                  }
+                                  {
+                                    u32 *wv_a5 = wv + d10 * (u32)4U;
+                                    u32 *wv_b5 = wv + a * (u32)4U;
                                     {
                                       u32 i;
                                       for (i = (u32)0U; i < (u32)4U; i++)
                                       {
-                                        u32 *os = r112;
-                                        u32 x1 = r112[i];
-                                        u32 x10 = x1 >> r22 | x1 << ((u32)32U - r22);
-                                        os[i] = x10;
+                                        u32 *os = wv_a5;
+                                        u32 x1 = wv_a5[i] ^ wv_b5[i];
+                                        os[i] = x1;
                                       }
                                     }
                                     {
-                                      u32 *wv_a6 = wv + c0 * (u32)4U;
-                                      u32 *wv_b6 = wv + d10 * (u32)4U;
+                                      u32 *r112 = wv_a5;
                                       {
                                         u32 i;
                                         for (i = (u32)0U; i < (u32)4U; i++)
                                         {
-                                          u32 *os = wv_a6;
-                                          u32 x1 = wv_a6[i] + wv_b6[i];
-                                          os[i] = x1;
+                                          u32 *os = r112;
+                                          u32 x1 = r112[i];
+                                          u32 x10 = x1 >> r22 | x1 << ((u32)32U - r22);
+                                          os[i] = x10;
                                         }
                                       }
                                       {
-                                        u32 i;
-                                        for (i = (u32)0U; i < (u32)4U; i++)
-                                        {
-                                          u32 *os = wv_a6;
-                                          u32 x1 = wv_a6[i] + zz0[i];
-                                          os[i] = x1;
-                                        }
-                                      }
-                                      {
-                                        u32 *wv_a7 = wv + b4 * (u32)4U;
-                                        u32 *wv_b7 = wv + c0 * (u32)4U;
+                                        u32 *wv_a6 = wv + c0 * (u32)4U;
+                                        u32 *wv_b6 = wv + d10 * (u32)4U;
                                         {
                                           u32 i;
                                           for (i = (u32)0U; i < (u32)4U; i++)
                                           {
-                                            u32 *os = wv_a7;
-                                            u32 x1 = wv_a7[i] ^ wv_b7[i];
+                                            u32 *os = wv_a6;
+                                            u32 x1 = wv_a6[i] + wv_b6[i];
                                             os[i] = x1;
                                           }
                                         }
                                         {
-                                          u32 *r113 = wv_a7;
+                                          u32 *wv_a7 = wv + b0 * (u32)4U;
+                                          u32 *wv_b7 = wv + c0 * (u32)4U;
                                           {
                                             u32 i;
                                             for (i = (u32)0U; i < (u32)4U; i++)
                                             {
-                                              u32 *os = r113;
-                                              u32 x1 = r113[i];
-                                              u32 x10 = x1 >> r32 | x1 << ((u32)32U - r32);
-                                              os[i] = x10;
+                                              u32 *os = wv_a7;
+                                              u32 x1 = wv_a7[i] ^ wv_b7[i];
+                                              os[i] = x1;
                                             }
                                           }
                                           {
-                                            u32 *r14 = wv + (u32)1U * (u32)4U;
-                                            u32 *r23 = wv + (u32)2U * (u32)4U;
-                                            u32 *r33 = wv + (u32)3U * (u32)4U;
-                                            u32 *r114 = r14;
-                                            u32 x00 = r114[1U];
-                                            u32 x10 = r114[((u32)1U + (u32)1U) % (u32)4U];
-                                            u32 x20 = r114[((u32)1U + (u32)2U) % (u32)4U];
-                                            u32 x30 = r114[((u32)1U + (u32)3U) % (u32)4U];
-                                            r114[0U] = x00;
-                                            r114[1U] = x10;
-                                            r114[2U] = x20;
-                                            r114[3U] = x30;
+                                            u32 *r113 = wv_a7;
                                             {
-                                              u32 *r115 = r23;
-                                              u32 x01 = r115[2U];
-                                              u32 x11 = r115[((u32)2U + (u32)1U) % (u32)4U];
-                                              u32 x21 = r115[((u32)2U + (u32)2U) % (u32)4U];
-                                              u32 x31 = r115[((u32)2U + (u32)3U) % (u32)4U];
-                                              r115[0U] = x01;
-                                              r115[1U] = x11;
-                                              r115[2U] = x21;
-                                              r115[3U] = x31;
+                                              u32 i;
+                                              for (i = (u32)0U; i < (u32)4U; i++)
                                               {
-                                                u32 *r116 = r33;
-                                                u32 x02 = r116[3U];
-                                                u32 x12 = r116[((u32)3U + (u32)1U) % (u32)4U];
-                                                u32 x22 = r116[((u32)3U + (u32)2U) % (u32)4U];
-                                                u32 x32 = r116[((u32)3U + (u32)3U) % (u32)4U];
-                                                r116[0U] = x02;
-                                                r116[1U] = x12;
-                                                r116[2U] = x22;
-                                                r116[3U] = x32;
+                                                u32 *os = r113;
+                                                u32 x1 = r113[i];
+                                                u32 x10 = x1 >> r32 | x1 << ((u32)32U - r32);
+                                                os[i] = x10;
+                                              }
+                                            }
+                                            {
+                                              u32 *r14 = wv + (u32)1U * (u32)4U;
+                                              u32 *r23 = wv + (u32)2U * (u32)4U;
+                                              u32 *r33 = wv + (u32)3U * (u32)4U;
+                                              u32 *r114 = r14;
+                                              u32 x00 = r114[1U];
+                                              u32 x10 = r114[((u32)1U + (u32)1U) % (u32)4U];
+                                              u32 x20 = r114[((u32)1U + (u32)2U) % (u32)4U];
+                                              u32 x30 = r114[((u32)1U + (u32)3U) % (u32)4U];
+                                              r114[0U] = x00;
+                                              r114[1U] = x10;
+                                              r114[2U] = x20;
+                                              r114[3U] = x30;
+                                              {
+                                                u32 *r115 = r23;
+                                                u32 x01 = r115[2U];
+                                                u32 x11 = r115[((u32)2U + (u32)1U) % (u32)4U];
+                                                u32 x21 = r115[((u32)2U + (u32)2U) % (u32)4U];
+                                                u32 x31 = r115[((u32)2U + (u32)3U) % (u32)4U];
+                                                r115[0U] = x01;
+                                                r115[1U] = x11;
+                                                r115[2U] = x21;
+                                                r115[3U] = x31;
                                                 {
-                                                  u32 a0 = (u32)0U;
-                                                  u32 b = (u32)1U;
-                                                  u32 c = (u32)2U;
-                                                  u32 d1 = (u32)3U;
-                                                  u32 r0 = Hacl_Impl_Blake2_Constants_rTable_S[0U];
-                                                  u32 r1 = Hacl_Impl_Blake2_Constants_rTable_S[1U];
-                                                  u32 r24 = Hacl_Impl_Blake2_Constants_rTable_S[2U];
-                                                  u32 r34 = Hacl_Impl_Blake2_Constants_rTable_S[3U];
-                                                  u32 zz[4U] = { 0U };
-                                                  u32 *wv_a = wv + a0 * (u32)4U;
-                                                  u32 *wv_b8 = wv + b * (u32)4U;
+                                                  u32 *r116 = r33;
+                                                  u32 x02 = r116[3U];
+                                                  u32 x12 = r116[((u32)3U + (u32)1U) % (u32)4U];
+                                                  u32 x22 = r116[((u32)3U + (u32)2U) % (u32)4U];
+                                                  u32 x32 = r116[((u32)3U + (u32)3U) % (u32)4U];
+                                                  r116[0U] = x02;
+                                                  r116[1U] = x12;
+                                                  r116[2U] = x22;
+                                                  r116[3U] = x32;
                                                   {
-                                                    u32 i;
-                                                    for (i = (u32)0U; i < (u32)4U; i++)
-                                                    {
-                                                      u32 *os = wv_a;
-                                                      u32 x1 = wv_a[i] + wv_b8[i];
-                                                      os[i] = x1;
-                                                    }
-                                                  }
-                                                  {
-                                                    u32 i;
-                                                    for (i = (u32)0U; i < (u32)4U; i++)
-                                                    {
-                                                      u32 *os = wv_a;
-                                                      u32 x1 = wv_a[i] + z[i];
-                                                      os[i] = x1;
-                                                    }
-                                                  }
-                                                  {
-                                                    u32 *wv_a8 = wv + d1 * (u32)4U;
-                                                    u32 *wv_b9 = wv + a0 * (u32)4U;
+                                                    u32 a0 = (u32)0U;
+                                                    u32 b = (u32)1U;
+                                                    u32 c = (u32)2U;
+                                                    u32 d1 = (u32)3U;
+                                                    u32
+                                                    r0 = Hacl_Impl_Blake2_Constants_rTable_S[0U];
+                                                    u32
+                                                    r1 = Hacl_Impl_Blake2_Constants_rTable_S[1U];
+                                                    u32
+                                                    r24 = Hacl_Impl_Blake2_Constants_rTable_S[2U];
+                                                    u32
+                                                    r34 = Hacl_Impl_Blake2_Constants_rTable_S[3U];
+                                                    u32 *wv_a = wv + a0 * (u32)4U;
+                                                    u32 *wv_b8 = wv + b * (u32)4U;
                                                     {
                                                       u32 i;
                                                       for (i = (u32)0U; i < (u32)4U; i++)
                                                       {
-                                                        u32 *os = wv_a8;
-                                                        u32 x1 = wv_a8[i] ^ wv_b9[i];
+                                                        u32 *os = wv_a;
+                                                        u32 x1 = wv_a[i] + wv_b8[i];
                                                         os[i] = x1;
                                                       }
                                                     }
                                                     {
-                                                      u32 *r117 = wv_a8;
+                                                      u32 i;
+                                                      for (i = (u32)0U; i < (u32)4U; i++)
+                                                      {
+                                                        u32 *os = wv_a;
+                                                        u32 x1 = wv_a[i] + z[i];
+                                                        os[i] = x1;
+                                                      }
+                                                    }
+                                                    {
+                                                      u32 *wv_a8 = wv + d1 * (u32)4U;
+                                                      u32 *wv_b9 = wv + a0 * (u32)4U;
                                                       {
                                                         u32 i;
                                                         for (i = (u32)0U; i < (u32)4U; i++)
                                                         {
-                                                          u32 *os = r117;
-                                                          u32 x1 = r117[i];
-                                                          u32
-                                                          x13 = x1 >> r0 | x1 << ((u32)32U - r0);
-                                                          os[i] = x13;
+                                                          u32 *os = wv_a8;
+                                                          u32 x1 = wv_a8[i] ^ wv_b9[i];
+                                                          os[i] = x1;
                                                         }
                                                       }
                                                       {
-                                                        u32 *wv_a9 = wv + c * (u32)4U;
-                                                        u32 *wv_b10 = wv + d1 * (u32)4U;
+                                                        u32 *r117 = wv_a8;
                                                         {
                                                           u32 i;
                                                           for (i = (u32)0U; i < (u32)4U; i++)
                                                           {
-                                                            u32 *os = wv_a9;
-                                                            u32 x1 = wv_a9[i] + wv_b10[i];
-                                                            os[i] = x1;
+                                                            u32 *os = r117;
+                                                            u32 x1 = r117[i];
+                                                            u32
+                                                            x13 = x1 >> r0 | x1 << ((u32)32U - r0);
+                                                            os[i] = x13;
                                                           }
                                                         }
                                                         {
-                                                          u32 i;
-                                                          for (i = (u32)0U; i < (u32)4U; i++)
-                                                          {
-                                                            u32 *os = wv_a9;
-                                                            u32 x1 = wv_a9[i] + zz[i];
-                                                            os[i] = x1;
-                                                          }
-                                                        }
-                                                        {
-                                                          u32 *wv_a10 = wv + b * (u32)4U;
-                                                          u32 *wv_b11 = wv + c * (u32)4U;
+                                                          u32 *wv_a9 = wv + c * (u32)4U;
+                                                          u32 *wv_b10 = wv + d1 * (u32)4U;
                                                           {
                                                             u32 i;
                                                             for (i = (u32)0U; i < (u32)4U; i++)
                                                             {
-                                                              u32 *os = wv_a10;
-                                                              u32 x1 = wv_a10[i] ^ wv_b11[i];
+                                                              u32 *os = wv_a9;
+                                                              u32 x1 = wv_a9[i] + wv_b10[i];
                                                               os[i] = x1;
                                                             }
                                                           }
                                                           {
-                                                            u32 *r118 = wv_a10;
+                                                            u32 *wv_a10 = wv + b * (u32)4U;
+                                                            u32 *wv_b11 = wv + c * (u32)4U;
                                                             {
                                                               u32 i;
                                                               for (i = (u32)0U; i < (u32)4U; i++)
                                                               {
-                                                                u32 *os = r118;
-                                                                u32 x1 = r118[i];
-                                                                u32
-                                                                x13 =
-                                                                  x1
-                                                                  >> r1
-                                                                  | x1 << ((u32)32U - r1);
-                                                                os[i] = x13;
+                                                                u32 *os = wv_a10;
+                                                                u32 x1 = wv_a10[i] ^ wv_b11[i];
+                                                                os[i] = x1;
                                                               }
                                                             }
                                                             {
-                                                              u32 *wv_a11 = wv + a0 * (u32)4U;
-                                                              u32 *wv_b12 = wv + b * (u32)4U;
+                                                              u32 *r118 = wv_a10;
                                                               {
                                                                 u32 i;
                                                                 for (i = (u32)0U; i < (u32)4U; i++)
                                                                 {
-                                                                  u32 *os = wv_a11;
-                                                                  u32 x1 = wv_a11[i] + wv_b12[i];
-                                                                  os[i] = x1;
+                                                                  u32 *os = r118;
+                                                                  u32 x1 = r118[i];
+                                                                  u32
+                                                                  x13 =
+                                                                    x1
+                                                                    >> r1
+                                                                    | x1 << ((u32)32U - r1);
+                                                                  os[i] = x13;
                                                                 }
                                                               }
                                                               {
-                                                                u32 i;
-                                                                for (i = (u32)0U; i < (u32)4U; i++)
-                                                                {
-                                                                  u32 *os = wv_a11;
-                                                                  u32 x1 = wv_a11[i] + w[i];
-                                                                  os[i] = x1;
-                                                                }
-                                                              }
-                                                              {
-                                                                u32 *wv_a12 = wv + d1 * (u32)4U;
-                                                                u32 *wv_b13 = wv + a0 * (u32)4U;
+                                                                u32 *wv_a11 = wv + a0 * (u32)4U;
+                                                                u32 *wv_b12 = wv + b * (u32)4U;
                                                                 {
                                                                   u32 i;
                                                                   for
@@ -521,13 +448,28 @@ static inline void blake2s_update_block(u32 *wv, u32 *hash, bool flag, u64 totle
                                                                     < (u32)4U;
                                                                     i++)
                                                                   {
-                                                                    u32 *os = wv_a12;
-                                                                    u32 x1 = wv_a12[i] ^ wv_b13[i];
+                                                                    u32 *os = wv_a11;
+                                                                    u32 x1 = wv_a11[i] + wv_b12[i];
                                                                     os[i] = x1;
                                                                   }
                                                                 }
                                                                 {
-                                                                  u32 *r119 = wv_a12;
+                                                                  u32 i;
+                                                                  for
+                                                                  (i
+                                                                    = (u32)0U;
+                                                                    i
+                                                                    < (u32)4U;
+                                                                    i++)
+                                                                  {
+                                                                    u32 *os = wv_a11;
+                                                                    u32 x1 = wv_a11[i] + w[i];
+                                                                    os[i] = x1;
+                                                                  }
+                                                                }
+                                                                {
+                                                                  u32 *wv_a12 = wv + d1 * (u32)4U;
+                                                                  u32 *wv_b13 = wv + a0 * (u32)4U;
                                                                   {
                                                                     u32 i;
                                                                     for
@@ -537,19 +479,14 @@ static inline void blake2s_update_block(u32 *wv, u32 *hash, bool flag, u64 totle
                                                                       < (u32)4U;
                                                                       i++)
                                                                     {
-                                                                      u32 *os = r119;
-                                                                      u32 x1 = r119[i];
+                                                                      u32 *os = wv_a12;
                                                                       u32
-                                                                      x13 =
-                                                                        x1
-                                                                        >> r24
-                                                                        | x1 << ((u32)32U - r24);
-                                                                      os[i] = x13;
+                                                                      x1 = wv_a12[i] ^ wv_b13[i];
+                                                                      os[i] = x1;
                                                                     }
                                                                   }
                                                                   {
-                                                                    u32 *wv_a13 = wv + c * (u32)4U;
-                                                                    u32 *wv_b14 = wv + d1 * (u32)4U;
+                                                                    u32 *r119 = wv_a12;
                                                                     {
                                                                       u32 i;
                                                                       for
@@ -559,30 +496,21 @@ static inline void blake2s_update_block(u32 *wv, u32 *hash, bool flag, u64 totle
                                                                         < (u32)4U;
                                                                         i++)
                                                                       {
-                                                                        u32 *os = wv_a13;
+                                                                        u32 *os = r119;
+                                                                        u32 x1 = r119[i];
                                                                         u32
-                                                                        x1 = wv_a13[i] + wv_b14[i];
-                                                                        os[i] = x1;
-                                                                      }
-                                                                    }
-                                                                    {
-                                                                      u32 i;
-                                                                      for
-                                                                      (i
-                                                                        = (u32)0U;
-                                                                        i
-                                                                        < (u32)4U;
-                                                                        i++)
-                                                                      {
-                                                                        u32 *os = wv_a13;
-                                                                        u32 x1 = wv_a13[i] + zz[i];
-                                                                        os[i] = x1;
+                                                                        x13 =
+                                                                          x1
+                                                                          >> r24
+                                                                          | x1 << ((u32)32U - r24);
+                                                                        os[i] = x13;
                                                                       }
                                                                     }
                                                                     {
                                                                       u32
-                                                                      *wv_a14 = wv + b * (u32)4U;
-                                                                      u32 *wv_b = wv + c * (u32)4U;
+                                                                      *wv_a13 = wv + c * (u32)4U;
+                                                                      u32
+                                                                      *wv_b14 = wv + d1 * (u32)4U;
                                                                       {
                                                                         u32 i;
                                                                         for
@@ -592,14 +520,17 @@ static inline void blake2s_update_block(u32 *wv, u32 *hash, bool flag, u64 totle
                                                                           < (u32)4U;
                                                                           i++)
                                                                         {
-                                                                          u32 *os = wv_a14;
+                                                                          u32 *os = wv_a13;
                                                                           u32
-                                                                          x1 = wv_a14[i] ^ wv_b[i];
+                                                                          x1 = wv_a13[i] + wv_b14[i];
                                                                           os[i] = x1;
                                                                         }
                                                                       }
                                                                       {
-                                                                        u32 *r1110 = wv_a14;
+                                                                        u32
+                                                                        *wv_a14 = wv + b * (u32)4U;
+                                                                        u32
+                                                                        *wv_b = wv + c * (u32)4U;
                                                                         {
                                                                           u32 i;
                                                                           for
@@ -609,93 +540,115 @@ static inline void blake2s_update_block(u32 *wv, u32 *hash, bool flag, u64 totle
                                                                             < (u32)4U;
                                                                             i++)
                                                                           {
-                                                                            u32 *os = r1110;
-                                                                            u32 x1 = r1110[i];
+                                                                            u32 *os = wv_a14;
                                                                             u32
-                                                                            x13 =
-                                                                              x1
-                                                                              >> r34
-                                                                              |
-                                                                                x1
-                                                                                << ((u32)32U - r34);
-                                                                            os[i] = x13;
+                                                                            x1 = wv_a14[i] ^ wv_b[i];
+                                                                            os[i] = x1;
                                                                           }
                                                                         }
                                                                         {
-                                                                          u32
-                                                                          *r15 =
-                                                                            wv
-                                                                            + (u32)1U * (u32)4U;
-                                                                          u32
-                                                                          *r2 =
-                                                                            wv
-                                                                            + (u32)2U * (u32)4U;
-                                                                          u32
-                                                                          *r3 =
-                                                                            wv
-                                                                            + (u32)3U * (u32)4U;
-                                                                          u32 *r11 = r15;
-                                                                          u32 x03 = r11[3U];
-                                                                          u32
-                                                                          x13 =
-                                                                            r11[((u32)3U + (u32)1U)
-                                                                            % (u32)4U];
-                                                                          u32
-                                                                          x23 =
-                                                                            r11[((u32)3U + (u32)2U)
-                                                                            % (u32)4U];
-                                                                          u32
-                                                                          x33 =
-                                                                            r11[((u32)3U + (u32)3U)
-                                                                            % (u32)4U];
-                                                                          r11[0U] = x03;
-                                                                          r11[1U] = x13;
-                                                                          r11[2U] = x23;
-                                                                          r11[3U] = x33;
+                                                                          u32 *r1110 = wv_a14;
                                                                           {
-                                                                            u32 *r1111 = r2;
-                                                                            u32 x04 = r1111[2U];
+                                                                            u32 i;
+                                                                            for
+                                                                            (i
+                                                                              = (u32)0U;
+                                                                              i
+                                                                              < (u32)4U;
+                                                                              i++)
+                                                                            {
+                                                                              u32 *os = r1110;
+                                                                              u32 x1 = r1110[i];
+                                                                              u32
+                                                                              x13 =
+                                                                                x1
+                                                                                >> r34
+                                                                                |
+                                                                                  x1
+                                                                                  <<
+                                                                                    ((u32)32U - r34);
+                                                                              os[i] = x13;
+                                                                            }
+                                                                          }
+                                                                          {
                                                                             u32
-                                                                            x14 =
-                                                                              r1111[((u32)2U
+                                                                            *r15 =
+                                                                              wv
+                                                                              + (u32)1U * (u32)4U;
+                                                                            u32
+                                                                            *r2 =
+                                                                              wv
+                                                                              + (u32)2U * (u32)4U;
+                                                                            u32
+                                                                            *r3 =
+                                                                              wv
+                                                                              + (u32)3U * (u32)4U;
+                                                                            u32 *r11 = r15;
+                                                                            u32 x03 = r11[3U];
+                                                                            u32
+                                                                            x13 =
+                                                                              r11[((u32)3U
                                                                               + (u32)1U)
                                                                               % (u32)4U];
                                                                             u32
-                                                                            x24 =
-                                                                              r1111[((u32)2U
+                                                                            x23 =
+                                                                              r11[((u32)3U
                                                                               + (u32)2U)
                                                                               % (u32)4U];
                                                                             u32
-                                                                            x34 =
-                                                                              r1111[((u32)2U
+                                                                            x33 =
+                                                                              r11[((u32)3U
                                                                               + (u32)3U)
                                                                               % (u32)4U];
-                                                                            r1111[0U] = x04;
-                                                                            r1111[1U] = x14;
-                                                                            r1111[2U] = x24;
-                                                                            r1111[3U] = x34;
+                                                                            r11[0U] = x03;
+                                                                            r11[1U] = x13;
+                                                                            r11[2U] = x23;
+                                                                            r11[3U] = x33;
                                                                             {
-                                                                              u32 *r1112 = r3;
-                                                                              u32 x0 = r1112[1U];
+                                                                              u32 *r1111 = r2;
+                                                                              u32 x04 = r1111[2U];
                                                                               u32
-                                                                              x1 =
-                                                                                r1112[((u32)1U
+                                                                              x14 =
+                                                                                r1111[((u32)2U
                                                                                 + (u32)1U)
                                                                                 % (u32)4U];
                                                                               u32
-                                                                              x2 =
-                                                                                r1112[((u32)1U
+                                                                              x24 =
+                                                                                r1111[((u32)2U
                                                                                 + (u32)2U)
                                                                                 % (u32)4U];
                                                                               u32
-                                                                              x3 =
-                                                                                r1112[((u32)1U
+                                                                              x34 =
+                                                                                r1111[((u32)2U
                                                                                 + (u32)3U)
                                                                                 % (u32)4U];
-                                                                              r1112[0U] = x0;
-                                                                              r1112[1U] = x1;
-                                                                              r1112[2U] = x2;
-                                                                              r1112[3U] = x3;
+                                                                              r1111[0U] = x04;
+                                                                              r1111[1U] = x14;
+                                                                              r1111[2U] = x24;
+                                                                              r1111[3U] = x34;
+                                                                              {
+                                                                                u32 *r1112 = r3;
+                                                                                u32 x0 = r1112[1U];
+                                                                                u32
+                                                                                x1 =
+                                                                                  r1112[((u32)1U
+                                                                                  + (u32)1U)
+                                                                                  % (u32)4U];
+                                                                                u32
+                                                                                x2 =
+                                                                                  r1112[((u32)1U
+                                                                                  + (u32)2U)
+                                                                                  % (u32)4U];
+                                                                                u32
+                                                                                x3 =
+                                                                                  r1112[((u32)1U
+                                                                                  + (u32)3U)
+                                                                                  % (u32)4U];
+                                                                                r1112[0U] = x0;
+                                                                                r1112[1U] = x1;
+                                                                                r1112[2U] = x2;
+                                                                                r1112[3U] = x3;
+                                                                              }
                                                                             }
                                                                           }
                                                                         }
@@ -732,45 +685,48 @@ static inline void blake2s_update_block(u32 *wv, u32 *hash, bool flag, u64 totle
           }
         }
       }
-    }
-    s00 = hash + (u32)0U * (u32)4U;
-    s16 = hash + (u32)1U * (u32)4U;
-    r00 = wv + (u32)0U * (u32)4U;
-    r10 = wv + (u32)1U * (u32)4U;
-    r20 = wv + (u32)2U * (u32)4U;
-    r30 = wv + (u32)3U * (u32)4U;
-    {
-      u32 i;
-      for (i = (u32)0U; i < (u32)4U; i++)
+      s00 = hash + (u32)0U * (u32)4U;
+      s16 = hash + (u32)1U * (u32)4U;
+      r00 = wv + (u32)0U * (u32)4U;
+      r10 = wv + (u32)1U * (u32)4U;
+      r20 = wv + (u32)2U * (u32)4U;
+      r30 = wv + (u32)3U * (u32)4U;
       {
-        u32 *os = s00;
-        u32 x = s00[i] ^ r00[i];
-        os[i] = x;
+        u32 i;
+        for (i = (u32)0U; i < (u32)4U; i++)
+        {
+          u32 *os = s00;
+          u32 x = s00[i] ^ r00[i];
+          os[i] = x;
+        }
       }
-    }
-    {
-      u32 i;
-      for (i = (u32)0U; i < (u32)4U; i++)
       {
-        u32 *os = s00;
-        u32 x = s00[i] ^ r20[i];
-        os[i] = x;
+        u32 i;
+        for (i = (u32)0U; i < (u32)4U; i++)
+        {
+          u32 *os = s00;
+          u32 x = s00[i] ^ r20[i];
+          os[i] = x;
+        }
       }
-    }
-    {
-      u32 i;
-      for (i = (u32)0U; i < (u32)4U; i++)
       {
-        u32 *os = s16;
-        u32 x = s16[i] ^ r10[i];
-        os[i] = x;
+        u32 i;
+        for (i = (u32)0U; i < (u32)4U; i++)
+        {
+          u32 *os = s16;
+          u32 x = s16[i] ^ r10[i];
+          os[i] = x;
+        }
       }
-    }
-    for (i0 = (u32)0U; i0 < (u32)4U; i0++)
-    {
-      u32 *os = s16;
-      u32 x = s16[i0] ^ r30[i0];
-      os[i0] = x;
+      {
+        u32 i;
+        for (i = (u32)0U; i < (u32)4U; i++)
+        {
+          u32 *os = s16;
+          u32 x = s16[i] ^ r30[i];
+          os[i] = x;
+        }
+      }
     }
   }
 }
