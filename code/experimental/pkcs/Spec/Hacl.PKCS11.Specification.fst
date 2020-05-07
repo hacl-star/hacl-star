@@ -1,6 +1,5 @@
 module Hacl.PKCS11.Specification
 
-
 open FStar.UInt32
 open FStar.UInt8
 
@@ -23,8 +22,8 @@ open Hacl.PKCS11.External
 
 open  Hacl.PKCS11.Lib 
 
-#set-options "--z3rlimit 300"
 
+#set-options "--z3rlimit 300"
 
 (* Not to laugh, I forgot how to write it for nats *)
 assume val logand: nat -> nat -> nat
@@ -993,16 +992,15 @@ val combineAllProvidedAttributes:
   -> pTemplate: seq _CK_ATTRIBUTE 
   -> Tot (s: seq _CK_ATTRIBUTE
     {
-      forall (i: nat). i < Seq.length defaultAttributes /\ contains (fun x -> x = (index defaultAttributes i)) s /\ (
-      forall (i: nat). i < Seq.length pTemplate /\ contains (fun x -> x = (index pTemplate i)) s) /\ (
-      forall (i: nat). i < Seq.length (getAttributesByMechanism mechanism) /\ contains (fun x -> x = (index (getAttributesByMechanism mechanism) i)) s)
+      forall (i: nat). i < Seq.length defaultAttributes ==> contains (fun x -> x = (index defaultAttributes i)) s /\ (
+      forall (i: nat). i < Seq.length pTemplate ==> contains (fun x -> x = (index pTemplate i)) s) /\ (
+      forall (i: nat). i < Seq.length (getAttributesByMechanism mechanism) ==> contains (fun x -> x = (index (getAttributesByMechanism mechanism) i)) s)
     }
   )
 
 
 let combineAllProvidedAttributes mechanism pTemplate  = 
   let mechanismAttributes = getAttributesByMechanism mechanism in 
-  lemmaContainsSelf mechanismAttributes;
   append (append defaultAttributes mechanismAttributes) pTemplate
 
 
@@ -1012,28 +1010,32 @@ val combineAllRequiredAttributes:
   -> Tot (s: seq _CK_ATTRIBUTE_TYPE
     {
       (
-	forall (i: nat). i < length (getRequiredAttributesByMechanism mechanism) /\
+	forall (i: nat). i < length (getRequiredAttributesByMechanism mechanism) ==> 
 	 contains (fun x -> x = (index (getRequiredAttributesByMechanism mechanism) i)) s /\
 	 (
-	   forall (i: nat). i < length (getAttributesForType t) /\ 
+	   forall (i: nat). i < length (getAttributesForType t) ==>
 	   contains (fun x -> x = (index (getAttributesForType t) i)) s
 	 )
       )
     }
 )    
 
+
+
 let combineAllRequiredAttributes mechanism t = 
   let mechanismRequiredAttributes = getRequiredAttributesByMechanism mechanism in 
   let attributesToConstructType = getAttributesForType t in 
   lemmaContainsSelf mechanismRequiredAttributes;
   lemmaContainsSelf attributesToConstructType;
+  let f i = fun x -> x = index (getAttributesForType t) i in 
+  lemmaContains3 attributesToConstructType mechanismRequiredAttributes f;
   append mechanismRequiredAttributes attributesToConstructType
-
+  
 
 let attributesTemplateComplete (t : _CK_OBJECT_CLASS) (pMechanism : _CK_MECHANISM) (pTemplate : seq _CK_ATTRIBUTE) = 
   let allProvidedAttributes = combineAllProvidedAttributes pMechanism.mechanismID pTemplate in 
   let allRequiredAttributes = combineAllRequiredAttributes pMechanism.mechanismID t in 
-  forall (i: nat {i < Seq.length allRequiredAttributes}). contains (fun x -> x.aType = (index allRequiredAttributes i)) allProvidedAttributes
+  forall (i: nat). i < Seq.length allRequiredAttributes ==> contains (fun x -> x.aType = (index allRequiredAttributes i)) allProvidedAttributes
 
 
 
@@ -1209,29 +1211,16 @@ let _CKS_GenerateKey d hSession pMechanism pTemplate =
   let mechanismPresent = isMechanismPresentOnDevice d pMechanism.mechanismID in 
   if mechanismPresent = false then 
     (|Inr CKR_MECHANISM_INVALID, d|) else
-    begin
-    assert(attributesTemplateComplete CKO_SECRET_KEY pMechanism pTemplate);
-    assert(
-    attributesNotReadOnly pTemplate );
- (* let complete = isAttributeTemplateComplete pMechanism pTemplate CKO_SECRET_KEY in 
-  if complete = false then 
+  let complete = isAttributeTemplateComplete pMechanism pTemplate CKO_SECRET_KEY in 
+    if complete = false then 
      (|Inr CKR_TEMPLATE_INCOMPLETE, d|) else 
   let notReadOnly = areAttributesNotReadOnly pTemplate in 
     if notReadOnly = false then 
     (|Inr CKR_ATTRIBUTE_READ_ONLY, d|) 
-  else *)
+  else
     __CKS_GenerateKey d hSession pMechanism pTemplate
-    end
+ 
 
-
-let test (p: seq _CK_ATTRIBUTE) (pMechanism: _CK_MECHANISM) = 
-  let allRequiredAttributes = combineAllRequiredAttributes pMechanism.mechanismID CKO_SECRET_KEY in 
-  let allProvidedAttributes = combineAllProvidedAttributes pMechanism.mechanismID p in 
-  
-  assert(  forall (i: nat).  i < Seq.length allRequiredAttributes ==> contains (fun x -> x.aType = (index allRequiredAttributes i)) allProvidedAttributes
-);
-  assert(length (combineAllRequiredAttributes pMechanism.mechanismID CKO_SECRET_KEY) > 0);
-  assert(attributesTemplateComplete CKO_SECRET_KEY pMechanism p)
 
 
 (*

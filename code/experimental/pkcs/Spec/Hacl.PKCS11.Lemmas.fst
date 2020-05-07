@@ -70,40 +70,23 @@ let containsFindL1 #a f s =
   lemmaFindLExistIfSome f s 
 
 
-val lemmaContainsSelf: #a: eqtype -> s: seq a -> Lemma
-  (
-    forall (i: nat). i < Seq.length s ==> contains (fun x -> x = (index s i)) s
-  )
-
-let lemmaContainsSelf #a s = ()
-
-(*
-val lemmaContainsAppend: #a: eqtype -> s: seq a -> s1: seq a -> f: (a -> Tot bool) -> Lemma
-  (requires (contains f s))
-  (ensures (let sUpdated = append s s1 in contains f sUpdated))
-
-let lemmaContainsAppend #a s s1 f = admit()
-*)
-(*
-val lemmaContains2: #a: eqtype -> 
-  s: seq a -> s1: seq a ->
-  f: (a -> Tot bool) -> f1: (a -> Tot bool) -> 
-  Lemma
-  (requires (forall (i: nat). i < length s /\ contains f s /\ contains f1 s))
-  (ensures (forall (i: nat). i < length (append s s1) /\ contains f (append s s1) /\ contains f1 (append s s1)))
-
-let lemmaContains2 #a s s1 f f1 = admit()
-
-
 val lemmaContains3: #a: eqtype -> 
-  s: seq a -> s1: seq a -> s2: seq a ->
-  f: (i: nat -> a -> Tot bool) -> f1: (i: nat -> a -> Tot bool) -> f2: (i: nat ->a -> Tot bool) ->
+  s1: seq a -> s2: seq a -> 
+  f: (i: nat {i < length s1} -> x: a -> Tot bool) ->
   Lemma
-  (requires (forall (i: nat). i < length s /\ contains (f i) s /\ contains (f1 i) s /\ contains (f2 i) s2))
-  (ensures (forall (i: nat). i < length (append (append s s1) s2) /\ 
-    contains (f i) (append (append s s1) s2) /\ 
-    contains (f1 i) (append (append s s1) s2) /\ 
-    contains (f2 i) (append (append s s1) s2)))
+  (
+    requires 
+      (
+	forall (i: nat). i < length s1 ==> contains (f i) s1
+      )
+  )
+  (ensures 
+    (
+      let s = append s2 s1 in 
+	forall (i: nat). i < length s1 ==> contains (f i) s
+    )
+  )
+  (decreases (length s2))
 
-let lemmaContains3 #a s s1 s2 f f1 f2 = admit()
-*)
+
+let rec lemmaContains3 #a s1 s2 f = admit()
