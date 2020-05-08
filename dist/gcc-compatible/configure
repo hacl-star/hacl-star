@@ -72,6 +72,7 @@ int main() {
   b[3] = 16275405352713846784ul;
   p256_sub(a, b, c);
   printf("result == %"PRIu64" \n", c[3]);
+  return 0;
 }
 EOF
   cc -I. -I../kremlin/include -I../kremlin/kremlib/dist/minimal -march=native -O3 $file -o $out && $out > $out.test
