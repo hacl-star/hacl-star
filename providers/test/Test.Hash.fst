@@ -2,6 +2,7 @@ module Test.Hash
 
 module H = EverCrypt.Hash
 module HI = EverCrypt.Hash.Incremental
+module S = Hacl.Streaming.Functor
 
 module ST = FStar.HyperStack.ST
 module M = LowStar.Modifies
@@ -42,8 +43,8 @@ let test_incremental_api (): St unit =
   let st = HI.create_in SHA2_256 HyperStack.root in
   HI.init (G.hide SHA2_256) st;
   let h0 = ST.get () in
-  assert B.(loc_disjoint (HI.footprint h0 st) (loc_buffer b1));
-  assert (HI.hashed h0 st `Seq.equal` Seq.empty);
+  assert B.(loc_disjoint (S.footprint HI.evercrypt_hash SHA2_256 h0 st) (loc_buffer b1));
+  assert (S.seen HI.evercrypt_hash SHA2_256 h0 st `Seq.equal` Seq.empty);
 
   assert_norm (4 < pow2 61);
   HI.update (G.hide SHA2_256) st b1 4ul;

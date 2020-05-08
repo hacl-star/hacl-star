@@ -874,8 +874,13 @@ let lemma_320 a b c d u =
   lemma_mult_le_right (uint_v u) (uint_v c) (pow2 64 - 1);  
 
   lemma_mult_le_left (uint_v d) (uint_v u) (pow2 64 - 1);
-  lemma_mult_le_right (uint_v u) (uint_v d) (pow2 64 - 1);  
-
+  lemma_mult_le_right (uint_v u) (uint_v d) (pow2 64 - 1);
+  lemma_mult_le_left (uint_v a) (uint_v u) (pow2 64 - 1);
+  lemma_mult_le_right (uint_v u) (uint_v a) (pow2 64 - 1);
+  lemma_mult_le_left (uint_v b) (uint_v u) (pow2 64 - 1);
+  lemma_mult_le_right (uint_v u) (uint_v b) (pow2 64 - 1);
+  lemma_mult_le_left (uint_v c) (uint_v u) (pow2 64 - 1);
+  lemma_mult_le_right (uint_v u) (uint_v c) (pow2 64 - 1);
 
   assert(uint_v u * uint_v a <= (pow2 64 - 1) * (pow2 64 - 1));
   assert(uint_v u * uint_v d <= (pow2 64 - 1) * (pow2 64 - 1));
@@ -980,8 +985,10 @@ val sq0_0: f: lbuffer uint64 (size 4) -> result: lbuffer uint64 (size 4) -> memo
    )
 )
 
-let sq0_0 f result memory temp = 
-    let h0 = ST.get() in 
+#restart-solver
+#push-options "--z3rlimit 1000"
+let sq0 f result memory temp = 
+  let h0 = ST.get() in 
   
   let f0 = index f (size 0) in 
   let f1 = index f (size 1) in 
@@ -1025,10 +1032,10 @@ let lemma_distr_4 a b c e d = ()
 let sq0 f result memory temp = 
   let h0 = ST.get() in 
   
-  assert_norm (pow2 64 * pow2 64 = pow2 128);
-  assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192);
-  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);  
-  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 320); 
+  let h5 = ST.get() in 
+  let temp0 = index temp (size 0) in
+  assert (Lib.IntTypes.range (Lib.IntTypes.v c3 + Lib.IntTypes.v temp0) (Lib.IntTypes.U64));
+  let r = c3 +! temp0 in 
 
   let f0 = index f (size 0) in 
   let f1 = index f (size 1) in 
@@ -1057,6 +1064,7 @@ let sq0 f result memory temp =
   assert(Lib.Sequence.index (as_seq h2 result) 1 == Lib.Sequence.index (as_seq h2 o0) 1);
   assert(Lib.Sequence.index (as_seq h2 result) 0 == Lib.Sequence.index (as_seq h2 o0) 0);
 
+
   distributivity_add_left  (v c3) (uint_v temp0) (pow2 64 * pow2 64 * pow2 64 * pow2 64);
   lemma_distr_4 (v f0) (v f0) (v f1) (v f2) (v f3);
   
@@ -1066,6 +1074,7 @@ let sq0 f result memory temp =
    lemma_div_lt_nat (v c3 + uint_v temp0) 320 256;
    
   c3 +! temp0
+
 
 
 

@@ -32,7 +32,7 @@ val index_lt_s:
 let index_lt_s n1 n2 i j =
   assert (j * n1 + i <= (n2 - 1) * n1 + n1 - 1)
 
-// This proof is fragile
+// This proof is fragile, AR: yes
 private
 val index_neq:
     #n1:size_nat
@@ -48,7 +48,9 @@ let index_neq #n1 #n2 i j i' j' =
     begin
     assert (i' * n2 + j' < n2 * (i' + 1));
     assert (i' * n2 + j' < n2 * i + j);
-    assert ((i' * n2 + j' <> i * n2 + j) /\ i' * n2 + j' < n1 * n2)
+    assert (i' * n2 + j' <> i * n2 + j);
+    assert (i' + 1 < n1);
+    assert (i' * n2 + j' < n1 * n2)
     end
   else if i = i' then ()
   else

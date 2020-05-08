@@ -189,9 +189,11 @@ let copy_or_expand (i: impl)
 =
   match i with
   | Vale_AES128 ->
-      vale_expand Vale_AES128 k ek
+      if EverCrypt.TargetConfig.x64 then
+        vale_expand Vale_AES128 k ek
   | Vale_AES256 ->
-      vale_expand Vale_AES256 k ek
+      if EverCrypt.TargetConfig.x64 then
+        vale_expand Vale_AES256 k ek
   | Hacl_CHACHA20 ->
       B.blit k 0ul ek 0ul 32ul
 
@@ -334,10 +336,12 @@ let update_block a p dst src =
   let State i g_iv iv iv_len g_key ek c0 = !*p in
   match i with
   | Vale_AES128 ->
-      update_block_vale Vale_AES128 p dst src
+      if EverCrypt.TargetConfig.x64 then
+        update_block_vale Vale_AES128 p dst src
 
   | Vale_AES256 ->
-      update_block_vale Vale_AES256 p dst src
+      if EverCrypt.TargetConfig.x64 then
+        update_block_vale Vale_AES256 p dst src
 
   | Hacl_CHACHA20 ->
       let open Hacl.Impl.Chacha20 in

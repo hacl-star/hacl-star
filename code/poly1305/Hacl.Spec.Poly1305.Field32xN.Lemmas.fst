@@ -55,6 +55,20 @@ let precomp_r5_fits_lemma2 #w r =
   FStar.Classical.forall_intro (precomp_r5_as_tup64 #w r)
 
 
+val precomp_r5_zeros: w:lanes -> Lemma
+  (let r = (zero w, zero w, zero w, zero w, zero w) in
+   precomp_r5 r == (zero w, zero w, zero w, zero w, zero w))
+
+let precomp_r5_zeros w =
+  let r = (zero w, zero w, zero w, zero w, zero w) in
+  let (r0, r1, r2, r3, r4) = precomp_r5 r in
+
+  let aux (i:nat{i < w}) : Lemma ((vec_v (vec_smul_mod (zero w) (u64 5))).[i] == u64 0) = () in
+  Classical.forall_intro aux;
+  eq_intro (vec_v (vec_smul_mod (zero w) (u64 5))) (vec_v (zero w));
+  vecv_extensionality (vec_smul_mod (zero w) (u64 5)) (zero w)
+
+
 val fadd5_fits_lemma:
     #w:lanes
   -> f1:felem5 w{felem_fits5 f1 (2,2,2,2,2)}
@@ -595,14 +609,16 @@ val fmul_r4_normalize5_lemma:
     (feval5 out).[0] == Vec.normalize_4 (feval5 r).[0] (feval5 acc)))
   [SMTPat (fmul_r4_normalize5 acc r r_5 r4)]
 
+#restart-solver
+#push-options "--z3rlimit 500"
 let fmul_r4_normalize5_lemma acc fr fr_5 fr4 =
-  let fr2 = fmul_r5 fr fr fr_5 in
-  let fr3 = fmul_r5 fr2 fr fr_5 in
+  let fr2 = fmul_r5 #4 fr fr fr_5 in
+  let fr3 = fmul_r5 #4 fr2 fr fr_5 in
   let out = fmul_r4_normalize50 acc fr fr2 fr3 fr4 in
   let v2 = fmul_r4_normalize51 out in
   let res = carry_full_felem5 v2 in
   carry_full_felem5_lemma v2
-
+#pop-options
 
 val load_felem5_lemma:
     #w:lanes
