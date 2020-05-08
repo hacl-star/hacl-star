@@ -47,8 +47,13 @@ let update_multi
 =
   Lib.UpdateMulti.mk_update_multi (block_length a) (update a) hash blocks
 
-(* As defined in the NIST standard; pad, then update, then finish. *)
+#push-options "--fuel 0 --ifuel 0"
+
 let hash (a:hash_alg) (input:bytes{S.length input <= max_input_length a})
   =
-  let padding = pad a (S.length input) in
-  finish a (update_multi a (init a) S.(input @| padding))
+  if is_blake a then
+    Spec.Blake2.blake2 (to_blake_alg a) input 0 Seq.empty (Spec.Blake2.max_output (to_blake_alg a))
+  else
+    (* As defined in the NIST standard; pad, then update, then finish. *)
+    let padding = pad a (S.length input) in
+    finish a (update_multi a (init a) S.(input @| padding))
