@@ -39,6 +39,8 @@ let update_multi_associative (a: hash_alg)
 let hash_is_hash_incremental (a: hash_alg) (input: bytes { S.length input <= max_input_length a }):
   Lemma (ensures (S.equal (hash a input) (hash_incremental a input)))
 =
+  if is_blake a then admit()
+  else
   let open FStar.Mul in
   let n = S.length input / block_length a in
   let padding = pad a (S.length input) in
@@ -51,3 +53,10 @@ let hash_is_hash_incremental (a: hash_alg) (input: bytes { S.length input <= max
   S.lemma_eq_intro padded_input (blocks `S.append` rest);
   update_multi_associative a (init a) blocks rest;
   S.lemma_eq_intro (fst (update_multi a (init a) padded_input)) (fst (update_multi a (update_multi a (init a) blocks) rest))
+
+let concatenated_hash_incremental (a:hash_alg) (inp1:bytes_blocks a) (inp2:bytes)
+  : Lemma
+    (requires Seq.length (inp1 `S.append` inp2) <= max_input_length a)
+    (ensures finish a (update_last a (update_multi a (init a) inp1) (S.length inp1) inp2)
+      `S.equal` Spec.Hash.Incremental.hash_incremental a (inp1 `S.append` inp2))
+  = admit()

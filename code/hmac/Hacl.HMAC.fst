@@ -12,8 +12,11 @@ open LowStar.BufferOps
 
 open Spec.Hash.Definitions
 open Spec.Agile.HMAC
+open Spec.Agile.Hash
+open Spec.Hash.Incremental
+open Spec.Hash.PadFinish
 friend Spec.Agile.HMAC
-friend Spec.Agile.Hash
+//friend Spec.Agile.Hash
 
 let _: squash (inversion hash_alg) = allow_inversion hash_alg
 
@@ -153,21 +156,8 @@ let part1 a init update_multi update_last finish s key data len =
     (S.equal) { }
       finish a (update_last a (update_multi a (init a) (B.as_seq h0 key))
         (block_length a) (B.as_seq h0 data));
-    (S.equal) { }
-      finish a (update_multi a (update_multi a (init a) (B.as_seq h0 key))
-        (S.append (B.as_seq h0 data) (pad a (block_length a + v len))));
-    (S.equal) { }
-      finish a (update_multi a (init a)
-        (S.append (B.as_seq h0 key)
-          (S.append (B.as_seq h0 data) (pad a (block_length a + v len)))));
-    (S.equal) { S.append_assoc
-      (B.as_seq h0 key)
-      (B.as_seq h0 data)
-      (pad a (block_length a + v len))
-    }
-      finish a (update_multi a (init a)
-        (S.append (S.append (B.as_seq h0 key) (B.as_seq h0 data))
-          (pad a (block_length a + v len))));
+    (S.equal) { Spec.Hash.Lemmas.concatenated_hash_incremental a (B.as_seq h0 key) (B.as_seq h0 data) }
+      Spec.Hash.Incremental.hash_incremental a (S.append (B.as_seq h0 key) (B.as_seq h0 data));
     (S.equal) {
       Spec.Hash.Lemmas.hash_is_hash_incremental a (S.append (B.as_seq h0 key) (B.as_seq h0 data))
     }
@@ -229,21 +219,8 @@ let part2 a init update_multi update_last finish s dst key data len =
     (S.equal) { }
       finish a (update_last a (update_multi a (init a) (B.as_seq h0 key))
         (block_length a) (B.as_seq h0 data));
-    (S.equal) { }
-      finish a (update_multi a (update_multi a (init a) (B.as_seq h0 key))
-        (S.append (B.as_seq h0 data) (pad a (block_length a + v len))));
-    (S.equal) { }
-      finish a (update_multi a (init a)
-        (S.append (B.as_seq h0 key)
-          (S.append (B.as_seq h0 data) (pad a (block_length a + v len)))));
-    (S.equal) { S.append_assoc
-      (B.as_seq h0 key)
-      (B.as_seq h0 data)
-      (pad a (block_length a + v len))
-    }
-      finish a (update_multi a (init a)
-        (S.append (S.append (B.as_seq h0 key) (B.as_seq h0 data))
-          (pad a (block_length a + v len))));
+    (S.equal) { Spec.Hash.Lemmas.concatenated_hash_incremental a (B.as_seq h0 key) (B.as_seq h0 data) }
+      Spec.Hash.Incremental.hash_incremental a (S.append (B.as_seq h0 key) (B.as_seq h0 data));
     (S.equal) {
       Spec.Hash.Lemmas.hash_is_hash_incremental a (S.append (B.as_seq h0 key) (B.as_seq h0 data))
     }
