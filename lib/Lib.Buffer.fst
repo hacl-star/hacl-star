@@ -406,7 +406,7 @@ let fill_blocks #t h0 len n output a_spec refl footprint spec impl =
 
 let fill_blocks_simple #a h0 bs n output spec_f impl_f =
   [@inline_let]
-  let refl h (i:nat{i <= v n}) : GTot (Seq.map_blocks_a a (v bs) (v n) i) =
+  let refl h (i:nat{i <= v n}) : GTot (Sequence.generate_blocks_simple_a a (v bs) (v n) i) =
     FStar.Math.Lemmas.lemma_mult_le_right (v bs) i (v n);
     assert (v (size i *! bs) <= v n * v bs);
     as_seq h (gsub output (size 0) (size i *! bs)) in
@@ -415,9 +415,9 @@ let fill_blocks_simple #a h0 bs n output spec_f impl_f =
   [@inline_let]
   let spec h0 = Sequence.generate_blocks_simple_f #a (v bs) (v n) (spec_f h0) in
   let h0 = ST.get () in
-  loop h0 n (Seq.map_blocks_a a (v bs) (v n)) refl footprint spec
+  loop h0 n (Sequence.generate_blocks_simple_a a (v bs) (v n)) refl footprint spec
   (fun i ->
-    Loop.unfold_repeat_gen (v n) (Seq.map_blocks_a a (v bs) (v n))
+    Loop.unfold_repeat_gen (v n) (Sequence.generate_blocks_simple_a a (v bs) (v n))
       (Sequence.generate_blocks_simple_f #a (v bs) (v n) (spec_f h0)) (refl h0 0) (v i);
     FStar.Math.Lemmas.lemma_mult_le_right (v bs) (v i + 1) (v n);
     assert (v (i *! bs) + v bs <= v n * v bs);

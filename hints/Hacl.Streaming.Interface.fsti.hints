@@ -282,7 +282,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_buffer"
       ],
       0,
-      "9c884282983e5d3090217256932c6d5d"
+      "b2751a91e189ee906947e27d78b13fae"
     ],
     [
       "Hacl.Streaming.Interface.stateful_unused",
@@ -349,25 +349,19 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Hacl.Streaming.Interface.Erased",
+        "constructor_distinct_Hacl.Streaming.Interface.Runtime",
         "disc_equation_Hacl.Streaming.Interface.Erased",
         "disc_equation_Hacl.Streaming.Interface.Runtime",
-        "equation_FStar.Monotonic.HyperHeap.hmap",
-        "equation_FStar.Monotonic.HyperStack.is_tip",
-        "equation_FStar.Monotonic.HyperStack.is_wf_with_ctr_and_tip",
-        "equation_FStar.Monotonic.HyperStack.mem",
+        "equality_tok_Hacl.Streaming.Interface.Erased@tok",
+        "equality_tok_Hacl.Streaming.Interface.Runtime@tok",
         "equation_Hacl.Streaming.Interface.optional_key",
         "fuel_guarded_inversion_Hacl.Streaming.Interface.key_management",
-        "function_token_typing_FStar.Monotonic.Heap.heap",
-        "inversion-interp", "lemma_FStar.Map.lemma_ContainsDom",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
-        "typing_FStar.Map.contains", "typing_FStar.Monotonic.HyperHeap.rid",
-        "typing_FStar.Monotonic.HyperStack.get_hmap",
-        "typing_FStar.Monotonic.HyperStack.get_tip"
+        "inversion-interp"
       ],
       0,
-      "2837c63d53c31359196a6a4386fff0c4"
+      "16b3bf117add54ab3cb6b95a1f5a345f"
     ],
     [
       "Hacl.Streaming.Interface.block",
@@ -433,7 +427,7 @@
         "typing_tok_Hacl.Streaming.Interface.Erased@tok"
       ],
       0,
-      "0447e8f60ca889f1205a3bc0216f3a89"
+      "c48eed5e3f0c92f21a09c6c9eba632f3"
     ],
     [
       "Hacl.Streaming.Interface.__proj__Block__item__init_s",
@@ -1013,7 +1007,7 @@
         "typing_tok_Hacl.Streaming.Interface.Erased@tok"
       ],
       0,
-      "d52a1e824e886631100c0290da726d52"
+      "43c84e43c5c23d8e184c47d8ae774df9"
     ],
     [
       "Hacl.Streaming.Interface.__proj__Block__item__finish",
@@ -1048,7 +1042,7 @@
         "typing_tok_Hacl.Streaming.Interface.Erased@tok"
       ],
       0,
-      "359a222f10889df9a6a6e98c54e76d82"
+      "a2b6928176954b446d87f0f555b95b3f"
     ]
   ]
 ]

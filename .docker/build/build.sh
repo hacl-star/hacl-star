@@ -29,8 +29,8 @@ function export_home() {
 function vale_test() {
   echo Running Vale Test &&
   fetch_kremlin &&
-        fetch_vale &&
-        env VALE_SCONS_PARALLEL_OPT="-j $threads" make -j $threads vale.build -k
+      fetch_vale &&
+      make -j $threads vale.build -k
 }
 
 function hacl_test() {
@@ -56,7 +56,7 @@ function hacl_test() {
           done
           $r
         ) &&
-        env VALE_SCONS_PARALLEL_OPT="-j $threads" make -j $threads $make_target -k
+        make -j $threads $make_target -k
 }
 
 function hacl_test_hints_dist() {
@@ -182,13 +182,13 @@ function refresh_hacl_hints_dist() {
 # Then add changes to git.
 function clean_build_dist() {
     ORANGE_FILE="../orange_file.txt"
-    rm -rf dist/*/*
-    env VALE_SCONS_PARALLEL_OPT="-j $threads" make -j $threads all-unstaged -k
-    echo "Searching for a diff in dist/"
+    rm -rf dist/*/* &&
+    make -j $threads all-unstaged -k &&
+    echo "Searching for a diff in dist/" &&
     if ! git diff --exit-code --name-only -- dist :!dist/*/INFO.txt; then
         echo "GIT DIFF: the files in dist/ have a git diff"
         { echo " - dist-diff (hacl-star)" >> $ORANGE_FILE; }
-    fi
+    fi &&
     git add dist
 }
 
@@ -263,19 +263,11 @@ function exec_build() {
 
     if [[ $target == "hacl-ci" || $target == "mozilla-ci" ]]; then
         echo target - >hacl-ci
-        if [[ $branchname == "vale" ||  $branchname == "_vale" ]]; then
-          vale_test && echo -n true >$status_file
-        else
-          hacl_test && echo -n true >$status_file
-        fi
+        hacl_test && echo -n true >$status_file
     elif [[ $target == "hacl-nightly" ]]; then
         echo target - >hacl-nightly
-        if [[ $branchname == "vale" ||  $branchname == "_vale" ]]; then
-          vale_test && echo -n true >$status_file
-        else
-          export OTHERFLAGS="--record_hints $OTHERFLAGS --z3rlimit_factor 2"
-          hacl_test_hints_dist && echo -n true >$status_file
-        fi
+        export OTHERFLAGS="--record_hints $OTHERFLAGS --z3rlimit_factor 2"
+        hacl_test_hints_dist && echo -n true >$status_file
     else
         echo "Invalid target"
         echo Failure >$result_file

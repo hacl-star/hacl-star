@@ -13,6 +13,8 @@ type alg =
   | Blake2S
   | Blake2B
 
+let alg_inversion_lemma (a:alg) : Lemma (a == Blake2S \/ a == Blake2B) = ()
+
 inline_for_extraction
 let wt (a:alg) : t:inttype{unsigned t} =
   match a with
@@ -72,19 +74,6 @@ let load_row (#a:alg) (s:lseq (word_t a) 4) : row a =
 inline_for_extraction
 let create_row (#a:alg) x0 x1 x2 x3 : row a =
   createL [x0;x1;x2;x3]
-
-let word_index (a:alg) (len:size_nat) =
-  i:size_t{v i * size_word a + size_word a <= len}
-inline_for_extraction
-let gather_row (#a:alg) (#len:size_nat) (m:lbytes len) (i0 i1 i2 i3:word_index a len) : row a =
-  let nb = size_word a in
-  let u0 = uint_from_bytes_le #(wt a) #SEC (sub m (v i0*nb) nb) in
-  let u1 = uint_from_bytes_le #(wt a) #SEC (sub m (v i1*nb) nb) in
-  let u2 = uint_from_bytes_le #(wt a) #SEC (sub m (v i2*nb) nb) in
-  let u3 = uint_from_bytes_le #(wt a) #SEC (sub m (v i3*nb) nb) in
-  create_row u0 u1 u2 u3
-
-
 
 inline_for_extraction
 unfold let state (a:alg) = lseq (row a) 4
@@ -222,6 +211,7 @@ let sigmaTable:lseq sigma_elt_t size_sigmaTable =
 
 (* Algorithms types *)
 type block_s (a:alg) = lseq uint8 (size_block a)
+type block_w (a:alg) = lseq (word_t a) 16
 type idx_t = n:size_nat{n < 16}
 
 let row_idx = n:nat {n < 4}
@@ -250,6 +240,9 @@ let g1 (a:alg) (wv:state a) (i:row_idx) (j:row_idx) (r:rotval (wt a)) : Tot (sta
 let g2 (a:alg) (wv:state a) (i:row_idx) (j:row_idx) (x:row a) : Tot (state a) =
   wv.[i] <- (wv.[i] +| wv.[j] +| x)
 
+let g2z (a:alg) (wv:state a) (i:row_idx) (j:row_idx) : Tot (state a) =
+  wv.[i] <- (wv.[i] +| wv.[j])
+
 
 val blake2_mixing:
     a:alg
@@ -266,11 +259,11 @@ let blake2_mixing al wv x y =
   let rt = rTable al in
   let wv = g2 al wv a b x in
   let wv = g1 al wv d a rt.[0] in
-  let wv = g2 al wv c d (zero_row al) in
+  let wv = g2z al wv c d in
   let wv = g1 al wv b c rt.[1] in
   let wv = g2 al wv a b y in
   let wv = g1 al wv d a rt.[2] in
-  let wv = g2 al wv c d (zero_row al) in
+  let wv = g2z al wv c d in
   let wv = g1 al wv b c rt.[3] in
   wv
 
@@ -286,7 +279,18 @@ let undiag (#a:alg) (wv:state a) : state a =
   let wv = wv.[3] <- rotr wv.[3] 1 in
   wv
 
-val gather_state: a:alg -> m:block_s a -> start:nat{start <= 144} -> state a
+inline_for_extraction
+let gather_row (#a:alg) (m:block_w a) (i0 i1 i2 i3:sigma_elt_t) : row a =
+  create_row m.[v i0] m.[v i1] m.[v i2] m.[v i3]
+(*  let nb = size_word a in
+  let u0 = uint_from_bytes_le #(wt a) #SEC (sub m (v i0*nb) nb) in
+  let u1 = uint_from_bytes_le #(wt a) #SEC (sub m (v i1*nb) nb) in
+  let u2 = uint_from_bytes_le #(wt a) #SEC (sub m (v i2*nb) nb) in
+  let u3 = uint_from_bytes_le #(wt a) #SEC (sub m (v i3*nb) nb) in
+  create_row u0 u1 u2 u3
+*)
+
+val gather_state: a:alg -> m:block_w a -> start:nat{start <= 144} -> state a
 let gather_state a m start =
   let x = gather_row m sigmaTable.[start] sigmaTable.[start+2] sigmaTable.[start+4] sigmaTable.[start+6]  in
   let y = gather_row m sigmaTable.[start+1] sigmaTable.[start+3] sigmaTable.[start+5] sigmaTable.[start+7]  in
@@ -298,7 +302,7 @@ let gather_state a m start =
 
 val blake2_round:
     a:alg
-  -> m:block_s a
+  -> m:block_w a
   -> i:size_nat
   -> wv:state a
   -> state a
@@ -311,6 +315,12 @@ let blake2_round a m i wv =
   let wv = blake2_mixing a wv m_s.[2] m_s.[3] in
   undiag wv
 
+val blake2_compress0:
+    a:alg
+  -> m:block_s a
+  -> block_w a
+let blake2_compress0 a m =
+  uints_from_bytes_le m
 
 val blake2_compress1:
     a:alg
@@ -335,7 +345,7 @@ let blake2_compress1 a s_iv offset flag =
 val blake2_compress2:
     a:alg
   -> wv:state a
-  -> m:block_s a ->
+  -> m:block_w a ->
   Tot (state a)
 
 let blake2_compress2 a wv m = repeati (rounds a) (blake2_round a m) wv
@@ -360,8 +370,9 @@ val blake2_compress:
   Tot (state a)
 
 let blake2_compress a s_iv m offset flag =
+  let m_w = blake2_compress0 a m in
   let wv = blake2_compress1 a s_iv offset flag in
-  let wv = blake2_compress2 a wv m in
+  let wv = blake2_compress2 a wv m_w in
   let s_iv = blake2_compress3 a wv s_iv in
   s_iv
 

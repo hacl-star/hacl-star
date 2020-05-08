@@ -1,15 +1,15 @@
 [
-  "-ö\u0017\u0012÷ßÂêÝ!Š\nA+U+",
+  "[½JÉ\u001dc,¡ñ‰Nì/q)¤",
   [
     [
       "Vale.Transformers.MovMovElim.safe_mov_mov_elim",
       1,
       1,
-      1,
+      4,
       [
         "@MaxIFuel_assumption", "@query",
         "Vale.X64.Instruction_s_pretyping_3f42fef2c19ae51071f07b756c9d8230",
-        "data_elim_Vale.X64.Bytes_Code_s.Instr",
+        "data_elim_Prims.Cons", "data_elim_Vale.X64.Bytes_Code_s.Instr",
         "data_elim_Vale.X64.Machine_Semantics_s.AnnotateMov64",
         "disc_equation_Vale.X64.Machine_s.OConst",
         "disc_equation_Vale.X64.Machine_s.OMem",
@@ -19,40 +19,26 @@
         "equation_Prims.eq2", "equation_Prims.eqtype", "equation_Prims.nat",
         "equation_Prims.squash", "equation_Vale.Def.Words_s.nat64",
         "equation_Vale.Def.Words_s.natN",
-        "equation_Vale.X64.Bytes_Code_s.instr_annotation_t",
         "equation_Vale.X64.Machine_Semantics_s.equals_instr",
         "equation_Vale.X64.Machine_Semantics_s.ins",
         "equation_Vale.X64.Machine_s.operand64",
         "equation_Vale.X64.Machine_s.reg_64",
         "fuel_guarded_inversion_Vale.X64.Machine_s.operand",
         "function_token_typing_Prims.int",
-        "function_token_typing_Vale.X64.Machine_Semantics_s.ins",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "haseqTm_refine_c1424615841f28cac7fc34e92b7ff33c",
         "haseqTm_refine_c365eb902b454950de62fba701d9049d",
-        "proj_equation_Prims.Cons_hd", "proj_equation_Prims.Cons_tl",
-        "proj_equation_Vale.X64.Bytes_Code_s.Instr_annotation",
-        "proj_equation_Vale.X64.Bytes_Code_s.Instr_i",
         "proj_equation_Vale.X64.Instruction_s.InstrTypeRecord_args",
         "proj_equation_Vale.X64.Instruction_s.InstrTypeRecord_outs",
         "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_Prims.Cons_hd",
-        "projection_inverse_Prims.Cons_tl",
-        "projection_inverse_Vale.X64.Bytes_Code_s.Instr_annotation",
-        "projection_inverse_Vale.X64.Bytes_Code_s.Instr_i",
         "projection_inverse_Vale.X64.Instruction_s.InstrTypeRecord_args",
         "projection_inverse_Vale.X64.Instruction_s.InstrTypeRecord_outs",
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
-        "refinement_interpretation_Tm_refine_7aac12c24449a22c34d98a0ea8ed4a32",
-        "refinement_interpretation_Tm_refine_9ed713f3afd4b3469851e41178e98008",
-        "token_correspondence_Vale.X64.Machine_Semantics_s.instr_annotation@tok",
-        "typing_Prims.__proj__Cons__item__hd",
-        "typing_Prims.__proj__Cons__item__tl",
-        "typing_Vale.X64.Bytes_Code_s.__proj__Instr__item__annotation"
+        "token_correspondence_Vale.X64.Machine_Semantics_s.instr_annotation@tok"
       ],
       0,
-      "5bc7c30fa997c20819771da0cd09c5c3"
+      "160c1d43188fc76ab152ac313d7556f3"
     ],
     [
       "Vale.Transformers.MovMovElim.mov_mov_elim_ph",
@@ -66,7 +52,7 @@
         "proj_equation_Prims.Cons_tl"
       ],
       0,
-      "d573e3d23dbc7f9970f6da3e87da8818"
+      "ff91c1a23d134ca2d69b5597e62e78d9"
     ],
     [
       "Vale.Transformers.MovMovElim.lemma_mov_mov_is_mov",
@@ -276,7 +262,7 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "5f640405dff622db6359b7f6b65f64c6"
+      "272f480cb91bf846ae50ee8570af8556"
     ],
     [
       "Vale.Transformers.MovMovElim.mov_mov_elim_correct",
@@ -318,17 +304,17 @@
         "typing_Vale.X64.Machine_Semantics_s.machine_eval_ins"
       ],
       0,
-      "70c137b9cb967c340d4117864ce72e48"
+      "992b150f30ecc7a5f489e8a824c0d56a"
     ],
     [
       "Vale.Transformers.MovMovElim.safe_mov_mov_elim",
       2,
       1,
-      1,
+      4,
       [
         "@MaxIFuel_assumption", "@query",
         "Vale.X64.Instruction_s_pretyping_3f42fef2c19ae51071f07b756c9d8230",
-        "data_elim_Vale.X64.Bytes_Code_s.Instr",
+        "data_elim_Prims.Cons", "data_elim_Vale.X64.Bytes_Code_s.Instr",
         "data_elim_Vale.X64.Machine_Semantics_s.AnnotateMov64",
         "disc_equation_Vale.X64.Machine_s.OConst",
         "disc_equation_Vale.X64.Machine_s.OMem",
@@ -338,40 +324,26 @@
         "equation_Prims.eq2", "equation_Prims.eqtype", "equation_Prims.nat",
         "equation_Prims.squash", "equation_Vale.Def.Words_s.nat64",
         "equation_Vale.Def.Words_s.natN",
-        "equation_Vale.X64.Bytes_Code_s.instr_annotation_t",
         "equation_Vale.X64.Machine_Semantics_s.equals_instr",
         "equation_Vale.X64.Machine_Semantics_s.ins",
         "equation_Vale.X64.Machine_s.operand64",
         "equation_Vale.X64.Machine_s.reg_64",
         "fuel_guarded_inversion_Vale.X64.Machine_s.operand",
         "function_token_typing_Prims.int",
-        "function_token_typing_Vale.X64.Machine_Semantics_s.ins",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "haseqTm_refine_c1424615841f28cac7fc34e92b7ff33c",
         "haseqTm_refine_c365eb902b454950de62fba701d9049d",
-        "proj_equation_Prims.Cons_hd", "proj_equation_Prims.Cons_tl",
-        "proj_equation_Vale.X64.Bytes_Code_s.Instr_annotation",
-        "proj_equation_Vale.X64.Bytes_Code_s.Instr_i",
         "proj_equation_Vale.X64.Instruction_s.InstrTypeRecord_args",
         "proj_equation_Vale.X64.Instruction_s.InstrTypeRecord_outs",
         "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_Prims.Cons_hd",
-        "projection_inverse_Prims.Cons_tl",
-        "projection_inverse_Vale.X64.Bytes_Code_s.Instr_annotation",
-        "projection_inverse_Vale.X64.Bytes_Code_s.Instr_i",
         "projection_inverse_Vale.X64.Instruction_s.InstrTypeRecord_args",
         "projection_inverse_Vale.X64.Instruction_s.InstrTypeRecord_outs",
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
-        "refinement_interpretation_Tm_refine_7aac12c24449a22c34d98a0ea8ed4a32",
-        "refinement_interpretation_Tm_refine_9ed713f3afd4b3469851e41178e98008",
-        "token_correspondence_Vale.X64.Machine_Semantics_s.instr_annotation@tok",
-        "typing_Prims.__proj__Cons__item__hd",
-        "typing_Prims.__proj__Cons__item__tl",
-        "typing_Vale.X64.Bytes_Code_s.__proj__Instr__item__annotation"
+        "token_correspondence_Vale.X64.Machine_Semantics_s.instr_annotation@tok"
       ],
       0,
-      "833bf495c2d4fbb2db7148bb176e4675"
+      "5b9ff6962df32f5cb02d17d96d5a4783"
     ],
     [
       "Vale.Transformers.MovMovElim.mov_mov_elim_ph",
@@ -385,7 +357,7 @@
         "proj_equation_Prims.Cons_tl"
       ],
       0,
-      "d6eeaaa75761f886802ec74f51610b50"
+      "89194f184c1806417742eb932df4a751"
     ]
   ]
 ]

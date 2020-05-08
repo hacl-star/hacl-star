@@ -8,7 +8,7 @@ module Lib.UpdateMulti.Lemmas
 let repeat_l_input #a (block_length:pos { block_length < pow2 32 })
   (update_last: (a -> s:S.seq uint8 { S.length s < block_length } -> a))
   (input1 input2:S.seq uint8)
-  (l: Lib.IntTypes.size_nat { l == S.length input1 % block_length })
+  (l: Lib.IntTypes.size_nat { l < block_length })
   (s: Lib.Sequence.lseq uint8 l)
   (acc: a): Lemma
     (requires S.length input1 % block_length == S.length input2 % block_length)
@@ -105,18 +105,3 @@ let rec update_full_is_repeat_blocks #a block_length update update_last acc inpu
       Lib.Sequence.repeat_blocks #uint8 block_length input repeat_f repeat_l acc;
     }
   end
-
-let repeat_blocks_extensionality #a #b bs inp f1 f2 l1 l2 init =
-  // Naming things
-  let len = length inp in
-  let nb = len / bs in
-  let rem = len % bs in
-  let acc1 = Lib.LoopCombinators.repeati nb (repeat_blocks_f bs inp f1 nb) init in
-  let acc2 = Lib.LoopCombinators.repeati nb (repeat_blocks_f bs inp f2 nb) init in
-  let last = Seq.slice inp (nb * bs) len in
-  let acc1' = l1 rem last acc1 in
-  let acc2' = l2 rem last acc2 in
-  Lib.Sequence.lemma_repeat_blocks bs inp f1 l1 init;
-  Lib.Sequence.lemma_repeat_blocks bs inp f2 l2 init;
-  Lib.Sequence.Lemmas.repeati_extensionality nb (repeat_blocks_f bs inp f1 nb)
-    (repeat_blocks_f bs inp f2 nb) init
