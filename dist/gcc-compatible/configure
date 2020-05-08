@@ -34,6 +34,29 @@ detect_ocaml () {
   done
 }
 
+check_no_bug81300 () {
+  local out=$(mktemp /tmp/testbug81300.XXXXXXX)
+  local file=${out}.c
+  cat > $file <<EOF
+#include <x86intrin.h>
+
+int main() {
+  unsigned long long _discard = 0, zero = 0, maxull = 0;
+  unsigned char zero1 = _addcarry_u64(0, 0, 0, &_discard);
+  unsigned char zero2 = _addcarry_u64(zero1, 0, 0, &zero);
+  _subborrow_u64(0x0, 2, -1, &_discard);
+  unsigned char one = _subborrow_u64(0, zero, 1, &maxull);
+  unsigned long long x = _subborrow_u64(one, zero2, 0, &_discard);
+  unsigned long long z1 = 0;
+  __asm__ ("movq %1, %0;" :"+r"(z1) :"r"(x));
+  unsigned long long z2 = 3;
+  __asm__ ("movq %1, %0;" :"+r"(z2) :"r"(x));
+  return 1-(z1 | z2);
+}
+EOF
+  cc -march=native -O3 $file -o $out && $out
+}
+
 detect_uint128 () {
   local file=$(mktemp /tmp/testint128.XXXXXXX).c
   echo "unsigned __int128 x = 0;" > $file
@@ -115,6 +138,12 @@ else
     echo "#define BROKEN_INLINE_ASM 1" >> config.h
   else
     echo "... not using known buggy Apple LLVM build"
+  fi
+  if ! check_no_bug81300; then
+    echo "found broken GCC < 5.5 with bug 81300, disabling subborrow + addcarry"
+    echo "#define BROKEN_INTRINSICS 1" >> config.h
+  else
+    echo "... using a non-buggy GCC"
   fi
 fi
 
