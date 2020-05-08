@@ -3,17 +3,19 @@ open SharedDefs
 module C = CBytes
 
 module AutoConfig2 : sig
+  type feature =
+  | SHAEXT
+  | AES_NI
+  | PCLMULQDQ
+  | AVX
+  | AVX2
+  | BMI2
+  | ADX
+  | SSE
+  | MOVBE
+  | RDRAND
   val init : unit -> unit
-  val has_shaext : unit -> bool
-  val has_aesni : unit -> bool
-  val has_pclmulqdq : unit -> bool
-  val has_avx2 : unit -> bool
-  val has_avx : unit -> bool
-  val has_bmi2 : unit -> bool
-  val has_adx : unit -> bool
-  val has_sse : unit -> bool
-  val has_movbe : unit -> bool
-  val has_rdrand : unit -> bool
+  val has_feature : feature -> bool
 end
 
 module Error : sig

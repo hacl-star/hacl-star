@@ -1,4 +1,5 @@
 open EverCrypt.Error
+open EverCrypt.AutoConfig2
 
 open Test_utils
 
@@ -59,25 +60,28 @@ let test_agile (v: Bytes.t aead_test) =
   | Error err -> test_result Failure (Printf.sprintf "Init error: %s" (print_error err))
 
 
-let test_nonagile (v: Bytes.t aead_test) t encrypt decrypt =
+let test_nonagile (v: Bytes.t aead_test) t encrypt decrypt reqs =
   let test_result = test_result t in
 
-  let ct = Test_utils.init_bytes v.msg_len in
-  let tag = Test_utils.init_bytes v.tag_len in
+  if supports reqs then begin
+    let ct = Test_utils.init_bytes v.msg_len in
+    let tag = Test_utils.init_bytes v.tag_len in
 
-  encrypt v.test_key v.test_iv v.test_ad v.test_pt ct tag;
-  if Bytes.compare tag v.test_tag = 0 && Bytes.compare ct v.test_ct = 0 then
-    test_result Success "Encryption succeeded"
-  else
-    test_result Failure
-      (Printf.sprintf "Wrong ciphertext/mac %d %d \n" (Bytes.compare ct v.test_ct) (Bytes.compare tag v.test_tag));
-  let dt = Test_utils.init_bytes v.msg_len in
-  if decrypt v.test_key v.test_iv v.test_ad dt ct tag then
-    if Bytes.compare v.test_pt dt = 0 then
-      test_result Success "Decryption succeeded"
+    encrypt v.test_key v.test_iv v.test_ad v.test_pt ct tag;
+    if Bytes.compare tag v.test_tag = 0 && Bytes.compare ct v.test_ct = 0 then
+      test_result Success "Encryption succeeded"
     else
-      test_result Failure "Decrypted and plaintext do not match"
-  else test_result Failure "Decryption error"
+      test_result Failure
+        (Printf.sprintf "Wrong ciphertext/mac %d %d \n" (Bytes.compare ct v.test_ct) (Bytes.compare tag v.test_tag));
+    let dt = Test_utils.init_bytes v.msg_len in
+    if decrypt v.test_key v.test_iv v.test_ad dt ct tag then
+      if Bytes.compare v.test_pt dt = 0 then
+        test_result Success "Decryption succeeded"
+      else
+        test_result Failure "Decrypted and plaintext do not match"
+    else test_result Failure "Decryption error"
+  end else
+    test_result Skipped "Required CPU feature not detected"
 
 let test_random () =
   let test_result = test_result "Lib.RandomBuffer" in
@@ -88,22 +92,22 @@ let test_random () =
     test_result Failure ""
 
 let _ =
-  EverCrypt.AutoConfig2.init ();
-  Printf.printf "has_shaext: %b\n" (EverCrypt.AutoConfig2.has_shaext ());
-  Printf.printf "has_aesni: %b\n" (EverCrypt.AutoConfig2.has_aesni ());
-  Printf.printf "has_pclmulqdq: %b\n" (EverCrypt.AutoConfig2.has_pclmulqdq ());
-  Printf.printf "has_avx2: %b\n" (EverCrypt.AutoConfig2.has_avx2 ());
-  Printf.printf "has_avx: %b\n" (EverCrypt.AutoConfig2.has_avx ());
-  Printf.printf "has_bmi2: %b\n" (EverCrypt.AutoConfig2.has_bmi2 ());
-  Printf.printf "has_adx: %b\n" (EverCrypt.AutoConfig2.has_adx ());
-  Printf.printf "has_sse: %b\n" (EverCrypt.AutoConfig2.has_sse ());
-  Printf.printf "has_movbe: %b\n" (EverCrypt.AutoConfig2.has_movbe ());
-  Printf.printf "has_rdrand: %b\n" (EverCrypt.AutoConfig2.has_rdrand ());
+  init ();
+  Printf.printf "SHAEXT: %b\n" (has_feature SHAEXT);
+  Printf.printf "AES_NI: %b\n" (has_feature AES_NI);
+  Printf.printf "PCLMULQDQ: %b\n" (has_feature PCLMULQDQ);
+  Printf.printf "AVX2: %b\n" (has_feature AVX2);
+  Printf.printf "AVX: %b\n" (has_feature AVX);
+  Printf.printf "BMI2: %b\n" (has_feature BMI2);
+  Printf.printf "ADX: %b\n" (has_feature ADX);
+  Printf.printf "SSE: %b\n" (has_feature SSE);
+  Printf.printf "MOVBE: %b\n" (has_feature MOVBE);
+  Printf.printf "RDRAND: %b\n" (has_feature RDRAND);
 
   test_agile chacha20poly1305_test;
-  test_nonagile chacha20poly1305_test "Hacl.Chacha20_Poly1305_32" Hacl.Chacha20_Poly1305_32.encrypt Hacl.Chacha20_Poly1305_32.decrypt;
-  test_nonagile chacha20poly1305_test "Hacl.Chacha20_Poly1305_128" Hacl.Chacha20_Poly1305_128.encrypt Hacl.Chacha20_Poly1305_128.decrypt;
-  test_nonagile chacha20poly1305_test "Hacl.Chacha20_Poly1305_256" Hacl.Chacha20_Poly1305_256.encrypt Hacl.Chacha20_Poly1305_256.decrypt;
-  test_nonagile chacha20poly1305_test "EverCrypt.Chacha20_Poly1305_256" EverCrypt.Chacha20_Poly1305.encrypt EverCrypt.Chacha20_Poly1305.decrypt;
+  test_nonagile chacha20poly1305_test "Hacl.Chacha20_Poly1305_32" Hacl.Chacha20_Poly1305_32.encrypt Hacl.Chacha20_Poly1305_32.decrypt [];
+  test_nonagile chacha20poly1305_test "Hacl.Chacha20_Poly1305_128" Hacl.Chacha20_Poly1305_128.encrypt Hacl.Chacha20_Poly1305_128.decrypt [AVX];
+  test_nonagile chacha20poly1305_test "Hacl.Chacha20_Poly1305_256" Hacl.Chacha20_Poly1305_256.encrypt Hacl.Chacha20_Poly1305_256.decrypt [AVX2];
+  test_nonagile chacha20poly1305_test "EverCrypt.Chacha20_Poly1305_256" EverCrypt.Chacha20_Poly1305.encrypt EverCrypt.Chacha20_Poly1305.decrypt [];
 
   test_random ()
