@@ -111,7 +111,7 @@ let lemma_blake2_hash_equivalence
   : Lemma
     (B2.blake2 (to_blake_alg a) d 0 Seq.empty (B2.max_output (to_blake_alg a)) ==
      Spec.Agile.Hash.hash a d)
-  = () //lemma_update_multi a d (Spec.Agile.Hash.init a)
+  = ()
 
 #pop-options
 
