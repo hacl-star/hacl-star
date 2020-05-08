@@ -125,17 +125,6 @@ let load_buffer8 a0 a1 a2 a3 a4 a5 a6 a7  o =
   upd o (size 6) a6;
   upd o (size 7) a7
 
-(** This is unused *)
-(** Now it's used*)
-
-inline_for_extraction noextract
-val copy_conditional_u64: a: uint64 -> b: uint64 -> mask: uint64 {uint_v mask = 0 \/ uint_v mask = pow2 64 - 1} -> 
-  Tot (r: uint64 {if uint_v mask = 0 then uint_v r = uint_v a else uint_v r = uint_v b})
-
-let copy_conditional_u64 a b mask = 
-  lemma_xor_copy_cond a b mask;
-  logxor a (logand mask (logxor a b))
-
 
 val copy_conditional: out: felem -> x: felem -> mask: uint64{uint_v mask = 0 \/ uint_v mask = pow2 64 - 1} -> Stack unit 
   (requires fun h -> live h out /\ live h x)
@@ -175,25 +164,6 @@ let copy_conditional out x mask =
   lemma_eq_funct_ (as_seq h1 out) (as_seq h0 x)
 
 
-(* Non constant-time implementations of add_carry_u64 and sub_borrow_u64
-   with the same specification as functions in Lib.IntTypes.Intrinsics *)
-
-inline_for_extraction noextract
-let eq_u64_nCT a b =
-  let open Lib.RawIntTypes in
-  FStar.UInt64.(u64_to_UInt64 a =^ u64_to_UInt64 b)
-
-inline_for_extraction noextract
-val lt_u64:a:uint64 -> b:uint64 -> Tot bool
-let lt_u64 a b =
-  let open Lib.RawIntTypes in
-  FStar.UInt64.(u64_to_UInt64 a <^ u64_to_UInt64 b)
-
-inline_for_extraction noextract
-val le_u64:a:uint64 -> b:uint64 -> Tot bool
-let le_u64 a b =
-  let open Lib.RawIntTypes in
-  FStar.UInt64.(u64_to_UInt64 a <=^ u64_to_UInt64 b)
 
 val add_carry_u64: cin:uint64 -> x:uint64 -> y:uint64 -> r:lbuffer uint64 (size 1) ->
   Stack uint64
@@ -203,25 +173,15 @@ val add_carry_u64: cin:uint64 -> x:uint64 -> y:uint64 -> r:lbuffer uint64 (size 
       (let r = Seq.index (as_seq h1 r) 0 in
        v r + v c * pow2 64 == v x + v y + v cin))
 
-(*let add_carry_u64 cin x y result1 =
-  assert(uint_v cin + uint_v x + uint_v y < 2 * pow2 64);
-  let res = x +. y +. cin in
-  let c = (lt_mask res x) &. (u64 1) in
-    lt_mask_lemma res x;
-    logand_lemma (lt_mask res x) (u64 1);
-    assert(if v res < v x then uint_v c == 1 else v c == 0);
-
-  result1.(0ul) <- res;
-  c
-*)
 
 let add_carry_u64 cin x y result1 =
-  let res1 = x +. cin in
-  let c = logand (lt_mask res1 cin) (u64 1) in
-  let res = res1 +. y in
-  let c1 = logand (lt_mask res res1) (u64 1)  in 
+  let res = x +. cin +. y in 
+  let c = logand (logor (lt_mask res x) (logand (eq_mask res x) cin)) (u64 1) in 
   result1.(0ul) <- res;
-  c +. c1
+  logand_lemma (eq_mask res x) cin;
+  logor_lemma (lt_mask res x) (logand (eq_mask res x) cin);
+  logand_mask (logor (lt_mask res x) (logand (eq_mask res x) cin)) (u64 1) 1;
+  c
 
 
 val sub_borrow_u64: cin:uint64 -> x:uint64 -> y:uint64 -> r:lbuffer uint64 (size 1) ->
@@ -235,8 +195,10 @@ val sub_borrow_u64: cin:uint64 -> x:uint64 -> y:uint64 -> r:lbuffer uint64 (size
 let sub_borrow_u64 cin x y result1 =
   let res = x -. y -. cin in 
   let eqlty = eq_mask res x in 
-  let c1 = logand (logor (logand cin eqlty) (logand (gte_mask res x) (lognot eqlty))) (u64 1) in 
-  let c = logand (logor (logand cin eqlty) (gt_mask res x)) (u64 1) in 
+  let c1 = logand (logor (gt_mask res x) (logand eqlty cin)) (u64 1) in
+    logand_lemma eqlty cin;
+    logor_lemma (gt_mask res x) (logand eqlty cin);
+    logand_mask (logor (gt_mask res x) (logand eqlty cin)) (u64 1) 1;
   result1.(0ul) <- res;
   c1
 
