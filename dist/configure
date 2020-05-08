@@ -3,6 +3,10 @@
 set -o pipefail
 set -e
 
+if [[ $CC == "" ]]; then
+  CC=cc
+fi
+
 # This script mostly detects the presence of ocamlfind as well as various ocaml
 # packages
 
@@ -75,8 +79,8 @@ int main() {
   return 0;
 }
 EOF
-  cc -I. -I../kremlin/include -I../kremlin/kremlib/dist/minimal -march=native -O3 $file -o $out && $out > $out.test
-  cc -I. -I../kremlin/include -I../kremlin/kremlib/dist/minimal -DBROKEN_INTRINSICS -march=native -O3 $file -o $out && $out > $out.ref
+  $CC -I. -I../kremlin/include -I../kremlin/kremlib/dist/minimal -march=native -O3 $file -o $out && $out > $out.test
+  $CC -I. -I../kremlin/include -I../kremlin/kremlib/dist/minimal -DBROKEN_INTRINSICS -march=native -O3 $file -o $out && $out > $out.ref
   echo reference:
   cat $out.ref
   echo test:
@@ -87,7 +91,7 @@ EOF
 detect_uint128 () {
   local file=$(mktemp /tmp/testint128.XXXXXXX).c
   echo "unsigned __int128 x = 0;" > $file
-  cc -c $file -o /dev/null
+  $CC -c $file -o /dev/null
 }
 
 detect_x64 () {
@@ -111,7 +115,7 @@ int main () {
   return 0;
 }
 EOF
-  cc -I. -march=armv8-a+simd -c $file -o /dev/null
+  $CC -I. -march=armv8-a+simd -c $file -o /dev/null
 }
 
 detect_broken_xcode () {
@@ -130,7 +134,7 @@ detect_broken_xcode () {
   # - Installing XCode 10.0 (for MacOS 10.14, Catalina) does not give me the right LLVM build
   # - Installing XCode 10.1 (for MacOS 10.14, Catalina) does not give me the right LLVM build
   # - Installing XCode 10.3 (for MacOS 10.14, Catalina) bails because my OSX is too recent
-  cc --version | grep -q clang-1000.11.45.5
+  $CC --version | grep -q clang-1000.11.45.5
 }
 
 # Main auto-detection
@@ -146,10 +150,10 @@ if detect_arm; then
   echo "BLACKLIST += evercrypt_vale_stubs.c" >> Makefile.config
   echo "CFLAGS += -DLib_IntVector_Intrinsics_vec256=\"void *\"" >> Makefile.config
   if detect_arm_cc; then
-    echo "... cc can cross-compile to ARM64 with SIMD"
+    echo "... $CC can cross-compile to ARM64 with SIMD"
     echo "CFLAGS_128 = -march=armv8-a+simd" >> Makefile.config
   else
-    echo "cc cannot compile 128-bit vector arithmetic, disabling"
+    echo "$CC cannot compile 128-bit vector arithmetic, disabling"
     echo "BLACKLIST += $(ls *CP128*.c *_128.c *_Vec128.c | xargs)" >> Makefile.config
   fi
 fi
@@ -177,7 +181,7 @@ fi
 if ! detect_uint128; then
   # Explicitly not supporting compilation with MSVC, which would entail not
   # defining KRML_VERIFIED_UINT128.
-  echo "cc does not support unsigned __int128 -- using a fallback verified implementation"
+  echo "$CC does not support unsigned __int128 -- using a fallback verified implementation"
   echo "CFLAGS += -DKRML_VERIFIED_UINT128" >> Makefile.config
 fi
 
