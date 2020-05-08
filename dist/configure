@@ -81,11 +81,7 @@ int main() {
 EOF
   $CC -I. -I../kremlin/include -I../kremlin/kremlib/dist/minimal -march=native -O3 $file -o $out && $out > $out.test
   $CC -I. -I../kremlin/include -I../kremlin/kremlib/dist/minimal -DBROKEN_INTRINSICS -march=native -O3 $file -o $out && $out > $out.ref
-  echo reference:
-  cat $out.ref
-  echo test:
-  cat $out.test
-  diff $out.test $out.ref >/dev/null
+  diff $out.test $out.ref
 }
 
 detect_uint128 () {
