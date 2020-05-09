@@ -183,7 +183,7 @@ function refresh_hacl_hints_dist() {
 function clean_build_dist() {
     ORANGE_FILE="../orange_file.txt"
     rm -rf dist/*/* &&
-    make -j $threads all-unstaged -k &&
+    make -j $threads all-unstaged test-c -k &&
     echo "Searching for a diff in dist/" &&
     if ! git diff --exit-code --name-only -- dist :!dist/*/INFO.txt; then
         echo "GIT DIFF: the files in dist/ have a git diff"
