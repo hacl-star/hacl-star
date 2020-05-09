@@ -67,7 +67,9 @@ endif
 endif
 
 ifneq (,$(wildcard EverCrypt_BCrypt.h))
+ifeq ($(OS),Windows_NT)
   LDFLAGS	+= -lbcrypt
+endif
   SOURCES	+= evercrypt_bcrypt.c
 endif
 
