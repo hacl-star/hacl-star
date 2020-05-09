@@ -48,7 +48,7 @@ function hacl_test() {
           cd dist
           r=true
           for a in *; do
-            if [[ $a != "kremlin" && $a != "vale" && $a != "linux" && $a != "wasm" && $a != "merkle-tree" && -d $a ]]; then
+            if [[ $a != "kremlin" && $a != "vale" && $a != "linux" && $a != "wasm" && $a != "merkle-tree" && $a != "test" && -d $a ]]; then
               echo "Building snapshot: $a"
               make -C $a -j $threads || r=false
               echo
