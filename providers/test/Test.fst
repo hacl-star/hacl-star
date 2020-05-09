@@ -174,7 +174,7 @@ let test_aead_st alg key key_len iv iv_len aad aad_len tag tag_len plaintext pla
     let st = B.alloca B.null 1ul in
     let e = EverCrypt.AEAD.create_in #alg HyperStack.root st key in
     begin match e with
-    | UnsupportedAlgorithm -> C.Failure.failwith !$"Failure: AEAD create_in UnsupportedAlgorithm"
+    | UnsupportedAlgorithm -> () // Non-fatal since, say, some CI machines may not have AESNI. Was: C.Failure.failwith !$"Failure: AEAD create_in UnsupportedAlgorithm"
     | Success ->
       let h1 = HST.get () in
       let st = B.index st 0ul in
