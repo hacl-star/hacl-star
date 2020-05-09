@@ -8,3 +8,4 @@ let _ =
    Format.printf "#include \"Hacl_IntTypes_Intrinsics.h\"\n");
   Cstubs.write_c Format.std_formatter ~prefix:""
     (module Hacl_IntTypes_Intrinsics_bindings.Bindings)
+  

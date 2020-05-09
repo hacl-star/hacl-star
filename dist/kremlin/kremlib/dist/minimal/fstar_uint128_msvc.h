@@ -94,9 +94,7 @@ FStar_UInt128_add_underspec(FStar_UInt128_uint128 a, FStar_UInt128_uint128 b) {
 #else
   return ((FStar_UInt128_uint128){
       .low = a.low + b.low,
-      .high = FStar_UInt64_add_underspec(
-          FStar_UInt64_add_underspec(a.high, b.high),
-          FStar_UInt128_carry(a.low + b.low, b.low)) });
+      .high = a.high + b.high + FStar_UInt128_carry(a.low + b.low, b.low)});
 #endif
 }
 
@@ -133,9 +131,7 @@ FStar_UInt128_sub_underspec(FStar_UInt128_uint128 a, FStar_UInt128_uint128 b) {
 #else
   return ((FStar_UInt128_uint128){
       .low = a.low - b.low,
-      .high = FStar_UInt64_sub_underspec(
-          FStar_UInt64_sub_underspec(a.high, b.high),
-          FStar_UInt128_carry(a.low, a.low - b.low)) });
+      .high = a.high - b.high - FStar_UInt128_carry(a.low, a.low - b.low)});
 #endif
 }
 
