@@ -15,7 +15,7 @@ open Spec.P256.MontgomeryMultiplication.PointDouble
 
 let prime = prime256
 
-#set-options "--z3rlimit 300 --fuel 0 --ifuel 0"  
+#set-options "--z3rlimit 100"  
 
 noextract       
 val lemma_pointAddToSpecification: 
@@ -62,11 +62,15 @@ val lemma_pointAddToSpecification:
   )
 )
 
+val lemma_pointAdd0: a: nat -> b: nat -> Lemma (2 * a * a * b == 2 * b * a * a)
+
+let lemma_pointAdd0 a b = ()
+
 
 let lemma_pointAddToSpecification x1D y1D z1D x2D y2D z2D x3 y3 z3  u1 u2 s1 s2 h r = 
     let open FStar.Tactics in 
     let open FStar.Tactics.Canon in 
-    
+   
     let u1D = fromDomain_ u1 in 
     let u2D = fromDomain_ u2 in 
     let s1D = fromDomain_ s1 in 
@@ -97,8 +101,8 @@ let lemma_pointAddToSpecification x1D y1D z1D x2D y2D z2D x3 y3 z3  u1 u2 s1 s2 
     assert_by_tactic (z1D * z2D * hD = hD * z1D * z2D) canon;
     assert_by_tactic ((rD * (u1D * (hD * hD) - xN) - s1D * (hD * hD * hD)) = ((hD * hD * u1D - xN) * rD - s1D * hD*hD*hD)) canon;
     
-    assert_by_tactic (forall (n: nat). n * hN * hN = n * (hN * hN)) canon; 
-    assert_by_tactic (2 * hD * hD * u1D = 2 * u1D * hD * hD) canon
+    assert_by_tactic (forall (n: nat). n * hN * hN = n * (hN * hN)) canon;
+    lemma_pointAdd0 hD u1D
 
 
 val lemma_point_add_0: a: int -> b: int -> c: int -> Lemma 
