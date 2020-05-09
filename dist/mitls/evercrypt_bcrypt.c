@@ -155,7 +155,7 @@ static void bcrypt_rng_cleanup(void)
   handleErrors();
 }
 
-static BCRYPT_KEY_HANDLE bcrypt_create(BCRYPT_ALG_HANDLE alg, uint8_t key, uint32_t key_size)
+static BCRYPT_KEY_HANDLE bcrypt_create(BCRYPT_ALG_HANDLE alg, uint8_t *key, uint32_t key_size)
 {
   return NULL;
 }
