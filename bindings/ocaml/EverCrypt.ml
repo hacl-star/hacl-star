@@ -21,17 +21,29 @@ module EverCrypt_Ed25519 = EverCrypt_Ed25519_bindings.Bindings(EverCrypt_Ed25519
 
 module AutoConfig2 = struct
   open EverCrypt_AutoConfig2
+  type feature =
+    | SHAEXT
+    | AES_NI
+    | PCLMULQDQ
+    | AVX
+    | AVX2
+    | BMI2
+    | ADX
+    | SSE
+    | MOVBE
+    | RDRAND
   let init () = everCrypt_AutoConfig2_init ()
-  let has_shaext () = everCrypt_AutoConfig2_has_shaext ()
-  let has_aesni () = everCrypt_AutoConfig2_has_aesni ()
-  let has_pclmulqdq () = everCrypt_AutoConfig2_has_pclmulqdq ()
-  let has_avx2 () = everCrypt_AutoConfig2_has_avx2 ()
-  let has_avx () = everCrypt_AutoConfig2_has_avx ()
-  let has_bmi2 () = everCrypt_AutoConfig2_has_bmi2 ()
-  let has_adx () = everCrypt_AutoConfig2_has_adx ()
-  let has_sse () = everCrypt_AutoConfig2_has_sse ()
-  let has_movbe () = everCrypt_AutoConfig2_has_movbe ()
-  let has_rdrand () = everCrypt_AutoConfig2_has_rdrand ()
+  let has_feature = function
+    | SHAEXT -> everCrypt_AutoConfig2_has_shaext ()
+    | AES_NI -> everCrypt_AutoConfig2_has_aesni ()
+    | PCLMULQDQ -> everCrypt_AutoConfig2_has_pclmulqdq ()
+    | AVX -> everCrypt_AutoConfig2_has_avx ()
+    | AVX2 -> everCrypt_AutoConfig2_has_avx2 ()
+    | BMI2 -> everCrypt_AutoConfig2_has_bmi2 ()
+    | ADX -> everCrypt_AutoConfig2_has_adx ()
+    | SSE -> everCrypt_AutoConfig2_has_sse ()
+    | MOVBE -> everCrypt_AutoConfig2_has_movbe ()
+    | RDRAND -> everCrypt_AutoConfig2_has_rdrand ()
 end
 
 module Error = struct
