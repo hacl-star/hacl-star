@@ -62,11 +62,6 @@ val lemma_pointAddToSpecification:
   )
 )
 
-val lemma_pointAdd0: a: nat -> b: nat -> Lemma (2 * a * a * b == 2 * b * a * a)
-
-let lemma_pointAdd0 a b = ()
-
-
 let lemma_pointAddToSpecification x1D y1D z1D x2D y2D z2D x3 y3 z3  u1 u2 s1 s2 h r = 
     let open FStar.Tactics in 
     let open FStar.Tactics.Canon in 
