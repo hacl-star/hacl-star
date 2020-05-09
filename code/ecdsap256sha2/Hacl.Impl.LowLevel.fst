@@ -125,6 +125,14 @@ let load_buffer8 a0 a1 a2 a3 a4 a5 a6 a7  o =
   upd o (size 6) a6;
   upd o (size 7) a7
 
+(** This is unused *)
+inline_for_extraction noextract
+val copy_conditional_u64: a: uint64 -> b: uint64 -> mask: uint64 {uint_v mask = 0 \/ uint_v mask = pow2 64 - 1} -> 
+  Tot (r: uint64 {if uint_v mask = 0 then uint_v r = uint_v a else uint_v r = uint_v b})
+
+let copy_conditional_u64 a b mask = 
+  lemma_xor_copy_cond a b mask;
+  logxor a (logand mask (logxor a b))
 
 val copy_conditional: out: felem -> x: felem -> mask: uint64{uint_v mask = 0 \/ uint_v mask = pow2 64 - 1} -> Stack unit 
   (requires fun h -> live h out /\ live h x)
@@ -163,7 +171,66 @@ let copy_conditional out x mask =
   lemma_eq_funct_ (as_seq h1 out) (as_seq h0 out);
   lemma_eq_funct_ (as_seq h1 out) (as_seq h0 x)
 
+(*
+(* Non constant-time implementations of add_carry_u64 and sub_borrow_u64
+   with the same specification as functions in Lib.IntTypes.Intrinsics *)
 
+inline_for_extraction noextract
+let eq_u64_nCT a b =
+  let open Lib.RawIntTypes in
+  FStar.UInt64.(u64_to_UInt64 a =^ u64_to_UInt64 b)
+
+inline_for_extraction noextract
+val lt_u64:a:uint64 -> b:uint64 -> Tot bool
+let lt_u64 a b =
+  let open Lib.RawIntTypes in
+  FStar.UInt64.(u64_to_UInt64 a <^ u64_to_UInt64 b)
+
+inline_for_extraction noextract
+val le_u64:a:uint64 -> b:uint64 -> Tot bool
+let le_u64 a b =
+  let open Lib.RawIntTypes in
+  FStar.UInt64.(u64_to_UInt64 a <=^ u64_to_UInt64 b)
+
+val add_carry_u64_nCT: cin:uint64 -> x:uint64 -> y:uint64 -> r:lbuffer uint64 (size 1) ->
+  Stack uint64
+    (requires fun h -> live h r /\ v cin <= 1)
+    (ensures  fun h0 c h1 ->
+      modifies1 r h0 h1 /\ v c <= 1 /\
+      (let r = Seq.index (as_seq h1 r) 0 in
+       v r + v c * pow2 64 == v x + v y + v cin))
+
+let add_carry_u64_nCT cin x y result1 =
+  let res1 = x +. cin in
+  let mask1 = res1 `lt_mask` cin in
+  lt_mask_lemma res1 cin;
+  let c = copy_conditional_u64 (u64 0) (u64 1) mask1 in
+  let res = res1 +. y in
+  let mask2 = res `lt_mask` res1 in
+  lt_mask_lemma res res1;
+  result1.(0ul) <- res;
+  let c1 = copy_conditional_u64 (u64 0) (u64 1) mask2 in
+  c +. c1
+
+val sub_borrow_u64_nCT: cin:uint64 -> x:uint64 -> y:uint64 -> r:lbuffer uint64 (size 1) ->
+  Stack uint64
+    (requires fun h -> live h r /\ v cin <= 1)
+    (ensures  fun h0 c h1 ->
+      modifies1 r h0 h1 /\
+      (let r = Seq.index (as_seq h1 r) 0 in
+       v r - v c * pow2 64 == v x - v y - v cin))
+
+let sub_borrow_u64_nCT cin x y result1 =
+  let res = x -. y -. cin in
+  let c =
+    if eq_u64_nCT cin (u64 1) then
+      if le_u64 x y then u64 1 else u64 0
+    else
+      if lt_u64 x y then u64 1 else u64 0
+  in
+  result1.(0ul) <- res;
+  c
+*)
 
 val add4: x: felem -> y: felem -> result: felem -> 
   Stack uint64
@@ -303,8 +370,8 @@ val sub4_il: x: felem -> y: glbuffer uint64 (size 4) -> result: felem ->
     (requires fun h -> live h x /\ live h y /\ live h result /\ disjoint x result /\ disjoint result y)
     (ensures fun h0 c h1 -> modifies1 result h0 h1 /\ v c <= 1 /\
       (
-	as_nat h1 result - v c * pow2 256 == as_nat h0 x  - as_nat_il h0 y /\
-	(if uint_v c = 0 then as_nat h0 x >= as_nat_il h0 y else as_nat h0 x < as_nat_il h0 y)
+  as_nat h1 result - v c * pow2 256 == as_nat h0 x  - as_nat_il h0 y /\
+  (if uint_v c = 0 then as_nat h0 x >= as_nat_il h0 y else as_nat h0 x < as_nat_il h0 y)
       )
     )
 
@@ -807,13 +874,8 @@ let lemma_320 a b c d u =
   lemma_mult_le_right (uint_v u) (uint_v c) (pow2 64 - 1);  
 
   lemma_mult_le_left (uint_v d) (uint_v u) (pow2 64 - 1);
-  lemma_mult_le_right (uint_v u) (uint_v d) (pow2 64 - 1);
-  lemma_mult_le_left (uint_v a) (uint_v u) (pow2 64 - 1);
-  lemma_mult_le_right (uint_v u) (uint_v a) (pow2 64 - 1);
-  lemma_mult_le_left (uint_v b) (uint_v u) (pow2 64 - 1);
-  lemma_mult_le_right (uint_v u) (uint_v b) (pow2 64 - 1);
-  lemma_mult_le_left (uint_v c) (uint_v u) (pow2 64 - 1);
-  lemma_mult_le_right (uint_v u) (uint_v c) (pow2 64 - 1);
+  lemma_mult_le_right (uint_v u) (uint_v d) (pow2 64 - 1);  
+
 
   assert(uint_v u * uint_v a <= (pow2 64 - 1) * (pow2 64 - 1));
   assert(uint_v u * uint_v d <= (pow2 64 - 1) * (pow2 64 - 1));
@@ -918,10 +980,8 @@ val sq0_0: f: lbuffer uint64 (size 4) -> result: lbuffer uint64 (size 4) -> memo
    )
 )
 
-#restart-solver
-#push-options "--z3rlimit 1000"
-let sq0 f result memory temp = 
-  let h0 = ST.get() in 
+let sq0_0 f result memory temp = 
+    let h0 = ST.get() in 
   
   let f0 = index f (size 0) in 
   let f1 = index f (size 1) in 
@@ -965,10 +1025,10 @@ let lemma_distr_4 a b c e d = ()
 let sq0 f result memory temp = 
   let h0 = ST.get() in 
   
-  let h5 = ST.get() in 
-  let temp0 = index temp (size 0) in
-  assert (Lib.IntTypes.range (Lib.IntTypes.v c3 + Lib.IntTypes.v temp0) (Lib.IntTypes.U64));
-  let r = c3 +! temp0 in 
+  assert_norm (pow2 64 * pow2 64 = pow2 128);
+  assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192);
+  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);  
+  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 320); 
 
   let f0 = index f (size 0) in 
   let f1 = index f (size 1) in 
@@ -997,7 +1057,6 @@ let sq0 f result memory temp =
   assert(Lib.Sequence.index (as_seq h2 result) 1 == Lib.Sequence.index (as_seq h2 o0) 1);
   assert(Lib.Sequence.index (as_seq h2 result) 0 == Lib.Sequence.index (as_seq h2 o0) 0);
 
-
   distributivity_add_left  (v c3) (uint_v temp0) (pow2 64 * pow2 64 * pow2 64 * pow2 64);
   lemma_distr_4 (v f0) (v f0) (v f1) (v f2) (v f3);
   
@@ -1007,7 +1066,6 @@ let sq0 f result memory temp =
    lemma_div_lt_nat (v c3 + uint_v temp0) 320 256;
    
   c3 +! temp0
-
 
 
 
