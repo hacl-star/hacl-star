@@ -288,7 +288,6 @@ procedure Check_avx512_support()
     And64(rbx, 0x10000);
     And64(rax, 0x20000);
     And64(r10, 0x40000000);
-    And64(r11, 0x80000000);
 
     assert_normalize(0x10000 == pow2(16));
     assert_normalize(0x20000 == pow2(17));
@@ -303,13 +302,17 @@ procedure Check_avx512_support()
     lemma_ishr_pow2_diff64(16, 30); // ==> shr(pow2(30), 14) == pow2(16)
     lemma_ishr_zero64(14);         // ==> shr(0, 14) == 0
 
+    lemma_iand_maybe_pow2_64(rax, rbx, 16); // Post condition
+    lemma_iand_pow2_64(rax, 16);
+    And64(rax, rbx);
+
+    // Need to move 2**31 to a register, as it is out of range of imm32 to be used in AND directly
+    Mov64(rbx, 0x80000000);
+    And64(r11, rbx);
     Shr64(r11, 15);
     lemma_ishr_pow2_diff64(16, 31); // ==> shr(pow2(31), 15) == pow2(16)
     lemma_ishr_zero64(15);         // ==> shr(0, 15) == 0
 
-    lemma_iand_maybe_pow2_64(rax, rbx, 16); // Post condition
-    lemma_iand_pow2_64(rax, 16);
-    And64(rax, rbx);
     lemma_iand_maybe_pow2_64(rax, r10, 16); // Post condition
     And64(rax, r10);
     lemma_iand_maybe_pow2_64(rax, r11, 16); // Post condition
