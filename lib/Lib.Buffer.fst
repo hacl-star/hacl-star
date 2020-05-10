@@ -391,9 +391,9 @@ let fill_blocks #t h0 len n output a_spec refl footprint spec impl =
     norm [delta] Seq.generate_blocks (v len) (v n) (v n) a_spec (spec h0) (refl h0 0));
   let h1 = ST.get() in
   assert(refl' h1 (v n) == Loop.repeat_gen (v n)
-	       (Sequence.generate_blocks_a t (v len) (v n) a_spec)
-	       (Sequence.generate_blocks_inner t (v len) (v n) a_spec (spec h0))
-	       (refl' h0 0));
+         (Sequence.generate_blocks_a t (v len) (v n) a_spec)
+         (Sequence.generate_blocks_inner t (v len) (v n) a_spec (spec h0))
+         (refl' h0 0));
   assert(B.loc_includes (loc output) (loc (gsub output 0ul (n *! len))));
   assert(B.modifies (B.loc_union (footprint (v n)) (loc (gsub output 0ul (n *! len)))) h0 h1);
   B.loc_includes_union_l (footprint (v n)) (loc output) (footprint (v n));
@@ -464,12 +464,12 @@ let fill #a h0 clen out spec impl =
   loop h0 clen a_spec refl footprint spec
   (fun i ->
            Loop.unfold_repeat_gen (v clen) a_spec (spec h0) (refl h0 0) (v i);
-	   let os = sub out 0ul (i +! 1ul) in
-	   let h = ST.get() in
-	   let x = impl i in
-	   os.(i) <- x;
-	   let h' = ST.get() in
-	   assert (Seq.equal (refl h' (v i + 1)) (spec h0 (v i) (refl h (v i))))
+     let os = sub out 0ul (i +! 1ul) in
+     let h = ST.get() in
+     let x = impl i in
+     os.(i) <- x;
+     let h' = ST.get() in
+     assert (Seq.equal (refl h' (v i + 1)) (spec h0 (v i) (refl h (v i))))
   )
 
 inline_for_extraction noextract
@@ -486,11 +486,11 @@ val lemma_eq_disjoint:
   -> h1: mem
   -> Lemma
   (requires (live h0 b1 /\ live h0 b2 /\ eq_or_disjoint b1 b2 /\
-	     modifies1 #a1 (gsub b1 0ul n) h0 h1))
+       modifies1 #a1 (gsub b1 0ul n) h0 h1))
   (ensures (let b2s = gsub b2 n (clen2 -! n) in
-	    as_seq h0 b2s == as_seq h1 b2s /\
-	    Seq.index (as_seq h0 b2) (v n) ==
-	    Seq.index (as_seq h1 b2) (v n)))
+      as_seq h0 b2s == as_seq h1 b2s /\
+      Seq.index (as_seq h0 b2) (v n) ==
+      Seq.index (as_seq h1 b2) (v n)))
 
 let lemma_eq_disjoint #t2 #a1 #a2 clen1 clen2 b1 b2 n h0 h1 =
   let b1s = gsub b1 0ul n in
@@ -510,9 +510,9 @@ let mapT #t #a #b clen out f inp =
   let spec h = Seq.map_inner f (as_seq h inp) in
   fill h0 clen out spec
     (fun i -> let x = inp.(i) in
-	   let h1 = ST.get() in
-	   lemma_eq_disjoint #t clen clen out inp i h0 h1;
-	   f x)
+     let h1 = ST.get() in
+     lemma_eq_disjoint #t clen clen out inp i h0 h1;
+     f x)
 
 inline_for_extraction
 let map2T #t #a1 #a2 #b clen out f inp1 inp2 =
