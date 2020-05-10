@@ -40,3 +40,5 @@ curve64-rfc.exe: $(patsubst %.c,%.o,$(wildcard rfc7748_src/*.c))
 
 %.test: %.exe
 	./$<
+
+
