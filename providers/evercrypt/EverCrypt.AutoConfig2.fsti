@@ -31,6 +31,8 @@ val has_adx: getter Vale.X64.CPU_Features_s.adx_enabled
 val has_sse: getter Vale.X64.CPU_Features_s.sse_enabled
 val has_movbe: getter Vale.X64.CPU_Features_s.movbe_enabled
 val has_rdrand: getter Vale.X64.CPU_Features_s.rdrand_enabled
+(** At the moment, has_avx512 contains the AVX512_F, AVX512_DQ, AVX512_BW and AVX512_VL flags
+    See Vale.X64.CPU_Features_s for more details. **)
 val has_avx512: getter Vale.X64.CPU_Features_s.avx512_enabled
 
 val wants_vale: unit ->
