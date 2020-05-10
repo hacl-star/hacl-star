@@ -1,4 +1,4 @@
-module Hacl.Impl.LowLevel.RawCmp
+module Hacl.Impl.P256.LowLevel .RawCmp
 
 
 open FStar.HyperStack.All

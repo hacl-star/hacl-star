@@ -15,8 +15,8 @@ open Hacl.Impl.SolinasReduction
 open Spec.P256.MontgomeryMultiplication
 open Spec.P256.MontgomeryMultiplication.PointDouble
 open Spec.P256.MontgomeryMultiplication.PointAdd
-open Hacl.Impl.LowLevel
-open Hacl.Impl.P256.LowLevel
+open Hacl.Impl.P256.LowLevel 
+open Hacl.Impl.P256.LowLevel.PrimeSpecific
 open Hacl.Impl.P256.MontgomeryMultiplication
 open Spec.P256
 open Hacl.Impl.P256.Math 

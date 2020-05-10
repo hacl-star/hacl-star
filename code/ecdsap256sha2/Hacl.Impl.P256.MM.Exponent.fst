@@ -10,7 +10,7 @@ open Lib.Buffer
 
 open FStar.Math.Lemmas
 
-open Hacl.Impl.LowLevel
+open Hacl.Impl.P256.LowLevel 
 
 open FStar.Mul
 
@@ -19,7 +19,7 @@ open Lib.Loops
 open Hacl.Impl.P256.MontgomeryMultiplication
 open Spec.P256.MontgomeryMultiplication
 
-open Hacl.Impl.P256.LowLevel
+open Hacl.Impl.P256.LowLevel.PrimeSpecific
 open Hacl.Impl.P256
 
 open Spec.P256.Definitions

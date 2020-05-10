@@ -10,7 +10,7 @@ open Lib.Buffer
 open Spec.P256.Lemmas
 
 open Spec.P256.Definitions
-open Hacl.Impl.LowLevel
+open Hacl.Impl.P256.LowLevel 
 open Hacl.Impl.P256
 open Spec.P256.MontgomeryMultiplication
 open Hacl.Impl.ECDSA.MontgomeryMultiplication
@@ -23,8 +23,8 @@ open Spec.P256
 open Spec.P256.Lemmas
 
 open Hacl.Impl.P256.PointAdd
-open Hacl.Impl.P256.LowLevel
-open Hacl.Impl.LowLevel.RawCmp
+open Hacl.Impl.P256.LowLevel.PrimeSpecific
+open Hacl.Impl.P256.LowLevel.RawCmp
 
 open Hacl.Hash.SHA2
 
@@ -164,8 +164,8 @@ let ecdsa_verification_step4 bufferU1 bufferU2 r s hash =
     multPowerPartial s inverseS r u2;
   
   let h1 = ST.get() in 
-    Hacl.Impl.LowLevel.changeEndian u1;
-    Hacl.Impl.LowLevel.changeEndian u2;
+    Hacl.Impl.P256.LowLevel .changeEndian u1;
+    Hacl.Impl.P256.LowLevel .changeEndian u2;
     toUint8 u1 bufferU1;
     toUint8 u2 bufferU2;
   

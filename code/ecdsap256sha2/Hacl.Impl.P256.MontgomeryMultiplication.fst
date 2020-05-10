@@ -14,8 +14,8 @@ open FStar.Mul
 
 open Spec.P256.Definitions
 open Spec.P256.Lemmas
-open Hacl.Impl.LowLevel
-open Hacl.Impl.P256.LowLevel
+open Hacl.Impl.P256.LowLevel 
+open Hacl.Impl.P256.LowLevel.PrimeSpecific
 
 open Lib.Loops
 open Spec.P256.MontgomeryMultiplication

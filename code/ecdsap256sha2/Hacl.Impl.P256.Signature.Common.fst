@@ -16,11 +16,11 @@ open Spec.P256.Lemmas
 open Spec.ECDSA
 open Spec.ECDSAP256.Definition
 
-open Hacl.Impl.LowLevel
+open Hacl.Impl.P256.LowLevel 
 open Hacl.Impl.P256.MontgomeryMultiplication
 open Hacl.Impl.ECDSA.MontgomeryMultiplication
 
-open Hacl.Impl.P256.LowLevel
+open Hacl.Impl.P256.LowLevel.PrimeSpecific
 open Hacl.Impl.P256
 
 open Hacl.Impl.P256.Math 
@@ -28,7 +28,7 @@ open FStar.Math.Lemmas
 open FStar.Mul
 
 open Hacl.Impl.P256.Arithmetics
-open Hacl.Impl.LowLevel.RawCmp
+open Hacl.Impl.P256.LowLevel .RawCmp
 open Spec.P256.MontgomeryMultiplication
 friend Spec.P256.MontgomeryMultiplication
 

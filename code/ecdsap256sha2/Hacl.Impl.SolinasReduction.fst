@@ -10,8 +10,8 @@ open FStar.Math.Lib
 open Lib.Buffer
 
 open Spec.P256.SolinasReduction
-open Hacl.Impl.LowLevel
-open Hacl.Impl.P256.LowLevel
+open Hacl.Impl.P256.LowLevel 
+open Hacl.Impl.P256.LowLevel.PrimeSpecific
 
 open Spec.P256.Definitions
 open FStar.Mul

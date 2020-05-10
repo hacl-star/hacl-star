@@ -11,7 +11,7 @@ open FStar.Math.Lemmas
 
 open Spec.P256.Lemmas
 open Spec.ECDSAP256.Definition
-open Hacl.Impl.LowLevel
+open Hacl.Impl.P256.LowLevel 
 
 open FStar.Tactics
 open FStar.Tactics.Canon 
@@ -27,7 +27,7 @@ val add8_without_carry1:  t: widefelem -> t1: widefelem -> result: widefelem  ->
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\  wide_as_nat h1 result = wide_as_nat h0 t + wide_as_nat h0 t1)
 
 let add8_without_carry1 t t1 result  = 
-  let _ = Hacl.Impl.LowLevel.add8 t t1 result in 
+  let _ = add8 t t1 result in 
     assert_norm (pow2 320 + prime_p256_order * prime_p256_order < pow2 512)
 
 
@@ -233,7 +233,7 @@ let reduction_prime_2prime_with_carry x result  =
     let cin = Lib.Buffer.index x (size 4) in 
     let x_ = Lib.Buffer.sub x (size 0) (size 4) in 
         recall_contents prime256order_buffer (Lib.Sequence.of_list p256_order_prime_list);
-    let c = Hacl.Impl.LowLevel.sub4_il x_ prime256order_buffer tempBuffer in
+    let c = Hacl.Impl.P256.LowLevel .sub4_il x_ prime256order_buffer tempBuffer in
       let h1 = ST.get() in 
 
       assert(if uint_v c = 0 then as_nat h0 x_ >= prime_p256_order else as_nat h0 x_ < prime_p256_order);
@@ -254,7 +254,7 @@ let reduction_prime_2prime_with_carry2 cin x result  =
     let tempBuffer = create (size 4) (u64 0) in 
     let tempBufferForSubborrow = create (size 1) (u64 0) in 
         recall_contents prime256order_buffer (Lib.Sequence.of_list p256_order_prime_list);
-    let c = Hacl.Impl.LowLevel.sub4_il x prime256order_buffer tempBuffer in
+    let c = Hacl.Impl.P256.LowLevel .sub4_il x prime256order_buffer tempBuffer in
     let carry = sub_borrow_u64 c cin (u64 0) tempBufferForSubborrow in 
     cmovznz4 carry tempBuffer x result;
  pop_frame()      
@@ -380,7 +380,6 @@ let montgomery_multiplication_ecdsa_module a b result =
 
 
 let felem_add arg1 arg2 out = 
-  let open Hacl.Impl.LowLevel in 
   let t = add4 arg1 arg2 out in 
   reduction_prime_2prime_with_carry2 t out out
 
