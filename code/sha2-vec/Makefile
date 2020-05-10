@@ -10,7 +10,7 @@ test: all
 # Defines rules for producing .checked, .krml, .depend, etc.
 include ../../Makefile.local
 
-BASE_FLAGS+= -funroll-loops 5 -fbuiltin-uint128
+BASE_FLAGS+= -funroll-loops 16 -fbuiltin-uint128
 
 CFLAGS += -I../../../lib/c -I../../lib/c -I ../hash/dist -march=native -mtune=native -O3
 export CFLAGS
