@@ -1,0 +1,2 @@
+let memzero _ _ =
+  ()
