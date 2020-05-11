@@ -14,6 +14,8 @@ open FStar.Math.Lib
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
+(* https://eprint.iacr.org/2013/816.pdf *)
+
 let prime = prime256
 
 let aCoordinateP256 = -3 

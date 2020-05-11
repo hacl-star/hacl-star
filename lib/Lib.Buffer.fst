@@ -420,6 +420,7 @@ let fill_blocks_simple #a h0 bs n output spec_f impl_f =
     Loop.unfold_repeat_gen (v n) (Sequence.generate_blocks_simple_a a (v bs) (v n))
       (Sequence.generate_blocks_simple_f #a (v bs) (v n) (spec_f h0)) (refl h0 0) (v i);
     FStar.Math.Lemmas.lemma_mult_le_right (v bs) (v i + 1) (v n);
+    assert (v i * v bs <= maxint U32);
     assert (v (i *! bs) + v bs <= v n * v bs);
     let block = sub output (i *! bs) bs in
     let h0_ = ST.get() in
