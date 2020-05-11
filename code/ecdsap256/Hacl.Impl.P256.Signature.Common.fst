@@ -21,7 +21,7 @@ open Hacl.Impl.P256.MontgomeryMultiplication
 open Hacl.Impl.ECDSA.MontgomeryMultiplication
 
 open Hacl.Impl.P256.LowLevel.PrimeSpecific
-open Hacl.Impl.P256
+open Hacl.Impl.P256.Core
 
 open Hacl.Impl.P256.Math 
 open FStar.Math.Lemmas

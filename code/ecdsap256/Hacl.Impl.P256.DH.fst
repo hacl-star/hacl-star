@@ -16,7 +16,7 @@ open Spec.ECDSAP256.Definition
 open Spec.P256.Lemmas
 
 open Hacl.Impl.P256.LowLevel 
-open Hacl.Impl.P256
+open Hacl.Impl.P256.Core
 open Hacl.Impl.P256.Signature.Common
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 200"

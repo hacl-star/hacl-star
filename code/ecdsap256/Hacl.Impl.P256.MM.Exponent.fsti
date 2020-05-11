@@ -22,7 +22,7 @@ open Hacl.Impl.P256.MontgomeryMultiplication
 open Spec.P256.MontgomeryMultiplication
 
 open Hacl.Impl.P256.LowLevel.PrimeSpecific
-open Hacl.Impl.P256
+open Hacl.Impl.P256.Core
 open Hacl.Impl.P256.Arithmetics
 
 open Spec.P256.Definitions

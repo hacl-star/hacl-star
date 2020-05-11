@@ -7,7 +7,7 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Impl.P256
+open Hacl.Impl.P256.Core
 open Hacl.Impl.P256.LowLevel 
 open Hacl.Impl.P256.LowLevel.PrimeSpecific
 open Hacl.Impl.P256.MM.Exponent
