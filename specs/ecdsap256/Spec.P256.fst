@@ -44,8 +44,6 @@ let _point_double (p:point_nat_prime) : point_nat_prime =
 
 noextract
 let _point_add (p:point_nat_prime) (q:point_nat_prime) : point_nat_prime =
-  let open FStar.Tactics in
-  let open FStar.Tactics.Canon in
 
   let (x1, y1, z1) = p in
   let (x2, y2, z2) = q in
@@ -56,28 +54,18 @@ let _point_add (p:point_nat_prime) (q:point_nat_prime) : point_nat_prime =
   let u1 = x1 * z2z2 % prime256 in
   let u2 = x2 * z1z1 % prime256 in
 
-  assert_by_tactic (x1 * z2 * z2 = x1 * (z2 * z2)) canon;
-  assert_by_tactic (x2 * z1 * z1 = x2 * (z1 * z1)) canon;
-
   let s1 = y1 * z2 * z2z2 % prime256 in
   let s2 = y2 * z1 * z1z1 % prime256 in
-
-  assert_by_tactic (y1 * z2 * (z2 * z2) = y1 * z2 * z2 * z2) canon;
-  assert_by_tactic (y2 * z1 * (z1 * z1) = y2 * z1 * z1 * z1) canon;
 
   let h = (u2 - u1) % prime256 in
   let r = (s2 - s1) % prime256 in
 
-  let rr = (r * r) in
-  let hh = (h * h) in
-  let hhh = (h * h * h) in
+  let rr = r * r in
+  let hh = h * h in
+  let hhh = h * h * h in
 
-  assert_by_tactic (forall (n: nat). n * h * h = n * (h * h)) canon;
-  assert_by_tactic (s1 * (h * h * h) = s1 * h * h * h) canon;
   let x3 = (rr - hhh - 2 * u1 * hh) % prime256 in
-  assert(x3 = (r * r - h * h * h - 2 * u1 * h * h) % prime256);
   let y3 = (r * (u1 * hh - x3) - s1 * hhh) % prime256 in
-  assert(y3 = (r * (u1 * h*h - x3) - s1 * h*h*h) % prime256);
   let z3 = (h * z1 * z2) % prime256 in
   if z2 = 0 then
     (x1, y1, z1)
@@ -93,7 +81,6 @@ let isPointAtInfinity (p:point_nat) =
 
 
 let _norm (p:point_nat_prime) : point_nat_prime =
-  assert_norm (prime256 - 2 > 0);
   let (x, y, z) = p in
   let z2 = z * z in
   let z2i = modp_inv2_pow z2 in
@@ -102,8 +89,6 @@ let _norm (p:point_nat_prime) : point_nat_prime =
   let x3 = (z2i * x) % prime256 in
   let y3 = (z3i * y) % prime256 in
   let z3 = if isPointAtInfinity p then 0 else 1 in
-  assert(x3 == (x * (pow (z * z) (prime256 - 2) % prime256) % prime256));
-  assert(y3 == (y * (pow (z * z * z) (prime256 - 2) % prime256) % prime256));
   (x3, y3, z3)
 
 
