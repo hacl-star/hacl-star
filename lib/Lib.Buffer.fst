@@ -273,7 +273,7 @@ val loopi_blocks_f_nospec:
     (requires fun h -> live h inp /\ live h w /\ disjoint inp w)
     (ensures  fun h0 _ h1 -> modifies (loc w) h0 h1)
 
-#set-options "--z3rlimit 200 --max_fuel 0"
+#set-options "--z3rlimit 300 --max_fuel 0"
 
 let loopi_blocks_f_nospec #a #b #blen bs inpLen inp f nb i w =
   assert ((v i + 1) * v bs <= v nb * v bs);
@@ -402,7 +402,7 @@ let fill_blocks #t h0 len n output a_spec refl footprint spec impl =
   assert(B.loc_includes (B.loc_union (footprint (v n)) (loc output)) (B.loc_union (footprint (v n)) (loc (gsub output 0ul (n *! len)))));
   assert(B.modifies (B.loc_union (footprint (v n)) (loc output)) h0 h1)
 
-#reset-options "--z3rlimit 300 --max_fuel 1"
+#reset-options "--z3rlimit 400 --max_fuel 1"
 
 let fill_blocks_simple #a h0 bs n output spec_f impl_f =
   [@inline_let]
