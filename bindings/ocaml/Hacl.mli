@@ -64,8 +64,11 @@ module NaCl : sig
   end
 end
 
-module Blake2b_32 : Blake2b
-module Blake2b_256 : Blake2b
+module Blake2b_32 : Blake2
+module Blake2b_256 : Blake2
+
+module Blake2s_32 : Blake2
+module Blake2s_128 : Blake2
 
 module ECDSA : sig
   val sign : C.t -> C.t -> C.t -> C.t -> bool
