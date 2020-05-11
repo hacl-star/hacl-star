@@ -1,4 +1,4 @@
-module Hacl.Impl.ECDSA
+module Hacl.Interface.P256.ECDSA
 
 open FStar.HyperStack.All
 open FStar.HyperStack
@@ -9,38 +9,14 @@ open Lib.Buffer
 open Lib.ByteSequence
 
 open FStar.Mul
-open FStar.Math.Lemmas
-
-open Hacl.Hash.SHA2
-
 open Spec.P256
 open Spec.P256.Lemmas
 open Spec.P256.Definitions
 open Spec.Hash.Definitions
 
 open Spec.ECDSAP256.Definition
-
-open Hacl.Impl.P256.LowLevel 
-
-open Hacl.Impl.P256.Core
-
-open Hacl.Impl.ECDSA.MM.Exponent
-open Hacl.Impl.ECDSA.MontgomeryMultiplication
-
-open Hacl.Impl.P256.Signature.Common
-
 open Hacl.Impl.P256.Compression
-
-open Hacl.Impl.ECDSA.P256SHA256.Signature.Agile
-
-open Hacl.Impl.ECDSA.P256SHA256.Verification.Agile
-open Hacl.Impl.ECDSA.P256SHA256.Verification.Hashless
-
 open Spec.P256.MontgomeryMultiplication
-open Hacl.Impl.ECDSA.Reduction
-
-
-
 
 val ecdsa_sign_p256_sha2: result: lbuffer uint8 (size 64) -> mLen: size_t -> m: lbuffer uint8 mLen ->
   privKey: lbuffer uint8 (size 32) -> 
@@ -322,39 +298,3 @@ val reduction_8_32: x: lbuffer uint8 (size 32) -> result: lbuffer uint8 (size 32
       nat_from_bytes_be (as_seq h1 result) == nat_from_bytes_be (as_seq h0 x) % prime_p256_order /\
       nat_from_bytes_be (as_seq h1 result) < prime_p256_order
     )
-
-
-
-val ecp256dh_i:
-    result:lbuffer uint8 (size 64)
-  -> scalar:lbuffer uint8 (size 32)
-  -> Stack uint64
-  (requires fun h ->
-    live h result /\ live h scalar /\ 
-    disjoint result scalar)
-  (ensures fun h0 r h1 ->
-    let pointX, pointY, flag = ecp256_dh_i (as_seq h0 scalar) in
-    modifies (loc result) h0 h1 /\
-    r == flag /\
-    as_seq h1 (gsub result (size 0) (size 32)) == pointX /\
-    as_seq h1 (gsub result (size 32) (size 32)) == pointY)
-
-
-(* This code is not constant-time on pubKey *)
-val ecp256dh_r:
-    result:lbuffer uint8 (size 64)
-  -> pubKey:lbuffer uint8 (size 64)
-  -> scalar:lbuffer uint8 (size 32)
-  -> Stack uint64
-    (requires fun h ->
-      live h result /\ live h pubKey /\ live h scalar /\
-      disjoint result pubKey /\ disjoint result scalar)
-    (ensures fun h0 r h1 ->
-      let pubKeyX = gsub pubKey (size 0) (size 32) in
-      let pubKeyY = gsub pubKey (size 32) (size 32) in
-      let pointX, pointY, flag =
-        ecp256_dh_r (as_seq h0 pubKeyX) (as_seq h0 pubKeyY) (as_seq h0 scalar) in
-      r == flag /\
-      modifies (loc result) h0 h1 /\
-      as_seq h1 (gsub result (size 0) (size 32)) == pointX /\
-      as_seq h1 (gsub result (size 32) (size 32)) == pointY)
