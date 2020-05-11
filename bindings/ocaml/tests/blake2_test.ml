@@ -1,4 +1,5 @@
 open Test_utils
+open AutoConfig2
 
 type 'a blake2_test =
   { name: string; plaintext: 'a; key: 'a; expected: 'a }
@@ -12,17 +13,21 @@ let tests = [
   }
 ]
 
-let test (v: Bytes.t blake2_test) n hash =
+let test (v: Bytes.t blake2_test) n hash reqs =
   let test_result = test_result (n ^ " " ^ v.name) in
-  let output = Test_utils.init_bytes 64 in
 
-  hash v.key v.plaintext output;
-  if Bytes.compare output v.expected = 0 then
-    test_result Success ""
-  else
-    test_result Failure "Output mismatch"
+  if supports reqs then begin
+    let output = Test_utils.init_bytes (Bytes.length v.expected) in
 
+    hash v.key v.plaintext output;
+    if Bytes.compare output v.expected = 0 then
+      test_result Success ""
+    else
+      test_result Failure "Output mismatch"
+  end else
+    test_result Skipped "Required CPU feature not detected"
 
 let _ =
-  List.iter (fun v -> test v "Blake2b_32" Hacl.Blake2b_32.hash) tests;
-  List.iter (fun v -> test v "Blake2b_256" Hacl.Blake2b_256.hash) tests
+  List.iter (fun v -> test v "Blake2b_32" Hacl.Blake2b_32.hash []) blake2b_tests;
+  List.iter (fun v -> test v "Blake2b_256" Hacl.Blake2b_256.hash [AVX2]) blake2b_tests;
+

@@ -1,5 +1,5 @@
 open EverCrypt.Error
-open EverCrypt.AutoConfig2
+open AutoConfig2
 
 open Test_utils
 
@@ -92,7 +92,6 @@ let test_random () =
     test_result Failure ""
 
 let _ =
-  init ();
   Printf.printf "SHAEXT: %b\n" (has_feature SHAEXT);
   Printf.printf "AES_NI: %b\n" (has_feature AES_NI);
   Printf.printf "PCLMULQDQ: %b\n" (has_feature PCLMULQDQ);

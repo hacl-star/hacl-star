@@ -36,14 +36,22 @@ module Chacha20_Poly1305_32 : Chacha20_Poly1305 =
 
 module Chacha20_Poly1305_128 : Chacha20_Poly1305 =
   Make_Chacha20_Poly1305 (struct
-    let encrypt = Hacl_Chacha20Poly1305_128.hacl_Chacha20Poly1305_128_aead_encrypt
-    let decrypt = Hacl_Chacha20Poly1305_128.hacl_Chacha20Poly1305_128_aead_decrypt
+    let encrypt =
+      assert (AutoConfig2.has_feature AVX);
+      Hacl_Chacha20Poly1305_128.hacl_Chacha20Poly1305_128_aead_encrypt
+    let decrypt =
+      assert (AutoConfig2.has_feature AVX);
+      Hacl_Chacha20Poly1305_128.hacl_Chacha20Poly1305_128_aead_decrypt
   end)
 
 module Chacha20_Poly1305_256 : Chacha20_Poly1305 =
   Make_Chacha20_Poly1305 (struct
-    let encrypt = Hacl_Chacha20Poly1305_256.hacl_Chacha20Poly1305_256_aead_encrypt
-    let decrypt = Hacl_Chacha20Poly1305_256.hacl_Chacha20Poly1305_256_aead_decrypt
+    let encrypt =
+      assert (AutoConfig2.has_feature AVX2);
+      Hacl_Chacha20Poly1305_256.hacl_Chacha20Poly1305_256_aead_encrypt
+    let decrypt =
+      assert (AutoConfig2.has_feature AVX2);
+      Hacl_Chacha20Poly1305_256.hacl_Chacha20Poly1305_256_aead_decrypt
   end)
 
 module Curve25519_51 : Curve25519 =
@@ -55,9 +63,18 @@ module Curve25519_51 : Curve25519 =
 
 module Curve25519_64 : Curve25519 =
   Make_Curve25519 (struct
-    let secret_to_public = Hacl_Curve25519_64.hacl_Curve25519_64_secret_to_public
-    let scalarmult = Hacl_Curve25519_64.hacl_Curve25519_64_scalarmult
-    let ecdh = Hacl_Curve25519_64.hacl_Curve25519_64_ecdh
+    let secret_to_public =
+      assert (AutoConfig2.has_feature ADX);
+      assert (AutoConfig2.has_feature BMI2);
+      Hacl_Curve25519_64.hacl_Curve25519_64_secret_to_public
+    let scalarmult =
+      assert (AutoConfig2.has_feature ADX);
+      assert (AutoConfig2.has_feature BMI2);
+      Hacl_Curve25519_64.hacl_Curve25519_64_scalarmult
+    let ecdh =
+      assert (AutoConfig2.has_feature ADX);
+      assert (AutoConfig2.has_feature BMI2);
+      Hacl_Curve25519_64.hacl_Curve25519_64_ecdh
   end)
 
 module Ed25519 : EdDSA =
@@ -171,12 +188,16 @@ end)
 
 module Poly1305_128 : MAC =
   Make_Poly1305 (struct
-    let mac = Hacl_Poly1305_128.hacl_Poly1305_128_poly1305_mac
+    let mac =
+      assert (AutoConfig2.has_feature AVX);
+      Hacl_Poly1305_128.hacl_Poly1305_128_poly1305_mac
 end)
 
 module Poly1305_256 : MAC =
   Make_Poly1305 (struct
-    let mac = Hacl_Poly1305_256.hacl_Poly1305_256_poly1305_mac
+    let mac =
+      assert (AutoConfig2.has_feature AVX2);
+      Hacl_Poly1305_256.hacl_Poly1305_256_poly1305_mac
 end)
 
 module HKDF_SHA2_256 : HKDF =
@@ -289,7 +310,9 @@ module Blake2b_32 : Blake2b =
 
 module Blake2b_256 : Blake2b =
   Make_Blake2b (struct
-    let blake2b = Hacl_Blake2b_256.hacl_Blake2b_256_blake2b
+    let blake2b =
+      assert (AutoConfig2.has_feature AVX2);
+      Hacl_Blake2b_256.hacl_Blake2b_256_blake2b
   end)
 
 (* WIP, will update along with chages to ECDSA *)
