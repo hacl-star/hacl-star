@@ -395,56 +395,58 @@ let checkCoordinates r s =
 
 open Spec.Hash.Definitions
 
+
 type hash_alg_ecdsa = 
   |NoHash
   |Hash of (a: hash_alg {a == SHA2_256 \/ a == SHA2_384 \/ a == SHA2_512})
 
+
+let invert_state_s (a: hash_alg_ecdsa): Lemma
+  (requires True)
+  (ensures (inversion hash_alg_ecdsa))
+  [ SMTPat (hash_alg_ecdsa) ]
+=
+  allow_inversion (hash_alg_ecdsa)
+
+
 val max_input_length: hash_alg_ecdsa -> Tot pos 
 
 let max_input_length a =
-  allow_inversion hash_alg_ecdsa;
   match a with
-    |NoHash -> pow2 32 - 1
+    |NoHash -> 32
     |Hash a -> max_input_length a
 
-#push-options "--ifuel 1"
 
-val hashSpec: a: hash_alg_ecdsa -> 
-  Tot (m: bytes {
-      match a with 
-	|NoHash -> Seq.length m == max_input_length a
-	|Hash _ -> Seq.length m <= max_input_length a
-      } -> Lib.ByteSequence.lbytes
-    (
+
+val hashSpec: a: hash_alg_ecdsa -> mLen: size_nat{if NoHash? a then mLen == max_input_length a else True} -> m: lseq uint8 mLen ->
+  Tot (r:Lib.ByteSequence.lbytes (
       match a with 
 	|NoHash -> length m
-	|Hash a -> hash_length a)
-    )
+	|Hash a -> hash_length a
+    ) {length r >= 32})
 
-#pop-options
-
-let hashSpec a = 
+let hashSpec a mLen m = 
+  assert_norm (pow2 32 < pow2 61);
+  assert_norm (pow2 32 < pow2 125);
   allow_inversion hash_alg_ecdsa;
   match a with 
-  |NoHash -> (fun x -> x)
-  |Hash a -> Spec.Agile.Hash.hash a
-    
+  |NoHash ->  m
+  |Hash a -> Spec.Agile.Hash.hash a m
 
 open Lib.ByteSequence 
+
 
 val ecdsa_verification_agile:
   alg: hash_alg_ecdsa
   -> publicKey:tuple2 nat nat 
   -> r: nat 
   -> s: nat
-  -> mLen:size_nat {NoHash? alg -> mLen == max_input_length alg} 
+  -> mLen:size_nat {if NoHash? alg then mLen == max_input_length alg else True} 
   -> m:lseq uint8 mLen
   -> bool
 
 let ecdsa_verification_agile alg publicKey r s mLen m =
   allow_inversion hash_alg_ecdsa;
-  assert_norm (pow2 32 < pow2 61);
-  assert_norm (pow2 32 < pow2 125);
   let publicJacobian = toJacobianCoordinates publicKey in
   if not (verifyQValidCurvePointSpec publicJacobian) then false
   else
@@ -452,8 +454,10 @@ let ecdsa_verification_agile alg publicKey r s mLen m =
     if not (checkCoordinates r s) then false
     else
       begin
-      let hashM = (hashSpec alg) m in
-      let cutHashM = sub hashM 0 32 in admit();
+
+      let hashM = hashSpec alg mLen m in 
+     
+      let cutHashM = sub hashM 0 32 in 
       let hashNat = nat_from_bytes_be cutHashM % prime_p256_order in
 
       let u1 = nat_to_bytes_be 32 (pow s (prime_p256_order - 2) * hashNat % prime_p256_order) in
