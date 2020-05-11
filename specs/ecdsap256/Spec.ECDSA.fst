@@ -399,22 +399,32 @@ type hash_alg_ecdsa =
   |NoHash
   |Hash of (a: hash_alg {a == SHA2_256 \/ a == SHA2_384 \/ a == SHA2_512})
 
+val max_input_length: hash_alg_ecdsa -> Tot pos 
 
-let max_input_length: hash_alg_ecdsa -> Tot pos = function 
-  |NoHash -> pow2 32 - 1
-  |Hash a -> max_input_length a
+let max_input_length a =
+  allow_inversion hash_alg_ecdsa;
+  match a with
+    |NoHash -> pow2 32 - 1
+    |Hash a -> max_input_length a
 
+#push-options "--ifuel 1"
 
 val hashSpec: a: hash_alg_ecdsa -> 
-  Tot (m: bytes {Seq.length m <= max_input_length a} -> Lib.ByteSequence.lbytes
+  Tot (m: bytes {
+      match a with 
+	|NoHash -> Seq.length m == max_input_length a
+	|Hash _ -> Seq.length m <= max_input_length a
+      } -> Lib.ByteSequence.lbytes
     (
       match a with 
 	|NoHash -> length m
 	|Hash a -> hash_length a)
     )
 
+#pop-options
 
 let hashSpec a = 
+  allow_inversion hash_alg_ecdsa;
   match a with 
   |NoHash -> (fun x -> x)
   |Hash a -> Spec.Agile.Hash.hash a
@@ -427,11 +437,12 @@ val ecdsa_verification_agile:
   -> publicKey:tuple2 nat nat 
   -> r: nat 
   -> s: nat
-  -> mLen:size_nat
+  -> mLen:size_nat {NoHash? alg -> mLen == max_input_length alg} 
   -> m:lseq uint8 mLen
   -> bool
 
 let ecdsa_verification_agile alg publicKey r s mLen m =
+  allow_inversion hash_alg_ecdsa;
   assert_norm (pow2 32 < pow2 61);
   assert_norm (pow2 32 < pow2 125);
   let publicJacobian = toJacobianCoordinates publicKey in
@@ -442,7 +453,7 @@ let ecdsa_verification_agile alg publicKey r s mLen m =
     else
       begin
       let hashM = (hashSpec alg) m in
-      let cutHashM = sub hashM 0 32 in 
+      let cutHashM = sub hashM 0 32 in admit();
       let hashNat = nat_from_bytes_be cutHashM % prime_p256_order in
 
       let u1 = nat_to_bytes_be 32 (pow s (prime_p256_order - 2) * hashNat % prime_p256_order) in
