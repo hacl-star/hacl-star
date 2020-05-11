@@ -395,22 +395,38 @@ let checkCoordinates r s =
 
 open Spec.Hash.Definitions
 
-val hashSpec: a: hash_alg {SHA2_256? a \/ SHA2_384? a \/ SHA2_512? a} -> 
-  Tot (m: bytes {Seq.length m <= max_input_length a}  -> r: Lib.ByteSequence.lbytes (hash_length a))
+type hash_alg_ecdsa = 
+  |NoHash
+  |Hash of (a: hash_alg {a == SHA2_256 \/ a == SHA2_384 \/ a == SHA2_512})
+
+
+let max_input_length: hash_alg_ecdsa -> Tot pos = function 
+  |NoHash -> pow2 32 - 1
+  |Hash a -> max_input_length a
+
+
+val hashSpec: a: hash_alg_ecdsa -> 
+  Tot (m: bytes {Seq.length m <= max_input_length a} -> Lib.ByteSequence.lbytes
+    (
+      match a with 
+	|NoHash -> length m
+	|Hash a -> hash_length a)
+    )
 
 
 let hashSpec a = 
   match a with 
-  |SHA2_256 -> Spec.Agile.Hash.hash Def.SHA2_256
-  |SHA2_384 -> Spec.Agile.Hash.hash Def.SHA2_384
-  |SHA2_512 -> Spec.Agile.Hash.hash Def.SHA2_512
+  |NoHash -> (fun x -> x)
+  |Hash a -> Spec.Agile.Hash.hash a
     
 
 open Lib.ByteSequence 
 
 val ecdsa_verification_agile:
-  alg: hash_alg {SHA2_256? alg \/ SHA2_384? alg \/ SHA2_512? alg} 
-  -> publicKey:tuple2 nat nat -> r:nat -> s:nat
+  alg: hash_alg_ecdsa
+  -> publicKey:tuple2 nat nat 
+  -> r: nat 
+  -> s: nat
   -> mLen:size_nat
   -> m:lseq uint8 mLen
   -> bool
