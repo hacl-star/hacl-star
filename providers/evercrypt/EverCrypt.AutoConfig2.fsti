@@ -31,6 +31,9 @@ val has_adx: getter Vale.X64.CPU_Features_s.adx_enabled
 val has_sse: getter Vale.X64.CPU_Features_s.sse_enabled
 val has_movbe: getter Vale.X64.CPU_Features_s.movbe_enabled
 val has_rdrand: getter Vale.X64.CPU_Features_s.rdrand_enabled
+(** At the moment, has_avx512 contains the AVX512_F, AVX512_DQ, AVX512_BW and AVX512_VL flags
+    See Vale.X64.CPU_Features_s for more details. **)
+val has_avx512: getter Vale.X64.CPU_Features_s.avx512_enabled
 
 val wants_vale: unit ->
   Stack bool (requires fun _ -> True) (ensures fun h0 _ h1 -> B.(modifies loc_none h0 h1))
@@ -80,6 +83,7 @@ val disable_pclmulqdq: disabler
 val disable_sse: disabler
 val disable_movbe: disabler
 val disable_rdrand: disabler
+val disable_avx512: disabler
 val disable_vale: disabler
 val disable_hacl: disabler
 val disable_openssl: disabler
