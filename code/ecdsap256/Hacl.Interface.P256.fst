@@ -1,4 +1,4 @@
-module Hacl.Impl.ECDSA
+module Hacl.Interface.P256
 
 open FStar.HyperStack.All
 open FStar.HyperStack
@@ -8,45 +8,31 @@ open Lib.IntTypes
 open Lib.Buffer
 open Lib.ByteSequence
 
-open FStar.Mul
-open FStar.Math.Lemmas
+open Spec.DH
+open Spec.ECDSAP256.Definition
 
-open Hacl.Hash.SHA2
+open Lib.IntTypes
+open Lib.Buffer
+open Lib.ByteSequence
+
+open FStar.Mul
 
 open Spec.P256
 open Spec.P256.Lemmas
 open Spec.P256.Definitions
 
-open Spec.ECDSAP256.Definition
-
-open Hacl.Impl.P256.LowLevel 
-
-open Hacl.Impl.P256.Core
-
-open Hacl.Impl.ECDSA.MM.Exponent
-open Hacl.Impl.ECDSA.MontgomeryMultiplication
-
-open Hacl.Impl.P256.Signature.Common
-
-
-open Hacl.Impl.ECDSA.P256SHA256.Signature.Agile
-
-open Hacl.Impl.ECDSA.P256SHA256.Verification.Agile
-
 open Hacl.Impl.P256.Compression
-
 open Spec.Hash.Definitions
-open Hacl.Hash.Definitions
 
 
 let ecdsa_sign_p256_sha2 result mLen m privKey k = 
-  ecdsa_signature SHA2_256 result mLen m privKey k
+  Hacl.Impl.ECDSA.P256SHA256.Signature.Agile.ecdsa_signature SHA2_256 result mLen m privKey k
 
 let ecdsa_sign_p256_sha384 result mLen m privKey k = 
-  ecdsa_signature SHA2_384 result mLen m privKey k
+  Hacl.Impl.ECDSA.P256SHA256.Signature.Agile.ecdsa_signature SHA2_384 result mLen m privKey k
 
 let ecdsa_sign_p256_sha512 result mLen m privKey k = 
-  ecdsa_signature SHA2_512 result mLen m privKey k
+  Hacl.Impl.ECDSA.P256SHA256.Signature.Agile.ecdsa_signature SHA2_512 result mLen m privKey k
 
 let ecdsa_sign_p256_without_hash result m privKey k = 
   Hacl.Impl.ECDSA.P256SHA256.Signature.Hashless.ecdsa_signature_without_hash result m privKey k
@@ -86,3 +72,9 @@ let compressionCompressedForm b result =
  
 
 let reduction_8_32 x result = Hacl.Impl.ECDSA.Reduction.reduction_8_32 x result 
+
+
+
+let ecp256dh_i result scalar = Hacl.Impl.P256.DH.ecp256dh_i result scalar
+
+let ecp256dh_r result pubKey scalar = Hacl.Impl.P256.DH.ecp256dh_r result pubKey scalar

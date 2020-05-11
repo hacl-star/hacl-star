@@ -1,4 +1,4 @@
-module Hacl.Impl.ECDSA
+module Hacl.Interface.P256
 
 open FStar.HyperStack.All
 open FStar.HyperStack
@@ -9,37 +9,15 @@ open Lib.Buffer
 open Lib.ByteSequence
 
 open FStar.Mul
-open FStar.Math.Lemmas
-
-open Hacl.Hash.SHA2
-
 open Spec.P256
 open Spec.P256.Lemmas
 open Spec.P256.Definitions
 open Spec.Hash.Definitions
 
+open Spec.DH
 open Spec.ECDSAP256.Definition
-
-open Hacl.Impl.P256.LowLevel 
-
-open Hacl.Impl.P256.Core
-
-open Hacl.Impl.ECDSA.MM.Exponent
-open Hacl.Impl.ECDSA.MontgomeryMultiplication
-
-open Hacl.Impl.P256.Signature.Common
-
 open Hacl.Impl.P256.Compression
-
-open Hacl.Impl.ECDSA.P256SHA256.Signature.Agile
-
-open Hacl.Impl.ECDSA.P256SHA256.Verification.Agile
-open Hacl.Impl.ECDSA.P256SHA256.Verification.Hashless
-
 open Spec.P256.MontgomeryMultiplication
-open Hacl.Impl.ECDSA.Reduction
-
-
 
 
 val ecdsa_sign_p256_sha2: result: lbuffer uint8 (size 64) -> mLen: size_t -> m: lbuffer uint8 mLen ->
@@ -322,7 +300,6 @@ val reduction_8_32: x: lbuffer uint8 (size 32) -> result: lbuffer uint8 (size 32
       nat_from_bytes_be (as_seq h1 result) == nat_from_bytes_be (as_seq h0 x) % prime_p256_order /\
       nat_from_bytes_be (as_seq h1 result) < prime_p256_order
     )
-
 
 
 val ecp256dh_i:

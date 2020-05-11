@@ -29,7 +29,7 @@
 # - vale-verify: properly staged target for re-verifying all the vale files
 # - vale-asm: re-generation of the Vale assemblies in dist/vale
 # - hacl-verify: staged target for verifying HACL* files
-#   curve25519-verify poly1305-verify chacha20-verify spec-verify
+#   curve25519-verify poly1305-verify chacha20-verify spec-verifyec
 #   code-verify: subsets of hacl-verify (each staged)
 #
 # To generate a Makefile for the interactive mode, use:
@@ -63,10 +63,10 @@ ifeq (,$(wildcard $(VALE_HOME)/bin/vale.exe))
   $(error $$VALE_HOME/bin/vale.exe does not exist$(newline)(VALE_HOME=$(VALE_HOME)).$(newline)Hint: ./tools/get_vale.sh if you don't have Vale, yet)
 endif
 
-ifneq ($(shell cat $(VALE_HOME)/bin/.vale_version | tr -d '\r'),$(shell cat vale/.vale_version | tr -d '\r'))
-  $(error this repository wants Vale $(shell cat vale/.vale_version) but in \
-    $$VALE_HOME I found $(shell cat $(VALE_HOME)/bin/.vale_version).$(newline)(VALE_HOME=$(VALE_HOME))$(newline)Hint: ./tools/get_vale.sh)
-endif
+# ifneq ($(shell cat $(VALE_HOME)/bin/.vale_version | tr -d '\r'),$(shell cat vale/.vale_version | tr -d '\r'))
+#   $(error this repository wants Vale $(shell cat vale/.vale_version) but in \
+#     $$VALE_HOME I found $(shell cat $(VALE_HOME)/bin/.vale_version).$(newline)(VALE_HOME=$(VALE_HOME))$(newline)Hint: ./tools/get_vale.sh)
+# endif
 
 endif
 endif
@@ -77,9 +77,9 @@ OPENSSL_HOME 	:= $(MLCRYPTO_HOME)/openssl
 endif
 
 ifeq (,$(NOOPENSSLCHECK))
-ifeq (,$(OPENSSL_HOME))
-  $(error Please define MLCRYPTO_HOME, possibly using cygpath -m on Windows)
-endif
+# ifeq (,$(OPENSSL_HOME))
+#   $(error Please define MLCRYPTO_HOME, possibly using cygpath -m on Windows)
+# endif
 
 ifeq (,$(OPENSSL_HOME)/libcrypto.a)
   $(error $$OPENSSL_HOME/libcrypto.a does not exist (OPENSSL_HOME=$(OPENSSL_HOME)))
@@ -669,7 +669,7 @@ BUNDLE_FLAGS	=\
   $(SALSA20_BUNDLE) \
   $(CURVE_BUNDLE) \
   $(CHACHAPOLY_BUNDLE) \
-  $(ECDSA_BUNDLE) \
+  $(P256_BUNDLE) \
   $(ED_BUNDLE) \
   $(POLY_BUNDLE) \
   $(NACLBOX_BUNDLE) \
@@ -732,7 +732,7 @@ dist/wasm/Makefile.basic: HASH_BUNDLE += -bundle Hacl.HMAC_DRBG
 dist/wasm/Makefile.basic: FRODO_BUNDLE = -bundle Hacl.Frodo.KEM,Frodo.Params,Hacl.Impl.Frodo.*,Hacl.Impl.Matrix,Hacl.Frodo.*,Hacl.Keccak,Hacl.AES128
 
 # Doesn't work in Wasm because it uses assembler intrinsics
-dist/wasm/Makefile.basic: ECDSA_BUNDLE = -bundle Hacl.Impl.ECDSA,Hacl.Impl.ECDSA,Hacl.Impl.ECDSA.*,Hacl.Impl.P256.*,Hacl.Impl.P256,Hacl.Spec.P256.*,Hacl.Impl.SolinasReduction,Hacl.Impl.LowLevel
+dist/wasm/Makefile.basic: P256_BUNDLE = -bundle Hacl.Impl.ECDSA,Hacl.Impl.ECDSA,Hacl.Impl.ECDSA.*,Hacl.Impl.P256.*,Hacl.Impl.P256,Hacl.Spec.P256.*,Hacl.Impl.SolinasReduction,Hacl.Impl.LowLevel
 
 # No Vale Curve64 no "Local" or "Slow" Curve64, only Curve51 (local Makefile hack)
 dist/wasm/Makefile.basic: CURVE_BUNDLE_SLOW =
@@ -901,7 +901,7 @@ dist/ccf/Makefile.basic: HAND_WRITTEN_FILES := $(filter-out %/Lib_PrintBuffer.c 
 dist/ccf/Makefile.basic: HAND_WRITTEN_H_FILES := $(filter-out %/libintvector.h %/lib_intrinsics.h,$(HAND_WRITTEN_H_FILES))
 dist/ccf/Makefile.basic: HACL_OLD_FILES =
 dist/ccf/Makefile.basic: POLY_BUNDLE =
-dist/ccf/Makefile.basic: ECDSA_BUNDLE =
+dist/ccf/Makefile.basic: P256_BUNDLE =
 dist/ccf/Makefile.basic: HPKE_BUNDLE = -bundle 'Hacl.HPKE.*'
 
 # Mozilla distribution
@@ -927,7 +927,7 @@ dist/mozilla/Makefile.basic: BLAKE2_BUNDLE = -bundle Hacl.Impl.Blake2.*,Hacl.Bla
 dist/mozilla/Makefile.basic: SHA3_BUNDLE = -bundle Hacl.SHA3
 dist/mozilla/Makefile.basic: HASH_BUNDLE = -bundle Hacl.Hash.*,Hacl.HKDF,Hacl.HMAC,Hacl.HMAC_DRBG
 dist/mozilla/Makefile.basic: HPKE_BUNDLE = -bundle 'Hacl.HPKE.*'
-dist/mozilla/Makefile.basic: ECDSA_BUNDLE =
+dist/mozilla/Makefile.basic: P256_BUNDLE =
 dist/mozilla/Makefile.basic: STREAMING_BUNDLE = -bundle Hacl.Streaming.*
 dist/mozilla/Makefile.basic: FRODO_BUNDLE = -bundle Hacl.Frodo.*,Hacl.SHA3,Hacl.Keccak,Frodo.Params
 dist/mozilla/Makefile.basic: \
