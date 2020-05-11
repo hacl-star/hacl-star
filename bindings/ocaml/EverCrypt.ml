@@ -111,6 +111,8 @@ end
 
 module Chacha20_Poly1305 : Chacha20_Poly1305 =
   Make_Chacha20_Poly1305 (struct
+    (* EverCrypt already performs these runtime checks so all `reqs` attributes in
+     * this file are empty since there is no need to do them here. *)
     let reqs = []
     let encrypt = EverCrypt_Chacha20Poly1305.everCrypt_Chacha20Poly1305_aead_encrypt
     let decrypt = EverCrypt_Chacha20Poly1305.everCrypt_Chacha20Poly1305_aead_decrypt
