@@ -115,7 +115,7 @@ module type HKDF_generic = sig
   val extract: t -> t -> t -> unit
 end
 
-module type Blake2b_generic = sig
+module type Blake2_generic = sig
   type t
   val hash : t -> t -> t -> unit
 end
@@ -126,4 +126,4 @@ module type EdDSA = EdDSA_generic with type t = CBytes.t
 module type HashFunction = HashFunction_generic with type t = CBytes.t
 module type MAC = MAC_generic with type t = CBytes.t
 module type HKDF = HKDF_generic with type t = CBytes.t
-module type Blake2b = Blake2b_generic with type t = CBytes.t
+module type Blake2 = Blake2_generic with type t = CBytes.t

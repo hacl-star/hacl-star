@@ -198,6 +198,26 @@ module Make_Blake2b_generic (C: Buffer)
     Impl.blake2b (C.size_uint32 output) (C.ctypes_buf output) (C.size_uint32 pt) (C.ctypes_buf pt) (C.size_uint32 key) (C.ctypes_buf key)
 end
 
+module Make_Blake2s_generic (C: Buffer)
+    (Impl : sig
+       val blake2s : uint32 -> C.buf -> uint32 -> C.buf -> uint32 -> C.buf -> unit
+     end)
+= struct
+  type t = C.t
+  let hash key pt output =
+    (* Hacl.Impl.Blake2.Generic.blake2_t *)
+    assert (C.size output > 0 && C.size output <= 32);
+    assert (C.size key <= 32);
+    if C.size key = 0 then
+      assert (C.size pt <= max_size_t)
+    else
+      assert (C.size pt + 512 <= max_size_t);
+    assert (C.disjoint key pt);
+    assert (C.disjoint key output);
+    assert (C.disjoint pt output);
+    Impl.blake2s (C.size_uint32 output) (C.ctypes_buf output) (C.size_uint32 pt) (C.ctypes_buf pt) (C.size_uint32 key) (C.ctypes_buf key)
+end
+
 module Make_Chacha20_Poly1305 = Make_Chacha20_Poly1305_generic (CBytes)
 module Make_Curve25519 = Make_Curve25519_generic (CBytes)
 module Make_EdDSA = Make_EdDSA_generic (CBytes)
@@ -206,3 +226,4 @@ module Make_Poly1305 = Make_Poly1305_generic (CBytes)
 module Make_HMAC = Make_HMAC_generic (CBytes)
 module Make_HKDF = Make_HKDF_generic (CBytes)
 module Make_Blake2b = Make_Blake2b_generic (CBytes)
+module Make_Blake2s = Make_Blake2s_generic (CBytes)

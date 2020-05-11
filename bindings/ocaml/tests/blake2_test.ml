@@ -1,9 +1,10 @@
 open Test_utils
+open AutoConfig2
 
 type 'a blake2_test =
   { name: string; plaintext: 'a; key: 'a; expected: 'a }
 
-let tests = [
+let blake2b_tests = [
   {
     name = "Test 1";
     plaintext = Bytes.of_string "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f\x20\x21\x22\x23\x24\x25\x26\x27\x28\x29\x2a\x2b";
@@ -12,17 +13,32 @@ let tests = [
   }
 ]
 
-let test (v: Bytes.t blake2_test) n hash =
+let blake2s_tests = [
+  {
+    name = "Test 1";
+    plaintext = Bytes.of_string "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f\x20\x21\x22\x23\x24\x25\x26\x27\x28\x29\x2a\x2b\x2c\x2d\x2e\x2f\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x3a\x3b\x3c\x3d\x3e";
+    key = Bytes.of_string "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f";
+    expected = Bytes.of_string "\xc6\x53\x82\x51\x3f\x07\x46\x0d\xa3\x98\x33\xcb\x66\x6c\x5e\xd8\x2e\x61\xb9\xe9\x98\xf4\xb0\xc4\x28\x7c\xee\x56\xc3\xcc\x9b\xcd"
+  }
+]
+
+let test (v: Bytes.t blake2_test) n hash reqs =
   let test_result = test_result (n ^ " " ^ v.name) in
-  let output = Test_utils.init_bytes 64 in
 
-  hash v.key v.plaintext output;
-  if Bytes.compare output v.expected = 0 then
-    test_result Success ""
-  else
-    test_result Failure "Output mismatch"
+  if supports reqs then begin
+    let output = Test_utils.init_bytes (Bytes.length v.expected) in
 
+    hash v.key v.plaintext output;
+    if Bytes.compare output v.expected = 0 then
+      test_result Success ""
+    else
+      test_result Failure "Output mismatch"
+  end else
+    test_result Skipped "Required CPU feature not detected"
 
 let _ =
-  List.iter (fun v -> test v "Blake2b_32" Hacl.Blake2b_32.hash) tests;
-  List.iter (fun v -> test v "Blake2b_256" Hacl.Blake2b_256.hash) tests
+  List.iter (fun v -> test v "Blake2b_32" Hacl.Blake2b_32.hash []) blake2b_tests;
+  List.iter (fun v -> test v "Blake2b_256" Hacl.Blake2b_256.hash [AVX2]) blake2b_tests;
+  List.iter (fun v -> test v "Blake2s_32" Hacl.Blake2s_32.hash []) blake2s_tests;
+  List.iter (fun v -> test v "Blake2s_128" Hacl.Blake2s_128.hash [AVX]) blake2s_tests
+

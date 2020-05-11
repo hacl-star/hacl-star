@@ -1,5 +1,5 @@
 open Test_utils
-open EverCrypt.AutoConfig2
+open AutoConfig2
 
 type 'a curve25519_test =
   { name : string ; scalar: 'a ; input : 'a ; expected : 'a }
@@ -38,7 +38,6 @@ let test (v: Bytes.t curve25519_test) t scalarmult ecdh reqs =
 
 (* TODO: tests for secret_to_public *)
 let _ =
-  init ();
   List.iter (fun v -> test v "EverCrypt.Curve25519" EverCrypt.Curve25519.scalarmult EverCrypt.Curve25519.ecdh []) tests;
   List.iter (fun v -> test v "Hacl.Curve25519_51" Hacl.Curve25519_51.scalarmult Hacl.Curve25519_51.ecdh []) tests;
   List.iter (fun v -> test v "Hacl.Curve25519_64" Hacl.Curve25519_64.scalarmult Hacl.Curve25519_64.ecdh [BMI2; ADX]) tests
