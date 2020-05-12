@@ -31,7 +31,7 @@ release-hacl-star: prepare-raw
 	mv raw hacl-star/
 	mv hacl-star/raw/hacl-star-raw.opam hacl-star/
 	sed -i 's/make/make "-C" "raw"/g' hacl-star/hacl-star-raw.opam
-	sed -i 's/\.\/configure/\.\/raw\/configure/g' hacl-star/hacl-star-raw.opam
+	sed -i 's/"\.\/configure"/"sh" "-exc" "cd raw \&\& \.\/configure"/g' hacl-star/hacl-star-raw.opam
 	cd hacl-star && dune clean
 	cd hacl-star && tar -czvf ../$(ARCHIVE) .
 
