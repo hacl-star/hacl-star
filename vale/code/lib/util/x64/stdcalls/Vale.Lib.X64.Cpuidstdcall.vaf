@@ -132,3 +132,16 @@ procedure Check_rdrand_stdcall(inline win:bool)
 {
     Check_rdrand_support();
 }
+
+procedure Check_avx512_stdcall(inline win:bool)
+    {:public}
+    {:quick}
+    {:exportSpecs}
+    modifies
+        rax; rbx; rcx; rdx; r9; r10; r11; efl;
+    ensures
+        rax != 0 ==> avx512_enabled;
+        rbx == old(rbx);
+{
+    Check_avx512_support();
+}

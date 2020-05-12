@@ -30,4 +30,4 @@ let init_bytes len =
 
 let rec supports = function
   | [] -> true
-  | f::fs -> EverCrypt.AutoConfig2.has_feature f && supports fs
+  | f::fs -> AutoConfig2.has_feature f && supports fs

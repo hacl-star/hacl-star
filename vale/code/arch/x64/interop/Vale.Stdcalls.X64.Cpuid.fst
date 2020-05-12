@@ -72,3 +72,13 @@ let lowstar_rdrand : lowstar_rdrand_t  =
     (W.mk_prediction code_rdrand dom [] (rdrand_lemma code_rdrand IA.win))
 
 let check_rdrand = as_normal_t #lowstar_rdrand_t lowstar_rdrand
+
+(* And here's the check_avx512 wrapper itself *)
+let lowstar_avx512 : lowstar_avx512_t  =
+  IX64.wrap_weak_stdcall
+    code_avx512
+    dom
+    (W.mk_prediction code_avx512 dom [] (avx512_lemma code_avx512 IA.win))
+
+let check_avx512 = as_normal_t #lowstar_avx512_t lowstar_avx512
+

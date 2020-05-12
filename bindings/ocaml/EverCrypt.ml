@@ -7,7 +7,6 @@ module C = CBytes
 
 module Hacl_Spec = Hacl_Spec_bindings.Bindings(Hacl_Spec_stubs)
 
-module EverCrypt_AutoConfig2 = EverCrypt_AutoConfig2_bindings.Bindings(EverCrypt_AutoConfig2_stubs)
 module EverCrypt_AEAD = EverCrypt_AEAD_bindings.Bindings(EverCrypt_AEAD_stubs)
 module EverCrypt_Chacha20Poly1305 = EverCrypt_Chacha20Poly1305_bindings.Bindings(EverCrypt_Chacha20Poly1305_stubs)
 module EverCrypt_Curve25519 = EverCrypt_Curve25519_bindings.Bindings(EverCrypt_Curve25519_stubs)
@@ -18,33 +17,6 @@ module EverCrypt_HKDF = EverCrypt_HKDF_bindings.Bindings(EverCrypt_HKDF_stubs)
 module EverCrypt_DRBG = EverCrypt_DRBG_bindings.Bindings(EverCrypt_DRBG_stubs)
 module EverCrypt_Ed25519 = EverCrypt_Ed25519_bindings.Bindings(EverCrypt_Ed25519_stubs)
 
-
-module AutoConfig2 = struct
-  open EverCrypt_AutoConfig2
-  type feature =
-    | SHAEXT
-    | AES_NI
-    | PCLMULQDQ
-    | AVX
-    | AVX2
-    | BMI2
-    | ADX
-    | SSE
-    | MOVBE
-    | RDRAND
-  let init () = everCrypt_AutoConfig2_init ()
-  let has_feature = function
-    | SHAEXT -> everCrypt_AutoConfig2_has_shaext ()
-    | AES_NI -> everCrypt_AutoConfig2_has_aesni ()
-    | PCLMULQDQ -> everCrypt_AutoConfig2_has_pclmulqdq ()
-    | AVX -> everCrypt_AutoConfig2_has_avx ()
-    | AVX2 -> everCrypt_AutoConfig2_has_avx2 ()
-    | BMI2 -> everCrypt_AutoConfig2_has_bmi2 ()
-    | ADX -> everCrypt_AutoConfig2_has_adx ()
-    | SSE -> everCrypt_AutoConfig2_has_sse ()
-    | MOVBE -> everCrypt_AutoConfig2_has_movbe ()
-    | RDRAND -> everCrypt_AutoConfig2_has_rdrand ()
-end
 
 module Error = struct
   type error_code =
@@ -139,12 +111,16 @@ end
 
 module Chacha20_Poly1305 : Chacha20_Poly1305 =
   Make_Chacha20_Poly1305 (struct
+    (* EverCrypt already performs these runtime checks so all `reqs` attributes in
+     * this file are empty since there is no need to do them here. *)
+    let reqs = []
     let encrypt = EverCrypt_Chacha20Poly1305.everCrypt_Chacha20Poly1305_aead_encrypt
     let decrypt = EverCrypt_Chacha20Poly1305.everCrypt_Chacha20Poly1305_aead_decrypt
   end)
 
 module Curve25519 : Curve25519 =
   Make_Curve25519 (struct
+    let reqs = []
     let secret_to_public = EverCrypt_Curve25519.everCrypt_Curve25519_secret_to_public
     let scalarmult = EverCrypt_Curve25519.everCrypt_Curve25519_scalarmult
     let ecdh = EverCrypt_Curve25519.everCrypt_Curve25519_ecdh
@@ -231,6 +207,7 @@ end)
 
 module Poly1305 : MAC =
   Make_Poly1305 (struct
+    let reqs = []
     let mac dst data_len data key = EverCrypt_Poly1305.everCrypt_Poly1305_poly1305 dst data data_len key
 end)
 

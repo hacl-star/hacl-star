@@ -167,7 +167,7 @@ CTYPES_DEPS += lib/Lib_RandomBuffer_System_stubs.cmx lib/Lib_RandomBuffer_System
 ocamlevercrypt.cmxa: $(ALL_BINDINGS) $(ALL_ML_STUBS) $(ALL_C_STUBS) libevercrypt.$(SO)
 	ocamlfind mklib -o ocamlevercrypt $(CTYPES_DEPS) $(ALL_C_STUBS) -ccopt -L. -cclib -levercrypt
 
-install-hacl-star-raw:
+install-hacl-star-raw: ocamlevercrypt.cmxa
 	ocamlfind install hacl-star-raw META $(wildcard lib/*.ml lib/*.cmx lib/*.cmi *.cmxa *.a *.so *.dll)
 
 endif
