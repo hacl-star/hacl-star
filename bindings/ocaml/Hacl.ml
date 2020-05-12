@@ -1,5 +1,6 @@
 open Unsigned
 
+open AutoConfig2
 open SharedDefs
 open SharedFunctors
 module C = CBytes
@@ -32,32 +33,28 @@ end
 
 module Chacha20_Poly1305_32 : Chacha20_Poly1305 =
   Make_Chacha20_Poly1305 (struct
+    let reqs = []
     let encrypt = Hacl_Chacha20Poly1305_32.hacl_Chacha20Poly1305_32_aead_encrypt
     let decrypt = Hacl_Chacha20Poly1305_32.hacl_Chacha20Poly1305_32_aead_decrypt
   end)
 
 module Chacha20_Poly1305_128 : Chacha20_Poly1305 =
   Make_Chacha20_Poly1305 (struct
-    let encrypt =
-      assert (AutoConfig2.has_feature AVX);
-      Hacl_Chacha20Poly1305_128.hacl_Chacha20Poly1305_128_aead_encrypt
-    let decrypt =
-      assert (AutoConfig2.has_feature AVX);
-      Hacl_Chacha20Poly1305_128.hacl_Chacha20Poly1305_128_aead_decrypt
+    let reqs = [AVX]
+    let encrypt = Hacl_Chacha20Poly1305_128.hacl_Chacha20Poly1305_128_aead_encrypt
+    let decrypt = Hacl_Chacha20Poly1305_128.hacl_Chacha20Poly1305_128_aead_decrypt
   end)
 
 module Chacha20_Poly1305_256 : Chacha20_Poly1305 =
   Make_Chacha20_Poly1305 (struct
-    let encrypt =
-      assert (AutoConfig2.has_feature AVX2);
-      Hacl_Chacha20Poly1305_256.hacl_Chacha20Poly1305_256_aead_encrypt
-    let decrypt =
-      assert (AutoConfig2.has_feature AVX2);
-      Hacl_Chacha20Poly1305_256.hacl_Chacha20Poly1305_256_aead_decrypt
+    let reqs = [AVX2]
+    let encrypt = Hacl_Chacha20Poly1305_256.hacl_Chacha20Poly1305_256_aead_encrypt
+    let decrypt = Hacl_Chacha20Poly1305_256.hacl_Chacha20Poly1305_256_aead_decrypt
   end)
 
 module Curve25519_51 : Curve25519 =
   Make_Curve25519 (struct
+    let reqs = []
     let secret_to_public = Hacl_Curve25519_51.hacl_Curve25519_51_secret_to_public
     let scalarmult = Hacl_Curve25519_51.hacl_Curve25519_51_scalarmult
     let ecdh = Hacl_Curve25519_51.hacl_Curve25519_51_ecdh
@@ -65,18 +62,10 @@ module Curve25519_51 : Curve25519 =
 
 module Curve25519_64 : Curve25519 =
   Make_Curve25519 (struct
-    let secret_to_public =
-      assert (AutoConfig2.has_feature ADX);
-      assert (AutoConfig2.has_feature BMI2);
-      Hacl_Curve25519_64.hacl_Curve25519_64_secret_to_public
-    let scalarmult =
-      assert (AutoConfig2.has_feature ADX);
-      assert (AutoConfig2.has_feature BMI2);
-      Hacl_Curve25519_64.hacl_Curve25519_64_scalarmult
-    let ecdh =
-      assert (AutoConfig2.has_feature ADX);
-      assert (AutoConfig2.has_feature BMI2);
-      Hacl_Curve25519_64.hacl_Curve25519_64_ecdh
+    let reqs = [BMI2; ADX]
+    let secret_to_public = Hacl_Curve25519_64.hacl_Curve25519_64_secret_to_public
+    let scalarmult = Hacl_Curve25519_64.hacl_Curve25519_64_scalarmult
+    let ecdh = Hacl_Curve25519_64.hacl_Curve25519_64_ecdh
   end)
 
 module Ed25519 : EdDSA =
@@ -185,21 +174,20 @@ end)
 
 module Poly1305_32 : MAC =
   Make_Poly1305 (struct
+    let reqs = []
     let mac = Hacl_Poly1305_32.hacl_Poly1305_32_poly1305_mac
 end)
 
 module Poly1305_128 : MAC =
   Make_Poly1305 (struct
-    let mac =
-      assert (AutoConfig2.has_feature AVX);
-      Hacl_Poly1305_128.hacl_Poly1305_128_poly1305_mac
+    let reqs = [AVX]
+    let mac = Hacl_Poly1305_128.hacl_Poly1305_128_poly1305_mac
 end)
 
 module Poly1305_256 : MAC =
   Make_Poly1305 (struct
-    let mac =
-      assert (AutoConfig2.has_feature AVX2);
-      Hacl_Poly1305_256.hacl_Poly1305_256_poly1305_mac
+      let reqs = [AVX2]
+    let mac = Hacl_Poly1305_256.hacl_Poly1305_256_poly1305_mac
 end)
 
 module HKDF_SHA2_256 : HKDF =
@@ -307,26 +295,26 @@ end
 
 module Blake2b_32 : Blake2 =
   Make_Blake2b (struct
+    let reqs = []
     let blake2b = Hacl_Blake2b_32.hacl_Blake2b_32_blake2b
   end)
 
 module Blake2b_256 : Blake2 =
   Make_Blake2b (struct
-    let blake2b =
-      assert (AutoConfig2.has_feature AVX2);
-      Hacl_Blake2b_256.hacl_Blake2b_256_blake2b
+    let reqs = [AVX2]
+    let blake2b = Hacl_Blake2b_256.hacl_Blake2b_256_blake2b
   end)
 
 module Blake2s_32 : Blake2 =
   Make_Blake2s (struct
+    let reqs = []
     let blake2s = Hacl_Blake2s_32.hacl_Blake2s_32_blake2s
   end)
 
 module Blake2s_128 : Blake2 =
   Make_Blake2s (struct
-    let blake2s =
-      assert (AutoConfig2.has_feature AVX2);
-      Hacl_Blake2s_128.hacl_Blake2s_128_blake2s
+    let reqs = [AVX]
+    let blake2s = Hacl_Blake2s_128.hacl_Blake2s_128_blake2s
   end)
 
 (* WIP, will update along with chages to ECDSA *)

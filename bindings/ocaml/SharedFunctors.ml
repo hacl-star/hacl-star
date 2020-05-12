@@ -1,9 +1,13 @@
 open Unsigned
 
 open SharedDefs
+open AutoConfig2
+
+let check_reqs = List.iter (fun x -> assert (has_feature x))
 
 module Make_Chacha20_Poly1305_generic (C: Buffer)
     (Impl : sig
+       val reqs : feature list
        val encrypt : C.buf -> C.buf -> uint32 -> C.buf -> uint32 -> C.buf -> C.buf -> C.buf -> unit
        val decrypt : C.buf -> C.buf -> uint32 -> C.buf -> uint32 -> C.buf -> C.buf -> C.buf -> uint32
      end)
@@ -14,6 +18,7 @@ module Make_Chacha20_Poly1305_generic (C: Buffer)
     assert (C.size iv = 12);
     assert (C.size tag = 16)
   let encrypt key iv ad pt ct tag =
+    check_reqs Impl.reqs;
     (* Hacl.Impl.Chacha20Poly1305.aead_encrypt_st *)
     check_sizes key iv tag;
     assert (C.disjoint key ct);
@@ -25,6 +30,7 @@ module Make_Chacha20_Poly1305_generic (C: Buffer)
     Impl.encrypt (C.ctypes_buf key) (C.ctypes_buf iv) (C.size_uint32 ad) (C.ctypes_buf ad)
       (C.size_uint32 pt) (C.ctypes_buf pt) (C.ctypes_buf ct) (C.ctypes_buf tag)
   let decrypt key iv ad pt ct tag =
+    check_reqs Impl.reqs;
     (* Hacl.Impl.Chacha20Poly1305.aead_decrypt_st *)
     check_sizes key iv tag;
     let result = Impl.decrypt (C.ctypes_buf key) (C.ctypes_buf iv) (C.size_uint32 ad) (C.ctypes_buf ad)
@@ -35,19 +41,22 @@ end
 
 module Make_Curve25519_generic (C: Buffer)
     (Impl : sig
-    val secret_to_public : C.buf -> C.buf -> unit
-    val scalarmult : C.buf -> C.buf -> C.buf -> unit
-    val ecdh : C.buf -> C.buf -> C.buf -> bool
+       val reqs : feature list
+       val secret_to_public : C.buf -> C.buf -> unit
+       val scalarmult : C.buf -> C.buf -> C.buf -> unit
+       val ecdh : C.buf -> C.buf -> C.buf -> bool
   end)
 = struct
   type t = C.t
   let secret_to_public pub priv =
+    check_reqs Impl.reqs;
     (* Hacl.Impl.Curve25519.Generic.secret_to_public_st *)
     assert (C.disjoint pub priv);
     assert (C.size pub = 32);
     assert (C.size priv = 32);
     Impl.secret_to_public (C.ctypes_buf pub) (C.ctypes_buf priv)
   let scalarmult shared my_priv their_pub =
+    check_reqs Impl.reqs;
     (* Hacl.Impl.Curve25519.Generic.scalarmult_st *)
     assert (C.disjoint shared my_priv);
     assert (C.disjoint shared their_pub);
@@ -56,6 +65,7 @@ module Make_Curve25519_generic (C: Buffer)
     assert (C.size their_pub = 32);
     Impl.scalarmult (C.ctypes_buf shared) (C.ctypes_buf my_priv) (C.ctypes_buf their_pub)
   let ecdh shared my_priv their_pub =
+    check_reqs Impl.reqs;
     (* Hacl.Impl.Curve25519.Generic.ecdh_st *)
     assert (C.disjoint shared my_priv);
     assert (C.disjoint shared their_pub);
@@ -123,11 +133,13 @@ end
 
 module Make_Poly1305_generic (C: Buffer)
     (Impl : sig
+       val reqs : feature list
        val mac : C.buf -> uint32 -> C.buf -> C.buf -> unit
      end)
 = struct
   type t = C.t
   let mac dst key data =
+    check_reqs Impl.reqs;
     (* Hacl.Impl.Poly1305.poly1305_mac_st *)
     assert (C.size dst = 16);
     assert (C.size key = 32);
@@ -180,11 +192,13 @@ end
 
 module Make_Blake2b_generic (C: Buffer)
     (Impl : sig
+       val reqs : feature list
        val blake2b : uint32 -> C.buf -> uint32 -> C.buf -> uint32 -> C.buf -> unit
      end)
 = struct
   type t = C.t
   let hash key pt output =
+    check_reqs Impl.reqs;
     (* Hacl.Impl.Blake2.Generic.blake2_t *)
     assert (C.size output > 0 && C.size output <= 64);
     assert (C.size key <= 64);
@@ -200,11 +214,13 @@ end
 
 module Make_Blake2s_generic (C: Buffer)
     (Impl : sig
+       val reqs : feature list
        val blake2s : uint32 -> C.buf -> uint32 -> C.buf -> uint32 -> C.buf -> unit
      end)
 = struct
   type t = C.t
   let hash key pt output =
+    check_reqs Impl.reqs;
     (* Hacl.Impl.Blake2.Generic.blake2_t *)
     assert (C.size output > 0 && C.size output <= 32);
     assert (C.size key <= 32);
