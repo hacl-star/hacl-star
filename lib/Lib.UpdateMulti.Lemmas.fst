@@ -19,6 +19,7 @@ let repeat_l_input #a (block_length:pos { block_length < pow2 32 })
 =
   ()
 
+#restart-solver
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 150"
 let rec update_full_is_repeat_blocks #a block_length update update_last acc input input' =
   // Lib.UpdateMulti side

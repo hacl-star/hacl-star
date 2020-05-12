@@ -24,9 +24,7 @@ let extra_bytes_helper (n:nat) : Lemma
 #reset-options "--smtencoding.elim_box true --z3rlimit 25 --max_ifuel 1 --initial_fuel 0 --max_fuel 1"
 let bytes_to_quad_size_no_extra_bytes num_bytes = ()
 
-let no_extra_bytes_helper s num_bytes =
-  assert (slice (le_seq_quad32_to_bytes s) 0 num_bytes == le_seq_quad32_to_bytes s); // TODO: this shouldn't be necessary
-  ()
+let no_extra_bytes_helper s num_bytes = ()
 
 let le_seq_quad32_to_bytes_tail_prefix (s:seq quad32) (num_bytes:nat) =
   let num_extra = num_bytes % 16 in
