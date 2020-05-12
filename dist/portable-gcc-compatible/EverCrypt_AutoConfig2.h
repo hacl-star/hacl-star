@@ -94,6 +94,12 @@ bool EverCrypt_AutoConfig2_has_rdrand();
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_has_rdrand */
 
+/* SNIPPET_START: EverCrypt_AutoConfig2_has_avx512 */
+
+bool EverCrypt_AutoConfig2_has_avx512();
+
+/* SNIPPET_END: EverCrypt_AutoConfig2_has_avx512 */
+
 /* SNIPPET_START: EverCrypt_AutoConfig2_wants_vale */
 
 bool EverCrypt_AutoConfig2_wants_vale();
@@ -195,6 +201,12 @@ void EverCrypt_AutoConfig2_disable_movbe();
 void EverCrypt_AutoConfig2_disable_rdrand();
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_disable_rdrand */
+
+/* SNIPPET_START: EverCrypt_AutoConfig2_disable_avx512 */
+
+void EverCrypt_AutoConfig2_disable_avx512();
+
+/* SNIPPET_END: EverCrypt_AutoConfig2_disable_avx512 */
 
 /* SNIPPET_START: EverCrypt_AutoConfig2_disable_vale */
 

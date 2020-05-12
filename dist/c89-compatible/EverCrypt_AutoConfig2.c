@@ -44,6 +44,8 @@ static bool cpu_has_movbe[1U] = { false };
 
 static bool cpu_has_rdrand[1U] = { false };
 
+static bool cpu_has_avx512[1U] = { false };
+
 static bool user_wants_hacl[1U] = { true };
 
 static bool user_wants_vale[1U] = { true };
@@ -100,6 +102,11 @@ bool EverCrypt_AutoConfig2_has_movbe()
 bool EverCrypt_AutoConfig2_has_rdrand()
 {
   return cpu_has_rdrand[0U];
+}
+
+bool EverCrypt_AutoConfig2_has_avx512()
+{
+  return cpu_has_avx512[0U];
 }
 
 bool EverCrypt_AutoConfig2_wants_vale()
@@ -179,6 +186,13 @@ void EverCrypt_AutoConfig2_init()
                 {
                   cpu_has_rdrand[0U] = true;
                 }
+                {
+                  uint64_t scrut7 = check_avx512();
+                  if (scrut7 != (uint64_t)0U)
+                  {
+                    cpu_has_avx512[0U] = true;
+                  }
+                }
               }
             }
           }
@@ -241,6 +255,11 @@ void EverCrypt_AutoConfig2_disable_movbe()
 void EverCrypt_AutoConfig2_disable_rdrand()
 {
   cpu_has_rdrand[0U] = false;
+}
+
+void EverCrypt_AutoConfig2_disable_avx512()
+{
+  cpu_has_avx512[0U] = false;
 }
 
 void EverCrypt_AutoConfig2_disable_vale()
