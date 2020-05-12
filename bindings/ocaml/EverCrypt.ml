@@ -111,12 +111,16 @@ end
 
 module Chacha20_Poly1305 : Chacha20_Poly1305 =
   Make_Chacha20_Poly1305 (struct
+    (* EverCrypt already performs these runtime checks so all `reqs` attributes in
+     * this file are empty since there is no need to do them here. *)
+    let reqs = []
     let encrypt = EverCrypt_Chacha20Poly1305.everCrypt_Chacha20Poly1305_aead_encrypt
     let decrypt = EverCrypt_Chacha20Poly1305.everCrypt_Chacha20Poly1305_aead_decrypt
   end)
 
 module Curve25519 : Curve25519 =
   Make_Curve25519 (struct
+    let reqs = []
     let secret_to_public = EverCrypt_Curve25519.everCrypt_Curve25519_secret_to_public
     let scalarmult = EverCrypt_Curve25519.everCrypt_Curve25519_scalarmult
     let ecdh = EverCrypt_Curve25519.everCrypt_Curve25519_ecdh
@@ -203,6 +207,7 @@ end)
 
 module Poly1305 : MAC =
   Make_Poly1305 (struct
+    let reqs = []
     let mac dst data_len data key = EverCrypt_Poly1305.everCrypt_Poly1305_poly1305 dst data data_len key
 end)
 
