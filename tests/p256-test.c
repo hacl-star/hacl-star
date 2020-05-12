@@ -14,6 +14,13 @@
 
 #include <openssl/evp.h>
 #include <openssl/ecdsa.h>
+#include <openssl/ecdh.h>
+
+
+// #include <openssl/bn.h>
+// #include <openssl/digest.h>
+// #include <openssl/err.h>
+// #include <openssl/mem.h>
 
 
 // uint8_t
@@ -108,6 +115,20 @@ siggen_vectors_low6[32U] =
   };
 
 
+static uint8_t px0_0[32] = {
+0x70, 0x0c, 0x48, 0xf7, 0x7f, 0x56, 0x58, 0x4c, 0x5c, 0xc6, 0x32, 0xca, 0x65, 0x64, 0x0d, 0xb9, 0x1b, 0x6b, 0xac, 0xce, 0x3a, 0x4d, 0xf6, 0xb4, 0x2c, 0xe7, 0xcc, 0x83, 0x88, 0x33, 0xd2, 0x87 
+
+};
+static uint8_t py0_0[32] = {
+0xdb, 0x71, 0xe5, 0x09, 0xe3, 0xfd, 0x9b, 0x06, 0x0d, 0xdb, 0x20, 0xba, 0x5c, 0x51, 0xdc, 0xc5, 0x94, 0x8d, 0x46, 0xfb, 0xf6, 0x40, 0xdf, 0xe0, 0x44, 0x17, 0x82, 0xca, 0xb8, 0x5f, 0xa4, 0xac 
+};
+
+static uint8_t scalar0[32] = {
+0x7d, 0x7d, 0xc5, 0xf7, 0x1e, 0xb2, 0x9d, 0xda, 0xf8, 0x0d, 0x62, 0x14, 0x63, 0x2e, 0xea, 0xe0, 0x3d, 0x90, 0x58, 0xaf, 0x1f, 0xb6, 0xd2, 0x2e, 0xd8, 0x0b, 0xad, 0xb6, 0x2b, 0xc1, 0xa5, 0x34 
+
+};
+
+
 bool print_result(int in_len, uint8_t* comp, uint8_t* exp) {
   return compare_and_print(in_len, comp, exp);
 }
@@ -168,9 +189,7 @@ int main()
 		return -1;
 	}
 
-
-
-	cycles a,b;
+  cycles a,b;
 	clock_t t1,t2;
 	uint8_t* result = (uint8_t*) malloc (sizeof (uint8_t) * 64);
 
@@ -179,49 +198,118 @@ int main()
 	memset(plain,'P',SIZE);
 	
 	t1 = clock();
-  	a = cpucycles_begin();
+  a = cpucycles_begin();
 
-  	for (int j = 0; j < ROUNDS; j++)
-  	{
-		  Hacl_Interface_P256_ecdsa_sign_p256_without_hash(plain, plain, prKey, nonce);
-  	}
+  for (int j = 0; j < ROUNDS; j++)
+  {
+		Hacl_Interface_P256_ecdsa_sign_p256_without_hash(plain, plain, prKey, nonce);
+  }
 	
 	b = cpucycles_end();
-	t2 = clock();
+	
+  t2 = clock();
 	clock_t tdiff1 = t2 - t1;
 	cycles cdiff1 = b - a;
 
+  
 
 
-  	EC_KEY *eckey = EC_KEY_new();
+
+
+  EC_KEY *eckey = EC_KEY_new();
 	if (eckey == NULL) {
-      return false;
-    }
+    return false;
+  }
 
 	
   // memset(plain,'P',SIZE);
   EC_KEY_set_private_key(eckey, prKey);
 
-    EC_GROUP *group = EC_GROUP_new_by_curve_name(NID_X9_62_prime256v1);
-    EC_KEY_set_group(eckey, group);
-    unsigned int sig_len = ECDSA_size(eckey);
-    unsigned char *signature = OPENSSL_malloc(sig_len);
-    EC_KEY_generate_key(eckey);
-
+  EC_GROUP *group = EC_GROUP_new_by_curve_name(NID_X9_62_prime256v1);
+  EC_KEY_set_group(eckey, group);
+  unsigned int sig_len = ECDSA_size(eckey);
+  unsigned char *signature = OPENSSL_malloc(sig_len);
+  EC_KEY_generate_key(eckey);
 
   t1 = clock();
-    a = cpucycles_begin();
+  a = cpucycles_begin();
 
-  	for (int j = 0; j < ROUNDS; j++)
-  	{
-		  ECDSA_sign(0, signature + 40, 32, signature, &sig_len, eckey);
-
-  	}
+  for (int j = 0; j < ROUNDS; j++)
+  {
+		ECDSA_sign(0, signature + 40, 32, signature, &sig_len, eckey);
+  }
 	
 	b = cpucycles_end();
 	t2 = clock();
 	clock_t tdiff2 = t2 - t1;
 	cycles cdiff2 = b - a;
+
+
+
+
+
+  t1 = clock();
+  a = cpucycles_begin();
+
+  uint8_t* pk = (uint8_t*) malloc (sizeof (uint8_t) * 64);
+  memcpy(pk, px0_0,  32);
+  memcpy(pk+32, py0_0,  32);
+
+  for (int j = 0; j < ROUNDS; j++)
+  {
+    Hacl_Interface_P256_ecp256dh_r(pk, pk, scalar0); 
+  }
+  
+  b = cpucycles_end();
+  t2 = clock();
+  clock_t tdiff3 = t2 - t1;
+  cycles cdiff3 = b - a;
+
+
+
+
+	
+
+	// EC_KEY *key, *peerkey;
+	// int field_size;
+	// unsigned char *secret;
+
+	// /* Create an Elliptic Curve Key object and set it up to use the ANSI X9.62 Prime 256v1 curve */
+	// EC_KEY_new_by_curve_name(NID_X9_62_prime256v1);
+
+	// /* Generate the private and public key */
+	// EC_KEY_generate_key(key);
+
+	// /* Get the peer's public key, and provide the peer with our public key -
+	//  * how this is done will be specific to your circumstances */
+	// // peerkey = get_peerkey_low(key);
+
+	//  Calculate the size of the buffer for the shared secret 
+	// field_size = EC_GROUP_get_degree(EC_KEY_get0_group(key));
+	// unsigned int *secret_len = (field_size+7)/8;
+
+	// /* Allocate the memory for the shared secret */
+	// secret = OPENSSL_malloc(*secret_len);
+
+
+
+	// t1 = clock();
+	// a = cpucycles_begin();
+
+	// for (int j = 0; j < ROUNDS; j++)
+	// {
+	// 	ECDH_compute_key(secret, *secret_len, secret,
+	// 						key, NULL);
+	// }
+
+	// b = cpucycles_end();
+	// t2 = clock();
+	// clock_t tdiff4 = t2 - t1;
+	// cycles cdiff4 = b - a;
+
+
+
+
 
 	uint64_t count = ROUNDS * SIZE;
 	printf("Hacl ECDSA (without hasing) PERF: %d\n"); 
@@ -229,6 +317,12 @@ int main()
 
 	printf("OpenSSL ECDSA (without hasing) PERF: %d\n"); 
 	print_time(count,tdiff2,cdiff2);
+
+	printf("Hacl ECDH PERF: %d\n"); 
+	print_time(count,tdiff3,cdiff3);  
+
+	// printf("OpenSSL ECDH PERF: %d\n"); 
+	// print_time(count,tdiff4,cdiff4); 
 
 }
 
