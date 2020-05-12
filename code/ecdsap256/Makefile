@@ -2,6 +2,8 @@ HACL_HOME=../..
 
 # CUSTOMIZE HERE: determine what is the main target of this Makefile, e.g. a C
 # test, a Low* test, or just a binary archive (like libcurve.a).
+
+CC = gcc-9.1
 all: dist/Hacl_Test_ECDSA.exe
 
 test: all
@@ -37,8 +39,8 @@ dist/Hacl_Test_ECDSA.exe: dist/Hacl_P256.o dist/Hacl_Test_ECDSA.o \
 
 
 dist/p256-openssl-test.exe: dist/Hacl_P256.o
-	$(CC) $(CFLAGS) -I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/include/crypto -I $(OPENSSL_HOME)/crypto \
-	-I -I $(HACL_HOME)/tests $(HACL_HOME)/tests/tests-openssl/p256-test.c $^ \
+	$(CC) $(CFLAGS) -I $(OPENSSL_HOME)/include -I ../../dist/gcc-compatible -I $(OPENSSL_HOME)/include/crypto -I $(OPENSSL_HOME)/crypto \
+	 $(HACL_HOME)/tests/p256-test.c $^ \
 	-o $@ $(OPENSSL_HOME)/libcrypto.a -lpthread -ldl
 
 %.exe:
