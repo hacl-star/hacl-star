@@ -455,6 +455,8 @@ extern bool EverCrypt_AutoConfig2_has_movbe();
 
 extern bool EverCrypt_AutoConfig2_has_rdrand();
 
+extern bool EverCrypt_AutoConfig2_has_avx512();
+
 extern bool EverCrypt_AutoConfig2_wants_vale();
 
 extern bool EverCrypt_AutoConfig2_wants_hacl();
@@ -488,6 +490,8 @@ extern void EverCrypt_AutoConfig2_disable_sse();
 extern void EverCrypt_AutoConfig2_disable_movbe();
 
 extern void EverCrypt_AutoConfig2_disable_rdrand();
+
+extern void EverCrypt_AutoConfig2_disable_avx512();
 
 extern void EverCrypt_AutoConfig2_disable_vale();
 
