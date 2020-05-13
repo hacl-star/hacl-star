@@ -1,0 +1,76 @@
+[
+  "\u00005ö\u001dÉùRî¯\u0004=íX\u0000\n$",
+  [
+    [
+      "C.String.zero_free",
+      1,
+      2,
+      1,
+      [
+        "@query", "assumption_C.HasEq_char",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "00a4f1a27e6d4c11dd8d1eda97e13487"
+    ],
+    [
+      "C.String.well_formed",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "assumption_C.HasEq_char",
+        "equation_Prims.nat", "function_token_typing_C.char",
+        "int_inversion", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "typing_FStar.Seq.Base.length"
+      ],
+      0,
+      "e4083d306fc87d76e320c9ecd6dc263f"
+    ],
+    [
+      "C.String.get",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "assumption_C.HasEq_char",
+        "b2t_def", "equation_FStar.UInt.fits", "equation_FStar.UInt.min_int",
+        "equation_FStar.UInt.size", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_dfcb8c150fd42ce38050af33905be19c"
+      ],
+      0,
+      "025f2e48b01ba0909ff5e2f8e4e5a481"
+    ],
+    [
+      "C.String.nonzero_is_lt",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "assumption_C.HasEq_char",
+        "refinement_interpretation_Tm_refine_a4691fadffad56bb755d245a5fc50b20",
+        "typing_C.String.length"
+      ],
+      0,
+      "f3583df6814f00aefdaef43f371a80b6"
+    ],
+    [
+      "C.String.memcpy",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "lemma_FStar.Seq.Base.hasEq_lemma",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "typing_FStar.UInt8.t"
+      ],
+      0,
+      "1305e692579bc82480de589be75e2fc2"
+    ]
+  ]
+]

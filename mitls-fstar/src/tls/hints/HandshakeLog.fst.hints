@@ -1,0 +1,289 @@
+[
+  "–çó\u0017\b&ŒqTMú\u0017Ú–(¿",
+  [
+    [
+      "HandshakeLog.gforall",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "binder_x_0a56e3de562c08d8ab59f4ac6f626a98_3",
+        "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
+        "fuel_guarded_inversion_Prims.list", "subterm_ordering_Prims.Cons"
+      ],
+      0,
+      "6642716c76af37d656133dd21312d414"
+    ],
+    [
+      "HandshakeLog.append_transcript",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_72e5a2aa76f3c2442b018562b3272ee5"
+      ],
+      0,
+      "19de9d4690308435f2cdbd32b14f2f6e"
+    ],
+    [
+      "HandshakeLog.discard",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.HyperStack.ST.equal_stack_domains",
+        "equation_FStar.Monotonic.Heap.equal_dom",
+        "lemma_FStar.HyperStack.ST.lemma_same_refs_in_stack_regions_intro"
+      ],
+      0,
+      "d1c9e01490f778dc021bcf4dfb4020c0"
+    ],
+    [
+      "HandshakeLog.trace",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_DebugFlags.debug",
+        "equation_DebugFlags.debug_HSL"
+      ],
+      0,
+      "a251e5ddf5ccda9ad91afc8925d5ab6a"
+    ],
+    [
+      "HandshakeLog.elift1_def",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "lemma_FStar.Ghost.hide_reveal",
+        "refinement_interpretation_Tm_refine_785b445c1ccb59eaa8c666ff5bddec28",
+        "typing_FStar.Ghost.elift1"
+      ],
+      0,
+      "ab8f1d6fa09adc65714af6e076cfff8f"
+    ],
+    [
+      "HandshakeLog.bind_log",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_HandshakeLog.erased_transcript",
+        "equation_HandshakeLog.reveal_log"
+      ],
+      0,
+      "f67c52b92715795f2c22dea4d8f94ce6"
+    ],
+    [
+      "HandshakeLog.empty_hs_transcript",
+      1,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_HandshakeLog.gforall.fuel_instrumented",
+        "@query",
+        "FStar.Seq.Properties_interpretation_Tm_ghost_arrow_9a34a9deaac3ca72ad48c3ec79b6656c",
+        "bool_typing", "constructor_distinct_Prims.Nil",
+        "data_typing_intro_Prims.Nil@tok", "equation_HandshakeLog.msg",
+        "equation_HandshakeLog.transcript_version",
+        "equation_HandshakeLog.valid_transcript",
+        "equation_HandshakeLog.weak_valid_transcript",
+        "equation_HandshakeMessages.valid_hs_msg_prop",
+        "equation_with_fuel_HandshakeLog.gforall.fuel_instrumented",
+        "kinding_HandshakeMessages.hs_msg@tok", "primitive_Prims.op_AmpAmp",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_Prims.Nil_a",
+        "token_correspondence_HandshakeMessages.valid_hs_msg_prop"
+      ],
+      0,
+      "3ab54f678e503756f42f03b8dcd35662"
+    ],
+    [
+      "HandshakeLog.append_hs_transcript",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_HandshakeLog.msg",
+        "refinement_interpretation_Tm_refine_3e2c9291fd3b066a107ccf5a30cfc03a"
+      ],
+      0,
+      "1cb6d4b2cb949c3988bdbb0bd71dd41d"
+    ],
+    [
+      "HandshakeLog.extend_hs_transcript",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_71752dd75c462e2f1a8dac5147cb3746"
+      ],
+      0,
+      "240d280a22c937ac90f2e4c8b82190fb"
+    ],
+    [
+      "HandshakeLog.coerce",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_de9aeb070296eed20d879692d0254af0"
+      ],
+      0,
+      "2dd9309366e8e0275344c8014551ec7f"
+    ],
+    [
+      "HandshakeLog.gforall_list_to_list_refined",
+      1,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_HandshakeLog.gforall.fuel_instrumented",
+        "@fuel_irrelevance_HandshakeLog.gforall.fuel_instrumented", "@query",
+        "FStar.Seq.Properties_interpretation_Tm_ghost_arrow_9a34a9deaac3ca72ad48c3ec79b6656c",
+        "HandshakeLog_interpretation_Tm_ghost_arrow_91040baa576254f59f26077b926e4973",
+        "binder_x_305bfb6241561845621b641f253a0683_2",
+        "binder_x_6dc7d5e885a1f1092abb79630e57e5e3_3",
+        "binder_x_fe28d8bcde588226b4e538b35321de05_1", "bool_inversion",
+        "constructor_distinct_Prims.Cons", "constructor_distinct_Tm_unit",
+        "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
+        "equation_FStar.HyperStack.ST.is_eternal_region",
+        "equation_FStar.Monotonic.HyperStack.is_eternal_color",
+        "equation_Mem.rgn",
+        "equation_with_fuel_HandshakeLog.gforall.fuel_instrumented",
+        "primitive_Prims.op_AmpAmp", "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_Prims.Cons_a",
+        "projection_inverse_Prims.Cons_hd",
+        "projection_inverse_Prims.Cons_tl",
+        "refinement_interpretation_Tm_refine_31bfde48b952b6d7959cd5a2aa36404e",
+        "refinement_interpretation_Tm_refine_5df7a239cffc1cbece33048aa5c6b300",
+        "subterm_ordering_Prims.Cons",
+        "token_correspondence_HandshakeLog.gforall.fuel_instrumented",
+        "typing_FStar.Monotonic.HyperHeap.color",
+        "typing_FStar.Monotonic.HyperStack.is_eternal_color",
+        "typing_HandshakeLog.gforall", "typing_TLSInfo.safe_region"
+      ],
+      0,
+      "5c0f7518d0c549c969d1693ea57afbb8"
+    ],
+    [
+      "HandshakeLog.valid_transcript_to_list_valid_hs_msg_aux",
+      1,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_HandshakeLog.gforall.fuel_instrumented",
+        "@fuel_irrelevance_HandshakeLog.gforall.fuel_instrumented", "@query",
+        "FStar.Seq.Properties_interpretation_Tm_ghost_arrow_9a34a9deaac3ca72ad48c3ec79b6656c",
+        "HandshakeMessages_interpretation_Tm_ghost_arrow_54e02bd4c11efb798fe4ec4f356417f6",
+        "binder_x_1a103abad8ed8024fcdd4ad199fc3846_0",
+        "binder_x_b1b73bab281a8321f2b361152b87ea9d_1", "bool_inversion",
+        "constructor_distinct_Prims.Cons", "constructor_distinct_Tm_unit",
+        "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
+        "equality_tok_Prims.LexTop@tok",
+        "equation_FStar.HyperStack.ST.is_eternal_region",
+        "equation_FStar.Monotonic.HyperStack.is_eternal_color",
+        "equation_Mem.rgn", "equation_TLSConstants.protocolVersion",
+        "equation_with_fuel_HandshakeLog.gforall.fuel_instrumented",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.option",
+        "fuel_guarded_inversion_Prims.list",
+        "function_token_typing_HandshakeMessages.valid_hs_msg_prop",
+        "kinding_HandshakeMessages.hs_msg@tok", "primitive_Prims.op_AmpAmp",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_Prims.Cons_hd",
+        "projection_inverse_Prims.Cons_tl",
+        "refinement_interpretation_Tm_refine_31bfde48b952b6d7959cd5a2aa36404e",
+        "refinement_interpretation_Tm_refine_3a60f682bb5078aacf9eea139e635f3c",
+        "subterm_ordering_Prims.Cons",
+        "token_correspondence_HandshakeLog.gforall.fuel_instrumented",
+        "token_correspondence_HandshakeMessages.valid_hs_msg_prop",
+        "typing_FStar.Monotonic.HyperHeap.color",
+        "typing_FStar.Monotonic.HyperStack.is_eternal_color",
+        "typing_HandshakeLog.gforall", "typing_TLSInfo.safe_region"
+      ],
+      0,
+      "5dce69ff5f3740d8f554a6d792fb0be8"
+    ],
+    [
+      "HandshakeLog.valid_transcript_to_list_valid_hs_msg_aux_inj",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "e50c8757166344c3c8f81749763305a2"
+    ],
+    [
+      "HandshakeLog.valid_transcript_to_list_valid_hs_msg_aux_inj",
+      2,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_HandshakeLog.gforall.fuel_instrumented",
+        "@fuel_correspondence_HandshakeLog.valid_transcript_to_list_valid_hs_msg_aux.fuel_instrumented",
+        "@fuel_irrelevance_HandshakeLog.gforall.fuel_instrumented",
+        "@fuel_irrelevance_HandshakeLog.valid_transcript_to_list_valid_hs_msg_aux.fuel_instrumented",
+        "@query",
+        "FStar.Seq.Properties_interpretation_Tm_ghost_arrow_9a34a9deaac3ca72ad48c3ec79b6656c",
+        "HandshakeMessages_interpretation_Tm_ghost_arrow_54e02bd4c11efb798fe4ec4f356417f6",
+        "binder_x_1a103abad8ed8024fcdd4ad199fc3846_0",
+        "binder_x_b1b73bab281a8321f2b361152b87ea9d_1",
+        "binder_x_b1b73bab281a8321f2b361152b87ea9d_2", "bool_inversion",
+        "constructor_distinct_Prims.Cons", "constructor_distinct_Prims.Nil",
+        "disc_equation_Prims.Cons",
+        "equation_FStar.HyperStack.ST.is_eternal_region",
+        "equation_FStar.Monotonic.HyperStack.is_eternal_color",
+        "equation_HandshakeMessages.valid_hs_msg", "equation_Mem.rgn",
+        "equation_TLSConstants.protocolVersion",
+        "equation_with_fuel_HandshakeLog.gforall.fuel_instrumented",
+        "equation_with_fuel_HandshakeLog.valid_transcript_to_list_valid_hs_msg_aux.fuel_instrumented",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.option",
+        "fuel_guarded_inversion_Prims.list",
+        "function_token_typing_HandshakeMessages.valid_hs_msg_prop",
+        "kinding_HandshakeMessages.hs_msg@tok", "primitive_Prims.op_AmpAmp",
+        "proj_equation_FStar.Pervasives.Native.Mktuple2__1",
+        "proj_equation_FStar.Pervasives.Native.Mktuple2__2",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
+        "projection_inverse_Prims.Cons_a",
+        "projection_inverse_Prims.Cons_hd",
+        "projection_inverse_Prims.Cons_tl",
+        "refinement_interpretation_Tm_refine_2f48b2411bdb84eca59b17b22724d64d",
+        "refinement_interpretation_Tm_refine_31bfde48b952b6d7959cd5a2aa36404e",
+        "refinement_interpretation_Tm_refine_3a60f682bb5078aacf9eea139e635f3c",
+        "subterm_ordering_Prims.Cons",
+        "token_correspondence_HandshakeMessages.valid_hs_msg_prop",
+        "typing_FStar.Monotonic.HyperHeap.color",
+        "typing_FStar.Monotonic.HyperStack.is_eternal_color",
+        "typing_HandshakeLog.gforall", "typing_TLSInfo.safe_region"
+      ],
+      0,
+      "eafb10be51327d88464276eeef64466d"
+    ],
+    [
+      "HandshakeLog.transcript_bytes",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_HandshakeLog.hs_transcript", "equation_HandshakeLog.msg",
+        "equation_HandshakeLog.valid_transcript",
+        "primitive_Prims.op_AmpAmp", "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_7913c46ed823df5e60659625cd966658"
+      ],
+      0,
+      "c08e1efe1cc5babdb498f8b59d60c5f3"
+    ]
+  ]
+]

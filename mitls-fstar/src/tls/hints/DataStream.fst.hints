@@ -1,0 +1,224 @@
+[
+  "Š\u001dßôéÄ#\u0019¸sòúa)\n\u001a",
+  [
+    [
+      "DataStream.fragment",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_FStar.UInt.uint_t",
+        "lemma_FStar.Buffer.lemma_size",
+        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec"
+      ],
+      0,
+      "4512e1b19aee84c5ab3e232781a8968d"
+    ],
+    [
+      "DataStream.repr",
+      1,
+      2,
+      1,
+      [ "@query", "equation_DataStream.ghost_repr" ],
+      0,
+      "375f1cd7aed8a562066df9a3d0a23f20"
+    ],
+    [
+      "DataStream.mk_fragment",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_DataStream.ghost_repr", "equation_Range.within",
+        "primitive_Prims.op_AmpAmp", "projection_inverse_BoxBool_proj_0"
+      ],
+      0,
+      "93d4e8b7a4d4eb35b19da45562f40232"
+    ],
+    [
+      "DataStream.appFragment",
+      1,
+      2,
+      1,
+      [ "@query", "equation_DataStream.ghost_repr" ],
+      0,
+      "238b89bb8f757498966e7350f52dc727"
+    ],
+    [
+      "DataStream.appBytes",
+      1,
+      2,
+      1,
+      [ "@query", "equation_DataStream.ghost_repr" ],
+      0,
+      "d7f55a7bc80635773689c74379cb55c1"
+    ],
+    [
+      "DataStream.delta",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "assumption_Parsers.Alert.alert__uu___haseq",
+        "equation_DataStream.fragment", "equation_DataStream.pre_fragment",
+        "equation_Range.fragment_range",
+        "haseqTm_refine_d8bdfb1b483f1471db6abe90c9377c69",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "typing_FStar.Bytes.bytes"
+      ],
+      0,
+      "df3be8abd46cc61be3cd2a5842b4ba7e"
+    ],
+    [
+      "DataStream.__proj__Data__item___0",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "disc_equation_DataStream.Data",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_0d466ae495b3961c5a09f777ca3640cd"
+      ],
+      0,
+      "76b6c38dc579f5b6cf04a34f81f8fa0c"
+    ],
+    [
+      "DataStream.__proj__Alert__item___0",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "disc_equation_DataStream.Alert",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_36ed55116eca5cfa741045f75917d7b2"
+      ],
+      0,
+      "f4862b644b384e6689d5265194bf7d6b"
+    ],
+    [
+      "DataStream.final",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "assumption_Parsers.AlertLevel.alertLevel__uu___haseq",
+        "disc_equation_DataStream.Alert", "disc_equation_DataStream.Close",
+        "disc_equation_DataStream.Data",
+        "fuel_guarded_inversion_DataStream.delta"
+      ],
+      0,
+      "710d85c3030fd4d891338b0e2d402862"
+    ],
+    [
+      "DataStream.finalized",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "TLSInfo_pretyping_0afe7076ab7c3944b08749f79d359184",
+        "binder_x_0afe7076ab7c3944b08749f79d359184_0",
+        "binder_x_8734431131df6dd46aa9962779a47103_1",
+        "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
+        "equality_tok_Prims.LexTop@tok", "fuel_guarded_inversion_Prims.list",
+        "subterm_ordering_Prims.Cons"
+      ],
+      0,
+      "b93d8caa3ccbd7c946248897b418d49b"
+    ],
+    [
+      "DataStream.wellformed",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "binder_x_8734431131df6dd46aa9962779a47103_1",
+        "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
+        "fuel_guarded_inversion_Prims.list"
+      ],
+      0,
+      "c318b8a14e882ef2d0a3724e2b47a3e6"
+    ],
+    [
+      "DataStream.empty_is_well_formed",
+      1,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_DataStream.wellformed.fuel_instrumented",
+        "@query", "bool_inversion", "constructor_distinct_Prims.Nil",
+        "data_typing_intro_Prims.Nil@tok",
+        "equation_FStar.HyperStack.ST.is_eternal_region",
+        "equation_FStar.Monotonic.HyperStack.is_eternal_color",
+        "equation_Mem.rgn",
+        "equation_with_fuel_DataStream.wellformed.fuel_instrumented",
+        "kinding_DataStream.delta@tok", "projection_inverse_Prims.Nil_a",
+        "refinement_interpretation_Tm_refine_b5163a5c7eb2f4891aa85b6bd19b6e5e",
+        "typing_FStar.Monotonic.HyperHeap.color",
+        "typing_FStar.Monotonic.HyperStack.is_eternal_color",
+        "typing_TLSInfo.safe_region"
+      ],
+      0,
+      "4c1ea7062f58de1f271237fa5c12f4d9"
+    ],
+    [
+      "DataStream.__proj__State__item__log",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion", "bool_typing",
+        "disc_equation_FStar.Pervasives.Native.Some",
+        "equation_TLSInfo.authId", "proj_equation_DataStream.State_region",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_DataStream.State_region",
+        "refinement_interpretation_Tm_refine_ce76b661643d2140682dd3c2b703af52"
+      ],
+      0,
+      "eec5dce9ac29e63301c53409036bbeb1"
+    ],
+    [
+      "DataStream.__proj__State__item__ctr",
+      1,
+      2,
+      1,
+      [
+        "@query", "proj_equation_DataStream.State_region",
+        "projection_inverse_DataStream.State_region"
+      ],
+      0,
+      "dc7e65614dbf076601b76dbe90e9c415"
+    ],
+    [
+      "DataStream.gen",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565", "bool_inversion",
+        "constructor_distinct_FStar.Pervasives.Native.None",
+        "data_typing_intro_FStar.Pervasives.V@tok",
+        "disc_equation_FStar.Pervasives.Native.None",
+        "disc_equation_FStar.Pervasives.Native.Some",
+        "equation_FStar.HyperStack.ST.ralloc_post", "equation_Prims.nat",
+        "equation_TLSInfo.authId",
+        "function_token_typing_Prims.__cache_version_number__",
+        "kinding_DataStream.state@tok",
+        "kinding_FStar.Pervasives.Native.tuple2@tok",
+        "lemma_FStar.Monotonic.HyperHeap.lemma_extends_includes",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_FStar.Pervasives.Native.None_a",
+        "refinement_interpretation_Tm_refine_161e04719814801d293219f408210f95",
+        "refinement_interpretation_Tm_refine_e41ddb492020ba80410e3ac61c253988",
+        "typing_FStar.Monotonic.HyperHeap.includes"
+      ],
+      0,
+      "7fcaaceba85158b991f78ccaadfa90b3"
+    ]
+  ]
+]
