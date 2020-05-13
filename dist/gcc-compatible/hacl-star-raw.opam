@@ -16,11 +16,12 @@ which `hacl-star-raw` is a dependency.
 """
 depends: [
   "ocaml" { >= "4.05.0" }
-  "ocamlfind"
+  "ocamlfind" {build}
   "ctypes"
   "ctypes-foreign"
 ]
 build: [
+  ["./configure"]
   [make]
 ]
 install: [

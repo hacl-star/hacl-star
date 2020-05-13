@@ -412,6 +412,54 @@ let lowstar_rdrand_t =
     _
     (W.mk_prediction code_rdrand dom [] (rdrand_lemma code_rdrand IA.win))
 
+(* Need to rearrange the order of arguments *)
+[@__reduce__] noextract
+let avx512_pre : VSig.vale_pre dom =
+  fun (c:V.va_code)
+    (va_s0:V.va_state) ->
+      VC.va_req_Check_avx512_stdcall c va_s0 IA.win
+
+[@__reduce__] noextract
+let avx512_post : VSig.vale_post dom =
+  fun (c:V.va_code)
+    (va_s0:V.va_state)
+    (va_s1:V.va_state)
+    (f:V.va_fuel) ->
+      VC.va_ens_Check_avx512_stdcall c va_s0 IA.win va_s1 f
+
+(* The vale lemma doesn't quite suffice to prove the modifies clause
+   expected of the interop layer *)
+[@__reduce__] noextract
+let avx512_lemma'
+    (code:V.va_code)
+    (_win:bool)
+    (va_s0:V.va_state)
+ : Ghost (V.va_state & V.va_fuel)
+     (requires
+       avx512_pre code va_s0)
+     (ensures (fun (va_s1, f) ->
+       V.eval_code code va_s0 f va_s1 /\
+       VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
+       avx512_post code va_s0 va_s1 f))
+ = VC.va_lemma_Check_avx512_stdcall code va_s0 IA.win
+
+(* Prove that vm_lemma' has the required type *)
+noextract
+let avx512_lemma = as_t #(VSig.vale_sig_stdcall avx512_pre avx512_post) avx512_lemma'
+noextract
+let code_avx512 = VC.va_code_Check_avx512_stdcall IA.win
+
+(* Here's the type expected for the check_avx wrapper *)
+[@__reduce__] noextract
+let lowstar_avx512_t =
+  IX64.as_lowstar_sig_t_weak_stdcall
+    code_avx512
+    dom
+    []
+    _
+    _
+    (W.mk_prediction code_avx512 dom [] (avx512_lemma code_avx512 IA.win))
+
 [@ (CCConv "stdcall") ]
 val check_aesni : normal lowstar_aesni_t
 
@@ -435,3 +483,6 @@ val check_sse : normal lowstar_sse_t
 
 [@ (CCConv "stdcall") ]
 val check_rdrand : normal lowstar_rdrand_t
+
+[@ (CCConv "stdcall") ]
+val check_avx512 : normal lowstar_avx512_t

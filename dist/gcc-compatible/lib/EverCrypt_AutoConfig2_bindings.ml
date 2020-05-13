@@ -24,6 +24,8 @@ module Bindings(F:Cstubs.FOREIGN) =
       foreign "EverCrypt_AutoConfig2_has_movbe" (void @-> (returning bool)) 
     let everCrypt_AutoConfig2_has_rdrand =
       foreign "EverCrypt_AutoConfig2_has_rdrand" (void @-> (returning bool)) 
+    let everCrypt_AutoConfig2_has_avx512 =
+      foreign "EverCrypt_AutoConfig2_has_avx512" (void @-> (returning bool)) 
     let everCrypt_AutoConfig2_wants_vale =
       foreign "EverCrypt_AutoConfig2_wants_vale" (void @-> (returning bool)) 
     let everCrypt_AutoConfig2_wants_hacl =
@@ -72,6 +74,10 @@ module Bindings(F:Cstubs.FOREIGN) =
       
     let everCrypt_AutoConfig2_disable_rdrand =
       foreign "EverCrypt_AutoConfig2_disable_rdrand"
+        (void @-> (returning void))
+      
+    let everCrypt_AutoConfig2_disable_avx512 =
+      foreign "EverCrypt_AutoConfig2_disable_avx512"
         (void @-> (returning void))
       
     let everCrypt_AutoConfig2_disable_vale =
