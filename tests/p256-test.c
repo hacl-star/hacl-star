@@ -16,6 +16,8 @@
 #include <openssl/ecdsa.h>
 #include <openssl/ecdh.h>
 
+// #include <ecdsa.c>
+
 
 uint8_t
 prKey[32U] =
@@ -234,21 +236,38 @@ int main()
 	cycles cdiff3 = b - a;
 
 
+	
+
+	// for (int j = 0; j < ROUNDS; j++)
+	// 	ECDSA_do_sign(signature, 32, eckey);
+
+	// t1 = clock();
+	// a = cpucycles_begin();
+
+	// for (int j = 0; j < ROUNDS; j++)
+	// 	ECDSA_do_sign(signature, 32, eckey);
+
+	// b = cpucycles_end();
+	// t2 = clock();
+	// clock_t tdiff4 = t2 - t1;
+	// cycles cdiff4 = b - a;
+
 
 
 
 
 	uint64_t count = ROUNDS * SIZE;
-	printf("Hacl ECDSA (without hasing) PERF: %d\n"); 
+	printf("Hacl ECDSA (without hashing) PERF: %d\n"); 
 	print_time(count,tdiff1,cdiff1);
 
-	printf("OpenSSL ECDSA (without hasing) PERF: %d\n"); 
+	printf("OpenSSL ECDSA (without hashing) PERF: %d\n"); 
 	print_time(count,tdiff2,cdiff2);
 
 	printf("Hacl ECDH PERF: %d\n"); 
 	print_time(count,tdiff3,cdiff3);  
 
-	// printf("OpenSSL ECDH PERF: %d\n"); 
-	// print_time(count,tdiff4,cdiff4); 
+	// printf("Actually I have no idea what it computes: %d\n"); 
+	// print_time(count,tdiff4,cdiff4);  
+
 
 }
