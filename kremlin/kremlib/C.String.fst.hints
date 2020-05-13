@@ -1,0 +1,154 @@
+[
+  "².§ê<Vâ6’-Ò’]\u007f’(",
+  [
+    [
+      "C.String.zero_free",
+      1,
+      2,
+      1,
+      [
+        "@query", "assumption_C.HasEq_char",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "5b7a6256ed07f6405c8c7225e4380006"
+    ],
+    [
+      "C.String.well_formed",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "assumption_C.HasEq_char",
+        "equation_Prims.nat", "function_token_typing_C.char",
+        "int_inversion", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "typing_FStar.Seq.Base.length"
+      ],
+      0,
+      "e059962835b94cd25041be5d2da3ef85"
+    ],
+    [
+      "C.String.t",
+      1,
+      2,
+      1,
+      [
+        "@query", "assumption_C.HasEq_char", "function_token_typing_C.char",
+        "lemma_FStar.Seq.Base.hasEq_lemma"
+      ],
+      0,
+      "531062e7c47bc70b18827e53ef22fa03"
+    ],
+    [
+      "C.String.length",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "data_elim_C.String.S",
+        "equation_C.String.v", "equation_C.String.well_formed",
+        "fuel_guarded_inversion_C.String.t", "proj_equation_C.String.S_s",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_ed6e8a85e123e1e628ba0dad885f3031"
+      ],
+      0,
+      "11e48cea6fc51f2fcb84c5f514c143d2"
+    ],
+    [
+      "C.String.get",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "assumption_C.HasEq_char",
+        "b2t_def", "equation_C.String.v", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
+        "equation_FStar.UInt.uint_t", "fuel_guarded_inversion_C.String.t",
+        "int_inversion", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_dfcb8c150fd42ce38050af33905be19c",
+        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
+        "typing_FStar.UInt32.v"
+      ],
+      0,
+      "c7a781d03e8a41537bd937f265361446"
+    ],
+    [
+      "C.String.get",
+      2,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "b2t_def", "equation_C.String.v",
+        "equation_FStar.UInt.fits", "equation_FStar.UInt.min_int",
+        "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
+        "fuel_guarded_inversion_C.String.t", "int_inversion",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_dfcb8c150fd42ce38050af33905be19c",
+        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
+        "typing_FStar.UInt32.v"
+      ],
+      0,
+      "d6af63a77ad272f0b3427abb46b3eb4a"
+    ],
+    [
+      "C.String.nonzero_is_lt",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "assumption_C.HasEq_char",
+        "data_elim_C.String.S", "equation_C.String.get",
+        "equation_C.String.length", "equation_C.String.v",
+        "equation_C.String.well_formed", "equation_FStar.UInt.uint_t",
+        "fuel_guarded_inversion_C.String.t", "int_inversion", "int_typing",
+        "primitive_Prims.op_Subtraction", "proj_equation_C.String.S_s",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_ed6e8a85e123e1e628ba0dad885f3031",
+        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
+        "typing_FStar.UInt32.v"
+      ],
+      0,
+      "84f460336ffdb874953e27e10e72204d"
+    ],
+    [
+      "C.String.nonzero_is_lt",
+      2,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_C.String.get",
+        "equation_C.String.length", "equation_C.String.v",
+        "equation_C.String.well_formed", "equation_FStar.UInt.uint_t",
+        "fuel_guarded_inversion_C.String.t", "int_inversion", "int_typing",
+        "primitive_Prims.op_Subtraction", "proj_equation_C.String.S_s",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_a4691fadffad56bb755d245a5fc50b20",
+        "refinement_interpretation_Tm_refine_ed6e8a85e123e1e628ba0dad885f3031",
+        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
+        "typing_C.String.__proj__S__item__s", "typing_C.String.length",
+        "typing_FStar.UInt32.v"
+      ],
+      0,
+      "fe8a0369451cf33a5255199be9768fd7"
+    ],
+    [
+      "C.String.memcpy",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "lemma_FStar.Seq.Base.hasEq_lemma",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "typing_FStar.UInt8.t"
+      ],
+      0,
+      "0a61e20de5ed0571599d0e01ba69f6fc"
+    ]
+  ]
+]
