@@ -1,0 +1,53 @@
+[
+  "∑;|‘ï\u0005ÚKÅR˝W?Á¯B",
+  [
+    [
+      "Parsers.TicketContents12.ticketContents12",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "assumption_Parsers.Boolean.boolean__uu___haseq",
+        "assumption_Parsers.CipherSuite.cipherSuite__uu___haseq",
+        "assumption_Parsers.ProtocolVersion.protocolVersion__uu___haseq",
+        "equation_FStar.Bytes.lbytes",
+        "equation_Parsers.TicketContents12_master_secret.ticketContents12_master_secret",
+        "haseqTm_refine_71ea40360194fe02ee1272538c9cacbc",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "typing_FStar.Bytes.bytes"
+      ],
+      0,
+      "941a01de91bf39c09985f50e1f3fd76e"
+    ],
+    [
+      "Parsers.TicketContents12.ticketContents12_jumper",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_LowParse.Spec.Base.strong_parser_kind",
+        "equation_Parsers.TicketContents12.ticketContents12_parser_kind",
+        "proj_equation_LowParse.Spec.Base.Mkparser_kind__parser_kind_high",
+        "proj_equation_LowParse.Spec.Base.Mkparser_kind__parser_kind_low",
+        "projection_inverse_LowParse.Spec.Base.Mkparser_kind__parser_kind_high",
+        "projection_inverse_LowParse.Spec.Base.Mkparser_kind__parser_kind_low"
+      ],
+      0,
+      "2925b43bfad2b7cb7e8a4f660e3b8a51"
+    ],
+    [
+      "Parsers.TicketContents12.ticketContents12_valid",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
+        "l_and-interp",
+        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c"
+      ],
+      0,
+      "358cc914431a661b316c9630a496a492"
+    ]
+  ]
+]

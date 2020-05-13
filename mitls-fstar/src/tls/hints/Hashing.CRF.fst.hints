@@ -1,0 +1,183 @@
+[
+  "…ßÙG׃חÞ.ׁ&רך<„5a",
+  [
+    [
+      "Hashing.CRF.range",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "assumption_Spec.Hash.Definitions.hash_alg__uu___haseq",
+        "equation_FStar.Bytes.lbytes32",
+        "equation_Hacl.Hash.Definitions.hash_len", "equation_Hashing.tag",
+        "haseqTm_refine_01eac1db03c934bf91dcdae8ea4ae6a2",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "typing_FStar.Bytes.bytes"
+      ],
+      0,
+      "57a8d24bcca5c5fc6256640384125b4a"
+    ],
+    [
+      "Hashing.CRF.__proj__Computed__item__t",
+      1,
+      2,
+      1,
+      [
+        "@query", "proj_equation_Hashing.CRF.Computed_a",
+        "projection_inverse_Hashing.CRF.Computed_a"
+      ],
+      0,
+      "67e9e69cfdbd185593e826cc24428778"
+    ],
+    [
+      "Hashing.CRF.domain",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_FStar.Bytes.lbytes32",
+        "equation_Hacl.Hash.Definitions.hash_len", "equation_Hashing.tag",
+        "haseqTm_refine_01eac1db03c934bf91dcdae8ea4ae6a2",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "typing_FStar.Bytes.bytes"
+      ],
+      0,
+      "c9a3757c15253604292c001e0eb9aa12"
+    ],
+    [
+      "Hashing.CRF.inv",
+      1,
+      2,
+      1,
+      [ "@query", "assumption_Hashing.CRF.range__uu___haseq" ],
+      0,
+      "dba5c04f3f8ecc5fa453f674e1d146a1"
+    ],
+    [
+      "Hashing.CRF.table",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "assumption_Hashing.CRF.range__uu___haseq",
+        "equation_Hashing.CRF.inv", "equation_Mem.rgn",
+        "equation_Mem.tls_rgn",
+        "refinement_interpretation_Tm_refine_31bfde48b952b6d7959cd5a2aa36404e",
+        "refinement_interpretation_Tm_refine_9393f41ccc9ce36df1080eefe33f6c53"
+      ],
+      0,
+      "db1d383d51bf1bdc3b24a3d26f2d9160"
+    ],
+    [
+      "Hashing.CRF.hashed",
+      1,
+      2,
+      1,
+      [ "@query", "assumption_Hashing.CRF.range__uu___haseq" ],
+      0,
+      "02c6c31a26de7419a00e8bb3696967ce"
+    ],
+    [
+      "Hashing.CRF.crf_injective",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_Hashing.CRF.crf",
+        "projection_inverse_BoxBool_proj_0"
+      ],
+      0,
+      "7d750c1b705be517470f677ca106b176"
+    ],
+    [
+      "Hashing.CRF.crf_injective",
+      2,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "equation_FStar.HyperStack.ST.equal_stack_domains",
+        "equation_FStar.Monotonic.Heap.equal_dom",
+        "equation_FStar.Monotonic.HyperHeap.hmap",
+        "equation_FStar.Monotonic.HyperStack.is_tip",
+        "equation_FStar.Monotonic.HyperStack.is_wf_with_ctr_and_tip",
+        "equation_FStar.Monotonic.HyperStack.mem",
+        "equation_Hashing.CRF.crf",
+        "function_token_typing_FStar.Monotonic.Heap.heap",
+        "lemma_FStar.HyperStack.ST.lemma_same_refs_in_stack_regions_intro",
+        "lemma_FStar.Map.lemma_ContainsDom",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
+        "refinement_interpretation_Tm_refine_64f4bd6493f1f728b0cc401769821de9",
+        "typing_FStar.Map.contains", "typing_FStar.Monotonic.HyperHeap.rid",
+        "typing_FStar.Monotonic.HyperStack.get_hmap",
+        "typing_FStar.Monotonic.HyperStack.get_tip"
+      ],
+      0,
+      "9b534643cd3497aabc5515fc6b38ee45"
+    ],
+    [
+      "Hashing.CRF.finalize",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_FStar.Bytes.lbytes32",
+        "equation_Hacl.Hash.Definitions.hash_len", "equation_Hashing.tag",
+        "haseqTm_refine_01eac1db03c934bf91dcdae8ea4ae6a2",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "typing_FStar.Bytes.bytes"
+      ],
+      0,
+      "df574091bc348e7fc71a724ddabe04f1"
+    ],
+    [
+      "Hashing.CRF.test",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "equation_FStar.Bytes.lbytes", "equation_FStar.Bytes.lbytes32",
+        "equation_FStar.HyperStack.ST.equal_stack_domains",
+        "equation_FStar.Monotonic.Heap.equal_dom",
+        "equation_FStar.Monotonic.HyperHeap.hmap",
+        "equation_FStar.Monotonic.HyperStack.is_tip",
+        "equation_FStar.Monotonic.HyperStack.is_wf_with_ctr_and_tip",
+        "equation_FStar.Monotonic.HyperStack.mem",
+        "equation_FStar.UInt.uint_t",
+        "equation_Hacl.Hash.Definitions.hash_len",
+        "equation_Hashing.hashable", "equation_Hashing.tag",
+        "function_token_typing_FStar.Monotonic.Heap.heap",
+        "haseqTm_refine_01eac1db03c934bf91dcdae8ea4ae6a2", "int_inversion",
+        "lemma_FStar.HyperStack.ST.lemma_same_refs_in_stack_regions_elim",
+        "lemma_FStar.HyperStack.ST.lemma_same_refs_in_stack_regions_intro",
+        "lemma_FStar.Map.lemma_ContainsDom",
+        "lemma_FStar.Monotonic.HyperStack.lemma_tip_top_smt",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_disEquality",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_71ea40360194fe02ee1272538c9cacbc",
+        "refinement_interpretation_Tm_refine_7a4ed30e20911894f6da6e25856d8fc5",
+        "refinement_interpretation_Tm_refine_ab7a34c52ec57200cbb883e479fbf207",
+        "refinement_interpretation_Tm_refine_babee7091cb5d003b0dbe658ea2962a3",
+        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
+        "refinement_interpretation_Tm_refine_f642616d3514ed1287f47ef54d2c074c",
+        "typing_FStar.Bytes.bytes", "typing_FStar.Bytes.empty_bytes",
+        "typing_FStar.Bytes.len", "typing_FStar.Map.contains",
+        "typing_FStar.Monotonic.HyperHeap.rid",
+        "typing_FStar.Monotonic.HyperStack.get_hmap",
+        "typing_FStar.Monotonic.HyperStack.get_tip", "typing_FStar.UInt32.v",
+        "typing_Hashing.content", "typing_Hashing.extend",
+        "typing_Hashing.start"
+      ],
+      0,
+      "113e1d11acb8f25de0425fee0b8f8c57"
+    ]
+  ]
+]
