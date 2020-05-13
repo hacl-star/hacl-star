@@ -37,7 +37,9 @@ module Def = Spec.Hash.Definitions
 open Spec.Hash.Definitions
 open Hacl.Hash.Definitions
 
-#set-options "--z3rlimit 100"
+
+#set-options "--z3rlimit 100 --ifuel 0 --fuel 0"
+
 
 inline_for_extraction noextract
 val ecdsa_signature_step12: alg:hash_alg_ecdsa
@@ -85,6 +87,7 @@ let ecdsa_signature_step12 alg mLen m result =
 
   pop_frame()
 
+#push-options "--ifuel 1"
 
 inline_for_extraction
 val ecdsa_signature_step45: x: felem 
@@ -118,6 +121,7 @@ let ecdsa_signature_step45 x k tempBuffer =
   pop_frame();
     isZero_uint64_CT x
 
+#pop-options
 
 val lemma_power_step6: kInv: nat -> Lemma 
   (Spec.ECDSA.exponent_spec (fromDomain_ kInv) == toDomain_ (pow kInv (prime_p256_order - 2)))
@@ -139,8 +143,6 @@ let lemma_power_step6 kInv =
 
   lemma_mod_mul_distr_r (pow kInv (prime_p256_order - 2)) (pow2 256) prime_p256_order;
   lemmaToDomain (pow kInv (prime_p256_order - 2))
-
-#push-options "--z3rlimit 300"
 
 
 inline_for_extraction
@@ -205,8 +207,7 @@ let ecdsa_signature_step6 result kFelem z r da =
       lemma_mod_mul_distr_r (br0 * br1) (modp_inv2_prime (pow2 256) prime_p256_order * pow2 256) prime_p256_order;
       lemma_mod_mul_distr_r br0 br1 prime_p256_order
 
-#pop-options
-
+#push-options "--ifuel 1"
 
 val ecdsa_signature_core: alg: hash_alg_ecdsa
   -> r: felem 
@@ -249,6 +250,7 @@ val ecdsa_signature_core: alg: hash_alg_ecdsa
     )
   )
 
+
 let ecdsa_signature_core alg r s mLen m privKeyAsFelem k = 
   push_frame();
   let h0 = ST.get() in 
@@ -269,6 +271,7 @@ let ecdsa_signature_core alg r s mLen m privKeyAsFelem k =
   pop_frame(); 
   logor step5Flag sIsZero
 
+#pop-options
 
 inline_for_extraction noextract
 val ecdsa_signature: alg: hash_alg_ecdsa 
@@ -298,7 +301,6 @@ val ecdsa_signature: alg: hash_alg_ecdsa
     )    
   )
 
-#reset-options "--z3rlimit 400"
 
 let ecdsa_signature alg result mLen m privKey k = 
   push_frame();

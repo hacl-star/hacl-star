@@ -41,7 +41,7 @@ open FStar.Mul
 module H = Spec.Agile.Hash
 module Def = Spec.Hash.Definitions
 
-#set-options "--fuel 0 --ifuel 0 --z3rlimit 300"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
 (* This code is not side channel resistant *)
 inline_for_extraction noextract
@@ -94,6 +94,7 @@ let ecdsa_verification_step1 r s =
   let isRCorrect = isMoreThanZeroLessThanOrderMinusOne r in
   let isSCorrect = isMoreThanZeroLessThanOrderMinusOne s in
   isRCorrect && isSCorrect
+
 
 inline_for_extraction
 val ecdsa_verification_step23: alg:hash_alg_ecdsa
