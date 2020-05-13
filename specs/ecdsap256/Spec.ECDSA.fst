@@ -409,21 +409,26 @@ let invert_state_s (a: hash_alg_ecdsa): Lemma
   allow_inversion (hash_alg_ecdsa)
 
 
-val max_input_length: hash_alg_ecdsa -> Tot pos 
+val min_input_length: hash_alg_ecdsa -> Tot int
 
-let max_input_length a =
+let min_input_length a =
   match a with
     |NoHash -> 32
-    |Hash a -> max_input_length a
+    |Hash a -> 0
 
+(*
+noextract
+let hash_length (a : hash_alg_ecdsa) =
+  match a with 
+    |NoHash -> 32
+    |Hash a -> hash_length a
+*)
 
-
-val hashSpec: a: hash_alg_ecdsa -> mLen: size_nat{if NoHash? a then mLen == max_input_length a else True} -> m: lseq uint8 mLen ->
-  Tot (r:Lib.ByteSequence.lbytes (
-      match a with 
-	|NoHash -> length m
-	|Hash a -> hash_length a
-    ) {length r >= 32})
+val hashSpec: a: hash_alg_ecdsa 
+  -> mLen: size_nat{mLen >= min_input_length a}
+  -> m: lseq uint8 mLen ->
+  Tot (r:Lib.ByteSequence.lbytes 
+    (if Hash? a then hash_length (match a with Hash a -> a) else mLen) {length r >= 32})
 
 let hashSpec a mLen m = 
   assert_norm (pow2 32 < pow2 61);
@@ -441,7 +446,7 @@ val ecdsa_verification_agile:
   -> publicKey:tuple2 nat nat 
   -> r: nat 
   -> s: nat
-  -> mLen:size_nat {if NoHash? alg then mLen == max_input_length alg else True} 
+  -> mLen:size_nat {mLen == min_input_length alg} 
   -> m:lseq uint8 mLen
   -> bool
 
@@ -474,8 +479,7 @@ let ecdsa_verification_agile alg publicKey r s mLen m =
     end
   end
 
-
-
+(*
 val ecdsa_verification_without_hash:
   publicKey:tuple2 nat nat -> r:nat -> s:nat
   -> m:lseq uint8 32
@@ -505,12 +509,12 @@ let ecdsa_verification_without_hash publicKey r s m =
       if Spec.P256.isPointAtInfinity pointNorm then false else x = r
     end
   end
-
+*)
 
 
 val ecdsa_signature_agile:
-  alg: hash_alg {SHA2_256? alg \/ SHA2_384? alg \/ SHA2_512? alg}
-  -> mLen:size_nat
+  alg: hash_alg_ecdsa
+  -> mLen:size_nat{mLen >= min_input_length alg} 
   -> m:lseq uint8 mLen
   -> privateKey:lseq uint8 32
   -> k:lseq uint8 32
@@ -521,7 +525,7 @@ let ecdsa_signature_agile alg mLen m privateKey k =
   assert_norm (pow2 32 < pow2 125);
   let r, _ = montgomery_ladder_spec k ((0,0,0), basePoint) in
   let (xN, _, _) = _norm r in
-  let hashM = (hashSpec alg) m in
+  let hashM = hashSpec alg mLen m in 
   let cutHashM = sub hashM 0 32 in 
   let z = nat_from_bytes_be cutHashM % prime_p256_order in
   let kFelem = nat_from_bytes_be k in
@@ -533,7 +537,7 @@ let ecdsa_signature_agile alg mLen m privateKey k =
     else
       resultR, resultS, u64 0
 
-
+(*
 
 val ecdsa_signature_without_hash:
     m:lseq uint8 32
@@ -553,3 +557,4 @@ let ecdsa_signature_without_hash m privateKey k =
       resultR, resultS, u64 (pow2 64 - 1)
     else
       resultR, resultS, u64 0
+*)

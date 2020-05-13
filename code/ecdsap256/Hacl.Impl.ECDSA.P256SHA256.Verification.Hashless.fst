@@ -42,10 +42,8 @@ module Def = Spec.Hash.Definitions
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 300"
 
-(* https://blenderartists.org/uploads/default/original/4X/8/e/b/8eb44765c0060fb9a6f6cbc0a7b1cd2dcd92dbc8.jpg *)
-
 (* This code is not side channel resistant *)
-inline_for_extraction noextract
+(* inline_for_extraction noextract
 val isZero_uint64_nCT: f: felem -> Stack bool
   (requires fun h -> live h f)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\ r = (as_nat h0 f = 0))
@@ -579,3 +577,4 @@ let ecdsa_verification_without_hash pubKey r s m =
     uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 s);
 
   result
+ *)

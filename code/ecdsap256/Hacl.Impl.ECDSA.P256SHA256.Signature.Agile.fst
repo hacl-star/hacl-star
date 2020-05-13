@@ -40,14 +40,15 @@ open Hacl.Hash.Definitions
 #set-options "--z3rlimit 100"
 
 inline_for_extraction noextract
-val ecdsa_signature_step12: alg: hash_alg {SHA2_256? alg \/ SHA2_384? alg \/ SHA2_512? alg (* and blake one day *)}
-  ->  mLen: size_t -> m: lbuffer uint8 mLen -> result: felem -> Stack unit
+val ecdsa_signature_step12: alg:hash_alg_ecdsa
+  -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length alg}
+  -> m: lbuffer uint8 mLen -> result: felem -> Stack unit
   (requires fun h -> live h m /\ live h result )
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
     (
       assert_norm (pow2 32 < pow2 61);
       assert_norm (pow2 32 < pow2 125);
-      let hashM = (hashSpec alg) (as_seq h0 m) in 
+      let hashM = hashSpec alg (v mLen) (as_seq h0 m) in 
       let cutHashM = Lib.Sequence.sub hashM 0 32 in 
       as_nat h1 result = nat_from_bytes_be cutHashM % prime_p256_order
     )
@@ -59,17 +60,16 @@ let ecdsa_signature_step12 alg mLen m result =
   assert_norm (pow2 32 < pow2 125);
   push_frame(); 
     let h0 = ST.get() in 
-  let sz: FStar.UInt32.t = hash_len alg in
+  let sz: FStar.UInt32.t = match alg with |NoHash -> mLen |Hash a ->  hash_len a in
   let mHash = create sz (u8 0) in    
   
   begin
   match alg with 
-    |SHA2_256 ->
-      hash_256 m mLen mHash
-    |SHA2_384 ->
-      hash_384 m mLen mHash
-    |SHA2_512 -> 
-      hash_512 m mLen mHash
+    |NoHash -> copy mHash m 
+    |Hash a -> match a with 
+      |SHA2_256 -> hash_256 m mLen mHash
+      |SHA2_384 -> hash_384 m mLen mHash
+      |SHA2_512 -> hash_512 m mLen mHash 
   end;
   
   let cutHash = sub mHash (size 0) (size 32) in 
@@ -87,23 +87,26 @@ let ecdsa_signature_step12 alg mLen m result =
 
 
 inline_for_extraction
-val ecdsa_signature_step45: x: felem -> k: lbuffer uint8 (size 32) -> tempBuffer: lbuffer uint64 (size 100) -> Stack uint64
-  (requires fun h -> 
-    live h x /\ live h k /\ live h tempBuffer /\ 
-    LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer; loc k; loc x]
-  )
-  (ensures fun h0 r h1 -> 
-    modifies (loc x |+| loc tempBuffer) h0 h1 /\ 
-    as_nat h1 x < prime_p256_order /\ 
-    (
-      let (rxN, ryN, rzN), _ = montgomery_ladder_spec (as_seq h0 k) ((0,0,0), basePoint) in 
-      let (xN, _, _) = _norm (rxN, ryN, rzN) in 
-      as_nat h1 x == xN % prime_p256_order /\ 
+val ecdsa_signature_step45: x: felem 
+  -> k: lbuffer uint8 (size 32) 
+  -> tempBuffer: lbuffer uint64 (size 100) 
+  -> Stack uint64
+    (requires fun h -> 
+      live h x /\ live h k /\ live h tempBuffer /\ 
+      LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer; loc k; loc x]
+    )
+    (ensures fun h0 r h1 -> 
+      modifies (loc x |+| loc tempBuffer) h0 h1 /\ 
+      as_nat h1 x < prime_p256_order /\ 
       (
-  if as_nat h1 x = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0
+	let (rxN, ryN, rzN), _ = montgomery_ladder_spec (as_seq h0 k) ((0,0,0), basePoint) in 
+	let (xN, _, _) = _norm (rxN, ryN, rzN) in 
+	as_nat h1 x == xN % prime_p256_order /\ 
+	(
+	  if as_nat h1 x = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0
+	)
       )
     )
-  )
 
 let ecdsa_signature_step45 x k tempBuffer = 
   push_frame();
@@ -139,19 +142,25 @@ let lemma_power_step6 kInv =
 
 #push-options "--z3rlimit 300"
 
+
 inline_for_extraction
-val ecdsa_signature_step6: result: felem -> kFelem: felem -> z: felem -> r: felem -> da: felem -> Stack unit
-  (requires fun h -> 
-    live h result /\ live h kFelem /\ live h z /\ live h r /\ live h da /\
-    as_nat h kFelem < prime_p256_order /\ 
-    as_nat h z < prime_p256_order /\ 
-    as_nat h r < prime_p256_order /\ 
-    as_nat h da < prime_p256_order
-  )
-  (ensures fun h0 _ h1 -> 
-    modifies (loc result) h0 h1 /\
-    as_nat h1 result = (as_nat h0 z + as_nat h0 r * as_nat h0 da) * pow (as_nat h0 kFelem) (prime_p256_order - 2) % prime_p256_order
-  )
+val ecdsa_signature_step6: result: felem 
+  -> kFelem: felem
+  -> z: felem 
+  -> r: felem
+  -> da: felem 
+  -> Stack unit
+    (requires fun h -> 
+      live h result /\ live h kFelem /\ live h z /\ live h r /\ live h da /\
+      as_nat h kFelem < prime_p256_order /\ 
+      as_nat h z < prime_p256_order /\ 
+      as_nat h r < prime_p256_order /\ 
+      as_nat h da < prime_p256_order
+    )
+    (ensures fun h0 _ h1 -> 
+      modifies (loc result) h0 h1 /\
+      as_nat h1 result = (as_nat h0 z + as_nat h0 r * as_nat h0 da) * pow (as_nat h0 kFelem) (prime_p256_order - 2) % prime_p256_order
+    )
 
 let ecdsa_signature_step6 result kFelem z r da = 
   let open FStar.Tactics in 
@@ -198,9 +207,14 @@ let ecdsa_signature_step6 result kFelem z r da =
 
 #pop-options
 
-val ecdsa_signature_core: alg: hash_alg {SHA2_256? alg \/ SHA2_384? alg \/ SHA2_512? alg}  -> r: felem -> s: felem -> mLen: size_t -> m: lbuffer uint8 mLen ->  
-  privKeyAsFelem: felem  -> 
-  k: lbuffer uint8 (size 32) -> 
+
+val ecdsa_signature_core: alg: hash_alg_ecdsa
+  -> r: felem 
+  -> s: felem
+  -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length alg}
+  -> m: lbuffer uint8 mLen 
+  -> privKeyAsFelem: felem  
+  -> k: lbuffer uint8 (size 32) -> 
   Stack uint64
   (requires fun h -> 
     live h r /\ live h s /\ live h m /\ live h privKeyAsFelem /\ live h k /\
@@ -217,7 +231,7 @@ val ecdsa_signature_core: alg: hash_alg {SHA2_256? alg \/ SHA2_384? alg \/ SHA2_
     (
       assert_norm (pow2 32 < pow2 61); 
       assert_norm (pow2 32 < pow2 125);
-      let hashM = (hashSpec alg) (as_seq h0 m) in 
+      let hashM = hashSpec alg (v mLen) (as_seq h0 m) in 
       let cutHashM = Lib.Sequence.sub hashM 0 32 in 
       let z =  nat_from_bytes_be cutHashM % prime_p256_order in 
       let (rxN, ryN, rzN), _ = montgomery_ladder_spec (as_seq h0 k) ((0,0,0), basePoint) in 
@@ -227,10 +241,10 @@ val ecdsa_signature_core: alg: hash_alg {SHA2_256? alg \/ SHA2_384? alg \/ SHA2_
       as_nat h1 r == xN % prime_p256_order /\
       as_nat h1 s == (z + (as_nat h1 r) * as_nat h0 privKeyAsFelem) * pow kFelem (prime_p256_order - 2) % prime_p256_order /\
       (
-  if as_nat h1 r = 0 || as_nat h1 s = 0 then 
-    uint_v flag == pow2 64 - 1
-  else 
-    uint_v flag == 0
+	if as_nat h1 r = 0 || as_nat h1 s = 0 then 
+	  uint_v flag == pow2 64 - 1
+	else 
+	  uint_v flag == 0
       )
     )
   )
@@ -255,10 +269,14 @@ let ecdsa_signature_core alg r s mLen m privKeyAsFelem k =
   pop_frame(); 
   logor step5Flag sIsZero
 
+
 inline_for_extraction noextract
-val ecdsa_signature: alg: hash_alg {SHA2_256? alg \/ SHA2_384? alg \/ SHA2_512? alg} -> result: lbuffer uint8 (size 64) -> mLen: size_t -> m: lbuffer uint8 mLen ->
-  privKey: lbuffer uint8 (size 32) -> 
-  k: lbuffer uint8 (size 32) -> 
+val ecdsa_signature: alg: hash_alg_ecdsa 
+  -> result: lbuffer uint8 (size 64) 
+  -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length alg}
+  -> m: lbuffer uint8 mLen 
+  -> privKey: lbuffer uint8 (size 32) 
+  -> k: lbuffer uint8 (size 32) -> 
   Stack uint64
   (requires fun h -> 
     live h result /\ live h m /\ live h privKey /\ live h k /\

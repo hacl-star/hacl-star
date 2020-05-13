@@ -42,7 +42,7 @@ module H = Spec.Agile.Hash
 module Def = Spec.Hash.Definitions
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 300"
-
+(* 
 (* This code is not side channel resistant *)
 inline_for_extraction noextract
 val isZero_uint64_nCT: f: felem -> Stack bool
@@ -586,3 +586,4 @@ let ecdsa_verification alg pubKey r s mLen m =
     uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 s);
 
   result
+ *)

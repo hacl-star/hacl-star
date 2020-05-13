@@ -17,7 +17,7 @@ open Spec.Hash.Definitions
 open Spec.ECDSAP256.Definition
 open Hacl.Impl.P256.Compression
 open Spec.P256.MontgomeryMultiplication
-
+(* 
 val ecdsa_sign_p256_sha2: result: lbuffer uint8 (size 64) -> mLen: size_t -> m: lbuffer uint8 mLen ->
   privKey: lbuffer uint8 (size 32) -> 
   k: lbuffer uint8 (size 32) -> 
@@ -298,3 +298,4 @@ val reduction_8_32: x: lbuffer uint8 (size 32) -> result: lbuffer uint8 (size 32
       nat_from_bytes_be (as_seq h1 result) == nat_from_bytes_be (as_seq h0 x) % prime_p256_order /\
       nat_from_bytes_be (as_seq h1 result) < prime_p256_order
     )
+ *)

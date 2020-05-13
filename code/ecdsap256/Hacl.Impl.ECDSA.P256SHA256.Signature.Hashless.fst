@@ -32,7 +32,7 @@ open Hacl.Impl.ECDSA.MontgomeryMultiplication
 open Hacl.Impl.P256.Signature.Common
 
 #set-options "--z3rlimit 100 --ifuel 1 --fuel 1"
-
+(* 
 inline_for_extraction
 val ecdsa_signature_step12: m: lbuffer uint8 (size 32) -> result: felem -> Stack unit
   (requires fun h -> live h m /\ live h result /\ disjoint m result)
@@ -280,3 +280,4 @@ let ecdsa_signature_without_hash result m privKey k =
 
   pop_frame();
   flag  
+ *)
