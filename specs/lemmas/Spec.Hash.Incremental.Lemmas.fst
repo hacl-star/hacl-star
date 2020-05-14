@@ -104,44 +104,68 @@ let concatenated_hash_incremental_blake (a:hash_alg{is_blake a}) (inp1:bytes) (i
     let h = init a in
     concatenated_hash_incremental_blake_aux a inp1 inp2 h
 
-#push-options "--z3rlimit 100"
+let concatenated_hash_incremental_md_aux (a:hash_alg{is_md a})
+  (inp1:bytes) (inp2:bytes)
+  (h:words_state a)
+  : Lemma
+    (requires Seq.length (inp1 `S.append` inp2) <= max_input_length a /\
+      Seq.length inp1 % block_length a == 0 /\ Seq.length inp2 > 0)
+    (ensures (
+      let input = inp1 `S.append` inp2 in
+      let bs, l = split_blocks a input in
+      fst (update_last a (update_multi a h bs) (S.length bs) l) ==
+      fst (update_last a (update_multi a h inp1) (S.length inp1) inp2)))
+  = allow_inversion hash_alg;
+    let input = inp1 `S.append` inp2 in
+    let bs, l = split_blocks a input in
+    let total_len = S.length bs + S.length l in
+    let padding = pad a total_len in
+    let l_padded = l `S.append` padding in
+    calc (==) {
+      (S.length padding + total_len) % block_length a;
+      (==) { Math.Lemmas.lemma_mod_add_distr (S.length padding) total_len (block_length a) }
+      (S.length padding + total_len % block_length a) % block_length a;
+      (==) { Math.Lemmas.lemma_mod_add_distr (S.length l) (S.length bs) (block_length a) }
+      (S.length padding + S.length l % block_length a) % block_length a;
+      (==) { Math.Lemmas.lemma_mod_add_distr (S.length padding) (S.length l) (block_length a) }
+      S.length l_padded % block_length a;
+    };
+    let l2_padded = inp2 `S.append` padding in
+    calc (==) {
+      (S.length padding + total_len) % block_length a;
+      (==) { Math.Lemmas.lemma_mod_add_distr (S.length padding) total_len (block_length a) }
+      (S.length padding + total_len % block_length a) % block_length a;
+      (==) { Math.Lemmas.lemma_mod_add_distr (S.length inp2) (S.length inp1) (block_length a) }
+      (S.length padding + S.length inp2 % block_length a) % block_length a;
+      (==) { Math.Lemmas.lemma_mod_add_distr (S.length padding) (S.length inp2) (block_length a) }
+      S.length l2_padded % block_length a;
+    };
+
+    calc (==) {
+      update_last a (update_multi a h bs) (S.length bs) l;
+      (==) { }
+      update_multi a (update_multi a h bs) l_padded;
+      (==) { Spec.Hash.Lemmas.update_multi_associative a h bs l_padded }
+      update_multi a h (bs `S.append` l_padded);
+      (==) { S.append_assoc bs l padding }
+      update_multi a h (input `S.append` padding);
+      (==) { S.append_assoc inp1 inp2 padding }
+      update_multi a h (inp1 `S.append` (inp2 `S.append` padding));
+      (==) { Spec.Hash.Lemmas.update_multi_associative a h inp1 (inp2 `S.append` padding) }
+      update_last a (update_multi a h inp1) (S.length inp1) inp2;
+    }
 
 let concatenated_hash_incremental_md (a:hash_alg{is_md a}) (inp1:bytes_blocks a) (inp2:bytes)
   : Lemma
-    (requires Seq.length (inp1 `S.append` inp2) <= max_input_length a)
+    (requires Seq.length (inp1 `S.append` inp2) <= max_input_length a /\ S.length inp2 > 0)
     (ensures finish a (update_last a (update_multi a (init a) inp1) (S.length inp1) inp2)
       `S.equal` hash_incremental a (inp1 `S.append` inp2))
-  = admit();
-    allow_inversion hash_alg;
-    let len = S.length inp2 in
-    calc (S.equal) {
-    finish a (update_last a (update_multi a (init a) inp1)
-        (S.length inp1) inp2);
-    (S.equal) { }
-      finish a (update_multi a (update_multi a (init a) inp1)
-        (S.append inp2 (pad a (S.length inp1 + len))));
-    (S.equal) { }
-      finish a (update_multi a (init a)
-        (S.append inp1
-          (S.append inp2 (pad a (S.length inp1 + len)))));
-    (S.equal) { S.append_assoc
-      inp1
-      inp2
-      (pad a (S.length inp1 + len))
-    }
-      finish a (update_multi a (init a)
-        (S.append (S.append inp1 inp2)
-          (pad a (S.length inp1 + len))));
-    (==) { }
-      Spec.Agile.Hash.hash a (S.append inp1 inp2);
-    };
-    hash_is_hash_incremental a (S.append inp1 inp2)
-
-#pop-options
+  = let h = init a in
+    concatenated_hash_incremental_md_aux a inp1 inp2 h
 
 let concatenated_hash_incremental (a:hash_alg) (inp1:bytes_blocks a) (inp2:bytes)
   : Lemma
-    (requires Seq.length (inp1 `S.append` inp2) <= max_input_length a /\ Seq.length inp2 > 0)
+    (requires S.length (inp1 `S.append` inp2) <= max_input_length a /\ S.length inp2 > 0)
     (ensures finish a (update_last a (update_multi a (init a) inp1) (S.length inp1) inp2)
       `S.equal` hash_incremental a (inp1 `S.append` inp2))
    = if is_blake a then concatenated_hash_incremental_blake a inp1 inp2
