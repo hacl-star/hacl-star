@@ -232,6 +232,7 @@ let supportsSigning key =
   let attrs = key.ko.sto.attrs in 
   (isKeySecretKey key \/ isKeyPrivateKey key) /\
   (
+    assert(contains (fun x -> x.aType = CKA_SIGN) attrs);
     let sign = find_l (fun x -> x.aType = CKA_SIGN) attrs in  
     index (Some?.v sign).pValue 0 == true
   )
