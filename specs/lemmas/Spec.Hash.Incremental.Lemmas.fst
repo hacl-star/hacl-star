@@ -6,80 +6,103 @@ open Spec.Hash.PadFinish
 open FStar.Mul
 open Lib.IntTypes
 
-#reset-options "--fuel 0 --ifuel 0 --z3rlimit 30"
+#reset-options "--fuel 0 --ifuel 0 --z3rlimit 50"
 
-let padded_block_modulo (a:hash_alg{is_blake a}) (s1 s2:bytes) (rem:nat{rem <= block_length a}) (n:nat)
-  : Lemma (requires S.length s2 == n * block_length a /\ rem <= S.length s1)
-          (ensures Spec.Blake2.get_last_padded_block (to_blake_alg a) s1 rem `S.equal`
-                   Spec.Blake2.get_last_padded_block (to_blake_alg a) (s2 `S.append` s1) rem)
-  = let last1 = Seq.slice s1 (S.length s1 - rem) (S.length s1) in
-    let s' = s2 `S.append` s1 in
-    let last2 = Seq.slice s' (S.length s' - rem) (S.length s') in
-    assert (Seq.equal last1 last2)
-
-let small_update_last_blake
-  (a:hash_alg{is_blake a}) (h:words_state a)
-  (prevlen:nat{prevlen % block_length a = 0}) (s:bytes)
+let lemma_split_blocks_assoc (a:hash_alg) (s1 s2:bytes)
   : Lemma
-    (requires S.length s + prevlen <= max_input_length a /\ S.length s <= block_length a)
-    (ensures
-      (let last_block = Spec.Blake2.get_last_padded_block (to_blake_alg a) s (S.length s) in
-      update_last_blake a h prevlen s ==
-      (Spec.Blake2.blake2_update_block (to_blake_alg a) true (v (snd h +. u64 (S.length s))) last_block (fst h), u64 0)))
-   = let (nb, rem) = Spec.Blake2.split (to_blake_alg a) (S.length s) in
-     let blocks = Seq.slice s 0 (nb * block_length a) in
-     let h' = update_multi a h blocks in
-     Spec.Hash.Lemmas.update_multi_zero a h;
-     assert (h == h')
+      (requires
+        S.length s1 + S.length s2 <= max_input_length a /\
+        S.length s1 % block_length a == 0 /\ S.length s2 > 0)
+      (ensures (
+        let b1, l1 = split_blocks a (s1 `S.append` s2) in
+        let b2, l2 = split_blocks a s2 in
+        b1 == s1 `S.append` b2 /\ l1 == l2))
+  = let s = s1 `S.append` s2 in
+    let n_s1 = S.length s1 / block_length a in
 
-let blake_split_same_modulo (a:hash_alg{is_blake a}) (len1 len2:nat) (n:nat)
-  : Lemma (requires len1 + n * block_length a = len2 /\ len1 > 0)
-          (ensures snd (Spec.Blake2.split (to_blake_alg a) len1) ==
-                   snd (Spec.Blake2.split (to_blake_alg a) len2))
-  = ()
+    let n1 = S.length s / block_length a in
+    let n2 = S.length s2 / block_length a in
 
-#push-options "--z3rlimit 2500"
+    Math.Lemmas.division_addition_lemma (S.length s2) (block_length a) n_s1;
+    assert (n1 == n2 + n_s1);
 
-let concatenated_hash_incremental_blake (a:hash_alg{is_blake a}) (inp1:bytes_blocks a) (inp2:bytes)
+    let n1' = if S.length s % block_length a = 0 then n1-1 else n1 in
+    let n2' = if S.length s2 % block_length a = 0 then n2-1 else n2 in
+
+    let bs1, ls1 = S.split s (n1' * block_length a) in
+    let bs2, ls2 = S.split s2 (n2' * block_length a) in
+    assert (n1' * block_length a == n2' * block_length a + S.length s1);
+    assert (S.equal ls1 ls2);
+    assert (S.equal bs1 (s1 `S.append` bs2))
+
+let lemma_split_blake_modulo (a:hash_alg{is_blake a}) (s1 s2:bytes)
   : Lemma
-    (requires Seq.length (inp1 `S.append` inp2) <= max_input_length a /\ Seq.length inp2 > 0)
+      (requires S.length s1 + S.length s2 <= max_input_length a /\
+        S.length s1 % block_length a == 0 /\ S.length s2 > 0)
+      (ensures (
+        let b1, l1, rem1 = last_split_blake a (s1 `S.append` s2) in
+        let b2, l2, rem2 = last_split_blake a s2 in
+        l1 == l2 /\ rem1 == rem2)
+      )
+   = lemma_split_blocks_assoc a s1 s2
+
+let compose_split_blocks (a:hash_alg{is_blake a}) (inp1:bytes) (inp2:bytes)
+  : Lemma
+    (requires S.length inp1 % block_length a == 0 /\
+      S.length inp2 > 0 /\
+      S.length inp1 + S.length inp2 <= max_input_length a)
+    (ensures (
+      let input = inp1 `Seq.append` inp2 in
+      let bs, l = split_blocks a input in
+      let _, last, _ = last_split_blake a l in
+      let blocks2, last2, rem2 = last_split_blake a inp2 in
+      last == last2 /\
+      bs == inp1 `S.append` blocks2 /\
+      rem2 == S.length l))
+  = let input = inp1 `Seq.append` inp2 in
+    let bs, l = split_blocks a input in
+    let _, last, _ = last_split_blake a l in
+    let blocks2, last2, rem2 = last_split_blake a inp2 in
+    lemma_split_blocks_assoc a inp1 inp2;
+    let b2, _ = split_blocks a inp2 in
+    lemma_split_blake_modulo a b2 l
+
+let concatenated_hash_incremental_blake_aux (a:hash_alg{is_blake a})
+  (inp1:bytes) (inp2:bytes)
+  (h:words_state a)
+  : Lemma
+    (requires Seq.length (inp1 `S.append` inp2) <= max_input_length a /\
+      Seq.length inp1 % block_length a == 0 /\ Seq.length inp2 > 0)
+    (ensures (
+      let input = inp1 `S.append` inp2 in
+      let bs, l = split_blocks a input in
+      fst (update_last_blake a (update_multi a h bs) (S.length bs) l) ==
+      fst (update_last_blake a (update_multi a h inp1) (S.length inp1) inp2)))
+  = let input = inp1 `S.append` inp2 in
+    let bs, l = split_blocks a input in
+    let blocks2, last2, rem2 = last_split_blake a inp2 in
+    let h' = update_multi a (update_multi a h inp1) blocks2 in
+    let h_f = update_last_blake a h' (S.length bs) l in
+
+    let h_f2 = Spec.Blake2.blake2_update_block (to_blake_alg a) true (v (snd h' +. u64 rem2))
+      last2 (fst h') in
+
+    let _, last, _ = last_split_blake a l in
+    compose_split_blocks a inp1 inp2;
+
+    Spec.Hash.Lemmas.update_multi_associative a h inp1 blocks2;
+    assert (h' == update_multi a h bs)
+
+
+let concatenated_hash_incremental_blake (a:hash_alg{is_blake a}) (inp1:bytes) (inp2:bytes)
+  : Lemma
+    (requires Seq.length (inp1 `S.append` inp2) <= max_input_length a /\
+      Seq.length inp1 % block_length a == 0 /\ Seq.length inp2 > 0)
     (ensures finish a (update_last_blake a (update_multi a (init a) inp1) (S.length inp1) inp2)
       `S.equal` hash_incremental a (inp1 `S.append` inp2))
   = let open FStar.Mul in
     let h = init a in
-
-    let h1 = update_multi a h inp1 in
-    let h2 = update_last_blake a h1 (S.length inp1) inp2 in
-    let n = S.length inp2 / (block_length a) in
-    let n:nat = if S.length inp2 % block_length a = 0 && n > 0 then n-1 else n in
-    let nb, rem = Spec.Blake2.split (to_blake_alg a) (S.length inp2) in
-
-    let bs2, l2 = S.split inp2 (n * block_length a) in
-
-    assert (S.length l2 == S.length inp2 - (n * block_length a));
-    let h3 = update_multi a h1 bs2 in
-
-    let input = inp1 `S.append` inp2 in
-    let n' = S.length input / (block_length a) in
-    let n':nat = if S.length input % block_length a = 0 && n' > 0 then n'-1 else n' in
-    blake_split_same_modulo a (S.length inp2) (S.length input) (S.length inp1 / (block_length a));
-    let bs, l = S.split input (n' * (block_length a)) in
-
-    assert (l `S.equal` l2);
-    assert (bs `S.equal` (inp1 `S.append` bs2));
-
-    Spec.Hash.Lemmas.update_multi_associative a h inp1 bs2;
-    assert (h3 == update_multi a h bs);
-
-    assert (nb == n);
-
-    let h4 = update_last_blake a h3 (S.length inp1 + S.length bs2) l2 in
-
-    let last_block = Spec.Blake2.get_last_padded_block (to_blake_alg a) l2 (S.length l2) in
-    padded_block_modulo a l2 bs2 rem n;
-
-    small_update_last_blake a h3 (S.length inp1 + S.length bs2) l2
-
+    concatenated_hash_incremental_blake_aux a inp1 inp2 h
 
 #push-options "--z3rlimit 100"
 
