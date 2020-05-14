@@ -7,9 +7,8 @@ open Hacl.PKCS11.Lemmas
 
 val _attributesAllPresent: toSearchSequence: seq _CK_ATTRIBUTE -> toFinds: seq _CK_ATTRIBUTE_TYPE -> Tot (r: bool
   {
-    r == true ==> 
-      (forall (i: nat {i < Seq.length toFinds}). 
-  contains (fun x -> x.aType = (index toFinds i)) toSearchSequence)
+    r == true ==> (forall (i: nat {i < Seq.length toFinds}). 
+    contains (fun x -> x.aType = (index toFinds i)) toSearchSequence)
   }
 )
 

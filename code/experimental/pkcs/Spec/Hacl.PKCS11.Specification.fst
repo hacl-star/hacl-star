@@ -36,18 +36,9 @@ let isBitFlagSet flag bit =
   (logand flag bit) <> 0
 
 
-(* 
-/* CK_MECHANISM_INFO provides information about a particular
- * mechanism */
-typedef struct CK_MECHANISM_INFO {
-    CK_ULONG    ulMinKeySize;
-    CK_ULONG    ulMaxKeySize;
-    CK_FLAGS    flags;
-} CK_MECHANISM_INFO; *)
-
-
 type _CKS_MECHANISM_INFO = 
   | MecInfo: ulMinKeySize: _CK_ULONG -> ulMaxKeySize: _CK_ULONG -> flags: _CK_FLAGS -> _CKS_MECHANISM_INFO
+
 
 (* Experemental implementation *)
 let _map_cks_mechanism_info_to_mechanism: _CK_MECHANISM_TYPE -> _CKS_MECHANISM_INFO = function 
@@ -119,7 +110,7 @@ assume val attrributesConsistent: attrs: seq _CK_ATTRIBUTE -> Tot bool
 
 val isContaining: #a: Type -> f: (a -> bool) -> s: seq a -> Tot (r: bool {r == true <==> Hacl.PKCS11.Lib.contains f s})
 
-let isContaining #a f s = 
+let isContaining #a f s =
   match find_l f s with 
   |Some _ -> lemmaFindLExistIfSome f s; true
   |_ -> false
@@ -130,12 +121,11 @@ let isContaining #a f s =
 (* Notion of not being present: forall elements not function*)
 
 
-
 type _object = 
   |O: 
     attrs: seq _CK_ATTRIBUTE 
-      {
-	_attributesAllPresent attrs (getAttributesForTypeExtended CKO_OBJECT) 
+    {
+	_attributesAllPresent attrs (getAttributesForTypeExtended CKO_OBJECT)
 	 (* /\
 	attrributesConsistent attrs *)
       }  -> 
@@ -242,8 +232,7 @@ let supportsSigning key =
   let attrs = key.ko.sto.attrs in 
   (isKeySecretKey key \/ isKeyPrivateKey key) /\
   (
-    let sign = find_l (fun x -> x.aType = CKA_SIGN) attrs in 
-    assume (Some? sign);  
+    let sign = find_l (fun x -> x.aType = CKA_SIGN) attrs in  
     index (Some?.v sign).pValue 0 == true
   )
 
@@ -255,7 +244,6 @@ let supportsVerifying key =
   (isKeySecretKey key \/ isKeyPublicKey key) /\
   (
     let verify = find_l (fun x -> x.aType = CKA_VERIFY) attrs in 
-    assume (Some? verify);  
     index (Some?.v verify).pValue 0 == true
   )
   
@@ -509,8 +497,6 @@ val mechanismGetFromDevice: d: device ->
 
 let mechanismGetFromDevice d pMechanism = 
   Some?.v (find_l (fun x -> x.mechanismID = pMechanism) d.mechanisms)
-
-assume val checkedAttributes: pTemplate : seq _CK_ATTRIBUTE -> Tot bool
 
 
 (* compares two sessions -> The sessions are equal iff the elements are equal. 
@@ -878,7 +864,15 @@ assume val lemma_count: #ks: seq key_object -> #ms: seq _CK_MECHANISM -> #supM: 
 (* The size should be checked *)
 
 
-val deviceAddKey: d: device -> key: key_object -> Tot ((handler: result _CK_OBJECT_HANDLE) & (resultDevice: device))
+val deviceAddKey: d: device 
+  -> key: key_object 
+  -> Tot ((handler: result _CK_OBJECT_HANDLE) & 
+    (resultDevice: device {
+      match handler with 
+      |Inr _ -> resultDevice == d
+      |Inl _ -> True
+     }
+  ))
 
 let deviceAddKey d key = 
   if length d.keys = pow2 32 - 1 then 
@@ -1025,8 +1019,8 @@ val combineAllRequiredAttributes:
 let combineAllRequiredAttributes mechanism t = 
   let mechanismRequiredAttributes = getRequiredAttributesByMechanism mechanism in 
   let attributesToConstructType = getAttributesForType t in 
-  lemmaContainsSelf mechanismRequiredAttributes;
-  lemmaContainsSelf attributesToConstructType;
+  (*lemmaContainsSelf mechanismRequiredAttributes;
+  lemmaContainsSelf attributesToConstructType; *)
   let f i = fun x -> x = index (getAttributesForType t) i in 
   lemmaContains3 attributesToConstructType mechanismRequiredAttributes f;
   append mechanismRequiredAttributes attributesToConstructType
@@ -1165,7 +1159,7 @@ val __CKS_GenerateKey: d: device ->
 	if Inr? handler then 
 	  d = resultDevice else 
 	let handler : nat = (match handler with Inl a -> a) in 
-	Seq.length resultDevice.keys = Seq.length d.keys + 1 /\
+	Seq.length resultDevice.keys = Seq.length d.keys + 4 /\
 	Seq.length resultDevice.subSessions = Seq.length d.subSessions /\
 	handler = Seq.length resultDevice.keys -1 /\
 	(
@@ -1173,7 +1167,7 @@ val __CKS_GenerateKey: d: device ->
 	  isKeySecretKey newCreatedKey /\
 	  (
 	    let attributeLocal = getObjectAttributeLocal newCreatedKey.ko.sto in 
-	    Some? attributeLocal /\ 
+	    Some? attributeLocal /\  (* ??? *)
 	    index (match attributeLocal with Some a -> a).pValue 0 == true
 	  ) 
 	) /\
@@ -1186,11 +1180,11 @@ val __CKS_GenerateKey: d: device ->
 let __CKS_GenerateKey d hSession pMechanism pTemplate = 
   let mechanism = mechanismCreationSelect d pMechanism pTemplate in
   match mechanism with 
-  |Inl mechanism -> 
+  |Inl mechanism -> (** ? **) 
     let rawKey = mechanism () in 
     let allExistingAttributes = combineAllProvidedAttributes pMechanism.mechanismID pTemplate in 
     let requiredAttributes = getRequiredAttributes CKO_SECRET_KEY allExistingAttributes in 
-    let valueAttribute = A CKA_VALUE rawKey in 
+    let valueAttribute = A CKA_VALUE rawKey in  (*  the others?*)
     let key = _CKO_SECRET_KEY_Constructor (snoc requiredAttributes valueAttribute) in 
     let (|handler, updatedDevice|) = deviceAddKey d key.sk in 
     (|handler, updatedDevice|)
@@ -1223,7 +1217,6 @@ let _CKS_GenerateKey d hSession pMechanism pTemplate =
 
 
 
-(*
 assume val _sign: pData: seq FStar.UInt8.t ->  pMechanism: _CK_MECHANISM_TYPE -> key: _CK_OBJECT_HANDLE -> 
 	pSignature: option (seq UInt8.t) ->
 	pSignatureLen : _CK_ULONG ->
@@ -1238,7 +1231,7 @@ assume val _signUpdate: pPart: seq FStar.UInt8.t -> ulPartLen: nat {Seq.length p
 val signInit: d: device -> 
 	hSession: _CK_SESSION_HANDLE -> 
 	pMechanism: _CK_MECHANISM_TYPE{isPresentOnDevice d pMechanism = true /\ 
-		(let flags = mechanismGetFlags d pMechanism in isFlagSign flags)} ->
+		(let flags = mechanismGetFlags d pMechanism in isFlagSign flags)} -> (**???**)
 	keyHandler: _CK_OBJECT_HANDLE{Seq.length d.keys > keyHandler /\ 
 		(let key = Seq.index d.keys keyHandler in 
 		let attrKey = (key.element).attrs in

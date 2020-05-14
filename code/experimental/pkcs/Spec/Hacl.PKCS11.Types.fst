@@ -119,8 +119,11 @@ let getAttributesForTypeExtended: t: _CK_OBJECT_CLASS_EXTENDED -> seq _CK_ATTRIB
 (* other objects *)
 let getAttributesForType: t: _CK_OBJECT_CLASS -> seq _CK_ATTRIBUTE_TYPE = function 
   |CKO_SECRET_KEY -> (seq_of_list 
-    [CKA_CLASS; CKA_TOKEN; CKA_PRIVATE; CKA_MODIFIABLE; CKA_LABEL; CKA_COPYABLE; CKA_DESTROYABLE;
-    CKA_KEY_TYPE; CKA_ID; CKA_END_DATE; CKA_DERIVED; CKA_LOCAL; CKA_KEY_GEN_MECHANISM; CKA_ALLOWED_MECHANISMS; CKA_SENSITIVE; CKA_ENCRYPT; CKA_DECRYPT; CKA_SIGN; CKA_VERIFY; 
+    [
+    (* CKA_VALUE? *)
+    CKA_CLASS; CKA_TOKEN; CKA_PRIVATE; CKA_MODIFIABLE; CKA_LABEL; CKA_COPYABLE; CKA_DESTROYABLE;
+    CKA_KEY_TYPE; CKA_ID; CKA_END_DATE; CKA_DERIVED; CKA_LOCAL; CKA_KEY_GEN_MECHANISM; CKA_ALLOWED_MECHANISMS; 
+    CKA_SENSITIVE; CKA_ENCRYPT; CKA_DECRYPT; CKA_SIGN; CKA_VERIFY; 
     CKA_WRAP; CKA_UNWRAP; CKA_EXTRACTABLE; CKA_ALWAYS_SENSITIVE; CKA_NEVER_EXTRACTABLE])
   |_ -> (seq_of_list 
     [CKA_CLASS; CKA_TOKEN; CKA_PRIVATE; CKA_MODIFIABLE; CKA_LABEL; CKA_COPYABLE; CKA_DESTROYABLE;
@@ -217,11 +220,12 @@ let _ck_attribute_get_len: _CK_ATTRIBUTE_TYPE -> Tot (a: option nat {Some? a ==>
 
 type _CK_ATTRIBUTE  = 
   |A: 
-    aType: _CK_ATTRIBUTE_TYPE -> pValue: seq (_ck_attribute_get_type aType) 
+    aType: _CK_ATTRIBUTE_TYPE -> 
+    pValue: seq (_ck_attribute_get_type aType) 
     {
       let len = _ck_attribute_get_len aType in 
       if Some? len then 
-	length pValue = (match len with Some a -> a)
+	length pValue == (match len with Some a -> a)
       else 
 	True
     } 

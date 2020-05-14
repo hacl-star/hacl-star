@@ -10,7 +10,7 @@ let for_all
   (l: seq a)
 : Pure bool
   (requires True)
-  (ensures (fun b -> (b == true <==> (forall (i: nat). i < Seq.length l /\ f (index l i) == true))))
+  (ensures (fun b -> (b == true <==> (forall (i: nat). i < Seq.length l ==> f (index l i) == true))))
 = None? (seq_find (fun i -> not (f i)) l)
 
 
@@ -30,7 +30,7 @@ let rec for_all2 #a #b f s s1 =
 
 assume val map: #a: eqtype -> #b: eqtype -> f: (a -> b) ->  s: seq a -> 
   Tot (r: seq b{Seq.length s = Seq.length r /\
-    (forall (i: nat {i < Seq.length s}). index r i = f (index s i))})
+    (forall (i: nat). i < Seq.length s ==> index r i = f (index s i))})
   (decreases (Seq.length s))
 
 
@@ -54,8 +54,8 @@ val takeOne: #a: eqtype ->
   f: (a -> Tot bool) ->
   s: seq a ->   
   counter: nat {counter <= length s}-> 
-  seqToPut: seq a {(forall (i: nat {i < length seqToPut}) . f (index seqToPut i))} -> 
-  Tot (r: seq a {forall (i: nat {i < Seq.length r}). f (index r i)})
+  seqToPut: seq a {(forall (i: nat). i < length seqToPut ==> f (index seqToPut i))} -> 
+  Tot (r: seq a {forall (i: nat). i < Seq.length r ==> f (index r i)})
   (decreases (length s - counter))
   
 
@@ -73,7 +73,8 @@ let rec takeOne #a f s counter seqToPut =
     takeOne f s (counter + 1) seqToPutForCurrent
     end
 
-val takeAll: #a: eqtype -> f: (a -> Tot bool) -> s: seq a -> Tot (r: seq a {forall (i: nat {i < length r}). f (index r i)})
+val takeAll: #a: eqtype -> f: (a -> Tot bool) -> s: seq a ->
+  Tot (r: seq a {forall (i: nat). i < length r ==> f (index r i)})
 
 let takeAll #a f s = 
   let s = Seq.empty in 
