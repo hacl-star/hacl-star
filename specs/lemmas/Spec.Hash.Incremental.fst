@@ -10,45 +10,6 @@ open Lib.IntTypes
 
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 300"
 
-let update_last_blake (a:hash_alg{is_blake a})
-  (hash:words_state a)
-  (prevlen:nat{prevlen % block_length a = 0})
-  (input:bytes{S.length input + prevlen <= max_input_length a}):
-  Tot (words_state a)
-  = let (nb, rem) = Spec.Blake2.split (to_blake_alg a) (S.length input) in
-    let blocks = Seq.slice input 0 (nb * block_length a) in
-    let (h', totlen) = update_multi a hash blocks in
-    let last_block = Spec.Blake2.get_last_padded_block (to_blake_alg a) input rem in
-    (Spec.Blake2.blake2_update_block (to_blake_alg a) true (v (totlen +. u64 rem)) last_block h', u64 0)
-
-(* An incremental specification better suited to a stateful API, allowing the
-   client to perform the padding at the last minute upon hitting the last chunk of
-   data. *)
-let update_last (a:hash_alg)
-  (hash:words_state a)
-  (prevlen:nat{prevlen % block_length a = 0})
-  (input:bytes{S.length input + prevlen <= max_input_length a}):
-  Tot (words_state a)
-=
-  if is_blake a then
-    update_last_blake a hash prevlen input
-  else
-  let total_len = prevlen + S.length input in
-  let padding = pad a total_len in
-  update_multi a hash S.(input @| padding)
-
-let hash_incremental (a:hash_alg) (input:bytes{S.length input <= (max_input_length a)}):
-  Tot (hash:bytes{S.length hash = (hash_length a)})
-=
-  let open FStar.Mul in
-  let n = S.length input / (block_length a) in
-  // Ensuring that we always handle one block in update_last
-  let n = if S.length input % block_length a = 0 && n > 0 then n-1 else n in
-  let bs, l = S.split input (n * (block_length a)) in
-  let hash = update_multi a (init a) bs in
-  let hash = update_last a hash (n * (block_length a)) l in
-  finish a hash
-
 let padded_block_modulo (a:hash_alg{is_blake a}) (s1 s2:bytes) (rem:nat{rem <= block_length a}) (n:nat)
   : Lemma (requires S.length s2 == n * block_length a /\ rem <= S.length s1)
           (ensures Spec.Blake2.get_last_padded_block (to_blake_alg a) s1 rem `S.equal`
@@ -70,26 +31,14 @@ let small_update_last_blake
    = let (nb, rem) = Spec.Blake2.split (to_blake_alg a) (S.length s) in
      let blocks = Seq.slice s 0 (nb * block_length a) in
      let h' = update_multi a h blocks in
-//   TODO: Reorganize modules to avoid circular dependencies
-//     Spec.Hash.Lemmas.update_multi_zero a h
-     assume (h == h')
+     Spec.Hash.Lemmas.update_multi_zero a h;
+     assert (h == h')
 
 let blake_split_same_modulo (a:hash_alg{is_blake a}) (len1 len2:nat) (n:nat)
   : Lemma (requires len1 + n * block_length a = len2 /\ len1 > 0)
           (ensures snd (Spec.Blake2.split (to_blake_alg a) len1) ==
                    snd (Spec.Blake2.split (to_blake_alg a) len2))
   = ()
-
-// TODO: Reorganize modules to avoid circular dependencies
-let update_multi_associative (a: hash_alg)
-  (h: words_state a)
-  (input1: bytes_blocks a)
-  (input2: bytes_blocks a):
-  Lemma (ensures (
-    let input = S.append input1 input2 in
-    (update_multi a (update_multi a h input1) input2) ==
-      (update_multi a h input)))
-  = admit()
 
 #push-options "--z3rlimit 2500"
 
@@ -121,7 +70,7 @@ let concatenated_hash_incremental_blake (a:hash_alg{is_blake a}) (inp1:bytes_blo
     assert (l `S.equal` l2);
     assert (bs `S.equal` (inp1 `S.append` bs2));
 
-    update_multi_associative a h inp1 bs2;
+    Spec.Hash.Lemmas.update_multi_associative a h inp1 bs2;
     assert (h3 == update_multi a h bs);
 
     assert (nb == n);
@@ -132,3 +81,47 @@ let concatenated_hash_incremental_blake (a:hash_alg{is_blake a}) (inp1:bytes_blo
     padded_block_modulo a l2 bs2 rem n;
 
     small_update_last_blake a h3 (S.length inp1 + S.length bs2) l2
+
+
+#push-options "--z3rlimit 100"
+
+let concatenated_hash_incremental_md (a:hash_alg{is_md a}) (inp1:bytes_blocks a) (inp2:bytes)
+  : Lemma
+    (requires Seq.length (inp1 `S.append` inp2) <= max_input_length a)
+    (ensures finish a (update_last a (update_multi a (init a) inp1) (S.length inp1) inp2)
+      `S.equal` hash_incremental a (inp1 `S.append` inp2))
+  = admit();
+    allow_inversion hash_alg;
+    let len = S.length inp2 in
+    calc (S.equal) {
+    finish a (update_last a (update_multi a (init a) inp1)
+        (S.length inp1) inp2);
+    (S.equal) { }
+      finish a (update_multi a (update_multi a (init a) inp1)
+        (S.append inp2 (pad a (S.length inp1 + len))));
+    (S.equal) { }
+      finish a (update_multi a (init a)
+        (S.append inp1
+          (S.append inp2 (pad a (S.length inp1 + len)))));
+    (S.equal) { S.append_assoc
+      inp1
+      inp2
+      (pad a (S.length inp1 + len))
+    }
+      finish a (update_multi a (init a)
+        (S.append (S.append inp1 inp2)
+          (pad a (S.length inp1 + len))));
+    (==) { }
+      Spec.Agile.Hash.hash a (S.append inp1 inp2);
+    };
+    hash_is_hash_incremental a (S.append inp1 inp2)
+
+#pop-options
+
+let concatenated_hash_incremental (a:hash_alg) (inp1:bytes_blocks a) (inp2:bytes)
+  : Lemma
+    (requires Seq.length (inp1 `S.append` inp2) <= max_input_length a /\ Seq.length inp2 > 0)
+    (ensures finish a (update_last a (update_multi a (init a) inp1) (S.length inp1) inp2)
+      `S.equal` hash_incremental a (inp1 `S.append` inp2))
+   = if is_blake a then concatenated_hash_incremental_blake a inp1 inp2
+     else concatenated_hash_incremental_md a inp1 inp2
