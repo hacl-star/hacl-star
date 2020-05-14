@@ -25,6 +25,7 @@ val update_multi_associative (a: hash_alg)
   (input2: bytes_blocks a):
   Lemma (ensures (
     let input = S.append input1 input2 in
+    S.length input % block_length a = 0 /\
     (update_multi a (update_multi a h input1) input2) ==
       (update_multi a h input)))
   [ SMTPat (update_multi a (update_multi a h input1) input2) ]
