@@ -3,7 +3,7 @@ module Hacl.PKCS11.Attributes.API
 open FStar.Seq
 open Hacl.PKCS11.Types
 open Hacl.PKCS11.Lib
-open Hacl.PKCS11.Lemmas
+open Hacl.PKCS11.Lemmas.HighLevel
 
 
 #set-options "--z3rlimit 100 --fuel 0 --ifuel 0"

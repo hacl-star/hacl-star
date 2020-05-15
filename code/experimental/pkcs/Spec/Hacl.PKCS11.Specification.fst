@@ -13,7 +13,7 @@ open PKCS11.Spec.Lemmas
 open Hacl.PKCS11.Lib
 
 open Hacl.PKCS11.Types
-open Hacl.PKCS11.Lemmas
+open Hacl.PKCS11.Lemmas.HighLevel
 
 open Hacl.PKCS11.Attributes.API
 open Hacl.PKCS11.Lemmas.ObjectTree
@@ -230,6 +230,7 @@ val supportsSigning: key: key_object -> Tot Type0
 
 let supportsSigning key = 
   let attrs = key.ko.sto.attrs in 
+  (* It should be exclusive xor rather than or *)
   (isKeySecretKey key \/ isKeyPrivateKey key) /\
   (
     assert(contains (fun x -> x.aType = CKA_SIGN) attrs);
@@ -242,8 +243,10 @@ val supportsVerifying: key: key_object -> Tot Type0
 
 let supportsVerifying key = 
   let attrs = key.ko.sto.attrs in 
+  (* It should be exclusive xor rather than or *)
   (isKeySecretKey key \/ isKeyPublicKey key) /\
   (
+    assert(contains (fun x -> x.aType = CKA_VERIFY) attrs);
     let verify = find_l (fun x -> x.aType = CKA_VERIFY) attrs in 
     index (Some?.v verify).pValue 0 == true
   )
@@ -1228,7 +1231,7 @@ assume val _signUpdate: pPart: seq FStar.UInt8.t -> ulPartLen: nat {Seq.length p
 	previousSign: option temporalStorage -> 
 	Tot (result temporalStorage)
 
-
+(*
 val signInit: d: device -> 
 	hSession: _CK_SESSION_HANDLE -> 
 	pMechanism: _CK_MECHANISM_TYPE{isPresentOnDevice d pMechanism = true /\ 

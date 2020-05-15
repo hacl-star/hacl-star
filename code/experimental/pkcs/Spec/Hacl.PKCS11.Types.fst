@@ -4,6 +4,7 @@ open FStar.UInt32
 open FStar.UInt8
 
 open FStar.Seq
+open Hacl.PKCS11.Lemmas.LowLevel
 
 type _HACL_Curve_ID = 
   |Curve25519
@@ -118,14 +119,42 @@ let getAttributesForTypeExtended: t: _CK_OBJECT_CLASS_EXTENDED -> seq _CK_ATTRIB
 
 (* other objects *)
 
+(* Object -> Storage -> Key *)
 unfold let cko_secret_key_attributes_list: list _CK_ATTRIBUTE_TYPE = 
     [
-      CKA_CLASS; CKA_TOKEN; CKA_PRIVATE; CKA_MODIFIABLE; CKA_LABEL; CKA_COPYABLE; 
-      CKA_DESTROYABLE; CKA_KEY_TYPE; CKA_ID; CKA_END_DATE; CKA_DERIVED; CKA_LOCAL;
-      CKA_KEY_GEN_MECHANISM; CKA_ALLOWED_MECHANISMS; CKA_SENSITIVE; CKA_ENCRYPT; 
+      CKA_CLASS; (* Object attributes *)
+      CKA_TOKEN; CKA_PRIVATE; CKA_MODIFIABLE; CKA_LABEL; CKA_COPYABLE; 
+      CKA_DESTROYABLE; (* Storage attibutes *) 
+      CKA_KEY_TYPE; CKA_ID; CKA_END_DATE; CKA_DERIVED; CKA_LOCAL;
+      CKA_KEY_GEN_MECHANISM; CKA_ALLOWED_MECHANISMS; 
+      CKA_SENSITIVE; CKA_ENCRYPT; (* Commom key attributes *)
       CKA_DECRYPT; CKA_SIGN; CKA_VERIFY;  CKA_WRAP; CKA_UNWRAP; CKA_EXTRACTABLE;
       CKA_ALWAYS_SENSITIVE; CKA_NEVER_EXTRACTABLE
     ]
+
+unfold let cko_public_key_attributes_list: list _CK_ATTRIBUTE_TYPE = 
+    [
+      CKA_CLASS; (* Object attributes *)
+      CKA_TOKEN; CKA_PRIVATE; CKA_MODIFIABLE; CKA_LABEL; CKA_COPYABLE; 
+      CKA_DESTROYABLE; (* Storage attibutes *) 
+      CKA_KEY_TYPE; CKA_ID; CKA_END_DATE; CKA_DERIVED; CKA_LOCAL;
+      CKA_KEY_GEN_MECHANISM; CKA_ALLOWED_MECHANISMS; 
+      CKA_SENSITIVE; CKA_ENCRYPT; (* Commom key attributes *)
+      CKA_SUBJECT; CKA_ENCRYPT; CKA_VERIFY; CKA_VERIFY_RECOVER; CKA_WRAP; CKA_TRUSTED; CKA_WRAP_TEMPLATE; CKA_PUBLIC_KEY_INFO (* public key attributes (table 23) *)
+    ]  
+
+unfold let cko_private_key_attributes_list: list _CK_ATTRIBUTE_TYPE = 
+  [
+      CKA_CLASS; (* Object attributes *)
+      CKA_TOKEN; CKA_PRIVATE; CKA_MODIFIABLE; CKA_LABEL; CKA_COPYABLE; 
+      CKA_DESTROYABLE; (* Storage attibutes *) 
+      CKA_KEY_TYPE; CKA_ID; CKA_END_DATE; CKA_DERIVED; CKA_LOCAL;
+      CKA_KEY_GEN_MECHANISM; CKA_ALLOWED_MECHANISMS; 
+      CKA_SENSITIVE; CKA_ENCRYPT; (* Commom key attributes *)
+      CKA_SUBJECT; CKA_SENSITIVE; CKA_DECRYPT; CKA_SIGN; CKA_SIGN_RECOVER; CKA_UNWRAP; CKA_EXTRACTABLE; CKA_ALWAYS_SENSITIVE; CKA_NEVER_EXTRACTABLE; CKA_WRAP_WITH_TRUSTED; CKA_UNWRAP_TEMPLATE; CKA_ALWAYS_AUTHENTICATE; CKA_PUBLIC_KEY_INFO (* private key attributes (table 24 *)
+  ]
+
+
 
 unfold let cko_other_list: list _CK_ATTRIBUTE_TYPE = 
   [
@@ -139,14 +168,30 @@ unfold let cko_other_list: list _CK_ATTRIBUTE_TYPE =
 let getAttributesForType: t: _CK_OBJECT_CLASS -> (r : seq _CK_ATTRIBUTE_TYPE
   {
     match t with 
-    |CKO_SECRET_KEY -> length r == 24 /\ index r 17 = CKA_SIGN
-    |_ -> length r == 24
+      |CKO_SECRET_KEY -> length r == 24 /\ 
+	index r 17 = CKA_SIGN /\ index r 18 = CKA_VERIFY
+      |CKO_PRIVATE_KEY -> length r == 29 /\ index r 19 = CKA_SIGN
+      |CKO_PUBLIC_KEY -> length r == 24 /\ index r 18 = CKA_VERIFY
+      |_ -> length r == 24
   })  = function 
   |CKO_SECRET_KEY -> 
     assert_norm (List.Tot.length cko_secret_key_attributes_list == 24);
-    assert_norm(List.Tot.index cko_secret_key_attributes_list 17 = CKA_SIGN);
+    assert_norm (List.Tot.index cko_secret_key_attributes_list 17 = CKA_SIGN);
+    assert_norm (List.Tot.index cko_secret_key_attributes_list 18 = CKA_VERIFY);
     let r = seq_of_list cko_secret_key_attributes_list in 
-    assume (index r 17 = CKA_SIGN);
+    lemmaFromListToSequence cko_secret_key_attributes_list;
+    r
+  |CKO_PRIVATE_KEY -> 
+    assert_norm (List.Tot.length cko_private_key_attributes_list == 29); 
+    assert_norm (List.Tot.index cko_private_key_attributes_list 19 = CKA_SIGN); 
+    let r = seq_of_list cko_private_key_attributes_list in 
+    lemmaFromListToSequence cko_private_key_attributes_list;
+    r
+  |CKO_PUBLIC_KEY -> 
+    assert_norm (List.Tot.length cko_public_key_attributes_list == 24); 
+    assert_norm (List.Tot.index cko_public_key_attributes_list 18 = CKA_VERIFY);
+    let r = seq_of_list cko_public_key_attributes_list in 
+    lemmaFromListToSequence cko_public_key_attributes_list;
     r
   |_ -> 
     assert_norm (List.Tot.length cko_other_list == 24);

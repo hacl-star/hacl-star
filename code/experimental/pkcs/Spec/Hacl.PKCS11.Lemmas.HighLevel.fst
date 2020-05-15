@@ -1,4 +1,4 @@
-module Hacl.PKCS11.Lemmas
+module Hacl.PKCS11.Lemmas.HighLevel
 
 open FStar.Seq
 open Hacl.PKCS11.Lib
