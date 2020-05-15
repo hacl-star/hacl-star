@@ -631,8 +631,7 @@ let updateSession d ks ms supM sessions =
 val modifiesKeysM: dBefore: device -> 
   dAfter: device
     {
-      Seq.length dBefore.keys + 1 = Seq.length dAfter.keys /\ 
-      Seq.length dBefore.subSessions = Seq.length dAfter.subSessions
+      Seq.length dBefore.keys + 1 = Seq.length dAfter.keys
     } -> 
   i: _CK_OBJECT_HANDLE{i < Seq.length dAfter.keys} -> Tot Type0
 
@@ -647,9 +646,9 @@ let modifiesKeysM dBefore dAfter i =
   mechanismsPrevious == mechanismsNew /\
   objectsPrevious == objectsNew /\
   supportedMechanismsPrevious == supportedMechanismsNew /\
-
   keysBeforeA == keysAfterA /\ keysBeforeB = keysAfterB /\
-  
+
+  length dBefore.subSessions == length dAfter.subSessions /\
   (forall (i: nat{i < Seq.length dBefore.subSessions}). sessionEqual (index dBefore.subSessions i) (index dAfter.subSessions i))
 
 
@@ -874,7 +873,13 @@ val deviceAddKey: d: device
     (resultDevice: device {
       match handler with 
       |Inr _ -> resultDevice == d
-      |Inl _ -> True
+      |Inl handler -> 
+	(
+	  length resultDevice.keys = length d.keys + 1 /\
+	  handler = length resultDevice.keys - 1 /\
+	  modifiesKeysM d resultDevice handler
+	
+	)
      }
   ))
 
@@ -884,9 +889,16 @@ let deviceAddKey d key =
   else 
     begin
       let keysUpdated = snoc d.keys key in 
-      let handler = length keysUpdated in 
+      let handler = length keysUpdated - 1 in 
       let sessionUpdated = updateSession d keysUpdated d.mechanisms d.supportedMechanisms  d.subSessions in 
       let updatedDevice = Device keysUpdated d.mechanisms d.supportedMechanisms d.objects sessionUpdated in 
+
+      assert(
+	let keysAfterA, key_keysAfterB = Seq.split (snoc d.keys key) handler in 
+	let keyExcept, keysAfterB = split key_keysAfterB 1 in 
+	equal keysAfterA d.keys);
+
+
       (|Inl handler, updatedDevice|)
     end
 
@@ -1164,7 +1176,7 @@ val __CKS_GenerateKey: d: device ->
 	  d = resultDevice else 
 	let handler : nat = (match handler with Inl a -> a) in 
 	Seq.length resultDevice.keys = Seq.length d.keys + 4 /\
-	Seq.length resultDevice.subSessions = Seq.length d.subSessions /\
+	(* Seq.length resultDevice.subSessions = Seq.length d.subSessions /\ --- incluses inside modif*) 
 	handler = Seq.length resultDevice.keys -1 /\
 	(
 	  let newCreatedKey = Seq.index resultDevice.keys handler in 
