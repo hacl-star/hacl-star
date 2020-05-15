@@ -174,7 +174,7 @@ function refresh_hacl_hints_dist() {
         if [[ $branchname == "master" ]] ; then
           refresh_doc
         fi
-        refresh_hints_dist "git@github.com:mitls/hacl-star.git" "true" "regenerate hints and dist" "."
+        refresh_hints_dist "git@github.com:mitls/hacl-star.git" "true" "regenerate hints and dist" "hints"
     fi
 }
 
