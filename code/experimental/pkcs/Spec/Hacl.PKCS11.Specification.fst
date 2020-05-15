@@ -966,14 +966,13 @@ let deviceAddSession  f d newSession =
 val attributesNotReadOnly: seq _CK_ATTRIBUTE -> Type0
 
 let attributesNotReadOnly s = 
-  forall (i : nat). i < length s /\ (not (_ck_attribute_read_only (index s i).aType))
+  forall (i : nat). i < length s ==> (not (_ck_attribute_read_only (index s i).aType))
 
     
 val areAttributesNotReadOnly: s: seq _CK_ATTRIBUTE -> Tot (r: bool {r <==> attributesNotReadOnly s})
 
 let areAttributesNotReadOnly s = 
   for_all (fun x -> not (_ck_attribute_read_only x.aType)) s 
-
 
 
 val _CKO_SECRET_KEY_Constructor: attrs: seq _CK_ATTRIBUTE 
@@ -1035,8 +1034,6 @@ val combineAllRequiredAttributes:
 let combineAllRequiredAttributes mechanism t = 
   let mechanismRequiredAttributes = getRequiredAttributesByMechanism mechanism in 
   let attributesToConstructType = getAttributesForType t in 
-  (*lemmaContainsSelf mechanismRequiredAttributes;
-  lemmaContainsSelf attributesToConstructType; *)
   let f i = fun x -> x = index (getAttributesForType t) i in 
   lemmaContains3 attributesToConstructType mechanismRequiredAttributes f;
   append mechanismRequiredAttributes attributesToConstructType
@@ -1054,14 +1051,33 @@ let attributesTemplateComplete (t : _CK_OBJECT_CLASS) (pMechanism : _CK_MECHANIS
 (*One example of an inconsistent template would be using a template which specifies two different values for the same attribute.   *)
 
 (* for all attributes that have the same type, the values are the same *)
-val attributeConsistent0: attr: _CK_ATTRIBUTE -> s: seq _CK_ATTRIBUTE  -> Type0
 
-let attributeConsistent0 attr s  = 
-  let allAttributesSameType = map (fun x -> x.aType = attr.aType) s in
-  
-    True
+#push-options "--ifuel 0 --fuel 0"
+
+val attributeConsistent0_0: attr: _CK_ATTRIBUTE -> s: seq _CK_ATTRIBUTE{count (fun x -> x.aType = attr.aType) s > 0}
+  -> Type0
+
+let attributeConsistent0_0 attr s  = 
+  let allAttributesSameType = takeAll (fun x -> x.aType = attr.aType) s in
+  forall (i: nat). i < length allAttributesSameType ==> equalAttributeValue (index allAttributesSameType i) attr
    
-  
+
+val _attributeConsistent0_0: attr: _CK_ATTRIBUTE -> s: seq _CK_ATTRIBUTE{count (fun x -> x.aType = attr.aType) s > 0} 
+  -> Tot (r: bool {r == true <==> attributeConsistent0_0 attr s})
+
+let _attributeConsistent0_0 attr s = 
+  let allAttributesSameType = takeAll (fun x -> x.aType = attr.aType) s in 
+  for_all (fun x -> _equalAttributeValue x attr) allAttributesSameType
+
+
+val attributeConsistent1_0: attr: _CK_ATTRIBUTE -> s: seq _CK_ATTRIBUTE -> Type0
+
+let attributeConsistent1_0 attr s = 
+  let allAttributesSameType = takeAll (fun x -> x.aType = attr.aType) s in 
+  length allAttributesSameType == 1
+
+
+
 
 assume val _attributesTemplateConsistent0: attrs: seq _CK_ATTRIBUTE -> Tot bool
   (decreases (length attrs))

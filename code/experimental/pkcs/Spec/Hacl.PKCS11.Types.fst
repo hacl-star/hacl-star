@@ -299,6 +299,16 @@ type _CK_ATTRIBUTE  =
     -> _CK_ATTRIBUTE
 
 
+val equalAttributeValue: a: _CK_ATTRIBUTE -> b: _CK_ATTRIBUTE -> Type0
+
+let equalAttributeValue a b = 
+  _ck_attribute_get_type a.aType == _ck_attribute_get_type b.aType /\ 
+  a.pValue == b.pValue
+
+assume val _equalAttributeValue: a: _CK_ATTRIBUTE -> b: _CK_ATTRIBUTE -> Tot (r: bool {r <==> equalAttributeValue a b})
+
+
+
 
 (*/* at least 32 bits; each bit is a Boolean flag */
 typedef CK_ULONG          CK_FLAGS;
