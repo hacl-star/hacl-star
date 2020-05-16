@@ -63,6 +63,7 @@ Hacl_Interface_P256_ecdsa_sign_p256_sha512(
 uint64_t
 Hacl_Interface_P256_ecdsa_sign_p256_without_hash(
   uint8_t *result,
+  uint32_t mLen,
   uint8_t *m,
   uint8_t *privKey,
   uint8_t *k
@@ -97,6 +98,7 @@ Hacl_Interface_P256_ecdsa_verif_p256_sha512(
 
 bool
 Hacl_Interface_P256_ecdsa_verif_without_hash(
+  uint32_t mLen,
   uint8_t *m,
   uint8_t *pubKey,
   uint8_t *r,

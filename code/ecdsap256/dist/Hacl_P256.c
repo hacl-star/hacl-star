@@ -182,9 +182,9 @@ static uint64_t sub4(uint64_t *x, uint64_t *y, uint64_t *result)
 
 static void mul64(uint64_t x, uint64_t y, uint64_t *result, uint64_t *temp)
 {
-  FStar_UInt128_uint128 res = FStar_UInt128_mul_wide(x, y);
-  uint64_t l0 = FStar_UInt128_uint128_to_uint64(res);
-  uint64_t h0 = FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(res, (uint32_t)64U));
+  uint128_t res = (uint128_t)x * y;
+  uint64_t l0 = (uint64_t)res;
+  uint64_t h0 = (uint64_t)(res >> (uint32_t)64U);
   result[0U] = l0;
   temp[0U] = h0;
 }
@@ -1990,25 +1990,21 @@ static void pad_256(uint64_t len, uint8_t *dst)
   store64_be(dst3, len << (uint32_t)3U);
 }
 
-static void pad_384(FStar_UInt128_uint128 len, uint8_t *dst)
+static void pad_384(uint128_t len, uint8_t *dst)
 {
   uint8_t *dst1 = dst;
   dst1[0U] = (uint8_t)0x80U;
   uint8_t *dst2 = dst + (uint32_t)1U;
   uint32_t
   len_zero =
-    ((uint32_t)256U
-    - ((uint32_t)17U + (uint32_t)(FStar_UInt128_uint128_to_uint64(len) % (uint64_t)(uint32_t)128U)))
+    ((uint32_t)256U - ((uint32_t)17U + (uint32_t)((uint64_t)len % (uint64_t)(uint32_t)128U)))
     % (uint32_t)128U;
   for
   (uint32_t
     i = (uint32_t)0U;
     i
     <
-      ((uint32_t)256U
-      -
-        ((uint32_t)17U
-        + (uint32_t)(FStar_UInt128_uint128_to_uint64(len) % (uint64_t)(uint32_t)128U)))
+      ((uint32_t)256U - ((uint32_t)17U + (uint32_t)((uint64_t)len % (uint64_t)(uint32_t)128U)))
       % (uint32_t)128U;
     i++)
   {
@@ -2020,34 +2016,27 @@ static void pad_384(FStar_UInt128_uint128 len, uint8_t *dst)
     +
       (uint32_t)1U
       +
-        ((uint32_t)256U
-        -
-          ((uint32_t)17U
-          + (uint32_t)(FStar_UInt128_uint128_to_uint64(len) % (uint64_t)(uint32_t)128U)))
+        ((uint32_t)256U - ((uint32_t)17U + (uint32_t)((uint64_t)len % (uint64_t)(uint32_t)128U)))
         % (uint32_t)128U;
-  FStar_UInt128_uint128 len_ = FStar_UInt128_shift_left(len, (uint32_t)3U);
+  uint128_t len_ = len << (uint32_t)3U;
   store128_be(dst3, len_);
 }
 
-static void pad_512(FStar_UInt128_uint128 len, uint8_t *dst)
+static void pad_512(uint128_t len, uint8_t *dst)
 {
   uint8_t *dst1 = dst;
   dst1[0U] = (uint8_t)0x80U;
   uint8_t *dst2 = dst + (uint32_t)1U;
   uint32_t
   len_zero =
-    ((uint32_t)256U
-    - ((uint32_t)17U + (uint32_t)(FStar_UInt128_uint128_to_uint64(len) % (uint64_t)(uint32_t)128U)))
+    ((uint32_t)256U - ((uint32_t)17U + (uint32_t)((uint64_t)len % (uint64_t)(uint32_t)128U)))
     % (uint32_t)128U;
   for
   (uint32_t
     i = (uint32_t)0U;
     i
     <
-      ((uint32_t)256U
-      -
-        ((uint32_t)17U
-        + (uint32_t)(FStar_UInt128_uint128_to_uint64(len) % (uint64_t)(uint32_t)128U)))
+      ((uint32_t)256U - ((uint32_t)17U + (uint32_t)((uint64_t)len % (uint64_t)(uint32_t)128U)))
       % (uint32_t)128U;
     i++)
   {
@@ -2059,12 +2048,9 @@ static void pad_512(FStar_UInt128_uint128 len, uint8_t *dst)
     +
       (uint32_t)1U
       +
-        ((uint32_t)256U
-        -
-          ((uint32_t)17U
-          + (uint32_t)(FStar_UInt128_uint128_to_uint64(len) % (uint64_t)(uint32_t)128U)))
+        ((uint32_t)256U - ((uint32_t)17U + (uint32_t)((uint64_t)len % (uint64_t)(uint32_t)128U)))
         % (uint32_t)128U;
-  FStar_UInt128_uint128 len_ = FStar_UInt128_shift_left(len, (uint32_t)3U);
+  uint128_t len_ = len << (uint32_t)3U;
   store128_be(dst3, len_);
 }
 
@@ -2152,12 +2138,7 @@ static void update_last_256(uint32_t *s, uint64_t prev_len, uint8_t *input, uint
 }
 
 static void
-update_last_384(
-  uint64_t *s,
-  FStar_UInt128_uint128 prev_len,
-  uint8_t *input,
-  uint32_t input_len
-)
+update_last_384(uint64_t *s, uint128_t prev_len, uint8_t *input, uint32_t input_len)
 {
   uint32_t blocks_n = input_len / (uint32_t)128U;
   uint32_t blocks_len = blocks_n * (uint32_t)128U;
@@ -2165,18 +2146,13 @@ update_last_384(
   uint32_t rest_len = input_len - blocks_len;
   uint8_t *rest = input + blocks_len;
   update_multi_384(s, blocks, blocks_n);
-  FStar_UInt128_uint128
-  total_input_len =
-    FStar_UInt128_add(prev_len,
-      FStar_UInt128_uint64_to_uint128((uint64_t)input_len));
+  uint128_t total_input_len = prev_len + (uint128_t)(uint64_t)input_len;
   uint32_t
   pad_len =
     (uint32_t)1U
     +
       ((uint32_t)256U
-      -
-        ((uint32_t)17U
-        + (uint32_t)(FStar_UInt128_uint128_to_uint64(total_input_len) % (uint64_t)(uint32_t)128U)))
+      - ((uint32_t)17U + (uint32_t)((uint64_t)total_input_len % (uint64_t)(uint32_t)128U)))
       % (uint32_t)128U
     + (uint32_t)16U;
   uint32_t tmp_len = rest_len + pad_len;
@@ -2190,12 +2166,7 @@ update_last_384(
 }
 
 static void
-update_last_512(
-  uint64_t *s,
-  FStar_UInt128_uint128 prev_len,
-  uint8_t *input,
-  uint32_t input_len
-)
+update_last_512(uint64_t *s, uint128_t prev_len, uint8_t *input, uint32_t input_len)
 {
   uint32_t blocks_n = input_len / (uint32_t)128U;
   uint32_t blocks_len = blocks_n * (uint32_t)128U;
@@ -2203,18 +2174,13 @@ update_last_512(
   uint32_t rest_len = input_len - blocks_len;
   uint8_t *rest = input + blocks_len;
   update_multi_512(s, blocks, blocks_n);
-  FStar_UInt128_uint128
-  total_input_len =
-    FStar_UInt128_add(prev_len,
-      FStar_UInt128_uint64_to_uint128((uint64_t)input_len));
+  uint128_t total_input_len = prev_len + (uint128_t)(uint64_t)input_len;
   uint32_t
   pad_len =
     (uint32_t)1U
     +
       ((uint32_t)256U
-      -
-        ((uint32_t)17U
-        + (uint32_t)(FStar_UInt128_uint128_to_uint64(total_input_len) % (uint64_t)(uint32_t)128U)))
+      - ((uint32_t)17U + (uint32_t)((uint64_t)total_input_len % (uint64_t)(uint32_t)128U)))
       % (uint32_t)128U
     + (uint32_t)16U;
   uint32_t tmp_len = rest_len + pad_len;
@@ -2260,7 +2226,7 @@ static void hash_384(uint8_t *input, uint32_t input_len, uint8_t *dst)
   uint32_t rest_len = input_len - blocks_len;
   uint8_t *rest = input + blocks_len;
   update_multi_384(s, blocks, blocks_n);
-  update_last_384(s, FStar_UInt128_uint64_to_uint128((uint64_t)blocks_len), rest, rest_len);
+  update_last_384(s, (uint128_t)(uint64_t)blocks_len, rest, rest_len);
   finish_384(s, dst);
 }
 
@@ -2279,7 +2245,7 @@ static void hash_512(uint8_t *input, uint32_t input_len, uint8_t *dst)
   uint32_t rest_len = input_len - blocks_len;
   uint8_t *rest = input + blocks_len;
   update_multi_512(s, blocks, blocks_n);
-  update_last_512(s, FStar_UInt128_uint64_to_uint128((uint64_t)blocks_len), rest, rest_len);
+  update_last_512(s, (uint128_t)(uint64_t)blocks_len, rest, rest_len);
   finish_512(s, dst);
 }
 
@@ -2347,123 +2313,7 @@ static bool isMoreThanZeroLessThanOrderMinusOne(uint64_t *f)
   return less && !more;
 }
 
-static void ecdsa_verification_step23(uint8_t *m, uint64_t *result)
-{
-  toUint64ChangeEndian(m, result);
-  reduction_prime_2prime_order(result, result);
-}
-
 static bool compare_felem_bool(uint64_t *a, uint64_t *b)
-{
-  uint64_t a_0 = a[0U];
-  uint64_t a_1 = a[1U];
-  uint64_t a_2 = a[2U];
-  uint64_t a_3 = a[3U];
-  uint64_t b_0 = b[0U];
-  uint64_t b_1 = b[1U];
-  uint64_t b_2 = b[2U];
-  uint64_t b_3 = b[3U];
-  return
-    eq_u64_nCT(a_0,
-      b_0)
-    && eq_u64_nCT(a_1, b_1)
-    && eq_u64_nCT(a_2, b_2)
-    && eq_u64_nCT(a_3, b_3);
-}
-
-static bool
-ecdsa_verification_core(
-  uint64_t *publicKeyBuffer,
-  uint64_t *hashAsFelem,
-  uint64_t *r,
-  uint64_t *s,
-  uint8_t *m,
-  uint64_t *xBuffer,
-  uint64_t *tempBuffer
-)
-{
-  uint8_t tempBufferU8[64U] = { 0U };
-  uint8_t *bufferU1 = tempBufferU8;
-  uint8_t *bufferU2 = tempBufferU8 + (uint32_t)32U;
-  ecdsa_verification_step23(m, hashAsFelem);
-  uint64_t tempBuffer1[12U] = { 0U };
-  uint64_t *inverseS = tempBuffer1;
-  uint64_t *u1 = tempBuffer1 + (uint32_t)4U;
-  uint64_t *u2 = tempBuffer1 + (uint32_t)8U;
-  fromDomainImpl(s, inverseS);
-  montgomery_ladder_exponent(inverseS);
-  multPowerPartial(inverseS, hashAsFelem, u1);
-  multPowerPartial(inverseS, r, u2);
-  changeEndian(u1);
-  changeEndian(u2);
-  toUint8(u1, bufferU1);
-  toUint8(u2, bufferU2);
-  uint64_t pointSum[12U] = { 0U };
-  uint64_t points[24U] = { 0U };
-  uint64_t *buff = tempBuffer + (uint32_t)12U;
-  uint64_t *pointU1G = points;
-  uint64_t *pointU2Q0 = points + (uint32_t)12U;
-  secretToPublicWithoutNorm(pointU1G, bufferU1, tempBuffer);
-  scalarMultiplicationWithoutNorm(publicKeyBuffer, pointU2Q0, bufferU2, tempBuffer);
-  uint64_t *pointU1G0 = points;
-  uint64_t *pointU2Q = points + (uint32_t)12U;
-  point_add(pointU1G0, pointU2Q, pointSum, buff);
-  norm(pointSum, pointSum, buff);
-  bool resultIsPAI = isPointAtInfinityPublic(pointSum);
-  uint64_t *xCoordinateSum = pointSum;
-  memcpy(xBuffer, xCoordinateSum, (uint32_t)4U * sizeof (xCoordinateSum[0U]));
-  bool r1 = !resultIsPAI;
-  return r1;
-}
-
-static bool ecdsa_verification_(uint64_t *pubKey, uint64_t *r, uint64_t *s, uint8_t *m)
-{
-  uint64_t tempBufferU64[120U] = { 0U };
-  uint64_t *publicKeyBuffer = tempBufferU64;
-  uint64_t *hashAsFelem = tempBufferU64 + (uint32_t)12U;
-  uint64_t *tempBuffer = tempBufferU64 + (uint32_t)16U;
-  uint64_t *xBuffer = tempBufferU64 + (uint32_t)116U;
-  bufferToJac(pubKey, publicKeyBuffer);
-  bool publicKeyCorrect = verifyQValidCurvePoint(publicKeyBuffer, tempBuffer);
-  if (publicKeyCorrect == false)
-  {
-    return false;
-  }
-  bool isRCorrect = isMoreThanZeroLessThanOrderMinusOne(r);
-  bool isSCorrect = isMoreThanZeroLessThanOrderMinusOne(s);
-  bool step1 = isRCorrect && isSCorrect;
-  if (step1 == false)
-  {
-    return false;
-  }
-  bool
-  state = ecdsa_verification_core(publicKeyBuffer, hashAsFelem, r, s, m, xBuffer, tempBuffer);
-  if (state == false)
-  {
-    return false;
-  }
-  bool result = compare_felem_bool(xBuffer, r);
-  return result;
-}
-
-static bool isMoreThanZeroLessThanOrderMinusOne0(uint64_t *f)
-{
-  uint64_t tempBuffer[4U] = { 0U };
-  uint64_t carry = sub4_il(f, prime256order_buffer, tempBuffer);
-  bool less = eq_u64_nCT(carry, (uint64_t)1U);
-  uint64_t f0 = f[0U];
-  uint64_t f1 = f[1U];
-  uint64_t f2 = f[2U];
-  uint64_t f3 = f[3U];
-  bool z0_zero = eq_0_u64(f0);
-  bool z1_zero = eq_0_u64(f1);
-  bool z2_zero = eq_0_u64(f2);
-  bool z3_zero = eq_0_u64(f3);
-  bool more = z0_zero && z1_zero && z2_zero && z3_zero;
-  return less && !more;
-}
-
-static bool compare_felem_bool0(uint64_t *a, uint64_t *b)
 {
   uint64_t a_0 = a[0U];
   uint64_t a_1 = a[1U];
@@ -2483,7 +2333,7 @@ static bool compare_felem_bool0(uint64_t *a, uint64_t *b)
 
 static uint64_t
 ecdsa_signature_core(
-  Spec_Hash_Definitions_hash_alg alg,
+  Spec_ECDSA_hash_alg_ecdsa alg,
   uint64_t *r,
   uint64_t *s,
   uint32_t mLen,
@@ -2497,69 +2347,97 @@ ecdsa_signature_core(
   uint64_t kAsFelem[4U] = { 0U };
   toUint64ChangeEndian(k, kAsFelem);
   uint32_t sz;
-  switch (alg)
+  if (alg.tag == Spec_ECDSA_NoHash)
   {
-    case Spec_Hash_Definitions_MD5:
-      {
-        sz = (uint32_t)16U;
-        break;
-      }
-    case Spec_Hash_Definitions_SHA1:
-      {
-        sz = (uint32_t)20U;
-        break;
-      }
-    case Spec_Hash_Definitions_SHA2_224:
-      {
-        sz = (uint32_t)28U;
-        break;
-      }
-    case Spec_Hash_Definitions_SHA2_256:
-      {
-        sz = (uint32_t)32U;
-        break;
-      }
-    case Spec_Hash_Definitions_SHA2_384:
-      {
-        sz = (uint32_t)48U;
-        break;
-      }
-    case Spec_Hash_Definitions_SHA2_512:
-      {
-        sz = (uint32_t)64U;
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
+    sz = mLen;
+  }
+  else if (alg.tag == Spec_ECDSA_Hash)
+  {
+    Spec_Hash_Definitions_hash_alg a = alg._0;
+    switch (a)
+    {
+      case Spec_Hash_Definitions_MD5:
+        {
+          sz = (uint32_t)16U;
+          break;
+        }
+      case Spec_Hash_Definitions_SHA1:
+        {
+          sz = (uint32_t)20U;
+          break;
+        }
+      case Spec_Hash_Definitions_SHA2_224:
+        {
+          sz = (uint32_t)28U;
+          break;
+        }
+      case Spec_Hash_Definitions_SHA2_256:
+        {
+          sz = (uint32_t)32U;
+          break;
+        }
+      case Spec_Hash_Definitions_SHA2_384:
+        {
+          sz = (uint32_t)48U;
+          break;
+        }
+      case Spec_Hash_Definitions_SHA2_512:
+        {
+          sz = (uint32_t)64U;
+          break;
+        }
+      default:
+        {
+          KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+          KRML_HOST_EXIT(253U);
+        }
+    }
+  }
+  else
+  {
+    sz = KRML_EABORT(uint32_t, "unreachable (pattern matches are exhaustive in F*)");
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), sz);
   uint8_t mHash[sz];
   memset(mHash, 0U, sz * sizeof (mHash[0U]));
-  switch (alg)
+  if (alg.tag == Spec_ECDSA_NoHash)
   {
-    case Spec_Hash_Definitions_SHA2_256:
-      {
-        hash_256(m, mLen, mHash);
-        break;
-      }
-    case Spec_Hash_Definitions_SHA2_384:
-      {
-        hash_384(m, mLen, mHash);
-        break;
-      }
-    case Spec_Hash_Definitions_SHA2_512:
-      {
-        hash_512(m, mLen, mHash);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
+    memcpy(mHash, m, sz * sizeof (m[0U]));
+  }
+  else if (alg.tag == Spec_ECDSA_Hash)
+  {
+    Spec_Hash_Definitions_hash_alg a = alg._0;
+    switch (a)
+    {
+      case Spec_Hash_Definitions_SHA2_256:
+        {
+          hash_256(m, mLen, mHash);
+          break;
+        }
+      case Spec_Hash_Definitions_SHA2_384:
+        {
+          hash_384(m, mLen, mHash);
+          break;
+        }
+      case Spec_Hash_Definitions_SHA2_512:
+        {
+          hash_512(m, mLen, mHash);
+          break;
+        }
+      default:
+        {
+          KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+          KRML_HOST_EXIT(253U);
+        }
+    }
+  }
+  else
+  {
+    KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+      __FILE__,
+      __LINE__,
+      "unreachable (pattern matches are exhaustive in F*)");
+    KRML_HOST_EXIT(255U);
   }
   uint8_t *cutHash = mHash;
   toUint64ChangeEndian(cutHash, hashAsFelem);
@@ -2689,7 +2567,16 @@ Hacl_Interface_P256_ecdsa_sign_p256_sha2(
   uint8_t *resultS = result + (uint32_t)32U;
   toUint64ChangeEndian(privKey, privKeyAsFelem);
   uint64_t
-  flag = ecdsa_signature_core(Spec_Hash_Definitions_SHA2_256, r, s, mLen, m, privKeyAsFelem, k);
+  flag =
+    ecdsa_signature_core((
+        (Spec_ECDSA_hash_alg_ecdsa){ .tag = Spec_ECDSA_Hash, ._0 = Spec_Hash_Definitions_SHA2_256 }
+      ),
+      r,
+      s,
+      mLen,
+      m,
+      privKeyAsFelem,
+      k);
   changeEndian(r);
   toUint8(r, resultR);
   changeEndian(s);
@@ -2713,7 +2600,16 @@ Hacl_Interface_P256_ecdsa_sign_p256_sha384(
   uint8_t *resultS = result + (uint32_t)32U;
   toUint64ChangeEndian(privKey, privKeyAsFelem);
   uint64_t
-  flag = ecdsa_signature_core(Spec_Hash_Definitions_SHA2_384, r, s, mLen, m, privKeyAsFelem, k);
+  flag =
+    ecdsa_signature_core((
+        (Spec_ECDSA_hash_alg_ecdsa){ .tag = Spec_ECDSA_Hash, ._0 = Spec_Hash_Definitions_SHA2_384 }
+      ),
+      r,
+      s,
+      mLen,
+      m,
+      privKeyAsFelem,
+      k);
   changeEndian(r);
   toUint8(r, resultR);
   changeEndian(s);
@@ -2737,7 +2633,16 @@ Hacl_Interface_P256_ecdsa_sign_p256_sha512(
   uint8_t *resultS = result + (uint32_t)32U;
   toUint64ChangeEndian(privKey, privKeyAsFelem);
   uint64_t
-  flag = ecdsa_signature_core(Spec_Hash_Definitions_SHA2_512, r, s, mLen, m, privKeyAsFelem, k);
+  flag =
+    ecdsa_signature_core((
+        (Spec_ECDSA_hash_alg_ecdsa){ .tag = Spec_ECDSA_Hash, ._0 = Spec_Hash_Definitions_SHA2_512 }
+      ),
+      r,
+      s,
+      mLen,
+      m,
+      privKeyAsFelem,
+      k);
   changeEndian(r);
   toUint8(r, resultR);
   changeEndian(s);
@@ -2748,6 +2653,7 @@ Hacl_Interface_P256_ecdsa_sign_p256_sha512(
 uint64_t
 Hacl_Interface_P256_ecdsa_sign_p256_without_hash(
   uint8_t *result,
+  uint32_t mLen,
   uint8_t *m,
   uint8_t *privKey,
   uint8_t *k
@@ -2759,29 +2665,15 @@ Hacl_Interface_P256_ecdsa_sign_p256_without_hash(
   uint8_t *resultR = result;
   uint8_t *resultS = result + (uint32_t)32U;
   toUint64ChangeEndian(privKey, privKeyAsFelem);
-  uint64_t hashAsFelem[4U] = { 0U };
-  uint64_t tempBuffer[100U] = { 0U };
-  uint64_t kAsFelem[4U] = { 0U };
-  toUint64ChangeEndian(k, kAsFelem);
-  toUint64ChangeEndian(m, hashAsFelem);
-  reduction_prime_2prime_order(hashAsFelem, hashAsFelem);
-  uint64_t result1[12U] = { 0U };
-  uint64_t *tempForNorm = tempBuffer;
-  secretToPublicWithoutNorm(result1, k, tempBuffer);
-  normX(result1, r, tempForNorm);
-  reduction_prime_2prime_order(r, r);
-  uint64_t step5Flag = isZero_uint64_CT(r);
-  uint64_t rda[4U] = { 0U };
-  uint64_t zBuffer[4U] = { 0U };
-  uint64_t kInv[4U] = { 0U };
-  montgomery_multiplication_ecdsa_module(r, privKeyAsFelem, rda);
-  fromDomainImpl(hashAsFelem, zBuffer);
-  felem_add(rda, zBuffer, zBuffer);
-  memcpy(kInv, kAsFelem, (uint32_t)4U * sizeof (kAsFelem[0U]));
-  montgomery_ladder_exponent(kInv);
-  montgomery_multiplication_ecdsa_module(zBuffer, kInv, s);
-  uint64_t sIsZero = isZero_uint64_CT(s);
-  uint64_t flag = step5Flag | sIsZero;
+  uint64_t
+  flag =
+    ecdsa_signature_core(((Spec_ECDSA_hash_alg_ecdsa){ .tag = Spec_ECDSA_NoHash }),
+      r,
+      s,
+      mLen,
+      m,
+      privKeyAsFelem,
+      k);
   changeEndian(r);
   toUint8(r, resultR);
   changeEndian(s);
@@ -2820,8 +2712,8 @@ Hacl_Interface_P256_ecdsa_verif_p256_sha2(
   {
     return false;
   }
-  bool isRCorrect = isMoreThanZeroLessThanOrderMinusOne0(rAsFelem);
-  bool isSCorrect = isMoreThanZeroLessThanOrderMinusOne0(sAsFelem);
+  bool isRCorrect = isMoreThanZeroLessThanOrderMinusOne(rAsFelem);
+  bool isSCorrect = isMoreThanZeroLessThanOrderMinusOne(sAsFelem);
   bool step1 = isRCorrect && isSCorrect;
   if (step1 == false)
   {
@@ -2870,7 +2762,7 @@ Hacl_Interface_P256_ecdsa_verif_p256_sha2(
   {
     return false;
   }
-  bool result = compare_felem_bool0(xBuffer, rAsFelem);
+  bool result = compare_felem_bool(xBuffer, rAsFelem);
   return result;
 }
 
@@ -2905,8 +2797,8 @@ Hacl_Interface_P256_ecdsa_verif_p256_sha384(
   {
     return false;
   }
-  bool isRCorrect = isMoreThanZeroLessThanOrderMinusOne0(rAsFelem);
-  bool isSCorrect = isMoreThanZeroLessThanOrderMinusOne0(sAsFelem);
+  bool isRCorrect = isMoreThanZeroLessThanOrderMinusOne(rAsFelem);
+  bool isSCorrect = isMoreThanZeroLessThanOrderMinusOne(sAsFelem);
   bool step1 = isRCorrect && isSCorrect;
   if (step1 == false)
   {
@@ -2955,7 +2847,7 @@ Hacl_Interface_P256_ecdsa_verif_p256_sha384(
   {
     return false;
   }
-  bool result = compare_felem_bool0(xBuffer, rAsFelem);
+  bool result = compare_felem_bool(xBuffer, rAsFelem);
   return result;
 }
 
@@ -2990,8 +2882,8 @@ Hacl_Interface_P256_ecdsa_verif_p256_sha512(
   {
     return false;
   }
-  bool isRCorrect = isMoreThanZeroLessThanOrderMinusOne0(rAsFelem);
-  bool isSCorrect = isMoreThanZeroLessThanOrderMinusOne0(sAsFelem);
+  bool isRCorrect = isMoreThanZeroLessThanOrderMinusOne(rAsFelem);
+  bool isSCorrect = isMoreThanZeroLessThanOrderMinusOne(sAsFelem);
   bool step1 = isRCorrect && isSCorrect;
   if (step1 == false)
   {
@@ -3040,12 +2932,13 @@ Hacl_Interface_P256_ecdsa_verif_p256_sha512(
   {
     return false;
   }
-  bool result = compare_felem_bool0(xBuffer, rAsFelem);
+  bool result = compare_felem_bool(xBuffer, rAsFelem);
   return result;
 }
 
 bool
 Hacl_Interface_P256_ecdsa_verif_without_hash(
+  uint32_t mLen,
   uint8_t *m,
   uint8_t *pubKey,
   uint8_t *r,
@@ -3063,7 +2956,68 @@ Hacl_Interface_P256_ecdsa_verif_without_hash(
   toUint64ChangeEndian(pubKeyY, publicKeyFelemY);
   toUint64ChangeEndian(r, rAsFelem);
   toUint64ChangeEndian(s, sAsFelem);
-  bool result = ecdsa_verification_(publicKeyAsFelem, rAsFelem, sAsFelem, m);
+  uint64_t tempBufferU64[120U] = { 0U };
+  uint64_t *publicKeyBuffer = tempBufferU64;
+  uint64_t *hashAsFelem = tempBufferU64 + (uint32_t)12U;
+  uint64_t *tempBuffer = tempBufferU64 + (uint32_t)16U;
+  uint64_t *xBuffer = tempBufferU64 + (uint32_t)116U;
+  bufferToJac(publicKeyAsFelem, publicKeyBuffer);
+  bool publicKeyCorrect = verifyQValidCurvePoint(publicKeyBuffer, tempBuffer);
+  if (publicKeyCorrect == false)
+  {
+    return false;
+  }
+  bool isRCorrect = isMoreThanZeroLessThanOrderMinusOne(rAsFelem);
+  bool isSCorrect = isMoreThanZeroLessThanOrderMinusOne(sAsFelem);
+  bool step1 = isRCorrect && isSCorrect;
+  if (step1 == false)
+  {
+    return false;
+  }
+  uint8_t tempBufferU8[64U] = { 0U };
+  uint8_t *bufferU1 = tempBufferU8;
+  uint8_t *bufferU2 = tempBufferU8 + (uint32_t)32U;
+  uint32_t sz = mLen;
+  KRML_CHECK_SIZE(sizeof (uint8_t), sz);
+  uint8_t mHash[sz];
+  memset(mHash, 0U, sz * sizeof (mHash[0U]));
+  memcpy(mHash, m, sz * sizeof (m[0U]));
+  uint8_t *cutHash = mHash;
+  toUint64ChangeEndian(cutHash, hashAsFelem);
+  reduction_prime_2prime_order(hashAsFelem, hashAsFelem);
+  uint64_t tempBuffer1[12U] = { 0U };
+  uint64_t *inverseS = tempBuffer1;
+  uint64_t *u1 = tempBuffer1 + (uint32_t)4U;
+  uint64_t *u2 = tempBuffer1 + (uint32_t)8U;
+  fromDomainImpl(sAsFelem, inverseS);
+  montgomery_ladder_exponent(inverseS);
+  multPowerPartial(inverseS, hashAsFelem, u1);
+  multPowerPartial(inverseS, rAsFelem, u2);
+  changeEndian(u1);
+  changeEndian(u2);
+  toUint8(u1, bufferU1);
+  toUint8(u2, bufferU2);
+  uint64_t pointSum[12U] = { 0U };
+  uint64_t points[24U] = { 0U };
+  uint64_t *buff = tempBuffer + (uint32_t)12U;
+  uint64_t *pointU1G = points;
+  uint64_t *pointU2Q0 = points + (uint32_t)12U;
+  secretToPublicWithoutNorm(pointU1G, bufferU1, tempBuffer);
+  scalarMultiplicationWithoutNorm(publicKeyBuffer, pointU2Q0, bufferU2, tempBuffer);
+  uint64_t *pointU1G0 = points;
+  uint64_t *pointU2Q = points + (uint32_t)12U;
+  point_add(pointU1G0, pointU2Q, pointSum, buff);
+  norm(pointSum, pointSum, buff);
+  bool resultIsPAI = isPointAtInfinityPublic(pointSum);
+  uint64_t *xCoordinateSum = pointSum;
+  memcpy(xBuffer, xCoordinateSum, (uint32_t)4U * sizeof (xCoordinateSum[0U]));
+  bool r1 = !resultIsPAI;
+  bool state = r1;
+  if (state == false)
+  {
+    return false;
+  }
+  bool result = compare_felem_bool(xBuffer, rAsFelem);
   return result;
 }
 

@@ -41,5 +41,17 @@
 
 typedef uint8_t Spec_Hash_Definitions_hash_alg;
 
+#define Spec_ECDSA_NoHash 0
+#define Spec_ECDSA_Hash 1
+
+typedef uint8_t Spec_ECDSA_hash_alg_ecdsa_tags;
+
+typedef struct Spec_ECDSA_hash_alg_ecdsa_s
+{
+  Spec_ECDSA_hash_alg_ecdsa_tags tag;
+  Spec_Hash_Definitions_hash_alg _0;
+}
+Spec_ECDSA_hash_alg_ecdsa;
+
 #define __Hacl_Spec_H_DEFINED
 #endif
