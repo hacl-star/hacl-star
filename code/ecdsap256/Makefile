@@ -41,7 +41,7 @@ dist/Hacl_Test_ECDSA.exe: dist/Hacl_P256.o dist/Hacl_Test_ECDSA.o \
 
 
 dist/p256-openssl-test.exe: dist/Hacl_P256.o
-	$(CC) $(CFLAGS) -I $(OPENSSL_HOME)/include -I /home/nkulatov/boringssl/boringssl/include -I ../../dist/gcc-compatible -I /home/nkulatov/boringssl/boringssl/crypto/fipsmodule/ecdsa/ -I $(OPENSSL_HOME)/include/crypto -I $(OPENSSL_HOME)/crypto \
+	$(CC) $(CFLAGS) -I $(OPENSSL_HOME)/include -I ../../dist/gcc64-only  -I $(OPENSSL_HOME)/include/crypto -I $(OPENSSL_HOME)/crypto \
 	 $(HACL_HOME)/tests/p256-test.c $^ \
 	-o $@ $(OPENSSL_HOME)/libcrypto.a -lpthread -ldl
 
