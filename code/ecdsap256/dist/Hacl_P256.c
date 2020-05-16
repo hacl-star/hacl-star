@@ -495,9 +495,17 @@ static void uploadOneImpl(uint64_t *f)
 
 static void toUint8(uint64_t *i, uint8_t *o)
 {
-  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0++)
   {
-    store64_be(o + i0 * (uint32_t)8U, i[i0]);
+    store64_be(o + (uint32_t)0U * (uint32_t)8U, i[0U]);
+  }
+  {
+    store64_be(o + (uint32_t)1U * (uint32_t)8U, i[1U]);
+  }
+  {
+    store64_be(o + (uint32_t)2U * (uint32_t)8U, i[2U]);
+  }
+  {
+    store64_be(o + (uint32_t)3U * (uint32_t)8U, i[3U]);
   }
 }
 
@@ -515,14 +523,37 @@ static void changeEndian(uint64_t *i)
 
 static void toUint64ChangeEndian(uint8_t *i, uint64_t *o)
 {
-  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0++)
   {
     uint64_t *os = o;
-    uint8_t *bj = i + i0 * (uint32_t)8U;
+    uint8_t *bj = i + (uint32_t)0U * (uint32_t)8U;
     uint64_t u = load64_be(bj);
     uint64_t r = u;
     uint64_t x = r;
-    os[i0] = x;
+    os[0U] = x;
+  }
+  {
+    uint64_t *os = o;
+    uint8_t *bj = i + (uint32_t)1U * (uint32_t)8U;
+    uint64_t u = load64_be(bj);
+    uint64_t r = u;
+    uint64_t x = r;
+    os[1U] = x;
+  }
+  {
+    uint64_t *os = o;
+    uint8_t *bj = i + (uint32_t)2U * (uint32_t)8U;
+    uint64_t u = load64_be(bj);
+    uint64_t r = u;
+    uint64_t x = r;
+    os[2U] = x;
+  }
+  {
+    uint64_t *os = o;
+    uint8_t *bj = i + (uint32_t)3U * (uint32_t)8U;
+    uint64_t u = load64_be(bj);
+    uint64_t r = u;
+    uint64_t x = r;
+    os[3U] = x;
   }
   changeEndian(o);
 }
@@ -1243,11 +1274,65 @@ static uint64_t isPointAtInfinityPrivate(uint64_t *p)
 static inline void cswap(uint64_t bit, uint64_t *p1, uint64_t *p2)
 {
   uint64_t mask = (uint64_t)0U - bit;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)12U; i++)
   {
-    uint64_t dummy = mask & (p1[i] ^ p2[i]);
-    p1[i] = p1[i] ^ dummy;
-    p2[i] = p2[i] ^ dummy;
+    uint64_t dummy = mask & (p1[0U] ^ p2[0U]);
+    p1[0U] = p1[0U] ^ dummy;
+    p2[0U] = p2[0U] ^ dummy;
+  }
+  {
+    uint64_t dummy = mask & (p1[1U] ^ p2[1U]);
+    p1[1U] = p1[1U] ^ dummy;
+    p2[1U] = p2[1U] ^ dummy;
+  }
+  {
+    uint64_t dummy = mask & (p1[2U] ^ p2[2U]);
+    p1[2U] = p1[2U] ^ dummy;
+    p2[2U] = p2[2U] ^ dummy;
+  }
+  {
+    uint64_t dummy = mask & (p1[3U] ^ p2[3U]);
+    p1[3U] = p1[3U] ^ dummy;
+    p2[3U] = p2[3U] ^ dummy;
+  }
+  {
+    uint64_t dummy = mask & (p1[4U] ^ p2[4U]);
+    p1[4U] = p1[4U] ^ dummy;
+    p2[4U] = p2[4U] ^ dummy;
+  }
+  {
+    uint64_t dummy = mask & (p1[5U] ^ p2[5U]);
+    p1[5U] = p1[5U] ^ dummy;
+    p2[5U] = p2[5U] ^ dummy;
+  }
+  {
+    uint64_t dummy = mask & (p1[6U] ^ p2[6U]);
+    p1[6U] = p1[6U] ^ dummy;
+    p2[6U] = p2[6U] ^ dummy;
+  }
+  {
+    uint64_t dummy = mask & (p1[7U] ^ p2[7U]);
+    p1[7U] = p1[7U] ^ dummy;
+    p2[7U] = p2[7U] ^ dummy;
+  }
+  {
+    uint64_t dummy = mask & (p1[8U] ^ p2[8U]);
+    p1[8U] = p1[8U] ^ dummy;
+    p2[8U] = p2[8U] ^ dummy;
+  }
+  {
+    uint64_t dummy = mask & (p1[9U] ^ p2[9U]);
+    p1[9U] = p1[9U] ^ dummy;
+    p2[9U] = p2[9U] ^ dummy;
+  }
+  {
+    uint64_t dummy = mask & (p1[10U] ^ p2[10U]);
+    p1[10U] = p1[10U] ^ dummy;
+    p2[10U] = p2[10U] ^ dummy;
+  }
+  {
+    uint64_t dummy = mask & (p1[11U] ^ p2[11U]);
+    p1[11U] = p1[11U] ^ dummy;
+    p2[11U] = p2[11U] ^ dummy;
   }
 }
 
@@ -1807,11 +1892,45 @@ static void update_256(uint32_t *hash, uint8_t *block)
     hash1[6U] = f0;
     hash1[7U] = g0;
   }
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
   {
-    uint32_t xi = hash[i];
-    uint32_t yi = hash1[i];
-    hash[i] = xi + yi;
+    uint32_t xi = hash[0U];
+    uint32_t yi = hash1[0U];
+    hash[0U] = xi + yi;
+  }
+  {
+    uint32_t xi = hash[1U];
+    uint32_t yi = hash1[1U];
+    hash[1U] = xi + yi;
+  }
+  {
+    uint32_t xi = hash[2U];
+    uint32_t yi = hash1[2U];
+    hash[2U] = xi + yi;
+  }
+  {
+    uint32_t xi = hash[3U];
+    uint32_t yi = hash1[3U];
+    hash[3U] = xi + yi;
+  }
+  {
+    uint32_t xi = hash[4U];
+    uint32_t yi = hash1[4U];
+    hash[4U] = xi + yi;
+  }
+  {
+    uint32_t xi = hash[5U];
+    uint32_t yi = hash1[5U];
+    hash[5U] = xi + yi;
+  }
+  {
+    uint32_t xi = hash[6U];
+    uint32_t yi = hash1[6U];
+    hash[6U] = xi + yi;
+  }
+  {
+    uint32_t xi = hash[7U];
+    uint32_t yi = hash1[7U];
+    hash[7U] = xi + yi;
   }
 }
 
@@ -1882,11 +2001,45 @@ static void update_384(uint64_t *hash, uint8_t *block)
     hash1[6U] = f0;
     hash1[7U] = g0;
   }
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
   {
-    uint64_t xi = hash[i];
-    uint64_t yi = hash1[i];
-    hash[i] = xi + yi;
+    uint64_t xi = hash[0U];
+    uint64_t yi = hash1[0U];
+    hash[0U] = xi + yi;
+  }
+  {
+    uint64_t xi = hash[1U];
+    uint64_t yi = hash1[1U];
+    hash[1U] = xi + yi;
+  }
+  {
+    uint64_t xi = hash[2U];
+    uint64_t yi = hash1[2U];
+    hash[2U] = xi + yi;
+  }
+  {
+    uint64_t xi = hash[3U];
+    uint64_t yi = hash1[3U];
+    hash[3U] = xi + yi;
+  }
+  {
+    uint64_t xi = hash[4U];
+    uint64_t yi = hash1[4U];
+    hash[4U] = xi + yi;
+  }
+  {
+    uint64_t xi = hash[5U];
+    uint64_t yi = hash1[5U];
+    hash[5U] = xi + yi;
+  }
+  {
+    uint64_t xi = hash[6U];
+    uint64_t yi = hash1[6U];
+    hash[6U] = xi + yi;
+  }
+  {
+    uint64_t xi = hash[7U];
+    uint64_t yi = hash1[7U];
+    hash[7U] = xi + yi;
   }
 }
 
@@ -1957,11 +2110,45 @@ static void update_512(uint64_t *hash, uint8_t *block)
     hash1[6U] = f0;
     hash1[7U] = g0;
   }
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
   {
-    uint64_t xi = hash[i];
-    uint64_t yi = hash1[i];
-    hash[i] = xi + yi;
+    uint64_t xi = hash[0U];
+    uint64_t yi = hash1[0U];
+    hash[0U] = xi + yi;
+  }
+  {
+    uint64_t xi = hash[1U];
+    uint64_t yi = hash1[1U];
+    hash[1U] = xi + yi;
+  }
+  {
+    uint64_t xi = hash[2U];
+    uint64_t yi = hash1[2U];
+    hash[2U] = xi + yi;
+  }
+  {
+    uint64_t xi = hash[3U];
+    uint64_t yi = hash1[3U];
+    hash[3U] = xi + yi;
+  }
+  {
+    uint64_t xi = hash[4U];
+    uint64_t yi = hash1[4U];
+    hash[4U] = xi + yi;
+  }
+  {
+    uint64_t xi = hash[5U];
+    uint64_t yi = hash1[5U];
+    hash[5U] = xi + yi;
+  }
+  {
+    uint64_t xi = hash[6U];
+    uint64_t yi = hash1[6U];
+    hash[6U] = xi + yi;
+  }
+  {
+    uint64_t xi = hash[7U];
+    uint64_t yi = hash1[7U];
+    hash[7U] = xi + yi;
   }
 }
 
@@ -2057,27 +2244,81 @@ static void pad_512(uint128_t len, uint8_t *dst)
 static void finish_256(uint32_t *s, uint8_t *dst)
 {
   uint32_t *uu____0 = s;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
   {
-    store32_be(dst + i * (uint32_t)4U, uu____0[i]);
+    store32_be(dst + (uint32_t)0U * (uint32_t)4U, uu____0[0U]);
+  }
+  {
+    store32_be(dst + (uint32_t)1U * (uint32_t)4U, uu____0[1U]);
+  }
+  {
+    store32_be(dst + (uint32_t)2U * (uint32_t)4U, uu____0[2U]);
+  }
+  {
+    store32_be(dst + (uint32_t)3U * (uint32_t)4U, uu____0[3U]);
+  }
+  {
+    store32_be(dst + (uint32_t)4U * (uint32_t)4U, uu____0[4U]);
+  }
+  {
+    store32_be(dst + (uint32_t)5U * (uint32_t)4U, uu____0[5U]);
+  }
+  {
+    store32_be(dst + (uint32_t)6U * (uint32_t)4U, uu____0[6U]);
+  }
+  {
+    store32_be(dst + (uint32_t)7U * (uint32_t)4U, uu____0[7U]);
   }
 }
 
 static void finish_384(uint64_t *s, uint8_t *dst)
 {
   uint64_t *uu____0 = s;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)6U; i++)
   {
-    store64_be(dst + i * (uint32_t)8U, uu____0[i]);
+    store64_be(dst + (uint32_t)0U * (uint32_t)8U, uu____0[0U]);
+  }
+  {
+    store64_be(dst + (uint32_t)1U * (uint32_t)8U, uu____0[1U]);
+  }
+  {
+    store64_be(dst + (uint32_t)2U * (uint32_t)8U, uu____0[2U]);
+  }
+  {
+    store64_be(dst + (uint32_t)3U * (uint32_t)8U, uu____0[3U]);
+  }
+  {
+    store64_be(dst + (uint32_t)4U * (uint32_t)8U, uu____0[4U]);
+  }
+  {
+    store64_be(dst + (uint32_t)5U * (uint32_t)8U, uu____0[5U]);
   }
 }
 
 static void finish_512(uint64_t *s, uint8_t *dst)
 {
   uint64_t *uu____0 = s;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
   {
-    store64_be(dst + i * (uint32_t)8U, uu____0[i]);
+    store64_be(dst + (uint32_t)0U * (uint32_t)8U, uu____0[0U]);
+  }
+  {
+    store64_be(dst + (uint32_t)1U * (uint32_t)8U, uu____0[1U]);
+  }
+  {
+    store64_be(dst + (uint32_t)2U * (uint32_t)8U, uu____0[2U]);
+  }
+  {
+    store64_be(dst + (uint32_t)3U * (uint32_t)8U, uu____0[3U]);
+  }
+  {
+    store64_be(dst + (uint32_t)4U * (uint32_t)8U, uu____0[4U]);
+  }
+  {
+    store64_be(dst + (uint32_t)5U * (uint32_t)8U, uu____0[5U]);
+  }
+  {
+    store64_be(dst + (uint32_t)6U * (uint32_t)8U, uu____0[6U]);
+  }
+  {
+    store64_be(dst + (uint32_t)7U * (uint32_t)8U, uu____0[7U]);
   }
 }
 
@@ -2252,11 +2493,25 @@ static void hash_512(uint8_t *input, uint32_t input_len, uint8_t *dst)
 static inline void cswap0(uint64_t bit, uint64_t *p1, uint64_t *p2)
 {
   uint64_t mask = (uint64_t)0U - bit;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
-    uint64_t dummy = mask & (p1[i] ^ p2[i]);
-    p1[i] = p1[i] ^ dummy;
-    p2[i] = p2[i] ^ dummy;
+    uint64_t dummy = mask & (p1[0U] ^ p2[0U]);
+    p1[0U] = p1[0U] ^ dummy;
+    p2[0U] = p2[0U] ^ dummy;
+  }
+  {
+    uint64_t dummy = mask & (p1[1U] ^ p2[1U]);
+    p1[1U] = p1[1U] ^ dummy;
+    p2[1U] = p2[1U] ^ dummy;
+  }
+  {
+    uint64_t dummy = mask & (p1[2U] ^ p2[2U]);
+    p1[2U] = p1[2U] ^ dummy;
+    p2[2U] = p2[2U] ^ dummy;
+  }
+  {
+    uint64_t dummy = mask & (p1[3U] ^ p2[3U]);
+    p1[3U] = p1[3U] ^ dummy;
+    p2[3U] = p2[3U] ^ dummy;
   }
 }
 
@@ -2464,11 +2719,25 @@ ecdsa_signature_core(
 static inline void cswap1(uint64_t bit, uint64_t *p1, uint64_t *p2)
 {
   uint64_t mask = (uint64_t)0U - bit;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
-    uint64_t dummy = mask & (p1[i] ^ p2[i]);
-    p1[i] = p1[i] ^ dummy;
-    p2[i] = p2[i] ^ dummy;
+    uint64_t dummy = mask & (p1[0U] ^ p2[0U]);
+    p1[0U] = p1[0U] ^ dummy;
+    p2[0U] = p2[0U] ^ dummy;
+  }
+  {
+    uint64_t dummy = mask & (p1[1U] ^ p2[1U]);
+    p1[1U] = p1[1U] ^ dummy;
+    p2[1U] = p2[1U] ^ dummy;
+  }
+  {
+    uint64_t dummy = mask & (p1[2U] ^ p2[2U]);
+    p1[2U] = p1[2U] ^ dummy;
+    p2[2U] = p2[2U] ^ dummy;
+  }
+  {
+    uint64_t dummy = mask & (p1[3U] ^ p2[3U]);
+    p1[3U] = p1[3U] ^ dummy;
+    p2[3U] = p2[3U] ^ dummy;
   }
 }
 
