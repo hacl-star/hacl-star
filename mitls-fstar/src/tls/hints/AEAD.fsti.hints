@@ -1,0 +1,185 @@
+[
+  "\u0017ê\u0006ˇø¿Aw\bQ¬…Ã \u001aˆ",
+  [
+    [
+      "AEAD.iv",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_AEAD.ivlen",
+        "equation_FStar.UInt.uint_t", "lemma_FStar.Buffer.lemma_size",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
+        "typing_AEAD.ivlen", "typing_FStar.UInt32.v"
+      ],
+      0,
+      "998c1f106de7db36167fa07770a2b46e"
+    ],
+    [
+      "AEAD.aadmax",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "d2cd5895c18182aa0acd1d7ceb477b74"
+    ],
+    [
+      "AEAD.cipher",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_AEAD.taglen",
+        "equation_FStar.UInt.uint_t", "equation_Prims.nat",
+        "lemma_FStar.Buffer.lemma_size", "primitive_Prims.op_Addition",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_47c0fb6344b774b7d05aa33a2a180f89",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
+        "typing_AEAD.taglen", "typing_FStar.UInt32.v"
+      ],
+      0,
+      "134ace627dd6129e60648127143edfc8"
+    ],
+    [
+      "AEAD.cipher32",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "b2t_def", "bool_inversion",
+        "bool_typing", "equation_AEAD.taglen", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
+        "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
+        "equation_Spec.Poly1305.size_key", "int_typing",
+        "lemma_FStar.Buffer.lemma_size", "lemma_FStar.UInt32.vu_inv",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
+        "refinement_interpretation_Tm_refine_8f76dbbe53d0401b82e1fc1dd1a1a245",
+        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
+        "typing_FStar.UInt.fits", "typing_FStar.UInt32.v",
+        "typing_Spec.Poly1305.size_key"
+      ],
+      0,
+      "01186bcc417d7db5326614ce63f0db15"
+    ],
+    [
+      "AEAD.mk_entry",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_AEAD.plainLen",
+        "equation_AEAD.taglen", "equation_Crypto.Plain.as_bytes",
+        "equation_Crypto.Symmetric.Bytes.lbytes",
+        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_31dd7dd182feaaca31a5581d92a0ac85",
+        "refinement_interpretation_Tm_refine_d8a87ef7054ef6b9dddf6412446572ea",
+        "typing_Crypto.Plain.as_bytes"
+      ],
+      0,
+      "6b105966bf4f4ca8cdad5bf74edcdbcf"
+    ],
+    [
+      "AEAD.entry_injective",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_AEAD.cipher",
+        "equation_AEAD.plainLen", "equation_Crypto.Plain.as_bytes",
+        "equation_Crypto.Plain.plainLen",
+        "equation_Crypto.Symmetric.Bytes.lbytes",
+        "equation_FStar.Bytes.lbytes", "equation_FStar.UInt.uint_t",
+        "equation_Prims.nat", "int_inversion", "primitive_Prims.op_Addition",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_31dd7dd182feaaca31a5581d92a0ac85",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_71ea40360194fe02ee1272538c9cacbc",
+        "refinement_interpretation_Tm_refine_d8a87ef7054ef6b9dddf6412446572ea",
+        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
+        "typing_Crypto.Plain.as_bytes", "typing_FStar.Bytes.len",
+        "typing_FStar.UInt32.v"
+      ],
+      0,
+      "2740a7cb7cac5f69b37d22e360b3dca8"
+    ],
+    [
+      "AEAD.fresh_addresses",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_AEAD.address",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "627e59522a6fdfc6f78d620ca5f6c4bd"
+    ],
+    [
+      "AEAD.fresh_addresses",
+      2,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_AEAD.address",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "4abc5834861e33a7cb5d2c2a4aae3f54"
+    ],
+    [
+      "AEAD.ok_plain_len_32",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_FStar.UInt.uint_t",
+        "lemma_FStar.Buffer.lemma_size",
+        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
+        "typing_FStar.UInt32.v"
+      ],
+      0,
+      "c783b4caf4d200b9dacfc9006ed488c7"
+    ],
+    [
+      "AEAD.frame_log",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "b2t_def", "equation_Prims.l_and",
+        "equation_Prims.squash", "l_and-interp",
+        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c"
+      ],
+      0,
+      "0328efbb6bb72fe0f5d8fb39ca07981f"
+    ],
+    [
+      "AEAD.gen",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_AEAD.address",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "98999e764417303f855fa4ede5d9295d"
+    ]
+  ]
+]

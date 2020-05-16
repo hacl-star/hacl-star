@@ -2,22 +2,6 @@ open SharedDefs
 
 module C = CBytes
 
-module AutoConfig2 : sig
-  type feature =
-  | SHAEXT
-  | AES_NI
-  | PCLMULQDQ
-  | AVX
-  | AVX2
-  | BMI2
-  | ADX
-  | SSE
-  | MOVBE
-  | RDRAND
-  val init : unit -> unit
-  val has_feature : feature -> bool
-end
-
 module Error : sig
   type error_code =
     | UnsupportedAlgorithm

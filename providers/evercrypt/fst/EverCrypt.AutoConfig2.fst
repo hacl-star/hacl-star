@@ -45,6 +45,8 @@ let cpu_has_movbe: cached_flag Vale.X64.CPU_Features_s.movbe_enabled =
   B.gcmalloc_of_list HS.root [ false ]
 let cpu_has_rdrand: cached_flag Vale.X64.CPU_Features_s.rdrand_enabled =
   B.gcmalloc_of_list HS.root [ false ]
+let cpu_has_avx512: cached_flag Vale.X64.CPU_Features_s.avx512_enabled =
+  B.gcmalloc_of_list HS.root [ false ]
 
 let user_wants_hacl: eternal_pointer bool = B.gcmalloc_of_list HS.root [ SC.hacl ]
 let user_wants_vale: eternal_pointer bool = B.gcmalloc_of_list HS.root [ SC.vale ]
@@ -66,6 +68,7 @@ let has_adx = mk_getter cpu_has_adx
 let has_sse = mk_getter cpu_has_sse
 let has_movbe = mk_getter cpu_has_movbe
 let has_rdrand = mk_getter cpu_has_rdrand
+let has_avx512 = mk_getter cpu_has_avx512
 
 let wants_vale () = B.recall user_wants_vale; B.index user_wants_vale 0ul
 let wants_hacl () = B.recall user_wants_hacl; B.index user_wants_hacl 0ul
@@ -82,7 +85,8 @@ let fp_cpu_flags () =
   B.loc_buffer cpu_has_adx `B.loc_union`
   B.loc_buffer cpu_has_sse `B.loc_union`
   B.loc_buffer cpu_has_movbe `B.loc_union`
-  B.loc_buffer cpu_has_rdrand
+  B.loc_buffer cpu_has_rdrand `B.loc_union`
+  B.loc_buffer cpu_has_avx512
 
 let fp () =
   fp_cpu_flags() `B.loc_union`
@@ -102,6 +106,7 @@ let recall () =
   B.recall cpu_has_sse;
   B.recall cpu_has_movbe;
   B.recall cpu_has_rdrand;
+  B.recall cpu_has_avx512;
   B.recall user_wants_hacl;
   B.recall user_wants_vale;
   B.recall user_wants_openssl;
@@ -208,6 +213,18 @@ let init_rdrand_flags() =
   end
 
 inline_for_extraction noextract
+val init_avx512_flags: unit -> Stack unit
+  (requires (fun _ -> requires SC.vale))
+  (ensures (fun h0 _ h1 ->
+    B.modifies (fp_cpu_flags ()) h0 h1))
+
+let init_avx512_flags () =
+  if Vale.Wrapper.X64.Cpuid.check_avx512 () <> 0UL then begin
+    B.recall cpu_has_avx512;
+    B.upd cpu_has_avx512 0ul true
+  end
+
+inline_for_extraction noextract
 val init_cpu_flags: unit -> Stack unit
   (requires (fun _ -> True))
   (ensures (fun h0 _ h1 ->
@@ -223,7 +240,8 @@ let init_cpu_flags () =
       init_avx2_flags ();
       init_sse_flags ();
       init_movbe_flags ();
-      init_rdrand_flags ()
+      init_rdrand_flags ();
+      init_avx512_flags ()
     end
 
 #set-options "--z3rlimit 50"
@@ -260,6 +278,7 @@ let disable_pclmulqdq () = B.recall cpu_has_pclmulqdq; B.upd cpu_has_pclmulqdq 0
 let disable_sse () = B.recall cpu_has_sse; B.upd cpu_has_sse 0ul false
 let disable_movbe () = B.recall cpu_has_movbe; B.upd cpu_has_movbe 0ul false
 let disable_rdrand () = B.recall cpu_has_rdrand; B.upd cpu_has_rdrand 0ul false
+let disable_avx512 () = B.recall cpu_has_avx512; B.upd cpu_has_avx512 0ul false
 let disable_vale = mk_disabler user_wants_vale
 let disable_hacl = mk_disabler user_wants_hacl
 let disable_openssl = mk_disabler user_wants_openssl

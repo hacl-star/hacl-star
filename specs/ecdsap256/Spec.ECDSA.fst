@@ -395,29 +395,63 @@ let checkCoordinates r s =
 
 open Spec.Hash.Definitions
 
-val hashSpec: a: hash_alg {SHA2_256? a \/ SHA2_384? a \/ SHA2_512? a} -> 
-  Tot (m: bytes {Seq.length m <= max_input_length a}  -> r: Lib.ByteSequence.lbytes (hash_length a))
+
+type hash_alg_ecdsa = 
+  |NoHash
+  |Hash of (a: hash_alg {a == SHA2_256 \/ a == SHA2_384 \/ a == SHA2_512})
 
 
-let hashSpec a = 
+let invert_state_s (a: hash_alg_ecdsa): Lemma
+  (requires True)
+  (ensures (inversion hash_alg_ecdsa))
+  [ SMTPat (hash_alg_ecdsa) ]
+=
+  allow_inversion (hash_alg_ecdsa)
+
+
+val min_input_length: hash_alg_ecdsa -> Tot int
+
+let min_input_length a =
+  match a with
+    |NoHash -> 32
+    |Hash a -> 0
+
+(*
+noextract
+let hash_length (a : hash_alg_ecdsa) =
   match a with 
-  |SHA2_256 -> Spec.Agile.Hash.hash Def.SHA2_256
-  |SHA2_384 -> Spec.Agile.Hash.hash Def.SHA2_384
-  |SHA2_512 -> Spec.Agile.Hash.hash Def.SHA2_512
-    
+    |NoHash -> 32
+    |Hash a -> hash_length a
+*)
+
+val hashSpec: a: hash_alg_ecdsa 
+  -> mLen: size_nat{mLen >= min_input_length a}
+  -> m: lseq uint8 mLen ->
+  Tot (r:Lib.ByteSequence.lbytes 
+    (if Hash? a then hash_length (match a with Hash a -> a) else mLen) {length r >= 32})
+
+let hashSpec a mLen m = 
+  assert_norm (pow2 32 < pow2 61);
+  assert_norm (pow2 32 < pow2 125);
+  allow_inversion hash_alg_ecdsa;
+  match a with 
+  |NoHash ->  m
+  |Hash a -> Spec.Agile.Hash.hash a m
 
 open Lib.ByteSequence 
 
+
 val ecdsa_verification_agile:
-  alg: hash_alg {SHA2_256? alg \/ SHA2_384? alg \/ SHA2_512? alg} 
-  -> publicKey:tuple2 nat nat -> r:nat -> s:nat
-  -> mLen:size_nat
+  alg: hash_alg_ecdsa
+  -> publicKey:tuple2 nat nat 
+  -> r: nat 
+  -> s: nat
+  -> mLen:size_nat {mLen >= min_input_length alg} 
   -> m:lseq uint8 mLen
   -> bool
 
 let ecdsa_verification_agile alg publicKey r s mLen m =
-  assert_norm (pow2 32 < pow2 61);
-  assert_norm (pow2 32 < pow2 125);
+  allow_inversion hash_alg_ecdsa;
   let publicJacobian = toJacobianCoordinates publicKey in
   if not (verifyQValidCurvePointSpec publicJacobian) then false
   else
@@ -425,7 +459,9 @@ let ecdsa_verification_agile alg publicKey r s mLen m =
     if not (checkCoordinates r s) then false
     else
       begin
-      let hashM = (hashSpec alg) m in
+
+      let hashM = hashSpec alg mLen m in 
+     
       let cutHashM = sub hashM 0 32 in 
       let hashNat = nat_from_bytes_be cutHashM % prime_p256_order in
 
@@ -443,43 +479,9 @@ let ecdsa_verification_agile alg publicKey r s mLen m =
     end
   end
 
-
-
-val ecdsa_verification_without_hash:
-  publicKey:tuple2 nat nat -> r:nat -> s:nat
-  -> m:lseq uint8 32
-  -> bool
-
-let ecdsa_verification_without_hash publicKey r s m =
-  let publicJacobian = toJacobianCoordinates publicKey in
-  if not (verifyQValidCurvePointSpec publicJacobian) then false
-  else
-    begin
-    if not (checkCoordinates r s) then false
-    else
-      begin
-      
-      let hashNat = nat_from_bytes_be m % prime_p256_order in
-
-      let u1 = nat_to_bytes_be 32 (pow s (prime_p256_order - 2) * hashNat % prime_p256_order) in
-      let u2 = nat_to_bytes_be 32 (pow s (prime_p256_order - 2) * r % prime_p256_order) in
-
-      let pointAtInfinity = (0, 0, 0) in
-      let u1D, _ = montgomery_ladder_spec u1 (pointAtInfinity, basePoint) in
-      let u2D, _ = montgomery_ladder_spec u2 (pointAtInfinity, publicJacobian) in
-
-      let sumPoints = _point_add u1D u2D in
-      let pointNorm = _norm sumPoints in
-      let x, y, z = pointNorm in
-      if Spec.P256.isPointAtInfinity pointNorm then false else x = r
-    end
-  end
-
-
-
 val ecdsa_signature_agile:
-  alg: hash_alg {SHA2_256? alg \/ SHA2_384? alg \/ SHA2_512? alg}
-  -> mLen:size_nat
+  alg: hash_alg_ecdsa
+  -> mLen:size_nat{mLen >= min_input_length alg} 
   -> m:lseq uint8 mLen
   -> privateKey:lseq uint8 32
   -> k:lseq uint8 32
@@ -490,30 +492,9 @@ let ecdsa_signature_agile alg mLen m privateKey k =
   assert_norm (pow2 32 < pow2 125);
   let r, _ = montgomery_ladder_spec k ((0,0,0), basePoint) in
   let (xN, _, _) = _norm r in
-  let hashM = (hashSpec alg) m in
+  let hashM = hashSpec alg mLen m in 
   let cutHashM = sub hashM 0 32 in 
   let z = nat_from_bytes_be cutHashM % prime_p256_order in
-  let kFelem = nat_from_bytes_be k in
-  let privateKeyFelem = nat_from_bytes_be privateKey in
-  let resultR = xN % prime_p256_order in
-  let resultS = (z + resultR * privateKeyFelem) * pow kFelem (prime_p256_order - 2) % prime_p256_order in
-    if resultR = 0 || resultS = 0 then
-      resultR, resultS, u64 (pow2 64 - 1)
-    else
-      resultR, resultS, u64 0
-
-
-
-val ecdsa_signature_without_hash:
-    m:lseq uint8 32
-  -> privateKey:lseq uint8 32
-  -> k:lseq uint8 32
-  -> tuple3 nat nat uint64
-
-let ecdsa_signature_without_hash m privateKey k =
-  let r, _ = montgomery_ladder_spec k ((0,0,0), basePoint) in
-  let (xN, _, _) = _norm r in
-  let z = nat_from_bytes_be m % prime_p256_order in 
   let kFelem = nat_from_bytes_be k in
   let privateKeyFelem = nat_from_bytes_be privateKey in
   let resultR = xN % prime_p256_order in

@@ -1,0 +1,140 @@
+[
+  "‹†_­3\u00010&V3]Tº‡ \u001f",
+  [
+    [
+      "AEAD.Pkg.ideal",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "bb12e222d949553eb79adb00ec66d20f"
+    ],
+    [
+      "AEAD.Pkg.is_safe",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "equation_AEAD.Pkg.safe",
+        "equation_FStar.HyperStack.ST.is_eternal_region",
+        "equation_FStar.HyperStack.ST.modifies_none",
+        "equation_FStar.Monotonic.HyperHeap.hmap",
+        "equation_FStar.Monotonic.HyperHeap.modifies_just",
+        "equation_FStar.Monotonic.HyperStack.is_heap_color",
+        "equation_FStar.Monotonic.HyperStack.mem",
+        "equation_FStar.Monotonic.HyperStack.modifies", "equation_Mem.rgn",
+        "fuel_guarded_inversion_Pkg.ipkg",
+        "function_token_typing_FStar.Monotonic.Heap.heap",
+        "lemma_FStar.Map.lemma_ContainsDom",
+        "lemma_FStar.Map.lemma_InDomConcat",
+        "lemma_FStar.Map.lemma_InDomRestrict",
+        "lemma_FStar.Map.lemma_SelConcat1",
+        "lemma_FStar.Map.lemma_SelConcat2",
+        "lemma_FStar.Map.lemma_SelRestrict",
+        "lemma_FStar.Map.lemma_equal_intro",
+        "lemma_FStar.Set.mem_complement", "lemma_FStar.Set.mem_empty",
+        "lemma_FStar.Set.mem_subset", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_BarBar", "primitive_Prims.op_Negation",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
+        "refinement_interpretation_Tm_refine_31bfde48b952b6d7959cd5a2aa36404e",
+        "typing_FStar.Map.concat", "typing_FStar.Map.contains",
+        "typing_FStar.Map.domain", "typing_FStar.Map.restrict",
+        "typing_FStar.Monotonic.HyperHeap.color",
+        "typing_FStar.Monotonic.HyperHeap.rid",
+        "typing_FStar.Monotonic.HyperHeap.rid_freeable",
+        "typing_FStar.Monotonic.HyperStack.get_hmap",
+        "typing_FStar.Monotonic.HyperStack.is_heap_color",
+        "typing_FStar.Set.complement", "typing_FStar.Set.empty",
+        "typing_TLSInfo.safe_region"
+      ],
+      0,
+      "d10d4ed52617eaf143a995ced668edbf"
+    ],
+    [
+      "AEAD.Pkg.info",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "assumption_AEAD.Pkg.aeadAlg__uu___haseq", "equation_Mem.rgn",
+        "equation_Prims.eqtype",
+        "haseqTm_refine_31bfde48b952b6d7959cd5a2aa36404e",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "typing_FStar.Monotonic.HyperHeap.rid"
+      ],
+      0,
+      "bd705957c1060f44e6d9a4c4a6229f99"
+    ],
+    [
+      "AEAD.Pkg.aead_pkg_keylen",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "disc_equation_AEAD.Pkg.AES_GCM128",
+        "disc_equation_AEAD.Pkg.AES_GCM256",
+        "fuel_guarded_inversion_AEAD.Pkg.aeadAlg"
+      ],
+      0,
+      "3b8e14deea24d0bdb99ab2163076523c"
+    ],
+    [
+      "AEAD.Pkg.shared_footprint",
+      1,
+      2,
+      1,
+      [
+        "@query", "lemma_FStar.Set.mem_empty",
+        "typing_FStar.Monotonic.HyperHeap.rid"
+      ],
+      0,
+      "edc85968dfaeeb7b0f33121bb7c3f0e2"
+    ],
+    [
+      "AEAD.Pkg.coerceT_key",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "9807acdcf8a6e94ba8b246c815808b31"
+    ],
+    [
+      "AEAD.Pkg.coerce_key",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "23a9b95a13a5dbf99228d09727cd5791"
+    ],
+    [
+      "AEAD.Pkg.local_ae_pkg",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "313c406548ffe7f47c4f1cb9644c8a65"
+    ],
+    [
+      "AEAD.Pkg.mp",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "data_elim_Pkg.Idx",
+        "equation_Prims.eqtype", "fuel_guarded_inversion_Pkg.ipkg",
+        "proj_equation_Pkg.Idx_t",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "5da3c25e58d413c3791cc203135b42f5"
+    ]
+  ]
+]

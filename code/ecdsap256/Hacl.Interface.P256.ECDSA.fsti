@@ -18,9 +18,12 @@ open Spec.ECDSAP256.Definition
 open Hacl.Impl.P256.Compression
 open Spec.P256.MontgomeryMultiplication
 
-val ecdsa_sign_p256_sha2: result: lbuffer uint8 (size 64) -> mLen: size_t -> m: lbuffer uint8 mLen ->
-  privKey: lbuffer uint8 (size 32) -> 
-  k: lbuffer uint8 (size 32) -> 
+
+val ecdsa_sign_p256_sha2: result: lbuffer uint8 (size 64) 
+  -> mLen: size_t 
+  -> m: lbuffer uint8 mLen 
+  -> privKey: lbuffer uint8 (size 32) 
+  -> k: lbuffer uint8 (size 32) -> 
   Stack uint64
   (requires fun h -> 
     live h result /\ live h m /\ live h privKey /\ live h k /\
@@ -35,7 +38,7 @@ val ecdsa_sign_p256_sha2: result: lbuffer uint8 (size 64) -> mLen: size_t -> m: 
      (assert_norm (pow2 32 < pow2 61);
       let resultR = gsub result (size 0) (size 32) in 
       let resultS = gsub result (size 32) (size 32) in 
-      let r, s, flagSpec = Spec.ECDSA.ecdsa_signature_agile SHA2_256 (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in 
+      let r, s, flagSpec = Spec.ECDSA.ecdsa_signature_agile (Spec.ECDSA.Hash SHA2_256) (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in 
       as_seq h1 resultR == nat_to_bytes_be 32 r /\
       as_seq h1 resultS == nat_to_bytes_be 32 s /\
       flag == flagSpec 
@@ -60,7 +63,7 @@ val ecdsa_sign_p256_sha384: result: lbuffer uint8 (size 64) -> mLen: size_t -> m
      (assert_norm (pow2 32 < pow2 61);
       let resultR = gsub result (size 0) (size 32) in 
       let resultS = gsub result (size 32) (size 32) in 
-      let r, s, flagSpec = Spec.ECDSA.ecdsa_signature_agile SHA2_384 (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in 
+      let r, s, flagSpec = Spec.ECDSA.ecdsa_signature_agile (Spec.ECDSA.Hash SHA2_384) (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in 
       as_seq h1 resultR == nat_to_bytes_be 32 r /\
       as_seq h1 resultS == nat_to_bytes_be 32 s /\
       flag == flagSpec 
@@ -69,9 +72,11 @@ val ecdsa_sign_p256_sha384: result: lbuffer uint8 (size 64) -> mLen: size_t -> m
 
 
 
-val ecdsa_sign_p256_sha512: result: lbuffer uint8 (size 64) -> mLen: size_t -> m: lbuffer uint8 mLen ->
-  privKey: lbuffer uint8 (size 32) -> 
-  k: lbuffer uint8 (size 32) -> 
+val ecdsa_sign_p256_sha512: result: lbuffer uint8 (size 64) 
+  -> mLen: size_t 
+  -> m: lbuffer uint8 mLen 
+  -> privKey: lbuffer uint8 (size 32) 
+  -> k: lbuffer uint8 (size 32) -> 
   Stack uint64
   (requires fun h -> 
     live h result /\ live h m /\ live h privKey /\ live h k /\
@@ -86,7 +91,7 @@ val ecdsa_sign_p256_sha512: result: lbuffer uint8 (size 64) -> mLen: size_t -> m
      (assert_norm (pow2 32 < pow2 61);
       let resultR = gsub result (size 0) (size 32) in 
       let resultS = gsub result (size 32) (size 32) in 
-      let r, s, flagSpec = Spec.ECDSA.ecdsa_signature_agile SHA2_512 (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in 
+      let r, s, flagSpec = Spec.ECDSA.ecdsa_signature_agile (Spec.ECDSA.Hash SHA2_512) (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in 
       as_seq h1 resultR == nat_to_bytes_be 32 r /\
       as_seq h1 resultS == nat_to_bytes_be 32 s /\
       flag == flagSpec 
@@ -94,9 +99,11 @@ val ecdsa_sign_p256_sha512: result: lbuffer uint8 (size 64) -> mLen: size_t -> m
   )
 
 
-val ecdsa_sign_p256_without_hash: result: lbuffer uint8 (size 64) -> m: lbuffer uint8 (size 32) ->
-  privKey: lbuffer uint8 (size 32) -> 
-  k: lbuffer uint8 (size 32) -> 
+val ecdsa_sign_p256_without_hash: result: lbuffer uint8 (size 64) 
+  -> mLen: size_t {uint_v mLen >= Spec.ECDSA.min_input_length Spec.ECDSA.NoHash}
+  -> m: lbuffer uint8 mLen
+  -> privKey: lbuffer uint8 (size 32) 
+  -> k: lbuffer uint8 (size 32) -> 
   Stack uint64
   (requires fun h -> 
     live h result /\ live h m /\ live h privKey /\ live h k /\
@@ -111,7 +118,7 @@ val ecdsa_sign_p256_without_hash: result: lbuffer uint8 (size 64) -> m: lbuffer 
      (assert_norm (pow2 32 < pow2 61);
       let resultR = gsub result (size 0) (size 32) in 
       let resultS = gsub result (size 32) (size 32) in 
-      let r, s, flagSpec = Spec.ECDSA.ecdsa_signature_without_hash(as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in 
+      let r, s, flagSpec = Spec.ECDSA.ecdsa_signature_agile Spec.ECDSA.NoHash (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in  
       as_seq h1 resultR == nat_to_bytes_be 32 r /\
       as_seq h1 resultS == nat_to_bytes_be 32 s /\
       flag == flagSpec 
@@ -136,7 +143,8 @@ val ecdsa_verif_p256_sha2:
       let r = nat_from_bytes_be (as_seq h1 r) in
       let s = nat_from_bytes_be (as_seq h1 s) in
       modifies0 h0 h1 /\
-      result == Spec.ECDSA.ecdsa_verification_agile SHA2_256 (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m))
+      result == Spec.ECDSA.ecdsa_verification_agile (Spec.ECDSA.Hash SHA2_256) (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m)
+    )
 
 
 (* This code is not side channel resistant *)
@@ -155,7 +163,8 @@ val ecdsa_verif_p256_sha384:
       let r = nat_from_bytes_be (as_seq h1 r) in
       let s = nat_from_bytes_be (as_seq h1 s) in
       modifies0 h0 h1 /\
-      result == Spec.ECDSA.ecdsa_verification_agile SHA2_384 (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m))
+      result == Spec.ECDSA.ecdsa_verification_agile (Spec.ECDSA.Hash SHA2_384) (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m)
+   )
 
 
 (* This code is not side channel resistant *)
@@ -174,11 +183,13 @@ val ecdsa_verif_p256_sha512:
       let r = nat_from_bytes_be (as_seq h1 r) in
       let s = nat_from_bytes_be (as_seq h1 s) in
       modifies0 h0 h1 /\
-      result == Spec.ECDSA.ecdsa_verification_agile SHA2_512 (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m))
+      result == Spec.ECDSA.ecdsa_verification_agile (Spec.ECDSA.Hash SHA2_512) (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m)
+   )
 
 
 val ecdsa_verif_without_hash:
-  m:lbuffer uint8 (size 32) 
+  mLen: size_t {uint_v mLen >= Spec.ECDSA.min_input_length Spec.ECDSA.NoHash}
+  -> m:lbuffer uint8 mLen
   -> pubKey:lbuffer uint8 (size 64)
   -> r:lbuffer uint8 (size 32)
   -> s:lbuffer uint8 (size 32)
@@ -191,7 +202,8 @@ val ecdsa_verif_without_hash:
       let r = nat_from_bytes_be (as_seq h1 r) in
       let s = nat_from_bytes_be (as_seq h1 s) in
       modifies0 h0 h1 /\
-      result == Spec.ECDSA.ecdsa_verification_without_hash (publicKeyX, publicKeyY) r s  (as_seq h0 m))
+      result == Spec.ECDSA.ecdsa_verification_agile Spec.ECDSA.NoHash (publicKeyX, publicKeyY) r s (v mLen)  (as_seq h0 m)
+   )
 
 
 val verifyQ: 
