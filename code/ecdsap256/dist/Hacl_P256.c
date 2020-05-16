@@ -24,21 +24,6 @@
 
 #include "Hacl_P256.h"
 
-static bool eq_u8_nCT(uint8_t a, uint8_t b)
-{
-  return a == b;
-}
-
-static bool eq_u64_nCT(uint64_t a, uint64_t b)
-{
-  return a == b;
-}
-
-static bool eq_0_u64(uint64_t a)
-{
-  return eq_u64_nCT(a, (uint64_t)0U);
-}
-
 static uint64_t isZero_uint64_CT(uint64_t *f)
 {
   uint64_t a0 = f[0U];
@@ -1649,10 +1634,10 @@ static bool isPointAtInfinityPublic(uint64_t *p)
   uint64_t z1 = p[9U];
   uint64_t z2 = p[10U];
   uint64_t z3 = p[11U];
-  bool z0_zero = eq_0_u64(z0);
-  bool z1_zero = eq_0_u64(z1);
-  bool z2_zero = eq_0_u64(z2);
-  bool z3_zero = eq_0_u64(z3);
+  bool z0_zero = z0 == (uint64_t)0U;
+  bool z1_zero = z1 == (uint64_t)0U;
+  bool z2_zero = z2 == (uint64_t)0U;
+  bool z3_zero = z3 == (uint64_t)0U;
   return z0_zero && z1_zero && z2_zero && z3_zero;
 }
 
@@ -1682,8 +1667,7 @@ static bool isPointOnCurvePublic(uint64_t *p)
   p256_constant[3U] = (uint64_t)15866188208926050356U;
   p256_add(xBuffer, p256_constant, xBuffer);
   uint64_t r = compare_felem(y2Buffer, xBuffer);
-  bool z = !eq_0_u64(r);
-  return z;
+  return !(r == (uint64_t)0U);
 }
 
 static bool isCoordinateValid(uint64_t *p)
@@ -1693,8 +1677,8 @@ static bool isCoordinateValid(uint64_t *p)
   uint64_t *y = p + (uint32_t)4U;
   uint64_t carryX = sub4_il(x, prime256_buffer, tempBuffer);
   uint64_t carryY = sub4_il(y, prime256_buffer, tempBuffer);
-  bool lessX = eq_u64_nCT(carryX, (uint64_t)1U);
-  bool lessY = eq_u64_nCT(carryY, (uint64_t)1U);
+  bool lessX = carryX == (uint64_t)1U;
+  bool lessY = carryY == (uint64_t)1U;
   return lessX && lessY;
 }
 
@@ -2555,15 +2539,15 @@ static bool isMoreThanZeroLessThanOrderMinusOne(uint64_t *f)
 {
   uint64_t tempBuffer[4U] = { 0U };
   uint64_t carry = sub4_il(f, prime256order_buffer, tempBuffer);
-  bool less = eq_u64_nCT(carry, (uint64_t)1U);
+  bool less = carry == (uint64_t)1U;
   uint64_t f0 = f[0U];
   uint64_t f1 = f[1U];
   uint64_t f2 = f[2U];
   uint64_t f3 = f[3U];
-  bool z0_zero = eq_0_u64(f0);
-  bool z1_zero = eq_0_u64(f1);
-  bool z2_zero = eq_0_u64(f2);
-  bool z3_zero = eq_0_u64(f3);
+  bool z0_zero = f0 == (uint64_t)0U;
+  bool z1_zero = f1 == (uint64_t)0U;
+  bool z2_zero = f2 == (uint64_t)0U;
+  bool z3_zero = f3 == (uint64_t)0U;
   bool more = z0_zero && z1_zero && z2_zero && z3_zero;
   return less && !more;
 }
@@ -2578,12 +2562,7 @@ static bool compare_felem_bool(uint64_t *a, uint64_t *b)
   uint64_t b_1 = b[1U];
   uint64_t b_2 = b[2U];
   uint64_t b_3 = b[3U];
-  return
-    eq_u64_nCT(a_0,
-      b_0)
-    && eq_u64_nCT(a_1, b_1)
-    && eq_u64_nCT(a_2, b_2)
-    && eq_u64_nCT(a_3, b_3);
+  return a_0 == b_0 && a_1 == b_1 && a_2 == b_2 && a_3 == b_3;
 }
 
 static uint64_t
@@ -2816,8 +2795,7 @@ static bool lessThanPrime(uint64_t *f)
 {
   uint64_t tempBuffer[4U] = { 0U };
   uint64_t carry = sub4_il(f, prime256_buffer, tempBuffer);
-  bool less = eq_u64_nCT(carry, (uint64_t)1U);
-  return less;
+  return carry == (uint64_t)1U;
 }
 
 uint64_t
@@ -3310,7 +3288,7 @@ bool Hacl_Interface_P256_verifyQ(uint8_t *pubKey)
 bool Hacl_Interface_P256_decompressionNotCompressedForm(uint8_t *b, uint8_t *result)
 {
   uint8_t compressionIdentifier = b[0U];
-  bool correctIdentifier = eq_u8_nCT((uint8_t)4U, compressionIdentifier);
+  bool correctIdentifier = (uint8_t)4U == compressionIdentifier;
   if (correctIdentifier)
   {
     memcpy(result, b + (uint32_t)1U, (uint32_t)64U * sizeof ((b + (uint32_t)1U)[0U]));
