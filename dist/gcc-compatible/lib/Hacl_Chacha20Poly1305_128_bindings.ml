@@ -11,7 +11,6 @@ module Bindings(F:Cstubs.FOREIGN) =
                     (uint32_t @->
                        (ocaml_bytes @->
                           (ocaml_bytes @-> (ocaml_bytes @-> (returning void)))))))))
-      
     let hacl_Chacha20Poly1305_128_aead_decrypt =
       foreign "Hacl_Chacha20Poly1305_128_aead_decrypt"
         (ocaml_bytes @->
@@ -22,5 +21,4 @@ module Bindings(F:Cstubs.FOREIGN) =
                        (ocaml_bytes @->
                           (ocaml_bytes @->
                              (ocaml_bytes @-> (returning uint32_t)))))))))
-      
   end
