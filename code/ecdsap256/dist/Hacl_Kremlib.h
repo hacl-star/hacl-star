@@ -1,0 +1,65 @@
+/* MIT License
+ *
+ * Copyright (c) 2016-2020 INRIA, CMU and Microsoft Corporation
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include <string.h>
+#include "lib_intrinsics.h"
+
+#ifndef __Hacl_Kremlib_H
+#define __Hacl_Kremlib_H
+
+
+
+
+static inline uint64_t FStar_UInt64_eq_mask(uint64_t a, uint64_t b);
+
+static inline uint8_t FStar_UInt8_eq_mask(uint8_t a, uint8_t b);
+
+static inline FStar_UInt128_uint128
+FStar_UInt128_add(FStar_UInt128_uint128 a, FStar_UInt128_uint128 b);
+
+static inline FStar_UInt128_uint128
+FStar_UInt128_shift_left(FStar_UInt128_uint128 a, uint32_t s);
+
+static inline FStar_UInt128_uint128
+FStar_UInt128_shift_right(FStar_UInt128_uint128 a, uint32_t s);
+
+static inline FStar_UInt128_uint128 FStar_UInt128_uint64_to_uint128(uint64_t a);
+
+static inline uint64_t FStar_UInt128_uint128_to_uint64(FStar_UInt128_uint128 a);
+
+static inline FStar_UInt128_uint128 FStar_UInt128_mul_wide(uint64_t x, uint64_t y);
+
+static inline void store128_be(uint8_t *x0, FStar_UInt128_uint128 x1);
+
+extern void C_String_print(C_String_t uu____143);
+
+extern void LowStar_Printf_print_string(Prims_string uu____92);
+
+extern void LowStar_Printf_print_u32(uint32_t uu____140);
+
+extern void LowStar_Printf_print_lmbuffer_u8(uint32_t l, uint8_t *r);
+
+#define __Hacl_Kremlib_H_DEFINED
+#endif
