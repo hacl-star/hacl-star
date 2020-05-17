@@ -15,6 +15,7 @@
 #include <openssl/evp.h>
 #include <openssl/ecdsa.h>
 #include <openssl/ecdh.h>
+#include <openssl/ec.h>
 
 // #include <ecdsa.c>
 
@@ -134,6 +135,10 @@ bool testImplementationOpenssl()
     return (flag == 0);
 }
 
+void handleErrors()
+{
+	printf("%s\n", "OpenSSl fault");
+}
 
 int main()
 {
@@ -219,6 +224,7 @@ int main()
 	for (int j = 0; j < ROUNDS; j++)
 	{
 		Hacl_Interface_P256_ecp256dh_r(pk, pk, scalar0);
+		res ^= scalar0[0] ^ scalar0[31];
 	}
 
 	t1 = clock();
@@ -227,7 +233,7 @@ int main()
 	for (int j = 0; j < ROUNDS; j++)
 	{
 		Hacl_Interface_P256_ecp256dh_r(pk, pk, scalar0); 
-	    res ^= scalar0[0] ^ scalar0[15];
+	    res ^= scalar0[0] ^ scalar0[31];
 	}
 
 	b = cpucycles_end();
@@ -238,22 +244,88 @@ int main()
 
 	
 
-	// for (int j = 0; j < ROUNDS; j++)
-	// 	ECDSA_do_sign(signature, 32, eckey);
-
-	// t1 = clock();
-	// a = cpucycles_begin();
-
-	// for (int j = 0; j < ROUNDS; j++)
-	// 	ECDSA_do_sign(signature, 32, eckey);
-
-	// b = cpucycles_end();
-	// t2 = clock();
-	// clock_t tdiff4 = t2 - t1;
-	// cycles cdiff4 = b - a;
 
 
 
+	size_t t = 64;
+	size_t* secret_len = &t;	
+	EVP_PKEY_CTX *pctx, *kctx;
+	EVP_PKEY_CTX *ctx;
+	unsigned char *secret;
+	EVP_PKEY *pkey = NULL, *peerkey = NULL, *params = NULL;
+	/* NB: assumes pkey, peerkey have been already set up */
+
+	/* Create the context for parameter generation */
+	if(NULL == (pctx = EVP_PKEY_CTX_new_id(EVP_PKEY_EC, NULL))) handleErrors();
+
+	/* Initialise the parameter generation */
+	if(1 != EVP_PKEY_paramgen_init(pctx)) handleErrors();
+
+	/* We're going to use the ANSI X9.62 Prime 256v1 curve */
+	if(1 != EVP_PKEY_CTX_set_ec_paramgen_curve_nid(pctx, NID_X9_62_prime256v1)) handleErrors();
+
+	/* Create the parameter object params */
+	if (!EVP_PKEY_paramgen(pctx, &params)) handleErrors();
+
+	/* Create the context for the key generation */
+	if(NULL == (kctx = EVP_PKEY_CTX_new(params, NULL))) handleErrors();
+
+	/* Generate the key */
+	if(1 != EVP_PKEY_keygen_init(kctx)) handleErrors();
+	if (1 != EVP_PKEY_keygen(kctx, &pkey)) handleErrors();
+	if (1 != EVP_PKEY_keygen(kctx, &peerkey)) handleErrors();
+
+
+
+	/* Create the context for the shared secret derivation */
+	if(NULL == (ctx = EVP_PKEY_CTX_new(pkey, NULL))) handleErrors();
+
+	/* Initialise */
+	if(1 != EVP_PKEY_derive_init(ctx)) handleErrors();
+
+
+	/* Provide the peer public key */
+	if(1 != EVP_PKEY_derive_set_peer(ctx, peerkey)) handleErrors();
+
+
+	/* Determine buffer length for shared secret */
+	if(1 != EVP_PKEY_derive(ctx, NULL, secret_len)) handleErrors();
+
+	/* Create the buffer */
+	if(NULL == (secret = OPENSSL_malloc(*secret_len))) handleErrors();
+
+
+	for (int j = 0; j < ROUNDS; j++)
+	{
+		EVP_PKEY_derive(ctx, secret, secret_len);
+	    res ^= secret[0] ^ secret[31];
+	}
+
+
+	t1 = clock();
+	a = cpucycles_begin();
+
+	/* Derive the shared secret */
+
+	for (int j = 0; j < ROUNDS; j++)
+	{
+		EVP_PKEY_derive(ctx, secret, secret_len);
+	    res ^= secret[0] ^ secret[31];
+	}
+
+	// if(1 != (EVP_PKEY_derive(ctx, secret, secret_len))) handleErrors();
+
+	b = cpucycles_end();
+	t2 = clock();
+	clock_t tdiff4 = t2 - t1;
+	cycles cdiff4 = b - a;
+
+	EVP_PKEY_CTX_free(ctx);
+	EVP_PKEY_free(peerkey);
+	EVP_PKEY_free(pkey);
+	EVP_PKEY_CTX_free(kctx);
+	EVP_PKEY_free(params);
+	EVP_PKEY_CTX_free(pctx);
 
 
 	uint64_t count = ROUNDS * SIZE;
@@ -266,8 +338,9 @@ int main()
 	printf("Hacl ECDH PERF: %d\n"); 
 	print_time(count,tdiff3,cdiff3);  
 
-	// printf("Actually I have no idea what it computes: %d\n"); 
-	// print_time(count,tdiff4,cdiff4);  
+	printf("OpenSSL ECDH PERF: %d\n"); 
+	print_time(count,tdiff4,cdiff4);  
+
 
 
 }
