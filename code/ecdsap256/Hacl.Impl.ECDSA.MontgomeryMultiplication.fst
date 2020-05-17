@@ -21,6 +21,7 @@ open Lib.IntTypes.Intrinsics
 
 #reset-options "--z3rlimit 200"
 
+inline_for_extraction noextract
 val add8_without_carry1:  t: widefelem -> t1: widefelem -> result: widefelem  -> Stack unit
   (requires fun h -> live h t /\ live h t1 /\ live h result /\ wide_as_nat h t1 < pow2 320 /\
     wide_as_nat h t <  prime_p256_order * prime_p256_order /\ eq_or_disjoint t result /\ eq_or_disjoint t1 result  )
@@ -284,6 +285,7 @@ let reduction_prime_2prime_order x result  =
   pop_frame()  
   
 
+inline_for_extraction noextract
 val upload_k0: unit ->  Tot (r: uint64 {uint_v r == min_one_prime (pow2 64) (- prime)})
 
 let upload_k0 () = 

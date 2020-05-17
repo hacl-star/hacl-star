@@ -23,7 +23,7 @@ open Spec.P256.MontgomeryMultiplication
 #set-options "--z3rlimit 100"
 
 inline_for_extraction noextract
-val add8_without_carry1:  t: widefelem -> t1: widefelem -> result: widefelem  -> Stack unit
+val add8_without_carry1: t: widefelem -> t1: widefelem -> result: widefelem  -> Stack unit
   (requires fun h -> 
     live h t /\ live h t1 /\ live h result /\ eq_or_disjoint t1 result /\ 
     eq_or_disjoint t result /\ wide_as_nat h t1 < pow2 320 /\ wide_as_nat h t < prime256 * prime256
@@ -68,7 +68,8 @@ let montgomery_multiplication_one_round_proof t result co =
   lemma_div_lt (t + (t % pow2 64) * prime256) 575 64; 
   assert_norm (prime256 * prime256 > pow2 (575 - 64))
 
-inline_for_extraction
+
+inline_for_extraction noextract
 val montgomery_multiplication_round_twice: t: widefelem -> result: widefelem -> Stack unit 
   (requires fun h -> live h t /\ live h result  /\ wide_as_nat h t < prime256 * prime256)
   (ensures fun h0 _ h1 -> 

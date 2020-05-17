@@ -918,7 +918,7 @@ let lemma_320_64 a b c d e u =
     ((pow2 64 - 1) * (pow2 64 - 1)) * pow2 64 * pow2 64 * pow2 64 + (pow2 64 - 1) < pow2 320)
 
 
-
+inline_for_extraction noextract
 val sq0: f:  lbuffer uint64 (size 4) -> result: lbuffer uint64 (size 4) -> memory: lbuffer uint64 (size 12) -> temp: lbuffer uint64 (size 5) -> Stack uint64
   (requires fun h -> live h result /\ live h f /\ live h memory /\ live h temp /\ 
     disjoint result temp /\ disjoint result memory /\ disjoint memory temp 
@@ -948,7 +948,7 @@ val sq0: f:  lbuffer uint64 (size 4) -> result: lbuffer uint64 (size 4) -> memor
       )
   )
 
-
+inline_for_extraction noextract
 val sq0_0: f: lbuffer uint64 (size 4) -> result: lbuffer uint64 (size 4) -> memory: lbuffer uint64 (size 12) -> temp: lbuffer uint64 (size 1) -> Stack uint64
   (requires fun h -> live h result /\ live h f /\ live h memory /\ live h temp /\
     disjoint result temp /\ disjoint result memory /\ disjoint memory temp)
@@ -1068,7 +1068,7 @@ let sq0 f result memory temp =
   c3 +! temp0
 
 
-
+inline_for_extraction noextract
 val sq1: f: felem -> f4: felem -> result: felem -> memory: lbuffer uint64 (size 12) -> 
   temp: lbuffer uint64 (size 5) -> 
   Stack uint64 
@@ -1210,7 +1210,7 @@ let sq1 f f4 result memory tempBuffer =
 
   c3 +! h_3 +! c4
 
-
+inline_for_extraction noextract
 val sq2: f: felem -> f4: felem -> result: felem  -> memory: lbuffer uint64 (size 12) -> temp: lbuffer uint64 (size 5) -> 
   Stack uint64 
   (requires fun h -> live h f /\ live h f4 /\ live h result /\ live h temp /\ live h memory /\ eq_or_disjoint f4 result /\ disjoint f4 memory /\ disjoint f4 temp /\ disjoint f result /\ disjoint temp result /\ disjoint memory temp /\ disjoint memory result /\
@@ -1338,7 +1338,7 @@ let sq2 f f4 result memory tempBuffer =
 
   c3 +! h_3 +! c4
 
-
+inline_for_extraction noextract
 val sq3: f: felem -> f4: felem -> result: felem -> memory: lbuffer uint64 (size 12) -> temp: lbuffer uint64 (size 5) -> 
   Stack uint64 
   (requires fun h -> live h f /\ live h f4 /\ live h result /\ live h temp /\ live h memory /\ eq_or_disjoint f4 result /\ disjoint f4 memory /\ disjoint f4 temp /\ disjoint f result /\ disjoint temp result /\ disjoint memory temp /\ disjoint memory result /\
