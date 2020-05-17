@@ -1054,20 +1054,22 @@ let attributesTemplateComplete (t : _CK_OBJECT_CLASS) (pMechanism : _CK_MECHANIS
 
 #push-options "--ifuel 0 --fuel 0"
 
-val attributeConsistent0_0: attr: _CK_ATTRIBUTE -> s: seq _CK_ATTRIBUTE{count (fun x -> x.aType = attr.aType) s > 0}
-  -> Type0
+val attributeConsistent0: s: seq _CK_ATTRIBUTE -> Type0
 
-let attributeConsistent0_0 attr s  = 
-  let allAttributesSameType = takeAll (fun x -> x.aType = attr.aType) s in
-  forall (i: nat). i < length allAttributesSameType ==> equalAttributeValue (index allAttributesSameType i) attr
-   
+let attributeConsistent0 s = 
+  let attributeConsistent0_0 attr s  = 
+    let allAttributesSameType = takeAll (fun x -> x.aType = attr.aType) s in
+    forall (i: nat). i < length allAttributesSameType ==> equalAttributeValue (index allAttributesSameType i) attr in 
+  forall (i: nat). i < length s ==> attributeConsistent0_0 (index s i) s
 
-val _attributeConsistent0_0: attr: _CK_ATTRIBUTE -> s: seq _CK_ATTRIBUTE{count (fun x -> x.aType = attr.aType) s > 0} 
-  -> Tot (r: bool {r == true <==> attributeConsistent0_0 attr s})
 
-let _attributeConsistent0_0 attr s = 
-  let allAttributesSameType = takeAll (fun x -> x.aType = attr.aType) s in 
-  for_all (fun x -> _equalAttributeValue x attr) allAttributesSameType
+val _attributeConsistent0: s: seq _CK_ATTRIBUTE -> Tot (r: bool {r == true <==> attributeConsistent0 s}) 
+
+let _attributeConsistent0 s = 
+  let _attributeConsistent0_0 attr s = 
+    let allAttributesSameType = takeAll (fun x -> x.aType = attr.aType) s in 
+    for_all (fun x -> _equalAttributeValue x attr) allAttributesSameType in 
+  for_all (fun x -> _attributeConsistent0_0 x s) s
 
 
 val attributeConsistent1_0: attr: _CK_ATTRIBUTE -> s: seq _CK_ATTRIBUTE -> Type0
