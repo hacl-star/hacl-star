@@ -121,7 +121,7 @@ let load_buffer a0 a1 a2 a3 o =
   upd o (size 2) a2;
   upd o (size 3) a3
 
-
+inline_for_extraction noextract
 val upl_zer_buffer:
     c0: uint32 -> c1: uint32 -> c2: uint32 -> c3: uint32
   -> c4: uint32 -> c5: uint32 -> c6: uint32 -> c7: uint32
@@ -154,7 +154,7 @@ let upl_zer_buffer c0 c1 c2 c3 c4 c5 c6 c7 o =
     let h2 = ST.get() in
     assert(as_nat h2 o = (v c1 * pow2 32 + v c0 + v c3 * pow2 (3 * 32) + v c2 * pow2 (2 * 32) + v c5 * pow2 (32 * 5) + v c4 * pow2 (32 * 4) + v c7 * pow2 (32 * 7) + v c6 * pow2 (32 * 6)) % prime256)
 
-
+inline_for_extraction noextract
 val upl_fir_buffer: c11: uint32 -> c12: uint32 -> c13: uint32 -> c14: uint32 -> c15: uint32
   -> o: lbuffer uint64 (size 4) ->
   Stack unit
@@ -177,7 +177,7 @@ let upl_fir_buffer c11 c12 c13 c14 c15 o =
   load_buffer b0 b1 b2 b3 o;
   reduction_prime_2prime_impl o o
 
-
+inline_for_extraction noextract
 val upl_sec_buffer: c12: uint32 -> c13: uint32 -> c14: uint32 -> c15: uint32
   -> o: lbuffer uint64 (size 4) ->
   Stack unit
@@ -202,7 +202,7 @@ let upl_sec_buffer c12 c13 c14 c15 o =
     let h1 = ST.get() in
     modulo_lemma (as_nat h1 o) prime
 
-
+inline_for_extraction noextract
 val upl_thi_buffer: c8: uint32 -> c9: uint32 -> c10: uint32 -> c14: uint32 -> c15: uint32
   -> o: lbuffer uint64 (size 4) ->
   Stack unit
@@ -223,7 +223,7 @@ let upl_thi_buffer c8 c9 c10 c14 c15 o =
    load_buffer b0 b1 b2 b3 o;
    reduction_prime_2prime_impl o o
 
-
+inline_for_extraction noextract
 val upl_for_buffer: c8: uint32 -> c9: uint32 -> c10: uint32 -> c11: uint32 -> c13: uint32 ->
   c14: uint32 -> c15: uint32-> o: lbuffer uint64 (size 4) ->
   Stack unit
@@ -244,7 +244,7 @@ let upl_for_buffer c8 c9 c10 c11 c13 c14 c15 o =
   load_buffer b0 b1 b2 b3 o;
   reduction_prime_2prime_impl o o
 
-
+inline_for_extraction noextract
 val upl_fif_buffer: c8: uint32 -> c10: uint32 -> c11: uint32 -> c12: uint32 -> c13: uint32
   -> o: lbuffer uint64 (size 4) ->
   Stack unit
@@ -265,7 +265,7 @@ let upl_fif_buffer c8 c10 c11 c12 c13 o =
     load_buffer b0 b1 b2 b3 o;
     reduction_prime_2prime_impl o o
 
-
+inline_for_extraction noextract
 val upl_six_buffer: c9: uint32 -> c11: uint32 -> c12: uint32 -> c13: uint32 -> c14: uint32 -> c15: uint32-> 
   o: lbuffer uint64 (size 4) ->
   Stack unit
@@ -287,7 +287,7 @@ let upl_six_buffer c9 c11 c12 c13 c14 c15 o =
     load_buffer b0 b1 b2 b3 o;
     reduction_prime_2prime_impl o o
 
-
+inline_for_extraction noextract
 val upl_sev_buffer: c8: uint32 -> c9: uint32 -> c10: uint32 -> c12: uint32 -> c13: uint32 ->
   c14: uint32 -> c15: uint32
   -> o: lbuffer uint64 (size 4) ->
@@ -309,7 +309,7 @@ let upl_sev_buffer c8 c9 c10 c12 c13 c14 c15 o =
     load_buffer b0 b1 b2 b3 o;
     reduction_prime_2prime_impl o o
 
-
+inline_for_extraction noextract
 val upl_eig_buffer: c9: uint32 -> c10: uint32 -> c11: uint32 -> c12: uint32 -> c13: uint32 ->
   c14: uint32 -> c15: uint32
   -> o: lbuffer uint64 (size 4) ->
