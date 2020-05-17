@@ -305,9 +305,18 @@ let equalAttributeValue a b =
   _ck_attribute_get_type a.aType == _ck_attribute_get_type b.aType /\ 
   a.pValue == b.pValue
 
-assume val _equalAttributeValue: a: _CK_ATTRIBUTE -> b: _CK_ATTRIBUTE -> Tot (r: bool {r <==> equalAttributeValue a b})
 
+val _equalAttributeValue: a: _CK_ATTRIBUTE -> b: _CK_ATTRIBUTE -> Tot (r: bool {r <==> equalAttributeValue a b})
 
+let _equalAttributeValue a b = 
+    match a.aType with 
+      |CKA_CLASS -> 
+	begin 
+	  match b.aType with 
+	    |CKA_CLASS -> a.pValue = b.pValue
+	    |_ -> false
+	end
+      |_ -> admit(); false
 
 
 (*/* at least 32 bits; each bit is a Boolean flag */
