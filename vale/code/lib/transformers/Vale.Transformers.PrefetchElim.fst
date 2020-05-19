@@ -19,7 +19,7 @@ let prefetch_elim_ph = {
   input_hint = 1;
 }
 
-#push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
+#push-options "--fuel 2 --ifuel 3"
 let prefetch_elim_correct (is:list ins) (s:machine_state) :
   Lemma (peephole_correct prefetch_elim_ph is s)
     [SMTPat (peephole_correct prefetch_elim_ph is s)] =
