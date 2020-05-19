@@ -32,8 +32,11 @@ open FStar.Mul
 #reset-options "--z3rlimit 300" 
 
 
-
-val point_double_compute_s_m: p: point -> s: felem -> m: felem -> tempBuffer:lbuffer uint64 (size 24) -> Stack unit
+inline_for_extraction noextract
+val point_double_compute_s_m: p: point -> s: felem -> m: felem 
+  -> tempBuffer:lbuffer uint64 (size 20) 
+  -> yy : felem 
+  -> Stack unit
   (requires fun h -> live h p /\ live h s /\ live h m /\ live h tempBuffer /\
     LowStar.Monotonic.Buffer.all_disjoint [loc p; loc s; loc m; loc tempBuffer] /\
     as_nat h (gsub p (size 8) (size 4)) < prime256 /\ 
@@ -55,17 +58,16 @@ val point_double_compute_s_m: p: point -> s: felem -> m: felem -> tempBuffer:lbu
 )
 
 
-let point_double_compute_s_m p s m tempBuffer =
+let point_double_compute_s_m p s m tempBuffer yy =
     let px = sub p (size 0) (size 4) in 
     let py = sub p (size 4) (size 4) in 
     let pz = sub p (size 8) (size 4) in 
 
-    let yy = sub tempBuffer (size 0) (size 4) in 
-    let xyy = sub tempBuffer (size 4) (size 4) in 
-    let zzzz = sub tempBuffer (size 8) (size 4) in 
-    let minThreeZzzz = sub tempBuffer (size 12) (size 4) in 
-    let xx = sub tempBuffer (size 16) (size 4) in 
-    let threeXx = sub tempBuffer (size 20) (size 4) in 
+    let xyy = sub tempBuffer (size 0) (size 4) in 
+    let zzzz = sub tempBuffer (size 4) (size 4) in 
+    let minThreeZzzz = sub tempBuffer (size 8) (size 4) in 
+    let xx = sub tempBuffer (size 12) (size 4) in 
+    let threeXx = sub tempBuffer (size 16) (size 4) in 
 
       let h0 = ST.get() in 
     montgomery_square_buffer py yy; 
@@ -122,9 +124,9 @@ let point_double_compute_x3 x3 s m tempBuffer =
      prime256;
      lemma_mod_sub_distr (fromDomain_ (as_nat h0 m) * fromDomain_ (as_nat h0 m)) (2 * fromDomain_ (as_nat h0 s)) prime256
  
-
+inline_for_extraction noextract
 val point_double_compute_y3: pY: felem ->  y3: felem ->  x3: felem -> 
-  s: felem -> m: felem -> tempBuffer: lbuffer uint64 (size 16) -> Stack unit 
+  s: felem -> m: felem -> tempBuffer: lbuffer uint64 (size 16) -> yy: felem -> Stack unit 
   (requires fun h -> live h pY /\ live h y3 /\ live h x3 /\ live h s /\ live h m /\ live h tempBuffer
     /\ LowStar.Monotonic.Buffer.all_disjoint [loc pY; loc y3; loc x3; loc s; loc m; loc tempBuffer]
     /\ as_nat h x3 < prime /\ as_nat h s < prime /\ as_nat h m < prime /\ as_nat h pY < prime)
@@ -139,13 +141,13 @@ val point_double_compute_y3: pY: felem ->  y3: felem ->  x3: felem ->
    )
  )
 
-let point_double_compute_y3 pY y3 x3 s m tempBuffer = 
+let point_double_compute_y3 pY y3 x3 s m tempBuffer yy = 
     let yyyy = sub tempBuffer (size 0) (size 4) in 
     let eightYyyy = sub tempBuffer (size 4) (size 4) in 
     let sx3 = sub tempBuffer (size 8) (size 4) in 
     let msx3 = sub tempBuffer (size 12) (size 4) in 
       let h0 = ST.get() in 
-    quatre pY yyyy;
+    montgomery_square_buffer yy yyyy;
     multByEight yyyy eightYyyy;
     p256_sub s x3 sx3;
       let h1 = ST.get() in 
@@ -166,7 +168,9 @@ let point_double p result tempBuffer =
 	let h0 = ST.get() in   
     let s = sub tempBuffer (size 0) (size 4) in 
     let m = sub tempBuffer (size 4) (size 4) in 
-    let buffer_for_s_m = sub tempBuffer (size 8) (size 24) in 
+    let yy = sub tempBuffer (size 8) (size 4) in 
+
+    let buffer_for_s_m = sub tempBuffer (size 12) (size 24) in 
 
     let buffer_for_x3 = sub tempBuffer (size 32) (size 8) in 
     let buffer_for_y3 = sub tempBuffer (size 40) (size 16) in 
@@ -181,9 +185,9 @@ let point_double p result tempBuffer =
     let pY = sub p (size 4) (size 4) in 
     let pZ = sub p (size 8) (size 4) in 
 
-   point_double_compute_s_m p s m buffer_for_s_m; 
+   point_double_compute_s_m p s m buffer_for_s_m yy; 
    point_double_compute_x3 x3 s m buffer_for_x3;
-   point_double_compute_y3 pY y3 x3 s m buffer_for_y3;
+   point_double_compute_y3 pY y3 x3 s m buffer_for_y3 yy;
    
    montgomery_multiplication_buffer pY pZ pypz;
    multByTwo pypz z3;
