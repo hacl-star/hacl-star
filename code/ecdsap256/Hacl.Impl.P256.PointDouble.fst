@@ -31,7 +31,7 @@ open FStar.Mul
 
 #reset-options "--z3rlimit 300" 
 
-
+(* 
 inline_for_extraction noextract
 val point_double_compute_s_m: p: point -> s: felem -> m: felem 
   -> tempBuffer:lbuffer uint64 (size 20) 
@@ -207,3 +207,81 @@ let point_double p result tempBuffer =
      Spec.P256.MontgomeryMultiplication.PointDouble.lemma_yToSpecification pxD pyD pzD (as_nat hEnd s) (as_nat hEnd m) (as_nat hEnd x3) (as_nat hEnd (gsub result (size 4) (size 4)));
      Spec.P256.MontgomeryMultiplication.PointDouble.lemma_zToSpecification pxD pyD pzD (as_nat hEnd (gsub result (size 8) (size 4)))
 
+*)
+
+(*   delta:=Z1^2;
+     gamma:=Y1^2;
+     beta:=X1*gamma;
+     alpha:=3*(X1-delta)*(X1+delta);
+     X3:=alpha^2-8*beta;
+     Z3:=(Y1+Z1)^2-gamma-delta;
+     Y3:=alpha*(4*beta-X3)-8*gamma^2;
+     SS!(x3-X3/Z3^2); SS!(y3-Y3/Z3^3); *)
+
+let point_double p result tempBuffer = 
+  let pX = sub p (size 0) (size 4) in 
+  let pY = sub p (size 4) (size 4) in 
+  let pZ = sub p (size 8) (size 4) in 
+
+  let x3 = sub result (size 0) (size 4) in 
+  let y3 = sub result (size 4) (size 4) in 
+  let z3 = sub result (size 8) (size 4) in 
+
+  let delta = sub tempBuffer (size 0) (size 4) in 
+  let gamma = sub tempBuffer (size 4) (size 4) in 
+  let beta = sub tempBuffer (size 8) (size 4) in 
+  let a0 = sub tempBuffer (size 12) (size 4) in 
+  let a1 = sub tempBuffer (size 16) (size 4) in 
+  let alpha = sub tempBuffer (size 20) (size 4) in 
+  let fourBeta = sub tempBuffer (size 24) (size 4) in 
+  let eightBeta = sub tempBuffer (size 28) (size 4) in 
+  let threeAlpha = sub tempBuffer (size 32) (size 4) in 
+  let eightGamma = sub tempBuffer (size 36) (size 4) in 
+
+  let h0 = ST.get() in 
+
+  montgomery_square_buffer pZ delta; (* delta = z * z*)
+  montgomery_square_buffer pY gamma; (* gamma = y * y *)
+    let h1 = ST.get() in 
+  montgomery_multiplication_buffer pX gamma beta; (* beta = x * gamma *)
+    let h2 = ST.get() in 
+
+
+  p256_sub pX delta a0; (* a0 = x - delta *)
+  p256_add pX delta a1; (* a1 = x + delta *)
+  montgomery_multiplication_buffer a0 a1 alpha; (* alpha = (x - delta) * (x + delta) *)
+
+  let h3 = ST.get() in 
+ 
+  multByThree alpha threeAlpha; (* alpha = 3 * (x - delta) * (x + delta) *)
+  
+  montgomery_square_buffer threeAlpha x3; (* x3 = alpha ** 2 *)
+  multByFour beta fourBeta; (*  fourBeta = beta * 4 *)
+  multByTwo fourBeta eightBeta; (* eightBeta = beta * 8 *)
+  p256_sub x3 eightBeta x3; (* x3 = alpha ** 2 - beta * 8 *) 
+
+  p256_add pY pZ z3; (* z3 = py + pz *)
+  montgomery_square_buffer z3 z3; (* z3 = (py + pz) ** 2 *)
+  p256_sub z3 gamma z3; (* z3 =  (py + pz) ** 2 - gamma  *)
+  p256_sub z3 delta z3; (* z3 = (py + pz) ** 2 - gamma - delta *)
+
+  p256_sub fourBeta x3 y3; (* y3 = 4 * beta - x3 *)
+  montgomery_multiplication_buffer threeAlpha y3 y3; (* y3 = alpha * (4 * beta - x3) *)
+  montgomery_square_buffer gamma gamma; (* gamma = gamma ** 2 *)
+  multByEight gamma eightGamma; (* gamma = 8 * gamma ** 2 *)
+  p256_sub y3 eightGamma y3 (* y3 = alpha * y3 - 8 * gamma **2 *);
+
+
+
+    assert(as_nat h3 delta = toDomain_ (fromDomain_ (as_nat h0 pZ) * fromDomain_ (as_nat h0 pZ) % prime256));
+    assert(as_nat h3 gamma = toDomain_ (fromDomain_ (as_nat h0 pY) * fromDomain_ (as_nat h0 pY) % prime256));
+    assert(as_nat h3 beta = toDomain_ (fromDomain_ (as_nat h0 pX) * fromDomain_ (as_nat h3 gamma) % prime256));
+    
+    assert(as_nat h3 a0 = toDomain_ ((fromDomain_ (as_nat h0 pX) - fromDomain_ (as_nat h3 delta)) % prime256));
+    assert(as_nat h3 a1 = toDomain_ ((fromDomain_ (as_nat h0 pX) + fromDomain_ (as_nat h3 delta)) % prime256));
+    assert(as_nat h3 alpha = toDomain_ ((((fromDomain_ (as_nat h0 pX) - fromDomain_ (as_nat h3 delta)) % prime256) * ((fromDomain_ (as_nat h0 pX) + fromDomain_ (as_nat h3 delta)) % prime256)) % prime256));
+    
+    admit()
+  
+  
+  
