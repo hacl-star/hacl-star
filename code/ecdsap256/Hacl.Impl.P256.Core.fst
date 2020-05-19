@@ -219,7 +219,7 @@ let norm p resultPoint tempBuffer =
   let tempBuffer20 = sub tempBuffer (size 12) (size 20) in 
 
     let h0 = ST.get() in 
-  montgomery_multiplication_buffer zf zf z2f; 
+  montgomery_square_buffer zf z2f; 
     let h1 = ST.get() in 
   montgomery_multiplication_buffer z2f zf z3f;
     let h2 = ST.get() in 
@@ -264,7 +264,7 @@ let normX p result tempBuffer =
   let tempBuffer20 = sub tempBuffer (size 12) (size 20) in 
 
     let h0 = ST.get() in 
-  montgomery_multiplication_buffer zf zf z2f; 
+  montgomery_square_buffer zf z2f; 
   exponent z2f z2f tempBuffer20;
   montgomery_multiplication_buffer z2f xf z2f;
   fromDomain z2f result;

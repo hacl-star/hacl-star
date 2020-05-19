@@ -106,7 +106,7 @@ let montgomery_ladder_power_step0 a b =
   let h0 = ST.get() in 
     montgomery_multiplication_buffer a b b;
       lemmaToDomainAndBackIsTheSame (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 b) % prime);
-    montgomery_multiplication_buffer a a a ;
+    montgomery_square_buffer a a ;
       lemmaToDomainAndBackIsTheSame (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a) % prime)
 
 

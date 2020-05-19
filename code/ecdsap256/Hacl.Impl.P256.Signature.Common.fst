@@ -55,7 +55,7 @@ val y_2: y: felem -> r: felem -> Stack unit
 
 let y_2 y r = 
   toDomain y r;
-  montgomery_multiplication_buffer r r r
+  montgomery_square_buffer r r
 
 
 inline_for_extraction noextract
@@ -108,7 +108,7 @@ let xcube_minus_x x r =
     let minusThreeXBuffer = create (size 4) (u64 0) in 
     let p256_constant = create (size 4) (u64 0) in 
   toDomain x xToDomainBuffer;
-  montgomery_multiplication_buffer xToDomainBuffer xToDomainBuffer r;
+  montgomery_square_buffer xToDomainBuffer r;
   montgomery_multiplication_buffer r xToDomainBuffer r;
     lemma_mod_mul_distr_l ((as_nat h0 x) * (as_nat h0 x)) (as_nat h0 x) prime;
   multByThree xToDomainBuffer minusThreeXBuffer;

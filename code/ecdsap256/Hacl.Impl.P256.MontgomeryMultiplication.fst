@@ -262,7 +262,7 @@ let fsquarePowN n a =
   power_one (fromDomain_ (as_nat h0 a)); 
   for (size 0) n (inv h0) (fun x -> 
     let h0_ = ST.get() in 
-     montgomery_multiplication_buffer a a a; 
+     montgomery_square_buffer a a; 
      let k = fromDomain_ (as_nat h0 a) in  
      inDomain_mod_is_not_mod (fromDomain_ (as_nat h0_ a) * fromDomain_ (as_nat h0_ a)); 
      lemmaFromDomainToDomainModuloPrime (let k = fromDomain_ (as_nat h0 a) in pow k (pow2 (v x)));
@@ -306,7 +306,7 @@ let fsquarePowNminusOne n a b =
   for (size 0) n (inv h0) (fun x -> 
     let h0_ = ST.get() in 
     montgomery_multiplication_buffer b a b;
-    montgomery_multiplication_buffer a a a;
+    montgomery_square_buffer a a;
     let k = fromDomain_ (as_nat h0 a) in 
     inDomain_mod_is_not_mod (fromDomain_ (as_nat h0_ b) * fromDomain_ (as_nat h0_ a));
     inDomain_mod_is_not_mod (fromDomain_ (as_nat h0_ a) * fromDomain_ (as_nat h0_ a));
