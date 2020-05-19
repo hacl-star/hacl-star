@@ -1,5 +1,5 @@
 [
-  "‘FD\u0002v>=û@O0²6e•",
+  "…@¤¿¸’S8\b$¸Kø”²\u001d",
   [
     [
       "MerkleTree.Low.Hashfunctions.init_hash",
@@ -8,31 +8,35 @@
       0,
       [ "@query" ],
       0,
-      "e48d4ac4af39a0e417e388ca6bba53f9"
+      "82ee58dd9a01142dd920eacaca29db3f"
     ],
     [
       "MerkleTree.Low.Hashfunctions.free_hash",
       1,
-      0,
-      0,
+      2,
+      2,
       [
-        "@MaxIFuel_assumption", "@query", "equation_LowStar.Regional.rg_inv",
+        "@MaxIFuel_assumption", "@query",
         "equation_MerkleTree.Low.Datastructures.hash",
         "equation_MerkleTree.Low.Datastructures.hash_size_t",
         "equation_MerkleTree.Low.Datastructures.hreg",
-        "refinement_interpretation_Tm_refine_3a4be71cbd5b25d784b09bc4fbf76831",
-        "refinement_interpretation_Tm_refine_59238531e6759906db5e681a93c5ccae",
+        "lemma_FStar.Ghost.hide_reveal",
+        "proj_equation_LowStar.Regional.Rgl_r_inv",
+        "projection_inverse_LowStar.Regional.Rgl_r_inv",
+        "refinement_interpretation_Tm_refine_843cd6297b28c062237c5d3efaded389",
+        "refinement_interpretation_Tm_refine_8c0551b61a036b536158e72eb516544e",
+        "refinement_kinding_Tm_refine_02de1ca607024051b572624909ff5c56",
         "token_correspondence_LowStar.Regional.__proj__Rgl__item__r_inv",
-        "token_correspondence_LowStar.Regional.rg_inv"
+        "token_correspondence_MerkleTree.Low.Datastructures.hash_r_inv"
       ],
       0,
-      "00952058f73e262ff62ccf563021c4e2"
+      "1db298f7543dfaff0572ff7ed089e86a"
     ],
     [
       "MerkleTree.Low.Hashfunctions.hash_fun_t",
       1,
-      0,
-      0,
+      2,
+      2,
       [
         "@MaxIFuel_assumption", "@query", "b2t_def",
         "equation_FStar.UInt.fits", "equation_FStar.UInt.gt",
@@ -44,11 +48,11 @@
         "primitive_Prims.op_GreaterThan",
         "primitive_Prims.op_LessThanOrEqual",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_02de1ca607024051b572624909ff5c56",
+        "refinement_interpretation_Tm_refine_56b4e6db87090880a4837304bb2a2909",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec"
       ],
       0,
-      "118353ae7b892df60f6819139ac8c795"
+      "fa377d221be953135a330a55b9e0e0d0"
     ],
     [
       "MerkleTree.Low.Hashfunctions.hash_fun_t",
@@ -85,7 +89,7 @@
         "typing_LowStar.Buffer.trivial_preorder"
       ],
       0,
-      "9d858ed4bbe2c2eb053d8c26a065e584"
+      "35b4828e55b4788070f62a0b1c4ae3cc"
     ]
   ]
 ]

@@ -189,7 +189,7 @@ val lemma_whileFalse_total (b:ocmp) (c:code) (s0:vale_state) (sW:vale_state) (fW
     eval_code (While b c) s0 f1 s1
   )
 
-val lemma_whileMerge_total (c:code) (s0:vale_state) (f0:fuel) (sM:vale_state) (fM:fuel) (sN:vale_state) : Ghost (fN:fuel)
+val lemma_whileMerge_total (c:code) (s0:vale_state) (f0:fuel) (sM:vale_state) (fM:fuel) (sN:vale_state) : Ghost fuel
   (requires While? c /\ (
     let cond = While?.whileCond c in
     sN.vs_ok /\

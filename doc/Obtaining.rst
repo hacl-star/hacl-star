@@ -45,6 +45,14 @@ cross-compilers. The `dist/compact-msvc` distribution works with the Microsoft
 compilers, but we provide no build support (i.e. no Visual Studio project, no
 NMake-compatible makefile).
 
+.. note::
+
+  The ``gcc-compatible`` distribution also features OCaml bindings to our code.
+  These require a valid OCaml setup, including packages ctypes, ctypes-foreign
+  and bigstring, usually obtained via OPAM. You can easily disable building
+  these bindings by removing the ``lib_gen`` directory in
+  ``dist/gcc-compatible``.
+
 Integrating the code
 --------------------
 
@@ -82,7 +90,43 @@ verification-oriented projects in F* or as part of larger C
 developments.  In addition to these use cases, the library developers
 and other HACL* users have also developed bindings for other programming languages:
 
-- OCaml: In a development branch, we have an OCaml wrapper for the full EverCrypt API
-- WebAssembly: The HACL* library has been compiled to `WebAssembly <https://github.com/Inria-Prosecco/hacl-wasm>`_
+OCaml
+^^^^^
 
-Various users have also published Rust crates for HACL*, but these have not been vetted by the HACL maintainers.
+The KReMLin compiler auto-generates ``ocaml-ctypes`` bindings for HACL*. On top
+of these "raw" bindings, we add a high-level wrapper that uses functors, shares
+type signatures, performs run-time checks and offers a much more idiomatic API.
+
+The former can be installed by running ``make install-hacl-star-raw`` in
+``dist/gcc-compatible``. The latter can be installed by running ``dune build &&
+dune install`` in ``bindings/ocaml``.
+
+We expect these to be available in OPAM soon.
+
+JavaScript
+^^^^^^^^^^
+
+HACL* is compiled to WebAssembly via the WASM backend of KreMLin (see the
+Oakland'19 paper for details). We offer an idiomatic JavaScript API on top of
+HACL-WASM so that clients do not have to be aware of the KreMLin memory layout,
+calling convention, etc. This latter API is available as a
+`Node.js package <https://www.npmjs.com/package/hacl-wasm>`_.
+
+The `jsdoc` documentation of the package can be found `online
+<https://hacl-star.github.io/javascript_doc/>`_.  Please note that the API is
+asynchronous (it uses promises).
+
+Here is a small example of how to use the library (with Node.js) :
+
+.. code-block:: javascript
+
+  var hacl = require("hacl-wasm");
+  hacl.Curve25519.ecdh(new Uint8Array(32), new Uint8Array(32)).then(function (result) {
+    // Here result contains an Uint8Array of size 32 with the DH exchange result
+  });
+
+Rust
+^^^^
+
+Various users have also published Rust crates for HACL*, but these have not been
+vetted by the HACL maintainers.

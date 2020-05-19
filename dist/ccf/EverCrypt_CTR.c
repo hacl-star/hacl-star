@@ -93,8 +93,8 @@ uint8_t EverCrypt_CTR_xor8(uint8_t a, uint8_t b)
 Spec_Agile_Cipher_cipher_alg EverCrypt_CTR_alg_of_state(EverCrypt_CTR_state_s *s)
 {
   EverCrypt_CTR_state_s scrut = *s;
-  Spec_Cipher_Expansion_impl i1 = scrut.i;
-  return Spec_Cipher_Expansion_cipher_alg_of_impl(i1);
+  Spec_Cipher_Expansion_impl i = scrut.i;
+  return Spec_Cipher_Expansion_cipher_alg_of_impl(i);
 }
 
 static Spec_Cipher_Expansion_impl vale_impl_of_alg(Spec_Agile_Cipher_cipher_alg a)
@@ -121,7 +121,7 @@ EverCrypt_Error_error_code
 EverCrypt_CTR_create_in(
   Spec_Agile_Cipher_cipher_alg a,
   EverCrypt_CTR_state_s **dst,
-  uint8_t *k1,
+  uint8_t *k,
   uint8_t *iv,
   uint32_t iv_len,
   uint32_t c
@@ -131,21 +131,21 @@ EverCrypt_CTR_create_in(
   {
     case Spec_Agile_Cipher_AES128:
       {
-        bool has_aesni1 = EverCrypt_AutoConfig2_has_aesni();
-        bool has_pclmulqdq1 = EverCrypt_AutoConfig2_has_pclmulqdq();
-        bool has_avx1 = EverCrypt_AutoConfig2_has_avx();
-        bool has_sse1 = EverCrypt_AutoConfig2_has_sse();
+        bool has_aesni = EverCrypt_AutoConfig2_has_aesni();
+        bool has_pclmulqdq = EverCrypt_AutoConfig2_has_pclmulqdq();
+        bool has_avx = EverCrypt_AutoConfig2_has_avx();
+        bool has_sse = EverCrypt_AutoConfig2_has_sse();
         if (iv_len < (uint32_t)12U)
         {
           return EverCrypt_Error_InvalidIVLength;
         }
         #if EVERCRYPT_TARGETCONFIG_X64
-        if (has_aesni1 && has_pclmulqdq1 && has_avx1 && has_sse1)
+        if (has_aesni && has_pclmulqdq && has_avx && has_sse)
         {
           uint8_t *ek = KRML_HOST_CALLOC((uint32_t)304U, sizeof (uint8_t));
           uint8_t *keys_b = ek;
           uint8_t *hkeys_b = ek + (uint32_t)176U;
-          uint64_t scrut = aes128_key_expansion(k1, keys_b);
+          uint64_t scrut = aes128_key_expansion(k, keys_b);
           uint64_t scrut0 = aes128_keyhash_init(keys_b, hkeys_b);
           uint8_t *iv_ = KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint8_t));
           memcpy(iv_, iv, iv_len * sizeof (iv[0U]));
@@ -170,21 +170,21 @@ EverCrypt_CTR_create_in(
       }
     case Spec_Agile_Cipher_AES256:
       {
-        bool has_aesni1 = EverCrypt_AutoConfig2_has_aesni();
-        bool has_pclmulqdq1 = EverCrypt_AutoConfig2_has_pclmulqdq();
-        bool has_avx1 = EverCrypt_AutoConfig2_has_avx();
-        bool has_sse1 = EverCrypt_AutoConfig2_has_sse();
+        bool has_aesni = EverCrypt_AutoConfig2_has_aesni();
+        bool has_pclmulqdq = EverCrypt_AutoConfig2_has_pclmulqdq();
+        bool has_avx = EverCrypt_AutoConfig2_has_avx();
+        bool has_sse = EverCrypt_AutoConfig2_has_sse();
         if (iv_len < (uint32_t)12U)
         {
           return EverCrypt_Error_InvalidIVLength;
         }
         #if EVERCRYPT_TARGETCONFIG_X64
-        if (has_aesni1 && has_pclmulqdq1 && has_avx1 && has_sse1)
+        if (has_aesni && has_pclmulqdq && has_avx && has_sse)
         {
           uint8_t *ek = KRML_HOST_CALLOC((uint32_t)368U, sizeof (uint8_t));
           uint8_t *keys_b = ek;
           uint8_t *hkeys_b = ek + (uint32_t)240U;
-          uint64_t scrut = aes256_key_expansion(k1, keys_b);
+          uint64_t scrut = aes256_key_expansion(k, keys_b);
           uint64_t scrut0 = aes256_keyhash_init(keys_b, hkeys_b);
           uint8_t *iv_ = KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint8_t));
           memcpy(iv_, iv, iv_len * sizeof (iv[0U]));
@@ -210,7 +210,7 @@ EverCrypt_CTR_create_in(
     case Spec_Agile_Cipher_CHACHA20:
       {
         uint8_t *ek = KRML_HOST_CALLOC((uint32_t)32U, sizeof (uint8_t));
-        memcpy(ek, k1, (uint32_t)32U * sizeof (k1[0U]));
+        memcpy(ek, k, (uint32_t)32U * sizeof (k[0U]));
         KRML_CHECK_SIZE(sizeof (uint8_t), iv_len);
         uint8_t *iv_ = KRML_HOST_CALLOC(iv_len, sizeof (uint8_t));
         memcpy(iv_, iv, iv_len * sizeof (iv[0U]));
@@ -241,7 +241,7 @@ EverCrypt_CTR_create_in(
 void
 EverCrypt_CTR_init(
   EverCrypt_CTR_state_s *p,
-  uint8_t *k1,
+  uint8_t *k,
   uint8_t *iv,
   uint32_t iv_len,
   uint32_t c
@@ -250,29 +250,33 @@ EverCrypt_CTR_init(
   EverCrypt_CTR_state_s scrut0 = *p;
   uint8_t *ek = scrut0.xkey;
   uint8_t *iv_ = scrut0.iv;
-  Spec_Cipher_Expansion_impl i1 = scrut0.i;
+  Spec_Cipher_Expansion_impl i = scrut0.i;
   memcpy(iv_, iv, iv_len * sizeof (iv[0U]));
-  switch (i1)
+  switch (i)
   {
     case Spec_Cipher_Expansion_Vale_AES128:
       {
+        #if EVERCRYPT_TARGETCONFIG_X64
         uint8_t *keys_b = ek;
         uint8_t *hkeys_b = ek + (uint32_t)176U;
-        uint64_t scrut = aes128_key_expansion(k1, keys_b);
+        uint64_t scrut = aes128_key_expansion(k, keys_b);
         uint64_t scrut1 = aes128_keyhash_init(keys_b, hkeys_b);
+        #endif
         break;
       }
     case Spec_Cipher_Expansion_Vale_AES256:
       {
+        #if EVERCRYPT_TARGETCONFIG_X64
         uint8_t *keys_b = ek;
         uint8_t *hkeys_b = ek + (uint32_t)240U;
-        uint64_t scrut = aes256_key_expansion(k1, keys_b);
+        uint64_t scrut = aes256_key_expansion(k, keys_b);
         uint64_t scrut1 = aes256_keyhash_init(keys_b, hkeys_b);
+        #endif
         break;
       }
     case Spec_Cipher_Expansion_Hacl_CHACHA20:
       {
-        memcpy(ek, k1, (uint32_t)32U * sizeof (k1[0U]));
+        memcpy(ek, k, (uint32_t)32U * sizeof (k[0U]));
         break;
       }
     default:
@@ -281,30 +285,31 @@ EverCrypt_CTR_init(
         KRML_HOST_EXIT(253U);
       }
   }
-  *p = ((EverCrypt_CTR_state_s){ .i = i1, .iv = iv_, .iv_len = iv_len, .xkey = ek, .ctr = c });
+  *p = ((EverCrypt_CTR_state_s){ .i = i, .iv = iv_, .iv_len = iv_len, .xkey = ek, .ctr = c });
 }
 
 void EverCrypt_CTR_update_block(EverCrypt_CTR_state_s *p, uint8_t *dst, uint8_t *src)
 {
   EverCrypt_CTR_state_s scrut = *p;
-  Spec_Cipher_Expansion_impl i1 = scrut.i;
+  Spec_Cipher_Expansion_impl i = scrut.i;
   uint8_t *iv = scrut.iv;
   uint8_t *ek = scrut.xkey;
-  uint32_t c01 = scrut.ctr;
-  switch (i1)
+  uint32_t c0 = scrut.ctr;
+  switch (i)
   {
     case Spec_Cipher_Expansion_Vale_AES128:
       {
+        #if EVERCRYPT_TARGETCONFIG_X64
         EverCrypt_CTR_state_s scrut0 = *p;
-        uint32_t c02 = scrut0.ctr;
+        uint32_t c01 = scrut0.ctr;
         uint8_t *ek1 = scrut0.xkey;
         uint32_t iv_len1 = scrut0.iv_len;
         uint8_t *iv1 = scrut0.iv;
-        uint8_t ctr_block1[16U] = { 0U };
-        memcpy(ctr_block1, iv1, iv_len1 * sizeof (iv1[0U]));
-        uint128_t uu____0 = load128_be(ctr_block1);
-        uint128_t c = uu____0 + (uint128_t)(uint64_t)c02;
-        store128_le(ctr_block1, c);
+        uint8_t ctr_block[16U] = { 0U };
+        memcpy(ctr_block, iv1, iv_len1 * sizeof (iv1[0U]));
+        uint128_t uu____0 = load128_be(ctr_block);
+        uint128_t c = uu____0 + (uint128_t)(uint64_t)c01;
+        store128_le(ctr_block, c);
         uint8_t *uu____1 = ek1;
         uint8_t inout_b[16U] = { 0U };
         uint32_t num_blocks = (uint32_t)(uint64_t)16U / (uint32_t)16U;
@@ -321,12 +326,12 @@ void EverCrypt_CTR_update_block(EverCrypt_CTR_state_s *p, uint8_t *dst, uint8_t 
             out_b_,
             inout_b,
             uu____1,
-            ctr_block1,
+            ctr_block,
             (uint64_t)num_blocks);
         memcpy(dst + num_bytes_,
           inout_b,
           (uint32_t)(uint64_t)16U % (uint32_t)16U * sizeof (inout_b[0U]));
-        uint32_t c4 = c02 + (uint32_t)1U;
+        uint32_t c1 = c01 + (uint32_t)1U;
         *p
         =
           (
@@ -335,23 +340,25 @@ void EverCrypt_CTR_update_block(EverCrypt_CTR_state_s *p, uint8_t *dst, uint8_t 
               .iv = iv1,
               .iv_len = iv_len1,
               .xkey = ek1,
-              .ctr = c4
+              .ctr = c1
             }
           );
+        #endif
         break;
       }
     case Spec_Cipher_Expansion_Vale_AES256:
       {
+        #if EVERCRYPT_TARGETCONFIG_X64
         EverCrypt_CTR_state_s scrut0 = *p;
-        uint32_t c02 = scrut0.ctr;
+        uint32_t c01 = scrut0.ctr;
         uint8_t *ek1 = scrut0.xkey;
         uint32_t iv_len1 = scrut0.iv_len;
         uint8_t *iv1 = scrut0.iv;
-        uint8_t ctr_block1[16U] = { 0U };
-        memcpy(ctr_block1, iv1, iv_len1 * sizeof (iv1[0U]));
-        uint128_t uu____2 = load128_be(ctr_block1);
-        uint128_t c = uu____2 + (uint128_t)(uint64_t)c02;
-        store128_le(ctr_block1, c);
+        uint8_t ctr_block[16U] = { 0U };
+        memcpy(ctr_block, iv1, iv_len1 * sizeof (iv1[0U]));
+        uint128_t uu____2 = load128_be(ctr_block);
+        uint128_t c = uu____2 + (uint128_t)(uint64_t)c01;
+        store128_le(ctr_block, c);
         uint8_t *uu____3 = ek1;
         uint8_t inout_b[16U] = { 0U };
         uint32_t num_blocks = (uint32_t)(uint64_t)16U / (uint32_t)16U;
@@ -368,12 +375,12 @@ void EverCrypt_CTR_update_block(EverCrypt_CTR_state_s *p, uint8_t *dst, uint8_t 
             out_b_,
             inout_b,
             uu____3,
-            ctr_block1,
+            ctr_block,
             (uint64_t)num_blocks);
         memcpy(dst + num_bytes_,
           inout_b,
           (uint32_t)(uint64_t)16U % (uint32_t)16U * sizeof (inout_b[0U]));
-        uint32_t c4 = c02 + (uint32_t)1U;
+        uint32_t c1 = c01 + (uint32_t)1U;
         *p
         =
           (
@@ -382,16 +389,17 @@ void EverCrypt_CTR_update_block(EverCrypt_CTR_state_s *p, uint8_t *dst, uint8_t 
               .iv = iv1,
               .iv_len = iv_len1,
               .xkey = ek1,
-              .ctr = c4
+              .ctr = c1
             }
           );
+        #endif
         break;
       }
     case Spec_Cipher_Expansion_Hacl_CHACHA20:
       {
         uint32_t ctx[16U] = { 0U };
         Hacl_Impl_Chacha20_chacha20_init(ctx, ek, iv, (uint32_t)0U);
-        Hacl_Impl_Chacha20_chacha20_encrypt_block(ctx, dst, c01, src);
+        Hacl_Impl_Chacha20_chacha20_encrypt_block(ctx, dst, c0, src);
         break;
       }
     default:

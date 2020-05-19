@@ -2,6 +2,8 @@ open Ctypes
 module Bindings(F:Cstubs.FOREIGN) =
   struct
     open F
+    module Hacl_Spec_applied = (Hacl_Spec_bindings.Bindings)(Hacl_Spec_stubs)
+    open Hacl_Spec_applied
     let hacl_Hash_MD5_legacy_update_multi =
       foreign "Hacl_Hash_MD5_legacy_update_multi"
         ((ptr uint32_t) @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))
@@ -120,4 +122,16 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Hash_Core_SHA2_finish_512 =
       foreign "Hacl_Hash_Core_SHA2_finish_512"
         ((ptr uint64_t) @-> (ocaml_bytes @-> (returning void)))
+    let hacl_Hash_Definitions_word_len =
+      foreign "Hacl_Hash_Definitions_word_len"
+        (spec_Hash_Definitions_hash_alg @-> (returning uint32_t))
+    let hacl_Hash_Definitions_block_len =
+      foreign "Hacl_Hash_Definitions_block_len"
+        (spec_Hash_Definitions_hash_alg @-> (returning uint32_t))
+    let hacl_Hash_Definitions_hash_word_len =
+      foreign "Hacl_Hash_Definitions_hash_word_len"
+        (spec_Hash_Definitions_hash_alg @-> (returning uint32_t))
+    let hacl_Hash_Definitions_hash_len =
+      foreign "Hacl_Hash_Definitions_hash_len"
+        (spec_Hash_Definitions_hash_alg @-> (returning uint32_t))
   end

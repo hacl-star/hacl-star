@@ -1,0 +1,39 @@
+# Builds a source archive required for opam release in bindings/ocaml/archive
+# The gcc-compatible snapshot is packaged as `hacl-star-raw`
+# The OCaml bindings are packaged as `hacl-star`
+#
+# Before using, the version number needs to be set in
+# 	* bindings/ocaml/hacl-star.opam
+# 	* dist/gcc-compatible/hacl-star-raw.opam
+# 	* dist/gcc-compatible/META
+#
+# Once the archive is generated and checked in, it can be published using
+#   `opam publish https://github.com/project-everest/hacl-star/raw/master/bindings/ocaml/archive/hacl-star.XX.tar.gz`
+# This will generate a pull request in github.com/ocaml/opam-repository
+
+VERSION=$(subst version: ,,$(shell grep "^version: " ../bindings/ocaml/hacl-star.opam))
+ARCHIVE=$(subst VER,$(VERSION),hacl-star.VER.tar.gz)
+
+all: release-hacl-star
+
+prepare-raw:
+	rm -rf raw && mkdir -p raw
+	cp -r ../dist/gcc-compatible/* raw
+	cp -r ../dist/kremlin raw
+	sed -i 's/KREMLIN_HOME ?= ..\/kremlin/KREMLIN_HOME=kremlin/g' raw/Makefile
+	make -C raw clean
+	cd raw && rm -rf lib/*.cmx lib/*.cmi lib/*.o lib_gen/*.exe lib_gen/*.cmx lib_gen/*.cmi lib_gen/*.o libevercrypt.so ocamlevercrypt.* dllocamlevercrypt.so
+
+release-hacl-star: prepare-raw
+	rm -rf hacl-star && mkdir -p hacl-star
+	cp -r ../bindings/ocaml/* hacl-star
+	rm -rf hacl-star/archive
+	mv raw hacl-star/
+	mv hacl-star/raw/hacl-star-raw.opam hacl-star/
+	sed -i 's/make/make "-C" "raw"/g' hacl-star/hacl-star-raw.opam
+	sed -i 's/"\.\/configure"/"sh" "-exc" "cd raw \&\& \.\/configure"/g' hacl-star/hacl-star-raw.opam
+	cd hacl-star && dune clean
+	cd hacl-star && tar -czvf ../$(ARCHIVE) .
+
+clean:
+	rm -rf raw hacl-star

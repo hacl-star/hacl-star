@@ -13,10 +13,10 @@ let poly1305_padded_32 = Hacl.Impl.Chacha20Poly1305.PolyCore.poly1305_padded #M3
 
 [@CInline]
 private
-let poly1305_do_32 = chacha20poly1305_poly1305_do_higher #M32 poly1305_finish poly1305_init poly1305_padded_32
+let poly1305_do_32 = chacha20poly1305_poly1305_do_higher #M32 True poly1305_finish poly1305_init poly1305_padded_32
 
 let aead_encrypt : aead_encrypt_st M32 =
-  chacha20poly1305_aead_encrypt_higher #M32 poly1305_do_32 Hacl.Chacha20.chacha20_encrypt
+  chacha20poly1305_aead_encrypt_higher #M32 True poly1305_do_32 Hacl.Chacha20.chacha20_encrypt
 
 let aead_decrypt : aead_decrypt_st M32 =
-  chacha20poly1305_aead_decrypt_higher #M32 Hacl.Chacha20.chacha20_encrypt poly1305_do_32
+  chacha20poly1305_aead_decrypt_higher #M32 True Hacl.Chacha20.chacha20_encrypt poly1305_do_32

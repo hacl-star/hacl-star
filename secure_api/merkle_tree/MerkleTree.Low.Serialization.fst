@@ -440,15 +440,22 @@ let mt_serialize mt output sz =
   let ok, pos = serialize_hash ok (MT?.mroot mtv) output sz pos in
   let h9 = HST.get() in mt_safe_preserved mt (B.loc_buffer output) h8 h9;
   if ok then (FStar.Int.Cast.uint32_to_uint64 pos) else 0UL
+#pop-options
 
+#push-options "--z3rlimit 15 --initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
 val mt_deserialize: 
-  #hash_size:hash_size_t ->
-  rid:HST.erid -> input:const_uint8_p -> sz:uint64_t{CB.length input = U64.v sz} -> 
-  hash_spec:Ghost.erased(MTS.hash_fun_t #(U32.v hash_size)) -> hash_fun:hash_fun_t #hash_size #hash_spec 
+  #hsz:Ghost.erased hash_size_t ->
+  rid:HST.erid -> 
+  input:const_uint8_p -> 
+  sz:uint64_t{CB.length input = U64.v sz} -> 
+  hash_spec:Ghost.erased(MTS.hash_fun_t #(U32.v (Ghost.reveal hsz))) -> 
+  hash_fun:hash_fun_t #(Ghost.reveal hsz) #hash_spec
 -> HST.ST (B.pointer_or_null merkle_tree)
-  (requires (fun h0 -> CB.live h0 input /\ HS.disjoint rid (B.frameOf (CB.cast input))))
-  (ensures (fun h0 r h1 -> modifies B.loc_none h0 h1))
-let mt_deserialize #hash_size rid input sz hash_spec hash_fun =
+  (requires (fun h0 -> CB.live h0 input /\ 
+                       HS.disjoint rid (B.frameOf (CB.cast input))))
+  (ensures (fun h0 r h1 -> modifies B.loc_none h0 h1 /\
+                        (not (g_is_null r)) ==> MT?.hash_size (B.get h1 r 0) = Ghost.reveal hsz))
+let mt_deserialize #ghsz rid input sz hash_spec hash_fun =
   let sz = FStar.Int.Cast.uint64_to_uint32 sz in
   let hrid = HST.new_region rid in
   let hvrid = HST.new_region rid in
@@ -456,59 +463,60 @@ let mt_deserialize #hash_size rid input sz hash_spec hash_fun =
   let ok, pos, format_version = deserialize_uint8_t true input sz 0ul in
   let ok = ok && format_version = 1uy in
   let ok, pos, hsz = deserialize_uint32_t ok input sz pos in
-  let ok = ok && hsz = hash_size in
-  let ok, pos, offset = deserialize_offset_t ok input sz pos in
-  let ok, pos, i = deserialize_index_t ok input sz pos in
-  let ok, pos, j = deserialize_index_t ok input sz pos in
-  let ok, pos, hs = deserialize_hash_vv #hash_size ok input sz hvvrid pos in
-  let ok, pos, rhs_ok = deserialize_bool ok input sz pos in
-  let ok, pos, rhs = deserialize_hash_vec #hash_size ok input sz hvrid pos in
-  let ok, pos, mroot = deserialize_hash #hash_size ok input sz hrid pos in
-  begin
-    if not ok ||
-       hash_size <> hash_size ||
-       not (merkle_tree_conditions #hash_size offset i j hs rhs_ok rhs mroot)
-    then B.null #merkle_tree
-    else B.malloc rid (MT hash_size offset i j hs rhs_ok rhs mroot hash_spec hash_fun) 1ul
+  if hsz = 0ul then B.null #merkle_tree else begin
+    let ok, pos, offset = deserialize_offset_t ok input sz pos in
+    let ok, pos, i = deserialize_index_t ok input sz pos in
+    let ok, pos, j = deserialize_index_t ok input sz pos in
+    let ok, pos, hs = deserialize_hash_vv #hsz ok input sz hvvrid pos in
+    let ok, pos, rhs_ok = deserialize_bool ok input sz pos in
+    let ok, pos, rhs = deserialize_hash_vec #hsz ok input sz hvrid pos in
+    let ok, pos, mroot = deserialize_hash #hsz ok input sz hrid pos in
+    begin
+      if not ok ||
+        not (merkle_tree_conditions #hsz offset i j hs rhs_ok rhs mroot)
+      then B.null #merkle_tree
+      else begin
+        assume (hsz = Ghost.reveal ghsz); // We trust the user to provide a suitable hash_fun.
+        B.malloc rid (MT hsz offset i j hs rhs_ok rhs mroot hash_spec hash_fun) 1ul
+      end
+    end
   end
 
-val mt_serialize_path: #hsz:Ghost.erased hash_size_t -> p:const_path_p #hsz -> mt:const_mt_p -> output:uint8_p -> sz:uint64_t -> HST.ST uint64_t
+val mt_serialize_path: #hsz:Ghost.erased hash_size_t -> p:const_path_p -> output:uint8_p -> sz:uint64_t -> HST.ST uint64_t
   (requires (fun h0 -> let ncp = CB.cast p in
-                       let mt = CB.cast mt in
-                       let mtv = B.get h0 mt 0 in
-                       let phv:hash_vec = B.get h0 ncp 0 in
-                       MT?.hash_size mtv = Ghost.reveal hsz /\
-                       path_safe h0 (B.frameOf mt) ncp /\ RV.rv_inv h0 phv /\
-                       mt_safe h0 mt /\
+                       let phv = B.get h0 ncp 0 in
+                       Path?.hash_size phv = Ghost.reveal hsz /\
+                       path_safe h0 (B.frameOf (CB.cast p)) ncp /\ RV.rv_inv #(hash #hsz) #hash_size_t #(hreg hsz) h0 (Path?.hashes phv) /\
                        B.live h0 output /\ B.length output = U64.v sz /\
-                       HS.disjoint (B.frameOf output) (B.frameOf ncp) /\
-                       HH.disjoint (B.frameOf mt) (B.frameOf ncp)))
-  (ensures (fun h0 _ h1 -> path_safe h1 (B.frameOf (CB.cast mt)) (CB.cast p) /\
+                       HS.disjoint (B.frameOf output) (B.frameOf ncp)))
+  (ensures (fun h0 _ h1 -> path_safe h1 (B.frameOf (CB.cast p)) (CB.cast p) /\
                            modifies (B.loc_buffer output) h0 h1))
-let mt_serialize_path #hsz p mt output sz =
-  let hsz = MT?.hash_size !*(CB.cast mt) in
+let mt_serialize_path #hsz p output sz =
+  let hsz = Path?.hash_size !*(CB.cast p) in
   let sz = FStar.Int.Cast.uint64_to_uint32 sz in
   let ncp = CB.cast p in
   let h0 = HST.get() in
   let ok, pos = serialize_uint32_t true hsz output sz 0ul in
   let h1 = HST.get() in
-  let ok, pos = serialize_hash_vec #hsz ok !*ncp output sz pos in
+  let ncpd = !*ncp in
+  let ok, pos = serialize_hash_vec #hsz ok (Path?.hashes ncpd) output sz pos in
   if ok then (FStar.Int.Cast.uint32_to_uint64 pos) else 0UL
 
-val mt_deserialize_path: 
-  #hsz:hash_size_t ->
+val mt_deserialize_path:
   rid:HST.erid -> input:const_uint8_p -> sz:uint64_t{CB.length input = U64.v sz}
--> HST.ST (B.pointer_or_null (path #hsz))
+-> HST.ST (B.pointer_or_null path)
   (requires (fun h0 -> CB.live h0 input /\ HS.disjoint rid (B.frameOf (CB.cast input))))
   (ensures (fun h0 r h1 -> modifies B.loc_none h0 h1))
-let mt_deserialize_path #hsz rid input sz =
+let mt_deserialize_path rid input sz =
   let sz = FStar.Int.Cast.uint64_to_uint32 sz in
   let hvvrid = HST.new_region rid in
   let ok, pos, hash_size = deserialize_uint32_t true input sz 0ul in
-  let ok, pos, hs = deserialize_hash_vec ok input sz hvvrid pos in
-  begin
-    if not ok || hash_size <> hsz
-    then B.null #path
-    else B.malloc rid hs 1ul
-  end
+  if not ok || hash_size = 0ul then B.null #path 
+  else 
+    let ok, pos, hs = deserialize_hash_vec #hash_size ok input sz hvvrid pos in
+    begin
+      if not ok
+      then (B.null #path)
+      else (B.malloc rid (Path hash_size hs) 1ul)
+    end 
 #pop-options

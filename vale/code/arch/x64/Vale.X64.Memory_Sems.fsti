@@ -21,7 +21,7 @@ val lemma_same_domains (h:vale_heap) (m1:S.machine_heap) (m2:S.machine_heap) : L
 
 val get_heap (h:vale_heap) : GTot (m:S.machine_heap{same_domain h m})
 
-val upd_heap (h:vale_heap) (m:S.machine_heap{is_machine_heap_update (get_heap h) m}) : GTot (h':vale_heap)
+val upd_heap (h:vale_heap) (m:S.machine_heap{is_machine_heap_update (get_heap h) m}) : GTot vale_heap
 
 //val lemma_upd_get_heap (h:vale_heap) : Lemma (upd_heap h (get_heap h) == h)
 //  [SMTPat (upd_heap h (get_heap h))]

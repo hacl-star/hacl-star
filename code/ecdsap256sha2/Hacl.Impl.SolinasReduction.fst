@@ -125,17 +125,15 @@ let load_buffer a0 a1 a2 a3 o =
 val upl_zer_buffer:
     c0: uint32 -> c1: uint32 -> c2: uint32 -> c3: uint32
   -> c4: uint32 -> c5: uint32 -> c6: uint32 -> c7: uint32
-  -> temp: lbuffer uint64 (size 4)
   -> o: lbuffer uint64 (size 4) ->
   Stack unit
-    (requires fun h ->
-      live h o /\ live h temp /\ disjoint o temp)
+    (requires fun h -> live h o)
     (ensures fun h0 _ h1 ->
-      modifies (loc o |+| loc temp) h0 h1 /\
+      modifies (loc o) h0 h1 /\
       as_nat h1 o == (v c0 + v c1 * pow2 (1 * 32) + v c2 * pow2 (2 * 32) + v c3 * pow2 (3 * 32) + v c4 * pow2 (4 * 32) + v c5 * pow2 (5 * 32) + v  c6 * pow2 (6 * 32) + v c7 * pow2 (7 * 32)) % prime256
    )
 
-let upl_zer_buffer c0 c1 c2 c3 c4 c5 c6 c7 temp o =
+let upl_zer_buffer c0 c1 c2 c3 c4 c5 c6 c7 o =
     let b0 = store_high_low_u c1 c0 in
     let b1 = store_high_low_u c3 c2 in
     let b2 = store_high_low_u c5 c4 in
@@ -151,23 +149,22 @@ let upl_zer_buffer c0 c1 c2 c3 c4 c5 c6 c7 temp o =
     assert(v b2 = v c5 * pow2 32 + v c4);
     assert(v b3 = v c7 * pow2 32 + v c6);
 
-    load_buffer b0 b1 b2 b3 temp;
-    reduction_prime_2prime_impl temp o;
+    load_buffer b0 b1 b2 b3 o;
+    reduction_prime_2prime_impl o o;
     let h2 = ST.get() in
     assert(as_nat h2 o = (v c1 * pow2 32 + v c0 + v c3 * pow2 (3 * 32) + v c2 * pow2 (2 * 32) + v c5 * pow2 (32 * 5) + v c4 * pow2 (32 * 4) + v c7 * pow2 (32 * 7) + v c6 * pow2 (32 * 6)) % prime256)
 
 
 val upl_fir_buffer: c11: uint32 -> c12: uint32 -> c13: uint32 -> c14: uint32 -> c15: uint32
-  -> temp: lbuffer uint64 (size 4)
   -> o: lbuffer uint64 (size 4) ->
   Stack unit
-    (requires fun h -> live h o /\ live h temp /\ disjoint o temp)
+    (requires fun h -> live h o)
     (ensures fun h0 _ h1 ->
-      modifies (loc o |+| loc temp) h0 h1 /\
+      modifies (loc o) h0 h1 /\
       as_nat h1 o == (v c11 * pow2 (3 * 32) + v c12 * pow2 (4 * 32) + v c13 * pow2 (5 * 32) + v c14 * pow2 (6 * 32) + v c15 * pow2 (7 * 32)) % prime256
     )
 
-let upl_fir_buffer c11 c12 c13 c14 c15 temp o =
+let upl_fir_buffer c11 c12 c13 c14 c15 o =
       assert_norm (pow2 (1 * 32) * pow2 (2 * 32) = pow2 (3 * 32));
       assert_norm (pow2 (2 * 32) * pow2 (2 * 32) = pow2 (4 * 32));
       assert_norm (pow2 (3 * 32) * pow2 (2 * 32) = pow2 (5 * 32));
@@ -177,21 +174,20 @@ let upl_fir_buffer c11 c12 c13 c14 c15 temp o =
   let b1 = store_high_low_u c11 (u32 0) in
   let b2 = store_high_low_u c13 c12 in
   let b3 = store_high_low_u c15 c14 in
-  load_buffer b0 b1 b2 b3 temp;
-  reduction_prime_2prime_impl temp o
+  load_buffer b0 b1 b2 b3 o;
+  reduction_prime_2prime_impl o o
 
 
 val upl_sec_buffer: c12: uint32 -> c13: uint32 -> c14: uint32 -> c15: uint32
-  -> temp: lbuffer uint64 (size 4)
   -> o: lbuffer uint64 (size 4) ->
   Stack unit
     (requires fun h -> live h o)
     (ensures fun h0 _ h1 ->
-      modifies (loc o |+| loc temp) h0 h1 /\
+      modifies (loc o) h0 h1 /\
       as_nat h1 o == (v c12 * pow2 (3 * 32) + v c13 * pow2 (4 * 32) + v c14 * pow2 (5 * 32) + v c15 * pow2 (6 * 32)) % prime /\ as_nat h1 o < prime
     )
 
-let upl_sec_buffer c12 c13 c14 c15 temp o =
+let upl_sec_buffer c12 c13 c14 c15 o =
       assert_norm (pow2 (1 * 32) * pow2 (2 * 32) = pow2 (3 * 32));
       assert_norm (pow2 (2 * 32) * pow2 (2 * 32) = pow2 (4 * 32));
       assert_norm (pow2 (3 * 32) * pow2 (2 * 32) = pow2 (5 * 32));
@@ -208,14 +204,13 @@ let upl_sec_buffer c12 c13 c14 c15 temp o =
 
 
 val upl_thi_buffer: c8: uint32 -> c9: uint32 -> c10: uint32 -> c14: uint32 -> c15: uint32
-  -> temp: lbuffer uint64 (size 4)
   -> o: lbuffer uint64 (size 4) ->
   Stack unit
- (requires fun h -> live h o /\ live h temp /\ disjoint o temp)
- (ensures fun h0 _ h1 -> modifies2 o temp h0 h1 /\
+ (requires fun h -> live h o)
+ (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\
       as_nat h1 o == (v c8 + v c9 * pow2 32 + v c10 * pow2 (2 * 32) +  v c14 * pow2 (6 * 32) + v c15 * pow2 (7 * 32)) % prime256)
 
-let upl_thi_buffer c8 c9 c10 c14 c15 temp o =
+let upl_thi_buffer c8 c9 c10 c14 c15 o =
    assert_norm (pow2 (1 * 32) * pow2 (2 * 32) = pow2 (3 * 32));
    assert_norm (pow2 (2 * 32) * pow2 (2 * 32) = pow2 (4 * 32));
    assert_norm (pow2 (3 * 32) * pow2 (2 * 32) = pow2 (5 * 32));
@@ -225,20 +220,18 @@ let upl_thi_buffer c8 c9 c10 c14 c15 temp o =
    let b1 = store_high_low_u (u32 0) c10 in
    let b2 = u64 0 in
    let b3 = store_high_low_u c15 c14 in
-   load_buffer b0 b1 b2 b3 temp;
-   reduction_prime_2prime_impl temp o
+   load_buffer b0 b1 b2 b3 o;
+   reduction_prime_2prime_impl o o
 
 
 val upl_for_buffer: c8: uint32 -> c9: uint32 -> c10: uint32 -> c11: uint32 -> c13: uint32 ->
-  c14: uint32 -> c15: uint32 ->
-  temp: lbuffer uint64 (size 4)
-  -> o: lbuffer uint64 (size 4) ->
+  c14: uint32 -> c15: uint32-> o: lbuffer uint64 (size 4) ->
   Stack unit
-    (requires fun h -> live h o /\ live h temp /\ disjoint o temp)
-    (ensures fun h0 _ h1 -> modifies2 o temp h0 h1 /\
+    (requires fun h -> live h o)
+    (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\
         as_nat h1 o == (v c9 + v c10 * pow2 32 + v c11 * pow2 (2 * 32) + v c13 * pow2 (3 * 32) + v c14 * pow2 (4 * 32) + v c15 * pow2 (5 * 32) + v c13 * pow2 (6 * 32) +  v c8 * pow2 (7 * 32)) % prime256)
 
-let upl_for_buffer c8 c9 c10 c11 c13 c14 c15 temp o =
+let upl_for_buffer c8 c9 c10 c11 c13 c14 c15 o =
   assert_norm (pow2 (1 * 32) * pow2 (2 * 32) = pow2 (3 * 32));
   assert_norm (pow2 (2 * 32) * pow2 (2 * 32) = pow2 (4 * 32));
   assert_norm (pow2 (3 * 32) * pow2 (2 * 32) = pow2 (5 * 32));
@@ -248,19 +241,18 @@ let upl_for_buffer c8 c9 c10 c11 c13 c14 c15 temp o =
   let b1 = store_high_low_u c13 c11 in
   let b2 = store_high_low_u c15 c14 in
   let b3 = store_high_low_u c8 c13 in
-  load_buffer b0 b1 b2 b3 temp;
-  reduction_prime_2prime_impl temp o
+  load_buffer b0 b1 b2 b3 o;
+  reduction_prime_2prime_impl o o
 
 
 val upl_fif_buffer: c8: uint32 -> c10: uint32 -> c11: uint32 -> c12: uint32 -> c13: uint32
-  -> temp: lbuffer uint64 (size 4)
   -> o: lbuffer uint64 (size 4) ->
   Stack unit
-    (requires fun h -> live h o /\ live h temp /\ disjoint o temp)
-    (ensures fun h0 _ h1 -> modifies2 o temp h0 h1 /\
+    (requires fun h -> live h o)
+    (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\
     as_nat h1 o == (v c11 + v c12 * pow2 32 + v c13 * pow2 (2 * 32) + v c8 * pow2 (6 * 32) + v c10 * pow2 (7 * 32)) % prime256)
 
-let upl_fif_buffer c8 c10 c11 c12 c13 temp o =
+let upl_fif_buffer c8 c10 c11 c12 c13 o =
      assert_norm (pow2 (1 * 32) * pow2 (2 * 32) = pow2 (3 * 32));
      assert_norm (pow2 (2 * 32) * pow2 (2 * 32) = pow2 (4 * 32));
      assert_norm (pow2 (3 * 32) * pow2 (2 * 32) = pow2 (5 * 32));
@@ -270,20 +262,19 @@ let upl_fif_buffer c8 c10 c11 c12 c13 temp o =
     let b1 = store_high_low_u (u32 0) c13 in
     let b2 = u64 0 in
     let b3 = store_high_low_u c10 c8 in
-    load_buffer b0 b1 b2 b3 temp;
-    reduction_prime_2prime_impl temp o
+    load_buffer b0 b1 b2 b3 o;
+    reduction_prime_2prime_impl o o
 
 
-val upl_six_buffer: c9: uint32 -> c11: uint32 -> c12: uint32 -> c13: uint32 -> c14: uint32 -> c15: uint32
-  -> temp: lbuffer uint64 (size 4)
-  -> o: lbuffer uint64 (size 4) ->
+val upl_six_buffer: c9: uint32 -> c11: uint32 -> c12: uint32 -> c13: uint32 -> c14: uint32 -> c15: uint32-> 
+  o: lbuffer uint64 (size 4) ->
   Stack unit
-    (requires fun h -> live h o /\ live h temp /\ disjoint o temp)
-    (ensures fun h0 _ h1 -> modifies2 o temp h0 h1 /\ as_nat h1 o == (
+    (requires fun h -> live h o)
+    (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\ as_nat h1 o == (
     v c12 + v c13 * pow2 32 + v c14 * pow2 (2 * 32) + v c15 * pow2 (3 * 32) +
           v c9 * pow2 (6 * 32) + v c11 * pow2 (7 * 32)) % prime256)
 
-let upl_six_buffer c9 c11 c12 c13 c14 c15 temp o =
+let upl_six_buffer c9 c11 c12 c13 c14 c15 o =
   assert_norm (pow2 (1 * 32) * pow2 (2 * 32) = pow2 (3 * 32));
   assert_norm (pow2 (2 * 32) * pow2 (2 * 32) = pow2 (4 * 32));
   assert_norm (pow2 (3 * 32) * pow2 (2 * 32) = pow2 (5 * 32));
@@ -293,20 +284,19 @@ let upl_six_buffer c9 c11 c12 c13 c14 c15 temp o =
     let b1 = store_high_low_u c15 c14 in
     let b2 = u64 0 in
     let b3 = store_high_low_u c11 c9 in
-    load_buffer b0 b1 b2 b3 temp;
-    reduction_prime_2prime_impl temp o
+    load_buffer b0 b1 b2 b3 o;
+    reduction_prime_2prime_impl o o
 
 
 val upl_sev_buffer: c8: uint32 -> c9: uint32 -> c10: uint32 -> c12: uint32 -> c13: uint32 ->
   c14: uint32 -> c15: uint32
-  -> temp: lbuffer uint64 (size 4)
   -> o: lbuffer uint64 (size 4) ->
   Stack unit
-    (requires fun h -> live h o /\ live h temp /\ disjoint o temp)
-      (ensures fun h0 _ h1 -> modifies2 o temp h0 h1 /\
+    (requires fun h -> live h o)
+      (ensures fun h0 _ h1 -> modifies (loc o)  h0 h1 /\
         as_nat h1 o == (v c13 + v c14 * pow2 32 + v c15 * pow2 (2 * 32) + v c8 * pow2 (3 * 32) +  v c9 * pow2 (4 * 32) + v c10 * pow2 (5 * 32) + v c12 * pow2 (7 * 32)) % prime256)
 
-let upl_sev_buffer c8 c9 c10 c12 c13 c14 c15 temp o =
+let upl_sev_buffer c8 c9 c10 c12 c13 c14 c15 o =
   assert_norm (pow2 (1 * 32) * pow2 (2 * 32) = pow2 (3 * 32));
   assert_norm (pow2 (2 * 32) * pow2 (2 * 32) = pow2 (4 * 32));
   assert_norm (pow2 (3 * 32) * pow2 (2 * 32) = pow2 (5 * 32));
@@ -316,19 +306,18 @@ let upl_sev_buffer c8 c9 c10 c12 c13 c14 c15 temp o =
     let b1 = store_high_low_u c8 c15 in
     let b2 = store_high_low_u c10 c9 in
     let b3 = store_high_low_u c12 (u32 0) in
-    load_buffer b0 b1 b2 b3 temp;
-    reduction_prime_2prime_impl temp o
+    load_buffer b0 b1 b2 b3 o;
+    reduction_prime_2prime_impl o o
 
 
 val upl_eig_buffer: c9: uint32 -> c10: uint32 -> c11: uint32 -> c12: uint32 -> c13: uint32 ->
   c14: uint32 -> c15: uint32
-  -> temp: lbuffer uint64 (size 4)
   -> o: lbuffer uint64 (size 4) ->
   Stack unit
-    (requires fun h -> live h o /\ live h temp /\ disjoint o temp)
-    (ensures fun h0 _ h1 -> modifies2 o temp h0 h1 /\ as_nat h1 o == (v c14 + v c15 * pow2 32 + v c9 * pow2 (3 * 32) + v c10 * pow2 (4 * 32) + v c11 * pow2 (5 * 32) + v c13 * pow2 (7 * 32)) % prime256)
+    (requires fun h -> live h o)
+    (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\ as_nat h1 o == (v c14 + v c15 * pow2 32 + v c9 * pow2 (3 * 32) + v c10 * pow2 (4 * 32) + v c11 * pow2 (5 * 32) + v c13 * pow2 (7 * 32)) % prime256)
 
-let upl_eig_buffer c9 c10 c11 c12 c13 c14 c15 temp o =
+let upl_eig_buffer c9 c10 c11 c12 c13 c14 c15 o =
   assert_norm (pow2 (1 * 32) * pow2 (2 * 32) = pow2 (3 * 32));
   assert_norm (pow2 (2 * 32) * pow2 (2 * 32) = pow2 (4 * 32));
   assert_norm (pow2 (3 * 32) * pow2 (2 * 32) = pow2 (5 * 32));
@@ -338,8 +327,8 @@ let upl_eig_buffer c9 c10 c11 c12 c13 c14 c15 temp o =
     let b1 = store_high_low_u c9 (u32 0) in
     let b2 = store_high_low_u c11 c10 in
     let b3 = store_high_low_u c13 (u32 0) in
-    load_buffer b0 b1 b2 b3 temp;
-    reduction_prime_2prime_impl temp o
+    load_buffer b0 b1 b2 b3 o;
+    reduction_prime_2prime_impl o o
 
 
 inline_for_extraction noextract
@@ -370,9 +359,7 @@ val solinas_reduction_upload: c0: uint32 -> c1: uint32 -> c2: uint32 -> c3: uint
     ))
 
 
-let solinas_reduction_upload c0 c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 c12 c13 c14 c15 tempBuffer  =
-  push_frame();
-    let redBuffer = create (size 4) (u64 0) in
+let solinas_reduction_upload c0 c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 c12 c13 c14 c15 tempBuffer =
     let t0 = sub tempBuffer (size 0) (size 4) in
     let t1 = sub tempBuffer (size 4) (size 4) in
     let t2 = sub tempBuffer (size 8) (size 4) in
@@ -382,16 +369,15 @@ let solinas_reduction_upload c0 c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 c12 c13 c14 c
     let t6 = sub tempBuffer (size 24) (size 4) in
     let t7 = sub tempBuffer (size 28) (size 4) in
     let t8 = sub tempBuffer (size 32) (size 4) in
-    upl_zer_buffer c0 c1 c2 c3 c4 c5 c6 c7 redBuffer t0;
-    upl_fir_buffer c11 c12 c13 c14 c15 redBuffer t1;
-    upl_sec_buffer c12 c13 c14 c15 redBuffer t2;
-    upl_thi_buffer c8 c9 c10 c14 c15 redBuffer  t3;
-    upl_for_buffer c8 c9 c10 c11 c13 c14 c15 redBuffer t4;
-    upl_fif_buffer c8 c10 c11 c12 c13 redBuffer t5;
-    upl_six_buffer c9 c11 c12 c13 c14 c15 redBuffer  t6;
-    upl_sev_buffer c8 c9 c10 c12 c13 c14 c15 redBuffer t7;
-    upl_eig_buffer c9 c10 c11 c12 c13 c14 c15 redBuffer t8;
-  pop_frame()
+    upl_zer_buffer c0 c1 c2 c3 c4 c5 c6 c7 t0;
+    upl_fir_buffer c11 c12 c13 c14 c15 t1;
+    upl_sec_buffer c12 c13 c14 c15 t2;
+    upl_thi_buffer c8 c9 c10 c14 c15  t3;
+    upl_for_buffer c8 c9 c10 c11 c13 c14 c15 t4;
+    upl_fif_buffer c8 c10 c11 c12 c13 t5;
+    upl_six_buffer c9 c11 c12 c13 c14 c15 t6;
+    upl_sev_buffer c8 c9 c10 c12 c13 c14 c15 t7;
+    upl_eig_buffer c9 c10 c11 c12 c13 c14 c15 t8
 
 
 inline_for_extraction noextract

@@ -468,6 +468,23 @@ procedure Cpuid_Rdrand()
     cpuid_features();
 }
 
+procedure Cpuid_Avx512()
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_Cpuid))}
+    requires
+        rax = 7;
+        rcx = 0;
+    modifies rax; rbx; rcx; rdx;
+    ensures
+      (iand64(rbx, 0x10000) > 0) == avx512f_enabled;
+      (iand64(rbx, 0x20000) > 0) == avx512dq_enabled;
+      (iand64(rbx, 0x40000000) > 0) == avx512bw_enabled;
+      (iand64(rbx, 0x80000000) > 0) == avx512vl_enabled;
+{
+    cpuid_features();
+}
+
 procedure Nat64Equal(out dst:reg_opr64, inout src:reg_opr64)
     {:public}
     {:quick exportOnly}

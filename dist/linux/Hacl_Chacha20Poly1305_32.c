@@ -26,14 +26,14 @@
 
 static inline void poly1305_padded_32(u64 *ctx, u32 len, u8 *text)
 {
-  u32 n1 = len / (u32)16U;
+  u32 n = len / (u32)16U;
   u32 r = len % (u32)16U;
   u8 *blocks = text;
-  u8 *rem1 = text + n1 * (u32)16U;
+  u8 *rem = text + n * (u32)16U;
   u64 *pre0 = ctx + (u32)5U;
   u64 *acc0 = ctx;
-  u32 nb = n1 * (u32)16U / (u32)16U;
-  u32 rem2 = n1 * (u32)16U % (u32)16U;
+  u32 nb = n * (u32)16U / (u32)16U;
+  u32 rem1 = n * (u32)16U % (u32)16U;
   {
     u32 i;
     for (i = (u32)0U; i < nb; i++)
@@ -123,29 +123,29 @@ static inline void poly1305_padded_32(u64 *ctx, u32 len, u8 *text)
           u64 t2 = a26;
           u64 t3 = a36;
           u64 t4 = a46;
-          u64 mask261 = (u64)0x3ffffffU;
+          u64 mask26 = (u64)0x3ffffffU;
           u64 z0 = t0 >> (u32)26U;
           u64 z1 = t3 >> (u32)26U;
-          u64 x0 = t0 & mask261;
-          u64 x3 = t3 & mask261;
+          u64 x0 = t0 & mask26;
+          u64 x3 = t3 & mask26;
           u64 x1 = t1 + z0;
           u64 x4 = t4 + z1;
           u64 z01 = x1 >> (u32)26U;
           u64 z11 = x4 >> (u32)26U;
           u64 t = z11 << (u32)2U;
           u64 z12 = z11 + t;
-          u64 x11 = x1 & mask261;
-          u64 x41 = x4 & mask261;
+          u64 x11 = x1 & mask26;
+          u64 x41 = x4 & mask26;
           u64 x2 = t2 + z01;
           u64 x01 = x0 + z12;
           u64 z02 = x2 >> (u32)26U;
           u64 z13 = x01 >> (u32)26U;
-          u64 x21 = x2 & mask261;
-          u64 x02 = x01 & mask261;
+          u64 x21 = x2 & mask26;
+          u64 x02 = x01 & mask26;
           u64 x31 = x3 + z02;
           u64 x12 = x11 + z13;
           u64 z03 = x31 >> (u32)26U;
-          u64 x32 = x31 & mask261;
+          u64 x32 = x31 & mask26;
           u64 x42 = x41 + z03;
           u64 o0 = x02;
           u64 o1 = x12;
@@ -161,12 +161,12 @@ static inline void poly1305_padded_32(u64 *ctx, u32 len, u8 *text)
       }
     }
   }
-  if (rem2 > (u32)0U)
+  if (rem1 > (u32)0U)
   {
-    u8 *last1 = blocks + nb * (u32)16U;
+    u8 *last = blocks + nb * (u32)16U;
     u64 e[5U] = { 0U };
     u8 tmp[16U] = { 0U };
-    memcpy(tmp, last1, rem2 * sizeof (last1[0U]));
+    memcpy(tmp, last, rem1 * sizeof (last[0U]));
     {
       u64 u0 = load64_le(tmp);
       u64 lo = u0;
@@ -190,10 +190,10 @@ static inline void poly1305_padded_32(u64 *ctx, u32 len, u8 *text)
       e[3U] = f3;
       e[4U] = f4;
       {
-        u64 b = (u64)1U << rem2 * (u32)8U % (u32)26U;
+        u64 b = (u64)1U << rem1 * (u32)8U % (u32)26U;
         u64 mask = b;
-        u64 fi = e[rem2 * (u32)8U / (u32)26U];
-        e[rem2 * (u32)8U / (u32)26U] = fi | mask;
+        u64 fi = e[rem1 * (u32)8U / (u32)26U];
+        e[rem1 * (u32)8U / (u32)26U] = fi | mask;
         {
           u64 *r1 = pre0;
           u64 *r5 = pre0 + (u32)5U;
@@ -251,29 +251,29 @@ static inline void poly1305_padded_32(u64 *ctx, u32 len, u8 *text)
           u64 t2 = a26;
           u64 t3 = a36;
           u64 t4 = a46;
-          u64 mask261 = (u64)0x3ffffffU;
+          u64 mask26 = (u64)0x3ffffffU;
           u64 z0 = t0 >> (u32)26U;
           u64 z1 = t3 >> (u32)26U;
-          u64 x0 = t0 & mask261;
-          u64 x3 = t3 & mask261;
+          u64 x0 = t0 & mask26;
+          u64 x3 = t3 & mask26;
           u64 x1 = t1 + z0;
           u64 x4 = t4 + z1;
           u64 z01 = x1 >> (u32)26U;
           u64 z11 = x4 >> (u32)26U;
           u64 t = z11 << (u32)2U;
           u64 z12 = z11 + t;
-          u64 x11 = x1 & mask261;
-          u64 x41 = x4 & mask261;
+          u64 x11 = x1 & mask26;
+          u64 x41 = x4 & mask26;
           u64 x2 = t2 + z01;
           u64 x01 = x0 + z12;
           u64 z02 = x2 >> (u32)26U;
           u64 z13 = x01 >> (u32)26U;
-          u64 x21 = x2 & mask261;
-          u64 x02 = x01 & mask261;
+          u64 x21 = x2 & mask26;
+          u64 x02 = x01 & mask26;
           u64 x31 = x3 + z02;
           u64 x12 = x11 + z13;
           u64 z03 = x31 >> (u32)26U;
-          u64 x32 = x31 & mask261;
+          u64 x32 = x31 & mask26;
           u64 x42 = x41 + z03;
           u64 o0 = x02;
           u64 o1 = x12;
@@ -291,7 +291,7 @@ static inline void poly1305_padded_32(u64 *ctx, u32 len, u8 *text)
   }
   {
     u8 tmp[16U] = { 0U };
-    memcpy(tmp, rem1, r * sizeof (rem1[0U]));
+    memcpy(tmp, rem, r * sizeof (rem[0U]));
     if (r > (u32)0U)
     {
       u64 *pre = ctx + (u32)5U;
@@ -372,7 +372,7 @@ static inline void poly1305_padded_32(u64 *ctx, u32 len, u8 *text)
       u64 t2;
       u64 t3;
       u64 t4;
-      u64 mask261;
+      u64 mask26;
       u64 z0;
       u64 z1;
       u64 x0;
@@ -466,29 +466,29 @@ static inline void poly1305_padded_32(u64 *ctx, u32 len, u8 *text)
       t2 = a26;
       t3 = a36;
       t4 = a46;
-      mask261 = (u64)0x3ffffffU;
+      mask26 = (u64)0x3ffffffU;
       z0 = t0 >> (u32)26U;
       z1 = t3 >> (u32)26U;
-      x0 = t0 & mask261;
-      x3 = t3 & mask261;
+      x0 = t0 & mask26;
+      x3 = t3 & mask26;
       x1 = t1 + z0;
       x4 = t4 + z1;
       z01 = x1 >> (u32)26U;
       z11 = x4 >> (u32)26U;
       t = z11 << (u32)2U;
       z12 = z11 + t;
-      x11 = x1 & mask261;
-      x41 = x4 & mask261;
+      x11 = x1 & mask26;
+      x41 = x4 & mask26;
       x2 = t2 + z01;
       x01 = x0 + z12;
       z02 = x2 >> (u32)26U;
       z13 = x01 >> (u32)26U;
-      x21 = x2 & mask261;
-      x02 = x01 & mask261;
+      x21 = x2 & mask26;
+      x02 = x01 & mask26;
       x31 = x3 + z02;
       x12 = x11 + z13;
       z03 = x31 >> (u32)26U;
-      x32 = x31 & mask261;
+      x32 = x31 & mask26;
       x42 = x41 + z03;
       o0 = x02;
       o1 = x12;
@@ -595,7 +595,7 @@ static inline void poly1305_do_32(u8 *k, u32 aadlen, u8 *aad, u32 mlen, u8 *m, u
     u64 t2;
     u64 t3;
     u64 t4;
-    u64 mask261;
+    u64 mask26;
     u64 z0;
     u64 z1;
     u64 x0;
@@ -689,29 +689,29 @@ static inline void poly1305_do_32(u8 *k, u32 aadlen, u8 *aad, u32 mlen, u8 *m, u
     t2 = a26;
     t3 = a36;
     t4 = a46;
-    mask261 = (u64)0x3ffffffU;
+    mask26 = (u64)0x3ffffffU;
     z0 = t0 >> (u32)26U;
     z1 = t3 >> (u32)26U;
-    x0 = t0 & mask261;
-    x3 = t3 & mask261;
+    x0 = t0 & mask26;
+    x3 = t3 & mask26;
     x1 = t1 + z0;
     x4 = t4 + z1;
     z01 = x1 >> (u32)26U;
     z11 = x4 >> (u32)26U;
     t = z11 << (u32)2U;
     z12 = z11 + t;
-    x11 = x1 & mask261;
-    x41 = x4 & mask261;
+    x11 = x1 & mask26;
+    x41 = x4 & mask26;
     x2 = t2 + z01;
     x01 = x0 + z12;
     z02 = x2 >> (u32)26U;
     z13 = x01 >> (u32)26U;
-    x21 = x2 & mask261;
-    x02 = x01 & mask261;
+    x21 = x2 & mask26;
+    x02 = x01 & mask26;
     x31 = x3 + z02;
     x12 = x11 + z13;
     z03 = x31 >> (u32)26U;
-    x32 = x31 & mask261;
+    x32 = x31 & mask26;
     x42 = x41 + z03;
     o0 = x02;
     o1 = x12;
@@ -730,7 +730,7 @@ static inline void poly1305_do_32(u8 *k, u32 aadlen, u8 *aad, u32 mlen, u8 *m, u
 void
 Hacl_Chacha20Poly1305_32_aead_encrypt(
   u8 *k,
-  u8 *n1,
+  u8 *n,
   u32 aadlen,
   u8 *aad,
   u32 mlen,
@@ -739,11 +739,11 @@ Hacl_Chacha20Poly1305_32_aead_encrypt(
   u8 *mac
 )
 {
-  Hacl_Chacha20_chacha20_encrypt(mlen, cipher, m, k, n1, (u32)1U);
+  Hacl_Chacha20_chacha20_encrypt(mlen, cipher, m, k, n, (u32)1U);
   {
     u8 tmp[64U] = { 0U };
     u8 *key;
-    Hacl_Chacha20_chacha20_encrypt((u32)64U, tmp, tmp, k, n1, (u32)0U);
+    Hacl_Chacha20_chacha20_encrypt((u32)64U, tmp, tmp, k, n, (u32)0U);
     key = tmp;
     poly1305_do_32(key, aadlen, aad, mlen, cipher, mac);
   }
@@ -752,7 +752,7 @@ Hacl_Chacha20Poly1305_32_aead_encrypt(
 u32
 Hacl_Chacha20Poly1305_32_aead_decrypt(
   u8 *k,
-  u8 *n1,
+  u8 *n,
   u32 aadlen,
   u8 *aad,
   u32 mlen,
@@ -764,7 +764,7 @@ Hacl_Chacha20Poly1305_32_aead_decrypt(
   u8 computed_mac[16U] = { 0U };
   u8 tmp[64U] = { 0U };
   u8 *key;
-  Hacl_Chacha20_chacha20_encrypt((u32)64U, tmp, tmp, k, n1, (u32)0U);
+  Hacl_Chacha20_chacha20_encrypt((u32)64U, tmp, tmp, k, n, (u32)0U);
   key = tmp;
   poly1305_do_32(key, aadlen, aad, mlen, cipher, computed_mac);
   {
@@ -782,7 +782,7 @@ Hacl_Chacha20Poly1305_32_aead_decrypt(
     z = res0;
     if (z == (u8)255U)
     {
-      Hacl_Chacha20_chacha20_encrypt(mlen, m, cipher, k, n1, (u32)1U);
+      Hacl_Chacha20_chacha20_encrypt(mlen, m, cipher, k, n, (u32)1U);
       res = (u32)0U;
     }
     else

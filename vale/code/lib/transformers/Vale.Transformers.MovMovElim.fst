@@ -12,6 +12,16 @@ open Vale.X64.InsLemmas
 
 open Vale.Transformers.PeepHole
 
+(*
+ * AR: this proof relies on multiple inductive type inversions to know that
+ *     oprs1 is a Mov64 (resp. for oprs2)
+ *    
+ *     this used to go through earlier with just ifuel 1, because F* was weakening
+ *       the branch VCs with discriminator expressions, thereby unintentionally
+ *       triggering the inversions, this is no longer true in F*, and hence more ifuel
+ *)
+
+#push-options "--ifuel 4"
 let safe_mov_mov_elim (is:list ins) : Tot bool =
   match is with
   | [Instr i1 oprs1 (AnnotateMov64 ()); Instr i2 oprs2 (AnnotateMov64 ())] ->
@@ -32,6 +42,7 @@ let safe_mov_mov_elim (is:list ins) : Tot bool =
         | _ -> false // TODO: Can we relax this restriction?
     )
   | _ -> false
+#pop-options
 
 let mov_mov_elim_ph = {
   ph = (fun is ->

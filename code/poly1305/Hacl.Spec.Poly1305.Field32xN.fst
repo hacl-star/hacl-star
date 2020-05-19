@@ -199,7 +199,7 @@ inline_for_extraction noextract
 val precomp_r5:
     #w:lanes
   -> r:felem5 w
-  -> r5:felem5 w
+  -> felem5 w
 let precomp_r5 #w (r0, r1, r2, r3, r4) =
   [@inline_let]
   let r50 = vec_smul_mod r0 (u64 5) in
@@ -218,7 +218,7 @@ val fadd5:
     #w:lanes
   -> f1:felem5 w
   -> f2:felem5 w
-  -> out:felem5 w
+  -> felem5 w
 let fadd5 #w (f10, f11, f12, f13, f14) (f20, f21, f22, f23, f24) =
   [@inline_let]
   let o0 = f10 +| f20 in
@@ -237,7 +237,7 @@ val smul_felem5:
     #w:lanes
   -> u1:uint64xN w
   -> f2:felem5 w
-  -> out:felem_wide5 w
+  -> felem_wide5 w
 let smul_felem5 #w u1 (f20, f21, f22, f23, f24) =
   [@inline_let]
   let o0 = vec_mul_mod f20 u1 in
@@ -257,7 +257,7 @@ val smul_add_felem5:
   -> u1:uint64xN w
   -> f2:felem5 w
   -> acc1:felem_wide5 w
-  -> acc2:felem_wide5 w
+  -> felem_wide5 w
 let smul_add_felem5 #w u1 (f20, f21, f22, f23, f24) (o0, o1, o2, o3, o4) =
   [@inline_let]
   let o0 = vec_add_mod o0 (vec_mul_mod f20 u1) in
@@ -277,7 +277,7 @@ val mul_felem5:
   -> f1:felem5 w
   -> r:felem5 w
   -> r5:felem5 w
-  -> out:felem_wide5 w
+  -> felem_wide5 w
 let mul_felem5 #w (f10,f11,f12,f13,f14) (r0,r1,r2,r3,r4) (r50,r51,r52,r53,r54) =
   let (a0,a1,a2,a3,a4) = smul_felem5 #w f10 (r0,r1,r2,r3,r4) in
   let (a0,a1,a2,a3,a4) = smul_add_felem5 #w f11 (r54,r0,r1,r2,r3) (a0,a1,a2,a3,a4) in
@@ -301,7 +301,7 @@ inline_for_extraction noextract
 val carry_full_felem5:
     #w:lanes
   -> inp:felem5 w
-  -> out:felem5 w
+  -> felem5 w
 let carry_full_felem5 #w (f0, f1, f2, f3, f4) =
   let tmp0,c0 = carry26 f0 (zero w) in
   let tmp1,c1 = carry26 f1 c0 in
@@ -317,7 +317,7 @@ inline_for_extraction noextract
 val subtract_p5:
     #w:lanes
   -> f:felem5 w
-  -> out:felem5 w
+  -> felem5 w
 let subtract_p5 #w (f0, f1, f2, f3, f4) =
   let mh = vec_load (u64 0x3ffffff) w in
   let ml = vec_load (u64 0x3fffffb) w in
@@ -339,7 +339,7 @@ inline_for_extraction noextract
 val reduce_felem5:
     #w:lanes
   -> f:felem5 w
-  -> out:felem5 w
+  -> felem5 w
 let reduce_felem5 #w (f0, f1, f2, f3, f4) =
   let (f0, f1, f2, f3, f4) = carry_full_felem5 (f0, f1, f2, f3, f4) in
   let (f0, f1, f2, f3, f4) = carry_full_felem5 (f0, f1, f2, f3, f4) in
@@ -350,7 +350,7 @@ val load_felem5:
     #w:lanes
   -> lo:uint64xN w
   -> hi:uint64xN w
-  -> f:felem5 w
+  -> felem5 w
 let load_felem5 #w lo hi =
   let f0 = vec_and lo (mask26 w) in
   let f1 = vec_and (vec_shift_right lo 26ul) (mask26 w) in
@@ -361,7 +361,7 @@ let load_felem5 #w lo hi =
 
 
 inline_for_extraction noextract
-val load_felem5_4: lo:uint64xN 4 -> hi:uint64xN 4 -> f:felem5 4
+val load_felem5_4: lo:uint64xN 4 -> hi:uint64xN 4 -> felem5 4
 let load_felem5_4 lo hi =
   let mask26 = mask26 4 in
   let m0 = vec_interleave_low_n 2 lo hi in
@@ -385,7 +385,7 @@ inline_for_extraction noextract
 val load_acc5_2:
     f:felem5 2
   -> e:felem5 2
-  -> out:felem5 2
+  -> felem5 2
 let load_acc5_2 (f0, f1, f2, f3, f4) (e0, e1, e2, e3, e4) =
   let f0 = vec_set f0 1ul (u64 0) in
   let f1 = vec_set f1 1ul (u64 0) in
@@ -399,7 +399,7 @@ inline_for_extraction noextract
 val load_acc5_4:
     f:felem5 4
   -> e:felem5 4
-  -> out:felem5 4
+  -> felem5 4
 let load_acc5_4 (f0, f1, f2, f3, f4) (e0, e1, e2, e3, e4) =
   let (r0, r1, r2, r3, r4) = (zero 4, zero 4, zero 4, zero 4, zero 4) in
   let r0 = vec_set r0 0ul (vec_get f0 0ul) in
@@ -433,7 +433,7 @@ inline_for_extraction noextract
 val carry_wide_felem5:
     #w:lanes
   -> inp:felem_wide5 w
-  -> out:felem5 w
+  -> felem5 w
 let carry_wide_felem5 #w (x0, x1, x2, x3, x4) =
   let mask26 = mask26 w in
   let z0 = vec_shift_right x0 26ul in
@@ -476,7 +476,7 @@ val fmul_r5:
   -> f1:felem5 w
   -> r:felem5 w
   -> r5:felem5 w
-  -> out:felem5 w
+  -> felem5 w
 let fmul_r5 #w (f10, f11, f12, f13, f14) (r0, r1, r2, r3, r4) (r50, r51, r52, r53, r54) =
   let (t0, t1, t2, t3, t4) = mul_felem5 (f10, f11, f12, f13, f14) (r0, r1, r2, r3, r4) (r50, r51, r52, r53, r54) in
   carry_wide_felem5 (t0, t1, t2, t3, t4)
@@ -488,7 +488,7 @@ val fadd_mul_r5:
   -> f1:felem5 w
   -> r:felem5 w
   -> r5:felem5 w
-  -> out:felem5 w
+  -> felem5 w
 let fadd_mul_r5 #w (a0, a1, a2, a3, a4) (f10, f11, f12, f13, f14) (r0, r1, r2, r3, r4) (r50, r51, r52, r53, r54) =
   let (a0, a1, a2, a3, a4) = fadd5 (a0, a1, a2, a3, a4) (f10, f11, f12, f13, f14) in
   let (t0, t1, t2, t3, t4) = mul_felem5 (a0, a1, a2, a3, a4) (r0, r1, r2, r3, r4) (r50, r51, r52, r53, r54) in
@@ -500,7 +500,7 @@ val fmul_rn5:
   -> f1:felem5 w
   -> rn:felem5 w
   -> rn5:felem5 w
-  -> out:felem5 w
+  -> felem5 w
 let fmul_rn5 #w (f10, f11, f12, f13, f14) (rn0, rn1, rn2, rn3, rn4) (rn50, rn51, rn52, rn53, rn54) =
   let (t0, t1, t2, t3, t4) = mul_felem5 (f10, f11, f12, f13, f14) (rn0, rn1, rn2, rn3, rn4) (rn50, rn51, rn52, rn53, rn54) in
   carry_wide_felem5 (t0, t1, t2, t3, t4)
@@ -510,7 +510,7 @@ val fmul_r2_normalize5:
     acc:felem5 2
   -> r:felem5 2
   -> r2:felem5 2
-  -> out:felem5 2
+  -> felem5 2
 let fmul_r2_normalize5 (a0, a1, a2, a3, a4) (r0, r1, r2, r3, r4) (r20, r21, r22, r23, r24) =
   let r20 = vec_interleave_low r20 r0 in
   let r21 = vec_interleave_low r21 r1 in
@@ -534,7 +534,7 @@ val fmul_r4_normalize5:
   -> r:felem5 4
   -> r_5:felem5 4
   -> r4:felem5 4
-  -> out:felem5 4
+  -> felem5 4
 let fmul_r4_normalize5 (a0, a1, a2, a3, a4) (r10, r11, r12, r13, r14) (r150, r151, r152, r153, r154) (r40, r41, r42, r43, r44) =
   let (r20, r21, r22, r23, r24) = fmul_r5 (r10, r11, r12, r13, r14) (r10, r11, r12, r13, r14) (r150, r151, r152, r153, r154) in
   let (r30, r31, r32, r33, r34) = fmul_r5 (r20, r21, r22, r23, r24) (r10, r11, r12, r13, r14) (r150, r151, r152, r153, r154) in
@@ -564,23 +564,28 @@ let fmul_r4_normalize5 (a0, a1, a2, a3, a4) (r10, r11, r12, r13, r14) (r150, r15
 
   let v00 = vec_interleave_high_n 2 o0 o0 in
   let v10 = vec_add_mod o0 v00 in
-  let v20 = vec_add_mod v10 (vec_permute4 v10 1ul 1ul 1ul 1ul) in
+  let v10h = vec_interleave_high v10 v10 in
+  let v20 = vec_add_mod v10 v10h in
 
   let v01 = vec_interleave_high_n 2 o1 o1 in
   let v11 = vec_add_mod o1 v01 in
-  let v21 = vec_add_mod v11 (vec_permute4 v11 1ul 1ul 1ul 1ul) in
+  let v11h = vec_interleave_high v11 v11 in 
+  let v21 = vec_add_mod v11 v11h in
 
   let v02 = vec_interleave_high_n 2 o2 o2 in
   let v12 = vec_add_mod o2 v02 in
-  let v22 = vec_add_mod v12 (vec_permute4 v12 1ul 1ul 1ul 1ul) in
+  let v12h = vec_interleave_high v12 v12 in 
+  let v22 = vec_add_mod v12 v12h in
 
   let v03 = vec_interleave_high_n 2 o3 o3 in
   let v13 = vec_add_mod o3 v03 in
-  let v23 = vec_add_mod v13 (vec_permute4 v13 1ul 1ul 1ul 1ul) in
+  let v13h = vec_interleave_high v13 v13 in 
+  let v23 = vec_add_mod v13 v13h in
 
   let v04 = vec_interleave_high_n 2 o4 o4 in
   let v14 = vec_add_mod o4 v04 in
-  let v24 = vec_add_mod v14 (vec_permute4 v14 1ul 1ul 1ul 1ul) in
+  let v14h = vec_interleave_high v14 v14 in 
+  let v24 = vec_add_mod v14 v14h in
   carry_full_felem5 (v20, v21, v22, v23, v24)
 
 noextract
@@ -588,7 +593,7 @@ val set_bit5:
     #w:lanes
   -> f:lseq (uint64xN w) 5
   -> i:size_nat{i <= 128}
-  -> out:lseq (uint64xN w) 5
+  -> lseq (uint64xN w) 5
 let set_bit5 #w f i =
   let b = u64 1 <<. size (i % 26) in
   let mask = vec_load b w in

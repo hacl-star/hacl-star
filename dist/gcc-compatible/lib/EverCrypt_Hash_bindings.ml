@@ -107,39 +107,75 @@ module Bindings(F:Cstubs.FOREIGN) =
       foreign "EverCrypt_Hash_hash"
         (spec_Hash_Definitions_hash_alg @->
            (ocaml_bytes @-> (ocaml_bytes @-> (uint32_t @-> (returning void)))))
-    type everCrypt_Hash_Incremental_state_s =
-      [ `everCrypt_Hash_Incremental_state_s ] structure
-    let (everCrypt_Hash_Incremental_state_s :
-      [ `everCrypt_Hash_Incremental_state_s ] structure typ) =
-      structure "EverCrypt_Hash_Incremental_state_s_s"
-    let everCrypt_Hash_Incremental_state_s_hash_state =
-      field everCrypt_Hash_Incremental_state_s "hash_state"
-        (ptr everCrypt_Hash_state_s)
-    let everCrypt_Hash_Incremental_state_s_buf =
-      field everCrypt_Hash_Incremental_state_s "buf" (ptr uint8_t)
-    let everCrypt_Hash_Incremental_state_s_total_len =
-      field everCrypt_Hash_Incremental_state_s "total_len" uint64_t
-    let _ = seal everCrypt_Hash_Incremental_state_s
-    let everCrypt_Hash_Incremental_alg_of_state =
-      foreign "EverCrypt_Hash_Incremental_alg_of_state"
-        ((ptr everCrypt_Hash_Incremental_state_s) @->
-           (returning spec_Hash_Definitions_hash_alg))
+    type hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ =
+      [ `hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ ]
+        structure
+    let (hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ :
+      [ `hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ ]
+        structure typ)
+      =
+      structure
+        "Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s_____s"
+    let hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s_____block_state
+      =
+      field hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____
+        "block_state" (ptr everCrypt_Hash_state_s)
+    let hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s_____buf =
+      field hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ "buf"
+        (ptr uint8_t)
+    let hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s_____total_len
+      =
+      field hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____
+        "total_len" uint64_t
+    let _ = seal hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____
     let everCrypt_Hash_Incremental_create_in =
       foreign "EverCrypt_Hash_Incremental_create_in"
         (spec_Hash_Definitions_hash_alg @->
-           (returning (ptr everCrypt_Hash_Incremental_state_s)))
+           (returning
+              (ptr
+                 hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____)))
     let everCrypt_Hash_Incremental_init =
       foreign "EverCrypt_Hash_Incremental_init"
-        ((ptr everCrypt_Hash_Incremental_state_s) @-> (returning void))
+        ((ptr hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____)
+           @-> (returning void))
     let everCrypt_Hash_Incremental_update =
       foreign "EverCrypt_Hash_Incremental_update"
-        ((ptr everCrypt_Hash_Incremental_state_s) @->
-           (ocaml_bytes @-> (uint32_t @-> (returning void))))
+        ((ptr hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____)
+           @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))
+    let everCrypt_Hash_Incremental_finish_md5 =
+      foreign "EverCrypt_Hash_Incremental_finish_md5"
+        ((ptr hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____)
+           @-> (ocaml_bytes @-> (returning void)))
+    let everCrypt_Hash_Incremental_finish_sha1 =
+      foreign "EverCrypt_Hash_Incremental_finish_sha1"
+        ((ptr hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____)
+           @-> (ocaml_bytes @-> (returning void)))
+    let everCrypt_Hash_Incremental_finish_sha224 =
+      foreign "EverCrypt_Hash_Incremental_finish_sha224"
+        ((ptr hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____)
+           @-> (ocaml_bytes @-> (returning void)))
+    let everCrypt_Hash_Incremental_finish_sha256 =
+      foreign "EverCrypt_Hash_Incremental_finish_sha256"
+        ((ptr hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____)
+           @-> (ocaml_bytes @-> (returning void)))
+    let everCrypt_Hash_Incremental_finish_sha384 =
+      foreign "EverCrypt_Hash_Incremental_finish_sha384"
+        ((ptr hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____)
+           @-> (ocaml_bytes @-> (returning void)))
+    let everCrypt_Hash_Incremental_finish_sha512 =
+      foreign "EverCrypt_Hash_Incremental_finish_sha512"
+        ((ptr hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____)
+           @-> (ocaml_bytes @-> (returning void)))
+    let everCrypt_Hash_Incremental_alg_of_state =
+      foreign "EverCrypt_Hash_Incremental_alg_of_state"
+        ((ptr hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____)
+           @-> (returning spec_Hash_Definitions_hash_alg))
     let everCrypt_Hash_Incremental_finish =
       foreign "EverCrypt_Hash_Incremental_finish"
-        ((ptr everCrypt_Hash_Incremental_state_s) @->
-           (ocaml_bytes @-> (returning void)))
+        ((ptr hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____)
+           @-> (ocaml_bytes @-> (returning void)))
     let everCrypt_Hash_Incremental_free =
       foreign "EverCrypt_Hash_Incremental_free"
-        ((ptr everCrypt_Hash_Incremental_state_s) @-> (returning void))
+        ((ptr hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____)
+           @-> (returning void))
   end

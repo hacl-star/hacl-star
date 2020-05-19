@@ -36,6 +36,18 @@
 #include "Hacl_Hash.h"
 
 
+/* SNIPPET_START: Hacl_Impl_P256_DH_ecp256dh_i */
+
+uint64_t Hacl_Impl_P256_DH_ecp256dh_i(uint8_t *result, uint8_t *scalar);
+
+/* SNIPPET_END: Hacl_Impl_P256_DH_ecp256dh_i */
+
+/* SNIPPET_START: Hacl_Impl_P256_DH_ecp256dh_r */
+
+uint64_t Hacl_Impl_P256_DH_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
+
+/* SNIPPET_END: Hacl_Impl_P256_DH_ecp256dh_r */
+
 /* SNIPPET_START: Hacl_Impl_ECDSA_ecdsa_p256_sha2_sign */
 
 uint64_t
@@ -57,7 +69,7 @@ Hacl_Impl_ECDSA_ecdsa_p256_sha2_verify(
   uint8_t *m,
   uint8_t *pubKey,
   uint8_t *r,
-  uint8_t *s1
+  uint8_t *s
 );
 
 /* SNIPPET_END: Hacl_Impl_ECDSA_ecdsa_p256_sha2_verify */

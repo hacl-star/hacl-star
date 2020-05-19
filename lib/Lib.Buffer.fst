@@ -61,10 +61,10 @@ let createL #a init =
   B.alloca_of_list init
 
 let createL_global #a init =
-  IB.igcmalloc_of_list #a root init
+  CB.of_ibuffer (IB.igcmalloc_of_list #a root init)
 
 let recall_contents #a #len b s =
-  B.recall_p (b <: ibuffer a) (cpred s)
+  B.recall_p (CB.to_ibuffer b) (cpred s)
 
 (* JP: why triplicate the code? would it not extract if we just cast i to a monotonic buffer?! *)
 let copy #t #a #len o i =
@@ -244,7 +244,7 @@ val loopi_blocks_f:
       Sequence.repeati_blocks_f (v blocksize) (as_seq h0 inp) spec_f (v nb) (v i) (as_seq h0 w))
 
 let loopi_blocks_f #a #b #blen bs inpLen inp spec_f f nb i w =
-  Math.Lemmas.lemma_mult_lt_right (v bs) (v i) (v nb);
+  Math.Lemmas.lemma_mult_le_right (v bs) (v i) (v nb);
   assert ((v i + 1) * v bs == v i * v bs + v bs);
   assert (v i * v bs + v bs <= v nb * v bs);
   assert (v nb * v bs <= v inpLen);
@@ -402,11 +402,12 @@ let fill_blocks #t h0 len n output a_spec refl footprint spec impl =
   assert(B.loc_includes (B.loc_union (footprint (v n)) (loc output)) (B.loc_union (footprint (v n)) (loc (gsub output 0ul (n *! len)))));
   assert(B.modifies (B.loc_union (footprint (v n)) (loc output)) h0 h1)
 
+#restart-solver
 #reset-options "--z3rlimit 300 --max_fuel 1"
 
 let fill_blocks_simple #a h0 bs n output spec_f impl_f =
   [@inline_let]
-  let refl h (i:nat{i <= v n}) : GTot (Seq.map_blocks_a a (v bs) (v n) i) =
+  let refl h (i:nat{i <= v n}) : GTot (Sequence.generate_blocks_simple_a a (v bs) (v n) i) =
     FStar.Math.Lemmas.lemma_mult_le_right (v bs) i (v n);
     assert (v (size i *! bs) <= v n * v bs);
     as_seq h (gsub output (size 0) (size i *! bs)) in
@@ -415,9 +416,9 @@ let fill_blocks_simple #a h0 bs n output spec_f impl_f =
   [@inline_let]
   let spec h0 = Sequence.generate_blocks_simple_f #a (v bs) (v n) (spec_f h0) in
   let h0 = ST.get () in
-  loop h0 n (Seq.map_blocks_a a (v bs) (v n)) refl footprint spec
+  loop h0 n (Sequence.generate_blocks_simple_a a (v bs) (v n)) refl footprint spec
   (fun i ->
-    Loop.unfold_repeat_gen (v n) (Seq.map_blocks_a a (v bs) (v n))
+    Loop.unfold_repeat_gen (v n) (Sequence.generate_blocks_simple_a a (v bs) (v n))
       (Sequence.generate_blocks_simple_f #a (v bs) (v n) (spec_f h0)) (refl h0 0) (v i);
     FStar.Math.Lemmas.lemma_mult_le_right (v bs) (v i + 1) (v n);
     assert (v (i *! bs) + v bs <= v n * v bs);

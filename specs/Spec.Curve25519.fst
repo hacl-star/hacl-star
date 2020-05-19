@@ -22,7 +22,7 @@ let ( +% ) = fadd
 let ( -% ) = fsub
 let ( *% ) = fmul
 
-val fpow: a:elem -> b:pos -> Tot (res:elem) (decreases b)
+val fpow: a:elem -> b:pos -> Tot elem (decreases b)
 let rec fpow a b =
   if b = 1 then a
   else
@@ -39,6 +39,11 @@ type proj_point = elem & elem
 let ith_bit (k:scalar) (i:nat{i < 256}) : uint64 =
   let q = i / 8 in let r = size (i % 8) in
   to_u64 ((k.[q] >>. r) &. u8 1)
+
+let decodeScalar (k:scalar) =
+  let k : scalar = k.[0] <- (k.[0] &. u8 248) in
+  let k : scalar = k.[31] <- (k.[31] &. u8 127) in
+  let k : scalar = k.[31] <- (k.[31] |. u8 64) in k
 
 let decodePoint (u:serialized_point) =
   (nat_from_bytes_le u % pow2 255) % prime

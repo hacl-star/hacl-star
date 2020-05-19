@@ -165,13 +165,13 @@ let permr_row #a #m r1 n =
   | Spec.Blake2S,M256
   | Spec.Blake2S,M128 ->
     let v0 : vec_t U32 4 = r1.(0ul) in
-    let v1 : vec_t U32 4 = vec_permute4 #U32 v0 n0 n1 n2 n3 in
+    let v1 : vec_t U32 4 = vec_rotate_right_lanes #U32 v0 n0 in
     Lib.Sequence.(eq_intro (create4 (vec_v v0).[v n0] (vec_v v0).[v n1] (vec_v v0).[v n2] (vec_v v0).[v n3]) (Lib.Sequence.(createi 4 (fun i -> (vec_v v0).[(i+v n)%4]))));
     Lib.Sequence.(eq_intro (Spec.rotr (vec_v v0) (v n)) (Lib.Sequence.(createi 4 (fun i -> (vec_v v0).[(i+v n)%4]))));
     r1.(0ul) <- v1
   | Spec.Blake2B,M256 ->
     let v0 : vec_t U64 4 = r1.(0ul) in
-    let v1 : vec_t U64 4 = vec_permute4 #U64 v0 n0 n1 n2 n3 in
+    let v1 : vec_t U64 4 = vec_rotate_right_lanes #U64 v0 n0 in
     Lib.Sequence.(eq_intro (create4 (vec_v v0).[v n0] (vec_v v0).[v n1] (vec_v v0).[v n2] (vec_v v0).[v n3]) (Lib.Sequence.(createi 4 (fun i -> (vec_v v0).[(i+v n)%4]))));
     Lib.Sequence.(eq_intro (Spec.rotr (vec_v v0) (v n)) (Lib.Sequence.(createi 4 (fun i -> (vec_v v0).[(i+v n)%4]))));
     r1.(0ul) <- v1
@@ -237,30 +237,9 @@ let store_row #a #m b r =
   | _ ->
     uints_to_bytes_le #(Spec.wt a) 4ul b r
 
-#push-options "--z3rlimit 100"
 inline_for_extraction
 let gather_row #a #ms r m i0 i1 i2 i3 =
-  let h0 = ST.get() in
-  let nb = size (numbytes (Spec.wt a)) in
-  let b0 = sub m (i0 *. nb) nb in
-  let b1 = sub m (i1 *. nb) nb in
-  let b2 = sub m (i2 *. nb) nb in
-  let b3 = sub m (i3 *. nb) nb in
-  as_seq_gsub h0 m (i0 *. nb) nb;
-  as_seq_gsub h0 m (i1 *. nb) nb;
-  as_seq_gsub h0 m (i2 *. nb) nb;
-  as_seq_gsub h0 m (i3 *. nb) nb;
-  assert (as_seq h0 b0 == Lib.Sequence.sub (as_seq h0 m) (v i0 * Spec.size_word a) (Spec.size_word a));
-  assert (as_seq h0 b1 == Lib.Sequence.sub (as_seq h0 m) (v i1 * Spec.size_word a) (Spec.size_word a));
-  assert (as_seq h0 b2 == Lib.Sequence.sub (as_seq h0 m) (v i2 * Spec.size_word a) (Spec.size_word a));
-  assert (as_seq h0 b3 == Lib.Sequence.sub (as_seq h0 m) (v i3 * Spec.size_word a) (Spec.size_word a));
-  let u0 = uint_from_bytes_le #(Spec.wt a) b0 in
-  let u1 = uint_from_bytes_le #(Spec.wt a) b1 in
-  let u2 = uint_from_bytes_le #(Spec.wt a) b2 in
-  let u3 = uint_from_bytes_le #(Spec.wt a) b3 in
-  assert (u0 == Lib.ByteSequence.uint_from_bytes_le (as_seq h0 b0));
-  create_row r u0 u1 u2 u3
-#pop-options
+    create_row r m.(i0) m.(i1) m.(i2) m.(i3)
 
 let alloc_state a m =
   create (4ul *. row_len a m) (zero_element a m)

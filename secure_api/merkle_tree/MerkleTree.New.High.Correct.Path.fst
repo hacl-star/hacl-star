@@ -99,10 +99,10 @@ val mt_get_path_step_acc_consistent:
                    (S.index (merge_hs #_ #f olds hs) lv) (S.index rhs lv)
                    k actd with
           | Some v ->
-            S.equal (mt_get_path_step lv hs rhs i j k S.empty actd)
+            S.equal (mt_make_path_step lv hs rhs i j k S.empty actd)
                     (S.cons v S.empty)
           | None ->
-            S.equal (mt_get_path_step lv hs rhs i j k S.empty actd)
+            S.equal (mt_make_path_step lv hs rhs i j k S.empty actd)
                     S.empty)))
 let mt_get_path_step_acc_consistent #_ #_ lv i j olds hs rhs k actd = ()
 
@@ -158,7 +158,7 @@ let rec mt_get_path_acc_consistent #hsz #f lv i j olds hs rhs k actd =
     let npa = mt_get_path_acc #_ #f (j / 2)
                 (S.slice (merge_hs #_ #f olds hs) (lv + 1) (lv + 1 + log2c (j / 2)))
                 (S.slice rhs (lv + 1) (lv + 1 + log2c (j / 2))) (k / 2) nactd_ in
-    let nps = mt_get_path_step lv hs rhs i j k S.empty actd in
+    let nps = mt_make_path_step lv hs rhs i j k S.empty actd in
     let np = mt_get_path_ (lv + 1) hs rhs (i / 2) (j / 2) (k / 2) nps nactd in
     let npe = mt_get_path_ (lv + 1) hs rhs (i / 2) (j / 2) (k / 2) S.empty nactd in
     mt_get_path_pull (lv + 1) hs rhs (i / 2) (j / 2) (k / 2) nps nactd;

@@ -94,7 +94,7 @@ let as_nat (h:mem) (e:felem) : GTot nat =
   as_nat4 (s0, s1, s2, s3)
 
 noextract
-let as_nat_il (h:mem) (e:ilbuffer uint64 (size 4)) : GTot nat =
+let as_nat_il (h:mem) (e:glbuffer uint64 (size 4)) : GTot nat =
   let s = as_seq h e in
   let s0 = s.[0] in
   let s1 = s.[1] in

@@ -261,3 +261,63 @@ procedure Check_rdrand_support()
 
     Mov64(rbx, r9);     // Callee-restore
 }
+
+procedure Check_avx512_support()
+    {:public}
+    {:quick}
+    modifies rax; rbx; rcx; rdx; r9; r10; r11; efl;
+    ensures
+        rax != 0 ==> avx512_enabled;
+        rbx == old(rbx);
+{
+    Mov64(r9, rbx);     // Callee-save
+
+    Mov64(rax, 7);
+    Mov64(rcx, 0);
+    Cpuid_Avx512();
+    lemma_iand_pow2_64(rbx, 16);
+    lemma_iand_pow2_64(rbx, 17);
+    lemma_iand_pow2_64(rbx, 30);
+    lemma_iand_pow2_64(rbx, 31);
+
+    // Save copies
+    Mov64(rax, rbx);
+    Mov64(r10, rbx);
+    Mov64(r11, rbx);
+
+    And64(rbx, 0x10000);
+    And64(rax, 0x20000);
+    And64(r10, 0x40000000);
+
+    assert_normalize(0x10000 == pow2(16));
+    assert_normalize(0x20000 == pow2(17));
+    assert_normalize(0x40000000 == pow2(30));
+    assert_normalize(0x80000000 == pow2(31));
+
+    Shr64(rax, 1);
+    lemma_ishr_pow2_diff64(16, 17); // ==> shr(pow2(17), 1) == pow2(16)
+    lemma_ishr_zero64(1);         // ==> shr(0, 1) == 0
+
+    Shr64(r10, 14);
+    lemma_ishr_pow2_diff64(16, 30); // ==> shr(pow2(30), 14) == pow2(16)
+    lemma_ishr_zero64(14);         // ==> shr(0, 14) == 0
+
+    lemma_iand_maybe_pow2_64(rax, rbx, 16); // Post condition
+    lemma_iand_pow2_64(rax, 16);
+    And64(rax, rbx);
+
+    // Need to move 2**31 to a register, as it is out of range of imm32 to be used in AND directly
+    Mov64(rbx, 0x80000000);
+    And64(r11, rbx);
+    Shr64(r11, 15);
+    lemma_ishr_pow2_diff64(16, 31); // ==> shr(pow2(31), 15) == pow2(16)
+    lemma_ishr_zero64(15);         // ==> shr(0, 15) == 0
+
+    lemma_iand_maybe_pow2_64(rax, r10, 16); // Post condition
+    And64(rax, r10);
+    lemma_iand_maybe_pow2_64(rax, r11, 16); // Post condition
+    And64(rax, r11);
+
+    Mov64(rbx, r9);     // Callee-restore
+}
+

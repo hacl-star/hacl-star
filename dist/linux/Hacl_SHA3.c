@@ -24,6 +24,7 @@
 
 #include "Hacl_SHA3.h"
 
+const
 u32
 Hacl_Impl_SHA3_keccak_rotc[24U] =
   {
@@ -32,6 +33,7 @@ Hacl_Impl_SHA3_keccak_rotc[24U] =
     (u32)18U, (u32)39U, (u32)61U, (u32)20U, (u32)44U
   };
 
+const
 u32
 Hacl_Impl_SHA3_keccak_piln[24U] =
   {
@@ -40,6 +42,7 @@ Hacl_Impl_SHA3_keccak_piln[24U] =
     (u32)14U, (u32)22U, (u32)9U, (u32)6U, (u32)1U
   };
 
+const
 u64
 Hacl_Impl_SHA3_keccak_rndc[24U] =
   {
@@ -165,8 +168,8 @@ void
 Hacl_Impl_SHA3_absorb(u64 *s, u32 rateInBytes, u32 inputByteLen, u8 *input, u8 delimitedSuffix)
 {
   u32 nb = inputByteLen / rateInBytes;
-  u32 rem1 = inputByteLen % rateInBytes;
-  u8 *last1;
+  u32 rem = inputByteLen % rateInBytes;
+  u8 *last;
   {
     u32 i;
     for (i = (u32)0U; i < nb; i++)
@@ -176,15 +179,15 @@ Hacl_Impl_SHA3_absorb(u64 *s, u32 rateInBytes, u32 inputByteLen, u8 *input, u8 d
       Hacl_Impl_SHA3_state_permute(s);
     }
   }
-  last1 = input + nb * rateInBytes;
+  last = input + nb * rateInBytes;
   KRML_CHECK_SIZE(sizeof (u8), rateInBytes);
   {
     u8 b[rateInBytes];
     memset(b, 0U, rateInBytes * sizeof (b[0U]));
-    memcpy(b, last1, rem1 * sizeof (last1[0U]));
-    b[rem1] = delimitedSuffix;
+    memcpy(b, last, rem * sizeof (last[0U]));
+    b[rem] = delimitedSuffix;
     Hacl_Impl_SHA3_loadState(rateInBytes, b, s);
-    if (!((delimitedSuffix & (u8)0x80U) == (u8)0U) && rem1 == rateInBytes - (u32)1U)
+    if (!((delimitedSuffix & (u8)0x80U) == (u8)0U) && rem == rateInBytes - (u32)1U)
       Hacl_Impl_SHA3_state_permute(s);
     KRML_CHECK_SIZE(sizeof (u8), rateInBytes);
     {
@@ -203,7 +206,7 @@ void Hacl_Impl_SHA3_squeeze(u64 *s, u32 rateInBytes, u32 outputByteLen, u8 *outp
 {
   u32 outBlocks = outputByteLen / rateInBytes;
   u32 remOut = outputByteLen % rateInBytes;
-  u8 *last1 = output + outputByteLen - remOut;
+  u8 *last = output + outputByteLen - remOut;
   u8 *blocks = output;
   {
     u32 i;
@@ -213,7 +216,7 @@ void Hacl_Impl_SHA3_squeeze(u64 *s, u32 rateInBytes, u32 outputByteLen, u8 *outp
       Hacl_Impl_SHA3_state_permute(s);
     }
   }
-  Hacl_Impl_SHA3_storeState(remOut, s, last1);
+  Hacl_Impl_SHA3_storeState(remOut, s, last);
 }
 
 void

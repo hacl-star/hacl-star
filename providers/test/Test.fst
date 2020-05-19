@@ -39,6 +39,8 @@ type block_cipher_vector = block_cipher * vec8 * vec8 * vec8
 
 module HST = FStar.HyperStack.ST
 
+// JP: disabling legacy tests
+(*
 val test_one_aes_ecb : block_cipher -> block_cipher_vector -> Stack unit (fun _ -> True) (fun _ _ _ -> True)
 let test_one_aes_ecb block0 v =
     let block, (LB key_len key), (LB plain_len plain), (LB cipher_len cipher) = v in
@@ -71,11 +73,14 @@ let test_one_aes_ecb block0 v =
       TestLib.compare_and_print !$"of AES128 block" cipher cipher' 16ul;
       pop_frame()
     end
+*)
 
 /// Test drivers
 
+(*
 let test_aes_ecb (block0: block_cipher) : Stack unit (fun _ -> True) (fun _ _ _ -> True) =
   Test.NoHeap.test_many !$"cipher" (test_one_aes_ecb block0) block_cipher_vectors_low
+*)
 
 let aead_key_length32 (al: Spec.Agile.AEAD.alg) : Tot (x: U32.t { U32.v x == Spec.Agile.AEAD.key_length al } ) =
   let open Spec.Agile.AEAD in
@@ -169,7 +174,7 @@ let test_aead_st alg key key_len iv iv_len aad aad_len tag tag_len plaintext pla
     let st = B.alloca B.null 1ul in
     let e = EverCrypt.AEAD.create_in #alg HyperStack.root st key in
     begin match e with
-    | UnsupportedAlgorithm -> C.Failure.failwith !$"Failure: AEAD create_in UnsupportedAlgorithm"
+    | UnsupportedAlgorithm -> () // Non-fatal since, say, some CI machines may not have AESNI. Was: C.Failure.failwith !$"Failure: AEAD create_in UnsupportedAlgorithm"
     | Success ->
       let h1 = HST.get () in
       let st = B.index st 0ul in
@@ -763,6 +768,7 @@ let test_chacha20_body (print: C.String.t -> St unit) : St unit =
     print !$"  >>>>>>>>> Chacha20\n";
     test_chacha20 chacha20_vectors_low
 
+(*
 inline_for_extraction
 noextract
 let test_aes128_ecb_body (print: C.String.t -> St unit) : St unit =
@@ -774,6 +780,7 @@ noextract
 let test_aes256_ecb_body (print: C.String.t -> St unit) : St unit =
     print !$"  >>>>>>>>> AES256_ECB\n";
     test_aes_ecb AES256
+*)
 
 (* Summary *)
 
@@ -796,11 +803,11 @@ let test_all () : St unit =
   print_sep ();
   hash_test_set             test_hash_body;
   print_sep ();
-  chacha20_test_set         test_chacha20_body;
+  chacha20_test_set         test_chacha20_body(*;
   print_sep ();
   aes128_ecb_test_set       test_aes128_ecb_body;
   print_sep ();
-  aes256_ecb_test_set       test_aes256_ecb_body
+  aes256_ecb_test_set       test_aes256_ecb_body*)
 
 let main (): St C.exit_code =
   push_frame ();

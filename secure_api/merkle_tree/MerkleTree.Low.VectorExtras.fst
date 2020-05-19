@@ -112,7 +112,7 @@ inline_for_extraction
 val shrink:
   #a:Type -> vec:vector a ->
   new_size:uint32_t{new_size <= size_of vec} ->
-  HST.ST (r:vector a)
+  HST.ST (vector a)
   (requires (fun h0 -> live h0 vec /\ freeable vec))
   (ensures (fun h0 r h1 ->
                 live h1 vec /\ live h1 r /\ size_of r = new_size /\
@@ -131,7 +131,7 @@ inline_for_extraction
 val flush_inplace:
   #a:Type -> vec:vector a -> 
   i:uint32_t{i <= size_of vec} ->
-  HST.ST (fvec:vector a)
+  HST.ST (vector a)
     (requires (fun h0 ->
       live h0 vec /\ freeable vec /\
       HST.is_eternal_region (frameOf vec)))

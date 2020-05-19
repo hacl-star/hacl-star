@@ -9,7 +9,7 @@ open Vale.Curve25519.Fast_defs
 
 let int_canon = fun _ -> norm [delta; zeta; iota]; int_semiring () //; dump "Final"
 
-let sub_carry (x y:nat64) (c:bit) : nat64 & (c':bit)
+let sub_carry (x y:nat64) (c:bit) : nat64 & bit
   =
   if x - (y + c) < 0 then
     (x - (y + c) + pow2_64, 1)

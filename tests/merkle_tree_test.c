@@ -6,7 +6,7 @@
 #include "MerkleTree.h"
 #include "merkle_tree_test.h"
 
-static char hs[32U+1];
+static char hs[64U+1];
 
 static const uint32_t hash_size = 32;
 
@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
   uint8_t *ih = mt_init_hash(hash_size);
   mt_p mt = mt_create(ih);
   print_hash("root", ih);
-  mt_free_hash(hash_size, ih);
+  mt_free_hash(ih);
 
   printf("Merkle tree created.\n");
 
@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
     hash[hash_size-1] = (uint8_t)i;
     print_hash("elem", hash);
     mt_insert(mt, hash);
-    mt_free_hash(hash_size, hash);
+    mt_free_hash(hash);
   }
 
 
@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
   uint8_t *rh = mt_init_hash(hash_size);
   mt_get_root(mt, rh);
   print_hash("root", rh);
-  mt_free_hash(hash_size, rh);
+  mt_free_hash(rh);
 
   printf("All values are inserted!\n");
 
@@ -70,28 +70,28 @@ int main(int argc, char *argv[]) {
 
   // Getting the Merkle path and verify it
   uint8_t *root = mt_init_hash(hash_size);
-  LowStar_Vector_vector_str___uint8_t_ *cur_path = mt_init_path(hash_size);
-
   for (uint64_t k = 0; k < num_elts; k++) {
+    MerkleTree_Low_path *cur_path = mt_init_path(hash_size);
     uint32_t sz = mt_get_path(mt, k, cur_path, root);
 
     printf("path from k=%lu:\n", k);
     uint8_t *tmp = mt_init_hash(hash_size);
-    memcpy(tmp, cur_path->vs[0], hash_size);
-    for (uint32_t l = 0; l < cur_path->sz; l++) {
-      print_hash("  elem", cur_path->vs[l]);
+    memcpy(tmp, mt_get_path_step(cur_path, 0), hash_size);
+    for (uint32_t l = 0; l < mt_get_path_length(cur_path); l++) {
+      uint8_t* step = mt_get_path_step(cur_path, l);
+      print_hash("  elem", step);
       if (l > 0) {
-        mt_sha256_compress(tmp, cur_path->vs[l], tmp);
+        mt_sha256_compress(tmp, step, tmp);
         print_hash("  tmp ", tmp);
       }
     }
-    mt_free_hash(hash_size, tmp);
+    mt_free_hash(tmp);
     print_hash("  root", root);
 
     bool verified = mt_verify(mt, k, sz, cur_path, root);
     printf("Verification with k=%ld, sz=%d: %d\n", k, sz, verified);
 
-    mt_clear_path(hash_size, cur_path);
+    mt_free_path(cur_path);
   }
 
   uint64_t flush_to = num_elts / 3;
@@ -99,12 +99,13 @@ int main(int argc, char *argv[]) {
   printf("Flushed tree to [%ld,%ld]\n", flush_to, num_elts);
 
   for (uint64_t k = flush_to; k < num_elts; k++) {
+    MerkleTree_Low_path *cur_path = mt_init_path(hash_size);
     uint32_t j = mt_get_path(mt, k, cur_path, root);
 
     bool verified = mt_verify(mt, k, j, cur_path, root);
     printf("Verification (after flushing) with k(%ld), j(%d): %d\n", k, j, verified);
 
-    mt_clear_path(hash_size, cur_path);
+    mt_free_path(cur_path);
   }
 
   flush_to = num_elts / 2;
@@ -112,12 +113,13 @@ int main(int argc, char *argv[]) {
   printf("Flushed tree to [%ld,%ld]\n", flush_to, num_elts);
 
   for (uint64_t k = flush_to; k < num_elts; k++) {
+    MerkleTree_Low_path *cur_path = mt_init_path(hash_size);
     uint32_t j = mt_get_path(mt, k, cur_path, root);
 
     bool verified = mt_verify(mt, k, j, cur_path, root);
     printf("Verification (after flushing) with k(%ld), j(%d): %d\n", k, j, verified);
 
-    mt_clear_path(hash_size, cur_path);
+    mt_free_path(cur_path);
   }
 
   printf("All merkle paths are verified!\n");
@@ -133,7 +135,7 @@ int main(int argc, char *argv[]) {
       return 1;
     }
 
-    merkle_tree *mtd = mt_deserialize(hash_size, buf, written, mt_sha256_compress);
+    merkle_tree *mtd = mt_deserialize(buf, written, mt_sha256_compress);
 
     if (mtd == NULL) {
       printf("Deserialization failed!\n");
@@ -144,22 +146,22 @@ int main(int argc, char *argv[]) {
 
     printf("Re-verifying paths on deserialized tree...\n");
     for (uint64_t k = flush_to; k < num_elts; k++) {
+      MerkleTree_Low_path *cur_path = mt_init_path(hash_size);
       uint32_t j = mt_get_path(mtd, k, cur_path, root);
 
       bool verified = mt_verify(mtd, k, j, cur_path, root);
 
       uint8_t buffer[2048];
-      uint32_t spsz = mt_serialize_path(cur_path, mt, buffer, 2048);
+      uint32_t spsz = mt_serialize_path(cur_path, buffer, 2048);
       assert(spsz > 0);
-      LowStar_Vector_vector_str___uint8_t_ *dpath = mt_deserialize_path(hash_size, buffer, 2048);
+      MerkleTree_Low_path *dpath = mt_deserialize_path(hash_size, buffer, 2048);
       assert(dpath != NULL);
 
       bool dverified = mt_verify(mtd, k, j, dpath, root);
       printf("Verification with k(%ld), j(%d): %d, deserialized (sz=%d): %d\n", k, j, verified, spsz, dverified);
 
-
-      mt_clear_path(hash_size, dpath);
-      mt_clear_path(hash_size, cur_path);
+      mt_free_path(dpath);
+      mt_free_path(cur_path);
     }
 
     mt_free(mtd);
@@ -176,6 +178,7 @@ int main(int argc, char *argv[]) {
 
   printf("Re-verifying paths on retracted tree...\n");
   for (uint64_t k = flush_to; k <= retract_to; k++) {
+    MerkleTree_Low_path *cur_path = mt_init_path(hash_size);
     if (!mt_get_path_pre(mt, k, cur_path, root)) {
       printf("ERROR: Precondition for mt_get_path does not hold; exiting.\n");
       exit(1);
@@ -185,7 +188,7 @@ int main(int argc, char *argv[]) {
     bool verified = mt_verify(mt, k, j, cur_path, root);
     printf("Verification with k(%ld), j(%d): %d\n", k, j, verified);
 
-    mt_clear_path(hash_size, cur_path);
+    mt_free_path(cur_path);
   }
 
   flush_to = retract_to;
@@ -193,16 +196,16 @@ int main(int argc, char *argv[]) {
   printf("Flushed tree to [%ld,%ld]\n", flush_to, retract_to);
   {
     uint64_t k = flush_to;
+    MerkleTree_Low_path *cur_path = mt_init_path(hash_size);
     uint32_t j = mt_get_path(mt, k, cur_path, root);
     bool verified = mt_verify(mt, k, j, cur_path, root);
     printf("Final verification with k(%ld), j(%d): %d\n", k, j, verified);
-    mt_clear_path(hash_size, cur_path);
+    mt_free_path(cur_path);
   }
 
   // Free
   mt_free(mt);
-  mt_free_path(hash_size, cur_path);
-  mt_free_hash(hash_size, root);
+  mt_free_hash(root);
 
   printf("The Merkle tree is freed\n");
 

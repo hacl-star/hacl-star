@@ -88,7 +88,7 @@ let montgomery_ladder_exponent_step0 a b =
 
 
 inline_for_extraction noextract
-val montgomery_ladder_exponent_step: a: felem -> b: felem -> scalar: ilbuffer uint8 (size 32) ->   i:size_t{v i < 256} ->  Stack unit
+val montgomery_ladder_exponent_step: a: felem -> b: felem -> scalar: glbuffer uint8 (size 32) ->   i:size_t{v i < 256} ->  Stack unit
   (requires fun h -> live h a  /\ live h b /\ live h scalar /\ as_nat h a < prime /\ as_nat h b < prime /\ disjoint a b)
   (ensures fun h0 _ h1 -> modifies (loc a |+| loc b) h0 h1  /\
     (
@@ -111,7 +111,7 @@ let montgomery_ladder_exponent_step a b scalar i =
 
 
 inline_for_extraction noextract 
-val _montgomery_ladder_exponent: a: felem ->b: felem ->  scalar: ilbuffer uint8 (size 32) -> Stack unit
+val _montgomery_ladder_exponent: a: felem ->b: felem ->  scalar: glbuffer uint8 (size 32) -> Stack unit
   (requires fun h -> live h a /\ live h b /\ live h scalar /\ as_nat h a < prime /\ 
     as_nat h b < prime /\ disjoint a b /\disjoint a scalar /\ disjoint b scalar)
   (ensures fun h0 _ h1 -> modifies (loc a |+| loc b) h0 h1 /\ 
@@ -159,6 +159,11 @@ let montgomery_ladder_exponent r =
     let p = create (size 4) (u64 0) in 
     upload_one_montg_form p; 
     recall_contents order_inverse_buffer prime_p256_order_inverse_seq;
+    let h = ST.get() in
+    mut_const_immut_disjoint #uint64 #uint8 p order_inverse_buffer h;
+    mut_const_immut_disjoint #uint64 #uint8 r order_inverse_buffer h;
+    assert (disjoint p order_inverse_buffer);
+    assert (disjoint r order_inverse_buffer);
     _montgomery_ladder_exponent p r order_inverse_buffer;
       lemmaToDomainFromDomain 1;
     copy r p;

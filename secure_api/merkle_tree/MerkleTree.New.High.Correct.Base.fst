@@ -429,7 +429,7 @@ let create_pads #hsz len = S.create len (MTS.HPad #hsz)
 val hash_seq_spec:
   #hsz:pos -> 
   hs:hashes #hsz {S.length hs > 0} ->
-  GTot (smt:MTS.merkle_tree #hsz (log2c (S.length hs)))
+  GTot (MTS.merkle_tree #hsz (log2c (S.length hs)))
 let hash_seq_spec #hsz hs =
   S.append (hash_seq_lift #hsz hs)
            (create_pads (pow2 (log2c (S.length hs)) - S.length hs))
@@ -490,7 +490,7 @@ val hash_seq_spec_full:
   #hsz:pos -> #f:MTS.hash_fun_t #hsz ->
   hs:hashes #hsz {S.length hs > 0} ->
   acc:hash #hsz -> actd:bool ->
-  GTot (smt:MTS.merkle_tree #hsz (log2c (S.length hs)))
+  GTot (MTS.merkle_tree #hsz (log2c (S.length hs)))
 let hash_seq_spec_full #hsz #f hs acc actd =
   if actd
   then (S.upd (hash_seq_spec #hsz hs) (S.length hs) (MTS.HRaw acc))
@@ -635,7 +635,7 @@ val mt_spec:
   #hsz:pos -> 
   mt:merkle_tree #hsz {mt_wf_elts mt /\ MT?.j mt > 0} ->
   olds:hashess{S.length olds = 32 /\ mt_olds_inv #hsz 0 (MT?.i mt) olds} ->
-  GTot (smt:MTS.merkle_tree #hsz (log2c (MT?.j mt)))
+  GTot (MTS.merkle_tree #hsz (log2c (MT?.j mt)))
 let mt_spec #hsz mt olds =
   hash_seq_spec #_ (mt_base mt olds)
 

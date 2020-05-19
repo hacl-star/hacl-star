@@ -31,7 +31,7 @@ val reveal_word (u:unit) : Lemma (word == Lib.IntTypes.uint32)
 
 (* Input data. *)
 type byte = UInt8.t
-type bytes =  m:Seq.seq byte
+type bytes = Seq.seq byte
 
 (* Input data, multiple of a block length. *)
 let bytes_blocks =

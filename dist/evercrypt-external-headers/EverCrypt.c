@@ -47,6 +47,28 @@ typedef struct EverCrypt_aes128_key_s_s
 }
 EverCrypt_aes128_key_s;
 
+extern bool EverCrypt_uu___is_AES128_OPENSSL(EverCrypt_aes128_key_s projectee);
+
+extern FStar_Dyn_dyn
+EverCrypt___proj__AES128_OPENSSL__item__st(EverCrypt_aes128_key_s projectee);
+
+extern bool EverCrypt_uu___is_AES128_BCRYPT(EverCrypt_aes128_key_s projectee);
+
+extern FStar_Dyn_dyn
+EverCrypt___proj__AES128_BCRYPT__item__st(EverCrypt_aes128_key_s projectee);
+
+extern bool EverCrypt_uu___is_AES128_VALE(EverCrypt_aes128_key_s projectee);
+
+extern uint8_t *EverCrypt___proj__AES128_VALE__item__w(EverCrypt_aes128_key_s projectee);
+
+extern uint8_t *EverCrypt___proj__AES128_VALE__item__sbox(EverCrypt_aes128_key_s projectee);
+
+extern bool EverCrypt_uu___is_AES128_HACL(EverCrypt_aes128_key_s projectee);
+
+extern uint8_t *EverCrypt___proj__AES128_HACL__item__w(EverCrypt_aes128_key_s projectee);
+
+extern uint8_t *EverCrypt___proj__AES128_HACL__item__sbox(EverCrypt_aes128_key_s projectee);
+
 typedef struct EverCrypt_aes256_key_s_s
 {
   EverCrypt_aes256_key_s_tags tag;
@@ -63,6 +85,22 @@ typedef struct EverCrypt_aes256_key_s_s
   ;
 }
 EverCrypt_aes256_key_s;
+
+extern bool EverCrypt_uu___is_AES256_OPENSSL(EverCrypt_aes256_key_s projectee);
+
+extern FStar_Dyn_dyn
+EverCrypt___proj__AES256_OPENSSL__item__st(EverCrypt_aes256_key_s projectee);
+
+extern bool EverCrypt_uu___is_AES256_BCRYPT(EverCrypt_aes256_key_s projectee);
+
+extern FStar_Dyn_dyn
+EverCrypt___proj__AES256_BCRYPT__item__st(EverCrypt_aes256_key_s projectee);
+
+extern bool EverCrypt_uu___is_AES256_HACL(EverCrypt_aes256_key_s projectee);
+
+extern uint8_t *EverCrypt___proj__AES256_HACL__item__w(EverCrypt_aes256_key_s projectee);
+
+extern uint8_t *EverCrypt___proj__AES256_HACL__item__sbox(EverCrypt_aes256_key_s projectee);
 
 typedef struct EverCrypt__aead_state_s
 {
@@ -105,11 +143,11 @@ typedef struct EverCrypt_AEAD_state_s_s
 }
 EverCrypt_AEAD_state_s;
 
-typedef struct EverCrypt_Hash_Incremental_state_s_s
+typedef struct Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s_____s
 {
-  EverCrypt_Hash_state_s *hash_state;
+  EverCrypt_Hash_state_s *block_state;
   uint8_t *buf;
   uint64_t total_len;
 }
-EverCrypt_Hash_Incremental_state_s;
+Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____;
 

@@ -15,7 +15,7 @@ open FStar.Tactics.Canon
 
 
 noextract
-val pow: a:nat -> b:nat -> res:nat
+val pow: a:nat -> b:nat -> nat
 
 let rec pow a b =
   if b = 0 then 1
@@ -122,7 +122,7 @@ type elem (n:pos) = x:nat{x < n}
 
 let fmul (#n:pos) (x:elem n) (y:elem n) : elem n = (x * y) % n
 
-val exp: #n: pos -> a: elem n -> b: pos -> Tot (res: elem n) (decreases b)
+val exp: #n: pos -> a: elem n -> b: pos -> Tot (elem n) (decreases b)
 
 let rec exp #n a b =
   if b = 1 then a
@@ -131,26 +131,26 @@ let rec exp #n a b =
     else fmul a (exp (fmul a a) (b / 2))
 
 
-noextract 
-let modp_inv_prime (prime: pos {prime > 3}) (x: elem prime) : Tot (r: elem prime) = 
+noextract
+let modp_inv_prime (prime: pos {prime > 3}) (x: elem prime) : Tot (elem prime) =
   (exp #prime x (prime - 2)) % prime
 
 noextract
-let modp_inv2_prime (x: int) (p: nat {p > 3}) : Tot (r: elem p) = modp_inv_prime p (x % p)
+let modp_inv2_prime (x: int) (p: nat {p > 3}) : Tot (elem p) = modp_inv_prime p (x % p)
 
 noextract
-let modp_inv2 (x: nat) : Tot (r: elem prime256) = 
+let modp_inv2 (x: nat) : Tot (elem prime256) =
   modp_inv2_prime x prime256
 
 
 noextract
-let modp_inv2_pow (x: nat) : Tot (r: elem prime256) = 
+let modp_inv2_pow (x: nat) : Tot (elem prime256) =
    power_distributivity x (prime256 - 2) prime256;
    pow x (prime256 - 2) % prime256
 
 
 noextract
-let min_one_prime (prime: pos {prime > 3}) (x: int) : Tot (r: elem prime) = 
+let min_one_prime (prime: pos {prime > 3}) (x: int) : Tot (elem prime) =
   let p = x % prime in 
   exp #prime p (prime - 1)
 
@@ -464,11 +464,27 @@ let lemma_mul_nat5 a b c d e = ()
 val modulo_distributivity_mult2: a: int -> b: int -> c: int -> d: pos -> Lemma (((a % d) * (b % d) * c) % d = (a * b * c)% d)
 
 let modulo_distributivity_mult2 a b c d = 
-  lemma_mod_mul_distr_l a ((b % d) * c) d;
-    assert((a % d * ((b % d) * c)) % d == (a * ((b % d) * c)) % d);
-    assert_by_tactic (a * ((b % d) * c) == (b % d) * a * c) canon;
-  lemma_mod_mul_distr_l b (a * c) d
+  calc (==) 
+  {
+    ((a % d) * (b % d) * c) % d;
+    (==) 
+    {assert_by_tactic (((a % d) * (b % d) * c) == ((a % d) * ((b % d) * c))) canon}
+    ((a % d) * ((b % d) * c)) % d;
+    (==)
+    {lemma_mod_mul_distr_l a ((b % d) * c) d}
+    (a * ((b % d) * c)) % d; 
+    (==) 
+    {assert_by_tactic (a * ((b % d) * c) == (a * (b % d) * c)) canon}
+    (a * (b % d) * c) % d; 
+    (==)
+    {assert_by_tactic (a * (b % d) * c == (b % d) * (a * c)) canon}
 
+    ((b % d) * (a * c)) % d;
+    (==) 
+    {lemma_mod_mul_distr_l b (a * c) d; assert_by_tactic (b * (a * c) == a * b * c) canon }
+    (a * b * c) % d; 
+  }
+  
 
 val lemma_minus_distr (a: int) (b: int): Lemma ((a % prime256 - b % prime256) % prime256 = (a - b) %prime256)
 
@@ -622,16 +638,6 @@ let lemma_low_level0 o0 o1 o2 o3 f0 f1 f2 f3 u h2 c1 c2 c3 h3 h4 =
   assert((c3 + h4) * pow2 256 < pow2 320);
   assert(c3 + h4 < pow2 64)
 
-
-val lemma_ll0: a: int -> b: int -> c: int -> d: int -> Lemma (
-    (a + b * pow2 64 + c * pow2 64 * pow2 64 +  d * pow2 64 * pow2 64 * pow2 64) * pow2 256 == 
-    a * pow2 64 * pow2 64 * pow2 64 * pow2 64  +
-    b * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
-    c * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
-    d * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64)
-
-let lemma_ll0 a b c d = 
-  assert_norm (pow2 256 == pow2 64 * pow2 64 * pow2 64 * pow2 64)
 
 val lemma_pow_signature: a: nat -> prime: pos{prime > 3} ->  Lemma 
   (

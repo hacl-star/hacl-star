@@ -134,13 +134,16 @@ let init #a s =
 
 friend Vale.SHA.SHA_helpers
 
+// Avoid a cross-compilation unit symbol visibility... duplicate locally.
+let k224_256 =
+  LowStar.ImmutableBuffer.igcmalloc_of_list HS.root Spec.SHA2.Constants.k224_256_l
+
 // A new switch between HACL and Vale; can be used in place of Hacl.Hash.SHA2.update_256
 let update_multi_256 s blocks n =
   let has_shaext = AC.has_shaext () in
   let has_sse = AC.has_sse () in
-  if SC.vale && has_shaext && has_sse then begin
+  if EverCrypt.TargetConfig.x64 && (SC.vale && has_shaext && has_sse) then begin
     let n = Int.Cast.Full.uint32_to_uint64 n in
-    let open Hacl.Hash.Core.SHA2.Constants in
     B.recall k224_256;
     IB.recall_contents k224_256 Spec.SHA2.Constants.k224_256;
     IB.buffer_immutable_buffer_disjoint s k224_256 (ST.get ());

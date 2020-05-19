@@ -60,9 +60,7 @@ val _ecp256dh_r:
       live h result /\ live h pubKey /\ live h scalar /\
       disjoint result pubKey /\ disjoint result scalar /\
       as_nat h (gsub result (size 0) (size 4)) == 0 /\
-      as_nat h (gsub result (size 4) (size 4)) == 0 /\
-      1 <= nat_from_bytes_le (as_seq h scalar) /\
-      nat_from_bytes_le (as_seq h scalar) < prime_p256_order)
+      as_nat h (gsub result (size 4) (size 4)) == 0)
     (ensures fun h0 r h1 -> 
       modifies (loc result) h0 h1 /\
       (let x, y = as_nat h0 (gsub pubKey (size 0) (size 4)), as_nat h0 (gsub pubKey (size 4) (size 4)) in
@@ -97,7 +95,6 @@ let _ecp256dh_r result pubKey scalar =
     pop_frame();
     u64 18446744073709551615
     end
-
 
 (* This code is not constant-time on pubKey *)
 let ecp256dh_r result pubKey scalar =

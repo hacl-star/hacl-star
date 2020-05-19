@@ -56,7 +56,7 @@ let vec_smul_mod_five #w f =
 
 
 noextract
-val carry_wide_felem5_compact: #w:lanes -> inp:felem_wide5 w -> out:felem5 w
+val carry_wide_felem5_compact: #w:lanes -> inp:felem_wide5 w -> felem5 w
 let carry_wide_felem5_compact #w (x0, x1, x2, x3, x4) =
   // m_i <= 4096, x_i <= m_i * max26 * max26
   // felem_wide_fits5 (x0, x1, x2, x3, x4) (m0, m1, m2, m3, m4)
@@ -274,6 +274,7 @@ val carry_wide_felem5_fits_lemma:
   (requires felem_wide_fits5 inp (126, 102, 78, 54, 30))
   (ensures  felem_fits5 (carry_wide_felem5 inp) (1, 2, 1, 1, 2))
 
+#push-options "--z3rlimit 100"
 let carry_wide_felem5_fits_lemma #w inp =
   let (x0, x1, x2, x3, x4) = inp in
   let t0, c0 = carry26_wide_zero x0 in
@@ -287,7 +288,7 @@ let carry_wide_felem5_fits_lemma #w inp =
   vec_smul_mod_five c4;
   let t0', c5 = carry26 t0 (vec_smul_mod c4 (u64 5)) in
   carry26_fits_lemma 155 1 t0 (vec_smul_mod c4 (u64 5))
-
+#pop-options
 
 val carry_wide_felem5_eval_lemma_i0:
     inp:tup64_5
@@ -904,7 +905,7 @@ let carry_reduce_lemma_i #w l cin i =
   FStar.Math.Lemmas.pow2_minus 32 26
 
 
-#push-options "--z3rlimit 300"
+#push-options "--z3rlimit 400"
 val carry_reduce_felem5_fits_lemma_i0:
     #w:lanes
   -> f:felem5 w{acc_inv_t f}

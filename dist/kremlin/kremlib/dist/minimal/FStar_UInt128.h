@@ -16,12 +16,6 @@
 
 
 
-static inline uint64_t
-FStar_UInt128___proj__Mkuint128__item__low(FStar_UInt128_uint128 projectee);
-
-static inline uint64_t
-FStar_UInt128___proj__Mkuint128__item__high(FStar_UInt128_uint128 projectee);
-
 static inline FStar_UInt128_uint128
 FStar_UInt128_add(FStar_UInt128_uint128 a, FStar_UInt128_uint128 b);
 

@@ -19,6 +19,9 @@ let of_list #a l = Seq.seq_of_list #a l
 let of_list_index #a l i =
   Seq.lemma_seq_of_list_index #a l i
 
+let equal #a #len s1 s2 =
+  forall (i:size_nat{i < len}).{:pattern (index s1 i); (index s2 i)} index s1 i == index s2 i
+
 let eq_intro #a #len s1 s2 =
   assert (forall (i:nat{i < len}).{:pattern (Seq.index s1 i); (Seq.index s2 i)}
     index s1 i == index s2 i);
@@ -175,7 +178,7 @@ let repeati_blocks #a #b bs inp f g init =
   let last = seq_sub inp (nb * bs) rem in
   g nb rem last acc
 
-let repeat_blocks #a #b bs inp f l init =
+let repeat_blocks #a #b #c bs inp f l init =
   let len = length inp in
   let nb = len / bs in
   let rem = len % bs in
@@ -183,7 +186,7 @@ let repeat_blocks #a #b bs inp f l init =
   let last = seq_sub inp (nb * bs) rem in
   l rem last acc
 
-let lemma_repeat_blocks #a #b bs inp f l init = ()
+let lemma_repeat_blocks #a #b #c bs inp f l init = ()
 
 let repeat_blocks_multi #a #b bs inp f init =
   let len = length inp in
@@ -204,7 +207,7 @@ let generate_blocks #t len max n a f acc0 =
   let a0  = (acc0, (Seq.empty <: s:seq t{length s == 0 * len}))  in
   repeat_gen n (generate_blocks_a t len max a) (generate_blocks_inner t len max a f) a0
 
-let map_blocks_a (a:Type) (bs:size_nat) (max:nat) (i:nat{i <= max}) = s:seq a{length s == i * bs}
+let generate_blocks_simple_a (a:Type) (bs:size_nat) (max:nat) (i:nat{i <= max}) = s:seq a{length s == i * bs}
 
 let generate_blocks_simple_f
  (#a:Type)
@@ -212,12 +215,12 @@ let generate_blocks_simple_f
  (max:nat)
  (f:(i:nat{i < max} -> lseq a bs))
  (i:nat{i < max})
- (acc:map_blocks_a a bs max i) : map_blocks_a a bs max (i + 1)
+ (acc:generate_blocks_simple_a a bs max i) : generate_blocks_simple_a a bs max (i + 1)
 =
  Seq.append acc (f i)
 
 let generate_blocks_simple #a bs max nb f =
- repeat_gen nb (map_blocks_a a bs max)
+ repeat_gen nb (generate_blocks_simple_a a bs max)
    (generate_blocks_simple_f #a bs max f) Seq.empty
 
 #restart-solver
@@ -249,22 +252,12 @@ let div_mul_l a b c d =
     b / (c * d);
   }
 
-let map_blocks_f
-  (#a:Type)
-  (bs:size_nat{bs > 0})
-  (max:nat)
-  (inp:seq a{length inp == max * bs})
-  (f:(i:nat{i < max} -> lseq a bs -> lseq a bs))
-  (i:nat{i < max})
-  (acc:map_blocks_a a bs max i) : map_blocks_a a bs max (i + 1)
-=
-  //Math.Lemmas.multiple_division_lemma max bs;
-  let block = Seq.slice inp (i*bs) ((i+1)*bs) in
-  Seq.append acc (f i block)
 
 let map_blocks_multi #a bs max nb inp f =
   repeat_gen nb (map_blocks_a a bs max)
     (map_blocks_f #a bs max inp f) Seq.empty
+
+let lemma_map_blocks_multi #a bs max nb inp f = ()
 
 private
 val mod_prop: n:pos -> a:nat -> b:nat{a * n <= b /\ b < (a + 1) * n} ->
@@ -303,6 +296,8 @@ let map_blocks #a blocksize inp f g =
   if (rem > 0) then
     Seq.append bs (g nb rem last)
   else bs
+
+let lemma_map_blocks #a blocksize inp f g = ()
 
 let index_map_blocks #a bs inp f g i =
   let len = length inp in
@@ -356,7 +351,7 @@ let rec index_generate_blocks #t len max n f i =
   let _,s = generate_blocks #t len max (n-1) a_spec f () in
   let _,s' = f (n-1) () in
   let _,s1 = generate_blocks #t len max n a_spec f () in
-  unfold_generate_blocks #t len max a_spec f () (n-1); 
+  unfold_generate_blocks #t len max a_spec f () (n-1);
   Seq.Properties.lemma_split s1 (n * len - len);
   Seq.Properties.lemma_split (Seq.append s s') (n * len - len);
   Seq.lemma_eq_intro s1 (Seq.append s s');

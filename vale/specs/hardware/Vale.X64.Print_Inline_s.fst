@@ -213,11 +213,10 @@ let print_explicit_register_arg (n:nat) (a:td) (i:nat{i < n}) (of_arg:reg_nat n 
     true, "  register " ^ ty ^ names i ^ "_r asm(\"" ^ P.print_reg_name (of_arg i) ^ "\") = " ^ names i ^ ";\n"
   else false, ""
 
-
 let rec print_explicit_register_args (n:nat) (args:list td) (i:nat{i + List.length args = n}) (of_arg:reg_nat n -> reg_64) (reserved:reg_64 -> bool) (names:nat -> string) =
   match args with
   | [] -> false, ""
-  | a::q -> 
+  | a::q ->
     let was_explicit, explicit_str = print_explicit_register_arg n a i of_arg reserved names in
     let are_explicit, rest_str = print_explicit_register_args n q (i+1) of_arg reserved names in
     was_explicit || are_explicit, explicit_str ^ rest_str
@@ -319,6 +318,12 @@ and remove_blanks (b:codes) : codes =
     )
   | c :: cs -> c :: remove_blanks cs
 
+// Check if any argument is passed in the rax register
+let rec uses_rax (#n:nat) (args:list td) (i:nat{i + List.length args = n}) (of_arg:reg_nat n -> reg_64) =
+  match args with
+  | [] -> false
+  | a::q -> if of_arg i = rRax then true else uses_rax q (i+1) of_arg
+
 let print_inline
   (name:string)
   (label:int)
@@ -334,6 +339,14 @@ let print_inline
   let comments = print_fn_comments fn_comments in
 
   let reserved_regs = build_reserved_args code (fun _ -> false) in
+
+  let inputs_use_rax = uses_rax args 0 of_arg in
+  if reserved_regs rRax && Some? ret_val then
+    FStar.All.failwith "We require the annotation register uint64_t result(rax), but it would be ignored by gcc < 9"; 
+
+  if inputs_use_rax && Some? ret_val then
+    FStar.All.failwith "inputs are not allowed to be passed in rax when there is a return argument";
+
 
   // Signature: static inline (void | uint64_t) [name] (arg1, arg2???) {
   let header = "static inline " ^ print_rettype ret_val ^ " " ^ name ^ " (" ^ print_args args 0 arg_names ^ ") \n{\n" in

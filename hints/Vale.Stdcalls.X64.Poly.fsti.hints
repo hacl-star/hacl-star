@@ -8,7 +8,7 @@
       0,
       [ "@query" ],
       0,
-      "6e7c92d50937a0323bde9e554b67816f"
+      "4ebeb8ed49558d244565bf0555eac177"
     ],
     [
       "Vale.Stdcalls.X64.Poly.as_normal_t",
@@ -17,7 +17,7 @@
       0,
       [ "@query" ],
       0,
-      "0f25701186d57ca20fa6b0af355feef8"
+      "00cf4894cde376c57fa52970dc12be0f"
     ],
     [
       "Vale.Stdcalls.X64.Poly.dom",
@@ -29,7 +29,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "57a13de640d966106cfb62e31d6a2bbb"
+      "3e5b3b6df10a07ad81301b9bef6256b9"
     ],
     [
       "Vale.Stdcalls.X64.Poly.poly_pre",
@@ -56,7 +56,7 @@
         "token_correspondence_Prims.pow2.fuel_instrumented"
       ],
       0,
-      "b27776e232ccaa6b2cd7d2748d5468d6"
+      "ac511df67c247334cada57cbb62bd7a7"
     ],
     [
       "Vale.Stdcalls.X64.Poly.poly_post",
@@ -83,7 +83,7 @@
         "token_correspondence_Prims.pow2.fuel_instrumented"
       ],
       0,
-      "18feeff9d5bcf753dc35d3f37f291e2d"
+      "73b6926e9ca90604702153d7ef5dbd27"
     ],
     [
       "Vale.Stdcalls.X64.Poly.poly_lemma'",
@@ -104,8 +104,8 @@
         "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
         "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder", "equation_Prims.eq2",
-        "equation_Prims.nat", "equation_Prims.pos", "equation_Prims.squash",
-        "equation_Vale.Arch.HeapImpl.vale_heaplets",
+        "equation_Prims.eqtype", "equation_Prims.nat", "equation_Prims.pos",
+        "equation_Prims.squash", "equation_Vale.Arch.HeapImpl.vale_heaplets",
         "equation_Vale.AsLowStar.ValeSig.vale_calling_conventions",
         "equation_Vale.AsLowStar.ValeSig.vale_calling_conventions_stdcall",
         "equation_Vale.AsLowStar.ValeSig.vale_save_reg",
@@ -151,13 +151,12 @@
         "equation_Vale.X64.State.update_reg_64",
         "fuel_guarded_inversion_Vale.Arch.HeapImpl.vale_full_heap",
         "fuel_guarded_inversion_Vale.X64.State.vale_state",
-        "function_token_typing_FStar.UInt8.t",
         "function_token_typing_Vale.Arch.HeapImpl.vale_heap",
         "function_token_typing_Vale.AsLowStar.MemoryHelpers.fuel_eq",
         "function_token_typing_Vale.Interop.X64.regs_modified_stdcall",
         "int_typing",
-        "interpretation_Tm_abs_32401718f2f6bcda7115202e34dea9bd",
-        "interpretation_Tm_abs_a8523bd44818ac2c307ce728425205f3",
+        "interpretation_Tm_abs_6164b340b35da46f7bf1c13e93438baf",
+        "interpretation_Tm_abs_6959279fcaad3568e198089a8cef989b",
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
         "lemma_Vale.AsLowStar.MemoryHelpers.as_vale_buffer_len",
@@ -187,6 +186,7 @@
         "projection_inverse_Vale.X64.State.Mkvale_state_vs_regs",
         "refinement_interpretation_Tm_refine_0559236e7a05befcc7b6302f3642ad81",
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_7d29e56e66c8277ffbad10980c3bdf4c",
@@ -198,7 +198,8 @@
         "refinement_interpretation_Tm_refine_f561eec0dd16c07a918cc88c431bb828",
         "token_correspondence_Vale.Interop.X64.regs_modified_stdcall",
         "token_correspondence_Vale.Interop.X64.xmms_modified_stdcall",
-        "typing_FStar.UInt64.v", "typing_LowStar.Buffer.trivial_preorder",
+        "typing_FStar.UInt64.v", "typing_FStar.UInt8.t",
+        "typing_LowStar.Buffer.trivial_preorder",
         "typing_Vale.Arch.HeapImpl.__proj__Mkvale_full_heap__item__vf_heap",
         "typing_Vale.Arch.HeapImpl.__proj__Mkvale_full_heap__item__vf_heaplets",
         "typing_Vale.Interop.Assumptions.win",
@@ -217,7 +218,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "8a95bd3d50909f0cab9be3a314ea8100"
+      "48eb31d7e5d23b5ccd740944d8b8f70e"
     ],
     [
       "Vale.Stdcalls.X64.Poly.poly_lemma",
@@ -234,8 +235,8 @@
         "equation_FStar.Pervasives.Native.snd", "equation_FStar.UInt.fits",
         "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
         "equation_LowStar.Buffer.buffer", "equation_Prims.eq2",
-        "equation_Prims.nat", "equation_Prims.squash",
-        "equation_Vale.AsLowStar.ValeSig.fuel_of",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Prims.squash", "equation_Vale.AsLowStar.ValeSig.fuel_of",
         "equation_Vale.AsLowStar.ValeSig.state_of",
         "equation_Vale.AsLowStar.ValeSig.vale_calling_conventions",
         "equation_Vale.AsLowStar.ValeSig.vale_calling_conventions_stdcall",
@@ -264,10 +265,9 @@
         "equation_Vale.X64.State.update_reg_64",
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple2",
         "fuel_guarded_inversion_Vale.X64.State.vale_state",
-        "function_token_typing_FStar.UInt8.t",
         "function_token_typing_Vale.AsLowStar.MemoryHelpers.fuel_eq",
-        "interpretation_Tm_abs_32401718f2f6bcda7115202e34dea9bd",
-        "interpretation_Tm_abs_a8523bd44818ac2c307ce728425205f3",
+        "interpretation_Tm_abs_6164b340b35da46f7bf1c13e93438baf",
+        "interpretation_Tm_abs_6959279fcaad3568e198089a8cef989b",
         "lemma_Vale.X64.Memory.loc_includes_refl",
         "lemma_Vale.X64.Memory.loc_includes_union_l_buffer",
         "lemma_Vale.X64.Memory.modifies_buffer_readable",
@@ -287,9 +287,11 @@
         "projection_inverse_Vale.Arch.HeapImpl.Mkvale_full_heap_vf_heap",
         "projection_inverse_Vale.X64.State.Mkvale_state_vs_heap",
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Tm_refine_83bd940927020bb51199658f6752ed80",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
-        "typing_FStar.UInt32.v", "typing_LowStar.Buffer.trivial_preorder",
+        "typing_FStar.UInt32.v", "typing_FStar.UInt8.t",
+        "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.len",
         "typing_Vale.AsLowStar.ValeSig.state_of",
         "typing_Vale.Interop.Assumptions.win",
@@ -304,7 +306,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "a0793462369166826525f9bb20c57db3"
+      "3e0436ef5822be7976eda5df4e6f44de"
     ],
     [
       "Vale.Stdcalls.X64.Poly.lowstar_poly_t",
@@ -335,7 +337,7 @@
         "typing_Vale.Stdcalls.X64.Poly.dom"
       ],
       0,
-      "3c4e72044d991b10a7c3d6141f3d0417"
+      "83c2c566ff2f07f6a5b61de7ea30b62b"
     ]
   ]
 ]

@@ -32,7 +32,8 @@ dist/chacha20-test.exe: $(HACL_HOME)/tests/chacha20-test.o dist/libchacha.a
 dist/chacha20-vec-test.exe: $(HACL_HOME)/tests/chacha20-vec-test.o dist/libchacha.a
 
 dist/chacha20-vec-openssl-test.exe: dist/libchacha.a
-	$(CC) $(CFLAGS) -I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/include/crypto -I $(OPENSSL_HOME)/crypto -I $(HACL_HOME)/tests/tests-openssl/jasmin-chacha-avx2 \
+	$(CC) $(CFLAGS) -I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/include/crypto -I $(OPENSSL_HOME)/crypto \
+	-I $(HACL_HOME)/tests/tests-openssl/jasmin-chacha-avx2 -I $(HACL_HOME)/tests \
 	$(HACL_HOME)/tests/tests-openssl/jasmin-chacha-avx2/chacha20.s $(HACL_HOME)/tests/tests-openssl/chacha20-vec-test.c $^ \
 	-o $@ $(OPENSSL_HOME)/libcrypto.a -lpthread -ldl
 
