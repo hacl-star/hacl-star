@@ -371,3 +371,6 @@ val ins_Newline : instr_dep [] [] PreserveFlags eval_Newline
 
 let eval_Space : option unit = Some ()
 val ins_Space (_:nat) : instr_dep [] [] PreserveFlags eval_Space
+
+let eval_Prefetchnta (_:nat64) : option unit = Some ()
+val ins_Prefetchnta : instr_dep [] [op64] PreserveFlags eval_Prefetchnta
