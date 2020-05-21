@@ -439,7 +439,7 @@ let mul64 x y result temp =
   upd result (size 0) l0;
   upd temp (size 0) h0
 
-
+inline_for_extraction noextract
 val mult64_0: x: felem -> u: uint64 -> result: lbuffer uint64 (size 1) -> temp: lbuffer uint64 (size 1) -> Stack unit 
   (requires fun h -> live h x /\ live h result /\ live h temp /\ disjoint result temp)
   (ensures fun h0 _ h1 -> 
@@ -452,7 +452,7 @@ let mult64_0 x u result temp =
   let f0 = index x (size 0) in 
   mul64 f0 u result temp
 
-
+inline_for_extraction noextract
 val mult64_0il: x: glbuffer uint64 (size 4) -> u: uint64 -> result:  lbuffer uint64 (size 1) -> temp: lbuffer uint64 (size 1) -> Stack unit 
   (requires fun h -> live h x /\ live h result /\ live h temp /\ disjoint result temp)
   (ensures fun h0 _ h1 -> 
@@ -465,7 +465,7 @@ let mult64_0il x u result temp =
   let f0 = index x (size 0) in 
   mul64 f0 u result temp
 
-
+inline_for_extraction noextract
 val mult64_c: x: uint64 -> u: uint64 -> cin: uint64{uint_v cin <= 1} -> result: lbuffer uint64 (size 1) -> temp: lbuffer uint64 (size 1) -> Stack uint64 
   (requires fun h -> live h result /\ live h temp /\ disjoint result temp)
   (ensures fun h0 c2 h1 -> modifies (loc result |+| loc temp) h0 h1 /\ uint_v c2 <= 1 /\
@@ -482,7 +482,7 @@ let mult64_c x u cin result temp =
   let l = index result (size 0) in     
   add_carry_u64 cin l h result
 
-
+inline_for_extraction noextract
 val mul1_il: f:  glbuffer uint64 (size 4) -> u: uint64 -> result: lbuffer uint64 (size 4) -> Stack uint64
   (requires fun h -> live h result /\ live h f)
   (ensures fun h0 c h1 -> modifies (loc result) h0 h1 /\ 
@@ -531,7 +531,7 @@ let mul1_il f u result =
   pop_frame();  
   c3 +! temp0
 
-
+inline_for_extraction noextract
 val mul1: f: lbuffer uint64 (size 4) -> u: uint64 -> result: lbuffer uint64 (size 4) -> Stack uint64
   (requires fun h -> live h result /\ live h f)
   (ensures fun h0 c h1 -> modifies (loc result) h0 h1 /\ 
@@ -580,7 +580,7 @@ let mul1 f u result =
   pop_frame();  
   c3 +! temp0
 
-
+inline_for_extraction noextract
 val mul1_add: f1: felem -> u2: uint64 -> f3: felem -> result: felem -> 
   Stack uint64 
   (requires fun h -> live h f1 /\ live h f3 /\ live h result /\ eq_or_disjoint f3 result /\ disjoint f1 result)
@@ -670,6 +670,7 @@ let lemma_powers () =
 
 #push-options "--z3rlimit 300"
 
+inline_for_extraction noextract
 val mul: f: felem -> r: felem -> out: widefelem -> 
   Stack unit
     (requires fun h -> live h out /\ live h f /\ live h r /\ disjoint r out)
@@ -1601,7 +1602,7 @@ val mod64: a: widefelem -> Stack uint64
 
 let mod64 a = index a (size 0)
 
-
+inline_for_extraction noextract
 val shortened_mul: a: glbuffer uint64 (size 4) -> b: uint64 -> result: widefelem -> Stack unit
   (requires fun h -> live h a /\ live h result /\ wide_as_nat h result = 0)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
