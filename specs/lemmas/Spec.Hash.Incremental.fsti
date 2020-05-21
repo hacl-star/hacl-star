@@ -30,7 +30,8 @@ let update_last_blake (a:hash_alg{is_blake a})
   Tot (words_state a)
   = let blocks, last_block, rem = last_split_blake a input in
     let h' = update_multi a hash blocks in
-    (Spec.Blake2.blake2_update_block (to_blake_alg a) true (v (snd h' +. u64 rem)) last_block (fst h'), u64 0)
+    let h_f = Spec.Blake2.blake2_update_block (to_blake_alg a) true (v (snd h' +. u64 rem)) last_block (fst h') in
+    (h_f, u64 0)
 
 (* An incremental specification better suited to a stateful API, allowing the
    client to perform the padding at the last minute upon hitting the last chunk of
@@ -63,13 +64,20 @@ let split_blocks (a:hash_alg) (input:bytes)
     S.lemma_split input (n * block_length a);
     bs, l
 
+let hash_incremental_body
+  (a:hash_alg)
+  (input:bytes{S.length input <= max_input_length a})
+  (s:words_state a)
+  : Tot (words_state a)
+  = let bs, l = split_blocks a input in
+    let s = update_multi a s bs in
+    update_last a s (S.length bs) l
+
 let hash_incremental (a:hash_alg) (input:bytes{S.length input <= (max_input_length a)}):
   Tot (hash:bytes{S.length hash = (hash_length a)})
-=
-  let bs, l = split_blocks a input in
-  let hash = update_multi a (init a) bs in
-  let hash = update_last a hash (S.length bs) l in
-  finish a hash
+= let s = init a in
+  let s = hash_incremental_body a input s in
+  finish a s
 
 let hash = Spec.Agile.Hash.hash
 
