@@ -12,39 +12,6 @@ friend Spec.Agile.Hash
 
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
 
-let rec lemma_update_multi_core_blake
-  (a:hash_alg{is_blake a})
-  (blocks:bytes{Seq.length blocks <= max_input_length a})
-  (nb:nat)
-  (h:words_state a)
-  : Lemma
-    (requires snd h == u64 0 /\ Seq.length blocks == nb * block_length a)
-    (ensures fst (Spec.Agile.Hash.update_multi a h blocks) ==
-             Lib.LoopCombinators.repeati nb (B2.blake2_update1 (to_blake_alg a) 0 blocks) (fst h))
-  = let n = S.length blocks / block_length a in
-    let f = B2.blake2_update1 (to_blake_alg a) 0 blocks in
-    let open Lib.LoopCombinators in
-    if nb = 0 then (
-       admit()
-       // assert (blocks `S.equal` S.empty);
-       // update_multi_zero a h;
-       // eq_repeati0 n f (fst h)
-
-    ) else admit ()
-
-let rec lemma_update_multi_core_blake_snd
-  (a:hash_alg{is_blake a})
-  (blocks:bytes{Seq.length blocks <= maxint U64})
-  (nb:nat)
-  (h:words_state a)
-  : Lemma
-    (requires snd h == u64 0 /\ Seq.length blocks == nb * block_length a)
-    (ensures snd (Spec.Agile.Hash.update_multi a h blocks) == u64 (S.length blocks))
-  = admit()
-
-
-#pop-options
-
 let rec repeati_ext (#a:Type) (n:nat) (f1 f2:(i:nat{i < n} -> a -> a)) (acc0:a) (i:nat{i <= n})
   : Lemma
     (requires forall (i:nat{i < n}) (acc:a). f1 i acc == f2 i acc)
@@ -59,6 +26,91 @@ let rec repeati_ext (#a:Type) (n:nat) (f1 f2:(i:nat{i < n} -> a -> a)) (acc0:a) 
       unfold_repeati n f2 acc0 (i-1);
       repeati_ext n f1 f2 acc0 (i-1)
     )
+
+let rec lemma_update_multi_core_blake_snd
+  (a:hash_alg{is_blake a})
+  (blocks:bytes{Seq.length blocks <= maxint U64})
+  (nb:nat)
+  (h:words_state a)
+  : Lemma
+    (requires snd h == u64 0 /\ Seq.length blocks == nb * block_length a)
+    (ensures snd (Spec.Agile.Hash.update_multi a h blocks) == u64 (S.length blocks))
+    (decreases nb)
+  = if nb = 0 then (
+       assert (S.equal blocks S.empty);
+       update_multi_zero a h
+    ) else (
+      let nb' = nb - 1 in
+      let blocks' = S.slice blocks 0 (nb' * block_length a) in
+      let last = S.slice blocks (nb' * block_length a) (S.length blocks) in
+      let h_inter = update_multi a h blocks' in
+      let h_f = update_multi a h blocks in
+
+      calc (==) {
+        v #U64 #SEC (snd h_f);
+        (==) {
+          update_multi_associative a h blocks' last;
+          assert (S.equal (blocks' `S.append` last) blocks);
+          lemma_update_multi_core_blake_snd a blocks' nb' h;
+          update_multi_update a h_inter last  }
+        v (u64 (S.length blocks') +. u64 (block_length a));
+        (==) { }
+        (S.length blocks' + block_length a) % pow2 64;
+        (==) { FStar.Math.Lemmas.small_mod (S.length blocks' + block_length a) (pow2 64) }
+        S.length blocks' + block_length a;
+        (==) { }
+        S.length blocks;
+      };
+      v_injective #U64 #SEC (snd h_f)
+    )
+
+let rec lemma_update_multi_core_blake
+  (a:hash_alg{is_blake a})
+  (blocks:bytes{Seq.length blocks <= max_input_length a})
+  (nb:nat)
+  (h:words_state a)
+  : Lemma
+    (requires snd h == u64 0 /\ Seq.length blocks == nb * block_length a)
+    (ensures fst (Spec.Agile.Hash.update_multi a h blocks) ==
+             Lib.LoopCombinators.repeati nb (B2.blake2_update1 (to_blake_alg a) 0 blocks) (fst h))
+    (decreases nb)
+  = let n = S.length blocks / block_length a in
+    let f = B2.blake2_update1 (to_blake_alg a) 0 blocks in
+    let open Lib.LoopCombinators in
+    if nb = 0 then (
+       admit()
+       // eq_repeati0 n f (fst h);
+       // assert (repeati nb f (fst h) == fst h);
+
+       // let h_f = fst (Spec.Agile.Hash.update_multi a h blocks) in
+       // assert (blocks `S.equal` S.empty);
+       // update_multi_zero a h;
+       // assert (h_f == fst h)
+    ) else (
+      admit()
+      // let h_fr = repeati nb (B2.blake2_update1 (to_blake_alg a) 0 blocks) (fst h) in
+
+      // let n' = nb - 1 in
+      // let blocks' = S.slice blocks 0 (n' * block_length a) in
+      // let last = S.slice blocks (n' * block_length a) (S.length blocks) in
+      // update_multi_associative a h blocks' last;
+      // let h_f = Spec.Agile.Hash.update_multi a h blocks in
+      // let h_inter = update_multi a h blocks' in
+      // assert (S.equal (S.append blocks' last) blocks);
+      // assert (h_f == update_multi a h_inter last);
+      // let f' = B2.blake2_update1 (to_blake_alg a) 0 blocks' in
+      // lemma_update_multi_core_blake a blocks' n' h;
+      // assert (fst h_inter == repeati n' (B2.blake2_update1 (to_blake_alg a) 0 blocks') (fst h));
+
+
+      // unfold_repeati n f (fst h) (nb - 1);
+      // assert (h_fr == f (nb-1) (repeati (nb-1) f (fst h)));
+      // assume (h_fr == f (nb-1) (repeati n' f' (fst h)));
+
+      // admit()
+    )
+
+
 
 #push-options "--z3rlimit 100"
 
@@ -192,21 +244,31 @@ let blake2_is_hash_incremental
     // TODO: max_input_length should be pow2 64 for both blake
     //lemma_hash_incremental_body_blake2 a d (init a)
 
+let md_is_hash_incremental
+  (a:hash_alg{not (is_blake a)})
+  (input: bytes { S.length input <= max_input_length a })
+  (s:words_state a)
+  : Lemma (
+      let blocks, rest = split_blocks a input in
+      update_multi a s (input `S.append` (pad a (S.length input))) ==
+      update_last a (update_multi a s blocks) (S.length blocks) rest)
+   = let blocks, rest = split_blocks a input in
+     assert (S.length input == S.length blocks + S.length rest);
+     let padding = pad a (S.length input) in
+     calc (==) {
+       update_last a (update_multi a s blocks) (S.length blocks) rest;
+       (==) { }
+       update_multi a (update_multi a s blocks) S.(rest @| padding);
+       (==) { update_multi_associative a s blocks S.(rest @| padding) }
+       update_multi a s S.(blocks @| (rest @| padding));
+       (==) { S.append_assoc blocks rest padding }
+       update_multi a s S.((blocks @| rest) @| padding);
+       (==) { }
+       update_multi a s S.(input @| padding);
+     }
+
 let hash_is_hash_incremental (a: hash_alg) (input: bytes { S.length input <= max_input_length a }):
   Lemma (ensures (S.equal (hash a input) (hash_incremental a input)))
 =
   if is_blake a then (blake2_is_hash_incremental a input)
-  else
-  admit();
-  let open FStar.Mul in
-  let n = S.length input / block_length a in
-  let padding = pad a (S.length input) in
-  let padded_input = input `S.append` padding in
-  let blocks, rest = Lib.UpdateMulti.split_block (block_length a) padded_input n in
-  let blocks', rest' = S.split input (n * block_length a) in
-  S.lemma_eq_intro blocks blocks';
-  S.lemma_eq_intro (rest' `S.append` padding) rest;
-  Math.Lemmas.multiple_modulo_lemma n (block_length a);
-  S.lemma_eq_intro padded_input (blocks `S.append` rest);
-  update_multi_associative a (init a) blocks rest;
-  S.lemma_eq_intro (fst (update_multi a (init a) padded_input)) (fst (update_multi a (update_multi a (init a) blocks) rest))
+  else md_is_hash_incremental a input (init a)
