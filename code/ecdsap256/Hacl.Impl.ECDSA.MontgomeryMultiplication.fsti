@@ -43,7 +43,7 @@ val reduction_prime_2prime_with_carry : x: widefelem -> result: felem ->
     (requires fun h -> live h x /\ live h result /\  eq_or_disjoint x result /\ wide_as_nat h x < 2 * prime_p256_order)
     (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat h1 result = wide_as_nat h0 x % prime_p256_order)  
     
-
+inline_for_extraction noextract
 val reduction_prime_2prime_with_carry2 : carry: uint64 ->  x: felem -> result: felem ->
   Stack unit 
     (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result /\ 
@@ -86,6 +86,7 @@ val montgomery_multiplication_ecdsa_module: a: felem -> b: felem ->result: felem
       as_nat h1 result = toDomain_ (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 b) % prime_p256_order))
 
 
+inline_for_extraction noextract
 val felem_add: arg1: felem -> arg2: felem -> out: felem -> Stack unit 
   (requires (fun h0 ->  
     live h0 arg1 /\ live h0 arg2 /\ live h0 out /\ 

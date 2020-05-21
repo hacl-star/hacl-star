@@ -10,7 +10,8 @@ open Lib.Buffer
 
 
 (* This code is not side channel resistant *)
-(* inline_for_extraction noextract *)
+
+inline_for_extraction noextract
 val eq_u8_nCT: a:uint8 -> b:uint8 -> (r:bool{r == (uint_v a = uint_v b)})
 
 let eq_u8_nCT a b =
@@ -19,7 +20,8 @@ let eq_u8_nCT a b =
 
 
 (* This code is not side channel resistant *)
-(* inline_for_extraction noextract *)
+
+inline_for_extraction noextract
 val eq_u64_nCT: a:uint64 -> b:uint64 -> (r:bool{r == (uint_v a = uint_v b)})
 
 let eq_u64_nCT a b =
@@ -28,7 +30,7 @@ let eq_u64_nCT a b =
 
 
 (* This code is not side channel resistant *)
-(* inline_for_extraction noextract *)
+inline_for_extraction noextract
 val eq_0_u64: a: uint64 -> r:bool{r == (uint_v a = 0)}
 
 let eq_0_u64 a = eq_u64_nCT a (u64 0)

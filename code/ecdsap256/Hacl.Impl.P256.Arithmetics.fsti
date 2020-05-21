@@ -28,6 +28,7 @@ val cube: a: felem -> result: felem -> Stack unit
     as_nat h1 result = toDomain_ (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a) % prime256) /\ 
     as_nat h1 result = toDomain_ (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a)))
 
+inline_for_extraction noextract
 val quatre: a: felem -> result: felem -> Stack unit
   (requires fun h -> live h a /\ live h result /\ disjoint a result /\ as_nat h a < prime)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 

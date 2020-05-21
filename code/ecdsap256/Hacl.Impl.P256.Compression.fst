@@ -26,6 +26,7 @@ open FStar.Mul
 
 #set-options "--z3rlimit 100 --ifuel 0 --fuel 0"
 
+inline_for_extraction noextract
 val uploadA: a: felem -> Stack unit
   (requires fun h -> live h a)
   (ensures fun h0 _ h1 -> modifies (loc a) h0 h1 /\ 
@@ -41,6 +42,7 @@ let uploadA a =
   upd a (size 3) (u64 18446744056529682436);
   assert_norm(18446744073709551612 + 17179869183 * pow2 64 + 18446744056529682436 * pow2 64 * pow2 64 * pow2 64 = (Spec.P256.aCoordinateP256 % prime256) * pow2 256 % prime256)
 
+inline_for_extraction noextract
 val uploadB: b: felem -> Stack unit 
   (requires fun h -> live h b)
   (ensures fun h0 _ h1 -> modifies (loc b) h0 h1 /\ as_nat h1 b < prime256 /\ 
@@ -146,7 +148,7 @@ let decompressionNotCompressedForm b result =
     copy result (sub b (size 1) (size 64));
   correctIdentifier
 
-
+inline_for_extraction noextract
 val lessThanPrime: f: felem -> Stack bool
   (requires fun h -> live h f)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\ r = (as_nat h0 f < prime256))

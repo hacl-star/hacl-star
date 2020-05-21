@@ -36,8 +36,8 @@ inDomain_mod_is_not_mod (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a) *
 
 let quatre a result = 
     let h0 = ST.get() in 
-  montgomery_multiplication_buffer a a result;
-  montgomery_multiplication_buffer result result result;
+  montgomery_square_buffer a result;
+  montgomery_square_buffer result result;
     inDomain_mod_is_not_mod ((fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a) % prime256) * (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a) % prime256));
     modulo_distributivity_mult2 (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a)) (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a)) 1 prime256;
     lemma_brackets (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a)) (fromDomain_ (as_nat h0 a)) (fromDomain_ (as_nat h0 a));
