@@ -535,3 +535,11 @@ procedure Space(inline n:nat)
 {
     // Do nothing. This is a no-op.
 }
+
+procedure Prefetchnta(in v:opr64)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr_annotate(I.ins_Prefetchnta, S.AnnotatePrefetchnta(), v))}
+{
+    // Do nothing. This is (effectively) a no-op.
+}

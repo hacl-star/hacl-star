@@ -8,4 +8,3 @@ let _ =
    Format.printf "#include \"Hacl_Streaming_SHA2_256.h\"\n");
   Cstubs.write_c Format.std_formatter ~prefix:""
     (module Hacl_Streaming_SHA2_256_bindings.Bindings)
-  
