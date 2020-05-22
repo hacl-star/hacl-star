@@ -1,6 +1,10 @@
-#if __APPLE__ && __MACH__
+#if (defined(__APPLE__) && defined(__MACH__)) || defined(__linux__)
 #define __STDC_WANT_LIB_EXT1__ 1
 #include <string.h>
+#endif
+
+#ifdef __FreeBSD__
+#include <strings.h>
 #endif
 
 #include <stdlib.h>
@@ -20,8 +24,14 @@ void Lib_Memzero0_memzero(void *dst, uint64_t len) {
      allocation-time, possibly via KRML_CHECK_SIZE, to fit in a size_t. */
   size_t len_ = (size_t) len;
 
-  #if __APPLE__ && __MACH__
+  #ifdef _WIN32
+    SecureZeroMemory(pnt, len);
+  #elif defined(__APPLE__) && defined(__MACH__)
     memset_s(dst, len_, 0, len_);
+  #elif defined(__linux__) || defined(__FreeBSD__)
+    explicit_bzero(dst, len_);
+  #elif defined(__NetBSD__)
+    explicit_memset(dst, 0, len_);
   #else
     /* Default implementation for platforms with no particular support. */
     #warning "Your platform does not support any safe implementation of memzero -- consider a pull request!"
