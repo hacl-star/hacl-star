@@ -156,6 +156,64 @@ let create_in #a r dst k =
   | CHACHA20_POLY1305 -> create_in_chacha20_poly1305 r dst k
   | _ -> UnsupportedAlgorithm
 
+#push-options "--z3rlimit 10 --max_fuel 0 --max_ifuel 0 --z3cliopt smt.QI.EAGER_THRESHOLD=5"
+
+let create_in_stack_chacha20_poly1305: create_in_stack_ty CHACHA20_POLY1305 =
+  fun dst k ->
+  let h0 = ST.get () in
+  let ek = B.alloca 0uy 32ul in
+  let h1 = ST.get () in
+  let p = B.alloca (Ek Hacl_CHACHA20 (G.hide (B.as_seq h0 k)) ek) 1ul in
+  let h2 = ST.get () in
+  B.blit k 0ul ek 0ul 32ul;
+  B.upd dst 0ul p;
+  let h3 = ST.get() in
+  B.modifies_only_not_unused_in B.(loc_buffer dst) h0 h3;
+  Success
+
+#pop-options
+
+inline_for_extraction noextract
+let create_in_stack_aes_gcm (i: vale_impl):
+  create_in_stack_ty (alg_of_vale_impl i) =
+fun dst k ->
+  let a = alg_of_vale_impl i in
+  let h0 = ST.get () in
+  let kv: G.erased (kv a) = G.hide (B.as_seq h0 k) in
+  let has_aesni = EverCrypt.AutoConfig2.has_aesni () in
+  let has_pclmulqdq = EverCrypt.AutoConfig2.has_pclmulqdq () in
+  let has_avx = EverCrypt.AutoConfig2.has_avx() in
+  let has_sse = EverCrypt.AutoConfig2.has_sse() in
+  let has_movbe = EverCrypt.AutoConfig2.has_movbe() in
+  if EverCrypt.TargetConfig.x64 && (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe) then (
+    let ek = B.alloca 0uy (concrete_xkey_len i + 176ul) in
+
+    vale_expand i k ek;
+
+    let h2 = ST.get () in
+    B.modifies_only_not_unused_in B.loc_none h0 h2;
+    let p = B.alloca (Ek i (G.hide (B.as_seq h0 k)) ek) 1ul in
+    let open LowStar.BufferOps in
+    dst *= p;
+    let h3 = ST.get() in
+    B.modifies_only_not_unused_in B.(loc_buffer dst) h2 h3;
+    Success
+
+  ) else
+    UnsupportedAlgorithm
+
+let create_in_stack_aes128_gcm: create_in_stack_ty AES128_GCM =
+  create_in_stack_aes_gcm Vale_AES128
+let create_in_stack_aes256_gcm: create_in_stack_ty AES256_GCM =
+  create_in_stack_aes_gcm Vale_AES256
+
+let create_in_stack #a dst k =
+  match a with
+  | AES128_GCM -> create_in_stack_aes128_gcm dst k
+  | AES256_GCM -> create_in_stack_aes256_gcm dst k
+  | CHACHA20_POLY1305 -> create_in_stack_chacha20_poly1305 dst k
+  | _ -> UnsupportedAlgorithm
+
 inline_for_extraction noextract
 let aes_gcm_encrypt (i: vale_impl):
   Vale.Wrapper.X64.GCMencryptOpt.encrypt_opt_stdcall_st (vale_alg_of_vale_impl i) =

@@ -147,6 +147,38 @@ let create_in_st (a: alg) =
           as_kv (B.deref h1 s) == B.as_seq h0 k
       | _ -> False)
 
+/// Same function as above, but in the StackInline effect, so that it is possible
+/// to use AES GCM while staying in the Stack effect. In this case, the state is
+/// allocated/deallocated just before/after any encryption or decryption (which
+/// is not very problematic during, for example, a handshake).
+inline_for_extraction noextract
+let create_in_stack_ty (a: alg) =
+  dst:B.pointer (B.pointer_or_null (state_s a)) ->
+  k:B.buffer uint8 { B.length k = key_length a } ->
+  StackInline error_code
+    (requires fun h0 ->
+      B.live h0 k /\ B.live h0 dst)
+    (ensures fun h0 e h1 ->
+      match e with
+      | UnsupportedAlgorithm ->
+          B.(modifies loc_none h0 h1)
+      | Success ->
+          let s = B.deref h1 dst in
+          // Sanity
+          is_supported_alg a /\
+          not (B.g_is_null s) /\
+          invariant h1 s /\
+
+          // Memory stuff
+          B.(modifies (loc_buffer dst) h0 h1) /\
+          B.fresh_loc (footprint h1 s) h0 h1 /\
+          B.live h1 s /\
+
+          // Useful stuff
+          as_kv (B.deref h1 s) == B.as_seq h0 k
+      | _ -> False)
+
+
 /// This function takes a pointer to a caller-allocated reference ``dst`` then,
 /// if the algorithm is supported (on this platform), allocates a fresh state
 /// and modifies ``dst`` to point to it. The key-value associated with this can
@@ -156,6 +188,7 @@ let create_in_st (a: alg) =
 (** @type: true
 *)
 val create_in: #a:alg -> create_in_st a
+val create_in_stack: #a:alg -> create_in_stack_ty a
 
 let iv_p a = iv:B.buffer uint8 { iv_length a (B.length iv)}
 let ad_p a = ad:B.buffer uint8 { B.length ad <= max_length a }
