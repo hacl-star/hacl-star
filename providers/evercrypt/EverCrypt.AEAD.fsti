@@ -75,6 +75,17 @@ let loc_includes_union_l_footprint_s
   [SMTPat (B.loc_includes (B.loc_union l1 l2) (footprint_s s))]
 = B.loc_includes_union_l l1 l2 (footprint_s s)
 
+/// The configuration preconditions
+let config_pre a =
+  match a with
+  | AES128_GCM
+  | AES256_GCM ->
+      EverCrypt.TargetConfig.x64 /\
+      Vale.X64.CPU_Features_s.(aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled /\
+                               movbe_enabled /\ sse_enabled)
+  | CHACHA20_POLY1305 -> True
+  | _ -> True
+
 val invariant_s: (#a:alg) -> HS.mem -> state_s a -> Type0
 let invariant (#a:alg) (m: HS.mem) (s: state a) =
   B.live m s /\
@@ -153,30 +164,21 @@ let create_in_st (a: alg) =
 /// is not very problematic during, for example, a handshake).
 inline_for_extraction noextract
 let create_in_stack_ty (a: alg) =
-  dst:B.pointer (B.pointer_or_null (state_s a)) ->
   k:B.buffer uint8 { B.length k = key_length a } ->
-  StackInline error_code
+  StackInline (B.pointer (state_s a))
     (requires fun h0 ->
-      B.live h0 k /\ B.live h0 dst)
-    (ensures fun h0 e h1 ->
-      match e with
-      | UnsupportedAlgorithm ->
-          B.(modifies loc_none h0 h1)
-      | Success ->
-          let s = B.deref h1 dst in
-          // Sanity
-          is_supported_alg a /\
-          not (B.g_is_null s) /\
-          invariant h1 s /\
+      B.live h0 k /\ config_pre a /\ is_supported_alg a)
+    (ensures fun h0 s h1 ->
+      // Sanity
+      invariant h1 s /\
 
-          // Memory stuff
-          B.(modifies (loc_buffer dst) h0 h1) /\
-          B.fresh_loc (footprint h1 s) h0 h1 /\
-          B.live h1 s /\
+      // Memory stuff
+      B.(modifies loc_none h0 h1) /\
+      B.fresh_loc (footprint h1 s) h0 h1 /\
+      B.live h1 s /\
 
-          // Useful stuff
-          as_kv (B.deref h1 s) == B.as_seq h0 k
-      | _ -> False)
+      // Useful stuff
+      as_kv (B.deref h1 s) == B.as_seq h0 k)
 
 
 /// This function takes a pointer to a caller-allocated reference ``dst`` then,
