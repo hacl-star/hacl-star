@@ -29,185 +29,110 @@ open FStar.Math.Lemmas
 friend Spec.P256.MontgomeryMultiplication
 open FStar.Mul
 
-#reset-options "--z3rlimit 300" 
+#set-options "--z3rlimit 500 --ifuel 0 --fuel 0" 
 
-(* 
-inline_for_extraction noextract
-val point_double_compute_s_m: p: point -> s: felem -> m: felem 
-  -> tempBuffer:lbuffer uint64 (size 20) 
-  -> yy : felem 
-  -> Stack unit
-  (requires fun h -> live h p /\ live h s /\ live h m /\ live h tempBuffer /\
-    LowStar.Monotonic.Buffer.all_disjoint [loc p; loc s; loc m; loc tempBuffer] /\
-    as_nat h (gsub p (size 8) (size 4)) < prime256 /\ 
-    as_nat h (gsub p (size 0) (size 4)) < prime256 /\ 
-    as_nat h (gsub p (size 4) (size 4)) < prime256 
-  )
-  (ensures fun h0 _ h1 -> 
-    modifies (loc tempBuffer |+| loc s |+| loc m) h0 h1 /\ (
-      let x = as_nat h0 (gsub p (size 0) (size 4)) in 
-      let y = as_nat h0 (gsub p (size 4) (size 4)) in 
-      let z = as_nat h0 (gsub p (size 8) (size 4)) in 
+val lemma_x3_0: x: int -> y: int -> z: int -> Lemma (
+  ((3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) * (3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime)  - 8 * (x * (y * y % prime) % prime)) % prime ==  ((3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) * (3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) - 8 * x * y * y) % prime)
 
-      let pxD = fromDomain_ x in 
-      let pyD = fromDomain_ y in 
-      let pzD = fromDomain_ z in 
+let lemma_x3_0 x y z = 
+  let open FStar.Tactics.Canon in 
+  
+  let t0 = (3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) in 
+  calc (==)
+  {
+    (t0 * t0 - 8 * (x * (y * y % prime) % prime)) % prime;
+    (==) {lemma_mod_mul_distr_r x (y * y) prime}
+    (t0 * t0 - 8 * ((x * (y * y)) % prime)) % prime;
+    (==) {assert_by_tactic (x * (y * y) == x * y * y) canon}
+    (t0 * t0 - 8 * (x * y * y % prime)) % prime;
+    (==) {lemma_mod_sub_distr (t0 * t0) (8 * (x * y * y % prime)) prime}
+    (t0 * t0 - (8 * (x * y * y % prime)) % prime) % prime;
+    (==) {lemma_mod_mul_distr_r 8 (x * y * y) prime}
+    (t0 * t0 - (8 * (x * y * y)) % prime) % prime;
+    (==) {assert_by_tactic (8 * (x * y * y) == 8 * x * y * y) canon}
+    (t0 * t0 - (8 * x * y * y) % prime) % prime;
+    (==) {lemma_mod_sub_distr (t0 * t0) (8 * x * y * y) prime}
+    (t0 * t0 - 8 * x * y * y) % prime;
 
-      as_nat h1 s == toDomain_(4 * pxD * pyD * pyD % prime256) /\
-      as_nat h1 m == toDomain_(((-3) * pzD * pzD * pzD * pzD + 3 * pxD * pxD) % prime))
+  }
+
+val lemma_x3_1: a: int -> b: int -> Lemma (((a % prime) * (a % prime) - b) % prime == (a * a - b) % prime)
+
+let lemma_x3_1 a b = 
+  calc (==)
+  {
+    ((a % prime) * (a % prime) - b) % prime;
+    (==) {lemma_mod_add_distr (- b) ((a % prime) * (a % prime)) prime}
+    ((a % prime) * (a % prime) % prime - b) % prime;
+    (==) {lemma_mod_mul_distr_l a (a % prime) prime; lemma_mod_mul_distr_r a a prime}
+    (a * a % prime - b) % prime;
+    (==) {lemma_mod_add_distr (- b) (a * a) prime}
+    (a * a - b) % prime;
+  }
+  
+
+
+
+val lemma_x3: x: int -> y: int -> z: int -> Lemma (
+  ((3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) * (3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) - 8 * (x * (y * y % prime) % prime)) % prime == 
+  ((3 * (x - z * z) * (x + z * z)) * (3 * (x - z * z) * (x + z * z)) - 8 * x * y * y) % prime
 )
 
+let lemma_x3 x y z = 
+  lemma_x3_0 x y z;
 
-let point_double_compute_s_m p s m tempBuffer yy =
-    let px = sub p (size 0) (size 4) in 
-    let py = sub p (size 4) (size 4) in 
-    let pz = sub p (size 8) (size 4) in 
-
-    let xyy = sub tempBuffer (size 0) (size 4) in 
-    let zzzz = sub tempBuffer (size 4) (size 4) in 
-    let minThreeZzzz = sub tempBuffer (size 8) (size 4) in 
-    let xx = sub tempBuffer (size 12) (size 4) in 
-    let threeXx = sub tempBuffer (size 16) (size 4) in 
-
-      let h0 = ST.get() in 
-    montgomery_square_buffer py yy; 
-    montgomery_multiplication_buffer px yy xyy;
-
-    quatre pz zzzz; 
-    multByMinusThree zzzz minThreeZzzz;
-      let h1 = ST.get() in 
-    montgomery_square_buffer px xx;
-    multByThree xx threeXx;
-    p256_add minThreeZzzz threeXx m;
-    multByFour xyy s;
-
-      lemmaToDomainAndBackIsTheSame (fromDomain_ (as_nat h0 py) * fromDomain_ (as_nat h0 py) % prime256);
-      lemma_mod_mul_distr_r (fromDomain_ (as_nat h0 px)) (fromDomain_ (as_nat h0 py) * fromDomain_ (as_nat h0 py)) prime256; 
-      lemma_brackets (fromDomain_ (as_nat h0 px)) (fromDomain_ (as_nat h0 py)) (fromDomain_ (as_nat h0 py));
-    
-      lemma_mod_mul_distr_r 4 (fromDomain_ (as_nat h0 px) * fromDomain_ (as_nat h0 py) * fromDomain_ (as_nat h0 py)) prime256;
-      lemma_brackets4 4 (fromDomain_ (as_nat h0 px)) (fromDomain_ (as_nat h0 py)) (fromDomain_ (as_nat h0 py));
-      lemma_mod_mul_distr_r (-3) (fromDomain_ (as_nat h0 pz) * fromDomain_ (as_nat h0 pz) * fromDomain_ (as_nat h0 pz) * fromDomain_ (as_nat h0 pz)) prime256;
-      
-      lemma_brackets5_0 (-3) (fromDomain_ (as_nat h0 pz)) (fromDomain_ (as_nat h0 pz))  (fromDomain_ (as_nat h0 pz))  (fromDomain_ (as_nat h0 pz));
-      lemma_mod_mul_distr_r 3 (fromDomain_ (as_nat h1 px) * fromDomain_ (as_nat h1 px)) prime256;
-      lemma_brackets 3 (fromDomain_ (as_nat h1 px)) (fromDomain_ (as_nat h1 px));
-
-      lemma_mod_add_distr ((-3) * fromDomain_ (as_nat h0 pz) * fromDomain_ (as_nat h0 pz) * fromDomain_ (as_nat h0 pz) * fromDomain_ (as_nat h0 pz) % prime256)  (3 * fromDomain_ (as_nat h1 px) * fromDomain_ (as_nat h1 px)) prime256;
-      lemma_mod_add_distr (3 * fromDomain_ (as_nat h1 px) * fromDomain_ (as_nat h1 px)) ((-3) * fromDomain_ (as_nat h0 pz) * fromDomain_ (as_nat h0 pz) * fromDomain_ (as_nat h0 pz) * fromDomain_ (as_nat h0 pz)) prime256
-
-
-inline_for_extraction noextract 
-val point_double_compute_x3: x3: felem -> 
-  s: felem -> m: felem -> tempBuffer: lbuffer uint64 (size 8) -> Stack unit 
-  (requires fun h -> live h x3 /\ live h s /\ live h m /\ live h tempBuffer /\
-    LowStar.Monotonic.Buffer.all_disjoint [loc x3; loc s; loc m; loc tempBuffer] /\
-    as_nat h s < prime /\ as_nat h m < prime 
-  )
-  (ensures fun h0 _ h1 -> modifies (loc x3 |+| loc tempBuffer) h0 h1 /\ (
-    let mD = fromDomain_ (as_nat h0 m) in 
-    let sD = fromDomain_ (as_nat h0 s) in 
-    as_nat h1 x3 = toDomain_ ((mD * mD - 2 * sD) % prime256) /\ 
-    as_nat h1 x3 < prime
-   )
-)
-
-
-let point_double_compute_x3 x3 s m tempBuffer = 
-   let twoS = sub tempBuffer (size 0) (size 4) in 
-   let mm = sub tempBuffer (size 4) (size 4) in 
-     let h0 = ST.get() in 
-   multByTwo s twoS;
-   montgomery_square_buffer m mm;
-   p256_sub mm twoS x3; 
-     lemma_mod_add_distr (-((2 * fromDomain_ (as_nat h0 s) % prime256))) (fromDomain_ (as_nat h0 m) * fromDomain_ (as_nat h0 m))
-     prime256;
-     lemma_mod_sub_distr (fromDomain_ (as_nat h0 m) * fromDomain_ (as_nat h0 m)) (2 * fromDomain_ (as_nat h0 s)) prime256
- 
-inline_for_extraction noextract
-val point_double_compute_y3: pY: felem ->  y3: felem ->  x3: felem -> 
-  s: felem -> m: felem -> tempBuffer: lbuffer uint64 (size 16) -> yy: felem -> Stack unit 
-  (requires fun h -> live h pY /\ live h y3 /\ live h x3 /\ live h s /\ live h m /\ live h tempBuffer
-    /\ LowStar.Monotonic.Buffer.all_disjoint [loc pY; loc y3; loc x3; loc s; loc m; loc tempBuffer]
-    /\ as_nat h x3 < prime /\ as_nat h s < prime /\ as_nat h m < prime /\ as_nat h pY < prime)
-  (ensures fun h0 _ h1 -> modifies (loc y3 |+| loc tempBuffer) h0 h1 /\ 
+  calc (==)
+  {
     (
-      let mD = fromDomain_ (as_nat h0 m) in 
-      let sD = fromDomain_ (as_nat h0 s) in 
-      let x3D = fromDomain_ (as_nat h0 x3) in 
-      let pyD = fromDomain_ (as_nat h0 pY) in 
-      as_nat h1 y3 = toDomain_ ((mD * (sD - x3D) - (8 * pyD * pyD * pyD * pyD)) % prime256) /\ 
-      as_nat h1 y3 < prime
-   )
- )
+      (3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) * 
+      (3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) - 8 * x * y * y) % prime;
+    
+    (==) {lemma_mod_mul_distr_l (3 * (x - (z * z % prime))) (x + (z * z % prime)) prime}
+    
+    (
+      (3 * (x - (z * z % prime)) % prime * (x + (z * z % prime)) % prime) * 
+      (3 * (x - (z * z % prime)) % prime * (x + (z * z % prime)) % prime) - 8 * x * y * y) % prime;
+    
+  (==) {lemma_mod_mul_distr_r 3 (x - (z * z % prime)) prime}
+  
+     (
+       (3 * ((x - (z * z % prime)) % prime) % prime * (x + (z * z % prime)) % prime) * 
+       (3 * ((x - (z * z % prime)) % prime) % prime * (x + (z * z % prime)) % prime) - 8 * x * y * y) % prime;
 
-let point_double_compute_y3 pY y3 x3 s m tempBuffer yy = 
-    let yyyy = sub tempBuffer (size 0) (size 4) in 
-    let eightYyyy = sub tempBuffer (size 4) (size 4) in 
-    let sx3 = sub tempBuffer (size 8) (size 4) in 
-    let msx3 = sub tempBuffer (size 12) (size 4) in 
-      let h0 = ST.get() in 
-    montgomery_square_buffer yy yyyy;
-    multByEight yyyy eightYyyy;
-    p256_sub s x3 sx3;
-      let h1 = ST.get() in 
-    montgomery_multiplication_buffer m sx3 msx3; 
-      let h2 = ST.get() in   
-    p256_sub msx3 eightYyyy y3;  
+   (==) {lemma_mod_sub_distr x (z * z) prime}
 
-	lemma_mod_mul_distr_r 8 (fromDomain_ (as_nat h0 pY) * fromDomain_ (as_nat h0 pY) * 
-	fromDomain_ (as_nat h0 pY) * fromDomain_ (as_nat h0 pY)) prime256;
-	assert_by_tactic (8 * (fromDomain_ (as_nat h0 pY) * fromDomain_ (as_nat h0 pY) * fromDomain_ (as_nat h0 pY) * fromDomain_ (as_nat h0 pY)) ==  8 * fromDomain_ (as_nat h0 pY) * fromDomain_ (as_nat h0 pY) * fromDomain_ (as_nat h0 pY) * fromDomain_ (as_nat h0 pY)) canon; 
+     (
+       (3 * ((x - z * z) % prime) % prime * (x + (z * z % prime)) % prime) *
+       (3 * ((x - z * z) % prime) % prime * (x + (z * z % prime)) % prime) - 8 * x * y * y) % prime;
 
-	lemma_mod_mul_distr_r (fromDomain_ (as_nat h1 m)) (fromDomain_ (as_nat h0 s) - fromDomain_ (as_nat h0 x3)) prime256;
-	lemma_mod_add_distr (-fromDomain_ (as_nat h2 eightYyyy)) (fromDomain_ (as_nat h1 m) * ((fromDomain_ (as_nat h0 s) - fromDomain_ (as_nat h0 x3)))) prime256;
-	lemma_mod_sub_distr (fromDomain_ (as_nat h1 m) * (fromDomain_ (as_nat h0 s) - fromDomain_ (as_nat h0 x3))) (8 * fromDomain_ (as_nat h0 pY) * fromDomain_ (as_nat h0 pY) * fromDomain_ (as_nat h0 pY) * fromDomain_ (as_nat h0 pY)) prime256
+  (==) {lemma_mod_mul_distr_r 3 (x - (z * z)) prime}
 
+     (
+       (3 * ((x - z * z)) % prime * (x + (z * z % prime)) % prime) * 
+       (3 * ((x - z * z)) % prime * (x + (z * z % prime)) % prime) - 8 * x * y * y) % prime;
 
-let point_double p result tempBuffer = 
-	let h0 = ST.get() in   
-    let s = sub tempBuffer (size 0) (size 4) in 
-    let m = sub tempBuffer (size 4) (size 4) in 
-    let yy = sub tempBuffer (size 8) (size 4) in 
+  (==) {lemma_mod_mul_distr_l (3 * (x - z * z)) (x + (z * z % prime)) prime}
 
-    let buffer_for_s_m = sub tempBuffer (size 12) (size 24) in 
-
-    let buffer_for_x3 = sub tempBuffer (size 32) (size 8) in 
-    let buffer_for_y3 = sub tempBuffer (size 40) (size 16) in 
-
-    let pypz = sub tempBuffer (size 56) (size 4) in 
-
-    let x3 = sub tempBuffer (size 60) (size 4) in 
-    let y3 = sub tempBuffer (size 64) (size 4) in 
-    let z3 = sub tempBuffer (size 68) (size 4) in 
-
-    let pX = sub p (size 0) (size 4) in 
-    let pY = sub p (size 4) (size 4) in 
-    let pZ = sub p (size 8) (size 4) in 
-
-   point_double_compute_s_m p s m buffer_for_s_m yy; 
-   point_double_compute_x3 x3 s m buffer_for_x3;
-   point_double_compute_y3 pY y3 x3 s m buffer_for_y3 yy;
-   
-   montgomery_multiplication_buffer pY pZ pypz;
-   multByTwo pypz z3;
-   
-     lemma_mod_mul_distr_r 2 (fromDomain_ (as_nat h0 pY) * fromDomain_ (as_nat h0 pZ)) prime256;
-     assert_by_tactic (2 * fromDomain_ (as_nat h0 pY) * fromDomain_ (as_nat h0 pZ) == 2 * (fromDomain_ (as_nat h0 pY) * fromDomain_ (as_nat h0 pZ))) canon;
+     (
+       (3 * (x - z * z) * (x + (z * z % prime)) % prime) * 
+       (3 * (x - z * z) * (x + (z * z % prime)) % prime) - 8 * x * y * y) % prime;
      
-   concat3 (size 4) x3 (size 4) y3 (size 4) z3 result ; 
+  (==) {lemma_mod_mul_distr_r (3 * (x - z * z)) (x + (z * z % prime)) prime; 
+       lemma_mod_add_distr x (z * z) prime; 
+       lemma_mod_mul_distr_r (3 * (x - z * z)) (x + z * z) prime}
 
-   let hEnd = ST.get() in 
-   
-   let pxD = fromDomain_ (as_nat h0 pX) in 
-   let pyD = fromDomain_ (as_nat h0 pY) in 
-   let pzD = fromDomain_ (as_nat h0 pZ) in 
-   
-     Spec.P256.MontgomeryMultiplication.PointDouble.lemma_xToSpecification pxD pyD pzD (as_nat hEnd s) (as_nat hEnd m) (as_nat hEnd (gsub result (size 0) (size 4)));
-     Spec.P256.MontgomeryMultiplication.PointDouble.lemma_yToSpecification pxD pyD pzD (as_nat hEnd s) (as_nat hEnd m) (as_nat hEnd x3) (as_nat hEnd (gsub result (size 4) (size 4)));
-     Spec.P256.MontgomeryMultiplication.PointDouble.lemma_zToSpecification pxD pyD pzD (as_nat hEnd (gsub result (size 8) (size 4)))
+    (  
+      (3 * (x - z * z) * (x + (z * z)) % prime) * 
+      (3 * (x - z * z) * (x + (z * z)) % prime) - 8 * x * y * y) % prime;
+  
+  (==) {lemma_x3_1 (3 * (x - z * z) * (x + (z * z))) (8 * x * y * y)}
 
-*)
+    (  
+      (3 * (x - z * z) * (x + z * z)) * 
+      (3 * (x - z * z) * (x + z * z)) - 8 * x * y * y) % prime;
+
+}
+
 
 (*   delta:=Z1^2;
      gamma:=Y1^2;
@@ -217,6 +142,182 @@ let point_double p result tempBuffer =
      Z3:=(Y1+Z1)^2-gamma-delta;
      Y3:=alpha*(4*beta-X3)-8*gamma^2;
      SS!(x3-X3/Z3^2); SS!(y3-Y3/Z3^3); *)
+
+val point_double_a_b_g: p: point -> alpha: felem -> beta: felem -> gamma: felem -> delta: felem -> tempBuffer: lbuffer uint64 (size 12) -> 
+  Stack unit
+    (requires fun h -> 
+      live h p /\ live h alpha /\ live h beta /\ live h gamma /\ live h delta /\ live h tempBuffer /\ 
+      LowStar.Monotonic.Buffer.all_disjoint [loc p; loc alpha; loc beta; loc gamma; loc delta; loc tempBuffer] /\
+      as_nat h (gsub p (size 8) (size 4)) < prime /\ 
+      as_nat h (gsub p (size 0) (size 4)) < prime /\ 
+      as_nat h (gsub p (size 4) (size 4)) < prime
+    )
+    (ensures fun h0 _ h1 -> modifies (loc alpha |+| loc beta |+| loc gamma |+| loc delta |+| loc tempBuffer) h0 h1 /\
+      (
+	let x = fromDomain_ (as_nat h0 (gsub p (size 0) (size 4))) in 
+	let y = fromDomain_ (as_nat h0 (gsub p (size 4) (size 4))) in 
+	let z = fromDomain_ (as_nat h0 (gsub p (size 8) (size 4))) in 
+	as_nat h1 delta = toDomain_ (z * z % prime) /\
+	as_nat h1 gamma = toDomain_ (y * y % prime) /\
+	as_nat h1 beta = toDomain_ (x * fromDomain_(as_nat h1 gamma) % prime) /\
+	as_nat h1 alpha = toDomain_ (3 * (x - fromDomain_ (as_nat h1 delta)) * (x + fromDomain_ (as_nat h1 delta)) % prime)
+      )
+    )
+
+let point_double_a_b_g p alpha beta gamma delta tempBuffer = 
+  let pX = sub p (size 0) (size 4) in 
+  let pY = sub p (size 4) (size 4) in 
+  let pZ = sub p (size 8) (size 4) in 
+
+  let a0 = sub tempBuffer (size 0) (size 4) in 
+  let a1 = sub tempBuffer (size 4) (size 4) in 
+  let alpha0 = sub tempBuffer (size 8) (size 4) in 
+
+  montgomery_square_buffer pZ delta; (* delta = z * z*)
+  montgomery_square_buffer pY gamma; (* gamma = y * y *)
+  montgomery_multiplication_buffer pX gamma beta; (* beta = x * gamma *)
+
+  let h0 = ST.get() in 
+
+  p256_sub pX delta a0; (* a0 = x - delta *)
+  p256_add pX delta a1; (* a1 = x + delta *)
+  montgomery_multiplication_buffer a0 a1 alpha0; (* alpha = (x - delta) * (x + delta) *)
+  multByThree alpha0 alpha;
+
+    let open FStar.Tactics.Canon in 
+    let xD = fromDomain_ (as_nat h0 pX) in 
+    let dlt = fromDomain_ (as_nat h0 delta) in 
+
+    calc (==) 
+    {
+      toDomain_ (3 * (((xD - dlt) % prime) *  ((xD + dlt) % prime) % prime) % prime);
+    (==) {lemma_mod_mul_distr_l (xD - dlt) ((xD + dlt) % prime) prime; lemma_mod_mul_distr_r (xD - dlt) (xD + dlt) prime}
+      toDomain_ (3 * ((xD - dlt) *  (xD + dlt) % prime) % prime);
+    (==) {lemma_mod_mul_distr_r 3 ((xD - dlt) * (xD + dlt)) prime}
+      toDomain_ (3 * ((xD - dlt) * (xD + dlt)) % prime);
+    (==) {assert_by_tactic (3 * (xD - dlt) * (xD + dlt) == 3 * ((xD - dlt) * (xD + dlt))) canon}
+      toDomain_ (3 * (xD - dlt) * (xD + dlt) % prime);
+    }
+
+val point_double_x3: x3: felem -> alpha: felem -> fourBeta: felem -> beta: felem -> eightBeta: felem ->
+  Stack unit
+    (requires fun h -> live h x3 /\ live h alpha /\ live h fourBeta /\ live h beta /\ live h eightBeta /\
+      LowStar.Monotonic.Buffer.all_disjoint [loc x3; loc alpha; loc fourBeta; loc beta; loc eightBeta] /\
+      as_nat h alpha < prime /\
+      as_nat h beta < prime
+    )
+    (ensures fun h0 _ h1 -> modifies (loc x3 |+| loc fourBeta |+| loc eightBeta) h0 h1 /\
+      as_nat h1 fourBeta = toDomain_ (4 * fromDomain_ (as_nat h0 beta) % prime256) /\
+      as_nat h1 x3 = toDomain_ ((fromDomain_ (as_nat h0 alpha) * fromDomain_ (as_nat h0 alpha) - 8 * (fromDomain_ (as_nat h0 beta))) % prime)
+    )
+
+let point_double_x3 x3 alpha fourBeta beta eightBeta  = 
+    let h0 = ST.get() in 
+  montgomery_square_buffer alpha x3; (* x3 = alpha ** 2 *)
+  multByFour beta fourBeta; (*  fourBeta = beta * 4 *)
+  multByTwo fourBeta eightBeta; (* eightBeta = beta * 8 *)
+  p256_sub x3 eightBeta x3 (* x3 = alpha ** 2 - beta * 8 *);
+
+  calc(==)
+  {
+     toDomain_ (((fromDomain_ (as_nat h0 alpha) * fromDomain_ (as_nat h0 alpha) % prime) - (2 *  (4 * fromDomain_ (as_nat h0 beta) % prime256) % prime256)) % prime256);
+  (==) {lemma_mod_mul_distr_r 2 (4 * fromDomain_ (as_nat h0 beta)) prime256}
+  toDomain_ (((fromDomain_ (as_nat h0 alpha) * fromDomain_ (as_nat h0 alpha) % prime) - (8 * fromDomain_ (as_nat h0 beta)) % prime256) % prime256);
+  (==) {lemma_mod_sub_distr (fromDomain_ (as_nat h0 alpha) * fromDomain_ (as_nat h0 alpha) % prime) (8 * fromDomain_ (as_nat h0 beta)) prime256}
+    toDomain_ (((fromDomain_ (as_nat h0 alpha) * fromDomain_ (as_nat h0 alpha) % prime) - (8 * fromDomain_ (as_nat h0 beta))) % prime256);
+  (==) {lemma_mod_add_distr (- 8 * fromDomain_ (as_nat h0 beta)) (fromDomain_ (as_nat h0 alpha) * fromDomain_ (as_nat h0 alpha)) prime}
+    toDomain_ ((fromDomain_ (as_nat h0 alpha) * fromDomain_ (as_nat h0 alpha) - 8 * fromDomain_ (as_nat h0 beta)) % prime256);
+  }
+
+
+val point_double_z3: z3: felem -> pY: felem -> pZ: felem -> gamma: felem -> delta: felem ->
+  Stack unit 
+    (requires fun h -> live h z3 /\ live h pY /\ live h pZ /\ live h gamma /\ live h delta /\
+      eq_or_disjoint pZ z3 /\ disjoint z3 gamma /\ disjoint z3 delta /\ disjoint pY z3 /\
+      as_nat h gamma < prime /\
+      as_nat h delta < prime /\
+      as_nat h pY < prime /\ 
+      as_nat h pZ < prime 
+    )
+    (ensures fun h0 _ h1 -> modifies (loc z3) h0 h1 /\
+      (
+	let y = fromDomain_ (as_nat h0 pY) in 
+	let z = fromDomain_ (as_nat h0 pZ) in 
+	as_nat h1 z3 = toDomain_ (((y + z) * (y + z) - fromDomain_ (as_nat h0 gamma) - fromDomain_ (as_nat h0 delta)) % prime)
+      )
+    )
+
+let point_double_z3 z3 pY pZ gamma delta  = 
+    let h0 = ST.get() in 
+
+  p256_add pY pZ z3; (* z3 = py + pz *) 
+  montgomery_square_buffer z3 z3; (* z3 = (py + pz) ** 2 *) 
+  p256_sub z3 gamma z3; (* z3 =  (py + pz) ** 2 - gamma  *)
+  p256_sub z3 delta z3 (* z3 = (py + pz) ** 2 - gamma - delta *);
+
+    let pyD = fromDomain_ (as_nat h0 pY) in 
+    let pzD = fromDomain_ (as_nat h0 pZ) in 
+
+  calc (==)
+  {
+    toDomain_ (((((( ((pyD + pzD) % prime) * ((pyD + pzD) % prime) % prime)) - fromDomain_ (as_nat h0 gamma)) % prime) - fromDomain_ (as_nat h0 delta)) % prime);
+  (==) {lemma_mod_mul_distr_l (pyD + pzD) ((pyD + pzD) % prime) prime; lemma_mod_mul_distr_r (pyD + pzD) (pyD + pzD) prime}
+    toDomain_ ((((((pyD + pzD) * (pyD + pzD) % prime) - fromDomain_ (as_nat h0 gamma)) % prime) - fromDomain_ (as_nat h0 delta)) % prime);
+  (==) {lemma_mod_add_distr (- fromDomain_ (as_nat h0 gamma)) ((pyD + pzD) * (pyD + pzD)) prime }
+    toDomain_ (((((pyD + pzD) * (pyD + pzD) - fromDomain_ (as_nat h0 gamma)) % prime) - fromDomain_ (as_nat h0 delta)) % prime);
+  (==) {lemma_mod_add_distr (- fromDomain_ (as_nat h0 delta)) ((pyD + pzD) * (pyD + pzD) - fromDomain_ (as_nat h0 gamma)) prime}
+    toDomain_ (((pyD + pzD) * (pyD + pzD) - fromDomain_ (as_nat h0 gamma) - fromDomain_ (as_nat h0 delta)) % prime);
+  }
+
+
+val point_double_y3: y3: felem -> x3: felem -> alpha: felem -> gamma: felem -> eightGamma: felem -> fourBeta: felem ->
+  Stack unit 
+  (requires fun h -> live h y3 /\ live h x3 /\ live h alpha /\ live h gamma /\ live h eightGamma /\ live h fourBeta /\
+    LowStar.Monotonic.Buffer.all_disjoint [loc y3; loc x3; loc alpha; loc gamma; loc eightGamma; loc fourBeta] /\
+    as_nat h x3 < prime /\
+    as_nat h alpha < prime /\
+    as_nat h gamma < prime /\
+    as_nat h fourBeta < prime
+  )
+  (ensures fun h0 _ h1 -> modifies (loc y3 |+| loc gamma |+| loc eightGamma) h0 h1 /\
+    (
+      let alphaD = fromDomain_ (as_nat h0 alpha) in 
+      let gammaD = fromDomain_ (as_nat h0 gamma) in 
+      as_nat h1 y3 == toDomain_ ((alphaD *  (fromDomain_ (as_nat h0 fourBeta) - fromDomain_ (as_nat h0 x3)) - 8 * gammaD * gammaD) % prime)
+    )
+  )
+
+
+
+let point_double_y3 y3 x3 alpha gamma eightGamma fourBeta = 
+    let h0 = ST.get() in 
+  p256_sub fourBeta x3 y3; (* y3 = 4 * beta - x3 *)
+  montgomery_multiplication_buffer alpha y3 y3; (* y3 = alpha * (4 * beta - x3) *)
+  montgomery_square_buffer gamma gamma; (* gamma = gamma ** 2 *)
+  multByEight gamma eightGamma; (* gamma = 8 * gamma ** 2 *)
+  p256_sub y3 eightGamma y3 (* y3 = alpha * y3 - 8 * gamma **2 *);
+
+
+  let alphaD = fromDomain_ (as_nat h0 alpha) in 
+  let gammaD = fromDomain_ (as_nat h0 gamma) in 
+
+  let open FStar.Tactics.Canon in 
+
+  calc(==)
+  {
+     toDomain_ (((fromDomain_ (as_nat h0 alpha) *  ((fromDomain_ (as_nat h0 fourBeta) - fromDomain_ (as_nat h0 x3)) % prime) % prime) - (8 *  (fromDomain_ (as_nat h0 gamma) * fromDomain_ (as_nat h0 gamma) % prime) % prime)) % prime);
+  (==) {lemma_mod_mul_distr_r (fromDomain_ (as_nat h0 alpha)) (((fromDomain_ (as_nat h0 fourBeta) - fromDomain_ (as_nat h0 x3)))) prime}
+    toDomain_ (((fromDomain_ (as_nat h0 alpha) *  (fromDomain_ (as_nat h0 fourBeta) - fromDomain_ (as_nat h0 x3)) % prime) - (8 *  (fromDomain_ (as_nat h0 gamma) * fromDomain_ (as_nat h0 gamma) % prime) % prime)) % prime);
+  (==) {lemma_mod_mul_distr_r 8 (fromDomain_ (as_nat h0 gamma) * (fromDomain_ (as_nat h0 gamma))) prime}
+    toDomain_ (((alphaD *  (fromDomain_ (as_nat h0 fourBeta) - fromDomain_ (as_nat h0 x3)) % prime) - (8 * (gammaD * gammaD) % prime)) % prime);
+  (==) {lemma_mod_add_distr (-(8 * (gammaD * gammaD) % prime)) (alphaD *  (fromDomain_ (as_nat h0 fourBeta) - fromDomain_ (as_nat h0 x3))) prime  }
+      toDomain_ (((alphaD *  (fromDomain_ (as_nat h0 fourBeta) - fromDomain_ (as_nat h0 x3))) - (8 * (gammaD * gammaD) % prime)) % prime);
+  (==) {lemma_mod_sub_distr (alphaD *  (fromDomain_ (as_nat h0 fourBeta) - fromDomain_ (as_nat h0 x3))) (8 * (gammaD * gammaD)) prime}
+       toDomain_ (((alphaD *  (fromDomain_ (as_nat h0 fourBeta) - fromDomain_ (as_nat h0 x3))) - (8 * (gammaD * gammaD))) % prime);
+  (==) {assert_by_tactic (8 * (gammaD * gammaD) == 8 * gammaD * gammaD) canon}
+    toDomain_ ((alphaD *  (fromDomain_ (as_nat h0 fourBeta) - fromDomain_ (as_nat h0 x3)) - 8 * gammaD * gammaD) % prime);
+}
+
 
 let point_double p result tempBuffer = 
   let pX = sub p (size 0) (size 4) in 
@@ -230,57 +331,44 @@ let point_double p result tempBuffer =
   let delta = sub tempBuffer (size 0) (size 4) in 
   let gamma = sub tempBuffer (size 4) (size 4) in 
   let beta = sub tempBuffer (size 8) (size 4) in 
-  let a0 = sub tempBuffer (size 12) (size 4) in 
-  let a1 = sub tempBuffer (size 16) (size 4) in 
-  let alpha = sub tempBuffer (size 20) (size 4) in 
-  let fourBeta = sub tempBuffer (size 24) (size 4) in 
-  let eightBeta = sub tempBuffer (size 28) (size 4) in 
-  let threeAlpha = sub tempBuffer (size 32) (size 4) in 
-  let eightGamma = sub tempBuffer (size 36) (size 4) in 
+  let alpha = sub tempBuffer (size 16) (size 4) in 
+  
+  let fourBeta = sub tempBuffer (size 20) (size 4) in 
+  let eightBeta = sub tempBuffer (size 24) (size 4) in 
+  let eightGamma = sub tempBuffer (size 28) (size 4) in 
+
+  let tmp = sub tempBuffer (size 32) (size 12) in 
+  
 
   let h0 = ST.get() in 
-
-  montgomery_square_buffer pZ delta; (* delta = z * z*)
-  montgomery_square_buffer pY gamma; (* gamma = y * y *)
-    let h1 = ST.get() in 
-  montgomery_multiplication_buffer pX gamma beta; (* beta = x * gamma *)
-    let h2 = ST.get() in 
-
-
-  p256_sub pX delta a0; (* a0 = x - delta *)
-  p256_add pX delta a1; (* a1 = x + delta *)
-  montgomery_multiplication_buffer a0 a1 alpha; (* alpha = (x - delta) * (x + delta) *)
-
+    point_double_a_b_g p alpha beta gamma delta tmp;
+    point_double_x3 x3 alpha fourBeta beta eightBeta; 
+    point_double_z3 z3 pY pZ gamma delta; 
   let h3 = ST.get() in 
- 
-  multByThree alpha threeAlpha; (* alpha = 3 * (x - delta) * (x + delta) *)
+
+    point_double_y3 y3 x3 alpha gamma eightGamma fourBeta;
+
+  let h4 = ST.get() in 
+
+  let x = fromDomain_ (as_nat h0 (gsub p (size 0) (size 4))) in 
+  let y = fromDomain_ (as_nat h0 (gsub p (size 4) (size 4))) in 
+  let z = fromDomain_ (as_nat h0 (gsub p (size 8) (size 4))) in 
+
+
+assert(
+  as_nat h4 delta = toDomain_ (z * z % prime) /\
   
-  montgomery_square_buffer threeAlpha x3; (* x3 = alpha ** 2 *)
-  multByFour beta fourBeta; (*  fourBeta = beta * 4 *)
-  multByTwo fourBeta eightBeta; (* eightBeta = beta * 8 *)
-  p256_sub x3 eightBeta x3; (* x3 = alpha ** 2 - beta * 8 *) 
+  as_nat h3 gamma = toDomain_ (y * y % prime) /\
+  as_nat h3 beta = toDomain_ (x * fromDomain_ (as_nat h3 gamma) % prime) /\
+  as_nat h3 alpha = toDomain_ (3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) /\
+  as_nat h3 fourBeta = toDomain_ (4 * (x * fromDomain_ (as_nat h3 gamma) % prime) % prime) /\
+  
+  as_nat h3 x3 = toDomain_ (((3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) * (3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) - 8 * (x * (y * y % prime) % prime)) % prime) /\
+  
+  as_nat h3 z3 = toDomain_ (((y + z) * (y + z) - fromDomain_ (as_nat h3 gamma) - (z * z % prime)) % prime) /\
+  
+  as_nat h4 y3 == toDomain_ ((fromDomain_ (as_nat h3 alpha) *  (fromDomain_ (as_nat h3 fourBeta) - fromDomain_ (as_nat h3 x3)) - 8 * fromDomain_ (as_nat h3 gamma) * fromDomain_ (as_nat h3 gamma)) % prime));
 
-  p256_add pY pZ z3; (* z3 = py + pz *)
-  montgomery_square_buffer z3 z3; (* z3 = (py + pz) ** 2 *)
-  p256_sub z3 gamma z3; (* z3 =  (py + pz) ** 2 - gamma  *)
-  p256_sub z3 delta z3; (* z3 = (py + pz) ** 2 - gamma - delta *)
-
-  p256_sub fourBeta x3 y3; (* y3 = 4 * beta - x3 *)
-  montgomery_multiplication_buffer threeAlpha y3 y3; (* y3 = alpha * (4 * beta - x3) *)
-  montgomery_square_buffer gamma gamma; (* gamma = gamma ** 2 *)
-  multByEight gamma eightGamma; (* gamma = 8 * gamma ** 2 *)
-  p256_sub y3 eightGamma y3 (* y3 = alpha * y3 - 8 * gamma **2 *);
-
-
-
-    assert(as_nat h3 delta = toDomain_ (fromDomain_ (as_nat h0 pZ) * fromDomain_ (as_nat h0 pZ) % prime256));
-    assert(as_nat h3 gamma = toDomain_ (fromDomain_ (as_nat h0 pY) * fromDomain_ (as_nat h0 pY) % prime256));
-    assert(as_nat h3 beta = toDomain_ (fromDomain_ (as_nat h0 pX) * fromDomain_ (as_nat h3 gamma) % prime256));
-    
-    assert(as_nat h3 a0 = toDomain_ ((fromDomain_ (as_nat h0 pX) - fromDomain_ (as_nat h3 delta)) % prime256));
-    assert(as_nat h3 a1 = toDomain_ ((fromDomain_ (as_nat h0 pX) + fromDomain_ (as_nat h3 delta)) % prime256));
-    assert(as_nat h3 alpha = toDomain_ ((((fromDomain_ (as_nat h0 pX) - fromDomain_ (as_nat h3 delta)) % prime256) * ((fromDomain_ (as_nat h0 pX) + fromDomain_ (as_nat h3 delta)) % prime256)) % prime256));
-    
     admit()
   
   
