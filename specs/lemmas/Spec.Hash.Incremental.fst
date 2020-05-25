@@ -84,6 +84,28 @@ let repeati_blake2_update1_eq
   let block = S.slice d ((nb-1) * block_length a) (nb * block_length a) in
   Loops.unfold_repeati nb update1 hash (nb - 1)
 
+let update_multi_associate_eq1
+  (a:hash_alg{is_blake a}) (nb prev : nat)
+  (blocks : bytes{S.length blocks == nb * block_length a})
+  (hash : words_state' a) :
+  Lemma
+  (requires (
+    nb > 0 /\
+    prev + nb * block_length a <= max_limb (to_blake_alg a) /\
+    prev + nb * block_length a <= pow2 64 - 1
+  ))
+  (ensures (
+    let blocks1, blocks2 = Seq.split blocks ((nb-1) * block_length a) in
+    update_multi a (hash, u64 prev) blocks ==
+    update_multi a (update_multi a (hash, u64 prev) blocks1) blocks2)) =
+  let blocks1, blocks2 = Seq.split blocks ((nb-1) * block_length a) in
+  assert(blocks `S.equal` S.append blocks1 blocks2);
+  assert(Seq.length blocks1 == (nb - 1) * block_length a);
+  Math.Lemmas.multiple_modulo_lemma (nb-1) (block_length a);
+  assert(Seq.length blocks2 == 1 * block_length a);
+  Math.Lemmas.multiple_modulo_lemma 1 (block_length a);
+  update_multi_associative a (hash, u64 prev) blocks1 blocks2
+
 /// TODO: the time spent on this proof is super random.
 #push-options "--z3rlimit 500 --fuel 1"
 let rec repeati_blake2_update1_as_update_multi_eq
@@ -114,12 +136,7 @@ let rec repeati_blake2_update1_as_update_multi_eq
     repeati_blake2_update1_eq a nb prev d hash;
     (**)
     let blocks1, blocks2 = Seq.split blocks ((nb-1) * block_length a) in
-    assert(blocks `S.equal` S.append blocks1 blocks2);
-    assert(Seq.length blocks1 == (nb - 1) * block_length a);
-    Math.Lemmas.multiple_modulo_lemma (nb-1) (block_length a);
-    assert(Seq.length blocks2 == 1 * block_length a);
-    Math.Lemmas.multiple_modulo_lemma 1 (block_length a);
-    update_multi_associative a (hash, u64 prev) blocks1 blocks2;
+    update_multi_associate_eq1 a nb prev blocks hash;
     let s2 = update_multi a (hash, u64 prev) blocks1 in
     assert(
       update_multi a (hash, u64 prev) blocks ==
