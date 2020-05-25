@@ -18,7 +18,7 @@ export CFLAGS
 
 dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
 	$(KRML) $^  $(BASE_FLAGS) $(BLAKE2_BUNDLE) \
-	  -funroll-loops 8 \
+	  -funroll-loops 16 \
 	  -fbuiltin-uint128 \
 	  -tmpdir dist \
 	  -ccopts -std=gnu11,-g,-O3 \

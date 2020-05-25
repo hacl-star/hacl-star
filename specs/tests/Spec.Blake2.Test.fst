@@ -778,6 +778,44 @@ let test16_expected : lbytes 64 =
 // Main
 //
 
+let blake2s_scalar_test num (plain:bytes{Seq.length plain <= max_size_t}) (key:bytes{Seq.length key <= 32}) expected =
+  IO.print_string ("\n\nTEST Blake2s Scalar "^(string_of_int num)^":");
+
+  let result : lbytes 32 =
+    Spec.Blake2.Scalar.blake2s plain (Seq.length key) key 32
+  in
+  let result2 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) expected result in
+
+ if result2 then begin  IO.print_string "\nSuccess!\n"; true end
+ else begin IO.print_string "\nFailure :(\n";
+
+  IO.print_string "\n2. Result  : ";
+  List.iter (fun a -> IO.print_uint8_hex_pad (u8_to_UInt8 a)) (to_list result);
+
+  IO.print_string "\n2. Expected: ";
+  List.iter (fun a -> IO.print_uint8_hex_pad (u8_to_UInt8 a)) (to_list expected);
+ false end
+
+
+let blake2b_scalar_test num (plain:bytes{Seq.length plain <= max_size_t}) (key:bytes{Seq.length key <= 64}) expected =
+  IO.print_string ("\n\nTEST Blake2b Scalar "^(string_of_int num)^":");
+
+  let result : lbytes 64 =
+    Spec.Blake2.Scalar.blake2b plain (Seq.length key) key 64
+  in
+  let result2 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) expected result in
+
+ if result2 then begin  IO.print_string "\nSuccess!\n"; true end
+ else begin IO.print_string "\nFailure :(\n";
+
+  IO.print_string "\n2. Result  : ";
+  List.iter (fun a -> IO.print_uint8_hex_pad (u8_to_UInt8 a)) (to_list result);
+
+  IO.print_string "\n2. Expected: ";
+  List.iter (fun a -> IO.print_uint8_hex_pad (u8_to_UInt8 a)) (to_list expected);
+ false end
+
+
 let blake2s_test num (plain:bytes{Seq.length plain <= max_size_t}) (key:bytes{Seq.length key <= 32}) expected =
   IO.print_string ("\n\nTEST Blake2s "^(string_of_int num)^":");
 
@@ -790,10 +828,10 @@ let blake2s_test num (plain:bytes{Seq.length plain <= max_size_t}) (key:bytes{Se
  else begin IO.print_string "\nFailure :(\n";
 
   IO.print_string "\n2. Result  : ";
-  List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (to_list result);
+  List.iter (fun a -> IO.print_uint8_hex_pad (u8_to_UInt8 a)) (to_list result);
 
   IO.print_string "\n2. Expected: ";
-  List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (to_list expected);
+  List.iter (fun a -> IO.print_uint8_hex_pad (u8_to_UInt8 a)) (to_list expected);
  false end
 
 
@@ -809,38 +847,85 @@ let blake2b_test num (plain:bytes{Seq.length plain <= max_size_t}) (key:bytes{Se
  else begin IO.print_string "\nFailure :(\n";
 
   IO.print_string "\n2. Result  : ";
-  List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (to_list result);
+  List.iter (fun a -> IO.print_uint8_hex_pad (u8_to_UInt8 a)) (to_list result);
 
   IO.print_string "\n2. Expected: ";
-  List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (to_list expected);
+  List.iter (fun a -> IO.print_uint8_hex_pad (u8_to_UInt8 a)) (to_list expected);
  false end
 
 
 let test () =
   let emp_key : lbytes 0 = (assert_norm (List.Tot.length ([] <: list uint8)<= max_size_t); of_list []) in
-  let result1 = blake2s_test 1 test1_plaintext emp_key test1_expected in
-  let result2 = blake2s_test 2 test2_plaintext test2_key test2_expected in
-  let result3 = blake2s_test 3 test3_plaintext test3_key test3_expected in
-  let result4 = blake2s_test 4 test4_plaintext test4_key test4_expected in
-  let result7 = blake2s_test 7 test7_plaintext test7_key test7_expected in
-  let result8 = blake2s_test 8 test8_plaintext test8_key test8_expected in
-  let result9 = blake2s_test 9 test9_plaintext test9_key test9_expected in
-  let result10 = blake2s_test 10 test10_plaintext test10_key test10_expected in
-  let result11 = blake2s_test 11 test11_plaintext test11_key test11_expected in
+  let result = blake2s_test 1 test1_plaintext emp_key test1_expected in
+  let result' = blake2s_test 2 test2_plaintext test2_key test2_expected in
+  let result = result && result' in
+  let result' = blake2s_test 3 test3_plaintext test3_key test3_expected in
+  let result = result && result' in
+  let result' = blake2s_test 4 test4_plaintext test4_key test4_expected in
+  let result = result && result' in
+  let result' = blake2s_test 7 test7_plaintext test7_key test7_expected in
+  let result = result && result' in
+  let result' = blake2s_test 8 test8_plaintext test8_key test8_expected in
+  let result = result && result' in
+  let result' = blake2s_test 9 test9_plaintext test9_key test9_expected in
+  let result = result && result' in
+  let result' = blake2s_test 10 test10_plaintext test10_key test10_expected in
+  let result = result && result' in
+  let result' = blake2s_test 11 test11_plaintext test11_key test11_expected in
+  let result = result && result' in
 
-  let result5 = blake2b_test 5 test5_plaintext emp_key test5_expected in
-  let result6 = blake2b_test 6 test6_plaintext test6_key test6_expected in
-  let result12 = blake2b_test 12 test12_plaintext test12_key test12_expected in
-  let result13 = blake2b_test 13 test13_plaintext test13_key test13_expected in
-  let result14 = blake2b_test 14 test14_plaintext test14_key test14_expected in
-  let result15 = blake2b_test 15 test15_plaintext test15_key test15_expected in
-  let result16 = blake2b_test 16 test16_plaintext test16_key test16_expected in
-  //
+  let result' = blake2s_scalar_test 1 test1_plaintext emp_key test1_expected in
+  let result = result && result' in
+  let result' = blake2s_scalar_test 2 test2_plaintext test2_key test2_expected in
+  let result = result && result' in
+  let result' = blake2s_scalar_test 3 test3_plaintext test3_key test3_expected in
+  let result = result && result' in
+  let result' = blake2s_scalar_test 4 test4_plaintext test4_key test4_expected in
+  let result = result && result' in
+  let result' = blake2s_scalar_test 7 test7_plaintext test7_key test7_expected in
+  let result = result && result' in
+  let result' = blake2s_scalar_test 8 test8_plaintext test8_key test8_expected in
+  let result = result && result' in
+  let result' = blake2s_scalar_test 9 test9_plaintext test9_key test9_expected in
+  let result = result && result' in
+  let result' = blake2s_scalar_test 10 test10_plaintext test10_key test10_expected in
+  let result = result && result' in
+  let result' = blake2s_scalar_test 11 test11_plaintext test11_key test11_expected in
+  let result = result && result' in
+
+  let result' = blake2b_test 5 test5_plaintext emp_key test5_expected in
+  let result = result && result' in
+  let result' = blake2b_test 6 test6_plaintext test6_key test6_expected in
+  let result = result && result' in
+  let result' = blake2b_test 12 test12_plaintext test12_key test12_expected in
+  let result = result && result' in
+  let result' = blake2b_test 13 test13_plaintext test13_key test13_expected in
+  let result = result && result' in
+  let result' = blake2b_test 14 test14_plaintext test14_key test14_expected in
+  let result = result && result' in
+  let result' = blake2b_test 15 test15_plaintext test15_key test15_expected in
+  let result = result && result' in
+  let result' = blake2b_test 16 test16_plaintext test16_key test16_expected in
+  let result = result && result' in
+
+  let result' = blake2b_scalar_test 5 test5_plaintext emp_key test5_expected in
+  let result = result && result' in
+  let result' = blake2b_scalar_test 6 test6_plaintext test6_key test6_expected in
+  let result = result && result' in
+  let result' = blake2b_scalar_test 12 test12_plaintext test12_key test12_expected in
+  let result = result && result' in
+  let result' = blake2b_scalar_test 13 test13_plaintext test13_key test13_expected in
+  let result = result && result' in
+  let result' = blake2b_scalar_test 14 test14_plaintext test14_key test14_expected in
+  let result = result && result' in
+  let result' = blake2b_scalar_test 15 test15_plaintext test15_key test15_expected in
+  let result = result && result' in
+  let result' = blake2b_scalar_test 16 test16_plaintext test16_key test16_expected in
+  let result = result && result' in
+//
   //
   // RESULT
   //
-  if result1 && result2 && result3 && result4 && result5 && result6 &&
-     result7 && result8 && result9 && result10 && result11 && result12 &&
-     result13 && result14 && result15 && result16 then
+  if result then
   begin IO.print_string "\n\nAll tests successful !\n"; true end
   else begin IO.print_string "\n\nSome test failed !\n"; false end

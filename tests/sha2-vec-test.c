@@ -28,6 +28,13 @@ void ossl_sha2(uint8_t* hash, uint8_t* input, int len){
    //EVP_CIPHER_CTX_free(ctx);
 }
 
+void ossl_sha512(uint8_t* hash, uint8_t* input, int len){
+  SHA512_CTX ctx;
+  SHA512_Init(&ctx);
+  SHA512_Update(&ctx,input,len);
+  SHA512_Final(hash,&ctx);
+}
+
 #define ROUNDS 16384
 #define SIZE   16384
 
@@ -51,6 +58,10 @@ bool print_test1(uint8_t* in, int in_len, uint8_t* exp256, uint8_t* exp512){
   ossl_sha2(comp256,in,in_len);
   printf("OpenSSL SHA2-256 (32-bit) Result:\n");
   ok = print_result(comp256,exp256,32) && ok;
+
+  ossl_sha512(comp512,in,in_len);
+  printf("OpenSSL SHA2-512 (32-bit) Result:\n");
+  ok = print_result(comp512,exp512,64) && ok;
 
   return ok;
 }
@@ -112,7 +123,6 @@ bool print_test8(uint8_t* in, uint8_t* in1, uint8_t* in2, uint8_t* in3, uint8_t*
 
   return ok;
 }
-
 
 int main()
 {
@@ -198,12 +208,60 @@ int main()
   double tdiff2a = (double)(t2 - t1);
 
 
+  for (int j = 0; j < ROUNDS; j++) {
+    Hacl_SHA2_Scalar32_sha512(plain,SIZE,plain);
+  }
+
+  t1 = clock();
+  a = cpucycles_begin();
+  for (int j = 0; j < ROUNDS; j++) {
+    Hacl_SHA2_Scalar32_sha512(plain,SIZE,plain);
+  }
+  b = cpucycles_end();
+  t2 = clock();
+  double cdiff1 = b - a;
+  double tdiff1 = (double)(t2 - t1);
+
+
+  for (int j = 0; j < ROUNDS; j++) {
+    Hacl_SHA2_Vec256_sha512_4(plain,plain+64,plain+128,plain+192,SIZE,plain,plain,plain,plain);
+  }
+
+  t1 = clock();
+  a = cpucycles_begin();
+  for (int j = 0; j < ROUNDS; j++) {
+    Hacl_SHA2_Vec256_sha512_4(plain,plain+64,plain+128,plain+192,SIZE,plain,plain,plain,plain);
+  }
+  b = cpucycles_end();
+  t2 = clock();
+  double cdiff2 = b - a;
+  double tdiff2 = (double)(t2 - t1);
+
+  for (int j = 0; j < ROUNDS; j++) {
+    ossl_sha512(plain,plain,SIZE);
+  }
+  t1 = clock();
+  a = cpucycles_begin();
+  for (int j = 0; j < ROUNDS; j++) {
+    ossl_sha512(plain,plain,SIZE);
+  }
+  b = cpucycles_end();
+  t2 = clock();
+  double cdiff4 = b - a;
+  double tdiff4 = (double)(t2 - t1);
+
+
   uint8_t res = plain[0];
   uint64_t count = ROUNDS * SIZE;
+  printf ("\n\n");  
   printf("NEW SHA2-256 (32-bit) PERF: %d\n",(int)res); print_time(count,tdiff2n,cdiff2n);
   printf("VEC4 SHA2-256 (32-bit) PERF: %d\n",(int)res); print_time(count,tdiff2v,cdiff2v);
   printf("VEC8 SHA2-256 (32-bit) PERF: %d\n",(int)res); print_time(count,tdiff2v8,cdiff2v8);
   printf("OpenSSL SHA2-256 (32-bit) PERF: %d\n",(int)res); print_time(count,tdiff2a,cdiff2a);
+  printf ("\n\n");
+  printf("NEW SHA2-512 (32-bit) PERF: %d\n",(int)res); print_time(count,tdiff1,cdiff1);
+  printf("VEC4 SHA2-512 (32-bit) PERF: %d\n",(int)res); print_time(count,tdiff2,cdiff2);
+  printf("OpenSSL SHA2-512 (32-bit) PERF: %d\n",(int)res); print_time(count,tdiff4,cdiff4);
 
   if (ok) return EXIT_SUCCESS;
   else return EXIT_FAILURE;

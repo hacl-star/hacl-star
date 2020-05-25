@@ -565,7 +565,7 @@ let vec_load_be t w b =
   | U64,4 -> vec256_load64_be b
   | U128,2 -> admit()//vec256_load_be b
   | U32,16 -> admit() // vec512_load_be b
-  | U64,8 -> admit() //vec512_load_be b
+  | U64,8 -> vec512_load64_be b
 
 
 let vec_store_le #t #w b v =
@@ -590,4 +590,4 @@ let vec_store_be #t #w b v =
   | U64,4 -> vec256_store64_be b v
   | U128,2 -> admit() //vec256_store_be b v
   | U32,16 -> admit()//vec512_store_be b v
-  | U64,8 -> admit()//vec512_store_be b v
+  | U64,8 -> vec512_store64_be b v
