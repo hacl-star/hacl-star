@@ -29,9 +29,9 @@ open Hacl.Impl.ECDSA.MontgomeryMultiplication
 
 open Hacl.Impl.P256.Signature.Common
 
-open Hacl.Impl.ECDSA.P256SHA256.Signature.Agile
+open Hacl.Impl.ECDSA.P256.Signature.Agile
 
-open Hacl.Impl.ECDSA.P256SHA256.Verification.Agile
+open Hacl.Impl.ECDSA.P256.Verification.Agile
 
 open Hacl.Impl.P256.Compression
 

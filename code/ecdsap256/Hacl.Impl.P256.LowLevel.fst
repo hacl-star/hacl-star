@@ -1572,7 +1572,7 @@ val lemma_shift_256: a: int -> b: int -> c: int -> d: int -> Lemma (
 
 let lemma_shift_256 a b c d = ()
 
-
+#restart-solver
 val shift_256_impl: i: felem -> o: lbuffer uint64 (size 8) -> 
   Stack unit 
     (requires fun h -> live h i /\ live h o /\ disjoint i o)
