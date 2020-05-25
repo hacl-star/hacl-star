@@ -22,6 +22,7 @@ open FStar.HyperStack.ST
 open FStar.Integers
 
 open Spec.Agile.AEAD
+module Spec = Spec.Agile.AEAD
 open EverCrypt.Error
 
 /// Note: if the fst and the fsti are running on different fuel settings,
@@ -200,9 +201,8 @@ let ad_p a = ad:B.buffer uint8 { B.length ad <= max_length a }
 let plain_p a = p:B.buffer uint8 { B.length p <= max_length a }
 let cipher_p a = p:B.buffer uint8 { B.length p + tag_length a <= max_length a }
 
-// SNIPPET_START: encrypt_pre
-let encrypt_pre (a: supported_alg)
-  (s:B.pointer_or_null (state_s a))
+
+let encrypt_gen_pre (a: supported_alg)
   (iv:iv_p a)
   (iv_len: UInt32.t)
   (ad:ad_p a)
@@ -217,7 +217,52 @@ let encrypt_pre (a: supported_alg)
   v ad_len = B.length ad /\ v ad_len <= pow2 31 /\
   v plain_len = B.length plain /\ v plain_len <= max_length a /\
   B.length cipher = B.length plain /\
-  B.length tag = tag_length a /\ (
+  B.length tag = tag_length a
+
+let encrypt_live_disjoint_pre (a: supported_alg)
+  (iv:iv_p a)
+  (iv_len: UInt32.t)
+  (ad:ad_p a)
+  (ad_len: UInt32.t)
+  (plain: plain_p a)
+  (plain_len: UInt32.t)
+  (cipher: B.buffer uint8)
+  (tag: B.buffer uint8)
+  (h0: HS.mem)
+=
+//  invariant h0 s /\
+(*  B.(loc_disjoint k_loc (loc_buffer iv)) /\
+  B.(loc_disjoint k_loc (loc_buffer ad)) /\
+  B.(loc_disjoint k_loc (loc_buffer tag)) /\
+  B.(loc_disjoint k_loc (loc_buffer plain)) /\
+  B.(loc_disjoint k_loc (loc_buffer cipher)) /\ *)
+  MB.(all_live h0 [ buf iv; buf ad; buf plain; buf cipher; buf tag ]) /\
+  (B.disjoint plain cipher \/ plain == cipher) /\
+  B.disjoint cipher tag /\
+  B.disjoint iv cipher /\ B.disjoint iv tag /\
+  B.disjoint plain tag /\
+  B.disjoint plain ad /\
+  B.disjoint ad cipher /\ B.disjoint ad tag
+
+// SNIPPET_START: encrypt_pre
+let encrypt_pre (a: supported_alg)
+  (s:B.pointer_or_null (state_s a))
+  (iv:iv_p a)
+  (iv_len: UInt32.t)
+  (ad:ad_p a)
+  (ad_len: UInt32.t)
+  (plain: plain_p a)
+  (plain_len: UInt32.t)
+  (cipher: B.buffer uint8)
+  (tag: B.buffer uint8)
+  (h0: HS.mem)
+=
+  encrypt_gen_pre a iv iv_len ad ad_len plain plain_len cipher tag h0 /\ (
+  (* v iv_len = B.length iv /\ v iv_len > 0 /\
+  v ad_len = B.length ad /\ v ad_len <= pow2 31 /\
+  v plain_len = B.length plain /\ v plain_len <= max_length a /\
+  B.length cipher = B.length plain /\
+  B.length tag = tag_length a /\ ( *)
   not (B.g_is_null s) ==>
     invariant h0 s /\
     B.(loc_disjoint (footprint h0 s) (loc_buffer iv)) /\
@@ -225,13 +270,14 @@ let encrypt_pre (a: supported_alg)
     B.(loc_disjoint (footprint h0 s) (loc_buffer tag)) /\
     B.(loc_disjoint (footprint h0 s) (loc_buffer plain)) /\
     B.(loc_disjoint (footprint h0 s) (loc_buffer cipher)) /\
-    MB.(all_live h0 [ buf iv; buf ad; buf plain; buf cipher; buf tag ]) /\
-    (B.disjoint plain cipher \/ plain == cipher) /\
-    B.disjoint cipher tag /\
-    B.disjoint iv cipher /\ B.disjoint iv tag /\
-    B.disjoint plain tag /\
-    B.disjoint plain ad /\
-    B.disjoint ad cipher /\ B.disjoint ad tag)
+    encrypt_live_disjoint_pre a iv iv_len ad ad_len plain plain_len cipher tag h0)
+//    MB.(all_live h0 [ buf iv; buf ad; buf plain; buf cipher; buf tag ]) /\
+//    (B.disjoint plain cipher \/ plain == cipher) /\
+//    B.disjoint cipher tag /\
+//    B.disjoint iv cipher /\ B.disjoint iv tag /\
+//    B.disjoint plain tag /\
+//    B.disjoint plain ad /\
+//    B.disjoint ad cipher /\ B.disjoint ad tag)
 // SNIPPET_END: encrypt_pre
 
 
@@ -257,8 +303,8 @@ let encrypt_st (a: supported_alg) =
         footprint h0 s == footprint h1 s /\
         preserves_freeable s h0 h1 /\
         as_kv (B.deref h1 s) == as_kv (B.deref h0 s) /\
-          S.equal (S.append (B.as_seq h1 cipher) (B.as_seq h1 tag))
-            (encrypt #a (as_kv (B.deref h0 s)) (B.as_seq h0 iv) (B.as_seq h0 ad) (B.as_seq h0 plain))
+        S.equal (S.append (B.as_seq h1 cipher) (B.as_seq h1 tag))
+          (Spec.encrypt #a (as_kv (B.deref h0 s)) (B.as_seq h0 iv) (B.as_seq h0 ad) (B.as_seq h0 plain))
       | InvalidKey ->
           B.g_is_null s /\
           B.(modifies loc_none h0 h1)
@@ -272,6 +318,45 @@ let encrypt_st (a: supported_alg) =
 (** @type: true
 *)
 val encrypt: #a:G.erased (supported_alg) -> encrypt_st (G.reveal a)
+
+let encrypt_expand_pre (a: supported_alg)
+  (k:B.buffer uint8 { B.length k = key_length a })
+  (iv:iv_p a)
+  (iv_len: UInt32.t)
+  (ad:ad_p a)
+  (ad_len: UInt32.t)
+  (plain: plain_p a)
+  (plain_len: UInt32.t)
+  (cipher: B.buffer uint8)
+  (tag: B.buffer uint8)
+  (h0: HS.mem)
+=
+  encrypt_gen_pre a iv iv_len ad ad_len plain plain_len cipher tag h0 /\ (
+  B.live h0 k /\ B.disjoint k cipher /\
+  encrypt_live_disjoint_pre a iv iv_len ad ad_len
+                            plain plain_len cipher tag h0)
+
+inline_for_extraction noextract
+let encrypt_expand_st (a: supported_alg) =
+  k:B.buffer uint8 { B.length k = key_length a } ->
+  iv:iv_p a ->
+  iv_len: UInt32.t { v iv_len = B.length iv /\ v iv_len > 0 } ->
+  ad:ad_p a ->
+  ad_len: UInt32.t { v ad_len = B.length ad /\ v ad_len <= pow2 31 } ->
+  plain: plain_p a ->
+  plain_len: UInt32.t { v plain_len = B.length plain /\ v plain_len <= max_length a } ->
+  cipher: B.buffer uint8 { B.length cipher = B.length plain } ->
+  tag: B.buffer uint8 { B.length tag = tag_length a } ->
+  Stack unit
+    (requires encrypt_expand_pre a k iv iv_len ad ad_len plain plain_len cipher tag)
+    (ensures fun h0 r h1 ->
+      B.(modifies ((loc_union (loc_buffer cipher) (loc_buffer tag))) h0 h1) /\
+      S.equal (S.append (B.as_seq h1 cipher) (B.as_seq h1 tag))
+        (Spec.encrypt #a (B.as_seq h0 k) (B.as_seq h0 iv) (B.as_seq h0 ad) (B.as_seq h0 plain)))
+
+/// This function takes a key, expands it then performs encryption.
+val encrypt_expand: #a:G.erased (supported_alg) -> encrypt_expand_st (G.reveal a)
+
 
 inline_for_extraction noextract
 let decrypt_st (a: supported_alg) =
@@ -306,7 +391,7 @@ let decrypt_st (a: supported_alg) =
           B.(modifies loc_none h0 h1)
       | Success ->
           not (B.g_is_null s) /\ (
-          let plain = decrypt #a (as_kv (B.deref h0 s)) (B.as_seq h0 iv) (B.as_seq h0 ad) cipher_tag in
+          let plain = Spec.decrypt #a (as_kv (B.deref h0 s)) (B.as_seq h0 iv) (B.as_seq h0 ad) cipher_tag in
           B.(modifies (loc_union (footprint h1 s) (loc_buffer dst)) h0 h1) /\
           invariant h1 s /\
           footprint h0 s == footprint h1 s /\
@@ -335,6 +420,42 @@ let decrypt_st (a: supported_alg) =
 (** @type: true
 *)
 val decrypt: #a:G.erased supported_alg -> decrypt_st (G.reveal a)
+
+
+inline_for_extraction noextract
+let decrypt_expand_st (a: supported_alg) =
+  k:B.buffer uint8 { B.length k = key_length a } ->
+  iv:iv_p a ->
+  iv_len:UInt32.t { v iv_len = B.length iv /\ v iv_len > 0 } ->
+  ad:ad_p a ->
+  ad_len: UInt32.t { v ad_len = B.length ad /\ v ad_len <= pow2 31 } ->
+  cipher: cipher_p a ->
+  cipher_len: UInt32.t { v cipher_len = B.length cipher } ->
+  tag: B.buffer uint8 { B.length tag = tag_length a } ->
+  dst: B.buffer uint8 { B.length dst = B.length cipher } ->
+  Stack error_code
+    (requires fun h0 ->
+        MB.(all_live h0 [ buf k; buf iv; buf ad; buf cipher; buf tag; buf dst ]) /\
+        B.disjoint k dst /\
+        B.disjoint tag dst /\ B.disjoint tag cipher /\
+        B.disjoint tag ad /\
+        B.disjoint cipher ad /\ B.disjoint dst ad /\
+        (B.disjoint cipher dst \/ cipher == dst))
+    (ensures fun h0 err h1 ->
+      let cipher_tag = B.as_seq h0 cipher `S.append` B.as_seq h0 tag in
+      let plain = Spec.decrypt #a (B.as_seq h0 k) (B.as_seq h0 iv) (B.as_seq h0 ad) cipher_tag in
+      B.(modifies (loc_buffer dst) h0 h1) /\
+      Some? plain /\ S.equal (Some?.v plain) (B.as_seq h1 dst))
+
+/// This function takes a key, expands it and performs decryption.
+///
+/// Possible return values are:
+/// - ``Success``: decryption was successfully performed
+/// - ``Failure``: cipher text could not be decrypted (e.g. tag mismatch)
+(** @type: true
+*)
+val decrypt_expand: #a:G.erased supported_alg -> decrypt_expand_st (G.reveal a)
+
 
 (** @type: true
 *)
