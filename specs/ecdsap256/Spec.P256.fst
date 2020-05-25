@@ -34,13 +34,10 @@ let basePoint : point_nat_prime =
 noextract
 let _point_double (p:point_nat_prime) : point_nat_prime =
   let x, y, z = p in
-  let s = (4 * x * y * y) % prime256 in
-  let m = ((-3) * z * z * z * z + 3 * x * x) % prime256 in
-  let x3 = (m * m - 2 * s) % prime256 in
-  let y3 = (m * (s - x3) - 8 * y * y * y * y) % prime256 in
-  let z3 = (2 * y * z) % prime256 in
+  let x3 = ((3 * (x - z * z) * (x + z * z)) * (3 * (x - z * z) * (x + z * z)) - 8 * x * y * y) % prime in 
+  let y3 = (3 * (x + z * z) * (x - z * z) *  (4 * x * y * y - x3) - 8 * y * y * y * y) % prime in 
+  let z3 = ((y + z) * (y + z) - z * z - y * y) % prime in 
   (x3, y3, z3)
-
 
 noextract
 let _point_add (p:point_nat_prime) (q:point_nat_prime) : point_nat_prime =
