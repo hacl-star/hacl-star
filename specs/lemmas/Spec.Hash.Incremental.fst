@@ -163,7 +163,7 @@ let blake2_no_finish
   let s3 = blake2_update_last (to_blake_alg a) prev0 rem input s2 in
   s3
 
-let blake2_ihash_no_finish
+let blake2_hash_incremental_no_finish
   (a:hash_alg{is_blake a}) (input:bytes{Seq.length input <= max_input_length a}) =
   let bs, l = split_blocks a input in
   let is1 = init a in
@@ -177,7 +177,7 @@ let blake2_ihash_no_finish
 let blake2_is_hash_incremental_aux
   (a:hash_alg{is_blake a}) (input:bytes{Seq.length input <= max_input_length a})
   : Lemma
-    (blake2_no_finish a input == fst (blake2_ihash_no_finish a input))
+    (blake2_no_finish a input == fst (blake2_hash_incremental_no_finish a input))
   =
   (* Let's prove the equality step by step *)
   (**)
