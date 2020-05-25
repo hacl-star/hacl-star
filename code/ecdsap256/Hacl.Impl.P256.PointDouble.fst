@@ -28,7 +28,7 @@ open FStar.Math.Lemmas
 friend Spec.P256.MontgomeryMultiplication
 open FStar.Mul
 
-#set-options "--z3rlimit 500 --ifuel 0 --fuel 0" 
+#set-options "--z3rlimit 1000 --ifuel 0 --fuel 0" 
 
 val lemma_x3_0: x: int -> y: int -> z: int -> Lemma (
   ((3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) * (3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime)  - 8 * (x * (y * y % prime) % prime)) % prime ==  ((3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) * (3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) - 8 * x * y * y) % prime)
@@ -78,6 +78,7 @@ val lemma_x3: x: int -> y: int -> z: int -> Lemma (
 )
 
 let lemma_x3 x y z = 
+  let open FStar.Tactics.Canon in 
   lemma_x3_0 x y z;
 
   calc (==)
@@ -129,6 +130,12 @@ let lemma_x3 x y z =
     (  
       (3 * (x - z * z) * (x + z * z)) * 
       (3 * (x - z * z) * (x + z * z)) - 8 * x * y * y) % prime;
+
+ (==) {assert_by_tactic (8 * x * y * y == 8 * x * (y * y)) canon}
+     (  
+      (3 * (x - z * z) * (x + z * z)) * 
+      (3 * (x - z * z) * (x + z * z)) - 8 * x * (y * y)) % prime;
+
 
 }
 

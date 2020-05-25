@@ -635,7 +635,7 @@ TARGET_H_INCLUDE = -add-include '"kremlin/internal/target.h"'
 # Disabled for distributions that don't include vectorized implementations.
 INTRINSIC_FLAGS = -add-include '"libintvector.h"'
 # Disabled for distributions that don't include code based on intrinsics.
-INTRINSIC_INT_FLAGS = -add-include 'Hacl_ECDSA:"lib_intrinsics.h"'
+INTRINSIC_INT_FLAGS = -add-include 'Hacl_P256:"lib_intrinsics.h"'
 
 # Disabled for dist/portable
 OPT_FLAGS = -ccopts -march=native,-mtune=native
