@@ -159,11 +159,11 @@ let create_in_st (a: alg) =
       | _ -> False)
 
 /// Same function as above, but in the StackInline effect, so that it is possible
-/// to use AES GCM while staying in the Stack effect. In this case, the state is
-/// allocated/deallocated just before/after any encryption or decryption (which
+/// to use AES GCM while staying in the Stack effect. In this case, the state should
+/// be allocated/deallocated just before/after any encryption or decryption (which
 /// is not very problematic during, for example, a handshake).
 inline_for_extraction noextract
-let create_in_stack_ty (a: alg) =
+let alloca_st (a: alg) =
   k:B.buffer uint8 { B.length k = key_length a } ->
   StackInline (B.pointer (state_s a))
     (requires fun h0 ->
@@ -176,6 +176,7 @@ let create_in_stack_ty (a: alg) =
       B.(modifies loc_none h0 h1) /\
       B.fresh_loc (footprint h1 s) h0 h1 /\
       B.live h1 s /\
+      B.(loc_includes (loc_region_only true (HS.get_tip h1)) (footprint h1 s)) /\
 
       // Useful stuff
       as_kv (B.deref h1 s) == B.as_seq h0 k)
@@ -190,7 +191,9 @@ let create_in_stack_ty (a: alg) =
 (** @type: true
 *)
 val create_in: #a:alg -> create_in_st a
-val create_in_stack: #a:alg -> create_in_stack_ty a
+
+inline_for_extraction noextract
+val alloca: #a:alg -> alloca_st a
 
 let iv_p a = iv:B.buffer uint8 { iv_length a (B.length iv)}
 let ad_p a = ad:B.buffer uint8 { B.length ad <= max_length a }

@@ -157,7 +157,8 @@ let create_in #a r dst k =
 
 #push-options "--z3rlimit 10 --max_fuel 0 --max_ifuel 0 --z3cliopt smt.QI.EAGER_THRESHOLD=5"
 
-let create_in_stack_chacha20_poly1305: create_in_stack_ty CHACHA20_POLY1305 =
+inline_for_extraction noextract
+let alloca_chacha20_poly1305: alloca_st CHACHA20_POLY1305 =
   fun k ->
   let h0 = ST.get () in
   let ek = B.alloca 0uy 32ul in
@@ -170,8 +171,8 @@ let create_in_stack_chacha20_poly1305: create_in_stack_ty CHACHA20_POLY1305 =
 #pop-options
 
 inline_for_extraction noextract
-let create_in_stack_aes_gcm (i: vale_impl):
-  create_in_stack_ty (alg_of_vale_impl i) =
+let alloca_aes_gcm (i: vale_impl):
+  alloca_st (alg_of_vale_impl i) =
   fun k ->
   let a = alg_of_vale_impl i in
   let h0 = ST.get () in
@@ -183,16 +184,19 @@ let create_in_stack_aes_gcm (i: vale_impl):
   let p = B.alloca (Ek i (G.hide (B.as_seq h0 k)) ek) 1ul in
   p
 
-let create_in_stack_aes128_gcm: create_in_stack_ty AES128_GCM =
-  create_in_stack_aes_gcm Vale_AES128
-let create_in_stack_aes256_gcm: create_in_stack_ty AES256_GCM =
-  create_in_stack_aes_gcm Vale_AES256
+inline_for_extraction noextract
+let alloca_aes128_gcm: alloca_st AES128_GCM =
+  alloca_aes_gcm Vale_AES128
 
-let create_in_stack #a k =
+inline_for_extraction noextract
+let alloca_aes256_gcm: alloca_st AES256_GCM =
+  alloca_aes_gcm Vale_AES256
+
+let alloca #a k =
   match a with
-  | AES128_GCM -> create_in_stack_aes128_gcm k
-  | AES256_GCM -> create_in_stack_aes256_gcm k
-  | CHACHA20_POLY1305 -> create_in_stack_chacha20_poly1305 k
+  | AES128_GCM -> alloca_aes128_gcm k
+  | AES256_GCM -> alloca_aes256_gcm k
+  | CHACHA20_POLY1305 -> alloca_chacha20_poly1305 k
 
 inline_for_extraction noextract
 let aes_gcm_encrypt (i: vale_impl):
