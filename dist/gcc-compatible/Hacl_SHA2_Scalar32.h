@@ -38,5 +38,7 @@
 
 void Hacl_SHA2_Scalar32_sha256(uint8_t *h, uint32_t len, uint8_t *b);
 
+void Hacl_SHA2_Scalar32_sha512(uint8_t *h, uint32_t len, uint8_t *b);
+
 #define __Hacl_SHA2_Scalar32_H_DEFINED
 #endif

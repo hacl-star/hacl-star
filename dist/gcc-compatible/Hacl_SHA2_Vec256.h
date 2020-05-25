@@ -77,5 +77,26 @@ Hacl_SHA2_Vec256_sha256_8(
   uint8_t *b7
 );
 
+typedef struct
+K___K____uint8_t__K____uint8_t__K____uint8_t___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t__s
+{
+  K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ fst;
+  K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ snd;
+}
+K___K____uint8_t__K____uint8_t__K____uint8_t___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_;
+
+void
+Hacl_SHA2_Vec256_sha512_4(
+  uint8_t *r0,
+  uint8_t *r1,
+  uint8_t *r2,
+  uint8_t *r3,
+  uint32_t len,
+  uint8_t *b0,
+  uint8_t *b1,
+  uint8_t *b2,
+  uint8_t *b3
+);
+
 #define __Hacl_SHA2_Vec256_H_DEFINED
 #endif
