@@ -28,7 +28,6 @@ open Hacl.Impl.P256.Arithmetics
 open Spec.P256.Definitions
 open Spec.P256.Lemmas
 open Spec.P256
-open Spec.P256.Ladder
 open Spec.P256.MontgomeryMultiplication
 
 inline_for_extraction noextract

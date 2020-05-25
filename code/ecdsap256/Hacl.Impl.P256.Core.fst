@@ -24,8 +24,6 @@ open Hacl.Impl.P256.Math
 open Hacl.Impl.P256.PointAdd
 open Hacl.Impl.P256.PointDouble
 
-
-
 open FStar.Tactics 
 open FStar.Tactics.Canon
 
@@ -33,6 +31,29 @@ open FStar.Math.Lemmas
 
 friend Spec.P256.MontgomeryMultiplication
 open FStar.Mul
+
+val swap: p: point_prime -> q: point_prime -> Tot (r: tuple2 point_prime point_prime {let pNew, qNew = r in 
+  pNew == q /\ qNew == p})
+
+let swap p q = (q, p)
+
+
+val conditional_swap: i: uint64 -> p: point_prime -> q: point_prime -> Tot (r: tuple2 point_prime point_prime
+  {
+    let pNew, qNew = r in 
+    if uint_v i = 0 then pNew == p /\ qNew == q
+    else
+      let p1, q1 = swap p q in 
+      p1 == pNew /\ q1 == qNew
+ }
+)
+
+let conditional_swap i p q = 
+  if uint_v i = 0 then 
+    (p, q)
+  else
+    (q, p)
+
 
 #set-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 0" 
 let toDomain value result = 

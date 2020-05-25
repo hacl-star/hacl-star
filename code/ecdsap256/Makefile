@@ -32,7 +32,7 @@ dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
 # We don't want Hacl_Test_ECDSA.o to be included so we redefine OBJS
 dist/libecdsa.a:dist/Hacl_P256.o
 	$(MAKE) -C dist -f Makefile.basic OBJS=$(notdir $^) $(notdir $@)
-
+	
 dist/%.o: dist/Makefile.basic
 	$(MAKE) -C dist -f Makefile.basic $(notdir $@)
 

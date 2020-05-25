@@ -566,6 +566,34 @@ let lemma_low_level0 o0 o1 o2 o3 f0 f1 f2 f3 u h2 c1 c2 c3 h3 h4 =
   assert(c3 + h4 < pow2 64)
 
 
+(*This code is taken from Curve25519, written by Polubelova M *)
+val lemma_cswap2_step:
+    bit:uint64{v bit <= 1}
+  -> p1:uint64
+  -> p2:uint64
+  -> Lemma (
+      let mask = u64 0 -. bit in
+      let dummy = mask &. (p1 ^. p2) in
+      let p1' = p1 ^. dummy in
+      let p2' = p2 ^. dummy in
+      if v bit = 1 then p1' == p2 /\ p2' == p1 else p1' == p1 /\ p2' == p2)
+
+let lemma_cswap2_step bit p1 p2 =
+  let mask = u64 0 -. bit in
+  assert (v bit == 0 ==> v mask == 0);
+  assert (v bit == 1 ==> v mask == pow2 64 - 1);
+  let dummy = mask &. (p1 ^. p2) in
+  logand_lemma mask (p1 ^. p2);
+  assert (v bit == 1 ==> v dummy == v (p1 ^. p2));
+  assert (v bit == 0 ==> v dummy == 0);
+  let p1' = p1 ^. dummy in
+  (* uintv_extensionality dummy (if v bit = 1 then (p1 ^. p2) else u64 0); *)
+  logxor_lemma p1 p2;
+  let p2' = p2 ^. dummy in
+  logxor_lemma p2 p1
+
+(* </> *)
+
 
 open Lib.Buffer
 open FStar.HyperStack.All

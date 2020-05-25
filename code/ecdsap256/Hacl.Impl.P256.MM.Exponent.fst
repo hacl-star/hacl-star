@@ -25,7 +25,6 @@ open Hacl.Impl.P256.Core
 open Spec.P256.Definitions
 open Spec.P256.Lemmas
 open Spec.P256
-open Spec.P256.Ladder
 open Spec.P256.MontgomeryMultiplication
 
 friend Spec.P256.MontgomeryMultiplication
@@ -211,8 +210,5 @@ let sqPower_buffer: x: glbuffer uint8 32ul {witnessed x sqPower_seq /\ recallabl
 
 
 let square_root a result = 
-  push_frame();
-    recall_contents sqPower_buffer sqPower_seq;
-    montgomery_ladder_power a sqPower_buffer result;  
-  pop_frame()
-
+  recall_contents sqPower_buffer sqPower_seq;
+  montgomery_ladder_power a sqPower_buffer result

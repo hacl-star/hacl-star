@@ -15,7 +15,6 @@ open Hacl.Impl.P256.Core
 open Spec.P256.MontgomeryMultiplication
 open Hacl.Impl.ECDSA.MontgomeryMultiplication
 open Hacl.Impl.ECDSA.MM.Exponent
-open Spec.P256.Ladder
 
 open Spec.ECDSAP256.Definition
 open Spec.ECDSA
