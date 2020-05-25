@@ -445,7 +445,14 @@ let decrypt_expand_st (a: supported_alg) =
       let cipher_tag = B.as_seq h0 cipher `S.append` B.as_seq h0 tag in
       let plain = Spec.decrypt #a (B.as_seq h0 k) (B.as_seq h0 iv) (B.as_seq h0 ad) cipher_tag in
       B.(modifies (loc_buffer dst) h0 h1) /\
-      Some? plain /\ S.equal (Some?.v plain) (B.as_seq h1 dst))
+      begin
+      match err with
+      | Success ->
+        Some? plain /\ S.equal (Some?.v plain) (B.as_seq h1 dst)
+      | AuthenticationFailure ->
+        None? plain
+      | _ -> False
+      end)
 
 /// This function takes a key, expands it and performs decryption.
 ///
@@ -454,6 +461,7 @@ let decrypt_expand_st (a: supported_alg) =
 /// - ``Failure``: cipher text could not be decrypted (e.g. tag mismatch)
 (** @type: true
 *)
+inline_for_extraction noextract
 val decrypt_expand: #a:G.erased supported_alg -> decrypt_expand_st (G.reveal a)
 
 
