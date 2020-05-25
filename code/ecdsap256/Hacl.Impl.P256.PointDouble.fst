@@ -179,7 +179,7 @@ let y3_lemma_1 x y z =
 
 
 val lemma_y3: x: int -> y: int -> z: int -> x3: int -> Lemma (
-  ((3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) *  ((4 * (x * (y * y % prime) % prime) % prime) - x3) - 8 * (y * y % prime) * (y * y % prime)) % prime == (3 * (x + z * z) * (x - z * z) *  (4 * x * (y * y) - x3) - 8 * (y * y) * (y * y)) % prime)
+  ((3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) *  ((4 * (x * (y * y % prime) % prime) % prime) - x3) - 8 * (y * y % prime) * (y * y % prime)) % prime == (3 * (x - z * z) * (x + z * z) *  (4 * x * (y * y) - x3) - 8 * (y * y) * (y * y)) % prime)
   
 
 let lemma_y3 x y z x3 = 
@@ -225,7 +225,9 @@ let lemma_y3 x y z x3 =
     (3 * (x + z * z) * (x - z * z) *  (4 * x * y * y - x3) - 8 * (y * y) * (y * y)) % prime;
     (==) {assert_by_tactic (4 * x * y * y == 4 * x * (y * y)) canon}
     (3 * (x + z * z) * (x - z * z) *  (4 * x * (y * y) - x3) - 8 * (y * y) * (y * y)) % prime;
-    
+    (==) {assert_by_tactic ((3 * (x + z * z) * (x - z * z) *  (4 * x * (y * y) - x3) - 8 * (y * y) * (y * y)) == (3 * (x - z * z) * (x + z * z) *  (4 * x * (y * y) - x3) - 8 * (y * y) * (y * y))) canon}
+    (3 * (x - z * z) * (x + z * z) *  (4 * x * (y * y) - x3) - 8 * (y * y) * (y * y)) % prime;
+   
   }
  
 
@@ -244,16 +246,6 @@ let lemma_z3 x y z =
       (==) {lemma_mod_sub_distr ((y + z) * (y + z) - z * z) (y * y) prime}
       ((y + z) * (y + z) - z * z - y * y) % prime;}
 
-
-
-(*   delta:=Z1^2;
-     gamma:=Y1^2;
-     beta:=X1*gamma;
-     alpha:=3*(X1-delta)*(X1+delta);
-     X3:=alpha^2-8*beta;
-     Z3:=(Y1+Z1)^2-gamma-delta;
-     Y3:=alpha*(4*beta-X3)-8*gamma^2;
-     SS!(x3-X3/Z3^2); SS!(y3-Y3/Z3^3); *)
 
 val point_double_a_b_g: p: point -> alpha: felem -> beta: felem -> gamma: felem -> delta: felem -> tempBuffer: lbuffer uint64 (size 12) -> 
   Stack unit
@@ -407,11 +399,11 @@ let point_double_y3 y3 x3 alpha gamma eightGamma fourBeta =
   montgomery_multiplication_buffer alpha y3 y3; (* y3 = alpha * (4 * beta - x3) *)
   montgomery_square_buffer gamma gamma; (* gamma = gamma ** 2 *)
   multByEight gamma eightGamma; (* gamma = 8 * gamma ** 2 *)
-  p256_sub y3 eightGamma y3 (* y3 = alpha * y3 - 8 * gamma **2 *);
+  p256_sub y3 eightGamma y3; (* y3 = alpha * y3 - 8 * gamma **2 *)
 
 
   let alphaD = fromDomain_ (as_nat h0 alpha) in 
-  let gammaD = fromDomain_ (as_nat h0 gamma) in 
+  let gammaD = fromDomain_ (as_nat h0 gamma) in  
 
   let open FStar.Tactics.Canon in 
 
@@ -430,6 +422,28 @@ let point_double_y3 y3 x3 alpha gamma eightGamma fourBeta =
     toDomain_ ((alphaD *  (fromDomain_ (as_nat h0 fourBeta) - fromDomain_ (as_nat h0 x3)) - 8 * gammaD * gammaD) % prime);
 }
 
+
+val lemma_pd_to_spec: x: nat -> y: nat -> z: nat -> x3: nat -> y3: nat -> z3: nat ->  Lemma 
+  (requires (  
+    let xD, yD, zD = fromDomain_ x, fromDomain_ y, fromDomain_ z in 
+    x3 == toDomain_ (((3 * (xD - zD * zD) * (xD + zD * zD)) * (3 * (xD - zD * zD) * (xD + zD * zD)) - 8 * xD * (yD * yD)) % prime) /\
+    y3 == toDomain_ ((3 * (xD - zD * zD) * (xD + zD * zD) *  (4 * xD * (yD * yD) - fromDomain_ x3) - 8 * (yD * yD) * (yD * yD)) % prime) /\
+    z3 = toDomain_ (((yD + zD) * (yD + zD) - zD * zD - yD * yD) % prime)
+  )
+)
+ (ensures(
+   let xD, yD, zD = fromDomain_ x, fromDomain_ y, fromDomain_ z in 
+   let x3D, y3D, z3D = fromDomain_ x3, fromDomain_ y3, fromDomain_ z3 in 
+   let xN, yN, zN = _point_double (xD, yD, zD) in 
+   x3D == xN /\ y3D == yN /\ z3D == zN))
+
+let lemma_pd_to_spec x y z x3 y3 z3 = 
+  let xD, yD, zD = fromDomain_ x, fromDomain_ y, fromDomain_ z in 
+  let x3D, y3D, z3D = fromDomain_ x3, fromDomain_ y3, fromDomain_ z3 in 
+  assert(let xN, yN, zN = _point_double (xD, yD, zD) in 
+      x3D == xN /\ y3D == yN /\ z3D == zN)
+
+  
 
 let point_double p result tempBuffer = 
   let pX = sub p (size 0) (size 4) in 
@@ -466,4 +480,11 @@ let point_double p result tempBuffer =
   
   lemma_x3 x y z;
   lemma_z3 x y z;
-  lemma_y3 x y z (fromDomain_ (as_nat h4 x3))
+  lemma_y3 x y z (fromDomain_ (as_nat h4 x3));
+  lemma_pd_to_spec 
+    (as_nat h0 (gsub p (size 0) (size 4))) 
+      (as_nat h0 (gsub p (size 4) (size 4))) 
+	(as_nat h0 (gsub p (size 8) (size 4))) 
+    (as_nat h4 (gsub result (size 0) (size 4))) 
+      (as_nat h4 (gsub result (size 4) (size 4))) 
+	(as_nat h4 (gsub result (size 8) (size 4)))
