@@ -36,7 +36,8 @@ let _point_double (p:point_nat_prime) : point_nat_prime =
   let x, y, z = p in
   let delta = z * z in 
   let gamma = y * y in 
-  let x3 = ((3 * (x - delta) * (x + delta)) * (3 * (x - delta) * (x + delta)) - 8 * x * gamma) % prime in 
+  let beta = x * gamma in 
+  let x3 = ((3 * (x - delta) * (x + delta)) * (3 * (x - delta) * (x + delta)) - 8 * beta) % prime in 
   let y3 = (3 * (x + delta) * (x - delta) *  (4 * x * gamma - x3) - 8 * gamma * gamma) % prime in 
   let z3 = ((y + z) * (y + z) - delta - gamma) % prime in 
   (x3, y3, z3)

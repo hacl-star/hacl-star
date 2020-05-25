@@ -11,7 +11,6 @@ open Spec.P256.MontgomeryMultiplication
 open FStar.Mul
 open Spec.P256
 
-open Spec.P256.MontgomeryMultiplication.PointDouble
 
 let prime = prime256
 

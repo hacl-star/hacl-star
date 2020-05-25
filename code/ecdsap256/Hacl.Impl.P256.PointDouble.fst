@@ -13,7 +13,6 @@ open Spec.P256.Lemmas
 open Spec.P256.Definitions
 open Hacl.Impl.SolinasReduction
 open Spec.P256.MontgomeryMultiplication
-open Spec.P256.MontgomeryMultiplication.PointDouble
 open Spec.P256.MontgomeryMultiplication.PointAdd
 open Hacl.Impl.P256.LowLevel 
 open Hacl.Impl.P256.LowLevel.PrimeSpecific
@@ -459,7 +458,7 @@ let point_double p result tempBuffer =
     point_double_z3 z3 pY pZ gamma delta;
     point_double_y3 y3 x3 alpha gamma eightGamma fourBeta;
 
-  let h4 = ST.get() in 
+  let h4 = ST.get() in
 
   let x = fromDomain_ (as_nat h0 (gsub p (size 0) (size 4))) in 
   let y = fromDomain_ (as_nat h0 (gsub p (size 4) (size 4))) in 
