@@ -70,7 +70,7 @@ let max_input_length: hash_alg -> Tot pos = function
   | SHA2_224 | SHA2_256 -> pow2 61 - 1
   | SHA2_384 | SHA2_512 -> pow2 125 - 1
   | Blake2S -> pow2 64 - 1
-  | Blake2B -> pow2 128 - 1
+  | Blake2B -> pow2 64 - 1
 
 // BB. Removed once renamed...
 let max_input = max_input_length
