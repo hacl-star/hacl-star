@@ -223,14 +223,14 @@ let blake2_is_hash_incremental_aux
     blocks == S.empty /\
     last_block == Spec.Blake2.get_last_padded_block (to_blake_alg a) l rem /\
     rem' = S.length l);
-//  assert(
-//    last_split_blake a l ==
-//    (S.empty, Spec.Blake2.get_last_padded_block (to_blake_alg a) l rem, S.length l));
   let h' = update_multi a is2 S.empty in
   update_multi_zero a is2;
   assert(h' == is2);
+  assert(max_input_length a == pow2 64 -1);
   assert(snd h' == u64 (S.length bs));
-  assume(v (snd h' +. u64 rem) == S.length input);
+  assert(v #U64 #SEC (snd h') + rem == S.length input);
+  add_v_eq (v #U64 #SEC (snd h')) rem;
+  assert(v (snd h' +. u64 rem) == S.length input);
   assert(
     is3 ==
     (Spec.Blake2.blake2_update_block (to_blake_alg a) true (v (snd h' +. u64 rem))
@@ -238,6 +238,8 @@ let blake2_is_hash_incremental_aux
      u64 0));
   (* Prove the final equality *)
   assert(s3 == fst is3)
+
+(* TODO HERE *)
 
 (*
 let split (a:alg) (len:nat)
