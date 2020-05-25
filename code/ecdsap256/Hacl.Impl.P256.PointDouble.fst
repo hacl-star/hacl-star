@@ -133,6 +133,104 @@ let lemma_x3 x y z =
 
 }
 
+val y3_lemma_0: x: int ->  y: int -> z: int -> x3: int -> t0: int -> Lemma (
+   (t0 - 8 * (y * y % prime) * (y * y % prime)) % prime == (t0 - 8 * y * y * y * y) % prime)
+
+let y3_lemma_0 x y z x3 t0 = 
+  calc (==) {
+    (t0 - 8 * (y * y % prime) * (y * y % prime)) % prime;
+  (==) {lemma_mod_sub_distr t0 (8 * (y * y % prime) * (y * y % prime)) prime}
+    (t0 - (8 * (y * y % prime) * (y * y % prime)) % prime) % prime;
+  (==) {lemma_mod_mul_distr_r (8 * (y * y % prime)) (y * y) prime}
+    (t0 - (8 * (y * y % prime) * (y * y)) % prime) % prime;
+  (==) {lemma_mod_mul_distr_r (8 * (y * y)) (y * y) prime}
+    (t0 - (8 * (y * y) * (y * y)) % prime) % prime;
+  (==) {assert_by_tactic (8 * (y * y) * (y * y) == 8 * y * y * y * y) canon}
+    (t0 - (8 * y * y * y * y) % prime) % prime;
+  (==) {lemma_mod_sub_distr t0 (8 * y * y * y * y) prime}
+    (t0 - 8 * y * y * y * y) % prime;
+  }
+
+
+val y3_lemma_1: x: int ->  y: int -> z: int ->  
+  Lemma (3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime == 3 * (x + z * z) * (x - z * z)  % prime)
+
+let y3_lemma_1 x y z = 
+  let open FStar.Tactics.Canon in 
+  calc (==)
+  {
+    3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime;
+    (==) {lemma_mod_mul_distr_r (3 * (x - (z * z % prime))) (x + (z * z % prime)) prime}
+      3 * (x - (z * z % prime)) * ((x + (z * z % prime)) % prime) % prime;
+    (==) {lemma_mod_add_distr x (z * z) prime}
+      3 * (x - (z * z % prime)) * ((x + z * z) % prime) % prime;
+    (==) {lemma_mod_mul_distr_r (3 * (x - (z * z % prime))) (x + z * z) prime}
+      3 * (x - (z * z % prime)) * (x + z * z) % prime;
+    (==) {assert_by_tactic (3 * (x - (z * z % prime)) * (x + z * z) == 3 * (x + z * z) * (x - (z * z % prime))) canon}
+      3 * (x + z * z) * (x - (z * z % prime)) % prime;
+    (==) {lemma_mod_mul_distr_r (3 * (x + z * z)) (x - (z * z % prime)) prime}
+      3 * (x + z * z) * ((x - (z * z % prime))  % prime)  % prime;
+    (==) {lemma_mod_sub_distr x (z * z) prime}
+      3 * (x + z * z) * ((x - z * z) % prime)  % prime;
+    (==) {lemma_mod_mul_distr_r (3 * (x + z * z)) (x - z * z) prime}
+      3 * (x - z * z) * (x + z * z)  % prime;
+    (==) {assert_by_tactic (3 * (x + z * z) * (x - z * z) == 3 * (x - z * z) * (x + z * z)) canon}
+      3 * (x + z * z) * (x - z * z)  % prime; 
+    }
+
+
+val y3_lemma: x: int -> y: int -> z: int -> x3: int -> Lemma (
+  ((3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) *  ((4 * (x * (y * y % prime) % prime) % prime) - x3) - 8 * (y * y % prime) * (y * y % prime)) % prime == (3 * (x + z * z) * (x - z * z) *  (4 * x * y * y - x3) - 8 * y * y * y * y) % prime)
+  
+
+let y3_lemma x y z x3 = 
+  let open FStar.Tactics.Canon in 
+  let t = ((3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) *  ((4 * (x * (y * y % prime) % prime) % prime) - x3) - 8 * (y * y % prime) * (y * y % prime)) % prime in 
+  let t0 = (3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) *  ((4 * (x * (y * y % prime) % prime) % prime) - x3) in 
+  assert(t == (t0 - 8 * (y * y % prime) * (y * y % prime)) % prime);
+
+  y3_lemma_0 x y z x3 t0;
+  y3_lemma_1 x y z;
+
+
+  calc (==)
+  {
+      4 * (x * (y * y % prime) % prime) % prime;
+    (==) {lemma_mod_mul_distr_r x (y * y) prime}
+       4 * ((x * (y * y)) % prime) % prime;
+    (==) {assert_by_tactic (x * (y * y) == x * y * y) canon}
+      (4 * ((x * y * y) % prime)) % prime;
+    (==) {lemma_mod_mul_distr_r 4 (x * y * y) prime}
+      (4 * (x * y * y)) % prime;
+    (==) {assert_by_tactic (4 * (x * y * y) == 4 * x * y * y) canon}
+      4 * x * y * y % prime;
+      
+   };
+
+  calc (==)
+  {
+    ((3 * (x + z * z) * (x - z * z)  % prime) *  (4 * x * y * y % prime - x3) - 8 * y * y * y * y) % prime;
+    (==) {lemma_mod_add_distr (- 8 * y * y * y * y) ((3 * (x + z * z) * (x - z * z)  % prime) *  (4 * x * y * y % prime - x3)) prime}
+    ((((3 * (x + z * z) * (x - z * z)) % prime) *  (4 * x * y * y % prime - x3)) % prime - 8 * y * y * y * y) % prime;
+    (==) {lemma_mod_mul_distr_l (3 * (x + z * z) * (x - z * z))  (4 * x * y * y % prime - x3) prime}
+    (((3 * (x + z * z) * (x - z * z)) *  (4 * x * y * y % prime - x3)) % prime - 8 * y * y * y * y) % prime;
+    (==) {lemma_mod_mul_distr_r (3 * (x + z * z) * (x - z * z)) (4 * x * y * y % prime - x3) prime}
+    (((3 * (x + z * z) * (x - z * z)) *  ((4 * x * y * y % prime - x3) % prime)) % prime - 8 * y * y * y * y) % prime;
+    (==) {lemma_mod_add_distr (- x3) (4 * x * y * y) prime}
+    (((3 * (x + z * z) * (x - z * z)) *  ((4 * x * y * y - x3) % prime)) % prime - 8 * y * y * y * y) % prime;
+    (==) {lemma_mod_mul_distr_r (3 * (x + z * z) * (x - z * z)) (4 * x * y * y - x3) prime}
+    ((3 * (x + z * z) * (x - z * z) *  (4 * x * y * y - x3)) % prime - 8 * y * y * y * y) % prime;
+    (==) {lemma_mod_add_distr (- 8 * y * y * y * y) (3 * (x + z * z) * (x - z * z) *  (4 * x * y * y - x3)) prime}
+    (3 * (x + z * z) * (x - z * z) *  (4 * x * y * y - x3) - 8 * y * y * y * y) % prime;
+    
+    
+  }
+ 
+ 
+
+
+
+
 
 (*   delta:=Z1^2;
      gamma:=Y1^2;
@@ -367,7 +465,8 @@ assert(
   
   as_nat h3 z3 = toDomain_ (((y + z) * (y + z) - fromDomain_ (as_nat h3 gamma) - (z * z % prime)) % prime) /\
   
-  as_nat h4 y3 == toDomain_ ((fromDomain_ (as_nat h3 alpha) *  (fromDomain_ (as_nat h3 fourBeta) - fromDomain_ (as_nat h3 x3)) - 8 * fromDomain_ (as_nat h3 gamma) * fromDomain_ (as_nat h3 gamma)) % prime));
+  as_nat h4 y3 == toDomain_ (((3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) *  ((4 * (x * (y * y % prime) % prime) % prime) - fromDomain_ (as_nat h3 x3)) - 8 * (y * y % prime) * (y * y % prime)) % prime)
+  );
 
     admit()
   
