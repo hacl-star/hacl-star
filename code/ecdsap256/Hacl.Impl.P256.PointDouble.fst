@@ -179,11 +179,11 @@ let y3_lemma_1 x y z =
     }
 
 
-val y3_lemma: x: int -> y: int -> z: int -> x3: int -> Lemma (
+val lemma_y3: x: int -> y: int -> z: int -> x3: int -> Lemma (
   ((3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) *  ((4 * (x * (y * y % prime) % prime) % prime) - x3) - 8 * (y * y % prime) * (y * y % prime)) % prime == (3 * (x + z * z) * (x - z * z) *  (4 * x * y * y - x3) - 8 * y * y * y * y) % prime)
   
 
-let y3_lemma x y z x3 = 
+let lemma_y3 x y z x3 = 
   let open FStar.Tactics.Canon in 
   let t = ((3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) *  ((4 * (x * (y * y % prime) % prime) % prime) - x3) - 8 * (y * y % prime) * (y * y % prime)) % prime in 
   let t0 = (3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) *  ((4 * (x * (y * y % prime) % prime) % prime) - x3) in 
@@ -226,9 +226,21 @@ let y3_lemma x y z x3 =
     
   }
  
- 
+
+val lemma_z3: x: int -> y: int -> z: int -> Lemma 
+  (((y + z) * (y + z) - (y * y % prime) - (z * z % prime)) % prime == ((y + z) * (y + z) - z * z - y * y) % prime)
 
 
+let lemma_z3 x y z = 
+  let t = ((y + z) * (y + z) - (y * y % prime) - (z * z % prime)) % prime in 
+
+  calc (==) 
+    {
+      ((y + z) * (y + z) - (y * y % prime) - (z * z % prime)) % prime;
+      (==) {lemma_mod_sub_distr ((y + z) * (y + z) - (y * y % prime)) (z * z) prime}
+      ((y + z) * (y + z) - (y * y % prime) - z * z) % prime;
+      (==) {lemma_mod_sub_distr ((y + z) * (y + z) - z * z) (y * y) prime}
+      ((y + z) * (y + z) - z * z - y * y) % prime;}
 
 
 
@@ -442,8 +454,6 @@ let point_double p result tempBuffer =
     point_double_a_b_g p alpha beta gamma delta tmp;
     point_double_x3 x3 alpha fourBeta beta eightBeta; 
     point_double_z3 z3 pY pZ gamma delta; 
-  let h3 = ST.get() in 
-
     point_double_y3 y3 x3 alpha gamma eightGamma fourBeta;
 
   let h4 = ST.get() in 
@@ -452,23 +462,7 @@ let point_double p result tempBuffer =
   let y = fromDomain_ (as_nat h0 (gsub p (size 4) (size 4))) in 
   let z = fromDomain_ (as_nat h0 (gsub p (size 8) (size 4))) in 
 
-
-assert(
-  as_nat h4 delta = toDomain_ (z * z % prime) /\
-  
-  as_nat h3 gamma = toDomain_ (y * y % prime) /\
-  as_nat h3 beta = toDomain_ (x * fromDomain_ (as_nat h3 gamma) % prime) /\
-  as_nat h3 alpha = toDomain_ (3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) /\
-  as_nat h3 fourBeta = toDomain_ (4 * (x * fromDomain_ (as_nat h3 gamma) % prime) % prime) /\
-  
-  as_nat h3 x3 = toDomain_ (((3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) * (3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) - 8 * (x * (y * y % prime) % prime)) % prime) /\
-  
-  as_nat h3 z3 = toDomain_ (((y + z) * (y + z) - fromDomain_ (as_nat h3 gamma) - (z * z % prime)) % prime) /\
-  
-  as_nat h4 y3 == toDomain_ (((3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) *  ((4 * (x * (y * y % prime) % prime) % prime) - fromDomain_ (as_nat h3 x3)) - 8 * (y * y % prime) * (y * y % prime)) % prime)
-  );
-
-    admit()
-  
-  
+  lemma_x3 x y z;
+  lemma_z3 x y z;
+  lemma_y3 x y z (fromDomain_ (as_nat h4 x3))
   
