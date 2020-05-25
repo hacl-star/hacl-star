@@ -28,6 +28,29 @@ let update a =
       Spec.SHA1.update
   | Blake2S -> fun h l ->
       let blake_state, totlen = h in
+      // We should never have overflows given the restriction on buffer lengths, so
+      // this should be equivalent to a nat addition
+      let totlen = totlen +. u64 (size_block a) in
+      (Spec.Blake2.blake2_update_block Spec.Blake2.Blake2S false (v #U64 #SEC totlen) l blake_state,
+       totlen)
+  | Blake2B -> fun h l ->
+      let blake_state, totlen = h in
+      // We should never have overflows given the restriction on buffer lengths, so
+      // this should be equivalent to a nat addition
+      let totlen = totlen +. u64 (size_block a) in
+      (Spec.Blake2.blake2_update_block Spec.Blake2.Blake2B false (v #U64 #SEC totlen) l blake_state,
+       totlen)
+
+(*let update a =
+  match a with
+  | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 ->
+      Spec.SHA2.update a
+  | MD5 ->
+      Spec.MD5.update
+  | SHA1 ->
+      Spec.SHA1.update
+  | Blake2S -> fun h l ->
+      let blake_state, totlen = h in
       (Spec.Blake2.blake2_update_block Spec.Blake2.Blake2S false (v #U64 #SEC totlen) l blake_state,
       // We should never have overflows given the restriction on buffer lengths, so
       // this should be equivalent to a nat addition
@@ -37,7 +60,7 @@ let update a =
       (Spec.Blake2.blake2_update_block Spec.Blake2.Blake2B false (v #U64 #SEC totlen) l blake_state,
       // We should never have overflows given the restriction on buffer lengths, so
       // this should be equivalent to a nat addition
-       totlen +. u64 (size_block a))
+       totlen +. u64 (size_block a)) *)
 
 
 let update_multi
