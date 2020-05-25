@@ -331,6 +331,7 @@ let encrypt_expand_pre (a: supported_alg)
   (tag: B.buffer uint8)
   (h0: HS.mem)
 =
+  config_pre a /\
   encrypt_gen_pre a iv iv_len ad ad_len plain plain_len cipher tag h0 /\ (
   B.live h0 k /\ B.disjoint k cipher /\
   encrypt_live_disjoint_pre a iv iv_len ad ad_len
@@ -354,8 +355,11 @@ let encrypt_expand_st (a: supported_alg) =
       S.equal (S.append (B.as_seq h1 cipher) (B.as_seq h1 tag))
         (Spec.encrypt #a (B.as_seq h0 k) (B.as_seq h0 iv) (B.as_seq h0 ad) (B.as_seq h0 plain)))
 
-/// This function takes a key, expands it then performs encryption.
-val encrypt_expand: #a:G.erased (supported_alg) -> encrypt_expand_st (G.reveal a)
+/// Those functions take a key, expand it then perform encryption.
+val encrypt_expand_aes128_gcm: encrypt_expand_st AES128_GCM
+val encrypt_expand_aes256_gcm: encrypt_expand_st AES256_GCM
+val encrypt_expand_chacha20_poly1305: encrypt_expand_st CHACHA20_POLY1305
+val encrypt_expand: #a:supported_alg -> encrypt_expand_st (G.reveal a)
 
 
 inline_for_extraction noextract
@@ -435,6 +439,7 @@ let decrypt_expand_st (a: supported_alg) =
   dst: B.buffer uint8 { B.length dst = B.length cipher } ->
   Stack error_code
     (requires fun h0 ->
+        config_pre a /\
         MB.(all_live h0 [ buf k; buf iv; buf ad; buf cipher; buf tag; buf dst ]) /\
         B.disjoint k dst /\
         B.disjoint tag dst /\ B.disjoint tag cipher /\
@@ -461,9 +466,10 @@ let decrypt_expand_st (a: supported_alg) =
 /// - ``Failure``: cipher text could not be decrypted (e.g. tag mismatch)
 (** @type: true
 *)
-inline_for_extraction noextract
-val decrypt_expand: #a:G.erased supported_alg -> decrypt_expand_st (G.reveal a)
-
+val decrypt_expand_aes128_gcm: decrypt_expand_st AES128_GCM
+val decrypt_expand_aes256_gcm: decrypt_expand_st AES256_GCM
+val decrypt_expand_chacha20_poly1305: decrypt_expand_st CHACHA20_POLY1305
+val decrypt_expand: #a:supported_alg -> decrypt_expand_st (G.reveal a)
 
 (** @type: true
 *)

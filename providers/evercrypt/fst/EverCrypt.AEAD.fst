@@ -351,6 +351,41 @@ let encrypt #a s iv iv_len ad ad_len plain plain_len cipher tag =
         end
 
 inline_for_extraction noextract
+let encrypt_expand_aes_gcm (i: vale_impl): encrypt_expand_st (alg_of_vale_impl i) =
+  fun k iv iv_len ad ad_len plain plain_len cipher tag ->
+  push_frame ();
+  (* Allocate the state *)
+  let s : B.pointer_or_null (state_s (alg_of_vale_impl i)) = alloca k in
+  let r = encrypt_aes_gcm i s iv iv_len ad ad_len plain plain_len cipher tag in
+  assert(r == Success);
+  pop_frame ()
+
+let encrypt_expand_aes128_gcm : encrypt_expand_st AES128_GCM =
+  encrypt_expand_aes_gcm Vale_AES128
+
+let encrypt_expand_aes256_gcm : encrypt_expand_st AES256_GCM =
+  encrypt_expand_aes_gcm Vale_AES256
+
+let encrypt_expand_chacha20_poly1305 : encrypt_expand_st CHACHA20_POLY1305 =
+  fun k iv iv_len ad ad_len plain plain_len cipher tag ->
+  push_frame ();
+  (* Allocate the state *)
+  let s : B.pointer_or_null (state_s CHACHA20_POLY1305) = alloca k in
+  let open LowStar.BufferOps in
+  let Ek i kv ek = !*s in
+  EverCrypt.Chacha20Poly1305.aead_encrypt ek iv ad_len ad plain_len plain cipher tag;
+  pop_frame ()
+
+let encrypt_expand #a k iv iv_len ad ad_len plain plain_len cipher tag =
+  match a with
+  | AES128_GCM ->
+    encrypt_expand_aes128_gcm k iv iv_len ad ad_len plain plain_len cipher tag
+  | AES256_GCM ->
+    encrypt_expand_aes256_gcm k iv iv_len ad ad_len plain plain_len cipher tag
+  | CHACHA20_POLY1305 ->
+    encrypt_expand_chacha20_poly1305 k iv iv_len ad ad_len plain plain_len cipher tag
+
+inline_for_extraction noextract
 let aes_gcm_decrypt (i: vale_impl):
   Vale.Wrapper.X64.GCMdecryptOpt.decrypt_opt_stdcall_st (vale_alg_of_vale_impl i) =
   match i with
@@ -487,9 +522,42 @@ let decrypt_aes256_gcm (_: squash (EverCrypt.TargetConfig.x64)): decrypt_st AES2
       let () = false_elim () in
       LowStar.Failure.failwith "statically unreachable"
 
-let decrypt #a s iv iv_len ad ad_len cipher cipher_len tag dst =
+let decrypt_chacha20_poly1305 : decrypt_st CHACHA20_POLY1305 =
+  fun s iv iv_len ad ad_len cipher cipher_len tag dst ->
   if B.is_null s then
     InvalidKey
+  else
+    // This condition is never satisfied in F* because of the iv_length precondition on iv.
+    // We keep it here to be defensive when extracting to C
+    if iv_len <> 12ul then
+      InvalidIVLength
+    else begin
+      let open LowStar.BufferOps in
+      let Ek i kv ek = !*s in
+      [@ inline_let ] let bound = pow2 32 - 1 - 16 in
+      assert (v cipher_len <= bound);
+      assert_norm (bound + 16 <= pow2 32 - 1);
+      assert_norm (pow2 31 + bound / 64 <= pow2 32 - 1);
+
+      let h0 = ST.get () in
+      let r = EverCrypt.Chacha20Poly1305.aead_decrypt
+        ek iv ad_len ad cipher_len dst cipher tag
+      in
+      assert (
+        let cipher_tag = B.as_seq h0 cipher `S.append` B.as_seq h0 tag in
+        let tag_s = S.slice cipher_tag (S.length cipher_tag - tag_length CHACHA20_POLY1305) (S.length cipher_tag) in
+        let cipher_s = S.slice cipher_tag 0 (S.length cipher_tag - tag_length CHACHA20_POLY1305) in
+        S.equal cipher_s (B.as_seq h0 cipher) /\ S.equal tag_s (B.as_seq h0 tag));
+
+      if r = 0ul then
+        Success
+      else
+        AuthenticationFailure
+    end
+
+let decrypt #a s iv iv_len ad ad_len cipher cipher_len tag dst =
+  if B.is_null s then
+     InvalidKey
   else
     let open LowStar.BufferOps in
     let Ek i kv ek = !*s in
@@ -499,31 +567,41 @@ let decrypt #a s iv iv_len ad ad_len cipher cipher_len tag dst =
     | Vale_AES256 ->
         decrypt_aes256_gcm () s iv iv_len ad ad_len cipher cipher_len tag dst
     | Hacl_CHACHA20 ->
-        // This condition is never satisfied in F* because of the iv_length precondition on iv.
-        // We keep it here to be defensive when extracting to C
-        if iv_len <> 12ul then
-          InvalidIVLength
-        else begin
-          [@ inline_let ] let bound = pow2 32 - 1 - 16 in
-          assert (v cipher_len <= bound);
-          assert_norm (bound + 16 <= pow2 32 - 1);
-          assert_norm (pow2 31 + bound / 64 <= pow2 32 - 1);
+        decrypt_chacha20_poly1305 s iv iv_len ad ad_len cipher cipher_len tag dst
 
-          let h0 = ST.get () in
-          let r = EverCrypt.Chacha20Poly1305.aead_decrypt
-            ek iv ad_len ad cipher_len dst cipher tag
-          in
-          assert (
-            let cipher_tag = B.as_seq h0 cipher `S.append` B.as_seq h0 tag in
-            let tag_s = S.slice cipher_tag (S.length cipher_tag - tag_length CHACHA20_POLY1305) (S.length cipher_tag) in
-            let cipher_s = S.slice cipher_tag 0 (S.length cipher_tag - tag_length CHACHA20_POLY1305) in
-            S.equal cipher_s (B.as_seq h0 cipher) /\ S.equal tag_s (B.as_seq h0 tag));
+inline_for_extraction noextract
+let decrypt_expand_aes_gcm (i: vale_impl): decrypt_expand_st (alg_of_vale_impl i) =
+  fun k iv iv_len ad ad_len cipher cipher_len tag dst ->
+  push_frame ();
+  (* Allocate the state *)
+  let s : B.pointer_or_null (state_s (alg_of_vale_impl i)) = alloca k in
+  let r = decrypt_aes_gcm i s iv iv_len ad ad_len cipher cipher_len tag dst in
+  pop_frame ();
+  r
 
-          if r = 0ul then
-            Success
-          else
-            AuthenticationFailure
-        end
+let decrypt_expand_aes128_gcm : decrypt_expand_st AES128_GCM =
+  decrypt_expand_aes_gcm Vale_AES128
+
+let decrypt_expand_aes256_gcm : decrypt_expand_st AES256_GCM =
+  decrypt_expand_aes_gcm Vale_AES256
+
+let decrypt_expand_chacha20_poly1305 : decrypt_expand_st CHACHA20_POLY1305 =
+  fun k iv iv_len ad ad_len cipher cipher_len tag dst ->
+  push_frame ();
+  (* Allocate the state *)
+  let s : B.pointer_or_null (state_s CHACHA20_POLY1305) = alloca k in
+  let r = decrypt_chacha20_poly1305 s iv iv_len ad ad_len cipher cipher_len tag dst in
+  pop_frame ();
+  r
+
+let decrypt_expand #a k iv iv_len ad ad_len cipher cipher_len tag dst =
+  match a with
+  | AES128_GCM ->
+    decrypt_expand_aes128_gcm k iv iv_len ad ad_len cipher cipher_len tag dst
+  | AES256_GCM ->
+    decrypt_expand_aes256_gcm k iv iv_len ad ad_len cipher cipher_len tag dst
+  | CHACHA20_POLY1305 ->
+    decrypt_expand_chacha20_poly1305 k iv iv_len ad ad_len cipher cipher_len tag dst
 
 let free #a s =
   let open LowStar.BufferOps in
