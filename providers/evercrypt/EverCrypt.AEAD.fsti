@@ -230,12 +230,6 @@ let encrypt_live_disjoint_pre (a: supported_alg)
   (tag: B.buffer uint8)
   (h0: HS.mem)
 =
-//  invariant h0 s /\
-(*  B.(loc_disjoint k_loc (loc_buffer iv)) /\
-  B.(loc_disjoint k_loc (loc_buffer ad)) /\
-  B.(loc_disjoint k_loc (loc_buffer tag)) /\
-  B.(loc_disjoint k_loc (loc_buffer plain)) /\
-  B.(loc_disjoint k_loc (loc_buffer cipher)) /\ *)
   MB.(all_live h0 [ buf iv; buf ad; buf plain; buf cipher; buf tag ]) /\
   (B.disjoint plain cipher \/ plain == cipher) /\
   B.disjoint cipher tag /\
@@ -258,11 +252,6 @@ let encrypt_pre (a: supported_alg)
   (h0: HS.mem)
 =
   encrypt_gen_pre a iv iv_len ad ad_len plain plain_len cipher tag h0 /\ (
-  (* v iv_len = B.length iv /\ v iv_len > 0 /\
-  v ad_len = B.length ad /\ v ad_len <= pow2 31 /\
-  v plain_len = B.length plain /\ v plain_len <= max_length a /\
-  B.length cipher = B.length plain /\
-  B.length tag = tag_length a /\ ( *)
   not (B.g_is_null s) ==>
     invariant h0 s /\
     B.(loc_disjoint (footprint h0 s) (loc_buffer iv)) /\
@@ -271,13 +260,6 @@ let encrypt_pre (a: supported_alg)
     B.(loc_disjoint (footprint h0 s) (loc_buffer plain)) /\
     B.(loc_disjoint (footprint h0 s) (loc_buffer cipher)) /\
     encrypt_live_disjoint_pre a iv iv_len ad ad_len plain plain_len cipher tag h0)
-//    MB.(all_live h0 [ buf iv; buf ad; buf plain; buf cipher; buf tag ]) /\
-//    (B.disjoint plain cipher \/ plain == cipher) /\
-//    B.disjoint cipher tag /\
-//    B.disjoint iv cipher /\ B.disjoint iv tag /\
-//    B.disjoint plain tag /\
-//    B.disjoint plain ad /\
-//    B.disjoint ad cipher /\ B.disjoint ad tag)
 // SNIPPET_END: encrypt_pre
 
 
