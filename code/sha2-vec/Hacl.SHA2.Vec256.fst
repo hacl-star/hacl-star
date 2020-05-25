@@ -30,7 +30,7 @@ let sha256_update8 b hash = update #SHA2_256 #M256 b hash
 val sha256_8 (r0 r1 r2 r3 r4 r5 r6 r7 : lbuffer uint8 32ul) (len:size_t) (b0 b1 b2 b3 b4 b5 b6 b7 : lbuffer uint8 len) :
   Stack unit
   (requires fun h0 -> live8 h0 b0 b1 b2 b3 b4 b5 b6 b7 /\ live8 h0 r0 r1 r2 r3 r4 r5 r6 r7 /\ internally_disjoint8 r0 r1 r2 r3 r4 r5 r6 r7)
-  (ensures  fun h0 _ h1 -> modifies (loc r0 |+| loc r1 |+| loc r2 |+| loc r3 |+| loc r4 |+| loc r5 |+| loc r6 |+| loc r7) h0 h1 /\
+  (ensures  fun h0 _ h1 -> modifies (loc r0 |+| (loc r1 |+| (loc r2 |+| (loc r3 |+| (loc r4 |+| (loc r5 |+| (loc r6 |+| loc r7))))))) h0 h1 /\
     as_seq h1 r0 == Spec.hash #SHA2_256 (v len) (as_seq h0 b0) /\
     as_seq h1 r1 == Spec.hash #SHA2_256 (v len) (as_seq h0 b1) /\
     as_seq h1 r2 == Spec.hash #SHA2_256 (v len) (as_seq h0 b2) /\
