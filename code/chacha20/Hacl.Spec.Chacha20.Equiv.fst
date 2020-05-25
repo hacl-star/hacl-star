@@ -594,6 +594,7 @@ let update_sub_is_append #a zero blocksize len b_v =
   eq_intro plain (Seq.append b_v zeros)
 
 
+#push-options "--z3rlimit 150"
 val update_sub_get_block_lemma_k:
     #a:Type
   -> w:size_pos
@@ -647,7 +648,7 @@ let update_sub_get_block_lemma_k #a w blocksize zero len b_v j k =
     };
 
   Seq.lemma_index_slice b_v (j / blocksize * blocksize) (j / blocksize * blocksize + blocksize) k
-
+#pop-options
 
 val update_sub_get_block_lemma:
     #a:Type
