@@ -1,8 +1,30 @@
 language: c
-os: linux
-arch: arm64
-dist: bionic
+jobs:
+  include:
+    - name: aarch64 / arm minimal tests
+      os: linux
+      arch: arm64
+      dist: bionic
+    - name: gcc 7 / full tests
+      os: linux
+      compiler: gcc
+      dist: bionic
+    - name: gcc 5.4 / full tests / ocaml 4.09.1 / ocaml tests
+      install:
+        - sudo add-apt-repository -y ppa:avsm/ppa
+        - sudo apt update -qq --yes && sudo apt install -qq --yes opam aspcud ocaml
+        - opam init --yes --bare
+        - opam switch create 4.09.1 --yes
+        - eval $(opam config env)
+        - opam install --yes ctypes ctypes-foreign dune zarith
+    - name: clang 7 / full tests
+      os: linux
+      compiler: clang
+    - name: xcode 10 / full tests
+      os: osx
+      osx_image: xcode10.1
+    - name: xcode 11 / full tests
+      os: osx
+      osx_image: xcode11.3
 script:
-  - cd dist/gcc-compatible && ./configure
-  - make -j
-  - make -C ../../tests arm -j
+  - .ci/script.sh

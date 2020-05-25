@@ -130,6 +130,7 @@ endif
 # Test should be renamed into Test.EverCrypt
 test-c: $(subst .,_,$(patsubst %.fst,test-c-%,$(notdir $(wildcard code/tests/*.fst)))) \
   test-c-Test
+	cp dist/Makefile.test dist/test/c/Makefile
 
 # Any file in specs/tests is taken to contain a `val test: unit -> bool` function.
 test-ml: $(subst .,_,$(patsubst %.fst,test-ml-%,$(notdir $(wildcard specs/tests/*.fst))))
@@ -679,6 +680,7 @@ BUNDLE_FLAGS	=\
   $(FRODO_BUNDLE) \
   $(HPKE_BUNDLE) \
   $(STREAMING_BUNDLE) \
+  $(INTTYPES_BUNDLE) \
   $(LEGACY_BUNDLE)
 
 DEFAULT_FLAGS = \
@@ -1024,6 +1026,7 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt \
 dist/evercrypt-external-headers/Makefile.basic: $(ALL_KRML_FILES)
 	$(KRML) -silent \
 	  -minimal \
+	  -header $(HACL_HOME)/dist/LICENSE.txt \
 	  -bundle EverCrypt+EverCrypt.AEAD+EverCrypt.AutoConfig2+EverCrypt.HKDF+EverCrypt.HMAC+EverCrypt.Hash+EverCrypt.Hash.Incremental+EverCrypt.Cipher+EverCrypt.Poly1305+EverCrypt.Chacha20Poly1305+EverCrypt.Curve25519=*[rename=EverCrypt] \
 	  -library EverCrypt,EverCrypt.* \
 	  -add-include '<inttypes.h>' \
@@ -1040,15 +1043,12 @@ dist/evercrypt-external-headers/Makefile.basic: $(ALL_KRML_FILES)
 # cause races on shared files (e.g. Makefile.basic, etc.) -- to be investigated.
 # In the meanwhile, we at least try to copy the header for intrinsics just once.
 
-dist/test/c/lib_intrinsics.h:
-	mkdir -p $(dir $@) && cp $(HACL_HOME)/lib/c/lib_intrinsics.h $@
-
 .PRECIOUS: dist/test/c/%.c
-dist/test/c/%.c: $(ALL_KRML_FILES) dist/test/c/lib_intrinsics.h
+dist/test/c/%.c: $(ALL_KRML_FILES)
 	$(KRML) -silent \
 	  -tmpdir $(dir $@) -skip-compilation \
 	  -no-prefix $(subst _,.,$*) \
-	  -library Hacl,Lib,EverCrypt,EverCrypt.* \
+	  -library Hacl.Impl.*,EverCrypt,EverCrypt.* \
 	  -fparentheses -fcurly-braces -fno-shadow \
 	  -minimal -add-include '"kremlib.h"' \
 	  -bundle '*[rename=$*]' $(KRML_EXTRA) $(filter %.krml,$^)
@@ -1083,7 +1083,7 @@ LDFLAGS 	+= -L$(OPENSSL_HOME)
 CFLAGS += -Wall -Wextra -g \
   -Wno-int-conversion -Wno-unused-parameter \
   -O3 -march=native -mtune=native -I$(KREMLIN_HOME)/kremlib/dist/minimal \
-  -I$(KREMLIN_HOME)/include
+  -I$(KREMLIN_HOME)/include -Idist/gcc-compatible
 
 # FIXME there's a kremlin error that generates a void* -- can't use -Werror
 # Need the libraries to be present and compiled.
@@ -1122,6 +1122,7 @@ test-handwritten: compile-gcc64-only compile-gcc-compatible
 
 obj/vale_testInline.exe: vale/code/test/TestInline.c obj/vale_testInline.h
 	$(CC) $(CFLAGS) $(LDFLAGS) $< -Iobj -o $@
+
 vale_testInline: obj/vale_testInline.exe
 	@echo "Testing Vale inline assembly printer"
 	$<
