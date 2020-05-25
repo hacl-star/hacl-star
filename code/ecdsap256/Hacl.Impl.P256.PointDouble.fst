@@ -75,7 +75,7 @@ let lemma_x3_1 a b =
 
 val lemma_x3: x: int -> y: int -> z: int -> Lemma (
   ((3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) * (3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) - 8 * (x * (y * y % prime) % prime)) % prime == 
-  ((3 * (x - z * z) * (x + z * z)) * (3 * (x - z * z) * (x + z * z)) - 8 * x * y * y) % prime
+  ((3 * (x - z * z) * (x + z * z)) * (3 * (x - z * z) * (x + z * z)) - 8 * x * (y * y)) % prime
 )
 
 let lemma_x3 x y z = 
@@ -180,7 +180,7 @@ let y3_lemma_1 x y z =
 
 
 val lemma_y3: x: int -> y: int -> z: int -> x3: int -> Lemma (
-  ((3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) *  ((4 * (x * (y * y % prime) % prime) % prime) - x3) - 8 * (y * y % prime) * (y * y % prime)) % prime == (3 * (x + z * z) * (x - z * z) *  (4 * x * y * y - x3) - 8 * y * y * y * y) % prime)
+  ((3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) *  ((4 * (x * (y * y % prime) % prime) % prime) - x3) - 8 * (y * y % prime) * (y * y % prime)) % prime == (3 * (x + z * z) * (x - z * z) *  (4 * x * (y * y) - x3) - 8 * (y * y) * (y * y)) % prime)
   
 
 let lemma_y3 x y z x3 = 
@@ -222,7 +222,10 @@ let lemma_y3 x y z x3 =
     ((3 * (x + z * z) * (x - z * z) *  (4 * x * y * y - x3)) % prime - 8 * y * y * y * y) % prime;
     (==) {lemma_mod_add_distr (- 8 * y * y * y * y) (3 * (x + z * z) * (x - z * z) *  (4 * x * y * y - x3)) prime}
     (3 * (x + z * z) * (x - z * z) *  (4 * x * y * y - x3) - 8 * y * y * y * y) % prime;
-    
+    (==) {assert_by_tactic (8 * y * y * y * y == 8 * (y * y) * (y * y)) canon}
+    (3 * (x + z * z) * (x - z * z) *  (4 * x * y * y - x3) - 8 * (y * y) * (y * y)) % prime;
+    (==) {assert_by_tactic (4 * x * y * y == 4 * x * (y * y)) canon}
+    (3 * (x + z * z) * (x - z * z) *  (4 * x * (y * y) - x3) - 8 * (y * y) * (y * y)) % prime;
     
   }
  
@@ -453,7 +456,7 @@ let point_double p result tempBuffer =
   let h0 = ST.get() in 
     point_double_a_b_g p alpha beta gamma delta tmp;
     point_double_x3 x3 alpha fourBeta beta eightBeta; 
-    point_double_z3 z3 pY pZ gamma delta; 
+    point_double_z3 z3 pY pZ gamma delta;
     point_double_y3 y3 x3 alpha gamma eightGamma fourBeta;
 
   let h4 = ST.get() in 
@@ -461,8 +464,7 @@ let point_double p result tempBuffer =
   let x = fromDomain_ (as_nat h0 (gsub p (size 0) (size 4))) in 
   let y = fromDomain_ (as_nat h0 (gsub p (size 4) (size 4))) in 
   let z = fromDomain_ (as_nat h0 (gsub p (size 8) (size 4))) in 
-
+  
   lemma_x3 x y z;
   lemma_z3 x y z;
   lemma_y3 x y z (fromDomain_ (as_nat h4 x3))
-  
