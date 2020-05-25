@@ -123,12 +123,28 @@ let rec repeati_blake2_update1_as_update_multi_eq
       update_multi a (hash, u64 prev) blocks ==
       update_multi a s2 blocks2);
     repeati_blake2_update1_as_update_multi_eq a (nb - 1) prev d hash;
-    assume(blocks1 `S.equal` fst (Seq.split d ((nb-1) * block_length a)));
+    assert(blocks1 `S.equal` Seq.slice d 0 ((nb-1) * block_length a));
     assert(
       s2 == (Loops.repeati (nb-1) update1 hash, u64 (prev + (nb-1) * block_length a)));
     update_multi_one_block_eq a blocks2 (fst s2) (v #U64 #SEC (snd s2))
     end
 #pop-options
+
+let rec update_multi_associative #a (block_length: pos)
+  (update: update_t a block_length)
+  (acc: a)
+  (input1 input2: S.seq uint8):
+  Lemma
+    (requires
+      S.length input1 % block_length == 0 /\
+      S.length input2 % block_length == 0)
+    (ensures (
+      let input = S.append input1 input2 in
+      S.length input % block_length == 0 /\
+      mk_update_multi block_length update (mk_update_multi block_length update acc input1) input2 ==
+        mk_update_multi block_length update acc input))
+    (decreases (
+      S.length input1 + S.length input2))
 
 (*
 #push-options "--z3rlimit 500 --ifuel 1"
