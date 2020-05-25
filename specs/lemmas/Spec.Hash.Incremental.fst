@@ -6,11 +6,12 @@ open Spec.Hash.Definitions
 open Spec.Hash.PadFinish
 open Spec.Hash.Lemmas
 
+module B2 = Spec.Blake2
+
 friend Spec.Agile.Hash
 
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
 
-open FStar.Tactics
 open FStar.Mul
 open Spec.Blake2
 module Loops = Lib.LoopCombinators
@@ -132,8 +133,8 @@ let rec repeati_blake2_update1_as_update_multi_eq
 #pop-options
 
 /// It is enough to prove the equality between the spec and the incremental hash
-/// without the finish step. Moreover, for some reason, introductin those two
-/// functions below helps reducing the proof time, which cease becoming super
+/// without the finish step. Moreover, for some reason, introducing those two
+/// functions below helps reducing the proof time, which ceases becoming super
 /// random (I don't know why).
 let blake2_no_finish
   (a:hash_alg{is_blake a}) (input:bytes{Seq.length input <= max_input_length a}) =
@@ -153,8 +154,8 @@ let blake2_ihash_no_finish
   let is3 = update_last a is2 (S.length bs) l in
   is3
 
-/// TODO: for some reason, if I don't put a very big rlimit, the proof quickly fails.
-/// However, with a big rlimit it succeeds quickly.
+/// TODO: for some reason, if I don't put a very big rlimit, the proof almost
+/// immediately fails. However, with a big rlimit it succeeds quickly.
 #push-options "--z3rlimit 500 --fuel 0 --ifuel 0"
 let blake2_is_hash_incremental_aux
   (a:hash_alg{is_blake a}) (input:bytes{Seq.length input <= max_input_length a})
@@ -227,21 +228,31 @@ let blake2_is_hash_incremental
   =
   blake2_is_hash_incremental_aux a input
 
+let md_is_hash_incremental
+  (a:hash_alg{not (is_blake a)})
+  (input: bytes { S.length input <= max_input_length a })
+  (s:words_state a)
+  : Lemma (
+      let blocks, rest = split_blocks a input in
+      update_multi a s (input `S.append` (pad a (S.length input))) ==
+      update_last a (update_multi a s blocks) (S.length blocks) rest)
+   = let blocks, rest = split_blocks a input in
+     assert (S.length input == S.length blocks + S.length rest);
+     let padding = pad a (S.length input) in
+     calc (==) {
+       update_last a (update_multi a s blocks) (S.length blocks) rest;
+       (==) { }
+       update_multi a (update_multi a s blocks) S.(rest @| padding);
+       (==) { update_multi_associative a s blocks S.(rest @| padding) }
+       update_multi a s S.(blocks @| (rest @| padding));
+       (==) { S.append_assoc blocks rest padding }
+       update_multi a s S.((blocks @| rest) @| padding);
+       (==) { }
+       update_multi a s S.(input @| padding);
+     }
+
 let hash_is_hash_incremental (a: hash_alg) (input: bytes { S.length input <= max_input_length a }):
   Lemma (ensures (S.equal (hash a input) (hash_incremental a input)))
-=
+  =
   if is_blake a then (blake2_is_hash_incremental a input)
-  else
-  let open FStar.Mul in
-  let n = S.length input / block_length a in
-  let n = if S.length input % block_length a = 0 && n > 0 then n-1 else n in
-  let padding = pad a (S.length input) in
-  let padded_input = input `S.append` padding in
-  let blocks, rest = Lib.UpdateMulti.split_block (block_length a) padded_input n in
-  let blocks', rest' = S.split input (n * block_length a) in
-  S.lemma_eq_intro blocks blocks';
-  S.lemma_eq_intro (rest' `S.append` padding) rest;
-  Math.Lemmas.multiple_modulo_lemma n (block_length a);
-  S.lemma_eq_intro padded_input (blocks `S.append` rest);
-  update_multi_associative a (init a) blocks rest;
-  S.lemma_eq_intro (fst (update_multi a (init a) padded_input)) (fst (update_multi a (update_multi a (init a) blocks) rest))
+  else md_is_hash_incremental a input (init a)
