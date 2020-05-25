@@ -9,6 +9,7 @@
 #include "Hacl_SHA2_Scalar32.h"
 #include "Hacl_SHA2_Vec128.h"
 #include "Hacl_SHA2_Vec256.h"
+#include "EverCrypt_AutoConfig2.h"
 
 #include "sha2_vectors.h"
 #include "sha2vec_vectors.h"
@@ -126,6 +127,8 @@ bool print_test8(uint8_t* in, uint8_t* in1, uint8_t* in2, uint8_t* in3, uint8_t*
 
 int main()
 {
+  EverCrypt_AutoConfig2_init();
+  
   bool ok = true;
   for (int i = 0; i < sizeof(vectors)/sizeof(sha2_test_vector); ++i) {
     ok &= print_test1(vectors[i].input,vectors[i].input_len,vectors[i].tag_256,vectors[i].tag_512);
@@ -135,13 +138,16 @@ int main()
   ok &= print_test4(vectors_vec[0].input,vectors_vec[1].input,vectors_vec[2].input,vectors_vec[3].input,vectors_vec[0].input_len,
 		    vectors_vec[0].tag_256,vectors_vec[1].tag_256,vectors_vec[2].tag_256,vectors_vec[3].tag_256);
 
-  ok &= print_test8(vectors_vec[0].input,vectors_vec[1].input,vectors_vec[2].input,vectors_vec[3].input,
+
+  if (EverCrypt_AutoConfig2_has_avx2()) {
+    ok &= print_test8(vectors_vec[0].input,vectors_vec[1].input,vectors_vec[2].input,vectors_vec[3].input,
 		    vectors_vec[4].input,vectors_vec[5].input,vectors_vec[6].input,vectors_vec[7].input, vectors_vec[0].input_len,
 		    vectors_vec[0].tag_256,vectors_vec[1].tag_256,vectors_vec[2].tag_256,vectors_vec[3].tag_256,
 		    vectors_vec[4].tag_256,vectors_vec[5].tag_256,vectors_vec[6].tag_256,vectors_vec[7].tag_256);
 
-  ok &= print_test4_512(vectors_vec[0].input,vectors_vec[1].input,vectors_vec[2].input,vectors_vec[3].input,vectors_vec[0].input_len,
+    ok &= print_test4_512(vectors_vec[0].input,vectors_vec[1].input,vectors_vec[2].input,vectors_vec[3].input,vectors_vec[0].input_len,
 			vectors_vec[0].tag_512,vectors_vec[1].tag_512,vectors_vec[2].tag_512,vectors_vec[3].tag_512);
+  }
 
   uint64_t len = SIZE;
   uint8_t plain[SIZE];
@@ -179,17 +185,19 @@ int main()
   double tdiff2v = (double)(t2 - t1);
 
 
-  for (int j = 0; j < ROUNDS; j++) {
-    Hacl_SHA2_Vec256_sha256_8(plain,plain+32,plain+64,plain+96,plain+128,plain+160,plain+192,plain+224,SIZE,plain,plain,plain,plain,plain,plain,plain,plain);
-  }
+  if (EverCrypt_AutoConfig2_has_avx2()) {
+    for (int j = 0; j < ROUNDS; j++) {
+      Hacl_SHA2_Vec256_sha256_8(plain,plain+32,plain+64,plain+96,plain+128,plain+160,plain+192,plain+224,SIZE,plain,plain,plain,plain,plain,plain,plain,plain);
+    }
 
-  t1 = clock();
-  a = cpucycles_begin();
-  for (int j = 0; j < ROUNDS; j++) {
-    Hacl_SHA2_Vec256_sha256_8(plain,plain+32,plain+64,plain+96,plain+128,plain+160,plain+192,plain+224,SIZE,plain,plain,plain,plain,plain,plain,plain,plain);
+    t1 = clock();
+    a = cpucycles_begin();
+    for (int j = 0; j < ROUNDS; j++) {
+      Hacl_SHA2_Vec256_sha256_8(plain,plain+32,plain+64,plain+96,plain+128,plain+160,plain+192,plain+224,SIZE,plain,plain,plain,plain,plain,plain,plain,plain);
+    }
+    b = cpucycles_end();
+    t2 = clock();
   }
-  b = cpucycles_end();
-  t2 = clock();
   double cdiff2v8 = b - a;
   double tdiff2v8 = (double)(t2 - t1);
 
@@ -223,17 +231,19 @@ int main()
   double tdiff1 = (double)(t2 - t1);
 
 
-  for (int j = 0; j < ROUNDS; j++) {
-    Hacl_SHA2_Vec256_sha512_4(plain,plain+64,plain+128,plain+192,SIZE,plain,plain,plain,plain);
-  }
+  if (EverCrypt_AutoConfig2_has_avx2()) {
+    for (int j = 0; j < ROUNDS; j++) {
+      Hacl_SHA2_Vec256_sha512_4(plain,plain+64,plain+128,plain+192,SIZE,plain,plain,plain,plain);
+    }
 
-  t1 = clock();
-  a = cpucycles_begin();
-  for (int j = 0; j < ROUNDS; j++) {
-    Hacl_SHA2_Vec256_sha512_4(plain,plain+64,plain+128,plain+192,SIZE,plain,plain,plain,plain);
+    t1 = clock();
+    a = cpucycles_begin();
+    for (int j = 0; j < ROUNDS; j++) {
+      Hacl_SHA2_Vec256_sha512_4(plain,plain+64,plain+128,plain+192,SIZE,plain,plain,plain,plain);
+    }
+    b = cpucycles_end();
+    t2 = clock();
   }
-  b = cpucycles_end();
-  t2 = clock();
   double cdiff2 = b - a;
   double tdiff2 = (double)(t2 - t1);
 
@@ -253,14 +263,19 @@ int main()
 
   uint8_t res = plain[0];
   uint64_t count = ROUNDS * SIZE;
-  printf ("\n\n");  
+  printf ("\n\n");
   printf("NEW SHA2-256 (32-bit) PERF: %d\n",(int)res); print_time(count,tdiff2n,cdiff2n);
   printf("VEC4 SHA2-256 (32-bit) PERF: %d\n",(int)res); print_time(count,tdiff2v,cdiff2v);
-  printf("VEC8 SHA2-256 (32-bit) PERF: %d\n",(int)res); print_time(count,tdiff2v8,cdiff2v8);
+  if (EverCrypt_AutoConfig2_has_avx2()) {
+    printf("VEC8 SHA2-256 (32-bit) PERF: %d\n",(int)res); print_time(count,tdiff2v8,cdiff2v8);
+  }
   printf("OpenSSL SHA2-256 (32-bit) PERF: %d\n",(int)res); print_time(count,tdiff2a,cdiff2a);
   printf ("\n\n");
   printf("NEW SHA2-512 (32-bit) PERF: %d\n",(int)res); print_time(count,tdiff1,cdiff1);
-  printf("VEC4 SHA2-512 (32-bit) PERF: %d\n",(int)res); print_time(count,tdiff2,cdiff2);
+
+  if (EverCrypt_AutoConfig2_has_avx2()) {
+    printf("VEC4 SHA2-512 (32-bit) PERF: %d\n",(int)res); print_time(count,tdiff2,cdiff2);
+  }
   printf("OpenSSL SHA2-512 (32-bit) PERF: %d\n",(int)res); print_time(count,tdiff4,cdiff4);
 
   if (ok) return EXIT_SUCCESS;
