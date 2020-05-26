@@ -653,7 +653,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "f507bb6cdbe2e7655813e3edf69952bf"
+      "0ffa542c751437df947669631d95fcde"
     ],
     [
       "Lib.Buffer.index",
@@ -1078,7 +1078,7 @@
         "typing_FStar.Monotonic.HyperHeap.root"
       ],
       0,
-      "0cd577a459a72d8c0e2301d41f20831a"
+      "29bc8edcb9cfd03e09480d9c8d842fea"
     ],
     [
       "Lib.Buffer.createL",
@@ -1174,7 +1174,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "462179e4a77124b598b6cb7544e7ebc1"
+      "570294d96cd17f3d9c3e0d5e753dc5b0"
     ],
     [
       "Lib.Buffer.createL_global",
@@ -1283,7 +1283,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "03a3e603ab40712d81809cca6a19b746"
+      "cd207849ef88721c1489c613ef89d58b"
     ],
     [
       "Lib.Buffer.recall_contents",
@@ -2970,7 +2970,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "b89f6c9f5bed7488060f138d7b1e26e4"
+      "85d1f6a32cd4b915fc7ed646da88da05"
     ],
     [
       "Lib.Buffer.salloc1",
@@ -4722,7 +4722,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "281f8c3305c5f78b02519a0f5a22dc6f"
+      "2631b542ac9fc0da09939a1f5488cfed"
     ],
     [
       "Lib.Buffer.eq_or_disjoint",
@@ -4973,7 +4973,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "c964ba4129f24808a5c6950b5b7cfc9c"
+      "dcd7d83fc1d8cbd40406851641e9fdfc"
     ],
     [
       "Lib.Buffer.map2T",
@@ -5001,8 +5001,9 @@
       0,
       1,
       [
-        "@MaxIFuel_assumption", "@query", "b2t_def", "bool_inversion",
-        "constructor_distinct_Lib.Buffer.CONST",
+        "@MaxIFuel_assumption", "@query",
+        "Lib.Sequence_interpretation_Tm_arrow_31983ce7bb3fa3288ec94b088df0f02a",
+        "b2t_def", "bool_inversion", "constructor_distinct_Lib.Buffer.CONST",
         "constructor_distinct_Lib.Buffer.MUT",
         "constructor_distinct_Lib.IntTypes.PUB",
         "constructor_distinct_Lib.IntTypes.U32",
@@ -5025,8 +5026,9 @@
         "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.pub_int_v",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.IntTypes.v", "equation_Lib.Sequence.map2",
-        "equation_Lib.Sequence.map2_inner", "equation_LowStar.Buffer.buffer",
+        "equation_Lib.IntTypes.v", "equation_Lib.Sequence.index",
+        "equation_Lib.Sequence.map2", "equation_Lib.Sequence.map2_inner",
+        "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder",
         "equation_LowStar.ConstBuffer.live",
         "equation_LowStar.ConstBuffer.loc_buffer",
@@ -5068,7 +5070,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "f39e949654d45dc18ca6a094174f0ffa"
+      "e1812ebd99db175301bcda70de875a90"
     ],
     [
       "Lib.Buffer.mapiT",
@@ -5099,8 +5101,9 @@
       0,
       1,
       [
-        "@MaxIFuel_assumption", "@query", "b2t_def", "bool_inversion",
-        "constructor_distinct_Lib.Buffer.MUT",
+        "@MaxIFuel_assumption", "@query",
+        "Lib.Buffer_interpretation_Tm_arrow_41eb6e4cd3493385999e9d2115287813",
+        "b2t_def", "bool_inversion", "constructor_distinct_Lib.Buffer.MUT",
         "constructor_distinct_Lib.IntTypes.PUB",
         "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_Lib.Buffer.MUT@tok",
@@ -5121,8 +5124,8 @@
         "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.pub_int_t",
         "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.range",
         "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
-        "equation_Lib.Sequence.mapi", "equation_Lib.Sequence.mapi_inner",
-        "equation_LowStar.Buffer.buffer",
+        "equation_Lib.Sequence.index", "equation_Lib.Sequence.mapi",
+        "equation_Lib.Sequence.mapi_inner", "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder",
         "equation_LowStar.ConstBuffer.live",
         "equation_LowStar.ImmutableBuffer.ibuffer",
@@ -5175,7 +5178,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "a0672548b3261fdbd4f1cebfebcf0acd"
+      "57bc0921760182f5b09fce8478282241"
     ],
     [
       "Lib.Buffer.mapi",

@@ -219,7 +219,7 @@
         "typing_Spec.Hash.Definitions.is_sha2"
       ],
       0,
-      "3bbd2733525031102dc9ee39e4652c6b"
+      "3dd47b5444075476254134ba55614a17"
     ],
     [
       "Hacl.Hash.Core.SHA2.k224_256",
@@ -310,8 +310,10 @@
         "equation_FStar.Monotonic.HyperStack.mem",
         "equation_FStar.Preorder.preorder",
         "equation_FStar.Preorder.preorder_rel",
-        "equation_FStar.Preorder.reflexive", "equation_Lib.IntTypes.uint32",
-        "equation_Lib.IntTypes.uint64",
+        "equation_FStar.Preorder.reflexive",
+        "equation_Hacl.Hash.Definitions.state",
+        "equation_Lib.IntTypes.uint32", "equation_Lib.IntTypes.uint64",
+        "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder",
         "equation_LowStar.ImmutableBuffer.immutable_preorder",
         "equation_Spec.Agile.Hash.init",
@@ -336,6 +338,7 @@
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
         "refinement_interpretation_Tm_refine_13bb5bd51326487ff966c528ecd61b6b",
         "refinement_interpretation_Tm_refine_2c1f6dc1d378fed54224fbf63fca7a8a",
+        "refinement_interpretation_Tm_refine_8123bca628cafe0c2db21c68d24b1c50",
         "refinement_interpretation_Tm_refine_9ca7807bfc284168a2426f4440262824",
         "refinement_interpretation_Tm_refine_bd10f09297e0e7dc08314f7d9211801c",
         "refinement_interpretation_Tm_refine_d2d1ea66f2b3a92c2deb42edcbb784ce",
@@ -351,7 +354,7 @@
         "typing_Spec.SHA2.Constants.h512_l"
       ],
       0,
-      "580a243f082baa860c558e921d4c52c0"
+      "8fd5ac548bd49459c5dd13bab4ff878a"
     ],
     [
       "Hacl.Hash.Core.SHA2.alloca_224",
@@ -780,7 +783,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "8853323aedbfb5f43e6ad5777adfd601"
+      "7bfe943561c8ac8e844a10d6f9c6bcf9"
     ],
     [
       "Hacl.Hash.Core.SHA2.ws",
@@ -953,6 +956,8 @@
         "equation_FStar.Monotonic.Heap.equal_dom",
         "equation_FStar.Monotonic.HyperHeap.hmap",
         "equation_FStar.Monotonic.HyperStack.mem",
+        "equation_LowStar.ImmutableBuffer.ibuffer",
+        "equation_LowStar.ImmutableBuffer.immutable_preorder",
         "equation_Spec.Hash.Definitions.is_sha2",
         "equation_Spec.Hash.Definitions.sha2_alg",
         "equation_Spec.Hash.Definitions.word",
@@ -976,7 +981,7 @@
         "typing_Spec.Hash.Definitions.is_sha2"
       ],
       0,
-      "c7d07d91d77cb2d7eafb9bad2858b374"
+      "26dc5b9c1efa94e50b60829b0564ca9c"
     ],
     [
       "Hacl.Hash.Core.SHA2.shuffle_core",
@@ -1128,7 +1133,7 @@
         "typing_Spec.Hash.Definitions.word_t", "typing_Spec.SHA2.size_k_w"
       ],
       0,
-      "f625f49994595804476f7c755ae0d38b"
+      "c2022944b5f427e5c482aac1a11a2fde"
     ],
     [
       "Hacl.Hash.Core.SHA2.shuffle",
@@ -1485,7 +1490,7 @@
         "typing_Spec.Hash.Definitions.word_t", "typing_Spec.SHA2.size_k_w"
       ],
       0,
-      "e505926fd5cc4c10a8e2cd00eba08150"
+      "5103c6638411c50fd281ed2f0babf84b"
     ],
     [
       "Hacl.Hash.Core.SHA2.update_224",
