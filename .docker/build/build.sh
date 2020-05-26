@@ -294,5 +294,5 @@ export MAKEFLAGS="$MAKEFLAGS -Otarget"
 export_home FSTAR "$(pwd)/FStar"
 cd hacl-star
 rootPath=$(pwd)
-timeout -k 3h -s 9 exec_build
+exec_build
 cd ..
