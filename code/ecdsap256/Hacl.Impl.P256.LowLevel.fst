@@ -1593,14 +1593,21 @@ let shift_256_impl i o =
 
   lemma_shift_256 (v (Lib.Sequence.index (as_seq h0 i) 0)) (v (Lib.Sequence.index (as_seq h0 i) 1)) (v (Lib.Sequence.index (as_seq h0 i) 2)) (v (Lib.Sequence.index (as_seq h0 i) 3))
 
-
+#push-options "--fuel 1"
 
 inline_for_extraction noextract
 val mod64: a: widefelem -> Stack uint64 
   (requires fun h -> live h a) 
-  (ensures fun h0 r h1 -> modifies0 h0 h1 /\  wide_as_nat h1 a % pow2 64 = uint_v r)
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ wide_as_nat h1 a % pow2 64 = uint_v r)
 
-let mod64 a = index a (size 0)
+let mod64 a =
+  let r = index a (size 0) in 
+    let h1 = ST.get() in 
+  assert(wide_as_nat h1 a % pow2 64 == uint_v r);
+  r
+
+#pop-options
+
 
 inline_for_extraction noextract
 val shortened_mul: a: glbuffer uint64 (size 4) -> b: uint64 -> result: widefelem -> Stack unit
