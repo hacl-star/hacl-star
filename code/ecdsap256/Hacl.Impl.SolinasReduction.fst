@@ -9,7 +9,7 @@ open FStar.Math.Lemmas
 open FStar.Math.Lib
 open Lib.Buffer
 
-open Spec.P256.SolinasReduction
+open Hacl.SolinasReduction.Lemmas
 open Hacl.Impl.P256.LowLevel
 open Hacl.Impl.P256.LowLevel.PrimeSpecific
 

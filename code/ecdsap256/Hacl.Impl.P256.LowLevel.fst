@@ -1593,7 +1593,7 @@ let shift_256_impl i o =
 
   lemma_shift_256 (v (Lib.Sequence.index (as_seq h0 i) 0)) (v (Lib.Sequence.index (as_seq h0 i) 1)) (v (Lib.Sequence.index (as_seq h0 i) 2)) (v (Lib.Sequence.index (as_seq h0 i) 3))
 
-#push-options "--fuel 1"
+#push-options "--fuel 1 --ifuel 1 --z3rlimit 500"
 
 inline_for_extraction noextract
 val mod64: a: widefelem -> Stack uint64 

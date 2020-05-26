@@ -1,4 +1,4 @@
-module Spec.P256.SolinasReduction
+module Hacl.SolinasReduction.Lemmas
 
 open Lib.IntTypes
 open FStar.Math.Lemmas
@@ -12,10 +12,13 @@ open FStar.Tactics.Canon
 
 #reset-options "--fuel 0 --ifuel 0 --z3rlimit 300"
 
+noextract
 let prime = prime256
 
+noextract
 let _uint32 = n:nat{n < pow2 32}
 
+noextract
 val c8_reduction: c8: _uint32 -> Lemma
   (c8 * pow2 256 % prime ==
    (c8 * pow2 (7 * 32) - c8 * pow2 (6 * 32) - c8 *  pow2 (3 * 32) + c8) % prime)
@@ -33,7 +36,7 @@ let c8_reduction c8 =
     (c8 * pow2 (7 * 32) - c8 * pow2 (6 * 32) - c8 * pow2 (3 * 32) + c8) % prime;
   }
 
-
+noextract
 val c9_reduction: c9: _uint32 -> Lemma
   (c9 * pow2 (9 * 32) % prime ==
    (-c9 * pow2 (6 * 32) - c9 * pow2 (4 * 32) - c9 * pow2 (3 * 32) + c9 * pow2 (1 * 32) + c9) % prime)
@@ -51,7 +54,7 @@ let c9_reduction c9 =
     (-c9 * pow2 (6 * 32) - c9 * pow2 (4 * 32) - c9 * pow2 (3 * 32) + c9 * pow2 (1 * 32) + c9) % prime;
   }
 
-
+noextract
 val c10_reduction: c10: _uint32 -> Lemma
   (c10 * pow2 (10 * 32) % prime ==
   (-c10 * pow2 (7 * 32) - c10 * pow2 (5 * 32) - c10 * pow2 (4 * 32) + c10 * pow2 32 + c10 * pow2 (2 * 32)) % prime)
@@ -69,7 +72,7 @@ let c10_reduction c10 =
     (-c10 * pow2 (7 * 32) - c10 * pow2 (5 * 32) - c10 * pow2 (4 * 32) + c10 * pow2 32 + c10 * pow2 (2 * 32)) % prime;
   }
 
-
+noextract
 val c11_reduction: c11: _uint32 -> Lemma
   (c11 * pow2 (11 * 32) % prime ==
   (2 * c11 * pow2 (3 * 32) + c11 * pow2 (2 * 32) - c11 - c11 * pow2 (32 * 7) - c11 * pow2 (5 * 32)) % prime)
@@ -89,7 +92,7 @@ let c11_reduction c11  =
     (2 * c11 * pow2 (3 * 32) + c11 * pow2 (2 * 32) - c11 - c11 * pow2 (32 * 7) - c11 * pow2 (5 * 32)) % prime;
    }
 
-
+noextract
 val c12_reduction: c12: _uint32 -> Lemma
   (c12 * pow2 (12 * 32) % prime ==
    (2 * c12 * pow2 (4 * 32) + 2 * c12 * pow2 (3 * 32) - c12 * pow2 32 - c12 - c12 * pow2 (7 * 32)) % prime)
@@ -107,7 +110,7 @@ let c12_reduction c12 =
     (2 * c12 * pow2 (4 * 32) + 2 * c12 * pow2 (3 * 32) - c12 * pow2 32 - c12 - c12 * pow2 (7 * 32)) % prime;
   }
 
-
+noextract
 val c13_reduction: c13: _uint32 -> Lemma
   (c13 * pow2 (13 * 32) % prime ==
    (2 * c13 * pow2 (5 * 32) + 2 * c13 * pow2 (4 * 32) + c13 * pow2 (3 * 32) + c13 * pow2 (6 * 32) - c13 * pow2 (2 * 32) - c13 * pow2 32 - c13 - c13 * pow2 (7 * 32)) % prime)
@@ -125,7 +128,7 @@ let c13_reduction c13 =
     (2 * c13 * pow2 (5 * 32) + 2 * c13 * pow2 (4 * 32) + c13 * pow2 (3 * 32) + c13 * pow2 (6 * 32) - c13 * pow2 (2 * 32) - c13 * pow2 32 - c13 - c13 * pow2 (7 * 32)) % prime;
   }
 
-
+noextract
 val c14_reduction: c14: _uint32 -> Lemma
   (c14 * pow2 (14 * 32) % prime ==
    (2 * c14 * pow2 (6 * 32) + 2 * c14 * pow2 (5 * 32) + c14 * pow2 (6 * 32) + c14 * pow2 (4 * 32) - c14 * pow2 (2 * 32) - c14 * pow2 32 - c14) % prime)
@@ -143,7 +146,7 @@ let c14_reduction c14 =
     (2 * c14 * pow2 (6 * 32) + 2 * c14 * pow2 (5 * 32) + c14 * pow2 (6 * 32) + c14 * pow2 (4 * 32) - c14 * pow2 (2 * 32) - c14 * pow2 32 - c14) % prime;
   }
 
-
+noextract
 val c15_reduction: c15: _uint32 -> Lemma
   (c15 * pow2 (15 * 32) % prime ==
    (2 * c15 * pow2 (7 * 32) + 2 * c15 * pow2 (6 * 32) + c15 * pow2 (7 * 32) + c15 * pow2 (5 * 32) - c15 * pow2 (3 * 32) - c15 * pow2 (2 * 32) - c15 * pow2 32) % prime)
@@ -161,7 +164,7 @@ let c15_reduction c15 =
     (2 * c15 * pow2 (7 * 32) + 2 * c15 * pow2 (6 * 32) + c15 * pow2 (7 * 32) + c15 * pow2 (5 * 32) - c15 * pow2 (3 * 32) - c15 * pow2 (2 * 32) - c15 * pow2 32) % prime;
   }
 
-
+noextract
 val inside_mod: a: int -> b: int -> c: int -> d: int -> e: int -> f: int -> g: int -> h: int -> i: int ->
   Lemma (
   (a + b + c + d + e + f + g + h + i) % prime ==
@@ -177,7 +180,7 @@ let inside_mod a b c d e f g h i =
   lemma_mod_add_distr (a + (b % prime) + d + e + f + g + h + i) c prime;
   lemma_mod_add_distr (a + c+ d + e + f + g + h + i) b prime
 
-
+noextract
 val inside_mod1: a: int -> b: int -> c: int -> d: int -> e: int -> f: int -> g: int -> h: int -> i: int ->
   Lemma (
     (a + 2 * b + 2 * c + d + e  - f - g - h - i) % prime ==
@@ -200,7 +203,7 @@ let inside_mod1 a b c d e f g h i =
   lemma_mod_add_distr ((a % prime) + 2 * c  + d + e - f - g - h - i) (2 * b) prime;
   lemma_mod_add_distr (2 * b + 2 * c + d + e - f - g - h - i) a prime
 
-
+noextract
 val solinas_reduction_nat:
   c0_n: _uint32->
   c1_n: _uint32 ->
@@ -256,7 +259,7 @@ let solinas_reduction_nat c0 c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 c12 c13 c14 c15 
 
   inside_mod a_ (c8 * pow2 (8 * 32)) (c9 * pow2 (9 * 32)) (c10 * pow2 (10 * 32)) (c11 * pow2 (11 * 32)) (c12 * pow2 (12 * 32)) (c13 * pow2 (13 * 32)) (c14 * pow2 (14 * 32)) (c15 * pow2 (15 * 32))
 
-
+noextract
 val solinas_reduction_mod:
   c0_n: _uint32->
   c1_n: _uint32 ->
