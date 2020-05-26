@@ -1593,7 +1593,6 @@ let shift_256_impl i o =
 
   lemma_shift_256 (v (Lib.Sequence.index (as_seq h0 i) 0)) (v (Lib.Sequence.index (as_seq h0 i) 1)) (v (Lib.Sequence.index (as_seq h0 i) 2)) (v (Lib.Sequence.index (as_seq h0 i) 3))
 
-#push-options "--fuel 1 --ifuel 1 --z3rlimit 500"
 
 inline_for_extraction noextract
 val mod64: a: widefelem -> Stack uint64 
@@ -1603,10 +1602,26 @@ val mod64: a: widefelem -> Stack uint64
 let mod64 a =
   let r = index a (size 0) in 
     let h1 = ST.get() in 
-  assert(wide_as_nat h1 a % pow2 64 == uint_v r);
+  assert(
+   let open Lib.Sequence in
+   let s = as_seq h1 a in
+   let s0 = s.[0] in
+   let s1 = s.[1] in
+   let s2 = s.[2] in
+   let s3 = s.[3] in
+   let s4 = s.[4] in
+   let s5 = s.[5] in
+   let s6 = s.[6] in
+   let s7 = s.[7] in
+   wide_as_nat h1 a ==  
+   v s0 + v s1 * pow2 64 + v s2 * pow2 64 * pow2 64 +
+   v s3 * pow2 64 * pow2 64 * pow2 64 +
+   v s4 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+   v s5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+   v s6 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+   v s7 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 /\
+   wide_as_nat h1 a % pow2 64 == v s0);
   r
-
-#pop-options
 
 
 inline_for_extraction noextract
