@@ -28,7 +28,7 @@ open FStar.Math.Lemmas
 friend Spec.P256.MontgomeryMultiplication
 open FStar.Mul
 
-#set-options "--z3rlimit 1000 --ifuel 0 --fuel 0" 
+#set-options "--z3rlimit 300 --ifuel 0 --fuel 0" 
 
 val lemma_x3_0: x: int -> y: int -> z: int -> Lemma (
   ((3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) * (3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime)  - 8 * (x * (y * y % prime) % prime)) % prime ==  ((3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) * (3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) - 8 * x * y * y) % prime)
@@ -55,6 +55,7 @@ let lemma_x3_0 x y z =
 
   }
 
+
 val lemma_x3_1: a: int -> b: int -> Lemma (((a % prime) * (a % prime) - b) % prime == (a * a - b) % prime)
 
 let lemma_x3_1 a b = 
@@ -69,8 +70,6 @@ let lemma_x3_1 a b =
     (a * a - b) % prime;
   }
   
-
-
 
 val lemma_x3: x: int -> y: int -> z: int -> Lemma (
   ((3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) * (3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) - 8 * (x * (y * y % prime) % prime)) % prime == 
@@ -135,14 +134,13 @@ let lemma_x3 x y z =
      (  
       (3 * (x - z * z) * (x + z * z)) * 
       (3 * (x - z * z) * (x + z * z)) - 8 * x * (y * y)) % prime;
-
-
 }
 
-val y3_lemma_0: x: int ->  y: int -> z: int -> x3: int -> t0: int -> Lemma (
+
+val y3_lemma_0: x: int ->  y: int -> z: int ->  t0: int -> Lemma (
    (t0 - 8 * (y * y % prime) * (y * y % prime)) % prime == (t0 - 8 * y * y * y * y) % prime)
 
-let y3_lemma_0 x y z x3 t0 = 
+let y3_lemma_0 x y z t0 = 
   calc (==) {
     (t0 - 8 * (y * y % prime) * (y * y % prime)) % prime;
   (==) {lemma_mod_sub_distr t0 (8 * (y * y % prime) * (y * y % prime)) prime}
@@ -154,6 +152,8 @@ let y3_lemma_0 x y z x3 t0 =
   (==) {assert_by_tactic (8 * (y * y) * (y * y) == 8 * y * y * y * y) canon}
     (t0 - (8 * y * y * y * y) % prime) % prime;
   (==) {lemma_mod_sub_distr t0 (8 * y * y * y * y) prime}
+    (t0 - (8 * y * y * y * y)) % prime;
+  (==) {assert_by_tactic (t0 - (8 * y * y * y * y) == t0 - 8 * y * y * y * y) canon}
     (t0 - 8 * y * y * y * y) % prime;
   }
 
@@ -195,7 +195,7 @@ let lemma_y3 x y z x3 =
   let t0 = (3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) *  ((4 * (x * (y * y % prime) % prime) % prime) - x3) in 
   assert(t == (t0 - 8 * (y * y % prime) * (y * y % prime)) % prime);
 
-  y3_lemma_0 x y z x3 t0;
+  y3_lemma_0 x y z t0;
   y3_lemma_1 x y z;
 
 
@@ -275,6 +275,12 @@ val point_double_a_b_g: p: point -> alpha: felem -> beta: felem -> gamma: felem 
       )
     )
 
+val lemma_point_abd: xD: int -> dlt: int -> 
+  Lemma (3 * (xD - dlt) * (xD + dlt) == 3 * ((xD - dlt) * (xD + dlt)))
+
+let lemma_point_abd xD dlt = ()
+
+
 let point_double_a_b_g p alpha beta gamma delta tempBuffer = 
   let pX = sub p (size 0) (size 4) in 
   let pY = sub p (size 4) (size 4) in 
@@ -301,14 +307,14 @@ let point_double_a_b_g p alpha beta gamma delta tempBuffer =
 
     calc (==) 
     {
-      toDomain_ (3 * (((xD - dlt) % prime) *  ((xD + dlt) % prime) % prime) % prime);
+      (3 * (((xD - dlt) % prime) *  ((xD + dlt) % prime) % prime) % prime);
     (==) {lemma_mod_mul_distr_l (xD - dlt) ((xD + dlt) % prime) prime; lemma_mod_mul_distr_r (xD - dlt) (xD + dlt) prime}
-      toDomain_ (3 * ((xD - dlt) *  (xD + dlt) % prime) % prime);
+      (3 * ((xD - dlt) *  (xD + dlt) % prime) % prime);
     (==) {lemma_mod_mul_distr_r 3 ((xD - dlt) * (xD + dlt)) prime}
-      toDomain_ (3 * ((xD - dlt) * (xD + dlt)) % prime);
-    (==) {assert_by_tactic (3 * (xD - dlt) * (xD + dlt) == 3 * ((xD - dlt) * (xD + dlt))) canon}
-      toDomain_ (3 * (xD - dlt) * (xD + dlt) % prime);
-    }
+      (3 * ((xD - dlt) * (xD + dlt)) % prime);
+    (==) {lemma_point_abd xD dlt}
+      (3 * (xD - dlt) * (xD + dlt)) % prime;
+  }
 
 val point_double_x3: x3: felem -> alpha: felem -> fourBeta: felem -> beta: felem -> eightBeta: felem ->
   Stack unit

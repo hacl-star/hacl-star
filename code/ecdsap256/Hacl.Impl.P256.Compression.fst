@@ -162,8 +162,22 @@ let lessThanPrime f =
   pop_frame();
     less
 
-#push-options "--z3rlimit 300"
+inline_for_extraction noextract
+val isIdentifierCorrect: v: uint8 -> Tot (r: bool {r <==> uint_v v = 2 || uint_v v = 3})
 
+let isIdentifierCorrect compressedIdentifier = 
+  let open Lib.RawIntTypes in 
+  let correctIdentifier2 = eq_mask (u8 2) compressedIdentifier in 
+    eq_mask_lemma (u8 2) compressedIdentifier;
+  let correctIdentifier3 = eq_mask (u8 3) compressedIdentifier in 
+    eq_mask_lemma (u8 3) compressedIdentifier;
+  let isIdentifierCorrect =  logor correctIdentifier2 correctIdentifier3 in 
+    logor_lemma correctIdentifier2 correctIdentifier3;
+  u8_to_UInt8 isIdentifierCorrect = 255uy
+
+
+
+#push-options "--z3rlimit 500"
 
 let decompressionCompressedForm b result = 
   push_frame();
@@ -171,16 +185,9 @@ let decompressionCompressedForm b result =
     let temp = create (size 8) (u64 0) in 
       let t0 = sub temp (size 0) (size 4) in 
       let t1 = sub temp (size 4) (size 4) in 
-    let open Lib.RawIntTypes in 
     let compressedIdentifier = index b (size 0) in 
-    let correctIdentifier2 = eq_mask (u8 2) compressedIdentifier in 
-      eq_mask_lemma (u8 2) compressedIdentifier;
-    let correctIdentifier3 = eq_mask (u8 3) compressedIdentifier in 
-      eq_mask_lemma (u8 3) compressedIdentifier;
-    let isIdentifierCorrect =  logor correctIdentifier2 correctIdentifier3 in 
-      logor_lemma correctIdentifier2 correctIdentifier3;
-
-    if u8_to_UInt8 isIdentifierCorrect = 255uy then 
+    let flag = isIdentifierCorrect compressedIdentifier in 
+    if flag then 
     begin
 
       let x = sub b (size 1) (size 32) in 
