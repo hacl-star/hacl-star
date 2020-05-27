@@ -156,10 +156,10 @@ let part1 a init update_multi update_last finish s key data len =
     (S.equal) { }
       finish a (update_last a (update_multi a (init a) (B.as_seq h0 key))
         (block_length a) (B.as_seq h0 data));
-    (S.equal) { Spec.Hash.Lemmas.concatenated_hash_incremental a (B.as_seq h0 key) (B.as_seq h0 data) }
+    (S.equal) { Spec.Hash.Incremental.Lemmas.concatenated_hash_incremental a (B.as_seq h0 key) (B.as_seq h0 data) }
       Spec.Hash.Incremental.hash_incremental a (S.append (B.as_seq h0 key) (B.as_seq h0 data));
     (S.equal) {
-      Spec.Hash.Lemmas.hash_is_hash_incremental a (S.append (B.as_seq h0 key) (B.as_seq h0 data))
+      Spec.Hash.Incremental.hash_is_hash_incremental a (S.append (B.as_seq h0 key) (B.as_seq h0 data))
     }
       hash a (S.append (B.as_seq h0 key) (B.as_seq h0 data));
     }
@@ -219,10 +219,10 @@ let part2 a init update_multi update_last finish s dst key data len =
     (S.equal) { }
       finish a (update_last a (update_multi a (init a) (B.as_seq h0 key))
         (block_length a) (B.as_seq h0 data));
-    (S.equal) { Spec.Hash.Lemmas.concatenated_hash_incremental a (B.as_seq h0 key) (B.as_seq h0 data) }
+    (S.equal) { Spec.Hash.Incremental.Lemmas.concatenated_hash_incremental a (B.as_seq h0 key) (B.as_seq h0 data) }
       Spec.Hash.Incremental.hash_incremental a (S.append (B.as_seq h0 key) (B.as_seq h0 data));
     (S.equal) {
-      Spec.Hash.Lemmas.hash_is_hash_incremental a (S.append (B.as_seq h0 key) (B.as_seq h0 data))
+      Spec.Hash.Incremental.hash_is_hash_incremental a (S.append (B.as_seq h0 key) (B.as_seq h0 data))
     }
       hash a (S.append (B.as_seq h0 key) (B.as_seq h0 data));
     }
