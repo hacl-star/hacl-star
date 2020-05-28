@@ -1,3 +1,7 @@
+#if defined(_WIN32)
+#include <windows.h>
+#endif
+
 #if (defined(__APPLE__) && defined(__MACH__)) || defined(__linux__)
 #define __STDC_WANT_LIB_EXT1__ 1
 #include <string.h>
@@ -25,7 +29,7 @@ void Lib_Memzero0_memzero(void *dst, uint64_t len) {
   size_t len_ = (size_t) len;
 
   #ifdef _WIN32
-    SecureZeroMemory(pnt, len);
+    SecureZeroMemory(dst, len);
   #elif defined(__APPLE__) && defined(__MACH__)
     memset_s(dst, len_, 0, len_);
   #elif defined(__linux__) || defined(__FreeBSD__)
