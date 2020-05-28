@@ -26,12 +26,181 @@ val shuffle_core_pre_lemma: a:sha2_alg -> k_t:word a -> ws_t:word a -> hash:word
 let shuffle_core_pre_lemma a k_t ws_t hash =
   reveal_opaque (`%Spec.shuffle_core_pre) Spec.shuffle_core_pre
 
+noextract
+val shuffle_pre_inner: a:sha2_alg -> ws:Spec.k_w a -> i:nat{i < size_k_w a} -> st:words_state a -> words_state a
+let shuffle_pre_inner a ws i st =
+  let k = k0 a in
+  shuffle_core_pre a k.[i] ws.[i] st
 
-val shuffle_lemma: a:sha2_alg -> ws:k_w a -> hash:words_state a ->
-  Lemma (shuffle a ws hash == Spec.shuffle a hash ws)
-let shuffle_lemma a ws hash =
+
+val shuffle_spec_lemma: a:sha2_alg -> st0:words_state a -> block:Spec.block_w a -> Lemma
+  (let ws = Spec.ws_pre a block in
+   Loops.repeati (Spec.size_k_w a) (shuffle_pre_inner a ws) st0 == Spec.shuffle a st0 block)
+
+let shuffle_spec_lemma a st0 block =
   reveal_opaque (`%Spec.shuffle) Spec.shuffle;
-  assume (shuffle a ws hash == Spec.shuffle_pre a hash ws)
+  let ws = Spec.ws_pre a block in
+  let k = Spec.k0 a in
+  let aux (i:nat{i < Spec.size_k_w a}) (st:words_state a) :
+    Lemma (shuffle_pre_inner a ws i st == Spec.shuffle_core_pre a k.[i] ws.[i] st) =
+    let k = Spec.k0 a in
+    shuffle_core_pre_lemma a k.[i] ws.[i] st in
+  Classical.forall_intro_2 aux;
+  LSeqLemmas.repeati_extensionality (Spec.size_k_w a)
+    (shuffle_pre_inner a ws)
+    (fun i h -> Spec.shuffle_core_pre a k.[i] ws.[i] h) st0
+
+
+noextract
+val shuffle_pre_inner16:
+    a:sha2_alg
+  -> ws:Spec.k_w a
+  -> i:nat{i < num_rounds16 a}
+  -> j:nat{j < 16}
+  -> st:words_state a ->
+  words_state a
+
+let shuffle_pre_inner16 a ws i j st =
+  let k = k0 a in
+  shuffle_core_pre a k.[16 * i + j] ws.[16 * i + j] st
+
+
+noextract
+val shuffle_pre_inner_num_rounds:
+    a:sha2_alg
+  -> ws:Spec.k_w a
+  -> i:nat{i < num_rounds16 a}
+  -> st:words_state a ->
+  words_state a
+
+let shuffle_pre_inner_num_rounds a ws i st =
+  Loops.repeati 16 (shuffle_pre_inner16 a ws i) st
+
+
+val shuffle_spec_lemma16_step:
+    a:sha2_alg
+  -> block:Spec.block_w a
+  -> i:nat{i < num_rounds16 a}
+  -> st:words_state a
+  -> j:nat{j <= 16} ->
+  Lemma
+   (let ws = Spec.ws_pre a block in
+    Loops.repeati j (shuffle_pre_inner16 a ws i) st ==
+    Loops.repeat_right (16 * i) (16 * i + j) (Loops.fixed_a (words_state a)) (shuffle_pre_inner a ws) st)
+
+let rec shuffle_spec_lemma16_step a block i st j =
+  let ws = Spec.ws_pre a block in
+  let a_fixed = Loops.fixed_a (words_state a) in
+  //let lp = Loops.repeati j (shuffle_pre_inner16 a ws i) st in
+  //let rp = Loops.repeat_right (16 * i) (16 * i + j) a_fixed (shuffle_pre_inner a ws) st in
+  if j = 0 then begin
+    Loops.eq_repeati0 j (shuffle_pre_inner16 a ws i) st;
+    Loops.eq_repeat_right (16 * i) (16 * i + j) a_fixed (shuffle_pre_inner a ws) st end
+  else begin
+    //let lp1 = Loops.repeati (j - 1) (shuffle_pre_inner16 a ws i) st in
+    //let rp1 = Loops.repeat_right (16 * i) (16 * i + j - 1) a_fixed (shuffle_pre_inner a ws) st in
+    Loops.unfold_repeati j (shuffle_pre_inner16 a ws i) st (j - 1);
+    Loops.unfold_repeat_right (16 * i) (16 * i + j) a_fixed (shuffle_pre_inner a ws) st (16 * i + j - 1);
+    //assert (lp == shuffle_pre_inner16 a ws i (j - 1) lp1);
+    //assert (rp == shuffle_pre_inner a ws (16 * i + j - 1) rp1);
+    shuffle_spec_lemma16_step a block i st (j - 1);
+    () end
+
+
+val shuffle_spec_lemma16: a:sha2_alg -> st0:words_state a -> block:Spec.block_w a -> Lemma
+  (let ws = Spec.ws_pre a block in
+   Loops.repeati (Spec.size_k_w a) (shuffle_pre_inner a ws) st0 ==
+   Loops.repeati (num_rounds16 a) (shuffle_pre_inner_num_rounds a ws) st0)
+
+let shuffle_spec_lemma16 a st0 block =
+  //w = 16, n = num_rounds16 a, normalize_v = id
+  let ws = Spec.ws_pre a block in
+  let a_fixed = Loops.fixed_a (words_state a) in
+  let aux (i:nat{i < num_rounds16 a}) (st:words_state a) :
+    Lemma (shuffle_pre_inner_num_rounds a ws i st ==
+      Loops.repeat_right (16 * i) (16 * (i + 1)) a_fixed (shuffle_pre_inner a ws) st) =
+   shuffle_spec_lemma16_step a block i st 16 in
+
+  Classical.forall_intro_2 aux;
+  Lib.Vec.Lemmas.lemma_repeati_vec 16 (num_rounds16 a) (fun x -> x)
+    (shuffle_pre_inner a ws)
+    (shuffle_pre_inner_num_rounds a ws)
+    st0
+
+
+val shuffle_lemma_i_step:
+    a:sha2_alg
+  -> block:k_w a
+  -> st0:words_state a
+  -> i:nat{i < num_rounds16 a}
+  -> ws1:k_w a
+  -> st1:words_state a -> Lemma
+   (let ws_s = Spec.ws_pre a block in
+    let st_s = shuffle_pre_inner_num_rounds a ws_s i st1 in
+    let (ws, st) = shuffle_inner_loop a i (ws1, st1) in
+    st == st_s)
+
+let shuffle_lemma_i_step a block st0 i ws1 st1 =
+  let ws_s = Spec.ws_pre a block in
+  let st_s = Loops.repeati 16 (shuffle_pre_inner16 a ws_s i) st1 in
+  let st = Loops.repeati 16 (shuffle_inner a ws1 i) st1 in
+  let ws = if i < num_rounds16 a - 1 then ws_next a ws1 else ws1 in
+
+  let aux (j:nat{j < 16}) (hash:words_state a) :
+    Lemma (shuffle_pre_inner16 a ws_s i j hash == shuffle_inner a ws1 i j hash) =
+    let k_t = Seq.index (k0 a) (16 * i + j) in
+    let lp = shuffle_core_pre a k_t ws_s.[16 * i + j] st in
+    let rp = shuffle_core_pre a k_t ws1.[j] hash in
+    assume (ws1.[j] == ws_s.[16 * i + j]);
+    () in
+
+  Classical.forall_intro_2 aux;
+  LSeqLemmas.repeati_extensionality 16 (shuffle_pre_inner16 a ws_s i) (shuffle_inner a ws1 i) st1
+
+
+val shuffle_lemma_i:
+    a:sha2_alg
+  -> block:k_w a
+  -> st0:words_state a
+  -> i:nat{i <= num_rounds16 a} ->
+  Lemma
+  (let ws_s = Spec.ws_pre a block in
+   let (ws, st) : tuple2 (k_w a) (words_state a) =
+     Loops.repeati i (shuffle_inner_loop a) (block, st0) in
+   st == Loops.repeati i (shuffle_pre_inner_num_rounds a ws_s) st0)
+
+let rec shuffle_lemma_i a block st0 i =
+  let ws_s = Spec.ws_pre a block in
+  let (ws, st) = Loops.repeati i (shuffle_inner_loop a) (block, st0) in
+  let st_s = Loops.repeati i (shuffle_pre_inner_num_rounds a ws_s) st0 in
+
+  if i = 0 then begin
+    Loops.eq_repeati0 i (shuffle_inner_loop a) (block, st0);
+    Loops.eq_repeati0 i (shuffle_pre_inner_num_rounds a ws_s) st0;
+    () end
+  else begin
+    let (ws1, st1) = Loops.repeati (i - 1) (shuffle_inner_loop a) (block, st0) in
+    let st_s1 = Loops.repeati (i - 1) (shuffle_pre_inner_num_rounds a ws_s) st0 in
+    Loops.unfold_repeati i (shuffle_inner_loop a) (block, st0) (i - 1);
+    Loops.unfold_repeati i (shuffle_pre_inner_num_rounds a ws_s) st0 (i - 1);
+    assert (st_s == shuffle_pre_inner_num_rounds a ws_s (i - 1) st_s1);
+    assert ((ws, st) == shuffle_inner_loop a (i - 1) (ws1, st1));
+    shuffle_lemma_i a block st0 (i - 1);
+    //assert (st1 == st_s1);
+    assert (st_s == shuffle_pre_inner_num_rounds a ws_s (i - 1) st1);
+    shuffle_lemma_i_step a block st0 (i - 1) ws1 st1 end
+
+
+val shuffle_lemma: a:sha2_alg -> block:k_w a -> st0:words_state a ->
+  Lemma (shuffle a block st0 == Spec.shuffle a st0 block)
+let shuffle_lemma a block st0 =
+  let ws_s = Spec.ws_pre a block in
+  //let st_s = Loops.repeati (Spec.size_k_w a) (shuffle_pre_inner a ws_s) st0 in
+  shuffle_spec_lemma a st0 block;
+  shuffle_spec_lemma16 a st0 block;
+  //assert (Spec.shuffle a st0 block == Loops.repeati (num_rounds16 a) (shuffle_pre_inner_num_rounds a ws_s) st0);
+  //let (ws, st) = Loops.repeati (num_rounds16 a) (shuffle_inner_loop a) (block, st0) in
+  shuffle_lemma_i a block st0 (num_rounds16 a)
 
 
 val update_lemma: a:sha2_alg -> block:block_t a -> hash:words_state a ->
