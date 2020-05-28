@@ -732,7 +732,7 @@ dist/wasm/Makefile.basic: HASH_BUNDLE += -bundle Hacl.HMAC_DRBG
 dist/wasm/Makefile.basic: FRODO_BUNDLE = -bundle Hacl.Frodo.KEM,Frodo.Params,Hacl.Impl.Frodo.*,Hacl.Impl.Matrix,Hacl.Frodo.*,Hacl.Keccak,Hacl.AES128
 
 # Doesn't work in Wasm because it uses assembler intrinsics
-dist/wasm/Makefile.basic: P256_BUNDLE = -bundle Hacl.Impl.ECDSA,Hacl.Impl.ECDSA,Hacl.Impl.ECDSA.*,Hacl.Impl.P256.*,Hacl.Impl.P256,Hacl.Spec.P256.*,Hacl.Impl.SolinasReduction,Hacl.Impl.LowLevel
+dist/wasm/Makefile.basic: P256_BUNDLE = -bundle Hacl.Interface.*,Hacl.Impl.ECDSA.*,Hacl.Hash.SHA2,Hacl.Hash.Core.SHA2,Hacl.Hash.Core.SHA2.Constants,Hacl.Hash.Definitions,Hacl.Impl.SolinasReduction,Hacl.Impl.P256.*
 
 # No Vale Curve64 no "Local" or "Slow" Curve64, only Curve51 (local Makefile hack)
 dist/wasm/Makefile.basic: CURVE_BUNDLE_SLOW =
@@ -915,7 +915,8 @@ dist/mozilla/Makefile.basic: INTRINSIC_FLAGS = \
   -add-include 'Hacl_Chacha20_Vec128:"libintvector.h"' \
   -add-include 'Hacl_Chacha20_Vec256:"libintvector.h"' \
   -add-include 'Hacl_Poly1305_128:"libintvector.h"' \
-  -add-include 'Hacl_Poly1305_256:"libintvector.h"'
+  -add-include 'Hacl_Poly1305_256:"libintvector.h"' \
+  -add-include 'Hacl_P256:"lib_instrinsics.h"'
 dist/mozilla/Makefile.basic: CURVE_BUNDLE_SLOW = -bundle Hacl.Curve25519_64_Slow
 dist/mozilla/Makefile.basic: SALSA20_BUNDLE = -bundle Hacl.Salsa20
 dist/mozilla/Makefile.basic: ED_BUNDLE = -bundle Hacl.Ed25519
