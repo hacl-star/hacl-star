@@ -8,4 +8,3 @@ let _ =
    Format.printf "#include \"Hacl_Chacha20_Vec128.h\"\n");
   Cstubs.write_c Format.std_formatter ~prefix:""
     (module Hacl_Chacha20_Vec128_bindings.Bindings)
-  
