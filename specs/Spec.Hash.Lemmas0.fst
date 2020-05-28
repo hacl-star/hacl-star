@@ -2,6 +2,12 @@ module Spec.Hash.Lemmas0
 
 open Spec.Hash.Definitions
 
+let block_length_smaller_than_max_input (a:hash_alg) :
+  Lemma(block_length a <= max_input_length a) =
+  normalize_term_spec(pow2 61 - 1);
+  normalize_term_spec(pow2 125 - 1);
+  normalize_term_spec(pow2 64 - 1)
+
 (* A useful lemma for all the operations that involve going from bytes to bits. *)
 let max_input_size_len (a: hash_alg{not (is_blake a)}): Lemma
   (ensures FStar.Mul.((max_input_length a) * 8 + 8 = pow2 (len_length a * 8)))
