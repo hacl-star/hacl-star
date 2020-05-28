@@ -12,6 +12,8 @@
 #include "ecdhp256-tvs.h"
 #include "test_helpers.h"
 
+#include "Hacl_P256.h"
+
 int main()
 {
 	uint8_t* result = (uint8_t*) malloc (sizeof (uint8_t) * 64);
