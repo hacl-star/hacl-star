@@ -87,7 +87,7 @@ let len_add32 (a: hash_alg{is_md a})
 (** Iterated compression function. *)
 noextract inline_for_extraction
 let mk_update_multi a update s ev blocks n_blocks =
-  assert (extra_state a == unit);
+  assume (extra_state a == unit);
   let h0 = ST.get () in
   let inv (h: HS.mem) (i: nat) =
     let i_block = block_length a * i in
@@ -106,24 +106,30 @@ let mk_update_multi a update s ev blocks n_blocks =
     let blocks0 = B.sub blocks 0ul U32.(sz *^ i) in
     let block = B.sub blocks U32.(sz *^ i) sz in
     update s ev block;
-    let h2 = ST.get () in
+    (**) Spec.Hash.Lemmas.update_multi_update a (as_seq h1 s, ev) (B.as_seq h0 block);
+    (**) let h2 = ST.get () in
+    (**) let blocks_v : Ghost.erased _ = B.as_seq h0 blocks in
+    (**) let block_v : Ghost.erased _ = B.as_seq h0 block in
+    (**) let blocks0_v : Ghost.erased _ = B.as_seq h0 blocks0 in 
     assert (
-      let s0 = B.as_seq h0 s in
       let s1 = B.as_seq h1 s in
       let s2 = B.as_seq h2 s in
-      let blocks = B.as_seq h0 blocks in
-      let block = B.as_seq h0 block in
-      let blocks0 = B.as_seq h0 blocks0 in
       let i = U32.v i in
       let n_blocks = U32.v n_blocks in
-      block_length a * (i + 1) <= S.length blocks /\
+      block_length a * (i + 1) <= S.length blocks_v /\
       (block_length a * (i + 1) - block_length a * i) % block_length a = 0 /\
-      S.equal block (S.slice blocks (block_length a * i) (block_length a * (i + 1))) /\
-      S.equal s2 (fst (Spec.Agile.Hash.update_multi a (s1, ()) block)))
+      S.equal block_v (S.slice blocks_v (block_length a * i) (block_length a * (i + 1))) /\
+      S.equal s2 (fst (Spec.Agile.Hash.update_multi a (s1, ()) block_v))
+      );
+    (**) let i_block : Ghost.erased _ = block_length a * (U32.v i) in
+    (**) Spec.Hash.Lemmas.update_multi_associative a (as_seq h0 s, ev)
+                                                   (S.slice blocks_v 0 i_block)
+                                                   block_v
   in
   assert (B.length blocks = U32.v n_blocks * block_length a);
   C.Loops.for 0ul n_blocks inv f;
   ev
+
 
 #push-options "--max_fuel 0 --z3rlimit 1600"
 
