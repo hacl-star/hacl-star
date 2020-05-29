@@ -29,29 +29,20 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-#ifndef __Hacl_ECDSA_H
-#define __Hacl_ECDSA_H
+#ifndef __Hacl_P256_H
+#define __Hacl_P256_H
 
 #include "Hacl_Kremlib.h"
 #include "Hacl_Hash.h"
+#include "Hacl_Spec.h"
 
-
-/* SNIPPET_START: Hacl_Impl_P256_DH_ecp256dh_i */
 
 uint64_t Hacl_Impl_P256_DH_ecp256dh_i(uint8_t *result, uint8_t *scalar);
 
-/* SNIPPET_END: Hacl_Impl_P256_DH_ecp256dh_i */
-
-/* SNIPPET_START: Hacl_Impl_P256_DH_ecp256dh_r */
-
 uint64_t Hacl_Impl_P256_DH_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
 
-/* SNIPPET_END: Hacl_Impl_P256_DH_ecp256dh_r */
-
-/* SNIPPET_START: Hacl_Impl_ECDSA_ecdsa_p256_sha2_sign */
-
 uint64_t
-Hacl_Impl_ECDSA_ecdsa_p256_sha2_sign(
+Hacl_Interface_P256_ecdsa_sign_p256_sha2(
   uint8_t *result,
   uint32_t mLen,
   uint8_t *m,
@@ -59,12 +50,35 @@ Hacl_Impl_ECDSA_ecdsa_p256_sha2_sign(
   uint8_t *k
 );
 
-/* SNIPPET_END: Hacl_Impl_ECDSA_ecdsa_p256_sha2_sign */
+uint64_t
+Hacl_Interface_P256_ecdsa_sign_p256_sha384(
+  uint8_t *result,
+  uint32_t mLen,
+  uint8_t *m,
+  uint8_t *privKey,
+  uint8_t *k
+);
 
-/* SNIPPET_START: Hacl_Impl_ECDSA_ecdsa_p256_sha2_verify */
+uint64_t
+Hacl_Interface_P256_ecdsa_sign_p256_sha512(
+  uint8_t *result,
+  uint32_t mLen,
+  uint8_t *m,
+  uint8_t *privKey,
+  uint8_t *k
+);
+
+uint64_t
+Hacl_Interface_P256_ecdsa_sign_p256_without_hash(
+  uint8_t *result,
+  uint32_t mLen,
+  uint8_t *m,
+  uint8_t *privKey,
+  uint8_t *k
+);
 
 bool
-Hacl_Impl_ECDSA_ecdsa_p256_sha2_verify(
+Hacl_Interface_P256_ecdsa_verif_p256_sha2(
   uint32_t mLen,
   uint8_t *m,
   uint8_t *pubKey,
@@ -72,7 +86,48 @@ Hacl_Impl_ECDSA_ecdsa_p256_sha2_verify(
   uint8_t *s
 );
 
-/* SNIPPET_END: Hacl_Impl_ECDSA_ecdsa_p256_sha2_verify */
+bool
+Hacl_Interface_P256_ecdsa_verif_p256_sha384(
+  uint32_t mLen,
+  uint8_t *m,
+  uint8_t *pubKey,
+  uint8_t *r,
+  uint8_t *s
+);
 
-#define __Hacl_ECDSA_H_DEFINED
+bool
+Hacl_Interface_P256_ecdsa_verif_p256_sha512(
+  uint32_t mLen,
+  uint8_t *m,
+  uint8_t *pubKey,
+  uint8_t *r,
+  uint8_t *s
+);
+
+bool
+Hacl_Interface_P256_ecdsa_verif_without_hash(
+  uint32_t mLen,
+  uint8_t *m,
+  uint8_t *pubKey,
+  uint8_t *r,
+  uint8_t *s
+);
+
+bool Hacl_Interface_P256_verifyQ(uint8_t *pubKey);
+
+bool Hacl_Interface_P256_decompressionNotCompressedForm(uint8_t *b, uint8_t *result);
+
+bool Hacl_Interface_P256_decompressionCompressedForm(uint8_t *b, uint8_t *result);
+
+void Hacl_Interface_P256_compressionNotCompressedForm(uint8_t *b, uint8_t *result);
+
+void Hacl_Interface_P256_compressionCompressedForm(uint8_t *b, uint8_t *result);
+
+void Hacl_Interface_P256_reduction_8_32(uint8_t *x, uint8_t *result);
+
+uint64_t Hacl_Interface_P256_ecp256dh_i(uint8_t *result, uint8_t *scalar);
+
+uint64_t Hacl_Interface_P256_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
+
+#define __Hacl_P256_H_DEFINED
 #endif

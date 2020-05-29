@@ -10,14 +10,12 @@
 #include <stdbool.h>
 #include "test_helpers.h"
 
-#include "Hacl_P256.h"
-
 #include <openssl/evp.h>
 #include <openssl/ecdsa.h>
 #include <openssl/ecdh.h>
 #include <openssl/ec.h>
 
-// #include <ecdsa.c>
+#include "Hacl_P256.h"
 
 
 uint8_t
@@ -116,28 +114,9 @@ bool testImplementationHacl()
 	return s0 && s1 && (flag == 0);
 }
 
-bool testImplementationOpenssl()
-{
-	EC_KEY *eckey = EC_KEY_new();
-	if (eckey == NULL) {
-      return false;
-    }
-
-	uint32_t buf_len = ECDSA_size(eckey); 
-    uint8_t length = 64;
-    uint8_t* result = (uint8_t*) malloc (sizeof (uint8_t) * length);
-    EC_KEY_set_private_key(eckey, prKey);
-
-    EC_GROUP *group = EC_GROUP_new_by_curve_name(NID_X9_62_prime256v1);
-    EC_KEY_set_group(eckey, group);
-
-    bool flag = ECDSA_sign(0, digest, 32, result, &buf_len, eckey);
-    return (flag == 0);
-}
-
 void handleErrors()
 {
-	printf("%s\n", "OpenSSl fault");
+	printf("%s\n", "OpenSSl exception");
 }
 
 int main()
@@ -148,11 +127,6 @@ int main()
 		return -1;
 	}
 
-	// if (!testImplementationOpenssl())
-	// {
-	// 	printf("%s\n", "Test Implementation failed for OpenSSL ECDSA");
-	// 	return -1;
-	// }
 
   	cycles a,b;
 	clock_t t1,t2;
@@ -176,10 +150,6 @@ int main()
 	t2 = clock();
 	clock_t tdiff1 = t2 - t1;
 	cycles cdiff1 = b - a;
-
-  
-
-
 
 
 	EC_KEY *eckey = EC_KEY_new();
@@ -223,7 +193,6 @@ int main()
 
 	for (int j = 0; j < ROUNDS; j++)
 	{
-		Hacl_Interface_P256_ecp256dh_r(pk, pk, scalar0);
 		res ^= scalar0[0] ^ scalar0[31];
 	}
 
@@ -232,7 +201,7 @@ int main()
 
 	for (int j = 0; j < ROUNDS; j++)
 	{
-		Hacl_Interface_P256_ecp256dh_r(pk, pk, scalar0); 
+		Hacl_Impl_P256_DH_ecp256dh_r(pk, pk, scalar0); 
 	    res ^= scalar0[0] ^ scalar0[31];
 	}
 
