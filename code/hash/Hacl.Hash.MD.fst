@@ -6,6 +6,7 @@ module U8 = FStar.UInt8
 module U32 = FStar.UInt32
 module U64 = FStar.UInt64
 module U128 = FStar.UInt128
+module Int = Lib.IntTypes
 module Lemmas = FStar.Math.Lemmas
 module B = LowStar.Buffer
 module S = FStar.Seq
@@ -16,6 +17,8 @@ open Hacl.Hash.Definitions
 open Hacl.Hash.Lemmas
 open Spec.Hash.Definitions
 open FStar.Mul
+module HI = Spec.Hash.Incremental
+module AH = Spec.Agile.Hash
 
 (** Auxiliary helpers *)
 
@@ -204,19 +207,59 @@ let u32_to_len (a: hash_alg{is_md a}) (l: U32.t): l':len_t a { len_v a l' = U32.
 #pop-options
 
 (** Complete hash. *)
+
 noextract inline_for_extraction
-let mk_hash a alloca update_multi update_last finish input input_len dst =
-  assert (extra_state a == unit);
-  let h0 = ST.get () in
-  ST.push_frame ();
-  let s, _ = alloca () in
+val split_blocks (a : hash_alg) (input:B.buffer Int.uint8)
+                 (input_len : Int.size_t { B.length input = U32.v input_len }) :
+  ST.Stack (Int.size_t & Int.size_t & B.buffer Int.uint8 & Int.size_t & B.buffer Int.uint8)
+  (requires fun h -> B.live h input /\ B.length input <= max_input_length a)
+  (ensures fun h0 (blocks_n, blocks_len, blocks, rest_len, rest) h1 ->
+           h0 == h1 /\
+           U32.v blocks_len + U32.v rest_len == U32.v input_len /\
+           B.length blocks == U32.v blocks_len /\ B.length rest == U32.v rest_len /\
+           B.as_seq h0 input `S.equal` S.append (B.as_seq h0 blocks) (B.as_seq h0 rest) /\
+           blocks == Ghost.reveal(B.gsub input 0ul blocks_len) /\
+           rest == B.gsub input blocks_len rest_len /\
+           (B.as_seq h0 blocks, B.as_seq h0 rest) ==
+             Spec.Hash.Incremental.split_blocks a (B.as_seq h0 input) /\
+           U32.v blocks_len == U32.v blocks_n * block_length a)
+
+let split_blocks a input input_len =
   let blocks_n = U32.(input_len /^ block_len a) in
+  let blocks_n = if U32.(input_len %^ block_len a =^ uint_to_t 0) && U32.(blocks_n >^ uint_to_t 0)
+                 then U32.(blocks_n -^ uint_to_t 1) else blocks_n in
   let blocks_len = U32.(blocks_n *^ block_len a) in
   let blocks = B.sub input 0ul blocks_len in
   let rest_len = U32.(input_len -^ blocks_len) in
   let rest = B.sub input blocks_len rest_len in
+  (blocks_n, blocks_len, blocks, rest_len, rest)
+
+#push-options "--max_fuel 0 --z3rlimit 100"
+noextract inline_for_extraction
+let mk_hash a alloca update_multi update_last finish input input_len dst =
+  (**) assert (extra_state a == unit);
+  (**) let h0 = ST.get () in
+  ST.push_frame ();
+  let s, _ = alloca () in
+  let (blocks_n, blocks_len, blocks, rest_len, rest) = split_blocks a input input_len in
+  (**) let blocks_v0 : Ghost.erased _ = B.as_seq h0 blocks in
+  (**) let rest_v0 : Ghost.erased _ = B.as_seq h0 rest in
+  (**) let input_v0 : Ghost.erased _ = B.as_seq h0 input in
+  (**) assert(input_v0 `S.equal` S.append blocks_v0 rest_v0);
   update_multi s () blocks blocks_n;
   update_last s () (u32_to_len a blocks_len) rest rest_len;
   finish s () dst;
-  ST.pop_frame ();
-  Spec.Hash.Incremental.hash_is_hash_incremental a (B.as_seq h0 input)
+  (**) let h1 = ST.get () in
+  (**) assert((as_seq h1 s, ()) ==
+         Spec.Hash.Incremental.update_last a
+           (Spec.Agile.Hash.(update_multi a (init a) blocks_v0)) (U32.v blocks_len) rest_v0);
+  (**) assert((as_seq h1 s, ()) ==
+         Spec.Hash.Incremental.hash_incremental_body a input_v0 (Spec.Agile.Hash.init a));
+  (**) assert(
+         B.as_seq h1 dst `S.equal`
+         Spec.Hash.PadFinish.finish a (
+           Spec.Hash.Incremental.hash_incremental_body a input_v0 (Spec.Agile.Hash.init a)));
+  (**) assert(B.as_seq h1 dst `S.equal` Spec.Hash.Incremental.hash_incremental a input_v0);
+  (**) Spec.Hash.Incremental.hash_is_hash_incremental a input_v0;
+  ST.pop_frame ()
+#pop-options
