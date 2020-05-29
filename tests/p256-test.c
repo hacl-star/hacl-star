@@ -152,34 +152,34 @@ int main()
 	cycles cdiff1 = b - a;
 
 
-	EC_KEY *eckey = EC_KEY_new();
-		if (eckey == NULL) {
-	    return false;
-	}
+	// EC_KEY *eckey = EC_KEY_new();
+	// 	if (eckey == NULL) {
+	//     return false;
+	// }
 
 	
-  	// memset(plain,'P',SIZE);
-  	EC_KEY_set_private_key(eckey, prKey);
+ //  	// memset(plain,'P',SIZE);
+ //  	EC_KEY_set_private_key(eckey, prKey);
 
-  	EC_GROUP *group = EC_GROUP_new_by_curve_name(NID_X9_62_prime256v1);
-  	EC_KEY_set_group(eckey, group);
-  	unsigned int sig_len = ECDSA_size(eckey);
-  	unsigned char *signature = OPENSSL_malloc(sig_len);
-  	EC_KEY_generate_key(eckey);
+ //  	EC_GROUP *group = EC_GROUP_new_by_curve_name(NID_X9_62_prime256v1);
+ //  	EC_KEY_set_group(eckey, group);
+ //  	unsigned int sig_len = ECDSA_size(eckey);
+ //  	unsigned char *signature = OPENSSL_malloc(sig_len);
+ //  	EC_KEY_generate_key(eckey);
 
-	for (int j = 0; j < ROUNDS; j++)
-		ECDSA_sign(0, signature + 40, 32, signature, &sig_len, eckey);
+	// for (int j = 0; j < ROUNDS; j++)
+	// 	ECDSA_sign(0, signature + 40, 32, signature, &sig_len, eckey);
 
-  	t1 = clock();
-  	a = cpucycles_begin();
+ //  	t1 = clock();
+ //  	a = cpucycles_begin();
 
-  	for (int j = 0; j < ROUNDS; j++)
-		ECDSA_sign(0, signature + 40, 32, signature, &sig_len, eckey);
+ //  	for (int j = 0; j < ROUNDS; j++)
+	// 	ECDSA_sign(0, signature + 40, 32, signature, &sig_len, eckey);
 
-	b = cpucycles_end();
-	t2 = clock();
-	clock_t tdiff2 = t2 - t1;
-	cycles cdiff2 = b - a;
+	// b = cpucycles_end();
+	// t2 = clock();
+	// clock_t tdiff2 = t2 - t1;
+	// cycles cdiff2 = b - a;
 
 
 
@@ -216,99 +216,99 @@ int main()
 
 
 
-	size_t t = 64;
-	size_t* secret_len = &t;	
-	EVP_PKEY_CTX *pctx, *kctx;
-	EVP_PKEY_CTX *ctx;
-	unsigned char *secret;
-	EVP_PKEY *pkey = NULL, *peerkey = NULL, *params = NULL;
-	/* NB: assumes pkey, peerkey have been already set up */
+	// size_t t = 64;
+	// size_t* secret_len = &t;	
+	// EVP_PKEY_CTX *pctx, *kctx;
+	// EVP_PKEY_CTX *ctx;
+	// unsigned char *secret;
+	// EVP_PKEY *pkey = NULL, *peerkey = NULL, *params = NULL;
+	// /* NB: assumes pkey, peerkey have been already set up */
 
-	/* Create the context for parameter generation */
-	if(NULL == (pctx = EVP_PKEY_CTX_new_id(EVP_PKEY_EC, NULL))) handleErrors();
+	// /* Create the context for parameter generation */
+	// if(NULL == (pctx = EVP_PKEY_CTX_new_id(EVP_PKEY_EC, NULL))) handleErrors();
 
-	/* Initialise the parameter generation */
-	if(1 != EVP_PKEY_paramgen_init(pctx)) handleErrors();
+	// /* Initialise the parameter generation */
+	// if(1 != EVP_PKEY_paramgen_init(pctx)) handleErrors();
 
-	/* We're going to use the ANSI X9.62 Prime 256v1 curve */
-	if(1 != EVP_PKEY_CTX_set_ec_paramgen_curve_nid(pctx, NID_X9_62_prime256v1)) handleErrors();
+	// /* We're going to use the ANSI X9.62 Prime 256v1 curve */
+	// if(1 != EVP_PKEY_CTX_set_ec_paramgen_curve_nid(pctx, NID_X9_62_prime256v1)) handleErrors();
 
-	/* Create the parameter object params */
-	if (!EVP_PKEY_paramgen(pctx, &params)) handleErrors();
+	// /* Create the parameter object params */
+	// if (!EVP_PKEY_paramgen(pctx, &params)) handleErrors();
 
-	/* Create the context for the key generation */
-	if(NULL == (kctx = EVP_PKEY_CTX_new(params, NULL))) handleErrors();
+	// /* Create the context for the key generation */
+	// if(NULL == (kctx = EVP_PKEY_CTX_new(params, NULL))) handleErrors();
 
-	/* Generate the key */
-	if(1 != EVP_PKEY_keygen_init(kctx)) handleErrors();
-	if (1 != EVP_PKEY_keygen(kctx, &pkey)) handleErrors();
-	if (1 != EVP_PKEY_keygen(kctx, &peerkey)) handleErrors();
-
-
-
-	/* Create the context for the shared secret derivation */
-	if(NULL == (ctx = EVP_PKEY_CTX_new(pkey, NULL))) handleErrors();
-
-	/* Initialise */
-	if(1 != EVP_PKEY_derive_init(ctx)) handleErrors();
+	// /* Generate the key */
+	// if(1 != EVP_PKEY_keygen_init(kctx)) handleErrors();
+	// if (1 != EVP_PKEY_keygen(kctx, &pkey)) handleErrors();
+	// if (1 != EVP_PKEY_keygen(kctx, &peerkey)) handleErrors();
 
 
-	/* Provide the peer public key */
-	if(1 != EVP_PKEY_derive_set_peer(ctx, peerkey)) handleErrors();
+
+	// /* Create the context for the shared secret derivation */
+	// if(NULL == (ctx = EVP_PKEY_CTX_new(pkey, NULL))) handleErrors();
+
+	// /* Initialise */
+	// if(1 != EVP_PKEY_derive_init(ctx)) handleErrors();
 
 
-	/* Determine buffer length for shared secret */
-	if(1 != EVP_PKEY_derive(ctx, NULL, secret_len)) handleErrors();
-
-	/* Create the buffer */
-	if(NULL == (secret = OPENSSL_malloc(*secret_len))) handleErrors();
+	// /* Provide the peer public key */
+	// if(1 != EVP_PKEY_derive_set_peer(ctx, peerkey)) handleErrors();
 
 
-	for (int j = 0; j < ROUNDS; j++)
-	{
-		EVP_PKEY_derive(ctx, secret, secret_len);
-	    res ^= secret[0] ^ secret[31];
-	}
+	// /* Determine buffer length for shared secret */
+	// if(1 != EVP_PKEY_derive(ctx, NULL, secret_len)) handleErrors();
+
+	// /* Create the buffer */
+	// if(NULL == (secret = OPENSSL_malloc(*secret_len))) handleErrors();
 
 
-	t1 = clock();
-	a = cpucycles_begin();
+	// for (int j = 0; j < ROUNDS; j++)
+	// {
+	// 	EVP_PKEY_derive(ctx, secret, secret_len);
+	//     res ^= secret[0] ^ secret[31];
+	// }
 
-	/* Derive the shared secret */
 
-	for (int j = 0; j < ROUNDS; j++)
-	{
-		EVP_PKEY_derive(ctx, secret, secret_len);
-	    res ^= secret[0] ^ secret[31];
-	}
+	// t1 = clock();
+	// a = cpucycles_begin();
 
-	// if(1 != (EVP_PKEY_derive(ctx, secret, secret_len))) handleErrors();
+	// /* Derive the shared secret */
 
-	b = cpucycles_end();
-	t2 = clock();
-	clock_t tdiff4 = t2 - t1;
-	cycles cdiff4 = b - a;
+	// for (int j = 0; j < ROUNDS; j++)
+	// {
+	// 	EVP_PKEY_derive(ctx, secret, secret_len);
+	//     res ^= secret[0] ^ secret[31];
+	// }
 
-	EVP_PKEY_CTX_free(ctx);
-	EVP_PKEY_free(peerkey);
-	EVP_PKEY_free(pkey);
-	EVP_PKEY_CTX_free(kctx);
-	EVP_PKEY_free(params);
-	EVP_PKEY_CTX_free(pctx);
+	// // if(1 != (EVP_PKEY_derive(ctx, secret, secret_len))) handleErrors();
+
+	// b = cpucycles_end();
+	// t2 = clock();
+	// clock_t tdiff4 = t2 - t1;
+	// cycles cdiff4 = b - a;
+
+	// EVP_PKEY_CTX_free(ctx);
+	// EVP_PKEY_free(peerkey);
+	// EVP_PKEY_free(pkey);
+	// EVP_PKEY_CTX_free(kctx);
+	// EVP_PKEY_free(params);
+	// EVP_PKEY_CTX_free(pctx);
 
 
 	uint64_t count = ROUNDS * SIZE;
 	printf("Hacl ECDSA (without hashing) PERF: %d\n"); 
 	print_time(count,tdiff1,cdiff1);
 
-	printf("OpenSSL ECDSA (without hashing) PERF: %d\n"); 
-	print_time(count,tdiff2,cdiff2);
+	// printf("OpenSSL ECDSA (without hashing) PERF: %d\n"); 
+	// print_time(count,tdiff2,cdiff2);
 
 	printf("Hacl ECDH PERF: %d\n"); 
 	print_time(count,tdiff3,cdiff3);  
 
-	printf("OpenSSL ECDH PERF: %d\n"); 
-	print_time(count,tdiff4,cdiff4);  
+	// printf("OpenSSL ECDH PERF: %d\n"); 
+	// print_time(count,tdiff4,cdiff4);  
 
 
 
