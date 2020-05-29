@@ -10,7 +10,7 @@
 extern void C_String_print(C_String_t uu____143);
 
 extern uint64_t
-Hacl_Impl_ECDSA_ecdsa_p256_sha2_sign(
+Hacl_Interface_P256_ecdsa_sign_p256_sha2(
   uint8_t *result,
   uint32_t mLen,
   uint8_t *m,
@@ -19,7 +19,7 @@ Hacl_Impl_ECDSA_ecdsa_p256_sha2_sign(
 );
 
 extern bool
-Hacl_Impl_ECDSA_ecdsa_p256_sha2_verify(
+Hacl_Interface_P256_ecdsa_verif_p256_sha2(
   uint32_t mLen,
   uint8_t *m,
   uint8_t *pubKey,
