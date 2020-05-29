@@ -8,3 +8,4 @@ let _ =
    Format.printf "#include \"Hacl_Salsa20.h\"\n");
   Cstubs.write_c Format.std_formatter ~prefix:""
     (module Hacl_Salsa20_bindings.Bindings)
+  
