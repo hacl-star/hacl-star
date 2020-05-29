@@ -128,3 +128,11 @@ let mov_mov_elim =
 
 let lemma_mov_mov_elim =
   PH.lemma_peephole_transform Vale.Transformers.MovMovElim.mov_mov_elim_ph
+
+/// Transformation to eliminate prefetches
+
+let prefetch_elim =
+  PH.peephole_transform Vale.Transformers.PrefetchElim.prefetch_elim_ph
+
+let lemma_prefetch_elim =
+  PH.lemma_peephole_transform Vale.Transformers.PrefetchElim.prefetch_elim_ph

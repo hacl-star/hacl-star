@@ -145,3 +145,5 @@ let ins_LargeComment s = make_ins (print (";# " ^ s) [])
 let ins_Newline = make_ins (print "" [])
 
 let ins_Space n = make_ins (print "" [])
+
+let ins_Prefetchnta = make_ins (fun loc -> print_s "prefetchnta" [P64 loc])
