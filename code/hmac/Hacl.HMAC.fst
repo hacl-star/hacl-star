@@ -220,22 +220,47 @@ val part2:
       B.as_seq h1 dst `Seq.equal`
         Spec.Agile.Hash.hash a (S.append (B.as_seq h0 key) (B.as_seq h0 data)))
 
+(* TODO: factorize part1 and part2 - the only difference is the [finish] step,
+ * where the destination buffer is not the same. *)
 #push-options "--z3rlimit 200 --ifuel 2"
 inline_for_extraction noextract
 let part2 a init update_multi update_last finish s dst key data len =
   (**) key_and_data_fits a;
   (**) let h0 = ST.get () in
+  (**) let key_v0 : Ghost.erased _ = B.as_seq h0 key in
+  (**) let data_v0 : Ghost.erased _ = B.as_seq h0 data in
+  (**) let key_data_v0 : Ghost.erased _ = Seq.append key_v0 data_v0 in
   let ev = init s in
   (**) let h1 = ST.get () in
-  (**) assert ((D.as_seq h1 s, ev) == Spec.Agile.Hash.init a);
-  let ev = update_multi s ev key 1ul in
-  (**) let h2 = ST.get () in
-  (**) assert ((D.as_seq h2 s, ev) == Spec.Agile.Hash.(update_multi a (init a) (B.as_seq h0 key)));
-  let ev = update_last s ev (block_len_as_len a) data len in
-  (**) let h3 = ST.get () in
-  (**) assert ((D.as_seq h3 s, ev) ==
-    Spec.Hash.Incremental.update_last a
-      (Spec.Agile.Hash.(update_multi a (init a) (B.as_seq h0 key))) (block_length a) (B.as_seq h0 data));
+  (**) let init_v : Ghost.erased (init_t a) = Spec.Agile.Hash.init a in
+  (**) assert ((D.as_seq h1 s, ev) == Ghost.reveal init_v);
+  let ev =
+    if len =. 0ul then
+      begin
+      let ev = update_last s ev (uint #(len_int_type a) #PUB 0) key (D.block_len a) in
+      (**) let h2 = ST.get () in
+      (**) Spec.Hash.Lemmas0.block_length_smaller_than_max_input a;
+      (**) assert(key_data_v0 `S.equal` key_v0);
+      (**) hash_incremental_block_is_update_last a init_v key_v0;
+      (**) assert(
+        (D.as_seq h2 s, ev) ==
+            Spec.Hash.Incremental.hash_incremental_body a key_data_v0 init_v);
+      ev
+      end
+    else
+      begin
+      let ev = update_multi s ev key 1ul in
+      (**) let h2 = ST.get () in
+      (**) assert ((D.as_seq h2 s, ev) ==
+                     Spec.Agile.Hash.(update_multi a (init a) key_v0));
+      let ev = update_last s ev (block_len_as_len a) data len in
+      (**) let h3 = ST.get () in
+      (**) assert ((D.as_seq h3 s, ev) ==
+        Spec.Hash.Incremental.update_last a
+          (Spec.Agile.Hash.(update_multi a (init a) key_v0)) (block_length a) data_v0);
+      ev
+      end
+  in
   finish s ev dst;
   (**) let h4 = ST.get () in
   begin
@@ -243,18 +268,22 @@ let part2 a init update_multi update_last finish s dst key data len =
     let open Spec.Hash.Incremental in
     let open Spec.Agile.Hash in
     let open Spec.Hash.Lemmas in
-    calc (S.equal) {
-      B.as_seq h4 dst;
-    (S.equal) { }
-      finish a (update_last a (update_multi a (init a) (B.as_seq h0 key))
-        (block_length a) (B.as_seq h0 data));
-    (S.equal) { Spec.Hash.Incremental.Lemmas.concatenated_hash_incremental a (B.as_seq h0 key) (B.as_seq h0 data) }
-      Spec.Hash.Incremental.hash_incremental a (S.append (B.as_seq h0 key) (B.as_seq h0 data));
-    (S.equal) {
-      Spec.Hash.Incremental.hash_is_hash_incremental a (S.append (B.as_seq h0 key) (B.as_seq h0 data))
-    }
-      hash a (S.append (B.as_seq h0 key) (B.as_seq h0 data));
-    }
+    if len =. 0ul then
+    begin
+      (* TODO: doesn't work if we put a calc here *)
+      assert(B.as_seq h4 dst `S.equal` finish a (hash_incremental_body a key_data_v0 init_v));
+      assert(B.as_seq h4 dst `S.equal` hash_incremental a key_data_v0)
+    end
+    else
+    begin
+      assert(B.as_seq h4 dst `S.equal`
+               finish a (update_last a (update_multi a (init a) key_v0)
+                      (block_length a) data_v0));
+      Spec.Hash.Incremental.Lemmas.concatenated_hash_incremental a key_v0 data_v0;
+      assert(B.as_seq h4 dst `S.equal` hash_incremental a key_data_v0)
+    end;
+    Spec.Hash.Incremental.hash_is_hash_incremental a key_data_v0;
+    assert(B.as_seq h4 dst `S.equal` hash a key_data_v0)
   end
 
 #pop-options
