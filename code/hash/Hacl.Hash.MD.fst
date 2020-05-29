@@ -87,7 +87,6 @@ let len_add32 (a: hash_alg{is_md a})
 (** Iterated compression function. *)
 noextract inline_for_extraction
 let mk_update_multi a update s ev blocks n_blocks =
-  assume (extra_state a == unit);
   let h0 = ST.get () in
   let inv (h: HS.mem) (i: nat) =
     let i_block = block_length a * i in
