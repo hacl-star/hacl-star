@@ -74,7 +74,7 @@ let hacl_sha2_256: block unit =
 
     (fun _ _ -> ())
     (fun _ _ _ _ -> ())
-    (fun _ _ input -> Spec.Hash.Lemmas.hash_is_hash_incremental SHA2_256 input)
+    (fun _ _ input -> Spec.Hash.Incremental.hash_is_hash_incremental SHA2_256 input)
 
     (fun _ _ -> ())
     (fun _ _ s -> Hacl.Hash.SHA2.init_256 s)

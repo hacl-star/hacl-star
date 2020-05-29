@@ -66,7 +66,7 @@ let evercrypt_hash: block hash_alg =
 
     Spec.Hash.Lemmas.update_multi_zero
     (fun _ _ _ _ -> ()) // relying on the pattern in Hacl.Streaming.SHA256 here
-    (fun a _ -> Spec.Hash.Lemmas.hash_is_hash_incremental a)
+    (fun a _ -> Spec.Hash.Incremental.hash_is_hash_incremental a)
 
     EverCrypt.Hash.alg_of_state
     (fun i _ -> EverCrypt.Hash.init #i)

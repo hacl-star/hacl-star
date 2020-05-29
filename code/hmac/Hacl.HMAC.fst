@@ -251,7 +251,6 @@ let mk_compute a hash alloca init update_multi update_last finish dst key key_le
   (**) S.lemma_eq_intro (B.as_seq h4 ipad) (S.(xor (u8 0x36) (wrap a (B.as_seq h0 key))));
   (**) S.lemma_eq_intro (B.as_seq h4 opad) (S.(xor (u8 0x5c) (wrap a (B.as_seq h0 key))));
   (**) S.lemma_eq_intro (B.as_seq h4 data) (B.as_seq h0 data);
-
   let s, _ = alloca () in
   part1 a init update_multi update_last finish s ipad data data_len;
   (**) key_and_data_fits a;

@@ -219,4 +219,4 @@ let mk_hash a alloca update_multi update_last finish input input_len dst =
   update_last s () (u32_to_len a blocks_len) rest rest_len;
   finish s () dst;
   ST.pop_frame ();
-  Spec.Hash.Lemmas.hash_is_hash_incremental a (B.as_seq h0 input)
+  Spec.Hash.Incremental.hash_is_hash_incremental a (B.as_seq h0 input)
