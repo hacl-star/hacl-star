@@ -28,19 +28,13 @@ let impl_state_length (a:hash_alg) = match a with
 inline_for_extraction
 type state (a:hash_alg) = b:B.buffer (impl_word a) { B.length b = impl_state_length a }
 
+(* TODO: make generic in the implementation *)
 inline_for_extraction noextract
 let as_seq (#a:hash_alg) (h:HS.mem) (s:state a) : GTot (words_state' a) =
   match a with
   | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 -> B.as_seq h s
   | Blake2S -> Blake2.state_v #Spec.Blake2.Blake2S #Blake2.M32 h s
   | Blake2B -> Blake2.state_v #Spec.Blake2.Blake2B #Blake2.M32 h s
-
-inline_for_extraction noextract
-let extra_state_v (#a:hash_alg) (s:extra_state a) : GTot nat =
-  match a with
-  | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 -> 0
-  | Blake2S -> v #U64 #SEC s
-  | Blake2B -> v #U64 #SEC s
 
 inline_for_extraction
 let word_len (a: hash_alg): n:size_t { v n = word_length a } =

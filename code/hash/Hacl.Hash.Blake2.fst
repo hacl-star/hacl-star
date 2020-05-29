@@ -98,6 +98,11 @@ let split a input_len =
     end
   else blocks_n, blocks_len, rest_len
 
+(* TODO: make the implementation really generic *)
+let core (a : hash_alg{is_blake a}) =
+  match a with
+  | Blake2S -> Hacl.Impl.Blake2.Core.M32
+  | Blake2B -> Hacl.Impl.Blake2.Core.M32
 
 (* The stateful signature for [Spec.Blake2.blake2_update_last], but where
  * the input is actually the remaining data (smaller than a block) *)
@@ -108,7 +113,7 @@ let blake2_update_last_block_st (a : hash_alg{is_blake a}) =
   input:B.buffer uint8 ->
   input_len:size_t { B.length input == v input_len /\ v input_len <= block_length a /\
                      (v #U64 #SEC ev) + v input_len <= max_input a } ->
-  ST.Stack (extra_state a)
+  ST.Stack unit
     (requires (fun h ->
       B.live h s /\ B.live h input /\ B.disjoint s input))
     (ensures (fun h0 ev' h1 ->
@@ -116,6 +121,44 @@ let blake2_update_last_block_st (a : hash_alg{is_blake a}) =
       as_seq h1 s ==
         Spec.Blake2.blake2_update_last (to_blake_alg a) (v #U64 #SEC ev)
                                        (v input_len) (B.as_seq h0 input) (as_seq h0 s)))
+
+val mk_blake2_update_last_block (a : hash_alg{is_blake a}) :
+  blake2_update_last_block_st a
+
+(* TODO: no need to copy the input if the length is exactly block_length *)
+let mk_blake2_update_last_block a s ev input input_len =
+  let h0 = ST.get () in
+  ST.push_frame ();
+  let wv = Lib.Buffer.create (4ul *. Core.row_len (to_blake_alg a) (core a))
+                             (Core.zero_element (to_blake_alg a) (core a)) in
+  let pad_len : Ghost.erased _ = block_len a -! input_len in
+  assert(v input_len + v pad_len == v (block_len a));
+  let tmp = B.alloca (Lib.IntTypes.u8 0) (block_len a) in
+  let tmp_rest = B.sub tmp 0ul input_len in
+  let tmp_pad : Ghost.erased _ = B.gsub tmp input_len pad_len in
+  B.blit input 0ul tmp_rest 0ul input_len;
+  (**) let h1 = ST.get () in
+  (**) let input_v : Ghost.erased _ = B.as_seq h0 input in
+  (**) let last_v : Ghost.erased _ = Seq.slice input_v 0 (Seq.length input_v) in
+  (**) assert(Ghost.reveal last_v `Seq.equal` input_v);
+  (**) let last_block1 : Ghost.erased _ = Lib.Sequence.create (size_block a) (u8 0) in
+  (**) let last_block2 : Ghost.erased _ =
+  (**)   Lib.Sequence.update_sub #uint8 #(size_block a) last_block1 0 (v input_len) last_v in
+  (**) assume(Ghost.reveal last_block1 `Seq.equal` B.as_seq h1 tmp);
+  (**) assume(
+    B.as_seq h1 tmp `Seq.equal`
+      Spec.Blake2.get_last_padded_block (to_blake_alg a) (input_v) (v input_len));
+  let totlen1 = ev +. Lib.IntTypes.to_u64 input_len in
+  let totlen2 =
+    match a with
+    | Blake2S -> totlen1
+    | Blake2B -> to_u128 totlen1
+  in
+  Impl.blake2_update_block #(to_blake_alg a) #(core a) wv s true totlen2 tmp;
+  (**) let h2 = ST.get () in
+  assert(as_seq h2 s == Spec.blake2_update_block (to_blake_alg a) true (v totlen1)
+                          (B.as_seq h1 tmp) (as_seq h1 s));
+  ST.pop_frame ()
 
 noextract inline_for_extraction
 val mk_update_last: a:hash_alg{is_blake a} -> update_multi_st a ->
@@ -146,7 +189,7 @@ let mk_update_last a update_multi blake2_update_last_block s ev prev_len input i
   (* Call update_block on the last padded block *)
   let rest = B.sub input blocks_len rest_len in
   (**) let rest_v : Ghost.erased _ = B.as_seq h0 rest in
-  let ev_f = blake2_update_last_block s ev' rest rest_len in
+  blake2_update_last_block s ev' rest rest_len;
   (**) let h2 = ST.get () in
   (**) assert(rest_v `Seq.equal` Seq.slice input_v (v blocks_len) (v input_len));
   (**) assert(as_seq h2 s  `Seq.equal`
@@ -156,8 +199,6 @@ let mk_update_last a update_multi blake2_update_last_block s ev prev_len input i
   u64 0
 #pop-options
 
-(*
-U128.uint64_to_uint128
 (*
   u64 0
 
