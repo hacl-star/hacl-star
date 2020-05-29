@@ -124,7 +124,7 @@ let rec repeati_blake2_update1_as_update_multi_eq
     let blocks, _ = Seq.split d (nb * block_length a) in
     (Loops.repeati nb (blake2_update1 (to_blake_alg a) prev d) hash,
      u64 (prev + nb * block_length a)) ==
-    update_multi a (hash, u64 prev) blocks)) =
+       update_multi a (hash, u64 prev) blocks)) =
   let update1 = blake2_update1 (to_blake_alg a) prev d in
   let blocks, _ = Seq.split d (nb * block_length a) in
   assert(Seq.length blocks == nb * block_length a);

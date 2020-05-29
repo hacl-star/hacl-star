@@ -4,9 +4,28 @@ module S = FStar.Seq
 
 include Spec.Hash.Lemmas0
 
+open Lib.IntTypes
+
 open Spec.Agile.Hash
 open Spec.Hash.Definitions
 open Spec.Hash.PadFinish
+
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 50"
+
+val extra_state_add_nat_bound_lem (#a:hash_alg{is_blake a}) (s : extra_state a)
+                                  (n:nat{n <= maxint (extra_state_int_type a)}) :
+  Lemma
+  (requires extra_state_v s + n <= maxint (extra_state_int_type a))
+  (ensures extra_state_v (extra_state_add_nat s n) ==
+             extra_state_v s + n)
+
+val extra_state_add_nat_bound_associative_lem (#a:hash_alg{is_blake a}) (s : extra_state a)
+                                              (n1 n2 : range_t (extra_state_int_type a)) :
+  Lemma
+  (requires n1 + n2 <= maxint (extra_state_int_type a))
+  (ensures
+       (extra_state_add_nat (extra_state_add_nat s n1) n2 ==
+        extra_state_add_nat s (n1 + n2)))
 
 val update_multi_zero (a: hash_alg) (h: words_state a): Lemma
   (ensures ((update_multi a h S.empty) == h))

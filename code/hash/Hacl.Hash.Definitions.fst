@@ -35,6 +35,13 @@ let as_seq (#a:hash_alg) (h:HS.mem) (s:state a) : GTot (words_state' a) =
   | Blake2S -> Blake2.state_v #Spec.Blake2.Blake2S #Blake2.M32 h s
   | Blake2B -> Blake2.state_v #Spec.Blake2.Blake2B #Blake2.M32 h s
 
+inline_for_extraction noextract
+let extra_state_v (#a:hash_alg) (s:extra_state a) : GTot nat =
+  match a with
+  | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 -> 0
+  | Blake2S -> v #U64 #SEC s
+  | Blake2B -> v #U64 #SEC s
+
 inline_for_extraction
 let word_len (a: hash_alg): n:size_t { v n = word_length a } =
   match a with
@@ -140,7 +147,8 @@ let update_multi_st (a: hash_alg) =
       B.live h s /\ B.live h blocks /\ B.disjoint s blocks))
     (ensures (fun h0 ev' h1 ->
       B.(modifies (loc_buffer s) h0 h1) /\
-      (as_seq h1 s, ev') == Spec.Agile.Hash.update_multi a (as_seq h0 s, ev) (B.as_seq h0 blocks)))
+      (as_seq h1 s, ev') ==
+        Spec.Agile.Hash.update_multi a (as_seq h0 s, ev) (B.as_seq h0 blocks)))
 
 noextract inline_for_extraction
 let update_last_st (a: hash_alg) =
@@ -151,10 +159,13 @@ let update_last_st (a: hash_alg) =
   input_len:size_t { B.length input = v input_len } ->
   ST.Stack (extra_state a)
     (requires (fun h ->
-      B.live h s /\ B.live h input /\ B.disjoint s input))
+      B.live h s /\ B.live h input /\ B.disjoint s input /\
+      (is_blake a ==> extra_state_v ev == len_v a prev_len)))
     (ensures (fun h0 ev' h1 ->
       B.(modifies (loc_buffer s) h0 h1) /\
-      (as_seq h1 s, ev') == Spec.Hash.Incremental.update_last a (as_seq h0 s, ev) (len_v a prev_len) (B.as_seq h0 input)))
+      (as_seq h1 s, ev') ==
+        Spec.Hash.Incremental.update_last a (as_seq h0 s, ev) (len_v a prev_len)
+                                          (B.as_seq h0 input)))
 
 noextract inline_for_extraction
 let finish_st (a: hash_alg) = s:state a -> ev:extra_state a -> dst:hash_t a -> ST.Stack unit

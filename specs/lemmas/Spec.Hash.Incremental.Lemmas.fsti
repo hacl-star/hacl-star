@@ -2,10 +2,21 @@ module Spec.Hash.Incremental.Lemmas
 
 module S = FStar.Seq
 
+open Lib.IntTypes
+
 open Spec.Hash.Definitions
 open Spec.Agile.Hash
 open Spec.Hash.PadFinish
 open Spec.Hash.Incremental
+
+val update_extra_state_eq
+  (a: hash_alg{is_blake a}) (h: words_state a)
+  (input: bytes_blocks a{Seq.length input <= maxint (extra_state_int_type a)}) :
+  Lemma
+  (requires True)
+  (ensures
+    (snd (update_multi a h input) == extra_state_add_nat (snd h) (Seq.length input)))
+  (decreases (Seq.length input))
 
 val hash_incremental_block_is_update_last (a:hash_alg)
   (s:words_state a)

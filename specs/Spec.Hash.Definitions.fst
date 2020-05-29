@@ -180,7 +180,34 @@ let extra_state a = match a with
   // We use uints to avoid reasoning about max bounds.
   // In practice, we never have overflows because of restrictions on length of buffers
   | Blake2S -> uint_t U64 SEC
-  | Blake2B -> uint_t U64 SEC
+  | Blake2B -> uint_t U64 SEC (* TODO: replace with U128, and update max_length *)
+
+inline_for_extraction noextract
+let extra_state_int_type : a:hash_alg{is_blake a} -> inttype = function
+  | Blake2S -> U64
+  | Blake2B -> U64
+
+inline_for_extraction noextract
+let extra_state_v (#a:hash_alg{is_blake a}) (s:extra_state a) :
+  GTot (n:nat{n <= maxint (extra_state_int_type a)}) =
+  match a with
+  | Blake2S -> v #U64 #SEC s
+  | Blake2B -> v #U64 #SEC s
+
+inline_for_extraction
+let nat_to_extra_state (a:hash_alg{is_blake a}) (n:nat{n <= maxint (extra_state_int_type a)}) =
+  mk_int #(extra_state_int_type a) #SEC n
+
+inline_for_extraction noextract
+let extra_state_add_len (#a:hash_alg{is_blake a}) (s : extra_state a) (len : len_t a) :
+  extra_state a =
+  s +. (cast #(len_int_type a) #PUB (extra_state_int_type a) SEC len)
+
+inline_for_extraction noextract
+let extra_state_add_nat (#a:hash_alg{is_blake a}) (s : extra_state a)
+                        (n:nat{n <= maxint (extra_state_int_type a)}) :
+  extra_state a =
+  s +. nat_to_extra_state a n
 
 (* The working state *)
 inline_for_extraction noextract

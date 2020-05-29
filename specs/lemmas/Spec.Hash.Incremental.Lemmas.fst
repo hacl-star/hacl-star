@@ -6,7 +6,47 @@ open Spec.Hash.PadFinish
 open FStar.Mul
 open Lib.IntTypes
 
+open Spec.Agile.Hash
+friend Spec.Agile.Hash
+open Spec.Hash.Lemmas
+
 #reset-options "--fuel 0 --ifuel 0 --z3rlimit 50"
+
+let rec update_extra_state_eq
+  (a: hash_alg{is_blake a}) (h: words_state a)
+  (input: bytes_blocks a{Seq.length input <= maxint (extra_state_int_type a)}) :
+  Lemma
+  (requires True)
+  (ensures
+    (snd (update_multi a h input) == extra_state_add_nat (snd h) (Seq.length input)))
+  (decreases (Seq.length input)) =
+  if Seq.length input = 0 then
+    begin
+    assert(input `Seq.equal` Seq.empty);
+    Spec.Hash.Lemmas.update_multi_zero a h;
+    assert(update_multi a h input == h);
+    let ev = snd h in
+    assert(extra_state_v ev <= maxint (extra_state_int_type a));
+    extra_state_add_nat_bound_lem ev (Seq.length input)
+    end
+  else
+    begin
+    let input1 = Seq.slice input 0 (block_length a) in
+    let input2 = Seq.slice input (block_length a) (Seq.length input) in
+    assert(input `Seq.equal` Seq.append input1 input2);
+    assert(Seq.length input1 % block_length a == 0);
+    assert(Seq.length input2 % block_length a == 0);
+    Spec.Hash.Lemmas.update_multi_associative a h input1 input2;
+    let h1 = update_multi a h input1 in
+    Spec.Hash.Lemmas.update_multi_update a h input1;
+    assert(Seq.length input2 < Seq.length input);
+    assert(snd h1 == extra_state_add_nat (snd h) (block_length a));
+    let h2 = update_multi a h1 input2 in
+    assert(h2 == update_multi a h input);
+    update_extra_state_eq a h1 input2;
+    assert(snd h2 == extra_state_add_nat (snd h1) (Seq.length input2));
+    extra_state_add_nat_bound_associative_lem (snd h) (Seq.length input1) (Seq.length input2)
+    end
 
 let hash_incremental_block_is_update_last (a:hash_alg)
   (s:words_state a)
