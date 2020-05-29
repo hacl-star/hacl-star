@@ -12,7 +12,7 @@ open Spec.Hash.Lemmas
 
 #reset-options "--fuel 0 --ifuel 0 --z3rlimit 50"
 
-let rec update_extra_state_eq
+let rec update_multi_extra_state_eq
   (a: hash_alg{is_blake a}) (h: words_state a)
   (input: bytes_blocks a{Seq.length input <= maxint (extra_state_int_type a)}) :
   Lemma
@@ -43,7 +43,7 @@ let rec update_extra_state_eq
     assert(snd h1 == extra_state_add_nat (snd h) (block_length a));
     let h2 = update_multi a h1 input2 in
     assert(h2 == update_multi a h input);
-    update_extra_state_eq a h1 input2;
+    update_multi_extra_state_eq a h1 input2;
     assert(snd h2 == extra_state_add_nat (snd h1) (Seq.length input2));
     extra_state_add_nat_bound_associative_lem (snd h) (Seq.length input1) (Seq.length input2)
     end

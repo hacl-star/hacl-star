@@ -17,6 +17,8 @@ module Core = Hacl.Impl.Blake2.Core
 
 open Hacl.Hash.Lemmas
 open Spec.Blake2.Lemmas
+open Spec.Hash.Lemmas
+open Spec.Hash.Incremental.Lemmas
 
 open FStar.Mul
 
@@ -133,8 +135,11 @@ let mk_update_last a update_multi blake2_update_last_block s ev prev_len input i
          let blocks_s, _, rem_s = Spec.Hash.Incremental.last_split_blake a input_v in
          blocks_v `Seq.equal` blocks_s /\ v rest_len == rem_s);
   let ev' = update_multi s ev blocks blocks_n in
-  assume(v #U64 #SEC ev' == v #U64 #SEC ev + v blocks_len);
-  assume(v #U64 #SEC ev == len_v a prev_len);
+  assert(v #U64 #SEC ev == len_v a prev_len);
+  update_multi_extra_state_eq a (as_seq h0 s, ev) blocks_v;
+  assert(ev' == extra_state_add_nat ev (v blocks_len));
+  extra_state_add_nat_bound_lem ev (v blocks_len);
+  assert(v #U64 #SEC ev' == v #U64 #SEC ev + v blocks_len);
   let h1 = ST.get () in
   (**) assert (S.equal (as_seq h1 s)
                (fst (Spec.Agile.Hash.update_multi a (as_seq h0 s, ev) (B.as_seq h0 blocks))));

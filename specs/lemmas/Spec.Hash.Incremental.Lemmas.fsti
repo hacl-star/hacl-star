@@ -9,7 +9,7 @@ open Spec.Agile.Hash
 open Spec.Hash.PadFinish
 open Spec.Hash.Incremental
 
-val update_extra_state_eq
+val update_multi_extra_state_eq
   (a: hash_alg{is_blake a}) (h: words_state a)
   (input: bytes_blocks a{Seq.length input <= maxint (extra_state_int_type a)}) :
   Lemma
