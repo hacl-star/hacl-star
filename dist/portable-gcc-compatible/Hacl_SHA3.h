@@ -32,6 +32,7 @@
 #define __Hacl_SHA3_H
 
 #include "Hacl_Kremlib.h"
+#include "Lib_Memzero0.h"
 
 
 /* SNIPPET_START: Hacl_Impl_SHA3_keccak_rotc */
