@@ -133,6 +133,20 @@ detect_broken_xcode () {
   $CC --version | grep -q clang-1000.11.45.5
 }
 
+check_explicit_bzero () {
+  local file=$(mktemp /tmp/testbzero.XXXXXXX).c
+  cat > $file <<EOF
+#include <string.h>
+
+int main () {
+  unsigned char *block[32] = { 0 };
+  explicit_bzero(block, 32);
+  return 0;
+}
+EOF
+  $CC -c $file -o /dev/null
+}
+
 # Main auto-detection
 
 echo -n > Makefile.config
@@ -184,4 +198,13 @@ fi
 if ! detect_ocaml; then
   echo "OCaml bindings disabled"
   echo "DISABLE_OCAML_BINDINGS=1" >> Makefile.config
+fi
+
+if [[ $(uname) == "Linux" ]]; then
+  if check_explicit_bzero; then
+    echo "... glibc is recent enough for explicit_bzero"
+  else
+    echo "toolchain does not support explicit_bzero"
+    echo "#define LINUX_NO_EXPLICIT_BZERO" >> config.h
+  fi
 fi
