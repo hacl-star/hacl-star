@@ -79,8 +79,6 @@ EXPORTS
   Hacl_Curve25519_51_scalarmult
   Hacl_Curve25519_51_secret_to_public
   Hacl_Curve25519_51_ecdh
-  Hacl_Impl_ECDSA_ecdsa_p256_sha2_sign
-  Hacl_Impl_ECDSA_ecdsa_p256_sha2_verify
   Hacl_Ed25519_sign
   Hacl_Ed25519_verify
   Hacl_Ed25519_secret_to_public
@@ -118,6 +116,22 @@ EXPORTS
   Hacl_NaCl_crypto_box_easy
   Hacl_NaCl_crypto_box_open_easy_afternm
   Hacl_NaCl_crypto_box_open_easy
+  Hacl_Interface_P256_ecdsa_sign_p256_sha2
+  Hacl_Interface_P256_ecdsa_sign_p256_sha384
+  Hacl_Interface_P256_ecdsa_sign_p256_sha512
+  Hacl_Interface_P256_ecdsa_sign_p256_without_hash
+  Hacl_Interface_P256_ecdsa_verif_p256_sha2
+  Hacl_Interface_P256_ecdsa_verif_p256_sha384
+  Hacl_Interface_P256_ecdsa_verif_p256_sha512
+  Hacl_Interface_P256_ecdsa_verif_without_hash
+  Hacl_Interface_P256_verifyQ
+  Hacl_Interface_P256_decompressionNotCompressedForm
+  Hacl_Interface_P256_decompressionCompressedForm
+  Hacl_Interface_P256_compressionNotCompressedForm
+  Hacl_Interface_P256_compressionCompressedForm
+  Hacl_Interface_P256_reduction_8_32
+  Hacl_Interface_P256_ecp256dh_i
+  Hacl_Interface_P256_ecp256dh_r
   Hacl_Frodo_KEM_crypto_kem_keypair
   Hacl_Frodo_KEM_crypto_kem_enc
   Hacl_Frodo_KEM_crypto_kem_dec

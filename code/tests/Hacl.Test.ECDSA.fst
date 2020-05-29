@@ -13,7 +13,7 @@ module B = LowStar.Buffer
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
-let ecdsa_verif_p256_sha2 = Hacl_Interface_P256_ecdsa_verif_p256_sha2
+(* let ecdsa_verif_p256_sha2 = Hacl_Interface_P256_ecdsa_verif_p256_sha2
 let ecdsa_verif_p256_sha384 = Hacl_Interface_P256_ecdsa_verif_p256_sha384
 let ecdsa_verif_p256_sha512 = Hacl_Interface_P256_ecdsa_verif_p256_sha512
 
@@ -21,7 +21,7 @@ let ecdsa_sign_p256_sha2 = Hacl_Interface_P256_ecdsa_sign_p256_sha2
 let ecdsa_sign_p256_sha384 = Hacl_Interface_P256_ecdsa_sign_p256_sha384
 let ecdsa_sign_p256_sha512 = Hacl_Interface_P256_ecdsa_sign_p256_sha512
 
-
+ *)
 
 noextract
 let sigver_vectors256_tmp = List.Tot.map
