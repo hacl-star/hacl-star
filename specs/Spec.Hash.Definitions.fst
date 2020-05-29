@@ -183,16 +183,16 @@ let extra_state a = match a with
   | Blake2B -> uint_t U64 SEC (* TODO: replace with U128, and update max_length *)
 
 inline_for_extraction noextract
+let extra_state_v (#a:hash_alg) (s:extra_state a) : GTot nat =
+  match a with
+  | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 -> 0
+  | Blake2S -> v #U64 #SEC s
+  | Blake2B -> v #U64 #SEC s
+
+inline_for_extraction noextract
 let extra_state_int_type : a:hash_alg{is_blake a} -> inttype = function
   | Blake2S -> U64
   | Blake2B -> U64
-
-inline_for_extraction noextract
-let extra_state_v (#a:hash_alg{is_blake a}) (s:extra_state a) :
-  GTot (n:nat{n <= maxint (extra_state_int_type a)}) =
-  match a with
-  | Blake2S -> v #U64 #SEC s
-  | Blake2B -> v #U64 #SEC s
 
 inline_for_extraction
 let nat_to_extra_state (a:hash_alg{is_blake a}) (n:nat{n <= maxint (extra_state_int_type a)}) =
