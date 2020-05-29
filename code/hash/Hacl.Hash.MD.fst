@@ -129,9 +129,11 @@ let mk_update_multi a update s ev blocks n_blocks =
   C.Loops.for 0ul n_blocks inv f;
   ev
 
+#pop-options
 
-#push-options "--max_fuel 0 --z3rlimit 1600"
+#push-options "--fuel 0 --ifuel 1 --z3rlimit 1600"
 
+(* TODO: the success rate of this proof is random *)
 (** An arbitrary number of bytes, then padding. *)
 noextract inline_for_extraction
 let mk_update_last a update_multi pad s ev prev_len input input_len =
@@ -199,8 +201,9 @@ let mk_update_last a update_multi pad s ev prev_len input input_len =
 
   ST.pop_frame ()
 
+#pop-options
 
-#push-options "--max_ifuel 1"
+#push-options "--ifuel 1"
 
 noextract inline_for_extraction
 let u32_to_len (a: hash_alg{is_md a}) (l: U32.t): l':len_t a { len_v a l' = U32.v l } =
@@ -211,8 +214,7 @@ let u32_to_len (a: hash_alg{is_md a}) (l: U32.t): l':len_t a { len_v a l' = U32.
 
 #pop-options
 
-(** Complete hash. *)
-
+(** split blocks: utility for the complete hash *)
 noextract inline_for_extraction
 val split_blocks (a : hash_alg) (input:B.buffer Int.uint8)
                  (input_len : Int.size_t { B.length input = U32.v input_len }) :
@@ -229,6 +231,7 @@ val split_blocks (a : hash_alg) (input:B.buffer Int.uint8)
              Spec.Hash.Incremental.split_blocks a (B.as_seq h0 input) /\
            U32.v blocks_len == U32.v blocks_n * block_length a)
 
+#push-options "--ifuel 1"
 let split_blocks a input input_len =
   let blocks_n = U32.(input_len /^ block_len a) in
   let blocks_n = if U32.(input_len %^ block_len a =^ uint_to_t 0) && U32.(blocks_n >^ uint_to_t 0)
@@ -238,8 +241,10 @@ let split_blocks a input input_len =
   let rest_len = U32.(input_len -^ blocks_len) in
   let rest = B.sub input blocks_len rest_len in
   (blocks_n, blocks_len, blocks, rest_len, rest)
+#pop-options
 
-#push-options "--max_fuel 0 --z3rlimit 100"
+(** Complete hash. *)
+
 noextract inline_for_extraction
 let mk_hash a alloca update_multi update_last finish input input_len dst =
   (**) assert (extra_state a == unit);
@@ -267,4 +272,3 @@ let mk_hash a alloca update_multi update_last finish input input_len dst =
   (**) assert(B.as_seq h1 dst `S.equal` Spec.Hash.Incremental.hash_incremental a input_v0);
   (**) Spec.Hash.Incremental.hash_is_hash_incremental a input_v0;
   ST.pop_frame ()
-#pop-options
