@@ -201,7 +201,7 @@ let ad_p a = ad:B.buffer uint8 { B.length ad <= max_length a }
 let plain_p a = p:B.buffer uint8 { B.length p <= max_length a }
 let cipher_p a = p:B.buffer uint8 { B.length p + tag_length a <= max_length a }
 
-
+// SNIPPET_START: encrypt_pre
 let encrypt_gen_pre (a: supported_alg)
   (iv:iv_p a)
   (iv_len: UInt32.t)
@@ -238,7 +238,6 @@ let encrypt_live_disjoint_pre (a: supported_alg)
   B.disjoint plain ad /\
   B.disjoint ad cipher /\ B.disjoint ad tag
 
-// SNIPPET_START: encrypt_pre
 let encrypt_pre (a: supported_alg)
   (s:B.pointer_or_null (state_s a))
   (iv:iv_p a)
