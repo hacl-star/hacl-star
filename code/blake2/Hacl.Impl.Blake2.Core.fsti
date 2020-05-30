@@ -11,7 +11,7 @@ open Lib.IntVector
 
 module Spec = Spec.Blake2
 
-#set-options "--max_fuel 0 --max_ifuel 0"
+#set-options "--max_fuel 0 --max_ifuel 1"
 
 type m_spec =
   | M32
@@ -184,13 +184,11 @@ val store_row: #a:Spec.alg -> #m:m_spec -> b:lbuffer uint8 (size_row a) -> r:row
 	  (ensures (fun h0 _ h1 -> modifies (loc b) h0 h1 /\
 			        as_seq h1 b == Lib.ByteSequence.uints_to_bytes_le (row_v h0 r)))
 
-
 inline_for_extraction
 let size_block (a:Spec.alg) : x:size_t{v x = 16 * Spec.size_word a} =
   match a with
   | Spec.Blake2.Blake2S -> 64ul
   | Spec.Blake2.Blake2B -> 128ul
-
 
 inline_for_extraction
 type block_p (a:Spec.alg) = lbuffer uint8 (size_block a)
