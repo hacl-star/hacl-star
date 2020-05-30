@@ -98,12 +98,6 @@ let split a input_len =
     end
   else blocks_n, blocks_len, rest_len
 
-(* TODO: make the implementation really generic *)
-let core (a : hash_alg{is_blake a}) =
-  match a with
-  | Blake2S -> Hacl.Impl.Blake2.Core.M32
-  | Blake2B -> Hacl.Impl.Blake2.Core.M32
-
 (* The stateful signature for [Spec.Blake2.blake2_update_last], but where
  * the input is actually the remaining data (smaller than a block) *)
 noextract inline_for_extraction
@@ -144,6 +138,9 @@ let update_sub_seq_end_eq (#a : Type) (#l1 : size_nat) (s1 : Lib.Sequence.lseq a
 
 val mk_blake2_update_last_block (a : hash_alg{is_blake a}) :
   blake2_update_last_block_st a
+
+(* TODO: remove *)
+let core = Hacl.Hash.Core.Blake2.core
 
 (* TODO: no need to copy the input if the length is exactly block_length *)
 let mk_blake2_update_last_block a s ev input input_len =

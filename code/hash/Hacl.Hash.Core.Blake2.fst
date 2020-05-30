@@ -29,10 +29,11 @@ let init_blake2s s =
 let update_blake2s s totlen block =
   ST.push_frame();
   let wv = Lib.Buffer.create 16ul (u32 0) in
+  let totlen = totlen +. u64 64 in
   Impl.blake2_update_block #Spec.Blake2S #Core.M32 wv s false totlen block;
   assert (64 == size_block Blake2S);
   ST.pop_frame();
-  totlen +. u64 64
+  totlen
 
 let pad_blake2s = Hacl.Hash.PadFinish.pad Blake2S
 
@@ -55,10 +56,11 @@ let init_blake2b s =
 let update_blake2b s totlen block =
   ST.push_frame();
   let wv = Lib.Buffer.create 16ul (u64 0) in
+  let totlen = totlen +. u64 128 in
   Impl.blake2_update_block #Spec.Blake2B #Core.M32 wv s false (to_u128 totlen) block;
   assert (128 == size_block Blake2B);
   ST.pop_frame();
-  totlen +. u64 128
+  totlen
 
 #pop-options
 
