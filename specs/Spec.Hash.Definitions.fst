@@ -70,7 +70,7 @@ let max_input_length: hash_alg -> Tot pos = function
   | SHA2_224 | SHA2_256 -> pow2 61 - 1
   | SHA2_384 | SHA2_512 -> pow2 125 - 1
   | Blake2S -> pow2 64 - 1
-  | Blake2B -> pow2 64 - 1
+  | Blake2B -> pow2 128 - 1
 
 // BB. Removed once renamed...
 let max_input = max_input_length
@@ -180,34 +180,43 @@ let extra_state a = match a with
   // We use uints to avoid reasoning about max bounds.
   // In practice, we never have overflows because of restrictions on length of buffers
   | Blake2S -> uint_t U64 SEC
-  | Blake2B -> uint_t U64 SEC (* TODO: replace with U128, and update max_length *)
+  | Blake2B -> uint_t U128 SEC
 
 inline_for_extraction noextract
-let extra_state_v (#a:hash_alg) (s:extra_state a) : GTot nat =
+let extra_state_v (#a:hash_alg) (s:extra_state a) : nat =
   match a with
   | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 -> 0
   | Blake2S -> v #U64 #SEC s
-  | Blake2B -> v #U64 #SEC s
+  | Blake2B -> v #U128 #SEC s
 
 inline_for_extraction noextract
 let extra_state_int_type : a:hash_alg{is_blake a} -> inttype = function
   | Blake2S -> U64
-  | Blake2B -> U64
+  | Blake2B -> U128
+
+noextract
+let max_extra_state (a:hash_alg{is_blake a}) : nat =
+  maxint (extra_state_int_type a)
 
 inline_for_extraction
-let nat_to_extra_state (a:hash_alg{is_blake a}) (n:nat{n <= maxint (extra_state_int_type a)}) =
+let nat_to_extra_state (a:hash_alg{is_blake a}) (n:nat{n <= max_extra_state a}) =
   mk_int #(extra_state_int_type a) #SEC n
 
-inline_for_extraction noextract
-let extra_state_add_len (#a:hash_alg{is_blake a}) (s : extra_state a) (len : len_t a) :
-  extra_state a =
-  s +. (cast #(len_int_type a) #PUB (extra_state_int_type a) SEC len)
+//inline_for_extraction noextract
+//let extra_state_add_len (#a:hash_alg{is_blake a}) (s : extra_state a) (len : len_t a) :
+//  extra_state a =
+//  s +. (cast #(len_int_type a) #PUB (extra_state_int_type a) SEC len)
 
 inline_for_extraction noextract
 let extra_state_add_nat (#a:hash_alg{is_blake a}) (s : extra_state a)
                         (n:nat{n <= maxint (extra_state_int_type a)}) :
   extra_state a =
   s +. nat_to_extra_state a n
+
+inline_for_extraction noextract
+let extra_state_add_size_t (#a:hash_alg{is_blake a}) (s : extra_state a) (n : size_t) :
+  s':extra_state a{s' == extra_state_add_nat s (size_v n)} =
+  s +. (cast (extra_state_int_type a) SEC n)
 
 (* The working state *)
 inline_for_extraction noextract

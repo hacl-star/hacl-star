@@ -20,6 +20,7 @@ let max_input_size_len (a: hash_alg{not (is_blake a)}): Lemma
       assert_norm (max_input_length a * 8 + 8 = pow2 (len_length a * 8))
 
 #reset-options "--using_facts_from 'Prims Spec.Hash.Definitions'"
+#push-options "--z3rlimit 100"
 let pad_invariant_block (a: hash_alg) (blocks: nat) (rest: nat): Lemma
   (requires blocks % block_length a = 0)
   (ensures (pad_length a rest = pad_length a (blocks + rest)))
@@ -58,3 +59,4 @@ let pad_invariant_block (a: hash_alg) (blocks: nat) (rest: nat): Lemma
   //which makes R.H.S. of (1) and (2) same, and hence the goal G
 
   ()
+#pop-options

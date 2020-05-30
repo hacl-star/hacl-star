@@ -12,9 +12,27 @@ open Spec.Hash.Lemmas
 
 #reset-options "--fuel 0 --ifuel 0 --z3rlimit 50"
 
+(* TODO: the proof time is super random. The proof actually sometimes seems
+ * to loop because of the last lemma call *)
+#push-options "--z3rlimit 500"
+let update_multi_empty_extra_state_eq
+  (a: hash_alg{is_blake a}) (h: words_state a) :
+  Lemma
+  (requires True)
+  (ensures
+    (snd (update_multi a h Seq.empty) == extra_state_add_nat (snd h) 0)) =
+  Spec.Hash.Lemmas.update_multi_zero a h;
+  assert(update_multi a h Seq.empty == h);
+  let ev = snd h in
+  assert(extra_state_v ev <= max_extra_state a);
+  assert(extra_state_v ev + 0 <= max_extra_state a); (* doesn't work without that *)
+  assert(Seq.length (Seq.empty #uint8) == 0);
+  extra_state_add_nat_bound_lem ev 0
+#pop-options
+
 let rec update_multi_extra_state_eq
   (a: hash_alg{is_blake a}) (h: words_state a)
-  (input: bytes_blocks a{Seq.length input <= maxint (extra_state_int_type a)}) :
+  (input: bytes_blocks a{Seq.length input <= max_extra_state a}) :
   Lemma
   (requires True)
   (ensures
@@ -23,11 +41,7 @@ let rec update_multi_extra_state_eq
   if Seq.length input = 0 then
     begin
     assert(input `Seq.equal` Seq.empty);
-    Spec.Hash.Lemmas.update_multi_zero a h;
-    assert(update_multi a h input == h);
-    let ev = snd h in
-    assert(extra_state_v ev <= maxint (extra_state_int_type a));
-    extra_state_add_nat_bound_lem ev (Seq.length input)
+    update_multi_empty_extra_state_eq a h
     end
   else
     begin
@@ -141,17 +155,18 @@ let concatenated_hash_incremental_blake_aux (a:hash_alg{is_blake a})
   = let input = inp1 `S.append` inp2 in
     let bs, l = split_blocks a input in
     let blocks2, last2, rem2 = last_split_blake a inp2 in
-    let h' = update_multi a (update_multi a h inp1) blocks2 in
-    let h_f = update_last_blake a h' (S.length bs) l in
-
-    let h_f2 = Spec.Blake2.blake2_update_block (to_blake_alg a) true (v (snd h' +. u64 rem2))
-      last2 (fst h') in
+    let h1 = update_multi a (update_multi a h inp1) blocks2 in
+    let h_f = update_last_blake a h1 (S.length bs) l in
+    let h2 = extra_state_add_nat (snd h1) rem2 in
+    let h_f2 = Spec.Blake2.blake2_update_block (to_blake_alg a) true
+                                               (extra_state_v h2)
+                                               last2 (fst h1) in
 
     let _, last, _ = last_split_blake a l in
     compose_split_blocks a inp1 inp2;
 
     Spec.Hash.Lemmas.update_multi_associative a h inp1 blocks2;
-    assert (h' == update_multi a h bs)
+    assert (h1 == update_multi a h bs)
 
 
 let concatenated_hash_incremental_blake (a:hash_alg{is_blake a}) (inp1:bytes) (inp2:bytes)

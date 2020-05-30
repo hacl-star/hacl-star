@@ -13,7 +13,7 @@ open Spec.Hash.PadFinish
 friend Spec.Agile.Hash
 
 let extra_state_add_nat_bound_lem (#a:hash_alg{is_blake a}) (s : extra_state a)
-                                  (n:nat{n <= maxint (extra_state_int_type a)}) :
+                                  (n:nat{n <= max_extra_state a}) :
   Lemma
   (requires extra_state_v s + n <= maxint (extra_state_int_type a))
   (ensures extra_state_v (extra_state_add_nat s n) ==
@@ -34,13 +34,14 @@ let extra_state_add_nat_bound_associative_lem (#a:hash_alg{is_blake a}) (s : ext
   let s3_v = extra_state_v s3 in
   assert(extra_state_add_nat (extra_state_add_nat s n1) n2 ==
           (s +. nat_to_extra_state a n1) +. nat_to_extra_state a n2);
-  assert(s1_v == (extra_state_v s + n1) @%. U64);
-  assert(s2_v == s1_v + n2 @%. U64);
-  assert(s2_v == (s1_v + n2) % modulus U64);
-  Math.Lemmas.lemma_mod_add_distr n2 (extra_state_v s + n1) (modulus U64);
-  assert(s2_v == (extra_state_v s + n1 + n2) % modulus U64);
-  Math.Lemmas.lemma_mod_add_distr (extra_state_v s) (n1 + n1) (modulus U64);
-  assert(s3_v == (extra_state_v s + n1 + n2) % modulus U64);
+  let t = extra_state_int_type a in
+  assert(s1_v == (extra_state_v s + n1) @%. t);
+  assert(s2_v == s1_v + n2 @%. t);
+  assert(s2_v == (s1_v + n2) % modulus t);
+  Math.Lemmas.lemma_mod_add_distr n2 (extra_state_v s + n1) (modulus t);
+  assert(s2_v == (extra_state_v s + n1 + n2) % modulus t);
+  Math.Lemmas.lemma_mod_add_distr (extra_state_v s) (n1 + n1) (modulus t);
+  assert(s3_v == (extra_state_v s + n1 + n2) % modulus t);
   assert(s2_v == s3_v)
 
 
@@ -51,10 +52,26 @@ let extra_state_add_nat_bound_associative_lem (#a:hash_alg{is_blake a}) (s : ext
 
 let update_multi_zero (a: hash_alg) = Lib.UpdateMulti.update_multi_zero (block_length a) (Spec.Agile.Hash.update a)
 
+#push-options "--fuel 1"
 let update_multi_update (a: hash_alg) (h: words_state a) (input: bytes_block a): Lemma
   (ensures (update_multi a h input) == (update a h input))
 =
-  ()
+  let h1 = update_multi a h input in
+  assert(h1 == Lib.UpdateMulti.mk_update_multi (block_length a) (update a) h input);
+  if S.length input = 0 then
+    begin
+    assert(h1 == h)
+    end
+  else
+    begin
+    let block, rem = Lib.UpdateMulti.split_block (block_length a) input 1 in
+    let h2 = update a h block in
+    assert(rem `Seq.equal` Seq.empty);
+    assert(block `Seq.equal` input);
+    let h3 = Lib.UpdateMulti.mk_update_multi (block_length a) (update a) h2 rem in
+    assert(h1 == h3)
+    end
+#pop-options
 
 let update_multi_associative (a: hash_alg)
   (h: words_state a)

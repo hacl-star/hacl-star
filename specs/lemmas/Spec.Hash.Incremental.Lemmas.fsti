@@ -11,7 +11,7 @@ open Spec.Hash.Incremental
 
 val update_multi_extra_state_eq
   (a: hash_alg{is_blake a}) (h: words_state a)
-  (input: bytes_blocks a{Seq.length input <= maxint (extra_state_int_type a)}) :
+  (input: bytes_blocks a{Seq.length input <= max_extra_state a}) :
   Lemma
   (requires True)
   (ensures

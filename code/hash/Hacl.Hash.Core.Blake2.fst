@@ -45,18 +45,18 @@ let alloca_blake2b () =
   Impl.blake2_init_hash #Spec.Blake2B #Core.M32 s (size 0) (size 64);
   let h2 = ST.get() in
   B.modifies_only_not_unused_in (B.loc_none) h0 h2;
-  s, (u64 0)
+  s, (nat_to_extra_state Blake2B 0)
 
 let init_blake2b s =
   Impl.blake2_init_hash #Spec.Blake2B #Core.M32 s (size 0) (size 64);
-  u64 0
+  nat_to_extra_state Blake2B 0
 
 #push-options "--z3rlimit 20"
 
 let update_blake2b s totlen block =
   ST.push_frame();
   let wv = Lib.Buffer.create 16ul (u64 0) in
-  let totlen = totlen +. u64 128 in
+  let totlen = totlen +. u128 128 in
   Impl.blake2_update_block #Spec.Blake2B #Core.M32 wv s false (to_u128 totlen) block;
   assert (128 == size_block Blake2B);
   ST.pop_frame();
