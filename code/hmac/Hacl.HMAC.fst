@@ -128,6 +128,16 @@ val part2:
       B.as_seq h1 dst `Seq.equal`
         Spec.Agile.Hash.hash a (S.append (B.as_seq h0 key) (B.as_seq h0 data)))
 
+let update_multi_extra_state_eq'
+  (a: hash_alg) (h: words_state a)
+  (input: bytes_blocks a) :
+  Lemma
+  (requires (is_blake a ==> Seq.length input <= max_extra_state a))
+  (ensures (is_blake a ==>
+    (snd (Spec.Agile.Hash.update_multi a h input) ==
+         extra_state_add_nat (snd h) (Seq.length input)))) =
+  if is_blake a then update_multi_extra_state_eq a h input else ()
+
 #push-options "--z3rlimit 200 --ifuel 1"
 inline_for_extraction noextract
 let part2 a init update_multi update_last finish s dst key data len =
@@ -155,16 +165,20 @@ let part2 a init update_multi update_last finish s dst key data len =
       end
     else
       begin
-      let ev = update_multi s ev key 1ul in
+      let ev1 = update_multi s ev key 1ul in
       (**) let h2 = ST.get () in
-      (**) assert ((D.as_seq h2 s, ev) ==
+      (**) assert ((D.as_seq h2 s, ev1) ==
                      Spec.Agile.Hash.(update_multi a (init a) key_v0));
-      let ev = update_last s ev (block_len_as_len a) data len in
+      (**) update_multi_extra_state_eq' a (D.as_seq h1 s, ev) key_v0;
+      (**) assert(is_blake a ==> (ev1 == extra_state_add_nat ev (Seq.length key_v0)));
+      (**) assert(extra_state_v ev == 0);
+      (**) assert(is_blake a ==> (extra_state_v ev1 == block_length a));
+      let ev2 = update_last s ev1 (block_len_as_len a) data len in
       (**) let h3 = ST.get () in
-      (**) assert ((D.as_seq h3 s, ev) ==
+      (**) assert ((D.as_seq h3 s, ev2) ==
         Spec.Hash.Incremental.update_last a
           (Spec.Agile.Hash.(update_multi a (init a) key_v0)) (block_length a) data_v0);
-      ev
+      ev2
       end
   in
   finish s ev dst;
