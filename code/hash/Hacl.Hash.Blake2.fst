@@ -122,6 +122,26 @@ let blake2_update_last_block_st (a : hash_alg{is_blake a}) =
         Spec.Blake2.blake2_update_last (to_blake_alg a) (v #U64 #SEC ev)
                                        (v input_len) (B.as_seq h0 input) (as_seq h0 s)))
 
+(* TODO: this lemma should be made more general and moved to Lib *)
+let update_sub_seq_end_eq (#a : Type) (#l1 : size_nat) (s1 : Lib.Sequence.lseq a l1)
+                      (#l2 : size_nat) (s2 : Lib.Sequence.lseq a l2)
+                      (start : size_nat) :
+  Lemma
+  (requires (start + l2 <= l1))
+  (ensures (
+    let s1' = Lib.Sequence.update_sub s1 start l2 s2 in
+    let s1_end = Lib.Sequence.slice s1 (start + l2) l1 in
+    let s1'_end = Lib.Sequence.slice s1' (start + l2) l1 in
+    s1'_end `Seq.equal` s1_end)) =
+  let s1' = Lib.Sequence.update_sub s1 start l2 s2 in
+  let s1_end = Lib.Sequence.slice s1 (start + l2) l1 in
+  let s1'_end = Lib.Sequence.slice s1' (start + l2) l1 in
+  assert(forall (k : nat{k < Seq.length s1'_end}).
+           Lib.Sequence.index s1'_end k == Lib.Sequence.index s1_end k);
+  assert(forall (k : nat{k < Seq.length s1'_end}).
+           Seq.index s1'_end k == Seq.index s1_end k);
+  ()
+
 val mk_blake2_update_last_block (a : hash_alg{is_blake a}) :
   blake2_update_last_block_st a
 
@@ -141,13 +161,27 @@ let mk_blake2_update_last_block a s ev input input_len =
   (**) let input_v : Ghost.erased _ = B.as_seq h0 input in
   (**) let last_v : Ghost.erased _ = Seq.slice input_v 0 (Seq.length input_v) in
   (**) assert(Ghost.reveal last_v `Seq.equal` input_v);
+  (* Introduce a ghost sequence which is equal to [Spec.Blake2.get_last_padded_block]
+   * and which is easy to reason about: *)
   (**) let last_block1 : Ghost.erased _ = Lib.Sequence.create (size_block a) (u8 0) in
   (**) let last_block2 : Ghost.erased _ =
   (**)   Lib.Sequence.update_sub #uint8 #(size_block a) last_block1 0 (v input_len) last_v in
-  (**) assume(Ghost.reveal last_block1 `Seq.equal` B.as_seq h1 tmp);
-  (**) assume(
-    B.as_seq h1 tmp `Seq.equal`
-      Spec.Blake2.get_last_padded_block (to_blake_alg a) (input_v) (v input_len));
+  (**) assert(last_block2 `Seq.equal`
+         Spec.Blake2.get_last_padded_block (to_blake_alg a) (input_v) (v input_len));
+  (* Now, prove that tmp is equal to the padded block as defined in the spec *)
+  (**) let tmp_v1 : Ghost.erased _ = B.as_seq h1 tmp in
+  (**) let tmp_rest_v1 : Ghost.erased _ = B.as_seq h1 tmp_rest in
+  (**) let tmp_pad_v1 : Ghost.erased _ = B.as_seq h1 tmp_pad in
+  (**) let last_block1_pad : Ghost.erased _ = Seq.slice last_block1 (v input_len) (size_block a) in
+  (**) let last_block2_rest : Ghost.erased _ = Seq.slice last_block2 0 (v input_len) in
+  (**) let last_block2_pad : Ghost.erased _ = Seq.slice last_block2 (v input_len) (size_block a) in
+  (**) assert(tmp_v1 `Seq.equal` Seq.append tmp_rest_v1 tmp_pad_v1);
+  (**) assert(last_block2 `Seq.equal` Seq.append last_block2_rest last_block2_pad);
+  (**) assert(tmp_rest_v1 `Seq.equal` last_block2_rest);
+  (* The equality difficult to get is: [last_block1_pad == last_block2_pad] *)
+  (**) update_sub_seq_end_eq #uint8 #(size_block a) last_block1 #(v input_len) last_v 0;
+  (**) assert(last_block2_pad `Seq.equal` last_block1_pad);
+  (**) assert(tmp_pad_v1 `Seq.equal` last_block2_pad);
   let totlen1 = ev +. Lib.IntTypes.to_u64 input_len in
   let totlen2 =
     match a with
@@ -192,7 +226,7 @@ let mk_update_last a update_multi blake2_update_last_block s ev prev_len input i
   blake2_update_last_block s ev' rest rest_len;
   (**) let h2 = ST.get () in
   (**) assert(rest_v `Seq.equal` Seq.slice input_v (v blocks_len) (v input_len));
-  (**) assert(as_seq h2 s  `Seq.equal`
+  (**) assert(as_seq h2 s `Seq.equal`
          fst (Spec.Hash.Incremental.update_last_blake a (as_seq h0 s, ev)
          (len_v a prev_len) input_v));
   ST.pop_frame ();
