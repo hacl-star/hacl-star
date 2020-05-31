@@ -559,6 +559,14 @@ let add_len_small #index (c: block index) (i: index) (total_len: UInt64.t) (len:
 let total_len_h #index (c: block index) (i: index) h (p: state' c i) =
   State?.total_len (B.deref h p)
 
+let seen_h #index (c: block index) (i: index) h (p: state' c i) =
+  State?.seen (B.deref h p)
+
+let split_at_last_seen_h #index (c: block index) (i: index) h (p: state' c i) =
+  let seen = seen_h c i h p in
+  let blocks, rest = split_at_last c i seen in
+  blocks, rest
+
 inline_for_extraction noextract
 val update_small:
   #index:Type0 ->
@@ -667,7 +675,6 @@ let nblocks #index (c: block index) (i: index)
 =
   admit()
 
-(* TODO HERE *)
 let update_empty_or_full_buf #index c i t t' p data len =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.state.frame_freeable #i in
@@ -708,22 +715,16 @@ let update_empty_or_full_buf #index c i t t' p data len =
                c.update_multi_s i (c.update_multi_s i init_state blocks) rest);
       assert(seen `Seq.equal` Seq.append blocks rest);
       assert(c.state.v i h1 block_state == c.update_multi_s i init_state seen)
-      (* TODO: the following assert fails, and I don't know what that means *)
-//      assert(optional_reveal h0 (k' <: optional_key i c.km c.key) ==
-//             optional_reveal h1 (k' <: optional_key i c.km c.key))
       end
     end;
  
   let h1 = ST.get () in
-//  let init_state = (c.init_s i (optional_reveal h0 (k' <: optional_key i c.km c.key))) in
-//  assert(c.state.v i h1 block_state == c.update_multi_s i init_state seen);
 
   assert(c.state.v i h1 block_state ==
     c.update_multi_s i (c.init_s i (optional_reveal h0 (k' <: optional_key i c.km c.key))) seen);
 
   split_at_last_blocks c i (G.reveal seen) (B.as_seq h0 data);
 
-//  let n_blocks = len `U32.div` c.block_len i in
   let n_blocks = nblocks c i len in
   let data1_len = n_blocks `U32.mul` c.block_len i in
   let data2_len = len `U32.sub` data1_len in
@@ -768,20 +769,89 @@ let update_empty_or_full_buf #index c i t t' p data len =
     (==) { }
       U64.v total_len + U32.v len;
     }
-  );
-
-  assert(
-    let seen' = G.reveal seen `S.append` B.as_seq h0 data in
-    let blocks, rest = split_at_last c i seen' in
-    
-  );
- admit()
+  )
 #pop-options
 
-/// Case 3: we are given just enough data to end up on the boundary and there is
-/// more data to come, meaning that we can flush the buffer (hence the specific
-/// postcondition).
-unfold noextract
+/// Case 3: we are given just enough data to end up on the boundary. It is just
+/// a sub-case of [update_small], but with a little bit more precise pre and post
+/// conditions.
+
+(* unfold noextract
+let update_round_post
+  #index
+  (c: block index)
+  (i: index)
+  (s: state' c i)
+  (data: B.buffer uint8)
+  (len: UInt32.t)
+  (h0 h1: HS.mem)
+=
+  update_post c i s data len h0 h1 /\ *)
+
+inline_for_extraction noextract
+val update_round:
+  #index:Type0 ->
+  c:block index ->
+  i:G.erased index -> (
+  let i = G.reveal i in
+  t:Type0 { t == c.state.s i } ->
+  t':Type0 { t' == optional_key i c.km c.key } ->
+  s:state c i t t' ->
+  data: B.buffer uint8 ->
+  len: UInt32.t ->
+  Stack unit
+    (requires fun h0 ->
+      update_pre c i s data len h0 /\ (
+      let r = rest c i (total_len_h c i h0 s) in
+      U32.v len + U32.v r = U32.v (c.block_len i) /\
+      r <> 0ul))
+    (ensures fun h0 _ h1 ->
+      update_post c i s data len h0 h1 /\
+      begin
+      let blocks, rest = split_at_last_seen_h c i h0 s in
+      let blocks', rest' = split_at_last_seen_h c i h1 s in
+      blocks' `S.equal` blocks /\
+      rest' `S.equal` S.append rest (B.as_seq h0 data) /\
+      S.length rest' = U32.v (c.block_len i)
+      end))
+
+#push-options "--z3rlimit 200"
+let update_round #index c i t t' p data len =
+  [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
+  [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
+  [@inline_let] let _ = c.key.frame_freeable #i in
+  [@inline_let] let _ = c.key.frame_freeable #i in
+  [@inline_let] let _ = c.update_multi_associative i in
+
+  let open LowStar.BufferOps in
+  (**) let h0 = ST.get() in
+  update_small #index c i t t' p data len;
+  (**) let h1 = ST.get() in
+  (**) split_at_last_small c i (seen_h c i h0 p) (B.as_seq h0 data)
+#pop-options  
+
+(* inline_for_extraction noextract
+val update_round:
+  #index:Type0 ->
+  c:block index ->
+  i:G.erased index -> (
+  let i = G.reveal i in
+  t:Type0 { t == c.state.s i } ->
+  t':Type0 { t' == optional_key i c.km c.key } ->
+  s:state c i t t' ->
+  data: B.buffer uint8 ->
+  len: UInt32.t ->
+  Stack unit
+    (requires fun h0 ->
+      update_pre c i s data len h0 /\ (
+      let r = rest c i (total_len_h c i h0 s) in
+      U32.v len + U32.v r = U32.v (c.block_len i) /\
+      r <> 0ul))
+    (ensures fun h0 _ h1 ->
+      update_round_post c i s data len h0 h1 /\
+      U64.v (total_len_h c i h1 s) % U32.v (c.block_len i) = 0)) *)
+
+(*unfold noextract
 let update_round_post
   #index
   (c: block index)
@@ -886,11 +956,12 @@ let update_round #index c i t t' p data len =
   c.state.frame_freeable (B.loc_buffer p) block_state h2 h3;
   optional_frame #_ #i #c.km #c.key (B.loc_buffer p) k' h2 h3;
   assert (seen_pred c i h3 p `S.equal` (S.append (G.reveal seen) (B.as_seq h0 data)))
-#pop-options
+#pop-options *)
 
 /// General update function, as a decomposition of the three sub-cases
 /// ==================================================================
 
+#push-options "--z3rlimit 200"
 let update #index c i t t' p data len =
   let open LowStar.BufferOps in
   let s = !*p in
@@ -906,8 +977,7 @@ let update #index c i t t' p data len =
     let diff = c.block_len i `U32.sub` sz in
     let data1 = B.sub data 0ul diff in
     let data2 = B.sub data diff (len `U32.sub` diff) in
-//    update_round c (G.hide i) t t' p data1 diff;
-    update_small c (G.hide i) t t' p data1 diff;
+    update_round c (G.hide i) t t' p data1 diff;
     let h1 = ST.get () in
     update_empty_or_full_buf c (G.hide i) t t' p data2 (len `U32.sub` diff);
     let h2 = ST.get () in
@@ -924,6 +994,7 @@ let update #index c i t t' p data len =
       ()
     )
   end
+#pop-options
 
 let mk_finish #index c i t t' p dst =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
