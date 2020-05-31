@@ -487,6 +487,14 @@ let rest #index (c: block index) (i: index)
 =
   admit()
 
+inline_for_extraction noextract
+let nblocks #index (c: block index) (i: index)
+  (len: UInt32.t): (x:UInt32.t {
+    U32.v x = split_at_last_num_blocks c i (U32.v len) })
+=
+  admit()
+
+
 (*  let open FStar.Int.Cast in
   let x = total_len `U64.rem` uint32_to_uint64 (c.block_len i) in
   if U64.(x =^ uint_to_t 0 && total_len >^ uint_to_t 0) then
@@ -536,7 +544,8 @@ let add_len_small #index (c: block index) (i: index) (total_len: UInt64.t) (len:
     U64.v total_len + U32.v len <= c.max_input_length i)
   (ensures (rest c i (add_len c i total_len len) = rest c i total_len `U32.add` len))
 =
-  calc (==) {
+  admit()
+(*  calc (==) {
     U32.v (rest c i (add_len c i total_len len));
   (==) { }
     U64.v (add_len c i total_len len) % U32.v (c.block_len i);
@@ -550,7 +559,7 @@ let add_len_small #index (c: block index) (i: index) (total_len: UInt64.t) (len:
     (U32.v (rest c i total_len) + U32.v len) % U32.v (c.block_len i);
   (==) { Math.Lemmas.modulo_lemma (U32.v (rest c i total_len) + U32.v len) (U32.v (c.block_len i)) }
     U32.v (rest c i total_len) + U32.v len;
-  }
+  }*)
 #pop-options
 
 /// Beginning of the three sub-cases (see Hacl.Streaming.Spec)
@@ -559,6 +568,7 @@ let add_len_small #index (c: block index) (i: index) (total_len: UInt64.t) (len:
 let total_len_h #index (c: block index) (i: index) h (p: state' c i) =
   State?.total_len (B.deref h p)
 
+(* TODO: actually equal to seen and seen_pred *)
 let seen_h #index (c: block index) (i: index) h (p: state' c i) =
   State?.seen (B.deref h p)
 
@@ -624,14 +634,16 @@ let update_small #index c i t t' p data len =
   assert (B.as_seq h2 data == B.as_seq h1 data);
   c.state.frame_invariant (B.loc_buffer p) block_state h1 h2;
   optional_frame #_ #i #c.km #c.key (B.loc_buffer p) k' h1 h2;
+
   assert (
     let b = S.append (G.reveal seen_) (B.as_seq h0 data) in
     let blocks, rest = split_at_last c i b in
     S.length blocks + S.length rest = U64.v total_len /\
     S.length b = U64.v total_len /\
     U64.v total_len <= c.max_input_length i /\
-    S.equal (S.slice (B.as_seq h2 buf) 0 (U64.v total_len % U32.v (c.block_len i))) rest
-    );
+    S.equal (S.slice (B.as_seq h2 buf) 0 (S.length rest)) rest
+  );
+
   assert (seen c i h2 p `S.equal` (S.append (G.reveal seen_) (B.as_seq h0 data)));
   assert (footprint c i h0 p == footprint c i h2 p);
   assert (equal_domains h00 h2)
@@ -666,14 +678,6 @@ val update_empty_or_full_buf:
 
 inline_for_extraction noextract
 let seen_pred = seen
-
-(* TODO: move with rest *)
-inline_for_extraction noextract
-let nblocks #index (c: block index) (i: index)
-  (len: UInt32.t): (x:UInt32.t {
-    U32.v x = split_at_last_num_blocks c i (U32.v len) })
-=
-  admit()
 
 let update_empty_or_full_buf #index c i t t' p data len =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
@@ -775,18 +779,6 @@ let update_empty_or_full_buf #index c i t t' p data len =
 /// Case 3: we are given just enough data to end up on the boundary. It is just
 /// a sub-case of [update_small], but with a little bit more precise pre and post
 /// conditions.
-
-(* unfold noextract
-let update_round_post
-  #index
-  (c: block index)
-  (i: index)
-  (s: state' c i)
-  (data: B.buffer uint8)
-  (len: UInt32.t)
-  (h0 h1: HS.mem)
-=
-  update_post c i s data len h0 h1 /\ *)
 
 inline_for_extraction noextract
 val update_round:
@@ -996,6 +988,7 @@ let update #index c i t t' p data len =
   end
 #pop-options
 
+#push-options "--z3rlimit 200"
 let mk_finish #index c i t t' p dst =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.state.frame_freeable #i in
@@ -1003,7 +996,6 @@ let mk_finish #index c i t t' p dst =
   [@inline_let] let _ = c.key.frame_freeable #i in
   [@inline_let] let _ = c.update_multi_associative i in
   [@inline_let] let _ = allow_inversion key_management in
-
 
   let open LowStar.BufferOps in
   let h0 = ST.get () in
@@ -1036,7 +1028,7 @@ let mk_finish #index c i t t' p dst =
   c.state.frame_freeable #i (c.state.footprint h2 tmp_block_state) block_state h2 h3;
   optional_frame #_ #i #c.km #c.key (c.state.footprint h2 tmp_block_state) k' h2 h3;
 
-  c.update_last (G.hide i) tmp_block_state buf_ total_len;
+  c.update_last (G.hide i) tmp_block_state buf_ total_len; (* TODO: length *)
 
   let h4 = ST.get () in
   c.state.frame_invariant #i (c.state.footprint h3 tmp_block_state) block_state h3 h4;
@@ -1049,9 +1041,12 @@ let mk_finish #index c i t t' p dst =
   begin
     let seen = G.reveal seen in
     let block_length = U32.v (c.block_len i) in
-    let n = S.length seen / block_length in
-    let blocks, rest_ = S.split seen (n * block_length)  in
+//    let n = S.length seen / block_length in
+//    let blocks, rest_ = S.split seen (n * block_length)  in
+    let n = split_at_last_num_blocks c i (S.length seen) in
+    let blocks, rest_ = split_at_last c i seen in
     let k = optional_reveal #_ #i #c.km #c.key h0 k' in
+//    assert(S.length blocks = n * block_length);
     calc (S.equal) {
       B.as_seq h5 dst;
     (S.equal) { }
@@ -1094,7 +1089,7 @@ let mk_finish #index c i t t' p dst =
   B.modifies_remove_fresh_frame h0 h1 h6 mloc;
   B.popped_modifies h5 h6;
   assert (B.(modifies mloc h0 h6))
-
+#pop-options
 let free #index c i t t' s =
   let _ = allow_inversion key_management in
   let open LowStar.BufferOps in
