@@ -85,10 +85,10 @@ let loc_includes_union_l_footprint_s
 val invariant_s (#index: Type0) (c: block index) (i: index) (h: HS.mem) (s: state_s' c i): Type0
 
 let invariant #index (c: block index) (i: index) (m: HS.mem) (s: state' c i) =
+  invariant_s c i m (B.get m s 0)
   B.freeable s /\
   B.live m s /\
-  B.(loc_disjoint (loc_addr_of_buffer s) (footprint_s c i m (B.deref m s))) /\
-  invariant_s c i m (B.get m s 0)
+  B.(loc_disjoint (loc_addr_of_buffer s) (footprint_s c i m (B.deref m s)))
 
 val invariant_loc_in_footprint
   (#index: Type0)

@@ -51,24 +51,257 @@ let uint32 = Lib.IntTypes.uint32
 noextract
 let bytes = S.seq uint8
 
+/// A lemma I could not find in FStar.Math.Lemmas
+let mul_zero_left_is_zero (n : nat) : Lemma(0 * n = 0) = ()
+
+/// Returns the number of blocks to process
+#push-options "--z3cliopt smt.arith.nl=false"
+noextract
+let split_at_last_num_blocks #index (c: block index) (i: index) (b: nat):
+  Pure nat
+    (requires True)
+    (ensures (fun blocks_n ->
+      let l = U32.v (c.block_len i) in
+      let blocks = blocks_n * l in
+      let rest = b - blocks in
+      rest <= l /\
+      (rest % l = b % l) /\
+      (rest =  b % l \/  rest = l) /\
+      (rest = 0 <==>  b == 0) /\
+      (rest = l <==> (blocks = (b / l - 1) * l)) /\
+      ((rest > 0 /\ rest < l) <==>  b % l <> 0) /\
+      (rest = (b % l) <==> (blocks = (b / l) * l)) /\
+       blocks % l = 0 /\
+      (blocks / l) * l = blocks
+  ))
+=
+  let l = U32.v (c.block_len i) in
+  let n = b / l in
+  let blocks = n * l in
+  let rest = b - n * l in
+
+  Math.Lemmas.nat_over_pos_is_nat b l;
+  assert(n >= 0);
+  Math.Lemmas.euclidean_division_definition b l;
+  Math.Lemmas.modulo_range_lemma b l;
+  assert(rest < l);
+  Math.Lemmas.modulo_lemma rest l;
+  assert(rest = b % l);
+  assert(rest = rest % l);
+  Math.Lemmas.cancel_mul_mod n l;
+  assert(blocks % l = 0);
+  assert(b = n * l + rest);
+  Math.Lemmas.euclidean_division_definition blocks l;
+  assert((blocks / l) * l = blocks);
+  assert(blocks = (b / l) * l);
+  Math.Lemmas.distributivity_sub_left (b / l) 1 l;
+  assert((b / l - 1) * l = (b / l) * l - l);
+  (* We always make sure rest is not empty (if possible) *)
+  if b % l = 0 && n > 0 then
+    begin
+    let n' = n - 1 in
+    let blocks' = n' * l in
+    let rest' = b - blocks' in
+
+    assert(rest = 0);
+    assert(blocks' = blocks - l);
+    assert(rest' = l);
+
+    Math.Lemmas.nat_times_nat_is_nat n' l;
+    assert(n' * l >= 0);
+    assert(b > 0);
+    Math.Lemmas.lemma_mod_sub_distr blocks l l;
+    assert(l % l = 0);
+    assert(blocks' % l = 0);
+    Math.Lemmas.euclidean_division_definition blocks' l;
+    assert((blocks' / l) * l = blocks');
+    n'
+    end
+  else
+    begin
+    assert(b % l <> 0 || n = 0);
+    if b % l <> 0 then
+      begin
+      assert(rest <> 0);
+      Math.Lemmas.nat_times_nat_is_nat n l;
+      assert(n * l >= 0);
+      n
+      end
+    else
+      begin
+      assert(n = 0);
+      assert(b = n * l + rest);
+      mul_zero_left_is_zero l;
+      assert(n * l = 0);
+      assert(b = rest);
+      n
+      end
+    end
+#pop-options
+
+#push-options "--z3cliopt smt.arith.nl=false"
 noextract
 let split_at_last #index (c: block index) (i: index) (b: bytes):
   Pure (bytes & bytes)
     (requires True)
     (ensures (fun (blocks, rest) ->
-      S.length rest < U32.v (c.block_len i) /\
-      S.length rest = S.length b % U32.v (c.block_len i) /\
+      let l = U32.v (c.block_len i) in
+      S.length rest <= l /\
+      (S.length rest % l = S.length b % l) /\
+      (S.length rest = S.length b % l \/ S.length rest = l) /\
+      (S.length rest = 0 <==> S.length b == 0) /\
+      (S.length rest = l <==>
+        (S.length blocks = (S.length b / l - 1) * l)) /\
+      ((S.length rest > 0 /\ S.length rest < l) <==> S.length b % l <> 0) /\
+      (S.length rest = (S.length b % l) <==>
+        (S.length blocks = (S.length b / l) * l)) /\
       S.equal (S.append blocks rest) b /\
-      S.length blocks % U32.v (c.block_len i) = 0))
+      S.length blocks % l = 0 /\
+      (S.length blocks / l) * l = S.length blocks
+  ))
 =
-  let n = S.length b / U32.v (c.block_len i) in
-  let blocks, rest = S.split b (n * U32.v (c.block_len i)) in
-  assert (S.length blocks = n * U32.v (c.block_len i));
-  FStar.Math.Lemmas.multiple_modulo_lemma n (U32.v (c.block_len i));
-  assert ((n * U32.v (c.block_len i)) % U32.v (c.block_len i) = 0);
-  assert (S.length rest = S.length b - n * U32.v (c.block_len i));
-  assert (S.length b - n * U32.v (c.block_len i) < U32.v (c.block_len i));
+  let l = U32.v (c.block_len i) in
+  let n = split_at_last_num_blocks c i (Seq.length b) in
+  Math.Lemmas.nat_times_nat_is_nat n l;
+  let blocks, rest = S.split b (n * l) in
   blocks, rest
+#pop-options
+
+/// The following lemmas characterize [split_at_last] with conditions which are easy to
+/// reason about, and is very useful for the various lemmas in this file which
+/// prove properties about how to update the internal buffer so that its content
+/// is actually the correct remainder of the data seen so far.
+/// TODO: this lemma was introduced lately, it might be good to update the proofs
+/// to use it.
+/// The proof strategy is to first prove that the blocks and rest sequences have the
+/// correct lengths, and the equality between sequences is then trivial to get.
+
+/// TODO: small lemmas I couldn't find in FStar.Math.Lemmas
+let add_equal_zero (a b : nat) :
+  Lemma
+  (requires (a + b = 0))
+  (ensures (a = 0 /\ b = 0)) = ()
+
+let mul_equal_zero (a b : nat) :
+  Lemma
+  (requires (a * b = 0))
+  (ensures (a = 0 \/ b = 0)) = ()
+
+/// This first auxiliary lemma only manipulates the lengths of the sequences.
+#push-options "--z3cliopt smt.arith.nl=false"
+noextract
+let split_at_last_num_blocks_spec #index (c: block index) (i: index)
+                                  (b n rest: nat):
+  Lemma
+  (requires (
+    let l = U32.v (c.block_len i) in
+    (rest <= l /\ (rest = 0 ==> b = 0) /\ b = n * l + rest)))
+  (ensures (n = split_at_last_num_blocks c i b)) =
+  let l = U32.v (c.block_len i) in
+  if b = 0 then
+    begin
+    Math.Lemmas.nat_times_nat_is_nat n l;
+    add_equal_zero (n * l) rest;
+    mul_equal_zero n l;
+    assert(n = 0)
+    end
+  else
+    begin
+    assert(b > 0);
+    (* In order to prove the equality between all the lengths, we use the unicity
+    * of the modulo to prove that the rests are equal, then that the numbers
+    * of blocks are equal. *)
+    let l = U32.v (c.block_len i) in
+    let blocks = n * l in
+    let rest = b - blocks in
+    let n' = split_at_last_num_blocks c i b in
+    let blocks' = n' * l in
+    let rest' = b - blocks' in
+    Math.Lemmas.cancel_mul_mod n l;
+    assert(blocks % l = 0);
+    assert(blocks' % l = 0); (* comes from the spec of [split_at_last] *)
+    Math.Lemmas.euclidean_division_definition blocks l;
+
+    (* First, prove that the lengths of the rests are equal modulo the size of
+    * a block *)
+    assert(rest' % l = b % l); (* comes from the spec of [split_at_last] *)
+    assert(rest + n * l = b);
+    Math.Lemmas.lemma_mod_plus rest n l; (* doesn't work inside a calc: typing problem with squash *)
+    assert(b % l = rest % l);
+    assert(rest % l = rest' % l);
+
+    (* If both rests are stricly smaller than a block, we can directly apply
+    * the modulo injectivity and the rest follows immediately *)
+    if rest < l && rest' < l then
+      begin
+      Math.Lemmas.lemma_mod_injective l rest rest';
+      assert(rest = rest');
+      assert(n * l + rest = n' * l + rest');
+      assert(n * l = n' * l);
+      Math.Lemmas.lemma_cancel_mul n n' l;
+      assert(n = n')
+      end
+    (* Otherwise, case one: both rests are equal to block length (even easier) *)
+    else if rest = l && rest' = l then
+      Math.Lemmas.lemma_cancel_mul n n' l
+    (* Last two cases: one of the rests is smaller than a block, and the other is
+    * of the size of a block. Because of modulo properties, the smaller rest
+    * must be equal to 0, which gives us that both rests are equal, and thus that
+    * the numbers of blocks are equal *)
+    else
+      begin
+      assert((rest = l && rest' < l) \/ (rest < l && rest' = l));
+      let rest, rest' = if rest = l then rest, rest' else rest', rest in
+      assert(rest = l && rest' < l);
+      (* [rest % l = 0] *)
+      assert(rest = 1 * l);
+      Math.Lemmas.cancel_mul_mod 1 l;
+      assert(rest % l = 0);
+      (* [rest' = 0 ] *)
+      Math.Lemmas.modulo_lemma rest' l;
+      assert(rest' = 0);
+      Math.Lemmas.lemma_cancel_mul n n' l;
+      assert(n = n')
+      end
+    end
+#pop-options
+
+/// This second lemma is the one we will use
+#push-options "--z3cliopt smt.arith.nl=false"
+noextract
+let split_at_last_spec #index (c: block index) (i: index)
+                              (b blocks rest: bytes):
+  Lemma
+  (requires (
+    let l = U32.v (c.block_len i) in
+    (S.length blocks % l = 0 /\
+     S.length rest <= l /\
+     (S.length rest = 0 ==> S.length b = 0) /\
+     b `Seq.equal` Seq.append blocks rest)))
+  (ensures (
+     (blocks, rest) == split_at_last c i b)) =
+  (* We need to introduce the variables with which to call [split_at_last_num_blocks_spec] *)
+  let l = U32.v (c.block_len i) in
+  let b_l = Seq.length b in
+  let blocks_l = Seq.length blocks in
+  let rest_l = Seq.length rest in
+  let blocks', rest' = split_at_last c i b in
+  let n' = Seq.length blocks' / l in
+  let n = blocks_l / l in
+  Math.Lemmas.nat_over_pos_is_nat blocks_l l;
+  assert(n >= 0);
+  Math.Lemmas.euclidean_division_definition (S.length blocks) l;
+  assert(blocks_l = l * n);
+  assert(b_l = n * l + rest_l);
+  split_at_last_num_blocks_spec c i b_l n rest_l;
+  assert(n = split_at_last_num_blocks c i b_l);
+  assert(n = n'); (* comes from the spec of [split_at_last] *)
+  assert(rest_l = Seq.length rest');
+  (* We have the equalities between the sequence lengths, so the rest follows
+   * naturally *)
+  assert(blocks `Seq.equal` blocks');
+  assert(rest `Seq.equal` rest')
+#pop-options
 
 /// For the initialization of the streaming state.
 
@@ -81,10 +314,20 @@ let split_at_last_empty #index (c: block index) (i: index): Lemma
   FStar.Math.Lemmas.multiple_division_lemma 0 (U32.v (c.block_len i))
 #pop-options
 
-/// "Small" case: not enough data to obtain a complete block, so it suffices to
+/// "Small" case: not enough data to obtain strictly more than a complete block,
+/// so it suffices to append the new input to the internal buffer. Note that
+/// we always make sure to have some data in the buffer (after the first call to
+/// update) so that the update_last is called on non-empty data at the very end.
+///
+/// There are many subcases that we prove in intermediate lemmas, until we can
+/// get the final [split_at_last_small] theorem.
+/// [b]: internal buffer
+/// [d]: data to append
+
+/// "Small" case 1: not enough data to obtain a complete block, so it suffices to
 /// append the new input to the internal buffer.
 
-let split_at_last_small #index (c: block index) (i: index) (b: bytes) (d: bytes): Lemma
+let split_at_last_small_strict #index (c: block index) (i: index) (b: bytes) (d: bytes): Lemma
   (requires (
     let _, rest = split_at_last c i b in
     S.length rest + S.length d < U32.v (c.block_len i)))
@@ -97,64 +340,108 @@ let split_at_last_small #index (c: block index) (i: index) (b: bytes) (d: bytes)
   let blocks', rest' = split_at_last c i (S.append b d) in
   let l = U32.v (c.block_len i) in
 
-  (* Looking at the definition of split_at_last, blocks depends only on S.length b / l. *)
-  calc (==) {
-    S.length b / l;
-  (==) { S.lemma_len_append blocks rest }
-    (S.length blocks + S.length rest) / l;
-  (==) { Math.Lemmas.lemma_div_exact (S.length blocks) l }
-    (l * (S.length blocks / l) + S.length rest) / l;
-  (==) { }
-    (S.length rest + (S.length blocks / l) * l) / l;
-  (==) { Math.Lemmas.lemma_div_plus (S.length rest) (S.length blocks / l) l }
-    (S.length rest) / l + (S.length blocks / l);
-  (==) { Math.Lemmas.small_div (S.length rest) l }
-    S.length blocks / l;
-  };
+  split_at_last_spec c i (S.append b d) blocks (S.append rest d)
 
-  calc (==) {
-    S.length (S.append b d) / l;
-  (==) { S.lemma_len_append b d; S.lemma_len_append blocks rest }
-    (S.length blocks + S.length rest + S.length d) / l;
-  (==) { Math.Lemmas.lemma_div_exact (S.length blocks) l }
-    (l * (S.length blocks / l) + (S.length rest + S.length d)) / l;
-  (==) { }
-    ((S.length rest + S.length d) + (S.length blocks / l) * l) / l;
-  (==) { Math.Lemmas.lemma_div_plus (S.length rest + S.length d) (S.length blocks / l) l }
-    (S.length rest + S.length d) / l + (S.length blocks / l);
-  (==) { Math.Lemmas.small_div (S.length rest + S.length d) l }
-    S.length blocks / l;
-  };
+/// "Small" case 2: exactly enough data to obtain a complete block, but the internal
+/// buffer is empty.
 
-  assert (S.equal blocks blocks');
+#push-options "--z3cliopt smt.arith.nl=false"
+let split_at_last_small_exact_empty_internal #index (c: block index) (i: index) (b: bytes) (d: bytes):
+  Lemma
+  (requires (
+    let _, rest = split_at_last c i b in
+    S.length rest + S.length d = U32.v (c.block_len i) /\
+    S.length rest = 0))
+  (ensures (
+    let blocks, rest = split_at_last c i b in
+    let blocks', rest' = split_at_last c i (S.append b d) in
+    S.equal blocks blocks' /\ S.equal (S.append rest d) rest'))
+=
+  let blocks, rest = split_at_last c i b in
+  (* The proof is trivial because [b] is empty *)
+  assert(b `Seq.equal` Seq.empty);
+  assert(S.append b d `Seq.equal` d);
+  assert(S.append rest d `Seq.equal` d)
+#pop-options
 
-  calc (S.equal) {
-    rest `S.append` d;
-  (S.equal) { (* definition *) }
-    S.slice b ((S.length b / l) * l) (S.length b) `S.append` d;
-  (S.equal) { }
-    S.slice (S.append b d) ((S.length b / l) * l) (S.length b) `S.append` d;
-  (S.equal) { (* above *) }
-    S.slice (S.append b d) ((S.length (S.append b d) / l) * l) (S.length b) `S.append` d;
-  (S.equal) { (* ? *) }
-    S.slice (S.append b d) ((S.length (S.append b d) / l) * l) (S.length b)
-    `S.append`
-    S.slice (S.append b d) (S.length b) (S.length (S.append b d));
-  (S.equal) { S.lemma_split (S.append b d) ((S.length (S.append b d) / l) * l) }
-    S.slice (S.append b d) ((S.length (S.append b d) / l) * l) (S.length b + S.length d);
-  (S.equal) { S.lemma_len_append b d }
-    S.slice (S.append b d) ((S.length (S.append b d) / l) * l) (S.length (S.append b d));
-  (S.equal) { }
-    rest';
-  };
+/// "Small" case 3: exactly enough data to obtain a complete block, but the
+/// data to add is empty.
 
-  ()
+#push-options "--z3cliopt smt.arith.nl=false"
+let split_at_last_small_exact_empty_data #index (c: block index) (i: index) (b: bytes)
+                                                (d: bytes):
+  Lemma
+  (requires (
+    let _, rest = split_at_last c i b in
+    S.length rest + S.length d = U32.v (c.block_len i) /\
+    S.length d = 0))
+  (ensures (
+    let blocks, rest = split_at_last c i b in
+    let blocks', rest' = split_at_last c i (S.append b d) in
+    S.equal blocks blocks' /\ S.equal (S.append rest d) rest'))
+=
+  let blocks, rest = split_at_last c i b in
+  let blocks', rest' = split_at_last c i (S.append b d) in
+  assert(S.append rest d `S.equal` rest);
+  assert(S.append b d `S.equal` b)
+#pop-options
+
+/// "Small" case 4: exactly enough data to obtain a complete block, the internal
+/// buffer is not empty and the data to add is not empty.
+
+#push-options "--z3cliopt smt.arith.nl=false"
+let split_at_last_small_exact #index (c: block index) (i: index) (b: bytes) (d: bytes): Lemma
+  (requires (
+    let _, rest = split_at_last c i b in
+    S.length rest + S.length d = U32.v (c.block_len i) /\
+    S.length rest > 0 /\ S.length d > 0))
+  (ensures (
+    let blocks, rest = split_at_last c i b in
+    let blocks', rest' = split_at_last c i (S.append b d) in
+    S.equal blocks blocks' /\ S.equal (S.append rest d) rest'))
+=
+  let blocks, rest = split_at_last c i b in
+  let blocks', rest' = split_at_last c i (S.append b d) in
+  let l = U32.v (c.block_len i) in
+  let n = S.length blocks / l in
+
+  assert(S.length blocks % l = 0); (* comes from the spec of [split_at_last] *)
+  assert(S.length (S.append rest d) = l);  
+  assert((S.append b d) `Seq.equal` Seq.append blocks (Seq.append rest d));
+  split_at_last_spec c i (S.append b d) blocks (S.append rest d)
+#pop-options
+
+/// "Small" case: final theorem: not enough data to obtain strictly more than a
+/// complete block, so it suffices to append the new input to the internal buffer.
+
+let split_at_last_small #index (c: block index) (i: index) (b: bytes) (d: bytes): Lemma
+  (requires (
+    let _, rest = split_at_last c i b in
+    S.length rest + S.length d <= U32.v (c.block_len i)))
+  (ensures (
+    let blocks, rest = split_at_last c i b in
+    let blocks', rest' = split_at_last c i (S.append b d) in
+    S.equal blocks blocks' /\ S.equal (S.append rest d) rest'))
+=
+  let blocks, rest = split_at_last c i b in
+  let blocks', rest' = split_at_last c i (S.append b d) in
+  let l = U32.v (c.block_len i) in
+  
+  if S.length rest + S.length d < l then
+    split_at_last_small_strict c i b d
+  else if S.length rest = 0 then
+    split_at_last_small_exact_empty_internal c i b d
+  else if S.length d = 0 then
+    split_at_last_small_exact_empty_data c i b d
+  else split_at_last_small_exact c i b d
+
+/// For the initialization of the streaming state.
 
 /// Second case: the buffer is empty, so this is a fast-path and we can just
 /// process blocks without touching the buffer.
 
-#push-options "--z3rlimit 100"
-let split_at_last_blocks #index (c: block index) (i: index) (b: bytes) (d: bytes): Lemma
+(* #push-options "--z3rlimit 100"
+let split_at_last_blocks' #index (c: block index) (i: index) (b: bytes) (d: bytes): Lemma
   (requires (
     let blocks, rest = split_at_last c i b in
     S.equal rest S.empty))
@@ -221,13 +508,60 @@ let split_at_last_blocks #index (c: block index) (i: index) (b: bytes) (d: bytes
   (S.equal) { }
     blocks'';
   }
+#pop-options *)
+
+/// TODO: this is the new second case: the data seen so far is empty or a multiple
+/// of the block size meaning that the internal buffer is empty or full, and the
+/// data to append is not empty. This is a fast path: we can process the internal
+/// buffer if it is non-empty, then process blocks without touching at the buffer
+/// and finally copy the remaining data to the buffer. Of course, the remaining
+/// data musn't be empty, which is why the data to append musn't be empty.
+
+#push-options "--z3rlimit 100 --z3cliopt smt.arith.nl=false"
+let split_at_last_blocks #index (c: block index) (i: index) (b: bytes) (d: bytes): Lemma
+  (requires (
+    let blocks, rest = split_at_last c i b in
+    (S.length rest = 0 \/ S.length rest = U32.v (c.block_len i)) /\
+    S.length d > 0))
+  (ensures (
+    let blocks, rest = split_at_last c i b in
+    let blocks', rest' = split_at_last c i d in
+    let blocks'', rest'' = split_at_last c i (S.append b d) in
+    S.equal blocks'' (S.append b blocks') /\
+    S.equal rest' rest''))
+=
+  let blocks, rest = split_at_last c i b in
+  let blocks', rest' = split_at_last c i d in
+  let blocks'', rest'' = split_at_last c i (S.append b d) in
+  let b' = S.append blocks rest in
+  let d' = S.append blocks' rest' in
+  let l = U32.v (c.block_len i) in
+
+  (* We prove the non-trivial requirements of [split_at_last_spec] *)
+  assert(S.length b % l = 0);
+  Math.Lemmas.modulo_distributivity (S.length b) (S.length blocks') l;
+  calc (==) {
+    S.length (S.append b blocks') % l;
+  (==) {}
+    (S.length b + S.length blocks') % l;
+  (==) { Math.Lemmas.modulo_distributivity (S.length b) (S.length blocks') l }
+    ((S.length b % l) + (S.length blocks' % l)) % l;
+  (==) {}
+    0 % l;
+  (==) { Math.Lemmas.modulo_lemma 0 l }
+    0;
+  };
+
+  (* End of proof *)
+  split_at_last_spec c i (S.append b d) (S.append b blocks') rest'
 #pop-options
+
 
 /// Third sub-case: the amount of data we receive is exactly enough to form a
 /// full block. This is an artificial case, but we need it to decompose the
 /// general case into a combination of the three sub-cases!
 
-#push-options "--z3cliopt smt.arith.nl=false"
+(*#push-options "--z3cliopt smt.arith.nl=false"
 let split_at_last_block #index (c: block index) (i: index) (b: bytes) (d: bytes): Lemma
   (requires (
     let _, rest = split_at_last c i b in
@@ -253,5 +587,7 @@ let split_at_last_block #index (c: block index) (i: index) (b: bytes) (d: bytes)
     0 % U32.v (c.block_len i);
   (==) { Math.Lemmas.small_modulo_lemma_1 0 (U32.v (c.block_len i)) }
     0;
-  }
+  };
+  admit()
 #pop-options
+*)

@@ -27,6 +27,7 @@ val extra_state_add_nat_bound_associative_lem (#a:hash_alg{is_blake a}) (s : ext
        (extra_state_add_nat (extra_state_add_nat s n1) n2 ==
         extra_state_add_nat s (n1 + n2)))
 
+/// The following lemmas allow to reason about [update_multi]
 val update_multi_zero (a: hash_alg) (h: words_state a): Lemma
   (ensures ((update_multi a h S.empty) == h))
   [ SMTPat (update_multi a h S.empty) ]

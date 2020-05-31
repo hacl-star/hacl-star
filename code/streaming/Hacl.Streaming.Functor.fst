@@ -142,6 +142,60 @@ let footprint_s #index (c: block index) (i: index) (h: HS.mem) s =
 /// Invariants
 /// ==========
 
+(*
+/// Generic state invariant. Not all the functions split the seen data at the same
+/// point, to differentiate between the data which has been hashed and the data
+/// which is still in the buffer, hence the [hashed_len] parameter.
+unfold
+val gen_invariant_s (#index: Type0) (c: block index) (i: index) (h: HS.mem)
+                    (s: state_s' c i)
+                    (hashed_len : nat{
+                       hashed_len <= Seq.length (State?.seen s) /\
+                       (hashed_len % UInt32.v (Block?.block_len c i)) = 0})
+                    : Type0
+
+let gen_invariant_s #index (c: block index) (i: index) h s hashed_len =
+  let State block_state buf_ total_len seen key = s in
+  let seen = G.reveal seen in
+  let blocks, rest = split_at_last c i seen in
+
+  // Liveness and disjointness (administrative)
+  B.live h buf_ /\ c.state.invariant #i h block_state /\ optional_invariant h key /\
+  B.(loc_disjoint (loc_buffer buf_) (c.state.footprint h block_state)) /\
+  B.(loc_disjoint (loc_buffer buf_) (optional_footprint h key)) /\
+  B.(loc_disjoint (optional_footprint h key) (c.state.footprint h block_state)) /\
+  B.freeable buf_ /\ c.state.freeable h block_state /\ optional_freeable h key /\
+
+  // Formerly, the "hashes" predicate
+  S.length blocks + S.length rest = U64.v total_len /\
+  S.length seen = U64.v total_len /\
+  U64.v total_len <= c.max_input_length i /\
+  // Note the double equals here, we now no longer know that this is a sequence.
+  c.state.v i h block_state == c.update_multi_s i (c.init_s i (optional_reveal h key)) blocks /\
+  S.equal (S.slice (B.as_seq h buf_) 0 (U64.v total_len % U32.v (c.block_len i))) rest///\
+
+/// The real invariant
+let invariant_s #index (c: block index) (i: index) h s =
+  let n = split_at_last_num_blocks c i (Seq.length (State?.seen s)) in
+  let l = UInt32.v (Block?.block_len c i) in
+  gen_invariant_s c i h s (n * l)
+
+/// This one is not an invariant: it is used to describe the state right after
+/// the internal buffer has been hashed.
+let invariant_s_post_hash #index (c: block index) (i: index) h s =
+  let l = UInt32.v (Block?.block_len c i) in
+  let n = Seq.length (State?.seen s) / l in
+  let hashed_len = n * l in
+  (**) Math.Lemmas.division_propriety (Seq.length (State?.seen s)) l;
+  (**) assert(hashed_len <= Seq.length (State?.seen s));
+  (**) Math.Lemmas.multiple_modulo_lemma n l;
+  (**) assert(hashed_len % l = 0);
+  gen_invariant_s c i h s (n * l)
+
+let invariant_post_hash #index (c: block index) (i: index) (m: HS.mem) (s: state' c i) =
+  invariant_visible c i m s /\
+  invariant_s_post_hash c i m (B.get m s 0) *)
+
 let invariant_s #index (c: block index) (i: index) h s =
   let State block_state buf_ total_len seen key = s in
   let seen = G.reveal seen in
@@ -160,7 +214,12 @@ let invariant_s #index (c: block index) (i: index) h s =
   U64.v total_len <= c.max_input_length i /\
   // Note the double equals here, we now no longer know that this is a sequence.
   c.state.v i h block_state == c.update_multi_s i (c.init_s i (optional_reveal h key)) blocks /\
-  S.equal (S.slice (B.as_seq h buf_) 0 (U64.v total_len % U32.v (c.block_len i))) rest
+//  S.equal (S.slice (B.as_seq h buf_) 0 (U64.v total_len % U32.v (c.block_len i))) rest///\
+  S.equal (S.slice (B.as_seq h buf_) 0 (Seq.length rest)) rest///\
+
+  // Note that we lazily flush the internal buffer, because we need to make sure
+  // it is not empty upon calling update_last
+//  (S.length seen > 0 ==> S.length rest > 0) *)
 
 #push-options "--max_ifuel 1"
 let invariant_loc_in_footprint #index c i s m =
@@ -398,7 +457,7 @@ let mod_block_len_bound #index (c: block index) (i: index)
     pow2 32 - 1;
   }
 
-inline_for_extraction noextract
+(*inline_for_extraction noextract
 let rest #index (c: block index) (i: index)
   (total_len: UInt64.t): (x:UInt32.t { U32.v x = U64.v total_len % U32.v (c.block_len i) })
 =
@@ -417,7 +476,47 @@ let rest #index (c: block index) (i: index)
   (==) { }
     U64.v total_len % U32.v (c.block_len i);
   };
+  r *)
+
+inline_for_extraction noextract
+let rest #index (c: block index) (i: index)
+  (total_len: UInt64.t): (x:UInt32.t {
+    let n = split_at_last_num_blocks c i (U64.v total_len) in
+    let l = U32.v (c.block_len i) in
+    U32.v x = U64.v total_len - (n * l) })
+=
+  admit()
+
+(*  let open FStar.Int.Cast in
+  let x = total_len `U64.rem` uint32_to_uint64 (c.block_len i) in
+  if U64.(x =^ uint_to_t 0 && total_len >^ uint_to_t 0) then
+    begin
+//    uint32_to_uint64 (c.block_len i)
+    end
+  else
+    begin
+    x
+    end
+
+  let x = total_len `U64.rem` uint32_to_uint64 (c.block_len i) in
+  let r = FStar.Int.Cast.uint64_to_uint32 x in
+  mod_block_len_bound c i total_len
   r
+
+  calc (==) {
+    U32.v r;
+  (==) { }
+    U64.v x % pow2 32;
+  (==) { FStar.Math.Lemmas.small_modulo_lemma_1 (U64.v x) (pow2 32) }
+    U64.v x;
+  (==) { FStar.Math.Lemmas.euclidean_division_definition (U64.v total_len) (U64.v (uint32_to_uint64 (c.block_len i))) }
+    U64.v total_len % U64.v (uint32_to_uint64 (c.block_len i) );
+  (==) { }
+    U64.v total_len % U32.v (c.block_len i);
+  };
+  r *)
+#pop-options
+
 #pop-options
 
 /// We always add 32-bit lengths to 64-bit lengths. Having a helper for that allows
@@ -433,7 +532,7 @@ let add_len #index (c: block index) (i: index) (total_len: UInt64.t) (len: UInt3
 #push-options "--z3cliopt smt.arith.nl=false"
 let add_len_small #index (c: block index) (i: index) (total_len: UInt64.t) (len: UInt32.t): Lemma
   (requires
-    U32.v len < U32.v (c.block_len i) - U32.v (rest c i total_len) /\
+    U32.v len <= U32.v (c.block_len i) - U32.v (rest c i total_len) /\
     U64.v total_len + U32.v len <= c.max_input_length i)
   (ensures (rest c i (add_len c i total_len len) = rest c i total_len `U32.add` len))
 =
@@ -474,11 +573,11 @@ val update_small:
   Stack unit
     (requires fun h0 ->
       update_pre c i s data len h0 /\
-      U32.v len < U32.v (c.block_len i) - U32.v (rest c i (total_len_h c i h0 s)))
+      U32.v len <= U32.v (c.block_len i) - U32.v (rest c i (total_len_h c i h0 s)))
     (ensures fun h0 s' h1 ->
       update_post c i s data len h0 h1))
 
-#push-options "--z3rlimit 60"
+#push-options "--z3rlimit 200"
 let update_small #index c i t t' p data len =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.state.frame_freeable #i in
@@ -531,11 +630,14 @@ let update_small #index c i t t' p data len =
 
 #pop-options
 
-/// Case 2: we have no buffered data.
+/// Case 2: we have no buffered data (ie: the buffer was just initialized), or the
+/// internal buffer is full meaning that we can just hash it to go to the case where
+/// there is no buffered data. Of course, the data we append has to be non-empty,
+/// otherwise we might end-up with an empty internal buffer.
 
 #push-options "--z3rlimit 100"
 inline_for_extraction noextract
-val update_empty_buf:
+val update_empty_or_full_buf:
   #index:Type0 ->
   c:block index ->
   i:G.erased index -> (
@@ -548,14 +650,25 @@ val update_empty_buf:
   Stack unit
     (requires fun h0 ->
       update_pre c i s data len h0 /\
-      rest c i (total_len_h c i h0 s) = 0ul)
+      (rest c i (total_len_h c i h0 s) = 0ul \/
+       rest c i (total_len_h c i h0 s) = c.block_len i) /\
+       U32.v len > 0)
     (ensures fun h0 s' h1 ->
       update_post c i s data len h0 h1))
 
 inline_for_extraction noextract
 let seen_pred = seen
 
-let update_empty_buf #index c i t t' p data len =
+(* TODO: move with rest *)
+inline_for_extraction noextract
+let nblocks #index (c: block index) (i: index)
+  (len: UInt32.t): (x:UInt32.t {
+    U32.v x = split_at_last_num_blocks c i (U32.v len) })
+=
+  admit()
+
+(* TODO HERE *)
+let update_empty_or_full_buf #index c i t t' p data len =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.state.frame_freeable #i in
   [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
@@ -570,12 +683,48 @@ let update_empty_buf #index c i t t' p data len =
   let block_state: c.state.s i = block_state in
   let sz = rest c i total_len in
   let h0 = ST.get () in
-  assert (
-    let blocks, rest = split_at_last c i (G.reveal seen) in
-    S.equal blocks (G.reveal seen) /\
-    S.equal rest S.empty);
+  
+  assert(
+    let blocks, rest = split_at_last c i seen in
+    Seq.length rest = U32.v sz /\
+    c.state.v i h0 block_state ==
+    c.update_multi_s i (c.init_s i (optional_reveal h0
+                     (k' <: optional_key i c.km c.key))) blocks);
+  
+  (* Start by "flushing" the buffer: hash it so that all the data seen so far
+   * has been hash and we can consider the buffer as empty *)
+  if U32.(sz =^ 0ul) then
+    assert(c.state.v i h0 block_state ==
+      c.update_multi_s i (c.init_s i (optional_reveal h0 (k' <: optional_key i c.km c.key))) seen)
+  else
+    begin
+    c.update_multi (G.hide i) block_state buf (c.block_len i);
+      begin
+      let h1 = ST.get () in
+      let init_state = (c.init_s i (optional_reveal h0 (k' <: optional_key i c.km c.key))) in
+      let blocks, rest = split_at_last c i seen in
+      assert(c.state.v i h0 block_state == c.update_multi_s i init_state blocks);
+      assert(c.state.v i h1 block_state ==
+               c.update_multi_s i (c.update_multi_s i init_state blocks) rest);
+      assert(seen `Seq.equal` Seq.append blocks rest);
+      assert(c.state.v i h1 block_state == c.update_multi_s i init_state seen)
+      (* TODO: the following assert fails, and I don't know what that means *)
+//      assert(optional_reveal h0 (k' <: optional_key i c.km c.key) ==
+//             optional_reveal h1 (k' <: optional_key i c.km c.key))
+      end
+    end;
+ 
+  let h1 = ST.get () in
+//  let init_state = (c.init_s i (optional_reveal h0 (k' <: optional_key i c.km c.key))) in
+//  assert(c.state.v i h1 block_state == c.update_multi_s i init_state seen);
+
+  assert(c.state.v i h1 block_state ==
+    c.update_multi_s i (c.init_s i (optional_reveal h0 (k' <: optional_key i c.km c.key))) seen);
+
   split_at_last_blocks c i (G.reveal seen) (B.as_seq h0 data);
-  let n_blocks = len `U32.div` c.block_len i in
+
+//  let n_blocks = len `U32.div` c.block_len i in
+  let n_blocks = nblocks c i len in
   let data1_len = n_blocks `U32.mul` c.block_len i in
   let data2_len = len `U32.sub` data1_len in
   let data1 = B.sub data 0ul data1_len in
@@ -619,11 +768,35 @@ let update_empty_buf #index c i t t' p data len =
     (==) { }
       U64.v total_len + U32.v len;
     }
-  )
+  );
+
+  assert(
+    let seen' = G.reveal seen `S.append` B.as_seq h0 data in
+    let blocks, rest = split_at_last c i seen' in
+    
+  );
+ admit()
 #pop-options
 
+/// Case 3: we are given just enough data to end up on the boundary and there is
+/// more data to come, meaning that we can flush the buffer (hence the specific
+/// postcondition).
+unfold noextract
+let update_round_post
+  #index
+  (c: block index)
+  (i: index)
+  (s: state' c i)
+  (data: B.buffer uint8)
+  (len: UInt32.t)
+  (h0 h1: HS.mem)
+=
+  invariant_post_hash c i h1 s /\
+  B.(modifies (footprint c i h0 s) h0 h1) /\
+  footprint c i h0 s == footprint c i h1 s /\
+  seen c i h1 s == seen c i h0 s `S.append` B.as_seq h0 data /\
+  key c i h1 s == key c i h0 s
 
-/// Case 3: we are given just enough data to end up on the boundary
 inline_for_extraction noextract
 val update_round:
   #index:Type0 ->
@@ -642,7 +815,7 @@ val update_round:
       U32.v len + U32.v r = U32.v (c.block_len i) /\
       r <> 0ul))
     (ensures fun h0 _ h1 ->
-      update_post c i s data len h0 h1 /\
+      update_round_post c i s data len h0 h1 /\
       U64.v (total_len_h c i h1 s) % U32.v (c.block_len i) = 0))
 
 #push-options "--z3rlimit 200"
@@ -723,19 +896,20 @@ let update #index c i t t' p data len =
   let s = !*p in
   let State block_state buf_ total_len seen k' = s in
   let i = c.index_of_state i block_state in
-  let sz = rest c i total_len in
-  if len `U32.lt` (c.block_len i `U32.sub` sz) then
+  let sz = rest c i total_len in  
+  if len `U32.lte` (c.block_len i `U32.sub` sz) then
     update_small c (G.hide i) t t' p data len
   else if sz = 0ul then
-    update_empty_buf c (G.hide i) t t' p data len
+    update_empty_or_full_buf c (G.hide i) t t' p data len
   else begin
     let h0 = ST.get () in
     let diff = c.block_len i `U32.sub` sz in
     let data1 = B.sub data 0ul diff in
     let data2 = B.sub data diff (len `U32.sub` diff) in
-    update_round c (G.hide i) t t' p data1 diff;
+//    update_round c (G.hide i) t t' p data1 diff;
+    update_small c (G.hide i) t t' p data1 diff;
     let h1 = ST.get () in
-    update_empty_buf c (G.hide i) t t' p data2 (len `U32.sub` diff);
+    update_empty_or_full_buf c (G.hide i) t t' p data2 (len `U32.sub` diff);
     let h2 = ST.get () in
     (
       let seen = G.reveal seen in
