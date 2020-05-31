@@ -317,17 +317,18 @@ let split_at_last_empty #index (c: block index) (i: index): Lemma
 #pop-options
 
 /// "Small" case: not enough data to obtain strictly more than a complete block,
-/// so it suffices to append the new input to the internal buffer. Note that
-/// we always make sure to have some data in the buffer (after the first call to
-/// update) so that the update_last is called on non-empty data at the very end.
+/// so it suffices to append the new input to the internal buffer. Note that we
+/// don't process the resulting buffer because we have to make sure there is always
+/// some data remaining in it (after the first call to update) so that [update_last]
+/// is called on non-empty data at the very end.
 ///
 /// There are many subcases that we prove in intermediate lemmas, until we can
 /// get the final [split_at_last_small] theorem.
 /// [b]: internal buffer
 /// [d]: data to append
 
-/// "Small" case 1: not enough data to obtain a complete block, so it suffices to
-/// append the new input to the internal buffer.
+/// "Small" case: subcase 1: not enough data to obtain a complete block append the
+/// new input to the internal buffer.
 
 let split_at_last_small_strict #index (c: block index) (i: index) (b: bytes) (d: bytes): Lemma
   (requires (
@@ -341,11 +342,10 @@ let split_at_last_small_strict #index (c: block index) (i: index) (b: bytes) (d:
   let blocks, rest = split_at_last c i b in
   let blocks', rest' = split_at_last c i (S.append b d) in
   let l = U32.v (c.block_len i) in
-
   split_at_last_spec c i (S.append b d) blocks (S.append rest d)
 
-/// "Small" case 2: exactly enough data to obtain a complete block, but the internal
-/// buffer is empty.
+/// "Small" case: subcase 2: exactly enough data to obtain a complete block, and the
+/// internal buffer is empty.
 
 #push-options "--z3cliopt smt.arith.nl=false"
 let split_at_last_small_exact_empty_internal #index (c: block index) (i: index) (b: bytes) (d: bytes):
@@ -366,8 +366,8 @@ let split_at_last_small_exact_empty_internal #index (c: block index) (i: index) 
   assert(S.append rest d `Seq.equal` d)
 #pop-options
 
-/// "Small" case 3: exactly enough data to obtain a complete block, but the
-/// data to add is empty.
+/// "Small" case 3: exactly enough data to obtain a complete block, and the data to
+/// add is empty.
 
 #push-options "--z3cliopt smt.arith.nl=false"
 let split_at_last_small_exact_empty_data #index (c: block index) (i: index) (b: bytes)
@@ -439,85 +439,13 @@ let split_at_last_small #index (c: block index) (i: index) (b: bytes) (d: bytes)
 
 /// For the initialization of the streaming state.
 
-/// Second case: the buffer is empty, so this is a fast-path and we can just
-/// process blocks without touching the buffer.
-
-(* #push-options "--z3rlimit 100"
-let split_at_last_blocks' #index (c: block index) (i: index) (b: bytes) (d: bytes): Lemma
-  (requires (
-    let blocks, rest = split_at_last c i b in
-    S.equal rest S.empty))
-  (ensures (
-    let blocks, rest = split_at_last c i b in
-    let blocks', rest' = split_at_last c i d in
-    let blocks'', rest'' = split_at_last c i (S.append b d) in
-    S.equal blocks'' (S.append blocks blocks') /\
-    S.equal rest' rest''))
-=
-  let blocks, rest = split_at_last c i b in
-  let blocks', rest' = split_at_last c i d in
-  let blocks'', rest'' = split_at_last c i (S.append b d) in
-  let b' = S.append blocks rest in
-  let d' = S.append blocks' rest' in
-  let l = U32.v (c.block_len i) in
-  calc (S.equal) {
-    rest';
-  (S.equal) { }
-    snd (split_at_last c i d);
-  (S.equal) { }
-    S.slice d ((S.length d / l) * l) (S.length d);
-  (S.equal) { }
-    S.slice (S.append b d) (S.length b + (S.length d / l) * l) (S.length b + S.length d);
-  (S.equal) { }
-    S.slice (S.append b d) (S.length b + (S.length d / l) * l) (S.length (S.append b d));
-  (S.equal) { Math.Lemmas.div_exact_r (S.length b) l }
-    // For some reason this doesn't go through with the default rlimit, even
-    // though this is a direct rewriting based on the application of the lemma
-    // above.
-    S.slice (S.append b d) ((S.length b / l) * l + (S.length d / l) * l) (S.length (S.append b d));
-  (S.equal) { Math.Lemmas.distributivity_add_left (S.length b / l) (S.length d / l) l }
-    S.slice (S.append b d) ((S.length b / l + S.length d / l) * l) (S.length (S.append b d));
-  (S.equal) { Math.Lemmas.lemma_div_plus (S.length d) (S.length b / l) l }
-    S.slice (S.append b d) (((S.length b + S.length d) / l) * l) (S.length (S.append b d));
-  (S.equal) { }
-    snd (S.split (S.append b d) (((S.length (S.append b d)) / l) * l));
-  (S.equal) { }
-    rest'';
-  };
-
-  calc (S.equal) {
-    S.append blocks blocks';
-  (S.equal) { (* rest = S.empty *) }
-    S.append (S.append blocks rest) blocks';
-  (S.equal) { }
-    S.append b blocks';
-  (S.equal) { }
-    S.append b (fst (split_at_last c i d));
-  (S.equal) { (* definition of split_at_last *) }
-    S.append b (fst (S.split d ((S.length d / l) * l)));
-  (S.equal) { (* definition of split *) }
-    S.append b (S.slice d 0 ((S.length d / l) * l));
-  (S.equal) { }
-    S.slice (S.append b d) 0 (S.length b + (S.length d / l) * l);
-  (S.equal) { Math.Lemmas.div_exact_r (S.length b) l }
-    S.slice (S.append b d) 0 ((S.length b / l) * l + (S.length d / l) * l);
-  (S.equal) { Math.Lemmas.distributivity_add_left (S.length b / l) (S.length d / l) l }
-    S.slice (S.append b d) 0 ((S.length b / l + S.length d / l) * l);
-  (S.equal) { Math.Lemmas.lemma_div_plus (S.length d) (S.length b / l) l }
-    S.slice (S.append b d) 0 (((S.length b + S.length d) / l) * l);
-  (S.equal) { }
-    fst (S.split (S.append b d) (((S.length (S.append b d)) / l) * l));
-  (S.equal) { }
-    blocks'';
-  }
-#pop-options *)
-
-/// TODO: this is the new second case: the data seen so far is empty or a multiple
-/// of the block size meaning that the internal buffer is empty or full, and the
-/// data to append is not empty. This is a fast path: we can process the internal
+/// Second case: the data seen so far is empty or a multiple of the block size
+/// meaning that the internal buffer is either empty or full, and the data to
+/// append is not empty. This is a fast path: we can process the internal
 /// buffer if it is non-empty, then process blocks without touching at the buffer
-/// and finally copy the remaining data to the buffer. Of course, the remaining
-/// data musn't be empty, which is why the data to append musn't be empty.
+/// and finally copy the remaining data to the buffer. Of course, there must be
+/// data remaining in the buffer in the end, which is why the data to append
+/// musn't be empty.
 
 #push-options "--z3rlimit 100 --z3cliopt smt.arith.nl=false"
 let split_at_last_blocks #index (c: block index) (i: index) (b: bytes) (d: bytes): Lemma
@@ -557,39 +485,3 @@ let split_at_last_blocks #index (c: block index) (i: index) (b: bytes) (d: bytes
   (* End of proof *)
   split_at_last_spec c i (S.append b d) (S.append b blocks') rest'
 #pop-options
-
-
-/// Third sub-case: the amount of data we receive is exactly enough to form a
-/// full block. This is an artificial case, but we need it to decompose the
-/// general case into a combination of the three sub-cases!
-
-(*#push-options "--z3cliopt smt.arith.nl=false"
-let split_at_last_block #index (c: block index) (i: index) (b: bytes) (d: bytes): Lemma
-  (requires (
-    let _, rest = split_at_last c i b in
-    S.length rest + S.length d = U32.v (c.block_len i)))
-  (ensures (
-    let blocks, rest = split_at_last c i b in
-    let blocks', rest' = split_at_last c i (S.append b d) in
-    S.equal (S.append b d) blocks' /\ S.equal S.empty rest'))
-=
-  let blocks, rest = split_at_last c i b in
-    let blocks', rest' = split_at_last c i (S.append b d) in
-
-  calc (==) {
-    (S.length b + S.length d) % U32.v (c.block_len i);
-  (==) { S.lemma_len_append blocks rest }
-    (S.length blocks + S.length rest + S.length d) % U32.v (c.block_len i);
-  (==) { Math.Lemmas.modulo_distributivity (S.length blocks) (S.length rest + S.length d) (U32.v (c.block_len i)) }
-    ((S.length blocks) % U32.v (c.block_len i) + (S.length rest + S.length d) % U32.v (c.block_len i))
-      % U32.v (c.block_len i);
-  (==) { Math.Lemmas.multiple_modulo_lemma (U32.v (c.block_len i)) 1 }
-    ((S.length blocks) % U32.v (c.block_len i)) % U32.v (c.block_len i);
-  (==) { }
-    0 % U32.v (c.block_len i);
-  (==) { Math.Lemmas.small_modulo_lemma_1 0 (U32.v (c.block_len i)) }
-    0;
-  };
-  admit()
-#pop-options
-*)
