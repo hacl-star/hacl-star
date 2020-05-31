@@ -440,44 +440,6 @@ let init #index c i t t' k s =
 /// Unsurprisingly, there's a fair amount of modulo reasoning here because of
 /// 64-bit-to-32-bit conversions, so we do them once and for all in a helper.
 #push-options "--z3cliopt smt.arith.nl=false"
-let mod_block_len_bound #index (c: block index) (i: index)
-  (total_len: U64.t): Lemma
-  (requires True)
-  (ensures U64.v (total_len `U64.rem` FStar.Int.Cast.uint32_to_uint64 (c.block_len i)) <= pow2 32 - 1)
-=
-  let open FStar.Int.Cast in
-  let x = total_len `U64.rem` uint32_to_uint64 (c.block_len i) in
-  calc (<=) {
-    U64.v x;
-  (<=) { FStar.Math.Lemmas.euclidean_division_definition (U64.v total_len) (U64.v (uint32_to_uint64 (c.block_len i))) }
-    U64.v total_len % U64.v (uint32_to_uint64 (c.block_len i) );
-  (<=) { FStar.Math.Lemmas.modulo_range_lemma (U64.v total_len) (U64.v (uint32_to_uint64 (c.block_len i))) }
-    U64.v (uint32_to_uint64 (c.block_len i));
-  (<=) { }
-    pow2 32 - 1;
-  }
-
-(*inline_for_extraction noextract
-let rest #index (c: block index) (i: index)
-  (total_len: UInt64.t): (x:UInt32.t { U32.v x = U64.v total_len % U32.v (c.block_len i) })
-=
-  let open FStar.Int.Cast in
-  let x = total_len `U64.rem` uint32_to_uint64 (c.block_len i) in
-  let r = FStar.Int.Cast.uint64_to_uint32 x in
-  mod_block_len_bound c i total_len;
-  calc (==) {
-    U32.v r;
-  (==) { }
-    U64.v x % pow2 32;
-  (==) { FStar.Math.Lemmas.small_modulo_lemma_1 (U64.v x) (pow2 32) }
-    U64.v x;
-  (==) { FStar.Math.Lemmas.euclidean_division_definition (U64.v total_len) (U64.v (uint32_to_uint64 (c.block_len i))) }
-    U64.v total_len % U64.v (uint32_to_uint64 (c.block_len i) );
-  (==) { }
-    U64.v total_len % U32.v (c.block_len i);
-  };
-  r *)
-
 inline_for_extraction noextract
 let rest #index (c: block index) (i: index)
   (total_len: UInt64.t): (x:UInt32.t {
@@ -485,46 +447,68 @@ let rest #index (c: block index) (i: index)
     let l = U32.v (c.block_len i) in
     U32.v x = U64.v total_len - (n * l) })
 =
-  admit()
+  let open FStar.Int.Cast in
+  [@inline_let] let l = uint32_to_uint64 (c.block_len i) in
+  [@inline_let] let r = total_len `U64.rem` l in
+  (**) let total_len_v : Ghost.erased nat = U64.v total_len in
+  (**) let l_v : Ghost.erased nat = U64.v l in
+  (**) let r_v : Ghost.erased nat = U64.v r in
+  (**) assert(Ghost.reveal r_v = total_len_v - ((total_len_v / l_v) * l_v));
+  (**) Math.Lemmas.euclidean_division_definition total_len_v l_v;
+  (**) assert(Ghost.reveal r_v = total_len_v % l_v);
+  (**) assert(r_v < l_v);
+  
+  if U64.(r =^ uint_to_t 0) && U64.(total_len >^ uint_to_t 0) then
+    c.block_len i
+  else
+    begin    
+    [@inline_let] let r' = FStar.Int.Cast.uint64_to_uint32 r in
+    FStar.Math.Lemmas.small_modulo_lemma_1 (U64.v r) (pow2 32);
+    calc (==) {
+      U32.v r';
+    (==) { }
+      U64.v r % pow2 32;
+    (==) { FStar.Math.Lemmas.small_modulo_lemma_1 (U64.v r) (pow2 32) }
+      U64.v r;
+    (==) { FStar.Math.Lemmas.euclidean_division_definition (U64.v total_len) (U64.v (uint32_to_uint64 (c.block_len i))) }
+      U64.v total_len % U64.v (uint32_to_uint64 (c.block_len i) );
+    (==) { }
+      U64.v total_len % U32.v (c.block_len i);
+    };
+    assert(
+        let n = split_at_last_num_blocks c i (U64.v total_len) in
+        let l = U32.v (c.block_len i) in
+        U32.v r' = U64.v total_len - (n * l));
+    r'
+    end
+#pop-options
 
-inline_for_extraction noextract
+/// The ``block`` function below allows computing, based ``total_len`` stored in
+/// the state, the number of blocks of data which have been processed (the remaining
+/// unprocessed data being left in ``buf``).
+#push-options "--z3cliopt smt.arith.nl=false"
 let nblocks #index (c: block index) (i: index)
   (len: UInt32.t): (x:UInt32.t {
     U32.v x = split_at_last_num_blocks c i (U32.v len) })
 =
-  admit()
-
-
-(*  let open FStar.Int.Cast in
-  let x = total_len `U64.rem` uint32_to_uint64 (c.block_len i) in
-  if U64.(x =^ uint_to_t 0 && total_len >^ uint_to_t 0) then
-    begin
-//    uint32_to_uint64 (c.block_len i)
-    end
-  else
-    begin
-    x
-    end
-
-  let x = total_len `U64.rem` uint32_to_uint64 (c.block_len i) in
-  let r = FStar.Int.Cast.uint64_to_uint32 x in
-  mod_block_len_bound c i total_len
-  r
-
-  calc (==) {
-    U32.v r;
-  (==) { }
-    U64.v x % pow2 32;
-  (==) { FStar.Math.Lemmas.small_modulo_lemma_1 (U64.v x) (pow2 32) }
-    U64.v x;
-  (==) { FStar.Math.Lemmas.euclidean_division_definition (U64.v total_len) (U64.v (uint32_to_uint64 (c.block_len i))) }
-    U64.v total_len % U64.v (uint32_to_uint64 (c.block_len i) );
-  (==) { }
-    U64.v total_len % U32.v (c.block_len i);
-  };
-  r *)
-#pop-options
-
+  let open FStar.Int.Cast in
+  [@inline_let] let l = c.block_len i in
+  [@inline_let] let r = rest c i (uint32_to_uint64 len) in
+  (**) let len_v : Ghost.erased nat = U32.v len in
+  (**) let l_v : Ghost.erased nat = U32.v l in
+  (**) let r_v : Ghost.erased nat = U32.v r in
+  (**) let n_s : Ghost.erased nat = split_at_last_num_blocks c i len_v in
+  (**) assert(Ghost.reveal len_v = n_s * l_v + r_v);
+  (**) Math.Lemmas.nat_times_nat_is_nat n_s l_v;
+  (**) assert(U32.v r <= U32.v len);
+  [@inline_let] let blocks = len `U32.sub` r in
+  (**) let blocks_v : Ghost.erased nat = U32.v blocks in
+  (**) assert(blocks_v % l_v = 0);
+  [@inline_let] let n = blocks `U32.div` l in
+  (**) let n_v : Ghost.erased nat = U32.v n in
+  (**) assert(n_v * l_v = Ghost.reveal blocks_v);
+  (**) split_at_last_num_blocks_spec c i len_v n_v r_v;
+  n
 #pop-options
 
 /// We always add 32-bit lengths to 64-bit lengths. Having a helper for that allows
@@ -544,23 +528,20 @@ let add_len_small #index (c: block index) (i: index) (total_len: UInt64.t) (len:
     U64.v total_len + U32.v len <= c.max_input_length i)
   (ensures (rest c i (add_len c i total_len len) = rest c i total_len `U32.add` len))
 =
-  admit()
-(*  calc (==) {
-    U32.v (rest c i (add_len c i total_len len));
-  (==) { }
-    U64.v (add_len c i total_len len) % U32.v (c.block_len i);
-  (==) { }
-    (U64.v total_len + U32.v len) % U32.v (c.block_len i);
-  (==) { Math.Lemmas.modulo_distributivity (U64.v total_len) (U32.v len) (U32.v (c.block_len i)) }
-    (U64.v total_len % U32.v (c.block_len i) + U32.v len % U32.v (c.block_len i)) % U32.v (c.block_len i);
-  (==) { Math.Lemmas.lemma_mod_add_distr (U64.v total_len % U32.v (c.block_len i)) (U32.v len) (U32.v (c.block_len i)) }
-    (U64.v total_len % U32.v (c.block_len i) + U32.v len) % U32.v (c.block_len i);
-  (==) { }
-    (U32.v (rest c i total_len) + U32.v len) % U32.v (c.block_len i);
-  (==) { Math.Lemmas.modulo_lemma (U32.v (rest c i total_len) + U32.v len) (U32.v (c.block_len i)) }
-    U32.v (rest c i total_len) + U32.v len;
-  }*)
+  let total_len_v = U64.v total_len in
+  let l = U32.v (c.block_len i) in
+  let b = total_len_v + U32.v len in
+  let n = split_at_last_num_blocks c i total_len_v in
+  let r = U32.v (rest c i total_len) in
+  assert(total_len_v = n * l + r);
+  let r' = U32.v (rest c i total_len) + U32.v len in
+  assert(r' <= l);
+  assert(r' = 0 ==> b = 0);
+  Math.Lemmas.euclidean_division_definition b l;
+  assert(b = n * l + r');
+  split_at_last_num_blocks_spec c i b n r'
 #pop-options
+  
 
 /// Beginning of the three sub-cases (see Hacl.Streaming.Spec)
 /// ==========================================================
@@ -595,7 +576,7 @@ val update_small:
     (ensures fun h0 s' h1 ->
       update_post c i s data len h0 h1))
 
-#push-options "--z3rlimit 200"
+#push-options "--z3rlimit 300 --z3cliopt smt.arith.nl=false"
 let update_small #index c i t t' p data len =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.state.frame_freeable #i in
@@ -646,7 +627,9 @@ let update_small #index c i t t' p data len =
 
   assert (seen c i h2 p `S.equal` (S.append (G.reveal seen_) (B.as_seq h0 data)));
   assert (footprint c i h0 p == footprint c i h2 p);
-  assert (equal_domains h00 h2)
+  assert (equal_domains h00 h2);
+  assert(invariant c i h2 p);
+  assert(update_post c i p data len h00 h2)
 
 #pop-options
 
@@ -1090,6 +1073,7 @@ let mk_finish #index c i t t' p dst =
   B.popped_modifies h5 h6;
   assert (B.(modifies mloc h0 h6))
 #pop-options
+
 let free #index c i t t' s =
   let _ = allow_inversion key_management in
   let open LowStar.BufferOps in

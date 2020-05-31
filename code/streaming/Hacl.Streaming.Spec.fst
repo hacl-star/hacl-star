@@ -60,9 +60,9 @@ noextract
 let split_at_last_num_blocks #index (c: block index) (i: index) (b: nat):
   Pure nat
     (requires True)
-    (ensures (fun blocks_n ->
+    (ensures (fun n ->
       let l = U32.v (c.block_len i) in
-      let blocks = blocks_n * l in
+      let blocks = n * l in
       let rest = b - blocks in
       rest <= l /\
       (rest % l = b % l) /\
@@ -80,62 +80,64 @@ let split_at_last_num_blocks #index (c: block index) (i: index) (b: nat):
   let blocks = n * l in
   let rest = b - n * l in
 
-  Math.Lemmas.nat_over_pos_is_nat b l;
-  assert(n >= 0);
-  Math.Lemmas.euclidean_division_definition b l;
-  Math.Lemmas.modulo_range_lemma b l;
-  assert(rest < l);
-  Math.Lemmas.modulo_lemma rest l;
-  assert(rest = b % l);
-  assert(rest = rest % l);
-  Math.Lemmas.cancel_mul_mod n l;
-  assert(blocks % l = 0);
-  assert(b = n * l + rest);
-  Math.Lemmas.euclidean_division_definition blocks l;
-  assert((blocks / l) * l = blocks);
-  assert(blocks = (b / l) * l);
-  Math.Lemmas.distributivity_sub_left (b / l) 1 l;
-  assert((b / l - 1) * l = (b / l) * l - l);
-  (* We always make sure rest is not empty (if possible) *)
+  (**) Math.Lemmas.nat_over_pos_is_nat b l;
+  (**) assert(n >= 0);
+  (**) Math.Lemmas.euclidean_division_definition b l;
+  (**) Math.Lemmas.modulo_range_lemma b l;
+  (**) assert(rest < l);
+  (**) Math.Lemmas.modulo_lemma rest l;
+  (**) assert(rest = b % l);
+  (**) assert(rest = rest % l);
+  (**) Math.Lemmas.cancel_mul_mod n l;
+  (**) assert(blocks % l = 0);
+  (**) assert(b = n * l + rest);
+  (**) Math.Lemmas.euclidean_division_definition blocks l;
+  (**) assert((blocks / l) * l = blocks);
+  (**) assert(blocks = (b / l) * l);
+  (**) Math.Lemmas.distributivity_sub_left (b / l) 1 l;
+  (**) assert((b / l - 1) * l = (b / l) * l - l);
+
+  (* We always make sure [rest] is not empty (if possible) *)
   if b % l = 0 && n > 0 then
     begin
     let n' = n - 1 in
     let blocks' = n' * l in
     let rest' = b - blocks' in
 
-    assert(rest = 0);
-    assert(blocks' = blocks - l);
-    assert(rest' = l);
-
-    Math.Lemmas.nat_times_nat_is_nat n' l;
-    assert(n' * l >= 0);
-    assert(b > 0);
-    Math.Lemmas.lemma_mod_sub_distr blocks l l;
-    assert(l % l = 0);
-    assert(blocks' % l = 0);
-    Math.Lemmas.euclidean_division_definition blocks' l;
-    assert((blocks' / l) * l = blocks');
+    (**) assert(rest = 0);
+    (**) assert(blocks' = blocks - l);
+    (**) assert(rest' = l);
+    (**) Math.Lemmas.nat_times_nat_is_nat n' l;
+    (**) assert(n' * l >= 0);
+    (**) assert(b > 0);
+    (**) Math.Lemmas.lemma_mod_sub_distr blocks l l;
+    (**) assert(l % l = 0);
+    (**) assert(blocks' % l = 0);
+    (**) Math.Lemmas.euclidean_division_definition blocks' l;
+    (**) assert((blocks' / l) * l = blocks');
     n'
     end
   else
     begin
-    assert(b % l <> 0 || n = 0);
-    if b % l <> 0 then
-      begin
-      assert(rest <> 0);
-      Math.Lemmas.nat_times_nat_is_nat n l;
-      assert(n * l >= 0);
-      n
-      end
-    else
-      begin
-      assert(n = 0);
-      assert(b = n * l + rest);
-      mul_zero_left_is_zero l;
-      assert(n * l = 0);
-      assert(b = rest);
-      n
-      end
+    (* Proof interlude *)
+    (**) begin
+    (**) assert(b % l <> 0 || n = 0);
+    (**) if b % l <> 0 then
+    (**)   begin
+    (**)   (**) assert(rest <> 0);
+    (**)   (**) Math.Lemmas.nat_times_nat_is_nat n l;
+    (**)   (**) assert(n * l >= 0)
+    (**)   end
+    (**) else
+    (**)   begin
+    (**)   (**) assert(n = 0);
+    (**)   (**) assert(b = n * l + rest);
+    (**)   mul_zero_left_is_zero l;
+    (**)   (**) assert(n * l = 0);
+    (**)   (**) assert(b = rest)
+    (**)   end
+    (**)end;
+    n
     end
 #pop-options
 
