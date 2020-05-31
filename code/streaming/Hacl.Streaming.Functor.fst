@@ -142,60 +142,6 @@ let footprint_s #index (c: block index) (i: index) (h: HS.mem) s =
 /// Invariants
 /// ==========
 
-(*
-/// Generic state invariant. Not all the functions split the seen data at the same
-/// point, to differentiate between the data which has been hashed and the data
-/// which is still in the buffer, hence the [hashed_len] parameter.
-unfold
-val gen_invariant_s (#index: Type0) (c: block index) (i: index) (h: HS.mem)
-                    (s: state_s' c i)
-                    (hashed_len : nat{
-                       hashed_len <= Seq.length (State?.seen s) /\
-                       (hashed_len % UInt32.v (Block?.block_len c i)) = 0})
-                    : Type0
-
-let gen_invariant_s #index (c: block index) (i: index) h s hashed_len =
-  let State block_state buf_ total_len seen key = s in
-  let seen = G.reveal seen in
-  let blocks, rest = split_at_last c i seen in
-
-  // Liveness and disjointness (administrative)
-  B.live h buf_ /\ c.state.invariant #i h block_state /\ optional_invariant h key /\
-  B.(loc_disjoint (loc_buffer buf_) (c.state.footprint h block_state)) /\
-  B.(loc_disjoint (loc_buffer buf_) (optional_footprint h key)) /\
-  B.(loc_disjoint (optional_footprint h key) (c.state.footprint h block_state)) /\
-  B.freeable buf_ /\ c.state.freeable h block_state /\ optional_freeable h key /\
-
-  // Formerly, the "hashes" predicate
-  S.length blocks + S.length rest = U64.v total_len /\
-  S.length seen = U64.v total_len /\
-  U64.v total_len <= c.max_input_length i /\
-  // Note the double equals here, we now no longer know that this is a sequence.
-  c.state.v i h block_state == c.update_multi_s i (c.init_s i (optional_reveal h key)) blocks /\
-  S.equal (S.slice (B.as_seq h buf_) 0 (U64.v total_len % U32.v (c.block_len i))) rest///\
-
-/// The real invariant
-let invariant_s #index (c: block index) (i: index) h s =
-  let n = split_at_last_num_blocks c i (Seq.length (State?.seen s)) in
-  let l = UInt32.v (Block?.block_len c i) in
-  gen_invariant_s c i h s (n * l)
-
-/// This one is not an invariant: it is used to describe the state right after
-/// the internal buffer has been hashed.
-let invariant_s_post_hash #index (c: block index) (i: index) h s =
-  let l = UInt32.v (Block?.block_len c i) in
-  let n = Seq.length (State?.seen s) / l in
-  let hashed_len = n * l in
-  (**) Math.Lemmas.division_propriety (Seq.length (State?.seen s)) l;
-  (**) assert(hashed_len <= Seq.length (State?.seen s));
-  (**) Math.Lemmas.multiple_modulo_lemma n l;
-  (**) assert(hashed_len % l = 0);
-  gen_invariant_s c i h s (n * l)
-
-let invariant_post_hash #index (c: block index) (i: index) (m: HS.mem) (s: state' c i) =
-  invariant_visible c i m s /\
-  invariant_s_post_hash c i m (B.get m s 0) *)
-
 let invariant_s #index (c: block index) (i: index) h s =
   let State block_state buf_ total_len seen key = s in
   let seen = G.reveal seen in
@@ -215,11 +161,7 @@ let invariant_s #index (c: block index) (i: index) h s =
   // Note the double equals here, we now no longer know that this is a sequence.
   c.state.v i h block_state == c.update_multi_s i (c.init_s i (optional_reveal h key)) blocks /\
 //  S.equal (S.slice (B.as_seq h buf_) 0 (U64.v total_len % U32.v (c.block_len i))) rest///\
-  S.equal (S.slice (B.as_seq h buf_) 0 (Seq.length rest)) rest///\
-
-  // Note that we lazily flush the internal buffer, because we need to make sure
-  // it is not empty upon calling update_last
-//  (S.length seen > 0 ==> S.length rest > 0) *)
+  S.equal (S.slice (B.as_seq h buf_) 0 (Seq.length rest)) rest
 
 #push-options "--max_ifuel 1"
 let invariant_loc_in_footprint #index c i s m =
@@ -350,8 +292,7 @@ let create_in #index c i t t' k r =
     let blocks, rest = split_at_last c i seen in
     // JP: unclear why I need to assert this... but without it the proof doesn't
     // go through.
-    U64.v total_len < c.max_input_length i /\
-    True
+    U64.v total_len < c.max_input_length i
   );
   (**) assert (invariant c i h8 p);
   (**) assert (seen c i h8 p == S.empty);
@@ -549,9 +490,7 @@ let add_len_small #index (c: block index) (i: index) (total_len: UInt64.t) (len:
 let total_len_h #index (c: block index) (i: index) h (p: state' c i) =
   State?.total_len (B.deref h p)
 
-(* TODO: actually equal to seen and seen_pred *)
-let seen_h #index (c: block index) (i: index) h (p: state' c i) =
-  State?.seen (B.deref h p)
+let seen_h = seen
 
 let split_at_last_seen_h #index (c: block index) (i: index) h (p: state' c i) =
   let seen = seen_h c i h p in
@@ -805,133 +744,6 @@ let update_round #index c i t t' p data len =
   (**) split_at_last_small c i (seen_h c i h0 p) (B.as_seq h0 data)
 #pop-options  
 
-(* inline_for_extraction noextract
-val update_round:
-  #index:Type0 ->
-  c:block index ->
-  i:G.erased index -> (
-  let i = G.reveal i in
-  t:Type0 { t == c.state.s i } ->
-  t':Type0 { t' == optional_key i c.km c.key } ->
-  s:state c i t t' ->
-  data: B.buffer uint8 ->
-  len: UInt32.t ->
-  Stack unit
-    (requires fun h0 ->
-      update_pre c i s data len h0 /\ (
-      let r = rest c i (total_len_h c i h0 s) in
-      U32.v len + U32.v r = U32.v (c.block_len i) /\
-      r <> 0ul))
-    (ensures fun h0 _ h1 ->
-      update_round_post c i s data len h0 h1 /\
-      U64.v (total_len_h c i h1 s) % U32.v (c.block_len i) = 0)) *)
-
-(*unfold noextract
-let update_round_post
-  #index
-  (c: block index)
-  (i: index)
-  (s: state' c i)
-  (data: B.buffer uint8)
-  (len: UInt32.t)
-  (h0 h1: HS.mem)
-=
-  invariant_post_hash c i h1 s /\
-  B.(modifies (footprint c i h0 s) h0 h1) /\
-  footprint c i h0 s == footprint c i h1 s /\
-  seen c i h1 s == seen c i h0 s `S.append` B.as_seq h0 data /\
-  key c i h1 s == key c i h0 s
-
-inline_for_extraction noextract
-val update_round:
-  #index:Type0 ->
-  c:block index ->
-  i:G.erased index -> (
-  let i = G.reveal i in
-  t:Type0 { t == c.state.s i } ->
-  t':Type0 { t' == optional_key i c.km c.key } ->
-  s:state c i t t' ->
-  data: B.buffer uint8 ->
-  len: UInt32.t ->
-  Stack unit
-    (requires fun h0 ->
-      update_pre c i s data len h0 /\ (
-      let r = rest c i (total_len_h c i h0 s) in
-      U32.v len + U32.v r = U32.v (c.block_len i) /\
-      r <> 0ul))
-    (ensures fun h0 _ h1 ->
-      update_round_post c i s data len h0 h1 /\
-      U64.v (total_len_h c i h1 s) % U32.v (c.block_len i) = 0))
-
-#push-options "--z3rlimit 200"
-let update_round #index c i t t' p data len =
-  [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
-  [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
-  [@inline_let] let _ = c.key.frame_freeable #i in
-  [@inline_let] let _ = c.key.frame_freeable #i in
-  [@inline_let] let _ = c.update_multi_associative i in
-
-  let open LowStar.BufferOps in
-  let s = !*p in
-  let State block_state buf_ total_len seen k' = s in
-  let i = c.index_of_state i block_state in
-  [@inline_let]
-  let block_state: c.state.s i = block_state in
-  let h0 = ST.get () in
-  let sz = rest c i total_len in
-  let diff = c.block_len i `U32.sub` sz in
-  let buf0 = B.sub buf_ 0ul (c.block_len i) in
-  let buf1 = B.sub buf0 0ul sz in
-  let buf2 = B.sub buf0 sz diff in
-  assert (B.(loc_pairwise_disjoint
-    [ loc_buffer buf1; loc_buffer buf2; loc_buffer data; ]));
-  B.blit data 0ul buf2 0ul diff;
-  let h1 = ST.get () in
-  assert (S.equal (B.as_seq h1 buf0) (S.append (B.as_seq h1 buf1) (B.as_seq h1 data)));
-  c.state.frame_invariant (B.loc_buffer buf_) block_state h0 h1;
-  c.state.frame_freeable (B.loc_buffer buf_) block_state h0 h1;
-  optional_frame #_ #i #c.km #c.key (B.loc_buffer buf_) k' h0 h1;
-  c.update_multi (G.hide i) block_state buf0 (c.block_len i);
-  let h2 = ST.get () in
-  optional_frame #_ #i #c.km #c.key (c.state.footprint h1 block_state) k' h1 h2;
-  (* Proof interlude *)
-  begin
-    let seen' = G.reveal seen `S.append` B.as_seq h0 data in
-    let blocks', rest' = split_at_last c i seen' in
-    let seen = G.reveal seen in
-    let blocks, rest = split_at_last c i seen in
-    assert (S.length blocks % U32.v (c.block_len i) = 0);
-    assert (S.length (rest `S.append` B.as_seq h0 data) % U32.v (c.block_len i) = 0);
-    let init = c.init_s i (optional_reveal #_ #i #c.km #c.key h0 k') in
-    calc (==) {
-      c.state.v i h2 block_state;
-    (==) { }
-      c.update_multi_s i (c.state.v i h1 block_state) (B.as_seq h1 buf0);
-    (==) { }
-      c.update_multi_s i (c.state.v i h1 block_state) (B.as_seq h0 buf1 `S.append` B.as_seq h0 data);
-    (==) { }
-      c.update_multi_s i (c.update_multi_s i init blocks) (B.as_seq h0 buf1 `S.append` B.as_seq h0 data);
-    (==) { }
-      c.update_multi_s i (c.update_multi_s i init blocks) (rest `S.append` B.as_seq h0 data);
-    (==) { }
-      c.update_multi_s i init (blocks `S.append` (rest `S.append` B.as_seq h0 data));
-    (==) { S.append_assoc blocks rest (B.as_seq h0 data) }
-      c.update_multi_s i init (blocks `S.append` rest `S.append` B.as_seq h0 data);
-    (==) { }
-      c.update_multi_s i init (seen `S.append` B.as_seq h0 data);
-    }
-  end;
-  [@inline_let]
-  let tmp: state_s c i t t' = State #index #c #i block_state buf_ (add_len c i total_len len)
-    (G.hide (G.reveal seen `S.append` B.as_seq h0 data)) k'
-  in
-  p *= tmp;
-  let h3 = ST.get () in
-  c.state.frame_invariant (B.loc_buffer p) block_state h2 h3;
-  c.state.frame_freeable (B.loc_buffer p) block_state h2 h3;
-  optional_frame #_ #i #c.km #c.key (B.loc_buffer p) k' h2 h3;
-  assert (seen_pred c i h3 p `S.equal` (S.append (G.reveal seen) (B.as_seq h0 data)))
-#pop-options *)
 
 /// General update function, as a decomposition of the three sub-cases
 /// ==================================================================
@@ -958,14 +770,14 @@ let update #index c i t t' p data len =
     let h2 = ST.get () in
     (
       let seen = G.reveal seen in
-      assert (seen_pred c i h1 p `S.equal` (S.append seen (B.as_seq h0 data1)));
-      assert (seen_pred c i h2 p `S.equal` (S.append (S.append seen (B.as_seq h0 data1)) (B.as_seq h0 data2)));
+      assert (seen_h c i h1 p `S.equal` (S.append seen (B.as_seq h0 data1)));
+      assert (seen_h c i h2 p `S.equal` (S.append (S.append seen (B.as_seq h0 data1)) (B.as_seq h0 data2)));
       S.append_assoc seen (B.as_seq h0 data1) (B.as_seq h0 data2);
       assert (S.equal (S.append (B.as_seq h0 data1) (B.as_seq h0 data2)) (B.as_seq h0 data));
       assert (S.equal
         (S.append (S.append seen (B.as_seq h0 data1)) (B.as_seq h0 data2))
         (S.append seen (B.as_seq h0 data)));
-      assert (seen_pred c i h2 p `S.equal` (S.append seen (B.as_seq h0 data)));
+      assert (seen_h c i h2 p `S.equal` (S.append seen (B.as_seq h0 data)));
       ()
     )
   end
@@ -1024,12 +836,9 @@ let mk_finish #index c i t t' p dst =
   begin
     let seen = G.reveal seen in
     let block_length = U32.v (c.block_len i) in
-//    let n = S.length seen / block_length in
-//    let blocks, rest_ = S.split seen (n * block_length)  in
     let n = split_at_last_num_blocks c i (S.length seen) in
     let blocks, rest_ = split_at_last c i seen in
     let k = optional_reveal #_ #i #c.km #c.key h0 k' in
-//    assert(S.length blocks = n * block_length);
     calc (S.equal) {
       B.as_seq h5 dst;
     (S.equal) { }
@@ -1062,7 +871,7 @@ let mk_finish #index c i t t' p dst =
   c.state.frame_invariant #i B.(loc_region_only false (HS.get_tip h5)) block_state h5 h6;
   c.state.frame_freeable #i B.(loc_region_only false (HS.get_tip h5)) block_state h5 h6;
   optional_frame #_ #i #c.km #c.key B.(loc_region_only false (HS.get_tip h5)) k' h5 h6;
-  assert (seen_pred c i h6 p `S.equal` (G.reveal seen));
+  assert (seen_h c i h6 p `S.equal` (G.reveal seen));
 
   // JP: this is not the right way to prove do this proof. Need to use
   // modifies_fresh_frame_popped instead, see e.g.
