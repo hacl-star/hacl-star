@@ -40,6 +40,7 @@ let supported_alg_of_impl (i: impl): supported_alg =
   | Vale_AES256 -> AES256_GCM
   | Hacl_CHACHA20 -> CHACHA20_POLY1305
 
+inline_for_extraction noextract
 let alg_of_vale_impl (i: vale_impl) =
   match i with
   | Vale_AES128 -> AES128_GCM
