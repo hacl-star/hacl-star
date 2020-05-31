@@ -196,6 +196,9 @@ val create_in: #a:alg -> create_in_st a
 inline_for_extraction noextract
 val alloca: #a:alg -> alloca_st a
 
+/// Encryption (pre-allocated state)
+/// --------------------------------
+
 let iv_p a = iv:B.buffer uint8 { iv_length a (B.length iv)}
 let ad_p a = ad:B.buffer uint8 { B.length ad <= max_length a }
 let plain_p a = p:B.buffer uint8 { B.length p <= max_length a }
@@ -300,6 +303,12 @@ let encrypt_st (a: supported_alg) =
 *)
 val encrypt: #a:G.erased (supported_alg) -> encrypt_st (G.reveal a)
 
+/// Encryption (no pre-allocated state)
+/// -----------------------------------
+///
+/// All-in-one API that does not require performing key expansion separately.
+/// Use if you must be in the Stack effect, or if you know you do not intend to
+/// reuse the key with a different nonce later.
 let encrypt_expand_pre (a: supported_alg)
   (k:B.buffer uint8 { B.length k = key_length a })
   (iv:iv_p a)
@@ -312,14 +321,13 @@ let encrypt_expand_pre (a: supported_alg)
   (tag: B.buffer uint8)
   (h0: HS.mem)
 =
-  config_pre a /\
   encrypt_gen_pre a iv iv_len ad ad_len plain plain_len cipher tag h0 /\ (
   B.live h0 k /\ B.disjoint k cipher /\
   encrypt_live_disjoint_pre a iv iv_len ad ad_len
                             plain plain_len cipher tag h0)
 
 inline_for_extraction noextract
-let encrypt_expand_st (a: supported_alg) =
+let encrypt_expand_st (does_runtime_check: bool) (a: supported_alg) =
   k:B.buffer uint8 { B.length k = key_length a } ->
   iv:iv_p a ->
   iv_len: UInt32.t { v iv_len = B.length iv /\ v iv_len > 0 } ->
@@ -329,19 +337,50 @@ let encrypt_expand_st (a: supported_alg) =
   plain_len: UInt32.t { v plain_len = B.length plain /\ v plain_len <= max_length a } ->
   cipher: B.buffer uint8 { B.length cipher = B.length plain } ->
   tag: B.buffer uint8 { B.length tag = tag_length a } ->
-  Stack unit
-    (requires encrypt_expand_pre a k iv iv_len ad ad_len plain plain_len cipher tag)
+  Stack error_code
+    (requires fun h0 ->
+      (if does_runtime_check then
+        true
+      else
+        config_pre a) /\
+      encrypt_expand_pre a k iv iv_len ad ad_len plain plain_len cipher tag h0)
     (ensures fun h0 r h1 ->
-      B.(modifies ((loc_union (loc_buffer cipher) (loc_buffer tag))) h0 h1) /\
-      S.equal (S.append (B.as_seq h1 cipher) (B.as_seq h1 tag))
-        (Spec.encrypt #a (B.as_seq h0 k) (B.as_seq h0 iv) (B.as_seq h0 ad) (B.as_seq h0 plain)))
+      match r with
+      | Success ->
+          B.(modifies ((loc_union (loc_buffer cipher) (loc_buffer tag))) h0 h1) /\
+          S.equal (S.append (B.as_seq h1 cipher) (B.as_seq h1 tag))
+            (Spec.encrypt #a (B.as_seq h0 k) (B.as_seq h0 iv) (B.as_seq h0 ad) (B.as_seq h0 plain))
+      | UnsupportedAlgorithm ->
+          if does_runtime_check then
+            B.(modifies loc_none h0 h1)
+          else
+            false
+      | _ ->
+          False)
 
-/// Those functions take a key, expand it then perform encryption.
-val encrypt_expand_aes128_gcm: encrypt_expand_st AES128_GCM
-val encrypt_expand_aes256_gcm: encrypt_expand_st AES256_GCM
-val encrypt_expand_chacha20_poly1305: encrypt_expand_st CHACHA20_POLY1305
-val encrypt_expand: #a:supported_alg -> encrypt_expand_st (G.reveal a)
+/// It's a little difficult to deal with AES-GCM cleanly because we're missing a
+/// fallback C implementation. The two functions below cannot appear in the code
+/// of EverCrypt, as they don't perform a runtime check and as such,
+/// unconditionally contain a link-time reference to the X64 AES-GCM code (which
+/// breaks the build on ARM. So, they're marked as inline_for_extraction,
+/// meaning clients can still call them, but then it's their problem to deal
+/// with dangling symbols on non-X64 targets.
+inline_for_extraction noextract
+val encrypt_expand_aes128_gcm_no_check: encrypt_expand_st false AES128_GCM
+inline_for_extraction noextract
+val encrypt_expand_aes256_gcm_no_check: encrypt_expand_st false AES256_GCM
 
+/// Those functions take a key, expand it then perform encryption. They do not
+/// require calling create_in before.
+val encrypt_expand_aes128_gcm: encrypt_expand_st true AES128_GCM
+val encrypt_expand_aes256_gcm: encrypt_expand_st true AES256_GCM
+val encrypt_expand_chacha20_poly1305: encrypt_expand_st false CHACHA20_POLY1305
+
+/// Run-time agility, run-time multiplexing, but not pre-expansion of the key.
+val encrypt_expand: #a:supported_alg -> encrypt_expand_st true (G.reveal a)
+
+/// Decryption (pre-allocated state)
+/// --------------------------------
 
 inline_for_extraction noextract
 let decrypt_st (a: supported_alg) =
@@ -406,9 +445,11 @@ let decrypt_st (a: supported_alg) =
 *)
 val decrypt: #a:G.erased supported_alg -> decrypt_st (G.reveal a)
 
+/// Decryption (no pre-allocated state)
+/// -----------------------------------
 
 inline_for_extraction noextract
-let decrypt_expand_st (a: supported_alg) =
+let decrypt_expand_st (does_runtime_check: bool) (a: supported_alg) =
   k:B.buffer uint8 { B.length k = key_length a } ->
   iv:iv_p a ->
   iv_len:UInt32.t { v iv_len = B.length iv /\ v iv_len > 0 } ->
@@ -420,7 +461,10 @@ let decrypt_expand_st (a: supported_alg) =
   dst: B.buffer uint8 { B.length dst = B.length cipher } ->
   Stack error_code
     (requires fun h0 ->
-        config_pre a /\
+        (if does_runtime_check then
+          true
+        else
+          config_pre a) /\
         MB.(all_live h0 [ buf k; buf iv; buf ad; buf cipher; buf tag; buf dst ]) /\
         B.disjoint k dst /\
         B.disjoint tag dst /\ B.disjoint tag cipher /\
@@ -437,8 +481,18 @@ let decrypt_expand_st (a: supported_alg) =
         Some? plain /\ S.equal (Some?.v plain) (B.as_seq h1 dst)
       | AuthenticationFailure ->
         None? plain
+      | UnsupportedAlgorithm ->
+          if does_runtime_check then
+            B.(modifies loc_none h0 h1)
+          else
+            false
       | _ -> False
       end)
+
+inline_for_extraction noextract
+val decrypt_expand_aes128_gcm_no_check: decrypt_expand_st false AES128_GCM
+inline_for_extraction noextract
+val decrypt_expand_aes256_gcm_no_check: decrypt_expand_st false AES256_GCM
 
 /// This function takes a key, expands it and performs decryption.
 ///
@@ -447,10 +501,10 @@ let decrypt_expand_st (a: supported_alg) =
 /// - ``Failure``: cipher text could not be decrypted (e.g. tag mismatch)
 (** @type: true
 *)
-val decrypt_expand_aes128_gcm: decrypt_expand_st AES128_GCM
-val decrypt_expand_aes256_gcm: decrypt_expand_st AES256_GCM
-val decrypt_expand_chacha20_poly1305: decrypt_expand_st CHACHA20_POLY1305
-val decrypt_expand: #a:supported_alg -> decrypt_expand_st (G.reveal a)
+val decrypt_expand_aes128_gcm: decrypt_expand_st true AES128_GCM
+val decrypt_expand_aes256_gcm: decrypt_expand_st true AES256_GCM
+val decrypt_expand_chacha20_poly1305: decrypt_expand_st false CHACHA20_POLY1305
+val decrypt_expand: #a:supported_alg -> decrypt_expand_st true (G.reveal a)
 
 (** @type: true
 *)
