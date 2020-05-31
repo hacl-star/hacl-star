@@ -101,11 +101,33 @@ let update_full #a
   (input: S.seq uint8)
 =
   let n_blocks = S.length input / block_length in
+  let rem = S.length input % block_length in
   let blocks, rest = S.split input (n_blocks * block_length) in
   assert (S.length rest = S.length input % block_length);
   Math.Lemmas.multiple_modulo_lemma n_blocks block_length;
   assert (S.length blocks % block_length = 0);
   assert (S.length rest < block_length);
+  update_last (mk_update_multi block_length update acc blocks) rest
+
+/// Same as [update_full] but we make sure the last block is not empty in order
+/// to mimic the behavior of the streaming API where we lazily process the internal
+/// block. Note that the length condition on update_last is not the same.
+let update_full_lazy #a
+  (block_length:pos)
+  (update: a -> (s:S.seq uint8 { S.length s = block_length }) -> a)
+  (update_last: a -> (s:S.seq uint8 { S.length s <= block_length }) -> a)
+  (acc: a)
+  (input: S.seq uint8)
+=
+  let n_blocks = S.length input / block_length in
+  let rem = S.length input % block_length in
+  let n_blocks, rem = if rem = 0 && n_blocks > 0 then n_blocks - 1, block_length
+                                                 else n_blocks, rem in
+  let blocks, rest = S.split input (n_blocks * block_length) in
+  assert (S.length rest % block_length = S.length input % block_length);
+  Math.Lemmas.multiple_modulo_lemma n_blocks block_length;
+  assert (S.length blocks % block_length = 0);
+  assert (S.length rest <= block_length);
   update_last (mk_update_multi block_length update acc blocks) rest
 
 /// Lemmas

@@ -281,8 +281,8 @@ type block (index: Type0) =
       let open FStar.Mul in
       let block_length = U32.v (block_len i) in
       let n = S.length input / block_length in
-      let rem = S.length input % block_length in
-      let n, rem = if rem = 0 && n > 0 then n - 1, block_length else n, rem in (**)      
+      let rem = S.length input % block_length in (**)
+      let n, rem = if rem = 0 && n > 0 then n - 1, block_length else n, rem in (**)
       let bs, l = S.split input (n * block_length) in
       FStar.Math.Lemmas.multiple_modulo_lemma n block_length;
       let hash = update_multi_s i (init_s i key) bs in
@@ -336,6 +336,7 @@ type block (index: Type0) =
     let i = G.reveal i in
     s:state.s i ->
     last:B.buffer uint8 { B.len last <= block_len i } ->
+    len:U32.t{len = B.len last} ->
     total_len:U64.t {
       U64.v total_len <= max_input_length i /\
       U64.v total_len >= B.length last /\

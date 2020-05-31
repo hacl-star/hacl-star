@@ -801,10 +801,11 @@ let mk_finish #index c i t t' p dst =
   c.state.frame_invariant #i B.loc_none block_state h0 h1;
   c.state.frame_freeable #i B.loc_none block_state h0 h1;
   optional_frame #_ #i #c.km #c.key B.loc_none k' h0 h1;
+  
+  let r = rest c i total_len in
 
   let buf_ = B.sub buf_ 0ul (rest c i total_len) in
   assert (
-    let r = rest c i total_len in
     (U64.v total_len - U32.v r) % U32.v (c.block_len i) = 0);
 
   let tmp_block_state = c.state.alloca i in
@@ -823,7 +824,7 @@ let mk_finish #index c i t t' p dst =
   c.state.frame_freeable #i (c.state.footprint h2 tmp_block_state) block_state h2 h3;
   optional_frame #_ #i #c.km #c.key (c.state.footprint h2 tmp_block_state) k' h2 h3;
 
-  c.update_last (G.hide i) tmp_block_state buf_ total_len; (* TODO: length *)
+  c.update_last (G.hide i) tmp_block_state buf_ r total_len;
 
   let h4 = ST.get () in
   c.state.frame_invariant #i (c.state.footprint h3 tmp_block_state) block_state h3 h4;
