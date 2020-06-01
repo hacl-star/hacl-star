@@ -70,16 +70,17 @@ module ECDSA : sig
   val verify : C.t -> C.t -> C.t -> bool
 end
 
-#ifndef BROKEN_INTRINSICS
+#ifndef IS_ARM_7
 module Chacha20_Poly1305_128 : Chacha20_Poly1305
-module Chacha20_Poly1305_256 : Chacha20_Poly1305
-
-module Curve25519_64 : Curve25519
-
 module Poly1305_128 : MAC
-module Poly1305_256 : MAC
-
-module Blake2b_256 : Blake2
-
 module Blake2s_128 : Blake2
+#ifndef IS_ARM_8
+module Chacha20_Poly1305_256 : Chacha20_Poly1305
+module Poly1305_256 : MAC
+module Blake2b_256 : Blake2
+#endif
+#endif
+
+#ifdef IS_X64
+module Curve25519_64 : Curve25519
 #endif

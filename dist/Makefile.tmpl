@@ -85,8 +85,12 @@ Hacl_Blake2b_256.o Hacl_Poly1305_256.o Hacl_Chacha20_Vec256.o Hacl_Chacha20Poly1
 
 all: libevercrypt.$(SO)
 
-libevercrypt.$(SO): $(OBJS)
+libevercrypt.$(SO): config.h $(OBJS)
 	$(CC) $(CFLAGS) -shared -o $@ $^ $(LDFLAGS)
+
+# If the configure script has not ran, create an empty config.h
+config.h:
+	touch $@
 
 # 4. Compilation of OCaml bindings; conditional on the presence of the lib_gen
 # folder, possibly disabled by configure.

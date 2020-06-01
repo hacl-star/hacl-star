@@ -20,15 +20,19 @@ module Hacl_Blake2b_32 = Hacl_Blake2b_32_bindings.Bindings(Hacl_Blake2b_32_stubs
 module Hacl_Blake2s_32 = Hacl_Blake2s_32_bindings.Bindings(Hacl_Blake2s_32_stubs)
 module Hacl_ECDSA = Hacl_ECDSA_bindings.Bindings(Hacl_ECDSA_stubs)
 
-#ifndef BROKEN_INTRINSICS
-open AutoConfig2
+#ifndef IS_ARM_7
 module Hacl_Chacha20Poly1305_128 = Hacl_Chacha20Poly1305_128_bindings.Bindings(Hacl_Chacha20Poly1305_128_stubs)
-module Hacl_Chacha20Poly1305_256 = Hacl_Chacha20Poly1305_256_bindings.Bindings(Hacl_Chacha20Poly1305_256_stubs)
-module Hacl_Curve25519_64 = Hacl_Curve25519_64_bindings.Bindings(Hacl_Curve25519_64_stubs)
 module Hacl_Poly1305_128 = Hacl_Poly1305_128_bindings.Bindings(Hacl_Poly1305_128_stubs)
+module Hacl_Blake2s_128 = Hacl_Blake2s_128_bindings.Bindings(Hacl_Blake2s_128_stubs)
+#ifndef IS_ARM_8
+module Hacl_Chacha20Poly1305_256 = Hacl_Chacha20Poly1305_256_bindings.Bindings(Hacl_Chacha20Poly1305_256_stubs)
 module Hacl_Poly1305_256 = Hacl_Poly1305_256_bindings.Bindings(Hacl_Poly1305_256_stubs)
 module Hacl_Blake2b_256 = Hacl_Blake2b_256_bindings.Bindings(Hacl_Blake2b_256_stubs)
-module Hacl_Blake2s_128 = Hacl_Blake2s_128_bindings.Bindings(Hacl_Blake2s_128_stubs)
+#endif
+#endif
+
+#ifdef IS_X64
+module Hacl_Curve25519_64 = Hacl_Curve25519_64_bindings.Bindings(Hacl_Curve25519_64_stubs)
 #endif
 
 module RandomBuffer = struct
@@ -300,7 +304,8 @@ module ECDSA = struct
     Hacl_ECDSA.hacl_Impl_ECDSA_ecdsa_p256_sha2_verify (C.size_uint32 msg) (C.ctypes_buf msg) (C.ctypes_buf pub) (C.ctypes_buf r) (C.ctypes_buf s)
 end
 
-#ifndef BROKEN_INTRINSICS
+#ifndef IS_ARM_7
+open AutoConfig2
 module Chacha20_Poly1305_128 : Chacha20_Poly1305 =
   Make_Chacha20_Poly1305 (struct
     let reqs = [AVX]
@@ -308,26 +313,25 @@ module Chacha20_Poly1305_128 : Chacha20_Poly1305 =
     let decrypt = Hacl_Chacha20Poly1305_128.hacl_Chacha20Poly1305_128_aead_decrypt
   end)
 
+module Poly1305_128 : MAC =
+  Make_Poly1305 (struct
+    let reqs = [AVX]
+    let mac = Hacl_Poly1305_128.hacl_Poly1305_128_poly1305_mac
+end)
+
+module Blake2s_128 : Blake2 =
+  Make_Blake2s (struct
+    let reqs = [AVX]
+    let blake2s = Hacl_Blake2s_128.hacl_Blake2s_128_blake2s
+  end)
+
+#ifndef IS_ARM_8
 module Chacha20_Poly1305_256 : Chacha20_Poly1305 =
   Make_Chacha20_Poly1305 (struct
     let reqs = [AVX2]
     let encrypt = Hacl_Chacha20Poly1305_256.hacl_Chacha20Poly1305_256_aead_encrypt
     let decrypt = Hacl_Chacha20Poly1305_256.hacl_Chacha20Poly1305_256_aead_decrypt
   end)
-
-module Curve25519_64 : Curve25519 =
-  Make_Curve25519 (struct
-    let reqs = [BMI2; ADX]
-    let secret_to_public = Hacl_Curve25519_64.hacl_Curve25519_64_secret_to_public
-    let scalarmult = Hacl_Curve25519_64.hacl_Curve25519_64_scalarmult
-    let ecdh = Hacl_Curve25519_64.hacl_Curve25519_64_ecdh
-  end)
-
-module Poly1305_128 : MAC =
-  Make_Poly1305 (struct
-    let reqs = [AVX]
-    let mac = Hacl_Poly1305_128.hacl_Poly1305_128_poly1305_mac
-end)
 
 module Poly1305_256 : MAC =
   Make_Poly1305 (struct
@@ -340,10 +344,16 @@ module Blake2b_256 : Blake2 =
     let reqs = [AVX2]
     let blake2b = Hacl_Blake2b_256.hacl_Blake2b_256_blake2b
   end)
+#endif
+#endif
 
-module Blake2s_128 : Blake2 =
-  Make_Blake2s (struct
-    let reqs = [AVX]
-    let blake2s = Hacl_Blake2s_128.hacl_Blake2s_128_blake2s
+#ifdef IS_X64
+open AutoConfig2
+module Curve25519_64 : Curve25519 =
+  Make_Curve25519 (struct
+    let reqs = [BMI2; ADX]
+    let secret_to_public = Hacl_Curve25519_64.hacl_Curve25519_64_secret_to_public
+    let scalarmult = Hacl_Curve25519_64.hacl_Curve25519_64_scalarmult
+    let ecdh = Hacl_Curve25519_64.hacl_Curve25519_64_ecdh
   end)
 #endif

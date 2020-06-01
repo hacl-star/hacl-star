@@ -162,9 +162,11 @@ if detect_arm; then
   if detect_arm_cc; then
     echo "... $CC can cross-compile to ARM64 with SIMD"
     echo "CFLAGS_128 = -march=armv8-a+simd" >> Makefile.config
+    echo "#define IS_ARM_8 1" >> config.h
   else
     echo "$CC cannot compile 128-bit vector arithmetic, disabling"
     echo "BLACKLIST += $(ls *CP128*.c *_128.c *_Vec128.c | xargs)" >> Makefile.config
+    echo "#define IS_ARM_7 1" >> config.h
   fi
 fi
 
@@ -186,6 +188,7 @@ else
   else
     echo "... using a non-buggy GCC"
   fi
+  echo "#define IS_X64 1" >> config.h
 fi
 
 if ! detect_uint128; then

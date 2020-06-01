@@ -7,6 +7,6 @@
  (preprocess (action (run %{bin:cppo} %{input-file})))
  (flags (:standard -warn-error -3)))
 
-(rule (targets config.h ) (deps)
+(rule (targets config.h) (deps)
  (action
   (bash "cp %{lib:hacl-star-raw:config.h} .")))
