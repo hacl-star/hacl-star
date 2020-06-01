@@ -201,7 +201,7 @@ int main()
 
 	for (int j = 0; j < ROUNDS; j++)
 	{
-		Hacl_Impl_P256_DH_ecp256dh_r(pk, pk, scalar0); 
+		Hacl_Interface_P256_ecp256dh_r(pk, pk, scalar0); 
 	    res ^= scalar0[0] ^ scalar0[31];
 	}
 
