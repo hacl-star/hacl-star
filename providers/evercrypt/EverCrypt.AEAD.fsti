@@ -340,7 +340,7 @@ let encrypt_expand_st (does_runtime_check: bool) (a: supported_alg) =
   Stack error_code
     (requires fun h0 ->
       (if does_runtime_check then
-        true
+        True
       else
         config_pre a) /\
       encrypt_expand_pre a k iv iv_len ad ad_len plain plain_len cipher tag h0)
@@ -354,7 +354,7 @@ let encrypt_expand_st (does_runtime_check: bool) (a: supported_alg) =
           if does_runtime_check then
             B.(modifies loc_none h0 h1)
           else
-            false
+            False
       | _ ->
           False)
 
@@ -462,7 +462,7 @@ let decrypt_expand_st (does_runtime_check: bool) (a: supported_alg) =
   Stack error_code
     (requires fun h0 ->
         (if does_runtime_check then
-          true
+          True
         else
           config_pre a) /\
         MB.(all_live h0 [ buf k; buf iv; buf ad; buf cipher; buf tag; buf dst ]) /\
@@ -485,7 +485,7 @@ let decrypt_expand_st (does_runtime_check: bool) (a: supported_alg) =
           if does_runtime_check then
             B.(modifies loc_none h0 h1)
           else
-            false
+            False
       | _ -> False
       end)
 
