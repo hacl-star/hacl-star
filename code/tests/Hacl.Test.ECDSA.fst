@@ -127,7 +127,7 @@ let test_sigver256 (vec:sigver_vector) : Stack unit (requires fun _ -> True) (en
     let qxy = B.alloca (u8 0) 64ul in
     B.blit qx 0ul qxy 0ul 32ul;
     B.blit qy 0ul qxy 32ul 32ul;
-    let result' = Hacl_Interface_P256_ecdsa_verif_p256_sha2 msg_len msg qxy r s in
+    let result' = ecdsa_verif_p256_sha2 msg_len msg qxy r s in
     if result' = result then ()
     else
       begin
@@ -161,7 +161,7 @@ let test_sigver384 (vec:sigver_vector) : Stack unit (requires fun _ -> True) (en
     let qxy = B.alloca (u8 0) 64ul in
     B.blit qx 0ul qxy 0ul 32ul;
     B.blit qy 0ul qxy 32ul 32ul;
-    let result' = Hacl_Interface_P256_ecdsa_verif_p256_sha384 msg_len msg qxy r s in
+    let result' = ecdsa_verif_p256_sha384 msg_len msg qxy r s in
     if result' = result then ()
     else
       begin
@@ -195,7 +195,7 @@ let test_sigver512 (vec:sigver_vector) : Stack unit (requires fun _ -> True) (en
     let qxy = B.alloca (u8 0) 64ul in
     B.blit qx 0ul qxy 0ul 32ul;
     B.blit qy 0ul qxy 32ul 32ul;
-    let result' = Hacl_Interface_P256_ecdsa_verif_p256_sha512 msg_len msg qxy r s in
+    let result' = ecdsa_verif_p256_sha512 msg_len msg qxy r s in
     if result' = result then ()
     else
       begin
@@ -298,14 +298,14 @@ let test_siggen_256 (vec:siggen_vector) : Stack unit (requires fun _ -> True) (e
     B.blit qx 0ul qxy 0ul 32ul;
     B.blit qy 0ul qxy 32ul 32ul; 
 
-    let flag = Hacl_Interface_P256_ecdsa_sign_p256_sha2 rs msg_len msg d k in 
+    let flag = ecdsa_sign_p256_sha2 rs msg_len msg d k in 
     if Lib.RawIntTypes.u64_to_UInt64 flag = 0uL then
       begin
       let okr = compare_and_print (B.sub rs 0ul 32ul) r 32ul in 
       let oks = compare_and_print (B.sub rs 32ul 32ul) s 32ul in 
       if okr && oks then
         begin
-        let result = Hacl_Interface_P256_ecdsa_verif_p256_sha2 msg_len msg qxy r s in
+        let result = ecdsa_verif_p256_sha2 msg_len msg qxy r s in
         if not result then
           begin
           LowStar.Printf.(printf "FAIL: verification\n" done);
@@ -363,14 +363,14 @@ let test_siggen_384 (vec:siggen_vector) : Stack unit (requires fun _ -> True) (e
     B.blit qx 0ul qxy 0ul 32ul;
     B.blit qy 0ul qxy 32ul 32ul; 
 
-    let flag = Hacl_Interface_P256_ecdsa_sign_p256_sha384 rs msg_len msg d k in 
+    let flag = ecdsa_sign_p256_sha384 rs msg_len msg d k in 
     if Lib.RawIntTypes.u64_to_UInt64 flag = 0uL then
       begin
       let okr = compare_and_print (B.sub rs 0ul 32ul) r 32ul in 
       let oks = compare_and_print (B.sub rs 32ul 32ul) s 32ul in 
       if okr && oks then
         begin
-        let result = Hacl_Interface_P256_ecdsa_verif_p256_sha384 msg_len msg qxy r s in
+        let result = ecdsa_verif_p256_sha384 msg_len msg qxy r s in
         if not result then
           begin
           LowStar.Printf.(printf "FAIL: verification\n" done);
@@ -428,14 +428,14 @@ let test_siggen_512 (vec:siggen_vector) : Stack unit (requires fun _ -> True) (e
     B.blit qx 0ul qxy 0ul 32ul;
     B.blit qy 0ul qxy 32ul 32ul; 
 
-    let flag = Hacl_Interface_P256_ecdsa_sign_p256_sha512 rs msg_len msg d k in 
+    let flag = ecdsa_sign_p256_sha512 rs msg_len msg d k in 
     if Lib.RawIntTypes.u64_to_UInt64 flag = 0uL then
       begin
       let okr = compare_and_print (B.sub rs 0ul 32ul) r 32ul in 
       let oks = compare_and_print (B.sub rs 32ul 32ul) s 32ul in 
       if okr && oks then
         begin
-        let result = Hacl_Interface_P256_ecdsa_verif_p256_sha512 msg_len msg qxy r s in
+        let result = ecdsa_verif_p256_sha512 msg_len msg qxy r s in
         if not result then
           begin
           LowStar.Printf.(printf "FAIL: verification\n" done);
