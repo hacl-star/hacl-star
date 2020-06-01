@@ -335,12 +335,18 @@ type block (index: Type0) =
     i: G.erased index -> (
     let i = G.reveal i in
     s:state.s i ->
-    last:B.buffer uint8 { B.len last <= block_len i } ->
-    len:U32.t{len = B.len last} ->
-    total_len:U64.t {
-      U64.v total_len <= max_input_length i /\
-      U64.v total_len >= B.length last /\
-      (U64.v total_len - B.length last) % U32.v (block_len i) = 0} ->
+    prev_len:U64.t {
+        U64.v prev_len % U32.v (block_len i) = 0
+//      U64.v total_len <= max_input_length i /\
+//      U64.v total_len >= B.length last /\
+//      U64.v total_len - B.length last <= 
+//      (U64.v total_len - B.length last) % U32.v (block_len i) = 0} ->
+        } ->
+    last:B.buffer uint8 (*{ B.len last <= block_len i }*) ->
+    last_len:U32.t{
+      last_len = B.len last /\
+      U32.v last_len <= U32.v (block_len i) /\
+      U64.v prev_len + U32.v last_len <= max_input_length i} ->
     Stack unit
     (requires fun h0 ->
       state.invariant #i h0 s /\
@@ -348,7 +354,7 @@ type block (index: Type0) =
       B.(loc_disjoint (state.footprint #i h0 s) (loc_buffer last)))
     (ensures fun h0 _ h1 ->
       state.invariant #i h1 s /\
-      state.v i h1 s == update_last_s i (state.v i h0 s) (U64.v total_len - B.length last) (B.as_seq h0 last) /\
+      state.v i h1 s == update_last_s i (state.v i h0 s) (U64.v prev_len) (B.as_seq h0 last) /\
       B.(modifies (state.footprint #i h0 s) h0 h1) /\
       state.footprint #i h0 s == state.footprint #i h1 s /\
       (state.freeable #i h0 s ==> state.freeable #i h1 s)))) ->

@@ -58,9 +58,8 @@ let update_multi_s () acc input =
   fst Agile.(update_multi SHA2_256 (acc, ()) input)
 
 let update_multi_zero () acc :
-  Lemma(update_multi_s () acc S.empty == acc) =
+  Lemma(update_multi_s () acc S.empty == acc) = ()
   
-
 #push-options "--ifuel 1"
 
 let update_multi_associative () acc (input1 input2 : S.seq uint8) :
@@ -74,9 +73,10 @@ let update_multi_associative () acc (input1 input2 : S.seq uint8) :
       update_multi_s () (update_multi_s () acc input1) input2 ==
         update_multi_s () acc input)) =
   Spec.Hash.Lemmas.update_multi_associative SHA2_256 (acc, ()) input1 input2
+#pop-options
 
 /// This proof usually succeeds fast but we increase the rlimit for safety
-#push-options "--z3rlimit 200"
+#push-options "--z3rlimit 200 --ifuel 1"
 inline_for_extraction noextract
 let hacl_sha2_256: block unit =
   Block
@@ -101,8 +101,7 @@ let hacl_sha2_256: block unit =
     (fun _ _ -> ())
     (fun _ _ s -> Hacl.Hash.SHA2.init_256 s)
     (fun _ s blocks len -> Hacl.Hash.SHA2.update_multi_256 s () blocks (len `U32.div` Hacl.Hash.Definitions.(block_len SHA2_256)))
-    (fun _ s last last_len total_len ->
-      let prev_len = U64.(total_len `sub` FStar.Int.Cast.uint32_to_uint64 last_len) in
+    (fun _ s prev_len last last_len ->
       Hacl.Hash.SHA2.update_last_256 s () prev_len last last_len)
     (fun _ _ s dst -> Hacl.Hash.SHA2.finish_256 s () dst)
 #pop-options

@@ -413,13 +413,13 @@ let poly1305_32: I.block unit =
       end;
       Hacl.Poly1305_32.poly1305_update s len blocks
     )
-    (fun _ s last len total_len ->
+    (fun _ s prev_len last last_len ->
       let h0 = ST.get () in
       begin
         let acc, r = P.as_get_acc h0 (as_lib s), P.as_get_r h0 (as_lib s) in
         update_last_is_update (B.as_seq h0 last) acc r
       end;
-      Hacl.Poly1305_32.poly1305_update s len last)
+      Hacl.Poly1305_32.poly1305_update s last_len last)
     (fun _ k s dst ->
       let h0 = ST.get () in
       ST.push_frame ();

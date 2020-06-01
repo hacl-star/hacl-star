@@ -6,6 +6,8 @@ module G = FStar.Ghost
 module S = FStar.Seq
 module U32 = FStar.UInt32
 module U64 = FStar.UInt64
+module U128 = FStar.UInt128
+module Case = FStar.Int.Cast.Full
 module F = Hacl.Streaming.Functor
 module I = Hacl.Streaming.Interface
 module P = Hacl.Impl.Poly1305
@@ -53,9 +55,10 @@ let to_hash_alg (a : Spec.alg) =
 
 let index = unit
 
-/// So far, no better way than having a buffer AND a pointer for the stateful state
+/// The stateful state: (wv, hash, *total_len)
+/// The total_len pointer should actually be ghost
 inline_for_extraction noextract
-let s = state_p a m & B.pointer (Hash.extra_state (to_hash_alg a))
+let s = state_p a m & state_p a m & B.pointer (Hash.extra_state (to_hash_alg a))
 
 inline_for_extraction noextract
 let extra_state_zero_element a : Hash.extra_state (to_hash_alg a) =
@@ -65,8 +68,12 @@ inline_for_extraction noextract
 let t = Hash.words_state (to_hash_alg a)
 
 inline_for_extraction noextract
+let get_wv (s : s) : Tot (state_p a m) =
+  match s with wv, _, _ -> wv
+
+inline_for_extraction noextract
 let get_state_p (s : s) : Tot (state_p a m) =
-  match s with p, _ -> p
+  match s with _, p, _ -> p
 
 inline_for_extraction noextract
 let state_v (h : HS.mem) (s : s) : GTot (Spec.state a) =
@@ -74,7 +81,7 @@ let state_v (h : HS.mem) (s : s) : GTot (Spec.state a) =
 
 inline_for_extraction noextract
 let get_extra_state_p (s : s) : Tot (B.pointer (Hash.extra_state (to_hash_alg a))) =
-  match s with _, l -> l
+  match s with _, _, l -> l
 
 inline_for_extraction noextract
 let extra_state_v (h : HS.mem) (s : s) : GTot (Hash.extra_state (to_hash_alg a))=
@@ -95,44 +102,55 @@ let stateful_blake2s_32: I.stateful unit =
   I.Stateful
     (fun () -> s) (* s *)
     (* footprint *)
-    (fun #_ _ s ->
-      let b, l = s in
+    (fun #_ _ acc ->
+      let wv, b, l = acc in
       B.loc_union
-        (B.loc_addr_of_buffer (state_to_lbuffer b))
+        (B.loc_union
+          (B.loc_addr_of_buffer (state_to_lbuffer wv))
+          (B.loc_addr_of_buffer (state_to_lbuffer b)))
         (B.loc_addr_of_buffer l))
     (* freeable *)
-    (fun #_ _ s ->
-      let b, l = s in
-      B.freeable (state_to_lbuffer b) /\ B.freeable l)
+    (fun #_ _ acc ->
+      let wv, b, l = acc in
+      B.freeable (state_to_lbuffer wv) /\
+      B.freeable (state_to_lbuffer b) /\
+      B.freeable l)
     (* invariant *)
-    (fun #_ h s ->
-      let b, l = s in
-      B.live h (state_to_lbuffer b) /\ B.live h l /\
+    (fun #_ h acc ->
+      let wv, b, l = acc in
+      B.live h (state_to_lbuffer wv) /\
+      B.live h (state_to_lbuffer b) /\
+      B.live h l /\
+      B.disjoint (state_to_lbuffer wv) (state_to_lbuffer b) /\
+      B.disjoint (state_to_lbuffer wv) l /\
       B.disjoint (state_to_lbuffer b) l)
     (fun () -> t) (* t *)
-    (fun () h s -> s_v h s) (* v *)
-    (fun #_ h s -> let b, l = s in ()) (* invariant_loc_in_footprint *)
-    (fun #_ l s h0 h1 -> let b, l = s in ()) (* frame_invariant *)
+    (fun () h acc -> s_v h acc) (* v *)
+    (fun #_ h acc -> let wv, b, l = acc in ()) (* invariant_loc_in_footprint *)
+    (fun #_ l acc h0 h1 -> let wv, b, l = acc in ()) (* frame_invariant *)
     (fun #_ _ _ _ _ -> ()) (* frame_freeable *)
     (* alloca *)
     (fun () ->
+      let wv = alloc_state a m in
       let b = alloc_state a m in
       let l = B.alloca (extra_state_zero_element a) (U32.uint_to_t 1) in
-      b, l)
+      wv, b, l)
     (* create_in *)
     (fun () r ->
+      let wv = B.malloc r (zero_element a m) U32.(4ul *^ row_len a m) in
       let b = B.malloc r (zero_element a m) U32.(4ul *^ row_len a m) in
       let l = B.malloc r (extra_state_zero_element a) (U32.uint_to_t 1) in
-      b, l)
+      wv, b, l)
     (* free *)
-    (fun _ s ->
-      match s with b, l ->
+    (fun _ acc ->
+      match acc with wv, b, l ->
+      B.free (state_to_lbuffer wv);
       B.free (state_to_lbuffer b);
       B.free l)
     (* copy *)
     (fun _ src dst ->
-      match src with src_b, src_l ->
-      match dst with dst_b, dst_l ->
+      match src with src_wv, src_b, src_l ->
+      match dst with src_wv, dst_b, dst_l ->
       B.blit (state_to_lbuffer src_b) 0ul (state_to_lbuffer dst_b) 0ul
              U32.(4ul *^ row_len a m);
       B.blit src_l 0ul dst_l 0ul 1ul)
@@ -221,6 +239,7 @@ val spec_is_incremental:
 
 let spec_is_incremental () key input = admit()
 
+#push-options "--ifuel 1"
 inline_for_extraction noextract
 let blake2s_32 : I.block unit =
   I.Block
@@ -246,13 +265,53 @@ let blake2s_32 : I.block unit =
 
     (* init *)
     (fun _ key acc ->
-      [@inline_let] let s = get_state_p acc in
-      [@inline_let] let es = get_extra_state_p in
-      Impl.blake2_init #a #m (Impl.blake2_update_block #a #m) s key_len key output_len;
-      B.upd es 0ul extra_state_zero_element)
+      [@inline_let] let wv = get_wv acc in
+      [@inline_let] let h = get_state_p acc in
+      [@inline_let] let es = get_extra_state_p acc in
+      Impl.blake2_init #a #m (Impl.blake2_update_block #a #m) wv h key_len key output_len;
+      B.upd es 0ul (extra_state_zero_element a))
     (fun _ -> admit()) (* update_multi *)
-    (fun _ -> admit()) (* update_last *)
-    (fun _ -> admit()) (* finish *)
+    (* update_last *)
+    (fun _ acc last last_len total_len ->
+      [@inline_let] let wv = get_wv acc in
+      [@inline_let] let h = get_state_p acc in
+      [@inline_let] let es = get_extra_state_p acc in
+      let prevlen =
+        match a with
+        | Spec.Blake2S ->
+          U64.(total_len `sub` FStar.Int.Cast.uint32_to_uint64 last_len)
+        | Spec.Blake2B ->
+          FStar.Int.Cast.Full.uint64_to_uint128 (
+            U64.(total_len `sub` FStar.Int.Cast.uint32_to_uint64 last_len))
+      in
+      Impl.blake2_update_last #a #m (Impl.blake2_update_block #a #m) #last_len
+                              wv h
+                              prevlen last_len last
+      )
+    (* finish *)
+    (fun _ k acc dst ->
+      [@inline_let] let wv = get_wv acc in
+      [@inline_let] let h = get_state_p acc in
+//      [@inline_let] let es = get_extra_state_p acc in
+      Impl.blake2_finish #a #m output_len dst h)
+#pop-options
+
+//Hacl.Hash.Blake2.update_multi_blake2s
+inline_for_extraction noextract
+let blake2_update_last_t (al:Spec.alg) (ms:m_spec) =
+   #len:size_t
+  -> wv: state_p al ms
+  -> hash: state_p al ms
+  -> prev: Spec.limb_t al{v prev + v len <= Spec.max_limb al}
+  -> rem: size_t {v rem <= v len /\ v rem <= Spec.size_block al}
+  -> d: lbuffer uint8 len ->
+  Stack unit
+    (requires (fun h -> live h wv /\ live h hash /\ live h d /\ disjoint hash d /\ disjoint wv hash /\ disjoint wv d))
+    (ensures  (fun h0 _ h1 -> modifies (loc hash |+| loc wv) h0 h1
+                         /\ state_v h1 hash == Spec.blake2_update_last al (v prev) (v rem) h0.[|d|] (state_v h0 hash)))
+
+inline_for_extraction noextract
+val blake2_update_last: #al:Spec.alg -> #ms:m_spec -> blake2_update_block: blake2_update_block_t al ms -> blake2_update_last_t al ms
 
 inline_for_extraction noextract
 let blake2_init_t  (al:Spec.alg) (ms:m_spec) =

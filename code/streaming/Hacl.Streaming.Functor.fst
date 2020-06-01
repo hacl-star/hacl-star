@@ -824,7 +824,8 @@ let mk_finish #index c i t t' p dst =
   c.state.frame_freeable #i (c.state.footprint h2 tmp_block_state) block_state h2 h3;
   optional_frame #_ #i #c.km #c.key (c.state.footprint h2 tmp_block_state) k' h2 h3;
 
-  c.update_last (G.hide i) tmp_block_state buf_ r total_len;
+  let prev_len = U64.(total_len `sub` FStar.Int.Cast.uint32_to_uint64 r) in
+  c.update_last (G.hide i) tmp_block_state prev_len buf_ r;
 
   let h4 = ST.get () in
   c.state.frame_invariant #i (c.state.footprint h3 tmp_block_state) block_state h3 h4;
