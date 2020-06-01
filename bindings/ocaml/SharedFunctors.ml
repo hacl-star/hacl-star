@@ -95,13 +95,13 @@ module Make_EdDSA_generic (C: Buffer)
     (* Hacl.Ed25519.sign *)
     assert (C.size priv = 32);
     assert (C.size signature = 64);
-    assert (C.size msg + 64 <= max_size_t);
+    assert Z.(of_int (C.size msg) + ~$64 <= max_size_t);
     Impl.sign (C.ctypes_buf signature) (C.ctypes_buf priv) (C.size_uint32 msg) (C.ctypes_buf msg)
   let verify pub msg signature =
     (* Hacl.Ed25519.verify *)
     assert (C.size pub = 32);
     assert (C.size signature = 64);
-    assert (C.size msg + 64 <= max_size_t);
+    assert Z.(of_int (C.size msg) + ~$64 <= max_size_t);
     Impl.verify (C.ctypes_buf pub) (C.size_uint32 msg) (C.ctypes_buf msg) (C.ctypes_buf signature)
   let expand_keys ks priv =
     (* Hacl.Ed25519.expand_keys *)
@@ -113,7 +113,7 @@ module Make_EdDSA_generic (C: Buffer)
     (* Hacl.Ed25519.sign_expanded *)
     assert (C.size ks = 96);
     assert (C.size signature = 64);
-    assert (C.size msg + 64 <= max_size_t);
+    assert Z.(of_int (C.size msg) + ~$64 <= max_size_t);
     Impl.sign_expanded (C.ctypes_buf signature) (C.ctypes_buf ks) (C.size_uint32 msg) (C.ctypes_buf msg)
 end
 
@@ -125,7 +125,7 @@ module Make_HashFunction_generic (C: Buffer)
 = struct
   type t = C.t
   let hash input output =
-    assert (C.size input < HashDefs.max_input_len);
+    HashDefs.check_max_input_len (C.size input);
     assert (C.disjoint input output);
     HashDefs.check_digest_len Impl.hash_alg (C.size output);
     Impl.hash (C.ctypes_buf input) (C.size_uint32 input) (C.ctypes_buf output)
@@ -177,7 +177,7 @@ module Make_HKDF_generic (C: Buffer)
     assert (C.size okm <= 255 * HashDefs.digest_len Impl.hash_alg);
     assert (C.disjoint okm prk);
     assert (HashDefs.digest_len Impl.hash_alg <= C.size prk);
-    assert (HashDefs.digest_len Impl.hash_alg + HashDefs.block_len Impl.hash_alg + C.size info + 1 < HashDefs.max_input_len);
+    HashDefs.(check_max_input_len (digest_len Impl.hash_alg + block_len Impl.hash_alg + C.size info + 1));
     HashDefs.check_key_len Impl.hash_alg (C.size prk);
     Impl.expand (C.ctypes_buf okm) (C.ctypes_buf prk) (C.size_uint32 prk) (C.ctypes_buf info) (C.size_uint32 info) (C.size_uint32 okm)
   let extract prk salt ikm =
@@ -203,9 +203,9 @@ module Make_Blake2b_generic (C: Buffer)
     assert (C.size output > 0 && C.size output <= 64);
     assert (C.size key <= 64);
     if C.size key = 0 then
-      assert (C.size pt <= max_size_t)
+      assert Z.(of_int (C.size pt) <= max_size_t)
     else
-      assert (C.size pt + 1024 <= max_size_t);
+      assert Z.(of_int (C.size pt) + ~$1024 <= max_size_t);
     assert (C.disjoint key pt);
     assert (C.disjoint key output);
     assert (C.disjoint pt output);
@@ -225,9 +225,9 @@ module Make_Blake2s_generic (C: Buffer)
     assert (C.size output > 0 && C.size output <= 32);
     assert (C.size key <= 32);
     if C.size key = 0 then
-      assert (C.size pt <= max_size_t)
+      assert Z.(of_int (C.size pt) <= max_size_t)
     else
-      assert (C.size pt + 512 <= max_size_t);
+      assert Z.(of_int (C.size pt) + ~$512 <= max_size_t);
     assert (C.disjoint key pt);
     assert (C.disjoint key output);
     assert (C.disjoint pt output);
