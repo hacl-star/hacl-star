@@ -40,6 +40,7 @@ let supported_alg_of_impl (i: impl): supported_alg =
   | Vale_AES256 -> AES256_GCM
   | Hacl_CHACHA20 -> CHACHA20_POLY1305
 
+inline_for_extraction noextract
 let alg_of_vale_impl (i: vale_impl) =
   match i with
   | Vale_AES128 -> AES128_GCM
@@ -351,22 +352,47 @@ let encrypt #a s iv iv_len ad ad_len plain plain_len cipher tag =
         end
 
 inline_for_extraction noextract
-let encrypt_expand_aes_gcm (i: vale_impl): encrypt_expand_st (alg_of_vale_impl i) =
+let encrypt_expand_aes_gcm (i: vale_impl): encrypt_expand_st false (alg_of_vale_impl i) =
   fun k iv iv_len ad ad_len plain plain_len cipher tag ->
   push_frame ();
   (* Allocate the state *)
   let s : B.pointer_or_null (state_s (alg_of_vale_impl i)) = alloca k in
   let r = encrypt_aes_gcm i s iv iv_len ad ad_len plain plain_len cipher tag in
   assert(r == Success);
-  pop_frame ()
+  pop_frame ();
+  Success
 
-let encrypt_expand_aes128_gcm : encrypt_expand_st AES128_GCM =
+let encrypt_expand_aes128_gcm_no_check : encrypt_expand_st false AES128_GCM =
   encrypt_expand_aes_gcm Vale_AES128
 
-let encrypt_expand_aes256_gcm : encrypt_expand_st AES256_GCM =
+let encrypt_expand_aes256_gcm_no_check : encrypt_expand_st false AES256_GCM =
   encrypt_expand_aes_gcm Vale_AES256
 
-let encrypt_expand_chacha20_poly1305 : encrypt_expand_st CHACHA20_POLY1305 =
+let encrypt_expand_aes128_gcm : encrypt_expand_st true AES128_GCM =
+  fun k iv iv_len ad ad_len plain plain_len cipher tag  ->
+  let has_pclmulqdq = EverCrypt.AutoConfig2.has_pclmulqdq () in
+  let has_avx = EverCrypt.AutoConfig2.has_avx() in
+  let has_sse = EverCrypt.AutoConfig2.has_sse() in
+  let has_movbe = EverCrypt.AutoConfig2.has_movbe() in
+  let has_aesni = EverCrypt.AutoConfig2.has_aesni () in
+  if EverCrypt.TargetConfig.x64 && (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe) then
+    encrypt_expand_aes_gcm Vale_AES128 k iv iv_len ad ad_len plain plain_len cipher tag
+  else
+    UnsupportedAlgorithm
+
+let encrypt_expand_aes256_gcm : encrypt_expand_st true AES256_GCM =
+  fun k iv iv_len ad ad_len plain plain_len cipher tag  ->
+  let has_pclmulqdq = EverCrypt.AutoConfig2.has_pclmulqdq () in
+  let has_avx = EverCrypt.AutoConfig2.has_avx() in
+  let has_sse = EverCrypt.AutoConfig2.has_sse() in
+  let has_movbe = EverCrypt.AutoConfig2.has_movbe() in
+  let has_aesni = EverCrypt.AutoConfig2.has_aesni () in
+  if EverCrypt.TargetConfig.x64 && (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe) then
+    encrypt_expand_aes_gcm Vale_AES256 k iv iv_len ad ad_len plain plain_len cipher tag
+  else
+    UnsupportedAlgorithm
+
+let encrypt_expand_chacha20_poly1305 : encrypt_expand_st false CHACHA20_POLY1305 =
   fun k iv iv_len ad ad_len plain plain_len cipher tag ->
   push_frame ();
   (* Allocate the state *)
@@ -374,7 +400,8 @@ let encrypt_expand_chacha20_poly1305 : encrypt_expand_st CHACHA20_POLY1305 =
   let open LowStar.BufferOps in
   let Ek i kv ek = !*s in
   EverCrypt.Chacha20Poly1305.aead_encrypt ek iv ad_len ad plain_len plain cipher tag;
-  pop_frame ()
+  pop_frame ();
+  Success
 
 let encrypt_expand #a k iv iv_len ad ad_len plain plain_len cipher tag =
   match a with
@@ -570,7 +597,7 @@ let decrypt #a s iv iv_len ad ad_len cipher cipher_len tag dst =
         decrypt_chacha20_poly1305 s iv iv_len ad ad_len cipher cipher_len tag dst
 
 inline_for_extraction noextract
-let decrypt_expand_aes_gcm (i: vale_impl): decrypt_expand_st (alg_of_vale_impl i) =
+let decrypt_expand_aes_gcm (i: vale_impl): decrypt_expand_st false (alg_of_vale_impl i) =
   fun k iv iv_len ad ad_len cipher cipher_len tag dst ->
   push_frame ();
   (* Allocate the state *)
@@ -579,13 +606,37 @@ let decrypt_expand_aes_gcm (i: vale_impl): decrypt_expand_st (alg_of_vale_impl i
   pop_frame ();
   r
 
-let decrypt_expand_aes128_gcm : decrypt_expand_st AES128_GCM =
+let decrypt_expand_aes128_gcm_no_check : decrypt_expand_st false AES128_GCM =
   decrypt_expand_aes_gcm Vale_AES128
 
-let decrypt_expand_aes256_gcm : decrypt_expand_st AES256_GCM =
+let decrypt_expand_aes256_gcm_no_check : decrypt_expand_st false AES256_GCM =
   decrypt_expand_aes_gcm Vale_AES256
 
-let decrypt_expand_chacha20_poly1305 : decrypt_expand_st CHACHA20_POLY1305 =
+let decrypt_expand_aes128_gcm : decrypt_expand_st true AES128_GCM =
+  fun k iv iv_len ad ad_len cipher cipher_len tag dst ->
+  let has_pclmulqdq = EverCrypt.AutoConfig2.has_pclmulqdq () in
+  let has_avx = EverCrypt.AutoConfig2.has_avx() in
+  let has_sse = EverCrypt.AutoConfig2.has_sse() in
+  let has_movbe = EverCrypt.AutoConfig2.has_movbe() in
+  let has_aesni = EverCrypt.AutoConfig2.has_aesni () in
+  if EverCrypt.TargetConfig.x64 && (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe) then
+    decrypt_expand_aes_gcm Vale_AES128 k iv iv_len ad ad_len cipher cipher_len tag dst
+  else
+    UnsupportedAlgorithm
+
+let decrypt_expand_aes256_gcm : decrypt_expand_st true AES256_GCM =
+  fun k iv iv_len ad ad_len cipher cipher_len tag dst ->
+  let has_pclmulqdq = EverCrypt.AutoConfig2.has_pclmulqdq () in
+  let has_avx = EverCrypt.AutoConfig2.has_avx() in
+  let has_sse = EverCrypt.AutoConfig2.has_sse() in
+  let has_movbe = EverCrypt.AutoConfig2.has_movbe() in
+  let has_aesni = EverCrypt.AutoConfig2.has_aesni () in
+  if EverCrypt.TargetConfig.x64 && (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe) then
+    decrypt_expand_aes_gcm Vale_AES256 k iv iv_len ad ad_len cipher cipher_len tag dst
+  else
+    UnsupportedAlgorithm
+
+let decrypt_expand_chacha20_poly1305 : decrypt_expand_st false CHACHA20_POLY1305 =
   fun k iv iv_len ad ad_len cipher cipher_len tag dst ->
   push_frame ();
   (* Allocate the state *)
