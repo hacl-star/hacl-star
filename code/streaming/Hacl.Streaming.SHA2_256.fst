@@ -58,7 +58,8 @@ let update_multi_s () acc input =
   fst Agile.(update_multi SHA2_256 (acc, ()) input)
 
 let update_multi_zero () acc :
-  Lemma(update_multi_s () acc S.empty == acc) = admit()
+  Lemma(update_multi_s () acc S.empty == acc) =
+  
 
 #push-options "--ifuel 1"
 
