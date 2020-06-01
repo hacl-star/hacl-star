@@ -24,6 +24,7 @@
         "constructor_distinct_Spec.Hash.Definitions.SHA2_224",
         "constructor_distinct_Spec.Hash.Definitions.SHA2_256",
         "constructor_distinct_Spec.Hash.Definitions.SHA2_384",
+        "constructor_distinct_Spec.Hash.Definitions.SHA2_512",
         "disc_equation_Spec.Hash.Definitions.MD5",
         "disc_equation_Spec.Hash.Definitions.SHA1",
         "disc_equation_Spec.Hash.Definitions.SHA2_224",
@@ -33,8 +34,14 @@
         "equality_tok_FStar.Integers.W16@tok",
         "equality_tok_FStar.Integers.W32@tok",
         "equality_tok_FStar.Integers.W64@tok",
-        "equality_tok_FStar.Integers.W8@tok", "equation_Prims.nat",
-        "equation_Prims.pos",
+        "equality_tok_FStar.Integers.W8@tok",
+        "equality_tok_Spec.Hash.Definitions.MD5@tok",
+        "equality_tok_Spec.Hash.Definitions.SHA1@tok",
+        "equality_tok_Spec.Hash.Definitions.SHA2_224@tok",
+        "equality_tok_Spec.Hash.Definitions.SHA2_256@tok",
+        "equality_tok_Spec.Hash.Definitions.SHA2_384@tok",
+        "equality_tok_Spec.Hash.Definitions.SHA2_512@tok",
+        "equation_Prims.nat", "equation_Prims.pos",
         "equation_Spec.Hash.Definitions.max_input_length",
         "fuel_guarded_inversion_Spec.Hash.Definitions.hash_alg",
         "int_typing", "inversion-interp", "lemma_FStar.UInt.pow2_values",
@@ -48,7 +55,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "27bb9e9a21458de32610f3bf462a4f6e"
+      "7547614df412aeb6c98d49a34a9fd218"
     ],
     [
       "Hacl.Streaming.SHA2_256.update_multi_associative",
@@ -66,7 +73,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "e76ebc0a8d67228dfd4e750710d95cb6"
+      "6e3178eb5c320791b045153f7e0a9b8b"
     ],
     [
       "Hacl.Streaming.SHA2_256.b",
@@ -110,7 +117,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_256@tok"
       ],
       0,
-      "474f92efeee87255a0eae1647858f541"
+      "4272d0344c2462ce26d7f1a4067ab192"
     ],
     [
       "Hacl.Streaming.SHA2_256.hacl_sha2_256",
@@ -315,7 +322,7 @@
         "unit_typing"
       ],
       0,
-      "0380de8204703bd089e8db6b94659551"
+      "7a689ac0cc5159f253323a552b96e038"
     ],
     [
       "Hacl.Streaming.SHA2_256.create_in",
@@ -341,7 +348,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "cb0b50928c7d42389f01adb15270f59f"
+      "8828061ade2186d8e251a7258eceb384"
     ],
     [
       "Hacl.Streaming.SHA2_256.init",
@@ -371,7 +378,7 @@
         "unit_typing"
       ],
       0,
-      "966d6dc01c8d8e5ef53edad310346d13"
+      "f4a61e57f0050d1f7e2b43567e680208"
     ],
     [
       "Hacl.Streaming.SHA2_256.update",
@@ -401,7 +408,7 @@
         "unit_typing"
       ],
       0,
-      "2b91a2702d9613984ee7555a11edb87e"
+      "4de15fccb238ef5005429c0a1cd0132e"
     ],
     [
       "Hacl.Streaming.SHA2_256.finish",
@@ -427,7 +434,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "8de57de6b077821549b03172a0207ff2"
+      "2905787dd1481edaa72adae3910be5d1"
     ],
     [
       "Hacl.Streaming.SHA2_256.free",
@@ -457,7 +464,7 @@
         "unit_typing"
       ],
       0,
-      "b0ec0624b99dd0fdfabe5c94fc4de2ea"
+      "1016f820d91e87c2da9dab57f5282ab1"
     ]
   ]
 ]

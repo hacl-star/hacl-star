@@ -11,6 +11,11 @@ open Lib.Buffer
 // to be such that we clear an exact multiple of 32-bit words.
 // This condition can be relaxed, but it's enough for our use in e.g. Frodo.
 
+/// The two variants below are monomorphic; they have restrictions on the length
+/// to be cleared, but reveal that the buffer has been zero-ed out in their
+/// post-condition. For a generic version without a functional specification,
+/// see Lib.Memzero0.
+
 val clear_words_u16:
     nwords:size_t{v nwords % 2 == 0}
   -> b:buffer uint16{v nwords <= length b}

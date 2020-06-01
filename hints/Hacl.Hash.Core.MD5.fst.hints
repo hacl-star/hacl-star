@@ -27,7 +27,7 @@
         "typing_FStar.Monotonic.HyperStack.get_tip"
       ],
       0,
-      "18daad8b23b84974c6f917d1fae3d462"
+      "552cc3b5f27f73e8b149bf26c4c3601e"
     ],
     [
       "Hacl.Hash.Core.MD5._t",
@@ -55,7 +55,7 @@
         "typing_FStar.Monotonic.HyperStack.get_tip"
       ],
       0,
-      "def935a53b278af5a8bf3cadeb9a2729"
+      "6b2b646cb598e54ac3da9e53b9287d84"
     ],
     [
       "Hacl.Hash.Core.MD5.legacy_alloca",
@@ -73,7 +73,10 @@
         "equality_tok_Spec.Hash.Definitions.MD5@tok",
         "equation_FStar.Preorder.preorder",
         "equation_FStar.Preorder.preorder_rel",
-        "equation_FStar.Preorder.reflexive", "equation_Lib.IntTypes.uint32",
+        "equation_FStar.Preorder.reflexive",
+        "equation_Hacl.Hash.Definitions.state",
+        "equation_Lib.IntTypes.uint32", "equation_LowStar.Buffer.buffer",
+        "equation_LowStar.Buffer.trivial_preorder",
         "equation_LowStar.ImmutableBuffer.immutable_preorder",
         "equation_Spec.Agile.Hash.init",
         "equation_Spec.Hash.Definitions.state_word_length",
@@ -83,6 +86,7 @@
         "function_token_typing_Lib.IntTypes.uint32",
         "interpretation_Tm_abs_b4ae3c8c313abed48b0c4141f8bc0016",
         "refinement_interpretation_Tm_refine_2dc51c00080a7acfcdb6c872f5b38068",
+        "refinement_interpretation_Tm_refine_8123bca628cafe0c2db21c68d24b1c50",
         "refinement_interpretation_Tm_refine_9ca7807bfc284168a2426f4440262824",
         "refinement_interpretation_Tm_refine_bd10f09297e0e7dc08314f7d9211801c",
         "refinement_interpretation_Tm_refine_d2d1ea66f2b3a92c2deb42edcbb784ce",
@@ -92,7 +96,7 @@
         "typing_Spec.MD5.init_as_list"
       ],
       0,
-      "c526117a6af8e8e1bae948d37fc43deb"
+      "fbf9bdc997dfa511b3bea8d46a97bf13"
     ],
     [
       "Hacl.Hash.Core.MD5.h0",
@@ -122,7 +126,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_none", "typing_Spec.MD5.init"
       ],
       0,
-      "a1301c95ebee989620da19916158fc86"
+      "a353838924b9bb196fd8edf456fee9ed"
     ],
     [
       "Hacl.Hash.Core.MD5.t",
@@ -145,7 +149,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_none", "typing_Spec.MD5.t"
       ],
       0,
-      "4937fa39afe6c54c4b0ba1d219a81113"
+      "8e0bb304831cecfb93f525e85563ee01"
     ],
     [
       "Hacl.Hash.Core.MD5.seq_index_upd",
@@ -169,7 +173,7 @@
         "refinement_interpretation_Tm_refine_df81b3f17797c6f405c1dbb191651292"
       ],
       0,
-      "2b2875b2f4571f289bc1a90b9c067dba"
+      "275fb1d6f06aad9a3de2e411e80b958f"
     ],
     [
       "Hacl.Hash.Core.MD5.legacy_init",
@@ -295,7 +299,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "3605b9c2f96c6198adc82b59575e55ff"
+      "f06d0c8c30a81ed0b26742bc01b89969"
     ],
     [
       "Hacl.Hash.Core.MD5.round_op_gen",
@@ -396,7 +400,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "f19226582276a14f92b1abb628c9d3d2"
+      "e899cc88a01483868f51c7be3dbfc8ea"
     ],
     [
       "Hacl.Hash.Core.MD5.round1",
@@ -827,7 +831,7 @@
         "typing_tok_Spec.Hash.Definitions.MD5@tok"
       ],
       0,
-      "2ab879710510881d263cb74d21032201"
+      "12564932935dd6a3102fff09293e53df"
     ],
     [
       "Hacl.Hash.Core.MD5.update'",
@@ -836,6 +840,7 @@
       0,
       [
         "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "constructor_distinct_Lib.IntTypes.U1",
         "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Spec.Hash.Definitions.MD5",
         "equality_tok_Lib.IntTypes.SEC@tok",
@@ -883,7 +888,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_buffer",
         "typing_Spec.Hash.Definitions.block_length",
         "typing_Spec.Hash.Definitions.word",
-        "typing_tok_Lib.IntTypes.U32@tok",
+        "typing_Spec.Hash.Definitions.word_t",
         "typing_tok_Spec.Hash.Definitions.MD5@tok"
       ],
       0,
@@ -938,7 +943,7 @@
         "typing_tok_Spec.Hash.Definitions.MD5@tok"
       ],
       0,
-      "6cd9251ed5e06fc80cef302882338c2f"
+      "1a6a5cc1f511023eb3d5312a74c0c78b"
     ]
   ]
 ]
