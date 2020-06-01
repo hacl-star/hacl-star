@@ -44,17 +44,38 @@ let max_input_length64 a: x:nat { 0 < x /\ x < pow2 64 /\ x <= max_input_length 
   | Blake2S -> pow2 64 - 1
   | Blake2B -> assert_norm (pow2 64 < pow2 128); pow2 64 - 1
 
-// Local redefinition to have the shape desired by the type class.
-let update_multi_associative (i: hash_alg) =
-  Lib.UpdateMulti.update_multi_associative (block_length i) (Spec.Agile.Hash.update i)
 
 open Hacl.Streaming.Interface
 
+open Hacl.Hash.Definitions
+module D = Hacl.Hash.Definitions
+module Agile = Spec.Agile.Hash
+
 inline_for_extraction noextract
-let b = stateful_buffer (word SHA2_256) (Hacl.Hash.Definitions.hash_word_len SHA2_256) (Lib.IntTypes.u32 0)
+let b = stateful_buffer (word SHA2_256) (D.hash_word_len SHA2_256) (Lib.IntTypes.u32 0)
+
+let update_multi_s () acc input =
+  fst Agile.(update_multi SHA2_256 (acc, ()) input)
+
+let update_multi_zero () acc :
+  Lemma(update_multi_s () acc S.empty == acc) = admit()
 
 #push-options "--ifuel 1"
 
+let update_multi_associative () acc (input1 input2 : S.seq uint8) :
+    Lemma
+    (requires (
+      S.length input1 % U32.v (D.block_len SHA2_256) = 0 /\
+      S.length input2 % U32.v (D.block_len SHA2_256) = 0))
+    (ensures (
+      let input = S.append input1 input2 in
+      S.length input % U32.v (D.block_len SHA2_256) = 0 /\
+      update_multi_s () (update_multi_s () acc input1) input2 ==
+        update_multi_s () acc input)) =
+  Spec.Hash.Lemmas.update_multi_associative SHA2_256 (acc, ()) input1 input2
+
+/// This proof usually succeeds fast but we increase the rlimit for safety
+#push-options "--z3rlimit 200"
 inline_for_extraction noextract
 let hacl_sha2_256: block unit =
   Block
@@ -67,28 +88,23 @@ let hacl_sha2_256: block unit =
     (fun () -> Hacl.Hash.Definitions.block_len SHA2_256)
 
     (fun () _ -> fst (Spec.Agile.Hash.(init SHA2_256)))
-    (fun () acc blocks -> fst Spec.Agile.Hash.(update_multi SHA2_256 (acc, ()) blocks))
+    (fun () acc blocks -> update_multi_s () acc blocks)
     (fun () acc prevlen input -> fst Spec.Hash.Incremental.(update_last SHA2_256 (acc, ()) prevlen input))
     (fun () _ acc -> Spec.Hash.PadFinish.(finish SHA2_256 (acc, ())))
     (fun () _ s -> Spec.Agile.Hash.(hash SHA2_256 s))
 
-    (fun _ _ -> ())
-    (fun _ _ _ _ -> ())
+    (fun i h -> update_multi_zero i h) (* update_multi_zero *)
+    (fun i acc input1 input2 -> update_multi_associative i acc input1 input2) (* update_multi_associative *)
     (fun _ _ input -> Spec.Hash.Incremental.hash_is_hash_incremental SHA2_256 input)
 
     (fun _ _ -> ())
     (fun _ _ s -> Hacl.Hash.SHA2.init_256 s)
     (fun _ s blocks len -> Hacl.Hash.SHA2.update_multi_256 s () blocks (len `U32.div` Hacl.Hash.Definitions.(block_len SHA2_256)))
-    (fun _ s last total_len ->
-      [@inline_let]
-      let block_len64 = 64UL in
-      assert_norm (U64.v block_len64 == block_length SHA2_256);
-      let last_len: len_t SHA2_256 = U64.(total_len `rem` block_len64) in
-      let prev_len = U64.(total_len `sub` last_len) in
-      let last_len = FStar.Int.Cast.Full.uint64_to_uint32 last_len in
-      assert (U64.v prev_len % block_length SHA2_256 = 0);
+    (fun _ s last last_len total_len ->
+      let prev_len = U64.(total_len `sub` FStar.Int.Cast.uint32_to_uint64 last_len) in
       Hacl.Hash.SHA2.update_last_256 s () prev_len last last_len)
     (fun _ _ s dst -> Hacl.Hash.SHA2.finish_256 s () dst)
+#pop-options
 
 /// An instantiation of the streaming functor for a specialized hash algorithm.
 ///
