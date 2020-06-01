@@ -335,14 +335,8 @@ type block (index: Type0) =
     i: G.erased index -> (
     let i = G.reveal i in
     s:state.s i ->
-    prev_len:U64.t {
-        U64.v prev_len % U32.v (block_len i) = 0
-//      U64.v total_len <= max_input_length i /\
-//      U64.v total_len >= B.length last /\
-//      U64.v total_len - B.length last <= 
-//      (U64.v total_len - B.length last) % U32.v (block_len i) = 0} ->
-        } ->
-    last:B.buffer uint8 (*{ B.len last <= block_len i }*) ->
+    prev_len:U64.t { U64.v prev_len % U32.v (block_len i) = 0 } ->
+    last:B.buffer uint8 ->
     last_len:U32.t{
       last_len = B.len last /\
       U32.v last_len <= U32.v (block_len i) /\
