@@ -13,6 +13,7 @@ depends: [
   "dune" {>= "1.2"}
   "hacl-star-raw" {= version}
   "zarith"
+  "cppo" {build}
 ]
 build: [
   ["dune" "build" "-p" name "-j" jobs]

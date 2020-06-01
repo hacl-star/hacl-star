@@ -11,4 +11,10 @@
         blake2_test
         ecdsa_test)
  (libraries hacl-star)
- (flags (:standard -open Hacl_star -warn-error -3)))
+ (preprocessor_deps config.h)
+ (preprocess (action (run %{bin:cppo} %{input-file})))
+ (flags (:standard -open Hacl_star -warn-error -3-33)))
+
+(rule (targets config.h ) (deps)
+ (action
+  (bash "cp %{lib:hacl-star-raw:config.h} .")))
