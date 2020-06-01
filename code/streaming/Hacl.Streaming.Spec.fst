@@ -19,7 +19,9 @@ module Hacl.Streaming.Spec
 ///
 /// - ``block_state`` contains the accumulated result of calling ``update`` on
 ///   all of the blocks, and
-/// - ``buf`` contains the rest of ``seen`` that is not big enough to form a complete block.
+/// - ``buf`` contains the rest of ``seen`` that is smaller or equal to a complete
+///   block and is processed lazily to make sure there is some data left when we
+///   call ``last_update`` 
 ///
 /// The function that performs this splitting is called ``split_at_last``, and
 /// we need to prove various properties about it, since the streaming functor
