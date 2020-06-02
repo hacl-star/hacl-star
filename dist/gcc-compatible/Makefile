@@ -173,12 +173,13 @@ BLACKLIST_CMX += $(patsubst %,lib/%_bindings.cmx,$(BLACKLIST_ML))
 CTYPES_CMX    =  $(filter-out $(BLACKLIST_CMX),$(CTYPES_DEPS))
 CTYPES_CMX    += lib/Lib_RandomBuffer_System_stubs.cmx lib/Lib_RandomBuffer_System_bindings.cmx
 CTYPES_ML     =  $(patsubst %.cmx,%.ml,$(CTYPES_CMX))
+CTYPES_CMI    =  $(patsubst %.cmx,%.cmi,$(CTYPES_CMX))
 
 ocamlevercrypt.cmxa: $(ALL_BINDINGS) $(ALL_ML_STUBS) $(ALL_C_STUBS) libevercrypt.$(SO)
-	ocamlfind mklib -o ocamlevercrypt $(CTYPES_CMX) -ccopt -L. -cclib -levercrypt
+	ocamlfind mklib -o ocamlevercrypt $(CTYPES_CMX) $(ALL_C_STUBS) -ccopt -L. -cclib -levercrypt
 
-install-hacl-star-raw: ocamlevercrypt.cmxa
-	ocamlfind install hacl-star-raw META $(CTYPES_ML) $(wildcard lib/*.cmx lib/*.cmi *.cmxa *.a *.so *.dll) config.h
+install-hacl-star-raw: ocamlevercrypt.cmxa libevercrypt.a
+	ocamlfind install hacl-star-raw META $(CTYPES_ML) $(CTYPES_CMX) $(CTYPES_CMI) $(wildcard *.cmxa *.a *.so *.dll) config.h
 
 endif
 endif

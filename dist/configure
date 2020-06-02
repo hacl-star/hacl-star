@@ -175,6 +175,7 @@ if ! detect_x64; then
   echo "BLACKLIST += Hacl_Curve25519_64.c $(ls Hacl_HPKE_Curve64_*.c | xargs)" >> Makefile.config
   echo "$(uname -m) does not support _addcarry_u64, using a C implementation"
   echo "#define BROKEN_INTRINSICS 1" >> config.h
+  echo "#define IS_NOT_X64 1" >> config.h
 else
   if detect_broken_xcode; then
     echo "found broken XCode version, known to refuse to compile our inline ASM, disabling "
@@ -188,7 +189,6 @@ else
   else
     echo "... using a non-buggy GCC"
   fi
-  echo "#define IS_X64 1" >> config.h
 fi
 
 if ! detect_uint128; then

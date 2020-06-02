@@ -74,13 +74,11 @@ end
 module Chacha20_Poly1305_128 : Chacha20_Poly1305
 module Poly1305_128 : MAC
 module Blake2s_128 : Blake2
-#ifndef IS_ARM_8
+#endif
+
+#ifndef IS_NOT_X64
 module Chacha20_Poly1305_256 : Chacha20_Poly1305
 module Poly1305_256 : MAC
 module Blake2b_256 : Blake2
-#endif
-#endif
-
-#ifdef IS_X64
 module Curve25519_64 : Curve25519
 #endif

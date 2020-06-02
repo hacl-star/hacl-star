@@ -16,7 +16,7 @@ jobs:
         - opam init --yes --bare
         - opam switch create 4.09.1 --yes
         - eval $(opam config env)
-        - opam install --yes ctypes ctypes-foreign dune zarith
+        - opam install --yes cppo ctypes ctypes-foreign dune zarith
     - name: clang 7 / full tests
       os: linux
       compiler: clang

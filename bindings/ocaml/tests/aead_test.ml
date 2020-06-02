@@ -110,11 +110,12 @@ let _ =
 
   #ifndef IS_ARM_7
   test_nonagile chacha20poly1305_test "Hacl.Chacha20_Poly1305_128" Hacl.Chacha20_Poly1305_128.encrypt Hacl.Chacha20_Poly1305_128.decrypt [AVX];
-  #ifndef IS_ARM_8
-  test_nonagile chacha20poly1305_test "Hacl.Chacha20_Poly1305_256" Hacl.Chacha20_Poly1305_256.encrypt Hacl.Chacha20_Poly1305_256.decrypt [AVX2];
-  #endif
   #endif
 
-  test_nonagile chacha20poly1305_test "EverCrypt.Chacha20_Poly1305_256" EverCrypt.Chacha20_Poly1305.encrypt EverCrypt.Chacha20_Poly1305.decrypt [];
+  #ifndef IS_NOT_X64
+  test_nonagile chacha20poly1305_test "Hacl.Chacha20_Poly1305_256" Hacl.Chacha20_Poly1305_256.encrypt Hacl.Chacha20_Poly1305_256.decrypt [AVX2];
+  #endif
+
+  test_nonagile chacha20poly1305_test "EverCrypt.Chacha20_Poly1305" EverCrypt.Chacha20_Poly1305.encrypt EverCrypt.Chacha20_Poly1305.decrypt [];
 
   test_random ()
