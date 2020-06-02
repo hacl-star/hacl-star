@@ -7,7 +7,7 @@
 #endif
 
 
-if defined(__arm__) || defined(__aarch64__)
+#if defined(__arm__) || defined(__aarch64__)
 #include "Hacl_IntTypes_Intrinsics.h"
 
 // __arm__ which is defined for 32bit arm, and 32bit arm only.
