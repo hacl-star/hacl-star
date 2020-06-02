@@ -19,8 +19,6 @@ if defined(__arm__)
 #define Lib_IntTypes_Intrinsics_sub_borrow_u64(x1, x2, x3, x4) \
   (Hacl_IntTypes_Intrinsics_sub_borrow_u64(x1, x2, x3, x4))
 
-#endif 
-
 #else 
 	#include <x86intrin.h>
 #endif 
