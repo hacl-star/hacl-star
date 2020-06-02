@@ -1043,12 +1043,12 @@ dist/evercrypt-external-headers/Makefile.basic: $(ALL_KRML_FILES)
 .PRECIOUS: dist/test/c/%.c
 dist/test/c/%.c: $(ALL_KRML_FILES)
 	$(KRML) -silent \
-	  -tmpdir $(dir $@) -skip-compilation \
-	  -no-prefix $(subst _,.,$*) \
-	  -library Hacl.Impl.*,EverCrypt,EverCrypt.* \
-	  -fparentheses -fcurly-braces -fno-shadow \
-	  -minimal -add-include '"kremlib.h"' \
-	  -bundle '*[rename=$*]' $(KRML_EXTRA) $(filter %.krml,$^)
+          -tmpdir $(dir $@) -skip-compilation \
+          -no-prefix $(subst _,.,$*) \
+          -library Hacl.Interface.*,Hacl.Impl.*,EverCrypt,EverCrypt.* \
+          -fparentheses -fcurly-braces -fno-shadow \
+          -minimal -add-include '"kremlib.h"' \
+          -bundle '*[rename=$*]' $(KRML_EXTRA) $(filter %.krml,$^)
 
 dist/test/c/Test.c: KRML_EXTRA=-add-include '"kremlin/internal/compat.h"'
 
