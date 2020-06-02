@@ -152,39 +152,6 @@ int main()
 	cycles cdiff1 = b - a;
 
 
-	// EC_KEY *eckey = EC_KEY_new();
-	// 	if (eckey == NULL) {
-	//     return false;
-	// }
-
-	
- //  	// memset(plain,'P',SIZE);
- //  	EC_KEY_set_private_key(eckey, prKey);
-
- //  	EC_GROUP *group = EC_GROUP_new_by_curve_name(NID_X9_62_prime256v1);
- //  	EC_KEY_set_group(eckey, group);
- //  	unsigned int sig_len = ECDSA_size(eckey);
- //  	unsigned char *signature = OPENSSL_malloc(sig_len);
- //  	EC_KEY_generate_key(eckey);
-
-	// for (int j = 0; j < ROUNDS; j++)
-	// 	ECDSA_sign(0, signature + 40, 32, signature, &sig_len, eckey);
-
- //  	t1 = clock();
- //  	a = cpucycles_begin();
-
- //  	for (int j = 0; j < ROUNDS; j++)
-	// 	ECDSA_sign(0, signature + 40, 32, signature, &sig_len, eckey);
-
-	// b = cpucycles_end();
-	// t2 = clock();
-	// clock_t tdiff2 = t2 - t1;
-	// cycles cdiff2 = b - a;
-
-
-
-
-
 	uint8_t* pk = (uint8_t*) malloc (sizeof (uint8_t) * 64);
 	memcpy(pk, px0_0,  32);
 	memcpy(pk+32, py0_0,  32);
@@ -212,8 +179,43 @@ int main()
 
 
 	
+	uint64_t count = ROUNDS * SIZE;
+	printf("Hacl ECDSA (without hashing) PERF: %d\n"); 
+	print_time(count,tdiff1,cdiff1);
+
+	printf("Hacl ECDH PERF: %d\n"); 
+	print_time(count,tdiff3,cdiff3);  
 
 
+
+	// EC_KEY *eckey = EC_KEY_new();
+	// 	if (eckey == NULL) {
+	//     return false;
+	// }
+
+	
+	 //  	// memset(plain,'P',SIZE);
+	 //  	EC_KEY_set_private_key(eckey, prKey);
+
+	 //  	EC_GROUP *group = EC_GROUP_new_by_curve_name(NID_X9_62_prime256v1);
+	 //  	EC_KEY_set_group(eckey, group);
+	 //  	unsigned int sig_len = ECDSA_size(eckey);
+	 //  	unsigned char *signature = OPENSSL_malloc(sig_len);
+	 //  	EC_KEY_generate_key(eckey);
+
+		// for (int j = 0; j < ROUNDS; j++)
+		// 	ECDSA_sign(0, signature + 40, 32, signature, &sig_len, eckey);
+
+	 //  	t1 = clock();
+ //  	a = cpucycles_begin();
+
+ //  	for (int j = 0; j < ROUNDS; j++)
+	// 	ECDSA_sign(0, signature + 40, 32, signature, &sig_len, eckey);
+
+	// b = cpucycles_end();
+	// t2 = clock();
+	// clock_t tdiff2 = t2 - t1;
+	// cycles cdiff2 = b - a;
 
 
 	// size_t t = 64;
@@ -297,15 +299,9 @@ int main()
 	// EVP_PKEY_CTX_free(pctx);
 
 
-	uint64_t count = ROUNDS * SIZE;
-	printf("Hacl ECDSA (without hashing) PERF: %d\n"); 
-	print_time(count,tdiff1,cdiff1);
-
 	// printf("OpenSSL ECDSA (without hashing) PERF: %d\n"); 
 	// print_time(count,tdiff2,cdiff2);
 
-	printf("Hacl ECDH PERF: %d\n"); 
-	print_time(count,tdiff3,cdiff3);  
 
 	// printf("OpenSSL ECDH PERF: %d\n"); 
 	// print_time(count,tdiff4,cdiff4);  
