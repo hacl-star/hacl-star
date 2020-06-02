@@ -682,3 +682,28 @@ val hash_lemma:
 
 let hash_lemma #a #m len b =
   Classical.forall_intro (hash_lemma_l #a #m len b)
+
+
+val hash_agile_lemma_l:
+    #a:sha2_alg
+  -> #m:m_spec
+  -> len:size_nat{len <= max_input_length a}
+  -> b:multiseq (lanes a m) len
+  -> l:nat{l < lanes a m} ->
+  Lemma ((hash #a #m len b).(|l|) == Spec.Agile.Hash.hash a b.(|l|))
+
+let hash_agile_lemma_l #a #m len b l =
+  hash_lemma_l #a #m len b l;
+  Hacl.Spec.SHA2.EquivScalar.hash_agile_lemma #a len b.(|l|)
+
+
+val hash_agile_lemma:
+    #a:sha2_alg
+  -> #m:m_spec
+  -> len:size_nat{len <= max_input_length a}
+  -> b:multiseq (lanes a m) len ->
+  Lemma (forall (l:nat{l < lanes a m}).
+    (hash #a #m len b).(|l|) == Spec.Agile.Hash.hash a b.(|l|))
+
+let hash_agile_lemma #a #m len b =
+  Classical.forall_intro (hash_agile_lemma_l #a #m len b)
