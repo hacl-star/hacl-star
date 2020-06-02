@@ -7,7 +7,7 @@
 #endif
 
 
-if defined(__arm__)
+if defined(__arm__) || defined(__aarch64__)
 #include "Hacl_IntTypes_Intrinsics.h"
 
 // __arm__ which is defined for 32bit arm, and 32bit arm only.
@@ -21,8 +21,6 @@ if defined(__arm__)
 
 #else 
 	#include <x86intrin.h>
-#endif 
-
 
 
 #if defined(BROKEN_INTRINSICS)
@@ -62,3 +60,5 @@ if defined(__arm__)
 #endif // GCC < 7.2
 
 #endif // BROKEN_INTRINSICS
+
+#endif  // ARM
