@@ -67,59 +67,6 @@ EverCrypt_AEAD_encrypt(
   uint8_t *tag
 );
 
-void
-EverCrypt_AEAD_encrypt_expand_aes128_gcm(
-  uint8_t *k,
-  uint8_t *iv,
-  uint32_t iv_len,
-  uint8_t *ad,
-  uint32_t ad_len,
-  uint8_t *plain,
-  uint32_t plain_len,
-  uint8_t *cipher,
-  uint8_t *tag
-);
-
-void
-EverCrypt_AEAD_encrypt_expand_aes256_gcm(
-  uint8_t *k,
-  uint8_t *iv,
-  uint32_t iv_len,
-  uint8_t *ad,
-  uint32_t ad_len,
-  uint8_t *plain,
-  uint32_t plain_len,
-  uint8_t *cipher,
-  uint8_t *tag
-);
-
-void
-EverCrypt_AEAD_encrypt_expand_chacha20_poly1305(
-  uint8_t *k,
-  uint8_t *iv,
-  uint32_t iv_len,
-  uint8_t *ad,
-  uint32_t ad_len,
-  uint8_t *plain,
-  uint32_t plain_len,
-  uint8_t *cipher,
-  uint8_t *tag
-);
-
-void
-EverCrypt_AEAD_encrypt_expand(
-  Spec_Agile_AEAD_alg a,
-  uint8_t *k,
-  uint8_t *iv,
-  uint32_t iv_len,
-  uint8_t *ad,
-  uint32_t ad_len,
-  uint8_t *plain,
-  uint32_t plain_len,
-  uint8_t *cipher,
-  uint8_t *tag
-);
-
 EverCrypt_Error_error_code
 EverCrypt_AEAD_encrypt_expand_aes128_gcm(
   uint8_t *k,
