@@ -39,7 +39,7 @@ let _ =
   List.iter (fun v -> test v "Hacl.Poly1305_32" Hacl.Poly1305_32.mac []) tests;
   List.iter (fun v -> test v "EverCrypt.Poly1305" EverCrypt.Poly1305.mac []) tests;
 
-  #ifndef IS_ARM_7
+  #if not (defined IS_NOT_X64) || defined IS_ARM_8
   List.iter (fun v -> test v "Hacl.Poly1305_128" Hacl.Poly1305_128.mac [AVX]) tests;
   #endif
 

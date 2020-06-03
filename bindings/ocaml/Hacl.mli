@@ -70,7 +70,7 @@ module ECDSA : sig
   val verify : C.t -> C.t -> C.t -> bool
 end
 
-#ifndef IS_ARM_7
+#if not (defined IS_NOT_X64) || defined IS_ARM_8
 module Chacha20_Poly1305_128 : Chacha20_Poly1305
 module Poly1305_128 : MAC
 module Blake2s_128 : Blake2

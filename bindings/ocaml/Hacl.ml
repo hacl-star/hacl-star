@@ -20,7 +20,7 @@ module Hacl_Blake2b_32 = Hacl_Blake2b_32_bindings.Bindings(Hacl_Blake2b_32_stubs
 module Hacl_Blake2s_32 = Hacl_Blake2s_32_bindings.Bindings(Hacl_Blake2s_32_stubs)
 module Hacl_ECDSA = Hacl_ECDSA_bindings.Bindings(Hacl_ECDSA_stubs)
 
-#ifndef IS_ARM_7
+#if not (defined IS_NOT_X64) || defined IS_ARM_8
 module Hacl_Chacha20Poly1305_128 = Hacl_Chacha20Poly1305_128_bindings.Bindings(Hacl_Chacha20Poly1305_128_stubs)
 module Hacl_Poly1305_128 = Hacl_Poly1305_128_bindings.Bindings(Hacl_Poly1305_128_stubs)
 module Hacl_Blake2s_128 = Hacl_Blake2s_128_bindings.Bindings(Hacl_Blake2s_128_stubs)
@@ -302,7 +302,7 @@ module ECDSA = struct
     Hacl_ECDSA.hacl_Impl_ECDSA_ecdsa_p256_sha2_verify (C.size_uint32 msg) (C.ctypes_buf msg) (C.ctypes_buf pub) (C.ctypes_buf r) (C.ctypes_buf s)
 end
 
-#ifndef IS_ARM_7
+#if not (defined IS_NOT_X64) || defined IS_ARM_8
 open AutoConfig2
 module Chacha20_Poly1305_128 : Chacha20_Poly1305 =
   Make_Chacha20_Poly1305 (struct

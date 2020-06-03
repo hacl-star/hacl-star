@@ -108,7 +108,7 @@ let _ =
   test_agile chacha20poly1305_test;
   test_nonagile chacha20poly1305_test "Hacl.Chacha20_Poly1305_32" Hacl.Chacha20_Poly1305_32.encrypt Hacl.Chacha20_Poly1305_32.decrypt [];
 
-  #ifndef IS_ARM_7
+  #if not (defined IS_NOT_X64) || defined IS_ARM_8
   test_nonagile chacha20poly1305_test "Hacl.Chacha20_Poly1305_128" Hacl.Chacha20_Poly1305_128.encrypt Hacl.Chacha20_Poly1305_128.decrypt [AVX];
   #endif
 
