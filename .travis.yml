@@ -1,10 +1,17 @@
 language: c
 jobs:
   include:
-    - name: aarch64 / arm minimal tests
+    - name: aarch64 / arm minimal tests / ocaml tests
       os: linux
       arch: arm64
       dist: bionic
+      install:
+        - sudo add-apt-repository -y ppa:avsm/ppa
+        - sudo apt update -qq --yes && sudo apt install -qq --yes opam aspcud ocaml
+        - opam init --yes --bare
+        - opam switch create 4.09.1 --yes
+        - eval $(opam config env)
+        - opam install --yes cppo ctypes ctypes-foreign dune zarith
     - name: gcc 7 / full tests
       os: linux
       compiler: gcc
@@ -16,7 +23,7 @@ jobs:
         - opam init --yes --bare
         - opam switch create 4.09.1 --yes
         - eval $(opam config env)
-        - opam install --yes ctypes ctypes-foreign dune zarith
+        - opam install --yes cppo ctypes ctypes-foreign dune zarith
     - name: clang 7 / full tests
       os: linux
       compiler: clang
