@@ -48,7 +48,8 @@ module Bindings(F:Cstubs.FOREIGN) =
                        (ocaml_bytes @->
                           (uint32_t @->
                              (ocaml_bytes @->
-                                (ocaml_bytes @-> (returning void))))))))))
+                                (ocaml_bytes @->
+                                   (returning everCrypt_Error_error_code))))))))))
       
     let everCrypt_AEAD_encrypt_expand_aes256_gcm =
       foreign "EverCrypt_AEAD_encrypt_expand_aes256_gcm"
@@ -60,7 +61,8 @@ module Bindings(F:Cstubs.FOREIGN) =
                        (ocaml_bytes @->
                           (uint32_t @->
                              (ocaml_bytes @->
-                                (ocaml_bytes @-> (returning void))))))))))
+                                (ocaml_bytes @->
+                                   (returning everCrypt_Error_error_code))))))))))
       
     let everCrypt_AEAD_encrypt_expand_chacha20_poly1305 =
       foreign "EverCrypt_AEAD_encrypt_expand_chacha20_poly1305"
@@ -72,7 +74,8 @@ module Bindings(F:Cstubs.FOREIGN) =
                        (ocaml_bytes @->
                           (uint32_t @->
                              (ocaml_bytes @->
-                                (ocaml_bytes @-> (returning void))))))))))
+                                (ocaml_bytes @->
+                                   (returning everCrypt_Error_error_code))))))))))
       
     let everCrypt_AEAD_encrypt_expand =
       foreign "EverCrypt_AEAD_encrypt_expand"
@@ -85,7 +88,8 @@ module Bindings(F:Cstubs.FOREIGN) =
                           (ocaml_bytes @->
                              (uint32_t @->
                                 (ocaml_bytes @->
-                                   (ocaml_bytes @-> (returning void)))))))))))
+                                   (ocaml_bytes @->
+                                      (returning everCrypt_Error_error_code)))))))))))
       
     let everCrypt_AEAD_decrypt =
       foreign "EverCrypt_AEAD_decrypt"

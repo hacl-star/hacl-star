@@ -97,7 +97,7 @@ EverCrypt_AEAD_encrypt(
 
 /* SNIPPET_START: EverCrypt_AEAD_encrypt_expand_aes128_gcm */
 
-void
+EverCrypt_Error_error_code
 EverCrypt_AEAD_encrypt_expand_aes128_gcm(
   uint8_t *k,
   uint8_t *iv,
@@ -114,7 +114,7 @@ EverCrypt_AEAD_encrypt_expand_aes128_gcm(
 
 /* SNIPPET_START: EverCrypt_AEAD_encrypt_expand_aes256_gcm */
 
-void
+EverCrypt_Error_error_code
 EverCrypt_AEAD_encrypt_expand_aes256_gcm(
   uint8_t *k,
   uint8_t *iv,
@@ -131,7 +131,7 @@ EverCrypt_AEAD_encrypt_expand_aes256_gcm(
 
 /* SNIPPET_START: EverCrypt_AEAD_encrypt_expand_chacha20_poly1305 */
 
-void
+EverCrypt_Error_error_code
 EverCrypt_AEAD_encrypt_expand_chacha20_poly1305(
   uint8_t *k,
   uint8_t *iv,
@@ -148,7 +148,7 @@ EverCrypt_AEAD_encrypt_expand_chacha20_poly1305(
 
 /* SNIPPET_START: EverCrypt_AEAD_encrypt_expand */
 
-void
+EverCrypt_Error_error_code
 EverCrypt_AEAD_encrypt_expand(
   Spec_Agile_AEAD_alg a,
   uint8_t *k,

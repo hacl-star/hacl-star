@@ -420,7 +420,7 @@ EverCrypt_AEAD_encrypt(
   uint8_t *cipher
 );
 
-extern void
+extern EverCrypt_Error_error_code
 EverCrypt_AEAD_encrypt_expand_aes128_gcm(
   uint8_t *k,
   uint8_t *iv,
@@ -433,7 +433,7 @@ EverCrypt_AEAD_encrypt_expand_aes128_gcm(
   uint8_t *tag
 );
 
-extern void
+extern EverCrypt_Error_error_code
 EverCrypt_AEAD_encrypt_expand_aes256_gcm(
   uint8_t *k,
   uint8_t *iv,
@@ -446,7 +446,7 @@ EverCrypt_AEAD_encrypt_expand_aes256_gcm(
   uint8_t *tag
 );
 
-extern void
+extern EverCrypt_Error_error_code
 EverCrypt_AEAD_encrypt_expand_chacha20_poly1305(
   uint8_t *k,
   uint8_t *iv,
@@ -459,7 +459,7 @@ EverCrypt_AEAD_encrypt_expand_chacha20_poly1305(
   uint8_t *tag
 );
 
-extern void
+extern EverCrypt_Error_error_code
 EverCrypt_AEAD_encrypt_expand(
   Spec_Agile_AEAD_alg a,
   uint8_t *k,

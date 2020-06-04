@@ -149,7 +149,7 @@ module Hash = struct
     Gc.finalise everCrypt_Hash_Incremental_free st;
     (alg, incr_len, st)
   let update (alg, incr_len, st) data =
-    assert (C.size data < max_input_len);
+    check_max_input_len (C.size data);
     incr_len := Z.add !incr_len (Z.of_int (C.size data));
     assert (Z.lt !incr_len (incremental_input_len alg));
     everCrypt_Hash_Incremental_update st (C.ctypes_buf data) (C.size_uint32 data)
@@ -157,7 +157,7 @@ module Hash = struct
     assert (C.size dst = digest_len alg);
     everCrypt_Hash_Incremental_finish st (C.ctypes_buf dst)
   let hash alg dst input =
-    assert (C.size input < max_input_len);
+    check_max_input_len (C.size input);
     assert (C.size dst = digest_len alg);
     assert (C.disjoint dst input);
     everCrypt_Hash_hash (alg_definition alg) (C.ctypes_buf dst) (C.ctypes_buf input) (C.size_uint32 input)
@@ -218,7 +218,7 @@ module HKDF = struct
     assert (C.size okm <= 255 * HashDefs.digest_len alg);
     assert (C.disjoint okm prk);
     assert (HashDefs.digest_len alg <= C.size prk);
-    assert (HashDefs.digest_len alg + HashDefs.block_len alg + C.size info + 1 < HashDefs.max_input_len);
+    HashDefs.(check_max_input_len (digest_len alg + block_len alg + C.size info + 1));
     HashDefs.check_key_len alg (C.size prk);
     everCrypt_HKDF_expand (HashDefs.alg_definition alg) (C.ctypes_buf okm) (C.ctypes_buf prk) (C.size_uint32 prk) (C.ctypes_buf info) (C.size_uint32 info) (C.size_uint32 okm)
   let extract alg prk salt ikm =
