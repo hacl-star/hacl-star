@@ -38,6 +38,55 @@ module Bindings(F:Cstubs.FOREIGN) =
                                 (ocaml_bytes @->
                                    (returning everCrypt_Error_error_code))))))))))
       
+    let everCrypt_AEAD_encrypt_expand_aes128_gcm =
+      foreign "EverCrypt_AEAD_encrypt_expand_aes128_gcm"
+        (ocaml_bytes @->
+           (ocaml_bytes @->
+              (uint32_t @->
+                 (ocaml_bytes @->
+                    (uint32_t @->
+                       (ocaml_bytes @->
+                          (uint32_t @->
+                             (ocaml_bytes @->
+                                (ocaml_bytes @-> (returning void))))))))))
+      
+    let everCrypt_AEAD_encrypt_expand_aes256_gcm =
+      foreign "EverCrypt_AEAD_encrypt_expand_aes256_gcm"
+        (ocaml_bytes @->
+           (ocaml_bytes @->
+              (uint32_t @->
+                 (ocaml_bytes @->
+                    (uint32_t @->
+                       (ocaml_bytes @->
+                          (uint32_t @->
+                             (ocaml_bytes @->
+                                (ocaml_bytes @-> (returning void))))))))))
+      
+    let everCrypt_AEAD_encrypt_expand_chacha20_poly1305 =
+      foreign "EverCrypt_AEAD_encrypt_expand_chacha20_poly1305"
+        (ocaml_bytes @->
+           (ocaml_bytes @->
+              (uint32_t @->
+                 (ocaml_bytes @->
+                    (uint32_t @->
+                       (ocaml_bytes @->
+                          (uint32_t @->
+                             (ocaml_bytes @->
+                                (ocaml_bytes @-> (returning void))))))))))
+      
+    let everCrypt_AEAD_encrypt_expand =
+      foreign "EverCrypt_AEAD_encrypt_expand"
+        (spec_Agile_AEAD_alg @->
+           (ocaml_bytes @->
+              (ocaml_bytes @->
+                 (uint32_t @->
+                    (ocaml_bytes @->
+                       (uint32_t @->
+                          (ocaml_bytes @->
+                             (uint32_t @->
+                                (ocaml_bytes @->
+                                   (ocaml_bytes @-> (returning void)))))))))))
+      
     let everCrypt_AEAD_decrypt =
       foreign "EverCrypt_AEAD_decrypt"
         ((ptr everCrypt_AEAD_state_s) @->
@@ -50,6 +99,59 @@ module Bindings(F:Cstubs.FOREIGN) =
                              (ocaml_bytes @->
                                 (ocaml_bytes @->
                                    (returning everCrypt_Error_error_code))))))))))
+      
+    let everCrypt_AEAD_decrypt_expand_aes128_gcm =
+      foreign "EverCrypt_AEAD_decrypt_expand_aes128_gcm"
+        (ocaml_bytes @->
+           (ocaml_bytes @->
+              (uint32_t @->
+                 (ocaml_bytes @->
+                    (uint32_t @->
+                       (ocaml_bytes @->
+                          (uint32_t @->
+                             (ocaml_bytes @->
+                                (ocaml_bytes @->
+                                   (returning everCrypt_Error_error_code))))))))))
+      
+    let everCrypt_AEAD_decrypt_expand_aes256_gcm =
+      foreign "EverCrypt_AEAD_decrypt_expand_aes256_gcm"
+        (ocaml_bytes @->
+           (ocaml_bytes @->
+              (uint32_t @->
+                 (ocaml_bytes @->
+                    (uint32_t @->
+                       (ocaml_bytes @->
+                          (uint32_t @->
+                             (ocaml_bytes @->
+                                (ocaml_bytes @->
+                                   (returning everCrypt_Error_error_code))))))))))
+      
+    let everCrypt_AEAD_decrypt_expand_chacha20_poly1305 =
+      foreign "EverCrypt_AEAD_decrypt_expand_chacha20_poly1305"
+        (ocaml_bytes @->
+           (ocaml_bytes @->
+              (uint32_t @->
+                 (ocaml_bytes @->
+                    (uint32_t @->
+                       (ocaml_bytes @->
+                          (uint32_t @->
+                             (ocaml_bytes @->
+                                (ocaml_bytes @->
+                                   (returning everCrypt_Error_error_code))))))))))
+      
+    let everCrypt_AEAD_decrypt_expand =
+      foreign "EverCrypt_AEAD_decrypt_expand"
+        (spec_Agile_AEAD_alg @->
+           (ocaml_bytes @->
+              (ocaml_bytes @->
+                 (uint32_t @->
+                    (ocaml_bytes @->
+                       (uint32_t @->
+                          (ocaml_bytes @->
+                             (uint32_t @->
+                                (ocaml_bytes @->
+                                   (ocaml_bytes @->
+                                      (returning everCrypt_Error_error_code)))))))))))
       
     let everCrypt_AEAD_free =
       foreign "EverCrypt_AEAD_free"

@@ -289,8 +289,29 @@ EXPORTS
   EverCrypt_CTR_init
   EverCrypt_CTR_update_block
   EverCrypt_CTR_free
+  Hacl_Impl_P256_LowLevel_sub4_il
+  Hacl_Impl_P256_LowLevel_shift_256_impl
+  Hacl_Impl_P256_LowLevel_toUint8
+  Hacl_Impl_P256_LowLevel_changeEndian
+  Hacl_Impl_P256_LowLevel_toUint64ChangeEndian
+  Hacl_Impl_ECDSA_MontgomeryMultiplication_reduction_prime_2prime_order
+  Hacl_Impl_SolinasReduction_solinas_reduction_impl
+  Hacl_Impl_P256_PointAdd_point_add
+  Hacl_Impl_P256_Core_norm
+  Hacl_Impl_P256_Core_scalarMultiplicationWithoutNorm
+  Hacl_Impl_P256_Core_secretToPublicWithoutNorm
+  Hacl_Impl_P256_Signature_Common_bufferToJac
+  Hacl_Impl_P256_Signature_Common_isPointAtInfinityPublic
+  Hacl_Impl_P256_Signature_Common_verifyQValidCurvePoint
   Hacl_Impl_P256_DH_ecp256dh_i
   Hacl_Impl_P256_DH_ecp256dh_r
+  Hacl_Impl_P256_Compression_computeYFromX
+  Hacl_Impl_ECDSA_MM_Exponent_montgomery_ladder_exponent
+  Hacl_Impl_ECDSA_MM_Exponent_fromDomainImpl
+  Hacl_Impl_ECDSA_MM_Exponent_multPowerPartial
+  Hacl_Impl_ECDSA_P256_Verification_Agile_isMoreThanZeroLessThanOrderMinusOne
+  Hacl_Impl_ECDSA_P256_Verification_Agile_compare_felem_bool
+  Hacl_Impl_ECDSA_P256_Signature_Agile_ecdsa_signature_core
   Hacl_Interface_P256_ecdsa_sign_p256_sha2
   Hacl_Interface_P256_ecdsa_sign_p256_sha384
   Hacl_Interface_P256_ecdsa_sign_p256_sha512
@@ -299,11 +320,11 @@ EXPORTS
   Hacl_Interface_P256_ecdsa_verif_p256_sha384
   Hacl_Interface_P256_ecdsa_verif_p256_sha512
   Hacl_Interface_P256_ecdsa_verif_without_hash
-  Hacl_Interface_P256_verifyQ
-  Hacl_Interface_P256_decompressionNotCompressedForm
-  Hacl_Interface_P256_decompressionCompressedForm
-  Hacl_Interface_P256_compressionNotCompressedForm
-  Hacl_Interface_P256_compressionCompressedForm
+  Hacl_Interface_P256_verify_q
+  Hacl_Interface_P256_decompression_not_compressed_form
+  Hacl_Interface_P256_decompression_compressed_form
+  Hacl_Interface_P256_compression_not_compressed_form
+  Hacl_Interface_P256_compression_compressed_form
   Hacl_Interface_P256_reduction_8_32
   Hacl_Interface_P256_ecp256dh_i
   Hacl_Interface_P256_ecp256dh_r
@@ -352,6 +373,8 @@ EXPORTS
   Hacl_HPKE_Curve51_CP256_SHA512_setupBaseR
   Hacl_HPKE_Curve51_CP256_SHA512_sealBase
   Hacl_HPKE_Curve51_CP256_SHA512_openBase
+  Hacl_Interface_P256_DH_ecp256dh_i
+  Hacl_Interface_P256_DH_ecp256dh_r
   Hacl_HPKE_Curve64_CP256_SHA512_setupBaseI
   Hacl_HPKE_Curve64_CP256_SHA512_setupBaseR
   Hacl_HPKE_Curve64_CP256_SHA512_sealBase
@@ -393,6 +416,20 @@ EXPORTS
   Hacl_HPKE_P256_CP32_SHA256_setupBaseR
   Hacl_HPKE_P256_CP32_SHA256_sealBase
   Hacl_HPKE_P256_CP32_SHA256_openBase
+  Hacl_Interface_P256_ECDSA_ecdsa_sign_p256_sha2
+  Hacl_Interface_P256_ECDSA_ecdsa_sign_p256_sha384
+  Hacl_Interface_P256_ECDSA_ecdsa_sign_p256_sha512
+  Hacl_Interface_P256_ECDSA_ecdsa_sign_p256_without_hash
+  Hacl_Interface_P256_ECDSA_ecdsa_verif_p256_sha2
+  Hacl_Interface_P256_ECDSA_ecdsa_verif_p256_sha384
+  Hacl_Interface_P256_ECDSA_ecdsa_verif_p256_sha512
+  Hacl_Interface_P256_ECDSA_ecdsa_verif_without_hash
+  Hacl_Interface_P256_ECDSA_verify_q
+  Hacl_Interface_P256_ECDSA_decompression_not_compressed_form
+  Hacl_Interface_P256_ECDSA_decompression_compressed_form
+  Hacl_Interface_P256_ECDSA_compression_not_compressed_form
+  Hacl_Interface_P256_ECDSA_compression_compressed_form
+  Hacl_Interface_P256_ECDSA_reduction_8_32
   Hacl_Blake2s_128_blake2s
   Hacl_HPKE_Curve64_CP32_SHA256_setupBaseI
   Hacl_HPKE_Curve64_CP32_SHA256_setupBaseR
@@ -419,7 +456,15 @@ EXPORTS
   EverCrypt_AEAD_alg_of_state
   EverCrypt_AEAD_create_in
   EverCrypt_AEAD_encrypt
+  EverCrypt_AEAD_encrypt_expand_aes128_gcm
+  EverCrypt_AEAD_encrypt_expand_aes256_gcm
+  EverCrypt_AEAD_encrypt_expand_chacha20_poly1305
+  EverCrypt_AEAD_encrypt_expand
   EverCrypt_AEAD_decrypt
+  EverCrypt_AEAD_decrypt_expand_aes128_gcm
+  EverCrypt_AEAD_decrypt_expand_aes256_gcm
+  EverCrypt_AEAD_decrypt_expand_chacha20_poly1305
+  EverCrypt_AEAD_decrypt_expand
   EverCrypt_AEAD_free
   EverCrypt_HMAC_compute_sha1
   EverCrypt_HMAC_compute_sha2_256

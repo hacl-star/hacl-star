@@ -207,7 +207,7 @@ val ecdsa_verif_without_hash:
    )
 
 
-val verifyQ: 
+val verify_q: 
   pubKey: lbuffer uint8 (size 64) ->
   Stack bool
     (requires fun h -> live h pubKey)
@@ -227,7 +227,7 @@ val verifyQ:
 (* Compressed form - a buffer containing the last bit of y coordinate + 2 followed by x coordinate *)
 
 (* The function takes a buffer in the not compressed form, checkes whether the form is correct and returns a raw form *)
-val decompressionNotCompressedForm: b: notCompressedForm -> result: lbuffer uint8 (size 64) -> Stack bool 
+val decompression_not_compressed_form: b: notCompressedForm -> result: lbuffer uint8 (size 64) -> Stack bool 
   (requires fun h -> live h b /\ live h result /\ disjoint b result)
   (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\
     (
@@ -244,7 +244,7 @@ val decompressionNotCompressedForm: b: notCompressedForm -> result: lbuffer uint
 )
 
 (* The function takes a buffer in the compressed form, checkes whether the form is correct and returns a raw form *)
-val decompressionCompressedForm: b: compressedForm -> result: lbuffer uint8 (size 64) -> Stack bool 
+val decompression_compressed_form: b: compressedForm -> result: lbuffer uint8 (size 64) -> Stack bool 
   (requires fun h -> live h b /\ live h result /\ disjoint b result)
   (ensures fun h0 r h1 -> 
     (
@@ -274,7 +274,7 @@ val decompressionCompressedForm: b: compressedForm -> result: lbuffer uint8 (siz
 
 
 (* The function takes a buffer in the raw form and returns a not-compressed form *)
-val compressionNotCompressedForm: b: lbuffer uint8 (size 64) -> result: notCompressedForm -> 
+val compression_not_compressed_form: b: lbuffer uint8 (size 64) -> result: notCompressedForm -> 
   Stack unit 
     (requires fun h -> live h b /\ live h result /\ disjoint b result)
     (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
@@ -289,7 +289,7 @@ val compressionNotCompressedForm: b: lbuffer uint8 (size 64) -> result: notCompr
     )
 
 (* The function takes a buffer in the raw form and returns a compressed form *)
-val compressionCompressedForm: b: lbuffer uint8 (size 64) -> result: compressedForm -> 
+val compression_compressed_form: b: lbuffer uint8 (size 64) -> result: compressedForm -> 
   Stack unit 
     (requires fun h -> live h b /\ live h result /\ disjoint b result)
     (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\

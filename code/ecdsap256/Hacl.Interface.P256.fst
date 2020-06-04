@@ -55,22 +55,22 @@ let ecdsa_verif_without_hash mLen m pubKey r s  =
    ecdsa_verification NoHash pubKey r s mLen m
 
 
-let verifyQ pubKey = 
+let verify_q pubKey = 
     Hacl.Impl.P256.Signature.Common.verifyQ pubKey
 
 
-let decompressionNotCompressedForm b result = 
+let decompression_not_compressed_form b result = 
   Hacl.Impl.P256.Compression.decompressionNotCompressedForm b result
 
-let decompressionCompressedForm b result = 
+let decompression_compressed_form b result = 
   Hacl.Impl.P256.Compression.decompressionCompressedForm b result
 
 
 
-let compressionNotCompressedForm b result = 
+let compression_not_compressed_form b result = 
   Hacl.Impl.P256.Compression.compressionNotCompressedForm b result
 
-let compressionCompressedForm b result = 
+let compression_compressed_form b result = 
   Hacl.Impl.P256.Compression.compressionCompressedForm b result
 
  
