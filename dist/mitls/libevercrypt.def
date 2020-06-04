@@ -419,7 +419,15 @@ EXPORTS
   EverCrypt_AEAD_alg_of_state
   EverCrypt_AEAD_create_in
   EverCrypt_AEAD_encrypt
+  EverCrypt_AEAD_encrypt_expand_aes128_gcm
+  EverCrypt_AEAD_encrypt_expand_aes256_gcm
+  EverCrypt_AEAD_encrypt_expand_chacha20_poly1305
+  EverCrypt_AEAD_encrypt_expand
   EverCrypt_AEAD_decrypt
+  EverCrypt_AEAD_decrypt_expand_aes128_gcm
+  EverCrypt_AEAD_decrypt_expand_aes256_gcm
+  EverCrypt_AEAD_decrypt_expand_chacha20_poly1305
+  EverCrypt_AEAD_decrypt_expand
   EverCrypt_AEAD_free
   __proj__Mkgcm_args__item__plain
   __proj__Mkgcm_args__item__plain_len

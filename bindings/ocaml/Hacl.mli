@@ -1,3 +1,5 @@
+#include "config.h"
+
 open SharedDefs
 
 module C = CBytes
@@ -7,11 +9,8 @@ module RandomBuffer : sig
 end
 
 module Chacha20_Poly1305_32 : Chacha20_Poly1305
-module Chacha20_Poly1305_128 : Chacha20_Poly1305
-module Chacha20_Poly1305_256 : Chacha20_Poly1305
 
 module Curve25519_51 : Curve25519
-module Curve25519_64 : Curve25519
 
 module Ed25519 : EdDSA
 
@@ -38,8 +37,6 @@ module HMAC_SHA2_384 : MAC
 module HMAC_SHA2_512 : MAC
 
 module Poly1305_32 : MAC
-module Poly1305_128 : MAC
-module Poly1305_256 : MAC
 
 module HKDF_SHA2_256 : HKDF
 module HKDF_SHA2_512 : HKDF
@@ -65,13 +62,23 @@ module NaCl : sig
 end
 
 module Blake2b_32 : Blake2
-module Blake2b_256 : Blake2
 
 module Blake2s_32 : Blake2
-module Blake2s_128 : Blake2
 
 module P256 : sig
   val sign : C.t -> C.t -> C.t -> C.t -> bool
   val verify : C.t -> C.t -> C.t -> bool
 end
 
+#if not (defined IS_NOT_X64) || defined IS_ARM_8
+module Chacha20_Poly1305_128 : Chacha20_Poly1305
+module Poly1305_128 : MAC
+module Blake2s_128 : Blake2
+#endif
+
+#ifndef IS_NOT_X64
+module Chacha20_Poly1305_256 : Chacha20_Poly1305
+module Poly1305_256 : MAC
+module Blake2b_256 : Blake2
+module Curve25519_64 : Curve25519
+#endif

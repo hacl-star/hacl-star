@@ -95,6 +95,75 @@ EverCrypt_AEAD_encrypt(
 
 /* SNIPPET_END: EverCrypt_AEAD_encrypt */
 
+/* SNIPPET_START: EverCrypt_AEAD_encrypt_expand_aes128_gcm */
+
+EverCrypt_Error_error_code
+EverCrypt_AEAD_encrypt_expand_aes128_gcm(
+  uint8_t *k,
+  uint8_t *iv,
+  uint32_t iv_len,
+  uint8_t *ad,
+  uint32_t ad_len,
+  uint8_t *plain,
+  uint32_t plain_len,
+  uint8_t *cipher,
+  uint8_t *tag
+);
+
+/* SNIPPET_END: EverCrypt_AEAD_encrypt_expand_aes128_gcm */
+
+/* SNIPPET_START: EverCrypt_AEAD_encrypt_expand_aes256_gcm */
+
+EverCrypt_Error_error_code
+EverCrypt_AEAD_encrypt_expand_aes256_gcm(
+  uint8_t *k,
+  uint8_t *iv,
+  uint32_t iv_len,
+  uint8_t *ad,
+  uint32_t ad_len,
+  uint8_t *plain,
+  uint32_t plain_len,
+  uint8_t *cipher,
+  uint8_t *tag
+);
+
+/* SNIPPET_END: EverCrypt_AEAD_encrypt_expand_aes256_gcm */
+
+/* SNIPPET_START: EverCrypt_AEAD_encrypt_expand_chacha20_poly1305 */
+
+EverCrypt_Error_error_code
+EverCrypt_AEAD_encrypt_expand_chacha20_poly1305(
+  uint8_t *k,
+  uint8_t *iv,
+  uint32_t iv_len,
+  uint8_t *ad,
+  uint32_t ad_len,
+  uint8_t *plain,
+  uint32_t plain_len,
+  uint8_t *cipher,
+  uint8_t *tag
+);
+
+/* SNIPPET_END: EverCrypt_AEAD_encrypt_expand_chacha20_poly1305 */
+
+/* SNIPPET_START: EverCrypt_AEAD_encrypt_expand */
+
+EverCrypt_Error_error_code
+EverCrypt_AEAD_encrypt_expand(
+  Spec_Agile_AEAD_alg a,
+  uint8_t *k,
+  uint8_t *iv,
+  uint32_t iv_len,
+  uint8_t *ad,
+  uint32_t ad_len,
+  uint8_t *plain,
+  uint32_t plain_len,
+  uint8_t *cipher,
+  uint8_t *tag
+);
+
+/* SNIPPET_END: EverCrypt_AEAD_encrypt_expand */
+
 /* SNIPPET_START: EverCrypt_AEAD_decrypt */
 
 EverCrypt_Error_error_code
@@ -111,6 +180,75 @@ EverCrypt_AEAD_decrypt(
 );
 
 /* SNIPPET_END: EverCrypt_AEAD_decrypt */
+
+/* SNIPPET_START: EverCrypt_AEAD_decrypt_expand_aes128_gcm */
+
+EverCrypt_Error_error_code
+EverCrypt_AEAD_decrypt_expand_aes128_gcm(
+  uint8_t *k,
+  uint8_t *iv,
+  uint32_t iv_len,
+  uint8_t *ad,
+  uint32_t ad_len,
+  uint8_t *cipher,
+  uint32_t cipher_len,
+  uint8_t *tag,
+  uint8_t *dst
+);
+
+/* SNIPPET_END: EverCrypt_AEAD_decrypt_expand_aes128_gcm */
+
+/* SNIPPET_START: EverCrypt_AEAD_decrypt_expand_aes256_gcm */
+
+EverCrypt_Error_error_code
+EverCrypt_AEAD_decrypt_expand_aes256_gcm(
+  uint8_t *k,
+  uint8_t *iv,
+  uint32_t iv_len,
+  uint8_t *ad,
+  uint32_t ad_len,
+  uint8_t *cipher,
+  uint32_t cipher_len,
+  uint8_t *tag,
+  uint8_t *dst
+);
+
+/* SNIPPET_END: EverCrypt_AEAD_decrypt_expand_aes256_gcm */
+
+/* SNIPPET_START: EverCrypt_AEAD_decrypt_expand_chacha20_poly1305 */
+
+EverCrypt_Error_error_code
+EverCrypt_AEAD_decrypt_expand_chacha20_poly1305(
+  uint8_t *k,
+  uint8_t *iv,
+  uint32_t iv_len,
+  uint8_t *ad,
+  uint32_t ad_len,
+  uint8_t *cipher,
+  uint32_t cipher_len,
+  uint8_t *tag,
+  uint8_t *dst
+);
+
+/* SNIPPET_END: EverCrypt_AEAD_decrypt_expand_chacha20_poly1305 */
+
+/* SNIPPET_START: EverCrypt_AEAD_decrypt_expand */
+
+EverCrypt_Error_error_code
+EverCrypt_AEAD_decrypt_expand(
+  Spec_Agile_AEAD_alg a,
+  uint8_t *k,
+  uint8_t *iv,
+  uint32_t iv_len,
+  uint8_t *ad,
+  uint32_t ad_len,
+  uint8_t *cipher,
+  uint32_t cipher_len,
+  uint8_t *tag,
+  uint8_t *dst
+);
+
+/* SNIPPET_END: EverCrypt_AEAD_decrypt_expand */
 
 /* SNIPPET_START: EverCrypt_AEAD_free */
 
