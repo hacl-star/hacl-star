@@ -721,7 +721,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "2a6ae5230331157443c801f53b0f2775"
+      "c96d98c599b00ec13f19aca31307fa0f"
     ],
     [
       "Vale.X64.Memory.modifies_buffer_elim",
@@ -1341,7 +1341,7 @@
         "typing_Vale.X64.Memory.valid_mem_aux"
       ],
       0,
-      "7c235b43efdffe2013f18958441bf9d1"
+      "12cd8e72cd793eab2e4a9916791f86c5"
     ],
     [
       "Vale.X64.Memory.valid_mem",
@@ -1497,10 +1497,8 @@
         "equation_FStar.Monotonic.HyperStack.is_wf_with_ctr_and_tip",
         "equation_FStar.Monotonic.HyperStack.mem", "equation_Prims.squash",
         "equation_Vale.Arch.HeapImpl._ih",
-        "equation_Vale.Arch.HeapImpl.buffer",
-        "equation_Vale.Interop.Types.view_n", "equation_Vale.X64.Memory.b8",
+        "equation_Vale.Arch.HeapImpl.buffer", "equation_Vale.X64.Memory.b8",
         "equation_Vale.X64.Memory.buffer_addr",
-        "equation_Vale.X64.Memory.scale_by",
         "equation_Vale.X64.Memory.sub_list",
         "equation_Vale.X64.Memory.valid_buffer",
         "equation_with_fuel_FStar.List.Tot.Base.memP.fuel_instrumented",
@@ -1512,8 +1510,8 @@
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Vale.Interop.Heap_s.__proj__InteropHeap__item__addrs",
-        "int_inversion", "int_typing", "kinding_Vale.Interop.Types.b8@tok",
-        "l_and-interp", "l_or-interp", "lemma_FStar.Map.lemma_ContainsDom",
+        "int_inversion", "kinding_Vale.Interop.Types.b8@tok", "l_and-interp",
+        "l_or-interp", "lemma_FStar.Map.lemma_ContainsDom",
         "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Equality",
         "proj_equation_Vale.Interop.Heap_s.InteropHeap_addrs",
         "proj_equation_Vale.Interop.Heap_s.InteropHeap_ptrs",
@@ -1536,7 +1534,7 @@
         "typing_Vale.Arch.HeapImpl._ih", "typing_Vale.X64.Memory.addr_in_ptr"
       ],
       0,
-      "1a974cf5fab65be9ba34839ff09eb4d6"
+      "4cb41ac2ddfcabbd103abeec3db36d76"
     ],
     [
       "Vale.X64.Memory.find_valid_buffer_ps",
@@ -1707,7 +1705,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "83cc3024eafaca9a527a294c80eb7a92"
+      "998067298492fe6633ec096be00a4105"
     ],
     [
       "Vale.X64.Memory.writeable_mem",
@@ -1874,7 +1872,7 @@
         "typing_Vale.X64.Memory.find_valid_buffer_aux"
       ],
       0,
-      "9aa11489111b66aafed3cde881c566d7"
+      "5a46fbf19425d985f0d5ca66cb3501d5"
     ],
     [
       "Vale.X64.Memory.length_t_eq",
