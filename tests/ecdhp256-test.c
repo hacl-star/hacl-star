@@ -65,10 +65,10 @@ int main()
 	uint8_t* compressed2 = (uint8_t *) malloc (sizeof (uint8_t) * 65);
 	uint8_t* compressed3 = (uint8_t *) malloc (sizeof (uint8_t) * 64);
 
-	Hacl_Interface_P256_compressionNotCompressedForm(point_compressed, compressed0);
-	Hacl_Interface_P256_decompressionNotCompressedForm(compressed0, compressed1);
-	Hacl_Interface_P256_compressionNotCompressedForm(compressed1, compressed2);
-	Hacl_Interface_P256_decompressionNotCompressedForm(compressed2, compressed3);
+	Hacl_Interface_P256_compression_not_compressed_form(point_compressed, compressed0);
+	Hacl_Interface_P256_decompression_not_compressed_form(compressed0, compressed1);
+	Hacl_Interface_P256_compression_not_compressed_form(compressed1, compressed2);
+	Hacl_Interface_P256_decompression_not_compressed_form(compressed2, compressed3);
 
 	ok = ok && compare_and_print(64, point_compressed, compressed3);
 
@@ -81,10 +81,10 @@ int main()
 	uint8_t* compressed7 = (uint8_t *) malloc (sizeof (uint8_t) * 64);
 
 
-	Hacl_Interface_P256_compressionCompressedForm(point_compressed, compressed4);
-	Hacl_Interface_P256_decompressionCompressedForm(compressed4, compressed5);
-	Hacl_Interface_P256_compressionCompressedForm(compressed5, compressed6);
-	Hacl_Interface_P256_decompressionCompressedForm(compressed6, compressed7);
+	Hacl_Interface_P256_compression_compressed_form(point_compressed, compressed4);
+	Hacl_Interface_P256_decompression_compressed_form(compressed4, compressed5);
+	Hacl_Interface_P256_compression_compressed_form(compressed5, compressed6);
+	Hacl_Interface_P256_decompression_compressed_form(compressed6, compressed7);
 
 	ok = ok && compare_and_print(64, point_compressed, compressed7);
 
