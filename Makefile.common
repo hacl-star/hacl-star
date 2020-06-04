@@ -125,7 +125,7 @@ INTTYPES_BUNDLE=-bundle Hacl.IntTypes.Intrinsics= -static-header Hacl.IntTypes.I
 
 TAC = $(shell which tac >/dev/null 2>&1 && echo "tac" || echo "tail -r")
 
-ALL_CMX_FILES = $(patsubst %.ml,%.cmx,$(shell echo $(ALL_ML_FILES) | $(TAC)))
+ALL_CMX_FILES = $(subst obj/Lib_Buffer.cmx,obj/Lib_Memzero0.cmx obj/Lib_Buffer.cmx,$(patsubst %.ml,%.cmx,$(shell echo $(ALL_ML_FILES) | $(TAC))))
 
 ifeq ($(OS),Windows_NT)
   export OCAMLPATH := $(FSTAR_HOME)/bin;$(OCAMLPATH)

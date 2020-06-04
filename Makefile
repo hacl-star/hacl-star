@@ -472,6 +472,9 @@ obj/%.ml:
 	    --extract_module $(subst .fst.checked,,$(notdir $<)) \
 	  ,[EXTRACT-ML] $(notdir $*),$(call to-obj-dir,$@))
 
+obj/Lib_Memzero0.ml: lib/ml/Lib_Memzero0.ml
+	cp $< $@
+
 dist/vale:
 	mkdir -p $@
 
@@ -644,7 +647,7 @@ TEST_FLAGS = -bundle Test,Test.*,Hacl.Test.*
 # Ensures that Lib_RandomBuffer_System.h and Lib_PrintBuffer.h have a constant name
 # (and are not subject to bundling). Erased by distributions that don't need
 # those files.
-HAND_WRITTEN_LIB_FLAGS = -bundle Lib.RandomBuffer.System= -bundle Lib.PrintBuffer=
+HAND_WRITTEN_LIB_FLAGS = -bundle Lib.RandomBuffer.System= -bundle Lib.PrintBuffer= -bundle Lib.Memzero0
 # Disabling by pure-HACL distributions
 TARGETCONFIG_FLAGS = -add-include '"evercrypt_targetconfig.h"'
 

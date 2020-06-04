@@ -195,7 +195,7 @@ let salloc1_with_inv #a #res h len x footprint spec spec_inv impl =
   let h2 = ST.get() in
   let r = impl b in
   let h3 = ST.get() in
-  memset #a #len b x len;
+  Lib.Memzero0.memzero #a b len;
   let h4 = ST.get() in
   pop_frame();
   let h5 = ST.get() in

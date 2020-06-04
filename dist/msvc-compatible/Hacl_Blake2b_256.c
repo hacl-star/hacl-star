@@ -275,7 +275,7 @@ Hacl_Blake2b_256_blake2b(
     uint8_t *b3 = b20 + (uint32_t)0U * (uint32_t)128U;
     blake2b_update_block(b1, b, false, totlen, b3);
   }
-  memset(b20, 0U, (uint32_t)128U * sizeof (b20[0U]));
+  Lib_Memzero0_memzero(b20, (uint32_t)128U * sizeof (b20[0U]));
   uint32_t nb0 = ll / (uint32_t)128U;
   uint32_t rem0 = ll % (uint32_t)128U;
   K___uint32_t_uint32_t scrut;
@@ -306,7 +306,7 @@ Hacl_Blake2b_256_blake2b(
   FStar_UInt128_uint128
   totlen = FStar_UInt128_add_mod(prev0, FStar_UInt128_uint64_to_uint128((uint64_t)ll));
   blake2b_update_block(b1, b, true, totlen, b21);
-  memset(b21, 0U, (uint32_t)128U * sizeof (b21[0U]));
+  Lib_Memzero0_memzero(b21, (uint32_t)128U * sizeof (b21[0U]));
   uint32_t double_row = (uint32_t)2U * (uint32_t)4U * (uint32_t)8U;
   KRML_CHECK_SIZE(sizeof (uint8_t), double_row);
   uint8_t *b2 = alloca(double_row * sizeof (uint8_t));
@@ -319,10 +319,8 @@ Hacl_Blake2b_256_blake2b(
   Lib_IntVector_Intrinsics_vec256_store_le(second, row1[0U]);
   uint8_t *final = b2;
   memcpy(output, final, nn * sizeof (final[0U]));
-  memset(b2, 0U, double_row * sizeof (b2[0U]));
-  for (uint32_t _i = 0U; _i < stlen; ++_i)
-    b1[_i] = stzero;
-  for (uint32_t _i = 0U; _i < stlen; ++_i)
-    b[_i] = stzero;
+  Lib_Memzero0_memzero(b2, double_row * sizeof (b2[0U]));
+  Lib_Memzero0_memzero(b1, stlen * sizeof (b1[0U]));
+  Lib_Memzero0_memzero(b, stlen * sizeof (b[0U]));
 }
 
