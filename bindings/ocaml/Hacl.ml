@@ -18,7 +18,6 @@ module Hacl_HKDF = Hacl_HKDF_bindings.Bindings(Hacl_HKDF_stubs)
 module Hacl_NaCl = Hacl_NaCl_bindings.Bindings(Hacl_NaCl_stubs)
 module Hacl_Blake2b_32 = Hacl_Blake2b_32_bindings.Bindings(Hacl_Blake2b_32_stubs)
 module Hacl_Blake2s_32 = Hacl_Blake2s_32_bindings.Bindings(Hacl_Blake2s_32_stubs)
-module Hacl_Blake2s_128 = Hacl_Blake2s_128_bindings.Bindings(Hacl_Blake2s_128_stubs)
 module Hacl_P256 = Hacl_P256_bindings.Bindings(Hacl_P256_stubs)
 
 #if not (defined IS_NOT_X64) || defined IS_ARM_8
@@ -276,12 +275,6 @@ module Blake2s_32 : Blake2 =
   Make_Blake2s (struct
     let reqs = []
     let blake2s = Hacl_Blake2s_32.hacl_Blake2s_32_blake2s
-  end)
-
-module Blake2s_128 : Blake2 =
-  Make_Blake2s (struct
-    let reqs = [AVX]
-    let blake2s = Hacl_Blake2s_128.hacl_Blake2s_128_blake2s
   end)
 
 (* WIP, will update along with changes to ECDSA *)
