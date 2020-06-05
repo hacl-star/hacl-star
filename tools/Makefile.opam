@@ -4,8 +4,9 @@
 #
 # Before using, the version number needs to be set (to the same version) in
 # 	* bindings/ocaml/hacl-star.opam
-# 	* dist/gcc-compatible/hacl-star-raw.opam
-# 	* dist/gcc-compatible/META
+# 	* dist/hacl-star-raw.opam
+# 	* dist/META
+# and make sure the files in dist have been copied in dist/gcc-compatible
 #
 # A new `ocaml-vXX` Git tag should be created and the resulting archive uploaded to GitHub as a release.
 # The opam-publish tool can be used to create a PR in ocaml/opam-repository to update the opam package:
