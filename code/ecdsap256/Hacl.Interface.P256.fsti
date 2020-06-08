@@ -10,6 +10,7 @@ open Lib.ByteSequence
 
 open FStar.Mul
 open Spec.P256
+open Spec.ECDSA
 open Spec.P256.Lemmas
 open Spec.P256.Definitions
 open Spec.Hash.Definitions
@@ -207,6 +208,37 @@ val ecdsa_verif_without_hash:
    )
 
 
+
+val ecdsa_signature_defensive: alg: hash_alg_ecdsa -> result: lbuffer uint8 (size 64) -> mLen: size_t -> m: lbuffer uint8 mLen ->
+  privKey: lbuffer uint8 (size 32) -> 
+  k: lbuffer uint8 (size 32) -> 
+  Stack uint64
+  (requires fun h -> 
+    live h result /\ live h m /\ live h privKey /\ live h k /\
+    disjoint result m /\
+    disjoint result privKey /\
+    disjoint result k /\
+    nat_from_bytes_be (as_seq h privKey) < prime_p256_order /\
+    nat_from_bytes_be (as_seq h k) < prime_p256_order
+  )
+  (ensures fun h0 flag h1 ->
+    modifies (loc result) h0 h1 (*/\
+    (
+      if (alg = SHA2_256 || alg = SHA2_384 || alg = SHA2_512) && (nat_from_bytes_be (as_seq h0 privKey) < prime_p256_order) &&  (nat_from_bytes_be (as_seq h0 k) < prime_p256_order) then 
+      (
+  let resultR = gsub result (size 0) (size 32) in 
+  let resultS = gsub result (size 32) (size 32) in 
+  let r, s, flagSpec = Spec.ECDSA.ecdsa_signature_agile alg (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in 
+  as_seq h1 resultR == nat_to_bytes_be 32 r /\
+  as_seq h1 resultS == nat_to_bytes_be 32 s /\
+  flag == flagSpec  
+      )
+      else 
+  v flag == pow2 64 - 1
+  ) *)
+)
+
+
 val verify_q: 
   pubKey: lbuffer uint8 (size 64) ->
   Stack bool
@@ -219,6 +251,7 @@ val verify_q:
         r == Spec.ECDSA.verifyQValidCurvePointSpec pkJ
       )
     )
+
 
 
 (** We distinguish 3 ways of representing a point **)

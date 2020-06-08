@@ -11,12 +11,14 @@ open Lib.ByteSequence
 open Spec.ECDSAP256.Definition
 
 open Spec.Hash.Definitions
-open Lib.Memzero2
-open Hacl.Impl.LowLevel
+open Hacl.Impl.P256.LowLevel
 
+open Spec.ECDSA
 open Spec.P256.Lemmas
 open Hacl.Impl.ECDSA.MontgomeryMultiplication
-open Hacl.Impl.ECDSA.P256SHA256.Signature.Agile
+open Hacl.Impl.ECDSA.P256.Signature.Agile
+
+open Lib.Memzero
 
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
@@ -26,7 +28,7 @@ val cleanUpCritical: critical : lbuffer uint64 (size 4) -> Stack unit
   (ensures fun h0 _ h1 -> modifies (loc critical) h0 h1 /\ as_seq h1 critical == Seq.create 4 (u64 0))
 
 let cleanUpCritical critical = 
-  mem_zero_u64 (size 4) critical
+  clear_words_u64 4ul critical
 
 
 open Lib.IntTypes.Intrinsics
@@ -93,15 +95,18 @@ val compareTo0TwoVariablesNotSC: a: uint64 -> b: uint64 ->
   Tot (r : bool {r = (uint_v a = 0 && uint_v b = 0)})
 
 let compareTo0TwoVariablesNotSC a b = 
-  let open Hacl.Impl.LowLevel.RawCmp in 
+  let open Hacl.Impl.P256.LowLevel.RawCmp in 
   let firstZero = eq_0_u64 a in 
   let secondZero = eq_0_u64 b in 
   firstZero && secondZero
   
 
-val ecdsa_signature_defensive: alg: hash_alg -> result: lbuffer uint8 (size 64) -> mLen: size_t -> m: lbuffer uint8 mLen ->
-  privKey: lbuffer uint8 (size 32) -> 
-  k: lbuffer uint8 (size 32) -> 
+val ecdsa_signature_defensive: alg: hash_alg_ecdsa 
+  -> result: lbuffer uint8 (size 64) 
+  -> mLen: size_t 
+  -> m: lbuffer uint8 mLen  {v mLen >= Spec.ECDSA.min_input_length alg} 
+  -> privKey: lbuffer uint8 (size 32) 
+  ->  k: lbuffer uint8 (size 32) -> 
   Stack uint64
   (requires fun h -> 
     live h result /\ live h m /\ live h privKey /\ live h k /\
@@ -114,7 +119,7 @@ val ecdsa_signature_defensive: alg: hash_alg -> result: lbuffer uint8 (size 64) 
   (ensures fun h0 flag h1 ->
     modifies (loc result) h0 h1 /\
     (
-      if (alg = SHA2_256 || alg = SHA2_384 || alg = SHA2_512) && (nat_from_bytes_be (as_seq h0 privKey) < prime_p256_order) &&  (nat_from_bytes_be (as_seq h0 k) < prime_p256_order) then 
+      if (alg = NoHash || alg = Hash SHA2_256 || alg = Hash SHA2_384 || alg = Hash SHA2_512) && (nat_from_bytes_be (as_seq h0 privKey) < prime_p256_order) &&  (nat_from_bytes_be (as_seq h0 k) < prime_p256_order) then 
       (
 	let resultR = gsub result (size 0) (size 32) in 
 	let resultS = gsub result (size 32) (size 32) in 
@@ -125,20 +130,18 @@ val ecdsa_signature_defensive: alg: hash_alg -> result: lbuffer uint8 (size 64) 
       )
       else 
 	v flag == pow2 64 - 1
-  )
+  ) 
 )
 
 let ecdsa_signature_defensive alg result mLen m privKey k = 
   push_frame();  
-  if alg = SHA2_256 || alg = SHA2_384 || alg = SHA2_512  
-    then 
-      begin
-	let cr0 = create (size 4) (u64 0) in 
-	let cr1 = create (size 4) (u64 0) in  
-	let less0 = lessThanOrderU8 privKey cr0 cr1 in 
-	let less1 = lessThanOrderU8 k cr0 cr1 in 
-
-	let flagLessOrder = compareTo0TwoVariablesNotSC less0 less1 in 
+  let cr0 = create (size 4) (u64 0) in 
+  let cr1 = create (size 4) (u64 0) in  
+  if alg = NoHash || alg = Hash SHA2_256 || alg = Hash SHA2_384 || alg = Hash SHA2_512  then 
+    begin
+      let less0 = lessThanOrderU8 privKey cr0 cr1 in 
+      let less1 = lessThanOrderU8 k cr0 cr1 in 
+      let flagLessOrder = compareTo0TwoVariablesNotSC less0 less1 in 
 	  if flagLessOrder then 
 	    begin
 	      let h1 = ST.get() in 
@@ -154,7 +157,8 @@ let ecdsa_signature_defensive alg result mLen m privKey k =
 	      u64 (maxint U64)
 	    end 
     end
-  else begin
-    pop_frame();
-    u64 (maxint U64)
+  else 
+    begin
+      pop_frame();
+      u64 (maxint U64)
     end

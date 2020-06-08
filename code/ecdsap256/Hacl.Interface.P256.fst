@@ -54,6 +54,8 @@ let ecdsa_verif_p256_sha512 mLen m pubKey r s =
 let ecdsa_verif_without_hash mLen m pubKey r s  =
    ecdsa_verification NoHash pubKey r s mLen m
 
+let ecdsa_signature_defensive alg result mLen m privKey k = 
+  Hacl.Impl.ECDSA.Defensive.ecdsa_signature_defensive alg result mLen m privKey k
 
 let verify_q pubKey = 
     Hacl.Impl.P256.Signature.Common.verifyQ pubKey
