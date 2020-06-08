@@ -104,22 +104,20 @@ let compareTo0TwoVariablesNotSC a b =
 val ecdsa_signature_defensive: alg: hash_alg_ecdsa 
   -> result: lbuffer uint8 (size 64) 
   -> mLen: size_t 
-  -> m: lbuffer uint8 mLen  {v mLen >= Spec.ECDSA.min_input_length alg} 
+  -> m: lbuffer uint8 mLen 
   -> privKey: lbuffer uint8 (size 32) 
-  ->  k: lbuffer uint8 (size 32) -> 
+  -> k: lbuffer uint8 (size 32) -> 
   Stack uint64
   (requires fun h -> 
     live h result /\ live h m /\ live h privKey /\ live h k /\
     disjoint result m /\
     disjoint result privKey /\
-    disjoint result k /\
-    nat_from_bytes_be (as_seq h privKey) < prime_p256_order /\
-    nat_from_bytes_be (as_seq h k) < prime_p256_order
+    disjoint result k
   )
   (ensures fun h0 flag h1 ->
     modifies (loc result) h0 h1 /\
     (
-      if (alg = NoHash || alg = Hash SHA2_256 || alg = Hash SHA2_384 || alg = Hash SHA2_512) && (nat_from_bytes_be (as_seq h0 privKey) < prime_p256_order) &&  (nat_from_bytes_be (as_seq h0 k) < prime_p256_order) then 
+      if (alg = NoHash || alg = Hash SHA2_256 || alg = Hash SHA2_384 || alg = Hash SHA2_512) && (v mLen >= Spec.ECDSA.min_input_length alg) && (nat_from_bytes_be (as_seq h0 privKey) < prime_p256_order) &&  (nat_from_bytes_be (as_seq h0 k) < prime_p256_order) then 
       (
 	let resultR = gsub result (size 0) (size 32) in 
 	let resultS = gsub result (size 32) (size 32) in 
@@ -137,7 +135,8 @@ let ecdsa_signature_defensive alg result mLen m privKey k =
   push_frame();  
   let cr0 = create (size 4) (u64 0) in 
   let cr1 = create (size 4) (u64 0) in  
-  if alg = NoHash || alg = Hash SHA2_256 || alg = Hash SHA2_384 || alg = Hash SHA2_512  then 
+  let sizeCheck = gte mLen (min_input_length_v alg) in   
+  if (alg = NoHash || alg = Hash SHA2_256 || alg = Hash SHA2_384 || alg = Hash SHA2_512) && sizeCheck  then 
     begin
       let less0 = lessThanOrderU8 privKey cr0 cr1 in 
       let less1 = lessThanOrderU8 k cr0 cr1 in 

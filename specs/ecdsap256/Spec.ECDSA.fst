@@ -409,12 +409,20 @@ let invert_state_s (a: hash_alg_ecdsa): Lemma
   allow_inversion (hash_alg_ecdsa)
 
 
+
+val min_input_length_v: hash_alg_ecdsa -> Tot size_t
+
+let min_input_length_v a =
+    match a with 
+    |NoHash -> 32ul
+    |Hash a -> 0ul
+
+
 val min_input_length: hash_alg_ecdsa -> Tot int
 
 let min_input_length a =
-  match a with
-    |NoHash -> 32
-    |Hash a -> 0
+  size_v (min_input_length_v a)
+
 
 (*
 noextract
