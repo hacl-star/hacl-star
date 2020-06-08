@@ -102,12 +102,12 @@ val ecdsa_signature_step45: x: felem
       modifies (loc x |+| loc tempBuffer) h0 h1 /\ 
       as_nat h1 x < prime_p256_order /\ 
       (
-	let (rxN, ryN, rzN), _ = montgomery_ladder_spec (as_seq h0 k) ((0,0,0), basePoint) in 
-	let (xN, _, _) = _norm (rxN, ryN, rzN) in 
-	as_nat h1 x == xN % prime_p256_order /\ 
-	(
-	  if as_nat h1 x = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0
-	)
+  let (rxN, ryN, rzN), _ = montgomery_ladder_spec (as_seq h0 k) ((0,0,0), basePoint) in 
+  let (xN, _, _) = _norm (rxN, ryN, rzN) in 
+  as_nat h1 x == xN % prime_p256_order /\ 
+  (
+    if as_nat h1 x = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0
+  )
       )
     )
 
@@ -242,10 +242,10 @@ val ecdsa_signature_core: alg: hash_alg_ecdsa
       as_nat h1 r == xN % prime_p256_order /\
       as_nat h1 s == (z + (as_nat h1 r) * as_nat h0 privKeyAsFelem) * pow kFelem (prime_p256_order - 2) % prime_p256_order /\
       (
-	if as_nat h1 r = 0 || as_nat h1 s = 0 then 
-	  uint_v flag == pow2 64 - 1
-	else 
-	  uint_v flag == 0
+  if as_nat h1 r = 0 || as_nat h1 s = 0 then 
+    uint_v flag == pow2 64 - 1
+  else 
+    uint_v flag == 0
       )
     )
   )
@@ -337,3 +337,77 @@ let ecdsa_signature alg result mLen m privKey k =
 
   pop_frame();
   flag  
+
+
+
+(* val ecdsa_signature_defensive: alg: hash_alg {SHA2_256? alg \/ SHA2_384? alg \/ SHA2_512? alg} -> result: lbuffer uint8 (size 64) -> mLen: size_t -> m: lbuffer uint8 mLen ->
+  privKey: lbuffer uint8 (size 32) -> 
+  k: lbuffer uint8 (size 32) -> 
+  critical0: felem -> 
+  critical1: felem -> 
+  Stack uint64
+  (requires fun h -> 
+    live h result /\ live h m /\ live h privKey /\ live h k /\ live h critical0 /\ live h critical1 /\
+    
+    disjoint critical0 m /\ disjoint critical0 privKey /\ disjoint critical0 k /\ disjoint critical0 m /\
+    disjoint critical1 m /\ disjoint critical1 privKey /\ disjoint critical1 k /\ disjoint critical1 m /\
+    disjoint critical0 critical1 /\
+    
+    disjoint result m /\
+    disjoint result privKey /\
+    disjoint result k /\
+    nat_from_bytes_be (as_seq h privKey) < prime_p256_order /\
+    nat_from_bytes_be (as_seq h k) < prime_p256_order
+  )
+  (ensures fun h0 flag h1 -> 
+    modifies (loc result |+| loc critical0 |+| loc critical1) h0 h1 /\
+     (assert_norm (pow2 32 < pow2 61);
+      let resultR = gsub result (size 0) (size 32) in 
+      let resultS = gsub result (size 32) (size 32) in 
+      let r, s, flagSpec = Spec.ECDSA.ecdsa_signature_agile alg (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in 
+      as_seq h1 resultR == nat_to_bytes_be 32 r /\
+      as_seq h1 resultS == nat_to_bytes_be 32 s /\
+      flag == flagSpec 
+    )    
+  )
+
+#reset-options "--z3rlimit 400"
+
+let ecdsa_signature_defensive alg result mLen m privKey k critical0 critical1 = 
+  push_frame();
+  let h0 = ST.get() in 
+  assert_norm (pow2 32 < pow2 61); 
+    let tempBuffer = create (size 8) (u64 0) in 
+    
+    let r = sub tempBuffer (size 0) (size 4) in 
+    let s = sub tempBuffer (size 4) (size 4) in 
+    
+  let resultR = sub result (size 0) (size 32) in 
+  let resultS = sub result (size 32) (size 32) in 
+  toUint64ChangeEndian privKey critical0;
+
+  let h1 = ST.get() in 
+  lemma_core_0 critical0 h1;
+  Spec.ECDSA.changeEndianLemma (uints_from_bytes_be (as_seq h0 privKey));
+  uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 privKey);    
+  let flag = ecdsa_signature_core alg r s mLen m critical0 k critical1 in 
+
+  let h2 = ST.get() in 
+  
+  changeEndian r;
+  toUint8 r resultR;
+  lemma_core_0 r h2;
+  lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h2 r);
+
+  changeEndian s;
+  toUint8 s resultS;
+  let h3 = ST.get() in 
+  lemma_core_0 s h2;
+  lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h2 s);
+
+  Spec.ECDSA.changeEndian_le_be (as_nat h2 r);
+  Spec.ECDSA.changeEndian_le_be (as_nat h2 s);
+
+  pop_frame();
+  flag  
+ *)
