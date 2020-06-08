@@ -209,26 +209,30 @@ val os2ip_lemma: emBits:size_pos{hLen + 2 <= blocks emBits 8} -> em:lbytes (bloc
 let os2ip_lemma emBits em =
   let emLen = blocks emBits 8 in
 
+  let aux (emBits:size_pos{emBits % 8 > 0}) : Lemma (8 * ((emBits - 1) / 8) + emBits % 8 <= emBits) =
+    assert ((emBits - 1) / 8 <= emBits / 8) in
+
   if emBits % 8 > 0 then begin
     nat_from_intseq_be_slice_lemma em 1;
     nat_from_intseq_be_lemma0 (slice em 0 1);
     assert (nat_from_bytes_be em == nat_from_bytes_be (slice em 1 emLen) + pow2 ((emLen - 1) * 8) * v em.[0]);
     assert (nat_from_bytes_be em < pow2 ((emLen - 1) * 8) + pow2 ((emLen - 1) * 8) * v em.[0]);
+
     calc (<=) {
       pow2 ((emLen - 1) * 8) + pow2 ((emLen - 1) * 8) * v em.[0];
       (==) { Math.Lemmas.distributivity_add_right (pow2 (8 * (emLen - 1))) 1 (v em.[0]) }
-      (v em.[0] + 1) * pow2 (8 * (emLen - 1));
-      (<=) { Math.Lemmas.lemma_mult_le_right (pow2 (8 * emLen - 1)) (v em.[0] + 1) (pow2 (emBits % 8)) }
-      pow2 (emBits % 8) * pow2 (8 * (emLen - 1));
-      (==) { Math.Lemmas.pow2_plus (emBits % 8) (8 * (emLen - 1)) }
-      pow2 (emBits % 8 + 8 * ((emBits - 1) / 8));
-      (==) { Math.Lemmas.euclidean_division_definition (emBits - 1) 8 }
-      pow2 (emBits % 8 + (emBits - 1) - (emBits - 1) % 8);
-      (<=) { Math.Lemmas.pow2_le_compat emBits (emBits % 8 + (emBits - 1) - (emBits - 1) % 8) }
+      pow2 (8 * (emLen - 1)) * (1 + v em.[0]);
+      (<=) { Math.Lemmas.lemma_mult_le_left (pow2 (8 * emLen - 1)) (v em.[0] + 1) (pow2 (emBits % 8)) }
+      pow2 (8 * (emLen - 1)) * pow2 (emBits % 8);
+      (==) { Math.Lemmas.pow2_plus (8 * (emLen - 1)) (emBits % 8) }
+      pow2 (8 * ((emBits - 1) / 8) + emBits % 8);
+      (<=) { aux emBits; Math.Lemmas.pow2_le_compat emBits ((emBits - 1) - (emBits - 1) % 8 + emBits % 8) }
       pow2 emBits;
     };
    assert (nat_from_bytes_be em < pow2 emBits) end
-  else Math.Lemmas.pow2_le_compat emBits (8 * emLen)
+  else begin
+    assert (nat_from_bytes_be em < pow2 (emLen * 8));
+    assert (emBits == 8 * emLen) end
 
 
 val rsapss_sign:
