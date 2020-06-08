@@ -161,3 +161,90 @@ let ecdsa_signature_defensive alg result mLen m privKey k =
       pop_frame();
       u64 (maxint U64)
     end
+
+
+
+
+val ecdsa_signature_defensive2: alg: hash_alg_ecdsa 
+  -> result: lbuffer uint8 (size 64) 
+  -> mLen: size_t 
+  -> m: lbuffer uint8 mLen 
+  -> keyLen: size_t 
+  -> privKey: lbuffer uint8 keyLen
+  -> nonceLen: size_t
+  -> k: lbuffer uint8 nonceLen -> 
+  Stack uint64
+  (requires fun h -> 
+    live h result /\ live h m /\ live h privKey /\ live h k /\
+    disjoint result m /\
+    disjoint result privKey /\
+    disjoint result k
+  )
+  (ensures fun h0 flag h1 ->
+     modifies (loc result) h0 h1 /\ 
+    (
+      if (alg = NoHash || alg = Hash SHA2_256 || alg = Hash SHA2_384 || alg = Hash SHA2_512) && 
+	(v mLen >= Spec.ECDSA.min_input_length alg) && 
+	(nat_from_bytes_be (as_seq h0 privKey) < prime_p256_order) && 
+	(nat_from_bytes_be (as_seq h0 k) < prime_p256_order)  && 
+	(uint_v keyLen = 32) &&
+	(uint_v nonceLen = 32) 
+	then 
+      (
+	let resultR = gsub result (size 0) (size 32) in 
+	let resultS = gsub result (size 32) (size 32) in 
+	let r, s, flagSpec = Spec.ECDSA.ecdsa_signature_agile alg (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in 
+	as_seq h1 resultR == nat_to_bytes_be 32 r /\
+	as_seq h1 resultS == nat_to_bytes_be 32 s /\
+	flag == flagSpec  
+      )
+      else 
+	v flag == pow2 64 - 1
+  ) 
+)
+
+
+let ecdsa_signature_defensive2 alg result mLen m keyLen privKey nonceLen k = 
+  push_frame();  
+    let h0 = ST.get() in 
+
+  let crTemp = create (size 8) (u64 0) in 
+    let cr0 = sub crTemp (size 0) (size 4) in 
+    let cr1 = sub crTemp (size 4) (size 4) in  
+
+  let criticalData = create (size 64) (u8 0) in 
+    let criticalKey = sub criticalData (size 0) (size 32) in 
+    let criticalNonce = sub criticalData (size 32) (size 32) in 
+
+  let lenKeyCorrect = eq keyLen (size 32) in 
+  let lenNonceCorrect = eq nonceLen (size 32) in 
+
+  let lenMessCorrect = gte mLen (min_input_length_v alg) in   
+  
+  if (alg = NoHash || alg = Hash SHA2_256 || alg = Hash SHA2_384 || alg = Hash SHA2_512) && lenMessCorrect && lenKeyCorrect && lenNonceCorrect then 
+    begin
+      let less0 = lessThanOrderU8 privKey cr0 cr1 in 
+      let less1 = lessThanOrderU8 k cr0 cr1 in 
+      let flagLessOrder = compareTo0TwoVariablesNotSC less0 less1 in 
+	  if flagLessOrder then 
+	    begin
+	      copy criticalKey privKey;
+	      copy criticalNonce k;
+
+	      let flag = Hacl.Impl.ECDSA.P256.Signature.Agile.ecdsa_signature_defensive alg result mLen m criticalKey criticalNonce cr0 cr1 in
+	      clear_words_u64 8ul crTemp;
+	      clear_words_u8 64ul criticalData;
+	      pop_frame();
+	      flag
+	    end
+	  else
+	    begin 
+	      pop_frame();
+	      u64 (maxint U64)
+	    end 
+    end
+  else 
+    begin
+      pop_frame();
+      u64 (maxint U64)
+    end
