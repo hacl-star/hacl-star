@@ -638,7 +638,9 @@ TARGET_H_INCLUDE = -add-include '"kremlin/internal/target.h"'
 # Disabled for distributions that don't include vectorized implementations.
 INTRINSIC_FLAGS = -add-include '"libintvector.h"'
 # Disabled for distributions that don't include code based on intrinsics.
-INTRINSIC_INT_FLAGS = -add-include 'Hacl_ECDSA:"lib_intrinsics.h"'
+INTRINSIC_INT_FLAGS = \
+  -add-include 'Hacl_ECDSA:"lib_intrinsics.h"' \
+  -add-include 'Hacl_RSAPSS:"lib_intrinsics.h"'
 
 # Disabled for dist/portable
 OPT_FLAGS = -ccopts -march=native,-mtune=native
@@ -683,6 +685,7 @@ BUNDLE_FLAGS	=\
   $(HPKE_BUNDLE) \
   $(STREAMING_BUNDLE) \
   $(INTTYPES_BUNDLE) \
+  $(RSAPSS_BUNDLE) \
   $(LEGACY_BUNDLE)
 
 DEFAULT_FLAGS = \
@@ -766,6 +769,7 @@ dist/wasm/Makefile.basic: STREAMING_BUNDLE = -bundle Hacl.Streaming.*
 # And Merkle trees
 dist/wasm/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree,MerkleTree.*'
 dist/wasm/Makefile.basic: CTR_BUNDLE =
+dist/wasm/Makefile.basic: RSAPSS_BUNDLE =
 dist/wasm/Makefile.basic: DEFAULT_FLAGS += -bundle 'EverCrypt,EverCrypt.*'
 
 dist/wasm/package.json: dist/wasm/Makefile.basic $(wildcard bindings/js/*.js) bindings/js/README.md $(wildcard bindings/js/*.json) bindings/js/.npmignore
@@ -905,6 +909,7 @@ dist/ccf/Makefile.basic: HAND_WRITTEN_H_FILES := $(filter-out %/libintvector.h %
 dist/ccf/Makefile.basic: HACL_OLD_FILES =
 dist/ccf/Makefile.basic: POLY_BUNDLE =
 dist/ccf/Makefile.basic: ECDSA_BUNDLE =
+dist/ccf/Makefile.basic: RSAPSS_BUNDLE =
 dist/ccf/Makefile.basic: HPKE_BUNDLE = -bundle 'Hacl.HPKE.*'
 
 # Mozilla distribution
@@ -931,6 +936,7 @@ dist/mozilla/Makefile.basic: SHA3_BUNDLE = -bundle Hacl.SHA3
 dist/mozilla/Makefile.basic: HASH_BUNDLE = -bundle Hacl.Hash.*,Hacl.HKDF,Hacl.HMAC,Hacl.HMAC_DRBG
 dist/mozilla/Makefile.basic: HPKE_BUNDLE = -bundle 'Hacl.HPKE.*'
 dist/mozilla/Makefile.basic: ECDSA_BUNDLE =
+dist/mozilla/Makefile.basic: RSAPSS_BUNDLE =
 dist/mozilla/Makefile.basic: STREAMING_BUNDLE = -bundle Hacl.Streaming.*
 dist/mozilla/Makefile.basic: FRODO_BUNDLE = -bundle Hacl.Frodo.*,Hacl.SHA3,Hacl.Keccak,Frodo.Params
 dist/mozilla/Makefile.basic: \
