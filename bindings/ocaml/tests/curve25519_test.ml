@@ -1,5 +1,3 @@
-#include "config.h"
-
 open Test_utils
 open AutoConfig2
 
@@ -42,6 +40,4 @@ let test (v: Bytes.t curve25519_test) t scalarmult ecdh reqs =
 let _ =
   List.iter (fun v -> test v "EverCrypt.Curve25519" EverCrypt.Curve25519.scalarmult EverCrypt.Curve25519.ecdh []) tests;
   List.iter (fun v -> test v "Hacl.Curve25519_51" Hacl.Curve25519_51.scalarmult Hacl.Curve25519_51.ecdh []) tests;
-  #ifndef IS_NOT_X64
   List.iter (fun v -> test v "Hacl.Curve25519_64" Hacl.Curve25519_64.scalarmult Hacl.Curve25519_64.ecdh [BMI2; ADX]) tests
-  #endif
