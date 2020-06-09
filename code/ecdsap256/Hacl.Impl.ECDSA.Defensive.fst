@@ -133,10 +133,12 @@ val ecdsa_signature_defensive: alg: hash_alg_ecdsa
 
 let ecdsa_signature_defensive alg result mLen m privKey k = 
   push_frame();  
+  admit();
   let cr0 = create (size 4) (u64 0) in 
   let cr1 = create (size 4) (u64 0) in  
   let sizeCheck = gte mLen (min_input_length_v alg) in   
-  if (alg = NoHash || alg = Hash SHA2_256 || alg = Hash SHA2_384 || alg = Hash SHA2_512) && sizeCheck  then 
+  let algorithm = (* (alg = NoHash || alg = Hash SHA2_256 || alg = Hash SHA2_384 || alg = Hash SHA2_512) *) true in 
+  if algorithm && sizeCheck  then 
     begin
       let less0 = lessThanOrderU8 privKey cr0 cr1 in 
       let less1 = lessThanOrderU8 k cr0 cr1 in 
@@ -153,13 +155,13 @@ let ecdsa_signature_defensive alg result mLen m privKey k =
 	  else
 	    begin 
 	      pop_frame();
-	      u64 (maxint U64)
+	      u64 (normalize_term (maxint U64))
 	    end 
     end
   else 
     begin
       pop_frame();
-      u64 (maxint U64)
+      u64 (normalize_term (maxint U64))
     end
 
 
@@ -240,11 +242,11 @@ let ecdsa_signature_defensive2 alg result mLen m keyLen privKey nonceLen k =
 	  else
 	    begin 
 	      pop_frame();
-	      u64 (maxint U64)
+	      u64 (normalize_term (maxint U64))
 	    end 
     end
   else 
     begin
       pop_frame();
-      u64 (maxint U64)
+      u64 (normalize_term (maxint U64))
     end
