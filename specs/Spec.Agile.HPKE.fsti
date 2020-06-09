@@ -77,7 +77,7 @@ type key_aead_s (cs:ciphersuite) = lbytes (size_aead_key cs)
 type nonce_aead_s (cs:ciphersuite) = lbytes (size_aead_nonce cs)
 type psk_s (cs:ciphersuite) = lbytes (size_psk cs)
 
-val setupBaseI:
+val setupBaseS:
     cs:ciphersuite
   -> skE: key_dh_secret_s cs
   -> pkR:key_dh_public_s cs
