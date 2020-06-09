@@ -19,11 +19,13 @@ open FStar.Math.Lib
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
+noextract
 let prime = prime_p256_order
 
+noextract
 let nat_prime = n:nat{n < prime}
 
-
+noextract
 val lemma_scalar_ith: sc:lbytes 32 -> k:nat{k < 32} -> Lemma
   (v sc.[k] == nat_from_intseq_le sc / pow2 (8 * k) % pow2 8)
 
@@ -31,7 +33,7 @@ let lemma_scalar_ith sc k =
   index_nat_to_intseq_le #U8 #SEC 32 (nat_from_intseq_le sc) k;
   nat_from_intseq_le_inj sc (nat_to_intseq_le 32 (nat_from_intseq_le sc))
 
-
+noextract
 val lemma_euclidian_for_ithbit: k: nat -> i: nat
   -> Lemma (k / (pow2 (8 * (i / 8)) * pow2 (i % 8)) == k / pow2 i)
 
@@ -39,7 +41,7 @@ let lemma_euclidian_for_ithbit k i =
   lemma_div_def i 8;
   pow2_plus (8 * (i / 8)) (i % 8)
 
-
+noextract
 val ith_bit: k:lbytes 32 -> i:nat{i < 256}
   -> t:uint64 {(v t == 0 \/ v t == 1) /\ v t == nat_from_intseq_le k / pow2 i % 2}
 
@@ -62,7 +64,7 @@ let ith_bit k i =
 
 let ( *% ) a b = (a * b) % prime
 
-
+noextract
 val _exp_step0: p:nat_prime -> q:nat_prime -> tuple2 nat_prime nat_prime
 
 let _exp_step0 r0 r1 =
@@ -70,7 +72,7 @@ let _exp_step0 r0 r1 =
   let r0 = r0 *% r0 in
   r0, r1
 
-
+noextract
 val _exp_step1: p:nat_prime -> q:nat_prime -> tuple2 nat_prime nat_prime
 
 let _exp_step1 r0 r1 =
@@ -78,9 +80,10 @@ let _exp_step1 r0 r1 =
   let r1 = r1 *% r1 in
   (r0, r1)
 
-
+noextract
 let swap p q = q, p
 
+noextract
 val conditional_swap: i:uint64 -> p:nat_prime -> q:nat_prime -> tuple2 nat_prime nat_prime
 
 let conditional_swap i p q =
@@ -97,7 +100,7 @@ val lemma_swaped_steps: p: nat_prime -> q: nat_prime ->
 
 let lemma_swaped_steps p q = ()
 
-
+noextract
 val _exp_step: k:lseq uint8 32 -> i:nat{i < 256} -> before:tuple2 nat_prime nat_prime
   -> tuple2 nat_prime nat_prime
 
@@ -107,7 +110,7 @@ let _exp_step k i (p, q) =
   let open Lib.RawIntTypes in
   if uint_to_nat bit = 0 then _exp_step0 p q else _exp_step1 p q
 
-
+noextract
 val _exponent_spec: k:lseq uint8 32  -> tuple2 nat_prime nat_prime
   -> tuple2 nat_prime nat_prime
 
@@ -291,7 +294,7 @@ let prime_p256_order_seq: s:lseq uint8 32{nat_from_intseq_be s == prime_p256_ord
   assert_norm (nat_from_intlist_be prime_p256_order_list == prime_p256_order);
   of_list prime_p256_order_list
 
-
+noextract
 val exponent_spec: a:nat_prime -> r:nat_prime{r = pow a (prime_p256_order - 2) % prime_p256_order}
 
 let exponent_spec a =
@@ -299,7 +302,7 @@ let exponent_spec a =
   lemma_exponen_spec prime_p256_order_inverse_seq (1, a) 256;
   a0
 
-
+noextract
 val changeEndian: felem_seq -> felem_seq
 
 let changeEndian i =
@@ -313,7 +316,7 @@ let changeEndian i =
   let o = Lib.Sequence.upd o 2 one in
           Lib.Sequence.upd o 3 zero
 
-
+noextract
 val changeEndianLemma: k: lseq uint64 4 -> Lemma
   (nat_from_intseq_le (changeEndian k) == nat_from_intseq_be k)
 
@@ -340,6 +343,7 @@ let changeEndianLemma k =
 
   assert_norm (pow2 (2 * 64) * pow2 64 == pow2 (3 * 64))
 
+noextract
 val changeEndianLemmaI: a: nat {a < pow2 256} -> Lemma
   (changeEndian (nat_to_intseq_le 4 a) == nat_to_intseq_be 4 a)
 
@@ -366,6 +370,7 @@ let changeEndianLemmaI a =
   eq_intro (changeEndian (nat_to_intseq_le #U64 #SEC 4 a)) (nat_to_intseq_be 4 a)
 
 
+noextract
 val changeEndian_le_be: a:nat{a < pow2 256} -> Lemma
   (uints_to_bytes_be (changeEndian (nat_to_intseq_le 4 a)) == nat_to_bytes_be 32 a)
 
@@ -373,7 +378,7 @@ let changeEndian_le_be a =
   changeEndianLemmaI a;
   uints_to_bytes_be_nat_lemma #U64 #SEC 4 a
 
-
+noextract
 val verifyQValidCurvePointSpec:
   publicKey:tuple3 nat nat nat{~(isPointAtInfinity publicKey)} -> bool
 
@@ -385,7 +390,7 @@ let verifyQValidCurvePointSpec publicKey =
   isPointOnCurve (x, y, z) &&
   isPointAtInfinity (scalar_multiplication prime_p256_order_seq publicKey)
 
-
+noextract
 val checkCoordinates: r:nat -> s:nat -> bool
 
 let checkCoordinates r s =
@@ -400,14 +405,13 @@ type hash_alg_ecdsa =
   |NoHash
   |Hash of (a: hash_alg {a == SHA2_256 \/ a == SHA2_384 \/ a == SHA2_512})
 
-
+noextract
 let invert_state_s (a: hash_alg_ecdsa): Lemma
   (requires True)
   (ensures (inversion hash_alg_ecdsa))
   [ SMTPat (hash_alg_ecdsa) ]
 =
   allow_inversion (hash_alg_ecdsa)
-
 
 
 val min_input_length_v: hash_alg_ecdsa -> Tot size_t
@@ -417,7 +421,7 @@ let min_input_length_v a =
     |NoHash -> 32ul
     |Hash a -> 0ul
 
-
+noextract
 val min_input_length: hash_alg_ecdsa -> Tot int
 
 let min_input_length a =
@@ -431,7 +435,7 @@ let hash_length (a : hash_alg_ecdsa) =
     |NoHash -> 32
     |Hash a -> hash_length a
 *)
-
+noextract
 val hashSpec: a: hash_alg_ecdsa 
   -> mLen: size_nat{mLen >= min_input_length a}
   -> m: lseq uint8 mLen ->
@@ -448,7 +452,7 @@ let hashSpec a mLen m =
 
 open Lib.ByteSequence 
 
-
+noextract
 val ecdsa_verification_agile:
   alg: hash_alg_ecdsa
   -> publicKey:tuple2 nat nat 
@@ -487,6 +491,7 @@ let ecdsa_verification_agile alg publicKey r s mLen m =
     end
   end
 
+noextract
 val ecdsa_signature_agile:
   alg: hash_alg_ecdsa
   -> mLen:size_nat{mLen >= min_input_length alg} 
