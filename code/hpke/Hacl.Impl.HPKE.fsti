@@ -20,7 +20,7 @@ inline_for_extraction noextract
 let nonce_aead (cs:S.ciphersuite) = lbuffer uint8 (size (S.size_aead_nonce cs))
 
 inline_for_extraction noextract
-let setupBaseI_st (cs:S.ciphersuite) (p:Type0) =
+let setupBaseS_st (cs:S.ciphersuite) (p:Type0) =
      o_pkE: key_dh_public cs
   -> o_k: key_aead cs
   -> o_n: nonce_aead cs
@@ -37,7 +37,7 @@ let setupBaseI_st (cs:S.ciphersuite) (p:Type0) =
         disjoint o_pkE o_k /\ disjoint o_pkE o_n /\
         disjoint o_k o_n)
      (ensures fun h0 result h1 -> modifies (loc o_pkE |+| loc o_k |+| loc o_n) h0 h1 /\
-       (let output = S.setupBaseI cs (as_seq h0 skE) (as_seq h0 pkR) (as_seq h0 info) in
+       (let output = S.setupBaseS cs (as_seq h0 skE) (as_seq h0 pkR) (as_seq h0 info) in
         match result with
         | 0ul -> Some? output /\ (let pkE, k, n = Some?.v output in
           as_seq h1 o_pkE == pkE /\
@@ -119,7 +119,7 @@ let openBase_st (cs:S.ciphersuite) (p:Type0) =
          | _ -> False))
 
 noextract inline_for_extraction
-val setupBaseI: #cs:S.ciphersuite -> setupBaseI_st cs True
+val setupBaseS: #cs:S.ciphersuite -> setupBaseS_st cs True
 
 noextract inline_for_extraction
 val setupBaseR: #cs:S.ciphersuite -> setupBaseR_st cs True

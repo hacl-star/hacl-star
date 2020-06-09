@@ -8,7 +8,7 @@ module Hash = Spec.Agile.Hash
 noextract unfold
 let cs = (DH.DH_P256, AEAD.CHACHA20_POLY1305, Hash.SHA2_256)
 
-val setupBaseI: setupBaseI_st cs True
+val setupBaseS: setupBaseS_st cs True
 
 val setupBaseR: setupBaseR_st cs True
 

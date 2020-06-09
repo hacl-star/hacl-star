@@ -271,7 +271,7 @@ let ks_derive cs m pkR zz pkE info opsk opkI =
 ///     return enc, KeySchedule(mode_base, pkR, zz, enc, info,
 ///                             default_psk, default_pskID, default_pkIm)
 
-let setupBaseI cs skE pkR info =
+let setupBaseS cs skE pkR info =
   let res = encap cs skE pkR in
   match res with
   | Some (zz, pkE) ->
@@ -300,7 +300,7 @@ let setupBaseR cs pkE skR info =
 ///     return enc, KeySchedule(pkR, zz, enc, info,
 ///                             default_psk, default_pskID, pkIm)
 
-val setupAuthI:
+val setupAuthS:
     cs:ciphersuite
   -> skE: key_dh_secret_s cs
   -> skI: key_dh_secret_s cs
@@ -308,7 +308,7 @@ val setupAuthI:
   -> info:bytes{Seq.length info <= max_info} ->
   Tot (option (key_dh_public_s cs & key_aead_s cs & nonce_aead_s cs))
 
-let setupAuthI cs skE skI pkR info =
+let setupAuthS cs skE skI pkR info =
   let pkI = DH.secret_to_public (curve_of_cs cs) skI in
   let res = auth_encap cs skE skI pkR in
   match pkI, res with
@@ -345,7 +345,7 @@ let setupAuthR cs pkE pkI skR info =
 ///     pkIm = Marshal(pk(skI))
 ///     return enc, KeySchedule(mode_psk_auth, pkR, zz, enc, info, psk, pskID, pkIm)
 
-val setupAuthPSKI:
+val setupAuthPSKS:
     cs:ciphersuite
   -> skE: key_dh_secret_s cs
   -> skI: key_dh_secret_s cs
@@ -355,7 +355,7 @@ val setupAuthPSKI:
   -> info:bytes{Seq.length info <= max_info} ->
   Tot (option (key_dh_public_s cs & key_aead_s cs & nonce_aead_s cs))
 
-let setupAuthPSKI cs skE skI pkR psk pskID info =
+let setupAuthPSKS cs skE skI pkR psk pskID info =
   let pkI = DH.secret_to_public (curve_of_cs cs) skI in
   let res = auth_encap cs skE skI pkR in
   match pkI, res with
@@ -370,7 +370,7 @@ let setupAuthPSKI cs skE skI pkR psk pskID info =
 ///     pkIm = Marshal(pkI)
 ///     return KeySchedule(mode_psk_auth, pk(skR), zz, enc, info, psk, pskID, pkIm)
 
-val setupPSKAuthR:
+val setupAuthPSKR:
     cs:ciphersuite
   -> pkE: key_dh_public_s cs
   -> pkI: key_dh_public_s cs
@@ -380,7 +380,7 @@ val setupPSKAuthR:
   -> info:bytes{Seq.length info <= max_info} ->
   Tot (option (key_aead_s cs & nonce_aead_s cs))
 
-let setupPSKAuthR cs pkE pkI skR psk pskID info =
+let setupAuthPSKR cs pkE pkI skR psk pskID info =
   let pkR = DH.secret_to_public (curve_of_cs cs) skR in
   let zz = auth_decap cs pkE pkI skR in
   match pkR, zz with
@@ -395,7 +395,7 @@ let setupPSKAuthR cs pkE pkI skR psk pskID info =
 #set-options "--z3rlimit 50"
 
 let sealBase cs skE pkR m info =
-  match setupBaseI cs skE pkR info with
+  match setupBaseS cs skE pkR info with
   | Some (pkE,k,n) ->
     Some (Seq.append pkE (AEAD.encrypt #(aead_of_cs cs) k n info m))
   | None -> None

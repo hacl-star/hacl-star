@@ -624,13 +624,13 @@ let test_base_setup
   // let k, n = HPKE.ks_derive cs HPKE.Base (of_list pkR) (of_list zz) (of_list pkE)
   //   (of_list info) None None in
 
-  IO.print_string "Test setupBaseI\n";
-  let setupBaseI = HPKE.setupBaseI cs (of_list skE) (of_list pkR) (of_list info) in
-  let res_setupBaseI =
-    if None? setupBaseI then (
-      IO.print_string "setupBaseI returned None\n"; false
+  IO.print_string "Test setupBaseS\n";
+  let setupBaseS = HPKE.setupBaseS cs (of_list skE) (of_list pkR) (of_list info) in
+  let res_setupBaseS =
+    if None? setupBaseS then (
+      IO.print_string "setupBaseS returned None\n"; false
     ) else (
-      let returned_pkE, returned_key, returned_nonce = Some?.v setupBaseI in
+      let returned_pkE, returned_key, returned_nonce = Some?.v setupBaseS in
       let r2_a = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b)
         (of_list pkE) returned_pkE in
       let r2_b = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b)
@@ -660,7 +660,7 @@ let test_base_setup
     )
   in
 
-  if res_setupBaseI then IO.print_string "setupBaseI succeeded\n" else IO.print_string "setupBaseI failed\n";
+  if res_setupBaseS then IO.print_string "setupBaseS succeeded\n" else IO.print_string "setupBaseS failed\n";
 
   IO.print_string "Test setupBaseR\n";
   let setupBaseR = HPKE.setupBaseR cs (of_list pkE) (of_list skR) (of_list info) in
@@ -692,7 +692,7 @@ let test_base_setup
 
   if res_setupBaseR then IO.print_string "setupBaseR succeeded\n" else IO.print_string "setupBaseR failed\n";
 
-  res_setupBaseI && res_setupBaseR
+  res_setupBaseS && res_setupBaseR
 
 let test_encrytion (cs:HPKE.ciphersuite)
   (skE:list uint8{List.Tot.length skE == HPKE.size_dh_key cs})

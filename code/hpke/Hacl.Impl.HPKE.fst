@@ -401,7 +401,7 @@ let ks_derive_default #cs pkR zz pkE infolen info o_key o_nonce =
 #set-options "--z3rlimit 100"
 
 [@ Meta.Attribute.specialize]
-let setupBaseI #cs o_pkE o_k o_n skE pkR infolen info =
+let setupBaseS #cs o_pkE o_k o_n skE pkR infolen info =
   push_frame();
   let zz = create (nsize_dh_public cs) (u8 0) in
   let res = encap zz o_pkE skE pkR in
@@ -462,7 +462,7 @@ let sealBase_aux #cs skE pkR mlen m infolen info output zz k n =
   assert (v (mlen +. 16ul) == v mlen + 16);
   assert (S.size_dh_public cs + v (mlen +. 16ul) == length output);
   let pkE:key_dh_public cs = sub output 0ul (nsize_dh_public cs) in
-  let res = setupBaseI pkE k n skE pkR infolen info in
+  let res = setupBaseS pkE k n skE pkR infolen info in
   let dec = sub output (nsize_dh_public cs) (mlen +. 16ul) in
   AEAD.aead_encrypt #cs k n infolen info mlen m dec;
   let h2 = ST.get() in
