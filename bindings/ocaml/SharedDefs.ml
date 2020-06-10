@@ -37,7 +37,7 @@ end
 module Hacl_Hash = Hacl_Hash_bindings.Bindings(Hacl_Hash_stubs)
 module Hacl_Spec = Hacl_Spec_bindings.Bindings(Hacl_Spec_stubs)
 
-let max_size_t = 4294967296
+let max_size_t = Z.of_string "4294967296"
 
 module HashDefs = struct
   open Hacl_Spec
@@ -64,6 +64,8 @@ module HashDefs = struct
     | Some alg -> assert (len = digest_len alg)
     | None -> ()
   let max_input_len = max_size_t
+  let check_max_input_len len =
+    assert Z.(of_int len < max_input_len)
   let incremental_input_len = function
     | Legacy SHA1
     | Legacy MD5
@@ -74,7 +76,7 @@ module HashDefs = struct
   let block_len alg =
     UInt32.to_int (Hacl_Hash.hacl_Hash_Definitions_block_len (alg_definition alg))
   let check_key_len alg len =
-    assert (len + block_len alg < max_input_len)
+    assert Z.(of_int len + of_int (block_len alg) < max_input_len)
 end
 
 module type Chacha20_Poly1305_generic = sig

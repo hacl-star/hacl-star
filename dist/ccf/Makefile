@@ -85,8 +85,12 @@ Hacl_Blake2b_256.o Hacl_Poly1305_256.o Hacl_Chacha20_Vec256.o Hacl_Chacha20Poly1
 
 all: libevercrypt.$(SO)
 
-libevercrypt.$(SO): $(OBJS)
-	$(CC) $(CFLAGS) -shared -o $@ $^ $(LDFLAGS)
+libevercrypt.$(SO): config.h $(OBJS)
+	$(CC) $(CFLAGS) -shared -o $@ $(filter-out %.h,$^) $(LDFLAGS)
+
+# If the configure script has not run, create an empty config.h
+config.h:
+	touch $@
 
 # 4. Compilation of OCaml bindings; conditional on the presence of the lib_gen
 # folder, possibly disabled by configure.
@@ -101,11 +105,13 @@ OCAMLDEP=ocamlfind dep -I lib -slash
 
 CFLAGS += -I "$(shell ocamlfind query ctypes)" -I "$(shell ocamlfind c -where)"
 
-# Just names.
-ALL_OCAML=$(patsubst lib_gen/%_gen.ml,%,$(wildcard lib_gen/*_gen.ml))
+# Don't include bindings for files that cannot be compiled.
+BLACKLIST_ML=$(patsubst %.c,%,$(BLACKLIST))
+ALL_OCAML=$(filter-out $(BLACKLIST_ML),$(patsubst lib_gen/%_gen.ml,%,$(wildcard lib_gen/*_gen.ml)))
 
+# Just names.
 ALL_BINDINGS=$(patsubst %,lib/%_bindings.cmx,$(ALL_OCAML))
-ALL_GENERATORS=$(patsubst %.ml,%.exe,$(wildcard lib_gen/*_gen.ml))
+ALL_GENERATORS=$(patsubst %,lib_gen/%_gen.exe, $(ALL_OCAML))
 ALL_ML_STUBS=$(patsubst %,lib/%_stubs.cmx,$(ALL_OCAML))
 ALL_C_STUBS=$(patsubst %,lib/%_c_stubs.o,$(ALL_OCAML))
 
@@ -162,13 +168,18 @@ lib/%_stubs.ml lib/%_c_stubs.c: lib_gen/%_gen.exe
 # Can be remove once ctypes is upgraded to 0.17
 lib/%_c_stubs.o: CFLAGS += -Wno-pointer-sign
 
-CTYPES_DEPS += lib/Lib_RandomBuffer_System_stubs.cmx lib/Lib_RandomBuffer_System_bindings.cmx
+BLACKLIST_CMX =  $(patsubst %,lib/%_stubs.cmx,$(BLACKLIST_ML))
+BLACKLIST_CMX += $(patsubst %,lib/%_bindings.cmx,$(BLACKLIST_ML))
+CTYPES_CMX    =  $(filter-out $(BLACKLIST_CMX),$(CTYPES_DEPS))
+CTYPES_CMX    += lib/Lib_RandomBuffer_System_stubs.cmx lib/Lib_RandomBuffer_System_bindings.cmx
+CTYPES_ML     =  $(patsubst %.cmx,%.ml,$(CTYPES_CMX))
+CTYPES_CMI    =  $(patsubst %.cmx,%.cmi,$(CTYPES_CMX))
 
 ocamlevercrypt.cmxa: $(ALL_BINDINGS) $(ALL_ML_STUBS) $(ALL_C_STUBS) libevercrypt.$(SO)
-	ocamlfind mklib -o ocamlevercrypt $(CTYPES_DEPS) $(ALL_C_STUBS) -ccopt -L. -cclib -levercrypt
+	ocamlfind mklib -o ocamlevercrypt $(CTYPES_CMX) $(ALL_C_STUBS) -ccopt -L. -cclib -levercrypt
 
-install-hacl-star-raw: ocamlevercrypt.cmxa
-	ocamlfind install hacl-star-raw META $(wildcard lib/*.ml lib/*.cmx lib/*.cmi *.cmxa *.a *.so *.dll)
+install-hacl-star-raw: ocamlevercrypt.cmxa libevercrypt.a
+	ocamlfind install hacl-star-raw META $(CTYPES_ML) $(CTYPES_CMX) $(CTYPES_CMI) $(wildcard *.cmxa *.a *.so *.dll) config.h
 
 endif
 endif

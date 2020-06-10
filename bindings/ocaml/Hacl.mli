@@ -74,4 +74,3 @@ module ECDSA : sig
   val sign : C.t -> C.t -> C.t -> C.t -> bool
   val verify : C.t -> C.t -> C.t -> bool
 end
-

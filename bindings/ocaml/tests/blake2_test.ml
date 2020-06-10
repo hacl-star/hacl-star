@@ -41,4 +41,3 @@ let _ =
   List.iter (fun v -> test v "Blake2b_256" Hacl.Blake2b_256.hash [AVX2]) blake2b_tests;
   List.iter (fun v -> test v "Blake2s_32" Hacl.Blake2s_32.hash []) blake2s_tests;
   List.iter (fun v -> test v "Blake2s_128" Hacl.Blake2s_128.hash [AVX]) blake2s_tests
-
