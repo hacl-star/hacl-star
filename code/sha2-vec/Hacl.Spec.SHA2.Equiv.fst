@@ -385,6 +385,7 @@ let load_blocks_lemma_ij_subst #a #m b j i =
     }
 
 
+#push-options "--z3rlimit 100"
 val load_ws_lemma_l:
     #a:sha2_alg
   -> #m:m_spec
@@ -407,6 +408,7 @@ let load_ws_lemma_l #a #m b j =
 
   Classical.forall_intro aux;
   eq_intro lp rp
+#pop-options
 
 
 val state_spec_v_map2_add:
@@ -462,9 +464,10 @@ let load_last_lemma_l #a #m totlen_seq fin len b l =
   reveal_opaque (`%load_last) (load_last #a #m);
   match lanes a m with
   | 1 -> ()
+  | 2 -> ()
   | 4 -> ()
   | 8 -> ()
-  | _ -> admit()
+  | 16 -> ()
 
 
 val update_last_lemma_l:

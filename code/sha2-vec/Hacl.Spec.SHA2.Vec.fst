@@ -203,26 +203,43 @@ noextract
 let transpose_ws1 (#a:sha2_alg) (#m:m_spec{lanes a m == 1}) (ws:ws_spec a m) : ws_spec a m = ws
 
 noextract
+let transpose_ws2 (#a:sha2_alg) (#m:m_spec{lanes a m == 2}) (ws:ws_spec a m) : ws_spec a m =
+  let (ws0,ws1) = VecTranspose.transpose2x2 (ws.[0],ws.[1]) in
+  let (ws2,ws3) = VecTranspose.transpose2x2 (ws.[2],ws.[3]) in
+  let (ws4,ws5) = VecTranspose.transpose2x2 (ws.[4],ws.[5]) in
+  let (ws6,ws7) = VecTranspose.transpose2x2 (ws.[6],ws.[7]) in
+  let (ws8,ws9) = VecTranspose.transpose2x2 (ws.[8],ws.[9]) in
+  let (ws10,ws11) = VecTranspose.transpose2x2 (ws.[10],ws.[11]) in
+  let (ws12,ws13) = VecTranspose.transpose2x2 (ws.[12],ws.[13]) in
+  let (ws14,ws15) = VecTranspose.transpose2x2 (ws.[14],ws.[15]) in
+  create16 ws0 ws1 ws2 ws3 ws4 ws5 ws6 ws7 ws8 ws9 ws10 ws11 ws12 ws13 ws14 ws15
+
+noextract
 let transpose_ws4 (#a:sha2_alg) (#m:m_spec{lanes a m == 4}) (ws:ws_spec a m) : ws_spec a m =
-    let (ws0,ws1,ws2,ws3) = VecTranspose.transpose4x4 (ws.[0], ws.[1], ws.[2], ws.[3]) in
-    let (ws4,ws5,ws6,ws7) = VecTranspose.transpose4x4 (ws.[4], ws.[5], ws.[6], ws.[7]) in
-    let (ws8,ws9,ws10,ws11) = VecTranspose.transpose4x4 (ws.[8], ws.[9], ws.[10], ws.[11]) in
-    let (ws12,ws13,ws14,ws15) = VecTranspose.transpose4x4 (ws.[12], ws.[13], ws.[14], ws.[15]) in
-    create16 ws0 ws1 ws2 ws3 ws4 ws5 ws6 ws7 ws8 ws9 ws10 ws11 ws12 ws13 ws14 ws15
+  let (ws0,ws1,ws2,ws3) = VecTranspose.transpose4x4 (ws.[0],ws.[1],ws.[2],ws.[3]) in
+  let (ws4,ws5,ws6,ws7) = VecTranspose.transpose4x4 (ws.[4],ws.[5],ws.[6],ws.[7]) in
+  let (ws8,ws9,ws10,ws11) = VecTranspose.transpose4x4 (ws.[8],ws.[9],ws.[10],ws.[11]) in
+  let (ws12,ws13,ws14,ws15) = VecTranspose.transpose4x4 (ws.[12],ws.[13],ws.[14],ws.[15]) in
+  create16 ws0 ws1 ws2 ws3 ws4 ws5 ws6 ws7 ws8 ws9 ws10 ws11 ws12 ws13 ws14 ws15
 
 noextract
 let transpose_ws8 (#a:sha2_alg) (#m:m_spec{lanes a m == 8}) (ws:ws_spec a m) : ws_spec a m =
-    let (ws0,ws1,ws2,ws3,ws4,ws5,ws6,ws7) = VecTranspose.transpose8x8 (ws.[0], ws.[1], ws.[2], ws.[3], ws.[4], ws.[5], ws.[6], ws.[7]) in
-    let (ws8,ws9,ws10,ws11,ws12,ws13,ws14,ws15) = VecTranspose.transpose8x8 (ws.[8], ws.[9], ws.[10], ws.[11], ws.[12], ws.[13], ws.[14], ws.[15]) in
-    create16 ws0 ws1 ws2 ws3 ws4 ws5 ws6 ws7 ws8 ws9 ws10 ws11 ws12 ws13 ws14 ws15
+  let (ws0,ws1,ws2,ws3,ws4,ws5,ws6,ws7) = VecTranspose.transpose8x8 (ws.[0],ws.[1],ws.[2],ws.[3],ws.[4],ws.[5],ws.[6],ws.[7]) in
+  let (ws8,ws9,ws10,ws11,ws12,ws13,ws14,ws15) = VecTranspose.transpose8x8 (ws.[8],ws.[9],ws.[10],ws.[11],ws.[12],ws.[13],ws.[14],ws.[15]) in
+  create16 ws0 ws1 ws2 ws3 ws4 ws5 ws6 ws7 ws8 ws9 ws10 ws11 ws12 ws13 ws14 ws15
+
+noextract
+let transpose_ws16 (#a:sha2_alg) (#m:m_spec{lanes a m == 16}) (ws:ws_spec a m) : ws_spec a m =
+  VecTranspose.transpose16x16_lseq ws
 
 noextract
 let transpose_ws (#a:sha2_alg) (#m:m_spec) (ws:ws_spec a m) : ws_spec a m =
   match lanes a m with
   | 1 -> transpose_ws1 #a #m ws
+  | 2 -> transpose_ws2 #a #m ws
   | 4 -> transpose_ws4 #a #m ws
   | 8 -> transpose_ws8 #a #m ws
-  | _ -> admit()
+  | 16 -> transpose_ws16 #a #m ws
 
 
 noextract
@@ -231,21 +248,18 @@ let load_ws (#a:sha2_alg) (#m:m_spec) (b:multiblock_spec a m) : ws_spec a m =
   transpose_ws #a #m ws
 
 noextract
-let ws_next_inner (#a:sha2_alg) (#m:m_spec)
-                  (i:size_nat{i < 16})
-                  (ws:ws_spec a m) : ws_spec a m =
-      let t16 = ws.[i] in
-      let t15 = ws.[(i+1) % 16] in
-      let t7  = ws.[(i+9) % 16] in
-      let t2  = ws.[(i+14) % 16] in
-      let s1 = _sigma1 t2 in
-      let s0 = _sigma0 t15 in
-      ws.[i] <- (s1 +| t7 +| s0 +| t16)
+let ws_next_inner (#a:sha2_alg) (#m:m_spec) (i:size_nat{i < 16}) (ws:ws_spec a m) : ws_spec a m =
+  let t16 = ws.[i] in
+  let t15 = ws.[(i+1) % 16] in
+  let t7  = ws.[(i+9) % 16] in
+  let t2  = ws.[(i+14) % 16] in
+  let s1 = _sigma1 t2 in
+  let s0 = _sigma0 t15 in
+  ws.[i] <- (s1 +| t7 +| s0 +| t16)
 
 noextract
-let ws_next (#a:sha2_alg) (#m:m_spec)
-            (ws:ws_spec a m) : ws_spec a m =
-    repeati 16 (ws_next_inner #a #m) ws
+let ws_next (#a:sha2_alg) (#m:m_spec) (ws:ws_spec a m) : ws_spec a m =
+  repeati 16 (ws_next_inner #a #m) ws
 
 noextract
 let shuffle_inner (#a:sha2_alg) (#m:m_spec) (ws:ws_spec a m) (i:size_nat{i < v (num_rounds16 a)}) (j:size_nat{j < 16}) (st:state_spec a m) : state_spec a m =
@@ -289,13 +303,13 @@ let load_last_blocks (#a:sha2_alg)
                      (len:size_nat{len < block_length a})
                      (b:lseq uint8 len) :
                      lseq uint8 (block_length a) & lseq uint8 (block_length a) =
-    let last = create (2 * block_length a) (u8 0) in
-    let last = update_sub last 0 len b in
-    let last = last.[len] <- u8 0x80 in
-    let last = update_sub last (fin - len_length a) (len_length a) totlen_seq in
-    let l0 : lseq uint8 (block_length a) = sub last 0 (block_length a) in
-    let l1 : lseq uint8 (block_length a) = sub last (block_length a) (block_length a) in
-    (l0, l1)
+  let last = create (2 * block_length a) (u8 0) in
+  let last = update_sub last 0 len b in
+  let last = last.[len] <- u8 0x80 in
+  let last = update_sub last (fin - len_length a) (len_length a) totlen_seq in
+  let l0 : lseq uint8 (block_length a) = sub last 0 (block_length a) in
+  let l1 : lseq uint8 (block_length a) = sub last (block_length a) (block_length a) in
+  (l0, l1)
 
 noextract
 let load_last1 (#a:sha2_alg) (#m:m_spec{lanes a m == 1})
@@ -303,11 +317,25 @@ let load_last1 (#a:sha2_alg) (#m:m_spec{lanes a m == 1})
                (fin:size_nat{fin == block_length a \/ fin == 2 * block_length a})
                (len:size_nat{len < block_length a}) (b:multiseq (lanes a m) len) :
                multiseq (lanes a m) (block_length a) & multiseq (lanes a m) (block_length a) =
-    let b = b.(|0|) in
-    let (l0,l1) = load_last_blocks #a totlen_seq fin len b in
-    let lb0 : multiseq (lanes a m) (block_length a) = ntup1 l0 in
-    let lb1 : multiseq (lanes a m) (block_length a) = ntup1 l1 in
-    (lb0, lb1)
+  let b = b.(|0|) in
+  let (l0,l1) = load_last_blocks #a totlen_seq fin len b in
+  let lb0 : multiseq (lanes a m) (block_length a) = ntup1 l0 in
+  let lb1 : multiseq (lanes a m) (block_length a) = ntup1 l1 in
+  (lb0, lb1)
+
+noextract
+let load_last2 (#a:sha2_alg) (#m:m_spec{lanes a m == 2})
+               (totlen_seq:lseq uint8 (len_length a))
+               (fin:size_nat{fin == block_length a \/ fin == 2 * block_length a})
+               (len:size_nat{len < block_length a}) (b:multiseq (lanes a m) len) :
+               multiseq (lanes a m) (block_length a) & multiseq (lanes a m) (block_length a) =
+  let b0 = b.(|0|) in
+  let b1 = b.(|1|) in
+  let (l00,l01) = load_last_blocks #a totlen_seq fin len b0 in
+  let (l10,l11) = load_last_blocks #a totlen_seq fin len b1 in
+  let mb0 = ntup2 (l00, l10) in
+  let mb1 = ntup2 (l01, l11) in
+  (mb0, mb1)
 
 #push-options "--z3rlimit 100"
 noextract
@@ -316,17 +344,17 @@ let load_last4 (#a:sha2_alg) (#m:m_spec{lanes a m == 4})
                (fin:size_nat{fin == block_length a \/ fin == 2 * block_length a})
                (len:size_nat{len < block_length a}) (b:multiseq (lanes a m) len) :
                multiseq (lanes a m) (block_length a) & multiseq (lanes a m) (block_length a) =
-    let b0 = b.(|0|) in
-    let b1 = b.(|1|) in
-    let b2 = b.(|2|) in
-    let b3 = b.(|3|) in
-    let (l00,l01) = load_last_blocks #a totlen_seq fin len b0 in
-    let (l10,l11) = load_last_blocks #a totlen_seq fin len b1 in
-    let (l20,l21) = load_last_blocks #a totlen_seq fin len b2 in
-    let (l30,l31) = load_last_blocks #a totlen_seq fin len b3 in
-    let mb0 = ntup4 (l00, (l10, (l20, l30))) in
-    let mb1 = ntup4 (l01, (l11, (l21, l31))) in
-    (mb0, mb1)
+  let b0 = b.(|0|) in
+  let b1 = b.(|1|) in
+  let b2 = b.(|2|) in
+  let b3 = b.(|3|) in
+  let (l00,l01) = load_last_blocks #a totlen_seq fin len b0 in
+  let (l10,l11) = load_last_blocks #a totlen_seq fin len b1 in
+  let (l20,l21) = load_last_blocks #a totlen_seq fin len b2 in
+  let (l30,l31) = load_last_blocks #a totlen_seq fin len b3 in
+  let mb0 = ntup4 (l00, (l10, (l20, l30))) in
+  let mb1 = ntup4 (l01, (l11, (l21, l31))) in
+  (mb0, mb1)
 
 noextract
 let load_last8 (#a:sha2_alg) (#m:m_spec{lanes a m == 8})
@@ -334,25 +362,61 @@ let load_last8 (#a:sha2_alg) (#m:m_spec{lanes a m == 8})
                (fin:size_nat{fin == block_length a \/ fin == 2 * block_length a})
                (len:size_nat{len < block_length a}) (b:multiseq (lanes a m) len) :
                multiseq (lanes a m) (block_length a) & multiseq (lanes a m) (block_length a) =
-    let b0 = b.(|0|) in
-    let b1 = b.(|1|) in
-    let b2 = b.(|2|) in
-    let b3 = b.(|3|) in
-    let b4 = b.(|4|) in
-    let b5 = b.(|5|) in
-    let b6 = b.(|6|) in
-    let b7 = b.(|7|) in
-    let (l00,l01) = load_last_blocks #a totlen_seq fin len b0 in
-    let (l10,l11) = load_last_blocks #a totlen_seq fin len b1 in
-    let (l20,l21) = load_last_blocks #a totlen_seq fin len b2 in
-    let (l30,l31) = load_last_blocks #a totlen_seq fin len b3 in
-    let (l40,l41) = load_last_blocks #a totlen_seq fin len b4 in
-    let (l50,l51) = load_last_blocks #a totlen_seq fin len b5 in
-    let (l60,l61) = load_last_blocks #a totlen_seq fin len b6 in
-    let (l70,l71) = load_last_blocks #a totlen_seq fin len b7 in
-    let mb0 = ntup8 (l00, (l10, (l20, (l30, (l40, (l50, (l60, l70))))))) in
-    let mb1 = ntup8 (l01, (l11, (l21, (l31, (l41, (l51, (l61, l71))))))) in
-    (mb0, mb1)
+  let b0 = b.(|0|) in
+  let b1 = b.(|1|) in
+  let b2 = b.(|2|) in
+  let b3 = b.(|3|) in
+  let b4 = b.(|4|) in
+  let b5 = b.(|5|) in
+  let b6 = b.(|6|) in
+  let b7 = b.(|7|) in
+  let (l00,l01) = load_last_blocks #a totlen_seq fin len b0 in
+  let (l10,l11) = load_last_blocks #a totlen_seq fin len b1 in
+  let (l20,l21) = load_last_blocks #a totlen_seq fin len b2 in
+  let (l30,l31) = load_last_blocks #a totlen_seq fin len b3 in
+  let (l40,l41) = load_last_blocks #a totlen_seq fin len b4 in
+  let (l50,l51) = load_last_blocks #a totlen_seq fin len b5 in
+  let (l60,l61) = load_last_blocks #a totlen_seq fin len b6 in
+  let (l70,l71) = load_last_blocks #a totlen_seq fin len b7 in
+  let mb0 = ntup8 (l00, (l10, (l20, (l30, (l40, (l50, (l60, l70))))))) in
+  let mb1 = ntup8 (l01, (l11, (l21, (l31, (l41, (l51, (l61, l71))))))) in
+  (mb0, mb1)
+
+noextract
+let load_last16 (#a:sha2_alg) (#m:m_spec{lanes a m == 16})
+               (totlen_seq:lseq uint8 (len_length a))
+               (fin:size_nat{fin == block_length a \/ fin == 2 * block_length a})
+               (len:size_nat{len < block_length a}) (b:multiseq (lanes a m) len) :
+               multiseq (lanes a m) (block_length a) & multiseq (lanes a m) (block_length a) =
+  let b0 = b.(|0|) in let b1 = b.(|1|) in
+  let b2 = b.(|2|) in let b3 = b.(|3|) in
+  let b4 = b.(|4|) in let b5 = b.(|5|) in
+  let b6 = b.(|6|) in let b7 = b.(|7|) in
+  let b8 = b.(|8|) in let b9 = b.(|9|) in
+  let b10 = b.(|10|) in let b11 = b.(|11|) in
+  let b12 = b.(|12|) in let b13 = b.(|13|) in
+  let b14 = b.(|14|) in let b15 = b.(|15|) in
+
+  let (l00,l01) = load_last_blocks #a totlen_seq fin len b0 in
+  let (l10,l11) = load_last_blocks #a totlen_seq fin len b1 in
+  let (l20,l21) = load_last_blocks #a totlen_seq fin len b2 in
+  let (l30,l31) = load_last_blocks #a totlen_seq fin len b3 in
+  let (l40,l41) = load_last_blocks #a totlen_seq fin len b4 in
+  let (l50,l51) = load_last_blocks #a totlen_seq fin len b5 in
+  let (l60,l61) = load_last_blocks #a totlen_seq fin len b6 in
+  let (l70,l71) = load_last_blocks #a totlen_seq fin len b7 in
+  let (l80,l81) = load_last_blocks #a totlen_seq fin len b8 in
+  let (l90,l91) = load_last_blocks #a totlen_seq fin len b9 in
+  let (l100,l101) = load_last_blocks #a totlen_seq fin len b10 in
+  let (l110,l111) = load_last_blocks #a totlen_seq fin len b11 in
+  let (l120,l121) = load_last_blocks #a totlen_seq fin len b12 in
+  let (l130,l131) = load_last_blocks #a totlen_seq fin len b13 in
+  let (l140,l141) = load_last_blocks #a totlen_seq fin len b14 in
+  let (l150,l151) = load_last_blocks #a totlen_seq fin len b15 in
+
+  let mb0 = ntup16 (l00, (l10, (l20, (l30, (l40, (l50, (l60, (l70, (l80, (l90, (l100, (l110, (l120, (l130, (l140, l150))))))))))))))) in
+  let mb1 = ntup16 (l01, (l11, (l21, (l31, (l41, (l51, (l61, (l71, (l81, (l91, (l101, (l111, (l121, (l131, (l141, l151))))))))))))))) in
+  (mb0, mb1)
 #pop-options
 
 [@"opaque_to_smt"]
@@ -361,11 +425,12 @@ let load_last (#a:sha2_alg) (#m:m_spec) (totlen_seq:lseq uint8 (len_length a))
               (fin:nat{fin == block_length a \/ fin == 2 * block_length a})
               (len:size_nat{len < block_length a}) (b:multiseq (lanes a m) len) :
               multiseq (lanes a m) (block_length a) & multiseq (lanes a m) (block_length a) =
-    match lanes a m with
-    | 1 -> load_last1 #a #m totlen_seq fin len b
-    | 4 -> load_last4 #a #m totlen_seq fin len b
-    | 8 -> load_last8 #a #m totlen_seq fin len b
-    | _ -> admit()
+  match lanes a m with
+  | 1 -> load_last1 #a #m totlen_seq fin len b
+  | 2 -> load_last2 #a #m totlen_seq fin len b
+  | 4 -> load_last4 #a #m totlen_seq fin len b
+  | 8 -> load_last8 #a #m totlen_seq fin len b
+  | 16 -> load_last16 #a #m totlen_seq fin len b
 
 noextract
 let update_last (#a:sha2_alg) (#m:m_spec) (totlen:len_t a)
@@ -381,72 +446,77 @@ let update_last (#a:sha2_alg) (#m:m_spec) (totlen:len_t a)
     update b1 st
   else st
 
-noextract
-let transpose_state4 (#a:sha2_alg) (#m:m_spec{lanes a m == 4})
-                    (st:state_spec a m) : state_spec a m =
-    let st0 = st.[0] in
-    let st1 = st.[1] in
-    let st2 = st.[2] in
-    let st3 = st.[3] in
-    let st4 = st.[4] in
-    let st5 = st.[5] in
-    let st6 = st.[6] in
-    let st7 = st.[7] in
-    let (st0,st1,st2,st3) = VecTranspose.transpose4x4 (st0,st1,st2,st3) in
-    let (st4,st5,st6,st7) = VecTranspose.transpose4x4 (st4,st5,st6,st7) in
-    create8 st0 st4 st1 st5 st2 st6 st3 st7
 
 noextract
-let transpose_state8 (#a:sha2_alg) (#m:m_spec{lanes a m == 8})
-                    (st:state_spec a m) : state_spec a m =
-    let st0 = st.[0] in
-    let st1 = st.[1] in
-    let st2 = st.[2] in
-    let st3 = st.[3] in
-    let st4 = st.[4] in
-    let st5 = st.[5] in
-    let st6 = st.[6] in
-    let st7 = st.[7] in
-    let (st0,st1,st2,st3,st4,st5,st6,st7) = VecTranspose.transpose8x8 (st0,st1,st2,st3,st4,st5,st6,st7) in
-    create8 st0 st1 st2 st3 st4 st5 st6 st7
+let transpose_state2 (#a:sha2_alg) (#m:m_spec{lanes a m == 2}) (st:state_spec a m) : state_spec a m =
+  let (st0,st1) = VecTranspose.transpose2x2 (st.[0],st.[1]) in
+  let (st2,st3) = VecTranspose.transpose2x2 (st.[2],st.[3]) in
+  let (st4,st5) = VecTranspose.transpose2x2 (st.[4],st.[5]) in
+  let (st6,st7) = VecTranspose.transpose2x2 (st.[6],st.[7]) in
+  create8 st0 st2 st4 st6 st1 st3 st5 st7
+
+noextract
+let transpose_state4 (#a:sha2_alg) (#m:m_spec{lanes a m == 4}) (st:state_spec a m) : state_spec a m =
+  let (st0,st1,st2,st3) = VecTranspose.transpose4x4 (st.[0],st.[1],st.[2],st.[3]) in
+  let (st4,st5,st6,st7) = VecTranspose.transpose4x4 (st.[4],st.[5],st.[6],st.[7]) in
+  create8 st0 st4 st1 st5 st2 st6 st3 st7
+
+noextract
+let transpose_state8 (#a:sha2_alg) (#m:m_spec{lanes a m == 8}) (st:state_spec a m) : state_spec a m =
+  VecTranspose.transpose8x8_lseq st
+
+noextract
+let transpose_state16 (#a:sha2_alg) (#m:m_spec{lanes a m == 16}) (st:state_spec a m) : state_spec a m =
+  let st16 = create 16 (zero_element a m) in
+  let st16 = update_sub st16 0 8 st in
+  let st = VecTranspose.transpose16x16_lseq st16 in
+  let st0 = vec_interleave_low_n 8 st.[0] st.[1] in
+  let st1 = vec_interleave_low_n 8 st.[2] st.[3] in
+  let st2 = vec_interleave_low_n 8 st.[4] st.[5] in
+  let st3 = vec_interleave_low_n 8 st.[6] st.[7] in
+  let st4 = vec_interleave_low_n 8 st.[8] st.[9] in
+  let st5 = vec_interleave_low_n 8 st.[10] st.[11] in
+  let st6 = vec_interleave_low_n 8 st.[12] st.[13] in
+  let st7 = vec_interleave_low_n 8 st.[14] st.[15] in
+  create8 st0 st1 st2 st3 st4 st5 st6 st7
 
 noextract
 let transpose_state (#a:sha2_alg) (#m:m_spec) (st:state_spec a m) : state_spec a m =
   match lanes a m with
   | 1 -> st
+  | 2 -> transpose_state2 #a #m st
   | 4 -> transpose_state4 #a #m st
   | 8 -> transpose_state8 #a #m st
-  | _ -> admit()
+  | 16 -> transpose_state16 #a #m st
 
 noextract
 let store_state (#a:sha2_alg) (#m:m_spec) (st:state_spec a m) :
                 lseq uint8 (lanes a m * 8 * word_length a) =
-    let st = transpose_state st in
-    Lib.IntVector.Serialize.vecs_to_bytes_be st
+  let st = transpose_state st in
+  Lib.IntVector.Serialize.vecs_to_bytes_be st
 
 noextract
 let emit (#a:sha2_alg) (#m:m_spec)
          (hseq:lseq uint8 (lanes a m * 8 * word_length a)):
          multiseq (lanes a m) (hash_length a) =
-    Lib.NTuple.createi (lanes a m)
-      (fun i -> sub hseq (i * 8 * word_length a) (hash_length a))
+  Lib.NTuple.createi (lanes a m)
+    (fun i -> sub hseq (i * 8 * word_length a) (hash_length a))
 
 noextract
 let get_multiblock_spec (#a:sha2_alg) (#m:m_spec)
                         (len:size_nat) (b:multiseq (lanes a m) len)
                         (i:size_nat{i < len / block_length a})
                         : multiseq (lanes a m) (block_length a) =
-
-    Lib.NTuple.createi #(lseq uint8 (block_length a)) (lanes a m)
-      (fun j -> sub b.(|j|) (i * block_length a) (block_length a))
+  Lib.NTuple.createi #(lseq uint8 (block_length a)) (lanes a m)
+    (fun j -> sub b.(|j|) (i * block_length a) (block_length a))
 
 noextract
 let get_multilast_spec (#a:sha2_alg) (#m:m_spec)
                         (len:size_nat) (b:multiseq (lanes a m) len)
                         : multiseq (lanes a m) (len % block_length a) =
-    let rem = len % block_length a in
-    Lib.NTuple.createi #(lseq uint8 rem) (lanes a m)
-      (fun j -> sub b.(|j|) (len - rem) rem)
+  let rem = len % block_length a in
+  Lib.NTuple.createi #(lseq uint8 rem) (lanes a m)
+    (fun j -> sub b.(|j|) (len - rem) rem)
 
 noextract
 let update_block (#a:sha2_alg) (#m:m_spec) (len:size_nat) (b:multiseq (lanes a m) len)
@@ -456,25 +526,24 @@ let update_block (#a:sha2_alg) (#m:m_spec) (len:size_nat) (b:multiseq (lanes a m
 
 noextract
 let update_nblocks (#a:sha2_alg) (#m:m_spec) (len:size_nat) (b:multiseq (lanes a m) len) (st:state_spec a m) : state_spec a m =
-    let blocks = len / block_length a in
-    let st = repeati blocks (update_block #a #m len b) st in
-    st
+  let blocks = len / block_length a in
+  let st = repeati blocks (update_block #a #m len b) st in
+  st
 
 noextract
-let finish (#a:sha2_alg) (#m:m_spec) (st:state_spec a m) :
-         multiseq (lanes a m) (hash_length a) =
-    let hseq = store_state st in
-    emit hseq
+let finish (#a:sha2_alg) (#m:m_spec) (st:state_spec a m) : multiseq (lanes a m) (hash_length a) =
+  let hseq = store_state st in
+  emit hseq
 
 noextract
 let hash (#a:sha2_alg) (#m:m_spec) (len:size_nat) (b:multiseq (lanes a m) len) =
-    let len' : len_t a = Lib.IntTypes.cast #U32 #PUB (len_int_type a) PUB (size len) in
-    let st = init a m in
-    let st = update_nblocks #a #m len b st in
-    let rem = len % block_length a in
-    let mb = get_multilast_spec #a #m len b in
-    let st = update_last len' rem mb st in
-    finish st
+  let len' : len_t a = Lib.IntTypes.cast #U32 #PUB (len_int_type a) PUB (size len) in
+  let st = init a m in
+  let st = update_nblocks #a #m len b st in
+  let rem = len % block_length a in
+  let mb = get_multilast_spec #a #m len b in
+  let st = update_last len' rem mb st in
+  finish st
 
 noextract
 let sha256 (len:size_nat) (b:lseq uint8 len) =
@@ -489,5 +558,5 @@ let sha512 (len:size_nat) (b:lseq uint8 len) =
   hash #SHA2_512 #M32 len b
 
 noextract
-  let sha512_4 (len:size_nat) (b:multiseq 4 len) =
+let sha512_4 (len:size_nat) (b:multiseq 4 len) =
   hash #SHA2_512 #M256 len b

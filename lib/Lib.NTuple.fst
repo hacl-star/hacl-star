@@ -35,10 +35,6 @@ let index #a #len s i =
 
 let index_fst_lemma #a #len s = ()
 
-// let rec index_rest_lemma #a #len s i =
-//   if len = 1 then ()
-//   else admit ()
-
 inline_for_extraction noextract
 let rec createi_ (#a:Type0) (min:nat) (max:flen{max > min}) (f:(i:nat{i < max} -> a)) :
   Tot (ntuple_ a (max - min)) (decreases (max - min))
@@ -223,13 +219,16 @@ let map2 #a #b #c #len f s1 s2 =
 let index_map2_lemma #a #b #c #len f s1 s2 i =
   createi_lemma len (fun i -> f (index s1 i) (index s2 i)) i
 
-#set-options "--max_fuel 4"
+#set-options "--fuel 16"
 
 let ntup1_lemma #a #l t =
   assert (ntuple a l == ntuple a 1)
 
 let tup1_lemma #a #l t =
   assert (ntuple a l == ntuple a 1)
+
+let ntup2_lemma #a #l t =
+  assert (ntuple a l == ntuple a 2)
 
 let ntup4_lemma #a #l t =
   assert (ntuple a l == ntuple a 4)
@@ -240,12 +239,12 @@ let tup4_lemma #a #l t =
   let t' : ntuple a 4 = (x0,(x1,(x2,x3))) in
   assert (t == t')
 
-#set-options "--max_fuel 9 --max_ifuel 8"
 let ntup8_lemma #a #l t = ()
-
 
 let tup8_lemma #a #l t =
   assert (ntuple a l == ntuple a 8);
   let (x0,(x1,(x2,(x3,(x4,(x5,(x6,x7))))))) = tup8 t in
   let t' : ntuple a 8 = (x0,(x1,(x2,(x3,(x4,(x5,(x6,x7))))))) in
   assert (t == t')
+
+let ntup16_lemma #a #l t = ()

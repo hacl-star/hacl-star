@@ -6,6 +6,15 @@ module Loops = Lib.LoopCombinators
 #set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 ///
+///  transpose2x2
+///
+
+let transpose2x2 #t (v0, v1) =
+  let v0' = vec_interleave_low v0 v1 in
+  let v1' = vec_interleave_high v0 v1 in
+  (v0', v1')
+
+///
 ///  transpose4x4
 ///
 
@@ -41,7 +50,6 @@ let transpose4x4 #t vs =
   match t with
   | U32 -> transpose4x4_uint32 #t vs
   | U64 -> transpose4x4_uint64 #t vs
-  | _ -> admit()
 
 ///
 ///   transpose8x8
@@ -120,7 +128,6 @@ let transpose8x8 #t vs =
   match t with
   | U32 -> transpose8x8_uint32 #t vs
   | U64 -> transpose8x8_uint64 #t vs
-  | _ -> admit()
 
 ///
 ///  transpose16x16
@@ -250,7 +257,6 @@ let transpose16x16_uint32 #t vs =
 let transpose16x16 #t vs =
   match t with
   | U32 -> transpose16x16_uint32 #t vs
-  | _ -> admit()
 
 
 ///
@@ -627,21 +633,31 @@ let transpose16x16_lemma_ij vs0 i j =
 #pop-options
 
 
+val transpose2x2_lemma_ij: #t:v_inttype -> vs:lseq (vec_t t 2) 2 -> i:nat{i < 2} -> j:nat{j < 2} ->
+  Lemma ((vec_v (transpose2x2_lseq #t vs).[i]).[j] == (vec_v vs.[j]).[i])
+
+let transpose2x2_lemma_ij #t vs0 i j =
+  let (v0, v1) = (vs0.[0], vs0.[1]) in
+  vec_interleave_high_lemma2 v0 v1;
+  vec_interleave_low_lemma2 v0 v1
+
+
+let transpose2x2_lemma #t vs =
+  Classical.forall_intro_2 (transpose2x2_lemma_ij vs)
+
+
 let transpose4x4_lemma #t vs =
   match t with
   | U32 -> Classical.forall_intro_2 (transpose4x4_lemma_uint32_ij vs)
   | U64 -> Classical.forall_intro_2 (transpose4x4_lemma_uint64_ij vs)
-  | _ -> admit()
 
 
 let transpose8x8_lemma #t vs =
   match t with
   | U32 -> Classical.forall_intro_2 (transpose8x8_lemma_uint32_ij vs)
   | U64 -> Classical.forall_intro_2 (transpose8x8_lemma_uint64_ij vs)
-  | _ -> admit()
 
 
 let transpose16x16_lemma #t vs =
   match t with
   | U32 -> Classical.forall_intro_2 (transpose16x16_lemma_ij vs)
-  | _ -> admit()

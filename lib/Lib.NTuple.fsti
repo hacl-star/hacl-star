@@ -177,7 +177,19 @@ val tup1_lemma (#a:Type0) (#l:flen{l == 1}) (t:ntuple a l):
   Lemma (let x0 = tup1 t in x0 == t.(|0|))
   [SMTPat (tup1 #a #l t)]
 
-#set-options "--max_fuel 4"
+
+inline_for_extraction noextract
+let ntup2 #a (#l:flen{l = 2}) (t:a & a) : ntuple a l =
+  assert (ntuple a l == ntuple a 2);
+  (t <: ntuple a 2)
+
+val ntup2_lemma (#a:Type0) (#l:flen{l == 2}) (t:a & a) :
+  Lemma
+   (let (x0,x1) = t in
+    let t = ntup2 #a #l t in
+    x0 == t.(|0|) /\ x1 == t.(|1|))
+  [SMTPat (ntup2 #a #l t)]
+
 
 inline_for_extraction noextract
 let ntup4 #a (#l:flen{l = 4}) (t:a & (a & (a & a))) : ntuple a l =
@@ -188,11 +200,11 @@ val ntup4_lemma (#a:Type0) (#l:flen{l == 4}) (t:a & (a & (a & a))) :
   Lemma
    (let (x0,(x1,(x2,x3))) = t in
     let t = ntup4 #a #l t in
-    x0 == t.(|0|) /\
-    x1 == t.(|1|) /\
-    x2 == t.(|2|) /\
-    x3 == t.(|3|))
+    x0 == t.(|0|) /\ x1 == t.(|1|) /\
+    x2 == t.(|2|) /\ x3 == t.(|3|))
   [SMTPat (ntup4 #a #l t)]
+
+#set-options "--fuel 8"
 
 inline_for_extraction noextract
 let tup4 #a (#l:flen{l = 4}) (t:ntuple a l) : (a & (a & (a & a))) =
@@ -202,13 +214,10 @@ let tup4 #a (#l:flen{l = 4}) (t:ntuple a l) : (a & (a & (a & a))) =
 val tup4_lemma (#a:Type0) (#l:flen{l = 4}) (t:ntuple a l) :
   Lemma
    (let (x0,(x1,(x2,x3))) = tup4 t in
-    x0 == t.(|0|) /\
-    x1 == t.(|1|) /\
-    x2 == t.(|2|) /\
-    x3 == t.(|3|))
+    x0 == t.(|0|) /\ x1 == t.(|1|) /\
+    x2 == t.(|2|) /\ x3 == t.(|3|))
   [SMTPat (tup4 t)]
 
-#set-options "--max_fuel 8 --max_ifuel 8"
 
 inline_for_extraction noextract
 let ntup8 #a (#l:flen{l = 8}) (t:a & (a & (a & (a & (a & (a & (a & a))))))) : ntuple a l =
@@ -219,14 +228,10 @@ val ntup8_lemma (#a:Type0) (#l:flen{l == 8}) (t:a & (a & (a & (a & (a & (a & (a 
   Lemma
    (let (x0,(x1,(x2,(x3,(x4,(x5,(x6,x7))))))) = t in
     let t = ntup8 #a #l t in
-    x0 == t.(|0|) /\
-    x1 == t.(|1|) /\
-    x2 == t.(|2|) /\
-    x3 == t.(|3|) /\
-    x4 == t.(|4|) /\
-    x5 == t.(|5|) /\
-    x6 == t.(|6|) /\
-    x7 == t.(|7|))
+    x0 == t.(|0|) /\ x1 == t.(|1|) /\
+    x2 == t.(|2|) /\ x3 == t.(|3|) /\
+    x4 == t.(|4|) /\ x5 == t.(|5|) /\
+    x6 == t.(|6|) /\ x7 == t.(|7|))
   [SMTPat (ntup8 #a #l t)]
 
 inline_for_extraction noextract
@@ -237,12 +242,28 @@ let tup8 #a (#l:flen{l = 8}) (t:ntuple a l) : (a & (a & (a & (a & (a & (a & (a &
 val tup8_lemma (#a:Type0) (#l:flen{l = 8}) (t:ntuple a l) :
   Lemma
    (let (x0,(x1,(x2,(x3,(x4,(x5,(x6,x7))))))) = tup8 t in
-    x0 == t.(|0|) /\
-    x1 == t.(|1|) /\
-    x2 == t.(|2|) /\
-    x3 == t.(|3|) /\
-    x4 == t.(|4|) /\
-    x5 == t.(|5|) /\
-    x6 == t.(|6|) /\
-    x7 == t.(|7|))
+    x0 == t.(|0|) /\ x1 == t.(|1|) /\
+    x2 == t.(|2|) /\ x3 == t.(|3|) /\
+    x4 == t.(|4|) /\ x5 == t.(|5|) /\
+    x6 == t.(|6|) /\ x7 == t.(|7|))
   [SMTPat (tup8 t)]
+
+
+inline_for_extraction noextract
+let ntup16 #a (#l:flen{l = 16}) (t:a & (a & (a & (a & (a & (a & (a & (a & (a & (a & (a & (a & (a & (a & (a & a))))))))))))))) : ntuple a l =
+  assert (ntuple a l == ntuple a 16);
+  (t <: ntuple a 16)
+
+val ntup16_lemma (#a:Type0) (#l:flen{l == 16}) (t:a & (a & (a & (a & (a & (a & (a & (a & (a & (a & (a & (a & (a & (a & (a & a))))))))))))))) :
+  Lemma
+   (let (x0,(x1,(x2,(x3,(x4,(x5,(x6,(x7,(x8,(x9,(x10,(x11,(x12,(x13,(x14,x15))))))))))))))) = t in
+    let t = ntup16 #a #l t in
+    x0 == t.(|0|) /\ x1 == t.(|1|) /\
+    x2 == t.(|2|) /\ x3 == t.(|3|) /\
+    x4 == t.(|4|) /\ x5 == t.(|5|) /\
+    x6 == t.(|6|) /\ x7 == t.(|7|) /\
+    x8 == t.(|8|) /\ x9 == t.(|9|) /\
+    x10 == t.(|10|) /\ x11 == t.(|11|) /\
+    x12 == t.(|12|) /\ x13 == t.(|13|) /\
+    x14 == t.(|14|) /\ x15 == t.(|15|))
+  [SMTPat (ntup16 #a #l t)]
