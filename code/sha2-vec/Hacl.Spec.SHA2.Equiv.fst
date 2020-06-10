@@ -385,7 +385,6 @@ let load_blocks_lemma_ij_subst #a #m b j i =
     }
 
 
-#push-options "--z3rlimit 100"
 val load_ws_lemma_l:
     #a:sha2_alg
   -> #m:m_spec{is_supported a m}
@@ -394,21 +393,20 @@ val load_ws_lemma_l:
   Lemma ((ws_spec_v (load_ws b)).[j] == BSeq.uints_from_bytes_be #(word_t a) #SEC b.(|j|))
 
 let load_ws_lemma_l #a #m b j =
-  let lp = (ws_spec_v (load_ws b)).[j] in
+  let lp = Seq.index (ws_spec_v (load_ws b)) j in
   let rp = BSeq.uints_from_bytes_be #(word_t a) #SEC #16 b.(|j|) in
 
-  let aux (i:nat{i < 16}) : Lemma (lp.[i] == rp.[i]) =
+  let aux (i:nat{i < 16}) : Lemma (Seq.index lp i == Seq.index rp i) =
     let l = lanes a m in
     BSeq.index_uints_from_bytes_be #(word_t a) #SEC #16 b.(|j|) i;
-    assert (rp.[i] == BSeq.uint_from_bytes_be (sub b.(|j|) (i * word_length a) (word_length a)));
+    assert (Seq.index rp i == BSeq.uint_from_bytes_be (sub b.(|j|) (i * word_length a) (word_length a)));
 
-    assert (lp.[i] == ((ws_spec_v (transpose_ws (load_blocks b))).[j]).[i]);
+    assert (Seq.index lp i == Seq.index (Seq.index (ws_spec_v (transpose_ws (load_blocks b))) j) i);
     Lemmas.transpose_ws_lemma_ij (load_blocks b) j i;
     load_blocks_lemma_ij_subst #a #m b j i in
 
   Classical.forall_intro aux;
   eq_intro lp rp
-#pop-options
 
 
 val state_spec_v_map2_add:

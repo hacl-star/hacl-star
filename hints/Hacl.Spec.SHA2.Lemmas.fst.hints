@@ -1,5 +1,5 @@
 [
-  "3ΩÃrœ\u001d„(y \u0000˙Ãê¡:",
+  "⁄_¡¯\u0013Ÿ\u001a\\Ç\n‡\u0011g‘¯¿",
   [
     [
       "Hacl.Spec.SHA2.Lemmas.transpose_ws4_lemma_ij",
@@ -51,7 +51,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "7a19bf23df9888b5a4b9ea136a861f84"
+      "96c84b0b81c0be192881871f5ca249f9"
     ],
     [
       "Hacl.Spec.SHA2.Lemmas.transpose_ws4_lemma_ij",
@@ -154,7 +154,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "a2ee374bb3a10d9addae5e0fc38f0dab"
+      "888ee41a5bc98ab364d650b1418ff885"
     ],
     [
       "Hacl.Spec.SHA2.Lemmas.transpose_ws8_lemma_ij",
@@ -206,7 +206,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "9e28f62ee1b3b337c3b612c311bc1ddb"
+      "27cb19ae9e7bccd56254671ce2b48db8"
     ],
     [
       "Hacl.Spec.SHA2.Lemmas.transpose_ws8_lemma_ij",
@@ -298,7 +298,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "ff0154bf98b297bb1aedf7d39b3991a5"
+      "cb17c5dfcea126911c8e12eabd32203d"
     ],
     [
       "Hacl.Spec.SHA2.Lemmas.transpose_ws_lemma_ij",
@@ -355,7 +355,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "cb19b3f9bc83cbd56f312f4887097ac1"
+      "c07aba542a5038d190ca3a69cb7ee0c1"
     ],
     [
       "Hacl.Spec.SHA2.Lemmas.transpose_ws_lemma_ij",
@@ -391,6 +391,7 @@
         "equality_tok_Lib.IntTypes.U64@tok",
         "equality_tok_Lib.IntTypes.U8@tok",
         "equation_Hacl.Spec.SHA2.Vec.element_t",
+        "equation_Hacl.Spec.SHA2.Vec.is_supported",
         "equation_Hacl.Spec.SHA2.Vec.lanes",
         "equation_Hacl.Spec.SHA2.Vec.lanes_t",
         "equation_Hacl.Spec.SHA2.Vec.transpose_ws",
@@ -400,11 +401,12 @@
         "equation_Hacl.Spec.SHA2.Vec.ws_spec",
         "equation_Hacl.Spec.SHA2.Vec.ws_spec_v",
         "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.int_t",
-        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.IntVector.vec_v_t", "equation_Lib.Sequence.lseq",
-        "equation_Lib.Sequence.seq", "equation_Lib.Sequence.to_seq",
-        "equation_Prims.nat", "equation_Spec.AES.gf8",
-        "equation_Spec.AES.irred", "equation_Spec.GaloisField.gf",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.range",
+        "equation_Lib.IntTypes.unsigned", "equation_Lib.IntVector.vec_v_t",
+        "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.seq",
+        "equation_Lib.Sequence.to_seq", "equation_Prims.nat",
+        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Spec.GaloisField.gf",
         "equation_Spec.Hash.Definitions.is_sha2",
         "equation_Spec.Hash.Definitions.sha2_alg",
         "equation_Spec.Hash.Definitions.word",
@@ -427,9 +429,11 @@
         "refinement_interpretation_Tm_refine_2b9ac1d6c43e9e240d84837e7e466c45",
         "refinement_interpretation_Tm_refine_2c1f6dc1d378fed54224fbf63fca7a8a",
         "refinement_interpretation_Tm_refine_2d7b510eddfad4db7a63fffb051cdf61",
+        "refinement_interpretation_Tm_refine_34c44c71737d0e4947427f3a57159cd0",
+        "refinement_interpretation_Tm_refine_48486e77aa5457d9a27027fef170c244",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_5d7fc65a01f63f2bc577298c179f855a",
-        "refinement_interpretation_Tm_refine_6b29d201259f1585acf9537e805ad0c4",
+        "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
         "refinement_interpretation_Tm_refine_abbfe228c7a3d1ae1f16ed243e0e6a67",
         "refinement_interpretation_Tm_refine_b194786adfb0f0425567ff777503403d",
         "refinement_interpretation_Tm_refine_bb718e95348d377a39b80a7b07e6a724",
@@ -442,17 +446,18 @@
         "typing_Hacl.Spec.SHA2.Vec.lanes",
         "typing_Hacl.Spec.SHA2.Vec.transpose_ws", "typing_Lib.IntTypes.bits",
         "typing_Lib.IntTypes.minint", "typing_Lib.IntTypes.unsigned",
-        "typing_Lib.IntVector.vec_v", "typing_Lib.Sequence.createi",
-        "typing_Lib.Sequence.index", "typing_Spec.AES.gf8",
+        "typing_Lib.IntTypes.v", "typing_Lib.IntVector.vec_v",
+        "typing_Lib.Sequence.createi", "typing_Lib.Sequence.index",
+        "typing_Spec.AES.gf8", "typing_Spec.AES.irred",
         "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_Spec.Hash.Definitions.is_sha2",
-        "typing_Spec.Hash.Definitions.word",
         "typing_Spec.Hash.Definitions.word_t",
         "typing_Tm_abs_9a6e3f2c32499327079bd3f4cd0c80e3",
-        "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
+        "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok",
+        "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "80653012bef3b0fbcca9084bb88ff833"
+      "fa484a3ced02a6e6dd465ca8495c8f35"
     ],
     [
       "Hacl.Spec.SHA2.Lemmas.transpose_state4_lemma",
@@ -474,12 +479,13 @@
         "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U64@tok",
-        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.minint",
-        "equation_Lib.IntTypes.unsigned", "equation_Lib.IntVector.vec_v_t",
-        "equation_Lib.Sequence.lseq", "equation_Prims.nat",
-        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
-        "equation_Spec.GaloisField.gf",
+        "equality_tok_Lib.IntTypes.U8@tok",
+        "equation_Hacl.Spec.SHA2.Vec.is_supported",
+        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.int_t",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.unsigned",
+        "equation_Lib.IntVector.vec_v_t", "equation_Lib.Sequence.lseq",
+        "equation_Prims.nat", "equation_Spec.AES.gf8",
+        "equation_Spec.AES.irred", "equation_Spec.GaloisField.gf",
         "equation_Spec.Hash.Definitions.is_sha2",
         "equation_Spec.Hash.Definitions.sha2_alg",
         "equation_Spec.Hash.Definitions.state_word_length",
@@ -509,7 +515,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "b4b3fa2c2af14b8eab38723350002774"
+      "e658a0fa13cfa015a64980e23655857c"
     ],
     [
       "Hacl.Spec.SHA2.Lemmas.transpose_state4_lemma",
@@ -555,7 +561,7 @@
         "equation_Hacl.Spec.SHA2.Vec.transpose_state4",
         "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.int_t",
         "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.range",
-        "equation_Lib.IntTypes.unsigned",
+        "equation_Lib.IntTypes.uint32", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.IntVector.Transpose.transpose4x4_lseq",
         "equation_Lib.IntVector.Transpose.vec_t4",
         "equation_Lib.IntVector.vec_v_t", "equation_Lib.IntVector.width",
@@ -571,7 +577,9 @@
         "equation_Spec.Hash.Definitions.word_t",
         "equation_Spec.Hash.Definitions.words_state",
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple4",
-        "fuel_guarded_inversion_Hacl.Spec.SHA2.Vec.m_spec", "int_inversion",
+        "fuel_guarded_inversion_Hacl.Spec.SHA2.Vec.m_spec",
+        "fuel_guarded_inversion_Spec.Hash.Definitions.hash_alg",
+        "function_token_typing_Lib.IntTypes.uint32", "int_inversion",
         "int_typing",
         "interpretation_Tm_abs_bec0296922124977af80a8627edbcee6",
         "lemma_FStar.UInt.pow2_values", "lemma_Lib.IntVector.create4_lemma",
@@ -585,6 +593,7 @@
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
         "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
+        "refinement_interpretation_Tm_refine_19b74f284abfc635cd6f661e882626ed",
         "refinement_interpretation_Tm_refine_2b9ac1d6c43e9e240d84837e7e466c45",
         "refinement_interpretation_Tm_refine_2c1f6dc1d378fed54224fbf63fca7a8a",
         "refinement_interpretation_Tm_refine_3a5af04d453be6024958e159d2d53ef1",
@@ -623,7 +632,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "b50568235bddf62fd8cdba57c645c7be"
+      "dd0a260b16d80d050f777f062d226179"
     ],
     [
       "Hacl.Spec.SHA2.Lemmas.transpose_state8_lemma",
@@ -680,7 +689,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "492cd094a3794e4ed3c24ec5c9fe6df8"
+      "0346fc4679035c0364d28d2558c099a5"
     ],
     [
       "Hacl.Spec.SHA2.Lemmas.transpose_state8_lemma",
@@ -734,8 +743,9 @@
         "equation_Spec.Hash.Definitions.word_length",
         "equation_Spec.Hash.Definitions.word_t",
         "equation_Spec.Hash.Definitions.words_state",
-        "fuel_guarded_inversion_Hacl.Spec.SHA2.Vec.m_spec", "int_inversion",
-        "int_typing",
+        "fuel_guarded_inversion_Hacl.Spec.SHA2.Vec.m_spec",
+        "fuel_guarded_inversion_Spec.Hash.Definitions.hash_alg",
+        "int_inversion", "int_typing",
         "interpretation_Tm_abs_bec0296922124977af80a8627edbcee6",
         "lemma_FStar.UInt.pow2_values", "lemma_Lib.IntVector.create8_lemma",
         "primitive_Prims.op_Addition", "primitive_Prims.op_Division",
@@ -748,6 +758,7 @@
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
         "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
+        "refinement_interpretation_Tm_refine_19b74f284abfc635cd6f661e882626ed",
         "refinement_interpretation_Tm_refine_26d768cc241c6628db9e0d45d45d9136",
         "refinement_interpretation_Tm_refine_2b9ac1d6c43e9e240d84837e7e466c45",
         "refinement_interpretation_Tm_refine_2c1f6dc1d378fed54224fbf63fca7a8a",
@@ -763,12 +774,13 @@
         "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
         "refinement_interpretation_Tm_refine_f6edde9c7845dae3440839b514420483",
         "typing_Hacl.Spec.SHA2.Vec.element_t",
-        "typing_Hacl.Spec.SHA2.Vec.lanes", "typing_Lib.IntTypes.bits",
-        "typing_Lib.IntTypes.int_t", "typing_Lib.IntTypes.minint",
-        "typing_Lib.IntTypes.unsigned", "typing_Lib.IntVector.create8",
-        "typing_Lib.IntVector.vec_v", "typing_Lib.Sequence.createi",
-        "typing_Lib.Sequence.index", "typing_Spec.AES.gf8",
-        "typing_Spec.GaloisField.__proj__GF__item__t",
+        "typing_Hacl.Spec.SHA2.Vec.lanes",
+        "typing_Hacl.Spec.SHA2.Vec.transpose_state8",
+        "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.int_t",
+        "typing_Lib.IntTypes.minint", "typing_Lib.IntTypes.unsigned",
+        "typing_Lib.IntVector.create8", "typing_Lib.IntVector.vec_v",
+        "typing_Lib.Sequence.createi", "typing_Lib.Sequence.index",
+        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_Spec.Hash.Definitions.is_sha2",
         "typing_Spec.Hash.Definitions.word_length",
         "typing_Spec.Hash.Definitions.word_t",
@@ -778,7 +790,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "eb3541a8535a9c35caa731109c65913b"
+      "f13f7106394c912d5fcbf1446ffea4be"
     ],
     [
       "Hacl.Spec.SHA2.Lemmas.transpose_state_lemma_ij",
@@ -855,7 +867,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "07cf62cca89d04d4d35edb24db0d11d8"
+      "812b7c588dc87324f9b3c87fcccd1520"
     ],
     [
       "Hacl.Spec.SHA2.Lemmas.transpose_state_lemma_ij",
@@ -893,6 +905,7 @@
         "equality_tok_Lib.IntTypes.U64@tok",
         "equality_tok_Lib.IntTypes.U8@tok",
         "equation_Hacl.Spec.SHA2.Vec.element_t",
+        "equation_Hacl.Spec.SHA2.Vec.is_supported",
         "equation_Hacl.Spec.SHA2.Vec.lanes",
         "equation_Hacl.Spec.SHA2.Vec.lanes_t",
         "equation_Hacl.Spec.SHA2.Vec.state_spec",
@@ -930,6 +943,7 @@
         "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
         "refinement_interpretation_Tm_refine_2b9ac1d6c43e9e240d84837e7e466c45",
         "refinement_interpretation_Tm_refine_2c1f6dc1d378fed54224fbf63fca7a8a",
+        "refinement_interpretation_Tm_refine_34c44c71737d0e4947427f3a57159cd0",
         "refinement_interpretation_Tm_refine_48486e77aa5457d9a27027fef170c244",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_5d7fc65a01f63f2bc577298c179f855a",
@@ -955,18 +969,17 @@
         "typing_Lib.IntTypes.minint", "typing_Lib.IntTypes.v",
         "typing_Lib.IntVector.create8", "typing_Lib.IntVector.vec_v",
         "typing_Lib.Sequence.createi", "typing_Lib.Sequence.index",
-        "typing_Spec.AES.gf8", "typing_Spec.AES.irred",
+        "typing_Prims.pow2", "typing_Spec.AES.gf8", "typing_Spec.AES.irred",
         "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_Spec.Hash.Definitions.is_sha2",
         "typing_Spec.Hash.Definitions.word_length",
         "typing_Spec.Hash.Definitions.word_t",
         "typing_Spec.Hash.Definitions.words_state",
         "typing_Tm_abs_bec0296922124977af80a8627edbcee6",
-        "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok",
-        "typing_tok_Lib.IntTypes.U8@tok"
+        "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "64ef8bf64a6ac1da0af308afc8dd57f5"
+      "1158c170621c9c4f0a64e89264efd401"
     ]
   ]
 ]
