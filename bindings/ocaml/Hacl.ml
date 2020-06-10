@@ -2,6 +2,7 @@
 
 open Unsigned
 
+open AutoConfig2
 open SharedDefs
 open SharedFunctors
 module C = CBytes
@@ -303,7 +304,6 @@ module P256 = struct
 end
 
 #if not (defined IS_NOT_X64) || defined IS_ARM_8
-open AutoConfig2
 module Chacha20_Poly1305_128 : Chacha20_Poly1305 =
   Make_Chacha20_Poly1305 (struct
     let reqs = [AVX]
@@ -322,10 +322,28 @@ module Blake2s_128 : Blake2 =
     let reqs = [AVX]
     let blake2s = Hacl_Blake2s_128.hacl_Blake2s_128_blake2s
   end)
+#else
+module Chacha20_Poly1305_128 : Chacha20_Poly1305 =
+  Make_Chacha20_Poly1305 (struct
+    let reqs = [AVX]
+    let encrypt _ _ _ _ _ _ = failwith "Not implemented on this platform"
+    let decrypt _ _ _ _ _ _ = failwith "Not implemented on this platform"
+  end)
+
+module Poly1305_128 : MAC =
+  Make_Poly1305 (struct
+    let reqs = [AVX]
+    let mac _ _ _ = failwith "Not implemented on this platform"
+end)
+
+module Blake2s_128 : Blake2 =
+  Make_Blake2s (struct
+    let reqs = [AVX]
+    let blake2s _ _ _ = failwith "Not implemented on this platform"
+  end)
 #endif
 
 #ifndef IS_NOT_X64
-open AutoConfig2
 module Chacha20_Poly1305_256 : Chacha20_Poly1305 =
   Make_Chacha20_Poly1305 (struct
     let reqs = [AVX2]
@@ -352,4 +370,32 @@ module Curve25519_64 : Curve25519 =
     let scalarmult = Hacl_Curve25519_64.hacl_Curve25519_64_scalarmult
     let ecdh = Hacl_Curve25519_64.hacl_Curve25519_64_ecdh
   end)
+#else
+module Chacha20_Poly1305_256 : Chacha20_Poly1305 =
+  Make_Chacha20_Poly1305 (struct
+     let reqs = [AVX2]
+    let encrypt _ _ _ _ _ _ = failwith "Not implemented on this platform"
+    let decrypt _ _ _ _ _ _ = failwith "Not implemented on this platform"
+  end)
+
+module Poly1305_256 : MAC =
+  Make_Poly1305 (struct
+      let reqs = [AVX2]
+    let mac _ _ _ = failwith "Not implemented on this platform"
+end)
+
+module Blake2b_256 : Blake2 =
+  Make_Blake2b (struct
+    let reqs = [AVX2]
+    let blake2b _ _ _ = failwith "Not implemented on this platform"
+  end)
+
+module Curve25519_64 : Curve25519 =
+  Make_Curve25519 (struct
+    let reqs = [BMI2; ADX]
+    let secret_to_public _ _ = failwith "Not implemented on this platform"
+    let scalarmult _ _ _ = failwith "Not implemented on this platform"
+    let ecdh _ _ _ = failwith "Not implemented on this platform"
+  end)
 #endif
+

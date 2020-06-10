@@ -1,5 +1,3 @@
-#include "config.h"
-
 open Test_utils
 open AutoConfig2
 
@@ -40,13 +38,6 @@ let test (v: Bytes.t blake2_test) n hash reqs =
 
 let _ =
   List.iter (fun v -> test v "Blake2b_32" Hacl.Blake2b_32.hash []) blake2b_tests;
+  List.iter (fun v -> test v "Blake2b_256" Hacl.Blake2b_256.hash [AVX2]) blake2b_tests;
   List.iter (fun v -> test v "Blake2s_32" Hacl.Blake2s_32.hash []) blake2s_tests;
-
-  #if not (defined IS_NOT_X64) || defined IS_ARM_8
-  List.iter (fun v -> test v "Blake2s_128" Hacl.Blake2s_128.hash [AVX]) blake2s_tests;
-  #endif
-
-  #ifndef IS_NOT_X64
-  List.iter (fun v -> test v "Blake2b_256" Hacl.Blake2b_256.hash [AVX2]) blake2b_tests
-  #endif
-
+  List.iter (fun v -> test v "Blake2s_128" Hacl.Blake2s_128.hash [AVX]) blake2s_tests
