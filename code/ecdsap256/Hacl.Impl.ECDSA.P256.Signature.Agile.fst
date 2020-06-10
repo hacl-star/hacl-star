@@ -285,8 +285,8 @@ val ecdsa_signature: alg: hash_alg_ecdsa
   -> result: lbuffer uint8 (size 64) 
   -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length alg}
   -> m: lbuffer uint8 mLen 
-  -> privKey: lbuffer uint8 (size 32) -> 
-  k: lbuffer uint8 (size 32) -> 
+  -> privKey: lbuffer uint8 (size 32) 
+  -> k: lbuffer uint8 (size 32) -> 
   Stack uint64
   (requires fun h -> 
     live h result /\ live h m /\ live h privKey /\ live h k /\
