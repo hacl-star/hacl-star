@@ -188,7 +188,7 @@ let init #a #m hash =
 
 
 inline_for_extraction noextract
-let update_vec_t (a:sha2_alg) (m:m_spec) =
+let update_vec_t (a:sha2_alg) (m:m_spec{is_supported a m}) =
     b:multibuf (lanes a m) (block_len a)
   -> hash:state_t a m ->
   Stack unit
@@ -199,7 +199,7 @@ let update_vec_t (a:sha2_alg) (m:m_spec) =
 
 #push-options "--z3rlimit 200"
 inline_for_extraction noextract
-val update: #a:sha2_alg -> #m:m_spec -> update_vec_t a m
+val update: #a:sha2_alg -> #m:m_spec{is_supported a m} -> update_vec_t a m
 let update #a #m b hash =
   let h0 = ST.get() in
   push_frame ();
@@ -233,7 +233,7 @@ let update #a #m b hash =
 
 
 inline_for_extraction noextract
-let update_last_vec_t (a:sha2_alg) (m:m_spec) =
+let update_last_vec_t (a:sha2_alg) (m:m_spec{is_supported a m}) =
     upd:update_vec_t a m
   -> totlen:len_t a
   -> len:size_t{v len < block_length a}
@@ -247,7 +247,7 @@ let update_last_vec_t (a:sha2_alg) (m:m_spec) =
 
 #push-options "--z3rlimit 350"
 inline_for_extraction noextract
-val update_last: #a:sha2_alg -> #m:m_spec -> update_last_vec_t a m
+val update_last: #a:sha2_alg -> #m:m_spec{is_supported a m} -> update_last_vec_t a m
 let update_last #a #m upd totlen len b hash =
   let h0 = ST.get() in
   push_frame ();
@@ -292,7 +292,7 @@ let update_last #a #m upd totlen len b hash =
 
 
 inline_for_extraction noextract
-let update_nblocks_vec_t (a:sha2_alg) (m:m_spec) =
+let update_nblocks_vec_t (a:sha2_alg) (m:m_spec{is_supported a m}) =
     upd:update_vec_t a m
   -> len:size_t
   -> b:multibuf (lanes a m) len
@@ -305,7 +305,7 @@ let update_nblocks_vec_t (a:sha2_alg) (m:m_spec) =
 
 #push-options "--z3rlimit 200"
 inline_for_extraction noextract
-val update_nblocks: #a:sha2_alg -> #m:m_spec -> update_nblocks_vec_t a m
+val update_nblocks: #a:sha2_alg -> #m:m_spec{is_supported a m} -> update_nblocks_vec_t a m
 let update_nblocks #a #m upd len b st =
   let blocks = len /. block_len a in
   let h0 = ST.get() in
@@ -324,7 +324,7 @@ let update_nblocks #a #m upd len b st =
 
 
 inline_for_extraction noextract
-let finish_vec_t (a:sha2_alg) (m:m_spec) =
+let finish_vec_t (a:sha2_alg) (m:m_spec{is_supported a m}) =
     st:state_t a m
   -> h:multibuf (lanes a m) (hash_len a) ->
   Stack unit
@@ -335,7 +335,7 @@ let finish_vec_t (a:sha2_alg) (m:m_spec) =
 
 #push-options "--z3rlimit 100"
 inline_for_extraction noextract
-val finish: #a:sha2_alg -> #m:m_spec -> finish_vec_t a m
+val finish: #a:sha2_alg -> #m:m_spec{is_supported a m} -> finish_vec_t a m
 let finish #a #m st h =
   let h0 = ST.get() in
   push_frame();
@@ -356,7 +356,7 @@ let finish #a #m st h =
 
 
 inline_for_extraction noextract
-let hash_vec_t (a:sha2_alg) (m:m_spec) =
+let hash_vec_t (a:sha2_alg) (m:m_spec{is_supported a m}) =
     upd:update_vec_t a m
   -> h:multibuf (lanes a m) (hash_len a)
   -> len:size_t
@@ -369,7 +369,7 @@ let hash_vec_t (a:sha2_alg) (m:m_spec) =
 
 #push-options "--z3rlimit 500"
 inline_for_extraction noextract
-val hash: #a:sha2_alg -> #m:m_spec -> hash_vec_t a m
+val hash: #a:sha2_alg -> #m:m_spec{is_supported a m} -> hash_vec_t a m
 let hash #a #m upd h len b =
   let init_h0 = ST.get() in
   push_frame();

@@ -276,7 +276,7 @@ let load_blocks8 #a #m ib ws =
 
 
 inline_for_extraction noextract
-val load_blocks: #a:sha2_alg -> #m:m_spec
+val load_blocks: #a:sha2_alg -> #m:m_spec{is_supported a m}
   -> b:multibuf (lanes a m) (block_len a)
   -> ws:ws_t a m ->
   Stack unit
@@ -289,7 +289,6 @@ let load_blocks #a #m b ws =
   | 1 -> load_blocks1 b ws
   | 4 -> load_blocks4 b ws
   | 8 -> load_blocks8 b ws
-  | _ -> admit()
 
 
 inline_for_extraction noextract
@@ -321,7 +320,7 @@ let transpose_ws8 #a #m ws =
 
 
 inline_for_extraction noextract
-val transpose_ws: #a:sha2_alg -> #m:m_spec -> ws:ws_t a m ->
+val transpose_ws: #a:sha2_alg -> #m:m_spec{is_supported a m} -> ws:ws_t a m ->
   Stack unit
   (requires fun h -> live h ws)
   (ensures  fun h0 _ h1 -> modifies (loc ws) h0 h1 /\
@@ -332,11 +331,10 @@ let transpose_ws #a #m ws =
   | 1 -> ()
   | 4 -> transpose_ws4 ws
   | 8 -> transpose_ws8 ws
-  | _ -> admit()
 
 
 inline_for_extraction noextract
-val load_ws: #a:sha2_alg -> #m:m_spec
+val load_ws: #a:sha2_alg -> #m:m_spec{is_supported a m}
   -> b:multibuf (lanes a m) (block_len a)
   -> ws:ws_t a m ->
   Stack unit
@@ -392,7 +390,7 @@ let preserves_sub_disjoint_multi #lanes #len #len' (b:lbuffer uint8 len) (r:mult
 
 
 inline_for_extraction noextract
-let load_last_t (a:sha2_alg) (m:m_spec) =
+let load_last_t (a:sha2_alg) (m:m_spec{is_supported a m}) =
     totlen_buf:lbuffer uint8 (len_len a)
   -> len:size_t{v len < block_length a}
   -> b:multibuf (lanes a m) len
@@ -534,13 +532,12 @@ let load_last8 #a #m totlen_buf len b fin last =
 
 
 inline_for_extraction noextract
-val load_last: #a:sha2_alg -> #m:m_spec -> load_last_t a m
+val load_last: #a:sha2_alg -> #m:m_spec{is_supported a m} -> load_last_t a m
 let load_last #a #m  totlen_buf len b fin last =
   match lanes a m with
   | 1 -> load_last1 #a #m totlen_buf len b fin last
   | 4 -> load_last4 #a #m totlen_buf len b fin last
   | 8 -> load_last8 #a #m totlen_buf len b fin last
-  | _ -> admit()
 
 
 inline_for_extraction noextract
@@ -569,7 +566,7 @@ let transpose_state8 #a #m st =
 
 
 inline_for_extraction noextract
-val transpose_state: #a:sha2_alg -> #m:m_spec -> st:state_t a m ->
+val transpose_state: #a:sha2_alg -> #m:m_spec{is_supported a m} -> st:state_t a m ->
   Stack unit
   (requires fun h -> live h st)
   (ensures  fun h0 _ h1 -> modifies (loc st) h0 h1 /\
@@ -580,11 +577,10 @@ let transpose_state #a #m st =
   | 1 -> ()
   | 4 -> transpose_state4 st
   | 8 -> transpose_state8 st
-  | _ -> admit()
 
 
 inline_for_extraction noextract
-val store_state: #a:sha2_alg -> #m:m_spec
+val store_state: #a:sha2_alg -> #m:m_spec{is_supported a m}
   -> st:state_t a m
   -> hbuf:lbuffer uint8 (size (lanes a m) *! 8ul *! word_len a) ->
   Stack unit
@@ -761,7 +757,7 @@ let emit8 #a #m hbuf result =
 
 
 inline_for_extraction noextract
-val emit: #a:sha2_alg -> #m:m_spec
+val emit: #a:sha2_alg -> #m:m_spec{is_supported a m}
   -> hbuf: lbuffer uint8 (size (lanes a m) *! 8ul *! word_len a)
   -> result:multibuf (lanes a m) (hash_len a) ->
   Stack unit
@@ -775,7 +771,6 @@ let emit #a #m hbuf result =
   | 1 -> emit1 #a #m hbuf result
   | 4 -> emit4 #a #m hbuf result
   | 8 -> emit8 #a #m hbuf result
-  | _ -> admit()
 
 
 noextract
@@ -795,7 +790,7 @@ let get_multiblock_t (a:sha2_alg) (m:m_spec) =
 
 
 inline_for_extraction noextract
-val get_multiblock: #a:sha2_alg -> #m:m_spec -> get_multiblock_t a m
+val get_multiblock: #a:sha2_alg -> #m:m_spec{is_supported a m} -> get_multiblock_t a m
 let get_multiblock #a #m len b i =
   let h0 = ST.get() in
   match lanes a m with
@@ -830,7 +825,6 @@ let get_multiblock #a #m len b i =
     let h1 = ST.get() in
     NTup.eq_intro (as_seq_multi h1 mb) (SpecVec.get_multiblock_spec #a #m (v len) (as_seq_multi h0 b) (v i));
     mb
-  | _ -> admit()
 
 
 inline_for_extraction noextract
@@ -843,7 +837,7 @@ let get_multilast_t (a:sha2_alg) (m:m_spec) =
     as_seq_multi h1 r == SpecVec.get_multilast_spec #a #m (v len) (as_seq_multi h0 b))
 
 inline_for_extraction noextract
-val get_multilast: #a:sha2_alg -> #m:m_spec -> get_multilast_t a m
+val get_multilast: #a:sha2_alg -> #m:m_spec{is_supported a m} -> get_multilast_t a m
 #push-options "--z3rlimit 300"
 let get_multilast #a #m len b =
   let h0 = ST.get() in
@@ -881,5 +875,4 @@ let get_multilast #a #m len b =
     let h1 = ST.get() in
     NTup.eq_intro (as_seq_multi h1 mb) (SpecVec.get_multilast_spec #a #m (v len) (as_seq_multi h0 b));
     mb
-  | _ -> admit()
 #pop-options

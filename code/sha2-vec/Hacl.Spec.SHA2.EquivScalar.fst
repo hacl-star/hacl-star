@@ -751,7 +751,7 @@ let load_last_lemma a totlen totlen_seq b =
   let last1 = update_sub last 0 rem b in
   Seq.lemma_eq_intro (Seq.slice last1 0 rem) b;
   let aux (i:nat{i < pad0_length a totlen}) : Lemma (last1.[rem + 1 + i] == zeros.[i]) =
-    assert (index last1 (rem + 1 + i) == index zeros i) in //REALLY??
+    assert (index last1 (rem + 1 + i) == index zeros i) in
   Classical.forall_intro aux;
   Seq.lemma_eq_intro (Seq.slice last1 (rem + 1) (fin - len_length a)) zeros;
 
@@ -764,7 +764,7 @@ let load_last_lemma a totlen totlen_seq b =
   Seq.lemma_eq_intro (Seq.slice last3 (fin - len_length a) fin) totlen_seq;
 
   let aux (i:nat{i < fin - len_length a}) : Lemma (last3.[i] == last2.[i]) =
-    assert (index last3 i == index last2 i) in //REALLY??
+    assert (index last3 i == index last2 i) in
   Classical.forall_intro aux;
   Seq.lemma_eq_intro (Seq.slice last3 0 (fin - len_length a)) (Seq.slice last2 0 (fin - len_length a));
   Seq.lemma_eq_intro (Seq.slice last3 0 rem) b;

@@ -385,9 +385,10 @@ let load_blocks_lemma_ij_subst #a #m b j i =
     }
 
 
+#push-options "--z3rlimit 100"
 val load_ws_lemma_l:
     #a:sha2_alg
-  -> #m:m_spec
+  -> #m:m_spec{is_supported a m}
   -> b:multiblock_spec a m
   -> j:nat{j < lanes a m} ->
   Lemma ((ws_spec_v (load_ws b)).[j] == BSeq.uints_from_bytes_be #(word_t a) #SEC b.(|j|))
@@ -407,6 +408,7 @@ let load_ws_lemma_l #a #m b j =
 
   Classical.forall_intro aux;
   eq_intro lp rp
+#pop-options
 
 
 val state_spec_v_map2_add:
@@ -426,7 +428,7 @@ let state_spec_v_map2_add #a #m st1 st2 l =
 
 val update_lemma_l:
     #a:sha2_alg
-  -> #m:m_spec
+  -> #m:m_spec{is_supported a m}
   -> b:multiblock_spec a m
   -> st:state_spec a m
   -> l:nat{l < lanes a m} ->
@@ -447,7 +449,7 @@ let update_lemma_l #a #m b st l =
 
 val load_last_lemma_l:
     #a:sha2_alg
-  -> #m:m_spec
+  -> #m:m_spec{is_supported a m}
   -> totlen_seq:lseq uint8 (len_length a)
   -> fin:nat{fin == block_length a \/ fin == 2 * block_length a}
   -> len:size_nat{len < block_length a}
@@ -460,16 +462,13 @@ val load_last_lemma_l:
 
 let load_last_lemma_l #a #m totlen_seq fin len b l =
   reveal_opaque (`%load_last) (load_last #a #m);
-  match lanes a m with
-  | 1 -> ()
-  | 4 -> ()
-  | 8 -> ()
-  | _ -> admit()
+  allow_inversion sha2_alg;
+  allow_inversion m_spec
 
 
 val update_last_lemma_l:
     #a:sha2_alg
-  -> #m:m_spec
+  -> #m:m_spec{is_supported a m}
   -> totlen:len_t a
   -> len:size_nat{len < block_length a}
   -> b:multiseq (lanes a m) len
@@ -492,7 +491,7 @@ let update_last_lemma_l #a #m totlen len b st0 l =
 
 val store_state_lemma_ij:
     #a:sha2_alg
-  -> #m:m_spec
+  -> #m:m_spec{is_supported a m}
   -> st:state_spec a m
   -> j:nat{j < lanes a m}
   -> i:nat{i < 8 * word_length a} ->
@@ -543,7 +542,7 @@ let store_state_lemma_ij #a #m st j i =
 
 val store_state_lemma_l:
     #a:sha2_alg
-  -> #m:m_spec
+  -> #m:m_spec{is_supported a m}
   -> st:state_spec a m
   -> l:nat{l < lanes a m} ->
   Lemma
@@ -579,7 +578,7 @@ let store_state_lemma_l #a #m st l =
 
 val finish_lemma_l:
     #a:sha2_alg
-  -> #m:m_spec
+  -> #m:m_spec{is_supported a m}
   -> st:state_spec a m
   -> l:nat{l < lanes a m} ->
   Lemma ((finish st).(|l|) == Spec.finish a (state_spec_v st).[l])
@@ -590,7 +589,7 @@ let finish_lemma_l #a #m st l =
 
 val update_block_lemma_l:
     #a:sha2_alg
-  -> #m:m_spec
+  -> #m:m_spec{is_supported a m}
   -> len:size_nat
   -> b:multiseq (lanes a m) len
   -> i:nat{i < len / block_length a}
@@ -607,7 +606,7 @@ let update_block_lemma_l #a #m len b i st l =
 
 val update_nblocks_loop_lemma:
     #a:sha2_alg
-  -> #m:m_spec
+  -> #m:m_spec{is_supported a m}
   -> len:size_nat
   -> b:multiseq (lanes a m) len
   -> st:state_spec a m
@@ -637,7 +636,7 @@ let rec update_nblocks_loop_lemma #a #m len b st l n =
 
 val update_nblocks_lemma_l:
     #a:sha2_alg
-  -> #m:m_spec
+  -> #m:m_spec{is_supported a m}
   -> len:size_nat
   -> b:multiseq (lanes a m) len
   -> st:state_spec a m
@@ -653,7 +652,7 @@ let update_nblocks_lemma_l #a #m len b st l =
 
 val hash_lemma_l:
     #a:sha2_alg
-  -> #m:m_spec
+  -> #m:m_spec{is_supported a m}
   -> len:size_nat
   -> b:multiseq (lanes a m) len
   -> l:nat{l < lanes a m} ->
@@ -674,7 +673,7 @@ let hash_lemma_l #a #m len b l =
 
 val hash_lemma:
     #a:sha2_alg
-  -> #m:m_spec
+  -> #m:m_spec{is_supported a m}
   -> len:size_nat
   -> b:multiseq (lanes a m) len ->
   Lemma (forall (l:nat{l < lanes a m}).
@@ -686,7 +685,7 @@ let hash_lemma #a #m len b =
 
 val hash_agile_lemma_l:
     #a:sha2_alg
-  -> #m:m_spec
+  -> #m:m_spec{is_supported a m}
   -> len:size_nat{len <= max_input_length a}
   -> b:multiseq (lanes a m) len
   -> l:nat{l < lanes a m} ->
@@ -699,7 +698,7 @@ let hash_agile_lemma_l #a #m len b l =
 
 val hash_agile_lemma:
     #a:sha2_alg
-  -> #m:m_spec
+  -> #m:m_spec{is_supported a m}
   -> len:size_nat{len <= max_input_length a}
   -> b:multiseq (lanes a m) len ->
   Lemma (forall (l:nat{l < lanes a m}).

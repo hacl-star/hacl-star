@@ -14,7 +14,7 @@ module LSeq = Lib.Sequence
 module VecTranspose = Lib.IntVector.Transpose
 
 
-#set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 noextract
 type m_spec =
@@ -42,6 +42,10 @@ let lanes (a:sha2_alg) (m:m_spec) : lanes_t =
   | SHA2_384,M512
   | SHA2_512,M512 -> 8
   | _ -> 1
+
+noextract
+let is_supported (a:sha2_alg) (m:m_spec) =
+  lanes a m = 1 \/ lanes a m = 4 \/ lanes a m = 8
 
 inline_for_extraction
 let element_t (a:sha2_alg) (m:m_spec) = vec_t (word_t a) (lanes a m)
@@ -217,16 +221,15 @@ let transpose_ws8 (#a:sha2_alg) (#m:m_spec{lanes a m == 8}) (ws:ws_spec a m) : w
     create16 ws0 ws1 ws2 ws3 ws4 ws5 ws6 ws7 ws8 ws9 ws10 ws11 ws12 ws13 ws14 ws15
 
 noextract
-let transpose_ws (#a:sha2_alg) (#m:m_spec) (ws:ws_spec a m) : ws_spec a m =
+let transpose_ws (#a:sha2_alg) (#m:m_spec{is_supported a m}) (ws:ws_spec a m) : ws_spec a m =
   match lanes a m with
   | 1 -> transpose_ws1 #a #m ws
   | 4 -> transpose_ws4 #a #m ws
   | 8 -> transpose_ws8 #a #m ws
-  | _ -> admit()
 
 
 noextract
-let load_ws (#a:sha2_alg) (#m:m_spec) (b:multiblock_spec a m) : ws_spec a m =
+let load_ws (#a:sha2_alg) (#m:m_spec{is_supported a m}) (b:multiblock_spec a m) : ws_spec a m =
   let ws = load_blocks #a #m b in
   transpose_ws #a #m ws
 
@@ -272,7 +275,7 @@ let init (a:sha2_alg) (m:m_spec) : state_spec a m =
 
 [@"opaque_to_smt"]
 noextract
-let update (#a:sha2_alg) (#m:m_spec) (b:multiblock_spec a m) (st:state_spec a m): state_spec a m =
+let update (#a:sha2_alg) (#m:m_spec{is_supported a m}) (b:multiblock_spec a m) (st:state_spec a m): state_spec a m =
   let st_old = st in
   let ws = load_ws b in
   let st_new = shuffle ws st_old in
@@ -357,7 +360,7 @@ let load_last8 (#a:sha2_alg) (#m:m_spec{lanes a m == 8})
 
 [@"opaque_to_smt"]
 noextract
-let load_last (#a:sha2_alg) (#m:m_spec) (totlen_seq:lseq uint8 (len_length a))
+let load_last (#a:sha2_alg) (#m:m_spec{is_supported a m}) (totlen_seq:lseq uint8 (len_length a))
               (fin:nat{fin == block_length a \/ fin == 2 * block_length a})
               (len:size_nat{len < block_length a}) (b:multiseq (lanes a m) len) :
               multiseq (lanes a m) (block_length a) & multiseq (lanes a m) (block_length a) =
@@ -365,10 +368,9 @@ let load_last (#a:sha2_alg) (#m:m_spec) (totlen_seq:lseq uint8 (len_length a))
     | 1 -> load_last1 #a #m totlen_seq fin len b
     | 4 -> load_last4 #a #m totlen_seq fin len b
     | 8 -> load_last8 #a #m totlen_seq fin len b
-    | _ -> admit()
 
 noextract
-let update_last (#a:sha2_alg) (#m:m_spec) (totlen:len_t a)
+let update_last (#a:sha2_alg) (#m:m_spec{is_supported a m}) (totlen:len_t a)
                 (len:size_nat{len < block_length a})
                 (b:multiseq (lanes a m) len) (st:state_spec a m): state_spec a m =
   let blocks = padded_blocks a len in
@@ -411,15 +413,14 @@ let transpose_state8 (#a:sha2_alg) (#m:m_spec{lanes a m == 8})
     create8 st0 st1 st2 st3 st4 st5 st6 st7
 
 noextract
-let transpose_state (#a:sha2_alg) (#m:m_spec) (st:state_spec a m) : state_spec a m =
+let transpose_state (#a:sha2_alg) (#m:m_spec{is_supported a m}) (st:state_spec a m) : state_spec a m =
   match lanes a m with
   | 1 -> st
   | 4 -> transpose_state4 #a #m st
   | 8 -> transpose_state8 #a #m st
-  | _ -> admit()
 
 noextract
-let store_state (#a:sha2_alg) (#m:m_spec) (st:state_spec a m) :
+let store_state (#a:sha2_alg) (#m:m_spec{is_supported a m}) (st:state_spec a m) :
                 lseq uint8 (lanes a m * 8 * word_length a) =
     let st = transpose_state st in
     Lib.IntVector.Serialize.vecs_to_bytes_be st
@@ -449,25 +450,25 @@ let get_multilast_spec (#a:sha2_alg) (#m:m_spec)
       (fun j -> sub b.(|j|) (len - rem) rem)
 
 noextract
-let update_block (#a:sha2_alg) (#m:m_spec) (len:size_nat) (b:multiseq (lanes a m) len)
+let update_block (#a:sha2_alg) (#m:m_spec{is_supported a m}) (len:size_nat) (b:multiseq (lanes a m) len)
                  (i:nat{i < len / block_length a}) (st:state_spec a m) : state_spec a m =
   let mb = get_multiblock_spec len b i in
   update mb st
 
 noextract
-let update_nblocks (#a:sha2_alg) (#m:m_spec) (len:size_nat) (b:multiseq (lanes a m) len) (st:state_spec a m) : state_spec a m =
+let update_nblocks (#a:sha2_alg) (#m:m_spec{is_supported a m}) (len:size_nat) (b:multiseq (lanes a m) len) (st:state_spec a m) : state_spec a m =
     let blocks = len / block_length a in
     let st = repeati blocks (update_block #a #m len b) st in
     st
 
 noextract
-let finish (#a:sha2_alg) (#m:m_spec) (st:state_spec a m) :
+let finish (#a:sha2_alg) (#m:m_spec{is_supported a m}) (st:state_spec a m) :
          multiseq (lanes a m) (hash_length a) =
     let hseq = store_state st in
     emit hseq
 
 noextract
-let hash (#a:sha2_alg) (#m:m_spec) (len:size_nat) (b:multiseq (lanes a m) len) =
+let hash (#a:sha2_alg) (#m:m_spec{is_supported a m}) (len:size_nat) (b:multiseq (lanes a m) len) =
     let len' : len_t a = Lib.IntTypes.cast #U32 #PUB (len_int_type a) PUB (size len) in
     let st = init a m in
     let st = update_nblocks #a #m len b st in
@@ -489,5 +490,5 @@ let sha512 (len:size_nat) (b:lseq uint8 len) =
   hash #SHA2_512 #M32 len b
 
 noextract
-  let sha512_4 (len:size_nat) (b:multiseq 4 len) =
+let sha512_4 (len:size_nat) (b:multiseq 4 len) =
   hash #SHA2_512 #M256 len b

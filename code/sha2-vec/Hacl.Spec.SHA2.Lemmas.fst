@@ -63,7 +63,7 @@ let transpose_ws8_lemma_ij #a #m ws j i =
 
 val transpose_ws_lemma_ij:
     #a:sha2_alg
-  -> #m:m_spec
+  -> #m:m_spec{is_supported a m}
   -> ws:ws_spec a m
   -> j:nat{j < lanes a m}
   -> i:nat{i < 16} ->
@@ -77,7 +77,6 @@ let transpose_ws_lemma_ij #a #m ws j i =
   | 1 -> ()
   | 4 -> transpose_ws4_lemma_ij #a #m ws j i
   | 8 -> transpose_ws8_lemma_ij #a #m ws j i
-  | _ -> admit()
 
 
 val transpose_state4_lemma:
@@ -120,7 +119,7 @@ let transpose_state8_lemma #a #m st j i =
 
 val transpose_state_lemma_ij:
     #a:sha2_alg
-  -> #m:m_spec
+  -> #m:m_spec{is_supported a m}
   -> st:state_spec a m
   -> j:nat{j < lanes a m}
   -> i:nat{i < 8 * word_length a} ->
@@ -135,4 +134,3 @@ let transpose_state_lemma_ij #a #m st j i =
   | 1 -> ()
   | 4 -> transpose_state4_lemma #a #m st j i
   | 8 -> transpose_state8_lemma #a #m st j i
-  | _ -> admit()
