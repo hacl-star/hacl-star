@@ -108,7 +108,7 @@ POLY_BUNDLE=-bundle 'Hacl.Poly1305_32=Hacl.Impl.Poly1305.Field32xN_32' \
   -bundle 'Hacl.Poly1305_128=Hacl.Impl.Poly1305.Field32xN_128' \
   -bundle 'Hacl.Poly1305_256=Hacl.Impl.Poly1305.Field32xN_256'
 NACLBOX_BUNDLE=-bundle Hacl.NaCl=Hacl.Impl.SecretBox,Hacl.Impl.Box
-P256_BUNDLE_RHS=Hacl.Impl.ECDSA.*,Hacl.Hash.SHA2,Hacl.Hash.Core.SHA2,Hacl.Hash.Core.SHA2.Constants,Hacl.Hash.Definitions,Hacl.Impl.SolinasReduction,Hacl.Impl.P256.*[rename=Hacl_P256] \
+P256_BUNDLE_RHS=Hacl.Impl.ECDSA.*,Hacl.Hash.SHA2,Hacl.Hash.Core.SHA2,Hacl.Hash.Core.SHA2.Constants,Hacl.Hash.Definitions,Hacl.Impl.SolinasReduction,Hacl.Impl.P256.*[rename-prefix=Hacl_P256] \
   -bundle Hacl.SolinasReduction.Lemmas
 P256_BUNDLE=-bundle Hacl.Interface.P256=$(P256_BUNDLE_RHS)
 ECDSA_BUNDLE=-bundle Hacl.Interface.P256.ECDSA=$(P256_BUNDLE_RHS)
