@@ -127,8 +127,7 @@ val ecdsa_sign_p256_without_hash: result: lbuffer uint8 (size 64)
   )
 
 
-
-(* This code is not side channel resistant *)
+[@ (Comment "  This code is not side channel resistant") "c_inline"]
 val ecdsa_verif_p256_sha2:
     mLen: size_t
   -> m: lbuffer uint8 mLen
@@ -148,7 +147,7 @@ val ecdsa_verif_p256_sha2:
     )
 
 
-(* This code is not side channel resistant *)
+[@ (Comment "  This code is not side channel resistant") "c_inline"]
 val ecdsa_verif_p256_sha384:
     mLen: size_t
   -> m: lbuffer uint8 mLen
@@ -168,7 +167,7 @@ val ecdsa_verif_p256_sha384:
    )
 
 
-(* This code is not side channel resistant *)
+[@ (Comment "  This code is not side channel resistant") "c_inline"]
 val ecdsa_verif_p256_sha512:
     mLen: size_t
   -> m: lbuffer uint8 mLen
@@ -221,12 +220,6 @@ val verify_q:
     )
 
 
-(** We distinguish 3 ways of representing a point **)
-(* The raw form - a buffer containing x coordinate and y coordinate *)
-(* Not compressed form - a buffer containing 04 as identifier followed by x and y *)
-(* Compressed form - a buffer containing the last bit of y coordinate + 2 followed by x coordinate *)
-
-(* The function takes a buffer in the not compressed form, checkes whether the form is correct and returns a raw form *)
 val decompression_not_compressed_form: b: notCompressedForm -> result: lbuffer uint8 (size 64) -> Stack bool 
   (requires fun h -> live h b /\ live h result /\ disjoint b result)
   (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\
@@ -243,7 +236,6 @@ val decompression_not_compressed_form: b: notCompressedForm -> result: lbuffer u
     )
 )
 
-(* The function takes a buffer in the compressed form, checkes whether the form is correct and returns a raw form *)
 val decompression_compressed_form: b: compressedForm -> result: lbuffer uint8 (size 64) -> Stack bool 
   (requires fun h -> live h b /\ live h result /\ disjoint b result)
   (ensures fun h0 r h1 -> 
@@ -273,7 +265,6 @@ val decompression_compressed_form: b: compressedForm -> result: lbuffer uint8 (s
   )
 
 
-(* The function takes a buffer in the raw form and returns a not-compressed form *)
 val compression_not_compressed_form: b: lbuffer uint8 (size 64) -> result: notCompressedForm -> 
   Stack unit 
     (requires fun h -> live h b /\ live h result /\ disjoint b result)
@@ -288,7 +279,7 @@ val compression_not_compressed_form: b: lbuffer uint8 (size 64) -> result: notCo
       )
     )
 
-(* The function takes a buffer in the raw form and returns a compressed form *)
+
 val compression_compressed_form: b: lbuffer uint8 (size 64) -> result: compressedForm -> 
   Stack unit 
     (requires fun h -> live h b /\ live h result /\ disjoint b result)
@@ -328,7 +319,7 @@ val ecp256dh_i:
     as_seq h1 (gsub result (size 32) (size 32)) == pointY)
 
 
-(* This code is not constant-time on pubKey *)
+[@ (Comment "  This code is not side channel resistant on pub_key") "c_inline"]
 val ecp256dh_r:
     result:lbuffer uint8 (size 64)
   -> pubKey:lbuffer uint8 (size 64)

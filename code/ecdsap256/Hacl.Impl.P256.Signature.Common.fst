@@ -47,7 +47,6 @@ let bufferToJac p result =
 #pop-options
 
 
-(* This code is used for computation of isPointOnCurve routine *)
 inline_for_extraction noextract
 val y_2: y: felem -> r: felem -> Stack unit
   (requires fun h -> as_nat h y < prime /\ live h y /\ live h r /\ eq_or_disjoint y r)
@@ -162,16 +161,6 @@ let isPointOnCurvePublic p =
      z
 
 
-(* 
-  checks whether the coordinates are valid = 
-  all of them are less than prime 
-*) 
-
-(* checks whether the intefer f is between 1 and (n- 1) (incl).  *)
-(* [1, n - 1] <==> a > 0 /\ a < n) *)
-
-(* This code is not side channel resistant *)
-(* we require the coordinate to be in affine representation of jac coordinate *)
 val isCoordinateValid: p: point -> Stack bool 
   (requires fun h -> live h p /\ point_z_as_nat h p == 1)
   (ensures fun h0 r h1 -> 
@@ -248,8 +237,8 @@ let multByOrder2 result p tempBuffer =
   pop_frame()  
     
 
-(* This code is not side channel resistant *) 
-(* Checks whether the base point * order is point at infinity *)
+[@ (Comment "  This code is not side channel resistant") "c_inline"]
+
 val isOrderCorrect: p: point -> tempBuffer: lbuffer uint64 (size 100) -> Stack bool
   (requires fun h -> 
     live h p /\ live h tempBuffer /\ 

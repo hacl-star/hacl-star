@@ -31,14 +31,13 @@ val bufferToJac: p:lbuffer uint64 (size 8) -> result:point -> Stack unit
      let pointJacX, pointJacY, pointJacZ = toJacobianCoordinates (x, y) in
      x3 == pointJacX /\ y3 == pointJacY /\ z3 == pointJacZ))
 
-(* This code is not side channel resistant *)
+[@ (Comment "  This code is not side channel resistant") "c_inline"]
 val isPointAtInfinityPublic: p:point -> Stack bool
   (requires fun h -> live h p)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
     r == Spec.P256.isPointAtInfinity (point_prime_to_coordinates (as_seq h0 p)))
 
-(* This code is not side channel resistant *)
-(* This is unused internally and not exposed in the top-level API *)
+[@ (Comment "  This code is not side channel resistant") "c_inline"]
 val isPointOnCurvePublic: p:point -> Stack bool
   (requires fun h -> live h p /\    
     as_nat h (gsub p (size 0) (size 4)) < prime256 /\ 
@@ -51,15 +50,8 @@ val isPointOnCurvePublic: p:point -> Stack bool
                           as_nat h1 (gsub p (size 8) (size 4)))
   )
 
-(*
-For Bob to authenticate Alice's signature, he must have a copy of her public-key curve point {\displaystyle Q_{A}} Q_{A}. Bob can verify {\displaystyle Q_{A}} Q_{A} is a valid curve point as follows:
 
-Check that {\displaystyle Q_{A}} Q_{A} is not equal to the identity element {\displaystyle O} O, and its coordinates are otherwise valid
-Check that {\displaystyle Q_{A}} Q_{A} lies on the curve
-Check that {\displaystyle n\times Q_{A}=O}
-*)
-
-(* This code is not side channel resistant *)
+[@ (Comment "  This code is not side channel resistant") "c_inline"]
 val verifyQValidCurvePoint: pubKeyAsPoint:point
   -> tempBuffer:lbuffer uint64 (size 100) -> Stack bool
   (requires fun h ->

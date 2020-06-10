@@ -42,6 +42,7 @@ module Def = Spec.Hash.Definitions
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
+[@ (Comment "  This code is not side channel resistant") "c_inline"]
 (* This code is not side channel resistant *)
 inline_for_extraction noextract
 val isZero_uint64_nCT: f: felem -> Stack bool
@@ -62,7 +63,8 @@ let isZero_uint64_nCT f =
     z0_zero && z1_zero && z2_zero && z3_zero
 
 
-(* This code is not side channel resistant *)
+[@ (Comment "  This code is not side channel resistant") "c_inline"]
+
 val isMoreThanZeroLessThanOrderMinusOne: f:felem -> Stack bool
   (requires fun h -> live h f)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
@@ -79,8 +81,6 @@ let isMoreThanZeroLessThanOrderMinusOne f =
   pop_frame();
   result
 
-
-(* Verify that {\displaystyle r} r and {\displaystyle s} s are integers in {\displaystyle [1,n-1]} [1,n-1]. If not, the signature is invalid. *)
 
 inline_for_extraction noextract
 val ecdsa_verification_step1: r:lbuffer uint64 (size 4) -> s:lbuffer uint64 (size 4) -> Stack bool
@@ -369,7 +369,7 @@ let ecdsa_verification_step5 x pubKeyAsPoint u1 u2 tempBuffer =
   not resultIsPAI
 
 
-(* to use with care - not SCA resistant, so used only in verification *)
+[@ (Comment "  This code is not side channel resistant") "c_inline"]
 val compare_felem_bool: a: felem -> b: felem -> Stack bool
   (requires fun h -> live h a /\ live h b)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\ r == (as_nat h0 a = as_nat h0 b))
@@ -463,7 +463,7 @@ let ecdsa_verification_core alg publicKeyBuffer hashAsFelem r s mLen m xBuffer t
   r
 
 
-(* This code is not side channel resistant *)
+[@ (Comment "  This code is not side channel resistant") "c_inline"]
 inline_for_extraction
 val ecdsa_verification_:alg:hash_alg_ecdsa
   -> pubKey:lbuffer uint64 (size 8)
