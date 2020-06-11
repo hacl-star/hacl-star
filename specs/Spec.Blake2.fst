@@ -170,7 +170,7 @@ let ivTable (a:alg) : lseq (pub_word_t a) 8 =
   | Blake2S -> of_list list_iv_S
   | Blake2B -> of_list list_iv_B
 
-unfold type sigma_elt_t = n:size_t{size_v n < 16}
+type sigma_elt_t = n:size_t{size_v n < 16}
 type list_sigma_t = l:list sigma_elt_t{List.Tot.length l == 160}
 
 [@"opaque_to_smt"]
@@ -282,6 +282,13 @@ let undiag (#a:alg) (wv:state a) : state a =
 inline_for_extraction
 let gather_row (#a:alg) (m:block_w a) (i0 i1 i2 i3:sigma_elt_t) : row a =
   create_row m.[v i0] m.[v i1] m.[v i2] m.[v i3]
+(*  let nb = size_word a in
+  let u0 = uint_from_bytes_le #(wt a) #SEC (sub m (v i0*nb) nb) in
+  let u1 = uint_from_bytes_le #(wt a) #SEC (sub m (v i1*nb) nb) in
+  let u2 = uint_from_bytes_le #(wt a) #SEC (sub m (v i2*nb) nb) in
+  let u3 = uint_from_bytes_le #(wt a) #SEC (sub m (v i3*nb) nb) in
+  create_row u0 u1 u2 u3
+*)
 
 val gather_state: a:alg -> m:block_w a -> start:nat{start <= 144} -> state a
 let gather_state a m start =
