@@ -10,7 +10,7 @@
 extern void C_String_print(C_String_t uu____143);
 
 extern uint64_t
-Hacl_Interface_P256_ecdsa_sign_p256_sha2(
+Hacl_P256_ecdsa_sign_p256_sha2(
   uint8_t *result,
   uint32_t mLen,
   uint8_t *m,
@@ -19,7 +19,7 @@ Hacl_Interface_P256_ecdsa_sign_p256_sha2(
 );
 
 extern bool
-Hacl_Interface_P256_ecdsa_verif_p256_sha2(
+Hacl_P256_ecdsa_verif_p256_sha2(
   uint32_t mLen,
   uint8_t *m,
   uint8_t *pubKey,
@@ -2859,7 +2859,7 @@ test_sigver(
     uint8_t qxy[64U] = { 0U };
     memcpy(qxy, qx, (uint32_t)32U * sizeof (qx[0U]));
     memcpy(qxy + (uint32_t)32U, qy, (uint32_t)32U * sizeof (qy[0U]));
-    bool result_ = Hacl_Interface_P256_ecdsa_verif_p256_sha2(msg_len, msg, qxy, r, s);
+    bool result_ = Hacl_P256_ecdsa_verif_p256_sha2(msg_len, msg, qxy, r, s);
     if (!(result_ == result))
     {
       LowStar_Printf_print_string("FAIL\n");
@@ -2936,14 +2936,14 @@ test_siggen(
     uint8_t qxy[64U] = { 0U };
     memcpy(qxy, qx, (uint32_t)32U * sizeof (qx[0U]));
     memcpy(qxy + (uint32_t)32U, qy, (uint32_t)32U * sizeof (qy[0U]));
-    uint64_t flag = Hacl_Interface_P256_ecdsa_sign_p256_sha2(rs, msg_len, msg, d, k);
+    uint64_t flag = Hacl_P256_ecdsa_sign_p256_sha2(rs, msg_len, msg, d, k);
     if (flag == (uint64_t)0U)
     {
       bool okr = compare_and_print(rs, r, (uint32_t)32U);
       bool oks = compare_and_print(rs + (uint32_t)32U, s, (uint32_t)32U);
       if (okr && oks)
       {
-        bool result = Hacl_Interface_P256_ecdsa_verif_p256_sha2(msg_len, msg, qxy, r, s);
+        bool result = Hacl_P256_ecdsa_verif_p256_sha2(msg_len, msg, qxy, r, s);
         if (!result)
         {
           LowStar_Printf_print_string("FAIL: verification\n");

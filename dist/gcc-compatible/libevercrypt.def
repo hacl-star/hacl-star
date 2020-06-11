@@ -328,6 +328,22 @@ EXPORTS
   Hacl_P256_reduction_8_32
   Hacl_P256_ecp256dh_i0
   Hacl_P256_ecp256dh_r0
+  Hacl_P256_DH_ecdsa_sign_p256_sha2
+  Hacl_P256_DH_ecdsa_sign_p256_sha384
+  Hacl_P256_DH_ecdsa_sign_p256_sha512
+  Hacl_P256_DH_ecdsa_sign_p256_without_hash
+  Hacl_P256_DH_ecdsa_verif_p256_sha2
+  Hacl_P256_DH_ecdsa_verif_p256_sha384
+  Hacl_P256_DH_ecdsa_verif_p256_sha512
+  Hacl_P256_DH_ecdsa_verif_without_hash
+  Hacl_P256_DH_verify_q
+  Hacl_P256_DH_decompression_not_compressed_form
+  Hacl_P256_DH_decompression_compressed_form
+  Hacl_P256_DH_compression_not_compressed_form
+  Hacl_P256_DH_compression_compressed_form
+  Hacl_P256_DH_reduction_8_32
+  Hacl_P256_ECDSA_ecp256dh_i
+  Hacl_P256_ECDSA_ecp256dh_r
   Hacl_Frodo_KEM_crypto_kem_keypair
   Hacl_Frodo_KEM_crypto_kem_enc
   Hacl_Frodo_KEM_crypto_kem_dec
@@ -373,8 +389,6 @@ EXPORTS
   Hacl_HPKE_Curve51_CP256_SHA512_setupBaseR
   Hacl_HPKE_Curve51_CP256_SHA512_sealBase
   Hacl_HPKE_Curve51_CP256_SHA512_openBase
-  Hacl_Interface_P256_DH_ecp256dh_i
-  Hacl_Interface_P256_DH_ecp256dh_r
   Hacl_HPKE_Curve64_CP256_SHA512_setupBaseI
   Hacl_HPKE_Curve64_CP256_SHA512_setupBaseR
   Hacl_HPKE_Curve64_CP256_SHA512_sealBase
@@ -416,20 +430,6 @@ EXPORTS
   Hacl_HPKE_P256_CP32_SHA256_setupBaseR
   Hacl_HPKE_P256_CP32_SHA256_sealBase
   Hacl_HPKE_P256_CP32_SHA256_openBase
-  Hacl_Interface_P256_ECDSA_ecdsa_sign_p256_sha2
-  Hacl_Interface_P256_ECDSA_ecdsa_sign_p256_sha384
-  Hacl_Interface_P256_ECDSA_ecdsa_sign_p256_sha512
-  Hacl_Interface_P256_ECDSA_ecdsa_sign_p256_without_hash
-  Hacl_Interface_P256_ECDSA_ecdsa_verif_p256_sha2
-  Hacl_Interface_P256_ECDSA_ecdsa_verif_p256_sha384
-  Hacl_Interface_P256_ECDSA_ecdsa_verif_p256_sha512
-  Hacl_Interface_P256_ECDSA_ecdsa_verif_without_hash
-  Hacl_Interface_P256_ECDSA_verify_q
-  Hacl_Interface_P256_ECDSA_decompression_not_compressed_form
-  Hacl_Interface_P256_ECDSA_decompression_compressed_form
-  Hacl_Interface_P256_ECDSA_compression_not_compressed_form
-  Hacl_Interface_P256_ECDSA_compression_compressed_form
-  Hacl_Interface_P256_ECDSA_reduction_8_32
   Hacl_Blake2s_128_blake2s
   Hacl_HPKE_Curve64_CP32_SHA256_setupBaseI
   Hacl_HPKE_Curve64_CP32_SHA256_setupBaseR
