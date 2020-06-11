@@ -36,6 +36,9 @@
 
 uint64_t Hacl_Interface_P256_DH_ecp256dh_i(uint8_t *result, uint8_t *scalar);
 
+/*
+  This code is not side channel resistant on pub_key
+*/
 uint64_t Hacl_Interface_P256_DH_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
 
 #define __Hacl_Interface_P256_DH_H_DEFINED

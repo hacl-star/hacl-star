@@ -237,7 +237,7 @@ let multByOrder2 result p tempBuffer =
   pop_frame()  
     
 
-[@ (Comment "  This code is not side channel resistant") "c_inline"]
+[@ (Comment "  This code is not side channel resistant")]
 
 val isOrderCorrect: p: point -> tempBuffer: lbuffer uint64 (size 100) -> Stack bool
   (requires fun h -> 

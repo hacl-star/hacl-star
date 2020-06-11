@@ -84,8 +84,14 @@ Hacl_Impl_P256_Core_secretToPublicWithoutNorm(
 
 void Hacl_Impl_P256_Signature_Common_bufferToJac(uint64_t *p, uint64_t *result);
 
+/*
+  This code is not side channel resistant
+*/
 bool Hacl_Impl_P256_Signature_Common_isPointAtInfinityPublic(uint64_t *p);
 
+/*
+  This code is not side channel resistant
+*/
 bool
 Hacl_Impl_P256_Signature_Common_verifyQValidCurvePoint(
   uint64_t *pubKeyAsPoint,
@@ -94,6 +100,12 @@ Hacl_Impl_P256_Signature_Common_verifyQValidCurvePoint(
 
 uint64_t Hacl_Impl_P256_DH_ecp256dh_i(uint8_t *result, uint8_t *scalar);
 
+/*
+  This code is not side channel resistant on pubKey
+*/
+/*
+  This code is not side channel resistant on pubKey
+*/
 uint64_t Hacl_Impl_P256_DH_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
 
 void Hacl_Impl_P256_Compression_computeYFromX(uint64_t *x, uint64_t *result, uint64_t sign);
@@ -110,8 +122,14 @@ Hacl_Impl_ECDSA_MM_Exponent_multPowerPartial(
   uint64_t *result
 );
 
+/*
+  This code is not side channel resistant
+*/
 bool Hacl_Impl_ECDSA_P256_Verification_Agile_isMoreThanZeroLessThanOrderMinusOne(uint64_t *f);
 
+/*
+  This code is not side channel resistant
+*/
 bool Hacl_Impl_ECDSA_P256_Verification_Agile_compare_felem_bool(uint64_t *a, uint64_t *b);
 
 uint64_t
@@ -161,6 +179,9 @@ Hacl_Interface_P256_ecdsa_sign_p256_without_hash(
   uint8_t *k
 );
 
+/*
+  This code is not side channel resistant
+*/
 bool
 Hacl_Interface_P256_ecdsa_verif_p256_sha2(
   uint32_t mLen,
@@ -170,6 +191,9 @@ Hacl_Interface_P256_ecdsa_verif_p256_sha2(
   uint8_t *s
 );
 
+/*
+  This code is not side channel resistant
+*/
 bool
 Hacl_Interface_P256_ecdsa_verif_p256_sha384(
   uint32_t mLen,
@@ -179,6 +203,9 @@ Hacl_Interface_P256_ecdsa_verif_p256_sha384(
   uint8_t *s
 );
 
+/*
+  This code is not side channel resistant
+*/
 bool
 Hacl_Interface_P256_ecdsa_verif_p256_sha512(
   uint32_t mLen,
@@ -211,6 +238,9 @@ void Hacl_Interface_P256_reduction_8_32(uint8_t *x, uint8_t *result);
 
 uint64_t Hacl_Interface_P256_ecp256dh_i(uint8_t *result, uint8_t *scalar);
 
+/*
+  This code is not side channel resistant on pub_key
+*/
 uint64_t Hacl_Interface_P256_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
 
 #define __Hacl_P256_H_DEFINED

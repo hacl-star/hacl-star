@@ -26,7 +26,7 @@ val ecp256dh_i:
     as_seq h1 (gsub result (size 32) (size 32)) == pointY)
 
 
-[@ (Comment "  This code is not side channel resistant on pubKey") "c_inline"]
+[@ (Comment "  This code is not side channel resistant on pubKey")]
 val ecp256dh_r:
     result:lbuffer uint8 (size 64)
   -> pubKey:lbuffer uint8 (size 64)

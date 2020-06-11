@@ -29,7 +29,11 @@ uint64_t Hacl_Interface_P256_DH_ecp256dh_i(uint8_t *result, uint8_t *scalar)
   return Hacl_Impl_P256_DH_ecp256dh_i(result, scalar);
 }
 
-uint64_t Hacl_Interface_P256_DH_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar)
+/*
+  This code is not side channel resistant on pub_key
+*/
+inline uint64_t
+Hacl_Interface_P256_DH_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar)
 {
   return Hacl_Impl_P256_DH_ecp256dh_r(result, pubKey, scalar);
 }

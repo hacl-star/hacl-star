@@ -42,7 +42,7 @@ module Def = Spec.Hash.Definitions
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
-[@ (Comment "  This code is not side channel resistant") "c_inline"]
+[@ (Comment "  This code is not side channel resistant")]
 (* This code is not side channel resistant *)
 inline_for_extraction noextract
 val isZero_uint64_nCT: f: felem -> Stack bool
@@ -63,7 +63,7 @@ let isZero_uint64_nCT f =
     z0_zero && z1_zero && z2_zero && z3_zero
 
 
-[@ (Comment "  This code is not side channel resistant") "c_inline"]
+[@ (Comment "  This code is not side channel resistant")]
 
 val isMoreThanZeroLessThanOrderMinusOne: f:felem -> Stack bool
   (requires fun h -> live h f)
@@ -369,7 +369,7 @@ let ecdsa_verification_step5 x pubKeyAsPoint u1 u2 tempBuffer =
   not resultIsPAI
 
 
-[@ (Comment "  This code is not side channel resistant") "c_inline"]
+[@ (Comment "  This code is not side channel resistant")]
 val compare_felem_bool: a: felem -> b: felem -> Stack bool
   (requires fun h -> live h a /\ live h b)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\ r == (as_nat h0 a = as_nat h0 b))
@@ -463,7 +463,7 @@ let ecdsa_verification_core alg publicKeyBuffer hashAsFelem r s mLen m xBuffer t
   r
 
 
-[@ (Comment "  This code is not side channel resistant") "c_inline"]
+[@ (Comment "  This code is not side channel resistant")]
 inline_for_extraction
 val ecdsa_verification_:alg:hash_alg_ecdsa
   -> pubKey:lbuffer uint64 (size 8)
