@@ -2229,17 +2229,17 @@ Hacl_P256_ecdsa_signature_core(
     {
       case Spec_Hash_Definitions_SHA2_256:
         {
-          Hacl_P256_hash_256(m, mLen, mHash);
+          Hacl_Hash_SHA2_hash_256(m, mLen, mHash);
           break;
         }
       case Spec_Hash_Definitions_SHA2_384:
         {
-          Hacl_P256_hash_384(m, mLen, mHash);
+          Hacl_Hash_SHA2_hash_384(m, mLen, mHash);
           break;
         }
       case Spec_Hash_Definitions_SHA2_512:
         {
-          Hacl_P256_hash_512(m, mLen, mHash);
+          Hacl_Hash_SHA2_hash_512(m, mLen, mHash);
           break;
         }
       default:
@@ -2463,7 +2463,7 @@ Hacl_P256_ecdsa_verif_p256_sha2(
   KRML_CHECK_SIZE(sizeof (uint8_t), sz);
   uint8_t mHash[sz];
   memset(mHash, 0U, sz * sizeof (mHash[0U]));
-  Hacl_P256_hash_256(m, mLen, mHash);
+  Hacl_Hash_SHA2_hash_256(m, mLen, mHash);
   uint8_t *cutHash = mHash;
   Hacl_P256_toUint64ChangeEndian(cutHash, hashAsFelem);
   Hacl_P256_reduction_prime_2prime_order(hashAsFelem, hashAsFelem);
@@ -2551,7 +2551,7 @@ Hacl_P256_ecdsa_verif_p256_sha384(
   KRML_CHECK_SIZE(sizeof (uint8_t), sz);
   uint8_t mHash[sz];
   memset(mHash, 0U, sz * sizeof (mHash[0U]));
-  Hacl_P256_hash_384(m, mLen, mHash);
+  Hacl_Hash_SHA2_hash_384(m, mLen, mHash);
   uint8_t *cutHash = mHash;
   Hacl_P256_toUint64ChangeEndian(cutHash, hashAsFelem);
   Hacl_P256_reduction_prime_2prime_order(hashAsFelem, hashAsFelem);
@@ -2639,7 +2639,7 @@ Hacl_P256_ecdsa_verif_p256_sha512(
   KRML_CHECK_SIZE(sizeof (uint8_t), sz);
   uint8_t mHash[sz];
   memset(mHash, 0U, sz * sizeof (mHash[0U]));
-  Hacl_P256_hash_512(m, mLen, mHash);
+  Hacl_Hash_SHA2_hash_512(m, mLen, mHash);
   uint8_t *cutHash = mHash;
   Hacl_P256_toUint64ChangeEndian(cutHash, hashAsFelem);
   Hacl_P256_reduction_prime_2prime_order(hashAsFelem, hashAsFelem);

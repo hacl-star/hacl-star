@@ -570,7 +570,7 @@ static void point_compress(uint8_t *z, uint64_t *p)
 
 static void secret_expand(uint8_t *expanded, uint8_t *secret)
 {
-  Hacl_P256_hash_512(secret, (uint32_t)32U, expanded);
+  Hacl_Hash_SHA2_hash_512(secret, (uint32_t)32U, expanded);
   uint8_t *h_low = expanded;
   uint8_t h_low0 = h_low[0U];
   uint8_t h_low31 = h_low[31U];
@@ -1596,7 +1596,7 @@ static void sha512_pre_msg(uint8_t *h, uint8_t *prefix, uint32_t len, uint8_t *i
   memset(pre_msg, 0U, (len + (uint32_t)32U) * sizeof (pre_msg[0U]));
   memcpy(pre_msg, prefix, (uint32_t)32U * sizeof (prefix[0U]));
   memcpy(pre_msg + (uint32_t)32U, input, len * sizeof (input[0U]));
-  Hacl_P256_hash_512(pre_msg, len + (uint32_t)32U, h);
+  Hacl_Hash_SHA2_hash_512(pre_msg, len + (uint32_t)32U, h);
 }
 
 static void
@@ -1614,7 +1614,7 @@ sha512_pre_pre2_msg(
   memcpy(pre_msg, prefix, (uint32_t)32U * sizeof (prefix[0U]));
   memcpy(pre_msg + (uint32_t)32U, prefix2, (uint32_t)32U * sizeof (prefix2[0U]));
   memcpy(pre_msg + (uint32_t)64U, input, len * sizeof (input[0U]));
-  Hacl_P256_hash_512(pre_msg, len + (uint32_t)64U, h);
+  Hacl_Hash_SHA2_hash_512(pre_msg, len + (uint32_t)64U, h);
 }
 
 static void sha512_modq_pre(uint64_t *out, uint8_t *prefix, uint32_t len, uint8_t *input)

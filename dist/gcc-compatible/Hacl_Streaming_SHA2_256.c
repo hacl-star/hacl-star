@@ -42,7 +42,7 @@ Hacl_Streaming_Functor_state_s___uint32_t____ *Hacl_Streaming_SHA2_256_create_in
   Hacl_Streaming_Functor_state_s___uint32_t____
   *p = KRML_HOST_MALLOC(sizeof (Hacl_Streaming_Functor_state_s___uint32_t____));
   p[0U] = s;
-  Hacl_P256_init_256(block_state);
+  Hacl_Hash_Core_SHA2_init_256(block_state);
   return p;
 }
 
@@ -51,7 +51,7 @@ void Hacl_Streaming_SHA2_256_init(Hacl_Streaming_Functor_state_s___uint32_t____ 
   Hacl_Streaming_Functor_state_s___uint32_t____ scrut = *s;
   uint8_t *buf = scrut.buf;
   uint32_t *block_state = scrut.block_state;
-  Hacl_P256_init_256(block_state);
+  Hacl_Hash_Core_SHA2_init_256(block_state);
   s[0U] =
     (
       (Hacl_Streaming_Functor_state_s___uint32_t____){
@@ -106,7 +106,7 @@ Hacl_Streaming_SHA2_256_update(
     uint32_t data2_len = len - data1_len;
     uint8_t *data1 = data;
     uint8_t *data2 = data + data1_len;
-    Hacl_P256_update_multi_256(block_state1, data1, data1_len / (uint32_t)64U);
+    Hacl_Hash_SHA2_update_multi_256(block_state1, data1, data1_len / (uint32_t)64U);
     uint8_t *dst = buf;
     memcpy(dst, data2, data2_len * sizeof (data2[0U]));
     *p
@@ -133,7 +133,7 @@ Hacl_Streaming_SHA2_256_update(
   uint8_t *buf0 = buf_1;
   uint8_t *buf2 = buf0 + sz1;
   memcpy(buf2, data1, diff1 * sizeof (data1[0U]));
-  Hacl_P256_update_multi_256(block_state10, buf0, (uint32_t)1U);
+  Hacl_Hash_SHA2_update_multi_256(block_state10, buf0, (uint32_t)1U);
   *p
   =
     (
@@ -152,7 +152,7 @@ Hacl_Streaming_SHA2_256_update(
   uint32_t data2_len = len - diff - data1_len;
   uint8_t *data11 = data2;
   uint8_t *data21 = data2 + data1_len;
-  Hacl_P256_update_multi_256(block_state1, data11, data1_len / (uint32_t)64U);
+  Hacl_Hash_SHA2_update_multi_256(block_state1, data11, data1_len / (uint32_t)64U);
   uint8_t *dst = buf;
   memcpy(dst, data21, data2_len * sizeof (data21[0U]));
   *p
@@ -179,8 +179,8 @@ Hacl_Streaming_SHA2_256_finish(Hacl_Streaming_Functor_state_s___uint32_t____ *p,
   uint64_t last_len = total_len % (uint64_t)64U;
   uint64_t prev_len = total_len - last_len;
   uint32_t last_len1 = (uint32_t)last_len;
-  Hacl_P256_update_last_256(tmp_block_state, prev_len, buf_1, last_len1);
-  Hacl_P256_finish_256(tmp_block_state, dst);
+  Hacl_Hash_SHA2_update_last_256(tmp_block_state, prev_len, buf_1, last_len1);
+  Hacl_Hash_Core_SHA2_finish_256(tmp_block_state, dst);
 }
 
 void Hacl_Streaming_SHA2_256_free(Hacl_Streaming_Functor_state_s___uint32_t____ *s)

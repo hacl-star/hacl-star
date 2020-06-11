@@ -75,9 +75,9 @@ Hacl_HPKE_P256_CP128_SHA256_setupBaseI(
   uint8_t secret[32U] = { 0U };
   uint8_t *info_hash = tmp;
   uint8_t *pskID_hash = tmp + (uint32_t)32U;
-  Hacl_P256_hash_256(info, infolen, info_hash);
+  Hacl_Hash_SHA2_hash_256(info, infolen, info_hash);
   uint8_t *empty_b = info;
-  Hacl_P256_hash_256(empty_b, (uint32_t)0U, pskID_hash);
+  Hacl_Hash_SHA2_hash_256(empty_b, (uint32_t)0U, pskID_hash);
   context[0U] = (uint8_t)0U;
   uint8_t *uu____1 = context + (uint32_t)1U;
   uint8_t *uu____2 = uu____1;
@@ -172,9 +172,9 @@ Hacl_HPKE_P256_CP128_SHA256_setupBaseR(
   uint8_t secret[32U] = { 0U };
   uint8_t *info_hash = tmp;
   uint8_t *pskID_hash = tmp + (uint32_t)32U;
-  Hacl_P256_hash_256(info, infolen, info_hash);
+  Hacl_Hash_SHA2_hash_256(info, infolen, info_hash);
   uint8_t *empty_b = info;
-  Hacl_P256_hash_256(empty_b, (uint32_t)0U, pskID_hash);
+  Hacl_Hash_SHA2_hash_256(empty_b, (uint32_t)0U, pskID_hash);
   context[0U] = (uint8_t)0U;
   uint8_t *uu____1 = context + (uint32_t)1U;
   uint8_t *uu____2 = uu____1;
