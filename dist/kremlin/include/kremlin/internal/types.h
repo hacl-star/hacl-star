@@ -59,7 +59,7 @@ typedef const char *Prims_string;
     defined(__aarch64__) || \
     (defined(__powerpc64__) && defined(__LITTLE_ENDIAN__)) || \
     defined(__s390x__) || \
-    (defined(_MSC_VER) && !defined(_M_X64) && defined(__clang__)) || \
+    (defined(_MSC_VER) && defined(_M_X64) && defined(__clang__)) || \
     (defined(__mips__) && defined(__LP64__)) || \
     (defined(__riscv) && __riscv_xlen == 64) || \
     defined(__SIZEOF_INT128__))
