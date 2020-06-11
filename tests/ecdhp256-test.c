@@ -35,7 +35,7 @@ int main()
 	for (int i = 0 ; i< sizeof(i_vectors)/sizeof(ecdhp256_tv_i); i++)
 	{
 		printf("ECDH Initiator Test %d \n", i );
-		uint64_t success = Hacl_Impl_P256_DH_ecp256dh_i(result, i_vectors[i].privateKey);
+		uint64_t success = Hacl_P256_ecp256dh_i(result, i_vectors[i].privateKey);
 		ok = ok && (success == 0);
 		ok = ok && compare_and_print(32, result, i_vectors[i].expectedPublicKeyX);
 		ok = ok && compare_and_print(32, result + 32, i_vectors[i].expectedPublicKeyY);
@@ -51,7 +51,7 @@ int main()
 		memcpy(pk, i_vectors[i].publicKeyX1,  32);
 		memcpy(pk+32, i_vectors[i].publicKeyY1,  32);
 	   
-	    uint64_t success = Hacl_Impl_P256_DH_ecp256dh_r(result, pk, i_vectors[i].privateKey);
+	    uint64_t success = Hacl_P256_ecp256dh_r(result, pk, i_vectors[i].privateKey);
 	    ok = ok && (success == 0);
 	    ok = ok && compare_and_print(32, result, i_vectors[i].expectedResult);
 	}
@@ -65,10 +65,10 @@ int main()
 	uint8_t* compressed2 = (uint8_t *) malloc (sizeof (uint8_t) * 65);
 	uint8_t* compressed3 = (uint8_t *) malloc (sizeof (uint8_t) * 64);
 
-	Hacl_Interface_P256_compression_not_compressed_form(point_compressed, compressed0);
-	Hacl_Interface_P256_decompression_not_compressed_form(compressed0, compressed1);
-	Hacl_Interface_P256_compression_not_compressed_form(compressed1, compressed2);
-	Hacl_Interface_P256_decompression_not_compressed_form(compressed2, compressed3);
+	Hacl_P256_compression_not_compressed_form(point_compressed, compressed0);
+	Hacl_P256_decompression_not_compressed_form(compressed0, compressed1);
+	Hacl_P256_compression_not_compressed_form(compressed1, compressed2);
+	Hacl_P256_decompression_not_compressed_form(compressed2, compressed3);
 
 	ok = ok && compare_and_print(64, point_compressed, compressed3);
 
@@ -81,10 +81,10 @@ int main()
 	uint8_t* compressed7 = (uint8_t *) malloc (sizeof (uint8_t) * 64);
 
 
-	Hacl_Interface_P256_compression_compressed_form(point_compressed, compressed4);
-	Hacl_Interface_P256_decompression_compressed_form(compressed4, compressed5);
-	Hacl_Interface_P256_compression_compressed_form(compressed5, compressed6);
-	Hacl_Interface_P256_decompression_compressed_form(compressed6, compressed7);
+	Hacl_P256_compression_compressed_form(point_compressed, compressed4);
+	Hacl_P256_decompression_compressed_form(compressed4, compressed5);
+	Hacl_P256_compression_compressed_form(compressed5, compressed6);
+	Hacl_P256_decompression_compressed_form(compressed6, compressed7);
 
 	ok = ok && compare_and_print(64, point_compressed, compressed7);
 
