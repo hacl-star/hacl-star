@@ -90,3 +90,9 @@ let bn_from_bytes_be len b res =
 
 let bn_to_bytes_be len b res =
   Hacl.Bignum.Convert.bn_to_bytes_be len b res
+
+let bn_from_bytes_le len b res =
+  Hacl.Bignum.Convert.bn_from_bytes_le len b res
+
+let bn_to_bytes_le len b res =
+  Hacl.Bignum.Convert.bn_to_bytes_le len b res

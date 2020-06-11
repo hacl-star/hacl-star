@@ -57,6 +57,27 @@ let bn_from_bytes_be len b res =
   pop_frame ()
 
 
+val bn_from_bytes_le:
+    len:size_t{0 < v len /\ 8 * v (blocks len 8ul) <= max_size_t}
+  -> b:lbuffer uint8 len
+  -> res:lbignum (blocks len 8ul) ->
+  Stack unit
+  (requires fun h -> live h b /\ live h res /\ disjoint res b)
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_seq h1 res == S.bn_from_bytes_le (v len) (as_seq h0 b))
+
+[@CInline]
+let bn_from_bytes_le len b res =
+  let h0 = ST.get () in
+  push_frame ();
+  let bnLen = blocks len 8ul in
+  let tmpLen = 8ul *! bnLen in
+  let tmp = create tmpLen (u8 0) in
+  update_sub tmp 0ul len b;
+  uints_from_bytes_le res tmp;
+  pop_frame ()
+
+
 inline_for_extraction noextract
 val bn_to_bytes_be_:
     len:size_t{8 * v len <= max_size_t}
@@ -97,4 +118,26 @@ let bn_to_bytes_be len b res =
   let tmp = create tmpLen (u8 0) in
   bn_to_bytes_be_ bnLen b tmp;
   copy res (sub tmp (tmpLen -! len) len);
+  pop_frame ()
+
+
+val bn_to_bytes_le:
+    len:size_t{0 < v len /\ 8 * v (blocks len 8ul) <= max_size_t}
+  -> b:lbignum (blocks len 8ul)
+  -> res:lbuffer uint8 len ->
+  Stack unit
+  (requires fun h ->
+    live h b /\ live h res /\ disjoint res b)
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_seq h1 res == S.bn_to_bytes_le (v len) (as_seq h0 b))
+
+[@CInline]
+let bn_to_bytes_le len b res =
+  let h0 = ST.get () in
+  push_frame ();
+  let bnLen = blocks len 8ul in
+  let tmpLen = 8ul *! bnLen in
+  let tmp = create tmpLen (u8 0) in
+  uints_to_bytes_le bnLen tmp b;
+  copy res (sub tmp 0ul len);
   pop_frame ()

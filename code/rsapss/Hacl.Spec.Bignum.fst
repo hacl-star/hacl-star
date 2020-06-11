@@ -209,9 +209,11 @@ let bn_is_bit_set_lemma #len b ind =
   let tmp2 = tmp1 &. u64 1 in
   mod_mask_lemma tmp1 1ul;
   assert (v (mod_mask #U64 #SEC 1ul) == v (u64 1));
+  assert (v tmp2 == v tmp1 % 2);
+  assert (v tmp1 == v b.[i] / pow2 j);
 
   calc (==) {
-    v tmp2;
+    v b.[i] / pow2 j % 2;
     (==) { bn_eval_index b i }
     (bn_v b / pow2 (64 * i) % pow2 64) / pow2 j % 2;
     (==) { Math.Lemmas.pow2_modulo_division_lemma_1 (bn_v b / pow2 (64 * i)) j 64 }
@@ -300,8 +302,20 @@ let bn_from_bytes_be len b =
 let bn_from_bytes_be_lemma len b =
   Hacl.Spec.Bignum.Convert.bn_from_bytes_be_lemma len b
 
+let bn_from_bytes_le len b =
+  Hacl.Spec.Bignum.Convert.bn_from_bytes_le len b
+
+let bn_from_bytes_le_lemma len b =
+  Hacl.Spec.Bignum.Convert.bn_from_bytes_le_lemma len b
+
 let bn_to_bytes_be len b =
   Hacl.Spec.Bignum.Convert.bn_to_bytes_be len b
 
 let bn_to_bytes_be_lemma len b =
   Hacl.Spec.Bignum.Convert.bn_to_bytes_be_lemma len b
+
+let bn_to_bytes_le len b =
+  Hacl.Spec.Bignum.Convert.bn_to_bytes_le len b
+
+let bn_to_bytes_le_lemma len b =
+  Hacl.Spec.Bignum.Convert.bn_to_bytes_le_lemma len b

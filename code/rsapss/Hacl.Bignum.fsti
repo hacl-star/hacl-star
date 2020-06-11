@@ -210,3 +210,25 @@ val bn_to_bytes_be:
   (requires fun h -> live h b /\ live h res /\ disjoint res b)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_seq h1 res == S.bn_to_bytes_be (v len) (as_seq h0 b))
+
+
+inline_for_extraction noextract
+val bn_from_bytes_le:
+    len:size_t{0 < v len /\ 8 * v (blocks len 8ul) <= max_size_t}
+  -> b:lbuffer uint8 len
+  -> res:lbignum (blocks len 8ul) ->
+  Stack unit
+  (requires fun h -> live h b /\ live h res /\ disjoint res b)
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_seq h1 res == S.bn_from_bytes_le (v len) (as_seq h0 b))
+
+
+inline_for_extraction noextract
+val bn_to_bytes_le:
+    len:size_t{0 < v len /\ 8 * v (blocks len 8ul) <= max_size_t}
+  -> b:lbignum (blocks len 8ul)
+  -> res:lbuffer uint8 len ->
+  Stack unit
+  (requires fun h -> live h b /\ live h res /\ disjoint res b)
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_seq h1 res == S.bn_to_bytes_le (v len) (as_seq h0 b))
