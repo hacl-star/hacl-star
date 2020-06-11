@@ -108,7 +108,7 @@ bool print_result(int in_len, uint8_t* comp, uint8_t* exp) {
 bool testImplementationHacl()
 {
 	uint8_t* result = (uint8_t*) malloc (sizeof (uint8_t) * 64);
-	uint64_t flag = Hacl_Interface_P256_ecdsa_sign_p256_without_hash(result, 32, digest, prKey, nonce);
+	uint64_t flag = Hacl_P256_ecdsa_sign_p256_without_hash(result, 32, digest, prKey, nonce);
 	bool s0 = compare_and_print(32, result, siggen_vectors_low5);
 	bool s1 = compare_and_print(32, result + 32, siggen_vectors_low6);
 	return s0 && s1 && (flag == 0);
@@ -137,13 +137,13 @@ int main()
 	memset(plain,'P',SIZE);
 	
   	for (int j = 0; j < ROUNDS; j++)
-		Hacl_Interface_P256_ecdsa_sign_p256_without_hash(plain, 32, plain, prKey, nonce);
+		Hacl_P256_ecdsa_sign_p256_without_hash(plain, 32, plain, prKey, nonce);
 
 	t1 = clock();
   	a = cpucycles_begin();
 
   	for (int j = 0; j < ROUNDS; j++)
-		Hacl_Interface_P256_ecdsa_sign_p256_without_hash(plain, 32, plain, prKey, nonce);
+		Hacl_P256_ecdsa_sign_p256_without_hash(plain, 32, plain, prKey, nonce);
 	
 	b = cpucycles_end();
 	
@@ -168,7 +168,7 @@ int main()
 
 	for (int j = 0; j < ROUNDS; j++)
 	{
-		Hacl_Interface_P256_ecp256dh_r(pk, pk, scalar0); 
+		Hacl_P256_ecp256dh_r(pk, pk, scalar0); 
 	    res ^= scalar0[0] ^ scalar0[31];
 	}
 
