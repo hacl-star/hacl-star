@@ -1388,60 +1388,55 @@ void Hacl_Hash_Core_SHA1_legacy_finish(uint32_t *s, uint8_t *dst)
   }
 }
 
-void Hacl_Hash_SHA2_update_multi_224(uint32_t *s, uint8_t *blocks, uint32_t n_blocks)
+void Hacl_P256_update_multi_224(uint32_t *s, uint8_t *blocks, uint32_t n_blocks)
 {
   for (uint32_t i = (uint32_t)0U; i < n_blocks; i++)
   {
     uint32_t sz = (uint32_t)64U;
     uint8_t *block = blocks + sz * i;
-    Hacl_Hash_Core_SHA2_update_224(s, block);
+    Hacl_P256_update_224(s, block);
   }
 }
 
-void Hacl_Hash_SHA2_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n_blocks)
+void Hacl_P256_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n_blocks)
 {
   for (uint32_t i = (uint32_t)0U; i < n_blocks; i++)
   {
     uint32_t sz = (uint32_t)64U;
     uint8_t *block = blocks + sz * i;
-    Hacl_Hash_Core_SHA2_update_256(s, block);
+    Hacl_P256_update_256(s, block);
   }
 }
 
-void Hacl_Hash_SHA2_update_multi_384(uint64_t *s, uint8_t *blocks, uint32_t n_blocks)
+void Hacl_P256_update_multi_384(uint64_t *s, uint8_t *blocks, uint32_t n_blocks)
 {
   for (uint32_t i = (uint32_t)0U; i < n_blocks; i++)
   {
     uint32_t sz = (uint32_t)128U;
     uint8_t *block = blocks + sz * i;
-    Hacl_Hash_Core_SHA2_update_384(s, block);
+    Hacl_P256_update_384(s, block);
   }
 }
 
-void Hacl_Hash_SHA2_update_multi_512(uint64_t *s, uint8_t *blocks, uint32_t n_blocks)
+void Hacl_P256_update_multi_512(uint64_t *s, uint8_t *blocks, uint32_t n_blocks)
 {
   for (uint32_t i = (uint32_t)0U; i < n_blocks; i++)
   {
     uint32_t sz = (uint32_t)128U;
     uint8_t *block = blocks + sz * i;
-    Hacl_Hash_Core_SHA2_update_512(s, block);
+    Hacl_P256_update_512(s, block);
   }
 }
 
 void
-Hacl_Hash_SHA2_update_last_224(
-  uint32_t *s,
-  uint64_t prev_len,
-  uint8_t *input,
-  uint32_t input_len
-)
+Hacl_P256_update_last_224(uint32_t *s, uint64_t prev_len, uint8_t *input, uint32_t input_len)
 {
   uint32_t blocks_n = input_len / (uint32_t)64U;
   uint32_t blocks_len = blocks_n * (uint32_t)64U;
   uint8_t *blocks = input;
   uint32_t rest_len = input_len - blocks_len;
   uint8_t *rest = input + blocks_len;
-  Hacl_Hash_SHA2_update_multi_224(s, blocks, blocks_n);
+  Hacl_P256_update_multi_224(s, blocks, blocks_n);
   uint64_t total_input_len = prev_len + (uint64_t)input_len;
   uint32_t
   pad_len =
@@ -1456,24 +1451,19 @@ Hacl_Hash_SHA2_update_last_224(
   uint8_t *tmp_rest = tmp;
   uint8_t *tmp_pad = tmp + rest_len;
   memcpy(tmp_rest, rest, rest_len * sizeof (rest[0U]));
-  Hacl_Hash_Core_SHA2_pad_224(total_input_len, tmp_pad);
-  Hacl_Hash_SHA2_update_multi_224(s, tmp, tmp_len / (uint32_t)64U);
+  Hacl_P256_pad_224(total_input_len, tmp_pad);
+  Hacl_P256_update_multi_224(s, tmp, tmp_len / (uint32_t)64U);
 }
 
 void
-Hacl_Hash_SHA2_update_last_256(
-  uint32_t *s,
-  uint64_t prev_len,
-  uint8_t *input,
-  uint32_t input_len
-)
+Hacl_P256_update_last_256(uint32_t *s, uint64_t prev_len, uint8_t *input, uint32_t input_len)
 {
   uint32_t blocks_n = input_len / (uint32_t)64U;
   uint32_t blocks_len = blocks_n * (uint32_t)64U;
   uint8_t *blocks = input;
   uint32_t rest_len = input_len - blocks_len;
   uint8_t *rest = input + blocks_len;
-  Hacl_Hash_SHA2_update_multi_256(s, blocks, blocks_n);
+  Hacl_P256_update_multi_256(s, blocks, blocks_n);
   uint64_t total_input_len = prev_len + (uint64_t)input_len;
   uint32_t
   pad_len =
@@ -1488,12 +1478,12 @@ Hacl_Hash_SHA2_update_last_256(
   uint8_t *tmp_rest = tmp;
   uint8_t *tmp_pad = tmp + rest_len;
   memcpy(tmp_rest, rest, rest_len * sizeof (rest[0U]));
-  Hacl_Hash_Core_SHA2_pad_256(total_input_len, tmp_pad);
-  Hacl_Hash_SHA2_update_multi_256(s, tmp, tmp_len / (uint32_t)64U);
+  Hacl_P256_pad_256(total_input_len, tmp_pad);
+  Hacl_P256_update_multi_256(s, tmp, tmp_len / (uint32_t)64U);
 }
 
 void
-Hacl_Hash_SHA2_update_last_384(
+Hacl_P256_update_last_384(
   uint64_t *s,
   FStar_UInt128_uint128 prev_len,
   uint8_t *input,
@@ -1505,7 +1495,7 @@ Hacl_Hash_SHA2_update_last_384(
   uint8_t *blocks = input;
   uint32_t rest_len = input_len - blocks_len;
   uint8_t *rest = input + blocks_len;
-  Hacl_Hash_SHA2_update_multi_384(s, blocks, blocks_n);
+  Hacl_P256_update_multi_384(s, blocks, blocks_n);
   FStar_UInt128_uint128
   total_input_len =
     FStar_UInt128_add(prev_len,
@@ -1526,12 +1516,12 @@ Hacl_Hash_SHA2_update_last_384(
   uint8_t *tmp_rest = tmp;
   uint8_t *tmp_pad = tmp + rest_len;
   memcpy(tmp_rest, rest, rest_len * sizeof (rest[0U]));
-  Hacl_Hash_Core_SHA2_pad_384(total_input_len, tmp_pad);
-  Hacl_Hash_SHA2_update_multi_384(s, tmp, tmp_len / (uint32_t)128U);
+  Hacl_P256_pad_384(total_input_len, tmp_pad);
+  Hacl_P256_update_multi_384(s, tmp, tmp_len / (uint32_t)128U);
 }
 
 void
-Hacl_Hash_SHA2_update_last_512(
+Hacl_P256_update_last_512(
   uint64_t *s,
   FStar_UInt128_uint128 prev_len,
   uint8_t *input,
@@ -1543,7 +1533,7 @@ Hacl_Hash_SHA2_update_last_512(
   uint8_t *blocks = input;
   uint32_t rest_len = input_len - blocks_len;
   uint8_t *rest = input + blocks_len;
-  Hacl_Hash_SHA2_update_multi_512(s, blocks, blocks_n);
+  Hacl_P256_update_multi_512(s, blocks, blocks_n);
   FStar_UInt128_uint128
   total_input_len =
     FStar_UInt128_add(prev_len,
@@ -1564,11 +1554,11 @@ Hacl_Hash_SHA2_update_last_512(
   uint8_t *tmp_rest = tmp;
   uint8_t *tmp_pad = tmp + rest_len;
   memcpy(tmp_rest, rest, rest_len * sizeof (rest[0U]));
-  Hacl_Hash_Core_SHA2_pad_512(total_input_len, tmp_pad);
-  Hacl_Hash_SHA2_update_multi_512(s, tmp, tmp_len / (uint32_t)128U);
+  Hacl_P256_pad_512(total_input_len, tmp_pad);
+  Hacl_P256_update_multi_512(s, tmp, tmp_len / (uint32_t)128U);
 }
 
-void Hacl_Hash_SHA2_hash_224(uint8_t *input, uint32_t input_len, uint8_t *dst)
+void Hacl_P256_hash_224(uint8_t *input, uint32_t input_len, uint8_t *dst)
 {
   uint32_t
   s[8U] =
@@ -1581,12 +1571,12 @@ void Hacl_Hash_SHA2_hash_224(uint8_t *input, uint32_t input_len, uint8_t *dst)
   uint8_t *blocks = input;
   uint32_t rest_len = input_len - blocks_len;
   uint8_t *rest = input + blocks_len;
-  Hacl_Hash_SHA2_update_multi_224(s, blocks, blocks_n);
-  Hacl_Hash_SHA2_update_last_224(s, (uint64_t)blocks_len, rest, rest_len);
-  Hacl_Hash_Core_SHA2_finish_224(s, dst);
+  Hacl_P256_update_multi_224(s, blocks, blocks_n);
+  Hacl_P256_update_last_224(s, (uint64_t)blocks_len, rest, rest_len);
+  Hacl_P256_finish_224(s, dst);
 }
 
-void Hacl_Hash_SHA2_hash_256(uint8_t *input, uint32_t input_len, uint8_t *dst)
+void Hacl_P256_hash_256(uint8_t *input, uint32_t input_len, uint8_t *dst)
 {
   uint32_t
   s[8U] =
@@ -1599,12 +1589,12 @@ void Hacl_Hash_SHA2_hash_256(uint8_t *input, uint32_t input_len, uint8_t *dst)
   uint8_t *blocks = input;
   uint32_t rest_len = input_len - blocks_len;
   uint8_t *rest = input + blocks_len;
-  Hacl_Hash_SHA2_update_multi_256(s, blocks, blocks_n);
-  Hacl_Hash_SHA2_update_last_256(s, (uint64_t)blocks_len, rest, rest_len);
-  Hacl_Hash_Core_SHA2_finish_256(s, dst);
+  Hacl_P256_update_multi_256(s, blocks, blocks_n);
+  Hacl_P256_update_last_256(s, (uint64_t)blocks_len, rest, rest_len);
+  Hacl_P256_finish_256(s, dst);
 }
 
-void Hacl_Hash_SHA2_hash_384(uint8_t *input, uint32_t input_len, uint8_t *dst)
+void Hacl_P256_hash_384(uint8_t *input, uint32_t input_len, uint8_t *dst)
 {
   uint64_t
   s[8U] =
@@ -1618,15 +1608,15 @@ void Hacl_Hash_SHA2_hash_384(uint8_t *input, uint32_t input_len, uint8_t *dst)
   uint8_t *blocks = input;
   uint32_t rest_len = input_len - blocks_len;
   uint8_t *rest = input + blocks_len;
-  Hacl_Hash_SHA2_update_multi_384(s, blocks, blocks_n);
-  Hacl_Hash_SHA2_update_last_384(s,
+  Hacl_P256_update_multi_384(s, blocks, blocks_n);
+  Hacl_P256_update_last_384(s,
     FStar_UInt128_uint64_to_uint128((uint64_t)blocks_len),
     rest,
     rest_len);
-  Hacl_Hash_Core_SHA2_finish_384(s, dst);
+  Hacl_P256_finish_384(s, dst);
 }
 
-void Hacl_Hash_SHA2_hash_512(uint8_t *input, uint32_t input_len, uint8_t *dst)
+void Hacl_P256_hash_512(uint8_t *input, uint32_t input_len, uint8_t *dst)
 {
   uint64_t
   s[8U] =
@@ -1640,12 +1630,12 @@ void Hacl_Hash_SHA2_hash_512(uint8_t *input, uint32_t input_len, uint8_t *dst)
   uint8_t *blocks = input;
   uint32_t rest_len = input_len - blocks_len;
   uint8_t *rest = input + blocks_len;
-  Hacl_Hash_SHA2_update_multi_512(s, blocks, blocks_n);
-  Hacl_Hash_SHA2_update_last_512(s,
+  Hacl_P256_update_multi_512(s, blocks, blocks_n);
+  Hacl_P256_update_last_512(s,
     FStar_UInt128_uint64_to_uint128((uint64_t)blocks_len),
     rest,
     rest_len);
-  Hacl_Hash_Core_SHA2_finish_512(s, dst);
+  Hacl_P256_finish_512(s, dst);
 }
 
 static uint32_t
@@ -1731,7 +1721,7 @@ k384_512[80U] =
     (uint64_t)0x5fcb6fab3ad6faecU, (uint64_t)0x6c44198c4a475817U
   };
 
-void Hacl_Hash_Core_SHA2_init_224(uint32_t *s)
+void Hacl_P256_init_224(uint32_t *s)
 {
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
   {
@@ -1739,7 +1729,7 @@ void Hacl_Hash_Core_SHA2_init_224(uint32_t *s)
   }
 }
 
-void Hacl_Hash_Core_SHA2_init_256(uint32_t *s)
+void Hacl_P256_init_256(uint32_t *s)
 {
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
   {
@@ -1747,7 +1737,7 @@ void Hacl_Hash_Core_SHA2_init_256(uint32_t *s)
   }
 }
 
-void Hacl_Hash_Core_SHA2_init_384(uint64_t *s)
+void Hacl_P256_init_384(uint64_t *s)
 {
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
   {
@@ -1755,7 +1745,7 @@ void Hacl_Hash_Core_SHA2_init_384(uint64_t *s)
   }
 }
 
-void Hacl_Hash_Core_SHA2_init_512(uint64_t *s)
+void Hacl_P256_init_512(uint64_t *s)
 {
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
   {
@@ -1763,7 +1753,7 @@ void Hacl_Hash_Core_SHA2_init_512(uint64_t *s)
   }
 }
 
-void Hacl_Hash_Core_SHA2_update_224(uint32_t *hash, uint8_t *block)
+void Hacl_P256_update_224(uint32_t *hash, uint8_t *block)
 {
   uint32_t hash1[8U] = { 0U };
   uint32_t computed_ws[64U] = { 0U };
@@ -1836,7 +1826,7 @@ void Hacl_Hash_Core_SHA2_update_224(uint32_t *hash, uint8_t *block)
   }
 }
 
-void Hacl_Hash_Core_SHA2_update_256(uint32_t *hash, uint8_t *block)
+void Hacl_P256_update_256(uint32_t *hash, uint8_t *block)
 {
   uint32_t hash1[8U] = { 0U };
   uint32_t computed_ws[64U] = { 0U };
@@ -1909,7 +1899,7 @@ void Hacl_Hash_Core_SHA2_update_256(uint32_t *hash, uint8_t *block)
   }
 }
 
-void Hacl_Hash_Core_SHA2_update_384(uint64_t *hash, uint8_t *block)
+void Hacl_P256_update_384(uint64_t *hash, uint8_t *block)
 {
   uint64_t hash1[8U] = { 0U };
   uint64_t computed_ws[80U] = { 0U };
@@ -1984,7 +1974,7 @@ void Hacl_Hash_Core_SHA2_update_384(uint64_t *hash, uint8_t *block)
   }
 }
 
-void Hacl_Hash_Core_SHA2_update_512(uint64_t *hash, uint8_t *block)
+void Hacl_P256_update_512(uint64_t *hash, uint8_t *block)
 {
   uint64_t hash1[8U] = { 0U };
   uint64_t computed_ws[80U] = { 0U };
@@ -2059,7 +2049,7 @@ void Hacl_Hash_Core_SHA2_update_512(uint64_t *hash, uint8_t *block)
   }
 }
 
-void Hacl_Hash_Core_SHA2_pad_224(uint64_t len, uint8_t *dst)
+void Hacl_P256_pad_224(uint64_t len, uint8_t *dst)
 {
   uint8_t *dst1 = dst;
   dst1[0U] = (uint8_t)0x80U;
@@ -2084,7 +2074,7 @@ void Hacl_Hash_Core_SHA2_pad_224(uint64_t len, uint8_t *dst)
   store64_be(dst3, len << (uint32_t)3U);
 }
 
-void Hacl_Hash_Core_SHA2_pad_256(uint64_t len, uint8_t *dst)
+void Hacl_P256_pad_256(uint64_t len, uint8_t *dst)
 {
   uint8_t *dst1 = dst;
   dst1[0U] = (uint8_t)0x80U;
@@ -2109,7 +2099,7 @@ void Hacl_Hash_Core_SHA2_pad_256(uint64_t len, uint8_t *dst)
   store64_be(dst3, len << (uint32_t)3U);
 }
 
-void Hacl_Hash_Core_SHA2_pad_384(FStar_UInt128_uint128 len, uint8_t *dst)
+void Hacl_P256_pad_384(FStar_UInt128_uint128 len, uint8_t *dst)
 {
   uint8_t *dst1 = dst;
   dst1[0U] = (uint8_t)0x80U;
@@ -2148,7 +2138,7 @@ void Hacl_Hash_Core_SHA2_pad_384(FStar_UInt128_uint128 len, uint8_t *dst)
   store128_be(dst3, len_);
 }
 
-void Hacl_Hash_Core_SHA2_pad_512(FStar_UInt128_uint128 len, uint8_t *dst)
+void Hacl_P256_pad_512(FStar_UInt128_uint128 len, uint8_t *dst)
 {
   uint8_t *dst1 = dst;
   dst1[0U] = (uint8_t)0x80U;
@@ -2187,7 +2177,7 @@ void Hacl_Hash_Core_SHA2_pad_512(FStar_UInt128_uint128 len, uint8_t *dst)
   store128_be(dst3, len_);
 }
 
-void Hacl_Hash_Core_SHA2_finish_224(uint32_t *s, uint8_t *dst)
+void Hacl_P256_finish_224(uint32_t *s, uint8_t *dst)
 {
   uint32_t *uu____0 = s;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)7U; i++)
@@ -2196,7 +2186,7 @@ void Hacl_Hash_Core_SHA2_finish_224(uint32_t *s, uint8_t *dst)
   }
 }
 
-void Hacl_Hash_Core_SHA2_finish_256(uint32_t *s, uint8_t *dst)
+void Hacl_P256_finish_256(uint32_t *s, uint8_t *dst)
 {
   uint32_t *uu____0 = s;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
@@ -2205,7 +2195,7 @@ void Hacl_Hash_Core_SHA2_finish_256(uint32_t *s, uint8_t *dst)
   }
 }
 
-void Hacl_Hash_Core_SHA2_finish_384(uint64_t *s, uint8_t *dst)
+void Hacl_P256_finish_384(uint64_t *s, uint8_t *dst)
 {
   uint64_t *uu____0 = s;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)6U; i++)
@@ -2214,7 +2204,7 @@ void Hacl_Hash_Core_SHA2_finish_384(uint64_t *s, uint8_t *dst)
   }
 }
 
-void Hacl_Hash_Core_SHA2_finish_512(uint64_t *s, uint8_t *dst)
+void Hacl_P256_finish_512(uint64_t *s, uint8_t *dst)
 {
   uint64_t *uu____0 = s;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
@@ -2223,7 +2213,7 @@ void Hacl_Hash_Core_SHA2_finish_512(uint64_t *s, uint8_t *dst)
   }
 }
 
-uint32_t Hacl_Hash_Definitions_word_len(Spec_Hash_Definitions_hash_alg a)
+uint32_t Hacl_P256_word_len(Spec_Hash_Definitions_hash_alg a)
 {
   switch (a)
   {
@@ -2259,7 +2249,7 @@ uint32_t Hacl_Hash_Definitions_word_len(Spec_Hash_Definitions_hash_alg a)
   }
 }
 
-uint32_t Hacl_Hash_Definitions_block_len(Spec_Hash_Definitions_hash_alg a)
+uint32_t Hacl_P256_block_len(Spec_Hash_Definitions_hash_alg a)
 {
   switch (a)
   {
@@ -2295,7 +2285,7 @@ uint32_t Hacl_Hash_Definitions_block_len(Spec_Hash_Definitions_hash_alg a)
   }
 }
 
-uint32_t Hacl_Hash_Definitions_hash_word_len(Spec_Hash_Definitions_hash_alg a)
+uint32_t Hacl_P256_hash_word_len(Spec_Hash_Definitions_hash_alg a)
 {
   switch (a)
   {
@@ -2331,7 +2321,7 @@ uint32_t Hacl_Hash_Definitions_hash_word_len(Spec_Hash_Definitions_hash_alg a)
   }
 }
 
-uint32_t Hacl_Hash_Definitions_hash_len(Spec_Hash_Definitions_hash_alg a)
+uint32_t Hacl_P256_hash_len(Spec_Hash_Definitions_hash_alg a)
 {
   switch (a)
   {

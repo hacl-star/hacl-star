@@ -37,38 +37,28 @@
 #include "Hacl_Spec.h"
 
 
-uint64_t Hacl_Impl_P256_LowLevel_sub4_il(uint64_t *x, const uint64_t *y, uint64_t *result);
+uint64_t Hacl_P256_sub4_il(uint64_t *x, const uint64_t *y, uint64_t *result);
 
-void Hacl_Impl_P256_LowLevel_shift_256_impl(uint64_t *i, uint64_t *o);
+void Hacl_P256_shift_256_impl(uint64_t *i, uint64_t *o);
 
-void Hacl_Impl_P256_LowLevel_toUint8(uint64_t *i, uint8_t *o);
+void Hacl_P256_toUint8(uint64_t *i, uint8_t *o);
 
-void Hacl_Impl_P256_LowLevel_changeEndian(uint64_t *i);
+void Hacl_P256_changeEndian(uint64_t *i);
 
-void Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(uint8_t *i, uint64_t *o);
+void Hacl_P256_toUint64ChangeEndian(uint8_t *i, uint64_t *o);
 
-void
-Hacl_Impl_ECDSA_MontgomeryMultiplication_reduction_prime_2prime_order(
-  uint64_t *x,
-  uint64_t *result
-);
+void Hacl_P256_reduction_prime_2prime_order(uint64_t *x, uint64_t *result);
 
-extern const uint64_t Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[4U];
+extern const uint64_t Hacl_P256_prime256_buffer[4U];
 
-void Hacl_Impl_SolinasReduction_solinas_reduction_impl(uint64_t *i, uint64_t *o);
+void Hacl_P256_solinas_reduction_impl(uint64_t *i, uint64_t *o);
 
-void
-Hacl_Impl_P256_PointAdd_point_add(
-  uint64_t *p,
-  uint64_t *q,
-  uint64_t *result,
-  uint64_t *tempBuffer
-);
+void Hacl_P256_point_add(uint64_t *p, uint64_t *q, uint64_t *result, uint64_t *tempBuffer);
 
-void Hacl_Impl_P256_Core_norm(uint64_t *p, uint64_t *resultPoint, uint64_t *tempBuffer);
+void Hacl_P256_norm(uint64_t *p, uint64_t *resultPoint, uint64_t *tempBuffer);
 
 void
-Hacl_Impl_P256_Core_scalarMultiplicationWithoutNorm(
+Hacl_P256_scalarMultiplicationWithoutNorm(
   uint64_t *p,
   uint64_t *result,
   uint8_t *scalar,
@@ -76,29 +66,21 @@ Hacl_Impl_P256_Core_scalarMultiplicationWithoutNorm(
 );
 
 void
-Hacl_Impl_P256_Core_secretToPublicWithoutNorm(
-  uint64_t *result,
-  uint8_t *scalar,
-  uint64_t *tempBuffer
-);
+Hacl_P256_secretToPublicWithoutNorm(uint64_t *result, uint8_t *scalar, uint64_t *tempBuffer);
 
-void Hacl_Impl_P256_Signature_Common_bufferToJac(uint64_t *p, uint64_t *result);
+void Hacl_P256_bufferToJac(uint64_t *p, uint64_t *result);
 
 /*
   This code is not side channel resistant
 */
-bool Hacl_Impl_P256_Signature_Common_isPointAtInfinityPublic(uint64_t *p);
+bool Hacl_P256_isPointAtInfinityPublic(uint64_t *p);
 
 /*
   This code is not side channel resistant
 */
-bool
-Hacl_Impl_P256_Signature_Common_verifyQValidCurvePoint(
-  uint64_t *pubKeyAsPoint,
-  uint64_t *tempBuffer
-);
+bool Hacl_P256_verifyQValidCurvePoint(uint64_t *pubKeyAsPoint, uint64_t *tempBuffer);
 
-uint64_t Hacl_Impl_P256_DH_ecp256dh_i(uint8_t *result, uint8_t *scalar);
+uint64_t Hacl_P256_ecp256dh_i(uint8_t *result, uint8_t *scalar);
 
 /*
   This code is not side channel resistant on pubKey
@@ -106,34 +88,28 @@ uint64_t Hacl_Impl_P256_DH_ecp256dh_i(uint8_t *result, uint8_t *scalar);
 /*
   This code is not side channel resistant on pubKey
 */
-uint64_t Hacl_Impl_P256_DH_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
+uint64_t Hacl_P256_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
 
-void Hacl_Impl_P256_Compression_computeYFromX(uint64_t *x, uint64_t *result, uint64_t sign);
+void Hacl_P256_computeYFromX(uint64_t *x, uint64_t *result, uint64_t sign);
 
-void Hacl_Impl_ECDSA_MM_Exponent_montgomery_ladder_exponent(uint64_t *r);
+void Hacl_P256_montgomery_ladder_exponent(uint64_t *r);
 
-void Hacl_Impl_ECDSA_MM_Exponent_fromDomainImpl(uint64_t *a, uint64_t *result);
+void Hacl_P256_fromDomainImpl(uint64_t *a, uint64_t *result);
 
-void
-Hacl_Impl_ECDSA_MM_Exponent_multPowerPartial(
-  uint64_t *s,
-  uint64_t *a,
-  uint64_t *b,
-  uint64_t *result
-);
+void Hacl_P256_multPowerPartial(uint64_t *s, uint64_t *a, uint64_t *b, uint64_t *result);
 
 /*
   This code is not side channel resistant
 */
-bool Hacl_Impl_ECDSA_P256_Verification_Agile_isMoreThanZeroLessThanOrderMinusOne(uint64_t *f);
+bool Hacl_P256_isMoreThanZeroLessThanOrderMinusOne(uint64_t *f);
 
 /*
   This code is not side channel resistant
 */
-bool Hacl_Impl_ECDSA_P256_Verification_Agile_compare_felem_bool(uint64_t *a, uint64_t *b);
+bool Hacl_P256_compare_felem_bool(uint64_t *a, uint64_t *b);
 
 uint64_t
-Hacl_Impl_ECDSA_P256_Signature_Agile_ecdsa_signature_core(
+Hacl_P256_ecdsa_signature_core(
   Spec_ECDSA_hash_alg_ecdsa alg,
   uint64_t *r,
   uint64_t *s,
@@ -144,7 +120,7 @@ Hacl_Impl_ECDSA_P256_Signature_Agile_ecdsa_signature_core(
 );
 
 uint64_t
-Hacl_Interface_P256_ecdsa_sign_p256_sha2(
+Hacl_P256_ecdsa_sign_p256_sha2(
   uint8_t *result,
   uint32_t mLen,
   uint8_t *m,
@@ -153,7 +129,7 @@ Hacl_Interface_P256_ecdsa_sign_p256_sha2(
 );
 
 uint64_t
-Hacl_Interface_P256_ecdsa_sign_p256_sha384(
+Hacl_P256_ecdsa_sign_p256_sha384(
   uint8_t *result,
   uint32_t mLen,
   uint8_t *m,
@@ -162,7 +138,7 @@ Hacl_Interface_P256_ecdsa_sign_p256_sha384(
 );
 
 uint64_t
-Hacl_Interface_P256_ecdsa_sign_p256_sha512(
+Hacl_P256_ecdsa_sign_p256_sha512(
   uint8_t *result,
   uint32_t mLen,
   uint8_t *m,
@@ -171,7 +147,7 @@ Hacl_Interface_P256_ecdsa_sign_p256_sha512(
 );
 
 uint64_t
-Hacl_Interface_P256_ecdsa_sign_p256_without_hash(
+Hacl_P256_ecdsa_sign_p256_without_hash(
   uint8_t *result,
   uint32_t mLen,
   uint8_t *m,
@@ -183,7 +159,7 @@ Hacl_Interface_P256_ecdsa_sign_p256_without_hash(
   This code is not side channel resistant
 */
 bool
-Hacl_Interface_P256_ecdsa_verif_p256_sha2(
+Hacl_P256_ecdsa_verif_p256_sha2(
   uint32_t mLen,
   uint8_t *m,
   uint8_t *pubKey,
@@ -195,7 +171,7 @@ Hacl_Interface_P256_ecdsa_verif_p256_sha2(
   This code is not side channel resistant
 */
 bool
-Hacl_Interface_P256_ecdsa_verif_p256_sha384(
+Hacl_P256_ecdsa_verif_p256_sha384(
   uint32_t mLen,
   uint8_t *m,
   uint8_t *pubKey,
@@ -207,7 +183,7 @@ Hacl_Interface_P256_ecdsa_verif_p256_sha384(
   This code is not side channel resistant
 */
 bool
-Hacl_Interface_P256_ecdsa_verif_p256_sha512(
+Hacl_P256_ecdsa_verif_p256_sha512(
   uint32_t mLen,
   uint8_t *m,
   uint8_t *pubKey,
@@ -216,7 +192,7 @@ Hacl_Interface_P256_ecdsa_verif_p256_sha512(
 );
 
 bool
-Hacl_Interface_P256_ecdsa_verif_without_hash(
+Hacl_P256_ecdsa_verif_without_hash(
   uint32_t mLen,
   uint8_t *m,
   uint8_t *pubKey,
@@ -224,24 +200,24 @@ Hacl_Interface_P256_ecdsa_verif_without_hash(
   uint8_t *s
 );
 
-bool Hacl_Interface_P256_verify_q(uint8_t *pubKey);
+bool Hacl_P256_verify_q(uint8_t *pubKey);
 
-bool Hacl_Interface_P256_decompression_not_compressed_form(uint8_t *b, uint8_t *result);
+bool Hacl_P256_decompression_not_compressed_form(uint8_t *b, uint8_t *result);
 
-bool Hacl_Interface_P256_decompression_compressed_form(uint8_t *b, uint8_t *result);
+bool Hacl_P256_decompression_compressed_form(uint8_t *b, uint8_t *result);
 
-void Hacl_Interface_P256_compression_not_compressed_form(uint8_t *b, uint8_t *result);
+void Hacl_P256_compression_not_compressed_form(uint8_t *b, uint8_t *result);
 
-void Hacl_Interface_P256_compression_compressed_form(uint8_t *b, uint8_t *result);
+void Hacl_P256_compression_compressed_form(uint8_t *b, uint8_t *result);
 
-void Hacl_Interface_P256_reduction_8_32(uint8_t *x, uint8_t *result);
+void Hacl_P256_reduction_8_32(uint8_t *x, uint8_t *result);
 
-uint64_t Hacl_Interface_P256_ecp256dh_i(uint8_t *result, uint8_t *scalar);
+uint64_t Hacl_P256_ecp256dh_i0(uint8_t *result, uint8_t *scalar);
 
 /*
   This code is not side channel resistant on pub_key
 */
-uint64_t Hacl_Interface_P256_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
+uint64_t Hacl_P256_ecp256dh_r0(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
 
 #define __Hacl_P256_H_DEFINED
 #endif

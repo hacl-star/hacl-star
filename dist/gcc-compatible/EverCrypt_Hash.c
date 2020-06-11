@@ -354,25 +354,25 @@ void EverCrypt_Hash_init(EverCrypt_Hash_state_s *s)
   if (scrut.tag == EverCrypt_Hash_SHA2_224_s)
   {
     uint32_t *p1 = scrut.case_SHA2_224_s;
-    Hacl_Hash_Core_SHA2_init_224(p1);
+    Hacl_P256_init_224(p1);
     return;
   }
   if (scrut.tag == EverCrypt_Hash_SHA2_256_s)
   {
     uint32_t *p1 = scrut.case_SHA2_256_s;
-    Hacl_Hash_Core_SHA2_init_256(p1);
+    Hacl_P256_init_256(p1);
     return;
   }
   if (scrut.tag == EverCrypt_Hash_SHA2_384_s)
   {
     uint64_t *p1 = scrut.case_SHA2_384_s;
-    Hacl_Hash_Core_SHA2_init_384(p1);
+    Hacl_P256_init_384(p1);
     return;
   }
   if (scrut.tag == EverCrypt_Hash_SHA2_512_s)
   {
     uint64_t *p1 = scrut.case_SHA2_512_s;
-    Hacl_Hash_Core_SHA2_init_512(p1);
+    Hacl_P256_init_512(p1);
     return;
   }
   KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
@@ -415,7 +415,7 @@ void EverCrypt_Hash_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n)
     return;
   }
   #endif
-  Hacl_Hash_SHA2_update_multi_256(s, blocks, n);
+  Hacl_P256_update_multi_256(s, blocks, n);
 }
 
 void EverCrypt_Hash_update(EverCrypt_Hash_state_s *s, uint8_t *block)
@@ -448,13 +448,13 @@ void EverCrypt_Hash_update(EverCrypt_Hash_state_s *s, uint8_t *block)
   if (scrut.tag == EverCrypt_Hash_SHA2_384_s)
   {
     uint64_t *p1 = scrut.case_SHA2_384_s;
-    Hacl_Hash_Core_SHA2_update_384(p1, block);
+    Hacl_P256_update_384(p1, block);
     return;
   }
   if (scrut.tag == EverCrypt_Hash_SHA2_512_s)
   {
     uint64_t *p1 = scrut.case_SHA2_512_s;
-    Hacl_Hash_Core_SHA2_update_512(p1, block);
+    Hacl_P256_update_512(p1, block);
     return;
   }
   KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
@@ -499,14 +499,14 @@ void EverCrypt_Hash_update_multi(EverCrypt_Hash_state_s *s, uint8_t *blocks, uin
   {
     uint64_t *p1 = scrut.case_SHA2_384_s;
     uint32_t n = len / (uint32_t)128U;
-    Hacl_Hash_SHA2_update_multi_384(p1, blocks, n);
+    Hacl_P256_update_multi_384(p1, blocks, n);
     return;
   }
   if (scrut.tag == EverCrypt_Hash_SHA2_512_s)
   {
     uint64_t *p1 = scrut.case_SHA2_512_s;
     uint32_t n = len / (uint32_t)128U;
-    Hacl_Hash_SHA2_update_multi_512(p1, blocks, n);
+    Hacl_P256_update_multi_512(p1, blocks, n);
     return;
   }
   KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
@@ -544,7 +544,7 @@ EverCrypt_Hash_update_last_256(
   uint8_t *tmp_rest = tmp;
   uint8_t *tmp_pad = tmp + rest_len;
   memcpy(tmp_rest, rest, rest_len * sizeof (rest[0U]));
-  Hacl_Hash_Core_SHA2_pad_256(total_input_len, tmp_pad);
+  Hacl_P256_pad_256(total_input_len, tmp_pad);
   EverCrypt_Hash_update_multi_256(s, tmp, tmp_len / (uint32_t)64U);
 }
 
@@ -588,7 +588,7 @@ void EverCrypt_Hash_update_last(EverCrypt_Hash_state_s *s, uint8_t *last, uint64
     uint64_t *p1 = scrut.case_SHA2_384_s;
     uint64_t input_len = total_len % (uint64_t)(uint32_t)128U;
     FStar_UInt128_uint128 prev_len = FStar_UInt128_uint64_to_uint128(total_len - input_len);
-    Hacl_Hash_SHA2_update_last_384(p1, prev_len, last, (uint32_t)input_len);
+    Hacl_P256_update_last_384(p1, prev_len, last, (uint32_t)input_len);
     return;
   }
   if (scrut.tag == EverCrypt_Hash_SHA2_512_s)
@@ -596,7 +596,7 @@ void EverCrypt_Hash_update_last(EverCrypt_Hash_state_s *s, uint8_t *last, uint64
     uint64_t *p1 = scrut.case_SHA2_512_s;
     uint64_t input_len = total_len % (uint64_t)(uint32_t)128U;
     FStar_UInt128_uint128 prev_len = FStar_UInt128_uint64_to_uint128(total_len - input_len);
-    Hacl_Hash_SHA2_update_last_512(p1, prev_len, last, (uint32_t)input_len);
+    Hacl_P256_update_last_512(p1, prev_len, last, (uint32_t)input_len);
     return;
   }
   KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
@@ -624,25 +624,25 @@ void EverCrypt_Hash_finish(EverCrypt_Hash_state_s *s, uint8_t *dst)
   if (scrut.tag == EverCrypt_Hash_SHA2_224_s)
   {
     uint32_t *p1 = scrut.case_SHA2_224_s;
-    Hacl_Hash_Core_SHA2_finish_224(p1, dst);
+    Hacl_P256_finish_224(p1, dst);
     return;
   }
   if (scrut.tag == EverCrypt_Hash_SHA2_256_s)
   {
     uint32_t *p1 = scrut.case_SHA2_256_s;
-    Hacl_Hash_Core_SHA2_finish_256(p1, dst);
+    Hacl_P256_finish_256(p1, dst);
     return;
   }
   if (scrut.tag == EverCrypt_Hash_SHA2_384_s)
   {
     uint64_t *p1 = scrut.case_SHA2_384_s;
-    Hacl_Hash_Core_SHA2_finish_384(p1, dst);
+    Hacl_P256_finish_384(p1, dst);
     return;
   }
   if (scrut.tag == EverCrypt_Hash_SHA2_512_s)
   {
     uint64_t *p1 = scrut.case_SHA2_512_s;
-    Hacl_Hash_Core_SHA2_finish_512(p1, dst);
+    Hacl_P256_finish_512(p1, dst);
     return;
   }
   KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
@@ -817,7 +817,7 @@ void EverCrypt_Hash_hash_256(uint8_t *input, uint32_t input_len, uint8_t *dst)
   uint8_t *rest = input + blocks_len;
   EverCrypt_Hash_update_multi_256(s, blocks, blocks_n);
   EverCrypt_Hash_update_last_256(s, (uint64_t)blocks_len, rest, rest_len);
-  Hacl_Hash_Core_SHA2_finish_256(s, dst);
+  Hacl_P256_finish_256(s, dst);
 }
 
 void EverCrypt_Hash_hash_224(uint8_t *input, uint32_t input_len, uint8_t *dst)
@@ -835,7 +835,7 @@ void EverCrypt_Hash_hash_224(uint8_t *input, uint32_t input_len, uint8_t *dst)
   uint8_t *rest = input + blocks_len;
   EverCrypt_Hash_update_multi_256(s, blocks, blocks_n);
   EverCrypt_Hash_update_last_256(s, (uint64_t)blocks_len, rest, rest_len);
-  Hacl_Hash_Core_SHA2_finish_224(s, dst);
+  Hacl_P256_finish_224(s, dst);
 }
 
 void
@@ -870,12 +870,12 @@ EverCrypt_Hash_hash(
       }
     case Spec_Hash_Definitions_SHA2_384:
       {
-        Hacl_Hash_SHA2_hash_384(input, len, dst);
+        Hacl_P256_hash_384(input, len, dst);
         break;
       }
     case Spec_Hash_Definitions_SHA2_512:
       {
-        Hacl_Hash_SHA2_hash_512(input, len, dst);
+        Hacl_P256_hash_512(input, len, dst);
         break;
       }
     default:
