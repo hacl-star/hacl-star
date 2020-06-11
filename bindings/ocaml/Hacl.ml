@@ -294,13 +294,13 @@ module P256 = struct
     assert (C.size priv = 32);
     assert (C.size k = 32);
     assert (C.disjoint signature msg);
-    get_result @@ Hacl_P256.hacl_Interface_P256_ecdsa_sign_p256_sha2 (C.ctypes_buf signature) (C.size_uint32 msg) (C.ctypes_buf msg) (C.ctypes_buf priv) (C.ctypes_buf k)
+    get_result @@ Hacl_P256.hacl_P256_ecdsa_sign_p256_sha2 (C.ctypes_buf signature) (C.size_uint32 msg) (C.ctypes_buf msg) (C.ctypes_buf priv) (C.ctypes_buf k)
   let verify pub msg signature =
     (* Hacl.Impl.ECDSA.P256SHA256.Verification.ecdsa_verification *)
     assert (C.size signature = 64);
     assert (C.size pub = 64);
     let r, s = Bytes.sub signature 0 32, Bytes.sub signature 32 32 in
-    Hacl_P256.hacl_Interface_P256_ecdsa_verif_p256_sha2 (C.size_uint32 msg) (C.ctypes_buf msg) (C.ctypes_buf pub) (C.ctypes_buf r) (C.ctypes_buf s)
+    Hacl_P256.hacl_P256_ecdsa_verif_p256_sha2 (C.size_uint32 msg) (C.ctypes_buf msg) (C.ctypes_buf pub) (C.ctypes_buf r) (C.ctypes_buf s)
 end
 
 #if not (defined IS_NOT_X64) || defined IS_ARM_8
