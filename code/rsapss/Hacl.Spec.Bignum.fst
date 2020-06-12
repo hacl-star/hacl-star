@@ -187,7 +187,7 @@ let bn_sub_mask_lemma #len n a =
 
 let bn_is_less #len a b =
   let mask = bn_mask_lt a b in
-  if UInt64.eq (Lib.RawIntTypes.u64_to_UInt64 mask) 0uL then false else true
+  not (FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 mask =^ 0uL))
 
 let bn_is_less_lemma #len a b =
   bn_mask_lt_lemma #len a b
@@ -199,7 +199,7 @@ let bn_is_bit_set #len input ind =
   let j = ind % 64 in
   let tmp = input.[i] in
   let tmp = (tmp >>. size j) &. u64 1 in
-  eq_u64 tmp (u64 1)
+  FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 tmp =^ 1uL)
 
 
 let bn_is_bit_set_lemma #len b ind =
