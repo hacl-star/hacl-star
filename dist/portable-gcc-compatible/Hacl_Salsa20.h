@@ -42,7 +42,7 @@ Hacl_Salsa20_salsa20_encrypt(
   uint8_t *out,
   uint8_t *text,
   uint8_t *key,
-  uint8_t *n1,
+  uint8_t *n,
   uint32_t ctr
 );
 
@@ -56,7 +56,7 @@ Hacl_Salsa20_salsa20_decrypt(
   uint8_t *out,
   uint8_t *cipher,
   uint8_t *key,
-  uint8_t *n1,
+  uint8_t *n,
   uint32_t ctr
 );
 
@@ -64,13 +64,13 @@ Hacl_Salsa20_salsa20_decrypt(
 
 /* SNIPPET_START: Hacl_Salsa20_salsa20_key_block0 */
 
-void Hacl_Salsa20_salsa20_key_block0(uint8_t *out, uint8_t *key, uint8_t *n1);
+void Hacl_Salsa20_salsa20_key_block0(uint8_t *out, uint8_t *key, uint8_t *n);
 
 /* SNIPPET_END: Hacl_Salsa20_salsa20_key_block0 */
 
 /* SNIPPET_START: Hacl_Salsa20_hsalsa20 */
 
-void Hacl_Salsa20_hsalsa20(uint8_t *out, uint8_t *key, uint8_t *n1);
+void Hacl_Salsa20_hsalsa20(uint8_t *out, uint8_t *key, uint8_t *n);
 
 /* SNIPPET_END: Hacl_Salsa20_hsalsa20 */
 

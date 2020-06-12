@@ -2,6 +2,7 @@ LIBRARY libevercrypt
 
 EXPORTS
   LowStar_Vector_new_capacity
+  Spec_Cipher_Expansion_cipher_alg_of_impl
   Hacl_Hash_MD5_legacy_update_multi
   Hacl_Hash_MD5_legacy_update_last
   Hacl_Hash_MD5_legacy_hash
@@ -44,6 +45,10 @@ EXPORTS
   Hacl_Hash_Core_SHA2_finish_256
   Hacl_Hash_Core_SHA2_finish_384
   Hacl_Hash_Core_SHA2_finish_512
+  Hacl_Hash_Definitions_word_len
+  Hacl_Hash_Definitions_block_len
+  Hacl_Hash_Definitions_hash_word_len
+  Hacl_Hash_Definitions_hash_len
   EverCrypt_AutoConfig2_has_shaext
   EverCrypt_AutoConfig2_has_aesni
   EverCrypt_AutoConfig2_has_pclmulqdq
@@ -54,6 +59,7 @@ EXPORTS
   EverCrypt_AutoConfig2_has_sse
   EverCrypt_AutoConfig2_has_movbe
   EverCrypt_AutoConfig2_has_rdrand
+  EverCrypt_AutoConfig2_has_avx512
   EverCrypt_AutoConfig2_wants_vale
   EverCrypt_AutoConfig2_wants_hacl
   EverCrypt_AutoConfig2_wants_openssl
@@ -70,11 +76,11 @@ EXPORTS
   EverCrypt_AutoConfig2_disable_sse
   EverCrypt_AutoConfig2_disable_movbe
   EverCrypt_AutoConfig2_disable_rdrand
+  EverCrypt_AutoConfig2_disable_avx512
   EverCrypt_AutoConfig2_disable_vale
   EverCrypt_AutoConfig2_disable_hacl
   EverCrypt_AutoConfig2_disable_openssl
   EverCrypt_AutoConfig2_disable_bcrypt
-  Spec_Cipher_Expansion_cipher_alg_of_impl
   EverCrypt_Hash_string_of_alg
   EverCrypt_Hash_uu___is_MD5_s
   EverCrypt_Hash___proj__MD5_s__item__p
@@ -103,14 +109,16 @@ EXPORTS
   EverCrypt_Hash_hash_256
   EverCrypt_Hash_hash_224
   EverCrypt_Hash_hash
-  EverCrypt_Hash_Incremental_uu___is_State
-  EverCrypt_Hash_Incremental___proj__State__item__hash_state
-  EverCrypt_Hash_Incremental___proj__State__item__buf
-  EverCrypt_Hash_Incremental___proj__State__item__total_len
-  EverCrypt_Hash_Incremental_alg_of_state
   EverCrypt_Hash_Incremental_create_in
   EverCrypt_Hash_Incremental_init
   EverCrypt_Hash_Incremental_update
+  EverCrypt_Hash_Incremental_finish_md5
+  EverCrypt_Hash_Incremental_finish_sha1
+  EverCrypt_Hash_Incremental_finish_sha224
+  EverCrypt_Hash_Incremental_finish_sha256
+  EverCrypt_Hash_Incremental_finish_sha384
+  EverCrypt_Hash_Incremental_finish_sha512
+  EverCrypt_Hash_Incremental_alg_of_state
   EverCrypt_Hash_Incremental_finish
   EverCrypt_Hash_Incremental_free
   Hacl_Impl_SHA3_rotl
@@ -288,6 +296,8 @@ EXPORTS
   Hacl_Frodo_KEM_crypto_kem_keypair
   Hacl_Frodo_KEM_crypto_kem_enc
   Hacl_Frodo_KEM_crypto_kem_dec
+  Hacl_IntTypes_Intrinsics_add_carry_u64
+  Hacl_IntTypes_Intrinsics_sub_borrow_u64
   Hacl_Chacha20_Vec128_chacha20_encrypt_128
   Hacl_Chacha20_Vec128_chacha20_decrypt_128
   Hacl_Chacha20Poly1305_128_aead_encrypt
@@ -350,6 +360,11 @@ EXPORTS
   Hacl_HPKE_Curve64_CP256_SHA256_setupBaseR
   Hacl_HPKE_Curve64_CP256_SHA256_sealBase
   Hacl_HPKE_Curve64_CP256_SHA256_openBase
+  Hacl_Streaming_Poly1305_32_create_in
+  Hacl_Streaming_Poly1305_32_init
+  Hacl_Streaming_Poly1305_32_update
+  Hacl_Streaming_Poly1305_32_finish
+  Hacl_Streaming_Poly1305_32_free
   Hacl_Blake2b_256_blake2b
   Hacl_Blake2s_32_blake2s
   Hacl_HPKE_Curve51_CP32_SHA512_setupBaseI
@@ -373,6 +388,11 @@ EXPORTS
   Hacl_HPKE_Curve64_CP32_SHA512_setupBaseR
   Hacl_HPKE_Curve64_CP32_SHA512_sealBase
   Hacl_HPKE_Curve64_CP32_SHA512_openBase
+  Hacl_Streaming_SHA2_256_create_in
+  Hacl_Streaming_SHA2_256_init
+  Hacl_Streaming_SHA2_256_update
+  Hacl_Streaming_SHA2_256_finish
+  Hacl_Streaming_SHA2_256_free
   Hacl_HPKE_Curve51_CP256_SHA256_setupBaseI
   Hacl_HPKE_Curve51_CP256_SHA256_setupBaseR
   Hacl_HPKE_Curve51_CP256_SHA256_sealBase
@@ -385,79 +405,16 @@ EXPORTS
   EverCrypt_AEAD_alg_of_state
   EverCrypt_AEAD_create_in
   EverCrypt_AEAD_encrypt
+  EverCrypt_AEAD_encrypt_expand_aes128_gcm
+  EverCrypt_AEAD_encrypt_expand_aes256_gcm
+  EverCrypt_AEAD_encrypt_expand_chacha20_poly1305
+  EverCrypt_AEAD_encrypt_expand
   EverCrypt_AEAD_decrypt
+  EverCrypt_AEAD_decrypt_expand_aes128_gcm
+  EverCrypt_AEAD_decrypt_expand_aes256_gcm
+  EverCrypt_AEAD_decrypt_expand_chacha20_poly1305
+  EverCrypt_AEAD_decrypt_expand
   EverCrypt_AEAD_free
-  __proj__Mkgcm_args__item__plain
-  __proj__Mkgcm_args__item__plain_len
-  __proj__Mkgcm_args__item__aad
-  __proj__Mkgcm_args__item__aad_len
-  __proj__Mkgcm_args__item__iv
-  __proj__Mkgcm_args__item__expanded_key
-  __proj__Mkgcm_args__item__cipher
-  __proj__Mkgcm_args__item__tag
-  EverCrypt_random_init
-  EverCrypt_random_sample
-  EverCrypt_random_cleanup
-  EverCrypt_uu___is_AES128_OPENSSL
-  EverCrypt___proj__AES128_OPENSSL__item__st
-  EverCrypt_uu___is_AES128_BCRYPT
-  EverCrypt___proj__AES128_BCRYPT__item__st
-  EverCrypt_uu___is_AES128_VALE
-  EverCrypt___proj__AES128_VALE__item__w
-  EverCrypt___proj__AES128_VALE__item__sbox
-  EverCrypt_uu___is_AES128_HACL
-  EverCrypt___proj__AES128_HACL__item__w
-  EverCrypt___proj__AES128_HACL__item__sbox
-  EverCrypt_aes128_create
-  EverCrypt_aes128_compute
-  EverCrypt_aes128_free
-  EverCrypt_uu___is_AES256_OPENSSL
-  EverCrypt___proj__AES256_OPENSSL__item__st
-  EverCrypt_uu___is_AES256_BCRYPT
-  EverCrypt___proj__AES256_BCRYPT__item__st
-  EverCrypt_uu___is_AES256_HACL
-  EverCrypt___proj__AES256_HACL__item__w
-  EverCrypt___proj__AES256_HACL__item__sbox
-  EverCrypt_aes256_create
-  EverCrypt_aes256_compute
-  EverCrypt_aes256_free
-  EverCrypt_aes128_gcm_encrypt
-  EverCrypt_aes128_gcm_decrypt
-  EverCrypt_aes256_gcm_encrypt
-  EverCrypt_aes256_gcm_decrypt
-  EverCrypt_uu___is_AES128_CBC
-  EverCrypt_uu___is_AES256_CBC
-  EverCrypt_uu___is_TDES_EDE_CBC
-  EverCrypt_block_cipher_keyLen
-  EverCrypt_block_cipher_blockLen
-  EverCrypt_uu___is_RC4_128
-  EverCrypt_uu___is_AES128_GCM
-  EverCrypt_uu___is_AES256_GCM
-  EverCrypt_uu___is_CHACHA20_POLY1305
-  EverCrypt_uu___is_AES128_CCM
-  EverCrypt_uu___is_AES256_CCM
-  EverCrypt_uu___is_AES128_CCM8
-  EverCrypt_uu___is_AES256_CCM8
-  EverCrypt_aead_keyLen
-  EverCrypt_aead_tagLen
-  EverCrypt_aead_ivLen
-  EverCrypt_aead_create
-  EverCrypt_aead_encrypt
-  EverCrypt_aead_decrypt
-  EverCrypt_aead_free
-  EverCrypt_dh_load_group
-  EverCrypt_dh_free_group
-  EverCrypt_dh_keygen
-  EverCrypt_dh_compute
-  EverCrypt_uu___is_ECC_P256
-  EverCrypt_uu___is_ECC_P384
-  EverCrypt_uu___is_ECC_P521
-  EverCrypt_uu___is_ECC_X25519
-  EverCrypt_uu___is_ECC_X448
-  EverCrypt_ecdh_load_curve
-  EverCrypt_ecdh_free_curve
-  EverCrypt_ecdh_keygen
-  EverCrypt_ecdh_compute
   EverCrypt_HMAC_compute_sha1
   EverCrypt_HMAC_compute_sha2_256
   EverCrypt_HMAC_compute_sha2_384
@@ -520,3 +477,11 @@ EXPORTS
   EverCrypt_Curve25519_scalarmult
   EverCrypt_Curve25519_ecdh
   EverCrypt_Cipher_chacha20
+  __proj__Mkgcm_args__item__plain
+  __proj__Mkgcm_args__item__plain_len
+  __proj__Mkgcm_args__item__aad
+  __proj__Mkgcm_args__item__aad_len
+  __proj__Mkgcm_args__item__iv
+  __proj__Mkgcm_args__item__expanded_key
+  __proj__Mkgcm_args__item__cipher
+  __proj__Mkgcm_args__item__tag

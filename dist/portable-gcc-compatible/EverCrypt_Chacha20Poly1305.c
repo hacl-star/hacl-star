@@ -29,7 +29,7 @@
 void
 EverCrypt_Chacha20Poly1305_aead_encrypt(
   uint8_t *k,
-  uint8_t *n1,
+  uint8_t *n,
   uint32_t aadlen,
   uint8_t *aad,
   uint32_t mlen,
@@ -43,18 +43,18 @@ EverCrypt_Chacha20Poly1305_aead_encrypt(
   #if EVERCRYPT_TARGETCONFIG_X64
   if (avx2)
   {
-    Hacl_Chacha20Poly1305_256_aead_encrypt(k, n1, aadlen, aad, mlen, m, cipher, tag);
+    Hacl_Chacha20Poly1305_256_aead_encrypt(k, n, aadlen, aad, mlen, m, cipher, tag);
     return;
   }
   #endif
   #if EVERCRYPT_TARGETCONFIG_X64
   if (avx)
   {
-    Hacl_Chacha20Poly1305_128_aead_encrypt(k, n1, aadlen, aad, mlen, m, cipher, tag);
+    Hacl_Chacha20Poly1305_128_aead_encrypt(k, n, aadlen, aad, mlen, m, cipher, tag);
     return;
   }
   #endif
-  Hacl_Chacha20Poly1305_32_aead_encrypt(k, n1, aadlen, aad, mlen, m, cipher, tag);
+  Hacl_Chacha20Poly1305_32_aead_encrypt(k, n, aadlen, aad, mlen, m, cipher, tag);
 }
 
 /* SNIPPET_END: EverCrypt_Chacha20Poly1305_aead_encrypt */
@@ -64,7 +64,7 @@ EverCrypt_Chacha20Poly1305_aead_encrypt(
 uint32_t
 EverCrypt_Chacha20Poly1305_aead_decrypt(
   uint8_t *k,
-  uint8_t *n1,
+  uint8_t *n,
   uint32_t aadlen,
   uint8_t *aad,
   uint32_t mlen,
@@ -78,16 +78,16 @@ EverCrypt_Chacha20Poly1305_aead_decrypt(
   #if EVERCRYPT_TARGETCONFIG_X64
   if (avx2)
   {
-    return Hacl_Chacha20Poly1305_256_aead_decrypt(k, n1, aadlen, aad, mlen, m, cipher, tag);
+    return Hacl_Chacha20Poly1305_256_aead_decrypt(k, n, aadlen, aad, mlen, m, cipher, tag);
   }
   #endif
   #if EVERCRYPT_TARGETCONFIG_X64
   if (avx)
   {
-    return Hacl_Chacha20Poly1305_128_aead_decrypt(k, n1, aadlen, aad, mlen, m, cipher, tag);
+    return Hacl_Chacha20Poly1305_128_aead_decrypt(k, n, aadlen, aad, mlen, m, cipher, tag);
   }
   #endif
-  return Hacl_Chacha20Poly1305_32_aead_decrypt(k, n1, aadlen, aad, mlen, m, cipher, tag);
+  return Hacl_Chacha20Poly1305_32_aead_decrypt(k, n, aadlen, aad, mlen, m, cipher, tag);
 }
 
 /* SNIPPET_END: EverCrypt_Chacha20Poly1305_aead_decrypt */
