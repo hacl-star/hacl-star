@@ -31,10 +31,10 @@
 #ifndef __Hacl_HPKE_P256_CP256_SHA256_H
 #define __Hacl_HPKE_P256_CP256_SHA256_H
 
-#include "Hacl_P256.h"
 #include "Hacl_Hash.h"
 #include "Hacl_HKDF.h"
 #include "Hacl_Chacha20Poly1305_256.h"
+#include "Hacl_ECDSA.h"
 
 
 /* SNIPPET_START: Hacl_HPKE_P256_CP256_SHA256_setupBaseI */
