@@ -73,7 +73,7 @@ EverCrypt_HMAC_compute_sha2_512(
   uint32_t data_len
 );
 
-bool EverCrypt_HMAC_is_supported_alg(Spec_Hash_Definitions_hash_alg uu___0_6237);
+bool EverCrypt_HMAC_is_supported_alg(Spec_Hash_Definitions_hash_alg uu___0_5843);
 
 typedef Spec_Hash_Definitions_hash_alg EverCrypt_HMAC_supported_alg;
 

@@ -36,68 +36,68 @@
 
 /* SNIPPET_START: TestLib_touch */
 
-extern void TestLib_touch(int32_t uu____12);
+extern void TestLib_touch(int32_t uu____11);
 
 /* SNIPPET_END: TestLib_touch */
 
 /* SNIPPET_START: TestLib_check */
 
-extern void TestLib_check(bool uu____28);
+extern void TestLib_check(bool uu____26);
 
 /* SNIPPET_END: TestLib_check */
 
 /* SNIPPET_START: TestLib_check8 */
 
-extern void TestLib_check8(int8_t uu____52, int8_t uu____53);
+extern void TestLib_check8(int8_t uu____48, int8_t uu____49);
 
 /* SNIPPET_END: TestLib_check8 */
 
 /* SNIPPET_START: TestLib_check16 */
 
-extern void TestLib_check16(int16_t uu____78, int16_t uu____79);
+extern void TestLib_check16(int16_t uu____70, int16_t uu____71);
 
 /* SNIPPET_END: TestLib_check16 */
 
 /* SNIPPET_START: TestLib_check32 */
 
-extern void TestLib_check32(int32_t uu____104, int32_t uu____105);
+extern void TestLib_check32(int32_t uu____92, int32_t uu____93);
 
 /* SNIPPET_END: TestLib_check32 */
 
 /* SNIPPET_START: TestLib_check64 */
 
-extern void TestLib_check64(int64_t uu____130, int64_t uu____131);
+extern void TestLib_check64(int64_t uu____114, int64_t uu____115);
 
 /* SNIPPET_END: TestLib_check64 */
 
 /* SNIPPET_START: TestLib_checku8 */
 
-extern void TestLib_checku8(uint8_t uu____156, uint8_t uu____157);
+extern void TestLib_checku8(uint8_t uu____136, uint8_t uu____137);
 
 /* SNIPPET_END: TestLib_checku8 */
 
 /* SNIPPET_START: TestLib_checku16 */
 
-extern void TestLib_checku16(uint16_t uu____182, uint16_t uu____183);
+extern void TestLib_checku16(uint16_t uu____158, uint16_t uu____159);
 
 /* SNIPPET_END: TestLib_checku16 */
 
 /* SNIPPET_START: TestLib_checku32 */
 
-extern void TestLib_checku32(uint32_t uu____208, uint32_t uu____209);
+extern void TestLib_checku32(uint32_t uu____180, uint32_t uu____181);
 
 /* SNIPPET_END: TestLib_checku32 */
 
 /* SNIPPET_START: TestLib_checku64 */
 
-extern void TestLib_checku64(uint64_t uu____234, uint64_t uu____235);
+extern void TestLib_checku64(uint64_t uu____202, uint64_t uu____203);
 
 /* SNIPPET_END: TestLib_checku64 */
 
 /* SNIPPET_START: TestLib_compare_and_print */
 
 extern void
-TestLib_compare_and_print(C_String_t uu____279, uint8_t *b1, uint8_t *b2, uint32_t l);
+TestLib_compare_and_print(C_String_t uu____242, uint8_t *b1, uint8_t *b2, uint32_t l);
 
 /* SNIPPET_END: TestLib_compare_and_print */
 
@@ -109,13 +109,13 @@ extern uint8_t *TestLib_unsafe_malloc(uint32_t l);
 
 /* SNIPPET_START: TestLib_perr */
 
-extern void TestLib_perr(uint32_t uu____326);
+extern void TestLib_perr(uint32_t uu____281);
 
 /* SNIPPET_END: TestLib_perr */
 
 /* SNIPPET_START: TestLib_print_clock_diff */
 
-extern void TestLib_print_clock_diff(clock_t uu____348, clock_t uu____349);
+extern void TestLib_print_clock_diff(clock_t uu____302, clock_t uu____303);
 
 /* SNIPPET_END: TestLib_print_clock_diff */
 
@@ -153,9 +153,9 @@ extern TestLib_cycles TestLib_cpucycles();
 
 extern void
 TestLib_print_cycles_per_round(
-  TestLib_cycles uu____434,
-  TestLib_cycles uu____435,
-  uint32_t uu____436
+  TestLib_cycles uu____378,
+  TestLib_cycles uu____379,
+  uint32_t uu____380
 );
 
 /* SNIPPET_END: TestLib_print_cycles_per_round */

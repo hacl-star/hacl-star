@@ -105,7 +105,7 @@ static inline void salsa20_core(u32 *k, u32 *ctx, u32 ctr)
   k[8U] = k[8U] + ctr_u32;
 }
 
-static inline void salsa20_key_block0(u8 *out, u8 *key, u8 *n)
+static inline void salsa20_key_block0(u8 *out, u8 *key, u8 *n1)
 {
   u32 ctx[16U] = { 0U };
   u32 k[16U] = { 0U };
@@ -130,7 +130,7 @@ static inline void salsa20_key_block0(u8 *out, u8 *key, u8 *n)
     for (i = (u32)0U; i < (u32)2U; i++)
     {
       u32 *os = n32;
-      u8 *bj = n + i * (u32)4U;
+      u8 *bj = n1 + i * (u32)4U;
       u32 u = load32_le(bj);
       u32 r = u;
       u32 x = r;
@@ -156,7 +156,7 @@ static inline void salsa20_key_block0(u8 *out, u8 *key, u8 *n)
   }
 }
 
-static inline void salsa20_encrypt(u32 len, u8 *out, u8 *text, u8 *key, u8 *n, u32 ctr)
+static inline void salsa20_encrypt(u32 len, u8 *out, u8 *text, u8 *key, u8 *n1, u32 ctr)
 {
   u32 ctx[16U] = { 0U };
   u32 k32[8U] = { 0U };
@@ -180,7 +180,7 @@ static inline void salsa20_encrypt(u32 len, u8 *out, u8 *text, u8 *key, u8 *n, u
     for (i = (u32)0U; i < (u32)2U; i++)
     {
       u32 *os = n32;
-      u8 *bj = n + i * (u32)4U;
+      u8 *bj = n1 + i * (u32)4U;
       u32 u = load32_le(bj);
       u32 r = u;
       u32 x = r;
@@ -200,9 +200,9 @@ static inline void salsa20_encrypt(u32 len, u8 *out, u8 *text, u8 *key, u8 *n, u
   ctx[15U] = (u32)0x6b206574U;
   {
     u32 k[16U] = { 0U };
-    u32 rem = len % (u32)64U;
-    u32 nb = len / (u32)64U;
     u32 rem1 = len % (u32)64U;
+    u32 nb = len / (u32)64U;
+    u32 rem2 = len % (u32)64U;
     {
       u32 i0;
       for (i0 = (u32)0U; i0 < nb; i0++)
@@ -242,12 +242,12 @@ static inline void salsa20_encrypt(u32 len, u8 *out, u8 *text, u8 *key, u8 *n, u
         }
       }
     }
-    if (rem1 > (u32)0U)
+    if (rem2 > (u32)0U)
     {
       u8 *uu____2 = out + nb * (u32)64U;
       u8 *uu____3 = text + nb * (u32)64U;
       u8 plain[64U] = { 0U };
-      memcpy(plain, uu____3, rem * sizeof (uu____3[0U]));
+      memcpy(plain, uu____3, rem1 * sizeof (uu____3[0U]));
       {
         u32 k1[16U] = { 0U };
         salsa20_core(k1, ctx, nb);
@@ -279,14 +279,14 @@ static inline void salsa20_encrypt(u32 len, u8 *out, u8 *text, u8 *key, u8 *n, u
             for (i = (u32)0U; i < (u32)16U; i++)
               store32_le(plain + i * (u32)4U, bl[i]);
           }
-          memcpy(uu____2, plain, rem * sizeof (plain[0U]));
+          memcpy(uu____2, plain, rem1 * sizeof (plain[0U]));
         }
       }
     }
   }
 }
 
-static inline void salsa20_decrypt(u32 len, u8 *out, u8 *cipher, u8 *key, u8 *n, u32 ctr)
+static inline void salsa20_decrypt(u32 len, u8 *out, u8 *cipher, u8 *key, u8 *n1, u32 ctr)
 {
   u32 ctx[16U] = { 0U };
   u32 k32[8U] = { 0U };
@@ -310,7 +310,7 @@ static inline void salsa20_decrypt(u32 len, u8 *out, u8 *cipher, u8 *key, u8 *n,
     for (i = (u32)0U; i < (u32)2U; i++)
     {
       u32 *os = n32;
-      u8 *bj = n + i * (u32)4U;
+      u8 *bj = n1 + i * (u32)4U;
       u32 u = load32_le(bj);
       u32 r = u;
       u32 x = r;
@@ -330,9 +330,9 @@ static inline void salsa20_decrypt(u32 len, u8 *out, u8 *cipher, u8 *key, u8 *n,
   ctx[15U] = (u32)0x6b206574U;
   {
     u32 k[16U] = { 0U };
-    u32 rem = len % (u32)64U;
-    u32 nb = len / (u32)64U;
     u32 rem1 = len % (u32)64U;
+    u32 nb = len / (u32)64U;
+    u32 rem2 = len % (u32)64U;
     {
       u32 i0;
       for (i0 = (u32)0U; i0 < nb; i0++)
@@ -372,12 +372,12 @@ static inline void salsa20_decrypt(u32 len, u8 *out, u8 *cipher, u8 *key, u8 *n,
         }
       }
     }
-    if (rem1 > (u32)0U)
+    if (rem2 > (u32)0U)
     {
       u8 *uu____2 = out + nb * (u32)64U;
       u8 *uu____3 = cipher + nb * (u32)64U;
       u8 plain[64U] = { 0U };
-      memcpy(plain, uu____3, rem * sizeof (uu____3[0U]));
+      memcpy(plain, uu____3, rem1 * sizeof (uu____3[0U]));
       {
         u32 k1[16U] = { 0U };
         salsa20_core(k1, ctx, nb);
@@ -409,14 +409,14 @@ static inline void salsa20_decrypt(u32 len, u8 *out, u8 *cipher, u8 *key, u8 *n,
             for (i = (u32)0U; i < (u32)16U; i++)
               store32_le(plain + i * (u32)4U, bl[i]);
           }
-          memcpy(uu____2, plain, rem * sizeof (plain[0U]));
+          memcpy(uu____2, plain, rem1 * sizeof (plain[0U]));
         }
       }
     }
   }
 }
 
-static inline void hsalsa20(u8 *out, u8 *key, u8 *n)
+static inline void hsalsa20(u8 *out, u8 *key, u8 *n1)
 {
   u32 ctx[16U] = { 0U };
   u32 k32[8U] = { 0U };
@@ -449,7 +449,7 @@ static inline void hsalsa20(u8 *out, u8 *key, u8 *n)
     for (i = (u32)0U; i < (u32)4U; i++)
     {
       u32 *os = n32;
-      u8 *bj = n + i * (u32)4U;
+      u8 *bj = n1 + i * (u32)4U;
       u32 u = load32_le(bj);
       u32 r = u;
       u32 x = r;
@@ -489,23 +489,23 @@ static inline void hsalsa20(u8 *out, u8 *key, u8 *n)
   }
 }
 
-void Hacl_Salsa20_salsa20_encrypt(u32 len, u8 *out, u8 *text, u8 *key, u8 *n, u32 ctr)
+void Hacl_Salsa20_salsa20_encrypt(u32 len, u8 *out, u8 *text, u8 *key, u8 *n1, u32 ctr)
 {
-  salsa20_encrypt(len, out, text, key, n, ctr);
+  salsa20_encrypt(len, out, text, key, n1, ctr);
 }
 
-void Hacl_Salsa20_salsa20_decrypt(u32 len, u8 *out, u8 *cipher, u8 *key, u8 *n, u32 ctr)
+void Hacl_Salsa20_salsa20_decrypt(u32 len, u8 *out, u8 *cipher, u8 *key, u8 *n1, u32 ctr)
 {
-  salsa20_decrypt(len, out, cipher, key, n, ctr);
+  salsa20_decrypt(len, out, cipher, key, n1, ctr);
 }
 
-void Hacl_Salsa20_salsa20_key_block0(u8 *out, u8 *key, u8 *n)
+void Hacl_Salsa20_salsa20_key_block0(u8 *out, u8 *key, u8 *n1)
 {
-  salsa20_key_block0(out, key, n);
+  salsa20_key_block0(out, key, n1);
 }
 
-void Hacl_Salsa20_hsalsa20(u8 *out, u8 *key, u8 *n)
+void Hacl_Salsa20_hsalsa20(u8 *out, u8 *key, u8 *n1)
 {
-  hsalsa20(out, key, n);
+  hsalsa20(out, key, n1);
 }
 

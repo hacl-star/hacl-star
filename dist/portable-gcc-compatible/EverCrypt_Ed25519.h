@@ -36,7 +36,7 @@
 
 /* SNIPPET_START: EverCrypt_Ed25519_sign */
 
-void EverCrypt_Ed25519_sign(uint8_t *signature, uint8_t *secret, uint32_t len, uint8_t *msg);
+void EverCrypt_Ed25519_sign(uint8_t *signature, uint8_t *secret1, uint32_t len, uint8_t *msg);
 
 /* SNIPPET_END: EverCrypt_Ed25519_sign */
 
@@ -48,13 +48,13 @@ bool EverCrypt_Ed25519_verify(uint8_t *output, uint32_t len, uint8_t *msg, uint8
 
 /* SNIPPET_START: EverCrypt_Ed25519_secret_to_public */
 
-void EverCrypt_Ed25519_secret_to_public(uint8_t *output, uint8_t *secret);
+void EverCrypt_Ed25519_secret_to_public(uint8_t *output, uint8_t *secret1);
 
 /* SNIPPET_END: EverCrypt_Ed25519_secret_to_public */
 
 /* SNIPPET_START: EverCrypt_Ed25519_expand_keys */
 
-void EverCrypt_Ed25519_expand_keys(uint8_t *ks, uint8_t *secret);
+void EverCrypt_Ed25519_expand_keys(uint8_t *ks, uint8_t *secret1);
 
 /* SNIPPET_END: EverCrypt_Ed25519_expand_keys */
 

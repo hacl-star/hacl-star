@@ -97,10 +97,10 @@ static inline void matrix_mul_s(u32 n1, u32 n2, u32 n3, u16 *a, u16 *b, u16 *c)
 static inline bool matrix_eq(u32 n1, u32 n2, u32 m, u16 *a, u16 *b)
 {
   bool res = true;
-  u32 n = n1 * n2;
+  u32 n3 = n1 * n2;
   {
     u32 i;
-    for (i = (u32)0U; i < n; i++)
+    for (i = (u32)0U; i < n3; i++)
     {
       u16 ai = a[i];
       u16 bi = b[i];
@@ -113,9 +113,9 @@ static inline bool matrix_eq(u32 n1, u32 n2, u32 m, u16 *a, u16 *b)
 
 static inline void matrix_to_lbytes(u32 n1, u32 n2, u16 *m, u8 *res)
 {
-  u32 n = n1 * n2;
+  u32 n3 = n1 * n2;
   u32 i;
-  for (i = (u32)0U; i < n; i++)
+  for (i = (u32)0U; i < n3; i++)
   {
     u8 *tmp = res + (u32)2U * i;
     store16_le(tmp, m[i]);
@@ -124,39 +124,39 @@ static inline void matrix_to_lbytes(u32 n1, u32 n2, u16 *m, u8 *res)
 
 static inline void matrix_from_lbytes(u32 n1, u32 n2, u8 *b, u16 *res)
 {
-  u32 n = n1 * n2;
+  u32 n3 = n1 * n2;
   u32 i;
-  for (i = (u32)0U; i < n; i++)
+  for (i = (u32)0U; i < n3; i++)
   {
     u16 u = load16_le(b + (u32)2U * i);
     res[i] = u;
   }
 }
 
-static inline void frodo_gen_matrix_cshake(u32 n, u32 seed_len, u8 *seed, u16 *res)
+static inline void frodo_gen_matrix_cshake(u32 n1, u32 seed_len, u8 *seed, u16 *res)
 {
-  KRML_CHECK_SIZE(sizeof (u8), (u32)2U * n);
+  KRML_CHECK_SIZE(sizeof (u8), (u32)2U * n1);
   {
-    u8 r[(u32)2U * n];
-    memset(r, 0U, (u32)2U * n * sizeof (r[0U]));
-    memset(res, 0U, n * n * sizeof (res[0U]));
+    u8 r[(u32)2U * n1];
+    memset(r, 0U, (u32)2U * n1 * sizeof (r[0U]));
+    memset(res, 0U, n1 * n1 * sizeof (res[0U]));
     {
       u32 i;
-      for (i = (u32)0U; i < n; i++)
+      for (i = (u32)0U; i < n1; i++)
       {
         u32 ctr = (u32)256U + i;
         u64 s[25U] = { 0U };
         s[0U] = (u64)0x10010001a801U | (u64)(u16)ctr << (u32)48U;
         Hacl_Impl_SHA3_state_permute(s);
         Hacl_Impl_SHA3_absorb(s, (u32)168U, seed_len, seed, (u8)0x04U);
-        Hacl_Impl_SHA3_squeeze(s, (u32)168U, (u32)2U * n, r);
+        Hacl_Impl_SHA3_squeeze(s, (u32)168U, (u32)2U * n1, r);
         {
           u32 i0;
-          for (i0 = (u32)0U; i0 < n; i0++)
+          for (i0 = (u32)0U; i0 < n1; i0++)
           {
             u8 *resij = r + (u32)2U * i0;
             u16 u = load16_le(resij);
-            res[i * n + i0] = u;
+            res[i * n1 + i0] = u;
           }
         }
       }
@@ -164,8 +164,7 @@ static inline void frodo_gen_matrix_cshake(u32 n, u32 seed_len, u8 *seed, u16 *r
   }
 }
 
-static const
-u16
+static u16
 cdf_table[12U] =
   {
     (u16)4727U, (u16)13584U, (u16)20864U, (u16)26113U, (u16)29434U, (u16)31278U, (u16)32176U,
@@ -226,9 +225,9 @@ frodo_sample_matrix(u32 n1, u32 n2, u32 seed_len, u8 *seed, u16 ctr, u16 *res)
 
 static inline void frodo_pack(u32 n1, u32 n2, u32 d, u16 *a, u8 *res)
 {
-  u32 n = n1 * n2 / (u32)8U;
+  u32 n3 = n1 * n2 / (u32)8U;
   u32 i;
-  for (i = (u32)0U; i < n; i++)
+  for (i = (u32)0U; i < n3; i++)
   {
     u16 *a1 = a + (u32)8U * i;
     u8 *r = res + d * i;
@@ -260,9 +259,9 @@ static inline void frodo_pack(u32 n1, u32 n2, u32 d, u16 *a, u8 *res)
 
 static inline void frodo_unpack(u32 n1, u32 n2, u32 d, u8 *b, u16 *res)
 {
-  u32 n = n1 * n2 / (u32)8U;
+  u32 n3 = n1 * n2 / (u32)8U;
   u32 i;
-  for (i = (u32)0U; i < n; i++)
+  for (i = (u32)0U; i < n3; i++)
   {
     u8 *b1 = b + d * i;
     u16 *r = res + (u32)8U * i;

@@ -2,7 +2,6 @@ LIBRARY libevercrypt
 
 EXPORTS
   LowStar_Vector_new_capacity
-  Spec_Cipher_Expansion_cipher_alg_of_impl
   Hacl_Hash_MD5_legacy_update_multi
   Hacl_Hash_MD5_legacy_update_last
   Hacl_Hash_MD5_legacy_hash
@@ -45,11 +44,6 @@ EXPORTS
   Hacl_Hash_Core_SHA2_finish_256
   Hacl_Hash_Core_SHA2_finish_384
   Hacl_Hash_Core_SHA2_finish_512
-  Hacl_Hash_Definitions_word_len
-  Hacl_Hash_Definitions_block_len
-  Hacl_Hash_Definitions_hash_word_len
-  Hacl_Hash_Definitions_hash_len
-  Hacl_HMAC_DRBG_min_length
   EverCrypt_AutoConfig2_has_shaext
   EverCrypt_AutoConfig2_has_aesni
   EverCrypt_AutoConfig2_has_pclmulqdq
@@ -60,7 +54,6 @@ EXPORTS
   EverCrypt_AutoConfig2_has_sse
   EverCrypt_AutoConfig2_has_movbe
   EverCrypt_AutoConfig2_has_rdrand
-  EverCrypt_AutoConfig2_has_avx512
   EverCrypt_AutoConfig2_wants_vale
   EverCrypt_AutoConfig2_wants_hacl
   EverCrypt_AutoConfig2_wants_openssl
@@ -77,11 +70,11 @@ EXPORTS
   EverCrypt_AutoConfig2_disable_sse
   EverCrypt_AutoConfig2_disable_movbe
   EverCrypt_AutoConfig2_disable_rdrand
-  EverCrypt_AutoConfig2_disable_avx512
   EverCrypt_AutoConfig2_disable_vale
   EverCrypt_AutoConfig2_disable_hacl
   EverCrypt_AutoConfig2_disable_openssl
   EverCrypt_AutoConfig2_disable_bcrypt
+  Spec_Cipher_Expansion_cipher_alg_of_impl
   EverCrypt_Hash_string_of_alg
   EverCrypt_Hash_uu___is_MD5_s
   EverCrypt_Hash___proj__MD5_s__item__p
@@ -110,16 +103,14 @@ EXPORTS
   EverCrypt_Hash_hash_256
   EverCrypt_Hash_hash_224
   EverCrypt_Hash_hash
+  EverCrypt_Hash_Incremental_uu___is_State
+  EverCrypt_Hash_Incremental___proj__State__item__hash_state
+  EverCrypt_Hash_Incremental___proj__State__item__buf
+  EverCrypt_Hash_Incremental___proj__State__item__total_len
+  EverCrypt_Hash_Incremental_alg_of_state
   EverCrypt_Hash_Incremental_create_in
   EverCrypt_Hash_Incremental_init
   EverCrypt_Hash_Incremental_update
-  EverCrypt_Hash_Incremental_finish_md5
-  EverCrypt_Hash_Incremental_finish_sha1
-  EverCrypt_Hash_Incremental_finish_sha224
-  EverCrypt_Hash_Incremental_finish_sha256
-  EverCrypt_Hash_Incremental_finish_sha384
-  EverCrypt_Hash_Incremental_finish_sha512
-  EverCrypt_Hash_Incremental_alg_of_state
   EverCrypt_Hash_Incremental_finish
   EverCrypt_Hash_Incremental_free
   Hacl_Impl_SHA3_rotl
@@ -275,8 +266,7 @@ EXPORTS
   Hacl_Frodo_KEM_crypto_kem_keypair
   Hacl_Frodo_KEM_crypto_kem_enc
   Hacl_Frodo_KEM_crypto_kem_dec
-  Hacl_IntTypes_Intrinsics_add_carry_u64
-  Hacl_IntTypes_Intrinsics_sub_borrow_u64
+  Hacl_HMAC_DRBG_min_length
   EverCrypt_Ed25519_sign
   EverCrypt_Ed25519_verify
   EverCrypt_Ed25519_secret_to_public

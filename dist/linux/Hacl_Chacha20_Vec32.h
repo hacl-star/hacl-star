@@ -35,10 +35,10 @@
 
 
 void
-Hacl_Chacha20_Vec32_chacha20_encrypt_32(u32 len, u8 *out, u8 *text, u8 *key, u8 *n, u32 ctr);
+Hacl_Chacha20_Vec32_chacha20_encrypt_32(u32 len, u8 *out, u8 *text, u8 *key, u8 *n1, u32 ctr);
 
 void
-Hacl_Chacha20_Vec32_chacha20_decrypt_32(u32 len, u8 *out, u8 *cipher, u8 *key, u8 *n, u32 ctr);
+Hacl_Chacha20_Vec32_chacha20_decrypt_32(u32 len, u8 *out, u8 *cipher, u8 *key, u8 *n1, u32 ctr);
 
 #define __Hacl_Chacha20_Vec32_H_DEFINED
 #endif

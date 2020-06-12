@@ -28,9 +28,9 @@
 
 static inline bool has_adx_bmi2()
 {
-  bool has_bmi2 = EverCrypt_AutoConfig2_has_bmi2();
-  bool has_adx = EverCrypt_AutoConfig2_has_adx();
-  return has_bmi2 && has_adx;
+  bool has_bmi21 = EverCrypt_AutoConfig2_has_bmi2();
+  bool has_adx1 = EverCrypt_AutoConfig2_has_adx();
+  return has_bmi21 && has_adx1;
 }
 
 /* SNIPPET_END: has_adx_bmi2 */

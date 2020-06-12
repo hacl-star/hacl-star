@@ -53,7 +53,7 @@ Hacl_Impl_Curve25519_Field51_fmul(
   uint64_t *out,
   uint64_t *f1,
   uint64_t *f2,
-  FStar_UInt128_uint128 *uu____3153
+  FStar_UInt128_uint128 *uu____2959
 );
 
 /* SNIPPET_END: Hacl_Impl_Curve25519_Field51_fmul */
@@ -70,7 +70,7 @@ void
 Hacl_Impl_Curve25519_Field51_fsqr(
   uint64_t *out,
   uint64_t *f,
-  FStar_UInt128_uint128 *uu____7683
+  FStar_UInt128_uint128 *uu____6941
 );
 
 /* SNIPPET_END: Hacl_Impl_Curve25519_Field51_fsqr */
@@ -82,7 +82,7 @@ Hacl_Curve25519_51_fsquare_times(
   uint64_t *o,
   uint64_t *inp,
   FStar_UInt128_uint128 *tmp,
-  uint32_t n
+  uint32_t n1
 );
 
 /* SNIPPET_END: Hacl_Curve25519_51_fsquare_times */

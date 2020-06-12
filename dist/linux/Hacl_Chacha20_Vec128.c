@@ -192,7 +192,7 @@ chacha20_core_128(
 }
 
 static inline void
-chacha20_init_128(Lib_IntVector_Intrinsics_vec128 *ctx, u8 *k, u8 *n, u32 ctr)
+chacha20_init_128(Lib_IntVector_Intrinsics_vec128 *ctx, u8 *k, u8 *n1, u32 ctr)
 {
   u32 ctx1[16U] = { 0U };
   u32 *uu____0 = ctx1;
@@ -229,7 +229,7 @@ chacha20_init_128(Lib_IntVector_Intrinsics_vec128 *ctx, u8 *k, u8 *n, u32 ctr)
     for (i = (u32)0U; i < (u32)3U; i++)
     {
       u32 *os = uu____2;
-      u8 *bj = n + i * (u32)4U;
+      u8 *bj = n1 + i * (u32)4U;
       u32 u = load32_le(bj);
       u32 r = u;
       u32 x = r;
@@ -252,7 +252,7 @@ chacha20_init_128(Lib_IntVector_Intrinsics_vec128 *ctx, u8 *k, u8 *n, u32 ctr)
 }
 
 void
-Hacl_Chacha20_Vec128_chacha20_encrypt_128(u32 len, u8 *out, u8 *text, u8 *key, u8 *n, u32 ctr)
+Hacl_Chacha20_Vec128_chacha20_encrypt_128(u32 len, u8 *out, u8 *text, u8 *key, u8 *n1, u32 ctr)
 {
   Lib_IntVector_Intrinsics_vec128 ctx[16U];
   {
@@ -261,13 +261,13 @@ Hacl_Chacha20_Vec128_chacha20_encrypt_128(u32 len, u8 *out, u8 *text, u8 *key, u
       ctx[_i] = Lib_IntVector_Intrinsics_vec128_zero;
   }
   {
-    u32 rem;
-    u32 nb;
     u32 rem1;
-    chacha20_init_128(ctx, key, n, ctr);
-    rem = len % (u32)256U;
-    nb = len / (u32)256U;
+    u32 nb;
+    u32 rem2;
+    chacha20_init_128(ctx, key, n1, ctr);
     rem1 = len % (u32)256U;
+    nb = len / (u32)256U;
+    rem2 = len % (u32)256U;
     {
       u32 i;
       for (i = (u32)0U; i < nb; i++)
@@ -407,12 +407,12 @@ Hacl_Chacha20_Vec128_chacha20_encrypt_128(u32 len, u8 *out, u8 *text, u8 *key, u
         }
       }
     }
-    if (rem1 > (u32)0U)
+    if (rem2 > (u32)0U)
     {
       u8 *uu____2 = out + nb * (u32)256U;
       u8 *uu____3 = text + nb * (u32)256U;
       u8 plain[256U] = { 0U };
-      memcpy(plain, uu____3, rem * sizeof (uu____3[0U]));
+      memcpy(plain, uu____3, rem1 * sizeof (uu____3[0U]));
       {
         Lib_IntVector_Intrinsics_vec128 k[16U];
         {
@@ -544,7 +544,7 @@ Hacl_Chacha20_Vec128_chacha20_encrypt_128(u32 len, u8 *out, u8 *text, u8 *key, u
               Lib_IntVector_Intrinsics_vec128_store_le(plain + i * (u32)16U, y);
             }
           }
-          memcpy(uu____2, plain, rem * sizeof (plain[0U]));
+          memcpy(uu____2, plain, rem1 * sizeof (plain[0U]));
         }
       }
     }
@@ -557,7 +557,7 @@ Hacl_Chacha20_Vec128_chacha20_decrypt_128(
   u8 *out,
   u8 *cipher,
   u8 *key,
-  u8 *n,
+  u8 *n1,
   u32 ctr
 )
 {
@@ -568,13 +568,13 @@ Hacl_Chacha20_Vec128_chacha20_decrypt_128(
       ctx[_i] = Lib_IntVector_Intrinsics_vec128_zero;
   }
   {
-    u32 rem;
-    u32 nb;
     u32 rem1;
-    chacha20_init_128(ctx, key, n, ctr);
-    rem = len % (u32)256U;
-    nb = len / (u32)256U;
+    u32 nb;
+    u32 rem2;
+    chacha20_init_128(ctx, key, n1, ctr);
     rem1 = len % (u32)256U;
+    nb = len / (u32)256U;
+    rem2 = len % (u32)256U;
     {
       u32 i;
       for (i = (u32)0U; i < nb; i++)
@@ -714,12 +714,12 @@ Hacl_Chacha20_Vec128_chacha20_decrypt_128(
         }
       }
     }
-    if (rem1 > (u32)0U)
+    if (rem2 > (u32)0U)
     {
       u8 *uu____2 = out + nb * (u32)256U;
       u8 *uu____3 = cipher + nb * (u32)256U;
       u8 plain[256U] = { 0U };
-      memcpy(plain, uu____3, rem * sizeof (uu____3[0U]));
+      memcpy(plain, uu____3, rem1 * sizeof (uu____3[0U]));
       {
         Lib_IntVector_Intrinsics_vec128 k[16U];
         {
@@ -851,7 +851,7 @@ Hacl_Chacha20_Vec128_chacha20_decrypt_128(
               Lib_IntVector_Intrinsics_vec128_store_le(plain + i * (u32)16U, y);
             }
           }
-          memcpy(uu____2, plain, rem * sizeof (plain[0U]));
+          memcpy(uu____2, plain, rem1 * sizeof (plain[0U]));
         }
       }
     }

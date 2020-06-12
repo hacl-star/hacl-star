@@ -102,27 +102,4 @@ _check_rdrand:
   mov %r9, %rbx
   ret
 
-.global _check_avx512
-_check_avx512:
-  mov %rbx, %r9
-  mov $7, %rax
-  mov $0, %rcx
-  cpuid
-  mov %rbx, %rax
-  mov %rbx, %r10
-  mov %rbx, %r11
-  and $65536, %rbx
-  and $131072, %rax
-  and $1073741824, %r10
-  shr $1, %rax
-  shr $14, %r10
-  and %rbx, %rax
-  mov $2147483648, %rbx
-  and %rbx, %r11
-  shr $15, %r11
-  and %r10, %rax
-  and %r11, %rax
-  mov %r9, %rbx
-  ret
-
 

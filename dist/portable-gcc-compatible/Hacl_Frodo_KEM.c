@@ -107,8 +107,8 @@ matrix_mul_s(uint32_t n1, uint32_t n2, uint32_t n3, uint16_t *a, uint16_t *b, ui
 static inline bool matrix_eq(uint32_t n1, uint32_t n2, uint32_t m, uint16_t *a, uint16_t *b)
 {
   bool res = true;
-  uint32_t n = n1 * n2;
-  for (uint32_t i = (uint32_t)0U; i < n; i++)
+  uint32_t n3 = n1 * n2;
+  for (uint32_t i = (uint32_t)0U; i < n3; i++)
   {
     uint16_t ai = a[i];
     uint16_t bi = b[i];
@@ -128,8 +128,8 @@ static inline bool matrix_eq(uint32_t n1, uint32_t n2, uint32_t m, uint16_t *a, 
 
 static inline void matrix_to_lbytes(uint32_t n1, uint32_t n2, uint16_t *m, uint8_t *res)
 {
-  uint32_t n = n1 * n2;
-  for (uint32_t i = (uint32_t)0U; i < n; i++)
+  uint32_t n3 = n1 * n2;
+  for (uint32_t i = (uint32_t)0U; i < n3; i++)
   {
     uint8_t *tmp = res + (uint32_t)2U * i;
     store16_le(tmp, m[i]);
@@ -142,8 +142,8 @@ static inline void matrix_to_lbytes(uint32_t n1, uint32_t n2, uint16_t *m, uint8
 
 static inline void matrix_from_lbytes(uint32_t n1, uint32_t n2, uint8_t *b, uint16_t *res)
 {
-  uint32_t n = n1 * n2;
-  for (uint32_t i = (uint32_t)0U; i < n; i++)
+  uint32_t n3 = n1 * n2;
+  for (uint32_t i = (uint32_t)0U; i < n3; i++)
   {
     uint16_t u = load16_le(b + (uint32_t)2U * i);
     res[i] = u;
@@ -155,25 +155,25 @@ static inline void matrix_from_lbytes(uint32_t n1, uint32_t n2, uint8_t *b, uint
 /* SNIPPET_START: frodo_gen_matrix_cshake */
 
 static inline void
-frodo_gen_matrix_cshake(uint32_t n, uint32_t seed_len, uint8_t *seed, uint16_t *res)
+frodo_gen_matrix_cshake(uint32_t n1, uint32_t seed_len, uint8_t *seed, uint16_t *res)
 {
-  KRML_CHECK_SIZE(sizeof (uint8_t), (uint32_t)2U * n);
-  uint8_t r[(uint32_t)2U * n];
-  memset(r, 0U, (uint32_t)2U * n * sizeof (r[0U]));
-  memset(res, 0U, n * n * sizeof (res[0U]));
-  for (uint32_t i = (uint32_t)0U; i < n; i++)
+  KRML_CHECK_SIZE(sizeof (uint8_t), (uint32_t)2U * n1);
+  uint8_t r[(uint32_t)2U * n1];
+  memset(r, 0U, (uint32_t)2U * n1 * sizeof (r[0U]));
+  memset(res, 0U, n1 * n1 * sizeof (res[0U]));
+  for (uint32_t i = (uint32_t)0U; i < n1; i++)
   {
     uint32_t ctr = (uint32_t)256U + i;
     uint64_t s[25U] = { 0U };
     s[0U] = (uint64_t)0x10010001a801U | (uint64_t)(uint16_t)ctr << (uint32_t)48U;
     Hacl_Impl_SHA3_state_permute(s);
     Hacl_Impl_SHA3_absorb(s, (uint32_t)168U, seed_len, seed, (uint8_t)0x04U);
-    Hacl_Impl_SHA3_squeeze(s, (uint32_t)168U, (uint32_t)2U * n, r);
-    for (uint32_t i0 = (uint32_t)0U; i0 < n; i0++)
+    Hacl_Impl_SHA3_squeeze(s, (uint32_t)168U, (uint32_t)2U * n1, r);
+    for (uint32_t i0 = (uint32_t)0U; i0 < n1; i0++)
     {
       uint8_t *resij = r + (uint32_t)2U * i0;
       uint16_t u = load16_le(resij);
-      res[i * n + i0] = u;
+      res[i * n1 + i0] = u;
     }
   }
 }
@@ -182,8 +182,7 @@ frodo_gen_matrix_cshake(uint32_t n, uint32_t seed_len, uint8_t *seed, uint16_t *
 
 /* SNIPPET_START: cdf_table */
 
-static const
-uint16_t
+static uint16_t
 cdf_table[12U] =
   {
     (uint16_t)4727U, (uint16_t)13584U, (uint16_t)20864U, (uint16_t)26113U, (uint16_t)29434U,
@@ -252,8 +251,8 @@ frodo_sample_matrix(
 
 static inline void frodo_pack(uint32_t n1, uint32_t n2, uint32_t d, uint16_t *a, uint8_t *res)
 {
-  uint32_t n = n1 * n2 / (uint32_t)8U;
-  for (uint32_t i = (uint32_t)0U; i < n; i++)
+  uint32_t n3 = n1 * n2 / (uint32_t)8U;
+  for (uint32_t i = (uint32_t)0U; i < n3; i++)
   {
     uint16_t *a1 = a + (uint32_t)8U * i;
     uint8_t *r = res + d * i;
@@ -296,8 +295,8 @@ static inline void frodo_pack(uint32_t n1, uint32_t n2, uint32_t d, uint16_t *a,
 static inline void
 frodo_unpack(uint32_t n1, uint32_t n2, uint32_t d, uint8_t *b, uint16_t *res)
 {
-  uint32_t n = n1 * n2 / (uint32_t)8U;
-  for (uint32_t i = (uint32_t)0U; i < n; i++)
+  uint32_t n3 = n1 * n2 / (uint32_t)8U;
+  for (uint32_t i = (uint32_t)0U; i < n3; i++)
   {
     uint8_t *b1 = b + d * i;
     uint16_t *r = res + (uint32_t)8U * i;

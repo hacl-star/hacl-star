@@ -31,14 +31,13 @@
 #define __Hacl_SHA3_H
 
 #include "Hacl_Kremlib.h"
-#include "Lib_Memzero0.h"
 
 
-extern const uint32_t Hacl_Impl_SHA3_keccak_rotc[24U];
+extern uint32_t Hacl_Impl_SHA3_keccak_rotc[24U];
 
-extern const uint32_t Hacl_Impl_SHA3_keccak_piln[24U];
+extern uint32_t Hacl_Impl_SHA3_keccak_piln[24U];
 
-extern const uint64_t Hacl_Impl_SHA3_keccak_rndc[24U];
+extern uint64_t Hacl_Impl_SHA3_keccak_rndc[24U];
 
 uint64_t Hacl_Impl_SHA3_rotl(uint64_t a, uint32_t b);
 

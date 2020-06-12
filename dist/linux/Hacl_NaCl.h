@@ -36,31 +36,32 @@
 #include "Hacl_Curve25519_51.h"
 
 
-u32 Hacl_NaCl_crypto_secretbox_detached(u8 *c, u8 *tag, u8 *m, u32 mlen, u8 *n, u8 *k);
+u32 Hacl_NaCl_crypto_secretbox_detached(u8 *c, u8 *tag, u8 *m, u32 mlen, u8 *n1, u8 *k);
 
-u32 Hacl_NaCl_crypto_secretbox_open_detached(u8 *m, u8 *c, u8 *tag, u32 mlen, u8 *n, u8 *k);
+u32 Hacl_NaCl_crypto_secretbox_open_detached(u8 *m, u8 *c, u8 *tag, u32 mlen, u8 *n1, u8 *k);
 
-u32 Hacl_NaCl_crypto_secretbox_easy(u8 *c, u8 *m, u32 mlen, u8 *n, u8 *k);
+u32 Hacl_NaCl_crypto_secretbox_easy(u8 *c, u8 *m, u32 mlen, u8 *n1, u8 *k);
 
-u32 Hacl_NaCl_crypto_secretbox_open_easy(u8 *m, u8 *c, u32 clen, u8 *n, u8 *k);
+u32 Hacl_NaCl_crypto_secretbox_open_easy(u8 *m, u8 *c, u32 clen, u8 *n1, u8 *k);
 
 u32 Hacl_NaCl_crypto_box_beforenm(u8 *k, u8 *pk, u8 *sk);
 
-u32 Hacl_NaCl_crypto_box_detached_afternm(u8 *c, u8 *tag, u8 *m, u32 mlen, u8 *n, u8 *k);
+u32 Hacl_NaCl_crypto_box_detached_afternm(u8 *c, u8 *tag, u8 *m, u32 mlen, u8 *n1, u8 *k);
 
-u32 Hacl_NaCl_crypto_box_detached(u8 *c, u8 *tag, u8 *m, u32 mlen, u8 *n, u8 *pk, u8 *sk);
+u32 Hacl_NaCl_crypto_box_detached(u8 *c, u8 *tag, u8 *m, u32 mlen, u8 *n1, u8 *pk, u8 *sk);
 
-u32 Hacl_NaCl_crypto_box_open_detached_afternm(u8 *m, u8 *c, u8 *tag, u32 mlen, u8 *n, u8 *k);
+u32 Hacl_NaCl_crypto_box_open_detached_afternm(u8 *m, u8 *c, u8 *tag, u32 mlen, u8 *n1, u8 *k);
 
-u32 Hacl_NaCl_crypto_box_open_detached(u8 *m, u8 *c, u8 *tag, u32 mlen, u8 *n, u8 *pk, u8 *sk);
+u32
+Hacl_NaCl_crypto_box_open_detached(u8 *m, u8 *c, u8 *tag, u32 mlen, u8 *n1, u8 *pk, u8 *sk);
 
-u32 Hacl_NaCl_crypto_box_easy_afternm(u8 *c, u8 *m, u32 mlen, u8 *n, u8 *k);
+u32 Hacl_NaCl_crypto_box_easy_afternm(u8 *c, u8 *m, u32 mlen, u8 *n1, u8 *k);
 
-u32 Hacl_NaCl_crypto_box_easy(u8 *c, u8 *m, u32 mlen, u8 *n, u8 *pk, u8 *sk);
+u32 Hacl_NaCl_crypto_box_easy(u8 *c, u8 *m, u32 mlen, u8 *n1, u8 *pk, u8 *sk);
 
-u32 Hacl_NaCl_crypto_box_open_easy_afternm(u8 *m, u8 *c, u32 clen, u8 *n, u8 *k);
+u32 Hacl_NaCl_crypto_box_open_easy_afternm(u8 *m, u8 *c, u32 clen, u8 *n1, u8 *k);
 
-u32 Hacl_NaCl_crypto_box_open_easy(u8 *m, u8 *c, u32 clen, u8 *n, u8 *pk, u8 *sk);
+u32 Hacl_NaCl_crypto_box_open_easy(u8 *m, u8 *c, u32 clen, u8 *n1, u8 *pk, u8 *sk);
 
 #define __Hacl_NaCl_H_DEFINED
 #endif

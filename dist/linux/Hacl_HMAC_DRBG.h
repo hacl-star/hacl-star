@@ -106,7 +106,7 @@ Hacl_HMAC_DRBG_generate(
   Spec_Hash_Definitions_hash_alg a,
   u8 *output,
   Hacl_HMAC_DRBG_state st,
-  u32 n,
+  u32 n1,
   u32 additional_input_len,
   u8 *additional_input
 );

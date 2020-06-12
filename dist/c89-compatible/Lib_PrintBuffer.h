@@ -34,15 +34,13 @@
 
 
 
-extern void Lib_PrintBuffer_print_bytes(uint32_t len, uint8_t *buf);
+extern void Lib_PrintBuffer_print_bytes(uint32_t len, uint8_t *buf1);
 
 extern void Lib_PrintBuffer_print_compare(uint32_t len, uint8_t *buf0, uint8_t *buf1);
 
-extern void
-Lib_PrintBuffer_print_compare_display(uint32_t len, const uint8_t *buf0, const uint8_t *buf1);
+extern void Lib_PrintBuffer_print_compare_display(uint32_t len, uint8_t *buf0, uint8_t *buf1);
 
-extern bool
-Lib_PrintBuffer_result_compare_display(uint32_t len, const uint8_t *buf0, const uint8_t *buf1);
+extern bool Lib_PrintBuffer_result_compare_display(uint32_t len, uint8_t *buf0, uint8_t *buf1);
 
 #define __Lib_PrintBuffer_H_DEFINED
 #endif

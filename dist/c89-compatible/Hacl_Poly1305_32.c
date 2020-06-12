@@ -196,7 +196,7 @@ void Hacl_Poly1305_32_poly1305_update1(uint64_t *ctx, uint8_t *text)
   uint64_t t2;
   uint64_t t3;
   uint64_t t4;
-  uint64_t mask26;
+  uint64_t mask261;
   uint64_t z0;
   uint64_t z1;
   uint64_t x0;
@@ -290,29 +290,29 @@ void Hacl_Poly1305_32_poly1305_update1(uint64_t *ctx, uint8_t *text)
   t2 = a26;
   t3 = a36;
   t4 = a46;
-  mask26 = (uint64_t)0x3ffffffU;
+  mask261 = (uint64_t)0x3ffffffU;
   z0 = t0 >> (uint32_t)26U;
   z1 = t3 >> (uint32_t)26U;
-  x0 = t0 & mask26;
-  x3 = t3 & mask26;
+  x0 = t0 & mask261;
+  x3 = t3 & mask261;
   x1 = t1 + z0;
   x4 = t4 + z1;
   z01 = x1 >> (uint32_t)26U;
   z11 = x4 >> (uint32_t)26U;
   t = z11 << (uint32_t)2U;
   z12 = z11 + t;
-  x11 = x1 & mask26;
-  x41 = x4 & mask26;
+  x11 = x1 & mask261;
+  x41 = x4 & mask261;
   x2 = t2 + z01;
   x01 = x0 + z12;
   z02 = x2 >> (uint32_t)26U;
   z13 = x01 >> (uint32_t)26U;
-  x21 = x2 & mask26;
-  x02 = x01 & mask26;
+  x21 = x2 & mask261;
+  x02 = x01 & mask261;
   x31 = x3 + z02;
   x12 = x11 + z13;
   z03 = x31 >> (uint32_t)26U;
-  x32 = x31 & mask26;
+  x32 = x31 & mask261;
   x42 = x41 + z03;
   o0 = x02;
   o1 = x12;
@@ -331,7 +331,7 @@ void Hacl_Poly1305_32_poly1305_update(uint64_t *ctx, uint32_t len, uint8_t *text
   uint64_t *pre = ctx + (uint32_t)5U;
   uint64_t *acc = ctx;
   uint32_t nb = len / (uint32_t)16U;
-  uint32_t rem = len % (uint32_t)16U;
+  uint32_t rem1 = len % (uint32_t)16U;
   {
     uint32_t i;
     for (i = (uint32_t)0U; i < nb; i++)
@@ -421,29 +421,29 @@ void Hacl_Poly1305_32_poly1305_update(uint64_t *ctx, uint32_t len, uint8_t *text
           uint64_t t2 = a26;
           uint64_t t3 = a36;
           uint64_t t4 = a46;
-          uint64_t mask26 = (uint64_t)0x3ffffffU;
+          uint64_t mask261 = (uint64_t)0x3ffffffU;
           uint64_t z0 = t0 >> (uint32_t)26U;
           uint64_t z1 = t3 >> (uint32_t)26U;
-          uint64_t x0 = t0 & mask26;
-          uint64_t x3 = t3 & mask26;
+          uint64_t x0 = t0 & mask261;
+          uint64_t x3 = t3 & mask261;
           uint64_t x1 = t1 + z0;
           uint64_t x4 = t4 + z1;
           uint64_t z01 = x1 >> (uint32_t)26U;
           uint64_t z11 = x4 >> (uint32_t)26U;
           uint64_t t = z11 << (uint32_t)2U;
           uint64_t z12 = z11 + t;
-          uint64_t x11 = x1 & mask26;
-          uint64_t x41 = x4 & mask26;
+          uint64_t x11 = x1 & mask261;
+          uint64_t x41 = x4 & mask261;
           uint64_t x2 = t2 + z01;
           uint64_t x01 = x0 + z12;
           uint64_t z02 = x2 >> (uint32_t)26U;
           uint64_t z13 = x01 >> (uint32_t)26U;
-          uint64_t x21 = x2 & mask26;
-          uint64_t x02 = x01 & mask26;
+          uint64_t x21 = x2 & mask261;
+          uint64_t x02 = x01 & mask261;
           uint64_t x31 = x3 + z02;
           uint64_t x12 = x11 + z13;
           uint64_t z03 = x31 >> (uint32_t)26U;
-          uint64_t x32 = x31 & mask26;
+          uint64_t x32 = x31 & mask261;
           uint64_t x42 = x41 + z03;
           uint64_t o0 = x02;
           uint64_t o1 = x12;
@@ -459,9 +459,9 @@ void Hacl_Poly1305_32_poly1305_update(uint64_t *ctx, uint32_t len, uint8_t *text
       }
     }
   }
-  if (rem > (uint32_t)0U)
+  if (rem1 > (uint32_t)0U)
   {
-    uint8_t *last = text + nb * (uint32_t)16U;
+    uint8_t *last1 = text + nb * (uint32_t)16U;
     uint64_t e[5U] = { 0U };
     uint8_t tmp[16U] = { 0U };
     uint64_t u0;
@@ -539,7 +539,7 @@ void Hacl_Poly1305_32_poly1305_update(uint64_t *ctx, uint32_t len, uint8_t *text
     uint64_t t2;
     uint64_t t3;
     uint64_t t4;
-    uint64_t mask26;
+    uint64_t mask261;
     uint64_t z0;
     uint64_t z1;
     uint64_t x0;
@@ -568,7 +568,7 @@ void Hacl_Poly1305_32_poly1305_update(uint64_t *ctx, uint32_t len, uint8_t *text
     uint64_t o2;
     uint64_t o3;
     uint64_t o4;
-    memcpy(tmp, last, rem * sizeof (last[0U]));
+    memcpy(tmp, last1, rem1 * sizeof (last1[0U]));
     u0 = load64_le(tmp);
     lo = u0;
     u = load64_le(tmp + (uint32_t)8U);
@@ -590,10 +590,10 @@ void Hacl_Poly1305_32_poly1305_update(uint64_t *ctx, uint32_t len, uint8_t *text
     e[2U] = f2;
     e[3U] = f3;
     e[4U] = f4;
-    b = (uint64_t)1U << rem * (uint32_t)8U % (uint32_t)26U;
+    b = (uint64_t)1U << rem1 * (uint32_t)8U % (uint32_t)26U;
     mask = b;
-    fi = e[rem * (uint32_t)8U / (uint32_t)26U];
-    e[rem * (uint32_t)8U / (uint32_t)26U] = fi | mask;
+    fi = e[rem1 * (uint32_t)8U / (uint32_t)26U];
+    e[rem1 * (uint32_t)8U / (uint32_t)26U] = fi | mask;
     r = pre;
     r5 = pre + (uint32_t)5U;
     r0 = r[0U];
@@ -650,29 +650,29 @@ void Hacl_Poly1305_32_poly1305_update(uint64_t *ctx, uint32_t len, uint8_t *text
     t2 = a26;
     t3 = a36;
     t4 = a46;
-    mask26 = (uint64_t)0x3ffffffU;
+    mask261 = (uint64_t)0x3ffffffU;
     z0 = t0 >> (uint32_t)26U;
     z1 = t3 >> (uint32_t)26U;
-    x0 = t0 & mask26;
-    x3 = t3 & mask26;
+    x0 = t0 & mask261;
+    x3 = t3 & mask261;
     x1 = t1 + z0;
     x4 = t4 + z1;
     z01 = x1 >> (uint32_t)26U;
     z11 = x4 >> (uint32_t)26U;
     t = z11 << (uint32_t)2U;
     z12 = z11 + t;
-    x11 = x1 & mask26;
-    x41 = x4 & mask26;
+    x11 = x1 & mask261;
+    x41 = x4 & mask261;
     x2 = t2 + z01;
     x01 = x0 + z12;
     z02 = x2 >> (uint32_t)26U;
     z13 = x01 >> (uint32_t)26U;
-    x21 = x2 & mask26;
-    x02 = x01 & mask26;
+    x21 = x2 & mask261;
+    x02 = x01 & mask261;
     x31 = x3 + z02;
     x12 = x11 + z13;
     z03 = x31 >> (uint32_t)26U;
-    x32 = x31 & mask26;
+    x32 = x31 & mask261;
     x42 = x41 + z03;
     o0 = x02;
     o1 = x12;

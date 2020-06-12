@@ -68,7 +68,7 @@ typedef uint8_t EverCrypt_Error_error_code;
 
 extern uint32_t EverCrypt_random_init();
 
-extern void EverCrypt_random_sample(uint32_t len, uint8_t *out);
+extern void EverCrypt_random_sample(uint32_t len, uint8_t *out1);
 
 extern void EverCrypt_random_cleanup();
 
@@ -107,12 +107,12 @@ typedef EverCrypt_aes128_key_s *EverCrypt_aes128_key;
 
 KRML_DEPRECATED("Please use EverCrypt_CTR.h (from C) or EverCrypt.CTR.fsti (from F*) ")
 
-extern EverCrypt_aes128_key_s *EverCrypt_aes128_create(uint8_t *k);
+extern EverCrypt_aes128_key_s *EverCrypt_aes128_create(uint8_t *k1);
 
 KRML_DEPRECATED("Please use EverCrypt_CTR.h (from C) or EverCrypt.CTR.fsti (from F*) ")
 
 extern void
-EverCrypt_aes128_compute(EverCrypt_aes128_key_s *k, uint8_t *plain, uint8_t *cipher);
+EverCrypt_aes128_compute(EverCrypt_aes128_key_s *k1, uint8_t *plain, uint8_t *cipher);
 
 KRML_DEPRECATED("Please use EverCrypt_CTR.h (from C) or EverCrypt.CTR.fsti (from F*) ")
 
@@ -146,12 +146,12 @@ typedef EverCrypt_aes256_key_s *EverCrypt_aes256_key;
 
 KRML_DEPRECATED("Please use EverCrypt_CTR.h (from C) or EverCrypt.CTR.fsti (from F*) ")
 
-extern EverCrypt_aes256_key_s *EverCrypt_aes256_create(uint8_t *k);
+extern EverCrypt_aes256_key_s *EverCrypt_aes256_create(uint8_t *k1);
 
 KRML_DEPRECATED("Please use EverCrypt_CTR.h (from C) or EverCrypt.CTR.fsti (from F*) ")
 
 extern void
-EverCrypt_aes256_compute(EverCrypt_aes256_key_s *k, uint8_t *plain, uint8_t *cipher);
+EverCrypt_aes256_compute(EverCrypt_aes256_key_s *k1, uint8_t *plain, uint8_t *cipher);
 
 KRML_DEPRECATED("Please use EverCrypt_CTR.h (from C) or EverCrypt.CTR.fsti (from F*) ")
 
@@ -225,9 +225,9 @@ extern bool EverCrypt_uu___is_AES256_CBC(EverCrypt_block_cipher_alg projectee);
 
 extern bool EverCrypt_uu___is_TDES_EDE_CBC(EverCrypt_block_cipher_alg projectee);
 
-extern uint32_t EverCrypt_block_cipher_keyLen(EverCrypt_block_cipher_alg uu___0_9927);
+extern uint32_t EverCrypt_block_cipher_keyLen(EverCrypt_block_cipher_alg uu___0_9512);
 
-extern uint32_t EverCrypt_block_cipher_blockLen(EverCrypt_block_cipher_alg uu___1_9938);
+extern uint32_t EverCrypt_block_cipher_blockLen(EverCrypt_block_cipher_alg uu___1_9522);
 
 #define EverCrypt_RC4_128 0
 
@@ -261,11 +261,11 @@ extern bool EverCrypt_uu___is_AES256_CCM8(EverCrypt_aead_alg projectee);
 
 KRML_DEPRECATED("Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")
 
-extern uint32_t EverCrypt_aead_keyLen(EverCrypt_aead_alg uu___2_10046);
+extern uint32_t EverCrypt_aead_keyLen(EverCrypt_aead_alg uu___2_9629);
 
 KRML_DEPRECATED("Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")
 
-extern uint32_t EverCrypt_aead_tagLen(EverCrypt_aead_alg uu___3_10061);
+extern uint32_t EverCrypt_aead_tagLen(EverCrypt_aead_alg uu___3_9643);
 
 KRML_DEPRECATED("Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")
 
@@ -287,7 +287,7 @@ typedef EverCrypt__aead_state *EverCrypt_aead_state;
 
 KRML_DEPRECATED("Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")
 
-extern EverCrypt__aead_state *EverCrypt_aead_create(EverCrypt_aead_alg alg, uint8_t *k);
+extern EverCrypt__aead_state *EverCrypt_aead_create(EverCrypt_aead_alg alg, uint8_t *k1);
 
 KRML_DEPRECATED("Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")
 
@@ -351,7 +351,7 @@ EverCrypt_dh_compute(
   EverCrypt__dh_state *st,
   uint8_t *public,
   uint32_t public_len,
-  uint8_t *out
+  uint8_t *out1
 );
 
 #define EverCrypt_ECC_P256 0
@@ -383,14 +383,14 @@ typedef EverCrypt__ecdh_state EverCrypt_ecdh_state_s;
 
 typedef EverCrypt__ecdh_state *EverCrypt_ecdh_state;
 
-extern EverCrypt__ecdh_state *EverCrypt_ecdh_load_curve(EverCrypt_ec_curve g);
+extern EverCrypt__ecdh_state *EverCrypt_ecdh_load_curve(EverCrypt_ec_curve g1);
 
 extern void EverCrypt_ecdh_free_curve(EverCrypt__ecdh_state *st);
 
 extern void EverCrypt_ecdh_keygen(EverCrypt__ecdh_state *st, uint8_t *outx, uint8_t *outy);
 
 extern uint32_t
-EverCrypt_ecdh_compute(EverCrypt__ecdh_state *st, uint8_t *inx, uint8_t *iny, uint8_t *out);
+EverCrypt_ecdh_compute(EverCrypt__ecdh_state *st, uint8_t *inx, uint8_t *iny, uint8_t *out1);
 
 typedef struct EverCrypt_AEAD_state_s_s EverCrypt_AEAD_state_s;
 
@@ -421,59 +421,6 @@ EverCrypt_AEAD_encrypt(
 );
 
 extern EverCrypt_Error_error_code
-EverCrypt_AEAD_encrypt_expand_aes128_gcm(
-  uint8_t *k,
-  uint8_t *iv,
-  uint32_t iv_len,
-  uint8_t *ad,
-  uint32_t ad_len,
-  uint8_t *plain,
-  uint32_t plain_len,
-  uint8_t *cipher,
-  uint8_t *tag
-);
-
-extern EverCrypt_Error_error_code
-EverCrypt_AEAD_encrypt_expand_aes256_gcm(
-  uint8_t *k,
-  uint8_t *iv,
-  uint32_t iv_len,
-  uint8_t *ad,
-  uint32_t ad_len,
-  uint8_t *plain,
-  uint32_t plain_len,
-  uint8_t *cipher,
-  uint8_t *tag
-);
-
-extern EverCrypt_Error_error_code
-EverCrypt_AEAD_encrypt_expand_chacha20_poly1305(
-  uint8_t *k,
-  uint8_t *iv,
-  uint32_t iv_len,
-  uint8_t *ad,
-  uint32_t ad_len,
-  uint8_t *plain,
-  uint32_t plain_len,
-  uint8_t *cipher,
-  uint8_t *tag
-);
-
-extern EverCrypt_Error_error_code
-EverCrypt_AEAD_encrypt_expand(
-  Spec_Agile_AEAD_alg a,
-  uint8_t *k,
-  uint8_t *iv,
-  uint32_t iv_len,
-  uint8_t *ad,
-  uint32_t ad_len,
-  uint8_t *plain,
-  uint32_t plain_len,
-  uint8_t *cipher,
-  uint8_t *tag
-);
-
-extern EverCrypt_Error_error_code
 EverCrypt_AEAD_decrypt(
   EverCrypt_AEAD_state_s *a,
   uint8_t *s,
@@ -484,59 +431,6 @@ EverCrypt_AEAD_decrypt(
   uint32_t cipher,
   uint8_t *cipher_len,
   uint8_t *tag
-);
-
-extern EverCrypt_Error_error_code
-EverCrypt_AEAD_decrypt_expand_aes128_gcm(
-  uint8_t *k,
-  uint8_t *iv,
-  uint32_t iv_len,
-  uint8_t *ad,
-  uint32_t ad_len,
-  uint8_t *cipher,
-  uint32_t cipher_len,
-  uint8_t *tag,
-  uint8_t *dst
-);
-
-extern EverCrypt_Error_error_code
-EverCrypt_AEAD_decrypt_expand_aes256_gcm(
-  uint8_t *k,
-  uint8_t *iv,
-  uint32_t iv_len,
-  uint8_t *ad,
-  uint32_t ad_len,
-  uint8_t *cipher,
-  uint32_t cipher_len,
-  uint8_t *tag,
-  uint8_t *dst
-);
-
-extern EverCrypt_Error_error_code
-EverCrypt_AEAD_decrypt_expand_chacha20_poly1305(
-  uint8_t *k,
-  uint8_t *iv,
-  uint32_t iv_len,
-  uint8_t *ad,
-  uint32_t ad_len,
-  uint8_t *cipher,
-  uint32_t cipher_len,
-  uint8_t *tag,
-  uint8_t *dst
-);
-
-extern EverCrypt_Error_error_code
-EverCrypt_AEAD_decrypt_expand(
-  Spec_Agile_AEAD_alg a,
-  uint8_t *k,
-  uint8_t *iv,
-  uint32_t iv_len,
-  uint8_t *ad,
-  uint32_t ad_len,
-  uint8_t *cipher,
-  uint32_t cipher_len,
-  uint8_t *tag,
-  uint8_t *dst
 );
 
 extern void EverCrypt_AEAD_free(EverCrypt_AEAD_state_s *a);
@@ -560,8 +454,6 @@ extern bool EverCrypt_AutoConfig2_has_sse();
 extern bool EverCrypt_AutoConfig2_has_movbe();
 
 extern bool EverCrypt_AutoConfig2_has_rdrand();
-
-extern bool EverCrypt_AutoConfig2_has_avx512();
 
 extern bool EverCrypt_AutoConfig2_wants_vale();
 
@@ -596,8 +488,6 @@ extern void EverCrypt_AutoConfig2_disable_sse();
 extern void EverCrypt_AutoConfig2_disable_movbe();
 
 extern void EverCrypt_AutoConfig2_disable_rdrand();
-
-extern void EverCrypt_AutoConfig2_disable_avx512();
 
 extern void EverCrypt_AutoConfig2_disable_vale();
 
@@ -765,7 +655,7 @@ EverCrypt_HMAC_compute_sha2_512(
   uint32_t data_len
 );
 
-extern bool EverCrypt_HMAC_is_supported_alg(Spec_Hash_Definitions_hash_alg uu___0_6237);
+extern bool EverCrypt_HMAC_is_supported_alg(Spec_Hash_Definitions_hash_alg uu___0_5843);
 
 typedef Spec_Hash_Definitions_hash_alg EverCrypt_HMAC_supported_alg;
 
@@ -815,73 +705,73 @@ EverCrypt_Hash_state_s;
 
 extern bool
 EverCrypt_Hash_uu___is_MD5_s(
-  Spec_Hash_Definitions_hash_alg uu____159,
+  Spec_Hash_Definitions_hash_alg uu____151,
   EverCrypt_Hash_state_s projectee
 );
 
 extern uint32_t
 *EverCrypt_Hash___proj__MD5_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____189,
+  Spec_Hash_Definitions_hash_alg uu____179,
   EverCrypt_Hash_state_s projectee
 );
 
 extern bool
 EverCrypt_Hash_uu___is_SHA1_s(
-  Spec_Hash_Definitions_hash_alg uu____213,
+  Spec_Hash_Definitions_hash_alg uu____202,
   EverCrypt_Hash_state_s projectee
 );
 
 extern uint32_t
 *EverCrypt_Hash___proj__SHA1_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____243,
+  Spec_Hash_Definitions_hash_alg uu____230,
   EverCrypt_Hash_state_s projectee
 );
 
 extern bool
 EverCrypt_Hash_uu___is_SHA2_224_s(
-  Spec_Hash_Definitions_hash_alg uu____267,
+  Spec_Hash_Definitions_hash_alg uu____253,
   EverCrypt_Hash_state_s projectee
 );
 
 extern uint32_t
 *EverCrypt_Hash___proj__SHA2_224_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____297,
+  Spec_Hash_Definitions_hash_alg uu____281,
   EverCrypt_Hash_state_s projectee
 );
 
 extern bool
 EverCrypt_Hash_uu___is_SHA2_256_s(
-  Spec_Hash_Definitions_hash_alg uu____321,
+  Spec_Hash_Definitions_hash_alg uu____304,
   EverCrypt_Hash_state_s projectee
 );
 
 extern uint32_t
 *EverCrypt_Hash___proj__SHA2_256_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____351,
+  Spec_Hash_Definitions_hash_alg uu____332,
   EverCrypt_Hash_state_s projectee
 );
 
 extern bool
 EverCrypt_Hash_uu___is_SHA2_384_s(
-  Spec_Hash_Definitions_hash_alg uu____375,
+  Spec_Hash_Definitions_hash_alg uu____355,
   EverCrypt_Hash_state_s projectee
 );
 
 extern uint64_t
 *EverCrypt_Hash___proj__SHA2_384_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____405,
+  Spec_Hash_Definitions_hash_alg uu____383,
   EverCrypt_Hash_state_s projectee
 );
 
 extern bool
 EverCrypt_Hash_uu___is_SHA2_512_s(
-  Spec_Hash_Definitions_hash_alg uu____429,
+  Spec_Hash_Definitions_hash_alg uu____406,
   EverCrypt_Hash_state_s projectee
 );
 
 extern uint64_t
 *EverCrypt_Hash___proj__SHA2_512_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____459,
+  Spec_Hash_Definitions_hash_alg uu____434,
   EverCrypt_Hash_state_s projectee
 );
 
@@ -893,7 +783,7 @@ extern EverCrypt_Hash_state_s *EverCrypt_Hash_create(Spec_Hash_Definitions_hash_
 
 extern void EverCrypt_Hash_init(EverCrypt_Hash_state_s *a);
 
-extern void EverCrypt_Hash_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n);
+extern void EverCrypt_Hash_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n1);
 
 extern void EverCrypt_Hash_update(EverCrypt_Hash_state_s *a, uint8_t *s);
 
@@ -908,7 +798,7 @@ EverCrypt_Hash_update_last_256(
   uint32_t input_len
 );
 
-extern void EverCrypt_Hash_update_last(EverCrypt_Hash_state_s *a, uint8_t *s, uint64_t last);
+extern void EverCrypt_Hash_update_last(EverCrypt_Hash_state_s *a, uint8_t *s, uint64_t last1);
 
 extern void EverCrypt_Hash_finish(EverCrypt_Hash_state_s *a, uint8_t *s);
 
@@ -928,71 +818,53 @@ EverCrypt_Hash_hash(
   uint32_t len
 );
 
-typedef struct Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s_____s
-Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____;
+typedef uint8_t *EverCrypt_Hash_Incremental_any_hash_t;
 
-extern Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____
+typedef struct EverCrypt_Hash_Incremental_state_s_s EverCrypt_Hash_Incremental_state_s;
+
+extern bool
+EverCrypt_Hash_Incremental_uu___is_State(
+  Spec_Hash_Definitions_hash_alg a,
+  EverCrypt_Hash_Incremental_state_s projectee
+);
+
+extern EverCrypt_Hash_state_s
+*EverCrypt_Hash_Incremental___proj__State__item__hash_state(
+  Spec_Hash_Definitions_hash_alg a,
+  EverCrypt_Hash_Incremental_state_s projectee
+);
+
+extern uint8_t
+*EverCrypt_Hash_Incremental___proj__State__item__buf(
+  Spec_Hash_Definitions_hash_alg a,
+  EverCrypt_Hash_Incremental_state_s projectee
+);
+
+extern uint64_t
+EverCrypt_Hash_Incremental___proj__State__item__total_len(
+  Spec_Hash_Definitions_hash_alg a,
+  EverCrypt_Hash_Incremental_state_s projectee
+);
+
+extern Spec_Hash_Definitions_hash_alg
+EverCrypt_Hash_Incremental_alg_of_state(EverCrypt_Hash_Incremental_state_s *a);
+
+extern EverCrypt_Hash_Incremental_state_s
 *EverCrypt_Hash_Incremental_create_in(Spec_Hash_Definitions_hash_alg a);
 
-extern void
-EverCrypt_Hash_Incremental_init(Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *a);
+extern void EverCrypt_Hash_Incremental_init(EverCrypt_Hash_Incremental_state_s *a);
 
 extern void
 EverCrypt_Hash_Incremental_update(
-  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *i,
-  uint8_t *p,
+  EverCrypt_Hash_Incremental_state_s *a,
+  uint8_t *p1,
   uint32_t data
 );
 
 extern void
-EverCrypt_Hash_Incremental_finish_md5(
-  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *p,
-  uint8_t *dst
-);
+EverCrypt_Hash_Incremental_finish(EverCrypt_Hash_Incremental_state_s *a, uint8_t *s);
 
-extern void
-EverCrypt_Hash_Incremental_finish_sha1(
-  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *p,
-  uint8_t *dst
-);
-
-extern void
-EverCrypt_Hash_Incremental_finish_sha224(
-  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *p,
-  uint8_t *dst
-);
-
-extern void
-EverCrypt_Hash_Incremental_finish_sha256(
-  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *p,
-  uint8_t *dst
-);
-
-extern void
-EverCrypt_Hash_Incremental_finish_sha384(
-  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *p,
-  uint8_t *dst
-);
-
-extern void
-EverCrypt_Hash_Incremental_finish_sha512(
-  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *p,
-  uint8_t *dst
-);
-
-extern Spec_Hash_Definitions_hash_alg
-EverCrypt_Hash_Incremental_alg_of_state(
-  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *a
-);
-
-extern void
-EverCrypt_Hash_Incremental_finish(
-  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *a,
-  uint8_t *s
-);
-
-extern void
-EverCrypt_Hash_Incremental_free(Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *i);
+extern void EverCrypt_Hash_Incremental_free(EverCrypt_Hash_Incremental_state_s *a);
 
 extern void
 EverCrypt_Cipher_chacha20(
@@ -1010,7 +882,7 @@ EverCrypt_Poly1305_poly1305(uint8_t *dst, uint8_t *src, uint32_t len, uint8_t *k
 extern void
 EverCrypt_Chacha20Poly1305_aead_encrypt(
   uint8_t *k,
-  uint8_t *n,
+  uint8_t *n1,
   uint32_t aadlen,
   uint8_t *aad,
   uint32_t mlen,
@@ -1022,7 +894,7 @@ EverCrypt_Chacha20Poly1305_aead_encrypt(
 extern uint32_t
 EverCrypt_Chacha20Poly1305_aead_decrypt(
   uint8_t *k,
-  uint8_t *n,
+  uint8_t *n1,
   uint32_t aadlen,
   uint8_t *aad,
   uint32_t mlen,

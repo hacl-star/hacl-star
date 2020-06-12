@@ -39,14 +39,14 @@ Hacl_HMAC_legacy_compute_sha1(
     uint8_t key_block[l];
     memset(key_block, 0U, l * sizeof (key_block[0U]));
     {
-      uint32_t i0;
+      uint32_t i1;
       if (key_len <= (uint32_t)64U)
       {
-        i0 = key_len;
+        i1 = key_len;
       }
       else
       {
-        i0 = (uint32_t)20U;
+        i1 = (uint32_t)20U;
       }
       {
         uint8_t *nkey = key_block;
@@ -126,14 +126,14 @@ Hacl_HMAC_compute_sha2_256(
     uint8_t key_block[l];
     memset(key_block, 0U, l * sizeof (key_block[0U]));
     {
-      uint32_t i0;
+      uint32_t i1;
       if (key_len <= (uint32_t)64U)
       {
-        i0 = key_len;
+        i1 = key_len;
       }
       else
       {
-        i0 = (uint32_t)32U;
+        i1 = (uint32_t)32U;
       }
       {
         uint8_t *nkey = key_block;
@@ -216,14 +216,14 @@ Hacl_HMAC_compute_sha2_384(
     uint8_t key_block[l];
     memset(key_block, 0U, l * sizeof (key_block[0U]));
     {
-      uint32_t i0;
+      uint32_t i1;
       if (key_len <= (uint32_t)128U)
       {
-        i0 = key_len;
+        i1 = key_len;
       }
       else
       {
-        i0 = (uint32_t)48U;
+        i1 = (uint32_t)48U;
       }
       {
         uint8_t *nkey = key_block;
@@ -312,14 +312,14 @@ Hacl_HMAC_compute_sha2_512(
     uint8_t key_block[l];
     memset(key_block, 0U, l * sizeof (key_block[0U]));
     {
-      uint32_t i0;
+      uint32_t i1;
       if (key_len <= (uint32_t)128U)
       {
-        i0 = key_len;
+        i1 = key_len;
       }
       else
       {
-        i0 = (uint32_t)64U;
+        i1 = (uint32_t)64U;
       }
       {
         uint8_t *nkey = key_block;

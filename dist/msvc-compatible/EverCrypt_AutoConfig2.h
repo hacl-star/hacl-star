@@ -54,8 +54,6 @@ bool EverCrypt_AutoConfig2_has_movbe();
 
 bool EverCrypt_AutoConfig2_has_rdrand();
 
-bool EverCrypt_AutoConfig2_has_avx512();
-
 bool EverCrypt_AutoConfig2_wants_vale();
 
 bool EverCrypt_AutoConfig2_wants_hacl();
@@ -89,8 +87,6 @@ void EverCrypt_AutoConfig2_disable_sse();
 void EverCrypt_AutoConfig2_disable_movbe();
 
 void EverCrypt_AutoConfig2_disable_rdrand();
-
-void EverCrypt_AutoConfig2_disable_avx512();
 
 void EverCrypt_AutoConfig2_disable_vale();
 

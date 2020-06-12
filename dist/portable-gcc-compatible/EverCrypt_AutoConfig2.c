@@ -84,12 +84,6 @@ static bool cpu_has_rdrand[1U] = { false };
 
 /* SNIPPET_END: cpu_has_rdrand */
 
-/* SNIPPET_START: cpu_has_avx512 */
-
-static bool cpu_has_avx512[1U] = { false };
-
-/* SNIPPET_END: cpu_has_avx512 */
-
 /* SNIPPET_START: user_wants_hacl */
 
 static bool user_wants_hacl[1U] = { true };
@@ -204,15 +198,6 @@ bool EverCrypt_AutoConfig2_has_rdrand()
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_has_rdrand */
 
-/* SNIPPET_START: EverCrypt_AutoConfig2_has_avx512 */
-
-bool EverCrypt_AutoConfig2_has_avx512()
-{
-  return cpu_has_avx512[0U];
-}
-
-/* SNIPPET_END: EverCrypt_AutoConfig2_has_avx512 */
-
 /* SNIPPET_START: EverCrypt_AutoConfig2_wants_vale */
 
 bool EverCrypt_AutoConfig2_wants_vale()
@@ -304,11 +289,6 @@ void EverCrypt_AutoConfig2_init()
   if (scrut6 != (uint64_t)0U)
   {
     cpu_has_rdrand[0U] = true;
-  }
-  uint64_t scrut7 = check_avx512();
-  if (scrut7 != (uint64_t)0U)
-  {
-    cpu_has_avx512[0U] = true;
   }
   #endif
   user_wants_hacl[0U] = true;
@@ -408,15 +388,6 @@ void EverCrypt_AutoConfig2_disable_rdrand()
 }
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_disable_rdrand */
-
-/* SNIPPET_START: EverCrypt_AutoConfig2_disable_avx512 */
-
-void EverCrypt_AutoConfig2_disable_avx512()
-{
-  cpu_has_avx512[0U] = false;
-}
-
-/* SNIPPET_END: EverCrypt_AutoConfig2_disable_avx512 */
 
 /* SNIPPET_START: EverCrypt_AutoConfig2_disable_vale */
 

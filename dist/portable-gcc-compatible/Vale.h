@@ -106,12 +106,6 @@ extern uint64_t check_rdrand();
 
 /* SNIPPET_END: check_rdrand */
 
-/* SNIPPET_START: check_avx512 */
-
-extern uint64_t check_avx512();
-
-/* SNIPPET_END: check_avx512 */
-
 /* SNIPPET_START: cswap2_e */
 
 extern uint64_t cswap2_e(uint64_t x0, uint64_t *x1, uint64_t *x2);

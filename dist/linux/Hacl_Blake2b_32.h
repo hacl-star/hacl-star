@@ -31,7 +31,6 @@
 #define __Hacl_Blake2b_32_H
 
 #include "Hacl_Kremlib.h"
-#include "Lib_Memzero0.h"
 #include "Hacl_Impl_Blake2_Constants.h"
 
 

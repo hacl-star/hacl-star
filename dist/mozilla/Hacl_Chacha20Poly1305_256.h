@@ -38,7 +38,7 @@
 void
 Hacl_Chacha20Poly1305_256_aead_encrypt(
   uint8_t *k,
-  uint8_t *n,
+  uint8_t *n1,
   uint32_t aadlen,
   uint8_t *aad,
   uint32_t mlen,
@@ -50,7 +50,7 @@ Hacl_Chacha20Poly1305_256_aead_encrypt(
 uint32_t
 Hacl_Chacha20Poly1305_256_aead_decrypt(
   uint8_t *k,
-  uint8_t *n,
+  uint8_t *n1,
   uint32_t aadlen,
   uint8_t *aad,
   uint32_t mlen,

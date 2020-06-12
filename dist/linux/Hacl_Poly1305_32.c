@@ -196,7 +196,7 @@ void Hacl_Poly1305_32_poly1305_update1(u64 *ctx, u8 *text)
   u64 t2;
   u64 t3;
   u64 t4;
-  u64 mask26;
+  u64 mask261;
   u64 z0;
   u64 z1;
   u64 x0;
@@ -290,29 +290,29 @@ void Hacl_Poly1305_32_poly1305_update1(u64 *ctx, u8 *text)
   t2 = a26;
   t3 = a36;
   t4 = a46;
-  mask26 = (u64)0x3ffffffU;
+  mask261 = (u64)0x3ffffffU;
   z0 = t0 >> (u32)26U;
   z1 = t3 >> (u32)26U;
-  x0 = t0 & mask26;
-  x3 = t3 & mask26;
+  x0 = t0 & mask261;
+  x3 = t3 & mask261;
   x1 = t1 + z0;
   x4 = t4 + z1;
   z01 = x1 >> (u32)26U;
   z11 = x4 >> (u32)26U;
   t = z11 << (u32)2U;
   z12 = z11 + t;
-  x11 = x1 & mask26;
-  x41 = x4 & mask26;
+  x11 = x1 & mask261;
+  x41 = x4 & mask261;
   x2 = t2 + z01;
   x01 = x0 + z12;
   z02 = x2 >> (u32)26U;
   z13 = x01 >> (u32)26U;
-  x21 = x2 & mask26;
-  x02 = x01 & mask26;
+  x21 = x2 & mask261;
+  x02 = x01 & mask261;
   x31 = x3 + z02;
   x12 = x11 + z13;
   z03 = x31 >> (u32)26U;
-  x32 = x31 & mask26;
+  x32 = x31 & mask261;
   x42 = x41 + z03;
   o0 = x02;
   o1 = x12;
@@ -331,7 +331,7 @@ void Hacl_Poly1305_32_poly1305_update(u64 *ctx, u32 len, u8 *text)
   u64 *pre = ctx + (u32)5U;
   u64 *acc = ctx;
   u32 nb = len / (u32)16U;
-  u32 rem = len % (u32)16U;
+  u32 rem1 = len % (u32)16U;
   {
     u32 i;
     for (i = (u32)0U; i < nb; i++)
@@ -421,29 +421,29 @@ void Hacl_Poly1305_32_poly1305_update(u64 *ctx, u32 len, u8 *text)
           u64 t2 = a26;
           u64 t3 = a36;
           u64 t4 = a46;
-          u64 mask26 = (u64)0x3ffffffU;
+          u64 mask261 = (u64)0x3ffffffU;
           u64 z0 = t0 >> (u32)26U;
           u64 z1 = t3 >> (u32)26U;
-          u64 x0 = t0 & mask26;
-          u64 x3 = t3 & mask26;
+          u64 x0 = t0 & mask261;
+          u64 x3 = t3 & mask261;
           u64 x1 = t1 + z0;
           u64 x4 = t4 + z1;
           u64 z01 = x1 >> (u32)26U;
           u64 z11 = x4 >> (u32)26U;
           u64 t = z11 << (u32)2U;
           u64 z12 = z11 + t;
-          u64 x11 = x1 & mask26;
-          u64 x41 = x4 & mask26;
+          u64 x11 = x1 & mask261;
+          u64 x41 = x4 & mask261;
           u64 x2 = t2 + z01;
           u64 x01 = x0 + z12;
           u64 z02 = x2 >> (u32)26U;
           u64 z13 = x01 >> (u32)26U;
-          u64 x21 = x2 & mask26;
-          u64 x02 = x01 & mask26;
+          u64 x21 = x2 & mask261;
+          u64 x02 = x01 & mask261;
           u64 x31 = x3 + z02;
           u64 x12 = x11 + z13;
           u64 z03 = x31 >> (u32)26U;
-          u64 x32 = x31 & mask26;
+          u64 x32 = x31 & mask261;
           u64 x42 = x41 + z03;
           u64 o0 = x02;
           u64 o1 = x12;
@@ -459,9 +459,9 @@ void Hacl_Poly1305_32_poly1305_update(u64 *ctx, u32 len, u8 *text)
       }
     }
   }
-  if (rem > (u32)0U)
+  if (rem1 > (u32)0U)
   {
-    u8 *last = text + nb * (u32)16U;
+    u8 *last1 = text + nb * (u32)16U;
     u64 e[5U] = { 0U };
     u8 tmp[16U] = { 0U };
     u64 u0;
@@ -539,7 +539,7 @@ void Hacl_Poly1305_32_poly1305_update(u64 *ctx, u32 len, u8 *text)
     u64 t2;
     u64 t3;
     u64 t4;
-    u64 mask26;
+    u64 mask261;
     u64 z0;
     u64 z1;
     u64 x0;
@@ -568,7 +568,7 @@ void Hacl_Poly1305_32_poly1305_update(u64 *ctx, u32 len, u8 *text)
     u64 o2;
     u64 o3;
     u64 o4;
-    memcpy(tmp, last, rem * sizeof (last[0U]));
+    memcpy(tmp, last1, rem1 * sizeof (last1[0U]));
     u0 = load64_le(tmp);
     lo = u0;
     u = load64_le(tmp + (u32)8U);
@@ -590,10 +590,10 @@ void Hacl_Poly1305_32_poly1305_update(u64 *ctx, u32 len, u8 *text)
     e[2U] = f2;
     e[3U] = f3;
     e[4U] = f4;
-    b = (u64)1U << rem * (u32)8U % (u32)26U;
+    b = (u64)1U << rem1 * (u32)8U % (u32)26U;
     mask = b;
-    fi = e[rem * (u32)8U / (u32)26U];
-    e[rem * (u32)8U / (u32)26U] = fi | mask;
+    fi = e[rem1 * (u32)8U / (u32)26U];
+    e[rem1 * (u32)8U / (u32)26U] = fi | mask;
     r = pre;
     r5 = pre + (u32)5U;
     r0 = r[0U];
@@ -650,29 +650,29 @@ void Hacl_Poly1305_32_poly1305_update(u64 *ctx, u32 len, u8 *text)
     t2 = a26;
     t3 = a36;
     t4 = a46;
-    mask26 = (u64)0x3ffffffU;
+    mask261 = (u64)0x3ffffffU;
     z0 = t0 >> (u32)26U;
     z1 = t3 >> (u32)26U;
-    x0 = t0 & mask26;
-    x3 = t3 & mask26;
+    x0 = t0 & mask261;
+    x3 = t3 & mask261;
     x1 = t1 + z0;
     x4 = t4 + z1;
     z01 = x1 >> (u32)26U;
     z11 = x4 >> (u32)26U;
     t = z11 << (u32)2U;
     z12 = z11 + t;
-    x11 = x1 & mask26;
-    x41 = x4 & mask26;
+    x11 = x1 & mask261;
+    x41 = x4 & mask261;
     x2 = t2 + z01;
     x01 = x0 + z12;
     z02 = x2 >> (u32)26U;
     z13 = x01 >> (u32)26U;
-    x21 = x2 & mask26;
-    x02 = x01 & mask26;
+    x21 = x2 & mask261;
+    x02 = x01 & mask261;
     x31 = x3 + z02;
     x12 = x11 + z13;
     z03 = x31 >> (u32)26U;
-    x32 = x31 & mask26;
+    x32 = x31 & mask261;
     x42 = x41 + z03;
     o0 = x02;
     o1 = x12;

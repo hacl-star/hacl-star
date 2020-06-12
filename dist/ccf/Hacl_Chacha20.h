@@ -33,13 +33,13 @@
 #include "Hacl_Kremlib.h"
 
 
-void Hacl_Impl_Chacha20_chacha20_init(uint32_t *ctx, uint8_t *k, uint8_t *n, uint32_t ctr);
+void Hacl_Impl_Chacha20_chacha20_init(uint32_t *ctx, uint8_t *k, uint8_t *n1, uint32_t ctr);
 
 void
 Hacl_Impl_Chacha20_chacha20_encrypt_block(
   uint32_t *ctx,
   uint8_t *out,
-  uint32_t incr,
+  uint32_t incr1,
   uint8_t *text
 );
 
@@ -52,7 +52,7 @@ Hacl_Chacha20_chacha20_encrypt(
   uint8_t *out,
   uint8_t *text,
   uint8_t *key,
-  uint8_t *n,
+  uint8_t *n1,
   uint32_t ctr
 );
 
@@ -62,7 +62,7 @@ Hacl_Chacha20_chacha20_decrypt(
   uint8_t *out,
   uint8_t *cipher,
   uint8_t *key,
-  uint8_t *n,
+  uint8_t *n1,
   uint32_t ctr
 );
 

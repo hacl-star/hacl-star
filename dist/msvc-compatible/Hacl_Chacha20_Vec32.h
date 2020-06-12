@@ -41,7 +41,7 @@ Hacl_Chacha20_Vec32_chacha20_encrypt_32(
   uint8_t *out,
   uint8_t *text,
   uint8_t *key,
-  uint8_t *n,
+  uint8_t *n1,
   uint32_t ctr
 );
 
@@ -51,7 +51,7 @@ Hacl_Chacha20_Vec32_chacha20_decrypt_32(
   uint8_t *out,
   uint8_t *cipher,
   uint8_t *key,
-  uint8_t *n,
+  uint8_t *n1,
   uint32_t ctr
 );
 

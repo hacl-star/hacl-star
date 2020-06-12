@@ -32,7 +32,7 @@
 #include "Hacl_Kremlib.h"
 
 
-extern const uint32_t Hacl_Impl_Chacha20_Vec_chacha20_constants[4U];
+extern uint32_t Hacl_Impl_Chacha20_Vec_chacha20_constants[4U];
 
 void
 Hacl_Chacha20_chacha20_encrypt(
@@ -40,7 +40,7 @@ Hacl_Chacha20_chacha20_encrypt(
   uint8_t *out,
   uint8_t *text,
   uint8_t *key,
-  uint8_t *n,
+  uint8_t *n1,
   uint32_t ctr
 );
 
@@ -50,7 +50,7 @@ Hacl_Chacha20_chacha20_decrypt(
   uint8_t *out,
   uint8_t *cipher,
   uint8_t *key,
-  uint8_t *n,
+  uint8_t *n1,
   uint32_t ctr
 );
 

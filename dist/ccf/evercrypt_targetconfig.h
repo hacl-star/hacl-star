@@ -16,11 +16,7 @@
 #define EVERCRYPT_TARGETCONFIG_AARCH32 1
 #endif
 
-#if __has_include("config.h")
-#include "config.h"
-#endif
-
-#if defined(__GNUC__) && !defined(BROKEN_INLINE_ASM)
+#if defined(__GNUC__)
 #define EVERCRYPT_TARGETCONFIG_GCC 1
 #endif
 

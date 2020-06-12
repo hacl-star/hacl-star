@@ -55,8 +55,6 @@ extern uint64_t check_sse();
 
 extern uint64_t check_rdrand();
 
-extern uint64_t check_avx512();
-
 extern uint64_t cswap2_e(uint64_t x0, uint64_t *x1, uint64_t *x2);
 
 extern uint64_t fsqr_e(uint64_t *x0, uint64_t *x1, uint64_t *x2);

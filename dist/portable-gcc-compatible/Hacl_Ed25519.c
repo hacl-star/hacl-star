@@ -90,13 +90,13 @@ static void times_2(uint64_t *out, uint64_t *a)
 
 static void times_d(uint64_t *out, uint64_t *a)
 {
-  uint64_t d[5U] = { 0U };
-  d[0U] = (uint64_t)0x00034dca135978a3U;
-  d[1U] = (uint64_t)0x0001a8283b156ebdU;
-  d[2U] = (uint64_t)0x0005e7a26001c029U;
-  d[3U] = (uint64_t)0x000739c663a03cbbU;
-  d[4U] = (uint64_t)0x00052036cee2b6ffU;
-  fmul0(out, d, a);
+  uint64_t d1[5U] = { 0U };
+  d1[0U] = (uint64_t)0x00034dca135978a3U;
+  d1[1U] = (uint64_t)0x0001a8283b156ebdU;
+  d1[2U] = (uint64_t)0x0005e7a26001c029U;
+  d1[3U] = (uint64_t)0x000739c663a03cbbU;
+  d1[4U] = (uint64_t)0x00052036cee2b6ffU;
+  fmul0(out, d1, a);
 }
 
 /* SNIPPET_END: times_d */
@@ -130,24 +130,24 @@ static void fsquare(uint64_t *out, uint64_t *a)
 
 /* SNIPPET_START: fsquare_times */
 
-static void fsquare_times(uint64_t *output, uint64_t *input, uint32_t count)
+static void fsquare_times(uint64_t *output, uint64_t *input, uint32_t count1)
 {
   FStar_UInt128_uint128 tmp[5U];
   for (uint32_t _i = 0U; _i < (uint32_t)5U; ++_i)
     tmp[_i] = FStar_UInt128_uint64_to_uint128((uint64_t)0U);
-  Hacl_Curve25519_51_fsquare_times(output, input, tmp, count);
+  Hacl_Curve25519_51_fsquare_times(output, input, tmp, count1);
 }
 
 /* SNIPPET_END: fsquare_times */
 
 /* SNIPPET_START: fsquare_times_inplace */
 
-static void fsquare_times_inplace(uint64_t *output, uint32_t count)
+static void fsquare_times_inplace(uint64_t *output, uint32_t count1)
 {
   FStar_UInt128_uint128 tmp[5U];
   for (uint32_t _i = 0U; _i < (uint32_t)5U; ++_i)
     tmp[_i] = FStar_UInt128_uint64_to_uint128((uint64_t)0U);
-  Hacl_Curve25519_51_fsquare_times(output, output, tmp, count);
+  Hacl_Curve25519_51_fsquare_times(output, output, tmp, count1);
 }
 
 /* SNIPPET_END: fsquare_times_inplace */
@@ -352,7 +352,7 @@ static void store_51(uint8_t *output, uint64_t *input)
 
 /* SNIPPET_START: point_add */
 
-static void point_add(uint64_t *out, uint64_t *p, uint64_t *q)
+static void point_add(uint64_t *out, uint64_t *p, uint64_t *q1)
 {
   uint64_t tmp[30U] = { 0U };
   uint64_t *tmp1 = tmp;
@@ -361,8 +361,8 @@ static void point_add(uint64_t *out, uint64_t *p, uint64_t *q)
   uint64_t *tmp40 = tmp + (uint32_t)15U;
   uint64_t *x1 = p;
   uint64_t *y1 = p + (uint32_t)5U;
-  uint64_t *x2 = q;
-  uint64_t *y2 = q + (uint32_t)5U;
+  uint64_t *x2 = q1;
+  uint64_t *y2 = q1 + (uint32_t)5U;
   memcpy(tmp1, x1, (uint32_t)5U * sizeof (x1[0U]));
   memcpy(tmp20, x2, (uint32_t)5U * sizeof (x2[0U]));
   fdifference(tmp1, y1);
@@ -381,8 +381,8 @@ static void point_add(uint64_t *out, uint64_t *p, uint64_t *q)
   uint64_t *tmp60 = tmp + (uint32_t)25U;
   uint64_t *z1 = p + (uint32_t)10U;
   uint64_t *t1 = p + (uint32_t)15U;
-  uint64_t *z2 = q + (uint32_t)10U;
-  uint64_t *t2 = q + (uint32_t)15U;
+  uint64_t *z2 = q1 + (uint32_t)10U;
+  uint64_t *t2 = q1 + (uint32_t)15U;
   times_2d(tmp10, t1);
   fmul0(tmp2, tmp10, t2);
   times_2(tmp10, z1);
@@ -464,7 +464,7 @@ static void point_double(uint64_t *out, uint64_t *p)
 /* SNIPPET_START: swap_conditional_step */
 
 static void
-swap_conditional_step(uint64_t *a_, uint64_t *b_, uint64_t *a, uint64_t *b, uint64_t swap)
+swap_conditional_step(uint64_t *a_, uint64_t *b_, uint64_t *a, uint64_t *b, uint64_t swap1)
 {
   uint64_t a0 = a[0U];
   uint64_t a1 = a[1U];
@@ -476,11 +476,11 @@ swap_conditional_step(uint64_t *a_, uint64_t *b_, uint64_t *a, uint64_t *b, uint
   uint64_t b2 = b[2U];
   uint64_t b3 = b[3U];
   uint64_t b4 = b[4U];
-  uint64_t x0 = (a0 ^ b0) & swap;
-  uint64_t x1 = (a1 ^ b1) & swap;
-  uint64_t x2 = (a2 ^ b2) & swap;
-  uint64_t x3 = (a3 ^ b3) & swap;
-  uint64_t x4 = (a4 ^ b4) & swap;
+  uint64_t x0 = (a0 ^ b0) & swap1;
+  uint64_t x1 = (a1 ^ b1) & swap1;
+  uint64_t x2 = (a2 ^ b2) & swap1;
+  uint64_t x3 = (a3 ^ b3) & swap1;
+  uint64_t x4 = (a4 ^ b4) & swap1;
   a_[0U] = a0 ^ x0;
   b_[0U] = b0 ^ x0;
   a_[1U] = a1 ^ x1;
@@ -500,23 +500,23 @@ swap_conditional_step(uint64_t *a_, uint64_t *b_, uint64_t *a, uint64_t *b, uint
 static void
 swap_conditional(uint64_t *a_, uint64_t *b_, uint64_t *a, uint64_t *b, uint64_t iswap)
 {
-  uint64_t swap = (uint64_t)0U - iswap;
-  swap_conditional_step(a_, b_, a, b, swap);
+  uint64_t swap1 = (uint64_t)0U - iswap;
+  swap_conditional_step(a_, b_, a, b, swap1);
   swap_conditional_step(a_ + (uint32_t)5U,
     b_ + (uint32_t)5U,
     a + (uint32_t)5U,
     b + (uint32_t)5U,
-    swap);
+    swap1);
   swap_conditional_step(a_ + (uint32_t)10U,
     b_ + (uint32_t)10U,
     a + (uint32_t)10U,
     b + (uint32_t)10U,
-    swap);
+    swap1);
   swap_conditional_step(a_ + (uint32_t)15U,
     b_ + (uint32_t)15U,
     a + (uint32_t)15U,
     b + (uint32_t)15U,
-    swap);
+    swap1);
 }
 
 /* SNIPPET_END: swap_conditional */
@@ -525,30 +525,30 @@ swap_conditional(uint64_t *a_, uint64_t *b_, uint64_t *a, uint64_t *b, uint64_t 
 
 static void swap_conditional_inplace(uint64_t *a, uint64_t *b, uint64_t iswap)
 {
-  uint64_t swap = (uint64_t)0U - iswap;
-  swap_conditional_step(a, b, a, b, swap);
+  uint64_t swap1 = (uint64_t)0U - iswap;
+  swap_conditional_step(a, b, a, b, swap1);
   swap_conditional_step(a + (uint32_t)5U,
     b + (uint32_t)5U,
     a + (uint32_t)5U,
     b + (uint32_t)5U,
-    swap);
+    swap1);
   swap_conditional_step(a + (uint32_t)10U,
     b + (uint32_t)10U,
     a + (uint32_t)10U,
     b + (uint32_t)10U,
-    swap);
+    swap1);
   swap_conditional_step(a + (uint32_t)15U,
     b + (uint32_t)15U,
     a + (uint32_t)15U,
     b + (uint32_t)15U,
-    swap);
+    swap1);
 }
 
 /* SNIPPET_END: swap_conditional_inplace */
 
 /* SNIPPET_START: point_mul */
 
-static void point_mul(uint64_t *result, uint8_t *scalar, uint64_t *q)
+static void point_mul(uint64_t *result, uint8_t *scalar, uint64_t *q1)
 {
   uint64_t b[80U] = { 0U };
   uint64_t *nq = b;
@@ -577,16 +577,16 @@ static void point_mul(uint64_t *result, uint8_t *scalar, uint64_t *q)
   t[2U] = (uint64_t)0U;
   t[3U] = (uint64_t)0U;
   t[4U] = (uint64_t)0U;
-  memcpy(nqpq, q, (uint32_t)20U * sizeof (q[0U]));
+  memcpy(nqpq, q1, (uint32_t)20U * sizeof (q1[0U]));
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)256U; i++)
   {
     uint64_t *nq1 = b;
     uint64_t *nqpq1 = b + (uint32_t)20U;
     uint64_t *nq2 = b + (uint32_t)40U;
     uint64_t *nqpq2 = b + (uint32_t)60U;
-    uint32_t q1 = ((uint32_t)255U - i) >> (uint32_t)3U;
+    uint32_t q2 = ((uint32_t)255U - i) >> (uint32_t)3U;
     uint32_t r = ((uint32_t)255U - i) & (uint32_t)7U;
-    uint8_t kq = scalar[q1];
+    uint8_t kq = scalar[q2];
     uint8_t i1 = kq >> r & (uint8_t)1U;
     swap_conditional_inplace(nq1, nqpq1, (uint64_t)i1);
     point_double(nq2, nq1);
@@ -602,11 +602,11 @@ static void point_mul(uint64_t *result, uint8_t *scalar, uint64_t *q)
 
 static void point_mul_g(uint64_t *result, uint8_t *scalar)
 {
-  uint64_t g[20U] = { 0U };
-  uint64_t *gx = g;
-  uint64_t *gy = g + (uint32_t)5U;
-  uint64_t *gz = g + (uint32_t)10U;
-  uint64_t *gt = g + (uint32_t)15U;
+  uint64_t g1[20U] = { 0U };
+  uint64_t *gx = g1;
+  uint64_t *gy = g1 + (uint32_t)5U;
+  uint64_t *gz = g1 + (uint32_t)10U;
+  uint64_t *gt1 = g1 + (uint32_t)15U;
   gx[0U] = (uint64_t)0x00062d608f25d51aU;
   gx[1U] = (uint64_t)0x000412a4b4f6592aU;
   gx[2U] = (uint64_t)0x00075b7171a4b31dU;
@@ -622,12 +622,12 @@ static void point_mul_g(uint64_t *result, uint8_t *scalar)
   gz[2U] = (uint64_t)0U;
   gz[3U] = (uint64_t)0U;
   gz[4U] = (uint64_t)0U;
-  gt[0U] = (uint64_t)0x00068ab3a5b7dda3U;
-  gt[1U] = (uint64_t)0x00000eea2a5eadbbU;
-  gt[2U] = (uint64_t)0x0002af8df483c27eU;
-  gt[3U] = (uint64_t)0x000332b375274732U;
-  gt[4U] = (uint64_t)0x00067875f0fd78b7U;
-  point_mul(result, scalar, g);
+  gt1[0U] = (uint64_t)0x00068ab3a5b7dda3U;
+  gt1[1U] = (uint64_t)0x00000eea2a5eadbbU;
+  gt1[2U] = (uint64_t)0x0002af8df483c27eU;
+  gt1[3U] = (uint64_t)0x000332b375274732U;
+  gt1[4U] = (uint64_t)0x00067875f0fd78b7U;
+  point_mul(result, scalar, g1);
 }
 
 /* SNIPPET_END: point_mul_g */
@@ -662,9 +662,9 @@ static void point_compress(uint8_t *z, uint64_t *p)
 
 /* SNIPPET_START: secret_expand */
 
-static void secret_expand(uint8_t *expanded, uint8_t *secret)
+static void secret_expand(uint8_t *expanded, uint8_t *secret1)
 {
-  Hacl_Hash_SHA2_hash_512(secret, (uint32_t)32U, expanded);
+  Hacl_Hash_SHA2_hash_512(secret1, (uint32_t)32U, expanded);
   uint8_t *h_low = expanded;
   uint8_t h_low0 = h_low[0U];
   uint8_t h_low31 = h_low[31U];
@@ -676,11 +676,11 @@ static void secret_expand(uint8_t *expanded, uint8_t *secret)
 
 /* SNIPPET_START: secret_to_public */
 
-static void secret_to_public(uint8_t *out, uint8_t *secret)
+static void secret_to_public(uint8_t *out, uint8_t *secret1)
 {
   uint8_t expanded_secret[64U] = { 0U };
   uint64_t res[20U] = { 0U };
-  secret_expand(expanded_secret, secret);
+  secret_expand(expanded_secret, secret1);
   uint8_t *a = expanded_secret;
   point_mul_g(res, a);
   point_compress(out, res);
@@ -1727,14 +1727,14 @@ static void store_56(uint8_t *out, uint64_t *b)
 
 /* SNIPPET_START: sha512_pre_msg */
 
-static void sha512_pre_msg(uint8_t *h, uint8_t *prefix, uint32_t len, uint8_t *input)
+static void sha512_pre_msg(uint8_t *h1, uint8_t *prefix, uint32_t len, uint8_t *input)
 {
   KRML_CHECK_SIZE(sizeof (uint8_t), len + (uint32_t)32U);
   uint8_t pre_msg[len + (uint32_t)32U];
   memset(pre_msg, 0U, (len + (uint32_t)32U) * sizeof (pre_msg[0U]));
   memcpy(pre_msg, prefix, (uint32_t)32U * sizeof (prefix[0U]));
   memcpy(pre_msg + (uint32_t)32U, input, len * sizeof (input[0U]));
-  Hacl_Hash_SHA2_hash_512(pre_msg, len + (uint32_t)32U, h);
+  Hacl_Hash_SHA2_hash_512(pre_msg, len + (uint32_t)32U, h1);
 }
 
 /* SNIPPET_END: sha512_pre_msg */
@@ -1743,7 +1743,7 @@ static void sha512_pre_msg(uint8_t *h, uint8_t *prefix, uint32_t len, uint8_t *i
 
 static void
 sha512_pre_pre2_msg(
-  uint8_t *h,
+  uint8_t *h1,
   uint8_t *prefix,
   uint8_t *prefix2,
   uint32_t len,
@@ -1756,7 +1756,7 @@ sha512_pre_pre2_msg(
   memcpy(pre_msg, prefix, (uint32_t)32U * sizeof (prefix[0U]));
   memcpy(pre_msg + (uint32_t)32U, prefix2, (uint32_t)32U * sizeof (prefix2[0U]));
   memcpy(pre_msg + (uint32_t)64U, input, len * sizeof (input[0U]));
-  Hacl_Hash_SHA2_hash_512(pre_msg, len + (uint32_t)64U, h);
+  Hacl_Hash_SHA2_hash_512(pre_msg, len + (uint32_t)64U, h1);
 }
 
 /* SNIPPET_END: sha512_pre_pre2_msg */
@@ -1766,9 +1766,9 @@ sha512_pre_pre2_msg(
 static void sha512_modq_pre(uint64_t *out, uint8_t *prefix, uint32_t len, uint8_t *input)
 {
   uint64_t tmp[10U] = { 0U };
-  uint8_t hash[64U] = { 0U };
-  sha512_pre_msg(hash, prefix, len, input);
-  load_64_bytes(tmp, hash);
+  uint8_t hash1[64U] = { 0U };
+  sha512_pre_msg(hash1, prefix, len, input);
+  load_64_bytes(tmp, hash1);
   barrett_reduction(out, tmp);
 }
 
@@ -1786,9 +1786,9 @@ sha512_modq_pre_pre2(
 )
 {
   uint64_t tmp[10U] = { 0U };
-  uint8_t hash[64U] = { 0U };
-  sha512_pre_pre2_msg(hash, prefix, prefix2, len, input);
-  load_64_bytes(tmp, hash);
+  uint8_t hash1[64U] = { 0U };
+  sha512_pre_pre2_msg(hash1, prefix, prefix2, len, input);
+  load_64_bytes(tmp, hash1);
   barrett_reduction(out, tmp);
 }
 
@@ -1807,12 +1807,12 @@ static void point_mul_g_compress(uint8_t *out, uint8_t *s)
 
 /* SNIPPET_START: sign_step_1 */
 
-static void sign_step_1(uint8_t *secret, uint8_t *tmp_bytes)
+static void sign_step_1(uint8_t *secret1, uint8_t *tmp_bytes)
 {
   uint8_t *a__ = tmp_bytes + (uint32_t)96U;
   uint8_t *apre = tmp_bytes + (uint32_t)224U;
   uint8_t *a = apre;
-  secret_expand(apre, secret);
+  secret_expand(apre, secret1);
   point_mul_g_compress(a__, a);
 }
 
@@ -1847,10 +1847,10 @@ static void sign_step_3(uint8_t *tmp_bytes, uint64_t *tmp_ints)
 
 static void sign_step_4(uint32_t len, uint8_t *msg, uint8_t *tmp_bytes, uint64_t *tmp_ints)
 {
-  uint64_t *h = tmp_ints + (uint32_t)60U;
+  uint64_t *h1 = tmp_ints + (uint32_t)60U;
   uint8_t *a__ = tmp_bytes + (uint32_t)96U;
   uint8_t *rs_ = tmp_bytes + (uint32_t)160U;
-  sha512_modq_pre_pre2(h, rs_, a__, len, msg);
+  sha512_modq_pre_pre2(h1, rs_, a__, len, msg);
 }
 
 /* SNIPPET_END: sign_step_4 */
@@ -1863,11 +1863,11 @@ static void sign_step_5(uint8_t *tmp_bytes, uint64_t *tmp_ints)
   uint64_t *aq = tmp_ints + (uint32_t)45U;
   uint64_t *ha = tmp_ints + (uint32_t)50U;
   uint64_t *s = tmp_ints + (uint32_t)55U;
-  uint64_t *h = tmp_ints + (uint32_t)60U;
+  uint64_t *h1 = tmp_ints + (uint32_t)60U;
   uint8_t *s_ = tmp_bytes + (uint32_t)192U;
   uint8_t *a = tmp_bytes + (uint32_t)224U;
   load_32_bytes(aq, a);
-  mul_modq(ha, h, aq);
+  mul_modq(ha, h1, aq);
   add_modq(s, r, ha);
   store_56(s_, s);
 }
@@ -1878,11 +1878,11 @@ static void sign_step_5(uint8_t *tmp_bytes, uint64_t *tmp_ints)
 
 static void pow2_252m2(uint64_t *out, uint64_t *z)
 {
-  uint64_t buf[20U] = { 0U };
-  uint64_t *a = buf;
-  uint64_t *t00 = buf + (uint32_t)5U;
-  uint64_t *b0 = buf + (uint32_t)10U;
-  uint64_t *c0 = buf + (uint32_t)15U;
+  uint64_t buf1[20U] = { 0U };
+  uint64_t *a = buf1;
+  uint64_t *t00 = buf1 + (uint32_t)5U;
+  uint64_t *b0 = buf1 + (uint32_t)10U;
+  uint64_t *c0 = buf1 + (uint32_t)15U;
   fsquare_times(a, z, (uint32_t)1U);
   fsquare_times(t00, a, (uint32_t)2U);
   fmul0(b0, t00, z);
@@ -1898,10 +1898,10 @@ static void pow2_252m2(uint64_t *out, uint64_t *z)
   fsquare_times_inplace(t00, (uint32_t)10U);
   fmul0(b0, t00, b0);
   fsquare_times(t00, b0, (uint32_t)50U);
-  uint64_t *a0 = buf;
-  uint64_t *t0 = buf + (uint32_t)5U;
-  uint64_t *b = buf + (uint32_t)10U;
-  uint64_t *c = buf + (uint32_t)15U;
+  uint64_t *a0 = buf1;
+  uint64_t *t0 = buf1 + (uint32_t)5U;
+  uint64_t *b = buf1 + (uint32_t)10U;
+  uint64_t *c = buf1 + (uint32_t)15U;
   fsquare_times(a0, z, (uint32_t)1U);
   fmul0(c, t0, b);
   fsquare_times(t0, c, (uint32_t)100U);
@@ -1951,7 +1951,7 @@ static void mul_modp_sqrt_m1(uint64_t *x)
 
 /* SNIPPET_START: recover_x */
 
-static bool recover_x(uint64_t *x, uint64_t *y, uint64_t sign)
+static bool recover_x(uint64_t *x, uint64_t *y, uint64_t sign1)
 {
   uint64_t tmp[20U] = { 0U };
   uint64_t *x2 = tmp;
@@ -1976,28 +1976,28 @@ static bool recover_x(uint64_t *x, uint64_t *y, uint64_t sign)
   else
   {
     uint64_t tmp1[25U] = { 0U };
-    uint64_t *one = tmp1;
+    uint64_t *one1 = tmp1;
     uint64_t *y2 = tmp1 + (uint32_t)5U;
     uint64_t *dyyi = tmp1 + (uint32_t)10U;
     uint64_t *dyy = tmp1 + (uint32_t)15U;
-    one[0U] = (uint64_t)1U;
-    one[1U] = (uint64_t)0U;
-    one[2U] = (uint64_t)0U;
-    one[3U] = (uint64_t)0U;
-    one[4U] = (uint64_t)0U;
+    one1[0U] = (uint64_t)1U;
+    one1[1U] = (uint64_t)0U;
+    one1[2U] = (uint64_t)0U;
+    one1[3U] = (uint64_t)0U;
+    one1[4U] = (uint64_t)0U;
     fsquare(y2, y);
     times_d(dyy, y2);
-    fsum(dyy, one);
+    fsum(dyy, one1);
     reduce_513(dyy);
     inverse(dyyi, dyy);
-    fdifference(one, y2);
-    fmul0(x2, one, dyyi);
+    fdifference(one1, y2);
+    fmul0(x2, one1, dyyi);
     reduce(x2);
     bool x2_is_0 = is_0(x2);
     uint8_t z;
     if (x2_is_0)
     {
-      if (sign == (uint64_t)0U)
+      if (sign1 == (uint64_t)0U)
       {
         x[0U] = (uint64_t)0U;
         x[1U] = (uint64_t)0U;
@@ -2061,7 +2061,7 @@ static bool recover_x(uint64_t *x, uint64_t *y, uint64_t sign)
         reduce(x32);
         uint64_t x0 = x32[0U];
         uint64_t x01 = x0 & (uint64_t)1U;
-        if (!(x01 == sign))
+        if (!(x01 == sign1))
         {
           t0[0U] = (uint64_t)0U;
           t0[1U] = (uint64_t)0U;
@@ -2092,9 +2092,9 @@ static bool point_decompress(uint64_t *out, uint8_t *s)
   uint64_t *x = tmp + (uint32_t)5U;
   uint8_t s31 = s[31U];
   uint8_t z = s31 >> (uint32_t)7U;
-  uint64_t sign = (uint64_t)z;
+  uint64_t sign1 = (uint64_t)z;
   load_51(y, s);
-  bool z0 = recover_x(x, y, sign);
+  bool z0 = recover_x(x, y, sign1);
   bool res;
   if (z0 == false)
   {
@@ -2189,13 +2189,13 @@ static bool eq(uint64_t *a, uint64_t *b)
 
 /* SNIPPET_START: point_equal_1 */
 
-static bool point_equal_1(uint64_t *p, uint64_t *q, uint64_t *tmp)
+static bool point_equal_1(uint64_t *p, uint64_t *q1, uint64_t *tmp)
 {
   uint64_t *pxqz = tmp;
   uint64_t *qxpz = tmp + (uint32_t)5U;
-  fmul0(pxqz, p, q + (uint32_t)10U);
+  fmul0(pxqz, p, q1 + (uint32_t)10U);
   reduce(pxqz);
-  fmul0(qxpz, q, p + (uint32_t)10U);
+  fmul0(qxpz, q1, p + (uint32_t)10U);
   reduce(qxpz);
   return eq(pxqz, qxpz);
 }
@@ -2204,13 +2204,13 @@ static bool point_equal_1(uint64_t *p, uint64_t *q, uint64_t *tmp)
 
 /* SNIPPET_START: point_equal_2 */
 
-static bool point_equal_2(uint64_t *p, uint64_t *q, uint64_t *tmp)
+static bool point_equal_2(uint64_t *p, uint64_t *q1, uint64_t *tmp)
 {
   uint64_t *pyqz = tmp + (uint32_t)10U;
   uint64_t *qypz = tmp + (uint32_t)15U;
-  fmul0(pyqz, p + (uint32_t)5U, q + (uint32_t)10U);
+  fmul0(pyqz, p + (uint32_t)5U, q1 + (uint32_t)10U);
   reduce(pyqz);
-  fmul0(qypz, q + (uint32_t)5U, p + (uint32_t)10U);
+  fmul0(qypz, q1 + (uint32_t)5U, p + (uint32_t)10U);
   reduce(qypz);
   return eq(pyqz, qypz);
 }
@@ -2219,13 +2219,13 @@ static bool point_equal_2(uint64_t *p, uint64_t *q, uint64_t *tmp)
 
 /* SNIPPET_START: point_equal */
 
-static bool point_equal(uint64_t *p, uint64_t *q)
+static bool point_equal(uint64_t *p, uint64_t *q1)
 {
   uint64_t tmp[20U] = { 0U };
-  bool b = point_equal_1(p, q, tmp);
+  bool b = point_equal_1(p, q1, tmp);
   if (b)
   {
-    return point_equal_2(p, q, tmp);
+    return point_equal_2(p, q1, tmp);
   }
   return false;
 }

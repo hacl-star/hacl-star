@@ -143,11 +143,11 @@ typedef struct EverCrypt_AEAD_state_s_s
 }
 EverCrypt_AEAD_state_s;
 
-typedef struct Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s_____s
+typedef struct EverCrypt_Hash_Incremental_state_s_s
 {
-  EverCrypt_Hash_state_s *block_state;
+  EverCrypt_Hash_state_s *hash_state;
   uint8_t *buf;
   uint64_t total_len;
 }
-Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____;
+EverCrypt_Hash_Incremental_state_s;
 

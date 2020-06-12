@@ -71,13 +71,13 @@ static void times_2(u64 *out, u64 *a)
 
 static void times_d(u64 *out, u64 *a)
 {
-  u64 d[5U] = { 0U };
-  d[0U] = (u64)0x00034dca135978a3U;
-  d[1U] = (u64)0x0001a8283b156ebdU;
-  d[2U] = (u64)0x0005e7a26001c029U;
-  d[3U] = (u64)0x000739c663a03cbbU;
-  d[4U] = (u64)0x00052036cee2b6ffU;
-  fmul(out, d, a);
+  u64 d1[5U] = { 0U };
+  d1[0U] = (u64)0x00034dca135978a3U;
+  d1[1U] = (u64)0x0001a8283b156ebdU;
+  d1[2U] = (u64)0x0005e7a26001c029U;
+  d1[3U] = (u64)0x000739c663a03cbbU;
+  d1[4U] = (u64)0x00052036cee2b6ffU;
+  fmul(out, d1, a);
 }
 
 static void times_2d(u64 *out, u64 *a)
@@ -102,7 +102,7 @@ static void fsquare(u64 *out, u64 *a)
   Hacl_Impl_Curve25519_Field51_fsqr(out, a, tmp);
 }
 
-static void fsquare_times(u64 *output, u64 *input, u32 count)
+static void fsquare_times(u64 *output, u64 *input, u32 count1)
 {
   uint128_t tmp[5U];
   {
@@ -110,10 +110,10 @@ static void fsquare_times(u64 *output, u64 *input, u32 count)
     for (_i = 0U; _i < (u32)5U; ++_i)
       tmp[_i] = (uint128_t)(u64)0U;
   }
-  Hacl_Curve25519_51_fsquare_times(output, input, tmp, count);
+  Hacl_Curve25519_51_fsquare_times(output, input, tmp, count1);
 }
 
-static void fsquare_times_inplace(u64 *output, u32 count)
+static void fsquare_times_inplace(u64 *output, u32 count1)
 {
   uint128_t tmp[5U];
   {
@@ -121,7 +121,7 @@ static void fsquare_times_inplace(u64 *output, u32 count)
     for (_i = 0U; _i < (u32)5U; ++_i)
       tmp[_i] = (uint128_t)(u64)0U;
   }
-  Hacl_Curve25519_51_fsquare_times(output, output, tmp, count);
+  Hacl_Curve25519_51_fsquare_times(output, output, tmp, count1);
 }
 
 static void inverse(u64 *out, u64 *a)
@@ -346,7 +346,7 @@ static void store_51(u8 *output, u64 *input)
   store_4(output, o0, o1, o2, o3);
 }
 
-static void point_add(u64 *out, u64 *p, u64 *q)
+static void point_add(u64 *out, u64 *p, u64 *q1)
 {
   u64 tmp[30U] = { 0U };
   u64 *tmp10 = tmp;
@@ -355,8 +355,8 @@ static void point_add(u64 *out, u64 *p, u64 *q)
   u64 *tmp40 = tmp + (u32)15U;
   u64 *x1 = p;
   u64 *y1 = p + (u32)5U;
-  u64 *x2 = q;
-  u64 *y2 = q + (u32)5U;
+  u64 *x2 = q1;
+  u64 *y2 = q1 + (u32)5U;
   u64 *tmp11;
   u64 *tmp2;
   u64 *tmp3;
@@ -393,8 +393,8 @@ static void point_add(u64 *out, u64 *p, u64 *q)
   tmp60 = tmp + (u32)25U;
   z1 = p + (u32)10U;
   t1 = p + (u32)15U;
-  z2 = q + (u32)10U;
-  t2 = q + (u32)15U;
+  z2 = q1 + (u32)10U;
+  t2 = q1 + (u32)15U;
   times_2d(tmp11, t1);
   fmul(tmp2, tmp11, t2);
   times_2(tmp11, z1);
@@ -475,7 +475,7 @@ static void point_double(u64 *out, u64 *p)
   fmul(z3, tmp4, tmp2);
 }
 
-static void swap_conditional_step(u64 *a_, u64 *b_, u64 *a, u64 *b, u64 swap)
+static void swap_conditional_step(u64 *a_, u64 *b_, u64 *a, u64 *b, u64 swap1)
 {
   u64 a0 = a[0U];
   u64 a1 = a[1U];
@@ -487,11 +487,11 @@ static void swap_conditional_step(u64 *a_, u64 *b_, u64 *a, u64 *b, u64 swap)
   u64 b2 = b[2U];
   u64 b3 = b[3U];
   u64 b4 = b[4U];
-  u64 x0 = (a0 ^ b0) & swap;
-  u64 x1 = (a1 ^ b1) & swap;
-  u64 x2 = (a2 ^ b2) & swap;
-  u64 x3 = (a3 ^ b3) & swap;
-  u64 x4 = (a4 ^ b4) & swap;
+  u64 x0 = (a0 ^ b0) & swap1;
+  u64 x1 = (a1 ^ b1) & swap1;
+  u64 x2 = (a2 ^ b2) & swap1;
+  u64 x3 = (a3 ^ b3) & swap1;
+  u64 x4 = (a4 ^ b4) & swap1;
   a_[0U] = a0 ^ x0;
   b_[0U] = b0 ^ x0;
   a_[1U] = a1 ^ x1;
@@ -506,23 +506,23 @@ static void swap_conditional_step(u64 *a_, u64 *b_, u64 *a, u64 *b, u64 swap)
 
 static void swap_conditional(u64 *a_, u64 *b_, u64 *a, u64 *b, u64 iswap)
 {
-  u64 swap = (u64)0U - iswap;
-  swap_conditional_step(a_, b_, a, b, swap);
-  swap_conditional_step(a_ + (u32)5U, b_ + (u32)5U, a + (u32)5U, b + (u32)5U, swap);
-  swap_conditional_step(a_ + (u32)10U, b_ + (u32)10U, a + (u32)10U, b + (u32)10U, swap);
-  swap_conditional_step(a_ + (u32)15U, b_ + (u32)15U, a + (u32)15U, b + (u32)15U, swap);
+  u64 swap1 = (u64)0U - iswap;
+  swap_conditional_step(a_, b_, a, b, swap1);
+  swap_conditional_step(a_ + (u32)5U, b_ + (u32)5U, a + (u32)5U, b + (u32)5U, swap1);
+  swap_conditional_step(a_ + (u32)10U, b_ + (u32)10U, a + (u32)10U, b + (u32)10U, swap1);
+  swap_conditional_step(a_ + (u32)15U, b_ + (u32)15U, a + (u32)15U, b + (u32)15U, swap1);
 }
 
 static void swap_conditional_inplace(u64 *a, u64 *b, u64 iswap)
 {
-  u64 swap = (u64)0U - iswap;
-  swap_conditional_step(a, b, a, b, swap);
-  swap_conditional_step(a + (u32)5U, b + (u32)5U, a + (u32)5U, b + (u32)5U, swap);
-  swap_conditional_step(a + (u32)10U, b + (u32)10U, a + (u32)10U, b + (u32)10U, swap);
-  swap_conditional_step(a + (u32)15U, b + (u32)15U, a + (u32)15U, b + (u32)15U, swap);
+  u64 swap1 = (u64)0U - iswap;
+  swap_conditional_step(a, b, a, b, swap1);
+  swap_conditional_step(a + (u32)5U, b + (u32)5U, a + (u32)5U, b + (u32)5U, swap1);
+  swap_conditional_step(a + (u32)10U, b + (u32)10U, a + (u32)10U, b + (u32)10U, swap1);
+  swap_conditional_step(a + (u32)15U, b + (u32)15U, a + (u32)15U, b + (u32)15U, swap1);
 }
 
-static void point_mul(u64 *result, u8 *scalar, u64 *q)
+static void point_mul(u64 *result, u8 *scalar, u64 *q1)
 {
   u64 b[80U] = { 0U };
   u64 *nq = b;
@@ -551,7 +551,7 @@ static void point_mul(u64 *result, u8 *scalar, u64 *q)
   t[2U] = (u64)0U;
   t[3U] = (u64)0U;
   t[4U] = (u64)0U;
-  memcpy(nqpq, q, (u32)20U * sizeof (q[0U]));
+  memcpy(nqpq, q1, (u32)20U * sizeof (q1[0U]));
   {
     u32 i;
     for (i = (u32)0U; i < (u32)256U; i++)
@@ -560,9 +560,9 @@ static void point_mul(u64 *result, u8 *scalar, u64 *q)
       u64 *nqpq1 = b + (u32)20U;
       u64 *nq2 = b + (u32)40U;
       u64 *nqpq2 = b + (u32)60U;
-      u32 q1 = ((u32)255U - i) >> (u32)3U;
+      u32 q2 = ((u32)255U - i) >> (u32)3U;
       u32 r = ((u32)255U - i) & (u32)7U;
-      u8 kq = scalar[q1];
+      u8 kq = scalar[q2];
       u8 i1 = kq >> r & (u8)1U;
       swap_conditional_inplace(nq1, nqpq1, (u64)i1);
       point_double(nq2, nq1);
@@ -575,11 +575,11 @@ static void point_mul(u64 *result, u8 *scalar, u64 *q)
 
 static void point_mul_g(u64 *result, u8 *scalar)
 {
-  u64 g[20U] = { 0U };
-  u64 *gx = g;
-  u64 *gy = g + (u32)5U;
-  u64 *gz = g + (u32)10U;
-  u64 *gt = g + (u32)15U;
+  u64 g1[20U] = { 0U };
+  u64 *gx = g1;
+  u64 *gy = g1 + (u32)5U;
+  u64 *gz = g1 + (u32)10U;
+  u64 *gt1 = g1 + (u32)15U;
   gx[0U] = (u64)0x00062d608f25d51aU;
   gx[1U] = (u64)0x000412a4b4f6592aU;
   gx[2U] = (u64)0x00075b7171a4b31dU;
@@ -595,12 +595,12 @@ static void point_mul_g(u64 *result, u8 *scalar)
   gz[2U] = (u64)0U;
   gz[3U] = (u64)0U;
   gz[4U] = (u64)0U;
-  gt[0U] = (u64)0x00068ab3a5b7dda3U;
-  gt[1U] = (u64)0x00000eea2a5eadbbU;
-  gt[2U] = (u64)0x0002af8df483c27eU;
-  gt[3U] = (u64)0x000332b375274732U;
-  gt[4U] = (u64)0x00067875f0fd78b7U;
-  point_mul(result, scalar, g);
+  gt1[0U] = (u64)0x00068ab3a5b7dda3U;
+  gt1[1U] = (u64)0x00000eea2a5eadbbU;
+  gt1[2U] = (u64)0x0002af8df483c27eU;
+  gt1[3U] = (u64)0x000332b375274732U;
+  gt1[4U] = (u64)0x00067875f0fd78b7U;
+  point_mul(result, scalar, g1);
 }
 
 static void point_compress(u8 *z, u64 *p)
@@ -631,12 +631,12 @@ static void point_compress(u8 *z, u64 *p)
   z[31U] = o31 + (xbyte << (u32)7U);
 }
 
-static void secret_expand(u8 *expanded, u8 *secret)
+static void secret_expand(u8 *expanded, u8 *secret1)
 {
   u8 *h_low;
   u8 h_low0;
   u8 h_low31;
-  Hacl_Hash_SHA2_hash_512(secret, (u32)32U, expanded);
+  Hacl_Hash_SHA2_hash_512(secret1, (u32)32U, expanded);
   h_low = expanded;
   h_low0 = h_low[0U];
   h_low31 = h_low[31U];
@@ -644,12 +644,12 @@ static void secret_expand(u8 *expanded, u8 *secret)
   h_low[31U] = (h_low31 & (u8)127U) | (u8)64U;
 }
 
-static void secret_to_public(u8 *out, u8 *secret)
+static void secret_to_public(u8 *out, u8 *secret1)
 {
   u8 expanded_secret[64U] = { 0U };
   u64 res[20U] = { 0U };
   u8 *a;
-  secret_expand(expanded_secret, secret);
+  secret_expand(expanded_secret, secret1);
   a = expanded_secret;
   point_mul_g(res, a);
   point_compress(out, res);
@@ -1444,7 +1444,7 @@ static void store_56(u8 *out, u64 *b)
   store32_le(out + (u32)28U, b4_);
 }
 
-static void sha512_pre_msg(u8 *h, u8 *prefix, u32 len, u8 *input)
+static void sha512_pre_msg(u8 *h1, u8 *prefix, u32 len, u8 *input)
 {
   KRML_CHECK_SIZE(sizeof (u8), len + (u32)32U);
   {
@@ -1452,11 +1452,11 @@ static void sha512_pre_msg(u8 *h, u8 *prefix, u32 len, u8 *input)
     memset(pre_msg, 0U, (len + (u32)32U) * sizeof (pre_msg[0U]));
     memcpy(pre_msg, prefix, (u32)32U * sizeof (prefix[0U]));
     memcpy(pre_msg + (u32)32U, input, len * sizeof (input[0U]));
-    Hacl_Hash_SHA2_hash_512(pre_msg, len + (u32)32U, h);
+    Hacl_Hash_SHA2_hash_512(pre_msg, len + (u32)32U, h1);
   }
 }
 
-static void sha512_pre_pre2_msg(u8 *h, u8 *prefix, u8 *prefix2, u32 len, u8 *input)
+static void sha512_pre_pre2_msg(u8 *h1, u8 *prefix, u8 *prefix2, u32 len, u8 *input)
 {
   KRML_CHECK_SIZE(sizeof (u8), len + (u32)64U);
   {
@@ -1465,25 +1465,25 @@ static void sha512_pre_pre2_msg(u8 *h, u8 *prefix, u8 *prefix2, u32 len, u8 *inp
     memcpy(pre_msg, prefix, (u32)32U * sizeof (prefix[0U]));
     memcpy(pre_msg + (u32)32U, prefix2, (u32)32U * sizeof (prefix2[0U]));
     memcpy(pre_msg + (u32)64U, input, len * sizeof (input[0U]));
-    Hacl_Hash_SHA2_hash_512(pre_msg, len + (u32)64U, h);
+    Hacl_Hash_SHA2_hash_512(pre_msg, len + (u32)64U, h1);
   }
 }
 
 static void sha512_modq_pre(u64 *out, u8 *prefix, u32 len, u8 *input)
 {
   u64 tmp[10U] = { 0U };
-  u8 hash[64U] = { 0U };
-  sha512_pre_msg(hash, prefix, len, input);
-  load_64_bytes(tmp, hash);
+  u8 hash1[64U] = { 0U };
+  sha512_pre_msg(hash1, prefix, len, input);
+  load_64_bytes(tmp, hash1);
   barrett_reduction(out, tmp);
 }
 
 static void sha512_modq_pre_pre2(u64 *out, u8 *prefix, u8 *prefix2, u32 len, u8 *input)
 {
   u64 tmp[10U] = { 0U };
-  u8 hash[64U] = { 0U };
-  sha512_pre_pre2_msg(hash, prefix, prefix2, len, input);
-  load_64_bytes(tmp, hash);
+  u8 hash1[64U] = { 0U };
+  sha512_pre_pre2_msg(hash1, prefix, prefix2, len, input);
+  load_64_bytes(tmp, hash1);
   barrett_reduction(out, tmp);
 }
 
@@ -1494,12 +1494,12 @@ static void point_mul_g_compress(u8 *out, u8 *s)
   point_compress(out, tmp);
 }
 
-static void sign_step_1(u8 *secret, u8 *tmp_bytes)
+static void sign_step_1(u8 *secret1, u8 *tmp_bytes)
 {
   u8 *a__ = tmp_bytes + (u32)96U;
   u8 *apre = tmp_bytes + (u32)224U;
   u8 *a = apre;
-  secret_expand(apre, secret);
+  secret_expand(apre, secret1);
   point_mul_g_compress(a__, a);
 }
 
@@ -1522,10 +1522,10 @@ static void sign_step_3(u8 *tmp_bytes, u64 *tmp_ints)
 
 static void sign_step_4(u32 len, u8 *msg, u8 *tmp_bytes, u64 *tmp_ints)
 {
-  u64 *h = tmp_ints + (u32)60U;
+  u64 *h1 = tmp_ints + (u32)60U;
   u8 *a__ = tmp_bytes + (u32)96U;
   u8 *rs_ = tmp_bytes + (u32)160U;
-  sha512_modq_pre_pre2(h, rs_, a__, len, msg);
+  sha512_modq_pre_pre2(h1, rs_, a__, len, msg);
 }
 
 static void sign_step_5(u8 *tmp_bytes, u64 *tmp_ints)
@@ -1534,22 +1534,22 @@ static void sign_step_5(u8 *tmp_bytes, u64 *tmp_ints)
   u64 *aq = tmp_ints + (u32)45U;
   u64 *ha = tmp_ints + (u32)50U;
   u64 *s = tmp_ints + (u32)55U;
-  u64 *h = tmp_ints + (u32)60U;
+  u64 *h1 = tmp_ints + (u32)60U;
   u8 *s_ = tmp_bytes + (u32)192U;
   u8 *a = tmp_bytes + (u32)224U;
   load_32_bytes(aq, a);
-  mul_modq(ha, h, aq);
+  mul_modq(ha, h1, aq);
   add_modq(s, r, ha);
   store_56(s_, s);
 }
 
 static void pow2_252m2(u64 *out, u64 *z)
 {
-  u64 buf[20U] = { 0U };
-  u64 *a0 = buf;
-  u64 *t00 = buf + (u32)5U;
-  u64 *b0 = buf + (u32)10U;
-  u64 *c0 = buf + (u32)15U;
+  u64 buf1[20U] = { 0U };
+  u64 *a0 = buf1;
+  u64 *t00 = buf1 + (u32)5U;
+  u64 *b0 = buf1 + (u32)10U;
+  u64 *c0 = buf1 + (u32)15U;
   u64 *a;
   u64 *t0;
   u64 *b;
@@ -1569,10 +1569,10 @@ static void pow2_252m2(u64 *out, u64 *z)
   fsquare_times_inplace(t00, (u32)10U);
   fmul(b0, t00, b0);
   fsquare_times(t00, b0, (u32)50U);
-  a = buf;
-  t0 = buf + (u32)5U;
-  b = buf + (u32)10U;
-  c = buf + (u32)15U;
+  a = buf1;
+  t0 = buf1 + (u32)5U;
+  b = buf1 + (u32)10U;
+  c = buf1 + (u32)15U;
   fsquare_times(a, z, (u32)1U);
   fmul(c, t0, b);
   fsquare_times(t0, c, (u32)100U);
@@ -1604,7 +1604,7 @@ static void mul_modp_sqrt_m1(u64 *x)
   fmul(x, x, sqrt_m1);
 }
 
-static bool recover_x(u64 *x, u64 *y, u64 sign)
+static bool recover_x(u64 *x, u64 *y, u64 sign1)
 {
   u64 tmp[20U] = { 0U };
   u64 *x2 = tmp;
@@ -1627,28 +1627,28 @@ static bool recover_x(u64 *x, u64 *y, u64 sign)
   else
   {
     u64 tmp1[25U] = { 0U };
-    u64 *one = tmp1;
+    u64 *one1 = tmp1;
     u64 *y2 = tmp1 + (u32)5U;
     u64 *dyyi = tmp1 + (u32)10U;
     u64 *dyy = tmp1 + (u32)15U;
-    one[0U] = (u64)1U;
-    one[1U] = (u64)0U;
-    one[2U] = (u64)0U;
-    one[3U] = (u64)0U;
-    one[4U] = (u64)0U;
+    one1[0U] = (u64)1U;
+    one1[1U] = (u64)0U;
+    one1[2U] = (u64)0U;
+    one1[3U] = (u64)0U;
+    one1[4U] = (u64)0U;
     fsquare(y2, y);
     times_d(dyy, y2);
-    fsum(dyy, one);
+    fsum(dyy, one1);
     reduce_513(dyy);
     inverse(dyyi, dyy);
-    fdifference(one, y2);
-    fmul(x2, one, dyyi);
+    fdifference(one1, y2);
+    fmul(x2, one1, dyyi);
     reduce(x2);
     {
       bool x2_is_0 = is_0(x2);
       u8 z;
       if (x2_is_0)
-        if (sign == (u64)0U)
+        if (sign1 == (u64)0U)
         {
           x[0U] = (u64)0U;
           x[1U] = (u64)0U;
@@ -1703,7 +1703,7 @@ static bool recover_x(u64 *x, u64 *y, u64 sign)
                 {
                   u64 x0 = x32[0U];
                   u64 x01 = x0 & (u64)1U;
-                  if (!(x01 == sign))
+                  if (!(x01 == sign1))
                   {
                     t0[0U] = (u64)0U;
                     t0[1U] = (u64)0U;
@@ -1737,12 +1737,12 @@ static bool point_decompress(u64 *out, u8 *s)
   u64 *x = tmp + (u32)5U;
   u8 s31 = s[31U];
   u8 z0 = s31 >> (u32)7U;
-  u64 sign = (u64)z0;
+  u64 sign1 = (u64)z0;
   bool z;
   bool res0;
   bool res;
   load_51(y, s);
-  z = recover_x(x, y, sign);
+  z = recover_x(x, y, sign1);
   if (z == false)
     res0 = false;
   else
@@ -1806,34 +1806,34 @@ static bool eq(u64 *a, u64 *b)
   return a0 == b0 && a1 == b1 && a2 == b2 && a3 == b3 && a4 == b4;
 }
 
-static bool point_equal_1(u64 *p, u64 *q, u64 *tmp)
+static bool point_equal_1(u64 *p, u64 *q1, u64 *tmp)
 {
   u64 *pxqz = tmp;
   u64 *qxpz = tmp + (u32)5U;
-  fmul(pxqz, p, q + (u32)10U);
+  fmul(pxqz, p, q1 + (u32)10U);
   reduce(pxqz);
-  fmul(qxpz, q, p + (u32)10U);
+  fmul(qxpz, q1, p + (u32)10U);
   reduce(qxpz);
   return eq(pxqz, qxpz);
 }
 
-static bool point_equal_2(u64 *p, u64 *q, u64 *tmp)
+static bool point_equal_2(u64 *p, u64 *q1, u64 *tmp)
 {
   u64 *pyqz = tmp + (u32)10U;
   u64 *qypz = tmp + (u32)15U;
-  fmul(pyqz, p + (u32)5U, q + (u32)10U);
+  fmul(pyqz, p + (u32)5U, q1 + (u32)10U);
   reduce(pyqz);
-  fmul(qypz, q + (u32)5U, p + (u32)10U);
+  fmul(qypz, q1 + (u32)5U, p + (u32)10U);
   reduce(qypz);
   return eq(pyqz, qypz);
 }
 
-static bool point_equal(u64 *p, u64 *q)
+static bool point_equal(u64 *p, u64 *q1)
 {
   u64 tmp[20U] = { 0U };
-  bool b = point_equal_1(p, q, tmp);
+  bool b = point_equal_1(p, q1, tmp);
   if (b)
-    return point_equal_2(p, q, tmp);
+    return point_equal_2(p, q1, tmp);
   return false;
 }
 

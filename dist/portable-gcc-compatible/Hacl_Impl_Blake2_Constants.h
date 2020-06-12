@@ -36,8 +36,7 @@
 
 /* SNIPPET_START: Hacl_Impl_Blake2_Constants_sigmaTable */
 
-static const
-uint32_t
+static uint32_t
 Hacl_Impl_Blake2_Constants_sigmaTable[160U] =
   {
     (uint32_t)0U, (uint32_t)1U, (uint32_t)2U, (uint32_t)3U, (uint32_t)4U, (uint32_t)5U,
@@ -73,8 +72,7 @@ Hacl_Impl_Blake2_Constants_sigmaTable[160U] =
 
 /* SNIPPET_START: Hacl_Impl_Blake2_Constants_ivTable_S */
 
-static const
-uint32_t
+static uint32_t
 Hacl_Impl_Blake2_Constants_ivTable_S[8U] =
   {
     (uint32_t)0x6A09E667U, (uint32_t)0xBB67AE85U, (uint32_t)0x3C6EF372U, (uint32_t)0xA54FF53AU,
@@ -85,8 +83,7 @@ Hacl_Impl_Blake2_Constants_ivTable_S[8U] =
 
 /* SNIPPET_START: Hacl_Impl_Blake2_Constants_ivTable_B */
 
-static const
-uint64_t
+static uint64_t
 Hacl_Impl_Blake2_Constants_ivTable_B[8U] =
   {
     (uint64_t)0x6A09E667F3BCC908U, (uint64_t)0xBB67AE8584CAA73BU, (uint64_t)0x3C6EF372FE94F82BU,
@@ -98,8 +95,7 @@ Hacl_Impl_Blake2_Constants_ivTable_B[8U] =
 
 /* SNIPPET_START: Hacl_Impl_Blake2_Constants_rTable_S */
 
-static const
-uint32_t
+static uint32_t
 Hacl_Impl_Blake2_Constants_rTable_S[4U] =
   { (uint32_t)16U, (uint32_t)12U, (uint32_t)8U, (uint32_t)7U };
 
@@ -107,8 +103,7 @@ Hacl_Impl_Blake2_Constants_rTable_S[4U] =
 
 /* SNIPPET_START: Hacl_Impl_Blake2_Constants_rTable_B */
 
-static const
-uint32_t
+static uint32_t
 Hacl_Impl_Blake2_Constants_rTable_B[4U] =
   { (uint32_t)32U, (uint32_t)24U, (uint32_t)16U, (uint32_t)63U };
 
