@@ -202,7 +202,7 @@ val update_multi_zero:
   (ensures (update_multi_s i acc S.empty == acc))
 
 let update_multi_zero () acc =
-  admit()
+  Spec.Hash.Lemmas.update_multi_zero (to_hash_alg a) acc
 
 val  update_multi_associative:
   i:index ->
@@ -219,7 +219,8 @@ val  update_multi_associative:
     update_multi_s i (update_multi_s i acc input1) input2 ==
       update_multi_s i acc input))
 
-let update_multi_associative () acc input1 input2 = admit()
+let update_multi_associative () acc input1 input2 =
+  Spec.Hash.Lemmas.update_multi_associative (to_hash_alg a) acc input1 input2
 
 val spec_is_incremental:
   i:index ->
@@ -232,12 +233,15 @@ val spec_is_incremental:
     let rem = S.length input % block_length in (**)
     let n, rem = if rem = 0 && n > 0 then n - 1, block_length else n, rem in (**)
     let bs, l = S.split input (n * block_length) in
-    FStar.Math.Lemmas.multiple_modulo_lemma n block_length;
+    (**) FStar.Math.Lemmas.multiple_modulo_lemma n block_length;
     let hash = update_multi_s i (init_s i key) bs in
     let hash = update_last_s i hash (n * block_length) l in
     finish_s i hash `S.equal` spec_s i key input))
 
-let spec_is_incremental () key input = admit()
+(* TODO HERE *)
+let spec_is_incremental () key input =
+  admit()
+//  Spec.Hash.hash_is_hash_incremental (to_hash_alg a) input
 
 #push-options "--ifuel 1"
 inline_for_extraction noextract

@@ -284,7 +284,7 @@ type block (index: Type0) =
       let rem = S.length input % block_length in (**)
       let n, rem = if rem = 0 && n > 0 then n - 1, block_length else n, rem in (**)
       let bs, l = S.split input (n * block_length) in
-      FStar.Math.Lemmas.multiple_modulo_lemma n block_length;
+      (**) FStar.Math.Lemmas.multiple_modulo_lemma n block_length;
       let hash = update_multi_s i (init_s i key) bs in
       let hash = update_last_s i hash (n * block_length) l in
       finish_s i key hash `S.equal` spec_s i key input))) ->
