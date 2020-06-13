@@ -48,10 +48,10 @@ let a = Spec.Blake2S
 inline_for_extraction noextract
 let m = M32
 
-(* let to_hash_alg (a : Spec.alg) =
+let to_hash_alg (a : Spec.alg) =
   match a with
   | Spec.Blake2S -> Hash.Blake2S
-  | Spec.Blake2B -> Hash.Blake2B *)
+  | Spec.Blake2B -> Hash.Blake2B
 
 let index = unit
 
@@ -182,7 +182,9 @@ inline_for_extraction noextract
 let output_len = U32.uint_to_t output_size
 
 let init_s () key : Hash.words_state (to_hash_alg a) =
-  Spec.blake2_init a key_size key output_size, extra_state_zero_element a
+  Spec.blake2_init a key_size key output_size,
+  Hash.nat_to_extra_state (to_hash_alg a) (Spec.compute_prev0 a key_size)
+  //extra_state_zero_element a
 let update_s () acc = Agile.update (to_hash_alg a)
 let update_multi_s () = Agile.update_multi (to_hash_alg a)
 let update_last_s () = Spec.Hash.Incremental.update_last (to_hash_alg a)
@@ -238,10 +240,8 @@ val spec_is_incremental:
     let hash = update_last_s i hash (n * block_length) l in
     finish_s i hash `S.equal` spec_s i key input))
 
-(* TODO HERE *)
 let spec_is_incremental () key input =
-  admit()
-//  Spec.Hash.hash_is_hash_incremental (to_hash_alg a) input
+  Spec.Hash.Incremental.blake2_is_hash_incremental (to_hash_alg a) key_size key input
 
 #push-options "--ifuel 1"
 inline_for_extraction noextract
@@ -276,30 +276,31 @@ let blake2s_32 : I.block unit =
       B.upd es 0ul (extra_state_zero_element a))
     (fun _ -> admit()) (* update_multi *)
     (* update_last *)
-(fun _ acc prev_len last last_len ->
-  [@inline_let] let wv = get_wv acc in
-  [@inline_let] let h = get_state_p acc in
-  [@inline_let] let es = get_extra_state_p acc in
-  (**) let h0 = ST.get () in
-  assert_norm(U64.v prev_len + U32.v last_len <= Spec.Blake2.max_limb a);
-  [@inline_let]
-  let prev_len' : Spec.Blake2.limb_t a =
-    match a with
-    | Spec.Blake2S -> Lib.IntTypes.(cast #U64 #PUB U64 SEC prev_len)
-    | Spec.Blake2B -> FStar.Int.Cast.Full.uint64_to_uint128 prev_len
-  in
-  Impl.blake2_update_last #a #m (Impl.blake2_update_block #a #m) #last_len
-                          wv h
-                          prev_len' last_len last;
-  B.upd es 0ul (extra_state_zero_element a);
-  (**) let h2 = ST.get () in
-  assert(
-    Core.state_v h2 h ==
-      Spec.blake2_update_last a (U64.v prev_len) (U32.v last_len) (B.as_seq h0 last)
-                              (Core.state_v h0 h));
-  assume(s_v h2 acc ==
-         update_last_s () (s_v h0 acc) (U64.v prev_len) (B.as_seq h0 last))
-  )
+    (fun _ acc prev_len last last_len ->
+      [@inline_let] let wv = get_wv acc in
+      [@inline_let] let h = get_state_p acc in
+      [@inline_let] let es = get_extra_state_p acc in
+      (**) let h0 = ST.get () in
+      assert_norm(U64.v prev_len + U32.v last_len <= Spec.Blake2.max_limb a);
+      [@inline_let]
+      let prev_len' : Spec.Blake2.limb_t a =
+        match a with
+        | Spec.Blake2S -> Lib.IntTypes.(cast #U64 #PUB U64 SEC prev_len)
+        | Spec.Blake2B -> FStar.Int.Cast.Full.uint64_to_uint128 prev_len
+      in
+      Impl.blake2_update_last #a #m (Impl.blake2_update_block #a #m) #last_len
+                              wv h
+                              prev_len' last_len last;
+      B.upd es 0ul (extra_state_zero_element a);
+      (**) let h2 = ST.get () in
+      assert(
+        Core.state_v h2 h ==
+          Spec.blake2_update_last a (U64.v prev_len) (U32.v last_len) (B.as_seq h0 last)
+                                  (Core.state_v h0 h));
+      assume(s_v h2 acc ==
+             update_last_s () (s_v h0 acc) (U64.v prev_len) (B.as_seq h0 last))
+      )
+
     (* finish *)
     (fun _ k acc dst ->
       [@inline_let] let wv = get_wv acc in
