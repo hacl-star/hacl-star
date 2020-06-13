@@ -41,7 +41,7 @@ let update_last_blake (a:hash_alg{is_blake a})
   Tot (words_state a)
   = let blocks, last_block, rem = last_split_blake a input in
     let h' = update_multi a hash blocks in
-    let ev' = extra_state_add_nat (snd h') rem in // (v (snd h' +. u64 rem))
+    let ev' = extra_state_add_nat (snd h') rem in
     let h_f = Spec.Blake2.blake2_update_block (to_blake_alg a) true (extra_state_v ev')
                                               last_block (fst h') in
     (h_f, nat_to_extra_state a 0)

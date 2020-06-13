@@ -232,8 +232,8 @@ val spec_is_incremental:
     let open FStar.Mul in
     let block_length = U32.v block_len in
     let n = S.length input / block_length in
-    let rem = S.length input % block_length in (**)
-    let n, rem = if rem = 0 && n > 0 then n - 1, block_length else n, rem in (**)
+    let rem = S.length input % block_length in
+    let n, rem = if rem = 0 && n > 0 then n - 1, block_length else n, rem in
     let bs, l = S.split input (n * block_length) in
     (**) FStar.Math.Lemmas.multiple_modulo_lemma n block_length;
     let hash = update_multi_s i (init_s i key) bs in
@@ -243,7 +243,7 @@ val spec_is_incremental:
 let spec_is_incremental () key input =
   Spec.Hash.Incremental.blake2_is_hash_incremental (to_hash_alg a) key_size key input
 
-#push-options "--ifuel 1"
+#push-options "--z3rlimit 500 --ifuel 1"
 inline_for_extraction noextract
 let blake2s_32 : I.block unit =
   I.Block
@@ -273,8 +273,21 @@ let blake2s_32 : I.block unit =
       [@inline_let] let h = get_state_p acc in
       [@inline_let] let es = get_extra_state_p acc in
       Impl.blake2_init #a #m (Impl.blake2_update_block #a #m) wv h key_len key output_len;
-      B.upd es 0ul (extra_state_zero_element a))
-    (fun _ -> admit()) (* update_multi *)
+      B.upd es 0ul (Hash.nat_to_extra_state (to_hash_alg a) (Spec.compute_prev0 a key_size)))
+
+    (* update_multi *)
+    (fun _ acc blocks len ->
+      [@inline_let] let wv = get_wv acc in
+      [@inline_let] let h = get_state_p acc in
+      [@inline_let] let es = get_extra_state_p acc in
+      (**) let h0 = ST.get () in
+      let prev = B.index es 0ul in
+      (* TODO: add the following assumption in the signature *)
+      assume(Spec.Hash.Definitions.extra_state_v prev + U32.v len <= Spec.Blake2.max_limb a);
+      Impl.blake2_update_blocks #a #m #len (Impl.blake2_update_block #a #m) wv h prev blocks;
+      admit()
+      )
+
     (* update_last *)
     (fun _ acc prev_len last last_len ->
       [@inline_let] let wv = get_wv acc in
@@ -305,7 +318,6 @@ let blake2s_32 : I.block unit =
     (fun _ k acc dst ->
       [@inline_let] let wv = get_wv acc in
       [@inline_let] let h = get_state_p acc in
-//      [@inline_let] let es = get_extra_state_p acc in
       Impl.blake2_finish #a #m output_len dst h)
 #pop-options
 
