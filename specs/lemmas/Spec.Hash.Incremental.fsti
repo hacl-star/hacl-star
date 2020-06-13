@@ -1,14 +1,25 @@
 module Spec.Hash.Incremental
 
 module S = FStar.Seq
+module Blake2 = Spec.Blake2
 
 open Spec.Agile.Hash
 open Spec.Hash.Definitions
 open Spec.Hash.PadFinish
 open FStar.Mul
+open Lib.Sequence
+open Lib.ByteSequence
 open Lib.IntTypes
 
 #reset-options "--fuel 0 --ifuel 0 --z3rlimit 100"
+
+let blake2_init (a : hash_alg{is_blake a})
+                (kk : size_nat{kk <= Blake2.max_key (to_blake_alg a)})
+                (k : lbytes kk) : init_t a =
+  let prev0 = Blake2.compute_prev0 (to_blake_alg a) kk in
+  match a with
+  | Blake2S -> Spec.Blake2.blake2_init Spec.Blake2.Blake2S kk k 32, u64 prev0
+  | Blake2B -> Spec.Blake2.blake2_init Spec.Blake2.Blake2B kk k 64, u128 prev0
 
 let last_split_blake (a:hash_alg{is_blake a}) (input:bytes)
   : Pure (bytes & bytes & nat)
@@ -75,13 +86,33 @@ let hash_incremental_body
     let s = update_multi a s bs in
     update_last a s (S.length bs) l
 
-let hash_incremental (a:hash_alg) (input:bytes{S.length input <= (max_input_length a)}):
+let hash_incremental (a:hash_alg) (input:bytes{S.length input <= max_input_length a}):
   Tot (hash:bytes{S.length hash = (hash_length a)})
 = let s = init a in
   let s = hash_incremental_body a input s in
   finish a s
 
+let blake2_hash_incremental
+  (a : hash_alg{is_blake a})
+  (kk : size_nat{kk <= Blake2.max_key (to_blake_alg a)})
+  (k : lbytes kk)
+  (input : bytes {if kk = 0 then S.length input <= max_input_length a
+                  else S.length input + block_length a <= max_input_length a}) =
+  let s = blake2_init a kk k in
+  let s = hash_incremental_body a input s in
+  finish a s
+
 let hash = Spec.Agile.Hash.hash
 
+val blake2_is_hash_incremental
+  (a: hash_alg{is_blake a})
+  (kk : size_nat{kk <= Blake2.max_key (to_blake_alg a)})
+  (k : lbytes kk)
+  (input : bytes {if kk = 0 then S.length input <= max_input_length a
+                  else S.length input + block_length a <= max_input_length a}) :
+  Lemma (
+    S.equal (Blake2.blake2 (to_blake_alg a) input kk k (Spec.Blake2.max_output (to_blake_alg a)))
+            (blake2_hash_incremental a kk k input))
+
 val hash_is_hash_incremental (a: hash_alg) (input: bytes { S.length input <= max_input_length a }):
-  Lemma (ensures (S.equal (hash a input) (hash_incremental a input)))
+  Lemma (S.equal (hash a input) (hash_incremental a input))

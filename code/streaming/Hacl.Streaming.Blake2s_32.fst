@@ -48,10 +48,10 @@ let a = Spec.Blake2S
 inline_for_extraction noextract
 let m = M32
 
-let to_hash_alg (a : Spec.alg) =
+(* let to_hash_alg (a : Spec.alg) =
   match a with
   | Spec.Blake2S -> Hash.Blake2S
-  | Spec.Blake2B -> Hash.Blake2B
+  | Spec.Blake2B -> Hash.Blake2B *)
 
 let index = unit
 

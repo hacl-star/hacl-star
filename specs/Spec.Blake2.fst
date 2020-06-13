@@ -475,7 +475,6 @@ let blake2_init a kk k nn =
     let key_block = update_sub key_block 0 kk k in
     blake2_update1 a 0 key_block 0 s end
 
-
 val blake2_finish:
     a:alg
   -> s:state a
