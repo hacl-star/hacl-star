@@ -272,22 +272,30 @@ let blake2s_32 : I.block unit =
       B.upd es 0ul (extra_state_zero_element a))
     (fun _ -> admit()) (* update_multi *)
     (* update_last *)
-    (fun _ acc last last_len total_len ->
-      [@inline_let] let wv = get_wv acc in
-      [@inline_let] let h = get_state_p acc in
-      [@inline_let] let es = get_extra_state_p acc in
-      let prevlen =
-        match a with
-        | Spec.Blake2S ->
-          U64.(total_len `sub` FStar.Int.Cast.uint32_to_uint64 last_len)
-        | Spec.Blake2B ->
-          FStar.Int.Cast.Full.uint64_to_uint128 (
-            U64.(total_len `sub` FStar.Int.Cast.uint32_to_uint64 last_len))
-      in
-      Impl.blake2_update_last #a #m (Impl.blake2_update_block #a #m) #last_len
-                              wv h
-                              prevlen last_len last
-      )
+(fun _ acc prev_len last last_len ->
+  [@inline_let] let wv = get_wv acc in
+  [@inline_let] let h = get_state_p acc in
+  [@inline_let] let es = get_extra_state_p acc in
+  (**) let h0 = ST.get () in
+  assert_norm(U64.v prev_len + U32.v last_len <= Spec.Blake2.max_limb a);
+  [@inline_let]
+  let prev_len' : Spec.Blake2.limb_t a =
+    match a with
+    | Spec.Blake2S -> Lib.IntTypes.(cast #U64 #PUB U64 SEC prev_len)
+    | Spec.Blake2B -> FStar.Int.Cast.Full.uint64_to_uint128 prev_len
+  in
+  Impl.blake2_update_last #a #m (Impl.blake2_update_block #a #m) #last_len
+                          wv h
+                          prev_len' last_len last;
+  B.upd es 0ul (extra_state_zero_element a);
+  (**) let h2 = ST.get () in
+  assert(
+    Core.state_v h2 h ==
+      Spec.blake2_update_last a (U64.v prev_len) (U32.v last_len) (B.as_seq h0 last)
+                              (Core.state_v h0 h));
+  assume(s_v h2 acc ==
+         update_last_s () (s_v h0 acc) (U64.v prev_len) (B.as_seq h0 last))
+  )
     (* finish *)
     (fun _ k acc dst ->
       [@inline_let] let wv = get_wv acc in
@@ -296,31 +304,9 @@ let blake2s_32 : I.block unit =
       Impl.blake2_finish #a #m output_len dst h)
 #pop-options
 
-//Hacl.Hash.Blake2.update_multi_blake2s
-inline_for_extraction noextract
-let blake2_update_last_t (al:Spec.alg) (ms:m_spec) =
-   #len:size_t
-  -> wv: state_p al ms
-  -> hash: state_p al ms
-  -> prev: Spec.limb_t al{v prev + v len <= Spec.max_limb al}
-  -> rem: size_t {v rem <= v len /\ v rem <= Spec.size_block al}
-  -> d: lbuffer uint8 len ->
-  Stack unit
-    (requires (fun h -> live h wv /\ live h hash /\ live h d /\ disjoint hash d /\ disjoint wv hash /\ disjoint wv d))
-    (ensures  (fun h0 _ h1 -> modifies (loc hash |+| loc wv) h0 h1
-                         /\ state_v h1 hash == Spec.blake2_update_last al (v prev) (v rem) h0.[|d|] (state_v h0 hash)))
-
-inline_for_extraction noextract
-val blake2_update_last: #al:Spec.alg -> #ms:m_spec -> blake2_update_block: blake2_update_block_t al ms -> blake2_update_last_t al ms
-
-inline_for_extraction noextract
-let blake2_init_t  (al:Spec.alg) (ms:m_spec) =
-    wv:state_p al ms
-  -> hash: state_p al ms
-  -> kk: size_t{v kk <= Spec.max_key al}
-  -> k: lbuffer uint8 kk
-  -> nn: size_t{1 <= v nn /\ v nn <= Spec.max_output al} ->
-  Stack unit
-    (requires (fun h -> live h wv /\ live h hash /\ live h k /\ disjoint hash k /\ disjoint wv hash /\ disjoint wv k))
-    (ensures  (fun h0 _ h1 -> modifies (loc hash |+| loc wv) h0 h1 /\
-			   state_v h1 hash == Spec.blake2_init al (v kk) h0.[|k|] (v nn)))
+/// The incremental hash functions instantiations
+let create_in = F.create_in blake2s_32 () s (I.optional_key () I.Erased (k key_size))
+let init = F.init blake2s_32 (G.hide ()) s (I.optional_key () I.Erased (k key_size))
+let update = F.update blake2s_32 (G.hide ()) s (I.optional_key () I.Erased (k key_size))
+let finish = F.mk_finish blake2s_32 () s (I.optional_key () I.Erased (k key_size))
+let free = F.free blake2s_32 (G.hide ()) s (I.optional_key () I.Erased (k key_size))
