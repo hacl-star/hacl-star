@@ -27,6 +27,7 @@ val ecp256dh_i:
 
 
 [@ (Comment "  This code is not side channel resistant on pubKey")]
+
 val ecp256dh_r:
     result:lbuffer uint8 (size 64)
   -> pubKey:lbuffer uint8 (size 64)

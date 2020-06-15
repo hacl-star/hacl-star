@@ -42,8 +42,7 @@ module Def = Spec.Hash.Definitions
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
-[@ (Comment "  This code is not side channel resistant")]
-(* This code is not side channel resistant *)
+
 inline_for_extraction noextract
 val isZero_uint64_nCT: f: felem -> Stack bool
   (requires fun h -> live h f)
@@ -370,6 +369,7 @@ let ecdsa_verification_step5 x pubKeyAsPoint u1 u2 tempBuffer =
 
 
 [@ (Comment "  This code is not side channel resistant")]
+
 val compare_felem_bool: a: felem -> b: felem -> Stack bool
   (requires fun h -> live h a /\ live h b)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\ r == (as_nat h0 a = as_nat h0 b))
@@ -391,6 +391,7 @@ let compare_felem_bool a b  =
   eq_u64_nCT a_1 b_1 &&
   eq_u64_nCT a_2 b_2 &&
   eq_u64_nCT a_3 b_3
+
 
 inline_for_extraction
 val ecdsa_verification_core:
@@ -482,7 +483,6 @@ val ecdsa_verification_:alg:hash_alg_ecdsa
       let s = as_nat h0 s in
       modifies0 h0 h1 /\
       result == Spec.ECDSA.ecdsa_verification_agile alg (pubKeyX, pubKeyY) r s (v mLen) (as_seq h0 m))
-
 
 let ecdsa_verification_ alg pubKey r s mLen m =
   assert_norm (pow2 32 < pow2 61);

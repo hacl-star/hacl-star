@@ -52,7 +52,7 @@ let ecp256dh_i result scalar =
 
 
 [@ (Comment "  This code is not side channel resistant on pubKey")]
-(* This code is not constant-time on pubKey *)
+
 val _ecp256dh_r:
     result:lbuffer uint64 (size 12) 
   -> pubKey:lbuffer uint64 (size 8) 
@@ -97,6 +97,7 @@ let _ecp256dh_r result pubKey scalar =
     pop_frame();
     u64 18446744073709551615
     end
+
 
 [@ (Comment "  This code is not side channel resistant on pubKey")]
 

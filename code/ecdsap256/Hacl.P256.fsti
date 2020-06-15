@@ -128,6 +128,7 @@ val ecdsa_sign_p256_without_hash: result: lbuffer uint8 (size 64)
 
 
 [@ (Comment "  This code is not side channel resistant")]
+
 val ecdsa_verif_p256_sha2:
     mLen: size_t
   -> m: lbuffer uint8 mLen
@@ -148,6 +149,7 @@ val ecdsa_verif_p256_sha2:
 
 
 [@ (Comment "  This code is not side channel resistant")]
+
 val ecdsa_verif_p256_sha384:
     mLen: size_t
   -> m: lbuffer uint8 mLen
@@ -168,6 +170,7 @@ val ecdsa_verif_p256_sha384:
 
 
 [@ (Comment "  This code is not side channel resistant")]
+
 val ecdsa_verif_p256_sha512:
     mLen: size_t
   -> m: lbuffer uint8 mLen
@@ -320,6 +323,7 @@ val ecp256dh_i:
 
 
 [@ (Comment "  This code is not side channel resistant on pub_key")]
+
 val ecp256dh_r:
     result:lbuffer uint8 (size 64)
   -> pubKey:lbuffer uint8 (size 64)
