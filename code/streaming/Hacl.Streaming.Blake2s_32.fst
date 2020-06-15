@@ -303,7 +303,19 @@ let update_last_eq prev_length last acc =
   assert(Hash.extra_state_v (Hash.extra_state_add_nat (snd acc) (S.length last)) ==
          Hash.extra_state_v (snd acc) + S.length last)
 
-open FStar.Tactics
+/// Equality between the state types defined by blake2s and the generic hash.
+/// The equality is not trivial because of subtleties linked to the way types are
+/// encoded for Z3.
+val state_types_equalities : unit ->
+  Lemma(Spec.Blake2.state a == Hash.words_state' (to_hash_alg a))
+
+let state_types_equalities () =
+  let open Lib.Sequence in
+  let open Lib.IntTypes in
+  assert(Spec.Blake2.state a == lseq (Spec.row a) 4);
+  assert_norm(Hash.words_state' (to_hash_alg a) == m:Seq.seq (Spec.row a) {Seq.length m = 4});
+  assert_norm(lseq (Spec.row a) 4 == m:Seq.seq (Spec.row a) {Seq.length m == 4});
+  assert(lseq (Spec.row a) 4 == m:Seq.seq (Spec.row a) {Seq.length m = 4})
 
 #push-options "--z3rlimit 500 --ifuel 1 --print_implicits"
 inline_for_extraction noextract
@@ -360,9 +372,8 @@ let blake2s_32 : I.block unit =
       (**)                  (Spec.blake2_update1 a (Hash.extra_state_v prev)
       (**)                  (B.as_seq h0 blocks))
       (**)                  (fst (s_v h0 acc)));
-      (* F* needs a little help to see equality between functions when the type
-       * parameters are not syntactically the same (even though they are equal) *)
-      (**) assume(Loops.repeati #(Spec.Blake2.state a) == Loops.repeati #(Hash.words_state' (to_hash_alg a)));
+      (**) state_types_equalities ();
+      (**) assert(Spec.Blake2.state a == Hash.words_state' (to_hash_alg a));
       (**) update_multi_eq (U32.v nb) (B.as_seq h0 blocks) (s_v h0 acc);
       (**) assert(s_v h3 acc == update_multi_s () (s_v h0 acc) (B.as_seq h0 blocks));
       (**) assert(B.(modifies (stateful_blake2s_32.I.footprint #() h0 acc) h0 h3)))
