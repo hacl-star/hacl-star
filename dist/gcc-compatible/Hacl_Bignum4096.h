@@ -32,7 +32,12 @@
 #define __Hacl_Bignum4096_H
 
 #include "Hacl_Kremlib.h"
-#include "Hacl_RSAPSS.h"
+#include "Hacl_Bignum.h"
+
+
+/************************/
+/* Arithmetic functions */
+/************************/
 
 
 /*
@@ -62,13 +67,39 @@ Write `a * b` in `res`.
 void Hacl_Bignum4096_mul(uint64_t *a, uint64_t *b, uint64_t *res);
 
 /*
-Write `a * b` in `res`.
+Write `a ^ b mod n1` in `res`.
 
-  The arguments a and b are meant to be 4096-bit bignums, i.e. uint64_t[64].
-  The outparam res is meant to be a 8192-bit bignum, i.e. uint64_t[128].
+  The arguments a, n1 and the outparam res are meant to be 4096-bit bignums, i.e. uint64_t[64].
+  The argument b is a bignum of any size, and bBits is an upper bound on the number of significant bits of b.
 */
 void
 Hacl_Bignum4096_mod_exp(uint64_t *n1, uint64_t *a, uint32_t bBits, uint64_t *b, uint64_t *res);
+
+
+/********************/
+/* Loads and stores */
+/********************/
+
+
+/*
+Load a bid-endian bignum from memory.
+
+  The argument b points to len bytes of valid memory.
+  The function returns a heap-allocated bignum of size sufficient to hold the
+    result of loading b, or NULL if the amount of required memory would exceed 4GB.
+
+  If the return value is non-null, clients must eventually call free(3) on it to
+  avoid memory leaks.
+*/
+uint64_t *Hacl_Bignum4096_new_bn_from_bytes_be(uint32_t len, uint8_t *b);
+
+/*
+Serialize a bignum into big-endian memory.
+
+  The argument b points to a 4096-bit bignum.
+  The outparam res points to 512 bytes of valid memory.
+*/
+void Hacl_Bignum4096_bn_to_bytes_be(uint64_t *b, uint8_t *res);
 
 #define __Hacl_Bignum4096_H_DEFINED
 #endif

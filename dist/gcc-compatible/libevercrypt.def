@@ -300,13 +300,11 @@ EXPORTS
   Hacl_IntTypes_Intrinsics_sub_borrow_u64
   Hacl_Bignum_Multiplication_mul_carry_add_u64_st
   Hacl_Bignum_bn_is_bit_set
-  Hacl_Bignum_Montgomery_mod_inv_u64
+  Hacl_Bignum_bn_bit_set
+  Hacl_Bignum_bn_is_less
+  Hacl_Bignum_ModInv64_mod_inv_u64
   Hacl_RSAPSS_rsapss_sign
   Hacl_RSAPSS_rsapss_verify
-  Hacl_Bignum_Convert_bn_from_bytes_be
-  Hacl_Bignum_Convert_bn_from_bytes_le
-  Hacl_Bignum_Convert_bn_to_bytes_be
-  Hacl_Bignum_Convert_bn_to_bytes_le
   Hacl_Chacha20_Vec128_chacha20_encrypt_128
   Hacl_Chacha20_Vec128_chacha20_decrypt_128
   Hacl_Chacha20Poly1305_128_aead_encrypt
@@ -328,6 +326,8 @@ EXPORTS
   Hacl_Bignum4096_sub
   Hacl_Bignum4096_mul
   Hacl_Bignum4096_mod_exp
+  Hacl_Bignum4096_new_bn_from_bytes_be
+  Hacl_Bignum4096_bn_to_bytes_be
   Hacl_Chacha20_Vec32_chacha20_encrypt_32
   Hacl_Chacha20_Vec32_chacha20_decrypt_32
   EverCrypt_Ed25519_sign

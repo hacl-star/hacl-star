@@ -24,6 +24,11 @@
 
 #include "Hacl_Bignum4096.h"
 
+/************************/
+/* Arithmetic functions */
+/************************/
+
+
 /*
 Write `a + b mod 2^4096` in `res`.
 
@@ -301,10 +306,10 @@ mod_exp_loop(
 }
 
 /*
-Write `a * b` in `res`.
+Write `a ^ b mod n1` in `res`.
 
-  The arguments a and b are meant to be 4096-bit bignums, i.e. uint64_t[64].
-  The outparam res is meant to be a 8192-bit bignum, i.e. uint64_t[128].
+  The arguments a, n1 and the outparam res are meant to be 4096-bit bignums, i.e. uint64_t[64].
+  The argument b is a bignum of any size, and bBits is an upper bound on the number of significant bits of b.
 */
 void
 Hacl_Bignum4096_mod_exp(uint64_t *n1, uint64_t *a, uint32_t bBits, uint64_t *b, uint64_t *res)
@@ -314,7 +319,7 @@ Hacl_Bignum4096_mod_exp(uint64_t *n1, uint64_t *a, uint32_t bBits, uint64_t *b, 
   acc[0U] = (uint64_t)1U;
   uint32_t rLen = (uint32_t)65U;
   uint32_t bLen = (bBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
-  uint64_t nInv_u64 = Hacl_Bignum_Montgomery_mod_inv_u64(n1[0U]);
+  uint64_t nInv_u64 = Hacl_Bignum_ModInv64_mod_inv_u64(n1[0U]);
   uint64_t r2[64U] = { 0U };
   precomp((uint32_t)4096U, n1, r2);
   KRML_CHECK_SIZE(sizeof (uint64_t), rLen);
@@ -328,5 +333,75 @@ Hacl_Bignum4096_mod_exp(uint64_t *n1, uint64_t *a, uint32_t bBits, uint64_t *b, 
   mod_exp_loop(n1, nInv_u64, bBits, bLen, b, aM, accM);
   from(n1, nInv_u64, accM, res);
   sub_mask(n1, res);
+}
+
+
+/********************/
+/* Loads and stores */
+/********************/
+
+
+/*
+Load a bid-endian bignum from memory.
+
+  The argument b points to len bytes of valid memory.
+  The function returns a heap-allocated bignum of size sufficient to hold the
+    result of loading b, or NULL if the amount of required memory would exceed 4GB.
+
+  If the return value is non-null, clients must eventually call free(3) on it to
+  avoid memory leaks.
+*/
+uint64_t *Hacl_Bignum4096_new_bn_from_bytes_be(uint32_t len, uint8_t *b)
+{
+  if
+  (
+    len
+    == (uint32_t)0U
+    || !((len - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U <= (uint32_t)536870911U)
+  )
+  {
+    return NULL;
+  }
+  KRML_CHECK_SIZE(sizeof (uint64_t), (len - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U);
+  uint64_t
+  *res = KRML_HOST_CALLOC((len - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U, sizeof (uint64_t));
+  uint64_t *res1 = res;
+  uint64_t *res2 = res1;
+  uint32_t bnLen = (len - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
+  uint32_t tmpLen = (uint32_t)8U * bnLen;
+  KRML_CHECK_SIZE(sizeof (uint8_t), tmpLen);
+  uint8_t tmp[tmpLen];
+  memset(tmp, 0U, tmpLen * sizeof (tmp[0U]));
+  memcpy(tmp + tmpLen - len, b, len * sizeof (b[0U]));
+  for (uint32_t i = (uint32_t)0U; i < bnLen; i++)
+  {
+    uint64_t *os = res2;
+    uint64_t u = load64_be(tmp + (bnLen - i - (uint32_t)1U) * (uint32_t)8U);
+    uint64_t x = u;
+    os[i] = x;
+  }
+  return res2;
+}
+
+/*
+Serialize a bignum into big-endian memory.
+
+  The argument b points to a 4096-bit bignum.
+  The outparam res points to 512 bytes of valid memory.
+*/
+void Hacl_Bignum4096_bn_to_bytes_be(uint64_t *b, uint8_t *res)
+{
+  uint32_t bnLen = ((uint32_t)64U - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
+  uint32_t tmpLen = (uint32_t)8U * bnLen;
+  KRML_CHECK_SIZE(sizeof (uint8_t), tmpLen);
+  uint8_t tmp[tmpLen];
+  memset(tmp, 0U, tmpLen * sizeof (tmp[0U]));
+  for (uint32_t i = (uint32_t)0U; i < bnLen; i++)
+  {
+    store64_be(tmp + i * (uint32_t)8U, b[bnLen - i - (uint32_t)1U]);
+  }
+  memcpy(res,
+    tmp + tmpLen - (uint32_t)64U,
+    (uint32_t)64U * sizeof ((tmp + tmpLen - (uint32_t)64U)[0U]));
 }
 

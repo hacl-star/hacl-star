@@ -33,20 +33,9 @@
 #define __Hacl_RSAPSS_H
 
 #include "Hacl_Kremlib.h"
+#include "Hacl_Bignum.h"
 #include "Hacl_Hash.h"
 
-
-uint64_t
-Hacl_Bignum_Multiplication_mul_carry_add_u64_st(
-  uint64_t c_in,
-  uint64_t a,
-  uint64_t b,
-  uint64_t *out
-);
-
-bool Hacl_Bignum_bn_is_bit_set(uint32_t len, uint64_t *input, uint32_t ind);
-
-uint64_t Hacl_Bignum_Montgomery_mod_inv_u64(uint64_t n0);
 
 void
 Hacl_RSAPSS_rsapss_sign(
@@ -71,14 +60,6 @@ Hacl_RSAPSS_rsapss_verify(
   uint32_t msgLen,
   uint8_t *msg
 );
-
-void Hacl_Bignum_Convert_bn_from_bytes_be(uint32_t len, uint8_t *b, uint64_t *res);
-
-void Hacl_Bignum_Convert_bn_from_bytes_le(uint32_t len, uint8_t *b, uint64_t *res);
-
-void Hacl_Bignum_Convert_bn_to_bytes_be(uint32_t len, uint64_t *b, uint8_t *res);
-
-void Hacl_Bignum_Convert_bn_to_bytes_le(uint32_t len, uint64_t *b, uint8_t *res);
 
 #define __Hacl_RSAPSS_H_DEFINED
 #endif

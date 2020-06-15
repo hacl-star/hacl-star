@@ -24,58 +24,6 @@ friend Hacl.Spec.Bignum.Montgomery
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-
-inline_for_extraction noextract
-val mod_inv_u64_:
-    alpha:uint64
-  -> beta:uint64
-  -> ub:lbuffer uint64 1ul
-  -> vb:lbuffer uint64 1ul ->
-  Stack unit
-  (requires fun h -> live h ub /\ live h vb /\ disjoint ub vb)
-  (ensures  fun h0 _ h1 -> modifies (loc ub |+| loc vb) h0 h1 /\
-    (let (us, vs) =
-      Loops.repeat_gen 64 S.mod_inv_u64_t
-	(S.mod_inv_u64_f alpha beta)
-	(LSeq.index (as_seq h0 ub) 0, LSeq.index (as_seq h0 vb) 0) in
-    LSeq.index (as_seq h1 ub) 0 == us /\ LSeq.index (as_seq h1 vb) 0 == vs))
-
-let mod_inv_u64_ alpha beta ub vb =
-  [@inline_let]
-  let refl h i : GTot (uint64 & uint64) = LSeq.index (as_seq h ub) 0, LSeq.index (as_seq h vb) 0 in
-  [@inline_let]
-  let footprint i = loc ub |+| loc vb in
-  [@inline_let]
-  let spec h0 = S.mod_inv_u64_f alpha beta in
-  let h0 = ST.get () in
-  loop h0 64ul S.mod_inv_u64_t refl footprint spec
-  (fun i ->
-    Loops.unfold_repeat_gen 64 S.mod_inv_u64_t (spec h0) (refl h0 0) (v i);
-    let us = ub.(0ul) in
-    let vs = vb.(0ul) in
-    let u_is_odd = u64 0 -. (us &. u64 1) in
-    let beta_if_u_is_odd = beta &. u_is_odd in
-    ub.(0ul) <- ((us ^. beta_if_u_is_odd) >>. 1ul) +. (us &. beta_if_u_is_odd);
-
-    let alpha_if_u_is_odd = alpha &. u_is_odd in
-    vb.(0ul) <- (vs >>. 1ul) +. alpha_if_u_is_odd
-  )
-
-
-[@CInline]
-let mod_inv_u64 n0 =
-  push_frame ();
-  let alpha = u64 1 <<. 63ul in
-  let beta = n0 in
-  let ub = create 1ul (u64 0) in
-  let vb = create 1ul (u64 0) in
-  ub.(0ul) <- u64 1;
-  vb.(0ul) <- u64 0;
-  mod_inv_u64_ alpha beta ub vb;
-  let res = vb.(0ul) in
-  pop_frame ();
-  res
-
 let precomp_r2_mod_n #nLen #_ modBits n res =
   memset res (u64 0) nLen;
   // Note here that BN.bit_set refers to the implicitly-defined projector for
@@ -143,7 +91,7 @@ let mont_reduction nLen n nInv_u64 c res =
 
 
 [@CInline]
-let to_mont #nLen #_ n nInv_u64 r2 a aM =
+let to_mont #nLen #_ mont_reduction n nInv_u64 r2 a aM =
   [@ inline_let]
   let rLen = nLen +. 1ul in
   push_frame ();
@@ -154,7 +102,7 @@ let to_mont #nLen #_ n nInv_u64 r2 a aM =
   update_sub_f h0 tmp 0ul (nLen +! nLen)
     (fun h -> SB.bn_mul (as_seq h0 a) (as_seq h0 r2))
     (fun _ -> BN.mul a r2 c);
-  mont_reduction nLen n nInv_u64 tmp aM; // aM = c % n
+  mont_reduction n nInv_u64 tmp aM; // aM = c % n
   pop_frame ()
 
 
@@ -191,7 +139,7 @@ let mont_mul #nLen #k mont_reduction n nInv_u64 aM bM resM =
 
 let precomp_runtime len = precomp_r2_mod_n #len #(BN.mk_runtime_bn len)
 let mont_reduction_runtime len = mont_reduction len
-let to_runtime len = to_mont #len #(BN.mk_runtime_bn len)
+let to_runtime len = to_mont #len #(BN.mk_runtime_bn len) (mont_reduction_runtime len)
 let from_runtime len = from_mont #len (mont_reduction_runtime len)
 let mul_runtime len = mont_mul #len #(BN.mk_runtime_bn len) (mont_reduction_runtime len)
 

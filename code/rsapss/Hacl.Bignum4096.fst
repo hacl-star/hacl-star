@@ -58,7 +58,7 @@ let reduction: BM.mont_reduction_st n =
   BM.mont_reduction n
 
 let to: BM.to_mont_st n =
-  BM.to_mont #n #bn_inst
+  BM.to_mont #n #bn_inst reduction
 
 let from: BM.from_mont_st n =
   BM.from_mont #n reduction
@@ -81,3 +81,7 @@ let mod_exp_loop: BE.bn_mod_exp_loop_st n =
 
 let mod_exp =
   BE.mk_bn_mod_exp 4096ul n #mont_inst mod_exp_loop
+
+let new_bn_from_bytes_be = Hacl.Bignum.Convert.new_bn_from_bytes_be
+
+let bn_to_bytes_be = Hacl.Bignum.Convert.mk_bn_to_bytes_be n

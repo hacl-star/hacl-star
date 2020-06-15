@@ -11,14 +11,9 @@ open Hacl.Bignum.Definitions
 module S = Hacl.Spec.Bignum.Montgomery
 module BN = Hacl.Bignum
 
+include Hacl.Bignum.ModInv64
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
-
-val mod_inv_u64: n0:uint64 ->
-  Stack uint64
-  (requires fun h -> True)
-  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    r == S.mod_inv_u64 n0)
 
 inline_for_extraction noextract
 let precomp_r2_mod_n_st (nLen: BN.meta_len) =
@@ -80,6 +75,7 @@ inline_for_extraction noextract
 val to_mont:
     #nLen:BN.meta_len
   -> (#[FStar.Tactics.Typeclasses.tcresolve ()] _ : BN.bn nLen)
+  -> mr: mont_reduction_st nLen
   -> to_mont_st nLen
 
 
