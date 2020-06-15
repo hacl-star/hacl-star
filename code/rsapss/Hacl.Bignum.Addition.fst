@@ -57,9 +57,8 @@ let bn_sub1 aLen a c_in res =
 
 
 inline_for_extraction noextract
-val bn_sub_eq_len:
-    aLen:size_t
-  -> a:lbignum aLen
+let bn_sub_eq_len_st (aLen:size_t) =
+    a:lbignum aLen
   -> b:lbignum aLen
   -> res:lbignum aLen ->
   Stack carry
@@ -69,6 +68,9 @@ val bn_sub_eq_len:
   (ensures  fun h0 c_out h1 -> modifies (loc res) h0 h1 /\
     (let c, r = SL.generate_elems #uint64 #carry (v aLen) (v aLen) (S.bn_sub_f (as_seq h0 a) (as_seq h0 b)) (u64 0) in
     c_out == c /\ as_seq h1 res == r))
+
+inline_for_extraction noextract
+val bn_sub_eq_len: aLen:size_t -> bn_sub_eq_len_st aLen
 
 let bn_sub_eq_len aLen a b res =
   push_frame ();
@@ -169,9 +171,8 @@ let bn_add1 aLen a c_in res =
 
 
 inline_for_extraction noextract
-val bn_add_eq_len:
-    aLen:size_t
-  -> a:lbignum aLen
+let bn_add_eq_len_st (aLen:size_t) =
+    a:lbignum aLen
   -> b:lbignum aLen
   -> res:lbignum aLen ->
   Stack carry
@@ -181,6 +182,9 @@ val bn_add_eq_len:
   (ensures  fun h0 c_out h1 -> modifies (loc res) h0 h1 /\
     (let c, r = SL.generate_elems #uint64 #carry (v aLen) (v aLen) (S.bn_add_f (as_seq h0 a) (as_seq h0 b)) (u64 0) in
     c_out == c /\ as_seq h1 res == r))
+
+inline_for_extraction noextract
+val bn_add_eq_len: aLen:size_t -> bn_add_eq_len_st aLen
 
 let bn_add_eq_len aLen a b res =
   push_frame ();

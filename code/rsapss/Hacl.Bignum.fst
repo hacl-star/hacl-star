@@ -50,8 +50,8 @@ let bn_add_mod_n len n a b res =
   map2T len res (Hacl.Spec.Bignum.Definitions.mask_select c) res tmp;
   pop_frame()
 
-let bn_mul aLen a bLen b res =
-  Hacl.Bignum.Multiplication.bn_mul aLen a bLen b res
+let bn_mul aLen a bLen b =
+  Hacl.Bignum.Multiplication.bn_mul aLen a bLen b
 
 let bn_mul1_lshift_add_in_place aLen a b j res =
   Hacl.Bignum.Multiplication.bn_mul1_lshift_add aLen a b j res
@@ -65,7 +65,7 @@ let bn_sub_mask len n a =
   let mod_mask = create len (u64 0) in
   let mask = Lib.ByteBuffer.buf_eq_mask n a len mask in
   mapT len mod_mask (logand mask) n;
-  let _ = Hacl.Bignum.Addition.bn_sub len a len mod_mask a in
+  let _ = Hacl.Bignum.Addition.bn_sub_eq_len len a mod_mask a in
   pop_frame ()
 
 [@CInline]

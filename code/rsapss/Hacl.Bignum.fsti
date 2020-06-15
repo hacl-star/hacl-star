@@ -87,9 +87,8 @@ val bn_sub:
 
 
 inline_for_extraction noextract
-val bn_add_mod_n:
-    len:size_t{v len > 0}
-  -> n:lbignum len
+let bn_add_mod_n_st (len:size_t{v len > 0}) =
+    n:lbignum len
   -> a:lbignum len
   -> b:lbignum len
   -> res:lbignum len ->
@@ -101,14 +100,15 @@ val bn_add_mod_n:
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_seq h1 res == S.bn_add_mod_n (as_seq h0 n) (as_seq h0 a) (as_seq h0 b))
 
+inline_for_extraction noextract
+val bn_add_mod_n: len:size_t{v len > 0} -> bn_add_mod_n_st len
 
 inline_for_extraction noextract
-val bn_mul:
-    aLen:size_t
-  -> a:lbignum aLen
-  -> bLen:size_t{v aLen + v bLen <= max_size_t}
-  -> b:lbignum bLen
-  -> res:lbignum (aLen +! bLen) ->
+let bn_mul_st (#aLen:size_t)
+  (a:lbignum aLen)
+  (#bLen:size_t{v aLen + v bLen <= max_size_t})
+  (b:lbignum bLen) =
+  res:lbignum (aLen +! bLen) ->
   Stack unit
   (requires fun h ->
     live h a /\ live h b /\ live h res /\
@@ -116,6 +116,13 @@ val bn_mul:
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_seq h1 res == S.bn_mul (as_seq h0 a) (as_seq h0 b))
 
+inline_for_extraction noextract
+val bn_mul:
+    aLen:size_t
+  -> a:lbignum aLen
+  -> bLen:size_t{v aLen + v bLen <= max_size_t}
+  -> b:lbignum bLen
+  -> bn_mul_st a b
 
 inline_for_extraction noextract
 val bn_mul1_lshift_add_in_place:
@@ -144,15 +151,16 @@ val bn_rshift:
 
 
 inline_for_extraction noextract
-val bn_sub_mask:
-    len:size_t{v len > 0}
-  -> n:lbignum len
+let bn_sub_mask_st (len:size_t{v len > 0}) =
+    n:lbignum len
   -> a:lbignum len ->
   Stack unit
   (requires fun h -> live h n /\ live h a /\ disjoint n a)
   (ensures  fun h0 _ h1 -> modifies (loc a) h0 h1 /\
     as_seq h1 a == S.bn_sub_mask (as_seq h0 n) (as_seq h0 a))
 
+inline_for_extraction noextract
+val bn_sub_mask: len:size_t{v len > 0} -> bn_sub_mask_st len
 
 val bn_is_less:
     len:size_t
@@ -176,15 +184,65 @@ val bn_is_bit_set:
   (ensures  fun h0 r h1 -> h0 == h1 /\
     r == S.bn_is_bit_set (as_seq h0 b) (v i))
 
-
-val bn_bit_set:
-    len:size_t
-  -> b:lbignum len
+/// A now common pattern in HACL*: inline_for_extraction and stateful type
+/// abbreviations, to maximize code sharing.
+inline_for_extraction noextract
+let bn_bit_set_st (len:size_t) =
+    b:lbignum len
   -> i:size_t{v i / 64 < v len} ->
   Stack unit
   (requires fun h -> live h b)
   (ensures  fun h0 _ h1 -> modifies (loc b) h0 h1 /\
     as_seq h1 b == S.bn_bit_set (as_seq h0 b) (v i))
+
+val bn_bit_set:
+    len:size_t -> bn_bit_set_st len
+
+/// Start of the len-based specialization infrastructure.
+///
+/// Essentially, we wish to describe a type class of basic bignum operations
+/// needed to implement Montgomery reduction. This will allow us to generate
+/// specialized versions of modular exponentiation for a given bignum size.
+///
+/// This is done "by hand" because the specialization pattern is more
+/// complicated than other pieces of code (chacha, poly, curve), meaning I don't
+/// (yet) know how to automate it with a tactic. So, a type class seems like the
+/// most efficient way to go about it.
+///
+/// The operations of the type class were found by essentially reading the code,
+/// writing down which operations from Hacl.Bignum are (transitively) needed to
+/// implement modular exponentiation, and figuring out for each call-site
+/// whether they can be specialized for the bignum size, or whether they have to
+/// been inline-for-extraction'd.
+
+#set-options "--fuel 0 --ifuel 0"
+
+let meta_len = len: size_t { 0 < v len /\ 128 * (v len + 1) < max_size_t }
+
+/// This type class is entirely meta-level and will not appear after partial
+/// evaluation in the resulting C code. Clients can take this type class as a
+/// parameter if they want the benefits of a function set specialized for a
+/// given bignum length.
+inline_for_extraction noextract
+class bn (len: meta_len) = {
+  bit_set: bn_bit_set_st len;
+  add_mod_n: bn_add_mod_n_st len;
+  mul: a:lbignum len -> b:lbignum len -> bn_mul_st a b;
+  mul': a:lbignum (len +. 1ul) -> b:lbignum (len +. 1ul) -> bn_mul_st a b;
+  sub_mask: bn_sub_mask_st len;
+}
+
+/// This is a default implementation that *will* generate code depending on
+/// `len` at run-time! Only use if you want to generate run-time generic
+/// functions!
+inline_for_extraction noextract
+let mk_runtime_bn (len: meta_len) = {
+  bit_set = bn_bit_set len;
+  add_mod_n = bn_add_mod_n len;
+  mul = (fun a b -> bn_mul len a len b);
+  mul' = (fun a b -> bn_mul (len +. 1ul) a (len +. 1ul) b);
+  sub_mask = bn_sub_mask len;
+}
 
 ///
 ///  Conversion functions for bignum

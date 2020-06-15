@@ -14,7 +14,7 @@ open Hacl.Spec.Lib
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 val lemma_mul_carry_add_64: a:uint64 -> b:uint64 -> c:uint64 -> d:uint64 ->
-  Lemma (uint_v a * uint_v b + uint_v c + uint_v d < pow2 128)
+    Lemma (uint_v a * uint_v b + uint_v c + uint_v d < pow2 128)
 let lemma_mul_carry_add_64 a b c d =
   let n = pow2 64 in
   //assert (uint_v a <= n - 1 /\ uint_v b <= n - 1 /\ uint_v c <= n - 1 /\ uint_v d <= n - 1);
