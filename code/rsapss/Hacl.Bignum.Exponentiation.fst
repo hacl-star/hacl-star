@@ -112,7 +112,7 @@ val mk_bn_mod_exp:
 let mk_bn_mod_exp modBits nLen #_ bn_mod_exp_loop n a bBits b res =
   push_frame ();
   let acc  = create nLen (u64 0) in
-  acc.(0ul) <- u64 1;
+  BN.bn_from_uint nLen (u64 1) acc;
   bn_mod_exp_mont modBits nLen bn_mod_exp_loop n a acc bBits b res;
   pop_frame ()
 

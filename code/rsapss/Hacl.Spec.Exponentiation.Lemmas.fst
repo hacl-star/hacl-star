@@ -659,21 +659,19 @@ let rec mod_exp_mont_ll_lemma_loop rLen n d mu bBits b i aM0 accM0 =
     () end
 
 
-val mod_exp_mont_ll_lemma_eval:
+val mod_exp_mont_ll_lemma_eval_aux:
   rLen:nat -> n:pos -> d:int -> mu:nat -> a:nat -> bBits:nat -> b:pos{b < pow2 bBits} -> Lemma
   (requires (1 + n * mu) % pow2 64 == 0 /\ pow2 (64 * rLen) * d % n == 1)
-  (ensures  mod_exp_mont_ll rLen n mu a bBits b % n == pow a b % n)
+  (ensures
+   (let aM0 = M.to_mont rLen n mu a in
+    let accM0 = M.to_mont rLen n mu 1 in
+    pow aM0 b * accM0 * pow d b % n == pow a b * accM0 % n))
 
-let mod_exp_mont_ll_lemma_eval rLen n d mu a bBits b =
+let mod_exp_mont_ll_lemma_eval_aux rLen n d mu a bBits b =
   let r = pow2 (64 * rLen) in
   let aM0 = M.to_mont rLen n mu a in
   let accM0 = M.to_mont rLen n mu 1 in
-  let (aM1, accM1) : tuple2 nat nat = Loops.repeati bBits (mod_exp_f_ll rLen n mu bBits b) (aM0, accM0) in
-  mod_exp_mont_ll_lemma_loop rLen n d mu bBits b bBits aM0 accM0;
 
-  mod_exp_mont_lemma n d bBits b bBits aM0 accM0;
-  Math.Lemmas.small_mod b (pow2 bBits);
-  assert (accM1 % n == pow aM0 b * accM0 * pow d b % n);
   calc (==) {
     pow aM0 b * accM0 * pow d b % n;
     (==) { Math.Lemmas.paren_mul_right (pow aM0 b) accM0 (pow d b) }
@@ -690,7 +688,25 @@ let mod_exp_mont_ll_lemma_eval rLen n d mu a bBits b =
     pow (a * r % n) b * accM0 * pow d b % n;
     (==) { mont_mod_exp_lemma_before_to_mont n r d bBits b a accM0 }
     pow a b * accM0 % n;
-  };
+  }
+
+
+val mod_exp_mont_ll_lemma_eval:
+  rLen:nat -> n:pos -> d:int -> mu:nat -> a:nat -> bBits:nat -> b:pos{b < pow2 bBits} -> Lemma
+  (requires (1 + n * mu) % pow2 64 == 0 /\ pow2 (64 * rLen) * d % n == 1)
+  (ensures  mod_exp_mont_ll rLen n mu a bBits b % n == pow a b % n)
+
+let mod_exp_mont_ll_lemma_eval rLen n d mu a bBits b =
+  let r = pow2 (64 * rLen) in
+  let aM0 = M.to_mont rLen n mu a in
+  let accM0 = M.to_mont rLen n mu 1 in
+  let (aM1, accM1) : tuple2 nat nat = Loops.repeati bBits (mod_exp_f_ll rLen n mu bBits b) (aM0, accM0) in
+  mod_exp_mont_ll_lemma_loop rLen n d mu bBits b bBits aM0 accM0;
+
+  mod_exp_mont_lemma n d bBits b bBits aM0 accM0;
+  Math.Lemmas.small_mod b (pow2 bBits);
+  assert (accM1 % n == pow aM0 b * accM0 * pow d b % n);
+  mod_exp_mont_ll_lemma_eval_aux rLen n d mu a bBits b;
   assert (accM1 % n == pow a b * accM0 % n);
   let res = M.from_mont rLen n mu accM1 in
   M.from_mont_lemma rLen n d mu accM1;
@@ -709,6 +725,7 @@ let mod_exp_mont_ll_lemma_eval rLen n d mu a bBits b =
     pow a b % n;
   };
   assert (accM1 * d % n == pow a b % n)
+
 
 ///
 ///  Fits-related lemmas

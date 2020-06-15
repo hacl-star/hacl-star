@@ -13,14 +13,6 @@ module BSeq = Lib.ByteSequence
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-val bn_mask_lt: #len:size_nat -> a:lbignum len -> b:lbignum len -> uint64
-
-val bn_mask_lt_lemma: #len:size_nat -> a:lbignum len -> b:lbignum len -> Lemma
-  (let mask = bn_mask_lt a b in
-   (v mask = 0 \/ v mask = v (ones U64 SEC)) /\
-   (if v mask = 0 then bn_v a >= bn_v b else bn_v a < bn_v b))
-
-
 val bn_add: #aLen:size_nat -> #bLen:size_nat{bLen <= aLen} -> a:lbignum aLen -> b:lbignum bLen -> carry & lbignum aLen
 
 val bn_add_lemma: #aLen:size_nat -> #bLen:size_nat{bLen <= aLen} -> a:lbignum aLen -> b:lbignum bLen ->
@@ -32,11 +24,13 @@ val bn_sub: #aLen:size_nat -> #bLen:size_nat{bLen <= aLen} -> a:lbignum aLen -> 
 val bn_sub_lemma: #aLen:size_nat -> #bLen:size_nat{bLen <= aLen} -> a:lbignum aLen -> b:lbignum bLen ->
   Lemma (let (c_out, res) = bn_sub a b in bn_v res - v c_out * pow2 (64 * aLen) == bn_v a - bn_v b)
 
+
 val bn_add_mod_n: #len:size_nat -> n:lbignum len -> a:lbignum len -> b:lbignum len -> lbignum len
 
 val bn_add_mod_n_lemma: #len:size_nat -> n:lbignum len -> a:lbignum len -> b:lbignum len -> Lemma
   (requires bn_v a < bn_v n /\ bn_v b < bn_v n)
   (ensures  bn_v (bn_add_mod_n n a b) == (bn_v a + bn_v b) % bn_v n)
+
 
 val bn_mul: #aLen:size_nat -> #bLen:size_nat{aLen + bLen <= max_size_t} -> a:lbignum aLen -> b:lbignum bLen -> lbignum (aLen + bLen)
 
@@ -79,12 +73,6 @@ val bn_sub_mask_lemma: #len:size_nat -> n:lbignum len -> a:lbignum len -> Lemma
   (ensures  bn_v (bn_sub_mask n a) == (if bn_v a = bn_v n then 0 else bn_v a))
 
 
-val bn_is_less: #len:size_nat -> a:lbignum len -> b:lbignum len -> bool
-
-val bn_is_less_lemma: #len:size_nat -> a:lbignum len -> b:lbignum len -> Lemma
-  (bn_is_less a b == (bn_v a < bn_v b))
-
-
 ///
 ///  Get and set i-th bit of a bignum
 ///
@@ -94,6 +82,7 @@ val bn_is_bit_set: #len:size_nat -> b:lbignum len -> i:size_nat{i / 64 < len} ->
 val bn_is_bit_set_lemma: #len:size_nat -> b:lbignum len -> i:size_nat{i / 64 < len} ->
   Lemma (bn_is_bit_set b i == (bn_v b / pow2 i % 2 = 1))
 
+
 val bn_bit_set: #len:size_nat -> b:lbignum len -> i:size_nat{i / 64 < len} -> lbignum len
 
 val bn_bit_set_lemma: #len:size_nat -> b:lbignum len -> i:size_nat{i / 64 < len} -> Lemma
@@ -101,8 +90,53 @@ val bn_bit_set_lemma: #len:size_nat -> b:lbignum len -> i:size_nat{i / 64 < len}
   (ensures  bn_v (bn_bit_set b i) == bn_v b + pow2 i)
 
 ///
+///  Bignum comparison and test functions
+///
+
+val bn_is_zero: #len:size_nat -> a:lbignum len -> bool
+
+val bn_is_zero_lemma: #len:size_nat -> a:lbignum len -> Lemma
+  (bn_is_zero #len a == (bn_v a = 0))
+
+
+val bn_is_odd: #len:size_nat -> a:lbignum len -> bool
+
+val bn_is_odd_lemma: #len:size_nat -> a:lbignum len -> Lemma
+  (bn_is_odd #len a == (bn_v a % 2 = 1))
+
+
+val bn_mask_lt: #len:size_nat -> a:lbignum len -> b:lbignum len -> uint64
+
+val bn_mask_lt_lemma: #len:size_nat -> a:lbignum len -> b:lbignum len -> Lemma
+  (let mask = bn_mask_lt a b in
+   (v mask = 0 \/ v mask = v (ones U64 SEC)) /\
+   (if v mask = 0 then bn_v a >= bn_v b else bn_v a < bn_v b))
+
+val bn_is_less: #len:size_nat -> a:lbignum len -> b:lbignum len -> bool
+
+val bn_is_less_lemma: #len:size_nat -> a:lbignum len -> b:lbignum len -> Lemma
+  (bn_is_less a b == (bn_v a < bn_v b))
+
+
+val bn_lt_pow2: #len:size_nat -> b:lbignum len -> x:size_nat -> bool
+
+val bn_lt_pow2_lemma: #len:size_nat -> b:lbignum len -> x:size_nat -> Lemma
+  (bn_lt_pow2 #len b x == (bn_v b < pow2 x))
+
+val bn_gt_pow2: #len:size_nat -> b:lbignum len -> x:size_nat -> bool
+
+val bn_gt_pow2_lemma: #len:size_nat -> b:lbignum len -> x:size_nat -> Lemma
+  (bn_gt_pow2 #len b x == (pow2 x < bn_v b))
+
+///
 ///  Conversion functions for bignum
 ///
+
+val bn_from_uint: len:size_pos -> x:uint64 -> lbignum len
+
+val bn_from_uint_lemma: len:size_pos -> x:uint64 -> Lemma
+  (bn_v (bn_from_uint len x) == uint_v x)
+
 
 val bn_from_bytes_be: len:size_pos{8 * (blocks len 8) <= max_size_t} -> b:lseq uint8 len -> lbignum (blocks len 8)
 
