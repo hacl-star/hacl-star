@@ -110,6 +110,7 @@ let bn_mul_ aLen a bLen b j res =
 
 
 // bn_v h1 res == bn_v h0 a * bn_v h0 b
+inline_for_extraction noextract
 val bn_mul:
     aLen:size_t
   -> a:lbignum aLen

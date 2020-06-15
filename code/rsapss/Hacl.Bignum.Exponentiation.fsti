@@ -13,6 +13,7 @@ module S = Hacl.Spec.Bignum.Exponentiation
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+inline_for_extraction noextract
 let bn_mod_exp_st (modBits:size_t{v modBits > 0})
   (nLen:size_t{0 < v nLen /\ v nLen = v (blocks modBits 64ul) /\ 128 * (v nLen + 1) <= max_size_t})
 =

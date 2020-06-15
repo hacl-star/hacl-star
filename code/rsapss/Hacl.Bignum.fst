@@ -50,8 +50,8 @@ let bn_add_mod_n len n a b res =
   map2T len res (Hacl.Spec.Bignum.Definitions.mask_select c) res tmp;
   pop_frame()
 
-let bn_mul aLen a bLen b =
-  Hacl.Bignum.Multiplication.bn_mul aLen a bLen b
+let bn_mul aLen a bLen b res =
+  Hacl.Bignum.Multiplication.bn_mul aLen a bLen b res
 
 let bn_mul1_lshift_add_in_place aLen a b j res =
   Hacl.Bignum.Multiplication.bn_mul1_lshift_add aLen a b j res

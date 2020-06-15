@@ -99,6 +99,7 @@ let bn_sub_eq_len aLen a b res =
   res
 
 
+inline_for_extraction noextract
 val bn_sub:
     aLen:size_t
   -> a:lbignum aLen
@@ -213,6 +214,7 @@ let bn_add_eq_len aLen a b res =
   res
 
 
+inline_for_extraction noextract
 val bn_add:
     aLen:size_t
   -> a:lbignum aLen
