@@ -627,15 +627,6 @@ val blake2_update_blocks:
 
 let blake2_update_blocks #al #ms #len blake2_update_block wv hash prev blocks =
   let (nb,rem) = split_blocks al len in
-  let h0 = ST.get () in
-  [@inline_let]
-  let a_spec = Spec.state al in
-  [@inline_let]
-  let refl h = state_v h hash in
-  [@inline_let]
-  let footprint = Ghost.hide(loc hash |+| loc wv) in
-  [@inline_let]
-  let spec h = Spec.blake2_update1 al (v prev) h.[|blocks|] in
   blake2_update_multi #al #ms blake2_update_block wv hash prev blocks nb;
   blake2_update_last #al #ms blake2_update_block #len wv hash prev rem blocks
 
