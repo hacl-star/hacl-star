@@ -289,29 +289,8 @@ EXPORTS
   EverCrypt_CTR_init
   EverCrypt_CTR_update_block
   EverCrypt_CTR_free
-  Hacl_P256_sub4_il
-  Hacl_P256_shift_256_impl
-  Hacl_P256_toUint8
-  Hacl_P256_changeEndian
-  Hacl_P256_toUint64ChangeEndian
-  Hacl_P256_reduction_prime_2prime_order
-  Hacl_P256_solinas_reduction_impl
-  Hacl_P256_point_add
-  Hacl_P256_norm
-  Hacl_P256_scalarMultiplicationWithoutNorm
-  Hacl_P256_secretToPublicWithoutNorm
-  Hacl_P256_bufferToJac
-  Hacl_P256_isPointAtInfinityPublic
-  Hacl_P256_verifyQValidCurvePoint
-  Hacl_P256_ecp256dh_i
-  Hacl_P256_ecp256dh_r
-  Hacl_P256_computeYFromX
-  Hacl_P256_montgomery_ladder_exponent
-  Hacl_P256_fromDomainImpl
-  Hacl_P256_multPowerPartial
-  Hacl_P256_isMoreThanZeroLessThanOrderMinusOne
-  Hacl_P256_compare_felem_bool
-  Hacl_P256_ecdsa_signature_core
+  Hacl_Impl_P256_DH_ecp256dh_i
+  Hacl_Impl_P256_DH_ecp256dh_r
   Hacl_P256_ecdsa_sign_p256_sha2
   Hacl_P256_ecdsa_sign_p256_sha384
   Hacl_P256_ecdsa_sign_p256_sha512
@@ -326,24 +305,8 @@ EXPORTS
   Hacl_P256_compression_not_compressed_form
   Hacl_P256_compression_compressed_form
   Hacl_P256_reduction_8_32
-  Hacl_P256_ecp256dh_i0
-  Hacl_P256_ecp256dh_r0
-  Hacl_P256_DH_ecdsa_sign_p256_sha2
-  Hacl_P256_DH_ecdsa_sign_p256_sha384
-  Hacl_P256_DH_ecdsa_sign_p256_sha512
-  Hacl_P256_DH_ecdsa_sign_p256_without_hash
-  Hacl_P256_DH_ecdsa_verif_p256_sha2
-  Hacl_P256_DH_ecdsa_verif_p256_sha384
-  Hacl_P256_DH_ecdsa_verif_p256_sha512
-  Hacl_P256_DH_ecdsa_verif_without_hash
-  Hacl_P256_DH_verify_q
-  Hacl_P256_DH_decompression_not_compressed_form
-  Hacl_P256_DH_decompression_compressed_form
-  Hacl_P256_DH_compression_not_compressed_form
-  Hacl_P256_DH_compression_compressed_form
-  Hacl_P256_DH_reduction_8_32
-  Hacl_P256_ECDSA_ecp256dh_i
-  Hacl_P256_ECDSA_ecp256dh_r
+  Hacl_P256_ecp256dh_i
+  Hacl_P256_ecp256dh_r
   Hacl_Frodo_KEM_crypto_kem_keypair
   Hacl_Frodo_KEM_crypto_kem_enc
   Hacl_Frodo_KEM_crypto_kem_dec

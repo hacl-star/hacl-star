@@ -35,22 +35,6 @@ module Bindings(F:Cstubs.FOREIGN) =
       Unsigned.UInt8.of_int 1 
     let spec_Agile_Cipher_cipher_alg_Spec_Agile_Cipher_CHACHA20 =
       Unsigned.UInt8.of_int 2 
-    type spec_ECDSA_hash_alg_ecdsa_tags = Unsigned.UInt8.t
-    let spec_ECDSA_hash_alg_ecdsa_tags =
-      typedef uint8_t "Spec_ECDSA_hash_alg_ecdsa_tags" 
-    let spec_ECDSA_hash_alg_ecdsa_tags_Spec_ECDSA_NoHash =
-      Unsigned.UInt8.of_int 0 
-    let spec_ECDSA_hash_alg_ecdsa_tags_Spec_ECDSA_Hash =
-      Unsigned.UInt8.of_int 1 
-    type spec_ECDSA_hash_alg_ecdsa = [ `spec_ECDSA_hash_alg_ecdsa ] structure
-    let (spec_ECDSA_hash_alg_ecdsa :
-      [ `spec_ECDSA_hash_alg_ecdsa ] structure typ) =
-      structure "Spec_ECDSA_hash_alg_ecdsa_s" 
-    let spec_ECDSA_hash_alg_ecdsa_tag =
-      field spec_ECDSA_hash_alg_ecdsa "tag" spec_ECDSA_hash_alg_ecdsa_tags 
-    let spec_ECDSA_hash_alg_ecdsa__0 =
-      field spec_ECDSA_hash_alg_ecdsa "_0" spec_Hash_Definitions_hash_alg 
-    let _ = seal spec_ECDSA_hash_alg_ecdsa 
     type spec_Agile_AEAD_alg = Unsigned.UInt8.t
     let spec_Agile_AEAD_alg = typedef uint8_t "Spec_Agile_AEAD_alg" 
     let spec_Agile_AEAD_alg_Spec_Agile_AEAD_AES128_GCM =
