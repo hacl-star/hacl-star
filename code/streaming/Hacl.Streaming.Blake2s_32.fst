@@ -256,7 +256,9 @@ val update_multi_eq :
       Hash.extra_state_add_nat #(to_hash_alg a) (snd acc) (S.length blocks)) ==
        update_multi_s () acc blocks)
 
-let update_multi_eq prev_length blocks acc = admit()
+(* TODO HERE *)
+let update_multi_eq prev_length blocks acc =
+  admit()
 
 val update_last_eq :
   prev_length : nat{prev_length % Hash.block_length (to_hash_alg a) = 0} ->

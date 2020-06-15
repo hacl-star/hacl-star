@@ -576,6 +576,40 @@ let split_blocks al len =
   else (nb,rem)
 
 inline_for_extraction noextract
+val blake2_update_multi:
+    #al:Spec.alg
+  -> #ms:m_spec
+  -> #len:size_t
+  -> blake2_update_block:blake2_update_block_t al ms
+  -> wv: state_p al ms
+  -> hash: state_p al ms
+  -> prev: Spec.limb_t al{v prev + v len <= Spec.max_limb al}
+  -> blocks: lbuffer uint8 len
+  -> nb : size_t{length blocks >= v nb * v (size_block al) } ->
+  Stack unit
+    (requires (fun h -> live h wv /\ live h hash /\ live h blocks /\
+                      disjoint hash blocks /\ disjoint wv hash /\ disjoint wv blocks))
+    (ensures  (fun h0 _ h1 ->
+      modifies (loc hash |+| loc wv) h0 h1 /\
+      state_v h1 hash == repeati (v nb) (Spec.blake2_update1 al (v prev) h0.[|blocks|])
+                                 (state_v h0 hash)))
+
+let blake2_update_multi #al #ms #len blake2_update_block wv hash prev blocks nb =
+  let h0 = ST.get () in
+  [@inline_let]
+  let a_spec = Spec.state al in
+  [@inline_let]
+  let refl h = state_v h hash in
+  [@inline_let]
+  let footprint = Ghost.hide(loc hash |+| loc wv) in
+  [@inline_let]
+  let spec h = Spec.blake2_update1 al (v prev) h.[|blocks|] in
+  loop_refl h0 nb a_spec refl footprint spec
+  (fun i ->
+    Loops.unfold_repeati (v nb) (spec h0) (state_v h0 hash) (v i);
+    blake2_update1 #al #ms blake2_update_block #len wv hash prev blocks i)
+
+inline_for_extraction noextract
 val blake2_update_blocks:
     #al:Spec.alg
   -> #ms:m_spec
@@ -602,12 +636,8 @@ let blake2_update_blocks #al #ms #len blake2_update_block wv hash prev blocks =
   let footprint = Ghost.hide(loc hash |+| loc wv) in
   [@inline_let]
   let spec h = Spec.blake2_update1 al (v prev) h.[|blocks|] in
-  loop_refl h0 nb a_spec refl footprint spec
-  (fun i ->
-    Loops.unfold_repeati (v nb) (spec h0) (state_v h0 hash) (v i);
-    blake2_update1 #al #ms blake2_update_block #len wv hash prev blocks i);
+  blake2_update_multi #al #ms blake2_update_block wv hash prev blocks nb;
   blake2_update_last #al #ms blake2_update_block #len wv hash prev rem blocks
-
 
 inline_for_extraction noextract
 let blake2_finish_t (al:Spec.alg) (ms:m_spec) =
