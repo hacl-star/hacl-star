@@ -5,6 +5,24 @@ module Loops = Lib.LoopCombinators
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+let bn_is_odd #len b =
+  if len > 0 then
+    FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 (b.[0] &. u64 1) =^ 1uL)
+  else false
+
+let bn_is_odd_lemma #len b =
+  if len > 0 then begin
+    bn_eval_split_i #len b 1;
+    bn_eval1 (slice b 0 1);
+    assert (bn_v b % 2 == (v b.[0] + pow2 64 * bn_v (slice b 1 len)) % 2);
+    Math.Lemmas.pow2_plus 1 63;
+    Math.Lemmas.modulo_addition_lemma (v b.[0]) 2 (pow2 63 * bn_v (slice b 1 len));
+    assert (bn_v b % 2 == v b.[0] % 2);
+    mod_mask_lemma b.[0] 1ul;
+    assert (v (mod_mask #U64 #SEC 1ul) == v (u64 1)) end
+  else bn_eval0 #len b
+
+
 val bn_mask_lt_f: #len:size_nat -> a:lbignum len -> b:lbignum len -> i:nat{i < len} -> acc:uint64 -> uint64
 let bn_mask_lt_f #len a b i acc =
   let beq = eq_mask a.[i] b.[i] in

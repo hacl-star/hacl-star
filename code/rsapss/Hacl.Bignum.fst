@@ -4,6 +4,12 @@ friend Hacl.Spec.Bignum
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+let bn_is_odd len a =
+  if len >. 0ul then
+    let tmp = a.(0ul) &. u64 1 in
+    FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 tmp =^ 1uL)
+  else false
+
 let bn_mask_lt len a b =
   push_frame ();
   let acc = create 1ul (u64 0) in

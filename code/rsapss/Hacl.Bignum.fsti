@@ -18,6 +18,16 @@ module Loops = Lib.LoopCombinators
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
+val bn_is_odd:
+    len:size_t
+  -> a:lbignum len ->
+  Stack bool
+  (requires fun h -> live h a)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+    r == S.bn_is_odd #(v len) (as_seq h0 a))
+
+
+inline_for_extraction noextract
 val bn_mask_lt:
     len:size_t
   -> a:lbignum len

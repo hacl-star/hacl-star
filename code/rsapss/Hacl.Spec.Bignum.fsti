@@ -13,6 +13,12 @@ module BSeq = Lib.ByteSequence
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+val bn_is_odd: #len:size_nat -> a:lbignum len -> bool
+
+val bn_is_odd_lemma: #len:size_nat -> a:lbignum len -> Lemma
+  (bn_is_odd #len a == (bn_v a % 2 = 1))
+
+
 val bn_mask_lt: #len:size_nat -> a:lbignum len -> b:lbignum len -> uint64
 
 val bn_mask_lt_lemma: #len:size_nat -> a:lbignum len -> b:lbignum len -> Lemma
