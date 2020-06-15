@@ -97,10 +97,12 @@ let bn_mask_lt len a b =
   pop_frame ();
   mask
 
-[@CInline]
-let bn_is_less len a b =
+let mk_bn_is_less len a b =
   let mask = bn_mask_lt len a b in
   FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 mask =^ ones U64 PUB)
+
+[@CInline]
+let bn_is_less = mk_bn_is_less
 
 let bn_lt_pow2 len b x =
   push_frame ();

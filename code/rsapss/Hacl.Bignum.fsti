@@ -258,15 +258,19 @@ val bn_mask_lt:
     v r == v (S.bn_mask_lt (as_seq h0 a) (as_seq h0 b)))
 
 
-val bn_is_less:
-    len:size_t
-  -> a:lbignum len
+inline_for_extraction noextract
+let bn_is_less_st (len:size_t) =
+    a:lbignum len
   -> b:lbignum len ->
   Stack bool
   (requires fun h -> live h a /\ live h b)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
     r == S.bn_is_less (as_seq h0 a) (as_seq h0 b))
 
+inline_for_extraction noextract
+val mk_bn_is_less: len:size_t -> bn_is_less_st len
+
+val bn_is_less: len:size_t -> bn_is_less_st len
 
 inline_for_extraction noextract
 val bn_lt_pow2:

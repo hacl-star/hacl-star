@@ -42,7 +42,9 @@ val mul: a:lbignum n -> b:lbignum n -> BN.bn_mul_st a b
 [@@ Comment "Write `a ^ b mod n1` in `res`.
 
   The arguments a, n1 and the outparam res are meant to be 4096-bit bignums, i.e. uint64_t[64].
-  The argument b is a bignum of any size, and bBits is an upper bound on the number of significant bits of b."]
+  The argument b is a bignum of any size, and bBits is an upper bound on the
+  number of significant bits of b. For instance, if b is a 4096-bit bignum,
+  bBits should be 4096."]
 val mod_exp: BE.bn_mod_exp_st 4096ul n
 
 [@@ CPrologue
@@ -65,3 +67,11 @@ val new_bn_from_bytes_be: Hacl.Bignum.Convert.new_bn_from_bytes_be_st
   The argument b points to a 4096-bit bignum.
   The outparam res points to 512 bytes of valid memory."]
 val bn_to_bytes_be: Hacl.Bignum.Convert.bn_to_bytes_be_st n
+
+[@@ CPrologue
+"\n/***************/
+/* Comparisons */
+/***************/\n";
+Comment
+"Returns true if and only if argument a is strictly see then argument b."]
+val lt: Hacl.Bignum.bn_is_less_st n
