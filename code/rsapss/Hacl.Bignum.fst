@@ -4,37 +4,6 @@ friend Hacl.Spec.Bignum
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-let bn_is_odd len a =
-  if len >. 0ul then
-    let tmp = a.(0ul) &. u64 1 in
-    FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 tmp =^ 1uL)
-  else false
-
-let bn_mask_lt len a b =
-  push_frame ();
-  let acc = create 1ul (u64 0) in
-
-  [@inline_let]
-  let refl h i : GTot uint64 = Lib.Sequence.index (as_seq h acc) 0 in
-  [@inline_let]
-  let footprint i = loc acc in
-  [@inline_let]
-  let spec h = S.bn_mask_lt_f (as_seq h a) (as_seq h b) in
-
-  let h0 = ST.get () in
-  loop h0 len (S.bn_mask_lt_t (v len)) refl footprint spec
-  (fun i ->
-    Loops.unfold_repeat_gen (v len) (S.bn_mask_lt_t (v len)) (spec h0) (refl h0 0) (v i);
-    let beq = eq_mask a.(i) b.(i) in
-    let blt = lt_mask a.(i) b.(i) in
-    acc.(0ul) <-
-      Hacl.Spec.Bignum.Definitions.mask_select beq acc.(0ul)
-      (Hacl.Spec.Bignum.Definitions.mask_select blt (ones U64 SEC) (zeros U64 SEC))
-  );
-  let mask = acc.(0ul) in
-  pop_frame ();
-  mask
-
 let bn_add_eq_len aLen a b res =
   Hacl.Bignum.Addition.bn_add_eq_len aLen a b res
 
@@ -74,11 +43,6 @@ let bn_sub_mask len n a =
   let _ = Hacl.Bignum.Addition.bn_sub len a len mod_mask a in
   pop_frame ()
 
-[@CInline]
-let bn_is_less len a b =
-  let mask = bn_mask_lt len a b in
-  not (FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 mask =^ 0uL))
-
 let bn_is_bit_set len input ind =
   let i = ind /. 64ul in
   let j = ind %. 64ul in
@@ -90,6 +54,79 @@ let bn_bit_set len input ind =
   let i = ind /. 64ul in
   let j = ind %. 64ul in
   input.(i) <- input.(i) |. (u64 1 <<. j)
+
+(* bignum comparison and test functions *)
+
+let bn_is_zero len b =
+  push_frame ();
+  let bn_zero = create len (u64 0) in
+  let mask = create 1ul (ones U64 SEC) in
+  let mask = Lib.ByteBuffer.buf_eq_mask b bn_zero len mask in
+  let res = FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 mask =^ ones U64 PUB) in
+  pop_frame ();
+  res
+
+let bn_is_odd len a =
+  if len >. 0ul then
+    let tmp = a.(0ul) &. u64 1 in
+    FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 tmp =^ 1uL)
+  else false
+
+let bn_mask_lt len a b =
+  push_frame ();
+  let acc = create 1ul (u64 0) in
+
+  [@inline_let]
+  let refl h i : GTot uint64 = Lib.Sequence.index (as_seq h acc) 0 in
+  [@inline_let]
+  let footprint i = loc acc in
+  [@inline_let]
+  let spec h = S.bn_mask_lt_f (as_seq h a) (as_seq h b) in
+
+  let h0 = ST.get () in
+  loop h0 len (S.bn_mask_lt_t (v len)) refl footprint spec
+  (fun i ->
+    Loops.unfold_repeat_gen (v len) (S.bn_mask_lt_t (v len)) (spec h0) (refl h0 0) (v i);
+    let beq = eq_mask a.(i) b.(i) in
+    let blt = lt_mask a.(i) b.(i) in
+    acc.(0ul) <-
+      Hacl.Spec.Bignum.Definitions.mask_select beq acc.(0ul)
+      (Hacl.Spec.Bignum.Definitions.mask_select blt (ones U64 SEC) (zeros U64 SEC))
+  );
+  let mask = acc.(0ul) in
+  pop_frame ();
+  mask
+
+[@CInline]
+let bn_is_less len a b =
+  let mask = bn_mask_lt len a b in
+  FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 mask =^ ones U64 PUB)
+
+let bn_lt_pow2 len b x =
+  push_frame ();
+  let b2 = create len (u64 0) in
+
+  let res =
+    if (x >=. 64ul *! len) then true
+    else begin
+      bn_bit_set len b2 x;
+      bn_is_less len b b2 end in
+  pop_frame ();
+  res
+
+let bn_gt_pow2 len b x =
+  push_frame ();
+  let b2 = create len (u64 0) in
+
+  let res =
+    if (x >=. 64ul *! len) then false
+    else begin
+      bn_bit_set len b2 x;
+      bn_is_less len b2 b end in
+  pop_frame ();
+  res
+
+(* Convertion functions *)
 
 let bn_from_uint len x b =
   memset b (u64 0) len;

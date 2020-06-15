@@ -18,27 +18,6 @@ module Loops = Lib.LoopCombinators
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
-val bn_is_odd:
-    len:size_t
-  -> a:lbignum len ->
-  Stack bool
-  (requires fun h -> live h a)
-  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    r == S.bn_is_odd #(v len) (as_seq h0 a))
-
-
-inline_for_extraction noextract
-val bn_mask_lt:
-    len:size_t
-  -> a:lbignum len
-  -> b:lbignum len ->
-  Stack uint64
-  (requires fun h -> live h a /\ live h b)
-  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    v r == v (S.bn_mask_lt (as_seq h0 a) (as_seq h0 b)))
-
-
-inline_for_extraction noextract
 val bn_add_eq_len:
     aLen:size_t
   -> a:lbignum aLen
@@ -163,16 +142,6 @@ val bn_sub_mask:
   (ensures  fun h0 _ h1 -> modifies (loc a) h0 h1 /\
     as_seq h1 a == S.bn_sub_mask (as_seq h0 n) (as_seq h0 a))
 
-
-val bn_is_less:
-    len:size_t
-  -> a:lbignum len
-  -> b:lbignum len ->
-  Stack bool
-  (requires fun h -> live h a /\ live h b)
-  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    r == S.bn_is_less (as_seq h0 a) (as_seq h0 b))
-
 ///
 ///  Get and set i-th bit of a bignum
 ///
@@ -195,6 +164,72 @@ val bn_bit_set:
   (requires fun h -> live h b)
   (ensures  fun h0 _ h1 -> modifies (loc b) h0 h1 /\
     as_seq h1 b == S.bn_bit_set (as_seq h0 b) (v i))
+
+///
+///  Bignum comparison and test functions
+///
+
+inline_for_extraction noextract
+val bn_is_zero:
+    len:size_t{v len > 0}
+  -> a:lbignum len ->
+  Stack bool
+  (requires fun h -> live h a)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+    r == S.bn_is_zero #(v len) (as_seq h0 a))
+
+
+inline_for_extraction noextract
+val bn_is_odd:
+    len:size_t
+  -> a:lbignum len ->
+  Stack bool
+  (requires fun h -> live h a)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+    r == S.bn_is_odd #(v len) (as_seq h0 a))
+
+
+inline_for_extraction noextract
+val bn_mask_lt:
+    len:size_t
+  -> a:lbignum len
+  -> b:lbignum len ->
+  Stack uint64
+  (requires fun h -> live h a /\ live h b)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+    v r == v (S.bn_mask_lt (as_seq h0 a) (as_seq h0 b)))
+
+
+val bn_is_less:
+    len:size_t
+  -> a:lbignum len
+  -> b:lbignum len ->
+  Stack bool
+  (requires fun h -> live h a /\ live h b)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+    r == S.bn_is_less (as_seq h0 a) (as_seq h0 b))
+
+
+inline_for_extraction noextract
+val bn_lt_pow2:
+    len:size_t{0 < v len /\ 64 * v len <= max_size_t}
+  -> b:lbignum len
+  -> x:size_t ->
+  Stack bool
+  (requires fun h -> live h b)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+    r == S.bn_lt_pow2 #(v len) (as_seq h0 b) (v x))
+
+
+inline_for_extraction noextract
+val bn_gt_pow2:
+    len:size_t{0 < v len /\ 64 * v len <= max_size_t}
+  -> b:lbignum len
+  -> x:size_t ->
+  Stack bool
+  (requires fun h -> live h b)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+    r == S.bn_gt_pow2 #(v len) (as_seq h0 b) (v x))
 
 ///
 ///  Conversion functions for bignum

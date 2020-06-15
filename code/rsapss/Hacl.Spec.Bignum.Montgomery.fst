@@ -153,10 +153,10 @@ let mod_inv_u64_inv_step_odd n0 i ub0 vb0 =
     (v ub0 + v beta) * 2 * v alpha - (v vb0 * v beta + 2 * v alpha * v beta);
     (==) { Math.Lemmas.distributivity_add_left (v ub0) (v beta) (2 * v alpha) }
     v ub0 * 2 * v alpha + v beta * 2 * v alpha - (v vb0 * v beta + 2 * v alpha * v beta);
-    (==) { }
-    v ub0 * 2 * v alpha - v vb0 * v beta;
-    (==) { }
-    pow2 (64 - i + 1);
+    //(==) { }
+    //v ub0 * 2 * v alpha - v vb0 * v beta;
+    //(==) { }
+    //pow2 (64 - i + 1);
   };
   assert (2 * (ub * 2 * v alpha - vb * v beta) == pow2 (64 - i + 1))
 
