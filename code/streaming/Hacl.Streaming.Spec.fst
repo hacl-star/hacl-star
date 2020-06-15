@@ -126,17 +126,17 @@ let split_at_last_num_blocks #index (c: block index) (i: index) (b: nat):
     (**) assert(b % l <> 0 || n = 0);
     (**) if b % l <> 0 then
     (**)   begin
-    (**)   (**) assert(rest <> 0);
-    (**)   (**) Math.Lemmas.nat_times_nat_is_nat n l;
-    (**)   (**) assert(n * l >= 0)
+    (**)        assert(rest <> 0);
+    (**)        Math.Lemmas.nat_times_nat_is_nat n l;
+    (**)        assert(n * l >= 0)
     (**)   end
     (**) else
     (**)   begin
-    (**)   (**) assert(n = 0);
-    (**)   (**) assert(b = n * l + rest);
+    (**)        assert(n = 0);
+    (**)        assert(b = n * l + rest);
     (**)   mul_zero_left_is_zero l;
-    (**)   (**) assert(n * l = 0);
-    (**)   (**) assert(b = rest)
+    (**)        assert(n * l = 0);
+    (**)        assert(b = rest)
     (**)   end
     (**)end;
     n
