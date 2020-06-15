@@ -625,7 +625,7 @@ let update_empty_or_full_buf #index c i t t' p data len =
                      (k' <: optional_key i c.km c.key))) blocks);
   
   (* Start by "flushing" the buffer: hash it so that all the data seen so far
-   * has been hash and we can consider the buffer as empty *)
+   * has been processed and we can consider the buffer as empty *)
   if U32.(sz =^ 0ul) then
     assert(c.state.v i h0 block_state ==
       c.update_multi_s i (c.init_s i (optional_reveal h0 (k' <: optional_key i c.km c.key))) seen)
