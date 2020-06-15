@@ -83,12 +83,13 @@ inline_for_extraction noextract
 let get_extra_state_p (s : s) : Tot (B.pointer (Hash.extra_state (to_hash_alg a))) =
   match s with _, _, l -> l
 
-inline_for_extraction noextract
+(*inline_for_extraction noextract
 let extra_state_v (h : HS.mem) (s : s) : GTot (Hash.extra_state (to_hash_alg a))=
-  B.deref h (get_extra_state_p s)
+  B.deref h (get_extra_state_p s) *)
 
 inline_for_extraction noextract
-let s_v (h : HS.mem) (s : s) : GTot t = state_v h s, extra_state_v h s
+let s_v (h : HS.mem) (s : s) : GTot t =
+  state_v h s, B.deref h (get_extra_state_p s) //extra_state_v h s
 
 /// Small helper which facilitates inferencing implicit arguments for buffer
 /// operations
@@ -243,6 +244,7 @@ val spec_is_incremental:
 let spec_is_incremental () key input =
   Spec.Hash.Incremental.blake2_is_hash_incremental (to_hash_alg a) key_size key input
 
+
 #push-options "--z3rlimit 500 --ifuel 1"
 inline_for_extraction noextract
 let blake2s_32 : I.block unit =
@@ -282,11 +284,14 @@ let blake2s_32 : I.block unit =
       [@inline_let] let es = get_extra_state_p acc in
       (**) let h0 = ST.get () in
       let prev = B.index es 0ul in
-      (* TODO: add the following assumption in the signature *)
+      (* TODO: add the following assumption to the signature *)
       assume(Spec.Hash.Definitions.extra_state_v prev + U32.v len <= Spec.Blake2.max_limb a);
       Impl.blake2_update_blocks #a #m #len (Impl.blake2_update_block #a #m) wv h prev blocks;
-      admit()
-      )
+      [@inline_let] let totlen = Hash.extra_state_add_size_t #(to_hash_alg a) prev len in
+      B.upd es 0ul totlen;
+      (**) let h3 = ST.get () in
+      assume(s_v h3 acc == update_multi_s () (s_v h0 acc) (B.as_seq h0 blocks));
+      assert(B.(modifies (stateful_blake2s_32.I.footprint #() h0 acc) h0 h3)))
 
     (* update_last *)
     (fun _ acc prev_len last last_len ->

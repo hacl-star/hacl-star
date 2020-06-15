@@ -198,7 +198,7 @@ noextract
 let max_extra_state (a:hash_alg{is_blake a}) : nat =
   maxint (extra_state_int_type a)
 
-inline_for_extraction
+inline_for_extraction noextract
 let nat_to_extra_state (a:hash_alg{is_blake a}) (n:nat{n <= max_extra_state a}) =
   mk_int #(extra_state_int_type a) #SEC n
 
