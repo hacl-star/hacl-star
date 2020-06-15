@@ -201,6 +201,17 @@ val bn_bit_set:
 ///
 
 inline_for_extraction noextract
+val bn_from_uint:
+    len:size_t{0 < v len}
+  -> x:uint64
+  -> b:lbignum len ->
+  Stack unit
+  (requires fun h -> live h b)
+  (ensures  fun h0 _ h1 -> modifies (loc b) h0 h1 /\
+    as_seq h1 b == S.bn_from_uint (v len) x)
+
+
+inline_for_extraction noextract
 val bn_from_bytes_be:
     len:size_t{0 < v len /\ 8 * v (blocks len 8ul) <= max_size_t}
   -> b:lbuffer uint8 len

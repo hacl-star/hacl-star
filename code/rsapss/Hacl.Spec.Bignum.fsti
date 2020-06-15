@@ -110,6 +110,12 @@ val bn_bit_set_lemma: #len:size_nat -> b:lbignum len -> i:size_nat{i / 64 < len}
 ///  Conversion functions for bignum
 ///
 
+val bn_from_uint: len:size_pos -> x:uint64 -> lbignum len
+
+val bn_from_uint_lemma: len:size_pos -> x:uint64 -> Lemma
+  (bn_v (bn_from_uint len x) == uint_v x)
+
+
 val bn_from_bytes_be: len:size_pos{8 * (blocks len 8) <= max_size_t} -> b:lseq uint8 len -> lbignum (blocks len 8)
 
 val bn_from_bytes_be_lemma: len:size_pos{8 * (blocks len 8) <= max_size_t} -> b:lseq uint8 len ->

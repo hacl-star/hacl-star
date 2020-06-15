@@ -95,6 +95,6 @@ let bn_mod_exp_mont modBits nLen n a acc bBits b res =
 let bn_mod_exp modBits nLen n a bBits b res =
   push_frame ();
   let acc  = create nLen (u64 0) in
-  acc.(0ul) <- u64 1;
+  bn_from_uint nLen (u64 1) acc;
   bn_mod_exp_mont modBits nLen n a acc bBits b res;
   pop_frame ()

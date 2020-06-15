@@ -91,6 +91,10 @@ let bn_bit_set len input ind =
   let j = ind %. 64ul in
   input.(i) <- input.(i) |. (u64 1 <<. j)
 
+let bn_from_uint len x b =
+  memset b (u64 0) len;
+  b.(0ul) <- x
+
 let bn_from_bytes_be len b res =
   Hacl.Bignum.Convert.bn_from_bytes_be len b res
 

@@ -56,8 +56,7 @@ let bn_mod_exp_mont modBits nLen n a acc bBits b =
   bn_sub_mask n res
 
 let bn_mod_exp modBits nLen n a bBits b =
-  let acc  = create nLen (u64 0) in
-  let acc = acc.[0] <- u64 1 in
+  let acc = bn_from_uint nLen (u64 1) in
   bn_mod_exp_mont modBits nLen n a acc bBits b
 
 
@@ -142,23 +141,6 @@ let rec bn_mod_exp_mont_loop_lemma #nLen #rLen n mu bBits bLen b i (aM0, accM0) 
     () end
 
 
-val lemma_acc_init: nLen:size_pos -> Lemma
-  (let acc = create nLen (u64 0) in
-   let acc = acc.[0] <- u64 1 in
-   bn_v acc == 1)
-
-let lemma_acc_init nLen =
-  let acc = create nLen (u64 0) in
-  let acc = acc.[0] <- u64 1 in
-  bn_eval_split_i acc 1;
-  assert (bn_v acc == bn_v (slice acc 0 1) + pow2 64 * bn_v (slice acc 1 nLen));
-  eq_intro (slice acc 1 nLen) (create (nLen - 1) (u64 0));
-  bn_eval_zeroes (nLen - 1) (nLen - 1);
-  assert (bn_v acc == bn_v (slice acc 0 1));
-  bn_eval_unfold_i (slice acc 0 1) 1;
-  bn_eval0 (slice acc 0 1)
-
-
 val bn_mod_exp_mont_lemma_aux:
     modBits:size_pos
   -> nLen:size_pos{nLen = (blocks modBits 64) /\ 128 * (nLen + 1) <= max_size_t}
@@ -179,9 +161,8 @@ let bn_mod_exp_mont_lemma_aux modBits nLen n a bBits b =
   let rLen = nLen + 1 in
   let bLen = blocks bBits 64 in
 
-  let acc = create nLen (u64 0) in
-  let acc = acc.[0] <- u64 1 in
-  lemma_acc_init nLen;
+  let acc = bn_from_uint nLen (u64 1) in
+  bn_from_uint_lemma nLen (u64 1);
   assert (bn_v acc == 1);
 
   let mu = mod_inv_u64 n.[0] in

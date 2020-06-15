@@ -314,6 +314,20 @@ let bn_bit_set_lemma #len input ind =
   }
 
 
+let bn_from_uint len x =
+  let b = create len (u64 0) in
+  b.[0] <- x
+
+let bn_from_uint_lemma len x =
+  let b = create len (u64 0) in
+  let b = b.[0] <- x in
+  bn_eval_split_i b 1;
+  assert (bn_v b == bn_v (slice b 0 1) + pow2 64 * bn_v (slice b 1 len));
+  eq_intro (slice b 1 len) (create (len - 1) (u64 0));
+  bn_eval_zeroes (len - 1) (len - 1);
+  assert (bn_v b == bn_v (slice b 0 1));
+  bn_eval1 (slice b 0 1)
+
 let bn_from_bytes_be len b =
   Hacl.Spec.Bignum.Convert.bn_from_bytes_be len b
 
