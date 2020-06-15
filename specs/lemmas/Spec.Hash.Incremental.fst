@@ -13,7 +13,6 @@ friend Spec.Agile.Hash
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
 
 open FStar.Mul
-//open Spec.Blake2
 module Loops = Lib.LoopCombinators
 
 /// TODO: I don't find this lemma in Lib, and the below proofs don't work if
@@ -23,7 +22,7 @@ let add_v_eq (a b : nat) :
   (requires (a + b <= pow2 64 - 1))
   (ensures (v (u64 a +. u64 b) == a + b)) = ()
 
-/// The [repeati_blake2_update1_as_update_multi_eq] lemma is not fundamentally difficult, but
+/// The [repeati_blake2_update1_is_update_multi] lemma is not fundamentally difficult, but
 /// the proof time/success rate can be very random, probably because of modular
 /// arithmetic. For this reason, we cut it into small pieces.
 let update_multi_one_block_eq
@@ -68,8 +67,6 @@ let repeati_blake2_update1_eq
   (requires (
     nb > 0 /\
     nb * block_length a <= Seq.length d /\
-    prev + nb * block_length a <= Blake2.max_limb (to_blake_alg a) /\
-    nb <= Seq.length d / Blake2.size_block (to_blake_alg a) /\
     prev + Seq.length d <= Blake2.max_limb (to_blake_alg a) /\
     prev + nb * block_length a <= max_extra_state a
   ))
@@ -106,26 +103,26 @@ let update_multi_associate_eq1
   Math.Lemmas.multiple_modulo_lemma 1 (block_length a);
   update_multi_associative a (hash, nat_to_extra_state a prev) blocks1 blocks2
 
-//open Spec.Blake2
 /// TODO: the time spent on this proof is super random.
+/// TODO: fix the proof which seems to loop
 #push-options "--z3rlimit 500 --fuel 1"
-let rec repeati_blake2_update1_as_update_multi_eq
+let rec repeati_blake2_update1_is_update_multi
   (a:hash_alg{is_blake a}) (nb prev : nat)
   (d : bytes)
   (hash : words_state' a) :
   Lemma
   (requires (
     nb * block_length a <= Seq.length d /\
-    prev + nb * block_length a <= Blake2.max_limb (to_blake_alg a) /\
-    nb <= Seq.length d / Blake2.size_block (to_blake_alg a) /\
     prev + Seq.length d <= Blake2.max_limb (to_blake_alg a) /\
     prev + nb * block_length a <= max_extra_state a
   ))
   (ensures (
     let blocks, _ = Seq.split d (nb * block_length a) in
-    (Loops.repeati nb (Blake2.blake2_update1 (to_blake_alg a) prev d) hash,
+    (Loops.repeati #(words_state' a) nb (Blake2.blake2_update1 (to_blake_alg a) prev d) hash,
      nat_to_extra_state a (prev + nb * block_length a)) ==
        update_multi a (hash, nat_to_extra_state a prev) blocks)) =
+  assert(nb <= Seq.length d / Blake2.size_block (to_blake_alg a));
+  assert(prev + nb * block_length a <= Blake2.max_limb (to_blake_alg a));
   let update1 = Blake2.blake2_update1 (to_blake_alg a) prev d in
   let blocks, _ = Seq.split d (nb * block_length a) in
   assert(Seq.length blocks == nb * block_length a);
@@ -142,10 +139,11 @@ let rec repeati_blake2_update1_as_update_multi_eq
     assert(
       update_multi a (hash, nat_to_extra_state a prev) blocks ==
       update_multi a s2 blocks2);
-    repeati_blake2_update1_as_update_multi_eq a (nb - 1) prev d hash;
+    repeati_blake2_update1_is_update_multi a (nb - 1) prev d hash;
     assert(blocks1 `S.equal` Seq.slice d 0 ((nb-1) * block_length a));
     assert(
-      s2 == (Loops.repeati (nb-1) update1 hash, nat_to_extra_state a (prev + (nb-1) * block_length a)));
+      s2 == (Loops.repeati #(words_state' a) (nb-1) update1 hash,
+             nat_to_extra_state a (prev + (nb-1) * block_length a)));
     update_multi_one_block_eq a blocks2 (fst s2) (extra_state_v (snd s2))
     end
 #pop-options
@@ -223,11 +221,9 @@ let blake2_is_hash_incremental_aux
   assert(S.length bs == nb * block_length a);
   assert(
     nb * block_length a <= Seq.length input /\
-    prev0 + nb * block_length a <= Blake2.max_limb (to_blake_alg a) /\
-    nb <= Seq.length input / Blake2.size_block (to_blake_alg a) /\
     prev0 + Seq.length input <= Blake2.max_limb (to_blake_alg a) /\
     prev0 + nb * block_length a <= max_extra_state a);
-  repeati_blake2_update1_as_update_multi_eq a nb prev0 input s1;  
+  repeati_blake2_update1_is_update_multi a nb prev0 input s1;  
   assert(s2 == fst is2);
   (* [s3 == fst is3] *)
   (* First, work on [s3] *)

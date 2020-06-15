@@ -194,12 +194,17 @@ let extra_state_int_type : a:hash_alg{is_blake a} -> inttype = function
   | Blake2S -> U64
   | Blake2B -> U128
 
+inline_for_extraction noextract
+let extra_state_int_t (a:hash_alg{is_blake a}) : Type0 =
+  int_t (extra_state_int_type a) SEC
+
 noextract
 let max_extra_state (a:hash_alg{is_blake a}) : nat =
   maxint (extra_state_int_type a)
 
 inline_for_extraction noextract
-let nat_to_extra_state (a:hash_alg{is_blake a}) (n:nat{n <= max_extra_state a}) =
+let nat_to_extra_state (a:hash_alg{is_blake a}) (n:nat{n <= max_extra_state a}) :
+  extra_state a =
   mk_int #(extra_state_int_type a) #SEC n
 
 //inline_for_extraction noextract
@@ -211,12 +216,12 @@ inline_for_extraction noextract
 let extra_state_add_nat (#a:hash_alg{is_blake a}) (s : extra_state a)
                         (n:nat{n <= maxint (extra_state_int_type a)}) :
   extra_state a =
-  s +. nat_to_extra_state a n
+  (s <: extra_state_int_t a) +. nat_to_extra_state a n
 
 inline_for_extraction noextract
 let extra_state_add_size_t (#a:hash_alg{is_blake a}) (s : extra_state a) (n : size_t) :
   s':extra_state a{s' == extra_state_add_nat s (size_v n)} =
-  s +. (cast (extra_state_int_type a) SEC n)
+  (s <: extra_state_int_t a) +. (cast (extra_state_int_type a) SEC n)
 
 (* The working state *)
 inline_for_extraction noextract

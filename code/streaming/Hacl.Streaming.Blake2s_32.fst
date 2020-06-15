@@ -19,6 +19,8 @@ module Hash = Spec.Hash.Definitions
 open LowStar.BufferOps
 open FStar.Mul
 
+module Loops = Lib.LoopCombinators
+
 /// Opening a bunch of modules for Blake2
 /// =======================================
 
@@ -244,21 +246,32 @@ val spec_is_incremental:
 let spec_is_incremental () key input =
   Spec.Hash.Incremental.blake2_is_hash_incremental (to_hash_alg a) key_size key input
 
-(* TODO HERE *)
 val update_multi_eq :
-  prev_length : nat ->
-  blocks : S.seq uint8 {prev_length + S.length blocks <= max_input_length key_size /\
-                        S.length blocks % Hash.block_length (to_hash_alg a) = 0} ->
+  nb : nat ->
+  blocks : S.seq uint8 ->
   acc : Hash.words_state (to_hash_alg a) ->
   Lemma
-    (((Spec.blake2_update_blocks a prev_length blocks (fst acc) <:
-       Hash.words_state' (to_hash_alg a)),
-      Hash.extra_state_add_nat #(to_hash_alg a) (snd acc) (S.length blocks)) ==
-       update_multi_s () acc blocks)
+    (requires (
+      Hash.extra_state_v (snd acc) + S.length blocks <= Spec.max_limb a /\
+      Hash.extra_state_v (snd acc) + S.length blocks <= Hash.max_extra_state (to_hash_alg a) /\
+      S.length blocks = Hash.block_length (to_hash_alg a) * nb))
+    (ensures (
+      let prev_length = Hash.extra_state_v (snd acc) in
+      (Loops.repeati #(Hash.words_state' (to_hash_alg a)) nb (Spec.blake2_update1 a prev_length blocks) (fst acc),
+       Hash.extra_state_add_nat #(to_hash_alg a) (snd acc) (S.length blocks)) ==
+       update_multi_s () acc blocks))
 
-(* TODO HERE *)
-let update_multi_eq prev_length blocks acc =
-  admit()
+let update_multi_eq nb blocks acc =
+  let blocks', _ = Seq.split blocks (nb * Hash.block_length (to_hash_alg a)) in
+  assert(blocks' `Seq.equal` blocks);
+  let prev_length = Hash.extra_state_v (snd acc) in
+  Spec.Hash.Incremental.repeati_blake2_update1_is_update_multi (to_hash_alg a)
+                                                               nb prev_length
+                                                               blocks (fst acc);
+  Spec.Hash.Lemmas.extra_state_add_nat_bound_lem #(to_hash_alg a) (snd acc) (S.length blocks);
+  assert(
+    Hash.nat_to_extra_state (to_hash_alg a) (prev_length + S.length blocks) ==
+    Hash.extra_state_add_nat #(to_hash_alg a) (snd acc) (S.length blocks))
 
 val update_last_eq :
   prev_length : nat{prev_length % Hash.block_length (to_hash_alg a) = 0} ->
@@ -290,7 +303,9 @@ let update_last_eq prev_length last acc =
   assert(Hash.extra_state_v (Hash.extra_state_add_nat (snd acc) (S.length last)) ==
          Hash.extra_state_v (snd acc) + S.length last)
 
-#push-options "--z3rlimit 500 --ifuel 1"
+open FStar.Tactics
+
+#push-options "--z3rlimit 500 --ifuel 1 --print_implicits"
 inline_for_extraction noextract
 let blake2s_32 : I.block unit =
   I.Block
@@ -329,18 +344,32 @@ let blake2s_32 : I.block unit =
       [@inline_let] let es = get_extra_state_p acc in
       (**) let h0 = ST.get () in
       let prev = B.index es 0ul in
-      (* TODO: add the following assumption to the signature *)
+      (* TODO: add the following assumption to the signature? *)
       (**) assume(Hash.extra_state_v prev + U32.v len <= max_input_length key_size);
-      Impl.blake2_update_blocks #a #m #len (Impl.blake2_update_block #a #m) wv h prev blocks;
+      let nb = U32.(len /^ block_len) in
+      Impl.blake2_update_multi #a #m #len (Impl.blake2_update_block #a #m) wv h prev blocks nb;
       [@inline_let] let totlen = Hash.extra_state_add_size_t #(to_hash_alg a) prev len in
       B.upd es 0ul totlen;
       (**) let h3 = ST.get () in
-      (**) update_multi_eq (Hash.extra_state_v prev) (B.as_seq h0 blocks) (s_v h0 acc);
+      (**) [@inline_let] let s1 = Loops.repeati (*#(Hash.words_state' (to_hash_alg a))*) (U32.v nb)
+                           (Spec.blake2_update1 a (Hash.extra_state_v prev)
+                           (B.as_seq h0 blocks))
+                           (fst (s_v h0 acc)) in
+      (**) assert(fst (s_v h3 acc) ==
+      (**)    Loops.repeati #(Spec.Blake2.state a) (U32.v nb)
+      (**)                  (Spec.blake2_update1 a (Hash.extra_state_v prev)
+      (**)                  (B.as_seq h0 blocks))
+      (**)                  (fst (s_v h0 acc)));
+      (* F* needs a little help to see equality between functions when the type
+       * parameters are not syntactically the same (even though they are equal) *)
+      (**) assume(Loops.repeati #(Spec.Blake2.state a) == Loops.repeati #(Hash.words_state' (to_hash_alg a)));
+      (**) update_multi_eq (U32.v nb) (B.as_seq h0 blocks) (s_v h0 acc);
       (**) assert(s_v h3 acc == update_multi_s () (s_v h0 acc) (B.as_seq h0 blocks));
       (**) assert(B.(modifies (stateful_blake2s_32.I.footprint #() h0 acc) h0 h3)))
 
     (* update_last *)
     (fun _ acc prev_len last last_len ->
+      (* TODO: use the extra state and not prev_len - they are not the same *)
       [@inline_let] let wv = get_wv acc in
       [@inline_let] let h = get_state_p acc in
       [@inline_let] let es = get_extra_state_p acc in
@@ -353,14 +382,19 @@ let blake2s_32 : I.block unit =
         | Spec.Blake2B -> FStar.Int.Cast.Full.uint64_to_uint128 prev_len
       in
       Impl.blake2_update_last #a #m (Impl.blake2_update_block #a #m) #last_len
-                              wv h
-                              prev_len' last_len last;
+                              wv h prev_len' last_len last;
       B.upd es 0ul (extra_state_zero_element a);
       (**) let h2 = ST.get () in
       (**) assert(
       (**)   Core.state_v h2 h ==
       (**)     Spec.blake2_update_last a (U64.v prev_len) (U32.v last_len) (B.as_seq h0 last)
       (**)                               (Core.state_v h0 h));
+      (* TODO: I think we could remove the extra state from the concrete implementation
+       * of ``words_state`` and add a ``prev_len`` parameter wherever necessary.
+       * Update: actually, it will cause problem because of the [init]. We need to
+       * ignore the prevlen parameter in the interface and always use the extra state,
+       * which can't be ghost. *)
+      (**) assume(U64.v prev_len = Hash.extra_state_v (snd (s_v h0 acc)));
       (**) update_last_eq (U64.v prev_len) (B.as_seq h0 last) (s_v h0 acc);
       (**) assert(s_v h2 acc ==
       (**)   update_last_s () (s_v h0 acc) (U64.v prev_len) (B.as_seq h0 last))
