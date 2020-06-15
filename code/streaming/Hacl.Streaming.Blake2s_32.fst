@@ -363,10 +363,6 @@ let blake2s_32 : I.block unit =
       [@inline_let] let totlen = Hash.extra_state_add_size_t #(to_hash_alg a) prev len in
       B.upd es 0ul totlen;
       (**) let h3 = ST.get () in
-      (**) [@inline_let] let s1 = Loops.repeati (*#(Hash.words_state' (to_hash_alg a))*) (U32.v nb)
-                           (Spec.blake2_update1 a (Hash.extra_state_v prev)
-                           (B.as_seq h0 blocks))
-                           (fst (s_v h0 acc)) in
       (**) assert(fst (s_v h3 acc) ==
       (**)    Loops.repeati #(Spec.Blake2.state a) (U32.v nb)
       (**)                  (Spec.blake2_update1 a (Hash.extra_state_v prev)
@@ -404,7 +400,10 @@ let blake2s_32 : I.block unit =
        * of ``words_state`` and add a ``prev_len`` parameter wherever necessary.
        * Update: actually, it will cause problem because of the [init]. We need to
        * ignore the prevlen parameter in the interface and always use the extra state,
-       * which can't be ghost. *)
+       * which can't be ghost. But this will cause problem in update_multi...
+       * To solve the init problem: we could add size_block to prevlen by checking the size
+       * of the key (and this check could be normalized at extraction) and remove the extra
+       * state. *)
       (**) assume(U64.v prev_len = Hash.extra_state_v (snd (s_v h0 acc)));
       (**) update_last_eq (U64.v prev_len) (B.as_seq h0 last) (s_v h0 acc);
       (**) assert(s_v h2 acc ==
