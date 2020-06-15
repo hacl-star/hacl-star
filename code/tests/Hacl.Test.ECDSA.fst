@@ -5,7 +5,7 @@ open Test.Lowstarize
 
 open Lib.IntTypes
 
-open Hacl.Interface.P256
+open Hacl.P256
 open Spec.ECDSA.Test.Vectors
 
 module L = Test.Lowstarize

@@ -37,50 +37,7 @@
 #include "Hacl_Spec.h"
 
 
-uint64_t Hacl_P256_sub4_il(uint64_t *x, const uint64_t *y, uint64_t *result);
-
-void Hacl_P256_shift_256_impl(uint64_t *i, uint64_t *o);
-
-void Hacl_P256_toUint8(uint64_t *i, uint8_t *o);
-
-void Hacl_P256_changeEndian(uint64_t *i);
-
-void Hacl_P256_toUint64ChangeEndian(uint8_t *i, uint64_t *o);
-
-void Hacl_P256_reduction_prime_2prime_order(uint64_t *x, uint64_t *result);
-
-extern const uint64_t Hacl_P256_prime256_buffer[4U];
-
-void Hacl_P256_solinas_reduction_impl(uint64_t *i, uint64_t *o);
-
-void Hacl_P256_point_add(uint64_t *p, uint64_t *q, uint64_t *result, uint64_t *tempBuffer);
-
-void Hacl_P256_norm(uint64_t *p, uint64_t *resultPoint, uint64_t *tempBuffer);
-
-void
-Hacl_P256_scalarMultiplicationWithoutNorm(
-  uint64_t *p,
-  uint64_t *result,
-  uint8_t *scalar,
-  uint64_t *tempBuffer
-);
-
-void
-Hacl_P256_secretToPublicWithoutNorm(uint64_t *result, uint8_t *scalar, uint64_t *tempBuffer);
-
-void Hacl_P256_bufferToJac(uint64_t *p, uint64_t *result);
-
-/*
-  This code is not side channel resistant
-*/
-bool Hacl_P256_isPointAtInfinityPublic(uint64_t *p);
-
-/*
-  This code is not side channel resistant
-*/
-bool Hacl_P256_verifyQValidCurvePoint(uint64_t *pubKeyAsPoint, uint64_t *tempBuffer);
-
-uint64_t Hacl_P256_ecp256dh_i(uint8_t *result, uint8_t *scalar);
+uint64_t Hacl_Impl_P256_DH_ecp256dh_i(uint8_t *result, uint8_t *scalar);
 
 /*
   This code is not side channel resistant on pubKey
@@ -88,36 +45,7 @@ uint64_t Hacl_P256_ecp256dh_i(uint8_t *result, uint8_t *scalar);
 /*
   This code is not side channel resistant on pubKey
 */
-uint64_t Hacl_P256_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
-
-void Hacl_P256_computeYFromX(uint64_t *x, uint64_t *result, uint64_t sign);
-
-void Hacl_P256_montgomery_ladder_exponent(uint64_t *r);
-
-void Hacl_P256_fromDomainImpl(uint64_t *a, uint64_t *result);
-
-void Hacl_P256_multPowerPartial(uint64_t *s, uint64_t *a, uint64_t *b, uint64_t *result);
-
-/*
-  This code is not side channel resistant
-*/
-bool Hacl_P256_isMoreThanZeroLessThanOrderMinusOne(uint64_t *f);
-
-/*
-  This code is not side channel resistant
-*/
-bool Hacl_P256_compare_felem_bool(uint64_t *a, uint64_t *b);
-
-uint64_t
-Hacl_P256_ecdsa_signature_core(
-  Spec_ECDSA_hash_alg_ecdsa alg,
-  uint64_t *r,
-  uint64_t *s,
-  uint32_t mLen,
-  uint8_t *m,
-  uint64_t *privKeyAsFelem,
-  uint8_t *k
-);
+uint64_t Hacl_Impl_P256_DH_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
 
 uint64_t
 Hacl_P256_ecdsa_sign_p256_sha2(
@@ -212,12 +140,12 @@ void Hacl_P256_compression_compressed_form(uint8_t *b, uint8_t *result);
 
 void Hacl_P256_reduction_8_32(uint8_t *x, uint8_t *result);
 
-uint64_t Hacl_P256_ecp256dh_i0(uint8_t *result, uint8_t *scalar);
+uint64_t Hacl_P256_ecp256dh_i(uint8_t *result, uint8_t *scalar);
 
 /*
   This code is not side channel resistant on pub_key
 */
-uint64_t Hacl_P256_ecp256dh_r0(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
+uint64_t Hacl_P256_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
 
 #define __Hacl_P256_H_DEFINED
 #endif
