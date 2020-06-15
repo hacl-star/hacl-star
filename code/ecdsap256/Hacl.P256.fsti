@@ -20,6 +20,8 @@ open Hacl.Impl.P256.Compression
 open Spec.P256.MontgomeryMultiplication
 
 
+[@ (Comment " Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n  priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. \n Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. \n The private key and the nonce are expected to be less than the curve order.")]
+
 val ecdsa_sign_p256_sha2: result: lbuffer uint8 (size 64) 
   -> mLen: size_t 
   -> m: lbuffer uint8 mLen 
@@ -47,6 +49,8 @@ val ecdsa_sign_p256_sha2: result: lbuffer uint8 (size 64)
   )
 
 
+[@ (Comment " Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n  priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. \n Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. \n The private key and the nonce are expected to be less than the curve order.")]
+
 val ecdsa_sign_p256_sha384: result: lbuffer uint8 (size 64) -> mLen: size_t -> m: lbuffer uint8 mLen ->
   privKey: lbuffer uint8 (size 32) -> 
   k: lbuffer uint8 (size 32) -> 
@@ -72,6 +76,7 @@ val ecdsa_sign_p256_sha384: result: lbuffer uint8 (size 64) -> mLen: size_t -> m
   )
 
 
+[@ (Comment " Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n  priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. \n Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. \n The private key and the nonce are expected to be less than the curve order.")]
 
 val ecdsa_sign_p256_sha512: result: lbuffer uint8 (size 64) 
   -> mLen: size_t 
@@ -100,6 +105,8 @@ val ecdsa_sign_p256_sha512: result: lbuffer uint8 (size 64)
   )
 
 
+[@ (Comment " Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n  priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. \n Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. \n The private key and the nonce are expected to be less than the curve order. \n The message m is expected to be hashed by a strong hash function, the lenght of the message is expected to be 32 bytes and more.")]
+
 val ecdsa_sign_p256_without_hash: result: lbuffer uint8 (size 64) 
   -> mLen: size_t {uint_v mLen >= Spec.ECDSA.min_input_length Spec.ECDSA.NoHash}
   -> m: lbuffer uint8 mLen
@@ -127,7 +134,7 @@ val ecdsa_sign_p256_without_hash: result: lbuffer uint8 (size 64)
   )
 
 
-[@ (Comment "  This code is not side channel resistant")]
+[@ (Comment "This code is not side-channel resistant.\n Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n  priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. \n Output: bool, where 0 stands for the correct signature verification. \n The private key and the nonce are expected to be less than the curve order.")]
 
 val ecdsa_verif_p256_sha2:
     mLen: size_t
@@ -148,7 +155,7 @@ val ecdsa_verif_p256_sha2:
     )
 
 
-[@ (Comment "  This code is not side channel resistant")]
+[@ (Comment "This code is not side-channel resistant.\n Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n  priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. \n Output: bool, where 0 stands for the correct signature verification. \n The private key and the nonce are expected to be less than the curve order.")]
 
 val ecdsa_verif_p256_sha384:
     mLen: size_t
@@ -169,7 +176,7 @@ val ecdsa_verif_p256_sha384:
    )
 
 
-[@ (Comment "  This code is not side channel resistant")]
+[@ (Comment "This code is not side-channel resistant.\n Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n  priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. \n Output: bool, where 0 stands for the correct signature verification. \n The private key and the nonce are expected to be less than the curve order.")]
 
 val ecdsa_verif_p256_sha512:
     mLen: size_t
@@ -190,6 +197,8 @@ val ecdsa_verif_p256_sha512:
    )
 
 
+[@ (Comment "This code is not side-channel resistant.\n Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n  priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. \n Output: bool, where 0 stands for the correct signature verification. \n The private key and the nonce are expected to be less than the curve order. \n The message m is expected to be hashed by a strong hash function, the lenght of the message is expected to be 32 bytes and more.")]
+
 val ecdsa_verif_without_hash:
   mLen: size_t {uint_v mLen >= Spec.ECDSA.min_input_length Spec.ECDSA.NoHash}
   -> m:lbuffer uint8 mLen
@@ -208,6 +217,8 @@ val ecdsa_verif_without_hash:
       result == Spec.ECDSA.ecdsa_verification_agile Spec.ECDSA.NoHash (publicKeyX, publicKeyY) r s (v mLen)  (as_seq h0 m)
    )
 
+
+[@ (Comment " ")]
 
 val verify_q: 
   pubKey: lbuffer uint8 (size 64) ->
