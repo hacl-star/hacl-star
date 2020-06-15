@@ -121,8 +121,7 @@ let bn_is_bit_set_lemma #len b ind =
   let tmp2 = tmp1 &. u64 1 in
   mod_mask_lemma tmp1 1ul;
   assert (v (mod_mask #U64 #SEC 1ul) == v (u64 1));
-  assert (v tmp2 == v tmp1 % 2);
-  assert (v tmp1 == v b.[i] / pow2 j);
+  assert (v tmp2 == v b.[i] / pow2 j % 2);
 
   calc (==) {
     v b.[i] / pow2 j % 2;
