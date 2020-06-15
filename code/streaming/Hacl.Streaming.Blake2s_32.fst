@@ -251,12 +251,10 @@ val update_multi_eq :
                         S.length blocks % Hash.block_length (to_hash_alg a) = 0} ->
   acc : Hash.words_state (to_hash_alg a) ->
   Lemma
-//  (requires (prev_length == Hash.extra_state_v (snd acc)))
-  (ensures (
-    ((Spec.blake2_update_blocks a prev_length blocks (fst acc) <:
-      Hash.words_state' (to_hash_alg a)),
-     Hash.extra_state_add_nat #(to_hash_alg a) (snd acc) (S.length blocks)) ==
-      update_multi_s () acc blocks))
+    (((Spec.blake2_update_blocks a prev_length blocks (fst acc) <:
+       Hash.words_state' (to_hash_alg a)),
+      Hash.extra_state_add_nat #(to_hash_alg a) (snd acc) (S.length blocks)) ==
+       update_multi_s () acc blocks)
 
 let update_multi_eq prev_length blocks acc = admit()
 
@@ -266,11 +264,29 @@ val update_last_eq :
                       prev_length + S.length last <= max_input_length key_size} ->
   acc : Hash.words_state (to_hash_alg a) ->
   Lemma
+  (requires (prev_length = Hash.extra_state_v #(to_hash_alg a) (snd acc)))
   (ensures (
     Spec.blake2_update_last a prev_length (S.length last) last (fst acc) ==
       fst (update_last_s () acc prev_length last)))
 
-let update_last_eq prev_length last acc = admit()
+let update_last_eq prev_length last acc =
+  (* Checking how to unfold the ``update_last_s`` definition *)
+  let accf = update_last_s () acc prev_length last in
+  assert(accf == Spec.Hash.Incremental.update_last_blake (to_hash_alg a) acc prev_length last);
+  (* Make sure the blocks decomposition is what we expect *)
+  let blocks, last_block, rem = Spec.Hash.Incremental.last_split_blake (to_hash_alg a) last in
+  assert(blocks `S.equal` S.empty);
+  assert(rem = S.length last);
+  assert(last_block == Spec.get_last_padded_block a last (S.length last));
+  (* Prove that the last call to ``update_multi`` does nothing (there is no call to
+   * ``update_multi`` in ``blake2_update_last`` *)
+  let acc2 = Spec.Agile.Hash.update_multi (to_hash_alg a) acc blocks in
+  Spec.Hash.Lemmas.update_multi_zero (to_hash_alg a) acc;
+  assert(acc2 == acc);
+  (* Prove that the extra state update computes the same total length as in ``blake2_update_last`` *)
+  Spec.Hash.Lemmas.extra_state_add_nat_bound_lem #(to_hash_alg a) (snd acc) (S.length last);
+  assert(Hash.extra_state_v (Hash.extra_state_add_nat (snd acc) (S.length last)) ==
+         Hash.extra_state_v (snd acc) + S.length last)
 
 #push-options "--z3rlimit 500 --ifuel 1"
 inline_for_extraction noextract
