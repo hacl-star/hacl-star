@@ -61,6 +61,12 @@ Write `a * b` in `res`.
 */
 void Hacl_Bignum4096_mul(uint64_t *a, uint64_t *b, uint64_t *res);
 
+/*
+Write `a * b` in `res`.
+
+  The arguments a and b are meant to be 4096-bit bignums, i.e. uint64_t[64].
+  The outparam res is meant to be a 8192-bit bignum, i.e. uint64_t[128].
+*/
 void
 Hacl_Bignum4096_mod_exp(uint64_t *n1, uint64_t *a, uint32_t bBits, uint64_t *b, uint64_t *res);
 

@@ -249,65 +249,7 @@ static void to(uint64_t *n1, uint64_t nInv_u64, uint64_t *r2, uint64_t *a, uint6
     ((uint32_t)64U + (uint32_t)1U + (uint32_t)64U + (uint32_t)1U) * sizeof (tmp[0U]));
   uint64_t *c = tmp;
   Hacl_Bignum4096_mul(a, r2, c);
-  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)64U + (uint32_t)1U; i0++)
-  {
-    uint64_t qj = nInv_u64 * tmp[i0];
-    uint64_t *res_ = tmp + i0;
-    uint64_t c1 = (uint64_t)0U;
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
-    {
-      c1 = Hacl_Bignum_Multiplication_mul_carry_add_u64_st(c1, n1[i], qj, res_ + i);
-    }
-    uint64_t r0 = c1;
-    uint64_t c10 = r0;
-    uint64_t c2 = c10;
-    uint64_t *res2 = tmp + i0 + (uint32_t)64U;
-    uint64_t *a0 = res2;
-    uint64_t *res0 = res2;
-    uint64_t c30 = (uint64_t)0U;
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)1U; i++)
-    {
-      uint64_t t1 = a0[i];
-      uint64_t t2 = (&c2)[i];
-      c30 = Lib_IntTypes_Intrinsics_add_carry_u64(c30, t1, t2, res0 + i);
-    }
-    uint64_t c0 = c30;
-    uint64_t r;
-    if
-    (
-      (uint32_t)1U
-      < (uint32_t)64U + (uint32_t)1U + (uint32_t)64U + (uint32_t)1U - i0 - (uint32_t)64U
-    )
-    {
-      uint32_t
-      rLen =
-        (uint32_t)64U
-        + (uint32_t)1U
-        + (uint32_t)64U + (uint32_t)1U
-        - i0
-        - (uint32_t)64U
-        - (uint32_t)1U;
-      uint64_t *a1 = res2 + (uint32_t)1U;
-      uint64_t *res1 = res2 + (uint32_t)1U;
-      uint64_t c3 = c0;
-      for (uint32_t i = (uint32_t)0U; i < rLen; i++)
-      {
-        uint64_t t1 = a1[i];
-        c3 = Lib_IntTypes_Intrinsics_add_carry_u64(c3, t1, (uint64_t)0U, res1 + i);
-      }
-      uint64_t c11 = c3;
-      r = c11;
-    }
-    else
-    {
-      r = c0;
-    }
-    uint64_t uu____0 = r;
-  }
-  memcpy(aM,
-    tmp + (uint32_t)64U + (uint32_t)1U,
-    ((uint32_t)64U + (uint32_t)1U + (uint32_t)64U + (uint32_t)1U - ((uint32_t)64U + (uint32_t)1U))
-    * sizeof ((tmp + (uint32_t)64U + (uint32_t)1U)[0U]));
+  reduction(n1, nInv_u64, tmp, aM);
 }
 
 static void from(uint64_t *n1, uint64_t nInv_u64, uint64_t *aM, uint64_t *a)
@@ -358,10 +300,17 @@ mod_exp_loop(
   }
 }
 
+/*
+Write `a * b` in `res`.
+
+  The arguments a and b are meant to be 4096-bit bignums, i.e. uint64_t[64].
+  The outparam res is meant to be a 8192-bit bignum, i.e. uint64_t[128].
+*/
 void
 Hacl_Bignum4096_mod_exp(uint64_t *n1, uint64_t *a, uint32_t bBits, uint64_t *b, uint64_t *res)
 {
   uint64_t acc[64U] = { 0U };
+  memset(acc, 0U, (uint32_t)64U * sizeof (acc[0U]));
   acc[0U] = (uint64_t)1U;
   uint32_t rLen = (uint32_t)65U;
   uint32_t bLen = (bBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
