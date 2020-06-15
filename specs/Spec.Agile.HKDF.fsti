@@ -5,6 +5,9 @@ open Spec.Hash.Definitions
 
 let lbytes (l:nat) = b:bytes {Seq.length b = l}
 
+let extract_ikm_length_pred (a:hash_alg) (ikm_length:nat) =
+  ikm_length + block_length a <= max_input_length a
+
 val extract:
   a: hash_alg ->
   key: bytes ->
@@ -12,8 +15,14 @@ val extract:
   Pure (lbytes (hash_length a))
     (requires
       Spec.Agile.HMAC.keysized a (Seq.length key) /\
-      Seq.length data + block_length a <= max_input_length a)
+      extract_ikm_length_pred a (Seq.length data))
     (ensures fun _ -> True)
+
+let expand_info_length_pred (a:hash_alg) (info_length:nat) =
+  hash_length a + info_length + 1 + block_length a <= max_input_length a
+
+let expand_output_length_pred (a:hash_alg) (len:nat) =
+  len <= 255 * hash_length a
 
 val expand:
   a: hash_alg ->
@@ -24,6 +33,6 @@ val expand:
     (requires
       hash_length a <= Seq.length prk /\
       HMAC.keysized a (Seq.length prk) /\
-      hash_length a + Seq.length info + 1 + block_length a <= max_input_length a /\
-      len <= 255 * hash_length a)
+      expand_info_length_pred a (Seq.length info) /\
+      expand_output_length_pred a len)
     (ensures fun _ -> True)
