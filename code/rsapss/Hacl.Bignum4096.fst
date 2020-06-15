@@ -52,19 +52,19 @@ instance bn_inst: BN.bn n = {
 }
 
 let precomp: BM.precomp_r2_mod_n_st n =
-  BM.(norm [ zeta; primops; iota; delta_only [`%precomp_r2_mod_n;] ] (precomp_r2_mod_n #n #bn_inst))
+  BM.precomp_r2_mod_n #n #bn_inst
 
 let reduction: BM.mont_reduction_st n =
-  BM.(norm [ zeta; primops; iota; delta_only [ `%mont_reduction ] ] (mont_reduction n))
+  BM.mont_reduction n
 
 let to: BM.to_mont_st n =
-  BM.(norm [ zeta; primops; iota; delta_only [ `%to_mont ] ] (to_mont #n #bn_inst))
+  BM.to_mont #n #bn_inst
 
 let from: BM.from_mont_st n =
-  norm [ zeta; primops; iota; delta_only [ `%BM.from_mont ] ] (BM.from_mont #n reduction)
+  BM.from_mont #n reduction
 
 let mont_mul: BM.mont_mul_st n =
-  norm [ zeta; primops; iota; delta_only [ `%BM.mont_mul ] ] (BM.mont_mul #n #bn_inst reduction)
+  BM.mont_mul #n #bn_inst reduction
 
 inline_for_extraction noextract
 instance mont_inst: BM.mont n = {

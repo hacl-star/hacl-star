@@ -33,6 +33,7 @@ let precomp_r2_mod_n_st (nLen: BN.meta_len) =
 // Not marking this one as noextract, since it legitimately can execute with
 // nLen passed at run-time. It's just a little inefficient. (And it's helpful to
 // keep a super-generic bignum implementation for any width.)
+inline_for_extraction noextract
 val precomp_r2_mod_n:
     #nLen:BN.meta_len
   -> (#[FStar.Tactics.Typeclasses.tcresolve ()] _ : BN.bn nLen)
@@ -53,6 +54,7 @@ let mont_reduction_st (nLen:size_t { v nLen + 1 + v nLen + 1 <= max_size_t }) =
   (ensures  fun h0 _ h1 -> modifies (loc res |+| loc c) h0 h1 /\
     as_seq h1 res == S.mont_reduction #(v nLen) #(v rLen) (as_seq h0 n) mu (as_seq h0 c))
 
+inline_for_extraction noextract
 val mont_reduction:
     nLen:BN.meta_len
   -> mont_reduction_st nLen
@@ -74,6 +76,7 @@ let to_mont_st (nLen: BN.meta_len) =
   (ensures  fun h0 _ h1 -> modifies (loc aM) h0 h1 /\
     as_seq h1 aM == S.to_mont #(v nLen) #(v rLen) (as_seq h0 n) mu (as_seq h0 r2) (as_seq h0 a))
 
+inline_for_extraction noextract
 val to_mont:
     #nLen:BN.meta_len
   -> (#[FStar.Tactics.Typeclasses.tcresolve ()] _ : BN.bn nLen)
@@ -96,6 +99,7 @@ let from_mont_st (nLen: BN.meta_len) =
 
 // This one just needs a specialized implementation of mont_reduction. No point
 // in doing a type class for a single function , so we take it as a parameter.
+inline_for_extraction noextract
 val from_mont:
     #nLen:BN.meta_len
   -> mr: mont_reduction_st nLen
@@ -119,6 +123,7 @@ let mont_mul_st (nLen: BN.meta_len) =
     as_seq h1 resM == S.mont_mul (as_seq h0 n) mu (as_seq h0 aM) (as_seq h0 bM))
 
 /// This one needs both the type class and a specialized montgomery reduction.
+inline_for_extraction noextract
 val mont_mul:
     #nLen:BN.meta_len
   -> (#[FStar.Tactics.Typeclasses.tcresolve ()] _ : BN.bn nLen)
@@ -141,15 +146,6 @@ class mont (len: BN.meta_len)  = {
 inline_for_extraction noextract
 instance bn_of_mont (#len: BN.meta_len) (x: mont len): BN.bn len = x.bn
 
-// Same here: a completely run-time-only instance.
-// FIXME: I cannot seem to use any dependency and must repeat the definitions of
-// bn and reduction.
+// A completely run-time-only instance where the functions above exist in the C code.
 inline_for_extraction noextract
-let mk_runtime_mont (len: BN.meta_len): mont len = {
-  bn = BN.mk_runtime_bn len;
-  precomp = norm [ zeta; primops; iota; delta_only [`%precomp_r2_mod_n;] ] (precomp_r2_mod_n #len #(BN.mk_runtime_bn len));
-  reduction = mont_reduction len;
-  to = to_mont #len #(BN.mk_runtime_bn len);
-  from = from_mont #len (mont_reduction len);
-  mul = mont_mul #len #(BN.mk_runtime_bn len) (mont_reduction len);
-}
+val mk_runtime_mont (len: BN.meta_len): mont len

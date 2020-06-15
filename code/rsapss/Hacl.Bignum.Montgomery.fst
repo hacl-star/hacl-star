@@ -182,3 +182,25 @@ let mont_mul #nLen #k mont_reduction n nInv_u64 aM bM resM =
   k.BN.mul' aM bM c; // c = aM * bM
   mont_reduction n nInv_u64 c resM; // resM = c % n
   pop_frame ()
+
+/// All of the functions above are inline_for_extraction noextract meaning that
+/// they're intended to be specialized by clients for a specific value of
+/// ``len``. We provide a default implementation that actually keeps ``len`` at
+/// runtime, to offer a version of mod_exp where all the parameters are present
+/// at run-time.
+
+let precomp_runtime len = precomp_r2_mod_n #len #(BN.mk_runtime_bn len)
+let mont_reduction_runtime len = mont_reduction len
+let to_runtime len = to_mont #len #(BN.mk_runtime_bn len)
+let from_runtime len = from_mont #len (mont_reduction_runtime len)
+let mul_runtime len = mont_mul #len #(BN.mk_runtime_bn len) (mont_reduction_runtime len)
+
+inline_for_extraction noextract
+let mk_runtime_mont (len: BN.meta_len): mont len = {
+  bn = BN.mk_runtime_bn len;
+  precomp = precomp_runtime len;
+  reduction = mont_reduction_runtime len;
+  to = to_runtime len;
+  from = from_runtime len;
+  mul = mul_runtime len;
+}

@@ -109,7 +109,6 @@ val mk_bn_mod_exp:
   -> bn_mod_exp_loop:bn_mod_exp_loop_st nLen ->
   bn_mod_exp_st modBits nLen
 
-[@CInline]
 let mk_bn_mod_exp modBits nLen #_ bn_mod_exp_loop n a bBits b res =
   push_frame ();
   let acc  = create nLen (u64 0) in
@@ -117,6 +116,7 @@ let mk_bn_mod_exp modBits nLen #_ bn_mod_exp_loop n a bBits b res =
   bn_mod_exp_mont modBits nLen bn_mod_exp_loop n a acc bBits b res;
   pop_frame ()
 
+[@CInline]
 let bn_mod_exp modBits nLen =
   [@ inline_let ]
   let inst = BM.mk_runtime_mont nLen in
