@@ -15,6 +15,12 @@ friend Spec.Agile.Hash
 open FStar.Mul
 module Loops = Lib.LoopCombinators
 
+/// A lemma I could not find in FStar.Math.Lemmas - note: duplicated in Hash.Streaming.Spec.fst
+let mul_zero_left_is_zero (n : nat) : Lemma(0 * n = 0) = ()
+
+/// A lemma I could not find in FStar.Math.Lemmas
+let add_zero_right_is_same (n : nat) : Lemma(n + 0 = n) = ()
+
 /// TODO: I don't find this lemma in Lib, and the below proofs don't work if
 /// I don't prove this step separately.
 let add_v_eq (a b : nat) :
@@ -103,10 +109,8 @@ let update_multi_associate_eq1
   Math.Lemmas.multiple_modulo_lemma 1 (block_length a);
   update_multi_associative a (hash, nat_to_extra_state a prev) blocks1 blocks2
 
-/// TODO: the time spent on this proof is super random.
-/// TODO: fix the proof which seems to loop
-#push-options "--z3rlimit 500 --fuel 1"
-let rec repeati_blake2_update1_is_update_multi
+#push-options "--fuel 1 --z3cliopt smt.arith.nl=false"
+val repeati_blake2_update1_is_update_multi_aux
   (a:hash_alg{is_blake a}) (nb prev : nat)
   (d : bytes)
   (hash : words_state' a) :
@@ -117,36 +121,112 @@ let rec repeati_blake2_update1_is_update_multi
     prev + nb * block_length a <= max_extra_state a
   ))
   (ensures (
+    (**) Math.Lemmas.nat_times_nat_is_nat nb (block_length a);
+    (**) assert(nb * block_length a >= 0);
+    (**) assert_norm(Spec.Blake2.size_block (to_blake_alg a) > 0);
+    (**) assert_norm(block_length a == Blake2.size_block (to_blake_alg a));
+    (**) calc (<=) {
+    (**)   (nb <: int);
+    (**)   (==) { Math.Lemmas.cancel_mul_div nb (block_length a) }
+    (**)   (nb * block_length a) / block_length a;
+    (**)   (<=) { Math.Lemmas.lemma_div_le (nb * block_length a) (Seq.length d) (block_length a) }
+    (**)   Seq.length d / block_length a;
+    (**)   (==) {}
+    (**)   Seq.length d / Spec.Blake2.size_block (to_blake_alg a);
+    (**) };
+    (**) assert(forall (i : nat). i < nb ==> (i < Seq.length d / Spec.Blake2.size_block (to_blake_alg a)));
+    (**) assert_norm(block_length a > 0);
     let blocks, _ = Seq.split d (nb * block_length a) in
+    (**) Math.Lemmas.multiple_modulo_lemma nb (block_length a);
+    (**) assert(Seq.length blocks % block_length a = 0);
     (Loops.repeati #(words_state' a) nb (Blake2.blake2_update1 (to_blake_alg a) prev d) hash,
      nat_to_extra_state a (prev + nb * block_length a)) ==
-       update_multi a (hash, nat_to_extra_state a prev) blocks)) =
+       update_multi a (hash, nat_to_extra_state a prev) blocks))
+
+let rec repeati_blake2_update1_is_update_multi_aux a nb prev d hash =
+  assert_norm(block_length a > 0);
+  assert_norm(block_length a == Blake2.size_block (to_blake_alg a));
+  calc (<=) {
+    (nb <: int);
+    (==) { Math.Lemmas.cancel_mul_div nb (block_length a) }
+    (nb * block_length a) / block_length a;
+    (<=) { Math.Lemmas.lemma_div_le (nb * block_length a) (Seq.length d) (block_length a) }
+    Seq.length d / block_length a;
+  };
+  assert(Seq.length d % block_length a >= 0);
   assert(nb <= Seq.length d / Blake2.size_block (to_blake_alg a));
   assert(prev + nb * block_length a <= Blake2.max_limb (to_blake_alg a));
   let update1 = Blake2.blake2_update1 (to_blake_alg a) prev d in
+  Math.Lemmas.nat_times_nat_is_nat nb (block_length a);
   let blocks, _ = Seq.split d (nb * block_length a) in
   assert(Seq.length blocks == nb * block_length a);
   Math.Lemmas.multiple_modulo_lemma nb (block_length a);
   if nb = 0 then
-    Loops.eq_repeati0 nb update1 hash
+    begin
+    Loops.eq_repeati0 #(words_state' a) nb update1 hash;
+    assert(Loops.repeati #(words_state' a) nb (Blake2.blake2_update1 (to_blake_alg a) prev d) hash == hash);
+    mul_zero_left_is_zero (block_length a);
+    assert(Seq.length blocks = 0);
+    Spec.Hash.Lemmas.update_multi_zero a (hash, nat_to_extra_state a prev);
+    assert(update_multi a (hash, nat_to_extra_state a prev) blocks == (hash, nat_to_extra_state a prev));
+    calc (==) {
+      prev + nb * block_length a;
+      (==) { mul_zero_left_is_zero (block_length a) }
+      prev + 0;
+      (==) { add_zero_right_is_same prev }
+      prev;
+    }
+    end
   else
     begin
     repeati_blake2_update1_eq a nb prev d hash;
-    (**)
+    Math.Lemmas.nat_times_nat_is_nat (nb-1) (block_length a);
+    Math.Lemmas.lemma_mult_le_right (block_length a) (nb - 1) nb;
+    assert((nb - 1) * block_length a <= nb * block_length a);
     let blocks1, blocks2 = Seq.split blocks ((nb-1) * block_length a) in
+    assert(Seq.append blocks1 blocks2 `Seq.equal` blocks);
     update_multi_associate_eq1 a nb prev blocks hash;
-    let s2 = update_multi a (hash, nat_to_extra_state a prev) blocks1 in
-    assert(
-      update_multi a (hash, nat_to_extra_state a prev) blocks ==
-      update_multi a s2 blocks2);
-    repeati_blake2_update1_is_update_multi a (nb - 1) prev d hash;
+    calc (==) {
+      Seq.length blocks1 % block_length a;
+      (==) {}
+      ((nb - 1) * block_length a) % block_length a;
+      (==) { Math.Lemmas.cancel_mul_mod (nb-1) (block_length a) }
+      0;
+    };
+    calc (==) {
+      Seq.length blocks2;
+      (==) {}
+      (nb * block_length a) - ((nb-1) * block_length a);
+      (==) { Math.Lemmas.distributivity_sub_left nb (nb-1) (block_length a) }
+      block_length a;
+    };
+    calc (==) {
+      Seq.length blocks2 % block_length a;
+      (==) {}
+      1 * block_length a % block_length a;
+      (==) { Math.Lemmas.cancel_mul_mod 1 (block_length a) }
+      0;
+    };
+    let s0 = (hash, nat_to_extra_state a prev) in
+    let s1 = update_multi a s0 blocks1 in
+    let s2 = update_multi a s1 blocks2 in
+    let s2' = update_multi a s0 blocks in
+    assert(s2 == s2');
+    assert((nb - 1) * block_length a <= Seq.length d);
+    assert(prev + Seq.length d <= Blake2.max_limb (to_blake_alg a));
+    assert(prev + (nb-1) * block_length a <= max_extra_state a);
+    repeati_blake2_update1_is_update_multi_aux a (nb - 1) prev d hash;
     assert(blocks1 `S.equal` Seq.slice d 0 ((nb-1) * block_length a));
     assert(
-      s2 == (Loops.repeati #(words_state' a) (nb-1) update1 hash,
+      s1 == (Loops.repeati #(words_state' a) (nb-1) update1 hash,
              nat_to_extra_state a (prev + (nb-1) * block_length a)));
-    update_multi_one_block_eq a blocks2 (fst s2) (extra_state_v (snd s2))
+    update_multi_one_block_eq a blocks2 (fst s1) (extra_state_v (snd s1));
+    Loops.unfold_repeati #(words_state' a) nb update1 hash (nb-1)
     end
 #pop-options
+
+let repeati_blake2_update1_is_update_multi a nb prev d hash =
+  repeati_blake2_update1_is_update_multi_aux a nb prev d hash
 
 /// It is enough to prove the equality between the spec and the incremental hash
 /// without the finish step. Moreover, for some reason, introducing those two
