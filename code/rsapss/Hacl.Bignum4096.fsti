@@ -73,5 +73,5 @@ val bn_to_bytes_be: Hacl.Bignum.Convert.bn_to_bytes_be_st n
 /* Comparisons */
 /***************/\n";
 Comment
-"Returns true if and only if argument a is strictly see then argument b."]
+"Returns true if and only if argument a is strictly less than the argument b."]
 val lt: Hacl.Bignum.bn_is_less_st n
