@@ -263,10 +263,9 @@ val verify_q:
   \n We denote || as byte concatenation. 
   \n A compressed point is a point representaion as follows: (0x2 + y % 2) || x.
   \n A not Compressed point is a point representation as follows: 0x4 || x || y.
- ")]
 
-
-[@ (Comment " Input: a point in not compressed form (uint8[65]), \n result: uint8[64] (internal point representation).
+  \n \n \n \n
+Input: a point in not compressed form (uint8[65]), \n result: uint8[64] (internal point representation).
   \n Output: bool, where true stands for the correct decompression.
  ")]
 
