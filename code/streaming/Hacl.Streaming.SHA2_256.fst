@@ -54,15 +54,15 @@ module Agile = Spec.Agile.Hash
 inline_for_extraction noextract
 let b = stateful_buffer (word SHA2_256) (D.hash_word_len SHA2_256) (Lib.IntTypes.u32 0)
 
-let update_multi_s () acc input =
+let update_multi_s () acc (prevlen : nat) input =
   fst Agile.(update_multi SHA2_256 (acc, ()) input)
 
-let update_multi_zero () acc :
-  Lemma(update_multi_s () acc S.empty == acc) = ()
+let update_multi_zero () acc (prevlen : nat) :
+  Lemma(update_multi_s () acc prevlen S.empty == acc) = ()
   
 #push-options "--ifuel 1"
 
-let update_multi_associative () acc (input1 input2 : S.seq uint8) :
+let update_multi_associative () acc (prevlen1 prevlen2 : nat) (input1 input2 : S.seq uint8) :
     Lemma
     (requires (
       S.length input1 % U32.v (D.block_len SHA2_256) = 0 /\
@@ -70,8 +70,8 @@ let update_multi_associative () acc (input1 input2 : S.seq uint8) :
     (ensures (
       let input = S.append input1 input2 in
       S.length input % U32.v (D.block_len SHA2_256) = 0 /\
-      update_multi_s () (update_multi_s () acc input1) input2 ==
-        update_multi_s () acc input)) =
+      update_multi_s () (update_multi_s () acc prevlen1 input1) prevlen2 input2 ==
+        update_multi_s () acc prevlen1 input)) =
   Spec.Hash.Lemmas.update_multi_associative SHA2_256 (acc, ()) input1 input2
 #pop-options
 
@@ -89,20 +89,23 @@ let hacl_sha2_256: block unit =
     (fun () -> Hacl.Hash.Definitions.block_len SHA2_256)
 
     (fun () _ -> fst (Spec.Agile.Hash.(init SHA2_256)))
-    (fun () acc blocks -> update_multi_s () acc blocks)
+    (fun () acc prevlen blocks -> update_multi_s () acc prevlen blocks)
     (fun () acc prevlen input -> fst Spec.Hash.Incremental.(update_last SHA2_256 (acc, ()) prevlen input))
     (fun () _ acc -> Spec.Hash.PadFinish.(finish SHA2_256 (acc, ())))
     (fun () _ s -> Spec.Agile.Hash.(hash SHA2_256 s))
 
-    (fun i h -> update_multi_zero i h) (* update_multi_zero *)
-    (fun i acc input1 input2 -> update_multi_associative i acc input1 input2) (* update_multi_associative *)
+    (fun i h prevlen -> update_multi_zero i h prevlen) (* update_multi_zero *)
+    (fun i acc prevlen1 prevlen2 input1 input2 ->
+      update_multi_associative i acc prevlen1 prevlen2 input1 input2) (* update_multi_associative *)
     (fun _ _ input -> Spec.Hash.Incremental.hash_is_hash_incremental SHA2_256 input)
 
     (fun _ _ -> ())
     (fun _ _ s -> Hacl.Hash.SHA2.init_256 s)
-    (fun _ s blocks len -> Hacl.Hash.SHA2.update_multi_256 s () blocks (len `U32.div` Hacl.Hash.Definitions.(block_len SHA2_256)))
-    (fun _ s prev_len last last_len ->
-      Hacl.Hash.SHA2.update_last_256 s () prev_len last last_len)
+    (fun _ s prevlen blocks len ->
+      Hacl.Hash.SHA2.update_multi_256 s () blocks
+                                      (len `U32.div` Hacl.Hash.Definitions.(block_len SHA2_256)))
+    (fun _ s prevlen last last_len ->
+      Hacl.Hash.SHA2.update_last_256 s () prevlen last last_len)
     (fun _ _ s dst -> Hacl.Hash.SHA2.finish_256 s () dst)
 #pop-options
 
