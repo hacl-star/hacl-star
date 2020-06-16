@@ -22,6 +22,7 @@
  */
 
 #include "evercrypt_targetconfig.h"
+#include "lib_intrinsics.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
@@ -70,7 +71,9 @@ void Hacl_Bignum4096_mul(uint64_t *a, uint64_t *b, uint64_t *res);
 Write `a ^ b mod n1` in `res`.
 
   The arguments a, n1 and the outparam res are meant to be 4096-bit bignums, i.e. uint64_t[64].
-  The argument b is a bignum of any size, and bBits is an upper bound on the number of significant bits of b.
+  The argument b is a bignum of any size, and bBits is an upper bound on the
+  number of significant bits of b. For instance, if b is a 4096-bit bignum,
+  bBits should be 4096.
 */
 void
 Hacl_Bignum4096_mod_exp(uint64_t *n1, uint64_t *a, uint32_t bBits, uint64_t *b, uint64_t *res);
@@ -100,6 +103,17 @@ Serialize a bignum into big-endian memory.
   The outparam res points to 512 bytes of valid memory.
 */
 void Hacl_Bignum4096_bn_to_bytes_be(uint64_t *b, uint8_t *res);
+
+
+/***************/
+/* Comparisons */
+/***************/
+
+
+/*
+Returns true if and only if argument a is strictly see then argument b.
+*/
+bool Hacl_Bignum4096_lt(uint64_t *a, uint64_t *b);
 
 #define __Hacl_Bignum4096_H_DEFINED
 #endif

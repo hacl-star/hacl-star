@@ -309,7 +309,9 @@ mod_exp_loop(
 Write `a ^ b mod n1` in `res`.
 
   The arguments a, n1 and the outparam res are meant to be 4096-bit bignums, i.e. uint64_t[64].
-  The argument b is a bignum of any size, and bBits is an upper bound on the number of significant bits of b.
+  The argument b is a bignum of any size, and bBits is an upper bound on the
+  number of significant bits of b. For instance, if b is a 4096-bit bignum,
+  bBits should be 4096.
 */
 void
 Hacl_Bignum4096_mod_exp(uint64_t *n1, uint64_t *a, uint32_t bBits, uint64_t *b, uint64_t *res)
@@ -403,5 +405,27 @@ void Hacl_Bignum4096_bn_to_bytes_be(uint64_t *b, uint8_t *res)
   memcpy(res,
     tmp + tmpLen - (uint32_t)64U,
     (uint32_t)64U * sizeof ((tmp + tmpLen - (uint32_t)64U)[0U]));
+}
+
+
+/***************/
+/* Comparisons */
+/***************/
+
+
+/*
+Returns true if and only if argument a is strictly see then argument b.
+*/
+bool Hacl_Bignum4096_lt(uint64_t *a, uint64_t *b)
+{
+  uint64_t acc = (uint64_t)0U;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
+  {
+    uint64_t beq = FStar_UInt64_eq_mask(a[i], b[i]);
+    uint64_t blt = ~FStar_UInt64_gte_mask(a[i], b[i]);
+    acc = (beq & acc) | (~beq & ((blt & (uint64_t)0xFFFFFFFFFFFFFFFFU) | (~blt & (uint64_t)0U)));
+  }
+  uint64_t mask = acc;
+  return mask == (uint64_t)0xFFFFFFFFFFFFFFFFU;
 }
 

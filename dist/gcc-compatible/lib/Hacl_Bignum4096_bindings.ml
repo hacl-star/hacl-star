@@ -26,4 +26,7 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Bignum4096_bn_to_bytes_be =
       foreign "Hacl_Bignum4096_bn_to_bytes_be"
         ((ptr uint64_t) @-> (ocaml_bytes @-> (returning void)))
+    let hacl_Bignum4096_lt =
+      foreign "Hacl_Bignum4096_lt"
+        ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning bool)))
   end
