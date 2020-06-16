@@ -919,7 +919,7 @@ dist/mozilla/Makefile.basic: INTRINSIC_FLAGS = \
   -add-include 'Hacl_Chacha20_Vec256:"libintvector.h"' \
   -add-include 'Hacl_Poly1305_128:"libintvector.h"' \
   -add-include 'Hacl_Poly1305_256:"libintvector.h"' \
-  -add-include 'Hacl_P256:"lib_instrinsics.h"'
+  -add-include 'Hacl_P256:"lib_intrinsics.h"'
 dist/mozilla/Makefile.basic: CURVE_BUNDLE_SLOW = -bundle Hacl.Curve25519_64_Slow
 dist/mozilla/Makefile.basic: SALSA20_BUNDLE = -bundle Hacl.Salsa20
 dist/mozilla/Makefile.basic: ED_BUNDLE = -bundle Hacl.Ed25519
