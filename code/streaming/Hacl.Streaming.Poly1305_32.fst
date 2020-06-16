@@ -105,10 +105,10 @@ inline_for_extraction noextract
 let update_ (acc, r) (block: block) =
   Spec.Poly1305.poly1305_update1 r Spec.Poly1305.size_block block acc, r
 
-/// Same as [update_], but with the input not necessarily a block (can be smaller)
+/// Same as [update_], but with the input not necessarily a full block (can be smaller)
 inline_for_extraction noextract
 let update__ (acc, r) (input: S.seq uint8{S.length input <= Spec.Poly1305.size_block}) =
-  Spec.Poly1305.poly1305_update1 r Spec.Poly1305.size_block input acc, r
+  Spec.Poly1305.poly1305_update1 r (S.length input) input acc, r
 
 inline_for_extraction noextract
 let update' r acc (block: block) =
@@ -393,19 +393,21 @@ let poly1305_32: I.block unit =
     (fun () -> 16ul)
 
     (fun () -> Spec.Poly1305.poly1305_init)
-    (fun () x y -> update_multi x y)
+    (fun () acc prevlen data -> update_multi acc data)
     (fun () x _ y -> update_last x y)
     (fun () -> finish_)
 
     (fun () -> spec)
 
-    (fun () -> Lib.UpdateMulti.update_multi_zero Spec.Poly1305.size_block update_)
-    (fun () -> Lib.UpdateMulti.update_multi_associative Spec.Poly1305.size_block update_)
+    (fun () acc prevlen -> Lib.UpdateMulti.update_multi_zero Spec.Poly1305.size_block update_ acc)
+    (fun () acc prevlen1 prevlen2 input1 input2 ->
+      Lib.UpdateMulti.update_multi_associative Spec.Poly1305.size_block update_
+                                               acc input1 input2)
     (fun () -> poly_is_incremental_lazy)
 
     (fun _ _ -> ())
     (fun _ k s -> Hacl.Poly1305_32.poly1305_init s k)
-    (fun _ s blocks len ->
+    (fun _ s prevlen blocks len ->
       let h0 = ST.get () in
       begin
         let acc, r = P.as_get_acc h0 (as_lib s), P.as_get_r h0 (as_lib s) in
