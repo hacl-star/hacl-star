@@ -12,23 +12,22 @@ open Spec.Hash.Lemmas
 
 #reset-options "--fuel 0 --ifuel 0 --z3rlimit 50"
 
-(* TODO: the proof time is super random. The proof actually sometimes seems
- * to loop because of the last lemma call *)
-#push-options "--z3rlimit 500"
 let update_multi_empty_extra_state_eq
   (a: hash_alg{is_blake a}) (h: words_state a) :
   Lemma
   (requires True)
   (ensures
     (snd (update_multi a h Seq.empty) == extra_state_add_nat (snd h) 0)) =
-  Spec.Hash.Lemmas.update_multi_zero a h;
-  assert(update_multi a h Seq.empty == h);
   let ev = snd h in
-  assert(extra_state_v ev <= max_extra_state a);
-  assert(extra_state_v ev + 0 <= max_extra_state a); (* doesn't work without that *)
-  assert(Seq.length (Seq.empty #uint8) == 0);
+  let ev_v = extra_state_v ev in
+  assert(ev_v <= max_extra_state a);
+  assert(ev_v + 0 = ev_v);
+  assert(ev_v + 0 <= max_extra_state a);
+  Spec.Hash.Lemmas.update_multi_zero a h;
+  assert(Seq.length (Seq.empty #uint8) = 0);
+  Math.Lemmas.modulo_lemma 0 (block_length a);
+  assert(update_multi a h Seq.empty == h);
   extra_state_add_nat_bound_lem1 ev 0
-#pop-options
 
 let rec update_multi_extra_state_eq
   (a: hash_alg{is_blake a}) (h: words_state a)
