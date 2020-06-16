@@ -160,7 +160,6 @@ let invariant_s #index (c: block index) (i: index) h s =
   U64.v total_len <= c.max_input_length i /\
   // Note the double equals here, we now no longer know that this is a sequence.
   c.state.v i h block_state == c.update_multi_s i (c.init_s i (optional_reveal h key)) 0 blocks /\
-//  S.equal (S.slice (B.as_seq h buf_) 0 (U64.v total_len % U32.v (c.block_len i))) rest///\
   S.equal (S.slice (B.as_seq h buf_) 0 (Seq.length rest)) rest
 
 #push-options "--max_ifuel 1"
@@ -603,7 +602,6 @@ val update_empty_or_full_buf:
 inline_for_extraction noextract
 let seen_pred = seen
 
-(* TODO: fix the proof *)
 let update_empty_or_full_buf #index c i t t' p data len =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.state.frame_freeable #i in
@@ -623,32 +621,36 @@ let update_empty_or_full_buf #index c i t t' p data len =
   Math.Lemmas.modulo_lemma 0 (U32.v (c.block_len i));
   assert(0 % U32.v (c.block_len i) = 0);                     
 
-  (* TODO: this doesn't type *)
   assert(
     let blocks, rest = split_at_last c i seen in
     Seq.length rest = U32.v sz /\
     c.state.v i h0 block_state ==
     c.update_multi_s i (c.init_s i (optional_reveal h0
                      (k' <: optional_key i c.km c.key))) 0 blocks);
+
+   let init_state : Ghost.erased _ =
+     c.init_s i (optional_reveal h0 (k' <: optional_key i c.km c.key)) in
   
   (* Start by "flushing" the buffer: hash it so that all the data seen so far
    * has been processed and we can consider the buffer as empty *)
   if U32.(sz =^ 0ul) then
     assert(c.state.v i h0 block_state ==
-      c.update_multi_s i (c.init_s i (optional_reveal h0 (k' <: optional_key i c.km c.key))) seen)
+      c.update_multi_s i init_state 0 seen)
   else
     begin
     let prevlen = U64.(total_len `sub` FStar.Int.Cast.uint32_to_uint64 sz) in
     c.update_multi (G.hide i) block_state prevlen buf (c.block_len i);
       begin
       let h1 = ST.get () in
-      let init_state = (c.init_s i (optional_reveal h0 (k' <: optional_key i c.km c.key))) in
       let blocks, rest = split_at_last c i seen in
-      assert(c.state.v i h0 block_state == c.update_multi_s i init_state blocks);
+      assert(Seq.length blocks = U64.v prevlen);
+      assert(c.state.v i h0 block_state == c.update_multi_s i init_state 0 blocks);
       assert(c.state.v i h1 block_state ==
                c.update_multi_s i (c.update_multi_s i init_state 0 blocks) (U64.v prevlen) rest);
       assert(seen `Seq.equal` Seq.append blocks rest);
-      assert(c.state.v i h1 block_state == c.update_multi_s i init_state seen)
+      (* TODO: the pattern of ``update_multi_associative`` is not triggered *)
+      c.update_multi_associative i init_state 0 (U64.v prevlen) blocks rest;
+      assert(c.state.v i h1 block_state == c.update_multi_s i init_state 0 seen)
       end
     end;
  
@@ -667,6 +669,12 @@ let update_empty_or_full_buf #index c i t t' p data len =
   c.update_multi (G.hide i) block_state total_len data1 data1_len;
   let h01 = ST.get () in
   optional_frame #_ #i #c.km #c.key (c.state.footprint h0 block_state) k' h0 h01;
+  
+  begin
+    let data1_v = B.as_seq h01 data1 in
+    c.update_multi_associative i init_state 0 (Seq.length seen) seen data1_v;
+    assert(c.state.v i h01 block_state == c.update_multi_s i init_state 0 (Seq.append seen data1_v))
+  end;
 
   let dst = B.sub buf 0ul data2_len in
   let h1 = ST.get () in
@@ -681,7 +689,9 @@ let update_empty_or_full_buf #index c i t t' p data len =
     (S.append (G.reveal seen) (S.append (B.as_seq h0 data1) (B.as_seq h0 data2))));
 
   [@inline_let]
-  let tmp: state_s c i t t' = State #index #c #i block_state buf (add_len c i total_len len)
+  let total_len' = add_len c i total_len len in
+  [@inline_let]
+  let tmp: state_s c i t t' = State #index #c #i block_state buf total_len'
     (G.hide (G.reveal seen `S.append` B.as_seq h0 data)) k'
   in
   p *= tmp;
@@ -689,21 +699,31 @@ let update_empty_or_full_buf #index c i t t' p data len =
   c.state.frame_invariant (B.loc_buffer p) block_state h2 h3;
   optional_frame #_ #i #c.km #c.key (B.loc_buffer p) k' h2 h3;
 
-  // After careful diagnosis, this is the difficult proof obligation that sends
+  // After careful diagnosis, those are the difficult proof obligations that send
   // z3 off the rails.
   (
     let seen' = G.reveal seen `S.append` B.as_seq h0 data in
     let blocks, rest = split_at_last c i seen' in
+    calc(==) {
+      S.length seen';
+    (==) { S.lemma_len_append (G.reveal seen) (B.as_seq h0 data) }
+      S.length (G.reveal seen) + S.length (B.as_seq h0 data);
+    (==) {}
+      U64.v total_len';
+    };
     calc (==) {
       S.length blocks + S.length rest;
     (==) { }
       S.length seen';
-    (==) { S.lemma_len_append (G.reveal seen) (B.as_seq h0 data) }
+    (==) {} //{ S.lemma_len_append (G.reveal seen) (B.as_seq h0 data) }
       S.length (G.reveal seen) + S.length (B.as_seq h0 data);
     (==) { }
       U64.v total_len + U32.v len;
     }
-  )
+  );
+  (* The following proof obligation is the difficult one - keep it here for
+   * easy debugging when updating the definitions/proofs *)
+  assert(invariant_s c i h3 (B.get h3 p 0))
 #pop-options
 
 /// Case 3: we are given just enough data to end up on the boundary. It is just
