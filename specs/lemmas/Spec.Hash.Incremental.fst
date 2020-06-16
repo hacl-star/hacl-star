@@ -18,18 +18,8 @@ module Loops = Lib.LoopCombinators
 /// A lemma I could not find in FStar.Math.Lemmas - note: duplicated in Hash.Streaming.Spec.fst
 let mul_zero_left_is_zero (n : int) : Lemma(0 * n = 0) = ()
 
-/// A lemma I could not find in FStar.Math.Lemmas - note: duplicated in Hash.Streaming.Spec.
-let mul_one_left_is_same (n : int) : Lemma(1 * n = n) = ()
-
 /// A lemma I could not find in FStar.Math.Lemmas
 let add_zero_right_is_same (n : int) : Lemma(n + 0 = n) = ()
-
-/// TODO: I don't find this lemma in Lib, and the below proofs don't work if
-/// I don't prove this step separately.
-let add_v_eq (a b : nat) :
-  Lemma
-  (requires (a + b <= pow2 64 - 1))
-  (ensures (v (u64 a +. u64 b) == a + b)) = ()
 
 /// The [repeati_blake2_update1_is_update_multi] lemma is not fundamentally difficult, but
 /// the proof time/success rate can be very random, probably because of modular
@@ -231,13 +221,13 @@ let rec repeati_blake2_update1_is_update_multi_aux a nb prev d hash =
 let repeati_blake2_update1_is_update_multi a nb prev d hash =
   repeati_blake2_update1_is_update_multi_aux a nb prev d hash
 
-/// Below we prove properties about the values returned by some utility functions
-/// once and for all. Note that some of those functions have post-conditions, so
-/// don't be surprise not to see obvious properties which are already given by those
-/// postconditions (we don't duplicate them).
-/// Those properties are easy to prove independantly, and allow us to make proofs
-/// while disabling non-linear artihmetic in Z3 later on, so as to ensure proofs
-/// stability.
+/// Below we prove once and for all some properties about the values returned by
+/// some utility functions. Note that some of those functions have post-conditions,
+/// so don't be surprise not to see obvious properties which are already given by
+/// those postconditions (we don't duplicate them).
+/// We introduce those lemmas below because they are easy to prove independantly,
+/// and allow us to make proofs while disabling non-linear artihmetic in Z3 later,
+/// so as to ensure proofs stability.
 let blake2_size_block_props (a : hash_alg{is_blake a}) :
   Lemma(
     Spec.Blake2.size_block (to_blake_alg a) > 0 /\
@@ -249,8 +239,6 @@ let blake2_split_props (a:Blake2.alg) (len:nat) :
     rem <= len /\
     rem <= Blake2.size_block a) = ()
 
-/// TODO: make stable
-#push-options "--z3rlimit 100"
 let split_blocks_props (a:hash_alg{is_blake a}) (input:bytes) :
   Lemma
   (requires (S.length input <= max_input_length a))
@@ -265,8 +253,11 @@ let split_blocks_props (a:hash_alg{is_blake a}) (input:bytes) :
     l `S.equal` S.slice input (S.length input - rem) (S.length input) /\
     (Seq.length input <= block_length a ==>
      (nb = 0 /\ rem = Seq.length input))))
-  = ()
-#pop-options
+  =
+  let nb, rem = Blake2.split (to_blake_alg a) (S.length input) in
+  blake2_split_props (to_blake_alg a) (S.length input);
+  let bs, l = split_blocks a input in
+  ()
 
 let last_split_blake_props (a:hash_alg{is_blake a}) (input : bytes) :
   Lemma
@@ -339,10 +330,10 @@ let compute_prev0_props (a:hash_alg{is_blake a}) (kk : nat) :
 /// equal, with one auxiliary lemma per step.
 
 /// We begin by providing properly unfolded versions of the blake functions below,
-/// for sanity check, and which will be used as references to match the different
-/// steps.
+/// which will be used as references to match the different steps. We prove that
+/// those functions are equal to the original ones for sanity check.
 
-/// The blake2 function
+/// The alternative blake2 function
 let blake2'
   (a:hash_alg{is_blake a})
   (kk : size_nat{kk <= Blake2.max_key (to_blake_alg a)})
@@ -362,7 +353,7 @@ let blake2'
   let s4 = Blake2.blake2_finish (to_blake_alg a) s3 (Spec.Blake2.max_output (to_blake_alg a)) in
   s4
 
-/// The incremental blake2 function
+/// The alternative incremental blake2 function
 let blake2_hash_incremental'
   (a:hash_alg{is_blake a})
   (kk : size_nat{kk <= Blake2.max_key (to_blake_alg a)})
