@@ -268,7 +268,7 @@ let update_multi_eq nb blocks acc =
   Spec.Hash.Incremental.repeati_blake2_update1_is_update_multi (to_hash_alg a)
                                                                nb prev_length
                                                                blocks (fst acc);
-  Spec.Hash.Lemmas.extra_state_add_nat_bound_lem #(to_hash_alg a) (snd acc) (S.length blocks);
+  Spec.Hash.Lemmas.extra_state_add_nat_bound_lem1 #(to_hash_alg a) (snd acc) (S.length blocks);
   assert(
     Hash.nat_to_extra_state (to_hash_alg a) (prev_length + S.length blocks) ==
     Hash.extra_state_add_nat #(to_hash_alg a) (snd acc) (S.length blocks))
@@ -299,7 +299,7 @@ let update_last_eq prev_length last acc =
   Spec.Hash.Lemmas.update_multi_zero (to_hash_alg a) acc;
   assert(acc2 == acc);
   (* Prove that the extra state update computes the same total length as in ``blake2_update_last`` *)
-  Spec.Hash.Lemmas.extra_state_add_nat_bound_lem #(to_hash_alg a) (snd acc) (S.length last);
+  Spec.Hash.Lemmas.extra_state_add_nat_bound_lem1 #(to_hash_alg a) (snd acc) (S.length last);
   assert(Hash.extra_state_v (Hash.extra_state_add_nat (snd acc) (S.length last)) ==
          Hash.extra_state_v (snd acc) + S.length last)
 

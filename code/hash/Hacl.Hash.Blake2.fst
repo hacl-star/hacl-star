@@ -211,7 +211,7 @@ let mk_update_last a update_multi blake2_update_last_block s ev prev_len input i
   assert(extra_state_v ev == len_v a prev_len);
   update_multi_extra_state_eq a (as_seq h0 s, ev) blocks_v;
   assert(ev' == extra_state_add_nat ev (v blocks_len));
-  extra_state_add_nat_bound_lem ev (v blocks_len);
+  extra_state_add_nat_bound_lem1 ev (v blocks_len);
   assert(extra_state_v ev' == extra_state_v ev + v blocks_len);
   let h1 = ST.get () in
   (**) assert (S.equal (as_seq h1 s)

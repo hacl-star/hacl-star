@@ -27,7 +27,7 @@ let update_multi_empty_extra_state_eq
   assert(extra_state_v ev <= max_extra_state a);
   assert(extra_state_v ev + 0 <= max_extra_state a); (* doesn't work without that *)
   assert(Seq.length (Seq.empty #uint8) == 0);
-  extra_state_add_nat_bound_lem ev 0
+  extra_state_add_nat_bound_lem1 ev 0
 #pop-options
 
 let rec update_multi_extra_state_eq
