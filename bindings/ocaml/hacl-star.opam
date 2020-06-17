@@ -10,13 +10,13 @@ license: "Apache-2.0"
 synopsis: "OCaml API for EverCrypt/HACL*"
 depends: [
   "ocaml" { >= "4.05.0" }
-  "hacl-star-raw"
-  # "bigstring"
+  "dune" {>= "1.2"}
+  "hacl-star-raw" {= version}
   "zarith"
 ]
 build: [
   ["dune" "build" "-p" name "-j" jobs]
 ]
 run-test: [
-  ["dune" "runtest"]
+  ["dune" "runtest" "-p" name "-j" jobs]
 ]

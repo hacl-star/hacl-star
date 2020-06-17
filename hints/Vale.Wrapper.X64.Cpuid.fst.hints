@@ -1,5 +1,5 @@
 [
-  "\u000b¯)⁄\u000bNí-?∞ˆ\u0003Sä…Æ",
+  "ùÊô¥EÀ\u0012π\u000eu»~™6≤\u001f",
   [
     [
       "Vale.Wrapper.X64.Cpuid.check_aesni",
@@ -16,7 +16,7 @@
         "typing_Vale.Interop.Assumptions.win"
       ],
       0,
-      "dc32d12a02efc9eeccbab1d66d5607ec"
+      "e7cac266d504e40d4fc163d14272f9fe"
     ],
     [
       "Vale.Wrapper.X64.Cpuid.check_sha",
@@ -33,7 +33,7 @@
         "typing_Vale.Interop.Assumptions.win"
       ],
       0,
-      "d2fd0e84b1c2b14e128d00ded1e949ef"
+      "be7c84a0d9fdcc719c9a5cb1be0f8aa2"
     ],
     [
       "Vale.Wrapper.X64.Cpuid.check_adx_bmi2",
@@ -50,7 +50,7 @@
         "typing_Vale.Interop.Assumptions.win"
       ],
       0,
-      "fc4c4f724d11dd79b5adc380b49cb4ab"
+      "6b214c3448fd9b52313b22ab585fddaa"
     ],
     [
       "Vale.Wrapper.X64.Cpuid.check_avx",
@@ -67,7 +67,7 @@
         "typing_Vale.Interop.Assumptions.win"
       ],
       0,
-      "e673d6ae7ac189c9fd8ba0d3f583e588"
+      "cf484689d9c99100c27b5a8503bae0d3"
     ],
     [
       "Vale.Wrapper.X64.Cpuid.check_avx2",
@@ -84,7 +84,7 @@
         "typing_Vale.Interop.Assumptions.win"
       ],
       0,
-      "4c7ad028e97a9fff33ffddc87a62db69"
+      "eb4afcb9f54ddfc63783fa4075399347"
     ],
     [
       "Vale.Wrapper.X64.Cpuid.check_movbe",
@@ -101,7 +101,7 @@
         "typing_Vale.Interop.Assumptions.win"
       ],
       0,
-      "916123bec869b0cb08cd07747039dac8"
+      "90c3452a155730bfd018b4e52683a5d4"
     ],
     [
       "Vale.Wrapper.X64.Cpuid.check_sse",
@@ -118,7 +118,7 @@
         "typing_Vale.Interop.Assumptions.win"
       ],
       0,
-      "da39932b8416ec43a9aeba120fce41d9"
+      "49d1edc0df5b7bcf42df884ef57c0eb4"
     ],
     [
       "Vale.Wrapper.X64.Cpuid.check_rdrand",
@@ -135,7 +135,24 @@
         "typing_Vale.Interop.Assumptions.win"
       ],
       0,
-      "6b79eb964a147b2ed1add40b5329eb9d"
+      "603ad4c071f115245b7b3caefc9306e7"
+    ],
+    [
+      "Vale.Wrapper.X64.Cpuid.check_avx512",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "equation_Vale.Lib.X64.Cpuidstdcall.va_ens_Check_avx512_stdcall",
+        "equation_Vale.Lib.X64.Cpuidstdcall.va_req_Check_avx512_stdcall",
+        "equation_Vale.Stdcalls.X64.Cpuid.code_avx512",
+        "equation_Vale.X64.Decls.va_require_total",
+        "fuel_guarded_inversion_Vale.X64.State.vale_state",
+        "typing_Vale.Interop.Assumptions.win"
+      ],
+      0,
+      "25021201776a46ef58241f0346d6a75f"
     ]
   ]
 ]

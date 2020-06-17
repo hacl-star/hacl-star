@@ -177,6 +177,7 @@ val load_row: #a:Spec.alg -> #m:m_spec -> r1:row_p a m -> ws:lbuffer (word_t a) 
 
 inline_for_extraction
 let size_row al = 4ul *. size (Spec.size_word al)
+
 inline_for_extraction
 val store_row: #a:Spec.alg -> #m:m_spec -> b:lbuffer uint8 (size_row a) -> r:row_p a m ->
 	  Stack unit
@@ -186,6 +187,7 @@ val store_row: #a:Spec.alg -> #m:m_spec -> b:lbuffer uint8 (size_row a) -> r:row
 
 inline_for_extraction
 let size_block (a:Spec.alg) : x:size_t{v x = 16 * Spec.size_word a} =
+  Spec.alg_inversion_lemma a;
   match a with
   | Spec.Blake2.Blake2S -> 64ul
   | Spec.Blake2.Blake2B -> 128ul
@@ -194,12 +196,15 @@ inline_for_extraction
 type block_p (a:Spec.alg) = lbuffer uint8 (size_block a)
 
 inline_for_extraction
-val gather_row: #a:Spec.alg -> #ms:m_spec -> r:row_p a ms -> m:block_p a ->
+type block_w (a:Spec.alg) = lbuffer (word_t a) 16ul
+
+inline_for_extraction
+val gather_row: #a:Spec.alg -> #ms:m_spec -> r:row_p a ms -> m:block_w a ->
           i0: Spec.sigma_elt_t -> i1:Spec.sigma_elt_t -> i2:Spec.sigma_elt_t -> i3:Spec.sigma_elt_t
 	  -> Stack unit
 	  (requires (fun h -> live h r /\ live h m /\ disjoint r m))
 	  (ensures (fun h0 _ h1 -> modifies (loc r) h0 h1 /\
-				row_v h1 r == Spec.( gather_row (as_seq h0 m) i0 i1 i2 i3)))
+				row_v h1 r == Spec.(gather_row (as_seq h0 m) i0 i1 i2 i3)))
 
 
 inline_for_extraction

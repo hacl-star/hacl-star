@@ -48,7 +48,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "d84ad2bb12592c23083f9d1a5d953db6"
+      "27ba126ccd950730727dcb5ea5422aae"
     ],
     [
       "Hacl.Impl.ECDSA.P256SHA256.Signature.ecdsa_signature_step12",
@@ -221,7 +221,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_256@tok"
       ],
       0,
-      "c3d7c3666538507b12536f5db200f439"
+      "305fe71aedfbd728e1aa55c9a468eaf3"
     ],
     [
       "Hacl.Impl.ECDSA.P256SHA256.Signature.ecdsa_signature_step45",
@@ -266,7 +266,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "03e4a8b4f584c60c24e22c2f41b4fbbf"
+      "2f2410b052e3104d997cdddc4cc03443"
     ],
     [
       "Hacl.Impl.ECDSA.P256SHA256.Signature.ecdsa_signature_step45",
@@ -287,7 +287,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "57fa0251e1f3da12e76ae43e6067e3ee"
+      "a3d4fb5305e0efbc33a13a2f91258909"
     ],
     [
       "Hacl.Impl.ECDSA.P256SHA256.Signature.ecdsa_signature_step45",
@@ -462,7 +462,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "cc059b54be6668ed2d87a51482d3011e"
+      "09051e0254770e329ad8bfc70f218d69"
     ],
     [
       "Hacl.Impl.ECDSA.P256SHA256.Signature.lemma_power_step6",
@@ -476,7 +476,7 @@
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "b7fe4c01e174bb03b15b2f89ff9c0f7b"
+      "362ab0e57965881fe4a47172a7736713"
     ],
     [
       "Hacl.Impl.ECDSA.P256SHA256.Signature.lemma_power_step6",
@@ -507,7 +507,7 @@
         "typing_Spec.P256.Lemmas.exp"
       ],
       0,
-      "a936045eae6825a9e725663a78c36e64"
+      "a00a63499feaa2263031d3b294138fab"
     ],
     [
       "Hacl.Impl.ECDSA.P256SHA256.Signature.ecdsa_signature_step6",
@@ -519,7 +519,7 @@
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "567032cccc3d5b427f5410147ce058e6"
+      "097e5e2a11f144694bf33101d9ca9960"
     ],
     [
       "Hacl.Impl.ECDSA.P256SHA256.Signature.ecdsa_signature_step6",
@@ -674,7 +674,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "a663d105bd81f1556670facd0e7e3de8"
+      "5c63e3d4d311837e8eb76bd2e7c5addb"
     ],
     [
       "Hacl.Impl.ECDSA.P256SHA256.Signature.ecdsa_signature_core",
@@ -739,7 +739,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "fc4fe607d1900e931ca211e6ff4189a7"
+      "a6d0337b7db669864d39df493f877d52"
     ],
     [
       "Hacl.Impl.ECDSA.P256SHA256.Signature.ecdsa_signature_core",
@@ -759,7 +759,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "720c49514eb0c69776a7d4cb42d513a7"
+      "2f81e77e5ec989cf4768eea3ff374611"
     ],
     [
       "Hacl.Impl.ECDSA.P256SHA256.Signature.ecdsa_signature_core",
@@ -782,6 +782,7 @@
         "constructor_distinct_Lib.IntTypes.U8",
         "disc_equation_Lib.IntTypes.U1", "equality_tok_Lib.Buffer.MUT@tok",
         "equality_tok_Lib.IntTypes.PUB@tok",
+        "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U64@tok",
         "equation_FStar.HyperStack.ST.equal_domains",
@@ -913,7 +914,8 @@
         "typing_FStar.Set.complement", "typing_FStar.Set.mem",
         "typing_FStar.Set.singleton", "typing_FStar.Set.union",
         "typing_Lib.Buffer.loc", "typing_Lib.Buffer.op_Bar_Plus_Bar",
-        "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.mk_int",
+        "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.logor",
+        "typing_Lib.IntTypes.mk_int",
         "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.address_liveness_insensitive_locs",
         "typing_LowStar.Monotonic.Buffer.as_addr",
@@ -926,10 +928,11 @@
         "typing_LowStar.Monotonic.Buffer.loc_regions",
         "typing_LowStar.Monotonic.Buffer.loc_union", "typing_Prims.pow2",
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.PUB@tok",
-        "typing_tok_Lib.IntTypes.U32@tok"
+        "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok",
+        "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "7ddd1e1786cb8992b4942bca6165a475"
+      "4cee57ea61abc8a4299d3881cf618080"
     ],
     [
       "Hacl.Impl.ECDSA.P256SHA256.Signature.ecdsa_signature",
@@ -976,7 +979,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "544ceaa191a8cd7c76b7983925595c2d"
+      "d5642c5a07b0fbf2eb9f07478d64e7ff"
     ],
     [
       "Hacl.Impl.ECDSA.P256SHA256.Signature.ecdsa_signature",
@@ -998,7 +1001,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "0be2d610d3e062b4037f796793ba01f6"
+      "82f8b80f47a102261e003a5ef3df385c"
     ],
     [
       "Hacl.Impl.ECDSA.P256SHA256.Signature.ecdsa_signature",
@@ -1202,7 +1205,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "cdfcd50fccecc9ca086413ff0e445842"
+      "fd347ef6cb0d25df40f7abc215ceb1c0"
     ]
   ]
 ]

@@ -933,6 +933,7 @@ let lemma_barrett_reduce' x =
   let u = if r < qml then pow2 264 + r - qml else r - qml in
   let z = if u < l then u else u - l in
 
+  assert (u < 2 * l);
   Math.Lemmas.modulo_lemma u (pow2 264);
   assert (u == x - q * l);
   lemma_barrett_reduce'' u z x q

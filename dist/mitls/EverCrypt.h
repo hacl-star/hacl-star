@@ -191,9 +191,9 @@ bool EverCrypt_uu___is_AES256_CBC(EverCrypt_block_cipher_alg projectee);
 
 bool EverCrypt_uu___is_TDES_EDE_CBC(EverCrypt_block_cipher_alg projectee);
 
-uint32_t EverCrypt_block_cipher_keyLen(EverCrypt_block_cipher_alg uu___0_9949);
+uint32_t EverCrypt_block_cipher_keyLen(EverCrypt_block_cipher_alg uu___0_9927);
 
-uint32_t EverCrypt_block_cipher_blockLen(EverCrypt_block_cipher_alg uu___1_9960);
+uint32_t EverCrypt_block_cipher_blockLen(EverCrypt_block_cipher_alg uu___1_9938);
 
 #define EverCrypt_RC4_128 0
 
@@ -227,11 +227,11 @@ bool EverCrypt_uu___is_AES256_CCM8(EverCrypt_aead_alg projectee);
 
 KRML_DEPRECATED("Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")
 
-uint32_t EverCrypt_aead_keyLen(EverCrypt_aead_alg uu___2_10068);
+uint32_t EverCrypt_aead_keyLen(EverCrypt_aead_alg uu___2_10046);
 
 KRML_DEPRECATED("Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")
 
-uint32_t EverCrypt_aead_tagLen(EverCrypt_aead_alg uu___3_10083);
+uint32_t EverCrypt_aead_tagLen(EverCrypt_aead_alg uu___3_10061);
 
 KRML_DEPRECATED("Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")
 

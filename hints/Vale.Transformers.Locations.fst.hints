@@ -8,7 +8,7 @@
       0,
       [ "@query", "assumption_Vale.X64.Machine_s.reg__uu___haseq" ],
       0,
-      "0642773efd5dc38c582c1c48381a9504"
+      "e8051df60ba9c5916d11afcefb593234"
     ],
     [
       "Vale.Transformers.Locations.__proj__ALocReg__item___0",
@@ -22,7 +22,7 @@
         "refinement_interpretation_Tm_refine_3475018c8870eaf55e8ea5559487b430"
       ],
       0,
-      "0b9d6bbeb91bcde1f0cca9d509c579b2"
+      "402d23d3a2e6f68fa49b435f4616f228"
     ],
     [
       "Vale.Transformers.Locations.aux_print_reg_from_location",
@@ -42,7 +42,7 @@
         "typing_Vale.X64.Machine_s.n_regs"
       ],
       0,
-      "b37e41bfc9c39d0aee6018e13d2f400f"
+      "e69c8e734973cf64a295ca0a1337861f"
     ],
     [
       "Vale.Transformers.Locations.disjoint_location",
@@ -51,7 +51,10 @@
       1,
       [
         "@MaxIFuel_assumption", "@query",
+        "Vale.Transformers.Locations_pretyping_f6ab80eb5ffc2f5a5eff56ec5e04f3b2",
         "assumption_Vale.X64.Machine_s.reg__uu___haseq",
+        "constructor_distinct_Vale.Transformers.Locations.ALocReg",
+        "data_typing_intro_Vale.Transformers.Locations.ALocStack@tok",
         "disc_equation_Vale.Transformers.Locations.ALocCf",
         "disc_equation_Vale.Transformers.Locations.ALocMem",
         "disc_equation_Vale.Transformers.Locations.ALocOf",
@@ -62,10 +65,11 @@
         "proj_equation_FStar.Pervasives.Native.Mktuple2__2",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2"
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
+        "projection_inverse_Vale.Transformers.Locations.ALocReg__0"
       ],
       0,
-      "8d08861d55fb1a55d199e9f2cb405a53"
+      "49f363e1219813f50ef0739afddaec54"
     ],
     [
       "Vale.Transformers.Locations.auto_lemma_disjoint_location",
@@ -93,7 +97,7 @@
         "typing_tok_Vale.Transformers.Locations.ALocMem@tok", "unit_typing"
       ],
       0,
-      "2ccd2745488cc3d85dc993e16a95498f"
+      "cff2c5dd6c68c6ad9f7c1efea198dbd9"
     ],
     [
       "Vale.Transformers.Locations.lemma_disjoint_locations_symmetric",
@@ -160,7 +164,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "c27ab52a279eab39ca2b39a274da27cd"
+      "1cb7ba74201b787055b39b61257e280b"
     ],
     [
       "Vale.Transformers.Locations.location_val_t",
@@ -177,7 +181,7 @@
         "fuel_guarded_inversion_Vale.Transformers.Locations.location"
       ],
       0,
-      "7a86e036990ea9ba0d570a64c9f7fbff"
+      "27972ecc7a6059f6ed952b8570fabbf4"
     ],
     [
       "Vale.Transformers.Locations.location_val_eqt",
@@ -213,7 +217,7 @@
         "typing_Vale.X64.Machine_s.n_regs"
       ],
       0,
-      "b439c808d060cbeb7b9544e55321237b"
+      "0ee3a367934a308f364bb10ac380ac7d"
     ],
     [
       "Vale.Transformers.Locations.raise_location_val_eqt",
@@ -226,7 +230,7 @@
         "refinement_interpretation_Tm_refine_392b51d468236060fcf180188eadbab2"
       ],
       0,
-      "eadf3b1935c2d2427d36c849d0e939bc"
+      "30faa5404b5f1dbe07683b0c4c739e50"
     ],
     [
       "Vale.Transformers.Locations.eval_location",
@@ -237,7 +241,11 @@
         "@MaxIFuel_assumption", "@query",
         "FStar.FunctionalExtensionality_interpretation_Tm_arrow_a7d5cc170be69663c495e8582d2bc62a",
         "Vale.X64.Machine_Semantics_s_pretyping_65b491a3aaa0023c48ae2461669f28bd",
+        "constructor_distinct_Vale.Transformers.Locations.ALocCf",
+        "constructor_distinct_Vale.Transformers.Locations.ALocMem",
+        "constructor_distinct_Vale.Transformers.Locations.ALocOf",
         "constructor_distinct_Vale.Transformers.Locations.ALocReg",
+        "constructor_distinct_Vale.Transformers.Locations.ALocStack",
         "data_elim_Vale.X64.Machine_Semantics_s.Mkmachine_state",
         "data_typing_intro_FStar.Pervasives.Native.Mktuple2@tok",
         "disc_equation_Vale.Transformers.Locations.ALocCf",
@@ -245,6 +253,10 @@
         "disc_equation_Vale.Transformers.Locations.ALocOf",
         "disc_equation_Vale.Transformers.Locations.ALocReg",
         "disc_equation_Vale.Transformers.Locations.ALocStack",
+        "equality_tok_Vale.Transformers.Locations.ALocCf@tok",
+        "equality_tok_Vale.Transformers.Locations.ALocMem@tok",
+        "equality_tok_Vale.Transformers.Locations.ALocOf@tok",
+        "equality_tok_Vale.Transformers.Locations.ALocStack@tok",
         "equation_FStar.FunctionalExtensionality.restricted_t",
         "equation_Vale.Arch.HeapTypes_s.memTaint_t",
         "equation_Vale.Transformers.Locations.location_val_t",
@@ -258,7 +270,6 @@
         "kinding_Vale.X64.Machine_Semantics_s.machine_stack@tok",
         "proj_equation_Vale.X64.Machine_Semantics_s.Mkmachine_state_ms_heap",
         "proj_equation_Vale.X64.Machine_Semantics_s.Mkmachine_state_ms_regs",
-        "projection_inverse_BoxBool_proj_0",
         "projection_inverse_Vale.Transformers.Locations.ALocReg__0",
         "refinement_interpretation_Tm_refine_7e4a6c5999db731b5d17d0418dfeea3e",
         "refinement_kinding_Tm_refine_c2c488db3214c38826155caf10d30036",
@@ -272,7 +283,7 @@
         "typing_Vale.X64.Machine_s.t_reg"
       ],
       0,
-      "b87f62dc5126c77ff97df1845942ec0d"
+      "63d6a5a294d7571a81eb6d7ce3e0296e"
     ],
     [
       "Vale.Transformers.Locations.update_location",
@@ -300,6 +311,10 @@
         "disc_equation_Vale.Transformers.Locations.ALocOf",
         "disc_equation_Vale.Transformers.Locations.ALocReg",
         "disc_equation_Vale.Transformers.Locations.ALocStack",
+        "equality_tok_Vale.Transformers.Locations.ALocCf@tok",
+        "equality_tok_Vale.Transformers.Locations.ALocMem@tok",
+        "equality_tok_Vale.Transformers.Locations.ALocOf@tok",
+        "equality_tok_Vale.Transformers.Locations.ALocStack@tok",
         "equation_FStar.FunctionalExtensionality.feq",
         "equation_FStar.Pervasives.Native.fst",
         "equation_FStar.Pervasives.Native.snd",
@@ -333,7 +348,6 @@
         "proj_equation_Vale.X64.Machine_Semantics_s.Mkmachine_state_ms_regs",
         "proj_equation_Vale.X64.Machine_Semantics_s.Mkmachine_state_ms_stack",
         "proj_equation_Vale.X64.Machine_Semantics_s.Mkmachine_state_ms_stackTaint",
-        "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_Vale.Transformers.Locations.ALocReg__0",
         "projection_inverse_Vale.X64.Machine_Semantics_s.Mkmachine_state_ms_flags",
@@ -353,7 +367,7 @@
         "typing_Vale.X64.Machine_s.t_reg"
       ],
       0,
-      "aa30e0f27b2b6e0790d17d669b038eaf"
+      "c444938ef9ee83e3c29473a5a8b75185"
     ],
     [
       "Vale.Transformers.Locations.lemma_locations_truly_disjoint",
@@ -420,7 +434,7 @@
         "typing_Vale.X64.Machine_s.t_reg"
       ],
       0,
-      "f4895d18cc60eb2695e38109b577df74"
+      "76bc4fd516bcd5481c30ccc3335e085e"
     ],
     [
       "Vale.Transformers.Locations.lemma_locations_complete",
@@ -549,7 +563,7 @@
         "typing_Tm_abs_f086d77986b470aab4bfebc171e6c366"
       ],
       0,
-      "8738bc07a77960872bfd810b6dd8e5b9"
+      "774ac1c69d01111bb53cd54bebfa3e3d"
     ]
   ]
 ]

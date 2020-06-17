@@ -47,12 +47,13 @@ typedef uint64_t FStar_Date_dateTime, FStar_Date_timeSpan;
  * definition into scope by default. */
 typedef const char *Prims_string;
 
-/* The great static header headache. */
-
 #if (defined(_MSC_VER) && defined(_M_X64) && !defined(__clang__))
 #define IS_MSVC64 1
 #endif
 
+/* This code makes a number of assumptions and should be refined. In particular,
+ * it assumes that: any non-MSVC amd64 compiler supports int128. Maybe it would
+ * be easier to just test for defined(__SIZEOF_INT128__) only? */
 #if (defined(__x86_64__) || \
     defined(__x86_64) || \
     defined(__aarch64__) || \
@@ -60,7 +61,8 @@ typedef const char *Prims_string;
     defined(__s390x__) || \
     (defined(_MSC_VER) && !defined(_M_X64) && defined(__clang__)) || \
     (defined(__mips__) && defined(__LP64__)) || \
-    (defined(__riscv) && __riscv_xlen == 64))
+    (defined(__riscv) && __riscv_xlen == 64) || \
+    defined(__SIZEOF_INT128__))
 #define HAS_INT128 1
 #endif
 

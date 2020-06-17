@@ -1,4 +1,5 @@
 open Test_utils
+open AutoConfig2
 
 type 'a curve25519_test =
   { name : string ; scalar: 'a ; input : 'a ; expected : 'a }
@@ -18,23 +19,25 @@ let tests = [
   }
 ]
 
-let test (v: Bytes.t curve25519_test) t scalarmult ecdh =
+let test (v: Bytes.t curve25519_test) t scalarmult ecdh reqs =
   let test_result = test_result (t ^ " " ^ v.name) in
+  if supports reqs then begin
+    let out_scalarmult = Test_utils.init_bytes 32 in
+    let out_ecdh = Test_utils.init_bytes 32 in
 
-  let out_scalarmult = Test_utils.init_bytes 32 in
-  let out_ecdh = Test_utils.init_bytes 32 in
-
-  scalarmult out_scalarmult v.scalar v.input;
-  if ecdh out_ecdh v.scalar v.input then
-    if Bytes.compare out_scalarmult v.expected = 0 && Bytes.compare out_ecdh v.expected = 0 then
-      test_result Success ""
+    scalarmult out_scalarmult v.scalar v.input;
+    if ecdh out_ecdh v.scalar v.input then
+      if Bytes.compare out_scalarmult v.expected = 0 && Bytes.compare out_ecdh v.expected = 0 then
+        test_result Success ""
+      else
+        test_result Failure "Shared scret mismatch"
     else
-      test_result Failure "Shared scret mismatch"
-  else
-    test_result Failure ""
+      test_result Failure ""
+  end else
+    test_result Skipped "Required CPU feature not detected"
 
-(* TODO: tests for secret_to_public, internals *)
+(* TODO: tests for secret_to_public *)
 let _ =
-  List.iter (fun v -> test v "EverCrypt.Curve25519" EverCrypt.Curve25519.scalarmult EverCrypt.Curve25519.ecdh) tests;
-  List.iter (fun v -> test v "Hacl.Curve25519_51" Hacl.Curve25519_51.scalarmult Hacl.Curve25519_51.ecdh) tests;
-  List.iter (fun v -> test v "Hacl.Curve25519_64" Hacl.Curve25519_64.scalarmult Hacl.Curve25519_64.ecdh) tests
+  List.iter (fun v -> test v "EverCrypt.Curve25519" EverCrypt.Curve25519.scalarmult EverCrypt.Curve25519.ecdh []) tests;
+  List.iter (fun v -> test v "Hacl.Curve25519_51" Hacl.Curve25519_51.scalarmult Hacl.Curve25519_51.ecdh []) tests;
+  List.iter (fun v -> test v "Hacl.Curve25519_64" Hacl.Curve25519_64.scalarmult Hacl.Curve25519_64.ecdh [BMI2; ADX]) tests

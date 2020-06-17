@@ -10,6 +10,7 @@
 #include <time.h>
 
 #include "Hacl_Curve25519_64.h"
+#include "EverCrypt_AutoConfig2.h"
 
 #include "test_helpers.h"
 #include "curve25519_vectors.h"
@@ -33,6 +34,11 @@ bool print_test(uint8_t* scalar, uint8_t* pub, uint8_t* exp){
 }
 
 int main() {
+  EverCrypt_AutoConfig2_init();
+
+  if (!(EverCrypt_AutoConfig2_has_adx () && EverCrypt_AutoConfig2_has_bmi2()))
+    return EXIT_SUCCESS;
+
   bool ok = true;
   for (int i = 0; i < sizeof(vectors)/sizeof(curve25519_test_vector); ++i) {
     ok &= print_test(vectors[i].scalar,vectors[i].public,vectors[i].secret);

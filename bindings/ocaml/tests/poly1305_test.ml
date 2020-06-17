@@ -17,21 +17,24 @@ let validate_test (v: Bytes.t poly1305_test) =
   assert (Bytes.length v.key = 32);
   assert (Bytes.length v.expected = 16)
 
-let test (v: Bytes.t poly1305_test) t mac =
+let test (v: Bytes.t poly1305_test) t mac reqs =
   let test_result = test_result (t ^ " " ^ v.name) in
 
-  let tag = Test_utils.init_bytes 16 in
+  if supports reqs then begin
+    let tag = Test_utils.init_bytes 16 in
 
-  mac tag v.key v.msg;
+    mac tag v.key v.msg;
 
-  if Bytes.compare tag v.expected = 0 then
-    test_result Success ""
-  else
-    test_result Failure ""
+    if Bytes.compare tag v.expected = 0 then
+      test_result Success ""
+    else
+      test_result Failure ""
+  end else
+    test_result Skipped "Required CPU feature not detected"
 
 let _ =
   List.iter validate_test tests;
-  List.iter (fun v -> test v "Hacl.Poly1305_32" Hacl.Poly1305_32.mac) tests;
-  List.iter (fun v -> test v "Hacl.Poly1305_128" Hacl.Poly1305_128.mac) tests;
-  List.iter (fun v -> test v "Hacl.Poly1305_256" Hacl.Poly1305_256.mac) tests;
-  List.iter (fun v -> test v "EverCrypt.Poly1305" EverCrypt.Poly1305.mac) tests;
+  List.iter (fun v -> test v "Hacl.Poly1305_32" Hacl.Poly1305_32.mac []) tests;
+  List.iter (fun v -> test v "Hacl.Poly1305_128" Hacl.Poly1305_128.mac [AVX]) tests;
+  List.iter (fun v -> test v "Hacl.Poly1305_256" Hacl.Poly1305_256.mac [AVX2]) tests;
+  List.iter (fun v -> test v "EverCrypt.Poly1305" EverCrypt.Poly1305.mac []) tests;

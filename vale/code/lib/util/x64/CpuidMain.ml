@@ -8,4 +8,5 @@ let _ =
     ("check_movbe",    (fun win -> Vale_Lib_X64_Cpuidstdcall.va_code_Check_movbe_stdcall win, Vale_Lib_X64_Cpuidstdcall.va_codegen_success_Check_movbe_stdcall win), 0, true);
     ("check_sse",    (fun win -> Vale_Lib_X64_Cpuidstdcall.va_code_Check_sse_stdcall win, Vale_Lib_X64_Cpuidstdcall.va_codegen_success_Check_sse_stdcall win), 0, true);
     ("check_rdrand",    (fun win -> Vale_Lib_X64_Cpuidstdcall.va_code_Check_rdrand_stdcall win, Vale_Lib_X64_Cpuidstdcall.va_codegen_success_Check_rdrand_stdcall win), 0, true);
+    ("check_avx512",    (fun win -> Vale_Lib_X64_Cpuidstdcall.va_code_Check_avx512_stdcall win, Vale_Lib_X64_Cpuidstdcall.va_codegen_success_Check_avx512_stdcall win), 0, true);
   ]

@@ -130,6 +130,7 @@ endif
 # Test should be renamed into Test.EverCrypt
 test-c: $(subst .,_,$(patsubst %.fst,test-c-%,$(notdir $(wildcard code/tests/*.fst)))) \
   test-c-Test
+	cp dist/Makefile.test dist/test/c/Makefile
 
 # Any file in specs/tests is taken to contain a `val test: unit -> bool` function.
 test-ml: $(subst .,_,$(patsubst %.fst,test-ml-%,$(notdir $(wildcard specs/tests/*.fst))))
@@ -678,6 +679,7 @@ BUNDLE_FLAGS	=\
   $(FRODO_BUNDLE) \
   $(HPKE_BUNDLE) \
   $(STREAMING_BUNDLE) \
+  $(INTTYPES_BUNDLE) \
   $(LEGACY_BUNDLE)
 
 DEFAULT_FLAGS = \
@@ -769,21 +771,26 @@ dist/wasm/package.json: dist/wasm/Makefile.basic $(wildcard bindings/js/*.js) bi
 
 dist/wasm/doc/readable_api.js: dist/wasm/package.json
 	cd dist/wasm && \
-	mkdir -p doc && \
-	node api_doc.js
+	  mkdir -p doc && \
+	  node api_doc.js
 
 dist/wasm/doc/out/index.html: dist/wasm/doc/readable_api.js
 	jsdoc $< -d $(dir $@)
 
+ifeq ($(OS),Windows_NT)
+doc-wasm:
+	echo "WASM documentation disabled (jsdoc segfaults on Windows)"
+else
 doc-wasm: dist/wasm/doc/out/index.html
+endif
 
 publish-test-wasm: dist/wasm/package.json
 	cd dist/wasm && \
-	npm publish --dry-run
+	  npm publish --dry-run
 
 test-wasm: dist/wasm/package.json
 	cd dist/wasm && \
-	node api_test.js
+	  node api_test.js
 
 # Compact distributions
 # ---------------------
@@ -992,7 +999,7 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt \
   $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(VALE_ASMS) | old-extract-c
 	mkdir -p $(dir $@)
 	[ x"$(HACL_OLD_FILES)" != x ] && cp $(HACL_OLD_FILES) $(patsubst %.c,%.h,$(HACL_OLD_FILES)) $(dir $@) || true
-	[ x"$(HAND_WRITTEN_FILES)$(HAND_WRITTEN_H_FILES)" != x ] && cp $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(dir $@) || true
+	[ x"$(HAND_WRITTEN_FILES)$(HAND_WRITTEN_H_FILES)$(HAND_WRITTEN_OPTIONAL_FILES)" != x ] && cp $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(dir $@) || true
 	[ x"$(HAND_WRITTEN_ML_BINDINGS)" != x ] && mkdir -p $(dir $@)/lib && cp $(HAND_WRITTEN_ML_BINDINGS) $(dir $@)lib/ || true
 	[ x"$(HAND_WRITTEN_ML_GEN)" != x ] && mkdir -p $(dir $@)/lib_gen && cp $(HAND_WRITTEN_ML_GEN) $(dir $@)lib_gen/ || true
 	[ x"$(VALE_ASMS)" != x ] && cp $(VALE_ASMS) $(dir $@) || true
@@ -1010,10 +1017,12 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt \
 	echo "F* version: $(shell cd $(FSTAR_HOME) && git rev-parse HEAD)" >> $(dir $@)/INFO.txt
 	echo "KreMLin version: $(shell cd $(KREMLIN_HOME) && git rev-parse HEAD)" >> $(dir $@)/INFO.txt
 	echo "Vale version: $(shell cat $(VALE_HOME)/bin/.vale_version)" >> $(dir $@)/INFO.txt
+	if [ "$*" == "wasm" ]; then touch $@; fi
 
 dist/evercrypt-external-headers/Makefile.basic: $(ALL_KRML_FILES)
 	$(KRML) -silent \
 	  -minimal \
+	  -header $(HACL_HOME)/dist/LICENSE.txt \
 	  -bundle EverCrypt+EverCrypt.AEAD+EverCrypt.AutoConfig2+EverCrypt.HKDF+EverCrypt.HMAC+EverCrypt.Hash+EverCrypt.Hash.Incremental+EverCrypt.Cipher+EverCrypt.Poly1305+EverCrypt.Chacha20Poly1305+EverCrypt.Curve25519=*[rename=EverCrypt] \
 	  -library EverCrypt,EverCrypt.* \
 	  -add-include '<inttypes.h>' \
@@ -1030,15 +1039,12 @@ dist/evercrypt-external-headers/Makefile.basic: $(ALL_KRML_FILES)
 # cause races on shared files (e.g. Makefile.basic, etc.) -- to be investigated.
 # In the meanwhile, we at least try to copy the header for intrinsics just once.
 
-dist/test/c/lib_intrinsics.h:
-	mkdir -p $(dir $@) && cp $(HACL_HOME)/lib/c/lib_intrinsics.h $@
-
 .PRECIOUS: dist/test/c/%.c
-dist/test/c/%.c: $(ALL_KRML_FILES) dist/test/c/lib_intrinsics.h
+dist/test/c/%.c: $(ALL_KRML_FILES)
 	$(KRML) -silent \
 	  -tmpdir $(dir $@) -skip-compilation \
 	  -no-prefix $(subst _,.,$*) \
-	  -library Hacl,Lib,EverCrypt,EverCrypt.* \
+	  -library Hacl.Impl.*,EverCrypt,EverCrypt.* \
 	  -fparentheses -fcurly-braces -fno-shadow \
 	  -minimal -add-include '"kremlib.h"' \
 	  -bundle '*[rename=$*]' $(KRML_EXTRA) $(filter %.krml,$^)
@@ -1073,7 +1079,7 @@ LDFLAGS 	+= -L$(OPENSSL_HOME)
 CFLAGS += -Wall -Wextra -g \
   -Wno-int-conversion -Wno-unused-parameter \
   -O3 -march=native -mtune=native -I$(KREMLIN_HOME)/kremlib/dist/minimal \
-  -I$(KREMLIN_HOME)/include
+  -I$(KREMLIN_HOME)/include -Idist/gcc-compatible
 
 # FIXME there's a kremlin error that generates a void* -- can't use -Werror
 # Need the libraries to be present and compiled.
@@ -1112,6 +1118,7 @@ test-handwritten: compile-gcc64-only compile-gcc-compatible
 
 obj/vale_testInline.exe: vale/code/test/TestInline.c obj/vale_testInline.h
 	$(CC) $(CFLAGS) $(LDFLAGS) $< -Iobj -o $@
+
 vale_testInline: obj/vale_testInline.exe
 	@echo "Testing Vale inline assembly printer"
 	$<

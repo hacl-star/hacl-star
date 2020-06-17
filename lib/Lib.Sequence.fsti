@@ -282,20 +282,22 @@ let repeat_blocks_f
 val repeat_blocks:
     #a:Type0
   -> #b:Type0
+  -> #c:Type0
   -> blocksize:size_pos
   -> inp:seq a
   -> f:(lseq a blocksize -> b -> b)
-  -> l:(len:size_nat{len == length inp % blocksize} -> s:lseq a len -> b -> b)
+  -> l:(len:size_nat{len == length inp % blocksize} -> s:lseq a len -> b -> c)
   -> init:b ->
-  Tot b
+  Tot c
 
 val lemma_repeat_blocks:
     #a:Type0
   -> #b:Type0
+  -> #c:Type0
   -> bs:size_pos
   -> inp:seq a
   -> f:(lseq a bs -> b -> b)
-  -> l:(len:size_nat{len == length inp % bs} -> s:lseq a len -> b -> b)
+  -> l:(len:size_nat{len == length inp % bs} -> s:lseq a len -> b -> c)
   -> init:b ->
   Lemma (
     let len = length inp in
@@ -373,6 +375,22 @@ val div_mul_l: a:int -> b:int -> c:pos -> d:pos -> Lemma
   (ensures  a / (c * d) = b / (c * d))
 
 
+let map_blocks_a (a:Type) (bs:size_nat) (max:nat) (i:nat{i <= max}) = s:seq a{length s == i * bs}
+
+let map_blocks_f
+  (#a:Type)
+  (bs:size_nat{bs > 0})
+  (max:nat)
+  (inp:seq a{length inp == max * bs})
+  (f:(i:nat{i < max} -> lseq a bs -> lseq a bs))
+  (i:nat{i < max})
+  (acc:map_blocks_a a bs max i) : map_blocks_a a bs max (i + 1)
+=
+  //Math.Lemmas.multiple_division_lemma max bs;
+  let block = Seq.slice inp (i*bs) ((i+1)*bs) in
+  Seq.append acc (f i block)
+
+
 val map_blocks_multi:
     #a:Type0
   -> blocksize:size_pos
@@ -381,6 +399,19 @@ val map_blocks_multi:
   -> inp:seq a{length inp == max * blocksize}
   -> f:(i:nat{i < max} -> lseq a blocksize -> lseq a blocksize) ->
   Tot (out:seq a {length out == n * blocksize})
+
+
+val lemma_map_blocks_multi:
+    #a:Type0
+  -> blocksize:size_pos
+  -> max:nat
+  -> n:nat{n <= max}
+  -> inp:seq a{length inp == max * blocksize}
+  -> f:(i:nat{i < max} -> lseq a blocksize -> lseq a blocksize)
+  -> Lemma
+  (map_blocks_multi #a blocksize max n inp f ==
+   LoopCombinators.repeat_gen n (map_blocks_a a blocksize max) (map_blocks_f #a blocksize max inp f) Seq.empty)
+
 
 #restart-solver
 val index_map_blocks_multi:
@@ -412,6 +443,23 @@ val map_blocks:
   -> f:(block (length inp) blocksize -> lseq a blocksize -> lseq a blocksize)
   -> g:(last (length inp) blocksize -> rem:size_nat{rem < blocksize} -> s:lseq a rem -> lseq a rem) ->
   Tot (out:seq a{length out == length inp})
+
+val lemma_map_blocks:
+    #a:Type0
+  -> blocksize:size_pos
+  -> inp:seq a
+  -> f:(block (length inp) blocksize -> lseq a blocksize -> lseq a blocksize)
+  -> g:(last (length inp) blocksize -> rem:size_nat{rem < blocksize} -> s:lseq a rem -> lseq a rem) ->
+  Lemma (
+    let len = length inp in
+    let nb = len / blocksize in
+    let rem = len % blocksize in
+    let blocks = Seq.slice inp 0 (nb * blocksize) in
+    let last = Seq.slice inp (nb * blocksize) len in
+    Math.Lemmas.cancel_mul_div nb blocksize;
+    let bs = map_blocks_multi #a blocksize nb nb blocks f in
+    let res = if (rem > 0) then Seq.append bs (g nb rem last) else bs in
+    res == map_blocks #a blocksize inp f g)
 
 
 (* Computes the block of the i-th element of (map_blocks blocksize input f g) *)
