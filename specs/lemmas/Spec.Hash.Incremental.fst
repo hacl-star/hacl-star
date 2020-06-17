@@ -21,10 +21,8 @@ let mul_zero_left_is_zero (n : int) : Lemma(0 * n = 0) = ()
 /// A lemma I could not find in FStar.Math.Lemmas
 let add_zero_right_is_same (n : int) : Lemma(n + 0 = n) = ()
 
-/// The [repeati_blake2_update1_is_update_multi] lemma is not fundamentally difficult, but
-/// the proof time/success rate can be very random, probably because of modular
-/// arithmetic. For this reason, we cut it into small pieces.
-let update_multi_one_block_eq
+/// Below are various lemmas used to prove ``repeati_blake2_update1_is_update_multi``.
+let blake2_update_multi_one_block_eq
   (a:hash_alg{is_blake a})
   (block : bytes_block a)
   (hash : words_state' a) 
@@ -80,7 +78,7 @@ let repeati_blake2_update1_eq
   let block = S.slice d ((nb-1) * block_length a) (nb * block_length a) in
   Loops.unfold_repeati nb update1 hash (nb - 1)
 
-let update_multi_associate_eq1
+let blake2_update_multi_associate_eq1
   (a:hash_alg{is_blake a}) (nb prev : nat)
   (blocks : bytes{S.length blocks == nb * block_length a})
   (hash : words_state' a) :
@@ -178,7 +176,7 @@ let rec repeati_blake2_update1_is_update_multi_aux a nb prev d hash =
     assert((nb - 1) * block_length a <= nb * block_length a);
     let blocks1, blocks2 = Seq.split blocks ((nb-1) * block_length a) in
     assert(Seq.append blocks1 blocks2 `Seq.equal` blocks);
-    update_multi_associate_eq1 a nb prev blocks hash;
+    blake2_update_multi_associate_eq1 a nb prev blocks hash;
     calc (==) {
       Seq.length blocks1 % block_length a;
       (==) {}
@@ -213,7 +211,7 @@ let rec repeati_blake2_update1_is_update_multi_aux a nb prev d hash =
     assert(
       s1 == (Loops.repeati #(words_state' a) (nb-1) update1 hash,
              nat_to_extra_state a (prev + (nb-1) * block_length a)));
-    update_multi_one_block_eq a blocks2 (fst s1) (extra_state_v (snd s1));
+    blake2_update_multi_one_block_eq a blocks2 (fst s1) (extra_state_v (snd s1));
     Loops.unfold_repeati #(words_state' a) nb update1 hash (nb-1)
     end
 #pop-options
@@ -221,7 +219,7 @@ let rec repeati_blake2_update1_is_update_multi_aux a nb prev d hash =
 let repeati_blake2_update1_is_update_multi a nb prev d hash =
   repeati_blake2_update1_is_update_multi_aux a nb prev d hash
 
-/// Below we prove once and for all some properties about the values returned by
+/// Below we prove once and for all properties about the values returned by
 /// some utility functions. Note that some of those functions have post-conditions,
 /// so don't be surprise not to see obvious properties which are already given by
 /// those postconditions (we don't duplicate them).

@@ -224,7 +224,6 @@ let optional_t #index
 /// No such indexing occurs for spec-level functions, because they are always
 /// free to ignore superfluous arguments, and the shape of the API does not
 /// matter.
-#push-options "--z3rlimit 1000" // TODO: remove
 inline_for_extraction noextract noeq
 type block (index: Type0) =
 | Block:
@@ -293,10 +292,11 @@ type block (index: Type0) =
   (* val *) spec_is_incremental: (i:index ->
     key: key.t i ->
     input:S.seq uint8 { S.length input <= max_input_length i } ->
-    Lemma (ensures (
+    Lemma (
       let open FStar.Mul in
       let block_length = U32.v (block_len i) in
       (**) Math.Lemmas.nat_over_pos_is_nat (S.length input) block_length;
+      (* TODO: factorize those 3 lines by using Spec.Hash.Incremental.split_blocks *)
       let n = S.length input / block_length in
       let rem = S.length input % block_length in (**)
       let n, rem = if rem = 0 && n > 0 then n - 1, block_length else n, rem in (**)
@@ -304,9 +304,10 @@ type block (index: Type0) =
       let bs, l = S.split input (n * block_length) in
       (**) Math.Lemmas.multiple_modulo_lemma n block_length;
       (**) Math.Lemmas.modulo_lemma 0 (U32.v (block_len i));
+      (* TODO: use update_full ? *)
       let hash = update_multi_s i (init_s i key) 0 bs in
       let hash = update_last_s i hash (n * block_length) l in
-      finish_s i key hash `S.equal` spec_s i key input))) -> (**)
+      finish_s i key hash `S.equal` spec_s i key input)) -> (**)
 
   // Stateful operations
   (* val *) index_of_state: (i:G.erased index -> (
@@ -401,4 +402,3 @@ type block (index: Type0) =
       (state.freeable #i h0 s ==> state.freeable #i h1 s)))) -> (**)
 
   block index
-#pop-options
