@@ -14,15 +14,15 @@ module HKDF = Spec.Agile.HKDF
 
 #set-options "--z3rlimit 20 --fuel 0 --ifuel 1"
 
-let is_ciphersuite = function
+let is_valid_ciphersuite = function
   | DH.DH_Curve25519, Hash.SHA2_256, AEAD.AES128_GCM,        Hash.SHA2_256
   | DH.DH_Curve25519, Hash.SHA2_256, AEAD.CHACHA20_POLY1305, Hash.SHA2_256
   | DH.DH_P256,       Hash.SHA2_256, AEAD.AES128_GCM,        Hash.SHA2_256
-  | DH.DH_P256,       Hash.SHA2_256, AEAD.CHACHA20_POLY1305, Hash.SHA2_256 -> true
+  | DH.DH_P256,       Hash.SHA2_256, AEAD.CHACHA20_POLY1305, Hash.SHA2_256
   | DH.DH_Curve25519, Hash.SHA2_256, AEAD.CHACHA20_POLY1305, Hash.SHA2_512 -> true
   | _,_,_,_ -> false
 
-let ciphersuite = cs:(DH.algorithm & Hash.algorithm & AEAD.alg & Hash.algorithm){is_ciphersuite cs}
+let ciphersuite = cs:(DH.algorithm & Hash.algorithm & AEAD.alg & Hash.algorithm){is_valid_ciphersuite cs}
 
 // TODO rename to dh_of_cs or kemdh or dhkem
 let curve_of_cs (cs:ciphersuite) : DH.algorithm =
@@ -36,6 +36,136 @@ let aead_of_cs (cs:ciphersuite) : AEAD.alg =
 
 let hash_of_cs (cs:ciphersuite) : Hash.algorithm =
   let (_,_,_,h) = cs in h
+
+// TODO rename to AuthPSK
+type mode =
+  | Base
+  | PSK
+  | Auth
+  | PSKAuth
+/// Constants
+
+(** Constants for HPKE labels *)
+// generated: "RFCXXXX "
+inline_for_extraction
+let size_label_rfcXXXX: size_nat = 8
+let label_rfcXXXX_list : l:list uint8{List.Tot.length l == size_label_rfcXXXX} =
+  [@inline_let]
+  let l = [u8 0x52; u8 0x46; u8 0x43; u8 0x58; u8 0x58; u8 0x58; u8 0x58; u8 0x20] in
+  assert_norm(List.Tot.length l == size_label_rfcXXXX);
+  l
+let label_rfcXXXX : lbytes size_label_rfcXXXX = createL label_rfcXXXX_list
+
+
+// generated: "dh"
+inline_for_extraction
+let size_label_dh: size_nat = 2
+let label_dh_list : l:list uint8{List.Tot.length l == size_label_dh} =
+  [@inline_let]
+  let l = [u8 0x64; u8 0x68] in
+  assert_norm(List.Tot.length l == size_label_dh);
+  l
+let label_dh : lbytes size_label_dh = createL label_dh_list
+
+
+// generated: "prk"
+inline_for_extraction
+let size_label_prk: size_nat = 3
+let label_prk_list : l:list uint8{List.Tot.length l == size_label_prk} =
+  [@inline_let]
+  let l = [u8 0x70; u8 0x72; u8 0x6b] in
+  assert_norm(List.Tot.length l == size_label_prk);
+  l
+let label_prk : lbytes size_label_prk = createL label_prk_list
+
+
+// generated: "pskID_hash"
+inline_for_extraction
+let size_label_pskID_hash: size_nat = 10
+let label_pskID_hash_list : l:list uint8{List.Tot.length l == size_label_pskID_hash} =
+  [@inline_let]
+  let l = [u8 0x70; u8 0x73; u8 0x6b; u8 0x49; u8 0x44; u8 0x5f; u8 0x68; u8 0x61; u8 0x73; u8 0x68] in
+  assert_norm(List.Tot.length l == size_label_pskID_hash);
+  l
+let label_pskID_hash : lbytes size_label_pskID_hash = createL label_pskID_hash_list
+
+
+// generated: "info_hash"
+inline_for_extraction
+let size_label_info_hash: size_nat = 9
+let label_info_hash_list : l:list uint8{List.Tot.length l == size_label_info_hash} =
+  [@inline_let]
+  let l = [u8 0x69; u8 0x6e; u8 0x66; u8 0x6f; u8 0x5f; u8 0x68; u8 0x61; u8 0x73; u8 0x68] in
+  assert_norm(List.Tot.length l == size_label_info_hash);
+  l
+let label_info_hash : lbytes size_label_info_hash = createL label_info_hash_list
+
+
+// generated: "psk_hash"
+inline_for_extraction
+let size_label_psk_hash: size_nat = 8
+let label_psk_hash_list : l:list uint8{List.Tot.length l == size_label_psk_hash} =
+  [@inline_let]
+  let l = [u8 0x70; u8 0x73; u8 0x6b; u8 0x5f; u8 0x68; u8 0x61; u8 0x73; u8 0x68] in
+  assert_norm(List.Tot.length l == size_label_psk_hash);
+  l
+let label_psk_hash : lbytes size_label_psk_hash = createL label_psk_hash_list
+
+
+// generated: "secret"
+inline_for_extraction
+let size_label_secret: size_nat = 6
+let label_secret_list : l:list uint8{List.Tot.length l == size_label_secret} =
+  [@inline_let]
+  let l = [u8 0x73; u8 0x65; u8 0x63; u8 0x72; u8 0x65; u8 0x74] in
+  assert_norm(List.Tot.length l == size_label_secret);
+  l
+let label_secret : lbytes size_label_secret = createL label_secret_list
+
+
+// generated: "key"
+inline_for_extraction
+let size_label_key: size_nat = 3
+let label_key_list : l:list uint8{List.Tot.length l == size_label_key} =
+  [@inline_let]
+  let l = [u8 0x6b; u8 0x65; u8 0x79] in
+  assert_norm(List.Tot.length l == size_label_key);
+  l
+let label_key : lbytes size_label_key = createL label_key_list
+
+
+// generated: "nonce"
+inline_for_extraction
+let size_label_nonce: size_nat = 5
+let label_nonce_list : l:list uint8{List.Tot.length l == size_label_nonce} =
+  [@inline_let]
+  let l = [u8 0x6e; u8 0x6f; u8 0x6e; u8 0x63; u8 0x65] in
+  assert_norm(List.Tot.length l == size_label_nonce);
+  l
+let label_nonce : lbytes size_label_nonce = createL label_nonce_list
+
+
+// generated: "exp"
+inline_for_extraction
+let size_label_exp: size_nat = 3
+let label_exp_list : l:list uint8{List.Tot.length l == size_label_exp} =
+  [@inline_let]
+  let l = [u8 0x65; u8 0x78; u8 0x70] in
+  assert_norm(List.Tot.length l == size_label_exp);
+  l
+let label_exp : lbytes size_label_exp = createL label_exp_list
+
+
+// generated: "sec"
+inline_for_extraction
+let size_label_sec: size_nat = 3
+let label_sec_list : l:list uint8{List.Tot.length l == size_label_sec} =
+  [@inline_let]
+  let l = [u8 0x73; u8 0x65; u8 0x63] in
+  assert_norm(List.Tot.length l == size_label_sec);
+  l
+let label_sec : lbytes size_label_sec = createL label_sec_list
+
 
 /// Constants sizes
 
@@ -57,9 +187,11 @@ inline_for_extraction
 let size_dh_public (cs:ciphersuite): size_nat = match curve_of_cs cs with
   | DH.DH_Curve25519 -> DH.size_public DH.DH_Curve25519
   | DH.DH_P256 -> DH.size_public DH.DH_P256 + 1 // Need the additional byte for representation
+// TODO shouldn't the extra byte be handled inside the P256 module?
 
 inline_for_extraction
 let size_kem_kdf (cs:ciphersuite): size_nat = Hash.size_hash (kem_hash_of_cs cs)
+// TODO size_...
 
 inline_for_extraction
 let size_kem_key (cs:ciphersuite): size_nat = Hash.size_hash (kem_hash_of_cs cs)
@@ -67,28 +199,51 @@ let size_kem_key (cs:ciphersuite): size_nat = Hash.size_hash (kem_hash_of_cs cs)
 inline_for_extraction
 let size_kdf (cs:ciphersuite): size_nat = Hash.size_hash (hash_of_cs cs)
 
-// TODO This could be refined depending on the underlying hash function?
-inline_for_extraction
-let max_psk (cs:ciphersuite): size_nat = pow2 16 - 1
-
-// TODO rename? length of what? plaintext, right?
-inline_for_extraction
-let max_length (cs:ciphersuite):size_nat = AEAD.max_length (aead_of_cs cs)
-
-// TODO This could be refined depending on the underlying hash function?
-inline_for_extraction
-let max_pskID (cs:ciphersuite):size_nat = pow2 16 - 1
-
-// TODO This could be refined depending on the underlying hash function?
-inline_for_extraction
-let max_info (cs:ciphersuite):size_nat = pow2 16 - 1
-
-// TODO This could be refined depending on the underlying hash function?
-inline_for_extraction
-let max_exp_ctx: size_nat = pow2 16 - 1
-
 let max_seq (cs:ciphersuite): nat = pow2 (8*(size_aead_nonce cs)) - 1
 
+inline_for_extraction
+let size_cs_identifier: size_nat = 6
+
+inline_for_extraction
+let size_mode_identifier: size_nat = 1
+
+let size_ks_ctx (cs:ciphersuite): size_nat = size_cs_identifier + size_mode_identifier + 2*(size_kdf cs)
+
+// TODO
+(* let keysized (a:hash_alg) (l:nat) = *)
+(*   l <= max_input_length a /\ *)
+(*   l + block_length a < pow2 32 *)
+
+let labeled_extract_ikm_length_pred (a:Hash.algorithm) (ikm_length:nat) =
+  HKDF.extract_ikm_length_pred a (Seq.length label_rfcXXXX + ikm_length)
+
+val labeled_extract:
+    a:Hash.algorithm
+  -> salt:bytes
+  -> label:bytes
+  -> ikm:bytes ->
+  Pure (lbytes (Spec.Hash.Definitions.hash_length a))
+    (requires
+      Spec.Agile.HMAC.keysized a (Seq.length salt) /\
+      labeled_extract_ikm_length_pred a (Seq.length label + Seq.length ikm))
+    (ensures fun _ -> True)
+
+let labeled_expand_info_length_pred (a:Hash.algorithm) (info_length:nat) =
+  HKDF.expand_info_length_pred a (2 + Seq.length label_rfcXXXX + info_length)
+
+val labeled_expand:
+    a:Hash.algorithm
+  -> prk:bytes
+  -> label:bytes
+  -> info:bytes
+  -> l:size_nat ->
+  Pure (lbytes l)
+    (requires
+      Spec.Hash.Definitions.hash_length a <= Seq.length prk /\
+      Spec.Agile.HMAC.keysized a (Seq.length prk) /\
+      labeled_expand_info_length_pred a (Seq.length label + Seq.length info) /\
+      HKDF.expand_output_length_pred a l)
+    (ensures fun _ -> True)
 
 /// Types
 
@@ -98,15 +253,28 @@ type key_kem_s (cs:ciphersuite) = lbytes (size_kem_key cs) // TODO This is true 
 type key_aead_s (cs:ciphersuite) = lbytes (size_aead_key cs)
 type nonce_aead_s (cs:ciphersuite) = lbytes (size_aead_nonce cs)
 type seq_aead_s (cs:ciphersuite) = n:nat{n <= max_seq cs}
-type psk_s (cs:ciphersuite) = b:bytes{Seq.length b <= max_psk cs}
-type pskID_s (cs:ciphersuite) = b:bytes{Seq.length b <= max_pskID cs}
+// TODO can we use normalization or smth else to compute the maximum bounds for each cs?
+// TODO can we use lbytes here?
+type psk_s (cs:ciphersuite) = b:bytes{labeled_extract_ikm_length_pred (hash_of_cs cs) (size_label_psk_hash + Seq.length b)}
+type pskID_s (cs:ciphersuite) = b:bytes{labeled_extract_ikm_length_pred (hash_of_cs cs) (size_label_pskID_hash + Seq.length b)}
 type exporter_secret_s (cs:ciphersuite) = lbytes (size_kdf cs)
-type info_s (cs:ciphersuite) = b:bytes{Seq.length b <= max_info cs} // TODO should this be _s?
-type exp_ctx_s (cs:ciphersuite) = b:bytes{Seq.length b <= max_exp_ctx} // TODO should this be _s?
+type info_s (cs:ciphersuite) = b:bytes{labeled_extract_ikm_length_pred (hash_of_cs cs) (size_label_info_hash + Seq.length b)}
+type exp_ctx_s (cs:ciphersuite) = b:bytes{labeled_expand_info_length_pred (hash_of_cs cs) (size_label_sec + Seq.length b)}
+
+val unmarshal:
+    cs:ciphersuite // TODO could this be an implicit parameter?
+  -> pk:key_dh_public_s cs ->
+  Tot (DH.serialized_point (curve_of_cs cs))
+
+val marshal:
+    cs:ciphersuite
+  -> pk:DH.serialized_point (curve_of_cs cs) ->
+  Tot (key_dh_public_s cs)
 
 // TODO can we hide the contents of encryption_context, i.e. not
 //      expose them in this fsti, to avoid usage which is not
 //      conform with the spec?
+// TODO maybe rename to _state (because it is not a context that gets hashed into smth)
 let encryption_context (cs:ciphersuite) = key_aead_s cs & nonce_aead_s cs & seq_aead_s cs & exporter_secret_s cs
 
 val context_export:

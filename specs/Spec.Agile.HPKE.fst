@@ -19,62 +19,9 @@ let pow2_35_less_than_pow2_125 : _:unit{pow2 32 * pow2 3 <= pow2 125 - 1} = asse
 #set-options "--z3rlimit 20 --fuel 0 --ifuel 1"
 
 
-/// Constants
-
-(** Constants for HPKE labels *)
-inline_for_extraction
-let size_rfcXXXX: size_nat = 10 // TODO use the actual value // TODO Do I need an empty line after inline_for_extraction?
-let rfcXXXX_list : l:list uint8{List.Tot.length l == size_rfcXXXX} =
-  [@inline_let]
-  let l = [u8 0x68; u8 0x70; u8 0x6b; u8 0x65; u8 0x20; u8 0x6e; u8 0x6f; u8 0x6e; u8 0x63; u8 0x65] in
-  assert_norm(List.Tot.length l == size_rfcXXXX);
-  l
-let rfcXXXX : lbytes size_rfcXXXX = createL rfcXXXX_list
-
-inline_for_extraction
-let size_label_dh: size_nat = 10
-let label_dh_list : l:list uint8{List.Tot.length l == size_label_dh} =
-  [@inline_let]
-  let l = [u8 0x68; u8 0x70; u8 0x6b; u8 0x65; u8 0x20; u8 0x6e; u8 0x6f; u8 0x6e; u8 0x63; u8 0x65] in
-  assert_norm(List.Tot.length l == size_label_dh);
-  l
-let label_dh : lbytes size_label_dh = createL label_dh_list
-
-inline_for_extraction
-let size_label_prk: size_nat = 10
-let label_prk_list : l:list uint8{List.Tot.length l == size_label_prk} =
-  [@inline_let]
-  let l = [u8 0x68; u8 0x70; u8 0x6b; u8 0x65; u8 0x20; u8 0x6e; u8 0x6f; u8 0x6e; u8 0x63; u8 0x65] in
-  assert_norm(List.Tot.length l == size_label_prk);
-  l
-let label_prk : lbytes size_label_prk = createL label_prk_list
-
-inline_for_extraction
-let size_label_nonce: size_nat = 10
-let label_nonce_list : l:list uint8{List.Tot.length l == size_label_nonce} =
-  [@inline_let]
-  let l = [u8 0x68; u8 0x70; u8 0x6b; u8 0x65; u8 0x20; u8 0x6e; u8 0x6f; u8 0x6e; u8 0x63; u8 0x65] in
-  assert_norm(List.Tot.length l == size_label_nonce);
-  l
-let label_nonce : lbytes size_label_nonce = createL label_nonce_list
-
-inline_for_extraction
-let size_label_key: size_nat = 8
-let label_key_list : l:list uint8{List.Tot.length l == size_label_key} =
-  [@inline_let]
-  let l = [u8 0x68; u8 0x70; u8 0x6b; u8 0x65; u8 0x20; u8 0x6b; u8 0x65; u8 0x79] in
-  assert_norm(List.Tot.length l == size_label_key);
-  l
-let label_key : lbytes size_label_key = createL label_key_list
 
 
 /// Types
-
-inline_for_extraction
-let size_cs_identifier: size_nat = 6
-
-inline_for_extraction
-let size_mode_identifier: size_nat = 1
 
 // TODO This must match the first two and set the id accordingly
 val id_kem: cs:ciphersuite -> Tot (lbytes 2)
@@ -101,13 +48,6 @@ val id_of_cs: cs:ciphersuite -> Tot (lbytes size_cs_identifier)
 // TODO This should already be in big endian each
 let id_of_cs cs = id_kem cs @| id_kdf cs @| id_aead cs
 
-// TODO rename to AuthPSK
-type mode =
-  | Base
-  | PSK
-  | Auth
-  | PSKAuth
-
 val id_of_mode: m:mode -> Tot (lbytes size_mode_identifier)
 let id_of_mode m =
   match m with
@@ -116,76 +56,25 @@ let id_of_mode m =
   | Auth -> create 1 (u8 2)
   | PSKAuth -> create 1 (u8 3)
 
-val unmarshal:
-    cs:ciphersuite
-  -> pk:key_dh_public_s cs ->
-  Tot (DH.serialized_point (curve_of_cs cs))
-
-let unmarshal cs pk = match curve_of_cs cs with
-  | DH.DH_Curve25519 -> pk
-  // Extract the point coordinates by removing the first representation byte
-  | DH.DH_P256 -> sub pk 1 64
-
-val marshal:
-    cs:ciphersuite
-  -> pk:DH.serialized_point (curve_of_cs cs) ->
-  Tot (key_dh_public_s cs)
-
-let marshal cs pk = match curve_of_cs cs with
-  | DH.DH_Curve25519 -> pk
-  // Add the first representation byte to the point coordinates
-  | DH.DH_P256 -> create 1 (u8 4) @| pk
-
 //[@"opaque_to_smt"]
 //let labeled_extract_pred_ikm (a:Hash.algorithm) (label:bytes) (ikm:bytes) (consts:nat) =
-//   Seq.length rfcXXXX + Seq.length label + Seq.length ikm + Spec.Hash.Definitions.block_length a + consts <= Spec.Hash.Definitions.max_input_length a
+//   Seq.length label_rfcXXXX + Seq.length label + Seq.length ikm + Spec.Hash.Definitions.block_length a + consts <= Spec.Hash.Definitions.max_input_length a
 
 //let labeled_extract_pred_ikm_elim (a:Hash.algorithm) (label:bytes) (ikm:bytes) (consts:nat) :Lemma
 //  (requires labeled_extract_pred_ikm a label ikm consts)
-//  (ensures Seq.length rfcXXXX + Seq.length label + Seq.length ikm + Spec.Hash.Definitions.block_length a + consts <= Spec.Hash.Definitions.max_input_length a)
+//  (ensures Seq.length label_rfcXXXX + Seq.length label + Seq.length ikm + Spec.Hash.Definitions.block_length a + consts <= Spec.Hash.Definitions.max_input_length a)
 //= ()
-////  assert (Seq.length rfcXXXX + Seq.length label + Seq.length ikm + Spec.Hash.Definitions.block_length a + consts <= Spec.Hash.Definitions.max_input_length a) by (FStar.Tactics.fail "foobar")
-
-let labeled_extract_ikm_length_pred (a:Hash.algorithm) (ikm_length:nat) =
-  HKDF.extract_ikm_length_pred a (Seq.length rfcXXXX + ikm_length)
-
-val labeled_extract:
-    a:Hash.algorithm
-  -> salt:bytes
-  -> label:bytes
-  -> ikm:bytes ->
-  Pure (lbytes (Spec.Hash.Definitions.hash_length a))
-    (requires
-      Spec.Agile.HMAC.keysized a (Seq.length salt) /\
-      labeled_extract_ikm_length_pred a (Seq.length label + Seq.length ikm))
-    (ensures fun _ -> True)
+////  assert (Seq.length label_rfcXXXX + Seq.length label + Seq.length ikm + Spec.Hash.Definitions.block_length a + consts <= Spec.Hash.Definitions.max_input_length a) by (FStar.Tactics.fail "foobar")
 
 let labeled_extract a salt label ikm =
 //  labeled_extract_pred_ikm_elim a label ikm 0;
-  let labeledIKM = Seq.append rfcXXXX label in
+  let labeledIKM = Seq.append label_rfcXXXX label in
   let labeledIKM = Seq.append labeledIKM ikm in
   HKDF.extract a salt labeledIKM
 
-let labeled_expand_info_length_pred (a:Hash.algorithm) (info_length:nat) =
-  HKDF.expand_info_length_pred a (2 + Seq.length rfcXXXX + info_length)
-
-val labeled_expand:
-    a:Hash.algorithm
-  -> prk:bytes
-  -> label:bytes
-  -> info:bytes
-  -> l:size_nat ->
-  Pure (lbytes l)
-    (requires
-      Spec.Hash.Definitions.hash_length a <= Seq.length prk /\
-      Spec.Agile.HMAC.keysized a (Seq.length prk) /\
-      labeled_expand_info_length_pred a (Seq.length label + Seq.length info) /\
-      HKDF.expand_output_length_pred a l)
-    (ensures fun _ -> True)
-
 let labeled_expand a prk label info l =
   let labeledInfo = nat_to_bytes_be 2 l in
-  let labeledInfo = Seq.append labeledInfo rfcXXXX in
+  let labeledInfo = Seq.append labeledInfo label_rfcXXXX in
   let labeledInfo = Seq.append labeledInfo label in
   let labeledInfo = Seq.append labeledInfo info in
   HKDF.expand a prk labeledInfo l
@@ -210,6 +99,18 @@ let extract_and_expand cs dh kemContext =
   let prk = labeled_extract (kem_hash_of_cs cs) lbytes_empty label_dh dh in
   labeled_expand (kem_hash_of_cs cs) prk label_prk kemContext (size_kem_key cs)
 
+let unmarshal cs pk = match curve_of_cs cs with
+  | DH.DH_Curve25519 -> pk
+  // Extract the point coordinates by removing the first representation byte
+  | DH.DH_P256 -> sub pk 1 64
+
+
+let marshal cs pk = match curve_of_cs cs with
+  | DH.DH_Curve25519 -> pk
+  // Add the first representation byte to the point coordinates
+  | DH.DH_P256 -> create 1 (u8 4) @| pk
+
+
 /// def Encap(pkR):
 ///   skE, pkE = GenerateKeyPair()
 ///   dh = DH(skE, pkR)
@@ -227,7 +128,7 @@ val encap:
   -> pkR:DH.serialized_point (curve_of_cs cs) ->
   Tot (option (key_kem_s cs & key_dh_public_s cs))
 
-#set-options "--z3rlimit 75 --fuel 0 --ifuel 2"
+#set-options "--z3rlimit 100 --fuel 0 --ifuel 2"
 let encap cs skE pkR =
   match DH.secret_to_public (curve_of_cs cs) skE with
   | None -> None
@@ -260,6 +161,7 @@ val decap:
   -> skR: key_dh_secret_s cs ->
   Tot (option (key_kem_s cs))
 
+#set-options "--z3rlimit 100 --fuel 0 --ifuel 2"
 let decap cs enc skR =
   let pkE = unmarshal cs enc in
   match DH.dh (curve_of_cs cs) skR pkE with
@@ -297,7 +199,7 @@ val auth_encap:
   -> skS:key_dh_secret_s cs ->
   Tot (option (key_kem_s cs & key_dh_public_s cs))
 
-#set-options "--z3rlimit 75 --fuel 0 --ifuel 2"
+#set-options "--z3rlimit 100 --fuel 0 --ifuel 2"
 let auth_encap cs skE pkR skS =
   match DH.secret_to_public (curve_of_cs cs) skE with
   | None -> None
@@ -343,7 +245,7 @@ val auth_decap:
   -> pkS: DH.serialized_point (curve_of_cs cs) ->
   Tot (option (key_kem_s cs))
 
-#set-options "--z3rlimit 75 --fuel 0 --ifuel 2"
+#set-options "--z3rlimit 100 --fuel 0 --ifuel 2"
 let auth_decap cs enc skR pkS =
   let pkE = unmarshal cs enc in
   match DH.dh (curve_of_cs cs) skR pkE with
@@ -396,7 +298,7 @@ val build_context:
   -> m:mode
   -> pskID_hash:lbytes (size_kdf cs)
   -> info_hash:lbytes (size_kdf cs) ->
-  Tot (lbytes (size_cs_identifier + size_mode_identifier + 2*(size_kdf cs)))
+  Tot (lbytes (size_ks_ctx cs))
 
 let build_context cs m pskID_hash info_hash =
   let context = (id_of_cs cs) @| (id_of_mode m) in
@@ -404,34 +306,16 @@ let build_context cs m pskID_hash info_hash =
   let context = Seq.append context info_hash in
   context
 
-// TODO replace by actual label and move to top
-inline_for_extraction
-let size_label_pskID_hash: size_nat = 10
-let label_pskID_hash_list : l:list uint8{List.Tot.length l == size_label_pskID_hash} =
-  [@inline_let]
-  let l = [u8 0x68; u8 0x70; u8 0x6b; u8 0x65; u8 0x20; u8 0x6e; u8 0x6f; u8 0x6e; u8 0x63; u8 0x65] in
-  assert_norm(List.Tot.length l == size_label_pskID_hash);
-  l
-let label_pskID_hash : lbytes size_label_pskID_hash = createL label_pskID_hash_list
-
-// TODO replace by actual label and move to top
-inline_for_extraction
-let size_label_info_hash: size_nat = 10
-let label_info_hash_list : l:list uint8{List.Tot.length l == size_label_info_hash} =
-  [@inline_let]
-  let l = [u8 0x68; u8 0x70; u8 0x6b; u8 0x65; u8 0x20; u8 0x6e; u8 0x6f; u8 0x6e; u8 0x63; u8 0x65] in
-  assert_norm(List.Tot.length l == size_label_info_hash);
-  l
-let label_info_hash : lbytes size_label_info_hash = createL label_info_hash_list
-
 // TODO This could go into hacl-star/lib/Lib.ByteSequence?
 //      However, it should be noted that this function leaks
 //      if the two lbytes have the same length or not, i.e.
 //      it is not constant time. lbytes_eq seems to be.
-let lbytes_equal (#l1:size_nat) (#l2:size_nat) (b1:lbytes l1) (b2:lbytes l2) : bool =
+let lbytes_equal (#l1:nat) (#l2:size_nat) (b1:bytes{Seq.length b1 = l1}) (b2:lbytes l2) : bool =
   if not (Seq.length b1 = Seq.length b2) then false else
-  lbytes_eq #l1 b1 b2
+  lbytes_eq #l2 b1 b2
 
+// TODO use heterogenous equality
+// TODO replace got_psk and got_pskID by match on an option type?
 let verify_psk_inputs (cs:ciphersuite) (m:mode) (psk:psk_s cs) (pskID:pskID_s cs) : bool =
   let got_psk = not (lbytes_equal #(Seq.length psk) #(size_kdf cs) psk (default_psk cs)) in
   let got_pskID = not (lbytes_equal #(Seq.length pskID) #0 pskID (default_pskID cs)) in
@@ -443,35 +327,6 @@ let verify_psk_inputs (cs:ciphersuite) (m:mode) (psk:psk_s cs) (pskID:pskID_s cs
   | (PSKAuth, false) -> false // Missing required PSK input
   | _ -> true
 
-// TODO replace by actual label and move to top
-inline_for_extraction
-let size_label_psk_hash: size_nat = 10
-let label_psk_hash_list : l:list uint8{List.Tot.length l == size_label_psk_hash} =
-  [@inline_let]
-  let l = [u8 0x68; u8 0x70; u8 0x6b; u8 0x65; u8 0x20; u8 0x6e; u8 0x6f; u8 0x6e; u8 0x63; u8 0x65] in
-  assert_norm(List.Tot.length l == size_label_psk_hash);
-  l
-let label_psk_hash : lbytes size_label_psk_hash = createL label_psk_hash_list
-
-// TODO replace by actual label and move to top
-inline_for_extraction
-let size_label_secret: size_nat = 10
-let label_secret_list : l:list uint8{List.Tot.length l == size_label_secret} =
-  [@inline_let]
-  let l = [u8 0x68; u8 0x70; u8 0x6b; u8 0x65; u8 0x20; u8 0x6e; u8 0x6f; u8 0x6e; u8 0x63; u8 0x65] in
-  assert_norm(List.Tot.length l == size_label_secret);
-  l
-let label_secret : lbytes size_label_secret = createL label_secret_list
-
-// TODO replace by actual label and move to top
-inline_for_extraction
-let size_label_exporter_secret: size_nat = 10
-let label_exporter_secret_list : l:list uint8{List.Tot.length l == size_label_exporter_secret} =
-  [@inline_let]
-  let l = [u8 0x68; u8 0x70; u8 0x6b; u8 0x65; u8 0x20; u8 0x6e; u8 0x6f; u8 0x6e; u8 0x63; u8 0x65] in
-  assert_norm(List.Tot.length l == size_label_exporter_secret);
-  l
-let label_exporter_secret : lbytes size_label_exporter_secret = createL label_exporter_secret_list
 
 val key_schedule:
     cs:ciphersuite
@@ -482,8 +337,6 @@ val key_schedule:
   -> pskID:pskID_s cs ->
   Pure (encryption_context cs)
     (requires verify_psk_inputs cs m psk pskID)
-    // TODO I definitely need to refine the info and psk and pskID type more
-    //      to determine the actual length limits (they are hardcoded right now)
     (ensures fun _ -> True)
 
 let key_schedule cs m zz info psk pskID =
@@ -494,18 +347,8 @@ let key_schedule cs m zz info psk pskID =
   let secret = labeled_extract (hash_of_cs cs) psk_hash label_secret zz in
   let key = labeled_expand (hash_of_cs cs) secret label_key context (size_aead_key cs) in
   let nonce = labeled_expand (hash_of_cs cs) secret label_nonce context (size_aead_nonce cs) in
-  let exporter_secret = labeled_expand (hash_of_cs cs) secret label_exporter_secret context (size_kdf cs) in // TODO introduce a size variable for exp secret
+  let exporter_secret = labeled_expand (hash_of_cs cs) secret label_exp context (size_kdf cs) in
   (key, nonce, 0, exporter_secret)
-
-// TODO replace by actual label and move to top
-inline_for_extraction
-let size_label_sec: size_nat = 10
-let label_sec_list : l:list uint8{List.Tot.length l == size_label_sec} =
-  [@inline_let]
-  let l = [u8 0x68; u8 0x70; u8 0x6b; u8 0x65; u8 0x20; u8 0x6e; u8 0x6f; u8 0x6e; u8 0x63; u8 0x65] in
-  assert_norm(List.Tot.length l == size_label_sec);
-  l
-let label_sec : lbytes size_label_sec = createL label_sec_list
 
 let key_of_ctx (cs:ciphersuite) (ctx:encryption_context cs) =
   let key, _, _, _ = ctx in key
@@ -535,9 +378,10 @@ let context_compute_nonce cs ctx seq =
 
 let context_increment_seq cs ctx =
   let key, nonce, seq, exporter_secret = ctx in
-  if seq = max_seq cs then None else
-  Some (set_seq cs ctx seq)
+  if seq = max_seq cs then None else // TODO this should be a pre-condition. “no need for dynamic checks in the Pure world”
+  Some (set_seq cs ctx (seq + 1))
 
+// TODO In the spec world, I could enforce a pre-condition on ctx.seq
 let context_seal cs ctx aad pt =
   let key = key_of_ctx cs ctx in
   let seq = seq_of_ctx cs ctx in
