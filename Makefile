@@ -736,7 +736,7 @@ dist/wasm/Makefile.basic: FRODO_BUNDLE = -bundle Hacl.Frodo.KEM,Frodo.Params,Hac
 
 # Doesn't work in Wasm because it uses assembler intrinsics
 dist/wasm/Makefile.basic: P256_BUNDLE= -bundle Hacl.P256,Hacl.Impl.ECDSA.*,Hacl.Impl.SolinasReduction,Hacl.Impl.P256.*
-	
+
 # No Vale Curve64 no "Local" or "Slow" Curve64, only Curve51 (local Makefile hack)
 dist/wasm/Makefile.basic: CURVE_BUNDLE_SLOW =
 dist/wasm/Makefile.basic: CURVE_BUNDLE = \
@@ -1046,12 +1046,13 @@ dist/evercrypt-external-headers/Makefile.basic: $(ALL_KRML_FILES)
 .PRECIOUS: dist/test/c/%.c
 dist/test/c/%.c: $(ALL_KRML_FILES)
 	$(KRML) -silent \
-          -tmpdir $(dir $@) -skip-compilation \
-          -no-prefix $(subst _,.,$*) \
-          -library Hacl.P256,Hacl.Impl.*,EverCrypt,EverCrypt.* \
-          -fparentheses -fcurly-braces -fno-shadow \
-          -minimal -add-include '"kremlib.h"' \
-          -bundle '*[rename=$*]' $(KRML_EXTRA) $(filter %.krml,$^)
+	  -tmpdir $(dir $@) -skip-compilation \
+	  -header $(HACL_HOME)/dist/LICENSE.txt \
+	  -no-prefix $(subst _,.,$*) \
+	  -library Hacl.P256,Hacl.Impl.*,EverCrypt,EverCrypt.* \
+	  -fparentheses -fcurly-braces -fno-shadow \
+	  -minimal -add-include '"kremlib.h"' \
+	  -bundle '*[rename=$*]' $(KRML_EXTRA) $(filter %.krml,$^)
 
 dist/test/c/Test.c: KRML_EXTRA=-add-include '"kremlin/internal/compat.h"'
 
