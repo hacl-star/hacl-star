@@ -206,7 +206,9 @@ val update_last_block_is_update
     (requires (S.length input = Spec.Poly1305.size_block))
     (ensures (update_last (acc, r) input == (Spec.Poly1305.poly1305_update input acc r, r)))
 
-#push-options "--fuel 1"
+open FStar.Tactics
+
+#push-options "--fuel 1 --print_implicits"
 let update_last_block_is_update input acc r =
   let open Lib.UpdateMulti.Lemmas in
   let block_length = Spec.Poly1305.size_block in
@@ -214,6 +216,24 @@ let update_last_block_is_update input acc r =
   assert(input `S.equal` S.append input S.empty);
   let acc1 = update' r acc input in
   let acc1' = update_multi' r acc input in
+  // SH: fun fact: this lemma call and the following assert should be the
+  // last part of the below calc. However, if put below/inside the calc,
+  // the proof loops.
+  Lib.Sequence.Lemmas.repeat_blocks_extensionality block_length input
+      (repeat_f block_length (update' r))
+      Spec.Poly1305.(poly1305_update1 r size_block)
+      (repeat_l block_length (update_last' r) input)
+      Spec.Poly1305.(poly1305_update_last r)
+      acc;
+  assert(
+    Lib.Sequence.repeat_blocks #uint8 #Spec.Poly1305.felem block_length input
+      (repeat_f block_length (update' r))
+      (repeat_l block_length (update_last' r) input)
+      acc ==
+    Lib.Sequence.repeat_blocks #uint8 #Spec.Poly1305.felem block_length input
+     Spec.Poly1305.(poly1305_update1 r size_block)
+     Spec.Poly1305.(poly1305_update_last r)
+     acc);
   assert(
     let block, rem = Lib.UpdateMulti.split_block block_length input 1 in
     block `S.equal` input /\ rem `S.equal` S.empty);
@@ -228,22 +248,11 @@ let update_last_block_is_update input acc r =
   (==) { }
     update_last' r (update' r acc input) S.empty, r;
   (==) {  }
-    update_last' r (update_multi' r acc input) S.empty, r;
+   update_last' r (update_multi' r acc input) S.empty, r;
   (==) { update_full_is_repeat_blocks block_length (update' r) (update_last' r) acc input input }
     Lib.Sequence.repeat_blocks #uint8 #Spec.Poly1305.felem block_length input
       (repeat_f block_length (update' r))
       (repeat_l block_length (update_last' r) input)
-      acc, r;
-  (==) { repeat_blocks_extensionality block_length input
-      (repeat_f block_length (update' r))
-      Spec.Poly1305.(poly1305_update1 r size_block)
-      (repeat_l block_length (update_last' r) input)
-      Spec.Poly1305.(poly1305_update_last r)
-      acc
-  }
-    Lib.Sequence.repeat_blocks #uint8 #Spec.Poly1305.felem block_length input
-      Spec.Poly1305.(poly1305_update1 r size_block)
-      Spec.Poly1305.(poly1305_update_last r)
       acc, r;
   }
 #pop-options

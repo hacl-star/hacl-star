@@ -39,8 +39,6 @@ let extra_state_add_nat_bound_associative_lem (#a:hash_alg{is_blake a}) (s : ext
   let s1_v = extra_state_v s1 in
   let s2_v = extra_state_v s2 in
   let s3_v = extra_state_v s3 in
-  assert(extra_state_add_nat (extra_state_add_nat s n1) n2 ==
-          (s +. nat_to_extra_state a n1) +. nat_to_extra_state a n2);
   let t = extra_state_int_type a in
   assert(s1_v == (extra_state_v s + n1) @%. t);
   assert(s2_v == s1_v + n2 @%. t);

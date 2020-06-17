@@ -3,7 +3,6 @@ module Spec.Hash.Incremental
 module S = FStar.Seq
 module Blake2 = Spec.Blake2
 
-open Spec.Hash.Split
 open Spec.Agile.Hash
 open Spec.Hash.Definitions
 open Spec.Hash.PadFinish
