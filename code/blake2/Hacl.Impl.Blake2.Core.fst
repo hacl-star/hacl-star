@@ -11,7 +11,7 @@ open Lib.IntVector
 
 module Spec = Spec.Blake2
 
-#set-options "--max_fuel 0 --max_ifuel 0"
+#set-options "--max_fuel 0 --max_ifuel 1"
 
 inline_for_extraction
 let zero_element (a:Spec.alg) (m:m_spec) : element_t a m =

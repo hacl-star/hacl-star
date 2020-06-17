@@ -6,6 +6,7 @@ open Lib.RawIntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 open Lib.LoopCombinators
+module UpdateMulti = Lib.UpdateMulti
 
 #set-options "--z3rlimit 50"
 
@@ -425,11 +426,7 @@ val blake2_update_blocks:
 let split (a:alg) (len:nat)
   : nb_rem:(nat & nat){let (nb,rem) = nb_rem in
 		   nb * size_block a + rem == len} =
-  let nb = len / size_block a in
-  let rem = len % size_block a in
-  let nb' = if rem = 0 && nb > 0 then nb - 1 else nb in
-  let rem' = if rem = 0 && nb > 0 then size_block a else rem in
-  (nb',rem')
+  UpdateMulti.split_at_last_lazy_nb_rem (size_block a) len
 
 let blake2_update_blocks a prev m s =
   let (nb,rem) = split a (length m) in

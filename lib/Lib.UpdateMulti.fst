@@ -16,61 +16,228 @@ let uint8 = Lib.IntTypes.uint8
 /// Specification
 /// =============
 
-#push-options "--z3cliopt smt.arith.nl=false"
-
-/// A helper that deals with the modulo proof obligation to make things go
+/// Helpers that deal with the modulo proof obligation to make things go
 /// smoothly. Originally in Spec.Agile.Hash, now generic, with a much more
 /// robust proof.
-let split_block (block_length: pos)
-  (blocks: S.seq uint8)
+
+/// The first helpers help to reason about splitting data at ad-hoc number of blocks.
+
+/// First, reason about the lengths
+#push-options "--z3cliopt smt.arith.nl=false"
+let split_nb_lem (block_length: pos)
+  (data_length: nat)
+  (n: nat):
+  Lemma
+    (requires
+      n <= data_length / block_length)
+    (ensures (
+      0 <= n * block_length /\
+      n * block_length <= data_length /\
+      n * block_length % block_length = 0 /\
+      (data_length - n * block_length) % block_length = data_length % block_length)) =
+  let bl = n * block_length in
+  Math.Lemmas.nat_times_nat_is_nat n block_length;
+  Math.Lemmas.nat_over_pos_is_nat bl block_length;
+  assert(bl >= 0);
+  assert(bl / block_length >= 0);
+  Math.Lemmas.multiple_modulo_lemma n block_length;
+  assert(bl % block_length = 0);
+  calc (<=) {
+    bl;
+    (<=) { Math.Lemmas.lemma_mult_le_right block_length n (data_length / block_length) }
+    (data_length / block_length) * block_length;
+    (<=) {}
+    (data_length / block_length) * block_length + data_length % block_length;
+    (==) { Math.Lemmas.euclidean_division_definition data_length block_length }
+    data_length;
+  };
+  let r = data_length - bl in
+   calc (==) {
+     r % block_length;
+   (==) { Math.Lemmas.modulo_distributivity data_length (- bl) block_length }
+     (data_length % block_length + (- bl) % block_length) % block_length;
+   (==) { Math.Lemmas.paren_mul_right (-1) n block_length }
+     (data_length % block_length + ((- n) * block_length) % block_length) % block_length;
+   (==) { Math.Lemmas.multiple_modulo_lemma (-n) block_length }
+     (data_length % block_length) % block_length;
+   (==) { Math.Lemmas.lemma_mod_add_distr 0 data_length block_length }
+     data_length % block_length;
+   }
+
+#pop-options
+
+/// The helper which actually splits sequences - TODO: rename
+#push-options "--z3cliopt smt.arith.nl=false"
+let split_block
+  (block_length: pos)
+  (data: S.seq uint8)
   (n: nat):
   Pure (S.seq uint8 & S.seq uint8)
     (requires
-      S.length blocks % block_length = 0 /\
-      n <= S.length blocks / block_length)
+      n <= S.length data / block_length)
     (ensures fun (l, r) ->
       0 <= n * block_length /\
-      n * block_length <= S.length blocks /\
+      n * block_length <= S.length data /\
       S.length l % block_length = 0 /\
-      S.length r % block_length = 0 /\
-      l == fst (Seq.split blocks (FStar.Mul.(n * block_length))) /\
-      r == snd (Seq.split blocks (FStar.Mul.(n * block_length))) /\
-      S.append l r == blocks)
+      (S.length r % block_length = S.length data % block_length) /\
+      l == fst (Seq.split data (FStar.Mul.(n * block_length))) /\
+      r == snd (Seq.split data (FStar.Mul.(n * block_length))) /\
+      S.append l r == data)
 =
-  Math.Lemmas.nat_times_nat_is_nat n block_length;
-  assert (0 <= n * block_length);
-  calc (<=) {
-    n * block_length;
-  (<=) { Math.Lemmas.lemma_mult_le_left block_length n (S.length blocks / block_length) }
-    (S.length blocks / block_length) * block_length;
-  (<=) { Math.Lemmas.euclidean_division_definition (S.length blocks) block_length }
-    S.length blocks;
-  };
-  let l, r = S.split blocks FStar.Mul.(n * block_length) in
-  Math.Lemmas.modulo_distributivity (S.length r) (S.length l) block_length;
-  Math.Lemmas.multiple_modulo_lemma (S.length blocks / block_length) block_length ;
-  Math.Lemmas.multiple_modulo_lemma n block_length;
-  Math.Lemmas.modulo_distributivity ((S.length blocks / block_length) * block_length) (- (S.length l)) block_length;
-  S.lemma_eq_intro (l `S.append` r) blocks;
-  assert (S.length l % block_length = 0);
-  calc (==) {
-    S.length r % block_length;
-  (==) { }
-    (S.length blocks - n * block_length) % block_length;
-  (==) { Math.Lemmas.modulo_distributivity (S.length blocks) (- (n * block_length)) block_length }
-    (S.length blocks % block_length + (- n * block_length) % block_length) % block_length;
-  (==) { Math.Lemmas.paren_mul_right (-1) n block_length }
-    (((- n) * block_length) % block_length) % block_length;
-  (==) { Math.Lemmas.multiple_modulo_lemma (-n) block_length }
-    0 % block_length;
-  (==) { Math.Lemmas.multiple_modulo_lemma 0 block_length }
-    0;
-  };
-  assert (S.length r % block_length = 0);
-  assert (l == fst (Seq.split blocks (FStar.Mul.(n * block_length))));
-  assert (r == snd (Seq.split blocks (FStar.Mul.(n * block_length))));
-  assert (S.append l r == blocks);
+  split_nb_lem block_length (Seq.length data) n;
+  let l, r = S.split data FStar.Mul.(n * block_length) in
+  S.lemma_eq_intro (l `S.append` r) data;
+  assert(S.length l = n * block_length);
+  assert(S.length r = S.length data - n * block_length);
+  assert (l == fst (Seq.split data (FStar.Mul.(n * block_length))));
+  assert (r == snd (Seq.split data (FStar.Mul.(n * block_length))));
+  assert (S.append l r == data);
   l, r
+#pop-options
+
+/// We now define more specific split functions, to split data between a
+/// sequence of blocks and a remainder (strictly) smaller than a block.
+
+/// First version: the remainder is strictly smaller than a block
+#push-options "--z3cliopt smt.arith.nl=false"
+let split_at_last_nb_rem
+  (block_length: pos)
+  (data_length: nat) :
+  Pure (nat & nat)
+    (requires True)
+    (ensures fun (n, rem) ->
+        0 <= n * block_length /\
+        n * block_length <= data_length /\
+        n * block_length % block_length = 0 /\
+        (rem % block_length = data_length % block_length) /\
+        n = data_length / block_length /\
+        rem = data_length % block_length /\
+        0 <= rem /\ rem < block_length /\
+        data_length = n * block_length + rem) =
+  let n = data_length / block_length in
+  let rem = data_length % block_length in
+  Math.Lemmas.nat_over_pos_is_nat data_length block_length;
+  split_nb_lem block_length data_length n;
+  Math.Lemmas.euclidean_division_definition data_length block_length;
+  n, rem
+#pop-options
+
+#push-options "--z3cliopt smt.arith.nl=false"
+let split_at_last
+  (block_length: pos)
+  (data: S.seq uint8) :
+  Pure (S.seq uint8 & S.seq uint8)
+    (requires True)
+    (ensures fun (l, r) ->
+      S.length l % block_length = 0 /\
+      (S.length data % block_length = 0 ==> S.length r % block_length = 0) /\
+      Seq.length r = Seq.length data % block_length /\
+      0 <= Seq.length r /\ Seq.length r < block_length /\
+      Seq.length data = Seq.length l + Seq.length r /\
+      S.append l r == data) =
+ let n, rem = split_at_last_nb_rem block_length (Seq.length data) in
+ let l, r = split_block block_length data n in
+ l, r
+#pop-options
+
+/// Second version: the remainder is smaller or equal to a block. We call this
+/// version "lazy" because it is used to differ the processing of the last full
+/// block in the hash implementations (incremental, streaming...).
+
+/// A lemma I could not find in FStar.Math.Lemmas
+let mul_zero_left_is_zero (n : nat) : Lemma(0 * n = 0) = ()
+
+#push-options "--z3cliopt smt.arith.nl=false"
+let split_at_last_lazy_nb_rem
+  (l: pos)
+  (d: nat) :
+  Pure (nat & nat)
+    (requires True)
+    (ensures (fun (n, rem) ->
+      let blocks = n * l in
+      rem <= l /\
+      (rem % l = d % l) /\
+      (rem =  d % l \/  rem = l) /\
+      (rem = 0 <==> d == 0) /\
+      (rem = l <==> (blocks = (d / l - 1) * l)) /\
+      ((rem > 0 /\ rem < l) <==>  d % l <> 0) /\
+      (rem = (d % l) <==> (blocks = (d / l) * l)) /\
+       blocks % l = 0 /\
+      (blocks / l) * l = blocks
+  )) =
+  let n, rem = split_at_last_nb_rem l d in
+  (**) let blocks = n * l in
+  (**) Math.Lemmas.euclidean_division_definition blocks l;
+  (**) assert((blocks / l) * l = blocks);
+  (**) Math.Lemmas.distributivity_sub_left (d / l) 1 l;
+  (**) assert((d / l - 1) * l = (d / l) * l - l);
+  if n > 0 && rem = 0 then
+    begin
+    let n' = n - 1 in
+    (**) let blocks' = n' * l in
+    let rem' = d - blocks' in
+    (**) assert(rem = 0);
+    (**) assert(blocks' = blocks - l);
+    (**) assert(rem' = l);
+    (**) Math.Lemmas.nat_times_nat_is_nat n' l;
+    (**) assert(n' * l >= 0);
+    (**) assert(d > 0);
+    (**) Math.Lemmas.lemma_mod_sub_distr blocks l l;
+    (**) assert(l % l = 0);
+    (**) assert(blocks' % l = 0);
+    (**) Math.Lemmas.euclidean_division_definition blocks' l;
+    (**) assert((blocks' / l) * l = blocks');
+    n', rem'
+    end
+  else
+    begin
+    (* Proof interlude *)
+    (**) begin
+    (**) assert(d % l <> 0 || n = 0);
+    (**) if d % l <> 0 then
+    (**)   begin
+    (**)        assert(rem <> 0);
+    (**)        Math.Lemmas.nat_times_nat_is_nat n l;
+    (**)        assert(n * l >= 0)
+    (**)   end
+    (**) else
+    (**)   begin
+    (**)        assert(n = 0);
+    (**)        assert(d = n * l + rem);
+    (**)   mul_zero_left_is_zero l;
+    (**)        assert(n * l = 0);
+    (**)        assert(d = rem)
+    (**)   end
+    (**) end;
+    n, rem
+    end
+#pop-options
+
+#push-options "--z3cliopt smt.arith.nl=false"
+noextract
+let split_at_last_lazy
+  (l: pos)
+  (b: S.seq uint8) :
+  Pure (S.seq uint8 & S.seq uint8)
+    (requires True)
+    (ensures (fun (blocks, rest) ->
+      S.length rest <= l /\
+      (S.length rest % l = S.length b % l) /\
+      (S.length rest = S.length b % l \/ S.length rest = l) /\
+      (S.length rest = 0 <==> S.length b == 0) /\
+      (S.length rest = l <==>
+        (S.length blocks = (S.length b / l - 1) * l)) /\
+      ((S.length rest > 0 /\ S.length rest < l) <==> S.length b % l <> 0) /\
+      (S.length rest = (S.length b % l) <==>
+        (S.length blocks = (S.length b / l) * l)) /\
+      S.equal (S.append blocks rest) b /\
+      S.length blocks % l = 0 /\
+      (S.length blocks / l) * l = S.length blocks))
+=
+  let n, rem = split_at_last_lazy_nb_rem l (Seq.length b) in
+  Math.Lemmas.nat_times_nat_is_nat n l;
+  let blocks, rest = S.split b (n * l) in
+  blocks, rest
 #pop-options
 
 let update_t a block_length =
@@ -100,18 +267,20 @@ let update_full #a
   (acc: a)
   (input: S.seq uint8)
 =
-  let n_blocks = S.length input / block_length in
-  let rem = S.length input % block_length in
-  let blocks, rest = S.split input (n_blocks * block_length) in
-  assert (S.length rest = S.length input % block_length);
-  Math.Lemmas.multiple_modulo_lemma n_blocks block_length;
-  assert (S.length blocks % block_length = 0);
-  assert (S.length rest < block_length);
+//  let n_blocks = S.length input / block_length in
+//  let rem = S.length input % block_length in
+//  let blocks, rest = S.split input (n_blocks * block_length) in
+  let blocks, rest = split_at_last block_length input in
+//  assert (S.length rest = S.length input % block_length);
+//  Math.Lemmas.multiple_modulo_lemma n_blocks block_length;
+//  assert (S.length blocks % block_length = 0);
+//  assert (S.length rest < block_length);
   update_last (mk_update_multi block_length update acc blocks) rest
 
 /// Same as [update_full] but we make sure the last block is not empty in order
 /// to mimic the behavior of the streaming API where we lazily process the internal
 /// block. Note that the length condition on update_last is not the same.
+#push-options "--z3rlimit 100"
 let update_full_lazy #a
   (block_length:pos)
   (update: a -> (s:S.seq uint8 { S.length s = block_length }) -> a)
@@ -119,16 +288,18 @@ let update_full_lazy #a
   (acc: a)
   (input: S.seq uint8)
 =
-  let n_blocks = S.length input / block_length in
-  let rem = S.length input % block_length in
-  let n_blocks, rem = if rem = 0 && n_blocks > 0 then n_blocks - 1, block_length
-                                                 else n_blocks, rem in
-  let blocks, rest = S.split input (n_blocks * block_length) in
-  assert (S.length rest % block_length = S.length input % block_length);
-  Math.Lemmas.multiple_modulo_lemma n_blocks block_length;
-  assert (S.length blocks % block_length = 0);
-  assert (S.length rest <= block_length);
+//  let n_blocks = S.length input / block_length in
+//  let rem = S.length input % block_length in
+//  let n_blocks, rem = if rem = 0 && n_blocks > 0 then n_blocks - 1, block_length
+//                                                 else n_blocks, rem in
+//  let blocks, rest = S.split input (n_blocks * block_length) in
+  let blocks, rest = split_at_last_lazy block_length input in
+//  assert (S.length rest % block_length = S.length input % block_length);
+//  Math.Lemmas.multiple_modulo_lemma n_blocks block_length;
+//  assert (S.length blocks % block_length = 0);
+//  assert (S.length rest <= block_length);
   update_last (mk_update_multi block_length update acc blocks) rest
+#pop-options
 
 /// Lemmas
 /// ======

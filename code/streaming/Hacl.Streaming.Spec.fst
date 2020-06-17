@@ -53,9 +53,6 @@ let uint32 = Lib.IntTypes.uint32
 noextract
 let bytes = S.seq uint8
 
-/// A lemma I could not find in FStar.Math.Lemmas
-let mul_zero_left_is_zero (n : nat) : Lemma(0 * n = 0) = ()
-
 /// Returns the number of blocks to process
 #push-options "--z3cliopt smt.arith.nl=false"
 noextract
@@ -77,70 +74,7 @@ let split_at_last_num_blocks #index (c: block index) (i: index) (b: nat):
       (blocks / l) * l = blocks
   ))
 =
-  let l = U32.v (c.block_len i) in
-  let n = b / l in
-  let blocks = n * l in
-  let rest = b - n * l in
-
-  (**) Math.Lemmas.nat_over_pos_is_nat b l;
-  (**) assert(n >= 0);
-  (**) Math.Lemmas.euclidean_division_definition b l;
-  (**) Math.Lemmas.modulo_range_lemma b l;
-  (**) assert(rest < l);
-  (**) Math.Lemmas.modulo_lemma rest l;
-  (**) assert(rest = b % l);
-  (**) assert(rest = rest % l);
-  (**) Math.Lemmas.cancel_mul_mod n l;
-  (**) assert(blocks % l = 0);
-  (**) assert(b = n * l + rest);
-  (**) Math.Lemmas.euclidean_division_definition blocks l;
-  (**) assert((blocks / l) * l = blocks);
-  (**) assert(blocks = (b / l) * l);
-  (**) Math.Lemmas.distributivity_sub_left (b / l) 1 l;
-  (**) assert((b / l - 1) * l = (b / l) * l - l);
-
-  (* We always make sure [rest] is not empty (if possible) *)
-  if b % l = 0 && n > 0 then
-    begin
-    let n' = n - 1 in
-    let blocks' = n' * l in
-    let rest' = b - blocks' in
-
-    (**) assert(rest = 0);
-    (**) assert(blocks' = blocks - l);
-    (**) assert(rest' = l);
-    (**) Math.Lemmas.nat_times_nat_is_nat n' l;
-    (**) assert(n' * l >= 0);
-    (**) assert(b > 0);
-    (**) Math.Lemmas.lemma_mod_sub_distr blocks l l;
-    (**) assert(l % l = 0);
-    (**) assert(blocks' % l = 0);
-    (**) Math.Lemmas.euclidean_division_definition blocks' l;
-    (**) assert((blocks' / l) * l = blocks');
-    n'
-    end
-  else
-    begin
-    (* Proof interlude *)
-    (**) begin
-    (**) assert(b % l <> 0 || n = 0);
-    (**) if b % l <> 0 then
-    (**)   begin
-    (**)        assert(rest <> 0);
-    (**)        Math.Lemmas.nat_times_nat_is_nat n l;
-    (**)        assert(n * l >= 0)
-    (**)   end
-    (**) else
-    (**)   begin
-    (**)        assert(n = 0);
-    (**)        assert(b = n * l + rest);
-    (**)   mul_zero_left_is_zero l;
-    (**)        assert(n * l = 0);
-    (**)        assert(b = rest)
-    (**)   end
-    (**)end;
-    n
-    end
+  fst (Lib.UpdateMulti.split_at_last_lazy_nb_rem (U32.v (c.block_len i)) b)
 #pop-options
 
 #push-options "--z3cliopt smt.arith.nl=false"
@@ -165,31 +99,13 @@ let split_at_last #index (c: block index) (i: index) (b: bytes):
   ))
 =
   let l = U32.v (c.block_len i) in
-  let n = split_at_last_num_blocks c i (Seq.length b) in
-  Math.Lemmas.nat_times_nat_is_nat n l;
-  let blocks, rest = S.split b (n * l) in
-  blocks, rest
+  Lib.UpdateMulti.split_at_last_lazy l b
 #pop-options
 
 /// The following lemmas characterize [split_at_last] with conditions which are easy to
 /// reason about, and is very useful for the various lemmas in this file which
 /// prove properties about how to update the internal buffer so that its content
 /// is actually the correct remainder of the data seen so far.
-/// TODO: this lemma was introduced lately, it might be good to update the proofs
-/// to use it.
-/// The proof strategy is to first prove that the blocks and rest sequences have the
-/// correct lengths, and the equality between sequences is then trivial to get.
-
-/// TODO: small lemmas I couldn't find in FStar.Math.Lemmas
-let add_equal_zero (a b : nat) :
-  Lemma
-  (requires (a + b = 0))
-  (ensures (a = 0 /\ b = 0)) = ()
-
-let mul_equal_zero (a b : nat) :
-  Lemma
-  (requires (a * b = 0))
-  (ensures (a = 0 \/ b = 0)) = ()
 
 /// This first auxiliary lemma only manipulates the lengths of the sequences.
 #push-options "--z3cliopt smt.arith.nl=false"
@@ -202,72 +118,7 @@ let split_at_last_num_blocks_spec #index (c: block index) (i: index)
     (rest <= l /\ (rest = 0 ==> b = 0) /\ b = n * l + rest)))
   (ensures (n = split_at_last_num_blocks c i b)) =
   let l = U32.v (c.block_len i) in
-  if b = 0 then
-    begin
-    Math.Lemmas.nat_times_nat_is_nat n l;
-    add_equal_zero (n * l) rest;
-    mul_equal_zero n l;
-    assert(n = 0)
-    end
-  else
-    begin
-    assert(b > 0);
-    (* In order to prove the equality between all the lengths, we use the unicity
-    * of the modulo to prove that the rests are equal, then that the numbers
-    * of blocks are equal. *)
-    let l = U32.v (c.block_len i) in
-    let blocks = n * l in
-    let rest = b - blocks in
-    let n' = split_at_last_num_blocks c i b in
-    let blocks' = n' * l in
-    let rest' = b - blocks' in
-    Math.Lemmas.cancel_mul_mod n l;
-    assert(blocks % l = 0);
-    assert(blocks' % l = 0); (* comes from the spec of [split_at_last] *)
-    Math.Lemmas.euclidean_division_definition blocks l;
-
-    (* First, prove that the lengths of the rests are equal modulo the size of
-    * a block *)
-    assert(rest' % l = b % l); (* comes from the spec of [split_at_last] *)
-    assert(rest + n * l = b);
-    Math.Lemmas.lemma_mod_plus rest n l; (* doesn't work inside a calc: typing problem with squash *)
-    assert(b % l = rest % l);
-    assert(rest % l = rest' % l);
-
-    (* If both rests are stricly smaller than a block, we can directly apply
-    * the modulo injectivity and the rest follows immediately *)
-    if rest < l && rest' < l then
-      begin
-      Math.Lemmas.lemma_mod_injective l rest rest';
-      assert(rest = rest');
-      assert(n * l + rest = n' * l + rest');
-      assert(n * l = n' * l);
-      Math.Lemmas.lemma_cancel_mul n n' l;
-      assert(n = n')
-      end
-    (* Otherwise, case one: both rests are equal to block length (even easier) *)
-    else if rest = l && rest' = l then
-      Math.Lemmas.lemma_cancel_mul n n' l
-    (* Last two cases: one of the rests is smaller than a block, and the other is
-    * of the size of a block. Because of modulo properties, the smaller rest
-    * must be equal to 0, which gives us that both rests are equal, and thus that
-    * the numbers of blocks are equal *)
-    else
-      begin
-      assert((rest = l && rest' < l) \/ (rest < l && rest' = l));
-      let rest, rest' = if rest = l then rest, rest' else rest', rest in
-      assert(rest = l && rest' < l);
-      (* [rest % l = 0] *)
-      assert(rest = 1 * l);
-      Math.Lemmas.cancel_mul_mod 1 l;
-      assert(rest % l = 0);
-      (* [rest' = 0 ] *)
-      Math.Lemmas.modulo_lemma rest' l;
-      assert(rest' = 0);
-      Math.Lemmas.lemma_cancel_mul n n' l;
-      assert(n = n')
-      end
-    end
+  Lib.UpdateMulti.Lemmas.split_at_last_lazy_nb_rem_spec l b n rest
 #pop-options
 
 /// This second lemma is the one we will use
@@ -284,27 +135,8 @@ let split_at_last_spec #index (c: block index) (i: index)
      b `Seq.equal` Seq.append blocks rest)))
   (ensures (
      (blocks, rest) == split_at_last c i b)) =
-  (* We need to introduce the variables with which to call [split_at_last_num_blocks_spec] *)
   let l = U32.v (c.block_len i) in
-  let b_l = Seq.length b in
-  let blocks_l = Seq.length blocks in
-  let rest_l = Seq.length rest in
-  let blocks', rest' = split_at_last c i b in
-  let n' = Seq.length blocks' / l in
-  let n = blocks_l / l in
-  Math.Lemmas.nat_over_pos_is_nat blocks_l l;
-  assert(n >= 0);
-  Math.Lemmas.euclidean_division_definition (S.length blocks) l;
-  assert(blocks_l = l * n);
-  assert(b_l = n * l + rest_l);
-  split_at_last_num_blocks_spec c i b_l n rest_l;
-  assert(n = split_at_last_num_blocks c i b_l);
-  assert(n = n'); (* comes from the spec of [split_at_last] *)
-  assert(rest_l = Seq.length rest');
-  (* We have the equalities between the sequence lengths, so the rest follows
-   * naturally *)
-  assert(blocks `Seq.equal` blocks');
-  assert(rest `Seq.equal` rest')
+  Lib.UpdateMulti.Lemmas.split_at_last_lazy_spec l b blocks rest
 #pop-options
 
 /// For the initialization of the streaming state.

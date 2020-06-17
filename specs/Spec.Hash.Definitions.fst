@@ -292,7 +292,6 @@ let bytes_blocks a =
 let bytes_hash a =
   b:bytes { Seq.length b = hash_length a }
 
-
 (** The types for the core functions *)
 
 let init_t (a: hash_alg) =

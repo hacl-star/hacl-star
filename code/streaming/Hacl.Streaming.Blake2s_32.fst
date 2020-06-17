@@ -119,13 +119,11 @@ let stateful_blake2s_32: I.stateful unit =
     (fun () ->
       let wv = alloc_state a m in
       let b = alloc_state a m in
-//      let l = B.alloca (extra_state_zero_element a) (U32.uint_to_t 1) in
       wv, b)
     (* create_in *)
     (fun () r ->
       let wv = B.malloc r (zero_element a m) U32.(4ul *^ row_len a m) in
       let b = B.malloc r (zero_element a m) U32.(4ul *^ row_len a m) in
-//      let l = B.malloc r (extra_state_zero_element a) (U32.uint_to_t 1) in
       wv, b)
     (* free *)
     (fun _ acc ->

@@ -3,6 +3,7 @@ module Spec.Hash.Incremental
 module S = FStar.Seq
 module Blake2 = Spec.Blake2
 
+open Spec.Hash.Split
 open Spec.Agile.Hash
 open Spec.Hash.Definitions
 open Spec.Hash.PadFinish
@@ -11,6 +12,7 @@ open Lib.Sequence
 open Lib.ByteSequence
 open Lib.IntTypes
 module Loops = Lib.LoopCombinators
+module UpdateMulti = Lib.UpdateMulti
 
 #reset-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
@@ -67,17 +69,11 @@ let update_last (a:hash_alg)
 let split_blocks (a:hash_alg) (input:bytes)
   : Pure (bytes & bytes)
     (requires S.length input <= max_input_length a)
-    (ensures fun (l, r) ->
-      S.length l % block_length a == 0 /\
-      S.length r <= block_length a /\
-      S.append l r == input)
-  = let open FStar.Mul in
-    let n = S.length input / block_length a in
-    // Ensuring that we always handle one block in update_last
-    let n = if S.length input % block_length a = 0 && n > 0 then n-1 else n in
-    let bs, l = S.split input (n * block_length a) in
-    S.lemma_split input (n * block_length a);
-    bs, l
+    (ensures fun (bs, l) ->
+      S.length bs % block_length a = 0 /\
+      S.length l <= block_length a /\
+      S.append bs l == input) =
+  UpdateMulti.split_at_last_lazy (block_length a) input
 
 let hash_incremental_body
   (a:hash_alg)

@@ -568,6 +568,7 @@ let blake2_is_hash_incremental
   let s3 = Blake2.blake2_update_last (to_blake_alg a) prev0 rem input s2 in
   blake2_is_hash_incremental_aux4 a kk k input s3
 
+#push-options "--z3rlimit 100"
 let md_is_hash_incremental
   (a:hash_alg{not (is_blake a)})
   (input: bytes { S.length input <= max_input_length a })
@@ -590,11 +591,13 @@ let md_is_hash_incremental
        (==) { }
        update_multi a s S.(input @| padding);
      }
+#pop-options
 
 let blake2_hash_incremental_no_key_eq
   (a: hash_alg{is_blake a}) (input: bytes { S.length input <= max_input_length a }) :
   Lemma(Seq.equal (blake2_hash_incremental a 0 Seq.empty input)
-                  (hash_incremental a input)) = ()
+                  (hash_incremental a input)) =
+  assert(init a == blake2_init a 0 Seq.empty)
 
 let hash_is_hash_incremental (a: hash_alg) (input: bytes { S.length input <= max_input_length a }):
   Lemma (S.equal (hash a input) (hash_incremental a input))
