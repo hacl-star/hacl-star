@@ -99,8 +99,6 @@ let _ecp256dh_r result pubKey scalar =
     end
 
 
-[@ (Comment "  This code is not side channel resistant on pubKey")]
-
 let ecp256dh_r result pubKey scalar =
   push_frame();
   let h0 = ST.get() in

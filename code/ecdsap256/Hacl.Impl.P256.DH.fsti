@@ -11,6 +11,8 @@ open Lib.ByteSequence
 open Spec.DH
 open Spec.ECDSAP256.Definition
 
+
+inline_for_extraction noextract
 val ecp256dh_i:
     result:lbuffer uint8 (size 64)
   -> scalar:lbuffer uint8 (size 32)
@@ -26,8 +28,7 @@ val ecp256dh_i:
     as_seq h1 (gsub result (size 32) (size 32)) == pointY)
 
 
-[@ (Comment "  This code is not side channel resistant on pubKey")]
-
+inline_for_extraction noextract
 val ecp256dh_r:
     result:lbuffer uint8 (size 64)
   -> pubKey:lbuffer uint8 (size 64)
