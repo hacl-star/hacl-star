@@ -37,4 +37,4 @@ let test (v: Bytes.t ecdsa_test) t sign verify =
     test_result Failure "Signing"
 
 let _ =
-  List.iter (fun v -> test v "Hacl.ECDSA" Hacl.ECDSA.sign Hacl.ECDSA.verify) tests
+  List.iter (fun v -> test v "Hacl.P256" Hacl.P256.sign Hacl.P256.verify) tests

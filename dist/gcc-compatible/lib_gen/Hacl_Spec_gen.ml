@@ -6,3 +6,4 @@ let _ =
    Format.printf "#include \"Hacl_Spec.h\"\n");
   Cstubs.write_c Format.std_formatter ~prefix:""
     (module Hacl_Spec_bindings.Bindings)
+  

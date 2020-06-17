@@ -70,7 +70,7 @@ module Blake2b_256 : Blake2
 module Blake2s_32 : Blake2
 module Blake2s_128 : Blake2
 
-module ECDSA : sig
+module P256 : sig
   val sign : C.t -> C.t -> C.t -> C.t -> bool
   val verify : C.t -> C.t -> C.t -> bool
 end

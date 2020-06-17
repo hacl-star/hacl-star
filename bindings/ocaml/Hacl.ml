@@ -19,7 +19,7 @@ module Hacl_HKDF = Hacl_HKDF_bindings.Bindings(Hacl_HKDF_stubs)
 module Hacl_NaCl = Hacl_NaCl_bindings.Bindings(Hacl_NaCl_stubs)
 module Hacl_Blake2b_32 = Hacl_Blake2b_32_bindings.Bindings(Hacl_Blake2b_32_stubs)
 module Hacl_Blake2s_32 = Hacl_Blake2s_32_bindings.Bindings(Hacl_Blake2s_32_stubs)
-module Hacl_ECDSA = Hacl_ECDSA_bindings.Bindings(Hacl_ECDSA_stubs)
+module Hacl_P256 = Hacl_P256_bindings.Bindings(Hacl_P256_stubs)
 
 #if not (defined IS_NOT_X64) || defined IS_ARM_8
 module Hacl_Chacha20Poly1305_128 = Hacl_Chacha20Poly1305_128_bindings.Bindings(Hacl_Chacha20Poly1305_128_stubs)
@@ -278,8 +278,8 @@ module Blake2s_32 : Blake2 =
     let blake2s = Hacl_Blake2s_32.hacl_Blake2s_32_blake2s
   end)
 
-(* WIP, will update along with chages to ECDSA *)
-module ECDSA = struct
+(* WIP, will update along with changes to ECDSA *)
+module P256 = struct
   let get_result r =
     if r = UInt64.zero then
       true
@@ -294,13 +294,13 @@ module ECDSA = struct
     assert (C.size priv = 32);
     assert (C.size k = 32);
     assert (C.disjoint signature msg);
-    get_result @@ Hacl_ECDSA.hacl_Impl_ECDSA_ecdsa_p256_sha2_sign (C.ctypes_buf signature) (C.size_uint32 msg) (C.ctypes_buf msg) (C.ctypes_buf priv) (C.ctypes_buf k)
+    get_result @@ Hacl_P256.hacl_P256_ecdsa_sign_p256_sha2 (C.ctypes_buf signature) (C.size_uint32 msg) (C.ctypes_buf msg) (C.ctypes_buf priv) (C.ctypes_buf k)
   let verify pub msg signature =
     (* Hacl.Impl.ECDSA.P256SHA256.Verification.ecdsa_verification *)
     assert (C.size signature = 64);
     assert (C.size pub = 64);
     let r, s = Bytes.sub signature 0 32, Bytes.sub signature 32 32 in
-    Hacl_ECDSA.hacl_Impl_ECDSA_ecdsa_p256_sha2_verify (C.size_uint32 msg) (C.ctypes_buf msg) (C.ctypes_buf pub) (C.ctypes_buf r) (C.ctypes_buf s)
+    Hacl_P256.hacl_P256_ecdsa_verif_p256_sha2 (C.size_uint32 msg) (C.ctypes_buf msg) (C.ctypes_buf pub) (C.ctypes_buf r) (C.ctypes_buf s)
 end
 
 #if not (defined IS_NOT_X64) || defined IS_ARM_8
@@ -398,3 +398,4 @@ module Curve25519_64 : Curve25519 =
     let ecdh _ _ _ = failwith "Not implemented on this platform"
   end)
 #endif
+
