@@ -20,7 +20,6 @@ module U64 = FStar.UInt64
 
 open LowStar.BufferOps
 open FStar.Mul
-open Spec.Hash.Split
 
 inline_for_extraction noextract
 let uint8 = Lib.IntTypes.uint8
@@ -294,7 +293,7 @@ type block (index: Type0) =
     key: key.t i ->
     input:S.seq uint8 { S.length input <= max_input_length i } ->
     Lemma (
-      let bs, l = gen_split_blocks (U32.v (block_len i)) input in
+      let bs, l = Lib.UpdateMulti.split_at_last_lazy (U32.v (block_len i)) input in
       (**) Math.Lemmas.modulo_lemma 0 (U32.v (block_len i));
       (* TODO: use update_full ? *)
       let hash0 = init_s i key in

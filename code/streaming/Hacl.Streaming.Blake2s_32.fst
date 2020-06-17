@@ -319,7 +319,7 @@ let blake2_hash_incremental_s_is_hash_incremental i key input =
   assert(s3' == s3);
   assert(acc4 == s4)
 
-/// TODO: make stable
+/// TODO: make the proof stable
 val spec_is_incremental:
   i:index ->
   key: I.((k key_size).t ()) ->
@@ -374,14 +374,14 @@ val update_last_eq :
     Spec.blake2_update_last a prevlen' (S.length last) last acc ==
       update_last_s () acc prevlen last))
 
-/// TODO: make stable
+/// TODO: make the proof stable
 let update_last_eq prevlen last acc =
   (* Checking how to unfold the ``update_last_s`` definition *)
   let prevlen' = blake2_prevlen_nat key_size prevlen in
   let es = Hash.nat_to_extra_state (to_hash_alg a) prevlen' in
   let s = acc, es in
   let s' = Spec.Hash.Incremental.update_last_blake (to_hash_alg a) s prevlen' last in
-  (* TODO: if accf is defined before s', the proof loops at the definition of s' *)
+  (* SH: if accf is defined before s', the proof loops at the definition of s' *)
   let accf = update_last_s () acc prevlen last in
   assert(accf == fst s');
   (* Make sure the blocks decomposition is what we expect *)
@@ -490,7 +490,7 @@ let update_last _ acc prevlen last last_len =
   assert((U64.v prevlen) % Hash.block_length (to_hash_alg a) = 0);
   assert(B.length last <= Hash.block_length (to_hash_alg a));
   assert(U64.v prevlen + B.length last <= max_input_length key_size);
-  (* TODO: this call loops if moved at the end of the proof *)
+  (* SH: this call loops if moved at the end of the proof *)
   (**) update_last_eq (U64.v prevlen) (B.as_seq h0 last) (s_v h0 acc);
   Impl.blake2_update_last #a #m (Impl.blake2_update_block #a #m) #last_len
                           wv h prevlen' last_len last;

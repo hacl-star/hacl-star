@@ -76,6 +76,7 @@ let len_mod_32 (a: hash_alg) (len: len_t a):
 
 // JP: this proof works instantly in interactive mode, not in batch mode unless
 // there's a high rlimit
+#push-options "--z3rlimit 200"
 inline_for_extraction
 let pad0_len (a: hash_alg{not (is_blake a)}) (len: len_t a):
   Tot (n:U32.t { U32.v n = pad0_length a (len_v a len) })
@@ -112,6 +113,7 @@ let pad0_len (a: hash_alg{not (is_blake a)}) (len: len_t a):
   [@inline_let]
   let r = (block_len a +^ block_len a) -^ (len_len a +^ 1ul +^ len_mod_32 a len) in
   r %^ block_len a
+#pop-options
 
 #reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
 
