@@ -243,6 +243,7 @@ val ecdsa_verif_without_hash:
   \n Verify that y2 = x3 + ax + b where a and b are the coefficients of the curve equation.
   \n Verify that nQ = O (the point at infinity), where n is the order of the curve and Q is the public key point.
   \n The last extract is taken from : https://neilmadden.blog/2017/05/17/so-how-do-you-validate-nist-ecdh-public-keys/
+  \n This code is not side-channel resistant.
  ")]
 
 val verify_q: 

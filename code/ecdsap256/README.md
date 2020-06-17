@@ -10,15 +10,22 @@ Hacl.Impl.P256.Signature.Common.isPointAtInfinityPublic
 Hacl.Impl.P256.Signature.Common.isPointOnCurvePublic
 Hacl.Impl.P256.Signature.Common.isOrderCorrect
 
-Hacl.Impl.ECDSA.P256SHA256.Verification.isZero_uint64_nCT
-Hacl.Impl.ECDSA.P256SHA256.Verification.isMoreThanZeroLessThanOrderMinusOne
-Hacl.Impl.ECDSA.P256SHA256.Verification.compare_felem_bool
-Hacl.Impl.ECDSA.P256SHA256.Verification.ecdsa_verification_step1
-Hacl.Impl.ECDSA.P256SHA256.Verification.ecdsa_verification_step5
-Hacl.Impl.ECDSA.P256SHA256.Verification.ecdsa_verification
+Hacl.Impl.ECDSA.P256.Verification.isZero_uint64_nCT
+Hacl.Impl.ECDSA.P256.Verification.isMoreThanZeroLessThanOrderMinusOne
+Hacl.Impl.ECDSA.P256.Verification.compare_felem_bool
+Hacl.Impl.ECDSA.P256.Verification.ecdsa_verification_step1
+Hacl.Impl.ECDSA.P256.Verification.ecdsa_verification_step5
+Hacl.Impl.ECDSA.P256.Verification.ecdsa_verification
 
 Hacl.Impl.ECDSA.ecdsa_p256_sha2_verify
 Hacl.Impl.ECDSA.ecdsa_p256_sha2_verify_u8
+
+Hacl.P256.ecdsa_verif_p256_sha2
+Hacl.P256.ecdsa_verif_p256_sha384
+Hacl.P256.ecdsa_verif_p256_sha512
+Hacl.P256.ecdsa_verif_without_hash
+Hacl.P256.verifyQ
+Hacl.P256.ecp256dh_r
 
 ## These functions are constant-time on `scalar` but not on `pubKey`
 
