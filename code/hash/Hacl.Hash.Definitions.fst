@@ -154,7 +154,8 @@ let update_last_st (a: hash_alg) =
   ST.Stack (extra_state a)
     (requires (fun h ->
       B.live h s /\ B.live h input /\ B.disjoint s input /\
-      (is_blake a ==> extra_state_v ev == len_v a prev_len)))
+      (* ``extra_state_v ev`` is equal to 0 if the algorithm is not blake *)
+      B.length input + extra_state_v ev <= max_input_length a))
     (ensures (fun h0 ev' h1 ->
       B.(modifies (loc_buffer s) h0 h1) /\
       (as_seq h1 s, ev') ==

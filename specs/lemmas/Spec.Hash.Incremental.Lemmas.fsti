@@ -9,6 +9,8 @@ open Spec.Agile.Hash
 open Spec.Hash.PadFinish
 open Spec.Hash.Incremental
 
+#set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
+
 val update_multi_extra_state_eq
   (a: hash_alg{is_blake a}) (h: words_state a)
   (input: bytes_blocks a{Seq.length input <= max_extra_state a}) :
@@ -18,13 +20,22 @@ val update_multi_extra_state_eq
     (snd (update_multi a h input) == extra_state_add_nat (snd h) (Seq.length input)))
   (decreases (Seq.length input))
 
+(* val update_last_is_update_multi_padded
+  (a:hash_alg)
+  (hash:words_state a)
+  (prevlen:nat{prevlen % block_length a = 0})
+  (input:bytes{S.length input + prevlen <= max_input_length a}):
+  Lemma(
+    update_last a hash prevlen input ==
+      update_multi a hash S.(input @| pad a (prevlen + S.length input)))
+
 val hash_incremental_block_is_update_last (a:hash_alg)
   (s:words_state a)
   (input : bytes_block a) :
   Lemma (
       (**) Spec.Hash.Lemmas0.block_length_smaller_than_max_input a;
       Spec.Hash.Incremental.update_last a s 0 input ==
-      Spec.Hash.Incremental.hash_incremental_body a input s)
+      Spec.Hash.Incremental.hash_incremental_body a input s) *)
 
 val block_hash_incremental (a:hash_alg) (input:bytes_block a)
   : Lemma

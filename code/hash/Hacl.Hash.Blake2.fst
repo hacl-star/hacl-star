@@ -106,6 +106,7 @@ let blake2_update_last_block_st (a : hash_alg{is_blake a}) =
   ev:extra_state a ->
   input:B.buffer uint8 ->
   input_len:size_t { B.length input == v input_len /\ v input_len <= block_length a /\
+                     (* If the algorithm is not blake, ``extra_state_v ev`` is 0 *)
                      (extra_state_v ev) + v input_len <= max_input a } ->
   ST.Stack unit
     (requires (fun h ->
@@ -147,15 +148,15 @@ let core (a : hash_alg{is_blake a}) =
 
 (* TODO: no need to copy the input if the length is exactly block_length *)
 let mk_blake2_update_last_block a s ev input input_len =
-  let h0 = ST.get () in
+  (**) let h0 = ST.get () in
   ST.push_frame ();
   let wv = Lib.Buffer.create (4ul *. Core.row_len (to_blake_alg a) (core a))
                              (Core.zero_element (to_blake_alg a) (core a)) in
-  let pad_len : Ghost.erased _ = block_len a -! input_len in
-  assert(v input_len + v pad_len == v (block_len a));
+  (**) let pad_len : Ghost.erased _ = block_len a -! input_len in
+  (**) assert(v input_len + v pad_len == v (block_len a));
   let tmp = B.alloca (Lib.IntTypes.u8 0) (block_len a) in
   let tmp_rest = B.sub tmp 0ul input_len in
-  let tmp_pad : Ghost.erased _ = B.gsub tmp input_len pad_len in
+  (**) let tmp_pad : Ghost.erased _ = B.gsub tmp input_len pad_len in
   B.blit input 0ul tmp_rest 0ul input_len;
   (**) let h1 = ST.get () in
   (**) let input_v : Ghost.erased _ = B.as_seq h0 input in
@@ -167,7 +168,7 @@ let mk_blake2_update_last_block a s ev input input_len =
   (**) let last_block2 : Ghost.erased _ =
   (**)   Lib.Sequence.update_sub #uint8 #(size_block a) last_block1 0 (v input_len) last_v in
   (**) assert(last_block2 `Seq.equal`
-         Spec.Blake2.get_last_padded_block (to_blake_alg a) (input_v) (v input_len));
+  (**)   Spec.Blake2.get_last_padded_block (to_blake_alg a) (input_v) (v input_len));
   (* Now, prove that tmp is equal to the padded block as defined in the spec *)
   (**) let tmp_v1 : Ghost.erased _ = B.as_seq h1 tmp in
   (**) let tmp_rest_v1 : Ghost.erased _ = B.as_seq h1 tmp_rest in
@@ -182,12 +183,13 @@ let mk_blake2_update_last_block a s ev input input_len =
   (**) update_sub_seq_end_eq #uint8 #(size_block a) last_block1 #(v input_len) last_v 0;
   (**) assert(last_block2_pad `Seq.equal` last_block1_pad);
   (**) assert(tmp_pad_v1 `Seq.equal` last_block2_pad);
-  (**) (* TODO HERE *)
   let totlen = extra_state_add_size_t ev input_len in
   Impl.blake2_update_block #(to_blake_alg a) #(core a) wv s true totlen tmp;
   (**) let h2 = ST.get () in
-  assert(as_seq h2 s == Spec.blake2_update_block (to_blake_alg a) true (extra_state_v totlen)
-                          (B.as_seq h1 tmp) (as_seq h1 s));
+  (**) assert(as_seq h2 s ==
+  (**)               Spec.blake2_update_block (to_blake_alg a) true
+  (**)                                        (extra_state_v totlen)
+  (**)                                        (B.as_seq h1 tmp) (as_seq h1 s));
   ST.pop_frame ()
 
 noextract inline_for_extraction
@@ -205,17 +207,14 @@ let mk_update_last a update_multi blake2_update_last_block s ev prev_len input i
   let blocks = B.sub input 0ul blocks_len in
   (**) let blocks_v : Ghost.erased _ = B.as_seq h0 blocks in
   (**) assert(
-         let blocks_s, _, rem_s = Spec.Hash.Incremental.last_split_blake a input_v in
-         blocks_v `Seq.equal` blocks_s /\ v rest_len == rem_s);
+  (**)   let blocks_s, _, rem_s = Spec.Hash.Incremental.last_split_blake a input_v in
+  (**)   blocks_v `Seq.equal` blocks_s /\ v rest_len == rem_s);
   let ev' = update_multi s ev blocks blocks_n in
-  assert(extra_state_v ev == len_v a prev_len);
-  update_multi_extra_state_eq a (as_seq h0 s, ev) blocks_v;
-  assert(ev' == extra_state_add_nat ev (v blocks_len));
-  extra_state_add_nat_bound_lem1 ev (v blocks_len);
-  assert(extra_state_v ev' == extra_state_v ev + v blocks_len);
-  let h1 = ST.get () in
+  (**) update_multi_extra_state_eq a (as_seq h0 s, ev) blocks_v;
+  (**) assert(ev' == extra_state_add_nat ev (v blocks_len));
+  (**) let h1 = ST.get () in
   (**) assert (S.equal (as_seq h1 s)
-               (fst (Spec.Agile.Hash.update_multi a (as_seq h0 s, ev) (B.as_seq h0 blocks))));
+  (**)         (fst (Spec.Agile.Hash.update_multi a (as_seq h0 s, ev) (B.as_seq h0 blocks))));
   (* Call update_block on the last padded block *)
   let rest = B.sub input blocks_len rest_len in
   (**) let rest_v : Ghost.erased _ = B.as_seq h0 rest in
@@ -223,8 +222,8 @@ let mk_update_last a update_multi blake2_update_last_block s ev prev_len input i
   (**) let h2 = ST.get () in
   (**) assert(rest_v `Seq.equal` Seq.slice input_v (v blocks_len) (v input_len));
   (**) assert(as_seq h2 s `Seq.equal`
-         fst (Spec.Hash.Incremental.update_last_blake a (as_seq h0 s, ev)
-         (len_v a prev_len) input_v));
+  (**)   fst (Spec.Hash.Incremental.update_last_blake a (as_seq h0 s, ev)
+  (**)   (len_v a prev_len) input_v));
   ST.pop_frame ();
   nat_to_extra_state a 0
 #pop-options

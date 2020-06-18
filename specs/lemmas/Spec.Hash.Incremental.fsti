@@ -36,7 +36,6 @@ let last_split_blake (a:hash_alg{is_blake a}) (input:bytes)
     let last_block = Spec.Blake2.get_last_padded_block (to_blake_alg a) input rem in
     blocks, last_block, rem
 
-(* TODO: prevlen is redundant with the extra state in ``words_state`` *)
 let update_last_blake (a:hash_alg{is_blake a})
   (hash:words_state a)
   (prevlen:nat{prevlen % block_length a = 0})
