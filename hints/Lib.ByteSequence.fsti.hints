@@ -1,5 +1,5 @@
 [
-  "¬\u0018CÑ]eo\\Ë¹Å“üHÀv",
+  "¨ÒÏ¥áæŽ6L\bû\u001d°Ñ\"\u0010",
   [
     [
       "Lib.ByteSequence.bytes_l",
@@ -1153,6 +1153,23 @@
       "c3520c5510d3ad5244d000e30d042206"
     ],
     [
+      "Lib.ByteSequence.lemma_nat_from_to_intseq_be_preserves_value",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_28a7794573a2e47cefd724414092f328",
+        "refinement_interpretation_Tm_refine_387e6d282145573240ab7b8a4b94cce5",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "6c9a739e04fec7c6ceab0b798b6a0705"
+    ],
+    [
       "Lib.ByteSequence.lemma_nat_from_to_bytes_le_preserves_value",
       1,
       2,
@@ -1176,7 +1193,24 @@
         "typing_Prims.pow2"
       ],
       0,
-      "c477cded4dc5a758301cc8cf1ffdc8a3"
+      "44ffdf05cac0c6030b458bf61366b270"
+    ],
+    [
+      "Lib.ByteSequence.lemma_nat_from_to_bytes_be_preserves_value",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.unsigned", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_c58ed13380a3b1fc4b109d0b978f6850"
+      ],
+      0,
+      "ea979af6ec8d9bd7eda5746916dff158"
     ],
     [
       "Lib.ByteSequence.lemma_reveal_uint_to_bytes_le",
@@ -1199,7 +1233,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "6fa009b8e57d2a0c70114f72adf6b464"
+      "b4ac4b1e4bd86c9a9f9d5100f55c4ca4"
     ],
     [
       "Lib.ByteSequence.lemma_reveal_uint_to_bytes_be",
@@ -1222,7 +1256,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "d06cdf4c1e92e3da8472d289af0c6221"
+      "a0eea476b49aaabc884ca76433b95d1f"
     ]
   ]
 ]
