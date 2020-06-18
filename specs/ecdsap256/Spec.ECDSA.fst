@@ -1,7 +1,7 @@
 module Spec.ECDSA
 
 open FStar.Mul
-open Spec.ECDSAP256.Definition
+
 open Spec.P256.Lemmas
 
 open Lib.ByteSequence
@@ -16,12 +16,14 @@ module Def = Spec.Hash.Definitions
 open FStar.Math.Lemmas
 open FStar.Math.Lib
 
+noextract
+let prime_p256_order: (a: pos{a < pow2 256}) =
+  assert_norm (115792089210356248762697446949407573529996955224135760342422259061068512044369 < pow2 256);
+  115792089210356248762697446949407573529996955224135760342422259061068512044369
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
-let prime = prime_p256_order
-
-let nat_prime = n:nat{n < prime}
+let nat_prime = n:nat{n < prime_p256_order}
 
 
 val lemma_scalar_ith: sc:lbytes 32 -> k:nat{k < 32} -> Lemma
@@ -60,7 +62,7 @@ let ith_bit k i =
   res
 
 
-let ( *% ) a b = (a * b) % prime
+let ( *% ) a b = (a * b) % prime_p256_order
 
 
 val _exp_step0: p:nat_prime -> q:nat_prime -> tuple2 nat_prime nat_prime
@@ -299,79 +301,6 @@ let exponent_spec a =
   lemma_exponen_spec prime_p256_order_inverse_seq (1, a) 256;
   a0
 
-
-val changeEndian: felem_seq -> felem_seq
-
-let changeEndian i =
-  let zero =  Lib.Sequence.index i 0 in
-  let one =   Lib.Sequence.index i 1 in
-  let two =   Lib.Sequence.index i 2 in
-  let three = Lib.Sequence.index i 3 in
-
-  let o = Lib.Sequence.upd i 0 three in
-  let o = Lib.Sequence.upd o 1 two in
-  let o = Lib.Sequence.upd o 2 one in
-          Lib.Sequence.upd o 3 zero
-
-
-val changeEndianLemma: k: lseq uint64 4 -> Lemma
-  (nat_from_intseq_le (changeEndian k) == nat_from_intseq_be k)
-
-let changeEndianLemma k =
-  let k0 = changeEndian k in
-
-  nat_from_intseq_be_slice_lemma (slice k 2 4) 1;
-  nat_from_intseq_be_slice_lemma (slice k 1 4) 1;
-  nat_from_intseq_be_slice_lemma k 1;
-
-  nat_from_intseq_be_lemma0 (slice k 0 1);
-  nat_from_intseq_be_lemma0 (slice k 1 2);
-  nat_from_intseq_be_lemma0 (slice k 2 3);
-  nat_from_intseq_be_lemma0 (slice k 3 4);
-
-  nat_from_intseq_le_slice_lemma (slice k0 2 4) 1;
-  nat_from_intseq_le_slice_lemma (slice k0 1 4) 1;
-  nat_from_intseq_le_slice_lemma k0 1;
-
-  nat_from_intseq_le_lemma0 (slice k0 0 1);
-  nat_from_intseq_le_lemma0 (slice k0 1 2);
-  nat_from_intseq_le_lemma0 (slice k0 2 3);
-  nat_from_intseq_le_lemma0 (slice k0 3 4);
-
-  assert_norm (pow2 (2 * 64) * pow2 64 == pow2 (3 * 64))
-
-val changeEndianLemmaI: a: nat {a < pow2 256} -> Lemma
-  (changeEndian (nat_to_intseq_le 4 a) == nat_to_intseq_be 4 a)
-
-let changeEndianLemmaI a =
-  let a0 = nat_to_intseq_le #U64 #SEC 4 a in
-  index_nat_to_intseq_le #U64 #SEC  4 a 0;
-  index_nat_to_intseq_le #U64 #SEC  4 a 1;
-  index_nat_to_intseq_le #U64 #SEC  4 a 2;
-  index_nat_to_intseq_le #U64 #SEC  4 a 3;
-
-  index_nat_to_intseq_be #U64 #SEC 4 a 0;
-  index_nat_to_intseq_be #U64 #SEC 4 a 2;
-  index_nat_to_intseq_be #U64 #SEC 4 a 3;
-  index_nat_to_intseq_be #U64 #SEC 4 a 1;
-
-
-  assert(Lib.Sequence.index #_ #4 (changeEndian (nat_to_intseq_le #U64 #SEC 4 a)) 3 == Lib.Sequence.index #_ #4 (nat_to_intseq_be #U64 #SEC 4 a) 3);
-
-  assert(Lib.Sequence.index #_ #4 (changeEndian (nat_to_intseq_le #U64 #SEC 4 a)) 2 == Lib.Sequence.index #_ #4 (nat_to_intseq_be #U64 #SEC 4 a) 2);
-
-  assert(Lib.Sequence.index #_ #4 (changeEndian (nat_to_intseq_le #U64 #SEC 4 a)) 1 == Lib.Sequence.index #_ #4 (nat_to_intseq_be #U64 #SEC 4 a) 1);
-
-  assert(Lib.Sequence.index #_ #4 (changeEndian (nat_to_intseq_le #U64 #SEC 4 a)) 0 == Lib.Sequence.index #_ #4 (nat_to_intseq_be #U64 #SEC 4 a) 0);
-  eq_intro (changeEndian (nat_to_intseq_le #U64 #SEC 4 a)) (nat_to_intseq_be 4 a)
-
-
-val changeEndian_le_be: a:nat{a < pow2 256} -> Lemma
-  (uints_to_bytes_be (changeEndian (nat_to_intseq_le 4 a)) == nat_to_bytes_be 32 a)
-
-let changeEndian_le_be a =
-  changeEndianLemmaI a;
-  uints_to_bytes_be_nat_lemma #U64 #SEC 4 a
 
 
 val verifyQValidCurvePointSpec:

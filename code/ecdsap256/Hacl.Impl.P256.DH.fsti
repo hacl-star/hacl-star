@@ -9,7 +9,7 @@ open Lib.Buffer
 open Lib.ByteSequence
 
 open Spec.DH
-open Spec.ECDSAP256.Definition
+open Hacl.Spec.ECDSA.Definition
 
 
 inline_for_extraction noextract

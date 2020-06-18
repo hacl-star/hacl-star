@@ -10,13 +10,14 @@ open Lib.Buffer
 open Spec.P256.Lemmas
 
 open Spec.P256.Definitions
+open Hacl.Spec.ECDSA.Definition
 open Hacl.Impl.P256.LowLevel 
 open Hacl.Impl.P256.Core
 open Spec.P256.MontgomeryMultiplication
 open Hacl.Impl.ECDSA.MontgomeryMultiplication
 open Hacl.Impl.ECDSA.MM.Exponent
 
-open Spec.ECDSAP256.Definition
+open Hacl.Spec.ECDSA.Definition
 open Spec.ECDSA
 open Spec.P256
 open Spec.P256.Lemmas
@@ -137,7 +138,7 @@ let ecdsa_verification_step23 alg mLen m result =
   reduction_prime_2prime_order result result;
 
   lemma_core_0 result h1;
-  Spec.ECDSA.changeEndianLemma (uints_from_bytes_be #U64 #_ #4 (as_seq h1 cutHash));
+  changeEndianLemma (uints_from_bytes_be #U64 #_ #4 (as_seq h1 cutHash));
   uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 cutHash);
 
   pop_frame()
@@ -199,11 +200,11 @@ let ecdsa_verification_step4 bufferU1 bufferU2 r s hash =
     calc(==) {
     as_seq h2 bufferU1;
     == {}
-    uints_to_bytes_be (Spec.ECDSA.changeEndian (as_seq h1 u1));
+    uints_to_bytes_be (changeEndian (as_seq h1 u1));
     == {lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h1 u1)}
-    uints_to_bytes_be (Spec.ECDSA.changeEndian (nat_to_intseq_le 4 (nat_from_intseq_le (as_seq h1 u1))));
+    uints_to_bytes_be (changeEndian (nat_to_intseq_le 4 (nat_from_intseq_le (as_seq h1 u1))));
     == {lemma_core_0 u1 h1}
-    uints_to_bytes_be (Spec.ECDSA.changeEndian (nat_to_intseq_le 4 (as_nat h1 u1)));
+    uints_to_bytes_be (changeEndian (nat_to_intseq_le 4 (as_nat h1 u1)));
     == { changeEndian_le_be (as_nat h1 u1) }
     nat_to_bytes_be 32 (as_nat h1 u1);
     };
@@ -211,11 +212,11 @@ let ecdsa_verification_step4 bufferU1 bufferU2 r s hash =
     calc(==) {
       as_seq h2 bufferU2;
       == {}
-      uints_to_bytes_be (Spec.ECDSA.changeEndian (as_seq h1 u2));
+      uints_to_bytes_be (changeEndian (as_seq h1 u2));
       == {lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h1 u2)}
-      uints_to_bytes_be (Spec.ECDSA.changeEndian (nat_to_intseq_le 4 (nat_from_intseq_le (as_seq h1 u2))));
+      uints_to_bytes_be (changeEndian (nat_to_intseq_le 4 (nat_from_intseq_le (as_seq h1 u2))));
       == {lemma_core_0 u2 h1}
-      uints_to_bytes_be (Spec.ECDSA.changeEndian (nat_to_intseq_le 4 (as_nat h1 u2)));
+      uints_to_bytes_be (changeEndian (nat_to_intseq_le 4 (as_nat h1 u2)));
       == { changeEndian_le_be (as_nat h1 u2) }
       nat_to_bytes_be 32 (as_nat h1 u2);
     };

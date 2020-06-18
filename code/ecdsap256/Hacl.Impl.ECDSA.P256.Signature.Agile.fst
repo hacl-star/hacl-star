@@ -19,8 +19,9 @@ open Hacl.Hash.SHA2
 open Spec.P256
 open Spec.P256.Lemmas
 open Spec.P256.Definitions
+open Hacl.Spec.ECDSA.Definition
 
-open Spec.ECDSAP256.Definition
+open Hacl.Spec.ECDSA.Definition
 
 open Hacl.Impl.P256.LowLevel 
 
@@ -82,7 +83,7 @@ let ecdsa_signature_step12 alg mLen m result =
   reduction_prime_2prime_order result result;
 
   lemma_core_0 result h1;
-  Spec.ECDSA.changeEndianLemma (uints_from_bytes_be #U64 #_ #4 (as_seq h1 cutHash));
+  changeEndianLemma (uints_from_bytes_be #U64 #_ #4 (as_seq h1 cutHash));
   uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 cutHash);
 
   pop_frame()
@@ -261,7 +262,7 @@ let ecdsa_signature_core alg r s mLen m privKeyAsFelem k =
   ecdsa_signature_step12 alg mLen m hashAsFelem;
   let h1 = ST.get() in 
   lemma_core_0 kAsFelem h1;
-  Spec.ECDSA.changeEndianLemma (uints_from_bytes_be (as_seq h0 k));
+  changeEndianLemma (uints_from_bytes_be (as_seq h0 k));
   uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h0 k);
   let step5Flag = ecdsa_signature_step45 r k tempBuffer in 
   assert_norm (pow2 32 < pow2 61);
@@ -315,7 +316,7 @@ let ecdsa_signature alg result mLen m privKey k =
 
   let h1 = ST.get() in 
   lemma_core_0 privKeyAsFelem h1;
-  Spec.ECDSA.changeEndianLemma (uints_from_bytes_be (as_seq h0 privKey));
+  changeEndianLemma (uints_from_bytes_be (as_seq h0 privKey));
   uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 privKey);    
   let flag = ecdsa_signature_core alg r s mLen m privKeyAsFelem k in 
 
@@ -332,8 +333,8 @@ let ecdsa_signature alg result mLen m privKey k =
   lemma_core_0 s h2;
   lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h2 s);
 
-  Spec.ECDSA.changeEndian_le_be (as_nat h2 r);
-  Spec.ECDSA.changeEndian_le_be (as_nat h2 s);
+  changeEndian_le_be (as_nat h2 r);
+  changeEndian_le_be (as_nat h2 s);
 
   pop_frame();
   flag  

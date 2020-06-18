@@ -1686,7 +1686,7 @@ open Lib.ByteBuffer
 val changeEndian: i:felem -> Stack unit 
   (requires fun h -> live h i)
   (ensures  fun h0 _ h1 -> modifies1 i h0 h1 /\ 
-    as_seq h1 i == Spec.ECDSA.changeEndian (as_seq h0 i) /\
+    as_seq h1 i == Hacl.Spec.ECDSA.Definition.changeEndian (as_seq h0 i) /\
     as_nat h1 i < pow2 256
   ) 
 
@@ -1707,7 +1707,7 @@ val toUint64ChangeEndian: i:lbuffer uint8 (size 32) -> o:felem -> Stack unit
   (requires fun h -> live h i /\ live h o /\ disjoint i o)
   (ensures  fun h0 _ h1 ->
     modifies (loc o) h0 h1 /\
-    as_seq h1 o == Spec.ECDSA.changeEndian (Lib.ByteSequence.uints_from_bytes_be (as_seq h0 i))
+    as_seq h1 o == Hacl.Spec.ECDSA.Definition.changeEndian (Lib.ByteSequence.uints_from_bytes_be (as_seq h0 i))
   )
 
 let toUint64ChangeEndian i o = 

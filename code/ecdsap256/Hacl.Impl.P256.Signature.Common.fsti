@@ -13,7 +13,7 @@ open Spec.P256.Definitions
 
 open Spec.ECDSA
 open Spec.P256.Lemmas
-open Spec.ECDSAP256.Definition
+open Hacl.Spec.ECDSA.Definition
 
 open Hacl.Impl.P256.Core
 

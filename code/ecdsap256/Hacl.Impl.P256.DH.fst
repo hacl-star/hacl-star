@@ -12,7 +12,7 @@ open Spec.P256
 open Spec.ECDSA
 open Spec.P256.Definitions
 open Spec.DH
-open Spec.ECDSAP256.Definition
+open Hacl.Spec.ECDSA.Definition
 open Spec.P256.Lemmas
 
 open Hacl.Impl.P256.LowLevel 
