@@ -273,12 +273,12 @@ let update_last_st (#a:e_alg) =
   let a = Ghost.reveal a in
   p:Hacl.Hash.Definitions.state a ->
   ev:extra_state a ->
+  prev_len:uint64_t ->
   last:uint8_p { B.length last <= block_length a } ->
-  last_len:uint32_t { v last_len = B.length last } ->
-  total_len:uint64_t {
-    v total_len <= max_input_length a /\
-    B.length last <= v total_len /\
-    (v total_len - B.length last) % block_length a = 0 /\
+  last_len:uint32_t {
+    v last_len = B.length last /\
+    v prev_len + v last_len <= max_input_length a /\
+    v prev_len % block_length a = 0 /\
     extra_state_v ev + B.length last <= max_input_length a
     } ->
   Stack (extra_state a)
@@ -288,13 +288,9 @@ let update_last_st (#a:e_alg) =
     B.(loc_disjoint (loc_buffer p) (loc_buffer last)))
   (ensures fun h0 ev' h1 ->
     B.(modifies (loc_buffer p) h0 h1) /\
-//    (B.length last + Seq.length (Spec.Hash.PadFinish.pad a (v total_len))) % block_length a = 0 /\
     (Hacl.Hash.Definitions.as_seq h1 p, ev') ==
       Spec.Hash.Incremental.update_last a (Hacl.Hash.Definitions.as_seq h0 p, ev)
-                                        (v total_len - v last_len) (B.as_seq h0 last)
-//      Spec.Agile.Hash.update_multi a (Hacl.Hash.Definitions.as_seq h0 p, ev)
-//        (Seq.append (B.as_seq h0 last) (Spec.Hash.PadFinish.pad a (v total_len)))
-        )
+                                        (v prev_len) (B.as_seq h0 last))
 
 inline_for_extraction
 val update_last_64 (a: e_alg{ G.reveal a <> SHA2_384 /\
@@ -303,11 +299,9 @@ val update_last_64 (a: e_alg{ G.reveal a <> SHA2_384 /\
   (update_last: Hacl.Hash.Definitions.update_last_st (G.reveal a)):
   update_last_st #a
 inline_for_extraction
-let update_last_64 a update_last p ev last last_len total_len =
-  let prev_len : UInt64.t = total_len - Int.Cast.Full.uint32_to_uint64 last_len in
+let update_last_64 a update_last p ev prev_len last last_len =
   update_last p ev prev_len last last_len
 
-#push-options "--z3rlimit 1000"
 inline_for_extraction
 val update_last_128 (a: e_alg{ G.reveal a = SHA2_384 \/
                                G.reveal a = SHA2_512 \/
@@ -315,11 +309,9 @@ val update_last_128 (a: e_alg{ G.reveal a = SHA2_384 \/
   (update_last: Hacl.Hash.Definitions.update_last_st (G.reveal a)):
   update_last_st #a
 inline_for_extraction
-let update_last_128 a update_last p ev last last_len total_len =
-  let prev_len : UInt128.t =
-    Int.Cast.Full.uint64_to_uint128 (total_len - Int.Cast.Full.uint32_to_uint64 last_len) in
+let update_last_128 a update_last p ev prev_len last last_len =
+  [@inline_let] let prev_len : UInt128.t = Int.Cast.Full.uint64_to_uint128 prev_len in
   update_last p ev prev_len last last_len
-#pop-options
 
 /// Before defining ``update_last`` we introduce auxiliary functions for Blake2S
 /// and Blake2B, because trying to define it at once leads to a proof loop.
@@ -328,12 +320,13 @@ let update_last_with_internal_st (a : alg) =
   s:state a ->
   p:Hacl.Hash.Definitions.state a ->
   es:extra_state a ->
+  prev_len:uint64_t ->
   last:B.buffer Lib.IntTypes.uint8 { B.length last <= block_length a } ->
-  last_len:uint32_t { v last_len = B.length last } ->
-  total_len:uint64_t {
-    v total_len <= max_input_length a /\
-    B.length last <= v total_len /\
-    (v total_len - B.length last) % block_length a = 0} ->
+  last_len:uint32_t {
+    v last_len = B.length last /\
+    v prev_len + v last_len <= max_input_length a /\
+    v prev_len % block_length a = 0
+    } ->
   Stack unit
   (requires fun h0 ->
     invariant s h0 /\
@@ -344,7 +337,7 @@ let update_last_with_internal_st (a : alg) =
   (ensures fun h0 _ h1 ->
     invariant s h1 /\
     repr s h1 ==
-      Spec.Hash.Incremental.update_last a (repr s h0) (v total_len - v last_len)
+      Spec.Hash.Incremental.update_last a (repr s h0) (v prev_len)
                                         (B.as_seq h0 last) /\
     M.(modifies (footprint s h0) h0 h1) /\
     footprint s h0 == footprint s h1 /\
@@ -353,54 +346,54 @@ let update_last_with_internal_st (a : alg) =
 inline_for_extraction noextract
 val update_last_blake2s : update_last_with_internal_st Blake2S
 
-let update_last_blake2s s p ev last last_len total_len =
+let update_last_blake2s s p ev prev_len last last_len =
   let h0 = ST.get () in
   let ev' = update_last_64 Blake2S Hacl.Hash.Blake2.update_last_blake2s p ev
-                           last last_len total_len in
+                           prev_len last last_len in
   s *= Blake2S_s p ev';
   let h2 = ST.get () in
   assert(M.(modifies (footprint s h0) h0 h2));
   assert(
     repr s h2 ==
-      Spec.Hash.Incremental.update_last Blake2S (repr s h0) (v total_len - v last_len)
+      Spec.Hash.Incremental.update_last Blake2S (repr s h0) (v prev_len)
                                         (B.as_seq h0 last));
    assert(footprint s h0 == footprint s h2)
 
 inline_for_extraction noextract
 val update_last_blake2b : update_last_with_internal_st Blake2B
 
-let update_last_blake2b s p ev last last_len total_len =
+let update_last_blake2b s p ev prev_len last last_len =
   let h0 = ST.get () in
   let ev' = update_last_128 Blake2B Hacl.Hash.Blake2.update_last_blake2b p ev
-                            last last_len total_len in
+                            prev_len last last_len in
   let h1 = ST.get () in
   s *= Blake2B_s p ev';
   let h2 = ST.get () in
   assert(M.(modifies (footprint s h0) h0 h2));
   assert(
     repr s h2 ==
-      Spec.Hash.Incremental.update_last Blake2B (repr s h0) (v total_len - v last_len)
+      Spec.Hash.Incremental.update_last Blake2B (repr s h0) (v prev_len)
                                         (B.as_seq h0 last));
    assert(footprint s h0 == footprint s h2)
 
-let update_last #a s last last_len total_len =
+let update_last #a s prev_len last last_len =
   match !*s with
   | MD5_s p ->
-      update_last_64 a Hacl.Hash.MD5.legacy_update_last p () last last_len total_len
+      update_last_64 a Hacl.Hash.MD5.legacy_update_last p () prev_len last last_len
   | SHA1_s p ->
-      update_last_64 a Hacl.Hash.SHA1.legacy_update_last p () last last_len total_len
+      update_last_64 a Hacl.Hash.SHA1.legacy_update_last p () prev_len last last_len
   | SHA2_224_s p ->
-      update_last_64 a update_last_224 p () last last_len total_len
+      update_last_64 a update_last_224 p () prev_len last last_len
   | SHA2_256_s p ->
-      update_last_64 a update_last_256 p () last last_len total_len
+      update_last_64 a update_last_256 p () prev_len last last_len
   | SHA2_384_s p ->
-      update_last_128 a Hacl.Hash.SHA2.update_last_384 p () last last_len total_len
+      update_last_128 a Hacl.Hash.SHA2.update_last_384 p () prev_len last last_len
   | SHA2_512_s p ->
-      update_last_128 a Hacl.Hash.SHA2.update_last_512 p () last last_len total_len
+      update_last_128 a Hacl.Hash.SHA2.update_last_512 p () prev_len last last_len
   | Blake2S_s p ev ->
-      update_last_blake2s s p ev last last_len total_len
+      update_last_blake2s s p ev prev_len last last_len
   | Blake2B_s p ev ->
-      update_last_blake2b s p ev last last_len total_len
+      update_last_blake2b s p ev prev_len last last_len
 
 #push-options "--ifuel 1"
 

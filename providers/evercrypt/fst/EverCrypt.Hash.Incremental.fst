@@ -58,21 +58,22 @@ let evercrypt_hash: block hash_alg =
     Hacl.Hash.Definitions.block_len
 
     (fun a _ -> Spec.Agile.Hash.init a)
-    Spec.Agile.Hash.update_multi
+    (fun a s prevlen input -> Spec.Agile.Hash.update_multi a s input)
     Spec.Hash.Incremental.update_last
     (fun a _ -> Spec.Hash.PadFinish.finish a)
 
     (fun a _ -> Spec.Agile.Hash.hash a)
 
-    Spec.Hash.Lemmas.update_multi_zero
-    (fun _ _ _ _ -> ()) // relying on the pattern in Hacl.Streaming.SHA256 here
+    (fun a s prevlen -> Spec.Hash.Lemmas.update_multi_zero a s)
+    (fun _ _ _ _ _ _ -> ()) // relying on the pattern in Hacl.Streaming.SHA256 here
     (fun a _ -> Spec.Hash.Incremental.hash_is_hash_incremental a)
 
     EverCrypt.Hash.alg_of_state
     (fun i _ -> EverCrypt.Hash.init #i)
-    (fun i -> EverCrypt.Hash.update_multi #i)
-    (fun i -> EverCrypt.Hash.update_last #i)
+    (fun i s prevlen blocks len -> EverCrypt.Hash.update_multi #i s blocks len)
+    (fun i s prevlen last last_len -> EverCrypt.Hash.update_last #i s prevlen last last_len)
     (fun i _ -> EverCrypt.Hash.finish #i)
+
 
 let create_in a = F.create_in evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit) ()
 

@@ -290,12 +290,12 @@ val update_last:
   #a:e_alg -> (
   let a = Ghost.reveal a in
   s:state a ->
+  prev_len:uint64_t ->
   last:B.buffer Lib.IntTypes.uint8 { B.length last <= block_length a } ->
-  last_len:uint32_t { v last_len = B.length last } ->
-  total_len:uint64_t {
-    v total_len <= max_input_length a /\
-    B.length last <= v total_len /\
-    (v total_len - B.length last) % block_length a = 0} ->
+  last_len:uint32_t {
+    v last_len = B.length last /\
+    v prev_len + v last_len <= max_input_length a /\
+    v prev_len % block_length a = 0} ->
   Stack unit
   (requires fun h0 ->
     invariant s h0 /\
@@ -305,7 +305,7 @@ val update_last:
   (ensures fun h0 _ h1 ->
     invariant s h1 /\
     repr s h1 ==
-      Spec.Hash.Incremental.update_last a (repr s h0) (v total_len - v last_len)
+      Spec.Hash.Incremental.update_last a (repr s h0) (v prev_len)
                                         (B.as_seq h0 last) /\
     M.(modifies (footprint s h0) h0 h1) /\
     footprint s h0 == footprint s h1 /\
