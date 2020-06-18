@@ -16,10 +16,23 @@ module HKDF = Spec.Agile.HKDF
 
 let is_valid_ciphersuite = function
   | DH.DH_Curve25519, Hash.SHA2_256, AEAD.AES128_GCM,        Hash.SHA2_256
+  | DH.DH_Curve25519, Hash.SHA2_256, AEAD.AES128_GCM,        Hash.SHA2_384
+  | DH.DH_Curve25519, Hash.SHA2_256, AEAD.AES128_GCM,        Hash.SHA2_512
+  | DH.DH_Curve25519, Hash.SHA2_256, AEAD.AES256_GCM,        Hash.SHA2_256
+  | DH.DH_Curve25519, Hash.SHA2_256, AEAD.AES256_GCM,        Hash.SHA2_384
+  | DH.DH_Curve25519, Hash.SHA2_256, AEAD.AES256_GCM,        Hash.SHA2_512
   | DH.DH_Curve25519, Hash.SHA2_256, AEAD.CHACHA20_POLY1305, Hash.SHA2_256
+  | DH.DH_Curve25519, Hash.SHA2_256, AEAD.CHACHA20_POLY1305, Hash.SHA2_384
+  | DH.DH_Curve25519, Hash.SHA2_256, AEAD.CHACHA20_POLY1305, Hash.SHA2_512
   | DH.DH_P256,       Hash.SHA2_256, AEAD.AES128_GCM,        Hash.SHA2_256
+  | DH.DH_P256,       Hash.SHA2_256, AEAD.AES128_GCM,        Hash.SHA2_384
+  | DH.DH_P256,       Hash.SHA2_256, AEAD.AES128_GCM,        Hash.SHA2_512
+  | DH.DH_P256,       Hash.SHA2_256, AEAD.AES256_GCM,        Hash.SHA2_256
+  | DH.DH_P256,       Hash.SHA2_256, AEAD.AES256_GCM,        Hash.SHA2_384
+  | DH.DH_P256,       Hash.SHA2_256, AEAD.AES256_GCM,        Hash.SHA2_512
   | DH.DH_P256,       Hash.SHA2_256, AEAD.CHACHA20_POLY1305, Hash.SHA2_256
-  | DH.DH_Curve25519, Hash.SHA2_256, AEAD.CHACHA20_POLY1305, Hash.SHA2_512 -> true
+  | DH.DH_P256,       Hash.SHA2_256, AEAD.CHACHA20_POLY1305, Hash.SHA2_384
+  | DH.DH_P256,       Hash.SHA2_256, AEAD.CHACHA20_POLY1305, Hash.SHA2_512 -> true
   | _,_,_,_ -> false
 
 let ciphersuite = cs:(DH.algorithm & Hash.algorithm & AEAD.alg & Hash.algorithm){is_valid_ciphersuite cs}
@@ -245,6 +258,27 @@ val labeled_expand:
       HKDF.expand_output_length_pred a l)
     (ensures fun _ -> True)
 
+let pow2_61_1 : _:unit{pow2 61 - 1 == 2305843009213693951} = assert_norm(pow2 61 - 1 == 2305843009213693951)
+let pow2_125_1 : _:unit{pow2 125 - 1 == 42535295865117307932921825928971026431} = assert_norm(pow2 125 - 1 == 42535295865117307932921825928971026431)
+
+let hash_max_input_length (a:Hash.algorithm) =
+  match a with
+  | Hash.MD5 | Hash.SHA1
+  | Hash.SHA2_224 | Hash.SHA2_256 -> 2305843009213693951 // pow2 61 - 1
+  | Hash.SHA2_384 | Hash.SHA2_512 -> 42535295865117307932921825928971026431 // pow2 125 - 1
+
+let labeled_extract_max_length_ikm (a:Hash.algorithm) (size_local_label:size_nat) =
+  hash_max_input_length a - size_label_rfcXXXX - size_local_label - Spec.Hash.Definitions.block_length a
+
+let labeled_expand_max_length_info (a:Hash.algorithm) (size_local_label:size_nat) =
+  hash_max_input_length a - Spec.Hash.Definitions.hash_length a - 2 - size_label_rfcXXXX - size_local_label - 1 - Spec.Hash.Definitions.block_length a
+
+let max_length_psk (a:Hash.algorithm) = labeled_extract_max_length_ikm a size_label_psk_hash
+let max_length_pskID (a:Hash.algorithm) = labeled_extract_max_length_ikm a size_label_pskID_hash
+let max_length_info (a:Hash.algorithm) = labeled_extract_max_length_ikm a size_label_info_hash
+let max_length_exp_ctx (a:Hash.algorithm) = labeled_expand_max_length_info a size_label_sec
+
+
 /// Types
 
 type key_dh_public_s (cs:ciphersuite) = lbytes (size_dh_public cs)
@@ -253,13 +287,25 @@ type key_kem_s (cs:ciphersuite) = lbytes (size_kem_key cs) // TODO This is true 
 type key_aead_s (cs:ciphersuite) = lbytes (size_aead_key cs)
 type nonce_aead_s (cs:ciphersuite) = lbytes (size_aead_nonce cs)
 type seq_aead_s (cs:ciphersuite) = n:nat{n <= max_seq cs}
-// TODO can we use normalization or smth else to compute the maximum bounds for each cs?
-// TODO can we use lbytes here?
-type psk_s (cs:ciphersuite) = b:bytes{labeled_extract_ikm_length_pred (hash_of_cs cs) (size_label_psk_hash + Seq.length b)}
-type pskID_s (cs:ciphersuite) = b:bytes{labeled_extract_ikm_length_pred (hash_of_cs cs) (size_label_pskID_hash + Seq.length b)}
 type exporter_secret_s (cs:ciphersuite) = lbytes (size_kdf cs)
-type info_s (cs:ciphersuite) = b:bytes{labeled_extract_ikm_length_pred (hash_of_cs cs) (size_label_info_hash + Seq.length b)}
-type exp_ctx_s (cs:ciphersuite) = b:bytes{labeled_expand_info_length_pred (hash_of_cs cs) (size_label_sec + Seq.length b)}
+(* let max_length_psk: size_nat = 65535 *)
+(* let max_length_pskID: size_nat = 65535 *)
+(* let max_length_info: size_nat = 65535 *)
+(* let max_length_exp_ctx: size_nat = 65535 *)
+// could we use normalization or smth else to compute the maximum bounds for each cs?
+(* type psk_s (cs:ciphersuite) = b:bytes{labeled_extract_ikm_length_pred (hash_of_cs cs) (size_label_psk_hash + Seq.length b)} *)
+(* type pskID_s (cs:ciphersuite) = b:bytes{labeled_extract_ikm_length_pred (hash_of_cs cs) (size_label_pskID_hash + Seq.length b)} *)
+(* type info_s (cs:ciphersuite) = b:bytes{labeled_extract_ikm_length_pred (hash_of_cs cs) (size_label_info_hash + Seq.length b)} *)
+(* type exp_ctx_s (cs:ciphersuite) = b:bytes{labeled_expand_info_length_pred (hash_of_cs cs) (size_label_sec + Seq.length b)} *)
+type psk_s (cs:ciphersuite) =     b:bytes{Seq.length b <= max_length_psk (hash_of_cs cs)}
+type pskID_s (cs:ciphersuite) =   b:bytes{Seq.length b <= max_length_pskID (hash_of_cs cs)}
+type info_s (cs:ciphersuite) =    b:bytes{Seq.length b <= max_length_info (hash_of_cs cs)}
+type exp_ctx_s (cs:ciphersuite) = b:bytes{Seq.length b <= max_length_exp_ctx (hash_of_cs cs)}
+// TODO can we use lbytes here?
+(* type psk_s (cs:ciphersuite) = b:bytes{Seq.length b <= max_length_psk} *)
+(* type pskID_s (cs:ciphersuite) = b:bytes{Seq.length b <= max_length_pskID} *)
+(* type info_s (cs:ciphersuite) = b:bytes{Seq.length b <= max_length_info} *)
+(* type exp_ctx_s (cs:ciphersuite) = b:bytes{Seq.length b <= max_length_exp_ctx} *)
 
 val unmarshal:
     cs:ciphersuite // TODO could this be an implicit parameter?
@@ -342,4 +388,124 @@ val openBase:
   -> aad:AEAD.ad (aead_of_cs cs)
   -> ct:AEAD.cipher (aead_of_cs cs) ->
   Tot (option (AEAD.decrypted #(aead_of_cs cs) ct))
+
+(* val setupPSKS: *)
+(*     cs:ciphersuite *)
+(*   -> skE:key_dh_secret_s cs *)
+(*   -> pkR:DH.serialized_point (curve_of_cs cs) *)
+(*   -> info:info_s cs *)
+(*   -> psk:psk_s cs *)
+(*   -> pskID:pskID_s cs -> *)
+(*   Tot (option (key_dh_public_s cs & encryption_context cs)) *)
+
+(* val setupPSKR: *)
+(*     cs:ciphersuite *)
+(*   -> enc:key_dh_public_s cs *)
+(*   -> skR:key_dh_secret_s cs *)
+(*   -> info:info_s cs *)
+(*   -> psk:psk_s cs *)
+(*   -> pskID:pskID_s cs -> *)
+(*   Tot (option (encryption_context cs)) *)
+
+(* val sealPSK: *)
+(*     cs:ciphersuite *)
+(*   -> skE:key_dh_secret_s cs *)
+(*   -> pkR:DH.serialized_point (curve_of_cs cs) *)
+(*   -> info:info_s cs *)
+(*   -> aad:AEAD.ad (aead_of_cs cs) *)
+(*   -> pt:AEAD.plain (aead_of_cs cs) *)
+(*   -> psk:psk_s cs *)
+(*   -> pskID:pskID_s cs -> *)
+(*   Tot (option (key_dh_public_s cs & AEAD.encrypted #(aead_of_cs cs) pt)) *)
+
+(* val openPSK: *)
+(*     cs:ciphersuite *)
+(*   -> enc:key_dh_public_s cs *)
+(*   -> skR:key_dh_secret_s cs *)
+(*   -> info:info_s cs *)
+(*   -> aad:AEAD.ad (aead_of_cs cs) *)
+(*   -> ct:AEAD.cipher (aead_of_cs cs) *)
+(*   -> psk:psk_s cs *)
+(*   -> pskID:pskID_s cs -> *)
+(*   Tot (option (AEAD.decrypted #(aead_of_cs cs) ct)) *)
+
+(* val setupAuthS: *)
+(*     cs:ciphersuite *)
+(*   -> skE:key_dh_secret_s cs *)
+(*   -> pkR:DH.serialized_point (curve_of_cs cs) *)
+(*   -> info:info_s cs *)
+(*   -> skS:key_dh_secret_s cs -> *)
+(*   Tot (option (key_dh_public_s cs & encryption_context cs)) *)
+
+(* val setupAuthR: *)
+(*     cs:ciphersuite *)
+(*   -> enc:key_dh_public_s cs *)
+(*   -> skR:key_dh_secret_s cs *)
+(*   -> info:info_s cs *)
+(*   -> pkS:key_dh_public_s cs -> *)
+(*   Tot (option (encryption_context cs)) *)
+
+(* val sealAuth: *)
+(*     cs:ciphersuite *)
+(*   -> skE:key_dh_secret_s cs *)
+(*   -> pkR:DH.serialized_point (curve_of_cs cs) *)
+(*   -> info:info_s cs *)
+(*   -> aad:AEAD.ad (aead_of_cs cs) *)
+(*   -> pt:AEAD.plain (aead_of_cs cs) *)
+(*   -> skS:key_dh_secret_s cs -> *)
+(*   Tot (option (key_dh_public_s cs & AEAD.encrypted #(aead_of_cs cs) pt)) *)
+
+(* val openAuth: *)
+(*     cs:ciphersuite *)
+(*   -> enc:key_dh_public_s cs *)
+(*   -> skR:key_dh_secret_s cs *)
+(*   -> info:info_s cs *)
+(*   -> aad:AEAD.ad (aead_of_cs cs) *)
+(*   -> ct:AEAD.cipher (aead_of_cs cs) *)
+(*   -> pkS:key_dh_public_s cs -> *)
+(*   Tot (option (AEAD.decrypted #(aead_of_cs cs) ct)) *)
+
+(* val setupAuthPSKS: *)
+(*     cs:ciphersuite *)
+(*   -> skE:key_dh_secret_s cs *)
+(*   -> pkR:DH.serialized_point (curve_of_cs cs) *)
+(*   -> info:info_s cs *)
+(*   -> psk:psk_s cs *)
+(*   -> pskID:pskID_s cs *)
+(*   -> skS:key_dh_secret_s cs -> *)
+(*   Tot (option (key_dh_public_s cs & encryption_context cs)) *)
+
+(* val setupAuthPSKR: *)
+(*     cs:ciphersuite *)
+(*   -> enc:key_dh_public_s cs *)
+(*   -> skR:key_dh_secret_s cs *)
+(*   -> info:info_s cs *)
+(*   -> psk:psk_s cs *)
+(*   -> pskID:pskID_s cs *)
+(*   -> pkS:key_dh_public_s cs -> *)
+(*   Tot (option (encryption_context cs)) *)
+
+(* val sealAuthPSK: *)
+(*     cs:ciphersuite *)
+(*   -> skE:key_dh_secret_s cs *)
+(*   -> pkR:DH.serialized_point (curve_of_cs cs) *)
+(*   -> info:info_s cs *)
+(*   -> aad:AEAD.ad (aead_of_cs cs) *)
+(*   -> pt:AEAD.plain (aead_of_cs cs) *)
+(*   -> psk:psk_s cs *)
+(*   -> pskID:pskID_s cs *)
+(*   -> skS:key_dh_secret_s cs -> *)
+(*   Tot (option (key_dh_public_s cs & AEAD.encrypted #(aead_of_cs cs) pt)) *)
+
+(* val openAuthPSK: *)
+(*     cs:ciphersuite *)
+(*   -> enc:key_dh_public_s cs *)
+(*   -> skR:key_dh_secret_s cs *)
+(*   -> info:info_s cs *)
+(*   -> aad:AEAD.ad (aead_of_cs cs) *)
+(*   -> ct:AEAD.cipher (aead_of_cs cs) *)
+(*   -> psk:psk_s cs *)
+(*   -> pskID:pskID_s cs *)
+(*   -> pkS:key_dh_public_s cs -> *)
+(*   Tot (option (AEAD.decrypted #(aead_of_cs cs) ct)) *)
 

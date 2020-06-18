@@ -34,6 +34,7 @@ val id_kdf: cs:ciphersuite -> Tot (lbytes 2)
 let id_kdf cs = let _, _, _, h = cs in
   match h with
   | Hash.SHA2_256 -> create 1 (u8 0) @| create 1 (u8 1)
+  | Hash.SHA2_384 -> create 1 (u8 0) @| create 1 (u8 2)
   | Hash.SHA2_512 -> create 1 (u8 0) @| create 1 (u8 3)
 
 val id_aead: cs:ciphersuite -> Tot (lbytes 2)
@@ -199,7 +200,7 @@ val auth_encap:
   -> skS:key_dh_secret_s cs ->
   Tot (option (key_kem_s cs & key_dh_public_s cs))
 
-#set-options "--z3rlimit 100 --fuel 0 --ifuel 2"
+#set-options "--z3rlimit 150 --fuel 0 --ifuel 2"
 let auth_encap cs skE pkR skS =
   match DH.secret_to_public (curve_of_cs cs) skE with
   | None -> None
@@ -245,7 +246,7 @@ val auth_decap:
   -> pkS: DH.serialized_point (curve_of_cs cs) ->
   Tot (option (key_kem_s cs))
 
-#set-options "--z3rlimit 100 --fuel 0 --ifuel 2"
+#set-options "--z3rlimit 150 --fuel 0 --ifuel 2"
 let auth_decap cs enc skR pkS =
   let pkE = unmarshal cs enc in
   match DH.dh (curve_of_cs cs) skR pkE with
@@ -271,12 +272,11 @@ let auth_decap cs enc skR pkS =
         let zz = extract_and_expand cs dh kemContext in
         Some (zz)
 
-/// default_pkSm = zero(Npk)
-/// default_psk = zero(Nh)
+/// default_psk = zero(0)
 /// default_pskId = zero(0)
 
-let default_pkSm (cs:ciphersuite):key_dh_public_s cs = create (size_dh_public cs) (u8 0)
 let default_psk (cs:ciphersuite):psk_s cs  = create (size_kdf cs) (u8 0)
+//let default_psk (cs:ciphersuite):psk_s cs  = lbytes_empty // TODO change as soon as test vectors have been updated
 let default_pskID (cs:ciphersuite):pskID_s cs = lbytes_empty
 
 
@@ -427,106 +427,6 @@ let setupBaseR cs enc skR info =
     Some (key_schedule cs Base zz info (default_psk cs) (default_pskID cs))
   | _ -> None
 
-
-/// def SetupAuthI(pkR, skI, info):
-///     zz, enc = AuthEncap(pkR, skI)
-///     pkIm = Marshal(pk(skI))
-///     return enc, KeySchedule(pkR, zz, enc, info,
-///                             default_psk, default_pskID, pkIm)
-
-(* val setupAuthS: *)
-(*     cs:ciphersuite *)
-(*   -> skE: key_dh_secret_s cs *)
-(*   -> skI: key_dh_secret_s cs *)
-(*   -> pkR:key_dh_public_s cs *)
-(*   -> info:bytes{Seq.length info <= max_info} -> *)
-(*   Tot (option (key_dh_public_s cs & key_aead_s cs & nonce_aead_s cs)) *)
-
-(* let setupAuthS cs skE skI pkR info = *)
-(*   let pkI = DH.secret_to_public (curve_of_cs cs) skI in *)
-(*   let res = auth_encap cs skE skI pkR in *)
-(*   match pkI, res with *)
-(*   | Some pkI, Some (zz, pkE) -> *)
-(*     let k, n = ks_derive cs Auth pkR zz pkE info None (Some (marshal cs pkI)) in *)
-(*     Some (pkE, k, n) *)
-(*   | _ -> None *)
-
-
-/// def SetupAuthR(enc, skR, pkI, info):
-///     zz = AuthDecap(enc, skR, pkI)
-///     pkIm = Marshal(pkI)
-///     return KeySchedule(pk(skR), zz, enc, info,
-///                        default_psk, default_pskID, pkIm)
-
-(* val setupAuthR: *)
-(*     cs:ciphersuite *)
-(*   -> pkE: key_dh_public_s cs *)
-(*   -> pkI: key_dh_public_s cs *)
-(*   -> skR:key_dh_secret_s cs *)
-(*   -> info:bytes{Seq.length info <= max_info} -> *)
-(*   Tot (option (key_aead_s cs & nonce_aead_s cs)) *)
-
-(* let setupAuthR cs pkE pkI skR info = *)
-(*   let pkR = DH.secret_to_public (curve_of_cs cs) skR in *)
-(*   let zz = auth_decap cs pkE pkI skR in *)
-(*   match pkR, zz with *)
-(*   | Some pkR, Some zz -> *)
-(*     Some (ks_derive cs Auth (marshal cs pkR) zz pkE info None (Some pkI)) *)
-(*   | _ -> None *)
-
-/// def SetupAuthPSKI(pkR, info, psk, pskID, skI):
-///     zz, enc = AuthEncap(pkR, skI)
-///     pkIm = Marshal(pk(skI))
-///     return enc, KeySchedule(mode_psk_auth, pkR, zz, enc, info, psk, pskID, pkIm)
-
-(* val setupAuthPSKS: *)
-(*     cs:ciphersuite *)
-(*   -> skE: key_dh_secret_s cs *)
-(*   -> skI: key_dh_secret_s cs *)
-(*   -> pkR: key_dh_public_s cs *)
-(*   -> psk: psk_s cs *)
-(*   -> pskID: bytes{Seq.length pskID <= max_pskID} *)
-(*   -> info:bytes{Seq.length info <= max_info} -> *)
-(*   Tot (option (key_dh_public_s cs & key_aead_s cs & nonce_aead_s cs)) *)
-
-(* let setupAuthPSKS cs skE skI pkR psk pskID info = *)
-(*   let pkI = DH.secret_to_public (curve_of_cs cs) skI in *)
-(*   let res = auth_encap cs skE skI pkR in *)
-(*   match pkI, res with *)
-(*   | Some pkI, Some (zz, pkE) -> *)
-(*     let k, n = ks_derive cs PSKAuth pkR zz pkE info (Some (psk, pskID)) (Some (marshal cs pkI)) in *)
-(*     Some (pkE, k, n) *)
-(*   | _ -> None *)
-
-
-/// def SetupAuthPSKR(enc, skR, info, psk, pskID, pkI):
-///     zz = AuthDecap(enc, skR, pkI)
-///     pkIm = Marshal(pkI)
-///     return KeySchedule(mode_psk_auth, pk(skR), zz, enc, info, psk, pskID, pkIm)
-
-(* val setupAuthPSKR: *)
-(*     cs:ciphersuite *)
-(*   -> pkE: key_dh_public_s cs *)
-(*   -> pkI: key_dh_public_s cs *)
-(*   -> skR:key_dh_secret_s cs *)
-(*   -> psk: psk_s cs *)
-(*   -> pskID: bytes{Seq.length pskID <= max_pskID} *)
-(*   -> info:bytes{Seq.length info <= max_info} -> *)
-(*   Tot (option (key_aead_s cs & nonce_aead_s cs)) *)
-
-(* let setupAuthPSKR cs pkE pkI skR psk pskID info = *)
-(*   let pkR = DH.secret_to_public (curve_of_cs cs) skR in *)
-(*   let zz = auth_decap cs pkE pkI skR in *)
-(*   match pkR, zz with *)
-(*   | Some pkR, Some zz -> *)
-(*     Some (ks_derive cs PSKAuth (marshal cs pkR) zz pkE info (Some (psk, pskID)) (Some pkI)) *)
-(*   | _ -> None *)
-
-
-/// Encrypt() and Decrypt using the derived AEAD key and nonce
-/// are implemented by calling AEAD.encrypt and AEAD.Decrypt
-
-
 let sealBase cs skE pkR info aad pt =
   match setupBaseS cs skE pkR info with
   | None -> None
@@ -542,3 +442,44 @@ let openBase cs enc skR info aad ct =
     match context_open cs ctx aad ct with
     | None -> None
     | Some (ctx, pt) -> Some pt
+
+// /// def SetupPSKS(pkR, info, psk, pskID):
+// ///   zz, enc = Encap(pkR)
+// ///   return enc, KeySchedule(mode_psk, zz, info, psk, pskID)
+
+// let setupPSKS cs skE pkR info psk pskID =
+//   match encap cs skE pkR with
+//   | None -> None
+//   | Some (zz, enc) ->
+//     assert (verify_psk_inputs cs PSK psk pskID);
+//     let enc_ctx = key_schedule cs PSK zz info psk pskID in
+//     Some (enc, enc_ctx)
+
+
+// /// def SetupPSKR(enc, skR, info, psk, pskID):
+// ///   zz = Decap(enc, skR)
+// ///   return KeySchedule(mode_psk, zz, info, psk, pskID)
+
+// let setupPSKR cs enc skR info psk pskID =
+//   let pkR = DH.secret_to_public (curve_of_cs cs) skR in
+//   let zz = decap cs enc skR in
+//   match pkR, zz with
+//   | Some pkR, Some zz ->
+//     Some (key_schedule cs PSK zz info psk pskID)
+//   | _ -> None
+
+// let sealPSK cs skE pkR info aad pt psk pskID =
+//   match setupPSKS cs skE pkR info psk pskID with
+//   | None -> None
+//   | Some (enc, ctx) ->
+//     match context_seal cs ctx aad pt with
+//     | None -> None
+//     | Some (ctx, ct) -> Some (enc, ct)
+
+// let openPSK cs enc skR info aad ct psk pskID =
+//   match setupBaseR cs enc skR info psk pskID with
+//   | None -> None
+//   | Some ctx ->
+//     match context_open cs ctx aad ct with
+//     | None -> None
+//     | Some (ctx, pt) -> Some pt
