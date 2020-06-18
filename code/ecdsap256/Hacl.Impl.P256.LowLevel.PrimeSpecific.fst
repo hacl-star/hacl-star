@@ -137,27 +137,7 @@ let reduction_prime_2prime_impl x result =
   pop_frame()  
 
 
-val lemma_t_computation: t: uint64{uint_v t == 0 \/ uint_v t == 1} -> 
-  Lemma
-    (
-        let t0 = u64 0 in 
-	let t1 = (u64 0) -. (t <<. (size 32)) in 
-	let t2 = (u64 0) -. t in 
-	let t3 = (t <<. (size 32)) -. (t <<. (size 1)) in 
-	let s = uint_v t0 + uint_v t1 * pow2 64 + uint_v t2 * pow2 128 + uint_v t3 * pow2 192 in 
-	if uint_v t = 1 then s == pow2 256 - prime256 - 1 else s == 0
-    )
-
-let lemma_t_computation t = 
-  let t0 = u64 0 in 
-  let t1 = (u64 0) -. (t <<. (size 32)) in 
-  let t2 = (u64 0) -. t in 
-  let t3 = (t <<. (size 32)) -. (t <<. (size 1)) in 
-  let s = uint_v t0 + uint_v t1 * pow2 64 + uint_v t2 * pow2 128 + uint_v t3 * pow2 192 in  
-  assert_norm(18446744069414584320 * pow2 64 + 18446744073709551615 * pow2 128 + 4294967294 * pow2 192 = pow2 256 - prime256 - 1)
-
-
-val lemma_t_computation2: t: uint64 {uint_v t == 0 \/ uint_v t == 1} ->
+val lemma_t_computation: t: uint64 {uint_v t == 0 \/ uint_v t == 1} ->
   Lemma
     (
       let t0 = (u64 0) -. t in 
@@ -168,7 +148,7 @@ val lemma_t_computation2: t: uint64 {uint_v t == 0 \/ uint_v t == 1} ->
       if uint_v t = 1 then s == prime256 else s == 0
     )
 
-let lemma_t_computation2 t = 
+let lemma_t_computation t = 
   let t0 = (u64 0) -. t in 
   let t1 = ((u64 0) -. t) >>. (size 32) in 
   let t2 = u64 0 in 
@@ -194,12 +174,9 @@ val p256_add: arg1: felem -> arg2: felem ->  out: felem -> Stack unit
 let p256_add arg1 arg2 out = 
   let h0 = ST.get() in   
   let t = add4 arg1 arg2 out in 
-    lemma_t_computation t;
-    reduction_prime256_2prime256_with_carry_impl t out out;
-  let h2 = ST.get() in 
-    additionInDomain (as_nat h0 arg1) (as_nat h0 arg2);
-    inDomain_mod_is_not_mod (fromDomain_ (as_nat h0 arg1) + fromDomain_ (as_nat h0 arg2))
-    (* lemma_eq_funct (as_seq h2 out) (felem_add_seq (as_seq h0 arg1) (as_seq h0 arg2)) *)
+  reduction_prime256_2prime256_with_carry_impl t out out;
+  additionInDomain (as_nat h0 arg1) (as_nat h0 arg2);
+  inDomain_mod_is_not_mod (fromDomain_ (as_nat h0 arg1) + fromDomain_ (as_nat h0 arg2))
 
 
 val p256_double: arg1: felem ->  out: felem -> Stack unit 
@@ -213,9 +190,7 @@ val p256_double: arg1: felem ->  out: felem -> Stack unit
 let p256_double arg1 out = 
     let h0 = ST.get() in 
   let t = add4 arg1 arg1 out in 
-  lemma_t_computation t;
   reduction_prime256_2prime256_with_carry_impl t out out;
-
   additionInDomain (as_nat h0 arg1) (as_nat h0 arg1);
   inDomain_mod_is_not_mod (fromDomain_ (as_nat h0 arg1) + fromDomain_ (as_nat h0 arg1))
 
@@ -236,7 +211,7 @@ let p256_sub arg1 arg2 out =
     let h0 = ST.get() in 
   let t = sub4 arg1 arg2 out in 
     let h1 = ST.get() in 
-    lemma_t_computation2 t;
+    lemma_t_computation t;
   let t0 = (u64 0) -. t in 
   let t1 = ((u64 0) -. t) >>. (size 32) in 
   let t2 = u64 0 in 
