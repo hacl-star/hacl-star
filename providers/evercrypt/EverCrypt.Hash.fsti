@@ -117,7 +117,16 @@ let invariant (#a:alg) (s: state a) (m: HS.mem) =
 
 //18-07-06 as_acc a better name? not really a representation
 val repr: #a:alg ->
-  s:state a -> h:HS.mem -> GTot (words_state a)
+  s:state a -> h:HS.mem -> GTot (words_state' a)
+
+#push-options "--ifuel 1"
+let repr_with_counter (#a:alg) (s:state a) (h:HS.mem) (counter:uint64_t) :
+  GTot (words_state a) =
+  if is_blake a then
+    let ev : extra_state a = Lib.IntTypes.cast (extra_state_int_type a) Lib.IntTypes.SEC counter in
+    repr s h, ev
+  else (repr s h, ())
+#pop-options
 
 val alg_of_state: a:e_alg -> (
   let a = G.reveal a in
@@ -217,7 +226,7 @@ val init: #a:e_alg -> (
   (requires invariant s)
   (ensures fun h0 _ h1 ->
     invariant s h1 /\
-    repr s h1 == Spec.Agile.Hash.init a /\
+    repr s h1 == fst (Spec.Agile.Hash.init a) /\
     M.(modifies (footprint s h0) h0 h1) /\
     footprint s h0 == footprint s h1 /\
     preserves_freeable s h0 h1))
@@ -237,6 +246,7 @@ val update:
   #a:e_alg -> (
   let a = Ghost.reveal a in
   s:state a ->
+  prevlen : uint64_t ->
   block:B.buffer Lib.IntTypes.uint8 { B.length block = block_length a } ->
   Stack unit
   (requires fun h0 ->
@@ -247,7 +257,8 @@ val update:
     M.(modifies (footprint s h0) h0 h1) /\
     footprint s h0 == footprint s h1 /\
     invariant s h1 /\
-    repr s h1 == Spec.Agile.Hash.update a (repr s h0) (B.as_seq h0 block) /\
+    repr s h1 == fst (Spec.Agile.Hash.update a (repr_with_counter s h0 prevlen)
+                                             (B.as_seq h0 block)) /\
     preserves_freeable s h0 h1))
 
 // Note that we pass the data length in bytes (rather than blocks).
@@ -257,6 +268,7 @@ val update_multi:
   #a:e_alg -> (
   let a = Ghost.reveal a in
   s:state a ->
+  prevlen : uint64_t ->
   blocks:B.buffer Lib.IntTypes.uint8 { B.length blocks % block_length a = 0 } ->
   len: UInt32.t { v len = B.length blocks } ->
   Stack unit
@@ -268,7 +280,8 @@ val update_multi:
     M.(modifies (footprint s h0) h0 h1) /\
     footprint s h0 == footprint s h1 /\
     invariant s h1 /\
-    repr s h1 == Spec.Agile.Hash.update_multi a (repr s h0) (B.as_seq h0 blocks) /\
+    repr s h1 == fst (Spec.Agile.Hash.update_multi a (repr_with_counter s h0 prevlen)
+                                                   (B.as_seq h0 blocks)) /\
     preserves_freeable s h0 h1))
 
 val update_last_256: Hacl.Hash.Definitions.update_last_st SHA2_256
@@ -295,18 +308,17 @@ val update_last:
   last_len:uint32_t {
     v last_len = B.length last /\
     v prev_len + v last_len <= max_input_length a /\
-    v prev_len % block_length a = 0} ->
+    v prev_len % block_length a = 0 } ->
   Stack unit
   (requires fun h0 ->
     invariant s h0 /\
     B.live h0 last /\
-    M.(loc_disjoint (footprint s h0) (loc_buffer last) /\
-    extra_state_v (snd (repr s h0)) + v last_len <= max_input_length a))
+    M.(loc_disjoint (footprint s h0) (loc_buffer last)))
   (ensures fun h0 _ h1 ->
     invariant s h1 /\
     repr s h1 ==
-      Spec.Hash.Incremental.update_last a (repr s h0) (v prev_len)
-                                        (B.as_seq h0 last) /\
+      fst (Spec.Hash.Incremental.update_last a (repr_with_counter s h0 prev_len) (v prev_len)
+                                             (B.as_seq h0 last)) /\
     M.(modifies (footprint s h0) h0 h1) /\
     footprint s h0 == footprint s h1 /\
     preserves_freeable s h0 h1))
@@ -327,7 +339,8 @@ val finish:
     invariant s h1 /\
     M.(modifies (loc_buffer dst) h0 h1) /\
     footprint s h0 == footprint s h1 /\
-    B.as_seq h1 dst == Spec.Hash.PadFinish.finish a (repr s h0) /\
+    (* The 0UL value is dummy: it is actually useless *)
+    B.as_seq h1 dst == Spec.Hash.PadFinish.finish a (repr_with_counter s h0 0UL) /\
     preserves_freeable s h0 h1))
 
 (** @type: true
