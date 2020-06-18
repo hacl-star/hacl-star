@@ -286,7 +286,7 @@ let last_split_blake_get_last_padded_block_eq (a:hash_alg{is_blake a}) (input : 
   last_split_blake_props a l;
   ()
 
-/// TODO: duplicate with Hacl.Streaming.Blake2s_32.fst - MOVE
+/// TODO: duplicate with Hacl.Streaming.Blake2.fst - MOVE
 /// Equality between the state types defined by blake2s and the generic hash.
 /// The below equality is not trivial because of the way types are encoded for Z3.
 val blake2_state_types_equalities (a : hash_alg{is_blake a}) :
