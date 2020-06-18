@@ -42,9 +42,7 @@ val conditional_swap: i: uint64 -> p: point_prime -> q: point_prime -> Tot (r: t
     if uint_v i = 0 then pNew == p /\ qNew == q
     else
       let p1, q1 = swap p q in 
-      p1 == pNew /\ q1 == qNew
- }
-)
+      p1 == pNew /\ q1 == qNew})
 
 let conditional_swap i p q = 
   if uint_v i = 0 then 
@@ -54,6 +52,7 @@ let conditional_swap i p q =
 
 
 #set-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 0" 
+
 let toDomain value result = 
   push_frame();
     let multBuffer = create (size 8) (u64 0) in 
@@ -64,6 +63,7 @@ let toDomain value result =
 
 let fromDomain f result = 
   montgomery_multiplication_buffer_by_one f result  
+
 
 let pointToDomain p result = 
     let p_x = sub p (size 0) (size 4) in 
@@ -77,6 +77,7 @@ let pointToDomain p result =
     toDomain p_x r_x;
     toDomain p_y r_y;
     toDomain p_z r_z
+
 
 let pointFromDomain p result = 
     let p_x = sub p (size 0) (size 4) in 
@@ -241,6 +242,7 @@ let normalisation_update z2x z3y p resultPoint =
     let h2 = ST.get() in 
   pop_frame()
   
+
 let norm p resultPoint tempBuffer = 
   let xf = sub p (size 0) (size 4) in 
   let yf = sub p (size 4) (size 4) in 
@@ -290,7 +292,6 @@ let normX p result tempBuffer =
   let xf = sub p (size 0) (size 4) in 
   let yf = sub p (size 4) (size 4) in 
   let zf = sub p (size 8) (size 4) in 
-
   
   let z2f = sub tempBuffer (size 4) (size 4) in 
   let z3f = sub tempBuffer (size 8) (size 4) in
@@ -474,7 +475,6 @@ val montgomery_ladder: #buf_type: buftype->  p: point -> q: point ->
 let montgomery_ladder #a p q scalar tempBuffer =  
   let h0 = ST.get() in 
 
-
   [@inline_let]
   let spec_ml h0 = _ml_step (as_seq h0 scalar) in 
 
@@ -502,33 +502,6 @@ let montgomery_ladder #a p q scalar tempBuffer =
       montgomery_ladder_step p q tempBuffer scalar i; 
       Lib.LoopCombinators.unfold_repeati 256 (spec_ml h0) (acc h0) (uint_v i)
     )
-
-val zero_buffer: p: point -> 
-  Stack unit
-    (requires fun h -> live h p)
-    (ensures fun h0 _ h1 ->     
-      modifies (loc p) h0 h1 /\
-      (
-	let k = Lib.Sequence.create 12 (u64 0) in 
-	as_nat h1 (gsub p (size 0) (size 4)) == 0 /\ 
-	as_nat h1 (gsub p (size 4) (size 4)) == 0 /\
-	as_nat h1 (gsub p (size 8) (size 4)) == 0 
-    )
-  )
-
-let zero_buffer p = 
-  upd p (size 0) (u64 0);
-  upd p (size 1) (u64 0);
-  upd p (size 2) (u64 0);
-  upd p (size 3) (u64 0);
-  upd p (size 4) (u64 0);
-  upd p (size 5) (u64 0);
-  upd p (size 6) (u64 0);
-  upd p (size 7) (u64 0);
-  upd p (size 8) (u64 0);
-  upd p (size 9) (u64 0);
-  upd p (size 10) (u64 0);
-  upd p (size 11) (u64 0)
 
 
 val lemma_point_to_domain: h0: mem -> h1: mem ->  p: point -> result: point ->  Lemma
@@ -600,7 +573,7 @@ val scalarMultiplication_t: #t:buftype -> p: point -> result: point ->
 let scalarMultiplication_t #t p result scalar tempBuffer  = 
     let h0 = ST.get() in 
   let q = sub tempBuffer (size 0) (size 12) in 
-  zero_buffer q;
+  uploadZeroPoint q;
   let buff = sub tempBuffer (size 12) (size 88) in 
   pointToDomain p result;
     let h2 = ST.get() in 
@@ -611,8 +584,8 @@ let scalarMultiplication_t #t p result scalar tempBuffer  =
   norm q result buff; 
     lemma_coord h3 q
 
-let scalarMultiplicationL = scalarMultiplication_t #MUT
 
+let scalarMultiplicationL = scalarMultiplication_t #MUT
 let scalarMultiplicationI = scalarMultiplication_t #IMMUT
 let scalarMultiplicationC = scalarMultiplication_t #CONST
 
@@ -669,45 +642,43 @@ let uploadBasePoint p =
   assert_norm (1 + pow2 64 * 18446744069414584320 + pow2 64 * pow2 64 * 18446744073709551615 + pow2 64 * pow2 64 * pow2 64 * 4294967294 = 26959946660873538059280334323183841250350249843923952699046031785985) 
 
 
-
 let scalarMultiplicationWithoutNorm p result scalar tempBuffer = 
   let h0 = ST.get() in 
   let q = sub tempBuffer (size 0) (size 12) in 
-  zero_buffer q;
+  uploadZeroPoint q;
   let buff = sub tempBuffer (size 12) (size 88) in 
   pointToDomain p result;
-    let h2 = ST.get() in 
+    let h1 = ST.get() in 
   montgomery_ladder q result scalar buff;
   copy_point q result;  
-    let h3 = ST.get() in 
-    lemma_point_to_domain h0 h2 p result;
-    lemma_pif_to_domain h2 q
+    lemma_point_to_domain h0 h1 p result;
+    lemma_pif_to_domain h1 q
     
 
 let secretToPublic result scalar tempBuffer = 
   push_frame(); 
-       let basePoint = create (size 12) (u64 0) in 
-    uploadBasePoint basePoint;
-      let q = sub tempBuffer (size 0) (size 12) in 
-      let buff = sub tempBuffer (size 12) (size 88) in 
-    zero_buffer q; 
-      let h1 = ST.get() in 
-      lemma_pif_to_domain h1 q;
-    montgomery_ladder q basePoint scalar buff; 
-    norm q result buff;  
+    let basePoint = create (size 12) (u64 0) in 
+  uploadBasePoint basePoint;
+    let q = sub tempBuffer (size 0) (size 12) in 
+    let buff = sub tempBuffer (size 12) (size 88) in 
+  uploadZeroPoint q; 
+  let h1 = ST.get() in 
+    lemma_pif_to_domain h1 q;
+  montgomery_ladder q basePoint scalar buff; 
+  norm q result buff;  
   pop_frame()
 
 
 let secretToPublicWithoutNorm result scalar tempBuffer = 
-    push_frame(); 
-      let basePoint = create (size 12) (u64 0) in 
-    uploadBasePoint basePoint;
+  push_frame(); 
+    let basePoint = create (size 12) (u64 0) in 
+  uploadBasePoint basePoint;
       let q = sub tempBuffer (size 0) (size 12) in 
       let buff = sub tempBuffer (size 12) (size 88) in 
-    zero_buffer q; 
+  uploadZeroPoint q; 
       let h1 = ST.get() in 
       lemma_pif_to_domain h1 q; 
-    montgomery_ladder q basePoint scalar buff; 
-    copy_point q result;
+  montgomery_ladder q basePoint scalar buff; 
+  copy_point q result;
   pop_frame()  
 

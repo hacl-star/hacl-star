@@ -1593,6 +1593,36 @@ let uploadZeroImpl f =
   upd f (size 2) (u64 0);
   upd f (size 3) (u64 0)
 
+
+val uploadZeroPoint: p: point -> 
+  Stack unit
+    (requires fun h -> live h p)
+    (ensures fun h0 _ h1 ->     
+      modifies (loc p) h0 h1 /\
+      (
+        let k = Lib.Sequence.create 12 (u64 0) in 
+        as_nat h1 (gsub p (size 0) (size 4)) == 0 /\ 
+        as_nat h1 (gsub p (size 4) (size 4)) == 0 /\
+        as_nat h1 (gsub p (size 8) (size 4)) == 0 
+      )
+    )
+
+let uploadZeroPoint p = 
+  upd p (size 0) (u64 0);
+  upd p (size 1) (u64 0);
+  upd p (size 2) (u64 0);
+  upd p (size 3) (u64 0);
+  upd p (size 4) (u64 0);
+  upd p (size 5) (u64 0);
+  upd p (size 6) (u64 0);
+  upd p (size 7) (u64 0);
+  upd p (size 8) (u64 0);
+  upd p (size 9) (u64 0);
+  upd p (size 10) (u64 0);
+  upd p (size 11) (u64 0)
+
+
+
 val uploadOneImpl: f: felem -> Stack unit
   (requires fun h -> live h f)
   (ensures fun h0 _ h1 -> as_nat h1 f == 1 /\ modifies (loc f) h0 h1)
@@ -1602,6 +1632,7 @@ let uploadOneImpl f =
   upd f (size 1) (u64 0);
   upd f (size 2) (u64 0);
   upd f (size 3) (u64 0)
+
 
 
 val toUint8: i: felem ->  o: lbuffer uint8 (32ul) -> Stack unit
