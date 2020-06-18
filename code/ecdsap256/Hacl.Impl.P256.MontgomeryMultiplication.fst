@@ -18,7 +18,7 @@ open Hacl.Impl.P256.LowLevel
 open Hacl.Impl.P256.LowLevel.PrimeSpecific
 
 open Lib.Loops
-open Spec.P256.MontgomeryMultiplication
+open Hacl.Spec.P256.MontgomeryMultiplication
 
 #set-options "--z3rlimit 100"
 

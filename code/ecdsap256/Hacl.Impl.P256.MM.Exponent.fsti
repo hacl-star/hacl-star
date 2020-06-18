@@ -19,7 +19,7 @@ open FStar.Mul
 open Lib.Loops
 
 open Hacl.Impl.P256.MontgomeryMultiplication
-open Spec.P256.MontgomeryMultiplication
+open Hacl.Spec.P256.MontgomeryMultiplication
 
 open Hacl.Impl.P256.LowLevel.PrimeSpecific
 open Hacl.Impl.P256.Core
@@ -28,7 +28,7 @@ open Hacl.Impl.P256.Arithmetics
 open Spec.P256.Definitions
 open Spec.P256.Lemmas
 open Spec.P256
-open Spec.P256.MontgomeryMultiplication
+open Hacl.Spec.P256.MontgomeryMultiplication
 
 inline_for_extraction noextract
 val square_root: a: felem -> result: felem ->  Stack unit 

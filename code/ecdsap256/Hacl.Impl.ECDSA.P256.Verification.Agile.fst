@@ -13,7 +13,7 @@ open Spec.P256.Definitions
 open Hacl.Spec.ECDSA.Definition
 open Hacl.Impl.P256.LowLevel 
 open Hacl.Impl.P256.Core
-open Spec.P256.MontgomeryMultiplication
+open Hacl.Spec.P256.MontgomeryMultiplication
 open Hacl.Impl.ECDSA.MontgomeryMultiplication
 open Hacl.Impl.ECDSA.MM.Exponent
 

@@ -17,7 +17,7 @@ open FStar.Mul
 open Lib.Loops
 
 open Hacl.Impl.P256.MontgomeryMultiplication
-open Spec.P256.MontgomeryMultiplication
+open Hacl.Spec.P256.MontgomeryMultiplication
 
 open Hacl.Impl.P256.LowLevel.PrimeSpecific
 open Hacl.Impl.P256.Core
@@ -25,9 +25,9 @@ open Hacl.Impl.P256.Core
 open Spec.P256.Definitions
 open Spec.P256.Lemmas
 open Spec.P256
-open Spec.P256.MontgomeryMultiplication
+open Hacl.Spec.P256.MontgomeryMultiplication
 
-friend Spec.P256.MontgomeryMultiplication
+friend Hacl.Spec.P256.MontgomeryMultiplication
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 

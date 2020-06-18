@@ -17,7 +17,7 @@ open Spec.Hash.Definitions
 open Spec.DH
 open Hacl.Spec.ECDSA.Definition
 open Hacl.Impl.P256.Compression
-open Spec.P256.MontgomeryMultiplication
+open Hacl.Spec.P256.MontgomeryMultiplication
 
 
 [@ (Comment " Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. 

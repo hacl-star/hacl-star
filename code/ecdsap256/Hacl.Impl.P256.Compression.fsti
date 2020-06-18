@@ -12,7 +12,7 @@ open Lib.Buffer
 open Spec.P256.Definitions
 open Spec.P256
 
-open Spec.P256.MontgomeryMultiplication
+open Hacl.Spec.P256.MontgomeryMultiplication
 
 
 let notCompressedForm = lbuffer uint8 (size 65)

@@ -29,8 +29,8 @@ open FStar.Mul
 
 open Hacl.Impl.P256.Arithmetics
 open Hacl.Impl.P256.LowLevel .RawCmp
-open Spec.P256.MontgomeryMultiplication
-friend Spec.P256.MontgomeryMultiplication
+open Hacl.Spec.P256.MontgomeryMultiplication
+friend Hacl.Spec.P256.MontgomeryMultiplication
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 

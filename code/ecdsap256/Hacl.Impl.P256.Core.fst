@@ -11,8 +11,7 @@ open Lib.Buffer
 
 open Spec.P256.Lemmas
 open Spec.P256.Definitions
-open Spec.P256.MontgomeryMultiplication
-open Spec.P256.MontgomeryMultiplication.PointAdd
+open Hacl.Spec.P256.MontgomeryMultiplication
 open Spec.P256
 open Hacl.Impl.SolinasReduction
 open Hacl.Impl.P256.LowLevel 
@@ -28,7 +27,7 @@ open FStar.Tactics.Canon
 
 open FStar.Math.Lemmas
 
-friend Spec.P256.MontgomeryMultiplication
+friend Hacl.Spec.P256.MontgomeryMultiplication
 open FStar.Mul
 
 val swap: p: point_prime -> q: point_prime -> Tot (r: tuple2 point_prime point_prime {let pNew, qNew = r in 

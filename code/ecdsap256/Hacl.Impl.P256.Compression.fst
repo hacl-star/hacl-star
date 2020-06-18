@@ -17,7 +17,7 @@ open Hacl.Impl.P256.Arithmetics
 open Hacl.Impl.P256.LowLevel.RawCmp
 open Hacl.Spec.ECDSA.Definition
 
-open Spec.P256.MontgomeryMultiplication
+open Hacl.Spec.P256.MontgomeryMultiplication
 
 open Spec.P256.Definitions
 

@@ -12,8 +12,7 @@ open Lib.Buffer
 open Spec.P256.Lemmas
 open Spec.P256.Definitions
 open Hacl.Impl.SolinasReduction
-open Spec.P256.MontgomeryMultiplication
-open Spec.P256.MontgomeryMultiplication.PointAdd
+open Hacl.Spec.P256.MontgomeryMultiplication
 open Hacl.Impl.P256.LowLevel 
 open Hacl.Impl.P256.LowLevel.PrimeSpecific
 open Hacl.Impl.P256.MontgomeryMultiplication
@@ -25,7 +24,7 @@ open FStar.Tactics.Canon
 
 open FStar.Math.Lemmas
 
-friend Spec.P256.MontgomeryMultiplication
+friend Hacl.Spec.P256.MontgomeryMultiplication
 open FStar.Mul
 
 #set-options "--z3rlimit 300 --ifuel 0 --fuel 0" 

@@ -15,10 +15,10 @@ open Hacl.Impl.P256.LowLevel.PrimeSpecific
 open Hacl.Impl.P256.MontgomeryMultiplication
 open Spec.P256
 
-open Spec.P256.MontgomeryMultiplication
+open Hacl.Spec.P256.MontgomeryMultiplication
 
 open FStar.Math.Lemmas
-friend Spec.P256.MontgomeryMultiplication
+friend Hacl.Spec.P256.MontgomeryMultiplication
 
 open FStar.Mul
 
