@@ -105,7 +105,10 @@ let evercrypt_hash //: block hash_alg =
     (fun i _ -> EverCrypt.Hash.init #i)
     (fun i s prevlen blocks len -> EverCrypt.Hash.update_multi #i s prevlen blocks len)
     (fun i s prevlen last last_len ->
-       assume(not(is_blake i));
+       (**) if is_blake i then
+       (**)   assert(
+       (**)    Lib.IntTypes.cast (extra_state_int_type i) Lib.IntTypes.SEC prevlen ==
+       (**)    nat_to_extra_state i (U64.v prevlen));
        EverCrypt.Hash.update_last #i s prevlen last last_len)
     (fun i _ -> EverCrypt.Hash.finish #i)
 #pop-options
