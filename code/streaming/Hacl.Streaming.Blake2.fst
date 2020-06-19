@@ -669,7 +669,7 @@ let mk_update_last a m key_size i acc prevlen last last_len =
 /// for the key): it must thus be a constant.
 #push-options "--ifuel 1 --z3cliopt smt.arith.nl=false"
 inline_for_extraction noextract
-let blake2 (a : alg) (m : m_spec) (key_size : key_size_ty a) //: I.block unit =
+let blake2 (a : alg) (m : m_spec) (key_size : key_size_ty a) : I.block unit =
   =
   I.Block
     I.Erased (* key management *)

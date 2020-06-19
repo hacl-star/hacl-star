@@ -19,7 +19,10 @@ val lemma_blake2_hash_equivalence
     (Spec.Blake2.blake2 (to_blake_alg a) d 0 Seq.empty (Spec.Blake2.max_output (to_blake_alg a)) ==
      Spec.Agile.Hash.hash a d)
 
-/// TODO: the following is redundant with ``extra_state_add_nat``
+/// SH: TODO: I hadn't noticed this file when starting to work on blake,
+/// otherwise I would have make definitions like ``extra_state_add_nat``
+/// consistent (in terms of naming convention) with the definitions below,
+/// and I would have put some lemmas here rather than in Spec.Hash.Lemmas
 noextract inline_for_extraction
 val add_extra_i (a:hash_alg{is_blake a}) (ev:extra_state a) (i:U32.t) : extra_state a
 

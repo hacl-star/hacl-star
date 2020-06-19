@@ -227,48 +227,47 @@ let optional_t #index
 inline_for_extraction noextract noeq
 type block (index: Type0) =
 | Block:
-//  (* val *) index:Type0
-
-  (* val *) km: key_management -> (**)
+  km: key_management ->
 
   // Low-level types
-  (* val *) state: stateful index -> (**)
-  (* val *) key: stateful index -> (**)
+  state: stateful index ->
+  key: stateful index ->
 
   // Introducing a notion of blocks and final result.
-  (* val *) max_input_length: (index -> x:nat { 0 < x /\ x < pow2 64 }) -> (**)
-  (* val *) output_len: (index -> x:U32.t { U32.v x > 0 }) -> (**)
-  (* val *) block_len: (index -> x:U32.t { U32.v x > 0 }) -> (**)
+  max_input_length: (index -> x:nat { 0 < x /\ x < pow2 64 }) ->
+  output_len: (index -> x:U32.t { U32.v x > 0 }) ->
+  block_len: (index -> x:U32.t { U32.v x > 0 }) ->
 
   /// An init/update/update_last/finish specification. The long refinements were
   /// previously defined as blocks / small / output.
-  (* val *) init_s: (i:index -> key.t i -> state.t i) -> (**)
-  (* val *) update_multi_s: (i:index ->
+  init_s: (i:index -> key.t i -> state.t i) ->
+  update_multi_s: (i:index ->
     state.t i ->
     prevlen:nat { prevlen % U32.v (block_len i) = 0 } ->
     s:S.seq uint8 { prevlen + S.length s <= max_input_length i /\ S.length s % U32.v (block_len i) = 0 } ->
-    state.t i) -> (**)
-  (* val *) update_last_s: (i:index ->
+    state.t i) ->
+  update_last_s: (i:index ->
     state.t i ->
     prevlen:nat { prevlen % U32.v (block_len i) = 0 } ->
     s:S.seq uint8 { S.length s + prevlen <= max_input_length i /\ S.length s <= U32.v (block_len i) } ->
-    state.t i) -> (**)
-  (* val *) finish_s: (i:index -> key.t i -> state.t i -> s:S.seq uint8 { S.length s = U32.v (output_len i) }) -> (**)
+    state.t i) ->
+  finish_s: (i:index -> key.t i -> state.t i -> s:S.seq uint8 { S.length s = U32.v (output_len i) }) ->
 
   /// The specification in one shot.
-  (* val *) spec_s: (i:index -> key.t i -> input:S.seq uint8 { S.length input <= max_input_length i } ->
-    output:S.seq uint8 { S.length output == U32.v (output_len i) }) -> (**)
+  spec_s: (i:index -> key.t i -> input:S.seq uint8 { S.length input <= max_input_length i } ->
+    output:S.seq uint8 { S.length output == U32.v (output_len i) }) ->
 
   // Required lemmas... clients can enjoy them in their local contexts with the SMT pattern via a let-binding.
 
-  (* val *) update_multi_zero: (i:index ->
+  update_multi_zero: (i:index ->
     h:state.t i ->
-    prevlen:nat { prevlen % U32.v (block_len i) = 0 /\ prevlen <= max_input_length i } -> Lemma
+    prevlen:nat { prevlen % U32.v (block_len i) = 0 /\ prevlen <= max_input_length i } ->
+    Lemma
     (ensures (
-      (**) Math.Lemmas.modulo_lemma 0 (UInt32.v (block_len i));
-      update_multi_s i h prevlen S.empty == h))) -> (**)
+      Math.Lemmas.modulo_lemma 0 (UInt32.v (block_len i));
+      update_multi_s i h prevlen S.empty == h))) ->
 
-  (* val *) update_multi_associative: (i:index ->
+  update_multi_associative: (i:index ->
     h:state.t i ->
     prevlen1:nat ->
     prevlen2:nat ->
@@ -287,9 +286,11 @@ type block (index: Type0) =
       prevlen2 % U32.v (block_len i) = 0 /\
       update_multi_s i (update_multi_s i h prevlen1 input1) prevlen2 input2 ==
         update_multi_s i h prevlen1 input))
-    [ SMTPat (update_multi_s i prevlen2 (update_multi_s i h prevlen1 input1) input2) ]) -> (**)
+    [ SMTPat (update_multi_s i prevlen2 (update_multi_s i h prevlen1 input1) input2) ]) ->
 
-  (* val *) spec_is_incremental: (i:index ->
+  (* TODO: it might be possible to factorize more the proofs between Lib.UpdateMulti
+   * and Spec.Hash.Incremental *)
+  spec_is_incremental: (i:index ->
     key: key.t i ->
     input:S.seq uint8 { S.length input <= max_input_length i } ->
     Lemma (
@@ -300,17 +301,17 @@ type block (index: Type0) =
       let hash1 = update_multi_s i hash0 0 bs in
       let hash2 = update_last_s i hash1 (S.length bs) l in
       let hash3 = finish_s i key hash2 in
-      hash3 `S.equal` spec_s i key input)) -> (**)
+      hash3 `S.equal` spec_s i key input)) ->
 
   // Stateful operations
-  (* val *) index_of_state: (i:G.erased index -> (
+  index_of_state: (i:G.erased index -> (
     let i = G.reveal i in
     s: state.s i -> Stack index
     (fun h0 -> state.invariant #i h0 s)
-    (fun h0 i' h1 -> h0 == h1 /\ i' == i))) -> (**)
+    (fun h0 i' h1 -> h0 == h1 /\ i' == i))) ->
 
 
-  (* val *) init: (i:G.erased index -> (
+  init: (i:G.erased index -> (
     let i = G.reveal i in
     k: key.s i ->
     s: state.s i -> Stack unit
@@ -325,10 +326,10 @@ type block (index: Type0) =
       state.v i h1 s == init_s i (key.v i h0 k) /\
       B.(modifies (state.footprint #i h0 s) h0 h1) /\
       state.footprint #i h0 s == state.footprint #i h1 s /\
-      (state.freeable #i h0 s ==> state.freeable #i h1 s)))) -> (**)
+      (state.freeable #i h0 s ==> state.freeable #i h1 s)))) ->
 
 
-  (* val *) update_multi: (i:G.erased index -> (
+  update_multi: (i:G.erased index -> (
     let i = G.reveal i in
     s:state.s i ->
     prevlen:U64.t { U64.v prevlen % U32.v (block_len i) = 0 } ->
@@ -345,9 +346,9 @@ type block (index: Type0) =
       state.footprint #i h0 s == state.footprint #i h1 s /\
       state.invariant #i h1 s /\
       state.v i h1 s == update_multi_s i (state.v i h0 s) (U64.v prevlen) (B.as_seq h0 blocks) /\
-      (state.freeable #i h0 s ==> state.freeable #i h1 s)))) -> (**)
+      (state.freeable #i h0 s ==> state.freeable #i h1 s)))) ->
 
-  (* val *) update_last: (
+  update_last: (
     i: G.erased index -> (
     let i = G.reveal i in
     s:state.s i ->
@@ -367,9 +368,9 @@ type block (index: Type0) =
       state.v i h1 s == update_last_s i (state.v i h0 s) (U64.v prevlen) (B.as_seq h0 last) /\
       B.(modifies (state.footprint #i h0 s) h0 h1) /\
       state.footprint #i h0 s == state.footprint #i h1 s /\
-      (state.freeable #i h0 s ==> state.freeable #i h1 s)))) -> (**)
+      (state.freeable #i h0 s ==> state.freeable #i h1 s)))) ->
 
-  (* val *) finish: (
+  finish: (
     i: G.erased index -> (
     let i = G.reveal i in
     k: optional_key i km key ->
@@ -392,6 +393,6 @@ type block (index: Type0) =
       B.(modifies (loc_buffer dst) h0 h1) /\
       state.footprint #i h0 s == state.footprint #i h1 s /\
       B.as_seq h1 dst == finish_s i (optional_t h0 k) (state.v i h0 s) /\
-      (state.freeable #i h0 s ==> state.freeable #i h1 s)))) -> (**)
+      (state.freeable #i h0 s ==> state.freeable #i h1 s)))) ->
 
   block index
