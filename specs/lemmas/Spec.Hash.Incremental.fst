@@ -15,10 +15,11 @@ friend Spec.Agile.Hash
 open FStar.Mul
 module Loops = Lib.LoopCombinators
 
-/// A lemma I could not find in FStar.Math.Lemmas - note: duplicated in Hash.Streaming.Spec.fst
+/// TODO: A lemma I could not find in FStar.Math.Lemmas -
+/// note: duplicated in Hash.Streaming.Spec.fst
 let mul_zero_left_is_zero (n : int) : Lemma(0 * n = 0) = ()
 
-/// A lemma I could not find in FStar.Math.Lemmas
+/// TODO: A lemma I could not find in FStar.Math.Lemmas
 let add_zero_right_is_same (n : int) : Lemma(n + 0 = n) = ()
 
 /// Below are various lemmas used to prove ``repeati_blake2_update1_is_update_multi``.

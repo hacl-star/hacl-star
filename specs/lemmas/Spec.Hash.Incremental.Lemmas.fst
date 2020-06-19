@@ -13,6 +13,10 @@ open Spec.Hash.Incremental
 
 #reset-options "--fuel 0 --ifuel 0 --z3rlimit 50"
 
+/// TODO: A lemma I could not find in FStar.Math.Lemmas
+/// Note: duplicated in Hash.Streaming.Spec.fst and Spec.Hash.Incremental
+let mul_zero_left_is_zero (n : int) : Lemma(0 * n = 0) = ()
+
 let update_multi_empty_extra_state_eq
   (a: hash_alg{is_blake a}) (h: words_state a) :
   Lemma
@@ -82,6 +86,7 @@ let block_hash_incremental (a:hash_alg) (input:bytes_block a)
   (**) Spec.Hash.Lemmas0.block_length_smaller_than_max_input a;
   hash_incremental_block_is_update_last a (init a) input
 
+#push-options "--z3cliopt smt.arith.nl=false --quake 10"
 let lemma_split_blocks_assoc (a:hash_alg) (s1 s2:bytes)
   : Lemma
       (requires
@@ -90,24 +95,51 @@ let lemma_split_blocks_assoc (a:hash_alg) (s1 s2:bytes)
       (ensures (
         let b1, l1 = split_blocks a (s1 `S.append` s2) in
         let b2, l2 = split_blocks a s2 in
-        b1 == s1 `S.append` b2 /\ l1 == l2))
-  = let s = s1 `S.append` s2 in
-    let n_s1 = S.length s1 / block_length a in
+        b1 == s1 `S.append` b2 /\ l1 == l2)) =
+  let s = s1 `S.append` s2 in
+  let n_s1 = S.length s1 / block_length a in
 
-    let n1 = S.length s / block_length a in
-    let n2 = S.length s2 / block_length a in
+  let n1 = S.length s / block_length a in
+  let n2 = S.length s2 / block_length a in
 
-    Math.Lemmas.division_addition_lemma (S.length s2) (block_length a) n_s1;
-    assert (n1 == n2 + n_s1);
+  Math.Lemmas.euclidean_division_definition (S.length s1) (block_length a);
+  assert(S.length s1 = (S.length s1 / block_length a) * block_length a);
+  Math.Lemmas.division_addition_lemma (S.length s2) (block_length a) n_s1;
+  assert (n1 == n2 + n_s1);
 
-    let n1' = if S.length s % block_length a = 0 then n1-1 else n1 in
-    let n2' = if S.length s2 % block_length a = 0 then n2-1 else n2 in
+  mul_zero_left_is_zero (block_length a);
+  Math.Lemmas.nat_over_pos_is_nat (S.length s) (block_length a);
+  Math.Lemmas.euclidean_division_definition (S.length s) (block_length a);
+  assert(S.length s % block_length a = 0 ==> n1 > 0);
 
-    let bs1, ls1 = S.split s (n1' * block_length a) in
-    let bs2, ls2 = S.split s2 (n2' * block_length a) in
-    assert (n1' * block_length a == n2' * block_length a + S.length s1);
-    assert (S.equal ls1 ls2);
-    assert (S.equal bs1 (s1 `S.append` bs2))
+  Math.Lemmas.nat_over_pos_is_nat (S.length s2) (block_length a);
+  Math.Lemmas.euclidean_division_definition (S.length s2) (block_length a);
+  assert(S.length s2 % block_length a = 0 ==> n2 > 0);
+
+  let n1' = if S.length s % block_length a = 0 then n1-1 else n1 in
+  let n2' = if S.length s2 % block_length a = 0 then n2-1 else n2 in
+
+  Math.Lemmas.nat_times_nat_is_nat n1' (block_length a);
+  Math.Lemmas.lemma_mult_le_right (block_length a) n1' n1;
+  Math.Lemmas.nat_times_nat_is_nat n2' (block_length a);
+  Math.Lemmas.lemma_mult_le_right (block_length a) n2' n2;
+  let bs1, ls1 = S.split s (n1' * block_length a) in
+  let bs2, ls2 = S.split s2 (n2' * block_length a) in
+  
+  Math.Lemmas.lemma_mod_add_distr (S.length s2) (S.length s1) (block_length a);
+  assert(S.length s % block_length a = S.length s2 % block_length a);
+  assert(n_s1 * block_length a = S.length s1);
+  
+  if S.length s % block_length a = 0 then
+    begin
+    Math.Lemmas.distributivity_sub_left n1 1 (block_length a);
+    Math.Lemmas.distributivity_sub_left n2 1 (block_length a)
+    end;
+  
+  assert (n1' * block_length a == n2' * block_length a + S.length s1);
+  assert (S.equal ls1 ls2);
+  assert (S.equal bs1 (s1 `S.append` bs2))
+#pop-options
 
 let lemma_split_blake_modulo (a:hash_alg{is_blake a}) (s1 s2:bytes)
   : Lemma

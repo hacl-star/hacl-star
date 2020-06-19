@@ -140,6 +140,7 @@ let update1_add a h l =
 #restart-solver
 #push-options "--fuel 1 --z3rlimit 50"
 
+/// TODO: make stable (checked with quake)
 let rec lemma_update_s a h i input =
   let ev = snd h in
   let h' = update_multi a h input in
