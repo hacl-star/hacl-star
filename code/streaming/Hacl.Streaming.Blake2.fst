@@ -157,7 +157,7 @@ let k (#a : alg) (key_size : key_size_ty a) : I.stateful unit =
 /// Defining stateful keys
 inline_for_extraction noextract
 let stateful_key_t (a : alg) (key_size : key_size_ty a) : Type =
-  if key_size > 0 then b:B.buffer uint8 { B.length b == key_size } else unit
+  if key_size = 0 then unit else b:B.buffer uint8 { B.length b == key_size }
 
 inline_for_extraction noextract
 let buffer_to_stateful_key_t (a : alg) (key_size : key_size_ty a{key_size > 0})
@@ -172,36 +172,44 @@ let unit_to_stateful_key_t (a : alg) :
 
 /// Pay attention to the fact that the ``key_size`` parameter is not Low* and
 /// appears in extracted code: it must be a constant.
+/// TODO: this definition could be moved to Hacl.Streaming.Interface, it could
+/// be pretty useful in other situations as it generalizes ``stateful_buffer`` in
+/// the case the length is zero. Note that rather than being unit, the type could
+/// be buffer too (and we would use null whenever needed).
 inline_for_extraction noextract
-let stateful_key (a : alg) (key_size : key_size_ty a)//: I.stateful unit =
-  =
+let stateful_key (a : alg) (key_size : key_size_ty a) : I.stateful unit =
   I.Stateful
     (fun _ -> stateful_key_t a key_size)
-    (fun #_ h s -> if key_size > 0 then B.loc_addr_of_buffer (s <: B.buffer uint8) else B.loc_none)
-    (fun #_ h s -> if key_size > 0 then B.freeable (s <: B.buffer uint8) else True)
-    (fun #_ h s -> if key_size > 0 then B.live h (s <: B.buffer uint8) else True)
+    (fun #_ h s -> if key_size = 0 then B.loc_none else B.loc_addr_of_buffer (s <: B.buffer uint8))
+    (fun #_ h s -> if key_size = 0 then True else B.freeable (s <: B.buffer uint8))
+    (fun #_ h s -> if key_size = 0 then True else B.live h (s <: B.buffer uint8))
     (fun _ -> s:S.seq uint8 { S.length s == key_size })
-    (fun _ h s -> if key_size > 0 then B.as_seq h (s <: B.buffer uint8) else Seq.empty)
+    (fun _ h s -> if key_size = 0 then Seq.empty else B.as_seq h (s <: B.buffer uint8))
     (fun #_ h s -> ())
     (fun #_ l s h0 h1 -> ())
     (fun #_ l s h0 h1 -> ())
     (fun () ->
-       if key_size > 0 then
+       if key_size = 0 then unit_to_stateful_key_t a
+       else
          buffer_to_stateful_key_t a key_size (B.alloca (Lib.IntTypes.u8 0)
-                                                       (U32.uint_to_t key_size))
-       else unit_to_stateful_key_t a)
+                                                       (U32.uint_to_t key_size)))
     (fun () r -> 
-      if key_size > 0 then
+      if key_size = 0 then unit_to_stateful_key_t a
+      else
         buffer_to_stateful_key_t a key_size (B.malloc r (Lib.IntTypes.u8 0)
-                                                        (U32.uint_to_t key_size))
-        else unit_to_stateful_key_t a)
-    (fun _ s -> if key_size > 0 then B.free (s <: B.buffer uint8) else ())
+                                                        (U32.uint_to_t key_size)))
+    (fun _ s -> if key_size = 0 then () else  B.free (s <: B.buffer uint8))
     (fun _ s_src s_dst ->
-      if key_size > 0 then B.blit (s_src <: B.buffer uint8) 0ul
-                                  (s_dst <: B.buffer uint8) 0ul (U32.uint_to_t key_size) else ())
+      if key_size = 0 then ()
+      else B.blit (s_src <: B.buffer uint8) 0ul
+                  (s_dst <: B.buffer uint8) 0ul (U32.uint_to_t key_size))
 
+let stateful_key_to_buffer (#a : alg) (#key_size : key_size_ty a)
+                           (key : stateful_key_t a key_size) :
+  b:B.buffer uint8 { B.length b = key_size } =
+  if key_size = 0 then B.null #uint8 else key
+  
 let k = stateful_key
-
 
 //inline_for_extraction noextract
 //let k (#a : alg) (key_size : key_size_t a) =
@@ -673,7 +681,7 @@ let mk_update_last a m key_size i acc prevlen last last_len =
 /// appears in extracted code (in some tests which must be reduced, for the definition
 /// of the key type, for some arithmetic and for the size of the buffer to allocate
 /// for the key): it must thus be a constant.
-#push-options "--ifuel 1"
+#push-options "--ifuel 1 --z3cliopt smt.arith.nl=false"
 inline_for_extraction noextract
 let blake2 (a : alg) (m : m_spec) (key_size : key_size_ty a) //: I.block unit =
   =
@@ -704,7 +712,12 @@ let blake2 (a : alg) (m : m_spec) (key_size : key_size_ty a) //: I.block unit =
     (fun _ key acc ->
       [@inline_let] let wv = get_wv acc in
       [@inline_let] let h = get_state_p acc in
-      Impl.blake2_init #a #m (Impl.blake2_update_block #a #m) wv h key_size key (output_len a))
+      [@inline_let]
+      let key : b:B.buffer uint8{B.length b = key_size} =
+        if key_size = 0 then B.null #uint8 else key in
+      Impl.blake2_init #a #m (Impl.blake2_update_block #a #m) wv h
+                       (U32.uint_to_t key_size) key
+                       (output_len a))
 
     (* update_multi *)
     (fun _ acc prevlen blocks len -> mk_update_multi a m key_size () acc prevlen blocks len)
@@ -722,16 +735,16 @@ let blake2 (a : alg) (m : m_spec) (key_size : key_size_ty a) //: I.block unit =
 
 /// The incremental hash functions instantiations
 let mk_create_in (a : alg) (m : m_spec) (key_size : key_size_ty a) =
-  F.create_in (blake2 a m key_size) () (s a m) (I.optional_key () I.Erased (k key_size))
+  F.create_in (blake2 a m key_size) () (s a m) (I.optional_key () I.Erased (k a key_size))
 
 let mk_init (a : alg) (m : m_spec) (key_size : key_size_ty a) =
-  F.init (blake2 a m key_size) (G.hide ()) (s a m) (I.optional_key () I.Erased (k key_size))
+  F.init (blake2 a m key_size) (G.hide ()) (s a m) (I.optional_key () I.Erased (k a key_size))
 
 let mk_update (a : alg) (m : m_spec) (key_size : key_size_ty a) =
-  F.update (blake2 a m key_size) (G.hide ()) (s a m) (I.optional_key () I.Erased (k key_size))
+  F.update (blake2 a m key_size) (G.hide ()) (s a m) (I.optional_key () I.Erased (k a key_size))
 
 let mk_finish (a : alg) (m : m_spec) (key_size : key_size_ty a) =
-  F.mk_finish (blake2 a m key_size) () (s a m) (I.optional_key () I.Erased (k key_size))
+  F.mk_finish (blake2 a m key_size) () (s a m) (I.optional_key () I.Erased (k a key_size))
 
 let mk_free (a : alg) (m : m_spec) (key_size : key_size_ty a) =
-  F.free (blake2 a m key_size) (G.hide ()) (s a m) (I.optional_key () I.Erased (k key_size))
+  F.free (blake2 a m key_size) (G.hide ()) (s a m) (I.optional_key () I.Erased (k a key_size))
