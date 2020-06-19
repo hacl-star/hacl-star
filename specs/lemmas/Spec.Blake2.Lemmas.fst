@@ -10,6 +10,10 @@ friend Spec.Agile.Hash
 
 #push-options "--fuel 0 --ifuel 0"
 
+/// TODO: A lemma I could not find in FStar.Math.Lemmas -
+/// note: duplicated in Spec.Hash.Incremental, Hash.Streaming.Spec.fst
+let mul_zero_left_is_zero (n : int) : Lemma(0 * n = 0) = ()
+
 module B2 = Spec.Blake2
 
 /// Proving spec equivalence
@@ -138,23 +142,37 @@ let update1_add a h l =
   mul_mod_lemma (to_u64 1ul) (u64 (size_block a))
 
 #restart-solver
-#push-options "--fuel 1 --z3rlimit 50"
+#push-options "--fuel 1 --z3rlimit 50 --z3cliopt smt.arith.nl=false"
 
-/// TODO: make stable (checked with quake)
 let rec lemma_update_s a h i input =
   let ev = snd h in
   let h' = update_multi a h input in
   let ev' = snd h' in
-  if i = 0 then add_extra_s_zero ev
+
+  if i = 0 then
+    begin
+    mul_zero_left_is_zero (block_length a);
+    assert(Seq.length input = 0);
+    assert(input `Seq.equal` Seq.empty);
+    update_multi_zero a h;
+    add_extra_s_zero ev
+    end
   else
+    begin
+    Math.Lemmas.cancel_mul_div i (block_length a);
+    assert(1 <= Seq.length input / block_length a);
     let block, rem = Lib.UpdateMulti.split_block (block_length a) input 1 in
     let h_mid = update a h block in
     let h_f = update_multi a h_mid rem in
 
     let ev_mid = snd h_mid in
     let ev_f = snd h_f in
-    
+
     let itype = extra_state_int_type a in
+
+    (* For the recursive call *)
+    Math.Lemmas.distributivity_sub_left i 1 (block_length a);
+    assert(Seq.length rem == (i-1) * block_length a);
 
     calc (==) {
       v #itype #SEC ev';
@@ -174,6 +192,7 @@ let rec lemma_update_s a h i input =
       (==) { add_extra_s_assoc a (v #itype #SEC ev) (i-1) 1 }
       add_extra_s a (v #itype #SEC ev) i;
     }
+    end
 
 #pop-options
 

@@ -16,7 +16,7 @@ open FStar.Mul
 module Loops = Lib.LoopCombinators
 
 /// TODO: A lemma I could not find in FStar.Math.Lemmas -
-/// note: duplicated in Hash.Streaming.Spec.fst
+/// note: duplicated in Hash.Streaming.Spec.fst and other places (make a grep)
 let mul_zero_left_is_zero (n : int) : Lemma(0 * n = 0) = ()
 
 /// TODO: A lemma I could not find in FStar.Math.Lemmas

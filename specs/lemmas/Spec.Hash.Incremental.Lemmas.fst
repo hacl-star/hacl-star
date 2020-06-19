@@ -86,7 +86,7 @@ let block_hash_incremental (a:hash_alg) (input:bytes_block a)
   (**) Spec.Hash.Lemmas0.block_length_smaller_than_max_input a;
   hash_incremental_block_is_update_last a (init a) input
 
-#push-options "--z3cliopt smt.arith.nl=false --quake 10"
+#push-options "--z3cliopt smt.arith.nl=false"
 let lemma_split_blocks_assoc (a:hash_alg) (s1 s2:bytes)
   : Lemma
       (requires
