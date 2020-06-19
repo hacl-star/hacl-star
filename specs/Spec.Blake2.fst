@@ -501,6 +501,10 @@ val blake2:
   -> nn:size_nat{1 <= nn /\ nn <= max_output a} ->
   Tot (lbytes nn)
 
+(* TODO: SH: this definition is awkward to use because of the multiplication.
+ * Wouldn't it be possible to simply write the following?
+ * [if kk = 0 then 0 else size_block a]
+ * It is actually shorter and clearer. *)
 let compute_prev0 a kk =
   let kn = if kk = 0 then 0 else 1 in
   let prev0 = kn * (size_block a) in

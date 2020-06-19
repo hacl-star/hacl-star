@@ -46,10 +46,7 @@ module Incr = Spec.Hash.Incremental
 let add_zero_left_is_same (n : int) :
   Lemma(0 + n = n) = ()
 
-let to_hash_alg (a : Spec.alg) =
-  match a with
-  | Spec.Blake2S -> Hash.Blake2S
-  | Spec.Blake2B -> Hash.Blake2B
+let to_hash_alg (a : Spec.alg) = Hash.to_hash_alg a
 
 let index = unit
 
@@ -211,10 +208,6 @@ let stateful_key_to_buffer (#a : alg) (#key_size : key_size_ty a)
   
 let k = stateful_key
 
-//inline_for_extraction noextract
-//let k (#a : alg) (key_size : key_size_t a) =
-//  I.stateful_buffer uint8 key_len (Lib.IntTypes.u8 0)
-
 /// The functor currently limits the size of the data, so we can't go as far as blake2b can go
 #push-options "--z3cliopt smt.arith.nl=false"
 let max_total_hash_length (a : alg) :
@@ -274,8 +267,14 @@ let blake2_prevlen (a : alg) (key_len : U32.t)
     Lib.IntTypes.cast U128 SEC x
 
 let init_s (#a : alg) (#key_size : key_size_ty a) ()
-           (key : Seq.lseq uint8 key_size) : Tot (t a) =
+           (key : Seq.lseq uint8 key_size) :
+  Tot (t a) =
   Spec.blake2_init a key_size key (output_size a)
+
+(*let init_s_no_key_is_agile_init (#a : alg) :
+  Lemma((init_s #a #0 () Seq.empty, Agile.nat_to_extra_state (to_hash_alg a) 0) ==
+          Agile.init (to_hash_alg a)) =
+  Spec.Blake2.Lemmas.blake2_init_no_key_is_agile (to_hash_alg a)*)
 
 let update_multi_s (#a : alg) (key_size : key_size_ty a) () (acc : t a)
                    (prevlen : nat{prevlen % Spec.size_block a = 0})

@@ -22,6 +22,9 @@ open Hacl.Streaming.Interface
 include Spec.Hash.Definitions
 include Hacl.Hash.Definitions
 
+open Spec.Hash.Lemmas
+open Spec.Hash.Incremental.Lemmas
+
 #set-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
 
 inline_for_extraction noextract
@@ -55,6 +58,7 @@ let mk_words_state (#a : hash_alg) (s : words_state' a)
  else (s, ())
 #pop-options    
 
+#push-options "--ifuel 1"
 inline_for_extraction noextract
 let evercrypt_hash //: block hash_alg =
   =
@@ -63,6 +67,7 @@ let evercrypt_hash //: block hash_alg =
     agile_state
     (stateful_unused hash_alg)
 
+    (* TODO: this general max length definition shouldn't be in the SHA2 256 file! *)
     Hacl.Streaming.SHA2_256.max_input_length64
     Hacl.Hash.Definitions.hash_len
     Hacl.Hash.Definitions.block_len
@@ -75,15 +80,35 @@ let evercrypt_hash //: block hash_alg =
     (fun a _ -> Spec.Agile.Hash.hash a)
 
     (fun a s prevlen -> Spec.Hash.Lemmas.update_multi_zero a (mk_words_state s prevlen))
-    (fun a s prevlen1 prevlen2 input1 input2 -> admit()) // relying on the pattern in Hacl.Streaming.SHA256 here
-    (fun a _ input -> admit())// Spec.Hash.Incremental.hash_is_hash_incremental a input)
+    (* udpate_multi_associative *)
+    (fun a s prevlen1 prevlen2 input1 input2 ->
+       let s = mk_words_state s prevlen1 in
+       Spec.Hash.Lemmas.update_multi_associative a s input1 input2;
+       if is_blake a then
+         begin
+         Spec.Hash.Incremental.Lemmas.update_multi_extra_state_eq a s input1;
+         Spec.Hash.Lemmas.extra_state_add_nat_bound_lem2 #a (snd s) (S.length input1)
+         end
+       else ())
+    (* spec_is_incremental *)
+    (fun a _ input ->
+       if is_blake a then
+         begin
+         Spec.Blake2.Lemmas.blake2_init_no_key_is_agile a;
+         Spec.Blake2.Lemmas.lemma_blake2_hash_equivalence a input;
+         Hacl.Streaming.Blake2.spec_is_incremental (to_blake_alg a) #0 () Seq.empty input
+         end
+       else
+         Spec.Hash.Incremental.hash_is_hash_incremental a input)
 
     EverCrypt.Hash.alg_of_state
     (fun i _ -> EverCrypt.Hash.init #i)
     (fun i s prevlen blocks len -> EverCrypt.Hash.update_multi #i s prevlen blocks len)
-    (fun i s prevlen last last_len -> admit())// EverCrypt.Hash.update_last #i s prevlen last last_len) (**)
+    (fun i s prevlen last last_len ->
+       assume(not(is_blake i));
+       EverCrypt.Hash.update_last #i s prevlen last last_len)
     (fun i _ -> EverCrypt.Hash.finish #i)
-
+#pop-options
 
 let create_in a = F.create_in evercrypt_hash a (EverCrypt.Hash.state a) (G.erased unit) ()
 

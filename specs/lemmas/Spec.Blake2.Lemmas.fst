@@ -14,6 +14,13 @@ module B2 = Spec.Blake2
 
 /// Proving spec equivalence
 
+let blake2_init_no_key_is_agile (a : hash_alg{is_blake a}) :
+  Lemma(
+    ((Spec.Blake2.blake2_init (to_blake_alg a) 0 Seq.empty (Spec.Blake2.max_output (to_blake_alg a))
+      <: words_state' a),
+      Spec.Agile.Hash.nat_to_extra_state a 0) ==
+      Spec.Agile.Hash.init a) = ()
+
 #push-options "--z3rlimit 10"
 
 let lemma_blake2_hash_equivalence
@@ -30,8 +37,10 @@ let lemma_blake2_hash_equivalence
 
 noextract inline_for_extraction
 let add_extra_i (a:hash_alg{is_blake a}) (ev:extra_state a) (i:U32.t) : extra_state a =
-    // Note that we can't do multiplication over U128 integers, which is why
-    // we use U64 then convert to the ``extra_state`` type
+    // Note that we can't do multiplication over uint128 integers, which is why
+    // we use uint64 then convert to the ``extra_state`` type. Also note that
+    // as ``i`` is a uint32, by converting it to a uint64 we make sure there is
+    // no overflow during the multiplication.
     [@inline_let] let i' : uint64 = to_u64 i in
     [@inline_let] let s = (to_u64 i) *. u64 (size_block a) in
     (ev <: extra_state_int_t a) +. (cast (extra_state_int_type a) SEC s)
@@ -118,13 +127,6 @@ val lemma_update_s (a:hash_alg{is_blake a}) (h:words_state a) (i:nat) (input: by
           extra_state_v (snd h') == add_extra_s a (extra_state_v (snd h)) i))
         (decreases i)
 
-(* val lemma_update_s (a:hash_alg{is_blake a}) (h:words_state a) (i:nat) (input: bytes_blocks a) :
-  Lemma (requires i + 1 < pow2 32 /\ Seq.length input == i * block_length a)
-        (ensures (
-          let h' = update_multi a h input in
-          v #U64 #SEC (snd h') == add_extra_s a (v #U64 #SEC (snd h)) i))
-        (decreases i) *)
-
 val update1_add (a:hash_alg{is_blake a}) (h:words_state a)
                 (l:bytes{Seq.length l == block_length a})
   : Lemma
@@ -136,7 +138,7 @@ let update1_add a h l =
   mul_mod_lemma (to_u64 1ul) (u64 (size_block a))
 
 #restart-solver
-#push-options "--fuel 1 --z3rlimit 20"
+#push-options "--fuel 1 --z3rlimit 50"
 
 let rec lemma_update_s a h i input =
   let ev = snd h in

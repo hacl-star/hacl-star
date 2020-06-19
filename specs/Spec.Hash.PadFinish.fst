@@ -54,6 +54,9 @@ let finish_blake (a:hash_alg{is_blake a}) (hashw:words_state a): Tot (lbytes (ha
   let alg = to_blake_alg a in
   Spec.Blake2.blake2_finish alg (fst hashw) (Spec.Blake2.max_output alg)
 
+(* Note that the ``extra_state`` in the ``words_state`` parameter is useless -
+ * we use this fact pervasively in the proofs and some definitions by providing
+ * dummy extra-states when we don't manipulate "full" words states *)
 let finish (a:hash_alg) (hashw:words_state a): Tot (lbytes (hash_length a)) =
   if is_blake a then finish_blake a hashw
   else finish_md a hashw
