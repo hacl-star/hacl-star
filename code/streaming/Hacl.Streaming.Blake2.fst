@@ -142,15 +142,6 @@ let key_size_ty (a : alg) = key_size:nat{0 <= key_size /\ key_size <= Spec.max_k
 inline_for_extraction noextract
 let key_size_t (a : alg) = key_size:U32.t{0 <= U32.v key_size /\ U32.v key_size <= Spec.max_key a}
 
-(*
-/// Pay attention to the fact that the ``key_size`` parameter is not Low* and
-/// appears in extracted code: it must be a constant.
-inline_for_extraction noextract
-let k (#a : alg) (key_size : key_size_ty a) : I.stateful unit =
-  if key_size > 0 then
-    I.stateful_buffer uint8 (U32.uint_to_t key_size) (Lib.IntTypes.u8 0)
-  else I.stateful_unused unit *)
-
 /// Defining stateful keys
 inline_for_extraction noextract
 let stateful_key_t (a : alg) (key_size : key_size_ty a) : Type =
@@ -271,10 +262,6 @@ let init_s (#a : alg) (#key_size : key_size_ty a) ()
   Tot (t a) =
   Spec.blake2_init a key_size key (output_size a)
 
-(*let init_s_no_key_is_agile_init (#a : alg) :
-  Lemma((init_s #a #0 () Seq.empty, Agile.nat_to_extra_state (to_hash_alg a) 0) ==
-          Agile.init (to_hash_alg a)) =
-  Spec.Blake2.Lemmas.blake2_init_no_key_is_agile (to_hash_alg a)*)
 
 let update_multi_s (#a : alg) (key_size : key_size_ty a) () (acc : t a)
                    (prevlen : nat{prevlen % Spec.size_block a = 0})
