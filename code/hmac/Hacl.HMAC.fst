@@ -71,25 +71,25 @@ fun output key len ->
   let i = helper_smtpat a len in
   let nkey = B.sub output 0ul i in
   let zeroes = B.sub output i (D.block_len a - i) in
-  assert B.(loc_disjoint (loc_buffer nkey) (loc_buffer zeroes));
-  let h0 = ST.get () in
-  assert (Seq.equal (B.as_seq h0 zeroes) (Seq.create (v (D.block_len a - i)) (u8 0)));
+  (**) assert B.(loc_disjoint (loc_buffer nkey) (loc_buffer zeroes));
+  (**) let h0 = ST.get () in
+  (**) assert (Seq.equal (B.as_seq h0 zeroes) (Seq.create (v (D.block_len a - i)) (u8 0)));
   if len <= D.block_len a then begin
     B.blit key 0ul nkey 0ul len;
     let h1 = ST.get () in
-    assert (Seq.equal (B.as_seq h1 zeroes) (B.as_seq h0 zeroes));
-    assert (Seq.equal (B.as_seq h1 nkey) (B.as_seq h0 key));
-    assert (Seq.equal (B.as_seq h1 output) (S.append (B.as_seq h1 nkey) (B.as_seq h1 zeroes)));
-    Seq.lemma_eq_elim (B.as_seq h1 output) (S.append (B.as_seq h1 nkey) (B.as_seq h1 zeroes));
-    assert (B.as_seq h1 output == wrap a (B.as_seq h0 key))
+    (**) assert (Seq.equal (B.as_seq h1 zeroes) (B.as_seq h0 zeroes));
+    (**) assert (Seq.equal (B.as_seq h1 nkey) (B.as_seq h0 key));
+    (**) assert (Seq.equal (B.as_seq h1 output) (S.append (B.as_seq h1 nkey) (B.as_seq h1 zeroes)));
+    (**) Seq.lemma_eq_elim (B.as_seq h1 output) (S.append (B.as_seq h1 nkey) (B.as_seq h1 zeroes));
+    (**) assert (B.as_seq h1 output == wrap a (B.as_seq h0 key))
   end else begin
     hash key len nkey;
-    let h1 = ST.get () in
-    assert (Seq.equal (B.as_seq h1 zeroes) (B.as_seq h0 zeroes));
-    assert (Seq.equal (B.as_seq h1 nkey) (Spec.Agile.Hash.hash a (B.as_seq h0 key)));
-    assert (Seq.equal (B.as_seq h1 output) (S.append (B.as_seq h1 nkey) (B.as_seq h1 zeroes)));
-    Seq.lemma_eq_elim (B.as_seq h1 output) (S.append (B.as_seq h1 nkey) (B.as_seq h1 zeroes));
-    assert (B.as_seq h1 output == wrap a (B.as_seq h0 key))
+    (**) let h1 = ST.get () in
+    (**) assert (Seq.equal (B.as_seq h1 zeroes) (B.as_seq h0 zeroes));
+    (**) assert (Seq.equal (B.as_seq h1 nkey) (Spec.Agile.Hash.hash a (B.as_seq h0 key)));
+    (**) assert (Seq.equal (B.as_seq h1 output) (S.append (B.as_seq h1 nkey) (B.as_seq h1 zeroes)));
+    (**) Seq.lemma_eq_elim (B.as_seq h1 output) (S.append (B.as_seq h1 nkey) (B.as_seq h1 zeroes));
+    (**) assert (B.as_seq h1 output == wrap a (B.as_seq h0 key))
   end
 
 inline_for_extraction noextract
@@ -102,8 +102,10 @@ let block_len_as_len (a: hash_alg):
   | MD5 | SHA1 | SHA2_224 | SHA2_256 | Blake2S -> uint32_to_uint64 (D.block_len a)
   | SHA2_384 | SHA2_512 | Blake2B -> uint64_to_uint128 (uint32_to_uint64 (D.block_len a))
 
-/// This implementation is optimized by reusing an existing hash state
-/// ``s`` rather than allocating a new one.
+/// This implementation is optimized by reusing an existing hash state ``s``
+/// rather than allocating a new one. Note that the disjointness hypotheses are
+/// voluntarily very loose (in particular, the hash state and the key are not
+/// necessarily disjoint).
 inline_for_extraction noextract
 val part2:
   a: hash_alg ->
@@ -138,7 +140,8 @@ let update_multi_extra_state_eq'
          extra_state_add_nat (snd h) (Seq.length input)))) =
   if is_blake a then update_multi_extra_state_eq a h input else ()
 
-#push-options "--z3rlimit 200 --ifuel 1"
+#push-options "--z3rlimit 100 --ifuel 1"
+
 inline_for_extraction noextract
 let part2 a init update_multi update_last finish s dst key data len =
   (**) key_and_data_fits a;
@@ -148,6 +151,7 @@ let part2 a init update_multi update_last finish s dst key data len =
   (**) let key_data_v0 : Ghost.erased _ = Seq.append key_v0 data_v0 in
   let ev = init s in
   (**) let h1 = ST.get () in
+  (**) assert(B.(modifies (loc_buffer s) h0 h1));
   (**) let init_v : Ghost.erased (init_t a) = Spec.Agile.Hash.init a in
   (**) assert ((D.as_seq h1 s, ev) == Ghost.reveal init_v);
   let ev =
@@ -157,10 +161,9 @@ let part2 a init update_multi update_last finish s dst key data len =
       (**) let h2 = ST.get () in
       (**) Spec.Hash.Lemmas0.block_length_smaller_than_max_input a;
       (**) assert(key_data_v0 `S.equal` key_v0);
-      (**) hash_incremental_block_is_update_last a init_v key_v0;
-      (**) assert(
-        (D.as_seq h2 s, ev) ==
-            Spec.Hash.Incremental.hash_incremental_body a key_data_v0 init_v);
+      (**) Spec.Hash.Incremental.Lemmas.hash_incremental_block_is_update_last a init_v key_v0;
+      (**) assert((D.as_seq h2 s, ev) ==
+      (**)  Spec.Hash.Incremental.hash_incremental_body a key_data_v0 init_v);
       ev
       end
     else
@@ -168,7 +171,7 @@ let part2 a init update_multi update_last finish s dst key data len =
       let ev1 = update_multi s ev key 1ul in
       (**) let h2 = ST.get () in
       (**) assert ((D.as_seq h2 s, ev1) ==
-                     Spec.Agile.Hash.(update_multi a (init a) key_v0));
+      (**)           Spec.Agile.Hash.(update_multi a (init a) key_v0));
       (**) update_multi_extra_state_eq' a (D.as_seq h1 s, ev) key_v0;
       (**) assert(is_blake a ==> (ev1 == extra_state_add_nat ev (Seq.length key_v0)));
       (**) assert(extra_state_v ev == 0);
@@ -176,35 +179,39 @@ let part2 a init update_multi update_last finish s dst key data len =
       let ev2 = update_last s ev1 (block_len_as_len a) data len in
       (**) let h3 = ST.get () in
       (**) assert ((D.as_seq h3 s, ev2) ==
-        Spec.Hash.Incremental.update_last a
-          (Spec.Agile.Hash.(update_multi a (init a) key_v0)) (block_length a) data_v0);
+      (**)  Spec.Hash.Incremental.update_last a
+      (**)    (Spec.Agile.Hash.(update_multi a (init a) key_v0)) (block_length a) data_v0);
       ev2
       end
   in
+  (**) let h3 = ST.get () in
+  (**) assert(B.(modifies (loc_buffer s) h0 h3));
   finish s ev dst;
   (**) let h4 = ST.get () in
-  begin
-    let open Spec.Hash.PadFinish in
-    let open Spec.Hash.Incremental in
-    let open Spec.Agile.Hash in
-    let open Spec.Hash.Lemmas in
-    if len =. 0ul then
-    begin
-      (* TODO: doesn't work if we put a calc here *)
-      assert(B.as_seq h4 dst `S.equal` finish a (hash_incremental_body a key_data_v0 init_v));
-      assert(B.as_seq h4 dst `S.equal` hash_incremental a key_data_v0)
-    end
-    else
-    begin
-      assert(B.as_seq h4 dst `S.equal`
-               finish a (update_last a (update_multi a (init a) key_v0)
-                      (block_length a) data_v0));
-      Spec.Hash.Incremental.Lemmas.concatenated_hash_incremental a key_v0 data_v0;
-      assert(B.as_seq h4 dst `S.equal` hash_incremental a key_data_v0)
-    end;
-    Spec.Hash.Incremental.hash_is_hash_incremental a key_data_v0;
-    assert(B.as_seq h4 dst `S.equal` hash a key_data_v0)
-  end
+  (**) assert(B.(modifies (loc_union (loc_buffer s) (loc_buffer dst)) h3 h4));
+  (**) assert(B.(modifies (loc_union (loc_buffer s) (loc_buffer dst)) h0 h4));
+  (**) begin
+  (**) let open Spec.Hash.PadFinish in
+  (**) let open Spec.Hash.Incremental in
+  (**) let open Spec.Agile.Hash in
+  (**) let open Spec.Hash.Lemmas in
+  (**) if len =. 0ul then
+  (**) begin
+  (**)   (* TODO: doesn't work if we put a calc here *)
+  (**)   assert(B.as_seq h4 dst `S.equal` finish a (hash_incremental_body a key_data_v0 init_v));
+  (**)   assert(B.as_seq h4 dst `S.equal` hash_incremental a key_data_v0)
+  (**) end
+  (**) else
+  (**) begin
+  (**)   assert(B.as_seq h4 dst `S.equal`
+  (**)            finish a (update_last a (update_multi a (init a) key_v0)
+  (**)                   (block_length a) data_v0));
+  (**)   Spec.Hash.Incremental.Lemmas.concatenated_hash_incremental a key_v0 data_v0;
+  (**)   assert(B.as_seq h4 dst `S.equal` hash_incremental a key_data_v0)
+  (**) end;
+  (**) Spec.Hash.Incremental.hash_is_hash_incremental a key_data_v0;
+  (**) assert(B.as_seq h4 dst `S.equal` hash a key_data_v0)
+  (**) end
 
 #pop-options
 
@@ -261,7 +268,7 @@ let mk_compute a hash alloca init update_multi update_last finish dst key key_le
   xor_bytes_inplace opad key_block l;
   (**) let h4 = ST.get () in
   (**) assert B.(modifies (loc_buffer key_block `loc_union` loc_buffer ipad
-    `loc_union` loc_buffer opad) h1 h4);
+  (**)   `loc_union` loc_buffer opad) h1 h4);
   (**) S.lemma_eq_intro (B.as_seq h4 ipad) (S.(xor (u8 0x36) (wrap a (B.as_seq h0 key))));
   (**) S.lemma_eq_intro (B.as_seq h4 opad) (S.(xor (u8 0x5c) (wrap a (B.as_seq h0 key))));
   (**) S.lemma_eq_intro (B.as_seq h4 data) (B.as_seq h0 data);
@@ -270,16 +277,16 @@ let mk_compute a hash alloca init update_multi update_last finish dst key key_le
   (**) key_and_data_fits a;
   (**) let h5 = ST.get () in
   (**) S.lemma_eq_intro (S.slice (B.as_seq h5 ipad) 0 (hash_length a))
-      (Spec.Agile.Hash.hash a S.(append (xor (u8 0x36) (wrap a (B.as_seq h0 key))) (B.as_seq h0 data)));
+  (**)    (Spec.Agile.Hash.hash a S.(append (xor (u8 0x36) (wrap a (B.as_seq h0 key)))
+  (**)                          (B.as_seq h0 data)));
   let hash1 = B.sub ipad 0ul (D.hash_len a) in
   part2 a init update_multi update_last finish s dst opad hash1 (D.hash_len a);
   (**) let h6 = ST.get () in
-  (**) assert (B.as_seq h6 dst `S.equal`
-    hmac a (B.as_seq h0 key) (B.as_seq h0 data));
+  (**) assert (B.as_seq h6 dst `S.equal` hmac a (B.as_seq h0 key) (B.as_seq h0 data));
   pop_frame ();
   (**) let h7 = ST.get () in
   (**) assert B.(modifies (loc_buffer key_block `loc_union` loc_buffer ipad `loc_union`
-    loc_buffer opad `loc_union` loc_buffer s) h1 h2);
+  (**)                     loc_buffer opad `loc_union` loc_buffer s) h1 h2);
   (**) LowStar.Monotonic.Buffer.modifies_fresh_frame_popped h0 h1 (B.loc_buffer dst) h6 h7
 
 let legacy_compute_sha1: compute_st SHA1 =

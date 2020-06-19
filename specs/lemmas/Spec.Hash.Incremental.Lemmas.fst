@@ -62,55 +62,6 @@ let rec update_multi_extra_state_eq
     extra_state_add_nat_bound_associative_lem (snd h) (Seq.length input1) (Seq.length input2)
     end
 
-(*
-val last_split_blake_eq (a:hash_alg{is_blake a}) (input:bytes) :
-  Lemma(
-    let nb, rem = Spec.Blake2.split (to_blake_alg a) (S.length input) in
-    let last_block = S.slice input (S.length input - rem) (S.length input) in
-    S.length last_block = block_length a /\
-    S.equal S.(input @| pad a rem)
-            (Spec.Blake2.get_last_padded_block (to_blake_alg a) input rem))
-
-let last_split_blake_eq a input =
-  admit()
-
-let update_last_blake_is_update_multi_padded
-    (a:hash_alg{is_blake a})
-    (s:words_state a)
-    (prevlen:nat{prevlen % block_length a = 0})
-    (input:bytes{S.length input + prevlen <= max_input_length a}):
-    Lemma(
-      update_last_blake a s prevlen input ==
-        update_multi a s S.(input @| pad a (prevlen + S.length input))) =
-  let pd = pad a (prevlen + S.length input) in
-  let padded = S.(input @| pad a (prevlen + S.length input)) in
-  let s1 = update_last_blake a s prevlen input in
-  let blocks, last_block, rem = last_split_blake a input in
-  last_split_blake_eq a input;
-  let s2 = update_multi a s blocks in
-  let ev2 = extra_state_add_nat (snd s2) rem in
-  let s_f = Spec.Blake2.blake2_update_block (to_blake_alg a) true (extra_state_v ev2)
-                                            last_block (fst s2) in
-  assert(s_f == update a 
-  admit()
-  
-  
-  let s2 = update_multi a s padded in
-  assert(
-  admit()
-
-let update_last_is_update_multi_padded
-    (a:hash_alg)
-    (hash:words_state a)
-    (prevlen:nat{prevlen % block_length a = 0})
-    (input:bytes{S.length input + prevlen <= max_input_length a}):
-    Lemma(
-      update_last a hash prevlen input ==
-        update_multi a hash S.(input @| pad a (prevlen + S.length input))) =
-  if is_blake a then
-    update_last_blake_is_update_multi_padded a hash prevlen input
-  else () *)
-
 let hash_incremental_block_is_update_last (a:hash_alg)
   (s:words_state a)
   (input : bytes_block a) :
