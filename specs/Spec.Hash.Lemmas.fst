@@ -49,6 +49,9 @@ let extra_state_add_nat_bound_associative_lem (#a:hash_alg{is_blake a}) (s : ext
   assert(s3_v == (extra_state_v s + n1 + n2) % modulus t);
   assert(s2_v == s3_v)
 
+let extra_state_v_of_nat (a:hash_alg{is_blake a})
+                         (n:nat{n <= max_extra_state a}) :
+  Lemma(extra_state_v (nat_to_extra_state a n) = n) = ()
 
 (* Lemmas such as: relationship between maximum lengths, incremental API vs.
  * NIST reference, etc. *)

@@ -43,27 +43,26 @@ let split_nb_lem (block_length: pos)
   Math.Lemmas.multiple_modulo_lemma n block_length;
   assert(bl % block_length = 0);
   calc (<=) {
-    bl;
-    (<=) { Math.Lemmas.lemma_mult_le_right block_length n (data_length / block_length) }
+     bl;
+  (<=) { Math.Lemmas.lemma_mult_le_right block_length n (data_length / block_length) }
     (data_length / block_length) * block_length;
-    (<=) {}
+  (<=) {}
     (data_length / block_length) * block_length + data_length % block_length;
-    (==) { Math.Lemmas.euclidean_division_definition data_length block_length }
+  (==) { Math.Lemmas.euclidean_division_definition data_length block_length }
     data_length;
   };
   let r = data_length - bl in
-   calc (==) {
-     r % block_length;
-   (==) { Math.Lemmas.modulo_distributivity data_length (- bl) block_length }
-     (data_length % block_length + (- bl) % block_length) % block_length;
-   (==) { Math.Lemmas.paren_mul_right (-1) n block_length }
-     (data_length % block_length + ((- n) * block_length) % block_length) % block_length;
-   (==) { Math.Lemmas.multiple_modulo_lemma (-n) block_length }
-     (data_length % block_length) % block_length;
-   (==) { Math.Lemmas.lemma_mod_add_distr 0 data_length block_length }
-     data_length % block_length;
-   }
-
+  calc (==) {
+    r % block_length;
+  (==) { Math.Lemmas.modulo_distributivity data_length (- bl) block_length }
+    (data_length % block_length + (- bl) % block_length) % block_length;
+  (==) { Math.Lemmas.paren_mul_right (-1) n block_length }
+    (data_length % block_length + ((- n) * block_length) % block_length) % block_length;
+  (==) { Math.Lemmas.multiple_modulo_lemma (-n) block_length }
+    (data_length % block_length) % block_length;
+  (==) { Math.Lemmas.lemma_mod_add_distr 0 data_length block_length }
+    data_length % block_length;
+  }
 #pop-options
 
 /// The helper which actually splits sequences - TODO: rename

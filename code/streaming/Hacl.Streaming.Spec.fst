@@ -71,8 +71,7 @@ let split_at_last_num_blocks #index (c: block index) (i: index) (b: nat):
       ((rest > 0 /\ rest < l) <==>  b % l <> 0) /\
       (rest = (b % l) <==> (blocks = (b / l) * l)) /\
        blocks % l = 0 /\
-      (blocks / l) * l = blocks
-  ))
+      (blocks / l) * l = blocks))
 =
   fst (Lib.UpdateMulti.split_at_last_lazy_nb_rem (U32.v (c.block_len i)) b)
 #pop-options
