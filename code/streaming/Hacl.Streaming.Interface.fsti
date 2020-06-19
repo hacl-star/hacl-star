@@ -224,6 +224,20 @@ let optional_t #index
 /// No such indexing occurs for spec-level functions, because they are always
 /// free to ignore superfluous arguments, and the shape of the API does not
 /// matter.
+
+/// SH: TODO: Maybe we should cut the functor in pieces (we could have a functional specifications
+/// functor, containing only the functional specification definitions, and an
+/// implementation and properties functor, which would be parameterized by a spec functor
+/// and would contain all the lemmas and implementations).
+/// It would actually make the proofs simpler, because after the spec functor is defined
+/// could easily use its fields (the current workaround is to define every field before
+/// defining the functor, which is tedious because we have to copy the signatures
+/// correctly), and moreover because the signatures of the fields of the implementations
+/// and properties functor would only depend on the signature functor: it would thus be
+/// possible to define all those signatures indenpendantly, allowing the user to reuse
+/// them rather than copy-paste big chunks of code (as what is done in Hacl.Streaming.Blake2).
+/// Note that a workaround is to partially instanciate the functor at definition time.
+
 inline_for_extraction noextract noeq
 type block (index: Type0) =
 | Block:
