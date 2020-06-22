@@ -130,7 +130,7 @@ static u64 add4_variables(u64 *x, u64 cin, u64 y0, u64 y1, u64 y2, u64 y3, u64 *
   return cc3;
 }
 
-u64 Hacl_Impl_P256_LowLevel_sub4_il(u64 *x, const u64 *y, u64 *result)
+static u64 sub4_il(u64 *x, const u64 *y, u64 *result)
 {
   u64 *r0 = result;
   u64 *r1 = result + (u32)1U;
@@ -376,7 +376,7 @@ static void cmovznz4(u64 cin, u64 *x, u64 *y, u64 *r)
   r[3U] = r3;
 }
 
-void Hacl_Impl_P256_LowLevel_shift_256_impl(u64 *i, u64 *o)
+static void shift_256_impl(u64 *i, u64 *o)
 {
   o[0U] = (u64)0U;
   o[1U] = (u64)0U;
@@ -423,14 +423,14 @@ static void uploadOneImpl(u64 *f)
   f[3U] = (u64)0U;
 }
 
-void Hacl_Impl_P256_LowLevel_toUint8(u64 *i, u8 *o)
+static void toUint8(u64 *i, u8 *o)
 {
   u32 i0;
   for (i0 = (u32)0U; i0 < (u32)4U; i0++)
     store64_be(o + i0 * (u32)8U, i[i0]);
 }
 
-void Hacl_Impl_P256_LowLevel_changeEndian(u64 *i)
+static void changeEndian(u64 *i)
 {
   u64 zero = i[0U];
   u64 one = i[1U];
@@ -442,7 +442,7 @@ void Hacl_Impl_P256_LowLevel_changeEndian(u64 *i)
   i[3U] = zero;
 }
 
-void Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(u8 *i, u64 *o)
+static void toUint64ChangeEndian(u8 *i, u64 *o)
 {
   {
     u32 i0;
@@ -456,320 +456,18 @@ void Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(u8 *i, u64 *o)
       os[i0] = x;
     }
   }
-  Hacl_Impl_P256_LowLevel_changeEndian(o);
+  changeEndian(o);
 }
 
 static const
 u64
-prime256order_buffer[4U] =
-  {
-    (u64)17562291160714782033U,
-    (u64)13611842547513532036U,
-    (u64)18446744073709551615U,
-    (u64)18446744069414584320U
-  };
-
-static const
-u8
-order_inverse_buffer[32U] =
-  {
-    (u8)79U, (u8)37U, (u8)99U, (u8)252U, (u8)194U, (u8)202U, (u8)185U, (u8)243U, (u8)132U, (u8)158U,
-    (u8)23U, (u8)167U, (u8)173U, (u8)250U, (u8)230U, (u8)188U, (u8)255U, (u8)255U, (u8)255U,
-    (u8)255U, (u8)255U, (u8)255U, (u8)255U, (u8)255U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)255U,
-    (u8)255U, (u8)255U, (u8)255U
-  };
-
-static const
-u8
-order_buffer[32U] =
-  {
-    (u8)255U, (u8)255U, (u8)255U, (u8)255U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)255U, (u8)255U,
-    (u8)255U, (u8)255U, (u8)255U, (u8)255U, (u8)255U, (u8)255U, (u8)188U, (u8)230U, (u8)250U,
-    (u8)173U, (u8)167U, (u8)23U, (u8)158U, (u8)132U, (u8)243U, (u8)185U, (u8)202U, (u8)194U,
-    (u8)252U, (u8)99U, (u8)37U, (u8)81U
-  };
-
-static void montgomery_multiplication_round(u64 *t, u64 *round, u64 k0)
-{
-  u64 temp = (u64)0U;
-  u64 y = (u64)0U;
-  u64 t2[8U] = { 0U };
-  u64 t3[8U] = { 0U };
-  u64 t1 = t[0U];
-  u64 y_;
-  u64 *result04;
-  mul64(t1, k0, &y, &temp);
-  y_ = y;
-  result04 = t2;
-  {
-    u64 temp1 = (u64)0U;
-    u64 f1 = prime256order_buffer[1U];
-    u64 f2 = prime256order_buffer[2U];
-    u64 f3 = prime256order_buffer[3U];
-    u64 *o0 = result04;
-    u64 *o1 = result04 + (u32)1U;
-    u64 *o2 = result04 + (u32)2U;
-    u64 *o3 = result04 + (u32)3U;
-    u64 f01 = prime256order_buffer[0U];
-    u64 h0;
-    u64 l0;
-    u64 c1;
-    u64 h1;
-    u64 l1;
-    u64 c2;
-    u64 h;
-    u64 l;
-    u64 c3;
-    u64 temp0;
-    u64 c;
-    u64 uu____0;
-    mul64(f01, y_, o0, &temp1);
-    h0 = temp1;
-    mul64(f1, y_, o1, &temp1);
-    l0 = o1[0U];
-    c1 = Lib_IntTypes_Intrinsics_add_carry_u64((u64)0U, l0, h0, o1);
-    h1 = temp1;
-    mul64(f2, y_, o2, &temp1);
-    l1 = o2[0U];
-    c2 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, l1, h1, o2);
-    h = temp1;
-    mul64(f3, y_, o3, &temp1);
-    l = o3[0U];
-    c3 = Lib_IntTypes_Intrinsics_add_carry_u64(c2, l, h, o3);
-    temp0 = temp1;
-    c = c3 + temp0;
-    t2[4U] = c;
-    uu____0 = add8(t, t2, t3);
-    shift8(t3, round);
-  }
-}
-
-static void montgomery_multiplication_round_twice(u64 *t, u64 *result, u64 k0)
-{
-  u64 tempRound[8U] = { 0U };
-  montgomery_multiplication_round(t, tempRound, k0);
-  montgomery_multiplication_round(tempRound, result, k0);
-}
-
-static void reduction_prime_2prime_with_carry(u64 *x, u64 *result)
-{
-  u64 tempBuffer[4U] = { 0U };
-  u64 tempBufferForSubborrow = (u64)0U;
-  u64 cin = x[4U];
-  u64 *x_ = x;
-  u64 c = Hacl_Impl_P256_LowLevel_sub4_il(x_, prime256order_buffer, tempBuffer);
-  u64 carry = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, cin, (u64)0U, &tempBufferForSubborrow);
-  cmovznz4(carry, tempBuffer, x_, result);
-}
-
-void Hacl_Impl_ECDSA_MontgomeryMultiplication_reduction_prime_2prime_order(u64 *x, u64 *result)
-{
-  u64 tempBuffer[4U] = { 0U };
-  u64 c = Hacl_Impl_P256_LowLevel_sub4_il(x, prime256order_buffer, tempBuffer);
-  cmovznz4(c, tempBuffer, x, result);
-}
-
-static void montgomery_multiplication_ecdsa_module(u64 *a, u64 *b, u64 *result)
-{
-  u64 t[8U] = { 0U };
-  u64 round2[8U] = { 0U };
-  u64 round4[8U] = { 0U };
-  u64 prime_p256_orderBuffer[4U] = { 0U };
-  u64 k0 = (u64)14758798090332847183U;
-  u64 f0 = a[0U];
-  u64 f1 = a[1U];
-  u64 f2 = a[2U];
-  u64 f3 = a[3U];
-  u64 *b0 = t;
-  u64 temp2 = (u64)0U;
-  u64 f110 = b[1U];
-  u64 f210 = b[2U];
-  u64 f310 = b[3U];
-  u64 *o00 = b0;
-  u64 *o10 = b0 + (u32)1U;
-  u64 *o20 = b0 + (u32)2U;
-  u64 *o30 = b0 + (u32)3U;
-  u64 f020 = b[0U];
-  u64 h0;
-  u64 l0;
-  u64 c10;
-  u64 h1;
-  u64 l1;
-  u64 c20;
-  u64 h2;
-  u64 l2;
-  u64 c30;
-  u64 temp00;
-  u64 c0;
-  u64 *b1;
-  mul64(f020, f0, o00, &temp2);
-  h0 = temp2;
-  mul64(f110, f0, o10, &temp2);
-  l0 = o10[0U];
-  c10 = Lib_IntTypes_Intrinsics_add_carry_u64((u64)0U, l0, h0, o10);
-  h1 = temp2;
-  mul64(f210, f0, o20, &temp2);
-  l1 = o20[0U];
-  c20 = Lib_IntTypes_Intrinsics_add_carry_u64(c10, l1, h1, o20);
-  h2 = temp2;
-  mul64(f310, f0, o30, &temp2);
-  l2 = o30[0U];
-  c30 = Lib_IntTypes_Intrinsics_add_carry_u64(c20, l2, h2, o30);
-  temp00 = temp2;
-  c0 = c30 + temp00;
-  t[4U] = c0;
-  b1 = t + (u32)1U;
-  {
-    u64 temp3[4U] = { 0U };
-    u64 temp10 = (u64)0U;
-    u64 f111 = b[1U];
-    u64 f211 = b[2U];
-    u64 f311 = b[3U];
-    u64 *o01 = temp3;
-    u64 *o11 = temp3 + (u32)1U;
-    u64 *o21 = temp3 + (u32)2U;
-    u64 *o31 = temp3 + (u32)3U;
-    u64 f021 = b[0U];
-    u64 h3;
-    u64 l3;
-    u64 c12;
-    u64 h4;
-    u64 l4;
-    u64 c22;
-    u64 h5;
-    u64 l5;
-    u64 c31;
-    u64 temp01;
-    u64 c4;
-    u64 c32;
-    u64 c1;
-    u64 *b2;
-    mul64(f021, f1, o01, &temp10);
-    h3 = temp10;
-    mul64(f111, f1, o11, &temp10);
-    l3 = o11[0U];
-    c12 = Lib_IntTypes_Intrinsics_add_carry_u64((u64)0U, l3, h3, o11);
-    h4 = temp10;
-    mul64(f211, f1, o21, &temp10);
-    l4 = o21[0U];
-    c22 = Lib_IntTypes_Intrinsics_add_carry_u64(c12, l4, h4, o21);
-    h5 = temp10;
-    mul64(f311, f1, o31, &temp10);
-    l5 = o31[0U];
-    c31 = Lib_IntTypes_Intrinsics_add_carry_u64(c22, l5, h5, o31);
-    temp01 = temp10;
-    c4 = c31 + temp01;
-    c32 = add4(temp3, b1, b1);
-    c1 = c4 + c32;
-    t[5U] = c1;
-    b2 = t + (u32)2U;
-    {
-      u64 temp4[4U] = { 0U };
-      u64 temp11 = (u64)0U;
-      u64 f112 = b[1U];
-      u64 f212 = b[2U];
-      u64 f312 = b[3U];
-      u64 *o02 = temp4;
-      u64 *o12 = temp4 + (u32)1U;
-      u64 *o22 = temp4 + (u32)2U;
-      u64 *o32 = temp4 + (u32)3U;
-      u64 f022 = b[0U];
-      u64 h6;
-      u64 l6;
-      u64 c110;
-      u64 h7;
-      u64 l7;
-      u64 c23;
-      u64 h8;
-      u64 l8;
-      u64 c33;
-      u64 temp02;
-      u64 c5;
-      u64 c34;
-      u64 c2;
-      u64 *b3;
-      mul64(f022, f2, o02, &temp11);
-      h6 = temp11;
-      mul64(f112, f2, o12, &temp11);
-      l6 = o12[0U];
-      c110 = Lib_IntTypes_Intrinsics_add_carry_u64((u64)0U, l6, h6, o12);
-      h7 = temp11;
-      mul64(f212, f2, o22, &temp11);
-      l7 = o22[0U];
-      c23 = Lib_IntTypes_Intrinsics_add_carry_u64(c110, l7, h7, o22);
-      h8 = temp11;
-      mul64(f312, f2, o32, &temp11);
-      l8 = o32[0U];
-      c33 = Lib_IntTypes_Intrinsics_add_carry_u64(c23, l8, h8, o32);
-      temp02 = temp11;
-      c5 = c33 + temp02;
-      c34 = add4(temp4, b2, b2);
-      c2 = c5 + c34;
-      t[6U] = c2;
-      b3 = t + (u32)3U;
-      {
-        u64 temp[4U] = { 0U };
-        u64 temp1 = (u64)0U;
-        u64 f11 = b[1U];
-        u64 f21 = b[2U];
-        u64 f31 = b[3U];
-        u64 *o0 = temp;
-        u64 *o1 = temp + (u32)1U;
-        u64 *o2 = temp + (u32)2U;
-        u64 *o3 = temp + (u32)3U;
-        u64 f02 = b[0U];
-        u64 h9;
-        u64 l9;
-        u64 c11;
-        u64 h10;
-        u64 l10;
-        u64 c21;
-        u64 h;
-        u64 l;
-        u64 c35;
-        u64 temp0;
-        u64 c;
-        u64 c36;
-        u64 c3;
-        mul64(f02, f3, o0, &temp1);
-        h9 = temp1;
-        mul64(f11, f3, o1, &temp1);
-        l9 = o1[0U];
-        c11 = Lib_IntTypes_Intrinsics_add_carry_u64((u64)0U, l9, h9, o1);
-        h10 = temp1;
-        mul64(f21, f3, o2, &temp1);
-        l10 = o2[0U];
-        c21 = Lib_IntTypes_Intrinsics_add_carry_u64(c11, l10, h10, o2);
-        h = temp1;
-        mul64(f31, f3, o3, &temp1);
-        l = o3[0U];
-        c35 = Lib_IntTypes_Intrinsics_add_carry_u64(c21, l, h, o3);
-        temp0 = temp1;
-        c = c35 + temp0;
-        c36 = add4(temp, b3, b3);
-        c3 = c + c36;
-        t[7U] = c3;
-        montgomery_multiplication_round_twice(t, round2, k0);
-        montgomery_multiplication_round_twice(round2, round4, k0);
-        reduction_prime_2prime_with_carry(round4, result);
-      }
-    }
-  }
-}
-
-const
-u64
-Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[4U] =
+prime256_buffer[4U] =
   { (u64)0xffffffffffffffffU, (u64)0xffffffffU, (u64)0U, (u64)0xffffffff00000001U };
 
 static void reduction_prime_2prime_impl(u64 *x, u64 *result)
 {
   u64 tempBuffer[4U] = { 0U };
-  u64
-  c =
-    Hacl_Impl_P256_LowLevel_sub4_il(x,
-      Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer,
-      tempBuffer);
+  u64 c = sub4_il(x, prime256_buffer, tempBuffer);
   cmovznz4(c, tempBuffer, x, result);
 }
 
@@ -778,11 +476,7 @@ static void p256_add(u64 *arg1, u64 *arg2, u64 *out)
   u64 t = add4(arg1, arg2, out);
   u64 tempBuffer[4U] = { 0U };
   u64 tempBufferForSubborrow = (u64)0U;
-  u64
-  c =
-    Hacl_Impl_P256_LowLevel_sub4_il(out,
-      Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer,
-      tempBuffer);
+  u64 c = sub4_il(out, prime256_buffer, tempBuffer);
   u64 carry = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t, (u64)0U, &tempBufferForSubborrow);
   cmovznz4(carry, tempBuffer, out, out);
 }
@@ -792,11 +486,7 @@ static void p256_double(u64 *arg1, u64 *out)
   u64 t = add4(arg1, arg1, out);
   u64 tempBuffer[4U] = { 0U };
   u64 tempBufferForSubborrow = (u64)0U;
-  u64
-  c =
-    Hacl_Impl_P256_LowLevel_sub4_il(out,
-      Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer,
-      tempBuffer);
+  u64 c = sub4_il(out, prime256_buffer, tempBuffer);
   u64 carry = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t, (u64)0U, &tempBufferForSubborrow);
   cmovznz4(carry, tempBuffer, out, out);
 }
@@ -825,14 +515,14 @@ static void montgomery_multiplication_buffer_by_one(u64 *a, u64 *result)
     u64 t10 = t[0U];
     u64 *result040 = t20;
     u64 temp1 = (u64)0U;
-    u64 f10 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[1U];
-    u64 f20 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[2U];
-    u64 f30 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[3U];
+    u64 f10 = prime256_buffer[1U];
+    u64 f20 = prime256_buffer[2U];
+    u64 f30 = prime256_buffer[3U];
     u64 *o00 = result040;
     u64 *o10 = result040 + (u32)1U;
     u64 *o20 = result040 + (u32)2U;
     u64 *o30 = result040 + (u32)3U;
-    u64 f010 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[0U];
+    u64 f010 = prime256_buffer[0U];
     u64 h0;
     u64 l0;
     u64 c10;
@@ -869,14 +559,14 @@ static void montgomery_multiplication_buffer_by_one(u64 *a, u64 *result)
       u64 t11 = tempRound[0U];
       u64 *result041 = t21;
       u64 temp2 = (u64)0U;
-      u64 f11 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[1U];
-      u64 f21 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[2U];
-      u64 f31 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[3U];
+      u64 f11 = prime256_buffer[1U];
+      u64 f21 = prime256_buffer[2U];
+      u64 f31 = prime256_buffer[3U];
       u64 *o01 = result041;
       u64 *o11 = result041 + (u32)1U;
       u64 *o21 = result041 + (u32)2U;
       u64 *o31 = result041 + (u32)3U;
-      u64 f011 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[0U];
+      u64 f011 = prime256_buffer[0U];
       u64 h3;
       u64 l3;
       u64 c11;
@@ -914,14 +604,14 @@ static void montgomery_multiplication_buffer_by_one(u64 *a, u64 *result)
         u64 t12 = round2[0U];
         u64 *result042 = t2;
         u64 temp3 = (u64)0U;
-        u64 f12 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[1U];
-        u64 f22 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[2U];
-        u64 f32 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[3U];
+        u64 f12 = prime256_buffer[1U];
+        u64 f22 = prime256_buffer[2U];
+        u64 f32 = prime256_buffer[3U];
         u64 *o02 = result042;
         u64 *o12 = result042 + (u32)1U;
         u64 *o22 = result042 + (u32)2U;
         u64 *o32 = result042 + (u32)3U;
-        u64 f012 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[0U];
+        u64 f012 = prime256_buffer[0U];
         u64 h6;
         u64 l6;
         u64 c12;
@@ -958,14 +648,14 @@ static void montgomery_multiplication_buffer_by_one(u64 *a, u64 *result)
           u64 t1 = tempRound0[0U];
           u64 *result04 = t22;
           u64 temp = (u64)0U;
-          u64 f1 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[1U];
-          u64 f2 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[2U];
-          u64 f3 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[3U];
+          u64 f1 = prime256_buffer[1U];
+          u64 f2 = prime256_buffer[2U];
+          u64 f3 = prime256_buffer[3U];
           u64 *o0 = result04;
           u64 *o1 = result04 + (u32)1U;
           u64 *o2 = result04 + (u32)2U;
           u64 *o3 = result04 + (u32)3U;
-          u64 f01 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[0U];
+          u64 f01 = prime256_buffer[0U];
           u64 h9;
           u64 l9;
           u64 c1;
@@ -1001,11 +691,7 @@ static void montgomery_multiplication_buffer_by_one(u64 *a, u64 *result)
             u64 tempBufferForSubborrow = (u64)0U;
             u64 cin = round4[4U];
             u64 *x_ = round4;
-            u64
-            c =
-              Hacl_Impl_P256_LowLevel_sub4_il(x_,
-                Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer,
-                tempBuffer);
+            u64 c = sub4_il(x_, prime256_buffer, tempBuffer);
             u64
             carry = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, cin, (u64)0U, &tempBufferForSubborrow);
             cmovznz4(carry, tempBuffer, x_, result);
@@ -1201,14 +887,14 @@ static void montgomery_multiplication_buffer(u64 *a, u64 *b, u64 *result)
           u64 t10 = t[0U];
           u64 *result040 = t20;
           u64 temp6 = (u64)0U;
-          u64 f12 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[1U];
-          u64 f22 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[2U];
-          u64 f32 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[3U];
+          u64 f12 = prime256_buffer[1U];
+          u64 f22 = prime256_buffer[2U];
+          u64 f32 = prime256_buffer[3U];
           u64 *o04 = result040;
           u64 *o14 = result040 + (u32)1U;
           u64 *o24 = result040 + (u32)2U;
           u64 *o34 = result040 + (u32)3U;
-          u64 f010 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[0U];
+          u64 f010 = prime256_buffer[0U];
           u64 h12;
           u64 l12;
           u64 c14;
@@ -1245,14 +931,14 @@ static void montgomery_multiplication_buffer(u64 *a, u64 *b, u64 *result)
             u64 t11 = tempRound[0U];
             u64 *result041 = t21;
             u64 temp7 = (u64)0U;
-            u64 f13 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[1U];
-            u64 f23 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[2U];
-            u64 f33 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[3U];
+            u64 f13 = prime256_buffer[1U];
+            u64 f23 = prime256_buffer[2U];
+            u64 f33 = prime256_buffer[3U];
             u64 *o05 = result041;
             u64 *o15 = result041 + (u32)1U;
             u64 *o25 = result041 + (u32)2U;
             u64 *o35 = result041 + (u32)3U;
-            u64 f011 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[0U];
+            u64 f011 = prime256_buffer[0U];
             u64 h15;
             u64 l15;
             u64 c15;
@@ -1290,14 +976,14 @@ static void montgomery_multiplication_buffer(u64 *a, u64 *b, u64 *result)
               u64 t12 = round2[0U];
               u64 *result042 = t2;
               u64 temp8 = (u64)0U;
-              u64 f14 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[1U];
-              u64 f24 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[2U];
-              u64 f34 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[3U];
+              u64 f14 = prime256_buffer[1U];
+              u64 f24 = prime256_buffer[2U];
+              u64 f34 = prime256_buffer[3U];
               u64 *o06 = result042;
               u64 *o16 = result042 + (u32)1U;
               u64 *o26 = result042 + (u32)2U;
               u64 *o36 = result042 + (u32)3U;
-              u64 f012 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[0U];
+              u64 f012 = prime256_buffer[0U];
               u64 h18;
               u64 l18;
               u64 c16;
@@ -1334,14 +1020,14 @@ static void montgomery_multiplication_buffer(u64 *a, u64 *b, u64 *result)
                 u64 t1 = tempRound0[0U];
                 u64 *result04 = t22;
                 u64 temp = (u64)0U;
-                u64 f1 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[1U];
-                u64 f2 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[2U];
-                u64 f3 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[3U];
+                u64 f1 = prime256_buffer[1U];
+                u64 f2 = prime256_buffer[2U];
+                u64 f3 = prime256_buffer[3U];
                 u64 *o0 = result04;
                 u64 *o1 = result04 + (u32)1U;
                 u64 *o2 = result04 + (u32)2U;
                 u64 *o3 = result04 + (u32)3U;
-                u64 f01 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[0U];
+                u64 f01 = prime256_buffer[0U];
                 u64 h21;
                 u64 l21;
                 u64 c1;
@@ -1377,11 +1063,7 @@ static void montgomery_multiplication_buffer(u64 *a, u64 *b, u64 *result)
                   u64 tempBufferForSubborrow = (u64)0U;
                   u64 cin = round4[4U];
                   u64 *x_ = round4;
-                  u64
-                  c =
-                    Hacl_Impl_P256_LowLevel_sub4_il(x_,
-                      Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer,
-                      tempBuffer);
+                  u64 c = sub4_il(x_, prime256_buffer, tempBuffer);
                   u64
                   carry =
                     Lib_IntTypes_Intrinsics_sub_borrow_u64(c,
@@ -1412,14 +1094,14 @@ static void montgomery_square_buffer(u64 *a, u64 *result)
     u64 t10 = t[0U];
     u64 *result040 = t20;
     u64 temp1 = (u64)0U;
-    u64 f10 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[1U];
-    u64 f20 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[2U];
-    u64 f30 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[3U];
+    u64 f10 = prime256_buffer[1U];
+    u64 f20 = prime256_buffer[2U];
+    u64 f30 = prime256_buffer[3U];
     u64 *o00 = result040;
     u64 *o10 = result040 + (u32)1U;
     u64 *o20 = result040 + (u32)2U;
     u64 *o30 = result040 + (u32)3U;
-    u64 f010 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[0U];
+    u64 f010 = prime256_buffer[0U];
     u64 h0;
     u64 l0;
     u64 c10;
@@ -1456,14 +1138,14 @@ static void montgomery_square_buffer(u64 *a, u64 *result)
       u64 t11 = tempRound[0U];
       u64 *result041 = t21;
       u64 temp2 = (u64)0U;
-      u64 f11 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[1U];
-      u64 f21 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[2U];
-      u64 f31 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[3U];
+      u64 f11 = prime256_buffer[1U];
+      u64 f21 = prime256_buffer[2U];
+      u64 f31 = prime256_buffer[3U];
       u64 *o01 = result041;
       u64 *o11 = result041 + (u32)1U;
       u64 *o21 = result041 + (u32)2U;
       u64 *o31 = result041 + (u32)3U;
-      u64 f011 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[0U];
+      u64 f011 = prime256_buffer[0U];
       u64 h3;
       u64 l3;
       u64 c11;
@@ -1501,14 +1183,14 @@ static void montgomery_square_buffer(u64 *a, u64 *result)
         u64 t12 = round2[0U];
         u64 *result042 = t2;
         u64 temp3 = (u64)0U;
-        u64 f12 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[1U];
-        u64 f22 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[2U];
-        u64 f32 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[3U];
+        u64 f12 = prime256_buffer[1U];
+        u64 f22 = prime256_buffer[2U];
+        u64 f32 = prime256_buffer[3U];
         u64 *o02 = result042;
         u64 *o12 = result042 + (u32)1U;
         u64 *o22 = result042 + (u32)2U;
         u64 *o32 = result042 + (u32)3U;
-        u64 f012 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[0U];
+        u64 f012 = prime256_buffer[0U];
         u64 h6;
         u64 l6;
         u64 c12;
@@ -1545,14 +1227,14 @@ static void montgomery_square_buffer(u64 *a, u64 *result)
           u64 t1 = tempRound0[0U];
           u64 *result04 = t22;
           u64 temp = (u64)0U;
-          u64 f1 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[1U];
-          u64 f2 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[2U];
-          u64 f3 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[3U];
+          u64 f1 = prime256_buffer[1U];
+          u64 f2 = prime256_buffer[2U];
+          u64 f3 = prime256_buffer[3U];
           u64 *o0 = result04;
           u64 *o1 = result04 + (u32)1U;
           u64 *o2 = result04 + (u32)2U;
           u64 *o3 = result04 + (u32)3U;
-          u64 f01 = Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[0U];
+          u64 f01 = prime256_buffer[0U];
           u64 h9;
           u64 l9;
           u64 c1;
@@ -1588,11 +1270,7 @@ static void montgomery_square_buffer(u64 *a, u64 *result)
             u64 tempBufferForSubborrow = (u64)0U;
             u64 cin = round4[4U];
             u64 *x_ = round4;
-            u64
-            c =
-              Hacl_Impl_P256_LowLevel_sub4_il(x_,
-                Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer,
-                tempBuffer);
+            u64 c = sub4_il(x_, prime256_buffer, tempBuffer);
             u64
             carry = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, cin, (u64)0U, &tempBufferForSubborrow);
             cmovznz4(carry, tempBuffer, x_, result);
@@ -1691,7 +1369,7 @@ static u64 store_high_low_u(u32 high, u32 low)
   return as_uint64_low ^ as_uint64_high1;
 }
 
-void Hacl_Impl_SolinasReduction_solinas_reduction_impl(u64 *i, u64 *o)
+static void solinas_reduction_impl(u64 *i, u64 *o)
 {
   u64 tempBuffer[36U] = { 0U };
   u64 i0 = i[0U];
@@ -1947,7 +1625,7 @@ copy_point_conditional(u64 *x3_out, u64 *y3_out, u64 *z3_out, u64 *p, u64 *maskP
   copy_conditional(z3_out, p_z, mask);
 }
 
-void Hacl_Impl_P256_PointAdd_point_add(u64 *p, u64 *q, u64 *result, u64 *tempBuffer)
+static void point_add(u64 *p, u64 *q, u64 *result, u64 *tempBuffer)
 {
   u64 *tempBuffer16 = tempBuffer;
   u64 *u1 = tempBuffer + (u32)16U;
@@ -2036,16 +1714,16 @@ static void pointToDomain(u64 *p, u64 *result)
   u64 *r_y = result + (u32)4U;
   u64 *r_z = result + (u32)8U;
   u64 multBuffer[8U] = { 0U };
-  Hacl_Impl_P256_LowLevel_shift_256_impl(p_x, multBuffer);
-  Hacl_Impl_SolinasReduction_solinas_reduction_impl(multBuffer, r_x);
+  shift_256_impl(p_x, multBuffer);
+  solinas_reduction_impl(multBuffer, r_x);
   {
     u64 multBuffer0[8U] = { 0U };
-    Hacl_Impl_P256_LowLevel_shift_256_impl(p_y, multBuffer0);
-    Hacl_Impl_SolinasReduction_solinas_reduction_impl(multBuffer0, r_y);
+    shift_256_impl(p_y, multBuffer0);
+    solinas_reduction_impl(multBuffer0, r_y);
     {
       u64 multBuffer1[8U] = { 0U };
-      Hacl_Impl_P256_LowLevel_shift_256_impl(p_z, multBuffer1);
-      Hacl_Impl_SolinasReduction_solinas_reduction_impl(multBuffer1, r_z);
+      shift_256_impl(p_z, multBuffer1);
+      solinas_reduction_impl(multBuffer1, r_z);
     }
   }
 }
@@ -2080,7 +1758,7 @@ static inline void cswap(u64 bit, u64 *p1, u64 *p2)
   }
 }
 
-void Hacl_Impl_P256_Core_norm(u64 *p, u64 *resultPoint, u64 *tempBuffer)
+static void norm(u64 *p, u64 *resultPoint, u64 *tempBuffer)
 {
   u64 *xf = p;
   u64 *yf = p + (u32)4U;
@@ -2149,12 +1827,12 @@ static void scalarMultiplicationL(u64 *p, u64 *result, u8 *scalar, u64 *tempBuff
       u32 bit0 = (u32)255U - i;
       u64 bit = (u64)(scalar[(u32)31U - bit0 / (u32)8U] >> bit0 % (u32)8U & (u8)1U);
       cswap(bit, q, result);
-      Hacl_Impl_P256_PointAdd_point_add(q, result, result, buff);
+      point_add(q, result, result, buff);
       point_double(q, q, buff);
       cswap(bit, q, result);
     }
   }
-  Hacl_Impl_P256_Core_norm(q, result, buff);
+  norm(q, result, buff);
 }
 
 static void scalarMultiplicationC(u64 *p, u64 *result, const u8 *scalar, u64 *tempBuffer)
@@ -2171,12 +1849,12 @@ static void scalarMultiplicationC(u64 *p, u64 *result, const u8 *scalar, u64 *te
       u32 bit0 = (u32)255U - i;
       u64 bit = (u64)(scalar[(u32)31U - bit0 / (u32)8U] >> bit0 % (u32)8U & (u8)1U);
       cswap(bit, q, result);
-      Hacl_Impl_P256_PointAdd_point_add(q, result, result, buff);
+      point_add(q, result, result, buff);
       point_double(q, q, buff);
       cswap(bit, q, result);
     }
   }
-  Hacl_Impl_P256_Core_norm(q, result, buff);
+  norm(q, result, buff);
 }
 
 static void uploadBasePoint(u64 *p)
@@ -2195,13 +1873,7 @@ static void uploadBasePoint(u64 *p)
   p[11U] = (u64)4294967294U;
 }
 
-void
-Hacl_Impl_P256_Core_scalarMultiplicationWithoutNorm(
-  u64 *p,
-  u64 *result,
-  u8 *scalar,
-  u64 *tempBuffer
-)
+static void scalarMultiplicationWithoutNorm(u64 *p, u64 *result, u8 *scalar, u64 *tempBuffer)
 {
   u64 *q = tempBuffer;
   u64 *buff;
@@ -2215,7 +1887,7 @@ Hacl_Impl_P256_Core_scalarMultiplicationWithoutNorm(
       u32 bit0 = (u32)255U - i;
       u64 bit = (u64)(scalar[(u32)31U - bit0 / (u32)8U] >> bit0 % (u32)8U & (u8)1U);
       cswap(bit, q, result);
-      Hacl_Impl_P256_PointAdd_point_add(q, result, result, buff);
+      point_add(q, result, result, buff);
       point_double(q, q, buff);
       cswap(bit, q, result);
     }
@@ -2239,15 +1911,15 @@ static void secretToPublic(u64 *result, u8 *scalar, u64 *tempBuffer)
       u32 bit0 = (u32)255U - i;
       u64 bit = (u64)(scalar[(u32)31U - bit0 / (u32)8U] >> bit0 % (u32)8U & (u8)1U);
       cswap(bit, q, basePoint);
-      Hacl_Impl_P256_PointAdd_point_add(q, basePoint, basePoint, buff);
+      point_add(q, basePoint, basePoint, buff);
       point_double(q, q, buff);
       cswap(bit, q, basePoint);
     }
   }
-  Hacl_Impl_P256_Core_norm(q, result, buff);
+  norm(q, result, buff);
 }
 
-void Hacl_Impl_P256_Core_secretToPublicWithoutNorm(u64 *result, u8 *scalar, u64 *tempBuffer)
+static void secretToPublicWithoutNorm(u64 *result, u8 *scalar, u64 *tempBuffer)
 {
   u64 basePoint[12U] = { 0U };
   u64 *q;
@@ -2263,7 +1935,7 @@ void Hacl_Impl_P256_Core_secretToPublicWithoutNorm(u64 *result, u8 *scalar, u64 
       u32 bit0 = (u32)255U - i;
       u64 bit = (u64)(scalar[(u32)31U - bit0 / (u32)8U] >> bit0 % (u32)8U & (u8)1U);
       cswap(bit, q, basePoint);
-      Hacl_Impl_P256_PointAdd_point_add(q, basePoint, basePoint, buff);
+      point_add(q, basePoint, basePoint, buff);
       point_double(q, q, buff);
       cswap(bit, q, basePoint);
     }
@@ -2271,7 +1943,305 @@ void Hacl_Impl_P256_Core_secretToPublicWithoutNorm(u64 *result, u8 *scalar, u64 
   copy_point(q, result);
 }
 
-void Hacl_Impl_P256_Signature_Common_bufferToJac(u64 *p, u64 *result)
+static const
+u64
+prime256order_buffer[4U] =
+  {
+    (u64)17562291160714782033U,
+    (u64)13611842547513532036U,
+    (u64)18446744073709551615U,
+    (u64)18446744069414584320U
+  };
+
+static const
+u8
+order_inverse_buffer[32U] =
+  {
+    (u8)79U, (u8)37U, (u8)99U, (u8)252U, (u8)194U, (u8)202U, (u8)185U, (u8)243U, (u8)132U, (u8)158U,
+    (u8)23U, (u8)167U, (u8)173U, (u8)250U, (u8)230U, (u8)188U, (u8)255U, (u8)255U, (u8)255U,
+    (u8)255U, (u8)255U, (u8)255U, (u8)255U, (u8)255U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)255U,
+    (u8)255U, (u8)255U, (u8)255U
+  };
+
+static const
+u8
+order_buffer[32U] =
+  {
+    (u8)255U, (u8)255U, (u8)255U, (u8)255U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)255U, (u8)255U,
+    (u8)255U, (u8)255U, (u8)255U, (u8)255U, (u8)255U, (u8)255U, (u8)188U, (u8)230U, (u8)250U,
+    (u8)173U, (u8)167U, (u8)23U, (u8)158U, (u8)132U, (u8)243U, (u8)185U, (u8)202U, (u8)194U,
+    (u8)252U, (u8)99U, (u8)37U, (u8)81U
+  };
+
+static void montgomery_multiplication_round(u64 *t, u64 *round, u64 k0)
+{
+  u64 temp = (u64)0U;
+  u64 y = (u64)0U;
+  u64 t2[8U] = { 0U };
+  u64 t3[8U] = { 0U };
+  u64 t1 = t[0U];
+  u64 y_;
+  u64 *result04;
+  mul64(t1, k0, &y, &temp);
+  y_ = y;
+  result04 = t2;
+  {
+    u64 temp1 = (u64)0U;
+    u64 f1 = prime256order_buffer[1U];
+    u64 f2 = prime256order_buffer[2U];
+    u64 f3 = prime256order_buffer[3U];
+    u64 *o0 = result04;
+    u64 *o1 = result04 + (u32)1U;
+    u64 *o2 = result04 + (u32)2U;
+    u64 *o3 = result04 + (u32)3U;
+    u64 f01 = prime256order_buffer[0U];
+    u64 h0;
+    u64 l0;
+    u64 c1;
+    u64 h1;
+    u64 l1;
+    u64 c2;
+    u64 h;
+    u64 l;
+    u64 c3;
+    u64 temp0;
+    u64 c;
+    u64 uu____0;
+    mul64(f01, y_, o0, &temp1);
+    h0 = temp1;
+    mul64(f1, y_, o1, &temp1);
+    l0 = o1[0U];
+    c1 = Lib_IntTypes_Intrinsics_add_carry_u64((u64)0U, l0, h0, o1);
+    h1 = temp1;
+    mul64(f2, y_, o2, &temp1);
+    l1 = o2[0U];
+    c2 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, l1, h1, o2);
+    h = temp1;
+    mul64(f3, y_, o3, &temp1);
+    l = o3[0U];
+    c3 = Lib_IntTypes_Intrinsics_add_carry_u64(c2, l, h, o3);
+    temp0 = temp1;
+    c = c3 + temp0;
+    t2[4U] = c;
+    uu____0 = add8(t, t2, t3);
+    shift8(t3, round);
+  }
+}
+
+static void montgomery_multiplication_round_twice(u64 *t, u64 *result, u64 k0)
+{
+  u64 tempRound[8U] = { 0U };
+  montgomery_multiplication_round(t, tempRound, k0);
+  montgomery_multiplication_round(tempRound, result, k0);
+}
+
+static void reduction_prime_2prime_with_carry(u64 *x, u64 *result)
+{
+  u64 tempBuffer[4U] = { 0U };
+  u64 tempBufferForSubborrow = (u64)0U;
+  u64 cin = x[4U];
+  u64 *x_ = x;
+  u64 c = sub4_il(x_, prime256order_buffer, tempBuffer);
+  u64 carry = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, cin, (u64)0U, &tempBufferForSubborrow);
+  cmovznz4(carry, tempBuffer, x_, result);
+}
+
+static void reduction_prime_2prime_order(u64 *x, u64 *result)
+{
+  u64 tempBuffer[4U] = { 0U };
+  u64 c = sub4_il(x, prime256order_buffer, tempBuffer);
+  cmovznz4(c, tempBuffer, x, result);
+}
+
+static void montgomery_multiplication_ecdsa_module(u64 *a, u64 *b, u64 *result)
+{
+  u64 t[8U] = { 0U };
+  u64 round2[8U] = { 0U };
+  u64 round4[8U] = { 0U };
+  u64 prime_p256_orderBuffer[4U] = { 0U };
+  u64 k0 = (u64)14758798090332847183U;
+  u64 f0 = a[0U];
+  u64 f1 = a[1U];
+  u64 f2 = a[2U];
+  u64 f3 = a[3U];
+  u64 *b0 = t;
+  u64 temp2 = (u64)0U;
+  u64 f110 = b[1U];
+  u64 f210 = b[2U];
+  u64 f310 = b[3U];
+  u64 *o00 = b0;
+  u64 *o10 = b0 + (u32)1U;
+  u64 *o20 = b0 + (u32)2U;
+  u64 *o30 = b0 + (u32)3U;
+  u64 f020 = b[0U];
+  u64 h0;
+  u64 l0;
+  u64 c10;
+  u64 h1;
+  u64 l1;
+  u64 c20;
+  u64 h2;
+  u64 l2;
+  u64 c30;
+  u64 temp00;
+  u64 c0;
+  u64 *b1;
+  mul64(f020, f0, o00, &temp2);
+  h0 = temp2;
+  mul64(f110, f0, o10, &temp2);
+  l0 = o10[0U];
+  c10 = Lib_IntTypes_Intrinsics_add_carry_u64((u64)0U, l0, h0, o10);
+  h1 = temp2;
+  mul64(f210, f0, o20, &temp2);
+  l1 = o20[0U];
+  c20 = Lib_IntTypes_Intrinsics_add_carry_u64(c10, l1, h1, o20);
+  h2 = temp2;
+  mul64(f310, f0, o30, &temp2);
+  l2 = o30[0U];
+  c30 = Lib_IntTypes_Intrinsics_add_carry_u64(c20, l2, h2, o30);
+  temp00 = temp2;
+  c0 = c30 + temp00;
+  t[4U] = c0;
+  b1 = t + (u32)1U;
+  {
+    u64 temp3[4U] = { 0U };
+    u64 temp10 = (u64)0U;
+    u64 f111 = b[1U];
+    u64 f211 = b[2U];
+    u64 f311 = b[3U];
+    u64 *o01 = temp3;
+    u64 *o11 = temp3 + (u32)1U;
+    u64 *o21 = temp3 + (u32)2U;
+    u64 *o31 = temp3 + (u32)3U;
+    u64 f021 = b[0U];
+    u64 h3;
+    u64 l3;
+    u64 c12;
+    u64 h4;
+    u64 l4;
+    u64 c22;
+    u64 h5;
+    u64 l5;
+    u64 c31;
+    u64 temp01;
+    u64 c4;
+    u64 c32;
+    u64 c1;
+    u64 *b2;
+    mul64(f021, f1, o01, &temp10);
+    h3 = temp10;
+    mul64(f111, f1, o11, &temp10);
+    l3 = o11[0U];
+    c12 = Lib_IntTypes_Intrinsics_add_carry_u64((u64)0U, l3, h3, o11);
+    h4 = temp10;
+    mul64(f211, f1, o21, &temp10);
+    l4 = o21[0U];
+    c22 = Lib_IntTypes_Intrinsics_add_carry_u64(c12, l4, h4, o21);
+    h5 = temp10;
+    mul64(f311, f1, o31, &temp10);
+    l5 = o31[0U];
+    c31 = Lib_IntTypes_Intrinsics_add_carry_u64(c22, l5, h5, o31);
+    temp01 = temp10;
+    c4 = c31 + temp01;
+    c32 = add4(temp3, b1, b1);
+    c1 = c4 + c32;
+    t[5U] = c1;
+    b2 = t + (u32)2U;
+    {
+      u64 temp4[4U] = { 0U };
+      u64 temp11 = (u64)0U;
+      u64 f112 = b[1U];
+      u64 f212 = b[2U];
+      u64 f312 = b[3U];
+      u64 *o02 = temp4;
+      u64 *o12 = temp4 + (u32)1U;
+      u64 *o22 = temp4 + (u32)2U;
+      u64 *o32 = temp4 + (u32)3U;
+      u64 f022 = b[0U];
+      u64 h6;
+      u64 l6;
+      u64 c110;
+      u64 h7;
+      u64 l7;
+      u64 c23;
+      u64 h8;
+      u64 l8;
+      u64 c33;
+      u64 temp02;
+      u64 c5;
+      u64 c34;
+      u64 c2;
+      u64 *b3;
+      mul64(f022, f2, o02, &temp11);
+      h6 = temp11;
+      mul64(f112, f2, o12, &temp11);
+      l6 = o12[0U];
+      c110 = Lib_IntTypes_Intrinsics_add_carry_u64((u64)0U, l6, h6, o12);
+      h7 = temp11;
+      mul64(f212, f2, o22, &temp11);
+      l7 = o22[0U];
+      c23 = Lib_IntTypes_Intrinsics_add_carry_u64(c110, l7, h7, o22);
+      h8 = temp11;
+      mul64(f312, f2, o32, &temp11);
+      l8 = o32[0U];
+      c33 = Lib_IntTypes_Intrinsics_add_carry_u64(c23, l8, h8, o32);
+      temp02 = temp11;
+      c5 = c33 + temp02;
+      c34 = add4(temp4, b2, b2);
+      c2 = c5 + c34;
+      t[6U] = c2;
+      b3 = t + (u32)3U;
+      {
+        u64 temp[4U] = { 0U };
+        u64 temp1 = (u64)0U;
+        u64 f11 = b[1U];
+        u64 f21 = b[2U];
+        u64 f31 = b[3U];
+        u64 *o0 = temp;
+        u64 *o1 = temp + (u32)1U;
+        u64 *o2 = temp + (u32)2U;
+        u64 *o3 = temp + (u32)3U;
+        u64 f02 = b[0U];
+        u64 h9;
+        u64 l9;
+        u64 c11;
+        u64 h10;
+        u64 l10;
+        u64 c21;
+        u64 h;
+        u64 l;
+        u64 c35;
+        u64 temp0;
+        u64 c;
+        u64 c36;
+        u64 c3;
+        mul64(f02, f3, o0, &temp1);
+        h9 = temp1;
+        mul64(f11, f3, o1, &temp1);
+        l9 = o1[0U];
+        c11 = Lib_IntTypes_Intrinsics_add_carry_u64((u64)0U, l9, h9, o1);
+        h10 = temp1;
+        mul64(f21, f3, o2, &temp1);
+        l10 = o2[0U];
+        c21 = Lib_IntTypes_Intrinsics_add_carry_u64(c11, l10, h10, o2);
+        h = temp1;
+        mul64(f31, f3, o3, &temp1);
+        l = o3[0U];
+        c35 = Lib_IntTypes_Intrinsics_add_carry_u64(c21, l, h, o3);
+        temp0 = temp1;
+        c = c35 + temp0;
+        c36 = add4(temp, b3, b3);
+        c3 = c + c36;
+        t[7U] = c3;
+        montgomery_multiplication_round_twice(t, round2, k0);
+        montgomery_multiplication_round_twice(round2, round4, k0);
+        reduction_prime_2prime_with_carry(round4, result);
+      }
+    }
+  }
+}
+
+static void bufferToJac(u64 *p, u64 *result)
 {
   u64 *partPoint = result;
   memcpy(partPoint, p, (u32)8U * sizeof (p[0U]));
@@ -2281,7 +2251,10 @@ void Hacl_Impl_P256_Signature_Common_bufferToJac(u64 *p, u64 *result)
   result[11U] = (u64)0U;
 }
 
-bool Hacl_Impl_P256_Signature_Common_isPointAtInfinityPublic(u64 *p)
+/*
+  This code is not side channel resistant
+*/
+static bool isPointAtInfinityPublic(u64 *p)
 {
   u64 z0 = p[8U];
   u64 z1 = p[9U];
@@ -2294,6 +2267,9 @@ bool Hacl_Impl_P256_Signature_Common_isPointAtInfinityPublic(u64 *p)
   return z0_zero && z1_zero && z2_zero && z3_zero;
 }
 
+/*
+  This code is not side channel resistant
+*/
 static bool isPointOnCurvePublic(u64 *p)
 {
   u64 y2Buffer[4U] = { 0U };
@@ -2301,8 +2277,8 @@ static bool isPointOnCurvePublic(u64 *p)
   u64 *x = p;
   u64 *y = p + (u32)4U;
   u64 multBuffer0[8U] = { 0U };
-  Hacl_Impl_P256_LowLevel_shift_256_impl(y, multBuffer0);
-  Hacl_Impl_SolinasReduction_solinas_reduction_impl(multBuffer0, y2Buffer);
+  shift_256_impl(y, multBuffer0);
+  solinas_reduction_impl(multBuffer0, y2Buffer);
   montgomery_square_buffer(y2Buffer, y2Buffer);
   {
     u64 xToDomainBuffer[4U] = { 0U };
@@ -2310,8 +2286,8 @@ static bool isPointOnCurvePublic(u64 *p)
     u64 p256_constant[4U] = { 0U };
     u64 multBuffer[8U] = { 0U };
     u64 r;
-    Hacl_Impl_P256_LowLevel_shift_256_impl(x, multBuffer);
-    Hacl_Impl_SolinasReduction_solinas_reduction_impl(multBuffer, xToDomainBuffer);
+    shift_256_impl(x, multBuffer);
+    solinas_reduction_impl(multBuffer, xToDomainBuffer);
     montgomery_square_buffer(xToDomainBuffer, xBuffer);
     montgomery_multiplication_buffer(xBuffer, xToDomainBuffer, xBuffer);
     multByThree(xToDomainBuffer, minusThreeXBuffer);
@@ -2331,21 +2307,16 @@ static bool isCoordinateValid(u64 *p)
   u64 tempBuffer[4U] = { 0U };
   u64 *x = p;
   u64 *y = p + (u32)4U;
-  u64
-  carryX =
-    Hacl_Impl_P256_LowLevel_sub4_il(x,
-      Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer,
-      tempBuffer);
-  u64
-  carryY =
-    Hacl_Impl_P256_LowLevel_sub4_il(y,
-      Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer,
-      tempBuffer);
+  u64 carryX = sub4_il(x, prime256_buffer, tempBuffer);
+  u64 carryY = sub4_il(y, prime256_buffer, tempBuffer);
   bool lessX = carryX == (u64)1U;
   bool lessY = carryY == (u64)1U;
   return lessX && lessY;
 }
 
+/*
+  This code is not side channel resistant
+*/
 static bool isOrderCorrect(u64 *p, u64 *tempBuffer)
 {
   u64 multResult[12U] = { 0U };
@@ -2353,12 +2324,14 @@ static bool isOrderCorrect(u64 *p, u64 *tempBuffer)
   bool result;
   memcpy(pBuffer, p, (u32)12U * sizeof (p[0U]));
   scalarMultiplicationC(pBuffer, multResult, order_buffer, tempBuffer);
-  result = Hacl_Impl_P256_Signature_Common_isPointAtInfinityPublic(multResult);
+  result = isPointAtInfinityPublic(multResult);
   return result;
 }
 
-bool
-Hacl_Impl_P256_Signature_Common_verifyQValidCurvePoint(u64 *pubKeyAsPoint, u64 *tempBuffer)
+/*
+  This code is not side channel resistant
+*/
+static bool verifyQValidCurvePoint(u64 *pubKeyAsPoint, u64 *tempBuffer)
 {
   bool coordinatesValid = isCoordinateValid(pubKeyAsPoint);
   if (!coordinatesValid)
@@ -2370,34 +2343,17 @@ Hacl_Impl_P256_Signature_Common_verifyQValidCurvePoint(u64 *pubKeyAsPoint, u64 *
   }
 }
 
-u64 Hacl_Impl_P256_DH_ecp256dh_i(u8 *result, u8 *scalar)
-{
-  u64 tempBuffer[100U] = { 0U };
-  u64 resultBuffer[12U] = { 0U };
-  u64 *resultBufferX = resultBuffer;
-  u64 *resultBufferY = resultBuffer + (u32)4U;
-  u8 *resultX = result;
-  u8 *resultY = result + (u32)32U;
-  u64 flag;
-  secretToPublic(resultBuffer, scalar, tempBuffer);
-  flag = isPointAtInfinityPrivate(resultBuffer);
-  Hacl_Impl_P256_LowLevel_changeEndian(resultBufferX);
-  Hacl_Impl_P256_LowLevel_changeEndian(resultBufferY);
-  Hacl_Impl_P256_LowLevel_toUint8(resultBufferX, resultX);
-  Hacl_Impl_P256_LowLevel_toUint8(resultBufferY, resultY);
-  return flag;
-}
-
+/*
+  This code is not side channel resistant on pubKey
+*/
 static u64 _ecp256dh_r(u64 *result, u64 *pubKey, u8 *scalar)
 {
   u64 tempBuffer[100U] = { 0U };
   u64 publicKeyBuffer[12U] = { 0U };
   bool publicKeyCorrect;
   u64 ite;
-  Hacl_Impl_P256_Signature_Common_bufferToJac(pubKey, publicKeyBuffer);
-  publicKeyCorrect =
-    Hacl_Impl_P256_Signature_Common_verifyQValidCurvePoint(publicKeyBuffer,
-      tempBuffer);
+  bufferToJac(pubKey, publicKeyBuffer);
+  publicKeyCorrect = verifyQValidCurvePoint(publicKeyBuffer, tempBuffer);
   if (publicKeyCorrect)
   {
     scalarMultiplicationL(publicKeyBuffer, result, scalar, tempBuffer);
@@ -2409,29 +2365,6 @@ static u64 _ecp256dh_r(u64 *result, u64 *pubKey, u8 *scalar)
   else
     ite = (u64)18446744073709551615U;
   return ite;
-}
-
-u64 Hacl_Impl_P256_DH_ecp256dh_r(u8 *result, u8 *pubKey, u8 *scalar)
-{
-  u64 resultBufferFelem[12U] = { 0U };
-  u64 *resultBufferFelemX = resultBufferFelem;
-  u64 *resultBufferFelemY = resultBufferFelem + (u32)4U;
-  u8 *resultX = result;
-  u8 *resultY = result + (u32)32U;
-  u64 publicKeyAsFelem[8U] = { 0U };
-  u64 *publicKeyFelemX = publicKeyAsFelem;
-  u64 *publicKeyFelemY = publicKeyAsFelem + (u32)4U;
-  u8 *pubKeyX = pubKey;
-  u8 *pubKeyY = pubKey + (u32)32U;
-  u64 flag;
-  Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(pubKeyX, publicKeyFelemX);
-  Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(pubKeyY, publicKeyFelemY);
-  flag = _ecp256dh_r(resultBufferFelem, publicKeyAsFelem, scalar);
-  Hacl_Impl_P256_LowLevel_changeEndian(resultBufferFelemX);
-  Hacl_Impl_P256_LowLevel_changeEndian(resultBufferFelemY);
-  Hacl_Impl_P256_LowLevel_toUint8(resultBufferFelemX, resultX);
-  Hacl_Impl_P256_LowLevel_toUint8(resultBufferFelemY, resultY);
-  return flag;
 }
 
 static inline void cswap0(u64 bit, u64 *p1, u64 *p2)
@@ -2446,79 +2379,7 @@ static inline void cswap0(u64 bit, u64 *p1, u64 *p2)
   }
 }
 
-static void montgomery_ladder_power(u64 *a, const u8 *scalar, u64 *result)
-{
-  u64 p[4U] = { 0U };
-  p[0U] = (u64)1U;
-  p[1U] = (u64)18446744069414584320U;
-  p[2U] = (u64)18446744073709551615U;
-  p[3U] = (u64)4294967294U;
-  {
-    u32 i;
-    for (i = (u32)0U; i < (u32)256U; i++)
-    {
-      u32 bit0 = (u32)255U - i;
-      u64 bit = (u64)(scalar[bit0 / (u32)8U] >> bit0 % (u32)8U & (u8)1U);
-      cswap0(bit, p, a);
-      montgomery_multiplication_buffer(p, a, a);
-      montgomery_square_buffer(p, p);
-      cswap0(bit, p, a);
-    }
-  }
-  memcpy(result, p, (u32)4U * sizeof (p[0U]));
-}
-
-static const
-u8
-sqPower_buffer[32U] =
-  {
-    (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)64U,
-    (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)64U,
-    (u8)0U, (u8)0U, (u8)0U, (u8)192U, (u8)255U, (u8)255U, (u8)255U, (u8)63U
-  };
-
-void Hacl_Impl_P256_Compression_computeYFromX(u64 *x, u64 *result, u64 sign)
-{
-  u64 aCoordinateBuffer[4U] = { 0U };
-  u64 bCoordinateBuffer[4U] = { 0U };
-  u64 word;
-  u64 bitToCheck;
-  u64 flag;
-  aCoordinateBuffer[0U] = (u64)18446744073709551612U;
-  aCoordinateBuffer[1U] = (u64)17179869183U;
-  aCoordinateBuffer[2U] = (u64)0U;
-  aCoordinateBuffer[3U] = (u64)18446744056529682436U;
-  bCoordinateBuffer[0U] = (u64)15608596021259845087U;
-  bCoordinateBuffer[1U] = (u64)12461466548982526096U;
-  bCoordinateBuffer[2U] = (u64)16546823903870267094U;
-  bCoordinateBuffer[3U] = (u64)15866188208926050356U;
-  montgomery_multiplication_buffer(aCoordinateBuffer, x, aCoordinateBuffer);
-  cube(x, result);
-  p256_add(result, aCoordinateBuffer, result);
-  p256_add(result, bCoordinateBuffer, result);
-  uploadZeroImpl(aCoordinateBuffer);
-  montgomery_ladder_power(result, sqPower_buffer, result);
-  montgomery_multiplication_buffer_by_one(result, result);
-  p256_sub(aCoordinateBuffer, result, bCoordinateBuffer);
-  word = result[0U];
-  bitToCheck = word & (u64)1U;
-  flag = FStar_UInt64_eq_mask(bitToCheck, sign);
-  cmovznz4(flag, bCoordinateBuffer, result, result);
-}
-
-static inline void cswap1(u64 bit, u64 *p1, u64 *p2)
-{
-  u64 mask = (u64)0U - bit;
-  u32 i;
-  for (i = (u32)0U; i < (u32)4U; i++)
-  {
-    u64 dummy = mask & (p1[i] ^ p2[i]);
-    p1[i] = p1[i] ^ dummy;
-    p2[i] = p2[i] ^ dummy;
-  }
-}
-
-void Hacl_Impl_ECDSA_MM_Exponent_montgomery_ladder_exponent(u64 *r)
+static void montgomery_ladder_exponent(u64 *r)
 {
   u64 p[4U] = { 0U };
   p[0U] = (u64)884452912994769583U;
@@ -2531,34 +2392,37 @@ void Hacl_Impl_ECDSA_MM_Exponent_montgomery_ladder_exponent(u64 *r)
     {
       u32 bit0 = (u32)255U - i;
       u64 bit = (u64)(order_inverse_buffer[bit0 / (u32)8U] >> bit0 % (u32)8U & (u8)1U);
-      cswap1(bit, p, r);
+      cswap0(bit, p, r);
       montgomery_multiplication_ecdsa_module(p, r, r);
       montgomery_multiplication_ecdsa_module(p, p, p);
-      cswap1(bit, p, r);
+      cswap0(bit, p, r);
     }
   }
   memcpy(r, p, (u32)4U * sizeof (p[0U]));
 }
 
-void Hacl_Impl_ECDSA_MM_Exponent_fromDomainImpl(u64 *a, u64 *result)
+static void fromDomainImpl(u64 *a, u64 *result)
 {
   u64 one[4U] = { 0U };
   uploadOneImpl(one);
   montgomery_multiplication_ecdsa_module(one, a, result);
 }
 
-void Hacl_Impl_ECDSA_MM_Exponent_multPowerPartial(u64 *s, u64 *a, u64 *b, u64 *result)
+static void multPowerPartial(u64 *a, u64 *b, u64 *result)
 {
   u64 buffFromDB[4U] = { 0U };
-  Hacl_Impl_ECDSA_MM_Exponent_fromDomainImpl(b, buffFromDB);
-  Hacl_Impl_ECDSA_MM_Exponent_fromDomainImpl(buffFromDB, buffFromDB);
+  fromDomainImpl(b, buffFromDB);
+  fromDomainImpl(buffFromDB, buffFromDB);
   montgomery_multiplication_ecdsa_module(a, buffFromDB, result);
 }
 
-bool Hacl_Impl_ECDSA_P256_Verification_Agile_isMoreThanZeroLessThanOrderMinusOne(u64 *f)
+/*
+  This code is not side channel resistant
+*/
+static bool isMoreThanZeroLessThanOrderMinusOne(u64 *f)
 {
   u64 tempBuffer[4U] = { 0U };
-  u64 carry = Hacl_Impl_P256_LowLevel_sub4_il(f, prime256order_buffer, tempBuffer);
+  u64 carry = sub4_il(f, prime256order_buffer, tempBuffer);
   bool less = carry == (u64)1U;
   u64 f0 = f[0U];
   u64 f1 = f[1U];
@@ -2572,7 +2436,10 @@ bool Hacl_Impl_ECDSA_P256_Verification_Agile_isMoreThanZeroLessThanOrderMinusOne
   return less && !more;
 }
 
-bool Hacl_Impl_ECDSA_P256_Verification_Agile_compare_felem_bool(u64 *a, u64 *b)
+/*
+  This code is not side channel resistant
+*/
+static bool compare_felem_bool(u64 *a, u64 *b)
 {
   u64 a_0 = a[0U];
   u64 a_1 = a[1U];
@@ -2585,8 +2452,188 @@ bool Hacl_Impl_ECDSA_P256_Verification_Agile_compare_felem_bool(u64 *a, u64 *b)
   return a_0 == b_0 && a_1 == b_1 && a_2 == b_2 && a_3 == b_3;
 }
 
-u64
-Hacl_Impl_ECDSA_P256_Signature_Agile_ecdsa_signature_core(
+/*
+  This code is not side channel resistant
+*/
+static bool
+ecdsa_verification_(
+  Spec_ECDSA_hash_alg_ecdsa alg,
+  u64 *pubKey,
+  u64 *r,
+  u64 *s,
+  u32 mLen,
+  u8 *m
+)
+{
+  u64 tempBufferU64[120U] = { 0U };
+  u64 *publicKeyBuffer = tempBufferU64;
+  u64 *hashAsFelem = tempBufferU64 + (u32)12U;
+  u64 *tempBuffer = tempBufferU64 + (u32)16U;
+  u64 *xBuffer = tempBufferU64 + (u32)116U;
+  bool publicKeyCorrect;
+  bool ite;
+  bufferToJac(pubKey, publicKeyBuffer);
+  publicKeyCorrect = verifyQValidCurvePoint(publicKeyBuffer, tempBuffer);
+  if (publicKeyCorrect == false)
+    ite = false;
+  else
+  {
+    bool isRCorrect = isMoreThanZeroLessThanOrderMinusOne(r);
+    bool isSCorrect = isMoreThanZeroLessThanOrderMinusOne(s);
+    bool step1 = isRCorrect && isSCorrect;
+    if (step1 == false)
+      ite = false;
+    else
+    {
+      u8 tempBufferU8[64U] = { 0U };
+      u8 *bufferU1 = tempBufferU8;
+      u8 *bufferU2 = tempBufferU8 + (u32)32U;
+      u32 sz;
+      if (alg.tag == Spec_ECDSA_NoHash)
+        sz = mLen;
+      else if (alg.tag == Spec_ECDSA_Hash)
+      {
+        Spec_Hash_Definitions_hash_alg a = alg._0;
+        switch (a)
+        {
+          case Spec_Hash_Definitions_MD5:
+            {
+              sz = (u32)16U;
+              break;
+            }
+          case Spec_Hash_Definitions_SHA1:
+            {
+              sz = (u32)20U;
+              break;
+            }
+          case Spec_Hash_Definitions_SHA2_224:
+            {
+              sz = (u32)28U;
+              break;
+            }
+          case Spec_Hash_Definitions_SHA2_256:
+            {
+              sz = (u32)32U;
+              break;
+            }
+          case Spec_Hash_Definitions_SHA2_384:
+            {
+              sz = (u32)48U;
+              break;
+            }
+          case Spec_Hash_Definitions_SHA2_512:
+            {
+              sz = (u32)64U;
+              break;
+            }
+          default:
+            {
+              KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+              KRML_HOST_EXIT(253U);
+            }
+        }
+      }
+      else
+        sz = KRML_EABORT(u32, "unreachable (pattern matches are exhaustive in F*)");
+      KRML_CHECK_SIZE(sizeof (u8), sz);
+      {
+        u8 mHash[sz];
+        memset(mHash, 0U, sz * sizeof (mHash[0U]));
+        if (alg.tag == Spec_ECDSA_NoHash)
+          memcpy(mHash, m, sz * sizeof (m[0U]));
+        else if (alg.tag == Spec_ECDSA_Hash)
+        {
+          Spec_Hash_Definitions_hash_alg a = alg._0;
+          switch (a)
+          {
+            case Spec_Hash_Definitions_SHA2_256:
+              {
+                Hacl_Hash_SHA2_hash_256(m, mLen, mHash);
+                break;
+              }
+            case Spec_Hash_Definitions_SHA2_384:
+              {
+                Hacl_Hash_SHA2_hash_384(m, mLen, mHash);
+                break;
+              }
+            case Spec_Hash_Definitions_SHA2_512:
+              {
+                Hacl_Hash_SHA2_hash_512(m, mLen, mHash);
+                break;
+              }
+            default:
+              {
+                KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+                KRML_HOST_EXIT(253U);
+              }
+          }
+        }
+        else
+        {
+          KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+            __FILE__,
+            __LINE__,
+            "unreachable (pattern matches are exhaustive in F*)");
+          KRML_HOST_EXIT(255U);
+        }
+        {
+          u8 *cutHash = mHash;
+          toUint64ChangeEndian(cutHash, hashAsFelem);
+          reduction_prime_2prime_order(hashAsFelem, hashAsFelem);
+          {
+            u64 tempBuffer1[12U] = { 0U };
+            u64 *inverseS = tempBuffer1;
+            u64 *u1 = tempBuffer1 + (u32)4U;
+            u64 *u2 = tempBuffer1 + (u32)8U;
+            fromDomainImpl(s, inverseS);
+            montgomery_ladder_exponent(inverseS);
+            multPowerPartial(inverseS, hashAsFelem, u1);
+            multPowerPartial(inverseS, r, u2);
+            changeEndian(u1);
+            changeEndian(u2);
+            toUint8(u1, bufferU1);
+            toUint8(u2, bufferU2);
+            {
+              u64 pointSum[12U] = { 0U };
+              u64 points[24U] = { 0U };
+              u64 *buff = tempBuffer + (u32)12U;
+              u64 *pointU1G = points;
+              u64 *pointU2Q0 = points + (u32)12U;
+              secretToPublicWithoutNorm(pointU1G, bufferU1, tempBuffer);
+              scalarMultiplicationWithoutNorm(publicKeyBuffer, pointU2Q0, bufferU2, tempBuffer);
+              {
+                u64 *pointU1G0 = points;
+                u64 *pointU2Q = points + (u32)12U;
+                point_add(pointU1G0, pointU2Q, pointSum, buff);
+                norm(pointSum, pointSum, buff);
+                {
+                  bool resultIsPAI = isPointAtInfinityPublic(pointSum);
+                  u64 *xCoordinateSum = pointSum;
+                  memcpy(xBuffer, xCoordinateSum, (u32)4U * sizeof (xCoordinateSum[0U]));
+                  {
+                    bool r1 = !resultIsPAI;
+                    bool state = r1;
+                    if (state == false)
+                      ite = false;
+                    else
+                    {
+                      bool result = compare_felem_bool(xBuffer, r);
+                      ite = result;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  return ite;
+}
+
+static u64
+ecdsa_signature_core(
   Spec_ECDSA_hash_alg_ecdsa alg,
   u64 *r,
   u64 *s,
@@ -2599,7 +2646,7 @@ Hacl_Impl_ECDSA_P256_Signature_Agile_ecdsa_signature_core(
   u64 hashAsFelem[4U] = { 0U };
   u64 tempBuffer[100U] = { 0U };
   u64 kAsFelem[4U] = { 0U };
-  Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(k, kAsFelem);
+  toUint64ChangeEndian(k, kAsFelem);
   {
     u32 sz;
     if (alg.tag == Spec_ECDSA_NoHash)
@@ -2692,16 +2739,15 @@ Hacl_Impl_ECDSA_P256_Signature_Agile_ecdsa_signature_core(
           KRML_HOST_EXIT(255U);
         }
         cutHash = mHash;
-        Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(cutHash, hashAsFelem);
-        Hacl_Impl_ECDSA_MontgomeryMultiplication_reduction_prime_2prime_order(hashAsFelem,
-          hashAsFelem);
+        toUint64ChangeEndian(cutHash, hashAsFelem);
+        reduction_prime_2prime_order(hashAsFelem, hashAsFelem);
         {
           u64 result[12U] = { 0U };
           u64 *tempForNorm = tempBuffer;
           u64 step5Flag;
-          Hacl_Impl_P256_Core_secretToPublicWithoutNorm(result, k, tempBuffer);
+          secretToPublicWithoutNorm(result, k, tempBuffer);
           normX(result, r, tempForNorm);
-          Hacl_Impl_ECDSA_MontgomeryMultiplication_reduction_prime_2prime_order(r, r);
+          reduction_prime_2prime_order(r, r);
           step5Flag = isZero_uint64_CT(r);
           {
             u64 rda[4U] = { 0U };
@@ -2709,18 +2755,18 @@ Hacl_Impl_ECDSA_P256_Signature_Agile_ecdsa_signature_core(
             u64 kInv[4U] = { 0U };
             u64 t;
             montgomery_multiplication_ecdsa_module(r, privKeyAsFelem, rda);
-            Hacl_Impl_ECDSA_MM_Exponent_fromDomainImpl(hashAsFelem, zBuffer);
+            fromDomainImpl(hashAsFelem, zBuffer);
             t = add4(rda, zBuffer, zBuffer);
             {
               u64 tempBuffer1[4U] = { 0U };
               u64 tempBufferForSubborrow = (u64)0U;
-              u64 c = Hacl_Impl_P256_LowLevel_sub4_il(zBuffer, prime256order_buffer, tempBuffer1);
+              u64 c = sub4_il(zBuffer, prime256order_buffer, tempBuffer1);
               u64
               carry = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t, (u64)0U, &tempBufferForSubborrow);
               u64 sIsZero;
               cmovznz4(carry, tempBuffer1, zBuffer, zBuffer);
               memcpy(kInv, kAsFelem, (u32)4U * sizeof (kAsFelem[0U]));
-              Hacl_Impl_ECDSA_MM_Exponent_montgomery_ladder_exponent(kInv);
+              montgomery_ladder_exponent(kInv);
               montgomery_multiplication_ecdsa_module(zBuffer, kInv, s);
               sIsZero = isZero_uint64_CT(s);
               return step5Flag | sIsZero;
@@ -2732,7 +2778,89 @@ Hacl_Impl_ECDSA_P256_Signature_Agile_ecdsa_signature_core(
   }
 }
 
-u64 Hacl_Interface_P256_ecdsa_sign_p256_sha2(u8 *result, u32 mLen, u8 *m, u8 *privKey, u8 *k)
+static inline void cswap1(u64 bit, u64 *p1, u64 *p2)
+{
+  u64 mask = (u64)0U - bit;
+  u32 i;
+  for (i = (u32)0U; i < (u32)4U; i++)
+  {
+    u64 dummy = mask & (p1[i] ^ p2[i]);
+    p1[i] = p1[i] ^ dummy;
+    p2[i] = p2[i] ^ dummy;
+  }
+}
+
+static void montgomery_ladder_power(u64 *a, const u8 *scalar, u64 *result)
+{
+  u64 p[4U] = { 0U };
+  p[0U] = (u64)1U;
+  p[1U] = (u64)18446744069414584320U;
+  p[2U] = (u64)18446744073709551615U;
+  p[3U] = (u64)4294967294U;
+  {
+    u32 i;
+    for (i = (u32)0U; i < (u32)256U; i++)
+    {
+      u32 bit0 = (u32)255U - i;
+      u64 bit = (u64)(scalar[bit0 / (u32)8U] >> bit0 % (u32)8U & (u8)1U);
+      cswap1(bit, p, a);
+      montgomery_multiplication_buffer(p, a, a);
+      montgomery_square_buffer(p, p);
+      cswap1(bit, p, a);
+    }
+  }
+  memcpy(result, p, (u32)4U * sizeof (p[0U]));
+}
+
+static const
+u8
+sqPower_buffer[32U] =
+  {
+    (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)64U,
+    (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)64U,
+    (u8)0U, (u8)0U, (u8)0U, (u8)192U, (u8)255U, (u8)255U, (u8)255U, (u8)63U
+  };
+
+static void computeYFromX(u64 *x, u64 *result, u64 sign)
+{
+  u64 aCoordinateBuffer[4U] = { 0U };
+  u64 bCoordinateBuffer[4U] = { 0U };
+  u64 word;
+  u64 bitToCheck;
+  u64 flag;
+  aCoordinateBuffer[0U] = (u64)18446744073709551612U;
+  aCoordinateBuffer[1U] = (u64)17179869183U;
+  aCoordinateBuffer[2U] = (u64)0U;
+  aCoordinateBuffer[3U] = (u64)18446744056529682436U;
+  bCoordinateBuffer[0U] = (u64)15608596021259845087U;
+  bCoordinateBuffer[1U] = (u64)12461466548982526096U;
+  bCoordinateBuffer[2U] = (u64)16546823903870267094U;
+  bCoordinateBuffer[3U] = (u64)15866188208926050356U;
+  montgomery_multiplication_buffer(aCoordinateBuffer, x, aCoordinateBuffer);
+  cube(x, result);
+  p256_add(result, aCoordinateBuffer, result);
+  p256_add(result, bCoordinateBuffer, result);
+  uploadZeroImpl(aCoordinateBuffer);
+  montgomery_ladder_power(result, sqPower_buffer, result);
+  montgomery_multiplication_buffer_by_one(result, result);
+  p256_sub(aCoordinateBuffer, result, bCoordinateBuffer);
+  word = result[0U];
+  bitToCheck = word & (u64)1U;
+  flag = FStar_UInt64_eq_mask(bitToCheck, sign);
+  cmovznz4(flag, bCoordinateBuffer, result, result);
+}
+
+/*
+ Input: result buffer: uint8[64], 
+ m buffer: uint8 [mLen], 
+ priv(ate)Key: uint8[32], 
+ k (nonce): uint32[32]. 
+  
+ Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
+  
+ The private key and the nonce are expected to be less than the curve order.
+*/
+u64 Hacl_P256_ecdsa_sign_p256_sha2(u8 *result, u32 mLen, u8 *m, u8 *privKey, u8 *k)
 {
   u64 privKeyAsFelem[4U] = { 0U };
   u64 r[4U] = { 0U };
@@ -2740,9 +2868,9 @@ u64 Hacl_Interface_P256_ecdsa_sign_p256_sha2(u8 *result, u32 mLen, u8 *m, u8 *pr
   u8 *resultR = result;
   u8 *resultS = result + (u32)32U;
   u64 flag;
-  Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(privKey, privKeyAsFelem);
+  toUint64ChangeEndian(privKey, privKeyAsFelem);
   flag =
-    Hacl_Impl_ECDSA_P256_Signature_Agile_ecdsa_signature_core((
+    ecdsa_signature_core((
         (Spec_ECDSA_hash_alg_ecdsa){ .tag = Spec_ECDSA_Hash, ._0 = Spec_Hash_Definitions_SHA2_256 }
       ),
       r,
@@ -2751,14 +2879,24 @@ u64 Hacl_Interface_P256_ecdsa_sign_p256_sha2(u8 *result, u32 mLen, u8 *m, u8 *pr
       m,
       privKeyAsFelem,
       k);
-  Hacl_Impl_P256_LowLevel_changeEndian(r);
-  Hacl_Impl_P256_LowLevel_toUint8(r, resultR);
-  Hacl_Impl_P256_LowLevel_changeEndian(s);
-  Hacl_Impl_P256_LowLevel_toUint8(s, resultS);
+  changeEndian(r);
+  toUint8(r, resultR);
+  changeEndian(s);
+  toUint8(s, resultS);
   return flag;
 }
 
-u64 Hacl_Interface_P256_ecdsa_sign_p256_sha384(u8 *result, u32 mLen, u8 *m, u8 *privKey, u8 *k)
+/*
+ Input: result buffer: uint8[64], 
+ m buffer: uint8 [mLen], 
+ priv(ate)Key: uint8[32], 
+ k (nonce): uint32[32]. 
+  
+ Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
+  
+ The private key and the nonce are expected to be less than the curve order.
+*/
+u64 Hacl_P256_ecdsa_sign_p256_sha384(u8 *result, u32 mLen, u8 *m, u8 *privKey, u8 *k)
 {
   u64 privKeyAsFelem[4U] = { 0U };
   u64 r[4U] = { 0U };
@@ -2766,9 +2904,9 @@ u64 Hacl_Interface_P256_ecdsa_sign_p256_sha384(u8 *result, u32 mLen, u8 *m, u8 *
   u8 *resultR = result;
   u8 *resultS = result + (u32)32U;
   u64 flag;
-  Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(privKey, privKeyAsFelem);
+  toUint64ChangeEndian(privKey, privKeyAsFelem);
   flag =
-    Hacl_Impl_ECDSA_P256_Signature_Agile_ecdsa_signature_core((
+    ecdsa_signature_core((
         (Spec_ECDSA_hash_alg_ecdsa){ .tag = Spec_ECDSA_Hash, ._0 = Spec_Hash_Definitions_SHA2_384 }
       ),
       r,
@@ -2777,14 +2915,24 @@ u64 Hacl_Interface_P256_ecdsa_sign_p256_sha384(u8 *result, u32 mLen, u8 *m, u8 *
       m,
       privKeyAsFelem,
       k);
-  Hacl_Impl_P256_LowLevel_changeEndian(r);
-  Hacl_Impl_P256_LowLevel_toUint8(r, resultR);
-  Hacl_Impl_P256_LowLevel_changeEndian(s);
-  Hacl_Impl_P256_LowLevel_toUint8(s, resultS);
+  changeEndian(r);
+  toUint8(r, resultR);
+  changeEndian(s);
+  toUint8(s, resultS);
   return flag;
 }
 
-u64 Hacl_Interface_P256_ecdsa_sign_p256_sha512(u8 *result, u32 mLen, u8 *m, u8 *privKey, u8 *k)
+/*
+ Input: result buffer: uint8[64], 
+ m buffer: uint8 [mLen], 
+ priv(ate)Key: uint8[32], 
+ k (nonce): uint32[32]. 
+  
+ Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
+  
+ The private key and the nonce are expected to be less than the curve order.
+*/
+u64 Hacl_P256_ecdsa_sign_p256_sha512(u8 *result, u32 mLen, u8 *m, u8 *privKey, u8 *k)
 {
   u64 privKeyAsFelem[4U] = { 0U };
   u64 r[4U] = { 0U };
@@ -2792,9 +2940,9 @@ u64 Hacl_Interface_P256_ecdsa_sign_p256_sha512(u8 *result, u32 mLen, u8 *m, u8 *
   u8 *resultR = result;
   u8 *resultS = result + (u32)32U;
   u64 flag;
-  Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(privKey, privKeyAsFelem);
+  toUint64ChangeEndian(privKey, privKeyAsFelem);
   flag =
-    Hacl_Impl_ECDSA_P256_Signature_Agile_ecdsa_signature_core((
+    ecdsa_signature_core((
         (Spec_ECDSA_hash_alg_ecdsa){ .tag = Spec_ECDSA_Hash, ._0 = Spec_Hash_Definitions_SHA2_512 }
       ),
       r,
@@ -2803,21 +2951,26 @@ u64 Hacl_Interface_P256_ecdsa_sign_p256_sha512(u8 *result, u32 mLen, u8 *m, u8 *
       m,
       privKeyAsFelem,
       k);
-  Hacl_Impl_P256_LowLevel_changeEndian(r);
-  Hacl_Impl_P256_LowLevel_toUint8(r, resultR);
-  Hacl_Impl_P256_LowLevel_changeEndian(s);
-  Hacl_Impl_P256_LowLevel_toUint8(s, resultS);
+  changeEndian(r);
+  toUint8(r, resultR);
+  changeEndian(s);
+  toUint8(s, resultS);
   return flag;
 }
 
-u64
-Hacl_Interface_P256_ecdsa_sign_p256_without_hash(
-  u8 *result,
-  u32 mLen,
-  u8 *m,
-  u8 *privKey,
-  u8 *k
-)
+/*
+ Input: result buffer: uint8[64], 
+ m buffer: uint8 [mLen], 
+ priv(ate)Key: uint8[32], 
+ k (nonce): uint32[32]. 
+  
+ Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
+  
+ The private key and the nonce are expected to be less than the curve order. 
+  
+ The message m is expected to be hashed by a strong hash function, the lenght of the message is expected to be 32 bytes and more.
+*/
+u64 Hacl_P256_ecdsa_sign_p256_without_hash(u8 *result, u32 mLen, u8 *m, u8 *privKey, u8 *k)
 {
   u64 privKeyAsFelem[4U] = { 0U };
   u64 r[4U] = { 0U };
@@ -2825,25 +2978,33 @@ Hacl_Interface_P256_ecdsa_sign_p256_without_hash(
   u8 *resultR = result;
   u8 *resultS = result + (u32)32U;
   u64 flag;
-  Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(privKey, privKeyAsFelem);
+  toUint64ChangeEndian(privKey, privKeyAsFelem);
   flag =
-    Hacl_Impl_ECDSA_P256_Signature_Agile_ecdsa_signature_core((
-        (Spec_ECDSA_hash_alg_ecdsa){ .tag = Spec_ECDSA_NoHash }
-      ),
+    ecdsa_signature_core(((Spec_ECDSA_hash_alg_ecdsa){ .tag = Spec_ECDSA_NoHash }),
       r,
       s,
       mLen,
       m,
       privKeyAsFelem,
       k);
-  Hacl_Impl_P256_LowLevel_changeEndian(r);
-  Hacl_Impl_P256_LowLevel_toUint8(r, resultR);
-  Hacl_Impl_P256_LowLevel_changeEndian(s);
-  Hacl_Impl_P256_LowLevel_toUint8(s, resultS);
+  changeEndian(r);
+  toUint8(r, resultR);
+  changeEndian(s);
+  toUint8(s, resultS);
   return flag;
 }
 
-bool Hacl_Interface_P256_ecdsa_verif_p256_sha2(u32 mLen, u8 *m, u8 *pubKey, u8 *r, u8 *s)
+/*
+ This code is not side-channel resistant.
+  
+ Input: m buffer: uint8 [mLen], 
+ pub(lic)Key: uint8[64], 
+ r: uint8[32], 
+ s: uint8[32]. 
+  
+ Output: bool, where true stands for the correct signature verification. 
+*/
+bool Hacl_P256_ecdsa_verif_p256_sha2(u32 mLen, u8 *m, u8 *pubKey, u8 *r, u8 *s)
 {
   u64 publicKeyAsFelem[8U] = { 0U };
   u64 *publicKeyFelemX = publicKeyAsFelem;
@@ -2852,112 +3013,34 @@ bool Hacl_Interface_P256_ecdsa_verif_p256_sha2(u32 mLen, u8 *m, u8 *pubKey, u8 *
   u64 sAsFelem[4U] = { 0U };
   u8 *pubKeyX = pubKey;
   u8 *pubKeyY = pubKey + (u32)32U;
-  Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(pubKeyX, publicKeyFelemX);
-  Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(pubKeyY, publicKeyFelemY);
-  Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(r, rAsFelem);
-  Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(s, sAsFelem);
-  {
-    u64 tempBufferU64[120U] = { 0U };
-    u64 *publicKeyBuffer = tempBufferU64;
-    u64 *hashAsFelem = tempBufferU64 + (u32)12U;
-    u64 *tempBuffer = tempBufferU64 + (u32)16U;
-    u64 *xBuffer = tempBufferU64 + (u32)116U;
-    bool publicKeyCorrect;
-    bool result;
-    Hacl_Impl_P256_Signature_Common_bufferToJac(publicKeyAsFelem, publicKeyBuffer);
-    publicKeyCorrect =
-      Hacl_Impl_P256_Signature_Common_verifyQValidCurvePoint(publicKeyBuffer,
-        tempBuffer);
-    if (publicKeyCorrect == false)
-      result = false;
-    else
-    {
-      bool
-      isRCorrect =
-        Hacl_Impl_ECDSA_P256_Verification_Agile_isMoreThanZeroLessThanOrderMinusOne(rAsFelem);
-      bool
-      isSCorrect =
-        Hacl_Impl_ECDSA_P256_Verification_Agile_isMoreThanZeroLessThanOrderMinusOne(sAsFelem);
-      bool step1 = isRCorrect && isSCorrect;
-      if (step1 == false)
-        result = false;
-      else
-      {
-        u8 tempBufferU8[64U] = { 0U };
-        u8 *bufferU1 = tempBufferU8;
-        u8 *bufferU2 = tempBufferU8 + (u32)32U;
-        u32 sz = (u32)32U;
-        KRML_CHECK_SIZE(sizeof (u8), sz);
-        {
-          u8 mHash[sz];
-          memset(mHash, 0U, sz * sizeof (mHash[0U]));
-          Hacl_Hash_SHA2_hash_256(m, mLen, mHash);
-          {
-            u8 *cutHash = mHash;
-            Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(cutHash, hashAsFelem);
-            Hacl_Impl_ECDSA_MontgomeryMultiplication_reduction_prime_2prime_order(hashAsFelem,
-              hashAsFelem);
-            {
-              u64 tempBuffer1[12U] = { 0U };
-              u64 *inverseS = tempBuffer1;
-              u64 *u1 = tempBuffer1 + (u32)4U;
-              u64 *u2 = tempBuffer1 + (u32)8U;
-              Hacl_Impl_ECDSA_MM_Exponent_fromDomainImpl(sAsFelem, inverseS);
-              Hacl_Impl_ECDSA_MM_Exponent_montgomery_ladder_exponent(inverseS);
-              Hacl_Impl_ECDSA_MM_Exponent_multPowerPartial(sAsFelem, inverseS, hashAsFelem, u1);
-              Hacl_Impl_ECDSA_MM_Exponent_multPowerPartial(sAsFelem, inverseS, rAsFelem, u2);
-              Hacl_Impl_P256_LowLevel_changeEndian(u1);
-              Hacl_Impl_P256_LowLevel_changeEndian(u2);
-              Hacl_Impl_P256_LowLevel_toUint8(u1, bufferU1);
-              Hacl_Impl_P256_LowLevel_toUint8(u2, bufferU2);
-              {
-                u64 pointSum[12U] = { 0U };
-                u64 points[24U] = { 0U };
-                u64 *buff = tempBuffer + (u32)12U;
-                u64 *pointU1G = points;
-                u64 *pointU2Q0 = points + (u32)12U;
-                Hacl_Impl_P256_Core_secretToPublicWithoutNorm(pointU1G, bufferU1, tempBuffer);
-                Hacl_Impl_P256_Core_scalarMultiplicationWithoutNorm(publicKeyBuffer,
-                  pointU2Q0,
-                  bufferU2,
-                  tempBuffer);
-                {
-                  u64 *pointU1G0 = points;
-                  u64 *pointU2Q = points + (u32)12U;
-                  Hacl_Impl_P256_PointAdd_point_add(pointU1G0, pointU2Q, pointSum, buff);
-                  Hacl_Impl_P256_Core_norm(pointSum, pointSum, buff);
-                  {
-                    bool
-                    resultIsPAI = Hacl_Impl_P256_Signature_Common_isPointAtInfinityPublic(pointSum);
-                    u64 *xCoordinateSum = pointSum;
-                    memcpy(xBuffer, xCoordinateSum, (u32)4U * sizeof (xCoordinateSum[0U]));
-                    {
-                      bool r1 = !resultIsPAI;
-                      bool state = r1;
-                      if (state == false)
-                        result = false;
-                      else
-                      {
-                        bool
-                        result0 =
-                          Hacl_Impl_ECDSA_P256_Verification_Agile_compare_felem_bool(xBuffer,
-                            rAsFelem);
-                        result = result0;
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    return result;
-  }
+  bool result;
+  toUint64ChangeEndian(pubKeyX, publicKeyFelemX);
+  toUint64ChangeEndian(pubKeyY, publicKeyFelemY);
+  toUint64ChangeEndian(r, rAsFelem);
+  toUint64ChangeEndian(s, sAsFelem);
+  result =
+    ecdsa_verification_((
+        (Spec_ECDSA_hash_alg_ecdsa){ .tag = Spec_ECDSA_Hash, ._0 = Spec_Hash_Definitions_SHA2_256 }
+      ),
+      publicKeyAsFelem,
+      rAsFelem,
+      sAsFelem,
+      mLen,
+      m);
+  return result;
 }
 
-bool Hacl_Interface_P256_ecdsa_verif_p256_sha384(u32 mLen, u8 *m, u8 *pubKey, u8 *r, u8 *s)
+/*
+ This code is not side-channel resistant.
+  
+ Input: m buffer: uint8 [mLen], 
+ pub(lic)Key: uint8[64], 
+ r: uint8[32], 
+ s: uint8[32]. 
+  
+ Output: bool, where true stands for the correct signature verification. 
+*/
+bool Hacl_P256_ecdsa_verif_p256_sha384(u32 mLen, u8 *m, u8 *pubKey, u8 *r, u8 *s)
 {
   u64 publicKeyAsFelem[8U] = { 0U };
   u64 *publicKeyFelemX = publicKeyAsFelem;
@@ -2966,112 +3049,34 @@ bool Hacl_Interface_P256_ecdsa_verif_p256_sha384(u32 mLen, u8 *m, u8 *pubKey, u8
   u64 sAsFelem[4U] = { 0U };
   u8 *pubKeyX = pubKey;
   u8 *pubKeyY = pubKey + (u32)32U;
-  Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(pubKeyX, publicKeyFelemX);
-  Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(pubKeyY, publicKeyFelemY);
-  Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(r, rAsFelem);
-  Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(s, sAsFelem);
-  {
-    u64 tempBufferU64[120U] = { 0U };
-    u64 *publicKeyBuffer = tempBufferU64;
-    u64 *hashAsFelem = tempBufferU64 + (u32)12U;
-    u64 *tempBuffer = tempBufferU64 + (u32)16U;
-    u64 *xBuffer = tempBufferU64 + (u32)116U;
-    bool publicKeyCorrect;
-    bool result;
-    Hacl_Impl_P256_Signature_Common_bufferToJac(publicKeyAsFelem, publicKeyBuffer);
-    publicKeyCorrect =
-      Hacl_Impl_P256_Signature_Common_verifyQValidCurvePoint(publicKeyBuffer,
-        tempBuffer);
-    if (publicKeyCorrect == false)
-      result = false;
-    else
-    {
-      bool
-      isRCorrect =
-        Hacl_Impl_ECDSA_P256_Verification_Agile_isMoreThanZeroLessThanOrderMinusOne(rAsFelem);
-      bool
-      isSCorrect =
-        Hacl_Impl_ECDSA_P256_Verification_Agile_isMoreThanZeroLessThanOrderMinusOne(sAsFelem);
-      bool step1 = isRCorrect && isSCorrect;
-      if (step1 == false)
-        result = false;
-      else
-      {
-        u8 tempBufferU8[64U] = { 0U };
-        u8 *bufferU1 = tempBufferU8;
-        u8 *bufferU2 = tempBufferU8 + (u32)32U;
-        u32 sz = (u32)48U;
-        KRML_CHECK_SIZE(sizeof (u8), sz);
-        {
-          u8 mHash[sz];
-          memset(mHash, 0U, sz * sizeof (mHash[0U]));
-          Hacl_Hash_SHA2_hash_384(m, mLen, mHash);
-          {
-            u8 *cutHash = mHash;
-            Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(cutHash, hashAsFelem);
-            Hacl_Impl_ECDSA_MontgomeryMultiplication_reduction_prime_2prime_order(hashAsFelem,
-              hashAsFelem);
-            {
-              u64 tempBuffer1[12U] = { 0U };
-              u64 *inverseS = tempBuffer1;
-              u64 *u1 = tempBuffer1 + (u32)4U;
-              u64 *u2 = tempBuffer1 + (u32)8U;
-              Hacl_Impl_ECDSA_MM_Exponent_fromDomainImpl(sAsFelem, inverseS);
-              Hacl_Impl_ECDSA_MM_Exponent_montgomery_ladder_exponent(inverseS);
-              Hacl_Impl_ECDSA_MM_Exponent_multPowerPartial(sAsFelem, inverseS, hashAsFelem, u1);
-              Hacl_Impl_ECDSA_MM_Exponent_multPowerPartial(sAsFelem, inverseS, rAsFelem, u2);
-              Hacl_Impl_P256_LowLevel_changeEndian(u1);
-              Hacl_Impl_P256_LowLevel_changeEndian(u2);
-              Hacl_Impl_P256_LowLevel_toUint8(u1, bufferU1);
-              Hacl_Impl_P256_LowLevel_toUint8(u2, bufferU2);
-              {
-                u64 pointSum[12U] = { 0U };
-                u64 points[24U] = { 0U };
-                u64 *buff = tempBuffer + (u32)12U;
-                u64 *pointU1G = points;
-                u64 *pointU2Q0 = points + (u32)12U;
-                Hacl_Impl_P256_Core_secretToPublicWithoutNorm(pointU1G, bufferU1, tempBuffer);
-                Hacl_Impl_P256_Core_scalarMultiplicationWithoutNorm(publicKeyBuffer,
-                  pointU2Q0,
-                  bufferU2,
-                  tempBuffer);
-                {
-                  u64 *pointU1G0 = points;
-                  u64 *pointU2Q = points + (u32)12U;
-                  Hacl_Impl_P256_PointAdd_point_add(pointU1G0, pointU2Q, pointSum, buff);
-                  Hacl_Impl_P256_Core_norm(pointSum, pointSum, buff);
-                  {
-                    bool
-                    resultIsPAI = Hacl_Impl_P256_Signature_Common_isPointAtInfinityPublic(pointSum);
-                    u64 *xCoordinateSum = pointSum;
-                    memcpy(xBuffer, xCoordinateSum, (u32)4U * sizeof (xCoordinateSum[0U]));
-                    {
-                      bool r1 = !resultIsPAI;
-                      bool state = r1;
-                      if (state == false)
-                        result = false;
-                      else
-                      {
-                        bool
-                        result0 =
-                          Hacl_Impl_ECDSA_P256_Verification_Agile_compare_felem_bool(xBuffer,
-                            rAsFelem);
-                        result = result0;
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    return result;
-  }
+  bool result;
+  toUint64ChangeEndian(pubKeyX, publicKeyFelemX);
+  toUint64ChangeEndian(pubKeyY, publicKeyFelemY);
+  toUint64ChangeEndian(r, rAsFelem);
+  toUint64ChangeEndian(s, sAsFelem);
+  result =
+    ecdsa_verification_((
+        (Spec_ECDSA_hash_alg_ecdsa){ .tag = Spec_ECDSA_Hash, ._0 = Spec_Hash_Definitions_SHA2_384 }
+      ),
+      publicKeyAsFelem,
+      rAsFelem,
+      sAsFelem,
+      mLen,
+      m);
+  return result;
 }
 
-bool Hacl_Interface_P256_ecdsa_verif_p256_sha512(u32 mLen, u8 *m, u8 *pubKey, u8 *r, u8 *s)
+/*
+ This code is not side-channel resistant.
+  
+ Input: m buffer: uint8 [mLen], 
+ pub(lic)Key: uint8[64], 
+ r: uint8[32], 
+ s: uint8[32]. 
+  
+ Output: bool, where true stands for the correct signature verification. 
+*/
+bool Hacl_P256_ecdsa_verif_p256_sha512(u32 mLen, u8 *m, u8 *pubKey, u8 *r, u8 *s)
 {
   u64 publicKeyAsFelem[8U] = { 0U };
   u64 *publicKeyFelemX = publicKeyAsFelem;
@@ -3080,112 +3085,36 @@ bool Hacl_Interface_P256_ecdsa_verif_p256_sha512(u32 mLen, u8 *m, u8 *pubKey, u8
   u64 sAsFelem[4U] = { 0U };
   u8 *pubKeyX = pubKey;
   u8 *pubKeyY = pubKey + (u32)32U;
-  Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(pubKeyX, publicKeyFelemX);
-  Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(pubKeyY, publicKeyFelemY);
-  Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(r, rAsFelem);
-  Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(s, sAsFelem);
-  {
-    u64 tempBufferU64[120U] = { 0U };
-    u64 *publicKeyBuffer = tempBufferU64;
-    u64 *hashAsFelem = tempBufferU64 + (u32)12U;
-    u64 *tempBuffer = tempBufferU64 + (u32)16U;
-    u64 *xBuffer = tempBufferU64 + (u32)116U;
-    bool publicKeyCorrect;
-    bool result;
-    Hacl_Impl_P256_Signature_Common_bufferToJac(publicKeyAsFelem, publicKeyBuffer);
-    publicKeyCorrect =
-      Hacl_Impl_P256_Signature_Common_verifyQValidCurvePoint(publicKeyBuffer,
-        tempBuffer);
-    if (publicKeyCorrect == false)
-      result = false;
-    else
-    {
-      bool
-      isRCorrect =
-        Hacl_Impl_ECDSA_P256_Verification_Agile_isMoreThanZeroLessThanOrderMinusOne(rAsFelem);
-      bool
-      isSCorrect =
-        Hacl_Impl_ECDSA_P256_Verification_Agile_isMoreThanZeroLessThanOrderMinusOne(sAsFelem);
-      bool step1 = isRCorrect && isSCorrect;
-      if (step1 == false)
-        result = false;
-      else
-      {
-        u8 tempBufferU8[64U] = { 0U };
-        u8 *bufferU1 = tempBufferU8;
-        u8 *bufferU2 = tempBufferU8 + (u32)32U;
-        u32 sz = (u32)64U;
-        KRML_CHECK_SIZE(sizeof (u8), sz);
-        {
-          u8 mHash[sz];
-          memset(mHash, 0U, sz * sizeof (mHash[0U]));
-          Hacl_Hash_SHA2_hash_512(m, mLen, mHash);
-          {
-            u8 *cutHash = mHash;
-            Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(cutHash, hashAsFelem);
-            Hacl_Impl_ECDSA_MontgomeryMultiplication_reduction_prime_2prime_order(hashAsFelem,
-              hashAsFelem);
-            {
-              u64 tempBuffer1[12U] = { 0U };
-              u64 *inverseS = tempBuffer1;
-              u64 *u1 = tempBuffer1 + (u32)4U;
-              u64 *u2 = tempBuffer1 + (u32)8U;
-              Hacl_Impl_ECDSA_MM_Exponent_fromDomainImpl(sAsFelem, inverseS);
-              Hacl_Impl_ECDSA_MM_Exponent_montgomery_ladder_exponent(inverseS);
-              Hacl_Impl_ECDSA_MM_Exponent_multPowerPartial(sAsFelem, inverseS, hashAsFelem, u1);
-              Hacl_Impl_ECDSA_MM_Exponent_multPowerPartial(sAsFelem, inverseS, rAsFelem, u2);
-              Hacl_Impl_P256_LowLevel_changeEndian(u1);
-              Hacl_Impl_P256_LowLevel_changeEndian(u2);
-              Hacl_Impl_P256_LowLevel_toUint8(u1, bufferU1);
-              Hacl_Impl_P256_LowLevel_toUint8(u2, bufferU2);
-              {
-                u64 pointSum[12U] = { 0U };
-                u64 points[24U] = { 0U };
-                u64 *buff = tempBuffer + (u32)12U;
-                u64 *pointU1G = points;
-                u64 *pointU2Q0 = points + (u32)12U;
-                Hacl_Impl_P256_Core_secretToPublicWithoutNorm(pointU1G, bufferU1, tempBuffer);
-                Hacl_Impl_P256_Core_scalarMultiplicationWithoutNorm(publicKeyBuffer,
-                  pointU2Q0,
-                  bufferU2,
-                  tempBuffer);
-                {
-                  u64 *pointU1G0 = points;
-                  u64 *pointU2Q = points + (u32)12U;
-                  Hacl_Impl_P256_PointAdd_point_add(pointU1G0, pointU2Q, pointSum, buff);
-                  Hacl_Impl_P256_Core_norm(pointSum, pointSum, buff);
-                  {
-                    bool
-                    resultIsPAI = Hacl_Impl_P256_Signature_Common_isPointAtInfinityPublic(pointSum);
-                    u64 *xCoordinateSum = pointSum;
-                    memcpy(xBuffer, xCoordinateSum, (u32)4U * sizeof (xCoordinateSum[0U]));
-                    {
-                      bool r1 = !resultIsPAI;
-                      bool state = r1;
-                      if (state == false)
-                        result = false;
-                      else
-                      {
-                        bool
-                        result0 =
-                          Hacl_Impl_ECDSA_P256_Verification_Agile_compare_felem_bool(xBuffer,
-                            rAsFelem);
-                        result = result0;
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    return result;
-  }
+  bool result;
+  toUint64ChangeEndian(pubKeyX, publicKeyFelemX);
+  toUint64ChangeEndian(pubKeyY, publicKeyFelemY);
+  toUint64ChangeEndian(r, rAsFelem);
+  toUint64ChangeEndian(s, sAsFelem);
+  result =
+    ecdsa_verification_((
+        (Spec_ECDSA_hash_alg_ecdsa){ .tag = Spec_ECDSA_Hash, ._0 = Spec_Hash_Definitions_SHA2_512 }
+      ),
+      publicKeyAsFelem,
+      rAsFelem,
+      sAsFelem,
+      mLen,
+      m);
+  return result;
 }
 
-bool Hacl_Interface_P256_ecdsa_verif_without_hash(u32 mLen, u8 *m, u8 *pubKey, u8 *r, u8 *s)
+/*
+This code is not side-channel resistant.
+  
+ Input: m buffer: uint8 [mLen], 
+ pub(lic)Key: uint8[64], 
+ r: uint8[32], 
+ s: uint8[32]. 
+  
+ Output: bool, where true stands for the correct signature verification.
+  
+ The message m is expected to be hashed by a strong hash function, the lenght of the message is expected to be 32 bytes and more.
+*/
+bool Hacl_P256_ecdsa_verif_without_hash(u32 mLen, u8 *m, u8 *pubKey, u8 *r, u8 *s)
 {
   u64 publicKeyAsFelem[8U] = { 0U };
   u64 *publicKeyFelemX = publicKeyAsFelem;
@@ -3194,112 +3123,37 @@ bool Hacl_Interface_P256_ecdsa_verif_without_hash(u32 mLen, u8 *m, u8 *pubKey, u
   u64 sAsFelem[4U] = { 0U };
   u8 *pubKeyX = pubKey;
   u8 *pubKeyY = pubKey + (u32)32U;
-  Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(pubKeyX, publicKeyFelemX);
-  Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(pubKeyY, publicKeyFelemY);
-  Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(r, rAsFelem);
-  Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(s, sAsFelem);
-  {
-    u64 tempBufferU64[120U] = { 0U };
-    u64 *publicKeyBuffer = tempBufferU64;
-    u64 *hashAsFelem = tempBufferU64 + (u32)12U;
-    u64 *tempBuffer = tempBufferU64 + (u32)16U;
-    u64 *xBuffer = tempBufferU64 + (u32)116U;
-    bool publicKeyCorrect;
-    bool result;
-    Hacl_Impl_P256_Signature_Common_bufferToJac(publicKeyAsFelem, publicKeyBuffer);
-    publicKeyCorrect =
-      Hacl_Impl_P256_Signature_Common_verifyQValidCurvePoint(publicKeyBuffer,
-        tempBuffer);
-    if (publicKeyCorrect == false)
-      result = false;
-    else
-    {
-      bool
-      isRCorrect =
-        Hacl_Impl_ECDSA_P256_Verification_Agile_isMoreThanZeroLessThanOrderMinusOne(rAsFelem);
-      bool
-      isSCorrect =
-        Hacl_Impl_ECDSA_P256_Verification_Agile_isMoreThanZeroLessThanOrderMinusOne(sAsFelem);
-      bool step1 = isRCorrect && isSCorrect;
-      if (step1 == false)
-        result = false;
-      else
-      {
-        u8 tempBufferU8[64U] = { 0U };
-        u8 *bufferU1 = tempBufferU8;
-        u8 *bufferU2 = tempBufferU8 + (u32)32U;
-        u32 sz = mLen;
-        KRML_CHECK_SIZE(sizeof (u8), sz);
-        {
-          u8 mHash[sz];
-          memset(mHash, 0U, sz * sizeof (mHash[0U]));
-          memcpy(mHash, m, sz * sizeof (m[0U]));
-          {
-            u8 *cutHash = mHash;
-            Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(cutHash, hashAsFelem);
-            Hacl_Impl_ECDSA_MontgomeryMultiplication_reduction_prime_2prime_order(hashAsFelem,
-              hashAsFelem);
-            {
-              u64 tempBuffer1[12U] = { 0U };
-              u64 *inverseS = tempBuffer1;
-              u64 *u1 = tempBuffer1 + (u32)4U;
-              u64 *u2 = tempBuffer1 + (u32)8U;
-              Hacl_Impl_ECDSA_MM_Exponent_fromDomainImpl(sAsFelem, inverseS);
-              Hacl_Impl_ECDSA_MM_Exponent_montgomery_ladder_exponent(inverseS);
-              Hacl_Impl_ECDSA_MM_Exponent_multPowerPartial(sAsFelem, inverseS, hashAsFelem, u1);
-              Hacl_Impl_ECDSA_MM_Exponent_multPowerPartial(sAsFelem, inverseS, rAsFelem, u2);
-              Hacl_Impl_P256_LowLevel_changeEndian(u1);
-              Hacl_Impl_P256_LowLevel_changeEndian(u2);
-              Hacl_Impl_P256_LowLevel_toUint8(u1, bufferU1);
-              Hacl_Impl_P256_LowLevel_toUint8(u2, bufferU2);
-              {
-                u64 pointSum[12U] = { 0U };
-                u64 points[24U] = { 0U };
-                u64 *buff = tempBuffer + (u32)12U;
-                u64 *pointU1G = points;
-                u64 *pointU2Q0 = points + (u32)12U;
-                Hacl_Impl_P256_Core_secretToPublicWithoutNorm(pointU1G, bufferU1, tempBuffer);
-                Hacl_Impl_P256_Core_scalarMultiplicationWithoutNorm(publicKeyBuffer,
-                  pointU2Q0,
-                  bufferU2,
-                  tempBuffer);
-                {
-                  u64 *pointU1G0 = points;
-                  u64 *pointU2Q = points + (u32)12U;
-                  Hacl_Impl_P256_PointAdd_point_add(pointU1G0, pointU2Q, pointSum, buff);
-                  Hacl_Impl_P256_Core_norm(pointSum, pointSum, buff);
-                  {
-                    bool
-                    resultIsPAI = Hacl_Impl_P256_Signature_Common_isPointAtInfinityPublic(pointSum);
-                    u64 *xCoordinateSum = pointSum;
-                    memcpy(xBuffer, xCoordinateSum, (u32)4U * sizeof (xCoordinateSum[0U]));
-                    {
-                      bool r1 = !resultIsPAI;
-                      bool state = r1;
-                      if (state == false)
-                        result = false;
-                      else
-                      {
-                        bool
-                        result0 =
-                          Hacl_Impl_ECDSA_P256_Verification_Agile_compare_felem_bool(xBuffer,
-                            rAsFelem);
-                        result = result0;
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    return result;
-  }
+  bool result;
+  toUint64ChangeEndian(pubKeyX, publicKeyFelemX);
+  toUint64ChangeEndian(pubKeyY, publicKeyFelemY);
+  toUint64ChangeEndian(r, rAsFelem);
+  toUint64ChangeEndian(s, sAsFelem);
+  result =
+    ecdsa_verification_(((Spec_ECDSA_hash_alg_ecdsa){ .tag = Spec_ECDSA_NoHash }),
+      publicKeyAsFelem,
+      rAsFelem,
+      sAsFelem,
+      mLen,
+      m);
+  return result;
 }
 
-bool Hacl_Interface_P256_verify_q(u8 *pubKey)
+/*
+ Public key verification function. 
+  
+ This code is not side-channel resistant.
+  
+ Input: pub(lic)Key: uint8[64]. 
+  
+ Output: bool, where 0 stands for the public key to be correct with respect to SP 800-56A:  
+ Verify that the public key is not the “point at infinity”, represented as O. 
+ Verify that the affine x and y coordinates of the point represented by the public key are in the range [0, p – 1] where p is the prime defining the finite field. 
+ Verify that y2 = x3 + ax + b where a and b are the coefficients of the curve equation. 
+ Verify that nQ = O (the point at infinity), where n is the order of the curve and Q is the public key point.
+  
+ The last extract is taken from : https://neilmadden.blog/2017/05/17/so-how-do-you-validate-nist-ecdh-public-keys/
+*/
+bool Hacl_P256_verify_q(u8 *pubKey)
 {
   u8 *pubKeyX = pubKey;
   u8 *pubKeyY = pubKey + (u32)32U;
@@ -3310,14 +3164,31 @@ bool Hacl_Interface_P256_verify_q(u8 *pubKey)
   u64 *publicKeyX = publicKeyB;
   u64 *publicKeyY = publicKeyB + (u32)4U;
   bool r;
-  Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(pubKeyX, publicKeyX);
-  Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(pubKeyY, publicKeyY);
-  Hacl_Impl_P256_Signature_Common_bufferToJac(publicKeyB, publicKeyJ);
-  r = Hacl_Impl_P256_Signature_Common_verifyQValidCurvePoint(publicKeyJ, tempBufferV);
+  toUint64ChangeEndian(pubKeyX, publicKeyX);
+  toUint64ChangeEndian(pubKeyY, publicKeyY);
+  bufferToJac(publicKeyB, publicKeyJ);
+  r = verifyQValidCurvePoint(publicKeyJ, tempBufferV);
   return r;
 }
 
-bool Hacl_Interface_P256_decompression_not_compressed_form(u8 *b, u8 *result)
+/*
+ There and further we introduce notions of compressed point and not compressed point. 
+  
+ We denote || as byte concatenation. 
+  
+ A compressed point is a point representaion as follows: (0x2 + y % 2) || x.
+  
+ A not Compressed point is a point representation as follows: 0x4 || x || y.
+
+  
+ 
+ Input: a point in not compressed form (uint8[65]), 
+ result: uint8[64] (internal point representation).
+  
+ Output: bool, where true stands for the correct decompression.
+ 
+*/
+bool Hacl_P256_decompression_not_compressed_form(u8 *b, u8 *result)
 {
   u8 compressionIdentifier = b[0U];
   bool correctIdentifier = (u8)4U == compressionIdentifier;
@@ -3326,7 +3197,14 @@ bool Hacl_Interface_P256_decompression_not_compressed_form(u8 *b, u8 *result)
   return correctIdentifier;
 }
 
-bool Hacl_Interface_P256_decompression_compressed_form(u8 *b, u8 *result)
+/*
+ Input: a point in compressed form (uint8[33]), 
+ result: uint8[64] (internal point representation).
+  
+ Output: bool, where true stands for the correct decompression.
+ 
+*/
+bool Hacl_P256_decompression_compressed_form(u8 *b, u8 *result)
 {
   u64 temp[8U] = { 0U };
   u64 *t0 = temp;
@@ -3340,26 +3218,22 @@ bool Hacl_Interface_P256_decompression_compressed_form(u8 *b, u8 *result)
   {
     u8 *x = b + (u32)1U;
     memcpy(result, x, (u32)32U * sizeof (x[0U]));
-    Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(x, t0);
+    toUint64ChangeEndian(x, t0);
     {
       u64 tempBuffer[4U] = { 0U };
-      u64
-      carry =
-        Hacl_Impl_P256_LowLevel_sub4_il(t0,
-          Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer,
-          tempBuffer);
+      u64 carry = sub4_il(t0, prime256_buffer, tempBuffer);
       bool lessThanPrimeXCoordinate = carry == (u64)1U;
       if (!lessThanPrimeXCoordinate)
         return false;
       {
         u64 multBuffer[8U] = { 0U };
-        Hacl_Impl_P256_LowLevel_shift_256_impl(t0, multBuffer);
-        Hacl_Impl_SolinasReduction_solinas_reduction_impl(multBuffer, t0);
+        shift_256_impl(t0, multBuffer);
+        solinas_reduction_impl(multBuffer, t0);
         {
           u64 identifierBit = (u64)(compressedIdentifier & (u8)1U);
-          Hacl_Impl_P256_Compression_computeYFromX(t0, t1, identifierBit);
-          Hacl_Impl_P256_LowLevel_changeEndian(t1);
-          Hacl_Impl_P256_LowLevel_toUint8(t1, result + (u32)32U);
+          computeYFromX(t0, t1, identifierBit);
+          changeEndian(t1);
+          toUint8(t1, result + (u32)32U);
           return true;
         }
       }
@@ -3368,14 +3242,22 @@ bool Hacl_Interface_P256_decompression_compressed_form(u8 *b, u8 *result)
   return false;
 }
 
-void Hacl_Interface_P256_compression_not_compressed_form(u8 *b, u8 *result)
+/*
+ Input: a point buffer (internal representation: uint8[64]), 
+ result: a point in not compressed form (uint8[65]).
+*/
+void Hacl_P256_compression_not_compressed_form(u8 *b, u8 *result)
 {
   u8 *to = result + (u32)1U;
   memcpy(to, b, (u32)64U * sizeof (b[0U]));
   result[0U] = (u8)4U;
 }
 
-void Hacl_Interface_P256_compression_compressed_form(u8 *b, u8 *result)
+/*
+ Input: a point buffer (internal representation: uint8[64]), 
+ result: a point in not compressed form (uint8[33]).
+*/
+void Hacl_P256_compression_compressed_form(u8 *b, u8 *result)
 {
   u8 *y = b + (u32)32U;
   u8 lastWordY = y[31U];
@@ -3385,22 +3267,75 @@ void Hacl_Interface_P256_compression_compressed_form(u8 *b, u8 *result)
   result[0U] = identifier;
 }
 
-void Hacl_Interface_P256_reduction_8_32(u8 *x, u8 *result)
+/*
+ The function takes an arbitraty 32 bytes buffer and reduces it to contain a value that is less than the curve order.
+  
+ Input: x: uint8[32], 
+ result: uint8[32], such that by the end of the function the value stored in the buffer result equal to the value stored in the buffer x modulo curveOrder.
+*/
+void Hacl_P256_reduction_8_32(u8 *x, u8 *result)
 {
   u64 xAsFelem[4U] = { 0U };
-  Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(x, xAsFelem);
-  Hacl_Impl_ECDSA_MontgomeryMultiplication_reduction_prime_2prime_order(xAsFelem, xAsFelem);
-  Hacl_Impl_P256_LowLevel_changeEndian(xAsFelem);
-  Hacl_Impl_P256_LowLevel_toUint8(xAsFelem, result);
+  toUint64ChangeEndian(x, xAsFelem);
+  reduction_prime_2prime_order(xAsFelem, xAsFelem);
+  changeEndian(xAsFelem);
+  toUint8(xAsFelem, result);
 }
 
-u64 Hacl_Interface_P256_ecp256dh_i(u8 *result, u8 *scalar)
+/*
+ Input: result: uint8[64], 
+ scalar: uint8[32].
+  
+ Output: uint64, where 0 stands for the correct key generation. All the other values mean that an error has occurred. 
+  
+*/
+u64 Hacl_P256_ecp256dh_i(u8 *result, u8 *scalar)
 {
-  return Hacl_Impl_P256_DH_ecp256dh_i(result, scalar);
+  u64 tempBuffer[100U] = { 0U };
+  u64 resultBuffer[12U] = { 0U };
+  u64 *resultBufferX = resultBuffer;
+  u64 *resultBufferY = resultBuffer + (u32)4U;
+  u8 *resultX = result;
+  u8 *resultY = result + (u32)32U;
+  u64 flag;
+  secretToPublic(resultBuffer, scalar, tempBuffer);
+  flag = isPointAtInfinityPrivate(resultBuffer);
+  changeEndian(resultBufferX);
+  changeEndian(resultBufferY);
+  toUint8(resultBufferX, resultX);
+  toUint8(resultBufferY, resultY);
+  return flag;
 }
 
-u64 Hacl_Interface_P256_ecp256dh_r(u8 *result, u8 *pubKey, u8 *scalar)
+/*
+ This code is not side channel resistant on pub_key. 
+ Input: result: uint8[64], 
+ pub(lic)Key: uint8[64], 
+ scalar: uint8[64].
+  
+ Output: uint64, where 0 stands for the correct key generation. All the other values mean that an error has occurred. 
+  
+*/
+u64 Hacl_P256_ecp256dh_r(u8 *result, u8 *pubKey, u8 *scalar)
 {
-  return Hacl_Impl_P256_DH_ecp256dh_r(result, pubKey, scalar);
+  u64 resultBufferFelem[12U] = { 0U };
+  u64 *resultBufferFelemX = resultBufferFelem;
+  u64 *resultBufferFelemY = resultBufferFelem + (u32)4U;
+  u8 *resultX = result;
+  u8 *resultY = result + (u32)32U;
+  u64 publicKeyAsFelem[8U] = { 0U };
+  u64 *publicKeyFelemX = publicKeyAsFelem;
+  u64 *publicKeyFelemY = publicKeyAsFelem + (u32)4U;
+  u8 *pubKeyX = pubKey;
+  u8 *pubKeyY = pubKey + (u32)32U;
+  u64 flag;
+  toUint64ChangeEndian(pubKeyX, publicKeyFelemX);
+  toUint64ChangeEndian(pubKeyY, publicKeyFelemY);
+  flag = _ecp256dh_r(resultBufferFelem, publicKeyAsFelem, scalar);
+  changeEndian(resultBufferFelemX);
+  changeEndian(resultBufferFelemY);
+  toUint8(resultBufferFelemX, resultX);
+  toUint8(resultBufferFelemY, resultY);
+  return flag;
 }
 
