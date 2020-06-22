@@ -24,7 +24,7 @@ let nat_prime = n:nat{n < prime256}
 
 let point_nat = tuple3 nat nat nat
 
-let point_nat_prime = tuple3 nat_prime nat_prime nat_prime
+let point_nat_prime = (p: point_nat {let (a, b, c) = p in a < prime256 /\ b < prime256 /\ c < prime256})
 
 type elem (n:pos) = x:nat{x < n}
 
@@ -144,9 +144,10 @@ let _point_add (p:point_nat_prime) (q:point_nat_prime) : point_nat_prime =
       (x3, y3, z3)
 
 
-let isPointAtInfinity (p:point_nat) =
+let isPointAtInfinity (p:point_nat_prime) =
   let (_, _, z) = p in z = 0
 
+#push-options "--fuel 1"
 
 let _norm (p:point_nat_prime) : point_nat_prime =
   let (x, y, z) = p in
