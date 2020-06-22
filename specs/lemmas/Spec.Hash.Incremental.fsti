@@ -109,17 +109,23 @@ let blake2_hash_incremental
 
 let hash = Spec.Agile.Hash.hash
 
-val repeati_blake2_update1_is_update_multi
-  (a:hash_alg{is_blake a}) (nb prev : nat)
-  (d : bytes)
-  (hash : words_state' a) :
+/// Auxiliary lemma to help type postconditions
+private
+val nb_blocks_props :
+  a:hash_alg{is_blake a} -> nb : nat -> prev : nat -> data_length : nat ->
   Lemma
   (requires (
-    nb * block_length a <= Seq.length d /\
-    prev + Seq.length d <= Blake2.max_limb (to_blake_alg a) /\
-    prev + nb * block_length a <= max_extra_state a
-  ))
+    nb * block_length a <= data_length /\
+    prev + data_length <= Blake2.max_limb (to_blake_alg a) /\
+    prev + nb * block_length a <= max_extra_state a))
   (ensures (
+    nb * block_length a >= 0 /\
+    nb <= data_length / Spec.Blake2.size_block (to_blake_alg a) /\
+    nb * block_length a % block_length a = 0))
+
+(*    (**) Math.Lemmas.multiple_modulo_lemma nb (block_length a);
+    (**) assert(Seq.length blocks % block_length a = 0);
+    
     (**) Math.Lemmas.nat_times_nat_is_nat nb (block_length a);
     (**) assert(nb * block_length a >= 0);
     (**) assert_norm(Spec.Blake2.size_block (to_blake_alg a) > 0);
@@ -133,11 +139,27 @@ val repeati_blake2_update1_is_update_multi
     (**)   (==) {}
     (**)   Seq.length d / Spec.Blake2.size_block (to_blake_alg a);
     (**) };
-    (**) assert(forall (i : nat). i < nb ==> (i < Seq.length d / Spec.Blake2.size_block (to_blake_alg a)));
+//    (**) assert(forall (i : nat). i < nb ==> (i < Seq.length d / Spec.Blake2.size_block (to_blake_alg a)));
     (**) assert_norm(block_length a > 0);
     let blocks, _ = Seq.split d (nb * block_length a) in
     (**) Math.Lemmas.multiple_modulo_lemma nb (block_length a);
     (**) assert(Seq.length blocks % block_length a = 0);
+    (Loops.repeati #(words_state' a) nb (Blake2.blake2_update1 (to_blake_alg a) prev d) hash,
+     nat_to_extra_state a (prev + nb * block_length a)) ==
+       update_multi a (hash, nat_to_extra_state a prev) blocks)) *)
+
+val repeati_blake2_update1_is_update_multi
+  (a:hash_alg{is_blake a}) (nb prev : nat)
+  (d : bytes)
+  (hash : words_state' a) :
+  Lemma
+  (requires (
+    nb * block_length a <= Seq.length d /\
+    prev + Seq.length d <= Blake2.max_limb (to_blake_alg a) /\
+    prev + nb * block_length a <= max_extra_state a))
+  (ensures (
+    (**) nb_blocks_props a nb prev (Seq.length d);
+    let blocks, _ = Seq.split d (nb * block_length a) in
     (Loops.repeati #(words_state' a) nb (Blake2.blake2_update1 (to_blake_alg a) prev d) hash,
      nat_to_extra_state a (prev + nb * block_length a)) ==
        update_multi a (hash, nat_to_extra_state a prev) blocks))

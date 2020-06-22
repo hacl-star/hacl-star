@@ -126,6 +126,58 @@ let blake2_update_multi_one_block_eq
                                  block hash,
      totlen')))
 
+/// Auxiliary lemma to help type postconditions
+let nb_blocks_props (a:hash_alg{is_blake a}) (nb prev data_length : nat) :
+  Lemma
+  (requires (
+    nb * block_length a <= data_length /\
+    prev + data_length <= Blake2.max_limb (to_blake_alg a) /\
+    prev + nb * block_length a <= max_extra_state a))
+  (ensures (
+    nb * block_length a >= 0 /\
+    nb <= data_length / Spec.Blake2.size_block (to_blake_alg a) /\
+    nb * block_length a % block_length a = 0)) =
+  Math.Lemmas.nat_times_nat_is_nat nb (block_length a);
+  assert(nb * block_length a >= 0);
+  assert_norm(Spec.Blake2.size_block (to_blake_alg a) > 0);
+  assert_norm(block_length a == Blake2.size_block (to_blake_alg a));
+  calc (<=) {
+    (nb <: int);
+    (==) { Math.Lemmas.cancel_mul_div nb (block_length a) }
+    (nb * block_length a) / block_length a;
+    (<=) { Math.Lemmas.lemma_div_le (nb * block_length a) data_length (block_length a) }
+    data_length / block_length a;
+    (==) {}
+    data_length / Spec.Blake2.size_block (to_blake_alg a);
+  };
+  assert_norm(block_length a > 0);
+  Math.Lemmas.multiple_modulo_lemma nb (block_length a)
+
+/// Auxiliary lemma to help type postconditions
+let nb_nonzero_blocks_props (a:hash_alg{is_blake a}) (nb prev data_length : nat) :
+  Lemma
+  (requires (
+    nb > 0 /\
+    nb * block_length a <= data_length /\
+    prev + data_length <= Blake2.max_limb (to_blake_alg a) /\
+    prev + nb * block_length a <= max_extra_state a))
+  (ensures (
+    nb * block_length a >= 0 /\
+    nb <= data_length / Spec.Blake2.size_block (to_blake_alg a) /\
+    nb * block_length a % block_length a = 0 /\
+    (nb - 1) * block_length a >= 0 /\
+    (nb - 1) * block_length a < nb * block_length a /\
+    (nb * block_length a) - ((nb-1) * block_length a) = block_length a /\
+    Blake2.size_block (to_blake_alg a) == block_length a)) =
+  nb_blocks_props a nb prev data_length;
+  blake2_size_block_props a;
+  Math.Lemmas.lemma_mult_le_right (block_length a) (nb-1) nb;
+  Math.Lemmas.nat_times_nat_is_nat (nb-1) (block_length a);
+  Math.Lemmas.lemma_div_le (nb * block_length a) data_length (block_length a);
+  Math.Lemmas.cancel_mul_div nb (block_length a);
+  Math.Lemmas.distributivity_sub_left nb (nb-1) (block_length a);
+  mul_one_left_is_same (block_length a)
+
 #push-options "--z3cliopt smt.arith.nl=false"
 let repeati_blake2_update1_eq
   (a:hash_alg{is_blake a})
@@ -139,29 +191,14 @@ let repeati_blake2_update1_eq
     prev + Seq.length d <= Blake2.max_limb (to_blake_alg a) /\
     prev + nb * block_length a <= max_extra_state a))
   (ensures (
-    (**) Math.Lemmas.lemma_mult_le_right (block_length a) (nb-1) nb;
-    (**) Math.Lemmas.nat_times_nat_is_nat (nb-1) (block_length a);
-    (**) Math.Lemmas.nat_times_nat_is_nat nb (block_length a);
-    (**) blake2_size_block_props a;
-    (**) Math.Lemmas.lemma_div_le (nb * block_length a) (Seq.length d) (block_length a);
-    (**) Math.Lemmas.cancel_mul_div nb (block_length a);
-    (**) assert(nb <= Seq.length d / block_length a);
+    (**) nb_nonzero_blocks_props a nb prev (Seq.length d);
     let update1 = Blake2.blake2_update1 (to_blake_alg a) prev d in
     let block = S.slice d ((nb-1) * block_length a) (nb * block_length a) in
-    (**) Math.Lemmas.distributivity_sub_left nb (nb-1) (block_length a);
-    (**) mul_one_left_is_same (block_length a);
-    (**) assert(S.length block = block_length a);
     Loops.repeati nb update1 hash ==
     Blake2.blake2_update_block (to_blake_alg a) false (prev + nb * block_length a)
                                block (Loops.repeati (nb-1) update1 hash)
   )) =
-  (**) Math.Lemmas.lemma_mult_le_right (block_length a) (nb-1) nb;
-  (**) Math.Lemmas.nat_times_nat_is_nat (nb-1) (block_length a);
-  (**) Math.Lemmas.nat_times_nat_is_nat nb (block_length a);
-  (**) blake2_size_block_props a;
-  (**) Math.Lemmas.lemma_div_le (nb * block_length a) (Seq.length d) (block_length a);
-  (**) Math.Lemmas.cancel_mul_div nb (block_length a);
-  (**) assert(nb <= Seq.length d / block_length a);
+  nb_nonzero_blocks_props a nb prev (Seq.length d);
   let update1 = Blake2.blake2_update1 (to_blake_alg a) prev d in
   let block = S.slice d ((nb-1) * block_length a) (nb * block_length a) in
   Loops.unfold_repeati nb update1 hash (nb - 1)
@@ -201,24 +238,8 @@ val repeati_blake2_update1_is_update_multi_aux
     prev + nb * block_length a <= max_extra_state a
   ))
   (ensures (
-    (**) Math.Lemmas.nat_times_nat_is_nat nb (block_length a);
-    (**) assert(nb * block_length a >= 0);
-    (**) assert_norm(Spec.Blake2.size_block (to_blake_alg a) > 0);
-    (**) assert_norm(block_length a == Blake2.size_block (to_blake_alg a));
-    (**) calc (<=) {
-    (**)   (nb <: int);
-    (**)   (==) { Math.Lemmas.cancel_mul_div nb (block_length a) }
-    (**)   (nb * block_length a) / block_length a;
-    (**)   (<=) { Math.Lemmas.lemma_div_le (nb * block_length a) (Seq.length d) (block_length a) }
-    (**)   Seq.length d / block_length a;
-    (**)   (==) {}
-    (**)   Seq.length d / Spec.Blake2.size_block (to_blake_alg a);
-    (**) };
-    (**) assert(forall (i : nat). i < nb ==> (i < Seq.length d / Spec.Blake2.size_block (to_blake_alg a)));
-    (**) assert_norm(block_length a > 0);
+    (**) nb_blocks_props a nb prev (Seq.length d);
     let blocks, _ = Seq.split d (nb * block_length a) in
-    (**) Math.Lemmas.multiple_modulo_lemma nb (block_length a);
-    (**) assert(Seq.length blocks % block_length a = 0);
     (Loops.repeati #(words_state' a) nb (Blake2.blake2_update1 (to_blake_alg a) prev d) hash,
      nat_to_extra_state a (prev + nb * block_length a)) ==
        update_multi a (hash, nat_to_extra_state a prev) blocks))
@@ -226,23 +247,10 @@ val repeati_blake2_update1_is_update_multi_aux
 
 #push-options "--fuel 1 --z3cliopt smt.arith.nl=false"
 let rec repeati_blake2_update1_is_update_multi_aux a nb prev d hash =
-  assert_norm(block_length a > 0);
-  assert_norm(block_length a == Blake2.size_block (to_blake_alg a));
-  calc (<=) {
-    (nb <: int);
-    (==) { Math.Lemmas.cancel_mul_div nb (block_length a) }
-    (nb * block_length a) / block_length a;
-    (<=) { Math.Lemmas.lemma_div_le (nb * block_length a) (Seq.length d) (block_length a) }
-    Seq.length d / block_length a;
-  };
-  assert(Seq.length d % block_length a >= 0);
-  assert(nb <= Seq.length d / Blake2.size_block (to_blake_alg a));
-  assert(prev + nb * block_length a <= Blake2.max_limb (to_blake_alg a));
+  nb_blocks_props a nb prev (Seq.length d);
+  blake2_size_block_props a;
   let update1 = Blake2.blake2_update1 (to_blake_alg a) prev d in
-  Math.Lemmas.nat_times_nat_is_nat nb (block_length a);
   let blocks, _ = Seq.split d (nb * block_length a) in
-  assert(Seq.length blocks == nb * block_length a);
-  Math.Lemmas.multiple_modulo_lemma nb (block_length a);
   if nb = 0 then
     begin
     Loops.eq_repeati0 #(words_state' a) nb update1 hash;
