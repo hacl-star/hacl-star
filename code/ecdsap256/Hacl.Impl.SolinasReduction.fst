@@ -10,10 +10,11 @@ open FStar.Math.Lib
 open Lib.Buffer
 
 open Hacl.SolinasReduction.Lemmas
+open Spec.P256
 open Hacl.Impl.P256.LowLevel
 open Hacl.Impl.P256.LowLevel.PrimeSpecific
 
-open Spec.P256.Definitions
+open Hacl.Spec.P256.Definition
 open FStar.Mul
 
 module BV = FStar.BitVector

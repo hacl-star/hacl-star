@@ -9,11 +9,10 @@ open Hacl.Impl.P256.Arithmetics
 
 open Lib.Buffer
 
-open Spec.P256.Lemmas
-open Spec.P256.Definitions
+(* open Spec.P256.Lemmas *)
+open Hacl.Spec.P256.Definition
 open Hacl.Spec.P256.MontgomeryMultiplication
 open Spec.P256
-open Hacl.Impl.SolinasReduction
 open Hacl.Impl.P256.LowLevel 
 open Hacl.Impl.P256.LowLevel.PrimeSpecific
 open Hacl.Impl.P256.MontgomeryMultiplication
@@ -31,13 +30,13 @@ val point_double: p: point -> result: point -> tempBuffer: lbuffer uint64 (size 
   (requires fun h -> live h p /\ live h tempBuffer /\ live h result /\
     disjoint p tempBuffer /\ disjoint result tempBuffer /\
     eq_or_disjoint p result /\
-    as_nat h (gsub p (size 8) (size 4)) < prime /\ 
-    as_nat h (gsub p (size 0) (size 4)) < prime /\ 
-    as_nat h (gsub p (size 4) (size 4)) < prime)
+    as_nat h (gsub p (size 8) (size 4)) < prime256 /\ 
+    as_nat h (gsub p (size 0) (size 4)) < prime256 /\ 
+    as_nat h (gsub p (size 4) (size 4)) < prime256)
   (ensures fun h0 _ h1 -> modifies (loc tempBuffer |+| loc result)  h0 h1 /\  
-    as_nat h1 (gsub result (size 8) (size 4)) < prime /\ 
-    as_nat h1 (gsub result (size 0) (size 4)) < prime /\ 
-    as_nat h1 (gsub result (size 4) (size 4)) < prime /\
+    as_nat h1 (gsub result (size 8) (size 4)) < prime256 /\ 
+    as_nat h1 (gsub result (size 0) (size 4)) < prime256 /\ 
+    as_nat h1 (gsub result (size 4) (size 4)) < prime256 /\
     (
       let x, y, z = gsub p (size 0) (size 4),  gsub p (size 4) (size 4), gsub p (size 8) (size 4) in 
       let x3, y3, z3 = gsub result (size 0) (size 4), gsub result (size 4) (size 4), gsub result (size 8) (size 4) in 

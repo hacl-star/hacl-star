@@ -9,7 +9,7 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Buffer
 
-open Spec.P256.Definitions
+open Hacl.Spec.P256.Definition
 open Spec.P256
 
 open Hacl.Spec.P256.MontgomeryMultiplication

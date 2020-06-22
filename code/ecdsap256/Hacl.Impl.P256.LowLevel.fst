@@ -7,8 +7,9 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
-open Spec.P256.Definitions
-open Spec.P256.Lemmas
+open Hacl.Spec.P256.Definition
+open Hacl.Lemmas.P256
+(* open Spec.ECDSA.Lemmas *)
 open Spec.ECDSA
 
 open FStar.Math
@@ -18,7 +19,7 @@ open FStar.Mul
 open FStar.Tactics
 open FStar.Tactics.Canon 
 
-open Spec.P256.Lemmas
+(* open Spec.P256.Lemmas *)
 open Lib.IntTypes.Intrinsics
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 200"

@@ -12,7 +12,7 @@ open Lib.Buffer
 open Hacl.SolinasReduction.Lemmas
 open Hacl.Impl.P256.LowLevel 
 
-open Spec.P256.Definitions
+open Hacl.Spec.P256.Definition
 open FStar.Mul
 
 

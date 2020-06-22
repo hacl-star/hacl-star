@@ -10,8 +10,8 @@ open Lib.ByteSequence
 
 open FStar.Mul
 open Spec.P256
-open Spec.P256.Lemmas
-open Spec.P256.Definitions
+(* open Spec.P256.Lemmas *)
+open Hacl.Spec.P256.Definition
 open Spec.Hash.Definitions
 
 open Spec.DH

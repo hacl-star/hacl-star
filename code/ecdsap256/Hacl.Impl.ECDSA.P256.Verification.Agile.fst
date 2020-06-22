@@ -7,9 +7,9 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
-open Spec.P256.Lemmas
+open Hacl.Lemmas.P256
 
-open Spec.P256.Definitions
+open Hacl.Spec.P256.Definition
 open Hacl.Spec.ECDSA.Definition
 open Hacl.Impl.P256.LowLevel 
 open Hacl.Impl.P256.Core
@@ -20,7 +20,7 @@ open Hacl.Impl.ECDSA.MM.Exponent
 open Hacl.Spec.ECDSA.Definition
 open Spec.ECDSA
 open Spec.P256
-open Spec.P256.Lemmas
+(* open Spec.P256.Lemmas *)
 
 open Hacl.Impl.P256.PointAdd
 open Hacl.Impl.P256.LowLevel.PrimeSpecific

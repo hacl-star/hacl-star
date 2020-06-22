@@ -15,11 +15,12 @@ open Hacl.Impl.P256.MontgomeryMultiplication
 open Hacl.Impl.P256.Arithmetics
 
 open Hacl.Impl.P256.LowLevel.RawCmp
+open Hacl.Lemmas.P256
 open Hacl.Spec.ECDSA.Definition
 
 open Hacl.Spec.P256.MontgomeryMultiplication
 
-open Spec.P256.Definitions
+open Hacl.Spec.P256.Definition
 
 open FStar.Math.Lemmas
 
@@ -94,7 +95,7 @@ let computeYFromX x result sign =
   let h6 = ST.get() in 
   
     lemmaFromDomain (as_nat h6 aCoordinateBuffer);
-    assert_norm (0 * Spec.P256.Lemmas.modp_inv2 (pow2 256) % prime256 == 0);
+    assert_norm (0 * modp_inv2 (pow2 256) % prime256 == 0);
     square_root result result;
 
   let h7 = ST.get() in 
@@ -118,7 +119,7 @@ let computeYFromX x result sign =
 
     cmovznz4 flag bCoordinateBuffer result result;
 
-    Spec.P256.Lemmas.lemma_core_0 result h10;
+    lemma_core_0 result h10;
     Lib.ByteSequence.lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h10 result);
     Lib.ByteSequence.index_nat_to_intseq_le #U64 #SEC 4 (as_nat h10 result) 0;
     
@@ -195,7 +196,7 @@ let decompressionCompressedForm b result =
       copy (sub result (size 0) (size 32)) x;
       toUint64ChangeEndian x t0;
 	let h1 = ST.get() in 
-      Spec.P256.Lemmas.lemma_core_0 t0 h1;
+      lemma_core_0 t0 h1;
 
       let lessThanPrimeXCoordinate = lessThanPrime t0 in 
       changeEndianLemma (Lib.ByteSequence.uints_from_bytes_be (as_seq h0 x));
@@ -232,7 +233,7 @@ let decompressionCompressedForm b result =
 	   let h5 = ST.get() in 
 	   assert(as_seq h5 (gsub result (size 32) (size 32)) == Lib.ByteSequence.uints_to_bytes_be (changeEndian (as_seq h3 t1)));
 
-	  Spec.P256.Lemmas.lemma_core_0 t1 h3;
+	  lemma_core_0 t1 h3;
 	  
 	  Lib.ByteSequence.lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h3 t1);
 	  changeEndian_le_be (as_nat h3 t1);

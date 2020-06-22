@@ -7,8 +7,8 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
-open Spec.P256.Lemmas
-open Spec.P256.Definitions
+open Hacl.Lemmas.P256
+open Hacl.Spec.P256.Definition
 
 open Hacl.Impl.P256.LowLevel 
 open Hacl.Impl.P256.LowLevel.PrimeSpecific

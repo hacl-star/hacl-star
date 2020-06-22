@@ -10,10 +10,10 @@ open Lib.ByteSequence
 
 open Spec.P256
 open Spec.ECDSA
-open Spec.P256.Definitions
+open Hacl.Spec.P256.Definition
 open Spec.DH
 open Hacl.Spec.ECDSA.Definition
-open Spec.P256.Lemmas
+open Hacl.Lemmas.P256
 
 open Hacl.Impl.P256.LowLevel 
 open Hacl.Impl.P256.Core

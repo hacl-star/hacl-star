@@ -7,13 +7,13 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
-open Spec.P256.Definitions
+open Hacl.Spec.P256.Definition
 open Hacl.Spec.ECDSA.Definition
 
 open Hacl.Impl.ECDSA.MontgomeryMultiplication
 open Hacl.Impl.P256.LowLevel 
 
-open Spec.P256.Lemmas
+open Hacl.Lemmas.P256
 open Lib.ByteSequence
 
 #set-options "--z3rlimit 100 --ifuel 0 --fuel 0"

@@ -8,14 +8,15 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
-open FStar.Math.Lemmas
+(* open FStar.Math.Lemmas *)
 
-open Spec.P256.Lemmas
+(* open Spec.P256.Lemmas *)
 open Hacl.Spec.ECDSA.Definition
 open Spec.ECDSA
 open Hacl.Impl.P256.LowLevel 
+open Spec.P256
 
-open Spec.P256.Lemmas
+(* open Spec.P256.Lemmas *)
 
 open FStar.Mul
 

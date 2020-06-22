@@ -9,7 +9,7 @@ open Lib.Buffer
 open Lib.ByteSequence
 
 open Spec.ECDSA
-open Spec.P256.Lemmas
+open Hacl.Lemmas.P256
 
 open FStar.Mul
 open FStar.Math.Lemmas
@@ -17,8 +17,8 @@ open FStar.Math.Lemmas
 open Hacl.Hash.SHA2
 
 open Spec.P256
-open Spec.P256.Lemmas
-open Spec.P256.Definitions
+(* open Spec.P256.Lemmas *)
+open Hacl.Spec.P256.Definition
 open Hacl.Spec.ECDSA.Definition
 
 open Hacl.Spec.ECDSA.Definition
