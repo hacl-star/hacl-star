@@ -20,9 +20,11 @@ let prime256: (a: pos {a > 3 && a < pow2 256}) =
   pow2 256 - pow2 224 + pow2 192 + pow2 96 -1
 
 
+let nat_prime = n:nat{n < prime256}
+
 let point_nat = tuple3 nat nat nat
 
-let point_nat_prime = (p: point_nat {let (a, b, c) = p in a < prime256 /\ b < prime256 /\ c < prime256})
+let point_nat_prime = tuple3 nat_prime nat_prime nat_prime
 
 type elem (n:pos) = x:nat{x < n}
 

@@ -93,7 +93,7 @@ let rec nat_from_intlist_seq_le #t #l len b =
 
 #pop-options
 
-noextract
+
 val modulo_distributivity_mult: a: int -> b: int -> c: pos -> 
   Lemma ((a * b) % c = ((a % c) * (b % c)) % c)
 
