@@ -62,7 +62,16 @@ let update_last (a:hash_alg)
   else
   let total_len = prevlen + S.length input in
   let padding = pad a total_len in
+  (**) Math.Lemmas.lemma_mod_add_distr (S.length input + S.length padding) prevlen (block_length a);
+  (**) assert(S.length S.(input @| padding) % block_length a = 0);
   update_multi a hash S.(input @| padding)
+
+let pad (a:hash_alg)
+  (total_len:nat{total_len <= max_input_length a}):
+  Tot (b:bytes{(S.length b + total_len) % block_length a = 0})
+= if is_blake a then pad_blake a total_len
+  else pad_md a total_len
+
 
 let split_blocks (a:hash_alg) (input:bytes)
   : Pure (bytes & bytes)
@@ -111,7 +120,24 @@ val repeati_blake2_update1_is_update_multi
     prev + nb * block_length a <= max_extra_state a
   ))
   (ensures (
+    (**) Math.Lemmas.nat_times_nat_is_nat nb (block_length a);
+    (**) assert(nb * block_length a >= 0);
+    (**) assert_norm(Spec.Blake2.size_block (to_blake_alg a) > 0);
+    (**) assert_norm(block_length a == Blake2.size_block (to_blake_alg a));
+    (**) calc (<=) {
+    (**)   (nb <: int);
+    (**)   (==) { Math.Lemmas.cancel_mul_div nb (block_length a) }
+    (**)   (nb * block_length a) / block_length a;
+    (**)   (<=) { Math.Lemmas.lemma_div_le (nb * block_length a) (Seq.length d) (block_length a) }
+    (**)   Seq.length d / block_length a;
+    (**)   (==) {}
+    (**)   Seq.length d / Spec.Blake2.size_block (to_blake_alg a);
+    (**) };
+    (**) assert(forall (i : nat). i < nb ==> (i < Seq.length d / Spec.Blake2.size_block (to_blake_alg a)));
+    (**) assert_norm(block_length a > 0);
     let blocks, _ = Seq.split d (nb * block_length a) in
+    (**) Math.Lemmas.multiple_modulo_lemma nb (block_length a);
+    (**) assert(Seq.length blocks % block_length a = 0);
     (Loops.repeati #(words_state' a) nb (Blake2.blake2_update1 (to_blake_alg a) prev d) hash,
      nat_to_extra_state a (prev + nb * block_length a)) ==
        update_multi a (hash, nat_to_extra_state a prev) blocks))

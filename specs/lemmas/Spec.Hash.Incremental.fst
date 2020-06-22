@@ -22,6 +22,76 @@ let mul_zero_left_is_zero (n : int) : Lemma(0 * n = 0) = ()
 /// TODO: A lemma I could not find in FStar.Math.Lemmas
 let add_zero_right_is_same (n : int) : Lemma(n + 0 = n) = ()
 
+/// TODO: A lemma I could not find in FStar.Math.Lemmas
+let mul_one_left_is_same (n : int) : Lemma(1 * n = n) = ()
+
+/// Below we prove once and for all properties about the values returned by
+/// some utility functions. Note that some of those functions have post-conditions,
+/// so don't be surprise not to see obvious properties which are already given by
+/// those postconditions (we don't duplicate them).
+/// We introduce those lemmas below because they are easy to prove independantly,
+/// and allow us to make proofs while disabling non-linear artihmetic in Z3 later,
+/// so as to ensure proofs stability.
+let blake2_size_block_props (a : hash_alg{is_blake a}) :
+  Lemma(
+    Spec.Blake2.size_block (to_blake_alg a) > 0 /\
+    Spec.Blake2.size_block (to_blake_alg a) == block_length a) = ()
+
+let blake2_split_props (a:Blake2.alg) (len:nat) :
+  Lemma(
+    let nb, rem = Blake2.split a len in
+    rem <= len /\
+    rem <= Blake2.size_block a) = ()
+
+let split_blocks_props (a:hash_alg{is_blake a}) (input:bytes) :
+  Lemma
+  (requires (S.length input <= max_input_length a))
+  (ensures (
+    let nb, rem = Blake2.split (to_blake_alg a) (S.length input) in
+    let bs, l = split_blocks a input in
+    Seq.length bs = nb * block_length a /\
+    Seq.length l = rem /\
+    rem <= block_length a /\
+    Seq.length input = Seq.length bs + rem /\
+    rem = Seq.length input - Seq.length bs /\ 
+    l `S.equal` S.slice input (S.length input - rem) (S.length input) /\
+    (Seq.length input <= block_length a ==>
+     (nb = 0 /\ rem = Seq.length input))))
+  =
+  let nb, rem = Blake2.split (to_blake_alg a) (S.length input) in
+  blake2_split_props (to_blake_alg a) (S.length input);
+  let bs, l = split_blocks a input in
+  ()
+
+let last_split_blake_props (a:hash_alg{is_blake a}) (input : bytes) :
+  Lemma
+  (requires (Seq.length input <= block_length a))
+  (ensures (
+    let blocks, last_block, rem = last_split_blake a input in
+    blocks `Seq.equal` Seq.empty /\
+    rem = Seq.length input /\
+    last_block `Seq.equal` Blake2.get_last_padded_block (to_blake_alg a) input rem)) =
+  ()
+
+let last_split_blake_get_last_padded_block_eq (a:hash_alg{is_blake a}) (input : bytes) :
+  Lemma
+  (requires S.length input <= max_input_length a)
+  (ensures (
+    let nb, rem = Blake2.split (to_blake_alg a) (S.length input) in
+    let bs, l = split_blocks a input in
+    let last_block1 = Blake2.get_last_padded_block (to_blake_alg a) input rem in
+    let blocks, last_block2, rem = last_split_blake a l in
+    last_block2 `Seq.equal` last_block1)) =
+  let nb, rem = Blake2.split (to_blake_alg a) (S.length input) in
+  let bs, l = split_blocks a input in
+  let last_block1 = Blake2.get_last_padded_block (to_blake_alg a) input rem in
+  let blocks, last_block2, rem = last_split_blake a l in
+  assert(input `Seq.equal` Seq.append bs l);
+  blake2_split_props (to_blake_alg a) (S.length input);
+  split_blocks_props a input;
+  last_split_blake_props a l;
+  ()
+
 /// Below are various lemmas used to prove ``repeati_blake2_update1_is_update_multi``.
 let blake2_update_multi_one_block_eq
   (a:hash_alg{is_blake a})
@@ -56,7 +126,8 @@ let blake2_update_multi_one_block_eq
                                  block hash,
      totlen')))
 
-let repeati_blake2_update1_eq 
+#push-options "--z3cliopt smt.arith.nl=false"
+let repeati_blake2_update1_eq
   (a:hash_alg{is_blake a})
   (nb prev : nat)
   (d : bytes)
@@ -66,18 +137,35 @@ let repeati_blake2_update1_eq
     nb > 0 /\
     nb * block_length a <= Seq.length d /\
     prev + Seq.length d <= Blake2.max_limb (to_blake_alg a) /\
-    prev + nb * block_length a <= max_extra_state a
-  ))
+    prev + nb * block_length a <= max_extra_state a))
   (ensures (
+    (**) Math.Lemmas.lemma_mult_le_right (block_length a) (nb-1) nb;
+    (**) Math.Lemmas.nat_times_nat_is_nat (nb-1) (block_length a);
+    (**) Math.Lemmas.nat_times_nat_is_nat nb (block_length a);
+    (**) blake2_size_block_props a;
+    (**) Math.Lemmas.lemma_div_le (nb * block_length a) (Seq.length d) (block_length a);
+    (**) Math.Lemmas.cancel_mul_div nb (block_length a);
+    (**) assert(nb <= Seq.length d / block_length a);
     let update1 = Blake2.blake2_update1 (to_blake_alg a) prev d in
     let block = S.slice d ((nb-1) * block_length a) (nb * block_length a) in
+    (**) Math.Lemmas.distributivity_sub_left nb (nb-1) (block_length a);
+    (**) mul_one_left_is_same (block_length a);
+    (**) assert(S.length block = block_length a);
     Loops.repeati nb update1 hash ==
     Blake2.blake2_update_block (to_blake_alg a) false (prev + nb * block_length a)
                                block (Loops.repeati (nb-1) update1 hash)
   )) =
+  (**) Math.Lemmas.lemma_mult_le_right (block_length a) (nb-1) nb;
+  (**) Math.Lemmas.nat_times_nat_is_nat (nb-1) (block_length a);
+  (**) Math.Lemmas.nat_times_nat_is_nat nb (block_length a);
+  (**) blake2_size_block_props a;
+  (**) Math.Lemmas.lemma_div_le (nb * block_length a) (Seq.length d) (block_length a);
+  (**) Math.Lemmas.cancel_mul_div nb (block_length a);
+  (**) assert(nb <= Seq.length d / block_length a);
   let update1 = Blake2.blake2_update1 (to_blake_alg a) prev d in
   let block = S.slice d ((nb-1) * block_length a) (nb * block_length a) in
   Loops.unfold_repeati nb update1 hash (nb - 1)
+#pop-options
 
 let blake2_update_multi_associate_eq1
   (a:hash_alg{is_blake a}) (nb prev : nat)
@@ -101,7 +189,7 @@ let blake2_update_multi_associate_eq1
   Math.Lemmas.multiple_modulo_lemma 1 (block_length a);
   update_multi_associative a (hash, nat_to_extra_state a prev) blocks1 blocks2
 
-#push-options "--fuel 1 --z3cliopt smt.arith.nl=false"
+#push-options "--z3cliopt smt.arith.nl=false"
 val repeati_blake2_update1_is_update_multi_aux
   (a:hash_alg{is_blake a}) (nb prev : nat)
   (d : bytes)
@@ -134,7 +222,9 @@ val repeati_blake2_update1_is_update_multi_aux
     (Loops.repeati #(words_state' a) nb (Blake2.blake2_update1 (to_blake_alg a) prev d) hash,
      nat_to_extra_state a (prev + nb * block_length a)) ==
        update_multi a (hash, nat_to_extra_state a prev) blocks))
+#pop-options
 
+#push-options "--fuel 1 --z3cliopt smt.arith.nl=false"
 let rec repeati_blake2_update1_is_update_multi_aux a nb prev d hash =
   assert_norm(block_length a > 0);
   assert_norm(block_length a == Blake2.size_block (to_blake_alg a));
@@ -219,73 +309,6 @@ let rec repeati_blake2_update1_is_update_multi_aux a nb prev d hash =
 
 let repeati_blake2_update1_is_update_multi a nb prev d hash =
   repeati_blake2_update1_is_update_multi_aux a nb prev d hash
-
-/// Below we prove once and for all properties about the values returned by
-/// some utility functions. Note that some of those functions have post-conditions,
-/// so don't be surprise not to see obvious properties which are already given by
-/// those postconditions (we don't duplicate them).
-/// We introduce those lemmas below because they are easy to prove independantly,
-/// and allow us to make proofs while disabling non-linear artihmetic in Z3 later,
-/// so as to ensure proofs stability.
-let blake2_size_block_props (a : hash_alg{is_blake a}) :
-  Lemma(
-    Spec.Blake2.size_block (to_blake_alg a) > 0 /\
-    Spec.Blake2.size_block (to_blake_alg a) == block_length a) = ()
-
-let blake2_split_props (a:Blake2.alg) (len:nat) :
-  Lemma(
-    let nb, rem = Blake2.split a len in
-    rem <= len /\
-    rem <= Blake2.size_block a) = ()
-
-let split_blocks_props (a:hash_alg{is_blake a}) (input:bytes) :
-  Lemma
-  (requires (S.length input <= max_input_length a))
-  (ensures (
-    let nb, rem = Blake2.split (to_blake_alg a) (S.length input) in
-    let bs, l = split_blocks a input in
-    Seq.length bs = nb * block_length a /\
-    Seq.length l = rem /\
-    rem <= block_length a /\
-    Seq.length input = Seq.length bs + rem /\
-    rem = Seq.length input - Seq.length bs /\ 
-    l `S.equal` S.slice input (S.length input - rem) (S.length input) /\
-    (Seq.length input <= block_length a ==>
-     (nb = 0 /\ rem = Seq.length input))))
-  =
-  let nb, rem = Blake2.split (to_blake_alg a) (S.length input) in
-  blake2_split_props (to_blake_alg a) (S.length input);
-  let bs, l = split_blocks a input in
-  ()
-
-let last_split_blake_props (a:hash_alg{is_blake a}) (input : bytes) :
-  Lemma
-  (requires (Seq.length input <= block_length a))
-  (ensures (
-    let blocks, last_block, rem = last_split_blake a input in
-    blocks `Seq.equal` Seq.empty /\
-    rem = Seq.length input /\
-    last_block `Seq.equal` Blake2.get_last_padded_block (to_blake_alg a) input rem)) =
-  ()
-
-let last_split_blake_get_last_padded_block_eq (a:hash_alg{is_blake a}) (input : bytes) :
-  Lemma
-  (requires S.length input <= max_input_length a)
-  (ensures (
-    let nb, rem = Blake2.split (to_blake_alg a) (S.length input) in
-    let bs, l = split_blocks a input in
-    let last_block1 = Blake2.get_last_padded_block (to_blake_alg a) input rem in
-    let blocks, last_block2, rem = last_split_blake a l in
-    last_block2 `Seq.equal` last_block1)) =
-  let nb, rem = Blake2.split (to_blake_alg a) (S.length input) in
-  let bs, l = split_blocks a input in
-  let last_block1 = Blake2.get_last_padded_block (to_blake_alg a) input rem in
-  let blocks, last_block2, rem = last_split_blake a l in
-  assert(input `Seq.equal` Seq.append bs l);
-  blake2_split_props (to_blake_alg a) (S.length input);
-  split_blocks_props a input;
-  last_split_blake_props a l;
-  ()
 
 /// TODO: duplicate with Hacl.Streaming.Blake2.fst - MOVE
 /// Equality between the state types defined by blake2s and the generic hash.
