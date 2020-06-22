@@ -2,14 +2,13 @@ module Spec.ECDSA
 
 open FStar.Mul
 
-open Spec.P256.Lemmas
-
 open Lib.ByteSequence
 open Lib.IntTypes
 open Lib.Sequence
 
 open Spec.Hash
 open Spec.P256
+open Spec.ECDSA.Lemmas
 
 module Def = Spec.Hash.Definitions
 
@@ -24,22 +23,6 @@ let prime_p256_order: (a: pos{a < pow2 256}) =
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
 let nat_prime = n:nat{n < prime_p256_order}
-
-
-val lemma_scalar_ith: sc:lbytes 32 -> k:nat{k < 32} -> Lemma
-  (v sc.[k] == nat_from_intseq_le sc / pow2 (8 * k) % pow2 8)
-
-let lemma_scalar_ith sc k =
-  index_nat_to_intseq_le #U8 #SEC 32 (nat_from_intseq_le sc) k;
-  nat_from_intseq_le_inj sc (nat_to_intseq_le 32 (nat_from_intseq_le sc))
-
-
-val lemma_euclidian_for_ithbit: k: nat -> i: nat
-  -> Lemma (k / (pow2 (8 * (i / 8)) * pow2 (i % 8)) == k / pow2 i)
-
-let lemma_euclidian_for_ithbit k i =
-  lemma_div_def i 8;
-  pow2_plus (8 * (i / 8)) (i % 8)
 
 
 val ith_bit: k:lbytes 32 -> i:nat{i < 256}
@@ -308,9 +291,9 @@ val verifyQValidCurvePointSpec:
 
 let verifyQValidCurvePointSpec publicKey =
   let (x: nat), (y:nat), (z:nat) = publicKey in
-  x < Spec.P256.Definitions.prime256 &&
-  y < Spec.P256.Definitions.prime256 &&
-  z < Spec.P256.Definitions.prime256 &&
+  x < Spec.P256.prime256 &&
+  y < Spec.P256.prime256 &&
+  z < Spec.P256.prime256 &&
   isPointOnCurve (x, y, z) &&
   isPointAtInfinity (scalar_multiplication prime_p256_order_seq publicKey)
 
@@ -345,13 +328,6 @@ let min_input_length a =
     |NoHash -> 32
     |Hash a -> 0
 
-(*
-noextract
-let hash_length (a : hash_alg_ecdsa) =
-  match a with 
-    |NoHash -> 32
-    |Hash a -> hash_length a
-*)
 
 val hashSpec: a: hash_alg_ecdsa 
   -> mLen: size_nat{mLen >= min_input_length a}
