@@ -215,7 +215,7 @@ function refresh_hints_dist() {
     # outputting the list of files to stdout
     eval "$extra"
 
-    clean_build_dist
+    clean_build_dist || return 1
 
     git commit --allow-empty -m "[CI] $msg"
     # Memorize that commit
