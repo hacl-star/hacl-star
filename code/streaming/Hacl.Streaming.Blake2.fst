@@ -40,7 +40,7 @@ module Incr = Spec.Hash.Incremental
 /// An instance of the stateful type class for blake2
 /// =========================================================
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
 
 /// Some lemmas I could not find in Math.Lemmas
 let add_zero_left_is_same (n : int) :
@@ -640,7 +640,7 @@ val mk_update_last:
     (state.I.freeable #i h0 s ==> state.I.freeable #i h1 s))))
 
 /// TODO: after analysis with quake, this proof sometimes loops
-#push-options "--ifuel 1 --z3cliopt smt.arith.nl=false"
+#push-options "--ifuel 1 --z3cliopt smt.arith.nl=false --quake 10"
 let mk_update_last a m key_size i acc prevlen last last_len =
   (**) size_block_props a;
   [@inline_let] let wv = get_wv acc in

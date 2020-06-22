@@ -13,7 +13,7 @@ open Lib.IntTypes
 module Loops = Lib.LoopCombinators
 module UpdateMulti = Lib.UpdateMulti
 
-#reset-options "--fuel 0 --ifuel 0 --z3rlimit 100"
+#reset-options "--fuel 0 --ifuel 0 --z3rlimit 50"
 
 let blake2_init (a : hash_alg{is_blake a})
                 (kk : size_nat{kk <= Blake2.max_key (to_blake_alg a)})
@@ -122,31 +122,6 @@ val nb_blocks_props :
     nb * block_length a >= 0 /\
     nb <= data_length / Spec.Blake2.size_block (to_blake_alg a) /\
     nb * block_length a % block_length a = 0))
-
-(*    (**) Math.Lemmas.multiple_modulo_lemma nb (block_length a);
-    (**) assert(Seq.length blocks % block_length a = 0);
-    
-    (**) Math.Lemmas.nat_times_nat_is_nat nb (block_length a);
-    (**) assert(nb * block_length a >= 0);
-    (**) assert_norm(Spec.Blake2.size_block (to_blake_alg a) > 0);
-    (**) assert_norm(block_length a == Blake2.size_block (to_blake_alg a));
-    (**) calc (<=) {
-    (**)   (nb <: int);
-    (**)   (==) { Math.Lemmas.cancel_mul_div nb (block_length a) }
-    (**)   (nb * block_length a) / block_length a;
-    (**)   (<=) { Math.Lemmas.lemma_div_le (nb * block_length a) (Seq.length d) (block_length a) }
-    (**)   Seq.length d / block_length a;
-    (**)   (==) {}
-    (**)   Seq.length d / Spec.Blake2.size_block (to_blake_alg a);
-    (**) };
-//    (**) assert(forall (i : nat). i < nb ==> (i < Seq.length d / Spec.Blake2.size_block (to_blake_alg a)));
-    (**) assert_norm(block_length a > 0);
-    let blocks, _ = Seq.split d (nb * block_length a) in
-    (**) Math.Lemmas.multiple_modulo_lemma nb (block_length a);
-    (**) assert(Seq.length blocks % block_length a = 0);
-    (Loops.repeati #(words_state' a) nb (Blake2.blake2_update1 (to_blake_alg a) prev d) hash,
-     nat_to_extra_state a (prev + nb * block_length a)) ==
-       update_multi a (hash, nat_to_extra_state a prev) blocks)) *)
 
 val repeati_blake2_update1_is_update_multi
   (a:hash_alg{is_blake a}) (nb prev : nat)

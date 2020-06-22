@@ -43,6 +43,7 @@ let blake2_split_props (a:Blake2.alg) (len:nat) :
     rem <= len /\
     rem <= Blake2.size_block a) = ()
 
+#push-options "--z3rlimit 100"
 let split_blocks_props (a:hash_alg{is_blake a}) (input:bytes) :
   Lemma
   (requires (S.length input <= max_input_length a))
@@ -62,6 +63,7 @@ let split_blocks_props (a:hash_alg{is_blake a}) (input:bytes) :
   blake2_split_props (to_blake_alg a) (S.length input);
   let bs, l = split_blocks a input in
   ()
+#pop-options
 
 let last_split_blake_props (a:hash_alg{is_blake a}) (input : bytes) :
   Lemma
