@@ -55,7 +55,7 @@ let id_of_mode m =
   | Base -> create 1 (u8 0)
   | PSK -> create 1 (u8 1)
   | Auth -> create 1 (u8 2)
-  | PSKAuth -> create 1 (u8 3)
+  | AuthPSK -> create 1 (u8 3)
 
 //[@"opaque_to_smt"]
 //let labeled_extract_pred_ikm (a:Hash.algorithm) (label:bytes) (ikm:bytes) (consts:nat) =
@@ -162,7 +162,7 @@ val decap:
   -> skR: key_dh_secret_s cs ->
   Tot (option (key_kem_s cs))
 
-#set-options "--z3rlimit 100 --fuel 0 --ifuel 2"
+#set-options "--z3rlimit 150 --fuel 0 --ifuel 2"
 let decap cs enc skR =
   let pkE = unmarshal cs enc in
   match DH.dh (curve_of_cs cs) skR pkE with
@@ -324,7 +324,7 @@ let verify_psk_inputs (cs:ciphersuite) (m:mode) (psk:psk_s cs) (pskID:pskID_s cs
   | (Base, true) -> false     // PSK input provided when not needed
   | (Auth, true) -> false     // PSK input provided when not needed
   | (PSK, false) -> false     // Missing required PSK input
-  | (PSKAuth, false) -> false // Missing required PSK input
+  | (AuthPSK, false) -> false // Missing required PSK input
   | _ -> true
 
 

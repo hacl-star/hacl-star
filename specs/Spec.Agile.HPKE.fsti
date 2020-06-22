@@ -55,7 +55,7 @@ type mode =
   | Base
   | PSK
   | Auth
-  | PSKAuth
+  | AuthPSK
 /// Constants
 
 (** Constants for HPKE labels *)
