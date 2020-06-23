@@ -1,19 +1,22 @@
 module Spec.Hash.Incremental
 
 module S = FStar.Seq
+module Blake2 = Spec.Blake2
 
+open Spec.Agile.Hash
 open Spec.Hash.Definitions
 open Spec.Hash.PadFinish
 open Spec.Hash.Lemmas
 
-module Blake2 = Spec.Blake2
-
 friend Spec.Agile.Hash
-
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
 
 open FStar.Mul
 module Loops = Lib.LoopCombinators
+
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 50"
+
+/// A declaration whose sole purpose is to force synchronize the .fst and the .fsti
+let _sync_decl = unit
 
 /// TODO: A lemma I could not find in FStar.Math.Lemmas -
 /// note: duplicated in Hash.Streaming.Spec.fst and other places (make a grep)
@@ -290,6 +293,8 @@ let rec repeati_blake2_update1_is_update_multi_aux a nb prev d hash =
       (==) {}
       (nb * block_length a) - ((nb-1) * block_length a);
       (==) { Math.Lemmas.distributivity_sub_left nb (nb-1) (block_length a) }
+      1 * block_length a;
+      (==) { mul_one_left_is_same (block_length a) }
       block_length a;
     };
     calc (==) {

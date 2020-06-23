@@ -6,14 +6,20 @@ module Blake2 = Spec.Blake2
 open Spec.Agile.Hash
 open Spec.Hash.Definitions
 open Spec.Hash.PadFinish
+
 open FStar.Mul
 open Lib.Sequence
 open Lib.ByteSequence
 open Lib.IntTypes
+
 module Loops = Lib.LoopCombinators
 module UpdateMulti = Lib.UpdateMulti
 
-#reset-options "--fuel 0 --ifuel 0 --z3rlimit 50"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 50"
+
+/// A declaration whose sole purpose is to force synchronize the .fst and the .fsti
+[@must_erase_for_extraction]
+private val _sync_decl : Type0
 
 let blake2_init (a : hash_alg{is_blake a})
                 (kk : size_nat{kk <= Blake2.max_key (to_blake_alg a)})
