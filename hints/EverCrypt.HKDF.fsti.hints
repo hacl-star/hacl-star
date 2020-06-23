@@ -1,5 +1,5 @@
 [
-  "øäèÆ\u0002–B3~∫VW\u0015X\\ñ",
+  "≥g8ôî%_cBœñÙbm5ï",
   [
     [
       "EverCrypt.HKDF.key_and_data_fits",
@@ -7,62 +7,47 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption",
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "constructor_distinct_Tm_unit", "equation_Prims.nat",
         "equation_Spec.Hash.Definitions.block_length",
         "equation_Spec.Hash.Definitions.block_word_length",
         "equation_Spec.Hash.Definitions.max_input_length",
         "equation_Spec.Hash.Definitions.word_length", "int_inversion",
+        "int_typing", "lemma_FStar.UInt.pow2_values",
         "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "typing_Spec.Hash.Definitions.block_length",
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "d40b73432676dc19b9028dc3e961114a"
+      "cdd78f4828ce82291e205e55088efc94"
     ],
     [
       "EverCrypt.HKDF.hash_block_length_fits",
       1,
-      2,
-      1,
+      0,
+      0,
       [
-        "@MaxIFuel_assumption",
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "constructor_distinct_FStar.Integers.Signed",
-        "constructor_distinct_FStar.Integers.W128",
-        "constructor_distinct_FStar.Integers.W16",
-        "constructor_distinct_FStar.Integers.W31",
-        "constructor_distinct_FStar.Integers.W32",
-        "constructor_distinct_FStar.Integers.W63",
-        "constructor_distinct_FStar.Integers.W8",
-        "constructor_distinct_FStar.Integers.Winfinite",
-        "constructor_distinct_Lib.IntTypes.U1",
-        "constructor_distinct_Lib.IntTypes.U128",
-        "constructor_distinct_Lib.IntTypes.U64",
-        "equality_tok_FStar.Integers.W128@tok",
-        "equality_tok_FStar.Integers.W16@tok",
-        "equality_tok_FStar.Integers.W31@tok",
-        "equality_tok_FStar.Integers.W32@tok",
-        "equality_tok_FStar.Integers.W63@tok",
-        "equality_tok_FStar.Integers.W8@tok",
-        "equality_tok_FStar.Integers.Winfinite@tok",
-        "equation_FStar.Integers.width_of_sw",
+        "constructor_distinct_Tm_unit", "equation_Prims.nat",
         "equation_Spec.Hash.Definitions.block_length",
         "equation_Spec.Hash.Definitions.block_word_length",
         "equation_Spec.Hash.Definitions.hash_length",
         "equation_Spec.Hash.Definitions.hash_word_length",
         "equation_Spec.Hash.Definitions.max_input_length",
-        "equation_Spec.Hash.Definitions.word_length",
-        "fuel_guarded_inversion_Spec.Hash.Definitions.hash_alg",
+        "equation_Spec.Hash.Definitions.word_length", "int_inversion",
+        "int_typing", "lemma_FStar.UInt.pow2_values",
         "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_FStar.Integers.Signed__0",
-        "projection_inverse_FStar.Integers.Unsigned__0"
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "typing_Spec.Hash.Definitions.block_length",
+        "typing_Spec.Hash.Definitions.hash_word_length"
       ],
       0,
-      "1ef9fad8afd7e7112ba8078c0320afae"
+      "d2f663388eaa0e53e0e9185a791fb24f"
     ],
     [
       "EverCrypt.HKDF.extract_st",
@@ -88,7 +73,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "dd0366a22aabb29ac4ffc8fadb7c9297"
+      "24b480aa699e395bbd7c94d381f63c9b"
     ],
     [
       "EverCrypt.HKDF.expand_st",
@@ -115,7 +100,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "9eb57198279a9eece1d05300e0c42ad7"
+      "b4645c95273b4df06a78419fe38ea16f"
     ]
   ]
 ]
