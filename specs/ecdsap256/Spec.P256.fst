@@ -144,7 +144,7 @@ let _point_add (p:point_nat_prime) (q:point_nat_prime) : point_nat_prime =
       (x3, y3, z3)
 
 
-let isPointAtInfinity (p:point_nat_prime) =
+let isPointAtInfinity (p:point_nat) =
   let (_, _, z) = p in z = 0
 
 #push-options "--fuel 1"

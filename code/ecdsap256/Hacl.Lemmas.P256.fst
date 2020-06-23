@@ -22,7 +22,7 @@ open FStar.Tactics.Canon
 
 open Spec.P256
 
-#set-options " --z3rlimit 100 --fuel 0 --ifuel 0" 
+#set-options " --z3rlimit 200 --fuel 0 --ifuel 0" 
 
 val lemma_scalar_ith: sc:lbytes 32 -> k:nat{k < 32} -> Lemma
   (v sc.[k] == nat_from_intseq_le sc / pow2 (8 * k) % pow2 8)
