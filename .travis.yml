@@ -7,6 +7,7 @@ jobs:
       env:
         - MSBUILD_PATH="/C/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/MSBuild/14.0/Bin"
       before_install:
+        - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\Common7\Tools\VsDevCmd.bat"
         - export PATH="$MSBUILD_PATH:$PATH"
       install:
         - export CC=cl.exe
