@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
 # Delete me
-call "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\Common7\Tools\VsDevCmd.bat" -host_arch=amd64 -arch=amd64
-call "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\Common7\Tools\VsDevCmd.bat" -test
+cmd.exe /C '"C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" amd64 &&
+          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release &&
+          ninja -v'
 
 set -e
 set -o pipefail
