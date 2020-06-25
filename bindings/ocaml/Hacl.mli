@@ -70,6 +70,7 @@ module P256 : sig
   val decompress_c : C.t -> C.t -> bool
   val decompress_n : C.t -> C.t -> bool
   val dh_initiator : C.t -> C.t -> bool
+  val dh_responder : C.t -> C.t -> C.t -> bool
   val reduction : C.t -> C.t -> unit
   val valid_pk : C.t -> bool
   include ECDSA
