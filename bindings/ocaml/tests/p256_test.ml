@@ -4,6 +4,16 @@ type 'a ecdsa_test =
   { name: string ; sk : 'a ; pk : 'a ; msg : 'a ; k : 'a ; expected_sig : 'a }
 
 let tests = [
+  {name = "Test 1";
+   msg = Bytes.of_string "\028\203\233\028\007\095\199\244\240\051\191\162\072\219\143\204\211\086\093\233\075\191\177\047\060\089\255\070\194\113\191\131";
+   sk = Bytes.of_string "\081\155\066\061\113\095\139\088\031\079\168\238\089\244\119\026\091\068\200\019\011\078\062\172\202\084\165\109\218\114\180\100";
+   pk = Bytes.of_string "\x1c\xcb\xe9\x1c\x07\x5f\xc7\xf4\xf0\x33\xbf\xa2\x48\xdb\x8f\xcc\xd3\x56\x5d\xe9\x4b\xbf\xb1\x2f\x3c\x59\xff\x46\xc2\x71\xbf\x83\xce\x40\x14\xc6\x88\x11\xf9\xa2\x1a\x1f\xdb\x2c\x0e\x61\x13\xe0\x6d\xb7\xca\x93\xb7\x40\x4e\x78\xdc\x7c\xcd\x5c\xa8\x9a\x4c\xa9";
+   k = Bytes.of_string "\148\161\187\177\075\144\106\097\162\128\242\069\249\233\060\127\059\074\098\071\130\079\093\051\185\103\007\135\100\042\104\222";
+   expected_sig = Bytes.of_string "\243\172\128\097\181\020\121\091\136\067\227\214\098\149\039\237\042\253\107\031\106\085\090\122\202\187\094\111\121\200\194\172\xcf\xa7\x40\xfe\xc7\x67\x96\xd2\xe3\x92\x16\xbe\x7e\xbf\x58\x0e\xa3\xc0\xef\x4b\xb0\x0a\xb2\xe7\xe4\x20\x84\x34\xf4\x5f\x8c\x9c"
+  }
+]
+
+let tests_sha256 = [
   { name = "Test 1";
     msg = Bytes.of_string "\x59\x05\x23\x88\x77\xc7\x74\x21\xf7\x3e\x43\xee\x3d\xa6\xf2\xd9\xe2\xcc\xad\x5f\xc9\x42\xdc\xec\x0c\xbd\x25\x48\x29\x35\xfa\xaf\x41\x69\x83\xfe\x16\x5b\x1a\x04\x5e\xe2\xbc\xd2\xe6\xdc\xa3\xbd\xf4\x6c\x43\x10\xa7\x46\x1f\x9a\x37\x96\x0c\xa6\x72\xd3\xfe\xb5\x47\x3e\x25\x36\x05\xfb\x1d\xdf\xd2\x80\x65\xb5\x3c\xb5\x85\x8a\x8a\xd2\x81\x75\xbf\x9b\xd3\x86\xa5\xe4\x71\xea\x7a\x65\xc1\x7c\xc9\x34\xa9\xd7\x91\xe9\x14\x91\xeb\x37\x54\xd0\x37\x99\x79\x0f\xe2\xd3\x08\xd1\x61\x46\xd5\xc9\xb0\xd0\xde\xbd\x97\xd7\x9c\xe8";
     sk    = Bytes.of_string "\x51\x9b\x42\x3d\x71\x5f\x8b\x58\x1f\x4f\xa8\xee\x59\xf4\x77\x1a\x5b\x44\xc8\x13\x0b\x4e\x3e\xac\xca\x54\xa5\x6d\xda\x72\xb4\x64";
@@ -25,7 +35,13 @@ let test (v: Bytes.t ecdsa_test) t sign verify =
 
   let signature = Test_utils.init_bytes 64 in
 
-  assert (sign signature v.sk v.msg v.k);
+  let pk = Test_utils.init_bytes 64 in
+  let _ = Hacl.P256.dh_initiator pk v.sk in
+  assert (Hacl.P256.valid_pk v.pk);
+  if Bytes.compare pk v.pk <> 0 then
+    test_result Failure "Key generation";
+
+  assert (sign v.sk v.msg v.k signature);
   if Bytes.compare signature v.expected_sig = 0 then
     begin
       if verify v.pk v.msg signature then
@@ -37,4 +53,5 @@ let test (v: Bytes.t ecdsa_test) t sign verify =
     test_result Failure "Signing"
 
 let _ =
-  List.iter (fun v -> test v "Hacl.P256" Hacl.P256.sign Hacl.P256.verify) tests
+  List.iter (fun v -> test v "Hacl.P256_SHA2" Hacl.P256.sign Hacl.P256.verify) tests;
+  List.iter (fun v -> test v "Hacl.P256_SHA2_256" Hacl.P256.SHA2_256.sign Hacl.P256.SHA2_256.verify) tests_sha256
