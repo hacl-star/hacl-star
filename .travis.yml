@@ -38,11 +38,9 @@ jobs:
       compiler: msvc
       env:
         - MSBUILD_PATH="/C/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/MSBuild/14.0/Bin"
-      before_install:
+      install:
         - export PATH="$MSBUILD_PATH:$PATH"
         - choco install -y visualstudio2017community visualstudio2017-workload-nativecrossplat
         - choco install visualstudio2017-workload-vctools -y
-        - MATRIX_EVAL="CC=cl.exe && CXX=cl.exe"
-        - eval "${MATRIX_EVAL}"
 script:
   - .ci/script.sh
