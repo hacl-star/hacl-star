@@ -9,7 +9,6 @@ jobs:
       before_install:
         - export PATH="$MSBUILD_PATH:$PATH"
       install:
-        - choco install -y visualstudio2017community visualstudio2017-workload-nativecrossplat
-        - choco install visualstudio2017-workload-vctools -y
+        - cl *.c
 script:
   - .ci/script.sh
