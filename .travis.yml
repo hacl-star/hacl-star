@@ -5,11 +5,16 @@ jobs:
       os: windows
       compiler: msvc
       env:
-        - MSBUILD_PATH="/C/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/MSBuild/14.0/Bin"
+        - MATRIX_EVAL="CC=cl.exe && CXX=cl.exe"
       before_install:
-        - export PATH="$MSBUILD_PATH:$PATH"
+        - eval "${MATRIX_EVAL}"
       install:
-        - export CC=cl.exe
-        - cl *.c
+        - choco install ninja
+      script:
+        - mkdir build && cd build
+        - cmd.exe /C '"C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" amd64 &&
+          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release &&
+          ninja -v'
+        - ctest -V
 script:
   - .ci/script.sh
