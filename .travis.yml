@@ -37,11 +37,11 @@ jobs:
       os: windows
       compiler: msvc
       env:
-        - LABEL="windows-msvc"
-        - MSBUILD_PATH="/C/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/MSBuild/15.0/Bin"
-        - MATRIX_EVAL="CC=cl.exe && CXX=cl.exe"
+        - MSBUILD_PATH="/C/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/MSBuild/14.0/Bin"
       before_install:
         - export PATH="$MSBUILD_PATH:$PATH"
+        - choco install visualstudio2017-workload-vctools -y
+        - MATRIX_EVAL="CC=cl.exe && CXX=cl.exe"
         - eval "${MATRIX_EVAL}"
 script:
   - .ci/script.sh
