@@ -35,8 +35,10 @@ jobs:
       osx_image: xcode11.3
     - name: test/win
       os: windows
+      compiler: msvc
       env:
-      - LABEL="windows-msvc"
-      - MSBUILD_PATH="/C/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/MSBuild/15.0/Bin"
+        - MATRIX_EVAL="CC=cl.exe && CXX=cl.exe"
+      before_install:
+        - eval "${MATRIX_EVAL}"
 script:
   - .ci/script.sh
