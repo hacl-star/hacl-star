@@ -41,7 +41,7 @@ jobs:
       before_install:
         - export PATH="$MSBUILD_PATH:$PATH"
         - choco install visualstudio2017-workload-vctools -y
-        - MATRIX_EVAL="CC=cl.exe && CXX=cl.exe"
+        - MATRIX_EVAL="CC=cl && CXX=cl"
         - eval "${MATRIX_EVAL}"
 script:
   - .ci/script.sh
