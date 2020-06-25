@@ -9,6 +9,7 @@ jobs:
       before_install:
         - export PATH="$MSBUILD_PATH:$PATH"
       install:
+        - export CC=cl.exe
         - cl *.c
 script:
   - .ci/script.sh
