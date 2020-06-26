@@ -210,7 +210,7 @@ val lemma_exponen_spec: k:lseq uint8 32
     f1 == pow start1 (arithmetic_shift_right number newIndex + 1) % prime256
   )
 
-#push-options "--fuel 1 --z3rlimit 100"
+#push-options "--fuel 1 --ifuel 1 --z3rlimit 100"
 
 val lemma_exponen_spec_0: k:lseq uint8 32
   -> start:tuple2 nat_prime nat_prime {let st0, _ = start in st0 == 1} ->
