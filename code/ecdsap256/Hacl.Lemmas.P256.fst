@@ -22,7 +22,7 @@ open FStar.Tactics.Canon
 
 open Spec.P256
 
-#set-options " --z3rlimit 200 --fuel 0 --ifuel 0" 
+#set-options " --z3rlimit 200" 
 
 val lemma_scalar_ith: sc:lbytes 32 -> k:nat{k < 32} -> Lemma
   (v sc.[k] == nat_from_intseq_le sc / pow2 (8 * k) % pow2 8)
@@ -53,9 +53,6 @@ let lemma_equ_felem a b c d  a1 b1 c1 d1  =
   assert(c == c1);
   assert(d == d1)
 
-
-#push-options "--ifuel 1 --fuel 1 --z3rlimit 200"
-
 val lemma_equality: a: felem4 -> b: felem4 -> Lemma (
   let (a_0, a_1, a_2, a_3) = a in 
   let (b_0, b_1, b_2, b_3) = b in 
@@ -63,8 +60,6 @@ val lemma_equality: a: felem4 -> b: felem4 -> Lemma (
   then as_nat4 a == as_nat4 b else as_nat4 a <> as_nat4 b)
 
 let lemma_equality a b = ()
-
-#pop-options
 
 
 val lemma_eq_funct: a: felem_seq -> b: felem_seq -> Lemma
@@ -252,8 +247,6 @@ let lemma_xor_copy_cond a b mask =
     logxor_lemma a snd;
     logxor_lemma a b
 
-#push-options "--fuel 2 --ifuel 1 --z3rlimit 200"
-
 val power_one: a: nat -> Lemma (pow 1 a == 1) 
 
 let rec power_one a = 
@@ -292,9 +285,17 @@ let rec power_distributivity_2 a b c =
   match c with 
   |0 -> ()
   |1 -> ()
-  | _ ->
-    power_distributivity_2 a b (c - 1);
-    assert_by_tactic (pow a (c - 1) * pow b (c - 1) * a * b == (pow a c * pow b c)) canon
+  | _ -> 
+    calc (==)
+    {
+      pow (a * b) c;
+      (==) {assert_by_tactic (pow (a * b) c == pow (a * b) (c - 1) * a * b) canon}
+      pow (a * b) (c - 1) * a * b;
+      (==) {power_distributivity_2 a b (c - 1)}
+      pow a (c - 1) * pow b (c - 1) * a * b;
+      (==) {assert_by_tactic (pow a (c - 1) * pow b (c - 1) * a * b == pow a c * pow b c) canon}
+      pow a c * pow b c;
+    }
 
 
 noextract
@@ -306,9 +307,6 @@ let rec power_mult a b c =
   |_ ->  power_mult a b (c - 1); 
     pow_plus a (b * (c - 1)) b
 
-#pop-options
-
-#reset-options "--z3rlimit 100"
 
 (* Start of Marina RSA PSS code *)
 val lemma_fpow_unfold0: a: nat -> b: pos {1 < b /\ b % 2 = 0} -> prime: pos {a < prime} -> Lemma (
@@ -554,8 +552,6 @@ val lemma_mul_nat5: a: nat -> b: nat -> c: nat -> d: nat -> e: nat -> Lemma (a *
 
 let lemma_mul_nat5 a b c d e = ()
 
-
-#reset-options " --z3rlimit 300" 
 
 val modulo_distributivity_mult2: a: int -> b: int -> c: int -> d: pos -> Lemma (((a % d) * (b % d) * c) % d = (a * b * c) % d)
 
