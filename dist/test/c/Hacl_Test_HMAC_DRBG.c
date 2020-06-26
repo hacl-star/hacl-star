@@ -869,7 +869,7 @@ static void legacy_hash(uint8_t *input, uint32_t input_len, uint8_t *dst)
   legacy_finish(s, dst);
 }
 
-extern void C_String_print(C_String_t uu____143);
+extern void C_String_print(C_String_t uu____102);
 
 static bool is_supported_alg(hash_alg uu___0_7)
 {

@@ -35,11 +35,11 @@ typedef uint8_t hash_alg;
 
 extern void portable_exit(int32_t uu____60);
 
-extern void C_String_print(C_String_t uu____143);
+extern void C_String_print(C_String_t uu____102);
 
-extern uint32_t C_String_strlen(C_String_t uu____151);
+extern uint32_t C_String_strlen(C_String_t uu____110);
 
-extern void C_String_memcpy(uint8_t *uu____179, C_String_t uu____180, uint32_t uu____181);
+extern void C_String_memcpy(uint8_t *uu____138, C_String_t uu____139, uint32_t uu____140);
 
 static bool whatever()
 {
