@@ -28,7 +28,7 @@ inline_for_extraction
 let prime (a:algorithm) =
   match a with
   | DH_Curve25519 -> Spec.Curve25519.prime
-  | DH_P256 -> Spec.P256.prime
+  | DH_P256 -> Spec.P256.prime256
 
 /// Types
 
