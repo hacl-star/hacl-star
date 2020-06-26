@@ -9,7 +9,7 @@
         nacl_test
         drbg_test
         blake2_test
-        ecdsa_test)
+        p256_test)
  (libraries hacl-star)
  (preprocessor_deps config.h)
  (preprocess (action (run %{bin:cppo} %{input-file})))

@@ -465,3 +465,6 @@ FStar_UInt128_uint128 FStar_UInt128_mul_wide(uint64_t x, uint64_t y) {
   return FStar_UInt128_mul_wide_impl(x, y);
 #endif
 }
+
+#undef low
+#undef high

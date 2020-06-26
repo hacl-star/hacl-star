@@ -62,7 +62,7 @@ C_String_t EverCrypt_Hash_string_of_alg(Spec_Hash_Definitions_hash_alg uu___0_6)
 
 bool
 EverCrypt_Hash_uu___is_MD5_s(
-  Spec_Hash_Definitions_hash_alg uu____159,
+  Spec_Hash_Definitions_hash_alg uu____123,
   EverCrypt_Hash_state_s projectee
 )
 {
@@ -75,7 +75,7 @@ EverCrypt_Hash_uu___is_MD5_s(
 
 uint32_t
 *EverCrypt_Hash___proj__MD5_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____189,
+  Spec_Hash_Definitions_hash_alg uu____153,
   EverCrypt_Hash_state_s projectee
 )
 {
@@ -92,7 +92,7 @@ uint32_t
 
 bool
 EverCrypt_Hash_uu___is_SHA1_s(
-  Spec_Hash_Definitions_hash_alg uu____213,
+  Spec_Hash_Definitions_hash_alg uu____177,
   EverCrypt_Hash_state_s projectee
 )
 {
@@ -105,7 +105,7 @@ EverCrypt_Hash_uu___is_SHA1_s(
 
 uint32_t
 *EverCrypt_Hash___proj__SHA1_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____243,
+  Spec_Hash_Definitions_hash_alg uu____207,
   EverCrypt_Hash_state_s projectee
 )
 {
@@ -122,7 +122,7 @@ uint32_t
 
 bool
 EverCrypt_Hash_uu___is_SHA2_224_s(
-  Spec_Hash_Definitions_hash_alg uu____267,
+  Spec_Hash_Definitions_hash_alg uu____231,
   EverCrypt_Hash_state_s projectee
 )
 {
@@ -135,7 +135,7 @@ EverCrypt_Hash_uu___is_SHA2_224_s(
 
 uint32_t
 *EverCrypt_Hash___proj__SHA2_224_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____297,
+  Spec_Hash_Definitions_hash_alg uu____261,
   EverCrypt_Hash_state_s projectee
 )
 {
@@ -152,7 +152,7 @@ uint32_t
 
 bool
 EverCrypt_Hash_uu___is_SHA2_256_s(
-  Spec_Hash_Definitions_hash_alg uu____321,
+  Spec_Hash_Definitions_hash_alg uu____285,
   EverCrypt_Hash_state_s projectee
 )
 {
@@ -165,7 +165,7 @@ EverCrypt_Hash_uu___is_SHA2_256_s(
 
 uint32_t
 *EverCrypt_Hash___proj__SHA2_256_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____351,
+  Spec_Hash_Definitions_hash_alg uu____315,
   EverCrypt_Hash_state_s projectee
 )
 {
@@ -182,7 +182,7 @@ uint32_t
 
 bool
 EverCrypt_Hash_uu___is_SHA2_384_s(
-  Spec_Hash_Definitions_hash_alg uu____375,
+  Spec_Hash_Definitions_hash_alg uu____339,
   EverCrypt_Hash_state_s projectee
 )
 {
@@ -195,7 +195,7 @@ EverCrypt_Hash_uu___is_SHA2_384_s(
 
 uint64_t
 *EverCrypt_Hash___proj__SHA2_384_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____405,
+  Spec_Hash_Definitions_hash_alg uu____369,
   EverCrypt_Hash_state_s projectee
 )
 {
@@ -212,7 +212,7 @@ uint64_t
 
 bool
 EverCrypt_Hash_uu___is_SHA2_512_s(
-  Spec_Hash_Definitions_hash_alg uu____429,
+  Spec_Hash_Definitions_hash_alg uu____393,
   EverCrypt_Hash_state_s projectee
 )
 {
@@ -225,7 +225,7 @@ EverCrypt_Hash_uu___is_SHA2_512_s(
 
 uint64_t
 *EverCrypt_Hash___proj__SHA2_512_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____459,
+  Spec_Hash_Definitions_hash_alg uu____423,
   EverCrypt_Hash_state_s projectee
 )
 {

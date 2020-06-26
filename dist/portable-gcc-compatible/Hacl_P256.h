@@ -37,18 +37,6 @@
 #include "Hacl_Spec.h"
 
 
-/* SNIPPET_START: Hacl_Impl_P256_LowLevel_sub4_il */
-
-uint64_t Hacl_Impl_P256_LowLevel_sub4_il(uint64_t *x, const uint64_t *y, uint64_t *result);
-
-/* SNIPPET_END: Hacl_Impl_P256_LowLevel_sub4_il */
-
-/* SNIPPET_START: Hacl_Impl_P256_LowLevel_shift_256_impl */
-
-void Hacl_Impl_P256_LowLevel_shift_256_impl(uint64_t *i, uint64_t *o);
-
-/* SNIPPET_END: Hacl_Impl_P256_LowLevel_shift_256_impl */
-
 /* SNIPPET_START: Hacl_Impl_P256_LowLevel_toUint8 */
 
 void Hacl_Impl_P256_LowLevel_toUint8(uint64_t *i, uint8_t *o);
@@ -67,164 +55,42 @@ void Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(uint8_t *i, uint64_t *o);
 
 /* SNIPPET_END: Hacl_Impl_P256_LowLevel_toUint64ChangeEndian */
 
-/* SNIPPET_START: Hacl_Impl_ECDSA_MontgomeryMultiplication_reduction_prime_2prime_order */
+/* SNIPPET_START: Hacl_Impl_P256_Core_isPointAtInfinityPrivate */
+
+uint64_t Hacl_Impl_P256_Core_isPointAtInfinityPrivate(uint64_t *p);
+
+/* SNIPPET_END: Hacl_Impl_P256_Core_isPointAtInfinityPrivate */
+
+/* SNIPPET_START: Hacl_Impl_P256_Core_secretToPublic */
 
 void
-Hacl_Impl_ECDSA_MontgomeryMultiplication_reduction_prime_2prime_order(
-  uint64_t *x,
-  uint64_t *result
-);
+Hacl_Impl_P256_Core_secretToPublic(uint64_t *result, uint8_t *scalar, uint64_t *tempBuffer);
 
-/* SNIPPET_END: Hacl_Impl_ECDSA_MontgomeryMultiplication_reduction_prime_2prime_order */
+/* SNIPPET_END: Hacl_Impl_P256_Core_secretToPublic */
 
-/* SNIPPET_START: Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer */
+/* SNIPPET_START: Hacl_Impl_P256_DH__ecp256dh_r */
 
-extern const uint64_t Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer[4U];
+/*
+  This code is not side channel resistant on pubKey
+*/
+uint64_t Hacl_Impl_P256_DH__ecp256dh_r(uint64_t *result, uint64_t *pubKey, uint8_t *scalar);
 
-/* SNIPPET_END: Hacl_Impl_P256_LowLevel_PrimeSpecific_prime256_buffer */
+/* SNIPPET_END: Hacl_Impl_P256_DH__ecp256dh_r */
 
-/* SNIPPET_START: Hacl_Impl_SolinasReduction_solinas_reduction_impl */
+/* SNIPPET_START: Hacl_P256_ecdsa_sign_p256_sha2 */
 
-void Hacl_Impl_SolinasReduction_solinas_reduction_impl(uint64_t *i, uint64_t *o);
-
-/* SNIPPET_END: Hacl_Impl_SolinasReduction_solinas_reduction_impl */
-
-/* SNIPPET_START: Hacl_Impl_P256_PointAdd_point_add */
-
-void
-Hacl_Impl_P256_PointAdd_point_add(
-  uint64_t *p,
-  uint64_t *q,
-  uint64_t *result,
-  uint64_t *tempBuffer
-);
-
-/* SNIPPET_END: Hacl_Impl_P256_PointAdd_point_add */
-
-/* SNIPPET_START: Hacl_Impl_P256_Core_norm */
-
-void Hacl_Impl_P256_Core_norm(uint64_t *p, uint64_t *resultPoint, uint64_t *tempBuffer);
-
-/* SNIPPET_END: Hacl_Impl_P256_Core_norm */
-
-/* SNIPPET_START: Hacl_Impl_P256_Core_scalarMultiplicationWithoutNorm */
-
-void
-Hacl_Impl_P256_Core_scalarMultiplicationWithoutNorm(
-  uint64_t *p,
-  uint64_t *result,
-  uint8_t *scalar,
-  uint64_t *tempBuffer
-);
-
-/* SNIPPET_END: Hacl_Impl_P256_Core_scalarMultiplicationWithoutNorm */
-
-/* SNIPPET_START: Hacl_Impl_P256_Core_secretToPublicWithoutNorm */
-
-void
-Hacl_Impl_P256_Core_secretToPublicWithoutNorm(
-  uint64_t *result,
-  uint8_t *scalar,
-  uint64_t *tempBuffer
-);
-
-/* SNIPPET_END: Hacl_Impl_P256_Core_secretToPublicWithoutNorm */
-
-/* SNIPPET_START: Hacl_Impl_P256_Signature_Common_bufferToJac */
-
-void Hacl_Impl_P256_Signature_Common_bufferToJac(uint64_t *p, uint64_t *result);
-
-/* SNIPPET_END: Hacl_Impl_P256_Signature_Common_bufferToJac */
-
-/* SNIPPET_START: Hacl_Impl_P256_Signature_Common_isPointAtInfinityPublic */
-
-bool Hacl_Impl_P256_Signature_Common_isPointAtInfinityPublic(uint64_t *p);
-
-/* SNIPPET_END: Hacl_Impl_P256_Signature_Common_isPointAtInfinityPublic */
-
-/* SNIPPET_START: Hacl_Impl_P256_Signature_Common_verifyQValidCurvePoint */
-
-bool
-Hacl_Impl_P256_Signature_Common_verifyQValidCurvePoint(
-  uint64_t *pubKeyAsPoint,
-  uint64_t *tempBuffer
-);
-
-/* SNIPPET_END: Hacl_Impl_P256_Signature_Common_verifyQValidCurvePoint */
-
-/* SNIPPET_START: Hacl_Impl_P256_DH_ecp256dh_i */
-
-uint64_t Hacl_Impl_P256_DH_ecp256dh_i(uint8_t *result, uint8_t *scalar);
-
-/* SNIPPET_END: Hacl_Impl_P256_DH_ecp256dh_i */
-
-/* SNIPPET_START: Hacl_Impl_P256_DH_ecp256dh_r */
-
-uint64_t Hacl_Impl_P256_DH_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
-
-/* SNIPPET_END: Hacl_Impl_P256_DH_ecp256dh_r */
-
-/* SNIPPET_START: Hacl_Impl_P256_Compression_computeYFromX */
-
-void Hacl_Impl_P256_Compression_computeYFromX(uint64_t *x, uint64_t *result, uint64_t sign);
-
-/* SNIPPET_END: Hacl_Impl_P256_Compression_computeYFromX */
-
-/* SNIPPET_START: Hacl_Impl_ECDSA_MM_Exponent_montgomery_ladder_exponent */
-
-void Hacl_Impl_ECDSA_MM_Exponent_montgomery_ladder_exponent(uint64_t *r);
-
-/* SNIPPET_END: Hacl_Impl_ECDSA_MM_Exponent_montgomery_ladder_exponent */
-
-/* SNIPPET_START: Hacl_Impl_ECDSA_MM_Exponent_fromDomainImpl */
-
-void Hacl_Impl_ECDSA_MM_Exponent_fromDomainImpl(uint64_t *a, uint64_t *result);
-
-/* SNIPPET_END: Hacl_Impl_ECDSA_MM_Exponent_fromDomainImpl */
-
-/* SNIPPET_START: Hacl_Impl_ECDSA_MM_Exponent_multPowerPartial */
-
-void
-Hacl_Impl_ECDSA_MM_Exponent_multPowerPartial(
-  uint64_t *s,
-  uint64_t *a,
-  uint64_t *b,
-  uint64_t *result
-);
-
-/* SNIPPET_END: Hacl_Impl_ECDSA_MM_Exponent_multPowerPartial */
-
-/* SNIPPET_START: Hacl_Impl_ECDSA_P256_Verification_Agile_isMoreThanZeroLessThanOrderMinusOne */
-
-bool Hacl_Impl_ECDSA_P256_Verification_Agile_isMoreThanZeroLessThanOrderMinusOne(uint64_t *f);
-
-/* SNIPPET_END: Hacl_Impl_ECDSA_P256_Verification_Agile_isMoreThanZeroLessThanOrderMinusOne */
-
-/* SNIPPET_START: Hacl_Impl_ECDSA_P256_Verification_Agile_compare_felem_bool */
-
-bool Hacl_Impl_ECDSA_P256_Verification_Agile_compare_felem_bool(uint64_t *a, uint64_t *b);
-
-/* SNIPPET_END: Hacl_Impl_ECDSA_P256_Verification_Agile_compare_felem_bool */
-
-/* SNIPPET_START: Hacl_Impl_ECDSA_P256_Signature_Agile_ecdsa_signature_core */
-
+/*
+ Input: result buffer: uint8[64], 
+ m buffer: uint8 [mLen], 
+ priv(ate)Key: uint8[32], 
+ k (nonce): uint32[32]. 
+  
+ Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
+  
+ The private key and the nonce are expected to be less than the curve order.
+*/
 uint64_t
-Hacl_Impl_ECDSA_P256_Signature_Agile_ecdsa_signature_core(
-  Spec_ECDSA_hash_alg_ecdsa alg,
-  uint64_t *r,
-  uint64_t *s,
-  uint32_t mLen,
-  uint8_t *m,
-  uint64_t *privKeyAsFelem,
-  uint8_t *k
-);
-
-/* SNIPPET_END: Hacl_Impl_ECDSA_P256_Signature_Agile_ecdsa_signature_core */
-
-/* SNIPPET_START: Hacl_Interface_P256_ecdsa_sign_p256_sha2 */
-
-uint64_t
-Hacl_Interface_P256_ecdsa_sign_p256_sha2(
+Hacl_P256_ecdsa_sign_p256_sha2(
   uint8_t *result,
   uint32_t mLen,
   uint8_t *m,
@@ -232,12 +98,22 @@ Hacl_Interface_P256_ecdsa_sign_p256_sha2(
   uint8_t *k
 );
 
-/* SNIPPET_END: Hacl_Interface_P256_ecdsa_sign_p256_sha2 */
+/* SNIPPET_END: Hacl_P256_ecdsa_sign_p256_sha2 */
 
-/* SNIPPET_START: Hacl_Interface_P256_ecdsa_sign_p256_sha384 */
+/* SNIPPET_START: Hacl_P256_ecdsa_sign_p256_sha384 */
 
+/*
+ Input: result buffer: uint8[64], 
+ m buffer: uint8 [mLen], 
+ priv(ate)Key: uint8[32], 
+ k (nonce): uint32[32]. 
+  
+ Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
+  
+ The private key and the nonce are expected to be less than the curve order.
+*/
 uint64_t
-Hacl_Interface_P256_ecdsa_sign_p256_sha384(
+Hacl_P256_ecdsa_sign_p256_sha384(
   uint8_t *result,
   uint32_t mLen,
   uint8_t *m,
@@ -245,12 +121,22 @@ Hacl_Interface_P256_ecdsa_sign_p256_sha384(
   uint8_t *k
 );
 
-/* SNIPPET_END: Hacl_Interface_P256_ecdsa_sign_p256_sha384 */
+/* SNIPPET_END: Hacl_P256_ecdsa_sign_p256_sha384 */
 
-/* SNIPPET_START: Hacl_Interface_P256_ecdsa_sign_p256_sha512 */
+/* SNIPPET_START: Hacl_P256_ecdsa_sign_p256_sha512 */
 
+/*
+ Input: result buffer: uint8[64], 
+ m buffer: uint8 [mLen], 
+ priv(ate)Key: uint8[32], 
+ k (nonce): uint32[32]. 
+  
+ Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
+  
+ The private key and the nonce are expected to be less than the curve order.
+*/
 uint64_t
-Hacl_Interface_P256_ecdsa_sign_p256_sha512(
+Hacl_P256_ecdsa_sign_p256_sha512(
   uint8_t *result,
   uint32_t mLen,
   uint8_t *m,
@@ -258,12 +144,24 @@ Hacl_Interface_P256_ecdsa_sign_p256_sha512(
   uint8_t *k
 );
 
-/* SNIPPET_END: Hacl_Interface_P256_ecdsa_sign_p256_sha512 */
+/* SNIPPET_END: Hacl_P256_ecdsa_sign_p256_sha512 */
 
-/* SNIPPET_START: Hacl_Interface_P256_ecdsa_sign_p256_without_hash */
+/* SNIPPET_START: Hacl_P256_ecdsa_sign_p256_without_hash */
 
+/*
+ Input: result buffer: uint8[64], 
+ m buffer: uint8 [mLen], 
+ priv(ate)Key: uint8[32], 
+ k (nonce): uint32[32]. 
+  
+ Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
+  
+ The private key and the nonce are expected to be less than the curve order. 
+  
+ The message m is expected to be hashed by a strong hash function, the lenght of the message is expected to be 32 bytes and more.
+*/
 uint64_t
-Hacl_Interface_P256_ecdsa_sign_p256_without_hash(
+Hacl_P256_ecdsa_sign_p256_without_hash(
   uint8_t *result,
   uint32_t mLen,
   uint8_t *m,
@@ -271,12 +169,22 @@ Hacl_Interface_P256_ecdsa_sign_p256_without_hash(
   uint8_t *k
 );
 
-/* SNIPPET_END: Hacl_Interface_P256_ecdsa_sign_p256_without_hash */
+/* SNIPPET_END: Hacl_P256_ecdsa_sign_p256_without_hash */
 
-/* SNIPPET_START: Hacl_Interface_P256_ecdsa_verif_p256_sha2 */
+/* SNIPPET_START: Hacl_P256_ecdsa_verif_p256_sha2 */
 
+/*
+ This code is not side-channel resistant.
+  
+ Input: m buffer: uint8 [mLen], 
+ pub(lic)Key: uint8[64], 
+ r: uint8[32], 
+ s: uint8[32]. 
+  
+ Output: bool, where true stands for the correct signature verification. 
+*/
 bool
-Hacl_Interface_P256_ecdsa_verif_p256_sha2(
+Hacl_P256_ecdsa_verif_p256_sha2(
   uint32_t mLen,
   uint8_t *m,
   uint8_t *pubKey,
@@ -284,12 +192,22 @@ Hacl_Interface_P256_ecdsa_verif_p256_sha2(
   uint8_t *s
 );
 
-/* SNIPPET_END: Hacl_Interface_P256_ecdsa_verif_p256_sha2 */
+/* SNIPPET_END: Hacl_P256_ecdsa_verif_p256_sha2 */
 
-/* SNIPPET_START: Hacl_Interface_P256_ecdsa_verif_p256_sha384 */
+/* SNIPPET_START: Hacl_P256_ecdsa_verif_p256_sha384 */
 
+/*
+ This code is not side-channel resistant.
+  
+ Input: m buffer: uint8 [mLen], 
+ pub(lic)Key: uint8[64], 
+ r: uint8[32], 
+ s: uint8[32]. 
+  
+ Output: bool, where true stands for the correct signature verification. 
+*/
 bool
-Hacl_Interface_P256_ecdsa_verif_p256_sha384(
+Hacl_P256_ecdsa_verif_p256_sha384(
   uint32_t mLen,
   uint8_t *m,
   uint8_t *pubKey,
@@ -297,12 +215,22 @@ Hacl_Interface_P256_ecdsa_verif_p256_sha384(
   uint8_t *s
 );
 
-/* SNIPPET_END: Hacl_Interface_P256_ecdsa_verif_p256_sha384 */
+/* SNIPPET_END: Hacl_P256_ecdsa_verif_p256_sha384 */
 
-/* SNIPPET_START: Hacl_Interface_P256_ecdsa_verif_p256_sha512 */
+/* SNIPPET_START: Hacl_P256_ecdsa_verif_p256_sha512 */
 
+/*
+ This code is not side-channel resistant.
+  
+ Input: m buffer: uint8 [mLen], 
+ pub(lic)Key: uint8[64], 
+ r: uint8[32], 
+ s: uint8[32]. 
+  
+ Output: bool, where true stands for the correct signature verification. 
+*/
 bool
-Hacl_Interface_P256_ecdsa_verif_p256_sha512(
+Hacl_P256_ecdsa_verif_p256_sha512(
   uint32_t mLen,
   uint8_t *m,
   uint8_t *pubKey,
@@ -310,12 +238,24 @@ Hacl_Interface_P256_ecdsa_verif_p256_sha512(
   uint8_t *s
 );
 
-/* SNIPPET_END: Hacl_Interface_P256_ecdsa_verif_p256_sha512 */
+/* SNIPPET_END: Hacl_P256_ecdsa_verif_p256_sha512 */
 
-/* SNIPPET_START: Hacl_Interface_P256_ecdsa_verif_without_hash */
+/* SNIPPET_START: Hacl_P256_ecdsa_verif_without_hash */
 
+/*
+This code is not side-channel resistant.
+  
+ Input: m buffer: uint8 [mLen], 
+ pub(lic)Key: uint8[64], 
+ r: uint8[32], 
+ s: uint8[32]. 
+  
+ Output: bool, where true stands for the correct signature verification.
+  
+ The message m is expected to be hashed by a strong hash function, the lenght of the message is expected to be 32 bytes and more.
+*/
 bool
-Hacl_Interface_P256_ecdsa_verif_without_hash(
+Hacl_P256_ecdsa_verif_without_hash(
   uint32_t mLen,
   uint8_t *m,
   uint8_t *pubKey,
@@ -323,55 +263,124 @@ Hacl_Interface_P256_ecdsa_verif_without_hash(
   uint8_t *s
 );
 
-/* SNIPPET_END: Hacl_Interface_P256_ecdsa_verif_without_hash */
+/* SNIPPET_END: Hacl_P256_ecdsa_verif_without_hash */
 
-/* SNIPPET_START: Hacl_Interface_P256_verify_q */
+/* SNIPPET_START: Hacl_P256_verify_q */
 
-bool Hacl_Interface_P256_verify_q(uint8_t *pubKey);
+/*
+ Public key verification function. 
+  
+ This code is not side-channel resistant.
+  
+ Input: pub(lic)Key: uint8[64]. 
+  
+ Output: bool, where 0 stands for the public key to be correct with respect to SP 800-56A:  
+ Verify that the public key is not the “point at infinity”, represented as O. 
+ Verify that the affine x and y coordinates of the point represented by the public key are in the range [0, p – 1] where p is the prime defining the finite field. 
+ Verify that y2 = x3 + ax + b where a and b are the coefficients of the curve equation. 
+ Verify that nQ = O (the point at infinity), where n is the order of the curve and Q is the public key point.
+  
+ The last extract is taken from : https://neilmadden.blog/2017/05/17/so-how-do-you-validate-nist-ecdh-public-keys/
+*/
+bool Hacl_P256_verify_q(uint8_t *pubKey);
 
-/* SNIPPET_END: Hacl_Interface_P256_verify_q */
+/* SNIPPET_END: Hacl_P256_verify_q */
 
-/* SNIPPET_START: Hacl_Interface_P256_decompression_not_compressed_form */
+/* SNIPPET_START: Hacl_P256_decompression_not_compressed_form */
 
-bool Hacl_Interface_P256_decompression_not_compressed_form(uint8_t *b, uint8_t *result);
+/*
+ There and further we introduce notions of compressed point and not compressed point. 
+  
+ We denote || as byte concatenation. 
+  
+ A compressed point is a point representaion as follows: (0x2 + y % 2) || x.
+  
+ A not Compressed point is a point representation as follows: 0x4 || x || y.
 
-/* SNIPPET_END: Hacl_Interface_P256_decompression_not_compressed_form */
+  
+ 
+ Input: a point in not compressed form (uint8[65]), 
+ result: uint8[64] (internal point representation).
+  
+ Output: bool, where true stands for the correct decompression.
+ 
+*/
+bool Hacl_P256_decompression_not_compressed_form(uint8_t *b, uint8_t *result);
 
-/* SNIPPET_START: Hacl_Interface_P256_decompression_compressed_form */
+/* SNIPPET_END: Hacl_P256_decompression_not_compressed_form */
 
-bool Hacl_Interface_P256_decompression_compressed_form(uint8_t *b, uint8_t *result);
+/* SNIPPET_START: Hacl_P256_decompression_compressed_form */
 
-/* SNIPPET_END: Hacl_Interface_P256_decompression_compressed_form */
+/*
+ Input: a point in compressed form (uint8[33]), 
+ result: uint8[64] (internal point representation).
+  
+ Output: bool, where true stands for the correct decompression.
+ 
+*/
+bool Hacl_P256_decompression_compressed_form(uint8_t *b, uint8_t *result);
 
-/* SNIPPET_START: Hacl_Interface_P256_compression_not_compressed_form */
+/* SNIPPET_END: Hacl_P256_decompression_compressed_form */
 
-void Hacl_Interface_P256_compression_not_compressed_form(uint8_t *b, uint8_t *result);
+/* SNIPPET_START: Hacl_P256_compression_not_compressed_form */
 
-/* SNIPPET_END: Hacl_Interface_P256_compression_not_compressed_form */
+/*
+ Input: a point buffer (internal representation: uint8[64]), 
+ result: a point in not compressed form (uint8[65]).
+*/
+void Hacl_P256_compression_not_compressed_form(uint8_t *b, uint8_t *result);
 
-/* SNIPPET_START: Hacl_Interface_P256_compression_compressed_form */
+/* SNIPPET_END: Hacl_P256_compression_not_compressed_form */
 
-void Hacl_Interface_P256_compression_compressed_form(uint8_t *b, uint8_t *result);
+/* SNIPPET_START: Hacl_P256_compression_compressed_form */
 
-/* SNIPPET_END: Hacl_Interface_P256_compression_compressed_form */
+/*
+ Input: a point buffer (internal representation: uint8[64]), 
+ result: a point in not compressed form (uint8[33]).
+*/
+void Hacl_P256_compression_compressed_form(uint8_t *b, uint8_t *result);
 
-/* SNIPPET_START: Hacl_Interface_P256_reduction_8_32 */
+/* SNIPPET_END: Hacl_P256_compression_compressed_form */
 
-void Hacl_Interface_P256_reduction_8_32(uint8_t *x, uint8_t *result);
+/* SNIPPET_START: Hacl_P256_reduction_8_32 */
 
-/* SNIPPET_END: Hacl_Interface_P256_reduction_8_32 */
+/*
+ The function takes an arbitraty 32 bytes buffer and reduces it to contain a value that is less than the curve order.
+  
+ Input: x: uint8[32], 
+ result: uint8[32], such that by the end of the function the value stored in the buffer result equal to the value stored in the buffer x modulo curveOrder.
+*/
+void Hacl_P256_reduction_8_32(uint8_t *x, uint8_t *result);
 
-/* SNIPPET_START: Hacl_Interface_P256_ecp256dh_i */
+/* SNIPPET_END: Hacl_P256_reduction_8_32 */
 
-uint64_t Hacl_Interface_P256_ecp256dh_i(uint8_t *result, uint8_t *scalar);
+/* SNIPPET_START: Hacl_P256_ecp256dh_i */
 
-/* SNIPPET_END: Hacl_Interface_P256_ecp256dh_i */
+/*
+ Input: result: uint8[64], 
+ scalar: uint8[32].
+  
+ Output: uint64, where 0 stands for the correct key generation. All the other values mean that an error has occurred. 
+  
+*/
+uint64_t Hacl_P256_ecp256dh_i(uint8_t *result, uint8_t *scalar);
 
-/* SNIPPET_START: Hacl_Interface_P256_ecp256dh_r */
+/* SNIPPET_END: Hacl_P256_ecp256dh_i */
 
-uint64_t Hacl_Interface_P256_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
+/* SNIPPET_START: Hacl_P256_ecp256dh_r */
 
-/* SNIPPET_END: Hacl_Interface_P256_ecp256dh_r */
+/*
+ This code is not side channel resistant on pub_key. 
+ Input: result: uint8[64], 
+ pub(lic)Key: uint8[64], 
+ scalar: uint8[32].
+  
+ Output: uint64, where 0 stands for the correct key generation. All the other values mean that an error has occurred. 
+  
+*/
+uint64_t Hacl_P256_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
+
+/* SNIPPET_END: Hacl_P256_ecp256dh_r */
 
 #define __Hacl_P256_H_DEFINED
 #endif
