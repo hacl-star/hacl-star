@@ -11,20 +11,60 @@ open FStar.Math.Lib
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
-(* https://eprint.iacr.org/2013/816.pdf *)
-
-
 let prime256: (a: pos {a > 3 && a < pow2 256}) =
   assert_norm (pow2 256 - pow2 224 + pow2 192 + pow2 96 -1 > 3);
   assert_norm (pow2 256 - pow2 224 + pow2 192 + pow2 96 -1 < pow2 256);
   pow2 256 - pow2 224 + pow2 192 + pow2 96 -1
 
+let prime384: (a: pos {a > 3 && a < pow2 384}) = 
+  assert_norm(pow2 384 - pow2 128 - pow2 96 + pow2 32 - 1 > 3);
+  assert_norm(pow2 384 - pow2 128 - pow2 96 + pow2 32 - 1 < pow2 384);
+  pow2 384 - pow2 128 - pow2 96 + pow2 32 - 1
 
-let nat_prime = n:nat{n < prime256}
+
+type curve = 
+  |P256
+  |P384
+
+let invert_state_s (a: curve): Lemma
+  (requires True)
+  (ensures (inversion curve))
+  [SMTPat (curve) ]
+=
+  allow_inversion (curve)
+
+
+let getPrime curve = 
+  match curve with 
+  |P256 -> prime256
+  |P384 -> prime384
+
+(* for p256 and 384 are the same *)
+let aCoordinate curve = -3 
+
+
+let bCoordinate curve : (a: nat {a < (getPrime curve)}) =
+  match curve with 
+  |P256 -> assert_norm (41058363725152142129326129780047268409114441015993725554835256314039467401291 < getPrime P256);
+    41058363725152142129326129780047268409114441015993725554835256314039467401291
+  |P384 -> assert_norm (27580193559959705877849011840389048093056905856361568521428707301988689241309860865136260764883745107765439761230575 < getPrime P384); 27580193559959705877849011840389048093056905856361568521428707301988689241309860865136260764883745107765439761230575
+
+
+noextract
+let basePoint : point_nat_prime =
+  assert_norm (0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296 < prime256);
+  (0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296,
+   0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5,
+   1)
+
+
+
+
+let nat_prime curve = n:nat{n < prime256}
 
 let point_nat = tuple3 nat nat nat
 
-let point_nat_prime = (p: point_nat {let (a, b, c) = p in a < prime256 /\ b < prime256 /\ c < prime256})
+let point_nat_prime curve = (p: point_nat {let (a, b, c) = p in a < prime256 /\ b < prime256 /\ c < prime256})
 
 type elem (n:pos) = x:nat{x < n}
 
@@ -69,13 +109,13 @@ noextract
 let modp_inv2_prime (x: int) (p: nat {p > 3}) : Tot (elem p) = modp_inv_prime p (x % p)
 
 noextract
-let modp_inv2 (x: nat) : Tot (elem prime256) =
-  assert_norm(prime256 > 3);
-  modp_inv2_prime x prime256
+let modp_inv2 curve (x: nat) : Tot (elem (getPrime curve)) =
+  modp_inv2_prime x (getPrime curve)
 
 noextract
-let modp_inv2_pow (x: nat) : Tot (elem prime256) =
-   pow x (prime256 - 2) % prime256
+let modp_inv2_pow curve (x: nat) : Tot (elem (getPrime curve)) =
+  let prime = getPrime curve in 
+  pow x (prime - 2) % prime
 
 
 noextract
@@ -83,19 +123,6 @@ let min_one_prime (prime: pos {prime > 3}) (x: int) : Tot (elem prime) =
   let p = x % prime in 
   exp #prime p (prime - 1)
   
-
-let aCoordinateP256 = -3 
-let bCoordinateP256 : (a: nat {a < prime256}) =
-  assert_norm (41058363725152142129326129780047268409114441015993725554835256314039467401291 < prime256);
-  41058363725152142129326129780047268409114441015993725554835256314039467401291
-
-noextract
-let basePoint : point_nat_prime =
-  assert_norm (0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296 < prime256);
-  (0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296,
-   0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5,
-   1)
-
 
 noextract
 let _point_double (p:point_nat_prime) : point_nat_prime =
