@@ -60,6 +60,12 @@ let bn_mul #aLen #bLen a b =
 let bn_mul_lemma #aLen #bLen a b =
   Hacl.Spec.Bignum.Multiplication.bn_mul_lemma a b
 
+let bn_sqr #aLen a =
+  Hacl.Spec.Bignum.Multiplication.bn_sqr a
+
+let bn_sqr_lemma #aLen a =
+  Hacl.Spec.Bignum.Multiplication.bn_sqr_lemma a
+
 let bn_mul1_lshift_add #aLen #resLen a b j acc =
   Hacl.Spec.Bignum.Multiplication.bn_mul1_lshift_add a b j acc
 
@@ -113,6 +119,8 @@ let bn_is_bit_set #len input ind =
   let tmp = (tmp >>. size j) &. u64 1 in
   FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 tmp =^ 1uL)
 
+
+#set-options "--z3rlimit 100"
 
 let bn_is_bit_set_lemma #len b ind =
   let i = ind / 64 in

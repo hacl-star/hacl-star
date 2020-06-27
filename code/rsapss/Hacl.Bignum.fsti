@@ -114,6 +114,21 @@ val bn_mul:
   -> bn_mul_st a b
 
 inline_for_extraction noextract
+let bn_sqr_st (#aLen:size_t{0 < v aLen /\ v aLen + v aLen <= max_size_t})
+  (a:lbignum aLen) =
+  res:lbignum (aLen +! aLen) ->
+  Stack unit
+  (requires fun h -> live h a /\ live h res /\ disjoint res a)
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_seq h1 res == S.bn_sqr (as_seq h0 a))
+
+inline_for_extraction noextract
+val bn_sqr:
+    aLen:size_t{0 < v aLen /\ v aLen + v aLen <= max_size_t}
+  -> a:lbignum aLen
+  -> bn_sqr_st a
+
+inline_for_extraction noextract
 val bn_mul1_lshift_add_in_place:
     aLen:size_t
   -> a:lbignum aLen
@@ -208,6 +223,7 @@ class bn (len: meta_len) = {
   add_mod_n: bn_add_mod_n_st len;
   mul: a:lbignum len -> b:lbignum len -> bn_mul_st a b;
   mul': a:lbignum (len +. 1ul) -> b:lbignum (len +. 1ul) -> bn_mul_st a b;
+  sqr': a:lbignum (len +. 1ul) -> bn_sqr_st a;
   sub_mask: bn_sub_mask_st len;
 }
 
@@ -220,6 +236,7 @@ let mk_runtime_bn (len: meta_len) = {
   add_mod_n = bn_add_mod_n len;
   mul = (fun a b -> bn_mul len a len b);
   mul' = (fun a b -> bn_mul (len +. 1ul) a (len +. 1ul) b);
+  sqr' = (fun a -> bn_sqr (len +. 1ul) a);
   sub_mask = bn_sub_mask len;
 }
 

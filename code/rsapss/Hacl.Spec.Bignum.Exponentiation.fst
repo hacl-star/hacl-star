@@ -29,7 +29,7 @@ val bn_mod_exp_f:
 
 let bn_mod_exp_f #nLen #rLen n mu bBits bLen b i (aM, accM) =
   let accM = if (bn_is_bit_set #bLen b i) then mont_mul n mu aM accM else accM in // acc = (acc * a) % n
-  let aM = mont_mul n mu aM aM in // a = (a * a) % n
+  let aM = mont_sqr n mu aM in // a = (a * a) % n
   (aM, accM)
 
 
@@ -87,7 +87,7 @@ val bn_mod_exp_f_lemma:
 let bn_mod_exp_f_lemma #nLen #rLen n mu bBits bLen b i (aM0, accM0) =
   let (aM1, accM1) = bn_mod_exp_f #nLen #rLen n mu bBits bLen b i (aM0, accM0) in
   let (aM2, accM2) = BL.mod_exp_f_ll rLen (bn_v n) (v mu) bBits (bn_v b) i (bn_v aM0, bn_v accM0) in
-  mont_mul_lemma #nLen #rLen n mu aM0 aM0;
+  mont_sqr_lemma #nLen #rLen n mu aM0;
   assert (bn_v aM1 == aM2);
   bn_is_bit_set_lemma #bLen b i;
   if (bn_v b / pow2 i % 2 = 1) then mont_mul_lemma #nLen #rLen n mu aM0 accM0;

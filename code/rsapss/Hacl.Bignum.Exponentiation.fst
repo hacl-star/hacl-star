@@ -57,7 +57,7 @@ let bn_mod_exp_loop nLen #_ n nInv_u64 bBits bLen b aM accM =
     Lib.LoopCombinators.unfold_repeati (v bBits) (spec h0) (as_seq h0 aM, as_seq h0 accM) (v i);
     if BN.bn_is_bit_set bLen b i then
       BM.mul n nInv_u64 aM accM accM; // acc = (acc * a) % n
-    BM.mul n nInv_u64 aM aM aM // a = (a * a) % n
+    BM.sqr n nInv_u64 aM aM // a = (a * a) % n
   )
 
 

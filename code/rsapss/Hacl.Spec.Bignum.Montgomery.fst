@@ -334,6 +334,10 @@ let mont_mul #nLen #rLen n mu aM bM =
   let c = bn_mul aM bM in // c = aM * bM
   mont_reduction n mu c // resM = c % n
 
+let mont_sqr #nLen #rLen n mu aM =
+  let c = bn_sqr aM in // c = aM * aM
+  mont_reduction n mu c // resM = c % n
+
 
 
 val mont_reduction_f_carry:
@@ -642,5 +646,14 @@ let mont_mul_lemma #nLen #rLen n mu aM bM =
   bn_mul_lemma aM bM;
   assert (bn_v c == bn_v aM * bn_v bM);
   Math.Lemmas.lemma_mult_lt_sqr (bn_v aM) (bn_v bM) (2 * bn_v n);
+  assert (bn_v c < 4 * bn_v n * bn_v n);
+  mont_reduction_lemma #nLen #rLen n mu c
+
+
+let mont_sqr_lemma #nLen #rLen n mu aM =
+  let c = bn_sqr aM in
+  bn_sqr_lemma aM;
+  assert (bn_v c == bn_v aM * bn_v aM);
+  Math.Lemmas.lemma_mult_lt_sqr (bn_v aM) (bn_v aM) (2 * bn_v n);
   assert (bn_v c < 4 * bn_v n * bn_v n);
   mont_reduction_lemma #nLen #rLen n mu c

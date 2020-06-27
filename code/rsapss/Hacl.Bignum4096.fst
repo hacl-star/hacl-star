@@ -42,12 +42,16 @@ let sub_mask: BN.bn_sub_mask_st n =
 let mul' (a b: lbignum n'): BN.bn_mul_st a b =
   BN.bn_mul n' a n' b
 
+let sqr' (a: lbignum n'): BN.bn_sqr_st a =
+  BN.bn_sqr n' a
+
 inline_for_extraction noextract
 instance bn_inst: BN.bn n = {
   BN.bit_set;
   BN.add_mod_n;
   BN.mul;
   BN.mul';
+  BN.sqr';
   BN.sub_mask
 }
 
@@ -66,6 +70,9 @@ let from: BM.from_mont_st n =
 let mont_mul: BM.mont_mul_st n =
   BM.mont_mul #n #bn_inst reduction
 
+let mont_sqr: BM.mont_sqr_st n =
+  BM.mont_sqr #n #bn_inst reduction
+
 inline_for_extraction noextract
 instance mont_inst: BM.mont n = {
   BM.bn = FStar.Tactics.Typeclasses.solve;
@@ -74,6 +81,7 @@ instance mont_inst: BM.mont n = {
   BM.to;
   BM.from;
   BM.mul = mont_mul;
+  BM.sqr = mont_sqr;
 }
 
 let mod_exp_loop: BE.bn_mod_exp_loop_st n =

@@ -38,6 +38,12 @@ val bn_mul_lemma: #aLen:size_nat -> #bLen:size_nat{aLen + bLen <= max_size_t} ->
   Lemma (bn_v (bn_mul a b) == bn_v a * bn_v b)
 
 
+val bn_sqr: #aLen:size_nat{aLen + aLen <= max_size_t} -> a:lbignum aLen -> lbignum (aLen + aLen)
+
+val bn_sqr_lemma: #aLen:size_nat{aLen + aLen <= max_size_t} -> a:lbignum aLen ->
+  Lemma (bn_v (bn_sqr a) == bn_v a * bn_v a)
+
+
 val bn_mul1_lshift_add:
     #aLen:size_nat
   -> #resLen:size_nat

@@ -127,6 +127,29 @@ val mont_mul:
   -> mont_mul_st nLen
 
 
+inline_for_extraction noextract
+let mont_sqr_st (nLen: BN.meta_len) =
+  let rLen = nLen +. 1ul in
+    n:lbignum nLen
+  -> mu:uint64
+  -> aM:lbignum rLen
+  -> resM:lbignum rLen ->
+  Stack unit
+  (requires fun h ->
+    live h aM /\ live h resM /\ live h n /\
+    disjoint resM n /\ eq_or_disjoint aM resM)
+  (ensures  fun h0 _ h1 -> modifies (loc resM) h0 h1 /\
+    as_seq h1 resM == S.mont_sqr (as_seq h0 n) mu (as_seq h0 aM))
+
+/// This one needs both the type class and a specialized montgomery reduction.
+inline_for_extraction noextract
+val mont_sqr:
+    #nLen:BN.meta_len
+  -> (#[FStar.Tactics.Typeclasses.tcresolve ()] _ : BN.bn nLen)
+  -> mr: mont_reduction_st nLen
+  -> mont_sqr_st nLen
+
+
 /// A montgomery implementation specialized for a bignum length.
 inline_for_extraction noextract
 class mont (len: BN.meta_len)  = {
@@ -136,6 +159,7 @@ class mont (len: BN.meta_len)  = {
   to: to_mont_st len;
   from: from_mont_st len;
   mul: mont_mul_st len;
+  sqr: mont_sqr_st len;
 }
 
 /// Encoding type-class hierarchies via a hook for type class resolution.

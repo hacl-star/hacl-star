@@ -74,6 +74,14 @@ val mont_mul:
   lbignum rLen
 
 
+val mont_sqr:
+    #nLen:size_nat
+  -> #rLen:size_nat{rLen = nLen + 1 /\ rLen + rLen <= max_size_t}
+  -> n:lbignum nLen
+  -> mu:uint64
+  -> aM:lbignum rLen ->
+  lbignum rLen
+
 ///
 ///  Lemmas
 ///
@@ -141,4 +149,20 @@ val mont_mul_lemma:
   (ensures
     (let res = bn_v (mont_mul #nLen #rLen n mu aM bM) in
     res == M.mont_mul rLen (bn_v n) (v mu) (bn_v aM) (bn_v bM) /\
+    res < 2 * bn_v n))
+
+
+val mont_sqr_lemma:
+    #nLen:size_nat
+  -> #rLen:size_nat{rLen = nLen + 1 /\ rLen + rLen <= max_size_t}
+  -> n:lbignum nLen
+  -> mu:uint64
+  -> aM:lbignum rLen -> Lemma
+  (requires
+    (1 + (bn_v n % pow2 64) * v mu) % pow2 64 == 0 /\
+    bn_v n % 2 = 1 /\ 1 < bn_v n /\ bn_v n < pow2 (64 * nLen) /\
+    bn_v aM < 2 * bn_v n)
+  (ensures
+    (let res = bn_v (mont_sqr #nLen #rLen n mu aM) in
+    res == M.mont_mul rLen (bn_v n) (v mu) (bn_v aM) (bn_v aM) /\
     res < 2 * bn_v n))

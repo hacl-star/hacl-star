@@ -139,3 +139,64 @@ let bn_mul aLen a bLen b res =
     Loops.unfold_repeati (v bLen) (spec h0) (as_seq h0 res) (v j);
     bn_mul_ aLen a bLen b j res
   )
+
+
+inline_for_extraction noextract
+val bn_sqr_diag:
+    aLen:size_t{v aLen + v aLen <= max_size_t}
+  -> a:lbignum aLen
+  -> res:lbignum (aLen +! aLen) ->
+  Stack unit
+  (requires fun h -> live h a /\ live h res /\ disjoint res a /\
+    as_seq h res == LSeq.create (v aLen + v aLen) (u64 0))
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_seq h1 res == S.bn_sqr_diag (as_seq h0 a))
+
+let bn_sqr_diag aLen a res =
+  let h0 = ST.get () in
+
+  [@inline_let]
+  let spec h = S.bn_sqr_diag_f (as_seq h a) in
+
+  loop1 h0 aLen res spec
+  (fun i ->
+    Loops.unfold_repeati (v aLen) (spec h0) (as_seq h0 res) (v i);
+    let a2 = mul64_wide a.(i) a.(i) in
+    res.(2ul *! i) <- to_u64 a2;
+    res.(2ul *! i +! 1ul) <- to_u64 (a2 >>. 64ul))
+
+
+// This code is taken from BoringSSL
+// https://github.com/google/boringssl/blob/master/crypto/fipsmodule/bn/mul.c#L551
+inline_for_extraction noextract
+val bn_sqr:
+    aLen:size_t{0 < v aLen /\ v aLen + v aLen <= max_size_t}
+  -> a:lbignum aLen
+  -> res:lbignum (aLen +! aLen) ->
+  Stack unit
+  (requires fun h -> live h a /\ live h res /\ disjoint res a)
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_seq h1 res == S.bn_sqr #(v aLen) (as_seq h0 a))
+
+[@CInline]
+let bn_sqr aLen a res =
+  push_frame ();
+  let resLen = aLen +! aLen in
+  memset res (u64 0) resLen;
+  let h0 = ST.get () in
+  LSeq.eq_intro (LSeq.sub (as_seq h0 res) 0 (v resLen)) (as_seq h0 res);
+
+  [@inline_let]
+  let spec h = S.bn_sqr_f (as_seq h a) in
+
+  loop1 h0 aLen res spec
+  (fun j ->
+    Loops.unfold_repeati (v aLen) (spec h0) (as_seq h0 res) (v j);
+    res.(j +! j) <- bn_mul1_lshift_add j (sub a 0ul j) a.(j) resLen j res
+  );
+
+  let _ = Hacl.Bignum.Addition.bn_add_eq_len resLen res res res in
+  let tmp = create resLen (u64 0) in
+  bn_sqr_diag aLen a tmp;
+  let _ = Hacl.Bignum.Addition.bn_add_eq_len resLen res tmp res in
+  pop_frame ()
