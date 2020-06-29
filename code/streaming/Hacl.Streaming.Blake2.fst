@@ -46,12 +46,16 @@ module Incr = Spec.Hash.Incremental
 let add_zero_left_is_same (n : int) :
   Lemma(0 + n = n) = ()
 
+inline_for_extraction noextract
 let to_hash_alg (a : Spec.alg) = Hash.to_hash_alg a
 
+inline_for_extraction noextract
 let index = unit
 
+inline_for_extraction noextract
 let alg = Spec.alg
 
+inline_for_extraction noextract
 let m_spec = Core.m_spec
 
 /// The stateful state: (wv, hash)
@@ -192,15 +196,18 @@ let stateful_key (a : alg) (key_size : key_size_ty a) : I.stateful unit =
       else B.blit (s_src <: B.buffer uint8) 0ul
                   (s_dst <: B.buffer uint8) 0ul (U32.uint_to_t key_size))
 
+inline_for_extraction noextract
 let stateful_key_to_buffer (#a : alg) (#key_size : key_size_ty a)
                            (key : stateful_key_t a key_size) :
   b:B.buffer uint8 { B.length b = key_size } =
   if key_size = 0 then B.null #uint8 else key
-  
+
+inline_for_extraction noextract  
 let k = stateful_key
 
 /// The functor currently limits the size of the data, so we can't go as far as blake2b can go
 #push-options "--z3cliopt smt.arith.nl=false"
+noextract
 let max_total_hash_length (a : alg) :
   n:nat{n <= Spec.Hash.Definitions.max_input_length (to_hash_alg a)} =
   assert_norm(
@@ -208,6 +215,7 @@ let max_total_hash_length (a : alg) :
   Spec.max_limb Spec.Blake2S
 #pop-options
 
+noextract
 let max_input_length (a : alg) (key_size : nat) : nat =
   if key_size = 0 then max_total_hash_length a
   else max_total_hash_length a - Spec.size_block a
@@ -232,6 +240,7 @@ inline_for_extraction noextract
 let blake2_prevlength (a : alg) (key_size : nat) (prevlen : nat) : nat =
   if key_size = 0 then prevlen else prevlen + Spec.size_block a
 
+noextract
 let blake2_prevlength_add_right_eq (a : alg) (key_size : nat) (prevlen len : nat) :
   Lemma(
     blake2_prevlength a key_size prevlen + len = blake2_prevlength a key_size (prevlen + len))
@@ -257,12 +266,13 @@ let blake2_prevlen (a : alg) (key_len : U32.t)
     [@inline_let] let x : uint64 = to_u64 #U64 #PUB (blake2_prevlen_ a key_len prevlen) in
     Lib.IntTypes.cast U128 SEC x
 
+noextract
 let init_s (#a : alg) (#key_size : key_size_ty a) ()
            (key : Seq.lseq uint8 key_size) :
   Tot (t a) =
   Spec.blake2_init a key_size key (output_size a)
 
-
+noextract
 let update_multi_s (#a : alg) (key_size : key_size_ty a) () (acc : t a)
                    (prevlen : nat{prevlen % Spec.size_block a = 0})
                    (input : Seq.seq uint8{ prevlen + S.length input <= max_input_length a key_size /\
@@ -272,6 +282,7 @@ let update_multi_s (#a : alg) (key_size : key_size_ty a) () (acc : t a)
   let s = (acc, es) in
   fst (Agile.update_multi (to_hash_alg a) s input)
 
+noextract
 let update_last_s (#a : alg) (key_size : key_size_ty a) () (acc : t a)
                   (prevlen : nat{prevlen % Spec.size_block a = 0})
                   (input : Seq.seq uint8{ S.length input + prevlen <= max_input_length a key_size /\
@@ -281,6 +292,7 @@ let update_last_s (#a : alg) (key_size : key_size_ty a) () (acc : t a)
   let s = (acc, es) in
   fst (Spec.Hash.Incremental.update_last (to_hash_alg a) s prevlen input)
 
+noextract
 let finish_s (#a : alg) (#key_size : key_size_ty a) ()
              (key : S.seq uint8{S.length key = key_size}) (acc : t a) :
   output : S.seq uint8 { S.length output = U32.v (output_len a) } =
@@ -288,6 +300,7 @@ let finish_s (#a : alg) (#key_size : key_size_ty a) ()
   let s = (acc, Hash.nat_to_extra_state (to_hash_alg a) 0) in
   Spec.Hash.PadFinish.finish (to_hash_alg a) s
 
+noextract
 let spec_s (a : alg) (#key_size : key_size_ty a) ()
            (key : S.seq uint8{S.length key = key_size})
            (input : S.seq uint8{S.length input <= max_input_length a key_size}) = 
@@ -295,6 +308,7 @@ let spec_s (a : alg) (#key_size : key_size_ty a) ()
 
 /// Interlude for spec proofs
 /// =====================================
+noextract
 val update_multi_zero:
   #a : alg ->
   key_size : key_size_ty a ->
@@ -310,6 +324,7 @@ let update_multi_zero #a key_size () acc prevlen =
   let s = (acc, es) in
   Spec.Hash.Lemmas.update_multi_zero (to_hash_alg a) s
 
+noextract
 val update_multi_associative:
   #a : alg ->
   key_size : key_size_ty a ->
@@ -342,6 +357,7 @@ let update_multi_associative #a key_size () acc prevlen1 prevlen2 input1 input2 
  
 /// A helper function: the hash incremental function defined with the functions
 /// locally defined (with a signature adapted to the functor).
+noextract
 val blake2_hash_incremental_s :
   a : alg ->
   #key_size : key_size_ty a ->
@@ -350,6 +366,7 @@ val blake2_hash_incremental_s :
   input:S.seq uint8 { S.length input <= max_input_length a key_size } ->
   output:S.seq uint8 { S.length output = output_size a }
 
+noextract
 let size_block_props (a : Spec.alg) :
   Lemma(
     Spec.size_block a = Spec.Hash.Definitions.block_length (to_hash_alg a) /\
@@ -370,6 +387,7 @@ let blake2_hash_incremental_s a #key_size i key input =
 /// The following helper lemmas prove that the blake2 specification functions defined above
 /// with a signature adapted to the functor give the same result, if properly called,
 /// as the original hash incremental functions.
+noextract
 val blake2_hash_incremental_s_is_hash_incremental :
   a : alg ->
   #key_size : key_size_ty a ->
@@ -380,6 +398,7 @@ val blake2_hash_incremental_s_is_hash_incremental :
     blake2_hash_incremental_s a #key_size i key input ==
       Spec.Hash.Incremental.blake2_hash_incremental (to_hash_alg a) key_size key input)
 
+noextract
 let init_s_blake2_init_eq
   (a : alg)
   (#key_size : key_size_ty a)
@@ -434,6 +453,7 @@ let blake2_hash_incremental_s_is_hash_incremental a #key_size i key input =
 #pop-options
 
 #push-options "--z3cliopt smt.arith.nl=false"
+noextract
 val spec_is_incremental:
   a : alg ->
   #key_size : key_size_ty a ->
@@ -458,6 +478,7 @@ let spec_is_incremental a #key_size i key input =
   Spec.Hash.Incremental.blake2_is_hash_incremental (to_hash_alg a) key_size key input
 #pop-options
 
+noextract
 val update_multi_eq :
   #a : alg ->
   key_size : key_size_ty a ->
@@ -489,6 +510,7 @@ let update_multi_eq #a key_size nb acc prevlen blocks =
     Hash.nat_to_extra_state (to_hash_alg a) (prevlen' + S.length blocks) ==
     Hash.extra_state_add_nat #(to_hash_alg a) es (S.length blocks))
 
+noextract
 val update_last_eq :
   #a : alg ->
   key_size : key_size_ty a ->
@@ -531,6 +553,7 @@ let update_last_eq #a key_size prevlen last acc =
 /// Equality between the state types defined by blake2s and the generic hash.
 /// The equality is not trivial because of subtleties linked to the way types are
 /// encoded for Z3.
+noextract
 val state_types_equalities : (a : alg) ->
   Lemma(Spec.Blake2.state a == Hash.words_state' (to_hash_alg a))
 
@@ -640,7 +663,7 @@ val mk_update_last:
     (state.I.freeable #i h0 s ==> state.I.freeable #i h1 s))))
 
 /// TODO: after analysis with quake, this proof sometimes loops
-#push-options "--ifuel 1 --z3cliopt smt.arith.nl=false --quake 10"
+#push-options "--ifuel 1 --z3cliopt smt.arith.nl=false"
 let mk_update_last a m key_size i acc prevlen last last_len =
   (**) size_block_props a;
   [@inline_let] let wv = get_wv acc in
