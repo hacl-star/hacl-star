@@ -175,7 +175,7 @@ type sigma_elt_t = n:size_t{size_v n < 16}
 type list_sigma_t = l:list sigma_elt_t{List.Tot.length l == 160}
 
 [@"opaque_to_smt"]
-inline_for_extraction
+noextract
 let list_sigma: list_sigma_t =
   [@inline_let]
   let l : list sigma_elt_t = [

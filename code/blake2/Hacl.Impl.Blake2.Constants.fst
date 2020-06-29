@@ -14,7 +14,8 @@ module Loops = Lib.LoopCombinators
 module Spec = Spec.Blake2
 
 let sigmaTable : x:glbuffer Spec.sigma_elt_t 160ul{witnessed x Spec.sigmaTable /\ recallable x} =
-  createL_global Spec.list_sigma
+  (**) norm_spec [delta_only [`%Spec.list_sigma]] Spec.list_sigma;
+  createL_global (norm [delta_only [`%Spec.list_sigma]] Spec.list_sigma)
 
 let ivTable_S: (x:glbuffer (Spec.pub_word_t Spec.Blake2S) 8ul{witnessed x (Spec.ivTable Spec.Blake2S) /\ recallable x}) =
   createL_global Spec.list_iv_S
