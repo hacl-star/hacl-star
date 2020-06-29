@@ -695,7 +695,7 @@ let mk_update_last a m key_size i acc prevlen last last_len =
 /// for the key): it must thus be a constant.
 #push-options "--ifuel 1 --z3cliopt smt.arith.nl=false"
 inline_for_extraction noextract
-let _blake2 (a : alg) (m : m_spec) (key_size : key_size_ty a) : I.block unit =
+let blake2 (a : alg) (m : m_spec) (key_size : key_size_ty a) : I.block unit =
   I.Block
     I.Erased (* key management *)
     
@@ -744,57 +744,18 @@ let _blake2 (a : alg) (m : m_spec) (key_size : key_size_ty a) : I.block unit =
       Impl.blake2_finish #a #m (output_len a) dst h)
 #pop-options
 
-/// Some specialized instanciations to help normalization
-inline_for_extraction noextract
-let blake2s_32 (key_size : key_size_ty Spec.Blake2S) : I.block unit =
-  _blake2 Spec.Blake2S M32 key_size
-
-inline_for_extraction noextract
-let blake2s_128 (key_size : key_size_ty Spec.Blake2S) : I.block unit =
-  _blake2 Spec.Blake2S M128 key_size
-
-inline_for_extraction noextract
-let blake2b_32 (key_size : key_size_ty Spec.Blake2B) : I.block unit =
-  _blake2 Spec.Blake2B M32 key_size
-
-inline_for_extraction noextract
-let blake2b_256 (key_size : key_size_ty Spec.Blake2B) : I.block unit =
-  _blake2 Spec.Blake2B M256 key_size
-
-/// TODO: move
-noextract
-let is_valid_blake_config (a : alg) (m : m_spec) : bool =
-  match a, m with
-  | Spec.Blake2S, M32 | Spec.Blake2S, M128 | Spec.Blake2B, M32 | Spec.Blake2B, M256 -> true
-  | _ -> false
-
-/// Pay attention to the fact that the ``key_size`` parameter is not Low*
-inline_for_extraction noextract
-let blake2 (a : alg) (m : m_spec{is_valid_blake_config a m})
-           (key_size : key_size_ty a) : I.block unit =
-  match a, m with
-  | Spec.Blake2S, M32 -> blake2s_32 key_size
-  | Spec.Blake2S, M128 -> blake2s_128 key_size 
-  | Spec.Blake2B, M32 -> blake2b_32 key_size
-  | Spec.Blake2B, M256 -> blake2b_256 key_size
-
 /// The incremental hash functions instantiations
-inline_for_extraction noextract
-let mk_create_in (a : alg) (m : m_spec{is_valid_blake_config a m}) (key_size : key_size_ty a) =
+let mk_create_in (a : alg) (m : m_spec) (key_size : key_size_ty a) =
   F.create_in (blake2 a m key_size) () (s a m) (I.optional_key () I.Erased (k a key_size))
 
-inline_for_extraction noextract
-let mk_init (a : alg) (m : m_spec{is_valid_blake_config a m}) (key_size : key_size_ty a) =
+let mk_init (a : alg) (m : m_spec) (key_size : key_size_ty a) =
   F.init (blake2 a m key_size) (G.hide ()) (s a m) (I.optional_key () I.Erased (k a key_size))
 
-inline_for_extraction noextract
-let mk_update (a : alg) (m : m_spec{is_valid_blake_config a m}) (key_size : key_size_ty a) =
+let mk_update (a : alg) (m : m_spec) (key_size : key_size_ty a) =
   F.update (blake2 a m key_size) (G.hide ()) (s a m) (I.optional_key () I.Erased (k a key_size))
 
-inline_for_extraction noextract
-let mk_finish (a : alg) (m : m_spec{is_valid_blake_config a m}) (key_size : key_size_ty a) =
+let mk_finish (a : alg) (m : m_spec) (key_size : key_size_ty a) =
   F.mk_finish (blake2 a m key_size) () (s a m) (I.optional_key () I.Erased (k a key_size))
 
-inline_for_extraction noextract
-let mk_free (a : alg) (m : m_spec{is_valid_blake_config a m}) (key_size : key_size_ty a) =
+let mk_free (a : alg) (m : m_spec) (key_size : key_size_ty a) =
   F.free (blake2 a m key_size) (G.hide ()) (s a m) (I.optional_key () I.Erased (k a key_size))
