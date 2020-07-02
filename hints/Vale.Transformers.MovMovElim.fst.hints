@@ -38,7 +38,7 @@
         "token_correspondence_Vale.X64.Machine_Semantics_s.instr_annotation@tok"
       ],
       0,
-      "6eb6619f195c17d47639bab471f4bced"
+      "1aa22f4f8de79bdc497ff160e240c2d7"
     ],
     [
       "Vale.Transformers.MovMovElim.mov_mov_elim_ph",
@@ -49,10 +49,11 @@
         "@query", "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
         "equation_Vale.Transformers.MovMovElim.safe_mov_mov_elim",
         "equation_Vale.X64.Machine_Semantics_s.ins",
-        "proj_equation_Prims.Cons_tl"
+        "primitive_Prims.op_AmpAmp", "proj_equation_Prims.Cons_tl",
+        "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "bd2e8988b27202b371ce176130d1a382"
+      "921f03010150fbeb64d8fba49583f7ca"
     ],
     [
       "Vale.Transformers.MovMovElim.lemma_mov_mov_is_mov",
@@ -262,7 +263,7 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "a49e36e9f2897d31d6b0d3752340c76a"
+      "38b32d35be5c1a0a9ffbc6f259e61068"
     ],
     [
       "Vale.Transformers.MovMovElim.mov_mov_elim_correct",
@@ -272,11 +273,11 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Vale.Transformers.PeepHole.eval_inss.fuel_instrumented",
-        "@query", "b2t_def", "bool_inversion",
+        "@query", "b2t_def", "bool_inversion", "bool_typing",
         "constructor_distinct_FStar.Pervasives.Native.None",
         "constructor_distinct_FStar.Pervasives.Native.Some",
-        "constructor_distinct_Prims.Cons", "constructor_distinct_Prims.Nil",
-        "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
+        "constructor_distinct_Prims.Nil", "disc_equation_Prims.Cons",
+        "disc_equation_Prims.Nil",
         "equation_Vale.Transformers.MovMovElim.mov_mov_elim_ph",
         "equation_Vale.Transformers.MovMovElim.safe_mov_mov_elim",
         "equation_Vale.Transformers.PeepHole.peephole_correct",
@@ -285,7 +286,8 @@
         "fuel_guarded_inversion_Vale.X64.Machine_Semantics_s.machine_state",
         "function_token_typing_Vale.X64.Machine_Semantics_s.ins",
         "interpretation_Tm_abs_adc34492dfd2377f45b2eee82a264abe",
-        "l_imp-interp", "proj_equation_Prims.Cons_tl",
+        "l_imp-interp", "primitive_Prims.op_AmpAmp",
+        "proj_equation_Prims.Cons_tl",
         "proj_equation_Vale.Transformers.PeepHole.Mkpre_peephole_ph",
         "proj_equation_Vale.X64.Machine_Semantics_s.Mkmachine_state_ms_ok",
         "projection_inverse_BoxBool_proj_0",
@@ -299,12 +301,13 @@
         "refinement_interpretation_Tm_refine_7aac12c24449a22c34d98a0ea8ed4a32",
         "token_correspondence_Vale.Transformers.PeepHole.__proj__Mkpre_peephole__item__ph",
         "true_interp", "typing_Prims.__proj__Cons__item__tl",
+        "typing_Prims.uu___is_Cons",
         "typing_Vale.Transformers.PeepHole.eval_inss",
         "typing_Vale.X64.Machine_Semantics_s.__proj__Mkmachine_state__item__ms_ok",
         "typing_Vale.X64.Machine_Semantics_s.machine_eval_ins"
       ],
       0,
-      "cbe2d1d34f2af10036599e44964ddeaf"
+      "9077e72aa39d85aae1a733dd7e7977e1"
     ],
     [
       "Vale.Transformers.MovMovElim.safe_mov_mov_elim",
@@ -343,7 +346,7 @@
         "token_correspondence_Vale.X64.Machine_Semantics_s.instr_annotation@tok"
       ],
       0,
-      "610e416f3639437cdba3a8c15fc2a7e9"
+      "60f45c5f9f56a98806b4f467322a952b"
     ],
     [
       "Vale.Transformers.MovMovElim.mov_mov_elim_ph",
@@ -354,10 +357,11 @@
         "@query", "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
         "equation_Vale.Transformers.MovMovElim.safe_mov_mov_elim",
         "equation_Vale.X64.Machine_Semantics_s.ins",
-        "proj_equation_Prims.Cons_tl"
+        "primitive_Prims.op_AmpAmp", "proj_equation_Prims.Cons_tl",
+        "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "a1139509409d084f89116b7db68c84c9"
+      "699eb6bd15622bbb46d3539f53ff7e8e"
     ]
   ]
 ]

@@ -18,7 +18,7 @@
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c"
       ],
       0,
-      "0dab600b86fdcdcff0d869b5b27bcc39"
+      "dc6d8e8fced2db93bdf97bfbef2bc35d"
     ],
     [
       "EverCrypt.CTR.state_s",
@@ -125,7 +125,7 @@
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c"
       ],
       0,
-      "0d7f41334eaa3fa476718bf3f76da6ad"
+      "6d85e821941983060bc5dea087e45520"
     ],
     [
       "EverCrypt.CTR.invariant_s",
@@ -449,7 +449,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "9dada5f95262d15554437574d87efd88"
+      "c48fd330d82314f55783e7d1a819d52d"
     ],
     [
       "EverCrypt.CTR.vale_impl_of_alg",
@@ -472,7 +472,7 @@
         "refinement_interpretation_Tm_refine_177c69f55dbc44094b230a6a570a50b1"
       ],
       0,
-      "73d005646a36fa22a8a8ca89672b8500"
+      "58e41523c2f5daec7b5ab8657a1463c2"
     ],
     [
       "EverCrypt.CTR.create_in_vale",
@@ -996,7 +996,7 @@
         "typing_tok_Spec.Agile.Cipher.CHACHA20@tok"
       ],
       0,
-      "7e77342bca032ae0c86510d240f63795"
+      "2ca56a84a01e87838c394c3e670ac10d"
     ],
     [
       "EverCrypt.CTR.copy_or_expand",
@@ -1097,7 +1097,7 @@
         "function_token_typing_LowStar.Buffer.trivial_preorder",
         "function_token_typing_Spec.Cipher.Expansion.uu___29",
         "function_token_typing_Spec.Cipher.Expansion.uu___30",
-        "int_inversion",
+        "int_inversion", "int_typing",
         "interpretation_Tm_abs_612136ee4143d24977831c80e4f470a1",
         "inversion-interp", "l_and-interp",
         "lemma_FStar.Seq.Base.lemma_eq_elim",
@@ -1106,8 +1106,6 @@
         "lemma_FStar.UInt32.vu_inv",
         "lemma_LowStar.Monotonic.Buffer.as_seq_gsub",
         "lemma_LowStar.Monotonic.Buffer.length_as_seq",
-        "lemma_LowStar.Monotonic.Buffer.length_null_1",
-        "lemma_LowStar.Monotonic.Buffer.length_null_2",
         "lemma_LowStar.Monotonic.Buffer.modifies_buffer_elim",
         "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_LessThanOrEqual",
@@ -1133,26 +1131,25 @@
         "refinement_interpretation_Tm_refine_f10315e12d7a82715dc69dbc7dc872a6",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
         "typing_EverCrypt.CTR.Keys.concrete_xkey_len",
-        "typing_EverCrypt.TargetConfig.x64", "typing_FStar.UInt.fits",
-        "typing_FStar.UInt32.uint_to_t", "typing_FStar.UInt32.v",
-        "typing_Lib.IntTypes.minint",
+        "typing_EverCrypt.TargetConfig.x64", "typing_FStar.UInt32.uint_to_t",
+        "typing_FStar.UInt32.v", "typing_Lib.IntTypes.minint",
         "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.as_seq",
         "typing_LowStar.Monotonic.Buffer.len",
         "typing_LowStar.Monotonic.Buffer.length",
         "typing_LowStar.Monotonic.Buffer.loc_buffer",
         "typing_LowStar.Monotonic.Buffer.mgsub", "typing_Spec.AES.gf8",
-        "typing_Spec.Chacha20.size_key",
         "typing_Spec.Cipher.Expansion.cipher_alg_of_impl",
         "typing_Spec.Cipher.Expansion.concrete_expand",
         "typing_Spec.Cipher.Expansion.concrete_xkey_length",
         "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_tok_Lib.IntTypes.U8@tok",
+        "typing_tok_Spec.Cipher.Expansion.Vale_AES128@tok",
         "typing_tok_Spec.Cipher.Expansion.Vale_AES256@tok", "unit_inversion",
         "unit_typing"
       ],
       0,
-      "0df650984c41e31c2b325ef16b184d8d"
+      "6f1948508bc634a6a2f8c82057b3e7bc"
     ],
     [
       "EverCrypt.CTR.init",
@@ -1636,7 +1633,7 @@
         "unit_typing"
       ],
       0,
-      "587e516b2c47145401a3a0adc49d1d9f"
+      "8841da411f2b7a61a9c5ae3c5a2dcb79"
     ],
     [
       "EverCrypt.CTR.uint128_of_uint32",
@@ -2054,7 +2051,7 @@
         "typing_tok_Lib.Buffer.MUT@tok", "unit_inversion", "unit_typing"
       ],
       0,
-      "66008288906df6cb45ccb31309867dbe"
+      "adcbb0f9fcf5e04121c1ac956a2951d9"
     ],
     [
       "EverCrypt.CTR.free",
