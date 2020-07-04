@@ -138,11 +138,11 @@ Hacl_P256_ecdsa_verif_p256_sha512(
   uint8_t *s
 );
 
-extern void C_String_print(C_String_t uu____102);
+extern void C_String_print(C_String_t uu____68);
 
-extern void LowStar_Printf_print_string(Prims_string uu____92);
+extern void LowStar_Printf_print_string(Prims_string uu____39);
 
-extern void LowStar_Printf_print_u32(uint32_t uu____140);
+extern void LowStar_Printf_print_u32(uint32_t uu____71);
 
 extern void LowStar_Printf_print_lmbuffer_u8(uint32_t l, uint8_t *r);
 

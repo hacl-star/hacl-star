@@ -869,11 +869,11 @@ static void legacy_hash(uint8_t *input, uint32_t input_len, uint8_t *dst)
   legacy_finish(s, dst);
 }
 
-extern void C_String_print(C_String_t uu____102);
+extern void C_String_print(C_String_t uu____68);
 
-static bool is_supported_alg(hash_alg uu___0_7)
+static bool is_supported_alg(hash_alg uu___0_6)
 {
-  switch (uu___0_7)
+  switch (uu___0_6)
   {
     case SHA1:
       {
@@ -2150,9 +2150,9 @@ generate(
   }
 }
 
-extern void LowStar_Printf_print_string(Prims_string uu____92);
+extern void LowStar_Printf_print_string(Prims_string uu____39);
 
-extern void LowStar_Printf_print_u32(uint32_t uu____140);
+extern void LowStar_Printf_print_u32(uint32_t uu____71);
 
 extern void LowStar_Printf_print_lmbuffer_u8(uint32_t l, uint8_t *r);
 

@@ -91,7 +91,7 @@ EverCrypt_HMAC_compute_sha2_512(
 
 /* SNIPPET_START: EverCrypt_HMAC_is_supported_alg */
 
-bool EverCrypt_HMAC_is_supported_alg(Spec_Hash_Definitions_hash_alg uu___0_6237);
+bool EverCrypt_HMAC_is_supported_alg(Spec_Hash_Definitions_hash_alg uu___0_2480);
 
 /* SNIPPET_END: EverCrypt_HMAC_is_supported_alg */
 

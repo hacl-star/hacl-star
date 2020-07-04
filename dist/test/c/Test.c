@@ -33,13 +33,13 @@
 
 typedef uint8_t hash_alg;
 
-extern void portable_exit(int32_t uu____60);
+extern void portable_exit(int32_t uu____31);
 
-extern void C_String_print(C_String_t uu____102);
+extern void C_String_print(C_String_t uu____68);
 
-extern uint32_t C_String_strlen(C_String_t uu____110);
+extern uint32_t C_String_strlen(C_String_t uu____74);
 
-extern void C_String_memcpy(uint8_t *uu____138, C_String_t uu____139, uint32_t uu____140);
+extern void C_String_memcpy(uint8_t *uu____92, C_String_t uu____93, uint32_t uu____94);
 
 static bool whatever()
 {
@@ -80,7 +80,7 @@ extern void EverCrypt_AutoConfig2_disable_openssl();
 
 extern void EverCrypt_AutoConfig2_disable_bcrypt();
 
-extern C_String_t EverCrypt_Hash_string_of_alg(hash_alg uu___0_6);
+extern C_String_t EverCrypt_Hash_string_of_alg(hash_alg uu___0_5);
 
 #define MD5_s 0
 #define SHA1_s 1
@@ -112,9 +112,9 @@ extern void EverCrypt_Hash_init(state_s *a);
 
 extern void EverCrypt_Hash_hash(hash_alg a, uint8_t *dst, uint8_t *input, uint32_t len);
 
-static bool is_supported_alg(hash_alg uu___0_7)
+static bool is_supported_alg(hash_alg uu___0_6)
 {
-  switch (uu___0_7)
+  switch (uu___0_6)
   {
     case SHA1:
       {
@@ -342,7 +342,7 @@ EverCrypt_AEAD_decrypt(
 );
 
 extern void
-TestLib_compare_and_print(C_String_t uu____279, uint8_t *b1, uint8_t *b2, uint32_t l);
+TestLib_compare_and_print(C_String_t uu____176, uint8_t *b1, uint8_t *b2, uint32_t l);
 
 static uint8_t
 key0[32U] =
@@ -12331,9 +12331,9 @@ test_aead_st(
   }
 }
 
-static alg alg_of_alg(cipher uu___0_2362)
+static alg alg_of_alg(cipher uu___0_867)
 {
-  switch (uu___0_2362)
+  switch (uu___0_867)
   {
     case CHACHA20_POLY13050:
       {
@@ -12415,12 +12415,12 @@ static void
 test_aead_loop(
   cipher alg0,
   lbuffer__K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  uu____2401
+  uu____905
 )
 {
-  uint32_t len = uu____2401.len;
+  uint32_t len = uu____905.len;
   __Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  *vs = uu____2401.b;
+  *vs = uu____905.b;
   if (!(len == (uint32_t)0U))
   {
     __Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
