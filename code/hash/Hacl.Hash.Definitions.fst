@@ -16,28 +16,35 @@ open FStar.Mul
     successfully call this module. *)
 
 inline_for_extraction noextract
-let impl_word (a:hash_alg) = match a with
-  | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 -> word a
-  | Blake2S | Blake2B -> Blake2.element_t (to_blake_alg a) Blake2.M32
+let m_spec (a:hash_alg) : Type0 =
+  match a with
+  | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 -> unit
+  | Blake2S | Blake2B -> Blake2.m_spec
 
 inline_for_extraction noextract
-let impl_state_length (a:hash_alg) = match a with
+let impl_word (a:hash_alg) (m:m_spec a)= match a with
+  | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 -> word a
+  | Blake2S | Blake2B -> Blake2.element_t (to_blake_alg a) m
+
+inline_for_extraction noextract
+let impl_state_length (a:hash_alg) (m:m_spec a) = match a with
   | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 -> state_word_length a
-  | Blake2S | Blake2B -> UInt32.v (4ul *. Blake2.row_len (to_blake_alg a) Blake2.M32)
+  | Blake2S | Blake2B -> UInt32.v (4ul *. Blake2.row_len (to_blake_alg a) m)
 
 inline_for_extraction
-type state (a:hash_alg) = b:B.buffer (impl_word a) { B.length b = impl_state_length a }
+type state (a:hash_alg) (m:m_spec a) =
+  b:B.buffer (impl_word a m) { B.length b = impl_state_length a m }
 
 (* TODO: make generic in the implementation *)
 inline_for_extraction noextract
-let as_seq (#a:hash_alg) (h:HS.mem) (s:state a) : GTot (words_state' a) =
+let as_seq (#a:hash_alg) (#m:m_spec a) (h:HS.mem) (s:state a m) : GTot (words_state' a) =
   match a with
   | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 -> B.as_seq h s
-  | Blake2S -> Blake2.state_v #Spec.Blake2.Blake2S #Blake2.M32 h s
-  | Blake2B -> Blake2.state_v #Spec.Blake2.Blake2B #Blake2.M32 h s
+  | Blake2S -> Blake2.state_v #Spec.Blake2.Blake2S #m h s
+  | Blake2B -> Blake2.state_v #Spec.Blake2.Blake2B #m h s
 
 inline_for_extraction
-let word_len (a: hash_alg): n:size_t { v n = word_length a } =
+let word_len (a: hash_alg) : n:size_t { v n = word_length a } =
   match a with
   | MD5 | SHA1 | SHA2_224 | SHA2_256 -> 4ul
   | SHA2_384 | SHA2_512 -> 8ul
@@ -85,7 +92,7 @@ let hash_t (a: hash_alg) = b:B.buffer uint8 { B.length b = hash_length a }
 (** The types of all stateful operations for a hash algorithm. *)
 
 noextract inline_for_extraction
-let alloca_st (a: hash_alg) = unit -> ST.StackInline (state a & extra_state a)
+let alloca_st (a: hash_alg) (m:m_spec a) = unit -> ST.StackInline (state a m & extra_state a)
   (requires (fun h ->
     HS.is_stack_region (HS.get_tip h)))
   (ensures (fun h0 (s, v) h1 ->
@@ -98,7 +105,7 @@ let alloca_st (a: hash_alg) = unit -> ST.StackInline (state a & extra_state a)
     (HS.get_tip h1) == (HS.get_tip h0)))
 
 noextract inline_for_extraction
-let init_st (a: hash_alg) = s:state a -> ST.Stack (extra_state a)
+let init_st (a: hash_alg) (m:m_spec a) = s:state a m -> ST.Stack (extra_state a)
   (requires (fun h ->
     B.live h s))
   (ensures (fun h0 v h1 ->
@@ -106,8 +113,8 @@ let init_st (a: hash_alg) = s:state a -> ST.Stack (extra_state a)
     (as_seq h1 s, v) == Spec.Agile.Hash.init a))
 
 noextract inline_for_extraction
-let update_st (a: hash_alg) =
-  s:state a ->
+let update_st (a: hash_alg) (m:m_spec a) =
+  s:state a m ->
   v:extra_state a ->
   block:B.buffer uint8 { B.length block = block_length a } ->
   ST.Stack (extra_state a)
@@ -131,8 +138,8 @@ let pad_st (a: hash_alg) = len:len_t a -> dst:B.buffer uint8 ->
 // Note: we cannot take more than 4GB of data because we are currently
 // constrained by the size of buffers...
 noextract inline_for_extraction
-let update_multi_st (a: hash_alg) =
-  s:state a ->
+let update_multi_st (a: hash_alg) (m:m_spec a) =
+  s:state a m ->
   ev:extra_state a ->
   blocks:blocks_t a ->
   n:size_t { B.length blocks = block_length a * v n } ->
@@ -145,8 +152,8 @@ let update_multi_st (a: hash_alg) =
         Spec.Agile.Hash.update_multi a (as_seq h0 s, ev) (B.as_seq h0 blocks)))
 
 noextract inline_for_extraction
-let update_last_st (a: hash_alg) =
-  s:state a ->
+let update_last_st (a: hash_alg) (m:m_spec a) =
+  s:state a m ->
   ev:extra_state a ->
   prev_len:len_t a { len_v a prev_len % block_length a = 0 } ->
   input:B.buffer uint8 { B.length input + len_v a prev_len <= max_input_length a } ->
@@ -163,7 +170,8 @@ let update_last_st (a: hash_alg) =
                                           (B.as_seq h0 input)))
 
 noextract inline_for_extraction
-let finish_st (a: hash_alg) = s:state a -> ev:extra_state a -> dst:hash_t a -> ST.Stack unit
+let finish_st (a: hash_alg) (m:m_spec a) =
+  s:state a m -> ev:extra_state a -> dst:hash_t a -> ST.Stack unit
   (requires (fun h ->
     B.live h s /\ B.live h dst /\ B.disjoint s dst))
   (ensures (fun h0 _ h1 ->

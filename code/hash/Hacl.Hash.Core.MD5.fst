@@ -346,7 +346,7 @@ let rounds
 
 inline_for_extraction
 let overwrite
-  (abcd:state MD5)
+  (abcd:state MD5 ())
   (a' b' c' d' : uint32)
 : HST.Stack unit
     (requires (fun h ->

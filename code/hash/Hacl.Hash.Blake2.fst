@@ -28,9 +28,9 @@ open FStar.Mul
 
 (*** update_multi *)
 noextract inline_for_extraction
-val mk_update_multi: a:hash_alg{is_blake a} -> update:update_st a -> update_multi_st a
+val mk_update_multi: a:hash_alg{is_blake a} -> m:m_spec a -> update:update_st a m -> update_multi_st a m
 
-let mk_update_multi a update s ev blocks n_blocks =
+let mk_update_multi a m update s ev blocks n_blocks =
   let h0 = ST.get () in
   let inv (h: HS.mem) (i: nat) =
     let i_block = block_length a * i in
@@ -101,8 +101,8 @@ let split a input_len =
 (* The stateful signature for [Spec.Blake2.blake2_update_last], but where
  * the input is actually the remaining data (smaller than a block) *)
 noextract inline_for_extraction
-let blake2_update_last_block_st (a : hash_alg{is_blake a}) =
-  s:state a ->
+let blake2_update_last_block_st (a : hash_alg{is_blake a}) (m : m_spec a) =
+  s:state a m ->
   ev:extra_state a ->
   input:B.buffer uint8 ->
   input_len:size_t { B.length input == v input_len /\ v input_len <= block_length a /\
@@ -119,8 +119,8 @@ let blake2_update_last_block_st (a : hash_alg{is_blake a}) =
 
 (* TODO: this lemma should be made more general and moved to Lib *)
 let update_sub_seq_end_eq (#a : Type) (#l1 : size_nat) (s1 : Lib.Sequence.lseq a l1)
-                      (#l2 : size_nat) (s2 : Lib.Sequence.lseq a l2)
-                      (start : size_nat) :
+                          (#l2 : size_nat) (s2 : Lib.Sequence.lseq a l2)
+                          (start : size_nat) :
   Lemma
   (requires (start + l2 <= l1))
   (ensures (
@@ -137,21 +137,14 @@ let update_sub_seq_end_eq (#a : Type) (#l1 : size_nat) (s1 : Lib.Sequence.lseq a
            Seq.index s1'_end k == Seq.index s1_end k);
   ()
 
-val mk_blake2_update_last_block (a : hash_alg{is_blake a}) :
-  blake2_update_last_block_st a
+val mk_blake2_update_last_block (a : hash_alg{is_blake a}) (m : m_spec a) :
+  blake2_update_last_block_st a m
 
-(* TODO: make the implementation really generic *)
-let core (a : hash_alg{is_blake a}) =
-  match a with
-  | Blake2S -> Hacl.Impl.Blake2.Core.M32
-  | Blake2B -> Hacl.Impl.Blake2.Core.M32
-
-(* TODO: no need to copy the input if the length is exactly block_length *)
-let mk_blake2_update_last_block a s ev input input_len =
+let mk_blake2_update_last_block a m s ev input input_len =
   (**) let h0 = ST.get () in
   ST.push_frame ();
-  let wv = Lib.Buffer.create (4ul *. Core.row_len (to_blake_alg a) (core a))
-                             (Core.zero_element (to_blake_alg a) (core a)) in
+  let wv = Lib.Buffer.create (4ul *. Core.row_len (to_blake_alg a) m)
+                             (Core.zero_element (to_blake_alg a) m) in
   (**) let pad_len : Ghost.erased _ = block_len a -! input_len in
   (**) assert(v input_len + v pad_len == v (block_len a));
   let tmp = B.alloca (Lib.IntTypes.u8 0) (block_len a) in
@@ -184,7 +177,7 @@ let mk_blake2_update_last_block a s ev input input_len =
   (**) assert(last_block2_pad `Seq.equal` last_block1_pad);
   (**) assert(tmp_pad_v1 `Seq.equal` last_block2_pad);
   let totlen = extra_state_add_size_t ev input_len in
-  Impl.blake2_update_block #(to_blake_alg a) #(core a) wv s true totlen tmp;
+  Impl.blake2_update_block #(to_blake_alg a) #m wv s true totlen tmp;
   (**) let h2 = ST.get () in
   (**) assert(as_seq h2 s ==
   (**)               Spec.blake2_update_block (to_blake_alg a) true
@@ -193,10 +186,10 @@ let mk_blake2_update_last_block a s ev input input_len =
   ST.pop_frame ()
 
 noextract inline_for_extraction
-val mk_update_last: a:hash_alg{is_blake a} -> update_multi_st a ->
-                    blake2_update_last_block_st a -> update_last_st a
+val mk_update_last: a:hash_alg{is_blake a} -> m:m_spec a -> update_multi_st a m ->
+                    blake2_update_last_block_st a m -> update_last_st a m
 
-let mk_update_last a update_multi blake2_update_last_block s ev prev_len input input_len =
+let mk_update_last a m update_multi blake2_update_last_block s ev prev_len input input_len =
   ST.push_frame ();
   (**) let h0 = ST.get () in
   (**) let input_v : Ghost.erased _ = B.as_seq h0 input in
@@ -228,22 +221,50 @@ let mk_update_last a update_multi blake2_update_last_block s ev prev_len input i
   nat_to_extra_state a 0
 #pop-options
 
-let update_multi_blake2s: update_multi_st Blake2S =
-  mk_update_multi Blake2S update_blake2s
-let update_multi_blake2b: update_multi_st Blake2B =
-  mk_update_multi Blake2B update_blake2b
+let update_multi_blake2s_32: update_multi_st Blake2S Core.M32 =
+  mk_update_multi Blake2S Core.M32 update_blake2s_32
 
-let update_last_blake2s: update_last_st Blake2S =
-  mk_update_last Blake2S update_multi_blake2s (mk_blake2_update_last_block Blake2S)
-let update_last_blake2b: update_last_st Blake2B =
-  mk_update_last Blake2B update_multi_blake2b (mk_blake2_update_last_block Blake2B)
+let update_multi_blake2s_128: update_multi_st Blake2S Core.M128 =
+  mk_update_multi Blake2S Core.M128 update_blake2s_128
 
-let hash_blake2s: hash_st Blake2S = fun input input_len dst ->
+let update_multi_blake2b_32: update_multi_st Blake2B Core.M32 =
+  mk_update_multi Blake2B Core.M32 update_blake2b_32
+
+let update_multi_blake2b_256: update_multi_st Blake2B Core.M256 =
+  mk_update_multi Blake2B Core.M256 update_blake2b_256
+
+let update_last_blake2s_32: update_last_st Blake2S Core.M32 =
+  mk_update_last Blake2S Core.M32 update_multi_blake2s_32
+                 (mk_blake2_update_last_block Blake2S Core.M32)
+
+let update_last_blake2s_128: update_last_st Blake2S Core.M128 =
+  mk_update_last Blake2S Core.M128 update_multi_blake2s_128
+                 (mk_blake2_update_last_block Blake2S Core.M128)
+
+let update_last_blake2b_32: update_last_st Blake2B Core.M32 =
+  mk_update_last Blake2B Core.M32 update_multi_blake2b_32
+                 (mk_blake2_update_last_block Blake2B Core.M32)
+
+let update_last_blake2b_256: update_last_st Blake2B Core.M256 =
+  mk_update_last Blake2B Core.M256 update_multi_blake2b_256
+                 (mk_blake2_update_last_block Blake2B Core.M256)
+
+let hash_blake2s_32: hash_st Blake2S = fun input input_len dst ->
   let h0 = ST.get() in
   Hacl.Blake2s_32.blake2s 32ul dst input_len input 0ul (B.null #uint8);
   lemma_blake2_hash_equivalence Blake2S (B.as_seq h0 input)
 
-let hash_blake2b: hash_st Blake2B = fun input input_len dst ->
+let hash_blake2s_128: hash_st Blake2S = fun input input_len dst ->
+  let h0 = ST.get() in
+  Hacl.Blake2s_128.blake2s 32ul dst input_len input 0ul (B.null #uint8);
+  lemma_blake2_hash_equivalence Blake2S (B.as_seq h0 input)
+
+let hash_blake2b_32: hash_st Blake2B = fun input input_len dst ->
   let h0 = ST.get() in
   Hacl.Blake2b_32.blake2b 64ul dst input_len input 0ul (B.null #uint8);
+  lemma_blake2_hash_equivalence Blake2B (B.as_seq h0 input)
+
+let hash_blake2b_256: hash_st Blake2B = fun input input_len dst ->
+  let h0 = ST.get() in
+  Hacl.Blake2b_256.blake2b 64ul dst input_len input 0ul (B.null #uint8);
   lemma_blake2_hash_equivalence Blake2B (B.as_seq h0 input)

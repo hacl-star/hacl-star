@@ -68,7 +68,7 @@ let k384_512 = IB.igcmalloc_of_list HS.root Constants.k384_512_l
 #set-options "--max_fuel 1"
 
 noextract inline_for_extraction
-val alloca: a:sha2_alg -> alloca_st a
+val alloca: a:sha2_alg -> alloca_st a ()
 noextract inline_for_extraction
 let alloca a () =
   [@ inline_let ]
@@ -82,18 +82,18 @@ let alloca a () =
 #set-options "--max_fuel 0"
 
 inline_for_extraction noextract
-let alloca_224: alloca_st SHA2_224 = alloca SHA2_224
+let alloca_224: alloca_st SHA2_224 () = alloca SHA2_224
 inline_for_extraction noextract
-let alloca_256: alloca_st SHA2_256 = alloca SHA2_256
+let alloca_256: alloca_st SHA2_256 () = alloca SHA2_256
 inline_for_extraction noextract
-let alloca_384: alloca_st SHA2_384 = alloca SHA2_384
+let alloca_384: alloca_st SHA2_384 () = alloca SHA2_384
 inline_for_extraction noextract
-let alloca_512: alloca_st SHA2_512 = alloca SHA2_512
+let alloca_512: alloca_st SHA2_512 () = alloca SHA2_512
 
 (** Init *)
 
 noextract inline_for_extraction
-val init: a:sha2_alg -> init_st a
+val init: a:sha2_alg -> init_st a ()
 noextract inline_for_extraction
 let init a s =
   let h0 = ST.get () in
@@ -116,10 +116,10 @@ let init a s =
   in
   C.Loops.for 0ul 8ul inv f
 
-let init_224: init_st SHA2_224 = init SHA2_224
-let init_256: init_st SHA2_256 = init SHA2_256
-let init_384: init_st SHA2_384 = init SHA2_384
-let init_512: init_st SHA2_512 = init SHA2_512
+let init_224: init_st SHA2_224 () = init SHA2_224
+let init_256: init_st SHA2_256 () = init SHA2_256
+let init_384: init_st SHA2_384 () = init SHA2_384
+let init_512: init_st SHA2_512 () = init SHA2_512
 
 
 (** Update *)
@@ -351,7 +351,7 @@ let zero (a: sha2_alg): word a =
 #set-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
 
 noextract inline_for_extraction
-val update: a:sha2_alg -> update_st a
+val update: a:sha2_alg -> update_st a ()
 noextract inline_for_extraction
 let update a hash ev block =
   (**) ST.push_frame ();
@@ -374,17 +374,17 @@ let update a hash ev block =
   (**) reveal_opaque (`%Spec.update) Spec.update
 
 
-let update_224: update_st SHA2_224 = update SHA2_224
-let update_256: update_st SHA2_256 = update SHA2_256
-let update_384: update_st SHA2_384 = update SHA2_384
-let update_512: update_st SHA2_512 = update SHA2_512
+let update_224: update_st SHA2_224 () = update SHA2_224
+let update_256: update_st SHA2_256 () = update SHA2_256
+let update_384: update_st SHA2_384 () = update SHA2_384
+let update_512: update_st SHA2_512 () = update SHA2_512
 
 let pad_224: pad_st SHA2_224 = Hacl.Hash.PadFinish.pad SHA2_224
 let pad_256: pad_st SHA2_256 = Hacl.Hash.PadFinish.pad SHA2_256
 let pad_384: pad_st SHA2_384 = Hacl.Hash.PadFinish.pad SHA2_384
 let pad_512: pad_st SHA2_512 = Hacl.Hash.PadFinish.pad SHA2_512
 
-let finish_224: finish_st SHA2_224 = Hacl.Hash.PadFinish.finish SHA2_224
-let finish_256: finish_st SHA2_256 = Hacl.Hash.PadFinish.finish SHA2_256
-let finish_384: finish_st SHA2_384 = Hacl.Hash.PadFinish.finish SHA2_384
-let finish_512: finish_st SHA2_512 = Hacl.Hash.PadFinish.finish SHA2_512
+let finish_224: finish_st SHA2_224 () = Hacl.Hash.PadFinish.finish SHA2_224 ()
+let finish_256: finish_st SHA2_256 () = Hacl.Hash.PadFinish.finish SHA2_256 ()
+let finish_384: finish_st SHA2_384 () = Hacl.Hash.PadFinish.finish SHA2_384 ()
+let finish_512: finish_st SHA2_512 () = Hacl.Hash.PadFinish.finish SHA2_512 ()

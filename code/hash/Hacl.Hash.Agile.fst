@@ -7,7 +7,7 @@ open Spec.Hash.Definitions
     generic Merkle-Damgard construction. *)
 
 inline_for_extraction noextract
-let alloca (a: hash_alg): alloca_st a =
+let alloca (a: hash_alg) (m:m_spec a): alloca_st a m =
   match a with
   | MD5 -> Hacl.Hash.Core.MD5.legacy_alloca
   | SHA1 -> Hacl.Hash.Core.SHA1.legacy_alloca
@@ -15,11 +15,11 @@ let alloca (a: hash_alg): alloca_st a =
   | SHA2_256 -> Hacl.Hash.Core.SHA2.alloca_256
   | SHA2_384 -> Hacl.Hash.Core.SHA2.alloca_384
   | SHA2_512 -> Hacl.Hash.Core.SHA2.alloca_512
-  | Blake2S -> Hacl.Hash.Core.Blake2.alloca_blake2s
-  | Blake2B -> Hacl.Hash.Core.Blake2.alloca_blake2b
+  | Blake2S -> Hacl.Hash.Core.Blake2.mk_alloca Blake2S m (Hacl.Hash.Core.Blake2.mk_init Blake2S m)
+  | Blake2B -> Hacl.Hash.Core.Blake2.mk_alloca Blake2B m (Hacl.Hash.Core.Blake2.mk_init Blake2B m)
 
 inline_for_extraction noextract
-let init (a: hash_alg): init_st a =
+let init (a: hash_alg) (m:m_spec a): init_st a m =
   match a with
   | MD5 -> Hacl.Hash.Core.MD5.legacy_init
   | SHA1 -> Hacl.Hash.Core.SHA1.legacy_init
@@ -27,12 +27,12 @@ let init (a: hash_alg): init_st a =
   | SHA2_256 -> Hacl.Hash.Core.SHA2.init_256
   | SHA2_384 -> Hacl.Hash.Core.SHA2.init_384
   | SHA2_512 -> Hacl.Hash.Core.SHA2.init_512
-  | Blake2S -> Hacl.Hash.Core.Blake2.init_blake2s
-  | Blake2B -> Hacl.Hash.Core.Blake2.init_blake2b
+  | Blake2S -> Hacl.Hash.Core.Blake2.mk_init Blake2S m
+  | Blake2B -> Hacl.Hash.Core.Blake2.mk_init Blake2B m
 
 
 inline_for_extraction noextract
-let update (a: hash_alg): update_st a =
+let update (a: hash_alg) (m:m_spec a): update_st a m =
   match a with
   | MD5 -> Hacl.Hash.Core.MD5.legacy_update
   | SHA1 -> Hacl.Hash.Core.SHA1.legacy_update
@@ -40,9 +40,8 @@ let update (a: hash_alg): update_st a =
   | SHA2_256 -> Hacl.Hash.Core.SHA2.update_256
   | SHA2_384 -> Hacl.Hash.Core.SHA2.update_384
   | SHA2_512 -> Hacl.Hash.Core.SHA2.update_512
-  | Blake2S -> Hacl.Hash.Core.Blake2.update_blake2s
-  | Blake2B -> Hacl.Hash.Core.Blake2.update_blake2b
-
+  | Blake2S -> Hacl.Hash.Core.Blake2.mk_update Blake2S m
+  | Blake2B -> Hacl.Hash.Core.Blake2.mk_update Blake2B m
 
 inline_for_extraction noextract
 let pad (a: hash_alg): pad_st a =
@@ -58,7 +57,7 @@ let pad (a: hash_alg): pad_st a =
 
 
 inline_for_extraction noextract
-let finish (a: hash_alg): finish_st a =
+let finish (a: hash_alg) (m:m_spec a): finish_st a m =
   match a with
   | MD5 -> Hacl.Hash.Core.MD5.legacy_finish
   | SHA1 -> Hacl.Hash.Core.SHA1.legacy_finish
@@ -66,5 +65,5 @@ let finish (a: hash_alg): finish_st a =
   | SHA2_256 -> Hacl.Hash.Core.SHA2.finish_256
   | SHA2_384 -> Hacl.Hash.Core.SHA2.finish_384
   | SHA2_512 -> Hacl.Hash.Core.SHA2.finish_512
-  | Blake2S -> Hacl.Hash.Core.Blake2.finish_blake2s
-  | Blake2B -> Hacl.Hash.Core.Blake2.finish_blake2b
+  | Blake2S -> Hacl.Hash.Core.Blake2.mk_finish Blake2S m
+  | Blake2B -> Hacl.Hash.Core.Blake2.mk_finish Blake2B m

@@ -15,49 +15,55 @@ friend Spec.Agile.Hash
 
 #push-options "--ifuel 0 --fuel 0"
 
-noextract inline_for_extraction
-val mk_init (a:hash_alg{is_blake a}) : init_st a
-
-let mk_init a s =
-  Impl.blake2_init_hash #(to_blake_alg a) #Core.M32 s (size 0)
+let mk_init a m s =
+  Impl.blake2_init_hash #(to_blake_alg a) #m s (size 0)
                         (size (Spec.max_output (to_blake_alg a)));
   nat_to_extra_state a 0
 
-noextract inline_for_extraction
-val mk_alloca (a:hash_alg{is_blake a}) : init_st a -> alloca_st a
-
-let mk_alloca a init () =
+let mk_alloca a m init () =
   let h0 = ST.get() in
-  let (s:Core.state_p (to_blake_alg a) Core.M32) =
-    Lib.Buffer.create (4ul *. Core.row_len (to_blake_alg a) Core.M32)
-                      (Core.zero_element (to_blake_alg a) Core.M32) in
+  let (s:Core.state_p (to_blake_alg a) m) =
+    Lib.Buffer.create (4ul *. Core.row_len (to_blake_alg a) m)
+                      (Core.zero_element (to_blake_alg a) m) in
   let es = init s in
   let h2 = ST.get() in
   B.modifies_only_not_unused_in (B.loc_none) h0 h2;
-  assert((as_seq h2 s, es) == Spec.Agile.Hash.init a);
-  (s <: state a), es
+  assert((as_seq #a #m h2 s, es) == Spec.Agile.Hash.init a);
+  (s <: state a m), es
 
-noextract inline_for_extraction
-val mk_update (a:hash_alg{is_blake a}) : update_st a
-
-let mk_update a s totlen block =
+let mk_update a m s totlen block =
   ST.push_frame();
-  let (wv:Core.state_p (to_blake_alg a) Core.M32) =
-    Lib.Buffer.create (4ul *. Core.row_len (to_blake_alg a) Core.M32)
-                      (Core.zero_element (to_blake_alg a) Core.M32) in
+  let (wv:Core.state_p (to_blake_alg a) m) =
+    Lib.Buffer.create (4ul *. Core.row_len (to_blake_alg a) m)
+                      (Core.zero_element (to_blake_alg a) m) in
   let totlen = extra_state_add_size_t totlen (block_len a) in
-  Impl.blake2_update_block #(to_blake_alg a) #Core.M32 wv s false totlen block;
+  Impl.blake2_update_block #(to_blake_alg a) #m wv s false totlen block;
   ST.pop_frame();
   totlen
 
-let init_blake2s = mk_init Blake2S
-let alloca_blake2s = mk_alloca Blake2S (mk_init Blake2S)
-let update_blake2s = mk_update Blake2S
-let pad_blake2s = Hacl.Hash.PadFinish.pad Blake2S
-let finish_blake2s = Hacl.Hash.PadFinish.finish Blake2S
+let mk_finish a m =
+  Hacl.Hash.PadFinish.finish a m
 
-let init_blake2b = mk_init Blake2B
-let alloca_blake2b = mk_alloca Blake2B (mk_init Blake2B)
-let update_blake2b = mk_update Blake2B
-let pad_blake2b = Hacl.Hash.PadFinish.pad Blake2B
-let finish_blake2b = Hacl.Hash.PadFinish.finish Blake2B
+let init_blake2s_32: init_st Blake2S Core.M32 = mk_init Blake2S Core.M32
+let alloca_blake2s_32: alloca_st Blake2S Core.M32 = mk_alloca Blake2S Core.M32 (mk_init Blake2S Core.M32)
+let update_blake2s_32: update_st Blake2S Core.M32 = mk_update Blake2S Core.M32
+let finish_blake2s_32: finish_st Blake2S Core.M32 = mk_finish Blake2S Core.M32
+
+let init_blake2s_128: init_st Blake2S Core.M128 = mk_init Blake2S Core.M128
+let alloca_blake2s_128: alloca_st Blake2S Core.M128 = mk_alloca Blake2S Core.M128 (mk_init Blake2S Core.M128)
+let update_blake2s_128: update_st Blake2S Core.M128 = mk_update Blake2S Core.M128
+let finish_blake2s_128: finish_st Blake2S Core.M128 = mk_finish Blake2S Core.M128
+
+let pad_blake2s: pad_st Blake2S = Hacl.Hash.PadFinish.pad Blake2S
+
+let init_blake2b_32: init_st Blake2B Core.M32 = mk_init Blake2B Core.M32
+let alloca_blake2b_32: alloca_st Blake2B Core.M32 = mk_alloca Blake2B Core.M32 (mk_init Blake2B Core.M32)
+let update_blake2b_32: update_st Blake2B Core.M32 = mk_update Blake2B Core.M32
+let finish_blake2b_32: finish_st Blake2B Core.M32 = mk_finish Blake2B Core.M32
+
+let init_blake2b_256: init_st Blake2B Core.M256 = mk_init Blake2B Core.M256
+let alloca_blake2b_256: alloca_st Blake2B Core.M256 = mk_alloca Blake2B Core.M256 (mk_init Blake2B Core.M256)
+let update_blake2b_256: update_st Blake2B Core.M256 = mk_update Blake2B Core.M256
+let finish_blake2b_256: finish_st Blake2B Core.M256 = mk_finish Blake2B Core.M256
+
+let pad_blake2b: pad_st Blake2B = Hacl.Hash.PadFinish.pad Blake2B
