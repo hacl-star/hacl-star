@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
+set -e
+set -o pipefail
+
 if [[ $OS == "Windows_NT" ]]; then
   .ci/script.bat && exit 0
 fi
-
-set -e
-set -o pipefail
 
 # For OSX... seems like the most reliable way to figure out which OpenSSL is
 # installed? We have both 1.1.1d and 1.1.1f and neither can be installed on the
