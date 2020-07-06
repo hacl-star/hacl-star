@@ -5,7 +5,7 @@ set -o pipefail
 
 if [[ $OS == "Windows_NT" ]]; then
   # The usual issue of return codes not being forwarded.
-  .ci/script.bat |& tee log
+  .ci/script.bat 2>&1 | tee log
   if grep "SUCCESS" log; then
     exit 0
   else
