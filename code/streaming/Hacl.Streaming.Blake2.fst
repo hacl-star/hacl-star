@@ -540,7 +540,7 @@ let update_last_eq #a key_size prevlen last acc =
   assert(rem = S.length last);
   assert(last_block == Spec.get_last_padded_block a last (S.length last));
   (* Prove that the last call to ``update_multi`` does nothing (there is no call to
-   * ``update_multi`` in ``blake2_update_last`` *)
+   * ``update_multi`` in ``blake2_update_last``) *)
   let s2 = Spec.Agile.Hash.update_multi (to_hash_alg a) s blocks in
   Spec.Hash.Lemmas.update_multi_zero (to_hash_alg a) s;
   assert(s2 == s);
