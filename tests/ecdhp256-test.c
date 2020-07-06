@@ -93,24 +93,58 @@ int main()
 
 
 	printf("%s\n", "Wycheproof tests: ");
+		
+	for (int i = 0 ; i< sizeof(w_vectors)/sizeof(ecdhp256_w_i); i++)
+	// for (int i = 174 ; i< 175; i++)
+	{
+		printf("ECDH Test %d \n", i );
+		compare_and_print(65, w_vectors[i].publicKey, w_vectors[i].publicKey);
 
-	int i = 0;
-	uint8_t* decompressedPoint = (uint8_t*) malloc (sizeof (uint8_t) * 64);
-	ok = ok && Hacl_P256_decompression_not_compressed_form(w_vectors[i].publicKey, decompressedPoint);
-	
-	uint64_t success = Hacl_P256_ecp256dh_r(result, decompressedPoint, w_vectors[i].privateKey);
-	if (w_vectors[i].flag != 1)
-		ok = ok && (success == w_vectors[i].flag);
-		if (success == 0)
-			ok = ok && compare_and_print(32, result, w_vectors[i].sharedKey);
-	else
-		if (success == 0)
-			ok = ok && compare_and_print(32, result, w_vectors[i].sharedKey);
+		uint8_t* decompressedPoint = (uint8_t*) malloc (sizeof (uint8_t) * 64);
+		bool flagDecompress = Hacl_P256_decompression_not_compressed_form(w_vectors[i].publicKey, decompressedPoint);
 
-	if (ok) return printf("%s\n", "Success");
-  	else return printf("%s\n", "Failure");
+		uint64_t success = Hacl_P256_ecp256dh_r(result, decompressedPoint, w_vectors[i].privateKey);
 
+		uint64_t fDU = 0;
+		if (flagDecompress = true)
+			fDU = success;
+		
+		compare_and_print(64, result, result);
+
+
+		if (w_vectors[i].flag != 1) 
+		{
+
+			ok = ok && ((success & fDU) == w_vectors[i].flag);
+			if (success == 0)
+				ok = ok && compare_and_print(32, result, w_vectors[i].sharedKey);
+		}
+		else
+			if (success == 0)
+				ok = ok && compare_and_print(32, result, w_vectors[i].sharedKey);
+
+
+		if (ok) printf("%s\n", "Success");
+  		else return printf("%s\n", "Failure");	
+
+	}
 
   	if (ok) return EXIT_SUCCESS;
   	else return EXIT_FAILURE;
 }
+
+
+
+//Test 175
+// prime = 2** 256 - 2**224 + 2**192 + 2**96 -1
+// p = Zmod(prime)
+
+// a = -3
+// b = 41058363725152142129326129780047268409114441015993725554835256314039467401291
+
+// bx = 0x31028f3377fc8f2b1967edaab90213acad0da9f50897f08f57537f78f1167447
+// by = 0x43a1930189363bbde2ac4cbd1649cdc6f451add71dd2f16a8a867f2b17caa16b
+
+// c = EllipticCurve(p, [a, b])
+// p = c(bx, by) * (3 * 2**(31 * 8))
+// print(hex(p.xy()[0]))
