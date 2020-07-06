@@ -5,7 +5,7 @@ typedef struct {
   size_t input_len;
   uint8_t tag_256[32];
   uint8_t tag_512[64];
-} sha2vec_test_vector;
+} sha2mb_test_vector;
 
 static uint8_t in0[71] = { 0 };
 
@@ -25,7 +25,7 @@ static uint8_t in7[71] = { 7 };
 
 
 
-static sha2vec_test_vector vectors_vec[] = {
+static sha2mb_test_vector vectors_mb[] = {
   {
     .input = in0,
     .input_len = sizeof(in0),

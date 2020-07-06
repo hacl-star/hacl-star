@@ -12,7 +12,7 @@
 #include "EverCrypt_AutoConfig2.h"
 
 #include "sha2_vectors.h"
-#include "sha2vec_vectors.h"
+#include "sha2mb_vectors.h"
 #include "test_helpers.h"
 
 #include <openssl/sha.h>
@@ -135,18 +135,18 @@ int main()
   }
 
 
-  ok &= print_test4(vectors_vec[0].input,vectors_vec[1].input,vectors_vec[2].input,vectors_vec[3].input,vectors_vec[0].input_len,
-		    vectors_vec[0].tag_256,vectors_vec[1].tag_256,vectors_vec[2].tag_256,vectors_vec[3].tag_256);
+  ok &= print_test4(vectors_mb[0].input,vectors_mb[1].input,vectors_mb[2].input,vectors_mb[3].input,vectors_mb[0].input_len,
+		    vectors_mb[0].tag_256,vectors_mb[1].tag_256,vectors_mb[2].tag_256,vectors_mb[3].tag_256);
 
 
   if (EverCrypt_AutoConfig2_has_avx2()) {
-    ok &= print_test8(vectors_vec[0].input,vectors_vec[1].input,vectors_vec[2].input,vectors_vec[3].input,
-		    vectors_vec[4].input,vectors_vec[5].input,vectors_vec[6].input,vectors_vec[7].input, vectors_vec[0].input_len,
-		    vectors_vec[0].tag_256,vectors_vec[1].tag_256,vectors_vec[2].tag_256,vectors_vec[3].tag_256,
-		    vectors_vec[4].tag_256,vectors_vec[5].tag_256,vectors_vec[6].tag_256,vectors_vec[7].tag_256);
+    ok &= print_test8(vectors_mb[0].input,vectors_mb[1].input,vectors_mb[2].input,vectors_mb[3].input,
+		    vectors_mb[4].input,vectors_mb[5].input,vectors_mb[6].input,vectors_mb[7].input, vectors_mb[0].input_len,
+		    vectors_mb[0].tag_256,vectors_mb[1].tag_256,vectors_mb[2].tag_256,vectors_mb[3].tag_256,
+		    vectors_mb[4].tag_256,vectors_mb[5].tag_256,vectors_mb[6].tag_256,vectors_mb[7].tag_256);
 
-    ok &= print_test4_512(vectors_vec[0].input,vectors_vec[1].input,vectors_vec[2].input,vectors_vec[3].input,vectors_vec[0].input_len,
-			vectors_vec[0].tag_512,vectors_vec[1].tag_512,vectors_vec[2].tag_512,vectors_vec[3].tag_512);
+    ok &= print_test4_512(vectors_mb[0].input,vectors_mb[1].input,vectors_mb[2].input,vectors_mb[3].input,vectors_mb[0].input_len,
+			vectors_mb[0].tag_512,vectors_mb[1].tag_512,vectors_mb[2].tag_512,vectors_mb[3].tag_512);
   }
 
   uint64_t len = SIZE;
