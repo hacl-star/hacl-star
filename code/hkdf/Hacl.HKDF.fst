@@ -183,14 +183,26 @@ let expand_sha2_512: expand_st SHA2_512 =
 let extract_sha2_512: extract_st SHA2_512 =
   mk_extract SHA2_512 Hacl.HMAC.compute_sha2_512
 
-let expand_blake2s: expand_st Blake2S =
-  mk_expand Blake2S Hacl.HMAC.compute_blake2s
+let expand_blake2s_32: expand_st Blake2S =
+  mk_expand Blake2S Hacl.HMAC.compute_blake2s_32
 
-let extract_blake2s: extract_st Blake2S =
-  mk_extract Blake2S Hacl.HMAC.compute_blake2s
+let extract_blake2s_32: extract_st Blake2S =
+  mk_extract Blake2S Hacl.HMAC.compute_blake2s_32
 
-let expand_blake2b: expand_st Blake2B =
-  mk_expand Blake2B Hacl.HMAC.compute_blake2b
+let expand_blake2s_128: expand_st Blake2S =
+  mk_expand Blake2S Hacl.HMAC.compute_blake2s_128
 
-let extract_blake2b: extract_st Blake2B =
-  mk_extract Blake2B Hacl.HMAC.compute_blake2b
+let extract_blake2s_128: extract_st Blake2S =
+  mk_extract Blake2S Hacl.HMAC.compute_blake2s_128
+
+let expand_blake2b_32: expand_st Blake2B =
+  mk_expand Blake2B Hacl.HMAC.compute_blake2b_32
+
+let extract_blake2b_32: extract_st Blake2B =
+  mk_extract Blake2B Hacl.HMAC.compute_blake2b_32
+
+let expand_blake2b_256: expand_st Blake2B =
+  mk_expand Blake2B Hacl.HMAC.compute_blake2b_256
+
+let extract_blake2b_256: extract_st Blake2B =
+  mk_extract Blake2B Hacl.HMAC.compute_blake2b_256

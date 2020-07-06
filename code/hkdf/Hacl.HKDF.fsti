@@ -96,10 +96,18 @@ val expand_sha2_512: expand_st SHA2_512
 
 val extract_sha2_512: extract_st SHA2_512
 
-val expand_blake2s: expand_st Blake2S
+val expand_blake2s_32: expand_st Blake2S
 
-val extract_blake2s: extract_st Blake2S
+val extract_blake2s_32: extract_st Blake2S
 
-val expand_blake2b: expand_st Blake2B
+val expand_blake2s_128: expand_st Blake2S
 
-val extract_blake2b: extract_st Blake2B
+val extract_blake2s_128: extract_st Blake2S
+
+val expand_blake2b_32: expand_st Blake2B
+
+val extract_blake2b_32: extract_st Blake2B
+
+val expand_blake2b_256: expand_st Blake2B
+
+val extract_blake2b_256: extract_st Blake2B
