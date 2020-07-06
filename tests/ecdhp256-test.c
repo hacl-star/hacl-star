@@ -10,7 +10,10 @@
 #include <time.h>
 
 #include "ecdhp256-tvs.h"
+#include "ecdhp256_tv_w.h"
+
 #include "test_helpers.h"
+#include <inttypes.h>
 
 #include "Hacl_P256.h"
 
@@ -89,6 +92,23 @@ int main()
 	ok = ok && compare_and_print(64, point_compressed, compressed7);
 
 
+	printf("%s\n", "Wycheproof tests: ");
+
+	int i = 0;
+	uint8_t* decompressedPoint = (uint8_t*) malloc (sizeof (uint8_t) * 64);
+	ok = ok && Hacl_P256_decompression_not_compressed_form(w_vectors[i].publicKey, decompressedPoint);
+	
+	uint64_t success = Hacl_P256_ecp256dh_r(result, decompressedPoint, w_vectors[i].privateKey);
+	if (w_vectors[i].flag != 1)
+		ok = ok && (success == w_vectors[i].flag);
+		if (success == 0)
+			ok = ok && compare_and_print(32, result, w_vectors[i].sharedKey);
+	else
+		if (success == 0)
+			ok = ok && compare_and_print(32, result, w_vectors[i].sharedKey);
+
+	if (ok) return printf("%s\n", "Success");
+  	else return printf("%s\n", "Failure");
 
 
   	if (ok) return EXIT_SUCCESS;
