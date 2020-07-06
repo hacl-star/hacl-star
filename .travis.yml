@@ -33,7 +33,7 @@ jobs:
     - name: xcode 11 / full tests
       os: osx
       osx_image: xcode11.3
-    - name: windows / compile-only
+    - name: vs2017 / compile-only
       os: windows
 script:
   - .ci/script.sh

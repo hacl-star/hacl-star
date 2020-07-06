@@ -4,7 +4,13 @@ set -e
 set -o pipefail
 
 if [[ $OS == "Windows_NT" ]]; then
-  .ci/script.bat && exit 0
+  # The usual issue of return codes not being forwarded.
+  .ci/script.bat |& tee log
+  if grep "SUCCESS" log; then
+    exit 1
+  else
+    exit 0
+  fi
 fi
 
 # For OSX... seems like the most reliable way to figure out which OpenSSL is
