@@ -5,6 +5,7 @@ module D = Hacl.Hash.Definitions
 module ST = FStar.HyperStack.ST
 module B = LowStar.Buffer
 module MB = LowStar.Monotonic.Buffer
+module C = Hacl.Impl.Blake2.Core
 
 open FStar.HyperStack.ST
 open FStar.Integers
@@ -109,11 +110,12 @@ let block_len_as_len (a: hash_alg):
 inline_for_extraction noextract
 val part2:
   a: hash_alg ->
-  init: D.init_st a ->
-  update_multi: D.update_multi_st a ->
-  update_last: D.update_last_st a ->
-  finish: D.finish_st a ->
-  s: D.state a ->
+  m : D.m_spec a ->
+  init: D.init_st a m ->
+  update_multi: D.update_multi_st a m ->
+  update_last: D.update_last_st a m ->
+  finish: D.finish_st a m ->
+  s: D.state a m ->
   dst: B.buffer uint8 { B.length dst = hash_length a } ->
   key: B.buffer uint8 { B.length key = block_length a } ->
   data: B.buffer uint8 ->
@@ -143,7 +145,7 @@ let update_multi_extra_state_eq'
 #push-options "--z3rlimit 100 --ifuel 1"
 
 inline_for_extraction noextract
-let part2 a init update_multi update_last finish s dst key data len =
+let part2 a m init update_multi update_last finish s dst key data len =
   (**) key_and_data_fits a;
   (**) let h0 = ST.get () in
   (**) let key_v0 : Ghost.erased _ = B.as_seq h0 key in
@@ -222,11 +224,12 @@ let part2 a init update_multi update_last finish s dst key data len =
 inline_for_extraction noextract
 val part1:
   a: hash_alg ->
-  init: D.init_st a ->
-  update_multi: D.update_multi_st a ->
-  update_last: D.update_last_st a ->
-  finish: D.finish_st a ->
-  s: D.state a ->
+  m : D.m_spec a ->
+  init: D.init_st a m ->
+  update_multi: D.update_multi_st a m ->
+  update_last: D.update_last_st a m ->
+  finish: D.finish_st a m ->
+  s: D.state a m ->
   key: B.buffer uint8 { B.length key = block_length a } ->
   data: B.buffer uint8 ->
   len: UInt32.t { B.length data = v len } ->
@@ -241,15 +244,15 @@ val part1:
       S.slice (B.as_seq h1 key) 0 (hash_length a) `Seq.equal`
         Spec.Agile.Hash.hash a (S.append (B.as_seq h0 key) (B.as_seq h0 data)))
 
-let part1 a init update_multi update_last finish s key data len =
+let part1 a m init update_multi update_last finish s key data len =
   let dst = B.sub key 0ul (D.hash_len a) in
-  part2 a init update_multi update_last finish s dst key data len
+  part2 a m init update_multi update_last finish s dst key data len
 
 let block_len_positive (a: hash_alg): Lemma (D.block_len a > 0ul) = ()
 let hash_lt_block (a: hash_alg): Lemma (hash_length a < block_length a) = ()
 
 #set-options "--z3rlimit 100"
-let mk_compute a hash alloca init update_multi update_last finish dst key key_len data data_len =
+let mk_compute a m hash alloca init update_multi update_last finish dst key key_len data data_len =
   block_len_positive a;
   hash_lt_block a;
   (**) let h0 = ST.get() in
@@ -273,14 +276,14 @@ let mk_compute a hash alloca init update_multi update_last finish dst key key_le
   (**) S.lemma_eq_intro (B.as_seq h4 opad) (S.(xor (u8 0x5c) (wrap a (B.as_seq h0 key))));
   (**) S.lemma_eq_intro (B.as_seq h4 data) (B.as_seq h0 data);
   let s, _ = alloca () in
-  part1 a init update_multi update_last finish s ipad data data_len;
+  part1 a m init update_multi update_last finish s ipad data data_len;
   (**) key_and_data_fits a;
   (**) let h5 = ST.get () in
   (**) S.lemma_eq_intro (S.slice (B.as_seq h5 ipad) 0 (hash_length a))
   (**)    (Spec.Agile.Hash.hash a S.(append (xor (u8 0x36) (wrap a (B.as_seq h0 key)))
   (**)                          (B.as_seq h0 data)));
   let hash1 = B.sub ipad 0ul (D.hash_len a) in
-  part2 a init update_multi update_last finish s dst opad hash1 (D.hash_len a);
+  part2 a m init update_multi update_last finish s dst opad hash1 (D.hash_len a);
   (**) let h6 = ST.get () in
   (**) assert (B.as_seq h6 dst `S.equal` hmac a (B.as_seq h0 key) (B.as_seq h0 data));
   pop_frame ();
@@ -291,24 +294,36 @@ let mk_compute a hash alloca init update_multi update_last finish dst key key_le
 
 let legacy_compute_sha1: compute_st SHA1 =
   let open Hacl.Hash.SHA1 in
-  mk_compute SHA1 legacy_hash legacy_alloca legacy_init legacy_update_multi legacy_update_last legacy_finish
+  mk_compute SHA1 () legacy_hash legacy_alloca legacy_init legacy_update_multi legacy_update_last legacy_finish
 
 let compute_sha2_256: compute_st SHA2_256 =
   let open Hacl.Hash.SHA2 in
-  mk_compute SHA2_256 hash_256 alloca_256 init_256 update_multi_256 update_last_256 finish_256
+  mk_compute SHA2_256 () hash_256 alloca_256 init_256 update_multi_256 update_last_256 finish_256
 
 let compute_sha2_384: compute_st SHA2_384 =
   let open Hacl.Hash.SHA2 in
-  mk_compute SHA2_384 hash_384 alloca_384 init_384 update_multi_384 update_last_384 finish_384
+  mk_compute SHA2_384 () hash_384 alloca_384 init_384 update_multi_384 update_last_384 finish_384
 
 let compute_sha2_512: compute_st SHA2_512 =
   let open Hacl.Hash.SHA2 in
-  mk_compute SHA2_512 hash_512 alloca_512 init_512 update_multi_512 update_last_512 finish_512
+  mk_compute SHA2_512 () hash_512 alloca_512 init_512 update_multi_512 update_last_512 finish_512
 
-let compute_blake2s: compute_st Blake2S =
+let compute_blake2s_32: compute_st Blake2S =
   let open Hacl.Hash.Blake2 in
-  mk_compute Blake2S hash_blake2s alloca_blake2s init_blake2s update_multi_blake2s update_last_blake2s finish_blake2s
+  mk_compute Blake2S C.M32 hash_blake2s_32 alloca_blake2s_32 init_blake2s_32
+                           update_multi_blake2s_32 update_last_blake2s_32 finish_blake2s_32
 
-let compute_blake2b: compute_st Blake2B =
+let compute_blake2s_128: compute_st Blake2S =
   let open Hacl.Hash.Blake2 in
-  mk_compute Blake2B hash_blake2b alloca_blake2b init_blake2b update_multi_blake2b update_last_blake2b finish_blake2b
+  mk_compute Blake2S C.M128 hash_blake2s_128 alloca_blake2s_128 init_blake2s_128
+                           update_multi_blake2s_128 update_last_blake2s_128 finish_blake2s_128
+
+let compute_blake2b_32: compute_st Blake2B =
+  let open Hacl.Hash.Blake2 in
+  mk_compute Blake2B C.M32 hash_blake2b_32 alloca_blake2b_32 init_blake2b_32
+                           update_multi_blake2b_32 update_last_blake2b_32 finish_blake2b_32
+
+let compute_blake2b_256: compute_st Blake2B =
+  let open Hacl.Hash.Blake2 in
+  mk_compute Blake2B C.M256 hash_blake2b_256 alloca_blake2b_256 init_blake2b_256
+                           update_multi_blake2b_256 update_last_blake2b_256 finish_blake2b_256
