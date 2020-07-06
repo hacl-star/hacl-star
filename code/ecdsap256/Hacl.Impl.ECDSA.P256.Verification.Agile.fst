@@ -40,8 +40,8 @@ open FStar.Mul
 module H = Spec.Agile.Hash
 module Def = Spec.Hash.Definitions
 
-#set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
-
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
+//Anne will take a look
 
 inline_for_extraction noextract
 val isZero_uint64_nCT: f: felem -> Stack bool
