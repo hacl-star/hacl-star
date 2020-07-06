@@ -52,16 +52,6 @@ let vec_counter (t:v_inttype) (w:width) =
   | U32,16 -> vec512_load32s (u32 0) (u32 1) (u32 2) (u32 3) (u32 4) (u32 5) (u32 6) (u32 7) (u32 8) (u32 9) (u32 10) (u32 11) (u32 12) (u32 13) (u32 14) (u32 15)
   | U64,8 -> vec512_load64s (u64 0) (u64 1) (u64 2) (u64 3) (u64 4) (u64 5) (u64 6) (u64 7)
 
-let create2 #a x0 x1 = admit()
-let create2_lemma #a x0 x1 = admit()
-let create4 #a x0 x1 x2 x3 = admit()
-let create4_lemma #a x0 x1 x2 x3 = admit()
-let create8 #a x0 x1 x2 x3 x4 x5 x6 x7 = admit()
-let create8_lemma #a x0 x1 x2 x3 x4 x5 x6 x7 = admit()
-let create16 #a x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 = admit()
-let create16_lemma #a x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 = admit()
-let create32 #a x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15  = admit()
-
 let vec_load (#t:v_inttype) (x:uint_t t SEC) (w:width) =
   match t,w with
   | U128,1 -> vec128_load128 x
@@ -89,8 +79,6 @@ let vec_load8 #t x0 x1 x2 x3 x4 x5 x6 x7 =
   | U32 -> vec256_load32s x0 x1 x2 x3 x4 x5 x6 x7
 
 let vec_load16 #a x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 = admit()
-let vec_load32 #a x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15  = admit()
-
 
 let vec_set (#t:v_inttype) (#w:width) (v:vec_t t w) (i:vec_index w) (x:uint_t t SEC) =
   match t,w with

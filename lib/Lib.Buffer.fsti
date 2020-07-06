@@ -302,10 +302,10 @@ let recallable (#t:buftype) (#a:Type0) (#len:size_t) (b:lbuffer_t t a len) =
 
 inline_for_extraction noextract
 val recall:
-    #t:buftype 
+    #t:buftype
   -> #a:Type0
   -> #len:size_t
-  -> b:lbuffer_t t a len -> 
+  -> b:lbuffer_t t a len ->
   Stack unit
     (requires fun _ -> recallable b)
     (ensures  fun h0 _ h1 -> h0 == h1 /\ live h0 b)
@@ -938,7 +938,7 @@ val fill_blocks:
   -> spec:(mem -> GTot (i:size_nat{i < v n} -> a_spec i -> a_spec (i + 1) & Seq.lseq t (v len)))
   -> impl:(i:size_t{v i < v n} -> Stack unit
       (requires fun h1 ->
-      	(v i + 1) * v len <= max_size_t /\
+	Math.Lemmas.lemma_mult_le_right (v len) (v i + 1) (v n);
         modifies (footprint (v i) |+| loc (gsub output 0ul (i *! len))) h0 h1)
       (ensures  fun h1 _ h2 ->
         (let block = gsub output (i *! len) len in
@@ -1155,3 +1155,24 @@ val map_blocks:
     (ensures  fun _ _ h1 -> modifies1 output h0 h1 /\
 	as_seq h1 output == Seq.map_blocks (v blocksize) (as_seq h0 inp) (spec_f h0) (spec_l h0))
 
+
+inline_for_extraction noextract
+val create8: #a:Type0 -> st:lbuffer a 8ul
+  -> v0:a -> v1:a -> v2:a -> v3:a
+  -> v4:a -> v5:a -> v6:a -> v7:a ->
+  Stack unit
+  (requires fun h -> live h st)
+  (ensures  fun h0 _ h1 -> modifies (loc st) h0 h1 /\
+    as_seq h1 st == Seq.create8 v0 v1 v2 v3 v4 v5 v6 v7)
+
+
+inline_for_extraction noextract
+val create16: #a:Type0 -> st:lbuffer a 16ul
+  -> v0:a -> v1:a -> v2:a -> v3:a
+  -> v4:a -> v5:a -> v6:a -> v7:a
+  -> v8:a -> v9:a -> v10:a -> v11:a
+  -> v12:a -> v13:a -> v14:a -> v15:a ->
+  Stack unit
+  (requires fun h -> live h st)
+  (ensures  fun h0 _ h1 -> modifies (loc st) h0 h1 /\
+    as_seq h1 st == Seq.create16 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15)

@@ -365,3 +365,67 @@ let rec index_generate_blocks #t len max n f i =
     Seq.lemma_index_app2 s s' i;
     mod_prop len (n-1) i
     end
+
+#push-options "--using_facts_from '+FStar.UInt.pow2_values'"
+
+let create2 #a x0 x1 =
+  let l = [x0; x1] in
+  assert_norm (List.Tot.length l = 2);
+  createL l
+
+let create2_lemma #a x0 x1 =
+  let s = create2 x0 x1 in
+  assert_norm (s.[0] == x0);
+  assert_norm (s.[1] == x1)
+
+let create4 #a x0 x1 x2 x3 =
+  let l = [x0; x1; x2; x3] in
+  assert_norm (List.Tot.length l = 4);
+  createL l
+
+let create4_lemma #a x0 x1 x2 x3 =
+  let s = create4 x0 x1 x2 x3 in
+  assert_norm (s.[0] == x0);
+  assert_norm (s.[1] == x1);
+  assert_norm (s.[2] == x2);
+  assert_norm (s.[3] == x3)
+
+let create8 #a x0 x1 x2 x3 x4 x5 x6 x7 =
+  let l = [x0; x1; x2; x3; x4; x5; x6; x7] in
+  assert_norm (List.Tot.length l = 8);
+  createL l
+
+let create8_lemma #a x0 x1 x2 x3 x4 x5 x6 x7 =
+  let s = create8 x0 x1 x2 x3 x4 x5 x6 x7 in
+  assert_norm (s.[0] == x0);
+  assert_norm (s.[1] == x1);
+  assert_norm (s.[2] == x2);
+  assert_norm (s.[3] == x3);
+  assert_norm (s.[4] == x4);
+  assert_norm (s.[5] == x5);
+  assert_norm (s.[6] == x6);
+  assert_norm (s.[7] == x7)
+
+let create16 #a x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 =
+  let l = [x0; x1; x2; x3; x4; x5; x6; x7; x8; x9; x10; x11; x12; x13; x14; x15] in
+  assert_norm (List.Tot.length l = 16);
+  createL l
+
+let create16_lemma #a x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 =
+  let s = create16 x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 in
+  assert_norm (s.[0] == x0);
+  assert_norm (s.[1] == x1);
+  assert_norm (s.[2] == x2);
+  assert_norm (s.[3] == x3);
+  assert_norm (s.[4] == x4);
+  assert_norm (s.[5] == x5);
+  assert_norm (s.[6] == x6);
+  assert_norm (s.[7] == x7);
+  assert_norm (s.[8] == x8);
+  assert_norm (s.[9] == x9);
+  assert_norm (s.[10] == x10);
+  assert_norm (s.[11] == x11);
+  assert_norm (s.[12] == x12);
+  assert_norm (s.[13] == x13);
+  assert_norm (s.[14] == x14);
+  assert_norm (s.[15] == x15)

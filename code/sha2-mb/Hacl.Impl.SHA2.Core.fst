@@ -9,7 +9,6 @@ open Lib.NTuple
 open Lib.Buffer
 open Lib.IntVector
 open Lib.MultiBuffer
-open Lib.CreateN
 
 open Spec.Hash.Definitions
 open Hacl.Hash.Definitions
@@ -73,7 +72,7 @@ let load_blocks_spec1 (#a:sha2_alg) (#m:m_spec{lanes a m == 1}) (b:multiblock_sp
   let ws13 = SpecVec.load_elementi b 13 in
   let ws14 = SpecVec.load_elementi b 14 in
   let ws15 = SpecVec.load_elementi b 15 in
-  create16 ws0 ws1 ws2 ws3 ws4 ws5 ws6 ws7
+  LSeq.create16 ws0 ws1 ws2 ws3 ws4 ws5 ws6 ws7
            ws8 ws9 ws10 ws11 ws12 ws13 ws14 ws15
 
 noextract
@@ -145,7 +144,7 @@ let load_blocks_spec4 (#a:sha2_alg) (#m:m_spec{lanes a m == 4}) (b:multiblock_sp
   let ws13 = SpecVec.load_elementi b1 3 in
   let ws14 = SpecVec.load_elementi b2 3 in
   let ws15 = SpecVec.load_elementi b3 3 in
-  create16 ws0 ws1 ws2 ws3 ws4 ws5 ws6 ws7
+  LSeq.create16 ws0 ws1 ws2 ws3 ws4 ws5 ws6 ws7
            ws8 ws9 ws10 ws11 ws12 ws13 ws14 ws15
 
 
@@ -223,7 +222,7 @@ let load_blocks_spec8 (#a:sha2_alg) (#m:m_spec{lanes a m == 8}) (b:multiblock_sp
   let ws13 = SpecVec.load_elementi b5 1 in
   let ws14 = SpecVec.load_elementi b6 1 in
   let ws15 = SpecVec.load_elementi b7 1 in
-  create16 ws0 ws1 ws2 ws3 ws4 ws5 ws6 ws7
+  LSeq.create16 ws0 ws1 ws2 ws3 ws4 ws5 ws6 ws7
            ws8 ws9 ws10 ws11 ws12 ws13 ws14 ws15
 
 
@@ -303,7 +302,7 @@ let transpose_ws4 #a #m ws =
   let (ws4,ws5,ws6,ws7) = VecTranspose.transpose4x4 (ws.(4ul),ws.(5ul),ws.(6ul),ws.(7ul)) in
   let (ws8,ws9,ws10,ws11) = VecTranspose.transpose4x4 (ws.(8ul),ws.(9ul),ws.(10ul),ws.(11ul)) in
   let (ws12,ws13,ws14,ws15) = VecTranspose.transpose4x4 (ws.(12ul),ws.(13ul),ws.(14ul),ws.(15ul)) in
-  create16_st ws ws0 ws1 ws2 ws3 ws4 ws5 ws6 ws7 ws8 ws9 ws10 ws11 ws12 ws13 ws14 ws15
+  create16 ws ws0 ws1 ws2 ws3 ws4 ws5 ws6 ws7 ws8 ws9 ws10 ws11 ws12 ws13 ws14 ws15
 
 
 inline_for_extraction noextract
@@ -316,7 +315,7 @@ val transpose_ws8: #a:sha2_alg -> #m:m_spec{lanes a m == 8} -> ws:ws_t a m ->
 let transpose_ws8 #a #m ws =
   let (ws0,ws1,ws2,ws3,ws4,ws5,ws6,ws7) = VecTranspose.transpose8x8 (ws.(0ul),ws.(1ul),ws.(2ul),ws.(3ul),ws.(4ul),ws.(5ul),ws.(6ul),ws.(7ul)) in
   let (ws8,ws9,ws10,ws11,ws12,ws13,ws14,ws15) = VecTranspose.transpose8x8 (ws.(8ul),ws.(9ul),ws.(10ul),ws.(11ul),ws.(12ul),ws.(13ul),ws.(14ul),ws.(15ul)) in
-  create16_st ws ws0 ws1 ws2 ws3 ws4 ws5 ws6 ws7 ws8 ws9 ws10 ws11 ws12 ws13 ws14 ws15
+  create16 ws ws0 ws1 ws2 ws3 ws4 ws5 ws6 ws7 ws8 ws9 ws10 ws11 ws12 ws13 ws14 ws15
 
 
 inline_for_extraction noextract
@@ -550,7 +549,7 @@ val transpose_state4: #a:sha2_alg -> #m:m_spec{lanes a m == 4} -> st:state_t a m
 let transpose_state4 #a #m st =
   let (st0',st1',st2',st3') = VecTranspose.transpose4x4 (st.(0ul),st.(1ul),st.(2ul),st.(3ul)) in
   let (st4',st5',st6',st7') = VecTranspose.transpose4x4 (st.(4ul),st.(5ul),st.(6ul),st.(7ul)) in
-  create8_st st st0' st4' st1' st5' st2' st6' st3' st7'
+  create8 st st0' st4' st1' st5' st2' st6' st3' st7'
 
 
 inline_for_extraction noextract
@@ -562,7 +561,7 @@ val transpose_state8: #a:sha2_alg -> #m:m_spec{lanes a m == 8} -> st:state_t a m
 
 let transpose_state8 #a #m st =
   let (st0',st1',st2',st3',st4',st5',st6',st7') = VecTranspose.transpose8x8 (st.(0ul),st.(1ul),st.(2ul),st.(3ul),st.(4ul),st.(5ul),st.(6ul),st.(7ul)) in
-  create8_st st st0' st1' st2' st3' st4' st5' st6' st7'
+  create8 st st0' st1' st2' st3' st4' st5' st6' st7'
 
 
 inline_for_extraction noextract

@@ -9,7 +9,6 @@ open Lib.IntTypes
 open Lib.Buffer
 open Lib.ByteBuffer
 open Lib.IntVector
-open Lib.CreateN
 
 module Spec = Hacl.Spec.Chacha20.Vec
 module VecTranspose = Lib.IntVector.Transpose
@@ -90,7 +89,7 @@ let transpose4 st =
   let (v4,v5,v6,v7) = VecTranspose.transpose4x4 (st.(4ul),st.(5ul),st.(6ul),st.(7ul)) in
   let (v8,v9,v10,v11) = VecTranspose.transpose4x4 (st.(8ul),st.(9ul),st.(10ul),st.(11ul)) in
   let (v12,v13,v14,v15) = VecTranspose.transpose4x4 (st.(12ul),st.(13ul),st.(14ul),st.(15ul)) in
-  create16_st #(uint32xN 4) st v0 v4 v8 v12 v1 v5 v9 v13 v2 v6 v10 v14 v3 v7 v11 v15
+  create16 #(uint32xN 4) st v0 v4 v8 v12 v1 v5 v9 v13 v2 v6 v10 v14 v3 v7 v11 v15
 
 
 inline_for_extraction noextract
@@ -102,7 +101,7 @@ val transpose8: st:state 8 ->
 let transpose8 st =
   let (v0,v1,v2,v3,v4,v5,v6,v7) = VecTranspose.transpose8x8 (st.(0ul),st.(1ul),st.(2ul),st.(3ul),st.(4ul),st.(5ul),st.(6ul),st.(7ul)) in
   let (v8,v9,v10,v11,v12,v13,v14,v15) = VecTranspose.transpose8x8 (st.(8ul),st.(9ul),st.(10ul),st.(11ul),st.(12ul),st.(13ul),st.(14ul),st.(15ul)) in
-  create16_st #(uint32xN 8) st v0 v8 v1 v9 v2 v10 v3 v11 v4 v12 v5 v13 v6 v14 v7 v15
+  create16 #(uint32xN 8) st v0 v8 v1 v9 v2 v10 v3 v11 v4 v12 v5 v13 v6 v14 v7 v15
 
 inline_for_extraction noextract
 val transpose:
