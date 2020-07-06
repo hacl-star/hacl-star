@@ -158,10 +158,6 @@ EXPORTS
   Hacl_Curve25519_51_scalarmult
   Hacl_Curve25519_51_secret_to_public
   Hacl_Curve25519_51_ecdh
-  Hacl_Impl_P256_DH_ecp256dh_i
-  Hacl_Impl_P256_DH_ecp256dh_r
-  Hacl_Impl_ECDSA_ecdsa_p256_sha2_sign
-  Hacl_Impl_ECDSA_ecdsa_p256_sha2_verify
   Hacl_Ed25519_sign
   Hacl_Ed25519_verify
   Hacl_Ed25519_secret_to_public
@@ -217,6 +213,28 @@ EXPORTS
   EverCrypt_CTR_init
   EverCrypt_CTR_update_block
   EverCrypt_CTR_free
+  Hacl_Impl_P256_LowLevel_toUint8
+  Hacl_Impl_P256_LowLevel_changeEndian
+  Hacl_Impl_P256_LowLevel_toUint64ChangeEndian
+  Hacl_Impl_P256_Core_isPointAtInfinityPrivate
+  Hacl_Impl_P256_Core_secretToPublic
+  Hacl_Impl_P256_DH__ecp256dh_r
+  Hacl_P256_ecdsa_sign_p256_sha2
+  Hacl_P256_ecdsa_sign_p256_sha384
+  Hacl_P256_ecdsa_sign_p256_sha512
+  Hacl_P256_ecdsa_sign_p256_without_hash
+  Hacl_P256_ecdsa_verif_p256_sha2
+  Hacl_P256_ecdsa_verif_p256_sha384
+  Hacl_P256_ecdsa_verif_p256_sha512
+  Hacl_P256_ecdsa_verif_without_hash
+  Hacl_P256_verify_q
+  Hacl_P256_decompression_not_compressed_form
+  Hacl_P256_decompression_compressed_form
+  Hacl_P256_compression_not_compressed_form
+  Hacl_P256_compression_compressed_form
+  Hacl_P256_reduction_8_32
+  Hacl_P256_ecp256dh_i
+  Hacl_P256_ecp256dh_r
   Hacl_Frodo_KEM_crypto_kem_keypair
   Hacl_Frodo_KEM_crypto_kem_enc
   Hacl_Frodo_KEM_crypto_kem_dec

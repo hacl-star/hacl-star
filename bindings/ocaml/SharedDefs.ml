@@ -9,6 +9,8 @@ module type Buffer = sig
   val size : t -> int
   val equal : t -> t -> bool
   val disjoint : t -> t -> bool
+  val sub : t -> int -> int -> t
+  val z_compare : t -> Z.t -> int
 end
 
 module CBytes : Buffer with type t = Bytes.t and type buf = Bytes.t Ctypes.ocaml = struct
@@ -19,6 +21,8 @@ module CBytes : Buffer with type t = Bytes.t and type buf = Bytes.t Ctypes.ocaml
   let size = Bytes.length
   let equal = Bytes.equal
   let disjoint b1 b2 = b1 != b2
+  let sub = Bytes.sub
+  let z_compare b z = Z.compare (Z.of_bits (Bytes.to_string b)) z
 end
 
 (* VD: temporarely disable, eliminate dependency on bigstring *)
@@ -117,6 +121,12 @@ module type HKDF_generic = sig
   val extract: t -> t -> t -> unit
 end
 
+module type ECDSA_generic = sig
+  type t
+  val sign : t -> t -> t -> t -> bool
+  val verify : t -> t -> t -> bool
+end
+
 module type Blake2_generic = sig
   type t
   val hash : t -> t -> t -> unit
@@ -128,4 +138,5 @@ module type EdDSA = EdDSA_generic with type t = CBytes.t
 module type HashFunction = HashFunction_generic with type t = CBytes.t
 module type MAC = MAC_generic with type t = CBytes.t
 module type HKDF = HKDF_generic with type t = CBytes.t
+module type ECDSA = ECDSA_generic with type t = CBytes.t
 module type Blake2 = Blake2_generic with type t = CBytes.t
