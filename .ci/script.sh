@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+if [[ $OS == "Windows_NT" ]]; then
+  .ci/script.bat && exit 0
+fi
+
 set -e
 set -o pipefail
 
