@@ -7,9 +7,9 @@ if [[ $OS == "Windows_NT" ]]; then
   # The usual issue of return codes not being forwarded.
   .ci/script.bat |& tee log
   if grep "SUCCESS" log; then
-    exit 1
-  else
     exit 0
+  else
+    exit 1
   fi
 fi
 
