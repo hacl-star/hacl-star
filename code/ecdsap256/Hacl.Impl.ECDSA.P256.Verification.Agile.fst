@@ -40,8 +40,7 @@ open FStar.Mul
 module H = Spec.Agile.Hash
 module Def = Spec.Hash.Definitions
 
-#set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
-//Anne will take a look
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
 inline_for_extraction noextract
 val isZero_uint64_nCT: f: felem -> Stack bool
@@ -376,7 +375,9 @@ val compare_felem_bool: a: felem -> b: felem -> Stack bool
 
 let compare_felem_bool a b  =
   assert_norm (pow2 64 * pow2 64 == pow2 128);
-  assert_norm (pow2 128 * pow2 64 == pow2 192);
+  assert_norm (pow2 64 * pow2 64 * pow2 64 == pow2 192);
+  
+  
   let a_0 = index a (size 0) in
   let a_1 = index a (size 1) in
   let a_2 = index a (size 2) in
