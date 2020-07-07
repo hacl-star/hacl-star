@@ -23,7 +23,7 @@ prepare-raw:
 	cp -r ../dist/kremlin raw
 	sed -i 's/KREMLIN_HOME ?= ..\/kremlin/KREMLIN_HOME=kremlin/g' raw/Makefile
 	make -C raw clean
-	cd raw && rm -rf lib/*.cmx lib/*.cmi lib/*.o lib_gen/*.exe lib_gen/*.cmx lib_gen/*.cmi lib_gen/*.o libevercrypt.so ocamlevercrypt.* dllocamlevercrypt.so
+	cd raw && rm -rf lib/*.cmx lib/*.cmi lib/*.cmo lib/*.o lib_gen/*.exe lib_gen/*.cmx lib_gen/*.cmi lib_gen/*.o libocamlevercrypt.a libevercrypt.so ocamlevercrypt.* dllocamlevercrypt.so
 
 release-hacl-star: prepare-raw
 	rm -rf hacl-star && mkdir -p hacl-star
