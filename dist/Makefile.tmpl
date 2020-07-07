@@ -191,7 +191,7 @@ ocamlevercrypt.cma: $(ALL_BINDINGS) $(ALL_ML_STUBS_CMO) $(CTYPES_CMO) $(ALL_C_ST
 	ocamlfind mklib -o ocamlevercrypt $(CTYPES_CMO) $(ALL_C_STUBS) -ccopt -L. -cclib -levercrypt
 
 install-hacl-star-raw: ocamlevercrypt.cmxa ocamlevercrypt.cma libevercrypt.a
-	ocamlfind install hacl-star-raw META $(CTYPES_ML) $(CTYPES_CMX) $(CTYPES_CMO) $(CTYPES_CMI) ocamlevercrypt.cma ocamlevercrypt.cmxa $(wildcard *.a *.so *.dll) config.h
+	ocamlfind install hacl-star-raw META $(CTYPES_ML) $(CTYPES_CMX) $(CTYPES_CMO) $(CTYPES_CMI) ocamlevercrypt.cma ocamlevercrypt.cmxa *.a *.$(SO) config.h
 
 endif
 endif
