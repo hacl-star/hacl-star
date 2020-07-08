@@ -280,7 +280,9 @@ let hash_word_len (a: hash_alg): n:U32.t { U32.v n = hash_word_length a } =
 #set-options "--max_fuel 0 --max_ifuel 1 --z3rlimit 50"
 
 noextract inline_for_extraction
-let finish a m s ev dst =
+let finish i s ev dst =
+  [@inline_let] let a = get_alg i in
+  [@inline_let] let m = get_spec i in
   match a with
   | MD5 -> Lib.ByteBuffer.uints_to_bytes_le #U32 #SEC (hash_word_len a) dst (B.sub s 0ul (hash_word_len a))
   | Blake2S ->

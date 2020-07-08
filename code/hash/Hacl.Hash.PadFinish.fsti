@@ -16,4 +16,4 @@ val pad_len: a:hash_alg -> len:len_t a ->
   x:U32.t { U32.v x = pad_length a (len_v a len) }
 
 noextract inline_for_extraction
-val finish (a:hash_alg) (m:m_spec a) : finish_st a m
+val finish (i:impl) : finish_st i

@@ -7,7 +7,9 @@ open Spec.Hash.Definitions
     generic Merkle-Damgard construction. *)
 
 inline_for_extraction noextract
-let alloca (a: hash_alg) (m:m_spec a): alloca_st a m =
+let alloca (i:impl): alloca_st i =
+  [@inline_let] let a = get_alg i in
+  [@inline_let] let m = get_spec i in
   match a with
   | MD5 -> Hacl.Hash.Core.MD5.legacy_alloca
   | SHA1 -> Hacl.Hash.Core.SHA1.legacy_alloca
@@ -19,7 +21,9 @@ let alloca (a: hash_alg) (m:m_spec a): alloca_st a m =
   | Blake2B -> Hacl.Hash.Core.Blake2.mk_alloca Blake2B m (Hacl.Hash.Core.Blake2.mk_init Blake2B m)
 
 inline_for_extraction noextract
-let init (a: hash_alg) (m:m_spec a): init_st a m =
+let init (i:impl): init_st i =
+  [@inline_let] let a = get_alg i in
+  [@inline_let] let m = get_spec i in
   match a with
   | MD5 -> Hacl.Hash.Core.MD5.legacy_init
   | SHA1 -> Hacl.Hash.Core.SHA1.legacy_init
@@ -32,7 +36,9 @@ let init (a: hash_alg) (m:m_spec a): init_st a m =
 
 
 inline_for_extraction noextract
-let update (a: hash_alg) (m:m_spec a): update_st a m =
+let update (i:impl): update_st i =
+  [@inline_let] let a = get_alg i in
+  [@inline_let] let m = get_spec i in
   match a with
   | MD5 -> Hacl.Hash.Core.MD5.legacy_update
   | SHA1 -> Hacl.Hash.Core.SHA1.legacy_update
@@ -55,9 +61,10 @@ let pad (a: hash_alg): pad_st a =
   | Blake2S -> Hacl.Hash.Core.Blake2.pad_blake2s
   | Blake2B -> Hacl.Hash.Core.Blake2.pad_blake2b
 
-
 inline_for_extraction noextract
-let finish (a: hash_alg) (m:m_spec a): finish_st a m =
+let finish (i:impl): finish_st i =
+  [@inline_let] let a = get_alg i in
+  [@inline_let] let m = get_spec i in
   match a with
   | MD5 -> Hacl.Hash.Core.MD5.legacy_finish
   | SHA1 -> Hacl.Hash.Core.SHA1.legacy_finish

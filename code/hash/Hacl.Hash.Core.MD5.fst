@@ -346,7 +346,7 @@ let rounds
 
 inline_for_extraction
 let overwrite
-  (abcd:state MD5 ())
+  (abcd:state (|MD5, ()|))
   (a' b' c' d' : uint32)
 : HST.Stack unit
     (requires (fun h ->
@@ -406,4 +406,4 @@ let legacy_update abcd ev x = update' abcd x
 
 let legacy_pad: pad_st MD5 = Hacl.Hash.PadFinish.pad MD5
 
-let legacy_finish: finish_st MD5 = Hacl.Hash.PadFinish.finish MD5
+let legacy_finish: finish_st (|MD5, ()|) = Hacl.Hash.PadFinish.finish (|MD5, ()|)

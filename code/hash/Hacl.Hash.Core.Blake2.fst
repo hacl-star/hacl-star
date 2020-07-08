@@ -21,6 +21,7 @@ let mk_init a m s =
   nat_to_extra_state a 0
 
 let mk_alloca a m init () =
+  [@inline_let] let i = mk_impl a m in
   let h0 = ST.get() in
   let (s:Core.state_p (to_blake_alg a) m) =
     Lib.Buffer.create (4ul *. Core.row_len (to_blake_alg a) m)
@@ -28,8 +29,8 @@ let mk_alloca a m init () =
   let es = init s in
   let h2 = ST.get() in
   B.modifies_only_not_unused_in (B.loc_none) h0 h2;
-  assert((as_seq #a #m h2 s, es) == Spec.Agile.Hash.init a);
-  (s <: state a m), es
+  assert((as_seq #i h2 s, es) == Spec.Agile.Hash.init a);
+  (s <: state i), es
 
 let mk_update a m s totlen block =
   ST.push_frame();
@@ -42,28 +43,28 @@ let mk_update a m s totlen block =
   totlen
 
 let mk_finish a m =
-  Hacl.Hash.PadFinish.finish a m
+  Hacl.Hash.PadFinish.finish (mk_impl a m)
 
-let init_blake2s_32: init_st Blake2S Core.M32 = mk_init Blake2S Core.M32
-let alloca_blake2s_32: alloca_st Blake2S Core.M32 = mk_alloca Blake2S Core.M32 (mk_init Blake2S Core.M32)
-let update_blake2s_32: update_st Blake2S Core.M32 = mk_update Blake2S Core.M32
-let finish_blake2s_32: finish_st Blake2S Core.M32 = mk_finish Blake2S Core.M32
+let init_blake2s_32 = mk_init Blake2S Core.M32
+let alloca_blake2s_32 = mk_alloca Blake2S Core.M32 (mk_init Blake2S Core.M32)
+let update_blake2s_32 = mk_update Blake2S Core.M32
+let finish_blake2s_32 = mk_finish Blake2S Core.M32
 
-let init_blake2s_128: init_st Blake2S Core.M128 = mk_init Blake2S Core.M128
-let alloca_blake2s_128: alloca_st Blake2S Core.M128 = mk_alloca Blake2S Core.M128 (mk_init Blake2S Core.M128)
-let update_blake2s_128: update_st Blake2S Core.M128 = mk_update Blake2S Core.M128
-let finish_blake2s_128: finish_st Blake2S Core.M128 = mk_finish Blake2S Core.M128
+let init_blake2s_128 = mk_init Blake2S Core.M128
+let alloca_blake2s_128 = mk_alloca Blake2S Core.M128 (mk_init Blake2S Core.M128)
+let update_blake2s_128 = mk_update Blake2S Core.M128
+let finish_blake2s_128 = mk_finish Blake2S Core.M128
 
-let pad_blake2s: pad_st Blake2S = Hacl.Hash.PadFinish.pad Blake2S
+let pad_blake2s = Hacl.Hash.PadFinish.pad Blake2S
 
-let init_blake2b_32: init_st Blake2B Core.M32 = mk_init Blake2B Core.M32
-let alloca_blake2b_32: alloca_st Blake2B Core.M32 = mk_alloca Blake2B Core.M32 (mk_init Blake2B Core.M32)
-let update_blake2b_32: update_st Blake2B Core.M32 = mk_update Blake2B Core.M32
-let finish_blake2b_32: finish_st Blake2B Core.M32 = mk_finish Blake2B Core.M32
+let init_blake2b_32 = mk_init Blake2B Core.M32
+let alloca_blake2b_32 = mk_alloca Blake2B Core.M32 (mk_init Blake2B Core.M32)
+let update_blake2b_32 = mk_update Blake2B Core.M32
+let finish_blake2b_32 = mk_finish Blake2B Core.M32
 
-let init_blake2b_256: init_st Blake2B Core.M256 = mk_init Blake2B Core.M256
-let alloca_blake2b_256: alloca_st Blake2B Core.M256 = mk_alloca Blake2B Core.M256 (mk_init Blake2B Core.M256)
-let update_blake2b_256: update_st Blake2B Core.M256 = mk_update Blake2B Core.M256
-let finish_blake2b_256: finish_st Blake2B Core.M256 = mk_finish Blake2B Core.M256
+let init_blake2b_256 = mk_init Blake2B Core.M256
+let alloca_blake2b_256 = mk_alloca Blake2B Core.M256 (mk_init Blake2B Core.M256)
+let update_blake2b_256 = mk_update Blake2B Core.M256
+let finish_blake2b_256 = mk_finish Blake2B Core.M256
 
-let pad_blake2b: pad_st Blake2B = Hacl.Hash.PadFinish.pad Blake2B
+let pad_blake2b = Hacl.Hash.PadFinish.pad Blake2B

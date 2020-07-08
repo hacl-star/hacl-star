@@ -178,7 +178,7 @@ let step3_body
   (mi: Ghost.erased Spec.word_block)
   (w: w_t)
   (gw: Ghost.erased (Spec.step3_body_w_t (Ghost.reveal mi)))
-  (b: state SHA1 ())
+  (b: state (|SHA1, ()|))
   (t: U32.t {U32.v t < 80})
 : HST.Stack unit
   (requires (fun h ->
@@ -230,7 +230,7 @@ let spec_step3_body_spec
 inline_for_extraction
 let step3
   (m: block_t)
-  (h: state SHA1 ())
+  (h: state (|SHA1, ()|))
 : HST.Stack unit
   (requires (fun h0 ->
     B.live h0 m /\
@@ -270,7 +270,7 @@ let step3
 inline_for_extraction
 let step4
   (m: block_t)
-  (h: state SHA1 ())
+  (h: state (|SHA1, ()|))
 : HST.Stack unit
   (requires (fun h0 ->
     B.live h0 m /\
@@ -309,4 +309,4 @@ let legacy_update h ev l =
 
 let legacy_pad: pad_st SHA1 = Hacl.Hash.PadFinish.pad SHA1
 
-let legacy_finish: finish_st SHA1 () = Hacl.Hash.PadFinish.finish SHA1 ()
+let legacy_finish: finish_st (|SHA1, ()|) = Hacl.Hash.PadFinish.finish (|SHA1, ()|)

@@ -28,7 +28,11 @@ open FStar.Mul
 
 (*** update_multi *)
 noextract inline_for_extraction
-val mk_update_multi: a:hash_alg{is_blake a} -> m:m_spec a -> update:update_st a m -> update_multi_st a m
+val mk_update_multi:
+     a:hash_alg{is_blake a}
+  -> m:m_spec a
+  -> update:update_st (|a, m|) ->
+  update_multi_st (|a, m|)
 
 let mk_update_multi a m update s ev blocks n_blocks =
   let h0 = ST.get () in
@@ -102,7 +106,7 @@ let split a input_len =
  * the input is actually the remaining data (smaller than a block) *)
 noextract inline_for_extraction
 let blake2_update_last_block_st (a : hash_alg{is_blake a}) (m : m_spec a) =
-  s:state a m ->
+  s:state (|a, m|) ->
   ev:extra_state a ->
   input:B.buffer uint8 ->
   input_len:size_t { B.length input == v input_len /\ v input_len <= block_length a /\
@@ -186,8 +190,12 @@ let mk_blake2_update_last_block a m s ev input input_len =
   ST.pop_frame ()
 
 noextract inline_for_extraction
-val mk_update_last: a:hash_alg{is_blake a} -> m:m_spec a -> update_multi_st a m ->
-                    blake2_update_last_block_st a m -> update_last_st a m
+val mk_update_last:
+     a:hash_alg{is_blake a}
+  -> m:m_spec a
+  -> update_multi_st (|a, m|)
+  -> blake2_update_last_block_st a m ->
+  update_last_st (|a, m|)
 
 let mk_update_last a m update_multi blake2_update_last_block s ev prev_len input input_len =
   ST.push_frame ();
@@ -221,31 +229,31 @@ let mk_update_last a m update_multi blake2_update_last_block s ev prev_len input
   nat_to_extra_state a 0
 #pop-options
 
-let update_multi_blake2s_32: update_multi_st Blake2S Core.M32 =
+let update_multi_blake2s_32 =
   mk_update_multi Blake2S Core.M32 update_blake2s_32
 
-let update_multi_blake2s_128: update_multi_st Blake2S Core.M128 =
+let update_multi_blake2s_128 =
   mk_update_multi Blake2S Core.M128 update_blake2s_128
 
-let update_multi_blake2b_32: update_multi_st Blake2B Core.M32 =
+let update_multi_blake2b_32 =
   mk_update_multi Blake2B Core.M32 update_blake2b_32
 
-let update_multi_blake2b_256: update_multi_st Blake2B Core.M256 =
+let update_multi_blake2b_256 =
   mk_update_multi Blake2B Core.M256 update_blake2b_256
 
-let update_last_blake2s_32: update_last_st Blake2S Core.M32 =
+let update_last_blake2s_32 =
   mk_update_last Blake2S Core.M32 update_multi_blake2s_32
                  (mk_blake2_update_last_block Blake2S Core.M32)
 
-let update_last_blake2s_128: update_last_st Blake2S Core.M128 =
+let update_last_blake2s_128 =
   mk_update_last Blake2S Core.M128 update_multi_blake2s_128
                  (mk_blake2_update_last_block Blake2S Core.M128)
 
-let update_last_blake2b_32: update_last_st Blake2B Core.M32 =
+let update_last_blake2b_32 =
   mk_update_last Blake2B Core.M32 update_multi_blake2b_32
                  (mk_blake2_update_last_block Blake2B Core.M32)
 
-let update_last_blake2b_256: update_last_st Blake2B Core.M256 =
+let update_last_blake2b_256 =
   mk_update_last Blake2B Core.M256 update_multi_blake2b_256
                  (mk_blake2_update_last_block Blake2B Core.M256)
 
