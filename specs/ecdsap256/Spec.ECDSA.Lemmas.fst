@@ -12,12 +12,12 @@ open FStar.Math.Lib
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
 
-val lemma_scalar_ith: sc:lbytes 32 -> k:nat{k < 32} -> Lemma
+val lemma_scalar_ith: l: size_nat -> sc:lbytes l -> k:nat{k < l} -> Lemma
   (v sc.[k] == nat_from_intseq_le sc / pow2 (8 * k) % pow2 8)
 
-let lemma_scalar_ith sc k =
-  index_nat_to_intseq_le #U8 #SEC 32 (nat_from_intseq_le sc) k;
-  nat_from_intseq_le_inj sc (nat_to_intseq_le 32 (nat_from_intseq_le sc))
+let lemma_scalar_ith l sc k =
+  index_nat_to_intseq_le #U8 #SEC l (nat_from_intseq_le sc) k;
+  nat_from_intseq_le_inj sc (nat_to_intseq_le l (nat_from_intseq_le sc))
 
 
 val lemma_euclidian_for_ithbit: k: nat -> i: nat

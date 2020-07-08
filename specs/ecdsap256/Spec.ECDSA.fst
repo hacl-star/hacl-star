@@ -15,20 +15,13 @@ module Def = Spec.Hash.Definitions
 open FStar.Math.Lemmas
 open FStar.Math.Lib
 
-noextract
-let prime_p256_order: (a: pos{a < pow2 256}) =
-  assert_norm (115792089210356248762697446949407573529996955224135760342422259061068512044369 < pow2 256);
-  115792089210356248762697446949407573529996955224135760342422259061068512044369
 
 #set-options "--z3rlimit 200"
 
-let nat_prime = n:nat{n < prime_p256_order}
-
-
-val ith_bit: k:lbytes 32 -> i:nat{i < 256}
+val ith_bit: #c: curve -> k:lbytes (getCoordinateLen c) -> i:nat{i < getPower c}
   -> t:uint64 {(v t == 0 \/ v t == 1) /\ v t == nat_from_intseq_le k / pow2 i % 2}
 
-let ith_bit k i =
+let ith_bit #c k i =
   let q = i / 8 in
   let r = i % 8 in
   let tmp1 = k.[q] >>. (size r) in
@@ -36,7 +29,7 @@ let ith_bit k i =
   let res = to_u64 tmp2 in
   logand_le tmp1 (u8 1);
   logand_mask tmp1 (u8 1) 1;
-  lemma_scalar_ith k q;
+  lemma_scalar_ith (getCoordinateLen c) k q;
   let k = nat_from_intseq_le k in
   pow2_modulo_division_lemma_1 (k / pow2 (8 * (i / 8))) (i % 8) 8;
   division_multiplication_lemma k (pow2 (8 * (i / 8))) (pow2 (i % 8));
@@ -45,34 +38,35 @@ let ith_bit k i =
   res
 
 
-let ( *% ) a b = (a * b) % prime_p256_order
+let ( *% ) (#c: curve) a b = (a * b) % (getPrimeOrder #c)
 
+let fmul (#c: curve) (a: elem (getPrime c)) (b: elem (getPrime c)) : elem (getPrime c) = (a * b) % (getPrime c)
 
-val _exp_step0: p:nat_prime -> q:nat_prime -> tuple2 nat_prime nat_prime
+val _exp_step0: #c: curve -> p: nat_prime #c -> q: nat_prime #c -> tuple2 (nat_prime #c) (nat_prime #c)
 
-let _exp_step0 r0 r1 =
-  let r1 = r0 *% r1 in
-  let r0 = r0 *% r0 in
+let _exp_step0 #c r0 r1 =
+  let r1 = fmul #c r0 r1 in
+  let r0 = fmul #c r0  r0 in
   r0, r1
 
 
-val _exp_step1: p:nat_prime -> q:nat_prime -> tuple2 nat_prime nat_prime
+val _exp_step1: #c: curve -> p:nat_prime #c -> q:nat_prime #c -> tuple2 (nat_prime #c) (nat_prime #c)
 
-let _exp_step1 r0 r1 =
-  let r0 = r0 *% r1 in
-  let r1 = r1 *% r1 in
+let _exp_step1 #c r0 r1 =
+  let r0 = fmul #c r0 r1 in
+  let r1 = fmul #c r1 r1 in
   (r0, r1)
 
 
 let swap p q = q, p
 
-val conditional_swap: i:uint64 -> p:nat_prime -> q:nat_prime -> tuple2 nat_prime nat_prime
+val conditional_swap: #c: curve -> i:uint64 -> p: nat_prime #c -> q: nat_prime #c -> tuple2 (nat_prime #c) (nat_prime #c)
 
 let conditional_swap i p q =
   if v i = 0 then (p, q) else (q, p)
 
 
-val lemma_swaped_steps: p: nat_prime -> q: nat_prime ->
+val lemma_swaped_steps: #c: curve -> p: nat_prime #c -> q: nat_prime #c ->
   Lemma (
     let afterSwapP, afterSwapQ = swap p q in
     let p1, q1 = _exp_step0 afterSwapP afterSwapQ in
@@ -83,49 +77,56 @@ val lemma_swaped_steps: p: nat_prime -> q: nat_prime ->
 let lemma_swaped_steps p q = ()
 
 
-val _exp_step: k:lseq uint8 32 -> i:nat{i < 256} -> before:tuple2 nat_prime nat_prime
-  -> tuple2 nat_prime nat_prime
+val _exp_step: #c: curve 
+  -> k:lseq uint8 (getCoordinateLen c) 
+  -> i:nat{i < getPower c} 
+  -> before:tuple2 (nat_prime #c) (nat_prime #c)
+  -> tuple2 (nat_prime #c) (nat_prime #c)
 
-let _exp_step k i (p, q) =
-  let bit = 255 - i in
+let _exp_step #c k i (p, q) =
+  let bit = (getPower c - 1) - i in
   let bit = ith_bit k bit in
   let open Lib.RawIntTypes in
   if uint_to_nat bit = 0 then _exp_step0 p q else _exp_step1 p q
 
 
-val _exponent_spec: k:lseq uint8 32  -> tuple2 nat_prime nat_prime
-  -> tuple2 nat_prime nat_prime
+val _exponent_spec: #c: curve 
+  -> k:lseq uint8 (getCoordinateLen c) 
+  -> tuple2 (nat_prime #c) (nat_prime #c) 
+  -> tuple2 (nat_prime #c) (nat_prime #c)
 
-let _exponent_spec k (p, q) =
+let _exponent_spec #c k (p, q) =
   let open Lib.LoopCombinators in
-  Lib.LoopCombinators.repeati 256 (_exp_step k) (p, q)
+  Lib.LoopCombinators.repeati (getPower c) (_exp_step k) (p, q)
 
 
-val lemma_even: index:pos{index <= 256} -> k:lseq uint8 32 {v (ith_bit k (256 - index)) == 0} ->
+val lemma_even: #c: curve 
+  -> index:pos{index <= getPower c} 
+  -> k:lseq uint8 (getCoordinateLen c) {v (ith_bit k (getPower c - index)) == 0} ->
   Lemma (
     let number = nat_from_bytes_le k in
-    let newIndex = 256 - index in
+    let newIndex = (getPower c) - index in
     2 * arithmetic_shift_right number (newIndex + 1) ==
     arithmetic_shift_right number newIndex)
 
-let lemma_even index k =
+let lemma_even #c index k =
   let number = nat_from_bytes_le k in
-  let n = 256 - index in
+  let n = (getPower c)  - index in
   FStar.Math.Lemmas.pow2_double_mult n;
   lemma_div_def (number / pow2 n) 2;
   FStar.Math.Lemmas.division_multiplication_lemma number (pow2 n) 2
 
 
-val lemma_odd: index:pos{index <= 256} -> k:lseq uint8 32 {uint_v (ith_bit k (256 - index)) == 1} ->
+val lemma_odd: #c: curve -> index:pos{index <= getPower c} -> k:lseq uint8 (getCoordinateLen c) {uint_v (ith_bit k (getPower c - index)) == 1} ->
   Lemma(
-    let number = nat_from_intseq_le k in
-    let n = 256 - index  in
+    let number = nat_from_intseq_le k in 
+    let n = getPower c - index  in
     2 * arithmetic_shift_right number (n + 1) + 1 ==
     arithmetic_shift_right number n)
 
-let lemma_odd index k =
+let lemma_odd #c index k =
   let number = nat_from_bytes_le k in
-  let n = 256 - index in
+  let n = getPower c - index in
   let a0 = 2 * arithmetic_shift_right number (n + 1) + 1 in
   lemma_div_def (number / pow2 n) 2;
   division_multiplication_lemma number (pow2 n) 2;
@@ -135,117 +136,121 @@ let lemma_odd index k =
           2 * arithmetic_shift_right number (n + 1) + 1)
 
 
-val lemma_exponen_spec: k:lseq uint8 32
-  -> start:tuple2 nat_prime nat_prime {let st0, st1 = start in st0 == 1}
-  -> index:nat{index <= 256} ->
+val lemma_exponen_spec: #c: curve -> k:lseq uint8 (getCoordinateLen c)
+  -> start:tuple2 (nat_prime #c) (nat_prime #c) {let st0, st1 = start in st0 == 1}
+  -> index:nat{index <= getPower c} ->
   Lemma (
     let start0, start1 = start in
     let number = nat_from_bytes_le k in
-    let newIndex = 256 - index in
+    let newIndex = getPower c - index in
     let f0, f1 = Lib.LoopCombinators.repeati index (_exp_step k) start in
-    f0 == pow start1 (arithmetic_shift_right number newIndex) % prime_p256_order /\
-    f1 == pow start1 (arithmetic_shift_right number newIndex + 1) % prime_p256_order
+    f0 == pow start1 (arithmetic_shift_right number newIndex) % getPrimeOrder #c /\
+    f1 == pow start1 (arithmetic_shift_right number newIndex + 1) % getPrimeOrder #c
   )
 
 #push-options "--fuel 1"
 
-val lemma_exponen_spec_0: k:lseq uint8 32
-  -> start:tuple2 nat_prime nat_prime {let st0, st1 = start in st0 == 1} ->
+val lemma_exponen_spec_0: #c: curve -> k:lseq uint8 (getCoordinateLen c)
+  -> start:tuple2 (nat_prime #c) (nat_prime #c) {let st0, st1 = start in st0 == 1} ->
   Lemma (
     let start0, start1 = start in
     let number = nat_from_bytes_le k in
-    let newIndex = 256 in
+    let newIndex = getPower c in
     let f0, f1 = Lib.LoopCombinators.repeati 0 (_exp_step k) start in
-    f0 == pow start1 (arithmetic_shift_right number newIndex) % prime_p256_order /\
-    f1 == pow start1 (arithmetic_shift_right number newIndex + 1) % prime_p256_order
+    f0 == pow start1 (arithmetic_shift_right number newIndex) % getPrimeOrder #c /\
+    f1 == pow start1 (arithmetic_shift_right number newIndex + 1) % getPrimeOrder #c
   )
 
-let lemma_exponen_spec_0 k start =
+let lemma_exponen_spec_0 #c k start =
   let st0, st1 = start in
   let number = nat_from_bytes_le k in
-  assert (arithmetic_shift_right number 256 == number / pow2 256);
-  FStar.Math.Lemmas.lemma_div_lt_nat number 256 256;
-  assert (arithmetic_shift_right number 256 == 0);
-  Lib.LoopCombinators.eq_repeati0 256 (_exp_step k) start
+  assert (arithmetic_shift_right number (getPower c) == number / pow2 (getPower c));
+  FStar.Math.Lemmas.lemma_div_lt_nat number (getPower c) (getPower c);
+  assert (arithmetic_shift_right number (getPower c) == 0);
+  Lib.LoopCombinators.eq_repeati0 (getPower c) (_exp_step k) start;
+  admit()
 
 #pop-options
 
-let rec lemma_exponen_spec k start index =
+let rec lemma_exponen_spec #c k start index =
+  admit();
+  let prime_order = getPrimeOrder #c in 
+  let power = getPower c in 
   let f = _exp_step k in
   let st0, st1 = start in
   let number = nat_from_bytes_le k in
-  let newIndex = 256 - index in
+  let newIndex = getPower c - index in
   let open Lib.LoopCombinators in
   match index with
   | 0 -> lemma_exponen_spec_0 k start
   | _ ->
     begin
-    unfold_repeati 256 f start (index - 1);
+    unfold_repeati (getPower c) f start (index - 1);
     lemma_exponen_spec k start (index - 1);
-    let bitMask = uint_v (ith_bit k (256 - index)) in
+    let bitMask = uint_v (ith_bit k ((getPower c) - index)) in
     match bitMask with
       | 0 ->
-        let a0 = pow st1 (arithmetic_shift_right number (256 - index + 1)) in
-        let a1 = pow st1 (arithmetic_shift_right number (256 - index + 1) + 1) in
+        let a0 = pow st1 (arithmetic_shift_right number (power - index + 1)) in
+        let a1 = pow st1 (arithmetic_shift_right number (power - index + 1) + 1) in
         calc (==) {
-          (a0 % prime_p256_order) * (a0 % prime_p256_order) % prime_p256_order;
-          == {modulo_distributivity_mult a0 a0 prime_p256_order}
-          (a0 * a0) % prime_p256_order;
+          (a0 % prime_order) * (a0 % prime_order) % prime_order;
+          == {modulo_distributivity_mult a0 a0 prime_order}
+          (a0 * a0) % prime_order;
           == { }
-          (pow st1 (arithmetic_shift_right number (256 - index + 1)) * pow st1 (arithmetic_shift_right number (256 - index + 1))) % prime_p256_order;
-          == {pow_plus st1 (arithmetic_shift_right number (256 - index + 1)) (arithmetic_shift_right number (256 - index + 1))}
-          (pow st1 (arithmetic_shift_right number (256 - index + 1) + arithmetic_shift_right number (256 - index + 1))) % prime_p256_order;
+          (pow st1 (arithmetic_shift_right number (power - index + 1)) * pow st1 (arithmetic_shift_right number (power - index + 1))) % prime_order;
+          == {pow_plus st1 (arithmetic_shift_right number (power - index + 1)) (arithmetic_shift_right number (power - index + 1))}
+          (pow st1 (arithmetic_shift_right number (power - index + 1) + arithmetic_shift_right number (power - index + 1))) % prime_order;
           == {}
-          (pow st1 (2 * arithmetic_shift_right number (256 - index + 1))) % prime_p256_order;
+          (pow st1 (2 * arithmetic_shift_right number (power - index + 1))) % prime_order;
           == {lemma_even index k}
-          pow st1 (arithmetic_shift_right number newIndex) % prime_p256_order;
+          pow st1 (arithmetic_shift_right number newIndex) % prime_order;
         };
         calc (==) {
-          (a0 % prime_p256_order) * (a1 % prime_p256_order) % prime_p256_order;
-          == {modulo_distributivity_mult a0 a1 prime_p256_order}
-          (a0 * a1) % prime_p256_order;
+          (a0 % prime_order) * (a1 % prime_order) % prime_order;
+          == {modulo_distributivity_mult a0 a1 prime_order}
+          (a0 * a1) % prime_order;
           == { }
-          (pow st1 (arithmetic_shift_right number (256 - index + 1)) * pow st1 (arithmetic_shift_right number (256 - index + 1) + 1)) % prime_p256_order;
-          == {pow_plus st1 (arithmetic_shift_right number (256 - index + 1)) (arithmetic_shift_right number (256 - index + 1) + 1)}
-          (pow st1 (arithmetic_shift_right number (256 - index + 1) + arithmetic_shift_right number (256 - index + 1) + 1)) % prime_p256_order;
+          (pow st1 (arithmetic_shift_right number (power - index + 1)) * pow st1 (arithmetic_shift_right number (power - index + 1) + 1)) % prime_order;
+          == {pow_plus st1 (arithmetic_shift_right number (power - index + 1)) (arithmetic_shift_right number (power - index + 1) + 1)}
+          (pow st1 (arithmetic_shift_right number (power - index + 1) + arithmetic_shift_right number (power - index + 1) + 1)) % prime_order;
           == {}
-          (pow st1 (2* arithmetic_shift_right number (256 - index + 1) + 1)) % prime_p256_order;
+          (pow st1 (2 * arithmetic_shift_right number (power - index + 1) + 1)) % prime_order;
           == {lemma_even index k}
-          (pow st1 (arithmetic_shift_right number (256 - index) + 1)) % prime_p256_order;
+          (pow st1 (arithmetic_shift_right number (power - index) + 1)) % prime_order;
         }
       | 1 ->
-        let a0 = pow st1 (arithmetic_shift_right number (256 - index + 1)) in
-        let a1 = pow st1 (arithmetic_shift_right number (256 - index + 1) + 1) in
+        let a0 = pow st1 (arithmetic_shift_right number (power - index + 1)) in
+        let a1 = pow st1 (arithmetic_shift_right number (power - index + 1) + 1) in
         calc (==) {
-          (a1 % prime_p256_order) * (a1 % prime_p256_order) % prime_p256_order;
-          == {modulo_distributivity_mult a1 a1 prime_p256_order}
-          (a1 * a1) % prime_p256_order;
+          (a1 % prime_order) * (a1 % prime_order) % prime_order;
+          == {modulo_distributivity_mult a1 a1 prime_order}
+          (a1 * a1) % prime_order;
           == { }
-          (pow st1 (arithmetic_shift_right number (256 - index + 1) + 1) * pow st1 (arithmetic_shift_right number (256 - index + 1) + 1)) % prime_p256_order;
-          == {pow_plus st1 (arithmetic_shift_right number (256 - index + 1) + 1) (arithmetic_shift_right number (256 - index + 1) + 1)}
-          (pow st1 (arithmetic_shift_right number (256 - index + 1) + 1 + arithmetic_shift_right number (256 - index + 1) + 1)) % prime_p256_order;
+          (pow st1 (arithmetic_shift_right number (power - index + 1) + 1) * pow st1 (arithmetic_shift_right number (power - index + 1) + 1)) % prime_order;
+          == {pow_plus st1 (arithmetic_shift_right number (power - index + 1) + 1) (arithmetic_shift_right number (power - index + 1) + 1)}
+          (pow st1 (arithmetic_shift_right number (power - index + 1) + 1 + arithmetic_shift_right number (power - index + 1) + 1)) % prime_order;
           == {}
-          (pow st1 (2 * arithmetic_shift_right number (256 - index + 1) + 2)) % prime_p256_order;
+          (pow st1 (2 * arithmetic_shift_right number (power - index + 1) + 2)) % prime_order;
           == {lemma_odd index k}
-          pow st1 (arithmetic_shift_right number newIndex + 1) % prime_p256_order;
+          pow st1 (arithmetic_shift_right number newIndex + 1) % prime_order;
         };
         calc (==) {
-          (a0 % prime_p256_order) * (a1 % prime_p256_order) % prime_p256_order;
-          == {modulo_distributivity_mult a0 a1 prime_p256_order}
-          (a0 * a1) % prime_p256_order;
+          (a0 % prime_order) * (a1 % prime_order) % prime_order;
+          == {modulo_distributivity_mult a0 a1 prime_order}
+          (a0 * a1) % prime_order;
           == { }
-          (pow st1 (arithmetic_shift_right number (256 - index + 1)) * pow st1 (arithmetic_shift_right number (256 - index + 1) + 1)) % prime_p256_order;
-          == {pow_plus st1 (arithmetic_shift_right number (256 - index + 1)) (arithmetic_shift_right number (256 - index + 1) + 1)}
-          (pow st1 (arithmetic_shift_right number (256 - index + 1) + arithmetic_shift_right number (256 - index + 1) + 1)) % prime_p256_order;
+          (pow st1 (arithmetic_shift_right number (power - index + 1)) * pow st1 (arithmetic_shift_right number (power - index + 1) + 1)) % prime_order;
+          == {pow_plus st1 (arithmetic_shift_right number (power - index + 1)) (arithmetic_shift_right number (power - index + 1) + 1)}
+          (pow st1 (arithmetic_shift_right number (power - index + 1) + arithmetic_shift_right number (power - index + 1) + 1)) % prime_order;
           == {}
-          (pow st1 (2* arithmetic_shift_right number (256 - index + 1) + 1)) % prime_p256_order;
+          (pow st1 (2 * arithmetic_shift_right number (power - index + 1) + 1)) % prime_order;
           == {lemma_odd index k}
-          (pow st1 (arithmetic_shift_right (nat_from_bytes_le k) (256 - index)) % prime_p256_order);
+          (pow st1 (arithmetic_shift_right (nat_from_bytes_le k) (power - index)) % prime_order);
         }
     end
 
 
-unfold let prime_p256_order_inverse_list: list uint8 =
+unfold let prime_p256_order_inverse_list  list uint8 =
  [
    u8 79;  u8 37;  u8 99;  u8 252; u8 194; u8 202; u8 185; u8 243;
    u8 132; u8 158; u8 23;  u8 167; u8 173; u8 250; u8 230; u8 188;
@@ -254,10 +259,11 @@ unfold let prime_p256_order_inverse_list: list uint8 =
  ]
 
 
-let prime_p256_order_inverse_seq: s:lseq uint8 32{nat_from_intseq_le s == prime_p256_order - 2} =
+let prime_p256_order_inverse_seq (#c: curve) : (s:lseq uint8 (getCoordinateLen c) {nat_from_intseq_le s == (getPrimeOrder #c) - 2}) =
+  let order = getPrimeOrder #c in 
   assert_norm (List.Tot.length prime_p256_order_inverse_list == 32);
   nat_from_intlist_seq_le 32 prime_p256_order_inverse_list;
-  assert_norm (nat_from_intlist_le prime_p256_order_inverse_list == prime_p256_order - 2);
+  assert_norm (nat_from_intlist_le prime_p256_order_inverse_list == order - 2);
   of_list prime_p256_order_inverse_list
 
 
@@ -311,6 +317,11 @@ open Spec.Hash.Definitions
 type hash_alg_ecdsa = 
   |NoHash
   |Hash of (a: hash_alg {a == SHA2_256 \/ a == SHA2_384 \/ a == SHA2_512})
+
+
+type supported_curves = 
+  |P256
+  |P384
 
 
 let invert_state_s (a: hash_alg_ecdsa): Lemma
@@ -385,14 +396,15 @@ let ecdsa_verification_agile alg publicKey r s mLen m =
   end
 
 val ecdsa_signature_agile:
-  alg: hash_alg_ecdsa
+  curve: supported_curves 
+  -> alg: hash_alg_ecdsa
   -> mLen:size_nat{mLen >= min_input_length alg} 
   -> m:lseq uint8 mLen
   -> privateKey:lseq uint8 32
   -> k:lseq uint8 32
   -> tuple3 nat nat uint64
 
-let ecdsa_signature_agile alg mLen m privateKey k =
+let ecdsa_signature_agile curve alg mLen m privateKey k =
   assert_norm (pow2 32 < pow2 61);
   assert_norm (pow2 32 < pow2 125);
   let r, _ = montgomery_ladder_spec k ((0,0,0), basePoint) in

@@ -26,6 +26,7 @@ type curve =
   |P256
   |P384
 
+
 let invert_state_s (a: curve): Lemma
   (requires True)
   (ensures (inversion curve))
@@ -34,37 +35,62 @@ let invert_state_s (a: curve): Lemma
   allow_inversion (curve)
 
 
+let getCoordinateLen curve =
+  match curve with 
+  |P256 -> 32
+  |P384 -> 48
+
+let getPower curve = 
+  match curve with 
+  |P256 -> 256
+  |P384 -> 384
+
 let getPrime curve = 
   match curve with 
   |P256 -> prime256
   |P384 -> prime384
 
+let getPrimeOrder (#c: curve) : (a: pos{a < pow2 (getPower c)}) =
+  match c with 
+  |P256 -> assert_norm (115792089210356248762697446949407573529996955224135760342422259061068512044369 < pow2 (getPower P256));
+  115792089210356248762697446949407573529996955224135760342422259061068512044369
+  |P384 -> 
+    assert_norm (39402006196394479212279040100143613805079739270465446667946905279627659399113263569398956308152294913554433653942643 < pow2 (getPower P384));
+39402006196394479212279040100143613805079739270465446667946905279627659399113263569398956308152294913554433653942643
+
+
 (* for p256 and 384 are the same *)
-let aCoordinate curve = -3 
+let aCoordinate (#c: curve) = -3 
 
 
-let bCoordinate curve : (a: nat {a < (getPrime curve)}) =
+let bCoordinate #curve : (a: nat {a < (getPrime curve)}) =
   match curve with 
   |P256 -> assert_norm (41058363725152142129326129780047268409114441015993725554835256314039467401291 < getPrime P256);
     41058363725152142129326129780047268409114441015993725554835256314039467401291
   |P384 -> assert_norm (27580193559959705877849011840389048093056905856361568521428707301988689241309860865136260764883745107765439761230575 < getPrime P384); 27580193559959705877849011840389048093056905856361568521428707301988689241309860865136260764883745107765439761230575
 
 
-noextract
-let basePoint : point_nat_prime =
-  assert_norm (0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296 < prime256);
-  (0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296,
-   0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5,
-   1)
-
-
-
-
-let nat_prime curve = n:nat{n < prime256}
+let nat_prime #curve = n:nat{n < getPrime curve}
 
 let point_nat = tuple3 nat nat nat
 
-let point_nat_prime curve = (p: point_nat {let (a, b, c) = p in a < prime256 /\ b < prime256 /\ c < prime256})
+let point_nat_prime #curve = (p: point_nat 
+  {
+    let prime = getPrime curve in 
+    let (a, b, c) = p in a < prime /\ b < prime /\ c < prime})
+
+
+noextract
+let basePoint #curve : point_nat_prime #curve  =
+  match curve with 
+  |P256 -> assert_norm (0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296 < getPrime P256);
+  (0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296,
+  0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5,
+  1)
+   |P384 -> assert_norm(0xaa87ca22be8b05378eb1c71ef320ad746e1d3b628ba79b9859f741e082542a385502f25dbf55296c3a545e3872760ab7 < getPrime P384);
+  (0xaa87ca22be8b05378eb1c71ef320ad746e1d3b628ba79b9859f741e082542a385502f25dbf55296c3a545e3872760ab7,0x3617de4a96262c6f5d9e98bf9292dc29f8f41dbd289a147ce9da3113b5f0b8c00a60b1ce1d7e819d7a431d7c90ea0e5f, 1) 
+
+
 
 type elem (n:pos) = x:nat{x < n}
 
@@ -109,11 +135,11 @@ noextract
 let modp_inv2_prime (x: int) (p: nat {p > 3}) : Tot (elem p) = modp_inv_prime p (x % p)
 
 noextract
-let modp_inv2 curve (x: nat) : Tot (elem (getPrime curve)) =
+let modp_inv2 #curve (x: nat) : Tot (elem (getPrime curve)) =
   modp_inv2_prime x (getPrime curve)
 
 noextract
-let modp_inv2_pow curve (x: nat) : Tot (elem (getPrime curve)) =
+let modp_inv2_pow #curve (x: nat) : Tot (elem (getPrime curve)) =
   let prime = getPrime curve in 
   pow x (prime - 2) % prime
 
@@ -125,43 +151,44 @@ let min_one_prime (prime: pos {prime > 3}) (x: int) : Tot (elem prime) =
   
 
 noextract
-let _point_double (p:point_nat_prime) : point_nat_prime =
+let _point_double #curve (p:point_nat_prime #curve) : point_nat_prime #curve =
+  let prime = getPrime curve in 
   let x, y, z = p in
   let delta = z * z in 
   let gamma = y * y in 
   let beta = x * gamma in 
   let alpha = 3 * (x - delta) * (x + delta) in 
-  let x3 = (alpha * alpha - 8 * beta) % prime256 in 
-  let y3 = (alpha *  (4 * beta - x3) - 8 * gamma * gamma) % prime256 in 
-  let z3 = ((y + z) * (y + z) - delta - gamma) % prime256 in 
+  let x3 = (alpha * alpha - 8 * beta) % prime in 
+  let y3 = (alpha *  (4 * beta - x3) - 8 * gamma * gamma) % prime in 
+  let z3 = ((y + z) * (y + z) - delta - gamma) % prime in 
   (x3, y3, z3)
 
 
 noextract
-let _point_add (p:point_nat_prime) (q:point_nat_prime) : point_nat_prime =
-
+let _point_add #curve (p:point_nat_prime #curve) (q:point_nat_prime #curve) : point_nat_prime #curve =
+  let prime = getPrime curve in 
   let (x1, y1, z1) = p in
   let (x2, y2, z2) = q in
 
   let z2z2 = z2 * z2 in
   let z1z1 = z1 * z1 in
 
-  let u1 = x1 * z2z2 % prime256 in
-  let u2 = x2 * z1z1 % prime256 in
+  let u1 = x1 * z2z2 % prime in
+  let u2 = x2 * z1z1 % prime in
 
-  let s1 = y1 * z2 * z2z2 % prime256 in
-  let s2 = y2 * z1 * z1z1 % prime256 in
+  let s1 = y1 * z2 * z2z2 % prime in
+  let s2 = y2 * z1 * z1z1 % prime in
 
-  let h = (u2 - u1) % prime256 in
-  let r = (s2 - s1) % prime256 in
+  let h = (u2 - u1) % prime in
+  let r = (s2 - s1) % prime in
 
   let rr = r * r in
   let hh = h * h in
   let hhh = h * h * h in
 
-  let x3 = (rr - hhh - 2 * u1 * hh) % prime256 in
-  let y3 = (r * (u1 * hh - x3) - s1 * hhh) % prime256 in
-  let z3 = (h * z1 * z2) % prime256 in
+  let x3 = (rr - hhh - 2 * u1 * hh) % prime in
+  let y3 = (r * (u1 * hh - x3) - s1 * hhh) % prime in
+  let z3 = (h * z1 * z2) % prime in
   if z2 = 0 then
     (x1, y1, z1)
   else
@@ -176,27 +203,28 @@ let isPointAtInfinity (p:point_nat) =
 
 #push-options "--fuel 1"
 
-let _norm (p:point_nat_prime) : point_nat_prime =
+let _norm #curve (p:point_nat_prime #curve) : point_nat_prime #curve =
+  let prime = getPrime curve in 
   let (x, y, z) = p in
   let z2 = z * z in
-  let z2i = modp_inv2_pow z2 in
+  let z2i = modp_inv2_pow #curve z2 in
   let z3 = z * z * z in
-  let z3i = modp_inv2_pow z3 in
-  let x3 = (z2i * x) % prime256 in
-  let y3 = (z3i * y) % prime256 in
+  let z3i = modp_inv2_pow #curve z3 in
+  let x3 = (z2i * x) % prime in
+  let y3 = (z3i * y) % prime in
   let z3 = if isPointAtInfinity p then 0 else 1 in
   (x3, y3, z3)
 
 
-let scalar = lbytes 32
+let scalar (#c: curve) = lbytes (getCoordinateLen c)
 
 
-let ith_bit (k:lbytes 32) (i:nat{i < 256}) : uint64 =
-  let q = 31 - i / 8 in let r = size (i % 8) in
+let ith_bit (#c: curve) (k:lbytes (getCoordinateLen c)) (i:nat{i < getPower c}) : uint64 =
+  let q = (getCoordinateLen c - 1) - i / 8 in 
+  let r = size (i % 8) in
   to_u64 ((index k q >>. r) &. u8 1)
 
-
-val _ml_step0: p:point_nat_prime -> q:point_nat_prime -> tuple2 point_nat_prime point_nat_prime
+val _ml_step0: #c: curve -> p:point_nat_prime #c -> q:point_nat_prime #c -> tuple2 (point_nat_prime #c) (point_nat_prime #c)
 
 let _ml_step0 r0 r1 =
   let r0 = _point_add r1 r0 in
@@ -204,7 +232,7 @@ let _ml_step0 r0 r1 =
   (r0, r1)
 
 
-val _ml_step1: p: point_nat_prime -> q: point_nat_prime -> tuple2 point_nat_prime point_nat_prime
+val _ml_step1: #c: curve -> p: point_nat_prime #c -> q: point_nat_prime #c -> tuple2 (point_nat_prime #c) (point_nat_prime #c)
 
 let _ml_step1 r0 r1 =
   let r1 = _point_add r0 r1 in
@@ -212,11 +240,10 @@ let _ml_step1 r0 r1 =
   (r0, r1)
 
 
-val _ml_step: k:scalar -> i:nat{i < 256} -> tuple2 point_nat_prime point_nat_prime
-  -> tuple2 point_nat_prime point_nat_prime
+val _ml_step: #c: curve -> k:scalar #c -> i:nat{i < 256} -> tuple2 (point_nat_prime #c) (point_nat_prime #c) -> tuple2 (point_nat_prime #c) (point_nat_prime #c)
 
-let _ml_step k i (p, q) =
-  let bit = 255 - i in
+let _ml_step #c k i (p, q) =
+  let bit = (getPower c - 1) - i in
   let bit = ith_bit k bit in
   let open Lib.RawIntTypes in
   if uint_to_nat bit = 0 then
@@ -225,14 +252,13 @@ let _ml_step k i (p, q) =
     _ml_step0 p q
 
 
-val montgomery_ladder_spec: k:scalar -> tuple2 point_nat_prime point_nat_prime
-  -> tuple2 point_nat_prime point_nat_prime
+val montgomery_ladder_spec: #c: curve -> scalar #c -> tuple2 (point_nat_prime #c) (point_nat_prime #c)-> tuple2 (point_nat_prime #c) (point_nat_prime #c)
 
 let montgomery_ladder_spec k pq =
   Lib.LoopCombinators.repeati 256 (_ml_step k) pq
 
 
-val scalar_multiplication: scalar -> point_nat_prime -> point_nat_prime
+val scalar_multiplication: #c: curve -> scalar #c -> point_nat_prime #c -> point_nat_prime #c
 
 let scalar_multiplication k p =
   let pai = (0, 0, 0) in
@@ -240,7 +266,7 @@ let scalar_multiplication k p =
   _norm q
 
 
-val secret_to_public: scalar -> point_nat_prime
+val secret_to_public: #c: curve -> scalar #c -> point_nat_prime #c
 
 let secret_to_public k =
   let pai = (0, 0, 0) in
@@ -248,12 +274,10 @@ let secret_to_public k =
   _norm q
 
 
-val isPointOnCurve: point_nat_prime -> bool
-
-let isPointOnCurve p =
+let isPointOnCurve (#c: curve) (p: point_nat_prime #c) : bool = 
   let (x, y, z) = p in
-  (y * y) % prime256 =
-  (x * x * x + aCoordinateP256 * x + bCoordinateP256) % prime256
+  (y * y) % (getPrime c) =
+  (x * x * x + aCoordinate #c  * x + bCoordinate #c) % prime256
 
 
 val toJacobianCoordinates: tuple2 nat nat -> tuple3 nat nat nat
