@@ -42,15 +42,14 @@ let compute_st (a: hash_alg) =
 
 inline_for_extraction noextract
 val mk_compute:
-  a: hash_alg ->
-  m: D.m_spec a ->
-  hash: D.hash_st a ->
-  alloca: D.alloca_st a m ->
-  init: D.init_st a m ->
-  update_multi: D.update_multi_st a m ->
-  update_last: D.update_last_st a m ->
-  finish: D.finish_st a m ->
-  compute_st a
+  i: D.impl ->
+  hash: D.hash_st (D.get_alg i) ->
+  alloca: D.alloca_st i ->
+  init: D.init_st i ->
+  update_multi: D.update_multi_st i ->
+  update_last: D.update_last_st i ->
+  finish: D.finish_st i ->
+  compute_st (D.get_alg i)
 
 val legacy_compute_sha1: compute_st SHA1
 
