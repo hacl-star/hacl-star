@@ -372,7 +372,14 @@ val hashSpec:
   -> a: hash_alg_ecdsa 
   -> mLen: size_nat{mLen >= min_input_length #c a}
   -> m: lseq uint8 mLen ->
-  Tot (Lib.ByteSequence.lbytes (getCoordinateLen c))
+  Tot (Lib.ByteSequence.lbytes 
+    (
+      if NoHash? a 
+	then getCoordinateLen c 
+      else if hash_length (match a with Hash a -> a) > getCoordinateLen c
+	then getCoordinateLen c 
+      else hash_length (match a with Hash a -> a) 
+))
 
 let hashSpec c a mLen m = 
   assert_norm (pow2 32 < pow2 61);
@@ -381,13 +388,11 @@ let hashSpec c a mLen m =
   match a with 
   |NoHash ->  sub m 0 (getCoordinateLen c)
   |Hash a ->
-    let h = create (getCoordinateLen c) (u8 0) in 
     let hashed = Spec.Agile.Hash.hash a m in 
-    if hash_length a >= getCoordinateLen c then 
+    if hash_length a > getCoordinateLen c then 
       sub hashed 0 (getCoordinateLen c)
     else
-      let s = sub h (getCoordinateLen c - hash_length a) (hash_length a) in
-      update_sub h (getCoordinateLen c - hash_length a) (hash_length a) hashed
+      hashed
 
 open Lib.ByteSequence 
 
