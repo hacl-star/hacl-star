@@ -250,21 +250,36 @@ let rec lemma_exponen_spec #c k start index =
     end
 
 
-unfold let prime_p256_order_inverse_list  list uint8 =
- [
-   u8 79;  u8 37;  u8 99;  u8 252; u8 194; u8 202; u8 185; u8 243;
-   u8 132; u8 158; u8 23;  u8 167; u8 173; u8 250; u8 230; u8 188;
-   u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255;
-   u8 0;   u8 0;   u8 0;   u8 0;   u8 255; u8 255; u8 255; u8 255
- ]
+unfold let prime_order_inverse_list (#c: curve) : list uint8 = 
+  match c with 
+  |P256 -> 
+    [
+      u8 79;  u8 37;  u8 99;  u8 252; u8 194; u8 202; u8 185; u8 243;
+      u8 132; u8 158; u8 23;  u8 167; u8 173; u8 250; u8 230; u8 188;
+      u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255;
+      u8 0;   u8 0;   u8 0;   u8 0;   u8 255; u8 255; u8 255; u8 255
+    ]
+  |P384 -> 
+    [ 
+      u8 113; u8 41;  u8 197; u8 204; u8 106; u8 25;  u8 236; u8 236;
+      u8 122; u8 167; u8 176; u8 72;  u8 178; u8 13;  u8 26;  u8 88;
+      u8 223; u8 45;  u8 55;  u8 244; u8 129; u8 77;  u8 99;  u8 199;
+      u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255;
+      u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255;
+      u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255
+   ]
 
 
 let prime_p256_order_inverse_seq (#c: curve) : (s:lseq uint8 (getCoordinateLen c) {nat_from_intseq_le s == (getPrimeOrder #c) - 2}) =
   let order = getPrimeOrder #c in 
-  assert_norm (List.Tot.length prime_p256_order_inverse_list == 32);
-  nat_from_intlist_seq_le 32 prime_p256_order_inverse_list;
-  assert_norm (nat_from_intlist_le prime_p256_order_inverse_list == order - 2);
-  of_list prime_p256_order_inverse_list
+  assert_norm (List.Tot.length (prime_order_inverse_list #P256) == getCoordinateLen P256);
+  assert_norm (List.Tot.length (prime_order_inverse_list #P384) == getCoordinateLen P384);
+  nat_from_intlist_seq_le (getCoordinateLen c) (prime_order_inverse_list #c); 
+  assert_norm (nat_from_intlist_le (prime_order_inverse_list #P256) == getPrimeOrder #P256 - 2);
+  assert_norm (nat_from_intlist_le (prime_order_inverse_list #P384) == getPrimeOrder #P384 - 2);
+  of_list (prime_order_inverse_list #c)
+
+    
 
 
 unfold let prime_p256_order_list: list uint8 =
