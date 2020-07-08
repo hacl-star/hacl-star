@@ -50,6 +50,7 @@ let getPrime curve =
   |P256 -> prime256
   |P384 -> prime384
 
+
 let getPrimeOrder (#c: curve) : (a: pos{a < pow2 (getPower c)}) =
   match c with 
   |P256 -> assert_norm (115792089210356248762697446949407573529996955224135760342422259061068512044369 < pow2 (getPower P256));

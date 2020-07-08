@@ -270,7 +270,7 @@ unfold let prime_order_inverse_list (#c: curve) : list uint8 =
    ]
 
 
-let prime_p256_order_inverse_seq (#c: curve) : (s:lseq uint8 (getCoordinateLen c) {nat_from_intseq_le s == getPrimeOrder #c - 2}) =  
+let prime_order_inverse_seq (#c: curve) : (s:lseq uint8 (getCoordinateLen c) {nat_from_intseq_le s == getPrimeOrder #c - 2}) =  
   assert_norm (List.Tot.length (prime_order_inverse_list #P256) == getCoordinateLen P256);
   assert_norm (List.Tot.length (prime_order_inverse_list #P384) == getCoordinateLen P384);
   nat_from_intlist_seq_le (getCoordinateLen c) (prime_order_inverse_list #c); 
@@ -299,7 +299,7 @@ unfold let prime_order_list (#c: curve) : list uint8 =
     ]
 
 
-let prime_p256_order_seq (#c: curve) : s:lseq uint8 (getCoordinateLen c) 
+let prime_order_seq (#c: curve) : s:lseq uint8 (getCoordinateLen c) 
   {nat_from_intseq_be s == (getPrimeOrder #c)} =
   assert_norm (List.Tot.length (prime_order_list #P256) == getCoordinateLen P256);
   assert_norm (List.Tot.length (prime_order_list #P384) == getCoordinateLen P384);
@@ -310,45 +310,41 @@ let prime_p256_order_seq (#c: curve) : s:lseq uint8 (getCoordinateLen c)
   of_list (prime_order_list #c)
 
 
-val exponent_spec: a:nat_prime -> r:nat_prime{r = pow a (prime_p256_order - 2) % prime_p256_order}
+val exponent_spec: #c: curve -> a:nat_prime #c -> r:nat_prime #c{r = pow a (getPrimeOrder #c - 2) % getPrimeOrder #c}
 
-let exponent_spec a =
-  let a0, _ = _exponent_spec prime_p256_order_inverse_seq (1, a) in
-  lemma_exponen_spec prime_p256_order_inverse_seq (1, a) 256;
+let exponent_spec #c a =
+  let a0, _ = _exponent_spec prime_order_inverse_seq (1, a) in
+  lemma_exponen_spec prime_order_inverse_seq (1, a) (getPower c) ;
   a0
 
 
 
-val verifyQValidCurvePointSpec:
-  publicKey:tuple3 nat nat nat{~(isPointAtInfinity publicKey)} -> bool
+val verifyQValidCurvePointSpec: #c: curve 
+  -> publicKey:tuple3 nat nat nat{~(isPointAtInfinity publicKey)} -> bool
 
-let verifyQValidCurvePointSpec publicKey =
+let verifyQValidCurvePointSpec #c publicKey =
   let (x: nat), (y:nat), (z:nat) = publicKey in
-  x < Spec.P256.prime256 &&
-  y < Spec.P256.prime256 &&
-  z < Spec.P256.prime256 &&
-  isPointOnCurve (x, y, z) &&
-  isPointAtInfinity (scalar_multiplication prime_p256_order_seq publicKey)
+  let prime = getPrime c in 
+  x < prime &&
+  y < prime &&
+  z < prime &&
+  isPointOnCurve #c (x, y, z) &&
+  isPointAtInfinity (scalar_multiplication (prime_order_seq #c) publicKey)
 
 
-val checkCoordinates: r:nat -> s:nat -> bool
+val checkCoordinates: #c: curve ->  r: nat -> s: nat -> bool
 
-let checkCoordinates r s =
-  if r > 0 && r < prime_p256_order && s > 0 && s < prime_p256_order
+let checkCoordinates #c r s =
+  let prime = getPrime c in 
+  if r > 0 && r < prime && s > 0 && s < prime
   then true
   else false
 
 open Spec.Hash.Definitions
 
-
 type hash_alg_ecdsa = 
   |NoHash
   |Hash of (a: hash_alg {a == SHA2_256 \/ a == SHA2_384 \/ a == SHA2_512})
-
-
-type supported_curves = 
-  |P256
-  |P384
 
 
 let invert_state_s (a: hash_alg_ecdsa): Lemma
@@ -359,60 +355,72 @@ let invert_state_s (a: hash_alg_ecdsa): Lemma
   allow_inversion (hash_alg_ecdsa)
 
 
-val min_input_length: hash_alg_ecdsa -> Tot int
+val min_input_length: #c: curve -> hash_alg_ecdsa -> Tot int
 
-let min_input_length a =
+let min_input_length #c a =
   match a with
-    |NoHash -> 32
+    |NoHash -> getCoordinateLen c
     |Hash a -> 0
 
+(* Calculate {\displaystyle e={\textrm {HASH}}(m)}e={\textrm {HASH}}(m). (Here HASH is a cryptographic hash function, such as SHA-2, with the output converted to an integer.)
+Let {\displaystyle z}z be the {\displaystyle L_{n}}L_{n} leftmost bits of {\displaystyle e}e, where {\displaystyle L_{n}}L_{n} is the bit length of the group order {\displaystyle n}n. (Note that {\displaystyle z}z can be greater than {\displaystyle n}n but not longer.[1]) *)
 
-val hashSpec: a: hash_alg_ecdsa 
-  -> mLen: size_nat{mLen >= min_input_length a}
+
+(* Not decided yet *)
+val hashSpec:
+  c: curve 
+  -> a: hash_alg_ecdsa 
+  -> mLen: size_nat{mLen >= min_input_length #c a}
   -> m: lseq uint8 mLen ->
-  Tot (r:Lib.ByteSequence.lbytes 
-    (if Hash? a then hash_length (match a with Hash a -> a) else mLen) {length r >= 32})
+  Tot (Lib.ByteSequence.lbytes (getCoordinateLen c))
 
-let hashSpec a mLen m = 
+let hashSpec c a mLen m = 
   assert_norm (pow2 32 < pow2 61);
   assert_norm (pow2 32 < pow2 125);
   allow_inversion hash_alg_ecdsa;
   match a with 
-  |NoHash ->  m
-  |Hash a -> Spec.Agile.Hash.hash a m
+  |NoHash ->  sub m 0 (getCoordinateLen c)
+  |Hash a ->
+    let h = create (getCoordinateLen c) (u8 0) in 
+    let hashed = Spec.Agile.Hash.hash a m in 
+    if hash_length a >= getCoordinateLen c then 
+      sub hashed 0 (getCoordinateLen c)
+    else
+      let s = sub h (getCoordinateLen c - hash_length a) (hash_length a) in
+      update_sub h (getCoordinateLen c - hash_length a) (hash_length a) hashed
 
 open Lib.ByteSequence 
 
 
 val ecdsa_verification_agile:
+  c: curve -> 
   alg: hash_alg_ecdsa
   -> publicKey:tuple2 nat nat 
   -> r: nat 
   -> s: nat
-  -> mLen:size_nat {mLen >= min_input_length alg} 
+  -> mLen:size_nat {mLen >= min_input_length #c alg} 
   -> m:lseq uint8 mLen
   -> bool
 
-let ecdsa_verification_agile alg publicKey r s mLen m =
-  allow_inversion hash_alg_ecdsa;
+let ecdsa_verification_agile c alg publicKey r s mLen m =
+  allow_inversion hash_alg_ecdsa; 
+  let order = getPrimeOrder #c in 
   let publicJacobian = toJacobianCoordinates publicKey in
-  if not (verifyQValidCurvePointSpec publicJacobian) then false
+  if not (verifyQValidCurvePointSpec #c publicJacobian) then false
   else
     begin
-    if not (checkCoordinates r s) then false
+    if not ((checkCoordinates #c) r s) then false
     else
       begin
 
-      let hashM = hashSpec alg mLen m in 
-     
-      let cutHashM = sub hashM 0 32 in 
-      let hashNat = nat_from_bytes_be cutHashM % prime_p256_order in
+      let hashM = hashSpec c alg mLen m in
+      let hashNat = nat_from_bytes_be hashM % order in 
 
-      let u1 = nat_to_bytes_be 32 (pow s (prime_p256_order - 2) * hashNat % prime_p256_order) in
-      let u2 = nat_to_bytes_be 32 (pow s (prime_p256_order - 2) * r % prime_p256_order) in
+      let u1 = nat_to_bytes_be (getCoordinateLen c) (pow s (order - 2) * hashNat % order) in
+      let u2 = nat_to_bytes_be (getCoordinateLen c) (pow s (order - 2) * r % order) in 
 
       let pointAtInfinity = (0, 0, 0) in
-      let u1D, _ = montgomery_ladder_spec u1 (pointAtInfinity, basePoint) in
+      let u1D, _ = montgomery_ladder_spec u1 (pointAtInfinity, basePoint #c) in
       let u2D, _ = montgomery_ladder_spec u2 (pointAtInfinity, publicJacobian) in
 
       let sumPoints = _point_add u1D u2D in
@@ -421,6 +429,7 @@ let ecdsa_verification_agile alg publicKey r s mLen m =
       if Spec.P256.isPointAtInfinity pointNorm then false else x = r
     end
   end
+
 
 val ecdsa_signature_agile:
   curve: supported_curves 
