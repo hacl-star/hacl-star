@@ -398,8 +398,8 @@ open Lib.ByteSequence
 
 
 val ecdsa_verification_agile:
-  c: curve -> 
-  alg: hash_alg_ecdsa
+  c: curve 
+  -> alg: hash_alg_ecdsa
   -> publicKey:tuple2 nat nat 
   -> r: nat 
   -> s: nat
@@ -437,26 +437,26 @@ let ecdsa_verification_agile c alg publicKey r s mLen m =
 
 
 val ecdsa_signature_agile:
-  curve: supported_curves 
+  c: curve  
   -> alg: hash_alg_ecdsa
-  -> mLen:size_nat{mLen >= min_input_length alg} 
+  -> mLen:size_nat{mLen >= min_input_length #c alg} 
   -> m:lseq uint8 mLen
   -> privateKey:lseq uint8 32
   -> k:lseq uint8 32
   -> tuple3 nat nat uint64
 
-let ecdsa_signature_agile curve alg mLen m privateKey k =
+let ecdsa_signature_agile c alg mLen m privateKey k =
   assert_norm (pow2 32 < pow2 61);
   assert_norm (pow2 32 < pow2 125);
+  let order = getPrimeOrder #c in 
   let r, _ = montgomery_ladder_spec k ((0,0,0), basePoint) in
   let (xN, _, _) = _norm r in
-  let hashM = hashSpec alg mLen m in 
-  let cutHashM = sub hashM 0 32 in 
-  let z = nat_from_bytes_be cutHashM % prime_p256_order in
+  let hashM = hashSpec c alg mLen m in 
+  let z = nat_from_bytes_be hashM % order in
   let kFelem = nat_from_bytes_be k in
   let privateKeyFelem = nat_from_bytes_be privateKey in
-  let resultR = xN % prime_p256_order in
-  let resultS = (z + resultR * privateKeyFelem) * pow kFelem (prime_p256_order - 2) % prime_p256_order in
+  let resultR = xN % order in
+  let resultS = (z + resultR * privateKeyFelem) * pow kFelem (order - 2) % order in
     if resultR = 0 || resultS = 0 then
       resultR, resultS, u64 (pow2 64 - 1)
     else
