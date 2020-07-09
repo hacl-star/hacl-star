@@ -39,63 +39,120 @@ let eq1_u64 a =
   neq_mask a (u64 0)
 
 
-val isZero_uint64_CT:  f: felem -> Stack uint64
+val isZero_uint64_CT: #c: curve ->  f: felem c -> Stack uint64
   (requires fun h -> live h f)
-  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ (if as_nat h0 f = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0))
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ (if as_nat c h0 f = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0))
  
-let isZero_uint64_CT f = 
-  let a0 = index f (size 0) in 
-  let a1 = index f (size 1) in 
-  let a2 = index f (size 2) in 
-  let a3 = index f (size 3) in 
+let isZero_uint64_CT #c f = 
+  match c with 
+  |P256 -> 
+    let a0 = index f (size 0) in 
+    let a1 = index f (size 1) in 
+    let a2 = index f (size 2) in 
+    let a3 = index f (size 3) in 
   
-  let r0 = eq_mask a0 (u64 0) in 
-  let r1 = eq_mask a1 (u64 0) in 
-  let r2 = eq_mask a2 (u64 0) in 
-  let r3 = eq_mask a3 (u64 0) in 
+    let r0 = eq_mask a0 (u64 0) in 
+    let r1 = eq_mask a1 (u64 0) in 
+    let r2 = eq_mask a2 (u64 0) in 
+    let r3 = eq_mask a3 (u64 0) in 
   
-  let r01 = logand r0 r1 in 
-     logand_lemma r0 r1; 
-  let r23 = logand r2 r3 in 
-     logand_lemma r2 r3;
-  let r = logand r01 r23 in 
-    logand_lemma r01 r23;
-  r
-
-
-val compare_felem: a: felem -> b: felem -> Stack uint64
-  (requires fun h -> live h a /\ live h b) 
-  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ (if as_nat h0 a = as_nat h0 b then uint_v r == pow2 64 - 1 else uint_v r = 0))
-
-let compare_felem a b = 
-  let a_0 = index a (size 0) in 
-  let a_1 = index a (size 1) in 
-  let a_2 = index a (size 2) in 
-  let a_3 = index a (size 3) in 
-
-  let b_0 = index b (size 0) in 
-  let b_1 = index b (size 1) in 
-  let b_2 = index b (size 2) in 
-  let b_3 = index b (size 3) in 
-
-  let r_0 = eq_mask a_0 b_0 in 
-      eq_mask_lemma a_0 b_0;
-  let r_1 = eq_mask a_1 b_1 in 
-      eq_mask_lemma a_1 b_1;
-  let r_2 = eq_mask a_2 b_2 in 
-      eq_mask_lemma a_2 b_2;
-  let r_3 = eq_mask a_3 b_3 in 
-      eq_mask_lemma a_3 b_3;
-  
-  let r01 = logand r_0 r_1 in 
-      logand_lemma r_0 r_1;
-  let r23 = logand r_2 r_3 in 
-      logand_lemma r_2 r_3;
-  
-  let r = logand r01 r23 in 
+    let r01 = logand r0 r1 in 
+      logand_lemma r0 r1; 
+    let r23 = logand r2 r3 in 
+      logand_lemma r2 r3;
+    let r = logand r01 r23 in 
       logand_lemma r01 r23;
-      lemma_equality (a_0, a_1, a_2, a_3) (b_0, b_1, b_2, b_3); 
-  r
+    r
+  |P384 -> admit();
+    let a0 = index f (size 0) in 
+    let a1 = index f (size 1) in 
+    let a2 = index f (size 2) in 
+    let a3 = index f (size 3) in 
+    let a4 = index f (size 4) in 
+    let a5 = index f (size 5) in 
+  
+    let r0 = eq_mask a0 (u64 0) in 
+    let r1 = eq_mask a1 (u64 0) in 
+    let r2 = eq_mask a2 (u64 0) in 
+    let r3 = eq_mask a3 (u64 0) in 
+    let r4 = eq_mask a4 (u64 0) in 
+    let r5 = eq_mask a5 (u64 0) in 
+  
+    let r01 = logand r0 r1 in 
+      logand_lemma r0 r1; 
+    let r23 = logand r2 r3 in 
+      logand_lemma r2 r3;
+    let r = logand r01 r23 in 
+      logand_lemma r01 r23;
+    let r45 = logand r4 r5 in 
+    let r = logand r r45 in 
+    r
+
+
+val compare_felem: #c: curve -> a: felem c -> b: felem c -> Stack uint64
+  (requires fun h -> live h a /\ live h b) 
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ (if as_nat c h0 a = as_nat c h0 b then uint_v r == pow2 64 - 1 else uint_v r = 0))
+
+let compare_felem #c a b = 
+  match c with 
+  |P256 -> 
+    let a_0 = index a (size 0) in 
+    let a_1 = index a (size 1) in 
+    let a_2 = index a (size 2) in 
+    let a_3 = index a (size 3) in 
+
+    let b_0 = index b (size 0) in 
+    let b_1 = index b (size 1) in 
+    let b_2 = index b (size 2) in 
+    let b_3 = index b (size 3) in 
+
+    let r_0 = eq_mask a_0 b_0 in 
+	eq_mask_lemma a_0 b_0;
+    let r_1 = eq_mask a_1 b_1 in 
+	eq_mask_lemma a_1 b_1;
+    let r_2 = eq_mask a_2 b_2 in 
+	eq_mask_lemma a_2 b_2;
+    let r_3 = eq_mask a_3 b_3 in 
+	eq_mask_lemma a_3 b_3;
+    
+    let r01 = logand r_0 r_1 in 
+	logand_lemma r_0 r_1;
+    let r23 = logand r_2 r_3 in 
+	logand_lemma r_2 r_3;
+    
+    let r = logand r01 r23 in 
+	logand_lemma r01 r23;
+	lemma_equality (a_0, a_1, a_2, a_3) (b_0, b_1, b_2, b_3); 
+    r
+  |P384 -> 
+      let a_0 = index a (size 0) in 
+      let a_1 = index a (size 1) in 
+      let a_2 = index a (size 2) in 
+      let a_3 = index a (size 3) in 
+      let a_4 = index a (size 4) in 
+      let a_5 = index a (size 5) in 
+
+      let b_0 = index b (size 0) in 
+      let b_1 = index b (size 1) in 
+      let b_2 = index b (size 2) in 
+      let b_3 = index b (size 3) in 
+      let b_4 = index b (size 4) in 
+      let b_5 = index b (size 5) in 
+
+      let r_0 = eq_mask a_0 b_0 in 
+      let r_1 = eq_mask a_1 b_1 in 
+      let r_2 = eq_mask a_2 b_2 in 
+      let r_3 = eq_mask a_3 b_3 in 
+      let r_4 = eq_mask a_4 b_4 in 
+      let r_5 = eq_mask a_5 b_5 in 
+    
+      let r01 = logand r_0 r_1 in 
+      let r23 = logand r_2 r_3 in 
+      let r45 = logand r_4 r_5 in 
+
+      let r = logand(logand r01 r23) r45 in 
+      r
+    
 
 
 inline_for_extraction noextract
@@ -107,7 +164,7 @@ val load_buffer8:
   o: lbuffer uint64 (size 8) -> 
   Stack unit
     (requires fun h -> live h o)
-    (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\ wide_as_nat h1 o == wide_as_nat4 (a0, a1, a2, a3, a4, a5, a6, a7))
+    (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\ wide_as_nat #P256 h1 o == wide_as_nat4 (a0, a1, a2, a3, a4, a5, a6, a7))
 
 let load_buffer8 a0 a1 a2 a3 a4 a5 a6 a7  o = 
     let h0 = ST.get() in 
@@ -137,49 +194,53 @@ let copy_conditional_u64 a b mask =
   lemma_xor_copy_cond a b mask;
   logxor a (logand mask (logxor a b))
 
-val copy_conditional: out: felem -> x: felem -> mask: uint64{uint_v mask = 0 \/ uint_v mask = pow2 64 - 1} -> Stack unit 
+
+val copy_conditional: #c: curve -> out: felem c -> x: felem c -> mask: uint64{uint_v mask = 0 \/ uint_v mask = pow2 64 - 1} -> Stack unit 
   (requires fun h -> live h out /\ live h x)
   (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\ 
     (if uint_v mask = 0 then as_seq h1 out == as_seq h0 out else as_seq h1 out == as_seq h0 x)
   ) 
 
-let copy_conditional out x mask = 
+let copy_conditional #c out x mask = 
+  match c with 
+  |P256 -> 
     let h0 = ST.get() in 
-  let out_0 = index out (size 0) in 
-  let out_1 = index out (size 1) in 
-  let out_2 = index out (size 2) in 
-  let out_3 = index out (size 3) in 
+    let out_0 = index out (size 0) in 
+    let out_1 = index out (size 1) in 
+    let out_2 = index out (size 2) in 
+    let out_3 = index out (size 3) in 
 
-  let x_0 = index x (size 0) in 
-  let x_1 = index x (size 1) in 
-  let x_2 = index x (size 2) in 
-  let x_3 = index x (size 3) in 
+    let x_0 = index x (size 0) in 
+    let x_1 = index x (size 1) in 
+    let x_2 = index x (size 2) in 
+    let x_3 = index x (size 3) in 
 
-  let r_0 = logxor out_0 (logand mask (logxor out_0 x_0)) in 
-  let r_1 = logxor out_1 (logand mask (logxor out_1 x_1)) in 
-  let r_2 = logxor out_2 (logand mask (logxor out_2 x_2)) in 
-  let r_3 = logxor out_3 (logand mask (logxor out_3 x_3)) in 
+    let r_0 = logxor out_0 (logand mask (logxor out_0 x_0)) in 
+    let r_1 = logxor out_1 (logand mask (logxor out_1 x_1)) in 
+    let r_2 = logxor out_2 (logand mask (logxor out_2 x_2)) in 
+    let r_3 = logxor out_3 (logand mask (logxor out_3 x_3)) in 
 
-  lemma_xor_copy_cond out_0 x_0 mask;
-  lemma_xor_copy_cond out_1 x_1 mask;
-  lemma_xor_copy_cond out_2 x_2 mask;
-  lemma_xor_copy_cond out_3 x_3 mask;
+    lemma_xor_copy_cond out_0 x_0 mask;
+    lemma_xor_copy_cond out_1 x_1 mask;
+    lemma_xor_copy_cond out_2 x_2 mask;
+    lemma_xor_copy_cond out_3 x_3 mask;
 
-  upd out (size 0) r_0;
-  upd out (size 1) r_1;
-  upd out (size 2) r_2;
-  upd out (size 3) r_3;
-    let h1 = ST.get() in 
+    upd out (size 0) r_0;
+    upd out (size 1) r_1;
+    upd out (size 2) r_2;
+    upd out (size 3) r_3;
+      let h1 = ST.get() in 
 
-  lemma_eq_funct_ (as_seq h1 out) (as_seq h0 out);
-  lemma_eq_funct_ (as_seq h1 out) (as_seq h0 x)
+    lemma_eq_funct_ (as_seq h1 out) (as_seq h0 out);
+    lemma_eq_funct_ (as_seq h1 out) (as_seq h0 x)
+  |P384 -> ()
 
 
-val add4: x: felem -> y: felem -> result: felem -> 
+val add4: x: felem P256 -> y: felem P256 -> result: felem P256 -> 
   Stack uint64
     (requires fun h -> live h x /\ live h y /\ live h result /\ eq_or_disjoint x result /\ eq_or_disjoint y result)
     (ensures fun h0 c h1 -> modifies (loc result) h0 h1 /\ v c <= 1 /\ 
-      as_nat h1 result + v c * pow2 256 == as_nat h0 x + as_nat h0 y)   
+      as_nat P256 h1 result + v c * pow2 256 == as_nat P256 h0 x + as_nat P256 h0 y)   
 
 let add4 x y result =    
   let h0 = ST.get() in
@@ -205,12 +266,12 @@ let add4 x y result =
   cc3
 
 
-val add4_with_carry: c: uint64 ->  x: felem -> y: felem -> result: felem -> 
+val add4_with_carry: c: uint64 ->  x: felem P256 -> y: felem P256 -> result: felem P256 -> 
   Stack uint64
     (requires fun h -> uint_v c <= 1 /\ live h x /\ live h y /\ live h result /\ eq_or_disjoint x result /\ 
       eq_or_disjoint y result)
     (ensures fun h0 carry h1 -> modifies (loc result) h0 h1 /\ uint_v carry <= 1 /\ 
-      as_nat h1 result + v carry * pow2 256 == as_nat h0 x + as_nat h0 y + uint_v c)   
+      as_nat P256 h1 result + v carry * pow2 256 == as_nat P256 h0 x + as_nat P256 h0 y + uint_v c)   
 
 let add4_with_carry c x y result =    
     let h0 = ST.get() in
@@ -236,7 +297,7 @@ let add4_with_carry c x y result =
     cc
 
 
-val add8: x: widefelem -> y: widefelem -> result: widefelem -> Stack uint64 
+val add8: x: widefelem P256 -> y: widefelem P256 -> result: widefelem P256 -> Stack uint64 
   (requires fun h -> live h x /\ live h y /\ live h result /\ eq_or_disjoint x result /\ eq_or_disjoint y result)
   (ensures fun h0 c h1 -> modifies (loc result) h0 h1 /\ v c <= 1 /\ 
     wide_as_nat h1 result + v c * pow2 512 == wide_as_nat h0 x + wide_as_nat h0 y)
@@ -263,7 +324,7 @@ let add8 x y result =
       wide_as_nat h0 x + wide_as_nat h0 y;
       (==) 
       {
-  distributivity_add_left (as_nat h0 a1) (as_nat h0 b1) (pow2 256)
+  distributivity_add_left (as_nat P256 h0 a1) (as_nat P256 h0 b1) (pow2 256)
       } 
       wide_as_nat h1 result + uint_v carry1 * pow2 256 * pow2 256; 
       (==) 
@@ -276,12 +337,12 @@ let add8 x y result =
   carry1
 
 
-val add4_variables: x: felem -> cin: uint64 {uint_v cin <=1} ->  y0: uint64 -> y1: uint64 -> y2: uint64 -> y3: uint64 -> 
-  result: felem -> 
+val add4_variables: x: felem P256 -> cin: uint64 {uint_v cin <=1} ->  y0: uint64 -> y1: uint64 -> y2: uint64 -> y3: uint64 -> 
+  result: felem P256 -> 
   Stack uint64
     (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result)
     (ensures fun h0 c h1 -> modifies (loc result) h0 h1 /\ v c <= 1 /\  
-      as_nat h1 result  + uint_v c * pow2 256 == as_nat h0 x + uint_v y0 + uint_v y1 * pow2 64 + uint_v y2 * pow2 128 + uint_v y3 * pow2 192 + uint_v cin)   
+      as_nat P256 h1 result  + uint_v c * pow2 256 == as_nat P256 h0 x + uint_v y0 + uint_v y1 * pow2 64 + uint_v y2 * pow2 128 + uint_v y3 * pow2 192 + uint_v cin)   
 
 let add4_variables x cin y0 y1 y2 y3 result = 
     let h0 = ST.get() in 
@@ -307,13 +368,13 @@ let add4_variables x cin y0 y1 y2 y3 result =
     cc
 
 
-val sub4_il: x: felem -> y: glbuffer uint64 (size 4) -> result: felem -> 
+val sub4_il: x: felem P256 -> y: glbuffer uint64 (size 4) -> result: felem P256 -> 
   Stack uint64
     (requires fun h -> live h x /\ live h y /\ live h result /\ disjoint x result /\ disjoint result y)
     (ensures fun h0 c h1 -> modifies1 result h0 h1 /\ v c <= 1 /\
       (
-  as_nat h1 result - v c * pow2 256 == as_nat h0 x  - as_nat_il h0 y /\
-  (if uint_v c = 0 then as_nat h0 x >= as_nat_il h0 y else as_nat h0 x < as_nat_il h0 y)
+  as_nat P256 h1 result - v c * pow2 256 == as_nat P256 h0 x  - as_nat_il h0 y /\
+  (if uint_v c = 0 then as_nat P256 h0 x >= as_nat_il h0 y else as_nat P256 h0 x < as_nat_il h0 y)
       )
     )
 
@@ -335,10 +396,10 @@ let sub4_il x y result =
     cc
 
 
-val sub4: x: felem -> y:felem -> result: felem -> 
+val sub4: x: felem P256 -> y:felem P256 -> result: felem P256-> 
   Stack uint64
     (requires fun h -> live h x /\ live h y /\ live h result /\ eq_or_disjoint x result /\ eq_or_disjoint y result)
-    (ensures fun h0 c h1 -> modifies1 result h0 h1 /\ v c <= 1 /\ as_nat h1 result - v c * pow2 256 == as_nat h0 x - as_nat h0 y)
+    (ensures fun h0 c h1 -> modifies1 result h0 h1 /\ v c <= 1 /\ as_nat P256 h1 result - v c * pow2 256 == as_nat P256 h0 x - as_nat P256 h0 y)
 
 let sub4 x y result = 
   let h0 = ST.get() in 
@@ -382,7 +443,7 @@ let mul64 x y result temp =
   upd temp (size 0) h0
 
 inline_for_extraction noextract
-val mult64_0: x: felem -> u: uint64 -> result: lbuffer uint64 (size 1) -> temp: lbuffer uint64 (size 1) -> Stack unit 
+val mult64_0: x: felem P256 -> u: uint64 -> result: lbuffer uint64 (size 1) -> temp: lbuffer uint64 (size 1) -> Stack unit 
   (requires fun h -> live h x /\ live h result /\ live h temp /\ disjoint result temp)
   (ensures fun h0 _ h1 -> 
     let result_ = Seq.index (as_seq h1 result) 0 in 
@@ -428,7 +489,7 @@ inline_for_extraction noextract
 val mul1_il: f:  glbuffer uint64 (size 4) -> u: uint64 -> result: lbuffer uint64 (size 4) -> Stack uint64
   (requires fun h -> live h result /\ live h f)
   (ensures fun h0 c h1 -> modifies (loc result) h0 h1 /\ 
-    as_nat_il h0 f * uint_v u = uint_v c * pow2 64 * pow2 64 * pow2 64 * pow2 64 + as_nat h1 result /\ 
+    as_nat_il h0 f * uint_v u = uint_v c * pow2 64 * pow2 64 * pow2 64 * pow2 64 + as_nat P256 h1 result /\ 
     as_nat_il h0 f * uint_v u < pow2 320 /\
     uint_v c < pow2 64 - 1 
   )
@@ -477,8 +538,8 @@ inline_for_extraction noextract
 val mul1: f: lbuffer uint64 (size 4) -> u: uint64 -> result: lbuffer uint64 (size 4) -> Stack uint64
   (requires fun h -> live h result /\ live h f)
   (ensures fun h0 c h1 -> modifies (loc result) h0 h1 /\ 
-    as_nat h0 f * uint_v u = uint_v c * pow2 256 + as_nat h1 result /\ 
-    as_nat h0 f * uint_v u < pow2 320 /\
+    as_nat P256 h0 f * uint_v u = uint_v c * pow2 256 + as_nat P256 h1 result /\ 
+    as_nat P256 h0 f * uint_v u < pow2 320 /\
     uint_v c < pow2 64 - 1
   )
 
@@ -515,7 +576,7 @@ let mul1 f u result =
   let temp0 = index temp (size 0) in 
     lemma_low_level0 (uint_v(Seq.index (as_seq h1 o0) 0)) (uint_v (Seq.index (as_seq h2 o1) 0)) (uint_v (Seq.index (as_seq h3 o2) 0)) (uint_v (Seq.index (as_seq h4 o3) 0)) (uint_v f0) (uint_v f1) (uint_v f2) (uint_v f3) (uint_v u) (uint_v (Seq.index (as_seq h2 temp) 0)) (uint_v c1) (uint_v c2) (uint_v c3) (uint_v (Seq.index (as_seq h3 temp) 0)) (uint_v temp0); 
     
-  mul_lemma_4 (as_nat h0 f) (uint_v u) (pow2 256 - 1) (pow2 64 - 1);
+  mul_lemma_4 (as_nat P256 h0 f) (uint_v u) (pow2 256 - 1) (pow2 64 - 1);
   assert_norm((pow2 256 - 1) * (pow2 64 - 1) == pow2 320 - pow2 256 - pow2 64 + 1);
   assert_norm((pow2 320 - pow2 256) / pow2 256 == pow2 64 - 1);
 
@@ -523,11 +584,11 @@ let mul1 f u result =
   c3 +! temp0
 
 inline_for_extraction noextract
-val mul1_add: f1: felem -> u2: uint64 -> f3: felem -> result: felem -> 
+val mul1_add: f1: felem P256 -> u2: uint64 -> f3: felem P256 -> result: felem P256 -> 
   Stack uint64 
   (requires fun h -> live h f1 /\ live h f3 /\ live h result /\ eq_or_disjoint f3 result /\ disjoint f1 result)
   (ensures fun h0 c h1 -> modifies (loc result) h0 h1  /\
-    as_nat h1 result + uint_v c * pow2 256 == as_nat h0 f1 * uint_v u2 + as_nat h0 f3 )
+    as_nat P256 h1 result + uint_v c * pow2 256 == as_nat P256 h0 f1 * uint_v u2 + as_nat P256 h0 f3 )
 
 let mul1_add f1 u2 f3 result = 
   push_frame();
@@ -613,11 +674,11 @@ let lemma_powers () =
 #push-options "--z3rlimit 300"
 
 inline_for_extraction noextract
-val mul: f: felem -> r: felem -> out: widefelem -> 
+val mul: f: felem P256 -> r: felem P256 -> out: widefelem P256 -> 
   Stack unit
     (requires fun h -> live h out /\ live h f /\ live h r /\ disjoint r out)
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\ 
-      wide_as_nat h1 out = as_nat h0 r * as_nat h0 f
+      wide_as_nat h1 out = as_nat P256 h0 r * as_nat P256 h0 f
     )
 
 let mul f r out =
@@ -636,14 +697,14 @@ let mul f r out =
     let h1 = ST.get() in 
     let bk0 = sub out (size 0) (size 1) in 
     
-    assert(as_nat h0 r * uint_v f0 = uint_v (Lib.Sequence.index (as_seq h1 out) 4) * pow2 64 * pow2 64 * pow2 64 * pow2 64 + as_nat h1 b0);
+    assert(as_nat P256 h0 r * uint_v f0 = uint_v (Lib.Sequence.index (as_seq h1 out) 4) * pow2 64 * pow2 64 * pow2 64 * pow2 64 + as_nat P256 h1 b0);
 
   let b1 = sub out (size 1) (size 4) in   
   let c1 = mul1_add r f1 b1 b1 in 
       upd out (size 5) c1; 
     let h2 = ST.get() in
     
-    assert(as_nat h2 b1 + uint_v (Lib.Sequence.index (as_seq h2 out) 5) * pow2 64 * pow2 64 * pow2 64 * pow2 64 == as_nat h1 r * uint_v f1 + as_nat h1 b1);
+    assert(as_nat P256 h2 b1 + uint_v (Lib.Sequence.index (as_seq h2 out) 5) * pow2 64 * pow2 64 * pow2 64 * pow2 64 == as_nat P256 h1 r * uint_v f1 + as_nat P256 h1 b1);
 
       let bk1 = sub out (size 0) (size 2) in 
   let b2 = sub out (size 2) (size 4) in 
@@ -651,7 +712,7 @@ let mul f r out =
     upd out (size 6) c2;
     let h3 = ST.get() in 
    
-    assert(as_nat h3 b2 + uint_v (Lib.Sequence.index (as_seq h3 out) 6) * pow2 64 * pow2 64 * pow2 64 * pow2 64 == as_nat h2 r * uint_v f2 + as_nat h2 b2);
+    assert(as_nat P256 h3 b2 + uint_v (Lib.Sequence.index (as_seq h3 out) 6) * pow2 64 * pow2 64 * pow2 64 * pow2 64 == as_nat P256 h2 r * uint_v f2 + as_nat P256 h2 b2);
 
      let bk2 = sub out (size 0) (size 3) in 
   let b3 = sub out (size 3) (size 4) in 
@@ -660,7 +721,7 @@ let mul f r out =
 
     let h4 = ST.get() in 
 
-    assert(as_nat h4 b3 + uint_v (Lib.Sequence.index (as_seq h4 out) 7) * pow2 64 * pow2 64 * pow2 64 * pow2 64 == as_nat h3 r * uint_v f3 + as_nat h3 b3);
+    assert(as_nat P256 h4 b3 + uint_v (Lib.Sequence.index (as_seq h4 out) 7) * pow2 64 * pow2 64 * pow2 64 * pow2 64 == as_nat P256 h3 r * uint_v f3 + as_nat P256 h3 b3);
     
     let h5 = ST.get() in
 
@@ -670,17 +731,17 @@ let mul f r out =
     uint_v (Lib.Sequence.index (as_seq h4 out) 0) +  
     uint_v (Lib.Sequence.index (as_seq h4 out) 1) * pow2 64 + 
     uint_v (Lib.Sequence.index (as_seq h4 out) 2) * pow2 64 * pow2 64 + 
-    as_nat h4 b3 * pow2 64 * pow2 64 * pow2 64 + 
+    as_nat P256 h4 b3 * pow2 64 * pow2 64 * pow2 64 + 
     uint_v (Lib.Sequence.index (as_seq h4 out) 7) * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64;
     
     (==) {
-      lemma_mul0 (as_nat h4 b3) (uint_v (Lib.Sequence.index (as_seq h4 out) 7)) (as_nat h3 r) (uint_v f3) (as_nat h3 b3)}
+      lemma_mul0 (as_nat P256 h4 b3) (uint_v (Lib.Sequence.index (as_seq h4 out) 7)) (as_nat P256 h3 r) (uint_v f3) (as_nat P256 h3 b3)}
 
     uint_v (Lib.Sequence.index (as_seq h4 out) 0) +  
     uint_v (Lib.Sequence.index (as_seq h4 out) 1) * pow2 64 + 
     uint_v (Lib.Sequence.index (as_seq h4 out) 2) * pow2 64 * pow2 64 + 
-    as_nat h3 r * uint_v f3 * pow2 64 * pow2 64 * pow2 64 + 
-    as_nat h3 b3 * pow2 64 * pow2 64 * pow2 64;
+    as_nat P256 h3 r * uint_v f3 * pow2 64 * pow2 64 * pow2 64 + 
+    as_nat P256 h3 b3 * pow2 64 * pow2 64 * pow2 64;
 
     (==)
     {
@@ -698,7 +759,7 @@ let mul f r out =
       uint_v (Lib.Sequence.index (as_seq h3 out) 5) * pow2 64 * pow2 64 + 
       uint_v (Lib.Sequence.index (as_seq h3 out) 6) * pow2 64 * pow2 64 * pow2 64
     ) * pow2 64 * pow2 64 * pow2 64 + 
-    as_nat h3 r * uint_v f3 * pow2 64 * pow2 64 * pow2 64;
+    as_nat P256 h3 r * uint_v f3 * pow2 64 * pow2 64 * pow2 64;
   
     (==) {
       lemma_mul1 (uint_v (Lib.Sequence.index (as_seq h3 out) 3)) (uint_v (Lib.Sequence.index (as_seq h3 out) 4)) (uint_v (Lib.Sequence.index (as_seq h3 out) 5)) (uint_v (Lib.Sequence.index (as_seq h3 out) 6))}
@@ -706,20 +767,20 @@ let mul f r out =
     uint_v (Lib.Sequence.index (as_seq h3 out) 0) +  
     uint_v (Lib.Sequence.index (as_seq h3 out) 1) * pow2 64 + 
     
-    as_nat h3 b2 * pow2 64 * pow2 64 + 
+    as_nat P256 h3 b2 * pow2 64 * pow2 64 + 
     
     uint_v (Lib.Sequence.index (as_seq h3 out) 6) * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 + 
     
-    as_nat h3 r * uint_v f3 * pow2 64 * pow2 64 * pow2 64;
+    as_nat P256 h3 r * uint_v f3 * pow2 64 * pow2 64 * pow2 64;
     (==){
-      lemma_mul2 (as_nat h3 b2) (uint_v (Lib.Sequence.index (as_seq h3 out) 6)) (as_nat h2 r) (uint_v f2) (as_nat h2 b2)}
+      lemma_mul2 (as_nat P256 h3 b2) (uint_v (Lib.Sequence.index (as_seq h3 out) 6)) (as_nat P256 h2 r) (uint_v f2) (as_nat P256 h2 b2)}
   
     uint_v (Lib.Sequence.index (as_seq h3 out) 0) +  
     uint_v (Lib.Sequence.index (as_seq h3 out) 1) * pow2 64 + 
     
-    as_nat h2 r * uint_v f2 * pow2 64 * pow2 64 + 
-    as_nat h2 b2 * pow2 64 * pow2 64 + 
-    as_nat h3 r * uint_v f3 * pow2 64 * pow2 64 * pow2 64;
+    as_nat P256 h2 r * uint_v f2 * pow2 64 * pow2 64 + 
+    as_nat P256 h2 b2 * pow2 64 * pow2 64 + 
+    as_nat P256 h3 r * uint_v f3 * pow2 64 * pow2 64 * pow2 64;
 
     (==){    
       assert(Lib.Sequence.index (as_seq h2 bk1) 0 == Lib.Sequence.index (as_seq h2 out) 0);
@@ -733,25 +794,25 @@ let mul f r out =
       uint_v (Lib.Sequence.index (as_seq h2 out) 4) * pow2 64 * pow2 64 + 
       uint_v (Lib.Sequence.index (as_seq h2 out) 5) * pow2 64 * pow2 64 * pow2 64
     ) * pow2 64 * pow2 64 + 
-    as_nat h2 r * uint_v f2 * pow2 64 * pow2 64 + 
-    as_nat h3 r * uint_v f3 * pow2 64 * pow2 64 * pow2 64;
+    as_nat P256 h2 r * uint_v f2 * pow2 64 * pow2 64 + 
+    as_nat P256 h3 r * uint_v f3 * pow2 64 * pow2 64 * pow2 64;
 
     (==) {
       lemma_mul3 (uint_v (Lib.Sequence.index (as_seq h2 out) 2)) (uint_v (Lib.Sequence.index (as_seq h2 out) 3)) (uint_v (Lib.Sequence.index (as_seq h2 out) 4)) (uint_v (Lib.Sequence.index (as_seq h2 out) 5))}
 
     uint_v (Lib.Sequence.index (as_seq h2 out) 0) +  
-    as_nat h2 b1 * pow2 64 + 
+    as_nat P256 h2 b1 * pow2 64 + 
     uint_v (Lib.Sequence.index (as_seq h2 out) 5) * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 + 
-    as_nat h2 r * uint_v f2 * pow2 64 * pow2 64 + 
-    as_nat h3 r * uint_v f3 * pow2 64 * pow2 64 * pow2 64;
+    as_nat P256 h2 r * uint_v f2 * pow2 64 * pow2 64 + 
+    as_nat P256 h3 r * uint_v f3 * pow2 64 * pow2 64 * pow2 64;
 
     (==){
-       lemma_mul4 (as_nat h2 b1) (uint_v (Lib.Sequence.index (as_seq h2 out) 5)) (as_nat h1 r) (uint_v f1) (as_nat h1 b1)}
+       lemma_mul4 (as_nat P256 h2 b1) (uint_v (Lib.Sequence.index (as_seq h2 out) 5)) (as_nat P256 h1 r) (uint_v f1) (as_nat P256 h1 b1)}
 
     uint_v (Lib.Sequence.index (as_seq h2 out) 0) +  
-    as_nat h1 r * uint_v f1 * pow2 64 + as_nat h1 b1 * pow2 64 +
-    as_nat h2 r * uint_v f2 * pow2 64 * pow2 64 + 
-    as_nat h3 r * uint_v f3 * pow2 64 * pow2 64 * pow2 64;
+    as_nat P256 h1 r * uint_v f1 * pow2 64 + as_nat P256 h1 b1 * pow2 64 +
+    as_nat P256 h2 r * uint_v f2 * pow2 64 * pow2 64 + 
+    as_nat P256 h3 r  * uint_v f3 * pow2 64 * pow2 64 * pow2 64;
 
     (==){
       assert(Lib.Sequence.index (as_seq h1 bk0) 0 == Lib.Sequence.index (as_seq h1 out) 0)}
@@ -763,21 +824,21 @@ let mul f r out =
       uint_v (Lib.Sequence.index (as_seq h1 out) 3) * pow2 64 * pow2 64 + 
       uint_v (Lib.Sequence.index (as_seq h1 out) 4) * pow2 64 * pow2 64 * pow2 64) * pow2 64 +
       
-      as_nat h1 r * uint_v f1 * pow2 64 + 
-      as_nat h2 r * uint_v f2 * pow2 64 * pow2 64 + 
-      as_nat h3 r * uint_v f3 * pow2 64 * pow2 64 * pow2 64;
+      as_nat P256 h1 r * uint_v f1 * pow2 64 + 
+      as_nat P256 h2 r * uint_v f2 * pow2 64 * pow2 64 + 
+      as_nat P256 h3 r * uint_v f3 * pow2 64 * pow2 64 * pow2 64;
 
     (==) {
      lemma_mul5 (uint_v (Lib.Sequence.index (as_seq h1 out) 1)) (uint_v (Lib.Sequence.index (as_seq h1 out) 2)) (uint_v (Lib.Sequence.index (as_seq h1 out) 3)) (uint_v (Lib.Sequence.index (as_seq h1 out) 4))}
 
-     as_nat h0 r * uint_v f0 +
-     as_nat h0 r * uint_v f1 * pow2 64 + 
-     as_nat h0 r * uint_v f2 * pow2 64 * pow2 64 + 
-     as_nat h0 r * uint_v f3 * pow2 64 * pow2 64 * pow2 64;
+     as_nat P256 h0 r * uint_v f0 +
+     as_nat P256 h0 r * uint_v f1 * pow2 64 + 
+     as_nat P256 h0 r * uint_v f2 * pow2 64 * pow2 64 + 
+     as_nat P256 h0 r * uint_v f3 * pow2 64 * pow2 64 * pow2 64;
 
-    (==) {lemma_mul6 (as_nat h0 r) (uint_v f0) (uint_v f1) (uint_v f2) (uint_v f3)}
+    (==) {lemma_mul6 (as_nat P256 h0 r) (uint_v f0) (uint_v f1) (uint_v f2) (uint_v f3)}
 
-    as_nat h0 r * as_nat h0 f;}
+    as_nat P256 h0 r * as_nat P256 h0 f;}
 
 #pop-options
 
@@ -834,7 +895,7 @@ val sq0: f:  lbuffer uint64 (size 4) -> result: lbuffer uint64 (size 4) -> memor
   (ensures fun h0 c h1 -> modifies (loc result |+| loc memory |+| loc temp) h0 h1 /\ 
     (
       let f0 = Lib.Sequence.index (as_seq h0 f) 0 in 
-      as_nat h1 result + uint_v c * pow2 64 * pow2 64 * pow2 64 * pow2 64  = uint_v f0 * as_nat h0 f) /\
+      as_nat P256 h1 result + uint_v c * pow2 64 * pow2 64 * pow2 64 * pow2 64  = uint_v f0 * as_nat P256 h0 f) /\
       (
 	let f = as_seq h0 f in 
 	let f0 = Lib.Sequence.index f 0 in 
@@ -968,8 +1029,8 @@ let sq0 f result memory temp =
   distributivity_add_left  (v c3) (uint_v temp0) (pow2 64 * pow2 64 * pow2 64 * pow2 64);
   lemma_distr_4 (v f0) (v f0) (v f1) (v f2) (v f3);
   
-   lemma_mult_le_left (as_nat h0 f) (v f0) (pow2 64);
-   lemma_mult_le_left (v f0) (as_nat h0 f) (pow2 256);
+   lemma_mult_le_left (as_nat P256 h0 f) (v f0) (pow2 64);
+   lemma_mult_le_left (v f0) (as_nat P256 h0 f) (pow2 256);
 
    lemma_div_lt_nat (v c3 + uint_v temp0) 320 256;
    
@@ -977,7 +1038,7 @@ let sq0 f result memory temp =
 
 
 inline_for_extraction noextract
-val sq1: f: felem -> f4: felem -> result: felem -> memory: lbuffer uint64 (size 12) -> 
+val sq1: f: felem P256 -> f4: felem P256 -> result: felem P256 -> memory: lbuffer uint64 (size 12) -> 
   temp: lbuffer uint64 (size 5) -> 
   Stack uint64 
   (requires fun h -> live h f /\ live h f4 /\ live h result /\ live h temp /\ 
@@ -1030,7 +1091,7 @@ val sq1: f: felem -> f4: felem -> result: felem -> memory: lbuffer uint64 (size 
       uint_v m6 + uint_v m7 * pow2 64 == uint_v f1 * uint_v f2 /\
       uint_v m8 + uint_v m9 * pow2 64 == uint_v f1 * uint_v f3 /\
 
-      as_nat h1 result + uint_v c * pow2 256 = uint_v f1 * as_nat h0 f + as_nat h0 f4
+      as_nat P256 h1 result + uint_v c * pow2 256 = uint_v f1 * as_nat P256 h0 f + as_nat P256 h0 f4
     ) 
   )
 
@@ -1087,7 +1148,7 @@ let sq1 f f4 result memory tempBuffer =
     let h6 = ST.get() in 
     
   calc (==) {
-    uint_v f1 * as_nat h0 f;
+    uint_v f1 * as_nat P256 h0 f;
     (==) { }
     uint_v f1 * (uint_v f0 +  uint_v f1 * pow2 64 + uint_v f2 * pow2 64 * pow2 64 + uint_v f3 * pow2 64 * pow2 64 * pow2 64);
     (==){
@@ -1097,10 +1158,10 @@ let sq1 f f4 result memory tempBuffer =
       uint_v f2 * uint_v f1 * pow2 64 * pow2 64 + 
       uint_v f3 * uint_v f1 * pow2 64 * pow2 64 * pow2 64) canon}
       
-    as_nat h6 tempBufferResult + (uint_v c3 + uint_v h_3) * (pow2 64 * pow2 64 * pow2 64 * pow2 64);
+    as_nat P256 h6 tempBufferResult + (uint_v c3 + uint_v h_3) * (pow2 64 * pow2 64 * pow2 64 * pow2 64);
     (==){assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256)}
     
-    as_nat h6 tempBufferResult + (uint_v c3 + uint_v h_3) * pow2 256;};
+    as_nat P256 h6 tempBufferResult + (uint_v c3 + uint_v h_3) * pow2 256;};
 
 
   let c4 = add4 tempBufferResult f4 result in   
@@ -1109,13 +1170,13 @@ let sq1 f f4 result memory tempBuffer =
   assert_by_tactic (uint_v c4 * pow2 256 + (uint_v c3 + uint_v h_3) * pow2 256 = 
     (uint_v c4 + uint_v c3 + uint_v h_3) * pow2 256) canon;
 
-  lemma_320_1 (as_nat h7 result) (uint_v c4 + uint_v c3 + uint_v h_3) (uint_v f1) (as_nat h0 f) (as_nat h0 f4);
+  lemma_320_1 (as_nat P256 h7 result) (uint_v c4 + uint_v c3 + uint_v h_3) (uint_v f1) (as_nat P256 h0 f) (as_nat P256 h0 f4);
 
   c3 +! h_3 +! c4
 
 
 inline_for_extraction noextract
-val sq2: f: felem -> f4: felem -> result: felem  -> memory: lbuffer uint64 (size 12) -> temp: lbuffer uint64 (size 5) -> 
+val sq2: f: felem P256 -> f4: felem P256 -> result: felem P256 -> memory: lbuffer uint64 (size 12) -> temp: lbuffer uint64 (size 5) -> 
   Stack uint64 
   (requires fun h -> live h f /\ live h f4 /\ live h result /\ live h temp /\ live h memory /\ eq_or_disjoint f4 result /\ disjoint f4 memory /\ disjoint f4 temp /\ disjoint f result /\ disjoint temp result /\ disjoint memory temp /\ disjoint memory result /\
     (
@@ -1161,7 +1222,7 @@ val sq2: f: felem -> f4: felem -> result: felem  -> memory: lbuffer uint64 (size
       uint_v m4 + uint_v m5 * pow2 64 == uint_v f0 * uint_v f3 /\
       uint_v m8 + uint_v m9 * pow2 64 == uint_v f1 * uint_v f3 /\ 
       uint_v m10 + uint_v m11 * pow2 64 == uint_v f2 * uint_v f3 /\
-      as_nat h1 result + uint_v c * pow2 256 = uint_v f2 * as_nat h0 f + as_nat h0 f4
+      as_nat P256 h1 result + uint_v c * pow2 256 = uint_v f2 * as_nat P256 h0 f + as_nat P256 h0 f4
     )  
  )
 
@@ -1212,7 +1273,7 @@ let sq2 f f4 result memory tempBuffer =
 
     calc (==) {
 
-    uint_v f2 * as_nat h0 f;
+    uint_v f2 * as_nat P256 h0 f;
     (==) {}
     uint_v f2 * (uint_v f0 +  uint_v f1 * pow2 64 + uint_v f2 * pow2 64 * pow2 64 + uint_v f3 * pow2 64 * pow2 64 * pow2 64);
     (==){
@@ -1222,11 +1283,11 @@ let sq2 f f4 result memory tempBuffer =
       uint_v f2 * uint_v f2 * pow2 64 * pow2 64 + 
       uint_v f3 * uint_v f2 * pow2 64 * pow2 64 * pow2 64) canon}
    
-   as_nat h6 tempBufferResult + (uint_v c3 + uint_v h_3) * (pow2 64 * pow2 64 * pow2 64 * pow2 64);
+   as_nat P256 h6 tempBufferResult + (uint_v c3 + uint_v h_3) * (pow2 64 * pow2 64 * pow2 64 * pow2 64);
    
    (==){assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256)}
    
-   as_nat h6 tempBufferResult + (uint_v c3 + uint_v h_3) * pow2 256;
+   as_nat P256 h6 tempBufferResult + (uint_v c3 + uint_v h_3) * pow2 256;
    };
 
 
@@ -1236,13 +1297,13 @@ let sq2 f f4 result memory tempBuffer =
   assert_by_tactic (uint_v c4 * pow2 256 + (uint_v c3 + uint_v h_3) * pow2 256 = 
     (uint_v c4 + uint_v c3 + uint_v h_3) * pow2 256) canon;
 
-  lemma_320_1 (as_nat h7 result) (uint_v c4 + uint_v c3 + uint_v h_3) (uint_v f2) (as_nat h0 f) (as_nat h0 f4);
+  lemma_320_1 (as_nat P256 h7 result) (uint_v c4 + uint_v c3 + uint_v h_3) (uint_v f2) (as_nat P256 h0 f) (as_nat P256 h0 f4);
 
   c3 +! h_3 +! c4
 
 
 inline_for_extraction noextract
-val sq3: f: felem -> f4: felem -> result: felem -> memory: lbuffer uint64 (size 12) -> temp: lbuffer uint64 (size 5) -> 
+val sq3: f: felem P256 -> f4: felem P256 -> result: felem P256 -> memory: lbuffer uint64 (size 12) -> temp: lbuffer uint64 (size 5) -> 
   Stack uint64 
   (requires fun h -> live h f /\ live h f4 /\ live h result /\ live h temp /\ live h memory /\ eq_or_disjoint f4 result /\ disjoint f4 memory /\ disjoint f4 temp /\ disjoint f result /\ disjoint temp result /\ disjoint memory temp /\ disjoint memory result /\
   (
@@ -1268,7 +1329,7 @@ val sq3: f: felem -> f4: felem -> result: felem -> memory: lbuffer uint64 (size 
   (ensures fun h0 c h1 -> modifies (loc result |+| loc memory |+| loc temp) h0 h1 /\
     (
       let f3 = Lib.Sequence.index (as_seq h0 f) 3 in 
-      as_nat h1 result + uint_v c * pow2 256 = uint_v f3 * as_nat h0 f + as_nat h0 f4
+      as_nat P256 h1 result + uint_v c * pow2 256 = uint_v f3 * as_nat P256 h0 f + as_nat P256 h0 f4
     )
   )
 
@@ -1312,7 +1373,7 @@ let sq3 f f4 result memory tempBuffer =
 
     calc (==) {
 
-    uint_v f3 * as_nat h0 f;
+    uint_v f3 * as_nat P256 h0 f;
     (==) {}
     uint_v f3 * (uint_v f0 +  uint_v f1 * pow2 64 + uint_v f2 * pow2 64 * pow2 64 + uint_v f3 * pow2 64 * pow2 64 * pow2 64);
     (==){
@@ -1322,24 +1383,24 @@ let sq3 f f4 result memory tempBuffer =
       uint_v f2 * uint_v f3 * pow2 64 * pow2 64 + 
       uint_v f3 * uint_v f3 * pow2 64 * pow2 64 * pow2 64) canon}
    
-   as_nat h6 tempBufferResult + (uint_v c3 + uint_v h_3) * (pow2 64 * pow2 64 * pow2 64 * pow2 64);
+   as_nat P256 h6 tempBufferResult + (uint_v c3 + uint_v h_3) * (pow2 64 * pow2 64 * pow2 64 * pow2 64);
    
    (==){assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256)}
 
-   as_nat h6 tempBufferResult + (uint_v c3 + uint_v h_3) * pow2 256;
+   as_nat P256 h6 tempBufferResult + (uint_v c3 + uint_v h_3) * pow2 256;
    };
 
   let c4 = add4 tempBufferResult f4 result in 
   let h7 = ST.get() in 
     assert_by_tactic (uint_v c4 * pow2 256 + (uint_v c3 + uint_v h_3) * pow2 256 = 
     (uint_v c4 + uint_v c3 + uint_v h_3) * pow2 256) canon;
-    lemma_320_1 (as_nat h7 result) (uint_v c4 + uint_v c3 + uint_v h_3) (uint_v f3) (as_nat h0 f) (as_nat h0 f4);
+    lemma_320_1 (as_nat P256 h7 result) (uint_v c4 + uint_v c3 + uint_v h_3) (uint_v f3) (as_nat P256 h0 f) (as_nat P256 h0 f4);
   c3 +! h_3 +! c4
 
 
-val sq: f: felem -> out: widefelem -> Stack unit
+val sq: f: felem P256 -> out: widefelem P256 -> Stack unit
     (requires fun h -> live h out /\ live h f /\ eq_or_disjoint f out)
-    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\ wide_as_nat h1 out = as_nat h0 f * as_nat h0 f)
+    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\ wide_as_nat h1 out = as_nat P256 h0 f * as_nat P256 h0 f)
       
 let sq f out =
   push_frame();
@@ -1392,12 +1453,12 @@ let sq f out =
     let h4 = ST.get() in 
 
  assert(
-    uint_v f0 * as_nat h0 f + 
-    uint_v f1 * as_nat h0 f * pow2 64 + 
-    uint_v f2 * as_nat h0 f * pow2 64 * pow2 64 + 
-    uint_v f3 * as_nat h0 f * pow2 64 * pow2 64 * pow2 64 = 
+    uint_v f0 * as_nat P256 h0 f + 
+    uint_v f1 * as_nat P256 h0 f * pow2 64 + 
+    uint_v f2 * as_nat P256 h0 f * pow2 64 * pow2 64 + 
+    uint_v f3 * as_nat P256 h0 f * pow2 64 * pow2 64 * pow2 64 = 
     
-    as_nat h4 b3  * pow2 64 * pow2 64 * pow2 64 + 
+    as_nat P256 h4 b3  * pow2 64 * pow2 64 * pow2 64 + 
     uint_v (Lib.Sequence.index (as_seq h4 out) 7) * pow2 64 * pow2 64 * pow2 64 * pow2 64  * pow2 64 * pow2 64 * pow2 64 +
     uint_v (Lib.Sequence.index (as_seq h4 out) 2) * pow2 64 * pow2 64 + 
     uint_v (Lib.Sequence.index (as_seq h4 out) 1) * pow2 64 + 
@@ -1405,7 +1466,7 @@ let sq f out =
 
     calc (==) {
     
-    as_nat h4 b3  * pow2 64 * pow2 64 * pow2 64 + 
+    as_nat P256 h4 b3  * pow2 64 * pow2 64 * pow2 64 + 
     uint_v (Lib.Sequence.index (as_seq h4 out) 7) * pow2 64 * pow2 64 * pow2 64 * pow2 64  * pow2 64 * pow2 64 * pow2 64 +
     uint_v (Lib.Sequence.index (as_seq h4 out) 2) * pow2 64 * pow2 64 + 
     uint_v (Lib.Sequence.index (as_seq h4 out) 1) * pow2 64 + 
@@ -1416,29 +1477,30 @@ let sq f out =
     calc (==)
     {
 
-    as_nat h0 f * as_nat h0 f;
+    as_nat P256 h0 f * as_nat P256 h0 f;
     (==) {assert_by_tactic (
-    uint_v f0 * as_nat h0 f + 
-    uint_v f1 * as_nat h0 f * pow2 64 + 
-    uint_v f2 * as_nat h0 f * pow2 64 * pow2 64 + 
-    uint_v f3 * as_nat h0 f * pow2 64 * pow2 64 * pow2 64 == as_nat h0 f * (uint_v f0 + uint_v f1 * pow2 64 + uint_v f2 * pow2 64 * pow2 64 + uint_v f3 * pow2 64 * pow2 64 * pow2 64)) canon}
+    uint_v f0 * as_nat P256 h0 f + 
+    uint_v f1 * as_nat P256 h0 f * pow2 64 + 
+    uint_v f2 * as_nat P256 h0 f * pow2 64 * pow2 64 + 
+    uint_v f3 * as_nat P256 h0 f * pow2 64 * pow2 64 * pow2 64 == as_nat P256 h0 f * (uint_v f0 + uint_v f1 * pow2 64 + uint_v f2 * pow2 64 * pow2 64 + uint_v f3 * pow2 64 * pow2 64 * pow2 64)) canon}
 
-    uint_v f0 * as_nat h0 f + 
-    uint_v f1 * as_nat h0 f * pow2 64 + 
-    uint_v f2 * as_nat h0 f * pow2 64 * pow2 64 + 
-    uint_v f3 * as_nat h0 f * pow2 64 * pow2 64 * pow2 64;
+    uint_v f0 * as_nat P256 h0 f + 
+    uint_v f1 * as_nat P256 h0 f * pow2 64 + 
+    uint_v f2 * as_nat P256 h0 f * pow2 64 * pow2 64 + 
+    uint_v f3 * as_nat P256 h0 f * pow2 64 * pow2 64 * pow2 64;
     };
 
   pop_frame()
 
 
-val cmovznz4: cin: uint64 -> x: felem -> y: felem -> result: felem ->
+val cmovznz4: #c: curve -> cin: uint64 -> x: felem c -> y: felem c -> result: felem c ->
   Stack unit
     (requires fun h -> live h x /\ live h y /\ live h result /\ disjoint x result /\ eq_or_disjoint y result)
     (ensures fun h0 _ h1 -> modifies1 result h0 h1 /\ 
-      (if uint_v cin = 0 then as_nat h1 result == as_nat h0 x else as_nat h1 result == as_nat h0 y))
+      (if uint_v cin = 0 then as_nat c h1 result == as_nat c h0 x else as_nat c h1 result == as_nat c  h0 y))
 
-let cmovznz4 cin x y r =  
+let cmovznz4 #c  cin x y r =  
+  match c with |P256 ->
   let h0 = ST.get() in 
   
   let mask = neq_mask cin (u64 0) in 
@@ -1459,6 +1521,7 @@ let cmovznz4 cin x y r =
   cmovznz4_lemma cin (Seq.index x 1) (Seq.index y 1);
   cmovznz4_lemma cin (Seq.index x 2) (Seq.index y 2);
   cmovznz4_lemma cin (Seq.index x 3) (Seq.index y 3)
+  |P384 -> ()
 
 
 val lemma_shift_256: a: int -> b: int -> c: int -> d: int -> Lemma (
@@ -1471,10 +1534,10 @@ val lemma_shift_256: a: int -> b: int -> c: int -> d: int -> Lemma (
 let lemma_shift_256 a b c d = ()
 
 #restart-solver
-val shift_256_impl: i: felem -> o: lbuffer uint64 (size 8) -> 
+val shift_256_impl: #c: curve -> i: felem c -> o: lbuffer uint64 (size (getCoordinateLenU64 c * 2)) -> 
   Stack unit 
     (requires fun h -> live h i /\ live h o /\ disjoint i o)
-    (ensures fun h0 _ h1 -> modifies1 o h0 h1 /\ wide_as_nat h1 o == as_nat h0 i * pow2 256)
+    (ensures fun h0 _ h1 -> modifies1 o h0 h1 /\ wide_as_nat #c h1 o == as_nat c h0 i * pow2 256)
 
 let shift_256_impl i o = 
   assert_norm(pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
@@ -1493,37 +1556,41 @@ let shift_256_impl i o =
 
 
 inline_for_extraction noextract
-val mod64: a: widefelem -> Stack uint64 
+val mod64: #c: curve -> a: widefelem c -> Stack uint64 
   (requires fun h -> live h a) 
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\ wide_as_nat h1 a % pow2 64 = uint_v r)
 
-let mod64 a =
-  let r = index a (size 0) in 
+let mod64 #c a =
+  match c with 
+  |P256 -> 
+    let r = index a (size 0) in 
     let h1 = ST.get() in 
-  assert(
-   let open Lib.Sequence in
-   let s = as_seq h1 a in
-   let s0 = s.[0] in
-   let s1 = s.[1] in
-   let s2 = s.[2] in
-   let s3 = s.[3] in
-   let s4 = s.[4] in
-   let s5 = s.[5] in
-   let s6 = s.[6] in
-   let s7 = s.[7] in
-   wide_as_nat h1 a ==  
-   v s0 + v s1 * pow2 64 + v s2 * pow2 64 * pow2 64 +
-   v s3 * pow2 64 * pow2 64 * pow2 64 +
-   v s4 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
-   v s5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
-   v s6 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
-   v s7 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 /\
-   wide_as_nat h1 a % pow2 64 == v s0);
-  r
+	assert(
+	let open Lib.Sequence in
+	let s = as_seq h1 a in
+	let s0 = s.[0] in
+	let s1 = s.[1] in
+	let s2 = s.[2] in
+	let s3 = s.[3] in
+	let s4 = s.[4] in
+	let s5 = s.[5] in
+	let s6 = s.[6] in
+	let s7 = s.[7] in
+	wide_as_nat h1 a ==  
+	v s0 + v s1 * pow2 64 + v s2 * pow2 64 * pow2 64 +
+	v s3 * pow2 64 * pow2 64 * pow2 64 +
+	v s4 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+	v s5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+	v s6 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+	v s7 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 /\
+	wide_as_nat h1 a % pow2 64 == v s0);
+	r
+   |P384 -> index a (size 0)
+
 
 
 inline_for_extraction noextract
-val shortened_mul: a: glbuffer uint64 (size 4) -> b: uint64 -> result: widefelem -> Stack unit
+val shortened_mul: a: glbuffer uint64 (size 4) -> b: uint64 -> result: widefelem P256 -> Stack unit
   (requires fun h -> live h a /\ live h result /\ wide_as_nat h result = 0)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
     as_nat_il h0 a * uint_v b = wide_as_nat h1 result /\ 
@@ -1543,7 +1610,7 @@ let shortened_mul a b result =
     assert_norm( pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256)
    
 
-val shift8: t: widefelem -> t1: widefelem -> Stack unit 
+val shift8: t: widefelem P256 -> t1: widefelem P256 -> Stack unit 
   (requires fun h -> live h t /\ live h t1 /\ eq_or_disjoint t t1)
   (ensures fun h0 _ h1 -> modifies (loc t1) h0 h1 /\ wide_as_nat h0 t / pow2 64 = wide_as_nat h1 t1)
 
@@ -1585,9 +1652,9 @@ let scalar_bit #buf_type s n =
   to_u64 ((s.(n /. 8ul) >>. (n %. 8ul)) &. u8 1)
 
 
-val uploadZeroImpl: f: felem -> Stack unit 
+val uploadZeroImpl: f: felem P256 -> Stack unit 
   (requires fun h -> live h f)
-  (ensures fun h0 _ h1 -> as_nat h1 f == 0 /\ modifies (loc f) h0 h1)
+  (ensures fun h0 _ h1 -> as_nat P256 h1 f == 0 /\ modifies (loc f) h0 h1)
 
 let uploadZeroImpl f = 
   upd f (size 0) (u64 0);
@@ -1596,16 +1663,16 @@ let uploadZeroImpl f =
   upd f (size 3) (u64 0)
 
 
-val uploadZeroPoint: p: point -> 
+val uploadZeroPoint: p: point P256 -> 
   Stack unit
     (requires fun h -> live h p)
     (ensures fun h0 _ h1 ->     
       modifies (loc p) h0 h1 /\
       (
         let k = Lib.Sequence.create 12 (u64 0) in 
-        as_nat h1 (gsub p (size 0) (size 4)) == 0 /\ 
-        as_nat h1 (gsub p (size 4) (size 4)) == 0 /\
-        as_nat h1 (gsub p (size 8) (size 4)) == 0 
+        as_nat P256 h1 (gsub p (size 0) (size 4)) == 0 /\ 
+        as_nat P256 h1 (gsub p (size 4) (size 4)) == 0 /\
+        as_nat P256 h1 (gsub p (size 8) (size 4)) == 0 
       )
     )
 
@@ -1625,9 +1692,9 @@ let uploadZeroPoint p =
 
 
 
-val uploadOneImpl: f: felem -> Stack unit
+val uploadOneImpl: f: felem P256 -> Stack unit
   (requires fun h -> live h f)
-  (ensures fun h0 _ h1 -> as_nat h1 f == 1 /\ modifies (loc f) h0 h1)
+  (ensures fun h0 _ h1 -> as_nat P256 h1 f == 1 /\ modifies (loc f) h0 h1)
   
 let uploadOneImpl f = 
   upd f (size 0) (u64 1);
@@ -1637,7 +1704,7 @@ let uploadOneImpl f =
 
 
 
-val toUint8: i: felem ->  o: lbuffer uint8 (32ul) -> Stack unit
+val toUint8: i: felem P256 ->  o: lbuffer uint8 (32ul) -> Stack unit
   (requires fun h -> live h i /\ live h o /\ disjoint i o)
   (ensures fun h0 _ h1 -> 
     modifies (loc o) h0 h1 /\ 
@@ -1648,11 +1715,11 @@ let toUint8 i o =
 
 open Lib.ByteBuffer
 
-val changeEndian: i:felem -> Stack unit 
+val changeEndian: i:felem P256 -> Stack unit 
   (requires fun h -> live h i)
   (ensures  fun h0 _ h1 -> modifies1 i h0 h1 /\ 
     as_seq h1 i == Hacl.Spec.ECDSA.Definition.changeEndian (as_seq h0 i) /\
-    as_nat h1 i < pow2 256) 
+    as_nat P256 h1 i < pow2 256) 
 
 let changeEndian i = 
   assert_norm (pow2 64 * pow2 64 = pow2 (2 * 64));
@@ -1668,7 +1735,7 @@ let changeEndian i =
   upd i (size 3) zero
 
 
-val toUint64ChangeEndian: i:lbuffer uint8 (size 32) -> o:felem -> Stack unit
+val toUint64ChangeEndian: i:lbuffer uint8 (size 32) -> o:felem P256 -> Stack unit
   (requires fun h -> live h i /\ live h o /\ disjoint i o)
   (ensures  fun h0 _ h1 ->
     modifies (loc o) h0 h1 /\

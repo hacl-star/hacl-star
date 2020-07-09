@@ -24,12 +24,12 @@ open Spec.P256
 
 #set-options " --z3rlimit 200" 
 
-val lemma_scalar_ith: sc:lbytes 32 -> k:nat{k < 32} -> Lemma
+val lemma_scalar_ith: c: curve ->  sc:lbytes (getScalarLen c) -> k:nat{k < (getScalarLen c)} -> Lemma
   (v sc.[k] == nat_from_intseq_le sc / pow2 (8 * k) % pow2 8)
 
-let lemma_scalar_ith sc k =
-  index_nat_to_intseq_le #U8 #SEC 32 (nat_from_intseq_le sc) k;
-  nat_from_intseq_le_inj sc (nat_to_intseq_le 32 (nat_from_intseq_le sc))
+let lemma_scalar_ith c sc k =
+  index_nat_to_intseq_le #U8 #SEC (getScalarLen c) (nat_from_intseq_le sc) k;
+  nat_from_intseq_le_inj sc (nat_to_intseq_le (getScalarLen c) (nat_from_intseq_le sc))
 
 
 val lemma_equ_felem: a: nat {a < pow2 64} 
@@ -93,10 +93,10 @@ let lemma_eq_funct_ a b =
     lemma_eq_funct a b 
 
 
-val lemma_core_0: a:lbuffer uint64 (size 4) -> h:mem
-  -> Lemma (nat_from_intseq_le (as_seq h a) == as_nat h a)
+val lemma_core_0: c: curve -> a:lbuffer uint64 (size (getCoordinateLen c)) -> h:mem
+  -> Lemma (nat_from_intseq_le (as_seq h a) == as_nat c h a)
 
-let lemma_core_0 a h = 
+let lemma_core_0 c a h = 
   let k = as_seq h a in 
   let z = nat_from_intseq_le k in 
     nat_from_intseq_le_slice_lemma k 1;
