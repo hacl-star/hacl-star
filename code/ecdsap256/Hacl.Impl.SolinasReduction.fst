@@ -112,7 +112,7 @@ val load_buffer: a0: uint64 -> a1: uint64 -> a2: uint64 -> a3: uint64
     (requires fun h -> live h o)
     (ensures  fun h0 _ h1 ->
        modifies (loc o) h0 h1 /\
-       as_nat h1 o = v a0 + v a1 * pow2 64 + v a2 * pow2 128 + v a3 * pow2 192)
+       as_nat P256 h1 o = v a0 + v a1 * pow2 64 + v a2 * pow2 128 + v a3 * pow2 192)
 
 let load_buffer a0 a1 a2 a3 o =
   assert_norm (pow2 64 * pow2 64 = pow2 128);
@@ -131,7 +131,7 @@ val upl_zer_buffer:
     (requires fun h -> live h o)
     (ensures fun h0 _ h1 ->
       modifies (loc o) h0 h1 /\
-      as_nat h1 o == (v c0 + v c1 * pow2 (1 * 32) + v c2 * pow2 (2 * 32) + v c3 * pow2 (3 * 32) + v c4 * pow2 (4 * 32) + v c5 * pow2 (5 * 32) + v  c6 * pow2 (6 * 32) + v c7 * pow2 (7 * 32)) % prime256
+      as_nat P256 h1 o == (v c0 + v c1 * pow2 (1 * 32) + v c2 * pow2 (2 * 32) + v c3 * pow2 (3 * 32) + v c4 * pow2 (4 * 32) + v c5 * pow2 (5 * 32) + v  c6 * pow2 (6 * 32) + v c7 * pow2 (7 * 32)) % prime256
    )
 
 let upl_zer_buffer c0 c1 c2 c3 c4 c5 c6 c7 o =
@@ -153,7 +153,7 @@ let upl_zer_buffer c0 c1 c2 c3 c4 c5 c6 c7 o =
     load_buffer b0 b1 b2 b3 o;
     reduction_prime_2prime_impl o o;
     let h2 = ST.get() in
-    assert(as_nat h2 o = (v c1 * pow2 32 + v c0 + v c3 * pow2 (3 * 32) + v c2 * pow2 (2 * 32) + v c5 * pow2 (32 * 5) + v c4 * pow2 (32 * 4) + v c7 * pow2 (32 * 7) + v c6 * pow2 (32 * 6)) % prime256)
+    assert(as_nat P256 h2 o = (v c1 * pow2 32 + v c0 + v c3 * pow2 (3 * 32) + v c2 * pow2 (2 * 32) + v c5 * pow2 (32 * 5) + v c4 * pow2 (32 * 4) + v c7 * pow2 (32 * 7) + v c6 * pow2 (32 * 6)) % prime256)
 
 inline_for_extraction noextract
 val upl_fir_buffer: c11: uint32 -> c12: uint32 -> c13: uint32 -> c14: uint32 -> c15: uint32
@@ -162,7 +162,7 @@ val upl_fir_buffer: c11: uint32 -> c12: uint32 -> c13: uint32 -> c14: uint32 -> 
     (requires fun h -> live h o)
     (ensures fun h0 _ h1 ->
       modifies (loc o) h0 h1 /\
-      as_nat h1 o == (v c11 * pow2 (3 * 32) + v c12 * pow2 (4 * 32) + v c13 * pow2 (5 * 32) + v c14 * pow2 (6 * 32) + v c15 * pow2 (7 * 32)) % prime256
+      as_nat P256 h1 o == (v c11 * pow2 (3 * 32) + v c12 * pow2 (4 * 32) + v c13 * pow2 (5 * 32) + v c14 * pow2 (6 * 32) + v c15 * pow2 (7 * 32)) % prime256
     )
 
 let upl_fir_buffer c11 c12 c13 c14 c15 o =
@@ -185,7 +185,7 @@ val upl_sec_buffer: c12: uint32 -> c13: uint32 -> c14: uint32 -> c15: uint32
     (requires fun h -> live h o)
     (ensures fun h0 _ h1 ->
       modifies (loc o) h0 h1 /\
-      as_nat h1 o == (v c12 * pow2 (3 * 32) + v c13 * pow2 (4 * 32) + v c14 * pow2 (5 * 32) + v c15 * pow2 (6 * 32)) % prime /\ as_nat h1 o < prime
+      as_nat P256 h1 o == (v c12 * pow2 (3 * 32) + v c13 * pow2 (4 * 32) + v c14 * pow2 (5 * 32) + v c15 * pow2 (6 * 32)) % prime /\ as_nat P256 h1 o < prime
     )
 
 let upl_sec_buffer c12 c13 c14 c15 o =
@@ -201,7 +201,7 @@ let upl_sec_buffer c12 c13 c14 c15 o =
     load_buffer b0 b1 b2 b3 o;
     assert_norm(v c12 * pow2 (3 * 32) + v c13 * pow2 (4 * 32) + v c14 * pow2 (5 * 32) + v c15 * pow2 (6 * 32) < prime);
     let h1 = ST.get() in
-    modulo_lemma (as_nat h1 o) prime
+    modulo_lemma (as_nat P256 h1 o) prime
 
 inline_for_extraction noextract
 val upl_thi_buffer: c8: uint32 -> c9: uint32 -> c10: uint32 -> c14: uint32 -> c15: uint32
@@ -209,7 +209,7 @@ val upl_thi_buffer: c8: uint32 -> c9: uint32 -> c10: uint32 -> c14: uint32 -> c1
   Stack unit
  (requires fun h -> live h o)
  (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\
-      as_nat h1 o == (v c8 + v c9 * pow2 32 + v c10 * pow2 (2 * 32) +  v c14 * pow2 (6 * 32) + v c15 * pow2 (7 * 32)) % prime256)
+      as_nat P256 h1 o == (v c8 + v c9 * pow2 32 + v c10 * pow2 (2 * 32) +  v c14 * pow2 (6 * 32) + v c15 * pow2 (7 * 32)) % prime256)
 
 let upl_thi_buffer c8 c9 c10 c14 c15 o =
    assert_norm (pow2 (1 * 32) * pow2 (2 * 32) = pow2 (3 * 32));
@@ -230,7 +230,7 @@ val upl_for_buffer: c8: uint32 -> c9: uint32 -> c10: uint32 -> c11: uint32 -> c1
   Stack unit
     (requires fun h -> live h o)
     (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\
-        as_nat h1 o == (v c9 + v c10 * pow2 32 + v c11 * pow2 (2 * 32) + v c13 * pow2 (3 * 32) + v c14 * pow2 (4 * 32) + v c15 * pow2 (5 * 32) + v c13 * pow2 (6 * 32) +  v c8 * pow2 (7 * 32)) % prime256)
+        as_nat P256 h1 o == (v c9 + v c10 * pow2 32 + v c11 * pow2 (2 * 32) + v c13 * pow2 (3 * 32) + v c14 * pow2 (4 * 32) + v c15 * pow2 (5 * 32) + v c13 * pow2 (6 * 32) +  v c8 * pow2 (7 * 32)) % prime256)
 
 let upl_for_buffer c8 c9 c10 c11 c13 c14 c15 o =
   assert_norm (pow2 (1 * 32) * pow2 (2 * 32) = pow2 (3 * 32));
@@ -251,7 +251,7 @@ val upl_fif_buffer: c8: uint32 -> c10: uint32 -> c11: uint32 -> c12: uint32 -> c
   Stack unit
     (requires fun h -> live h o)
     (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\
-    as_nat h1 o == (v c11 + v c12 * pow2 32 + v c13 * pow2 (2 * 32) + v c8 * pow2 (6 * 32) + v c10 * pow2 (7 * 32)) % prime256)
+    as_nat P256 h1 o == (v c11 + v c12 * pow2 32 + v c13 * pow2 (2 * 32) + v c8 * pow2 (6 * 32) + v c10 * pow2 (7 * 32)) % prime256)
 
 let upl_fif_buffer c8 c10 c11 c12 c13 o =
      assert_norm (pow2 (1 * 32) * pow2 (2 * 32) = pow2 (3 * 32));
@@ -271,7 +271,7 @@ val upl_six_buffer: c9: uint32 -> c11: uint32 -> c12: uint32 -> c13: uint32 -> c
   o: lbuffer uint64 (size 4) ->
   Stack unit
     (requires fun h -> live h o)
-    (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\ as_nat h1 o == (
+    (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\ as_nat P256 h1 o == (
     v c12 + v c13 * pow2 32 + v c14 * pow2 (2 * 32) + v c15 * pow2 (3 * 32) +
           v c9 * pow2 (6 * 32) + v c11 * pow2 (7 * 32)) % prime256)
 
@@ -295,7 +295,7 @@ val upl_sev_buffer: c8: uint32 -> c9: uint32 -> c10: uint32 -> c12: uint32 -> c1
   Stack unit
     (requires fun h -> live h o)
       (ensures fun h0 _ h1 -> modifies (loc o)  h0 h1 /\
-        as_nat h1 o == (v c13 + v c14 * pow2 32 + v c15 * pow2 (2 * 32) + v c8 * pow2 (3 * 32) +  v c9 * pow2 (4 * 32) + v c10 * pow2 (5 * 32) + v c12 * pow2 (7 * 32)) % prime256)
+        as_nat P256 h1 o == (v c13 + v c14 * pow2 32 + v c15 * pow2 (2 * 32) + v c8 * pow2 (3 * 32) +  v c9 * pow2 (4 * 32) + v c10 * pow2 (5 * 32) + v c12 * pow2 (7 * 32)) % prime256)
 
 let upl_sev_buffer c8 c9 c10 c12 c13 c14 c15 o =
   assert_norm (pow2 (1 * 32) * pow2 (2 * 32) = pow2 (3 * 32));
@@ -316,7 +316,7 @@ val upl_eig_buffer: c9: uint32 -> c10: uint32 -> c11: uint32 -> c12: uint32 -> c
   -> o: lbuffer uint64 (size 4) ->
   Stack unit
     (requires fun h -> live h o)
-    (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\ as_nat h1 o == (v c14 + v c15 * pow2 32 + v c9 * pow2 (3 * 32) + v c10 * pow2 (4 * 32) + v c11 * pow2 (5 * 32) + v c13 * pow2 (7 * 32)) % prime256)
+    (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\ as_nat P256 h1 o == (v c14 + v c15 * pow2 32 + v c9 * pow2 (3 * 32) + v c10 * pow2 (4 * 32) + v c11 * pow2 (5 * 32) + v c13 * pow2 (7 * 32)) % prime256)
 
 let upl_eig_buffer c9 c10 c11 c12 c13 c14 c15 o =
   assert_norm (pow2 (1 * 32) * pow2 (2 * 32) = pow2 (3 * 32));
@@ -338,15 +338,15 @@ val solinas_reduction_upload: c0: uint32 -> c1: uint32 -> c2: uint32 -> c3: uint
     (requires fun h -> live h tempBuffer)
     (ensures fun h0 _ h1 -> modifies1 tempBuffer h0 h1 /\
         (
-          let t0 = as_nat h1 (gsub tempBuffer (size 0) (size 4)) in
-          let t1 = as_nat h1 (gsub tempBuffer (size 4) (size 4)) in
-          let t2 = as_nat h1 (gsub tempBuffer (size 8) (size 4)) in
-          let t3 = as_nat h1 (gsub tempBuffer (size 12) (size 4)) in
-          let t4 = as_nat h1 (gsub tempBuffer (size 16) (size 4)) in
-          let t5 = as_nat h1 (gsub tempBuffer (size 20) (size 4)) in
-          let t6 = as_nat h1 (gsub tempBuffer (size 24) (size 4)) in
-          let t7 = as_nat h1 (gsub tempBuffer (size 28) (size 4)) in
-          let t8 = as_nat h1 (gsub tempBuffer (size 32) (size 4)) in
+          let t0 = as_nat P256 h1 (gsub tempBuffer (size 0) (size 4)) in
+          let t1 = as_nat P256 h1 (gsub tempBuffer (size 4) (size 4)) in
+          let t2 = as_nat P256 h1 (gsub tempBuffer (size 8) (size 4)) in
+          let t3 = as_nat P256 h1 (gsub tempBuffer (size 12) (size 4)) in
+          let t4 = as_nat P256 h1 (gsub tempBuffer (size 16) (size 4)) in
+          let t5 = as_nat P256 h1 (gsub tempBuffer (size 20) (size 4)) in
+          let t6 = as_nat P256 h1 (gsub tempBuffer (size 24) (size 4)) in
+          let t7 = as_nat P256 h1 (gsub tempBuffer (size 28) (size 4)) in
+          let t8 = as_nat P256 h1 (gsub tempBuffer (size 32) (size 4)) in
           t0 == (v c0 + v c1 * pow2 (1 * 32) + v c2 * pow2 (2 * 32) + v c3 * pow2 (3 * 32) + v c4 * pow2 (4 * 32) + v c5 * pow2 (5 * 32) + v  c6 * pow2 (6 * 32) +  v c7 * pow2 (7 * 32)) % prime /\
           t1 == (v c11 * pow2 (3 * 32) + v c12 * pow2 (4 * 32) + v c13 * pow2 (5 * 32) +
            v c14 * pow2 (6 * 32) + v c15 * pow2 (7 * 32)) % prime /\
@@ -386,31 +386,31 @@ val solinas_reduction_operations: tempBuffer: lbuffer uint64 (size 36) ->  o: lb
   Stack unit
     (requires fun h -> live h o /\ live h tempBuffer /\ disjoint tempBuffer o /\
       (
-          let t0 = as_nat h (gsub tempBuffer (size 0) (size 4)) in
-          let t1 = as_nat h (gsub tempBuffer (size 4) (size 4)) in
-          let t2 = as_nat h (gsub tempBuffer (size 8) (size 4)) in
-          let t3 = as_nat h (gsub tempBuffer (size 12) (size 4)) in
-          let t4 = as_nat h (gsub tempBuffer (size 16) (size 4)) in
-          let t5 = as_nat h (gsub tempBuffer (size 20) (size 4)) in
-          let t6 = as_nat h (gsub tempBuffer (size 24) (size 4)) in
-          let t7 = as_nat h (gsub tempBuffer (size 28) (size 4)) in
-          let t8 = as_nat h (gsub tempBuffer (size 32) (size 4)) in
+          let t0 = as_nat P256 h (gsub tempBuffer (size 0) (size 4)) in
+          let t1 = as_nat P256 h (gsub tempBuffer (size 4) (size 4)) in
+          let t2 = as_nat P256 h (gsub tempBuffer (size 8) (size 4)) in
+          let t3 = as_nat P256 h (gsub tempBuffer (size 12) (size 4)) in
+          let t4 = as_nat P256 h (gsub tempBuffer (size 16) (size 4)) in
+          let t5 = as_nat P256 h (gsub tempBuffer (size 20) (size 4)) in
+          let t6 = as_nat P256 h (gsub tempBuffer (size 24) (size 4)) in
+          let t7 = as_nat P256 h (gsub tempBuffer (size 28) (size 4)) in
+          let t8 = as_nat P256 h (gsub tempBuffer (size 32) (size 4)) in
           t0 < prime /\ t1 < prime /\ t2 < prime /\ t3 < prime /\ t4 < prime /\
           t5 < prime /\ t6 < prime /\ t7 < prime /\ t8 < prime
       )
     )
     (ensures fun h0 _ h1 -> modifies2 tempBuffer o h0 h1 /\
        (
-          let t0 = as_nat h0 (gsub tempBuffer (size 0) (size 4)) in
-          let t1 = as_nat h0 (gsub tempBuffer (size 4) (size 4)) in
-          let t2 = as_nat h0 (gsub tempBuffer (size 8) (size 4)) in
-          let t3 = as_nat h0 (gsub tempBuffer (size 12) (size 4)) in
-          let t4 = as_nat h0 (gsub tempBuffer (size 16) (size 4)) in
-          let t5 = as_nat h0 (gsub tempBuffer (size 20) (size 4)) in
-          let t6 = as_nat h0 (gsub tempBuffer (size 24) (size 4)) in
-          let t7 = as_nat h0 (gsub tempBuffer (size 28) (size 4)) in
-          let t8 = as_nat h0 (gsub tempBuffer (size 32) (size 4)) in
-          as_nat h1 o == (t0 + 2 * t1 + 2 * t2  + t3 + t4 - t5  - t6 - t7 - t8) % prime
+          let t0 = as_nat P256 h0 (gsub tempBuffer (size 0) (size 4)) in
+          let t1 = as_nat P256 h0 (gsub tempBuffer (size 4) (size 4)) in
+          let t2 = as_nat P256 h0 (gsub tempBuffer (size 8) (size 4)) in
+          let t3 = as_nat P256 h0 (gsub tempBuffer (size 12) (size 4)) in
+          let t4 = as_nat P256 h0 (gsub tempBuffer (size 16) (size 4)) in
+          let t5 = as_nat P256 h0 (gsub tempBuffer (size 20) (size 4)) in
+          let t6 = as_nat P256 h0 (gsub tempBuffer (size 24) (size 4)) in
+          let t7 = as_nat P256 h0 (gsub tempBuffer (size 28) (size 4)) in
+          let t8 = as_nat P256 h0 (gsub tempBuffer (size 32) (size 4)) in
+          as_nat P256 h1 o == (t0 + 2 * t1 + 2 * t2  + t3 + t4 - t5  - t6 - t7 - t8) % prime
     )
   )
 
@@ -437,7 +437,7 @@ let solinas_reduction_operations tempBuffer o =
     p256_sub o t7 o;
     p256_sub o t8 o;
 
-    reduce_brackets (as_nat h0 t0) (as_nat h0 t1) (as_nat h0 t2) (as_nat h0 t3) (as_nat h0 t4) (as_nat h0 t5) (as_nat h0 t6) (as_nat h0 t7) (as_nat h0 t8)
+    reduce_brackets (as_nat P256 h0 t0) (as_nat P256 h0 t1) (as_nat P256 h0 t2) (as_nat P256 h0 t3) (as_nat P256 h0 t4) (as_nat P256 h0 t5) (as_nat P256 h0 t6) (as_nat P256 h0 t7) (as_nat P256 h0 t8)
 
 
 val lemma_opened: i:Lib.Sequence.lseq uint64 8 -> Lemma
@@ -694,7 +694,7 @@ let solinas_reduction_impl i o =
     solinas_reduction_operations tempBuffer o;
     let h2 = ST.get() in
 
-    solinas_reduction_mod (v c0) (v c1) (v c2) (v c3) (v c4) (v c5) (v c6) (v c7) (v c8) (v c9) (v c10) (v c11) (v c12) (v c13) (v c14) (v c15) (as_nat h1 t0) (as_nat h1 t1) (as_nat h1 t2) (as_nat h1 t3) (as_nat h1 t4) (as_nat h1 t5) (as_nat h1 t6) (as_nat h1 t7) (as_nat h1 t8) (as_nat h2 o);
+    solinas_reduction_mod (v c0) (v c1) (v c2) (v c3) (v c4) (v c5) (v c6) (v c7) (v c8) (v c9) (v c10) (v c11) (v c12) (v c13) (v c14) (v c15) (as_nat P256 h1 t0) (as_nat P256 h1 t1) (as_nat P256 h1 t2) (as_nat P256 h1 t3) (as_nat P256 h1 t4) (as_nat P256 h1 t5) (as_nat P256 h1 t6) (as_nat P256 h1 t7) (as_nat P256 h1 t8) (as_nat P256 h2 o);
 
-  modulo_lemma (as_nat h2 o) prime;
+  modulo_lemma (as_nat P256 h2 o) prime;
   pop_frame()

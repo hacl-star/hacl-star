@@ -28,13 +28,13 @@ let prime256_buffer: x: glbuffer uint64 4ul {witnessed #uint64 #(size 4) x (Lib.
 
 
 inline_for_extraction noextract
-val reduction_prime256_2prime256_with_carry_impl: cin: uint64 -> x: felem -> result: felem ->
+val reduction_prime256_2prime256_with_carry_impl: cin: uint64 -> x: felem P256 -> result: felem P256 ->
   Stack unit 
     (requires fun h -> live h x /\ live h result /\  eq_or_disjoint x result /\ 
-      (as_nat h x + uint_v cin * pow2 256) < 2 * prime256)
+      (as_nat P256 h x + uint_v cin * pow2 256) < 2 * prime256)
     (ensures fun h0 _ h1 -> 
       modifies (loc result) h0 h1 /\ 
-      as_nat h1 result = (as_nat h0 x + uint_v cin * pow2 256) % prime256
+      as_nat P256 h1 result = (as_nat P256 h0 x + uint_v cin * pow2 256) % prime256
     )  
 
 
@@ -46,7 +46,7 @@ let reduction_prime256_2prime256_with_carry_impl cin x result =
     let c = sub4_il x prime256_buffer tempBuffer in
   let h0 = ST.get() in 
       assert(uint_v c <= 1);
-      assert(if uint_v c = 0 then as_nat h0 x >= prime256 else as_nat h0 x < prime256);
+      assert(if uint_v c = 0 then as_nat P256 h0 x >= prime256 else as_nat P256 h0 x < prime256);
     let carry = sub_borrow_u64 c cin (u64 0) tempBufferForSubborrow in 
     cmovznz4 carry tempBuffer x result;
   let h1 = ST.get() in 
@@ -57,21 +57,21 @@ let reduction_prime256_2prime256_with_carry_impl cin x result =
       assert(uint_v cin <= 1);
       assert(uint_v c <= 1);
 
-      assert(if as_nat h0 x >= prime256 then uint_v c = 0 else True);
-      assert(if uint_v cin < uint_v c then as_nat h1 result == as_nat h0 x else as_nat h1 result == as_nat h0 tempBuffer);
+      assert(if as_nat P256 h0 x >= prime256 then uint_v c = 0 else True);
+      assert(if uint_v cin < uint_v c then as_nat P256 h1 result == as_nat P256 h0 x else as_nat P256 h1 result == as_nat P256 h0 tempBuffer);
 
-      assert(as_nat h1 result < prime256);
+      assert(as_nat P256 h1 result < prime256);
 
-      modulo_addition_lemma (as_nat h1 result) prime256 1;
-      small_modulo_lemma_1 (as_nat h1 result) prime256; 
+      modulo_addition_lemma (as_nat P256 h1 result) prime256 1;
+      small_modulo_lemma_1 (as_nat P256 h1 result) prime256; 
   pop_frame()   
 
 
 inline_for_extraction
-val reduction_prime256_2prime256_8_with_carry_impl: x: widefelem -> result: felem -> 
+val reduction_prime256_2prime256_8_with_carry_impl: x: widefelem P256 -> result: felem P256 -> 
   Stack unit 
     (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result /\ wide_as_nat h x < 2 * prime256)
-    (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat h1 result = wide_as_nat h0 x % prime256)
+    (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat P256 h1 result = wide_as_nat h0 x % prime256)
 
 let reduction_prime256_2prime256_8_with_carry_impl x result = 
   push_frame();
@@ -91,12 +91,12 @@ let reduction_prime256_2prime256_8_with_carry_impl x result =
       assert_norm (pow2 256 > prime256);
       assert(if (wide_as_nat h0 x < prime256) then begin
       small_modulo_lemma_1 (wide_as_nat h0 x) prime256;
-      as_nat h4 result = (wide_as_nat h0 x) % prime256 end 
+      as_nat P256 h4 result = (wide_as_nat h0 x) % prime256 end 
       else 
 	begin 
-	small_modulo_lemma_1 (as_nat h4 result) prime256;
+	small_modulo_lemma_1 (as_nat P256 h4 result) prime256;
 	lemma_mod_sub (wide_as_nat h0 x) prime256 1;
-	as_nat h4 result = (wide_as_nat h0 x) % prime256
+	as_nat  P256 h4 result = (wide_as_nat h0 x) % prime256
 	end );
  pop_frame()
 
@@ -119,10 +119,10 @@ let lemma_reduction1 a r =
     small_mod r prime256
 
 
-val reduction_prime_2prime_impl: x: felem -> result: felem -> 
+val reduction_prime_2prime_impl: x: felem P256 -> result: felem P256 -> 
   Stack unit
     (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result)
-    (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat h1 result == as_nat h0 x % prime256)
+    (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat P256 h1 result == as_nat P256 h0 x % prime256)
 
 let reduction_prime_2prime_impl x result = 
   assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
@@ -133,7 +133,7 @@ let reduction_prime_2prime_impl x result =
     let c = sub4_il x prime256_buffer tempBuffer in 
     cmovznz4 c tempBuffer x result;
       let h2 = ST.get() in 
-    lemma_reduction1 (as_nat h0 x) (as_nat h2 result);
+    lemma_reduction1 (as_nat P256 h0 x) (as_nat P256 h2 result);
   pop_frame()  
 
 
@@ -157,16 +157,16 @@ let lemma_t_computation t =
   assert_norm(18446744073709551615 + 4294967295 * pow2 64 + 18446744069414584321 * pow2 192 = prime256)
 
 
-val p256_add: arg1: felem -> arg2: felem ->  out: felem -> Stack unit 
+val p256_add: arg1: felem P256 -> arg2: felem P256 ->  out: felem P256 -> Stack unit 
   (requires (fun h0 ->  
     live h0 arg1 /\ live h0 arg2 /\ live h0 out /\ 
     eq_or_disjoint arg1 out /\ eq_or_disjoint arg2 out /\
-    as_nat h0 arg1 < prime256 /\ as_nat h0 arg2 < prime256 
+    as_nat P256 h0 arg1 < prime256 /\ as_nat P256 h0 arg2 < prime256 
    )
   )
   (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\ 
-      as_nat h1 out == (as_nat h0 arg1 + as_nat h0 arg2) % prime256 /\
-      as_nat h1 out == toDomain_ ((fromDomain_ (as_nat h0 arg1) + fromDomain_ (as_nat h0 arg2)) % prime256)
+      as_nat P256 h1 out == (as_nat P256 h0 arg1 + as_nat P256 h0 arg2) % prime256 /\
+      as_nat P256 h1 out == toDomain_ ((fromDomain_ (as_nat P256 h0 arg1) + fromDomain_ (as_nat P256 h0 arg2)) % prime256)
     )
   )
 
@@ -175,15 +175,15 @@ let p256_add arg1 arg2 out =
   let h0 = ST.get() in   
   let t = add4 arg1 arg2 out in 
   reduction_prime256_2prime256_with_carry_impl t out out;
-  additionInDomain (as_nat h0 arg1) (as_nat h0 arg2);
-  inDomain_mod_is_not_mod (fromDomain_ (as_nat h0 arg1) + fromDomain_ (as_nat h0 arg2))
+  additionInDomain (as_nat P256 h0 arg1) (as_nat P256 h0 arg2);
+  inDomain_mod_is_not_mod (fromDomain_ (as_nat P256 h0 arg1) + fromDomain_ (as_nat P256 h0 arg2))
 
 
-val p256_double: arg1: felem ->  out: felem -> Stack unit 
-  (requires (fun h0 ->  live h0 arg1 /\ live h0 out /\ eq_or_disjoint arg1 out /\ as_nat h0 arg1 < prime256))
+val p256_double: arg1: felem P256 ->  out: felem P256 -> Stack unit 
+  (requires (fun h0 ->  live h0 arg1 /\ live h0 out /\ eq_or_disjoint arg1 out /\ as_nat P256 h0 arg1 < prime256))
   (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\ 
-    as_nat h1 out == (2 * as_nat h0 arg1) % prime256 /\ as_nat h1 out < prime256 /\
-    as_nat h1 out == toDomain_ (2 * fromDomain_ (as_nat h0 arg1) % prime256)
+    as_nat P256 h1 out == (2 * as_nat P256 h0 arg1) % prime256 /\ as_nat P256 h1 out < prime256 /\
+    as_nat P256 h1 out == toDomain_ (2 * fromDomain_ (as_nat P256 h0 arg1) % prime256)
   )
 )
 
@@ -191,18 +191,18 @@ let p256_double arg1 out =
     let h0 = ST.get() in 
   let t = add4 arg1 arg1 out in 
   reduction_prime256_2prime256_with_carry_impl t out out;
-  additionInDomain (as_nat h0 arg1) (as_nat h0 arg1);
-  inDomain_mod_is_not_mod (fromDomain_ (as_nat h0 arg1) + fromDomain_ (as_nat h0 arg1))
+  additionInDomain (as_nat P256 h0 arg1) (as_nat P256 h0 arg1);
+  inDomain_mod_is_not_mod (fromDomain_ (as_nat P256 h0 arg1) + fromDomain_ (as_nat P256 h0 arg1))
 
 
-val p256_sub: arg1: felem -> arg2: felem -> out: felem -> Stack unit 
+val p256_sub: arg1: felem P256 -> arg2: felem P256 -> out: felem P256 -> Stack unit 
   (requires 
     (fun h0 -> live h0 out /\ live h0 arg1 /\ live h0 arg2 /\ 
       eq_or_disjoint arg1 out /\ eq_or_disjoint arg2 out /\
-      as_nat h0 arg1 < prime256 /\ as_nat h0 arg2 < prime256))
+      as_nat P256 h0 arg1 < prime256 /\ as_nat P256 h0 arg2 < prime256))
     (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\ 
-	as_nat h1 out == (as_nat h0 arg1 - as_nat h0 arg2) % prime256 /\
-	as_nat h1 out == toDomain_ ((fromDomain_ (as_nat h0 arg1) - fromDomain_ (as_nat h0 arg2)) % prime256)
+	as_nat P256 h1 out == (as_nat P256 h0 arg1 - as_nat P256 h0 arg2) % prime256 /\
+	as_nat P256 h1 out == toDomain_ ((fromDomain_ (as_nat P256 h0 arg1) - fromDomain_ (as_nat P256 h0 arg2)) % prime256)
     )
 )    
 
@@ -216,19 +216,19 @@ let p256_sub arg1 arg2 out =
   let t1 = ((u64 0) -. t) >>. (size 32) in 
   let t2 = u64 0 in 
   let t3 = t -. (t <<. (size 32)) in 
-    modulo_addition_lemma  (as_nat h0 arg1 - as_nat h0 arg2) prime256 1;
+    modulo_addition_lemma  (as_nat P256 h0 arg1 - as_nat P256  h0 arg2) prime256 1;
   let c = add4_variables out (u64 0)  t0 t1 t2 t3 out in 
     let h2 = ST.get() in 
       assert(
-      if as_nat h0 arg1 - as_nat h0 arg2 >= 0 then 
+      if as_nat P256 h0 arg1 - as_nat P256 h0 arg2 >= 0 then 
 	begin
-	  modulo_lemma (as_nat h0 arg1 - as_nat h0 arg2) prime256;
-	  as_nat h2 out == (as_nat h0 arg1 - as_nat h0 arg2) % prime256
+	  modulo_lemma (as_nat P256 h0 arg1 - as_nat P256 h0 arg2) prime256;
+	  as_nat P256 h2 out == (as_nat P256 h0 arg1 - as_nat P256 h0 arg2) % prime256
 	end
       else
           begin
-	    modulo_lemma (as_nat h2 out) prime256;
-            as_nat h2 out == (as_nat h0 arg1 - as_nat h0 arg2) % prime256
+	    modulo_lemma (as_nat P256 h2 out) prime256;
+            as_nat P256 h2 out == (as_nat P256 h0 arg1 - as_nat P256 h0 arg2) % prime256
 	  end);
     substractionInDomain (felem_seq_as_nat (as_seq h0 arg1)) (felem_seq_as_nat (as_seq h0 arg2));
     inDomain_mod_is_not_mod (fromDomain_ (felem_seq_as_nat (as_seq h0 arg1)) - fromDomain_ (felem_seq_as_nat (as_seq h0 arg2)))

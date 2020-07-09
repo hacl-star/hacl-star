@@ -128,7 +128,7 @@ let ith_bit_power k i =
   let res = to_u64 tmp2 in
   logand_le tmp1 (u8 1);
   logand_mask tmp1 (u8 1) 1;
-  lemma_scalar_ith k q;
+  lemma_scalar_ith P256 k q;
   let k = nat_from_intseq_le k in
   pow2_modulo_division_lemma_1 (k / pow2 (8 * (i / 8))) (i % 8) 8;
   division_multiplication_lemma k (pow2 (8 * (i / 8))) (pow2 (i % 8));
