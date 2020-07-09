@@ -21,7 +21,9 @@ open Hacl.Impl.P256.Signature.Common
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
 
-let ecp256dh_i result scalar =
+let ecp256dh_i c result scalar =
+  match c with 
+  |P256 -> 
   push_frame();
   let tempBuffer = create (size 100) (u64 0) in
   let resultBuffer = create (size 12) (u64 0) in
@@ -49,6 +51,7 @@ let ecp256dh_i result scalar =
   changeEndian_le_be (as_nat h0 resultBufferY); 
   pop_frame();
   flag
+  |P384 -> ()
 
 (*
 [@ (Comment "  This code is not side channel resistant on pubKey")]
@@ -101,7 +104,9 @@ let _ecp256dh_r result pubKey scalar =
     end
 
 
-let ecp256dh_r result pubKey scalar =
+let ecp256dh_r c result pubKey scalar =
+  match c with 
+  |P256 -> 
   push_frame();
   let h0 = ST.get() in
   let resultBufferFelem = create (size 12) (u64 0) in
@@ -147,3 +152,4 @@ let ecp256dh_r result pubKey scalar =
 
   pop_frame();
   flag
+  |P384 -> ()

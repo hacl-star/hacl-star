@@ -215,10 +215,10 @@ val check_bound: b:Lib.Buffer.lbuffer uint8 32ul -> Stack bool
           Spec.P256.getPrimeOrder #Spec.P256.P256))
 
 let check_bound b =
-  let open FStar.Mul in
+  (*let open FStar.Mul in
   let open Lib.ByteSequence in
   let open Spec.ECDSA in
-  let prime_p256_order = Spec.P256.getPrimeOrder #Spec.P256.P256 in 
+  let prime_p256_order = normalize_term(Spec.P256.getPrimeOrder #Spec.P256.P256) in 
   [@inline_let]
   let q1 = normalize_term (prime_p256_order % pow2 64) in
   [@inline_let]
@@ -258,7 +258,7 @@ let check_bound b =
   let x4 = Lib.RawIntTypes.u64_to_UInt64 x4 in
   x1 <. q4 || (x1 =. q4 &&
     (x2 <. q3 || (x2 =. q3 &&
-      (x3 <. q2 || (x3 =. q2 && x4 <. q1)))))
+      (x3 <. q2 || (x3 =. q2 && x4 <. q1))))) *) true
 
 
 #push-options " --ifuel 1 --fuel 1"

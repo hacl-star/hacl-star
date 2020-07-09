@@ -40,6 +40,27 @@ let getCoordinateLen curve =
   |P256 -> 32
   |P384 -> 48
 
+
+let getCoordinateLenU64 curve = 
+  match curve with
+  |P256 -> 4
+  |P384 -> 6  
+
+
+let getPointLen curve = 
+  match curve with 
+  |P256 -> 64
+  |P384 -> 96
+
+(* Actually there is a logical distinction between the length of a coordinate and the length of the order.
+ Just by magic they have the same values (:  *)
+
+let getScalarLen curve = 
+  match curve with 
+  |P256 -> 32
+  |P384 -> 48
+
+
 let getPower curve = 
   match curve with 
   |P256 -> 256
