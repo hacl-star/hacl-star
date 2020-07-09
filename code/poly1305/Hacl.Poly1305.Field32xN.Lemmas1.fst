@@ -118,6 +118,7 @@ val carry26_wide_fits_lemma:
   (let (l0, l1) = carry26 #w l cin in
   felem_fits1 l0 1 /\ uint64xN_fits l1 ((m + 1) * max26))
 
+#push-options "--z3rlimit 100"
 let carry26_wide_fits_lemma #w #m l cin =
   match w with
   | 1 ->
@@ -130,7 +131,7 @@ let carry26_wide_fits_lemma #w #m l cin =
     carry26_wide_lemma_i #w #m l cin 1;
     carry26_wide_lemma_i #w #m l cin 2;
     carry26_wide_lemma_i #w #m l cin 3
-
+#pop-options
 
 val carry26_wide_eval_lemma:
     #w:lanes
@@ -567,6 +568,7 @@ val subtract_p5_s:
     tup64_fits5 out (1, 1, 1, 1, 1) /\
     as_nat5 out == as_nat5 (as_tup64_i f i) % prime)
 
+#push-options "--z3rlimit 100"
 let subtract_p5_s #w f i =
   let (f0, f1, f2, f3, f4) = as_tup64_i f i in
   let mask0 = eq_mask f4 (u64 0x3ffffff) in
@@ -590,6 +592,7 @@ let subtract_p5_s #w f i =
   let f4' = f4 -. p4 in
   lemma_subtract_p5 (f0, f1, f2, f3, f4) (f0', f1', f2', f3', f4');
   (f0', f1', f2', f3', f4')
+#pop-options
 
 #push-options "--max_ifuel 1"
 val subtract_p5_felem5_lemma_i:
