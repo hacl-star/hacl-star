@@ -96,7 +96,7 @@ let evercrypt_hash //: block hash_alg =
          begin
          Spec.Blake2.Lemmas.blake2_init_no_key_is_agile a;
          Spec.Blake2.Lemmas.lemma_blake2_hash_equivalence a input;
-         Hacl.Streaming.Blake2.spec_is_incremental (to_blake_alg a) #0 () Seq.empty input
+         Hacl.Streaming.Blake2.spec_is_incremental (to_blake_alg a) true 0ul () Seq.empty input
          end
        else
          Spec.Hash.Incremental.hash_is_hash_incremental a input)
