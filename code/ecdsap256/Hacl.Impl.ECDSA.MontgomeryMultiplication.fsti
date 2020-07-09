@@ -29,13 +29,13 @@ let prime256order_buffer: x: glbuffer uint64 (size 4)
 
 
 inline_for_extraction
-let order_inverse_buffer: x: glbuffer uint8 32ul {witnessed x prime_p256_order_inverse_seq /\ recallable x} = 
-  createL_global prime_p256_order_inverse_list
+let order_inverse_buffer: x: glbuffer uint8 32ul {witnessed x (prime_order_inverse_seq #P256) /\ recallable x} = 
+  createL_global (prime_order_inverse_list #P256)
 
 
 inline_for_extraction
-let order_buffer: x: glbuffer uint8 32ul {witnessed x prime_p256_order_seq /\ recallable x} = 
-  createL_global prime_p256_order_list 
+let order_buffer: x: glbuffer uint8 32ul {witnessed x (prime_order_seq #P256) /\ recallable x} = 
+  createL_global (prime_order_list #P256)
 
 
 val reduction_prime_2prime_with_carry : x: widefelem -> result: felem ->

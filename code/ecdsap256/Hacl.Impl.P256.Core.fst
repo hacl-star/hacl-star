@@ -106,12 +106,12 @@ val lemma_pointAtInfInDomain: x: nat -> y: nat -> z: nat {z < prime256} ->
 
 let lemma_pointAtInfInDomain x y z =
   assert (if isPointAtInfinity (x, y, z) then z == 0 else z <> 0);
-  assert_norm (modp_inv2 (pow2 256) % prime256 <> 0);
+  assert_norm (modp_inv2 #P256 (pow2 256) % prime256 <> 0);
   lemmaFromDomain z;
-  assert (fromDomain_ z == (z * modp_inv2 (pow2 256) % prime256));
-  assert_norm (0 * modp_inv2 (pow2 256) % prime256 == 0);
+  assert (fromDomain_ z == (z * modp_inv2 #P256 (pow2 256) % prime256));
+  assert_norm (0 * modp_inv2 #P256 (pow2 256) % prime256 == 0);
   lemma_multiplication_not_mod_prime z;
-  assert (if z = 0 then z * modp_inv2 (pow2 256) % prime256 == 0
+  assert (if z = 0 then z * modp_inv2 #P256 (pow2 256) % prime256 == 0
                    else fromDomain_ z <> 0)
 
 
@@ -140,7 +140,7 @@ val lemma_norm_as_specification: xD: nat{xD < prime256} -> yD: nat{yD < prime256
   y3 : nat {y3 == yD * (pow (zD * zD * zD) (prime -2) % prime) % prime} -> 
   z3: nat {if isPointAtInfinity(xD, yD, zD) then z3 == 0 else z3 == 1} -> 
   Lemma (
-  let (xN, yN, zN) = _norm (xD, yD, zD) in 
+  let (xN, yN, zN) = _norm #P256 (xD, yD, zD) in 
   x3 == xN /\ y3 == yN /\ z3 == zN)
 
 
@@ -284,7 +284,7 @@ let norm p resultPoint tempBuffer =
        let zD = fromDomain_(point_z_as_nat h0 p) in 
        let xD = fromDomain_(point_x_as_nat h0 p) in 
        let yD = fromDomain_(point_y_as_nat h0 p) in 
-       let (xN, yN, zN) = _norm (xD, yD, zD) in 
+       let (xN, yN, zN) = _norm #P256 (xD, yD, zD) in 
        point_x_as_nat h3 resultPoint == xN /\ point_y_as_nat h3 resultPoint == yN /\ point_z_as_nat h3 resultPoint == zN)
 
 
@@ -315,7 +315,7 @@ val scalar_bit:
   -> n:size_t{v n < 256}
   -> Stack uint64
     (requires fun h0 -> live h0 s)
-    (ensures  fun h0 r h1 -> h0 == h1 /\ r == ith_bit (as_seq h0 s) (v n) /\ v r <= 1)
+    (ensures  fun h0 r h1 -> h0 == h1 /\ r == ith_bit #P256 (as_seq h0 s) (v n) /\ v r <= 1)
 
 let scalar_bit #buf_type s n =
   let h0 = ST.get () in
@@ -358,7 +358,7 @@ val montgomery_ladder_step1: p: point -> q: point ->tempBuffer: lbuffer uint64 (
       let r1Z = as_nat h1 (gsub q (size 8) (size 4)) in
 
 
-      let (rN0X, rN0Y, rN0Z), (rN1X, rN1Y, rN1Z) = _ml_step1 (fromDomain_ pX, fromDomain_ pY, fromDomain_ pZ) (fromDomain_ qX, fromDomain_ qY, fromDomain_ qZ) in 
+      let (rN0X, rN0Y, rN0Z), (rN1X, rN1Y, rN1Z) = _ml_step1 #P256 (fromDomain_ pX, fromDomain_ pY, fromDomain_ pZ) (fromDomain_ qX, fromDomain_ qY, fromDomain_ qZ) in 
       
       fromDomain_ r0X == rN0X /\ fromDomain_ r0Y == rN0Y /\ fromDomain_ r0Z == rN0Z /\
       fromDomain_ r1X == rN1X /\ fromDomain_ r1Y == rN1Y /\ fromDomain_ r1Z == rN1Z /\ 
@@ -414,7 +414,7 @@ val montgomery_ladder_step: #buf_type: buftype->
       let r1Y = as_nat h1 (gsub q (size 4) (size 4)) in
       let r1Z = as_nat h1 (gsub q (size 8) (size 4)) in
 
-      let (rN0X, rN0Y, rN0Z), (rN1X, rN1Y, rN1Z) = _ml_step (as_seq h0 scalar) (uint_v i) ((fromDomain_ pX, fromDomain_ pY, fromDomain_ pZ), (fromDomain_ qX, fromDomain_ qY, fromDomain_ qZ)) in 
+      let (rN0X, rN0Y, rN0Z), (rN1X, rN1Y, rN1Z) = _ml_step #P256 (as_seq h0 scalar) (uint_v i) ((fromDomain_ pX, fromDomain_ pY, fromDomain_ pZ), (fromDomain_ qX, fromDomain_ qY, fromDomain_ qZ)) in 
       
       fromDomain_ r0X == rN0X /\ fromDomain_ r0Y == rN0Y /\ fromDomain_ r0Z == rN0Z /\
       fromDomain_ r1X == rN1X /\ fromDomain_ r1Y == rN1Y /\ fromDomain_ r1Z == rN1Z /\ 
@@ -462,7 +462,7 @@ val montgomery_ladder: #buf_type: buftype->  p: point -> q: point ->
       (
 	let p1 = fromDomainPoint(point_prime_to_coordinates (as_seq h1 p)) in 
 	let q1 = fromDomainPoint(point_prime_to_coordinates (as_seq h1 q)) in 
-	let rN, qN = montgomery_ladder_spec (as_seq h0 scalar) 
+	let rN, qN = montgomery_ladder_spec #P256 (as_seq h0 scalar) 
 	  (
 	    fromDomainPoint(point_prime_to_coordinates (as_seq h0 p)),  
 	    fromDomainPoint(point_prime_to_coordinates (as_seq h0 q))
@@ -476,7 +476,7 @@ let montgomery_ladder #a p q scalar tempBuffer =
   let h0 = ST.get() in 
 
   [@inline_let]
-  let spec_ml h0 = _ml_step (as_seq h0 scalar) in 
+  let spec_ml h0 = _ml_step #P256 (as_seq h0 scalar) in 
 
   [@inline_let] 
   let acc (h:mem) : GTot (tuple2 point_nat_prime point_nat_prime) = 
@@ -564,7 +564,7 @@ val scalarMultiplication_t: #t:buftype -> p: point -> result: point ->
     modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\
     (
       let x3, y3, z3 = point_x_as_nat h1 result, point_y_as_nat h1 result, point_z_as_nat h1 result in 
-      let (xN, yN, zN) = scalar_multiplication (as_seq h0 scalar) (point_prime_to_coordinates (as_seq h0 p)) in 
+      let (xN, yN, zN) = scalar_multiplication #P256 (as_seq h0 scalar) (point_prime_to_coordinates (as_seq h0 p)) in 
       x3 == xN /\ y3 == yN /\ z3 == zN 
   )
 ) 

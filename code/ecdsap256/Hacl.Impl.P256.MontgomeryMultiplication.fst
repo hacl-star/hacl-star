@@ -61,7 +61,7 @@ val montgomery_multiplication_one_round_proof:
   t: nat {t < prime256 * prime256} -> 
   result: nat {result = (t + (t % pow2 64) * prime256) / pow2 64} ->
   co: nat {co % prime256 == t % prime256} -> Lemma (
-    result % prime256 == co * modp_inv2 (pow2 64) % prime256 /\
+    result % prime256 == co * modp_inv2 #P256 (pow2 64) % prime256 /\
     result < prime256 * prime256)
 
 let montgomery_multiplication_one_round_proof t result co = 

@@ -32,7 +32,7 @@ inline_for_extraction noextract
 val fromDomain: f: felem-> result: felem-> Stack unit 
   (requires fun h -> live h f /\ live h result /\ as_nat h f < prime256)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
-    as_nat h1 result = (as_nat h0 f * modp_inv2(pow2 256)) % prime256 /\ 
+    as_nat h1 result = (as_nat h0 f * modp_inv2 #P256 (pow2 256)) % prime256 /\ 
     as_nat h1 result = fromDomain_ (as_nat h0 f))
 
 
@@ -112,7 +112,7 @@ val norm: p: point -> resultPoint: point -> tempBuffer: lbuffer uint64 (size 88)
       (
       let resultPoint =  point_prime_to_coordinates (as_seq h1 resultPoint) in 
       let pointD = fromDomainPoint (point_prime_to_coordinates (as_seq h0 p)) in 
-      let pointNorm = _norm pointD in 
+      let pointNorm = _norm #P256 pointD in 
       pointNorm == resultPoint
    )   
   )
@@ -132,7 +132,7 @@ val normX: p: point -> result: felem -> tempBuffer: lbuffer uint64 (size 88) -> 
 	let pyD = fromDomain_ (as_nat h0 (gsub p (size 4) (size 4))) in 
 	let pzD = fromDomain_ (as_nat h0 (gsub p (size 8) (size 4))) in 
       
-	let (xN, _, _) = _norm (pxD, pyD, pzD) in 
+	let (xN, _, _) = _norm #P256 (pxD, pyD, pzD) in 
 	as_nat h1 result == xN
       )
   )
@@ -159,7 +159,7 @@ val scalarMultiplication: #buf_type: buftype->  p: point -> result: point ->
     as_nat h1 (gsub result (size 8) (size 4)) < prime256 /\
     (
       let x3, y3, z3 = point_x_as_nat h1 result, point_y_as_nat h1 result, point_z_as_nat h1 result in 
-      let (xN, yN, zN) = scalar_multiplication (as_seq h0 scalar) (point_prime_to_coordinates (as_seq h0 p)) in 
+      let (xN, yN, zN) = scalar_multiplication #P256 (as_seq h0 scalar) (point_prime_to_coordinates (as_seq h0 p)) in 
       x3 == xN /\ y3 == yN /\ z3 == zN 
   )
 ) 
@@ -186,7 +186,7 @@ val scalarMultiplicationWithoutNorm: p: point -> result: point ->
     modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\
     (
       let p1 = fromDomainPoint(point_prime_to_coordinates (as_seq h1 result)) in 
-      let rN, _ = montgomery_ladder_spec (as_seq h0 scalar) ((0, 0, 0),  point_prime_to_coordinates (as_seq h0 p)) in 
+      let rN, _ = montgomery_ladder_spec #P256 (as_seq h0 scalar) ((0, 0, 0),  point_prime_to_coordinates (as_seq h0 p)) in 
       rN == p1
   )
 ) 
@@ -205,7 +205,7 @@ val secretToPublic: result: point -> scalar: lbuffer uint8 (size 32) -> tempBuff
     as_nat h1 (gsub result (size 8) (size 4)) < prime256 /\
     (
       let x3, y3, z3 = point_x_as_nat h1 result, point_y_as_nat h1 result, point_z_as_nat h1 result in 
-      let (xN, yN, zN) = secret_to_public (as_seq h0 scalar)  in 
+      let (xN, yN, zN) = secret_to_public #P256 (as_seq h0 scalar)  in 
       x3 == xN /\ y3 == yN /\ z3 == zN 
     )
   )
@@ -224,5 +224,5 @@ val secretToPublicWithoutNorm: result: point -> scalar: lbuffer uint8 (size 32) 
       as_nat h1 (gsub result (size 8) (size 4)) < prime256 /\
       (
 	let p1 = fromDomainPoint(point_prime_to_coordinates (as_seq h1 result)) in 
-	let rN, _ = montgomery_ladder_spec (as_seq h0 scalar) ((0, 0, 0), basePoint) in 
+	let rN, _ = montgomery_ladder_spec (as_seq h0 scalar) ((0, 0, 0), (basePoint #P256)) in 
 	rN == p1))  

@@ -44,7 +44,7 @@ val point_double: p: point -> result: point -> tempBuffer: lbuffer uint64 (size 
       let xD, yD, zD = fromDomain_ (as_nat h0 x), fromDomain_ (as_nat h0 y), fromDomain_ (as_nat h0 z) in 
       let x3D, y3D, z3D = fromDomain_ (as_nat h1 x3), fromDomain_ (as_nat h1 y3), fromDomain_ (as_nat h1 z3) in
       
-      let xN, yN, zN = _point_double (xD, yD, zD) in 
+      let xN, yN, zN = _point_double #P256 (xD, yD, zD) in 
       x3D == xN /\ y3D == yN /\ z3D == zN
   )
 ) 

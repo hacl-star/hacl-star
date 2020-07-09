@@ -63,7 +63,7 @@ let isZero_uint64_nCT f =
     z0_zero && z1_zero && z2_zero && z3_zero
 
 
-[@ (Comment "  This code is not side channel resistant")]
+(* [@ (Comment "  This code is not side channel resistant")] *)
 
 val isMoreThanZeroLessThanOrderMinusOne: f:felem -> Stack bool
   (requires fun h -> live h f)
@@ -87,7 +87,7 @@ val ecdsa_verification_step1: r:lbuffer uint64 (size 4) -> s:lbuffer uint64 (siz
   (requires fun h -> live h r /\ live h s)
   (ensures  fun h0 result h1 ->
     modifies0 h0 h1 /\
-    result == checkCoordinates (as_nat h0 r) (as_nat h0 s))
+    result == checkCoordinates #P256 (as_nat h0 r) (as_nat h0 s))
 
 let ecdsa_verification_step1 r s =
   let isRCorrect = isMoreThanZeroLessThanOrderMinusOne r in
@@ -97,7 +97,7 @@ let ecdsa_verification_step1 r s =
 
 inline_for_extraction
 val ecdsa_verification_step23: alg:hash_alg_ecdsa
-  -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length alg}
+  -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length #P256 alg}
   -> m: lbuffer uint8 mLen 
   -> result: felem
   -> Stack unit
@@ -106,7 +106,7 @@ val ecdsa_verification_step23: alg:hash_alg_ecdsa
       (
 	assert_norm (pow2 32 < pow2 61);
 	assert_norm (pow2 32 < pow2 125);
-	let hashM = hashSpec alg (v mLen) (as_seq h0 m) in 
+	let hashM = hashSpec P256 alg (v mLen) (as_seq h0 m) in 
 	let cutHashM = Lib.Sequence.sub hashM 0 32 in 
 	as_nat h1 result = nat_from_bytes_be cutHashM % prime_p256_order
       )
@@ -261,8 +261,8 @@ val ecdsa_verification_step5_0:
       let fromDomainPointU1 = fromDomainPoint (point_prime_to_coordinates (as_seq h1 pointU1)) in
       let fromDomainPointU2 = fromDomainPoint (point_prime_to_coordinates (as_seq h1 pointU2)) in
       let pointAtInfinity = (0, 0, 0) in
-      let u1D, _ = montgomery_ladder_spec (as_seq h0 u1) (pointAtInfinity, basePoint) in
-      let u2D, _ = montgomery_ladder_spec (as_seq h0 u2) (pointAtInfinity, point_prime_to_coordinates (as_seq h0 pubKeyAsPoint)) in
+      let u1D, _ = montgomery_ladder_spec #P256 (as_seq h0 u1) (pointAtInfinity, basePoint) in
+      let u2D, _ = montgomery_ladder_spec #P256 (as_seq h0 u2) (pointAtInfinity, point_prime_to_coordinates (as_seq h0 pubKeyAsPoint)) in
       fromDomainPointU1 == u1D /\ fromDomainPointU2 == u2D
     )
   )
@@ -300,7 +300,7 @@ val ecdsa_verification_step5_1:
       as_nat h1 (gsub pointSum (size 0) (size 4)) < prime256 /\
       (
         let pointAtInfinity = (0, 0, 0) in
-        let u1D, _ = montgomery_ladder_spec (as_seq h0 u1) (pointAtInfinity, basePoint) in
+        let u1D, _ = montgomery_ladder_spec (as_seq h0 u1) (pointAtInfinity, basePoint #P256) in
         let u2D, _ = montgomery_ladder_spec (as_seq h0 u2) (pointAtInfinity, point_prime_to_coordinates (as_seq h0 pubKeyAsPoint)) in
         let sumD = _point_add u1D u2D in
         let pointNorm = _norm sumD in
@@ -348,7 +348,7 @@ val ecdsa_verification_step5:
       as_nat h1 x < prime256 /\
       (
         let pointAtInfinity = (0, 0, 0) in
-        let u1D, _ = montgomery_ladder_spec (as_seq h0 u1) (pointAtInfinity, basePoint) in
+        let u1D, _ = montgomery_ladder_spec (as_seq h0 u1) (pointAtInfinity, basePoint #P256) in
         let u2D, _ = montgomery_ladder_spec (as_seq h0 u2) (pointAtInfinity, point_prime_to_coordinates (as_seq h0 pubKeyAsPoint)) in
         let sumD = _point_add u1D u2D in
         let pointNorm = _norm sumD in
@@ -369,7 +369,7 @@ let ecdsa_verification_step5 x pubKeyAsPoint u1 u2 tempBuffer =
   not resultIsPAI
 
 
-[@ (Comment "  This code is not side channel resistant")]
+(* [@ (Comment "  This code is not side channel resistant")] *)
 
 val compare_felem_bool: a: felem -> b: felem -> Stack bool
   (requires fun h -> live h a /\ live h b)
@@ -401,7 +401,7 @@ val ecdsa_verification_core:
   -> hashAsFelem:felem
   -> r:lbuffer uint64 (size 4)
   -> s:lbuffer uint64 (size 4)
-  -> mLen:size_t{v mLen >= Spec.ECDSA.min_input_length alg}
+  -> mLen:size_t{v mLen >= Spec.ECDSA.min_input_length #P256 alg}
   -> m:lbuffer uint8 mLen
   -> xBuffer:felem
   -> tempBuffer:lbuffer uint64 (size 100) ->
@@ -432,7 +432,7 @@ val ecdsa_verification_core:
          assert_norm (pow2 32 < pow2 61);
 	 assert_norm (pow2 32 < pow2 125);
 	 
-	 let hashM = hashSpec alg (v mLen) (as_seq h0 m) in 
+	 let hashM = hashSpec P256 alg (v mLen) (as_seq h0 m) in 
 	 let cutHashM = Lib.Sequence.sub hashM 0 32 in 
 	 let hashNat =  nat_from_bytes_be cutHashM % prime_p256_order in 
 	 
@@ -442,7 +442,7 @@ val ecdsa_verification_core:
 	 let bufferU1 = nat_to_bytes_be 32 p0  in 
 	 let bufferU2 = nat_to_bytes_be 32 p1 in 
 	 let pointAtInfinity = (0, 0, 0) in
-         let u1D, _ = montgomery_ladder_spec bufferU1 (pointAtInfinity, basePoint) in
+         let u1D, _ = montgomery_ladder_spec bufferU1 (pointAtInfinity, basePoint #P256) in
          let u2D, _ = montgomery_ladder_spec bufferU2 (pointAtInfinity, point_prime_to_coordinates (as_seq h0 publicKeyPoint)) in
          let sumD = _point_add u1D u2D in
          let (xResult, yResult, zResult) = _norm sumD in
@@ -465,13 +465,13 @@ let ecdsa_verification_core alg publicKeyBuffer hashAsFelem r s mLen m xBuffer t
   r
 
 
-[@ (Comment "  This code is not side channel resistant")]
+(*[@ (Comment "  This code is not side channel resistant")] *)
 
 val ecdsa_verification_:alg:hash_alg_ecdsa
   -> pubKey:lbuffer uint64 (size 8)
   -> r:lbuffer uint64 (size 4)
   -> s: lbuffer uint64 (size 4)
-  -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length alg}
+  -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length #P256 alg}
   -> m:lbuffer uint8 mLen ->
   Stack bool
     (requires fun h -> live h pubKey /\ live h r /\ live h s /\ live h m)
@@ -483,7 +483,7 @@ val ecdsa_verification_:alg:hash_alg_ecdsa
       let r = as_nat h0 r in
       let s = as_nat h0 s in
       modifies0 h0 h1 /\
-      result == Spec.ECDSA.ecdsa_verification_agile alg (pubKeyX, pubKeyY) r s (v mLen) (as_seq h0 m))
+      result == Spec.ECDSA.ecdsa_verification_agile P256 alg (pubKeyX, pubKeyY) r s (v mLen) (as_seq h0 m))
 
 let ecdsa_verification_ alg pubKey r s mLen m =
   assert_norm (pow2 32 < pow2 61);
@@ -530,7 +530,7 @@ val ecdsa_verification:
   -> pubKey:lbuffer uint8 (size 64)
   -> r:lbuffer uint8 (size 32)
   -> s:lbuffer uint8 (size 32)
-  -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length alg}
+  -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length #P256 alg}
   -> m:lbuffer uint8 mLen ->
   Stack bool
     (requires fun h -> live h pubKey /\ live h r /\ live h s /\ live h m)
@@ -542,7 +542,7 @@ val ecdsa_verification:
       let r = nat_from_bytes_be (as_seq h1 r) in
       let s = nat_from_bytes_be (as_seq h1 s) in
       modifies0 h0 h1 /\
-      result == Spec.ECDSA.ecdsa_verification_agile alg (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m))
+      result == Spec.ECDSA.ecdsa_verification_agile P256 alg (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m))
 
 let ecdsa_verification alg pubKey r s mLen m =
   assert_norm (pow2 32 < pow2 61);

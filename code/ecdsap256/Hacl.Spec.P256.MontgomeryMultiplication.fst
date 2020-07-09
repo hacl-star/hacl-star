@@ -16,7 +16,7 @@ open Lib.IntTypes
 let prime = prime256
 
 
-let fromDomain_ a = (a * modp_inv2 (pow2 256)) % prime256
+let fromDomain_ a = (a * modp_inv2 #P256 (pow2 256)) % prime256
 
 
 let fromDomainPoint a =
@@ -38,9 +38,9 @@ let lemmaToDomainAndBackIsTheSame a =
   lemmaToDomain a;
   let from = fromDomain_ to in
   lemmaFromDomain to;
-  lemma_mod_mul_distr_l (a * pow2 256) (modp_inv2 (pow2 256)) prime256;
-  assert_norm (pow2 256 * modp_inv2 (pow2 256) % prime256 = 1);
-  modulo_distributivity_mult_last_two a 1 1 (pow2 256) (modp_inv2 (pow2 256)) prime256;
+  lemma_mod_mul_distr_l (a * pow2 256) (modp_inv2 #P256 (pow2 256)) prime256;
+  assert_norm (pow2 256 * modp_inv2 #P256 (pow2 256) % prime256 = 1);
+  modulo_distributivity_mult_last_two a 1 1 (pow2 256) (modp_inv2 #P256 (pow2 256)) prime256;
   modulo_lemma a prime
 
 
@@ -49,16 +49,16 @@ let lemmaFromDomainToDomain a =
   lemmaFromDomain a;
   let to = toDomain_ from in
   lemmaToDomain from;
-  lemma_mod_mul_distr_l (a * modp_inv2 (pow2 256)) (pow2 256)  prime256;
-  assert_norm (modp_inv2 (pow2 256) * (pow2 256) % prime = 1);
-  modulo_distributivity_mult_last_two a 1 1 (modp_inv2 (pow2 256)) (pow2 256) prime256;
+  lemma_mod_mul_distr_l (a * modp_inv2 #P256 (pow2 256)) (pow2 256)  prime256;
+  assert_norm (modp_inv2 #P256 (pow2 256) * (pow2 256) % prime = 1);
+  modulo_distributivity_mult_last_two a 1 1 (modp_inv2 #P256 (pow2 256)) (pow2 256) prime256;
   modulo_lemma a prime
 
 
 let lemmaFromDomainToDomainModuloPrime a =
-  lemma_mod_mul_distr_l (a*pow2 256) (modp_inv2 (pow2 256)) prime256;
-  assert_norm (pow2 256 * modp_inv2 (pow2 256) % prime256 = 1);
-  modulo_distributivity_mult_last_two a 1 1 (pow2 256) (modp_inv2 (pow2 256)) prime256
+  lemma_mod_mul_distr_l (a*pow2 256) (modp_inv2 #P256 (pow2 256)) prime256;
+  assert_norm (pow2 256 * modp_inv2 #P256 (pow2 256) % prime256 = 1);
+  modulo_distributivity_mult_last_two a 1 1 (pow2 256) (modp_inv2 #P256 (pow2 256)) prime256
 
 
 let inDomain_mod_is_not_mod a =
@@ -69,9 +69,9 @@ let multiplicationInDomainNat #k #l a b =
   assert_norm (prime256 > 3);
   let multResult = a * b * modp_inv2_prime (pow2 256) prime256 % prime256 in
   modulo_distributivity_mult2 (k * pow2 256) (l * pow2 256) (modp_inv2_prime (pow2 256) prime256) prime;
-  lemma_twice_brackets k (pow2 256) 1 l (pow2 256) 1 (modp_inv2 (pow2 256));
-  assert_norm (pow2 256 * modp_inv2 (pow2 256) % prime == 1);
-  modulo_distributivity_mult_last_two k (pow2 256) l (pow2 256) (modp_inv2 (pow2 256)) prime;
+  lemma_twice_brackets k (pow2 256) 1 l (pow2 256) 1 (modp_inv2 #P256 (pow2 256));
+  assert_norm (pow2 256 * modp_inv2 #P256 (pow2 256) % prime == 1);
+  modulo_distributivity_mult_last_two k (pow2 256) l (pow2 256) (modp_inv2 #P256 (pow2 256)) prime;
   lemma_mul_associativity_3 k (pow2 256) l
 
 let additionInDomain a b =

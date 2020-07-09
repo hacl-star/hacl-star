@@ -28,7 +28,7 @@ val fromDomainPoint: a: tuple3 nat nat nat -> Tot (r: tuple3 nat nat nat
 noextract
 val toDomain_: a: int -> Tot nat
 
-val lemmaFromDomain: a: int -> Lemma (fromDomain_ (a) == a * modp_inv2 (pow2 256) % prime256)
+val lemmaFromDomain: a: int -> Lemma (fromDomain_ (a) == a * modp_inv2 #P256 (pow2 256) % prime256)
 
 val lemmaToDomain: a: int -> Lemma (toDomain_(a) == a * (pow2 256) % prime256)
 
@@ -56,13 +56,13 @@ val substractionInDomain: a: nat {a < prime256} -> b: nat { b < prime256} -> Lem
   ((a - b) % prime256 == toDomain_ (fromDomain_ a - fromDomain_ b))
 
 
-val _pow_step0: p:nat_prime -> q:nat_prime -> tuple2 nat_prime nat_prime
+val _pow_step0: p:nat_prime #P256 -> q:nat_prime #P256 -> tuple2 (nat_prime #P256) (nat_prime #P256)
 
-val _pow_step1: p:nat_prime -> q:nat_prime -> tuple2 nat_prime nat_prime
+val _pow_step1: p:nat_prime #P256 -> q:nat_prime #P256 -> tuple2 (nat_prime #P256) (nat_prime #P256)
 
-let swap (p:nat_prime) (q:nat_prime) = q, p
+let swap (p:nat_prime #P256) (q:nat_prime #P256) = q, p
 
-val conditional_swap_pow: i:uint64 -> p:nat_prime -> q:nat_prime -> tuple2 nat_prime nat_prime
+val conditional_swap_pow: i:uint64 -> p:nat_prime #P256 -> q:nat_prime #P256 -> tuple2 (nat_prime #P256) (nat_prime #P256)
 
 val lemma_swaped_steps: p: nat_prime -> q: nat_prime ->
   Lemma (
@@ -73,9 +73,9 @@ val lemma_swaped_steps: p: nat_prime -> q: nat_prime ->
     p2 == r0 /\ q2 == r1)
 
 
-val _pow_step: k:lseq uint8 32 -> i:nat{i < 256} -> before:tuple2 nat_prime nat_prime
-  -> tuple2 nat_prime nat_prime
+val _pow_step: k:lseq uint8 32 -> i:nat{i < 256} -> before: tuple2 (nat_prime #P256) (nat_prime #P256)
+  -> tuple2 (nat_prime #P256) (nat_prime #P256)
 
-val pow_spec: k:lseq uint8 32 -> a:nat_prime -> Tot (r: nat_prime {r = pow a (Lib.ByteSequence.nat_from_bytes_le k) % prime256})
+val pow_spec: k:lseq uint8 32 -> a:nat_prime #P256 -> Tot (r: nat_prime #P256 {r = pow a (Lib.ByteSequence.nat_from_bytes_le k) % prime256})
 
-val sq_root_spec: a: nat_prime -> Tot (r: nat_prime {r = pow a ((prime256 + 1) / 4) % prime256})
+val sq_root_spec: a: nat_prime #P256 -> Tot (r: nat_prime #P256 {r = pow a ((prime256 + 1) / 4) % prime256})

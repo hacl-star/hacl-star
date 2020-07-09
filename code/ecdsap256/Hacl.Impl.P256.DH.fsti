@@ -8,6 +8,7 @@ open Lib.IntTypes
 open Lib.Buffer
 open Lib.ByteSequence
 
+open Spec.P256
 open Spec.DH
 open Hacl.Spec.ECDSA.Definition
 
@@ -21,7 +22,7 @@ val ecp256dh_i:
     live h result /\ live h scalar /\ 
     disjoint result scalar)
   (ensures fun h0 r h1 ->
-    let pointX, pointY, flag = ecp256_dh_i (as_seq h0 scalar) in
+    let pointX, pointY, flag = ecp256_dh_i #P256 (as_seq h0 scalar) in
     modifies (loc result) h0 h1 /\
     r == flag /\
     as_seq h1 (gsub result (size 0) (size 32)) == pointX /\
@@ -41,7 +42,7 @@ val ecp256dh_r:
       let pubKeyX = gsub pubKey (size 0) (size 32) in
       let pubKeyY = gsub pubKey (size 32) (size 32) in
       let pointX, pointY, flag =
-        ecp256_dh_r (as_seq h0 pubKeyX) (as_seq h0 pubKeyY) (as_seq h0 scalar) in
+        ecp256_dh_r #P256 (as_seq h0 pubKeyX) (as_seq h0 pubKeyY) (as_seq h0 scalar) in
       r == flag /\
       modifies (loc result) h0 h1 /\
       as_seq h1 (gsub result (size 0) (size 32)) == pointX /\

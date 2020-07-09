@@ -32,7 +32,7 @@ val bufferToJac: p:lbuffer uint64 (size 8) -> result:point -> Stack unit
      x3 == pointJacX /\ y3 == pointJacY /\ z3 == pointJacZ))
 
 
-[@ (Comment "  This code is not side channel resistant")]
+(* [@ (Comment "  This code is not side channel resistant")]  *)
 
 val isPointAtInfinityPublic: p:point -> Stack bool
   (requires fun h -> live h p)
@@ -47,13 +47,13 @@ val isPointOnCurvePublic: p:point -> Stack bool
     as_nat h (gsub p (size 8) (size 4)) == 1)
   (ensures fun h0 r h1 ->
     modifies0 h0 h1 /\ 
-     r == isPointOnCurve (as_nat h1 (gsub p (size 0) (size 4)), 
+     r == isPointOnCurve #P256 (as_nat h1 (gsub p (size 0) (size 4)), 
                           as_nat h1 (gsub p (size 4) (size 4)), 
                           as_nat h1 (gsub p (size 8) (size 4)))
   )
 
 
-[@ (Comment "  This code is not side channel resistant")]
+(* [@ (Comment "  This code is not side channel resistant")] *)
 
 val verifyQValidCurvePoint: pubKeyAsPoint:point
   -> tempBuffer:lbuffer uint64 (size 100) -> Stack bool
@@ -65,7 +65,7 @@ val verifyQValidCurvePoint: pubKeyAsPoint:point
   )
   (ensures  fun h0 r h1 ->
     modifies (loc tempBuffer) h0 h1 /\
-    r == verifyQValidCurvePointSpec (point_prime_to_coordinates (as_seq h0 pubKeyAsPoint)))
+    r == verifyQValidCurvePointSpec #P256 (point_prime_to_coordinates (as_seq h0 pubKeyAsPoint)))
 
 inline_for_extraction
 val verifyQ: 
@@ -77,6 +77,6 @@ val verifyQ:
 	let publicKeyX = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))) in 
 	let publicKeyY = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 32) (size 32))) in
 	let pkJ = Spec.P256.toJacobianCoordinates (publicKeyX, publicKeyY) in 
-	r == verifyQValidCurvePointSpec pkJ
+	r == verifyQValidCurvePointSpec #P256 pkJ
       )
     )

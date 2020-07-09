@@ -50,8 +50,10 @@ let ecp256dh_i result scalar =
   pop_frame();
   flag
 
-
+(*
 [@ (Comment "  This code is not side channel resistant on pubKey")]
+*)
+
 
 val _ecp256dh_r:
     result:lbuffer uint64 (size 12) 
@@ -68,11 +70,11 @@ val _ecp256dh_r:
       (let x, y = as_nat h0 (gsub pubKey (size 0) (size 4)), as_nat h0 (gsub pubKey (size 4) (size 4)) in
        let x3, y3, z3 = point_x_as_nat h1 result, point_y_as_nat h1 result, point_z_as_nat h1 result in
        let pointJacX, pointJacY, pointJacZ = toJacobianCoordinates (x, y) in
-       if not (verifyQValidCurvePointSpec (pointJacX, pointJacY, pointJacZ)) then
+       if not (verifyQValidCurvePointSpec #P256 (pointJacX, pointJacY, pointJacZ)) then
          uint_v r = maxint U64 /\ x3 == 0 /\ y3 == 0
        else
         x3 < prime256 /\ y3 < prime256 /\ z3 < prime256 /\
-        (let xN, yN, zN = scalar_multiplication (as_seq h0 scalar) (pointJacX, pointJacY, pointJacZ) in
+        (let xN, yN, zN = scalar_multiplication #P256 (as_seq h0 scalar) (pointJacX, pointJacY, pointJacZ) in
          xN == x3 /\ yN == y3 /\ zN == z3 /\
          (if isPointAtInfinity (xN, yN, zN) then
            uint_v r = maxint U64

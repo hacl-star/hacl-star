@@ -446,13 +446,13 @@ val lemma_pd_to_spec: x: nat -> y: nat -> z: nat -> x3: nat -> y3: nat -> z3: na
  (ensures(
    let xD, yD, zD = fromDomain_ x, fromDomain_ y, fromDomain_ z in 
    let x3D, y3D, z3D = fromDomain_ x3, fromDomain_ y3, fromDomain_ z3 in 
-   let xN, yN, zN = _point_double (xD, yD, zD) in 
+   let xN, yN, zN = _point_double #P256 (xD, yD, zD) in 
    x3D == xN /\ y3D == yN /\ z3D == zN))
 
 let lemma_pd_to_spec x y z x3 y3 z3 = 
   let xD, yD, zD = fromDomain_ x, fromDomain_ y, fromDomain_ z in 
   let x3D, y3D, z3D = fromDomain_ x3, fromDomain_ y3, fromDomain_ z3 in 
-  assert(let xN, yN, zN = _point_double (xD, yD, zD) in 
+  assert(let xN, yN, zN = _point_double #P256 (xD, yD, zD) in 
       x3D == xN /\ y3D == yN /\ z3D == zN)
 
   

@@ -90,7 +90,7 @@ let multByMinusThree a result  =
     let zeros = create (size 4) (u64 0) in 
     p256_sub zeros result result;
       lemmaFromDomain 0; 
-      assert_norm( 0 * modp_inv2 (pow2 256) % prime256 == 0);
+      assert_norm( 0 * modp_inv2 #P256 (pow2 256) % prime256 == 0);
       assert_norm (fromDomain_ 0 == 0); 
       lemma_mod_sub_distr 0 (3 * fromDomain_ (as_nat h0 a)) prime256;
       inDomain_mod_is_not_mod ((-3) * fromDomain_ (as_nat h0 a));  

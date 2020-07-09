@@ -69,7 +69,7 @@ val lemma_pointAddToSpecification:
   (ensures 
   (    
     let x3D, y3D, z3D = fromDomain_ x3, fromDomain_ y3, fromDomain_ z3 in 
-    let (xN, yN, zN) = _point_add (pxD, pyD, pzD) (qxD, qyD, qzD) in
+    let (xN, yN, zN) = _point_add #P256 (pxD, pyD, pzD) (qxD, qyD, qzD) in
     let u1D = fromDomain_ u1 in let u2D = fromDomain_ u2 in 
     let s1D = fromDomain_ s1 in let s2D = fromDomain_ s2 in 
     xN == x3D /\  yN == y3D /\ zN == z3D
@@ -115,7 +115,7 @@ let lemma_pointAddToSpecification x1D y1D z1D x2D y2D z2D x3 y3 z3  u1 u2 s1 s2 
   )
       );
 
-    let (xN, yN, zN) = _point_add (x1D, y1D, z1D) (x2D, y2D, z2D) in 
+    let (xN, yN, zN) = _point_add #P256 (x1D, y1D, z1D) (x2D, y2D, z2D) in 
 
 
     assert_by_tactic (z2D * z2D * pxD = pxD * (z2D * z2D)) canon; 
@@ -541,8 +541,8 @@ let point_add_if_second_branch_impl result p q u1 u2 s1 s2 r h uh hCube tempBuff
   lemma_point_add_1 (hD * hD * u1D) x3D rD s1D (hD * hD * hD);
   assert_by_tactic (s1D * (hD * hD * hD) == s1D * hD * hD * hD) canon;
 
-  assert_norm (modp_inv2 (pow2 256) > 0);
-  assert_norm (modp_inv2 (pow2 256) % prime <> 0); 
+  assert_norm (modp_inv2 #P256 (pow2 256) > 0);
+  assert_norm (modp_inv2 #P256 (pow2 256) % prime <> 0); 
 
   lemma_multiplication_not_mod_prime (as_nat h0 pZ);
   lemma_multiplication_not_mod_prime (as_nat h0 qZ);

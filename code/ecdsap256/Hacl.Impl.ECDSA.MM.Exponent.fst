@@ -34,7 +34,7 @@ val cswap: bit:uint64{v bit <= 1} -> p:felem -> q:felem
     (ensures  fun h0 _ h1 ->
       modifies (loc p |+| loc q) h0 h1 /\
 	(
-	  let (r0, r1) = Spec.ECDSA.conditional_swap bit (as_nat h0 p) (as_nat h0 q) in 
+	  let (r0, r1) = Spec.ECDSA.conditional_swap #P256 bit (as_nat h0 p) (as_nat h0 q) in 
 	  let pBefore = as_seq h0 p in let qBefore = as_seq h0 q in 
 	  let pAfter = as_seq h1 p in let qAfter = as_seq h1 q in 
 	  if uint_v bit = 0 then r0 == as_nat h0 p /\ r1 == as_nat h0 q else r0 == as_nat h0 q /\ r1 == as_nat h0 p) /\
@@ -76,7 +76,7 @@ val montgomery_ladder_exponent_step0: a: felem -> b: felem -> Stack unit
   (ensures fun h0 _ h1 -> modifies (loc a |+| loc b) h0 h1 /\ 
     as_nat h1 a < prime /\ as_nat h1 b < prime /\
     (
-      let (r0D, r1D) = _exp_step0 (fromDomain_ (as_nat h0 a)) (fromDomain_ (as_nat h0 b)) in 
+      let (r0D, r1D) = _exp_step0 #P256 (fromDomain_ (as_nat h0 a)) (fromDomain_ (as_nat h0 b)) in 
       r0D == fromDomain_ (as_nat h1 a) /\ r1D == fromDomain_ (as_nat h1 b)
     )
 )
@@ -96,7 +96,7 @@ val montgomery_ladder_exponent_step: a: felem -> b: felem -> scalar: glbuffer ui
     (
       let a_ = fromDomain_ (as_nat h0 a) in 
       let b_ = fromDomain_ (as_nat h0 b) in 
-      let (r0D, r1D) = _exp_step (as_seq h0 scalar) (uint_v i) (a_, b_) in 
+      let (r0D, r1D) = _exp_step #P256 (as_seq h0 scalar) (uint_v i) (a_, b_) in 
       r0D == fromDomain_ (as_nat h1 a) /\ r1D == fromDomain_ (as_nat h1 b) /\ 
       as_nat h1 a < prime /\ as_nat h1 b < prime
     ) 
@@ -109,7 +109,7 @@ let montgomery_ladder_exponent_step a b scalar i =
   cswap bit a b;
   montgomery_ladder_exponent_step0 a b;
   cswap bit a b;
-  Spec.ECDSA.lemma_swaped_steps (fromDomain_ (as_nat h0 a)) (fromDomain_ (as_nat h0 b))
+  Spec.ECDSA.lemma_swaped_steps #P256 (fromDomain_ (as_nat h0 a)) (fromDomain_ (as_nat h0 b))
 
 
 inline_for_extraction noextract 
@@ -120,7 +120,7 @@ val _montgomery_ladder_exponent: a: felem ->b: felem ->  scalar: glbuffer uint8 
     (
       let a_ = fromDomain_ (as_nat h0 a) in 
       let b_ = fromDomain_ (as_nat h0 b) in 
-      let (r0D, r1D) = _exponent_spec (as_seq h0 scalar) (a_, b_) in 
+      let (r0D, r1D) = _exponent_spec #P256 (as_seq h0 scalar) (a_, b_) in 
       r0D == fromDomain_ (as_nat h1 a) /\ r1D == fromDomain_ (as_nat h1 b) /\
       as_nat h1 a < prime /\ as_nat h1 b < prime )
   )
@@ -129,7 +129,7 @@ val _montgomery_ladder_exponent: a: felem ->b: felem ->  scalar: glbuffer uint8 
 let _montgomery_ladder_exponent a b scalar = 
   let h0 = ST.get() in 
   [@inline_let]
-  let spec_exp h0  = _exp_step (as_seq h0 scalar) in 
+  let spec_exp h0  = _exp_step #P256 (as_seq h0 scalar) in 
   [@inline_let]
   let acc (h: mem) : GTot (tuple2 nat_prime nat_prime) = (fromDomain_ (as_nat h a), fromDomain_ (as_nat h b)) in 
   Lib.LoopCombinators.eq_repeati0 256 (spec_exp h0) (acc h0);
@@ -160,7 +160,7 @@ let montgomery_ladder_exponent r =
   push_frame(); 
     let p = create (size 4) (u64 0) in 
     upload_one_montg_form p; 
-    recall_contents order_inverse_buffer prime_p256_order_inverse_seq;
+    recall_contents order_inverse_buffer (prime_order_inverse_seq #P256);
     let h = ST.get() in
     mut_const_immut_disjoint #uint64 #uint8 p order_inverse_buffer h;
     mut_const_immut_disjoint #uint64 #uint8 r order_inverse_buffer h;

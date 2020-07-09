@@ -57,7 +57,7 @@ val point_add: p: point -> q: point -> result: point -> tempBuffer: lbuffer uint
        let qxD, qyD, qzD = fromDomain_ (as_nat h0 qX), fromDomain_ (as_nat h0 qY), fromDomain_ (as_nat h0 qZ) in 
        let x3D, y3D, z3D = fromDomain_ (as_nat h1 x3), fromDomain_ (as_nat h1 y3), fromDomain_ (as_nat h1 z3) in
       
-       let xN, yN, zN = _point_add (pxD, pyD, pzD) (qxD, qyD, qzD) in 
+       let xN, yN, zN = _point_add #P256 (pxD, pyD, pzD) (qxD, qyD, qzD) in 
        x3D == xN /\ y3D == yN /\ z3D == zN
   )
 )

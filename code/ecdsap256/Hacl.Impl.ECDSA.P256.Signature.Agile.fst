@@ -44,14 +44,14 @@ open Hacl.Hash.Definitions
 
 inline_for_extraction noextract
 val ecdsa_signature_step12: alg:hash_alg_ecdsa
-  -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length alg}
+  -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length #P256 alg}
   -> m: lbuffer uint8 mLen -> result: felem -> Stack unit
   (requires fun h -> live h m /\ live h result )
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
     (
       assert_norm (pow2 32 < pow2 61);
       assert_norm (pow2 32 < pow2 125);
-      let hashM = hashSpec alg (v mLen) (as_seq h0 m) in 
+      let hashM = hashSpec P256 alg (v mLen) (as_seq h0 m) in 
       let cutHashM = Lib.Sequence.sub hashM 0 32 in 
       as_nat h1 result = nat_from_bytes_be cutHashM % prime_p256_order
     )
@@ -103,8 +103,8 @@ val ecdsa_signature_step45: x: felem
       modifies (loc x |+| loc tempBuffer) h0 h1 /\ 
       as_nat h1 x < prime_p256_order /\ 
       (
-	let (rxN, ryN, rzN), _ = montgomery_ladder_spec (as_seq h0 k) ((0,0,0), basePoint) in 
-	let (xN, _, _) = _norm (rxN, ryN, rzN) in 
+	let (rxN, ryN, rzN), _ = montgomery_ladder_spec (as_seq h0 k) ((0,0,0), basePoint #P256) in 
+	let (xN, _, _) = _norm #P256 (rxN, ryN, rzN) in 
 	as_nat h1 x == xN % prime_p256_order /\ 
 	(
 	  if as_nat h1 x = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0
@@ -125,10 +125,10 @@ let ecdsa_signature_step45 x k tempBuffer =
 #pop-options
 
 val lemma_power_step6: kInv: nat -> Lemma 
-  (Spec.ECDSA.exponent_spec (fromDomain_ kInv) == toDomain_ (pow kInv (prime_p256_order - 2)))
+  (Spec.ECDSA.exponent_spec #P256 (fromDomain_ kInv) == toDomain_ (pow kInv (prime_p256_order - 2)))
 
 let lemma_power_step6 kInv = 
-  let a = Spec.ECDSA.exponent_spec (fromDomain_ kInv) in 
+  let a = Spec.ECDSA.exponent_spec #P256 (fromDomain_ kInv) in 
   lemmaFromDomain kInv;
 
   power_distributivity (kInv * modp_inv2_prime (pow2 256) prime_p256_order) (prime_p256_order - 2) prime_p256_order;
@@ -213,7 +213,7 @@ let ecdsa_signature_step6 result kFelem z r da =
 val ecdsa_signature_core: alg: hash_alg_ecdsa
   -> r: felem 
   -> s: felem
-  -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length alg}
+  -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length #P256 alg}
   -> m: lbuffer uint8 mLen 
   -> privKeyAsFelem: felem  
   -> k: lbuffer uint8 (size 32) -> 
@@ -233,11 +233,11 @@ val ecdsa_signature_core: alg: hash_alg_ecdsa
     (
       assert_norm (pow2 32 < pow2 61); 
       assert_norm (pow2 32 < pow2 125);
-      let hashM = hashSpec alg (v mLen) (as_seq h0 m) in 
+      let hashM = hashSpec P256 alg (v mLen) (as_seq h0 m) in 
       let cutHashM = Lib.Sequence.sub hashM 0 32 in 
       let z =  nat_from_bytes_be cutHashM % prime_p256_order in 
-      let (rxN, ryN, rzN), _ = montgomery_ladder_spec (as_seq h0 k) ((0,0,0), basePoint) in 
-      let (xN, _, _) = _norm (rxN, ryN, rzN) in 
+      let (rxN, ryN, rzN), _ = montgomery_ladder_spec (as_seq h0 k) ((0,0,0), basePoint #P256) in 
+      let (xN, _, _) = _norm #P256 (rxN, ryN, rzN) in 
       
       let kFelem = nat_from_bytes_be (as_seq h0 k) in 
       as_nat h1 r == xN % prime_p256_order /\
@@ -277,7 +277,7 @@ let ecdsa_signature_core alg r s mLen m privKeyAsFelem k =
 inline_for_extraction noextract
 val ecdsa_signature: alg: hash_alg_ecdsa 
   -> result: lbuffer uint8 (size 64) 
-  -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length alg}
+  -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length #P256 alg}
   -> m: lbuffer uint8 mLen 
   -> privKey: lbuffer uint8 (size 32) 
   -> k: lbuffer uint8 (size 32) -> 
@@ -295,7 +295,7 @@ val ecdsa_signature: alg: hash_alg_ecdsa
      (assert_norm (pow2 32 < pow2 61);
       let resultR = gsub result (size 0) (size 32) in 
       let resultS = gsub result (size 32) (size 32) in 
-      let r, s, flagSpec = Spec.ECDSA.ecdsa_signature_agile alg (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in 
+      let r, s, flagSpec = Spec.ECDSA.ecdsa_signature_agile P256 alg (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in 
       as_seq h1 resultR == nat_to_bytes_be 32 r /\
       as_seq h1 resultS == nat_to_bytes_be 32 s /\
       flag == flagSpec 

@@ -446,7 +446,7 @@ let lemma_reduce_mod_by_sub3 t =
 
 val mult_one_round: t: nat -> co: nat{t % prime256 == co% prime256}  -> Lemma (
   let result = (t + (t % pow2 64) * prime256) / pow2 64 % prime256 in 
-  result == (co * modp_inv2 (pow2 64)) % prime256)
+  result == (co * modp_inv2 #P256 (pow2 64)) % prime256)
 
 let mult_one_round t co = 
 let t1 = t % pow2 64 in 
@@ -461,7 +461,7 @@ let t1 = t % pow2 64 in
       assert(exists (k: nat). k * pow2 64 = t3);
       assert_norm (prime256 > 3);
       lemma_division_is_multiplication t3 prime256;
-      lemma_multiplication_to_same_number t3 co (modp_inv2 (pow2 64)) prime256
+      lemma_multiplication_to_same_number t3 co (modp_inv2 #P256 (pow2 64)) prime256
 
 
 val lemma_reduce_mod_ecdsa_prime:
