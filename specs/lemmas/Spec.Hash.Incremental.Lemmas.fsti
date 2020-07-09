@@ -24,13 +24,13 @@ val hash_incremental_block_is_update_last (a:hash_alg)
   (s:words_state a)
   (input : bytes_block a) :
   Lemma (
-      (**) Spec.Hash.Lemmas0.block_length_smaller_than_max_input a;
+      (**) Spec.Hash.Lemmas.block_length_smaller_than_max_input a;
       Spec.Hash.Incremental.update_last a s 0 input ==
       Spec.Hash.Incremental.hash_incremental_body a input s)
 
 val block_hash_incremental (a:hash_alg) (input:bytes_block a)
   : Lemma
-    ((**) Spec.Hash.Lemmas0.block_length_smaller_than_max_input a;
+    ((**) Spec.Hash.Lemmas.block_length_smaller_than_max_input a;
      finish a (update_last a (init a) 0 input) `S.equal` hash_incremental a input)
 
 val concatenated_hash_incremental (a:hash_alg) (inp1:bytes_blocks a) (inp2:bytes)

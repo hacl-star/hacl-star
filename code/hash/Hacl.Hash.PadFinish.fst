@@ -23,7 +23,7 @@ open LowStar.BufferOps
 open Hacl.Hash.Definitions
 open Hacl.Hash.Lemmas
 open Spec.Hash.Definitions
-open Spec.Hash.Lemmas0
+open Spec.Hash.Lemmas
 
 (** Padding *)
 

@@ -17,9 +17,9 @@ open Spec.Agile.Hash
 open Spec.Hash.Incremental
 open Spec.Hash.Incremental.Lemmas
 open Spec.Hash.PadFinish
-open Spec.Hash.Lemmas //
+open Spec.Hash.Lemmas
 friend Spec.Agile.HMAC
-friend Spec.Agile.Hash //
+friend Spec.Agile.Hash
 
 let _: squash (inversion hash_alg) = allow_inversion hash_alg
 
@@ -161,7 +161,7 @@ let part2 a m init update_multi update_last finish s dst key data len =
       begin
       let ev = update_last s ev (uint #(len_int_type a) #PUB 0) key (D.block_len a) in
       (**) let h2 = ST.get () in
-      (**) Spec.Hash.Lemmas0.block_length_smaller_than_max_input a;
+      (**) Spec.Hash.Lemmas.block_length_smaller_than_max_input a;
       (**) assert(key_data_v0 `S.equal` key_v0);
       (**) Spec.Hash.Incremental.Lemmas.hash_incremental_block_is_update_last a init_v key_v0;
       (**) assert((D.as_seq h2 s, ev) ==

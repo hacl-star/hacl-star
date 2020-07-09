@@ -2,13 +2,12 @@ module Spec.Hash.Lemmas
 
 module S = FStar.Seq
 
-include Spec.Hash.Lemmas0
-
 open Lib.IntTypes
 
 open Spec.Agile.Hash
 open Spec.Hash.Definitions
 open Spec.Hash.PadFinish
+include Spec.Hash.Lemmas0
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 50"
 
@@ -58,3 +57,20 @@ val update_multi_associative (a: hash_alg)
     (update_multi a (update_multi a h input1) input2) ==
       (update_multi a h input)))
   [ SMTPat (update_multi a (update_multi a h input1) input2) ]
+
+val block_length_smaller_than_max_input (a:hash_alg) :
+  Lemma(block_length a <= max_input_length a)
+
+val pad_invariant_block (a: hash_alg) (blocks: nat) (rest: nat): Lemma
+  (requires blocks % block_length a = 0)
+  (ensures (pad_length a rest = pad_length a (blocks + rest)))
+  [ SMTPat (pad_length a (blocks + rest)) ]
+
+(* A useful lemma for all the operations that involve going from bytes to bits. *)
+val max_input_size_len (a: hash_alg{not (is_blake a)}):
+  Lemma (FStar.Mul.((max_input_length a) * 8 + 8 = pow2 (len_length a * 8)))
+
+(* *)
+let pad_length (a: hash_alg) (len: nat): Tot (n:nat { (len + n) % block_length a = 0 }) =
+  if is_blake a then (block_length a - len) % block_length a
+  else pad0_length a len + 1 + len_length a
