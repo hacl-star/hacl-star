@@ -31,7 +31,7 @@ open FStar.Mul
 
 #reset-options "--z3rlimit 300" 
 
-
+(*)
 val point_add: p: point -> q: point -> result: point -> tempBuffer: lbuffer uint64 (size 88) -> 
    Stack unit (requires fun h -> live h p /\ live h q /\ live h result /\ live h tempBuffer /\ 
    eq_or_disjoint q result /\
@@ -61,3 +61,4 @@ val point_add: p: point -> q: point -> result: point -> tempBuffer: lbuffer uint
        x3D == xN /\ y3D == yN /\ z3D == zN
   )
 )
+ *)

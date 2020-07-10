@@ -30,7 +30,7 @@ open FStar.Mul
 
 #reset-options "--z3rlimit 300" 
 
-
+(*)
 noextract       
 val lemma_pointAddToSpecification: 
   pxD: nat {pxD < prime256} -> pyD: nat{pyD < prime256} -> pzD: nat {pzD < prime256} -> 
@@ -589,3 +589,6 @@ let point_add p q result tempBuffer =
       let y3 = as_nat h1 (gsub result (size 4) (size 4)) in 
       let z3 = as_nat h1 (gsub result (size 8) (size 4)) in 
       lemma_pointAddToSpecification pxD pyD pzD qxD qyD qzD x3 y3 z3 (as_nat h1 u1) (as_nat h1 u2) (as_nat h1 s1) (as_nat h1 s2) (as_nat h1 h) (as_nat h1 r)
+
+
+      *)

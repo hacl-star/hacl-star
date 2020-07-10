@@ -279,51 +279,62 @@ let lemma_z3 #c x y z =
     }
 
 
-val point_double_a_b_g: #c: curve 
-  -> p: point c 
-  -> alpha: felem c 
-  -> beta: felem c 
-  -> gamma: felem c
-  -> delta: felem c 
-  -> tempBuffer: lbuffer uint64 (size 12) -> 
-  Stack unit
-    (requires fun h -> 
-      live h p /\ live h alpha /\ live h beta /\ live h gamma /\ live h delta /\ live h tempBuffer /\ 
-      LowStar.Monotonic.Buffer.all_disjoint [loc p; loc alpha; loc beta; loc gamma; loc delta; loc tempBuffer] /\
-      as_nat c h (gsub p (size 8) (size 4)) < prime /\ 
-      as_nat c h (gsub p (size 0) (size 4)) < prime /\ 
-      as_nat c h (gsub p (size 4) (size 4)) < prime
-    )
-    (ensures fun h0 _ h1 -> modifies (loc alpha |+| loc beta |+| loc gamma |+| loc delta |+| loc tempBuffer) h0 h1 /\
-      (
-	let x = fromDomain_ (as_nat h0 (gsub p (size 0) (size 4))) in 
-	let y = fromDomain_ (as_nat h0 (gsub p (size 4) (size 4))) in 
-	let z = fromDomain_ (as_nat h0 (gsub p (size 8) (size 4))) in 
-	as_nat h1 delta = toDomain_ (z * z % prime) /\
-	as_nat h1 gamma = toDomain_ (y * y % prime) /\
-	as_nat h1 beta = toDomain_ (x * fromDomain_(as_nat h1 gamma) % prime) /\
-	as_nat h1 alpha = toDomain_ (3 * (x - fromDomain_ (as_nat h1 delta)) * (x + fromDomain_ (as_nat h1 delta)) % prime)
-      )
-    )
-
 val lemma_point_abd: xD: int -> dlt: int -> 
   Lemma (3 * (xD - dlt) * (xD + dlt) == 3 * ((xD - dlt) * (xD + dlt)))
 
 let lemma_point_abd xD dlt = ()
 
 
-let point_double_a_b_g p alpha beta gamma delta tempBuffer = 
-  let pX = sub p (size 0) (size 4) in 
-  let pY = sub p (size 4) (size 4) in 
-  let pZ = sub p (size 8) (size 4) in 
 
-  let a0 = sub tempBuffer (size 0) (size 4) in 
-  let a1 = sub tempBuffer (size 4) (size 4) in 
-  let alpha0 = sub tempBuffer (size 8) (size 4) in 
+val point_double_a_b_g: #c: curve 
+  -> p: point c 
+  -> alpha: felem c 
+  -> beta: felem c 
+  -> gamma: felem c
+  -> delta: felem c 
+  -> tempBuffer: lbuffer uint64 (size (getCoordinateLenU64 c * 3)) -> 
+  Stack unit
+    (requires fun h -> 
+      let coordinateLen = getCoordinateLenU64 c in 
+      let prime = getPrime c in 
+      live h p /\ live h alpha /\ live h beta /\ live h gamma /\ live h delta /\ live h tempBuffer /\ 
+      LowStar.Monotonic.Buffer.all_disjoint [loc p; loc alpha; loc beta; loc gamma; loc delta; loc tempBuffer] /\
+      as_nat c h (gsub p (size 0) (size coordinateLen)) < prime /\ 
+      as_nat c h (gsub p (size coordinateLen) (size coordinateLen)) < prime /\
+      as_nat c h (gsub p (size (coordinateLen * 2)) (size coordinateLen)) < prime
+    )
+    (ensures fun h0 _ h1 -> modifies (loc alpha |+| loc beta |+| loc gamma |+| loc delta |+| loc tempBuffer) h0 h1 /\
+      (
+	let coordinateLen = getCoordinateLenU64 c in 
+	let prime = getPrime c in 
+	let x = fromDomain_ (as_nat c h0 (gsub p (size 0) (size coordinateLen))) in 
+	let y = fromDomain_ (as_nat c h0 (gsub p (size coordinateLen) (size coordinateLen))) in 
+	let z = fromDomain_ (as_nat c h0 (gsub p (size (2 * coordinateLen)) (size coordinateLen))) in 
+	as_nat c h1 delta = toDomain_ (z * z % prime) /\
+	as_nat c h1 gamma = toDomain_ (y * y % prime) /\
+	as_nat c h1 beta = toDomain_ (x * fromDomain_ (as_nat c h1 gamma) % prime) /\
+	as_nat c h1 alpha = toDomain_ (3 * (x - fromDomain_ (as_nat c h1 delta)) * (x + fromDomain_ (as_nat c h1 delta)) % prime)
+      )
+    )
 
+
+let point_double_a_b_g #c p alpha beta gamma delta tempBuffer = 
+  let coordinateLen = getCoordinateLenU64 c in 
+  
+  let pX = sub p (size 0) (size coordinateLen) in 
+  let pY = sub p (size coordinateLen) (size coordinateLen) in 
+  let pZ = sub p (size (2 * coordinateLen)) (size coordinateLen) in 
+
+  admit();
+  let a0 = sub tempBuffer (size 0) (size coordinateLen) in 
+  let a1 = sub tempBuffer (size coordinateLen) (size coordinateLen) in 
+  let alpha0 = sub tempBuffer (size (2 * coordinateLen)) (size coordinateLen) in 
+
+  
   montgomery_square_buffer pZ delta; (* delta = z * z*)
   montgomery_square_buffer pY gamma; (* gamma = y * y *)
-  montgomery_multiplication_buffer pX gamma beta; (* beta = x * gamma *)
+  admit();
+  (*montgomery_multiplication_buffer pX gamma beta; (* beta = x * gamma *)
 
   let h0 = ST.get() in 
 
@@ -346,6 +357,41 @@ let point_double_a_b_g p alpha beta gamma delta tempBuffer =
     (==) {lemma_point_abd xD dlt}
       (3 * (xD - dlt) * (xD + dlt)) % prime;
   }
+*)
+
+
+
+ ()
+
+(*
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 val point_double_x3: x3: felem -> alpha: felem -> fourBeta: felem -> beta: felem -> eightBeta: felem ->
   Stack unit
@@ -532,3 +578,4 @@ let point_double p result tempBuffer =
     (as_nat h4 (gsub result (size 0) (size 4))) 
       (as_nat h4 (gsub result (size 4) (size 4))) 
 	(as_nat h4 (gsub result (size 8) (size 4)))
+ *)

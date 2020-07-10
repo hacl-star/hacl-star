@@ -68,10 +68,10 @@ noextract
 let felem_seq = lseq uint64 4
 
 inline_for_extraction
-let felem (c: curve) = lbuffer uint64 (size (getCoordinateLen c))
+let felem (c: curve) = lbuffer uint64 (size (getCoordinateLenU64 c))
 
 inline_for_extraction 
-let widefelem (c : curve) =  lbuffer uint64 (size (getCoordinateLen c * 2))
+let widefelem (c : curve) =  lbuffer uint64 (size (getCoordinateLenU64 c * 2))
 
 
 noextract

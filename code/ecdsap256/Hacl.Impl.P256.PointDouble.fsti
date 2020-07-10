@@ -26,6 +26,7 @@ open FStar.Mul
 
 #reset-options "--z3rlimit 300" 
 
+(*
 val point_double: p: point -> result: point -> tempBuffer: lbuffer uint64 (size 88) -> Stack unit
   (requires fun h -> live h p /\ live h tempBuffer /\ live h result /\
     disjoint p tempBuffer /\ disjoint result tempBuffer /\
@@ -48,3 +49,4 @@ val point_double: p: point -> result: point -> tempBuffer: lbuffer uint64 (size 
       x3D == xN /\ y3D == yN /\ z3D == zN
   )
 ) 
+ *)
