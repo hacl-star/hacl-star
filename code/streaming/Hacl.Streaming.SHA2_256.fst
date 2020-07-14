@@ -54,14 +54,17 @@ module Agile = Spec.Agile.Hash
 inline_for_extraction noextract
 let b = stateful_buffer (word SHA2_256) (D.hash_word_len SHA2_256) (Lib.IntTypes.u32 0)
 
+inline_for_extraction noextract
 let update_multi_s () acc (prevlen : nat) input =
   fst Agile.(update_multi SHA2_256 (acc, ()) input)
 
+noextract
 let update_multi_zero () acc (prevlen : nat) :
   Lemma(update_multi_s () acc prevlen S.empty == acc) = ()
   
 #push-options "--ifuel 1"
 
+noextract
 let update_multi_associative () acc (prevlen1 prevlen2 : nat) (input1 input2 : S.seq uint8) :
     Lemma
     (requires (
