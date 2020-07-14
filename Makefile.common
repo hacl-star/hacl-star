@@ -23,6 +23,7 @@ include $(HACL_HOME)/Makefile.include
 INCLUDES = \
   $(ALL_HACL_DIRS) \
   $(FSTAR_HOME)/ulib/.cache \
+  $(KREMLIN_HOME)/kremlib/obj \
   $(KREMLIN_HOME)/kremlib
 
 # 0. Vale

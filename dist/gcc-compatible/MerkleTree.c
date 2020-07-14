@@ -38,7 +38,12 @@ static void hash_r_free(uint8_t *v)
 
 static void hash_copy(uint32_t s, uint8_t *src, uint8_t *dst)
 {
-  memcpy(dst, src, s * sizeof (src[0U]));
+  bool uu____0 = src == NULL;
+  if (!(uu____0 || dst == NULL))
+  {
+    memcpy(dst, src, s * sizeof (src[0U]));
+    return;
+  }
 }
 
 static LowStar_Vector_vector_str___uint8_t_ alloc_reserve___uint8_t_(uint32_t len, uint8_t *ia)
@@ -426,8 +431,16 @@ void mt_sha256_compress(uint8_t *src1, uint8_t *src2, uint8_t *dst)
   uint32_t hash_size = (uint32_t)32U;
   Spec_Hash_Definitions_hash_alg hash_alg = Spec_Hash_Definitions_SHA2_256;
   uint8_t cb[64U] = { 0U };
-  memcpy(cb, src1, hash_size * sizeof (src1[0U]));
-  memcpy(cb + (uint32_t)32U, src2, hash_size * sizeof (src2[0U]));
+  bool uu____0 = src1 == NULL;
+  if (!(uu____0 || cb == NULL))
+  {
+    memcpy(cb, src1, hash_size * sizeof (src1[0U]));
+  }
+  bool uu____1 = src2 == NULL;
+  if (!(uu____1 || cb == NULL))
+  {
+    memcpy(cb + (uint32_t)32U, src2, hash_size * sizeof (src2[0U]));
+  }
   uint32_t buf0[4U];
   uint32_t buf1[5U];
   uint32_t buf2[8U];
@@ -678,7 +691,16 @@ assign__LowStar_Vector_vector_str__uint8_t_(
   LowStar_Vector_vector_str___uint8_t_ v
 )
 {
-  (vec.vs + i)[0U] = v;
+  void **ite;
+  if (vec.vs == NULL)
+  {
+    ite = NULL;
+  }
+  else
+  {
+    ite = vec.vs + i;
+  }
+  ite[0U] = v;
 }
 
 static void
@@ -735,7 +757,16 @@ static uint8_t *rg_alloc___uint8_t__uint32_t(regional__uint32_t__uint8_t_ rg)
 
 static void assign___uint8_t_(LowStar_Vector_vector_str___uint8_t_ vec, uint32_t i, uint8_t *v)
 {
-  (vec.vs + i)[0U] = v;
+  void **ite;
+  if (vec.vs == NULL)
+  {
+    ite = NULL;
+  }
+  else
+  {
+    ite = vec.vs + i;
+  }
+  ite[0U] = v;
 }
 
 static void
@@ -956,7 +987,11 @@ insert___uint8_t_(LowStar_Vector_vector_str___uint8_t_ vec, uint8_t *v)
     uint8_t **nvs = KRML_HOST_MALLOC(sizeof (uint8_t *) * ncap);
     for (uint32_t _i = 0U; _i < ncap; ++_i)
       nvs[_i] = v;
-    memcpy(nvs, vs, sz * sizeof (vs[0U]));
+    bool uu____0 = vs == NULL;
+    if (!(uu____0 || nvs == NULL))
+    {
+      memcpy(nvs, vs, sz * sizeof (vs[0U]));
+    }
     nvs[sz] = v;
     KRML_HOST_FREE(vs);
     return
@@ -2220,7 +2255,11 @@ deserialize_hash(uint32_t hash_size, bool ok, const uint8_t *buf, uint32_t sz, u
     return ((__bool_uint32_t__uint8_t_){ .fst = false, .snd = pos, .thd = rg.dummy });
   }
   uint8_t *hash = rg_alloc___uint8_t__uint32_t(rg);
-  memcpy(hash, (uint8_t *)buf + pos, hash_size * sizeof (((uint8_t *)buf)[0U]));
+  bool uu____0 = (uint8_t *)buf == NULL;
+  if (!(uu____0 || hash == NULL))
+  {
+    memcpy(hash, (uint8_t *)buf + pos, hash_size * sizeof (((uint8_t *)buf)[0U]));
+  }
   return ((__bool_uint32_t__uint8_t_){ .fst = true, .snd = pos + hash_size, .thd = hash });
 }
 

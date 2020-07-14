@@ -26,10 +26,42 @@
 
 static void secretbox_init(uint8_t *xkeys, uint8_t *k, uint8_t *n)
 {
-  uint8_t *subkey = xkeys;
-  uint8_t *aekey = xkeys + (uint32_t)32U;
-  uint8_t *n0 = n;
-  uint8_t *n1 = n + (uint32_t)16U;
+  uint8_t *subkey;
+  if (xkeys == NULL)
+  {
+    subkey = NULL;
+  }
+  else
+  {
+    subkey = xkeys;
+  }
+  uint8_t *aekey;
+  if (xkeys == NULL)
+  {
+    aekey = NULL;
+  }
+  else
+  {
+    aekey = xkeys + (uint32_t)32U;
+  }
+  uint8_t *n0;
+  if (n == NULL)
+  {
+    n0 = NULL;
+  }
+  else
+  {
+    n0 = n;
+  }
+  uint8_t *n1;
+  if (n == NULL)
+  {
+    n1 = NULL;
+  }
+  else
+  {
+    n1 = n + (uint32_t)16U;
+  }
   Hacl_Salsa20_hsalsa20(subkey, k, n0);
   Hacl_Salsa20_salsa20_key_block0(aekey, subkey, n1);
 }
@@ -39,10 +71,51 @@ secretbox_detached(uint32_t mlen, uint8_t *c, uint8_t *tag, uint8_t *k, uint8_t 
 {
   uint8_t xkeys[96U] = { 0U };
   secretbox_init(xkeys, k, n);
-  uint8_t *mkey = xkeys + (uint32_t)32U;
-  uint8_t *n1 = n + (uint32_t)16U;
-  uint8_t *subkey = xkeys;
-  uint8_t *ekey0 = xkeys + (uint32_t)64U;
+  uint8_t *mkey;
+  if (xkeys == NULL)
+  {
+    mkey = NULL;
+  }
+  else
+  {
+    mkey = xkeys + (uint32_t)32U;
+  }
+  uint8_t *n1;
+  if (n == NULL)
+  {
+    n1 = NULL;
+  }
+  else
+  {
+    n1 = n + (uint32_t)16U;
+  }
+  uint8_t *subkey;
+  if (xkeys == NULL)
+  {
+    subkey = NULL;
+  }
+  else
+  {
+    subkey = xkeys;
+  }
+  uint8_t *mkey1;
+  if (xkeys == NULL)
+  {
+    mkey1 = NULL;
+  }
+  else
+  {
+    mkey1 = xkeys + (uint32_t)32U;
+  }
+  uint8_t *ekey0;
+  if (xkeys == NULL)
+  {
+    ekey0 = NULL;
+  }
+  else
+  {
+    ekey0 = xkeys + (uint32_t)64U;
+  }
   uint32_t mlen0;
   if (mlen <= (uint32_t)32U)
   {
@@ -53,19 +126,76 @@ secretbox_detached(uint32_t mlen, uint8_t *c, uint8_t *tag, uint8_t *k, uint8_t 
     mlen0 = (uint32_t)32U;
   }
   uint32_t mlen1 = mlen - mlen0;
-  uint8_t *m0 = m;
-  uint8_t *m1 = m + mlen0;
+  uint8_t *m0;
+  if (m == NULL)
+  {
+    m0 = NULL;
+  }
+  else
+  {
+    m0 = m;
+  }
+  uint8_t *m1;
+  if (m == NULL)
+  {
+    m1 = NULL;
+  }
+  else
+  {
+    m1 = m + mlen0;
+  }
   uint8_t block0[32U] = { 0U };
-  memcpy(block0, m0, mlen0 * sizeof (m0[0U]));
+  bool uu____0 = m0 == NULL;
+  if (!(uu____0 || block0 == NULL))
+  {
+    memcpy(block0, m0, mlen0 * sizeof (m0[0U]));
+  }
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)32U; i++)
   {
-    uint8_t *os = block0;
+    uint8_t *os;
+    if (block0 == NULL)
+    {
+      os = NULL;
+    }
+    else
+    {
+      os = block0;
+    }
     uint8_t x = block0[i] ^ ekey0[i];
     os[i] = x;
   }
-  uint8_t *c0 = c;
-  uint8_t *c1 = c + mlen0;
-  memcpy(c0, block0, mlen0 * sizeof (block0[0U]));
+  uint8_t *c0;
+  if (c == NULL)
+  {
+    c0 = NULL;
+  }
+  else
+  {
+    c0 = c;
+  }
+  uint8_t *c1;
+  if (c == NULL)
+  {
+    c1 = NULL;
+  }
+  else
+  {
+    c1 = c + mlen0;
+  }
+  uint8_t *uu____1;
+  if (block0 == NULL)
+  {
+    uu____1 = NULL;
+  }
+  else
+  {
+    uu____1 = block0;
+  }
+  bool uu____2 = uu____1 == NULL;
+  if (!(uu____2 || c0 == NULL))
+  {
+    memcpy(c0, uu____1, mlen0 * sizeof (uu____1[0U]));
+  }
   Hacl_Salsa20_salsa20_encrypt(mlen1, c1, m1, subkey, n1, (uint32_t)1U);
   Hacl_Poly1305_32_poly1305_mac(tag, mlen, c, mkey);
 }
@@ -82,7 +212,15 @@ secretbox_open_detached(
 {
   uint8_t xkeys[96U] = { 0U };
   secretbox_init(xkeys, k, n);
-  uint8_t *mkey = xkeys + (uint32_t)32U;
+  uint8_t *mkey;
+  if (xkeys == NULL)
+  {
+    mkey = NULL;
+  }
+  else
+  {
+    mkey = xkeys + (uint32_t)32U;
+  }
   uint8_t tag_[16U] = { 0U };
   Hacl_Poly1305_32_poly1305_mac(tag_, mlen, c, mkey);
   uint8_t res = (uint8_t)255U;
@@ -94,9 +232,33 @@ secretbox_open_detached(
   uint8_t z = res;
   if (z == (uint8_t)255U)
   {
-    uint8_t *subkey = xkeys;
-    uint8_t *ekey0 = xkeys + (uint32_t)64U;
-    uint8_t *n1 = n + (uint32_t)16U;
+    uint8_t *subkey;
+    if (xkeys == NULL)
+    {
+      subkey = NULL;
+    }
+    else
+    {
+      subkey = xkeys;
+    }
+    uint8_t *ekey0;
+    if (xkeys == NULL)
+    {
+      ekey0 = NULL;
+    }
+    else
+    {
+      ekey0 = xkeys + (uint32_t)64U;
+    }
+    uint8_t *n1;
+    if (n == NULL)
+    {
+      n1 = NULL;
+    }
+    else
+    {
+      n1 = n + (uint32_t)16U;
+    }
     uint32_t mlen0;
     if (mlen <= (uint32_t)32U)
     {
@@ -107,19 +269,76 @@ secretbox_open_detached(
       mlen0 = (uint32_t)32U;
     }
     uint32_t mlen1 = mlen - mlen0;
-    uint8_t *c0 = c;
-    uint8_t *c1 = c + mlen0;
+    uint8_t *c0;
+    if (c == NULL)
+    {
+      c0 = NULL;
+    }
+    else
+    {
+      c0 = c;
+    }
+    uint8_t *c1;
+    if (c == NULL)
+    {
+      c1 = NULL;
+    }
+    else
+    {
+      c1 = c + mlen0;
+    }
     uint8_t block0[32U] = { 0U };
-    memcpy(block0, c0, mlen0 * sizeof (c0[0U]));
+    bool uu____1 = c0 == NULL;
+    if (!(uu____1 || block0 == NULL))
+    {
+      memcpy(block0, c0, mlen0 * sizeof (c0[0U]));
+    }
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)32U; i++)
     {
-      uint8_t *os = block0;
+      uint8_t *os;
+      if (block0 == NULL)
+      {
+        os = NULL;
+      }
+      else
+      {
+        os = block0;
+      }
       uint8_t x = block0[i] ^ ekey0[i];
       os[i] = x;
     }
-    uint8_t *m0 = m;
-    uint8_t *m1 = m + mlen0;
-    memcpy(m0, block0, mlen0 * sizeof (block0[0U]));
+    uint8_t *m0;
+    if (m == NULL)
+    {
+      m0 = NULL;
+    }
+    else
+    {
+      m0 = m;
+    }
+    uint8_t *m1;
+    if (m == NULL)
+    {
+      m1 = NULL;
+    }
+    else
+    {
+      m1 = m + mlen0;
+    }
+    uint8_t *uu____2;
+    if (block0 == NULL)
+    {
+      uu____2 = NULL;
+    }
+    else
+    {
+      uu____2 = block0;
+    }
+    bool uu____3 = uu____2 == NULL;
+    if (!(uu____3 || m0 == NULL))
+    {
+      memcpy(m0, uu____2, mlen0 * sizeof (uu____2[0U]));
+    }
     Hacl_Salsa20_salsa20_decrypt(mlen1, m1, c1, subkey, n1, (uint32_t)1U);
     return (uint32_t)0U;
   }
@@ -128,16 +347,48 @@ secretbox_open_detached(
 
 static void secretbox_easy(uint32_t mlen, uint8_t *c, uint8_t *k, uint8_t *n, uint8_t *m)
 {
-  uint8_t *tag = c;
-  uint8_t *cip = c + (uint32_t)16U;
+  uint8_t *tag;
+  if (c == NULL)
+  {
+    tag = NULL;
+  }
+  else
+  {
+    tag = c;
+  }
+  uint8_t *cip;
+  if (c == NULL)
+  {
+    cip = NULL;
+  }
+  else
+  {
+    cip = c + (uint32_t)16U;
+  }
   secretbox_detached(mlen, cip, tag, k, n, m);
 }
 
 static uint32_t
 secretbox_open_easy(uint32_t mlen, uint8_t *m, uint8_t *k, uint8_t *n, uint8_t *c)
 {
-  uint8_t *tag = c;
-  uint8_t *cip = c + (uint32_t)16U;
+  uint8_t *tag;
+  if (c == NULL)
+  {
+    tag = NULL;
+  }
+  else
+  {
+    tag = c;
+  }
+  uint8_t *cip;
+  if (c == NULL)
+  {
+    cip = NULL;
+  }
+  else
+  {
+    cip = c + (uint32_t)16U;
+  }
   return secretbox_open_detached(mlen, m, k, n, cip, tag);
 }
 
@@ -223,8 +474,24 @@ box_open_detached(
 static inline uint32_t
 box_easy_afternm(uint32_t mlen, uint8_t *c, uint8_t *k, uint8_t *n, uint8_t *m)
 {
-  uint8_t *tag = c;
-  uint8_t *cip = c + (uint32_t)16U;
+  uint8_t *tag;
+  if (c == NULL)
+  {
+    tag = NULL;
+  }
+  else
+  {
+    tag = c;
+  }
+  uint8_t *cip;
+  if (c == NULL)
+  {
+    cip = NULL;
+  }
+  else
+  {
+    cip = c + (uint32_t)16U;
+  }
   uint32_t res = box_detached_afternm(mlen, cip, tag, k, n, m);
   return res;
 }
@@ -232,8 +499,24 @@ box_easy_afternm(uint32_t mlen, uint8_t *c, uint8_t *k, uint8_t *n, uint8_t *m)
 static inline uint32_t
 box_easy(uint32_t mlen, uint8_t *c, uint8_t *sk, uint8_t *pk, uint8_t *n, uint8_t *m)
 {
-  uint8_t *tag = c;
-  uint8_t *cip = c + (uint32_t)16U;
+  uint8_t *tag;
+  if (c == NULL)
+  {
+    tag = NULL;
+  }
+  else
+  {
+    tag = c;
+  }
+  uint8_t *cip;
+  if (c == NULL)
+  {
+    cip = NULL;
+  }
+  else
+  {
+    cip = c + (uint32_t)16U;
+  }
   uint32_t res = box_detached(mlen, cip, tag, sk, pk, n, m);
   return res;
 }
@@ -241,16 +524,48 @@ box_easy(uint32_t mlen, uint8_t *c, uint8_t *sk, uint8_t *pk, uint8_t *n, uint8_
 static inline uint32_t
 box_open_easy_afternm(uint32_t mlen, uint8_t *m, uint8_t *k, uint8_t *n, uint8_t *c)
 {
-  uint8_t *tag = c;
-  uint8_t *cip = c + (uint32_t)16U;
+  uint8_t *tag;
+  if (c == NULL)
+  {
+    tag = NULL;
+  }
+  else
+  {
+    tag = c;
+  }
+  uint8_t *cip;
+  if (c == NULL)
+  {
+    cip = NULL;
+  }
+  else
+  {
+    cip = c + (uint32_t)16U;
+  }
   return box_open_detached_afternm(mlen, m, k, n, cip, tag);
 }
 
 static inline uint32_t
 box_open_easy(uint32_t mlen, uint8_t *m, uint8_t *pk, uint8_t *sk, uint8_t *n, uint8_t *c)
 {
-  uint8_t *tag = c;
-  uint8_t *cip = c + (uint32_t)16U;
+  uint8_t *tag;
+  if (c == NULL)
+  {
+    tag = NULL;
+  }
+  else
+  {
+    tag = c;
+  }
+  uint8_t *cip;
+  if (c == NULL)
+  {
+    cip = NULL;
+  }
+  else
+  {
+    cip = c + (uint32_t)16U;
+  }
   return box_open_detached(mlen, m, pk, sk, n, cip, tag);
 }
 

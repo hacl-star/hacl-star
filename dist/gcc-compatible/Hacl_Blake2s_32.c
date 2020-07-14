@@ -30,8 +30,24 @@ blake2s_update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, u
   uint32_t m_w[16U] = { 0U };
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
   {
-    uint32_t *os = m_w;
-    uint8_t *bj = d + i * (uint32_t)4U;
+    uint32_t *os;
+    if (m_w == NULL)
+    {
+      os = NULL;
+    }
+    else
+    {
+      os = m_w;
+    }
+    uint8_t *bj;
+    if (d == NULL)
+    {
+      bj = NULL;
+    }
+    else
+    {
+      bj = d + i * (uint32_t)4U;
+    }
     uint32_t u = load32_le(bj);
     uint32_t r = u;
     uint32_t x = r;
@@ -52,11 +68,31 @@ blake2s_update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, u
   mask[1U] = (uint32_t)(totlen >> (uint32_t)32U);
   mask[2U] = wv_14;
   mask[3U] = wv_15;
-  memcpy(wv, hash, (uint32_t)4U * (uint32_t)4U * sizeof (hash[0U]));
-  uint32_t *wv3 = wv + (uint32_t)3U * (uint32_t)4U;
+  bool uu____0 = hash == NULL;
+  if (!(uu____0 || wv == NULL))
+  {
+    memcpy(wv, hash, (uint32_t)4U * (uint32_t)4U * sizeof (hash[0U]));
+  }
+  uint32_t *wv3;
+  if (wv == NULL)
+  {
+    wv3 = NULL;
+  }
+  else
+  {
+    wv3 = wv + (uint32_t)3U * (uint32_t)4U;
+  }
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
-    uint32_t *os = wv3;
+    uint32_t *os;
+    if (wv3 == NULL)
+    {
+      os = NULL;
+    }
+    else
+    {
+      os = wv3;
+    }
     uint32_t x = wv3[i] ^ mask[i];
     os[i] = x;
   }
@@ -66,10 +102,42 @@ blake2s_update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, u
     KRML_CHECK_SIZE(sizeof (uint32_t), (uint32_t)4U * (uint32_t)4U);
     uint32_t m_st[(uint32_t)4U * (uint32_t)4U];
     memset(m_st, 0U, (uint32_t)4U * (uint32_t)4U * sizeof (m_st[0U]));
-    uint32_t *r00 = m_st + (uint32_t)0U * (uint32_t)4U;
-    uint32_t *r10 = m_st + (uint32_t)1U * (uint32_t)4U;
-    uint32_t *r20 = m_st + (uint32_t)2U * (uint32_t)4U;
-    uint32_t *r30 = m_st + (uint32_t)3U * (uint32_t)4U;
+    uint32_t *r00;
+    if (m_st == NULL)
+    {
+      r00 = NULL;
+    }
+    else
+    {
+      r00 = m_st + (uint32_t)0U * (uint32_t)4U;
+    }
+    uint32_t *r10;
+    if (m_st == NULL)
+    {
+      r10 = NULL;
+    }
+    else
+    {
+      r10 = m_st + (uint32_t)1U * (uint32_t)4U;
+    }
+    uint32_t *r20;
+    if (m_st == NULL)
+    {
+      r20 = NULL;
+    }
+    else
+    {
+      r20 = m_st + (uint32_t)2U * (uint32_t)4U;
+    }
+    uint32_t *r30;
+    if (m_st == NULL)
+    {
+      r30 = NULL;
+    }
+    else
+    {
+      r30 = m_st + (uint32_t)3U * (uint32_t)4U;
+    }
     uint32_t s0 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx];
     uint32_t s1 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)1U];
     uint32_t s2 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)2U];
@@ -86,38 +154,70 @@ blake2s_update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, u
     uint32_t s13 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)13U];
     uint32_t s14 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)14U];
     uint32_t s15 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)15U];
-    uint32_t uu____0 = m_w[s2];
-    uint32_t uu____1 = m_w[s4];
-    uint32_t uu____2 = m_w[s6];
+    uint32_t uu____1 = m_w[s2];
+    uint32_t uu____2 = m_w[s4];
+    uint32_t uu____3 = m_w[s6];
     r00[0U] = m_w[s0];
-    r00[1U] = uu____0;
-    r00[2U] = uu____1;
-    r00[3U] = uu____2;
-    uint32_t uu____3 = m_w[s3];
-    uint32_t uu____4 = m_w[s5];
-    uint32_t uu____5 = m_w[s7];
+    r00[1U] = uu____1;
+    r00[2U] = uu____2;
+    r00[3U] = uu____3;
+    uint32_t uu____4 = m_w[s3];
+    uint32_t uu____5 = m_w[s5];
+    uint32_t uu____6 = m_w[s7];
     r10[0U] = m_w[s1];
-    r10[1U] = uu____3;
-    r10[2U] = uu____4;
-    r10[3U] = uu____5;
-    uint32_t uu____6 = m_w[s10];
-    uint32_t uu____7 = m_w[s12];
-    uint32_t uu____8 = m_w[s14];
+    r10[1U] = uu____4;
+    r10[2U] = uu____5;
+    r10[3U] = uu____6;
+    uint32_t uu____7 = m_w[s10];
+    uint32_t uu____8 = m_w[s12];
+    uint32_t uu____9 = m_w[s14];
     r20[0U] = m_w[s8];
-    r20[1U] = uu____6;
-    r20[2U] = uu____7;
-    r20[3U] = uu____8;
-    uint32_t uu____9 = m_w[s11];
-    uint32_t uu____10 = m_w[s13];
-    uint32_t uu____11 = m_w[s15];
+    r20[1U] = uu____7;
+    r20[2U] = uu____8;
+    r20[3U] = uu____9;
+    uint32_t uu____10 = m_w[s11];
+    uint32_t uu____11 = m_w[s13];
+    uint32_t uu____12 = m_w[s15];
     r30[0U] = m_w[s9];
-    r30[1U] = uu____9;
-    r30[2U] = uu____10;
-    r30[3U] = uu____11;
-    uint32_t *x = m_st + (uint32_t)0U * (uint32_t)4U;
-    uint32_t *y = m_st + (uint32_t)1U * (uint32_t)4U;
-    uint32_t *z = m_st + (uint32_t)2U * (uint32_t)4U;
-    uint32_t *w = m_st + (uint32_t)3U * (uint32_t)4U;
+    r30[1U] = uu____10;
+    r30[2U] = uu____11;
+    r30[3U] = uu____12;
+    uint32_t *x;
+    if (m_st == NULL)
+    {
+      x = NULL;
+    }
+    else
+    {
+      x = m_st + (uint32_t)0U * (uint32_t)4U;
+    }
+    uint32_t *y;
+    if (m_st == NULL)
+    {
+      y = NULL;
+    }
+    else
+    {
+      y = m_st + (uint32_t)1U * (uint32_t)4U;
+    }
+    uint32_t *z;
+    if (m_st == NULL)
+    {
+      z = NULL;
+    }
+    else
+    {
+      z = m_st + (uint32_t)2U * (uint32_t)4U;
+    }
+    uint32_t *w;
+    if (m_st == NULL)
+    {
+      w = NULL;
+    }
+    else
+    {
+      w = m_st + (uint32_t)3U * (uint32_t)4U;
+    }
     uint32_t a = (uint32_t)0U;
     uint32_t b0 = (uint32_t)1U;
     uint32_t c0 = (uint32_t)2U;
@@ -126,117 +226,381 @@ blake2s_update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, u
     uint32_t r12 = Hacl_Impl_Blake2_Constants_rTable_S[1U];
     uint32_t r21 = Hacl_Impl_Blake2_Constants_rTable_S[2U];
     uint32_t r31 = Hacl_Impl_Blake2_Constants_rTable_S[3U];
-    uint32_t *wv_a0 = wv + a * (uint32_t)4U;
-    uint32_t *wv_b0 = wv + b0 * (uint32_t)4U;
+    uint32_t *wv_a0;
+    if (wv == NULL)
+    {
+      wv_a0 = NULL;
+    }
+    else
+    {
+      wv_a0 = wv + a * (uint32_t)4U;
+    }
+    uint32_t *wv_b0;
+    if (wv == NULL)
+    {
+      wv_b0 = NULL;
+    }
+    else
+    {
+      wv_b0 = wv + b0 * (uint32_t)4U;
+    }
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
     {
-      uint32_t *os = wv_a0;
+      uint32_t *os;
+      if (wv_a0 == NULL)
+      {
+        os = NULL;
+      }
+      else
+      {
+        os = wv_a0;
+      }
       uint32_t x1 = wv_a0[i] + wv_b0[i];
       os[i] = x1;
     }
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
     {
-      uint32_t *os = wv_a0;
+      uint32_t *os;
+      if (wv_a0 == NULL)
+      {
+        os = NULL;
+      }
+      else
+      {
+        os = wv_a0;
+      }
       uint32_t x1 = wv_a0[i] + x[i];
       os[i] = x1;
     }
-    uint32_t *wv_a1 = wv + d10 * (uint32_t)4U;
-    uint32_t *wv_b1 = wv + a * (uint32_t)4U;
+    uint32_t *wv_a1;
+    if (wv == NULL)
+    {
+      wv_a1 = NULL;
+    }
+    else
+    {
+      wv_a1 = wv + d10 * (uint32_t)4U;
+    }
+    uint32_t *wv_b1;
+    if (wv == NULL)
+    {
+      wv_b1 = NULL;
+    }
+    else
+    {
+      wv_b1 = wv + a * (uint32_t)4U;
+    }
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
     {
-      uint32_t *os = wv_a1;
+      uint32_t *os;
+      if (wv_a1 == NULL)
+      {
+        os = NULL;
+      }
+      else
+      {
+        os = wv_a1;
+      }
       uint32_t x1 = wv_a1[i] ^ wv_b1[i];
       os[i] = x1;
     }
     uint32_t *r110 = wv_a1;
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
     {
-      uint32_t *os = r110;
+      uint32_t *os;
+      if (r110 == NULL)
+      {
+        os = NULL;
+      }
+      else
+      {
+        os = r110;
+      }
       uint32_t x1 = r110[i];
       uint32_t x10 = x1 >> r01 | x1 << ((uint32_t)32U - r01);
       os[i] = x10;
     }
-    uint32_t *wv_a2 = wv + c0 * (uint32_t)4U;
-    uint32_t *wv_b2 = wv + d10 * (uint32_t)4U;
+    uint32_t *wv_a2;
+    if (wv == NULL)
+    {
+      wv_a2 = NULL;
+    }
+    else
+    {
+      wv_a2 = wv + c0 * (uint32_t)4U;
+    }
+    uint32_t *wv_b2;
+    if (wv == NULL)
+    {
+      wv_b2 = NULL;
+    }
+    else
+    {
+      wv_b2 = wv + d10 * (uint32_t)4U;
+    }
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
     {
-      uint32_t *os = wv_a2;
+      uint32_t *os;
+      if (wv_a2 == NULL)
+      {
+        os = NULL;
+      }
+      else
+      {
+        os = wv_a2;
+      }
       uint32_t x1 = wv_a2[i] + wv_b2[i];
       os[i] = x1;
     }
-    uint32_t *wv_a3 = wv + b0 * (uint32_t)4U;
-    uint32_t *wv_b3 = wv + c0 * (uint32_t)4U;
+    uint32_t *wv_a3;
+    if (wv == NULL)
+    {
+      wv_a3 = NULL;
+    }
+    else
+    {
+      wv_a3 = wv + b0 * (uint32_t)4U;
+    }
+    uint32_t *wv_b3;
+    if (wv == NULL)
+    {
+      wv_b3 = NULL;
+    }
+    else
+    {
+      wv_b3 = wv + c0 * (uint32_t)4U;
+    }
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
     {
-      uint32_t *os = wv_a3;
+      uint32_t *os;
+      if (wv_a3 == NULL)
+      {
+        os = NULL;
+      }
+      else
+      {
+        os = wv_a3;
+      }
       uint32_t x1 = wv_a3[i] ^ wv_b3[i];
       os[i] = x1;
     }
     uint32_t *r111 = wv_a3;
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
     {
-      uint32_t *os = r111;
+      uint32_t *os;
+      if (r111 == NULL)
+      {
+        os = NULL;
+      }
+      else
+      {
+        os = r111;
+      }
       uint32_t x1 = r111[i];
       uint32_t x10 = x1 >> r12 | x1 << ((uint32_t)32U - r12);
       os[i] = x10;
     }
-    uint32_t *wv_a4 = wv + a * (uint32_t)4U;
-    uint32_t *wv_b4 = wv + b0 * (uint32_t)4U;
+    uint32_t *wv_a4;
+    if (wv == NULL)
+    {
+      wv_a4 = NULL;
+    }
+    else
+    {
+      wv_a4 = wv + a * (uint32_t)4U;
+    }
+    uint32_t *wv_b4;
+    if (wv == NULL)
+    {
+      wv_b4 = NULL;
+    }
+    else
+    {
+      wv_b4 = wv + b0 * (uint32_t)4U;
+    }
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
     {
-      uint32_t *os = wv_a4;
+      uint32_t *os;
+      if (wv_a4 == NULL)
+      {
+        os = NULL;
+      }
+      else
+      {
+        os = wv_a4;
+      }
       uint32_t x1 = wv_a4[i] + wv_b4[i];
       os[i] = x1;
     }
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
     {
-      uint32_t *os = wv_a4;
+      uint32_t *os;
+      if (wv_a4 == NULL)
+      {
+        os = NULL;
+      }
+      else
+      {
+        os = wv_a4;
+      }
       uint32_t x1 = wv_a4[i] + y[i];
       os[i] = x1;
     }
-    uint32_t *wv_a5 = wv + d10 * (uint32_t)4U;
-    uint32_t *wv_b5 = wv + a * (uint32_t)4U;
+    uint32_t *wv_a5;
+    if (wv == NULL)
+    {
+      wv_a5 = NULL;
+    }
+    else
+    {
+      wv_a5 = wv + d10 * (uint32_t)4U;
+    }
+    uint32_t *wv_b5;
+    if (wv == NULL)
+    {
+      wv_b5 = NULL;
+    }
+    else
+    {
+      wv_b5 = wv + a * (uint32_t)4U;
+    }
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
     {
-      uint32_t *os = wv_a5;
+      uint32_t *os;
+      if (wv_a5 == NULL)
+      {
+        os = NULL;
+      }
+      else
+      {
+        os = wv_a5;
+      }
       uint32_t x1 = wv_a5[i] ^ wv_b5[i];
       os[i] = x1;
     }
     uint32_t *r112 = wv_a5;
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
     {
-      uint32_t *os = r112;
+      uint32_t *os;
+      if (r112 == NULL)
+      {
+        os = NULL;
+      }
+      else
+      {
+        os = r112;
+      }
       uint32_t x1 = r112[i];
       uint32_t x10 = x1 >> r21 | x1 << ((uint32_t)32U - r21);
       os[i] = x10;
     }
-    uint32_t *wv_a6 = wv + c0 * (uint32_t)4U;
-    uint32_t *wv_b6 = wv + d10 * (uint32_t)4U;
+    uint32_t *wv_a6;
+    if (wv == NULL)
+    {
+      wv_a6 = NULL;
+    }
+    else
+    {
+      wv_a6 = wv + c0 * (uint32_t)4U;
+    }
+    uint32_t *wv_b6;
+    if (wv == NULL)
+    {
+      wv_b6 = NULL;
+    }
+    else
+    {
+      wv_b6 = wv + d10 * (uint32_t)4U;
+    }
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
     {
-      uint32_t *os = wv_a6;
+      uint32_t *os;
+      if (wv_a6 == NULL)
+      {
+        os = NULL;
+      }
+      else
+      {
+        os = wv_a6;
+      }
       uint32_t x1 = wv_a6[i] + wv_b6[i];
       os[i] = x1;
     }
-    uint32_t *wv_a7 = wv + b0 * (uint32_t)4U;
-    uint32_t *wv_b7 = wv + c0 * (uint32_t)4U;
+    uint32_t *wv_a7;
+    if (wv == NULL)
+    {
+      wv_a7 = NULL;
+    }
+    else
+    {
+      wv_a7 = wv + b0 * (uint32_t)4U;
+    }
+    uint32_t *wv_b7;
+    if (wv == NULL)
+    {
+      wv_b7 = NULL;
+    }
+    else
+    {
+      wv_b7 = wv + c0 * (uint32_t)4U;
+    }
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
     {
-      uint32_t *os = wv_a7;
+      uint32_t *os;
+      if (wv_a7 == NULL)
+      {
+        os = NULL;
+      }
+      else
+      {
+        os = wv_a7;
+      }
       uint32_t x1 = wv_a7[i] ^ wv_b7[i];
       os[i] = x1;
     }
     uint32_t *r113 = wv_a7;
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
     {
-      uint32_t *os = r113;
+      uint32_t *os;
+      if (r113 == NULL)
+      {
+        os = NULL;
+      }
+      else
+      {
+        os = r113;
+      }
       uint32_t x1 = r113[i];
       uint32_t x10 = x1 >> r31 | x1 << ((uint32_t)32U - r31);
       os[i] = x10;
     }
-    uint32_t *r13 = wv + (uint32_t)1U * (uint32_t)4U;
-    uint32_t *r22 = wv + (uint32_t)2U * (uint32_t)4U;
-    uint32_t *r32 = wv + (uint32_t)3U * (uint32_t)4U;
+    uint32_t *r13;
+    if (wv == NULL)
+    {
+      r13 = NULL;
+    }
+    else
+    {
+      r13 = wv + (uint32_t)1U * (uint32_t)4U;
+    }
+    uint32_t *r22;
+    if (wv == NULL)
+    {
+      r22 = NULL;
+    }
+    else
+    {
+      r22 = wv + (uint32_t)2U * (uint32_t)4U;
+    }
+    uint32_t *r32;
+    if (wv == NULL)
+    {
+      r32 = NULL;
+    }
+    else
+    {
+      r32 = wv + (uint32_t)3U * (uint32_t)4U;
+    }
     uint32_t *r114 = r13;
     uint32_t x00 = r114[1U];
     uint32_t x10 = r114[((uint32_t)1U + (uint32_t)1U) % (uint32_t)4U];
@@ -272,117 +636,381 @@ blake2s_update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, u
     uint32_t r1 = Hacl_Impl_Blake2_Constants_rTable_S[1U];
     uint32_t r23 = Hacl_Impl_Blake2_Constants_rTable_S[2U];
     uint32_t r33 = Hacl_Impl_Blake2_Constants_rTable_S[3U];
-    uint32_t *wv_a = wv + a0 * (uint32_t)4U;
-    uint32_t *wv_b8 = wv + b * (uint32_t)4U;
+    uint32_t *wv_a;
+    if (wv == NULL)
+    {
+      wv_a = NULL;
+    }
+    else
+    {
+      wv_a = wv + a0 * (uint32_t)4U;
+    }
+    uint32_t *wv_b8;
+    if (wv == NULL)
+    {
+      wv_b8 = NULL;
+    }
+    else
+    {
+      wv_b8 = wv + b * (uint32_t)4U;
+    }
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
     {
-      uint32_t *os = wv_a;
+      uint32_t *os;
+      if (wv_a == NULL)
+      {
+        os = NULL;
+      }
+      else
+      {
+        os = wv_a;
+      }
       uint32_t x1 = wv_a[i] + wv_b8[i];
       os[i] = x1;
     }
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
     {
-      uint32_t *os = wv_a;
+      uint32_t *os;
+      if (wv_a == NULL)
+      {
+        os = NULL;
+      }
+      else
+      {
+        os = wv_a;
+      }
       uint32_t x1 = wv_a[i] + z[i];
       os[i] = x1;
     }
-    uint32_t *wv_a8 = wv + d1 * (uint32_t)4U;
-    uint32_t *wv_b9 = wv + a0 * (uint32_t)4U;
+    uint32_t *wv_a8;
+    if (wv == NULL)
+    {
+      wv_a8 = NULL;
+    }
+    else
+    {
+      wv_a8 = wv + d1 * (uint32_t)4U;
+    }
+    uint32_t *wv_b9;
+    if (wv == NULL)
+    {
+      wv_b9 = NULL;
+    }
+    else
+    {
+      wv_b9 = wv + a0 * (uint32_t)4U;
+    }
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
     {
-      uint32_t *os = wv_a8;
+      uint32_t *os;
+      if (wv_a8 == NULL)
+      {
+        os = NULL;
+      }
+      else
+      {
+        os = wv_a8;
+      }
       uint32_t x1 = wv_a8[i] ^ wv_b9[i];
       os[i] = x1;
     }
     uint32_t *r117 = wv_a8;
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
     {
-      uint32_t *os = r117;
+      uint32_t *os;
+      if (r117 == NULL)
+      {
+        os = NULL;
+      }
+      else
+      {
+        os = r117;
+      }
       uint32_t x1 = r117[i];
       uint32_t x13 = x1 >> r0 | x1 << ((uint32_t)32U - r0);
       os[i] = x13;
     }
-    uint32_t *wv_a9 = wv + c * (uint32_t)4U;
-    uint32_t *wv_b10 = wv + d1 * (uint32_t)4U;
+    uint32_t *wv_a9;
+    if (wv == NULL)
+    {
+      wv_a9 = NULL;
+    }
+    else
+    {
+      wv_a9 = wv + c * (uint32_t)4U;
+    }
+    uint32_t *wv_b10;
+    if (wv == NULL)
+    {
+      wv_b10 = NULL;
+    }
+    else
+    {
+      wv_b10 = wv + d1 * (uint32_t)4U;
+    }
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
     {
-      uint32_t *os = wv_a9;
+      uint32_t *os;
+      if (wv_a9 == NULL)
+      {
+        os = NULL;
+      }
+      else
+      {
+        os = wv_a9;
+      }
       uint32_t x1 = wv_a9[i] + wv_b10[i];
       os[i] = x1;
     }
-    uint32_t *wv_a10 = wv + b * (uint32_t)4U;
-    uint32_t *wv_b11 = wv + c * (uint32_t)4U;
+    uint32_t *wv_a10;
+    if (wv == NULL)
+    {
+      wv_a10 = NULL;
+    }
+    else
+    {
+      wv_a10 = wv + b * (uint32_t)4U;
+    }
+    uint32_t *wv_b11;
+    if (wv == NULL)
+    {
+      wv_b11 = NULL;
+    }
+    else
+    {
+      wv_b11 = wv + c * (uint32_t)4U;
+    }
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
     {
-      uint32_t *os = wv_a10;
+      uint32_t *os;
+      if (wv_a10 == NULL)
+      {
+        os = NULL;
+      }
+      else
+      {
+        os = wv_a10;
+      }
       uint32_t x1 = wv_a10[i] ^ wv_b11[i];
       os[i] = x1;
     }
     uint32_t *r118 = wv_a10;
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
     {
-      uint32_t *os = r118;
+      uint32_t *os;
+      if (r118 == NULL)
+      {
+        os = NULL;
+      }
+      else
+      {
+        os = r118;
+      }
       uint32_t x1 = r118[i];
       uint32_t x13 = x1 >> r1 | x1 << ((uint32_t)32U - r1);
       os[i] = x13;
     }
-    uint32_t *wv_a11 = wv + a0 * (uint32_t)4U;
-    uint32_t *wv_b12 = wv + b * (uint32_t)4U;
+    uint32_t *wv_a11;
+    if (wv == NULL)
+    {
+      wv_a11 = NULL;
+    }
+    else
+    {
+      wv_a11 = wv + a0 * (uint32_t)4U;
+    }
+    uint32_t *wv_b12;
+    if (wv == NULL)
+    {
+      wv_b12 = NULL;
+    }
+    else
+    {
+      wv_b12 = wv + b * (uint32_t)4U;
+    }
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
     {
-      uint32_t *os = wv_a11;
+      uint32_t *os;
+      if (wv_a11 == NULL)
+      {
+        os = NULL;
+      }
+      else
+      {
+        os = wv_a11;
+      }
       uint32_t x1 = wv_a11[i] + wv_b12[i];
       os[i] = x1;
     }
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
     {
-      uint32_t *os = wv_a11;
+      uint32_t *os;
+      if (wv_a11 == NULL)
+      {
+        os = NULL;
+      }
+      else
+      {
+        os = wv_a11;
+      }
       uint32_t x1 = wv_a11[i] + w[i];
       os[i] = x1;
     }
-    uint32_t *wv_a12 = wv + d1 * (uint32_t)4U;
-    uint32_t *wv_b13 = wv + a0 * (uint32_t)4U;
+    uint32_t *wv_a12;
+    if (wv == NULL)
+    {
+      wv_a12 = NULL;
+    }
+    else
+    {
+      wv_a12 = wv + d1 * (uint32_t)4U;
+    }
+    uint32_t *wv_b13;
+    if (wv == NULL)
+    {
+      wv_b13 = NULL;
+    }
+    else
+    {
+      wv_b13 = wv + a0 * (uint32_t)4U;
+    }
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
     {
-      uint32_t *os = wv_a12;
+      uint32_t *os;
+      if (wv_a12 == NULL)
+      {
+        os = NULL;
+      }
+      else
+      {
+        os = wv_a12;
+      }
       uint32_t x1 = wv_a12[i] ^ wv_b13[i];
       os[i] = x1;
     }
     uint32_t *r119 = wv_a12;
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
     {
-      uint32_t *os = r119;
+      uint32_t *os;
+      if (r119 == NULL)
+      {
+        os = NULL;
+      }
+      else
+      {
+        os = r119;
+      }
       uint32_t x1 = r119[i];
       uint32_t x13 = x1 >> r23 | x1 << ((uint32_t)32U - r23);
       os[i] = x13;
     }
-    uint32_t *wv_a13 = wv + c * (uint32_t)4U;
-    uint32_t *wv_b14 = wv + d1 * (uint32_t)4U;
+    uint32_t *wv_a13;
+    if (wv == NULL)
+    {
+      wv_a13 = NULL;
+    }
+    else
+    {
+      wv_a13 = wv + c * (uint32_t)4U;
+    }
+    uint32_t *wv_b14;
+    if (wv == NULL)
+    {
+      wv_b14 = NULL;
+    }
+    else
+    {
+      wv_b14 = wv + d1 * (uint32_t)4U;
+    }
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
     {
-      uint32_t *os = wv_a13;
+      uint32_t *os;
+      if (wv_a13 == NULL)
+      {
+        os = NULL;
+      }
+      else
+      {
+        os = wv_a13;
+      }
       uint32_t x1 = wv_a13[i] + wv_b14[i];
       os[i] = x1;
     }
-    uint32_t *wv_a14 = wv + b * (uint32_t)4U;
-    uint32_t *wv_b = wv + c * (uint32_t)4U;
+    uint32_t *wv_a14;
+    if (wv == NULL)
+    {
+      wv_a14 = NULL;
+    }
+    else
+    {
+      wv_a14 = wv + b * (uint32_t)4U;
+    }
+    uint32_t *wv_b;
+    if (wv == NULL)
+    {
+      wv_b = NULL;
+    }
+    else
+    {
+      wv_b = wv + c * (uint32_t)4U;
+    }
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
     {
-      uint32_t *os = wv_a14;
+      uint32_t *os;
+      if (wv_a14 == NULL)
+      {
+        os = NULL;
+      }
+      else
+      {
+        os = wv_a14;
+      }
       uint32_t x1 = wv_a14[i] ^ wv_b[i];
       os[i] = x1;
     }
     uint32_t *r1110 = wv_a14;
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
     {
-      uint32_t *os = r1110;
+      uint32_t *os;
+      if (r1110 == NULL)
+      {
+        os = NULL;
+      }
+      else
+      {
+        os = r1110;
+      }
       uint32_t x1 = r1110[i];
       uint32_t x13 = x1 >> r33 | x1 << ((uint32_t)32U - r33);
       os[i] = x13;
     }
-    uint32_t *r14 = wv + (uint32_t)1U * (uint32_t)4U;
-    uint32_t *r2 = wv + (uint32_t)2U * (uint32_t)4U;
-    uint32_t *r3 = wv + (uint32_t)3U * (uint32_t)4U;
+    uint32_t *r14;
+    if (wv == NULL)
+    {
+      r14 = NULL;
+    }
+    else
+    {
+      r14 = wv + (uint32_t)1U * (uint32_t)4U;
+    }
+    uint32_t *r2;
+    if (wv == NULL)
+    {
+      r2 = NULL;
+    }
+    else
+    {
+      r2 = wv + (uint32_t)2U * (uint32_t)4U;
+    }
+    uint32_t *r3;
+    if (wv == NULL)
+    {
+      r3 = NULL;
+    }
+    else
+    {
+      r3 = wv + (uint32_t)3U * (uint32_t)4U;
+    }
     uint32_t *r11 = r14;
     uint32_t x03 = r11[3U];
     uint32_t x13 = r11[((uint32_t)3U + (uint32_t)1U) % (uint32_t)4U];
@@ -411,33 +1039,113 @@ blake2s_update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, u
     r1112[2U] = x2;
     r1112[3U] = x3;
   }
-  uint32_t *s0 = hash + (uint32_t)0U * (uint32_t)4U;
-  uint32_t *s1 = hash + (uint32_t)1U * (uint32_t)4U;
-  uint32_t *r0 = wv + (uint32_t)0U * (uint32_t)4U;
-  uint32_t *r1 = wv + (uint32_t)1U * (uint32_t)4U;
-  uint32_t *r2 = wv + (uint32_t)2U * (uint32_t)4U;
-  uint32_t *r3 = wv + (uint32_t)3U * (uint32_t)4U;
+  uint32_t *s0;
+  if (hash == NULL)
+  {
+    s0 = NULL;
+  }
+  else
+  {
+    s0 = hash + (uint32_t)0U * (uint32_t)4U;
+  }
+  uint32_t *s1;
+  if (hash == NULL)
+  {
+    s1 = NULL;
+  }
+  else
+  {
+    s1 = hash + (uint32_t)1U * (uint32_t)4U;
+  }
+  uint32_t *r0;
+  if (wv == NULL)
+  {
+    r0 = NULL;
+  }
+  else
+  {
+    r0 = wv + (uint32_t)0U * (uint32_t)4U;
+  }
+  uint32_t *r1;
+  if (wv == NULL)
+  {
+    r1 = NULL;
+  }
+  else
+  {
+    r1 = wv + (uint32_t)1U * (uint32_t)4U;
+  }
+  uint32_t *r2;
+  if (wv == NULL)
+  {
+    r2 = NULL;
+  }
+  else
+  {
+    r2 = wv + (uint32_t)2U * (uint32_t)4U;
+  }
+  uint32_t *r3;
+  if (wv == NULL)
+  {
+    r3 = NULL;
+  }
+  else
+  {
+    r3 = wv + (uint32_t)3U * (uint32_t)4U;
+  }
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
-    uint32_t *os = s0;
+    uint32_t *os;
+    if (s0 == NULL)
+    {
+      os = NULL;
+    }
+    else
+    {
+      os = s0;
+    }
     uint32_t x = s0[i] ^ r0[i];
     os[i] = x;
   }
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
-    uint32_t *os = s0;
+    uint32_t *os;
+    if (s0 == NULL)
+    {
+      os = NULL;
+    }
+    else
+    {
+      os = s0;
+    }
     uint32_t x = s0[i] ^ r2[i];
     os[i] = x;
   }
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
-    uint32_t *os = s1;
+    uint32_t *os;
+    if (s1 == NULL)
+    {
+      os = NULL;
+    }
+    else
+    {
+      os = s1;
+    }
     uint32_t x = s1[i] ^ r1[i];
     os[i] = x;
   }
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
-    uint32_t *os = s1;
+    uint32_t *os;
+    if (s1 == NULL)
+    {
+      os = NULL;
+    }
+    else
+    {
+      os = s1;
+    }
     uint32_t x = s1[i] ^ r3[i];
     os[i] = x;
   }
@@ -473,10 +1181,42 @@ Hacl_Blake2s_32_blake2s(
   for (uint32_t _i = 0U; _i < stlen; ++_i)
     b1[_i] = stzero;
   uint8_t b20[64U] = { 0U };
-  uint32_t *r0 = b + (uint32_t)0U * (uint32_t)4U;
-  uint32_t *r1 = b + (uint32_t)1U * (uint32_t)4U;
-  uint32_t *r2 = b + (uint32_t)2U * (uint32_t)4U;
-  uint32_t *r3 = b + (uint32_t)3U * (uint32_t)4U;
+  uint32_t *r0;
+  if (b == NULL)
+  {
+    r0 = NULL;
+  }
+  else
+  {
+    r0 = b + (uint32_t)0U * (uint32_t)4U;
+  }
+  uint32_t *r1;
+  if (b == NULL)
+  {
+    r1 = NULL;
+  }
+  else
+  {
+    r1 = b + (uint32_t)1U * (uint32_t)4U;
+  }
+  uint32_t *r2;
+  if (b == NULL)
+  {
+    r2 = NULL;
+  }
+  else
+  {
+    r2 = b + (uint32_t)2U * (uint32_t)4U;
+  }
+  uint32_t *r3;
+  if (b == NULL)
+  {
+    r3 = NULL;
+  }
+  else
+  {
+    r3 = b + (uint32_t)3U * (uint32_t)4U;
+  }
   uint32_t iv0 = Hacl_Impl_Blake2_Constants_ivTable_S[0U];
   uint32_t iv1 = Hacl_Impl_Blake2_Constants_ivTable_S[1U];
   uint32_t iv2 = Hacl_Impl_Blake2_Constants_ivTable_S[2U];
@@ -505,9 +1245,21 @@ Hacl_Blake2s_32_blake2s(
   r1[3U] = iv7;
   if (!(kk == (uint32_t)0U))
   {
-    memcpy(b20, k, kk * sizeof (k[0U]));
+    bool uu____0 = k == NULL;
+    if (!(uu____0 || b20 == NULL))
+    {
+      memcpy(b20, k, kk * sizeof (k[0U]));
+    }
     uint64_t totlen = (uint64_t)(uint32_t)0U + (uint64_t)(uint32_t)64U;
-    uint8_t *b3 = b20 + (uint32_t)0U * (uint32_t)64U;
+    uint8_t *b3;
+    if (b20 == NULL)
+    {
+      b3 = NULL;
+    }
+    else
+    {
+      b3 = b20 + (uint32_t)0U * (uint32_t)64U;
+    }
     blake2s_update_block(b1, b, false, totlen, b3);
   }
   Lib_Memzero0_memzero(b20, (uint32_t)64U * sizeof (b20[0U]));
@@ -529,12 +1281,32 @@ Hacl_Blake2s_32_blake2s(
   for (uint32_t i = (uint32_t)0U; i < nb; i++)
   {
     uint64_t totlen = prev0 + (uint64_t)((i + (uint32_t)1U) * (uint32_t)64U);
-    uint8_t *b2 = d + i * (uint32_t)64U;
+    uint8_t *b2;
+    if (d == NULL)
+    {
+      b2 = NULL;
+    }
+    else
+    {
+      b2 = d + i * (uint32_t)64U;
+    }
     blake2s_update_block(b1, b, false, totlen, b2);
   }
   uint8_t b21[64U] = { 0U };
-  uint8_t *last = d + ll - rem;
-  memcpy(b21, last, rem * sizeof (last[0U]));
+  uint8_t *last;
+  if (d == NULL)
+  {
+    last = NULL;
+  }
+  else
+  {
+    last = d + ll - rem;
+  }
+  bool uu____1 = last == NULL;
+  if (!(uu____1 || b21 == NULL))
+  {
+    memcpy(b21, last, rem * sizeof (last[0U]));
+  }
   uint64_t totlen = prev0 + (uint64_t)ll;
   blake2s_update_block(b1, b, true, totlen, b21);
   Lib_Memzero0_memzero(b21, (uint32_t)64U * sizeof (b21[0U]));
@@ -542,20 +1314,100 @@ Hacl_Blake2s_32_blake2s(
   KRML_CHECK_SIZE(sizeof (uint8_t), double_row);
   uint8_t b2[double_row];
   memset(b2, 0U, double_row * sizeof (b2[0U]));
-  uint8_t *first = b2;
-  uint8_t *second = b2 + (uint32_t)4U * (uint32_t)4U;
-  uint32_t *row0 = b + (uint32_t)0U * (uint32_t)4U;
-  uint32_t *row1 = b + (uint32_t)1U * (uint32_t)4U;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+  uint8_t *first;
+  if (b2 == NULL)
   {
-    store32_le(first + i * (uint32_t)4U, row0[i]);
+    first = NULL;
+  }
+  else
+  {
+    first = b2;
+  }
+  uint8_t *second;
+  if (b2 == NULL)
+  {
+    second = NULL;
+  }
+  else
+  {
+    second = b2 + (uint32_t)4U * (uint32_t)4U;
+  }
+  uint32_t *row0;
+  if (b == NULL)
+  {
+    row0 = NULL;
+  }
+  else
+  {
+    row0 = b + (uint32_t)0U * (uint32_t)4U;
+  }
+  uint32_t *row1;
+  if (b == NULL)
+  {
+    row1 = NULL;
+  }
+  else
+  {
+    row1 = b + (uint32_t)1U * (uint32_t)4U;
   }
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
-    store32_le(second + i * (uint32_t)4U, row1[i]);
+    uint8_t *block;
+    if (first == NULL)
+    {
+      block = NULL;
+    }
+    else
+    {
+      block = first + i * (uint32_t)4U;
+    }
+    uint8_t *uu____2;
+    if (first == NULL)
+    {
+      uu____2 = NULL;
+    }
+    else
+    {
+      uu____2 = first + i * (uint32_t)4U;
+    }
+    store32_le(uu____2, row0[i]);
   }
-  uint8_t *final = b2;
-  memcpy(output, final, nn * sizeof (final[0U]));
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+  {
+    uint8_t *block;
+    if (second == NULL)
+    {
+      block = NULL;
+    }
+    else
+    {
+      block = second + i * (uint32_t)4U;
+    }
+    uint8_t *uu____3;
+    if (second == NULL)
+    {
+      uu____3 = NULL;
+    }
+    else
+    {
+      uu____3 = second + i * (uint32_t)4U;
+    }
+    store32_le(uu____3, row1[i]);
+  }
+  uint8_t *final;
+  if (b2 == NULL)
+  {
+    final = NULL;
+  }
+  else
+  {
+    final = b2;
+  }
+  bool uu____4 = final == NULL;
+  if (!(uu____4 || output == NULL))
+  {
+    memcpy(output, final, nn * sizeof (final[0U]));
+  }
   Lib_Memzero0_memzero(b2, double_row * sizeof (b2[0U]));
   Lib_Memzero0_memzero(b1, stlen * sizeof (b1[0U]));
   Lib_Memzero0_memzero(b, stlen * sizeof (b[0U]));

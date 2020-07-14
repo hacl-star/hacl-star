@@ -656,41 +656,263 @@ static const uint8_t g25519[32U] = { (uint8_t)9U };
 
 static void point_add_and_double(uint64_t *q, uint64_t *p01_tmp1, FStar_UInt128_uint128 *tmp2)
 {
-  uint64_t *nq = p01_tmp1;
-  uint64_t *nq_p1 = p01_tmp1 + (uint32_t)10U;
-  uint64_t *tmp1 = p01_tmp1 + (uint32_t)20U;
-  uint64_t *x1 = q;
-  uint64_t *x2 = nq;
-  uint64_t *z2 = nq + (uint32_t)5U;
-  uint64_t *z3 = nq_p1 + (uint32_t)5U;
-  uint64_t *a = tmp1;
-  uint64_t *b = tmp1 + (uint32_t)5U;
-  uint64_t *ab = tmp1;
-  uint64_t *dc = tmp1 + (uint32_t)10U;
+  uint64_t *nq;
+  if (p01_tmp1 == NULL)
+  {
+    nq = NULL;
+  }
+  else
+  {
+    nq = p01_tmp1;
+  }
+  uint64_t *nq_p1;
+  if (p01_tmp1 == NULL)
+  {
+    nq_p1 = NULL;
+  }
+  else
+  {
+    nq_p1 = p01_tmp1 + (uint32_t)10U;
+  }
+  uint64_t *tmp1;
+  if (p01_tmp1 == NULL)
+  {
+    tmp1 = NULL;
+  }
+  else
+  {
+    tmp1 = p01_tmp1 + (uint32_t)20U;
+  }
+  uint64_t *x1;
+  if (q == NULL)
+  {
+    x1 = NULL;
+  }
+  else
+  {
+    x1 = q;
+  }
+  uint64_t *x2;
+  if (nq == NULL)
+  {
+    x2 = NULL;
+  }
+  else
+  {
+    x2 = nq;
+  }
+  uint64_t *z2;
+  if (nq == NULL)
+  {
+    z2 = NULL;
+  }
+  else
+  {
+    z2 = nq + (uint32_t)5U;
+  }
+  uint64_t *z3;
+  if (nq_p1 == NULL)
+  {
+    z3 = NULL;
+  }
+  else
+  {
+    z3 = nq_p1 + (uint32_t)5U;
+  }
+  uint64_t *a;
+  if (tmp1 == NULL)
+  {
+    a = NULL;
+  }
+  else
+  {
+    a = tmp1;
+  }
+  uint64_t *b;
+  if (tmp1 == NULL)
+  {
+    b = NULL;
+  }
+  else
+  {
+    b = tmp1 + (uint32_t)5U;
+  }
+  uint64_t *ab;
+  if (tmp1 == NULL)
+  {
+    ab = NULL;
+  }
+  else
+  {
+    ab = tmp1;
+  }
+  uint64_t *dc;
+  if (tmp1 == NULL)
+  {
+    dc = NULL;
+  }
+  else
+  {
+    dc = tmp1 + (uint32_t)10U;
+  }
   Hacl_Impl_Curve25519_Field51_fadd(a, x2, z2);
   Hacl_Impl_Curve25519_Field51_fsub(b, x2, z2);
-  uint64_t *x3 = nq_p1;
-  uint64_t *z31 = nq_p1 + (uint32_t)5U;
-  uint64_t *d0 = dc;
-  uint64_t *c0 = dc + (uint32_t)5U;
+  uint64_t *x3;
+  if (nq_p1 == NULL)
+  {
+    x3 = NULL;
+  }
+  else
+  {
+    x3 = nq_p1;
+  }
+  uint64_t *z31;
+  if (nq_p1 == NULL)
+  {
+    z31 = NULL;
+  }
+  else
+  {
+    z31 = nq_p1 + (uint32_t)5U;
+  }
+  uint64_t *a1;
+  if (ab == NULL)
+  {
+    a1 = NULL;
+  }
+  else
+  {
+    a1 = ab;
+  }
+  uint64_t *b10;
+  if (ab == NULL)
+  {
+    b10 = NULL;
+  }
+  else
+  {
+    b10 = ab + (uint32_t)5U;
+  }
+  uint64_t *d0;
+  if (dc == NULL)
+  {
+    d0 = NULL;
+  }
+  else
+  {
+    d0 = dc;
+  }
+  uint64_t *c0;
+  if (dc == NULL)
+  {
+    c0 = NULL;
+  }
+  else
+  {
+    c0 = dc + (uint32_t)5U;
+  }
   Hacl_Impl_Curve25519_Field51_fadd(c0, x3, z31);
   Hacl_Impl_Curve25519_Field51_fsub(d0, x3, z31);
   fmul20(dc, dc, ab);
   Hacl_Impl_Curve25519_Field51_fadd(x3, d0, c0);
   Hacl_Impl_Curve25519_Field51_fsub(z31, d0, c0);
-  uint64_t *a1 = tmp1;
-  uint64_t *b1 = tmp1 + (uint32_t)5U;
-  uint64_t *d = tmp1 + (uint32_t)10U;
-  uint64_t *c = tmp1 + (uint32_t)15U;
-  uint64_t *ab1 = tmp1;
-  uint64_t *dc1 = tmp1 + (uint32_t)10U;
+  uint64_t *x21;
+  if (nq == NULL)
+  {
+    x21 = NULL;
+  }
+  else
+  {
+    x21 = nq;
+  }
+  uint64_t *z21;
+  if (nq == NULL)
+  {
+    z21 = NULL;
+  }
+  else
+  {
+    z21 = nq + (uint32_t)5U;
+  }
+  uint64_t *x30;
+  if (nq_p1 == NULL)
+  {
+    x30 = NULL;
+  }
+  else
+  {
+    x30 = nq_p1;
+  }
+  uint64_t *z310;
+  if (nq_p1 == NULL)
+  {
+    z310 = NULL;
+  }
+  else
+  {
+    z310 = nq_p1 + (uint32_t)5U;
+  }
+  uint64_t *a10;
+  if (tmp1 == NULL)
+  {
+    a10 = NULL;
+  }
+  else
+  {
+    a10 = tmp1;
+  }
+  uint64_t *b1;
+  if (tmp1 == NULL)
+  {
+    b1 = NULL;
+  }
+  else
+  {
+    b1 = tmp1 + (uint32_t)5U;
+  }
+  uint64_t *d;
+  if (tmp1 == NULL)
+  {
+    d = NULL;
+  }
+  else
+  {
+    d = tmp1 + (uint32_t)10U;
+  }
+  uint64_t *c;
+  if (tmp1 == NULL)
+  {
+    c = NULL;
+  }
+  else
+  {
+    c = tmp1 + (uint32_t)15U;
+  }
+  uint64_t *ab1;
+  if (tmp1 == NULL)
+  {
+    ab1 = NULL;
+  }
+  else
+  {
+    ab1 = tmp1;
+  }
+  uint64_t *dc1;
+  if (tmp1 == NULL)
+  {
+    dc1 = NULL;
+  }
+  else
+  {
+    dc1 = tmp1 + (uint32_t)10U;
+  }
   fsqr20(dc1, ab1);
   fsqr20(nq_p1, nq_p1);
-  a1[0U] = c[0U];
-  a1[1U] = c[1U];
-  a1[2U] = c[2U];
-  a1[3U] = c[3U];
-  a1[4U] = c[4U];
+  a10[0U] = c[0U];
+  a10[1U] = c[1U];
+  a10[2U] = c[2U];
+  a10[3U] = c[3U];
+  a10[4U] = c[4U];
   Hacl_Impl_Curve25519_Field51_fsub(c, d, c);
   Hacl_Impl_Curve25519_Field51_fmul1(b1, c, (uint64_t)121665U);
   Hacl_Impl_Curve25519_Field51_fadd(b1, b1, d);
@@ -700,14 +922,78 @@ static void point_add_and_double(uint64_t *q, uint64_t *p01_tmp1, FStar_UInt128_
 
 static void point_double(uint64_t *nq, uint64_t *tmp1, FStar_UInt128_uint128 *tmp2)
 {
-  uint64_t *x2 = nq;
-  uint64_t *z2 = nq + (uint32_t)5U;
-  uint64_t *a = tmp1;
-  uint64_t *b = tmp1 + (uint32_t)5U;
-  uint64_t *d = tmp1 + (uint32_t)10U;
-  uint64_t *c = tmp1 + (uint32_t)15U;
-  uint64_t *ab = tmp1;
-  uint64_t *dc = tmp1 + (uint32_t)10U;
+  uint64_t *x2;
+  if (nq == NULL)
+  {
+    x2 = NULL;
+  }
+  else
+  {
+    x2 = nq;
+  }
+  uint64_t *z2;
+  if (nq == NULL)
+  {
+    z2 = NULL;
+  }
+  else
+  {
+    z2 = nq + (uint32_t)5U;
+  }
+  uint64_t *a;
+  if (tmp1 == NULL)
+  {
+    a = NULL;
+  }
+  else
+  {
+    a = tmp1;
+  }
+  uint64_t *b;
+  if (tmp1 == NULL)
+  {
+    b = NULL;
+  }
+  else
+  {
+    b = tmp1 + (uint32_t)5U;
+  }
+  uint64_t *d;
+  if (tmp1 == NULL)
+  {
+    d = NULL;
+  }
+  else
+  {
+    d = tmp1 + (uint32_t)10U;
+  }
+  uint64_t *c;
+  if (tmp1 == NULL)
+  {
+    c = NULL;
+  }
+  else
+  {
+    c = tmp1 + (uint32_t)15U;
+  }
+  uint64_t *ab;
+  if (tmp1 == NULL)
+  {
+    ab = NULL;
+  }
+  else
+  {
+    ab = tmp1;
+  }
+  uint64_t *dc;
+  if (tmp1 == NULL)
+  {
+    dc = NULL;
+  }
+  else
+  {
+    dc = tmp1 + (uint32_t)10U;
+  }
   Hacl_Impl_Curve25519_Field51_fadd(a, x2, z2);
   Hacl_Impl_Curve25519_Field51_fsub(b, x2, z2);
   fsqr20(dc, ab);
@@ -728,13 +1014,83 @@ static void montgomery_ladder(uint64_t *out, uint8_t *key, uint64_t *init)
   for (uint32_t _i = 0U; _i < (uint32_t)10U; ++_i)
     tmp2[_i] = FStar_UInt128_uint64_to_uint128((uint64_t)0U);
   uint64_t p01_tmp1_swap[41U] = { 0U };
-  uint64_t *p0 = p01_tmp1_swap;
-  uint64_t *p01 = p01_tmp1_swap;
-  uint64_t *p03 = p01;
-  uint64_t *p11 = p01 + (uint32_t)10U;
-  memcpy(p11, init, (uint32_t)10U * sizeof (init[0U]));
-  uint64_t *x0 = p03;
-  uint64_t *z0 = p03 + (uint32_t)5U;
+  uint64_t *p0;
+  if (p01_tmp1_swap == NULL)
+  {
+    p0 = NULL;
+  }
+  else
+  {
+    p0 = p01_tmp1_swap;
+  }
+  uint64_t *p01;
+  if (p01_tmp1_swap == NULL)
+  {
+    p01 = NULL;
+  }
+  else
+  {
+    p01 = p01_tmp1_swap;
+  }
+  uint64_t *p02;
+  if (p01_tmp1_swap == NULL)
+  {
+    p02 = NULL;
+  }
+  else
+  {
+    p02 = p01_tmp1_swap;
+  }
+  uint64_t *p1;
+  if (p01_tmp1_swap == NULL)
+  {
+    p1 = NULL;
+  }
+  else
+  {
+    p1 = p01_tmp1_swap + (uint32_t)10U;
+  }
+  uint64_t *p03;
+  if (p01 == NULL)
+  {
+    p03 = NULL;
+  }
+  else
+  {
+    p03 = p01;
+  }
+  uint64_t *p11;
+  if (p01 == NULL)
+  {
+    p11 = NULL;
+  }
+  else
+  {
+    p11 = p01 + (uint32_t)10U;
+  }
+  bool uu____0 = init == NULL;
+  if (!(uu____0 || p11 == NULL))
+  {
+    memcpy(p11, init, (uint32_t)10U * sizeof (init[0U]));
+  }
+  uint64_t *x0;
+  if (p03 == NULL)
+  {
+    x0 = NULL;
+  }
+  else
+  {
+    x0 = p03;
+  }
+  uint64_t *z0;
+  if (p03 == NULL)
+  {
+    z0 = NULL;
+  }
+  else
+  {
+    z0 = p03 + (uint32_t)5U;
+  }
   x0[0U] = (uint64_t)1U;
   x0[1U] = (uint64_t)0U;
   x0[2U] = (uint64_t)0U;
@@ -745,20 +1101,110 @@ static void montgomery_ladder(uint64_t *out, uint8_t *key, uint64_t *init)
   z0[2U] = (uint64_t)0U;
   z0[3U] = (uint64_t)0U;
   z0[4U] = (uint64_t)0U;
-  uint64_t *p01_tmp1 = p01_tmp1_swap;
-  uint64_t *p01_tmp11 = p01_tmp1_swap;
-  uint64_t *nq1 = p01_tmp1_swap;
-  uint64_t *nq_p11 = p01_tmp1_swap + (uint32_t)10U;
-  uint64_t *swap = p01_tmp1_swap + (uint32_t)40U;
+  uint64_t *p01_tmp1;
+  if (p01_tmp1_swap == NULL)
+  {
+    p01_tmp1 = NULL;
+  }
+  else
+  {
+    p01_tmp1 = p01_tmp1_swap;
+  }
+  uint64_t *nq;
+  if (p01_tmp1_swap == NULL)
+  {
+    nq = NULL;
+  }
+  else
+  {
+    nq = p01_tmp1_swap;
+  }
+  uint64_t *nq_p1;
+  if (p01_tmp1_swap == NULL)
+  {
+    nq_p1 = NULL;
+  }
+  else
+  {
+    nq_p1 = p01_tmp1_swap + (uint32_t)10U;
+  }
+  uint64_t *p01_tmp11;
+  if (p01_tmp1_swap == NULL)
+  {
+    p01_tmp11 = NULL;
+  }
+  else
+  {
+    p01_tmp11 = p01_tmp1_swap;
+  }
+  uint64_t *nq1;
+  if (p01_tmp1_swap == NULL)
+  {
+    nq1 = NULL;
+  }
+  else
+  {
+    nq1 = p01_tmp1_swap;
+  }
+  uint64_t *nq_p11;
+  if (p01_tmp1_swap == NULL)
+  {
+    nq_p11 = NULL;
+  }
+  else
+  {
+    nq_p11 = p01_tmp1_swap + (uint32_t)10U;
+  }
+  uint64_t *swap;
+  if (p01_tmp1_swap == NULL)
+  {
+    swap = NULL;
+  }
+  else
+  {
+    swap = p01_tmp1_swap + (uint32_t)40U;
+  }
   cswap20((uint64_t)1U, nq1, nq_p11);
   point_add_and_double(init, p01_tmp11, tmp2);
   swap[0U] = (uint64_t)1U;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)251U; i++)
   {
-    uint64_t *p01_tmp12 = p01_tmp1_swap;
-    uint64_t *swap1 = p01_tmp1_swap + (uint32_t)40U;
-    uint64_t *nq2 = p01_tmp12;
-    uint64_t *nq_p12 = p01_tmp12 + (uint32_t)10U;
+    uint64_t *p01_tmp12;
+    if (p01_tmp1_swap == NULL)
+    {
+      p01_tmp12 = NULL;
+    }
+    else
+    {
+      p01_tmp12 = p01_tmp1_swap;
+    }
+    uint64_t *swap1;
+    if (p01_tmp1_swap == NULL)
+    {
+      swap1 = NULL;
+    }
+    else
+    {
+      swap1 = p01_tmp1_swap + (uint32_t)40U;
+    }
+    uint64_t *nq2;
+    if (p01_tmp12 == NULL)
+    {
+      nq2 = NULL;
+    }
+    else
+    {
+      nq2 = p01_tmp12;
+    }
+    uint64_t *nq_p12;
+    if (p01_tmp12 == NULL)
+    {
+      nq_p12 = NULL;
+    }
+    else
+    {
+      nq_p12 = p01_tmp12 + (uint32_t)10U;
+    }
     uint64_t
     bit =
       (uint64_t)(key[((uint32_t)253U - i)
@@ -772,12 +1218,32 @@ static void montgomery_ladder(uint64_t *out, uint8_t *key, uint64_t *init)
   }
   uint64_t sw = swap[0U];
   cswap20(sw, nq1, nq_p11);
-  uint64_t *nq10 = p01_tmp1;
-  uint64_t *tmp1 = p01_tmp1 + (uint32_t)20U;
+  uint64_t *nq10;
+  if (p01_tmp1 == NULL)
+  {
+    nq10 = NULL;
+  }
+  else
+  {
+    nq10 = p01_tmp1;
+  }
+  uint64_t *tmp1;
+  if (p01_tmp1 == NULL)
+  {
+    tmp1 = NULL;
+  }
+  else
+  {
+    tmp1 = p01_tmp1 + (uint32_t)20U;
+  }
   point_double(nq10, tmp1, tmp2);
   point_double(nq10, tmp1, tmp2);
   point_double(nq10, tmp1, tmp2);
-  memcpy(out, p0, (uint32_t)10U * sizeof (p0[0U]));
+  bool uu____1 = p0 == NULL;
+  if (!(uu____1 || out == NULL))
+  {
+    memcpy(out, p0, (uint32_t)10U * sizeof (p0[0U]));
+  }
 }
 
 void
@@ -798,11 +1264,51 @@ Hacl_Curve25519_51_fsquare_times(
 void Hacl_Curve25519_51_finv(uint64_t *o, uint64_t *i, FStar_UInt128_uint128 *tmp)
 {
   uint64_t t1[20U] = { 0U };
-  uint64_t *a = t1;
-  uint64_t *b = t1 + (uint32_t)5U;
-  uint64_t *c = t1 + (uint32_t)10U;
-  uint64_t *t00 = t1 + (uint32_t)15U;
-  FStar_UInt128_uint128 *tmp1 = tmp;
+  uint64_t *a;
+  if (t1 == NULL)
+  {
+    a = NULL;
+  }
+  else
+  {
+    a = t1;
+  }
+  uint64_t *b;
+  if (t1 == NULL)
+  {
+    b = NULL;
+  }
+  else
+  {
+    b = t1 + (uint32_t)5U;
+  }
+  uint64_t *c;
+  if (t1 == NULL)
+  {
+    c = NULL;
+  }
+  else
+  {
+    c = t1 + (uint32_t)10U;
+  }
+  uint64_t *t00;
+  if (t1 == NULL)
+  {
+    t00 = NULL;
+  }
+  else
+  {
+    t00 = t1 + (uint32_t)15U;
+  }
+  FStar_UInt128_uint128 *tmp1;
+  if (tmp == NULL)
+  {
+    tmp1 = NULL;
+  }
+  else
+  {
+    tmp1 = tmp;
+  }
   Hacl_Curve25519_51_fsquare_times(a, i, tmp1, (uint32_t)1U);
   Hacl_Curve25519_51_fsquare_times(t00, a, tmp1, (uint32_t)2U);
   Hacl_Impl_Curve25519_Field51_fmul(b, t00, i, tmp);
@@ -824,15 +1330,47 @@ void Hacl_Curve25519_51_finv(uint64_t *o, uint64_t *i, FStar_UInt128_uint128 *tm
   Hacl_Curve25519_51_fsquare_times(t00, t00, tmp1, (uint32_t)50U);
   Hacl_Impl_Curve25519_Field51_fmul(t00, t00, b, tmp);
   Hacl_Curve25519_51_fsquare_times(t00, t00, tmp1, (uint32_t)5U);
-  uint64_t *a0 = t1;
-  uint64_t *t0 = t1 + (uint32_t)15U;
+  uint64_t *a0;
+  if (t1 == NULL)
+  {
+    a0 = NULL;
+  }
+  else
+  {
+    a0 = t1;
+  }
+  uint64_t *t0;
+  if (t1 == NULL)
+  {
+    t0 = NULL;
+  }
+  else
+  {
+    t0 = t1 + (uint32_t)15U;
+  }
   Hacl_Impl_Curve25519_Field51_fmul(o, t0, a0, tmp);
 }
 
 static void encode_point(uint8_t *o, uint64_t *i)
 {
-  uint64_t *x = i;
-  uint64_t *z = i + (uint32_t)5U;
+  uint64_t *x;
+  if (i == NULL)
+  {
+    x = NULL;
+  }
+  else
+  {
+    x = i;
+  }
+  uint64_t *z;
+  if (i == NULL)
+  {
+    z = NULL;
+  }
+  else
+  {
+    z = i + (uint32_t)5U;
+  }
   uint64_t tmp[5U] = { 0U };
   uint64_t u64s[4U] = { 0U };
   FStar_UInt128_uint128 tmp_w[10U];
@@ -843,7 +1381,25 @@ static void encode_point(uint8_t *o, uint64_t *i)
   store_felem(u64s, tmp);
   for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0++)
   {
-    store64_le(o + i0 * (uint32_t)8U, u64s[i0]);
+    uint8_t *block;
+    if (o == NULL)
+    {
+      block = NULL;
+    }
+    else
+    {
+      block = o + i0 * (uint32_t)8U;
+    }
+    uint8_t *uu____0;
+    if (o == NULL)
+    {
+      uu____0 = NULL;
+    }
+    else
+    {
+      uu____0 = o + i0 * (uint32_t)8U;
+    }
+    store64_le(uu____0, u64s[i0]);
   }
 }
 
@@ -853,8 +1409,24 @@ void Hacl_Curve25519_51_scalarmult(uint8_t *out, uint8_t *priv, uint8_t *pub)
   uint64_t tmp[4U] = { 0U };
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
-    uint64_t *os = tmp;
-    uint8_t *bj = pub + i * (uint32_t)8U;
+    uint64_t *os;
+    if (tmp == NULL)
+    {
+      os = NULL;
+    }
+    else
+    {
+      os = tmp;
+    }
+    uint8_t *bj;
+    if (pub == NULL)
+    {
+      bj = NULL;
+    }
+    else
+    {
+      bj = pub + i * (uint32_t)8U;
+    }
     uint64_t u = load64_le(bj);
     uint64_t r = u;
     uint64_t x = r;
@@ -862,8 +1434,24 @@ void Hacl_Curve25519_51_scalarmult(uint8_t *out, uint8_t *priv, uint8_t *pub)
   }
   uint64_t tmp3 = tmp[3U];
   tmp[3U] = tmp3 & (uint64_t)0x7fffffffffffffffU;
-  uint64_t *x = init;
-  uint64_t *z = init + (uint32_t)5U;
+  uint64_t *x;
+  if (init == NULL)
+  {
+    x = NULL;
+  }
+  else
+  {
+    x = init;
+  }
+  uint64_t *z;
+  if (init == NULL)
+  {
+    z = NULL;
+  }
+  else
+  {
+    z = init + (uint32_t)5U;
+  }
   z[0U] = (uint64_t)1U;
   z[1U] = (uint64_t)0U;
   z[2U] = (uint64_t)0U;
@@ -891,7 +1479,15 @@ void Hacl_Curve25519_51_secret_to_public(uint8_t *pub, uint8_t *priv)
   uint8_t basepoint[32U] = { 0U };
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)32U; i++)
   {
-    uint8_t *os = basepoint;
+    uint8_t *os;
+    if (basepoint == NULL)
+    {
+      os = NULL;
+    }
+    else
+    {
+      os = basepoint;
+    }
     uint8_t x = g25519[i];
     os[i] = x;
   }
