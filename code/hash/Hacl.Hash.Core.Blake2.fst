@@ -43,9 +43,6 @@ let mk_alloca a m init () =
   let (s:Core.state_p (to_blake_alg a) m) = 
     Lib.Buffer.create state_len zero_elem in
   [@inline_let] let s : state i = state_p_to_state s in
-//  let (s:Core.state_p (to_blake_alg a) m) =
-//    Lib.Buffer.create (4ul *. Core.row_len (to_blake_alg a) m)
-//                      (Core.zero_element (to_blake_alg a) m) in
   let es = init s in
   let h2 = ST.get() in
   B.modifies_only_not_unused_in (B.loc_none) h0 h2;
@@ -65,9 +62,6 @@ let mk_update a m s totlen block =
   let (wv:Core.state_p (to_blake_alg a) m) = 
     Lib.Buffer.create state_len zero_elem in
   [@inline_let] let wv = state_p_to_state wv in
-//  let (wv:Core.state_p (to_blake_alg a) m) =
-//    Lib.Buffer.create (4ul *. Core.row_len (to_blake_alg a) m)
-//                      (Core.zero_element (to_blake_alg a) m) in
   let totlen = extra_state_add_size_t totlen (block_len a) in
   Impl.blake2_update_block #(to_blake_alg a) #m wv s false totlen block;
   ST.pop_frame();
