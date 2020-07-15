@@ -60,6 +60,7 @@ let to_blake_alg (a:blake_alg) = match a with
   | Blake2S -> Spec.Blake2.Blake2S
   | Blake2B -> Spec.Blake2.Blake2B
 
+noextract inline_for_extraction
 let to_hash_alg (a : Spec.Blake2.alg) =
   match a with
   | Spec.Blake2.Blake2S -> Blake2S
