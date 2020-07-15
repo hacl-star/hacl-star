@@ -209,10 +209,14 @@ noextract
 let max_extra_state (a:hash_alg{is_blake a}) : nat =
   maxint (extra_state_int_type a)
 
-inline_for_extraction noextract
+// Do not use this in Low* code: it is not possible to directly convert a
+// constant nat to a uint128.
+noextract
 let nat_to_extra_state (a:hash_alg{is_blake a}) (n:nat{n <= max_extra_state a}) :
   extra_state a =
-  mk_int #(extra_state_int_type a) #SEC n
+  match a with
+  | Blake2S -> mk_int #U64 #SEC n
+  | Blake2B -> mk_int #U128 #SEC n
 
 inline_for_extraction noextract
 let extra_state_add_nat (#a:hash_alg{is_blake a}) (s : extra_state a)
