@@ -50,6 +50,7 @@ let agile_state: stateful hash_alg =
     (fun i -> EverCrypt.Hash.copy #i)
 
 #push-options "--ifuel 1"
+inline_for_extraction noextract
 let mk_words_state (#a : hash_alg) (s : words_state' a)
                    (counter : nat{is_blake a ==> counter <= max_extra_state a}) :
  Tot (words_state a) =

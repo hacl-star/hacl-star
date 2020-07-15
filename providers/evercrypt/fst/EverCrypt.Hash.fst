@@ -395,7 +395,9 @@ let finish #a s dst =
   | SHA2_384_s p -> Hacl.Hash.SHA2.finish_384 p () dst
   | SHA2_512_s p -> Hacl.Hash.SHA2.finish_512 p () dst
   | Blake2S_s p -> Hacl.Hash.Blake2.finish_blake2s_32 p 0UL dst
-  | Blake2B_s p -> Hacl.Hash.Blake2.finish_blake2b_32 p (UInt128.uint_to_t 0) dst
+  | Blake2B_s p ->
+    Hacl.Hash.Blake2.finish_blake2b_32 p (Int.Cast.Full.uint64_to_uint128
+                                             (UInt64.uint_to_t 0)) dst
 
 #pop-options
 
