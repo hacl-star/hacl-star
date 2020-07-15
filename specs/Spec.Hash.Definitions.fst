@@ -55,6 +55,7 @@ let is_md = function
 let sha2_alg = a:hash_alg { is_sha2 a }
 let blake_alg = a:hash_alg { is_blake a }
 
+noextract inline_for_extraction
 let to_blake_alg (a:blake_alg) = match a with
   | Blake2S -> Spec.Blake2.Blake2S
   | Blake2B -> Spec.Blake2.Blake2B
