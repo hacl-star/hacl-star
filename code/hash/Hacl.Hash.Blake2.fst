@@ -141,6 +141,7 @@ let update_sub_seq_end_eq (#a : Type) (#l1 : size_nat) (s1 : Lib.Sequence.lseq a
            Seq.index s1'_end k == Seq.index s1_end k);
   ()
 
+noextract inline_for_extraction
 val mk_blake2_update_last_block (a : hash_alg{is_blake a}) (m : m_spec a) :
   blake2_update_last_block_st a m
 
