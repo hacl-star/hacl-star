@@ -16,7 +16,7 @@ module Impl = Hacl.Impl.Blake2.Generic
 module Core = Hacl.Impl.Blake2.Core
 
 open Hacl.Hash.Lemmas
-open Spec.Blake2.Lemmas
+open Hacl.Hash.Blake2.Lemmas
 open Spec.Hash.Lemmas
 open Spec.Hash.Incremental.Lemmas
 

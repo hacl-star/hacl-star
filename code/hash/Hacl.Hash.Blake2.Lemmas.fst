@@ -1,10 +1,11 @@
-module Spec.Blake2.Lemmas
+module Hacl.Hash.Blake2.Lemmas
 
 open Lib.IntTypes
 
 open Spec.Hash.Lemmas
 open FStar.Mul
 open FStar.Math.Lemmas
+open Hacl.Hash.Definitions
 
 friend Spec.Agile.Hash
 
@@ -46,7 +47,7 @@ let add_extra_i (a:hash_alg{is_blake a}) (ev:extra_state a) (i:U32.t) : extra_st
     // as ``i`` is a uint32, by converting it to a uint64 we make sure there is
     // no overflow during the multiplication.
     [@inline_let] let i' : uint64 = to_u64 i in
-    [@inline_let] let s = (to_u64 i) *. u64 (size_block a) in
+    [@inline_let] let s = (to_u64 i) *. (cast U64 SEC (block_len a)) in
     (ev <: extra_state_int_t a) +. (cast (extra_state_int_type a) SEC s)
 
 let add_extra_s (a:hash_alg{is_blake a}) (ev:nat) (i:nat) : nat =
@@ -67,9 +68,11 @@ let add_s_i (a:hash_alg{is_blake a}) (ev:extra_state a) (i:U32.t) :
   calc (==) {
     v ev2;
     (==) { }
+    v (ev1  +. cast itype SEC (to_u64 i *. (cast U64 SEC (block_len a))));
+    (==) { }
     v (ev1  +. cast itype SEC (to_u64 i *. u64 (size_block a)));
     (==) { }
-    ((v ev1) + v (cast itype SEC (to_u64 i *. u64 (size_block a)))) % pow2 n;
+    ((v ev1) + v (cast itype SEC (to_u64 i *. u64 (size_block a)))) % pow2 n; //
     (==) { }
     ((v ev1) + ((v (to_u64 i *. u64 (size_block a))) % pow2 n)) % pow2 n;
     (==) { lemma_mod_add_distr (v ev1) (v (to_u64 i *. u64 (size_block a))) (pow2 n) }

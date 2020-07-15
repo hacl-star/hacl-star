@@ -1,4 +1,4 @@
-module Spec.Blake2.Lemmas
+module Hacl.Hash.Blake2.Lemmas
 
 module U32 = FStar.UInt32
 
