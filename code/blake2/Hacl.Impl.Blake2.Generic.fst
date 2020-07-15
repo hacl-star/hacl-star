@@ -333,7 +333,14 @@ let blake2_compress1 #al #m wv s_iv offset flag =
   let wv_12 = Spec.limb_to_word al offset in
   [@inline_let]
   let wv_13 = Spec.limb_to_word al (offset >>. (size (bits (Spec.wt al)))) in
-  let wv_14 = if flag then ones (Spec.wt al) SEC else (Spec.zero al) in
+  // SH: TODO: for some reason, ``ones`` below doesn't get inlined by Kremlin,
+  // causing an extraction problem. The 3 lines below are a hack to fix
+  // extraction for the time being:
+  // [> let wv_14 = if flag then (ones (Spec.wt al) SEC) else (Spec.zero al) in
+  (**) norm_spec [delta_only[`%ones]] (ones (Spec.wt al) SEC);
+  [@inline_let] let _ones = norm [delta_only[`%ones]] (ones (Spec.wt al)) SEC in
+  let wv_14 = if flag then _ones else (Spec.zero al) in
+  // end of the TODO
   let wv_15 = Spec.zero al in
   create_row mask wv_12 wv_13 wv_14 wv_15;
   copy_state wv s_iv;
