@@ -106,6 +106,18 @@ let blocks_t (a: hash_alg) =
 
 let hash_t (a: hash_alg) = b:B.buffer uint8 { B.length b = hash_length a }
 
+// The proper way to generate an extra state from a constant nat.
+noextract inline_for_extraction
+let const_nat_to_extra_state (a:hash_alg{is_blake a}) (n:nat{n <= maxint U64}) :
+  extra_state a =
+  match a with
+  | Blake2S -> mk_int #U64 #SEC n
+  | Blake2B -> cast U128 SEC (mk_int #U64 #SEC n)
+
+noextract inline_for_extraction
+let initial_extra_state (a:hash_alg) : extra_state a =
+  if is_blake a then const_nat_to_extra_state a 0
+  else ()
 
 (** The types of all stateful operations for a hash algorithm. *)
 

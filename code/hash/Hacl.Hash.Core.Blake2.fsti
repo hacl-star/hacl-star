@@ -6,8 +6,14 @@ module Core = Hacl.Impl.Blake2.Core
 
 noextract inline_for_extraction
 val mk_init (a:hash_alg{is_blake a}) (m:m_spec a) : init_st (|a, m|)
+
+noextract inline_for_extraction
 val mk_alloca (a:hash_alg{is_blake a}) (m:m_spec a) : init_st (|a, m|) -> alloca_st (|a, m|)
+
+noextract inline_for_extraction
 val mk_update (a:hash_alg{is_blake a}) (m:m_spec a) : update_st (|a, m|)
+
+noextract inline_for_extraction
 val mk_finish (a:hash_alg{is_blake a}) (m:m_spec a) : finish_st (|a, m|)
 
 noextract inline_for_extraction

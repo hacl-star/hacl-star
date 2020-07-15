@@ -144,6 +144,17 @@ let update_multi_extra_state_eq'
 
 #push-options "--z3rlimit 100 --ifuel 1"
 
+// TODO: move
+(* We can't directly introduce uint128 literals *)
+inline_for_extraction
+let zero_to_len (a:hash_alg) : uint_t (len_int_type a) PUB =
+  match a with
+  | MD5 | SHA1
+  | SHA2_224 | SHA2_256
+  | Blake2S -> UInt64.uint_to_t 0
+  | SHA2_384 | SHA2_512
+  | Blake2B -> FStar.Int.Cast.Full.uint64_to_uint128 (UInt64.uint_to_t 0)
+
 inline_for_extraction noextract
 let part2 a m init update_multi update_last finish s dst key data len =
   (**) key_and_data_fits a;
@@ -159,7 +170,7 @@ let part2 a m init update_multi update_last finish s dst key data len =
   let ev =
     if len =. 0ul then
       begin
-      let ev = update_last s ev (uint #(len_int_type a) #PUB 0) key (D.block_len a) in
+      let ev = update_last s ev (zero_to_len a) key (D.block_len a) in
       (**) let h2 = ST.get () in
       (**) Spec.Hash.Lemmas.block_length_smaller_than_max_input a;
       (**) assert(key_data_v0 `S.equal` key_v0);

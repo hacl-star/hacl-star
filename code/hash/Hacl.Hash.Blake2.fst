@@ -22,9 +22,7 @@ open Spec.Hash.Incremental.Lemmas
 
 open FStar.Mul
 
-#set-options "--fuel 0 --ifuel 0"
-
-#push-options "--fuel 1 --ifuel 1 --z3rlimit 200"
+#set-options "--z3rlimit 200 --fuel 0 --ifuel 0"
 
 (*** update_multi *)
 noextract inline_for_extraction
@@ -227,8 +225,7 @@ let mk_update_last a m update_multi blake2_update_last_block s ev prev_len input
   (**)   fst (Spec.Hash.Incremental.update_last_blake a (as_seq h0 s, ev)
   (**)   (len_v a prev_len) input_v));
   ST.pop_frame ();
-  nat_to_extra_state a 0
-#pop-options
+  initial_extra_state a
 
 let update_multi_blake2s_32 =
   mk_update_multi Blake2S Core.M32 update_blake2s_32
