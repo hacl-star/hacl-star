@@ -428,6 +428,7 @@ let rest #index (c: block index) (i: index)
 /// the state, the number of blocks of data which have been processed (the remaining
 /// unprocessed data being left in ``buf``).
 #push-options "--z3cliopt smt.arith.nl=false"
+inline_for_extraction noextract
 let nblocks #index (c: block index) (i: index)
   (len: UInt32.t): (x:UInt32.t {
     U32.v x = split_at_last_num_blocks c i (U32.v len) })
@@ -463,6 +464,7 @@ let add_len #index (c: block index) (i: index) (total_len: UInt64.t) (len: UInt3
   total_len `U64.add` Int.Cast.uint32_to_uint64 len
 
 #push-options "--z3cliopt smt.arith.nl=false"
+inline_for_extraction noextract
 let add_len_small #index (c: block index) (i: index) (total_len: UInt64.t) (len: UInt32.t): Lemma
   (requires
     U32.v len <= U32.v (c.block_len i) - U32.v (rest c i total_len) /\
@@ -487,11 +489,14 @@ let add_len_small #index (c: block index) (i: index) (total_len: UInt64.t) (len:
 /// Beginning of the three sub-cases (see Hacl.Streaming.Spec)
 /// ==========================================================
 
+noextract
 let total_len_h #index (c: block index) (i: index) h (p: state' c i) =
   State?.total_len (B.deref h p)
 
+noextract
 let seen_h = seen
 
+noextract
 let split_at_last_seen_h #index (c: block index) (i: index) h (p: state' c i) =
   let seen = seen_h c i h p in
   let blocks, rest = split_at_last c i seen in
