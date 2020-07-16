@@ -66,13 +66,23 @@ let add_s_i (a:hash_alg{is_blake a}) (ev:extra_state a) (i:U32.t) :
   let ev2 : int_t itype SEC = add_extra_i a ev i in
   assert_norm(size_block a < pow2 64);
   calc (==) {
+    v (cast U64 SEC (block_len a));
+    (==) { }
+    (v (block_len a)) % pow2 64;
+    (==) { }
+    (size_block a) % pow2 64;
+    (==) { modulo_lemma (block_length a) (pow2 64) }
+    block_length a;
+  };
+  assert(cast U64 SEC (block_len a) == u64 (size_block a));
+  calc (==) {
     v ev2;
     (==) { }
     v (ev1  +. cast itype SEC (to_u64 i *. (cast U64 SEC (block_len a))));
     (==) { }
     v (ev1  +. cast itype SEC (to_u64 i *. u64 (size_block a)));
     (==) { }
-    ((v ev1) + v (cast itype SEC (to_u64 i *. u64 (size_block a)))) % pow2 n; //
+    ((v ev1) + v (cast itype SEC (to_u64 i *. u64 (size_block a)))) % pow2 n;
     (==) { }
     ((v ev1) + ((v (to_u64 i *. u64 (size_block a))) % pow2 n)) % pow2 n;
     (==) { lemma_mod_add_distr (v ev1) (v (to_u64 i *. u64 (size_block a))) (pow2 n) }
