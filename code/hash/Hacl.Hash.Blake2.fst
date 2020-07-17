@@ -196,8 +196,9 @@ val mk_update_last:
   -> blake2_update_last_block_st a m ->
   update_last_st (|a, m|)
 
+// TODO: this proof often loops
+#push-options "--z3rlimit 300"
 let mk_update_last a m update_multi blake2_update_last_block s ev prev_len input input_len =
-  ST.push_frame ();
   (**) let h0 = ST.get () in
   (**) let input_v : Ghost.erased _ = B.as_seq h0 input in
   (* Compute the lengths to split the blocks *)
@@ -224,8 +225,8 @@ let mk_update_last a m update_multi blake2_update_last_block s ev prev_len input
   (**) assert(as_seq h2 s `Seq.equal`
   (**)   fst (Spec.Hash.Incremental.update_last_blake a (as_seq h0 s, ev)
   (**)   (len_v a prev_len) input_v));
-  ST.pop_frame ();
   initial_extra_state a
+#pop-options
 
 let update_multi_blake2s_32 =
   mk_update_multi Blake2S Core.M32 update_blake2s_32
