@@ -116,7 +116,7 @@ FRODO_BUNDLE=-bundle 'Hacl.Frodo.KEM=Frodo.Params,Hacl.Impl.Frodo.*,Hacl.Impl.Ma
 HPKE_BUNDLE=-bundle Hacl.HPKE.Interface.*
 STREAMING_BUNDLE=-bundle Hacl.Streaming.Interface,Hacl.Streaming.Lemmas
 INTTYPES_BUNDLE=-bundle Hacl.IntTypes.Intrinsics= -static-header Hacl.IntTypes.Intrinsics
-RSAPSS_BUNDLE=-bundle Hacl.Bignum,Hacl.Bignum.Multiplication,Hacl.Bignum.ModInv64[rename=Hacl_Bignum] -static-header Hacl.Bignum,Hacl.Bignum.Multiplication,Hacl.Bignum.ModInv64 -bundle Hacl.RSAPSS=Hacl.Bignum.*,Hacl.Impl.MGF,Hacl.Impl.RSAPSS[rename=Hacl_RSAPSS]
+RSAPSS_BUNDLE=-bundle Hacl.Bignum,Hacl.Bignum.Multiplication,Hacl.Bignum.ModInv64[rename=Hacl_Bignum] -static-header Hacl.Bignum,Hacl.Bignum.Multiplication,Hacl.Bignum.ModInv64 -bundle Hacl.RSAPSS+Hacl.Bignum.Convert=Hacl.Bignum.*,Hacl.Impl.MGF,Hacl.Impl.RSAPSS[rename=Hacl_RSAPSS]
 
 # 3. OCaml
 
