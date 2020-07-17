@@ -44,7 +44,7 @@ bool hacl_sign(
   Hacl_Bignum_Convert_bn_from_bytes_be((modBits - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U, n1, nNat);
   Hacl_Bignum_Convert_bn_from_bytes_be((pkeyBits - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U, e, eNat);
   Hacl_Bignum_Convert_bn_from_bytes_be((skeyBits - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U, d, dNat);
-  Hacl_RSAPSS_rsapss_sign(modBits, pkeyBits, skeyBits, skey, saltLen, salt, msgLen, msg, sgnt);
+  Hacl_RSAPSS_rsapss_sign(Spec_Hash_Definitions_SHA2_256, modBits, pkeyBits, skeyBits, skey, saltLen, salt, msgLen, msg, sgnt);
   return 1;
 }
 
@@ -70,7 +70,7 @@ bool hacl_verify(
   Hacl_Bignum_Convert_bn_from_bytes_be((modBits - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U, n1, nNat);
   Hacl_Bignum_Convert_bn_from_bytes_be((pkeyBits - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U, e, eNat);
 
-  bool verify_sgnt = Hacl_RSAPSS_rsapss_verify(modBits, pkeyBits, pkey, saltLen, sgnt, msgLen, msg);
+  bool verify_sgnt = Hacl_RSAPSS_rsapss_verify(Spec_Hash_Definitions_SHA2_256, modBits, pkeyBits, pkey, saltLen, sgnt, msgLen, msg);
   return verify_sgnt;
 }
 

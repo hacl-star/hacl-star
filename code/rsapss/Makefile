@@ -25,6 +25,7 @@ dist/Makefile.basic: $(filter-out %prims.krml,$(ALL_KRML_FILES))
 	$(KRML) $^ -o librsapss.a $(BASE_FLAGS) $(SHA2_BUNDLE) $(RSAPSS_BUNDLE) \
 	-tmpdir dist \
 	-add-include '"lib_intrinsics.h"' \
+	-fbuiltin-uint128 \
 	-skip-compilation
 
 dist/rsapss-test.exe: $(HACL_HOME)/tests/rsapss-test.o dist/librsapss.a

@@ -11,7 +11,7 @@ open Hacl.Spec.Bignum.Exponentiation
 
 module S = Spec.RSAPSS
 module BSeq = Lib.ByteSequence
-
+module Hash = Spec.Agile.Hash
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -37,7 +37,8 @@ let sgnt_blocks_eq_nLen modBits = ()
 
 
 val rsapss_sign_inv:
-     modBits:size_pos{1 < modBits}
+    a:Hash.sha2_alg
+  -> modBits:size_pos{1 < modBits}
   -> eBits:size_pos
   -> dBits:size_pos{blocks modBits 64 + blocks eBits 64 + blocks dBits 64 <= max_size_t}
   -> skey:lbignum (blocks modBits 64 + blocks eBits 64 + blocks dBits 64)
@@ -45,9 +46,9 @@ val rsapss_sign_inv:
   -> salt:lseq uint8 sLen
   -> msgLen:size_nat
   -> msg:lseq uint8 msgLen -> Type0
-let rsapss_sign_inv modBits eBits dBits skey sLen salt msgLen msg =
-  sLen + S.hLen + 8 <= max_size_t /\ sLen + S.hLen + 8 <= S.max_input /\
-  sLen + S.hLen + 2 <= (blocks (modBits - 1) 8) /\ msgLen <= S.max_input /\
+let rsapss_sign_inv a modBits eBits dBits skey sLen salt msgLen msg =
+  sLen + Hash.hash_length a + 8 <= max_size_t /\ sLen + Hash.hash_length a + 8 <= Hash.max_input_length a /\
+  sLen + Hash.hash_length a + 2 <= (blocks (modBits - 1) 8) /\ msgLen <= Hash.max_input_length a /\
 
   128 * (blocks modBits 64 + 1) <= max_size_t /\
  (let nLen = blocks modBits 64 in
@@ -64,7 +65,8 @@ let rsapss_sign_inv modBits eBits dBits skey sLen salt msgLen msg =
 
 
 val rsapss_sign:
-     modBits:size_pos{1 < modBits}
+    a:Hash.sha2_alg
+  -> modBits:size_pos{1 < modBits}
   -> eBits:size_pos
   -> dBits:size_pos{blocks modBits 64 + blocks eBits 64 + blocks dBits 64 <= max_size_t}
   -> skey:lbignum (blocks modBits 64 + blocks eBits 64 + blocks dBits 64)
@@ -73,10 +75,10 @@ val rsapss_sign:
   -> msgLen:size_nat
   -> msg:lseq uint8 msgLen
   -> Pure (lseq uint8 (blocks modBits 8))
-  (requires rsapss_sign_inv modBits eBits dBits skey sLen salt msgLen msg)
+  (requires rsapss_sign_inv a modBits eBits dBits skey sLen salt msgLen msg)
   (ensures  fun sgnt -> True)
 
-let rsapss_sign modBits eBits dBits skey sLen salt msgLen msg =
+let rsapss_sign a modBits eBits dBits skey sLen salt msgLen msg =
   let nLen = blocks modBits 64 in
   let eLen = blocks eBits 64 in
   let dLen = blocks dBits 64 in
@@ -88,7 +90,7 @@ let rsapss_sign modBits eBits dBits skey sLen salt msgLen msg =
   let emBits = modBits - 1 in
   let emLen = blocks emBits 8 in
 
-  let em = S.pss_encode salt msg emBits in
+  let em = S.pss_encode #a salt msg emBits in
   em_blocks_lt_max_size_t modBits;
   assert (8 * blocks emLen 8 <= max_size_t);
   let emNat = bn_from_bytes_be emLen em in
@@ -103,7 +105,8 @@ let rsapss_sign modBits eBits dBits skey sLen salt msgLen msg =
 
 
 val rsapss_sign_lemma:
-     modBits:size_pos{1 < modBits}
+    a:Hash.sha2_alg
+  -> modBits:size_pos{1 < modBits}
   -> eBits:size_pos
   -> dBits:size_pos{blocks modBits 64 + blocks eBits 64 + blocks dBits 64 <= max_size_t}
   -> skey:lbignum (blocks modBits 64 + blocks eBits 64 + blocks dBits 64)
@@ -112,7 +115,7 @@ val rsapss_sign_lemma:
   -> msgLen:size_nat
   -> msg:lseq uint8 msgLen -> Lemma
   (requires
-    rsapss_sign_inv modBits eBits dBits skey sLen salt msgLen msg)
+    rsapss_sign_inv a modBits eBits dBits skey sLen salt msgLen msg)
   (ensures
    (let nLen = blocks modBits 64 in
     let eLen = blocks eBits 64 in
@@ -123,10 +126,10 @@ val rsapss_sign_lemma:
     let d = bn_v (sub skey (nLen + eLen) dLen) in
     let pkeys : S.rsa_pubkey modBits = S.Mk_rsa_pubkey n e in
     let skeys : S.rsa_privkey modBits = S.Mk_rsa_privkey pkeys d in
-    let sgnt = rsapss_sign modBits eBits dBits skey sLen salt msgLen msg in
-    sgnt `Seq.equal` S.rsapss_sign #sLen #msgLen modBits skeys salt msg))
+    let sgnt = rsapss_sign a modBits eBits dBits skey sLen salt msgLen msg in
+    sgnt `Seq.equal` S.rsapss_sign #a #sLen #msgLen modBits skeys salt msg))
 
-let rsapss_sign_lemma modBits eBits dBits skey sLen salt msgLen msg =
+let rsapss_sign_lemma a modBits eBits dBits skey sLen salt msgLen msg =
   let nLen = blocks modBits 64 in
   let eLen = blocks eBits 64 in
   let dLen = blocks dBits 64 in
@@ -139,7 +142,7 @@ let rsapss_sign_lemma modBits eBits dBits skey sLen salt msgLen msg =
   let emBits = modBits - 1 in
   let emLen = blocks emBits 8 in
 
-  let em = S.pss_encode salt msg emBits in
+  let em = S.pss_encode #a salt msg emBits in
   em_blocks_lt_max_size_t modBits;
   assert (8 * blocks emLen 8 <= max_size_t);
 
@@ -225,16 +228,17 @@ let bn_eval_sub modBits m =
 
 
 val rsapss_verify_inv:
-    modBits:size_pos{1 < modBits}
+    a:Hash.sha2_alg
+  -> modBits:size_pos{1 < modBits}
   -> eBits:size_pos{blocks modBits 64 + blocks eBits 64 <= max_size_t}
   -> pkey:lbignum (blocks modBits 64 + blocks eBits 64)
   -> sLen:size_nat //saltLen
   -> sgnt:lseq uint8 (blocks modBits 8)
   -> msgLen:size_nat
   -> msg:lseq uint8 msgLen -> Type0
-let rsapss_verify_inv modBits eBits pkey sLen sgnt msgLen msg =
-  sLen + S.hLen + 8 <= max_size_t /\ sLen + S.hLen + 8 <= S.max_input /\
-  msgLen <= S.max_input /\
+let rsapss_verify_inv a modBits eBits pkey sLen sgnt msgLen msg =
+  sLen + Hash.hash_length a + 8 <= max_size_t /\ sLen + Hash.hash_length a + 8 <= Hash.max_input_length a /\
+  msgLen <= Hash.max_input_length a /\
 
   128 * (blocks modBits 64 + 1) <= max_size_t /\
  (let nLen = blocks modBits 64 in
@@ -248,7 +252,8 @@ let rsapss_verify_inv modBits eBits pkey sLen sgnt msgLen msg =
 
 
 val rsapss_verify:
-    modBits:size_pos{1 < modBits}
+    a:Hash.sha2_alg
+  -> modBits:size_pos{1 < modBits}
   -> eBits:size_pos{blocks modBits 64 + blocks eBits 64 <= max_size_t}
   -> pkey:lbignum (blocks modBits 64 + blocks eBits 64)
   -> sLen:size_nat //saltLen
@@ -256,10 +261,10 @@ val rsapss_verify:
   -> msgLen:size_nat
   -> msg:lseq uint8 msgLen ->
   Pure bool
-  (requires rsapss_verify_inv modBits eBits pkey sLen sgnt msgLen msg)
+  (requires rsapss_verify_inv a modBits eBits pkey sLen sgnt msgLen msg)
   (ensures  fun r -> True)
 
-let rsapss_verify modBits eBits pkey sLen sgnt msgLen msg =
+let rsapss_verify a modBits eBits pkey sLen sgnt msgLen msg =
   let nLen = blocks modBits 64 in
   let eLen = blocks eBits 64 in
 
@@ -282,13 +287,14 @@ let rsapss_verify modBits eBits pkey sLen sgnt msgLen msg =
     if bn_is_less_pow2 modBits m then begin
       let m1 = sub m 0 (blocks emLen 8) in
       let em = bn_to_bytes_be emLen m1 in
-      S.pss_verify sLen msg emBits em end
+      S.pss_verify #a sLen msg emBits em end
     else false end
   else false
 
 
 val rsapss_verify_lemma:
-    modBits:size_pos{1 < modBits}
+    a:Hash.sha2_alg
+  -> modBits:size_pos{1 < modBits}
   -> eBits:size_pos{blocks modBits 64 + blocks eBits 64 <= max_size_t}
   -> pkey:lbignum (blocks modBits 64 + blocks eBits 64)
   -> sLen:size_nat //saltLen
@@ -296,7 +302,7 @@ val rsapss_verify_lemma:
   -> msgLen:size_nat
   -> msg:lseq uint8 msgLen -> Lemma
   (requires
-    rsapss_verify_inv modBits eBits pkey sLen sgnt msgLen msg)
+    rsapss_verify_inv a modBits eBits pkey sLen sgnt msgLen msg)
   (ensures
    (let nLen = blocks modBits 64 in
     let eLen = blocks eBits 64 in
@@ -304,10 +310,10 @@ val rsapss_verify_lemma:
     let n = bn_v (sub pkey 0 nLen) in
     let e = bn_v (sub pkey nLen eLen) in
     let pkeys : S.rsa_pubkey modBits = S.Mk_rsa_pubkey n e in
-    rsapss_verify modBits eBits pkey sLen sgnt msgLen msg ==
-    S.rsapss_verify #msgLen modBits pkeys sLen msg sgnt))
+    rsapss_verify a modBits eBits pkey sLen sgnt msgLen msg ==
+    S.rsapss_verify #a #msgLen modBits pkeys sLen msg sgnt))
 
-let rsapss_verify_lemma modBits eBits pkey sLen sgnt msgLen msg =
+let rsapss_verify_lemma a modBits eBits pkey sLen sgnt msgLen msg =
   let nLen = blocks modBits 64 in
   let eLen = blocks eBits 64 in
 
@@ -340,7 +346,7 @@ let rsapss_verify_lemma modBits eBits pkey sLen sgnt msgLen msg =
       assert (bn_v m1 == bn_v m);
       let em = bn_to_bytes_be emLen m1 in
       bn_to_bytes_be_lemma emLen m1;
-      S.pss_verify sLen msg emBits em end
+      S.pss_verify #a sLen msg emBits em end
     else false end
   else false in
   ()

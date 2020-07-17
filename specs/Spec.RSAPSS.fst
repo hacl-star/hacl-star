@@ -7,6 +7,7 @@ open Lib.Sequence
 open Lib.ByteSequence
 open Lib.LoopCombinators
 
+module Hash = Spec.Agile.Hash
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -20,38 +21,43 @@ let blocks x m = (x - 1) / m + 1
 val xor_bytes: #len:size_pos -> b1:lbytes len -> b2:lbytes len -> Tot (lbytes len)
 let xor_bytes #len b1 b2 = map2 (fun x y -> x ^. y) b1 b2
 
-let hLen = 32
-let max_input = Spec.Hash.Definitions.max_input_length Spec.Hash.Definitions.SHA2_256
-let sha2_256 (msg:bytes{length msg <= max_input}) : lbytes hLen = Spec.Agile.Hash.hash Spec.Hash.Definitions.SHA2_256 msg
-
+let hash_is_supported (a:Hash.algorithm) : Tot bool =
+  match a with
+  | Hash.SHA2_256 -> true
+  | Hash.SHA2_384 -> true
+  | Hash.SHA2_512 -> true
+  | _ -> false
 
 (* Mask Generation Function *)
-val mgf_sha256_f:
-     len:size_nat{len + 4 <= max_size_t /\ len + 4 <= max_input}
+val mgf_hash_f:
+    a:Hash.algorithm{hash_is_supported a}
+  -> len:size_nat{len + 4 <= max_size_t /\ len + 4 <= Hash.max_input_length a}
   -> i:size_nat
   -> mgfseed_counter:lbytes (len + 4) ->
-  lbytes (len + 4) & lbytes hLen
+  lbytes (len + 4) & lbytes (Hash.hash_length a)
 
-let mgf_sha256_f len i mgfseed_counter =
+let mgf_hash_f a len i mgfseed_counter =
   let counter = nat_to_intseq_be 4 i in
   let mgfseed_counter = update_sub mgfseed_counter len 4 counter in
-  let block = sha2_256 mgfseed_counter in
+  let block = Hash.hash a mgfseed_counter in
   mgfseed_counter, block
 
-let mgf_sha256_a (len:size_nat{len + 4 <= max_size_t}) (n:pos) (i:nat{i <= n}) = lbytes (len + 4)
+let mgf_hash_a (len:size_nat{len + 4 <= max_size_t}) (n:pos) (i:nat{i <= n}) = lbytes (len + 4)
 
-val mgf_sha256:
-    #len:size_nat{len + 4 <= max_size_t /\ len + 4 <= max_input}
+val mgf_hash:
+    #a:Hash.algorithm{hash_is_supported a}
+  -> #len:size_nat{len + 4 <= max_size_t /\ len + 4 <= Hash.max_input_length a}
   -> mgfseed:lbytes len
-  -> maskLen:size_pos{(blocks maskLen hLen) * hLen < pow2 32} ->
+  -> maskLen:size_pos{(blocks maskLen (Hash.hash_length a)) * Hash.hash_length a < pow2 32} ->
   Tot (lbytes maskLen)
 
-let mgf_sha256 #len mgfseed maskLen =
+let mgf_hash #a #len mgfseed maskLen =
   let mgfseed_counter = create (len + 4) (u8 0) in
   let mgfseed_counter = update_sub mgfseed_counter 0 len mgfseed in
 
+  let hLen = Hash.hash_length a in
   let n = blocks maskLen hLen in
-  let _, acc = generate_blocks #uint8 hLen n n (mgf_sha256_a len n) (mgf_sha256_f len) mgfseed_counter in
+  let _, acc = generate_blocks #uint8 hLen n n (mgf_hash_a len n) (mgf_hash_f a len) mgfseed_counter in
   sub #uint8 #(n * hLen) acc 0 maskLen
 
 
@@ -104,24 +110,26 @@ let db_zero #len db emBits =
 
 
 val pss_encode:
-    #sLen:size_nat{sLen + hLen + 8 <= max_size_t /\ sLen + hLen + 8 <= max_input}
-  -> #msgLen:size_nat{msgLen <= max_input}
+    #a:Hash.algorithm{hash_is_supported a}
+  -> #sLen:size_nat{sLen + Hash.hash_length a + 8 <= max_size_t /\ sLen + Hash.hash_length a + 8 <= Hash.max_input_length a}
+  -> #msgLen:size_nat{msgLen <= Hash.max_input_length a}
   -> salt:lbytes sLen
   -> msg:lbytes msgLen
-  -> emBits:size_pos{hLen + sLen + 2 <= blocks emBits 8} ->
+  -> emBits:size_pos{Hash.hash_length a + sLen + 2 <= blocks emBits 8} ->
   Pure (lbytes (blocks emBits 8))
   (requires True)
   (ensures fun em -> if emBits % 8 > 0 then v em.[0] < pow2 (emBits % 8) else v em.[0] < pow2 8)
 
-let pss_encode #sLen #msgLen salt msg emBits =
-  let mHash = sha2_256 msg in
+let pss_encode #a #sLen #msgLen salt msg emBits =
+  let mHash = Hash.hash a msg in
+  let hLen = Hash.hash_length a in
 
   //m1 = [8 * 0x00; mHash; salt]
   let m1Len = 8 + hLen + sLen in
   let m1 = create m1Len (u8 0) in
   let m1 = update_sub m1 8 hLen mHash in
   let m1 = update_sub m1 (8 + hLen) sLen salt in
-  let m1Hash = sha2_256 m1 in
+  let m1Hash = Hash.hash a m1 in
 
   //db = [0x00;..; 0x00; 0x01; salt]
   let emLen = blocks emBits 8 in
@@ -131,7 +139,7 @@ let pss_encode #sLen #msgLen salt msg emBits =
   let db = db.[last_before_salt] <- u8 1 in
   let db = update_sub db (last_before_salt + 1) sLen salt in
 
-  let dbMask = mgf_sha256 m1Hash dbLen in
+  let dbMask = mgf_hash #a m1Hash dbLen in
   let maskedDB = xor_bytes db dbMask in
   let maskedDB = db_zero maskedDB emBits in
 
@@ -144,20 +152,22 @@ let pss_encode #sLen #msgLen salt msg emBits =
 
 
 val pss_verify_:
-    #msgLen:size_nat{msgLen <= max_input}
-  -> sLen:size_nat{sLen + hLen + 8 <= max_size_t /\ sLen + hLen + 8 <= max_input}
+    #a:Hash.algorithm{hash_is_supported a}
+  -> #msgLen:size_nat{msgLen <= Hash.max_input_length a}
+  -> sLen:size_nat{sLen + Hash.hash_length a + 8 <= max_size_t /\ sLen + Hash.hash_length a + 8 <= Hash.max_input_length a}
   -> msg:lbytes msgLen
-  -> emBits:size_pos {blocks emBits 8 >= sLen + hLen + 2}
+  -> emBits:size_pos {blocks emBits 8 >= sLen + Hash.hash_length a + 2}
   -> em:lbytes (blocks emBits 8) ->
   Tot bool
 
-let pss_verify_ #msgLen sLen msg emBits em =
+let pss_verify_ #a #msgLen sLen msg emBits em =
+  let hLen = Hash.hash_length a in
   let emLen = blocks emBits 8 in
   let dbLen = emLen - hLen - 1 in
   let maskedDB = sub em 0 dbLen in
   let m1Hash = sub em dbLen hLen in
 
-  let dbMask = mgf_sha256 m1Hash dbLen in
+  let dbMask = mgf_hash #a m1Hash dbLen in
   let db = xor_bytes dbMask maskedDB in
   let db = db_zero db emBits in
 
@@ -170,25 +180,26 @@ let pss_verify_ #msgLen sLen msg emBits em =
 
   if not (lbytes_eq pad pad2) then false
   else begin
-    let mHash = sha2_256 msg in
+    let mHash = Hash.hash a msg in
     let m1Len = 8 + hLen + sLen in
     let m1 = create m1Len (u8 0) in
     let m1 = update_sub m1 8 hLen mHash in
     let m1 = update_sub m1 (8 + hLen) sLen salt in
-    let m1Hash0 = sha2_256 m1 in
+    let m1Hash0 = Hash.hash a m1 in
     lbytes_eq m1Hash0 m1Hash
   end
 
 
 val pss_verify:
-    #msgLen:size_nat{msgLen <= max_input}
-  -> sLen:size_nat{sLen + hLen + 8 <= max_size_t /\ sLen + hLen + 8 <= max_input}
+    #a:Hash.algorithm{hash_is_supported a}
+  -> #msgLen:size_nat{msgLen <= Hash.max_input_length a}
+  -> sLen:size_nat{sLen + Hash.hash_length a + 8 <= max_size_t /\ sLen + Hash.hash_length a + 8 <= Hash.max_input_length a}
   -> msg:lbytes msgLen
   -> emBits:size_pos
   -> em:lbytes (blocks emBits 8) ->
   Tot bool
 
-let pss_verify #msgLen sLen msg emBits em =
+let pss_verify #a #msgLen sLen msg emBits em =
   let open Lib.RawIntTypes in
   let emLen = blocks emBits 8 in
   let msBits = emBits % 8 in
@@ -196,13 +207,13 @@ let pss_verify #msgLen sLen msg emBits em =
   let em_0 = if msBits > 0 then em.[0] &. (u8 0xff <<. size msBits) else u8 0 in
   let em_last = em.[emLen - 1] in
 
-  if (emLen < sLen + hLen + 2) then false
+  if (emLen < sLen + Hash.hash_length a + 2) then false
   else begin
     if (not (uint_to_nat #U8 em_last = 0xbc && uint_to_nat #U8 em_0 = 0)) then false
-    else pss_verify_ #msgLen sLen msg emBits em end
+    else pss_verify_ #a #msgLen sLen msg emBits em end
 
 
-val os2ip_lemma: emBits:size_pos{hLen + 2 <= blocks emBits 8} -> em:lbytes (blocks emBits 8) -> Lemma
+val os2ip_lemma: emBits:size_pos -> em:lbytes (blocks emBits 8) -> Lemma
   (requires (if emBits % 8 > 0 then v em.[0] < pow2 (emBits % 8) else v em.[0] < pow2 8))
   (ensures  os2ip #(blocks emBits 8) em < pow2 emBits)
 
@@ -236,15 +247,16 @@ let os2ip_lemma emBits em =
 
 
 val rsapss_sign:
-    #sLen:size_nat{sLen + hLen + 8 <= max_size_t /\ sLen + hLen + 8 <= max_input}
-  -> #msgLen:size_nat{msgLen <= max_input}
-  -> modBits:modBits_t{sLen + hLen + 2 <= blocks (modBits - 1) 8}
+    #a:Hash.algorithm{hash_is_supported a}
+  -> #sLen:size_nat{sLen + Hash.hash_length a + 8 <= max_size_t /\ sLen + Hash.hash_length a + 8 <= Hash.max_input_length a}
+  -> #msgLen:size_nat{msgLen <= Hash.max_input_length a}
+  -> modBits:modBits_t{sLen + Hash.hash_length a + 2 <= blocks (modBits - 1) 8}
   -> skey:rsa_privkey modBits
   -> salt:lbytes sLen
   -> msg:lbytes msgLen ->
   Tot (lbytes (blocks modBits 8))
 
-let rsapss_sign #sLen #msgLen modBits skey salt msg =
+let rsapss_sign #a #sLen #msgLen modBits skey salt msg =
   let pkey = Mk_rsa_privkey?.pkey skey in
   let n = Mk_rsa_pubkey?.n pkey in
   let e = Mk_rsa_pubkey?.e pkey in
@@ -256,7 +268,7 @@ let rsapss_sign #sLen #msgLen modBits skey salt msg =
   let emBits = modBits - 1 in
   let emLen = blocks emBits 8 in
 
-  let em = pss_encode salt msg emBits in
+  let em = pss_encode #a salt msg emBits in
   let m = os2ip #emLen em in
   os2ip_lemma emBits em;
   let s = fpow #n m d in
@@ -264,15 +276,16 @@ let rsapss_sign #sLen #msgLen modBits skey salt msg =
 
 
 val rsapss_verify:
-    #msgLen:size_nat{msgLen <= max_input}
+    #a:Hash.algorithm{hash_is_supported a}
+  -> #msgLen:size_nat{msgLen <= Hash.max_input_length a}
   -> modBits:modBits_t
   -> pkey:rsa_pubkey modBits
-  -> sLen:size_nat{sLen + hLen + 8 <= max_size_t /\ sLen + hLen + 8 <= max_input}
+  -> sLen:size_nat{sLen + Hash.hash_length a + 8 <= max_size_t /\ sLen + Hash.hash_length a + 8 <= Hash.max_input_length a}
   -> msg:lbytes msgLen
   -> sgnt:lbytes (blocks modBits 8) ->
   Tot bool
 
-let rsapss_verify #msgLen modBits pkey sLen msg sgnt =
+let rsapss_verify #a #msgLen modBits pkey sLen msg sgnt =
   let n = Mk_rsa_pubkey?.n pkey in
   let e = Mk_rsa_pubkey?.e pkey in
   let nLen = blocks modBits 8 in
@@ -286,6 +299,6 @@ let rsapss_verify #msgLen modBits pkey sLen msg sgnt =
     let m = fpow #n s e in
     if m < pow2 (emLen * 8) then
       let em = i2osp #emLen m in
-      pss_verify #msgLen sLen msg emBits em
+      pss_verify #a #msgLen sLen msg emBits em
     else false end
   else false
