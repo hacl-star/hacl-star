@@ -230,7 +230,8 @@ let mk_update_last a m update_multi blake2_update_last_block s ev prev_len input
   (**) assert(B.disjoint s rest);
   let ev' = update_multi s ev blocks num_blocks in
   (**) assert(B.length rest == U32.v rest_len);
-  (**) Spec.Hash.Incremental.Lemmas.update_multi_extra_state_eq a (as_seq h0 s, ev) (B.as_seq h0 blocks);
+  (**) Spec.Hash.Incremental.Lemmas.update_multi_extra_state_eq a (as_seq h0 s, ev)
+  (**)                                                            (B.as_seq h0 blocks);
   (**) Spec.Hash.Lemmas.extra_state_add_nat_bound_lem1 ev (B.length blocks);
   (**) assert(extra_state_v ev' = extra_state_v ev + B.length blocks);
   (**) assert(extra_state_v ev' + U32.v rest_len <= max_input a);
