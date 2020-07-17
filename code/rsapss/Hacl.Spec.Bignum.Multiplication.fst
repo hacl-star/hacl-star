@@ -569,16 +569,24 @@ val bn_eval_square: #aLen:size_nat{aLen + aLen <= max_size_t} -> a:lbignum aLen 
     2 * eval_ aLen a (i - 1) * v a.[i - 1] * pow2 (64 * (i - 1)) + v a.[i - 1] * v a.[i - 1] * pow2 (64 * (i + i - 2)))
 
 let bn_eval_square #aLen a i =
+  let e1 = eval_ aLen a (i - 1) in
+  let p1 = pow2 (64 * (i - 1)) in
+  let p2 = pow2 (64 * (i + i - 2)) in
+
   calc (==) {
     eval_ aLen a i * eval_ aLen a i;
     (==) { bn_eval_unfold_i a i }
-    (eval_ aLen a (i - 1) + v a.[i - 1] * pow2 (64 * (i - 1))) * (eval_ aLen a (i - 1) + v a.[i - 1] * pow2 (64 * (i - 1)));
-    (==) { square_of_sum (eval_ aLen a (i - 1)) (v a.[i - 1] * pow2 (64 * (i - 1))) }
-    eval_ aLen a (i - 1) * eval_ aLen a (i - 1) + 2 * eval_ aLen a (i - 1) * v a.[i - 1] * pow2 (64 * (i - 1)) +
-    v a.[i - 1] * pow2 (64 * (i - 1)) * v a.[i - 1] * pow2 (64 * (i - 1));
+    (e1 + v a.[i - 1] * p1) * (e1 + v a.[i - 1] * p1);
+    (==) { square_of_sum e1 (v a.[i - 1] * p1) }
+    e1 * e1 + 2 * e1 * (v a.[i - 1] * p1) + (v a.[i - 1] * p1) * (v a.[i - 1] * p1);
+    (==) { Math.Lemmas.paren_mul_right (v a.[i - 1]) p1 (v a.[i - 1] * p1); Math.Lemmas.paren_mul_right p1 p1 (v a.[i - 1]) }
+    e1 * e1 + 2 * e1 * (v a.[i - 1] * p1) + v a.[i - 1] * (p1 * p1 * v a.[i - 1]);
     (==) { Math.Lemmas.pow2_plus (64 * (i - 1)) (64 * (i - 1)) }
-    eval_ aLen a (i - 1) * eval_ aLen a (i - 1) + 2 * eval_ aLen a (i - 1) * v a.[i - 1] * pow2 (64 * (i - 1)) +
-    v a.[i - 1] * v a.[i - 1] * pow2 (64 * (i + i - 2));
+    e1 * e1 + 2 * e1 * (v a.[i - 1] * p1) + v a.[i - 1] * (p2 * v a.[i - 1]);
+    (==) { Math.Lemmas.paren_mul_right (v a.[i - 1]) (v a.[i - 1]) p2 }
+    e1 * e1 + 2 * e1 * (v a.[i - 1] * p1) + v a.[i - 1] * v a.[i - 1] * p2;
+    (==) { Math.Lemmas.paren_mul_right (2 * e1) (v a.[i - 1]) p1 }
+    e1 * e1 + 2 * e1 * v a.[i - 1] * p1 + v a.[i - 1] * v a.[i - 1] * p2;
     }
 
 

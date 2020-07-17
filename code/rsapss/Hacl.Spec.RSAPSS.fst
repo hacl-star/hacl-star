@@ -37,7 +37,7 @@ let sgnt_blocks_eq_nLen modBits = ()
 
 
 val rsapss_sign_inv:
-    a:Hash.sha2_alg
+    a:Hash.algorithm{S.hash_is_supported a}
   -> modBits:size_pos{1 < modBits}
   -> eBits:size_pos
   -> dBits:size_pos{blocks modBits 64 + blocks eBits 64 + blocks dBits 64 <= max_size_t}
@@ -65,7 +65,7 @@ let rsapss_sign_inv a modBits eBits dBits skey sLen salt msgLen msg =
 
 
 val rsapss_sign:
-    a:Hash.sha2_alg
+    a:Hash.algorithm{S.hash_is_supported a}
   -> modBits:size_pos{1 < modBits}
   -> eBits:size_pos
   -> dBits:size_pos{blocks modBits 64 + blocks eBits 64 + blocks dBits 64 <= max_size_t}
@@ -105,7 +105,7 @@ let rsapss_sign a modBits eBits dBits skey sLen salt msgLen msg =
 
 
 val rsapss_sign_lemma:
-    a:Hash.sha2_alg
+    a:Hash.algorithm{S.hash_is_supported a}
   -> modBits:size_pos{1 < modBits}
   -> eBits:size_pos
   -> dBits:size_pos{blocks modBits 64 + blocks eBits 64 + blocks dBits 64 <= max_size_t}
@@ -228,7 +228,7 @@ let bn_eval_sub modBits m =
 
 
 val rsapss_verify_inv:
-    a:Hash.sha2_alg
+    a:Hash.algorithm{S.hash_is_supported a}
   -> modBits:size_pos{1 < modBits}
   -> eBits:size_pos{blocks modBits 64 + blocks eBits 64 <= max_size_t}
   -> pkey:lbignum (blocks modBits 64 + blocks eBits 64)
@@ -252,7 +252,7 @@ let rsapss_verify_inv a modBits eBits pkey sLen sgnt msgLen msg =
 
 
 val rsapss_verify:
-    a:Hash.sha2_alg
+    a:Hash.algorithm{S.hash_is_supported a}
   -> modBits:size_pos{1 < modBits}
   -> eBits:size_pos{blocks modBits 64 + blocks eBits 64 <= max_size_t}
   -> pkey:lbignum (blocks modBits 64 + blocks eBits 64)
@@ -293,7 +293,7 @@ let rsapss_verify a modBits eBits pkey sLen sgnt msgLen msg =
 
 
 val rsapss_verify_lemma:
-    a:Hash.sha2_alg
+    a:Hash.algorithm{S.hash_is_supported a}
   -> modBits:size_pos{1 < modBits}
   -> eBits:size_pos{blocks modBits 64 + blocks eBits 64 <= max_size_t}
   -> pkey:lbignum (blocks modBits 64 + blocks eBits 64)
