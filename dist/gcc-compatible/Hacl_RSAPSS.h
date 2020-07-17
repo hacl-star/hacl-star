@@ -35,10 +35,12 @@
 #include "Hacl_Kremlib.h"
 #include "Hacl_Bignum.h"
 #include "Hacl_Hash.h"
+#include "Hacl_Spec.h"
 
 
 void
 Hacl_RSAPSS_rsapss_sign(
+  Spec_Hash_Definitions_hash_alg a,
   uint32_t modBits,
   uint32_t eBits,
   uint32_t dBits,
@@ -52,6 +54,7 @@ Hacl_RSAPSS_rsapss_sign(
 
 bool
 Hacl_RSAPSS_rsapss_verify(
+  Spec_Hash_Definitions_hash_alg a,
   uint32_t modBits,
   uint32_t eBits,
   uint64_t *pkey,
