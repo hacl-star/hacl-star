@@ -103,6 +103,8 @@ ifneq (,$(wildcard lib_gen))
 OCAMLOPT=ocamlfind opt -package ctypes,ctypes.foreign,ctypes.stubs -linkpkg -I lib
 OCAMLDEP=ocamlfind dep -I lib -slash
 
+OCAMLC=ocamlfind c -g -package ctypes,ctypes.foreign,ctypes.stubs -linkpkg -I lib
+
 CFLAGS += -I "$(shell ocamlfind query ctypes)" -I "$(shell ocamlfind c -where)"
 
 # Don't include bindings for files that cannot be compiled.
@@ -150,6 +152,10 @@ lib_gen/%_gen.exe: libevercrypt.a
 %.cmx: %.ml
 	$(OCAMLOPT) -c $^ -o $@
 
+%.cmo: %.ml
+	$(OCAMLC) -c $^ -o $@
+
+
 .PRECIOUS: lib/%_stubs.ml
 lib/%_stubs.ml: lib/%_c_stubs.c
 
@@ -178,8 +184,14 @@ CTYPES_CMI    =  $(patsubst %.cmx,%.cmi,$(CTYPES_CMX))
 ocamlevercrypt.cmxa: $(ALL_BINDINGS) $(ALL_ML_STUBS) $(ALL_C_STUBS) libevercrypt.$(SO)
 	ocamlfind mklib -o ocamlevercrypt $(CTYPES_CMX) $(ALL_C_STUBS) -ccopt -L. -cclib -levercrypt
 
-install-hacl-star-raw: ocamlevercrypt.cmxa libevercrypt.a
-	ocamlfind install hacl-star-raw META $(CTYPES_ML) $(CTYPES_CMX) $(CTYPES_CMI) $(wildcard *.cmxa *.a *.so *.dll) config.h
+CTYPES_CMO    = $(patsubst %.cmx,%.cmo,$(CTYPES_CMX))
+ALL_ML_STUBS_CMO = $(patsubst %.cmx,%.cmo,$(ALL_ML_STUBS))
+
+ocamlevercrypt.cma: $(ALL_BINDINGS) $(ALL_ML_STUBS_CMO) $(CTYPES_CMO) $(ALL_C_STUBS) libevercrypt.$(SO)
+	ocamlfind mklib -o ocamlevercrypt $(CTYPES_CMO) $(ALL_C_STUBS) -ccopt -L. -cclib -levercrypt
+
+install-hacl-star-raw: ocamlevercrypt.cmxa ocamlevercrypt.cma libevercrypt.a
+	ocamlfind install hacl-star-raw META $(CTYPES_ML) $(CTYPES_CMX) $(CTYPES_CMO) $(CTYPES_CMI) ocamlevercrypt.cma ocamlevercrypt.cmxa *.a *.$(SO) config.h
 
 endif
 endif

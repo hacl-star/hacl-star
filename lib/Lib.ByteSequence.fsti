@@ -230,8 +230,14 @@ val lemma_uint_to_bytes_be_preserves_value: #t:inttype{unsigned t} -> #l:secrecy
 val lemma_nat_from_to_intseq_le_preserves_value: #t:inttype{unsigned t} -> #l:secrecy_level -> len:nat -> b:seq (uint_t t l){length b == len} ->
   Lemma (nat_to_intseq_le len (nat_from_intseq_le b) == b)
 
+val lemma_nat_from_to_intseq_be_preserves_value: #t:inttype{unsigned t} -> #l:secrecy_level -> len:nat -> b:seq (uint_t t l){length b == len} ->
+  Lemma (nat_to_intseq_be len (nat_from_intseq_be b) == b)
+
 val lemma_nat_from_to_bytes_le_preserves_value: #l:secrecy_level -> b:bytes_l l -> len:size_nat{len == Lib.Sequence.length b} ->
   Lemma (nat_to_bytes_le #l len (nat_from_bytes_le b) == b)
+
+val lemma_nat_from_to_bytes_be_preserves_value: #l:secrecy_level -> b:bytes_l l -> len:size_nat{len == Lib.Sequence.length b} ->
+  Lemma (nat_to_bytes_be #l len (nat_from_bytes_be b) == b)
 
 val lemma_reveal_uint_to_bytes_le: #t:inttype{unsigned t /\ t <> U1} -> #l:secrecy_level -> b:bytes_l l{Lib.Sequence.length b == numbytes t} ->
   Lemma (nat_from_bytes_le b == uint_v (uint_from_bytes_le #t #l b))

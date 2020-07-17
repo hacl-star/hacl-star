@@ -47,6 +47,26 @@
 
 typedef uint8_t Spec_Hash_Definitions_hash_alg;
 
+/* SNIPPET_START: Spec_ECDSA_hash_alg_ecdsa_tags */
+
+#define Spec_ECDSA_NoHash 0
+#define Spec_ECDSA_Hash 1
+
+/* SNIPPET_END: Spec_ECDSA_hash_alg_ecdsa_tags */
+
+typedef uint8_t Spec_ECDSA_hash_alg_ecdsa_tags;
+
+/* SNIPPET_START: Spec_ECDSA_hash_alg_ecdsa */
+
+typedef struct Spec_ECDSA_hash_alg_ecdsa_s
+{
+  Spec_ECDSA_hash_alg_ecdsa_tags tag;
+  Spec_Hash_Definitions_hash_alg _0;
+}
+Spec_ECDSA_hash_alg_ecdsa;
+
+/* SNIPPET_END: Spec_ECDSA_hash_alg_ecdsa */
+
 /* SNIPPET_START: Spec_Agile_Cipher_cipher_alg */
 
 #define Spec_Agile_Cipher_AES128 0

@@ -1,5 +1,5 @@
 [
-  "¦,éLÍ6C\\mÍ\u001dømft¿",
+  "¸8Œà\u0012+u\u0003Ã_ŽèÕ-‡”",
   [
     [
       "Spec.P256.MontgomeryMultiplication.lemmaFromDomain",
@@ -8,7 +8,7 @@
       1,
       [ "@query" ],
       0,
-      "1145caac203376c53fdff7eb31f3ce80"
+      "c8c02d31a1c70615236351cdeeb47060"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.lemmaToDomain",
@@ -17,7 +17,7 @@
       1,
       [ "@query" ],
       0,
-      "8f45228390f92de82de611d44c3463b2"
+      "3e4cf0be3d13232e216d71702246ceb3"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.lemmaToDomainAndBackIsTheSame",
@@ -26,7 +26,7 @@
       1,
       [ "@query" ],
       0,
-      "14b78513c59126ef78da01ea91c7280d"
+      "6b714b32f0e4bc4731375186b9ddc8df"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.lemmaFromDomainToDomainModuloPrime",
@@ -35,7 +35,7 @@
       1,
       [ "@query" ],
       0,
-      "124a4e35cf44c2dde25d144e40812c97"
+      "e05eae43c218bb344cd00f2a330ecc9d"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.inDomain_mod_is_not_mod",
@@ -44,7 +44,7 @@
       1,
       [ "@query" ],
       0,
-      "d6b24b3854e17a39516a534c6eb8ce3f"
+      "845778e0c69fb60db7fa72ba93f9555c"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.multiplicationInDomainNat",
@@ -69,7 +69,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "f22d0fffaafde1b70b3b2895ffc2a83e"
+      "729ba747df58166d5e96894d8a92a88d"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.additionInDomain",
@@ -78,7 +78,7 @@
       1,
       [ "@query" ],
       0,
-      "bc5e2aeb62805faa6122932141355beb"
+      "1e536d125be3a8cc5c9f8e9042ad1aa1"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.substractionInDomain",
@@ -87,7 +87,69 @@
       1,
       [ "@query" ],
       0,
-      "e306910e31991e87903a1500b09fe815"
+      "bef8d50f1e53ad454ce7e88fc4c1d4ac"
+    ],
+    [
+      "Spec.P256.MontgomeryMultiplication._pow_step",
+      1,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.unsigned",
+        "equation_Prims.nat", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
+      ],
+      0,
+      "7dcb4ec7858a24dd9ea18dc74c60ee1f"
+    ],
+    [
+      "Spec.P256.MontgomeryMultiplication.pow_spec",
+      1,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.S8",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
+      ],
+      0,
+      "6d08ecb003949c884340662d6ad7e334"
+    ],
+    [
+      "Spec.P256.MontgomeryMultiplication.sq_root_spec",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Spec.P256.Definitions.nat_prime",
+        "equation_Spec.P256.Definitions.prime256", "int_inversion",
+        "int_typing", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Division", "primitive_Prims.op_GreaterThan",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_0c4926e33a4dc1c024a6bb2210141ee1",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_ff2b90c8f94db4f4bcfea92159681cf1",
+        "typing_Spec.P256.Definitions.prime256"
+      ],
+      0,
+      "0d01612e0e0ba0911f5e96982d51ad2c"
     ]
   ]
 ]

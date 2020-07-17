@@ -50,4 +50,3 @@ Points of interest:
   efficient
 - HMAC/HKDF only use ASM implementations if the underlying hash algorithm has
   one
-- P-256 and Blake2 are available on a development branch

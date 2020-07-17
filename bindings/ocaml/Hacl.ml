@@ -2,6 +2,7 @@
 
 open Unsigned
 
+open AutoConfig2
 open SharedDefs
 open SharedFunctors
 module C = CBytes
@@ -18,7 +19,7 @@ module Hacl_HKDF = Hacl_HKDF_bindings.Bindings(Hacl_HKDF_stubs)
 module Hacl_NaCl = Hacl_NaCl_bindings.Bindings(Hacl_NaCl_stubs)
 module Hacl_Blake2b_32 = Hacl_Blake2b_32_bindings.Bindings(Hacl_Blake2b_32_stubs)
 module Hacl_Blake2s_32 = Hacl_Blake2s_32_bindings.Bindings(Hacl_Blake2s_32_stubs)
-module Hacl_ECDSA = Hacl_ECDSA_bindings.Bindings(Hacl_ECDSA_stubs)
+module Hacl_P256 = Hacl_P256_bindings.Bindings(Hacl_P256_stubs)
 
 #if not (defined IS_NOT_X64) || defined IS_ARM_8
 module Hacl_Chacha20Poly1305_128 = Hacl_Chacha20Poly1305_128_bindings.Bindings(Hacl_Chacha20Poly1305_128_stubs)
@@ -265,6 +266,81 @@ module NaCl = struct
   end
 end
 
+module P256 = struct
+  let get_result r =
+    if r = UInt64.zero then
+      true
+    else
+    if r = UInt64.max_int then
+      false
+    else
+      failwith "Unknown return value"
+  let compress_c p out =
+    (* Hacl.Impl.P256.Compression.compressionCompressedForm *)
+    assert (C.size p = 64);
+    assert (C.size out = 33);
+    Hacl_P256.hacl_P256_compression_compressed_form (C.ctypes_buf p) (C.ctypes_buf out)
+  let compress_n p out =
+    (* Hacl.Impl.P256.Compression.compressionNotCompressedForm *)
+    assert (C.size p = 64);
+    assert (C.size out = 65);
+    Hacl_P256.hacl_P256_compression_not_compressed_form (C.ctypes_buf p) (C.ctypes_buf out)
+  let decompress_c p out =
+    (* Hacl.Impl.P256.Compression.decompressionCompressedForm *)
+    assert (C.size p = 33);
+    assert (C.size out = 64);
+    Hacl_P256.hacl_P256_decompression_compressed_form (C.ctypes_buf p) (C.ctypes_buf out)
+  let decompress_n p out =
+    (* Hacl.Impl.P256.Compression.decompressionNotCompressedForm *)
+    assert (C.size p = 65);
+    assert (C.size out = 64);
+    Hacl_P256.hacl_P256_decompression_not_compressed_form (C.ctypes_buf p) (C.ctypes_buf out)
+  let dh_initiator result scalar =
+    (* Hacl.Interface.P256.DH.ecp256dh_i *)
+    assert (C.size result = 64);
+    assert (C.size scalar = 32);
+    assert (C.disjoint result scalar);
+    get_result @@ Hacl_P256.hacl_P256_ecp256dh_i (C.ctypes_buf result) (C.ctypes_buf scalar)
+  let dh_responder result pub scalar =
+    (* Hacl.Interface.P256.DH.ecp256dh_r *)
+    assert (C.size result = 64);
+    assert (C.size pub = 64);
+    assert (C.size scalar = 32);
+    assert (C.disjoint result scalar);
+    assert (C.disjoint result pub);
+    get_result @@ Hacl_P256.hacl_P256_ecp256dh_r (C.ctypes_buf result) (C.ctypes_buf pub) (C.ctypes_buf scalar)
+  let reduction p result =
+    (* Hacl.Interface.P256.ECDSA.reduction_8_32 *)
+    assert (C.size p = 32);
+    assert (C.size result = 32);
+    Hacl_P256.hacl_P256_reduction_8_32 (C.ctypes_buf p) (C.ctypes_buf result)
+  let valid_pk pub =
+    (* Hacl.Interface.P256.ECDSA.verifyQ *)
+    assert (C.size pub = 64);
+    Hacl_P256.hacl_P256_verify_q (C.ctypes_buf pub)
+  module NoHash = Make_ECDSA (struct
+      let min_msg_size = 32
+      let sign = Hacl_P256.hacl_P256_ecdsa_sign_p256_without_hash
+      let verify = Hacl_P256.hacl_P256_ecdsa_verif_without_hash
+    end)
+  include NoHash
+  module SHA2_256 = Make_ECDSA (struct
+      let min_msg_size = 0
+      let sign = Hacl_P256.hacl_P256_ecdsa_sign_p256_sha2
+      let verify = Hacl_P256.hacl_P256_ecdsa_verif_p256_sha2
+    end)
+  module SHA2_384 = Make_ECDSA (struct
+      let min_msg_size = 0
+      let sign = Hacl_P256.hacl_P256_ecdsa_sign_p256_sha384
+      let verify = Hacl_P256.hacl_P256_ecdsa_verif_p256_sha384
+    end)
+  module SHA2_512 = Make_ECDSA (struct
+      let min_msg_size = 0
+      let sign = Hacl_P256.hacl_P256_ecdsa_sign_p256_sha512
+      let verify = Hacl_P256.hacl_P256_ecdsa_verif_p256_sha512
+    end)
+end
+
 module Blake2b_32 : Blake2 =
   Make_Blake2b (struct
     let reqs = []
@@ -277,33 +353,7 @@ module Blake2s_32 : Blake2 =
     let blake2s = Hacl_Blake2s_32.hacl_Blake2s_32_blake2s
   end)
 
-(* WIP, will update along with chages to ECDSA *)
-module ECDSA = struct
-  let get_result r =
-    if r = UInt64.zero then
-      true
-    else
-    if r = UInt64.max_int then
-      false
-    else
-      failwith "Unknown return value"
-  let sign signature priv msg k =
-    (* Hacl.Impl.ECDSA.P256SHA256.Signature.ecdsa_signature *)
-    assert (C.size signature = 64);
-    assert (C.size priv = 32);
-    assert (C.size k = 32);
-    assert (C.disjoint signature msg);
-    get_result @@ Hacl_ECDSA.hacl_Impl_ECDSA_ecdsa_p256_sha2_sign (C.ctypes_buf signature) (C.size_uint32 msg) (C.ctypes_buf msg) (C.ctypes_buf priv) (C.ctypes_buf k)
-  let verify pub msg signature =
-    (* Hacl.Impl.ECDSA.P256SHA256.Verification.ecdsa_verification *)
-    assert (C.size signature = 64);
-    assert (C.size pub = 64);
-    let r, s = Bytes.sub signature 0 32, Bytes.sub signature 32 32 in
-    Hacl_ECDSA.hacl_Impl_ECDSA_ecdsa_p256_sha2_verify (C.size_uint32 msg) (C.ctypes_buf msg) (C.ctypes_buf pub) (C.ctypes_buf r) (C.ctypes_buf s)
-end
-
 #if not (defined IS_NOT_X64) || defined IS_ARM_8
-open AutoConfig2
 module Chacha20_Poly1305_128 : Chacha20_Poly1305 =
   Make_Chacha20_Poly1305 (struct
     let reqs = [AVX]
@@ -322,10 +372,28 @@ module Blake2s_128 : Blake2 =
     let reqs = [AVX]
     let blake2s = Hacl_Blake2s_128.hacl_Blake2s_128_blake2s
   end)
+#else
+module Chacha20_Poly1305_128 : Chacha20_Poly1305 =
+  Make_Chacha20_Poly1305 (struct
+    let reqs = [AVX]
+    let encrypt _ _ _ _ _ _ = failwith "Not implemented on this platform"
+    let decrypt _ _ _ _ _ _ = failwith "Not implemented on this platform"
+  end)
+
+module Poly1305_128 : MAC =
+  Make_Poly1305 (struct
+    let reqs = [AVX]
+    let mac _ _ _ = failwith "Not implemented on this platform"
+end)
+
+module Blake2s_128 : Blake2 =
+  Make_Blake2s (struct
+    let reqs = [AVX]
+    let blake2s _ _ _ = failwith "Not implemented on this platform"
+  end)
 #endif
 
 #ifndef IS_NOT_X64
-open AutoConfig2
 module Chacha20_Poly1305_256 : Chacha20_Poly1305 =
   Make_Chacha20_Poly1305 (struct
     let reqs = [AVX2]
@@ -352,4 +420,32 @@ module Curve25519_64 : Curve25519 =
     let scalarmult = Hacl_Curve25519_64.hacl_Curve25519_64_scalarmult
     let ecdh = Hacl_Curve25519_64.hacl_Curve25519_64_ecdh
   end)
+#else
+module Chacha20_Poly1305_256 : Chacha20_Poly1305 =
+  Make_Chacha20_Poly1305 (struct
+     let reqs = [AVX2]
+    let encrypt _ _ _ _ _ _ = failwith "Not implemented on this platform"
+    let decrypt _ _ _ _ _ _ = failwith "Not implemented on this platform"
+  end)
+
+module Poly1305_256 : MAC =
+  Make_Poly1305 (struct
+      let reqs = [AVX2]
+    let mac _ _ _ = failwith "Not implemented on this platform"
+end)
+
+module Blake2b_256 : Blake2 =
+  Make_Blake2b (struct
+    let reqs = [AVX2]
+    let blake2b _ _ _ = failwith "Not implemented on this platform"
+  end)
+
+module Curve25519_64 : Curve25519 =
+  Make_Curve25519 (struct
+    let reqs = [BMI2; ADX]
+    let secret_to_public _ _ = failwith "Not implemented on this platform"
+    let scalarmult _ _ _ = failwith "Not implemented on this platform"
+    let ecdh _ _ _ = failwith "Not implemented on this platform"
+  end)
 #endif
+

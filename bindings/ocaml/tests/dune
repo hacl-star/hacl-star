@@ -9,11 +9,11 @@
         nacl_test
         drbg_test
         blake2_test
-        ecdsa_test)
+        p256_test)
  (libraries hacl-star)
  (preprocessor_deps config.h)
  (preprocess (action (run %{bin:cppo} %{input-file})))
- (flags (:standard -open Hacl_star -warn-error -3-33)))
+ (flags (:standard -open Hacl_star -warn-error -3)))
 
 (rule (targets config.h) (deps)
  (action

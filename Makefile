@@ -639,7 +639,7 @@ TARGET_H_INCLUDE = -add-include '"kremlin/internal/target.h"'
 INTRINSIC_FLAGS = -add-include '"libintvector.h"'
 # Disabled for distributions that don't include code based on intrinsics.
 INTRINSIC_INT_FLAGS = \
-  -add-include 'Hacl_ECDSA:"lib_intrinsics.h"' \
+  -add-include 'Hacl_P256:"lib_intrinsics.h"' \
   -add-include 'Hacl_Bignum4096:"lib_intrinsics.h"' \
   -add-include 'Hacl_RSAPSS:"lib_intrinsics.h"'
 
@@ -675,13 +675,13 @@ BUNDLE_FLAGS	=\
   $(SALSA20_BUNDLE) \
   $(CURVE_BUNDLE) \
   $(CHACHAPOLY_BUNDLE) \
-  $(ECDSA_BUNDLE) \
   $(ED_BUNDLE) \
   $(POLY_BUNDLE) \
   $(NACLBOX_BUNDLE) \
   $(MERKLE_BUNDLE) \
   $(WASMSUPPORT_BUNDLE) \
   $(CTR_BUNDLE) \
+  $(P256_BUNDLE) \
   $(FRODO_BUNDLE) \
   $(HPKE_BUNDLE) \
   $(STREAMING_BUNDLE) \
@@ -739,7 +739,7 @@ dist/wasm/Makefile.basic: HASH_BUNDLE += -bundle Hacl.HMAC_DRBG
 dist/wasm/Makefile.basic: FRODO_BUNDLE = -bundle Hacl.Frodo.KEM,Frodo.Params,Hacl.Impl.Frodo.*,Hacl.Impl.Matrix,Hacl.Frodo.*,Hacl.Keccak,Hacl.AES128
 
 # Doesn't work in Wasm because it uses assembler intrinsics
-dist/wasm/Makefile.basic: ECDSA_BUNDLE = -bundle Hacl.Impl.ECDSA,Hacl.Impl.ECDSA,Hacl.Impl.ECDSA.*,Hacl.Impl.P256.*,Hacl.Impl.P256,Hacl.Spec.P256.*,Hacl.Impl.SolinasReduction,Hacl.Impl.LowLevel
+dist/wasm/Makefile.basic: P256_BUNDLE= -bundle Hacl.P256,Hacl.Impl.ECDSA.*,Hacl.Impl.SolinasReduction,Hacl.Impl.P256.*
 
 # No Vale Curve64 no "Local" or "Slow" Curve64, only Curve51 (local Makefile hack)
 dist/wasm/Makefile.basic: CURVE_BUNDLE_SLOW =
@@ -909,7 +909,7 @@ dist/ccf/Makefile.basic: HAND_WRITTEN_FILES := $(filter-out %/Lib_PrintBuffer.c 
 dist/ccf/Makefile.basic: HAND_WRITTEN_H_FILES := $(filter-out %/libintvector.h %/lib_intrinsics.h,$(HAND_WRITTEN_H_FILES))
 dist/ccf/Makefile.basic: HACL_OLD_FILES =
 dist/ccf/Makefile.basic: POLY_BUNDLE =
-dist/ccf/Makefile.basic: ECDSA_BUNDLE =
+dist/ccf/Makefile.basic: P256_BUNDLE=-bundle Hacl.P256,Hacl.Impl.ECDSA.*,Hacl.Impl.SolinasReduction,Hacl.Impl.P256.*
 dist/ccf/Makefile.basic: RSAPSS_BUNDLE =
 dist/ccf/Makefile.basic: HPKE_BUNDLE = -bundle 'Hacl.HPKE.*'
 
@@ -924,7 +924,8 @@ dist/mozilla/Makefile.basic: INTRINSIC_FLAGS = \
   -add-include 'Hacl_Chacha20_Vec128:"libintvector.h"' \
   -add-include 'Hacl_Chacha20_Vec256:"libintvector.h"' \
   -add-include 'Hacl_Poly1305_128:"libintvector.h"' \
-  -add-include 'Hacl_Poly1305_256:"libintvector.h"'
+  -add-include 'Hacl_Poly1305_256:"libintvector.h"' \
+  -add-include 'Hacl_P256:"lib_intrinsics.h"'
 dist/mozilla/Makefile.basic: CURVE_BUNDLE_SLOW = -bundle Hacl.Curve25519_64_Slow
 dist/mozilla/Makefile.basic: SALSA20_BUNDLE = -bundle Hacl.Salsa20
 dist/mozilla/Makefile.basic: ED_BUNDLE = -bundle Hacl.Ed25519
@@ -936,7 +937,7 @@ dist/mozilla/Makefile.basic: BLAKE2_BUNDLE = -bundle Hacl.Impl.Blake2.*,Hacl.Bla
 dist/mozilla/Makefile.basic: SHA3_BUNDLE = -bundle Hacl.SHA3
 dist/mozilla/Makefile.basic: HASH_BUNDLE = -bundle Hacl.Hash.*,Hacl.HKDF,Hacl.HMAC,Hacl.HMAC_DRBG
 dist/mozilla/Makefile.basic: HPKE_BUNDLE = -bundle 'Hacl.HPKE.*'
-dist/mozilla/Makefile.basic: ECDSA_BUNDLE =
+dist/mozilla/Makefile.basic: P256_BUNDLE= -bundle Hacl.P256,Hacl.Impl.ECDSA.*,Hacl.Impl.SolinasReduction,Hacl.Impl.P256.*
 dist/mozilla/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.RSAPSS,Hacl.Bignum.*,Hacl.Bignum,Hacl.Impl.MGF,Hacl.Impl.RSAPSS
 dist/mozilla/Makefile.basic: STREAMING_BUNDLE = -bundle Hacl.Streaming.*
 dist/mozilla/Makefile.basic: FRODO_BUNDLE = -bundle Hacl.Frodo.*,Hacl.SHA3,Hacl.Keccak,Frodo.Params
@@ -1053,8 +1054,9 @@ dist/evercrypt-external-headers/Makefile.basic: $(ALL_KRML_FILES)
 dist/test/c/%.c: $(ALL_KRML_FILES)
 	$(KRML) -silent \
 	  -tmpdir $(dir $@) -skip-compilation \
+	  -header $(HACL_HOME)/dist/LICENSE.txt \
 	  -no-prefix $(subst _,.,$*) \
-	  -library Hacl.Impl.*,EverCrypt,EverCrypt.* \
+	  -library Hacl.P256,Hacl.Impl.*,EverCrypt,EverCrypt.* \
 	  -fparentheses -fcurly-braces -fno-shadow \
 	  -minimal -add-include '"kremlib.h"' \
 	  -bundle '*[rename=$*]' $(KRML_EXTRA) $(filter %.krml,$^)

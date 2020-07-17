@@ -13,7 +13,7 @@
         "fuel_guarded_inversion_Spec.Agile.DH.algorithm"
       ],
       0,
-      "0c74d3f6c607e9029e0a7dd1b31067fc"
+      "d5bfc497da58567d9bc1ba4b50338d45"
     ],
     [
       "Hacl.HPKE.Interface.DH.nsize_public",
@@ -27,7 +27,7 @@
         "fuel_guarded_inversion_Spec.Agile.DH.algorithm"
       ],
       0,
-      "a0f6c1b9aad651fa6798dc36f675e104"
+      "8659b5e3dc4a5cd5b383996a683faf91"
     ],
     [
       "Hacl.HPKE.Interface.DH.dh_st",
@@ -97,7 +97,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "7d1265e28aae8857a7e09405e966ab52"
+      "69746d2f5ec3fa0239e09c81808d43bc"
     ],
     [
       "Hacl.HPKE.Interface.DH.secret_to_public_st",
@@ -151,7 +151,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "9dd3f4b97c07865aa43c777eff53cde4"
+      "679fa8430627dab66f8780a8b4782aaa"
     ],
     [
       "Hacl.HPKE.Interface.DH.secret_to_public_c51",
@@ -209,7 +209,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "8d9075329285ef4da2511d7b8b3f69dd"
+      "62b2f2ea5cbee0858f59c3738a912e0e"
     ],
     [
       "Hacl.HPKE.Interface.DH.dh_c51",
@@ -401,7 +401,7 @@
         "typing_tok_Spec.Agile.DH.DH_Curve25519@tok"
       ],
       0,
-      "fd366442ccd021dbf9637d2a4479dc0b"
+      "19ecee4a3d5e8bb45a3bcb97e2afba14"
     ],
     [
       "Hacl.HPKE.Interface.DH.secret_to_public_c64",
@@ -691,7 +691,7 @@
         "typing_tok_Spec.Agile.DH.DH_Curve25519@tok"
       ],
       0,
-      "3b60d0dd1510fdfc7fd7c882689ca5f2"
+      "53edc08439d9030c4bb6deabe363e983"
     ],
     [
       "Hacl.HPKE.Interface.DH.change_error_code",
@@ -746,7 +746,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "855052957c8c061ebded8f0e5f21c980"
+      "b7ac26fda970fab45f6588d52096ad7d"
     ],
     [
       "Hacl.HPKE.Interface.DH.secret_to_public_p256",
@@ -884,7 +884,7 @@
         "typing_tok_Spec.Agile.DH.DH_P256@tok"
       ],
       0,
-      "8e4e576f72672ee236e5968727a0855c"
+      "641b884eb7dfbfae322b654757ed1d0f"
     ],
     [
       "Hacl.HPKE.Interface.DH.nat_from_bytes_le_zero_is_zero",
@@ -941,8 +941,9 @@
         "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U8@tok",
         "equation_Lib.ByteSequence.nat_from_bytes_le",
-        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.range",
-        "equation_Lib.IntTypes.uint8", "equation_Lib.IntTypes.unsigned",
+        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.minint",
+        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.uint8",
+        "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.length",
         "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.seq",
         "equation_Lib.Sequence.slice", "equation_Lib.Sequence.to_seq",
         "equation_Prims.nat", "equation_Spec.AES.gf8",
@@ -971,12 +972,10 @@
         "refinement_interpretation_Tm_refine_782420a2054fd965084564ef5ff53609",
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
         "refinement_interpretation_Tm_refine_9d3fd79fd314167f1a9c213a188da3ec",
-        "refinement_interpretation_Tm_refine_9e7b7ec534a2a9a23ec52880cc32ece2",
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
         "refinement_interpretation_Tm_refine_d3d07693cd71377864ef84dc97d10ec1",
         "refinement_interpretation_Tm_refine_d83f8da8ef6c1cb9f71d1465c1bb1c55",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
-        "refinement_interpretation_Tm_refine_dd624741998a82d8d54e2ef006133069",
         "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
         "refinement_interpretation_Tm_refine_fc1f69e4229a94f85b0de30f1747a8d3",
         "refinement_interpretation_Tm_refine_fe82d32f9252b18be877ba5ac7aaeb88",
@@ -1015,7 +1014,7 @@
         "projection_inverse_FStar.Integers.Unsigned__0"
       ],
       0,
-      "acb06d05d9165fb12c7f4f8c031325d9"
+      "53de41c1dff74f44b2b098135a44678f"
     ],
     [
       "Hacl.HPKE.Interface.DH.nat_from_bytes_le_zero_is_zero",
@@ -1024,7 +1023,7 @@
       1,
       [ "@query" ],
       0,
-      "a98183efed9aa37d2f54023f4eff5ab4"
+      "f24826b1a0ac60ce213a889a7a6087ba"
     ],
     [
       "Hacl.HPKE.Interface.DH.dh_p256",
@@ -1255,7 +1254,7 @@
         "typing_tok_Spec.Agile.DH.DH_P256@tok"
       ],
       0,
-      "e01712cefda25b03953ed7584611350c"
+      "b2837d1e74e17b88d2854cfe21fbc0f1"
     ]
   ]
 ]

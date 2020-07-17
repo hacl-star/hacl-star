@@ -225,9 +225,9 @@ extern bool EverCrypt_uu___is_AES256_CBC(EverCrypt_block_cipher_alg projectee);
 
 extern bool EverCrypt_uu___is_TDES_EDE_CBC(EverCrypt_block_cipher_alg projectee);
 
-extern uint32_t EverCrypt_block_cipher_keyLen(EverCrypt_block_cipher_alg uu___0_9927);
+extern uint32_t EverCrypt_block_cipher_keyLen(EverCrypt_block_cipher_alg uu___0_3525);
 
-extern uint32_t EverCrypt_block_cipher_blockLen(EverCrypt_block_cipher_alg uu___1_9938);
+extern uint32_t EverCrypt_block_cipher_blockLen(EverCrypt_block_cipher_alg uu___1_3531);
 
 #define EverCrypt_RC4_128 0
 
@@ -261,11 +261,11 @@ extern bool EverCrypt_uu___is_AES256_CCM8(EverCrypt_aead_alg projectee);
 
 KRML_DEPRECATED("Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")
 
-extern uint32_t EverCrypt_aead_keyLen(EverCrypt_aead_alg uu___2_10046);
+extern uint32_t EverCrypt_aead_keyLen(EverCrypt_aead_alg uu___2_3602);
 
 KRML_DEPRECATED("Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")
 
-extern uint32_t EverCrypt_aead_tagLen(EverCrypt_aead_alg uu___3_10061);
+extern uint32_t EverCrypt_aead_tagLen(EverCrypt_aead_alg uu___3_3608);
 
 KRML_DEPRECATED("Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")
 
@@ -765,7 +765,7 @@ EverCrypt_HMAC_compute_sha2_512(
   uint32_t data_len
 );
 
-extern bool EverCrypt_HMAC_is_supported_alg(Spec_Hash_Definitions_hash_alg uu___0_6237);
+extern bool EverCrypt_HMAC_is_supported_alg(Spec_Hash_Definitions_hash_alg uu___0_2480);
 
 typedef Spec_Hash_Definitions_hash_alg EverCrypt_HMAC_supported_alg;
 
@@ -781,7 +781,7 @@ EverCrypt_HMAC_compute(
 
 typedef Spec_Hash_Definitions_hash_alg EverCrypt_Hash_alg;
 
-extern C_String_t EverCrypt_Hash_string_of_alg(Spec_Hash_Definitions_hash_alg uu___0_6);
+extern C_String_t EverCrypt_Hash_string_of_alg(Spec_Hash_Definitions_hash_alg uu___0_5);
 
 typedef Spec_Hash_Definitions_hash_alg EverCrypt_Hash_broken_alg;
 
@@ -815,73 +815,73 @@ EverCrypt_Hash_state_s;
 
 extern bool
 EverCrypt_Hash_uu___is_MD5_s(
-  Spec_Hash_Definitions_hash_alg uu____159,
+  Spec_Hash_Definitions_hash_alg uu____105,
   EverCrypt_Hash_state_s projectee
 );
 
 extern uint32_t
 *EverCrypt_Hash___proj__MD5_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____189,
+  Spec_Hash_Definitions_hash_alg uu____130,
   EverCrypt_Hash_state_s projectee
 );
 
 extern bool
 EverCrypt_Hash_uu___is_SHA1_s(
-  Spec_Hash_Definitions_hash_alg uu____213,
+  Spec_Hash_Definitions_hash_alg uu____151,
   EverCrypt_Hash_state_s projectee
 );
 
 extern uint32_t
 *EverCrypt_Hash___proj__SHA1_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____243,
+  Spec_Hash_Definitions_hash_alg uu____176,
   EverCrypt_Hash_state_s projectee
 );
 
 extern bool
 EverCrypt_Hash_uu___is_SHA2_224_s(
-  Spec_Hash_Definitions_hash_alg uu____267,
+  Spec_Hash_Definitions_hash_alg uu____197,
   EverCrypt_Hash_state_s projectee
 );
 
 extern uint32_t
 *EverCrypt_Hash___proj__SHA2_224_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____297,
+  Spec_Hash_Definitions_hash_alg uu____222,
   EverCrypt_Hash_state_s projectee
 );
 
 extern bool
 EverCrypt_Hash_uu___is_SHA2_256_s(
-  Spec_Hash_Definitions_hash_alg uu____321,
+  Spec_Hash_Definitions_hash_alg uu____243,
   EverCrypt_Hash_state_s projectee
 );
 
 extern uint32_t
 *EverCrypt_Hash___proj__SHA2_256_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____351,
+  Spec_Hash_Definitions_hash_alg uu____268,
   EverCrypt_Hash_state_s projectee
 );
 
 extern bool
 EverCrypt_Hash_uu___is_SHA2_384_s(
-  Spec_Hash_Definitions_hash_alg uu____375,
+  Spec_Hash_Definitions_hash_alg uu____289,
   EverCrypt_Hash_state_s projectee
 );
 
 extern uint64_t
 *EverCrypt_Hash___proj__SHA2_384_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____405,
+  Spec_Hash_Definitions_hash_alg uu____314,
   EverCrypt_Hash_state_s projectee
 );
 
 extern bool
 EverCrypt_Hash_uu___is_SHA2_512_s(
-  Spec_Hash_Definitions_hash_alg uu____429,
+  Spec_Hash_Definitions_hash_alg uu____335,
   EverCrypt_Hash_state_s projectee
 );
 
 extern uint64_t
 *EverCrypt_Hash___proj__SHA2_512_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____459,
+  Spec_Hash_Definitions_hash_alg uu____360,
   EverCrypt_Hash_state_s projectee
 );
 

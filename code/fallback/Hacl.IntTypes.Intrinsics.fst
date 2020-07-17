@@ -9,6 +9,8 @@ open Lib.Buffer
 
 open FStar.Mul
 
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
+
 val add_carry_u64: cin:uint64 -> x:uint64 -> y:uint64 -> r:lbuffer uint64 (size 1) ->
   Stack uint64
     (requires fun h -> live h r /\ v cin <= 1)
