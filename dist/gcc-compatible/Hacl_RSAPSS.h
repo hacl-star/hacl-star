@@ -64,5 +64,13 @@ Hacl_RSAPSS_rsapss_verify(
   uint8_t *msg
 );
 
+void Hacl_Bignum_Convert_bn_from_bytes_be(uint32_t len, uint8_t *b, uint64_t *res);
+
+void Hacl_Bignum_Convert_bn_from_bytes_le(uint32_t len, uint8_t *b, uint64_t *res);
+
+void Hacl_Bignum_Convert_bn_to_bytes_be(uint32_t len, uint64_t *b, uint8_t *res);
+
+void Hacl_Bignum_Convert_bn_to_bytes_le(uint32_t len, uint64_t *b, uint8_t *res);
+
 #define __Hacl_RSAPSS_H_DEFINED
 #endif
