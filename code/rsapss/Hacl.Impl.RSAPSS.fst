@@ -374,6 +374,7 @@ let rsapss_verify_st (a:Hash.algorithm{S.hash_is_supported a}) =
     let pkey : S.rsa_pubkey (v modBits) = S.Mk_rsa_pubkey n e in
     r == S.rsapss_verify #a #(v msgLen) (v modBits) pkey (v sLen) (as_seq h0 msg) (as_seq h0 sgnt)))
 
+#set-options "--z3rlimit 300"
 
 inline_for_extraction noextract
 val rsapss_verify: a:Hash.algorithm{S.hash_is_supported a} -> rsapss_verify_st a
