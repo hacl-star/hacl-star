@@ -1657,6 +1657,7 @@ void Hacl_Hash_Core_MD5_legacy_pad(u64 len, u8 *dst)
   u8 *dst1 = dst;
   u8 *dst2;
   u8 *dst3;
+  u64 x2;
   dst1[0U] = (u8)0x80U;
   dst2 = dst + (u32)1U;
   {
@@ -1665,7 +1666,8 @@ void Hacl_Hash_Core_MD5_legacy_pad(u64 len, u8 *dst)
       dst2[i] = (u8)0U;
   }
   dst3 = dst + (u32)1U + ((u32)128U - ((u32)9U + (u32)(len % (u64)(u32)64U))) % (u32)64U;
-  store64_le(dst3, len << (u32)3U);
+  x2 = len << (u32)3U;
+  store64_le(dst3, x2);
 }
 
 void Hacl_Hash_Core_MD5_legacy_finish(u32 *s, u8 *dst)
@@ -1673,7 +1675,11 @@ void Hacl_Hash_Core_MD5_legacy_finish(u32 *s, u8 *dst)
   u32 *uu____0 = s;
   u32 i;
   for (i = (u32)0U; i < (u32)4U; i++)
-    store32_le(dst + i * (u32)4U, uu____0[i]);
+  {
+    u8 *x0 = dst + i * (u32)4U;
+    u32 x2 = uu____0[i];
+    store32_le(x0, x2);
+  }
 }
 
 void Hacl_Hash_SHA1_legacy_update_multi(u32 *s, u8 *blocks, u32 n_blocks)
@@ -1839,6 +1845,7 @@ void Hacl_Hash_Core_SHA1_legacy_pad(u64 len, u8 *dst)
   u8 *dst1 = dst;
   u8 *dst2;
   u8 *dst3;
+  u64 x2;
   dst1[0U] = (u8)0x80U;
   dst2 = dst + (u32)1U;
   {
@@ -1847,7 +1854,8 @@ void Hacl_Hash_Core_SHA1_legacy_pad(u64 len, u8 *dst)
       dst2[i] = (u8)0U;
   }
   dst3 = dst + (u32)1U + ((u32)128U - ((u32)9U + (u32)(len % (u64)(u32)64U))) % (u32)64U;
-  store64_be(dst3, len << (u32)3U);
+  x2 = len << (u32)3U;
+  store64_be(dst3, x2);
 }
 
 void Hacl_Hash_Core_SHA1_legacy_finish(u32 *s, u8 *dst)
@@ -1855,7 +1863,11 @@ void Hacl_Hash_Core_SHA1_legacy_finish(u32 *s, u8 *dst)
   u32 *uu____0 = s;
   u32 i;
   for (i = (u32)0U; i < (u32)5U; i++)
-    store32_be(dst + i * (u32)4U, uu____0[i]);
+  {
+    u8 *x0 = dst + i * (u32)4U;
+    u32 x2 = uu____0[i];
+    store32_be(x0, x2);
+  }
 }
 
 void Hacl_Hash_SHA2_update_multi_224(u32 *s, u8 *blocks, u32 n_blocks)
@@ -2517,6 +2529,7 @@ void Hacl_Hash_Core_SHA2_pad_224(u64 len, u8 *dst)
   u8 *dst1 = dst;
   u8 *dst2;
   u8 *dst3;
+  u64 x2;
   dst1[0U] = (u8)0x80U;
   dst2 = dst + (u32)1U;
   {
@@ -2525,7 +2538,8 @@ void Hacl_Hash_Core_SHA2_pad_224(u64 len, u8 *dst)
       dst2[i] = (u8)0U;
   }
   dst3 = dst + (u32)1U + ((u32)128U - ((u32)9U + (u32)(len % (u64)(u32)64U))) % (u32)64U;
-  store64_be(dst3, len << (u32)3U);
+  x2 = len << (u32)3U;
+  store64_be(dst3, x2);
 }
 
 void Hacl_Hash_Core_SHA2_pad_256(u64 len, u8 *dst)
@@ -2533,6 +2547,7 @@ void Hacl_Hash_Core_SHA2_pad_256(u64 len, u8 *dst)
   u8 *dst1 = dst;
   u8 *dst2;
   u8 *dst3;
+  u64 x2;
   dst1[0U] = (u8)0x80U;
   dst2 = dst + (u32)1U;
   {
@@ -2541,7 +2556,8 @@ void Hacl_Hash_Core_SHA2_pad_256(u64 len, u8 *dst)
       dst2[i] = (u8)0U;
   }
   dst3 = dst + (u32)1U + ((u32)128U - ((u32)9U + (u32)(len % (u64)(u32)64U))) % (u32)64U;
-  store64_be(dst3, len << (u32)3U);
+  x2 = len << (u32)3U;
+  store64_be(dst3, x2);
 }
 
 void Hacl_Hash_Core_SHA2_pad_384(uint128_t len, u8 *dst)
@@ -2603,7 +2619,11 @@ void Hacl_Hash_Core_SHA2_finish_224(u32 *s, u8 *dst)
   u32 *uu____0 = s;
   u32 i;
   for (i = (u32)0U; i < (u32)7U; i++)
-    store32_be(dst + i * (u32)4U, uu____0[i]);
+  {
+    u8 *x0 = dst + i * (u32)4U;
+    u32 x2 = uu____0[i];
+    store32_be(x0, x2);
+  }
 }
 
 void Hacl_Hash_Core_SHA2_finish_256(u32 *s, u8 *dst)
@@ -2611,7 +2631,11 @@ void Hacl_Hash_Core_SHA2_finish_256(u32 *s, u8 *dst)
   u32 *uu____0 = s;
   u32 i;
   for (i = (u32)0U; i < (u32)8U; i++)
-    store32_be(dst + i * (u32)4U, uu____0[i]);
+  {
+    u8 *x0 = dst + i * (u32)4U;
+    u32 x2 = uu____0[i];
+    store32_be(x0, x2);
+  }
 }
 
 void Hacl_Hash_Core_SHA2_finish_384(u64 *s, u8 *dst)
@@ -2619,7 +2643,11 @@ void Hacl_Hash_Core_SHA2_finish_384(u64 *s, u8 *dst)
   u64 *uu____0 = s;
   u32 i;
   for (i = (u32)0U; i < (u32)6U; i++)
-    store64_be(dst + i * (u32)8U, uu____0[i]);
+  {
+    u8 *x0 = dst + i * (u32)8U;
+    u64 x2 = uu____0[i];
+    store64_be(x0, x2);
+  }
 }
 
 void Hacl_Hash_Core_SHA2_finish_512(u64 *s, u8 *dst)
@@ -2627,7 +2655,11 @@ void Hacl_Hash_Core_SHA2_finish_512(u64 *s, u8 *dst)
   u64 *uu____0 = s;
   u32 i;
   for (i = (u32)0U; i < (u32)8U; i++)
-    store64_be(dst + i * (u32)8U, uu____0[i]);
+  {
+    u8 *x0 = dst + i * (u32)8U;
+    u64 x2 = uu____0[i];
+    store64_be(x0, x2);
+  }
 }
 
 u32 Hacl_Hash_Definitions_word_len(Spec_Hash_Definitions_hash_alg a)

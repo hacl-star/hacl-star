@@ -850,12 +850,20 @@ void Hacl_Blake2s_32_blake2s(u32 nn, u8 *output, u32 ll, u8 *d, u32 kk, u8 *k)
                 {
                   u32 i;
                   for (i = (u32)0U; i < (u32)4U; i++)
-                    store32_le(first + i * (u32)4U, row0[i]);
+                  {
+                    u8 *x0 = first + i * (u32)4U;
+                    u32 x2 = row0[i];
+                    store32_le(x0, x2);
+                  }
                 }
                 {
                   u32 i;
                   for (i = (u32)0U; i < (u32)4U; i++)
-                    store32_le(second + i * (u32)4U, row1[i]);
+                  {
+                    u8 *x0 = second + i * (u32)4U;
+                    u32 x2 = row1[i];
+                    store32_le(x0, x2);
+                  }
                 }
                 final = b2;
                 memcpy(output, final, nn * sizeof (final[0U]));

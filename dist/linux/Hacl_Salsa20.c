@@ -152,7 +152,11 @@ static inline void salsa20_key_block0(u8 *out, u8 *key, u8 *n)
   {
     u32 i;
     for (i = (u32)0U; i < (u32)16U; i++)
-      store32_le(out + i * (u32)4U, k[i]);
+    {
+      u8 *x0 = out + i * (u32)4U;
+      u32 x2 = k[i];
+      store32_le(x0, x2);
+    }
   }
 }
 
@@ -237,7 +241,11 @@ static inline void salsa20_encrypt(u32 len, u8 *out, u8 *text, u8 *key, u8 *n, u
           {
             u32 i;
             for (i = (u32)0U; i < (u32)16U; i++)
-              store32_le(uu____0 + i * (u32)4U, bl[i]);
+            {
+              u8 *x0 = uu____0 + i * (u32)4U;
+              u32 x2 = bl[i];
+              store32_le(x0, x2);
+            }
           }
         }
       }
@@ -277,7 +285,11 @@ static inline void salsa20_encrypt(u32 len, u8 *out, u8 *text, u8 *key, u8 *n, u
           {
             u32 i;
             for (i = (u32)0U; i < (u32)16U; i++)
-              store32_le(plain + i * (u32)4U, bl[i]);
+            {
+              u8 *x0 = plain + i * (u32)4U;
+              u32 x2 = bl[i];
+              store32_le(x0, x2);
+            }
           }
           memcpy(uu____2, plain, rem * sizeof (plain[0U]));
         }
@@ -367,7 +379,11 @@ static inline void salsa20_decrypt(u32 len, u8 *out, u8 *cipher, u8 *key, u8 *n,
           {
             u32 i;
             for (i = (u32)0U; i < (u32)16U; i++)
-              store32_le(uu____0 + i * (u32)4U, bl[i]);
+            {
+              u8 *x0 = uu____0 + i * (u32)4U;
+              u32 x2 = bl[i];
+              store32_le(x0, x2);
+            }
           }
         }
       }
@@ -407,7 +423,11 @@ static inline void salsa20_decrypt(u32 len, u8 *out, u8 *cipher, u8 *key, u8 *n,
           {
             u32 i;
             for (i = (u32)0U; i < (u32)16U; i++)
-              store32_le(plain + i * (u32)4U, bl[i]);
+            {
+              u8 *x0 = plain + i * (u32)4U;
+              u32 x2 = bl[i];
+              store32_le(x0, x2);
+            }
           }
           memcpy(uu____2, plain, rem * sizeof (plain[0U]));
         }
@@ -485,7 +505,11 @@ static inline void hsalsa20(u8 *out, u8 *key, u8 *n)
   {
     u32 i;
     for (i = (u32)0U; i < (u32)8U; i++)
-      store32_le(out + i * (u32)4U, res[i]);
+    {
+      u8 *x0 = out + i * (u32)4U;
+      u32 x2 = res[i];
+      store32_le(x0, x2);
+    }
   }
 }
 

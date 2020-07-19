@@ -128,7 +128,8 @@ void Hacl_Impl_SHA3_loadState(uint32_t rateInBytes, uint8_t *input, uint64_t *s)
   memcpy(b, input, rateInBytes * sizeof (input[0U]));
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)25U; i++)
   {
-    uint64_t u = load64_le(b + i * (uint32_t)8U);
+    uint8_t *x0 = b + i * (uint32_t)8U;
+    uint64_t u = load64_le(x0);
     uint64_t x = u;
     s[i] = s[i] ^ x;
   }
@@ -141,7 +142,8 @@ void Hacl_Impl_SHA3_storeState(uint32_t rateInBytes, uint64_t *s, uint8_t *res)
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)25U; i++)
   {
     uint64_t sj = s[i];
-    store64_le(b + i * (uint32_t)8U, sj);
+    uint8_t *x0 = b + i * (uint32_t)8U;
+    store64_le(x0, sj);
   }
   memcpy(res, b, rateInBytes * sizeof (b[0U]));
   Lib_Memzero0_memzero(b, (uint32_t)200U * sizeof (b[0U]));
