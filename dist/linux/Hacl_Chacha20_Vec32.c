@@ -267,10 +267,12 @@ Hacl_Chacha20_Vec32_chacha20_encrypt_32(u32 len, u8 *out, u8 *text, u8 *key, u8 
         u32 i;
         for (i = (u32)0U; i < (u32)16U; i++)
         {
-          u32 u = load32_le(uu____1 + i * (u32)4U);
+          u8 *x00 = uu____1 + i * (u32)4U;
+          u32 u = load32_le(x00);
           u32 x = u;
           u32 y = x ^ k[i];
-          store32_le(uu____0 + i * (u32)4U, y);
+          u8 *x0 = uu____0 + i * (u32)4U;
+          store32_le(x0, y);
         }
       }
     }
@@ -288,10 +290,12 @@ Hacl_Chacha20_Vec32_chacha20_encrypt_32(u32 len, u8 *out, u8 *text, u8 *key, u8 
         u32 i;
         for (i = (u32)0U; i < (u32)16U; i++)
         {
-          u32 u = load32_le(plain + i * (u32)4U);
+          u8 *x00 = plain + i * (u32)4U;
+          u32 u = load32_le(x00);
           u32 x = u;
           u32 y = x ^ k[i];
-          store32_le(plain + i * (u32)4U, y);
+          u8 *x0 = plain + i * (u32)4U;
+          store32_le(x0, y);
         }
       }
       memcpy(uu____2, plain, rem * sizeof (plain[0U]));
@@ -322,10 +326,12 @@ Hacl_Chacha20_Vec32_chacha20_decrypt_32(u32 len, u8 *out, u8 *cipher, u8 *key, u
         u32 i;
         for (i = (u32)0U; i < (u32)16U; i++)
         {
-          u32 u = load32_le(uu____1 + i * (u32)4U);
+          u8 *x00 = uu____1 + i * (u32)4U;
+          u32 u = load32_le(x00);
           u32 x = u;
           u32 y = x ^ k[i];
-          store32_le(uu____0 + i * (u32)4U, y);
+          u8 *x0 = uu____0 + i * (u32)4U;
+          store32_le(x0, y);
         }
       }
     }
@@ -343,10 +349,12 @@ Hacl_Chacha20_Vec32_chacha20_decrypt_32(u32 len, u8 *out, u8 *cipher, u8 *key, u
         u32 i;
         for (i = (u32)0U; i < (u32)16U; i++)
         {
-          u32 u = load32_le(plain + i * (u32)4U);
+          u8 *x00 = plain + i * (u32)4U;
+          u32 u = load32_le(x00);
           u32 x = u;
           u32 y = x ^ k[i];
-          store32_le(plain + i * (u32)4U, y);
+          u8 *x0 = plain + i * (u32)4U;
+          store32_le(x0, y);
         }
       }
       memcpy(uu____2, plain, rem * sizeof (plain[0U]));

@@ -199,16 +199,20 @@ static void reduce(uint64_t *out)
 
 static void load_51(uint64_t *output, uint8_t *input)
 {
-  uint64_t u0 = load64_le(input);
-  uint64_t i0 = u0;
-  uint64_t u1 = load64_le(input + (uint32_t)6U);
-  uint64_t i1 = u1;
-  uint64_t u2 = load64_le(input + (uint32_t)12U);
-  uint64_t i2 = u2;
-  uint64_t u3 = load64_le(input + (uint32_t)19U);
-  uint64_t i3 = u3;
-  uint64_t u = load64_le(input + (uint32_t)24U);
-  uint64_t i4 = u;
+  uint64_t u = load64_le(input);
+  uint64_t i0 = u;
+  uint8_t *x00 = input + (uint32_t)6U;
+  uint64_t u0 = load64_le(x00);
+  uint64_t i1 = u0;
+  uint8_t *x01 = input + (uint32_t)12U;
+  uint64_t u1 = load64_le(x01);
+  uint64_t i2 = u1;
+  uint8_t *x02 = input + (uint32_t)19U;
+  uint64_t u2 = load64_le(x02);
+  uint64_t i3 = u2;
+  uint8_t *x0 = input + (uint32_t)24U;
+  uint64_t u3 = load64_le(x0);
+  uint64_t i4 = u3;
   uint64_t output0 = i0 & (uint64_t)0x7ffffffffffffU;
   uint64_t output1 = i1 >> (uint32_t)3U & (uint64_t)0x7ffffffffffffU;
   uint64_t output2 = i2 >> (uint32_t)6U & (uint64_t)0x7ffffffffffffU;
@@ -1558,7 +1562,8 @@ static void load_32_bytes(uint64_t *out, uint8_t *b)
   uint64_t b1 = hload56_le_(b, (uint32_t)7U);
   uint64_t b2 = hload56_le_(b, (uint32_t)14U);
   uint64_t b3 = hload56_le_(b, (uint32_t)21U);
-  uint32_t u = load32_le(b + (uint32_t)28U);
+  uint8_t *x0 = b + (uint32_t)28U;
+  uint32_t u = load32_le(x0);
   uint32_t b4 = u;
   uint64_t b41 = (uint64_t)b4;
   out[0U] = b0;
@@ -1586,7 +1591,8 @@ static void store_56(uint8_t *out, uint64_t *b)
   hstore56_le(out, (uint32_t)7U, b1);
   hstore56_le(out, (uint32_t)14U, b2);
   hstore56_le(out, (uint32_t)21U, b3);
-  store32_le(out + (uint32_t)28U, b4_);
+  uint8_t *x0 = out + (uint32_t)28U;
+  store32_le(x0, b4_);
 }
 
 static void sha512_pre_msg(uint8_t *h, uint8_t *prefix, uint32_t len, uint8_t *input)

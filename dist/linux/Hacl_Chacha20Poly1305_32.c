@@ -40,10 +40,11 @@ static inline void poly1305_padded_32(u64 *ctx, u32 len, u8 *text)
     {
       u8 *block = blocks + i * (u32)16U;
       u64 e[5U] = { 0U };
-      u64 u0 = load64_le(block);
-      u64 lo = u0;
-      u64 u = load64_le(block + (u32)8U);
-      u64 hi = u;
+      u64 u = load64_le(block);
+      u64 lo = u;
+      u8 *x00 = block + (u32)8U;
+      u64 u0 = load64_le(x00);
+      u64 hi = u0;
       u64 f0 = lo;
       u64 f1 = hi;
       u64 f010 = f0 & (u64)0x3ffffffU;
@@ -168,10 +169,11 @@ static inline void poly1305_padded_32(u64 *ctx, u32 len, u8 *text)
     u8 tmp[16U] = { 0U };
     memcpy(tmp, last, rem1 * sizeof (last[0U]));
     {
-      u64 u0 = load64_le(tmp);
-      u64 lo = u0;
-      u64 u = load64_le(tmp + (u32)8U);
-      u64 hi = u;
+      u64 u = load64_le(tmp);
+      u64 lo = u;
+      u8 *x00 = tmp + (u32)8U;
+      u64 u0 = load64_le(x00);
+      u64 hi = u0;
       u64 f0 = lo;
       u64 f1 = hi;
       u64 f010 = f0 & (u64)0x3ffffffU;
@@ -297,10 +299,11 @@ static inline void poly1305_padded_32(u64 *ctx, u32 len, u8 *text)
       u64 *pre = ctx + (u32)5U;
       u64 *acc = ctx;
       u64 e[5U] = { 0U };
-      u64 u0 = load64_le(tmp);
-      u64 lo = u0;
-      u64 u = load64_le(tmp + (u32)8U);
-      u64 hi = u;
+      u64 u = load64_le(tmp);
+      u64 lo = u;
+      u8 *x00 = tmp + (u32)8U;
+      u64 u0 = load64_le(x00);
+      u64 hi = u0;
       u64 f0 = lo;
       u64 f1 = hi;
       u64 f010 = f0 & (u64)0x3ffffffU;
@@ -509,21 +512,24 @@ static inline void poly1305_do_32(u8 *k, u32 aadlen, u8 *aad, u32 mlen, u8 *m, u
 {
   u64 ctx[25U] = { 0U };
   u8 block[16U] = { 0U };
+  u8 *x00;
   u64 *pre;
   u64 *acc;
   Hacl_Poly1305_32_poly1305_init(ctx, k);
   poly1305_padded_32(ctx, aadlen, aad);
   poly1305_padded_32(ctx, mlen, m);
   store64_le(block, (u64)aadlen);
-  store64_le(block + (u32)8U, (u64)mlen);
+  x00 = block + (u32)8U;
+  store64_le(x00, (u64)mlen);
   pre = ctx + (u32)5U;
   acc = ctx;
   {
     u64 e[5U] = { 0U };
-    u64 u0 = load64_le(block);
-    u64 lo = u0;
-    u64 u = load64_le(block + (u32)8U);
-    u64 hi = u;
+    u64 u = load64_le(block);
+    u64 lo = u;
+    u8 *x03 = block + (u32)8U;
+    u64 u0 = load64_le(x03);
+    u64 hi = u0;
     u64 f0 = lo;
     u64 f1 = hi;
     u64 f010 = f0 & (u64)0x3ffffffU;

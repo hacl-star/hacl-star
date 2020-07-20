@@ -427,7 +427,11 @@ static void toUint8(u64 *i, u8 *o)
 {
   u32 i0;
   for (i0 = (u32)0U; i0 < (u32)4U; i0++)
-    store64_be(o + i0 * (u32)8U, i[i0]);
+  {
+    u8 *x0 = o + i0 * (u32)8U;
+    u64 x2 = i[i0];
+    store64_be(x0, x2);
+  }
 }
 
 static void changeEndian(u64 *i)

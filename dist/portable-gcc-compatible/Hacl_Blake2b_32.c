@@ -567,11 +567,15 @@ Hacl_Blake2b_32_blake2b(
   uint64_t *row1 = b + (uint32_t)1U * (uint32_t)4U;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
-    store64_le(first + i * (uint32_t)8U, row0[i]);
+    uint8_t *x0 = first + i * (uint32_t)8U;
+    uint64_t x2 = row0[i];
+    store64_le(x0, x2);
   }
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
-    store64_le(second + i * (uint32_t)8U, row1[i]);
+    uint8_t *x0 = second + i * (uint32_t)8U;
+    uint64_t x2 = row1[i];
+    store64_le(x0, x2);
   }
   uint8_t *final = b2;
   memcpy(output, final, nn * sizeof (final[0U]));

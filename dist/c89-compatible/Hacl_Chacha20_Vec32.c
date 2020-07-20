@@ -274,10 +274,12 @@ Hacl_Chacha20_Vec32_chacha20_encrypt_32(
         uint32_t i;
         for (i = (uint32_t)0U; i < (uint32_t)16U; i++)
         {
-          uint32_t u = load32_le(uu____1 + i * (uint32_t)4U);
+          uint8_t *x00 = uu____1 + i * (uint32_t)4U;
+          uint32_t u = load32_le(x00);
           uint32_t x = u;
           uint32_t y = x ^ k[i];
-          store32_le(uu____0 + i * (uint32_t)4U, y);
+          uint8_t *x0 = uu____0 + i * (uint32_t)4U;
+          store32_le(x0, y);
         }
       }
     }
@@ -295,10 +297,12 @@ Hacl_Chacha20_Vec32_chacha20_encrypt_32(
         uint32_t i;
         for (i = (uint32_t)0U; i < (uint32_t)16U; i++)
         {
-          uint32_t u = load32_le(plain + i * (uint32_t)4U);
+          uint8_t *x00 = plain + i * (uint32_t)4U;
+          uint32_t u = load32_le(x00);
           uint32_t x = u;
           uint32_t y = x ^ k[i];
-          store32_le(plain + i * (uint32_t)4U, y);
+          uint8_t *x0 = plain + i * (uint32_t)4U;
+          store32_le(x0, y);
         }
       }
       memcpy(uu____2, plain, rem * sizeof (plain[0U]));
@@ -336,10 +340,12 @@ Hacl_Chacha20_Vec32_chacha20_decrypt_32(
         uint32_t i;
         for (i = (uint32_t)0U; i < (uint32_t)16U; i++)
         {
-          uint32_t u = load32_le(uu____1 + i * (uint32_t)4U);
+          uint8_t *x00 = uu____1 + i * (uint32_t)4U;
+          uint32_t u = load32_le(x00);
           uint32_t x = u;
           uint32_t y = x ^ k[i];
-          store32_le(uu____0 + i * (uint32_t)4U, y);
+          uint8_t *x0 = uu____0 + i * (uint32_t)4U;
+          store32_le(x0, y);
         }
       }
     }
@@ -357,10 +363,12 @@ Hacl_Chacha20_Vec32_chacha20_decrypt_32(
         uint32_t i;
         for (i = (uint32_t)0U; i < (uint32_t)16U; i++)
         {
-          uint32_t u = load32_le(plain + i * (uint32_t)4U);
+          uint8_t *x00 = plain + i * (uint32_t)4U;
+          uint32_t u = load32_le(x00);
           uint32_t x = u;
           uint32_t y = x ^ k[i];
-          store32_le(plain + i * (uint32_t)4U, y);
+          uint8_t *x0 = plain + i * (uint32_t)4U;
+          store32_le(x0, y);
         }
       }
       memcpy(uu____2, plain, rem * sizeof (plain[0U]));
