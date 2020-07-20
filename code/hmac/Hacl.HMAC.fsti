@@ -15,9 +15,9 @@ open Spec.Hash.Definitions
 open FStar.HyperStack.ST
 open Lib.IntTypes
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
-
 open EverCrypt.Helpers
+
+#set-options "--z3rlimit 25 --fuel 0 --ifuel 0"
 
 let key_and_data_fits (a: hash_alg): Lemma
   (ensures (block_length a + pow2 32 <= max_input_length a))
@@ -61,8 +61,4 @@ val compute_sha2_512: compute_st SHA2_512
 
 val compute_blake2s_32: compute_st Blake2S
 
-val compute_blake2s_128: compute_st Blake2S
-
 val compute_blake2b_32: compute_st Blake2B
-
-val compute_blake2b_256: compute_st Blake2B

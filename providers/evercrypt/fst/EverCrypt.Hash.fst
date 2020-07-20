@@ -318,12 +318,12 @@ let update_last_128 a update_last p ev prev_len last last_len =
   update_last p ev prev_len last last_len
 
 /// Before defining ``update_last`` we introduce auxiliary functions for Blake2S
-/// and Blake2B, because trying to define it at once leads to a proof loop.
-/// However, the Blake functions themselves are very brittle (they tend to loop).
+/// and Blake2B, because trying to define it completely at once leads to a proof loop.
+/// Besides, even with this the Blake functions themselves are very brittle (they tend to loop).
+inline_for_extraction noextract
 let update_last_with_internal_st (a : alg) =
   s:state a ->
   p:Hacl.Hash.Definitions.state (impl_of_alg a) ->
-//  es:extra_state a ->
   prev_len:uint64_t ->
   last:B.buffer Lib.IntTypes.uint8 { B.length last <= block_length a } ->
   last_len:uint32_t {

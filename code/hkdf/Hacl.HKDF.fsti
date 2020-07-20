@@ -15,7 +15,7 @@ open Spec.Agile.HKDF
 open FStar.HyperStack.ST
 open Lib.IntTypes
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
+#set-options "--z3rlimit 20 --fuel 0 --ifuel 0"
 
 let key_and_data_fits (a:hash_alg) :
   Lemma (block_length a + pow2 32 <= max_input_length a)
@@ -100,14 +100,6 @@ val expand_blake2s_32: expand_st Blake2S
 
 val extract_blake2s_32: extract_st Blake2S
 
-val expand_blake2s_128: expand_st Blake2S
-
-val extract_blake2s_128: extract_st Blake2S
-
 val expand_blake2b_32: expand_st Blake2B
 
 val extract_blake2b_32: extract_st Blake2B
-
-val expand_blake2b_256: expand_st Blake2B
-
-val extract_blake2b_256: extract_st Blake2B

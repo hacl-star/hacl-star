@@ -20,6 +20,7 @@ module Spec = Spec.Blake2
 /// that by inserting manual calls to `norm` inside the code, because it blocks
 /// the normalization performed by Kremlin, and we can't normalize as much as we
 /// want because of the interface abstractions. The solution is to use post-processing.
+noextract
 let pp_sigmaTable () : Tactics.Tac unit =
   Tactics.norm [delta_only [`%Spec.list_sigma]]; Tactics.trefl ()
 

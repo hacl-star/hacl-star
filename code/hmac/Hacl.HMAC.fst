@@ -330,17 +330,7 @@ let compute_blake2s_32: compute_st Blake2S =
   mk_compute (D.mk_impl Blake2S C.M32) hash_blake2s_32 alloca_blake2s_32 init_blake2s_32
              update_multi_blake2s_32 update_last_blake2s_32 finish_blake2s_32
 
-let compute_blake2s_128: compute_st Blake2S =
-  let open Hacl.Hash.Blake2 in
-  mk_compute (D.mk_impl Blake2S C.M128) hash_blake2s_128 alloca_blake2s_128 init_blake2s_128
-             update_multi_blake2s_128 update_last_blake2s_128 finish_blake2s_128
-
 let compute_blake2b_32: compute_st Blake2B =
   let open Hacl.Hash.Blake2 in
   mk_compute (D.mk_impl Blake2B C.M32) hash_blake2b_32 alloca_blake2b_32 init_blake2b_32
              update_multi_blake2b_32 update_last_blake2b_32 finish_blake2b_32
-
-let compute_blake2b_256: compute_st Blake2B =
-  let open Hacl.Hash.Blake2 in
-  mk_compute (D.mk_impl Blake2B C.M256) hash_blake2b_256 alloca_blake2b_256 init_blake2b_256
-             update_multi_blake2b_256 update_last_blake2b_256 finish_blake2b_256

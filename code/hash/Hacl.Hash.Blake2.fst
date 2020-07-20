@@ -25,13 +25,6 @@ open FStar.Mul
 #set-options "--z3rlimit 200 --fuel 0 --ifuel 0"
 
 (*** update_multi *)
-noextract inline_for_extraction
-val mk_update_multi:
-     a:hash_alg{is_blake a}
-  -> m:m_spec a
-  -> update:update_st (|a, m|) ->
-  update_multi_st (|a, m|)
-
 let mk_update_multi a m update s ev blocks n_blocks =
   let h0 = ST.get () in
   let inv (h: HS.mem) (i: nat) =
@@ -209,27 +202,28 @@ let mk_blake2_update_last_block a m s ev input input_len =
   let totlen = extra_state_add_size_t ev input_len in
   Impl.blake2_update_block #(to_blake_alg a) #m wv s true totlen tmp;
   (**) let h2 = ST.get () in
+  (**) //TODO: comment '=='
   (**) assert(as_seq h2 s ==
   (**)               Spec.blake2_update_block (to_blake_alg a) true
   (**)                                        (extra_state_v totlen)
   (**)                                        (B.as_seq h1 tmp) (as_seq h1 s));
   ST.pop_frame ()
 
+
 noextract inline_for_extraction
-val mk_update_last:
+val mk_update_last_:
      a:hash_alg{is_blake a}
   -> m:m_spec a
   -> update_multi_st (|a, m|)
   -> blake2_update_last_block_st a m ->
   update_last_st (|a, m|)
 
-let mk_update_last a m update_multi blake2_update_last_block s ev prev_len input input_len =
+let mk_update_last_ a m update_multi blake2_update_last_block s ev prev_len input input_len =
   (**) let h0 = ST.get () in
   let num_blocks, blocks_len, rest_len, blocks, rest = split_data a input_len input in
   (**) assert(B.disjoint s blocks);
   (**) assert(B.disjoint s rest);
   let ev' = update_multi s ev blocks num_blocks in
-  (**) assert(B.length rest == U32.v rest_len);
   (**) Spec.Hash.Incremental.Lemmas.update_multi_extra_state_eq a (as_seq h0 s, ev)
   (**)                                                            (B.as_seq h0 blocks);
   (**) Spec.Hash.Lemmas.extra_state_add_nat_bound_lem1 ev (B.length blocks);
@@ -241,47 +235,28 @@ let mk_update_last a m update_multi blake2_update_last_block s ev prev_len input
 let update_multi_blake2s_32 =
   mk_update_multi Blake2S Core.M32 update_blake2s_32
 
-let update_multi_blake2s_128 =
-  mk_update_multi Blake2S Core.M128 update_blake2s_128
-
 let update_multi_blake2b_32 =
   mk_update_multi Blake2B Core.M32 update_blake2b_32
 
-let update_multi_blake2b_256 =
-  mk_update_multi Blake2B Core.M256 update_blake2b_256
+let mk_update_last a m update_multi =
+  mk_update_last_ a m update_multi (mk_blake2_update_last_block a m)
 
 let update_last_blake2s_32 =
-  mk_update_last Blake2S Core.M32 update_multi_blake2s_32
-                 (mk_blake2_update_last_block Blake2S Core.M32)
-
-let update_last_blake2s_128 =
-  mk_update_last Blake2S Core.M128 update_multi_blake2s_128
-                 (mk_blake2_update_last_block Blake2S Core.M128)
+  mk_update_last_ Blake2S Core.M32 update_multi_blake2s_32
+                  (mk_blake2_update_last_block Blake2S Core.M32)
 
 let update_last_blake2b_32 =
-  mk_update_last Blake2B Core.M32 update_multi_blake2b_32
-                 (mk_blake2_update_last_block Blake2B Core.M32)
+  mk_update_last_ Blake2B Core.M32 update_multi_blake2b_32
+                  (mk_blake2_update_last_block Blake2B Core.M32)
 
-let update_last_blake2b_256 =
-  mk_update_last Blake2B Core.M256 update_multi_blake2b_256
-                 (mk_blake2_update_last_block Blake2B Core.M256)
-
-let hash_blake2s_32: hash_st Blake2S = fun input input_len dst ->
+let mk_hash a m blake2 = fun input input_len dst ->
   let h0 = ST.get() in
-  Hacl.Blake2s_32.blake2s 32ul dst input_len input 0ul (B.null #uint8);
-  lemma_blake2_hash_equivalence Blake2S (B.as_seq h0 input)
+  [@inline_let] let key_size = match a with
+    | Blake2S -> 32ul
+    | Blake2B -> 64ul
+  in
+  blake2 key_size dst input_len input 0ul (B.null #uint8);
+  lemma_blake2_hash_equivalence a (B.as_seq h0 input)
 
-let hash_blake2s_128: hash_st Blake2S = fun input input_len dst ->
-  let h0 = ST.get() in
-  Hacl.Blake2s_128.blake2s 32ul dst input_len input 0ul (B.null #uint8);
-  lemma_blake2_hash_equivalence Blake2S (B.as_seq h0 input)
-
-let hash_blake2b_32: hash_st Blake2B = fun input input_len dst ->
-  let h0 = ST.get() in
-  Hacl.Blake2b_32.blake2b 64ul dst input_len input 0ul (B.null #uint8);
-  lemma_blake2_hash_equivalence Blake2B (B.as_seq h0 input)
-
-let hash_blake2b_256: hash_st Blake2B = fun input input_len dst ->
-  let h0 = ST.get() in
-  Hacl.Blake2b_256.blake2b 64ul dst input_len input 0ul (B.null #uint8);
-  lemma_blake2_hash_equivalence Blake2B (B.as_seq h0 input)
+let hash_blake2s_32: hash_st Blake2S = mk_hash Blake2S Core.M32 Hacl.Blake2s_32.blake2s
+let hash_blake2b_32: hash_st Blake2B = mk_hash Blake2B Core.M32 Hacl.Blake2b_32.blake2b

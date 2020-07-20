@@ -60,6 +60,7 @@ let rec core_create_lemma_disjointness
       aux tl
 #reset-options
 
+#push-options "--ifuel 2"
 let rec args_b8_lemma (args:list arg) (x:arg)
   : Lemma
       (List.memP x args ==>
@@ -72,6 +73,7 @@ let rec args_b8_lemma (args:list arg) (x:arg)
     | a::q ->
       assert (List.memP x q ==> List.memP x args);
       args_b8_lemma q x
+#pop-options
 
 let readable_cons (hd:arg) (tl:list arg) (s:ME.vale_heap)
   : Lemma VSig.(readable (hd::tl) s <==> (readable_one s hd /\ readable tl s))

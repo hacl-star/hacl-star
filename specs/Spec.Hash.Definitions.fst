@@ -44,7 +44,7 @@ let is_sha2 = function
   | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 -> true
   | _ -> false
 
-inline_for_extraction noextract
+noextract inline_for_extraction
 let is_blake = function
   | Blake2S | Blake2B -> true
   | _ -> false

@@ -189,23 +189,11 @@ let expand_blake2s_32: expand_st Blake2S =
 let extract_blake2s_32: extract_st Blake2S =
   mk_extract Blake2S Hacl.HMAC.compute_blake2s_32
 
-let expand_blake2s_128: expand_st Blake2S =
-  mk_expand Blake2S Hacl.HMAC.compute_blake2s_128
-
-let extract_blake2s_128: extract_st Blake2S =
-  mk_extract Blake2S Hacl.HMAC.compute_blake2s_128
-
 let expand_blake2b_32: expand_st Blake2B =
   mk_expand Blake2B Hacl.HMAC.compute_blake2b_32
 
 let extract_blake2b_32: extract_st Blake2B =
   mk_extract Blake2B Hacl.HMAC.compute_blake2b_32
-
-let expand_blake2b_256: expand_st Blake2B =
-  mk_expand Blake2B Hacl.HMAC.compute_blake2b_256
-
-let extract_blake2b_256: extract_st Blake2B =
-  mk_extract Blake2B Hacl.HMAC.compute_blake2b_256
 
 val while_items: ni : nat -> ni_max: nat -> nw: nat{nw > 0} ->
   Tot bool

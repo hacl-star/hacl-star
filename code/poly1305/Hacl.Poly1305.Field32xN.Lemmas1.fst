@@ -909,7 +909,7 @@ let carry_reduce_lemma_i #w l cin i =
   FStar.Math.Lemmas.pow2_minus 32 26
 
 
-#push-options "--z3rlimit 400"
+#push-options "--z3rlimit 600"
 val carry_reduce_felem5_fits_lemma_i0:
     #w:lanes
   -> f:felem5 w{acc_inv_t f}
@@ -1001,7 +1001,7 @@ let carry_reduce_felem5_fits_lemma_i #w f i =
   assert (tup64_fits5 (as_tup64_i res i) (1, 1, 1, 1, 1))
 #pop-options
 
-
+#push-options "--z3rlimit 100"
 val carry_reduce_felem5_fits_lemma:
     #w:lanes
   -> f:felem5 w{acc_inv_t f} ->
@@ -1031,3 +1031,4 @@ val carry_reduce_felem5_lemma:
 let carry_reduce_felem5_lemma #w f =
   carry_reduce_felem5_fits_lemma #w f;
   carry_full_felem5_eval_lemma f
+#pop-options
