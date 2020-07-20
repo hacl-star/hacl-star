@@ -19,6 +19,7 @@ assume val sse2_enabled : bool       // CPUID.01H:EDX.SSE2[bit 26]
 assume val ssse3_enabled : bool      // CPUID.01H:ECX.SSSE3[bit 9]
 assume val sse4_1_enabled : bool     // CPUID.01H:ECX.SSE4.1[bit 19]
 assume val movbe_enabled : bool      // CPUID.01H.ECX.MOVBE[bit 22]
+assume val osxsave_enabled : bool    // CPUID.01H.ECX.OSXSAVE[bit 27]
 assume val rdrand_enabled : bool     // CPUID.01H.ECX.RDRAND[bit 30] = 0
 
 
@@ -37,6 +38,7 @@ assume val cpuid_features (u:unit) :
          (forall rcx . {:pattern (cpuid rRcx 1 rcx)} (Vale.Def.Types_s.iand (cpuid rRcx 1 rcx) (pow2_norm 9)  > 0) = ssse3_enabled) /\
          (forall rcx . {:pattern (cpuid rRcx 1 rcx)} (Vale.Def.Types_s.iand (cpuid rRcx 1 rcx) (pow2_norm 19)  > 0) = sse4_1_enabled) /\
          (forall rcx . {:pattern (cpuid rRcx 1 rcx)} (Vale.Def.Types_s.iand (cpuid rRcx 1 rcx) (pow2_norm 22)  > 0) = movbe_enabled) /\
+         (forall rcx . {:pattern (cpuid rRcx 1 rcx)} (Vale.Def.Types_s.iand (cpuid rRcx 1 rcx) (pow2_norm 27)  > 0) = osxsave_enabled) /\
          (forall rcx . {:pattern (cpuid rRcx 1 rcx)} (Vale.Def.Types_s.iand (cpuid rRcx 1 rcx) (pow2_norm 30)  > 0) = rdrand_enabled) /\
          (Vale.Def.Types_s.iand (cpuid rRbx 7 0) (pow2_norm  5) > 0) = avx2_enabled /\
          (Vale.Def.Types_s.iand (cpuid rRbx 7 0) (pow2_norm  8) > 0) = bmi2_enabled /\

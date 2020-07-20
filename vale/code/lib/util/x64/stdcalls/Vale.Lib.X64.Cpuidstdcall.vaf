@@ -145,3 +145,17 @@ procedure Check_avx512_stdcall(inline win:bool)
 {
     Check_avx512_support();
 }
+
+procedure Check_osxsave_stdcall(inline win:bool)
+    {:public}
+    {:quick}
+    {:exportSpecs}
+    modifies
+        rax; rbx; rcx; rdx; r9; efl;
+    ensures
+        rax != 0 ==> osxsave_enabled;
+        rbx == old(rbx);
+{
+    Check_osxsave_support();
+}
+

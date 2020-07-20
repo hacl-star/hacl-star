@@ -321,3 +321,28 @@ procedure Check_avx512_support()
     Mov64(rbx, r9);     // Callee-restore
 }
 
+procedure Check_osxsave_support()
+    {:public}
+    {:quick}
+    modifies rax; rbx; rcx; rdx; r9; efl;
+    ensures
+        rax != 0 ==> osxsave_enabled;
+        rbx == old(rbx);
+{
+    Mov64(r9, rbx);     // Callee-save
+
+    Mov64(rcx, 0);      // Dummy for taint analysis
+    Mov64(rax, 1);
+    Cpuid_Osxsave();
+    lemma_iand_pow2_64(rcx, 27); // ==> rcx & pow2(27) == 0 or pow2(27)
+    Mov64(rax, rcx);
+    And64(rax, 0x8000000);
+    assert_normalize(0x8000000 == pow2(27));
+
+    Shr64(rax, 26);
+    lemma_ishr_pow2_diff64(1, 27); // ==> shr(pow2(27), 26) == pow2(1)
+    lemma_ishr_zero64(26);         // ==> shr(0, 27) == 0
+
+    Mov64(rbx, r9);     // Callee-restore
+}
+

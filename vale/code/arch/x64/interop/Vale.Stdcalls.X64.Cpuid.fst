@@ -82,3 +82,12 @@ let lowstar_avx512 : lowstar_avx512_t  =
 
 let check_avx512 = as_normal_t #lowstar_avx512_t lowstar_avx512
 
+(* And here's the check_osxsave wrapper itself *)
+let lowstar_osxsave : lowstar_osxsave_t  =
+  IX64.wrap_weak_stdcall
+    code_osxsave
+    dom
+    (W.mk_prediction code_osxsave dom [] (osxsave_lemma code_osxsave IA.win))
+
+let check_osxsave = as_normal_t #lowstar_osxsave_t lowstar_osxsave
+
