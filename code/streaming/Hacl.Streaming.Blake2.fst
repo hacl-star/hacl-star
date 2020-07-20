@@ -770,84 +770,308 @@ let blake2 (a : alg) (m : m_spec) (no_key : bool) (key_size : key_size_t a no_ke
       Impl.blake2_finish #a #m (output_len a) dst h)
 #pop-options
 
-/// The incremental hash functions instantiations. Note that we can't write a
-/// generic one, because the normalization then performed by Kremlin explodes.
+/// We can't instantiate the hash functions generically because the normalization
+/// then performed by Kremlin explodes. In order to make things smoother, we
+/// introduce intermediate, specialized definitions.
+
+inline_for_extraction noextract
+let blake2s_32 (no_key : bool) (key_size : key_size_t Spec.Blake2S no_key) =
+  blake2 Spec.Blake2S M32 no_key key_size 
+
+inline_for_extraction noextract
+let blake2s_128 (no_key : bool) (key_size : key_size_t Spec.Blake2S no_key) =
+  blake2 Spec.Blake2S M128 no_key key_size 
+
+inline_for_extraction noextract
+let blake2b_32 (no_key : bool) (key_size : key_size_t Spec.Blake2B no_key) =
+  blake2 Spec.Blake2B M32 no_key key_size 
+
+inline_for_extraction noextract
+let blake2b_256 (no_key : bool) (key_size : key_size_t Spec.Blake2B no_key) =
+  blake2 Spec.Blake2B M256 no_key key_size 
+
+inline_for_extraction noextract
+let optional_key_blake2s (no_key : bool) (key_size : key_size_t Spec.Blake2S no_key) =
+  (I.optional_key () I.Erased (k Spec.Blake2S no_key key_size))
+
+inline_for_extraction noextract
+let optional_key_blake2b (no_key : bool) (key_size : key_size_t Spec.Blake2B no_key) =
+  (I.optional_key () I.Erased (k Spec.Blake2B no_key key_size))
+
 inline_for_extraction noextract
 let mk_blake2s_32_create_in (no_key : bool) (key_size : key_size_t Spec.Blake2S no_key) =
-  F.create_in (blake2 Spec.Blake2S M32 no_key key_size) () (s Spec.Blake2S M32)
-              (I.optional_key () I.Erased (k Spec.Blake2S no_key key_size))
+  F.create_in (blake2s_32 no_key key_size) () (s Spec.Blake2S M32)
+              (optional_key_blake2s no_key key_size)
 
 inline_for_extraction noextract
 let mk_blake2s_32_update (no_key : bool) (key_size : key_size_t Spec.Blake2S no_key) =
   F.update (blake2 Spec.Blake2S M32 no_key key_size) (G.hide ()) (s Spec.Blake2S M32)
-           (I.optional_key () I.Erased (k Spec.Blake2S no_key key_size))
+           (optional_key_blake2s no_key key_size)
 
 inline_for_extraction noextract
-let mk_blake2s_32_blake2s_32_finish (no_key : bool) (key_size : key_size_t Spec.Blake2S no_key) =
-  F.mk_finish (blake2 Spec.Blake2S M32 no_key key_size) () (s Spec.Blake2S M32)
-              (I.optional_key () I.Erased (k Spec.Blake2S no_key key_size))
+let mk_blake2s_32_finish (no_key : bool) (key_size : key_size_t Spec.Blake2S no_key) =
+  F.mk_finish (blake2s_32 no_key key_size) () (s Spec.Blake2S M32)
+              (optional_key_blake2s no_key key_size)
 
 inline_for_extraction noextract
 let mk_blake2s_32_free (no_key : bool) (key_size : key_size_t Spec.Blake2S no_key) =
-  F.free (blake2 Spec.Blake2S M32 no_key key_size) (G.hide ()) (s Spec.Blake2S M32)
-         (I.optional_key () I.Erased (k Spec.Blake2S no_key key_size))
+  F.free (blake2s_32 no_key key_size) (G.hide ()) (s Spec.Blake2S M32)
+         (optional_key_blake2s no_key key_size)
 
 inline_for_extraction noextract
 let mk_blake2s_128_create_in (no_key : bool) (key_size : key_size_t Spec.Blake2S no_key) =
-  F.create_in (blake2 Spec.Blake2S M128 no_key key_size) () (s Spec.Blake2S M128)
-              (I.optional_key () I.Erased (k Spec.Blake2S no_key key_size))
+  F.create_in (blake2s_128 no_key key_size) () (s Spec.Blake2S M128)
+              (optional_key_blake2s no_key key_size)
 
 inline_for_extraction noextract
 let mk_blake2s_128_update (no_key : bool) (key_size : key_size_t Spec.Blake2S no_key) =
-  F.update (blake2 Spec.Blake2S M128 no_key key_size) (G.hide ()) (s Spec.Blake2S M128)
-           (I.optional_key () I.Erased (k Spec.Blake2S no_key key_size))
+  F.update (blake2s_128 no_key key_size) (G.hide ()) (s Spec.Blake2S M128)
+           (optional_key_blake2s no_key key_size)
 
 inline_for_extraction noextract
-let mk_blake2s_128_blake2s_128_finish (no_key : bool) (key_size : key_size_t Spec.Blake2S no_key) =
-  F.mk_finish (blake2 Spec.Blake2S M128 no_key key_size) () (s Spec.Blake2S M128)
-              (I.optional_key () I.Erased (k Spec.Blake2S no_key key_size))
+let mk_blake2s_128_finish (no_key : bool) (key_size : key_size_t Spec.Blake2S no_key) =
+  F.mk_finish (blake2s_128 no_key key_size) () (s Spec.Blake2S M128)
+              (optional_key_blake2s no_key key_size)
 
 inline_for_extraction noextract
 let mk_blake2s_128_free (no_key : bool) (key_size : key_size_t Spec.Blake2S no_key) =
-  F.free (blake2 Spec.Blake2S M128 no_key key_size) (G.hide ()) (s Spec.Blake2S M128)
-         (I.optional_key () I.Erased (k Spec.Blake2S no_key key_size))
+  F.free (blake2s_128 no_key key_size) (G.hide ()) (s Spec.Blake2S M128)
+         (optional_key_blake2s no_key key_size)
 
 inline_for_extraction noextract
 let mk_blake2b_32_create_in (no_key : bool) (key_size : key_size_t Spec.Blake2B no_key) =
-  F.create_in (blake2 Spec.Blake2B M32 no_key key_size) () (s Spec.Blake2B M32)
-              (I.optional_key () I.Erased (k Spec.Blake2B no_key key_size))
+  F.create_in (blake2b_32 no_key key_size) () (s Spec.Blake2B M32)
+              (optional_key_blake2b no_key key_size)
 
 inline_for_extraction noextract
 let mk_blake2b_32_update (no_key : bool) (key_size : key_size_t Spec.Blake2B no_key) =
-  F.update (blake2 Spec.Blake2B M32 no_key key_size) (G.hide ()) (s Spec.Blake2B M32)
-           (I.optional_key () I.Erased (k Spec.Blake2B no_key key_size))
+  F.update (blake2b_32 no_key key_size) (G.hide ()) (s Spec.Blake2B M32)
+           (optional_key_blake2b no_key key_size)
 
 inline_for_extraction noextract
-let mk_blake2b_32_blake2b_32_finish (no_key : bool) (key_size : key_size_t Spec.Blake2B no_key) =
-  F.mk_finish (blake2 Spec.Blake2B M32 no_key key_size) () (s Spec.Blake2B M32)
-              (I.optional_key () I.Erased (k Spec.Blake2B no_key key_size))
+let mk_blake2b_32_finish (no_key : bool) (key_size : key_size_t Spec.Blake2B no_key) =
+  F.mk_finish (blake2b_32 no_key key_size) () (s Spec.Blake2B M32)
+              (optional_key_blake2b no_key key_size)
 
 inline_for_extraction noextract
 let mk_blake2b_32_free (no_key : bool) (key_size : key_size_t Spec.Blake2B no_key) =
-  F.free (blake2 Spec.Blake2B M32 no_key key_size) (G.hide ()) (s Spec.Blake2B M32)
-         (I.optional_key () I.Erased (k Spec.Blake2B no_key key_size))
+  F.free (blake2b_32 no_key key_size) (G.hide ()) (s Spec.Blake2B M32)
+         (optional_key_blake2b no_key key_size)
 
 inline_for_extraction noextract
 let mk_blake2b_256_create_in (no_key : bool) (key_size : key_size_t Spec.Blake2B no_key) =
-  F.create_in (blake2 Spec.Blake2B M256 no_key key_size) () (s Spec.Blake2B M256)
-              (I.optional_key () I.Erased (k Spec.Blake2B no_key key_size))
+  F.create_in (blake2b_256 no_key key_size) () (s Spec.Blake2B M256)
+              (optional_key_blake2b no_key key_size)
 
 inline_for_extraction noextract
 let mk_blake2b_256_update (no_key : bool) (key_size : key_size_t Spec.Blake2B no_key) =
-  F.update (blake2 Spec.Blake2B M256 no_key key_size) (G.hide ()) (s Spec.Blake2B M256)
-           (I.optional_key () I.Erased (k Spec.Blake2B no_key key_size))
+  F.update (blake2b_256 no_key key_size) (G.hide ()) (s Spec.Blake2B M256)
+           (optional_key_blake2b no_key key_size)
 
 inline_for_extraction noextract
-let mk_blake2b_256_blake2b_256_finish (no_key : bool) (key_size : key_size_t Spec.Blake2B no_key) =
-  F.mk_finish (blake2 Spec.Blake2B M256 no_key key_size) () (s Spec.Blake2B M256)
-              (I.optional_key () I.Erased (k Spec.Blake2B no_key key_size))
+let mk_blake2b_256_finish (no_key : bool) (key_size : key_size_t Spec.Blake2B no_key) =
+  F.mk_finish (blake2b_256 no_key key_size) () (s Spec.Blake2B M256)
+              (optional_key_blake2b no_key key_size)
 
 inline_for_extraction noextract
 let mk_blake2b_256_free (no_key : bool) (key_size : key_size_t Spec.Blake2B no_key) =
-  F.free (blake2 Spec.Blake2B M256 no_key key_size) (G.hide ()) (s Spec.Blake2B M256)
-         (I.optional_key () I.Erased (k Spec.Blake2B no_key key_size))
+  F.free (blake2b_256 no_key key_size) (G.hide ()) (s Spec.Blake2B M256)
+         (optional_key_blake2b no_key key_size)
+
+/// The incremental hash functions instantiations. Note that we can't write a
+/// generic one, because the normalization then performed by Kremlin explodes.
+
+/// First, the functions which don't use a key
+
+inline_for_extraction noextract
+[@ (Comment "  State allocation function when there is no key")]
+let mk_blake2s_32_no_key_create_in =
+  F.create_in (blake2s_32 true 0ul) () (s Spec.Blake2S M32)
+              (optional_key_blake2s true 0ul)
+
+inline_for_extraction noextract
+[@ (Comment "  Update function when there is no key")]
+let mk_blake2s_32_no_key_update =
+  F.update (blake2 Spec.Blake2S M32 true 0ul) (G.hide ()) (s Spec.Blake2S M32)
+           (optional_key_blake2s true 0ul)
+
+inline_for_extraction noextract
+[@ (Comment "  Finish function when there is no key")]
+let mk_blake2s_32_no_key_finish =
+  F.mk_finish (blake2s_32 true 0ul) () (s Spec.Blake2S M32)
+              (optional_key_blake2s true 0ul)
+
+inline_for_extraction noextract
+[@ (Comment "  Free state function when there is no key")]
+let mk_blake2s_32_no_key_free =
+  F.free (blake2s_32 true 0ul) (G.hide ()) (s Spec.Blake2S M32)
+         (optional_key_blake2s true 0ul)
+
+inline_for_extraction noextract
+[@ (Comment "  State allocation function when there is no key")]
+let mk_blake2s_128_no_key_create_in =
+  F.create_in (blake2s_128 true 0ul) () (s Spec.Blake2S M128)
+              (optional_key_blake2s true 0ul)
+
+inline_for_extraction noextract
+[@ (Comment "  Update function when there is no key")]
+let mk_blake2s_128_no_key_update =
+  F.update (blake2s_128 true 0ul) (G.hide ()) (s Spec.Blake2S M128)
+           (optional_key_blake2s true 0ul)
+
+inline_for_extraction noextract
+[@ (Comment "  Finish function when there is no key")]
+let mk_blake2s_128_no_key_128_finish =
+  F.mk_finish (blake2s_128 true 0ul) () (s Spec.Blake2S M128)
+              (optional_key_blake2s true 0ul)
+
+inline_for_extraction noextract
+[@ (Comment "  Free state function when there is no key")]
+let mk_blake2s_128_no_key_free =
+  F.free (blake2s_128 true 0ul) (G.hide ()) (s Spec.Blake2S M128)
+         (optional_key_blake2s true 0ul)
+
+inline_for_extraction noextract
+[@ (Comment "  State allocation function when there is no key")]
+let mk_blake2b_32_no_key_create_in =
+  F.create_in (blake2b_32 true 0ul) () (s Spec.Blake2B M32)
+              (optional_key_blake2b true 0ul)
+
+inline_for_extraction noextract
+[@ (Comment "  Update function when there is no key")]
+let mk_blake2b_32_no_key_update =
+  F.update (blake2b_32 true 0ul) (G.hide ()) (s Spec.Blake2B M32)
+           (optional_key_blake2b true 0ul)
+
+inline_for_extraction noextract
+[@ (Comment "  Finish function when there is no key")]
+let mk_blake2b_32_no_key_finish =
+  F.mk_finish (blake2b_32 true 0ul) () (s Spec.Blake2B M32)
+              (optional_key_blake2b true 0ul)
+
+inline_for_extraction noextract
+[@ (Comment "  Free state function when there is no key")]
+let mk_blake2b_32_no_key_free =
+  F.free (blake2b_32 true 0ul) (G.hide ()) (s Spec.Blake2B M32)
+         (optional_key_blake2b true 0ul)
+
+inline_for_extraction noextract
+[@ (Comment "  State allocation function when there is no key")]
+let mk_blake2b_256_no_key_create_in =
+  F.create_in (blake2b_256 true 0ul) () (s Spec.Blake2B M256)
+              (optional_key_blake2b true 0ul)
+
+inline_for_extraction noextract
+[@ (Comment "  Update function when there is no key")]
+let mk_blake2b_256_no_key_update =
+  F.update (blake2b_256 true 0ul) (G.hide ()) (s Spec.Blake2B M256)
+           (optional_key_blake2b true 0ul)
+
+inline_for_extraction noextract
+[@ (Comment "  Finish function when there is no key")]
+let mk_blake2b_256_no_key_finish =
+  F.mk_finish (blake2b_256 true 0ul) () (s Spec.Blake2B M256)
+              (optional_key_blake2b true 0ul)
+
+inline_for_extraction noextract
+[@ (Comment "  Free state function when there is no key")]
+let mk_blake2b_256_no_key_free =
+  F.free (blake2b_256 true 0ul) (G.hide ()) (s Spec.Blake2B M256)
+         (optional_key_blake2b true 0ul)
+
+/// Second, the functions which may use a key
+inline_for_extraction noextract
+[@ (Comment "  State allocation function when using a (potentially null) key")]
+let mk_blake2s_32_with_key_create_in (key_size : key_size_t Spec.Blake2S false) =
+  F.create_in (blake2s_32 false key_size) () (s Spec.Blake2S M32)
+              (optional_key_blake2s false key_size)
+
+inline_for_extraction noextract
+[@ (Comment "  Update function when using a (potentially null) key")]
+let mk_blake2s_32_with_key_update (key_size : key_size_t Spec.Blake2S false) =
+  F.update (blake2 Spec.Blake2S M32 false key_size) (G.hide ()) (s Spec.Blake2S M32)
+           (optional_key_blake2s false key_size)
+
+inline_for_extraction noextract
+[@ (Comment "  Finish function when using a (potentially null) key")]
+let mk_blake2s_32_with_key_finish (key_size : key_size_t Spec.Blake2S false) =
+  F.mk_finish (blake2s_32 false key_size) () (s Spec.Blake2S M32)
+              (optional_key_blake2s false key_size)
+
+inline_for_extraction noextract
+[@ (Comment "  Free state function when using a (potentially null) key")]
+let mk_blake2s_32_with_key_free (key_size : key_size_t Spec.Blake2S false) =
+  F.free (blake2s_32 false key_size) (G.hide ()) (s Spec.Blake2S M32)
+         (optional_key_blake2s false key_size)
+
+inline_for_extraction noextract
+[@ (Comment "  State allocation function when using a (potentially null) key")]
+let mk_blake2s_128_with_key_create_in (key_size : key_size_t Spec.Blake2S false) =
+  F.create_in (blake2s_128 false key_size) () (s Spec.Blake2S M128)
+              (optional_key_blake2s false key_size)
+
+inline_for_extraction noextract
+[@ (Comment "  Update function when using a (potentially null) key")]
+let mk_blake2s_128_with_key_update (key_size : key_size_t Spec.Blake2S false) =
+  F.update (blake2s_128 false key_size) (G.hide ()) (s Spec.Blake2S M128)
+           (optional_key_blake2s false key_size)
+
+inline_for_extraction noextract
+[@ (Comment "  Finish function when using a (potentially null) key")]
+let mk_blake2s_128_with_key_128_finish (key_size : key_size_t Spec.Blake2S false) =
+  F.mk_finish (blake2s_128 false key_size) () (s Spec.Blake2S M128)
+              (optional_key_blake2s false key_size)
+
+inline_for_extraction noextract
+[@ (Comment "  Free state function when using a (potentially null) key")]
+let mk_blake2s_128_with_key_free (key_size : key_size_t Spec.Blake2S false) =
+  F.free (blake2s_128 false key_size) (G.hide ()) (s Spec.Blake2S M128)
+         (optional_key_blake2s false key_size)
+
+inline_for_extraction noextract
+[@ (Comment "  State allocation function when using a (potentially null) key")]
+let mk_blake2b_32_with_key_create_in (key_size : key_size_t Spec.Blake2B false) =
+  F.create_in (blake2b_32 false key_size) () (s Spec.Blake2B M32)
+              (optional_key_blake2b false key_size)
+
+inline_for_extraction noextract
+[@ (Comment "  Update function when using a (potentially null) key")]
+let mk_blake2b_32_with_key_update (key_size : key_size_t Spec.Blake2B false) =
+  F.update (blake2b_32 false key_size) (G.hide ()) (s Spec.Blake2B M32)
+           (optional_key_blake2b false key_size)
+
+inline_for_extraction noextract
+[@ (Comment "  Finish function when using a (potentially null) key")]
+let mk_blake2b_32_with_key_finish (key_size : key_size_t Spec.Blake2B false) =
+  F.mk_finish (blake2b_32 false key_size) () (s Spec.Blake2B M32)
+              (optional_key_blake2b false key_size)
+
+inline_for_extraction noextract
+[@ (Comment "  Free state function when using a (potentially null) key")]
+let mk_blake2b_32_with_key_free (key_size : key_size_t Spec.Blake2B false) =
+  F.free (blake2b_32 false key_size) (G.hide ()) (s Spec.Blake2B M32)
+         (optional_key_blake2b false key_size)
+
+inline_for_extraction noextract
+[@ (Comment "  State allocation function when using a (potentially null) key")]
+let mk_blake2b_256_with_key_create_in (key_size : key_size_t Spec.Blake2B false) =
+  F.create_in (blake2b_256 false key_size) () (s Spec.Blake2B M256)
+              (optional_key_blake2b false key_size)
+
+inline_for_extraction noextract
+[@ (Comment "  Update function when using a (potentially null) key")]
+let mk_blake2b_256_with_key_update (key_size : key_size_t Spec.Blake2B false) =
+  F.update (blake2b_256 false key_size) (G.hide ()) (s Spec.Blake2B M256)
+           (optional_key_blake2b false key_size)
+
+inline_for_extraction noextract
+[@ (Comment "  Finish function when using a (potentially null) key")]
+let mk_blake2b_256_with_key_finish (key_size : key_size_t Spec.Blake2B false) =
+  F.mk_finish (blake2b_256 false key_size) () (s Spec.Blake2B M256)
+              (optional_key_blake2b false key_size)
+
+inline_for_extraction noextract
+[@ (Comment "  Free state function when using a (potentially null) key")]
+let mk_blake2b_256_with_key_free (key_size : key_size_t Spec.Blake2B false) =
+  F.free (blake2b_256 false key_size) (G.hide ()) (s Spec.Blake2B M256)
+         (optional_key_blake2b false key_size)
