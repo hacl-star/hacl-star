@@ -153,8 +153,7 @@ let compare_felem #c a b =
       let r = logand(logand r01 r23) r45 in 
       r
     
-
-
+(*
 inline_for_extraction noextract
 val load_buffer8: 
   a0: uint64 -> a1: uint64 -> 
@@ -184,6 +183,8 @@ let load_buffer8 a0 a1 a2 a3 a4 a5 a6 a7  o =
   upd o (size 5) a5;
   upd o (size 6) a6;
   upd o (size 7) a7
+*)
+
 
 (** This is unused *)
 inline_for_extraction noextract
@@ -300,7 +301,7 @@ let add4_with_carry c x y result =
 val add8: x: widefelem P256 -> y: widefelem P256 -> result: widefelem P256 -> Stack uint64 
   (requires fun h -> live h x /\ live h y /\ live h result /\ eq_or_disjoint x result /\ eq_or_disjoint y result)
   (ensures fun h0 c h1 -> modifies (loc result) h0 h1 /\ v c <= 1 /\ 
-    wide_as_nat h1 result + v c * pow2 512 == wide_as_nat h0 x + wide_as_nat h0 y)
+    wide_as_nat P256 h1 result + v c * pow2 512 == wide_as_nat P256 h0 x + wide_as_nat P256 h0 y)
 
 let add8 x y result = 
   assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 == pow2 256);
@@ -321,17 +322,17 @@ let add8 x y result =
 
     calc (==)
     {
-      wide_as_nat h0 x + wide_as_nat h0 y;
+      wide_as_nat P256 h0 x + wide_as_nat P256 h0 y;
       (==) 
       {
   distributivity_add_left (as_nat P256 h0 a1) (as_nat P256 h0 b1) (pow2 256)
       } 
-      wide_as_nat h1 result + uint_v carry1 * pow2 256 * pow2 256; 
+      wide_as_nat P256 h1 result + uint_v carry1 * pow2 256 * pow2 256; 
       (==) 
       {
   assert_norm (pow2 256 * pow2 256 = pow2 512)
       }
-      wide_as_nat h1 result + uint_v carry1 * pow2 512; 
+      wide_as_nat P256 h1 result + uint_v carry1 * pow2 512; 
    };
    
   carry1
@@ -678,7 +679,7 @@ val mul: f: felem P256 -> r: felem P256 -> out: widefelem P256 ->
   Stack unit
     (requires fun h -> live h out /\ live h f /\ live h r /\ disjoint r out)
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\ 
-      wide_as_nat h1 out = as_nat P256 h0 r * as_nat P256 h0 f
+      wide_as_nat P256 h1 out = as_nat P256 h0 r * as_nat P256 h0 f
     )
 
 let mul f r out =
@@ -726,7 +727,7 @@ let mul f r out =
     let h5 = ST.get() in
 
     calc (==) {
-    wide_as_nat h5 out;
+    wide_as_nat P256 h5 out;
     (==) {}
     uint_v (Lib.Sequence.index (as_seq h4 out) 0) +  
     uint_v (Lib.Sequence.index (as_seq h4 out) 1) * pow2 64 + 
@@ -1400,7 +1401,7 @@ let sq3 f f4 result memory tempBuffer =
 
 val sq: f: felem P256 -> out: widefelem P256 -> Stack unit
     (requires fun h -> live h out /\ live h f /\ eq_or_disjoint f out)
-    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\ wide_as_nat h1 out = as_nat P256 h0 f * as_nat P256 h0 f)
+    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\ wide_as_nat P256 h1 out = as_nat P256 h0 f * as_nat P256 h0 f)
       
 let sq f out =
   push_frame();
@@ -1472,7 +1473,7 @@ let sq f out =
     uint_v (Lib.Sequence.index (as_seq h4 out) 1) * pow2 64 + 
     uint_v (Lib.Sequence.index (as_seq h4 out) 0);
     (==) {}
-    wide_as_nat h4 out;};
+    wide_as_nat P256 h4 out;};
 
     calc (==)
     {
@@ -1537,7 +1538,7 @@ let lemma_shift_256 a b c d = ()
 val shift_256_impl: #c: curve -> i: felem c -> o: lbuffer uint64 (size (getCoordinateLenU64 c * 2)) -> 
   Stack unit 
     (requires fun h -> live h i /\ live h o /\ disjoint i o)
-    (ensures fun h0 _ h1 -> modifies1 o h0 h1 /\ wide_as_nat #c h1 o == as_nat c h0 i * pow2 256)
+    (ensures fun h0 _ h1 -> modifies1 o h0 h1 /\ wide_as_nat c h1 o == as_nat c h0 i * pow2 256)
 
 let shift_256_impl i o = 
   assert_norm(pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
@@ -1558,7 +1559,7 @@ let shift_256_impl i o =
 inline_for_extraction noextract
 val mod64: #c: curve -> a: widefelem c -> Stack uint64 
   (requires fun h -> live h a) 
-  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ wide_as_nat h1 a % pow2 64 = uint_v r)
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ wide_as_nat c h1 a % pow2 64 = uint_v r)
 
 let mod64 #c a =
   match c with 
@@ -1576,14 +1577,14 @@ let mod64 #c a =
 	let s5 = s.[5] in
 	let s6 = s.[6] in
 	let s7 = s.[7] in
-	wide_as_nat h1 a ==  
+	wide_as_nat c h1 a ==  
 	v s0 + v s1 * pow2 64 + v s2 * pow2 64 * pow2 64 +
 	v s3 * pow2 64 * pow2 64 * pow2 64 +
 	v s4 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
 	v s5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
 	v s6 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
 	v s7 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 /\
-	wide_as_nat h1 a % pow2 64 == v s0);
+	wide_as_nat c h1 a % pow2 64 == v s0);
 	r
    |P384 -> index a (size 0)
 
@@ -1591,10 +1592,10 @@ let mod64 #c a =
 
 inline_for_extraction noextract
 val shortened_mul: a: glbuffer uint64 (size 4) -> b: uint64 -> result: widefelem P256 -> Stack unit
-  (requires fun h -> live h a /\ live h result /\ wide_as_nat h result = 0)
+  (requires fun h -> live h a /\ live h result /\ wide_as_nat P256 h result = 0)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
-    as_nat_il h0 a * uint_v b = wide_as_nat h1 result /\ 
-    wide_as_nat h1 result < pow2 320)
+    as_nat_il h0 a * uint_v b = wide_as_nat P256 h1 result /\ 
+    wide_as_nat P256 h1 result < pow2 320)
 
 let shortened_mul a b result = 
   let result04 = sub result (size 0) (size 4) in 
@@ -1612,7 +1613,8 @@ let shortened_mul a b result =
 
 val shift8: t: widefelem P256 -> t1: widefelem P256 -> Stack unit 
   (requires fun h -> live h t /\ live h t1 /\ eq_or_disjoint t t1)
-  (ensures fun h0 _ h1 -> modifies (loc t1) h0 h1 /\ wide_as_nat h0 t / pow2 64 = wide_as_nat h1 t1)
+  (ensures fun h0 _ h1 -> modifies (loc t1) h0 h1 /\ 
+    wide_as_nat P256 h0 t / pow2 64 = wide_as_nat P256 h1 t1)
 
 let shift8 t out = 
   let t1 = index t (size 1) in 

@@ -29,19 +29,21 @@ inline_for_extraction noextract
 val add8_without_carry1: t: widefelem P256 -> t1: widefelem P256 -> result: widefelem P256 -> Stack unit
   (requires fun h -> 
     live h t /\ live h t1 /\ live h result /\ eq_or_disjoint t1 result /\ 
-    eq_or_disjoint t result /\ wide_as_nat h t1 < pow2 320 /\ wide_as_nat h t < prime256 * prime256
+    eq_or_disjoint t result /\ wide_as_nat P256 h t1 < pow2 320 /\ wide_as_nat P256 h t < prime256 * prime256
   )
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ wide_as_nat h1 result = wide_as_nat h0 t + wide_as_nat h0 t1)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ wide_as_nat P256 h1 result = wide_as_nat P256 h0 t + wide_as_nat P256 h0 t1)
+
 
 let add8_without_carry1 t t1 result  = 
   let _  = add8 t t1 result in 
     assert_norm (pow2 320 + prime256 * prime256 < pow2 512)
 
+
 inline_for_extraction
 val montgomery_multiplication_round: t: widefelem P256 -> round: widefelem P256 -> Stack unit 
-  (requires fun h -> live h t /\ live h round /\ wide_as_nat h t < prime256 * prime256)
+  (requires fun h -> live h t /\ live h round /\ wide_as_nat P256 h t < prime256 * prime256)
   (ensures fun h0 _ h1 -> modifies (loc round)  h0 h1 /\
-    wide_as_nat h1 round = (wide_as_nat h0 t + prime256 * (wide_as_nat h0 t % pow2 64)) / pow2 64
+    wide_as_nat P256 h1 round = (wide_as_nat P256 h0 t + prime256 * (wide_as_nat P256 h0 t % pow2 64)) / pow2 64
   )
 
 let montgomery_multiplication_round t round =
@@ -74,14 +76,14 @@ let montgomery_multiplication_one_round_proof t result co =
 
 inline_for_extraction noextract
 val montgomery_multiplication_round_twice: t: widefelem P256 -> result: widefelem P256 -> Stack unit 
-  (requires fun h -> live h t /\ live h result  /\ wide_as_nat h t < prime256 * prime256)
+  (requires fun h -> live h t /\ live h result  /\ wide_as_nat P256 h t < prime256 * prime256)
   (ensures fun h0 _ h1 -> 
     modifies (loc result) h0 h1 /\
     (
-      let round = (wide_as_nat h0 t + prime256 * (wide_as_nat h0 t % pow2 64)) / pow2 64 in 
-      wide_as_nat h1 result < prime256 * prime256 /\
-      wide_as_nat h1 result % prime256 == (wide_as_nat h0 t * modp_inv2_prime (pow2 128) prime256) % prime256 /\
-      wide_as_nat h1 result == (round + prime256 * (round % pow2 64)) / pow2 64
+      let round = (wide_as_nat P256 h0 t + prime256 * (wide_as_nat P256 h0 t % pow2 64)) / pow2 64 in 
+      wide_as_nat P256 h1 result < prime256 * prime256 /\
+      wide_as_nat P256 h1 result % prime256 == (wide_as_nat P256 h0 t * modp_inv2_prime (pow2 128) prime256) % prime256 /\
+      wide_as_nat P256 h1 result == (round + prime256 * (round % pow2 64)) / pow2 64
     )
  )
 
@@ -92,11 +94,11 @@ let montgomery_multiplication_round_twice t result =
       let h0 = ST.get() in 
     montgomery_multiplication_round t tempRound; 
       let h1 = ST.get() in 
-      montgomery_multiplication_one_round_proof (wide_as_nat h0 t)  (wide_as_nat #P256 h1 tempRound) (wide_as_nat h0 t);
+      montgomery_multiplication_one_round_proof (wide_as_nat P256 h0 t)  (wide_as_nat P256 h1 tempRound) (wide_as_nat P256 h0 t);
     montgomery_multiplication_round tempRound result;
       let h2 = ST.get() in 
-      montgomery_multiplication_one_round_proof (wide_as_nat #P256 h1 tempRound) (wide_as_nat h2 result) (wide_as_nat h0 t * modp_inv2_prime (pow2 64) prime256);
-      lemma_montgomery_mod_inverse_addition (wide_as_nat h0 t);
+      montgomery_multiplication_one_round_proof (wide_as_nat P256 h1 tempRound) (wide_as_nat P256 h2 result) (wide_as_nat P256 h0 t * modp_inv2_prime (pow2 64) prime256);
+      lemma_montgomery_mod_inverse_addition (wide_as_nat P256 h0 t);
   pop_frame()
 
 
@@ -120,22 +122,22 @@ let montgomery_multiplication_buffer_by_one a result =
       let h0 = ST.get() in 
     copy t_low a; 
       let h1 = ST.get() in 
-      assert(wide_as_nat #P256 h0 t = as_nat P256 h0 t_low + as_nat P256 h0 t_high * pow2 256);
+      assert(wide_as_nat P256 h0 t = as_nat P256 h0 t_low + as_nat P256 h0 t_high * pow2 256);
       assert_norm (prime256 < prime256 * prime256);
     montgomery_multiplication_round_twice t round2;
       let h2 = ST.get() in 
     montgomery_multiplication_round_twice round2 round4; 
-      lemma_montgomery_mod_inverse_addition2 (wide_as_nat #P256 h1 t);
-      lemma_mod_mul_distr_l (wide_as_nat #P256 h2 round2) (modp_inv2_prime (pow2 128) prime256) prime256;
-      lemma_mod_mul_distr_l (wide_as_nat #P256 h1 t * modp_inv2_prime (pow2 128) prime256) (modp_inv2_prime (pow2 128) prime256) prime256;
-	mul_lemma_2 (wide_as_nat #P256 h1 t % pow2 64) (pow2 64 - 1) prime256;
-	mul_lemma_2 (let round = (wide_as_nat #P256 h1 t + prime256 * (wide_as_nat #P256 h1 t % pow2 64)) / pow2 64 in round % pow2 64) (pow2 64 - 1) prime256;
+      lemma_montgomery_mod_inverse_addition2 (wide_as_nat P256 h1 t);
+      lemma_mod_mul_distr_l (wide_as_nat P256 h2 round2) (modp_inv2_prime (pow2 128) prime256) prime256;
+      lemma_mod_mul_distr_l (wide_as_nat P256 h1 t * modp_inv2_prime (pow2 128) prime256) (modp_inv2_prime (pow2 128) prime256) prime256;
+	mul_lemma_2 (wide_as_nat P256 h1 t % pow2 64) (pow2 64 - 1) prime256;
+	mul_lemma_2 (let round = (wide_as_nat P256 h1 t + prime256 * (wide_as_nat P256 h1 t % pow2 64)) / pow2 64 in round % pow2 64) (pow2 64 - 1) prime256;
 	mul_lemma_2 (
-	  let round = (wide_as_nat #P256 h1 t + prime256 * (wide_as_nat #P256 h1 t % pow2 64)) / pow2 64 in  
+	  let round = (wide_as_nat P256 h1 t + prime256 * (wide_as_nat P256 h1 t % pow2 64)) / pow2 64 in  
 	  let round2 = (round + prime256 * (round % pow2 64)) / pow2 64 in 
 	  round2 % pow2 64) (pow2 64 - 1) prime256;
 	mul_lemma_2 (	
-	  let round = (wide_as_nat #P256 h1 t + prime256 * (wide_as_nat #P256 h1 t % pow2 64)) / pow2 64 in  
+	  let round = (wide_as_nat P256 h1 t + prime256 * (wide_as_nat P256 h1 t % pow2 64)) / pow2 64 in  
 	  let round2 = (round + prime256 * (round % pow2 64)) / pow2 64 in 
 	  let round3 = (round2 + prime256 * (round2 % pow2 64)) / pow2 64 in   
 	  round3 % pow2 64) (pow2 64 - 1) prime256;
@@ -169,20 +171,20 @@ let montgomery_multiplication_buffer a b result =
       let h2 = ST.get() in 
   montgomery_multiplication_round_twice round2 round4; 
       let h3 = ST.get() in 
-	lemma_montgomery_mod_inverse_addition2 (wide_as_nat #P256 h1 t);
-	lemma_mod_mul_distr_l (wide_as_nat #P256 h2 round2) (modp_inv2_prime (pow2 128) prime256) prime256;
-	lemma_mod_mul_distr_l (wide_as_nat #P256 h1 t * modp_inv2_prime (pow2 128) prime256) (modp_inv2_prime (pow2 128) prime256) prime256;
-      mul_lemma_2 (wide_as_nat #P256 h1 t % pow2 64) (pow2 64 - 1) prime256;
+	lemma_montgomery_mod_inverse_addition2 (wide_as_nat P256 h1 t);
+	lemma_mod_mul_distr_l (wide_as_nat P256 h2 round2) (modp_inv2_prime (pow2 128) prime256) prime256;
+	lemma_mod_mul_distr_l (wide_as_nat P256 h1 t * modp_inv2_prime (pow2 128) prime256) (modp_inv2_prime (pow2 128) prime256) prime256;
+      mul_lemma_2 (wide_as_nat P256 h1 t % pow2 64) (pow2 64 - 1) prime256;
       mul_lemma_ (as_nat P256 h0 a) (as_nat P256 h0 b) prime256;
       mul_lemma_1 ( 
-         let round = (wide_as_nat #P256 h1 t + prime256 * (wide_as_nat #P256 h1 t % pow2 64)) / pow2 64 in  
+         let round = (wide_as_nat P256 h1 t + prime256 * (wide_as_nat P256 h1 t % pow2 64)) / pow2 64 in  
 	 round % pow2 64) (pow2 64) prime256; 
       mul_lemma_1 ( 
-	let round = (wide_as_nat #P256 h1 t + prime256 * (wide_as_nat #P256 h1 t % pow2 64)) / pow2 64 in 
+	let round = (wide_as_nat P256 h1 t + prime256 * (wide_as_nat P256 h1 t % pow2 64)) / pow2 64 in 
 	let round2 = (round + prime256 * (round % pow2 64)) / pow2 64 in 
 	round2 % pow2 64) (pow2 64) prime256; 
       mul_lemma_1 ( 
-	let round = (wide_as_nat #P256 h1 t + prime256 * (wide_as_nat #P256 h1 t % pow2 64)) / pow2 64 in 
+	let round = (wide_as_nat P256 h1 t + prime256 * (wide_as_nat P256 h1 t % pow2 64)) / pow2 64 in 
 	let round2 = (round + prime256 * (round % pow2 64)) / pow2 64 in 
 	let round3 = (round2 + prime256 * (round2 % pow2 64)) / pow2 64 in 
 	round3 % pow2 64) (pow2 64) prime256;  
@@ -209,10 +211,23 @@ val montgomery_square_buffer: #c: curve -> a: felem c -> result: felem c ->  Sta
   )
 
 
-let montgomery_square_buffer #c a result = 
-  match c with 
-  |P384 -> admit()
-  |P256 -> 
+val montgomery_square_buffer_p256: a: felem P256 -> result: felem P256 -> Stack unit
+  (requires (fun h -> live h a /\ as_nat P256 h a < (getPrime P256) /\ live h result)) 
+  (ensures (fun h0 _ h1 -> 
+    (
+      let c = P256 in 
+      let prime = getPrime P256 in 
+      modifies (loc result) h0 h1 /\  
+      as_nat P256 h1 result < prime /\ 
+      as_nat P256 h1 result = (as_nat c h0 a * as_nat c h0 a * modp_inv2_prime (getPower c) prime) % prime /\
+      as_nat c h1 result = toDomain_ (fromDomain_ (as_nat c h0 a) * fromDomain_ (as_nat c h0 a) % prime) /\
+      as_nat c h1 result = toDomain_ (fromDomain_ (as_nat c h0 a) * fromDomain_ (as_nat c h0 a)))
+    )
+  )
+
+
+
+let montgomery_square_buffer_p256 a result = 
     assert_norm(prime256 > 3);
     push_frame();
     
@@ -227,17 +242,17 @@ let montgomery_square_buffer #c a result =
       let h2 = ST.get() in 
     montgomery_multiplication_round_twice round2 round4; 
       let h3 = ST.get() in 
-    lemma_montgomery_mod_inverse_addition2 (wide_as_nat #P256 h1 t);
-    lemma_mod_mul_distr_l (wide_as_nat #P256 h2 round2) (modp_inv2_prime (pow2 128) prime256) prime256;
-    lemma_mod_mul_distr_l (wide_as_nat #P256 h1 t * modp_inv2_prime (pow2 128) prime256) (modp_inv2_prime (pow2 128) prime256) prime256;
-    mul_lemma_2 (wide_as_nat #P256 h1 t % pow2 64) (pow2 64 - 1) prime256;
+    lemma_montgomery_mod_inverse_addition2 (wide_as_nat P256 h1 t);
+    lemma_mod_mul_distr_l (wide_as_nat P256 h2 round2) (modp_inv2_prime (pow2 128) prime256) prime256;
+    lemma_mod_mul_distr_l (wide_as_nat P256 h1 t * modp_inv2_prime (pow2 128) prime256) (modp_inv2_prime (pow2 128) prime256) prime256;
+    mul_lemma_2 (wide_as_nat P256 h1 t % pow2 64) (pow2 64 - 1) prime256;
     mul_lemma_ (as_nat P256 h0 a) (as_nat P256 h0 a) prime256;
     mul_lemma_1 ( 
-      let round = (wide_as_nat #P256 h1 t + prime256 * (wide_as_nat #P256 h1 t % pow2 64)) / pow2 64 in round % pow2 64) (pow2 64) prime256; 
-    mul_lemma_1 (let round = (wide_as_nat #P256  h1 t + prime256 * (wide_as_nat #P256 h1 t % pow2 64)) / pow2 64 in 
+      let round = (wide_as_nat P256 h1 t + prime256 * (wide_as_nat P256 h1 t % pow2 64)) / pow2 64 in round % pow2 64) (pow2 64) prime256; 
+    mul_lemma_1 (let round = (wide_as_nat P256  h1 t + prime256 * (wide_as_nat P256 h1 t % pow2 64)) / pow2 64 in 
       let round2 = (round + prime256 * (round % pow2 64)) / pow2 64 in 
  round2 % pow2 64) (pow2 64) prime256; 
-   mul_lemma_1 (let round = (wide_as_nat #P256 h1 t + prime256 * (wide_as_nat #P256 h1 t % pow2 64)) / pow2 64 in 
+   mul_lemma_1 (let round = (wide_as_nat P256 h1 t + prime256 * (wide_as_nat P256 h1 t % pow2 64)) / pow2 64 in 
      let round2 = (round + prime256 * (round % pow2 64)) / pow2 64 in 
      let round3 = (round2 + prime256 * (round2 % pow2 64)) / pow2 64 in round3 % pow2 64) (pow2 64) prime256;  
       assert_norm((prime256 * pow2 64 + (prime256 * pow2 64 + (prime256 * pow2 64 + ((pow2 64 - 1) * prime256 + prime256 * prime256) / pow2 64) / pow2 64)/ pow2 64) / pow2 64 < 2 * prime256);
@@ -247,6 +262,14 @@ let montgomery_square_buffer #c a result =
    multiplicationInDomainNat #(fromDomain_ (as_nat P256 h0 a)) #(fromDomain_ (as_nat P256 h0 a))  (as_nat P256 h0 a) (as_nat P256 h0 a);
    inDomain_mod_is_not_mod (fromDomain_ (as_nat P256 h0 a) * fromDomain_ (as_nat P256 h0 a));
    pop_frame()  
+
+
+
+let montgomery_square_buffer #c a result = 
+  match c with 
+  |P384 -> admit()
+  |P256 -> montgomery_square_buffer_p256 a result
+   
 
 
 #reset-options "--z3rlimit 500" 

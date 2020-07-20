@@ -325,7 +325,6 @@ let point_double_a_b_g #c p alpha beta gamma delta tempBuffer =
   let pY = sub p (size coordinateLen) (size coordinateLen) in 
   let pZ = sub p (size (2 * coordinateLen)) (size coordinateLen) in 
 
-  admit();
   let a0 = sub tempBuffer (size 0) (size coordinateLen) in 
   let a1 = sub tempBuffer (size coordinateLen) (size coordinateLen) in 
   let alpha0 = sub tempBuffer (size (2 * coordinateLen)) (size coordinateLen) in 
@@ -333,9 +332,8 @@ let point_double_a_b_g #c p alpha beta gamma delta tempBuffer =
   
   montgomery_square_buffer pZ delta; (* delta = z * z*)
   montgomery_square_buffer pY gamma; (* gamma = y * y *)
-  admit();
-  (*montgomery_multiplication_buffer pX gamma beta; (* beta = x * gamma *)
-
+  montgomery_multiplication_buffer pX gamma beta; (* beta = x * gamma *)
+(*
   let h0 = ST.get() in 
 
   p256_sub pX delta a0; (* a0 = x - delta *)

@@ -70,8 +70,8 @@ let reduction_prime256_2prime256_with_carry_impl cin x result =
 inline_for_extraction
 val reduction_prime256_2prime256_8_with_carry_impl: x: widefelem P256 -> result: felem P256 -> 
   Stack unit 
-    (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result /\ wide_as_nat h x < 2 * prime256)
-    (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat P256 h1 result = wide_as_nat h0 x % prime256)
+    (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result /\ wide_as_nat P256 h x < 2 * prime256)
+    (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat P256 h1 result = wide_as_nat P256 h0 x % prime256)
 
 let reduction_prime256_2prime256_8_with_carry_impl x result = 
   push_frame();
@@ -89,14 +89,14 @@ let reduction_prime256_2prime256_8_with_carry_impl x result =
     cmovznz4 carry tempBuffer x_ result; 
       let h4 = ST.get() in 
       assert_norm (pow2 256 > prime256);
-      assert(if (wide_as_nat h0 x < prime256) then begin
-      small_modulo_lemma_1 (wide_as_nat h0 x) prime256;
-      as_nat P256 h4 result = (wide_as_nat h0 x) % prime256 end 
+      assert(if (wide_as_nat P256 h0 x < prime256) then begin
+      small_modulo_lemma_1 (wide_as_nat P256 h0 x) prime256;
+      as_nat P256 h4 result = (wide_as_nat P256 h0 x) % prime256 end 
       else 
 	begin 
 	small_modulo_lemma_1 (as_nat P256 h4 result) prime256;
-	lemma_mod_sub (wide_as_nat h0 x) prime256 1;
-	as_nat  P256 h4 result = (wide_as_nat h0 x) % prime256
+	lemma_mod_sub (wide_as_nat P256 h0 x) prime256 1;
+	as_nat  P256 h4 result = (wide_as_nat P256 h0 x) % prime256
 	end );
  pop_frame()
 
