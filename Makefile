@@ -760,8 +760,8 @@ dist/wasm/Makefile.basic: CHACHAPOLY_BUNDLE += \
 dist/wasm/Makefile.basic: POLY_BUNDLE = \
   -bundle 'Hacl.Poly1305_32=Hacl.Impl.Poly1305.Field32xN_32' \
   -bundle 'Hacl.Poly1305_128,Hacl.Poly1305_256,Hacl.Impl.Poly1305.*'
-dist/wasm/Makefile.basic: BLAKE2_BUNDLE = \
-  -bundle 'Hacl.Hash.Blake2s_128,Hacl.Hash.Blake2b_256,Hacl.HMAC.Blake2s_128,Hacl.HMAC.Blake2b_256'
+dist/wasm/Makefile.basic: BLAKE2_BUNDLE += \
+  -bundle 'Hacl.Blake2s_128,Hacl.Blake2b_256,Hacl.HMAC.Blake2s_128,Hacl.HMAC.Blake2b_256,Hacl.HKDF.Blake2s_128,Hacl.HKDF.Blake2b_256'
 
 dist/wasm/Makefile.basic: STREAMING_BUNDLE = -bundle Hacl.Streaming.*
 
@@ -931,7 +931,7 @@ dist/mozilla/Makefile.basic: NACLBOX_BUNDLE = -bundle Hacl.NaCl
 dist/mozilla/Makefile.basic: E_HASH_BUNDLE =
 dist/mozilla/Makefile.basic: MERKLE_BUNDLE = -bundle MerkleTree.*,MerkleTree
 dist/mozilla/Makefile.basic: CTR_BUNDLE =
-dist/mozilla/Makefile.basic: BLAKE2_BUNDLE = -bundle Hacl.Impl.Blake2.*,Hacl.Blake2b_256,Hacl.Blake2s_128,Hacl.Blake2b_32,Hacl.Blake2s_32
+dist/mozilla/Makefile.basic: BLAKE2_BUNDLE = -bundle Hacl.Impl.Blake2.*,Hacl.Blake2b_256,Hacl.Blake2s_128,Hacl.Blake2b_32,Hacl.Blake2s_32,Hacl.HMAC.Blake2b_256,Hacl.HMAC.Blake2s_128,Hacl.HKDF.Blake2b_256,Hacl.HKDF.Blake2s_128
 dist/mozilla/Makefile.basic: SHA3_BUNDLE = -bundle Hacl.SHA3
 dist/mozilla/Makefile.basic: HASH_BUNDLE = -bundle Hacl.Hash.*,Hacl.HKDF,Hacl.HMAC,Hacl.HMAC_DRBG
 dist/mozilla/Makefile.basic: HPKE_BUNDLE = -bundle 'Hacl.HPKE.*'
