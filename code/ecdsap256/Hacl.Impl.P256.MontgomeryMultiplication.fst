@@ -146,7 +146,7 @@ let montgomery_multiplication_buffer_by_one a result =
   pop_frame()  
 
 
-val montgomery_multiplication_buffer: a: felem P256 -> b: felem P256 -> result: felem P256 ->  Stack unit
+val montgomery_multiplication_buffer_p256: a: felem P256 -> b: felem P256 -> result: felem P256 ->  Stack unit
   (requires (fun h -> live h a /\ as_nat P256 h a < prime256 /\ live h b /\ live h result /\ as_nat P256 h b < prime256)) 
   (ensures (fun h0 _ h1 -> 
     modifies (loc result) h0 h1 /\  
@@ -157,7 +157,7 @@ val montgomery_multiplication_buffer: a: felem P256 -> b: felem P256 -> result: 
   )
 
 
-let montgomery_multiplication_buffer a b result = 
+let montgomery_multiplication_buffer_p256 a b result = 
   assert_norm(prime256 > 3);
   push_frame();
     let t = create (size 8) (u64 0) in 
@@ -195,6 +195,23 @@ let montgomery_multiplication_buffer a b result =
   multiplicationInDomainNat #(fromDomain_ (as_nat P256 h0 a)) #(fromDomain_ (as_nat P256 h0 b))  (as_nat P256 h0 a) (as_nat P256 h0 b);
   inDomain_mod_is_not_mod (fromDomain_ (as_nat P256 h0 a) * fromDomain_ (as_nat P256 h0 b));
   pop_frame()  
+
+
+val montgomery_multiplication_buffer: #c: curve -> a: felem c -> b: felem c -> result: felem c ->  Stack unit
+  (requires (fun h -> live h a /\ as_nat c h a < getPrime c /\ live h b /\ live h result /\ as_nat c h b < getPrime c)) 
+  (ensures (fun h0 _ h1 -> 
+    modifies (loc result) h0 h1 /\  
+    as_nat c h1 result < getPrime c /\
+    as_nat c h1 result = (as_nat c h0 a * as_nat c h0 b * modp_inv2_prime (pow2 (getPower c)) (getPrime c)) % getPrime c /\
+    as_nat c h1 result = toDomain_ (fromDomain_ (as_nat c h0 a) * fromDomain_ (as_nat c h0 b) % getPrime c) /\
+    as_nat c h1 result = toDomain_ (fromDomain_ (as_nat c h0 a) * fromDomain_ (as_nat c h0 b)))
+  )
+
+
+let montgomery_multiplication_buffer #c a b result = 
+  match c with 
+  |P256 -> montgomery_multiplication_buffer_p256 a b result
+  |P384 -> admit()
 
 
 val montgomery_square_buffer: #c: curve -> a: felem c -> result: felem c ->  Stack unit

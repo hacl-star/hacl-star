@@ -179,6 +179,26 @@ let p256_add arg1 arg2 out =
   inDomain_mod_is_not_mod (fromDomain_ (as_nat P256 h0 arg1) + fromDomain_ (as_nat P256 h0 arg2))
 
 
+val felem_add: #c: curve -> a: felem c -> b: felem c -> out: felem c -> Stack unit
+  (requires (fun h0 ->  
+    live h0 a /\ live h0 b /\ live h0 out /\ eq_or_disjoint a out /\ eq_or_disjoint b out /\
+    as_nat c h0 a < getPrime c /\ as_nat c h0 b < getPrime c 
+   )
+  )
+  (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\ 
+      as_nat c h1 out == (as_nat c h0 a + as_nat c h0 b) % getPrime c /\
+      as_nat c h1 out == toDomain_ ((fromDomain_ (as_nat c h0 a) + fromDomain_ (as_nat c h0 b)) % getPrime c)
+    )
+  )
+
+
+let felem_add #c a b out = 
+  match c with 
+  |P256 -> p256_add a b out
+  |P384 -> admit()
+
+
+
 val p256_double: arg1: felem P256 ->  out: felem P256 -> Stack unit 
   (requires (fun h0 ->  live h0 arg1 /\ live h0 out /\ eq_or_disjoint arg1 out /\ as_nat P256 h0 arg1 < prime256))
   (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\ 
@@ -193,6 +213,20 @@ let p256_double arg1 out =
   reduction_prime256_2prime256_with_carry_impl t out out;
   additionInDomain (as_nat P256 h0 arg1) (as_nat P256 h0 arg1);
   inDomain_mod_is_not_mod (fromDomain_ (as_nat P256 h0 arg1) + fromDomain_ (as_nat P256 h0 arg1))
+
+
+val felem_double: #c: curve -> arg1: felem c -> out: felem c -> Stack unit 
+  (requires (fun h0 -> live h0 arg1 /\ live h0 out /\ eq_or_disjoint arg1 out /\ as_nat c h0 arg1 < getPrime c))
+  (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\ 
+    as_nat c h1 out == (2 * as_nat c h0 arg1) % getPrime c /\ as_nat c h1 out < getPrime c /\
+    as_nat c h1 out == toDomain_ (2 * fromDomain_ (as_nat c h0 arg1) % getPrime c)
+  )
+)
+
+let felem_double #c arg1 out = 
+  match c with 
+  |P256 -> p256_double arg1 out
+  |P384 -> admit()
 
 
 val p256_sub: arg1: felem P256 -> arg2: felem P256 -> out: felem P256 -> Stack unit 
@@ -233,3 +267,20 @@ let p256_sub arg1 arg2 out =
     substractionInDomain (felem_seq_as_nat (as_seq h0 arg1)) (felem_seq_as_nat (as_seq h0 arg2));
     inDomain_mod_is_not_mod (fromDomain_ (felem_seq_as_nat (as_seq h0 arg1)) - fromDomain_ (felem_seq_as_nat (as_seq h0 arg2)))
 
+
+val felem_sub: #c: curve -> arg1: felem c -> arg2: felem c -> out: felem c -> Stack unit 
+  (requires 
+    (fun h0 -> live h0 out /\ live h0 arg1 /\ live h0 arg2 /\ 
+      eq_or_disjoint arg1 out /\ eq_or_disjoint arg2 out /\
+      as_nat c h0 arg1 < getPrime c /\ as_nat c h0 arg2 < getPrime c))
+    (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\ 
+	as_nat c h1 out == (as_nat c h0 arg1 - as_nat c h0 arg2) % getPrime c /\
+	as_nat c h1 out == toDomain_ ((fromDomain_ (as_nat c h0 arg1) - fromDomain_ (as_nat c h0 arg2)) % getPrime c)
+    )
+)    
+
+
+let felem_sub #c arg1 arg2 out = 
+  match c with 
+  |P256 -> p256_sub arg1 arg2 out
+  |P384 -> admit()

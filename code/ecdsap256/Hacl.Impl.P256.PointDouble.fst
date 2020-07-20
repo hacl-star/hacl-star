@@ -333,9 +333,10 @@ let point_double_a_b_g #c p alpha beta gamma delta tempBuffer =
   montgomery_square_buffer pZ delta; (* delta = z * z*)
   montgomery_square_buffer pY gamma; (* gamma = y * y *)
   montgomery_multiplication_buffer pX gamma beta; (* beta = x * gamma *)
-(*
+  
   let h0 = ST.get() in 
 
+  (*
   p256_sub pX delta a0; (* a0 = x - delta *)
   p256_add pX delta a1; (* a1 = x + delta *)
   montgomery_multiplication_buffer a0 a1 alpha0; (* alpha = (x - delta) * (x + delta) *)
@@ -359,7 +360,7 @@ let point_double_a_b_g #c p alpha beta gamma delta tempBuffer =
 
 
 
- ()
+ admit()
 
 (*
 
