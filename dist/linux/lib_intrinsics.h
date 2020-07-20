@@ -1,10 +1,17 @@
 #pragma once
 
 #include <sys/types.h>
-#include <x86intrin.h>
 
 #if __has_include("config.h")
 #include "config.h"
+#endif
+
+#if !defined(BROKEN_INTRINSICS)
+#if defined(_MSC_VER)
+#include <immintrin.h>
+#else
+#include <x86intrin.h>
+#endif
 #endif
 
 #if defined(BROKEN_INTRINSICS)

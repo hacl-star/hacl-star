@@ -76,7 +76,7 @@ OBJS 		+= $(patsubst %.S,%.o,$(wildcard *-$(MARCH)$(VARIANT).S))
 -include Makefile.config
 include Makefile.basic
 
-CFLAGS		+= -Wno-parentheses -Wno-deprecated-declarations -g -std=gnu11 -O3
+CFLAGS		+= -Wno-parentheses -Wno-deprecated-declarations -Wno-\#warnings -Wno-error=cpp -Wno-cpp -g -std=gnu11 -O3
 CFLAGS_128 ?= -mavx
 CFLAGS_256 ?= -mavx -mavx2
 
@@ -85,8 +85,12 @@ Hacl_Hash_Blake2b_256 Hacl_HMAC_Blake2b_256 Hacl_HKDF_Blake2b_256 Hacl_Blake2b_2
 
 all: libevercrypt.$(SO)
 
-libevercrypt.$(SO): $(OBJS)
-	$(CC) $(CFLAGS) -shared -o $@ $^ $(LDFLAGS)
+libevercrypt.$(SO): config.h $(OBJS)
+	$(CC) $(CFLAGS) -shared -o $@ $(filter-out %.h,$^) $(LDFLAGS)
+
+# If the configure script has not run, create an empty config.h
+config.h:
+	touch $@
 
 # 4. Compilation of OCaml bindings; conditional on the presence of the lib_gen
 # folder, possibly disabled by configure.
@@ -99,13 +103,17 @@ ifneq (,$(wildcard lib_gen))
 OCAMLOPT=ocamlfind opt -package ctypes,ctypes.foreign,ctypes.stubs -linkpkg -I lib
 OCAMLDEP=ocamlfind dep -I lib -slash
 
+OCAMLC=ocamlfind c -g -package ctypes,ctypes.foreign,ctypes.stubs -linkpkg -I lib
+
 CFLAGS += -I "$(shell ocamlfind query ctypes)" -I "$(shell ocamlfind c -where)"
 
-# Just names.
-ALL_OCAML=$(patsubst lib_gen/%_gen.ml,%,$(wildcard lib_gen/*_gen.ml))
+# Don't include bindings for files that cannot be compiled.
+BLACKLIST_ML=$(patsubst %.c,%,$(BLACKLIST))
+ALL_OCAML=$(filter-out $(BLACKLIST_ML),$(patsubst lib_gen/%_gen.ml,%,$(wildcard lib_gen/*_gen.ml)))
 
+# Just names.
 ALL_BINDINGS=$(patsubst %,lib/%_bindings.cmx,$(ALL_OCAML))
-ALL_GENERATORS=$(patsubst %.ml,%.exe,$(wildcard lib_gen/*_gen.ml))
+ALL_GENERATORS=$(patsubst %,lib_gen/%_gen.exe, $(ALL_OCAML))
 ALL_ML_STUBS=$(patsubst %,lib/%_stubs.cmx,$(ALL_OCAML))
 ALL_C_STUBS=$(patsubst %,lib/%_c_stubs.o,$(ALL_OCAML))
 
@@ -144,6 +152,10 @@ lib_gen/%_gen.exe: libevercrypt.a
 %.cmx: %.ml
 	$(OCAMLOPT) -c $^ -o $@
 
+%.cmo: %.ml
+	$(OCAMLC) -c $^ -o $@
+
+
 .PRECIOUS: lib/%_stubs.ml
 lib/%_stubs.ml: lib/%_c_stubs.c
 
@@ -162,13 +174,24 @@ lib/%_stubs.ml lib/%_c_stubs.c: lib_gen/%_gen.exe
 # Can be remove once ctypes is upgraded to 0.17
 lib/%_c_stubs.o: CFLAGS += -Wno-pointer-sign
 
-CTYPES_DEPS += lib/Lib_RandomBuffer_System_stubs.cmx lib/Lib_RandomBuffer_System_bindings.cmx
+BLACKLIST_CMX =  $(patsubst %,lib/%_stubs.cmx,$(BLACKLIST_ML))
+BLACKLIST_CMX += $(patsubst %,lib/%_bindings.cmx,$(BLACKLIST_ML))
+CTYPES_CMX    =  $(filter-out $(BLACKLIST_CMX),$(CTYPES_DEPS))
+CTYPES_CMX    += lib/Lib_RandomBuffer_System_stubs.cmx lib/Lib_RandomBuffer_System_bindings.cmx
+CTYPES_ML     =  $(patsubst %.cmx,%.ml,$(CTYPES_CMX))
+CTYPES_CMI    =  $(patsubst %.cmx,%.cmi,$(CTYPES_CMX))
 
 ocamlevercrypt.cmxa: $(ALL_BINDINGS) $(ALL_ML_STUBS) $(ALL_C_STUBS) libevercrypt.$(SO)
-	ocamlfind mklib -o ocamlevercrypt $(CTYPES_DEPS) $(ALL_C_STUBS) -ccopt -L. -cclib -levercrypt
+	ocamlfind mklib -o ocamlevercrypt $(CTYPES_CMX) $(ALL_C_STUBS) -ccopt -L. -cclib -levercrypt
 
-install-hacl-star-raw: ocamlevercrypt.cmxa
-	ocamlfind install hacl-star-raw META $(wildcard lib/*.ml lib/*.cmx lib/*.cmi *.cmxa *.a *.so *.dll)
+CTYPES_CMO    = $(patsubst %.cmx,%.cmo,$(CTYPES_CMX))
+ALL_ML_STUBS_CMO = $(patsubst %.cmx,%.cmo,$(ALL_ML_STUBS))
+
+ocamlevercrypt.cma: $(ALL_BINDINGS) $(ALL_ML_STUBS_CMO) $(CTYPES_CMO) $(ALL_C_STUBS) libevercrypt.$(SO)
+	ocamlfind mklib -o ocamlevercrypt $(CTYPES_CMO) $(ALL_C_STUBS) -ccopt -L. -cclib -levercrypt
+
+install-hacl-star-raw: ocamlevercrypt.cmxa ocamlevercrypt.cma libevercrypt.a
+	ocamlfind install hacl-star-raw META $(CTYPES_ML) $(CTYPES_CMX) $(CTYPES_CMO) $(CTYPES_CMI) ocamlevercrypt.cma ocamlevercrypt.cmxa *.a *.$(SO) config.h
 
 endif
 endif

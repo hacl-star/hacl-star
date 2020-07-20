@@ -1,6 +1,6 @@
 opam-version: "2.0"
 name: "hacl-star"
-version: "0.1"
+version: "0.2.1"
 maintainer: "Victor Dumitrescu <victor.dumitrescu@nomadic-labs.com>"
 authors: [ "Victor Dumitrescu <victor.dumitrescu@nomadic-labs.com>" ]
 homepage: "https://hacl-star.github.io/"
@@ -13,6 +13,7 @@ depends: [
   "dune" {>= "1.2"}
   "hacl-star-raw" {= version}
   "zarith"
+  "cppo" {build}
 ]
 build: [
   ["dune" "build" "-p" name "-j" jobs]

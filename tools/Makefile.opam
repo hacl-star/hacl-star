@@ -1,15 +1,16 @@
-# Builds a source archive required for opam release in bindings/ocaml/archive
+# Builds a source archive required for opam release in the current directory.
 # The gcc-compatible snapshot is packaged as `hacl-star-raw`
 # The OCaml bindings are packaged as `hacl-star`
 #
-# Before using, the version number needs to be set in
+# Before using, the version number needs to be set (to the same version) in
 # 	* bindings/ocaml/hacl-star.opam
-# 	* dist/gcc-compatible/hacl-star-raw.opam
-# 	* dist/gcc-compatible/META
+# 	* dist/hacl-star-raw.opam
+# 	* dist/META
+# and make sure the files in dist have been copied in dist/gcc-compatible
 #
-# Once the archive is generated and checked in, it can be published using
-#   `opam publish https://github.com/project-everest/hacl-star/raw/master/bindings/ocaml/archive/hacl-star.XX.tar.gz`
-# This will generate a pull request in github.com/ocaml/opam-repository
+# A new `ocaml-vXX` Git tag should be created and the resulting archive uploaded to GitHub as a release.
+# The opam-publish tool can be used to create a PR in ocaml/opam-repository to update the opam package:
+#   `opam publish https://github.com/project-everest/hacl-star/releases/download/ocaml-vXX/hacl-star.XX.tar.gz`
 
 VERSION=$(subst version: ,,$(shell grep "^version: " ../bindings/ocaml/hacl-star.opam))
 ARCHIVE=$(subst VER,$(VERSION),hacl-star.VER.tar.gz)
@@ -22,7 +23,7 @@ prepare-raw:
 	cp -r ../dist/kremlin raw
 	sed -i 's/KREMLIN_HOME ?= ..\/kremlin/KREMLIN_HOME=kremlin/g' raw/Makefile
 	make -C raw clean
-	cd raw && rm -rf lib/*.cmx lib/*.cmi lib/*.o lib_gen/*.exe lib_gen/*.cmx lib_gen/*.cmi lib_gen/*.o libevercrypt.so ocamlevercrypt.* dllocamlevercrypt.so
+	cd raw && rm -rf lib/*.cmx lib/*.cmi lib/*.cmo lib/*.o lib_gen/*.exe lib_gen/*.cmx lib_gen/*.cmi lib_gen/*.o libocamlevercrypt.a libevercrypt.so ocamlevercrypt.* dllocamlevercrypt.so
 
 release-hacl-star: prepare-raw
 	rm -rf hacl-star && mkdir -p hacl-star

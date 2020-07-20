@@ -64,14 +64,23 @@ module NaCl : sig
   end
 end
 
+module P256 : sig
+  val compress_c : C.t -> C.t -> unit
+  val compress_n : C.t -> C.t -> unit
+  val decompress_c : C.t -> C.t -> bool
+  val decompress_n : C.t -> C.t -> bool
+  val dh_initiator : C.t -> C.t -> bool
+  val dh_responder : C.t -> C.t -> C.t -> bool
+  val reduction : C.t -> C.t -> unit
+  val valid_pk : C.t -> bool
+  include ECDSA
+  module SHA2_256 : ECDSA
+  module SHA2_384 : ECDSA
+  module SHA2_512 : ECDSA
+end
+
 module Blake2b_32 : Blake2
 module Blake2b_256 : Blake2
 
 module Blake2s_32 : Blake2
 module Blake2s_128 : Blake2
-
-module ECDSA : sig
-  val sign : C.t -> C.t -> C.t -> C.t -> bool
-  val verify : C.t -> C.t -> C.t -> bool
-end
-

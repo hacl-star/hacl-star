@@ -60,7 +60,7 @@ let rec core_create_lemma_disjointness
       aux tl
 #reset-options
 
-#push-options "--ifuel 2"
+#push-options "--z3rlimit 40 --fuel 1 --ifuel 2"
 let rec args_b8_lemma (args:list arg) (x:arg)
   : Lemma
       (List.memP x args ==>

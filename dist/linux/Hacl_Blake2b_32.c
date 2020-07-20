@@ -805,7 +805,7 @@ void Hacl_Blake2b_32_blake2b(u32 nn, u8 *output, u32 ll, u8 *d, u32 kk, u8 *k)
               blake2b_update_block(b1, b, false, totlen, b3);
             }
           }
-          memset(b20, 0U, (u32)128U * sizeof (b20[0U]));
+          Lib_Memzero0_memzero(b20, (u32)128U * sizeof (b20[0U]));
           nb0 = ll / (u32)128U;
           rem0 = ll % (u32)128U;
           if (rem0 == (u32)0U && nb0 > (u32)0U)
@@ -835,7 +835,7 @@ void Hacl_Blake2b_32_blake2b(u32 nn, u8 *output, u32 ll, u8 *d, u32 kk, u8 *k)
             memcpy(b21, last, rem * sizeof (last[0U]));
             totlen = prev0 + (uint128_t)(u64)ll;
             blake2b_update_block(b1, b, true, totlen, b21);
-            memset(b21, 0U, (u32)128U * sizeof (b21[0U]));
+            Lib_Memzero0_memzero(b21, (u32)128U * sizeof (b21[0U]));
             double_row = (u32)2U * (u32)4U * (u32)8U;
             KRML_CHECK_SIZE(sizeof (u8), double_row);
             {
@@ -859,17 +859,9 @@ void Hacl_Blake2b_32_blake2b(u32 nn, u8 *output, u32 ll, u8 *d, u32 kk, u8 *k)
                 }
                 final = b2;
                 memcpy(output, final, nn * sizeof (final[0U]));
-                memset(b2, 0U, double_row * sizeof (b2[0U]));
-                {
-                  u32 _i;
-                  for (_i = 0U; _i < stlen; ++_i)
-                    b1[_i] = stzero;
-                }
-                {
-                  u32 _i;
-                  for (_i = 0U; _i < stlen; ++_i)
-                    b[_i] = stzero;
-                }
+                Lib_Memzero0_memzero(b2, double_row * sizeof (b2[0U]));
+                Lib_Memzero0_memzero(b1, stlen * sizeof (b1[0U]));
+                Lib_Memzero0_memzero(b, stlen * sizeof (b[0U]));
               }
             }
           }
