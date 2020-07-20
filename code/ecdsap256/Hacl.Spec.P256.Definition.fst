@@ -150,7 +150,7 @@ open FStar.Mul
 noextract
 let felem_seq_prime = a: felem_seq {felem_seq_as_nat a < prime256}
 noextract
-let point_prime =  p: point_seq{let x = Lib.Sequence.sub p 0 4 in let y = Lib.Sequence.sub p 4 4 in let z = Lib.Sequence.sub p 8 4 in 
+let point_prime =  p: point_seq {let x = Lib.Sequence.sub p 0 4 in let y = Lib.Sequence.sub p 4 4 in let z = Lib.Sequence.sub p 8 4 in 
   felem_seq_as_nat x < prime256 /\ felem_seq_as_nat y < prime256 /\ felem_seq_as_nat z < prime256} 
 
 
