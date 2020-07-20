@@ -1056,7 +1056,7 @@ type const_path_p = const_pointer path
 
 private
 let phashes (h:HS.mem) (p:path_p)
-: GTot (V.vector (hash #(Path?.hash_size (B.get h p 0)))) 
+: GTot (V.vector (hash #(Path?.hash_size (B.get h p 0))))
 = Path?.hashes (B.get h p 0)
 
 // Memory safety of a path as an invariant
@@ -1246,7 +1246,7 @@ val path_preserved:
                   loc_disjoint dl (path_loc p) /\
                   loc_disjoint dl (B.loc_all_regions_from false mtr) /\
                   modifies dl h0 h1))
-        (ensures (path_safe_preserved mtr p dl h0 h1;                 
+        (ensures (path_safe_preserved mtr p dl h0 h1;
                  let hsz0 = (Path?.hash_size (B.get h0 p 0)) in
                  let hsz1 = (Path?.hash_size (B.get h1 p 0)) in
                  let b:MTH.path = lift_path #hsz0 h0 mtr p in
@@ -1393,7 +1393,7 @@ let rec construct_rhs #hsz #hash_spec lv hs rhs i j acc actd hash_fun =
     else begin
       if actd
       then begin
-        RV.assign_copy (hcpy hsz) rhs lv acc;        
+        RV.assign_copy (hcpy hsz) rhs lv acc;
         let hh1 = HST.get () in
         // memory safety
         Rgl?.r_sep (hreg hsz) acc
@@ -1691,21 +1691,21 @@ val path_insert:
       HH.disjoint mtr (B.frameOf p) /\
       HH.includes mtr (B.frameOf hp) /\
       Path?.hash_size (B.get h0 p 0) = hsz))
-    (ensures (fun h0 _ h1 ->      
+    (ensures (fun h0 _ h1 ->
       // memory safety
       modifies (path_loc p) h0 h1 /\
-      path_safe h1 mtr p /\      
+      path_safe h1 mtr p /\
       // correctness
       (let hsz0 = Path?.hash_size (B.get h0 p 0) in
        let hsz1 = Path?.hash_size (B.get h1 p 0) in
-       (let before:(S.seq (MTH.hash #(U32.v hsz0))) = lift_path h0 mtr p in       
+       (let before:(S.seq (MTH.hash #(U32.v hsz0))) = lift_path h0 mtr p in
         let after:(S.seq (MTH.hash #(U32.v hsz1))) = lift_path h1 mtr p in
         V.size_of (phashes h1 p) = V.size_of (phashes h0 p) + 1ul /\
-        hsz = hsz0 /\ hsz = hsz1 /\        
+        hsz = hsz0 /\ hsz = hsz1 /\
         (let hspec:(S.seq (MTH.hash #(U32.v hsz))) = (MTH.path_insert #(U32.v hsz) before (Rgl?.r_repr (hreg hsz) h0 hp)) in
           S.equal hspec after)))))
 #push-options "--z3rlimit 20 --initial_fuel 1 --max_fuel 1"
-let path_insert #hsz mtr p hp =  
+let path_insert #hsz mtr p hp =
   let pth = !*p in
   let pv = Path?.hashes pth in
   let hh0 = HST.get () in
@@ -1775,10 +1775,10 @@ let rec mt_path_length lv k j actd =
 val mt_get_path_length:
   mtr:HH.rid ->
   p:const_path_p ->
-  HST.ST uint32_t 
+  HST.ST uint32_t
     (requires (fun h0 -> path_safe h0 mtr (CB.cast p)))
     (ensures (fun h0 _ h1 -> True))
-let mt_get_path_length mtr p = 
+let mt_get_path_length mtr p =
   let pd = !*(CB.cast p) in
   V.size_of (Path?.hashes pd)
 
@@ -1813,8 +1813,8 @@ val mt_make_path_step:
      (mt_safe_elts_spec h0 lv hs i j;
       (let hsz0 = Path?.hash_size (B.get h0 p 0) in
        let hsz1 = Path?.hash_size (B.get h1 p 0) in
-       let before:(S.seq (MTH.hash #(U32.v hsz0))) = lift_path h0 mtr p in       
-       let after:(S.seq (MTH.hash #(U32.v hsz1))) = lift_path h1 mtr p in       
+       let before:(S.seq (MTH.hash #(U32.v hsz0))) = lift_path h0 mtr p in
+       let after:(S.seq (MTH.hash #(U32.v hsz1))) = lift_path h1 mtr p in
        hsz = hsz0 /\ hsz = hsz1 /\
        S.equal after
                (MTH.mt_make_path_step
@@ -1862,14 +1862,14 @@ val mt_get_path_step_pre:
   p:const_path_p ->
   i:uint32_t ->
   HST.ST bool
-    (requires (fun h0 ->       
-                   path_safe h0 mtr (CB.cast p) /\ 
+    (requires (fun h0 ->
+                   path_safe h0 mtr (CB.cast p) /\
                    (let pv = B.get h0 (CB.cast p) 0 in
                     Path?.hash_size pv = Ghost.reveal hsz /\
                     live h0 (Path?.hashes pv) /\
                     mt_get_path_step_pre_nst #hsz mtr pv i)))
     (ensures (fun _ _ _ -> True))
-let mt_get_path_step_pre #hsz mtr p i = 
+let mt_get_path_step_pre #hsz mtr p i =
   let p = CB.cast p in
   mt_get_path_step_pre_nst #hsz mtr !*p i
 
@@ -1879,14 +1879,14 @@ val mt_get_path_step:
   p:const_path_p ->
   i:uint32_t ->
   HST.ST (hash #hsz)
-    (requires (fun h0 ->       
-                   path_safe h0 mtr (CB.cast p) /\ 
+    (requires (fun h0 ->
+                   path_safe h0 mtr (CB.cast p) /\
                    (let pv = B.get h0 (CB.cast p) 0 in
                     Path?.hash_size pv = Ghost.reveal hsz /\
                     live h0 (Path?.hashes pv) /\
                     i < V.size_of (Path?.hashes pv))))
     (ensures (fun h0 r h1 -> True ))
-let mt_get_path_step #hsz mtr p i = 
+let mt_get_path_step #hsz mtr p i =
   let pd = !*(CB.cast p) in
   V.index #(hash #(Path?.hash_size pd)) (Path?.hashes pd) i
 
@@ -1920,8 +1920,8 @@ val mt_get_path_:
      (mt_safe_elts_spec h0 lv hs i j;
       (let hsz0 = Path?.hash_size (B.get h0 p 0) in
        let hsz1 = Path?.hash_size (B.get h1 p 0) in
-       let before:(S.seq (MTH.hash #(U32.v hsz0))) = lift_path h0 mtr p in       
-       let after:(S.seq (MTH.hash #(U32.v hsz1))) = lift_path h1 mtr p in       
+       let before:(S.seq (MTH.hash #(U32.v hsz0))) = lift_path h0 mtr p in
+       let after:(S.seq (MTH.hash #(U32.v hsz1))) = lift_path h1 mtr p in
        hsz = hsz0 /\ hsz = hsz1 /\
        S.equal after
                (MTH.mt_get_path_ (U32.v lv) (RV.as_seq h0 hs) (RV.as_seq h0 rhs)
@@ -1999,7 +1999,7 @@ val mt_get_path_pre:
      let dmt = B.get h0 mt 0 in
      MT?.hash_size dmt = (Ghost.reveal hsz) /\
      mt_safe h0 mt /\
-     path_safe h0 (B.frameOf mt) p /\    
+     path_safe h0 (B.frameOf mt) p /\
      Rgl?.r_inv (hreg hsz) h0 root /\
      HH.disjoint (B.frameOf root) (B.frameOf mt) /\
      HH.disjoint (B.frameOf root) (B.frameOf p)))
@@ -2074,7 +2074,7 @@ let mt_get_path #hsz mt idx p root =
   mt_get_root mt root;
   let mtv = !*ncmt in
   let hsz = MT?.hash_size mtv in
-  
+
   let hh1 = HST.get () in
   path_safe_init_preserved mtframe p
     (B.loc_union (mt_loc ncmt)
@@ -2832,7 +2832,7 @@ val mt_verify_:
      ppos <= 64ul - mt_path_length 0ul k j actd /\
      ppos + mt_path_length 0ul k j actd <= V.size_of (phashes h0 p)))
    (ensures (fun h0 _ h1 ->
-     let p = CB.cast p in     
+     let p = CB.cast p in
      // memory safety
      modifies (B.loc_all_regions_from false (B.frameOf acc)) h0 h1 /\
      Rgl?.r_inv (hreg hsz) h1 acc /\
@@ -2953,7 +2953,7 @@ val mt_verify:
      let mtv0 = B.get h0 mt 0 in
      let mtv1 = B.get h1 mt 0 in
      MT?.hash_size mtv0 = Ghost.reveal hsz /\
-     MT?.hash_size mtv1 = Ghost.reveal hsz /\     
+     MT?.hash_size mtv1 = Ghost.reveal hsz /\
      // memory safety:
      // `rt` is not modified in this function, but we use a trick
      // to allocate an auxiliary buffer in the extended region of `rt`.

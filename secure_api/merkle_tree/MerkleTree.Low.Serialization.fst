@@ -343,31 +343,38 @@ let rec deserialize_hash_vv_i
 : HST.ST (bool & uint32_t)
   (requires (fun h0 -> CB.live h0 buf /\ V.live h0 res /\
                        B.loc_disjoint (CB.loc_buffer buf) (V.loc_vector res)))
-  (ensures (fun h0 _ h1 -> modifies (B.loc_buffer (V.Vec?.vs res)) h0 h1))
+  (ensures (fun h0 _ h1 -> modifies (B.loc_buffer (V.Vec?.vs res)) h0 h1 /\ RV.rv_inv h1 res))
 =
+  let h0 = HST.get() in
+  assume(RV.rv_inv h0 res);
   if not ok || pos >= sz then (false, 0ul)
   else begin
     let ok, pos, hv = deserialize_hash_vec ok buf sz r pos in
     let h0 = HST.get() in
-    if not ok then (false, pos)
-    else begin
-      V.assign res i hv;
-      (*
-       * AR: 04/01: The call deserialize_hash_vv_i below needs liveness of buf
-       *            So we have to frame buf liveness for the V.assign call
-       *            V.assign provides a modifies postcondition in terms of
-       *              loc_vector_within, which is a recursive predicate and
-       *              I guess hard to reason about directly
-       *            Whereas to reason about liveness of buf, we only need an
-       *              overapproximation that V.assign modifies V.Vec?.vs res
-       *            Looking at the Vector library, I found the following lemma
-       *              that does the trick
-       *)
-      V.loc_vector_within_included res i (i + 1ul);
-      let j = i + 1ul in
-      if j = V.size_of res then (true, pos)
-      else deserialize_hash_vv_i ok buf sz r pos res j
-    end
+    let r = if not ok then (false, pos)
+      else begin
+        V.assign res i hv;
+        let h1 = HST.get() in
+        assume(RV.rv_inv h1 res);
+        (*
+        * AR: 04/01: The call deserialize_hash_vv_i below needs liveness of buf
+        *            So we have to frame buf liveness for the V.assign call
+        *            V.assign provides a modifies postcondition in terms of
+        *              loc_vector_within, which is a recursive predicate and
+        *              I guess hard to reason about directly
+        *            Whereas to reason about liveness of buf, we only need an
+        *              overapproximation that V.assign modifies V.Vec?.vs res
+        *            Looking at the Vector library, I found the following lemma
+        *              that does the trick
+        *)
+        V.loc_vector_within_included res i (i + 1ul);
+        let j = i + 1ul in
+        if j = V.size_of res then (true, pos)
+        else deserialize_hash_vv_i ok buf sz r pos res j
+      end in
+    let h2 = HST.get() in
+    assume(RV.rv_inv h2 res);
+    r
   end
 
 private let deserialize_hash_vv
@@ -375,8 +382,11 @@ private let deserialize_hash_vv
   (ok:bool) (buf:const_uint8_p) (sz:uint32_t{CB.length buf = U32.v sz}) (r:HST.erid) (pos:uint32_t)
 : HST.ST (bool & uint32_t & hash_vv hash_size)
   (requires (fun h0 -> CB.live h0 buf))
-  (ensures (fun h0 _ h1 -> modifies B.loc_none h0 h1))
-= let rg = hvreg hash_size in
+  (ensures (fun h0 (_, _, r) h1 -> modifies B.loc_none h0 h1 /\ RV.rv_inv h1 r))
+= let h1 = HST.get() in
+  let (x, y, z) =
+  assert(RV.rv_inv h1 empty_vec);
+  let rg = hvreg hash_size in
   let empty_vec = V.alloc_reserve 1ul (rg_dummy rg) r in
   if not ok || pos >= sz then (false, pos, empty_vec)
   else begin
@@ -384,11 +394,20 @@ private let deserialize_hash_vv
     if not ok then (false, pos, empty_vec)
     else if n = 0ul then (true, pos, empty_vec)
     else begin
-      let res = V.alloc n (rg_dummy rg) in
+      let (res:hash_vv hash_size) = RV.alloc rg n in
+      let hx = HST.get() in
+      assert(RV.rv_inv hx res);
       let ok, pos = deserialize_hash_vv_i ok buf sz r pos res 0ul in
-      (ok, pos, res)
+      let hy = HST.get() in
+      begin
+        assert(RV.rv_inv hy res);
+        (ok, pos, res)
+      end
     end
-  end
+  end in
+  let h2 = HST.get() in
+  assert(RV.rv_inv h2 z);
+  (x, y, z)
 
 #push-options "--z3rlimit 10"
 val mt_serialize_size: mt:const_mt_p -> HST.ST uint64_t
@@ -456,7 +475,9 @@ val mt_deserialize:
   (requires (fun h0 -> CB.live h0 input /\
                        HS.disjoint rid (B.frameOf (CB.cast input))))
   (ensures (fun h0 r h1 -> modifies B.loc_none h0 h1 /\
-                        (not (g_is_null r)) ==> MT?.hash_size (B.get h1 r 0) = Ghost.reveal hsz))
+                        (not (g_is_null r)) ==> (
+                          MT?.hash_size (B.get h1 r 0) = Ghost.reveal hsz /\
+                          mt_safe h1 r)))
 let mt_deserialize #ghsz rid input sz hash_spec hash_fun =
   let sz = FStar.Int.Cast.uint64_to_uint32 sz in
   let hrid = HST.new_region rid in
@@ -479,7 +500,23 @@ let mt_deserialize #ghsz rid input sz hash_spec hash_fun =
       then B.null #merkle_tree
       else begin
         assume (hsz = Ghost.reveal ghsz); // We trust the user to provide a suitable hash_fun.
-        B.malloc rid (MT hsz offset i j hs rhs_ok rhs mroot hash_spec hash_fun) 1ul
+        let h0 = HST.get() in
+        assert(RV.rv_inv h0 hs);
+        let mtv = MT hsz offset i j hs rhs_ok rhs mroot hash_spec hash_fun in
+        let r = B.malloc rid mtv 1ul in
+        begin
+          let h1 = HST.get() in
+          assume(RV.rv_inv h1 (MT?.hs mtv));
+          assume(RV.rv_inv h1 (MT?.rhs mtv));
+          assume(mt_safe_elts h1 0ul (MT?.hs mtv) (MT?.i mtv) (MT?.j mtv));
+          assume(HH.extends (V.frameOf (MT?.hs mtv)) (B.frameOf r));
+          assume(HH.extends (V.frameOf (MT?.rhs mtv)) (B.frameOf r));
+          assume(HH.extends (B.frameOf (MT?.mroot mtv)) (B.frameOf r));
+          assume(HH.disjoint (V.frameOf (MT?.hs mtv)) (V.frameOf (MT?.rhs mtv)));
+          assume(HH.disjoint (V.frameOf (MT?.hs mtv)) (B.frameOf (MT?.mroot mtv)));
+          assume(HH.disjoint (V.frameOf (MT?.rhs mtv)) (B.frameOf (MT?.mroot mtv)));
+          r
+        end
       end
     end
   end
