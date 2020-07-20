@@ -19,6 +19,13 @@ open Hacl.Impl.Blake2.Core
 
 #set-options "--z3rlimit 50 --max_ifuel 0 --max_fuel 0"
 
+noextract
+let is_valid_blake2_config (a : Spec.alg) (m : m_spec) =
+  match a, m with
+  | Spec.Blake2S, M32 | Spec.Blake2S, M128
+  | Spec.Blake2B, M32 | Spec.Blake2B, M256 -> true
+  | _ -> false
+
 /// Accessors for constants
 
 inline_for_extraction noextract
