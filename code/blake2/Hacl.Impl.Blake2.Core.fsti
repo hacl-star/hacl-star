@@ -18,10 +18,10 @@ type m_spec =
   | M128
   | M256
 
-inline_for_extraction
+noextract inline_for_extraction
 type word_t (a:Spec.alg) = Spec.word_t a
 
-inline_for_extraction
+noextract inline_for_extraction
 let element_t (a:Spec.alg) (m:m_spec) =
   match a,m with
   | Spec.Blake2S,M128 -> (vec_t U32 4)
@@ -29,10 +29,10 @@ let element_t (a:Spec.alg) (m:m_spec) =
   | Spec.Blake2B,M256 -> (vec_t U64 4)
   | _ -> (word_t a)
 
-inline_for_extraction
+noextract inline_for_extraction
 val zero_element: a:Spec.alg -> m:m_spec -> element_t a m
 
-inline_for_extraction
+noextract inline_for_extraction
 let row_len (a:Spec.alg) (m:m_spec) : size_t =
   match a,m with
   | Spec.Blake2S,M128 -> 1ul
@@ -40,13 +40,11 @@ let row_len (a:Spec.alg) (m:m_spec) : size_t =
   | Spec.Blake2B,M256 -> 1ul
   | _ -> 4ul
 
-
-
-inline_for_extraction
+noextract inline_for_extraction
 unfold let row_p (a:Spec.alg) (m:m_spec) =
   lbuffer (element_t a m) (row_len a m)
 
-inline_for_extraction
+noextract inline_for_extraction
 val row_v: #a:Spec.alg -> #m:m_spec -> h:mem -> row_p a m -> GTot (Spec.row a)
 
 noextract
@@ -55,14 +53,14 @@ val row_v_lemma: #a:Spec.alg -> #m:m_spec -> h0:mem -> h1:mem -> r1:row_p a m ->
 		  row_v h0 r1 == row_v h1 r2))
 	[SMTPat (row_v h0 r1); SMTPat (row_v h1 r2)]
 
-inline_for_extraction
+noextract inline_for_extraction
 unfold let state_p (a:Spec.alg) (m:m_spec) =
   lbuffer (element_t a m) (4ul *. row_len a m)
 
-inline_for_extraction
+noextract inline_for_extraction
 unfold let index_t = n:size_t{v n < 4}
 
-inline_for_extraction
+noextract inline_for_extraction
 let g_rowi (#a:Spec.alg) (#m:m_spec) (st:state_p a m)  (idx:index_t) : GTot (row_p a m) =
   gsub st (idx *. row_len a m) (row_len a m)
 
@@ -115,31 +113,31 @@ val modifies_row_state: a:Spec.alg -> m:m_spec -> h0:mem -> h1:mem -> st:state_p
 	[SMTPat (modifies (loc (g_rowi #a #m st i)) h0 h1)]
 
 
-inline_for_extraction
+noextract inline_for_extraction
 val rowi: #a:Spec.alg -> #m:m_spec -> st:state_p a m -> idx:index_t ->
 	  Stack (row_p a m)
 	  (requires (fun h -> live h st))
 	  (ensures (fun h0 r h1 -> h0 == h1 /\ live h1 r /\ r == g_rowi st idx))
 
-inline_for_extraction
+noextract inline_for_extraction
 val xor_row: #a:Spec.alg -> #m:m_spec -> r1:row_p a m -> r2:row_p a m ->
 	  Stack unit
 	  (requires (fun h -> live h r1 /\ live h r2 /\ disjoint r1 r2))
 	  (ensures (fun h0 _ h1 -> modifies (loc r1) h0 h1 /\
 				row_v h1 r1 == Spec.( row_v h0 r1 ^| row_v h0 r2 )))
-inline_for_extraction
+noextract inline_for_extraction
 val add_row: #a:Spec.alg -> #m:m_spec -> r1:row_p a m -> r2:row_p a m ->
 	  Stack unit
 	  (requires (fun h -> live h r1 /\ live h r2 /\ disjoint r1 r2))
 	  (ensures (fun h0 _ h1 -> modifies (loc r1) h0 h1 /\
 				row_v h1 r1 == Spec.( row_v h0 r1 +| row_v h0 r2 )))
-inline_for_extraction
+noextract inline_for_extraction
 val ror_row: #a:Spec.alg -> #m:m_spec -> r1:row_p a m -> r2:rotval (Spec.wt a) ->
 	  Stack unit
 	  (requires (fun h -> live h r1))
 	  (ensures (fun h0 _ h1 -> modifies (loc r1) h0 h1 /\
 				row_v h1 r1 == Spec.( row_v h0 r1 >>>| r2 )))
-inline_for_extraction
+noextract inline_for_extraction
 val permr_row: #a:Spec.alg -> #m:m_spec -> r1:row_p a m -> n:index_t ->
 	  Stack unit
 	  (requires (fun h -> live h r1))
@@ -153,7 +151,7 @@ val create4_lemma: #a:Type -> x0:a -> x1:a -> x2:a -> x3:a ->
     Lib.Sequence.createL l == create4 x0 x1 x2 x3))
 	[SMTPat (Lib.Sequence.createL [x0;x1;x2;x3])]
 
-inline_for_extraction
+noextract inline_for_extraction
 val alloc_row: a:Spec.alg -> m:m_spec ->
 	  StackInline (row_p a m)
 	  (requires (fun h -> True))
@@ -161,13 +159,13 @@ val alloc_row: a:Spec.alg -> m:m_spec ->
 				live h1 r /\
 				row_v h1 r == Spec.zero_row a))
 
-inline_for_extraction
+noextract inline_for_extraction
 val create_row: #a:Spec.alg -> #m:m_spec -> r1:row_p a m -> w0:word_t a -> w1:word_t a -> w2:word_t a -> w3:word_t a ->
 	  Stack unit
 	  (requires (fun h -> live h r1))
 	  (ensures (fun h0 _ h1 -> modifies (loc r1) h0 h1 /\
 				row_v h1 r1 == Spec.( create_row w0 w1 w2 w3 )))
-inline_for_extraction
+noextract inline_for_extraction
 val load_row: #a:Spec.alg -> #m:m_spec -> r1:row_p a m -> ws:lbuffer (word_t a) 4ul ->
 	  Stack unit
 	  (requires (fun h -> live h r1 /\ live h ws /\ disjoint r1 ws))
@@ -175,30 +173,30 @@ val load_row: #a:Spec.alg -> #m:m_spec -> r1:row_p a m -> ws:lbuffer (word_t a) 
 				row_v h1 r1 == Spec.( load_row (as_seq h0 ws))))
 
 
-inline_for_extraction
+noextract inline_for_extraction
 let size_row al = 4ul *. size (Spec.size_word al)
 
-inline_for_extraction
+noextract inline_for_extraction
 val store_row: #a:Spec.alg -> #m:m_spec -> b:lbuffer uint8 (size_row a) -> r:row_p a m ->
 	  Stack unit
 	  (requires (fun h -> live h r /\ live h b /\ disjoint r b))
 	  (ensures (fun h0 _ h1 -> modifies (loc b) h0 h1 /\
 			        as_seq h1 b == Lib.ByteSequence.uints_to_bytes_le (row_v h0 r)))
 
-inline_for_extraction
+noextract inline_for_extraction
 let size_block (a:Spec.alg) : x:size_t{v x = 16 * Spec.size_word a} =
   Spec.alg_inversion_lemma a;
   match a with
   | Spec.Blake2.Blake2S -> 64ul
   | Spec.Blake2.Blake2B -> 128ul
 
-inline_for_extraction
+noextract inline_for_extraction
 type block_p (a:Spec.alg) = lbuffer uint8 (size_block a)
 
-inline_for_extraction
+noextract inline_for_extraction
 type block_w (a:Spec.alg) = lbuffer (word_t a) 16ul
 
-inline_for_extraction
+noextract inline_for_extraction
 val gather_row: #a:Spec.alg -> #ms:m_spec -> r:row_p a ms -> m:block_w a ->
           i0: Spec.sigma_elt_t -> i1:Spec.sigma_elt_t -> i2:Spec.sigma_elt_t -> i3:Spec.sigma_elt_t
 	  -> Stack unit
@@ -206,8 +204,7 @@ val gather_row: #a:Spec.alg -> #ms:m_spec -> r:row_p a ms -> m:block_w a ->
 	  (ensures (fun h0 _ h1 -> modifies (loc r) h0 h1 /\
 				row_v h1 r == Spec.(gather_row (as_seq h0 m) i0 i1 i2 i3)))
 
-
-inline_for_extraction
+noextract inline_for_extraction
 val alloc_state: a:Spec.alg -> m:m_spec ->
 	  StackInline (state_p a m)
 	  (requires (fun h -> True))
@@ -216,7 +213,7 @@ val alloc_state: a:Spec.alg -> m:m_spec ->
 
 
 
-inline_for_extraction
+noextract inline_for_extraction
 val copy_state: #a:Spec.alg -> #m:m_spec -> st2:state_p a m -> st1:state_p a m ->
 	  Stack unit
 	  (requires (fun h0 -> live h0 st1 /\ live h0 st2 /\ disjoint st1 st2))

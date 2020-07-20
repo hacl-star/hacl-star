@@ -230,7 +230,7 @@ let undiag #a #m wv =
   permr_row r3 1ul
 
 
-inline_for_extraction
+inline_for_extraction noextract
 val gather_state: #a:Spec.alg -> #ms:m_spec -> st:state_p a ms -> m:block_w a -> start:size_t{v start <= 144} -> Stack unit
 		  (requires (fun h -> live h st /\ live h m /\ disjoint st m))
 		  (ensures (fun h0 _ h1 -> modifies (loc st) h0 h1 /\
@@ -609,7 +609,7 @@ let blake2_init #al #ms blake2_update_block wv hash kk k nn =
 #push-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 let _ : squash (inversion Spec.alg) = allow_inversion Spec.alg
 
-inline_for_extraction
+inline_for_extraction noextract
 val split_blocks: al:Spec.alg -> len:size_t -> r:(size_t & size_t){
 					  let (x,y) = r in
 					  let (sx,sy) = Spec.split al (v len) in
@@ -729,7 +729,7 @@ let blake2_t (al:Spec.alg) (ms:m_spec) =
                          /\ h1.[|output|] == Spec.blake2 al h0.[|d|] (v kk) h0.[|k|] (v nn)))
 
 
-inline_for_extraction
+inline_for_extraction noextract
 val compute_prev0: al:Spec.alg -> kk:size_t{v kk <= Spec.max_key al} ->
 		   prev:Spec.limb_t al{v prev == Spec.compute_prev0 al (v kk) /\
 				       v prev <= Spec.size_block al}
