@@ -5,6 +5,19 @@ open Spec.Hash.Definitions
 open Hacl.Hash.Definitions
 open Hacl.Hash.Blake2
 
+noextract inline_for_extraction
+let init_blake2b_256: init_st (|Blake2B, M256|) =
+  mk_init Blake2B M256
+
+let alloca_blake2b_256: alloca_st (|Blake2B, M256|) =
+  mk_alloca Blake2B M256 (mk_init Blake2B M256)
+
+let update_blake2b_256: update_st (|Blake2B, M256|) =
+  mk_update Blake2B M256
+
+let finish_blake2b_256: finish_st (|Blake2B, M256|) =
+  mk_finish Blake2B M256
+
 let update_multi_blake2b_256: update_multi_st (|Blake2B, M256|) =
   mk_update_multi Blake2B M256 update_blake2b_256
 
