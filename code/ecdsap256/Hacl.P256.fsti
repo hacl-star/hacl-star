@@ -35,6 +35,8 @@ val ecdsa_sign_p256_sha2: result: lbuffer uint8 (size 64)
     disjoint result m /\
     disjoint result privKey /\
     disjoint result k /\
+    nat_from_bytes_be (as_seq h privKey) > 0 /\
+    nat_from_bytes_be (as_seq h k) > 0 /\
     nat_from_bytes_be (as_seq h privKey) < prime_p256_order /\
     nat_from_bytes_be (as_seq h k) < prime_p256_order
   )
@@ -64,6 +66,8 @@ val ecdsa_sign_p256_sha384: result: lbuffer uint8 (size 64) -> mLen: size_t -> m
     disjoint result m /\
     disjoint result privKey /\
     disjoint result k /\
+    nat_from_bytes_be (as_seq h privKey) > 0 /\
+    nat_from_bytes_be (as_seq h k) > 0 /\
     nat_from_bytes_be (as_seq h privKey) < prime_p256_order /\
     nat_from_bytes_be (as_seq h k) < prime_p256_order
   )
@@ -95,6 +99,8 @@ val ecdsa_sign_p256_sha512: result: lbuffer uint8 (size 64)
     disjoint result m /\
     disjoint result privKey /\
     disjoint result k /\
+    nat_from_bytes_be (as_seq h privKey) > 0 /\
+    nat_from_bytes_be (as_seq h k) > 0 /\
     nat_from_bytes_be (as_seq h privKey) < prime_p256_order /\
     nat_from_bytes_be (as_seq h k) < prime_p256_order
   )
@@ -127,6 +133,8 @@ val ecdsa_sign_p256_without_hash: result: lbuffer uint8 (size 64)
     disjoint result m /\
     disjoint result privKey /\
     disjoint result k /\
+    nat_from_bytes_be (as_seq h privKey) > 0 /\
+    nat_from_bytes_be (as_seq h k) > 0 /\
     nat_from_bytes_be (as_seq h privKey) < prime_p256_order /\
     nat_from_bytes_be (as_seq h k) < prime_p256_order
   )
