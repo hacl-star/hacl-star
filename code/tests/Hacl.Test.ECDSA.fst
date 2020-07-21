@@ -211,6 +211,7 @@ val check_bound: b:Lib.Buffer.lbuffer uint8 32ul -> Stack bool
   (requires fun h -> Lib.Buffer.live h b)
   (ensures  fun h0 r h1 ->
     h0 == h1 /\
+    r == (Lib.ByteSequence.nat_from_bytes_be (Lib.Buffer.as_seq h0 b) > 0)
     r == (Lib.ByteSequence.nat_from_bytes_be (Lib.Buffer.as_seq h0 b) <
           Spec.ECDSAP256.Definition.prime_p256_order))
 
@@ -228,6 +229,9 @@ let check_bound b =
   let q4 = normalize_term (((prime_p256_order / pow2 128) / pow2 64) % pow2 64) in
   assert_norm (pow2 128 * pow2 64 == pow2 192);
   assert (prime_p256_order == q1 + pow2 64 * q2 + pow2 128 * q3 + pow2 192 * q4); 
+
+  let zero = mk_int #U64 #PUB 0 in
+  
   let q1 = mk_int #U64 #PUB q1 in
   let q2 = mk_int #U64 #PUB q2 in
   let q3 = mk_int #U64 #PUB q3 in
@@ -255,6 +259,10 @@ let check_bound b =
   let x2 = Lib.RawIntTypes.u64_to_UInt64 x2 in
   let x3 = Lib.RawIntTypes.u64_to_UInt64 x3 in
   let x4 = Lib.RawIntTypes.u64_to_UInt64 x4 in
+  x1 <>. zero && 
+  x2 <>. zero && 
+  x3 <>. zero && 
+  x4 <>. zero && 
   x1 <. q4 || (x1 =. q4 &&
     (x2 <. q3 || (x2 =. q3 &&
       (x3 <. q2 || (x3 =. q2 && x4 <. q1)))))
