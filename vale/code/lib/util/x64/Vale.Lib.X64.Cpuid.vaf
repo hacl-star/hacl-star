@@ -125,7 +125,7 @@ procedure Check_avx_support()
     {:quick}
     modifies rax; rbx; rcx; rdx; r9; efl;
     ensures
-        rax != 0 ==> avx_enabled;
+        rax != 0 ==> avx_cpuid_enabled;
         rbx == old(rbx);
 {
     Mov64(r9, rbx);     // Callee-save
@@ -150,7 +150,7 @@ procedure Check_avx2_support()
     {:quick}
     modifies rax; rbx; rcx; rdx; r9; efl;
     ensures
-        rax != 0 ==> avx2_enabled;
+        rax != 0 ==> avx2_cpuid_enabled;
         rbx == old(rbx);
 {
     Mov64(r9, rbx);     // Callee-save
@@ -267,7 +267,7 @@ procedure Check_avx512_support()
     {:quick}
     modifies rax; rbx; rcx; rdx; r9; r10; r11; efl;
     ensures
-        rax != 0 ==> avx512_enabled;
+        rax != 0 ==> avx512_cpuid_enabled;
         rbx == old(rbx);
 {
     Mov64(r9, rbx);     // Callee-save

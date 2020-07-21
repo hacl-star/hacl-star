@@ -414,7 +414,7 @@ procedure Cpuid_Avx()
     {:instruction mk_ins(make_instr(I.ins_Cpuid))}
     requires rax = 1;
     modifies rax; rbx; rcx; rdx;
-    ensures (iand64(rcx, 0x10000000) > 0) == avx_enabled;
+    ensures (iand64(rcx, 0x10000000) > 0) == avx_cpuid_enabled;
 {
     cpuid_features();
 }
@@ -427,7 +427,7 @@ procedure Cpuid_Avx2()
         rax = 7;
         rcx = 0;
     modifies rax; rbx; rcx; rdx;
-    ensures (iand64(rbx, 0x20) > 0) == avx2_enabled;
+    ensures (iand64(rbx, 0x20) > 0) == avx2_cpuid_enabled;
 {
     cpuid_features();
 }
