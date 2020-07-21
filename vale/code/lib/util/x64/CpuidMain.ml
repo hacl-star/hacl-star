@@ -10,4 +10,6 @@ let _ =
     ("check_rdrand",    (fun win -> Vale_Lib_X64_Cpuidstdcall.va_code_Check_rdrand_stdcall win, Vale_Lib_X64_Cpuidstdcall.va_codegen_success_Check_rdrand_stdcall win), 0, true);
     ("check_avx512",    (fun win -> Vale_Lib_X64_Cpuidstdcall.va_code_Check_avx512_stdcall win, Vale_Lib_X64_Cpuidstdcall.va_codegen_success_Check_avx512_stdcall win), 0, true);
     ("check_osxsave",    (fun win -> Vale_Lib_X64_Cpuidstdcall.va_code_Check_osxsave_stdcall win, Vale_Lib_X64_Cpuidstdcall.va_codegen_success_Check_osxsave_stdcall win), 0, true);
+    ("check_avx_xcr0",    (fun win -> Vale_Lib_X64_Cpuidstdcall.va_code_Check_avx_xcr0_stdcall win, Vale_Lib_X64_Cpuidstdcall.va_codegen_success_Check_avx_xcr0_stdcall win), 0, true);
+    ("check_avx512_xcr0",    (fun win -> Vale_Lib_X64_Cpuidstdcall.va_code_Check_avx512_xcr0_stdcall win, Vale_Lib_X64_Cpuidstdcall.va_codegen_success_Check_avx512_xcr0_stdcall win), 0, true);
   ]

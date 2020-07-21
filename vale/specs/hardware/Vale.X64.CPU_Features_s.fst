@@ -4,6 +4,8 @@ open FStar.Mul
 open Vale.X64.Machine_s
 open Vale.Def.Words_s
 
+(* CPUID *)
+
 assume val aesni_enabled : bool      // CPUID.01H:ECX.AESNI[bit 25]
 assume val avx_enabled : bool        // CPUID.01H:ECX.AVX[bit 28]
 assume val pclmulqdq_enabled : bool  // CPUID.01H:ECX.PCLMULQDQ[bit 1]
@@ -49,3 +51,26 @@ assume val cpuid_features (u:unit) :
          (Vale.Def.Types_s.iand (cpuid rRbx 7 0) (pow2_norm 30) > 0) = avx512bw_enabled /\
          (Vale.Def.Types_s.iand (cpuid rRbx 7 0) (pow2_norm 31) > 0) = avx512vl_enabled
        )
+
+(* Extended Control Registers *)
+
+assume val sse_xcr0_enabled : bool       // Bit 1
+assume val avx_xcr0_enabled : bool       // Bit 2
+assume val opmask_xcr0_enabled : bool    // Bit 5
+assume val zmm_hi256_xcr0_enabled : bool // Bit 6
+assume val hi16_zmm_xcr0_enabled : bool  // Bit 7
+
+assume val xgetbv (r:reg_64) (rcx:nat64) : nat64
+
+assume val xgetbv_features (u:unit) :
+  Lemma ((Vale.Def.Types_s.iand (xgetbv rRax 0) (pow2_norm 1) > 0) = sse_xcr0_enabled /\
+         (Vale.Def.Types_s.iand (xgetbv rRax 0) (pow2_norm 2) > 0) = avx_xcr0_enabled /\ 
+         (Vale.Def.Types_s.iand (xgetbv rRax 0) (pow2_norm 5) > 0) = opmask_xcr0_enabled /\ 
+         (Vale.Def.Types_s.iand (xgetbv rRax 0) (pow2_norm 6) > 0) = zmm_hi256_xcr0_enabled /\ 
+         (Vale.Def.Types_s.iand (xgetbv rRax 0) (pow2_norm 7) > 0) = hi16_zmm_xcr0_enabled
+        ) 
+
+let avx_xcr0 : bool = sse_xcr0_enabled && avx_xcr0_enabled
+
+let avx512_xcr0 : bool =
+  avx_xcr0_enabled && opmask_xcr0_enabled && zmm_hi256_xcr0_enabled && hi16_zmm_xcr0_enabled

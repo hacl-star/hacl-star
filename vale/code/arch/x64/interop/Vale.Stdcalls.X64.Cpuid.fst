@@ -91,3 +91,21 @@ let lowstar_osxsave : lowstar_osxsave_t  =
 
 let check_osxsave = as_normal_t #lowstar_osxsave_t lowstar_osxsave
 
+(* And here's the check_avx_xcr0 wrapper itself *)
+let lowstar_avx_xcr0 : lowstar_avx_xcr0_t  =
+  IX64.wrap_weak_stdcall
+    code_avx_xcr0
+    dom
+    (W.mk_prediction code_avx_xcr0 dom [] (avx_xcr0_lemma code_avx_xcr0 IA.win))
+
+let check_avx_xcr0 = as_normal_t #lowstar_avx_xcr0_t lowstar_avx_xcr0
+
+(* And here's the check_avx512_xcr0 wrapper itself *)
+let lowstar_avx512_xcr0 : lowstar_avx512_xcr0_t  =
+  IX64.wrap_weak_stdcall
+    code_avx512_xcr0
+    dom
+    (W.mk_prediction code_avx512_xcr0 dom [] (avx512_xcr0_lemma code_avx512_xcr0 IA.win))
+
+let check_avx512_xcr0 = as_normal_t #lowstar_avx512_xcr0_t lowstar_avx512_xcr0
+

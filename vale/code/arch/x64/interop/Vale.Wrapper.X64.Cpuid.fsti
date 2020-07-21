@@ -74,3 +74,17 @@ val check_osxsave: unit -> Stack UInt64.t
     (ensures fun h0 ret_val h1 ->
       ((UInt64.v ret_val) =!= 0 ==> osxsave_enabled) /\
       B.modifies B.loc_none h0 h1)
+
+inline_for_extraction
+val check_avx_xcr0: unit -> Stack UInt64.t
+    (requires fun h0 -> osxsave_enabled)
+    (ensures fun h0 ret_val h1 ->
+      ((UInt64.v ret_val) =!= 0 ==> avx_xcr0) /\
+      B.modifies B.loc_none h0 h1)
+
+inline_for_extraction
+val check_avx512_xcr0: unit -> Stack UInt64.t
+    (requires fun h0 -> osxsave_enabled /\ avx_xcr0)
+    (ensures fun h0 ret_val h1 ->
+      ((UInt64.v ret_val) =!= 0 ==> avx512_xcr0) /\
+      B.modifies B.loc_none h0 h1)

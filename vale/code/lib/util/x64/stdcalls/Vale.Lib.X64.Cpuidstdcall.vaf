@@ -159,3 +159,31 @@ procedure Check_osxsave_stdcall(inline win:bool)
     Check_osxsave_support();
 }
 
+procedure Check_avx_xcr0_stdcall(inline win:bool)
+    {:public}
+    {:quick}
+    {:exportSpecs}
+    modifies
+        rax; rcx; rdx; efl;
+    requires
+        osxsave_enabled;
+    ensures
+        rax != 0 ==> avx_xcr0;
+{
+    Check_avx_xcr0_support();
+}
+
+procedure Check_avx512_xcr0_stdcall(inline win:bool)
+    {:public}
+    {:quick}
+    {:exportSpecs}
+    modifies
+        rax; rcx; rdx; efl;
+    requires
+        osxsave_enabled;
+        avx_xcr0;
+    ensures
+        rax != 0 ==> avx512_xcr0;
+{
+    Check_avx512_xcr0_support();
+}

@@ -496,6 +496,37 @@ procedure Cpuid_Osxsave()
     cpuid_features();
 }
 
+procedure Xgetbv_Avx()
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_Xgetbv))}
+    requires
+        osxsave_enabled;
+        rcx = 0;
+    modifies rax; rdx;
+    ensures
+      (iand64(rax, 0x2) > 0) == sse_xcr0_enabled;
+      (iand64(rax, 0x4) > 0) == avx_xcr0_enabled;
+{
+    xgetbv_features();
+}
+
+procedure Xgetbv_Avx512()
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_Xgetbv))}
+    requires
+        osxsave_enabled;
+        rcx = 0;
+    modifies rax; rdx;
+    ensures
+      (iand64(rax, 0x20) > 0) == opmask_xcr0_enabled;
+      (iand64(rax, 0x40) > 0) == zmm_hi256_xcr0_enabled;
+      (iand64(rax, 0x80) > 0) == hi16_zmm_xcr0_enabled;
+{
+    xgetbv_features();
+}
+
 procedure Nat64Equal(out dst:reg_opr64, inout src:reg_opr64)
     {:public}
     {:quick exportOnly}
