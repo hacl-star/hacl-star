@@ -9,6 +9,7 @@ noextract inline_for_extraction
 let init_blake2b_256: init_st (|Blake2B, M256|) =
   mk_init Blake2B M256
 
+noextract inline_for_extraction
 let alloca_blake2b_256: alloca_st (|Blake2B, M256|) =
   mk_alloca Blake2B M256 (mk_init Blake2B M256)
 
