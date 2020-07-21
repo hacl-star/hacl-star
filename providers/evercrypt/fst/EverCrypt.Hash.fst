@@ -352,8 +352,9 @@ val update_last_blake2s : update_last_with_internal_st Blake2S
 
 let update_last_blake2s s p prev_len last last_len =
   [@inline_let] let ev = prev_len in
-  let _ = update_last_64 Blake2S Hacl.Hash.Blake2.update_last_blake2s_32 p ev
-                         prev_len last last_len in
+  let x:Lib.IntTypes.uint_t Lib.IntTypes.U64 Lib.IntTypes.SEC =
+    update_last_64 Blake2S Hacl.Hash.Blake2.update_last_blake2s_32 p ev
+                   prev_len last last_len in
   ()
 
 inline_for_extraction noextract
@@ -361,8 +362,9 @@ val update_last_blake2b : update_last_with_internal_st Blake2B
 
 let update_last_blake2b s p prev_len last last_len =
   [@inline_let] let ev = Int.Cast.Full.uint64_to_uint128 prev_len in
-  let _ = update_last_128 Blake2B Hacl.Hash.Blake2.update_last_blake2b_32 p ev
-                          prev_len last last_len in
+  let x:Lib.IntTypes.uint_t Lib.IntTypes.U128 Lib.IntTypes.SEC =
+    update_last_128 Blake2B Hacl.Hash.Blake2.update_last_blake2b_32 p ev
+                    prev_len last last_len in
   ()
 
 let update_last #a s prev_len last last_len =
