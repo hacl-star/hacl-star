@@ -145,12 +145,12 @@ val init_avx_flags: unit -> Stack unit
     B.modifies (fp_cpu_flags ()) h0 h1))
 
 let init_avx_flags () =
-  if Vale.Wrapper.X64.Cpuid.check_avx () <> 0UL && Vale.Wrapper.X64.Cpuid.check_osxsave () <> 0UL then begin
-    if Vale.Wrapper.X64.Cpuid.check_avx_xcr0 () <> 0UL then begin
-      B.recall cpu_has_avx;
-      B.upd cpu_has_avx 0ul true
-    end
-  end
+  if Vale.Wrapper.X64.Cpuid.check_avx () <> 0UL then
+    if Vale.Wrapper.X64.Cpuid.check_osxsave () <> 0UL then
+      if Vale.Wrapper.X64.Cpuid.check_avx_xcr0 () <> 0UL then begin
+        B.recall cpu_has_avx;
+        B.upd cpu_has_avx 0ul true
+      end
 
 inline_for_extraction noextract
 val init_avx2_flags: unit -> Stack unit
@@ -159,12 +159,12 @@ val init_avx2_flags: unit -> Stack unit
     B.modifies (fp_cpu_flags ()) h0 h1))
 
 let init_avx2_flags () =
-  if Vale.Wrapper.X64.Cpuid.check_avx2 () <> 0UL && Vale.Wrapper.X64.Cpuid.check_osxsave () <> 0UL then begin
-    if Vale.Wrapper.X64.Cpuid.check_avx_xcr0 () <> 0UL then begin 
-      B.recall cpu_has_avx2;
-      B.upd cpu_has_avx2 0ul true
-    end
-  end
+  if Vale.Wrapper.X64.Cpuid.check_avx2 () <> 0UL then
+    if Vale.Wrapper.X64.Cpuid.check_osxsave () <> 0UL then
+      if Vale.Wrapper.X64.Cpuid.check_avx_xcr0 () <> 0UL then begin
+        B.recall cpu_has_avx2;
+        B.upd cpu_has_avx2 0ul true
+      end
 
 inline_for_extraction noextract
 val init_adx_bmi2_flags: unit -> Stack unit
@@ -223,12 +223,13 @@ val init_avx512_flags: unit -> Stack unit
     B.modifies (fp_cpu_flags ()) h0 h1))
 
 let init_avx512_flags () =
-  if Vale.Wrapper.X64.Cpuid.check_avx512 () <> 0UL && Vale.Wrapper.X64.Cpuid.check_osxsave () <> 0UL then begin
-    if Vale.Wrapper.X64.Cpuid.check_avx_xcr0 () <> 0UL && Vale.Wrapper.X64.Cpuid.check_avx512_xcr0 () <> 0UL then begin
-      B.recall cpu_has_avx512;
-      B.upd cpu_has_avx512 0ul true
-    end
-  end
+  if Vale.Wrapper.X64.Cpuid.check_avx512 () <> 0UL then
+    if Vale.Wrapper.X64.Cpuid.check_osxsave () <> 0UL then
+      if Vale.Wrapper.X64.Cpuid.check_avx_xcr0 () <> 0UL then
+        if Vale.Wrapper.X64.Cpuid.check_avx512_xcr0 () <> 0UL then begin
+          B.recall cpu_has_avx512;
+          B.upd cpu_has_avx512 0ul true
+        end
 
 inline_for_extraction noextract
 val init_cpu_flags: unit -> Stack unit
