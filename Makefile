@@ -638,7 +638,8 @@ TARGET_H_INCLUDE = -add-include '"kremlin/internal/target.h"'
 # Disabled for distributions that don't include vectorized implementations.
 INTRINSIC_FLAGS = -add-include '"libintvector.h"'
 # Disabled for distributions that don't include code based on intrinsics.
-INTRINSIC_INT_FLAGS = -add-include 'Hacl_P256:"lib_intrinsics.h"'
+INTRINSIC_INT_FLAGS = \
+  -add-include 'Hacl_P256:"lib_intrinsics.h"'
 
 # Disabled for dist/portable
 OPT_FLAGS = -ccopts -march=native,-mtune=native
@@ -664,10 +665,10 @@ WASMSUPPORT_BUNDLE = -bundle WasmSupport
 LEGACY_BUNDLE = -bundle EverCrypt[rename=EverCrypt_Legacy]
 
 BUNDLE_FLAGS	=\
+  $(BLAKE2_BUNDLE) \
   $(HASH_BUNDLE) \
   $(E_HASH_BUNDLE) \
   $(SHA3_BUNDLE) \
-  $(BLAKE2_BUNDLE) \
   $(CHACHA20_BUNDLE) \
   $(SALSA20_BUNDLE) \
   $(CURVE_BUNDLE) \
@@ -910,6 +911,11 @@ dist/ccf/Makefile.basic: HACL_OLD_FILES =
 dist/ccf/Makefile.basic: POLY_BUNDLE =
 dist/ccf/Makefile.basic: P256_BUNDLE=-bundle Hacl.P256,Hacl.Impl.ECDSA.*,Hacl.Impl.SolinasReduction,Hacl.Impl.P256.*
 dist/ccf/Makefile.basic: HPKE_BUNDLE = -bundle 'Hacl.HPKE.*'
+dist/ccf/Makefile.basic: BLAKE2_BUNDLE=-bundle Hacl.Impl.Blake2.Constants \
+  -static-header Hacl.Impl.Blake2.Constants \
+  -bundle Hacl.HKDF.Blake2b_256,Hacl.HMAC.Blake2b_256,Hacl.Blake2b_256,Hacl.Hash.Blake2b_256 \
+  -bundle Hacl.HKDF.Blake2s_128,Hacl.HMAC.Blake2s_128,Hacl.Blake2s_128,Hacl.Hash.Blake2s_128 \
+  -bundle 'Hacl.Impl.Blake2.\*'
 
 # Mozilla distribution
 # --------------------
