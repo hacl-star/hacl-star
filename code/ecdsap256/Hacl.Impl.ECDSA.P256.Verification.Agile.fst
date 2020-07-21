@@ -62,7 +62,7 @@ let isZero_uint64_nCT f =
     z0_zero && z1_zero && z2_zero && z3_zero
 
 
-[@ (Comment "  This code is not side channel resistant")]
+(*[@ (Comment "  This code is not side channel resistant")] *)
 
 val isMoreThanZeroLessThanOrderMinusOne: f:felem -> Stack bool
   (requires fun h -> live h f)
@@ -353,7 +353,7 @@ val ecdsa_verification_step5:
         let pointNorm = _norm sumD in
         let (xResult, yResult, zResult) = pointNorm in
         state == not (Spec.P256.isPointAtInfinity pointNorm) /\
-        as_nat h1 x == xResult
+        as_nat h1 x == xResult % prime_p256_order
     )
   )
 
@@ -364,11 +364,12 @@ let ecdsa_verification_step5 x pubKeyAsPoint u1 u2 tempBuffer =
   let resultIsPAI = isPointAtInfinityPublic pointSum in
   let xCoordinateSum = sub pointSum (size 0) (size 4) in
   copy x xCoordinateSum;
+  reduction_prime_2prime_order x x;
   pop_frame();
   not resultIsPAI
 
 
-[@ (Comment "  This code is not side channel resistant")]
+(* [@ (Comment "  This code is not side channel resistant")] *)
 
 val compare_felem_bool: a: felem -> b: felem -> Stack bool
   (requires fun h -> live h a /\ live h b)
@@ -446,7 +447,7 @@ val ecdsa_verification_core:
          let sumD = _point_add u1D u2D in
          let (xResult, yResult, zResult) = _norm sumD in
          state == not (Spec.P256.isPointAtInfinity (_norm sumD)) /\
-         as_nat h1 xBuffer == xResult
+         as_nat h1 xBuffer == xResult % prime_p256_order
       )
   )
 
@@ -464,7 +465,7 @@ let ecdsa_verification_core alg publicKeyBuffer hashAsFelem r s mLen m xBuffer t
   r
 
 
-[@ (Comment "  This code is not side channel resistant")]
+(* [@ (Comment "  This code is not side channel resistant")] *)
 
 val ecdsa_verification_:alg:hash_alg_ecdsa
   -> pubKey:lbuffer uint64 (size 8)

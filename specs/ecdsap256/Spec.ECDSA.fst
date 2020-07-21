@@ -475,6 +475,7 @@ let ecdsa_verification_agile alg publicKey r s mLen m =
       let sumPoints = _point_add u1D u2D in
       let pointNorm = _norm sumPoints in
       let x, y, z = pointNorm in
+      let x = x % prime_p256_order in 
       if Spec.P256.isPointAtInfinity pointNorm then false else x = r
     end
   end
