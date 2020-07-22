@@ -22,6 +22,7 @@ open Spec.P256
 open Spec.P256.Lemmas
 
 open Hacl.Impl.P256.PointAdd
+open Hacl.Impl.P256.PointDouble
 open Hacl.Impl.P256.LowLevel.PrimeSpecific
 open Hacl.Impl.P256.LowLevel.RawCmp
 
@@ -62,7 +63,7 @@ let isZero_uint64_nCT f =
     z0_zero && z1_zero && z2_zero && z3_zero
 
 
-[@ (Comment "  This code is not side channel resistant")]
+(*[@ (Comment "  This code is not side channel resistant")] *)
 
 val isMoreThanZeroLessThanOrderMinusOne: f:felem -> Stack bool
   (requires fun h -> live h f)
@@ -273,6 +274,52 @@ let ecdsa_verification_step5_0 points pubKeyAsPoint u1 u2 tempBuffer =
   scalarMultiplicationWithoutNorm pubKeyAsPoint pointU2Q u2 tempBuffer
 
 
+(* [@ (Comment "  This code is not side channel resistant")] *)
+
+val compare_felem_bool: a: felem -> b: felem -> Stack bool
+  (requires fun h -> live h a /\ live h b)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\ r == (as_nat h0 a = as_nat h0 b))
+
+let compare_felem_bool a b  =
+  assert_norm (pow2 64 * pow2 64 == pow2 128);
+  assert_norm (pow2 128 * pow2 64 == pow2 192);
+  let a_0 = index a (size 0) in
+  let a_1 = index a (size 1) in
+  let a_2 = index a (size 2) in
+  let a_3 = index a (size 3) in
+
+  let b_0 = index b (size 0) in
+  let b_1 = index b (size 1) in
+  let b_2 = index b (size 2) in
+  let b_3 = index b (size 3) in
+
+  eq_u64_nCT a_0 b_0 &&
+  eq_u64_nCT a_1 b_1 &&
+  eq_u64_nCT a_2 b_2 &&
+  eq_u64_nCT a_3 b_3
+
+
+
+inline_for_extraction noextract
+val compare_points_bool: a: point -> b: point -> Stack bool
+  (requires fun h -> live h a /\ live h b)
+  (ensures fun h0 _ h1 -> modifies0 h0 h1)
+
+let compare_points_bool a b = 
+  let x0 = sub a (size 0) (size 4) in 
+  let y0 = sub a (size 4) (size 4) in 
+  let z0 = sub a (size 8) (size 4) in 
+
+  let x1 = sub b (size 0) (size 4) in 
+  let y1 = sub b (size 4) (size 4) in 
+  let z1 = sub b (size 8) (size 4) in 
+
+  let xEqual = compare_felem_bool x0 x1 in
+  let yEqual = compare_felem_bool y0 y1 in 
+  let zEqual = compare_felem_bool z0 z1 in 
+  xEqual && yEqual && zEqual
+
+
 inline_for_extraction noextract
 val ecdsa_verification_step5_1:
     pointSum: point
@@ -310,13 +357,27 @@ val ecdsa_verification_step5_1:
 
 let ecdsa_verification_step5_1 pointSum pubKeyAsPoint u1 u2 tempBuffer =
   push_frame();
-  let points = create (size 24) (u64 0) in
+    let tmp = create (size 136) (u64 0) in 
+    let points = sub tmp (size 0) (size 24) in 
+    let result0Norm = sub tmp (size 24) (size 12) in 
+    let result1Norm = sub tmp (size 36) (size 12) in 
+    let tmpForNorm = sub tmp (size 48) (size 88) in 
+    
   let buff = sub tempBuffer (size 12) (size 88) in
   ecdsa_verification_step5_0 points pubKeyAsPoint u1 u2 tempBuffer;
   let pointU1G = sub points (size 0) (size 12) in
-  let pointU2Q = sub points (size 12) (size 12) in
-  point_add pointU1G pointU2Q pointSum buff;
-  norm pointSum pointSum buff;
+  let pointU2Q = sub points (size 12) (size 12) in 
+  
+  let normP = norm pointU1G result0Norm tmpForNorm in 
+  let normR = norm pointU2Q result1Norm tmpForNorm in 
+
+  let equalX = compare_points_bool normP normR in 
+
+  match equalX with
+  | true -> point_double pointU1G pointSum buff
+  | _ -> begin point_add pointU1G pointU2Q pointSum buff end;
+  admit();
+  norm pointSum pointSum buff; admit();
   pop_frame()
 
 
@@ -367,31 +428,6 @@ let ecdsa_verification_step5 x pubKeyAsPoint u1 u2 tempBuffer =
   reduction_prime_2prime_order x x;
   pop_frame();
   not resultIsPAI
-
-
-[@ (Comment "  This code is not side channel resistant")]
-
-val compare_felem_bool: a: felem -> b: felem -> Stack bool
-  (requires fun h -> live h a /\ live h b)
-  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\ r == (as_nat h0 a = as_nat h0 b))
-
-let compare_felem_bool a b  =
-  assert_norm (pow2 64 * pow2 64 == pow2 128);
-  assert_norm (pow2 128 * pow2 64 == pow2 192);
-  let a_0 = index a (size 0) in
-  let a_1 = index a (size 1) in
-  let a_2 = index a (size 2) in
-  let a_3 = index a (size 3) in
-
-  let b_0 = index b (size 0) in
-  let b_1 = index b (size 1) in
-  let b_2 = index b (size 2) in
-  let b_3 = index b (size 3) in
-
-  eq_u64_nCT a_0 b_0 &&
-  eq_u64_nCT a_1 b_1 &&
-  eq_u64_nCT a_2 b_2 &&
-  eq_u64_nCT a_3 b_3
 
 
 inline_for_extraction

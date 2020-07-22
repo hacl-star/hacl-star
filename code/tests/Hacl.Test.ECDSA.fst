@@ -211,7 +211,7 @@ val check_bound: b:Lib.Buffer.lbuffer uint8 32ul -> Stack bool
   (requires fun h -> Lib.Buffer.live h b)
   (ensures  fun h0 r h1 ->
     h0 == h1 /\
-    r == (Lib.ByteSequence.nat_from_bytes_be (Lib.Buffer.as_seq h0 b) > 0)
+    r == (Lib.ByteSequence.nat_from_bytes_be (Lib.Buffer.as_seq h0 b) > 0) /\
     r == (Lib.ByteSequence.nat_from_bytes_be (Lib.Buffer.as_seq h0 b) <
           Spec.ECDSAP256.Definition.prime_p256_order))
 
