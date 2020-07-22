@@ -255,7 +255,8 @@ val bn_mul1_lshift_add_lemma:
   -> acc:lbignum resLen -> Lemma
   (let (c, res) = bn_mul1_lshift_add #aLen #resLen a b_j j acc in
    v c * pow2 (64 * (aLen + j)) + eval_ resLen res (aLen + j) ==
-   eval_ resLen acc (aLen + j) + bn_v a * v b_j * pow2 (64 * j))
+   eval_ resLen acc (aLen + j) + bn_v a * v b_j * pow2 (64 * j) /\
+   slice res (aLen + j) resLen == slice acc (aLen + j) resLen)
 
 let bn_mul1_lshift_add_lemma #aLen #resLen a b_j j acc =
   let res1 = sub acc j aLen in
@@ -288,7 +289,8 @@ let bn_mul1_lshift_add_lemma #aLen #resLen a b_j j acc =
     pow2 (64 * j) * (bn_v a * v b_j) + eval_ resLen acc (j + aLen);
   };
   assert (v c * pow2 (64 * (aLen + j)) + eval_ resLen res (aLen + j) ==
-    eval_ resLen acc (aLen + j) + bn_v a * v b_j * pow2 (64 * j))
+    eval_ resLen acc (aLen + j) + bn_v a * v b_j * pow2 (64 * j));
+  eq_intro (slice res (aLen + j) resLen) (slice acc (aLen + j) resLen)
 
 
 val bn_mul_lemma_:

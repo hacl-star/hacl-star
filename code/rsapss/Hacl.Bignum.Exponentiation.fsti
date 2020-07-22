@@ -15,7 +15,7 @@ module S = Hacl.Spec.Bignum.Exponentiation
 
 inline_for_extraction noextract
 let bn_mod_exp_st (modBits:size_t{v modBits > 0})
-  (nLen:size_t{0 < v nLen /\ v nLen = v (blocks modBits 64ul) /\ 128 * (v nLen + 1) <= max_size_t})
+  (nLen:size_t{0 < v nLen /\ v nLen = v (blocks modBits 64ul) /\ 128 * v nLen <= max_size_t})
 =
     n:lbignum nLen
   -> a:lbignum nLen

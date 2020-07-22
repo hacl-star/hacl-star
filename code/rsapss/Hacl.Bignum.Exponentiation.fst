@@ -22,14 +22,13 @@ friend Hacl.Spec.Bignum.Exponentiation
 
 inline_for_extraction noextract
 let bn_mod_exp_loop_st (nLen: BN.meta_len) =
-  let rLen = nLen +. 1ul in
     n:lbignum nLen
   -> nInv_u64:uint64
   -> bBits:size_t{v bBits > 0}
   -> bLen:size_t{v bLen = v (blocks bBits 64ul) /\ (v bBits - 1) / 64 < v bLen}
   -> b:lbignum bLen
-  -> aM:lbignum rLen
-  -> accM:lbignum rLen ->
+  -> aM:lbignum nLen
+  -> accM:lbignum nLen ->
   Stack unit
   (requires fun h ->
     live h n /\ live h b /\ live h aM /\ live h accM /\
@@ -47,8 +46,6 @@ val bn_mod_exp_loop: nLen:BN.meta_len
   -> bn_mod_exp_loop_st nLen
 
 let bn_mod_exp_loop nLen #_ n nInv_u64 bBits bLen b aM accM =
-  [@ inline_let]
-  let rLen = nLen +. 1ul in
   [@inline_let]
   let spec h0 = S.bn_mod_exp_f (as_seq h0 n) nInv_u64 (v bBits) (v bLen) (as_seq h0 b) in
   let h0 = ST.get () in
@@ -64,7 +61,7 @@ let bn_mod_exp_loop nLen #_ n nInv_u64 bBits bLen b aM accM =
 inline_for_extraction noextract
 val bn_mod_exp_mont:
     modBits:size_t{v modBits > 0}
-  -> nLen:size_t{0 < v nLen /\ 128 * (v nLen + 1) <= max_size_t /\ v nLen == v (blocks modBits 64ul)}
+  -> nLen:size_t{0 < v nLen /\ 128 * v nLen <= max_size_t /\ v nLen == v (blocks modBits 64ul)}
   -> (#[FStar.Tactics.Typeclasses.tcresolve ()] _ : Hacl.Bignum.Montgomery.mont nLen)
   -> bn_mod_exp_loop:bn_mod_exp_loop_st nLen
   -> n:lbignum nLen
@@ -83,28 +80,25 @@ val bn_mod_exp_mont:
 
 let bn_mod_exp_mont modBits nLen #_ bn_mod_exp_loop n a acc bBits b res =
   push_frame ();
-  let rLen = nLen +! 1ul in
   let bLen = blocks bBits 64ul in
   let nInv_u64 = BM.mod_inv_u64 n.(0ul) in // n * nInv = 1 (mod (pow2 64))
 
   let r2 = create nLen (u64 0) in
   BM.precomp modBits n r2;
 
-  let aM   = create rLen (u64 0) in
-  let accM = create rLen (u64 0) in
+  let aM   = create nLen (u64 0) in
+  let accM = create nLen (u64 0) in
   BM.to n nInv_u64 r2 a aM;
   BM.to n nInv_u64 r2 acc accM;
   bn_mod_exp_loop n nInv_u64 bBits bLen b aM accM;
   BM.from n nInv_u64 accM res;
-  // Note here that type class resolution looks up in the parent type class.
-  BN.sub_mask n res;
   pop_frame ()
 
 
 inline_for_extraction noextract
 val mk_bn_mod_exp:
     modBits:size_t{v modBits > 0}
-  -> nLen:size_t{0 < v nLen /\ 128 * (v nLen + 1) <= max_size_t /\ v nLen == v (blocks modBits 64ul)}
+  -> nLen:size_t{0 < v nLen /\ 128 * v nLen <= max_size_t /\ v nLen == v (blocks modBits 64ul)}
   -> (#[FStar.Tactics.Typeclasses.tcresolve ()] _ : Hacl.Bignum.Montgomery.mont nLen)
   -> bn_mod_exp_loop:bn_mod_exp_loop_st nLen ->
   bn_mod_exp_st modBits nLen

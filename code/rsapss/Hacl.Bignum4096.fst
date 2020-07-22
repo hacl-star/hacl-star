@@ -10,9 +10,6 @@ friend Hacl.Bignum.Exponentiation
 
 let _ = assert_norm (4096ul = 64ul `FStar.UInt32.mul` 64ul)
 
-inline_for_extraction noextract
-let n': BN.meta_len = 65ul
-
 /// A note about the style of normalization used in this file. Normally,
 /// bn_sub_eq_len and others would be marked as inline_for_extraction. However,
 /// we want to keep a copy of the functions that take the nLen parameter at
@@ -39,19 +36,15 @@ let add_mod_n: BN.bn_add_mod_n_st n =
 let sub_mask: BN.bn_sub_mask_st n =
   BN.bn_sub_mask n
 
-let mul' (a b: lbignum n'): BN.bn_mul_st a b =
-  BN.bn_mul n' a n' b
-
-let sqr' (a: lbignum n'): BN.bn_sqr_st a =
-  BN.bn_sqr n' a
+let sqr (a: lbignum n): BN.bn_sqr_st a =
+  BN.bn_sqr n a
 
 inline_for_extraction noextract
 instance bn_inst: BN.bn n = {
   BN.bit_set;
   BN.add_mod_n;
   BN.mul;
-  BN.mul';
-  BN.sqr';
+  BN.sqr;
   BN.sub_mask
 }
 

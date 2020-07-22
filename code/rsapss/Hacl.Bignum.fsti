@@ -76,6 +76,18 @@ val bn_sub:
 
 
 inline_for_extraction noextract
+val bn_reduce_once:
+    aLen:size_t{v aLen > 0}
+  -> n:lbignum aLen
+  -> c:carry
+  -> a:lbignum aLen ->
+  Stack unit
+  (requires fun h -> live h a /\ live h n /\ disjoint a n)
+  (ensures  fun h0 c_out h1 -> modifies (loc a) h0 h1 /\
+    as_seq h1 a == S.bn_reduce_once (as_seq h0 n) c (as_seq h0 a))
+
+
+inline_for_extraction noextract
 let bn_add_mod_n_st (len:size_t{v len > 0}) =
     n:lbignum len
   -> a:lbignum len
@@ -211,7 +223,7 @@ val bn_bit_set:
 
 #set-options "--fuel 0 --ifuel 0"
 
-let meta_len = len: size_t { 0 < v len /\ 128 * (v len + 1) < max_size_t }
+let meta_len = len: size_t { 0 < v len /\ 128 * v len <= max_size_t }
 
 /// This type class is entirely meta-level and will not appear after partial
 /// evaluation in the resulting C code. Clients can take this type class as a
@@ -222,8 +234,7 @@ class bn (len: meta_len) = {
   bit_set: bn_bit_set_st len;
   add_mod_n: bn_add_mod_n_st len;
   mul: a:lbignum len -> b:lbignum len -> bn_mul_st a b;
-  mul': a:lbignum (len +. 1ul) -> b:lbignum (len +. 1ul) -> bn_mul_st a b;
-  sqr': a:lbignum (len +. 1ul) -> bn_sqr_st a;
+  sqr: a:lbignum len -> bn_sqr_st a;
   sub_mask: bn_sub_mask_st len;
 }
 
@@ -235,8 +246,7 @@ let mk_runtime_bn (len: meta_len) = {
   bit_set = bn_bit_set len;
   add_mod_n = bn_add_mod_n len;
   mul = (fun a b -> bn_mul len a len b);
-  mul' = (fun a b -> bn_mul (len +. 1ul) a (len +. 1ul) b);
-  sqr' = (fun a -> bn_sqr (len +. 1ul) a);
+  sqr = (fun a -> bn_sqr len a);
   sub_mask = bn_sub_mask len;
 }
 

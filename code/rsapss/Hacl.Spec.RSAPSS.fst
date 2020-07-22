@@ -16,7 +16,7 @@ module Hash = Spec.Agile.Hash
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 val em_blocks_lt_max_size_t: modBits:size_pos{1 < modBits} -> Lemma
-  (requires 128 * (blocks modBits 64 + 1) <= max_size_t)
+  (requires 128 * blocks modBits 64 <= max_size_t)
   (ensures  8 * blocks (blocks (modBits - 1) 8) 8 <= max_size_t)
 let em_blocks_lt_max_size_t modBits = ()
   // let r = 8 * blocks (blocks (modBits - 1) 8) 8 in
@@ -31,7 +31,7 @@ let em_blocks_lt_max_size_t modBits = ()
   //   }
 
 val sgnt_blocks_eq_nLen: modBits:size_pos{1 < modBits} -> Lemma
-  (requires 128 * (blocks modBits 64 + 1) <= max_size_t)
+  (requires 128 * blocks modBits 64 <= max_size_t)
   (ensures  blocks (blocks modBits 8) 8 == blocks modBits 64)
 let sgnt_blocks_eq_nLen modBits = ()
 
@@ -46,11 +46,12 @@ val rsapss_sign_inv:
   -> salt:lseq uint8 sLen
   -> msgLen:size_nat
   -> msg:lseq uint8 msgLen -> Type0
+
 let rsapss_sign_inv a modBits eBits dBits skey sLen salt msgLen msg =
   sLen + Hash.hash_length a + 8 <= max_size_t /\ sLen + Hash.hash_length a + 8 <= Hash.max_input_length a /\
   sLen + Hash.hash_length a + 2 <= (blocks (modBits - 1) 8) /\ msgLen <= Hash.max_input_length a /\
 
-  128 * (blocks modBits 64 + 1) <= max_size_t /\
+  128 * blocks modBits 64 <= max_size_t /\
  (let nLen = blocks modBits 64 in
   let eLen = blocks eBits 64 in
   let dLen = blocks dBits 64 in
@@ -170,6 +171,7 @@ let rsapss_sign_lemma a modBits eBits dBits skey sLen salt msgLen msg =
 val bn_eval_lt_pow2_modBits: modBits:size_pos{1 < modBits} -> m:lbignum (blocks modBits 64) -> Lemma
   (requires bn_v m < pow2 modBits)
   (ensures  bn_v m == (bn_v m / pow2 (modBits - 1) % 2) * pow2 (modBits - 1) + bn_v m % pow2 (modBits - 1))
+
 let bn_eval_lt_pow2_modBits modBits m =
   calc (==) {
     bn_v m;
@@ -192,6 +194,7 @@ let bn_is_less_pow2 modBits m =
 val bn_is_less_pow2_lemma: modBits:size_pos{1 < modBits} -> m:lbignum (blocks modBits 64) -> Lemma
   (requires bn_v m < pow2 modBits)
   (ensures  bn_is_less_pow2 modBits m == (bn_v m < pow2 (8 * blocks (modBits - 1) 8)))
+
 let bn_is_less_pow2_lemma modBits m =
   let k = blocks modBits 8 in
   let emLen = blocks (modBits - 1) 8 in
@@ -209,6 +212,7 @@ let bn_is_less_pow2_lemma modBits m =
     bn_eval_lt_pow2_modBits modBits m;
     let r = bn_is_bit_set m (modBits - 1) in
     bn_is_bit_set_lemma m (modBits - 1) end
+
 
 val bn_eval_sub: modBits:size_pos{1 < modBits} -> m:lbignum (blocks modBits 64) -> Lemma
   (requires bn_v m < pow2 (8 * blocks (modBits - 1) 8))
@@ -236,11 +240,12 @@ val rsapss_verify_inv:
   -> sgnt:lseq uint8 (blocks modBits 8)
   -> msgLen:size_nat
   -> msg:lseq uint8 msgLen -> Type0
+
 let rsapss_verify_inv a modBits eBits pkey sLen sgnt msgLen msg =
   sLen + Hash.hash_length a + 8 <= max_size_t /\ sLen + Hash.hash_length a + 8 <= Hash.max_input_length a /\
   msgLen <= Hash.max_input_length a /\
 
-  128 * (blocks modBits 64 + 1) <= max_size_t /\
+  128 * blocks modBits 64 <= max_size_t /\
  (let nLen = blocks modBits 64 in
   let eLen = blocks eBits 64 in
 

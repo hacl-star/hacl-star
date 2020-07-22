@@ -12,7 +12,7 @@ open Hacl.Spec.Bignum.Definitions
 
 val bn_mod_exp:
     modBits:size_pos
-  -> nLen:size_pos{nLen = (blocks modBits 64) /\ 128 * (nLen + 1) <= max_size_t}
+  -> nLen:size_pos{nLen = (blocks modBits 64) /\ 128 * nLen <= max_size_t}
   -> n:lbignum nLen
   -> a:lbignum nLen
   -> bBits:size_pos
@@ -22,7 +22,7 @@ val bn_mod_exp:
 
 val bn_mod_exp_lemma:
     modBits:size_pos
-  -> nLen:size_pos{nLen = (blocks modBits 64) /\ 128 * (nLen + 1) <= max_size_t}
+  -> nLen:size_pos{nLen = (blocks modBits 64) /\ 128 * nLen <= max_size_t}
   -> n:lbignum nLen
   -> a:lbignum nLen
   -> bBits:size_pos

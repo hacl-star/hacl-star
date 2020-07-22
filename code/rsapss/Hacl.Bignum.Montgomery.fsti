@@ -36,18 +36,17 @@ val precomp_r2_mod_n:
 
 
 inline_for_extraction noextract
-let mont_reduction_st (nLen:size_t { v nLen + 1 + v nLen + 1 <= max_size_t }) =
-  let rLen = nLen +. 1ul in
+let mont_reduction_st (nLen:size_t{0 < v nLen /\ v nLen + v nLen <= max_size_t}) =
     n:lbignum nLen
   -> mu:uint64
-  -> c:lbignum (rLen +! rLen)
-  -> res:lbignum rLen ->
+  -> c:lbignum (nLen +! nLen)
+  -> res:lbignum nLen ->
   Stack unit
   (requires fun h ->
     live h n /\ live h c /\ live h res /\
     disjoint res n /\ disjoint res c /\ disjoint n c)
   (ensures  fun h0 _ h1 -> modifies (loc res |+| loc c) h0 h1 /\
-    as_seq h1 res == S.mont_reduction #(v nLen) #(v rLen) (as_seq h0 n) mu (as_seq h0 c))
+    as_seq h1 res == S.mont_reduction #(v nLen) (as_seq h0 n) mu (as_seq h0 c))
 
 inline_for_extraction noextract
 val mont_reduction:
@@ -57,19 +56,18 @@ val mont_reduction:
 
 inline_for_extraction noextract
 let to_mont_st (nLen: BN.meta_len) =
-  let rLen = nLen +. 1ul in
     n:lbignum nLen
   -> mu:uint64
   -> r2:lbignum nLen
   -> a:lbignum nLen
-  -> aM:lbignum rLen ->
+  -> aM:lbignum nLen ->
   Stack unit
   (requires fun h ->
     live h n /\ live h r2 /\ live h a /\ live h aM /\
     disjoint a r2 /\ disjoint a n /\ disjoint a aM /\
     disjoint n r2 /\ disjoint n aM /\ disjoint r2 aM)
   (ensures  fun h0 _ h1 -> modifies (loc aM) h0 h1 /\
-    as_seq h1 aM == S.to_mont #(v nLen) #(v rLen) (as_seq h0 n) mu (as_seq h0 r2) (as_seq h0 a))
+    as_seq h1 aM == S.to_mont #(v nLen) (as_seq h0 n) mu (as_seq h0 r2) (as_seq h0 a))
 
 inline_for_extraction noextract
 val to_mont:
@@ -81,17 +79,16 @@ val to_mont:
 
 inline_for_extraction noextract
 let from_mont_st (nLen: BN.meta_len) =
-  let rLen = nLen +. 1ul in
     n:lbignum nLen
   -> mu:uint64
-  -> aM:lbignum rLen
+  -> aM:lbignum nLen
   -> a:lbignum nLen ->
   Stack unit
   (requires fun h ->
     live h n /\ live h a /\ live h aM /\
     disjoint aM a /\ disjoint aM n /\ disjoint a n)
   (ensures  fun h0 _ h1 -> modifies (loc a) h0 h1 /\
-    as_seq h1 a == S.from_mont #(v nLen) #(v rLen) (as_seq h0 n) mu (as_seq h0 aM))
+    as_seq h1 a == S.from_mont #(v nLen) (as_seq h0 n) mu (as_seq h0 aM))
 
 // This one just needs a specialized implementation of mont_reduction. No point
 // in doing a type class for a single function , so we take it as a parameter.
@@ -104,12 +101,11 @@ val from_mont:
 
 inline_for_extraction noextract
 let mont_mul_st (nLen: BN.meta_len) =
-  let rLen = nLen +. 1ul in
     n:lbignum nLen
   -> mu:uint64
-  -> aM:lbignum rLen
-  -> bM:lbignum rLen
-  -> resM:lbignum rLen ->
+  -> aM:lbignum nLen
+  -> bM:lbignum nLen
+  -> resM:lbignum nLen ->
   Stack unit
   (requires fun h ->
     live h aM /\ live h bM /\ live h resM /\ live h n /\
@@ -129,11 +125,10 @@ val mont_mul:
 
 inline_for_extraction noextract
 let mont_sqr_st (nLen: BN.meta_len) =
-  let rLen = nLen +. 1ul in
     n:lbignum nLen
   -> mu:uint64
-  -> aM:lbignum rLen
-  -> resM:lbignum rLen ->
+  -> aM:lbignum nLen
+  -> resM:lbignum nLen ->
   Stack unit
   (requires fun h ->
     live h aM /\ live h resM /\ live h n /\

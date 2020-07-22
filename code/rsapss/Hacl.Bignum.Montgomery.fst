@@ -14,6 +14,7 @@ open Hacl.Impl.Lib
 module ST = FStar.HyperStack.ST
 module Loops = Lib.LoopCombinators
 module LSeq = Lib.Sequence
+module B = LowStar.Buffer
 
 module S = Hacl.Spec.Bignum.Montgomery
 module SB = Hacl.Spec.Bignum
@@ -35,109 +36,122 @@ let precomp_r2_mod_n #nLen #_ modBits n res =
   let spec h = S.bn_lshift1_mod_n (as_seq h n) in
 
   let h0 = ST.get () in
-  loop1 h0 (128ul *! nLen +! 129ul -! modBits) res spec
+  loop1 h0 (128ul *! nLen +! 1ul -! modBits) res spec
   (fun i ->
-    Loops.unfold_repeati (128 * v nLen + 129 - v modBits) (spec h0) (as_seq h0 res) (v i);
+    Loops.unfold_repeati (128 * v nLen + 1 - v modBits) (spec h0) (as_seq h0 res) (v i);
     BN.add_mod_n n res res res
   )
 
 
 inline_for_extraction noextract
+val upd_addcarry_u64:
+    len:size_t
+  -> c0:carry
+  -> a:uint64
+  -> res:lbignum len
+  -> i:size_t{v i < v len} ->
+  Stack carry
+  (requires fun h -> live h res)
+  (ensures  fun h0 c h1 -> modifies (loc res) h0 h1 /\
+   (let r = Seq.index (as_seq h0 res) (v i) in
+    let (c1, r1) = addcarry_u64 c0 a r in
+    c == c1 /\ as_seq h1 res == LSeq.upd (as_seq h0 res) (v i) r1))
+
+let upd_addcarry_u64 len c0 a res i =
+  let tmp = sub res i 1ul in
+  let h0 = ST.get () in
+  let c2 = addcarry_u64_st c0 a res.(i) (sub res i 1ul) in
+  let h1 = ST.get () in
+  //assert ((c2, Seq.index (as_seq h1 res) (v i)) == addcarry_u64 c0 a (Seq.index (as_seq h0 res) (v i)));
+  B.modifies_buffer_elim (B.gsub #uint64 res 0ul i) (loc tmp) h0 h1;
+  assert (v (i +! 1ul) + v (len -! i -! 1ul) == v len);
+  B.modifies_buffer_elim (B.gsub #uint64 res (i +! 1ul) (len -! i -! 1ul)) (loc tmp) h0 h1;
+  LSeq.lemma_update_sub (as_seq h0 res) (v i) 1 (LSeq.sub (as_seq h1 res) (v i) 1) (as_seq h1 res);
+  //assert (as_seq h1 res == LSeq.update_sub (as_seq h0 res) (v i) 1 (LSeq.sub (as_seq h1 res) (v i) 1));
+  LSeq.eq_intro (as_seq h1 res) (LSeq.upd (as_seq h0 res) (v i) (Seq.index (as_seq h1 res) (v i)));
+  c2
+
+
+inline_for_extraction noextract
 val mont_reduction_f:
-    nLen:size_t
-  -> rLen:size_t{v rLen = v nLen + 1 /\ v rLen + v rLen <= max_size_t}
+    nLen:size_t{v nLen + v nLen <= max_size_t}
   -> n:lbignum nLen
   -> nInv_u64:uint64
-  -> j:size_t{v j < v rLen}
-  -> res:lbignum (rLen +! rLen) ->
+  -> j:size_t{v j < v nLen}
+  -> c:lbuffer carry 1ul
+  -> res:lbignum (nLen +! nLen) ->
   Stack unit
-  (requires fun h -> live h n /\ live h res /\ disjoint n res)
-  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_seq h1 res == S.mont_reduction_f #(v nLen) #(v rLen) (as_seq h0 n) nInv_u64 (v j) (as_seq h0 res))
+  (requires fun h ->
+    live h n /\ live h res /\ live h c /\
+    disjoint n res /\ disjoint n c /\ disjoint c res)
+  (ensures  fun h0 _ h1 -> modifies (loc res |+| loc c) h0 h1 /\
+    (Seq.index (as_seq h1 c) 0, as_seq h1 res) ==
+      S.mont_reduction_f #(v nLen) (as_seq h0 n) nInv_u64 (v j) (Seq.index (as_seq h0 c) 0, as_seq h0 res))
 
-let mont_reduction_f nLen rLen n nInv_u64 j res =
-  push_frame ();
+let mont_reduction_f nLen n nInv_u64 j c res =
   let qj = nInv_u64 *. res.(j) in
   // Keeping the inline_for_extraction version here.
-  let c = BN.bn_mul1_lshift_add_in_place nLen n qj (rLen +! rLen) j res in
-  let c = create 1ul c in
-
-  let h0 = ST.get () in
-  let res2 = sub res (j +! nLen) (rLen +! rLen -! j -! nLen) in
-  let _ = update_sub_f_carry #uint64 #carry h0 res (j +! nLen) (rLen +! rLen -! j -! nLen)
-    (fun h -> SB.bn_add (as_seq h0 res2) (as_seq h0 c))
-    // Also keeping the inline_for_extraction version, since the nLen parameter
-    // is too complicated to specialize ahead-of-time.
-    (fun _ -> BN.bn_add (rLen +! rLen -! j -! nLen) res2 1ul c res2) in
-  pop_frame ()
+  let c1 = BN.bn_mul1_lshift_add_in_place nLen n qj (nLen +! nLen) j res in
+  c.(0ul) <- upd_addcarry_u64 (nLen +! nLen) c.(0ul) c1 res (nLen +! j)
 
 
 [@CInline]
 let mont_reduction nLen n nInv_u64 c res =
+  push_frame ();
+  let c0 = create 1ul (u64 0) in
+  [@inline_let]
+  let refl h i : GTot (S.mont_reduction_t i) = Seq.index (as_seq h c0) 0, as_seq h c in
+  [@inline_let]
+  let footprint i = loc c0 |+| loc c in
   [@ inline_let]
-  let rLen = nLen +. 1ul in
-  [@ inline_let]
-  let spec h = S.mont_reduction_f #(v nLen) #(v rLen) (as_seq h n) nInv_u64 in
+  let spec h = S.mont_reduction_f #(v nLen) (as_seq h n) nInv_u64 in
 
   let h0 = ST.get () in
-  loop1 h0 rLen c spec
+  loop h0 nLen S.mont_reduction_t refl footprint spec
   (fun j ->
-    Loops.unfold_repeati (v rLen) (spec h0) (as_seq h0 c) (v j);
-    mont_reduction_f nLen rLen n nInv_u64 j c
+    Loops.unfold_repeat_gen (v nLen) S.mont_reduction_t (spec h0) (refl h0 0) (v j);
+    mont_reduction_f nLen n nInv_u64 j c0 c
   );
   // Easy to specialize, but such a small function that it's not worth it (per
   // Marina's advice).
-  BN.bn_rshift (rLen +! rLen) c rLen res
+  BN.bn_rshift (nLen +! nLen) c nLen res;
+  BN.bn_reduce_once nLen n c0.(0ul) res;
+  pop_frame ()
 
 
 [@CInline]
 let to_mont #nLen #_ mont_reduction n nInv_u64 r2 a aM =
-  [@ inline_let]
-  let rLen = nLen +. 1ul in
   push_frame ();
-  let tmp = create (rLen +! rLen) (u64 0) in
-
-  let h0 = ST.get () in
-  let c = sub tmp 0ul (nLen +! nLen) in
-  update_sub_f h0 tmp 0ul (nLen +! nLen)
-    (fun h -> SB.bn_mul (as_seq h0 a) (as_seq h0 r2))
-    (fun _ -> BN.mul a r2 c);
-  mont_reduction n nInv_u64 tmp aM; // aM = c % n
+  let c = create (nLen +! nLen) (u64 0) in
+  BN.mul a r2 c;
+  mont_reduction n nInv_u64 c aM; // aM = c % n
   pop_frame ()
 
 
 [@CInline]
 let from_mont #nLen mont_reduction n nInv_u64 aM a =
-  [@ inline_let]
-  let rLen = nLen +. 1ul in
   push_frame ();
-  let tmp = create (rLen +! rLen) (u64 0) in
-  update_sub tmp 0ul rLen aM;
-  let a' = create rLen (u64 0) in
-  mont_reduction n nInv_u64 tmp a';
-  copy a (sub a' 0ul nLen);
+  let tmp = create (nLen +! nLen) (u64 0) in
+  update_sub tmp 0ul nLen aM;
+  mont_reduction n nInv_u64 tmp a;
   pop_frame ()
 
 
 [@CInline]
 let mont_mul #nLen #k mont_reduction n nInv_u64 aM bM resM =
-  [@ inline_let]
-  let rLen = nLen +. 1ul in
   push_frame ();
-  let c = create (rLen +! rLen) (u64 0) in
+  let c = create (nLen +! nLen) (u64 0) in
   // In case you need to debug the type class projection, this is the explicit
   // syntax without referring to the implicitly-defined projector.
-  k.BN.mul' aM bM c; // c = aM * bM
+  k.BN.mul aM bM c; // c = aM * bM
   mont_reduction n nInv_u64 c resM; // resM = c % n
   pop_frame ()
 
 [@CInline]
 let mont_sqr #nLen #k mont_reduction n nInv_u64 aM resM =
-  [@ inline_let]
-  let rLen = nLen +. 1ul in
   push_frame ();
-  let c = create (rLen +! rLen) (u64 0) in
-  k.BN.sqr' aM c; // c = aM * aM
+  let c = create (nLen +! nLen) (u64 0) in
+  k.BN.sqr aM c; // c = aM * aM
   mont_reduction n nInv_u64 c resM; // resM = c % n
   pop_frame ()
 

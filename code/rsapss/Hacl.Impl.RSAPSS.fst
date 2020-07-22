@@ -208,6 +208,7 @@ let pss_verify_ a sLen msgLen msg emBits em =
   pop_frame ();
   res
 
+
 inline_for_extraction noextract
 let pss_verify_st (a:Hash.algorithm{S.hash_is_supported a}) =
     sLen:size_t{8 + Hash.hash_length a + v sLen <= max_size_t /\ 8 + Hash.hash_length a + v sLen <= Hash.max_input_length a}
@@ -259,7 +260,7 @@ let rsapss_sign_st (a:Hash.algorithm{S.hash_is_supported a}) =
     v sLen + Hash.hash_length a + 8 <= max_size_t /\ v sLen + Hash.hash_length a + 8 <= Hash.max_input_length a /\
     v sLen + Hash.hash_length a + 2 <= v (blocks (modBits -! 1ul) 8ul) /\ v msgLen <= Hash.max_input_length a /\
 
-    128 * (v (blocks modBits 64ul) + 1) <= max_size_t /\
+    128 * v (blocks modBits 64ul) <= max_size_t /\
    (let nLen = blocks modBits 64ul in
     let eLen = blocks eBits 64ul in
     let dLen = blocks dBits 64ul in
@@ -356,7 +357,7 @@ let rsapss_verify_st (a:Hash.algorithm{S.hash_is_supported a}) =
     v sLen + Hash.hash_length a + 8 <= max_size_t /\ v sLen + Hash.hash_length a + 8 <= Hash.max_input_length a /\
     v msgLen <= Hash.max_input_length a /\
 
-    128 * (v (blocks modBits 64ul) + 1) <= max_size_t /\
+    128 * v (blocks modBits 64ul) <= max_size_t /\
    (let nLen = blocks modBits 64ul in
     let eLen = blocks eBits 64ul in
 

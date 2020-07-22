@@ -17,42 +17,50 @@ let bn_sub #aLen #bLen a b =
 let bn_sub_lemma #aLen #bLen a b =
   Hacl.Spec.Bignum.Addition.bn_sub_lemma a b
 
-let bn_add_mod_n #len n a b =
-  let c0, res0 = bn_add a b in
-  let c1, res1 = bn_sub res0 n in
+let bn_reduce_once #len n c0 a =
+  let c1, res = bn_sub a n in
   let c = c0 -. c1 in
-  map2 (mask_select c) res0 res1
+  map2 (mask_select c) a res
 
-let bn_add_mod_n_lemma #len n a b =
-  let c0, res0 = bn_add a b in
-  bn_add_lemma a b;
+
+let bn_reduce_once_lemma #len n c0 res0 =
+  let tmp = bn_v res0 + v c0 * pow2 (64 * len) in
   let c1, res1 = bn_sub res0 n in
   bn_sub_lemma res0 n;
-  assert (bn_v res1 - v c1 * pow2 (64 * len) == bn_v a + bn_v b - v c0 * pow2 (64 * len) - bn_v n);
-  Math.Lemmas.distributivity_sub_left (v c0) (v c1) (pow2 (64 * len));
-  assert (bn_v res1 + (v c0 - v c1) * pow2 (64 * len) == bn_v a + bn_v b - bn_v n);
+  assert (bn_v res1 - v c1 * pow2 (64 * len) == bn_v res0 - bn_v n);
   let c = c0 -. c1 in
+  assert (bn_v res1 + (v c0 - v c1) * pow2 (64 * len) == tmp - bn_v n);
   let res = map2 (mask_select c) res0 res1 in
 
-  if bn_v a + bn_v b < bn_v n then begin
+  if tmp < bn_v n then begin
     assert (v c0 == 0);
     assert (v c1 == 1);
     assert (v c == pow2 64 - 1);
     bn_mask_select_lemma res0 res1 c;
     assert (bn_v res == bn_v res0);
-    Math.Lemmas.small_mod (bn_v a + bn_v b) (bn_v n);
-    assert (bn_v res == (bn_v a + bn_v b) % bn_v n) end
+    Math.Lemmas.small_mod tmp (bn_v n);
+    assert (bn_v res == tmp % bn_v n) end
   else begin
-    assert (bn_v a + bn_v b - bn_v n < bn_v n);
+    assert (tmp - bn_v n < bn_v n);
     bn_eval_bound res1 len;
     bn_eval_bound n len;
     assert (v c == 0);
     bn_mask_select_lemma res0 res1 c;
     assert (bn_v res == bn_v res1);
-    Math.Lemmas.modulo_addition_lemma (bn_v a + bn_v b) (bn_v n) (- 1);
-    assert (bn_v res % bn_v n == (bn_v a + bn_v b) % bn_v n);
+    Math.Lemmas.modulo_addition_lemma tmp (bn_v n) (- 1);
+    assert (bn_v res % bn_v n == tmp % bn_v n);
     Math.Lemmas.small_mod (bn_v res) (bn_v n) end
 
+
+let bn_add_mod_n #len n a b =
+  let c0, res0 = bn_add a b in
+  bn_reduce_once #len n c0 res0
+
+
+let bn_add_mod_n_lemma #len n a b =
+  let c0, res0 = bn_add a b in
+  bn_add_lemma a b;
+  bn_reduce_once_lemma #len n c0 res0
 
 let bn_mul #aLen #bLen a b =
   Hacl.Spec.Bignum.Multiplication.bn_mul a b

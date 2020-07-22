@@ -18,12 +18,16 @@ val bn_add: #aLen:size_nat -> #bLen:size_nat{bLen <= aLen} -> a:lbignum aLen -> 
 val bn_add_lemma: #aLen:size_nat -> #bLen:size_nat{bLen <= aLen} -> a:lbignum aLen -> b:lbignum bLen ->
   Lemma (let (c_out, res) = bn_add a b in bn_v res + v c_out * pow2 (64 * aLen) == bn_v a + bn_v b)
 
-
 val bn_sub: #aLen:size_nat -> #bLen:size_nat{bLen <= aLen} -> a:lbignum aLen -> b:lbignum bLen -> carry & lbignum aLen
 
 val bn_sub_lemma: #aLen:size_nat -> #bLen:size_nat{bLen <= aLen} -> a:lbignum aLen -> b:lbignum bLen ->
   Lemma (let (c_out, res) = bn_sub a b in bn_v res - v c_out * pow2 (64 * aLen) == bn_v a - bn_v b)
 
+val bn_reduce_once: #len:size_nat -> n:lbignum len -> c:carry -> a:lbignum len -> lbignum len
+
+val bn_reduce_once_lemma: #len:size_nat -> n:lbignum len -> c:carry -> a:lbignum len -> Lemma
+  (requires v c * pow2 (64 * len) + bn_v a < 2 * bn_v n)
+  (ensures  bn_v (bn_reduce_once n c a) == (v c * pow2 (64 * len) + bn_v a) % bn_v n)
 
 val bn_add_mod_n: #len:size_nat -> n:lbignum len -> a:lbignum len -> b:lbignum len -> lbignum len
 
@@ -63,7 +67,8 @@ val bn_mul1_lshift_add_lemma:
   -> acc:lbignum resLen ->
   Lemma (let (c_out, res) = bn_mul1_lshift_add a b j acc in
     v c_out * pow2 (64 * (aLen + j)) + eval_ resLen res (aLen + j) ==
-    eval_ resLen acc (aLen + j) + bn_v a * v b * pow2 (64 * j))
+    eval_ resLen acc (aLen + j) + bn_v a * v b * pow2 (64 * j) /\
+    slice res (aLen + j) resLen == slice acc (aLen + j) resLen)
 
 
 val bn_rshift: #len:size_nat -> b:lbignum len -> i:size_nat{i < len} -> lbignum (len - i)
