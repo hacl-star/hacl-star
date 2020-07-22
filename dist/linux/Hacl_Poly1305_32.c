@@ -33,7 +33,6 @@ void Hacl_Poly1305_32_poly1305_init(u64 *ctx, u8 *key)
   u8 *kr = key;
   u64 u0;
   u64 lo;
-  u8 *x0;
   u64 u;
   u64 hi;
   u64 mask0;
@@ -68,8 +67,7 @@ void Hacl_Poly1305_32_poly1305_init(u64 *ctx, u8 *key)
   acc[4U] = (u64)0U;
   u0 = load64_le(kr);
   lo = u0;
-  x0 = kr + (u32)8U;
-  u = load64_le(x0);
+  u = load64_le(kr + (u32)8U);
   hi = u;
   mask0 = (u64)0x0ffffffc0fffffffU;
   mask1 = (u64)0x0ffffffc0ffffffcU;
@@ -123,11 +121,10 @@ void Hacl_Poly1305_32_poly1305_update1(u64 *ctx, u8 *text)
   u64 *pre = ctx + (u32)5U;
   u64 *acc = ctx;
   u64 e[5U] = { 0U };
-  u64 u = load64_le(text);
-  u64 lo = u;
-  u8 *x00 = text + (u32)8U;
-  u64 u0 = load64_le(x00);
-  u64 hi = u0;
+  u64 u0 = load64_le(text);
+  u64 lo = u0;
+  u64 u = load64_le(text + (u32)8U);
+  u64 hi = u;
   u64 f0 = lo;
   u64 f1 = hi;
   u64 f010 = f0 & (u64)0x3ffffffU;
@@ -341,11 +338,10 @@ void Hacl_Poly1305_32_poly1305_update(u64 *ctx, u32 len, u8 *text)
     {
       u8 *block = text + i * (u32)16U;
       u64 e[5U] = { 0U };
-      u64 u = load64_le(block);
-      u64 lo = u;
-      u8 *x00 = block + (u32)8U;
-      u64 u0 = load64_le(x00);
-      u64 hi = u0;
+      u64 u0 = load64_le(block);
+      u64 lo = u0;
+      u64 u = load64_le(block + (u32)8U);
+      u64 hi = u;
       u64 f0 = lo;
       u64 f1 = hi;
       u64 f010 = f0 & (u64)0x3ffffffU;
@@ -470,7 +466,6 @@ void Hacl_Poly1305_32_poly1305_update(u64 *ctx, u32 len, u8 *text)
     u8 tmp[16U] = { 0U };
     u64 u0;
     u64 lo;
-    u8 *x00;
     u64 u;
     u64 hi;
     u64 f0;
@@ -576,8 +571,7 @@ void Hacl_Poly1305_32_poly1305_update(u64 *ctx, u32 len, u8 *text)
     memcpy(tmp, last, rem * sizeof (last[0U]));
     u0 = load64_le(tmp);
     lo = u0;
-    x00 = tmp + (u32)8U;
-    u = load64_le(x00);
+    u = load64_le(tmp + (u32)8U);
     hi = u;
     f0 = lo;
     f1 = hi;
@@ -778,7 +772,6 @@ void Hacl_Poly1305_32_poly1305_finish(u8 *tag, u8 *key, u64 *ctx)
   u64 f11;
   u64 u0;
   u64 lo;
-  u8 *x00;
   u64 u;
   u64 hi;
   u64 f20;
@@ -789,7 +782,6 @@ void Hacl_Poly1305_32_poly1305_finish(u8 *tag, u8 *key, u64 *ctx)
   u64 r11;
   u64 f30;
   u64 f31;
-  u8 *x0;
   acc[0U] = f011;
   acc[1U] = f111;
   acc[2U] = f211;
@@ -811,8 +803,7 @@ void Hacl_Poly1305_32_poly1305_finish(u8 *tag, u8 *key, u64 *ctx)
   f11 = hi0;
   u0 = load64_le(ks);
   lo = u0;
-  x00 = ks + (u32)8U;
-  u = load64_le(x00);
+  u = load64_le(ks + (u32)8U);
   hi = u;
   f20 = lo;
   f21 = hi;
@@ -823,8 +814,7 @@ void Hacl_Poly1305_32_poly1305_finish(u8 *tag, u8 *key, u64 *ctx)
   f30 = r0;
   f31 = r11;
   store64_le(tag, f30);
-  x0 = tag + (u32)8U;
-  store64_le(x0, f31);
+  store64_le(tag + (u32)8U, f31);
 }
 
 void Hacl_Poly1305_32_poly1305_mac(u8 *tag, u32 len, u8 *text, u8 *key)
