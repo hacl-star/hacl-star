@@ -303,7 +303,19 @@ let compare_felem_bool a b  =
 inline_for_extraction noextract
 val compare_points_bool: a: point -> b: point -> Stack bool
   (requires fun h -> live h a /\ live h b)
-  (ensures fun h0 _ h1 -> modifies0 h0 h1)
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ 
+    (
+      let xP = gsub a (size 0) (size 4) in 
+      let yP = gsub a (size 4) (size 4) in 
+      let zP = gsub a (size 8) (size 4) in 
+
+      let xQ = gsub b (size 0) (size 4) in 
+      let yQ = gsub b (size 4) (size 4) in 
+      let zQ = gsub b (size 8) (size 4) in 
+
+      r == ((as_nat h0 xP = as_nat h0 xQ) && (as_nat h0 yP = as_nat h0 yQ) && (as_nat h0 zP = as_nat h0 zQ))
+    )
+  )
 
 let compare_points_bool a b = 
   let x0 = sub a (size 0) (size 4) in 
@@ -367,16 +379,16 @@ let ecdsa_verification_step5_1 pointSum pubKeyAsPoint u1 u2 tempBuffer =
   ecdsa_verification_step5_0 points pubKeyAsPoint u1 u2 tempBuffer;
   let pointU1G = sub points (size 0) (size 12) in
   let pointU2Q = sub points (size 12) (size 12) in 
-  
-  let normP = norm pointU1G result0Norm tmpForNorm in 
-  let normR = norm pointU2Q result1Norm tmpForNorm in 
 
-  let equalX = compare_points_bool normP normR in 
+  norm pointU1G result0Norm tmpForNorm;
+  norm pointU2Q result1Norm tmpForNorm;
 
+  let equalX = compare_points_bool result0Norm result1Norm in admit();
+
+  begin
   match equalX with
   | true -> point_double pointU1G pointSum buff
-  | _ -> begin point_add pointU1G pointU2Q pointSum buff end;
-  admit();
+  | _ -> point_add pointU1G pointU2Q pointSum buff end;
   norm pointSum pointSum buff; admit();
   pop_frame()
 
