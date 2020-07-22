@@ -267,7 +267,6 @@ def fstar_default_args_nosmtencoding(relative=True):
   + (' --use_hints --use_hint_hashes' if use_hints else '')
   + (' --cache_off' if record_hints else ' --cache_checked_modules')
   + ' --cache_dir ' + cache_dir
-  + ' --use_extracted_interfaces true'
   )
 
 def fstar_default_args(relative=True):
@@ -801,7 +800,6 @@ def extract_fstar_file(options, sourcefile, fstar_includes):
   hintfile = to_hint_file(sourcefile)
   mlfile = ml_out_file(sourcefile, '.ml')
   Depends(mlfile, to_obj_dir(base_name + '.fst.verified'))
-  verifier_flags = options.verifier_flags.replace('--use_extracted_interfaces true', '')
   return env.Command(mlfile, sourcefile,
     f'{fstar_exe} {sourcefile} {verifier_flags} {fstar_z3_path} {fstar_no_verify} --admit_smt_queries true' +
     f' {fstar_includes} {" ".join(fstar_user_args)}' +
