@@ -61,10 +61,15 @@ let pad_length_mod (a: hash_alg{is_md a}) (base_len len: nat): Lemma
   (ensures  pad_length a (base_len + len) = pad_length a len)
 = pad0_length_mod a base_len len
 
-let pad_length_bound (a: hash_alg{is_md a}) (len: len_t a): Lemma
-  (pad_length a (len_v a len) <= 2 * block_length a)
-=
-  ()
+val pad_len_bound :
+  a : hash_alg ->
+  prev_len:len_t a { len_v a prev_len % block_length a = 0 } ->
+  input_len:U32.t { U32.v input_len + len_v a prev_len <= max_input_length a} ->
+  Lemma(
+    (U32.v input_len % block_length a) +
+      pad_length a (len_v a prev_len + U32.v input_len) <= 2 * block_length a)
+
+let pad_len_bound a prev_len input_len = ()
 
 (* Avoiding an ill-formed pattern error... *)
 noextract inline_for_extraction
@@ -131,19 +136,23 @@ let mk_update_multi a update s ev blocks n_blocks =
 
 #pop-options
 
-#push-options "--fuel 0 --ifuel 1 --z3rlimit 1600"
+#push-options "--fuel 0 --ifuel 1 --z3rlimit 400 --z3cliopt smt.arith.nl=false"
 
-(* TODO: the success rate of this proof is random *)
 (** An arbitrary number of bytes, then padding. *)
 noextract inline_for_extraction
-let mk_update_last a update_multi pad s ev prev_len input input_len =
+let mk_update_last a update_multi =
+  assert_norm(block_length a > 0);
+  fun pad s ev prev_len input input_len ->
   assert (extra_state a == unit);
   ST.push_frame ();
   let h0 = ST.get () in
 
   (* Get a series of complete blocks. *)
   let blocks_n = U32.(input_len /^ block_len a) in
+  Math.Lemmas.nat_times_nat_is_nat (UInt32.v blocks_n) (block_length a);
+  Math.Lemmas.euclidean_division_definition (U32.v input_len) (block_length a);
   let blocks_len = U32.(blocks_n *^ block_len a) in
+  Math.Lemmas.cancel_mul_mod (U32.v blocks_n) (block_length a);
   assert (U32.v blocks_len % block_length a = 0);
   let blocks = B.sub input 0ul blocks_len in
 
@@ -152,6 +161,8 @@ let mk_update_last a update_multi pad s ev prev_len input input_len =
   assert (U32.v rest_len < block_length a);
   let rest = B.sub input blocks_len rest_len in
 
+  assert(B.length blocks = U32.v blocks_len);
+  assert(block_length a * U32.v blocks_n = U32.v blocks_n * block_length a);
   update_multi s () blocks blocks_n;
 
   let h1 = ST.get () in
@@ -160,18 +171,20 @@ let mk_update_last a update_multi pad s ev prev_len input input_len =
 
   (* Compute the total number of bytes fed. *)
   let total_input_len: len_t a = len_add32 a prev_len input_len in
-
   (* Blit the remaining data and the padding together *)
   let pad_len = Hacl.Hash.PadFinish.pad_len a total_input_len in
   let tmp_len = U32.( rest_len +^ pad_len ) in
   assert (len_v a total_input_len = len_v a prev_len + U32.v blocks_len + U32.v rest_len);
   Lemmas.modulo_distributivity (len_v a prev_len) (U32.v blocks_len) (block_length a);
+
+  Math.Lemmas.lemma_mod_plus_distr_r (len_v a prev_len) (U32.v blocks_len) (block_length a);
   assert ((len_v a prev_len + U32.v blocks_len) % block_length a = 0);
   pad_length_mod a (len_v a prev_len + U32.v blocks_len) (U32.v rest_len);
   padding_round a total_input_len;
+  assert(FStar.UInt32.v tmp_len % Spec.Hash.Definitions.block_length a = 0);
   assert (U32.v tmp_len % block_length a = 0);
 
-  pad_length_bound a total_input_len;
+  pad_len_bound a prev_len input_len;
   assert (U32.v tmp_len <= 2 * block_length a);
 
   let tmp_twoblocks = B.alloca (Lib.IntTypes.u8 0) U32.(2ul *^ block_len a) in
@@ -187,6 +200,11 @@ let mk_update_last a update_multi pad s ev prev_len input input_len =
   assert (S.equal (B.as_seq h2 tmp_pad) (Spec.Hash.PadFinish.pad a (len_v a total_input_len)));
 
   (* Update multi those last few blocks *)
+  Math.Lemmas.cancel_mul_mod (U32.v tmp_len) (block_length a);
+  Math.Lemmas.euclidean_division_definition (U32.v tmp_len) (block_length a);
+  Math.Lemmas.swap_mul (block_length a) (U32.v U32.(tmp_len /^ block_len a));
+  assert(B.length tmp = block_length a * U32.v U32.(tmp_len /^ block_len a));
+
   update_multi s () tmp U32.(tmp_len /^ block_len a);
 
   let h3 = ST.get () in
