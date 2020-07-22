@@ -8,7 +8,7 @@
       0,
       [ "@query" ],
       0,
-      "c04fcb46c7104df103d924942bc09057"
+      "5ccc4105f5db2ac8d7683e3d47109ebe"
     ],
     [
       "Vale.Arch.MachineHeap_s.get_heap_val32_reveal",
@@ -17,7 +17,7 @@
       0,
       [ "@query" ],
       0,
-      "138c86ab811dd4a573d0f72cb708920e"
+      "fc38653ea677b9f73c22000f76448438"
     ],
     [
       "Vale.Arch.MachineHeap_s.get_heap_val64_def",
@@ -26,7 +26,7 @@
       0,
       [ "@query" ],
       0,
-      "127ca50a88aeaf0263d62ee6c1d7c461"
+      "b6fdd5da0acdcd7886d512e8a91c25b0"
     ],
     [
       "Vale.Arch.MachineHeap_s.get_heap_val64_reveal",
@@ -35,7 +35,7 @@
       0,
       [ "@query" ],
       0,
-      "d4fa2fa9e0c0a7c2b351734f5f8533cf"
+      "11109f27b42887586e5b4ddd9258acc7"
     ],
     [
       "Vale.Arch.MachineHeap_s.get_heap_val128_reveal",
@@ -44,7 +44,7 @@
       0,
       [ "@query" ],
       0,
-      "6fd4ed00546464a982cd1f4d91356053"
+      "37dd23ca6661b53003598022b5793a84"
     ],
     [
       "Vale.Arch.MachineHeap_s.update_heap32_def",
@@ -60,7 +60,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "052cf6405df5396fb08eb29701d6520e"
+      "24d6f6235a31fe10c3ac6de941662349"
     ],
     [
       "Vale.Arch.MachineHeap_s.update_heap32_reveal",
@@ -69,7 +69,7 @@
       0,
       [ "@query" ],
       0,
-      "eb47f6b6ccb3dd3f01cf00da4f0f2817"
+      "4614b6689acbbbc17348195b57124f47"
     ],
     [
       "Vale.Arch.MachineHeap_s.update_heap64_def",
@@ -88,7 +88,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "c909ea578762fd827bcba13f3ac9d270"
+      "9867c39837e0fd911a58f5a4b241871c"
     ],
     [
       "Vale.Arch.MachineHeap_s.update_heap64_reveal",
@@ -97,7 +97,7 @@
       0,
       [ "@query" ],
       0,
-      "469a548e3e45a1645b217de4327ca9a5"
+      "1c7fcb2211db58dd524cb612a24ad75c"
     ],
     [
       "Vale.Arch.MachineHeap_s.update_heap128_reveal",
@@ -106,60 +106,7 @@
       0,
       [ "@query" ],
       0,
-      "aa966eba5072024f2166390e01e201e8"
-    ],
-    [
-      "Vale.Arch.MachineHeap_s.get_heap_val32_def",
-      2,
-      1,
-      0,
-      [ "@query" ],
-      0,
-      "a7a42326457f2776a7f60ad2891461d3"
-    ],
-    [
-      "Vale.Arch.MachineHeap_s.get_heap_val64_def",
-      2,
-      1,
-      0,
-      [ "@query" ],
-      0,
-      "2b88fbbd8ef0d6a6515c2f38ca304857"
-    ],
-    [
-      "Vale.Arch.MachineHeap_s.update_heap32_def",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "equation_Prims.nat", "equation_Vale.Def.Words_s.natN",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
-      ],
-      0,
-      "b5a18781e934a0233678decd41deb5e7"
-    ],
-    [
-      "Vale.Arch.MachineHeap_s.update_heap64_def",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "equation_Prims.nat", "equation_Vale.Def.Words.Two_s.nat_to_two",
-        "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.natN",
-        "int_inversion", "proj_equation_Vale.Def.Words_s.Mktwo_lo",
-        "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_Vale.Def.Words_s.Mktwo_lo",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
-      ],
-      0,
-      "19419a15f1e47fee92166a5237949f3a"
+      "cd8958654d5f832745907ddba9fc10c4"
     ]
   ]
 ]
