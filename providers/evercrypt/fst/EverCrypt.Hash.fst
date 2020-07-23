@@ -99,11 +99,12 @@ let invariant_s #a (s: state_s a) h =
   B.live h (p s)
 
 let repr #a s h: GTot _ =
+  let s = B.get h s 0 in
   as_seq h (p s)
 
 let alg_of_state a s =
   let open LowStar.BufferOps in
-  match s with
+  match !*s with
   | MD5_s _ -> MD5
   | SHA1_s _ -> SHA1
   | SHA2_224_s _ -> SHA2_224
@@ -121,7 +122,8 @@ let fresh_is_disjoint l1 l2 h0 h1 = ()
 let invariant_loc_in_footprint #a s m = ()
 
 let frame_invariant #a l s h0 h1 =
-  assert (repr_eq #a (repr #a s h0) (repr #a s h1))
+  let state = B.deref h0 s in
+  assert (repr_eq (repr s h0) (repr s h1))
 
 inline_for_extraction noextract
 let alloca a =
@@ -136,7 +138,7 @@ let alloca a =
     | Blake2S -> Blake2S_s (B.alloca 0ul 16ul)
     | Blake2B -> Blake2B_s (B.alloca 0uL 16ul)
   in
-  s
+  B.alloca s 1ul
 
 let create_in a r =
   let s: state_s a =
@@ -150,7 +152,7 @@ let create_in a r =
     | Blake2S -> Blake2S_s (B.malloc r 0ul 16ul)
     | Blake2B -> Blake2B_s (B.malloc r 0uL 16ul)
   in
-  s
+  B.malloc r s 1ul
 
 let create a =
   create_in a HS.root
@@ -158,7 +160,7 @@ let create a =
 #push-options "--ifuel 1"
 
 let init #a s =
-  match s with
+  match !*s with
   | MD5_s p -> Hacl.Hash.MD5.legacy_init p
   | SHA1_s p -> Hacl.Hash.SHA1.legacy_init p
   | SHA2_224_s p -> Hacl.Hash.SHA2.init_224 p
@@ -203,7 +205,7 @@ let update_multi_224 s ev blocks n =
 // Need to unroll the definition of update_multi once to prove that it's update
 #push-options "--max_fuel 1 --ifuel 1"
 let update #a s prevlen block =
-  match s with
+  match !*s with
   | MD5_s p -> Hacl.Hash.MD5.legacy_update p () block
   | SHA1_s p -> Hacl.Hash.SHA1.legacy_update p () block
   | SHA2_224_s p -> update_multi_224 p () block 1ul
@@ -222,7 +224,7 @@ let update #a s prevlen block =
 #push-options "--ifuel 1"
 
 let update_multi #a s prevlen blocks len =
-  match s with
+  match !*s with
   | MD5_s p ->
       let n = len / block_len MD5 in
       Hacl.Hash.MD5.legacy_update_multi p () blocks n
@@ -317,12 +319,19 @@ let update_last_128 a update_last p ev prev_len last last_len =
   [@inline_let] let prev_len : UInt128.t = Int.Cast.Full.uint64_to_uint128 prev_len in
   update_last p ev prev_len last last_len
 
+let state_s_to_words_state (#a:alg) (s:state_s a) (h:HS.mem) (counter:uint64_t) :
+  GTot (words_state a) =
+  if is_blake a then
+    let ev : extra_state a = Lib.IntTypes.cast (extra_state_int_type a) Lib.IntTypes.SEC counter in
+    as_seq h (p s), ev
+  else (as_seq h (p s), ())
+
 /// Before defining ``update_last`` we introduce auxiliary functions for Blake2S
 /// and Blake2B, because trying to define it completely at once leads to a proof loop.
-/// Besides, even with this the Blake functions themselves are very brittle (they tend to loop).
+/// Besides, even with this the Blake functions tend to loop.
 inline_for_extraction noextract
 let update_last_with_internal_st (a : alg) =
-  s:state a ->
+//  s:state_s a ->
   p:Hacl.Hash.Definitions.state (impl_of_alg a) ->
   prev_len:uint64_t ->
   last:B.buffer Lib.IntTypes.uint8 { B.length last <= block_length a } ->
@@ -333,7 +342,62 @@ let update_last_with_internal_st (a : alg) =
     } ->
   Stack unit
   (requires fun h0 ->
-    invariant s h0 /\
+    let s = mk_state_s p in
+    invariant_s s h0 /\
+    B.live h0 last /\
+    M.(loc_disjoint (footprint_s s) (loc_buffer last) /\
+    v prev_len + v last_len <= max_input_length a))
+  (ensures fun h0 _ h1 ->
+    let s = mk_state_s p in
+    invariant_s s h1 /\
+    as_seq h1 p ==
+      fst (Spec.Hash.Incremental.update_last a (state_s_to_words_state s h0 prev_len) (v prev_len)
+                                             (B.as_seq h0 last)) /\
+    M.(modifies (footprint_s s) h0 h1) /\
+    footprint_s s == footprint_s s)
+
+(*inline_for_extraction noextract
+let update_last_with_internal_st (a : alg) =
+  s:state_s a ->
+  p:Hacl.Hash.Definitions.state (impl_of_alg a) ->
+  prev_len:uint64_t ->
+  last:B.buffer Lib.IntTypes.uint8 { B.length last <= block_length a } ->
+  last_len:uint32_t {
+    v last_len = B.length last /\
+    v prev_len + v last_len <= max_input_length a /\
+    v prev_len % block_length a = 0
+    } ->
+  Stack unit
+  (requires fun h0 ->
+    invariant_s s h0 /\
+    s == mk_state_s p /\
+    B.live h0 last /\
+    M.(loc_disjoint (footprint_s s) (loc_buffer last) /\
+    v prev_len + v last_len <= max_input_length a))
+  (ensures fun h0 _ h1 ->
+    invariant_s s h1 /\
+    as_seq h1 p ==
+      fst (Spec.Hash.Incremental.update_last a (state_s_to_words_state s h0 prev_len) (v prev_len)
+                                             (B.as_seq h0 last)) /\
+    M.(modifies (footprint_s s) h0 h1) /\
+    footprint_s s == footprint_s s) *)
+
+
+(*
+inline_for_extraction noextract
+let update_last_with_internal_st (a : alg) =
+  s:state_s a ->
+  p:Hacl.Hash.Definitions.state (impl_of_alg a) ->
+  prev_len:uint64_t ->
+  last:B.buffer Lib.IntTypes.uint8 { B.length last <= block_length a } ->
+  last_len:uint32_t {
+    v last_len = B.length last /\
+    v prev_len + v last_len <= max_input_length a /\
+    v prev_len % block_length a = 0
+    } ->
+  Stack unit
+  (requires fun h0 ->
+    invariant_s s h0 /\
     s == mk_state_s p /\
     B.live h0 last /\
     M.(loc_disjoint (footprint s h0) (loc_buffer last) /\
@@ -346,11 +410,12 @@ let update_last_with_internal_st (a : alg) =
     M.(modifies (footprint s h0) h0 h1) /\
     footprint s h0 == footprint s h1 /\
     preserves_freeable s h0 h1)
+*)
 
 inline_for_extraction noextract
 val update_last_blake2s : update_last_with_internal_st Blake2S
 
-let update_last_blake2s s p prev_len last last_len =
+let update_last_blake2s p prev_len last last_len =
   [@inline_let] let ev = prev_len in
   let _ = update_last_64 Blake2S Hacl.Hash.Blake2.update_last_blake2s_32 p ev
                          prev_len last last_len in
@@ -359,14 +424,14 @@ let update_last_blake2s s p prev_len last last_len =
 inline_for_extraction noextract
 val update_last_blake2b : update_last_with_internal_st Blake2B
 
-let update_last_blake2b s p prev_len last last_len =
+let update_last_blake2b p prev_len last last_len =
   [@inline_let] let ev = Int.Cast.Full.uint64_to_uint128 prev_len in
   let _ = update_last_128 Blake2B Hacl.Hash.Blake2.update_last_blake2b_32 p ev
                           prev_len last last_len in
   ()
 
 let update_last #a s prev_len last last_len =
-  match s with
+  match !*s with
   | MD5_s p ->
       update_last_64 a Hacl.Hash.MD5.legacy_update_last p () prev_len last last_len
   | SHA1_s p ->
@@ -380,14 +445,14 @@ let update_last #a s prev_len last last_len =
   | SHA2_512_s p ->
       update_last_128 a Hacl.Hash.SHA2.update_last_512 p () prev_len last last_len
   | Blake2S_s p ->
-      update_last_blake2s s p prev_len last last_len
+      update_last_blake2s p prev_len last last_len
   | Blake2B_s p ->
-      update_last_blake2b s p prev_len last last_len
+      update_last_blake2b p prev_len last last_len
 
 #push-options "--ifuel 1"
 
 let finish #a s dst =
-  match s with
+  match !*s with
   | MD5_s p -> Hacl.Hash.MD5.legacy_finish p () dst
   | SHA1_s p -> Hacl.Hash.SHA1.legacy_finish p () dst
   | SHA2_224_s p -> Hacl.Hash.SHA2.finish_224 p () dst
@@ -402,7 +467,7 @@ let finish #a s dst =
 #pop-options
 
 let free #ea s =
-  begin match s with
+  begin match !*s with
     | MD5_s p -> B.free p
     | SHA1_s p -> B.free p
     | SHA2_224_s p -> B.free p
@@ -416,46 +481,46 @@ let free #ea s =
 #push-options "--ifuel 1"
 
 let copy #a s_src s_dst =
-  match s_src with
+  match !*s_src with
   | MD5_s p_src ->
       [@inline_let]
       let s_dst: state MD5 = s_dst in
-      let p_dst = MD5_s?.p s_dst in
+      let p_dst = MD5_s?.p !*s_dst in
       B.blit p_src 0ul p_dst 0ul 4ul
   | SHA1_s p_src ->
       [@inline_let]
       let s_dst: state SHA1 = s_dst in
-      let p_dst = SHA1_s?.p s_dst in
+      let p_dst = SHA1_s?.p !*s_dst in
       B.blit p_src 0ul p_dst 0ul 5ul
   | SHA2_224_s p_src ->
       [@inline_let]
       let s_dst: state SHA2_224 = s_dst in
-      let p_dst = SHA2_224_s?.p s_dst in
+      let p_dst = SHA2_224_s?.p !*s_dst in
       B.blit p_src 0ul p_dst 0ul 8ul
   | SHA2_256_s p_src ->
       [@inline_let]
       let s_dst: state SHA2_256 = s_dst in
-      let p_dst = SHA2_256_s?.p s_dst in
+      let p_dst = SHA2_256_s?.p !*s_dst in
       B.blit p_src 0ul p_dst 0ul 8ul
   | SHA2_384_s p_src ->
       [@inline_let]
       let s_dst: state SHA2_384 = s_dst in
-      let p_dst = SHA2_384_s?.p s_dst in
+      let p_dst = SHA2_384_s?.p !*s_dst in
       B.blit p_src 0ul p_dst 0ul 8ul
   | SHA2_512_s p_src ->
       [@inline_let]
       let s_dst: state SHA2_512 = s_dst in
-      let p_dst = SHA2_512_s?.p s_dst in
+      let p_dst = SHA2_512_s?.p !*s_dst in
       B.blit p_src 0ul p_dst 0ul 8ul
   | Blake2S_s p_src ->
       [@inline_let]
       let s_dst: state Blake2S = s_dst in
-      let p_dst = Blake2S_s?.p s_dst in
+      let p_dst = Blake2S_s?.p !*s_dst in
       B.blit p_src 0ul p_dst 0ul 16ul
   | Blake2B_s p_src ->
       [@inline_let]
       let s_dst: state Blake2B = s_dst in
-      let p_dst = Blake2B_s?.p s_dst in
+      let p_dst = Blake2B_s?.p !*s_dst in
       B.blit p_src 0ul p_dst 0ul 16ul
 
 #pop-options
