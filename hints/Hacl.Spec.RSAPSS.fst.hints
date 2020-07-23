@@ -1,5 +1,5 @@
 [
-  "¸³””v3ûëMÆ‰\u0003jyCì",
+  "\u0004]©\u0002\u0004Æ\u001a³ýDØgÇ.×þ",
   [
     [
       "Hacl.Spec.RSAPSS.em_blocks_lt_max_size_t",
@@ -21,7 +21,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "e27b3bf827bc7ec2d1c981e892b5d9ba"
+      "4ba102e87d896eb8c626f18f2aacf3fb"
     ],
     [
       "Hacl.Spec.RSAPSS.em_blocks_lt_max_size_t",
@@ -37,7 +37,7 @@
         "refinement_interpretation_Tm_refine_ca3218c12763b17ce56d4338a3b25f5e"
       ],
       0,
-      "3e756e65d4d7888bc8c6dc32bcd8e9eb"
+      "d071bfe5730dbc663b0914ae1f533eb6"
     ],
     [
       "Hacl.Spec.RSAPSS.sgnt_blocks_eq_nLen",
@@ -56,7 +56,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "13d429829ba73d717e387ba4b8c19c85"
+      "ddcbf2d6ba4791bbf3e33db8241bbee0"
     ],
     [
       "Hacl.Spec.RSAPSS.sgnt_blocks_eq_nLen",
@@ -76,7 +76,7 @@
         "typing_Hacl.Spec.Bignum.Definitions.blocks"
       ],
       0,
-      "21f6c54f63687cae0bc7bb3df0d216a4"
+      "265bc58fab0a63073da4b219efa688e1"
     ],
     [
       "Hacl.Spec.RSAPSS.rsapss_sign_inv",
@@ -101,7 +101,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "20b3537467afd5750f48c4cc82322e49"
+      "fc9a77b5822aa82e12cbe7e865e48e7a"
     ],
     [
       "Hacl.Spec.RSAPSS.rsapss_sign_inv",
@@ -126,7 +126,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "04509421eb392543162e57f6ef48e4d3"
+      "d8fd32c95b781bceddc19a235618165a"
     ],
     [
       "Hacl.Spec.RSAPSS.rsapss_sign_inv",
@@ -134,22 +134,25 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Hacl.Spec.Bignum.Definitions.blocks", "equation_Prims.nat",
-        "equation_Prims.pos", "equation_Spec.RSAPSS.hLen", "int_inversion",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_Division",
-        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equation_Hacl.Spec.Bignum.Definitions.blocks",
+        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.unsigned",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Division", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
         "refinement_interpretation_Tm_refine_424c45f2a25a4a4b58b436fce73fe0fc",
         "refinement_interpretation_Tm_refine_44540322a5aeeac77ad2eb12638c2b4f",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_69a4e69ef618b8a53667f14bbf79e6f2",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "refinement_interpretation_Tm_refine_ca3218c12763b17ce56d4338a3b25f5e"
+        "refinement_interpretation_Tm_refine_ca3218c12763b17ce56d4338a3b25f5e",
+        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "d81734c695f0e04acd68d198cc33274a"
+      "b727b460a62818700a6a20387e972cac"
     ],
     [
       "Hacl.Spec.RSAPSS.rsapss_sign",
@@ -177,7 +180,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "6048b2cbfa78cb75500d0f30e589a041"
+      "777b95a76279bbda91e753dffa158add"
     ],
     [
       "Hacl.Spec.RSAPSS.rsapss_sign",
@@ -202,7 +205,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "f9f7e33f5ea67de422df6edc48b9ec3a"
+      "f59d7d60d00125e4ea118a73f5fdf2be"
     ],
     [
       "Hacl.Spec.RSAPSS.rsapss_sign",
@@ -258,7 +261,7 @@
         "typing_Spec.RSAPSS.sha2_256"
       ],
       0,
-      "2c24aff4f10b1ce0e2624fe65a506396"
+      "2819342d5b6d39a332aeb2d42eca17a6"
     ],
     [
       "Hacl.Spec.RSAPSS.rsapss_sign_lemma",
@@ -292,7 +295,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "28d8c46afa7a09f0caab3c8e4239e075"
+      "c90c91c2cd54d97fe8b320623d6eea36"
     ],
     [
       "Hacl.Spec.RSAPSS.rsapss_sign_lemma",
@@ -317,7 +320,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "a7efde61dc3979f21aa79237b645df53"
+      "c4b6fac1233fa7fb768c5cdaa8d78f02"
     ],
     [
       "Hacl.Spec.RSAPSS.rsapss_sign_lemma",
@@ -391,7 +394,7 @@
         "typing_Spec.RSAPSS.fpow", "typing_Spec.RSAPSS.sha2_256"
       ],
       0,
-      "089707a9b36691cc3d07fd50c4d1a283"
+      "338949859ee374d312efcc4bb942fb87"
     ],
     [
       "Hacl.Spec.RSAPSS.bn_eval_lt_pow2_modBits",
@@ -415,7 +418,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "472a27add036f94d500001e7bea4cbb4"
+      "375a06459cd5a3f83664c851d8afa124"
     ],
     [
       "Hacl.Spec.RSAPSS.bn_eval_lt_pow2_modBits",
@@ -434,7 +437,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "3ca94edfb1885b3ce3607eeb9657a916"
+      "661b2320cbb24592c0cbe153d35a346e"
     ],
     [
       "Hacl.Spec.RSAPSS.bn_eval_lt_pow2_modBits",
@@ -468,7 +471,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "1ff74703406abe510d1386dd80976a95"
+      "8d8325f3f55179e89d0637573d12a357"
     ],
     [
       "Hacl.Spec.RSAPSS.bn_is_less_pow2",
@@ -487,7 +490,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "b01f637439accc6edec148701a5afeff"
+      "d6b694bba2958b2c5e30ebc02cb59dd3"
     ],
     [
       "Hacl.Spec.RSAPSS.bn_is_less_pow2",
@@ -506,7 +509,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "b5f28f647e36195a912c36de6e96eebf"
+      "d39ced6fc5e1f271945ddddb50749504"
     ],
     [
       "Hacl.Spec.RSAPSS.bn_is_less_pow2",
@@ -528,7 +531,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "4f533fe3d2a4f0188d18b580742f2534"
+      "2c71431b87a3d428d7f81f380c2dd009"
     ],
     [
       "Hacl.Spec.RSAPSS.bn_is_less_pow2_lemma",
@@ -554,7 +557,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "e4403d8f09a8b574786e30da1499c9e3"
+      "ca48d5b74c831478d1460352ca358c7a"
     ],
     [
       "Hacl.Spec.RSAPSS.bn_is_less_pow2_lemma",
@@ -573,7 +576,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "d07ea233571c889bc3d1c87ad6259e19"
+      "6131a188f04b764b5bffae99f2af56da"
     ],
     [
       "Hacl.Spec.RSAPSS.bn_is_less_pow2_lemma",
@@ -612,7 +615,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "1440ab3b1ffc7c5ce0eb706465f27bdf"
+      "ca229b6099921204932c6677a100759a"
     ],
     [
       "Hacl.Spec.RSAPSS.bn_eval_sub",
@@ -641,7 +644,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "29cbf2450a072a9a747377ecab97af34"
+      "4369377f34d1c207b4ec4754aeb870d7"
     ],
     [
       "Hacl.Spec.RSAPSS.bn_eval_sub",
@@ -660,7 +663,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "d36b90a594373a9cd6f7f32c1f21d030"
+      "5a6d3008c6aed79dcf4de5a54e4e25a1"
     ],
     [
       "Hacl.Spec.RSAPSS.bn_eval_sub",
@@ -706,7 +709,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "27d5018f7eba99384e0b4a21498b3487"
+      "d922f9e97fd1ca90eb2660d793e84283"
     ],
     [
       "Hacl.Spec.RSAPSS.rsapss_verify_inv",
@@ -731,7 +734,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "bb314f2b3c6fad80ec0d03c6bc23d9a3"
+      "599e600afdf97b2464eaaaf9fd5768e0"
     ],
     [
       "Hacl.Spec.RSAPSS.rsapss_verify_inv",
@@ -756,7 +759,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "fbe8c82fdfbe927e6b316dcd38482164"
+      "a3cf153f52323c78cf871e39e1a9a845"
     ],
     [
       "Hacl.Spec.RSAPSS.rsapss_verify_inv",
@@ -781,7 +784,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "7fc08e21428b6a2f7a8eebd8dda88139"
+      "4e7c8cb7e2310567c2f630b826f977ac"
     ],
     [
       "Hacl.Spec.RSAPSS.rsapss_verify",
@@ -806,7 +809,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "b1cdbaa069471c4b2dcf82e0e1be907a"
+      "483bab53c835db31e1d72b2439264511"
     ],
     [
       "Hacl.Spec.RSAPSS.rsapss_verify",
@@ -831,7 +834,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "8dd93b4b0ef5e3597f5136a37193f64a"
+      "2b8594bd5bcd07402bafa7b96096e07a"
     ],
     [
       "Hacl.Spec.RSAPSS.rsapss_verify",
@@ -870,7 +873,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "5a99cf7a165449364b91846d2425afba"
+      "d0fcc4aa70e5756231448a1de84b2c05"
     ],
     [
       "Hacl.Spec.RSAPSS.rsapss_verify_lemma",
@@ -906,7 +909,7 @@
         "typing_Prims.pow2", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "a9f230c349cb199ebbf7689f887032ca"
+      "25e1b7f5baa662b82f0d00198bbd6794"
     ],
     [
       "Hacl.Spec.RSAPSS.rsapss_verify_lemma",
@@ -931,7 +934,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "622fd81de3130086a82ae2d8ce53b745"
+      "ea378078cd7d142beadd8a41fb549591"
     ],
     [
       "Hacl.Spec.RSAPSS.rsapss_verify_lemma",
@@ -986,7 +989,7 @@
         "typing_Spec.RSAPSS.fpow", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "fbcfdd80021610946116e3606f588e3a"
+      "af836c0b00badcb6e219091e6369160c"
     ]
   ]
 ]
