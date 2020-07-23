@@ -340,27 +340,27 @@ val mod_exp_mont_lemma_step_acc1:
 
 let mod_exp_mont_lemma_step_acc1 n d bBits b i aM0 accM0 aM1 accM1 =
   let (aM2, accM2) = mod_exp_f n d bBits b (i - 1) (aM1, accM1) in
-  let b1 = b % pow2 (i - 1) in
+  let p1 = pow2 (i - 1) in
   assert (accM2 == accM1 * aM1 * d % n);
-  let lemma_b_mod_pow2i_loc () : Lemma (b % pow2 i == pow2 (i - 1) + b1) =
+  let lemma_b_mod_pow2i_loc () : Lemma (b % pow2 i == p1 + b % p1) =
     lemma_b_mod_pow2i bBits b i in
 
   calc (==) {
     accM1 * aM1 * d % n;
     (==) { }
-    (pow aM0 b1 * accM0 * pow d b1 % n) * (pow aM0 (pow2 (i - 1)) * pow d (pow2 (i - 1) - 1) % n) * d % n;
-    (==) { lemma_mod_mul_distr_aux (pow aM0 b1 * accM0 * pow d b1) (pow aM0 (pow2 (i - 1)) * pow d (pow2 (i - 1) - 1)) d n }
-    pow aM0 b1 * accM0 * pow d b1 * (pow aM0 (pow2 (i - 1)) * pow d (pow2 (i - 1) - 1)) * d % n;
-    (==) { lemma_mul_ass5 (pow aM0 b1 * accM0) (pow d b1) (pow aM0 (pow2 (i - 1))) (pow d (pow2 (i - 1) - 1)) d }
-    pow aM0 b1 * accM0 * pow aM0 (pow2 (i - 1)) * (pow d b1 * pow d (pow2 (i - 1) - 1) * d) % n;
-    (==) { lemma_mul_ass3 (pow aM0 b1) accM0 (pow aM0 (pow2 (i - 1))) }
-    pow aM0 b1 * pow aM0 (pow2 (i - 1)) * accM0 * (pow d b1 * pow d (pow2 (i - 1) - 1) * d) % n;
-    (==) { lemma_pow_add aM0 b1 (pow2 (i - 1)) }
-    pow aM0 (b1 + pow2 (i - 1)) * accM0 * (pow d b1 * pow d (pow2 (i - 1) - 1) * d) % n;
-    (==) { lemma_pow_add d b1 (pow2 (i - 1) - 1) }
-    pow aM0 (b1 + pow2 (i - 1)) * accM0 * (pow d (b1 + pow2 (i - 1) - 1) * d) % n;
-    (==) { lemma_pow1 d; lemma_pow_add d (b1 + pow2 (i - 1) - 1) 1 }
-    pow aM0 (b1 + pow2 (i - 1)) * accM0 * pow d (b1 + pow2 (i - 1)) % n;
+    (pow aM0 (b % p1) * accM0 * pow d (b % p1) % n) * (pow aM0 p1 * pow d (p1 - 1) % n) * d % n;
+    (==) { lemma_mod_mul_distr_aux (pow aM0 (b % p1) * accM0 * pow d (b % p1)) (pow aM0 p1 * pow d (p1 - 1)) d n }
+    pow aM0 (b % p1) * accM0 * pow d (b % p1) * (pow aM0 p1 * pow d (p1 - 1)) * d % n;
+    (==) { lemma_mul_ass5 (pow aM0 (b % p1) * accM0) (pow d (b % p1)) (pow aM0 p1) (pow d (p1 - 1)) d }
+    pow aM0 (b % p1) * accM0 * pow aM0 p1 * (pow d (b % p1) * pow d (p1 - 1) * d) % n;
+    (==) { lemma_mul_ass3 (pow aM0 (b % p1)) accM0 (pow aM0 p1) }
+    pow aM0 (b % p1) * pow aM0 p1 * accM0 * (pow d (b % p1) * pow d (p1 - 1) * d) % n;
+    (==) { lemma_pow_add aM0 (b % p1) p1 }
+    pow aM0 (b % p1 + p1) * accM0 * (pow d (b % p1) * pow d (p1 - 1) * d) % n;
+    (==) { lemma_pow_add d (b % p1) (p1 - 1) }
+    pow aM0 (b % p1 + p1) * accM0 * (pow d (b % p1 + p1 - 1) * d) % n;
+    (==) { lemma_pow1 d; lemma_pow_add d (b % p1 + p1 - 1) 1 }
+    pow aM0 (b % p1 + p1) * accM0 * pow d (b % p1 + p1) % n;
     (==) { lemma_b_mod_pow2i_loc () }
     pow aM0 (b % pow2 i) * accM0 * pow d (b % pow2 i) % n;
     };
@@ -553,10 +553,10 @@ let rec mod_exp_mont_ll_lemma_loop rLen n d mu bBits b i aM0 accM0 =
     let aM4, accM4 = Loops.repeati (i - 1) (mod_exp_f n d bBits b) (aM0, accM0) in
     Loops.unfold_repeati i (mod_exp_f n d bBits b) (aM0, accM0) (i - 1);
     Loops.unfold_repeati i (mod_exp_f_ll rLen n mu bBits b) (aM0, accM0) (i - 1);
-    assert ((aM1, accM1) == mod_exp_f_ll rLen n mu bBits b (i - 1) (aM3, accM3));
-    assert ((aM2, accM2) == mod_exp_f n d bBits b (i - 1) (aM4, accM4));
+    //assert ((aM1, accM1) == mod_exp_f_ll rLen n mu bBits b (i - 1) (aM3, accM3));
+    //assert ((aM2, accM2) == mod_exp_f n d bBits b (i - 1) (aM4, accM4));
     mod_exp_mont_ll_lemma_loop rLen n d mu bBits b (i - 1) aM0 accM0;
-    assert (aM3 == aM4 /\ accM3 == accM4);
+    assert (aM3 == aM4 /\ accM3 == accM4 /\ aM3 < n /\ accM3 < n);
     Math.Lemmas.lemma_mult_lt_sqr aM3 aM3 n;
     M.mont_reduction_lemma rLen n d mu (aM3 * aM3);
 

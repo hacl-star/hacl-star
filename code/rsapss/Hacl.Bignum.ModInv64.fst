@@ -7,20 +7,13 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Bignum.Definitions
-open Hacl.Bignum.Base
-open Hacl.Impl.Lib
-
 module ST = FStar.HyperStack.ST
 module Loops = Lib.LoopCombinators
 module LSeq = Lib.Sequence
 
-module S = Hacl.Spec.Bignum.Montgomery
-module SB = Hacl.Spec.Bignum
+module S = Hacl.Spec.Bignum.ModInv64
 
-module BN = Hacl.Bignum
-
-friend Hacl.Spec.Bignum.Montgomery
+friend Hacl.Spec.Bignum.ModInv64
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 

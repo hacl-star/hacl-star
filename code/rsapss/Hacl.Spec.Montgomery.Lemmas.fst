@@ -353,15 +353,11 @@ let lemma_fits_aux c r n =
   Math.Lemmas.lemma_div_le (c - n) c r
 
 
-val mont_mult_lemma_fits_aux: rLen:nat -> n:pos -> d:int -> mu:nat -> c:nat -> Lemma
-  (requires
-    (1 + n * mu) % pow2 64 == 0 /\ pow2 (64 * rLen) * d % n == 1 /\
-     n < pow2 (64 * rLen) /\ c < n * n)
-  (ensures
-    (let res : nat = repeati rLen (mont_reduction_f rLen n mu) c in
-     res / pow2 (64 * rLen) < 2 * n))
+val mont_mult_lemma_fits_aux: rLen:nat -> n:pos -> mu:nat -> c:nat -> Lemma
+  (requires (1 + n * mu) % pow2 64 == 0 /\ n < pow2 (64 * rLen) /\ c < n * n)
+  (ensures  (let res : nat = repeati rLen (mont_reduction_f rLen n mu) c in res / pow2 (64 * rLen) < 2 * n))
 
-let mont_mult_lemma_fits_aux rLen n d mu c =
+let mont_mult_lemma_fits_aux rLen n mu c =
   let r = pow2 (64 * rLen) in
   let res : nat = repeati rLen (mont_reduction_f rLen n mu) c in
   mont_reduction_loop_lemma rLen n mu rLen c;
@@ -380,17 +376,15 @@ let mont_mult_lemma_fits_aux rLen n d mu c =
   assert (res / r < 2 * n)
 
 
-val mont_mult_lemma_fits: rLen:nat -> n:pos -> d:int -> mu:nat -> c:nat -> Lemma
-  (requires
-    (1 + n * mu) % pow2 64 == 0 /\ pow2 (64 * rLen) * d % n == 1 /\
-     n < pow2 (64 * rLen) /\ c < n * n)
+val mont_mult_lemma_fits: rLen:nat -> n:pos -> mu:nat -> c:nat -> Lemma
+  (requires (1 + n * mu) % pow2 64 == 0 /\ n < pow2 (64 * rLen) /\ c < n * n)
   (ensures mont_reduction rLen n mu c < n)
 
-let mont_mult_lemma_fits rLen n d mu c =
+let mont_mult_lemma_fits rLen n mu c =
   let r = pow2 (64 * rLen) in
   let res : nat = repeati rLen (mont_reduction_f rLen n mu) c in
   let res = res / r in
-  mont_mult_lemma_fits_aux rLen n d mu c;
+  mont_mult_lemma_fits_aux rLen n mu c;
   let res1 = if res < n then res else res - n in
   assert (res1 < n)
 
@@ -402,9 +396,6 @@ val mont_reduction_lemma: rLen:nat -> n:pos -> d:int-> mu:nat -> c:nat -> Lemma
   (ensures  mont_reduction rLen n mu c == c * d % n)
 
 let mont_reduction_lemma rLen n d mu c =
-  let r = pow2 (64 * rLen) in
-  let res : nat = repeati rLen (mont_reduction_f rLen n mu) c in
-
   let r = pow2 (64 * rLen) in
   let res : nat = repeati rLen (mont_reduction_f rLen n mu) c in
   mont_reduction_loop_lemma rLen n mu rLen c;
@@ -432,7 +423,7 @@ let mont_reduction_lemma rLen n d mu c =
   let res2 = if res1 < n then res1 else res1 - n in
   Math.Lemmas.lemma_mod_sub res1 n 1;
   assert (res2 % n == res1 % n);
-  mont_mult_lemma_fits rLen n d mu c;
+  mont_mult_lemma_fits rLen n mu c;
   Math.Lemmas.small_mod res2 n
 
 ///

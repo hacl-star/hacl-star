@@ -14,7 +14,8 @@ open Hacl.Spec.Lib
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 val lemma_mul_carry_add_64: a:uint64 -> b:uint64 -> c:uint64 -> d:uint64 ->
-    Lemma (uint_v a * uint_v b + uint_v c + uint_v d < pow2 128)
+  Lemma (uint_v a * uint_v b + uint_v c + uint_v d < pow2 128)
+
 let lemma_mul_carry_add_64 a b c d =
   let n = pow2 64 in
   //assert (uint_v a <= n - 1 /\ uint_v b <= n - 1 /\ uint_v c <= n - 1 /\ uint_v d <= n - 1);
@@ -167,38 +168,41 @@ val bn_mul1_add_in_place_lemma_loop_step:
     v c * pow2 (64 * i) + bn_v #i res == eval_ aLen acc i + eval_ aLen a i * v l))
 
 let bn_mul1_add_in_place_lemma_loop_step #aLen a l acc i (c1, res1) =
+  let p = pow2 (64 * i) in
+  let p1 = pow2 (64 * (i - 1)) in
+
   let (c, res) = generate_elem_f #uint64 #uint64 aLen (bn_mul1_add_in_place_f a l acc) (i - 1) (c1, res1) in
   let c, e = mul_carry_add_u64 a.[i - 1] l c1 acc.[i - 1] in
   assert (v e + v c * pow2 64 == v a.[i - 1] * v l + v c1 + v acc.[i - 1]);
 
   calc (==) {
-    v c * pow2 (64 * i) + bn_v #i res;
+    v c * p + bn_v #i res;
     (==) { bn_eval_snoc #(i - 1) res1 e }
-    v c * pow2 (64 * i) + bn_v #(i - 1) res1 + v e * pow2 (64 * (i - 1));
+    v c * p + bn_v #(i - 1) res1 + v e * p1;
     (==) { }
-    v c * pow2 (64 * i) + eval_ aLen acc (i - 1) + eval_ aLen a (i - 1) * v l -
-      (v e + v c * pow2 64 - v a.[i - 1] * v l - v acc.[i - 1]) * pow2 (64 * (i - 1)) + v e * pow2 (64 * (i - 1));
-    (==) { Math.Lemmas.distributivity_add_left (v e) (v c * pow2 64 - v a.[i - 1] * v l - v acc.[i - 1]) (pow2 (64 * (i - 1))) }
-    v c * pow2 (64 * i) + eval_ aLen acc (i - 1) + eval_ aLen a (i - 1) * v l - (v c * pow2 64 - v a.[i - 1] * v l - v acc.[i - 1]) * pow2 (64 * (i - 1));
-    (==) { Math.Lemmas.distributivity_sub_left (v c * pow2 64) (v a.[i - 1] * v l + v acc.[i - 1]) (pow2 (64 * (i - 1))) }
-    v c * pow2 (64 * i) + eval_ aLen acc (i - 1) + eval_ aLen a (i - 1) * v l - (v c * pow2 64) * pow2 (64 * (i - 1)) +
-      (v a.[i - 1] * v l + v acc.[i - 1]) * pow2 (64 * (i - 1));
-    (==) { Math.Lemmas.paren_mul_right (v c) (pow2 64) (pow2 (64 * (i - 1))); Math.Lemmas.pow2_plus 64 (64 * (i - 1)) }
-    eval_ aLen acc (i - 1) + eval_ aLen a (i - 1) * v l + (v a.[i - 1] * v l + v acc.[i - 1]) * pow2 (64 * (i - 1));
-    (==) { Math.Lemmas.distributivity_add_left (v a.[i - 1] * v l) (v acc.[i - 1]) (pow2 (64 * (i - 1))) }
-    eval_ aLen acc (i - 1) + eval_ aLen a (i - 1) * v l + v a.[i - 1] * v l * pow2 (64 * (i - 1)) + v acc.[i - 1] * pow2 (64 * (i - 1));
+    v c * p + eval_ aLen acc (i - 1) + eval_ aLen a (i - 1) * v l -
+      (v e + v c * pow2 64 - v a.[i - 1] * v l - v acc.[i - 1]) * p1 + v e * p1;
+    (==) { Math.Lemmas.distributivity_add_left (v e) (v c * pow2 64 - v a.[i - 1] * v l - v acc.[i - 1]) p1 }
+    v c * p + eval_ aLen acc (i - 1) + eval_ aLen a (i - 1) * v l - (v c * pow2 64 - v a.[i - 1] * v l - v acc.[i - 1]) * p1;
+    (==) { Math.Lemmas.distributivity_sub_left (v c * pow2 64) (v a.[i - 1] * v l + v acc.[i - 1]) p1 }
+    v c * p + eval_ aLen acc (i - 1) + eval_ aLen a (i - 1) * v l - (v c * pow2 64) * p1 +
+      (v a.[i - 1] * v l + v acc.[i - 1]) * p1;
+    (==) { Math.Lemmas.paren_mul_right (v c) (pow2 64) p1; Math.Lemmas.pow2_plus 64 (64 * (i - 1)) }
+    eval_ aLen acc (i - 1) + eval_ aLen a (i - 1) * v l + (v a.[i - 1] * v l + v acc.[i - 1]) * p1;
+    (==) { Math.Lemmas.distributivity_add_left (v a.[i - 1] * v l) (v acc.[i - 1]) p1 }
+    eval_ aLen acc (i - 1) + eval_ aLen a (i - 1) * v l + v a.[i - 1] * v l * p1 + v acc.[i - 1] * p1;
     (==) { bn_eval_unfold_i #aLen acc i }
-    eval_ aLen acc i + eval_ aLen a (i - 1) * v l + v a.[i - 1] * v l * pow2 (64 * (i - 1));
-    (==) { Math.Lemmas.paren_mul_right (v a.[i - 1]) (v l) (pow2 (64 * (i - 1))) }
-    eval_ aLen acc i + eval_ aLen a (i - 1) * v l + v a.[i - 1] * (pow2 (64 * (i - 1)) * v l);
-    (==) { Math.Lemmas.paren_mul_right (v a.[i - 1]) (pow2 (64 * (i - 1))) (v l) }
-    eval_ aLen acc i + eval_ aLen a (i - 1) * v l + v a.[i - 1] * pow2 (64 * (i - 1)) * v l;
-    (==) { Math.Lemmas.distributivity_add_left (eval_ aLen a (i - 1)) (v a.[i - 1] * pow2 (64 * (i - 1))) (v l) }
-    eval_ aLen acc i + (eval_ aLen a (i - 1) + v a.[i - 1] * pow2 (64 * (i - 1))) * v l;
+    eval_ aLen acc i + eval_ aLen a (i - 1) * v l + v a.[i - 1] * v l * p1;
+    (==) { Math.Lemmas.paren_mul_right (v a.[i - 1]) (v l) p1 }
+    eval_ aLen acc i + eval_ aLen a (i - 1) * v l + v a.[i - 1] * (p1 * v l);
+    (==) { Math.Lemmas.paren_mul_right (v a.[i - 1]) p1 (v l) }
+    eval_ aLen acc i + eval_ aLen a (i - 1) * v l + v a.[i - 1] * p1 * v l;
+    (==) { Math.Lemmas.distributivity_add_left (eval_ aLen a (i - 1)) (v a.[i - 1] * p1) (v l) }
+    eval_ aLen acc i + (eval_ aLen a (i - 1) + v a.[i - 1] * p1) * v l;
     (==) { bn_eval_unfold_i #aLen a i }
     eval_ aLen acc i + eval_ aLen a i * v l;
   };
-  assert (v c * pow2 (64 * i) + bn_v #i res == eval_ aLen acc i + eval_ aLen a i * v l)
+  assert (v c * p + bn_v #i res == eval_ aLen acc i + eval_ aLen a i * v l)
 
 
 val bn_mul1_add_in_place_lemma_loop:
@@ -325,24 +329,25 @@ val bn_mul_loop_lemma_step:
     eval_ (aLen + bLen) resi (aLen + i) == bn_v a * eval_ bLen b i))
 
 let bn_mul_loop_lemma_step #aLen #bLen a b i resi1 =
+  let p1 = pow2 (64 * (i - 1)) in
   let resi = bn_mul_ #aLen #bLen a b (i - 1) resi1 in
   bn_mul_lemma_ #aLen #bLen a b (i - 1) resi1;
   assert
     (v resi.[aLen + i - 1] * pow2 (64 * (aLen + i - 1)) + eval_ (aLen + bLen) resi (aLen + i - 1) ==
-     eval_ (aLen + bLen) resi1 (aLen + i - 1) + bn_v a * v b.[i - 1] * pow2 (64 * (i - 1)));
+     eval_ (aLen + bLen) resi1 (aLen + i - 1) + bn_v a * v b.[i - 1] * p1);
 
   calc (==) {
     eval_ (aLen + bLen) resi (aLen + i);
     (==) { bn_eval_unfold_i resi (aLen + i) }
     eval_ (aLen + bLen) resi (aLen + i - 1) + v resi.[aLen + i - 1] * pow2 (64 * (aLen + i - 1));
     (==) { }
-    eval_ (aLen + bLen) resi1 (aLen + i - 1) + bn_v a * v b.[i - 1] * pow2 (64 * (i - 1));
+    eval_ (aLen + bLen) resi1 (aLen + i - 1) + bn_v a * v b.[i - 1] * p1;
     (==) { }
-    bn_v a * eval_ bLen b (i - 1) + bn_v a * v b.[i - 1] * pow2 (64 * (i - 1));
-    (==) { Math.Lemmas.paren_mul_right (bn_v a) (v b.[i - 1]) (pow2 (64 * (i - 1))) }
-    bn_v a * eval_ bLen b (i - 1) + bn_v a * (v b.[i - 1] * pow2 (64 * (i - 1)));
-    (==) { Math.Lemmas.distributivity_add_right (bn_v a) (eval_ bLen b (i - 1)) (v b.[i - 1] * pow2 (64 * (i - 1))) }
-    bn_v a * (eval_ bLen b (i - 1) + v b.[i - 1] * pow2 (64 * (i - 1)));
+    bn_v a * eval_ bLen b (i - 1) + bn_v a * v b.[i - 1] * p1;
+    (==) { Math.Lemmas.paren_mul_right (bn_v a) (v b.[i - 1]) p1 }
+    bn_v a * eval_ bLen b (i - 1) + bn_v a * (v b.[i - 1] * p1);
+    (==) { Math.Lemmas.distributivity_add_right (bn_v a) (eval_ bLen b (i - 1)) (v b.[i - 1] * p1) }
+    bn_v a * (eval_ bLen b (i - 1) + v b.[i - 1] * p1);
     (==) { bn_eval_unfold_i b i }
     bn_v a * eval_ bLen b i;
   };
@@ -470,6 +475,7 @@ val bn_sqr_diag_loop_step:
    eval_ (aLen + aLen) acc1 (i + i) == eval_ (aLen + aLen) acc2 (i + i - 2) + v a.[i - 1] * v a.[i - 1] * pow2 (64 * (i + i - 2)))
 
 let bn_sqr_diag_loop_step #aLen a i =
+  let p2 = pow2 (64 * (i + i - 2)) in
   let acc0 = create (aLen + aLen) (u64 0) in
   let acc1 : lbignum (aLen + aLen) = repeati i (bn_sqr_diag_f #aLen a) acc0 in
   let acc2 : lbignum (aLen + aLen) = repeati (i - 1) (bn_sqr_diag_f #aLen a) acc0 in
@@ -477,25 +483,25 @@ let bn_sqr_diag_loop_step #aLen a i =
   bn_eval_unfold_i acc1 (i + i);
   bn_eval_unfold_i acc1 (i + i - 1);
   //assert (eval_ (aLen + aLen) acc1 (i + i) ==
-    //eval_ (aLen + aLen) acc1 (i + i - 2) + v acc1.[i + i - 2] * pow2 (64 * (i + i - 2)) + v acc1.[i + i - 1] * pow2 (64 * (i + i - 1)));
+    //eval_ (aLen + aLen) acc1 (i + i - 2) + v acc1.[i + i - 2] * p2 + v acc1.[i + i - 1] * pow2 (64 * (i + i - 1)));
 
   calc (==) {
-    v acc1.[i + i - 2] * pow2 (64 * (i + i - 2)) + v acc1.[i + i - 1] * pow2 (64 * (i + i - 1));
+    v acc1.[i + i - 2] * p2 + v acc1.[i + i - 1] * pow2 (64 * (i + i - 1));
     (==) { Math.Lemmas.pow2_plus (64 * (i + i - 2)) 64 }
-    v acc1.[i + i - 2] * pow2 (64 * (i + i - 2)) + v acc1.[i + i - 1] * (pow2 (64 * (i + i - 2)) * pow2 64);
-    (==) { Math.Lemmas.paren_mul_right (v acc1.[i + i - 1]) (pow2 64) (pow2 (64 * (i + i - 2))) }
-    v acc1.[i + i - 2] * pow2 (64 * (i + i - 2)) + (v acc1.[i + i - 1] * pow2 64) * pow2 (64 * (i + i - 2));
-    (==) { Math.Lemmas.distributivity_add_left (v acc1.[i + i - 2]) (v acc1.[i + i - 1] * pow2 64) (pow2 (64 * (i + i - 2))) }
-    (v acc1.[i + i - 2] + v acc1.[i + i - 1] * pow2 64) * pow2 (64 * (i + i - 2));
+    v acc1.[i + i - 2] * p2 + v acc1.[i + i - 1] * (p2 * pow2 64);
+    (==) { Math.Lemmas.paren_mul_right (v acc1.[i + i - 1]) (pow2 64) p2 }
+    v acc1.[i + i - 2] * p2 + (v acc1.[i + i - 1] * pow2 64) * p2;
+    (==) { Math.Lemmas.distributivity_add_left (v acc1.[i + i - 2]) (v acc1.[i + i - 1] * pow2 64) p2 }
+    (v acc1.[i + i - 2] + v acc1.[i + i - 1] * pow2 64) * p2;
     (==) { bn_sqr_diag_lemma #aLen a i }
-    v a.[i - 1] * v a.[i - 1] * pow2 (64 * (i + i - 2));
+    v a.[i - 1] * v a.[i - 1] * p2;
   };
 
   bn_sqr_diag_eq #aLen a (i - 1);
   bn_eval_extensionality_j acc1 acc2 (i + i - 2);
 
   assert (eval_ (aLen + aLen) acc1 (i + i) ==
-    eval_ (aLen + aLen) acc2 (i + i - 2) + v a.[i - 1] * v a.[i - 1] * pow2 (64 * (i + i - 2)))
+    eval_ (aLen + aLen) acc2 (i + i - 2) + v a.[i - 1] * v a.[i - 1] * p2)
 
 
 val bn_sqr_f_lemma:
@@ -613,6 +619,8 @@ let rec bn_sqr_loop_lemma #aLen a i =
     bn_eval0 tmp;
     bn_eval0 a end
   else begin
+    let p1 = pow2 (64 * (i + i - 1)) in
+    let p2 = pow2 (64 * (i + i - 2)) in
     let acc1 : lbignum (aLen + aLen) = repeati (i - 1) (bn_sqr_f a) bn_zero in
     let tmp1 : lbignum (aLen + aLen) = repeati (i - 1) (bn_sqr_diag_f a) bn_zero in
 
@@ -622,9 +630,9 @@ let rec bn_sqr_loop_lemma #aLen a i =
     calc (==) {
       eval_ resLen acc (i + i);
       (==) { bn_eval_unfold_i acc (i + i) }
-      eval_ resLen acc (i + i - 1) + v acc.[i + i - 1] * pow2 (64 * (i + i - 1));
+      eval_ resLen acc (i + i - 1) + v acc.[i + i - 1] * p1;
       (==) { bn_sqr_f_lemma a (i - 1) acc1 }
-      eval_ resLen acc1 (i + i - 2) + eval_ aLen a (i - 1) * v a.[i - 1] * pow2 (64 * (i - 1)) + v acc.[i + i - 1] * pow2 (64 * (i + i - 1));
+      eval_ resLen acc1 (i + i - 2) + eval_ aLen a (i - 1) * v a.[i - 1] * pow2 (64 * (i - 1)) + v acc.[i + i - 1] * p1;
       };
 
     bn_sqr_f_lemma a (i - 1) acc1;
@@ -635,14 +643,14 @@ let rec bn_sqr_loop_lemma #aLen a i =
     calc (==) {
       2 * eval_ resLen acc (i + i) + eval_ resLen tmp (i + i);
       (==) { bn_sqr_diag_loop_step #aLen a i }
-      2 * eval_ resLen acc (i + i) + eval_ (aLen + aLen) tmp1 (i + i - 2) + v a.[i - 1] * v a.[i - 1] * pow2 (64 * (i + i - 2));
+      2 * eval_ resLen acc (i + i) + eval_ (aLen + aLen) tmp1 (i + i - 2) + v a.[i - 1] * v a.[i - 1] * p2;
       (==) { }
       2 * eval_ resLen acc1 (i + i - 2) + 2 * eval_ aLen a (i - 1) * v a.[i - 1] * pow2 (64 * (i - 1)) +
-      eval_ (aLen + aLen) tmp1 (i + i - 2) + v a.[i - 1] * v a.[i - 1] * pow2 (64 * (i + i - 2));
+      eval_ (aLen + aLen) tmp1 (i + i - 2) + v a.[i - 1] * v a.[i - 1] * p2;
       (==) { bn_sqr_loop_lemma #aLen a (i - 1) }
       eval_ aLen a (i - 1) * eval_ aLen a (i - 1) +
       2 * eval_ aLen a (i - 1) * v a.[i - 1] * pow2 (64 * (i - 1)) +
-      v a.[i - 1] * v a.[i - 1] * pow2 (64 * (i + i - 2));
+      v a.[i - 1] * v a.[i - 1] * p2;
       (==) { bn_eval_square #aLen a i }
       eval_ aLen a i * eval_ aLen a i;
     }; () end

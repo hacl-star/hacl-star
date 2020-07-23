@@ -7,9 +7,7 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Bignum.Definitions
-module S = Hacl.Spec.Bignum.Montgomery
-module BN = Hacl.Bignum
+module S = Hacl.Spec.Bignum.ModInv64
 
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"

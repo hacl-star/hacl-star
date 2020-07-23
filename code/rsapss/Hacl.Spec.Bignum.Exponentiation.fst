@@ -9,6 +9,7 @@ open Lib.LoopCombinators
 open Hacl.Spec.Bignum.Definitions
 open Hacl.Spec.Bignum
 open Hacl.Spec.Bignum.Montgomery
+open Hacl.Spec.Bignum.ModInv64
 
 module BL = Hacl.Spec.Exponentiation.Lemmas
 module M = Hacl.Spec.Montgomery.Lemmas
