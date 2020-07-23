@@ -133,12 +133,11 @@ let mod_inv_u64_inv_step_odd n0 i ub0 vb0 =
   let ub = (v ub0 + v beta) / 2 % pow2 64 in
   let vb = (v vb0 / 2 + v alpha) % pow2 64 in
 
-  Math.Lemmas.small_mod ((v ub0 + v beta) / 2) (pow2 64);
-  Math.Lemmas.small_mod (v vb0 / 2 + v alpha) (pow2 64);
-
   calc (==) {
     2 * (ub * 2 * v alpha - vb * v beta);
-    (==) { }
+    (==) { Math.Lemmas.small_mod ((v ub0 + v beta) / 2) (pow2 64) }
+    2 * ((v ub0 + v beta) / 2 * 2 * v alpha - vb * v beta);
+    (==) { Math.Lemmas.small_mod (v vb0 / 2 + v alpha) (pow2 64) }
     2 * ((v ub0 + v beta) / 2 * 2 * v alpha - (v vb0 / 2 + v alpha) * v beta);
     (==) { Math.Lemmas.distributivity_sub_right 2 ((v ub0 + v beta) / 2 * 2 * v alpha) ((v vb0 / 2 + v alpha) * v beta) }
     2 * (v ub0 + v beta) / 2 * 2 * v alpha - 2 * (v vb0 / 2 + v alpha) * v beta;
@@ -154,6 +153,8 @@ let mod_inv_u64_inv_step_odd n0 i ub0 vb0 =
     (v ub0 + v beta) * 2 * v alpha - (v vb0 * v beta + 2 * v alpha * v beta);
     (==) { Math.Lemmas.distributivity_add_left (v ub0) (v beta) (2 * v alpha) }
     v ub0 * 2 * v alpha + v beta * 2 * v alpha - (v vb0 * v beta + 2 * v alpha * v beta);
+    (==) { Math.Lemmas.paren_mul_right (v beta) 2 (v alpha); Math.Lemmas.swap_mul (v beta) (2 * v alpha) }
+    v ub0 * 2 * v alpha + 2 * v alpha * v beta - v vb0 * v beta - 2 * v alpha * v beta;
     (==) { }
     v ub0 * 2 * v alpha - v vb0 * v beta;
     (==) { assert (pow2 (64 - i + 1) == v ub0 * 2 * v alpha - v vb0 * v beta) }
