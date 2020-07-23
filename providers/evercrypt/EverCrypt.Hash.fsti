@@ -74,20 +74,21 @@ type e_alg = G.erased alg
 (* ^ this should be restored once kremlin is fixed *)
 val state_s: alg -> Type0
 
-// The internal state used in the implementation
-let state alg = state_s alg
+// pointer to abstract implementation state
+let state alg = B.pointer (state_s alg)
 
 // abstract freeable (deep) predicate; only needed for create/free pairs
 val freeable_s: #(a: alg) -> state_s a -> Type0
 
-let freeable (#a: alg) (h: HS.mem) (s: state a) =
-  freeable_s s
+let freeable (#a: alg) (h: HS.mem) (p: state a) =
+  B.freeable p /\ freeable_s (B.deref h p)
 
 // NS: note that the state is the first argument to the invariant so that we can
 // do partial applications in pre- and post-conditions
 val footprint_s: #a:alg -> state_s a -> GTot M.loc
 let footprint (#a:alg) (s: state a) (m: HS.mem) =
-  footprint_s s
+  M.(loc_union (loc_addr_of_buffer s) (footprint_s (B.deref m s)))
+
 
 // TR: the following pattern is necessary because, if we generically
 // add such a pattern directly on `loc_includes_union_l`, then
@@ -111,7 +112,9 @@ let loc_includes_union_l_footprint_s
 
 val invariant_s: (#a:alg) -> state_s a -> HS.mem -> Type0
 let invariant (#a:alg) (s: state a) (m: HS.mem) =
-  invariant_s s m
+  B.live m s /\
+  M.(loc_disjoint (loc_addr_of_buffer s) (footprint_s (B.deref m s))) /\
+  invariant_s (B.get m s 0) m
 
 //18-07-06 as_acc a better name? not really a representation
 val repr: #a:alg ->
