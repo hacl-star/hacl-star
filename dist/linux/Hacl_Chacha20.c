@@ -204,11 +204,7 @@ static inline void chacha20_encrypt_block(u32 *ctx, u8 *out, u32 incr, u8 *text)
     {
       u32 i;
       for (i = (u32)0U; i < (u32)16U; i++)
-      {
-        u8 *x0 = out + i * (u32)4U;
-        u32 x2 = bl[i];
-        store32_le(x0, x2);
-      }
+        store32_le(out + i * (u32)4U, bl[i]);
     }
   }
 }

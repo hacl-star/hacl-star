@@ -132,8 +132,7 @@ static inline void matrix_to_lbytes(uint32_t n1, uint32_t n2, uint16_t *m, uint8
   for (uint32_t i = (uint32_t)0U; i < n; i++)
   {
     uint8_t *tmp = res + (uint32_t)2U * i;
-    uint16_t x2 = m[i];
-    store16_le(tmp, x2);
+    store16_le(tmp, m[i]);
   }
 }
 
@@ -146,8 +145,7 @@ static inline void matrix_from_lbytes(uint32_t n1, uint32_t n2, uint8_t *b, uint
   uint32_t n = n1 * n2;
   for (uint32_t i = (uint32_t)0U; i < n; i++)
   {
-    uint8_t *x0 = b + (uint32_t)2U * i;
-    uint16_t u = load16_le(x0);
+    uint16_t u = load16_le(b + (uint32_t)2U * i);
     res[i] = u;
   }
 }

@@ -202,9 +202,7 @@ Hacl_Impl_Chacha20_chacha20_encrypt_block(
   }
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
   {
-    uint8_t *x0 = out + i * (uint32_t)4U;
-    uint32_t x2 = bl[i];
-    store32_le(x0, x2);
+    store32_le(out + i * (uint32_t)4U, bl[i]);
   }
 }
 

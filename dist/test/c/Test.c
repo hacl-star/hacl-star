@@ -12626,8 +12626,7 @@ test_ctr_st(
         uint32_t rest = input_len - block_len(a);
         if (rest > (uint32_t)0U)
         {
-          uint32_t x2 = ctr + (uint32_t)1U;
-          store32_be(counter, x2);
+          store32_be(counter, ctr + (uint32_t)1U);
           uint8_t *uu____0 = input + block_len(a);
           test_ctr_st(a,
             counter,
