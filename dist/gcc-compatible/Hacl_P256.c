@@ -2224,6 +2224,7 @@ ecdsa_verification_(
   bool resultIsPAI = isPointAtInfinityPublic(pointSum);
   uint64_t *xCoordinateSum = pointSum;
   memcpy(xBuffer, xCoordinateSum, (uint32_t)4U * sizeof (xCoordinateSum[0U]));
+  reduction_prime_2prime_order(xBuffer, xBuffer);
   bool r1 = !resultIsPAI;
   bool state = r1;
   if (state == false)
