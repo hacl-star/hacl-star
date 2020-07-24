@@ -1,5 +1,100 @@
 #pragma once
 
+// stateMachine = -1
+// indexTest = 0
+
+// def parse(str):
+//     s = ""
+//     for i in range(len(str)//2):
+//         s = s + "0x" + str[2* i: 2 * i+2:] + ", "
+//     print(s[:-2])
+//     return s
+
+
+// def structure(n):
+//     for i in range(n + 1):
+//         print("{ \n .publicKey = pub_" + str(i) + ", \n .privateKey = pri_" + str(i) + ", \n  .sharedKey = x_" + str(i) + ", \n .flag = result__" + str(i) + " \n}, ")
+
+// if __name__ == '__main__':
+//     structure(215)
+
+
+//     # f = open("", 'r')
+//     #
+//     # for line in f:
+//     #     if line.find("tcId") != -1:
+//     #         stateMachine = 0
+//     #         continue
+//     #
+//     #     if stateMachine == 0:
+//     #         print("//" + "Test vector "  + str(indexTest) + ": "+ line)
+//     #         stateMachine += 1
+//     #         continue
+//     #
+//     #     if stateMachine == 1:
+//     #         id = "public";
+//     #         idLen = 11;
+//     #         indexStart = line.find(id)
+//     #         indexEnd = line.find(',')
+//     #         print("static uint8_t pub_" + str(indexTest) + "  [65] = {")
+//     #         parse(line[indexStart + idLen:indexEnd:])
+//     #         print("};")
+//     #         stateMachine +=1
+//     #         continue
+//     #
+//     #     if stateMachine == 2:
+//     #         id = "private";
+//     #         idLen = 12;
+//     #         indexStart = line.find(id)
+//     #         indexEnd = line.find(',')
+//     #         print("static uint8_t pri_" + str(indexTest) + "  [32] = {")
+//     #         parse(line[indexStart + idLen:indexEnd:])
+//     #         print("};")
+//     #         stateMachine +=1
+//     #         continue
+//     #
+//     #
+//     #     if stateMachine == 3:
+//     #         id = "shared";
+//     #         idLen = 11;
+//     #         indexStart = line.find(id)
+//     #         indexEnd = line.find(',')
+//     #         print("static uint8_t x_" + str(indexTest) + "  [32] = {")
+//     #         parse(line[indexStart + idLen:indexEnd:])
+//     #         print("};")
+//     #         stateMachine +=1
+//     #         continue
+//     #
+//     #     if stateMachine == 4:
+//     #         id = "result";
+//     #         idLen = 11;
+//     #         indexStart = line.find(id)
+//     #         indexEnd = line.find(',')
+//     #         result = line[indexStart + idLen:indexEnd - 1]
+//     #         if (result == "valid"):
+//     #             print("static const uint64_t result__" + str(indexTest) + " = 0;\n")
+//     #         elif (result == "invalid"):
+//     #             print(" static const uint64_t result__" + str(indexTest) + " = 18446744073709551615;\n")
+//     #         elif (result == "acceptable"):
+//     #             print("static const uint64_t result__" + str(indexTest) + " = 1;\n")
+//     #
+//     #         # if (result == "valid"):
+//     #         #     print("ok = ok && (success == 0); \n ok = ok && compare_and_print(32, result, x_0);")
+//     #         # elif (result == "invalid"):
+//     #         #     print("ok = ok && (success == 18446744073709551615);")
+//     #         # elif (result == "acceptable"):
+//     #         #     print("if (success == 0) \n ok = ok && compare_and_print(32, result, x_0); ");
+//     #         # else:
+//     #         #     print("SDDSS")
+//     #         stateMachine +=1
+//     #         indexTest += 1
+//     #         stateMachine = -1
+//     #         continue
+
+
+
+
+
 
 //           "public" : "0462d5bd3372af75fe85a040715d0f502428e07046868b0bfdfa61d731afe44f26ac333a93a9e70a81cd5a95b5bf8d13990eb741c8c38872b4a07d275a014e30cf",
 //           "private" : "0612465c89a023ab17855b0a6bcebfd3febb53aef84138647b5352e02c10c346",
