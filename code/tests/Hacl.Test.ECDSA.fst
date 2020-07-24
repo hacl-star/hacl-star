@@ -206,21 +206,25 @@ let test_sigver512 (vec:sigver_vector) : Stack unit (requires fun _ -> True) (en
     end
 
 
+#push-options "--fuel 1 --ifuel 1 --z3rlimit 200"
+
 
 val check_bound: b:Lib.Buffer.lbuffer uint8 32ul -> Stack bool
   (requires fun h -> Lib.Buffer.live h b)
   (ensures  fun h0 r h1 ->
     h0 == h1 /\
-    r == (Lib.ByteSequence.nat_from_bytes_be (Lib.Buffer.as_seq h0 b) > 0) /\
-    r == (Lib.ByteSequence.nat_from_bytes_be (Lib.Buffer.as_seq h0 b) <
-          Spec.ECDSAP256.Definition.prime_p256_order))
+    r == 
+      (
+	(Lib.ByteSequence.nat_from_bytes_be (Lib.Buffer.as_seq h0 b) > 0) &&
+	(Lib.ByteSequence.nat_from_bytes_be (Lib.Buffer.as_seq h0 b) <
+          Spec.ECDSAP256.Definition.prime_p256_order)))
 
 let check_bound b =
   let open FStar.Mul in
   let open Lib.ByteSequence in
   let open Spec.ECDSAP256.Definition in
   [@inline_let]
-  let q1 = normalize_term (prime_p256_order % pow2 64) in
+  let q1 = normalize_term (prime_p256_order % pow2 64) in 
   [@inline_let]
   let q2 = normalize_term ((prime_p256_order / pow2 64) % pow2 64) in
   [@inline_let]
@@ -258,14 +262,14 @@ let check_bound b =
   let x1 = Lib.RawIntTypes.u64_to_UInt64 x1 in
   let x2 = Lib.RawIntTypes.u64_to_UInt64 x2 in
   let x3 = Lib.RawIntTypes.u64_to_UInt64 x3 in
-  let x4 = Lib.RawIntTypes.u64_to_UInt64 x4 in
-  x1 <>. zero && 
-  x2 <>. zero && 
-  x3 <>. zero && 
-  x4 <>. zero && 
-  x1 <. q4 || (x1 =. q4 &&
+  let x4 = Lib.RawIntTypes.u64_to_UInt64 x4 in 
+
+  let r =  x1 <. q4 || (x1 =. q4 &&
     (x2 <. q3 || (x2 =. q3 &&
-      (x3 <. q2 || (x3 =. q2 && x4 <. q1)))))
+      (x3 <. q2 || (x3 =. q2 && x4 <. q1))))) in 
+
+  let r1 = x1 = zero &&  x2 = zero && x3 = zero && x4 = zero in 
+  r && not r1
 
 
 #push-options " --ifuel 1 --fuel 1"
