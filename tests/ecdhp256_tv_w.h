@@ -2534,7 +2534,7 @@ static uint8_t pri_192  [32] = {
 static uint8_t x_192  [32] = {
 
 };
-static const uint64_t result__192 = 18446744073709551615;
+static const uint64_t result__192 = 18446744073709551615U;
 
 //Test vector 193:           "comment" : "point is not on curve",
 
@@ -2547,7 +2547,7 @@ static uint8_t pri_193  [32] = {
 static uint8_t x_193  [32] = {
 
 };
- static const uint64_t result__193 = 18446744073709551615;
+ static const uint64_t result__193 = 18446744073709551615U;
 
 //Test vector 194:           "comment" : "point is not on curve",
 
@@ -2560,7 +2560,7 @@ static uint8_t pri_194  [32] = {
 static uint8_t x_194  [32] = {
 
 };
- static const uint64_t result__194 = 18446744073709551615;
+ static const uint64_t result__194 = 18446744073709551615U;
 
 //Test vector 195:           "comment" : "point is not on curve",
 
@@ -2573,7 +2573,7 @@ static uint8_t pri_195  [32] = {
 static uint8_t x_195  [32] = {
 
 };
- static const uint64_t result__195 = 18446744073709551615;
+ static const uint64_t result__195 = 18446744073709551615U;
 
 //Test vector 196:           "comment" : "point is not on curve",
 
@@ -2586,7 +2586,7 @@ static uint8_t pri_196  [32] = {
 static uint8_t x_196  [32] = {
 
 };
- static const uint64_t result__196 = 18446744073709551615;
+ static const uint64_t result__196 = 18446744073709551615U;
 
 //Test vector 197:           "comment" : "point is not on curve",
 
@@ -2599,7 +2599,7 @@ static uint8_t pri_197  [32] = {
 static uint8_t x_197  [32] = {
 
 };
- static const uint64_t result__197 = 18446744073709551615;
+ static const uint64_t result__197 = 18446744073709551615U;
 
 //Test vector 198:           "comment" : "point is not on curve",
 
@@ -2612,7 +2612,7 @@ static uint8_t pri_198  [32] = {
 static uint8_t x_198  [32] = {
 
 };
- static const uint64_t result__198 = 18446744073709551615;
+ static const uint64_t result__198 = 18446744073709551615U;
 
 //Test vector 199:           "comment" : "point is not on curve",
 
@@ -2625,7 +2625,7 @@ static uint8_t pri_199  [32] = {
 static uint8_t x_199  [32] = {
 
 };
- static const uint64_t result__199 = 18446744073709551615;
+ static const uint64_t result__199 = 18446744073709551615U;
 
 //Test vector 200:           "comment" : "point is not on curve",
 
@@ -2638,7 +2638,7 @@ static uint8_t pri_200  [32] = {
 static uint8_t x_200  [32] = {
 
 };
- static const uint64_t result__200 = 18446744073709551615;
+ static const uint64_t result__200 = 18446744073709551615U;
 
 //Test vector 201:           "comment" : "point is not on curve",
 
@@ -2651,7 +2651,7 @@ static uint8_t pri_201  [32] = {
 static uint8_t x_201  [32] = {
 
 };
- static const uint64_t result__201 = 18446744073709551615;
+ static const uint64_t result__201 = 18446744073709551615U;
 
 //Test vector 202:           "comment" : "point is not on curve",
 
@@ -2664,7 +2664,7 @@ static uint8_t pri_202  [32] = {
 static uint8_t x_202  [32] = {
 
 };
- static const uint64_t result__202 = 18446744073709551615;
+ static const uint64_t result__202 = 18446744073709551615U;
 
 //Test vector 203:           "comment" : "point is not on curve",
 
@@ -2677,7 +2677,7 @@ static uint8_t pri_203  [32] = {
 static uint8_t x_203  [32] = {
 
 };
- static const uint64_t result__203 = 18446744073709551615;
+ static const uint64_t result__203 = 18446744073709551615U;
 
 //Test vector 204:           "comment" : "point is not on curve",
 
@@ -2690,7 +2690,7 @@ static uint8_t pri_204  [32] = {
 static uint8_t x_204  [32] = {
 
 };
- static const uint64_t result__204 = 18446744073709551615;
+ static const uint64_t result__204 = 18446744073709551615U;
 
 //Test vector 205:           "comment" : "point is not on curve",
 
@@ -2703,7 +2703,7 @@ static uint8_t pri_205  [32] = {
 static uint8_t x_205  [32] = {
 
 };
- static const uint64_t result__205 = 18446744073709551615;
+ static const uint64_t result__205 = 18446744073709551615U;
 
 //Test vector 206:           "comment" : "point is not on curve",
 
@@ -2716,7 +2716,7 @@ static uint8_t pri_206  [32] = {
 static uint8_t x_206  [32] = {
 
 };
- static const uint64_t result__206 = 18446744073709551615;
+ static const uint64_t result__206 = 18446744073709551615U;
 
 //Test vector 207:           "comment" : "point is not on curve",
 
@@ -2729,7 +2729,7 @@ static uint8_t pri_207  [32] = {
 static uint8_t x_207  [32] = {
 
 };
- static const uint64_t result__207 = 18446744073709551615;
+ static const uint64_t result__207 = 18446744073709551615U;
 
 //Test vector 208:           "comment" : "",
 
@@ -2742,7 +2742,7 @@ static uint8_t pri_208  [32] = {
 static uint8_t x_208  [32] = {
 
 };
- static const uint64_t result__208 = 18446744073709551615;
+ static const uint64_t result__208 = 18446744073709551615U;
 
 //Test vector 209:           "comment" : "invalid public key",
 
@@ -2755,7 +2755,7 @@ static uint8_t pri_209  [32] = {
 static uint8_t x_209  [32] = {
 
 };
- static const uint64_t result__209 = 18446744073709551615;
+ static const uint64_t result__209 = 18446744073709551615U;
 
 //Test vector 210:           "comment" : "public key is a low order point on twist",
 
@@ -2768,7 +2768,7 @@ static uint8_t pri_210  [32] = {
 static uint8_t x_210  [32] = {
 
 };
- static const uint64_t result__210 = 18446744073709551615;
+ static const uint64_t result__210 = 18446744073709551615U;
 
 //Test vector 211:           "comment" : "public key is a low order point on twist",
 
@@ -2781,7 +2781,7 @@ static uint8_t pri_211  [32] = {
 static uint8_t x_211  [32] = {
 
 };
- static const uint64_t result__211 = 18446744073709551615;
+ static const uint64_t result__211 = 18446744073709551615U;
 
 //Test vector 212:           "comment" : "public key is a low order point on twist",
 
@@ -2794,7 +2794,7 @@ static uint8_t pri_212  [32] = {
 static uint8_t x_212  [32] = {
 
 };
- static const uint64_t result__212 = 18446744073709551615;
+ static const uint64_t result__212 = 18446744073709551615U;
 
 //Test vector 213:           "comment" : "public key is a low order point on twist",
 
@@ -2807,7 +2807,7 @@ static uint8_t pri_213  [32] = {
 static uint8_t x_213  [32] = {
 
 };
- static const uint64_t result__213 = 18446744073709551615;
+ static const uint64_t result__213 = 18446744073709551615U;
 
 //Test vector 214:           "comment" : "public key is a low order point on twist",
 
@@ -2820,7 +2820,7 @@ static uint8_t pri_214  [32] = {
 static uint8_t x_214  [32] = {
 
 };
- static const uint64_t result__214 = 18446744073709551615;
+ static const uint64_t result__214 = 18446744073709551615U;
 
 //Test vector 215:           "comment" : "public key is a low order point on twist",
 
@@ -2833,7 +2833,7 @@ static uint8_t pri_215  [32] = {
 static uint8_t x_215  [32] = {
 
 };
- static const uint64_t result__215 = 18446744073709551615;
+ static const uint64_t result__215 = 18446744073709551615U;
 
 
 
