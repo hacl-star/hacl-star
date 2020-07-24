@@ -331,7 +331,7 @@ let compare_points_bool a b =
   let zEqual = compare_felem_bool z0 z1 in 
   xEqual && yEqual && zEqual
 
-
+inline_for_extraction noextract
 val ecdsa_verification_step5_1: points:lbuffer uint64 (size 24) -> Stack bool
   (requires fun h -> live h points /\
     as_nat h (gsub points (size 0) (size 4)) < prime256 /\
