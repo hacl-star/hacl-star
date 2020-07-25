@@ -125,4 +125,42 @@ check_avx512:
   mov %r9, %rbx
   ret
 
+.global check_osxsave
+check_osxsave:
+  mov %rbx, %r9
+  mov $0, %rcx
+  mov $1, %rax
+  cpuid
+  mov %rcx, %rax
+  and $134217728, %rax
+  shr $26, %rax
+  mov %r9, %rbx
+  ret
+
+.global check_avx_xcr0
+check_avx_xcr0:
+  mov $0, %rcx
+  xgetbv
+  mov %rax, %rcx
+  and $4, %rax
+  shr $1, %rax
+  and $2, %rcx
+  and %rcx, %rax
+  ret
+
+.global check_avx512_xcr0
+check_avx512_xcr0:
+  mov $0, %rcx
+  xgetbv
+  mov %rax, %rcx
+  mov %rax, %rdx
+  and $32, %rax
+  and $64, %rcx
+  and $128, %rdx
+  shr $2, %rdx
+  shr $1, %rcx
+  and %rdx, %rax
+  and %rcx, %rax
+  ret
+
 
