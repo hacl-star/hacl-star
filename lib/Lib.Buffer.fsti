@@ -45,11 +45,21 @@ unfold let cbuffer (a:Type0) = buffer_t CONST a
 (** Global buffers are const immutable *)
 unfold let gbuffer (a:Type0) = c:cbuffer a{CB.qual_of c == CB.IMMUTABLE}
 
+let g_is_null #t #a (b: buffer_t t a) =
+  match t with
+  | MUT -> LowStar.Buffer.g_is_null (b <: buffer a)
+  | IMMUT -> LowStar.ImmutableBuffer.g_is_null (b <: ibuffer a)
+  | CONST -> LowStar.Monotonic.Buffer.g_is_null (LowStar.ConstBuffer.as_mbuf (b <: cbuffer a))
+
 let length (#t:buftype) (#a:Type0) (b:buffer_t t a) =
   match t with
   | MUT -> B.length (b <: buffer a)
   | IMMUT -> IB.length (b <: ibuffer a)
   | CONST -> CB.length (b <: cbuffer a)
+
+unfold
+let non_null #t #a (b: buffer_t t a) : Type0 =
+  length b == 0 ==> not (g_is_null b)
 
 let to_const #a #t (b:buffer_t t a) : r:cbuffer a {length r == length b}=
   match t with
@@ -205,9 +215,22 @@ val as_seq_gsub:
     Seq.sub #a #(v len) (as_seq h b) (v start) (v n))
   [SMTPat (Seq.sub #a #(v len) (as_seq h b) (v start) (v n))]
 
-(** Statefully get a sub-buffer of a buffer *)
+(** Statefully get a sub-buffer of a (non-null) buffer *)
 inline_for_extraction
 val sub:
+    #t:buftype
+  -> #a:Type0
+  -> #len:size_t
+  -> b:lbuffer_t t a len
+  -> start:size_t
+  -> n:size_t{v start + v n <= v len} ->
+  Stack (lbuffer_t t a n)
+    (requires fun h0 -> live h0 b /\ non_null b)
+    (ensures  fun h0 r h1 -> h0 == h1 /\ live h1 r /\ r == gsub b start n)
+
+(** Statefully get a sub-buffer of a buffer, has a dynamic null check *)
+inline_for_extraction
+val sub_generic:
     #t:buftype
   -> #a:Type0
   -> #len:size_t
@@ -361,9 +384,23 @@ val recall_contents:
     (requires fun h0 -> (live h0 b \/ recallable b) /\ witnessed b s)
     (ensures  fun h0 _ h1 -> h0 == h1 /\ live h0 b /\ as_seq h0 b == s)
 
-(** Copy a buffer into a mutable buffer *)
+(** Copy a buffer into a mutable buffer (both non-NULL) *)
 inline_for_extraction
 val copy:
+    #t:buftype
+  -> #a:Type
+  -> #len:size_t
+  -> o:lbuffer a len
+  -> i:lbuffer_t t a len ->
+  Stack unit
+    (requires fun h0 -> live h0 o /\ live h0 i /\ disjoint i o /\ non_null o /\ non_null i)
+    (ensures  fun h0 _ h1 ->
+      modifies1 o h0 h1 /\
+      as_seq h1 o == as_seq h0 i)
+
+(** Copy a buffer into a mutable buffer, has dynamic NULL-check *)
+inline_for_extraction
+val copy_generic:
     #t:buftype
   -> #a:Type
   -> #len:size_t
@@ -383,6 +420,22 @@ val copy:
 *)
 inline_for_extraction
 val memset:
+    #a:Type
+  -> #blen:size_t
+  -> b:lbuffer a blen
+  -> w:a
+  -> len:size_t{v len <= v blen} ->
+  Stack unit
+    (requires fun h0 -> live h0 b /\ non_null b)
+    (ensures  fun h0 _ h1 ->
+      modifies1 b h0 h1 /\
+      as_seq h1 (gsub b 0ul len) == Seq.create (v len) w /\
+      as_seq h1 (gsub b len (blen -! len)) ==
+      as_seq h0 (gsub b len (blen -! len)))
+
+(* Has dynamic NULL-check *)
+inline_for_extraction
+val memset_generic:
     #a:Type
   -> #blen:size_t
   -> b:lbuffer a blen
