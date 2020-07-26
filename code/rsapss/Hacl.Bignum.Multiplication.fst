@@ -60,7 +60,7 @@ let bn_mul1_add_in_place aLen a l res =
   let spec h = S.bn_mul1_add_in_place_f #(v aLen) (as_seq h a) l (as_seq h res) in
 
   let h0 = ST.get () in
-  fill_elems h0 aLen res refl footprint spec
+  fill_elems4 h0 aLen res refl footprint spec
   (fun i ->
     c.(0ul) <- mul_carry_add_u64_st c.(0ul) a.(i) l (sub res i 1ul)
   );

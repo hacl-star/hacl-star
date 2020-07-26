@@ -44,7 +44,7 @@ let bn_sub1 aLen a c_in res =
   let spec h = S.bn_sub1_f #(v aLen) (as_seq h a) in
 
   let h0 = ST.get () in
-  fill_elems h0 aLen res refl footprint spec
+  fill_elems4 h0 aLen res refl footprint spec
   (fun i ->
     let h1 = ST.get () in
     let t1 = a.(i) in
@@ -85,7 +85,7 @@ let bn_sub_eq_len aLen a b res =
   let spec h = S.bn_sub_f #(v aLen) (as_seq h a) (as_seq h b) in
 
   let h0 = ST.get () in
-  fill_elems h0 aLen res refl footprint spec
+  fill_elems4 h0 aLen res refl footprint spec
   (fun i ->
     let h1 = ST.get () in
     let t1 = a.(i) in
@@ -159,7 +159,7 @@ let bn_add1 aLen a c_in res =
   let spec h = S.bn_add1_f #(v aLen) (as_seq h a) in
 
   let h0 = ST.get () in
-  fill_elems h0 aLen res refl footprint spec
+  fill_elems4 h0 aLen res refl footprint spec
   (fun i ->
     let h1 = ST.get () in
     let t1 = a.(i) in
@@ -200,7 +200,7 @@ let bn_add_eq_len aLen a b res =
   let spec h = S.bn_add_f #(v aLen) (as_seq h a) (as_seq h b) in
 
   let h0 = ST.get () in
-  fill_elems h0 aLen res refl footprint spec
+  fill_elems4 h0 aLen res refl footprint spec
   (fun i ->
     let h1 = ST.get () in
     let t1 = a.(i) in
