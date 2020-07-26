@@ -27,6 +27,12 @@ let as_seq_gsub #t #a #len h b start n = ()
 
 let sub #t #a #len b start n =
   match t with
+  | MUT -> B.sub_non_null (b <: buffer a) start n
+  | IMMUT -> IB.isub_non_null (b <: ibuffer a) start n
+  | CONST -> CB.sub_non_null (b <: cbuffer a) start n
+
+let sub_generic #t #a #len b start n =
+  match t with
   | MUT -> B.sub (b <: buffer a) start n
   | IMMUT -> IB.isub (b <: ibuffer a) start n
   | CONST -> CB.sub (b <: cbuffer a) start n
@@ -66,8 +72,26 @@ let createL_global #a init =
 let recall_contents #a #len b s =
   B.recall_p (CB.to_ibuffer b) (cpred s)
 
-(* JP: why triplicate the code? would it not extract if we just cast i to a monotonic buffer?! *)
 let copy #t #a #len o i =
+  match t with
+  | MUT ->
+    let h0 = ST.get () in
+    LowStar.BufferOps.blit_non_null (i <: buffer a) 0ul (o <: buffer a) 0ul len;
+    let h1 = ST.get () in
+    assert (Seq.slice (as_seq h1 o) 0 (v len) == Seq.slice (as_seq h0 i) 0 (v len))
+  | IMMUT ->
+    let h0 = ST.get () in
+    LowStar.BufferOps.blit_non_null (i <: ibuffer a) 0ul (o <: buffer a) 0ul len;
+    let h1 = ST.get () in
+    assert (Seq.slice (as_seq h1 o) 0 (v len) == Seq.slice (as_seq h0 i) 0 (v len))
+  | CONST ->
+    let h0 = ST.get () in
+    LowStar.BufferOps.blit_non_null (CB.cast (i <: cbuffer a)) 0ul (o <: buffer a) 0ul len;
+    let h1 = ST.get () in
+    assert (Seq.slice (as_seq h1 o) 0 (v len) == Seq.slice (as_seq h0 i) 0 (v len))
+
+(* JP: why triplicate the code? would it not extract if we just cast i to a monotonic buffer?! *)
+let copy_generic #t #a #len o i =
   match t with
   | MUT ->
     let h0 = ST.get () in
@@ -85,11 +109,17 @@ let copy #t #a #len o i =
     let h1 = ST.get () in
     assert (Seq.slice (as_seq h1 o) 0 (v len) == Seq.slice (as_seq h0 i) 0 (v len))
 
+inline_for_extraction
 let memset #a #blen b init len =
+  B.fill_non_null #a #(fun _ _ -> True) #(fun _ _ -> True) b init len
+
+inline_for_extraction
+let memset_generic #a #blen b init len =
   B.fill #a #(fun _ _ -> True) #(fun _ _ -> True) b init len
 
 #set-options "--max_fuel 0"
 
+(* TODO: no null check here too? *)
 let update_sub #t #a #len dst start n src =
   match t with
   | MUT ->
@@ -121,7 +151,7 @@ let update_sub #t #a #len dst start n src =
         (Seq.update_sub #a #(v len) (as_seq h0 dst) (v start) (v n) (as_seq h0 src))
 
 let update_sub_f #a #len h0 buf start n spec f =
-  let tmp = sub buf start n in
+  let tmp = sub_generic buf start n in
   let h0 = ST.get () in
   f ();
   let h1 = ST.get () in
@@ -290,7 +320,7 @@ let loopi_blocks #a #b #blen bs inpLen inp spec_f spec_l f l w =
   (fun i ->
     Loop.unfold_repeati (v nb) (spec_fh h0) (as_seq h0 w) (v i);
     loopi_blocks_f #a #b #blen bs inpLen inp spec_f f nb i w);
-  let last = sub inp (nb *! bs) rem in
+  let last = sub_generic inp (nb *! bs) rem in
   l nb rem last w
 
 let loopi_blocks_nospec #a #b #blen bs inpLen inp f l w =
@@ -299,7 +329,7 @@ let loopi_blocks_nospec #a #b #blen bs inpLen inp f l w =
   let h0 = ST.get () in
   loop_nospec #h0 #b #blen nb w
   (fun i -> loopi_blocks_f_nospec #a #b #blen bs inpLen inp f nb i w);
-  let last = sub inp (nb *. bs) rem in
+  let last = sub_generic inp (nb *. bs) rem in
   l nb rem last w
 
 inline_for_extraction noextract
@@ -347,7 +377,7 @@ let loop_blocks #a #b #blen bs inpLen inp spec_f spec_l f l w =
   (fun i ->
     Loop.unfold_repeati (v nb) (spec_fh h0) (as_seq h0 w) (v i);
     loop_blocks_f #a #b #blen bs inpLen inp spec_f f nb i w);
-  let last = sub inp (nb *! bs) rem in
+  let last = sub_generic inp (nb *! bs) rem in
   l rem last w
 
 
@@ -368,7 +398,7 @@ let fill_blocks #t h0 len n output a_spec refl footprint spec impl =
       (Sequence.generate_blocks_inner t (v len) (v n) a_spec (spec h0)) (refl' h0 0) (v i);
     assert ((v i + 1) * v len == v i * v len + v len);
     assert (v i * v len <= max_size_t);
-    let block = sub output (i *! len) len in
+    let block = sub_generic output (i *! len) len in
     let h0_ = ST.get() in
     impl i;
     let h = ST.get() in
@@ -576,17 +606,18 @@ val div_mul_le: b:pos -> a:nat -> Lemma
   ((a / b) * b <= a)
 let div_mul_le b a = ()
 
-#reset-options "--z3rlimit 2000 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 2000 --fuel 0 --ifuel 0"
 
 let map_blocks #t #a h0 len blocksize inp output spec_f spec_l impl_f impl_l =
+  // TODO: branch on len=0 for null-check?
   div_mul_le (v blocksize) (v len);
   let nb = len /. blocksize in
   let rem = len %. blocksize in
   let blen = nb *! blocksize in
-  let ib = sub inp 0ul blen in
-  let ob = sub output 0ul blen in
-  let il = sub inp blen rem in
-  let ol = sub inp blen rem in
+  let ib = sub_generic inp 0ul blen in
+  let ob = sub_generic output 0ul blen in
+  let il = sub_generic inp blen rem in
+  let ol = sub_generic inp blen rem in
   Math.Lemmas.lemma_div_mod (v len) (v blocksize);
   Math.Lemmas.multiple_division_lemma (v nb) (v blocksize);
   map_blocks_multi #t #a h0 blocksize nb ib ob spec_f impl_f;
