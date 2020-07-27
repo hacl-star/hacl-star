@@ -379,7 +379,6 @@ void Hacl_Poly1305_128_poly1305_init(Lib_IntVector_Intrinsics_vec128 *ctx, u8 *k
   u8 *kr = key;
   u64 u0;
   u64 lo;
-  u8 *x00;
   u64 u;
   u64 hi;
   u64 mask0;
@@ -492,8 +491,7 @@ void Hacl_Poly1305_128_poly1305_init(Lib_IntVector_Intrinsics_vec128 *ctx, u8 *k
   acc[4U] = Lib_IntVector_Intrinsics_vec128_zero;
   u0 = load64_le(kr);
   lo = u0;
-  x00 = kr + (u32)8U;
-  u = load64_le(x00);
+  u = load64_le(kr + (u32)8U);
   hi = u;
   mask0 = (u64)0x0ffffffc0fffffffU;
   mask1 = (u64)0x0ffffffc0ffffffcU;
@@ -676,11 +674,10 @@ void Hacl_Poly1305_128_poly1305_update1(Lib_IntVector_Intrinsics_vec128 *ctx, u8
       e[_i] = Lib_IntVector_Intrinsics_vec128_zero;
   }
   {
-    u64 u = load64_le(text);
-    u64 lo = u;
-    u8 *x00 = text + (u32)8U;
-    u64 u0 = load64_le(x00);
-    u64 hi = u0;
+    u64 u0 = load64_le(text);
+    u64 lo = u0;
+    u64 u = load64_le(text + (u32)8U);
+    u64 hi = u;
     Lib_IntVector_Intrinsics_vec128 f0 = Lib_IntVector_Intrinsics_vec128_load64(lo);
     Lib_IntVector_Intrinsics_vec128 f1 = Lib_IntVector_Intrinsics_vec128_load64(hi);
     Lib_IntVector_Intrinsics_vec128
@@ -1229,11 +1226,10 @@ void Hacl_Poly1305_128_poly1305_update(Lib_IntVector_Intrinsics_vec128 *ctx, u32
           e[_i] = Lib_IntVector_Intrinsics_vec128_zero;
       }
       {
-        u64 u = load64_le(block);
-        u64 lo = u;
-        u8 *x00 = block + (u32)8U;
-        u64 u0 = load64_le(x00);
-        u64 hi = u0;
+        u64 u0 = load64_le(block);
+        u64 lo = u0;
+        u64 u = load64_le(block + (u32)8U);
+        u64 hi = u;
         Lib_IntVector_Intrinsics_vec128 f0 = Lib_IntVector_Intrinsics_vec128_load64(lo);
         Lib_IntVector_Intrinsics_vec128 f1 = Lib_IntVector_Intrinsics_vec128_load64(hi);
         Lib_IntVector_Intrinsics_vec128
@@ -1452,7 +1448,6 @@ void Hacl_Poly1305_128_poly1305_update(Lib_IntVector_Intrinsics_vec128 *ctx, u32
       u8 tmp[16U] = { 0U };
       u64 u0;
       u64 lo;
-      u8 *x00;
       u64 u;
       u64 hi;
       Lib_IntVector_Intrinsics_vec128 f0;
@@ -1558,8 +1553,7 @@ void Hacl_Poly1305_128_poly1305_update(Lib_IntVector_Intrinsics_vec128 *ctx, u32
       memcpy(tmp, last, rem * sizeof (last[0U]));
       u0 = load64_le(tmp);
       lo = u0;
-      x00 = tmp + (u32)8U;
-      u = load64_le(x00);
+      u = load64_le(tmp + (u32)8U);
       hi = u;
       f0 = Lib_IntVector_Intrinsics_vec128_load64(lo);
       f1 = Lib_IntVector_Intrinsics_vec128_load64(hi);
@@ -1874,7 +1868,6 @@ void Hacl_Poly1305_128_poly1305_finish(u8 *tag, u8 *key, Lib_IntVector_Intrinsic
   u64 f11;
   u64 u0;
   u64 lo;
-  u8 *x00;
   u64 u;
   u64 hi;
   u64 f20;
@@ -1885,7 +1878,6 @@ void Hacl_Poly1305_128_poly1305_finish(u8 *tag, u8 *key, Lib_IntVector_Intrinsic
   u64 r11;
   u64 f30;
   u64 f31;
-  u8 *x0;
   acc[0U] = f011;
   acc[1U] = f111;
   acc[2U] = f211;
@@ -1907,8 +1899,7 @@ void Hacl_Poly1305_128_poly1305_finish(u8 *tag, u8 *key, Lib_IntVector_Intrinsic
   f11 = hi0;
   u0 = load64_le(ks);
   lo = u0;
-  x00 = ks + (u32)8U;
-  u = load64_le(x00);
+  u = load64_le(ks + (u32)8U);
   hi = u;
   f20 = lo;
   f21 = hi;
@@ -1919,8 +1910,7 @@ void Hacl_Poly1305_128_poly1305_finish(u8 *tag, u8 *key, Lib_IntVector_Intrinsic
   f30 = r0;
   f31 = r11;
   store64_le(tag, f30);
-  x0 = tag + (u32)8U;
-  store64_le(x0, f31);
+  store64_le(tag + (u32)8U, f31);
 }
 
 void Hacl_Poly1305_128_poly1305_mac(u8 *tag, u32 len, u8 *text, u8 *key)

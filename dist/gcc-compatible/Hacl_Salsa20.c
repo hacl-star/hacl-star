@@ -127,9 +127,7 @@ static inline void salsa20_key_block0(uint8_t *out, uint8_t *key, uint8_t *n)
   salsa20_core(k, ctx, (uint32_t)0U);
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
   {
-    uint8_t *x0 = out + i * (uint32_t)4U;
-    uint32_t x2 = k[i];
-    store32_le(x0, x2);
+    store32_le(out + i * (uint32_t)4U, k[i]);
   }
 }
 
@@ -203,9 +201,7 @@ salsa20_encrypt(
     }
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
     {
-      uint8_t *x0 = uu____0 + i * (uint32_t)4U;
-      uint32_t x2 = bl[i];
-      store32_le(x0, x2);
+      store32_le(uu____0 + i * (uint32_t)4U, bl[i]);
     }
   }
   if (rem1 > (uint32_t)0U)
@@ -234,9 +230,7 @@ salsa20_encrypt(
     }
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
     {
-      uint8_t *x0 = plain + i * (uint32_t)4U;
-      uint32_t x2 = bl[i];
-      store32_le(x0, x2);
+      store32_le(plain + i * (uint32_t)4U, bl[i]);
     }
     memcpy(uu____2, plain, rem * sizeof (plain[0U]));
   }
@@ -312,9 +306,7 @@ salsa20_decrypt(
     }
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
     {
-      uint8_t *x0 = uu____0 + i * (uint32_t)4U;
-      uint32_t x2 = bl[i];
-      store32_le(x0, x2);
+      store32_le(uu____0 + i * (uint32_t)4U, bl[i]);
     }
   }
   if (rem1 > (uint32_t)0U)
@@ -343,9 +335,7 @@ salsa20_decrypt(
     }
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
     {
-      uint8_t *x0 = plain + i * (uint32_t)4U;
-      uint32_t x2 = bl[i];
-      store32_le(x0, x2);
+      store32_le(plain + i * (uint32_t)4U, bl[i]);
     }
     memcpy(uu____2, plain, rem * sizeof (plain[0U]));
   }
@@ -395,9 +385,7 @@ static inline void hsalsa20(uint8_t *out, uint8_t *key, uint8_t *n)
   uint32_t res[8U] = { r0, r1, r2, r3, r4, r5, r6, r7 };
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
   {
-    uint8_t *x0 = out + i * (uint32_t)4U;
-    uint32_t x2 = res[i];
-    store32_le(x0, x2);
+    store32_le(out + i * (uint32_t)4U, res[i]);
   }
 }
 

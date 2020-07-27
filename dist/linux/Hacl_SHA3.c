@@ -141,8 +141,7 @@ void Hacl_Impl_SHA3_loadState(u32 rateInBytes, u8 *input, u64 *s)
     u32 i;
     for (i = (u32)0U; i < (u32)25U; i++)
     {
-      u8 *x0 = b + i * (u32)8U;
-      u64 u = load64_le(x0);
+      u64 u = load64_le(b + i * (u32)8U);
       u64 x = u;
       s[i] = s[i] ^ x;
     }
@@ -158,8 +157,7 @@ void Hacl_Impl_SHA3_storeState(u32 rateInBytes, u64 *s, u8 *res)
     for (i = (u32)0U; i < (u32)25U; i++)
     {
       u64 sj = s[i];
-      u8 *x0 = b + i * (u32)8U;
-      store64_le(x0, sj);
+      store64_le(b + i * (u32)8U, sj);
     }
   }
   memcpy(res, b, rateInBytes * sizeof (b[0U]));
