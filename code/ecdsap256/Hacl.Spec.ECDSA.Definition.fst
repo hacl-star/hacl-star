@@ -12,6 +12,8 @@ open Lib.Sequence
 open Lib.Buffer
 open FStar.Mul
 
+open Spec.P256
+
 noextract
 let prime_p256_order: (a: pos{a < pow2 256}) =
   assert_norm (115792089210356248762697446949407573529996955224135760342422259061068512044369 < pow2 256);
@@ -37,9 +39,10 @@ let p256_order_prime_list : x:list uint64{List.Tot.length x == 4 /\
 
 
 inline_for_extraction
-let felem = lbuffer uint64 (size 4)
+let felem (c: curve) = lbuffer uint64 (size (getCoordinateLenU64 c))
+
 inline_for_extraction 
-let widefelem = lbuffer uint64 (size 8)
+let widefelem (c: curve) = lbuffer uint64 (size (getCoordinateLenU64 c * 2))
 
 
 inline_for_extraction noextract
@@ -67,19 +70,18 @@ let wide_as_nat4 f =
   v s7 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64
 
 
-
 noextract
-let as_nat (h:mem) (e:felem) : GTot nat =
+let as_nat (c: curve) (h:mem) (e:felem c) : GTot nat =
   let s = as_seq h e in
   let s0 = s.[0] in
   let s1 = s.[1] in
   let s2 = s.[2] in
   let s3 = s.[3] in
   as_nat4 (s0, s1, s2, s3)
-
+  
 
 noextract
-let wide_as_nat (h:mem) (e:widefelem) : GTot nat =
+let wide_as_nat (c: curve) (h:mem) (e: widefelem c) : GTot nat =
   let s = as_seq h e in
   let s0 = s.[0] in
   let s1 = s.[1] in
@@ -90,6 +92,9 @@ let wide_as_nat (h:mem) (e:widefelem) : GTot nat =
   let s6 = s.[6] in
   let s7 = s.[7] in
   wide_as_nat4 (s0, s1, s2, s3, s4, s5, s6, s7)
+
+
+
 
 noextract
 let felem_seq_as_nat_8 (a: lseq uint64 8) : Tot nat = 
