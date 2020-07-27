@@ -76,7 +76,7 @@ val lemmaFromDomainToDomain: a: nat { a < prime} -> Lemma (toDomain_ (fromDomain
 val lemmaToDomainFromDomain: a: nat { a < prime} -> Lemma (fromDomain_ (toDomain_ a) == a)
 
 
-val montgomery_multiplication_ecdsa_module: a: felem -> b: felem ->result: felem-> 
+val montgomery_multiplication_ecdsa_module: #c: curve -> a: felem c -> b: felem ->result: felem-> 
   Stack unit 
     (requires fun h -> live h a /\ live h b /\ live h result /\
       as_nat h a < prime_p256_order /\ as_nat h b < prime_p256_order)
