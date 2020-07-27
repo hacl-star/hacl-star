@@ -30,22 +30,24 @@ let lemmaFromDomain a = ()
 let lemmaToDomain a = ()
 
 
-let lemmaToDomainAndBackIsTheSame a =
-  let to = toDomain_ a in
-  lemmaToDomain a;
-  let from = fromDomain_ to in
-  lemmaFromDomain to;
+let lemmaToDomainAndBackIsTheSame #c a =
+  admit();
+  let to = toDomain_ #c a in
+  lemmaToDomain #c a;
+  let from = fromDomain_ #c to in
+  lemmaFromDomain #c to;
   lemma_mod_mul_distr_l (a * pow2 256) (modp_inv2 #P256 (pow2 256)) prime256;
   assert_norm (pow2 256 * modp_inv2 #P256 (pow2 256) % prime256 = 1);
   modulo_distributivity_mult_last_two a 1 1 (pow2 256) (modp_inv2 #P256 (pow2 256)) prime256;
-  modulo_lemma a prime
+  modulo_lemma a (getPrime c)
 
 
-let lemmaFromDomainToDomain a =
-  let from = fromDomain_ a in
-  lemmaFromDomain a;
-  let to = toDomain_ from in
-  lemmaToDomain from;
+let lemmaFromDomainToDomain #c a =
+  let prime = getPrime c in 
+  let from = fromDomain_ #c a in
+  lemmaFromDomain #c a;
+  let to = toDomain_ #c from in
+  lemmaToDomain #c from;
   lemma_mod_mul_distr_l (a * modp_inv2 #P256 (pow2 256)) (pow2 256)  prime256;
   assert_norm (modp_inv2 #P256 (pow2 256) * (pow2 256) % prime = 1);
   modulo_distributivity_mult_last_two a 1 1 (modp_inv2 #P256 (pow2 256)) (pow2 256) prime256;
@@ -62,7 +64,8 @@ let inDomain_mod_is_not_mod a =
   lemma_mod_mul_distr_l a (pow2 256) prime256
 
 
-let multiplicationInDomainNat #k #l a b =
+let multiplicationInDomainNat #c #k #l a b =
+  let prime = getPrime c in 
   assert_norm (prime256 > 3);
   let multResult = a * b * modp_inv2_prime (pow2 256) prime256 % prime256 in
   modulo_distributivity_mult2 (k * pow2 256) (l * pow2 256) (modp_inv2_prime (pow2 256) prime256) prime;
@@ -71,13 +74,14 @@ let multiplicationInDomainNat #k #l a b =
   modulo_distributivity_mult_last_two k (pow2 256) l (pow2 256) (modp_inv2 #P256 (pow2 256)) prime;
   lemma_mul_associativity_3 k (pow2 256) l
 
-let additionInDomain a b =
-  let k = fromDomain_ a in
-  let l = fromDomain_ b in
+let additionInDomain #c a b =
+  let prime = getPrime c in 
+  let k = fromDomain_ #c a in
+  let l = fromDomain_ #c b in
   calc (==) {
     (a + b) % prime256;
-    == { lemmaFromDomainToDomain a; lemmaFromDomainToDomain b }
-    (toDomain_ k + toDomain_ l) % prime256;
+    == { lemmaFromDomainToDomain #c a; lemmaFromDomainToDomain #c b }
+    (toDomain_ #c k + toDomain_ #c l) % prime256;
     == { }
     (k * pow2 256 % prime256 + l * pow2 256 % prime256) % prime256;
     == { modulo_distributivity (k * pow2 256) (l * pow2 256) prime }
@@ -85,17 +89,18 @@ let additionInDomain a b =
     == { distributivity_add_left k l (pow2 256) }
     ((k + l) * pow2 256) % prime256;
     == { }
-    toDomain_ (fromDomain_ a + fromDomain_ b);
+    toDomain_ #c (fromDomain_ #c a + fromDomain_ #c b);
   }
 
 
-let substractionInDomain a b =
-  let k = fromDomain_ a in
-  let l = fromDomain_ b in
+let substractionInDomain #c a b =
+  let prime = getPrime c in 
+  let k = fromDomain_ #c a in
+  let l = fromDomain_ #c b in
   calc (==) {
     (a - b) % prime256;
-    == { lemmaFromDomainToDomain a; lemmaFromDomainToDomain b }
-    (toDomain_ k - toDomain_ l) % prime256;
+    == { lemmaFromDomainToDomain #c a; lemmaFromDomainToDomain #c b }
+    (toDomain_ #c k - toDomain_ #c l) % prime256;
     == { }
     (k * pow2 256 % prime256 - l * pow2 256 % prime256) % prime256;
     == { lemma_mod_sub_distr (k * pow2 256 % prime256) (l * pow2 256) prime }
@@ -105,12 +110,8 @@ let substractionInDomain a b =
     == { distributivity_sub_left k l (pow2 256) }
     ((k - l) * pow2 256) % prime256;
     == { }
-    toDomain_ (fromDomain_ a - fromDomain_ b);
+    toDomain_ #c (fromDomain_ #c a - fromDomain_ #c b);
   }
-
-
-let ( *% ) a b = (a * b) % prime
-
 
 open Lib.ByteSequence
 
@@ -134,15 +135,15 @@ let ith_bit_power k i =
   res
 
 
-let _pow_step0 r0 r1 =
-  let r1 = r0 *% r1 in
-  let r0 = r0 *% r0 in
+let _pow_step0 #c r0 r1 =
+  let r1 = (r0 * r1) % (getPrime c) in 
+  let r0 = (r0 * r0) % (getPrime c) in 
   r0, r1
 
 
-let _pow_step1 r0 r1 =
-  let r0 = r0 *% r1 in
-  let r1 = r1 *% r1 in
+let _pow_step1 #c r0 r1 =
+  let r0 = (r0 * r1) % (getPrime c) in 
+  let r1 = (r1 * r1) % (getPrime c) in 
   (r0, r1)
 
 
