@@ -139,7 +139,6 @@ int main()
 	printf("%s\n", "Wycheproof tests ECDSA: ");
 		
 	for (int i = 0 ; i< sizeof(w_ecdsa_vectors)/sizeof(ecdsap256_w_i) ; i++)
-	// for (int i = 174 ; i< 175; i++)
 	{
 		printf("ECDSA Wycheproof Test %d", i );
 		
