@@ -29,8 +29,8 @@ let cube #c a result =
     montgomery_square_buffer a result;
     montgomery_multiplication_buffer result a result;
  let h1 = ST.get() in 
- lemma_mod_mul_distr_l (fromDomain_ (as_nat c h0 a) * fromDomain_ (as_nat c h0 a)) (fromDomain_ (as_nat c h0 a)) (getPrime c);
-inDomain_mod_is_not_mod (fromDomain_ (as_nat c h0 a) * fromDomain_ (as_nat c h0 a) * fromDomain_ (as_nat c h0 a)); 
+ lemma_mod_mul_distr_l (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 a)) (fromDomain_ #c (as_nat c h0 a)) (getPrime c);
+inDomain_mod_is_not_mod #c (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 a)); 
   admit()
 
 

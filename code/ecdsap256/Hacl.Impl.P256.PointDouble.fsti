@@ -50,8 +50,8 @@ val point_double: #c: curve -> p: point c -> result: point c -> tempBuffer: lbuf
 	let x, y, z = gsub p (size 0) (size len), gsub p (size len) (size len), gsub p (size (2 * len)) (size len) in 
 	let x3, y3, z3 = gsub result (size 0) (size len), gsub result (size len) (size len), gsub result (size (2 * len)) (size len) in 
       
-	let xD, yD, zD = fromDomain_ (as_nat c h0 x), fromDomain_ (as_nat c h0 y), fromDomain_ (as_nat c h0 z) in 
-	let x3D, y3D, z3D = fromDomain_ (as_nat c h1 x3), fromDomain_ (as_nat c h1 y3), fromDomain_ (as_nat c h1 z3) in
+	let xD, yD, zD = fromDomain_ #c (as_nat c h0 x), fromDomain_ #c (as_nat c h0 y), fromDomain_ #c (as_nat c h0 z) in 
+	let x3D, y3D, z3D = fromDomain_ #c (as_nat c h1 x3), fromDomain_ #c (as_nat c h1 y3), fromDomain_ #c (as_nat c h1 z3) in
 	let xN, yN, zN = _point_double #c (xD, yD, zD) in 
 	x3D == xN /\ y3D == yN /\ z3D == zN
       )
