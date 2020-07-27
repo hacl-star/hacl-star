@@ -98,6 +98,12 @@ let live (#t:buftype) (#a:Type0) (h:HS.mem) (b:buffer_t t a) : Type =
   | IMMUT -> IB.live h (b <: ibuffer a)
   | CONST -> CB.live h (b <: cbuffer a)
 
+let is_null #t #a (b: buffer_t t a) : Stack bool (fun h -> live h b) (fun h y h' -> y == g_is_null b /\ h == h') =
+  match t with
+  | MUT -> LowStar.Buffer.is_null (b <: buffer a)
+  | IMMUT -> LowStar.ImmutableBuffer.is_null (b <: ibuffer a)
+  | CONST -> LowStar.Buffer.is_null (LowStar.ConstBuffer.cast (b <: cbuffer a))
+
 let loc (#t:buftype) (#a:Type0) (b:buffer_t t a) : GTot B.loc =
   match t with
   | MUT -> B.loc_buffer (b <: buffer a)
