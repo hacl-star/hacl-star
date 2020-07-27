@@ -357,7 +357,7 @@ val storeState:
   -> s:state
   -> res:lbuffer uint8 rateInBytes
   -> Stack unit
-    (requires fun h0 -> live h0 s /\ live h0 res)
+    (requires fun h0 -> live h0 s /\ live h0 res /\ non_null res)
     (ensures  fun h0 _ h1 ->
       modifies (loc res) h0 h1 /\
       as_seq h1 res == S.storeState (v rateInBytes) (as_seq h0 s))
@@ -493,7 +493,7 @@ val squeeze:
   -> outputByteLen:size_t
   -> output:lbuffer uint8 outputByteLen
   -> Stack unit
-    (requires fun h0 -> live h0 s /\ live h0 output /\ disjoint s output)
+    (requires fun h0 -> live h0 s /\ live h0 output /\ disjoint s output /\ non_null output)
     (ensures  fun h0 _ h1 ->
       modifies2 s output h0 h1 /\
       as_seq h1 output == S.squeeze (as_seq h0 s) (v rateInBytes) (v outputByteLen))
@@ -535,9 +535,13 @@ val keccak:
       as_seq h1 output ==
       S.keccak (v rate) (v capacity) (v inputByteLen) (as_seq h0 input) delimitedSuffix (v outputByteLen))
 let keccak rate capacity inputByteLen input delimitedSuffix outputByteLen output =
+  if is_null output then
+    admit ()
+  else begin
   push_frame();
   let rateInBytes = rate /. size 8 in
   let s:state = create 25ul (u64 0) in
   absorb s rateInBytes inputByteLen input delimitedSuffix;
   squeeze s rateInBytes outputByteLen output;
   pop_frame()
+  end
