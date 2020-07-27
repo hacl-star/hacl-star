@@ -107,7 +107,7 @@ val montgomery_multiplication_buffer_by_one: a: felem P256 -> result: felem P256
   (ensures (fun h0 _ h1 -> 
     modifies (loc result) h0 h1 /\ 
     as_nat P256 h1 result  = (as_nat P256 h0 a * modp_inv2_prime (pow2 256) prime256) % prime256 /\
-    as_nat P256 h1 result = fromDomain_ (as_nat P256 h0 a))
+    as_nat P256 h1 result = fromDomain_ #P256 (as_nat P256 h0 a))
   )
 
 
@@ -142,7 +142,7 @@ let montgomery_multiplication_buffer_by_one a result =
 	  let round3 = (round2 + prime256 * (round2 % pow2 64)) / pow2 64 in   
 	  round3 % pow2 64) (pow2 64 - 1) prime256;
     reduction_prime256_2prime256_8_with_carry_impl round4 result;
-    lemmaFromDomain (as_nat P256 h0 a);
+    lemmaFromDomain #P256 (as_nat P256 h0 a);
   pop_frame()  
 
 
@@ -152,8 +152,8 @@ val montgomery_multiplication_buffer_p256: a: felem P256 -> b: felem P256 -> res
     modifies (loc result) h0 h1 /\  
     as_nat P256 h1 result < prime256 /\
     as_nat P256 h1 result = (as_nat P256 h0 a * as_nat P256 h0 b * modp_inv2_prime (pow2 256) prime256) % prime256 /\
-    as_nat P256 h1 result = toDomain_ (fromDomain_ (as_nat P256 h0 a) * fromDomain_ (as_nat P256 h0 b) % prime256) /\
-    as_nat P256 h1 result = toDomain_ (fromDomain_ (as_nat P256 h0 a) * fromDomain_ (as_nat P256 h0 b)))
+    as_nat P256 h1 result = toDomain_ #P256 (fromDomain_ #P256 (as_nat P256 h0 a) * fromDomain_ #P256 (as_nat P256 h0 b) % prime256) /\
+    as_nat P256 h1 result = toDomain_ #P256 (fromDomain_ #P256 (as_nat P256 h0 a) * fromDomain_ #P256 (as_nat P256 h0 b)))
   )
 
 
@@ -190,10 +190,10 @@ let montgomery_multiplication_buffer_p256 a b result =
 	round3 % pow2 64) (pow2 64) prime256;  
       assert_norm((prime256 * pow2 64 + (prime256 * pow2 64 + (prime256 * pow2 64 + ((pow2 64 - 1) * prime256 + prime256 * prime256) / pow2 64) / pow2 64)/ pow2 64) / pow2 64 < 2 * prime256);
   reduction_prime256_2prime256_8_with_carry_impl round4 result; 
-  lemmaFromDomainToDomain (as_nat P256 h0 a);
-  lemmaFromDomainToDomain (as_nat P256 h0 b);
-  multiplicationInDomainNat #(fromDomain_ (as_nat P256 h0 a)) #(fromDomain_ (as_nat P256 h0 b))  (as_nat P256 h0 a) (as_nat P256 h0 b);
-  inDomain_mod_is_not_mod (fromDomain_ (as_nat P256 h0 a) * fromDomain_ (as_nat P256 h0 b));
+  lemmaFromDomainToDomain #P256 (as_nat P256 h0 a);
+  lemmaFromDomainToDomain #P256 (as_nat P256 h0 b);
+  multiplicationInDomainNat #P256 #(fromDomain_ #P256 (as_nat P256 h0 a)) #(fromDomain_ #P256 (as_nat P256 h0 b))  (as_nat P256 h0 a) (as_nat P256 h0 b);
+  inDomain_mod_is_not_mod #P256 (fromDomain_ #P256 (as_nat P256 h0 a) * fromDomain_ #P256 (as_nat P256 h0 b));
   pop_frame()  
 
 
@@ -203,8 +203,8 @@ val montgomery_multiplication_buffer: #c: curve -> a: felem c -> b: felem c -> r
     modifies (loc result) h0 h1 /\  
     as_nat c h1 result < getPrime c /\
     as_nat c h1 result = (as_nat c h0 a * as_nat c h0 b * modp_inv2_prime (pow2 (getPower c)) (getPrime c)) % getPrime c /\
-    as_nat c h1 result = toDomain_ (fromDomain_ (as_nat c h0 a) * fromDomain_ (as_nat c h0 b) % getPrime c) /\
-    as_nat c h1 result = toDomain_ (fromDomain_ (as_nat c h0 a) * fromDomain_ (as_nat c h0 b)))
+    as_nat c h1 result = toDomain_ #c (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 b) % getPrime c) /\
+    as_nat c h1 result = toDomain_ #c (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 b)))
   )
 
 
@@ -222,8 +222,8 @@ val montgomery_square_buffer: #c: curve -> a: felem c -> result: felem c ->  Sta
       modifies (loc result) h0 h1 /\  
       as_nat c h1 result < prime /\ 
       as_nat c h1 result = (as_nat c h0 a * as_nat c h0 a * modp_inv2_prime (getPower c) prime) % prime /\
-      as_nat c h1 result = toDomain_ (fromDomain_ (as_nat c h0 a) * fromDomain_ (as_nat c h0 a) % prime) /\
-      as_nat c h1 result = toDomain_ (fromDomain_ (as_nat c h0 a) * fromDomain_ (as_nat c h0 a)))
+      as_nat c h1 result = toDomain_ #c (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 a) % prime) /\
+      as_nat c h1 result = toDomain_ #c (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 a)))
     )
   )
 
@@ -237,8 +237,8 @@ val montgomery_square_buffer_p256: a: felem P256 -> result: felem P256 -> Stack 
       modifies (loc result) h0 h1 /\  
       as_nat P256 h1 result < prime /\ 
       as_nat P256 h1 result = (as_nat c h0 a * as_nat c h0 a * modp_inv2_prime (getPower c) prime) % prime /\
-      as_nat c h1 result = toDomain_ (fromDomain_ (as_nat c h0 a) * fromDomain_ (as_nat c h0 a) % prime) /\
-      as_nat c h1 result = toDomain_ (fromDomain_ (as_nat c h0 a) * fromDomain_ (as_nat c h0 a)))
+      as_nat c h1 result = toDomain_ #P256 (fromDomain_ #P256 (as_nat c h0 a) * fromDomain_ #P256 (as_nat c h0 a) % prime) /\
+      as_nat c h1 result = toDomain_ #P256 (fromDomain_ #P256 (as_nat c h0 a) * fromDomain_ #P256 (as_nat c h0 a)))
     )
   )
 
@@ -275,9 +275,9 @@ let montgomery_square_buffer_p256 a result =
       assert_norm((prime256 * pow2 64 + (prime256 * pow2 64 + (prime256 * pow2 64 + ((pow2 64 - 1) * prime256 + prime256 * prime256) / pow2 64) / pow2 64)/ pow2 64) / pow2 64 < 2 * prime256);
   
    reduction_prime256_2prime256_8_with_carry_impl round4 result; 
-   lemmaFromDomainToDomain (as_nat P256 h0 a);
-   multiplicationInDomainNat #(fromDomain_ (as_nat P256 h0 a)) #(fromDomain_ (as_nat P256 h0 a))  (as_nat P256 h0 a) (as_nat P256 h0 a);
-   inDomain_mod_is_not_mod (fromDomain_ (as_nat P256 h0 a) * fromDomain_ (as_nat P256 h0 a));
+   lemmaFromDomainToDomain #P256 (as_nat P256 h0 a);
+   multiplicationInDomainNat #P256 #(fromDomain_ #P256 (as_nat P256 h0 a)) #(fromDomain_ #P256 (as_nat P256 h0 a))  (as_nat P256 h0 a) (as_nat P256 h0 a);
+   inDomain_mod_is_not_mod #P256 (fromDomain_ #P256 (as_nat P256 h0 a) * fromDomain_ #P256 (as_nat P256 h0 a));
    pop_frame()  
 
 
@@ -295,28 +295,28 @@ val fsquarePowN: n: size_t -> a: felem P256 -> Stack unit
   (requires (fun h -> live h a /\ as_nat P256 h a < prime256)) 
   (ensures (fun h0 _ h1 -> 
     modifies (loc a) h0 h1 /\  as_nat P256 h1 a < prime256 /\ 
-    (let k = fromDomain_(as_nat P256 h0 a) in as_nat P256 h1 a = toDomain_ (pow k (pow2 (v n)))))
+    (let k = fromDomain_ #P256 (as_nat P256 h0 a) in as_nat P256 h1 a = toDomain_ #P256 (pow k (pow2 (v n)))))
   )
 
 let fsquarePowN n a = 
   let h0 = ST.get() in  
-  lemmaFromDomainToDomain (as_nat P256 h0 a); 
+  lemmaFromDomainToDomain #P256 (as_nat P256 h0 a); 
   assert_norm (pow2 0 == 1); 
   let inv (h0: HyperStack.mem) (h1: HyperStack.mem) (i: nat) : Type0 =
-    let k = fromDomain_ (as_nat P256 h0 a) in 
-    as_nat P256 h1 a = toDomain_ (pow k (pow2 i)) /\
+    let k = fromDomain_ #P256 (as_nat P256 h0 a) in 
+    as_nat P256 h1 a = toDomain_ #P256 (pow k (pow2 i)) /\
     as_nat P256 h1 a < prime256 /\ live h1 a /\ modifies1 a h0 h1  in 
-  power_one (fromDomain_ (as_nat P256 h0 a)); 
+  power_one (fromDomain_ #P256 (as_nat P256 h0 a)); 
   for (size 0) n (inv h0) (fun x -> 
     let h0_ = ST.get() in 
      montgomery_square_buffer a a; 
-     let k = fromDomain_ (as_nat P256 h0 a) in  
-     inDomain_mod_is_not_mod (fromDomain_ (as_nat P256 h0_ a) * fromDomain_ (as_nat P256 h0_ a)); 
-     lemmaFromDomainToDomainModuloPrime (let k = fromDomain_ (as_nat P256 h0 a) in pow k (pow2 (v x)));
+     let k = fromDomain_ #P256 (as_nat P256 h0 a) in  
+     inDomain_mod_is_not_mod #P256 (fromDomain_ #P256 (as_nat P256 h0_ a) * fromDomain_ #P256 (as_nat P256 h0_ a)); 
+     lemmaFromDomainToDomainModuloPrime #P256 (let k = fromDomain_ #P256 (as_nat P256 h0 a) in pow k (pow2 (v x)));
      modulo_distributivity_mult (pow k (pow2 (v x))) (pow k (pow2 (v x))) prime256; 
      pow_plus k  (pow2 (v x)) (pow2 (v x )); 
      pow2_double_sum (v x);
-     inDomain_mod_is_not_mod (pow k (pow2 (v x + 1)))
+     inDomain_mod_is_not_mod #P256 (pow k (pow2 (v x + 1)))
   )
 
 
@@ -326,8 +326,9 @@ val fsquarePowNminusOne: n: size_t -> a: felem P256 -> tempBuffer: felem P256 ->
     as_nat P256 h1 a < prime256 /\ as_nat P256 h1 tempBuffer < prime256 /\ 
     modifies (loc a |+| loc tempBuffer) h0 h1 /\ 
     (
-      let k = fromDomain_ (as_nat P256 h0 a) in  
-      as_nat P256 h1 a = toDomain_ (pow k (pow2 (v n))) /\ as_nat P256 h1 tempBuffer = toDomain_ (pow k (pow2 (v n) -1 )))
+      let k = fromDomain_ #P256 (as_nat P256 h0 a) in  
+      as_nat P256 h1 a = toDomain_ #P256 (pow k (pow2 (v n))) /\ as_nat P256 h1 tempBuffer = 
+	toDomain_ #P256 (pow k (pow2 (v n) -1 )))
     )
    )
 
@@ -340,26 +341,26 @@ let fsquarePowNminusOne n a b =
   Lib.Buffer.upd b (size 3) (u64 4294967294);
 
   let one = (u64 1, u64 18446744069414584320, u64 18446744073709551615, u64 4294967294) in 
-      lemmaFromDomainToDomain (as_nat P256 h0 a);
-      lemmaToDomain 1;
+      lemmaFromDomainToDomain #P256 (as_nat P256 h0 a);
+      lemmaToDomain #P256 1;
       assert_norm (1 + pow2 64 * 18446744069414584320 + pow2 64 * pow2 64 * 18446744073709551615 + pow2 64 * pow2 64 * pow2 64 * 4294967294 = 26959946660873538059280334323183841250350249843923952699046031785985);
       assert_norm (pow2 256 % prime256 == 26959946660873538059280334323183841250350249843923952699046031785985);
-      assert_norm (as_nat4 one = toDomain_(1));
+      assert_norm (as_nat4 one = toDomain_ #P256 1);
 
   let inv (h0: HyperStack.mem) (h1: HyperStack.mem) (i: nat) : Type0 = 
-    let k = fromDomain_(as_nat P256 h0 a) in 
-    as_nat P256 h1 b = toDomain_ (pow k (pow2 i - 1)) /\ as_nat  P256 h1 a < prime256 /\ live h1 a /\
-    as_nat P256 h1 a = toDomain_ (pow k (pow2 i)) /\ as_nat P256 h1 b < prime256 /\ live h1 b /\ modifies (loc a |+| loc b) h0 h1 in 
+    let k = fromDomain_ #P256 (as_nat P256 h0 a) in 
+    as_nat P256 h1 b = toDomain_ #P256 (pow k (pow2 i - 1)) /\ as_nat  P256 h1 a < prime256 /\ live h1 a /\
+    as_nat P256 h1 a = toDomain_ #P256 (pow k (pow2 i)) /\ as_nat P256 h1 b < prime256 /\ live h1 b /\ modifies (loc a |+| loc b) h0 h1 in 
   for (size 0) n (inv h0) (fun x -> 
     let h0_ = ST.get() in 
     montgomery_multiplication_buffer b a b;
     montgomery_square_buffer a a;
-    let k = fromDomain_ (as_nat P256 h0 a) in 
-    inDomain_mod_is_not_mod (fromDomain_ (as_nat P256 h0_ b) * fromDomain_ (as_nat P256 h0_ a));
-    inDomain_mod_is_not_mod (fromDomain_ (as_nat P256 h0_ a) * fromDomain_ (as_nat P256 h0_ a));
+    let k = fromDomain_ #P256 (as_nat P256 h0 a) in 
+    inDomain_mod_is_not_mod #P256 (fromDomain_ #P256 (as_nat P256 h0_ b) * fromDomain_ #P256 (as_nat P256 h0_ a));
+    inDomain_mod_is_not_mod #P256 (fromDomain_ #P256 (as_nat P256 h0_ a) * fromDomain_ #P256 (as_nat P256 h0_ a));
 
-    lemmaFromDomainToDomainModuloPrime (pow k (pow2 (v x) - 1));
-    lemmaFromDomainToDomainModuloPrime (pow k (pow2 (v x)));
+    lemmaFromDomainToDomainModuloPrime #P256 (pow k (pow2 (v x) - 1));
+    lemmaFromDomainToDomainModuloPrime #P256 (pow k (pow2 (v x)));
     modulo_distributivity_mult (pow k (pow2 (v x) - 1)) (pow k (pow2 (v x))) prime256;
     modulo_distributivity_mult (pow k (pow2 (v x))) (pow k (pow2 (v x))) prime256;
     
@@ -367,8 +368,8 @@ let fsquarePowNminusOne n a b =
     pow_plus k (pow2 (v x)) (pow2 (v x));
     pow2_double_sum (v x);
 
-    inDomain_mod_is_not_mod (pow k (pow2 (v x + 1)));
-    inDomain_mod_is_not_mod (pow k (pow2 (v x + 1) - 1))
+    inDomain_mod_is_not_mod #P256 (pow k (pow2 (v x + 1)));
+    inDomain_mod_is_not_mod #P256 (pow k (pow2 (v x + 1) - 1))
 )
 
 
@@ -376,7 +377,7 @@ inline_for_extraction noextract
 val norm_part_one: a: felem P256 -> tempBuffer: lbuffer uint64 (size 8) -> 
   Stack unit (requires fun h -> live h a /\ live h tempBuffer /\ disjoint a tempBuffer /\  as_nat P256 h a < prime256)
   (ensures fun h0 _ h1 -> modifies1 tempBuffer h0 h1 /\ (let buffer_result = gsub tempBuffer (size 4) (size 4) in as_nat P256 h1 buffer_result < prime256 /\ 
-  (let k = fromDomain_ (as_nat P256 h0 a) in as_nat P256 h1 buffer_result = toDomain_(pow k ((pow2 32 - 1) * pow2 224) % prime256))))
+  (let k = fromDomain_ #P256 (as_nat P256 h0 a) in as_nat P256 h1 buffer_result = toDomain_ #P256 (pow k ((pow2 32 - 1) * pow2 224) % prime256))))
     
 let norm_part_one a tempBuffer = 
     let h0 = ST.get() in 
@@ -388,11 +389,11 @@ let norm_part_one a tempBuffer =
   fsquarePowNminusOne (size 32) buffer_a buffer_b;
   fsquarePowN (size 224) buffer_b;
 
-  let k = fromDomain_ (as_nat P256 h0 a) in 
-  lemmaFromDomainToDomainModuloPrime (pow k (pow2 32 - 1));
+  let k = fromDomain_ #P256 (as_nat P256 h0 a) in 
+  lemmaFromDomainToDomainModuloPrime #P256 (pow k (pow2 32 - 1));
   let k_powers = pow k (pow2 32 - 1) in 
   let k_prime = k_powers % prime256 in 
-  inDomain_mod_is_not_mod (pow k_prime (pow2 224));
+  inDomain_mod_is_not_mod #P256 (pow k_prime (pow2 224));
   power_distributivity k_powers (pow2 224) prime256;
   power_mult k (pow2 32 - 1) (pow2 224)
  
@@ -401,21 +402,21 @@ inline_for_extraction noextract
 val norm_part_two: a: felem P256 -> tempBuffer: lbuffer uint64 (size 4) -> 
   Stack unit (requires fun h -> live h a /\ live h tempBuffer /\ disjoint a tempBuffer /\  as_nat P256 h a < prime256)
   (ensures fun h0 _ h1 -> as_nat P256 h1 tempBuffer < prime256 /\ modifies1 tempBuffer h0 h1 /\
-    (let k = fromDomain_ (as_nat P256 h0 a) in as_nat P256 h1 tempBuffer = toDomain_(pow k (pow2 192) % prime256)))
+    (let k = fromDomain_ #P256 (as_nat P256 h0 a) in as_nat P256 h1 tempBuffer = toDomain_ #P256 (pow k (pow2 192) % prime256)))
     
 let norm_part_two a tempBuffer = 
   let h0 = ST.get() in 
   Lib.Buffer.copy tempBuffer a;
   fsquarePowN (size 192) tempBuffer;
-  let k = fromDomain_ (as_nat P256 h0 a) in 
-  inDomain_mod_is_not_mod (pow k (pow2 192))
+  let k = fromDomain_ #P256 (as_nat P256 h0 a) in 
+  inDomain_mod_is_not_mod #P256 (pow k (pow2 192))
 
 inline_for_extraction noextract   
 val norm_part_three:a: felem P256 -> tempBuffer: lbuffer uint64 (size 8) -> 
   Stack unit (requires fun h -> live h a /\ live h tempBuffer /\ disjoint a tempBuffer /\  
    as_nat P256 h a < prime256)   
   (ensures fun h0 _ h1 ->  modifies1 tempBuffer h0 h1 /\ (let buffer_result = gsub tempBuffer (size 4) (size 4) in as_nat P256 h1 buffer_result < prime256
-    /\ (let k = fromDomain_ (as_nat P256 h0 a) in as_nat P256 h1 buffer_result = toDomain_(pow k ((pow2 94 - 1) * pow2 2) % prime256))))
+    /\ (let k = fromDomain_ #P256 (as_nat P256 h0 a) in as_nat P256 h1 buffer_result = toDomain_ #P256 (pow k ((pow2 94 - 1) * pow2 2) % prime256))))
 
 let norm_part_three a tempBuffer = 
   let h0 = ST.get() in 
@@ -427,16 +428,16 @@ let norm_part_three a tempBuffer =
   fsquarePowNminusOne (size 94) buffer_a buffer_b;
   fsquarePowN (size 2) buffer_b;
 
-  let k = fromDomain_ (as_nat P256 h0 a) in 
-  lemmaFromDomainToDomainModuloPrime (pow k (pow2 94 - 1));
+  let k = fromDomain_ #P256 (as_nat P256 h0 a) in 
+  lemmaFromDomainToDomainModuloPrime #P256 (pow k (pow2 94 - 1));
   let k_powers = pow k (pow2 94 - 1) in 
   let k_prime = k_powers % prime256 in 
-  inDomain_mod_is_not_mod (pow k_prime (pow2 2));
+  inDomain_mod_is_not_mod #P256 (pow k_prime (pow2 2));
   power_distributivity k_powers (pow2 2) prime256;
   power_mult k (pow2 94 - 1) (pow2 2)
 
 
-val lemma_inDomainModulo: a: nat -> b: nat -> Lemma ((toDomain_ ((a % prime256) * (b % prime256) % prime256) = toDomain_ (a * b % prime256)))
+val lemma_inDomainModulo: a: nat -> b: nat -> Lemma ((toDomain_ #P256 ((a % prime256) * (b % prime256) % prime256) = toDomain_ #P256 (a * b % prime256)))
 
 let lemma_inDomainModulo a b = 
   lemma_mod_mul_distr_l a (b % prime256) prime256;
@@ -460,15 +461,16 @@ val lemma_mul_nat: a: nat -> b: nat -> Lemma (a * b >= 0)
 let lemma_mul_nat a b = ()
 
 
-val exponent: a: felem P256 -> result: felem P256 -> tempBuffer: lbuffer uint64 (size 20) ->  Stack unit
+val exponent: #c: curve ->  a: felem P256 -> result: felem P256 -> tempBuffer: lbuffer uint64 (size 20) ->  Stack unit
   (requires fun h -> live h a /\ live h tempBuffer /\ live h result /\ disjoint tempBuffer result /\ 
   disjoint a tempBuffer /\ as_nat P256 h a < prime256)
-  (ensures fun h0 _ h1 -> modifies2 result tempBuffer h0 h1 /\ (let k = fromDomain_ (as_nat P256 h0 a) in 
-    as_nat P256 h1 result =  toDomain_ ((pow k (prime256-2)) % prime256)))
+  (ensures fun h0 _ h1 -> modifies2 result tempBuffer h0 h1 /\
+    (let k = fromDomain_ #c (as_nat c h0 a) in 
+    as_nat P256 h1 result =  toDomain_ #c ((pow k (prime256-2)) % prime256)))
 
 
 #reset-options " --z3rlimit 200"
-let exponent a result tempBuffer = 
+let exponent #c a result tempBuffer = 
   let h0 = ST.get () in 
   let buffer_norm_1 = Lib.Buffer.sub  tempBuffer (size 0) (size 8) in 
     let buffer_result1 = Lib.Buffer.sub tempBuffer (size 4) (size 4) in 
@@ -494,7 +496,7 @@ let exponent a result tempBuffer =
   assert_norm ((pow2 94 - 1) * pow2 2 >= 0);
 
   
-  let k = fromDomain_ (as_nat P256 h0 a) in 
+  let k = fromDomain_ #c (as_nat P256 h0 a) in 
   let power1 = pow k ((pow2 32 - 1) * pow2 224) in 
   let power2 = pow k (pow2 192) in 
   let power3 = pow k ((pow2 94 - 1) * pow2 2) in 
@@ -504,7 +506,7 @@ let exponent a result tempBuffer =
 
   lemma_inDomainModulo power1 power2;
   lemma_inDomainModulo (power1 * power2) power3;
-  inDomain_mod_is_not_mod (((power1 * power2 * power3) % prime256 * power4));
+  inDomain_mod_is_not_mod #c (((power1 * power2 * power3) % prime256 * power4));
   lemma_mod_mul_distr_l (power1 * power2 * power3) power4 prime256;
   big_power k ((pow2 32 - 1) * pow2 224) (pow2 192) ((pow2 94 -1 ) * pow2 2) 1;
   assert_norm(((pow2 32 - 1) * pow2 224 + pow2 192 + (pow2 94 -1 ) * pow2 2 + 1) = prime256 - 2)
