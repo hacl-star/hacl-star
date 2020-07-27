@@ -30,11 +30,11 @@ open FStar.Mul
 
 #reset-options "--z3rlimit 300" 
 
-(*)
 noextract       
 val lemma_pointAddToSpecification: 
-  pxD: nat {pxD < prime256} -> pyD: nat{pyD < prime256} -> pzD: nat {pzD < prime256} -> 
-  qxD: nat {qxD < prime256} -> qyD: nat {qyD < prime256} -> qzD: nat {qzD < prime256} -> 
+  #c: curve -> 
+  pxD: nat {pxD < getPrime c} -> pyD: nat{pyD < getPrime c} -> pzD: nat {pzD < getPrime c} -> 
+  qxD: nat {qxD < getPrime c} -> qyD: nat {qyD < getPrime c} -> qzD: nat {qzD < getPrime c} -> 
   x3: nat -> y3: nat -> z3: nat -> 
   u1: nat -> u2: nat -> s1: nat -> s2: nat -> 
   h: nat -> r: nat -> 

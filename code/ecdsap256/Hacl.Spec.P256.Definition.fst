@@ -157,5 +157,5 @@ let point_prime =  p: point_seq {let x = Lib.Sequence.sub p 0 4 in let y = Lib.S
 inline_for_extraction
 type point (c: curve) = lbuffer uint64 (size (getCoordinateLenU64 c * 3))
 
-type scalar = lbuffer uint8 (size 32)
+type scalar (c: curve) = lbuffer uint8 (size (getScalarLen c))
 

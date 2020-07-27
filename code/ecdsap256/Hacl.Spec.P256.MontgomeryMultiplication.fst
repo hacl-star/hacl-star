@@ -13,18 +13,15 @@ open Lib.IntTypes
 
 #set-options "--z3rlimit 40 --fuel 0 --ifuel 0"
 
-let prime = prime256
+let fromDomain_ #c a = (a * modp_inv2 #c (pow2 (getPower c))) % (getPrime c)
 
 
-let fromDomain_ a = (a * modp_inv2 #P256 (pow2 256)) % prime256
-
-
-let fromDomainPoint a =
+let fromDomainPoint #c a =
   let x, y, z = a in
-  fromDomain_ x, fromDomain_ y, fromDomain_ z
+  fromDomain_ #c x, fromDomain_ #c y, fromDomain_ #c z
 
 
-let toDomain_ a = (a * pow2 256) % prime256
+let toDomain_ #c a = (a * pow2 (getPower c)) % (getPrime c)
 
 
 let lemmaFromDomain a = ()

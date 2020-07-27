@@ -14,66 +14,67 @@ open Lib.Sequence
 #set-options "--z3rlimit 40 --fuel 0 --ifuel 0"
 
 noextract
-val fromDomain_: a: int -> Tot (a: nat {a < prime256})
+val fromDomain_: #c: curve -> a: int -> Tot (a: nat {a < getPrime c})
 
 noextract
-val fromDomainPoint: a: tuple3 nat nat nat -> Tot (r: tuple3 nat nat nat 
+val fromDomainPoint: #c: curve ->  a: tuple3 nat nat nat -> Tot (r: tuple3 nat nat nat 
   {
     let x, y, z = a in
     let x3, y3, z3 = r in 
-    x3 == fromDomain_ x /\ y3 == fromDomain_ y /\ z3 == fromDomain_ z
+    x3 == fromDomain_ #c x /\ y3 == fromDomain_ #c y /\ z3 == fromDomain_ #c z
   }
 )
 
 noextract
-val toDomain_: a: int -> Tot nat
+val toDomain_: #c: curve -> a: int -> Tot nat
 
-val lemmaFromDomain: a: int -> Lemma (fromDomain_ (a) == a * modp_inv2 #P256 (pow2 256) % prime256)
+val lemmaFromDomain: #c: curve -> a: int -> Lemma (fromDomain_ #c a == a * modp_inv2 #c (pow2 (getPower c)) % getPrime c)
 
-val lemmaToDomain: a: int -> Lemma (toDomain_(a) == a * (pow2 256) % prime256)
+val lemmaToDomain: #c: curve -> a: int -> Lemma (toDomain_ #c a == a * (pow2 (getPower c)) % getPower c)
 
-val lemmaToDomainAndBackIsTheSame: a: nat {a < prime256} -> Lemma (fromDomain_ (toDomain_ a) == a)
-  [SMTPat (fromDomain_ (toDomain_ a))]
+val lemmaToDomainAndBackIsTheSame: #c: curve -> a: nat {a < getPrime c} -> Lemma (fromDomain_ #c (toDomain_ #c a) == a)
+  [SMTPat (fromDomain_ #c (toDomain_ #c a))]
 
-val lemmaFromDomainToDomain: a: nat { a < prime256} -> Lemma (toDomain_ (fromDomain_ a) == a)
+val lemmaFromDomainToDomain: #c: curve -> a: nat {a < getPrime c} -> Lemma (toDomain_ #c (fromDomain_ #c a) == a)
 
-val lemmaFromDomainToDomainModuloPrime: a: int -> Lemma (a % prime256 == fromDomain_(toDomain_ a))
+val lemmaFromDomainToDomainModuloPrime: #c: curve -> a: int -> Lemma (a % (getPrime c) == fromDomain_ #c (toDomain_ #c a))
 
-val inDomain_mod_is_not_mod: a: int -> Lemma (toDomain_ a == toDomain_ (a % prime256))
+val inDomain_mod_is_not_mod: #c: curve -> a: int -> Lemma (toDomain_ #c a == toDomain_ #c (a % getPrime c))
 
-val multiplicationInDomainNat: #k: nat -> #l: nat ->
-  a: nat {a == toDomain_ k /\ a < prime256} -> 
-  b: nat {b == toDomain_ l /\ b < prime256} ->
+val multiplicationInDomainNat: #c: curve -> 
+  #k: nat -> #l: nat ->
+  a: nat {a == toDomain_ #c k /\ a < getPrime c} -> 
+  b: nat {b == toDomain_ #c l /\ b < getPrime c} ->
   Lemma (
-    assert_norm (prime256 > 3);
-    let multResult = a * b * modp_inv2_prime (pow2 256) prime256 % prime256 in 
-    multResult == toDomain_ (k * l))
+    let prime = getPrime c in 
+    let multResult = a * b * modp_inv2_prime (pow2 (getPower c)) prime % prime in 
+    multResult == toDomain_ #c (k * l))
 
-val additionInDomain: a: nat {a < prime256} -> b: nat {b < prime256} -> Lemma 
-  ((a + b) % prime256 == toDomain_ (fromDomain_ a + fromDomain_ b))
+val additionInDomain: #c: curve -> a: nat {a < getPrime c} -> b: nat {b < getPrime c} -> Lemma 
+  ((a + b) % getPrime c == toDomain_ #c (fromDomain_ #c a + fromDomain_ #c b))
   
-val substractionInDomain: a: nat {a < prime256} -> b: nat { b < prime256} -> Lemma 
-  ((a - b) % prime256 == toDomain_ (fromDomain_ a - fromDomain_ b))
+val substractionInDomain: #c: curve ->  a: nat {a < getPrime c} -> b: nat {b < getPrime c} -> Lemma 
+  ((a - b) % getPrime c == toDomain_ #c (fromDomain_ #c a - fromDomain_ #c b))
 
 
-val _pow_step0: p:nat_prime #P256 -> q:nat_prime #P256 -> tuple2 (nat_prime #P256) (nat_prime #P256)
+val _pow_step0: #c: curve -> p:nat_prime #c -> q:nat_prime #c -> tuple2 (nat_prime #c) (nat_prime #c)
 
-val _pow_step1: p:nat_prime #P256 -> q:nat_prime #P256 -> tuple2 (nat_prime #P256) (nat_prime #P256)
+val _pow_step1: #c: curve -> p:nat_prime #c -> q:nat_prime #c -> tuple2 (nat_prime #c) (nat_prime #c)
 
-let swap (p:nat_prime #P256) (q:nat_prime #P256) = q, p
+let swap (#c: curve) (p:nat_prime #c) (q:nat_prime #c) = q, p
 
-val conditional_swap_pow: i:uint64 -> p:nat_prime #P256 -> q:nat_prime #P256 -> tuple2 (nat_prime #P256) (nat_prime #P256)
+val conditional_swap_pow: #c: curve -> i:uint64 -> p:nat_prime #c -> q:nat_prime #c -> tuple2 (nat_prime #c) (nat_prime #c)
 
-val lemma_swaped_steps: p: nat_prime -> q: nat_prime ->
+val lemma_swaped_steps: #c: curve ->  p: nat_prime -> q: nat_prime ->
   Lemma (
     let afterSwapP, afterSwapQ = swap p q in
     let p1, q1 = _pow_step0 afterSwapP afterSwapQ in
     let p2, q2 = swap p1 q1 in
-    let r0, r1 = _pow_step1 p q in
+    let r0, r1 = _pow_step1 #c p q in
     p2 == r0 /\ q2 == r1)
 
-
-val _pow_step: k:lseq uint8 32 -> i:nat{i < 256} -> before: tuple2 (nat_prime #P256) (nat_prime #P256)
+val _pow_step: #c: curve -> k: scalar c -> i:nat{i < getPower c} 
+  -> before: tuple2 (nat_prime #c) (nat_prime #P256)
   -> tuple2 (nat_prime #P256) (nat_prime #P256)
 
 val pow_spec: k:lseq uint8 32 -> a:nat_prime #P256 -> Tot (r: nat_prime #P256 {r = pow a (Lib.ByteSequence.nat_from_bytes_le k) % prime256})
