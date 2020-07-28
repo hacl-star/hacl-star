@@ -535,13 +535,21 @@ val keccak:
       as_seq h1 output ==
       S.keccak (v rate) (v capacity) (v inputByteLen) (as_seq h0 input) delimitedSuffix (v outputByteLen))
 let keccak rate capacity inputByteLen input delimitedSuffix outputByteLen output =
-  if is_null output then
-    admit ()
-  else begin
-  push_frame();
-  let rateInBytes = rate /. size 8 in
-  let s:state = create 25ul (u64 0) in
-  absorb s rateInBytes inputByteLen input delimitedSuffix;
-  squeeze s rateInBytes outputByteLen output;
-  pop_frame()
+  if is_null output then begin
+    let h0 = ST.get () in
+    (* Nothing to do, just prove that the two zero-length sequences
+     * are equal. *)
+    assert (v outputByteLen == 0);
+    let s1 = as_seq h0 output in
+    Seq.lemma_empty s1;
+    let s2 = S.keccak (v rate) (v capacity) (v inputByteLen) (as_seq h0 input) delimitedSuffix (v outputByteLen) in
+    Seq.lemma_empty s2;
+    ()
+  end else begin
+    push_frame();
+    let rateInBytes = rate /. size 8 in
+    let s:state = create 25ul (u64 0) in
+    absorb s rateInBytes inputByteLen input delimitedSuffix;
+    squeeze s rateInBytes outputByteLen output;
+    pop_frame()
   end
