@@ -60,7 +60,7 @@ let frodo_pack8 d a res =
   in
   uint_to_bytes_be v16 templong;
   let src = sub v16 (size 16 -! d) d in // Skips the 1st byte when d = 15
-  copy res src;
+  copy_generic res src;
   pop_frame()
 
 val frodo_pack:
@@ -91,8 +91,8 @@ let frodo_pack #n1 #n2 d a res =
       FStar.Math.Lemmas.lemma_mult_le_left (v d) (v i + 1) (v n);
       assert (v (d *! i +! d) <= v (d *! ((n1 *! n2) /. size 8)));
       Loops.unfold_repeat_gen (v n) a_spec (spec h0) (refl h0 0) (v i);
-      let a = sub a (size 8 *! i) (size 8) in
-      let r = sub res (d *! i) d in
+      let a = sub_generic a (size 8 *! i) (size 8) in
+      let r = sub_generic res (d *! i) d in
       frodo_pack8 d a r;
       let h = ST.get() in
       lemma_split (refl h (v i + 1)) (v d * v i)
@@ -164,7 +164,7 @@ let frodo_unpack_loop n1 n2 d b res h0 i =
   [@inline_let]
   let spec h0 = S.frodo_unpack_inner #(v n1) #(v n2) (v d) (as_seq h0 b) in
   Loops.unfold_repeat_gen (v n) a_spec (spec h0) (refl h0 0) (v i);
-  let b = sub b (d *! i) d in
+  let b = sub_generic b (d *! i) d in
   let r = sub res (size 8 *! i) (size 8) in
   frodo_unpack8 d b r;
   let h = ST.get() in
