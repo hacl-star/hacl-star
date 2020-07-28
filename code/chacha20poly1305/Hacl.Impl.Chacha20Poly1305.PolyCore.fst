@@ -43,8 +43,8 @@ let poly1305_padded #w ctx len text =
   Poly.reveal_ctx_inv ctx h0 h1;
   let n = len /. 16ul in
   let r = len %. 16ul in
-  let blocks = sub text 0ul (n *! 16ul) in
-  let rem = sub text (n *! 16ul) r in // the extra part of the input data
+  let blocks = sub_generic text 0ul (n *! 16ul) in
+  let rem = sub_generic text (n *! 16ul) r in // the extra part of the input data
   Poly.poly1305_update #w ctx (n *! 16ul) blocks;
   let h2 = ST.get () in
   let tmp = create 16ul (u8 0) in
