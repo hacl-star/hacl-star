@@ -80,17 +80,17 @@ let secretbox_detached_cipher mlen c k xkeys n m =
 
   let mlen0 = get_len0 mlen in
   let mlen1 = mlen -! mlen0 in
-  let m0 = sub m 0ul mlen0 in
-  let m1 = sub m mlen0 mlen1 in
+  let m0 = sub_generic m 0ul mlen0 in
+  let m1 = sub_generic m mlen0 mlen1 in
 
   let block0 = create 32ul (u8 0) in
   update_sub block0 0ul mlen0 m0;
   map2T 32ul block0 ( ^. ) block0 ekey0;
 
-  let c0 = sub c 0ul mlen0 in
-  let c1 = sub c mlen0 mlen1 in
+  let c0 = sub_generic c 0ul mlen0 in
+  let c1 = sub_generic c mlen0 mlen1 in
   let h1 = ST.get () in
-  copy c0 (sub block0 0ul mlen0);
+  copy_generic c0 (sub block0 0ul mlen0);
   let h2 = ST.get () in
   //assert (as_seq h2 c0 == LSeq.sub (as_seq h1 block0) 0 (v mlen0));
   salsa20_encrypt mlen1 c1 m1 subkey n1 1ul;
@@ -173,16 +173,16 @@ let secretbox_open_detached_plain mlen m xkeys n c =
 
   let mlen0 = get_len0 mlen in
   let mlen1 = mlen -! mlen0 in
-  let c0 = sub c 0ul mlen0 in
-  let c1 = sub c mlen0 mlen1 in
+  let c0 = sub_generic c 0ul mlen0 in
+  let c1 = sub_generic c mlen0 mlen1 in
 
   let block0 = create 32ul (u8 0) in
   update_sub block0 0ul mlen0 c0;
   map2T 32ul block0 ( ^. ) block0 ekey0;
 
-  let m0 = sub m 0ul mlen0 in
-  let m1 = sub m mlen0 mlen1 in
-  copy m0 (sub block0 0ul mlen0);
+  let m0 = sub_generic m 0ul mlen0 in
+  let m1 = sub_generic m mlen0 mlen1 in
+  copy_generic m0 (sub block0 0ul mlen0);
   salsa20_decrypt mlen1 m1 c1 subkey n1 1ul;
   let h1 = ST.get () in
   FStar.Seq.Properties.lemma_split (as_seq h1 m) (v mlen0);
