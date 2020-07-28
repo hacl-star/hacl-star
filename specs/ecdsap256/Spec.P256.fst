@@ -11,11 +11,13 @@ open FStar.Math.Lib
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
+noextract
 let prime256: (a: pos {a > 3 && a < pow2 256}) =
   assert_norm (pow2 256 - pow2 224 + pow2 192 + pow2 96 -1 > 3);
   assert_norm (pow2 256 - pow2 224 + pow2 192 + pow2 96 -1 < pow2 256);
   pow2 256 - pow2 224 + pow2 192 + pow2 96 -1
 
+noextract
 let prime384: (a: pos {a > 3 && a < pow2 384}) = 
   assert_norm(pow2 384 - pow2 128 - pow2 96 + pow2 32 - 1 > 3);
   assert_norm(pow2 384 - pow2 128 - pow2 96 + pow2 32 - 1 < pow2 384);
@@ -34,19 +36,19 @@ let invert_state_s (a: curve): Lemma
 =
   allow_inversion (curve)
 
-
+inline_for_extraction
 let getCoordinateLen curve =
   match curve with 
   |P256 -> 32
   |P384 -> 48
 
-
+inline_for_extraction
 let getCoordinateLenU64 curve = 
   match curve with
-  |P256 -> 4
-  |P384 -> 6  
+  |P256 -> 4ul
+  |P384 -> 6ul  
 
-
+inline_for_extraction
 let getPointLen curve = 
   match curve with 
   |P256 -> 64
@@ -55,23 +57,28 @@ let getPointLen curve =
 (* Actually there is a logical distinction between the length of a coordinate and the length of the order.
  Just by magic they have the same values (:  *)
 
+inline_for_extraction
 let getScalarLen curve = 
   match curve with 
-  |P256 -> 32
-  |P384 -> 48
+  |P256 -> 32ul
+  |P384 -> 48ul
 
+inline_for_extraction
+let getScalarLenNat curve = uint_v (getScalarLen curve)
 
+inline_for_extraction
 let getPower curve = 
   match curve with 
   |P256 -> 256
   |P384 -> 384
 
+inline_for_extraction
 let getPrime curve = 
   match curve with 
   |P256 -> prime256
   |P384 -> prime384
 
-
+inline_for_extraction
 let getPrimeOrder (#c: curve) : (a: pos{a < pow2 (getPower c)}) =
   match c with 
   |P256 -> assert_norm (115792089210356248762697446949407573529996955224135760342422259061068512044369 < pow2 (getPower P256));
@@ -82,9 +89,10 @@ let getPrimeOrder (#c: curve) : (a: pos{a < pow2 (getPower c)}) =
 
 
 (* for p256 and 384 are the same *)
+inline_for_extraction
 let aCoordinate (#c: curve) = -3 
 
-
+inline_for_extraction
 let bCoordinate #curve : (a: nat {a < (getPrime curve)}) =
   match curve with 
   |P256 -> assert_norm (41058363725152142129326129780047268409114441015993725554835256314039467401291 < getPrime P256);
@@ -102,7 +110,7 @@ let point_nat_prime #curve = (p: point_nat
     let (a, b, c) = p in a < prime /\ b < prime /\ c < prime})
 
 
-noextract
+inline_for_extraction
 let basePoint #curve : point_nat_prime #curve  =
   match curve with 
   |P256 -> assert_norm (0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296 < getPrime P256);

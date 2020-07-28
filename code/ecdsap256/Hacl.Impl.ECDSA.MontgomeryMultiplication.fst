@@ -1,3 +1,4 @@
+
 module Hacl.Impl.ECDSA.MontgomeryMultiplication
 
 open FStar.HyperStack.All
@@ -227,7 +228,7 @@ let montgomery_multiplication_round_twice #c t result k0 =
   pop_frame()
 
 
-let reduction_prime_2prime_with_carry x result  = 
+let reduction_prime_2prime_with_carry #c x result  = 
   assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 == pow2 256);
   push_frame();
     let h0 = ST.get() in 
@@ -247,11 +248,11 @@ let reduction_prime_2prime_with_carry x result  =
 	else if uint_v cin < uint_v c then uint_v carry = 1 
 	else uint_v carry = 0);
 
-    cmovznz4 carry tempBuffer x_ result;
+    cmovznz4 #c carry tempBuffer x_ result;
  pop_frame()   
 
 
-let reduction_prime_2prime_with_carry2 cin x result  = 
+let reduction_prime_2prime_with_carry2 #c cin x result  = 
   assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 == pow2 256);
   push_frame();
     let tempBuffer = create (size 4) (u64 0) in 
@@ -259,7 +260,7 @@ let reduction_prime_2prime_with_carry2 cin x result  =
         recall_contents prime256order_buffer (Lib.Sequence.of_list p256_order_prime_list);
     let c = Hacl.Impl.P256.LowLevel .sub4_il x prime256order_buffer tempBuffer in
     let carry = sub_borrow_u64 c cin (u64 0) tempBufferForSubborrow in 
-    cmovznz4 carry tempBuffer x result;
+    cmovznz4 #c carry tempBuffer x result;
  pop_frame()      
 
 
@@ -271,7 +272,7 @@ let lemma_reduction1 a r =
   assert_norm (pow2 256 - prime_p256_order < prime_p256_order)
 
 
-let reduction_prime_2prime_order #c x result  = 
+let reduction_prime_2prime_order #cu x result  = 
   push_frame();
     let tempBuffer = create (size 4) (u64 0) in 
     recall_contents prime256order_buffer (Lib.Sequence.of_list p256_order_prime_list);
@@ -280,7 +281,7 @@ let reduction_prime_2prime_order #c x result  =
       let h1 = ST.get() in 
       assert(as_nat c h1 tempBuffer = as_nat c h0 x - prime_p256_order + uint_v c * pow2 256);
       assert(let x = as_nat c h0 x in if x < prime_p256_order then uint_v c = 1 else uint_v c = 0);
-    cmovznz4 c tempBuffer x result; 
+    cmovznz4 #cu c tempBuffer x result; 
     let h2 = ST.get() in 
       assert_norm (pow2 256 == pow2 64 * pow2 64 * pow2 64 * pow2 64);
     lemma_reduction1 (as_nat c h0 x) (as_nat c h2 result);

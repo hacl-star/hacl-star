@@ -182,11 +182,12 @@ val montgomery_ladder_power: #c: curve -> a: felem c -> scalar: glbuffer uint8 (
 let montgomery_ladder_power #c a scalar result = 
   assert_norm (1 < prime256);
   push_frame(); 
-      let p = create (size 4) (u64 0) in 
-      upload_one_montg_form p; 
-      _montgomery_ladder_power p a scalar;
+  let p = create (getCoordinateLenU64 c) (u64 0) in  
+    upload_one_montg_form #c p; 
+      _montgomery_ladder_power #c p a scalar;
      lemmaToDomainAndBackIsTheSame #c 1;  
     copy result p;
+    admit(); 
   pop_frame()  
 
 

@@ -25,13 +25,13 @@ open FStar.Mul
 
 #reset-options "--z3rlimit 300" 
 
-val point_double: #c: curve -> p: point c -> result: point c -> tempBuffer: lbuffer uint64 (size (getCoordinateLenU64 c * 22)) -> Stack unit
+val point_double: #c: curve -> p: point c -> result: point c -> tempBuffer: lbuffer uint64  (getCoordinateLenU64 c *. 22ul) -> Stack unit
   (requires fun h -> live h p /\ live h tempBuffer /\ live h result /\
     disjoint p tempBuffer /\ disjoint result tempBuffer /\
     eq_or_disjoint p result /\
     (
       let prime = getPrime c in 
-      let len = getCoordinateLenU64 c in
+      let len = uint_v (getCoordinateLenU64 c) in
       as_nat c h (gsub p (size 0) (size len)) < prime /\ 
       as_nat c h (gsub p (size len) (size len)) < prime /\
       as_nat c h (gsub p (size (2 * len)) (size len)) < prime
@@ -40,7 +40,7 @@ val point_double: #c: curve -> p: point c -> result: point c -> tempBuffer: lbuf
   (ensures fun h0 _ h1 -> modifies (loc tempBuffer |+| loc result)  h0 h1 /\  
     (
       let prime = getPrime c in 
-      let len = getCoordinateLenU64 c in 
+      let len = uint_v (getCoordinateLenU64 c) in 
       
       as_nat c h1 (gsub result (size 0) (size len)) < prime /\ 
       as_nat c h1 (gsub result (size len) (size len)) < prime /\

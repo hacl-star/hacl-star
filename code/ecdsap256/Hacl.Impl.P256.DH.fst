@@ -32,8 +32,8 @@ let ecp256dh_i c result scalar =
   let resultX = sub result (size 0) (size 32) in
   let resultY = sub result (size 32) (size 32) in
 
-  secretToPublic resultBuffer scalar tempBuffer;
-  let flag = isPointAtInfinityPrivate resultBuffer in
+  secretToPublic #c resultBuffer scalar tempBuffer;
+  let flag = isPointAtInfinityPrivate #c resultBuffer in
 
   let h0 = ST.get() in
   changeEndian resultBufferX;
@@ -42,13 +42,13 @@ let ecp256dh_i c result scalar =
   toUint8 resultBufferX resultX;
   toUint8 resultBufferY resultY;
 
-  lemma_core_0 resultBufferX h0;
+  lemma_core_0 c resultBufferX h0;
   lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h0 resultBufferX);
-  changeEndian_le_be (as_nat h0 resultBufferX);
+  changeEndian_le_be (as_nat c h0 resultBufferX);
 
-  lemma_core_0 resultBufferY h0;
+  lemma_core_0 c resultBufferY h0;
   lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h0 resultBufferY);
-  changeEndian_le_be (as_nat h0 resultBufferY); 
+  changeEndian_le_be (as_nat c h0 resultBufferY); 
   pop_frame();
   flag
   |P384 -> ()
@@ -59,19 +59,20 @@ let ecp256dh_i c result scalar =
 
 
 val _ecp256dh_r:
-    result:lbuffer uint64 (size 12) 
+  #c: curve 
+  -> result:lbuffer uint64 (size 12) 
   -> pubKey:lbuffer uint64 (size 8) 
   -> scalar: lbuffer uint8 (size 32) 
   -> Stack uint64
     (requires fun h -> 
       live h result /\ live h pubKey /\ live h scalar /\
       disjoint result pubKey /\ disjoint result scalar /\
-      as_nat h (gsub result (size 0) (size 4)) == 0 /\
-      as_nat h (gsub result (size 4) (size 4)) == 0)
+      as_nat c h (gsub result (size 0) (size 4)) == 0 /\
+      as_nat c h (gsub result (size 4) (size 4)) == 0)
     (ensures fun h0 r h1 -> 
       modifies (loc result) h0 h1 /\
-      (let x, y = as_nat h0 (gsub pubKey (size 0) (size 4)), as_nat h0 (gsub pubKey (size 4) (size 4)) in
-       let x3, y3, z3 = point_x_as_nat h1 result, point_y_as_nat h1 result, point_z_as_nat h1 result in
+      (let x, y = as_nat c h0 (gsub pubKey (size 0) (size 4)), as_nat c h0 (gsub pubKey (size 4) (size 4)) in
+       let x3, y3, z3 = point_x_as_nat c h1 result, point_y_as_nat c h1 result, point_z_as_nat c h1 result in
        let pointJacX, pointJacY, pointJacZ = toJacobianCoordinates (x, y) in
        if not (verifyQValidCurvePointSpec #P256 (pointJacX, pointJacY, pointJacZ)) then
          uint_v r = maxint U64 /\ x3 == 0 /\ y3 == 0
@@ -84,16 +85,17 @@ val _ecp256dh_r:
          else
            uint_v r = 0))))
 
-let _ecp256dh_r result pubKey scalar =
+
+let _ecp256dh_r #c result pubKey scalar =
   push_frame();
   let tempBuffer = create (size 100) (u64 0) in
   let publicKeyBuffer = create (size 12) (u64 0) in
-  bufferToJac pubKey publicKeyBuffer;
-  let publicKeyCorrect = verifyQValidCurvePoint publicKeyBuffer tempBuffer in
+  bufferToJac #c pubKey publicKeyBuffer;
+  let publicKeyCorrect = verifyQValidCurvePoint #c publicKeyBuffer tempBuffer in
   if publicKeyCorrect then
     begin
-    scalarMultiplication publicKeyBuffer result scalar tempBuffer;
-    let flag = isPointAtInfinityPrivate result in
+    scalarMultiplication #c publicKeyBuffer result scalar tempBuffer;
+    let flag = isPointAtInfinityPrivate #c result in
     pop_frame();
     flag
     end
@@ -125,15 +127,15 @@ let ecp256dh_r c result pubKey scalar =
   toUint64ChangeEndian pubKeyY publicKeyFelemY;
 
   let h1 = ST.get() in
-  lemma_core_0 publicKeyFelemX h1;
+  lemma_core_0 c publicKeyFelemX h1;
   changeEndianLemma (uints_from_bytes_be (as_seq h0 pubKeyX));
   uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 pubKeyX);
 
-  lemma_core_0 publicKeyFelemY h1;
+  lemma_core_0 c publicKeyFelemY h1;
   changeEndianLemma (uints_from_bytes_be (as_seq h0 pubKeyY));
   uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 pubKeyY);
 
-  let flag = _ecp256dh_r resultBufferFelem publicKeyAsFelem scalar in
+  let flag = _ecp256dh_r #c resultBufferFelem publicKeyAsFelem scalar in
 
   let h2 = ST.get() in
   
@@ -142,13 +144,13 @@ let ecp256dh_r c result pubKey scalar =
   toUint8 resultBufferFelemX resultX;
   toUint8 resultBufferFelemY resultY;
 
-  lemma_core_0 resultBufferFelemX h2;
+  lemma_core_0 c resultBufferFelemX h2;
   lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h2 resultBufferFelemX);
-  changeEndian_le_be (as_nat h2 resultBufferFelemX);
+  changeEndian_le_be (as_nat c h2 resultBufferFelemX);
 
-  lemma_core_0 resultBufferFelemY h2;
+  lemma_core_0 c resultBufferFelemY h2;
   lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h2 resultBufferFelemY);
-  changeEndian_le_be (as_nat h2 resultBufferFelemY);
+  changeEndian_le_be (as_nat c h2 resultBufferFelemY);
 
   pop_frame();
   flag

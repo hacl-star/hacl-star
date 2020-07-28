@@ -38,7 +38,7 @@ let reduction_8_32 #c x result =
       lemma_core_0 c xAsFelem h1;
       changeEndianLemma (uints_from_bytes_be (as_seq h0 x));
       uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 x); 
-    reduction_prime_2prime_order xAsFelem xAsFelem;
+    reduction_prime_2prime_order #c xAsFelem xAsFelem;
     let h2 = ST.get() in 
     changeEndian xAsFelem;
     toUint8 xAsFelem result;

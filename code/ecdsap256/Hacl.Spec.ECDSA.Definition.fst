@@ -39,10 +39,10 @@ let p256_order_prime_list : x:list uint64{List.Tot.length x == 4 /\
 
 
 inline_for_extraction
-let felem (c: curve) = lbuffer uint64 (size (getCoordinateLenU64 c))
+let felem (c: curve) = lbuffer uint64 (getCoordinateLenU64 c)
 
 inline_for_extraction 
-let widefelem (c: curve) = lbuffer uint64 (size (getCoordinateLenU64 c * 2))
+let widefelem (c: curve) = lbuffer uint64 (getCoordinateLenU64 c *. 2ul)
 
 
 inline_for_extraction noextract

@@ -106,13 +106,13 @@ let xcube_minus_x #c x r =
     let xToDomainBuffer = create (size 4) (u64 0) in 
     let minusThreeXBuffer = create (size 4) (u64 0) in 
     let p256_constant = create (size 4) (u64 0) in 
-  toDomain x xToDomainBuffer;
-  montgomery_square_buffer xToDomainBuffer r;
-  montgomery_multiplication_buffer r xToDomainBuffer r;
+  toDomain #c x xToDomainBuffer;
+  montgomery_square_buffer #c xToDomainBuffer r;
+  montgomery_multiplication_buffer #c r xToDomainBuffer r;
     lemma_mod_mul_distr_l ((as_nat c h0 x) * (as_nat c h0 x)) (as_nat c h0 x) prime;
-  multByThree xToDomainBuffer minusThreeXBuffer;
+  multByThree #c xToDomainBuffer minusThreeXBuffer;
   p256_sub r minusThreeXBuffer r;
-    upload_p256_point_on_curve_constant p256_constant;
+    upload_p256_point_on_curve_constant #c p256_constant;
   p256_add r p256_constant r;
   pop_frame(); 
   
@@ -151,12 +151,12 @@ let isPointOnCurvePublic #c p =
   let h0 = ST.get() in 
     let x = sub p (size 0) (size 4) in 
     let y = sub p (size 4) (size 4) in 
-    y_2 y y2Buffer;
-    xcube_minus_x x xBuffer;
+    y_2 #c y y2Buffer;
+    xcube_minus_x #c x xBuffer;
     
     lemma_modular_multiplication_p256_2_d #c ((as_nat c h0 y) * (as_nat c h0 y) % prime) (let x_ = as_nat c h0 x in (x_ * x_ * x_ - 3 * x_ + bCoordinate #P256) % prime);
     
-    let r = compare_felem y2Buffer xBuffer in 
+    let r = compare_felem #c y2Buffer xBuffer in 
     let z = not (eq_0_u64 r) in 
   pop_frame();
      z

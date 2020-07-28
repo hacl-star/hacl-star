@@ -232,9 +232,9 @@ val copy_point_conditional: #c: curve ->  x3_out: felem c -> y3_out: felem c -> 
    )
 )
 
-let copy_point_conditional x3_out y3_out z3_out p maskPoint = 
+let copy_point_conditional #c x3_out y3_out z3_out p maskPoint = 
   let z = sub maskPoint (size 8) (size 4) in 
-  let mask = isZero_uint64_CT z in 
+  let mask = isZero_uint64_CT #c z in 
 
   let p_x = sub p (size 0) (size 4) in 
   let p_y = sub p (size 4) (size 4) in 
@@ -295,16 +295,16 @@ let move_from_jacobian_coordinates #c u1 u2 s1 s2 p q tempBuffer =
    let z2Cube = sub tempBuffer (size 8) (size 4) in 
    let z1Cube = sub tempBuffer (size 12) (size 4) in  
 
-   montgomery_square_buffer qZ z2Square;
-   montgomery_square_buffer pZ z1Square;
-   montgomery_multiplication_buffer z2Square qZ z2Cube;
+   montgomery_square_buffer #c qZ z2Square;
+   montgomery_square_buffer #c pZ z1Square;
+   montgomery_multiplication_buffer #c z2Square qZ z2Cube;
    
-   montgomery_multiplication_buffer z1Square pZ z1Cube;
-   montgomery_multiplication_buffer z2Square pX u1;
-   montgomery_multiplication_buffer z1Square qX u2;
+   montgomery_multiplication_buffer #c z1Square pZ z1Cube;
+   montgomery_multiplication_buffer #c z2Square pX u1;
+   montgomery_multiplication_buffer #c  z1Square qX u2;
    
-   montgomery_multiplication_buffer z2Cube pY s1;
-   montgomery_multiplication_buffer z1Cube qY s2;
+   montgomery_multiplication_buffer #c z2Cube pY s1;
+   montgomery_multiplication_buffer #c z1Cube qY s2;
    () (*
 
      lemma_mod_mul_distr_l (fromDomain_ #c (as_nat c h0 qZ) * fromDomain_ #c (as_nat h0 qZ)) (fromDomain_ (as_nat h0 qZ)) prime256;
@@ -627,7 +627,7 @@ let point_add #c p q result tempBuffer =
   let tempBuffer28 = sub tempBuffer (size 60) (size 28) in 
   
   move_from_jacobian_coordinates u1 u2 s1 s2 p q tempBuffer16;
-  compute_common_params_point_add h r uh hCube u1 u2 s1 s2 tempBuffer16;
+  compute_common_params_point_add #c h r uh hCube u1 u2 s1 s2 tempBuffer16;
   point_add_if_second_branch_impl result p q u1 u2 s1 s2 r h uh hCube tempBuffer28;
     let h1 = ST.get() in 
       let pxD = fromDomain_ #c (as_nat c h0 (gsub p (size 0) (size 4))) in 

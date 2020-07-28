@@ -68,10 +68,10 @@ noextract
 let felem_seq = lseq uint64 4
 
 inline_for_extraction
-let felem (c: curve) = lbuffer uint64 (size (getCoordinateLenU64 c))
+let felem (c: curve) = lbuffer uint64 (getCoordinateLenU64 c)
 
 inline_for_extraction 
-let widefelem (c: curve) = lbuffer uint64 (size (getCoordinateLenU64 c * 2))
+let widefelem (c: curve) = lbuffer uint64 (getCoordinateLenU64 c *. 2ul)
 
 
 noextract
@@ -155,7 +155,7 @@ let point_prime =  p: point_seq {let x = Lib.Sequence.sub p 0 4 in let y = Lib.S
 
 
 inline_for_extraction
-type point (c: curve) = lbuffer uint64 (size (getCoordinateLenU64 c * 3))
+type point (c: curve) = lbuffer uint64 (getCoordinateLenU64 c *. 3ul)
 
-type scalar (c: curve) = lbuffer uint8 (size (getScalarLen c))
+type scalar (c: curve) = lbuffer uint8 (getScalarLen c)
 

@@ -16,8 +16,8 @@ open Hacl.Spec.ECDSA.Definition
 inline_for_extraction noextract
 val ecp256dh_i:
     c: curve 
-  -> result:lbuffer uint8 (size (getPointLen c))
-  -> scalar:lbuffer uint8 (size (getScalarLen c))
+  -> result:lbuffer uint8 (getPointLen c)
+  -> scalar:lbuffer uint8 (getScalarLen c)
   -> Stack uint64
   (requires fun h ->
     live h result /\ live h scalar /\ 
@@ -26,17 +26,17 @@ val ecp256dh_i:
     let pointX, pointY, flag = ecp256_dh_i #c (as_seq h0 scalar) in
     modifies (loc result) h0 h1 /\
     r == flag /\
-    as_seq h1 (gsub result (size 0) (size (getCoordinateLen c))) == pointX /\
-    as_seq h1 (gsub result (size 32) (size (getCoordinateLen c))) == pointY
+    as_seq h1 (gsub result (size 0) (getCoordinateLen c)) == pointX /\
+    as_seq h1 (gsub result (size 32) (getCoordinateLen c)) == pointY
   )
 
 
 inline_for_extraction noextract
 val ecp256dh_r:
     c: curve 
-  -> result:lbuffer uint8 (size (getPointLen c))
-  -> pubKey:lbuffer uint8 (size (getPointLen c))
-  -> scalar:lbuffer uint8 (size (getScalarLen c))
+  -> result:lbuffer uint8 (getPointLen c)
+  -> pubKey:lbuffer uint8 (getPointLen c)
+  -> scalar:lbuffer uint8 (getScalarLen c)
   -> Stack uint64
     (requires fun h ->
       live h result /\ live h pubKey /\ live h scalar /\

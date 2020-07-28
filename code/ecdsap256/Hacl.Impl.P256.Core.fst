@@ -65,7 +65,7 @@ let fromDomain f result =
   montgomery_multiplication_buffer_by_one f result  
 
 
-let pointToDomain p result = 
+let pointToDomain #c p result = 
     let p_x = sub p (size 0) (size 4) in 
     let p_y = sub p (size 4) (size 4) in 
     let p_z = sub p (size 8) (size 4) in 
@@ -74,12 +74,12 @@ let pointToDomain p result =
     let r_y = sub result (size 4) (size 4) in 
     let r_z = sub result (size 8) (size 4) in 
 
-    toDomain p_x r_x;
-    toDomain p_y r_y;
-    toDomain p_z r_z
+    toDomain #c p_x r_x;
+    toDomain #c p_y r_y;
+    toDomain #c p_z r_z
 
 
-let pointFromDomain p result = 
+let pointFromDomain #c p result = 
     let p_x = sub p (size 0) (size 4) in 
     let p_y = sub p (size 4) (size 4) in 
     let p_z = sub p (size 8) (size 4) in 
@@ -88,9 +88,9 @@ let pointFromDomain p result =
     let r_y = sub result (size 4) (size 4) in 
     let r_z = sub result (size 8) (size 4) in 
 
-    fromDomain p_x r_x;
-    fromDomain p_y r_y;
-    fromDomain p_z r_z
+    fromDomain #c p_x r_x;
+    fromDomain #c p_y r_y;
+    fromDomain #c p_z r_z
 
 
 val copy_point: #c: curve ->  p: point c -> result: point c -> Stack unit 
@@ -228,7 +228,7 @@ val normalisation_update: #c: curve -> z2x: felem c -> z3y: felem c -> p: point 
   )
 
 
-let normalisation_update z2x z3y p resultPoint = 
+let normalisation_update #c z2x z3y p resultPoint = 
   push_frame(); 
     let zeroBuffer = create (size 4) (u64 0) in 
     
@@ -241,7 +241,7 @@ let normalisation_update z2x z3y p resultPoint =
   fromDomain z3y resultY;
   uploadOneImpl resultZ;
     let h1 = ST.get() in 
-  copy_conditional resultZ zeroBuffer bit;
+  copy_conditional #c resultZ zeroBuffer bit;
     let h2 = ST.get() in 
   pop_frame()
   
@@ -259,9 +259,9 @@ let norm #c  p resultPoint tempBuffer =
   let tempBuffer20 = sub tempBuffer (size 12) (size 20) in 
 
     let h0 = ST.get() in 
-  montgomery_square_buffer zf z2f; 
+  montgomery_square_buffer #c zf z2f; 
     let h1 = ST.get() in 
-  montgomery_multiplication_buffer z2f zf z3f;
+  montgomery_multiplication_buffer #c z2f zf z3f;
     let h2 = ST.get() in 
       (*lemma_mod_mul_distr_l (fromDomain_ #c (as_nat c h0 zf) * fromDomain_ #c (as_nat h0 zf)) (fromDomain_ #c (as_nat c h0 zf)) prime256;
       assert (as_nat c h1 z2f = toDomain_ (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf) % prime256));
@@ -274,8 +274,8 @@ let norm #c  p resultPoint tempBuffer =
     let h4 = ST.get() in 
       assert(as_nat c h4 z3f = toDomain_ #c (pow (fromDomain_ #c (as_nat c h3 z3f)) (prime256 - 2) % prime256));
      
-  montgomery_multiplication_buffer xf z2f z2f;
-  montgomery_multiplication_buffer yf z3f z3f;
+  montgomery_multiplication_buffer #c xf z2f z2f;
+  montgomery_multiplication_buffer #c yf z3f z3f;
 
   normalisation_update z2f z3f p resultPoint (*; 
     let h3 = ST.get() in 
@@ -303,9 +303,9 @@ let normX #c p result tempBuffer =
   let tempBuffer20 = sub tempBuffer (size 12) (size 20) in 
 
     let h0 = ST.get() in 
-  montgomery_square_buffer zf z2f; 
+  montgomery_square_buffer #c zf z2f; 
   exponent #c z2f z2f tempBuffer20;
-  montgomery_multiplication_buffer z2f xf z2f;
+  montgomery_multiplication_buffer #c z2f xf z2f;
   fromDomain z2f result (*; 
   assert_norm (prime >= 2); 
     power_distributivity (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf)) (prime -2) prime

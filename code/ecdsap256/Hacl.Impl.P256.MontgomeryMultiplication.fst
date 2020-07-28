@@ -483,11 +483,11 @@ let exponent #c a result tempBuffer =
   norm_part_three a buffer_norm_3;
   
     let h1 = ST.get() in 
-  montgomery_multiplication_buffer buffer_result1 buffer_result2 buffer_result1;
+  montgomery_multiplication_buffer #c buffer_result1 buffer_result2 buffer_result1;
     let h2 = ST.get() in 
-  montgomery_multiplication_buffer buffer_result1 buffer_result3 buffer_result1;
+  montgomery_multiplication_buffer #c buffer_result1 buffer_result3 buffer_result1;
     let h3 = ST.get() in 
-  montgomery_multiplication_buffer buffer_result1 a buffer_result1;
+  montgomery_multiplication_buffer #c buffer_result1 a buffer_result1;
     let h4 = ST.get() in 
   copy result buffer_result1; 
     let h5 = ST.get() in 

@@ -82,8 +82,8 @@ let computeYFromX #c x result sign =
     let bCoordinateBuffer = create (size 4) (u64 0) in 
 
   let h0 = ST.get() in 
-    uploadA aCoordinateBuffer;
-    uploadB bCoordinateBuffer;
+    uploadA #c aCoordinateBuffer;
+    uploadB #c bCoordinateBuffer;
     
     montgomery_multiplication_buffer aCoordinateBuffer x aCoordinateBuffer;
   cube x result;
@@ -198,7 +198,7 @@ let decompressionCompressedForm #c b result =
 	let h1 = ST.get() in 
       lemma_core_0 c t0 h1;
 
-      let lessThanPrimeXCoordinate = lessThanPrime t0 in 
+      let lessThanPrimeXCoordinate = lessThanPrime #c t0 in 
       changeEndianLemma (Lib.ByteSequence.uints_from_bytes_be (as_seq h0 x));
 	Lib.ByteSequence.uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h0 x);
 
@@ -209,14 +209,14 @@ let decompressionCompressedForm #c b result =
 	end  
       else 
 	begin 
-	  toDomain t0 t0;
+	  toDomain #c t0 t0;
 	  lemmaToDomain #c (as_nat c h1 t0);
 	    let h2 = ST.get() in 
 	    assert(as_nat c h2 t0 =  (toDomain_ #c (Lib.ByteSequence.nat_from_intseq_le (changeEndian (Lib.ByteSequence.uints_from_bytes_be (as_seq h0 x))))));
 
 	  let identifierBit = to_u64 (logand compressedIdentifier (u8 1)) in 
 	  logand_mask compressedIdentifier (u8 1) 1;
-	  computeYFromX t0 t1 identifierBit;
+	  computeYFromX #c t0 t1 identifierBit;
 	  lemmaToDomainAndBackIsTheSame #c (Lib.ByteSequence.nat_from_intseq_be (as_seq h0 x));
 
 	    let h3 = ST.get() in 

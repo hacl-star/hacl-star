@@ -292,10 +292,10 @@ val point_double_a_b_g: #c: curve
   -> beta: felem c 
   -> gamma: felem c
   -> delta: felem c 
-  -> tempBuffer: lbuffer uint64 (size (getCoordinateLenU64 c * 3)) -> 
+  -> tempBuffer: lbuffer uint64 (getCoordinateLenU64 c *. 3ul) -> 
   Stack unit
     (requires fun h -> 
-      let coordinateLen = getCoordinateLenU64 c in 
+      let coordinateLen = uint_v (getCoordinateLenU64 c) in 
       let prime = getPrime c in 
       live h p /\ live h alpha /\ live h beta /\ live h gamma /\ live h delta /\ live h tempBuffer /\ 
       LowStar.Monotonic.Buffer.all_disjoint [loc p; loc alpha; loc beta; loc gamma; loc delta; loc tempBuffer] /\
@@ -305,7 +305,7 @@ val point_double_a_b_g: #c: curve
     )
     (ensures fun h0 _ h1 -> modifies (loc alpha |+| loc beta |+| loc gamma |+| loc delta |+| loc tempBuffer) h0 h1 /\
       (
-	let coordinateLen = getCoordinateLenU64 c in 
+	let coordinateLen = uint_v (getCoordinateLenU64 c) in 
 	let prime = getPrime c in 
 	let x = fromDomain_ #c (as_nat c h0 (gsub p (size 0) (size coordinateLen))) in 
 	let y = fromDomain_ #c (as_nat c h0 (gsub p (size coordinateLen) (size coordinateLen))) in 
@@ -321,13 +321,13 @@ val point_double_a_b_g: #c: curve
 let point_double_a_b_g #c p alpha beta gamma delta tempBuffer = 
   let coordinateLen = getCoordinateLenU64 c in 
   
-  let pX = sub p (size 0) (size coordinateLen) in 
-  let pY = sub p (size coordinateLen) (size coordinateLen) in 
-  let pZ = sub p (size (2 * coordinateLen)) (size coordinateLen) in 
+  let pX = sub p (size 0) coordinateLen in 
+  let pY = sub p (coordinateLen) (coordinateLen) in 
+  let pZ = sub p ((2ul *. coordinateLen)) coordinateLen in 
 
-  let a0 = sub tempBuffer (size 0) (size coordinateLen) in 
-  let a1 = sub tempBuffer (size coordinateLen) (size coordinateLen) in 
-  let alpha0 = sub tempBuffer (size (2 * coordinateLen)) (size coordinateLen) in 
+  let a0 = sub tempBuffer (size 0) (coordinateLen) in 
+  let a1 = sub tempBuffer (coordinateLen) (coordinateLen) in 
+  let alpha0 = sub tempBuffer ((2ul *. coordinateLen)) (coordinateLen) in 
 
   
   montgomery_square_buffer pZ delta; (* delta = z * z*)
@@ -547,24 +547,24 @@ let lemma_pd_to_spec #c x y z x3 y3 z3 =
 let point_double #c p result tempBuffer = 
   let len = getCoordinateLenU64 c in 
 
-  let pX = sub p (size 0) (size len) in 
-  let pY = sub p (size len) (size len) in 
-  let pZ = sub p (size (2 * len)) (size len) in 
+  let pX = sub p (size 0) (len) in 
+  let pY = sub p ( len) (len) in 
+  let pZ = sub p (size (2ul *. len)) (len) in 
 
-  let x3 = sub result (size 0) (size len) in 
-  let y3 = sub result (size len) (size len) in 
-  let z3 = sub result (size (2 * len)) (size len) in 
+  let x3 = sub result (size 0) (len) in 
+  let y3 = sub result (len) (len) in 
+  let z3 = sub result ( (2ul *. len))  len in 
 
-  let delta = sub tempBuffer (size 0) (size len) in 
-  let gamma = sub tempBuffer (size len) (size len) in 
-  let beta = sub tempBuffer (size (2 * len)) (size len) in 
-  let alpha = sub tempBuffer (size (3 * len)) (size len) in 
+  let delta = sub tempBuffer (size 0) (len) in 
+  let gamma = sub tempBuffer (len) (len) in 
+  let beta = sub tempBuffer ((2ul *. len)) (len) in 
+  let alpha = sub tempBuffer ( (3ul *. len)) (len) in 
   
-  let fourBeta = sub tempBuffer (size (4 * len)) (size len) in 
-  let eightBeta = sub tempBuffer (size (5 * len)) (size len) in 
-  let eightGamma = sub tempBuffer (size (6 * len)) (size len) in 
+  let fourBeta = sub tempBuffer ( (4ul *. len)) (len) in 
+  let eightBeta = sub tempBuffer ((5ul *. len)) (len) in 
+  let eightGamma = sub tempBuffer ((6ul *. len)) (len) in 
 
-  let tmp = sub tempBuffer (size (7 * len)) (size (3 * len)) in 
+  let tmp = sub tempBuffer ((7ul *. len)) ((3ul *. len)) in 
   
 
   let h0 = ST.get() in 
@@ -575,18 +575,18 @@ let point_double #c p result tempBuffer =
 
   let h4 = ST.get() in
 
-  let x = fromDomain_ #c (as_nat c h0 (gsub p (size 0) (size len))) in 
-  let y = fromDomain_ #c (as_nat c h0 (gsub p (size len) (size len))) in 
-  let z = fromDomain_ #c (as_nat c h0 (gsub p (size (2 * len)) (size len))) in 
+  let x = fromDomain_ #c (as_nat c h0 (gsub p (size 0) (len))) in 
+  let y = fromDomain_ #c (as_nat c h0 (gsub p (len) (len))) in 
+  let z = fromDomain_ #c (as_nat c h0 (gsub p ((2ul *. len)) (len))) in 
   
   lemma_x3 #c x y z;
   lemma_z3 #c x y z;
   lemma_y3 #c x y z (fromDomain_ #c (as_nat c h4 x3));
   lemma_pd_to_spec #c
-    (as_nat c h0 (gsub p (size 0) (size len))) 
-      (as_nat c h0 (gsub p (size len) (size len))) 
-	(as_nat c h0 (gsub p (size (2 * len)) (size len))) 
-    (as_nat c h4 (gsub result (size 0) (size len))) 
-      (as_nat c h4 (gsub result (size len) (size len))) 
-	(as_nat c h4 (gsub result (size (2 * len)) (size len)))
+    (as_nat c h0 (gsub p (size 0) (len))) 
+      (as_nat c h0 (gsub p (len) (len))) 
+	(as_nat c h0 (gsub p ( (2ul *. len)) len)) 
+    (as_nat c h4 (gsub result (size 0) (len))) 
+      (as_nat c h4 (gsub result (len) ( len))) 
+	(as_nat c h4 (gsub result ((2ul *. len)) (len)))
 

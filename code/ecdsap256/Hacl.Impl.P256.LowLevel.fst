@@ -1535,7 +1535,7 @@ val lemma_shift_256: a: int -> b: int -> c: int -> d: int -> Lemma (
 let lemma_shift_256 a b c d = ()
 
 #restart-solver
-val shift_256_impl: #c: curve -> i: felem c -> o: lbuffer uint64 (size (getCoordinateLenU64 c * 2)) -> 
+val shift_256_impl: #c: curve -> i: felem c -> o: lbuffer uint64 (getCoordinateLenU64 c *. 2ul)-> 
   Stack unit 
     (requires fun h -> live h i /\ live h o /\ disjoint i o)
     (ensures fun h0 _ h1 -> modifies1 o h0 h1 /\ wide_as_nat c h1 o == as_nat c h0 i * pow2 256)
@@ -1737,7 +1737,7 @@ let changeEndian i =
   upd i (size 3) zero
 
 
-val toUint64ChangeEndian: i:lbuffer uint8 (size 32) -> o:felem P256 -> Stack unit
+val toUint64ChangeEndian: #c: curve -> i:lbuffer uint8 (getScalarLen c) -> o:felem c -> Stack unit
   (requires fun h -> live h i /\ live h o /\ disjoint i o)
   (ensures  fun h0 _ h1 ->
     modifies (loc o) h0 h1 /\

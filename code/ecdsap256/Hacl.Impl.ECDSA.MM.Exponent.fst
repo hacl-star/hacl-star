@@ -156,10 +156,10 @@ let upload_one_montg_form b =
     assert_norm(toDomain_ 1 == 26959946660873538059280334323273029441504803697035324946844617595567)
   
 
-let montgomery_ladder_exponent r = 
+let montgomery_ladder_exponent #c r = 
   push_frame(); 
     let p = create (size 4) (u64 0) in 
-    upload_one_montg_form p; 
+    upload_one_montg_form #c p; 
     recall_contents order_inverse_buffer (prime_order_inverse_seq #P256);
     let h = ST.get() in
     mut_const_immut_disjoint #uint64 #uint8 p order_inverse_buffer h;
@@ -221,15 +221,15 @@ let lemma_fromDomain2 a =
   power_one (prime_p256_order -2)
 
 
-let multPower #c  a b result = 
+let multPower #c a b result = 
   push_frame();
     let tempB1 = create (size 4) (u64 0) in 
     let buffFromDB = create (size 4) (u64 0) in 
 	let h0 = ST.get() in 
-      fromDomainImpl a tempB1;
-      fromDomainImpl b buffFromDB;
-      fromDomainImpl buffFromDB buffFromDB;
-      montgomery_ladder_exponent tempB1;
+      fromDomainImpl #c a tempB1;
+      fromDomainImpl #c b buffFromDB;
+      fromDomainImpl #c buffFromDB buffFromDB;
+      montgomery_ladder_exponent #c tempB1;
       montgomery_multiplication_ecdsa_module tempB1 buffFromDB result;
     pop_frame();
     
@@ -264,8 +264,8 @@ let multPowerPartial #c s a b result =
   let h0 = ST.get() in 
   push_frame();
     let buffFromDB = create (size 4) (u64 0) in 
-    fromDomainImpl b buffFromDB;
-    fromDomainImpl buffFromDB buffFromDB;
+    fromDomainImpl #c b buffFromDB;
+    fromDomainImpl #c buffFromDB buffFromDB;
     montgomery_multiplication_ecdsa_module a buffFromDB result;
   pop_frame();
 
