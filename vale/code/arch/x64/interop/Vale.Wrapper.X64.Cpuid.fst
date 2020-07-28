@@ -37,3 +37,15 @@ let check_rdrand () =
 let check_avx512 () =
   let (x, _) = Vale.Stdcalls.X64.Cpuid.check_avx512 () in //This is a call to the interop wrapper
   x
+
+let check_osxsave () =
+  let (x, _) = Vale.Stdcalls.X64.Cpuid.check_osxsave () in //This is a call to the interop wrapper
+  x
+
+let check_avx_xcr0 () =
+  let (x, _) = Vale.Stdcalls.X64.Cpuid.check_avx_xcr0 () in //This is a call to the interop wrapper
+  x
+
+let check_avx512_xcr0 () =
+  let (x, _) = Vale.Stdcalls.X64.Cpuid.check_avx512_xcr0 () in //This is a call to the interop wrapper
+  x
