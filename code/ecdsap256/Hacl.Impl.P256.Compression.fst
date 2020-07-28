@@ -194,7 +194,7 @@ let decompressionCompressedForm #c b result =
 
       let x = sub b (size 1) (size 32) in 
       copy (sub result (size 0) (size 32)) x;
-      toUint64ChangeEndian x t0;
+      toUint64ChangeEndian #c x t0;
 	let h1 = ST.get() in 
       lemma_core_0 c t0 h1;
 
@@ -228,7 +228,7 @@ let decompressionCompressedForm #c b result =
 	      else
 		as_nat c h3 t1 = (0 - sqRootWithoutSign) % prime256);
     
-	  Hacl.Impl.P256.LowLevel.changeEndian t1;
+	  Hacl.Impl.P256.LowLevel.changeEndian #c t1;
 	  toUint8 t1 (sub result (size 32) (size 32)); 
 	   let h5 = ST.get() in 
 	   assert(as_seq h5 (gsub result (size 32) (size 32)) == Lib.ByteSequence.uints_to_bytes_be (changeEndian (as_seq h3 t1)));

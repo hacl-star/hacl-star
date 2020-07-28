@@ -290,8 +290,8 @@ let verifyQ #c pubKey =
 	let publicKeyX = sub publicKeyB (size 0) (size 4) in 
 	let publicKeyY = sub publicKeyB (size 4) (size 4) in 
     
-    toUint64ChangeEndian pubKeyX publicKeyX;
-    toUint64ChangeEndian pubKeyY publicKeyY;
+    toUint64ChangeEndian #c pubKeyX publicKeyX;
+    toUint64ChangeEndian #c pubKeyY publicKeyY;
   let h1 = ST.get() in 
       lemma_core_0 c publicKeyX h1;
       uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 pubKeyX);  

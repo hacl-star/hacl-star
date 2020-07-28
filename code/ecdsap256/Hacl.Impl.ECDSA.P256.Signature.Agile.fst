@@ -68,6 +68,7 @@ let ecdsa_signature_step12 #c alg mLen m result =
   let mHash = create sz (u8 0) in    
   
   (* TO CHANGE! *)
+  (* Copy the mininum between the two *)
   let cutHash = create (getScalarLen c) (u8 0) in 
 
   begin
@@ -325,7 +326,7 @@ let ecdsa_signature c alg result mLen m privKey k =
   let s = create (size 4) (u64 0) in 
   let resultR = sub result (size 0) (size 32) in 
   let resultS = sub result (size 32) (size 32) in 
-  toUint64ChangeEndian privKey privKeyAsFelem;
+  toUint64ChangeEndian #c privKey privKeyAsFelem;
 
   let h1 = ST.get() in 
   lemma_core_0 privKeyAsFelem c h1;
@@ -335,12 +336,12 @@ let ecdsa_signature c alg result mLen m privKey k =
 
   let h2 = ST.get() in 
   
-  changeEndian r;
+  changeEndian #c r;
   toUint8 r resultR;
   lemma_core_0 c r h2;
   lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h2 r);
 
-  changeEndian s;
+  changeEndian #c s;
   toUint8 s resultS;
   let h3 = ST.get() in 
   lemma_core_0 c s h2;

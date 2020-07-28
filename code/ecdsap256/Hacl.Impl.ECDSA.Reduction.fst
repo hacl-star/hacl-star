@@ -33,14 +33,14 @@ let reduction_8_32 #c x result =
   push_frame();
     let h0 = ST.get() in 
       let xAsFelem = create (size 4) (u64 0) in 
-      toUint64ChangeEndian x xAsFelem;
+      toUint64ChangeEndian #c x xAsFelem;
     let h1 = ST.get() in   
       lemma_core_0 c xAsFelem h1;
       changeEndianLemma (uints_from_bytes_be (as_seq h0 x));
       uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 x); 
     reduction_prime_2prime_order #c xAsFelem xAsFelem;
     let h2 = ST.get() in 
-    changeEndian xAsFelem;
+    changeEndian #c xAsFelem;
     toUint8 xAsFelem result;
       lemma_core_0 c xAsFelem h2;
       lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h2 xAsFelem);

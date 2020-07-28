@@ -36,8 +36,8 @@ let ecp256dh_i c result scalar =
   let flag = isPointAtInfinityPrivate #c resultBuffer in
 
   let h0 = ST.get() in
-  changeEndian resultBufferX;
-  changeEndian resultBufferY;
+  changeEndian #c resultBufferX;
+  changeEndian #c resultBufferY;
 
   toUint8 resultBufferX resultX;
   toUint8 resultBufferY resultY;
@@ -123,8 +123,8 @@ let ecp256dh_r c result pubKey scalar =
   let pubKeyX = sub pubKey (size 0) (size 32) in
   let pubKeyY = sub pubKey (size 32) (size 32) in
 
-  toUint64ChangeEndian pubKeyX publicKeyFelemX;
-  toUint64ChangeEndian pubKeyY publicKeyFelemY;
+  toUint64ChangeEndian #c pubKeyX publicKeyFelemX;
+  toUint64ChangeEndian #c pubKeyY publicKeyFelemY;
 
   let h1 = ST.get() in
   lemma_core_0 c publicKeyFelemX h1;
@@ -139,8 +139,8 @@ let ecp256dh_r c result pubKey scalar =
 
   let h2 = ST.get() in
   
-  changeEndian resultBufferFelemX;
-  changeEndian resultBufferFelemY;
+  changeEndian #c resultBufferFelemX;
+  changeEndian #c resultBufferFelemY;
   toUint8 resultBufferFelemX resultX;
   toUint8 resultBufferFelemY resultY;
 

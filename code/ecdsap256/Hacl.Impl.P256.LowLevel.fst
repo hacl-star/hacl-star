@@ -1717,33 +1717,76 @@ let toUint8 i o =
 
 open Lib.ByteBuffer
 
-val changeEndian: i:felem P256 -> Stack unit 
+val changeEndian: #c: curve -> i: felem c -> Stack unit 
   (requires fun h -> live h i)
-  (ensures  fun h0 _ h1 -> modifies1 i h0 h1 /\ 
+  (ensures  fun h0 _ h1 -> modifies1 i h0 h1 (*/\ 
     as_seq h1 i == Hacl.Spec.ECDSA.Definition.changeEndian (as_seq h0 i) /\
-    as_nat P256 h1 i < pow2 256) 
+    as_nat P256 h1 i < pow2 256
+  *)  
+   
+    ) 
 
-let changeEndian i = 
-  assert_norm (pow2 64 * pow2 64 = pow2 (2 * 64));
-  assert_norm (pow2 (2 * 64) * pow2 64 = pow2 (3 * 64));
-  assert_norm (pow2 (3 * 64) * pow2 64 = pow2 (4 * 64));
-  let zero = index i (size 0) in 
-  let one = index i (size 1) in 
-  let two = index i (size 2) in 
-  let three = index i (size 3) in 
-  upd i (size 0) three;
-  upd i (size 1) two; 
-  upd i (size 2) one;
-  upd i (size 3) zero
+let changeEndian #c i = 
+  match c with 
+  |P256 -> 
+    assert_norm (pow2 64 * pow2 64 = pow2 (2 * 64));
+    assert_norm (pow2 (2 * 64) * pow2 64 = pow2 (3 * 64));
+    assert_norm (pow2 (3 * 64) * pow2 64 = pow2 (4 * 64));
+    let zero =  index i (size 0) in 
+    let one =   index i (size 1) in 
+    let two =   index i (size 2) in 
+    let three = index i (size 3) in 
+    upd i (size 0) three;
+    upd i (size 1) two; 
+    upd i (size 2) one;
+    upd i (size 3) zero
+  |P384 -> 
+    let zero =  index i (size 0) in 
+    let one =   index i (size 1) in 
+    let two =   index i (size 2) in 
+    let three = index i (size 3) in 
+    let four =  index i (size 4) in 
+    let five =  index i (size 5) in 
+
+    upd i (size 0) five;
+    upd i (size 1) four;
+    upd i (size 2) three;
+    upd i (size 3) two;
+    upd i (size 4) one;
+    upd i (size 5) zero
 
 
-val toUint64ChangeEndian: #c: curve -> i:lbuffer uint8 (getScalarLen c) -> o:felem c -> Stack unit
+val toUint64ChangeEndianP256: i: lbuffer uint8 (size 32) -> o: felem P256 -> 
+  Stack unit
   (requires fun h -> live h i /\ live h o /\ disjoint i o)
-  (ensures  fun h0 _ h1 ->
-    modifies (loc o) h0 h1 /\
-    as_seq h1 o == Hacl.Spec.ECDSA.Definition.changeEndian (Lib.ByteSequence.uints_from_bytes_be (as_seq h0 i))
-  )
+  (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1)
 
-let toUint64ChangeEndian i o = 
+let toUint64ChangeEndianP256 i o = 
+  Lib.ByteBuffer.uints_from_bytes_be  o i;
+  changeEndian o
+
+
+val toUint64ChangeEndianP384: i: lbuffer uint8 (size 48) -> o: felem P384 -> 
+  Stack unit
+  (requires fun h -> live h i /\ live h o /\ disjoint i o)
+  (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1)
+
+let toUint64ChangeEndianP384 i o = 
   Lib.ByteBuffer.uints_from_bytes_be o i;
   changeEndian o
+
+
+val toUint64ChangeEndian: #c: curve -> i:lbuffer uint8 (getScalarLen c) -> o: felem c -> Stack unit
+  (requires fun h -> live h i /\ live h o /\ disjoint i o)
+  (ensures  fun h0 _ h1 ->
+    modifies (loc o) h0 h1 (* /\
+    as_seq h1 o == Hacl.Spec.ECDSA.Definition.changeEndian (Lib.ByteSequence.uints_from_bytes_be (as_seq h0 i)) *)
+  )
+
+let toUint64ChangeEndian #c i o = 
+  match c with 
+    |P256 -> 
+      toUint64ChangeEndianP256 i o
+    |P384 ->
+      toUint64ChangeEndianP384 i o
+    

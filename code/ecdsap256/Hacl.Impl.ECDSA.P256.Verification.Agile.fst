@@ -133,7 +133,7 @@ let ecdsa_verification_step23 #c alg mLen m result =
   end;
   
   let cutHash = sub mHash (size 0) (size 32) in 
-  toUint64ChangeEndian cutHash result;
+  toUint64ChangeEndian #c cutHash result;
   
   let h1 = ST.get() in 
  
@@ -193,8 +193,8 @@ let ecdsa_verification_step4 #c bufferU1 bufferU2 r s hash =
     multPowerPartial s inverseS r u2;
   
   let h1 = ST.get() in 
-    Hacl.Impl.P256.LowLevel .changeEndian u1;
-    Hacl.Impl.P256.LowLevel .changeEndian u2;
+    Hacl.Impl.P256.LowLevel.changeEndian #c u1;
+    Hacl.Impl.P256.LowLevel.changeEndian #c u2;
     toUint8 u1 bufferU1;
     toUint8 u2 bufferU2;
   
@@ -567,11 +567,11 @@ let ecdsa_verification c alg pubKey r s mLen m =
       let pubKeyX = sub pubKey (size 0) (size 32) in
       let pubKeyY = sub pubKey (size 32) (size 32) in 
       
-    toUint64ChangeEndian pubKeyX publicKeyFelemX;
-    toUint64ChangeEndian pubKeyY publicKeyFelemY;
+    toUint64ChangeEndian #c pubKeyX publicKeyFelemX;
+    toUint64ChangeEndian #c pubKeyY publicKeyFelemY;
    
-    toUint64ChangeEndian r rAsFelem;
-    toUint64ChangeEndian s sAsFelem;
+    toUint64ChangeEndian #c r rAsFelem;
+    toUint64ChangeEndian #c s sAsFelem;
 
   let h1 = ST.get() in 
       lemma_core_0 c publicKeyFelemX h1;
