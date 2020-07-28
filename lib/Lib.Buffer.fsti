@@ -1178,6 +1178,9 @@ val map_blocks_multi:
     (ensures  fun _ _ h1 -> modifies1 output h0 h1 /\
 	as_seq h1 output == Seq.map_blocks_multi (v blocksize) (v nb) (v nb) (as_seq h0 inp) (spec_f h0))
 
+// GM: brittle on batch mode?
+#push-options "--z3rlimit 250 --retry 5"
+
 inline_for_extraction noextract
 val map_blocks:
     #t:buftype
