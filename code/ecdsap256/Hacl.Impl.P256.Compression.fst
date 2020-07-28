@@ -29,15 +29,15 @@ open FStar.Mul
 #set-options "--z3rlimit 100 --ifuel 0 --fuel 0"
 
 inline_for_extraction noextract
-val uploadA: a: felem -> Stack unit
+val uploadA: #c: curve -> a: felem c -> Stack unit
   (requires fun h -> live h a)
   (ensures fun h0 _ h1 -> modifies (loc a) h0 h1 /\ 
-    as_nat h1 a == toDomain_ (aCoordinate #P256 % prime256) /\
-    as_nat h1 a < prime256
+    as_nat c h1 a == toDomain_ #c (aCoordinate #P256 % prime256) /\
+    as_nat c h1 a < prime256
   )
 
-let uploadA a = 
-  lemmaToDomain (aCoordinate #P256 % prime256);
+let uploadA #c a = 
+  lemmaToDomain #c (aCoordinate #P256 % prime256);
   upd a (size 0) (u64 18446744073709551612);
   upd a (size 1) (u64 17179869183);
   upd a (size 2) (u64 0);
@@ -45,14 +45,14 @@ let uploadA a =
   assert_norm(18446744073709551612 + 17179869183 * pow2 64 + 18446744056529682436 * pow2 64 * pow2 64 * pow2 64 = (aCoordinate #P256 % prime256) * pow2 256 % prime256)
 
 inline_for_extraction noextract
-val uploadB: b: felem -> Stack unit 
+val uploadB: #c: curve -> b: felem c -> Stack unit 
   (requires fun h -> live h b)
-  (ensures fun h0 _ h1 -> modifies (loc b) h0 h1 /\ as_nat h1 b < prime256 /\ 
-    as_nat h1 b == toDomain_ (bCoordinate #P256)
+  (ensures fun h0 _ h1 -> modifies (loc b) h0 h1 /\ as_nat c h1 b < prime256 /\ 
+    as_nat c h1 b == toDomain_ #c (bCoordinate #P256)
   )
 
-let uploadB b = 
-  lemmaToDomain (bCoordinate #P256);
+let uploadB #c b = 
+  lemmaToDomain #c (bCoordinate #P256);
   upd b (size 0) (u64 15608596021259845087);
   upd b (size 1) (u64 12461466548982526096);
   upd b (size 2) (u64 16546823903870267094);
@@ -60,23 +60,23 @@ let uploadB b =
   assert_norm (15608596021259845087 + 12461466548982526096 * pow2 64 + 16546823903870267094 * pow2 64 * pow2 64 + 15866188208926050356 * pow2 64 * pow2 64 * pow2 64 == (bCoordinate #P256 * pow2 256 % prime256))
 
 
-val computeYFromX: x: felem ->  result: felem -> sign: uint64 -> Stack unit 
-  (requires fun h -> live h x /\ live h result /\ as_nat h x < prime256 /\ disjoint x result)
+val computeYFromX: #c: curve -> x: felem c -> result: felem c -> sign: uint64 -> Stack unit 
+  (requires fun h -> live h x /\ live h result /\ as_nat c h x < prime256 /\ disjoint x result)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-    as_nat h1 result < prime256 /\
+    as_nat c h1 result < prime256 /\
     (
-      let xD = fromDomain_ (as_nat h0 x) in 
+      let xD = fromDomain_ #c (as_nat c h0 x) in 
       let sqRootWithoutSign = sq_root_spec (((xD * xD * xD + aCoordinate #P256 * xD + bCoordinate #P256) % prime256)) in 
       
       if sqRootWithoutSign  % pow2 1 = uint_v sign then
-	as_nat h1 result = sqRootWithoutSign 
+	as_nat c h1 result = sqRootWithoutSign 
       else
-	as_nat h1 result = (0 - sqRootWithoutSign) % prime256
+	as_nat c h1 result = (0 - sqRootWithoutSign) % prime256
   )
 )
 
 
-let computeYFromX x result sign = 
+let computeYFromX #c x result sign = 
   push_frame();
     let aCoordinateBuffer = create (size 4) (u64 0) in 
     let bCoordinateBuffer = create (size 4) (u64 0) in 
@@ -94,13 +94,13 @@ let computeYFromX x result sign =
 
   let h6 = ST.get() in 
   
-    lemmaFromDomain (as_nat h6 aCoordinateBuffer);
+    lemmaFromDomain #c (as_nat c h6 aCoordinateBuffer);
     assert_norm (0 * modp_inv2 #P256 (pow2 256) % prime256 == 0);
     square_root result result;
 
   let h7 = ST.get() in 
   
-    lemmaFromDomainToDomain (as_nat h7 result);
+    lemmaFromDomainToDomain #c (as_nat c h7 result);
     fromDomain result result; 
 
   let h8 = ST.get() in 
@@ -119,16 +119,16 @@ let computeYFromX x result sign =
 
     cmovznz4 flag bCoordinateBuffer result result;
 
-    lemma_core_0 result h10;
+    lemma_core_0 c result h10;
     Lib.ByteSequence.lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h10 result);
-    Lib.ByteSequence.index_nat_to_intseq_le #U64 #SEC 4 (as_nat h10 result) 0;
+    Lib.ByteSequence.index_nat_to_intseq_le #U64 #SEC 4 (as_nat c h10 result) 0;
     
-    pow2_modulo_modulo_lemma_1 (as_nat h10 result) 1 64;
+    pow2_modulo_modulo_lemma_1 (as_nat c h10 result) 1 64;
 
     assert(modifies (loc aCoordinateBuffer |+| loc bCoordinateBuffer |+| loc result) h0 h9);
     pop_frame();
 
-  let x_ = fromDomain_ (as_nat h0 x) in
+  let x_ = fromDomain_ #c (as_nat c h0 x) in
 
   calc (==) {
     ((((x_ * x_ * x_ % prime256 + ((Spec.P256.aCoordinate #P256 % prime256) * x_ % prime256)) % prime256) + Spec.P256.bCoordinate #P256) % prime256);
@@ -151,9 +151,9 @@ let decompressionNotCompressedForm b result =
   correctIdentifier
 
 inline_for_extraction noextract
-val lessThanPrime: f: felem -> Stack bool
+val lessThanPrime: #c: curve ->  f: felem c -> Stack bool
   (requires fun h -> live h f)
-  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ r = (as_nat h0 f < prime256))
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ r = (as_nat c h0 f < prime256))
 
 let lessThanPrime f = 
   push_frame();
@@ -181,7 +181,7 @@ let isIdentifierCorrect compressedIdentifier =
 
 #push-options "--z3rlimit 500"
 
-let decompressionCompressedForm b result = 
+let decompressionCompressedForm #c b result = 
   push_frame();
     let h0 = ST.get() in 
     let temp = create (size 8) (u64 0) in 
@@ -196,7 +196,7 @@ let decompressionCompressedForm b result =
       copy (sub result (size 0) (size 32)) x;
       toUint64ChangeEndian x t0;
 	let h1 = ST.get() in 
-      lemma_core_0 t0 h1;
+      lemma_core_0 c t0 h1;
 
       let lessThanPrimeXCoordinate = lessThanPrime t0 in 
       changeEndianLemma (Lib.ByteSequence.uints_from_bytes_be (as_seq h0 x));
@@ -210,33 +210,33 @@ let decompressionCompressedForm b result =
       else 
 	begin 
 	  toDomain t0 t0;
-	  lemmaToDomain (as_nat h1 t0);
+	  lemmaToDomain #c (as_nat c h1 t0);
 	    let h2 = ST.get() in 
-	    assert(as_nat h2 t0 =  (toDomain_ (Lib.ByteSequence.nat_from_intseq_le (changeEndian (Lib.ByteSequence.uints_from_bytes_be (as_seq h0 x))))));
+	    assert(as_nat c h2 t0 =  (toDomain_ #c (Lib.ByteSequence.nat_from_intseq_le (changeEndian (Lib.ByteSequence.uints_from_bytes_be (as_seq h0 x))))));
 
 	  let identifierBit = to_u64 (logand compressedIdentifier (u8 1)) in 
 	  logand_mask compressedIdentifier (u8 1) 1;
 	  computeYFromX t0 t1 identifierBit;
-	  lemmaToDomainAndBackIsTheSame (Lib.ByteSequence.nat_from_intseq_be (as_seq h0 x));
+	  lemmaToDomainAndBackIsTheSame #c (Lib.ByteSequence.nat_from_intseq_be (as_seq h0 x));
 
 	    let h3 = ST.get() in 
 	    assert(    
 	      let xD = Lib.ByteSequence.nat_from_intseq_be (as_seq h0 x) in 
 	      let sqRootWithoutSign = sq_root_spec (((xD * xD * xD + Spec.P256.aCoordinate #P256 * xD + Spec.P256.bCoordinate #P256) % prime256)) in 
 	      if sqRootWithoutSign  % pow2 1 = uint_v identifierBit then
-		 as_nat h3 t1 = sqRootWithoutSign 
+		 as_nat c h3 t1 = sqRootWithoutSign 
 	      else
-		as_nat h3 t1 = (0 - sqRootWithoutSign) % prime256);
+		as_nat c h3 t1 = (0 - sqRootWithoutSign) % prime256);
     
 	  Hacl.Impl.P256.LowLevel.changeEndian t1;
 	  toUint8 t1 (sub result (size 32) (size 32)); 
 	   let h5 = ST.get() in 
 	   assert(as_seq h5 (gsub result (size 32) (size 32)) == Lib.ByteSequence.uints_to_bytes_be (changeEndian (as_seq h3 t1)));
 
-	  lemma_core_0 t1 h3;
+	  lemma_core_0 c t1 h3;
 	  
 	  Lib.ByteSequence.lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h3 t1);
-	  changeEndian_le_be (as_nat h3 t1);
+	  changeEndian_le_be (as_nat c h3 t1);
 	  
 	  assert(   
 	      let xD = Lib.ByteSequence.nat_from_intseq_be (as_seq h0 x) in 

@@ -20,48 +20,48 @@ open Hacl.Impl.P256.Core
 open FStar.Mul
 
 
-val bufferToJac: p:lbuffer uint64 (size 8) -> result:point -> Stack unit
+val bufferToJac: #c: curve -> p:lbuffer uint64 (size 8) -> result:point c -> Stack unit
   (requires fun h -> live h p /\ live h result /\ disjoint p result)
   (ensures  fun h0 _ h1 ->
     modifies (loc result) h0 h1 /\
-    as_nat h1 (gsub result (size 8) (size 4)) == 1 /\
-    (let x = as_nat h0 (gsub p (size 0) (size 4)) in
-     let y = as_nat h0 (gsub p (size 4) (size 4)) in
-     let x3, y3, z3 = point_x_as_nat h1 result, point_y_as_nat h1 result, point_z_as_nat h1 result in
+    as_nat c h1 (gsub result (size 8) (size 4)) == 1 /\
+    (let x = as_nat c h0 (gsub p (size 0) (size 4)) in
+     let y = as_nat c h0 (gsub p (size 4) (size 4)) in
+     let x3, y3, z3 = point_x_as_nat c h1 result, point_y_as_nat c h1 result, point_z_as_nat c h1 result in
      let pointJacX, pointJacY, pointJacZ = toJacobianCoordinates (x, y) in
      x3 == pointJacX /\ y3 == pointJacY /\ z3 == pointJacZ))
 
 
 (* [@ (Comment "  This code is not side channel resistant")]  *)
 
-val isPointAtInfinityPublic: p:point -> Stack bool
+val isPointAtInfinityPublic: #c: curve -> p:point c -> Stack bool
   (requires fun h -> live h p)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
     r == Spec.P256.isPointAtInfinity (point_prime_to_coordinates (as_seq h0 p)))
 
 [@ (Comment "  This code is not side channel resistant")]
-val isPointOnCurvePublic: p:point -> Stack bool
+val isPointOnCurvePublic: #c: curve -> p: point c -> Stack bool
   (requires fun h -> live h p /\    
-    as_nat h (gsub p (size 0) (size 4)) < prime256 /\ 
-    as_nat h (gsub p (size 4) (size 4)) < prime256 /\
-    as_nat h (gsub p (size 8) (size 4)) == 1)
+    as_nat c h (gsub p (size 0) (size 4)) < prime256 /\ 
+    as_nat c h (gsub p (size 4) (size 4)) < prime256 /\
+    as_nat c h (gsub p (size 8) (size 4)) == 1)
   (ensures fun h0 r h1 ->
     modifies0 h0 h1 /\ 
-     r == isPointOnCurve #P256 (as_nat h1 (gsub p (size 0) (size 4)), 
-                          as_nat h1 (gsub p (size 4) (size 4)), 
-                          as_nat h1 (gsub p (size 8) (size 4)))
+     r == isPointOnCurve #P256 (as_nat c h1 (gsub p (size 0) (size 4)), 
+                          as_nat c h1 (gsub p (size 4) (size 4)), 
+                          as_nat c h1 (gsub p (size 8) (size 4)))
   )
 
 
 (* [@ (Comment "  This code is not side channel resistant")] *)
 
-val verifyQValidCurvePoint: pubKeyAsPoint:point
+val verifyQValidCurvePoint: #c: curve -> pubKeyAsPoint: point c
   -> tempBuffer:lbuffer uint64 (size 100) -> Stack bool
   (requires fun h ->
     live h pubKeyAsPoint /\
     live h tempBuffer /\
     LowStar.Monotonic.Buffer.all_disjoint [loc pubKeyAsPoint; loc tempBuffer] /\
-    point_z_as_nat h pubKeyAsPoint == 1
+    point_z_as_nat c h pubKeyAsPoint == 1
   )
   (ensures  fun h0 r h1 ->
     modifies (loc tempBuffer) h0 h1 /\
@@ -69,6 +69,7 @@ val verifyQValidCurvePoint: pubKeyAsPoint:point
 
 inline_for_extraction
 val verifyQ: 
+  #c: curve ->
   pubKey: lbuffer uint8 (size 64) ->
   Stack bool
     (requires fun h -> live h pubKey)

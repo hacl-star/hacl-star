@@ -19,7 +19,7 @@ let notCompressedForm = lbuffer uint8 (size 65)
 let compressedForm = lbuffer uint8 (size 33)
 
 inline_for_extraction
-val decompressionNotCompressedForm: b: notCompressedForm -> result: lbuffer uint8 (size 64) -> Stack bool 
+val decompressionNotCompressedForm: #c: curve -> b: notCompressedForm -> result: lbuffer uint8 (size 64) -> Stack bool 
   (requires fun h -> live h b /\ live h result /\ disjoint b result)
   (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\
     (
@@ -36,7 +36,7 @@ val decompressionNotCompressedForm: b: notCompressedForm -> result: lbuffer uint
 )
 
 inline_for_extraction
-val decompressionCompressedForm: b: compressedForm -> result: lbuffer uint8 (size 64) -> Stack bool 
+val decompressionCompressedForm: #c: curve -> b: compressedForm -> result: lbuffer uint8 (size 64) -> Stack bool 
   (requires fun h -> live h b /\ live h result /\ disjoint b result)
   (ensures fun h0 r h1 -> 
     (
@@ -63,7 +63,7 @@ val decompressionCompressedForm: b: compressedForm -> result: lbuffer uint8 (siz
   modifies (loc result) h0 h1)
 
 inline_for_extraction
-val compressionNotCompressedForm: b: lbuffer uint8 (size 64) -> result: notCompressedForm -> 
+val compressionNotCompressedForm: #c: curve -> b: lbuffer uint8 (size 64) -> result: notCompressedForm -> 
   Stack unit 
     (requires fun h -> live h b /\ live h result /\ disjoint b result)
     (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
@@ -78,7 +78,7 @@ val compressionNotCompressedForm: b: lbuffer uint8 (size 64) -> result: notCompr
     )
 
 inline_for_extraction
-val compressionCompressedForm: b: lbuffer uint8 (size 64) -> result: compressedForm -> 
+val compressionCompressedForm: #c: curve -> b: lbuffer uint8 (size 64) -> result: compressedForm -> 
   Stack unit 
     (requires fun h -> live h b /\ live h result /\ disjoint b result)
     (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
