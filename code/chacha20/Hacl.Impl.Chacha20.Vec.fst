@@ -152,7 +152,7 @@ noextract
 val chacha20_encrypt_last:
     #w:lanes
   -> ctx:state w
-  -> len:size_t{v len < w * 64}
+  -> len:size_t{0 < v len /\ v len < w * 64}
   -> out:lbuffer uint8 len
   -> incr:size_t{w * v incr <= max_size_t}
   -> text:lbuffer uint8 len ->
