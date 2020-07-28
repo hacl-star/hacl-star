@@ -972,18 +972,14 @@ Hacl_Blake2b_32_blake2b(
                   uint32_t i;
                   for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                   {
-                    uint8_t *x0 = first + i * (uint32_t)8U;
-                    uint64_t x2 = row0[i];
-                    store64_le(x0, x2);
+                    store64_le(first + i * (uint32_t)8U, row0[i]);
                   }
                 }
                 {
                   uint32_t i;
                   for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                   {
-                    uint8_t *x0 = second + i * (uint32_t)8U;
-                    uint64_t x2 = row1[i];
-                    store64_le(x0, x2);
+                    store64_le(second + i * (uint32_t)8U, row1[i]);
                   }
                 }
                 final = b2;

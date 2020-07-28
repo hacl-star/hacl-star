@@ -401,8 +401,7 @@ static void pad_224(uint64_t len, uint8_t *dst)
       +
         ((uint32_t)128U - ((uint32_t)9U + (uint32_t)(len % (uint64_t)(uint32_t)64U)))
         % (uint32_t)64U;
-  uint64_t x2 = len << (uint32_t)3U;
-  store64_be(dst3, x2);
+  store64_be(dst3, len << (uint32_t)3U);
 }
 
 static void pad_256(uint64_t len, uint8_t *dst)
@@ -427,8 +426,7 @@ static void pad_256(uint64_t len, uint8_t *dst)
       +
         ((uint32_t)128U - ((uint32_t)9U + (uint32_t)(len % (uint64_t)(uint32_t)64U)))
         % (uint32_t)64U;
-  uint64_t x2 = len << (uint32_t)3U;
-  store64_be(dst3, x2);
+  store64_be(dst3, len << (uint32_t)3U);
 }
 
 static void pad_384(FStar_UInt128_uint128 len, uint8_t *dst)
@@ -514,9 +512,7 @@ static void finish_224(uint32_t *s, uint8_t *dst)
   uint32_t *uu____0 = s;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)7U; i++)
   {
-    uint8_t *x0 = dst + i * (uint32_t)4U;
-    uint32_t x2 = uu____0[i];
-    store32_be(x0, x2);
+    store32_be(dst + i * (uint32_t)4U, uu____0[i]);
   }
 }
 
@@ -525,9 +521,7 @@ static void finish_256(uint32_t *s, uint8_t *dst)
   uint32_t *uu____0 = s;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
   {
-    uint8_t *x0 = dst + i * (uint32_t)4U;
-    uint32_t x2 = uu____0[i];
-    store32_be(x0, x2);
+    store32_be(dst + i * (uint32_t)4U, uu____0[i]);
   }
 }
 
@@ -536,9 +530,7 @@ static void finish_384(uint64_t *s, uint8_t *dst)
   uint64_t *uu____0 = s;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)6U; i++)
   {
-    uint8_t *x0 = dst + i * (uint32_t)8U;
-    uint64_t x2 = uu____0[i];
-    store64_be(x0, x2);
+    store64_be(dst + i * (uint32_t)8U, uu____0[i]);
   }
 }
 
@@ -547,9 +539,7 @@ static void finish_512(uint64_t *s, uint8_t *dst)
   uint64_t *uu____0 = s;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
   {
-    uint8_t *x0 = dst + i * (uint32_t)8U;
-    uint64_t x2 = uu____0[i];
-    store64_be(x0, x2);
+    store64_be(dst + i * (uint32_t)8U, uu____0[i]);
   }
 }
 

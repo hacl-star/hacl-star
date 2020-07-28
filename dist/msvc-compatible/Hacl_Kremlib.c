@@ -34,6 +34,10 @@ uint32_t LowStar_Vector_new_capacity(uint32_t cap)
   {
     return max_uint32;
   }
+  if (cap == (uint32_t)0U)
+  {
+    return (uint32_t)1U;
+  }
   return cap * resize_ratio;
 }
 

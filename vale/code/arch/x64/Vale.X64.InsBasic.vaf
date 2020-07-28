@@ -414,7 +414,7 @@ procedure Cpuid_Avx()
     {:instruction mk_ins(make_instr(I.ins_Cpuid))}
     requires rax = 1;
     modifies rax; rbx; rcx; rdx;
-    ensures (iand64(rcx, 0x10000000) > 0) == avx_enabled;
+    ensures (iand64(rcx, 0x10000000) > 0) == avx_cpuid_enabled;
 {
     cpuid_features();
 }
@@ -427,7 +427,7 @@ procedure Cpuid_Avx2()
         rax = 7;
         rcx = 0;
     modifies rax; rbx; rcx; rdx;
-    ensures (iand64(rbx, 0x20) > 0) == avx2_enabled;
+    ensures (iand64(rbx, 0x20) > 0) == avx2_cpuid_enabled;
 {
     cpuid_features();
 }
@@ -483,6 +483,48 @@ procedure Cpuid_Avx512()
       (iand64(rbx, 0x80000000) > 0) == avx512vl_enabled;
 {
     cpuid_features();
+}
+
+procedure Cpuid_Osxsave()
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_Cpuid))}
+    requires rax = 1;
+    modifies rax; rbx; rcx; rdx;
+    ensures (iand64(rcx, 0x8000000) > 0) == osxsave_enabled;
+{
+    cpuid_features();
+}
+
+procedure Xgetbv_Avx()
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_Xgetbv))}
+    requires
+        osxsave_enabled;
+        rcx = 0;
+    modifies rax; rdx;
+    ensures
+      (iand64(rax, 0x2) > 0) == sse_xcr0_enabled;
+      (iand64(rax, 0x4) > 0) == avx_xcr0_enabled;
+{
+    xgetbv_features();
+}
+
+procedure Xgetbv_Avx512()
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_Xgetbv))}
+    requires
+        osxsave_enabled;
+        rcx = 0;
+    modifies rax; rdx;
+    ensures
+      (iand64(rax, 0x20) > 0) == opmask_xcr0_enabled;
+      (iand64(rax, 0x40) > 0) == zmm_hi256_xcr0_enabled;
+      (iand64(rax, 0x80) > 0) == hi16_zmm_xcr0_enabled;
+{
+    xgetbv_features();
 }
 
 procedure Nat64Equal(out dst:reg_opr64, inout src:reg_opr64)

@@ -880,9 +880,7 @@ static void encode_point(uint8_t *o, uint64_t *i)
     uint32_t i0;
     for (i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0++)
     {
-      uint8_t *x0 = o + i0 * (uint32_t)8U;
-      uint64_t x2 = u64s[i0];
-      store64_le(x0, x2);
+      store64_le(o + i0 * (uint32_t)8U, u64s[i0]);
     }
   }
 }

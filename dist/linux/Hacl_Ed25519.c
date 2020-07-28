@@ -255,20 +255,16 @@ static void reduce(u64 *out)
 
 static void load_51(u64 *output, u8 *input)
 {
-  u64 u = load64_le(input);
-  u64 i0 = u;
-  u8 *x00 = input + (u32)6U;
-  u64 u0 = load64_le(x00);
-  u64 i1 = u0;
-  u8 *x01 = input + (u32)12U;
-  u64 u1 = load64_le(x01);
-  u64 i2 = u1;
-  u8 *x02 = input + (u32)19U;
-  u64 u2 = load64_le(x02);
-  u64 i3 = u2;
-  u8 *x0 = input + (u32)24U;
-  u64 u3 = load64_le(x0);
-  u64 i4 = u3;
+  u64 u0 = load64_le(input);
+  u64 i0 = u0;
+  u64 u1 = load64_le(input + (u32)6U);
+  u64 i1 = u1;
+  u64 u2 = load64_le(input + (u32)12U);
+  u64 i2 = u2;
+  u64 u3 = load64_le(input + (u32)19U);
+  u64 i3 = u3;
+  u64 u = load64_le(input + (u32)24U);
+  u64 i4 = u;
   u64 output0 = i0 & (u64)0x7ffffffffffffU;
   u64 output1 = i1 >> (u32)3U & (u64)0x7ffffffffffffU;
   u64 output2 = i2 >> (u32)6U & (u64)0x7ffffffffffffU;
@@ -1417,8 +1413,7 @@ static void load_32_bytes(u64 *out, u8 *b)
   u64 b1 = hload56_le_(b, (u32)7U);
   u64 b2 = hload56_le_(b, (u32)14U);
   u64 b3 = hload56_le_(b, (u32)21U);
-  u8 *x0 = b + (u32)28U;
-  u32 u = load32_le(x0);
+  u32 u = load32_le(b + (u32)28U);
   u32 b4 = u;
   u64 b41 = (u64)b4;
   out[0U] = b0;
@@ -1442,13 +1437,11 @@ static void store_56(u8 *out, u64 *b)
   u64 b3 = b[3U];
   u64 b4 = b[4U];
   u32 b4_ = (u32)b4;
-  u8 *x0;
   hstore56_le(out, (u32)0U, b0);
   hstore56_le(out, (u32)7U, b1);
   hstore56_le(out, (u32)14U, b2);
   hstore56_le(out, (u32)21U, b3);
-  x0 = out + (u32)28U;
-  store32_le(x0, b4_);
+  store32_le(out + (u32)28U, b4_);
 }
 
 static void sha512_pre_msg(u8 *h, u8 *prefix, u32 len, u8 *input)
