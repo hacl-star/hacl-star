@@ -441,7 +441,7 @@ val map_blocks:
   -> blocksize:size_pos
   -> inp:seq a
   -> f:(block (length inp) blocksize -> lseq a blocksize -> lseq a blocksize)
-  -> g:(last (length inp) blocksize -> rem:size_nat{rem < blocksize} -> s:lseq a rem -> lseq a rem) ->
+  -> g:(last (length inp) blocksize -> rem:size_nat{0 < rem /\ rem < blocksize} -> s:lseq a rem -> lseq a rem) ->
   Tot (out:seq a{length out == length inp})
 
 val lemma_map_blocks:

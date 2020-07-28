@@ -1188,7 +1188,7 @@ val map_blocks:
   -> inp:lbuffer_t t a len
   -> output:lbuffer a len
   -> spec_f:(mem -> GTot (i:nat{i < v len / v blocksize} -> Seq.lseq a (v blocksize) -> Seq.lseq a (v blocksize)))
-  -> spec_l:(mem -> GTot (i:nat{i == v len / v blocksize} -> llen:size_nat{llen < v blocksize} -> Seq.lseq a llen -> Seq.lseq a llen))
+  -> spec_l:(mem -> GTot (i:nat{i == v len / v blocksize} -> llen:size_nat{0 < llen /\ llen < v blocksize} -> Seq.lseq a llen -> Seq.lseq a llen))
   -> impl_f:(i:size_t{v i < v len / v blocksize} -> Stack unit
       (requires fun h1 ->
         FStar.Math.Lemmas.lemma_mult_le_right (v blocksize) (v i) (v len / v blocksize);
@@ -1202,6 +1202,7 @@ val map_blocks:
         as_seq h2 oblock == ob))
   -> impl_l:(i:size_t{v i == v len / v blocksize} -> Stack unit
       (requires fun h1 ->
+        (v len % v blocksize > 0) /\
         modifies (loc (gsub output 0ul (i *! blocksize))) h0 h1)
       (ensures  fun h1 _ h2 ->
 	let iblock = gsub inp (i *! blocksize) (len %. blocksize)  in
