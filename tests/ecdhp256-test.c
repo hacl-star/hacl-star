@@ -96,7 +96,6 @@ int main()
 	printf("%s\n", "Wycheproof tests ECDH: ");
 		
 	for (int i = 0 ; i< sizeof(w_vectors)/sizeof(ecdhp256_w_i); i++)
-	// for (int i = 174 ; i< 175; i++)
 	{
 		printf("ECDH Wycheproof Test %d ", i );
 
@@ -185,8 +184,7 @@ int main()
 }
 
 
-
-//Test 175
+// Test 175
 // prime = 2** 256 - 2**224 + 2**192 + 2**96 -1
 // p = Zmod(prime)
 
