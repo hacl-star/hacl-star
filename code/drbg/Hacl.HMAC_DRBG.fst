@@ -160,9 +160,10 @@ let mk_instantiate #a hmac st
   let h0 = get () in
   push_frame();
   let seed_material = create (entropy_input_len +! nonce_len +! personalization_string_len) (u8 0) in
-  copy (sub seed_material 0ul entropy_input_len) entropy_input;
-  copy (sub seed_material entropy_input_len nonce_len) nonce;
-  copy (sub seed_material (entropy_input_len +! nonce_len) personalization_string_len) personalization_string;
+  assert (v entropy_input_len > 0);
+  copy_generic (sub_generic seed_material 0ul entropy_input_len) entropy_input;
+  copy_generic (sub_generic seed_material entropy_input_len nonce_len) nonce;
+  copy_generic (sub_generic seed_material (entropy_input_len +! nonce_len) personalization_string_len) personalization_string;
   let State k v ctr = st in
   memset k (u8 0) (hash_len a);
   memset v (u8 1) (hash_len a);
@@ -215,7 +216,7 @@ let mk_reseed #a hmac st
   push_frame();
   let seed_material = create (entropy_input_len +! additional_input_len) (u8 0) in
   copy (sub seed_material 0ul entropy_input_len) entropy_input;
-  copy (sub seed_material entropy_input_len additional_input_len) additional_input;
+  copy_generic (sub_generic seed_material entropy_input_len additional_input_len) additional_input;
   let h1 = get () in
   LSeq.eq_intro (as_seq h1 seed_material)
                 LSeq.(as_seq h0 entropy_input @| as_seq h0 additional_input);
@@ -260,7 +261,7 @@ let mk_generate #a hmac output st n additional_input_len additional_input =
       update hmac additional_input_len additional_input k v;
     let output:lbuffer uint8 n = output in
     let max = n /. hash_len a in
-    let out = sub output 0ul (max *! hash_len a) in
+    let out = sub_generic output 0ul (max *! hash_len a) in
     [@inline_let]
     let a_spec = S.a_spec a in
     [@inline_let]
