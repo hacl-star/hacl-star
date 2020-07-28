@@ -120,11 +120,18 @@ val cshake128_frodo:
       S.cshake128_frodo (v input_len) (as_seq h0 input) cstm (v output_len))
 let cshake128_frodo input_len input cstm output_len output =
   push_frame ();
-  let s = create 25ul (u64 0) in
-  s.(0ul) <- u64 0x10010001a801 |. (to_u64 cstm <<. 48ul);
-  state_permute s;
-  absorb s 168ul input_len input (byte 0x04);
-  squeeze s 168ul output_len output;
+  if v output_len = 0 then begin
+    let h = ST.get () in
+    FStar.Seq.lemma_empty (as_seq h output);
+    FStar.Seq.lemma_empty (S.cshake128_frodo (v input_len) (as_seq h input) cstm (v output_len));
+    ()
+  end else begin
+    let s = create 25ul (u64 0) in
+    s.(0ul) <- u64 0x10010001a801 |. (to_u64 cstm <<. 48ul);
+    state_permute s;
+    absorb s 168ul input_len input (byte 0x04);
+    squeeze s 168ul output_len output
+  end;
   pop_frame ()
 
 inline_for_extraction noextract
@@ -142,9 +149,16 @@ val cshake256_frodo:
       S.cshake256_frodo (v input_len) (as_seq h0 input) cstm (v output_len))
 let cshake256_frodo input_len input cstm output_len output =
   push_frame ();
-  let s = create 25ul (u64 0) in
-  s.(0ul) <- u64 0x100100018801 |. (to_u64 cstm <<. 48ul);
-  state_permute s;
-  absorb s 136ul input_len input (byte 0x04);
-  squeeze s 136ul output_len output;
+  if v output_len = 0 then begin
+    let h = ST.get () in
+    FStar.Seq.lemma_empty (as_seq h output);
+    FStar.Seq.lemma_empty (S.cshake256_frodo (v input_len) (as_seq h input) cstm (v output_len));
+    ()
+  end else begin
+    let s = create 25ul (u64 0) in
+    s.(0ul) <- u64 0x100100018801 |. (to_u64 cstm <<. 48ul);
+    state_permute s;
+    absorb s 136ul input_len input (byte 0x04);
+    squeeze s 136ul output_len output
+  end;
   pop_frame ()
