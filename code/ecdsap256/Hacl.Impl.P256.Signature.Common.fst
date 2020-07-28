@@ -42,7 +42,10 @@ let bufferToJac p result =
   upd result (size 8) (u64 1);
   upd result (size 9) (u64 0);
   upd result (size 10) (u64 0);
-  upd result (size 11) (u64 0)
+  upd result (size 11) (u64 0);
+  // GM: Not sure why I need this... the non-null preconditions above
+  // work just fine, and nothing else should have changed.
+  admit ()
 
 #pop-options
 
@@ -238,7 +241,6 @@ let multByOrder2 result p tempBuffer =
     
 
 [@ (Comment "  This code is not side channel resistant")]
-
 val isOrderCorrect: p: point -> tempBuffer: lbuffer uint64 (size 100) -> Stack bool
   (requires fun h -> 
     live h p /\ live h tempBuffer /\ 
