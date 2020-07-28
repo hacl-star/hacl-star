@@ -1,5 +1,5 @@
 [
-  "ùÊô¥EÀ\u0012π\u000eu»~™6≤\u001f",
+  "A«Pó\u0003Ø#–¨õﬁ\u0004“”µ.",
   [
     [
       "Vale.Wrapper.X64.Cpuid.check_aesni",
@@ -16,7 +16,7 @@
         "typing_Vale.Interop.Assumptions.win"
       ],
       0,
-      "e3c21fb0b9e9d23e590f0ad3bd7c9ac1"
+      "f840942f917a3ca745aa7ce12aa53e04"
     ],
     [
       "Vale.Wrapper.X64.Cpuid.check_sha",
@@ -33,7 +33,7 @@
         "typing_Vale.Interop.Assumptions.win"
       ],
       0,
-      "7bb710fe9b977263fe02525b374f23d2"
+      "f03a5fa85ccd7ece619d60b59d180290"
     ],
     [
       "Vale.Wrapper.X64.Cpuid.check_adx_bmi2",
@@ -50,7 +50,7 @@
         "typing_Vale.Interop.Assumptions.win"
       ],
       0,
-      "eb9eb30135e05bc8fe8329897f65c1b4"
+      "85a5809f016e8d78fc762177c80dd2f4"
     ],
     [
       "Vale.Wrapper.X64.Cpuid.check_avx",
@@ -67,7 +67,7 @@
         "typing_Vale.Interop.Assumptions.win"
       ],
       0,
-      "e7eeaacbbcbd14f81ee92a346ca3c748"
+      "218e7bc603538e4702de31fb94e917c0"
     ],
     [
       "Vale.Wrapper.X64.Cpuid.check_avx2",
@@ -84,7 +84,7 @@
         "typing_Vale.Interop.Assumptions.win"
       ],
       0,
-      "d189323d7344b449900b22bf91f9d8ac"
+      "70df4e60b1dd27de3772624bb1705ea0"
     ],
     [
       "Vale.Wrapper.X64.Cpuid.check_movbe",
@@ -101,7 +101,7 @@
         "typing_Vale.Interop.Assumptions.win"
       ],
       0,
-      "cfec06f0da4d6099f1e1c68fe933b4af"
+      "e4199fea94327165a2898511d5ad2d01"
     ],
     [
       "Vale.Wrapper.X64.Cpuid.check_sse",
@@ -118,7 +118,7 @@
         "typing_Vale.Interop.Assumptions.win"
       ],
       0,
-      "30da5008433c3ef52a4e5f5d0cdab29b"
+      "46b021956304c25d61e000edbeb3c392"
     ],
     [
       "Vale.Wrapper.X64.Cpuid.check_rdrand",
@@ -135,7 +135,7 @@
         "typing_Vale.Interop.Assumptions.win"
       ],
       0,
-      "57b18f13c054c8c442062ce81f3569f3"
+      "ce4dafdfb9a8f7ede88a46be65b75a93"
     ],
     [
       "Vale.Wrapper.X64.Cpuid.check_avx512",
@@ -152,7 +152,60 @@
         "typing_Vale.Interop.Assumptions.win"
       ],
       0,
-      "84bfbc1b1b1b208e3cbd18a35c891c22"
+      "4d3aabf640d2085dd33b14773bfa7e11"
+    ],
+    [
+      "Vale.Wrapper.X64.Cpuid.check_osxsave",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "equation_Vale.Lib.X64.Cpuidstdcall.va_ens_Check_osxsave_stdcall",
+        "equation_Vale.Lib.X64.Cpuidstdcall.va_req_Check_osxsave_stdcall",
+        "equation_Vale.Stdcalls.X64.Cpuid.code_osxsave",
+        "equation_Vale.X64.Decls.va_require_total",
+        "fuel_guarded_inversion_Vale.X64.State.vale_state",
+        "typing_Vale.Interop.Assumptions.win"
+      ],
+      0,
+      "e844567528dd8b470809cd444d775d17"
+    ],
+    [
+      "Vale.Wrapper.X64.Cpuid.check_avx_xcr0",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "equation_Vale.Lib.X64.Cpuidstdcall.va_ens_Check_avx_xcr0_stdcall",
+        "equation_Vale.Lib.X64.Cpuidstdcall.va_req_Check_avx_xcr0_stdcall",
+        "equation_Vale.Stdcalls.X64.Cpuid.code_avx_xcr0",
+        "equation_Vale.X64.Decls.va_require_total",
+        "fuel_guarded_inversion_Vale.X64.State.vale_state",
+        "refinement_interpretation_Tm_refine_2edd0a28a9cbd8f0909e1c087d9eaad3",
+        "typing_Vale.Interop.Assumptions.win"
+      ],
+      0,
+      "6821460352feeb1d926169f978f8a1ba"
+    ],
+    [
+      "Vale.Wrapper.X64.Cpuid.check_avx512_xcr0",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "equation_Vale.Lib.X64.Cpuidstdcall.va_ens_Check_avx512_xcr0_stdcall",
+        "equation_Vale.Lib.X64.Cpuidstdcall.va_req_Check_avx512_xcr0_stdcall",
+        "equation_Vale.Stdcalls.X64.Cpuid.code_avx512_xcr0",
+        "equation_Vale.X64.Decls.va_require_total",
+        "fuel_guarded_inversion_Vale.X64.State.vale_state",
+        "refinement_interpretation_Tm_refine_a27bd5e815ae88d8d53a3fa90623c819",
+        "typing_Vale.Interop.Assumptions.win"
+      ],
+      0,
+      "4ff671ff90a7bb7ac9fba8345889d64e"
     ]
   ]
 ]
