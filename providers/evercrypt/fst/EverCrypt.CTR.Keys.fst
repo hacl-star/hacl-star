@@ -88,8 +88,8 @@ let vale_expand (i: vale_impl) (k ek: B.buffer uint8):
   [@ inline_let ]
   let va = vale_alg_of_vale_impl i in
   let kv: G.erased (key a) = G.hide (B.as_seq h0 k) in
-  let keys_b = B.sub ek 0ul (key_offset i) in
-  let hkeys_b = B.sub ek (key_offset i) 128ul in
+  let keys_b = B.sub_non_null ek 0ul (key_offset i) in
+  let hkeys_b = B.sub_non_null ek (key_offset i) 128ul in
 
   aes_gcm_key_expansion i k keys_b;
   aes_gcm_keyhash_init i
