@@ -151,7 +151,7 @@ let stateful_buffer (a: Type) (l: UInt32.t { UInt32.v l > 0 }) (zero: a): statef
     (fun () -> B.alloca zero l)
     (fun () r -> B.malloc r zero l)
     (fun _ s -> B.free s)
-    (fun _ s_src s_dst -> B.blit s_src 0ul s_dst 0ul l)
+    (fun _ s_src s_dst -> B.blit_non_null s_src 0ul s_dst 0ul l)
 
 inline_for_extraction noextract
 let stateful_unused (t: Type0): stateful t =

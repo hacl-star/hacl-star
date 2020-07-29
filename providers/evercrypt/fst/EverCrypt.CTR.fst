@@ -122,7 +122,7 @@ fun r dst k iv iv_len c ->
     (**) B.modifies_only_not_unused_in B.loc_none h0 h1;
 
     let iv' = B.malloc r 0uy 16ul in
-    B.blit iv 0ul iv' 0ul iv_len;
+    B.blit_non_null iv 0ul iv' 0ul iv_len;
     (**) let h2 = ST.get () in
     (**) B.modifies_only_not_unused_in B.loc_none h0 h2;
 
@@ -154,12 +154,12 @@ let create_in a r dst k iv iv_len c =
       [@inline_let]
       let l = concrete_xkey_len Hacl_CHACHA20 in
       let ek = B.malloc r 0uy l in
-      B.blit k 0ul ek 0ul l;
+      B.blit_non_null k 0ul ek 0ul l;
       (**) let h1 = ST.get () in
       (**) B.modifies_only_not_unused_in B.loc_none h0 h1;
 
       let iv' = B.malloc r 0uy iv_len in
-      B.blit iv 0ul iv' 0ul iv_len;
+      B.blit_non_null iv 0ul iv' 0ul iv_len;
       (**) let h2 = ST.get () in
       (**) B.modifies_only_not_unused_in B.loc_none h0 h2;
 
@@ -195,7 +195,7 @@ let copy_or_expand (i: impl)
       if EverCrypt.TargetConfig.x64 then
         vale_expand Vale_AES256 k ek
   | Hacl_CHACHA20 ->
-      B.blit k 0ul ek 0ul 32ul
+      B.blit_non_null k 0ul ek 0ul 32ul
 
 let init a p k iv iv_len c =
   let State i _ iv' _ _ ek _ = !*p in
@@ -284,7 +284,7 @@ fun p dst src ->
   let ctr_block = B.alloca (0uy <: uint8) 16ul in
   (**) let h0 = ST.get () in
 
-  B.blit iv 0ul ctr_block 0ul iv_len;
+  B.blit_non_null iv 0ul ctr_block 0ul iv_len;
   (**) let h1 = ST.get () in
 
   // Proof steps missing:
@@ -320,7 +320,7 @@ fun p dst src ->
     (G.elift1 (as_vale_key i) g_key)
     src 16uL
     dst
-    (B.sub ek 0ul (key_offset i))
+    (B.sub_non_null ek 0ul (key_offset i))
     ctr_block;
   (**) vale_encrypt_is_hacl_encrypt i (G.reveal g_key) (B.as_seq h2 ctr_block)
     (B.as_seq h2 src);
@@ -350,7 +350,7 @@ let update_block a p dst src =
       // NOTE: chacha20_init must be called with 0ul because encrypt_block also
       // takes a counter argument and increments too! There may be a way to keep
       // the allocated initial block in the state, but not doing that for now.
-      chacha20_init ctx ek (B.sub iv 0ul 12ul) 0ul;
+      chacha20_init ctx ek (B.sub_non_null iv 0ul 12ul) 0ul;
       chacha20_encrypt_block ctx dst c0 src;
 
       pop_frame ();

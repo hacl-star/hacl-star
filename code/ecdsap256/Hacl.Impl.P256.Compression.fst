@@ -177,7 +177,7 @@ let isIdentifierCorrect compressedIdentifier =
 
 
 
-#push-options "--z3rlimit 500"
+#push-options "--z3rlimit 750"
 
 let decompressionCompressedForm b result = 
   push_frame();

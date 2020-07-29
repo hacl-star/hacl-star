@@ -510,7 +510,7 @@ let blake2_update_last #al #ms blake2_update_block #len wv hash prev rem d =
   let spec _ h1 = state_v h1 hash == Spec.blake2_update_last al (v prev) (v rem) h0.[|d|] (state_v h0 hash) in
   salloc1 h0 (size_block al) (u8 0) (Ghost.hide (loc hash |+| loc wv)) spec
   (fun last_block ->
-    let last = sub d (len -! rem) rem in
+    let last = sub_generic d (len -! rem) rem in
     let h1 = ST.get() in
     update_sub last_block 0ul rem last;
     let h2 = ST.get() in

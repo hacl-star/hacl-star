@@ -100,8 +100,8 @@ let mk_update_multi a update s blocks n_blocks =
   =
     let h1 = ST.get () in
     let sz = block_len a in
-    let blocks0 = B.sub blocks 0ul U32.(sz *^ i) in
-    let block = B.sub blocks U32.(sz *^ i) sz in
+    let blocks0 = B.sub_non_null blocks 0ul U32.(sz *^ i) in
+    let block = B.sub_non_null blocks U32.(sz *^ i) sz in
     update s block;
     let h2 = ST.get () in
     assert (

@@ -108,8 +108,8 @@ let mk_instantiate #a hmac st personalization_string personalization_string_len 
         false
       else
         begin
-        let entropy_input = B.sub entropy 0ul entropy_input_len in
-        let nonce = B.sub entropy entropy_input_len nonce_len in
+        let entropy_input = B.sub_non_null entropy 0ul entropy_input_len in
+        let nonce = B.sub_non_null entropy entropy_input_len nonce_len in
         S.hmac_input_bound a;
         let st_s = !*st in
         mk_instantiate hmac (p st_s)

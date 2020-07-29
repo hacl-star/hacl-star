@@ -133,7 +133,7 @@ let salsa20_encrypt_block ctx out incr text =
 inline_for_extraction
 val salsa20_encrypt_last:
     ctx:state
-  -> len:size_t{v len < 64}
+  -> len:size_t{0 < v len /\ v len < 64}
   -> out:lbuffer uint8 len
   -> incr:size_t
   -> text:lbuffer uint8 len ->

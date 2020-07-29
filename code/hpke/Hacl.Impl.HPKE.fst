@@ -326,7 +326,7 @@ let ks_derive_default_aux #cs pkR zz pkE infolen info o_key o_nonce context_len 
   let info_hash:lbuffer uint8 (nhash_length cs) = sub tmp 0ul (nhash_length cs) in
   let pskID_hash:lbuffer uint8 (nhash_length cs) = sub tmp (nhash_length cs) (nhash_length cs) in
   Hash.hash #cs info infolen info_hash;
-  let empty_b:lbuffer uint8 0ul = sub info 0ul 0ul in
+  let empty_b:lbuffer uint8 0ul = sub_generic info 0ul 0ul in
   (**) let h0 = get() in
   Hash.hash #cs empty_b 0ul pskID_hash;
   (**) assert (as_seq h0 empty_b `Seq.equal` S.default_pskId);

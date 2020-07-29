@@ -63,14 +63,14 @@ let mk_expand a hmac okm prk prklen info infolen len =
   let prk: B.lbuffer uint8 prklen = prk in
   [@inline_let]
   let info: B.lbuffer uint8 infolen = info in
-  let output: B.lbuffer uint8 (n *! tlen) = B.sub okm 0ul (n *! tlen) in
+  let output: B.lbuffer uint8 (n *! tlen) = B.sub_generic okm 0ul (n *! tlen) in
 
   push_frame ();
   let text = B.create (tlen +! infolen +! 1ul) (u8 0) in
   let text0: B.lbuffer uint8 (infolen +! 1ul) = B.sub text tlen (infolen +! 1ul) in
-  let tag = B.sub text 0ul tlen in
-  let ctr = B.sub text (tlen +! infolen) 1ul in
-  B.copy (B.sub text tlen infolen) info;
+  let tag = B.sub_generic text 0ul tlen in
+  let ctr = B.sub_generic text (tlen +! infolen) 1ul in
+  B.copy_generic (B.sub_generic text tlen infolen) info;
   [@inline_let]
   let a_spec = a_spec a in
   [@inline_let]
@@ -118,7 +118,7 @@ let mk_expand a hmac okm prk prklen info infolen len =
     Seq.unfold_generate_blocks
       (v tlen) (v n) a_spec (spec h0) (FStar.Seq.empty #uint8) (v i);
     //assert (v (i *! tlen) + v tlen <= v (n *! tlen));
-    B.copy (B.sub output (i *! tlen) tlen) tag
+    B.copy_generic (B.sub_generic output (i *! tlen) tlen) tag
     // let h3 = ST.get() in
     // assert (
     //   footprint (v i + 1) `LB.loc_includes` footprint (v i) /\

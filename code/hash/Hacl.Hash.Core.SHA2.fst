@@ -359,7 +359,7 @@ let update a hash block =
   let hash1: words_state a = B.alloca (zero a) 8ul in
   let computed_ws: ws_w a = B.alloca (zero a) (U32.uint_to_t (Spec.size_k_w a)) in
   ws a block computed_ws;
-  B.blit hash 0ul hash1 0ul 8ul;
+  B.blit_non_null hash 0ul hash1 0ul 8ul;
   (**) let h1 = ST.get () in
   (**) assert (S.equal (B.as_seq h1 hash1) (B.as_seq h0 hash));
   (**) assert (S.equal (B.as_seq h1 hash) (B.as_seq h0 hash));

@@ -546,12 +546,14 @@ let poly1305_update_vec #s len text pre acc =
   let sz_block = blocklen s in
   FStar.Math.Lemmas.multiply_fractions (v len) (v sz_block);
   let len0 = (len /. sz_block) *! sz_block in
-  let t0 = sub text 0ul len0 in
   FStar.Math.Lemmas.multiple_modulo_lemma (v (len /. sz_block)) (v (blocklen s));
-  if len0 >. 0ul then poly1305_update_multi len0 t0 pre acc;
+  if len0 >. 0ul then begin
+    let t0 = sub text 0ul len0 in
+    poly1305_update_multi len0 t0 pre acc
+  end;
 
   let len1 = len -! len0 in
-  let t1 = sub text len0 len1 in
+  let t1 = sub_generic text len0 len1 in
   poly1305_update_scalar #s len1 t1 pre acc
 
 

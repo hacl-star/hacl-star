@@ -48,14 +48,14 @@ let test_one_hash vec =
     assert (v input_len * v repeat + 1 < pow2 32);
     let total_input_len = input_len * repeat in
     let total_input = B.alloca 0uy (total_input_len + 1ul) in
-    let total_input = B.sub total_input 0ul total_input_len in
+    let total_input = B.sub_non_null total_input 0ul total_input_len in
     let h0 = get () in
     C.Loops.for 0ul repeat
     (fun h i -> B.live h total_input /\ B.modifies (B.loc_buffer total_input) h0 h)
     (fun i ->
       assert (v input_len * v i + v input_len <= v input_len * (v repeat - 1) + v input_len);
       assert (v input_len * v i + v input_len <= v input_len * v repeat);
-      C.String.memcpy (B.sub total_input (input_len * i) input_len) input input_len
+      C.String.memcpy (B.sub_non_null total_input (input_len * i) input_len) input input_len
     );
     EverCrypt.Hash.uint32_fits_maxLength a total_input_len;
     assert (v total_input_len <= Spec.Hash.Definitions.max_input_length a + 1);
@@ -207,7 +207,7 @@ let test_one_hkdf vec =
     TestLib.compare_and_print str expected_prk computed_prk (Hacl.Hash.Definitions.hash_len ha);
 
     let computed_okm = B.alloca 0uy (okmlen + 1ul) in
-    let computed_okm = B.sub computed_okm 0ul okmlen in
+    let computed_okm = B.sub_non_null computed_okm 0ul okmlen in
     EverCrypt.HKDF.expand ha computed_okm computed_prk prklen info infolen okmlen;
     B.recall expected_okm;
     TestLib.compare_and_print str expected_okm computed_okm okmlen;
@@ -240,7 +240,7 @@ let test_one_chacha20 (v: chacha20_vector): Stack unit (fun _ -> True) (fun _ _ 
     B.recall plain;
     B.recall cipher;
     let cipher' = B.alloca 0uy (cipher_len + 1ul) in
-    let cipher' = B.sub cipher' 0ul cipher_len in
+    let cipher' = B.sub_non_null cipher' 0ul cipher_len in
     EverCrypt.Cipher.chacha20 plain_len cipher' plain key iv ctr;
     TestLib.compare_and_print !$"of ChaCha20 message" cipher cipher' cipher_len;
     pop_frame ()
@@ -333,12 +333,12 @@ let test_one_chacha20poly1305 (v: Test.Vectors.Chacha20Poly1305.vector): Stack u
     B.recall key;
     push_frame ();
     let tmp = B.alloca 0uy (plain_len `U32.add` 16ul) in
-    let tmp_msg' = B.sub tmp 0ul plain_len in
-    let tag' = B.sub tmp plain_len 16ul in
+    let tmp_msg' = B.sub_non_null tmp 0ul plain_len in
+    let tag' = B.sub_non_null tmp plain_len 16ul in
     EverCrypt.Chacha20Poly1305.aead_encrypt key nonce aad_len aad plain_len plain tmp_msg' tag';
     TestLib.compare_and_print !$"chacha20poly1305 cipher and tag" cipher_and_tag tmp cipher_and_tag_len;
-    let cipher = B.sub cipher_and_tag 0ul plain_len in
-    let tag = B.sub cipher_and_tag plain_len 16ul in
+    let cipher = B.sub_non_null cipher_and_tag 0ul plain_len in
+    let tag = B.sub_non_null cipher_and_tag plain_len 16ul in
     let res = EverCrypt.Chacha20Poly1305.aead_decrypt key nonce aad_len aad plain_len tmp_msg' cipher tag in
     if res = 0ul
     then
