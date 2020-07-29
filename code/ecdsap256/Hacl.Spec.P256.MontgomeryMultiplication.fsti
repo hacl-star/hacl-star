@@ -73,10 +73,13 @@ val lemma_swaped_steps: #c: curve ->  p: nat_prime -> q: nat_prime ->
     let r0, r1 = _pow_step1 #c p q in
     p2 == r0 /\ q2 == r1)
 
-val _pow_step: #c: curve -> k: scalar c -> i:nat{i < getPower c} 
-  -> before: tuple2 (nat_prime #c) (nat_prime #P256)
-  -> tuple2 (nat_prime #P256) (nat_prime #P256)
+val _pow_step: #c: curve -> k: scalar_bytes #c -> i:nat{i < getPower c} 
+  -> before: tuple2 (nat_prime #c) (nat_prime #c)
+  -> tuple2 (nat_prime #c) (nat_prime #c)
 
-val pow_spec: k:lseq uint8 32 -> a:nat_prime #P256 -> Tot (r: nat_prime #P256 {r = pow a (Lib.ByteSequence.nat_from_bytes_le k) % prime256})
+val pow_spec: #c: curve -> k:scalar_bytes #c
+  -> a:nat_prime #c
+  -> Tot (r: nat_prime #c {r = pow a (Lib.ByteSequence.nat_from_bytes_le k) % getPrime c})
 
-val sq_root_spec: a: nat_prime #P256 -> Tot (r: nat_prime #P256 {r = pow a ((prime256 + 1) / 4) % prime256})
+val sq_root_spec: #c: curve -> a: nat_prime #c 
+  -> Tot (r: nat_prime #c {let prime = getPrime c in  r = pow a ((prime + 1) / 4) % prime})

@@ -249,7 +249,7 @@ let _norm #curve (p:point_nat_prime #curve) : point_nat_prime #curve =
   (x3, y3, z3)
 
 
-let scalar (#c: curve) = lbytes (getCoordinateLen c)
+let scalar_bytes (#c: curve) = lbytes (getCoordinateLen c)
 
 
 let ith_bit (#c: curve) (k:lbytes (getCoordinateLen c)) (i:nat{i < getPower c}) : uint64 =
@@ -273,7 +273,7 @@ let _ml_step1 r0 r1 =
   (r0, r1)
 
 
-val _ml_step: #c: curve -> k:scalar #c -> i:nat{i < 256} -> tuple2 (point_nat_prime #c) (point_nat_prime #c) -> tuple2 (point_nat_prime #c) (point_nat_prime #c)
+val _ml_step: #c: curve -> k:scalar_bytes #c -> i:nat{i < 256} -> tuple2 (point_nat_prime #c) (point_nat_prime #c) -> tuple2 (point_nat_prime #c) (point_nat_prime #c)
 
 let _ml_step #c k i (p, q) =
   let bit = (getPower c - 1) - i in
@@ -285,13 +285,13 @@ let _ml_step #c k i (p, q) =
     _ml_step0 p q
 
 
-val montgomery_ladder_spec: #c: curve -> scalar #c -> tuple2 (point_nat_prime #c) (point_nat_prime #c)-> tuple2 (point_nat_prime #c) (point_nat_prime #c)
+val montgomery_ladder_spec: #c: curve -> scalar_bytes #c -> tuple2 (point_nat_prime #c) (point_nat_prime #c)-> tuple2 (point_nat_prime #c) (point_nat_prime #c)
 
 let montgomery_ladder_spec k pq =
   Lib.LoopCombinators.repeati 256 (_ml_step k) pq
 
 
-val scalar_multiplication: #c: curve -> scalar #c -> point_nat_prime #c -> point_nat_prime #c
+val scalar_multiplication: #c: curve -> scalar_bytes #c -> point_nat_prime #c -> point_nat_prime #c
 
 let scalar_multiplication k p =
   let pai = (0, 0, 0) in
@@ -299,7 +299,7 @@ let scalar_multiplication k p =
   _norm q
 
 
-val secret_to_public: #c: curve -> scalar #c -> point_nat_prime #c
+val secret_to_public: #c: curve -> scalar_bytes #c -> point_nat_prime #c
 
 let secret_to_public k =
   let pai = (0, 0, 0) in

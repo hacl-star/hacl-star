@@ -196,34 +196,38 @@ let lemma_odd index k =
           2 * arithmetic_shift_right number (n + 1) + 1)
 
 
-val lemma_exponen_spec: k:lseq uint8 32
-  -> start:tuple2 nat_prime nat_prime {let st0, st1 = start in st0 == 1}
-  -> index:nat{index <= 256} ->
+val lemma_exponen_spec:
+  #c: curve 
+  -> k: scalar_bytes #c
+  -> start:tuple2 (nat_prime #c) (nat_prime #c) {let st0, st1 = start in st0 == 1}
+  -> index:nat{index <= getPower c} ->
   Lemma (
     let start0, start1 = start in
-    let number = nat_from_bytes_le k in
-    let newIndex = 256 - index in
+    let number = nat_from_bytes_le #SEC k in
+    let newIndex = getPower c - index in
     let f0, f1 = Lib.LoopCombinators.repeati index (_pow_step k) start in
-    f0 == pow start1 (arithmetic_shift_right number newIndex) % prime256 /\
-    f1 == pow start1 (arithmetic_shift_right number newIndex + 1) % prime256
+    f0 == pow start1 (arithmetic_shift_right number newIndex) % getPrime c /\
+    f1 == pow start1 (arithmetic_shift_right number newIndex + 1) % getPrime c
   )
 
 #push-options "--fuel 1 --ifuel 1 --z3rlimit 100"
 
-val lemma_exponen_spec_0: k:lseq uint8 32
-  -> start:tuple2 nat_prime nat_prime {let st0, _ = start in st0 == 1} ->
-  Lemma (
+val lemma_exponen_spec_0:
+  #c: curve 
+  -> k: scalar_bytes #c
+  -> start:tuple2 nat_prime nat_prime {let st0, _ = start in st0 == 1} 
+  -> Lemma (
     let start0, start1 = start in
     let number = nat_from_bytes_le k in
     let newIndex = 256 in
-    let f0, f1 = Lib.LoopCombinators.repeati 0 (_pow_step k) start in
+    let f0, f1 = Lib.LoopCombinators.repeati 0 (_pow_step #c k) start in
     f0 == pow start1 (arithmetic_shift_right number newIndex) % prime256 /\
     f1 == pow start1 (arithmetic_shift_right number newIndex + 1) % prime256
   )
 
 let lemma_exponen_spec_0 k start =
   let st0, st1 = start in
-  let number = nat_from_bytes_le k in
+  let number = nat_from_bytes_le #SEC k in
     assert (arithmetic_shift_right number 256 == number / pow2 256);
   FStar.Math.Lemmas.lemma_div_lt_nat number 256 256;
     assert (arithmetic_shift_right number 256 == 0);
