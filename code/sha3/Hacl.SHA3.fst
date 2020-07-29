@@ -120,7 +120,7 @@ val cshake128_frodo:
       S.cshake128_frodo (v input_len) (as_seq h0 input) cstm (v output_len))
 let cshake128_frodo input_len input cstm output_len output =
   push_frame ();
-  if v output_len = 0 then begin
+  if output_len = 0ul then begin
     let h = ST.get () in
     FStar.Seq.lemma_empty (as_seq h output);
     FStar.Seq.lemma_empty (S.cshake128_frodo (v input_len) (as_seq h input) cstm (v output_len));
@@ -149,7 +149,7 @@ val cshake256_frodo:
       S.cshake256_frodo (v input_len) (as_seq h0 input) cstm (v output_len))
 let cshake256_frodo input_len input cstm output_len output =
   push_frame ();
-  if v output_len = 0 then begin
+  if output_len = 0ul then begin
     let h = ST.get () in
     FStar.Seq.lemma_empty (as_seq h output);
     FStar.Seq.lemma_empty (S.cshake256_frodo (v input_len) (as_seq h input) cstm (v output_len));

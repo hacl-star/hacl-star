@@ -609,7 +609,7 @@ let div_mul_le b a = ()
 #reset-options "--z3rlimit 2000 --fuel 0 --ifuel 0"
 
 let map_blocks #t #a h0 len blocksize inp output spec_f spec_l impl_f impl_l =
-if v len = 0
+if len = 0ul
 then begin
   (* Can this be made into a lemma like:
      empty_seq_eq : Lemma (forall s1 s2. len s1 == 0 /\ len s2 == 0 ==> s1 == s2)
