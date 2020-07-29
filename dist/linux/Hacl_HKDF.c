@@ -28,38 +28,79 @@ void Hacl_HKDF_expand_sha2_256(u8 *okm, u8 *prk, u32 prklen, u8 *info, u32 infol
 {
   u32 tlen = (u32)32U;
   u32 n = len / tlen;
-  u8 *output = okm;
+  u8 *output;
+  if (okm == NULL)
+    output = NULL;
+  else
+    output = okm;
   KRML_CHECK_SIZE(sizeof (u8), tlen + infolen + (u32)1U);
   {
     u8 text[tlen + infolen + (u32)1U];
     memset(text, 0U, (tlen + infolen + (u32)1U) * sizeof (text[0U]));
     {
       u8 *text0 = text + tlen;
-      u8 *tag = text;
-      u8 *ctr = text + tlen + infolen;
-      memcpy(text + tlen, info, infolen * sizeof (info[0U]));
+      u8 *tag;
+      if (text == NULL)
+        tag = NULL;
+      else
+        tag = text;
       {
-        u32 i;
-        for (i = (u32)0U; i < n; i++)
-        {
-          ctr[0U] = (u8)(i + (u32)1U);
-          if (i == (u32)0U)
-            Hacl_HMAC_compute_sha2_256(tag, prk, prklen, text0, infolen + (u32)1U);
-          else
-            Hacl_HMAC_compute_sha2_256(tag, prk, prklen, text, tlen + infolen + (u32)1U);
-          memcpy(output + i * tlen, tag, tlen * sizeof (tag[0U]));
-        }
-      }
-      if (n * tlen < len)
-      {
-        ctr[0U] = (u8)(n + (u32)1U);
-        if (n == (u32)0U)
-          Hacl_HMAC_compute_sha2_256(tag, prk, prklen, text0, infolen + (u32)1U);
+        u8 *ctr;
+        if (text == NULL)
+          ctr = NULL;
         else
-          Hacl_HMAC_compute_sha2_256(tag, prk, prklen, text, tlen + infolen + (u32)1U);
+          ctr = text + tlen + infolen;
         {
-          u8 *block = okm + n * tlen;
-          memcpy(block, tag, (len - n * tlen) * sizeof (tag[0U]));
+          u8 *uu____0;
+          if (text == NULL)
+            uu____0 = NULL;
+          else
+            uu____0 = text + tlen;
+          {
+            bool uu____1 = info == NULL;
+            if (!(uu____1 || uu____0 == NULL))
+              memcpy(uu____0, info, infolen * sizeof (info[0U]));
+            {
+              u32 i;
+              for (i = (u32)0U; i < n; i++)
+              {
+                u8 *block;
+                if (output == NULL)
+                  block = NULL;
+                else
+                  block = output + i * tlen;
+                ctr[0U] = (u8)(i + (u32)1U);
+                if (i == (u32)0U)
+                  Hacl_HMAC_compute_sha2_256(tag, prk, prklen, text0, infolen + (u32)1U);
+                else
+                  Hacl_HMAC_compute_sha2_256(tag, prk, prklen, text, tlen + infolen + (u32)1U);
+                {
+                  u8 *uu____2;
+                  if (output == NULL)
+                    uu____2 = NULL;
+                  else
+                    uu____2 = output + i * tlen;
+                  {
+                    bool uu____3 = tag == NULL;
+                    if (!(uu____3 || uu____2 == NULL))
+                      memcpy(uu____2, tag, tlen * sizeof (tag[0U]));
+                  }
+                }
+              }
+            }
+            if (n * tlen < len)
+            {
+              ctr[0U] = (u8)(n + (u32)1U);
+              if (n == (u32)0U)
+                Hacl_HMAC_compute_sha2_256(tag, prk, prklen, text0, infolen + (u32)1U);
+              else
+                Hacl_HMAC_compute_sha2_256(tag, prk, prklen, text, tlen + infolen + (u32)1U);
+              {
+                u8 *block = okm + n * tlen;
+                memcpy(block, tag, (len - n * tlen) * sizeof (tag[0U]));
+              }
+            }
+          }
         }
       }
     }
@@ -75,38 +116,79 @@ void Hacl_HKDF_expand_sha2_512(u8 *okm, u8 *prk, u32 prklen, u8 *info, u32 infol
 {
   u32 tlen = (u32)64U;
   u32 n = len / tlen;
-  u8 *output = okm;
+  u8 *output;
+  if (okm == NULL)
+    output = NULL;
+  else
+    output = okm;
   KRML_CHECK_SIZE(sizeof (u8), tlen + infolen + (u32)1U);
   {
     u8 text[tlen + infolen + (u32)1U];
     memset(text, 0U, (tlen + infolen + (u32)1U) * sizeof (text[0U]));
     {
       u8 *text0 = text + tlen;
-      u8 *tag = text;
-      u8 *ctr = text + tlen + infolen;
-      memcpy(text + tlen, info, infolen * sizeof (info[0U]));
+      u8 *tag;
+      if (text == NULL)
+        tag = NULL;
+      else
+        tag = text;
       {
-        u32 i;
-        for (i = (u32)0U; i < n; i++)
-        {
-          ctr[0U] = (u8)(i + (u32)1U);
-          if (i == (u32)0U)
-            Hacl_HMAC_compute_sha2_512(tag, prk, prklen, text0, infolen + (u32)1U);
-          else
-            Hacl_HMAC_compute_sha2_512(tag, prk, prklen, text, tlen + infolen + (u32)1U);
-          memcpy(output + i * tlen, tag, tlen * sizeof (tag[0U]));
-        }
-      }
-      if (n * tlen < len)
-      {
-        ctr[0U] = (u8)(n + (u32)1U);
-        if (n == (u32)0U)
-          Hacl_HMAC_compute_sha2_512(tag, prk, prklen, text0, infolen + (u32)1U);
+        u8 *ctr;
+        if (text == NULL)
+          ctr = NULL;
         else
-          Hacl_HMAC_compute_sha2_512(tag, prk, prklen, text, tlen + infolen + (u32)1U);
+          ctr = text + tlen + infolen;
         {
-          u8 *block = okm + n * tlen;
-          memcpy(block, tag, (len - n * tlen) * sizeof (tag[0U]));
+          u8 *uu____0;
+          if (text == NULL)
+            uu____0 = NULL;
+          else
+            uu____0 = text + tlen;
+          {
+            bool uu____1 = info == NULL;
+            if (!(uu____1 || uu____0 == NULL))
+              memcpy(uu____0, info, infolen * sizeof (info[0U]));
+            {
+              u32 i;
+              for (i = (u32)0U; i < n; i++)
+              {
+                u8 *block;
+                if (output == NULL)
+                  block = NULL;
+                else
+                  block = output + i * tlen;
+                ctr[0U] = (u8)(i + (u32)1U);
+                if (i == (u32)0U)
+                  Hacl_HMAC_compute_sha2_512(tag, prk, prklen, text0, infolen + (u32)1U);
+                else
+                  Hacl_HMAC_compute_sha2_512(tag, prk, prklen, text, tlen + infolen + (u32)1U);
+                {
+                  u8 *uu____2;
+                  if (output == NULL)
+                    uu____2 = NULL;
+                  else
+                    uu____2 = output + i * tlen;
+                  {
+                    bool uu____3 = tag == NULL;
+                    if (!(uu____3 || uu____2 == NULL))
+                      memcpy(uu____2, tag, tlen * sizeof (tag[0U]));
+                  }
+                }
+              }
+            }
+            if (n * tlen < len)
+            {
+              ctr[0U] = (u8)(n + (u32)1U);
+              if (n == (u32)0U)
+                Hacl_HMAC_compute_sha2_512(tag, prk, prklen, text0, infolen + (u32)1U);
+              else
+                Hacl_HMAC_compute_sha2_512(tag, prk, prklen, text, tlen + infolen + (u32)1U);
+              {
+                u8 *block = okm + n * tlen;
+                memcpy(block, tag, (len - n * tlen) * sizeof (tag[0U]));
+              }
+            }
+          }
         }
       }
     }

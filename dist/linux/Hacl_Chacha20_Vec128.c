@@ -195,60 +195,77 @@ static inline void
 chacha20_init_128(Lib_IntVector_Intrinsics_vec128 *ctx, u8 *k, u8 *n, u32 ctr)
 {
   u32 ctx1[16U] = { 0U };
-  u32 *uu____0 = ctx1;
-  u32 *uu____1;
-  u32 *uu____2;
-  Lib_IntVector_Intrinsics_vec128 ctr1;
-  Lib_IntVector_Intrinsics_vec128 c12;
+  u32 *tmp0;
+  if (ctx1 == NULL)
+    tmp0 = NULL;
+  else
+    tmp0 = ctx1;
   {
-    u32 i;
-    for (i = (u32)0U; i < (u32)4U; i++)
+    u32 *uu____0 = ctx1;
+    u32 *tmp1;
+    u32 *uu____1;
+    u32 *tmp;
+    u32 *uu____2;
+    Lib_IntVector_Intrinsics_vec128 ctr1;
+    Lib_IntVector_Intrinsics_vec128 c12;
     {
-      u32 *os = uu____0;
-      u32 x = Hacl_Impl_Chacha20_Vec_chacha20_constants[i];
-      os[i] = x;
+      u32 i;
+      for (i = (u32)0U; i < (u32)4U; i++)
+      {
+        u32 *os = uu____0;
+        u32 x = Hacl_Impl_Chacha20_Vec_chacha20_constants[i];
+        os[i] = x;
+      }
     }
-  }
-  uu____1 = ctx1 + (u32)4U;
-  {
-    u32 i;
-    for (i = (u32)0U; i < (u32)8U; i++)
+    if (ctx1 == NULL)
+      tmp1 = NULL;
+    else
+      tmp1 = ctx1 + (u32)4U;
+    uu____1 = ctx1 + (u32)4U;
     {
-      u32 *os = uu____1;
-      u8 *bj = k + i * (u32)4U;
-      u32 u = load32_le(bj);
-      u32 r = u;
-      u32 x = r;
-      os[i] = x;
+      u32 i;
+      for (i = (u32)0U; i < (u32)8U; i++)
+      {
+        u32 *os = uu____1;
+        u8 *bj = k + i * (u32)4U;
+        u32 u = load32_le(bj);
+        u32 r = u;
+        u32 x = r;
+        os[i] = x;
+      }
     }
-  }
-  ctx1[12U] = ctr;
-  uu____2 = ctx1 + (u32)13U;
-  {
-    u32 i;
-    for (i = (u32)0U; i < (u32)3U; i++)
+    ctx1[12U] = ctr;
+    if (ctx1 == NULL)
+      tmp = NULL;
+    else
+      tmp = ctx1 + (u32)13U;
+    uu____2 = ctx1 + (u32)13U;
     {
-      u32 *os = uu____2;
-      u8 *bj = n + i * (u32)4U;
-      u32 u = load32_le(bj);
-      u32 r = u;
-      u32 x = r;
-      os[i] = x;
+      u32 i;
+      for (i = (u32)0U; i < (u32)3U; i++)
+      {
+        u32 *os = uu____2;
+        u8 *bj = n + i * (u32)4U;
+        u32 u = load32_le(bj);
+        u32 r = u;
+        u32 x = r;
+        os[i] = x;
+      }
     }
-  }
-  {
-    u32 i;
-    for (i = (u32)0U; i < (u32)16U; i++)
     {
-      Lib_IntVector_Intrinsics_vec128 *os = ctx;
-      u32 x = ctx1[i];
-      Lib_IntVector_Intrinsics_vec128 x0 = Lib_IntVector_Intrinsics_vec128_load32(x);
-      os[i] = x0;
+      u32 i;
+      for (i = (u32)0U; i < (u32)16U; i++)
+      {
+        Lib_IntVector_Intrinsics_vec128 *os = ctx;
+        u32 x = ctx1[i];
+        Lib_IntVector_Intrinsics_vec128 x0 = Lib_IntVector_Intrinsics_vec128_load32(x);
+        os[i] = x0;
+      }
     }
+    ctr1 = Lib_IntVector_Intrinsics_vec128_load32s((u32)0U, (u32)1U, (u32)2U, (u32)3U);
+    c12 = ctx[12U];
+    ctx[12U] = Lib_IntVector_Intrinsics_vec128_add32(c12, ctr1);
   }
-  ctr1 = Lib_IntVector_Intrinsics_vec128_load32s((u32)0U, (u32)1U, (u32)2U, (u32)3U);
-  c12 = ctx[12U];
-  ctx[12U] = Lib_IntVector_Intrinsics_vec128_add32(c12, ctr1);
 }
 
 void
@@ -262,289 +279,304 @@ Hacl_Chacha20_Vec128_chacha20_encrypt_128(u32 len, u8 *out, u8 *text, u8 *key, u
   }
   {
     u32 rem;
-    u32 nb;
-    u32 rem1;
     chacha20_init_128(ctx, key, n, ctr);
     rem = len % (u32)256U;
-    nb = len / (u32)256U;
-    rem1 = len % (u32)256U;
+    if (!(len == (u32)0U))
     {
-      u32 i;
-      for (i = (u32)0U; i < nb; i++)
+      u32 nb = len / (u32)256U;
+      u32 rem1 = len % (u32)256U;
+      u8 *ib;
+      if (text == NULL)
+        ib = NULL;
+      else
+        ib = text;
       {
-        u8 *uu____0 = out + i * (u32)256U;
-        u8 *uu____1 = text + i * (u32)256U;
-        Lib_IntVector_Intrinsics_vec128 k[16U];
+        u8 *ob;
+        if (out == NULL)
+          ob = NULL;
+        else
+          ob = out;
         {
-          u32 _i;
-          for (_i = 0U; _i < (u32)16U; ++_i)
-            k[_i] = Lib_IntVector_Intrinsics_vec128_zero;
-        }
-        chacha20_core_128(k, ctx, i);
-        {
-          Lib_IntVector_Intrinsics_vec128 v00 = k[0U];
-          Lib_IntVector_Intrinsics_vec128 v16 = k[1U];
-          Lib_IntVector_Intrinsics_vec128 v20 = k[2U];
-          Lib_IntVector_Intrinsics_vec128 v30 = k[3U];
-          Lib_IntVector_Intrinsics_vec128
-          v0_ = Lib_IntVector_Intrinsics_vec128_interleave_low32(v00, v16);
-          Lib_IntVector_Intrinsics_vec128
-          v1_ = Lib_IntVector_Intrinsics_vec128_interleave_high32(v00, v16);
-          Lib_IntVector_Intrinsics_vec128
-          v2_ = Lib_IntVector_Intrinsics_vec128_interleave_low32(v20, v30);
-          Lib_IntVector_Intrinsics_vec128
-          v3_ = Lib_IntVector_Intrinsics_vec128_interleave_high32(v20, v30);
-          Lib_IntVector_Intrinsics_vec128
-          v0__ = Lib_IntVector_Intrinsics_vec128_interleave_low64(v0_, v2_);
-          Lib_IntVector_Intrinsics_vec128
-          v1__ = Lib_IntVector_Intrinsics_vec128_interleave_high64(v0_, v2_);
-          Lib_IntVector_Intrinsics_vec128
-          v2__ = Lib_IntVector_Intrinsics_vec128_interleave_low64(v1_, v3_);
-          Lib_IntVector_Intrinsics_vec128
-          v3__ = Lib_IntVector_Intrinsics_vec128_interleave_high64(v1_, v3_);
-          Lib_IntVector_Intrinsics_vec128 v0 = v0__;
-          Lib_IntVector_Intrinsics_vec128 v1 = v1__;
-          Lib_IntVector_Intrinsics_vec128 v2 = v2__;
-          Lib_IntVector_Intrinsics_vec128 v3 = v3__;
-          Lib_IntVector_Intrinsics_vec128 v010 = k[4U];
-          Lib_IntVector_Intrinsics_vec128 v110 = k[5U];
-          Lib_IntVector_Intrinsics_vec128 v210 = k[6U];
-          Lib_IntVector_Intrinsics_vec128 v310 = k[7U];
-          Lib_IntVector_Intrinsics_vec128
-          v0_0 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v010, v110);
-          Lib_IntVector_Intrinsics_vec128
-          v1_0 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v010, v110);
-          Lib_IntVector_Intrinsics_vec128
-          v2_0 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v210, v310);
-          Lib_IntVector_Intrinsics_vec128
-          v3_0 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v210, v310);
-          Lib_IntVector_Intrinsics_vec128
-          v0__0 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v0_0, v2_0);
-          Lib_IntVector_Intrinsics_vec128
-          v1__0 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v0_0, v2_0);
-          Lib_IntVector_Intrinsics_vec128
-          v2__0 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v1_0, v3_0);
-          Lib_IntVector_Intrinsics_vec128
-          v3__0 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v1_0, v3_0);
-          Lib_IntVector_Intrinsics_vec128 v4 = v0__0;
-          Lib_IntVector_Intrinsics_vec128 v5 = v1__0;
-          Lib_IntVector_Intrinsics_vec128 v6 = v2__0;
-          Lib_IntVector_Intrinsics_vec128 v7 = v3__0;
-          Lib_IntVector_Intrinsics_vec128 v011 = k[8U];
-          Lib_IntVector_Intrinsics_vec128 v111 = k[9U];
-          Lib_IntVector_Intrinsics_vec128 v211 = k[10U];
-          Lib_IntVector_Intrinsics_vec128 v311 = k[11U];
-          Lib_IntVector_Intrinsics_vec128
-          v0_1 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v011, v111);
-          Lib_IntVector_Intrinsics_vec128
-          v1_1 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v011, v111);
-          Lib_IntVector_Intrinsics_vec128
-          v2_1 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v211, v311);
-          Lib_IntVector_Intrinsics_vec128
-          v3_1 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v211, v311);
-          Lib_IntVector_Intrinsics_vec128
-          v0__1 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v0_1, v2_1);
-          Lib_IntVector_Intrinsics_vec128
-          v1__1 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v0_1, v2_1);
-          Lib_IntVector_Intrinsics_vec128
-          v2__1 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v1_1, v3_1);
-          Lib_IntVector_Intrinsics_vec128
-          v3__1 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v1_1, v3_1);
-          Lib_IntVector_Intrinsics_vec128 v8 = v0__1;
-          Lib_IntVector_Intrinsics_vec128 v9 = v1__1;
-          Lib_IntVector_Intrinsics_vec128 v10 = v2__1;
-          Lib_IntVector_Intrinsics_vec128 v11 = v3__1;
-          Lib_IntVector_Intrinsics_vec128 v01 = k[12U];
-          Lib_IntVector_Intrinsics_vec128 v120 = k[13U];
-          Lib_IntVector_Intrinsics_vec128 v21 = k[14U];
-          Lib_IntVector_Intrinsics_vec128 v31 = k[15U];
-          Lib_IntVector_Intrinsics_vec128
-          v0_2 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v01, v120);
-          Lib_IntVector_Intrinsics_vec128
-          v1_2 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v01, v120);
-          Lib_IntVector_Intrinsics_vec128
-          v2_2 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v21, v31);
-          Lib_IntVector_Intrinsics_vec128
-          v3_2 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v21, v31);
-          Lib_IntVector_Intrinsics_vec128
-          v0__2 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v0_2, v2_2);
-          Lib_IntVector_Intrinsics_vec128
-          v1__2 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v0_2, v2_2);
-          Lib_IntVector_Intrinsics_vec128
-          v2__2 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v1_2, v3_2);
-          Lib_IntVector_Intrinsics_vec128
-          v3__2 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v1_2, v3_2);
-          Lib_IntVector_Intrinsics_vec128 v12 = v0__2;
-          Lib_IntVector_Intrinsics_vec128 v13 = v1__2;
-          Lib_IntVector_Intrinsics_vec128 v14 = v2__2;
-          Lib_IntVector_Intrinsics_vec128 v15 = v3__2;
-          k[0U] = v0;
-          k[1U] = v4;
-          k[2U] = v8;
-          k[3U] = v12;
-          k[4U] = v1;
-          k[5U] = v5;
-          k[6U] = v9;
-          k[7U] = v13;
-          k[8U] = v2;
-          k[9U] = v6;
-          k[10U] = v10;
-          k[11U] = v14;
-          k[12U] = v3;
-          k[13U] = v7;
-          k[14U] = v11;
-          k[15U] = v15;
+          u32 i;
+          for (i = (u32)0U; i < nb; i++)
           {
-            u32 i0;
-            for (i0 = (u32)0U; i0 < (u32)16U; i0++)
+            u8 *uu____0 = out + i * (u32)256U;
+            u8 *uu____1 = text + i * (u32)256U;
+            Lib_IntVector_Intrinsics_vec128 k[16U];
             {
+              u32 _i;
+              for (_i = 0U; _i < (u32)16U; ++_i)
+                k[_i] = Lib_IntVector_Intrinsics_vec128_zero;
+            }
+            chacha20_core_128(k, ctx, i);
+            {
+              Lib_IntVector_Intrinsics_vec128 v00 = k[0U];
+              Lib_IntVector_Intrinsics_vec128 v16 = k[1U];
+              Lib_IntVector_Intrinsics_vec128 v20 = k[2U];
+              Lib_IntVector_Intrinsics_vec128 v30 = k[3U];
               Lib_IntVector_Intrinsics_vec128
-              x = Lib_IntVector_Intrinsics_vec128_load_le(uu____1 + i0 * (u32)16U);
-              Lib_IntVector_Intrinsics_vec128 y = Lib_IntVector_Intrinsics_vec128_xor(x, k[i0]);
-              Lib_IntVector_Intrinsics_vec128_store_le(uu____0 + i0 * (u32)16U, y);
+              v0_ = Lib_IntVector_Intrinsics_vec128_interleave_low32(v00, v16);
+              Lib_IntVector_Intrinsics_vec128
+              v1_ = Lib_IntVector_Intrinsics_vec128_interleave_high32(v00, v16);
+              Lib_IntVector_Intrinsics_vec128
+              v2_ = Lib_IntVector_Intrinsics_vec128_interleave_low32(v20, v30);
+              Lib_IntVector_Intrinsics_vec128
+              v3_ = Lib_IntVector_Intrinsics_vec128_interleave_high32(v20, v30);
+              Lib_IntVector_Intrinsics_vec128
+              v0__ = Lib_IntVector_Intrinsics_vec128_interleave_low64(v0_, v2_);
+              Lib_IntVector_Intrinsics_vec128
+              v1__ = Lib_IntVector_Intrinsics_vec128_interleave_high64(v0_, v2_);
+              Lib_IntVector_Intrinsics_vec128
+              v2__ = Lib_IntVector_Intrinsics_vec128_interleave_low64(v1_, v3_);
+              Lib_IntVector_Intrinsics_vec128
+              v3__ = Lib_IntVector_Intrinsics_vec128_interleave_high64(v1_, v3_);
+              Lib_IntVector_Intrinsics_vec128 v0 = v0__;
+              Lib_IntVector_Intrinsics_vec128 v1 = v1__;
+              Lib_IntVector_Intrinsics_vec128 v2 = v2__;
+              Lib_IntVector_Intrinsics_vec128 v3 = v3__;
+              Lib_IntVector_Intrinsics_vec128 v010 = k[4U];
+              Lib_IntVector_Intrinsics_vec128 v110 = k[5U];
+              Lib_IntVector_Intrinsics_vec128 v210 = k[6U];
+              Lib_IntVector_Intrinsics_vec128 v310 = k[7U];
+              Lib_IntVector_Intrinsics_vec128
+              v0_0 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v010, v110);
+              Lib_IntVector_Intrinsics_vec128
+              v1_0 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v010, v110);
+              Lib_IntVector_Intrinsics_vec128
+              v2_0 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v210, v310);
+              Lib_IntVector_Intrinsics_vec128
+              v3_0 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v210, v310);
+              Lib_IntVector_Intrinsics_vec128
+              v0__0 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v0_0, v2_0);
+              Lib_IntVector_Intrinsics_vec128
+              v1__0 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v0_0, v2_0);
+              Lib_IntVector_Intrinsics_vec128
+              v2__0 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v1_0, v3_0);
+              Lib_IntVector_Intrinsics_vec128
+              v3__0 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v1_0, v3_0);
+              Lib_IntVector_Intrinsics_vec128 v4 = v0__0;
+              Lib_IntVector_Intrinsics_vec128 v5 = v1__0;
+              Lib_IntVector_Intrinsics_vec128 v6 = v2__0;
+              Lib_IntVector_Intrinsics_vec128 v7 = v3__0;
+              Lib_IntVector_Intrinsics_vec128 v011 = k[8U];
+              Lib_IntVector_Intrinsics_vec128 v111 = k[9U];
+              Lib_IntVector_Intrinsics_vec128 v211 = k[10U];
+              Lib_IntVector_Intrinsics_vec128 v311 = k[11U];
+              Lib_IntVector_Intrinsics_vec128
+              v0_1 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v011, v111);
+              Lib_IntVector_Intrinsics_vec128
+              v1_1 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v011, v111);
+              Lib_IntVector_Intrinsics_vec128
+              v2_1 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v211, v311);
+              Lib_IntVector_Intrinsics_vec128
+              v3_1 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v211, v311);
+              Lib_IntVector_Intrinsics_vec128
+              v0__1 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v0_1, v2_1);
+              Lib_IntVector_Intrinsics_vec128
+              v1__1 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v0_1, v2_1);
+              Lib_IntVector_Intrinsics_vec128
+              v2__1 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v1_1, v3_1);
+              Lib_IntVector_Intrinsics_vec128
+              v3__1 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v1_1, v3_1);
+              Lib_IntVector_Intrinsics_vec128 v8 = v0__1;
+              Lib_IntVector_Intrinsics_vec128 v9 = v1__1;
+              Lib_IntVector_Intrinsics_vec128 v10 = v2__1;
+              Lib_IntVector_Intrinsics_vec128 v11 = v3__1;
+              Lib_IntVector_Intrinsics_vec128 v01 = k[12U];
+              Lib_IntVector_Intrinsics_vec128 v120 = k[13U];
+              Lib_IntVector_Intrinsics_vec128 v21 = k[14U];
+              Lib_IntVector_Intrinsics_vec128 v31 = k[15U];
+              Lib_IntVector_Intrinsics_vec128
+              v0_2 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v01, v120);
+              Lib_IntVector_Intrinsics_vec128
+              v1_2 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v01, v120);
+              Lib_IntVector_Intrinsics_vec128
+              v2_2 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v21, v31);
+              Lib_IntVector_Intrinsics_vec128
+              v3_2 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v21, v31);
+              Lib_IntVector_Intrinsics_vec128
+              v0__2 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v0_2, v2_2);
+              Lib_IntVector_Intrinsics_vec128
+              v1__2 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v0_2, v2_2);
+              Lib_IntVector_Intrinsics_vec128
+              v2__2 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v1_2, v3_2);
+              Lib_IntVector_Intrinsics_vec128
+              v3__2 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v1_2, v3_2);
+              Lib_IntVector_Intrinsics_vec128 v12 = v0__2;
+              Lib_IntVector_Intrinsics_vec128 v13 = v1__2;
+              Lib_IntVector_Intrinsics_vec128 v14 = v2__2;
+              Lib_IntVector_Intrinsics_vec128 v15 = v3__2;
+              k[0U] = v0;
+              k[1U] = v4;
+              k[2U] = v8;
+              k[3U] = v12;
+              k[4U] = v1;
+              k[5U] = v5;
+              k[6U] = v9;
+              k[7U] = v13;
+              k[8U] = v2;
+              k[9U] = v6;
+              k[10U] = v10;
+              k[11U] = v14;
+              k[12U] = v3;
+              k[13U] = v7;
+              k[14U] = v11;
+              k[15U] = v15;
+              {
+                u32 i0;
+                for (i0 = (u32)0U; i0 < (u32)16U; i0++)
+                {
+                  Lib_IntVector_Intrinsics_vec128
+                  x = Lib_IntVector_Intrinsics_vec128_load_le(uu____1 + i0 * (u32)16U);
+                  Lib_IntVector_Intrinsics_vec128 y = Lib_IntVector_Intrinsics_vec128_xor(x, k[i0]);
+                  Lib_IntVector_Intrinsics_vec128_store_le(uu____0 + i0 * (u32)16U, y);
+                }
+              }
             }
           }
         }
-      }
-    }
-    if (rem1 > (u32)0U)
-    {
-      u8 *uu____2 = out + nb * (u32)256U;
-      u8 *uu____3 = text + nb * (u32)256U;
-      u8 plain[256U] = { 0U };
-      memcpy(plain, uu____3, rem * sizeof (uu____3[0U]));
-      {
-        Lib_IntVector_Intrinsics_vec128 k[16U];
+        if (rem1 > (u32)0U)
         {
-          u32 _i;
-          for (_i = 0U; _i < (u32)16U; ++_i)
-            k[_i] = Lib_IntVector_Intrinsics_vec128_zero;
-        }
-        chacha20_core_128(k, ctx, nb);
-        {
-          Lib_IntVector_Intrinsics_vec128 v00 = k[0U];
-          Lib_IntVector_Intrinsics_vec128 v16 = k[1U];
-          Lib_IntVector_Intrinsics_vec128 v20 = k[2U];
-          Lib_IntVector_Intrinsics_vec128 v30 = k[3U];
-          Lib_IntVector_Intrinsics_vec128
-          v0_ = Lib_IntVector_Intrinsics_vec128_interleave_low32(v00, v16);
-          Lib_IntVector_Intrinsics_vec128
-          v1_ = Lib_IntVector_Intrinsics_vec128_interleave_high32(v00, v16);
-          Lib_IntVector_Intrinsics_vec128
-          v2_ = Lib_IntVector_Intrinsics_vec128_interleave_low32(v20, v30);
-          Lib_IntVector_Intrinsics_vec128
-          v3_ = Lib_IntVector_Intrinsics_vec128_interleave_high32(v20, v30);
-          Lib_IntVector_Intrinsics_vec128
-          v0__ = Lib_IntVector_Intrinsics_vec128_interleave_low64(v0_, v2_);
-          Lib_IntVector_Intrinsics_vec128
-          v1__ = Lib_IntVector_Intrinsics_vec128_interleave_high64(v0_, v2_);
-          Lib_IntVector_Intrinsics_vec128
-          v2__ = Lib_IntVector_Intrinsics_vec128_interleave_low64(v1_, v3_);
-          Lib_IntVector_Intrinsics_vec128
-          v3__ = Lib_IntVector_Intrinsics_vec128_interleave_high64(v1_, v3_);
-          Lib_IntVector_Intrinsics_vec128 v0 = v0__;
-          Lib_IntVector_Intrinsics_vec128 v1 = v1__;
-          Lib_IntVector_Intrinsics_vec128 v2 = v2__;
-          Lib_IntVector_Intrinsics_vec128 v3 = v3__;
-          Lib_IntVector_Intrinsics_vec128 v010 = k[4U];
-          Lib_IntVector_Intrinsics_vec128 v110 = k[5U];
-          Lib_IntVector_Intrinsics_vec128 v210 = k[6U];
-          Lib_IntVector_Intrinsics_vec128 v310 = k[7U];
-          Lib_IntVector_Intrinsics_vec128
-          v0_0 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v010, v110);
-          Lib_IntVector_Intrinsics_vec128
-          v1_0 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v010, v110);
-          Lib_IntVector_Intrinsics_vec128
-          v2_0 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v210, v310);
-          Lib_IntVector_Intrinsics_vec128
-          v3_0 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v210, v310);
-          Lib_IntVector_Intrinsics_vec128
-          v0__0 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v0_0, v2_0);
-          Lib_IntVector_Intrinsics_vec128
-          v1__0 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v0_0, v2_0);
-          Lib_IntVector_Intrinsics_vec128
-          v2__0 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v1_0, v3_0);
-          Lib_IntVector_Intrinsics_vec128
-          v3__0 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v1_0, v3_0);
-          Lib_IntVector_Intrinsics_vec128 v4 = v0__0;
-          Lib_IntVector_Intrinsics_vec128 v5 = v1__0;
-          Lib_IntVector_Intrinsics_vec128 v6 = v2__0;
-          Lib_IntVector_Intrinsics_vec128 v7 = v3__0;
-          Lib_IntVector_Intrinsics_vec128 v011 = k[8U];
-          Lib_IntVector_Intrinsics_vec128 v111 = k[9U];
-          Lib_IntVector_Intrinsics_vec128 v211 = k[10U];
-          Lib_IntVector_Intrinsics_vec128 v311 = k[11U];
-          Lib_IntVector_Intrinsics_vec128
-          v0_1 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v011, v111);
-          Lib_IntVector_Intrinsics_vec128
-          v1_1 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v011, v111);
-          Lib_IntVector_Intrinsics_vec128
-          v2_1 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v211, v311);
-          Lib_IntVector_Intrinsics_vec128
-          v3_1 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v211, v311);
-          Lib_IntVector_Intrinsics_vec128
-          v0__1 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v0_1, v2_1);
-          Lib_IntVector_Intrinsics_vec128
-          v1__1 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v0_1, v2_1);
-          Lib_IntVector_Intrinsics_vec128
-          v2__1 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v1_1, v3_1);
-          Lib_IntVector_Intrinsics_vec128
-          v3__1 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v1_1, v3_1);
-          Lib_IntVector_Intrinsics_vec128 v8 = v0__1;
-          Lib_IntVector_Intrinsics_vec128 v9 = v1__1;
-          Lib_IntVector_Intrinsics_vec128 v10 = v2__1;
-          Lib_IntVector_Intrinsics_vec128 v11 = v3__1;
-          Lib_IntVector_Intrinsics_vec128 v01 = k[12U];
-          Lib_IntVector_Intrinsics_vec128 v120 = k[13U];
-          Lib_IntVector_Intrinsics_vec128 v21 = k[14U];
-          Lib_IntVector_Intrinsics_vec128 v31 = k[15U];
-          Lib_IntVector_Intrinsics_vec128
-          v0_2 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v01, v120);
-          Lib_IntVector_Intrinsics_vec128
-          v1_2 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v01, v120);
-          Lib_IntVector_Intrinsics_vec128
-          v2_2 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v21, v31);
-          Lib_IntVector_Intrinsics_vec128
-          v3_2 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v21, v31);
-          Lib_IntVector_Intrinsics_vec128
-          v0__2 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v0_2, v2_2);
-          Lib_IntVector_Intrinsics_vec128
-          v1__2 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v0_2, v2_2);
-          Lib_IntVector_Intrinsics_vec128
-          v2__2 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v1_2, v3_2);
-          Lib_IntVector_Intrinsics_vec128
-          v3__2 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v1_2, v3_2);
-          Lib_IntVector_Intrinsics_vec128 v12 = v0__2;
-          Lib_IntVector_Intrinsics_vec128 v13 = v1__2;
-          Lib_IntVector_Intrinsics_vec128 v14 = v2__2;
-          Lib_IntVector_Intrinsics_vec128 v15 = v3__2;
-          k[0U] = v0;
-          k[1U] = v4;
-          k[2U] = v8;
-          k[3U] = v12;
-          k[4U] = v1;
-          k[5U] = v5;
-          k[6U] = v9;
-          k[7U] = v13;
-          k[8U] = v2;
-          k[9U] = v6;
-          k[10U] = v10;
-          k[11U] = v14;
-          k[12U] = v3;
-          k[13U] = v7;
-          k[14U] = v11;
-          k[15U] = v15;
+          u8 *uu____2 = out + nb * (u32)256U;
+          u8 *uu____3 = text + nb * (u32)256U;
+          u8 plain[256U] = { 0U };
+          bool uu____4 = uu____3 == NULL;
+          if (!(uu____4 || plain == NULL))
+            memcpy(plain, uu____3, rem * sizeof (uu____3[0U]));
           {
-            u32 i;
-            for (i = (u32)0U; i < (u32)16U; i++)
+            Lib_IntVector_Intrinsics_vec128 k[16U];
             {
+              u32 _i;
+              for (_i = 0U; _i < (u32)16U; ++_i)
+                k[_i] = Lib_IntVector_Intrinsics_vec128_zero;
+            }
+            chacha20_core_128(k, ctx, nb);
+            {
+              Lib_IntVector_Intrinsics_vec128 v00 = k[0U];
+              Lib_IntVector_Intrinsics_vec128 v16 = k[1U];
+              Lib_IntVector_Intrinsics_vec128 v20 = k[2U];
+              Lib_IntVector_Intrinsics_vec128 v30 = k[3U];
               Lib_IntVector_Intrinsics_vec128
-              x = Lib_IntVector_Intrinsics_vec128_load_le(plain + i * (u32)16U);
-              Lib_IntVector_Intrinsics_vec128 y = Lib_IntVector_Intrinsics_vec128_xor(x, k[i]);
-              Lib_IntVector_Intrinsics_vec128_store_le(plain + i * (u32)16U, y);
+              v0_ = Lib_IntVector_Intrinsics_vec128_interleave_low32(v00, v16);
+              Lib_IntVector_Intrinsics_vec128
+              v1_ = Lib_IntVector_Intrinsics_vec128_interleave_high32(v00, v16);
+              Lib_IntVector_Intrinsics_vec128
+              v2_ = Lib_IntVector_Intrinsics_vec128_interleave_low32(v20, v30);
+              Lib_IntVector_Intrinsics_vec128
+              v3_ = Lib_IntVector_Intrinsics_vec128_interleave_high32(v20, v30);
+              Lib_IntVector_Intrinsics_vec128
+              v0__ = Lib_IntVector_Intrinsics_vec128_interleave_low64(v0_, v2_);
+              Lib_IntVector_Intrinsics_vec128
+              v1__ = Lib_IntVector_Intrinsics_vec128_interleave_high64(v0_, v2_);
+              Lib_IntVector_Intrinsics_vec128
+              v2__ = Lib_IntVector_Intrinsics_vec128_interleave_low64(v1_, v3_);
+              Lib_IntVector_Intrinsics_vec128
+              v3__ = Lib_IntVector_Intrinsics_vec128_interleave_high64(v1_, v3_);
+              Lib_IntVector_Intrinsics_vec128 v0 = v0__;
+              Lib_IntVector_Intrinsics_vec128 v1 = v1__;
+              Lib_IntVector_Intrinsics_vec128 v2 = v2__;
+              Lib_IntVector_Intrinsics_vec128 v3 = v3__;
+              Lib_IntVector_Intrinsics_vec128 v010 = k[4U];
+              Lib_IntVector_Intrinsics_vec128 v110 = k[5U];
+              Lib_IntVector_Intrinsics_vec128 v210 = k[6U];
+              Lib_IntVector_Intrinsics_vec128 v310 = k[7U];
+              Lib_IntVector_Intrinsics_vec128
+              v0_0 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v010, v110);
+              Lib_IntVector_Intrinsics_vec128
+              v1_0 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v010, v110);
+              Lib_IntVector_Intrinsics_vec128
+              v2_0 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v210, v310);
+              Lib_IntVector_Intrinsics_vec128
+              v3_0 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v210, v310);
+              Lib_IntVector_Intrinsics_vec128
+              v0__0 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v0_0, v2_0);
+              Lib_IntVector_Intrinsics_vec128
+              v1__0 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v0_0, v2_0);
+              Lib_IntVector_Intrinsics_vec128
+              v2__0 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v1_0, v3_0);
+              Lib_IntVector_Intrinsics_vec128
+              v3__0 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v1_0, v3_0);
+              Lib_IntVector_Intrinsics_vec128 v4 = v0__0;
+              Lib_IntVector_Intrinsics_vec128 v5 = v1__0;
+              Lib_IntVector_Intrinsics_vec128 v6 = v2__0;
+              Lib_IntVector_Intrinsics_vec128 v7 = v3__0;
+              Lib_IntVector_Intrinsics_vec128 v011 = k[8U];
+              Lib_IntVector_Intrinsics_vec128 v111 = k[9U];
+              Lib_IntVector_Intrinsics_vec128 v211 = k[10U];
+              Lib_IntVector_Intrinsics_vec128 v311 = k[11U];
+              Lib_IntVector_Intrinsics_vec128
+              v0_1 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v011, v111);
+              Lib_IntVector_Intrinsics_vec128
+              v1_1 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v011, v111);
+              Lib_IntVector_Intrinsics_vec128
+              v2_1 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v211, v311);
+              Lib_IntVector_Intrinsics_vec128
+              v3_1 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v211, v311);
+              Lib_IntVector_Intrinsics_vec128
+              v0__1 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v0_1, v2_1);
+              Lib_IntVector_Intrinsics_vec128
+              v1__1 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v0_1, v2_1);
+              Lib_IntVector_Intrinsics_vec128
+              v2__1 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v1_1, v3_1);
+              Lib_IntVector_Intrinsics_vec128
+              v3__1 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v1_1, v3_1);
+              Lib_IntVector_Intrinsics_vec128 v8 = v0__1;
+              Lib_IntVector_Intrinsics_vec128 v9 = v1__1;
+              Lib_IntVector_Intrinsics_vec128 v10 = v2__1;
+              Lib_IntVector_Intrinsics_vec128 v11 = v3__1;
+              Lib_IntVector_Intrinsics_vec128 v01 = k[12U];
+              Lib_IntVector_Intrinsics_vec128 v120 = k[13U];
+              Lib_IntVector_Intrinsics_vec128 v21 = k[14U];
+              Lib_IntVector_Intrinsics_vec128 v31 = k[15U];
+              Lib_IntVector_Intrinsics_vec128
+              v0_2 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v01, v120);
+              Lib_IntVector_Intrinsics_vec128
+              v1_2 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v01, v120);
+              Lib_IntVector_Intrinsics_vec128
+              v2_2 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v21, v31);
+              Lib_IntVector_Intrinsics_vec128
+              v3_2 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v21, v31);
+              Lib_IntVector_Intrinsics_vec128
+              v0__2 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v0_2, v2_2);
+              Lib_IntVector_Intrinsics_vec128
+              v1__2 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v0_2, v2_2);
+              Lib_IntVector_Intrinsics_vec128
+              v2__2 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v1_2, v3_2);
+              Lib_IntVector_Intrinsics_vec128
+              v3__2 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v1_2, v3_2);
+              Lib_IntVector_Intrinsics_vec128 v12 = v0__2;
+              Lib_IntVector_Intrinsics_vec128 v13 = v1__2;
+              Lib_IntVector_Intrinsics_vec128 v14 = v2__2;
+              Lib_IntVector_Intrinsics_vec128 v15 = v3__2;
+              k[0U] = v0;
+              k[1U] = v4;
+              k[2U] = v8;
+              k[3U] = v12;
+              k[4U] = v1;
+              k[5U] = v5;
+              k[6U] = v9;
+              k[7U] = v13;
+              k[8U] = v2;
+              k[9U] = v6;
+              k[10U] = v10;
+              k[11U] = v14;
+              k[12U] = v3;
+              k[13U] = v7;
+              k[14U] = v11;
+              k[15U] = v15;
+              {
+                u32 i;
+                for (i = (u32)0U; i < (u32)16U; i++)
+                {
+                  Lib_IntVector_Intrinsics_vec128
+                  x = Lib_IntVector_Intrinsics_vec128_load_le(plain + i * (u32)16U);
+                  Lib_IntVector_Intrinsics_vec128 y = Lib_IntVector_Intrinsics_vec128_xor(x, k[i]);
+                  Lib_IntVector_Intrinsics_vec128_store_le(plain + i * (u32)16U, y);
+                }
+              }
+              memcpy(uu____2, plain, rem * sizeof (plain[0U]));
             }
           }
-          memcpy(uu____2, plain, rem * sizeof (plain[0U]));
         }
       }
     }
@@ -569,289 +601,304 @@ Hacl_Chacha20_Vec128_chacha20_decrypt_128(
   }
   {
     u32 rem;
-    u32 nb;
-    u32 rem1;
     chacha20_init_128(ctx, key, n, ctr);
     rem = len % (u32)256U;
-    nb = len / (u32)256U;
-    rem1 = len % (u32)256U;
+    if (!(len == (u32)0U))
     {
-      u32 i;
-      for (i = (u32)0U; i < nb; i++)
+      u32 nb = len / (u32)256U;
+      u32 rem1 = len % (u32)256U;
+      u8 *ib;
+      if (cipher == NULL)
+        ib = NULL;
+      else
+        ib = cipher;
       {
-        u8 *uu____0 = out + i * (u32)256U;
-        u8 *uu____1 = cipher + i * (u32)256U;
-        Lib_IntVector_Intrinsics_vec128 k[16U];
+        u8 *ob;
+        if (out == NULL)
+          ob = NULL;
+        else
+          ob = out;
         {
-          u32 _i;
-          for (_i = 0U; _i < (u32)16U; ++_i)
-            k[_i] = Lib_IntVector_Intrinsics_vec128_zero;
-        }
-        chacha20_core_128(k, ctx, i);
-        {
-          Lib_IntVector_Intrinsics_vec128 v00 = k[0U];
-          Lib_IntVector_Intrinsics_vec128 v16 = k[1U];
-          Lib_IntVector_Intrinsics_vec128 v20 = k[2U];
-          Lib_IntVector_Intrinsics_vec128 v30 = k[3U];
-          Lib_IntVector_Intrinsics_vec128
-          v0_ = Lib_IntVector_Intrinsics_vec128_interleave_low32(v00, v16);
-          Lib_IntVector_Intrinsics_vec128
-          v1_ = Lib_IntVector_Intrinsics_vec128_interleave_high32(v00, v16);
-          Lib_IntVector_Intrinsics_vec128
-          v2_ = Lib_IntVector_Intrinsics_vec128_interleave_low32(v20, v30);
-          Lib_IntVector_Intrinsics_vec128
-          v3_ = Lib_IntVector_Intrinsics_vec128_interleave_high32(v20, v30);
-          Lib_IntVector_Intrinsics_vec128
-          v0__ = Lib_IntVector_Intrinsics_vec128_interleave_low64(v0_, v2_);
-          Lib_IntVector_Intrinsics_vec128
-          v1__ = Lib_IntVector_Intrinsics_vec128_interleave_high64(v0_, v2_);
-          Lib_IntVector_Intrinsics_vec128
-          v2__ = Lib_IntVector_Intrinsics_vec128_interleave_low64(v1_, v3_);
-          Lib_IntVector_Intrinsics_vec128
-          v3__ = Lib_IntVector_Intrinsics_vec128_interleave_high64(v1_, v3_);
-          Lib_IntVector_Intrinsics_vec128 v0 = v0__;
-          Lib_IntVector_Intrinsics_vec128 v1 = v1__;
-          Lib_IntVector_Intrinsics_vec128 v2 = v2__;
-          Lib_IntVector_Intrinsics_vec128 v3 = v3__;
-          Lib_IntVector_Intrinsics_vec128 v010 = k[4U];
-          Lib_IntVector_Intrinsics_vec128 v110 = k[5U];
-          Lib_IntVector_Intrinsics_vec128 v210 = k[6U];
-          Lib_IntVector_Intrinsics_vec128 v310 = k[7U];
-          Lib_IntVector_Intrinsics_vec128
-          v0_0 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v010, v110);
-          Lib_IntVector_Intrinsics_vec128
-          v1_0 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v010, v110);
-          Lib_IntVector_Intrinsics_vec128
-          v2_0 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v210, v310);
-          Lib_IntVector_Intrinsics_vec128
-          v3_0 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v210, v310);
-          Lib_IntVector_Intrinsics_vec128
-          v0__0 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v0_0, v2_0);
-          Lib_IntVector_Intrinsics_vec128
-          v1__0 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v0_0, v2_0);
-          Lib_IntVector_Intrinsics_vec128
-          v2__0 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v1_0, v3_0);
-          Lib_IntVector_Intrinsics_vec128
-          v3__0 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v1_0, v3_0);
-          Lib_IntVector_Intrinsics_vec128 v4 = v0__0;
-          Lib_IntVector_Intrinsics_vec128 v5 = v1__0;
-          Lib_IntVector_Intrinsics_vec128 v6 = v2__0;
-          Lib_IntVector_Intrinsics_vec128 v7 = v3__0;
-          Lib_IntVector_Intrinsics_vec128 v011 = k[8U];
-          Lib_IntVector_Intrinsics_vec128 v111 = k[9U];
-          Lib_IntVector_Intrinsics_vec128 v211 = k[10U];
-          Lib_IntVector_Intrinsics_vec128 v311 = k[11U];
-          Lib_IntVector_Intrinsics_vec128
-          v0_1 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v011, v111);
-          Lib_IntVector_Intrinsics_vec128
-          v1_1 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v011, v111);
-          Lib_IntVector_Intrinsics_vec128
-          v2_1 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v211, v311);
-          Lib_IntVector_Intrinsics_vec128
-          v3_1 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v211, v311);
-          Lib_IntVector_Intrinsics_vec128
-          v0__1 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v0_1, v2_1);
-          Lib_IntVector_Intrinsics_vec128
-          v1__1 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v0_1, v2_1);
-          Lib_IntVector_Intrinsics_vec128
-          v2__1 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v1_1, v3_1);
-          Lib_IntVector_Intrinsics_vec128
-          v3__1 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v1_1, v3_1);
-          Lib_IntVector_Intrinsics_vec128 v8 = v0__1;
-          Lib_IntVector_Intrinsics_vec128 v9 = v1__1;
-          Lib_IntVector_Intrinsics_vec128 v10 = v2__1;
-          Lib_IntVector_Intrinsics_vec128 v11 = v3__1;
-          Lib_IntVector_Intrinsics_vec128 v01 = k[12U];
-          Lib_IntVector_Intrinsics_vec128 v120 = k[13U];
-          Lib_IntVector_Intrinsics_vec128 v21 = k[14U];
-          Lib_IntVector_Intrinsics_vec128 v31 = k[15U];
-          Lib_IntVector_Intrinsics_vec128
-          v0_2 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v01, v120);
-          Lib_IntVector_Intrinsics_vec128
-          v1_2 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v01, v120);
-          Lib_IntVector_Intrinsics_vec128
-          v2_2 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v21, v31);
-          Lib_IntVector_Intrinsics_vec128
-          v3_2 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v21, v31);
-          Lib_IntVector_Intrinsics_vec128
-          v0__2 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v0_2, v2_2);
-          Lib_IntVector_Intrinsics_vec128
-          v1__2 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v0_2, v2_2);
-          Lib_IntVector_Intrinsics_vec128
-          v2__2 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v1_2, v3_2);
-          Lib_IntVector_Intrinsics_vec128
-          v3__2 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v1_2, v3_2);
-          Lib_IntVector_Intrinsics_vec128 v12 = v0__2;
-          Lib_IntVector_Intrinsics_vec128 v13 = v1__2;
-          Lib_IntVector_Intrinsics_vec128 v14 = v2__2;
-          Lib_IntVector_Intrinsics_vec128 v15 = v3__2;
-          k[0U] = v0;
-          k[1U] = v4;
-          k[2U] = v8;
-          k[3U] = v12;
-          k[4U] = v1;
-          k[5U] = v5;
-          k[6U] = v9;
-          k[7U] = v13;
-          k[8U] = v2;
-          k[9U] = v6;
-          k[10U] = v10;
-          k[11U] = v14;
-          k[12U] = v3;
-          k[13U] = v7;
-          k[14U] = v11;
-          k[15U] = v15;
+          u32 i;
+          for (i = (u32)0U; i < nb; i++)
           {
-            u32 i0;
-            for (i0 = (u32)0U; i0 < (u32)16U; i0++)
+            u8 *uu____0 = out + i * (u32)256U;
+            u8 *uu____1 = cipher + i * (u32)256U;
+            Lib_IntVector_Intrinsics_vec128 k[16U];
             {
+              u32 _i;
+              for (_i = 0U; _i < (u32)16U; ++_i)
+                k[_i] = Lib_IntVector_Intrinsics_vec128_zero;
+            }
+            chacha20_core_128(k, ctx, i);
+            {
+              Lib_IntVector_Intrinsics_vec128 v00 = k[0U];
+              Lib_IntVector_Intrinsics_vec128 v16 = k[1U];
+              Lib_IntVector_Intrinsics_vec128 v20 = k[2U];
+              Lib_IntVector_Intrinsics_vec128 v30 = k[3U];
               Lib_IntVector_Intrinsics_vec128
-              x = Lib_IntVector_Intrinsics_vec128_load_le(uu____1 + i0 * (u32)16U);
-              Lib_IntVector_Intrinsics_vec128 y = Lib_IntVector_Intrinsics_vec128_xor(x, k[i0]);
-              Lib_IntVector_Intrinsics_vec128_store_le(uu____0 + i0 * (u32)16U, y);
+              v0_ = Lib_IntVector_Intrinsics_vec128_interleave_low32(v00, v16);
+              Lib_IntVector_Intrinsics_vec128
+              v1_ = Lib_IntVector_Intrinsics_vec128_interleave_high32(v00, v16);
+              Lib_IntVector_Intrinsics_vec128
+              v2_ = Lib_IntVector_Intrinsics_vec128_interleave_low32(v20, v30);
+              Lib_IntVector_Intrinsics_vec128
+              v3_ = Lib_IntVector_Intrinsics_vec128_interleave_high32(v20, v30);
+              Lib_IntVector_Intrinsics_vec128
+              v0__ = Lib_IntVector_Intrinsics_vec128_interleave_low64(v0_, v2_);
+              Lib_IntVector_Intrinsics_vec128
+              v1__ = Lib_IntVector_Intrinsics_vec128_interleave_high64(v0_, v2_);
+              Lib_IntVector_Intrinsics_vec128
+              v2__ = Lib_IntVector_Intrinsics_vec128_interleave_low64(v1_, v3_);
+              Lib_IntVector_Intrinsics_vec128
+              v3__ = Lib_IntVector_Intrinsics_vec128_interleave_high64(v1_, v3_);
+              Lib_IntVector_Intrinsics_vec128 v0 = v0__;
+              Lib_IntVector_Intrinsics_vec128 v1 = v1__;
+              Lib_IntVector_Intrinsics_vec128 v2 = v2__;
+              Lib_IntVector_Intrinsics_vec128 v3 = v3__;
+              Lib_IntVector_Intrinsics_vec128 v010 = k[4U];
+              Lib_IntVector_Intrinsics_vec128 v110 = k[5U];
+              Lib_IntVector_Intrinsics_vec128 v210 = k[6U];
+              Lib_IntVector_Intrinsics_vec128 v310 = k[7U];
+              Lib_IntVector_Intrinsics_vec128
+              v0_0 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v010, v110);
+              Lib_IntVector_Intrinsics_vec128
+              v1_0 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v010, v110);
+              Lib_IntVector_Intrinsics_vec128
+              v2_0 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v210, v310);
+              Lib_IntVector_Intrinsics_vec128
+              v3_0 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v210, v310);
+              Lib_IntVector_Intrinsics_vec128
+              v0__0 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v0_0, v2_0);
+              Lib_IntVector_Intrinsics_vec128
+              v1__0 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v0_0, v2_0);
+              Lib_IntVector_Intrinsics_vec128
+              v2__0 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v1_0, v3_0);
+              Lib_IntVector_Intrinsics_vec128
+              v3__0 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v1_0, v3_0);
+              Lib_IntVector_Intrinsics_vec128 v4 = v0__0;
+              Lib_IntVector_Intrinsics_vec128 v5 = v1__0;
+              Lib_IntVector_Intrinsics_vec128 v6 = v2__0;
+              Lib_IntVector_Intrinsics_vec128 v7 = v3__0;
+              Lib_IntVector_Intrinsics_vec128 v011 = k[8U];
+              Lib_IntVector_Intrinsics_vec128 v111 = k[9U];
+              Lib_IntVector_Intrinsics_vec128 v211 = k[10U];
+              Lib_IntVector_Intrinsics_vec128 v311 = k[11U];
+              Lib_IntVector_Intrinsics_vec128
+              v0_1 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v011, v111);
+              Lib_IntVector_Intrinsics_vec128
+              v1_1 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v011, v111);
+              Lib_IntVector_Intrinsics_vec128
+              v2_1 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v211, v311);
+              Lib_IntVector_Intrinsics_vec128
+              v3_1 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v211, v311);
+              Lib_IntVector_Intrinsics_vec128
+              v0__1 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v0_1, v2_1);
+              Lib_IntVector_Intrinsics_vec128
+              v1__1 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v0_1, v2_1);
+              Lib_IntVector_Intrinsics_vec128
+              v2__1 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v1_1, v3_1);
+              Lib_IntVector_Intrinsics_vec128
+              v3__1 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v1_1, v3_1);
+              Lib_IntVector_Intrinsics_vec128 v8 = v0__1;
+              Lib_IntVector_Intrinsics_vec128 v9 = v1__1;
+              Lib_IntVector_Intrinsics_vec128 v10 = v2__1;
+              Lib_IntVector_Intrinsics_vec128 v11 = v3__1;
+              Lib_IntVector_Intrinsics_vec128 v01 = k[12U];
+              Lib_IntVector_Intrinsics_vec128 v120 = k[13U];
+              Lib_IntVector_Intrinsics_vec128 v21 = k[14U];
+              Lib_IntVector_Intrinsics_vec128 v31 = k[15U];
+              Lib_IntVector_Intrinsics_vec128
+              v0_2 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v01, v120);
+              Lib_IntVector_Intrinsics_vec128
+              v1_2 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v01, v120);
+              Lib_IntVector_Intrinsics_vec128
+              v2_2 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v21, v31);
+              Lib_IntVector_Intrinsics_vec128
+              v3_2 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v21, v31);
+              Lib_IntVector_Intrinsics_vec128
+              v0__2 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v0_2, v2_2);
+              Lib_IntVector_Intrinsics_vec128
+              v1__2 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v0_2, v2_2);
+              Lib_IntVector_Intrinsics_vec128
+              v2__2 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v1_2, v3_2);
+              Lib_IntVector_Intrinsics_vec128
+              v3__2 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v1_2, v3_2);
+              Lib_IntVector_Intrinsics_vec128 v12 = v0__2;
+              Lib_IntVector_Intrinsics_vec128 v13 = v1__2;
+              Lib_IntVector_Intrinsics_vec128 v14 = v2__2;
+              Lib_IntVector_Intrinsics_vec128 v15 = v3__2;
+              k[0U] = v0;
+              k[1U] = v4;
+              k[2U] = v8;
+              k[3U] = v12;
+              k[4U] = v1;
+              k[5U] = v5;
+              k[6U] = v9;
+              k[7U] = v13;
+              k[8U] = v2;
+              k[9U] = v6;
+              k[10U] = v10;
+              k[11U] = v14;
+              k[12U] = v3;
+              k[13U] = v7;
+              k[14U] = v11;
+              k[15U] = v15;
+              {
+                u32 i0;
+                for (i0 = (u32)0U; i0 < (u32)16U; i0++)
+                {
+                  Lib_IntVector_Intrinsics_vec128
+                  x = Lib_IntVector_Intrinsics_vec128_load_le(uu____1 + i0 * (u32)16U);
+                  Lib_IntVector_Intrinsics_vec128 y = Lib_IntVector_Intrinsics_vec128_xor(x, k[i0]);
+                  Lib_IntVector_Intrinsics_vec128_store_le(uu____0 + i0 * (u32)16U, y);
+                }
+              }
             }
           }
         }
-      }
-    }
-    if (rem1 > (u32)0U)
-    {
-      u8 *uu____2 = out + nb * (u32)256U;
-      u8 *uu____3 = cipher + nb * (u32)256U;
-      u8 plain[256U] = { 0U };
-      memcpy(plain, uu____3, rem * sizeof (uu____3[0U]));
-      {
-        Lib_IntVector_Intrinsics_vec128 k[16U];
+        if (rem1 > (u32)0U)
         {
-          u32 _i;
-          for (_i = 0U; _i < (u32)16U; ++_i)
-            k[_i] = Lib_IntVector_Intrinsics_vec128_zero;
-        }
-        chacha20_core_128(k, ctx, nb);
-        {
-          Lib_IntVector_Intrinsics_vec128 v00 = k[0U];
-          Lib_IntVector_Intrinsics_vec128 v16 = k[1U];
-          Lib_IntVector_Intrinsics_vec128 v20 = k[2U];
-          Lib_IntVector_Intrinsics_vec128 v30 = k[3U];
-          Lib_IntVector_Intrinsics_vec128
-          v0_ = Lib_IntVector_Intrinsics_vec128_interleave_low32(v00, v16);
-          Lib_IntVector_Intrinsics_vec128
-          v1_ = Lib_IntVector_Intrinsics_vec128_interleave_high32(v00, v16);
-          Lib_IntVector_Intrinsics_vec128
-          v2_ = Lib_IntVector_Intrinsics_vec128_interleave_low32(v20, v30);
-          Lib_IntVector_Intrinsics_vec128
-          v3_ = Lib_IntVector_Intrinsics_vec128_interleave_high32(v20, v30);
-          Lib_IntVector_Intrinsics_vec128
-          v0__ = Lib_IntVector_Intrinsics_vec128_interleave_low64(v0_, v2_);
-          Lib_IntVector_Intrinsics_vec128
-          v1__ = Lib_IntVector_Intrinsics_vec128_interleave_high64(v0_, v2_);
-          Lib_IntVector_Intrinsics_vec128
-          v2__ = Lib_IntVector_Intrinsics_vec128_interleave_low64(v1_, v3_);
-          Lib_IntVector_Intrinsics_vec128
-          v3__ = Lib_IntVector_Intrinsics_vec128_interleave_high64(v1_, v3_);
-          Lib_IntVector_Intrinsics_vec128 v0 = v0__;
-          Lib_IntVector_Intrinsics_vec128 v1 = v1__;
-          Lib_IntVector_Intrinsics_vec128 v2 = v2__;
-          Lib_IntVector_Intrinsics_vec128 v3 = v3__;
-          Lib_IntVector_Intrinsics_vec128 v010 = k[4U];
-          Lib_IntVector_Intrinsics_vec128 v110 = k[5U];
-          Lib_IntVector_Intrinsics_vec128 v210 = k[6U];
-          Lib_IntVector_Intrinsics_vec128 v310 = k[7U];
-          Lib_IntVector_Intrinsics_vec128
-          v0_0 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v010, v110);
-          Lib_IntVector_Intrinsics_vec128
-          v1_0 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v010, v110);
-          Lib_IntVector_Intrinsics_vec128
-          v2_0 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v210, v310);
-          Lib_IntVector_Intrinsics_vec128
-          v3_0 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v210, v310);
-          Lib_IntVector_Intrinsics_vec128
-          v0__0 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v0_0, v2_0);
-          Lib_IntVector_Intrinsics_vec128
-          v1__0 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v0_0, v2_0);
-          Lib_IntVector_Intrinsics_vec128
-          v2__0 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v1_0, v3_0);
-          Lib_IntVector_Intrinsics_vec128
-          v3__0 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v1_0, v3_0);
-          Lib_IntVector_Intrinsics_vec128 v4 = v0__0;
-          Lib_IntVector_Intrinsics_vec128 v5 = v1__0;
-          Lib_IntVector_Intrinsics_vec128 v6 = v2__0;
-          Lib_IntVector_Intrinsics_vec128 v7 = v3__0;
-          Lib_IntVector_Intrinsics_vec128 v011 = k[8U];
-          Lib_IntVector_Intrinsics_vec128 v111 = k[9U];
-          Lib_IntVector_Intrinsics_vec128 v211 = k[10U];
-          Lib_IntVector_Intrinsics_vec128 v311 = k[11U];
-          Lib_IntVector_Intrinsics_vec128
-          v0_1 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v011, v111);
-          Lib_IntVector_Intrinsics_vec128
-          v1_1 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v011, v111);
-          Lib_IntVector_Intrinsics_vec128
-          v2_1 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v211, v311);
-          Lib_IntVector_Intrinsics_vec128
-          v3_1 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v211, v311);
-          Lib_IntVector_Intrinsics_vec128
-          v0__1 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v0_1, v2_1);
-          Lib_IntVector_Intrinsics_vec128
-          v1__1 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v0_1, v2_1);
-          Lib_IntVector_Intrinsics_vec128
-          v2__1 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v1_1, v3_1);
-          Lib_IntVector_Intrinsics_vec128
-          v3__1 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v1_1, v3_1);
-          Lib_IntVector_Intrinsics_vec128 v8 = v0__1;
-          Lib_IntVector_Intrinsics_vec128 v9 = v1__1;
-          Lib_IntVector_Intrinsics_vec128 v10 = v2__1;
-          Lib_IntVector_Intrinsics_vec128 v11 = v3__1;
-          Lib_IntVector_Intrinsics_vec128 v01 = k[12U];
-          Lib_IntVector_Intrinsics_vec128 v120 = k[13U];
-          Lib_IntVector_Intrinsics_vec128 v21 = k[14U];
-          Lib_IntVector_Intrinsics_vec128 v31 = k[15U];
-          Lib_IntVector_Intrinsics_vec128
-          v0_2 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v01, v120);
-          Lib_IntVector_Intrinsics_vec128
-          v1_2 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v01, v120);
-          Lib_IntVector_Intrinsics_vec128
-          v2_2 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v21, v31);
-          Lib_IntVector_Intrinsics_vec128
-          v3_2 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v21, v31);
-          Lib_IntVector_Intrinsics_vec128
-          v0__2 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v0_2, v2_2);
-          Lib_IntVector_Intrinsics_vec128
-          v1__2 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v0_2, v2_2);
-          Lib_IntVector_Intrinsics_vec128
-          v2__2 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v1_2, v3_2);
-          Lib_IntVector_Intrinsics_vec128
-          v3__2 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v1_2, v3_2);
-          Lib_IntVector_Intrinsics_vec128 v12 = v0__2;
-          Lib_IntVector_Intrinsics_vec128 v13 = v1__2;
-          Lib_IntVector_Intrinsics_vec128 v14 = v2__2;
-          Lib_IntVector_Intrinsics_vec128 v15 = v3__2;
-          k[0U] = v0;
-          k[1U] = v4;
-          k[2U] = v8;
-          k[3U] = v12;
-          k[4U] = v1;
-          k[5U] = v5;
-          k[6U] = v9;
-          k[7U] = v13;
-          k[8U] = v2;
-          k[9U] = v6;
-          k[10U] = v10;
-          k[11U] = v14;
-          k[12U] = v3;
-          k[13U] = v7;
-          k[14U] = v11;
-          k[15U] = v15;
+          u8 *uu____2 = out + nb * (u32)256U;
+          u8 *uu____3 = cipher + nb * (u32)256U;
+          u8 plain[256U] = { 0U };
+          bool uu____4 = uu____3 == NULL;
+          if (!(uu____4 || plain == NULL))
+            memcpy(plain, uu____3, rem * sizeof (uu____3[0U]));
           {
-            u32 i;
-            for (i = (u32)0U; i < (u32)16U; i++)
+            Lib_IntVector_Intrinsics_vec128 k[16U];
             {
+              u32 _i;
+              for (_i = 0U; _i < (u32)16U; ++_i)
+                k[_i] = Lib_IntVector_Intrinsics_vec128_zero;
+            }
+            chacha20_core_128(k, ctx, nb);
+            {
+              Lib_IntVector_Intrinsics_vec128 v00 = k[0U];
+              Lib_IntVector_Intrinsics_vec128 v16 = k[1U];
+              Lib_IntVector_Intrinsics_vec128 v20 = k[2U];
+              Lib_IntVector_Intrinsics_vec128 v30 = k[3U];
               Lib_IntVector_Intrinsics_vec128
-              x = Lib_IntVector_Intrinsics_vec128_load_le(plain + i * (u32)16U);
-              Lib_IntVector_Intrinsics_vec128 y = Lib_IntVector_Intrinsics_vec128_xor(x, k[i]);
-              Lib_IntVector_Intrinsics_vec128_store_le(plain + i * (u32)16U, y);
+              v0_ = Lib_IntVector_Intrinsics_vec128_interleave_low32(v00, v16);
+              Lib_IntVector_Intrinsics_vec128
+              v1_ = Lib_IntVector_Intrinsics_vec128_interleave_high32(v00, v16);
+              Lib_IntVector_Intrinsics_vec128
+              v2_ = Lib_IntVector_Intrinsics_vec128_interleave_low32(v20, v30);
+              Lib_IntVector_Intrinsics_vec128
+              v3_ = Lib_IntVector_Intrinsics_vec128_interleave_high32(v20, v30);
+              Lib_IntVector_Intrinsics_vec128
+              v0__ = Lib_IntVector_Intrinsics_vec128_interleave_low64(v0_, v2_);
+              Lib_IntVector_Intrinsics_vec128
+              v1__ = Lib_IntVector_Intrinsics_vec128_interleave_high64(v0_, v2_);
+              Lib_IntVector_Intrinsics_vec128
+              v2__ = Lib_IntVector_Intrinsics_vec128_interleave_low64(v1_, v3_);
+              Lib_IntVector_Intrinsics_vec128
+              v3__ = Lib_IntVector_Intrinsics_vec128_interleave_high64(v1_, v3_);
+              Lib_IntVector_Intrinsics_vec128 v0 = v0__;
+              Lib_IntVector_Intrinsics_vec128 v1 = v1__;
+              Lib_IntVector_Intrinsics_vec128 v2 = v2__;
+              Lib_IntVector_Intrinsics_vec128 v3 = v3__;
+              Lib_IntVector_Intrinsics_vec128 v010 = k[4U];
+              Lib_IntVector_Intrinsics_vec128 v110 = k[5U];
+              Lib_IntVector_Intrinsics_vec128 v210 = k[6U];
+              Lib_IntVector_Intrinsics_vec128 v310 = k[7U];
+              Lib_IntVector_Intrinsics_vec128
+              v0_0 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v010, v110);
+              Lib_IntVector_Intrinsics_vec128
+              v1_0 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v010, v110);
+              Lib_IntVector_Intrinsics_vec128
+              v2_0 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v210, v310);
+              Lib_IntVector_Intrinsics_vec128
+              v3_0 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v210, v310);
+              Lib_IntVector_Intrinsics_vec128
+              v0__0 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v0_0, v2_0);
+              Lib_IntVector_Intrinsics_vec128
+              v1__0 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v0_0, v2_0);
+              Lib_IntVector_Intrinsics_vec128
+              v2__0 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v1_0, v3_0);
+              Lib_IntVector_Intrinsics_vec128
+              v3__0 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v1_0, v3_0);
+              Lib_IntVector_Intrinsics_vec128 v4 = v0__0;
+              Lib_IntVector_Intrinsics_vec128 v5 = v1__0;
+              Lib_IntVector_Intrinsics_vec128 v6 = v2__0;
+              Lib_IntVector_Intrinsics_vec128 v7 = v3__0;
+              Lib_IntVector_Intrinsics_vec128 v011 = k[8U];
+              Lib_IntVector_Intrinsics_vec128 v111 = k[9U];
+              Lib_IntVector_Intrinsics_vec128 v211 = k[10U];
+              Lib_IntVector_Intrinsics_vec128 v311 = k[11U];
+              Lib_IntVector_Intrinsics_vec128
+              v0_1 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v011, v111);
+              Lib_IntVector_Intrinsics_vec128
+              v1_1 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v011, v111);
+              Lib_IntVector_Intrinsics_vec128
+              v2_1 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v211, v311);
+              Lib_IntVector_Intrinsics_vec128
+              v3_1 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v211, v311);
+              Lib_IntVector_Intrinsics_vec128
+              v0__1 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v0_1, v2_1);
+              Lib_IntVector_Intrinsics_vec128
+              v1__1 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v0_1, v2_1);
+              Lib_IntVector_Intrinsics_vec128
+              v2__1 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v1_1, v3_1);
+              Lib_IntVector_Intrinsics_vec128
+              v3__1 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v1_1, v3_1);
+              Lib_IntVector_Intrinsics_vec128 v8 = v0__1;
+              Lib_IntVector_Intrinsics_vec128 v9 = v1__1;
+              Lib_IntVector_Intrinsics_vec128 v10 = v2__1;
+              Lib_IntVector_Intrinsics_vec128 v11 = v3__1;
+              Lib_IntVector_Intrinsics_vec128 v01 = k[12U];
+              Lib_IntVector_Intrinsics_vec128 v120 = k[13U];
+              Lib_IntVector_Intrinsics_vec128 v21 = k[14U];
+              Lib_IntVector_Intrinsics_vec128 v31 = k[15U];
+              Lib_IntVector_Intrinsics_vec128
+              v0_2 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v01, v120);
+              Lib_IntVector_Intrinsics_vec128
+              v1_2 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v01, v120);
+              Lib_IntVector_Intrinsics_vec128
+              v2_2 = Lib_IntVector_Intrinsics_vec128_interleave_low32(v21, v31);
+              Lib_IntVector_Intrinsics_vec128
+              v3_2 = Lib_IntVector_Intrinsics_vec128_interleave_high32(v21, v31);
+              Lib_IntVector_Intrinsics_vec128
+              v0__2 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v0_2, v2_2);
+              Lib_IntVector_Intrinsics_vec128
+              v1__2 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v0_2, v2_2);
+              Lib_IntVector_Intrinsics_vec128
+              v2__2 = Lib_IntVector_Intrinsics_vec128_interleave_low64(v1_2, v3_2);
+              Lib_IntVector_Intrinsics_vec128
+              v3__2 = Lib_IntVector_Intrinsics_vec128_interleave_high64(v1_2, v3_2);
+              Lib_IntVector_Intrinsics_vec128 v12 = v0__2;
+              Lib_IntVector_Intrinsics_vec128 v13 = v1__2;
+              Lib_IntVector_Intrinsics_vec128 v14 = v2__2;
+              Lib_IntVector_Intrinsics_vec128 v15 = v3__2;
+              k[0U] = v0;
+              k[1U] = v4;
+              k[2U] = v8;
+              k[3U] = v12;
+              k[4U] = v1;
+              k[5U] = v5;
+              k[6U] = v9;
+              k[7U] = v13;
+              k[8U] = v2;
+              k[9U] = v6;
+              k[10U] = v10;
+              k[11U] = v14;
+              k[12U] = v3;
+              k[13U] = v7;
+              k[14U] = v11;
+              k[15U] = v15;
+              {
+                u32 i;
+                for (i = (u32)0U; i < (u32)16U; i++)
+                {
+                  Lib_IntVector_Intrinsics_vec128
+                  x = Lib_IntVector_Intrinsics_vec128_load_le(plain + i * (u32)16U);
+                  Lib_IntVector_Intrinsics_vec128 y = Lib_IntVector_Intrinsics_vec128_xor(x, k[i]);
+                  Lib_IntVector_Intrinsics_vec128_store_le(plain + i * (u32)16U, y);
+                }
+              }
+              memcpy(uu____2, plain, rem * sizeof (plain[0U]));
             }
           }
-          memcpy(uu____2, plain, rem * sizeof (plain[0U]));
         }
       }
     }

@@ -225,9 +225,9 @@ extern bool EverCrypt_uu___is_AES256_CBC(EverCrypt_block_cipher_alg projectee);
 
 extern bool EverCrypt_uu___is_TDES_EDE_CBC(EverCrypt_block_cipher_alg projectee);
 
-extern uint32_t EverCrypt_block_cipher_keyLen(EverCrypt_block_cipher_alg uu___0_3525);
+extern uint32_t EverCrypt_block_cipher_keyLen(EverCrypt_block_cipher_alg uu___0_4485);
 
-extern uint32_t EverCrypt_block_cipher_blockLen(EverCrypt_block_cipher_alg uu___1_3531);
+extern uint32_t EverCrypt_block_cipher_blockLen(EverCrypt_block_cipher_alg uu___1_4491);
 
 #define EverCrypt_RC4_128 0
 
@@ -261,11 +261,11 @@ extern bool EverCrypt_uu___is_AES256_CCM8(EverCrypt_aead_alg projectee);
 
 KRML_DEPRECATED("Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")
 
-extern uint32_t EverCrypt_aead_keyLen(EverCrypt_aead_alg uu___2_3602);
+extern uint32_t EverCrypt_aead_keyLen(EverCrypt_aead_alg uu___2_4562);
 
 KRML_DEPRECATED("Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")
 
-extern uint32_t EverCrypt_aead_tagLen(EverCrypt_aead_alg uu___3_3608);
+extern uint32_t EverCrypt_aead_tagLen(EverCrypt_aead_alg uu___3_4568);
 
 KRML_DEPRECATED("Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")
 
@@ -765,7 +765,7 @@ EverCrypt_HMAC_compute_sha2_512(
   uint32_t data_len
 );
 
-extern bool EverCrypt_HMAC_is_supported_alg(Spec_Hash_Definitions_hash_alg uu___0_2480);
+extern bool EverCrypt_HMAC_is_supported_alg(Spec_Hash_Definitions_hash_alg uu___0_3048);
 
 typedef Spec_Hash_Definitions_hash_alg EverCrypt_HMAC_supported_alg;
 

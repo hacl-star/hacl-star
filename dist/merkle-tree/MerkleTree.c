@@ -55,7 +55,12 @@ static void hash_r_free(uint8_t *v)
 
 static void hash_copy(uint32_t s, uint8_t *src, uint8_t *dst)
 {
-  memcpy(dst, src, s * sizeof (src[0U]));
+  bool uu____0 = src == NULL;
+  if (!(uu____0 || dst == NULL))
+  {
+    memcpy(dst, src, s * sizeof (src[0U]));
+    return;
+  }
 }
 
 static LowStar_Vector_vector_str___uint8_t_ alloc_reserve___uint8_t_(uint32_t len, uint8_t *ia)
@@ -816,7 +821,11 @@ insert___uint8_t_(LowStar_Vector_vector_str___uint8_t_ vec, uint8_t *v)
     uint8_t **nvs = KRML_HOST_MALLOC(sizeof (uint8_t *) * ncap);
     for (uint32_t _i = 0U; _i < ncap; ++_i)
       nvs[_i] = v;
-    memcpy(nvs, vs, sz * sizeof (vs[0U]));
+    bool uu____0 = vs == NULL;
+    if (!(uu____0 || nvs == NULL))
+    {
+      memcpy(nvs, vs, sz * sizeof (vs[0U]));
+    }
     nvs[sz] = v;
     KRML_HOST_FREE(vs);
     return
@@ -2083,7 +2092,11 @@ deserialize_hash(uint32_t hash_size, bool ok, const uint8_t *buf, uint32_t sz, u
     return ((__bool_uint32_t__uint8_t_){ .fst = false, .snd = pos, .thd = rg.dummy });
   }
   uint8_t *hash = rg.r_alloc(rg.state);
-  memcpy(hash, (uint8_t *)buf + pos, hash_size * sizeof (((uint8_t *)buf)[0U]));
+  bool uu____0 = (uint8_t *)buf == NULL;
+  if (!(uu____0 || hash == NULL))
+  {
+    memcpy(hash, (uint8_t *)buf + pos, hash_size * sizeof (((uint8_t *)buf)[0U]));
+  }
   return ((__bool_uint32_t__uint8_t_){ .fst = true, .snd = pos + hash_size, .thd = hash });
 }
 

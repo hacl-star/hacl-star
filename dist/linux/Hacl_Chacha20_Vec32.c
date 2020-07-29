@@ -189,59 +189,76 @@ static inline void chacha20_core_32(u32 *k, u32 *ctx, u32 ctr)
 static inline void chacha20_init_32(u32 *ctx, u8 *k, u8 *n, u32 ctr)
 {
   u32 ctx1[16U] = { 0U };
-  u32 *uu____0 = ctx1;
-  u32 *uu____1;
-  u32 *uu____2;
-  u32 ctr1;
-  u32 c12;
+  u32 *tmp0;
+  if (ctx1 == NULL)
+    tmp0 = NULL;
+  else
+    tmp0 = ctx1;
   {
-    u32 i;
-    for (i = (u32)0U; i < (u32)4U; i++)
+    u32 *uu____0 = ctx1;
+    u32 *tmp1;
+    u32 *uu____1;
+    u32 *tmp;
+    u32 *uu____2;
+    u32 ctr1;
+    u32 c12;
     {
-      u32 *os = uu____0;
-      u32 x = Hacl_Impl_Chacha20_Vec_chacha20_constants[i];
-      os[i] = x;
+      u32 i;
+      for (i = (u32)0U; i < (u32)4U; i++)
+      {
+        u32 *os = uu____0;
+        u32 x = Hacl_Impl_Chacha20_Vec_chacha20_constants[i];
+        os[i] = x;
+      }
     }
-  }
-  uu____1 = ctx1 + (u32)4U;
-  {
-    u32 i;
-    for (i = (u32)0U; i < (u32)8U; i++)
+    if (ctx1 == NULL)
+      tmp1 = NULL;
+    else
+      tmp1 = ctx1 + (u32)4U;
+    uu____1 = ctx1 + (u32)4U;
     {
-      u32 *os = uu____1;
-      u8 *bj = k + i * (u32)4U;
-      u32 u = load32_le(bj);
-      u32 r = u;
-      u32 x = r;
-      os[i] = x;
+      u32 i;
+      for (i = (u32)0U; i < (u32)8U; i++)
+      {
+        u32 *os = uu____1;
+        u8 *bj = k + i * (u32)4U;
+        u32 u = load32_le(bj);
+        u32 r = u;
+        u32 x = r;
+        os[i] = x;
+      }
     }
-  }
-  ctx1[12U] = ctr;
-  uu____2 = ctx1 + (u32)13U;
-  {
-    u32 i;
-    for (i = (u32)0U; i < (u32)3U; i++)
+    ctx1[12U] = ctr;
+    if (ctx1 == NULL)
+      tmp = NULL;
+    else
+      tmp = ctx1 + (u32)13U;
+    uu____2 = ctx1 + (u32)13U;
     {
-      u32 *os = uu____2;
-      u8 *bj = n + i * (u32)4U;
-      u32 u = load32_le(bj);
-      u32 r = u;
-      u32 x = r;
-      os[i] = x;
+      u32 i;
+      for (i = (u32)0U; i < (u32)3U; i++)
+      {
+        u32 *os = uu____2;
+        u8 *bj = n + i * (u32)4U;
+        u32 u = load32_le(bj);
+        u32 r = u;
+        u32 x = r;
+        os[i] = x;
+      }
     }
-  }
-  {
-    u32 i;
-    for (i = (u32)0U; i < (u32)16U; i++)
     {
-      u32 *os = ctx;
-      u32 x = ctx1[i];
-      os[i] = x;
+      u32 i;
+      for (i = (u32)0U; i < (u32)16U; i++)
+      {
+        u32 *os = ctx;
+        u32 x = ctx1[i];
+        os[i] = x;
+      }
     }
+    ctr1 = (u32)0U;
+    c12 = ctx[12U];
+    ctx[12U] = c12 + ctr1;
   }
-  ctr1 = (u32)0U;
-  c12 = ctx[12U];
-  ctx[12U] = c12 + ctr1;
 }
 
 void
@@ -249,52 +266,67 @@ Hacl_Chacha20_Vec32_chacha20_encrypt_32(u32 len, u8 *out, u8 *text, u8 *key, u8 
 {
   u32 ctx[16U] = { 0U };
   u32 rem;
-  u32 nb;
-  u32 rem1;
   chacha20_init_32(ctx, key, n, ctr);
   rem = len % (u32)64U;
-  nb = len / (u32)64U;
-  rem1 = len % (u32)64U;
+  if (!(len == (u32)0U))
   {
-    u32 i0;
-    for (i0 = (u32)0U; i0 < nb; i0++)
+    u32 nb = len / (u32)64U;
+    u32 rem1 = len % (u32)64U;
+    u8 *ib;
+    if (text == NULL)
+      ib = NULL;
+    else
+      ib = text;
     {
-      u8 *uu____0 = out + i0 * (u32)64U;
-      u8 *uu____1 = text + i0 * (u32)64U;
-      u32 k[16U] = { 0U };
-      chacha20_core_32(k, ctx, i0);
+      u8 *ob;
+      if (out == NULL)
+        ob = NULL;
+      else
+        ob = out;
       {
-        u32 i;
-        for (i = (u32)0U; i < (u32)16U; i++)
+        u32 i0;
+        for (i0 = (u32)0U; i0 < nb; i0++)
         {
-          u32 u = load32_le(uu____1 + i * (u32)4U);
-          u32 x = u;
-          u32 y = x ^ k[i];
-          store32_le(uu____0 + i * (u32)4U, y);
+          u8 *uu____0 = out + i0 * (u32)64U;
+          u8 *uu____1 = text + i0 * (u32)64U;
+          u32 k[16U] = { 0U };
+          chacha20_core_32(k, ctx, i0);
+          {
+            u32 i;
+            for (i = (u32)0U; i < (u32)16U; i++)
+            {
+              u32 u = load32_le(uu____1 + i * (u32)4U);
+              u32 x = u;
+              u32 y = x ^ k[i];
+              store32_le(uu____0 + i * (u32)4U, y);
+            }
+          }
         }
       }
-    }
-  }
-  if (rem1 > (u32)0U)
-  {
-    u8 *uu____2 = out + nb * (u32)64U;
-    u8 *uu____3 = text + nb * (u32)64U;
-    u8 plain[64U] = { 0U };
-    memcpy(plain, uu____3, rem * sizeof (uu____3[0U]));
-    {
-      u32 k[16U] = { 0U };
-      chacha20_core_32(k, ctx, nb);
+      if (rem1 > (u32)0U)
       {
-        u32 i;
-        for (i = (u32)0U; i < (u32)16U; i++)
+        u8 *uu____2 = out + nb * (u32)64U;
+        u8 *uu____3 = text + nb * (u32)64U;
+        u8 plain[64U] = { 0U };
+        bool uu____4 = uu____3 == NULL;
+        if (!(uu____4 || plain == NULL))
+          memcpy(plain, uu____3, rem * sizeof (uu____3[0U]));
         {
-          u32 u = load32_le(plain + i * (u32)4U);
-          u32 x = u;
-          u32 y = x ^ k[i];
-          store32_le(plain + i * (u32)4U, y);
+          u32 k[16U] = { 0U };
+          chacha20_core_32(k, ctx, nb);
+          {
+            u32 i;
+            for (i = (u32)0U; i < (u32)16U; i++)
+            {
+              u32 u = load32_le(plain + i * (u32)4U);
+              u32 x = u;
+              u32 y = x ^ k[i];
+              store32_le(plain + i * (u32)4U, y);
+            }
+          }
+          memcpy(uu____2, plain, rem * sizeof (plain[0U]));
         }
       }
-      memcpy(uu____2, plain, rem * sizeof (plain[0U]));
     }
   }
 }
@@ -304,52 +336,67 @@ Hacl_Chacha20_Vec32_chacha20_decrypt_32(u32 len, u8 *out, u8 *cipher, u8 *key, u
 {
   u32 ctx[16U] = { 0U };
   u32 rem;
-  u32 nb;
-  u32 rem1;
   chacha20_init_32(ctx, key, n, ctr);
   rem = len % (u32)64U;
-  nb = len / (u32)64U;
-  rem1 = len % (u32)64U;
+  if (!(len == (u32)0U))
   {
-    u32 i0;
-    for (i0 = (u32)0U; i0 < nb; i0++)
+    u32 nb = len / (u32)64U;
+    u32 rem1 = len % (u32)64U;
+    u8 *ib;
+    if (cipher == NULL)
+      ib = NULL;
+    else
+      ib = cipher;
     {
-      u8 *uu____0 = out + i0 * (u32)64U;
-      u8 *uu____1 = cipher + i0 * (u32)64U;
-      u32 k[16U] = { 0U };
-      chacha20_core_32(k, ctx, i0);
+      u8 *ob;
+      if (out == NULL)
+        ob = NULL;
+      else
+        ob = out;
       {
-        u32 i;
-        for (i = (u32)0U; i < (u32)16U; i++)
+        u32 i0;
+        for (i0 = (u32)0U; i0 < nb; i0++)
         {
-          u32 u = load32_le(uu____1 + i * (u32)4U);
-          u32 x = u;
-          u32 y = x ^ k[i];
-          store32_le(uu____0 + i * (u32)4U, y);
+          u8 *uu____0 = out + i0 * (u32)64U;
+          u8 *uu____1 = cipher + i0 * (u32)64U;
+          u32 k[16U] = { 0U };
+          chacha20_core_32(k, ctx, i0);
+          {
+            u32 i;
+            for (i = (u32)0U; i < (u32)16U; i++)
+            {
+              u32 u = load32_le(uu____1 + i * (u32)4U);
+              u32 x = u;
+              u32 y = x ^ k[i];
+              store32_le(uu____0 + i * (u32)4U, y);
+            }
+          }
         }
       }
-    }
-  }
-  if (rem1 > (u32)0U)
-  {
-    u8 *uu____2 = out + nb * (u32)64U;
-    u8 *uu____3 = cipher + nb * (u32)64U;
-    u8 plain[64U] = { 0U };
-    memcpy(plain, uu____3, rem * sizeof (uu____3[0U]));
-    {
-      u32 k[16U] = { 0U };
-      chacha20_core_32(k, ctx, nb);
+      if (rem1 > (u32)0U)
       {
-        u32 i;
-        for (i = (u32)0U; i < (u32)16U; i++)
+        u8 *uu____2 = out + nb * (u32)64U;
+        u8 *uu____3 = cipher + nb * (u32)64U;
+        u8 plain[64U] = { 0U };
+        bool uu____4 = uu____3 == NULL;
+        if (!(uu____4 || plain == NULL))
+          memcpy(plain, uu____3, rem * sizeof (uu____3[0U]));
         {
-          u32 u = load32_le(plain + i * (u32)4U);
-          u32 x = u;
-          u32 y = x ^ k[i];
-          store32_le(plain + i * (u32)4U, y);
+          u32 k[16U] = { 0U };
+          chacha20_core_32(k, ctx, nb);
+          {
+            u32 i;
+            for (i = (u32)0U; i < (u32)16U; i++)
+            {
+              u32 u = load32_le(plain + i * (u32)4U);
+              u32 x = u;
+              u32 y = x ^ k[i];
+              store32_le(plain + i * (u32)4U, y);
+            }
+          }
+          memcpy(uu____2, plain, rem * sizeof (plain[0U]));
         }
       }
-      memcpy(uu____2, plain, rem * sizeof (plain[0U]));
     }
   }
 }

@@ -59,19 +59,60 @@ secretbox_detached(uint32_t mlen, uint8_t *c, uint8_t *tag, uint8_t *k, uint8_t 
     mlen0 = (uint32_t)32U;
   }
   uint32_t mlen1 = mlen - mlen0;
-  uint8_t *m0 = m;
-  uint8_t *m1 = m + mlen0;
+  uint8_t *m0;
+  if (m == NULL)
+  {
+    m0 = NULL;
+  }
+  else
+  {
+    m0 = m;
+  }
+  uint8_t *m1;
+  if (m == NULL)
+  {
+    m1 = NULL;
+  }
+  else
+  {
+    m1 = m + mlen0;
+  }
   uint8_t block0[32U] = { 0U };
-  memcpy(block0, m0, mlen0 * sizeof (m0[0U]));
+  bool uu____0 = m0 == NULL;
+  if (!(uu____0 || block0 == NULL))
+  {
+    memcpy(block0, m0, mlen0 * sizeof (m0[0U]));
+  }
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)32U; i++)
   {
     uint8_t *os = block0;
     uint8_t x = block0[i] ^ ekey0[i];
     os[i] = x;
   }
-  uint8_t *c0 = c;
-  uint8_t *c1 = c + mlen0;
-  memcpy(c0, block0, mlen0 * sizeof (block0[0U]));
+  uint8_t *c0;
+  if (c == NULL)
+  {
+    c0 = NULL;
+  }
+  else
+  {
+    c0 = c;
+  }
+  uint8_t *c1;
+  if (c == NULL)
+  {
+    c1 = NULL;
+  }
+  else
+  {
+    c1 = c + mlen0;
+  }
+  uint8_t *uu____1 = block0;
+  bool uu____2 = uu____1 == NULL;
+  if (!(uu____2 || c0 == NULL))
+  {
+    memcpy(c0, uu____1, mlen0 * sizeof (uu____1[0U]));
+  }
   Hacl_Salsa20_salsa20_encrypt(mlen1, c1, m1, subkey, n1, (uint32_t)1U);
   Hacl_Poly1305_32_poly1305_mac(tag, mlen, c, mkey);
 }
@@ -117,19 +158,60 @@ secretbox_open_detached(
       mlen0 = (uint32_t)32U;
     }
     uint32_t mlen1 = mlen - mlen0;
-    uint8_t *c0 = c;
-    uint8_t *c1 = c + mlen0;
+    uint8_t *c0;
+    if (c == NULL)
+    {
+      c0 = NULL;
+    }
+    else
+    {
+      c0 = c;
+    }
+    uint8_t *c1;
+    if (c == NULL)
+    {
+      c1 = NULL;
+    }
+    else
+    {
+      c1 = c + mlen0;
+    }
     uint8_t block0[32U] = { 0U };
-    memcpy(block0, c0, mlen0 * sizeof (c0[0U]));
+    bool uu____1 = c0 == NULL;
+    if (!(uu____1 || block0 == NULL))
+    {
+      memcpy(block0, c0, mlen0 * sizeof (c0[0U]));
+    }
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)32U; i++)
     {
       uint8_t *os = block0;
       uint8_t x = block0[i] ^ ekey0[i];
       os[i] = x;
     }
-    uint8_t *m0 = m;
-    uint8_t *m1 = m + mlen0;
-    memcpy(m0, block0, mlen0 * sizeof (block0[0U]));
+    uint8_t *m0;
+    if (m == NULL)
+    {
+      m0 = NULL;
+    }
+    else
+    {
+      m0 = m;
+    }
+    uint8_t *m1;
+    if (m == NULL)
+    {
+      m1 = NULL;
+    }
+    else
+    {
+      m1 = m + mlen0;
+    }
+    uint8_t *uu____2 = block0;
+    bool uu____3 = uu____2 == NULL;
+    if (!(uu____3 || m0 == NULL))
+    {
+      memcpy(m0, uu____2, mlen0 * sizeof (uu____2[0U]));
+    }
     Hacl_Salsa20_salsa20_decrypt(mlen1, m1, c1, subkey, n1, (uint32_t)1U);
     return (uint32_t)0U;
   }

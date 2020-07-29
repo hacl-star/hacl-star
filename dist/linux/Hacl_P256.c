@@ -427,7 +427,14 @@ static void toUint8(u64 *i, u8 *o)
 {
   u32 i0;
   for (i0 = (u32)0U; i0 < (u32)4U; i0++)
+  {
+    u8 *block;
+    if (o == NULL)
+      block = NULL;
+    else
+      block = o + i0 * (u32)8U;
     store64_be(o + i0 * (u32)8U, i[i0]);
+  }
 }
 
 static void changeEndian(u64 *i)
@@ -1309,18 +1316,23 @@ static void exponent(u64 *a, u64 *result, u64 *tempBuffer)
   u64 *buffer_result2 = tempBuffer + (u32)8U;
   u64 *buffer_norm_3 = tempBuffer + (u32)12U;
   u64 *buffer_result3 = tempBuffer + (u32)16U;
+  bool uu____0 = a == NULL;
   u64 *buffer_a0;
   u64 *buffer_b0;
+  bool uu____1;
   u64 *buffer_a;
   u64 *buffer_b;
-  memcpy(buffer_norm_1, a, (u32)4U * sizeof (a[0U]));
+  if (!(uu____0 || buffer_norm_1 == NULL))
+    memcpy(buffer_norm_1, a, (u32)4U * sizeof (a[0U]));
   buffer_a0 = buffer_norm_1;
   buffer_b0 = buffer_norm_1 + (u32)4U;
   fsquarePowNminusOne((u32)32U, buffer_a0, buffer_b0);
   fsquarePowN((u32)224U, buffer_b0);
   memcpy(buffer_result2, a, (u32)4U * sizeof (a[0U]));
   fsquarePowN((u32)192U, buffer_result2);
-  memcpy(buffer_norm_3, a, (u32)4U * sizeof (a[0U]));
+  uu____1 = a == NULL;
+  if (!(uu____1 || buffer_norm_3 == NULL))
+    memcpy(buffer_norm_3, a, (u32)4U * sizeof (a[0U]));
   buffer_a = buffer_norm_3;
   buffer_b = buffer_norm_3 + (u32)4U;
   fsquarePowNminusOne((u32)94U, buffer_a, buffer_b);
@@ -1661,6 +1673,9 @@ static void point_add(u64 *p, u64 *q, u64 *result, u64 *tempBuffer)
   u64 *u1hx3;
   u64 *ru1hx3;
   u64 *z1z2;
+  bool uu____0;
+  bool uu____1;
+  bool uu____2;
   montgomery_square_buffer(qZ0, z2Square);
   montgomery_square_buffer(pZ0, z1Square);
   montgomery_multiplication_buffer(z2Square, qZ0, z2Cube);
@@ -1700,9 +1715,18 @@ static void point_add(u64 *p, u64 *q, u64 *result, u64 *tempBuffer)
   montgomery_multiplication_buffer(z1z2, h, z3_out1);
   copy_point_conditional(x3_out1, y3_out1, z3_out1, q, p);
   copy_point_conditional(x3_out1, y3_out1, z3_out1, p, q);
-  memcpy(result, x3_out1, (u32)4U * sizeof (x3_out1[0U]));
-  memcpy(result + (u32)4U, y3_out1, (u32)4U * sizeof (y3_out1[0U]));
-  memcpy(result + (u32)8U, z3_out1, (u32)4U * sizeof (z3_out1[0U]));
+  uu____0 = x3_out1 == NULL;
+  if (!(uu____0 || result == NULL))
+    memcpy(result, x3_out1, (u32)4U * sizeof (x3_out1[0U]));
+  uu____1 = y3_out1 == NULL;
+  if (!(uu____1 || result == NULL))
+    memcpy(result + (u32)4U, y3_out1, (u32)4U * sizeof (y3_out1[0U]));
+  uu____2 = z3_out1 == NULL;
+  if (!(uu____2 || result == NULL))
+  {
+    memcpy(result + (u32)8U, z3_out1, (u32)4U * sizeof (z3_out1[0U]));
+    return;
+  }
 }
 
 static void pointToDomain(u64 *p, u64 *result)

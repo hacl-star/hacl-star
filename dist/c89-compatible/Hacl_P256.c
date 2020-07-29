@@ -437,6 +437,15 @@ void Hacl_Impl_P256_LowLevel_toUint8(uint64_t *i, uint8_t *o)
   uint32_t i0;
   for (i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0++)
   {
+    uint8_t *block;
+    if (o == NULL)
+    {
+      block = NULL;
+    }
+    else
+    {
+      block = o + i0 * (uint32_t)8U;
+    }
     store64_be(o + i0 * (uint32_t)8U, i[i0]);
   }
 }
@@ -1337,18 +1346,27 @@ static void exponent(uint64_t *a, uint64_t *result, uint64_t *tempBuffer)
   uint64_t *buffer_result2 = tempBuffer + (uint32_t)8U;
   uint64_t *buffer_norm_3 = tempBuffer + (uint32_t)12U;
   uint64_t *buffer_result3 = tempBuffer + (uint32_t)16U;
+  bool uu____0 = a == NULL;
   uint64_t *buffer_a0;
   uint64_t *buffer_b0;
+  bool uu____1;
   uint64_t *buffer_a;
   uint64_t *buffer_b;
-  memcpy(buffer_norm_1, a, (uint32_t)4U * sizeof (a[0U]));
+  if (!(uu____0 || buffer_norm_1 == NULL))
+  {
+    memcpy(buffer_norm_1, a, (uint32_t)4U * sizeof (a[0U]));
+  }
   buffer_a0 = buffer_norm_1;
   buffer_b0 = buffer_norm_1 + (uint32_t)4U;
   fsquarePowNminusOne((uint32_t)32U, buffer_a0, buffer_b0);
   fsquarePowN((uint32_t)224U, buffer_b0);
   memcpy(buffer_result2, a, (uint32_t)4U * sizeof (a[0U]));
   fsquarePowN((uint32_t)192U, buffer_result2);
-  memcpy(buffer_norm_3, a, (uint32_t)4U * sizeof (a[0U]));
+  uu____1 = a == NULL;
+  if (!(uu____1 || buffer_norm_3 == NULL))
+  {
+    memcpy(buffer_norm_3, a, (uint32_t)4U * sizeof (a[0U]));
+  }
   buffer_a = buffer_norm_3;
   buffer_b = buffer_norm_3 + (uint32_t)4U;
   fsquarePowNminusOne((uint32_t)94U, buffer_a, buffer_b);
@@ -1717,6 +1735,9 @@ static void point_add(uint64_t *p, uint64_t *q, uint64_t *result, uint64_t *temp
   uint64_t *u1hx3;
   uint64_t *ru1hx3;
   uint64_t *z1z2;
+  bool uu____0;
+  bool uu____1;
+  bool uu____2;
   montgomery_square_buffer(qZ0, z2Square);
   montgomery_square_buffer(pZ0, z1Square);
   montgomery_multiplication_buffer(z2Square, qZ0, z2Cube);
@@ -1756,9 +1777,22 @@ static void point_add(uint64_t *p, uint64_t *q, uint64_t *result, uint64_t *temp
   montgomery_multiplication_buffer(z1z2, h, z3_out1);
   copy_point_conditional(x3_out1, y3_out1, z3_out1, q, p);
   copy_point_conditional(x3_out1, y3_out1, z3_out1, p, q);
-  memcpy(result, x3_out1, (uint32_t)4U * sizeof (x3_out1[0U]));
-  memcpy(result + (uint32_t)4U, y3_out1, (uint32_t)4U * sizeof (y3_out1[0U]));
-  memcpy(result + (uint32_t)8U, z3_out1, (uint32_t)4U * sizeof (z3_out1[0U]));
+  uu____0 = x3_out1 == NULL;
+  if (!(uu____0 || result == NULL))
+  {
+    memcpy(result, x3_out1, (uint32_t)4U * sizeof (x3_out1[0U]));
+  }
+  uu____1 = y3_out1 == NULL;
+  if (!(uu____1 || result == NULL))
+  {
+    memcpy(result + (uint32_t)4U, y3_out1, (uint32_t)4U * sizeof (y3_out1[0U]));
+  }
+  uu____2 = z3_out1 == NULL;
+  if (!(uu____2 || result == NULL))
+  {
+    memcpy(result + (uint32_t)8U, z3_out1, (uint32_t)4U * sizeof (z3_out1[0U]));
+    return;
+  }
 }
 
 static void pointToDomain(uint64_t *p, uint64_t *result)

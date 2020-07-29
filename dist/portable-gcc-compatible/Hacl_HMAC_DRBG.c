@@ -236,11 +236,50 @@ Hacl_HMAC_DRBG_instantiate(
         memset(seed_material,
           0U,
           (entropy_input_len + nonce_len + personalization_string_len) * sizeof (seed_material[0U]));
-        memcpy(seed_material, entropy_input, entropy_input_len * sizeof (entropy_input[0U]));
-        memcpy(seed_material + entropy_input_len, nonce, nonce_len * sizeof (nonce[0U]));
-        memcpy(seed_material + entropy_input_len + nonce_len,
-          personalization_string,
-          personalization_string_len * sizeof (personalization_string[0U]));
+        uint8_t *uu____0;
+        if (seed_material == NULL)
+        {
+          uu____0 = NULL;
+        }
+        else
+        {
+          uu____0 = seed_material;
+        }
+        bool uu____1 = entropy_input == NULL;
+        if (!(uu____1 || uu____0 == NULL))
+        {
+          memcpy(uu____0, entropy_input, entropy_input_len * sizeof (entropy_input[0U]));
+        }
+        uint8_t *uu____2;
+        if (seed_material == NULL)
+        {
+          uu____2 = NULL;
+        }
+        else
+        {
+          uu____2 = seed_material + entropy_input_len;
+        }
+        bool uu____3 = nonce == NULL;
+        if (!(uu____3 || uu____2 == NULL))
+        {
+          memcpy(uu____2, nonce, nonce_len * sizeof (nonce[0U]));
+        }
+        uint8_t *uu____4;
+        if (seed_material == NULL)
+        {
+          uu____4 = NULL;
+        }
+        else
+        {
+          uu____4 = seed_material + entropy_input_len + nonce_len;
+        }
+        bool uu____5 = personalization_string == NULL;
+        if (!(uu____5 || uu____4 == NULL))
+        {
+          memcpy(uu____4,
+            personalization_string,
+            personalization_string_len * sizeof (personalization_string[0U]));
+        }
         uint8_t *k = st.k;
         uint8_t *v = st.v;
         uint32_t *ctr = st.reseed_counter;
@@ -296,11 +335,50 @@ Hacl_HMAC_DRBG_instantiate(
         memset(seed_material,
           0U,
           (entropy_input_len + nonce_len + personalization_string_len) * sizeof (seed_material[0U]));
-        memcpy(seed_material, entropy_input, entropy_input_len * sizeof (entropy_input[0U]));
-        memcpy(seed_material + entropy_input_len, nonce, nonce_len * sizeof (nonce[0U]));
-        memcpy(seed_material + entropy_input_len + nonce_len,
-          personalization_string,
-          personalization_string_len * sizeof (personalization_string[0U]));
+        uint8_t *uu____6;
+        if (seed_material == NULL)
+        {
+          uu____6 = NULL;
+        }
+        else
+        {
+          uu____6 = seed_material;
+        }
+        bool uu____7 = entropy_input == NULL;
+        if (!(uu____7 || uu____6 == NULL))
+        {
+          memcpy(uu____6, entropy_input, entropy_input_len * sizeof (entropy_input[0U]));
+        }
+        uint8_t *uu____8;
+        if (seed_material == NULL)
+        {
+          uu____8 = NULL;
+        }
+        else
+        {
+          uu____8 = seed_material + entropy_input_len;
+        }
+        bool uu____9 = nonce == NULL;
+        if (!(uu____9 || uu____8 == NULL))
+        {
+          memcpy(uu____8, nonce, nonce_len * sizeof (nonce[0U]));
+        }
+        uint8_t *uu____10;
+        if (seed_material == NULL)
+        {
+          uu____10 = NULL;
+        }
+        else
+        {
+          uu____10 = seed_material + entropy_input_len + nonce_len;
+        }
+        bool uu____11 = personalization_string == NULL;
+        if (!(uu____11 || uu____10 == NULL))
+        {
+          memcpy(uu____10,
+            personalization_string,
+            personalization_string_len * sizeof (personalization_string[0U]));
+        }
         uint8_t *k = st.k;
         uint8_t *v = st.v;
         uint32_t *ctr = st.reseed_counter;
@@ -356,11 +434,50 @@ Hacl_HMAC_DRBG_instantiate(
         memset(seed_material,
           0U,
           (entropy_input_len + nonce_len + personalization_string_len) * sizeof (seed_material[0U]));
-        memcpy(seed_material, entropy_input, entropy_input_len * sizeof (entropy_input[0U]));
-        memcpy(seed_material + entropy_input_len, nonce, nonce_len * sizeof (nonce[0U]));
-        memcpy(seed_material + entropy_input_len + nonce_len,
-          personalization_string,
-          personalization_string_len * sizeof (personalization_string[0U]));
+        uint8_t *uu____12;
+        if (seed_material == NULL)
+        {
+          uu____12 = NULL;
+        }
+        else
+        {
+          uu____12 = seed_material;
+        }
+        bool uu____13 = entropy_input == NULL;
+        if (!(uu____13 || uu____12 == NULL))
+        {
+          memcpy(uu____12, entropy_input, entropy_input_len * sizeof (entropy_input[0U]));
+        }
+        uint8_t *uu____14;
+        if (seed_material == NULL)
+        {
+          uu____14 = NULL;
+        }
+        else
+        {
+          uu____14 = seed_material + entropy_input_len;
+        }
+        bool uu____15 = nonce == NULL;
+        if (!(uu____15 || uu____14 == NULL))
+        {
+          memcpy(uu____14, nonce, nonce_len * sizeof (nonce[0U]));
+        }
+        uint8_t *uu____16;
+        if (seed_material == NULL)
+        {
+          uu____16 = NULL;
+        }
+        else
+        {
+          uu____16 = seed_material + entropy_input_len + nonce_len;
+        }
+        bool uu____17 = personalization_string == NULL;
+        if (!(uu____17 || uu____16 == NULL))
+        {
+          memcpy(uu____16,
+            personalization_string,
+            personalization_string_len * sizeof (personalization_string[0U]));
+        }
         uint8_t *k = st.k;
         uint8_t *v = st.v;
         uint32_t *ctr = st.reseed_counter;
@@ -416,11 +533,50 @@ Hacl_HMAC_DRBG_instantiate(
         memset(seed_material,
           0U,
           (entropy_input_len + nonce_len + personalization_string_len) * sizeof (seed_material[0U]));
-        memcpy(seed_material, entropy_input, entropy_input_len * sizeof (entropy_input[0U]));
-        memcpy(seed_material + entropy_input_len, nonce, nonce_len * sizeof (nonce[0U]));
-        memcpy(seed_material + entropy_input_len + nonce_len,
-          personalization_string,
-          personalization_string_len * sizeof (personalization_string[0U]));
+        uint8_t *uu____18;
+        if (seed_material == NULL)
+        {
+          uu____18 = NULL;
+        }
+        else
+        {
+          uu____18 = seed_material;
+        }
+        bool uu____19 = entropy_input == NULL;
+        if (!(uu____19 || uu____18 == NULL))
+        {
+          memcpy(uu____18, entropy_input, entropy_input_len * sizeof (entropy_input[0U]));
+        }
+        uint8_t *uu____20;
+        if (seed_material == NULL)
+        {
+          uu____20 = NULL;
+        }
+        else
+        {
+          uu____20 = seed_material + entropy_input_len;
+        }
+        bool uu____21 = nonce == NULL;
+        if (!(uu____21 || uu____20 == NULL))
+        {
+          memcpy(uu____20, nonce, nonce_len * sizeof (nonce[0U]));
+        }
+        uint8_t *uu____22;
+        if (seed_material == NULL)
+        {
+          uu____22 = NULL;
+        }
+        else
+        {
+          uu____22 = seed_material + entropy_input_len + nonce_len;
+        }
+        bool uu____23 = personalization_string == NULL;
+        if (!(uu____23 || uu____22 == NULL))
+        {
+          memcpy(uu____22,
+            personalization_string,
+            personalization_string_len * sizeof (personalization_string[0U]));
+        }
         uint8_t *k = st.k;
         uint8_t *v = st.v;
         uint32_t *ctr = st.reseed_counter;
@@ -500,13 +656,26 @@ Hacl_HMAC_DRBG_reseed(
           0U,
           (entropy_input_len + additional_input_input_len) * sizeof (seed_material[0U]));
         memcpy(seed_material, entropy_input, entropy_input_len * sizeof (entropy_input[0U]));
-        memcpy(seed_material + entropy_input_len,
-          additional_input_input,
-          additional_input_input_len * sizeof (additional_input_input[0U]));
-        Hacl_HMAC_DRBG_state uu____0 = st;
-        uint8_t *k = uu____0.k;
-        uint8_t *v = uu____0.v;
-        uint32_t *ctr = uu____0.reseed_counter;
+        uint8_t *uu____0;
+        if (seed_material == NULL)
+        {
+          uu____0 = NULL;
+        }
+        else
+        {
+          uu____0 = seed_material + entropy_input_len;
+        }
+        bool uu____1 = additional_input_input == NULL;
+        if (!(uu____1 || uu____0 == NULL))
+        {
+          memcpy(uu____0,
+            additional_input_input,
+            additional_input_input_len * sizeof (additional_input_input[0U]));
+        }
+        Hacl_HMAC_DRBG_state uu____2 = st;
+        uint8_t *k = uu____2.k;
+        uint8_t *v = uu____2.v;
+        uint32_t *ctr = uu____2.reseed_counter;
         uint32_t input_len = (uint32_t)21U + entropy_input_len + additional_input_input_len;
         KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
         uint8_t input0[input_len];
@@ -553,13 +722,26 @@ Hacl_HMAC_DRBG_reseed(
           0U,
           (entropy_input_len + additional_input_input_len) * sizeof (seed_material[0U]));
         memcpy(seed_material, entropy_input, entropy_input_len * sizeof (entropy_input[0U]));
-        memcpy(seed_material + entropy_input_len,
-          additional_input_input,
-          additional_input_input_len * sizeof (additional_input_input[0U]));
-        Hacl_HMAC_DRBG_state uu____1 = st;
-        uint8_t *k = uu____1.k;
-        uint8_t *v = uu____1.v;
-        uint32_t *ctr = uu____1.reseed_counter;
+        uint8_t *uu____3;
+        if (seed_material == NULL)
+        {
+          uu____3 = NULL;
+        }
+        else
+        {
+          uu____3 = seed_material + entropy_input_len;
+        }
+        bool uu____4 = additional_input_input == NULL;
+        if (!(uu____4 || uu____3 == NULL))
+        {
+          memcpy(uu____3,
+            additional_input_input,
+            additional_input_input_len * sizeof (additional_input_input[0U]));
+        }
+        Hacl_HMAC_DRBG_state uu____5 = st;
+        uint8_t *k = uu____5.k;
+        uint8_t *v = uu____5.v;
+        uint32_t *ctr = uu____5.reseed_counter;
         uint32_t input_len = (uint32_t)33U + entropy_input_len + additional_input_input_len;
         KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
         uint8_t input0[input_len];
@@ -606,13 +788,26 @@ Hacl_HMAC_DRBG_reseed(
           0U,
           (entropy_input_len + additional_input_input_len) * sizeof (seed_material[0U]));
         memcpy(seed_material, entropy_input, entropy_input_len * sizeof (entropy_input[0U]));
-        memcpy(seed_material + entropy_input_len,
-          additional_input_input,
-          additional_input_input_len * sizeof (additional_input_input[0U]));
-        Hacl_HMAC_DRBG_state uu____2 = st;
-        uint8_t *k = uu____2.k;
-        uint8_t *v = uu____2.v;
-        uint32_t *ctr = uu____2.reseed_counter;
+        uint8_t *uu____6;
+        if (seed_material == NULL)
+        {
+          uu____6 = NULL;
+        }
+        else
+        {
+          uu____6 = seed_material + entropy_input_len;
+        }
+        bool uu____7 = additional_input_input == NULL;
+        if (!(uu____7 || uu____6 == NULL))
+        {
+          memcpy(uu____6,
+            additional_input_input,
+            additional_input_input_len * sizeof (additional_input_input[0U]));
+        }
+        Hacl_HMAC_DRBG_state uu____8 = st;
+        uint8_t *k = uu____8.k;
+        uint8_t *v = uu____8.v;
+        uint32_t *ctr = uu____8.reseed_counter;
         uint32_t input_len = (uint32_t)49U + entropy_input_len + additional_input_input_len;
         KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
         uint8_t input0[input_len];
@@ -659,13 +854,26 @@ Hacl_HMAC_DRBG_reseed(
           0U,
           (entropy_input_len + additional_input_input_len) * sizeof (seed_material[0U]));
         memcpy(seed_material, entropy_input, entropy_input_len * sizeof (entropy_input[0U]));
-        memcpy(seed_material + entropy_input_len,
-          additional_input_input,
-          additional_input_input_len * sizeof (additional_input_input[0U]));
-        Hacl_HMAC_DRBG_state uu____3 = st;
-        uint8_t *k = uu____3.k;
-        uint8_t *v = uu____3.v;
-        uint32_t *ctr = uu____3.reseed_counter;
+        uint8_t *uu____9;
+        if (seed_material == NULL)
+        {
+          uu____9 = NULL;
+        }
+        else
+        {
+          uu____9 = seed_material + entropy_input_len;
+        }
+        bool uu____10 = additional_input_input == NULL;
+        if (!(uu____10 || uu____9 == NULL))
+        {
+          memcpy(uu____9,
+            additional_input_input,
+            additional_input_input_len * sizeof (additional_input_input[0U]));
+        }
+        Hacl_HMAC_DRBG_state uu____11 = st;
+        uint8_t *k = uu____11.k;
+        uint8_t *v = uu____11.v;
+        uint32_t *ctr = uu____11.reseed_counter;
         uint32_t input_len = (uint32_t)65U + entropy_input_len + additional_input_input_len;
         KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
         uint8_t input0[input_len];
@@ -777,9 +985,26 @@ Hacl_HMAC_DRBG_generate(
         }
         uint8_t *output1 = output;
         uint32_t max = n / (uint32_t)20U;
-        uint8_t *out = output1;
+        uint8_t *out;
+        if (output1 == NULL)
+        {
+          out = NULL;
+        }
+        else
+        {
+          out = output1;
+        }
         for (uint32_t i = (uint32_t)0U; i < max; i++)
         {
+          uint8_t *block;
+          if (out == NULL)
+          {
+            block = NULL;
+          }
+          else
+          {
+            block = out + i * (uint32_t)20U;
+          }
           Hacl_HMAC_legacy_compute_sha1(v, k, (uint32_t)20U, v, (uint32_t)20U);
           memcpy(out + i * (uint32_t)20U, v, (uint32_t)20U * sizeof (v[0U]));
         }
@@ -877,9 +1102,26 @@ Hacl_HMAC_DRBG_generate(
         }
         uint8_t *output1 = output;
         uint32_t max = n / (uint32_t)32U;
-        uint8_t *out = output1;
+        uint8_t *out;
+        if (output1 == NULL)
+        {
+          out = NULL;
+        }
+        else
+        {
+          out = output1;
+        }
         for (uint32_t i = (uint32_t)0U; i < max; i++)
         {
+          uint8_t *block;
+          if (out == NULL)
+          {
+            block = NULL;
+          }
+          else
+          {
+            block = out + i * (uint32_t)32U;
+          }
           Hacl_HMAC_compute_sha2_256(v, k, (uint32_t)32U, v, (uint32_t)32U);
           memcpy(out + i * (uint32_t)32U, v, (uint32_t)32U * sizeof (v[0U]));
         }
@@ -977,9 +1219,26 @@ Hacl_HMAC_DRBG_generate(
         }
         uint8_t *output1 = output;
         uint32_t max = n / (uint32_t)48U;
-        uint8_t *out = output1;
+        uint8_t *out;
+        if (output1 == NULL)
+        {
+          out = NULL;
+        }
+        else
+        {
+          out = output1;
+        }
         for (uint32_t i = (uint32_t)0U; i < max; i++)
         {
+          uint8_t *block;
+          if (out == NULL)
+          {
+            block = NULL;
+          }
+          else
+          {
+            block = out + i * (uint32_t)48U;
+          }
           Hacl_HMAC_compute_sha2_384(v, k, (uint32_t)48U, v, (uint32_t)48U);
           memcpy(out + i * (uint32_t)48U, v, (uint32_t)48U * sizeof (v[0U]));
         }
@@ -1077,9 +1336,26 @@ Hacl_HMAC_DRBG_generate(
         }
         uint8_t *output1 = output;
         uint32_t max = n / (uint32_t)64U;
-        uint8_t *out = output1;
+        uint8_t *out;
+        if (output1 == NULL)
+        {
+          out = NULL;
+        }
+        else
+        {
+          out = output1;
+        }
         for (uint32_t i = (uint32_t)0U; i < max; i++)
         {
+          uint8_t *block;
+          if (out == NULL)
+          {
+            block = NULL;
+          }
+          else
+          {
+            block = out + i * (uint32_t)64U;
+          }
           Hacl_HMAC_compute_sha2_512(v, k, (uint32_t)64U, v, (uint32_t)64U);
           memcpy(out + i * (uint32_t)64U, v, (uint32_t)64U * sizeof (v[0U]));
         }

@@ -31,6 +31,7 @@
 #ifndef __Hacl_HKDF_H
 #define __Hacl_HKDF_H
 
+#include "Hacl_Kremlib.h"
 #include "Hacl_HMAC.h"
 
 

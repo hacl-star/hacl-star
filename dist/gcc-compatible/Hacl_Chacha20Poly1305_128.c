@@ -47,93 +47,28 @@ poly1305_padded_128(Lib_IntVector_Intrinsics_vec128 *ctx, uint32_t len, uint8_t 
   {
     rem = text + n * (uint32_t)16U;
   }
-  Lib_IntVector_Intrinsics_vec128 *pre;
-  if (ctx == NULL)
-  {
-    pre = NULL;
-  }
-  else
-  {
-    pre = ctx + (uint32_t)5U;
-  }
-  Lib_IntVector_Intrinsics_vec128 *acc0;
-  if (ctx == NULL)
-  {
-    acc0 = NULL;
-  }
-  else
-  {
-    acc0 = ctx;
-  }
+  Lib_IntVector_Intrinsics_vec128 *pre = ctx + (uint32_t)5U;
+  Lib_IntVector_Intrinsics_vec128 *acc0 = ctx;
   uint32_t sz_block = (uint32_t)32U;
   uint32_t len0 = n * (uint32_t)16U / sz_block * sz_block;
-  uint8_t *t00;
-  if (blocks == NULL)
-  {
-    t00 = NULL;
-  }
-  else
-  {
-    t00 = blocks;
-  }
   if (len0 > (uint32_t)0U)
   {
+    uint8_t *t0 = blocks;
     uint32_t bs = (uint32_t)32U;
-    uint8_t *text0;
-    if (t00 == NULL)
-    {
-      text0 = NULL;
-    }
-    else
-    {
-      text0 = t00;
-    }
+    uint8_t *text0 = t0;
     Hacl_Impl_Poly1305_Field32xN_128_load_acc2(acc0, text0);
     uint32_t len1 = len0 - bs;
-    uint8_t *text1;
-    if (t00 == NULL)
-    {
-      text1 = NULL;
-    }
-    else
-    {
-      text1 = t00 + bs;
-    }
+    uint8_t *text1 = t0 + bs;
     uint32_t nb = len1 / bs;
     for (uint32_t i = (uint32_t)0U; i < nb; i++)
     {
-      uint8_t *block;
-      if (text1 == NULL)
-      {
-        block = NULL;
-      }
-      else
-      {
-        block = text1 + i * bs;
-      }
+      uint8_t *block = text1 + i * bs;
       Lib_IntVector_Intrinsics_vec128 e[5U];
       for (uint32_t _i = 0U; _i < (uint32_t)5U; ++_i)
         e[_i] = Lib_IntVector_Intrinsics_vec128_zero;
-      uint8_t *ite0;
-      if (block == NULL)
-      {
-        ite0 = NULL;
-      }
-      else
-      {
-        ite0 = block;
-      }
-      Lib_IntVector_Intrinsics_vec128 b1 = Lib_IntVector_Intrinsics_vec128_load_le(ite0);
-      uint8_t *ite;
-      if (block == NULL)
-      {
-        ite = NULL;
-      }
-      else
-      {
-        ite = block + (uint32_t)16U;
-      }
-      Lib_IntVector_Intrinsics_vec128 b2 = Lib_IntVector_Intrinsics_vec128_load_le(ite);
+      Lib_IntVector_Intrinsics_vec128 b1 = Lib_IntVector_Intrinsics_vec128_load_le(block);
+      Lib_IntVector_Intrinsics_vec128
+      b2 = Lib_IntVector_Intrinsics_vec128_load_le(block + (uint32_t)16U);
       Lib_IntVector_Intrinsics_vec128 lo = Lib_IntVector_Intrinsics_vec128_interleave_low64(b1, b2);
       Lib_IntVector_Intrinsics_vec128
       hi = Lib_IntVector_Intrinsics_vec128_interleave_high64(b1, b2);
@@ -174,24 +109,8 @@ poly1305_padded_128(Lib_IntVector_Intrinsics_vec128 *ctx, uint32_t len, uint8_t 
       Lib_IntVector_Intrinsics_vec128 mask = Lib_IntVector_Intrinsics_vec128_load64(b);
       Lib_IntVector_Intrinsics_vec128 f4 = e[4U];
       e[4U] = Lib_IntVector_Intrinsics_vec128_or(f4, mask);
-      Lib_IntVector_Intrinsics_vec128 *rn;
-      if (pre == NULL)
-      {
-        rn = NULL;
-      }
-      else
-      {
-        rn = pre + (uint32_t)10U;
-      }
-      Lib_IntVector_Intrinsics_vec128 *rn5;
-      if (pre == NULL)
-      {
-        rn5 = NULL;
-      }
-      else
-      {
-        rn5 = pre + (uint32_t)15U;
-      }
+      Lib_IntVector_Intrinsics_vec128 *rn = pre + (uint32_t)10U;
+      Lib_IntVector_Intrinsics_vec128 *rn5 = pre + (uint32_t)15U;
       Lib_IntVector_Intrinsics_vec128 r0 = rn[0U];
       Lib_IntVector_Intrinsics_vec128 r1 = rn[1U];
       Lib_IntVector_Intrinsics_vec128 r2 = rn[2U];
@@ -376,40 +295,14 @@ poly1305_padded_128(Lib_IntVector_Intrinsics_vec128 *ctx, uint32_t len, uint8_t 
   uint32_t rem1 = len1 % (uint32_t)16U;
   for (uint32_t i = (uint32_t)0U; i < nb; i++)
   {
-    uint8_t *block;
-    if (t10 == NULL)
-    {
-      block = NULL;
-    }
-    else
-    {
-      block = t10 + i * (uint32_t)16U;
-    }
+    uint8_t *block = t10 + i * (uint32_t)16U;
     Lib_IntVector_Intrinsics_vec128 e[5U];
     for (uint32_t _i = 0U; _i < (uint32_t)5U; ++_i)
       e[_i] = Lib_IntVector_Intrinsics_vec128_zero;
-    uint8_t *ite0;
-    if (block == NULL)
-    {
-      ite0 = NULL;
-    }
-    else
-    {
-      ite0 = block;
-    }
-    uint64_t u = load64_le(ite0);
-    uint64_t lo = u;
-    uint8_t *ite;
-    if (block == NULL)
-    {
-      ite = NULL;
-    }
-    else
-    {
-      ite = block + (uint32_t)8U;
-    }
-    uint64_t u0 = load64_le(ite);
-    uint64_t hi = u0;
+    uint64_t u0 = load64_le(block);
+    uint64_t lo = u0;
+    uint64_t u = load64_le(block + (uint32_t)8U);
+    uint64_t hi = u;
     Lib_IntVector_Intrinsics_vec128 f0 = Lib_IntVector_Intrinsics_vec128_load64(lo);
     Lib_IntVector_Intrinsics_vec128 f1 = Lib_IntVector_Intrinsics_vec128_load64(hi);
     Lib_IntVector_Intrinsics_vec128
@@ -449,24 +342,8 @@ poly1305_padded_128(Lib_IntVector_Intrinsics_vec128 *ctx, uint32_t len, uint8_t 
     Lib_IntVector_Intrinsics_vec128 mask = Lib_IntVector_Intrinsics_vec128_load64(b);
     Lib_IntVector_Intrinsics_vec128 f4 = e[4U];
     e[4U] = Lib_IntVector_Intrinsics_vec128_or(f4, mask);
-    Lib_IntVector_Intrinsics_vec128 *r1;
-    if (pre == NULL)
-    {
-      r1 = NULL;
-    }
-    else
-    {
-      r1 = pre;
-    }
-    Lib_IntVector_Intrinsics_vec128 *r5;
-    if (pre == NULL)
-    {
-      r5 = NULL;
-    }
-    else
-    {
-      r5 = pre + (uint32_t)5U;
-    }
+    Lib_IntVector_Intrinsics_vec128 *r1 = pre;
+    Lib_IntVector_Intrinsics_vec128 *r5 = pre + (uint32_t)5U;
     Lib_IntVector_Intrinsics_vec128 r0 = r1[0U];
     Lib_IntVector_Intrinsics_vec128 r11 = r1[1U];
     Lib_IntVector_Intrinsics_vec128 r2 = r1[2U];
@@ -576,7 +453,7 @@ poly1305_padded_128(Lib_IntVector_Intrinsics_vec128 *ctx, uint32_t len, uint8_t 
     a46 =
       Lib_IntVector_Intrinsics_vec128_add64(a45,
         Lib_IntVector_Intrinsics_vec128_mul64(r0, a41));
-    Lib_IntVector_Intrinsics_vec128 t01 = a06;
+    Lib_IntVector_Intrinsics_vec128 t0 = a06;
     Lib_IntVector_Intrinsics_vec128 t11 = a16;
     Lib_IntVector_Intrinsics_vec128 t2 = a26;
     Lib_IntVector_Intrinsics_vec128 t3 = a36;
@@ -584,10 +461,10 @@ poly1305_padded_128(Lib_IntVector_Intrinsics_vec128 *ctx, uint32_t len, uint8_t 
     Lib_IntVector_Intrinsics_vec128
     mask26 = Lib_IntVector_Intrinsics_vec128_load64((uint64_t)0x3ffffffU);
     Lib_IntVector_Intrinsics_vec128
-    z0 = Lib_IntVector_Intrinsics_vec128_shift_right64(t01, (uint32_t)26U);
+    z0 = Lib_IntVector_Intrinsics_vec128_shift_right64(t0, (uint32_t)26U);
     Lib_IntVector_Intrinsics_vec128
     z1 = Lib_IntVector_Intrinsics_vec128_shift_right64(t3, (uint32_t)26U);
-    Lib_IntVector_Intrinsics_vec128 x0 = Lib_IntVector_Intrinsics_vec128_and(t01, mask26);
+    Lib_IntVector_Intrinsics_vec128 x0 = Lib_IntVector_Intrinsics_vec128_and(t0, mask26);
     Lib_IntVector_Intrinsics_vec128 x3 = Lib_IntVector_Intrinsics_vec128_and(t3, mask26);
     Lib_IntVector_Intrinsics_vec128 x1 = Lib_IntVector_Intrinsics_vec128_add64(t11, z0);
     Lib_IntVector_Intrinsics_vec128 x4 = Lib_IntVector_Intrinsics_vec128_add64(t4, z1);
@@ -627,15 +504,7 @@ poly1305_padded_128(Lib_IntVector_Intrinsics_vec128 *ctx, uint32_t len, uint8_t 
   }
   if (rem1 > (uint32_t)0U)
   {
-    uint8_t *last;
-    if (t10 == NULL)
-    {
-      last = NULL;
-    }
-    else
-    {
-      last = t10 + nb * (uint32_t)16U;
-    }
+    uint8_t *last = t10 + nb * (uint32_t)16U;
     Lib_IntVector_Intrinsics_vec128 e[5U];
     for (uint32_t _i = 0U; _i < (uint32_t)5U; ++_i)
       e[_i] = Lib_IntVector_Intrinsics_vec128_zero;
@@ -645,28 +514,10 @@ poly1305_padded_128(Lib_IntVector_Intrinsics_vec128 *ctx, uint32_t len, uint8_t 
     {
       memcpy(tmp, last, rem1 * sizeof (last[0U]));
     }
-    uint8_t *ite0;
-    if (tmp == NULL)
-    {
-      ite0 = NULL;
-    }
-    else
-    {
-      ite0 = tmp;
-    }
-    uint64_t u = load64_le(ite0);
-    uint64_t lo = u;
-    uint8_t *ite;
-    if (tmp == NULL)
-    {
-      ite = NULL;
-    }
-    else
-    {
-      ite = tmp + (uint32_t)8U;
-    }
-    uint64_t u0 = load64_le(ite);
-    uint64_t hi = u0;
+    uint64_t u0 = load64_le(tmp);
+    uint64_t lo = u0;
+    uint64_t u = load64_le(tmp + (uint32_t)8U);
+    uint64_t hi = u;
     Lib_IntVector_Intrinsics_vec128 f0 = Lib_IntVector_Intrinsics_vec128_load64(lo);
     Lib_IntVector_Intrinsics_vec128 f1 = Lib_IntVector_Intrinsics_vec128_load64(hi);
     Lib_IntVector_Intrinsics_vec128
@@ -706,24 +557,8 @@ poly1305_padded_128(Lib_IntVector_Intrinsics_vec128 *ctx, uint32_t len, uint8_t 
     Lib_IntVector_Intrinsics_vec128 mask = Lib_IntVector_Intrinsics_vec128_load64(b);
     Lib_IntVector_Intrinsics_vec128 fi = e[rem1 * (uint32_t)8U / (uint32_t)26U];
     e[rem1 * (uint32_t)8U / (uint32_t)26U] = Lib_IntVector_Intrinsics_vec128_or(fi, mask);
-    Lib_IntVector_Intrinsics_vec128 *r1;
-    if (pre == NULL)
-    {
-      r1 = NULL;
-    }
-    else
-    {
-      r1 = pre;
-    }
-    Lib_IntVector_Intrinsics_vec128 *r5;
-    if (pre == NULL)
-    {
-      r5 = NULL;
-    }
-    else
-    {
-      r5 = pre + (uint32_t)5U;
-    }
+    Lib_IntVector_Intrinsics_vec128 *r1 = pre;
+    Lib_IntVector_Intrinsics_vec128 *r5 = pre + (uint32_t)5U;
     Lib_IntVector_Intrinsics_vec128 r0 = r1[0U];
     Lib_IntVector_Intrinsics_vec128 r11 = r1[1U];
     Lib_IntVector_Intrinsics_vec128 r2 = r1[2U];
@@ -833,7 +668,7 @@ poly1305_padded_128(Lib_IntVector_Intrinsics_vec128 *ctx, uint32_t len, uint8_t 
     a46 =
       Lib_IntVector_Intrinsics_vec128_add64(a45,
         Lib_IntVector_Intrinsics_vec128_mul64(r0, a41));
-    Lib_IntVector_Intrinsics_vec128 t01 = a06;
+    Lib_IntVector_Intrinsics_vec128 t0 = a06;
     Lib_IntVector_Intrinsics_vec128 t11 = a16;
     Lib_IntVector_Intrinsics_vec128 t2 = a26;
     Lib_IntVector_Intrinsics_vec128 t3 = a36;
@@ -841,10 +676,10 @@ poly1305_padded_128(Lib_IntVector_Intrinsics_vec128 *ctx, uint32_t len, uint8_t 
     Lib_IntVector_Intrinsics_vec128
     mask26 = Lib_IntVector_Intrinsics_vec128_load64((uint64_t)0x3ffffffU);
     Lib_IntVector_Intrinsics_vec128
-    z0 = Lib_IntVector_Intrinsics_vec128_shift_right64(t01, (uint32_t)26U);
+    z0 = Lib_IntVector_Intrinsics_vec128_shift_right64(t0, (uint32_t)26U);
     Lib_IntVector_Intrinsics_vec128
     z1 = Lib_IntVector_Intrinsics_vec128_shift_right64(t3, (uint32_t)26U);
-    Lib_IntVector_Intrinsics_vec128 x0 = Lib_IntVector_Intrinsics_vec128_and(t01, mask26);
+    Lib_IntVector_Intrinsics_vec128 x0 = Lib_IntVector_Intrinsics_vec128_and(t0, mask26);
     Lib_IntVector_Intrinsics_vec128 x3 = Lib_IntVector_Intrinsics_vec128_and(t3, mask26);
     Lib_IntVector_Intrinsics_vec128 x1 = Lib_IntVector_Intrinsics_vec128_add64(t11, z0);
     Lib_IntVector_Intrinsics_vec128 x4 = Lib_IntVector_Intrinsics_vec128_add64(t4, z1);
@@ -890,49 +725,15 @@ poly1305_padded_128(Lib_IntVector_Intrinsics_vec128 *ctx, uint32_t len, uint8_t 
   }
   if (r > (uint32_t)0U)
   {
-    Lib_IntVector_Intrinsics_vec128 *pre0;
-    if (ctx == NULL)
-    {
-      pre0 = NULL;
-    }
-    else
-    {
-      pre0 = ctx + (uint32_t)5U;
-    }
-    Lib_IntVector_Intrinsics_vec128 *acc;
-    if (ctx == NULL)
-    {
-      acc = NULL;
-    }
-    else
-    {
-      acc = ctx;
-    }
+    Lib_IntVector_Intrinsics_vec128 *pre0 = ctx + (uint32_t)5U;
+    Lib_IntVector_Intrinsics_vec128 *acc = ctx;
     Lib_IntVector_Intrinsics_vec128 e[5U];
     for (uint32_t _i = 0U; _i < (uint32_t)5U; ++_i)
       e[_i] = Lib_IntVector_Intrinsics_vec128_zero;
-    uint8_t *ite0;
-    if (tmp == NULL)
-    {
-      ite0 = NULL;
-    }
-    else
-    {
-      ite0 = tmp;
-    }
-    uint64_t u = load64_le(ite0);
-    uint64_t lo = u;
-    uint8_t *ite;
-    if (tmp == NULL)
-    {
-      ite = NULL;
-    }
-    else
-    {
-      ite = tmp + (uint32_t)8U;
-    }
-    uint64_t u0 = load64_le(ite);
-    uint64_t hi = u0;
+    uint64_t u0 = load64_le(tmp);
+    uint64_t lo = u0;
+    uint64_t u = load64_le(tmp + (uint32_t)8U);
+    uint64_t hi = u;
     Lib_IntVector_Intrinsics_vec128 f0 = Lib_IntVector_Intrinsics_vec128_load64(lo);
     Lib_IntVector_Intrinsics_vec128 f1 = Lib_IntVector_Intrinsics_vec128_load64(hi);
     Lib_IntVector_Intrinsics_vec128
@@ -972,24 +773,8 @@ poly1305_padded_128(Lib_IntVector_Intrinsics_vec128 *ctx, uint32_t len, uint8_t 
     Lib_IntVector_Intrinsics_vec128 mask = Lib_IntVector_Intrinsics_vec128_load64(b);
     Lib_IntVector_Intrinsics_vec128 f4 = e[4U];
     e[4U] = Lib_IntVector_Intrinsics_vec128_or(f4, mask);
-    Lib_IntVector_Intrinsics_vec128 *r1;
-    if (pre0 == NULL)
-    {
-      r1 = NULL;
-    }
-    else
-    {
-      r1 = pre0;
-    }
-    Lib_IntVector_Intrinsics_vec128 *r5;
-    if (pre0 == NULL)
-    {
-      r5 = NULL;
-    }
-    else
-    {
-      r5 = pre0 + (uint32_t)5U;
-    }
+    Lib_IntVector_Intrinsics_vec128 *r1 = pre0;
+    Lib_IntVector_Intrinsics_vec128 *r5 = pre0 + (uint32_t)5U;
     Lib_IntVector_Intrinsics_vec128 r0 = r1[0U];
     Lib_IntVector_Intrinsics_vec128 r11 = r1[1U];
     Lib_IntVector_Intrinsics_vec128 r2 = r1[2U];
@@ -1177,16 +962,7 @@ poly1305_do_128(
   {
     tmp = block;
   }
-  uint8_t *ite0;
-  if (block == NULL)
-  {
-    ite0 = NULL;
-  }
-  else
-  {
-    ite0 = block;
-  }
-  store64_le(ite0, (uint64_t)aadlen);
+  store64_le(block, (uint64_t)aadlen);
   uint8_t *tmp0;
   if (block == NULL)
   {
@@ -1196,59 +972,16 @@ poly1305_do_128(
   {
     tmp0 = block + (uint32_t)8U;
   }
-  uint8_t *ite1;
-  if (block == NULL)
-  {
-    ite1 = NULL;
-  }
-  else
-  {
-    ite1 = block + (uint32_t)8U;
-  }
-  store64_le(ite1, (uint64_t)mlen);
-  Lib_IntVector_Intrinsics_vec128 *pre;
-  if (ctx == NULL)
-  {
-    pre = NULL;
-  }
-  else
-  {
-    pre = ctx + (uint32_t)5U;
-  }
-  Lib_IntVector_Intrinsics_vec128 *acc;
-  if (ctx == NULL)
-  {
-    acc = NULL;
-  }
-  else
-  {
-    acc = ctx;
-  }
+  store64_le(block + (uint32_t)8U, (uint64_t)mlen);
+  Lib_IntVector_Intrinsics_vec128 *pre = ctx + (uint32_t)5U;
+  Lib_IntVector_Intrinsics_vec128 *acc = ctx;
   Lib_IntVector_Intrinsics_vec128 e[5U];
   for (uint32_t _i = 0U; _i < (uint32_t)5U; ++_i)
     e[_i] = Lib_IntVector_Intrinsics_vec128_zero;
-  uint8_t *ite2;
-  if (block == NULL)
-  {
-    ite2 = NULL;
-  }
-  else
-  {
-    ite2 = block;
-  }
-  uint64_t u = load64_le(ite2);
-  uint64_t lo = u;
-  uint8_t *ite;
-  if (block == NULL)
-  {
-    ite = NULL;
-  }
-  else
-  {
-    ite = block + (uint32_t)8U;
-  }
-  uint64_t u0 = load64_le(ite);
-  uint64_t hi = u0;
+  uint64_t u0 = load64_le(block);
+  uint64_t lo = u0;
+  uint64_t u = load64_le(block + (uint32_t)8U);
+  uint64_t hi = u;
   Lib_IntVector_Intrinsics_vec128 f0 = Lib_IntVector_Intrinsics_vec128_load64(lo);
   Lib_IntVector_Intrinsics_vec128 f1 = Lib_IntVector_Intrinsics_vec128_load64(hi);
   Lib_IntVector_Intrinsics_vec128
@@ -1288,24 +1021,8 @@ poly1305_do_128(
   Lib_IntVector_Intrinsics_vec128 mask = Lib_IntVector_Intrinsics_vec128_load64(b);
   Lib_IntVector_Intrinsics_vec128 f4 = e[4U];
   e[4U] = Lib_IntVector_Intrinsics_vec128_or(f4, mask);
-  Lib_IntVector_Intrinsics_vec128 *r;
-  if (pre == NULL)
-  {
-    r = NULL;
-  }
-  else
-  {
-    r = pre;
-  }
-  Lib_IntVector_Intrinsics_vec128 *r5;
-  if (pre == NULL)
-  {
-    r5 = NULL;
-  }
-  else
-  {
-    r5 = pre + (uint32_t)5U;
-  }
+  Lib_IntVector_Intrinsics_vec128 *r = pre;
+  Lib_IntVector_Intrinsics_vec128 *r5 = pre + (uint32_t)5U;
   Lib_IntVector_Intrinsics_vec128 r0 = r[0U];
   Lib_IntVector_Intrinsics_vec128 r1 = r[1U];
   Lib_IntVector_Intrinsics_vec128 r2 = r[2U];
@@ -1481,15 +1198,7 @@ Hacl_Chacha20Poly1305_128_aead_encrypt(
   Hacl_Chacha20_Vec128_chacha20_encrypt_128(mlen, cipher, m, k, n, (uint32_t)1U);
   uint8_t tmp[64U] = { 0U };
   Hacl_Chacha20_Vec128_chacha20_encrypt_128((uint32_t)64U, tmp, tmp, k, n, (uint32_t)0U);
-  uint8_t *key;
-  if (tmp == NULL)
-  {
-    key = NULL;
-  }
-  else
-  {
-    key = tmp;
-  }
+  uint8_t *key = tmp;
   poly1305_do_128(key, aadlen, aad, mlen, cipher, mac);
 }
 
@@ -1508,15 +1217,7 @@ Hacl_Chacha20Poly1305_128_aead_decrypt(
   uint8_t computed_mac[16U] = { 0U };
   uint8_t tmp[64U] = { 0U };
   Hacl_Chacha20_Vec128_chacha20_encrypt_128((uint32_t)64U, tmp, tmp, k, n, (uint32_t)0U);
-  uint8_t *key;
-  if (tmp == NULL)
-  {
-    key = NULL;
-  }
-  else
-  {
-    key = tmp;
-  }
+  uint8_t *key = tmp;
   poly1305_do_128(key, aadlen, aad, mlen, cipher, computed_mac);
   uint8_t res = (uint8_t)255U;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)

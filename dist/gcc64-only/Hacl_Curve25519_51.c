@@ -766,6 +766,15 @@ static void encode_point(uint8_t *o, uint64_t *i)
   store_felem(u64s, tmp);
   for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0++)
   {
+    uint8_t *block;
+    if (o == NULL)
+    {
+      block = NULL;
+    }
+    else
+    {
+      block = o + i0 * (uint32_t)8U;
+    }
     store64_le(o + i0 * (uint32_t)8U, u64s[i0]);
   }
 }

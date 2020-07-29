@@ -46,60 +46,18 @@ static inline void poly1305_padded_32(uint64_t *ctx, uint32_t len, uint8_t *text
   {
     rem = text + n * (uint32_t)16U;
   }
-  uint64_t *pre;
-  if (ctx == NULL)
-  {
-    pre = NULL;
-  }
-  else
-  {
-    pre = ctx + (uint32_t)5U;
-  }
-  uint64_t *acc0;
-  if (ctx == NULL)
-  {
-    acc0 = NULL;
-  }
-  else
-  {
-    acc0 = ctx;
-  }
+  uint64_t *pre = ctx + (uint32_t)5U;
+  uint64_t *acc0 = ctx;
   uint32_t nb = n * (uint32_t)16U / (uint32_t)16U;
   uint32_t rem1 = n * (uint32_t)16U % (uint32_t)16U;
   for (uint32_t i = (uint32_t)0U; i < nb; i++)
   {
-    uint8_t *block;
-    if (blocks == NULL)
-    {
-      block = NULL;
-    }
-    else
-    {
-      block = blocks + i * (uint32_t)16U;
-    }
+    uint8_t *block = blocks + i * (uint32_t)16U;
     uint64_t e[5U] = { 0U };
-    uint8_t *ite0;
-    if (block == NULL)
-    {
-      ite0 = NULL;
-    }
-    else
-    {
-      ite0 = block;
-    }
-    uint64_t u = load64_le(ite0);
-    uint64_t lo = u;
-    uint8_t *ite;
-    if (block == NULL)
-    {
-      ite = NULL;
-    }
-    else
-    {
-      ite = block + (uint32_t)8U;
-    }
-    uint64_t u0 = load64_le(ite);
-    uint64_t hi = u0;
+    uint64_t u0 = load64_le(block);
+    uint64_t lo = u0;
+    uint64_t u = load64_le(block + (uint32_t)8U);
+    uint64_t hi = u;
     uint64_t f0 = lo;
     uint64_t f1 = hi;
     uint64_t f010 = f0 & (uint64_t)0x3ffffffU;
@@ -121,24 +79,8 @@ static inline void poly1305_padded_32(uint64_t *ctx, uint32_t len, uint8_t *text
     uint64_t mask = b;
     uint64_t f4 = e[4U];
     e[4U] = f4 | mask;
-    uint64_t *r1;
-    if (pre == NULL)
-    {
-      r1 = NULL;
-    }
-    else
-    {
-      r1 = pre;
-    }
-    uint64_t *r5;
-    if (pre == NULL)
-    {
-      r5 = NULL;
-    }
-    else
-    {
-      r5 = pre + (uint32_t)5U;
-    }
+    uint64_t *r1 = pre;
+    uint64_t *r5 = pre + (uint32_t)5U;
     uint64_t r0 = r1[0U];
     uint64_t r11 = r1[1U];
     uint64_t r2 = r1[2U];
@@ -230,15 +172,7 @@ static inline void poly1305_padded_32(uint64_t *ctx, uint32_t len, uint8_t *text
   }
   if (rem1 > (uint32_t)0U)
   {
-    uint8_t *last;
-    if (blocks == NULL)
-    {
-      last = NULL;
-    }
-    else
-    {
-      last = blocks + nb * (uint32_t)16U;
-    }
+    uint8_t *last = blocks + nb * (uint32_t)16U;
     uint64_t e[5U] = { 0U };
     uint8_t tmp[16U] = { 0U };
     bool uu____0 = last == NULL;
@@ -246,28 +180,10 @@ static inline void poly1305_padded_32(uint64_t *ctx, uint32_t len, uint8_t *text
     {
       memcpy(tmp, last, rem1 * sizeof (last[0U]));
     }
-    uint8_t *ite0;
-    if (tmp == NULL)
-    {
-      ite0 = NULL;
-    }
-    else
-    {
-      ite0 = tmp;
-    }
-    uint64_t u = load64_le(ite0);
-    uint64_t lo = u;
-    uint8_t *ite;
-    if (tmp == NULL)
-    {
-      ite = NULL;
-    }
-    else
-    {
-      ite = tmp + (uint32_t)8U;
-    }
-    uint64_t u0 = load64_le(ite);
-    uint64_t hi = u0;
+    uint64_t u0 = load64_le(tmp);
+    uint64_t lo = u0;
+    uint64_t u = load64_le(tmp + (uint32_t)8U);
+    uint64_t hi = u;
     uint64_t f0 = lo;
     uint64_t f1 = hi;
     uint64_t f010 = f0 & (uint64_t)0x3ffffffU;
@@ -289,24 +205,8 @@ static inline void poly1305_padded_32(uint64_t *ctx, uint32_t len, uint8_t *text
     uint64_t mask = b;
     uint64_t fi = e[rem1 * (uint32_t)8U / (uint32_t)26U];
     e[rem1 * (uint32_t)8U / (uint32_t)26U] = fi | mask;
-    uint64_t *r1;
-    if (pre == NULL)
-    {
-      r1 = NULL;
-    }
-    else
-    {
-      r1 = pre;
-    }
-    uint64_t *r5;
-    if (pre == NULL)
-    {
-      r5 = NULL;
-    }
-    else
-    {
-      r5 = pre + (uint32_t)5U;
-    }
+    uint64_t *r1 = pre;
+    uint64_t *r5 = pre + (uint32_t)5U;
     uint64_t r0 = r1[0U];
     uint64_t r11 = r1[1U];
     uint64_t r2 = r1[2U];
@@ -404,47 +304,13 @@ static inline void poly1305_padded_32(uint64_t *ctx, uint32_t len, uint8_t *text
   }
   if (r > (uint32_t)0U)
   {
-    uint64_t *pre0;
-    if (ctx == NULL)
-    {
-      pre0 = NULL;
-    }
-    else
-    {
-      pre0 = ctx + (uint32_t)5U;
-    }
-    uint64_t *acc;
-    if (ctx == NULL)
-    {
-      acc = NULL;
-    }
-    else
-    {
-      acc = ctx;
-    }
+    uint64_t *pre0 = ctx + (uint32_t)5U;
+    uint64_t *acc = ctx;
     uint64_t e[5U] = { 0U };
-    uint8_t *ite0;
-    if (tmp == NULL)
-    {
-      ite0 = NULL;
-    }
-    else
-    {
-      ite0 = tmp;
-    }
-    uint64_t u = load64_le(ite0);
-    uint64_t lo = u;
-    uint8_t *ite;
-    if (tmp == NULL)
-    {
-      ite = NULL;
-    }
-    else
-    {
-      ite = tmp + (uint32_t)8U;
-    }
-    uint64_t u0 = load64_le(ite);
-    uint64_t hi = u0;
+    uint64_t u0 = load64_le(tmp);
+    uint64_t lo = u0;
+    uint64_t u = load64_le(tmp + (uint32_t)8U);
+    uint64_t hi = u;
     uint64_t f0 = lo;
     uint64_t f1 = hi;
     uint64_t f010 = f0 & (uint64_t)0x3ffffffU;
@@ -466,24 +332,8 @@ static inline void poly1305_padded_32(uint64_t *ctx, uint32_t len, uint8_t *text
     uint64_t mask = b;
     uint64_t f4 = e[4U];
     e[4U] = f4 | mask;
-    uint64_t *r1;
-    if (pre0 == NULL)
-    {
-      r1 = NULL;
-    }
-    else
-    {
-      r1 = pre0;
-    }
-    uint64_t *r5;
-    if (pre0 == NULL)
-    {
-      r5 = NULL;
-    }
-    else
-    {
-      r5 = pre0 + (uint32_t)5U;
-    }
+    uint64_t *r1 = pre0;
+    uint64_t *r5 = pre0 + (uint32_t)5U;
     uint64_t r0 = r1[0U];
     uint64_t r11 = r1[1U];
     uint64_t r2 = r1[2U];
@@ -600,16 +450,7 @@ poly1305_do_32(
   {
     tmp = block;
   }
-  uint8_t *ite0;
-  if (block == NULL)
-  {
-    ite0 = NULL;
-  }
-  else
-  {
-    ite0 = block;
-  }
-  store64_le(ite0, (uint64_t)aadlen);
+  store64_le(block, (uint64_t)aadlen);
   uint8_t *tmp0;
   if (block == NULL)
   {
@@ -619,57 +460,14 @@ poly1305_do_32(
   {
     tmp0 = block + (uint32_t)8U;
   }
-  uint8_t *ite1;
-  if (block == NULL)
-  {
-    ite1 = NULL;
-  }
-  else
-  {
-    ite1 = block + (uint32_t)8U;
-  }
-  store64_le(ite1, (uint64_t)mlen);
-  uint64_t *pre;
-  if (ctx == NULL)
-  {
-    pre = NULL;
-  }
-  else
-  {
-    pre = ctx + (uint32_t)5U;
-  }
-  uint64_t *acc;
-  if (ctx == NULL)
-  {
-    acc = NULL;
-  }
-  else
-  {
-    acc = ctx;
-  }
+  store64_le(block + (uint32_t)8U, (uint64_t)mlen);
+  uint64_t *pre = ctx + (uint32_t)5U;
+  uint64_t *acc = ctx;
   uint64_t e[5U] = { 0U };
-  uint8_t *ite2;
-  if (block == NULL)
-  {
-    ite2 = NULL;
-  }
-  else
-  {
-    ite2 = block;
-  }
-  uint64_t u = load64_le(ite2);
-  uint64_t lo = u;
-  uint8_t *ite;
-  if (block == NULL)
-  {
-    ite = NULL;
-  }
-  else
-  {
-    ite = block + (uint32_t)8U;
-  }
-  uint64_t u0 = load64_le(ite);
-  uint64_t hi = u0;
+  uint64_t u0 = load64_le(block);
+  uint64_t lo = u0;
+  uint64_t u = load64_le(block + (uint32_t)8U);
+  uint64_t hi = u;
   uint64_t f0 = lo;
   uint64_t f1 = hi;
   uint64_t f010 = f0 & (uint64_t)0x3ffffffU;
@@ -691,24 +489,8 @@ poly1305_do_32(
   uint64_t mask = b;
   uint64_t f4 = e[4U];
   e[4U] = f4 | mask;
-  uint64_t *r;
-  if (pre == NULL)
-  {
-    r = NULL;
-  }
-  else
-  {
-    r = pre;
-  }
-  uint64_t *r5;
-  if (pre == NULL)
-  {
-    r5 = NULL;
-  }
-  else
-  {
-    r5 = pre + (uint32_t)5U;
-  }
+  uint64_t *r = pre;
+  uint64_t *r5 = pre + (uint32_t)5U;
   uint64_t r0 = r[0U];
   uint64_t r1 = r[1U];
   uint64_t r2 = r[2U];
@@ -815,15 +597,7 @@ Hacl_Chacha20Poly1305_32_aead_encrypt(
   Hacl_Chacha20_chacha20_encrypt(mlen, cipher, m, k, n, (uint32_t)1U);
   uint8_t tmp[64U] = { 0U };
   Hacl_Chacha20_chacha20_encrypt((uint32_t)64U, tmp, tmp, k, n, (uint32_t)0U);
-  uint8_t *key;
-  if (tmp == NULL)
-  {
-    key = NULL;
-  }
-  else
-  {
-    key = tmp;
-  }
+  uint8_t *key = tmp;
   poly1305_do_32(key, aadlen, aad, mlen, cipher, mac);
 }
 
@@ -842,15 +616,7 @@ Hacl_Chacha20Poly1305_32_aead_decrypt(
   uint8_t computed_mac[16U] = { 0U };
   uint8_t tmp[64U] = { 0U };
   Hacl_Chacha20_chacha20_encrypt((uint32_t)64U, tmp, tmp, k, n, (uint32_t)0U);
-  uint8_t *key;
-  if (tmp == NULL)
-  {
-    key = NULL;
-  }
-  else
-  {
-    key = tmp;
-  }
+  uint8_t *key = tmp;
   poly1305_do_32(key, aadlen, aad, mlen, cipher, computed_mac);
   uint8_t res = (uint8_t)255U;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)

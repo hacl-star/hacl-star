@@ -129,7 +129,14 @@ Hacl_HPKE_P256_CP32_SHA256_setupBaseI(
               uint8_t *output_info;
               uint8_t *info_key;
               Hacl_Hash_SHA2_hash_256(info, infolen, info_hash);
-              empty_b = info;
+              if (info == NULL)
+              {
+                empty_b = NULL;
+              }
+              else
+              {
+                empty_b = info;
+              }
               Hacl_Hash_SHA2_hash_256(empty_b, (uint32_t)0U, pskID_hash);
               context[0U] = (uint8_t)0U;
               uu____1 = context + (uint32_t)1U;
@@ -285,7 +292,14 @@ Hacl_HPKE_P256_CP32_SHA256_setupBaseR(
               uint8_t *output_info;
               uint8_t *info_key;
               Hacl_Hash_SHA2_hash_256(info, infolen, info_hash);
-              empty_b = info;
+              if (info == NULL)
+              {
+                empty_b = NULL;
+              }
+              else
+              {
+                empty_b = info;
+              }
               Hacl_Hash_SHA2_hash_256(empty_b, (uint32_t)0U, pskID_hash);
               context[0U] = (uint8_t)0U;
               uu____1 = context + (uint32_t)1U;

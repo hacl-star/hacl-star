@@ -795,7 +795,14 @@ static void encode_point(u8 *o, u64 *i)
   {
     u32 i0;
     for (i0 = (u32)0U; i0 < (u32)4U; i0++)
+    {
+      u8 *block;
+      if (o == NULL)
+        block = NULL;
+      else
+        block = o + i0 * (u32)8U;
       store64_le(o + i0 * (u32)8U, u64s[i0]);
+    }
   }
 }
 

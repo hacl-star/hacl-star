@@ -905,7 +905,11 @@ Hacl_Blake2b_32_blake2b(
           r1[3U] = iv7;
           if (!(kk == (uint32_t)0U))
           {
-            memcpy(b20, k, kk * sizeof (k[0U]));
+            bool uu____0 = k == NULL;
+            if (!(uu____0 || b20 == NULL))
+            {
+              memcpy(b20, k, kk * sizeof (k[0U]));
+            }
             {
               FStar_UInt128_uint128
               totlen =
@@ -950,43 +954,75 @@ Hacl_Blake2b_32_blake2b(
           }
           {
             uint8_t b21[128U] = { 0U };
-            uint8_t *last = d + ll - rem;
-            FStar_UInt128_uint128 totlen;
-            uint32_t double_row;
-            memcpy(b21, last, rem * sizeof (last[0U]));
-            totlen = FStar_UInt128_add_mod(prev0, FStar_UInt128_uint64_to_uint128((uint64_t)ll));
-            blake2b_update_block(b1, b, true, totlen, b21);
-            Lib_Memzero0_memzero(b21, (uint32_t)128U * sizeof (b21[0U]));
-            double_row = (uint32_t)2U * (uint32_t)4U * (uint32_t)8U;
-            KRML_CHECK_SIZE(sizeof (uint8_t), double_row);
+            uint8_t *last;
+            if (d == NULL)
             {
-              uint8_t b2[double_row];
-              memset(b2, 0U, double_row * sizeof (b2[0U]));
+              last = NULL;
+            }
+            else
+            {
+              last = d + ll - rem;
+            }
+            {
+              bool uu____1 = last == NULL;
+              FStar_UInt128_uint128 totlen;
+              uint32_t double_row;
+              if (!(uu____1 || b21 == NULL))
               {
-                uint8_t *first = b2;
-                uint8_t *second = b2 + (uint32_t)4U * (uint32_t)8U;
-                uint64_t *row0 = b + (uint32_t)0U * (uint32_t)4U;
-                uint64_t *row1 = b + (uint32_t)1U * (uint32_t)4U;
-                uint8_t *final;
+                memcpy(b21, last, rem * sizeof (last[0U]));
+              }
+              totlen = FStar_UInt128_add_mod(prev0, FStar_UInt128_uint64_to_uint128((uint64_t)ll));
+              blake2b_update_block(b1, b, true, totlen, b21);
+              Lib_Memzero0_memzero(b21, (uint32_t)128U * sizeof (b21[0U]));
+              double_row = (uint32_t)2U * (uint32_t)4U * (uint32_t)8U;
+              KRML_CHECK_SIZE(sizeof (uint8_t), double_row);
+              {
+                uint8_t b2[double_row];
+                memset(b2, 0U, double_row * sizeof (b2[0U]));
                 {
-                  uint32_t i;
-                  for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
+                  uint8_t *first = b2;
+                  uint8_t *second = b2 + (uint32_t)4U * (uint32_t)8U;
+                  uint64_t *row0 = b + (uint32_t)0U * (uint32_t)4U;
+                  uint64_t *row1 = b + (uint32_t)1U * (uint32_t)4U;
+                  uint8_t *final;
                   {
-                    store64_le(first + i * (uint32_t)8U, row0[i]);
+                    uint32_t i;
+                    for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
+                    {
+                      uint8_t *block;
+                      if (first == NULL)
+                      {
+                        block = NULL;
+                      }
+                      else
+                      {
+                        block = first + i * (uint32_t)8U;
+                      }
+                      store64_le(first + i * (uint32_t)8U, row0[i]);
+                    }
                   }
-                }
-                {
-                  uint32_t i;
-                  for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                   {
-                    store64_le(second + i * (uint32_t)8U, row1[i]);
+                    uint32_t i;
+                    for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
+                    {
+                      uint8_t *block;
+                      if (second == NULL)
+                      {
+                        block = NULL;
+                      }
+                      else
+                      {
+                        block = second + i * (uint32_t)8U;
+                      }
+                      store64_le(second + i * (uint32_t)8U, row1[i]);
+                    }
                   }
+                  final = b2;
+                  memcpy(output, final, nn * sizeof (final[0U]));
+                  Lib_Memzero0_memzero(b2, double_row * sizeof (b2[0U]));
+                  Lib_Memzero0_memzero(b1, stlen * sizeof (b1[0U]));
+                  Lib_Memzero0_memzero(b, stlen * sizeof (b[0U]));
                 }
-                final = b2;
-                memcpy(output, final, nn * sizeof (final[0U]));
-                Lib_Memzero0_memzero(b2, double_row * sizeof (b2[0U]));
-                Lib_Memzero0_memzero(b1, stlen * sizeof (b1[0U]));
-                Lib_Memzero0_memzero(b, stlen * sizeof (b[0U]));
               }
             }
           }

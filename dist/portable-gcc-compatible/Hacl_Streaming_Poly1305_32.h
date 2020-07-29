@@ -31,6 +31,7 @@
 #ifndef __Hacl_Streaming_Poly1305_32_H
 #define __Hacl_Streaming_Poly1305_32_H
 
+#include "Hacl_Kremlib.h"
 #include "Hacl_Poly1305_32.h"
 
 

@@ -150,7 +150,11 @@ void Hacl_Impl_SHA3_state_permute(uint64_t *s)
 void Hacl_Impl_SHA3_loadState(uint32_t rateInBytes, uint8_t *input, uint64_t *s)
 {
   uint8_t b[200U] = { 0U };
-  memcpy(b, input, rateInBytes * sizeof (input[0U]));
+  bool uu____0 = input == NULL;
+  if (!(uu____0 || b == NULL))
+  {
+    memcpy(b, input, rateInBytes * sizeof (input[0U]));
+  }
   {
     uint32_t i;
     for (i = (uint32_t)0U; i < (uint32_t)25U; i++)
@@ -171,6 +175,15 @@ void Hacl_Impl_SHA3_storeState(uint32_t rateInBytes, uint64_t *s, uint8_t *res)
     for (i = (uint32_t)0U; i < (uint32_t)25U; i++)
     {
       uint64_t sj = s[i];
+      uint8_t *tmp;
+      if (b == NULL)
+      {
+        tmp = NULL;
+      }
+      else
+      {
+        tmp = b + i * (uint32_t)8U;
+      }
       store64_le(b + i * (uint32_t)8U, sj);
     }
   }
@@ -199,27 +212,40 @@ Hacl_Impl_SHA3_absorb(
       Hacl_Impl_SHA3_state_permute(s);
     }
   }
-  last = input + nb * rateInBytes;
+  if (input == NULL)
+  {
+    last = NULL;
+  }
+  else
+  {
+    last = input + nb * rateInBytes;
+  }
   KRML_CHECK_SIZE(sizeof (uint8_t), rateInBytes);
   {
     uint8_t b[rateInBytes];
     memset(b, 0U, rateInBytes * sizeof (b[0U]));
-    memcpy(b, last, rem * sizeof (last[0U]));
-    b[rem] = delimitedSuffix;
-    Hacl_Impl_SHA3_loadState(rateInBytes, b, s);
-    if (!((delimitedSuffix & (uint8_t)0x80U) == (uint8_t)0U) && rem == rateInBytes - (uint32_t)1U)
     {
-      Hacl_Impl_SHA3_state_permute(s);
-    }
-    KRML_CHECK_SIZE(sizeof (uint8_t), rateInBytes);
-    {
-      uint8_t b1[rateInBytes];
-      memset(b1, 0U, rateInBytes * sizeof (b1[0U]));
-      b1[rateInBytes - (uint32_t)1U] = (uint8_t)0x80U;
-      Hacl_Impl_SHA3_loadState(rateInBytes, b1, s);
-      Hacl_Impl_SHA3_state_permute(s);
-      Lib_Memzero0_memzero(b1, rateInBytes * sizeof (b1[0U]));
-      Lib_Memzero0_memzero(b, rateInBytes * sizeof (b[0U]));
+      bool uu____0 = last == NULL;
+      if (!(uu____0 || b == NULL))
+      {
+        memcpy(b, last, rem * sizeof (last[0U]));
+      }
+      b[rem] = delimitedSuffix;
+      Hacl_Impl_SHA3_loadState(rateInBytes, b, s);
+      if (!((delimitedSuffix & (uint8_t)0x80U) == (uint8_t)0U) && rem == rateInBytes - (uint32_t)1U)
+      {
+        Hacl_Impl_SHA3_state_permute(s);
+      }
+      KRML_CHECK_SIZE(sizeof (uint8_t), rateInBytes);
+      {
+        uint8_t b1[rateInBytes];
+        memset(b1, 0U, rateInBytes * sizeof (b1[0U]));
+        b1[rateInBytes - (uint32_t)1U] = (uint8_t)0x80U;
+        Hacl_Impl_SHA3_loadState(rateInBytes, b1, s);
+        Hacl_Impl_SHA3_state_permute(s);
+        Lib_Memzero0_memzero(b1, rateInBytes * sizeof (b1[0U]));
+        Lib_Memzero0_memzero(b, rateInBytes * sizeof (b[0U]));
+      }
     }
   }
 }
@@ -240,6 +266,15 @@ Hacl_Impl_SHA3_squeeze(
     uint32_t i;
     for (i = (uint32_t)0U; i < outBlocks; i++)
     {
+      uint8_t *block;
+      if (blocks == NULL)
+      {
+        block = NULL;
+      }
+      else
+      {
+        block = blocks + i * rateInBytes;
+      }
       Hacl_Impl_SHA3_storeState(rateInBytes, s, blocks + i * rateInBytes);
       Hacl_Impl_SHA3_state_permute(s);
     }
@@ -258,10 +293,14 @@ Hacl_Impl_SHA3_keccak(
   uint8_t *output
 )
 {
-  uint32_t rateInBytes = rate / (uint32_t)8U;
-  uint64_t s[25U] = { 0U };
-  Hacl_Impl_SHA3_absorb(s, rateInBytes, inputByteLen, input, delimitedSuffix);
-  Hacl_Impl_SHA3_squeeze(s, rateInBytes, outputByteLen, output);
+  if (!(outputByteLen == (uint32_t)0U))
+  {
+    uint32_t rateInBytes = rate / (uint32_t)8U;
+    uint64_t s[25U] = { 0U };
+    Hacl_Impl_SHA3_absorb(s, rateInBytes, inputByteLen, input, delimitedSuffix);
+    Hacl_Impl_SHA3_squeeze(s, rateInBytes, outputByteLen, output);
+    return;
+  }
 }
 
 void

@@ -113,6 +113,9 @@ static inline void salsa20_key_block0(u8 *out, u8 *key, u8 *n)
   u32 n32[2U] = { 0U };
   u32 *k0;
   u32 *k1;
+  bool uu____0;
+  bool uu____1;
+  bool uu____2;
   {
     u32 i;
     for (i = (u32)0U; i < (u32)8U; i++)
@@ -140,19 +143,32 @@ static inline void salsa20_key_block0(u8 *out, u8 *key, u8 *n)
   ctx[0U] = (u32)0x61707865U;
   k0 = k32;
   k1 = k32 + (u32)4U;
-  memcpy(ctx + (u32)1U, k0, (u32)4U * sizeof (k0[0U]));
+  uu____0 = k0 == NULL;
+  if (!(uu____0 || ctx == NULL))
+    memcpy(ctx + (u32)1U, k0, (u32)4U * sizeof (k0[0U]));
   ctx[5U] = (u32)0x3320646eU;
-  memcpy(ctx + (u32)6U, n32, (u32)2U * sizeof (n32[0U]));
+  uu____1 = n32 == NULL;
+  if (!(uu____1 || ctx == NULL))
+    memcpy(ctx + (u32)6U, n32, (u32)2U * sizeof (n32[0U]));
   ctx[8U] = (u32)0U;
   ctx[9U] = (u32)0U;
   ctx[10U] = (u32)0x79622d32U;
-  memcpy(ctx + (u32)11U, k1, (u32)4U * sizeof (k1[0U]));
+  uu____2 = k1 == NULL;
+  if (!(uu____2 || ctx == NULL))
+    memcpy(ctx + (u32)11U, k1, (u32)4U * sizeof (k1[0U]));
   ctx[15U] = (u32)0x6b206574U;
   salsa20_core(k, ctx, (u32)0U);
   {
     u32 i;
     for (i = (u32)0U; i < (u32)16U; i++)
+    {
+      u8 *block;
+      if (out == NULL)
+        block = NULL;
+      else
+        block = out + i * (u32)4U;
       store32_le(out + i * (u32)4U, k[i]);
+    }
   }
 }
 
@@ -163,6 +179,9 @@ static inline void salsa20_encrypt(u32 len, u8 *out, u8 *text, u8 *key, u8 *n, u
   u32 n32[2U] = { 0U };
   u32 *k0;
   u32 *k10;
+  bool uu____0;
+  bool uu____1;
+  bool uu____2;
   {
     u32 i;
     for (i = (u32)0U; i < (u32)8U; i++)
@@ -190,96 +209,133 @@ static inline void salsa20_encrypt(u32 len, u8 *out, u8 *text, u8 *key, u8 *n, u
   ctx[0U] = (u32)0x61707865U;
   k0 = k32;
   k10 = k32 + (u32)4U;
-  memcpy(ctx + (u32)1U, k0, (u32)4U * sizeof (k0[0U]));
+  uu____0 = k0 == NULL;
+  if (!(uu____0 || ctx == NULL))
+    memcpy(ctx + (u32)1U, k0, (u32)4U * sizeof (k0[0U]));
   ctx[5U] = (u32)0x3320646eU;
-  memcpy(ctx + (u32)6U, n32, (u32)2U * sizeof (n32[0U]));
+  uu____1 = n32 == NULL;
+  if (!(uu____1 || ctx == NULL))
+    memcpy(ctx + (u32)6U, n32, (u32)2U * sizeof (n32[0U]));
   ctx[8U] = ctr;
   ctx[9U] = (u32)0U;
   ctx[10U] = (u32)0x79622d32U;
-  memcpy(ctx + (u32)11U, k10, (u32)4U * sizeof (k10[0U]));
+  uu____2 = k10 == NULL;
+  if (!(uu____2 || ctx == NULL))
+    memcpy(ctx + (u32)11U, k10, (u32)4U * sizeof (k10[0U]));
   ctx[15U] = (u32)0x6b206574U;
   {
     u32 k[16U] = { 0U };
     u32 rem = len % (u32)64U;
-    u32 nb = len / (u32)64U;
-    u32 rem1 = len % (u32)64U;
+    if (!(len == (u32)0U))
     {
-      u32 i0;
-      for (i0 = (u32)0U; i0 < nb; i0++)
+      u32 nb = len / (u32)64U;
+      u32 rem1 = len % (u32)64U;
+      u8 *ib;
+      if (text == NULL)
+        ib = NULL;
+      else
+        ib = text;
       {
-        u8 *uu____0 = out + i0 * (u32)64U;
-        u8 *uu____1 = text + i0 * (u32)64U;
-        u32 k1[16U] = { 0U };
-        salsa20_core(k1, ctx, i0);
+        u8 *ob;
+        if (out == NULL)
+          ob = NULL;
+        else
+          ob = out;
         {
-          u32 bl[16U] = { 0U };
+          u32 i0;
+          for (i0 = (u32)0U; i0 < nb; i0++)
           {
-            u32 i;
-            for (i = (u32)0U; i < (u32)16U; i++)
+            u8 *uu____3 = out + i0 * (u32)64U;
+            u8 *uu____4 = text + i0 * (u32)64U;
+            u32 k1[16U] = { 0U };
+            salsa20_core(k1, ctx, i0);
             {
-              u32 *os = bl;
-              u8 *bj = uu____1 + i * (u32)4U;
-              u32 u = load32_le(bj);
-              u32 r = u;
-              u32 x = r;
-              os[i] = x;
+              u32 bl[16U] = { 0U };
+              {
+                u32 i;
+                for (i = (u32)0U; i < (u32)16U; i++)
+                {
+                  u32 *os = bl;
+                  u8 *bj = uu____4 + i * (u32)4U;
+                  u32 u = load32_le(bj);
+                  u32 r = u;
+                  u32 x = r;
+                  os[i] = x;
+                }
+              }
+              {
+                u32 i;
+                for (i = (u32)0U; i < (u32)16U; i++)
+                {
+                  u32 *os = bl;
+                  u32 x = bl[i] ^ k1[i];
+                  os[i] = x;
+                }
+              }
+              {
+                u32 i;
+                for (i = (u32)0U; i < (u32)16U; i++)
+                {
+                  u8 *block1;
+                  if (uu____3 == NULL)
+                    block1 = NULL;
+                  else
+                    block1 = uu____3 + i * (u32)4U;
+                  store32_le(uu____3 + i * (u32)4U, bl[i]);
+                }
+              }
             }
-          }
-          {
-            u32 i;
-            for (i = (u32)0U; i < (u32)16U; i++)
-            {
-              u32 *os = bl;
-              u32 x = bl[i] ^ k1[i];
-              os[i] = x;
-            }
-          }
-          {
-            u32 i;
-            for (i = (u32)0U; i < (u32)16U; i++)
-              store32_le(uu____0 + i * (u32)4U, bl[i]);
           }
         }
-      }
-    }
-    if (rem1 > (u32)0U)
-    {
-      u8 *uu____2 = out + nb * (u32)64U;
-      u8 *uu____3 = text + nb * (u32)64U;
-      u8 plain[64U] = { 0U };
-      memcpy(plain, uu____3, rem * sizeof (uu____3[0U]));
-      {
-        u32 k1[16U] = { 0U };
-        salsa20_core(k1, ctx, nb);
+        if (rem1 > (u32)0U)
         {
-          u32 bl[16U] = { 0U };
+          u8 *uu____5 = out + nb * (u32)64U;
+          u8 *uu____6 = text + nb * (u32)64U;
+          u8 plain[64U] = { 0U };
+          bool uu____7 = uu____6 == NULL;
+          if (!(uu____7 || plain == NULL))
+            memcpy(plain, uu____6, rem * sizeof (uu____6[0U]));
           {
-            u32 i;
-            for (i = (u32)0U; i < (u32)16U; i++)
+            u32 k1[16U] = { 0U };
+            salsa20_core(k1, ctx, nb);
             {
-              u32 *os = bl;
-              u8 *bj = plain + i * (u32)4U;
-              u32 u = load32_le(bj);
-              u32 r = u;
-              u32 x = r;
-              os[i] = x;
+              u32 bl[16U] = { 0U };
+              {
+                u32 i;
+                for (i = (u32)0U; i < (u32)16U; i++)
+                {
+                  u32 *os = bl;
+                  u8 *bj = plain + i * (u32)4U;
+                  u32 u = load32_le(bj);
+                  u32 r = u;
+                  u32 x = r;
+                  os[i] = x;
+                }
+              }
+              {
+                u32 i;
+                for (i = (u32)0U; i < (u32)16U; i++)
+                {
+                  u32 *os = bl;
+                  u32 x = bl[i] ^ k1[i];
+                  os[i] = x;
+                }
+              }
+              {
+                u32 i;
+                for (i = (u32)0U; i < (u32)16U; i++)
+                {
+                  u8 *block;
+                  if (plain == NULL)
+                    block = NULL;
+                  else
+                    block = plain + i * (u32)4U;
+                  store32_le(plain + i * (u32)4U, bl[i]);
+                }
+              }
+              memcpy(uu____5, plain, rem * sizeof (plain[0U]));
             }
           }
-          {
-            u32 i;
-            for (i = (u32)0U; i < (u32)16U; i++)
-            {
-              u32 *os = bl;
-              u32 x = bl[i] ^ k1[i];
-              os[i] = x;
-            }
-          }
-          {
-            u32 i;
-            for (i = (u32)0U; i < (u32)16U; i++)
-              store32_le(plain + i * (u32)4U, bl[i]);
-          }
-          memcpy(uu____2, plain, rem * sizeof (plain[0U]));
         }
       }
     }
@@ -293,6 +349,9 @@ static inline void salsa20_decrypt(u32 len, u8 *out, u8 *cipher, u8 *key, u8 *n,
   u32 n32[2U] = { 0U };
   u32 *k0;
   u32 *k10;
+  bool uu____0;
+  bool uu____1;
+  bool uu____2;
   {
     u32 i;
     for (i = (u32)0U; i < (u32)8U; i++)
@@ -320,96 +379,133 @@ static inline void salsa20_decrypt(u32 len, u8 *out, u8 *cipher, u8 *key, u8 *n,
   ctx[0U] = (u32)0x61707865U;
   k0 = k32;
   k10 = k32 + (u32)4U;
-  memcpy(ctx + (u32)1U, k0, (u32)4U * sizeof (k0[0U]));
+  uu____0 = k0 == NULL;
+  if (!(uu____0 || ctx == NULL))
+    memcpy(ctx + (u32)1U, k0, (u32)4U * sizeof (k0[0U]));
   ctx[5U] = (u32)0x3320646eU;
-  memcpy(ctx + (u32)6U, n32, (u32)2U * sizeof (n32[0U]));
+  uu____1 = n32 == NULL;
+  if (!(uu____1 || ctx == NULL))
+    memcpy(ctx + (u32)6U, n32, (u32)2U * sizeof (n32[0U]));
   ctx[8U] = ctr;
   ctx[9U] = (u32)0U;
   ctx[10U] = (u32)0x79622d32U;
-  memcpy(ctx + (u32)11U, k10, (u32)4U * sizeof (k10[0U]));
+  uu____2 = k10 == NULL;
+  if (!(uu____2 || ctx == NULL))
+    memcpy(ctx + (u32)11U, k10, (u32)4U * sizeof (k10[0U]));
   ctx[15U] = (u32)0x6b206574U;
   {
     u32 k[16U] = { 0U };
     u32 rem = len % (u32)64U;
-    u32 nb = len / (u32)64U;
-    u32 rem1 = len % (u32)64U;
+    if (!(len == (u32)0U))
     {
-      u32 i0;
-      for (i0 = (u32)0U; i0 < nb; i0++)
+      u32 nb = len / (u32)64U;
+      u32 rem1 = len % (u32)64U;
+      u8 *ib;
+      if (cipher == NULL)
+        ib = NULL;
+      else
+        ib = cipher;
       {
-        u8 *uu____0 = out + i0 * (u32)64U;
-        u8 *uu____1 = cipher + i0 * (u32)64U;
-        u32 k1[16U] = { 0U };
-        salsa20_core(k1, ctx, i0);
+        u8 *ob;
+        if (out == NULL)
+          ob = NULL;
+        else
+          ob = out;
         {
-          u32 bl[16U] = { 0U };
+          u32 i0;
+          for (i0 = (u32)0U; i0 < nb; i0++)
           {
-            u32 i;
-            for (i = (u32)0U; i < (u32)16U; i++)
+            u8 *uu____3 = out + i0 * (u32)64U;
+            u8 *uu____4 = cipher + i0 * (u32)64U;
+            u32 k1[16U] = { 0U };
+            salsa20_core(k1, ctx, i0);
             {
-              u32 *os = bl;
-              u8 *bj = uu____1 + i * (u32)4U;
-              u32 u = load32_le(bj);
-              u32 r = u;
-              u32 x = r;
-              os[i] = x;
+              u32 bl[16U] = { 0U };
+              {
+                u32 i;
+                for (i = (u32)0U; i < (u32)16U; i++)
+                {
+                  u32 *os = bl;
+                  u8 *bj = uu____4 + i * (u32)4U;
+                  u32 u = load32_le(bj);
+                  u32 r = u;
+                  u32 x = r;
+                  os[i] = x;
+                }
+              }
+              {
+                u32 i;
+                for (i = (u32)0U; i < (u32)16U; i++)
+                {
+                  u32 *os = bl;
+                  u32 x = bl[i] ^ k1[i];
+                  os[i] = x;
+                }
+              }
+              {
+                u32 i;
+                for (i = (u32)0U; i < (u32)16U; i++)
+                {
+                  u8 *block1;
+                  if (uu____3 == NULL)
+                    block1 = NULL;
+                  else
+                    block1 = uu____3 + i * (u32)4U;
+                  store32_le(uu____3 + i * (u32)4U, bl[i]);
+                }
+              }
             }
-          }
-          {
-            u32 i;
-            for (i = (u32)0U; i < (u32)16U; i++)
-            {
-              u32 *os = bl;
-              u32 x = bl[i] ^ k1[i];
-              os[i] = x;
-            }
-          }
-          {
-            u32 i;
-            for (i = (u32)0U; i < (u32)16U; i++)
-              store32_le(uu____0 + i * (u32)4U, bl[i]);
           }
         }
-      }
-    }
-    if (rem1 > (u32)0U)
-    {
-      u8 *uu____2 = out + nb * (u32)64U;
-      u8 *uu____3 = cipher + nb * (u32)64U;
-      u8 plain[64U] = { 0U };
-      memcpy(plain, uu____3, rem * sizeof (uu____3[0U]));
-      {
-        u32 k1[16U] = { 0U };
-        salsa20_core(k1, ctx, nb);
+        if (rem1 > (u32)0U)
         {
-          u32 bl[16U] = { 0U };
+          u8 *uu____5 = out + nb * (u32)64U;
+          u8 *uu____6 = cipher + nb * (u32)64U;
+          u8 plain[64U] = { 0U };
+          bool uu____7 = uu____6 == NULL;
+          if (!(uu____7 || plain == NULL))
+            memcpy(plain, uu____6, rem * sizeof (uu____6[0U]));
           {
-            u32 i;
-            for (i = (u32)0U; i < (u32)16U; i++)
+            u32 k1[16U] = { 0U };
+            salsa20_core(k1, ctx, nb);
             {
-              u32 *os = bl;
-              u8 *bj = plain + i * (u32)4U;
-              u32 u = load32_le(bj);
-              u32 r = u;
-              u32 x = r;
-              os[i] = x;
+              u32 bl[16U] = { 0U };
+              {
+                u32 i;
+                for (i = (u32)0U; i < (u32)16U; i++)
+                {
+                  u32 *os = bl;
+                  u8 *bj = plain + i * (u32)4U;
+                  u32 u = load32_le(bj);
+                  u32 r = u;
+                  u32 x = r;
+                  os[i] = x;
+                }
+              }
+              {
+                u32 i;
+                for (i = (u32)0U; i < (u32)16U; i++)
+                {
+                  u32 *os = bl;
+                  u32 x = bl[i] ^ k1[i];
+                  os[i] = x;
+                }
+              }
+              {
+                u32 i;
+                for (i = (u32)0U; i < (u32)16U; i++)
+                {
+                  u8 *block;
+                  if (plain == NULL)
+                    block = NULL;
+                  else
+                    block = plain + i * (u32)4U;
+                  store32_le(plain + i * (u32)4U, bl[i]);
+                }
+              }
+              memcpy(uu____5, plain, rem * sizeof (plain[0U]));
             }
           }
-          {
-            u32 i;
-            for (i = (u32)0U; i < (u32)16U; i++)
-            {
-              u32 *os = bl;
-              u32 x = bl[i] ^ k1[i];
-              os[i] = x;
-            }
-          }
-          {
-            u32 i;
-            for (i = (u32)0U; i < (u32)16U; i++)
-              store32_le(plain + i * (u32)4U, bl[i]);
-          }
-          memcpy(uu____2, plain, rem * sizeof (plain[0U]));
         }
       }
     }
@@ -423,6 +519,9 @@ static inline void hsalsa20(u8 *out, u8 *key, u8 *n)
   u32 n32[4U] = { 0U };
   u32 *k0;
   u32 *k1;
+  bool uu____0;
+  bool uu____1;
+  bool uu____2;
   u32 r0;
   u32 r1;
   u32 r2;
@@ -459,11 +558,17 @@ static inline void hsalsa20(u8 *out, u8 *key, u8 *n)
   k0 = k32;
   k1 = k32 + (u32)4U;
   ctx[0U] = (u32)0x61707865U;
-  memcpy(ctx + (u32)1U, k0, (u32)4U * sizeof (k0[0U]));
+  uu____0 = k0 == NULL;
+  if (!(uu____0 || ctx == NULL))
+    memcpy(ctx + (u32)1U, k0, (u32)4U * sizeof (k0[0U]));
   ctx[5U] = (u32)0x3320646eU;
-  memcpy(ctx + (u32)6U, n32, (u32)4U * sizeof (n32[0U]));
+  uu____1 = n32 == NULL;
+  if (!(uu____1 || ctx == NULL))
+    memcpy(ctx + (u32)6U, n32, (u32)4U * sizeof (n32[0U]));
   ctx[10U] = (u32)0x79622d32U;
-  memcpy(ctx + (u32)11U, k1, (u32)4U * sizeof (k1[0U]));
+  uu____2 = k1 == NULL;
+  if (!(uu____2 || ctx == NULL))
+    memcpy(ctx + (u32)11U, k1, (u32)4U * sizeof (k1[0U]));
   ctx[15U] = (u32)0x6b206574U;
   rounds(ctx);
   r0 = ctx[0U];
@@ -485,7 +590,14 @@ static inline void hsalsa20(u8 *out, u8 *key, u8 *n)
   {
     u32 i;
     for (i = (u32)0U; i < (u32)8U; i++)
+    {
+      u8 *block;
+      if (out == NULL)
+        block = NULL;
+      else
+        block = out + i * (u32)4U;
       store32_le(out + i * (u32)4U, res[i]);
+    }
   }
 }
 

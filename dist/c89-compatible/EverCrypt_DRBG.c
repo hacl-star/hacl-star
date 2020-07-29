@@ -320,100 +320,206 @@ EverCrypt_DRBG_instantiate_sha1(
           return false;
         }
         {
-          uint8_t *entropy_input = entropy;
-          uint8_t *nonce = entropy + entropy_input_len;
-          EverCrypt_DRBG_state_s st_s = *st;
-          KRML_CHECK_SIZE(sizeof (uint8_t),
-            entropy_input_len + nonce_len + personalization_string_len);
+          uint8_t *entropy_input;
+          if (entropy == NULL)
           {
-            uint8_t seed_material[entropy_input_len + nonce_len + personalization_string_len];
-            memset(seed_material,
-              0U,
-              (entropy_input_len + nonce_len + personalization_string_len)
-              * sizeof (seed_material[0U]));
-            memcpy(seed_material, entropy_input, entropy_input_len * sizeof (entropy_input[0U]));
-            memcpy(seed_material + entropy_input_len, nonce, nonce_len * sizeof (nonce[0U]));
-            memcpy(seed_material + entropy_input_len + nonce_len,
-              personalization_string,
-              personalization_string_len * sizeof (personalization_string[0U]));
+            entropy_input = NULL;
+          }
+          else
+          {
+            entropy_input = entropy;
+          }
+          {
+            uint8_t *nonce;
+            if (entropy == NULL)
             {
-              Hacl_HMAC_DRBG_state scrut;
-              if (st_s.tag == EverCrypt_DRBG_SHA1_s)
+              nonce = NULL;
+            }
+            else
+            {
+              nonce = entropy + entropy_input_len;
+            }
+            {
+              EverCrypt_DRBG_state_s st_s = *st;
+              KRML_CHECK_SIZE(sizeof (uint8_t),
+                entropy_input_len + nonce_len + personalization_string_len);
               {
-                scrut = st_s.val.case_SHA1_s;
-              }
-              else
-              {
-                scrut =
-                  KRML_EABORT(Hacl_HMAC_DRBG_state,
-                    "unreachable (pattern matches are exhaustive in F*)");
-              }
-              {
-                uint8_t *k = scrut.k;
-                uint8_t *v = scrut.v;
-                uint32_t *ctr = scrut.reseed_counter;
-                memset(k, 0U, (uint32_t)20U * sizeof (k[0U]));
-                memset(v, (uint8_t)1U, (uint32_t)20U * sizeof (v[0U]));
-                ctr[0U] = (uint32_t)1U;
+                uint8_t seed_material[entropy_input_len + nonce_len + personalization_string_len];
+                memset(seed_material,
+                  0U,
+                  (entropy_input_len + nonce_len + personalization_string_len)
+                  * sizeof (seed_material[0U]));
                 {
-                  uint32_t
-                  input_len =
-                    (uint32_t)21U
-                    + entropy_input_len + nonce_len + personalization_string_len;
-                  KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
+                  uint8_t *uu____0;
+                  if (seed_material == NULL)
                   {
-                    uint8_t input0[input_len];
-                    memset(input0, 0U, input_len * sizeof (input0[0U]));
+                    uu____0 = NULL;
+                  }
+                  else
+                  {
+                    uu____0 = seed_material;
+                  }
+                  {
+                    bool uu____1 = entropy_input == NULL;
+                    if (!(uu____1 || uu____0 == NULL))
                     {
-                      uint8_t *k_ = input0;
-                      memcpy(k_, v, (uint32_t)20U * sizeof (v[0U]));
-                      if
-                      (entropy_input_len + nonce_len + personalization_string_len != (uint32_t)0U)
+                      memcpy(uu____0,
+                        entropy_input,
+                        entropy_input_len * sizeof (entropy_input[0U]));
+                    }
+                    {
+                      uint8_t *uu____2;
+                      if (seed_material == NULL)
                       {
-                        memcpy(input0 + (uint32_t)21U,
-                          seed_material,
-                          (entropy_input_len + nonce_len + personalization_string_len)
-                          * sizeof (seed_material[0U]));
+                        uu____2 = NULL;
                       }
-                      input0[20U] = (uint8_t)0U;
-                      EverCrypt_HMAC_compute_sha1(k_, k, (uint32_t)20U, input0, input_len);
-                      EverCrypt_HMAC_compute_sha1(v, k_, (uint32_t)20U, v, (uint32_t)20U);
-                      memcpy(k, k_, (uint32_t)20U * sizeof (k_[0U]));
-                      if
-                      (entropy_input_len + nonce_len + personalization_string_len != (uint32_t)0U)
+                      else
                       {
-                        uint32_t
-                        input_len0 =
-                          (uint32_t)21U
-                          + entropy_input_len + nonce_len + personalization_string_len;
-                        KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
+                        uu____2 = seed_material + entropy_input_len;
+                      }
+                      {
+                        bool uu____3 = nonce == NULL;
+                        if (!(uu____3 || uu____2 == NULL))
                         {
-                          uint8_t input[input_len0];
-                          memset(input, 0U, input_len0 * sizeof (input[0U]));
+                          memcpy(uu____2, nonce, nonce_len * sizeof (nonce[0U]));
+                        }
+                        {
+                          uint8_t *uu____4;
+                          if (seed_material == NULL)
                           {
-                            uint8_t *k_0 = input;
-                            memcpy(k_0, v, (uint32_t)20U * sizeof (v[0U]));
-                            if
-                            (
-                              entropy_input_len
-                              + nonce_len
-                              + personalization_string_len
-                              != (uint32_t)0U
-                            )
+                            uu____4 = NULL;
+                          }
+                          else
+                          {
+                            uu____4 = seed_material + entropy_input_len + nonce_len;
+                          }
+                          {
+                            bool uu____5 = personalization_string == NULL;
+                            if (!(uu____5 || uu____4 == NULL))
                             {
-                              memcpy(input + (uint32_t)21U,
-                                seed_material,
-                                (entropy_input_len + nonce_len + personalization_string_len)
-                                * sizeof (seed_material[0U]));
+                              memcpy(uu____4,
+                                personalization_string,
+                                personalization_string_len * sizeof (personalization_string[0U]));
                             }
-                            input[20U] = (uint8_t)1U;
-                            EverCrypt_HMAC_compute_sha1(k_0, k, (uint32_t)20U, input, input_len0);
-                            EverCrypt_HMAC_compute_sha1(v, k_0, (uint32_t)20U, v, (uint32_t)20U);
-                            memcpy(k, k_0, (uint32_t)20U * sizeof (k_0[0U]));
+                            {
+                              Hacl_HMAC_DRBG_state scrut;
+                              if (st_s.tag == EverCrypt_DRBG_SHA1_s)
+                              {
+                                scrut = st_s.val.case_SHA1_s;
+                              }
+                              else
+                              {
+                                scrut =
+                                  KRML_EABORT(Hacl_HMAC_DRBG_state,
+                                    "unreachable (pattern matches are exhaustive in F*)");
+                              }
+                              {
+                                uint8_t *k = scrut.k;
+                                uint8_t *v = scrut.v;
+                                uint32_t *ctr = scrut.reseed_counter;
+                                memset(k, 0U, (uint32_t)20U * sizeof (k[0U]));
+                                memset(v, (uint8_t)1U, (uint32_t)20U * sizeof (v[0U]));
+                                ctr[0U] = (uint32_t)1U;
+                                {
+                                  uint32_t
+                                  input_len =
+                                    (uint32_t)21U
+                                    + entropy_input_len + nonce_len + personalization_string_len;
+                                  KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
+                                  {
+                                    uint8_t input0[input_len];
+                                    memset(input0, 0U, input_len * sizeof (input0[0U]));
+                                    {
+                                      uint8_t *k_ = input0;
+                                      memcpy(k_, v, (uint32_t)20U * sizeof (v[0U]));
+                                      if
+                                      (
+                                        entropy_input_len
+                                        + nonce_len
+                                        + personalization_string_len
+                                        != (uint32_t)0U
+                                      )
+                                      {
+                                        memcpy(input0 + (uint32_t)21U,
+                                          seed_material,
+                                          (entropy_input_len
+                                          + nonce_len
+                                          + personalization_string_len)
+                                          * sizeof (seed_material[0U]));
+                                      }
+                                      input0[20U] = (uint8_t)0U;
+                                      EverCrypt_HMAC_compute_sha1(k_,
+                                        k,
+                                        (uint32_t)20U,
+                                        input0,
+                                        input_len);
+                                      EverCrypt_HMAC_compute_sha1(v,
+                                        k_,
+                                        (uint32_t)20U,
+                                        v,
+                                        (uint32_t)20U);
+                                      memcpy(k, k_, (uint32_t)20U * sizeof (k_[0U]));
+                                      if
+                                      (
+                                        entropy_input_len
+                                        + nonce_len
+                                        + personalization_string_len
+                                        != (uint32_t)0U
+                                      )
+                                      {
+                                        uint32_t
+                                        input_len0 =
+                                          (uint32_t)21U
+                                          +
+                                            entropy_input_len
+                                            + nonce_len
+                                            + personalization_string_len;
+                                        KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
+                                        {
+                                          uint8_t input[input_len0];
+                                          memset(input, 0U, input_len0 * sizeof (input[0U]));
+                                          {
+                                            uint8_t *k_0 = input;
+                                            memcpy(k_0, v, (uint32_t)20U * sizeof (v[0U]));
+                                            if
+                                            (
+                                              entropy_input_len
+                                              + nonce_len
+                                              + personalization_string_len
+                                              != (uint32_t)0U
+                                            )
+                                            {
+                                              memcpy(input + (uint32_t)21U,
+                                                seed_material,
+                                                (entropy_input_len
+                                                + nonce_len
+                                                + personalization_string_len)
+                                                * sizeof (seed_material[0U]));
+                                            }
+                                            input[20U] = (uint8_t)1U;
+                                            EverCrypt_HMAC_compute_sha1(k_0,
+                                              k,
+                                              (uint32_t)20U,
+                                              input,
+                                              input_len0);
+                                            EverCrypt_HMAC_compute_sha1(v,
+                                              k_0,
+                                              (uint32_t)20U,
+                                              v,
+                                              (uint32_t)20U);
+                                            memcpy(k, k_0, (uint32_t)20U * sizeof (k_0[0U]));
+                                          }
+                                        }
+                                      }
+                                      return true;
+                                    }
+                                  }
+                                }
+                              }
+                            }
                           }
                         }
                       }
-                      return true;
                     }
                   }
                 }
@@ -452,108 +558,206 @@ EverCrypt_DRBG_instantiate_sha2_256(
           return false;
         }
         {
-          uint8_t *entropy_input = entropy;
-          uint8_t *nonce = entropy + entropy_input_len;
-          EverCrypt_DRBG_state_s st_s = *st;
-          KRML_CHECK_SIZE(sizeof (uint8_t),
-            entropy_input_len + nonce_len + personalization_string_len);
+          uint8_t *entropy_input;
+          if (entropy == NULL)
           {
-            uint8_t seed_material[entropy_input_len + nonce_len + personalization_string_len];
-            memset(seed_material,
-              0U,
-              (entropy_input_len + nonce_len + personalization_string_len)
-              * sizeof (seed_material[0U]));
-            memcpy(seed_material, entropy_input, entropy_input_len * sizeof (entropy_input[0U]));
-            memcpy(seed_material + entropy_input_len, nonce, nonce_len * sizeof (nonce[0U]));
-            memcpy(seed_material + entropy_input_len + nonce_len,
-              personalization_string,
-              personalization_string_len * sizeof (personalization_string[0U]));
+            entropy_input = NULL;
+          }
+          else
+          {
+            entropy_input = entropy;
+          }
+          {
+            uint8_t *nonce;
+            if (entropy == NULL)
             {
-              Hacl_HMAC_DRBG_state scrut;
-              if (st_s.tag == EverCrypt_DRBG_SHA2_256_s)
+              nonce = NULL;
+            }
+            else
+            {
+              nonce = entropy + entropy_input_len;
+            }
+            {
+              EverCrypt_DRBG_state_s st_s = *st;
+              KRML_CHECK_SIZE(sizeof (uint8_t),
+                entropy_input_len + nonce_len + personalization_string_len);
               {
-                scrut = st_s.val.case_SHA2_256_s;
-              }
-              else
-              {
-                scrut =
-                  KRML_EABORT(Hacl_HMAC_DRBG_state,
-                    "unreachable (pattern matches are exhaustive in F*)");
-              }
-              {
-                uint8_t *k = scrut.k;
-                uint8_t *v = scrut.v;
-                uint32_t *ctr = scrut.reseed_counter;
-                memset(k, 0U, (uint32_t)32U * sizeof (k[0U]));
-                memset(v, (uint8_t)1U, (uint32_t)32U * sizeof (v[0U]));
-                ctr[0U] = (uint32_t)1U;
+                uint8_t seed_material[entropy_input_len + nonce_len + personalization_string_len];
+                memset(seed_material,
+                  0U,
+                  (entropy_input_len + nonce_len + personalization_string_len)
+                  * sizeof (seed_material[0U]));
                 {
-                  uint32_t
-                  input_len =
-                    (uint32_t)33U
-                    + entropy_input_len + nonce_len + personalization_string_len;
-                  KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
+                  uint8_t *uu____0;
+                  if (seed_material == NULL)
                   {
-                    uint8_t input0[input_len];
-                    memset(input0, 0U, input_len * sizeof (input0[0U]));
+                    uu____0 = NULL;
+                  }
+                  else
+                  {
+                    uu____0 = seed_material;
+                  }
+                  {
+                    bool uu____1 = entropy_input == NULL;
+                    if (!(uu____1 || uu____0 == NULL))
                     {
-                      uint8_t *k_ = input0;
-                      memcpy(k_, v, (uint32_t)32U * sizeof (v[0U]));
-                      if
-                      (entropy_input_len + nonce_len + personalization_string_len != (uint32_t)0U)
+                      memcpy(uu____0,
+                        entropy_input,
+                        entropy_input_len * sizeof (entropy_input[0U]));
+                    }
+                    {
+                      uint8_t *uu____2;
+                      if (seed_material == NULL)
                       {
-                        memcpy(input0 + (uint32_t)33U,
-                          seed_material,
-                          (entropy_input_len + nonce_len + personalization_string_len)
-                          * sizeof (seed_material[0U]));
+                        uu____2 = NULL;
                       }
-                      input0[32U] = (uint8_t)0U;
-                      EverCrypt_HMAC_compute_sha2_256(k_, k, (uint32_t)32U, input0, input_len);
-                      EverCrypt_HMAC_compute_sha2_256(v, k_, (uint32_t)32U, v, (uint32_t)32U);
-                      memcpy(k, k_, (uint32_t)32U * sizeof (k_[0U]));
-                      if
-                      (entropy_input_len + nonce_len + personalization_string_len != (uint32_t)0U)
+                      else
                       {
-                        uint32_t
-                        input_len0 =
-                          (uint32_t)33U
-                          + entropy_input_len + nonce_len + personalization_string_len;
-                        KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
+                        uu____2 = seed_material + entropy_input_len;
+                      }
+                      {
+                        bool uu____3 = nonce == NULL;
+                        if (!(uu____3 || uu____2 == NULL))
                         {
-                          uint8_t input[input_len0];
-                          memset(input, 0U, input_len0 * sizeof (input[0U]));
+                          memcpy(uu____2, nonce, nonce_len * sizeof (nonce[0U]));
+                        }
+                        {
+                          uint8_t *uu____4;
+                          if (seed_material == NULL)
                           {
-                            uint8_t *k_0 = input;
-                            memcpy(k_0, v, (uint32_t)32U * sizeof (v[0U]));
-                            if
-                            (
-                              entropy_input_len
-                              + nonce_len
-                              + personalization_string_len
-                              != (uint32_t)0U
-                            )
+                            uu____4 = NULL;
+                          }
+                          else
+                          {
+                            uu____4 = seed_material + entropy_input_len + nonce_len;
+                          }
+                          {
+                            bool uu____5 = personalization_string == NULL;
+                            if (!(uu____5 || uu____4 == NULL))
                             {
-                              memcpy(input + (uint32_t)33U,
-                                seed_material,
-                                (entropy_input_len + nonce_len + personalization_string_len)
-                                * sizeof (seed_material[0U]));
+                              memcpy(uu____4,
+                                personalization_string,
+                                personalization_string_len * sizeof (personalization_string[0U]));
                             }
-                            input[32U] = (uint8_t)1U;
-                            EverCrypt_HMAC_compute_sha2_256(k_0,
-                              k,
-                              (uint32_t)32U,
-                              input,
-                              input_len0);
-                            EverCrypt_HMAC_compute_sha2_256(v,
-                              k_0,
-                              (uint32_t)32U,
-                              v,
-                              (uint32_t)32U);
-                            memcpy(k, k_0, (uint32_t)32U * sizeof (k_0[0U]));
+                            {
+                              Hacl_HMAC_DRBG_state scrut;
+                              if (st_s.tag == EverCrypt_DRBG_SHA2_256_s)
+                              {
+                                scrut = st_s.val.case_SHA2_256_s;
+                              }
+                              else
+                              {
+                                scrut =
+                                  KRML_EABORT(Hacl_HMAC_DRBG_state,
+                                    "unreachable (pattern matches are exhaustive in F*)");
+                              }
+                              {
+                                uint8_t *k = scrut.k;
+                                uint8_t *v = scrut.v;
+                                uint32_t *ctr = scrut.reseed_counter;
+                                memset(k, 0U, (uint32_t)32U * sizeof (k[0U]));
+                                memset(v, (uint8_t)1U, (uint32_t)32U * sizeof (v[0U]));
+                                ctr[0U] = (uint32_t)1U;
+                                {
+                                  uint32_t
+                                  input_len =
+                                    (uint32_t)33U
+                                    + entropy_input_len + nonce_len + personalization_string_len;
+                                  KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
+                                  {
+                                    uint8_t input0[input_len];
+                                    memset(input0, 0U, input_len * sizeof (input0[0U]));
+                                    {
+                                      uint8_t *k_ = input0;
+                                      memcpy(k_, v, (uint32_t)32U * sizeof (v[0U]));
+                                      if
+                                      (
+                                        entropy_input_len
+                                        + nonce_len
+                                        + personalization_string_len
+                                        != (uint32_t)0U
+                                      )
+                                      {
+                                        memcpy(input0 + (uint32_t)33U,
+                                          seed_material,
+                                          (entropy_input_len
+                                          + nonce_len
+                                          + personalization_string_len)
+                                          * sizeof (seed_material[0U]));
+                                      }
+                                      input0[32U] = (uint8_t)0U;
+                                      EverCrypt_HMAC_compute_sha2_256(k_,
+                                        k,
+                                        (uint32_t)32U,
+                                        input0,
+                                        input_len);
+                                      EverCrypt_HMAC_compute_sha2_256(v,
+                                        k_,
+                                        (uint32_t)32U,
+                                        v,
+                                        (uint32_t)32U);
+                                      memcpy(k, k_, (uint32_t)32U * sizeof (k_[0U]));
+                                      if
+                                      (
+                                        entropy_input_len
+                                        + nonce_len
+                                        + personalization_string_len
+                                        != (uint32_t)0U
+                                      )
+                                      {
+                                        uint32_t
+                                        input_len0 =
+                                          (uint32_t)33U
+                                          +
+                                            entropy_input_len
+                                            + nonce_len
+                                            + personalization_string_len;
+                                        KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
+                                        {
+                                          uint8_t input[input_len0];
+                                          memset(input, 0U, input_len0 * sizeof (input[0U]));
+                                          {
+                                            uint8_t *k_0 = input;
+                                            memcpy(k_0, v, (uint32_t)32U * sizeof (v[0U]));
+                                            if
+                                            (
+                                              entropy_input_len
+                                              + nonce_len
+                                              + personalization_string_len
+                                              != (uint32_t)0U
+                                            )
+                                            {
+                                              memcpy(input + (uint32_t)33U,
+                                                seed_material,
+                                                (entropy_input_len
+                                                + nonce_len
+                                                + personalization_string_len)
+                                                * sizeof (seed_material[0U]));
+                                            }
+                                            input[32U] = (uint8_t)1U;
+                                            EverCrypt_HMAC_compute_sha2_256(k_0,
+                                              k,
+                                              (uint32_t)32U,
+                                              input,
+                                              input_len0);
+                                            EverCrypt_HMAC_compute_sha2_256(v,
+                                              k_0,
+                                              (uint32_t)32U,
+                                              v,
+                                              (uint32_t)32U);
+                                            memcpy(k, k_0, (uint32_t)32U * sizeof (k_0[0U]));
+                                          }
+                                        }
+                                      }
+                                      return true;
+                                    }
+                                  }
+                                }
+                              }
+                            }
                           }
                         }
                       }
-                      return true;
                     }
                   }
                 }
@@ -592,108 +796,206 @@ EverCrypt_DRBG_instantiate_sha2_384(
           return false;
         }
         {
-          uint8_t *entropy_input = entropy;
-          uint8_t *nonce = entropy + entropy_input_len;
-          EverCrypt_DRBG_state_s st_s = *st;
-          KRML_CHECK_SIZE(sizeof (uint8_t),
-            entropy_input_len + nonce_len + personalization_string_len);
+          uint8_t *entropy_input;
+          if (entropy == NULL)
           {
-            uint8_t seed_material[entropy_input_len + nonce_len + personalization_string_len];
-            memset(seed_material,
-              0U,
-              (entropy_input_len + nonce_len + personalization_string_len)
-              * sizeof (seed_material[0U]));
-            memcpy(seed_material, entropy_input, entropy_input_len * sizeof (entropy_input[0U]));
-            memcpy(seed_material + entropy_input_len, nonce, nonce_len * sizeof (nonce[0U]));
-            memcpy(seed_material + entropy_input_len + nonce_len,
-              personalization_string,
-              personalization_string_len * sizeof (personalization_string[0U]));
+            entropy_input = NULL;
+          }
+          else
+          {
+            entropy_input = entropy;
+          }
+          {
+            uint8_t *nonce;
+            if (entropy == NULL)
             {
-              Hacl_HMAC_DRBG_state scrut;
-              if (st_s.tag == EverCrypt_DRBG_SHA2_384_s)
+              nonce = NULL;
+            }
+            else
+            {
+              nonce = entropy + entropy_input_len;
+            }
+            {
+              EverCrypt_DRBG_state_s st_s = *st;
+              KRML_CHECK_SIZE(sizeof (uint8_t),
+                entropy_input_len + nonce_len + personalization_string_len);
               {
-                scrut = st_s.val.case_SHA2_384_s;
-              }
-              else
-              {
-                scrut =
-                  KRML_EABORT(Hacl_HMAC_DRBG_state,
-                    "unreachable (pattern matches are exhaustive in F*)");
-              }
-              {
-                uint8_t *k = scrut.k;
-                uint8_t *v = scrut.v;
-                uint32_t *ctr = scrut.reseed_counter;
-                memset(k, 0U, (uint32_t)48U * sizeof (k[0U]));
-                memset(v, (uint8_t)1U, (uint32_t)48U * sizeof (v[0U]));
-                ctr[0U] = (uint32_t)1U;
+                uint8_t seed_material[entropy_input_len + nonce_len + personalization_string_len];
+                memset(seed_material,
+                  0U,
+                  (entropy_input_len + nonce_len + personalization_string_len)
+                  * sizeof (seed_material[0U]));
                 {
-                  uint32_t
-                  input_len =
-                    (uint32_t)49U
-                    + entropy_input_len + nonce_len + personalization_string_len;
-                  KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
+                  uint8_t *uu____0;
+                  if (seed_material == NULL)
                   {
-                    uint8_t input0[input_len];
-                    memset(input0, 0U, input_len * sizeof (input0[0U]));
+                    uu____0 = NULL;
+                  }
+                  else
+                  {
+                    uu____0 = seed_material;
+                  }
+                  {
+                    bool uu____1 = entropy_input == NULL;
+                    if (!(uu____1 || uu____0 == NULL))
                     {
-                      uint8_t *k_ = input0;
-                      memcpy(k_, v, (uint32_t)48U * sizeof (v[0U]));
-                      if
-                      (entropy_input_len + nonce_len + personalization_string_len != (uint32_t)0U)
+                      memcpy(uu____0,
+                        entropy_input,
+                        entropy_input_len * sizeof (entropy_input[0U]));
+                    }
+                    {
+                      uint8_t *uu____2;
+                      if (seed_material == NULL)
                       {
-                        memcpy(input0 + (uint32_t)49U,
-                          seed_material,
-                          (entropy_input_len + nonce_len + personalization_string_len)
-                          * sizeof (seed_material[0U]));
+                        uu____2 = NULL;
                       }
-                      input0[48U] = (uint8_t)0U;
-                      EverCrypt_HMAC_compute_sha2_384(k_, k, (uint32_t)48U, input0, input_len);
-                      EverCrypt_HMAC_compute_sha2_384(v, k_, (uint32_t)48U, v, (uint32_t)48U);
-                      memcpy(k, k_, (uint32_t)48U * sizeof (k_[0U]));
-                      if
-                      (entropy_input_len + nonce_len + personalization_string_len != (uint32_t)0U)
+                      else
                       {
-                        uint32_t
-                        input_len0 =
-                          (uint32_t)49U
-                          + entropy_input_len + nonce_len + personalization_string_len;
-                        KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
+                        uu____2 = seed_material + entropy_input_len;
+                      }
+                      {
+                        bool uu____3 = nonce == NULL;
+                        if (!(uu____3 || uu____2 == NULL))
                         {
-                          uint8_t input[input_len0];
-                          memset(input, 0U, input_len0 * sizeof (input[0U]));
+                          memcpy(uu____2, nonce, nonce_len * sizeof (nonce[0U]));
+                        }
+                        {
+                          uint8_t *uu____4;
+                          if (seed_material == NULL)
                           {
-                            uint8_t *k_0 = input;
-                            memcpy(k_0, v, (uint32_t)48U * sizeof (v[0U]));
-                            if
-                            (
-                              entropy_input_len
-                              + nonce_len
-                              + personalization_string_len
-                              != (uint32_t)0U
-                            )
+                            uu____4 = NULL;
+                          }
+                          else
+                          {
+                            uu____4 = seed_material + entropy_input_len + nonce_len;
+                          }
+                          {
+                            bool uu____5 = personalization_string == NULL;
+                            if (!(uu____5 || uu____4 == NULL))
                             {
-                              memcpy(input + (uint32_t)49U,
-                                seed_material,
-                                (entropy_input_len + nonce_len + personalization_string_len)
-                                * sizeof (seed_material[0U]));
+                              memcpy(uu____4,
+                                personalization_string,
+                                personalization_string_len * sizeof (personalization_string[0U]));
                             }
-                            input[48U] = (uint8_t)1U;
-                            EverCrypt_HMAC_compute_sha2_384(k_0,
-                              k,
-                              (uint32_t)48U,
-                              input,
-                              input_len0);
-                            EverCrypt_HMAC_compute_sha2_384(v,
-                              k_0,
-                              (uint32_t)48U,
-                              v,
-                              (uint32_t)48U);
-                            memcpy(k, k_0, (uint32_t)48U * sizeof (k_0[0U]));
+                            {
+                              Hacl_HMAC_DRBG_state scrut;
+                              if (st_s.tag == EverCrypt_DRBG_SHA2_384_s)
+                              {
+                                scrut = st_s.val.case_SHA2_384_s;
+                              }
+                              else
+                              {
+                                scrut =
+                                  KRML_EABORT(Hacl_HMAC_DRBG_state,
+                                    "unreachable (pattern matches are exhaustive in F*)");
+                              }
+                              {
+                                uint8_t *k = scrut.k;
+                                uint8_t *v = scrut.v;
+                                uint32_t *ctr = scrut.reseed_counter;
+                                memset(k, 0U, (uint32_t)48U * sizeof (k[0U]));
+                                memset(v, (uint8_t)1U, (uint32_t)48U * sizeof (v[0U]));
+                                ctr[0U] = (uint32_t)1U;
+                                {
+                                  uint32_t
+                                  input_len =
+                                    (uint32_t)49U
+                                    + entropy_input_len + nonce_len + personalization_string_len;
+                                  KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
+                                  {
+                                    uint8_t input0[input_len];
+                                    memset(input0, 0U, input_len * sizeof (input0[0U]));
+                                    {
+                                      uint8_t *k_ = input0;
+                                      memcpy(k_, v, (uint32_t)48U * sizeof (v[0U]));
+                                      if
+                                      (
+                                        entropy_input_len
+                                        + nonce_len
+                                        + personalization_string_len
+                                        != (uint32_t)0U
+                                      )
+                                      {
+                                        memcpy(input0 + (uint32_t)49U,
+                                          seed_material,
+                                          (entropy_input_len
+                                          + nonce_len
+                                          + personalization_string_len)
+                                          * sizeof (seed_material[0U]));
+                                      }
+                                      input0[48U] = (uint8_t)0U;
+                                      EverCrypt_HMAC_compute_sha2_384(k_,
+                                        k,
+                                        (uint32_t)48U,
+                                        input0,
+                                        input_len);
+                                      EverCrypt_HMAC_compute_sha2_384(v,
+                                        k_,
+                                        (uint32_t)48U,
+                                        v,
+                                        (uint32_t)48U);
+                                      memcpy(k, k_, (uint32_t)48U * sizeof (k_[0U]));
+                                      if
+                                      (
+                                        entropy_input_len
+                                        + nonce_len
+                                        + personalization_string_len
+                                        != (uint32_t)0U
+                                      )
+                                      {
+                                        uint32_t
+                                        input_len0 =
+                                          (uint32_t)49U
+                                          +
+                                            entropy_input_len
+                                            + nonce_len
+                                            + personalization_string_len;
+                                        KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
+                                        {
+                                          uint8_t input[input_len0];
+                                          memset(input, 0U, input_len0 * sizeof (input[0U]));
+                                          {
+                                            uint8_t *k_0 = input;
+                                            memcpy(k_0, v, (uint32_t)48U * sizeof (v[0U]));
+                                            if
+                                            (
+                                              entropy_input_len
+                                              + nonce_len
+                                              + personalization_string_len
+                                              != (uint32_t)0U
+                                            )
+                                            {
+                                              memcpy(input + (uint32_t)49U,
+                                                seed_material,
+                                                (entropy_input_len
+                                                + nonce_len
+                                                + personalization_string_len)
+                                                * sizeof (seed_material[0U]));
+                                            }
+                                            input[48U] = (uint8_t)1U;
+                                            EverCrypt_HMAC_compute_sha2_384(k_0,
+                                              k,
+                                              (uint32_t)48U,
+                                              input,
+                                              input_len0);
+                                            EverCrypt_HMAC_compute_sha2_384(v,
+                                              k_0,
+                                              (uint32_t)48U,
+                                              v,
+                                              (uint32_t)48U);
+                                            memcpy(k, k_0, (uint32_t)48U * sizeof (k_0[0U]));
+                                          }
+                                        }
+                                      }
+                                      return true;
+                                    }
+                                  }
+                                }
+                              }
+                            }
                           }
                         }
                       }
-                      return true;
                     }
                   }
                 }
@@ -732,108 +1034,206 @@ EverCrypt_DRBG_instantiate_sha2_512(
           return false;
         }
         {
-          uint8_t *entropy_input = entropy;
-          uint8_t *nonce = entropy + entropy_input_len;
-          EverCrypt_DRBG_state_s st_s = *st;
-          KRML_CHECK_SIZE(sizeof (uint8_t),
-            entropy_input_len + nonce_len + personalization_string_len);
+          uint8_t *entropy_input;
+          if (entropy == NULL)
           {
-            uint8_t seed_material[entropy_input_len + nonce_len + personalization_string_len];
-            memset(seed_material,
-              0U,
-              (entropy_input_len + nonce_len + personalization_string_len)
-              * sizeof (seed_material[0U]));
-            memcpy(seed_material, entropy_input, entropy_input_len * sizeof (entropy_input[0U]));
-            memcpy(seed_material + entropy_input_len, nonce, nonce_len * sizeof (nonce[0U]));
-            memcpy(seed_material + entropy_input_len + nonce_len,
-              personalization_string,
-              personalization_string_len * sizeof (personalization_string[0U]));
+            entropy_input = NULL;
+          }
+          else
+          {
+            entropy_input = entropy;
+          }
+          {
+            uint8_t *nonce;
+            if (entropy == NULL)
             {
-              Hacl_HMAC_DRBG_state scrut;
-              if (st_s.tag == EverCrypt_DRBG_SHA2_512_s)
+              nonce = NULL;
+            }
+            else
+            {
+              nonce = entropy + entropy_input_len;
+            }
+            {
+              EverCrypt_DRBG_state_s st_s = *st;
+              KRML_CHECK_SIZE(sizeof (uint8_t),
+                entropy_input_len + nonce_len + personalization_string_len);
               {
-                scrut = st_s.val.case_SHA2_512_s;
-              }
-              else
-              {
-                scrut =
-                  KRML_EABORT(Hacl_HMAC_DRBG_state,
-                    "unreachable (pattern matches are exhaustive in F*)");
-              }
-              {
-                uint8_t *k = scrut.k;
-                uint8_t *v = scrut.v;
-                uint32_t *ctr = scrut.reseed_counter;
-                memset(k, 0U, (uint32_t)64U * sizeof (k[0U]));
-                memset(v, (uint8_t)1U, (uint32_t)64U * sizeof (v[0U]));
-                ctr[0U] = (uint32_t)1U;
+                uint8_t seed_material[entropy_input_len + nonce_len + personalization_string_len];
+                memset(seed_material,
+                  0U,
+                  (entropy_input_len + nonce_len + personalization_string_len)
+                  * sizeof (seed_material[0U]));
                 {
-                  uint32_t
-                  input_len =
-                    (uint32_t)65U
-                    + entropy_input_len + nonce_len + personalization_string_len;
-                  KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
+                  uint8_t *uu____0;
+                  if (seed_material == NULL)
                   {
-                    uint8_t input0[input_len];
-                    memset(input0, 0U, input_len * sizeof (input0[0U]));
+                    uu____0 = NULL;
+                  }
+                  else
+                  {
+                    uu____0 = seed_material;
+                  }
+                  {
+                    bool uu____1 = entropy_input == NULL;
+                    if (!(uu____1 || uu____0 == NULL))
                     {
-                      uint8_t *k_ = input0;
-                      memcpy(k_, v, (uint32_t)64U * sizeof (v[0U]));
-                      if
-                      (entropy_input_len + nonce_len + personalization_string_len != (uint32_t)0U)
+                      memcpy(uu____0,
+                        entropy_input,
+                        entropy_input_len * sizeof (entropy_input[0U]));
+                    }
+                    {
+                      uint8_t *uu____2;
+                      if (seed_material == NULL)
                       {
-                        memcpy(input0 + (uint32_t)65U,
-                          seed_material,
-                          (entropy_input_len + nonce_len + personalization_string_len)
-                          * sizeof (seed_material[0U]));
+                        uu____2 = NULL;
                       }
-                      input0[64U] = (uint8_t)0U;
-                      EverCrypt_HMAC_compute_sha2_512(k_, k, (uint32_t)64U, input0, input_len);
-                      EverCrypt_HMAC_compute_sha2_512(v, k_, (uint32_t)64U, v, (uint32_t)64U);
-                      memcpy(k, k_, (uint32_t)64U * sizeof (k_[0U]));
-                      if
-                      (entropy_input_len + nonce_len + personalization_string_len != (uint32_t)0U)
+                      else
                       {
-                        uint32_t
-                        input_len0 =
-                          (uint32_t)65U
-                          + entropy_input_len + nonce_len + personalization_string_len;
-                        KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
+                        uu____2 = seed_material + entropy_input_len;
+                      }
+                      {
+                        bool uu____3 = nonce == NULL;
+                        if (!(uu____3 || uu____2 == NULL))
                         {
-                          uint8_t input[input_len0];
-                          memset(input, 0U, input_len0 * sizeof (input[0U]));
+                          memcpy(uu____2, nonce, nonce_len * sizeof (nonce[0U]));
+                        }
+                        {
+                          uint8_t *uu____4;
+                          if (seed_material == NULL)
                           {
-                            uint8_t *k_0 = input;
-                            memcpy(k_0, v, (uint32_t)64U * sizeof (v[0U]));
-                            if
-                            (
-                              entropy_input_len
-                              + nonce_len
-                              + personalization_string_len
-                              != (uint32_t)0U
-                            )
+                            uu____4 = NULL;
+                          }
+                          else
+                          {
+                            uu____4 = seed_material + entropy_input_len + nonce_len;
+                          }
+                          {
+                            bool uu____5 = personalization_string == NULL;
+                            if (!(uu____5 || uu____4 == NULL))
                             {
-                              memcpy(input + (uint32_t)65U,
-                                seed_material,
-                                (entropy_input_len + nonce_len + personalization_string_len)
-                                * sizeof (seed_material[0U]));
+                              memcpy(uu____4,
+                                personalization_string,
+                                personalization_string_len * sizeof (personalization_string[0U]));
                             }
-                            input[64U] = (uint8_t)1U;
-                            EverCrypt_HMAC_compute_sha2_512(k_0,
-                              k,
-                              (uint32_t)64U,
-                              input,
-                              input_len0);
-                            EverCrypt_HMAC_compute_sha2_512(v,
-                              k_0,
-                              (uint32_t)64U,
-                              v,
-                              (uint32_t)64U);
-                            memcpy(k, k_0, (uint32_t)64U * sizeof (k_0[0U]));
+                            {
+                              Hacl_HMAC_DRBG_state scrut;
+                              if (st_s.tag == EverCrypt_DRBG_SHA2_512_s)
+                              {
+                                scrut = st_s.val.case_SHA2_512_s;
+                              }
+                              else
+                              {
+                                scrut =
+                                  KRML_EABORT(Hacl_HMAC_DRBG_state,
+                                    "unreachable (pattern matches are exhaustive in F*)");
+                              }
+                              {
+                                uint8_t *k = scrut.k;
+                                uint8_t *v = scrut.v;
+                                uint32_t *ctr = scrut.reseed_counter;
+                                memset(k, 0U, (uint32_t)64U * sizeof (k[0U]));
+                                memset(v, (uint8_t)1U, (uint32_t)64U * sizeof (v[0U]));
+                                ctr[0U] = (uint32_t)1U;
+                                {
+                                  uint32_t
+                                  input_len =
+                                    (uint32_t)65U
+                                    + entropy_input_len + nonce_len + personalization_string_len;
+                                  KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
+                                  {
+                                    uint8_t input0[input_len];
+                                    memset(input0, 0U, input_len * sizeof (input0[0U]));
+                                    {
+                                      uint8_t *k_ = input0;
+                                      memcpy(k_, v, (uint32_t)64U * sizeof (v[0U]));
+                                      if
+                                      (
+                                        entropy_input_len
+                                        + nonce_len
+                                        + personalization_string_len
+                                        != (uint32_t)0U
+                                      )
+                                      {
+                                        memcpy(input0 + (uint32_t)65U,
+                                          seed_material,
+                                          (entropy_input_len
+                                          + nonce_len
+                                          + personalization_string_len)
+                                          * sizeof (seed_material[0U]));
+                                      }
+                                      input0[64U] = (uint8_t)0U;
+                                      EverCrypt_HMAC_compute_sha2_512(k_,
+                                        k,
+                                        (uint32_t)64U,
+                                        input0,
+                                        input_len);
+                                      EverCrypt_HMAC_compute_sha2_512(v,
+                                        k_,
+                                        (uint32_t)64U,
+                                        v,
+                                        (uint32_t)64U);
+                                      memcpy(k, k_, (uint32_t)64U * sizeof (k_[0U]));
+                                      if
+                                      (
+                                        entropy_input_len
+                                        + nonce_len
+                                        + personalization_string_len
+                                        != (uint32_t)0U
+                                      )
+                                      {
+                                        uint32_t
+                                        input_len0 =
+                                          (uint32_t)65U
+                                          +
+                                            entropy_input_len
+                                            + nonce_len
+                                            + personalization_string_len;
+                                        KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
+                                        {
+                                          uint8_t input[input_len0];
+                                          memset(input, 0U, input_len0 * sizeof (input[0U]));
+                                          {
+                                            uint8_t *k_0 = input;
+                                            memcpy(k_0, v, (uint32_t)64U * sizeof (v[0U]));
+                                            if
+                                            (
+                                              entropy_input_len
+                                              + nonce_len
+                                              + personalization_string_len
+                                              != (uint32_t)0U
+                                            )
+                                            {
+                                              memcpy(input + (uint32_t)65U,
+                                                seed_material,
+                                                (entropy_input_len
+                                                + nonce_len
+                                                + personalization_string_len)
+                                                * sizeof (seed_material[0U]));
+                                            }
+                                            input[64U] = (uint8_t)1U;
+                                            EverCrypt_HMAC_compute_sha2_512(k_0,
+                                              k,
+                                              (uint32_t)64U,
+                                              input,
+                                              input_len0);
+                                            EverCrypt_HMAC_compute_sha2_512(v,
+                                              k_0,
+                                              (uint32_t)64U,
+                                              v,
+                                              (uint32_t)64U);
+                                            memcpy(k, k_0, (uint32_t)64U * sizeof (k_0[0U]));
+                                          }
+                                        }
+                                      }
+                                      return true;
+                                    }
+                                  }
+                                }
+                              }
+                            }
                           }
                         }
                       }
-                      return true;
                     }
                   }
                 }
@@ -878,70 +1278,87 @@ EverCrypt_DRBG_reseed_sha1(
               0U,
               (entropy_input_len + additional_input_len) * sizeof (seed_material[0U]));
             memcpy(seed_material, entropy_input, entropy_input_len * sizeof (entropy_input[0U]));
-            memcpy(seed_material + entropy_input_len,
-              additional_input,
-              additional_input_len * sizeof (additional_input[0U]));
             {
-              Hacl_HMAC_DRBG_state uu____0;
-              if (st_s.tag == EverCrypt_DRBG_SHA1_s)
+              uint8_t *uu____0;
+              if (seed_material == NULL)
               {
-                uu____0 = st_s.val.case_SHA1_s;
+                uu____0 = NULL;
               }
               else
               {
-                uu____0 =
-                  KRML_EABORT(Hacl_HMAC_DRBG_state,
-                    "unreachable (pattern matches are exhaustive in F*)");
+                uu____0 = seed_material + entropy_input_len;
               }
               {
-                uint8_t *k = uu____0.k;
-                uint8_t *v = uu____0.v;
-                uint32_t *ctr = uu____0.reseed_counter;
-                uint32_t input_len = (uint32_t)21U + entropy_input_len + additional_input_len;
-                KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
+                bool uu____1 = additional_input == NULL;
+                if (!(uu____1 || uu____0 == NULL))
                 {
-                  uint8_t input0[input_len];
-                  memset(input0, 0U, input_len * sizeof (input0[0U]));
+                  memcpy(uu____0,
+                    additional_input,
+                    additional_input_len * sizeof (additional_input[0U]));
+                }
+                {
+                  Hacl_HMAC_DRBG_state uu____2;
+                  if (st_s.tag == EverCrypt_DRBG_SHA1_s)
                   {
-                    uint8_t *k_ = input0;
-                    memcpy(k_, v, (uint32_t)20U * sizeof (v[0U]));
-                    if (entropy_input_len + additional_input_len != (uint32_t)0U)
+                    uu____2 = st_s.val.case_SHA1_s;
+                  }
+                  else
+                  {
+                    uu____2 =
+                      KRML_EABORT(Hacl_HMAC_DRBG_state,
+                        "unreachable (pattern matches are exhaustive in F*)");
+                  }
+                  {
+                    uint8_t *k = uu____2.k;
+                    uint8_t *v = uu____2.v;
+                    uint32_t *ctr = uu____2.reseed_counter;
+                    uint32_t input_len = (uint32_t)21U + entropy_input_len + additional_input_len;
+                    KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
                     {
-                      memcpy(input0 + (uint32_t)21U,
-                        seed_material,
-                        (entropy_input_len + additional_input_len) * sizeof (seed_material[0U]));
-                    }
-                    input0[20U] = (uint8_t)0U;
-                    EverCrypt_HMAC_compute_sha1(k_, k, (uint32_t)20U, input0, input_len);
-                    EverCrypt_HMAC_compute_sha1(v, k_, (uint32_t)20U, v, (uint32_t)20U);
-                    memcpy(k, k_, (uint32_t)20U * sizeof (k_[0U]));
-                    if (entropy_input_len + additional_input_len != (uint32_t)0U)
-                    {
-                      uint32_t
-                      input_len0 = (uint32_t)21U + entropy_input_len + additional_input_len;
-                      KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
+                      uint8_t input0[input_len];
+                      memset(input0, 0U, input_len * sizeof (input0[0U]));
                       {
-                        uint8_t input[input_len0];
-                        memset(input, 0U, input_len0 * sizeof (input[0U]));
+                        uint8_t *k_ = input0;
+                        memcpy(k_, v, (uint32_t)20U * sizeof (v[0U]));
+                        if (entropy_input_len + additional_input_len != (uint32_t)0U)
                         {
-                          uint8_t *k_0 = input;
-                          memcpy(k_0, v, (uint32_t)20U * sizeof (v[0U]));
-                          if (entropy_input_len + additional_input_len != (uint32_t)0U)
-                          {
-                            memcpy(input + (uint32_t)21U,
-                              seed_material,
-                              (entropy_input_len + additional_input_len)
-                              * sizeof (seed_material[0U]));
-                          }
-                          input[20U] = (uint8_t)1U;
-                          EverCrypt_HMAC_compute_sha1(k_0, k, (uint32_t)20U, input, input_len0);
-                          EverCrypt_HMAC_compute_sha1(v, k_0, (uint32_t)20U, v, (uint32_t)20U);
-                          memcpy(k, k_0, (uint32_t)20U * sizeof (k_0[0U]));
+                          memcpy(input0 + (uint32_t)21U,
+                            seed_material,
+                            (entropy_input_len + additional_input_len) * sizeof (seed_material[0U]));
                         }
+                        input0[20U] = (uint8_t)0U;
+                        EverCrypt_HMAC_compute_sha1(k_, k, (uint32_t)20U, input0, input_len);
+                        EverCrypt_HMAC_compute_sha1(v, k_, (uint32_t)20U, v, (uint32_t)20U);
+                        memcpy(k, k_, (uint32_t)20U * sizeof (k_[0U]));
+                        if (entropy_input_len + additional_input_len != (uint32_t)0U)
+                        {
+                          uint32_t
+                          input_len0 = (uint32_t)21U + entropy_input_len + additional_input_len;
+                          KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
+                          {
+                            uint8_t input[input_len0];
+                            memset(input, 0U, input_len0 * sizeof (input[0U]));
+                            {
+                              uint8_t *k_0 = input;
+                              memcpy(k_0, v, (uint32_t)20U * sizeof (v[0U]));
+                              if (entropy_input_len + additional_input_len != (uint32_t)0U)
+                              {
+                                memcpy(input + (uint32_t)21U,
+                                  seed_material,
+                                  (entropy_input_len + additional_input_len)
+                                  * sizeof (seed_material[0U]));
+                              }
+                              input[20U] = (uint8_t)1U;
+                              EverCrypt_HMAC_compute_sha1(k_0, k, (uint32_t)20U, input, input_len0);
+                              EverCrypt_HMAC_compute_sha1(v, k_0, (uint32_t)20U, v, (uint32_t)20U);
+                              memcpy(k, k_0, (uint32_t)20U * sizeof (k_0[0U]));
+                            }
+                          }
+                        }
+                        ctr[0U] = (uint32_t)1U;
+                        return true;
                       }
                     }
-                    ctr[0U] = (uint32_t)1U;
-                    return true;
                   }
                 }
               }
@@ -985,70 +1402,95 @@ EverCrypt_DRBG_reseed_sha2_256(
               0U,
               (entropy_input_len + additional_input_len) * sizeof (seed_material[0U]));
             memcpy(seed_material, entropy_input, entropy_input_len * sizeof (entropy_input[0U]));
-            memcpy(seed_material + entropy_input_len,
-              additional_input,
-              additional_input_len * sizeof (additional_input[0U]));
             {
-              Hacl_HMAC_DRBG_state uu____0;
-              if (st_s.tag == EverCrypt_DRBG_SHA2_256_s)
+              uint8_t *uu____0;
+              if (seed_material == NULL)
               {
-                uu____0 = st_s.val.case_SHA2_256_s;
+                uu____0 = NULL;
               }
               else
               {
-                uu____0 =
-                  KRML_EABORT(Hacl_HMAC_DRBG_state,
-                    "unreachable (pattern matches are exhaustive in F*)");
+                uu____0 = seed_material + entropy_input_len;
               }
               {
-                uint8_t *k = uu____0.k;
-                uint8_t *v = uu____0.v;
-                uint32_t *ctr = uu____0.reseed_counter;
-                uint32_t input_len = (uint32_t)33U + entropy_input_len + additional_input_len;
-                KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
+                bool uu____1 = additional_input == NULL;
+                if (!(uu____1 || uu____0 == NULL))
                 {
-                  uint8_t input0[input_len];
-                  memset(input0, 0U, input_len * sizeof (input0[0U]));
+                  memcpy(uu____0,
+                    additional_input,
+                    additional_input_len * sizeof (additional_input[0U]));
+                }
+                {
+                  Hacl_HMAC_DRBG_state uu____2;
+                  if (st_s.tag == EverCrypt_DRBG_SHA2_256_s)
                   {
-                    uint8_t *k_ = input0;
-                    memcpy(k_, v, (uint32_t)32U * sizeof (v[0U]));
-                    if (entropy_input_len + additional_input_len != (uint32_t)0U)
+                    uu____2 = st_s.val.case_SHA2_256_s;
+                  }
+                  else
+                  {
+                    uu____2 =
+                      KRML_EABORT(Hacl_HMAC_DRBG_state,
+                        "unreachable (pattern matches are exhaustive in F*)");
+                  }
+                  {
+                    uint8_t *k = uu____2.k;
+                    uint8_t *v = uu____2.v;
+                    uint32_t *ctr = uu____2.reseed_counter;
+                    uint32_t input_len = (uint32_t)33U + entropy_input_len + additional_input_len;
+                    KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
                     {
-                      memcpy(input0 + (uint32_t)33U,
-                        seed_material,
-                        (entropy_input_len + additional_input_len) * sizeof (seed_material[0U]));
-                    }
-                    input0[32U] = (uint8_t)0U;
-                    EverCrypt_HMAC_compute_sha2_256(k_, k, (uint32_t)32U, input0, input_len);
-                    EverCrypt_HMAC_compute_sha2_256(v, k_, (uint32_t)32U, v, (uint32_t)32U);
-                    memcpy(k, k_, (uint32_t)32U * sizeof (k_[0U]));
-                    if (entropy_input_len + additional_input_len != (uint32_t)0U)
-                    {
-                      uint32_t
-                      input_len0 = (uint32_t)33U + entropy_input_len + additional_input_len;
-                      KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
+                      uint8_t input0[input_len];
+                      memset(input0, 0U, input_len * sizeof (input0[0U]));
                       {
-                        uint8_t input[input_len0];
-                        memset(input, 0U, input_len0 * sizeof (input[0U]));
+                        uint8_t *k_ = input0;
+                        memcpy(k_, v, (uint32_t)32U * sizeof (v[0U]));
+                        if (entropy_input_len + additional_input_len != (uint32_t)0U)
                         {
-                          uint8_t *k_0 = input;
-                          memcpy(k_0, v, (uint32_t)32U * sizeof (v[0U]));
-                          if (entropy_input_len + additional_input_len != (uint32_t)0U)
-                          {
-                            memcpy(input + (uint32_t)33U,
-                              seed_material,
-                              (entropy_input_len + additional_input_len)
-                              * sizeof (seed_material[0U]));
-                          }
-                          input[32U] = (uint8_t)1U;
-                          EverCrypt_HMAC_compute_sha2_256(k_0, k, (uint32_t)32U, input, input_len0);
-                          EverCrypt_HMAC_compute_sha2_256(v, k_0, (uint32_t)32U, v, (uint32_t)32U);
-                          memcpy(k, k_0, (uint32_t)32U * sizeof (k_0[0U]));
+                          memcpy(input0 + (uint32_t)33U,
+                            seed_material,
+                            (entropy_input_len + additional_input_len) * sizeof (seed_material[0U]));
                         }
+                        input0[32U] = (uint8_t)0U;
+                        EverCrypt_HMAC_compute_sha2_256(k_, k, (uint32_t)32U, input0, input_len);
+                        EverCrypt_HMAC_compute_sha2_256(v, k_, (uint32_t)32U, v, (uint32_t)32U);
+                        memcpy(k, k_, (uint32_t)32U * sizeof (k_[0U]));
+                        if (entropy_input_len + additional_input_len != (uint32_t)0U)
+                        {
+                          uint32_t
+                          input_len0 = (uint32_t)33U + entropy_input_len + additional_input_len;
+                          KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
+                          {
+                            uint8_t input[input_len0];
+                            memset(input, 0U, input_len0 * sizeof (input[0U]));
+                            {
+                              uint8_t *k_0 = input;
+                              memcpy(k_0, v, (uint32_t)32U * sizeof (v[0U]));
+                              if (entropy_input_len + additional_input_len != (uint32_t)0U)
+                              {
+                                memcpy(input + (uint32_t)33U,
+                                  seed_material,
+                                  (entropy_input_len + additional_input_len)
+                                  * sizeof (seed_material[0U]));
+                              }
+                              input[32U] = (uint8_t)1U;
+                              EverCrypt_HMAC_compute_sha2_256(k_0,
+                                k,
+                                (uint32_t)32U,
+                                input,
+                                input_len0);
+                              EverCrypt_HMAC_compute_sha2_256(v,
+                                k_0,
+                                (uint32_t)32U,
+                                v,
+                                (uint32_t)32U);
+                              memcpy(k, k_0, (uint32_t)32U * sizeof (k_0[0U]));
+                            }
+                          }
+                        }
+                        ctr[0U] = (uint32_t)1U;
+                        return true;
                       }
                     }
-                    ctr[0U] = (uint32_t)1U;
-                    return true;
                   }
                 }
               }
@@ -1092,70 +1534,95 @@ EverCrypt_DRBG_reseed_sha2_384(
               0U,
               (entropy_input_len + additional_input_len) * sizeof (seed_material[0U]));
             memcpy(seed_material, entropy_input, entropy_input_len * sizeof (entropy_input[0U]));
-            memcpy(seed_material + entropy_input_len,
-              additional_input,
-              additional_input_len * sizeof (additional_input[0U]));
             {
-              Hacl_HMAC_DRBG_state uu____0;
-              if (st_s.tag == EverCrypt_DRBG_SHA2_384_s)
+              uint8_t *uu____0;
+              if (seed_material == NULL)
               {
-                uu____0 = st_s.val.case_SHA2_384_s;
+                uu____0 = NULL;
               }
               else
               {
-                uu____0 =
-                  KRML_EABORT(Hacl_HMAC_DRBG_state,
-                    "unreachable (pattern matches are exhaustive in F*)");
+                uu____0 = seed_material + entropy_input_len;
               }
               {
-                uint8_t *k = uu____0.k;
-                uint8_t *v = uu____0.v;
-                uint32_t *ctr = uu____0.reseed_counter;
-                uint32_t input_len = (uint32_t)49U + entropy_input_len + additional_input_len;
-                KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
+                bool uu____1 = additional_input == NULL;
+                if (!(uu____1 || uu____0 == NULL))
                 {
-                  uint8_t input0[input_len];
-                  memset(input0, 0U, input_len * sizeof (input0[0U]));
+                  memcpy(uu____0,
+                    additional_input,
+                    additional_input_len * sizeof (additional_input[0U]));
+                }
+                {
+                  Hacl_HMAC_DRBG_state uu____2;
+                  if (st_s.tag == EverCrypt_DRBG_SHA2_384_s)
                   {
-                    uint8_t *k_ = input0;
-                    memcpy(k_, v, (uint32_t)48U * sizeof (v[0U]));
-                    if (entropy_input_len + additional_input_len != (uint32_t)0U)
+                    uu____2 = st_s.val.case_SHA2_384_s;
+                  }
+                  else
+                  {
+                    uu____2 =
+                      KRML_EABORT(Hacl_HMAC_DRBG_state,
+                        "unreachable (pattern matches are exhaustive in F*)");
+                  }
+                  {
+                    uint8_t *k = uu____2.k;
+                    uint8_t *v = uu____2.v;
+                    uint32_t *ctr = uu____2.reseed_counter;
+                    uint32_t input_len = (uint32_t)49U + entropy_input_len + additional_input_len;
+                    KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
                     {
-                      memcpy(input0 + (uint32_t)49U,
-                        seed_material,
-                        (entropy_input_len + additional_input_len) * sizeof (seed_material[0U]));
-                    }
-                    input0[48U] = (uint8_t)0U;
-                    EverCrypt_HMAC_compute_sha2_384(k_, k, (uint32_t)48U, input0, input_len);
-                    EverCrypt_HMAC_compute_sha2_384(v, k_, (uint32_t)48U, v, (uint32_t)48U);
-                    memcpy(k, k_, (uint32_t)48U * sizeof (k_[0U]));
-                    if (entropy_input_len + additional_input_len != (uint32_t)0U)
-                    {
-                      uint32_t
-                      input_len0 = (uint32_t)49U + entropy_input_len + additional_input_len;
-                      KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
+                      uint8_t input0[input_len];
+                      memset(input0, 0U, input_len * sizeof (input0[0U]));
                       {
-                        uint8_t input[input_len0];
-                        memset(input, 0U, input_len0 * sizeof (input[0U]));
+                        uint8_t *k_ = input0;
+                        memcpy(k_, v, (uint32_t)48U * sizeof (v[0U]));
+                        if (entropy_input_len + additional_input_len != (uint32_t)0U)
                         {
-                          uint8_t *k_0 = input;
-                          memcpy(k_0, v, (uint32_t)48U * sizeof (v[0U]));
-                          if (entropy_input_len + additional_input_len != (uint32_t)0U)
-                          {
-                            memcpy(input + (uint32_t)49U,
-                              seed_material,
-                              (entropy_input_len + additional_input_len)
-                              * sizeof (seed_material[0U]));
-                          }
-                          input[48U] = (uint8_t)1U;
-                          EverCrypt_HMAC_compute_sha2_384(k_0, k, (uint32_t)48U, input, input_len0);
-                          EverCrypt_HMAC_compute_sha2_384(v, k_0, (uint32_t)48U, v, (uint32_t)48U);
-                          memcpy(k, k_0, (uint32_t)48U * sizeof (k_0[0U]));
+                          memcpy(input0 + (uint32_t)49U,
+                            seed_material,
+                            (entropy_input_len + additional_input_len) * sizeof (seed_material[0U]));
                         }
+                        input0[48U] = (uint8_t)0U;
+                        EverCrypt_HMAC_compute_sha2_384(k_, k, (uint32_t)48U, input0, input_len);
+                        EverCrypt_HMAC_compute_sha2_384(v, k_, (uint32_t)48U, v, (uint32_t)48U);
+                        memcpy(k, k_, (uint32_t)48U * sizeof (k_[0U]));
+                        if (entropy_input_len + additional_input_len != (uint32_t)0U)
+                        {
+                          uint32_t
+                          input_len0 = (uint32_t)49U + entropy_input_len + additional_input_len;
+                          KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
+                          {
+                            uint8_t input[input_len0];
+                            memset(input, 0U, input_len0 * sizeof (input[0U]));
+                            {
+                              uint8_t *k_0 = input;
+                              memcpy(k_0, v, (uint32_t)48U * sizeof (v[0U]));
+                              if (entropy_input_len + additional_input_len != (uint32_t)0U)
+                              {
+                                memcpy(input + (uint32_t)49U,
+                                  seed_material,
+                                  (entropy_input_len + additional_input_len)
+                                  * sizeof (seed_material[0U]));
+                              }
+                              input[48U] = (uint8_t)1U;
+                              EverCrypt_HMAC_compute_sha2_384(k_0,
+                                k,
+                                (uint32_t)48U,
+                                input,
+                                input_len0);
+                              EverCrypt_HMAC_compute_sha2_384(v,
+                                k_0,
+                                (uint32_t)48U,
+                                v,
+                                (uint32_t)48U);
+                              memcpy(k, k_0, (uint32_t)48U * sizeof (k_0[0U]));
+                            }
+                          }
+                        }
+                        ctr[0U] = (uint32_t)1U;
+                        return true;
                       }
                     }
-                    ctr[0U] = (uint32_t)1U;
-                    return true;
                   }
                 }
               }
@@ -1199,70 +1666,95 @@ EverCrypt_DRBG_reseed_sha2_512(
               0U,
               (entropy_input_len + additional_input_len) * sizeof (seed_material[0U]));
             memcpy(seed_material, entropy_input, entropy_input_len * sizeof (entropy_input[0U]));
-            memcpy(seed_material + entropy_input_len,
-              additional_input,
-              additional_input_len * sizeof (additional_input[0U]));
             {
-              Hacl_HMAC_DRBG_state uu____0;
-              if (st_s.tag == EverCrypt_DRBG_SHA2_512_s)
+              uint8_t *uu____0;
+              if (seed_material == NULL)
               {
-                uu____0 = st_s.val.case_SHA2_512_s;
+                uu____0 = NULL;
               }
               else
               {
-                uu____0 =
-                  KRML_EABORT(Hacl_HMAC_DRBG_state,
-                    "unreachable (pattern matches are exhaustive in F*)");
+                uu____0 = seed_material + entropy_input_len;
               }
               {
-                uint8_t *k = uu____0.k;
-                uint8_t *v = uu____0.v;
-                uint32_t *ctr = uu____0.reseed_counter;
-                uint32_t input_len = (uint32_t)65U + entropy_input_len + additional_input_len;
-                KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
+                bool uu____1 = additional_input == NULL;
+                if (!(uu____1 || uu____0 == NULL))
                 {
-                  uint8_t input0[input_len];
-                  memset(input0, 0U, input_len * sizeof (input0[0U]));
+                  memcpy(uu____0,
+                    additional_input,
+                    additional_input_len * sizeof (additional_input[0U]));
+                }
+                {
+                  Hacl_HMAC_DRBG_state uu____2;
+                  if (st_s.tag == EverCrypt_DRBG_SHA2_512_s)
                   {
-                    uint8_t *k_ = input0;
-                    memcpy(k_, v, (uint32_t)64U * sizeof (v[0U]));
-                    if (entropy_input_len + additional_input_len != (uint32_t)0U)
+                    uu____2 = st_s.val.case_SHA2_512_s;
+                  }
+                  else
+                  {
+                    uu____2 =
+                      KRML_EABORT(Hacl_HMAC_DRBG_state,
+                        "unreachable (pattern matches are exhaustive in F*)");
+                  }
+                  {
+                    uint8_t *k = uu____2.k;
+                    uint8_t *v = uu____2.v;
+                    uint32_t *ctr = uu____2.reseed_counter;
+                    uint32_t input_len = (uint32_t)65U + entropy_input_len + additional_input_len;
+                    KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
                     {
-                      memcpy(input0 + (uint32_t)65U,
-                        seed_material,
-                        (entropy_input_len + additional_input_len) * sizeof (seed_material[0U]));
-                    }
-                    input0[64U] = (uint8_t)0U;
-                    EverCrypt_HMAC_compute_sha2_512(k_, k, (uint32_t)64U, input0, input_len);
-                    EverCrypt_HMAC_compute_sha2_512(v, k_, (uint32_t)64U, v, (uint32_t)64U);
-                    memcpy(k, k_, (uint32_t)64U * sizeof (k_[0U]));
-                    if (entropy_input_len + additional_input_len != (uint32_t)0U)
-                    {
-                      uint32_t
-                      input_len0 = (uint32_t)65U + entropy_input_len + additional_input_len;
-                      KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
+                      uint8_t input0[input_len];
+                      memset(input0, 0U, input_len * sizeof (input0[0U]));
                       {
-                        uint8_t input[input_len0];
-                        memset(input, 0U, input_len0 * sizeof (input[0U]));
+                        uint8_t *k_ = input0;
+                        memcpy(k_, v, (uint32_t)64U * sizeof (v[0U]));
+                        if (entropy_input_len + additional_input_len != (uint32_t)0U)
                         {
-                          uint8_t *k_0 = input;
-                          memcpy(k_0, v, (uint32_t)64U * sizeof (v[0U]));
-                          if (entropy_input_len + additional_input_len != (uint32_t)0U)
-                          {
-                            memcpy(input + (uint32_t)65U,
-                              seed_material,
-                              (entropy_input_len + additional_input_len)
-                              * sizeof (seed_material[0U]));
-                          }
-                          input[64U] = (uint8_t)1U;
-                          EverCrypt_HMAC_compute_sha2_512(k_0, k, (uint32_t)64U, input, input_len0);
-                          EverCrypt_HMAC_compute_sha2_512(v, k_0, (uint32_t)64U, v, (uint32_t)64U);
-                          memcpy(k, k_0, (uint32_t)64U * sizeof (k_0[0U]));
+                          memcpy(input0 + (uint32_t)65U,
+                            seed_material,
+                            (entropy_input_len + additional_input_len) * sizeof (seed_material[0U]));
                         }
+                        input0[64U] = (uint8_t)0U;
+                        EverCrypt_HMAC_compute_sha2_512(k_, k, (uint32_t)64U, input0, input_len);
+                        EverCrypt_HMAC_compute_sha2_512(v, k_, (uint32_t)64U, v, (uint32_t)64U);
+                        memcpy(k, k_, (uint32_t)64U * sizeof (k_[0U]));
+                        if (entropy_input_len + additional_input_len != (uint32_t)0U)
+                        {
+                          uint32_t
+                          input_len0 = (uint32_t)65U + entropy_input_len + additional_input_len;
+                          KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
+                          {
+                            uint8_t input[input_len0];
+                            memset(input, 0U, input_len0 * sizeof (input[0U]));
+                            {
+                              uint8_t *k_0 = input;
+                              memcpy(k_0, v, (uint32_t)64U * sizeof (v[0U]));
+                              if (entropy_input_len + additional_input_len != (uint32_t)0U)
+                              {
+                                memcpy(input + (uint32_t)65U,
+                                  seed_material,
+                                  (entropy_input_len + additional_input_len)
+                                  * sizeof (seed_material[0U]));
+                              }
+                              input[64U] = (uint8_t)1U;
+                              EverCrypt_HMAC_compute_sha2_512(k_0,
+                                k,
+                                (uint32_t)64U,
+                                input,
+                                input_len0);
+                              EverCrypt_HMAC_compute_sha2_512(v,
+                                k_0,
+                                (uint32_t)64U,
+                                v,
+                                (uint32_t)64U);
+                              memcpy(k, k_0, (uint32_t)64U * sizeof (k_0[0U]));
+                            }
+                          }
+                        }
+                        ctr[0U] = (uint32_t)1U;
+                        return true;
                       }
                     }
-                    ctr[0U] = (uint32_t)1U;
-                    return true;
                   }
                 }
               }
@@ -1323,70 +1815,97 @@ EverCrypt_DRBG_generate_sha1(
                 0U,
                 (entropy_input_len1 + additional_input_len) * sizeof (seed_material[0U]));
               memcpy(seed_material, entropy_input, entropy_input_len1 * sizeof (entropy_input[0U]));
-              memcpy(seed_material + entropy_input_len1,
-                additional_input,
-                additional_input_len * sizeof (additional_input[0U]));
               {
-                Hacl_HMAC_DRBG_state uu____0;
-                if (st_s.tag == EverCrypt_DRBG_SHA1_s)
+                uint8_t *uu____0;
+                if (seed_material == NULL)
                 {
-                  uu____0 = st_s.val.case_SHA1_s;
+                  uu____0 = NULL;
                 }
                 else
                 {
-                  uu____0 =
-                    KRML_EABORT(Hacl_HMAC_DRBG_state,
-                      "unreachable (pattern matches are exhaustive in F*)");
+                  uu____0 = seed_material + entropy_input_len1;
                 }
                 {
-                  uint8_t *k = uu____0.k;
-                  uint8_t *v = uu____0.v;
-                  uint32_t *ctr = uu____0.reseed_counter;
-                  uint32_t input_len = (uint32_t)21U + entropy_input_len1 + additional_input_len;
-                  KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
+                  bool uu____1 = additional_input == NULL;
+                  if (!(uu____1 || uu____0 == NULL))
                   {
-                    uint8_t input0[input_len];
-                    memset(input0, 0U, input_len * sizeof (input0[0U]));
+                    memcpy(uu____0,
+                      additional_input,
+                      additional_input_len * sizeof (additional_input[0U]));
+                  }
+                  {
+                    Hacl_HMAC_DRBG_state uu____2;
+                    if (st_s.tag == EverCrypt_DRBG_SHA1_s)
                     {
-                      uint8_t *k_ = input0;
-                      memcpy(k_, v, (uint32_t)20U * sizeof (v[0U]));
-                      if (entropy_input_len1 + additional_input_len != (uint32_t)0U)
+                      uu____2 = st_s.val.case_SHA1_s;
+                    }
+                    else
+                    {
+                      uu____2 =
+                        KRML_EABORT(Hacl_HMAC_DRBG_state,
+                          "unreachable (pattern matches are exhaustive in F*)");
+                    }
+                    {
+                      uint8_t *k = uu____2.k;
+                      uint8_t *v = uu____2.v;
+                      uint32_t *ctr = uu____2.reseed_counter;
+                      uint32_t
+                      input_len = (uint32_t)21U + entropy_input_len1 + additional_input_len;
+                      KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
                       {
-                        memcpy(input0 + (uint32_t)21U,
-                          seed_material,
-                          (entropy_input_len1 + additional_input_len) * sizeof (seed_material[0U]));
-                      }
-                      input0[20U] = (uint8_t)0U;
-                      EverCrypt_HMAC_compute_sha1(k_, k, (uint32_t)20U, input0, input_len);
-                      EverCrypt_HMAC_compute_sha1(v, k_, (uint32_t)20U, v, (uint32_t)20U);
-                      memcpy(k, k_, (uint32_t)20U * sizeof (k_[0U]));
-                      if (entropy_input_len1 + additional_input_len != (uint32_t)0U)
-                      {
-                        uint32_t
-                        input_len0 = (uint32_t)21U + entropy_input_len1 + additional_input_len;
-                        KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
+                        uint8_t input0[input_len];
+                        memset(input0, 0U, input_len * sizeof (input0[0U]));
                         {
-                          uint8_t input[input_len0];
-                          memset(input, 0U, input_len0 * sizeof (input[0U]));
+                          uint8_t *k_ = input0;
+                          memcpy(k_, v, (uint32_t)20U * sizeof (v[0U]));
+                          if (entropy_input_len1 + additional_input_len != (uint32_t)0U)
                           {
-                            uint8_t *k_0 = input;
-                            memcpy(k_0, v, (uint32_t)20U * sizeof (v[0U]));
-                            if (entropy_input_len1 + additional_input_len != (uint32_t)0U)
-                            {
-                              memcpy(input + (uint32_t)21U,
-                                seed_material,
-                                (entropy_input_len1 + additional_input_len)
-                                * sizeof (seed_material[0U]));
-                            }
-                            input[20U] = (uint8_t)1U;
-                            EverCrypt_HMAC_compute_sha1(k_0, k, (uint32_t)20U, input, input_len0);
-                            EverCrypt_HMAC_compute_sha1(v, k_0, (uint32_t)20U, v, (uint32_t)20U);
-                            memcpy(k, k_0, (uint32_t)20U * sizeof (k_0[0U]));
+                            memcpy(input0 + (uint32_t)21U,
+                              seed_material,
+                              (entropy_input_len1 + additional_input_len)
+                              * sizeof (seed_material[0U]));
                           }
+                          input0[20U] = (uint8_t)0U;
+                          EverCrypt_HMAC_compute_sha1(k_, k, (uint32_t)20U, input0, input_len);
+                          EverCrypt_HMAC_compute_sha1(v, k_, (uint32_t)20U, v, (uint32_t)20U);
+                          memcpy(k, k_, (uint32_t)20U * sizeof (k_[0U]));
+                          if (entropy_input_len1 + additional_input_len != (uint32_t)0U)
+                          {
+                            uint32_t
+                            input_len0 = (uint32_t)21U + entropy_input_len1 + additional_input_len;
+                            KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
+                            {
+                              uint8_t input[input_len0];
+                              memset(input, 0U, input_len0 * sizeof (input[0U]));
+                              {
+                                uint8_t *k_0 = input;
+                                memcpy(k_0, v, (uint32_t)20U * sizeof (v[0U]));
+                                if (entropy_input_len1 + additional_input_len != (uint32_t)0U)
+                                {
+                                  memcpy(input + (uint32_t)21U,
+                                    seed_material,
+                                    (entropy_input_len1 + additional_input_len)
+                                    * sizeof (seed_material[0U]));
+                                }
+                                input[20U] = (uint8_t)1U;
+                                EverCrypt_HMAC_compute_sha1(k_0,
+                                  k,
+                                  (uint32_t)20U,
+                                  input,
+                                  input_len0);
+                                EverCrypt_HMAC_compute_sha1(v,
+                                  k_0,
+                                  (uint32_t)20U,
+                                  v,
+                                  (uint32_t)20U);
+                                memcpy(k, k_0, (uint32_t)20U * sizeof (k_0[0U]));
+                              }
+                            }
+                          }
+                          ctr[0U] = (uint32_t)1U;
+                          result = true;
                         }
                       }
-                      ctr[0U] = (uint32_t)1U;
-                      result = true;
                     }
                   }
                 }
@@ -1484,11 +2003,28 @@ EverCrypt_DRBG_generate_sha1(
             {
               uint8_t *output1 = output;
               uint32_t max = n / (uint32_t)20U;
-              uint8_t *out = output1;
+              uint8_t *out;
+              if (output1 == NULL)
+              {
+                out = NULL;
+              }
+              else
+              {
+                out = output1;
+              }
               {
                 uint32_t i;
                 for (i = (uint32_t)0U; i < max; i++)
                 {
+                  uint8_t *block;
+                  if (out == NULL)
+                  {
+                    block = NULL;
+                  }
+                  else
+                  {
+                    block = out + i * (uint32_t)20U;
+                  }
                   EverCrypt_HMAC_compute_sha1(v, k, (uint32_t)20U, v, (uint32_t)20U);
                   memcpy(out + i * (uint32_t)20U, v, (uint32_t)20U * sizeof (v[0U]));
                 }
@@ -1607,78 +2143,97 @@ EverCrypt_DRBG_generate_sha2_256(
                 0U,
                 (entropy_input_len1 + additional_input_len) * sizeof (seed_material[0U]));
               memcpy(seed_material, entropy_input, entropy_input_len1 * sizeof (entropy_input[0U]));
-              memcpy(seed_material + entropy_input_len1,
-                additional_input,
-                additional_input_len * sizeof (additional_input[0U]));
               {
-                Hacl_HMAC_DRBG_state uu____0;
-                if (st_s.tag == EverCrypt_DRBG_SHA2_256_s)
+                uint8_t *uu____0;
+                if (seed_material == NULL)
                 {
-                  uu____0 = st_s.val.case_SHA2_256_s;
+                  uu____0 = NULL;
                 }
                 else
                 {
-                  uu____0 =
-                    KRML_EABORT(Hacl_HMAC_DRBG_state,
-                      "unreachable (pattern matches are exhaustive in F*)");
+                  uu____0 = seed_material + entropy_input_len1;
                 }
                 {
-                  uint8_t *k = uu____0.k;
-                  uint8_t *v = uu____0.v;
-                  uint32_t *ctr = uu____0.reseed_counter;
-                  uint32_t input_len = (uint32_t)33U + entropy_input_len1 + additional_input_len;
-                  KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
+                  bool uu____1 = additional_input == NULL;
+                  if (!(uu____1 || uu____0 == NULL))
                   {
-                    uint8_t input0[input_len];
-                    memset(input0, 0U, input_len * sizeof (input0[0U]));
+                    memcpy(uu____0,
+                      additional_input,
+                      additional_input_len * sizeof (additional_input[0U]));
+                  }
+                  {
+                    Hacl_HMAC_DRBG_state uu____2;
+                    if (st_s.tag == EverCrypt_DRBG_SHA2_256_s)
                     {
-                      uint8_t *k_ = input0;
-                      memcpy(k_, v, (uint32_t)32U * sizeof (v[0U]));
-                      if (entropy_input_len1 + additional_input_len != (uint32_t)0U)
+                      uu____2 = st_s.val.case_SHA2_256_s;
+                    }
+                    else
+                    {
+                      uu____2 =
+                        KRML_EABORT(Hacl_HMAC_DRBG_state,
+                          "unreachable (pattern matches are exhaustive in F*)");
+                    }
+                    {
+                      uint8_t *k = uu____2.k;
+                      uint8_t *v = uu____2.v;
+                      uint32_t *ctr = uu____2.reseed_counter;
+                      uint32_t
+                      input_len = (uint32_t)33U + entropy_input_len1 + additional_input_len;
+                      KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
                       {
-                        memcpy(input0 + (uint32_t)33U,
-                          seed_material,
-                          (entropy_input_len1 + additional_input_len) * sizeof (seed_material[0U]));
-                      }
-                      input0[32U] = (uint8_t)0U;
-                      EverCrypt_HMAC_compute_sha2_256(k_, k, (uint32_t)32U, input0, input_len);
-                      EverCrypt_HMAC_compute_sha2_256(v, k_, (uint32_t)32U, v, (uint32_t)32U);
-                      memcpy(k, k_, (uint32_t)32U * sizeof (k_[0U]));
-                      if (entropy_input_len1 + additional_input_len != (uint32_t)0U)
-                      {
-                        uint32_t
-                        input_len0 = (uint32_t)33U + entropy_input_len1 + additional_input_len;
-                        KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
+                        uint8_t input0[input_len];
+                        memset(input0, 0U, input_len * sizeof (input0[0U]));
                         {
-                          uint8_t input[input_len0];
-                          memset(input, 0U, input_len0 * sizeof (input[0U]));
+                          uint8_t *k_ = input0;
+                          memcpy(k_, v, (uint32_t)32U * sizeof (v[0U]));
+                          if (entropy_input_len1 + additional_input_len != (uint32_t)0U)
                           {
-                            uint8_t *k_0 = input;
-                            memcpy(k_0, v, (uint32_t)32U * sizeof (v[0U]));
-                            if (entropy_input_len1 + additional_input_len != (uint32_t)0U)
-                            {
-                              memcpy(input + (uint32_t)33U,
-                                seed_material,
-                                (entropy_input_len1 + additional_input_len)
-                                * sizeof (seed_material[0U]));
-                            }
-                            input[32U] = (uint8_t)1U;
-                            EverCrypt_HMAC_compute_sha2_256(k_0,
-                              k,
-                              (uint32_t)32U,
-                              input,
-                              input_len0);
-                            EverCrypt_HMAC_compute_sha2_256(v,
-                              k_0,
-                              (uint32_t)32U,
-                              v,
-                              (uint32_t)32U);
-                            memcpy(k, k_0, (uint32_t)32U * sizeof (k_0[0U]));
+                            memcpy(input0 + (uint32_t)33U,
+                              seed_material,
+                              (entropy_input_len1 + additional_input_len)
+                              * sizeof (seed_material[0U]));
                           }
+                          input0[32U] = (uint8_t)0U;
+                          EverCrypt_HMAC_compute_sha2_256(k_, k, (uint32_t)32U, input0, input_len);
+                          EverCrypt_HMAC_compute_sha2_256(v, k_, (uint32_t)32U, v, (uint32_t)32U);
+                          memcpy(k, k_, (uint32_t)32U * sizeof (k_[0U]));
+                          if (entropy_input_len1 + additional_input_len != (uint32_t)0U)
+                          {
+                            uint32_t
+                            input_len0 = (uint32_t)33U + entropy_input_len1 + additional_input_len;
+                            KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
+                            {
+                              uint8_t input[input_len0];
+                              memset(input, 0U, input_len0 * sizeof (input[0U]));
+                              {
+                                uint8_t *k_0 = input;
+                                memcpy(k_0, v, (uint32_t)32U * sizeof (v[0U]));
+                                if (entropy_input_len1 + additional_input_len != (uint32_t)0U)
+                                {
+                                  memcpy(input + (uint32_t)33U,
+                                    seed_material,
+                                    (entropy_input_len1 + additional_input_len)
+                                    * sizeof (seed_material[0U]));
+                                }
+                                input[32U] = (uint8_t)1U;
+                                EverCrypt_HMAC_compute_sha2_256(k_0,
+                                  k,
+                                  (uint32_t)32U,
+                                  input,
+                                  input_len0);
+                                EverCrypt_HMAC_compute_sha2_256(v,
+                                  k_0,
+                                  (uint32_t)32U,
+                                  v,
+                                  (uint32_t)32U);
+                                memcpy(k, k_0, (uint32_t)32U * sizeof (k_0[0U]));
+                              }
+                            }
+                          }
+                          ctr[0U] = (uint32_t)1U;
+                          result = true;
                         }
                       }
-                      ctr[0U] = (uint32_t)1U;
-                      result = true;
                     }
                   }
                 }
@@ -1776,11 +2331,28 @@ EverCrypt_DRBG_generate_sha2_256(
             {
               uint8_t *output1 = output;
               uint32_t max = n / (uint32_t)32U;
-              uint8_t *out = output1;
+              uint8_t *out;
+              if (output1 == NULL)
+              {
+                out = NULL;
+              }
+              else
+              {
+                out = output1;
+              }
               {
                 uint32_t i;
                 for (i = (uint32_t)0U; i < max; i++)
                 {
+                  uint8_t *block;
+                  if (out == NULL)
+                  {
+                    block = NULL;
+                  }
+                  else
+                  {
+                    block = out + i * (uint32_t)32U;
+                  }
                   EverCrypt_HMAC_compute_sha2_256(v, k, (uint32_t)32U, v, (uint32_t)32U);
                   memcpy(out + i * (uint32_t)32U, v, (uint32_t)32U * sizeof (v[0U]));
                 }
@@ -1899,78 +2471,97 @@ EverCrypt_DRBG_generate_sha2_384(
                 0U,
                 (entropy_input_len1 + additional_input_len) * sizeof (seed_material[0U]));
               memcpy(seed_material, entropy_input, entropy_input_len1 * sizeof (entropy_input[0U]));
-              memcpy(seed_material + entropy_input_len1,
-                additional_input,
-                additional_input_len * sizeof (additional_input[0U]));
               {
-                Hacl_HMAC_DRBG_state uu____0;
-                if (st_s.tag == EverCrypt_DRBG_SHA2_384_s)
+                uint8_t *uu____0;
+                if (seed_material == NULL)
                 {
-                  uu____0 = st_s.val.case_SHA2_384_s;
+                  uu____0 = NULL;
                 }
                 else
                 {
-                  uu____0 =
-                    KRML_EABORT(Hacl_HMAC_DRBG_state,
-                      "unreachable (pattern matches are exhaustive in F*)");
+                  uu____0 = seed_material + entropy_input_len1;
                 }
                 {
-                  uint8_t *k = uu____0.k;
-                  uint8_t *v = uu____0.v;
-                  uint32_t *ctr = uu____0.reseed_counter;
-                  uint32_t input_len = (uint32_t)49U + entropy_input_len1 + additional_input_len;
-                  KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
+                  bool uu____1 = additional_input == NULL;
+                  if (!(uu____1 || uu____0 == NULL))
                   {
-                    uint8_t input0[input_len];
-                    memset(input0, 0U, input_len * sizeof (input0[0U]));
+                    memcpy(uu____0,
+                      additional_input,
+                      additional_input_len * sizeof (additional_input[0U]));
+                  }
+                  {
+                    Hacl_HMAC_DRBG_state uu____2;
+                    if (st_s.tag == EverCrypt_DRBG_SHA2_384_s)
                     {
-                      uint8_t *k_ = input0;
-                      memcpy(k_, v, (uint32_t)48U * sizeof (v[0U]));
-                      if (entropy_input_len1 + additional_input_len != (uint32_t)0U)
+                      uu____2 = st_s.val.case_SHA2_384_s;
+                    }
+                    else
+                    {
+                      uu____2 =
+                        KRML_EABORT(Hacl_HMAC_DRBG_state,
+                          "unreachable (pattern matches are exhaustive in F*)");
+                    }
+                    {
+                      uint8_t *k = uu____2.k;
+                      uint8_t *v = uu____2.v;
+                      uint32_t *ctr = uu____2.reseed_counter;
+                      uint32_t
+                      input_len = (uint32_t)49U + entropy_input_len1 + additional_input_len;
+                      KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
                       {
-                        memcpy(input0 + (uint32_t)49U,
-                          seed_material,
-                          (entropy_input_len1 + additional_input_len) * sizeof (seed_material[0U]));
-                      }
-                      input0[48U] = (uint8_t)0U;
-                      EverCrypt_HMAC_compute_sha2_384(k_, k, (uint32_t)48U, input0, input_len);
-                      EverCrypt_HMAC_compute_sha2_384(v, k_, (uint32_t)48U, v, (uint32_t)48U);
-                      memcpy(k, k_, (uint32_t)48U * sizeof (k_[0U]));
-                      if (entropy_input_len1 + additional_input_len != (uint32_t)0U)
-                      {
-                        uint32_t
-                        input_len0 = (uint32_t)49U + entropy_input_len1 + additional_input_len;
-                        KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
+                        uint8_t input0[input_len];
+                        memset(input0, 0U, input_len * sizeof (input0[0U]));
                         {
-                          uint8_t input[input_len0];
-                          memset(input, 0U, input_len0 * sizeof (input[0U]));
+                          uint8_t *k_ = input0;
+                          memcpy(k_, v, (uint32_t)48U * sizeof (v[0U]));
+                          if (entropy_input_len1 + additional_input_len != (uint32_t)0U)
                           {
-                            uint8_t *k_0 = input;
-                            memcpy(k_0, v, (uint32_t)48U * sizeof (v[0U]));
-                            if (entropy_input_len1 + additional_input_len != (uint32_t)0U)
-                            {
-                              memcpy(input + (uint32_t)49U,
-                                seed_material,
-                                (entropy_input_len1 + additional_input_len)
-                                * sizeof (seed_material[0U]));
-                            }
-                            input[48U] = (uint8_t)1U;
-                            EverCrypt_HMAC_compute_sha2_384(k_0,
-                              k,
-                              (uint32_t)48U,
-                              input,
-                              input_len0);
-                            EverCrypt_HMAC_compute_sha2_384(v,
-                              k_0,
-                              (uint32_t)48U,
-                              v,
-                              (uint32_t)48U);
-                            memcpy(k, k_0, (uint32_t)48U * sizeof (k_0[0U]));
+                            memcpy(input0 + (uint32_t)49U,
+                              seed_material,
+                              (entropy_input_len1 + additional_input_len)
+                              * sizeof (seed_material[0U]));
                           }
+                          input0[48U] = (uint8_t)0U;
+                          EverCrypt_HMAC_compute_sha2_384(k_, k, (uint32_t)48U, input0, input_len);
+                          EverCrypt_HMAC_compute_sha2_384(v, k_, (uint32_t)48U, v, (uint32_t)48U);
+                          memcpy(k, k_, (uint32_t)48U * sizeof (k_[0U]));
+                          if (entropy_input_len1 + additional_input_len != (uint32_t)0U)
+                          {
+                            uint32_t
+                            input_len0 = (uint32_t)49U + entropy_input_len1 + additional_input_len;
+                            KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
+                            {
+                              uint8_t input[input_len0];
+                              memset(input, 0U, input_len0 * sizeof (input[0U]));
+                              {
+                                uint8_t *k_0 = input;
+                                memcpy(k_0, v, (uint32_t)48U * sizeof (v[0U]));
+                                if (entropy_input_len1 + additional_input_len != (uint32_t)0U)
+                                {
+                                  memcpy(input + (uint32_t)49U,
+                                    seed_material,
+                                    (entropy_input_len1 + additional_input_len)
+                                    * sizeof (seed_material[0U]));
+                                }
+                                input[48U] = (uint8_t)1U;
+                                EverCrypt_HMAC_compute_sha2_384(k_0,
+                                  k,
+                                  (uint32_t)48U,
+                                  input,
+                                  input_len0);
+                                EverCrypt_HMAC_compute_sha2_384(v,
+                                  k_0,
+                                  (uint32_t)48U,
+                                  v,
+                                  (uint32_t)48U);
+                                memcpy(k, k_0, (uint32_t)48U * sizeof (k_0[0U]));
+                              }
+                            }
+                          }
+                          ctr[0U] = (uint32_t)1U;
+                          result = true;
                         }
                       }
-                      ctr[0U] = (uint32_t)1U;
-                      result = true;
                     }
                   }
                 }
@@ -2068,11 +2659,28 @@ EverCrypt_DRBG_generate_sha2_384(
             {
               uint8_t *output1 = output;
               uint32_t max = n / (uint32_t)48U;
-              uint8_t *out = output1;
+              uint8_t *out;
+              if (output1 == NULL)
+              {
+                out = NULL;
+              }
+              else
+              {
+                out = output1;
+              }
               {
                 uint32_t i;
                 for (i = (uint32_t)0U; i < max; i++)
                 {
+                  uint8_t *block;
+                  if (out == NULL)
+                  {
+                    block = NULL;
+                  }
+                  else
+                  {
+                    block = out + i * (uint32_t)48U;
+                  }
                   EverCrypt_HMAC_compute_sha2_384(v, k, (uint32_t)48U, v, (uint32_t)48U);
                   memcpy(out + i * (uint32_t)48U, v, (uint32_t)48U * sizeof (v[0U]));
                 }
@@ -2191,78 +2799,97 @@ EverCrypt_DRBG_generate_sha2_512(
                 0U,
                 (entropy_input_len1 + additional_input_len) * sizeof (seed_material[0U]));
               memcpy(seed_material, entropy_input, entropy_input_len1 * sizeof (entropy_input[0U]));
-              memcpy(seed_material + entropy_input_len1,
-                additional_input,
-                additional_input_len * sizeof (additional_input[0U]));
               {
-                Hacl_HMAC_DRBG_state uu____0;
-                if (st_s.tag == EverCrypt_DRBG_SHA2_512_s)
+                uint8_t *uu____0;
+                if (seed_material == NULL)
                 {
-                  uu____0 = st_s.val.case_SHA2_512_s;
+                  uu____0 = NULL;
                 }
                 else
                 {
-                  uu____0 =
-                    KRML_EABORT(Hacl_HMAC_DRBG_state,
-                      "unreachable (pattern matches are exhaustive in F*)");
+                  uu____0 = seed_material + entropy_input_len1;
                 }
                 {
-                  uint8_t *k = uu____0.k;
-                  uint8_t *v = uu____0.v;
-                  uint32_t *ctr = uu____0.reseed_counter;
-                  uint32_t input_len = (uint32_t)65U + entropy_input_len1 + additional_input_len;
-                  KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
+                  bool uu____1 = additional_input == NULL;
+                  if (!(uu____1 || uu____0 == NULL))
                   {
-                    uint8_t input0[input_len];
-                    memset(input0, 0U, input_len * sizeof (input0[0U]));
+                    memcpy(uu____0,
+                      additional_input,
+                      additional_input_len * sizeof (additional_input[0U]));
+                  }
+                  {
+                    Hacl_HMAC_DRBG_state uu____2;
+                    if (st_s.tag == EverCrypt_DRBG_SHA2_512_s)
                     {
-                      uint8_t *k_ = input0;
-                      memcpy(k_, v, (uint32_t)64U * sizeof (v[0U]));
-                      if (entropy_input_len1 + additional_input_len != (uint32_t)0U)
+                      uu____2 = st_s.val.case_SHA2_512_s;
+                    }
+                    else
+                    {
+                      uu____2 =
+                        KRML_EABORT(Hacl_HMAC_DRBG_state,
+                          "unreachable (pattern matches are exhaustive in F*)");
+                    }
+                    {
+                      uint8_t *k = uu____2.k;
+                      uint8_t *v = uu____2.v;
+                      uint32_t *ctr = uu____2.reseed_counter;
+                      uint32_t
+                      input_len = (uint32_t)65U + entropy_input_len1 + additional_input_len;
+                      KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
                       {
-                        memcpy(input0 + (uint32_t)65U,
-                          seed_material,
-                          (entropy_input_len1 + additional_input_len) * sizeof (seed_material[0U]));
-                      }
-                      input0[64U] = (uint8_t)0U;
-                      EverCrypt_HMAC_compute_sha2_512(k_, k, (uint32_t)64U, input0, input_len);
-                      EverCrypt_HMAC_compute_sha2_512(v, k_, (uint32_t)64U, v, (uint32_t)64U);
-                      memcpy(k, k_, (uint32_t)64U * sizeof (k_[0U]));
-                      if (entropy_input_len1 + additional_input_len != (uint32_t)0U)
-                      {
-                        uint32_t
-                        input_len0 = (uint32_t)65U + entropy_input_len1 + additional_input_len;
-                        KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
+                        uint8_t input0[input_len];
+                        memset(input0, 0U, input_len * sizeof (input0[0U]));
                         {
-                          uint8_t input[input_len0];
-                          memset(input, 0U, input_len0 * sizeof (input[0U]));
+                          uint8_t *k_ = input0;
+                          memcpy(k_, v, (uint32_t)64U * sizeof (v[0U]));
+                          if (entropy_input_len1 + additional_input_len != (uint32_t)0U)
                           {
-                            uint8_t *k_0 = input;
-                            memcpy(k_0, v, (uint32_t)64U * sizeof (v[0U]));
-                            if (entropy_input_len1 + additional_input_len != (uint32_t)0U)
-                            {
-                              memcpy(input + (uint32_t)65U,
-                                seed_material,
-                                (entropy_input_len1 + additional_input_len)
-                                * sizeof (seed_material[0U]));
-                            }
-                            input[64U] = (uint8_t)1U;
-                            EverCrypt_HMAC_compute_sha2_512(k_0,
-                              k,
-                              (uint32_t)64U,
-                              input,
-                              input_len0);
-                            EverCrypt_HMAC_compute_sha2_512(v,
-                              k_0,
-                              (uint32_t)64U,
-                              v,
-                              (uint32_t)64U);
-                            memcpy(k, k_0, (uint32_t)64U * sizeof (k_0[0U]));
+                            memcpy(input0 + (uint32_t)65U,
+                              seed_material,
+                              (entropy_input_len1 + additional_input_len)
+                              * sizeof (seed_material[0U]));
                           }
+                          input0[64U] = (uint8_t)0U;
+                          EverCrypt_HMAC_compute_sha2_512(k_, k, (uint32_t)64U, input0, input_len);
+                          EverCrypt_HMAC_compute_sha2_512(v, k_, (uint32_t)64U, v, (uint32_t)64U);
+                          memcpy(k, k_, (uint32_t)64U * sizeof (k_[0U]));
+                          if (entropy_input_len1 + additional_input_len != (uint32_t)0U)
+                          {
+                            uint32_t
+                            input_len0 = (uint32_t)65U + entropy_input_len1 + additional_input_len;
+                            KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
+                            {
+                              uint8_t input[input_len0];
+                              memset(input, 0U, input_len0 * sizeof (input[0U]));
+                              {
+                                uint8_t *k_0 = input;
+                                memcpy(k_0, v, (uint32_t)64U * sizeof (v[0U]));
+                                if (entropy_input_len1 + additional_input_len != (uint32_t)0U)
+                                {
+                                  memcpy(input + (uint32_t)65U,
+                                    seed_material,
+                                    (entropy_input_len1 + additional_input_len)
+                                    * sizeof (seed_material[0U]));
+                                }
+                                input[64U] = (uint8_t)1U;
+                                EverCrypt_HMAC_compute_sha2_512(k_0,
+                                  k,
+                                  (uint32_t)64U,
+                                  input,
+                                  input_len0);
+                                EverCrypt_HMAC_compute_sha2_512(v,
+                                  k_0,
+                                  (uint32_t)64U,
+                                  v,
+                                  (uint32_t)64U);
+                                memcpy(k, k_0, (uint32_t)64U * sizeof (k_0[0U]));
+                              }
+                            }
+                          }
+                          ctr[0U] = (uint32_t)1U;
+                          result = true;
                         }
                       }
-                      ctr[0U] = (uint32_t)1U;
-                      result = true;
                     }
                   }
                 }
@@ -2360,11 +2987,28 @@ EverCrypt_DRBG_generate_sha2_512(
             {
               uint8_t *output1 = output;
               uint32_t max = n / (uint32_t)64U;
-              uint8_t *out = output1;
+              uint8_t *out;
+              if (output1 == NULL)
+              {
+                out = NULL;
+              }
+              else
+              {
+                out = output1;
+              }
               {
                 uint32_t i;
                 for (i = (uint32_t)0U; i < max; i++)
                 {
+                  uint8_t *block;
+                  if (out == NULL)
+                  {
+                    block = NULL;
+                  }
+                  else
+                  {
+                    block = out + i * (uint32_t)64U;
+                  }
                   EverCrypt_HMAC_compute_sha2_512(v, k, (uint32_t)64U, v, (uint32_t)64U);
                   memcpy(out + i * (uint32_t)64U, v, (uint32_t)64U * sizeof (v[0U]));
                 }

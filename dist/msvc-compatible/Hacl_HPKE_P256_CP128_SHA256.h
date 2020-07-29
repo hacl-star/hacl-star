@@ -31,6 +31,7 @@
 #ifndef __Hacl_HPKE_P256_CP128_SHA256_H
 #define __Hacl_HPKE_P256_CP128_SHA256_H
 
+#include "Hacl_Kremlib.h"
 #include "Hacl_P256.h"
 #include "Hacl_Hash.h"
 #include "Hacl_Chacha20Poly1305_128.h"

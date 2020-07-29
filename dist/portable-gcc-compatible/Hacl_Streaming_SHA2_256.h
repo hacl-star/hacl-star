@@ -31,6 +31,7 @@
 #ifndef __Hacl_Streaming_SHA2_256_H
 #define __Hacl_Streaming_SHA2_256_H
 
+#include "Hacl_Kremlib.h"
 #include "Hacl_Hash.h"
 
 

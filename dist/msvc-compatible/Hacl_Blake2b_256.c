@@ -267,7 +267,11 @@ Hacl_Blake2b_256_blake2b(
   r1[0U] = Lib_IntVector_Intrinsics_vec256_load64s(iv4, iv5, iv6, iv7);
   if (!(kk == (uint32_t)0U))
   {
-    memcpy(b20, k, kk * sizeof (k[0U]));
+    bool uu____0 = k == NULL;
+    if (!(uu____0 || b20 == NULL))
+    {
+      memcpy(b20, k, kk * sizeof (k[0U]));
+    }
     FStar_UInt128_uint128
     totlen =
       FStar_UInt128_add_mod(FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)0U),
@@ -301,8 +305,20 @@ Hacl_Blake2b_256_blake2b(
     blake2b_update_block(b1, b, false, totlen, b2);
   }
   uint8_t b21[128U] = { 0U };
-  uint8_t *last = d + ll - rem;
-  memcpy(b21, last, rem * sizeof (last[0U]));
+  uint8_t *last;
+  if (d == NULL)
+  {
+    last = NULL;
+  }
+  else
+  {
+    last = d + ll - rem;
+  }
+  bool uu____1 = last == NULL;
+  if (!(uu____1 || b21 == NULL))
+  {
+    memcpy(b21, last, rem * sizeof (last[0U]));
+  }
   FStar_UInt128_uint128
   totlen = FStar_UInt128_add_mod(prev0, FStar_UInt128_uint64_to_uint128((uint64_t)ll));
   blake2b_update_block(b1, b, true, totlen, b21);

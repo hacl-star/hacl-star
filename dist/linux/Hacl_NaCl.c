@@ -51,26 +51,51 @@ static void secretbox_detached(u32 mlen, u8 *c, u8 *tag, u8 *k, u8 *n, u8 *m)
       mlen0 = (u32)32U;
     {
       u32 mlen1 = mlen - mlen0;
-      u8 *m0 = m;
-      u8 *m1 = m + mlen0;
-      u8 block0[32U] = { 0U };
-      u8 *c0;
-      u8 *c1;
-      memcpy(block0, m0, mlen0 * sizeof (m0[0U]));
+      u8 *m0;
+      if (m == NULL)
+        m0 = NULL;
+      else
+        m0 = m;
       {
-        u32 i;
-        for (i = (u32)0U; i < (u32)32U; i++)
+        u8 *m1;
+        if (m == NULL)
+          m1 = NULL;
+        else
+          m1 = m + mlen0;
         {
-          u8 *os = block0;
-          u8 x = block0[i] ^ ekey0[i];
-          os[i] = x;
+          u8 block0[32U] = { 0U };
+          bool uu____0 = m0 == NULL;
+          u8 *c0;
+          u8 *c1;
+          u8 *uu____1;
+          bool uu____2;
+          if (!(uu____0 || block0 == NULL))
+            memcpy(block0, m0, mlen0 * sizeof (m0[0U]));
+          {
+            u32 i;
+            for (i = (u32)0U; i < (u32)32U; i++)
+            {
+              u8 *os = block0;
+              u8 x = block0[i] ^ ekey0[i];
+              os[i] = x;
+            }
+          }
+          if (c == NULL)
+            c0 = NULL;
+          else
+            c0 = c;
+          if (c == NULL)
+            c1 = NULL;
+          else
+            c1 = c + mlen0;
+          uu____1 = block0;
+          uu____2 = uu____1 == NULL;
+          if (!(uu____2 || c0 == NULL))
+            memcpy(c0, uu____1, mlen0 * sizeof (uu____1[0U]));
+          Hacl_Salsa20_salsa20_encrypt(mlen1, c1, m1, subkey, n1, (u32)1U);
+          Hacl_Poly1305_32_poly1305_mac(tag, mlen, c, mkey);
         }
       }
-      c0 = c;
-      c1 = c + mlen0;
-      memcpy(c0, block0, mlen0 * sizeof (block0[0U]));
-      Hacl_Salsa20_salsa20_encrypt(mlen1, c1, m1, subkey, n1, (u32)1U);
-      Hacl_Poly1305_32_poly1305_mac(tag, mlen, c, mkey);
     }
   }
 }
@@ -109,25 +134,54 @@ static u32 secretbox_open_detached(u32 mlen, u8 *m, u8 *k, u8 *n, u8 *c, u8 *tag
           mlen0 = (u32)32U;
         {
           u32 mlen1 = mlen - mlen0;
-          u8 *c0 = c;
-          u8 *c1 = c + mlen0;
-          u8 block0[32U] = { 0U };
-          memcpy(block0, c0, mlen0 * sizeof (c0[0U]));
+          u8 *c0;
+          if (c == NULL)
+            c0 = NULL;
+          else
+            c0 = c;
           {
-            u32 i;
-            for (i = (u32)0U; i < (u32)32U; i++)
+            u8 *c1;
+            if (c == NULL)
+              c1 = NULL;
+            else
+              c1 = c + mlen0;
             {
-              u8 *os = block0;
-              u8 x = block0[i] ^ ekey0[i];
-              os[i] = x;
+              u8 block0[32U] = { 0U };
+              bool uu____1 = c0 == NULL;
+              if (!(uu____1 || block0 == NULL))
+                memcpy(block0, c0, mlen0 * sizeof (c0[0U]));
+              {
+                u32 i;
+                for (i = (u32)0U; i < (u32)32U; i++)
+                {
+                  u8 *os = block0;
+                  u8 x = block0[i] ^ ekey0[i];
+                  os[i] = x;
+                }
+              }
+              {
+                u8 *m0;
+                if (m == NULL)
+                  m0 = NULL;
+                else
+                  m0 = m;
+                {
+                  u8 *m1;
+                  if (m == NULL)
+                    m1 = NULL;
+                  else
+                    m1 = m + mlen0;
+                  {
+                    u8 *uu____2 = block0;
+                    bool uu____3 = uu____2 == NULL;
+                    if (!(uu____3 || m0 == NULL))
+                      memcpy(m0, uu____2, mlen0 * sizeof (uu____2[0U]));
+                    Hacl_Salsa20_salsa20_decrypt(mlen1, m1, c1, subkey, n1, (u32)1U);
+                    res = (u32)0U;
+                  }
+                }
+              }
             }
-          }
-          {
-            u8 *m0 = m;
-            u8 *m1 = m + mlen0;
-            memcpy(m0, block0, mlen0 * sizeof (block0[0U]));
-            Hacl_Salsa20_salsa20_decrypt(mlen1, m1, c1, subkey, n1, (u32)1U);
-            res = (u32)0U;
           }
         }
       }

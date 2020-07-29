@@ -196,60 +196,86 @@ Hacl_HMAC_DRBG_instantiate(
             (entropy_input_len + nonce_len + personalization_string_len)
             * sizeof (seed_material[0U]));
           {
-            u8 *k;
-            u8 *v;
-            u32 *ctr;
-            memcpy(seed_material, entropy_input, entropy_input_len * sizeof (entropy_input[0U]));
-            memcpy(seed_material + entropy_input_len, nonce, nonce_len * sizeof (nonce[0U]));
-            memcpy(seed_material + entropy_input_len + nonce_len,
-              personalization_string,
-              personalization_string_len * sizeof (personalization_string[0U]));
-            k = st.k;
-            v = st.v;
-            ctr = st.reseed_counter;
-            memset(k, 0U, (u32)20U * sizeof (k[0U]));
-            memset(v, (u8)1U, (u32)20U * sizeof (v[0U]));
-            ctr[0U] = (u32)1U;
+            u8 *uu____0;
+            if (seed_material == NULL)
+              uu____0 = NULL;
+            else
+              uu____0 = seed_material;
             {
-              u32 input_len = (u32)21U + entropy_input_len + nonce_len + personalization_string_len;
-              KRML_CHECK_SIZE(sizeof (u8), input_len);
+              bool uu____1 = entropy_input == NULL;
+              u8 *uu____2;
+              bool uu____3;
+              u8 *uu____4;
+              bool uu____5;
+              u8 *k;
+              u8 *v;
+              u32 *ctr;
+              if (!(uu____1 || uu____0 == NULL))
+                memcpy(uu____0, entropy_input, entropy_input_len * sizeof (entropy_input[0U]));
+              if (seed_material == NULL)
+                uu____2 = NULL;
+              else
+                uu____2 = seed_material + entropy_input_len;
+              uu____3 = nonce == NULL;
+              if (!(uu____3 || uu____2 == NULL))
+                memcpy(uu____2, nonce, nonce_len * sizeof (nonce[0U]));
+              if (seed_material == NULL)
+                uu____4 = NULL;
+              else
+                uu____4 = seed_material + entropy_input_len + nonce_len;
+              uu____5 = personalization_string == NULL;
+              if (!(uu____5 || uu____4 == NULL))
+                memcpy(uu____4,
+                  personalization_string,
+                  personalization_string_len * sizeof (personalization_string[0U]));
+              k = st.k;
+              v = st.v;
+              ctr = st.reseed_counter;
+              memset(k, 0U, (u32)20U * sizeof (k[0U]));
+              memset(v, (u8)1U, (u32)20U * sizeof (v[0U]));
+              ctr[0U] = (u32)1U;
               {
-                u8 input0[input_len];
-                memset(input0, 0U, input_len * sizeof (input0[0U]));
+                u32
+                input_len = (u32)21U + entropy_input_len + nonce_len + personalization_string_len;
+                KRML_CHECK_SIZE(sizeof (u8), input_len);
                 {
-                  u8 *k_ = input0;
-                  memcpy(k_, v, (u32)20U * sizeof (v[0U]));
-                  if (entropy_input_len + nonce_len + personalization_string_len != (u32)0U)
-                    memcpy(input0 + (u32)21U,
-                      seed_material,
-                      (entropy_input_len + nonce_len + personalization_string_len)
-                      * sizeof (seed_material[0U]));
-                  input0[20U] = (u8)0U;
-                  Hacl_HMAC_legacy_compute_sha1(k_, k, (u32)20U, input0, input_len);
-                  Hacl_HMAC_legacy_compute_sha1(v, k_, (u32)20U, v, (u32)20U);
-                  memcpy(k, k_, (u32)20U * sizeof (k_[0U]));
-                  if (entropy_input_len + nonce_len + personalization_string_len != (u32)0U)
+                  u8 input0[input_len];
+                  memset(input0, 0U, input_len * sizeof (input0[0U]));
                   {
-                    u32
-                    input_len0 =
-                      (u32)21U
-                      + entropy_input_len + nonce_len + personalization_string_len;
-                    KRML_CHECK_SIZE(sizeof (u8), input_len0);
+                    u8 *k_ = input0;
+                    memcpy(k_, v, (u32)20U * sizeof (v[0U]));
+                    if (entropy_input_len + nonce_len + personalization_string_len != (u32)0U)
+                      memcpy(input0 + (u32)21U,
+                        seed_material,
+                        (entropy_input_len + nonce_len + personalization_string_len)
+                        * sizeof (seed_material[0U]));
+                    input0[20U] = (u8)0U;
+                    Hacl_HMAC_legacy_compute_sha1(k_, k, (u32)20U, input0, input_len);
+                    Hacl_HMAC_legacy_compute_sha1(v, k_, (u32)20U, v, (u32)20U);
+                    memcpy(k, k_, (u32)20U * sizeof (k_[0U]));
+                    if (entropy_input_len + nonce_len + personalization_string_len != (u32)0U)
                     {
-                      u8 input[input_len0];
-                      memset(input, 0U, input_len0 * sizeof (input[0U]));
+                      u32
+                      input_len0 =
+                        (u32)21U
+                        + entropy_input_len + nonce_len + personalization_string_len;
+                      KRML_CHECK_SIZE(sizeof (u8), input_len0);
                       {
-                        u8 *k_0 = input;
-                        memcpy(k_0, v, (u32)20U * sizeof (v[0U]));
-                        if (entropy_input_len + nonce_len + personalization_string_len != (u32)0U)
-                          memcpy(input + (u32)21U,
-                            seed_material,
-                            (entropy_input_len + nonce_len + personalization_string_len)
-                            * sizeof (seed_material[0U]));
-                        input[20U] = (u8)1U;
-                        Hacl_HMAC_legacy_compute_sha1(k_0, k, (u32)20U, input, input_len0);
-                        Hacl_HMAC_legacy_compute_sha1(v, k_0, (u32)20U, v, (u32)20U);
-                        memcpy(k, k_0, (u32)20U * sizeof (k_0[0U]));
+                        u8 input[input_len0];
+                        memset(input, 0U, input_len0 * sizeof (input[0U]));
+                        {
+                          u8 *k_0 = input;
+                          memcpy(k_0, v, (u32)20U * sizeof (v[0U]));
+                          if (entropy_input_len + nonce_len + personalization_string_len != (u32)0U)
+                            memcpy(input + (u32)21U,
+                              seed_material,
+                              (entropy_input_len + nonce_len + personalization_string_len)
+                              * sizeof (seed_material[0U]));
+                          input[20U] = (u8)1U;
+                          Hacl_HMAC_legacy_compute_sha1(k_0, k, (u32)20U, input, input_len0);
+                          Hacl_HMAC_legacy_compute_sha1(v, k_0, (u32)20U, v, (u32)20U);
+                          memcpy(k, k_0, (u32)20U * sizeof (k_0[0U]));
+                        }
                       }
                     }
                   }
@@ -270,60 +296,86 @@ Hacl_HMAC_DRBG_instantiate(
             (entropy_input_len + nonce_len + personalization_string_len)
             * sizeof (seed_material[0U]));
           {
-            u8 *k;
-            u8 *v;
-            u32 *ctr;
-            memcpy(seed_material, entropy_input, entropy_input_len * sizeof (entropy_input[0U]));
-            memcpy(seed_material + entropy_input_len, nonce, nonce_len * sizeof (nonce[0U]));
-            memcpy(seed_material + entropy_input_len + nonce_len,
-              personalization_string,
-              personalization_string_len * sizeof (personalization_string[0U]));
-            k = st.k;
-            v = st.v;
-            ctr = st.reseed_counter;
-            memset(k, 0U, (u32)32U * sizeof (k[0U]));
-            memset(v, (u8)1U, (u32)32U * sizeof (v[0U]));
-            ctr[0U] = (u32)1U;
+            u8 *uu____6;
+            if (seed_material == NULL)
+              uu____6 = NULL;
+            else
+              uu____6 = seed_material;
             {
-              u32 input_len = (u32)33U + entropy_input_len + nonce_len + personalization_string_len;
-              KRML_CHECK_SIZE(sizeof (u8), input_len);
+              bool uu____7 = entropy_input == NULL;
+              u8 *uu____8;
+              bool uu____9;
+              u8 *uu____10;
+              bool uu____11;
+              u8 *k;
+              u8 *v;
+              u32 *ctr;
+              if (!(uu____7 || uu____6 == NULL))
+                memcpy(uu____6, entropy_input, entropy_input_len * sizeof (entropy_input[0U]));
+              if (seed_material == NULL)
+                uu____8 = NULL;
+              else
+                uu____8 = seed_material + entropy_input_len;
+              uu____9 = nonce == NULL;
+              if (!(uu____9 || uu____8 == NULL))
+                memcpy(uu____8, nonce, nonce_len * sizeof (nonce[0U]));
+              if (seed_material == NULL)
+                uu____10 = NULL;
+              else
+                uu____10 = seed_material + entropy_input_len + nonce_len;
+              uu____11 = personalization_string == NULL;
+              if (!(uu____11 || uu____10 == NULL))
+                memcpy(uu____10,
+                  personalization_string,
+                  personalization_string_len * sizeof (personalization_string[0U]));
+              k = st.k;
+              v = st.v;
+              ctr = st.reseed_counter;
+              memset(k, 0U, (u32)32U * sizeof (k[0U]));
+              memset(v, (u8)1U, (u32)32U * sizeof (v[0U]));
+              ctr[0U] = (u32)1U;
               {
-                u8 input0[input_len];
-                memset(input0, 0U, input_len * sizeof (input0[0U]));
+                u32
+                input_len = (u32)33U + entropy_input_len + nonce_len + personalization_string_len;
+                KRML_CHECK_SIZE(sizeof (u8), input_len);
                 {
-                  u8 *k_ = input0;
-                  memcpy(k_, v, (u32)32U * sizeof (v[0U]));
-                  if (entropy_input_len + nonce_len + personalization_string_len != (u32)0U)
-                    memcpy(input0 + (u32)33U,
-                      seed_material,
-                      (entropy_input_len + nonce_len + personalization_string_len)
-                      * sizeof (seed_material[0U]));
-                  input0[32U] = (u8)0U;
-                  Hacl_HMAC_compute_sha2_256(k_, k, (u32)32U, input0, input_len);
-                  Hacl_HMAC_compute_sha2_256(v, k_, (u32)32U, v, (u32)32U);
-                  memcpy(k, k_, (u32)32U * sizeof (k_[0U]));
-                  if (entropy_input_len + nonce_len + personalization_string_len != (u32)0U)
+                  u8 input0[input_len];
+                  memset(input0, 0U, input_len * sizeof (input0[0U]));
                   {
-                    u32
-                    input_len0 =
-                      (u32)33U
-                      + entropy_input_len + nonce_len + personalization_string_len;
-                    KRML_CHECK_SIZE(sizeof (u8), input_len0);
+                    u8 *k_ = input0;
+                    memcpy(k_, v, (u32)32U * sizeof (v[0U]));
+                    if (entropy_input_len + nonce_len + personalization_string_len != (u32)0U)
+                      memcpy(input0 + (u32)33U,
+                        seed_material,
+                        (entropy_input_len + nonce_len + personalization_string_len)
+                        * sizeof (seed_material[0U]));
+                    input0[32U] = (u8)0U;
+                    Hacl_HMAC_compute_sha2_256(k_, k, (u32)32U, input0, input_len);
+                    Hacl_HMAC_compute_sha2_256(v, k_, (u32)32U, v, (u32)32U);
+                    memcpy(k, k_, (u32)32U * sizeof (k_[0U]));
+                    if (entropy_input_len + nonce_len + personalization_string_len != (u32)0U)
                     {
-                      u8 input[input_len0];
-                      memset(input, 0U, input_len0 * sizeof (input[0U]));
+                      u32
+                      input_len0 =
+                        (u32)33U
+                        + entropy_input_len + nonce_len + personalization_string_len;
+                      KRML_CHECK_SIZE(sizeof (u8), input_len0);
                       {
-                        u8 *k_0 = input;
-                        memcpy(k_0, v, (u32)32U * sizeof (v[0U]));
-                        if (entropy_input_len + nonce_len + personalization_string_len != (u32)0U)
-                          memcpy(input + (u32)33U,
-                            seed_material,
-                            (entropy_input_len + nonce_len + personalization_string_len)
-                            * sizeof (seed_material[0U]));
-                        input[32U] = (u8)1U;
-                        Hacl_HMAC_compute_sha2_256(k_0, k, (u32)32U, input, input_len0);
-                        Hacl_HMAC_compute_sha2_256(v, k_0, (u32)32U, v, (u32)32U);
-                        memcpy(k, k_0, (u32)32U * sizeof (k_0[0U]));
+                        u8 input[input_len0];
+                        memset(input, 0U, input_len0 * sizeof (input[0U]));
+                        {
+                          u8 *k_0 = input;
+                          memcpy(k_0, v, (u32)32U * sizeof (v[0U]));
+                          if (entropy_input_len + nonce_len + personalization_string_len != (u32)0U)
+                            memcpy(input + (u32)33U,
+                              seed_material,
+                              (entropy_input_len + nonce_len + personalization_string_len)
+                              * sizeof (seed_material[0U]));
+                          input[32U] = (u8)1U;
+                          Hacl_HMAC_compute_sha2_256(k_0, k, (u32)32U, input, input_len0);
+                          Hacl_HMAC_compute_sha2_256(v, k_0, (u32)32U, v, (u32)32U);
+                          memcpy(k, k_0, (u32)32U * sizeof (k_0[0U]));
+                        }
                       }
                     }
                   }
@@ -344,60 +396,86 @@ Hacl_HMAC_DRBG_instantiate(
             (entropy_input_len + nonce_len + personalization_string_len)
             * sizeof (seed_material[0U]));
           {
-            u8 *k;
-            u8 *v;
-            u32 *ctr;
-            memcpy(seed_material, entropy_input, entropy_input_len * sizeof (entropy_input[0U]));
-            memcpy(seed_material + entropy_input_len, nonce, nonce_len * sizeof (nonce[0U]));
-            memcpy(seed_material + entropy_input_len + nonce_len,
-              personalization_string,
-              personalization_string_len * sizeof (personalization_string[0U]));
-            k = st.k;
-            v = st.v;
-            ctr = st.reseed_counter;
-            memset(k, 0U, (u32)48U * sizeof (k[0U]));
-            memset(v, (u8)1U, (u32)48U * sizeof (v[0U]));
-            ctr[0U] = (u32)1U;
+            u8 *uu____12;
+            if (seed_material == NULL)
+              uu____12 = NULL;
+            else
+              uu____12 = seed_material;
             {
-              u32 input_len = (u32)49U + entropy_input_len + nonce_len + personalization_string_len;
-              KRML_CHECK_SIZE(sizeof (u8), input_len);
+              bool uu____13 = entropy_input == NULL;
+              u8 *uu____14;
+              bool uu____15;
+              u8 *uu____16;
+              bool uu____17;
+              u8 *k;
+              u8 *v;
+              u32 *ctr;
+              if (!(uu____13 || uu____12 == NULL))
+                memcpy(uu____12, entropy_input, entropy_input_len * sizeof (entropy_input[0U]));
+              if (seed_material == NULL)
+                uu____14 = NULL;
+              else
+                uu____14 = seed_material + entropy_input_len;
+              uu____15 = nonce == NULL;
+              if (!(uu____15 || uu____14 == NULL))
+                memcpy(uu____14, nonce, nonce_len * sizeof (nonce[0U]));
+              if (seed_material == NULL)
+                uu____16 = NULL;
+              else
+                uu____16 = seed_material + entropy_input_len + nonce_len;
+              uu____17 = personalization_string == NULL;
+              if (!(uu____17 || uu____16 == NULL))
+                memcpy(uu____16,
+                  personalization_string,
+                  personalization_string_len * sizeof (personalization_string[0U]));
+              k = st.k;
+              v = st.v;
+              ctr = st.reseed_counter;
+              memset(k, 0U, (u32)48U * sizeof (k[0U]));
+              memset(v, (u8)1U, (u32)48U * sizeof (v[0U]));
+              ctr[0U] = (u32)1U;
               {
-                u8 input0[input_len];
-                memset(input0, 0U, input_len * sizeof (input0[0U]));
+                u32
+                input_len = (u32)49U + entropy_input_len + nonce_len + personalization_string_len;
+                KRML_CHECK_SIZE(sizeof (u8), input_len);
                 {
-                  u8 *k_ = input0;
-                  memcpy(k_, v, (u32)48U * sizeof (v[0U]));
-                  if (entropy_input_len + nonce_len + personalization_string_len != (u32)0U)
-                    memcpy(input0 + (u32)49U,
-                      seed_material,
-                      (entropy_input_len + nonce_len + personalization_string_len)
-                      * sizeof (seed_material[0U]));
-                  input0[48U] = (u8)0U;
-                  Hacl_HMAC_compute_sha2_384(k_, k, (u32)48U, input0, input_len);
-                  Hacl_HMAC_compute_sha2_384(v, k_, (u32)48U, v, (u32)48U);
-                  memcpy(k, k_, (u32)48U * sizeof (k_[0U]));
-                  if (entropy_input_len + nonce_len + personalization_string_len != (u32)0U)
+                  u8 input0[input_len];
+                  memset(input0, 0U, input_len * sizeof (input0[0U]));
                   {
-                    u32
-                    input_len0 =
-                      (u32)49U
-                      + entropy_input_len + nonce_len + personalization_string_len;
-                    KRML_CHECK_SIZE(sizeof (u8), input_len0);
+                    u8 *k_ = input0;
+                    memcpy(k_, v, (u32)48U * sizeof (v[0U]));
+                    if (entropy_input_len + nonce_len + personalization_string_len != (u32)0U)
+                      memcpy(input0 + (u32)49U,
+                        seed_material,
+                        (entropy_input_len + nonce_len + personalization_string_len)
+                        * sizeof (seed_material[0U]));
+                    input0[48U] = (u8)0U;
+                    Hacl_HMAC_compute_sha2_384(k_, k, (u32)48U, input0, input_len);
+                    Hacl_HMAC_compute_sha2_384(v, k_, (u32)48U, v, (u32)48U);
+                    memcpy(k, k_, (u32)48U * sizeof (k_[0U]));
+                    if (entropy_input_len + nonce_len + personalization_string_len != (u32)0U)
                     {
-                      u8 input[input_len0];
-                      memset(input, 0U, input_len0 * sizeof (input[0U]));
+                      u32
+                      input_len0 =
+                        (u32)49U
+                        + entropy_input_len + nonce_len + personalization_string_len;
+                      KRML_CHECK_SIZE(sizeof (u8), input_len0);
                       {
-                        u8 *k_0 = input;
-                        memcpy(k_0, v, (u32)48U * sizeof (v[0U]));
-                        if (entropy_input_len + nonce_len + personalization_string_len != (u32)0U)
-                          memcpy(input + (u32)49U,
-                            seed_material,
-                            (entropy_input_len + nonce_len + personalization_string_len)
-                            * sizeof (seed_material[0U]));
-                        input[48U] = (u8)1U;
-                        Hacl_HMAC_compute_sha2_384(k_0, k, (u32)48U, input, input_len0);
-                        Hacl_HMAC_compute_sha2_384(v, k_0, (u32)48U, v, (u32)48U);
-                        memcpy(k, k_0, (u32)48U * sizeof (k_0[0U]));
+                        u8 input[input_len0];
+                        memset(input, 0U, input_len0 * sizeof (input[0U]));
+                        {
+                          u8 *k_0 = input;
+                          memcpy(k_0, v, (u32)48U * sizeof (v[0U]));
+                          if (entropy_input_len + nonce_len + personalization_string_len != (u32)0U)
+                            memcpy(input + (u32)49U,
+                              seed_material,
+                              (entropy_input_len + nonce_len + personalization_string_len)
+                              * sizeof (seed_material[0U]));
+                          input[48U] = (u8)1U;
+                          Hacl_HMAC_compute_sha2_384(k_0, k, (u32)48U, input, input_len0);
+                          Hacl_HMAC_compute_sha2_384(v, k_0, (u32)48U, v, (u32)48U);
+                          memcpy(k, k_0, (u32)48U * sizeof (k_0[0U]));
+                        }
                       }
                     }
                   }
@@ -418,60 +496,86 @@ Hacl_HMAC_DRBG_instantiate(
             (entropy_input_len + nonce_len + personalization_string_len)
             * sizeof (seed_material[0U]));
           {
-            u8 *k;
-            u8 *v;
-            u32 *ctr;
-            memcpy(seed_material, entropy_input, entropy_input_len * sizeof (entropy_input[0U]));
-            memcpy(seed_material + entropy_input_len, nonce, nonce_len * sizeof (nonce[0U]));
-            memcpy(seed_material + entropy_input_len + nonce_len,
-              personalization_string,
-              personalization_string_len * sizeof (personalization_string[0U]));
-            k = st.k;
-            v = st.v;
-            ctr = st.reseed_counter;
-            memset(k, 0U, (u32)64U * sizeof (k[0U]));
-            memset(v, (u8)1U, (u32)64U * sizeof (v[0U]));
-            ctr[0U] = (u32)1U;
+            u8 *uu____18;
+            if (seed_material == NULL)
+              uu____18 = NULL;
+            else
+              uu____18 = seed_material;
             {
-              u32 input_len = (u32)65U + entropy_input_len + nonce_len + personalization_string_len;
-              KRML_CHECK_SIZE(sizeof (u8), input_len);
+              bool uu____19 = entropy_input == NULL;
+              u8 *uu____20;
+              bool uu____21;
+              u8 *uu____22;
+              bool uu____23;
+              u8 *k;
+              u8 *v;
+              u32 *ctr;
+              if (!(uu____19 || uu____18 == NULL))
+                memcpy(uu____18, entropy_input, entropy_input_len * sizeof (entropy_input[0U]));
+              if (seed_material == NULL)
+                uu____20 = NULL;
+              else
+                uu____20 = seed_material + entropy_input_len;
+              uu____21 = nonce == NULL;
+              if (!(uu____21 || uu____20 == NULL))
+                memcpy(uu____20, nonce, nonce_len * sizeof (nonce[0U]));
+              if (seed_material == NULL)
+                uu____22 = NULL;
+              else
+                uu____22 = seed_material + entropy_input_len + nonce_len;
+              uu____23 = personalization_string == NULL;
+              if (!(uu____23 || uu____22 == NULL))
+                memcpy(uu____22,
+                  personalization_string,
+                  personalization_string_len * sizeof (personalization_string[0U]));
+              k = st.k;
+              v = st.v;
+              ctr = st.reseed_counter;
+              memset(k, 0U, (u32)64U * sizeof (k[0U]));
+              memset(v, (u8)1U, (u32)64U * sizeof (v[0U]));
+              ctr[0U] = (u32)1U;
               {
-                u8 input0[input_len];
-                memset(input0, 0U, input_len * sizeof (input0[0U]));
+                u32
+                input_len = (u32)65U + entropy_input_len + nonce_len + personalization_string_len;
+                KRML_CHECK_SIZE(sizeof (u8), input_len);
                 {
-                  u8 *k_ = input0;
-                  memcpy(k_, v, (u32)64U * sizeof (v[0U]));
-                  if (entropy_input_len + nonce_len + personalization_string_len != (u32)0U)
-                    memcpy(input0 + (u32)65U,
-                      seed_material,
-                      (entropy_input_len + nonce_len + personalization_string_len)
-                      * sizeof (seed_material[0U]));
-                  input0[64U] = (u8)0U;
-                  Hacl_HMAC_compute_sha2_512(k_, k, (u32)64U, input0, input_len);
-                  Hacl_HMAC_compute_sha2_512(v, k_, (u32)64U, v, (u32)64U);
-                  memcpy(k, k_, (u32)64U * sizeof (k_[0U]));
-                  if (entropy_input_len + nonce_len + personalization_string_len != (u32)0U)
+                  u8 input0[input_len];
+                  memset(input0, 0U, input_len * sizeof (input0[0U]));
                   {
-                    u32
-                    input_len0 =
-                      (u32)65U
-                      + entropy_input_len + nonce_len + personalization_string_len;
-                    KRML_CHECK_SIZE(sizeof (u8), input_len0);
+                    u8 *k_ = input0;
+                    memcpy(k_, v, (u32)64U * sizeof (v[0U]));
+                    if (entropy_input_len + nonce_len + personalization_string_len != (u32)0U)
+                      memcpy(input0 + (u32)65U,
+                        seed_material,
+                        (entropy_input_len + nonce_len + personalization_string_len)
+                        * sizeof (seed_material[0U]));
+                    input0[64U] = (u8)0U;
+                    Hacl_HMAC_compute_sha2_512(k_, k, (u32)64U, input0, input_len);
+                    Hacl_HMAC_compute_sha2_512(v, k_, (u32)64U, v, (u32)64U);
+                    memcpy(k, k_, (u32)64U * sizeof (k_[0U]));
+                    if (entropy_input_len + nonce_len + personalization_string_len != (u32)0U)
                     {
-                      u8 input[input_len0];
-                      memset(input, 0U, input_len0 * sizeof (input[0U]));
+                      u32
+                      input_len0 =
+                        (u32)65U
+                        + entropy_input_len + nonce_len + personalization_string_len;
+                      KRML_CHECK_SIZE(sizeof (u8), input_len0);
                       {
-                        u8 *k_0 = input;
-                        memcpy(k_0, v, (u32)64U * sizeof (v[0U]));
-                        if (entropy_input_len + nonce_len + personalization_string_len != (u32)0U)
-                          memcpy(input + (u32)65U,
-                            seed_material,
-                            (entropy_input_len + nonce_len + personalization_string_len)
-                            * sizeof (seed_material[0U]));
-                        input[64U] = (u8)1U;
-                        Hacl_HMAC_compute_sha2_512(k_0, k, (u32)64U, input, input_len0);
-                        Hacl_HMAC_compute_sha2_512(v, k_0, (u32)64U, v, (u32)64U);
-                        memcpy(k, k_0, (u32)64U * sizeof (k_0[0U]));
+                        u8 input[input_len0];
+                        memset(input, 0U, input_len0 * sizeof (input[0U]));
+                        {
+                          u8 *k_0 = input;
+                          memcpy(k_0, v, (u32)64U * sizeof (v[0U]));
+                          if (entropy_input_len + nonce_len + personalization_string_len != (u32)0U)
+                            memcpy(input + (u32)65U,
+                              seed_material,
+                              (entropy_input_len + nonce_len + personalization_string_len)
+                              * sizeof (seed_material[0U]));
+                          input[64U] = (u8)1U;
+                          Hacl_HMAC_compute_sha2_512(k_0, k, (u32)64U, input, input_len0);
+                          Hacl_HMAC_compute_sha2_512(v, k_0, (u32)64U, v, (u32)64U);
+                          memcpy(k, k_0, (u32)64U * sizeof (k_0[0U]));
+                        }
                       }
                     }
                   }
@@ -511,18 +615,26 @@ Hacl_HMAC_DRBG_reseed(
             0U,
             (entropy_input_len + additional_input_input_len) * sizeof (seed_material[0U]));
           {
-            Hacl_HMAC_DRBG_state uu____0;
+            u8 *uu____0;
+            bool uu____1;
+            Hacl_HMAC_DRBG_state uu____2;
             u8 *k;
             u8 *v;
             u32 *ctr;
             memcpy(seed_material, entropy_input, entropy_input_len * sizeof (entropy_input[0U]));
-            memcpy(seed_material + entropy_input_len,
-              additional_input_input,
-              additional_input_input_len * sizeof (additional_input_input[0U]));
-            uu____0 = st;
-            k = uu____0.k;
-            v = uu____0.v;
-            ctr = uu____0.reseed_counter;
+            if (seed_material == NULL)
+              uu____0 = NULL;
+            else
+              uu____0 = seed_material + entropy_input_len;
+            uu____1 = additional_input_input == NULL;
+            if (!(uu____1 || uu____0 == NULL))
+              memcpy(uu____0,
+                additional_input_input,
+                additional_input_input_len * sizeof (additional_input_input[0U]));
+            uu____2 = st;
+            k = uu____2.k;
+            v = uu____2.v;
+            ctr = uu____2.reseed_counter;
             {
               u32 input_len = (u32)21U + entropy_input_len + additional_input_input_len;
               KRML_CHECK_SIZE(sizeof (u8), input_len);
@@ -579,18 +691,26 @@ Hacl_HMAC_DRBG_reseed(
             0U,
             (entropy_input_len + additional_input_input_len) * sizeof (seed_material[0U]));
           {
-            Hacl_HMAC_DRBG_state uu____1;
+            u8 *uu____3;
+            bool uu____4;
+            Hacl_HMAC_DRBG_state uu____5;
             u8 *k;
             u8 *v;
             u32 *ctr;
             memcpy(seed_material, entropy_input, entropy_input_len * sizeof (entropy_input[0U]));
-            memcpy(seed_material + entropy_input_len,
-              additional_input_input,
-              additional_input_input_len * sizeof (additional_input_input[0U]));
-            uu____1 = st;
-            k = uu____1.k;
-            v = uu____1.v;
-            ctr = uu____1.reseed_counter;
+            if (seed_material == NULL)
+              uu____3 = NULL;
+            else
+              uu____3 = seed_material + entropy_input_len;
+            uu____4 = additional_input_input == NULL;
+            if (!(uu____4 || uu____3 == NULL))
+              memcpy(uu____3,
+                additional_input_input,
+                additional_input_input_len * sizeof (additional_input_input[0U]));
+            uu____5 = st;
+            k = uu____5.k;
+            v = uu____5.v;
+            ctr = uu____5.reseed_counter;
             {
               u32 input_len = (u32)33U + entropy_input_len + additional_input_input_len;
               KRML_CHECK_SIZE(sizeof (u8), input_len);
@@ -647,18 +767,26 @@ Hacl_HMAC_DRBG_reseed(
             0U,
             (entropy_input_len + additional_input_input_len) * sizeof (seed_material[0U]));
           {
-            Hacl_HMAC_DRBG_state uu____2;
+            u8 *uu____6;
+            bool uu____7;
+            Hacl_HMAC_DRBG_state uu____8;
             u8 *k;
             u8 *v;
             u32 *ctr;
             memcpy(seed_material, entropy_input, entropy_input_len * sizeof (entropy_input[0U]));
-            memcpy(seed_material + entropy_input_len,
-              additional_input_input,
-              additional_input_input_len * sizeof (additional_input_input[0U]));
-            uu____2 = st;
-            k = uu____2.k;
-            v = uu____2.v;
-            ctr = uu____2.reseed_counter;
+            if (seed_material == NULL)
+              uu____6 = NULL;
+            else
+              uu____6 = seed_material + entropy_input_len;
+            uu____7 = additional_input_input == NULL;
+            if (!(uu____7 || uu____6 == NULL))
+              memcpy(uu____6,
+                additional_input_input,
+                additional_input_input_len * sizeof (additional_input_input[0U]));
+            uu____8 = st;
+            k = uu____8.k;
+            v = uu____8.v;
+            ctr = uu____8.reseed_counter;
             {
               u32 input_len = (u32)49U + entropy_input_len + additional_input_input_len;
               KRML_CHECK_SIZE(sizeof (u8), input_len);
@@ -715,18 +843,26 @@ Hacl_HMAC_DRBG_reseed(
             0U,
             (entropy_input_len + additional_input_input_len) * sizeof (seed_material[0U]));
           {
-            Hacl_HMAC_DRBG_state uu____3;
+            u8 *uu____9;
+            bool uu____10;
+            Hacl_HMAC_DRBG_state uu____11;
             u8 *k;
             u8 *v;
             u32 *ctr;
             memcpy(seed_material, entropy_input, entropy_input_len * sizeof (entropy_input[0U]));
-            memcpy(seed_material + entropy_input_len,
-              additional_input_input,
-              additional_input_input_len * sizeof (additional_input_input[0U]));
-            uu____3 = st;
-            k = uu____3.k;
-            v = uu____3.v;
-            ctr = uu____3.reseed_counter;
+            if (seed_material == NULL)
+              uu____9 = NULL;
+            else
+              uu____9 = seed_material + entropy_input_len;
+            uu____10 = additional_input_input == NULL;
+            if (!(uu____10 || uu____9 == NULL))
+              memcpy(uu____9,
+                additional_input_input,
+                additional_input_input_len * sizeof (additional_input_input[0U]));
+            uu____11 = st;
+            k = uu____11.k;
+            v = uu____11.v;
+            ctr = uu____11.reseed_counter;
             {
               u32 input_len = (u32)65U + entropy_input_len + additional_input_input_len;
               KRML_CHECK_SIZE(sizeof (u8), input_len);
@@ -847,11 +983,20 @@ Hacl_HMAC_DRBG_generate(
           {
             u8 *output1 = output;
             u32 max = n / (u32)20U;
-            u8 *out = output1;
+            u8 *out;
+            if (output1 == NULL)
+              out = NULL;
+            else
+              out = output1;
             {
               u32 i;
               for (i = (u32)0U; i < max; i++)
               {
+                u8 *block;
+                if (out == NULL)
+                  block = NULL;
+                else
+                  block = out + i * (u32)20U;
                 Hacl_HMAC_legacy_compute_sha1(v, k, (u32)20U, v, (u32)20U);
                 memcpy(out + i * (u32)20U, v, (u32)20U * sizeof (v[0U]));
               }
@@ -965,11 +1110,20 @@ Hacl_HMAC_DRBG_generate(
           {
             u8 *output1 = output;
             u32 max = n / (u32)32U;
-            u8 *out = output1;
+            u8 *out;
+            if (output1 == NULL)
+              out = NULL;
+            else
+              out = output1;
             {
               u32 i;
               for (i = (u32)0U; i < max; i++)
               {
+                u8 *block;
+                if (out == NULL)
+                  block = NULL;
+                else
+                  block = out + i * (u32)32U;
                 Hacl_HMAC_compute_sha2_256(v, k, (u32)32U, v, (u32)32U);
                 memcpy(out + i * (u32)32U, v, (u32)32U * sizeof (v[0U]));
               }
@@ -1083,11 +1237,20 @@ Hacl_HMAC_DRBG_generate(
           {
             u8 *output1 = output;
             u32 max = n / (u32)48U;
-            u8 *out = output1;
+            u8 *out;
+            if (output1 == NULL)
+              out = NULL;
+            else
+              out = output1;
             {
               u32 i;
               for (i = (u32)0U; i < max; i++)
               {
+                u8 *block;
+                if (out == NULL)
+                  block = NULL;
+                else
+                  block = out + i * (u32)48U;
                 Hacl_HMAC_compute_sha2_384(v, k, (u32)48U, v, (u32)48U);
                 memcpy(out + i * (u32)48U, v, (u32)48U * sizeof (v[0U]));
               }
@@ -1201,11 +1364,20 @@ Hacl_HMAC_DRBG_generate(
           {
             u8 *output1 = output;
             u32 max = n / (u32)64U;
-            u8 *out = output1;
+            u8 *out;
+            if (output1 == NULL)
+              out = NULL;
+            else
+              out = output1;
             {
               u32 i;
               for (i = (u32)0U; i < max; i++)
               {
+                u8 *block;
+                if (out == NULL)
+                  block = NULL;
+                else
+                  block = out + i * (u32)64U;
                 Hacl_HMAC_compute_sha2_512(v, k, (u32)64U, v, (u32)64U);
                 memcpy(out + i * (u32)64U, v, (u32)64U * sizeof (v[0U]));
               }

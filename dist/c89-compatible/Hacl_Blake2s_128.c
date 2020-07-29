@@ -425,7 +425,11 @@ Hacl_Blake2s_128_blake2s(
           r1[0U] = Lib_IntVector_Intrinsics_vec128_load32s(iv4, iv5, iv6, iv7);
           if (!(kk == (uint32_t)0U))
           {
-            memcpy(b20, k, kk * sizeof (k[0U]));
+            bool uu____0 = k == NULL;
+            if (!(uu____0 || b20 == NULL))
+            {
+              memcpy(b20, k, kk * sizeof (k[0U]));
+            }
             {
               uint64_t totlen = (uint64_t)(uint32_t)0U + (uint64_t)(uint32_t)64U;
               uint8_t *b3 = b20 + (uint32_t)0U * (uint32_t)64U;
@@ -464,31 +468,45 @@ Hacl_Blake2s_128_blake2s(
           }
           {
             uint8_t b21[64U] = { 0U };
-            uint8_t *last = d + ll - rem;
-            uint64_t totlen;
-            uint32_t double_row;
-            memcpy(b21, last, rem * sizeof (last[0U]));
-            totlen = prev0 + (uint64_t)ll;
-            blake2s_update_block(b1, b, true, totlen, b21);
-            Lib_Memzero0_memzero(b21, (uint32_t)64U * sizeof (b21[0U]));
-            double_row = (uint32_t)2U * (uint32_t)4U * (uint32_t)4U;
-            KRML_CHECK_SIZE(sizeof (uint8_t), double_row);
+            uint8_t *last;
+            if (d == NULL)
             {
-              uint8_t b2[double_row];
-              memset(b2, 0U, double_row * sizeof (b2[0U]));
+              last = NULL;
+            }
+            else
+            {
+              last = d + ll - rem;
+            }
+            {
+              bool uu____1 = last == NULL;
+              uint64_t totlen;
+              uint32_t double_row;
+              if (!(uu____1 || b21 == NULL))
               {
-                uint8_t *first = b2;
-                uint8_t *second = b2 + (uint32_t)4U * (uint32_t)4U;
-                Lib_IntVector_Intrinsics_vec128 *row0 = b + (uint32_t)0U * (uint32_t)1U;
-                Lib_IntVector_Intrinsics_vec128 *row1 = b + (uint32_t)1U * (uint32_t)1U;
-                uint8_t *final;
-                Lib_IntVector_Intrinsics_vec128_store_le(first, row0[0U]);
-                Lib_IntVector_Intrinsics_vec128_store_le(second, row1[0U]);
-                final = b2;
-                memcpy(output, final, nn * sizeof (final[0U]));
-                Lib_Memzero0_memzero(b2, double_row * sizeof (b2[0U]));
-                Lib_Memzero0_memzero(b1, stlen * sizeof (b1[0U]));
-                Lib_Memzero0_memzero(b, stlen * sizeof (b[0U]));
+                memcpy(b21, last, rem * sizeof (last[0U]));
+              }
+              totlen = prev0 + (uint64_t)ll;
+              blake2s_update_block(b1, b, true, totlen, b21);
+              Lib_Memzero0_memzero(b21, (uint32_t)64U * sizeof (b21[0U]));
+              double_row = (uint32_t)2U * (uint32_t)4U * (uint32_t)4U;
+              KRML_CHECK_SIZE(sizeof (uint8_t), double_row);
+              {
+                uint8_t b2[double_row];
+                memset(b2, 0U, double_row * sizeof (b2[0U]));
+                {
+                  uint8_t *first = b2;
+                  uint8_t *second = b2 + (uint32_t)4U * (uint32_t)4U;
+                  Lib_IntVector_Intrinsics_vec128 *row0 = b + (uint32_t)0U * (uint32_t)1U;
+                  Lib_IntVector_Intrinsics_vec128 *row1 = b + (uint32_t)1U * (uint32_t)1U;
+                  uint8_t *final;
+                  Lib_IntVector_Intrinsics_vec128_store_le(first, row0[0U]);
+                  Lib_IntVector_Intrinsics_vec128_store_le(second, row1[0U]);
+                  final = b2;
+                  memcpy(output, final, nn * sizeof (final[0U]));
+                  Lib_Memzero0_memzero(b2, double_row * sizeof (b2[0U]));
+                  Lib_Memzero0_memzero(b1, stlen * sizeof (b1[0U]));
+                  Lib_Memzero0_memzero(b, stlen * sizeof (b[0U]));
+                }
               }
             }
           }

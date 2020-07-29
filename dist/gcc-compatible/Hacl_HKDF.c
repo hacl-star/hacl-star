@@ -48,15 +48,7 @@ Hacl_HKDF_expand_sha2_256(
   KRML_CHECK_SIZE(sizeof (uint8_t), tlen + infolen + (uint32_t)1U);
   uint8_t text[tlen + infolen + (uint32_t)1U];
   memset(text, 0U, (tlen + infolen + (uint32_t)1U) * sizeof (text[0U]));
-  uint8_t *text0;
-  if (text == NULL)
-  {
-    text0 = NULL;
-  }
-  else
-  {
-    text0 = text + tlen;
-  }
+  uint8_t *text0 = text + tlen;
   uint8_t *tag;
   if (text == NULL)
   {
@@ -135,29 +127,8 @@ Hacl_HKDF_expand_sha2_256(
     {
       Hacl_HMAC_compute_sha2_256(tag, prk, prklen, text, tlen + infolen + (uint32_t)1U);
     }
-    uint8_t *block;
-    if (okm == NULL)
-    {
-      block = NULL;
-    }
-    else
-    {
-      block = okm + n * tlen;
-    }
-    uint8_t *uu____4;
-    if (tag == NULL)
-    {
-      uu____4 = NULL;
-    }
-    else
-    {
-      uu____4 = tag;
-    }
-    bool uu____5 = uu____4 == NULL;
-    if (!(uu____5 || block == NULL))
-    {
-      memcpy(block, uu____4, (len - n * tlen) * sizeof (uu____4[0U]));
-    }
+    uint8_t *block = okm + n * tlen;
+    memcpy(block, tag, (len - n * tlen) * sizeof (tag[0U]));
   }
 }
 
@@ -197,15 +168,7 @@ Hacl_HKDF_expand_sha2_512(
   KRML_CHECK_SIZE(sizeof (uint8_t), tlen + infolen + (uint32_t)1U);
   uint8_t text[tlen + infolen + (uint32_t)1U];
   memset(text, 0U, (tlen + infolen + (uint32_t)1U) * sizeof (text[0U]));
-  uint8_t *text0;
-  if (text == NULL)
-  {
-    text0 = NULL;
-  }
-  else
-  {
-    text0 = text + tlen;
-  }
+  uint8_t *text0 = text + tlen;
   uint8_t *tag;
   if (text == NULL)
   {
@@ -284,29 +247,8 @@ Hacl_HKDF_expand_sha2_512(
     {
       Hacl_HMAC_compute_sha2_512(tag, prk, prklen, text, tlen + infolen + (uint32_t)1U);
     }
-    uint8_t *block;
-    if (okm == NULL)
-    {
-      block = NULL;
-    }
-    else
-    {
-      block = okm + n * tlen;
-    }
-    uint8_t *uu____4;
-    if (tag == NULL)
-    {
-      uu____4 = NULL;
-    }
-    else
-    {
-      uu____4 = tag;
-    }
-    bool uu____5 = uu____4 == NULL;
-    if (!(uu____5 || block == NULL))
-    {
-      memcpy(block, uu____4, (len - n * tlen) * sizeof (uu____4[0U]));
-    }
+    uint8_t *block = okm + n * tlen;
+    memcpy(block, tag, (len - n * tlen) * sizeof (tag[0U]));
   }
 }
 

@@ -31,6 +31,7 @@
 #ifndef __EverCrypt_Poly1305_H
 #define __EverCrypt_Poly1305_H
 
+#include "Hacl_Kremlib.h"
 #include "Vale.h"
 #include "EverCrypt_AutoConfig2.h"
 #include "Hacl_Poly1305_32.h"

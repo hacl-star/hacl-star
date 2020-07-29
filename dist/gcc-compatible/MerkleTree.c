@@ -683,16 +683,7 @@ assign__LowStar_Vector_vector_str__uint8_t_(
   LowStar_Vector_vector_str___uint8_t_ v
 )
 {
-  void **ite;
-  if (vec.vs == NULL)
-  {
-    ite = NULL;
-  }
-  else
-  {
-    ite = vec.vs + i;
-  }
-  ite[0U] = v;
+  (vec.vs + i)[0U] = v;
 }
 
 static void
@@ -743,16 +734,7 @@ regional__uint32_t__uint8_t_;
 
 static void assign___uint8_t_(LowStar_Vector_vector_str___uint8_t_ vec, uint32_t i, uint8_t *v)
 {
-  void **ite;
-  if (vec.vs == NULL)
-  {
-    ite = NULL;
-  }
-  else
-  {
-    ite = vec.vs + i;
-  }
-  ite[0U] = v;
+  (vec.vs + i)[0U] = v;
 }
 
 static void
@@ -2221,7 +2203,11 @@ deserialize_hash(uint32_t hash_size, bool ok, const uint8_t *buf, uint32_t sz, u
     return ((__bool_uint32_t__uint8_t_){ .fst = false, .snd = pos, .thd = rg.dummy });
   }
   uint8_t *hash = rg.r_alloc(rg.state);
-  memcpy(hash, (uint8_t *)buf + pos, hash_size * sizeof (((uint8_t *)buf)[0U]));
+  bool uu____0 = (uint8_t *)buf == NULL;
+  if (!(uu____0 || hash == NULL))
+  {
+    memcpy(hash, (uint8_t *)buf + pos, hash_size * sizeof (((uint8_t *)buf)[0U]));
+  }
   return ((__bool_uint32_t__uint8_t_){ .fst = true, .snd = pos + hash_size, .thd = hash });
 }
 

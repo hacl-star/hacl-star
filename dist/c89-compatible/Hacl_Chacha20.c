@@ -136,42 +136,71 @@ chacha20_constants[4U] =
 inline void
 Hacl_Impl_Chacha20_chacha20_init(uint32_t *ctx, uint8_t *k, uint8_t *n, uint32_t ctr)
 {
-  uint32_t *uu____0 = ctx;
-  uint32_t *uu____1;
-  uint32_t *uu____2;
-  uint32_t i;
+  uint32_t *tmp0;
+  if (ctx == NULL)
   {
-    uint32_t i0;
-    for (i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0++)
-    {
-      uint32_t *os = uu____0;
-      uint32_t x = chacha20_constants[i0];
-      os[i0] = x;
-    }
+    tmp0 = NULL;
   }
-  uu____1 = ctx + (uint32_t)4U;
+  else
   {
-    uint32_t i0;
-    for (i0 = (uint32_t)0U; i0 < (uint32_t)8U; i0++)
+    tmp0 = ctx;
+  }
+  {
+    uint32_t *uu____0 = ctx;
+    uint32_t *tmp1;
+    uint32_t *uu____1;
+    uint32_t *tmp;
+    uint32_t *uu____2;
+    uint32_t i;
     {
-      uint32_t *os = uu____1;
-      uint8_t *bj = k + i0 * (uint32_t)4U;
+      uint32_t i0;
+      for (i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0++)
+      {
+        uint32_t *os = uu____0;
+        uint32_t x = chacha20_constants[i0];
+        os[i0] = x;
+      }
+    }
+    if (ctx == NULL)
+    {
+      tmp1 = NULL;
+    }
+    else
+    {
+      tmp1 = ctx + (uint32_t)4U;
+    }
+    uu____1 = ctx + (uint32_t)4U;
+    {
+      uint32_t i0;
+      for (i0 = (uint32_t)0U; i0 < (uint32_t)8U; i0++)
+      {
+        uint32_t *os = uu____1;
+        uint8_t *bj = k + i0 * (uint32_t)4U;
+        uint32_t u = load32_le(bj);
+        uint32_t r = u;
+        uint32_t x = r;
+        os[i0] = x;
+      }
+    }
+    ctx[12U] = ctr;
+    if (ctx == NULL)
+    {
+      tmp = NULL;
+    }
+    else
+    {
+      tmp = ctx + (uint32_t)13U;
+    }
+    uu____2 = ctx + (uint32_t)13U;
+    for (i = (uint32_t)0U; i < (uint32_t)3U; i++)
+    {
+      uint32_t *os = uu____2;
+      uint8_t *bj = n + i * (uint32_t)4U;
       uint32_t u = load32_le(bj);
       uint32_t r = u;
       uint32_t x = r;
-      os[i0] = x;
+      os[i] = x;
     }
-  }
-  ctx[12U] = ctr;
-  uu____2 = ctx + (uint32_t)13U;
-  for (i = (uint32_t)0U; i < (uint32_t)3U; i++)
-  {
-    uint32_t *os = uu____2;
-    uint8_t *bj = n + i * (uint32_t)4U;
-    uint32_t u = load32_le(bj);
-    uint32_t r = u;
-    uint32_t x = r;
-    os[i] = x;
   }
 }
 
@@ -212,6 +241,15 @@ Hacl_Impl_Chacha20_chacha20_encrypt_block(
       uint32_t i;
       for (i = (uint32_t)0U; i < (uint32_t)16U; i++)
       {
+        uint8_t *block;
+        if (out == NULL)
+        {
+          block = NULL;
+        }
+        else
+        {
+          block = out + i * (uint32_t)4U;
+        }
         store32_le(out + i * (uint32_t)4U, bl[i]);
       }
     }
@@ -222,7 +260,11 @@ static inline void
 chacha20_encrypt_last(uint32_t *ctx, uint32_t len, uint8_t *out, uint32_t incr, uint8_t *text)
 {
   uint8_t plain[64U] = { 0U };
-  memcpy(plain, text, len * sizeof (text[0U]));
+  bool uu____0 = text == NULL;
+  if (!(uu____0 || plain == NULL))
+  {
+    memcpy(plain, text, len * sizeof (text[0U]));
+  }
   Hacl_Impl_Chacha20_chacha20_encrypt_block(ctx, plain, incr, plain);
   memcpy(out, plain, len * sizeof (plain[0U]));
 }
@@ -231,21 +273,44 @@ inline void
 Hacl_Impl_Chacha20_chacha20_update(uint32_t *ctx, uint32_t len, uint8_t *out, uint8_t *text)
 {
   uint32_t rem = len % (uint32_t)64U;
-  uint32_t nb = len / (uint32_t)64U;
-  uint32_t rem1 = len % (uint32_t)64U;
+  if (!(len == (uint32_t)0U))
   {
-    uint32_t i;
-    for (i = (uint32_t)0U; i < nb; i++)
+    uint32_t nb = len / (uint32_t)64U;
+    uint32_t rem1 = len % (uint32_t)64U;
+    uint8_t *ib;
+    if (text == NULL)
     {
-      Hacl_Impl_Chacha20_chacha20_encrypt_block(ctx,
-        out + i * (uint32_t)64U,
-        i,
-        text + i * (uint32_t)64U);
+      ib = NULL;
     }
-  }
-  if (rem1 > (uint32_t)0U)
-  {
-    chacha20_encrypt_last(ctx, rem, out + nb * (uint32_t)64U, nb, text + nb * (uint32_t)64U);
+    else
+    {
+      ib = text;
+    }
+    {
+      uint8_t *ob;
+      if (out == NULL)
+      {
+        ob = NULL;
+      }
+      else
+      {
+        ob = out;
+      }
+      {
+        uint32_t i;
+        for (i = (uint32_t)0U; i < nb; i++)
+        {
+          Hacl_Impl_Chacha20_chacha20_encrypt_block(ctx,
+            out + i * (uint32_t)64U,
+            i,
+            text + i * (uint32_t)64U);
+        }
+      }
+      if (rem1 > (uint32_t)0U)
+      {
+        chacha20_encrypt_last(ctx, rem, out + nb * (uint32_t)64U, nb, text + nb * (uint32_t)64U);
+      }
+    }
   }
 }
 

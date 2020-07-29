@@ -156,11 +156,14 @@ frodo_gen_matrix_cshake(uint32_t n, uint32_t seed_len, uint8_t *seed, uint16_t *
       for (i = (uint32_t)0U; i < n; i++)
       {
         uint32_t ctr = (uint32_t)256U + i;
-        uint64_t s[25U] = { 0U };
-        s[0U] = (uint64_t)0x10010001a801U | (uint64_t)(uint16_t)ctr << (uint32_t)48U;
-        Hacl_Impl_SHA3_state_permute(s);
-        Hacl_Impl_SHA3_absorb(s, (uint32_t)168U, seed_len, seed, (uint8_t)0x04U);
-        Hacl_Impl_SHA3_squeeze(s, (uint32_t)168U, (uint32_t)2U * n, r);
+        if (!((uint32_t)2U * n == (uint32_t)0U))
+        {
+          uint64_t s[25U] = { 0U };
+          s[0U] = (uint64_t)0x10010001a801U | (uint64_t)(uint16_t)ctr << (uint32_t)48U;
+          Hacl_Impl_SHA3_state_permute(s);
+          Hacl_Impl_SHA3_absorb(s, (uint32_t)168U, seed_len, seed, (uint8_t)0x04U);
+          Hacl_Impl_SHA3_squeeze(s, (uint32_t)168U, (uint32_t)2U * n, r);
+        }
         {
           uint32_t i0;
           for (i0 = (uint32_t)0U; i0 < n; i0++)
@@ -220,11 +223,22 @@ frodo_sample_matrix(
     uint8_t r[(uint32_t)2U * n1 * n2];
     memset(r, 0U, (uint32_t)2U * n1 * n2 * sizeof (r[0U]));
     {
-      uint64_t s[25U] = { 0U };
-      s[0U] = (uint64_t)0x10010001a801U | (uint64_t)ctr << (uint32_t)48U;
-      Hacl_Impl_SHA3_state_permute(s);
-      Hacl_Impl_SHA3_absorb(s, (uint32_t)168U, seed_len, seed, (uint8_t)0x04U);
-      Hacl_Impl_SHA3_squeeze(s, (uint32_t)168U, (uint32_t)2U * n1 * n2, r);
+      uint64_t s[25U];
+      if (!((uint32_t)2U * n1 * n2 == (uint32_t)0U))
+      {
+        uint64_t init = (uint64_t)0U;
+        {
+          uint32_t i;
+          for (i = (uint32_t)0U; i < (uint32_t)25U; i++)
+          {
+            s[i] = init;
+          }
+        }
+        s[0U] = (uint64_t)0x10010001a801U | (uint64_t)ctr << (uint32_t)48U;
+        Hacl_Impl_SHA3_state_permute(s);
+        Hacl_Impl_SHA3_absorb(s, (uint32_t)168U, seed_len, seed, (uint8_t)0x04U);
+        Hacl_Impl_SHA3_squeeze(s, (uint32_t)168U, (uint32_t)2U * n1 * n2, r);
+      }
       memset(res, 0U, n1 * n2 * sizeof (res[0U]));
       {
         uint32_t i0;
@@ -251,38 +265,65 @@ static inline void frodo_pack(uint32_t n1, uint32_t n2, uint32_t d, uint16_t *a,
   uint32_t i;
   for (i = (uint32_t)0U; i < n; i++)
   {
-    uint16_t *a1 = a + (uint32_t)8U * i;
-    uint8_t *r = res + d * i;
-    uint16_t maskd = (uint16_t)((uint32_t)1U << d) - (uint16_t)1U;
-    uint8_t v16[16U] = { 0U };
-    uint16_t a0 = a1[0U] & maskd;
-    uint16_t a11 = a1[1U] & maskd;
-    uint16_t a2 = a1[2U] & maskd;
-    uint16_t a3 = a1[3U] & maskd;
-    uint16_t a4 = a1[4U] & maskd;
-    uint16_t a5 = a1[5U] & maskd;
-    uint16_t a6 = a1[6U] & maskd;
-    uint16_t a7 = a1[7U] & maskd;
-    FStar_UInt128_uint128
-    templong =
-      FStar_UInt128_logor(FStar_UInt128_logor(FStar_UInt128_logor(FStar_UInt128_logor(FStar_UInt128_logor(FStar_UInt128_logor(FStar_UInt128_logor(FStar_UInt128_shift_left(FStar_UInt128_uint64_to_uint128((uint64_t)a0),
-                      (uint32_t)7U * d),
-                    FStar_UInt128_shift_left(FStar_UInt128_uint64_to_uint128((uint64_t)a11),
-                      (uint32_t)6U * d)),
-                  FStar_UInt128_shift_left(FStar_UInt128_uint64_to_uint128((uint64_t)a2),
-                    (uint32_t)5U * d)),
-                FStar_UInt128_shift_left(FStar_UInt128_uint64_to_uint128((uint64_t)a3),
-                  (uint32_t)4U * d)),
-              FStar_UInt128_shift_left(FStar_UInt128_uint64_to_uint128((uint64_t)a4),
-                (uint32_t)3U * d)),
-            FStar_UInt128_shift_left(FStar_UInt128_uint64_to_uint128((uint64_t)a5),
-              (uint32_t)2U * d)),
-          FStar_UInt128_shift_left(FStar_UInt128_uint64_to_uint128((uint64_t)a6), (uint32_t)1U * d)),
-        FStar_UInt128_shift_left(FStar_UInt128_uint64_to_uint128((uint64_t)a7), (uint32_t)0U * d));
-    uint8_t *src;
-    store128_be(v16, templong);
-    src = v16 + (uint32_t)16U - d;
-    memcpy(r, src, d * sizeof (src[0U]));
+    uint16_t *a1;
+    if (a == NULL)
+    {
+      a1 = NULL;
+    }
+    else
+    {
+      a1 = a + (uint32_t)8U * i;
+    }
+    {
+      uint8_t *r;
+      if (res == NULL)
+      {
+        r = NULL;
+      }
+      else
+      {
+        r = res + d * i;
+      }
+      {
+        uint16_t maskd = (uint16_t)((uint32_t)1U << d) - (uint16_t)1U;
+        uint8_t v16[16U] = { 0U };
+        uint16_t a0 = a1[0U] & maskd;
+        uint16_t a11 = a1[1U] & maskd;
+        uint16_t a2 = a1[2U] & maskd;
+        uint16_t a3 = a1[3U] & maskd;
+        uint16_t a4 = a1[4U] & maskd;
+        uint16_t a5 = a1[5U] & maskd;
+        uint16_t a6 = a1[6U] & maskd;
+        uint16_t a7 = a1[7U] & maskd;
+        FStar_UInt128_uint128
+        templong =
+          FStar_UInt128_logor(FStar_UInt128_logor(FStar_UInt128_logor(FStar_UInt128_logor(FStar_UInt128_logor(FStar_UInt128_logor(FStar_UInt128_logor(FStar_UInt128_shift_left(FStar_UInt128_uint64_to_uint128((uint64_t)a0),
+                          (uint32_t)7U * d),
+                        FStar_UInt128_shift_left(FStar_UInt128_uint64_to_uint128((uint64_t)a11),
+                          (uint32_t)6U * d)),
+                      FStar_UInt128_shift_left(FStar_UInt128_uint64_to_uint128((uint64_t)a2),
+                        (uint32_t)5U * d)),
+                    FStar_UInt128_shift_left(FStar_UInt128_uint64_to_uint128((uint64_t)a3),
+                      (uint32_t)4U * d)),
+                  FStar_UInt128_shift_left(FStar_UInt128_uint64_to_uint128((uint64_t)a4),
+                    (uint32_t)3U * d)),
+                FStar_UInt128_shift_left(FStar_UInt128_uint64_to_uint128((uint64_t)a5),
+                  (uint32_t)2U * d)),
+              FStar_UInt128_shift_left(FStar_UInt128_uint64_to_uint128((uint64_t)a6),
+                (uint32_t)1U * d)),
+            FStar_UInt128_shift_left(FStar_UInt128_uint64_to_uint128((uint64_t)a7),
+              (uint32_t)0U * d));
+        uint8_t *src;
+        bool uu____0;
+        store128_be(v16, templong);
+        src = v16 + (uint32_t)16U - d;
+        uu____0 = src == NULL;
+        if (!(uu____0 || r == NULL))
+        {
+          memcpy(r, src, d * sizeof (src[0U]));
+        }
+      }
+    }
   }
 }
 
@@ -293,47 +334,61 @@ frodo_unpack(uint32_t n1, uint32_t n2, uint32_t d, uint8_t *b, uint16_t *res)
   uint32_t i;
   for (i = (uint32_t)0U; i < n; i++)
   {
-    uint8_t *b1 = b + d * i;
-    uint16_t *r = res + (uint32_t)8U * i;
-    uint16_t maskd = (uint16_t)((uint32_t)1U << d) - (uint16_t)1U;
-    uint8_t src[16U] = { 0U };
-    FStar_UInt128_uint128 u;
-    FStar_UInt128_uint128 templong;
-    memcpy(src + (uint32_t)16U - d, b1, d * sizeof (b1[0U]));
-    u = load128_be(src);
-    templong = u;
-    r[0U] =
-      (uint16_t)FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(templong,
-          (uint32_t)7U * d))
-      & maskd;
-    r[1U] =
-      (uint16_t)FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(templong,
-          (uint32_t)6U * d))
-      & maskd;
-    r[2U] =
-      (uint16_t)FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(templong,
-          (uint32_t)5U * d))
-      & maskd;
-    r[3U] =
-      (uint16_t)FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(templong,
-          (uint32_t)4U * d))
-      & maskd;
-    r[4U] =
-      (uint16_t)FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(templong,
-          (uint32_t)3U * d))
-      & maskd;
-    r[5U] =
-      (uint16_t)FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(templong,
-          (uint32_t)2U * d))
-      & maskd;
-    r[6U] =
-      (uint16_t)FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(templong,
-          (uint32_t)1U * d))
-      & maskd;
-    r[7U] =
-      (uint16_t)FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(templong,
-          (uint32_t)0U * d))
-      & maskd;
+    uint8_t *b1;
+    if (b == NULL)
+    {
+      b1 = NULL;
+    }
+    else
+    {
+      b1 = b + d * i;
+    }
+    {
+      uint16_t *r = res + (uint32_t)8U * i;
+      uint16_t maskd = (uint16_t)((uint32_t)1U << d) - (uint16_t)1U;
+      uint8_t src[16U] = { 0U };
+      bool uu____0 = b1 == NULL;
+      FStar_UInt128_uint128 u;
+      FStar_UInt128_uint128 templong;
+      if (!(uu____0 || src == NULL))
+      {
+        memcpy(src + (uint32_t)16U - d, b1, d * sizeof (b1[0U]));
+      }
+      u = load128_be(src);
+      templong = u;
+      r[0U] =
+        (uint16_t)FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(templong,
+            (uint32_t)7U * d))
+        & maskd;
+      r[1U] =
+        (uint16_t)FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(templong,
+            (uint32_t)6U * d))
+        & maskd;
+      r[2U] =
+        (uint16_t)FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(templong,
+            (uint32_t)5U * d))
+        & maskd;
+      r[3U] =
+        (uint16_t)FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(templong,
+            (uint32_t)4U * d))
+        & maskd;
+      r[4U] =
+        (uint16_t)FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(templong,
+            (uint32_t)3U * d))
+        & maskd;
+      r[5U] =
+        (uint16_t)FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(templong,
+            (uint32_t)2U * d))
+        & maskd;
+      r[6U] =
+        (uint16_t)FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(templong,
+            (uint32_t)1U * d))
+        & maskd;
+      r[7U] =
+        (uint16_t)FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(templong,
+            (uint32_t)0U * d))
+        & maskd;
+    }
   }
 }
 
@@ -385,11 +440,15 @@ static inline void frodo_key_encode(uint32_t b, uint8_t *a, uint16_t *res)
   {
     uint8_t v8[8U] = { 0U };
     uint8_t *chunk = a + i0 * b;
+    bool uu____0 = chunk == NULL;
     uint64_t u;
     uint64_t x0;
     uint64_t x;
     uint32_t i;
-    memcpy(v8, chunk, b * sizeof (chunk[0U]));
+    if (!(uu____0 || v8 == NULL))
+    {
+      memcpy(v8, chunk, b * sizeof (chunk[0U]));
+    }
     u = load64_le(v8);
     x0 = u;
     x = x0;
@@ -422,9 +481,14 @@ static inline void frodo_key_decode(uint32_t b, uint16_t *a, uint8_t *res)
     {
       uint8_t v8[8U] = { 0U };
       uint8_t *tmp;
+      bool uu____0;
       store64_le(v8, templong);
       tmp = v8;
-      memcpy(res + i * b, tmp, b * sizeof (tmp[0U]));
+      uu____0 = tmp == NULL;
+      if (!(uu____0 || res == NULL))
+      {
+        memcpy(res + i * b, tmp, b * sizeof (tmp[0U]));
+      }
     }
   }
 }
@@ -497,10 +561,15 @@ static inline void crypto_kem_enc_ct(uint8_t *pk, uint8_t *g, uint8_t *coins, ui
     c2 = ct + c1Len;
     {
       uint16_t v_matrix[64U] = { 0U };
+      bool uu____0;
       frodo_mul_add_sb_plus_e_plus_mu(b, seed_e, coins, sp_matrix, v_matrix);
       frodo_pack((uint32_t)8U, (uint32_t)8U, (uint32_t)15U, v_matrix, c2);
       Lib_Memzero_clear_words_u16((uint32_t)64U, v_matrix);
-      memcpy(ct + c12Len, d, (uint32_t)16U * sizeof (d[0U]));
+      uu____0 = d == NULL;
+      if (!(uu____0 || ct == NULL))
+      {
+        memcpy(ct + c12Len, d, (uint32_t)16U * sizeof (d[0U]));
+      }
       Lib_Memzero_clear_words_u16((uint32_t)512U, sp_matrix);
     }
   }
@@ -516,8 +585,19 @@ static inline void crypto_kem_enc_ss(uint8_t *g, uint8_t *ct, uint8_t *ss)
     {
       uint8_t *c12 = ct;
       uint8_t *kd = g + (uint32_t)16U;
-      memcpy(ss_init, c12, (crypto_ciphertextbytes - (uint32_t)16U) * sizeof (c12[0U]));
-      memcpy(ss_init + crypto_ciphertextbytes - (uint32_t)16U, kd, (uint32_t)32U * sizeof (kd[0U]));
+      bool uu____0 = c12 == NULL;
+      bool uu____1;
+      if (!(uu____0 || ss_init == NULL))
+      {
+        memcpy(ss_init, c12, (crypto_ciphertextbytes - (uint32_t)16U) * sizeof (c12[0U]));
+      }
+      uu____1 = kd == NULL;
+      if (!(uu____1 || ss_init == NULL))
+      {
+        memcpy(ss_init + crypto_ciphertextbytes - (uint32_t)16U,
+          kd,
+          (uint32_t)32U * sizeof (kd[0U]));
+      }
       {
         uint64_t s[25U] = { 0U };
         s[0U] = (uint64_t)0x10010001a801U | (uint64_t)(uint16_t)7U << (uint32_t)48U;
@@ -545,6 +625,8 @@ uint32_t Hacl_Frodo_KEM_crypto_kem_keypair(uint8_t *pk, uint8_t *sk)
     uint64_t s1[25U] = { 0U };
     uint8_t *b;
     uint8_t *s_bytes;
+    bool uu____0;
+    bool uu____1;
     s1[0U] = (uint64_t)0x10010001a801U | (uint64_t)(uint16_t)0U << (uint32_t)48U;
     Hacl_Impl_SHA3_state_permute(s1);
     Hacl_Impl_SHA3_absorb(s1, (uint32_t)168U, (uint32_t)16U, z, (uint8_t)0x04U);
@@ -552,8 +634,16 @@ uint32_t Hacl_Frodo_KEM_crypto_kem_keypair(uint8_t *pk, uint8_t *sk)
     b = pk + (uint32_t)16U;
     s_bytes = sk + (uint32_t)16U + crypto_publickeybytes;
     frodo_mul_add_as_plus_e_pack(seed_a, seed_e, b, s_bytes);
-    memcpy(sk, s, (uint32_t)16U * sizeof (s[0U]));
-    memcpy(sk + (uint32_t)16U, pk, crypto_publickeybytes * sizeof (pk[0U]));
+    uu____0 = s == NULL;
+    if (!(uu____0 || sk == NULL))
+    {
+      memcpy(sk, s, (uint32_t)16U * sizeof (s[0U]));
+    }
+    uu____1 = pk == NULL;
+    if (!(uu____1 || sk == NULL))
+    {
+      memcpy(sk + (uint32_t)16U, pk, crypto_publickeybytes * sizeof (pk[0U]));
+    }
     return (uint32_t)0U;
   }
 }
@@ -565,8 +655,17 @@ uint32_t Hacl_Frodo_KEM_crypto_kem_enc(uint8_t *ct, uint8_t *ss, uint8_t *pk)
   {
     uint8_t g[48U] = { 0U };
     uint8_t pk_coins[992U] = { 0U };
-    memcpy(pk_coins, pk, crypto_publickeybytes * sizeof (pk[0U]));
-    memcpy(pk_coins + crypto_publickeybytes, coins, bytes_mu * sizeof (coins[0U]));
+    bool uu____0 = pk == NULL;
+    bool uu____1;
+    if (!(uu____0 || pk_coins == NULL))
+    {
+      memcpy(pk_coins, pk, crypto_publickeybytes * sizeof (pk[0U]));
+    }
+    uu____1 = coins == NULL;
+    if (!(uu____1 || pk_coins == NULL))
+    {
+      memcpy(pk_coins + crypto_publickeybytes, coins, bytes_mu * sizeof (coins[0U]));
+    }
     {
       uint64_t s[25U] = { 0U };
       s[0U] = (uint64_t)0x10010001a801U | (uint64_t)(uint16_t)3U << (uint32_t)48U;
@@ -614,10 +713,19 @@ uint32_t Hacl_Frodo_KEM_crypto_kem_dec(uint8_t *ss, uint8_t *ct, uint8_t *sk)
         memset(pk_mu_decode, 0U, pk_mu_decode_len * sizeof (pk_mu_decode[0U]));
         {
           uint8_t *pk0 = sk + (uint32_t)16U;
-          memcpy(pk_mu_decode, pk0, crypto_publickeybytes * sizeof (pk0[0U]));
-          memcpy(pk_mu_decode + crypto_publickeybytes,
-            mu_decode1,
-            bytes_mu * sizeof (mu_decode1[0U]));
+          bool uu____0 = pk0 == NULL;
+          bool uu____1;
+          if (!(uu____0 || pk_mu_decode == NULL))
+          {
+            memcpy(pk_mu_decode, pk0, crypto_publickeybytes * sizeof (pk0[0U]));
+          }
+          uu____1 = mu_decode1 == NULL;
+          if (!(uu____1 || pk_mu_decode == NULL))
+          {
+            memcpy(pk_mu_decode + crypto_publickeybytes,
+              mu_decode1,
+              bytes_mu * sizeof (mu_decode1[0U]));
+          }
           {
             uint64_t s0[25U] = { 0U };
             s0[0U] = (uint64_t)0x10010001a801U | (uint64_t)(uint16_t)3U << (uint32_t)48U;
@@ -679,8 +787,8 @@ uint32_t Hacl_Frodo_KEM_crypto_kem_dec(uint8_t *ss, uint8_t *ct, uint8_t *sk)
                     uint32_t i;
                     for (i = (uint32_t)0U; i < (uint32_t)16U; i++)
                     {
-                      uint8_t uu____0 = FStar_UInt8_eq_mask(d0[i], dp[i]);
-                      res = uu____0 & res;
+                      uint8_t uu____2 = FStar_UInt8_eq_mask(d0[i], dp[i]);
+                      res = uu____2 & res;
                     }
                   }
                   z = res;
@@ -707,27 +815,45 @@ uint32_t Hacl_Frodo_KEM_crypto_kem_dec(uint8_t *ss, uint8_t *ct, uint8_t *sk)
                     {
                       uint8_t ss_init[ss_init_len];
                       memset(ss_init, 0U, ss_init_len * sizeof (ss_init[0U]));
-                      memcpy(ss_init,
-                        c12,
-                        (crypto_ciphertextbytes - (uint32_t)16U) * sizeof (c12[0U]));
-                      memcpy(ss_init + crypto_ciphertextbytes - (uint32_t)16U,
-                        kp_s,
-                        (uint32_t)16U * sizeof (kp_s[0U]));
-                      memcpy(ss_init + crypto_ciphertextbytes - (uint32_t)16U + (uint32_t)16U,
-                        d,
-                        (uint32_t)16U * sizeof (d[0U]));
                       {
-                        uint64_t s1[25U] = { 0U };
-                        s1[0U] = (uint64_t)0x10010001a801U | (uint64_t)(uint16_t)7U << (uint32_t)48U;
-                        Hacl_Impl_SHA3_state_permute(s1);
-                        Hacl_Impl_SHA3_absorb(s1,
-                          (uint32_t)168U,
-                          ss_init_len,
-                          ss_init,
-                          (uint8_t)0x04U);
-                        Hacl_Impl_SHA3_squeeze(s1, (uint32_t)168U, (uint32_t)16U, ss);
-                        Lib_Memzero_clear_words_u8((uint32_t)32U, g);
-                        return (uint32_t)0U;
+                        bool uu____3 = c12 == NULL;
+                        bool uu____4;
+                        bool uu____5;
+                        if (!(uu____3 || ss_init == NULL))
+                        {
+                          memcpy(ss_init,
+                            c12,
+                            (crypto_ciphertextbytes - (uint32_t)16U) * sizeof (c12[0U]));
+                        }
+                        uu____4 = kp_s == NULL;
+                        if (!(uu____4 || ss_init == NULL))
+                        {
+                          memcpy(ss_init + crypto_ciphertextbytes - (uint32_t)16U,
+                            kp_s,
+                            (uint32_t)16U * sizeof (kp_s[0U]));
+                        }
+                        uu____5 = d == NULL;
+                        if (!(uu____5 || ss_init == NULL))
+                        {
+                          memcpy(ss_init + crypto_ciphertextbytes - (uint32_t)16U + (uint32_t)16U,
+                            d,
+                            (uint32_t)16U * sizeof (d[0U]));
+                        }
+                        {
+                          uint64_t s1[25U] = { 0U };
+                          s1[0U] =
+                            (uint64_t)0x10010001a801U
+                            | (uint64_t)(uint16_t)7U << (uint32_t)48U;
+                          Hacl_Impl_SHA3_state_permute(s1);
+                          Hacl_Impl_SHA3_absorb(s1,
+                            (uint32_t)168U,
+                            ss_init_len,
+                            ss_init,
+                            (uint8_t)0x04U);
+                          Hacl_Impl_SHA3_squeeze(s1, (uint32_t)168U, (uint32_t)16U, ss);
+                          Lib_Memzero_clear_words_u8((uint32_t)32U, g);
+                          return (uint32_t)0U;
+                        }
                       }
                     }
                   }

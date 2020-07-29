@@ -30,6 +30,7 @@
 #ifndef __Hacl_HMAC_DRBG_H
 #define __Hacl_HMAC_DRBG_H
 
+#include "Hacl_Kremlib.h"
 #include "Hacl_HMAC.h"
 #include "Hacl_Spec.h"
 

@@ -87,7 +87,15 @@ Hacl_HPKE_Curve64_CP32_SHA256_setupBaseI(
   uint8_t *info_hash = tmp;
   uint8_t *pskID_hash = tmp + (uint32_t)32U;
   Hacl_Hash_SHA2_hash_256(info, infolen, info_hash);
-  uint8_t *empty_b = info;
+  uint8_t *empty_b;
+  if (info == NULL)
+  {
+    empty_b = NULL;
+  }
+  else
+  {
+    empty_b = info;
+  }
   Hacl_Hash_SHA2_hash_256(empty_b, (uint32_t)0U, pskID_hash);
   context[0U] = (uint8_t)0U;
   uint8_t *uu____2 = context + (uint32_t)1U;
@@ -195,7 +203,15 @@ Hacl_HPKE_Curve64_CP32_SHA256_setupBaseR(
   uint8_t *info_hash = tmp;
   uint8_t *pskID_hash = tmp + (uint32_t)32U;
   Hacl_Hash_SHA2_hash_256(info, infolen, info_hash);
-  uint8_t *empty_b = info;
+  uint8_t *empty_b;
+  if (info == NULL)
+  {
+    empty_b = NULL;
+  }
+  else
+  {
+    empty_b = info;
+  }
   Hacl_Hash_SHA2_hash_256(empty_b, (uint32_t)0U, pskID_hash);
   context[0U] = (uint8_t)0U;
   uint8_t *uu____2 = context + (uint32_t)1U;

@@ -813,9 +813,9 @@ Hacl_Poly1305_128_poly1305_update(
   Lib_IntVector_Intrinsics_vec128 *acc = ctx;
   uint32_t sz_block = (uint32_t)32U;
   uint32_t len0 = len / sz_block * sz_block;
-  uint8_t *t0 = text;
   if (len0 > (uint32_t)0U)
   {
+    uint8_t *t0 = text;
     uint32_t bs = (uint32_t)32U;
     uint8_t *text0 = t0;
     Hacl_Impl_Poly1305_Field32xN_128_load_acc2(acc, text0);
@@ -1044,7 +1044,15 @@ Hacl_Poly1305_128_poly1305_update(
     Hacl_Impl_Poly1305_Field32xN_128_fmul_r2_normalize(acc, pre);
   }
   uint32_t len1 = len - len0;
-  uint8_t *t1 = text + len0;
+  uint8_t *t1;
+  if (text == NULL)
+  {
+    t1 = NULL;
+  }
+  else
+  {
+    t1 = text + len0;
+  }
   uint32_t nb = len1 / (uint32_t)16U;
   uint32_t rem = len1 % (uint32_t)16U;
   for (uint32_t i = (uint32_t)0U; i < nb; i++)
@@ -1207,7 +1215,7 @@ Hacl_Poly1305_128_poly1305_update(
     a46 =
       Lib_IntVector_Intrinsics_vec128_add64(a45,
         Lib_IntVector_Intrinsics_vec128_mul64(r0, a41));
-    Lib_IntVector_Intrinsics_vec128 t01 = a06;
+    Lib_IntVector_Intrinsics_vec128 t0 = a06;
     Lib_IntVector_Intrinsics_vec128 t11 = a16;
     Lib_IntVector_Intrinsics_vec128 t2 = a26;
     Lib_IntVector_Intrinsics_vec128 t3 = a36;
@@ -1215,10 +1223,10 @@ Hacl_Poly1305_128_poly1305_update(
     Lib_IntVector_Intrinsics_vec128
     mask26 = Lib_IntVector_Intrinsics_vec128_load64((uint64_t)0x3ffffffU);
     Lib_IntVector_Intrinsics_vec128
-    z0 = Lib_IntVector_Intrinsics_vec128_shift_right64(t01, (uint32_t)26U);
+    z0 = Lib_IntVector_Intrinsics_vec128_shift_right64(t0, (uint32_t)26U);
     Lib_IntVector_Intrinsics_vec128
     z1 = Lib_IntVector_Intrinsics_vec128_shift_right64(t3, (uint32_t)26U);
-    Lib_IntVector_Intrinsics_vec128 x0 = Lib_IntVector_Intrinsics_vec128_and(t01, mask26);
+    Lib_IntVector_Intrinsics_vec128 x0 = Lib_IntVector_Intrinsics_vec128_and(t0, mask26);
     Lib_IntVector_Intrinsics_vec128 x3 = Lib_IntVector_Intrinsics_vec128_and(t3, mask26);
     Lib_IntVector_Intrinsics_vec128 x1 = Lib_IntVector_Intrinsics_vec128_add64(t11, z0);
     Lib_IntVector_Intrinsics_vec128 x4 = Lib_IntVector_Intrinsics_vec128_add64(t4, z1);
@@ -1263,7 +1271,11 @@ Hacl_Poly1305_128_poly1305_update(
     for (uint32_t _i = 0U; _i < (uint32_t)5U; ++_i)
       e[_i] = Lib_IntVector_Intrinsics_vec128_zero;
     uint8_t tmp[16U] = { 0U };
-    memcpy(tmp, last, rem * sizeof (last[0U]));
+    bool uu____0 = last == NULL;
+    if (!(uu____0 || tmp == NULL))
+    {
+      memcpy(tmp, last, rem * sizeof (last[0U]));
+    }
     uint64_t u0 = load64_le(tmp);
     uint64_t lo = u0;
     uint64_t u = load64_le(tmp + (uint32_t)8U);
@@ -1418,7 +1430,7 @@ Hacl_Poly1305_128_poly1305_update(
     a46 =
       Lib_IntVector_Intrinsics_vec128_add64(a45,
         Lib_IntVector_Intrinsics_vec128_mul64(r0, a41));
-    Lib_IntVector_Intrinsics_vec128 t01 = a06;
+    Lib_IntVector_Intrinsics_vec128 t0 = a06;
     Lib_IntVector_Intrinsics_vec128 t11 = a16;
     Lib_IntVector_Intrinsics_vec128 t2 = a26;
     Lib_IntVector_Intrinsics_vec128 t3 = a36;
@@ -1426,10 +1438,10 @@ Hacl_Poly1305_128_poly1305_update(
     Lib_IntVector_Intrinsics_vec128
     mask26 = Lib_IntVector_Intrinsics_vec128_load64((uint64_t)0x3ffffffU);
     Lib_IntVector_Intrinsics_vec128
-    z0 = Lib_IntVector_Intrinsics_vec128_shift_right64(t01, (uint32_t)26U);
+    z0 = Lib_IntVector_Intrinsics_vec128_shift_right64(t0, (uint32_t)26U);
     Lib_IntVector_Intrinsics_vec128
     z1 = Lib_IntVector_Intrinsics_vec128_shift_right64(t3, (uint32_t)26U);
-    Lib_IntVector_Intrinsics_vec128 x0 = Lib_IntVector_Intrinsics_vec128_and(t01, mask26);
+    Lib_IntVector_Intrinsics_vec128 x0 = Lib_IntVector_Intrinsics_vec128_and(t0, mask26);
     Lib_IntVector_Intrinsics_vec128 x3 = Lib_IntVector_Intrinsics_vec128_and(t3, mask26);
     Lib_IntVector_Intrinsics_vec128 x1 = Lib_IntVector_Intrinsics_vec128_add64(t11, z0);
     Lib_IntVector_Intrinsics_vec128 x4 = Lib_IntVector_Intrinsics_vec128_add64(t4, z1);
@@ -1640,7 +1652,25 @@ Hacl_Poly1305_128_poly1305_finish(
   uint64_t r11 = r1 + c;
   uint64_t f30 = r0;
   uint64_t f31 = r11;
+  uint8_t *tmp;
+  if (tag == NULL)
+  {
+    tmp = NULL;
+  }
+  else
+  {
+    tmp = tag;
+  }
   store64_le(tag, f30);
+  uint8_t *tmp5;
+  if (tag == NULL)
+  {
+    tmp5 = NULL;
+  }
+  else
+  {
+    tmp5 = tag + (uint32_t)8U;
+  }
   store64_le(tag + (uint32_t)8U, f31);
 }
 

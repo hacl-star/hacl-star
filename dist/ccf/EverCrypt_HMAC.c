@@ -46,10 +46,31 @@ EverCrypt_HMAC_compute_sha1(
   {
     i0 = (uint32_t)20U;
   }
-  uint8_t *nkey = key_block;
+  uint8_t *nkey;
+  if (key_block == NULL)
+  {
+    nkey = NULL;
+  }
+  else
+  {
+    nkey = key_block;
+  }
+  uint8_t *zeroes;
+  if (key_block == NULL)
+  {
+    zeroes = NULL;
+  }
+  else
+  {
+    zeroes = key_block + i0;
+  }
   if (key_len <= (uint32_t)64U)
   {
-    memcpy(nkey, key, key_len * sizeof (key[0U]));
+    bool uu____0 = key == NULL;
+    if (!(uu____0 || nkey == NULL))
+    {
+      memcpy(nkey, key, key_len * sizeof (key[0U]));
+    }
   }
   else
   {
@@ -82,9 +103,25 @@ EverCrypt_HMAC_compute_sha1(
   Hacl_Hash_Core_SHA1_legacy_init(s);
   Hacl_Hash_SHA1_legacy_update_multi(s, ipad, (uint32_t)1U);
   Hacl_Hash_SHA1_legacy_update_last(s, (uint64_t)(uint32_t)64U, data, data_len);
-  uint8_t *dst1 = ipad;
+  uint8_t *dst1;
+  if (ipad == NULL)
+  {
+    dst1 = NULL;
+  }
+  else
+  {
+    dst1 = ipad;
+  }
   Hacl_Hash_Core_SHA1_legacy_finish(s, dst1);
-  uint8_t *hash1 = ipad;
+  uint8_t *hash1;
+  if (ipad == NULL)
+  {
+    hash1 = NULL;
+  }
+  else
+  {
+    hash1 = ipad;
+  }
   Hacl_Hash_Core_SHA1_legacy_init(s);
   Hacl_Hash_SHA1_legacy_update_multi(s, opad, (uint32_t)1U);
   Hacl_Hash_SHA1_legacy_update_last(s, (uint64_t)(uint32_t)64U, hash1, (uint32_t)20U);
@@ -113,10 +150,31 @@ EverCrypt_HMAC_compute_sha2_256(
   {
     i0 = (uint32_t)32U;
   }
-  uint8_t *nkey = key_block;
+  uint8_t *nkey;
+  if (key_block == NULL)
+  {
+    nkey = NULL;
+  }
+  else
+  {
+    nkey = key_block;
+  }
+  uint8_t *zeroes;
+  if (key_block == NULL)
+  {
+    zeroes = NULL;
+  }
+  else
+  {
+    zeroes = key_block + i0;
+  }
   if (key_len <= (uint32_t)64U)
   {
-    memcpy(nkey, key, key_len * sizeof (key[0U]));
+    bool uu____0 = key == NULL;
+    if (!(uu____0 || nkey == NULL))
+    {
+      memcpy(nkey, key, key_len * sizeof (key[0U]));
+    }
   }
   else
   {
@@ -149,9 +207,25 @@ EverCrypt_HMAC_compute_sha2_256(
   Hacl_Hash_Core_SHA2_init_256(s);
   EverCrypt_Hash_update_multi_256(s, ipad, (uint32_t)1U);
   EverCrypt_Hash_update_last_256(s, (uint64_t)(uint32_t)64U, data, data_len);
-  uint8_t *dst1 = ipad;
+  uint8_t *dst1;
+  if (ipad == NULL)
+  {
+    dst1 = NULL;
+  }
+  else
+  {
+    dst1 = ipad;
+  }
   Hacl_Hash_Core_SHA2_finish_256(s, dst1);
-  uint8_t *hash1 = ipad;
+  uint8_t *hash1;
+  if (ipad == NULL)
+  {
+    hash1 = NULL;
+  }
+  else
+  {
+    hash1 = ipad;
+  }
   Hacl_Hash_Core_SHA2_init_256(s);
   EverCrypt_Hash_update_multi_256(s, opad, (uint32_t)1U);
   EverCrypt_Hash_update_last_256(s, (uint64_t)(uint32_t)64U, hash1, (uint32_t)32U);
@@ -180,10 +254,31 @@ EverCrypt_HMAC_compute_sha2_384(
   {
     i0 = (uint32_t)48U;
   }
-  uint8_t *nkey = key_block;
+  uint8_t *nkey;
+  if (key_block == NULL)
+  {
+    nkey = NULL;
+  }
+  else
+  {
+    nkey = key_block;
+  }
+  uint8_t *zeroes;
+  if (key_block == NULL)
+  {
+    zeroes = NULL;
+  }
+  else
+  {
+    zeroes = key_block + i0;
+  }
   if (key_len <= (uint32_t)128U)
   {
-    memcpy(nkey, key, key_len * sizeof (key[0U]));
+    bool uu____0 = key == NULL;
+    if (!(uu____0 || nkey == NULL))
+    {
+      memcpy(nkey, key, key_len * sizeof (key[0U]));
+    }
   }
   else
   {
@@ -217,9 +312,25 @@ EverCrypt_HMAC_compute_sha2_384(
   Hacl_Hash_Core_SHA2_init_384(s);
   Hacl_Hash_SHA2_update_multi_384(s, ipad, (uint32_t)1U);
   Hacl_Hash_SHA2_update_last_384(s, (uint128_t)(uint64_t)(uint32_t)128U, data, data_len);
-  uint8_t *dst1 = ipad;
+  uint8_t *dst1;
+  if (ipad == NULL)
+  {
+    dst1 = NULL;
+  }
+  else
+  {
+    dst1 = ipad;
+  }
   Hacl_Hash_Core_SHA2_finish_384(s, dst1);
-  uint8_t *hash1 = ipad;
+  uint8_t *hash1;
+  if (ipad == NULL)
+  {
+    hash1 = NULL;
+  }
+  else
+  {
+    hash1 = ipad;
+  }
   Hacl_Hash_Core_SHA2_init_384(s);
   Hacl_Hash_SHA2_update_multi_384(s, opad, (uint32_t)1U);
   Hacl_Hash_SHA2_update_last_384(s, (uint128_t)(uint64_t)(uint32_t)128U, hash1, (uint32_t)48U);
@@ -248,10 +359,31 @@ EverCrypt_HMAC_compute_sha2_512(
   {
     i0 = (uint32_t)64U;
   }
-  uint8_t *nkey = key_block;
+  uint8_t *nkey;
+  if (key_block == NULL)
+  {
+    nkey = NULL;
+  }
+  else
+  {
+    nkey = key_block;
+  }
+  uint8_t *zeroes;
+  if (key_block == NULL)
+  {
+    zeroes = NULL;
+  }
+  else
+  {
+    zeroes = key_block + i0;
+  }
   if (key_len <= (uint32_t)128U)
   {
-    memcpy(nkey, key, key_len * sizeof (key[0U]));
+    bool uu____0 = key == NULL;
+    if (!(uu____0 || nkey == NULL))
+    {
+      memcpy(nkey, key, key_len * sizeof (key[0U]));
+    }
   }
   else
   {
@@ -285,18 +417,34 @@ EverCrypt_HMAC_compute_sha2_512(
   Hacl_Hash_Core_SHA2_init_512(s);
   Hacl_Hash_SHA2_update_multi_512(s, ipad, (uint32_t)1U);
   Hacl_Hash_SHA2_update_last_512(s, (uint128_t)(uint64_t)(uint32_t)128U, data, data_len);
-  uint8_t *dst1 = ipad;
+  uint8_t *dst1;
+  if (ipad == NULL)
+  {
+    dst1 = NULL;
+  }
+  else
+  {
+    dst1 = ipad;
+  }
   Hacl_Hash_Core_SHA2_finish_512(s, dst1);
-  uint8_t *hash1 = ipad;
+  uint8_t *hash1;
+  if (ipad == NULL)
+  {
+    hash1 = NULL;
+  }
+  else
+  {
+    hash1 = ipad;
+  }
   Hacl_Hash_Core_SHA2_init_512(s);
   Hacl_Hash_SHA2_update_multi_512(s, opad, (uint32_t)1U);
   Hacl_Hash_SHA2_update_last_512(s, (uint128_t)(uint64_t)(uint32_t)128U, hash1, (uint32_t)64U);
   Hacl_Hash_Core_SHA2_finish_512(s, dst);
 }
 
-bool EverCrypt_HMAC_is_supported_alg(Spec_Hash_Definitions_hash_alg uu___0_2480)
+bool EverCrypt_HMAC_is_supported_alg(Spec_Hash_Definitions_hash_alg uu___0_3048)
 {
-  switch (uu___0_2480)
+  switch (uu___0_3048)
   {
     case Spec_Hash_Definitions_SHA1:
       {

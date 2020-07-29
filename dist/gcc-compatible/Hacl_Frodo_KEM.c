@@ -109,15 +109,7 @@ static inline void matrix_to_lbytes(uint32_t n1, uint32_t n2, uint16_t *m, uint8
   uint32_t n = n1 * n2;
   for (uint32_t i = (uint32_t)0U; i < n; i++)
   {
-    uint8_t *tmp;
-    if (res == NULL)
-    {
-      tmp = NULL;
-    }
-    else
-    {
-      tmp = res + (uint32_t)2U * i;
-    }
+    uint8_t *tmp = res + (uint32_t)2U * i;
     store16_le(tmp, m[i]);
   }
 }
@@ -127,16 +119,7 @@ static inline void matrix_from_lbytes(uint32_t n1, uint32_t n2, uint8_t *b, uint
   uint32_t n = n1 * n2;
   for (uint32_t i = (uint32_t)0U; i < n; i++)
   {
-    uint8_t *ite;
-    if (b == NULL)
-    {
-      ite = NULL;
-    }
-    else
-    {
-      ite = b + (uint32_t)2U * i;
-    }
-    uint16_t u = load16_le(ite);
+    uint16_t u = load16_le(b + (uint32_t)2U * i);
     res[i] = u;
   }
 }
@@ -147,29 +130,21 @@ frodo_gen_matrix_cshake(uint32_t n, uint32_t seed_len, uint8_t *seed, uint16_t *
   KRML_CHECK_SIZE(sizeof (uint8_t), (uint32_t)2U * n);
   uint8_t r[(uint32_t)2U * n];
   memset(r, 0U, (uint32_t)2U * n * sizeof (r[0U]));
-  if (!(res == NULL))
-  {
-    memset(res, 0U, n * n * sizeof (res[0U]));
-  }
+  memset(res, 0U, n * n * sizeof (res[0U]));
   for (uint32_t i = (uint32_t)0U; i < n; i++)
   {
     uint32_t ctr = (uint32_t)256U + i;
-    uint64_t s[25U] = { 0U };
-    s[0U] = (uint64_t)0x10010001a801U | (uint64_t)(uint16_t)ctr << (uint32_t)48U;
-    Hacl_Impl_SHA3_state_permute(s);
-    Hacl_Impl_SHA3_absorb(s, (uint32_t)168U, seed_len, seed, (uint8_t)0x04U);
-    Hacl_Impl_SHA3_squeeze(s, (uint32_t)168U, (uint32_t)2U * n, r);
+    if (!((uint32_t)2U * n == (uint32_t)0U))
+    {
+      uint64_t s[25U] = { 0U };
+      s[0U] = (uint64_t)0x10010001a801U | (uint64_t)(uint16_t)ctr << (uint32_t)48U;
+      Hacl_Impl_SHA3_state_permute(s);
+      Hacl_Impl_SHA3_absorb(s, (uint32_t)168U, seed_len, seed, (uint8_t)0x04U);
+      Hacl_Impl_SHA3_squeeze(s, (uint32_t)168U, (uint32_t)2U * n, r);
+    }
     for (uint32_t i0 = (uint32_t)0U; i0 < n; i0++)
     {
-      uint8_t *resij;
-      if (r == NULL)
-      {
-        resij = NULL;
-      }
-      else
-      {
-        resij = r + (uint32_t)2U * i0;
-      }
+      uint8_t *resij = r + (uint32_t)2U * i0;
       uint16_t u = load16_le(resij);
       res[i * n + i0] = u;
     }
@@ -215,28 +190,25 @@ frodo_sample_matrix(
   KRML_CHECK_SIZE(sizeof (uint8_t), (uint32_t)2U * n1 * n2);
   uint8_t r[(uint32_t)2U * n1 * n2];
   memset(r, 0U, (uint32_t)2U * n1 * n2 * sizeof (r[0U]));
-  uint64_t s[25U] = { 0U };
-  s[0U] = (uint64_t)0x10010001a801U | (uint64_t)ctr << (uint32_t)48U;
-  Hacl_Impl_SHA3_state_permute(s);
-  Hacl_Impl_SHA3_absorb(s, (uint32_t)168U, seed_len, seed, (uint8_t)0x04U);
-  Hacl_Impl_SHA3_squeeze(s, (uint32_t)168U, (uint32_t)2U * n1 * n2, r);
-  if (!(res == NULL))
+  uint64_t s[25U];
+  if (!((uint32_t)2U * n1 * n2 == (uint32_t)0U))
   {
-    memset(res, 0U, n1 * n2 * sizeof (res[0U]));
+    uint64_t init = (uint64_t)0U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)25U; i++)
+    {
+      s[i] = init;
+    }
+    s[0U] = (uint64_t)0x10010001a801U | (uint64_t)ctr << (uint32_t)48U;
+    Hacl_Impl_SHA3_state_permute(s);
+    Hacl_Impl_SHA3_absorb(s, (uint32_t)168U, seed_len, seed, (uint8_t)0x04U);
+    Hacl_Impl_SHA3_squeeze(s, (uint32_t)168U, (uint32_t)2U * n1 * n2, r);
   }
+  memset(res, 0U, n1 * n2 * sizeof (res[0U]));
   for (uint32_t i0 = (uint32_t)0U; i0 < n1; i0++)
   {
     for (uint32_t i = (uint32_t)0U; i < n2; i++)
     {
-      uint8_t *resij;
-      if (r == NULL)
-      {
-        resij = NULL;
-      }
-      else
-      {
-        resij = r + (uint32_t)2U * (n2 * i0 + i);
-      }
+      uint8_t *resij = r + (uint32_t)2U * (n2 * i0 + i);
       uint16_t u = load16_le(resij);
       res[i0 * n2 + i] = frodo_sample(u);
     }
@@ -293,15 +265,7 @@ static inline void frodo_pack(uint32_t n1, uint32_t n2, uint32_t d, uint16_t *a,
           FStar_UInt128_shift_left(FStar_UInt128_uint64_to_uint128((uint64_t)a6), (uint32_t)1U * d)),
         FStar_UInt128_shift_left(FStar_UInt128_uint64_to_uint128((uint64_t)a7), (uint32_t)0U * d));
     store128_be(v16, templong);
-    uint8_t *src;
-    if (v16 == NULL)
-    {
-      src = NULL;
-    }
-    else
-    {
-      src = v16 + (uint32_t)16U - d;
-    }
+    uint8_t *src = v16 + (uint32_t)16U - d;
     bool uu____0 = src == NULL;
     if (!(uu____0 || r == NULL))
     {
@@ -325,15 +289,7 @@ frodo_unpack(uint32_t n1, uint32_t n2, uint32_t d, uint8_t *b, uint16_t *res)
     {
       b1 = b + d * i;
     }
-    uint16_t *r;
-    if (res == NULL)
-    {
-      r = NULL;
-    }
-    else
-    {
-      r = res + (uint32_t)8U * i;
-    }
+    uint16_t *r = res + (uint32_t)8U * i;
     uint16_t maskd = (uint16_t)((uint32_t)1U << d) - (uint16_t)1U;
     uint8_t src[16U] = { 0U };
     bool uu____0 = b1 == NULL;
@@ -422,15 +378,7 @@ static inline void frodo_key_encode(uint32_t b, uint8_t *a, uint16_t *res)
   for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)8U; i0++)
   {
     uint8_t v8[8U] = { 0U };
-    uint8_t *chunk;
-    if (a == NULL)
-    {
-      chunk = NULL;
-    }
-    else
-    {
-      chunk = a + i0 * b;
-    }
+    uint8_t *chunk = a + i0 * b;
     bool uu____0 = chunk == NULL;
     if (!(uu____0 || v8 == NULL))
     {
@@ -462,15 +410,7 @@ static inline void frodo_key_decode(uint32_t b, uint16_t *a, uint8_t *res)
     uint64_t templong0 = templong;
     uint8_t v8[8U] = { 0U };
     store64_le(v8, templong0);
-    uint8_t *tmp;
-    if (v8 == NULL)
-    {
-      tmp = NULL;
-    }
-    else
-    {
-      tmp = v8;
-    }
+    uint8_t *tmp = v8;
     bool uu____0 = tmp == NULL;
     if (!(uu____0 || res == NULL))
     {
@@ -507,42 +447,10 @@ frodo_mul_add_sb_plus_e_plus_mu(
 
 static inline void crypto_kem_enc_ct(uint8_t *pk, uint8_t *g, uint8_t *coins, uint8_t *ct)
 {
-  uint8_t *seed_a;
-  if (pk == NULL)
-  {
-    seed_a = NULL;
-  }
-  else
-  {
-    seed_a = pk;
-  }
-  uint8_t *b;
-  if (pk == NULL)
-  {
-    b = NULL;
-  }
-  else
-  {
-    b = pk + (uint32_t)16U;
-  }
-  uint8_t *seed_e;
-  if (g == NULL)
-  {
-    seed_e = NULL;
-  }
-  else
-  {
-    seed_e = g;
-  }
-  uint8_t *d;
-  if (g == NULL)
-  {
-    d = NULL;
-  }
-  else
-  {
-    d = g + (uint32_t)32U;
-  }
+  uint8_t *seed_a = pk;
+  uint8_t *b = pk + (uint32_t)16U;
+  uint8_t *seed_e = g;
+  uint8_t *d = g + (uint32_t)32U;
   uint16_t sp_matrix[512U] = { 0U };
   frodo_sample_matrix((uint32_t)8U,
     (uint32_t)64U,
@@ -553,15 +461,7 @@ static inline void crypto_kem_enc_ct(uint8_t *pk, uint8_t *g, uint8_t *coins, ui
   uint32_t c1Len = (uint32_t)960U;
   uint32_t c2Len = (uint32_t)120U;
   uint32_t c12Len = c1Len + c2Len;
-  uint8_t *c1;
-  if (ct == NULL)
-  {
-    c1 = NULL;
-  }
-  else
-  {
-    c1 = ct;
-  }
+  uint8_t *c1 = ct;
   uint16_t bp_matrix[512U] = { 0U };
   uint16_t a_matrix[4096U] = { 0U };
   uint16_t ep_matrix[512U] = { 0U };
@@ -576,15 +476,7 @@ static inline void crypto_kem_enc_ct(uint8_t *pk, uint8_t *g, uint8_t *coins, ui
   matrix_add((uint32_t)8U, (uint32_t)64U, bp_matrix, ep_matrix);
   Lib_Memzero_clear_words_u16((uint32_t)512U, ep_matrix);
   frodo_pack((uint32_t)8U, (uint32_t)64U, (uint32_t)15U, bp_matrix, c1);
-  uint8_t *c2;
-  if (ct == NULL)
-  {
-    c2 = NULL;
-  }
-  else
-  {
-    c2 = ct + c1Len;
-  }
+  uint8_t *c2 = ct + c1Len;
   uint16_t v_matrix[64U] = { 0U };
   frodo_mul_add_sb_plus_e_plus_mu(b, seed_e, coins, sp_matrix, v_matrix);
   frodo_pack((uint32_t)8U, (uint32_t)8U, (uint32_t)15U, v_matrix, c2);
@@ -603,24 +495,8 @@ static inline void crypto_kem_enc_ss(uint8_t *g, uint8_t *ct, uint8_t *ss)
   KRML_CHECK_SIZE(sizeof (uint8_t), ss_init_len);
   uint8_t ss_init[ss_init_len];
   memset(ss_init, 0U, ss_init_len * sizeof (ss_init[0U]));
-  uint8_t *c12;
-  if (ct == NULL)
-  {
-    c12 = NULL;
-  }
-  else
-  {
-    c12 = ct;
-  }
-  uint8_t *kd;
-  if (g == NULL)
-  {
-    kd = NULL;
-  }
-  else
-  {
-    kd = g + (uint32_t)16U;
-  }
+  uint8_t *c12 = ct;
+  uint8_t *kd = g + (uint32_t)16U;
   bool uu____0 = c12 == NULL;
   if (!(uu____0 || ss_init == NULL))
   {
@@ -642,65 +518,17 @@ uint32_t Hacl_Frodo_KEM_crypto_kem_keypair(uint8_t *pk, uint8_t *sk)
 {
   uint8_t coins[48U] = { 0U };
   randombytes_((uint32_t)48U, coins);
-  uint8_t *s;
-  if (coins == NULL)
-  {
-    s = NULL;
-  }
-  else
-  {
-    s = coins;
-  }
-  uint8_t *seed_e;
-  if (coins == NULL)
-  {
-    seed_e = NULL;
-  }
-  else
-  {
-    seed_e = coins + (uint32_t)16U;
-  }
-  uint8_t *z;
-  if (coins == NULL)
-  {
-    z = NULL;
-  }
-  else
-  {
-    z = coins + (uint32_t)32U;
-  }
-  uint8_t *seed_a;
-  if (pk == NULL)
-  {
-    seed_a = NULL;
-  }
-  else
-  {
-    seed_a = pk;
-  }
+  uint8_t *s = coins;
+  uint8_t *seed_e = coins + (uint32_t)16U;
+  uint8_t *z = coins + (uint32_t)32U;
+  uint8_t *seed_a = pk;
   uint64_t s1[25U] = { 0U };
   s1[0U] = (uint64_t)0x10010001a801U | (uint64_t)(uint16_t)0U << (uint32_t)48U;
   Hacl_Impl_SHA3_state_permute(s1);
   Hacl_Impl_SHA3_absorb(s1, (uint32_t)168U, (uint32_t)16U, z, (uint8_t)0x04U);
   Hacl_Impl_SHA3_squeeze(s1, (uint32_t)168U, (uint32_t)16U, seed_a);
-  uint8_t *b;
-  if (pk == NULL)
-  {
-    b = NULL;
-  }
-  else
-  {
-    b = pk + (uint32_t)16U;
-  }
-  uint8_t *s_bytes;
-  if (sk == NULL)
-  {
-    s_bytes = NULL;
-  }
-  else
-  {
-    s_bytes = sk + (uint32_t)16U + crypto_publickeybytes;
-  }
+  uint8_t *b = pk + (uint32_t)16U;
+  uint8_t *s_bytes = sk + (uint32_t)16U + crypto_publickeybytes;
   frodo_mul_add_as_plus_e_pack(seed_a, seed_e, b, s_bytes);
   bool uu____0 = s == NULL;
   if (!(uu____0 || sk == NULL))
@@ -742,16 +570,7 @@ uint32_t Hacl_Frodo_KEM_crypto_kem_enc(uint8_t *ct, uint8_t *ss, uint8_t *pk)
   Hacl_Impl_SHA3_squeeze(s, (uint32_t)168U, (uint32_t)48U, g);
   crypto_kem_enc_ct(pk, g, coins, ct);
   crypto_kem_enc_ss(g, ct, ss);
-  uint8_t *ite;
-  if (g == NULL)
-  {
-    ite = NULL;
-  }
-  else
-  {
-    ite = g;
-  }
-  Lib_Memzero_clear_words_u8((uint32_t)32U, ite);
+  Lib_Memzero_clear_words_u8((uint32_t)32U, g);
   return (uint32_t)0U;
 }
 
@@ -761,35 +580,11 @@ uint32_t Hacl_Frodo_KEM_crypto_kem_dec(uint8_t *ss, uint8_t *ct, uint8_t *sk)
   uint16_t c_matrix[64U] = { 0U };
   uint8_t mu_decode[16U] = { 0U };
   uint32_t c1Len = (uint32_t)960U;
-  uint8_t *c1;
-  if (ct == NULL)
-  {
-    c1 = NULL;
-  }
-  else
-  {
-    c1 = ct;
-  }
-  uint8_t *c2;
-  if (ct == NULL)
-  {
-    c2 = NULL;
-  }
-  else
-  {
-    c2 = ct + c1Len;
-  }
+  uint8_t *c1 = ct;
+  uint8_t *c2 = ct + c1Len;
   frodo_unpack((uint32_t)8U, (uint32_t)64U, (uint32_t)15U, c1, bp_matrix);
   frodo_unpack((uint32_t)8U, (uint32_t)8U, (uint32_t)15U, c2, c_matrix);
-  uint8_t *s_bytes;
-  if (sk == NULL)
-  {
-    s_bytes = NULL;
-  }
-  else
-  {
-    s_bytes = sk + (uint32_t)16U + crypto_publickeybytes;
-  }
+  uint8_t *s_bytes = sk + (uint32_t)16U + crypto_publickeybytes;
   uint8_t mu_decode1[16U] = { 0U };
   uint16_t s_matrix[512U] = { 0U };
   uint16_t m_matrix[64U] = { 0U };
@@ -802,15 +597,7 @@ uint32_t Hacl_Frodo_KEM_crypto_kem_dec(uint8_t *ss, uint8_t *ct, uint8_t *sk)
   KRML_CHECK_SIZE(sizeof (uint8_t), pk_mu_decode_len);
   uint8_t pk_mu_decode[pk_mu_decode_len];
   memset(pk_mu_decode, 0U, pk_mu_decode_len * sizeof (pk_mu_decode[0U]));
-  uint8_t *pk0;
-  if (sk == NULL)
-  {
-    pk0 = NULL;
-  }
-  else
-  {
-    pk0 = sk + (uint32_t)16U;
-  }
+  uint8_t *pk0 = sk + (uint32_t)16U;
   bool uu____0 = pk0 == NULL;
   if (!(uu____0 || pk_mu_decode == NULL))
   {
@@ -826,62 +613,14 @@ uint32_t Hacl_Frodo_KEM_crypto_kem_dec(uint8_t *ss, uint8_t *ct, uint8_t *sk)
   Hacl_Impl_SHA3_state_permute(s0);
   Hacl_Impl_SHA3_absorb(s0, (uint32_t)168U, pk_mu_decode_len, pk_mu_decode, (uint8_t)0x04U);
   Hacl_Impl_SHA3_squeeze(s0, (uint32_t)168U, (uint32_t)48U, g);
-  uint8_t *dp;
-  if (g == NULL)
-  {
-    dp = NULL;
-  }
-  else
-  {
-    dp = g + (uint32_t)32U;
-  }
-  uint8_t *d0;
-  if (ct == NULL)
-  {
-    d0 = NULL;
-  }
-  else
-  {
-    d0 = ct + crypto_ciphertextbytes - (uint32_t)16U;
-  }
+  uint8_t *dp = g + (uint32_t)32U;
+  uint8_t *d0 = ct + crypto_ciphertextbytes - (uint32_t)16U;
   uint16_t bpp_matrix[512U] = { 0U };
   uint16_t cp_matrix[64U] = { 0U };
-  uint8_t *pk;
-  if (sk == NULL)
-  {
-    pk = NULL;
-  }
-  else
-  {
-    pk = sk + (uint32_t)16U;
-  }
-  uint8_t *seed_a;
-  if (pk == NULL)
-  {
-    seed_a = NULL;
-  }
-  else
-  {
-    seed_a = pk;
-  }
-  uint8_t *b;
-  if (pk == NULL)
-  {
-    b = NULL;
-  }
-  else
-  {
-    b = pk + (uint32_t)16U;
-  }
-  uint8_t *seed_ep;
-  if (g == NULL)
-  {
-    seed_ep = NULL;
-  }
-  else
-  {
-    seed_ep = g;
-  }
+  uint8_t *pk = sk + (uint32_t)16U;
+  uint8_t *seed_a = pk;
+  uint8_t *b = pk + (uint32_t)16U;
+  uint8_t *seed_ep = g;
   uint16_t sp_matrix[512U] = { 0U };
   frodo_sample_matrix((uint32_t)8U,
     (uint32_t)64U,
@@ -915,24 +654,8 @@ uint32_t Hacl_Frodo_KEM_crypto_kem_dec(uint8_t *ss, uint8_t *ct, uint8_t *sk)
   bool b3 = matrix_eq((uint32_t)8U, (uint32_t)8U, (uint32_t)15U, c_matrix, cp_matrix);
   bool b0 = b1 && b2 && b3;
   bool b4 = b0;
-  uint8_t *kp;
-  if (g == NULL)
-  {
-    kp = NULL;
-  }
-  else
-  {
-    kp = g + (uint32_t)16U;
-  }
-  uint8_t *s;
-  if (sk == NULL)
-  {
-    s = NULL;
-  }
-  else
-  {
-    s = sk;
-  }
+  uint8_t *kp = g + (uint32_t)16U;
+  uint8_t *s = sk;
   uint8_t *kp_s;
   if (b4)
   {
@@ -942,24 +665,8 @@ uint32_t Hacl_Frodo_KEM_crypto_kem_dec(uint8_t *ss, uint8_t *ct, uint8_t *sk)
   {
     kp_s = s;
   }
-  uint8_t *c12;
-  if (ct == NULL)
-  {
-    c12 = NULL;
-  }
-  else
-  {
-    c12 = ct;
-  }
-  uint8_t *d;
-  if (ct == NULL)
-  {
-    d = NULL;
-  }
-  else
-  {
-    d = ct + crypto_ciphertextbytes - (uint32_t)16U;
-  }
+  uint8_t *c12 = ct;
+  uint8_t *d = ct + crypto_ciphertextbytes - (uint32_t)16U;
   uint32_t ss_init_len = crypto_ciphertextbytes + (uint32_t)16U;
   KRML_CHECK_SIZE(sizeof (uint8_t), ss_init_len);
   uint8_t ss_init[ss_init_len];

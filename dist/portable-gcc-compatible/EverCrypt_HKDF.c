@@ -38,16 +38,62 @@ EverCrypt_HKDF_expand_sha1(
 {
   uint32_t tlen = (uint32_t)20U;
   uint32_t n = len / tlen;
-  uint8_t *output = okm;
+  uint8_t *output;
+  if (okm == NULL)
+  {
+    output = NULL;
+  }
+  else
+  {
+    output = okm;
+  }
   KRML_CHECK_SIZE(sizeof (uint8_t), tlen + infolen + (uint32_t)1U);
   uint8_t text[tlen + infolen + (uint32_t)1U];
   memset(text, 0U, (tlen + infolen + (uint32_t)1U) * sizeof (text[0U]));
   uint8_t *text0 = text + tlen;
-  uint8_t *tag = text;
-  uint8_t *ctr = text + tlen + infolen;
-  memcpy(text + tlen, info, infolen * sizeof (info[0U]));
+  uint8_t *tag;
+  if (text == NULL)
+  {
+    tag = NULL;
+  }
+  else
+  {
+    tag = text;
+  }
+  uint8_t *ctr;
+  if (text == NULL)
+  {
+    ctr = NULL;
+  }
+  else
+  {
+    ctr = text + tlen + infolen;
+  }
+  uint8_t *uu____0;
+  if (text == NULL)
+  {
+    uu____0 = NULL;
+  }
+  else
+  {
+    uu____0 = text + tlen;
+  }
+  bool uu____1 = info == NULL;
+  if (!(uu____1 || uu____0 == NULL))
+  {
+    memcpy(uu____0, info, infolen * sizeof (info[0U]));
+  }
   for (uint32_t i = (uint32_t)0U; i < n; i++)
   {
+    uint8_t *block;
+    if (output == NULL)
+    {
+      block = NULL;
+    }
+    else
+    {
+      block = output + i * tlen;
+    }
     ctr[0U] = (uint8_t)(i + (uint32_t)1U);
     if (i == (uint32_t)0U)
     {
@@ -57,7 +103,20 @@ EverCrypt_HKDF_expand_sha1(
     {
       EverCrypt_HMAC_compute_sha1(tag, prk, prklen, text, tlen + infolen + (uint32_t)1U);
     }
-    memcpy(output + i * tlen, tag, tlen * sizeof (tag[0U]));
+    uint8_t *uu____2;
+    if (output == NULL)
+    {
+      uu____2 = NULL;
+    }
+    else
+    {
+      uu____2 = output + i * tlen;
+    }
+    bool uu____3 = tag == NULL;
+    if (!(uu____3 || uu____2 == NULL))
+    {
+      memcpy(uu____2, tag, tlen * sizeof (tag[0U]));
+    }
   }
   if (n * tlen < len)
   {
@@ -107,16 +166,62 @@ EverCrypt_HKDF_expand_sha2_256(
 {
   uint32_t tlen = (uint32_t)32U;
   uint32_t n = len / tlen;
-  uint8_t *output = okm;
+  uint8_t *output;
+  if (okm == NULL)
+  {
+    output = NULL;
+  }
+  else
+  {
+    output = okm;
+  }
   KRML_CHECK_SIZE(sizeof (uint8_t), tlen + infolen + (uint32_t)1U);
   uint8_t text[tlen + infolen + (uint32_t)1U];
   memset(text, 0U, (tlen + infolen + (uint32_t)1U) * sizeof (text[0U]));
   uint8_t *text0 = text + tlen;
-  uint8_t *tag = text;
-  uint8_t *ctr = text + tlen + infolen;
-  memcpy(text + tlen, info, infolen * sizeof (info[0U]));
+  uint8_t *tag;
+  if (text == NULL)
+  {
+    tag = NULL;
+  }
+  else
+  {
+    tag = text;
+  }
+  uint8_t *ctr;
+  if (text == NULL)
+  {
+    ctr = NULL;
+  }
+  else
+  {
+    ctr = text + tlen + infolen;
+  }
+  uint8_t *uu____0;
+  if (text == NULL)
+  {
+    uu____0 = NULL;
+  }
+  else
+  {
+    uu____0 = text + tlen;
+  }
+  bool uu____1 = info == NULL;
+  if (!(uu____1 || uu____0 == NULL))
+  {
+    memcpy(uu____0, info, infolen * sizeof (info[0U]));
+  }
   for (uint32_t i = (uint32_t)0U; i < n; i++)
   {
+    uint8_t *block;
+    if (output == NULL)
+    {
+      block = NULL;
+    }
+    else
+    {
+      block = output + i * tlen;
+    }
     ctr[0U] = (uint8_t)(i + (uint32_t)1U);
     if (i == (uint32_t)0U)
     {
@@ -126,7 +231,20 @@ EverCrypt_HKDF_expand_sha2_256(
     {
       EverCrypt_HMAC_compute_sha2_256(tag, prk, prklen, text, tlen + infolen + (uint32_t)1U);
     }
-    memcpy(output + i * tlen, tag, tlen * sizeof (tag[0U]));
+    uint8_t *uu____2;
+    if (output == NULL)
+    {
+      uu____2 = NULL;
+    }
+    else
+    {
+      uu____2 = output + i * tlen;
+    }
+    bool uu____3 = tag == NULL;
+    if (!(uu____3 || uu____2 == NULL))
+    {
+      memcpy(uu____2, tag, tlen * sizeof (tag[0U]));
+    }
   }
   if (n * tlen < len)
   {
@@ -176,16 +294,62 @@ EverCrypt_HKDF_expand_sha2_384(
 {
   uint32_t tlen = (uint32_t)48U;
   uint32_t n = len / tlen;
-  uint8_t *output = okm;
+  uint8_t *output;
+  if (okm == NULL)
+  {
+    output = NULL;
+  }
+  else
+  {
+    output = okm;
+  }
   KRML_CHECK_SIZE(sizeof (uint8_t), tlen + infolen + (uint32_t)1U);
   uint8_t text[tlen + infolen + (uint32_t)1U];
   memset(text, 0U, (tlen + infolen + (uint32_t)1U) * sizeof (text[0U]));
   uint8_t *text0 = text + tlen;
-  uint8_t *tag = text;
-  uint8_t *ctr = text + tlen + infolen;
-  memcpy(text + tlen, info, infolen * sizeof (info[0U]));
+  uint8_t *tag;
+  if (text == NULL)
+  {
+    tag = NULL;
+  }
+  else
+  {
+    tag = text;
+  }
+  uint8_t *ctr;
+  if (text == NULL)
+  {
+    ctr = NULL;
+  }
+  else
+  {
+    ctr = text + tlen + infolen;
+  }
+  uint8_t *uu____0;
+  if (text == NULL)
+  {
+    uu____0 = NULL;
+  }
+  else
+  {
+    uu____0 = text + tlen;
+  }
+  bool uu____1 = info == NULL;
+  if (!(uu____1 || uu____0 == NULL))
+  {
+    memcpy(uu____0, info, infolen * sizeof (info[0U]));
+  }
   for (uint32_t i = (uint32_t)0U; i < n; i++)
   {
+    uint8_t *block;
+    if (output == NULL)
+    {
+      block = NULL;
+    }
+    else
+    {
+      block = output + i * tlen;
+    }
     ctr[0U] = (uint8_t)(i + (uint32_t)1U);
     if (i == (uint32_t)0U)
     {
@@ -195,7 +359,20 @@ EverCrypt_HKDF_expand_sha2_384(
     {
       EverCrypt_HMAC_compute_sha2_384(tag, prk, prklen, text, tlen + infolen + (uint32_t)1U);
     }
-    memcpy(output + i * tlen, tag, tlen * sizeof (tag[0U]));
+    uint8_t *uu____2;
+    if (output == NULL)
+    {
+      uu____2 = NULL;
+    }
+    else
+    {
+      uu____2 = output + i * tlen;
+    }
+    bool uu____3 = tag == NULL;
+    if (!(uu____3 || uu____2 == NULL))
+    {
+      memcpy(uu____2, tag, tlen * sizeof (tag[0U]));
+    }
   }
   if (n * tlen < len)
   {
@@ -245,16 +422,62 @@ EverCrypt_HKDF_expand_sha2_512(
 {
   uint32_t tlen = (uint32_t)64U;
   uint32_t n = len / tlen;
-  uint8_t *output = okm;
+  uint8_t *output;
+  if (okm == NULL)
+  {
+    output = NULL;
+  }
+  else
+  {
+    output = okm;
+  }
   KRML_CHECK_SIZE(sizeof (uint8_t), tlen + infolen + (uint32_t)1U);
   uint8_t text[tlen + infolen + (uint32_t)1U];
   memset(text, 0U, (tlen + infolen + (uint32_t)1U) * sizeof (text[0U]));
   uint8_t *text0 = text + tlen;
-  uint8_t *tag = text;
-  uint8_t *ctr = text + tlen + infolen;
-  memcpy(text + tlen, info, infolen * sizeof (info[0U]));
+  uint8_t *tag;
+  if (text == NULL)
+  {
+    tag = NULL;
+  }
+  else
+  {
+    tag = text;
+  }
+  uint8_t *ctr;
+  if (text == NULL)
+  {
+    ctr = NULL;
+  }
+  else
+  {
+    ctr = text + tlen + infolen;
+  }
+  uint8_t *uu____0;
+  if (text == NULL)
+  {
+    uu____0 = NULL;
+  }
+  else
+  {
+    uu____0 = text + tlen;
+  }
+  bool uu____1 = info == NULL;
+  if (!(uu____1 || uu____0 == NULL))
+  {
+    memcpy(uu____0, info, infolen * sizeof (info[0U]));
+  }
   for (uint32_t i = (uint32_t)0U; i < n; i++)
   {
+    uint8_t *block;
+    if (output == NULL)
+    {
+      block = NULL;
+    }
+    else
+    {
+      block = output + i * tlen;
+    }
     ctr[0U] = (uint8_t)(i + (uint32_t)1U);
     if (i == (uint32_t)0U)
     {
@@ -264,7 +487,20 @@ EverCrypt_HKDF_expand_sha2_512(
     {
       EverCrypt_HMAC_compute_sha2_512(tag, prk, prklen, text, tlen + infolen + (uint32_t)1U);
     }
-    memcpy(output + i * tlen, tag, tlen * sizeof (tag[0U]));
+    uint8_t *uu____2;
+    if (output == NULL)
+    {
+      uu____2 = NULL;
+    }
+    else
+    {
+      uu____2 = output + i * tlen;
+    }
+    bool uu____3 = tag == NULL;
+    if (!(uu____3 || uu____2 == NULL))
+    {
+      memcpy(uu____2, tag, tlen * sizeof (tag[0U]));
+    }
   }
   if (n * tlen < len)
   {

@@ -76,25 +76,13 @@ static inline void rounds(uint32_t *st)
 
 static inline void salsa20_core(uint32_t *k, uint32_t *ctx, uint32_t ctr)
 {
-  bool uu____0 = ctx == NULL;
-  if (!(uu____0 || k == NULL))
-  {
-    memcpy(k, ctx, (uint32_t)16U * sizeof (ctx[0U]));
-  }
+  memcpy(k, ctx, (uint32_t)16U * sizeof (ctx[0U]));
   uint32_t ctr_u32 = ctr;
   k[8U] = k[8U] + ctr_u32;
   rounds(k);
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
   {
-    uint32_t *os;
-    if (k == NULL)
-    {
-      os = NULL;
-    }
-    else
-    {
-      os = k;
-    }
+    uint32_t *os = k;
     uint32_t x = k[i] + ctx[i];
     os[i] = x;
   }
@@ -109,24 +97,8 @@ static inline void salsa20_key_block0(uint8_t *out, uint8_t *key, uint8_t *n)
   uint32_t n32[2U] = { 0U };
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
   {
-    uint32_t *os;
-    if (k32 == NULL)
-    {
-      os = NULL;
-    }
-    else
-    {
-      os = k32;
-    }
-    uint8_t *bj;
-    if (key == NULL)
-    {
-      bj = NULL;
-    }
-    else
-    {
-      bj = key + i * (uint32_t)4U;
-    }
+    uint32_t *os = k32;
+    uint8_t *bj = key + i * (uint32_t)4U;
     uint32_t u = load32_le(bj);
     uint32_t r = u;
     uint32_t x = r;
@@ -134,48 +106,16 @@ static inline void salsa20_key_block0(uint8_t *out, uint8_t *key, uint8_t *n)
   }
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)2U; i++)
   {
-    uint32_t *os;
-    if (n32 == NULL)
-    {
-      os = NULL;
-    }
-    else
-    {
-      os = n32;
-    }
-    uint8_t *bj;
-    if (n == NULL)
-    {
-      bj = NULL;
-    }
-    else
-    {
-      bj = n + i * (uint32_t)4U;
-    }
+    uint32_t *os = n32;
+    uint8_t *bj = n + i * (uint32_t)4U;
     uint32_t u = load32_le(bj);
     uint32_t r = u;
     uint32_t x = r;
     os[i] = x;
   }
   ctx[0U] = (uint32_t)0x61707865U;
-  uint32_t *k0;
-  if (k32 == NULL)
-  {
-    k0 = NULL;
-  }
-  else
-  {
-    k0 = k32;
-  }
-  uint32_t *k1;
-  if (k32 == NULL)
-  {
-    k1 = NULL;
-  }
-  else
-  {
-    k1 = k32 + (uint32_t)4U;
-  }
+  uint32_t *k0 = k32;
+  uint32_t *k1 = k32 + (uint32_t)4U;
   bool uu____0 = k0 == NULL;
   if (!(uu____0 || ctx == NULL))
   {
@@ -208,16 +148,7 @@ static inline void salsa20_key_block0(uint8_t *out, uint8_t *key, uint8_t *n)
     {
       block = out + i * (uint32_t)4U;
     }
-    uint8_t *uu____3;
-    if (out == NULL)
-    {
-      uu____3 = NULL;
-    }
-    else
-    {
-      uu____3 = out + i * (uint32_t)4U;
-    }
-    store32_le(uu____3, k[i]);
+    store32_le(out + i * (uint32_t)4U, k[i]);
   }
 }
 
@@ -236,24 +167,8 @@ salsa20_encrypt(
   uint32_t n32[2U] = { 0U };
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
   {
-    uint32_t *os;
-    if (k32 == NULL)
-    {
-      os = NULL;
-    }
-    else
-    {
-      os = k32;
-    }
-    uint8_t *bj;
-    if (key == NULL)
-    {
-      bj = NULL;
-    }
-    else
-    {
-      bj = key + i * (uint32_t)4U;
-    }
+    uint32_t *os = k32;
+    uint8_t *bj = key + i * (uint32_t)4U;
     uint32_t u = load32_le(bj);
     uint32_t r = u;
     uint32_t x = r;
@@ -261,48 +176,16 @@ salsa20_encrypt(
   }
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)2U; i++)
   {
-    uint32_t *os;
-    if (n32 == NULL)
-    {
-      os = NULL;
-    }
-    else
-    {
-      os = n32;
-    }
-    uint8_t *bj;
-    if (n == NULL)
-    {
-      bj = NULL;
-    }
-    else
-    {
-      bj = n + i * (uint32_t)4U;
-    }
+    uint32_t *os = n32;
+    uint8_t *bj = n + i * (uint32_t)4U;
     uint32_t u = load32_le(bj);
     uint32_t r = u;
     uint32_t x = r;
     os[i] = x;
   }
   ctx[0U] = (uint32_t)0x61707865U;
-  uint32_t *k0;
-  if (k32 == NULL)
-  {
-    k0 = NULL;
-  }
-  else
-  {
-    k0 = k32;
-  }
-  uint32_t *k10;
-  if (k32 == NULL)
-  {
-    k10 = NULL;
-  }
-  else
-  {
-    k10 = k32 + (uint32_t)4U;
-  }
+  uint32_t *k0 = k32;
+  uint32_t *k10 = k32 + (uint32_t)4U;
   bool uu____0 = k0 == NULL;
   if (!(uu____0 || ctx == NULL))
   {
@@ -325,242 +208,106 @@ salsa20_encrypt(
   ctx[15U] = (uint32_t)0x6b206574U;
   uint32_t k[16U] = { 0U };
   uint32_t rem = len % (uint32_t)64U;
-  uint32_t nb = len / (uint32_t)64U;
-  uint32_t rem1 = len % (uint32_t)64U;
-  uint32_t blen = nb * (uint32_t)64U;
-  uint8_t *ib;
-  if (text == NULL)
+  if (!(len == (uint32_t)0U))
   {
-    ib = NULL;
-  }
-  else
-  {
-    ib = text;
-  }
-  uint8_t *ob;
-  if (out == NULL)
-  {
-    ob = NULL;
-  }
-  else
-  {
-    ob = out;
-  }
-  uint8_t *il;
-  if (text == NULL)
-  {
-    il = NULL;
-  }
-  else
-  {
-    il = text + blen;
-  }
-  uint8_t *ol;
-  if (text == NULL)
-  {
-    ol = NULL;
-  }
-  else
-  {
-    ol = text + blen;
-  }
-  for (uint32_t i0 = (uint32_t)0U; i0 < nb; i0++)
-  {
-    uint8_t *block;
-    if (ob == NULL)
-    {
-      block = NULL;
-    }
-    else
-    {
-      block = ob + i0 * (uint32_t)64U;
-    }
-    uint8_t *uu____3;
-    if (out == NULL)
-    {
-      uu____3 = NULL;
-    }
-    else
-    {
-      uu____3 = out + i0 * (uint32_t)64U;
-    }
-    uint8_t *uu____4;
+    uint32_t nb = len / (uint32_t)64U;
+    uint32_t rem1 = len % (uint32_t)64U;
+    uint8_t *ib;
     if (text == NULL)
     {
-      uu____4 = NULL;
+      ib = NULL;
     }
     else
     {
-      uu____4 = text + i0 * (uint32_t)64U;
+      ib = text;
     }
-    uint32_t k1[16U] = { 0U };
-    salsa20_core(k1, ctx, i0);
-    uint32_t bl[16U] = { 0U };
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
-    {
-      uint32_t *os;
-      if (bl == NULL)
-      {
-        os = NULL;
-      }
-      else
-      {
-        os = bl;
-      }
-      uint8_t *bj;
-      if (uu____4 == NULL)
-      {
-        bj = NULL;
-      }
-      else
-      {
-        bj = uu____4 + i * (uint32_t)4U;
-      }
-      uint32_t u = load32_le(bj);
-      uint32_t r = u;
-      uint32_t x = r;
-      os[i] = x;
-    }
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
-    {
-      uint32_t *os;
-      if (bl == NULL)
-      {
-        os = NULL;
-      }
-      else
-      {
-        os = bl;
-      }
-      uint32_t x = bl[i] ^ k1[i];
-      os[i] = x;
-    }
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
-    {
-      uint8_t *block1;
-      if (uu____3 == NULL)
-      {
-        block1 = NULL;
-      }
-      else
-      {
-        block1 = uu____3 + i * (uint32_t)4U;
-      }
-      uint8_t *uu____5;
-      if (uu____3 == NULL)
-      {
-        uu____5 = NULL;
-      }
-      else
-      {
-        uu____5 = uu____3 + i * (uint32_t)4U;
-      }
-      store32_le(uu____5, bl[i]);
-    }
-  }
-  if (rem1 > (uint32_t)0U)
-  {
-    uint8_t *uu____6;
+    uint8_t *ob;
     if (out == NULL)
     {
-      uu____6 = NULL;
+      ob = NULL;
     }
     else
     {
-      uu____6 = out + nb * (uint32_t)64U;
+      ob = out;
     }
-    uint8_t *uu____7;
-    if (text == NULL)
+    for (uint32_t i0 = (uint32_t)0U; i0 < nb; i0++)
     {
-      uu____7 = NULL;
+      uint8_t *uu____3 = out + i0 * (uint32_t)64U;
+      uint8_t *uu____4 = text + i0 * (uint32_t)64U;
+      uint32_t k1[16U] = { 0U };
+      salsa20_core(k1, ctx, i0);
+      uint32_t bl[16U] = { 0U };
+      for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
+      {
+        uint32_t *os = bl;
+        uint8_t *bj = uu____4 + i * (uint32_t)4U;
+        uint32_t u = load32_le(bj);
+        uint32_t r = u;
+        uint32_t x = r;
+        os[i] = x;
+      }
+      for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
+      {
+        uint32_t *os = bl;
+        uint32_t x = bl[i] ^ k1[i];
+        os[i] = x;
+      }
+      for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
+      {
+        uint8_t *block1;
+        if (uu____3 == NULL)
+        {
+          block1 = NULL;
+        }
+        else
+        {
+          block1 = uu____3 + i * (uint32_t)4U;
+        }
+        store32_le(uu____3 + i * (uint32_t)4U, bl[i]);
+      }
     }
-    else
+    if (rem1 > (uint32_t)0U)
     {
-      uu____7 = text + nb * (uint32_t)64U;
-    }
-    uint8_t plain[64U] = { 0U };
-    bool uu____8 = uu____7 == NULL;
-    if (!(uu____8 || plain == NULL))
-    {
-      memcpy(plain, uu____7, rem * sizeof (uu____7[0U]));
-    }
-    uint32_t k1[16U] = { 0U };
-    salsa20_core(k1, ctx, nb);
-    uint32_t bl[16U] = { 0U };
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
-    {
-      uint32_t *os;
-      if (bl == NULL)
+      uint8_t *uu____5 = out + nb * (uint32_t)64U;
+      uint8_t *uu____6 = text + nb * (uint32_t)64U;
+      uint8_t plain[64U] = { 0U };
+      bool uu____7 = uu____6 == NULL;
+      if (!(uu____7 || plain == NULL))
       {
-        os = NULL;
+        memcpy(plain, uu____6, rem * sizeof (uu____6[0U]));
       }
-      else
+      uint32_t k1[16U] = { 0U };
+      salsa20_core(k1, ctx, nb);
+      uint32_t bl[16U] = { 0U };
+      for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
       {
-        os = bl;
+        uint32_t *os = bl;
+        uint8_t *bj = plain + i * (uint32_t)4U;
+        uint32_t u = load32_le(bj);
+        uint32_t r = u;
+        uint32_t x = r;
+        os[i] = x;
       }
-      uint8_t *bj;
-      if (plain == NULL)
+      for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
       {
-        bj = NULL;
+        uint32_t *os = bl;
+        uint32_t x = bl[i] ^ k1[i];
+        os[i] = x;
       }
-      else
+      for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
       {
-        bj = plain + i * (uint32_t)4U;
+        uint8_t *block;
+        if (plain == NULL)
+        {
+          block = NULL;
+        }
+        else
+        {
+          block = plain + i * (uint32_t)4U;
+        }
+        store32_le(plain + i * (uint32_t)4U, bl[i]);
       }
-      uint32_t u = load32_le(bj);
-      uint32_t r = u;
-      uint32_t x = r;
-      os[i] = x;
-    }
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
-    {
-      uint32_t *os;
-      if (bl == NULL)
-      {
-        os = NULL;
-      }
-      else
-      {
-        os = bl;
-      }
-      uint32_t x = bl[i] ^ k1[i];
-      os[i] = x;
-    }
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
-    {
-      uint8_t *block;
-      if (plain == NULL)
-      {
-        block = NULL;
-      }
-      else
-      {
-        block = plain + i * (uint32_t)4U;
-      }
-      uint8_t *uu____9;
-      if (plain == NULL)
-      {
-        uu____9 = NULL;
-      }
-      else
-      {
-        uu____9 = plain + i * (uint32_t)4U;
-      }
-      store32_le(uu____9, bl[i]);
-    }
-    uint8_t *uu____10;
-    if (plain == NULL)
-    {
-      uu____10 = NULL;
-    }
-    else
-    {
-      uu____10 = plain;
-    }
-    bool uu____11 = uu____10 == NULL;
-    if (!(uu____11 || uu____6 == NULL))
-    {
-      memcpy(uu____6, uu____10, rem * sizeof (uu____10[0U]));
+      memcpy(uu____5, plain, rem * sizeof (plain[0U]));
     }
   }
 }
@@ -580,24 +327,8 @@ salsa20_decrypt(
   uint32_t n32[2U] = { 0U };
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
   {
-    uint32_t *os;
-    if (k32 == NULL)
-    {
-      os = NULL;
-    }
-    else
-    {
-      os = k32;
-    }
-    uint8_t *bj;
-    if (key == NULL)
-    {
-      bj = NULL;
-    }
-    else
-    {
-      bj = key + i * (uint32_t)4U;
-    }
+    uint32_t *os = k32;
+    uint8_t *bj = key + i * (uint32_t)4U;
     uint32_t u = load32_le(bj);
     uint32_t r = u;
     uint32_t x = r;
@@ -605,48 +336,16 @@ salsa20_decrypt(
   }
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)2U; i++)
   {
-    uint32_t *os;
-    if (n32 == NULL)
-    {
-      os = NULL;
-    }
-    else
-    {
-      os = n32;
-    }
-    uint8_t *bj;
-    if (n == NULL)
-    {
-      bj = NULL;
-    }
-    else
-    {
-      bj = n + i * (uint32_t)4U;
-    }
+    uint32_t *os = n32;
+    uint8_t *bj = n + i * (uint32_t)4U;
     uint32_t u = load32_le(bj);
     uint32_t r = u;
     uint32_t x = r;
     os[i] = x;
   }
   ctx[0U] = (uint32_t)0x61707865U;
-  uint32_t *k0;
-  if (k32 == NULL)
-  {
-    k0 = NULL;
-  }
-  else
-  {
-    k0 = k32;
-  }
-  uint32_t *k10;
-  if (k32 == NULL)
-  {
-    k10 = NULL;
-  }
-  else
-  {
-    k10 = k32 + (uint32_t)4U;
-  }
+  uint32_t *k0 = k32;
+  uint32_t *k10 = k32 + (uint32_t)4U;
   bool uu____0 = k0 == NULL;
   if (!(uu____0 || ctx == NULL))
   {
@@ -669,242 +368,106 @@ salsa20_decrypt(
   ctx[15U] = (uint32_t)0x6b206574U;
   uint32_t k[16U] = { 0U };
   uint32_t rem = len % (uint32_t)64U;
-  uint32_t nb = len / (uint32_t)64U;
-  uint32_t rem1 = len % (uint32_t)64U;
-  uint32_t blen = nb * (uint32_t)64U;
-  uint8_t *ib;
-  if (cipher == NULL)
+  if (!(len == (uint32_t)0U))
   {
-    ib = NULL;
-  }
-  else
-  {
-    ib = cipher;
-  }
-  uint8_t *ob;
-  if (out == NULL)
-  {
-    ob = NULL;
-  }
-  else
-  {
-    ob = out;
-  }
-  uint8_t *il;
-  if (cipher == NULL)
-  {
-    il = NULL;
-  }
-  else
-  {
-    il = cipher + blen;
-  }
-  uint8_t *ol;
-  if (cipher == NULL)
-  {
-    ol = NULL;
-  }
-  else
-  {
-    ol = cipher + blen;
-  }
-  for (uint32_t i0 = (uint32_t)0U; i0 < nb; i0++)
-  {
-    uint8_t *block;
-    if (ob == NULL)
-    {
-      block = NULL;
-    }
-    else
-    {
-      block = ob + i0 * (uint32_t)64U;
-    }
-    uint8_t *uu____3;
-    if (out == NULL)
-    {
-      uu____3 = NULL;
-    }
-    else
-    {
-      uu____3 = out + i0 * (uint32_t)64U;
-    }
-    uint8_t *uu____4;
+    uint32_t nb = len / (uint32_t)64U;
+    uint32_t rem1 = len % (uint32_t)64U;
+    uint8_t *ib;
     if (cipher == NULL)
     {
-      uu____4 = NULL;
+      ib = NULL;
     }
     else
     {
-      uu____4 = cipher + i0 * (uint32_t)64U;
+      ib = cipher;
     }
-    uint32_t k1[16U] = { 0U };
-    salsa20_core(k1, ctx, i0);
-    uint32_t bl[16U] = { 0U };
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
-    {
-      uint32_t *os;
-      if (bl == NULL)
-      {
-        os = NULL;
-      }
-      else
-      {
-        os = bl;
-      }
-      uint8_t *bj;
-      if (uu____4 == NULL)
-      {
-        bj = NULL;
-      }
-      else
-      {
-        bj = uu____4 + i * (uint32_t)4U;
-      }
-      uint32_t u = load32_le(bj);
-      uint32_t r = u;
-      uint32_t x = r;
-      os[i] = x;
-    }
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
-    {
-      uint32_t *os;
-      if (bl == NULL)
-      {
-        os = NULL;
-      }
-      else
-      {
-        os = bl;
-      }
-      uint32_t x = bl[i] ^ k1[i];
-      os[i] = x;
-    }
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
-    {
-      uint8_t *block1;
-      if (uu____3 == NULL)
-      {
-        block1 = NULL;
-      }
-      else
-      {
-        block1 = uu____3 + i * (uint32_t)4U;
-      }
-      uint8_t *uu____5;
-      if (uu____3 == NULL)
-      {
-        uu____5 = NULL;
-      }
-      else
-      {
-        uu____5 = uu____3 + i * (uint32_t)4U;
-      }
-      store32_le(uu____5, bl[i]);
-    }
-  }
-  if (rem1 > (uint32_t)0U)
-  {
-    uint8_t *uu____6;
+    uint8_t *ob;
     if (out == NULL)
     {
-      uu____6 = NULL;
+      ob = NULL;
     }
     else
     {
-      uu____6 = out + nb * (uint32_t)64U;
+      ob = out;
     }
-    uint8_t *uu____7;
-    if (cipher == NULL)
+    for (uint32_t i0 = (uint32_t)0U; i0 < nb; i0++)
     {
-      uu____7 = NULL;
+      uint8_t *uu____3 = out + i0 * (uint32_t)64U;
+      uint8_t *uu____4 = cipher + i0 * (uint32_t)64U;
+      uint32_t k1[16U] = { 0U };
+      salsa20_core(k1, ctx, i0);
+      uint32_t bl[16U] = { 0U };
+      for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
+      {
+        uint32_t *os = bl;
+        uint8_t *bj = uu____4 + i * (uint32_t)4U;
+        uint32_t u = load32_le(bj);
+        uint32_t r = u;
+        uint32_t x = r;
+        os[i] = x;
+      }
+      for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
+      {
+        uint32_t *os = bl;
+        uint32_t x = bl[i] ^ k1[i];
+        os[i] = x;
+      }
+      for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
+      {
+        uint8_t *block1;
+        if (uu____3 == NULL)
+        {
+          block1 = NULL;
+        }
+        else
+        {
+          block1 = uu____3 + i * (uint32_t)4U;
+        }
+        store32_le(uu____3 + i * (uint32_t)4U, bl[i]);
+      }
     }
-    else
+    if (rem1 > (uint32_t)0U)
     {
-      uu____7 = cipher + nb * (uint32_t)64U;
-    }
-    uint8_t plain[64U] = { 0U };
-    bool uu____8 = uu____7 == NULL;
-    if (!(uu____8 || plain == NULL))
-    {
-      memcpy(plain, uu____7, rem * sizeof (uu____7[0U]));
-    }
-    uint32_t k1[16U] = { 0U };
-    salsa20_core(k1, ctx, nb);
-    uint32_t bl[16U] = { 0U };
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
-    {
-      uint32_t *os;
-      if (bl == NULL)
+      uint8_t *uu____5 = out + nb * (uint32_t)64U;
+      uint8_t *uu____6 = cipher + nb * (uint32_t)64U;
+      uint8_t plain[64U] = { 0U };
+      bool uu____7 = uu____6 == NULL;
+      if (!(uu____7 || plain == NULL))
       {
-        os = NULL;
+        memcpy(plain, uu____6, rem * sizeof (uu____6[0U]));
       }
-      else
+      uint32_t k1[16U] = { 0U };
+      salsa20_core(k1, ctx, nb);
+      uint32_t bl[16U] = { 0U };
+      for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
       {
-        os = bl;
+        uint32_t *os = bl;
+        uint8_t *bj = plain + i * (uint32_t)4U;
+        uint32_t u = load32_le(bj);
+        uint32_t r = u;
+        uint32_t x = r;
+        os[i] = x;
       }
-      uint8_t *bj;
-      if (plain == NULL)
+      for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
       {
-        bj = NULL;
+        uint32_t *os = bl;
+        uint32_t x = bl[i] ^ k1[i];
+        os[i] = x;
       }
-      else
+      for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
       {
-        bj = plain + i * (uint32_t)4U;
+        uint8_t *block;
+        if (plain == NULL)
+        {
+          block = NULL;
+        }
+        else
+        {
+          block = plain + i * (uint32_t)4U;
+        }
+        store32_le(plain + i * (uint32_t)4U, bl[i]);
       }
-      uint32_t u = load32_le(bj);
-      uint32_t r = u;
-      uint32_t x = r;
-      os[i] = x;
-    }
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
-    {
-      uint32_t *os;
-      if (bl == NULL)
-      {
-        os = NULL;
-      }
-      else
-      {
-        os = bl;
-      }
-      uint32_t x = bl[i] ^ k1[i];
-      os[i] = x;
-    }
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
-    {
-      uint8_t *block;
-      if (plain == NULL)
-      {
-        block = NULL;
-      }
-      else
-      {
-        block = plain + i * (uint32_t)4U;
-      }
-      uint8_t *uu____9;
-      if (plain == NULL)
-      {
-        uu____9 = NULL;
-      }
-      else
-      {
-        uu____9 = plain + i * (uint32_t)4U;
-      }
-      store32_le(uu____9, bl[i]);
-    }
-    uint8_t *uu____10;
-    if (plain == NULL)
-    {
-      uu____10 = NULL;
-    }
-    else
-    {
-      uu____10 = plain;
-    }
-    bool uu____11 = uu____10 == NULL;
-    if (!(uu____11 || uu____6 == NULL))
-    {
-      memcpy(uu____6, uu____10, rem * sizeof (uu____10[0U]));
+      memcpy(uu____5, plain, rem * sizeof (plain[0U]));
     }
   }
 }
@@ -916,24 +479,8 @@ static inline void hsalsa20(uint8_t *out, uint8_t *key, uint8_t *n)
   uint32_t n32[4U] = { 0U };
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
   {
-    uint32_t *os;
-    if (k32 == NULL)
-    {
-      os = NULL;
-    }
-    else
-    {
-      os = k32;
-    }
-    uint8_t *bj;
-    if (key == NULL)
-    {
-      bj = NULL;
-    }
-    else
-    {
-      bj = key + i * (uint32_t)4U;
-    }
+    uint32_t *os = k32;
+    uint8_t *bj = key + i * (uint32_t)4U;
     uint32_t u = load32_le(bj);
     uint32_t r = u;
     uint32_t x = r;
@@ -941,47 +488,15 @@ static inline void hsalsa20(uint8_t *out, uint8_t *key, uint8_t *n)
   }
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
-    uint32_t *os;
-    if (n32 == NULL)
-    {
-      os = NULL;
-    }
-    else
-    {
-      os = n32;
-    }
-    uint8_t *bj;
-    if (n == NULL)
-    {
-      bj = NULL;
-    }
-    else
-    {
-      bj = n + i * (uint32_t)4U;
-    }
+    uint32_t *os = n32;
+    uint8_t *bj = n + i * (uint32_t)4U;
     uint32_t u = load32_le(bj);
     uint32_t r = u;
     uint32_t x = r;
     os[i] = x;
   }
-  uint32_t *k0;
-  if (k32 == NULL)
-  {
-    k0 = NULL;
-  }
-  else
-  {
-    k0 = k32;
-  }
-  uint32_t *k1;
-  if (k32 == NULL)
-  {
-    k1 = NULL;
-  }
-  else
-  {
-    k1 = k32 + (uint32_t)4U;
-  }
+  uint32_t *k0 = k32;
+  uint32_t *k1 = k32 + (uint32_t)4U;
   ctx[0U] = (uint32_t)0x61707865U;
   bool uu____0 = k0 == NULL;
   if (!(uu____0 || ctx == NULL))
@@ -1022,16 +537,7 @@ static inline void hsalsa20(uint8_t *out, uint8_t *key, uint8_t *n)
     {
       block = out + i * (uint32_t)4U;
     }
-    uint8_t *uu____3;
-    if (out == NULL)
-    {
-      uu____3 = NULL;
-    }
-    else
-    {
-      uu____3 = out + i * (uint32_t)4U;
-    }
-    store32_le(uu____3, res[i]);
+    store32_le(out + i * (uint32_t)4U, res[i]);
   }
 }
 

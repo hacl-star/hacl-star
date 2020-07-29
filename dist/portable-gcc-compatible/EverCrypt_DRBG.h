@@ -32,6 +32,7 @@
 #define __EverCrypt_DRBG_H
 
 #include "EverCrypt_HMAC.h"
+#include "Hacl_Kremlib.h"
 #include "Lib_RandomBuffer_System.h"
 #include "Hacl_Spec.h"
 #include "Hacl_HMAC_DRBG.h"
