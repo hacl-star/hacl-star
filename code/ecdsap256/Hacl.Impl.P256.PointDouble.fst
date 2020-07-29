@@ -425,7 +425,6 @@ val point_double_z3: #c: curve -> z3: felem c -> pY: felem c -> pZ: felem c -> g
 
 let point_double_z3 #c z3 pY pZ gamma delta  = 
     let h0 = ST.get() in 
-  let prime = getPrime c in 
 
   felem_add pY pZ z3; (* z3 = py + pz *) 
   montgomery_square_buffer z3 z3; (* z3 = (py + pz) ** 2 *) 
@@ -435,6 +434,8 @@ let point_double_z3 #c z3 pY pZ gamma delta  =
   admit();
     let pyD = fromDomain_ #c (as_nat c h0 pY) in 
     let pzD = fromDomain_ #c (as_nat c h0 pZ) in 
+    
+    let prime = getPrime c in 
 
   calc (==)
   {

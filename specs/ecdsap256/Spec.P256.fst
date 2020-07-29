@@ -73,6 +73,9 @@ let getPower curve =
   |P384 -> 384
 
 inline_for_extraction
+let getPower2 curve = pow2 (getPower curve)
+
+inline_for_extraction
 let getPrime curve = 
   match curve with 
   |P256 -> prime256

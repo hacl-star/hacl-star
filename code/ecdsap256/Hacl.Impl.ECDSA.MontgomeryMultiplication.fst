@@ -229,30 +229,35 @@ let montgomery_multiplication_round_twice #c t result k0 =
 
 
 let reduction_prime_2prime_with_carry #c x result  = 
-  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 == pow2 256);
-  push_frame();
-    let h0 = ST.get() in 
-    let tempBuffer = create (size 4) (u64 0) in 
-    let tempBufferForSubborrow = create (size 1) (u64 0) in 
-    let cin = Lib.Buffer.index x (size 4) in 
-    let x_ = Lib.Buffer.sub x (size 0) (size 4) in 
-        recall_contents prime256order_buffer (Lib.Sequence.of_list p256_order_prime_list);
-    let c = Hacl.Impl.P256.LowLevel .sub4_il x_ prime256order_buffer tempBuffer in
-      let h1 = ST.get() in 
+  match c with 
+  |P384 -> admit()
+  |P256 -> 
+    assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 == pow2 256);
+    push_frame();
+      let h0 = ST.get() in 
+      let tempBuffer = create (size 4) (u64 0) in 
+      let tempBufferForSubborrow = create (size 1) (u64 0) in 
+      let cin = Lib.Buffer.index x (size 4) in 
+      let x_ = Lib.Buffer.sub x (size 0) (size 4) in 
+          recall_contents prime256order_buffer (Lib.Sequence.of_list p256_order_prime_list);
+      let c = Hacl.Impl.P256.LowLevel.sub4_il x_ prime256order_buffer tempBuffer in
+	let h1 = ST.get() in 
 
-      assert(if uint_v c = 0 then as_nat c h0 x_ >= prime_p256_order else as_nat c h0 x_ < prime_p256_order);
-      assert(wide_as_nat c h0 x = as_nat c h0 x_ + uint_v cin * pow2 256);
-    let carry = sub_borrow_u64 c cin (u64 0) tempBufferForSubborrow in 
+	assert(if uint_v c = 0 then 
+	  as_nat P256 h0 x_ >= prime_p256_order 
+	  else as_nat P256 h0 x_ < prime_p256_order);
+	assert(wide_as_nat P256 h0 x = as_nat P256 h0 x_ + uint_v cin * pow2 256);
+      let carry = sub_borrow_u64 c cin (u64 0) tempBufferForSubborrow in 
       let h2 = ST.get() in 
-      assert(if (as_nat c h0 x_ >= prime_p256_order) then uint_v carry = 0 
+      assert(if (as_nat P256 h0 x_ >= prime_p256_order) then uint_v carry = 0 
 	else if uint_v cin < uint_v c then uint_v carry = 1 
-	else uint_v carry = 0);
+	else uint_v carry = 0); 
 
-    cmovznz4 #c carry tempBuffer x_ result;
+    cmovznz4 #P256 carry tempBuffer x_ result;
  pop_frame()   
 
 
-let reduction_prime_2prime_with_carry2 #c cin x result  = 
+let reduction_prime_2prime_with_carry2 #cu cin x result  = 
   assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 == pow2 256);
   push_frame();
     let tempBuffer = create (size 4) (u64 0) in 
@@ -260,7 +265,7 @@ let reduction_prime_2prime_with_carry2 #c cin x result  =
         recall_contents prime256order_buffer (Lib.Sequence.of_list p256_order_prime_list);
     let c = Hacl.Impl.P256.LowLevel .sub4_il x prime256order_buffer tempBuffer in
     let carry = sub_borrow_u64 c cin (u64 0) tempBufferForSubborrow in 
-    cmovznz4 #c carry tempBuffer x result;
+    cmovznz4 #cu carry tempBuffer x result;
  pop_frame()      
 
 

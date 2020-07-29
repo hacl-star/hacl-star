@@ -135,7 +135,6 @@ let montgomery_ladder_power_step #c a b scalar i =
   lemma_swaped_steps #c (fromDomain_ #c (as_nat c h0 a)) (fromDomain_ #c (as_nat c h0 b))
 
 
-inline_for_extraction noextract 
 val _montgomery_ladder_power: #c: curve -> a: felem c -> b: felem c -> scalar: glbuffer uint8 (size 32) -> Stack unit
   (requires fun h -> live h a /\ live h b /\ live h scalar /\ as_nat c h a < getPrime c /\ 
     as_nat c h b < getPrime c /\ disjoint a b /\ disjoint a scalar /\ disjoint b scalar)
@@ -169,13 +168,13 @@ let _montgomery_ladder_power #c a b scalar =
 val montgomery_ladder_power: #c: curve -> a: felem c -> scalar: glbuffer uint8 (size 32) -> result: felem c -> 
   Stack unit 
     (requires fun h -> live h a /\ live h scalar /\ live h result /\ as_nat c h a < getPrime c /\ disjoint a scalar)
-    (ensures fun h0 _ h1 -> modifies (loc a |+| loc result) h0 h1 /\
+    (ensures fun h0 _ h1 -> modifies (loc a |+| loc result) h0 h1 (*/\
       as_nat c h1 result < getPrime c /\ 
       (
 	assert_norm (1 < prime256);
 	let r0D = pow_spec (as_seq h0 scalar) (fromDomain_ #c (as_nat c h0 a)) in 
 	r0D == fromDomain_ #c (as_nat c h1 result)
-      )
+      ) *)
     )
 
 

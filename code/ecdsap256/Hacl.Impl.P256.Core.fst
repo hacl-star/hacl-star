@@ -56,7 +56,7 @@ let conditional_swap i p q =
 let toDomain value result = 
   push_frame();
     let multBuffer = create (size 8) (u64 0) in 
-    shift_256_impl value multBuffer;
+    shiftLeftWord value multBuffer;
     solinas_reduction_impl multBuffer result;
   pop_frame()  
 
@@ -247,7 +247,7 @@ let normalisation_update #c z2x z3y p resultPoint =
   
 
 let norm #c  p resultPoint tempBuffer = 
-  let prime = getPrime c in 
+(*  let prime = getPrime c in  *)
   
   let xf = sub p (size 0) (size 4) in 
   let yf = sub p (size 4) (size 4) in 
