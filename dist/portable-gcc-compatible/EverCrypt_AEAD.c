@@ -228,42 +228,10 @@ encrypt_aes128_gcm(
   }
   EverCrypt_AEAD_state_s scrut = *s;
   uint8_t *ek = scrut.ek;
-  uint8_t *scratch_b;
-  if (ek == NULL)
-  {
-    scratch_b = NULL;
-  }
-  else
-  {
-    scratch_b = ek + (uint32_t)304U;
-  }
-  uint8_t *ek1;
-  if (ek == NULL)
-  {
-    ek1 = NULL;
-  }
-  else
-  {
-    ek1 = ek;
-  }
-  uint8_t *keys_b;
-  if (ek1 == NULL)
-  {
-    keys_b = NULL;
-  }
-  else
-  {
-    keys_b = ek1;
-  }
-  uint8_t *hkeys_b;
-  if (ek1 == NULL)
-  {
-    hkeys_b = NULL;
-  }
-  else
-  {
-    hkeys_b = ek1 + (uint32_t)176U;
-  }
+  uint8_t *scratch_b = ek + (uint32_t)304U;
+  uint8_t *ek1 = ek;
+  uint8_t *keys_b = ek1;
+  uint8_t *hkeys_b = ek1 + (uint32_t)176U;
   uint8_t tmp_iv[16U] = { 0U };
   uint32_t len = iv_len / (uint32_t)16U;
   uint32_t bytes_len = len * (uint32_t)16U;
@@ -522,42 +490,10 @@ encrypt_aes256_gcm(
   }
   EverCrypt_AEAD_state_s scrut = *s;
   uint8_t *ek = scrut.ek;
-  uint8_t *scratch_b;
-  if (ek == NULL)
-  {
-    scratch_b = NULL;
-  }
-  else
-  {
-    scratch_b = ek + (uint32_t)368U;
-  }
-  uint8_t *ek1;
-  if (ek == NULL)
-  {
-    ek1 = NULL;
-  }
-  else
-  {
-    ek1 = ek;
-  }
-  uint8_t *keys_b;
-  if (ek1 == NULL)
-  {
-    keys_b = NULL;
-  }
-  else
-  {
-    keys_b = ek1;
-  }
-  uint8_t *hkeys_b;
-  if (ek1 == NULL)
-  {
-    hkeys_b = NULL;
-  }
-  else
-  {
-    hkeys_b = ek1 + (uint32_t)240U;
-  }
+  uint8_t *scratch_b = ek + (uint32_t)368U;
+  uint8_t *ek1 = ek;
+  uint8_t *keys_b = ek1;
+  uint8_t *hkeys_b = ek1 + (uint32_t)240U;
   uint8_t tmp_iv[16U] = { 0U };
   uint32_t len = iv_len / (uint32_t)16U;
   uint32_t bytes_len = len * (uint32_t)16U;
@@ -884,42 +820,10 @@ EverCrypt_AEAD_encrypt_expand_aes128_gcm(
     {
       EverCrypt_AEAD_state_s scrut = *s;
       uint8_t *ek0 = scrut.ek;
-      uint8_t *scratch_b;
-      if (ek0 == NULL)
-      {
-        scratch_b = NULL;
-      }
-      else
-      {
-        scratch_b = ek0 + (uint32_t)304U;
-      }
-      uint8_t *ek1;
-      if (ek0 == NULL)
-      {
-        ek1 = NULL;
-      }
-      else
-      {
-        ek1 = ek0;
-      }
-      uint8_t *keys_b;
-      if (ek1 == NULL)
-      {
-        keys_b = NULL;
-      }
-      else
-      {
-        keys_b = ek1;
-      }
-      uint8_t *hkeys_b;
-      if (ek1 == NULL)
-      {
-        hkeys_b = NULL;
-      }
-      else
-      {
-        hkeys_b = ek1 + (uint32_t)176U;
-      }
+      uint8_t *scratch_b = ek0 + (uint32_t)304U;
+      uint8_t *ek1 = ek0;
+      uint8_t *keys_b = ek1;
+      uint8_t *hkeys_b = ek1 + (uint32_t)176U;
       uint8_t tmp_iv[16U] = { 0U };
       uint32_t len = iv_len / (uint32_t)16U;
       uint32_t bytes_len = len * (uint32_t)16U;
@@ -1195,42 +1099,10 @@ EverCrypt_AEAD_encrypt_expand_aes256_gcm(
     {
       EverCrypt_AEAD_state_s scrut = *s;
       uint8_t *ek0 = scrut.ek;
-      uint8_t *scratch_b;
-      if (ek0 == NULL)
-      {
-        scratch_b = NULL;
-      }
-      else
-      {
-        scratch_b = ek0 + (uint32_t)368U;
-      }
-      uint8_t *ek1;
-      if (ek0 == NULL)
-      {
-        ek1 = NULL;
-      }
-      else
-      {
-        ek1 = ek0;
-      }
-      uint8_t *keys_b;
-      if (ek1 == NULL)
-      {
-        keys_b = NULL;
-      }
-      else
-      {
-        keys_b = ek1;
-      }
-      uint8_t *hkeys_b;
-      if (ek1 == NULL)
-      {
-        hkeys_b = NULL;
-      }
-      else
-      {
-        hkeys_b = ek1 + (uint32_t)240U;
-      }
+      uint8_t *scratch_b = ek0 + (uint32_t)368U;
+      uint8_t *ek1 = ek0;
+      uint8_t *keys_b = ek1;
+      uint8_t *hkeys_b = ek1 + (uint32_t)240U;
       uint8_t tmp_iv[16U] = { 0U };
       uint32_t len = iv_len / (uint32_t)16U;
       uint32_t bytes_len = len * (uint32_t)16U;
@@ -1587,42 +1459,10 @@ decrypt_aes128_gcm(
   }
   EverCrypt_AEAD_state_s scrut = *s;
   uint8_t *ek = scrut.ek;
-  uint8_t *scratch_b;
-  if (ek == NULL)
-  {
-    scratch_b = NULL;
-  }
-  else
-  {
-    scratch_b = ek + (uint32_t)304U;
-  }
-  uint8_t *ek1;
-  if (ek == NULL)
-  {
-    ek1 = NULL;
-  }
-  else
-  {
-    ek1 = ek;
-  }
-  uint8_t *keys_b;
-  if (ek1 == NULL)
-  {
-    keys_b = NULL;
-  }
-  else
-  {
-    keys_b = ek1;
-  }
-  uint8_t *hkeys_b;
-  if (ek1 == NULL)
-  {
-    hkeys_b = NULL;
-  }
-  else
-  {
-    hkeys_b = ek1 + (uint32_t)176U;
-  }
+  uint8_t *scratch_b = ek + (uint32_t)304U;
+  uint8_t *ek1 = ek;
+  uint8_t *keys_b = ek1;
+  uint8_t *hkeys_b = ek1 + (uint32_t)176U;
   uint8_t tmp_iv[16U] = { 0U };
   uint32_t len = iv_len / (uint32_t)16U;
   uint32_t bytes_len = len * (uint32_t)16U;
@@ -1891,42 +1731,10 @@ decrypt_aes256_gcm(
   }
   EverCrypt_AEAD_state_s scrut = *s;
   uint8_t *ek = scrut.ek;
-  uint8_t *scratch_b;
-  if (ek == NULL)
-  {
-    scratch_b = NULL;
-  }
-  else
-  {
-    scratch_b = ek + (uint32_t)368U;
-  }
-  uint8_t *ek1;
-  if (ek == NULL)
-  {
-    ek1 = NULL;
-  }
-  else
-  {
-    ek1 = ek;
-  }
-  uint8_t *keys_b;
-  if (ek1 == NULL)
-  {
-    keys_b = NULL;
-  }
-  else
-  {
-    keys_b = ek1;
-  }
-  uint8_t *hkeys_b;
-  if (ek1 == NULL)
-  {
-    hkeys_b = NULL;
-  }
-  else
-  {
-    hkeys_b = ek1 + (uint32_t)240U;
-  }
+  uint8_t *scratch_b = ek + (uint32_t)368U;
+  uint8_t *ek1 = ek;
+  uint8_t *keys_b = ek1;
+  uint8_t *hkeys_b = ek1 + (uint32_t)240U;
   uint8_t tmp_iv[16U] = { 0U };
   uint32_t len = iv_len / (uint32_t)16U;
   uint32_t bytes_len = len * (uint32_t)16U;
@@ -2292,42 +2100,10 @@ EverCrypt_AEAD_decrypt_expand_aes128_gcm(
     {
       EverCrypt_AEAD_state_s scrut1 = *s;
       uint8_t *ek0 = scrut1.ek;
-      uint8_t *scratch_b;
-      if (ek0 == NULL)
-      {
-        scratch_b = NULL;
-      }
-      else
-      {
-        scratch_b = ek0 + (uint32_t)304U;
-      }
-      uint8_t *ek1;
-      if (ek0 == NULL)
-      {
-        ek1 = NULL;
-      }
-      else
-      {
-        ek1 = ek0;
-      }
-      uint8_t *keys_b;
-      if (ek1 == NULL)
-      {
-        keys_b = NULL;
-      }
-      else
-      {
-        keys_b = ek1;
-      }
-      uint8_t *hkeys_b;
-      if (ek1 == NULL)
-      {
-        hkeys_b = NULL;
-      }
-      else
-      {
-        hkeys_b = ek1 + (uint32_t)176U;
-      }
+      uint8_t *scratch_b = ek0 + (uint32_t)304U;
+      uint8_t *ek1 = ek0;
+      uint8_t *keys_b = ek1;
+      uint8_t *hkeys_b = ek1 + (uint32_t)176U;
       uint8_t tmp_iv[16U] = { 0U };
       uint32_t len = iv_len / (uint32_t)16U;
       uint32_t bytes_len = len * (uint32_t)16U;
@@ -2614,42 +2390,10 @@ EverCrypt_AEAD_decrypt_expand_aes256_gcm(
     {
       EverCrypt_AEAD_state_s scrut1 = *s;
       uint8_t *ek0 = scrut1.ek;
-      uint8_t *scratch_b;
-      if (ek0 == NULL)
-      {
-        scratch_b = NULL;
-      }
-      else
-      {
-        scratch_b = ek0 + (uint32_t)368U;
-      }
-      uint8_t *ek1;
-      if (ek0 == NULL)
-      {
-        ek1 = NULL;
-      }
-      else
-      {
-        ek1 = ek0;
-      }
-      uint8_t *keys_b;
-      if (ek1 == NULL)
-      {
-        keys_b = NULL;
-      }
-      else
-      {
-        keys_b = ek1;
-      }
-      uint8_t *hkeys_b;
-      if (ek1 == NULL)
-      {
-        hkeys_b = NULL;
-      }
-      else
-      {
-        hkeys_b = ek1 + (uint32_t)240U;
-      }
+      uint8_t *scratch_b = ek0 + (uint32_t)368U;
+      uint8_t *ek1 = ek0;
+      uint8_t *keys_b = ek1;
+      uint8_t *hkeys_b = ek1 + (uint32_t)240U;
       uint8_t tmp_iv[16U] = { 0U };
       uint32_t len = iv_len / (uint32_t)16U;
       uint32_t bytes_len = len * (uint32_t)16U;

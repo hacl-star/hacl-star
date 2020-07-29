@@ -294,24 +294,8 @@ EverCrypt_DRBG_instantiate_sha1(
   {
     return false;
   }
-  uint8_t *entropy_input;
-  if (entropy == NULL)
-  {
-    entropy_input = NULL;
-  }
-  else
-  {
-    entropy_input = entropy;
-  }
-  uint8_t *nonce;
-  if (entropy == NULL)
-  {
-    nonce = NULL;
-  }
-  else
-  {
-    nonce = entropy + entropy_input_len;
-  }
+  uint8_t *entropy_input = entropy;
+  uint8_t *nonce = entropy + entropy_input_len;
   EverCrypt_DRBG_state_s st_s = *st;
   KRML_CHECK_SIZE(sizeof (uint8_t), entropy_input_len + nonce_len + personalization_string_len);
   uint8_t seed_material[entropy_input_len + nonce_len + personalization_string_len];
@@ -439,24 +423,8 @@ EverCrypt_DRBG_instantiate_sha2_256(
   {
     return false;
   }
-  uint8_t *entropy_input;
-  if (entropy == NULL)
-  {
-    entropy_input = NULL;
-  }
-  else
-  {
-    entropy_input = entropy;
-  }
-  uint8_t *nonce;
-  if (entropy == NULL)
-  {
-    nonce = NULL;
-  }
-  else
-  {
-    nonce = entropy + entropy_input_len;
-  }
+  uint8_t *entropy_input = entropy;
+  uint8_t *nonce = entropy + entropy_input_len;
   EverCrypt_DRBG_state_s st_s = *st;
   KRML_CHECK_SIZE(sizeof (uint8_t), entropy_input_len + nonce_len + personalization_string_len);
   uint8_t seed_material[entropy_input_len + nonce_len + personalization_string_len];
@@ -584,24 +552,8 @@ EverCrypt_DRBG_instantiate_sha2_384(
   {
     return false;
   }
-  uint8_t *entropy_input;
-  if (entropy == NULL)
-  {
-    entropy_input = NULL;
-  }
-  else
-  {
-    entropy_input = entropy;
-  }
-  uint8_t *nonce;
-  if (entropy == NULL)
-  {
-    nonce = NULL;
-  }
-  else
-  {
-    nonce = entropy + entropy_input_len;
-  }
+  uint8_t *entropy_input = entropy;
+  uint8_t *nonce = entropy + entropy_input_len;
   EverCrypt_DRBG_state_s st_s = *st;
   KRML_CHECK_SIZE(sizeof (uint8_t), entropy_input_len + nonce_len + personalization_string_len);
   uint8_t seed_material[entropy_input_len + nonce_len + personalization_string_len];
@@ -729,24 +681,8 @@ EverCrypt_DRBG_instantiate_sha2_512(
   {
     return false;
   }
-  uint8_t *entropy_input;
-  if (entropy == NULL)
-  {
-    entropy_input = NULL;
-  }
-  else
-  {
-    entropy_input = entropy;
-  }
-  uint8_t *nonce;
-  if (entropy == NULL)
-  {
-    nonce = NULL;
-  }
-  else
-  {
-    nonce = entropy + entropy_input_len;
-  }
+  uint8_t *entropy_input = entropy;
+  uint8_t *nonce = entropy + entropy_input_len;
   EverCrypt_DRBG_state_s st_s = *st;
   KRML_CHECK_SIZE(sizeof (uint8_t), entropy_input_len + nonce_len + personalization_string_len);
   uint8_t seed_material[entropy_input_len + nonce_len + personalization_string_len];

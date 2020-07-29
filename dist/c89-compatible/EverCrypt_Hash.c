@@ -798,15 +798,8 @@ void EverCrypt_Hash_copy(EverCrypt_Hash_state_s *s_src, EverCrypt_Hash_state_s *
     {
       p_dst = KRML_EABORT(uint32_t *, "unreachable (pattern matches are exhaustive in F*)");
     }
-    {
-      bool uu____0 = p_src == NULL;
-      if (!(uu____0 || p_dst == NULL))
-      {
-        memcpy(p_dst, p_src, (uint32_t)4U * sizeof (p_src[0U]));
-        return;
-      }
-      return;
-    }
+    memcpy(p_dst, p_src, (uint32_t)4U * sizeof (p_src[0U]));
+    return;
   }
   if (scrut.tag == EverCrypt_Hash_SHA1_s)
   {
@@ -821,15 +814,8 @@ void EverCrypt_Hash_copy(EverCrypt_Hash_state_s *s_src, EverCrypt_Hash_state_s *
     {
       p_dst = KRML_EABORT(uint32_t *, "unreachable (pattern matches are exhaustive in F*)");
     }
-    {
-      bool uu____1 = p_src == NULL;
-      if (!(uu____1 || p_dst == NULL))
-      {
-        memcpy(p_dst, p_src, (uint32_t)5U * sizeof (p_src[0U]));
-        return;
-      }
-      return;
-    }
+    memcpy(p_dst, p_src, (uint32_t)5U * sizeof (p_src[0U]));
+    return;
   }
   if (scrut.tag == EverCrypt_Hash_SHA2_224_s)
   {
@@ -844,15 +830,8 @@ void EverCrypt_Hash_copy(EverCrypt_Hash_state_s *s_src, EverCrypt_Hash_state_s *
     {
       p_dst = KRML_EABORT(uint32_t *, "unreachable (pattern matches are exhaustive in F*)");
     }
-    {
-      bool uu____2 = p_src == NULL;
-      if (!(uu____2 || p_dst == NULL))
-      {
-        memcpy(p_dst, p_src, (uint32_t)8U * sizeof (p_src[0U]));
-        return;
-      }
-      return;
-    }
+    memcpy(p_dst, p_src, (uint32_t)8U * sizeof (p_src[0U]));
+    return;
   }
   if (scrut.tag == EverCrypt_Hash_SHA2_256_s)
   {
@@ -867,15 +846,8 @@ void EverCrypt_Hash_copy(EverCrypt_Hash_state_s *s_src, EverCrypt_Hash_state_s *
     {
       p_dst = KRML_EABORT(uint32_t *, "unreachable (pattern matches are exhaustive in F*)");
     }
-    {
-      bool uu____3 = p_src == NULL;
-      if (!(uu____3 || p_dst == NULL))
-      {
-        memcpy(p_dst, p_src, (uint32_t)8U * sizeof (p_src[0U]));
-        return;
-      }
-      return;
-    }
+    memcpy(p_dst, p_src, (uint32_t)8U * sizeof (p_src[0U]));
+    return;
   }
   if (scrut.tag == EverCrypt_Hash_SHA2_384_s)
   {
@@ -890,15 +862,8 @@ void EverCrypt_Hash_copy(EverCrypt_Hash_state_s *s_src, EverCrypt_Hash_state_s *
     {
       p_dst = KRML_EABORT(uint64_t *, "unreachable (pattern matches are exhaustive in F*)");
     }
-    {
-      bool uu____4 = p_src == NULL;
-      if (!(uu____4 || p_dst == NULL))
-      {
-        memcpy(p_dst, p_src, (uint32_t)8U * sizeof (p_src[0U]));
-        return;
-      }
-      return;
-    }
+    memcpy(p_dst, p_src, (uint32_t)8U * sizeof (p_src[0U]));
+    return;
   }
   if (scrut.tag == EverCrypt_Hash_SHA2_512_s)
   {
@@ -913,15 +878,8 @@ void EverCrypt_Hash_copy(EverCrypt_Hash_state_s *s_src, EverCrypt_Hash_state_s *
     {
       p_dst = KRML_EABORT(uint64_t *, "unreachable (pattern matches are exhaustive in F*)");
     }
-    {
-      bool uu____5 = p_src == NULL;
-      if (!(uu____5 || p_dst == NULL))
-      {
-        memcpy(p_dst, p_src, (uint32_t)8U * sizeof (p_src[0U]));
-        return;
-      }
-      return;
-    }
+    memcpy(p_dst, p_src, (uint32_t)8U * sizeof (p_src[0U]));
+    return;
   }
   KRML_HOST_PRINTF("KreMLin abort at %s:%d\n%s\n",
     __FILE__,
@@ -1278,42 +1236,21 @@ EverCrypt_Hash_Incremental_update(
       {
         uint64_t x = total_len1 % (uint64_t)sw;
         uint32_t sz1 = (uint32_t)x;
-        uint8_t *buf1;
-        if (buf == NULL)
+        uint8_t *buf2 = buf + sz1;
+        bool uu____0 = data == NULL;
+        uint64_t total_len2;
+        if (!(uu____0 || buf2 == NULL))
         {
-          buf1 = NULL;
+          memcpy(buf2, data, len * sizeof (data[0U]));
         }
-        else
+        total_len2 = total_len1 + (uint64_t)len;
         {
-          buf1 = buf;
-        }
-        {
-          uint8_t *buf2;
-          if (buf == NULL)
-          {
-            buf2 = NULL;
-          }
-          else
-          {
-            buf2 = buf + sz1;
-          }
-          {
-            bool uu____0 = data == NULL;
-            uint64_t total_len2;
-            if (!(uu____0 || buf2 == NULL))
-            {
-              memcpy(buf2, data, len * sizeof (data[0U]));
-            }
-            total_len2 = total_len1 + (uint64_t)len;
-            {
-              Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ lit;
-              lit.block_state = block_state1;
-              lit.buf = buf;
-              lit.total_len = total_len2;
-              *p = lit;
-              return;
-            }
-          }
+          Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ lit;
+          lit.block_state = block_state1;
+          lit.buf = buf;
+          lit.total_len = total_len2;
+          *p = lit;
+          return;
         }
       }
     }
@@ -1472,14 +1409,7 @@ EverCrypt_Hash_Incremental_update(
                 uint8_t *dst;
                 bool uu____1;
                 EverCrypt_Hash_update_multi(block_state1, data1, data1_len);
-                if (buf == NULL)
-                {
-                  dst = NULL;
-                }
-                else
-                {
-                  dst = buf;
-                }
+                dst = buf;
                 uu____1 = data2 == NULL;
                 if (!(uu____1 || dst == NULL))
                 {
@@ -1541,62 +1471,130 @@ EverCrypt_Hash_Incremental_update(
       }
       {
         uint32_t diff = sw2 - sz;
-        uint8_t *data1;
-        if (data == NULL)
+        uint8_t *data1 = data;
+        uint8_t *data2 = data + diff;
+        Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ s10 = *p;
+        EverCrypt_Hash_state_s *block_state10 = s10.block_state;
+        uint8_t *buf_1 = s10.buf;
+        uint64_t total_len10 = s10.total_len;
+        Spec_Hash_Definitions_hash_alg i20 = EverCrypt_Hash_alg_of_state(block_state10);
+        uint32_t sw3;
+        switch (i20)
         {
-          data1 = NULL;
+          case Spec_Hash_Definitions_MD5:
+            {
+              sw3 = (uint32_t)64U;
+              break;
+            }
+          case Spec_Hash_Definitions_SHA1:
+            {
+              sw3 = (uint32_t)64U;
+              break;
+            }
+          case Spec_Hash_Definitions_SHA2_224:
+            {
+              sw3 = (uint32_t)64U;
+              break;
+            }
+          case Spec_Hash_Definitions_SHA2_256:
+            {
+              sw3 = (uint32_t)64U;
+              break;
+            }
+          case Spec_Hash_Definitions_SHA2_384:
+            {
+              sw3 = (uint32_t)128U;
+              break;
+            }
+          case Spec_Hash_Definitions_SHA2_512:
+            {
+              sw3 = (uint32_t)128U;
+              break;
+            }
+          default:
+            {
+              KRML_HOST_PRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+              KRML_HOST_EXIT(253U);
+            }
         }
-        else
         {
-          data1 = data;
-        }
-        {
-          uint8_t *data2;
-          if (data == NULL)
+          uint64_t x1 = total_len10 % (uint64_t)sw3;
+          uint32_t sz10 = (uint32_t)x1;
+          uint32_t sw4;
+          switch (i20)
           {
-            data2 = NULL;
+            case Spec_Hash_Definitions_MD5:
+              {
+                sw4 = (uint32_t)64U;
+                break;
+              }
+            case Spec_Hash_Definitions_SHA1:
+              {
+                sw4 = (uint32_t)64U;
+                break;
+              }
+            case Spec_Hash_Definitions_SHA2_224:
+              {
+                sw4 = (uint32_t)64U;
+                break;
+              }
+            case Spec_Hash_Definitions_SHA2_256:
+              {
+                sw4 = (uint32_t)64U;
+                break;
+              }
+            case Spec_Hash_Definitions_SHA2_384:
+              {
+                sw4 = (uint32_t)128U;
+                break;
+              }
+            case Spec_Hash_Definitions_SHA2_512:
+              {
+                sw4 = (uint32_t)128U;
+                break;
+              }
+            default:
+              {
+                KRML_HOST_PRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+                KRML_HOST_EXIT(253U);
+              }
           }
-          else
           {
-            data2 = data + diff;
-          }
-          {
-            Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ s10 = *p;
-            EverCrypt_Hash_state_s *block_state10 = s10.block_state;
-            uint8_t *buf_1 = s10.buf;
-            uint64_t total_len10 = s10.total_len;
-            Spec_Hash_Definitions_hash_alg i20 = EverCrypt_Hash_alg_of_state(block_state10);
-            uint32_t sw3;
+            uint32_t diff1 = sw4 - sz10;
+            uint8_t *buf0 = buf_1;
+            uint8_t *buf2 = buf0 + sz10;
+            uint32_t sw5;
+            memcpy(buf2, data1, diff1 * sizeof (data1[0U]));
             switch (i20)
             {
               case Spec_Hash_Definitions_MD5:
                 {
-                  sw3 = (uint32_t)64U;
+                  sw5 = (uint32_t)64U;
                   break;
                 }
               case Spec_Hash_Definitions_SHA1:
                 {
-                  sw3 = (uint32_t)64U;
+                  sw5 = (uint32_t)64U;
                   break;
                 }
               case Spec_Hash_Definitions_SHA2_224:
                 {
-                  sw3 = (uint32_t)64U;
+                  sw5 = (uint32_t)64U;
                   break;
                 }
               case Spec_Hash_Definitions_SHA2_256:
                 {
-                  sw3 = (uint32_t)64U;
+                  sw5 = (uint32_t)64U;
                   break;
                 }
               case Spec_Hash_Definitions_SHA2_384:
                 {
-                  sw3 = (uint32_t)128U;
+                  sw5 = (uint32_t)128U;
                   break;
                 }
               case Spec_Hash_Definitions_SHA2_512:
                 {
-                  sw3 = (uint32_t)128U;
+                  sw5 = (uint32_t)128U;
                   break;
                 }
               default:
@@ -1605,40 +1603,65 @@ EverCrypt_Hash_Incremental_update(
                   KRML_HOST_EXIT(253U);
                 }
             }
+            EverCrypt_Hash_update_multi(block_state10, buf0, sw5);
             {
-              uint64_t x1 = total_len10 % (uint64_t)sw3;
-              uint32_t sz10 = (uint32_t)x1;
-              uint32_t sw4;
-              switch (i20)
+              Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ lit;
+              Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ s1;
+              EverCrypt_Hash_state_s *block_state1;
+              uint8_t *buf;
+              uint64_t total_len1;
+              Spec_Hash_Definitions_hash_alg i2;
+              uint32_t sw6;
+              uint64_t x;
+              uint32_t sz1;
+              uint32_t sw7;
+              uint32_t n_blocks;
+              uint32_t sw;
+              uint32_t data1_len;
+              uint32_t data2_len;
+              uint8_t *data11;
+              uint8_t *data21;
+              uint8_t *dst;
+              bool uu____2;
+              lit.block_state = block_state10;
+              lit.buf = buf_1;
+              lit.total_len = total_len10 + (uint64_t)diff;
+              *p = lit;
+              s1 = *p;
+              block_state1 = s1.block_state;
+              buf = s1.buf;
+              total_len1 = s1.total_len;
+              i2 = EverCrypt_Hash_alg_of_state(block_state1);
+              switch (i2)
               {
                 case Spec_Hash_Definitions_MD5:
                   {
-                    sw4 = (uint32_t)64U;
+                    sw6 = (uint32_t)64U;
                     break;
                   }
                 case Spec_Hash_Definitions_SHA1:
                   {
-                    sw4 = (uint32_t)64U;
+                    sw6 = (uint32_t)64U;
                     break;
                   }
                 case Spec_Hash_Definitions_SHA2_224:
                   {
-                    sw4 = (uint32_t)64U;
+                    sw6 = (uint32_t)64U;
                     break;
                   }
                 case Spec_Hash_Definitions_SHA2_256:
                   {
-                    sw4 = (uint32_t)64U;
+                    sw6 = (uint32_t)64U;
                     break;
                   }
                 case Spec_Hash_Definitions_SHA2_384:
                   {
-                    sw4 = (uint32_t)128U;
+                    sw6 = (uint32_t)128U;
                     break;
                   }
                 case Spec_Hash_Definitions_SHA2_512:
                   {
-                    sw4 = (uint32_t)128U;
+                    sw6 = (uint32_t)128U;
                     break;
                   }
                 default:
@@ -1647,279 +1670,116 @@ EverCrypt_Hash_Incremental_update(
                     KRML_HOST_EXIT(253U);
                   }
               }
+              x = total_len1 % (uint64_t)sw6;
+              sz1 = (uint32_t)x;
+              switch (i2)
               {
-                uint32_t diff1 = sw4 - sz10;
-                uint8_t *buf0;
-                if (buf_1 == NULL)
-                {
-                  buf0 = NULL;
-                }
-                else
-                {
-                  buf0 = buf_1;
-                }
-                {
-                  uint8_t *buf1;
-                  if (buf0 == NULL)
+                case Spec_Hash_Definitions_MD5:
                   {
-                    buf1 = NULL;
+                    sw7 = (uint32_t)64U;
+                    break;
                   }
-                  else
+                case Spec_Hash_Definitions_SHA1:
                   {
-                    buf1 = buf0;
+                    sw7 = (uint32_t)64U;
+                    break;
                   }
+                case Spec_Hash_Definitions_SHA2_224:
                   {
-                    uint8_t *buf2;
-                    if (buf0 == NULL)
-                    {
-                      buf2 = NULL;
-                    }
-                    else
-                    {
-                      buf2 = buf0 + sz10;
-                    }
-                    {
-                      bool uu____2 = data1 == NULL;
-                      uint32_t sw5;
-                      if (!(uu____2 || buf2 == NULL))
-                      {
-                        memcpy(buf2, data1, diff1 * sizeof (data1[0U]));
-                      }
-                      switch (i20)
-                      {
-                        case Spec_Hash_Definitions_MD5:
-                          {
-                            sw5 = (uint32_t)64U;
-                            break;
-                          }
-                        case Spec_Hash_Definitions_SHA1:
-                          {
-                            sw5 = (uint32_t)64U;
-                            break;
-                          }
-                        case Spec_Hash_Definitions_SHA2_224:
-                          {
-                            sw5 = (uint32_t)64U;
-                            break;
-                          }
-                        case Spec_Hash_Definitions_SHA2_256:
-                          {
-                            sw5 = (uint32_t)64U;
-                            break;
-                          }
-                        case Spec_Hash_Definitions_SHA2_384:
-                          {
-                            sw5 = (uint32_t)128U;
-                            break;
-                          }
-                        case Spec_Hash_Definitions_SHA2_512:
-                          {
-                            sw5 = (uint32_t)128U;
-                            break;
-                          }
-                        default:
-                          {
-                            KRML_HOST_PRINTF("KreMLin incomplete match at %s:%d\n",
-                              __FILE__,
-                              __LINE__);
-                            KRML_HOST_EXIT(253U);
-                          }
-                      }
-                      EverCrypt_Hash_update_multi(block_state10, buf0, sw5);
-                      {
-                        Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ lit;
-                        Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ s1;
-                        EverCrypt_Hash_state_s *block_state1;
-                        uint8_t *buf;
-                        uint64_t total_len1;
-                        Spec_Hash_Definitions_hash_alg i2;
-                        uint32_t sw6;
-                        uint64_t x;
-                        uint32_t sz1;
-                        uint32_t sw7;
-                        uint32_t n_blocks;
-                        uint32_t sw;
-                        uint32_t data1_len;
-                        uint32_t data2_len;
-                        uint8_t *data11;
-                        uint8_t *data21;
-                        uint8_t *dst;
-                        bool uu____3;
-                        lit.block_state = block_state10;
-                        lit.buf = buf_1;
-                        lit.total_len = total_len10 + (uint64_t)diff;
-                        *p = lit;
-                        s1 = *p;
-                        block_state1 = s1.block_state;
-                        buf = s1.buf;
-                        total_len1 = s1.total_len;
-                        i2 = EverCrypt_Hash_alg_of_state(block_state1);
-                        switch (i2)
-                        {
-                          case Spec_Hash_Definitions_MD5:
-                            {
-                              sw6 = (uint32_t)64U;
-                              break;
-                            }
-                          case Spec_Hash_Definitions_SHA1:
-                            {
-                              sw6 = (uint32_t)64U;
-                              break;
-                            }
-                          case Spec_Hash_Definitions_SHA2_224:
-                            {
-                              sw6 = (uint32_t)64U;
-                              break;
-                            }
-                          case Spec_Hash_Definitions_SHA2_256:
-                            {
-                              sw6 = (uint32_t)64U;
-                              break;
-                            }
-                          case Spec_Hash_Definitions_SHA2_384:
-                            {
-                              sw6 = (uint32_t)128U;
-                              break;
-                            }
-                          case Spec_Hash_Definitions_SHA2_512:
-                            {
-                              sw6 = (uint32_t)128U;
-                              break;
-                            }
-                          default:
-                            {
-                              KRML_HOST_PRINTF("KreMLin incomplete match at %s:%d\n",
-                                __FILE__,
-                                __LINE__);
-                              KRML_HOST_EXIT(253U);
-                            }
-                        }
-                        x = total_len1 % (uint64_t)sw6;
-                        sz1 = (uint32_t)x;
-                        switch (i2)
-                        {
-                          case Spec_Hash_Definitions_MD5:
-                            {
-                              sw7 = (uint32_t)64U;
-                              break;
-                            }
-                          case Spec_Hash_Definitions_SHA1:
-                            {
-                              sw7 = (uint32_t)64U;
-                              break;
-                            }
-                          case Spec_Hash_Definitions_SHA2_224:
-                            {
-                              sw7 = (uint32_t)64U;
-                              break;
-                            }
-                          case Spec_Hash_Definitions_SHA2_256:
-                            {
-                              sw7 = (uint32_t)64U;
-                              break;
-                            }
-                          case Spec_Hash_Definitions_SHA2_384:
-                            {
-                              sw7 = (uint32_t)128U;
-                              break;
-                            }
-                          case Spec_Hash_Definitions_SHA2_512:
-                            {
-                              sw7 = (uint32_t)128U;
-                              break;
-                            }
-                          default:
-                            {
-                              KRML_HOST_PRINTF("KreMLin incomplete match at %s:%d\n",
-                                __FILE__,
-                                __LINE__);
-                              KRML_HOST_EXIT(253U);
-                            }
-                        }
-                        n_blocks = (len - diff) / sw7;
-                        switch (i2)
-                        {
-                          case Spec_Hash_Definitions_MD5:
-                            {
-                              sw = (uint32_t)64U;
-                              break;
-                            }
-                          case Spec_Hash_Definitions_SHA1:
-                            {
-                              sw = (uint32_t)64U;
-                              break;
-                            }
-                          case Spec_Hash_Definitions_SHA2_224:
-                            {
-                              sw = (uint32_t)64U;
-                              break;
-                            }
-                          case Spec_Hash_Definitions_SHA2_256:
-                            {
-                              sw = (uint32_t)64U;
-                              break;
-                            }
-                          case Spec_Hash_Definitions_SHA2_384:
-                            {
-                              sw = (uint32_t)128U;
-                              break;
-                            }
-                          case Spec_Hash_Definitions_SHA2_512:
-                            {
-                              sw = (uint32_t)128U;
-                              break;
-                            }
-                          default:
-                            {
-                              KRML_HOST_PRINTF("KreMLin incomplete match at %s:%d\n",
-                                __FILE__,
-                                __LINE__);
-                              KRML_HOST_EXIT(253U);
-                            }
-                        }
-                        data1_len = n_blocks * sw;
-                        data2_len = len - diff - data1_len;
-                        if (data2 == NULL)
-                        {
-                          data11 = NULL;
-                        }
-                        else
-                        {
-                          data11 = data2;
-                        }
-                        if (data2 == NULL)
-                        {
-                          data21 = NULL;
-                        }
-                        else
-                        {
-                          data21 = data2 + data1_len;
-                        }
-                        EverCrypt_Hash_update_multi(block_state1, data11, data1_len);
-                        if (buf == NULL)
-                        {
-                          dst = NULL;
-                        }
-                        else
-                        {
-                          dst = buf;
-                        }
-                        uu____3 = data21 == NULL;
-                        if (!(uu____3 || dst == NULL))
-                        {
-                          memcpy(dst, data21, data2_len * sizeof (data21[0U]));
-                        }
-                        {
-                          Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ lit0;
-                          lit0.block_state = block_state1;
-                          lit0.buf = buf;
-                          lit0.total_len = total_len1 + (uint64_t)(len - diff);
-                          *p = lit0;
-                        }
-                      }
-                    }
+                    sw7 = (uint32_t)64U;
+                    break;
                   }
-                }
+                case Spec_Hash_Definitions_SHA2_256:
+                  {
+                    sw7 = (uint32_t)64U;
+                    break;
+                  }
+                case Spec_Hash_Definitions_SHA2_384:
+                  {
+                    sw7 = (uint32_t)128U;
+                    break;
+                  }
+                case Spec_Hash_Definitions_SHA2_512:
+                  {
+                    sw7 = (uint32_t)128U;
+                    break;
+                  }
+                default:
+                  {
+                    KRML_HOST_PRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+                    KRML_HOST_EXIT(253U);
+                  }
+              }
+              n_blocks = (len - diff) / sw7;
+              switch (i2)
+              {
+                case Spec_Hash_Definitions_MD5:
+                  {
+                    sw = (uint32_t)64U;
+                    break;
+                  }
+                case Spec_Hash_Definitions_SHA1:
+                  {
+                    sw = (uint32_t)64U;
+                    break;
+                  }
+                case Spec_Hash_Definitions_SHA2_224:
+                  {
+                    sw = (uint32_t)64U;
+                    break;
+                  }
+                case Spec_Hash_Definitions_SHA2_256:
+                  {
+                    sw = (uint32_t)64U;
+                    break;
+                  }
+                case Spec_Hash_Definitions_SHA2_384:
+                  {
+                    sw = (uint32_t)128U;
+                    break;
+                  }
+                case Spec_Hash_Definitions_SHA2_512:
+                  {
+                    sw = (uint32_t)128U;
+                    break;
+                  }
+                default:
+                  {
+                    KRML_HOST_PRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+                    KRML_HOST_EXIT(253U);
+                  }
+              }
+              data1_len = n_blocks * sw;
+              data2_len = len - diff - data1_len;
+              if (data2 == NULL)
+              {
+                data11 = NULL;
+              }
+              else
+              {
+                data11 = data2;
+              }
+              if (data2 == NULL)
+              {
+                data21 = NULL;
+              }
+              else
+              {
+                data21 = data2 + data1_len;
+              }
+              EverCrypt_Hash_update_multi(block_state1, data11, data1_len);
+              dst = buf;
+              uu____2 = data21 == NULL;
+              if (!(uu____2 || dst == NULL))
+              {
+                memcpy(dst, data21, data2_len * sizeof (data21[0U]));
+              }
+              {
+                Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ lit0;
+                lit0.block_state = block_state1;
+                lit0.buf = buf;
+                lit0.total_len = total_len1 + (uint64_t)(len - diff);
+                *p = lit0;
               }
             }
           }
@@ -1939,27 +1799,17 @@ EverCrypt_Hash_Incremental_finish_md5(
   EverCrypt_Hash_state_s *block_state = scrut.block_state;
   uint8_t *buf_ = scrut.buf;
   uint64_t total_len = scrut.total_len;
-  uint8_t *buf_1;
-  if (buf_ == NULL)
+  uint8_t *buf_1 = buf_;
+  EverCrypt_Hash_state_s s;
+  s.tag = EverCrypt_Hash_MD5_s;
   {
-    buf_1 = NULL;
-  }
-  else
-  {
-    buf_1 = buf_;
-  }
-  {
-    EverCrypt_Hash_state_s s;
-    s.tag = EverCrypt_Hash_MD5_s;
+    uint32_t buf[4U] = { 0U };
+    s.val.case_MD5_s = buf;
     {
-      uint32_t buf[4U] = { 0U };
-      s.val.case_MD5_s = buf;
-      {
-        EverCrypt_Hash_state_s tmp_block_state = s;
-        EverCrypt_Hash_copy(block_state, &tmp_block_state);
-        EverCrypt_Hash_update_last(&tmp_block_state, buf_1, total_len);
-        EverCrypt_Hash_finish(&tmp_block_state, dst);
-      }
+      EverCrypt_Hash_state_s tmp_block_state = s;
+      EverCrypt_Hash_copy(block_state, &tmp_block_state);
+      EverCrypt_Hash_update_last(&tmp_block_state, buf_1, total_len);
+      EverCrypt_Hash_finish(&tmp_block_state, dst);
     }
   }
 }
@@ -1974,27 +1824,17 @@ EverCrypt_Hash_Incremental_finish_sha1(
   EverCrypt_Hash_state_s *block_state = scrut.block_state;
   uint8_t *buf_ = scrut.buf;
   uint64_t total_len = scrut.total_len;
-  uint8_t *buf_1;
-  if (buf_ == NULL)
+  uint8_t *buf_1 = buf_;
+  EverCrypt_Hash_state_s s;
+  s.tag = EverCrypt_Hash_SHA1_s;
   {
-    buf_1 = NULL;
-  }
-  else
-  {
-    buf_1 = buf_;
-  }
-  {
-    EverCrypt_Hash_state_s s;
-    s.tag = EverCrypt_Hash_SHA1_s;
+    uint32_t buf[5U] = { 0U };
+    s.val.case_SHA1_s = buf;
     {
-      uint32_t buf[5U] = { 0U };
-      s.val.case_SHA1_s = buf;
-      {
-        EverCrypt_Hash_state_s tmp_block_state = s;
-        EverCrypt_Hash_copy(block_state, &tmp_block_state);
-        EverCrypt_Hash_update_last(&tmp_block_state, buf_1, total_len);
-        EverCrypt_Hash_finish(&tmp_block_state, dst);
-      }
+      EverCrypt_Hash_state_s tmp_block_state = s;
+      EverCrypt_Hash_copy(block_state, &tmp_block_state);
+      EverCrypt_Hash_update_last(&tmp_block_state, buf_1, total_len);
+      EverCrypt_Hash_finish(&tmp_block_state, dst);
     }
   }
 }
@@ -2009,27 +1849,17 @@ EverCrypt_Hash_Incremental_finish_sha224(
   EverCrypt_Hash_state_s *block_state = scrut.block_state;
   uint8_t *buf_ = scrut.buf;
   uint64_t total_len = scrut.total_len;
-  uint8_t *buf_1;
-  if (buf_ == NULL)
+  uint8_t *buf_1 = buf_;
+  EverCrypt_Hash_state_s s;
+  s.tag = EverCrypt_Hash_SHA2_224_s;
   {
-    buf_1 = NULL;
-  }
-  else
-  {
-    buf_1 = buf_;
-  }
-  {
-    EverCrypt_Hash_state_s s;
-    s.tag = EverCrypt_Hash_SHA2_224_s;
+    uint32_t buf[8U] = { 0U };
+    s.val.case_SHA2_224_s = buf;
     {
-      uint32_t buf[8U] = { 0U };
-      s.val.case_SHA2_224_s = buf;
-      {
-        EverCrypt_Hash_state_s tmp_block_state = s;
-        EverCrypt_Hash_copy(block_state, &tmp_block_state);
-        EverCrypt_Hash_update_last(&tmp_block_state, buf_1, total_len);
-        EverCrypt_Hash_finish(&tmp_block_state, dst);
-      }
+      EverCrypt_Hash_state_s tmp_block_state = s;
+      EverCrypt_Hash_copy(block_state, &tmp_block_state);
+      EverCrypt_Hash_update_last(&tmp_block_state, buf_1, total_len);
+      EverCrypt_Hash_finish(&tmp_block_state, dst);
     }
   }
 }
@@ -2044,27 +1874,17 @@ EverCrypt_Hash_Incremental_finish_sha256(
   EverCrypt_Hash_state_s *block_state = scrut.block_state;
   uint8_t *buf_ = scrut.buf;
   uint64_t total_len = scrut.total_len;
-  uint8_t *buf_1;
-  if (buf_ == NULL)
+  uint8_t *buf_1 = buf_;
+  EverCrypt_Hash_state_s s;
+  s.tag = EverCrypt_Hash_SHA2_256_s;
   {
-    buf_1 = NULL;
-  }
-  else
-  {
-    buf_1 = buf_;
-  }
-  {
-    EverCrypt_Hash_state_s s;
-    s.tag = EverCrypt_Hash_SHA2_256_s;
+    uint32_t buf[8U] = { 0U };
+    s.val.case_SHA2_256_s = buf;
     {
-      uint32_t buf[8U] = { 0U };
-      s.val.case_SHA2_256_s = buf;
-      {
-        EverCrypt_Hash_state_s tmp_block_state = s;
-        EverCrypt_Hash_copy(block_state, &tmp_block_state);
-        EverCrypt_Hash_update_last(&tmp_block_state, buf_1, total_len);
-        EverCrypt_Hash_finish(&tmp_block_state, dst);
-      }
+      EverCrypt_Hash_state_s tmp_block_state = s;
+      EverCrypt_Hash_copy(block_state, &tmp_block_state);
+      EverCrypt_Hash_update_last(&tmp_block_state, buf_1, total_len);
+      EverCrypt_Hash_finish(&tmp_block_state, dst);
     }
   }
 }
@@ -2079,27 +1899,17 @@ EverCrypt_Hash_Incremental_finish_sha384(
   EverCrypt_Hash_state_s *block_state = scrut.block_state;
   uint8_t *buf_ = scrut.buf;
   uint64_t total_len = scrut.total_len;
-  uint8_t *buf_1;
-  if (buf_ == NULL)
+  uint8_t *buf_1 = buf_;
+  EverCrypt_Hash_state_s s;
+  s.tag = EverCrypt_Hash_SHA2_384_s;
   {
-    buf_1 = NULL;
-  }
-  else
-  {
-    buf_1 = buf_;
-  }
-  {
-    EverCrypt_Hash_state_s s;
-    s.tag = EverCrypt_Hash_SHA2_384_s;
+    uint64_t buf[8U] = { 0U };
+    s.val.case_SHA2_384_s = buf;
     {
-      uint64_t buf[8U] = { 0U };
-      s.val.case_SHA2_384_s = buf;
-      {
-        EverCrypt_Hash_state_s tmp_block_state = s;
-        EverCrypt_Hash_copy(block_state, &tmp_block_state);
-        EverCrypt_Hash_update_last(&tmp_block_state, buf_1, total_len);
-        EverCrypt_Hash_finish(&tmp_block_state, dst);
-      }
+      EverCrypt_Hash_state_s tmp_block_state = s;
+      EverCrypt_Hash_copy(block_state, &tmp_block_state);
+      EverCrypt_Hash_update_last(&tmp_block_state, buf_1, total_len);
+      EverCrypt_Hash_finish(&tmp_block_state, dst);
     }
   }
 }
@@ -2114,27 +1924,17 @@ EverCrypt_Hash_Incremental_finish_sha512(
   EverCrypt_Hash_state_s *block_state = scrut.block_state;
   uint8_t *buf_ = scrut.buf;
   uint64_t total_len = scrut.total_len;
-  uint8_t *buf_1;
-  if (buf_ == NULL)
+  uint8_t *buf_1 = buf_;
+  EverCrypt_Hash_state_s s;
+  s.tag = EverCrypt_Hash_SHA2_512_s;
   {
-    buf_1 = NULL;
-  }
-  else
-  {
-    buf_1 = buf_;
-  }
-  {
-    EverCrypt_Hash_state_s s;
-    s.tag = EverCrypt_Hash_SHA2_512_s;
+    uint64_t buf[8U] = { 0U };
+    s.val.case_SHA2_512_s = buf;
     {
-      uint64_t buf[8U] = { 0U };
-      s.val.case_SHA2_512_s = buf;
-      {
-        EverCrypt_Hash_state_s tmp_block_state = s;
-        EverCrypt_Hash_copy(block_state, &tmp_block_state);
-        EverCrypt_Hash_update_last(&tmp_block_state, buf_1, total_len);
-        EverCrypt_Hash_finish(&tmp_block_state, dst);
-      }
+      EverCrypt_Hash_state_s tmp_block_state = s;
+      EverCrypt_Hash_copy(block_state, &tmp_block_state);
+      EverCrypt_Hash_update_last(&tmp_block_state, buf_1, total_len);
+      EverCrypt_Hash_finish(&tmp_block_state, dst);
     }
   }
 }

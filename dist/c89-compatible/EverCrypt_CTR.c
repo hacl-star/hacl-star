@@ -148,11 +148,7 @@ EverCrypt_CTR_create_in(
           uint64_t scrut = aes128_key_expansion(k, keys_b);
           uint64_t scrut0 = aes128_keyhash_init(keys_b, hkeys_b);
           uint8_t *iv_ = KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint8_t));
-          bool uu____0 = iv == NULL;
-          if (!(uu____0 || iv_ == NULL))
-          {
-            memcpy(iv_, iv, iv_len * sizeof (iv[0U]));
-          }
+          memcpy(iv_, iv, iv_len * sizeof (iv[0U]));
           {
             EverCrypt_CTR_state_s lit;
             lit.i =
@@ -192,11 +188,7 @@ EverCrypt_CTR_create_in(
           uint64_t scrut = aes256_key_expansion(k, keys_b);
           uint64_t scrut0 = aes256_keyhash_init(keys_b, hkeys_b);
           uint8_t *iv_ = KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint8_t));
-          bool uu____1 = iv == NULL;
-          if (!(uu____1 || iv_ == NULL))
-          {
-            memcpy(iv_, iv, iv_len * sizeof (iv[0U]));
-          }
+          memcpy(iv_, iv, iv_len * sizeof (iv[0U]));
           {
             EverCrypt_CTR_state_s lit;
             lit.i =
@@ -220,19 +212,11 @@ EverCrypt_CTR_create_in(
     case Spec_Agile_Cipher_CHACHA20:
       {
         uint8_t *ek = KRML_HOST_CALLOC((uint32_t)32U, sizeof (uint8_t));
-        bool uu____2 = k == NULL;
-        if (!(uu____2 || ek == NULL))
-        {
-          memcpy(ek, k, (uint32_t)32U * sizeof (k[0U]));
-        }
+        memcpy(ek, k, (uint32_t)32U * sizeof (k[0U]));
         KRML_CHECK_SIZE(sizeof (uint8_t), iv_len);
         {
           uint8_t *iv_ = KRML_HOST_CALLOC(iv_len, sizeof (uint8_t));
-          bool uu____3 = iv == NULL;
-          if (!(uu____3 || iv_ == NULL))
-          {
-            memcpy(iv_, iv, iv_len * sizeof (iv[0U]));
-          }
+          memcpy(iv_, iv, iv_len * sizeof (iv[0U]));
           {
             EverCrypt_CTR_state_s lit;
             lit.i = Spec_Cipher_Expansion_Hacl_CHACHA20;
@@ -301,11 +285,7 @@ EverCrypt_CTR_init(
       }
     case Spec_Cipher_Expansion_Hacl_CHACHA20:
       {
-        bool uu____1 = k == NULL;
-        if (!(uu____1 || ek == NULL))
-        {
-          memcpy(ek, k, (uint32_t)32U * sizeof (k[0U]));
-        }
+        memcpy(ek, k, (uint32_t)32U * sizeof (k[0U]));
         break;
       }
     default:
@@ -343,25 +323,14 @@ void EverCrypt_CTR_update_block(EverCrypt_CTR_state_s *p, uint8_t *dst, uint8_t 
         uint32_t iv_len1 = scrut1.iv_len;
         uint8_t *iv1 = scrut1.iv;
         uint8_t ctr_block[16U] = { 0U };
-        bool uu____0 = iv1 == NULL;
-        FStar_UInt128_uint128 uu____1;
+        FStar_UInt128_uint128 uu____0;
         FStar_UInt128_uint128 c;
-        uint8_t *uu____2;
-        if (!(uu____0 || ctr_block == NULL))
-        {
-          memcpy(ctr_block, iv1, iv_len1 * sizeof (iv1[0U]));
-        }
-        uu____1 = load128_be(ctr_block);
-        c = FStar_UInt128_add_mod(uu____1, FStar_UInt128_uint64_to_uint128((uint64_t)c01));
+        uint8_t *uu____1;
+        memcpy(ctr_block, iv1, iv_len1 * sizeof (iv1[0U]));
+        uu____0 = load128_be(ctr_block);
+        c = FStar_UInt128_add_mod(uu____0, FStar_UInt128_uint64_to_uint128((uint64_t)c01));
         store128_le(ctr_block, c);
-        if (ek1 == NULL)
-        {
-          uu____2 = NULL;
-        }
-        else
-        {
-          uu____2 = ek1;
-        }
+        uu____1 = ek1;
         {
           uint8_t inout_b[16U] = { 0U };
           uint32_t num_blocks = (uint32_t)(uint64_t)16U / (uint32_t)16U;
@@ -386,11 +355,11 @@ void EverCrypt_CTR_update_block(EverCrypt_CTR_state_s *p, uint8_t *dst, uint8_t 
               out_b_ = dst;
             }
             {
-              bool uu____3 = src == NULL;
+              bool uu____2 = src == NULL;
               uint64_t scrut;
-              bool uu____4;
+              bool uu____3;
               uint32_t c1;
-              if (!(uu____3 || inout_b == NULL))
+              if (!(uu____2 || inout_b == NULL))
               {
                 memcpy(inout_b,
                   src + num_bytes_,
@@ -401,11 +370,11 @@ void EverCrypt_CTR_update_block(EverCrypt_CTR_state_s *p, uint8_t *dst, uint8_t 
                   (uint64_t)16U,
                   out_b_,
                   inout_b,
-                  uu____2,
+                  uu____1,
                   ctr_block,
                   (uint64_t)num_blocks);
-              uu____4 = inout_b == NULL;
-              if (!(uu____4 || dst == NULL))
+              uu____3 = inout_b == NULL;
+              if (!(uu____3 || dst == NULL))
               {
                 memcpy(dst + num_bytes_,
                   inout_b,
@@ -436,25 +405,14 @@ void EverCrypt_CTR_update_block(EverCrypt_CTR_state_s *p, uint8_t *dst, uint8_t 
         uint32_t iv_len1 = scrut1.iv_len;
         uint8_t *iv1 = scrut1.iv;
         uint8_t ctr_block[16U] = { 0U };
-        bool uu____5 = iv1 == NULL;
-        FStar_UInt128_uint128 uu____6;
+        FStar_UInt128_uint128 uu____4;
         FStar_UInt128_uint128 c;
-        uint8_t *uu____7;
-        if (!(uu____5 || ctr_block == NULL))
-        {
-          memcpy(ctr_block, iv1, iv_len1 * sizeof (iv1[0U]));
-        }
-        uu____6 = load128_be(ctr_block);
-        c = FStar_UInt128_add_mod(uu____6, FStar_UInt128_uint64_to_uint128((uint64_t)c01));
+        uint8_t *uu____5;
+        memcpy(ctr_block, iv1, iv_len1 * sizeof (iv1[0U]));
+        uu____4 = load128_be(ctr_block);
+        c = FStar_UInt128_add_mod(uu____4, FStar_UInt128_uint64_to_uint128((uint64_t)c01));
         store128_le(ctr_block, c);
-        if (ek1 == NULL)
-        {
-          uu____7 = NULL;
-        }
-        else
-        {
-          uu____7 = ek1;
-        }
+        uu____5 = ek1;
         {
           uint8_t inout_b[16U] = { 0U };
           uint32_t num_blocks = (uint32_t)(uint64_t)16U / (uint32_t)16U;
@@ -479,11 +437,11 @@ void EverCrypt_CTR_update_block(EverCrypt_CTR_state_s *p, uint8_t *dst, uint8_t 
               out_b_ = dst;
             }
             {
-              bool uu____8 = src == NULL;
+              bool uu____6 = src == NULL;
               uint64_t scrut;
-              bool uu____9;
+              bool uu____7;
               uint32_t c1;
-              if (!(uu____8 || inout_b == NULL))
+              if (!(uu____6 || inout_b == NULL))
               {
                 memcpy(inout_b,
                   src + num_bytes_,
@@ -494,11 +452,11 @@ void EverCrypt_CTR_update_block(EverCrypt_CTR_state_s *p, uint8_t *dst, uint8_t 
                   (uint64_t)16U,
                   out_b_,
                   inout_b,
-                  uu____7,
+                  uu____5,
                   ctr_block,
                   (uint64_t)num_blocks);
-              uu____9 = inout_b == NULL;
-              if (!(uu____9 || dst == NULL))
+              uu____7 = inout_b == NULL;
+              if (!(uu____7 || dst == NULL))
               {
                 memcpy(dst + num_bytes_,
                   inout_b,
@@ -523,16 +481,7 @@ void EverCrypt_CTR_update_block(EverCrypt_CTR_state_s *p, uint8_t *dst, uint8_t 
     case Spec_Cipher_Expansion_Hacl_CHACHA20:
       {
         uint32_t ctx[16U] = { 0U };
-        uint8_t *ite;
-        if (iv == NULL)
-        {
-          ite = NULL;
-        }
-        else
-        {
-          ite = iv;
-        }
-        Hacl_Impl_Chacha20_chacha20_init(ctx, ek, ite, (uint32_t)0U);
+        Hacl_Impl_Chacha20_chacha20_init(ctx, ek, iv, (uint32_t)0U);
         Hacl_Impl_Chacha20_chacha20_encrypt_block(ctx, dst, c0, src);
         break;
       }

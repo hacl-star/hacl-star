@@ -30,19 +30,8 @@ void Hacl_Hash_MD5_legacy_update_multi(u32 *s, u8 *blocks, u32 n_blocks)
   for (i = (u32)0U; i < n_blocks; i++)
   {
     u32 sz = (u32)64U;
-    u8 *blocks0;
-    if (blocks == NULL)
-      blocks0 = NULL;
-    else
-      blocks0 = blocks;
-    {
-      u8 *block;
-      if (blocks == NULL)
-        block = NULL;
-      else
-        block = blocks + sz * i;
-      Hacl_Hash_Core_MD5_legacy_update(s, block);
-    }
+    u8 *block = blocks + sz * i;
+    Hacl_Hash_Core_MD5_legacy_update(s, block);
   }
 }
 
@@ -1707,50 +1696,32 @@ void Hacl_Hash_Core_MD5_legacy_update(u32 *abcd, u8 *x)
 
 void Hacl_Hash_Core_MD5_legacy_pad(u64 len, u8 *dst)
 {
-  u8 *dst1;
-  if (dst == NULL)
-    dst1 = NULL;
-  else
-    dst1 = dst;
+  u8 *dst1 = dst;
+  u8 *dst2;
+  u8 *dst3;
+  dst1[0U] = (u8)0x80U;
+  dst2 = dst + (u32)1U;
   {
-    u8 *dst2;
-    u8 *dst3;
-    dst1[0U] = (u8)0x80U;
-    if (dst == NULL)
-      dst2 = NULL;
-    else
-      dst2 = dst + (u32)1U;
-    {
-      u32 i;
-      for (i = (u32)0U; i < ((u32)128U - ((u32)9U + (u32)(len % (u64)(u32)64U))) % (u32)64U; i++)
-        dst2[i] = (u8)0U;
-    }
-    if (dst == NULL)
-      dst3 = NULL;
-    else
-      dst3 = dst + (u32)1U + ((u32)128U - ((u32)9U + (u32)(len % (u64)(u32)64U))) % (u32)64U;
-    store64_le(dst3, len << (u32)3U);
+    u32 i;
+    for (i = (u32)0U; i < ((u32)128U - ((u32)9U + (u32)(len % (u64)(u32)64U))) % (u32)64U; i++)
+      dst2[i] = (u8)0U;
   }
+  dst3 = dst + (u32)1U + ((u32)128U - ((u32)9U + (u32)(len % (u64)(u32)64U))) % (u32)64U;
+  store64_le(dst3, len << (u32)3U);
 }
 
 void Hacl_Hash_Core_MD5_legacy_finish(u32 *s, u8 *dst)
 {
-  u32 *uu____0;
-  if (s == NULL)
-    uu____0 = NULL;
-  else
-    uu____0 = s;
+  u32 *uu____0 = s;
+  u32 i;
+  for (i = (u32)0U; i < (u32)4U; i++)
   {
-    u32 i;
-    for (i = (u32)0U; i < (u32)4U; i++)
-    {
-      u8 *block;
-      if (dst == NULL)
-        block = NULL;
-      else
-        block = dst + i * (u32)4U;
-      store32_le(dst + i * (u32)4U, uu____0[i]);
-    }
+    u8 *block;
+    if (dst == NULL)
+      block = NULL;
+    else
+      block = dst + i * (u32)4U;
+    store32_le(dst + i * (u32)4U, uu____0[i]);
   }
 }
 
@@ -1760,19 +1731,8 @@ void Hacl_Hash_SHA1_legacy_update_multi(u32 *s, u8 *blocks, u32 n_blocks)
   for (i = (u32)0U; i < n_blocks; i++)
   {
     u32 sz = (u32)64U;
-    u8 *blocks0;
-    if (blocks == NULL)
-      blocks0 = NULL;
-    else
-      blocks0 = blocks;
-    {
-      u8 *block;
-      if (blocks == NULL)
-        block = NULL;
-      else
-        block = blocks + sz * i;
-      Hacl_Hash_Core_SHA1_legacy_update(s, block);
-    }
+    u8 *block = blocks + sz * i;
+    Hacl_Hash_Core_SHA1_legacy_update(s, block);
   }
 }
 
@@ -1967,50 +1927,32 @@ void Hacl_Hash_Core_SHA1_legacy_update(u32 *h, u8 *l)
 
 void Hacl_Hash_Core_SHA1_legacy_pad(u64 len, u8 *dst)
 {
-  u8 *dst1;
-  if (dst == NULL)
-    dst1 = NULL;
-  else
-    dst1 = dst;
+  u8 *dst1 = dst;
+  u8 *dst2;
+  u8 *dst3;
+  dst1[0U] = (u8)0x80U;
+  dst2 = dst + (u32)1U;
   {
-    u8 *dst2;
-    u8 *dst3;
-    dst1[0U] = (u8)0x80U;
-    if (dst == NULL)
-      dst2 = NULL;
-    else
-      dst2 = dst + (u32)1U;
-    {
-      u32 i;
-      for (i = (u32)0U; i < ((u32)128U - ((u32)9U + (u32)(len % (u64)(u32)64U))) % (u32)64U; i++)
-        dst2[i] = (u8)0U;
-    }
-    if (dst == NULL)
-      dst3 = NULL;
-    else
-      dst3 = dst + (u32)1U + ((u32)128U - ((u32)9U + (u32)(len % (u64)(u32)64U))) % (u32)64U;
-    store64_be(dst3, len << (u32)3U);
+    u32 i;
+    for (i = (u32)0U; i < ((u32)128U - ((u32)9U + (u32)(len % (u64)(u32)64U))) % (u32)64U; i++)
+      dst2[i] = (u8)0U;
   }
+  dst3 = dst + (u32)1U + ((u32)128U - ((u32)9U + (u32)(len % (u64)(u32)64U))) % (u32)64U;
+  store64_be(dst3, len << (u32)3U);
 }
 
 void Hacl_Hash_Core_SHA1_legacy_finish(u32 *s, u8 *dst)
 {
-  u32 *uu____0;
-  if (s == NULL)
-    uu____0 = NULL;
-  else
-    uu____0 = s;
+  u32 *uu____0 = s;
+  u32 i;
+  for (i = (u32)0U; i < (u32)5U; i++)
   {
-    u32 i;
-    for (i = (u32)0U; i < (u32)5U; i++)
-    {
-      u8 *block;
-      if (dst == NULL)
-        block = NULL;
-      else
-        block = dst + i * (u32)4U;
-      store32_be(dst + i * (u32)4U, uu____0[i]);
-    }
+    u8 *block;
+    if (dst == NULL)
+      block = NULL;
+    else
+      block = dst + i * (u32)4U;
+    store32_be(dst + i * (u32)4U, uu____0[i]);
   }
 }
 
@@ -2020,19 +1962,8 @@ void Hacl_Hash_SHA2_update_multi_224(u32 *s, u8 *blocks, u32 n_blocks)
   for (i = (u32)0U; i < n_blocks; i++)
   {
     u32 sz = (u32)64U;
-    u8 *blocks0;
-    if (blocks == NULL)
-      blocks0 = NULL;
-    else
-      blocks0 = blocks;
-    {
-      u8 *block;
-      if (blocks == NULL)
-        block = NULL;
-      else
-        block = blocks + sz * i;
-      Hacl_Hash_Core_SHA2_update_224(s, block);
-    }
+    u8 *block = blocks + sz * i;
+    Hacl_Hash_Core_SHA2_update_224(s, block);
   }
 }
 
@@ -2042,19 +1973,8 @@ void Hacl_Hash_SHA2_update_multi_256(u32 *s, u8 *blocks, u32 n_blocks)
   for (i = (u32)0U; i < n_blocks; i++)
   {
     u32 sz = (u32)64U;
-    u8 *blocks0;
-    if (blocks == NULL)
-      blocks0 = NULL;
-    else
-      blocks0 = blocks;
-    {
-      u8 *block;
-      if (blocks == NULL)
-        block = NULL;
-      else
-        block = blocks + sz * i;
-      Hacl_Hash_Core_SHA2_update_256(s, block);
-    }
+    u8 *block = blocks + sz * i;
+    Hacl_Hash_Core_SHA2_update_256(s, block);
   }
 }
 
@@ -2064,19 +1984,8 @@ void Hacl_Hash_SHA2_update_multi_384(u64 *s, u8 *blocks, u32 n_blocks)
   for (i = (u32)0U; i < n_blocks; i++)
   {
     u32 sz = (u32)128U;
-    u8 *blocks0;
-    if (blocks == NULL)
-      blocks0 = NULL;
-    else
-      blocks0 = blocks;
-    {
-      u8 *block;
-      if (blocks == NULL)
-        block = NULL;
-      else
-        block = blocks + sz * i;
-      Hacl_Hash_Core_SHA2_update_384(s, block);
-    }
+    u8 *block = blocks + sz * i;
+    Hacl_Hash_Core_SHA2_update_384(s, block);
   }
 }
 
@@ -2086,19 +1995,8 @@ void Hacl_Hash_SHA2_update_multi_512(u64 *s, u8 *blocks, u32 n_blocks)
   for (i = (u32)0U; i < n_blocks; i++)
   {
     u32 sz = (u32)128U;
-    u8 *blocks0;
-    if (blocks == NULL)
-      blocks0 = NULL;
-    else
-      blocks0 = blocks;
-    {
-      u8 *block;
-      if (blocks == NULL)
-        block = NULL;
-      else
-        block = blocks + sz * i;
-      Hacl_Hash_Core_SHA2_update_512(s, block);
-    }
+    u8 *block = blocks + sz * i;
+    Hacl_Hash_Core_SHA2_update_512(s, block);
   }
 }
 
@@ -2568,7 +2466,6 @@ void Hacl_Hash_Core_SHA2_update_224(u32 *hash, u8 *block)
 {
   u32 hash1[8U] = { 0U };
   u32 computed_ws[64U] = { 0U };
-  bool uu____0;
   {
     u32 i;
     for (i = (u32)0U; i < (u32)64U; i++)
@@ -2596,9 +2493,7 @@ void Hacl_Hash_Core_SHA2_update_224(u32 *hash, u8 *block)
         computed_ws[i] = w;
       }
   }
-  uu____0 = hash == NULL;
-  if (!(uu____0 || hash1 == NULL))
-    memcpy(hash1, hash, (u32)8U * sizeof (hash[0U]));
+  memcpy(hash1, hash, (u32)8U * sizeof (hash[0U]));
   {
     u32 i;
     for (i = (u32)0U; i < (u32)64U; i++)
@@ -2651,7 +2546,6 @@ void Hacl_Hash_Core_SHA2_update_256(u32 *hash, u8 *block)
 {
   u32 hash1[8U] = { 0U };
   u32 computed_ws[64U] = { 0U };
-  bool uu____0;
   {
     u32 i;
     for (i = (u32)0U; i < (u32)64U; i++)
@@ -2679,9 +2573,7 @@ void Hacl_Hash_Core_SHA2_update_256(u32 *hash, u8 *block)
         computed_ws[i] = w;
       }
   }
-  uu____0 = hash == NULL;
-  if (!(uu____0 || hash1 == NULL))
-    memcpy(hash1, hash, (u32)8U * sizeof (hash[0U]));
+  memcpy(hash1, hash, (u32)8U * sizeof (hash[0U]));
   {
     u32 i;
     for (i = (u32)0U; i < (u32)64U; i++)
@@ -2734,7 +2626,6 @@ void Hacl_Hash_Core_SHA2_update_384(u64 *hash, u8 *block)
 {
   u64 hash1[8U] = { 0U };
   u64 computed_ws[80U] = { 0U };
-  bool uu____0;
   {
     u32 i;
     for (i = (u32)0U; i < (u32)80U; i++)
@@ -2760,9 +2651,7 @@ void Hacl_Hash_Core_SHA2_update_384(u64 *hash, u8 *block)
         computed_ws[i] = w;
       }
   }
-  uu____0 = hash == NULL;
-  if (!(uu____0 || hash1 == NULL))
-    memcpy(hash1, hash, (u32)8U * sizeof (hash[0U]));
+  memcpy(hash1, hash, (u32)8U * sizeof (hash[0U]));
   {
     u32 i;
     for (i = (u32)0U; i < (u32)80U; i++)
@@ -2815,7 +2704,6 @@ void Hacl_Hash_Core_SHA2_update_512(u64 *hash, u8 *block)
 {
   u64 hash1[8U] = { 0U };
   u64 computed_ws[80U] = { 0U };
-  bool uu____0;
   {
     u32 i;
     for (i = (u32)0U; i < (u32)80U; i++)
@@ -2841,9 +2729,7 @@ void Hacl_Hash_Core_SHA2_update_512(u64 *hash, u8 *block)
         computed_ws[i] = w;
       }
   }
-  uu____0 = hash == NULL;
-  if (!(uu____0 || hash1 == NULL))
-    memcpy(hash1, hash, (u32)8U * sizeof (hash[0U]));
+  memcpy(hash1, hash, (u32)8U * sizeof (hash[0U]));
   {
     u32 i;
     for (i = (u32)0U; i < (u32)80U; i++)
@@ -2894,215 +2780,143 @@ void Hacl_Hash_Core_SHA2_update_512(u64 *hash, u8 *block)
 
 void Hacl_Hash_Core_SHA2_pad_224(u64 len, u8 *dst)
 {
-  u8 *dst1;
-  if (dst == NULL)
-    dst1 = NULL;
-  else
-    dst1 = dst;
+  u8 *dst1 = dst;
+  u8 *dst2;
+  u8 *dst3;
+  dst1[0U] = (u8)0x80U;
+  dst2 = dst + (u32)1U;
   {
-    u8 *dst2;
-    u8 *dst3;
-    dst1[0U] = (u8)0x80U;
-    if (dst == NULL)
-      dst2 = NULL;
-    else
-      dst2 = dst + (u32)1U;
-    {
-      u32 i;
-      for (i = (u32)0U; i < ((u32)128U - ((u32)9U + (u32)(len % (u64)(u32)64U))) % (u32)64U; i++)
-        dst2[i] = (u8)0U;
-    }
-    if (dst == NULL)
-      dst3 = NULL;
-    else
-      dst3 = dst + (u32)1U + ((u32)128U - ((u32)9U + (u32)(len % (u64)(u32)64U))) % (u32)64U;
-    store64_be(dst3, len << (u32)3U);
+    u32 i;
+    for (i = (u32)0U; i < ((u32)128U - ((u32)9U + (u32)(len % (u64)(u32)64U))) % (u32)64U; i++)
+      dst2[i] = (u8)0U;
   }
+  dst3 = dst + (u32)1U + ((u32)128U - ((u32)9U + (u32)(len % (u64)(u32)64U))) % (u32)64U;
+  store64_be(dst3, len << (u32)3U);
 }
 
 void Hacl_Hash_Core_SHA2_pad_256(u64 len, u8 *dst)
 {
-  u8 *dst1;
-  if (dst == NULL)
-    dst1 = NULL;
-  else
-    dst1 = dst;
+  u8 *dst1 = dst;
+  u8 *dst2;
+  u8 *dst3;
+  dst1[0U] = (u8)0x80U;
+  dst2 = dst + (u32)1U;
   {
-    u8 *dst2;
-    u8 *dst3;
-    dst1[0U] = (u8)0x80U;
-    if (dst == NULL)
-      dst2 = NULL;
-    else
-      dst2 = dst + (u32)1U;
-    {
-      u32 i;
-      for (i = (u32)0U; i < ((u32)128U - ((u32)9U + (u32)(len % (u64)(u32)64U))) % (u32)64U; i++)
-        dst2[i] = (u8)0U;
-    }
-    if (dst == NULL)
-      dst3 = NULL;
-    else
-      dst3 = dst + (u32)1U + ((u32)128U - ((u32)9U + (u32)(len % (u64)(u32)64U))) % (u32)64U;
-    store64_be(dst3, len << (u32)3U);
+    u32 i;
+    for (i = (u32)0U; i < ((u32)128U - ((u32)9U + (u32)(len % (u64)(u32)64U))) % (u32)64U; i++)
+      dst2[i] = (u8)0U;
   }
+  dst3 = dst + (u32)1U + ((u32)128U - ((u32)9U + (u32)(len % (u64)(u32)64U))) % (u32)64U;
+  store64_be(dst3, len << (u32)3U);
 }
 
 void Hacl_Hash_Core_SHA2_pad_384(uint128_t len, u8 *dst)
 {
-  u8 *dst1;
-  if (dst == NULL)
-    dst1 = NULL;
-  else
-    dst1 = dst;
+  u8 *dst1 = dst;
+  u8 *dst2;
+  u8 *dst3;
+  uint128_t len_;
+  dst1[0U] = (u8)0x80U;
+  dst2 = dst + (u32)1U;
   {
-    u8 *dst2;
-    u8 *dst3;
-    uint128_t len_;
-    dst1[0U] = (u8)0x80U;
-    if (dst == NULL)
-      dst2 = NULL;
-    else
-      dst2 = dst + (u32)1U;
-    {
-      u32 i;
-      for
-      (i
-        = (u32)0U;
-        i
-        < ((u32)256U - ((u32)17U + (u32)((uint64_t)len % (u64)(u32)128U))) % (u32)128U;
-        i++)
-        dst2[i] = (u8)0U;
-    }
-    if (dst == NULL)
-      dst3 = NULL;
-    else
-      dst3 =
-        dst
-        + (u32)1U + ((u32)256U - ((u32)17U + (u32)((uint64_t)len % (u64)(u32)128U))) % (u32)128U;
-    len_ = len << (u32)3U;
-    store128_be(dst3, len_);
+    u32 i;
+    for
+    (i
+      = (u32)0U;
+      i
+      < ((u32)256U - ((u32)17U + (u32)((uint64_t)len % (u64)(u32)128U))) % (u32)128U;
+      i++)
+      dst2[i] = (u8)0U;
   }
+  dst3 =
+    dst
+    + (u32)1U + ((u32)256U - ((u32)17U + (u32)((uint64_t)len % (u64)(u32)128U))) % (u32)128U;
+  len_ = len << (u32)3U;
+  store128_be(dst3, len_);
 }
 
 void Hacl_Hash_Core_SHA2_pad_512(uint128_t len, u8 *dst)
 {
-  u8 *dst1;
-  if (dst == NULL)
-    dst1 = NULL;
-  else
-    dst1 = dst;
+  u8 *dst1 = dst;
+  u8 *dst2;
+  u8 *dst3;
+  uint128_t len_;
+  dst1[0U] = (u8)0x80U;
+  dst2 = dst + (u32)1U;
   {
-    u8 *dst2;
-    u8 *dst3;
-    uint128_t len_;
-    dst1[0U] = (u8)0x80U;
-    if (dst == NULL)
-      dst2 = NULL;
-    else
-      dst2 = dst + (u32)1U;
-    {
-      u32 i;
-      for
-      (i
-        = (u32)0U;
-        i
-        < ((u32)256U - ((u32)17U + (u32)((uint64_t)len % (u64)(u32)128U))) % (u32)128U;
-        i++)
-        dst2[i] = (u8)0U;
-    }
-    if (dst == NULL)
-      dst3 = NULL;
-    else
-      dst3 =
-        dst
-        + (u32)1U + ((u32)256U - ((u32)17U + (u32)((uint64_t)len % (u64)(u32)128U))) % (u32)128U;
-    len_ = len << (u32)3U;
-    store128_be(dst3, len_);
+    u32 i;
+    for
+    (i
+      = (u32)0U;
+      i
+      < ((u32)256U - ((u32)17U + (u32)((uint64_t)len % (u64)(u32)128U))) % (u32)128U;
+      i++)
+      dst2[i] = (u8)0U;
   }
+  dst3 =
+    dst
+    + (u32)1U + ((u32)256U - ((u32)17U + (u32)((uint64_t)len % (u64)(u32)128U))) % (u32)128U;
+  len_ = len << (u32)3U;
+  store128_be(dst3, len_);
 }
 
 void Hacl_Hash_Core_SHA2_finish_224(u32 *s, u8 *dst)
 {
-  u32 *uu____0;
-  if (s == NULL)
-    uu____0 = NULL;
-  else
-    uu____0 = s;
+  u32 *uu____0 = s;
+  u32 i;
+  for (i = (u32)0U; i < (u32)7U; i++)
   {
-    u32 i;
-    for (i = (u32)0U; i < (u32)7U; i++)
-    {
-      u8 *block;
-      if (dst == NULL)
-        block = NULL;
-      else
-        block = dst + i * (u32)4U;
-      store32_be(dst + i * (u32)4U, uu____0[i]);
-    }
+    u8 *block;
+    if (dst == NULL)
+      block = NULL;
+    else
+      block = dst + i * (u32)4U;
+    store32_be(dst + i * (u32)4U, uu____0[i]);
   }
 }
 
 void Hacl_Hash_Core_SHA2_finish_256(u32 *s, u8 *dst)
 {
-  u32 *uu____0;
-  if (s == NULL)
-    uu____0 = NULL;
-  else
-    uu____0 = s;
+  u32 *uu____0 = s;
+  u32 i;
+  for (i = (u32)0U; i < (u32)8U; i++)
   {
-    u32 i;
-    for (i = (u32)0U; i < (u32)8U; i++)
-    {
-      u8 *block;
-      if (dst == NULL)
-        block = NULL;
-      else
-        block = dst + i * (u32)4U;
-      store32_be(dst + i * (u32)4U, uu____0[i]);
-    }
+    u8 *block;
+    if (dst == NULL)
+      block = NULL;
+    else
+      block = dst + i * (u32)4U;
+    store32_be(dst + i * (u32)4U, uu____0[i]);
   }
 }
 
 void Hacl_Hash_Core_SHA2_finish_384(u64 *s, u8 *dst)
 {
-  u64 *uu____0;
-  if (s == NULL)
-    uu____0 = NULL;
-  else
-    uu____0 = s;
+  u64 *uu____0 = s;
+  u32 i;
+  for (i = (u32)0U; i < (u32)6U; i++)
   {
-    u32 i;
-    for (i = (u32)0U; i < (u32)6U; i++)
-    {
-      u8 *block;
-      if (dst == NULL)
-        block = NULL;
-      else
-        block = dst + i * (u32)8U;
-      store64_be(dst + i * (u32)8U, uu____0[i]);
-    }
+    u8 *block;
+    if (dst == NULL)
+      block = NULL;
+    else
+      block = dst + i * (u32)8U;
+    store64_be(dst + i * (u32)8U, uu____0[i]);
   }
 }
 
 void Hacl_Hash_Core_SHA2_finish_512(u64 *s, u8 *dst)
 {
-  u64 *uu____0;
-  if (s == NULL)
-    uu____0 = NULL;
-  else
-    uu____0 = s;
+  u64 *uu____0 = s;
+  u32 i;
+  for (i = (u32)0U; i < (u32)8U; i++)
   {
-    u32 i;
-    for (i = (u32)0U; i < (u32)8U; i++)
-    {
-      u8 *block;
-      if (dst == NULL)
-        block = NULL;
-      else
-        block = dst + i * (u32)8U;
-      store64_be(dst + i * (u32)8U, uu____0[i]);
-    }
+    u8 *block;
+    if (dst == NULL)
+      block = NULL;
+    else
+      block = dst + i * (u32)8U;
+    store64_be(dst + i * (u32)8U, uu____0[i]);
   }
 }
 
