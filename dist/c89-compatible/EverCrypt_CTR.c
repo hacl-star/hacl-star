@@ -143,50 +143,30 @@ EverCrypt_CTR_create_in(
         if (has_aesni && has_pclmulqdq && has_avx && has_sse)
         {
           uint8_t *ek = KRML_HOST_CALLOC((uint32_t)304U, sizeof (uint8_t));
-          uint8_t *keys_b;
-          if (ek == NULL)
+          uint8_t *keys_b = ek;
+          uint8_t *hkeys_b = ek + (uint32_t)176U;
+          uint64_t scrut = aes128_key_expansion(k, keys_b);
+          uint64_t scrut0 = aes128_keyhash_init(keys_b, hkeys_b);
+          uint8_t *iv_ = KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint8_t));
+          bool uu____0 = iv == NULL;
+          if (!(uu____0 || iv_ == NULL))
           {
-            keys_b = NULL;
+            memcpy(iv_, iv, iv_len * sizeof (iv[0U]));
           }
-          else
           {
-            keys_b = ek;
-          }
-          {
-            uint8_t *hkeys_b;
-            if (ek == NULL)
+            EverCrypt_CTR_state_s lit;
+            lit.i =
+              vale_impl_of_alg(Spec_Cipher_Expansion_cipher_alg_of_impl(Spec_Cipher_Expansion_Vale_AES128));
+            lit.iv = iv_;
+            lit.iv_len = iv_len;
+            lit.xkey = ek;
+            lit.ctr = c;
+            KRML_CHECK_SIZE(sizeof (EverCrypt_CTR_state_s), (uint32_t)1U);
             {
-              hkeys_b = NULL;
-            }
-            else
-            {
-              hkeys_b = ek + (uint32_t)176U;
-            }
-            {
-              uint64_t scrut = aes128_key_expansion(k, keys_b);
-              uint64_t scrut0 = aes128_keyhash_init(keys_b, hkeys_b);
-              uint8_t *iv_ = KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint8_t));
-              bool uu____0 = iv == NULL;
-              if (!(uu____0 || iv_ == NULL))
-              {
-                memcpy(iv_, iv, iv_len * sizeof (iv[0U]));
-              }
-              {
-                EverCrypt_CTR_state_s lit;
-                lit.i =
-                  vale_impl_of_alg(Spec_Cipher_Expansion_cipher_alg_of_impl(Spec_Cipher_Expansion_Vale_AES128));
-                lit.iv = iv_;
-                lit.iv_len = iv_len;
-                lit.xkey = ek;
-                lit.ctr = c;
-                KRML_CHECK_SIZE(sizeof (EverCrypt_CTR_state_s), (uint32_t)1U);
-                {
-                  EverCrypt_CTR_state_s *p = KRML_HOST_MALLOC(sizeof (EverCrypt_CTR_state_s));
-                  p[0U] = lit;
-                  *dst = p;
-                  return EverCrypt_Error_Success;
-                }
-              }
+              EverCrypt_CTR_state_s *p = KRML_HOST_MALLOC(sizeof (EverCrypt_CTR_state_s));
+              p[0U] = lit;
+              *dst = p;
+              return EverCrypt_Error_Success;
             }
           }
         }
@@ -207,50 +187,30 @@ EverCrypt_CTR_create_in(
         if (has_aesni && has_pclmulqdq && has_avx && has_sse)
         {
           uint8_t *ek = KRML_HOST_CALLOC((uint32_t)368U, sizeof (uint8_t));
-          uint8_t *keys_b;
-          if (ek == NULL)
+          uint8_t *keys_b = ek;
+          uint8_t *hkeys_b = ek + (uint32_t)240U;
+          uint64_t scrut = aes256_key_expansion(k, keys_b);
+          uint64_t scrut0 = aes256_keyhash_init(keys_b, hkeys_b);
+          uint8_t *iv_ = KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint8_t));
+          bool uu____1 = iv == NULL;
+          if (!(uu____1 || iv_ == NULL))
           {
-            keys_b = NULL;
+            memcpy(iv_, iv, iv_len * sizeof (iv[0U]));
           }
-          else
           {
-            keys_b = ek;
-          }
-          {
-            uint8_t *hkeys_b;
-            if (ek == NULL)
+            EverCrypt_CTR_state_s lit;
+            lit.i =
+              vale_impl_of_alg(Spec_Cipher_Expansion_cipher_alg_of_impl(Spec_Cipher_Expansion_Vale_AES256));
+            lit.iv = iv_;
+            lit.iv_len = iv_len;
+            lit.xkey = ek;
+            lit.ctr = c;
+            KRML_CHECK_SIZE(sizeof (EverCrypt_CTR_state_s), (uint32_t)1U);
             {
-              hkeys_b = NULL;
-            }
-            else
-            {
-              hkeys_b = ek + (uint32_t)240U;
-            }
-            {
-              uint64_t scrut = aes256_key_expansion(k, keys_b);
-              uint64_t scrut0 = aes256_keyhash_init(keys_b, hkeys_b);
-              uint8_t *iv_ = KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint8_t));
-              bool uu____1 = iv == NULL;
-              if (!(uu____1 || iv_ == NULL))
-              {
-                memcpy(iv_, iv, iv_len * sizeof (iv[0U]));
-              }
-              {
-                EverCrypt_CTR_state_s lit;
-                lit.i =
-                  vale_impl_of_alg(Spec_Cipher_Expansion_cipher_alg_of_impl(Spec_Cipher_Expansion_Vale_AES256));
-                lit.iv = iv_;
-                lit.iv_len = iv_len;
-                lit.xkey = ek;
-                lit.ctr = c;
-                KRML_CHECK_SIZE(sizeof (EverCrypt_CTR_state_s), (uint32_t)1U);
-                {
-                  EverCrypt_CTR_state_s *p = KRML_HOST_MALLOC(sizeof (EverCrypt_CTR_state_s));
-                  p[0U] = lit;
-                  *dst = p;
-                  return EverCrypt_Error_Success;
-                }
-              }
+              EverCrypt_CTR_state_s *p = KRML_HOST_MALLOC(sizeof (EverCrypt_CTR_state_s));
+              p[0U] = lit;
+              *dst = p;
+              return EverCrypt_Error_Success;
             }
           }
         }
@@ -322,60 +282,20 @@ EverCrypt_CTR_init(
     case Spec_Cipher_Expansion_Vale_AES128:
       {
         #if EVERCRYPT_TARGETCONFIG_X64
-        uint8_t *keys_b;
-        if (ek == NULL)
-        {
-          keys_b = NULL;
-        }
-        else
-        {
-          keys_b = ek;
-        }
-        {
-          uint8_t *hkeys_b;
-          if (ek == NULL)
-          {
-            hkeys_b = NULL;
-          }
-          else
-          {
-            hkeys_b = ek + (uint32_t)176U;
-          }
-          {
-            uint64_t scrut = aes128_key_expansion(k, keys_b);
-            uint64_t scrut1 = aes128_keyhash_init(keys_b, hkeys_b);
-          }
-        }
+        uint8_t *keys_b = ek;
+        uint8_t *hkeys_b = ek + (uint32_t)176U;
+        uint64_t scrut = aes128_key_expansion(k, keys_b);
+        uint64_t scrut1 = aes128_keyhash_init(keys_b, hkeys_b);
         #endif
         break;
       }
     case Spec_Cipher_Expansion_Vale_AES256:
       {
         #if EVERCRYPT_TARGETCONFIG_X64
-        uint8_t *keys_b;
-        if (ek == NULL)
-        {
-          keys_b = NULL;
-        }
-        else
-        {
-          keys_b = ek;
-        }
-        {
-          uint8_t *hkeys_b;
-          if (ek == NULL)
-          {
-            hkeys_b = NULL;
-          }
-          else
-          {
-            hkeys_b = ek + (uint32_t)240U;
-          }
-          {
-            uint64_t scrut = aes256_key_expansion(k, keys_b);
-            uint64_t scrut1 = aes256_keyhash_init(keys_b, hkeys_b);
-          }
-        }
+        uint8_t *keys_b = ek;
+        uint8_t *hkeys_b = ek + (uint32_t)240U;
+        uint64_t scrut = aes256_key_expansion(k, keys_b);
+        uint64_t scrut1 = aes256_keyhash_init(keys_b, hkeys_b);
         #endif
         break;
       }

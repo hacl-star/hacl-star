@@ -185,24 +185,8 @@ EverCrypt_CTR_create_in(
         if (has_aesni && has_pclmulqdq && has_avx && has_sse)
         {
           uint8_t *ek = KRML_HOST_CALLOC((uint32_t)304U, sizeof (uint8_t));
-          uint8_t *keys_b;
-          if (ek == NULL)
-          {
-            keys_b = NULL;
-          }
-          else
-          {
-            keys_b = ek;
-          }
-          uint8_t *hkeys_b;
-          if (ek == NULL)
-          {
-            hkeys_b = NULL;
-          }
-          else
-          {
-            hkeys_b = ek + (uint32_t)176U;
-          }
+          uint8_t *keys_b = ek;
+          uint8_t *hkeys_b = ek + (uint32_t)176U;
           uint64_t scrut = aes128_key_expansion(k, keys_b);
           uint64_t scrut0 = aes128_keyhash_init(keys_b, hkeys_b);
           uint8_t *iv_ = KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint8_t));
@@ -244,24 +228,8 @@ EverCrypt_CTR_create_in(
         if (has_aesni && has_pclmulqdq && has_avx && has_sse)
         {
           uint8_t *ek = KRML_HOST_CALLOC((uint32_t)368U, sizeof (uint8_t));
-          uint8_t *keys_b;
-          if (ek == NULL)
-          {
-            keys_b = NULL;
-          }
-          else
-          {
-            keys_b = ek;
-          }
-          uint8_t *hkeys_b;
-          if (ek == NULL)
-          {
-            hkeys_b = NULL;
-          }
-          else
-          {
-            hkeys_b = ek + (uint32_t)240U;
-          }
+          uint8_t *keys_b = ek;
+          uint8_t *hkeys_b = ek + (uint32_t)240U;
           uint64_t scrut = aes256_key_expansion(k, keys_b);
           uint64_t scrut0 = aes256_keyhash_init(keys_b, hkeys_b);
           uint8_t *iv_ = KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint8_t));
@@ -355,24 +323,8 @@ EverCrypt_CTR_init(
     case Spec_Cipher_Expansion_Vale_AES128:
       {
         #if EVERCRYPT_TARGETCONFIG_X64
-        uint8_t *keys_b;
-        if (ek == NULL)
-        {
-          keys_b = NULL;
-        }
-        else
-        {
-          keys_b = ek;
-        }
-        uint8_t *hkeys_b;
-        if (ek == NULL)
-        {
-          hkeys_b = NULL;
-        }
-        else
-        {
-          hkeys_b = ek + (uint32_t)176U;
-        }
+        uint8_t *keys_b = ek;
+        uint8_t *hkeys_b = ek + (uint32_t)176U;
         uint64_t scrut = aes128_key_expansion(k, keys_b);
         uint64_t scrut1 = aes128_keyhash_init(keys_b, hkeys_b);
         #endif
@@ -381,24 +333,8 @@ EverCrypt_CTR_init(
     case Spec_Cipher_Expansion_Vale_AES256:
       {
         #if EVERCRYPT_TARGETCONFIG_X64
-        uint8_t *keys_b;
-        if (ek == NULL)
-        {
-          keys_b = NULL;
-        }
-        else
-        {
-          keys_b = ek;
-        }
-        uint8_t *hkeys_b;
-        if (ek == NULL)
-        {
-          hkeys_b = NULL;
-        }
-        else
-        {
-          hkeys_b = ek + (uint32_t)240U;
-        }
+        uint8_t *keys_b = ek;
+        uint8_t *hkeys_b = ek + (uint32_t)240U;
         uint64_t scrut = aes256_key_expansion(k, keys_b);
         uint64_t scrut1 = aes256_keyhash_init(keys_b, hkeys_b);
         #endif

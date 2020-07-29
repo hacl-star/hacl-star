@@ -109,39 +109,19 @@ create_in_aes128_gcm(EverCrypt_AEAD_state_s **dst, uint8_t *k)
   if (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe)
   {
     uint8_t *ek = KRML_HOST_CALLOC((uint32_t)480U, sizeof (uint8_t));
-    uint8_t *keys_b;
-    if (ek == NULL)
+    uint8_t *keys_b = ek;
+    uint8_t *hkeys_b = ek + (uint32_t)176U;
+    uint64_t scrut = aes128_key_expansion(k, keys_b);
+    uint64_t scrut0 = aes128_keyhash_init(keys_b, hkeys_b);
+    EverCrypt_AEAD_state_s lit;
+    lit.impl = Spec_Cipher_Expansion_Vale_AES128;
+    lit.ek = ek;
+    KRML_CHECK_SIZE(sizeof (EverCrypt_AEAD_state_s), (uint32_t)1U);
     {
-      keys_b = NULL;
-    }
-    else
-    {
-      keys_b = ek;
-    }
-    {
-      uint8_t *hkeys_b;
-      if (ek == NULL)
-      {
-        hkeys_b = NULL;
-      }
-      else
-      {
-        hkeys_b = ek + (uint32_t)176U;
-      }
-      {
-        uint64_t scrut = aes128_key_expansion(k, keys_b);
-        uint64_t scrut0 = aes128_keyhash_init(keys_b, hkeys_b);
-        EverCrypt_AEAD_state_s lit;
-        lit.impl = Spec_Cipher_Expansion_Vale_AES128;
-        lit.ek = ek;
-        KRML_CHECK_SIZE(sizeof (EverCrypt_AEAD_state_s), (uint32_t)1U);
-        {
-          EverCrypt_AEAD_state_s *p = KRML_HOST_MALLOC(sizeof (EverCrypt_AEAD_state_s));
-          p[0U] = lit;
-          *dst = p;
-          return EverCrypt_Error_Success;
-        }
-      }
+      EverCrypt_AEAD_state_s *p = KRML_HOST_MALLOC(sizeof (EverCrypt_AEAD_state_s));
+      p[0U] = lit;
+      *dst = p;
+      return EverCrypt_Error_Success;
     }
   }
   #endif
@@ -160,39 +140,19 @@ create_in_aes256_gcm(EverCrypt_AEAD_state_s **dst, uint8_t *k)
   if (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe)
   {
     uint8_t *ek = KRML_HOST_CALLOC((uint32_t)544U, sizeof (uint8_t));
-    uint8_t *keys_b;
-    if (ek == NULL)
+    uint8_t *keys_b = ek;
+    uint8_t *hkeys_b = ek + (uint32_t)240U;
+    uint64_t scrut = aes256_key_expansion(k, keys_b);
+    uint64_t scrut0 = aes256_keyhash_init(keys_b, hkeys_b);
+    EverCrypt_AEAD_state_s lit;
+    lit.impl = Spec_Cipher_Expansion_Vale_AES256;
+    lit.ek = ek;
+    KRML_CHECK_SIZE(sizeof (EverCrypt_AEAD_state_s), (uint32_t)1U);
     {
-      keys_b = NULL;
-    }
-    else
-    {
-      keys_b = ek;
-    }
-    {
-      uint8_t *hkeys_b;
-      if (ek == NULL)
-      {
-        hkeys_b = NULL;
-      }
-      else
-      {
-        hkeys_b = ek + (uint32_t)240U;
-      }
-      {
-        uint64_t scrut = aes256_key_expansion(k, keys_b);
-        uint64_t scrut0 = aes256_keyhash_init(keys_b, hkeys_b);
-        EverCrypt_AEAD_state_s lit;
-        lit.impl = Spec_Cipher_Expansion_Vale_AES256;
-        lit.ek = ek;
-        KRML_CHECK_SIZE(sizeof (EverCrypt_AEAD_state_s), (uint32_t)1U);
-        {
-          EverCrypt_AEAD_state_s *p = KRML_HOST_MALLOC(sizeof (EverCrypt_AEAD_state_s));
-          p[0U] = lit;
-          *dst = p;
-          return EverCrypt_Error_Success;
-        }
-      }
+      EverCrypt_AEAD_state_s *p = KRML_HOST_MALLOC(sizeof (EverCrypt_AEAD_state_s));
+      p[0U] = lit;
+      *dst = p;
+      return EverCrypt_Error_Success;
     }
   }
   #endif
@@ -1017,375 +977,345 @@ EverCrypt_AEAD_encrypt_expand_aes128_gcm(
   if (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe)
   {
     uint8_t ek[480U] = { 0U };
-    uint8_t *keys_b0;
-    if (ek == NULL)
+    uint8_t *keys_b0 = ek;
+    uint8_t *hkeys_b0 = ek + (uint32_t)176U;
+    uint64_t scrut0 = aes128_key_expansion(k, keys_b0);
+    uint64_t scrut1 = aes128_keyhash_init(keys_b0, hkeys_b0);
+    EverCrypt_AEAD_state_s lit;
+    lit.impl = Spec_Cipher_Expansion_Vale_AES128;
+    lit.ek = ek;
     {
-      keys_b0 = NULL;
-    }
-    else
-    {
-      keys_b0 = ek;
-    }
-    {
-      uint8_t *hkeys_b0;
-      if (ek == NULL)
+      EverCrypt_AEAD_state_s p = lit;
+      EverCrypt_AEAD_state_s *s = &p;
+      EverCrypt_Error_error_code r;
+      if (s == NULL)
       {
-        hkeys_b0 = NULL;
+        r = EverCrypt_Error_InvalidKey;
+      }
+      else if (iv_len == (uint32_t)0U)
+      {
+        r = EverCrypt_Error_InvalidIVLength;
       }
       else
       {
-        hkeys_b0 = ek + (uint32_t)176U;
-      }
-      {
-        uint64_t scrut0 = aes128_key_expansion(k, keys_b0);
-        uint64_t scrut1 = aes128_keyhash_init(keys_b0, hkeys_b0);
-        EverCrypt_AEAD_state_s lit;
-        lit.impl = Spec_Cipher_Expansion_Vale_AES128;
-        lit.ek = ek;
+        EverCrypt_AEAD_state_s scrut = *s;
+        uint8_t *ek0 = scrut.ek;
+        uint8_t *scratch_b;
+        if (ek0 == NULL)
         {
-          EverCrypt_AEAD_state_s p = lit;
-          EverCrypt_AEAD_state_s *s = &p;
-          EverCrypt_Error_error_code r;
-          if (s == NULL)
+          scratch_b = NULL;
+        }
+        else
+        {
+          scratch_b = ek0 + (uint32_t)304U;
+        }
+        {
+          uint8_t *ek1;
+          if (ek0 == NULL)
           {
-            r = EverCrypt_Error_InvalidKey;
-          }
-          else if (iv_len == (uint32_t)0U)
-          {
-            r = EverCrypt_Error_InvalidIVLength;
+            ek1 = NULL;
           }
           else
           {
-            EverCrypt_AEAD_state_s scrut = *s;
-            uint8_t *ek0 = scrut.ek;
-            uint8_t *scratch_b;
-            if (ek0 == NULL)
+            ek1 = ek0;
+          }
+          {
+            uint8_t *keys_b;
+            if (ek1 == NULL)
             {
-              scratch_b = NULL;
+              keys_b = NULL;
             }
             else
             {
-              scratch_b = ek0 + (uint32_t)304U;
+              keys_b = ek1;
             }
             {
-              uint8_t *ek1;
-              if (ek0 == NULL)
+              uint8_t *hkeys_b;
+              if (ek1 == NULL)
               {
-                ek1 = NULL;
+                hkeys_b = NULL;
               }
               else
               {
-                ek1 = ek0;
+                hkeys_b = ek1 + (uint32_t)176U;
               }
               {
-                uint8_t *keys_b;
-                if (ek1 == NULL)
+                uint8_t tmp_iv[16U] = { 0U };
+                uint32_t len = iv_len / (uint32_t)16U;
+                uint32_t bytes_len = len * (uint32_t)16U;
+                uint8_t *iv_b;
+                if (iv == NULL)
                 {
-                  keys_b = NULL;
+                  iv_b = NULL;
                 }
                 else
                 {
-                  keys_b = ek1;
+                  iv_b = iv;
                 }
                 {
-                  uint8_t *hkeys_b;
-                  if (ek1 == NULL)
+                  bool uu____0 = iv == NULL;
+                  if (!(uu____0 || tmp_iv == NULL))
                   {
-                    hkeys_b = NULL;
-                  }
-                  else
-                  {
-                    hkeys_b = ek1 + (uint32_t)176U;
+                    memcpy(tmp_iv, iv + bytes_len, iv_len % (uint32_t)16U * sizeof (iv[0U]));
                   }
                   {
-                    uint8_t tmp_iv[16U] = { 0U };
-                    uint32_t len = iv_len / (uint32_t)16U;
-                    uint32_t bytes_len = len * (uint32_t)16U;
-                    uint8_t *iv_b;
-                    if (iv == NULL)
+                    uint64_t
+                    uu____1 =
+                      compute_iv_stdcall(iv_b,
+                        (uint64_t)iv_len,
+                        (uint64_t)len,
+                        tmp_iv,
+                        tmp_iv,
+                        hkeys_b);
+                    uint8_t *inout_b;
+                    if (scratch_b == NULL)
                     {
-                      iv_b = NULL;
+                      inout_b = NULL;
                     }
                     else
                     {
-                      iv_b = iv;
+                      inout_b = scratch_b;
                     }
                     {
-                      bool uu____0 = iv == NULL;
-                      if (!(uu____0 || tmp_iv == NULL))
+                      uint8_t *abytes_b;
+                      if (scratch_b == NULL)
                       {
-                        memcpy(tmp_iv, iv + bytes_len, iv_len % (uint32_t)16U * sizeof (iv[0U]));
+                        abytes_b = NULL;
+                      }
+                      else
+                      {
+                        abytes_b = scratch_b + (uint32_t)16U;
                       }
                       {
-                        uint64_t
-                        uu____1 =
-                          compute_iv_stdcall(iv_b,
-                            (uint64_t)iv_len,
-                            (uint64_t)len,
-                            tmp_iv,
-                            tmp_iv,
-                            hkeys_b);
-                        uint8_t *inout_b;
+                        uint8_t *scratch_b1;
                         if (scratch_b == NULL)
                         {
-                          inout_b = NULL;
+                          scratch_b1 = NULL;
                         }
                         else
                         {
-                          inout_b = scratch_b;
+                          scratch_b1 = scratch_b + (uint32_t)32U;
                         }
                         {
-                          uint8_t *abytes_b;
-                          if (scratch_b == NULL)
+                          uint32_t
+                          plain_len_ = (uint32_t)(uint64_t)plain_len / (uint32_t)16U * (uint32_t)16U;
+                          uint32_t
+                          auth_len_ = (uint32_t)(uint64_t)ad_len / (uint32_t)16U * (uint32_t)16U;
+                          uint8_t *plain_b_;
+                          if (plain == NULL)
                           {
-                            abytes_b = NULL;
+                            plain_b_ = NULL;
                           }
                           else
                           {
-                            abytes_b = scratch_b + (uint32_t)16U;
+                            plain_b_ = plain;
                           }
                           {
-                            uint8_t *scratch_b1;
-                            if (scratch_b == NULL)
+                            uint8_t *out_b_;
+                            if (cipher == NULL)
                             {
-                              scratch_b1 = NULL;
+                              out_b_ = NULL;
                             }
                             else
                             {
-                              scratch_b1 = scratch_b + (uint32_t)32U;
+                              out_b_ = cipher;
                             }
                             {
-                              uint32_t
-                              plain_len_ =
-                                (uint32_t)(uint64_t)plain_len
-                                / (uint32_t)16U
-                                * (uint32_t)16U;
-                              uint32_t
-                              auth_len_ = (uint32_t)(uint64_t)ad_len / (uint32_t)16U * (uint32_t)16U;
-                              uint8_t *plain_b_;
-                              if (plain == NULL)
+                              uint8_t *auth_b_;
+                              if (ad == NULL)
                               {
-                                plain_b_ = NULL;
+                                auth_b_ = NULL;
                               }
                               else
                               {
-                                plain_b_ = plain;
+                                auth_b_ = ad;
                               }
                               {
-                                uint8_t *out_b_;
-                                if (cipher == NULL)
+                                bool uu____2 = plain == NULL;
+                                if (!(uu____2 || inout_b == NULL))
                                 {
-                                  out_b_ = NULL;
+                                  memcpy(inout_b,
+                                    plain + plain_len_,
+                                    (uint32_t)(uint64_t)plain_len
+                                    % (uint32_t)16U
+                                    * sizeof (plain[0U]));
                                 }
-                                else
                                 {
-                                  out_b_ = cipher;
-                                }
-                                {
-                                  uint8_t *auth_b_;
-                                  if (ad == NULL)
+                                  bool uu____3 = ad == NULL;
+                                  if (!(uu____3 || abytes_b == NULL))
                                   {
-                                    auth_b_ = NULL;
-                                  }
-                                  else
-                                  {
-                                    auth_b_ = ad;
+                                    memcpy(abytes_b,
+                                      ad + auth_len_,
+                                      (uint32_t)(uint64_t)ad_len % (uint32_t)16U * sizeof (ad[0U]));
                                   }
                                   {
-                                    bool uu____2 = plain == NULL;
-                                    if (!(uu____2 || inout_b == NULL))
+                                    uint64_t
+                                    len128x6 = (uint64_t)plain_len / (uint64_t)96U * (uint64_t)96U;
+                                    if (len128x6 / (uint64_t)16U >= (uint64_t)18U)
                                     {
-                                      memcpy(inout_b,
-                                        plain + plain_len_,
-                                        (uint32_t)(uint64_t)plain_len
-                                        % (uint32_t)16U
-                                        * sizeof (plain[0U]));
-                                    }
-                                    {
-                                      bool uu____3 = ad == NULL;
-                                      if (!(uu____3 || abytes_b == NULL))
+                                      uint64_t
+                                      len128_num =
+                                        (uint64_t)plain_len
+                                        / (uint64_t)16U
+                                        * (uint64_t)16U
+                                        - len128x6;
+                                      uint8_t *in128x6_b;
+                                      if (plain_b_ == NULL)
                                       {
-                                        memcpy(abytes_b,
-                                          ad + auth_len_,
-                                          (uint32_t)(uint64_t)ad_len
-                                          % (uint32_t)16U
-                                          * sizeof (ad[0U]));
+                                        in128x6_b = NULL;
+                                      }
+                                      else
+                                      {
+                                        in128x6_b = plain_b_;
                                       }
                                       {
-                                        uint64_t
-                                        len128x6 =
-                                          (uint64_t)plain_len
-                                          / (uint64_t)96U
-                                          * (uint64_t)96U;
-                                        if (len128x6 / (uint64_t)16U >= (uint64_t)18U)
+                                        uint8_t *out128x6_b;
+                                        if (out_b_ == NULL)
                                         {
-                                          uint64_t
-                                          len128_num =
-                                            (uint64_t)plain_len
-                                            / (uint64_t)16U
-                                            * (uint64_t)16U
-                                            - len128x6;
-                                          uint8_t *in128x6_b;
-                                          if (plain_b_ == NULL)
-                                          {
-                                            in128x6_b = NULL;
-                                          }
-                                          else
-                                          {
-                                            in128x6_b = plain_b_;
-                                          }
-                                          {
-                                            uint8_t *out128x6_b;
-                                            if (out_b_ == NULL)
-                                            {
-                                              out128x6_b = NULL;
-                                            }
-                                            else
-                                            {
-                                              out128x6_b = out_b_;
-                                            }
-                                            {
-                                              uint8_t *in128_b;
-                                              if (plain_b_ == NULL)
-                                              {
-                                                in128_b = NULL;
-                                              }
-                                              else
-                                              {
-                                                in128_b = plain_b_ + (uint32_t)len128x6;
-                                              }
-                                              {
-                                                uint8_t *out128_b;
-                                                if (out_b_ == NULL)
-                                                {
-                                                  out128_b = NULL;
-                                                }
-                                                else
-                                                {
-                                                  out128_b = out_b_ + (uint32_t)len128x6;
-                                                }
-                                                {
-                                                  uint64_t
-                                                  auth_num = (uint64_t)ad_len / (uint64_t)16U;
-                                                  uint64_t len128x6_ = len128x6 / (uint64_t)16U;
-                                                  uint64_t len128_num_ = len128_num / (uint64_t)16U;
-                                                  uint64_t
-                                                  scrut2 =
-                                                    gcm128_encrypt_opt(auth_b_,
-                                                      (uint64_t)ad_len,
-                                                      auth_num,
-                                                      keys_b,
-                                                      tmp_iv,
-                                                      hkeys_b,
-                                                      abytes_b,
-                                                      in128x6_b,
-                                                      out128x6_b,
-                                                      len128x6_,
-                                                      in128_b,
-                                                      out128_b,
-                                                      len128_num_,
-                                                      inout_b,
-                                                      (uint64_t)plain_len,
-                                                      scratch_b1,
-                                                      tag);
-                                                }
-                                              }
-                                            }
-                                          }
+                                          out128x6_b = NULL;
                                         }
                                         else
                                         {
-                                          uint32_t len128x61 = (uint32_t)0U;
-                                          uint64_t
-                                          len128_num =
-                                            (uint64_t)plain_len
-                                            / (uint64_t)16U
-                                            * (uint64_t)16U;
-                                          uint8_t *in128x6_b;
+                                          out128x6_b = out_b_;
+                                        }
+                                        {
+                                          uint8_t *in128_b;
                                           if (plain_b_ == NULL)
                                           {
-                                            in128x6_b = NULL;
+                                            in128_b = NULL;
                                           }
                                           else
                                           {
-                                            in128x6_b = plain_b_;
+                                            in128_b = plain_b_ + (uint32_t)len128x6;
                                           }
                                           {
-                                            uint8_t *out128x6_b;
+                                            uint8_t *out128_b;
                                             if (out_b_ == NULL)
                                             {
-                                              out128x6_b = NULL;
+                                              out128_b = NULL;
                                             }
                                             else
                                             {
-                                              out128x6_b = out_b_;
+                                              out128_b = out_b_ + (uint32_t)len128x6;
                                             }
                                             {
-                                              uint8_t *in128_b;
-                                              if (plain_b_ == NULL)
-                                              {
-                                                in128_b = NULL;
-                                              }
-                                              else
-                                              {
-                                                in128_b = plain_b_ + len128x61;
-                                              }
-                                              {
-                                                uint8_t *out128_b;
-                                                if (out_b_ == NULL)
-                                                {
-                                                  out128_b = NULL;
-                                                }
-                                                else
-                                                {
-                                                  out128_b = out_b_ + len128x61;
-                                                }
-                                                {
-                                                  uint64_t
-                                                  auth_num = (uint64_t)ad_len / (uint64_t)16U;
-                                                  uint64_t len128_num_ = len128_num / (uint64_t)16U;
-                                                  uint64_t len128x6_ = (uint64_t)0U;
-                                                  uint64_t
-                                                  scrut2 =
-                                                    gcm128_encrypt_opt(auth_b_,
-                                                      (uint64_t)ad_len,
-                                                      auth_num,
-                                                      keys_b,
-                                                      tmp_iv,
-                                                      hkeys_b,
-                                                      abytes_b,
-                                                      in128x6_b,
-                                                      out128x6_b,
-                                                      len128x6_,
-                                                      in128_b,
-                                                      out128_b,
-                                                      len128_num_,
-                                                      inout_b,
-                                                      (uint64_t)plain_len,
-                                                      scratch_b1,
-                                                      tag);
-                                                }
-                                              }
+                                              uint64_t auth_num = (uint64_t)ad_len / (uint64_t)16U;
+                                              uint64_t len128x6_ = len128x6 / (uint64_t)16U;
+                                              uint64_t len128_num_ = len128_num / (uint64_t)16U;
+                                              uint64_t
+                                              scrut2 =
+                                                gcm128_encrypt_opt(auth_b_,
+                                                  (uint64_t)ad_len,
+                                                  auth_num,
+                                                  keys_b,
+                                                  tmp_iv,
+                                                  hkeys_b,
+                                                  abytes_b,
+                                                  in128x6_b,
+                                                  out128x6_b,
+                                                  len128x6_,
+                                                  in128_b,
+                                                  out128_b,
+                                                  len128_num_,
+                                                  inout_b,
+                                                  (uint64_t)plain_len,
+                                                  scratch_b1,
+                                                  tag);
                                             }
                                           }
                                         }
+                                      }
+                                    }
+                                    else
+                                    {
+                                      uint32_t len128x61 = (uint32_t)0U;
+                                      uint64_t
+                                      len128_num =
+                                        (uint64_t)plain_len
+                                        / (uint64_t)16U
+                                        * (uint64_t)16U;
+                                      uint8_t *in128x6_b;
+                                      if (plain_b_ == NULL)
+                                      {
+                                        in128x6_b = NULL;
+                                      }
+                                      else
+                                      {
+                                        in128x6_b = plain_b_;
+                                      }
+                                      {
+                                        uint8_t *out128x6_b;
+                                        if (out_b_ == NULL)
                                         {
-                                          bool uu____4 = inout_b == NULL;
-                                          if (!(uu____4 || cipher == NULL))
+                                          out128x6_b = NULL;
+                                        }
+                                        else
+                                        {
+                                          out128x6_b = out_b_;
+                                        }
+                                        {
+                                          uint8_t *in128_b;
+                                          if (plain_b_ == NULL)
                                           {
-                                            memcpy(cipher
-                                              +
-                                                (uint32_t)(uint64_t)plain_len
-                                                / (uint32_t)16U
-                                                * (uint32_t)16U,
-                                              inout_b,
-                                              (uint32_t)(uint64_t)plain_len
-                                              % (uint32_t)16U
-                                              * sizeof (inout_b[0U]));
+                                            in128_b = NULL;
                                           }
-                                          r = EverCrypt_Error_Success;
+                                          else
+                                          {
+                                            in128_b = plain_b_ + len128x61;
+                                          }
+                                          {
+                                            uint8_t *out128_b;
+                                            if (out_b_ == NULL)
+                                            {
+                                              out128_b = NULL;
+                                            }
+                                            else
+                                            {
+                                              out128_b = out_b_ + len128x61;
+                                            }
+                                            {
+                                              uint64_t auth_num = (uint64_t)ad_len / (uint64_t)16U;
+                                              uint64_t len128_num_ = len128_num / (uint64_t)16U;
+                                              uint64_t len128x6_ = (uint64_t)0U;
+                                              uint64_t
+                                              scrut2 =
+                                                gcm128_encrypt_opt(auth_b_,
+                                                  (uint64_t)ad_len,
+                                                  auth_num,
+                                                  keys_b,
+                                                  tmp_iv,
+                                                  hkeys_b,
+                                                  abytes_b,
+                                                  in128x6_b,
+                                                  out128x6_b,
+                                                  len128x6_,
+                                                  in128_b,
+                                                  out128_b,
+                                                  len128_num_,
+                                                  inout_b,
+                                                  (uint64_t)plain_len,
+                                                  scratch_b1,
+                                                  tag);
+                                            }
+                                          }
                                         }
                                       }
+                                    }
+                                    {
+                                      bool uu____4 = inout_b == NULL;
+                                      if (!(uu____4 || cipher == NULL))
+                                      {
+                                        memcpy(cipher
+                                          +
+                                            (uint32_t)(uint64_t)plain_len
+                                            / (uint32_t)16U
+                                            * (uint32_t)16U,
+                                          inout_b,
+                                          (uint32_t)(uint64_t)plain_len
+                                          % (uint32_t)16U
+                                          * sizeof (inout_b[0U]));
+                                      }
+                                      r = EverCrypt_Error_Success;
                                     }
                                   }
                                 }
@@ -1400,9 +1330,9 @@ EverCrypt_AEAD_encrypt_expand_aes128_gcm(
               }
             }
           }
-          return EverCrypt_Error_Success;
         }
       }
+      return EverCrypt_Error_Success;
     }
   }
   #endif
@@ -1431,375 +1361,345 @@ EverCrypt_AEAD_encrypt_expand_aes256_gcm(
   if (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe)
   {
     uint8_t ek[544U] = { 0U };
-    uint8_t *keys_b0;
-    if (ek == NULL)
+    uint8_t *keys_b0 = ek;
+    uint8_t *hkeys_b0 = ek + (uint32_t)240U;
+    uint64_t scrut0 = aes256_key_expansion(k, keys_b0);
+    uint64_t scrut1 = aes256_keyhash_init(keys_b0, hkeys_b0);
+    EverCrypt_AEAD_state_s lit;
+    lit.impl = Spec_Cipher_Expansion_Vale_AES256;
+    lit.ek = ek;
     {
-      keys_b0 = NULL;
-    }
-    else
-    {
-      keys_b0 = ek;
-    }
-    {
-      uint8_t *hkeys_b0;
-      if (ek == NULL)
+      EverCrypt_AEAD_state_s p = lit;
+      EverCrypt_AEAD_state_s *s = &p;
+      EverCrypt_Error_error_code r;
+      if (s == NULL)
       {
-        hkeys_b0 = NULL;
+        r = EverCrypt_Error_InvalidKey;
+      }
+      else if (iv_len == (uint32_t)0U)
+      {
+        r = EverCrypt_Error_InvalidIVLength;
       }
       else
       {
-        hkeys_b0 = ek + (uint32_t)240U;
-      }
-      {
-        uint64_t scrut0 = aes256_key_expansion(k, keys_b0);
-        uint64_t scrut1 = aes256_keyhash_init(keys_b0, hkeys_b0);
-        EverCrypt_AEAD_state_s lit;
-        lit.impl = Spec_Cipher_Expansion_Vale_AES256;
-        lit.ek = ek;
+        EverCrypt_AEAD_state_s scrut = *s;
+        uint8_t *ek0 = scrut.ek;
+        uint8_t *scratch_b;
+        if (ek0 == NULL)
         {
-          EverCrypt_AEAD_state_s p = lit;
-          EverCrypt_AEAD_state_s *s = &p;
-          EverCrypt_Error_error_code r;
-          if (s == NULL)
+          scratch_b = NULL;
+        }
+        else
+        {
+          scratch_b = ek0 + (uint32_t)368U;
+        }
+        {
+          uint8_t *ek1;
+          if (ek0 == NULL)
           {
-            r = EverCrypt_Error_InvalidKey;
-          }
-          else if (iv_len == (uint32_t)0U)
-          {
-            r = EverCrypt_Error_InvalidIVLength;
+            ek1 = NULL;
           }
           else
           {
-            EverCrypt_AEAD_state_s scrut = *s;
-            uint8_t *ek0 = scrut.ek;
-            uint8_t *scratch_b;
-            if (ek0 == NULL)
+            ek1 = ek0;
+          }
+          {
+            uint8_t *keys_b;
+            if (ek1 == NULL)
             {
-              scratch_b = NULL;
+              keys_b = NULL;
             }
             else
             {
-              scratch_b = ek0 + (uint32_t)368U;
+              keys_b = ek1;
             }
             {
-              uint8_t *ek1;
-              if (ek0 == NULL)
+              uint8_t *hkeys_b;
+              if (ek1 == NULL)
               {
-                ek1 = NULL;
+                hkeys_b = NULL;
               }
               else
               {
-                ek1 = ek0;
+                hkeys_b = ek1 + (uint32_t)240U;
               }
               {
-                uint8_t *keys_b;
-                if (ek1 == NULL)
+                uint8_t tmp_iv[16U] = { 0U };
+                uint32_t len = iv_len / (uint32_t)16U;
+                uint32_t bytes_len = len * (uint32_t)16U;
+                uint8_t *iv_b;
+                if (iv == NULL)
                 {
-                  keys_b = NULL;
+                  iv_b = NULL;
                 }
                 else
                 {
-                  keys_b = ek1;
+                  iv_b = iv;
                 }
                 {
-                  uint8_t *hkeys_b;
-                  if (ek1 == NULL)
+                  bool uu____0 = iv == NULL;
+                  if (!(uu____0 || tmp_iv == NULL))
                   {
-                    hkeys_b = NULL;
-                  }
-                  else
-                  {
-                    hkeys_b = ek1 + (uint32_t)240U;
+                    memcpy(tmp_iv, iv + bytes_len, iv_len % (uint32_t)16U * sizeof (iv[0U]));
                   }
                   {
-                    uint8_t tmp_iv[16U] = { 0U };
-                    uint32_t len = iv_len / (uint32_t)16U;
-                    uint32_t bytes_len = len * (uint32_t)16U;
-                    uint8_t *iv_b;
-                    if (iv == NULL)
+                    uint64_t
+                    uu____1 =
+                      compute_iv_stdcall(iv_b,
+                        (uint64_t)iv_len,
+                        (uint64_t)len,
+                        tmp_iv,
+                        tmp_iv,
+                        hkeys_b);
+                    uint8_t *inout_b;
+                    if (scratch_b == NULL)
                     {
-                      iv_b = NULL;
+                      inout_b = NULL;
                     }
                     else
                     {
-                      iv_b = iv;
+                      inout_b = scratch_b;
                     }
                     {
-                      bool uu____0 = iv == NULL;
-                      if (!(uu____0 || tmp_iv == NULL))
+                      uint8_t *abytes_b;
+                      if (scratch_b == NULL)
                       {
-                        memcpy(tmp_iv, iv + bytes_len, iv_len % (uint32_t)16U * sizeof (iv[0U]));
+                        abytes_b = NULL;
+                      }
+                      else
+                      {
+                        abytes_b = scratch_b + (uint32_t)16U;
                       }
                       {
-                        uint64_t
-                        uu____1 =
-                          compute_iv_stdcall(iv_b,
-                            (uint64_t)iv_len,
-                            (uint64_t)len,
-                            tmp_iv,
-                            tmp_iv,
-                            hkeys_b);
-                        uint8_t *inout_b;
+                        uint8_t *scratch_b1;
                         if (scratch_b == NULL)
                         {
-                          inout_b = NULL;
+                          scratch_b1 = NULL;
                         }
                         else
                         {
-                          inout_b = scratch_b;
+                          scratch_b1 = scratch_b + (uint32_t)32U;
                         }
                         {
-                          uint8_t *abytes_b;
-                          if (scratch_b == NULL)
+                          uint32_t
+                          plain_len_ = (uint32_t)(uint64_t)plain_len / (uint32_t)16U * (uint32_t)16U;
+                          uint32_t
+                          auth_len_ = (uint32_t)(uint64_t)ad_len / (uint32_t)16U * (uint32_t)16U;
+                          uint8_t *plain_b_;
+                          if (plain == NULL)
                           {
-                            abytes_b = NULL;
+                            plain_b_ = NULL;
                           }
                           else
                           {
-                            abytes_b = scratch_b + (uint32_t)16U;
+                            plain_b_ = plain;
                           }
                           {
-                            uint8_t *scratch_b1;
-                            if (scratch_b == NULL)
+                            uint8_t *out_b_;
+                            if (cipher == NULL)
                             {
-                              scratch_b1 = NULL;
+                              out_b_ = NULL;
                             }
                             else
                             {
-                              scratch_b1 = scratch_b + (uint32_t)32U;
+                              out_b_ = cipher;
                             }
                             {
-                              uint32_t
-                              plain_len_ =
-                                (uint32_t)(uint64_t)plain_len
-                                / (uint32_t)16U
-                                * (uint32_t)16U;
-                              uint32_t
-                              auth_len_ = (uint32_t)(uint64_t)ad_len / (uint32_t)16U * (uint32_t)16U;
-                              uint8_t *plain_b_;
-                              if (plain == NULL)
+                              uint8_t *auth_b_;
+                              if (ad == NULL)
                               {
-                                plain_b_ = NULL;
+                                auth_b_ = NULL;
                               }
                               else
                               {
-                                plain_b_ = plain;
+                                auth_b_ = ad;
                               }
                               {
-                                uint8_t *out_b_;
-                                if (cipher == NULL)
+                                bool uu____2 = plain == NULL;
+                                if (!(uu____2 || inout_b == NULL))
                                 {
-                                  out_b_ = NULL;
+                                  memcpy(inout_b,
+                                    plain + plain_len_,
+                                    (uint32_t)(uint64_t)plain_len
+                                    % (uint32_t)16U
+                                    * sizeof (plain[0U]));
                                 }
-                                else
                                 {
-                                  out_b_ = cipher;
-                                }
-                                {
-                                  uint8_t *auth_b_;
-                                  if (ad == NULL)
+                                  bool uu____3 = ad == NULL;
+                                  if (!(uu____3 || abytes_b == NULL))
                                   {
-                                    auth_b_ = NULL;
-                                  }
-                                  else
-                                  {
-                                    auth_b_ = ad;
+                                    memcpy(abytes_b,
+                                      ad + auth_len_,
+                                      (uint32_t)(uint64_t)ad_len % (uint32_t)16U * sizeof (ad[0U]));
                                   }
                                   {
-                                    bool uu____2 = plain == NULL;
-                                    if (!(uu____2 || inout_b == NULL))
+                                    uint64_t
+                                    len128x6 = (uint64_t)plain_len / (uint64_t)96U * (uint64_t)96U;
+                                    if (len128x6 / (uint64_t)16U >= (uint64_t)18U)
                                     {
-                                      memcpy(inout_b,
-                                        plain + plain_len_,
-                                        (uint32_t)(uint64_t)plain_len
-                                        % (uint32_t)16U
-                                        * sizeof (plain[0U]));
-                                    }
-                                    {
-                                      bool uu____3 = ad == NULL;
-                                      if (!(uu____3 || abytes_b == NULL))
+                                      uint64_t
+                                      len128_num =
+                                        (uint64_t)plain_len
+                                        / (uint64_t)16U
+                                        * (uint64_t)16U
+                                        - len128x6;
+                                      uint8_t *in128x6_b;
+                                      if (plain_b_ == NULL)
                                       {
-                                        memcpy(abytes_b,
-                                          ad + auth_len_,
-                                          (uint32_t)(uint64_t)ad_len
-                                          % (uint32_t)16U
-                                          * sizeof (ad[0U]));
+                                        in128x6_b = NULL;
+                                      }
+                                      else
+                                      {
+                                        in128x6_b = plain_b_;
                                       }
                                       {
-                                        uint64_t
-                                        len128x6 =
-                                          (uint64_t)plain_len
-                                          / (uint64_t)96U
-                                          * (uint64_t)96U;
-                                        if (len128x6 / (uint64_t)16U >= (uint64_t)18U)
+                                        uint8_t *out128x6_b;
+                                        if (out_b_ == NULL)
                                         {
-                                          uint64_t
-                                          len128_num =
-                                            (uint64_t)plain_len
-                                            / (uint64_t)16U
-                                            * (uint64_t)16U
-                                            - len128x6;
-                                          uint8_t *in128x6_b;
-                                          if (plain_b_ == NULL)
-                                          {
-                                            in128x6_b = NULL;
-                                          }
-                                          else
-                                          {
-                                            in128x6_b = plain_b_;
-                                          }
-                                          {
-                                            uint8_t *out128x6_b;
-                                            if (out_b_ == NULL)
-                                            {
-                                              out128x6_b = NULL;
-                                            }
-                                            else
-                                            {
-                                              out128x6_b = out_b_;
-                                            }
-                                            {
-                                              uint8_t *in128_b;
-                                              if (plain_b_ == NULL)
-                                              {
-                                                in128_b = NULL;
-                                              }
-                                              else
-                                              {
-                                                in128_b = plain_b_ + (uint32_t)len128x6;
-                                              }
-                                              {
-                                                uint8_t *out128_b;
-                                                if (out_b_ == NULL)
-                                                {
-                                                  out128_b = NULL;
-                                                }
-                                                else
-                                                {
-                                                  out128_b = out_b_ + (uint32_t)len128x6;
-                                                }
-                                                {
-                                                  uint64_t
-                                                  auth_num = (uint64_t)ad_len / (uint64_t)16U;
-                                                  uint64_t len128x6_ = len128x6 / (uint64_t)16U;
-                                                  uint64_t len128_num_ = len128_num / (uint64_t)16U;
-                                                  uint64_t
-                                                  scrut2 =
-                                                    gcm256_encrypt_opt(auth_b_,
-                                                      (uint64_t)ad_len,
-                                                      auth_num,
-                                                      keys_b,
-                                                      tmp_iv,
-                                                      hkeys_b,
-                                                      abytes_b,
-                                                      in128x6_b,
-                                                      out128x6_b,
-                                                      len128x6_,
-                                                      in128_b,
-                                                      out128_b,
-                                                      len128_num_,
-                                                      inout_b,
-                                                      (uint64_t)plain_len,
-                                                      scratch_b1,
-                                                      tag);
-                                                }
-                                              }
-                                            }
-                                          }
+                                          out128x6_b = NULL;
                                         }
                                         else
                                         {
-                                          uint32_t len128x61 = (uint32_t)0U;
-                                          uint64_t
-                                          len128_num =
-                                            (uint64_t)plain_len
-                                            / (uint64_t)16U
-                                            * (uint64_t)16U;
-                                          uint8_t *in128x6_b;
+                                          out128x6_b = out_b_;
+                                        }
+                                        {
+                                          uint8_t *in128_b;
                                           if (plain_b_ == NULL)
                                           {
-                                            in128x6_b = NULL;
+                                            in128_b = NULL;
                                           }
                                           else
                                           {
-                                            in128x6_b = plain_b_;
+                                            in128_b = plain_b_ + (uint32_t)len128x6;
                                           }
                                           {
-                                            uint8_t *out128x6_b;
+                                            uint8_t *out128_b;
                                             if (out_b_ == NULL)
                                             {
-                                              out128x6_b = NULL;
+                                              out128_b = NULL;
                                             }
                                             else
                                             {
-                                              out128x6_b = out_b_;
+                                              out128_b = out_b_ + (uint32_t)len128x6;
                                             }
                                             {
-                                              uint8_t *in128_b;
-                                              if (plain_b_ == NULL)
-                                              {
-                                                in128_b = NULL;
-                                              }
-                                              else
-                                              {
-                                                in128_b = plain_b_ + len128x61;
-                                              }
-                                              {
-                                                uint8_t *out128_b;
-                                                if (out_b_ == NULL)
-                                                {
-                                                  out128_b = NULL;
-                                                }
-                                                else
-                                                {
-                                                  out128_b = out_b_ + len128x61;
-                                                }
-                                                {
-                                                  uint64_t
-                                                  auth_num = (uint64_t)ad_len / (uint64_t)16U;
-                                                  uint64_t len128_num_ = len128_num / (uint64_t)16U;
-                                                  uint64_t len128x6_ = (uint64_t)0U;
-                                                  uint64_t
-                                                  scrut2 =
-                                                    gcm256_encrypt_opt(auth_b_,
-                                                      (uint64_t)ad_len,
-                                                      auth_num,
-                                                      keys_b,
-                                                      tmp_iv,
-                                                      hkeys_b,
-                                                      abytes_b,
-                                                      in128x6_b,
-                                                      out128x6_b,
-                                                      len128x6_,
-                                                      in128_b,
-                                                      out128_b,
-                                                      len128_num_,
-                                                      inout_b,
-                                                      (uint64_t)plain_len,
-                                                      scratch_b1,
-                                                      tag);
-                                                }
-                                              }
+                                              uint64_t auth_num = (uint64_t)ad_len / (uint64_t)16U;
+                                              uint64_t len128x6_ = len128x6 / (uint64_t)16U;
+                                              uint64_t len128_num_ = len128_num / (uint64_t)16U;
+                                              uint64_t
+                                              scrut2 =
+                                                gcm256_encrypt_opt(auth_b_,
+                                                  (uint64_t)ad_len,
+                                                  auth_num,
+                                                  keys_b,
+                                                  tmp_iv,
+                                                  hkeys_b,
+                                                  abytes_b,
+                                                  in128x6_b,
+                                                  out128x6_b,
+                                                  len128x6_,
+                                                  in128_b,
+                                                  out128_b,
+                                                  len128_num_,
+                                                  inout_b,
+                                                  (uint64_t)plain_len,
+                                                  scratch_b1,
+                                                  tag);
                                             }
                                           }
                                         }
+                                      }
+                                    }
+                                    else
+                                    {
+                                      uint32_t len128x61 = (uint32_t)0U;
+                                      uint64_t
+                                      len128_num =
+                                        (uint64_t)plain_len
+                                        / (uint64_t)16U
+                                        * (uint64_t)16U;
+                                      uint8_t *in128x6_b;
+                                      if (plain_b_ == NULL)
+                                      {
+                                        in128x6_b = NULL;
+                                      }
+                                      else
+                                      {
+                                        in128x6_b = plain_b_;
+                                      }
+                                      {
+                                        uint8_t *out128x6_b;
+                                        if (out_b_ == NULL)
                                         {
-                                          bool uu____4 = inout_b == NULL;
-                                          if (!(uu____4 || cipher == NULL))
+                                          out128x6_b = NULL;
+                                        }
+                                        else
+                                        {
+                                          out128x6_b = out_b_;
+                                        }
+                                        {
+                                          uint8_t *in128_b;
+                                          if (plain_b_ == NULL)
                                           {
-                                            memcpy(cipher
-                                              +
-                                                (uint32_t)(uint64_t)plain_len
-                                                / (uint32_t)16U
-                                                * (uint32_t)16U,
-                                              inout_b,
-                                              (uint32_t)(uint64_t)plain_len
-                                              % (uint32_t)16U
-                                              * sizeof (inout_b[0U]));
+                                            in128_b = NULL;
                                           }
-                                          r = EverCrypt_Error_Success;
+                                          else
+                                          {
+                                            in128_b = plain_b_ + len128x61;
+                                          }
+                                          {
+                                            uint8_t *out128_b;
+                                            if (out_b_ == NULL)
+                                            {
+                                              out128_b = NULL;
+                                            }
+                                            else
+                                            {
+                                              out128_b = out_b_ + len128x61;
+                                            }
+                                            {
+                                              uint64_t auth_num = (uint64_t)ad_len / (uint64_t)16U;
+                                              uint64_t len128_num_ = len128_num / (uint64_t)16U;
+                                              uint64_t len128x6_ = (uint64_t)0U;
+                                              uint64_t
+                                              scrut2 =
+                                                gcm256_encrypt_opt(auth_b_,
+                                                  (uint64_t)ad_len,
+                                                  auth_num,
+                                                  keys_b,
+                                                  tmp_iv,
+                                                  hkeys_b,
+                                                  abytes_b,
+                                                  in128x6_b,
+                                                  out128x6_b,
+                                                  len128x6_,
+                                                  in128_b,
+                                                  out128_b,
+                                                  len128_num_,
+                                                  inout_b,
+                                                  (uint64_t)plain_len,
+                                                  scratch_b1,
+                                                  tag);
+                                            }
+                                          }
                                         }
                                       }
+                                    }
+                                    {
+                                      bool uu____4 = inout_b == NULL;
+                                      if (!(uu____4 || cipher == NULL))
+                                      {
+                                        memcpy(cipher
+                                          +
+                                            (uint32_t)(uint64_t)plain_len
+                                            / (uint32_t)16U
+                                            * (uint32_t)16U,
+                                          inout_b,
+                                          (uint32_t)(uint64_t)plain_len
+                                          % (uint32_t)16U
+                                          * sizeof (inout_b[0U]));
+                                      }
+                                      r = EverCrypt_Error_Success;
                                     }
                                   }
                                 }
@@ -1814,9 +1714,9 @@ EverCrypt_AEAD_encrypt_expand_aes256_gcm(
               }
             }
           }
-          return EverCrypt_Error_Success;
         }
       }
+      return EverCrypt_Error_Success;
     }
   }
   #endif
@@ -2760,387 +2660,360 @@ EverCrypt_AEAD_decrypt_expand_aes128_gcm(
   if (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe)
   {
     uint8_t ek[480U] = { 0U };
-    uint8_t *keys_b0;
-    if (ek == NULL)
+    uint8_t *keys_b0 = ek;
+    uint8_t *hkeys_b0 = ek + (uint32_t)176U;
+    uint64_t scrut = aes128_key_expansion(k, keys_b0);
+    uint64_t scrut0 = aes128_keyhash_init(keys_b0, hkeys_b0);
+    EverCrypt_AEAD_state_s lit;
+    lit.impl = Spec_Cipher_Expansion_Vale_AES128;
+    lit.ek = ek;
     {
-      keys_b0 = NULL;
-    }
-    else
-    {
-      keys_b0 = ek;
-    }
-    {
-      uint8_t *hkeys_b0;
-      if (ek == NULL)
+      EverCrypt_AEAD_state_s p = lit;
+      EverCrypt_AEAD_state_s *s = &p;
+      if (s == NULL)
       {
-        hkeys_b0 = NULL;
+        return EverCrypt_Error_InvalidKey;
+      }
+      else if (iv_len == (uint32_t)0U)
+      {
+        return EverCrypt_Error_InvalidIVLength;
       }
       else
       {
-        hkeys_b0 = ek + (uint32_t)176U;
-      }
-      {
-        uint64_t scrut = aes128_key_expansion(k, keys_b0);
-        uint64_t scrut0 = aes128_keyhash_init(keys_b0, hkeys_b0);
-        EverCrypt_AEAD_state_s lit;
-        lit.impl = Spec_Cipher_Expansion_Vale_AES128;
-        lit.ek = ek;
+        EverCrypt_AEAD_state_s scrut1 = *s;
+        uint8_t *ek0 = scrut1.ek;
+        uint8_t *scratch_b;
+        if (ek0 == NULL)
         {
-          EverCrypt_AEAD_state_s p = lit;
-          EverCrypt_AEAD_state_s *s = &p;
-          if (s == NULL)
+          scratch_b = NULL;
+        }
+        else
+        {
+          scratch_b = ek0 + (uint32_t)304U;
+        }
+        {
+          uint8_t *ek1;
+          if (ek0 == NULL)
           {
-            return EverCrypt_Error_InvalidKey;
-          }
-          else if (iv_len == (uint32_t)0U)
-          {
-            return EverCrypt_Error_InvalidIVLength;
+            ek1 = NULL;
           }
           else
           {
-            EverCrypt_AEAD_state_s scrut1 = *s;
-            uint8_t *ek0 = scrut1.ek;
-            uint8_t *scratch_b;
-            if (ek0 == NULL)
+            ek1 = ek0;
+          }
+          {
+            uint8_t *keys_b;
+            if (ek1 == NULL)
             {
-              scratch_b = NULL;
+              keys_b = NULL;
             }
             else
             {
-              scratch_b = ek0 + (uint32_t)304U;
+              keys_b = ek1;
             }
             {
-              uint8_t *ek1;
-              if (ek0 == NULL)
+              uint8_t *hkeys_b;
+              if (ek1 == NULL)
               {
-                ek1 = NULL;
+                hkeys_b = NULL;
               }
               else
               {
-                ek1 = ek0;
+                hkeys_b = ek1 + (uint32_t)176U;
               }
               {
-                uint8_t *keys_b;
-                if (ek1 == NULL)
+                uint8_t tmp_iv[16U] = { 0U };
+                uint32_t len = iv_len / (uint32_t)16U;
+                uint32_t bytes_len = len * (uint32_t)16U;
+                uint8_t *iv_b;
+                if (iv == NULL)
                 {
-                  keys_b = NULL;
+                  iv_b = NULL;
                 }
                 else
                 {
-                  keys_b = ek1;
+                  iv_b = iv;
                 }
                 {
-                  uint8_t *hkeys_b;
-                  if (ek1 == NULL)
+                  bool uu____0 = iv == NULL;
+                  if (!(uu____0 || tmp_iv == NULL))
                   {
-                    hkeys_b = NULL;
-                  }
-                  else
-                  {
-                    hkeys_b = ek1 + (uint32_t)176U;
+                    memcpy(tmp_iv, iv + bytes_len, iv_len % (uint32_t)16U * sizeof (iv[0U]));
                   }
                   {
-                    uint8_t tmp_iv[16U] = { 0U };
-                    uint32_t len = iv_len / (uint32_t)16U;
-                    uint32_t bytes_len = len * (uint32_t)16U;
-                    uint8_t *iv_b;
-                    if (iv == NULL)
+                    uint64_t
+                    uu____1 =
+                      compute_iv_stdcall(iv_b,
+                        (uint64_t)iv_len,
+                        (uint64_t)len,
+                        tmp_iv,
+                        tmp_iv,
+                        hkeys_b);
+                    uint8_t *inout_b;
+                    if (scratch_b == NULL)
                     {
-                      iv_b = NULL;
+                      inout_b = NULL;
                     }
                     else
                     {
-                      iv_b = iv;
+                      inout_b = scratch_b;
                     }
                     {
-                      bool uu____0 = iv == NULL;
-                      if (!(uu____0 || tmp_iv == NULL))
+                      uint8_t *abytes_b;
+                      if (scratch_b == NULL)
                       {
-                        memcpy(tmp_iv, iv + bytes_len, iv_len % (uint32_t)16U * sizeof (iv[0U]));
+                        abytes_b = NULL;
+                      }
+                      else
+                      {
+                        abytes_b = scratch_b + (uint32_t)16U;
                       }
                       {
-                        uint64_t
-                        uu____1 =
-                          compute_iv_stdcall(iv_b,
-                            (uint64_t)iv_len,
-                            (uint64_t)len,
-                            tmp_iv,
-                            tmp_iv,
-                            hkeys_b);
-                        uint8_t *inout_b;
+                        uint8_t *scratch_b1;
                         if (scratch_b == NULL)
                         {
-                          inout_b = NULL;
+                          scratch_b1 = NULL;
                         }
                         else
                         {
-                          inout_b = scratch_b;
+                          scratch_b1 = scratch_b + (uint32_t)32U;
                         }
                         {
-                          uint8_t *abytes_b;
-                          if (scratch_b == NULL)
+                          uint32_t
+                          cipher_len_ =
+                            (uint32_t)(uint64_t)cipher_len
+                            / (uint32_t)16U
+                            * (uint32_t)16U;
+                          uint32_t
+                          auth_len_ = (uint32_t)(uint64_t)ad_len / (uint32_t)16U * (uint32_t)16U;
+                          uint8_t *cipher_b_;
+                          if (cipher == NULL)
                           {
-                            abytes_b = NULL;
+                            cipher_b_ = NULL;
                           }
                           else
                           {
-                            abytes_b = scratch_b + (uint32_t)16U;
+                            cipher_b_ = cipher;
                           }
                           {
-                            uint8_t *scratch_b1;
-                            if (scratch_b == NULL)
+                            uint8_t *out_b_;
+                            if (dst == NULL)
                             {
-                              scratch_b1 = NULL;
+                              out_b_ = NULL;
                             }
                             else
                             {
-                              scratch_b1 = scratch_b + (uint32_t)32U;
+                              out_b_ = dst;
                             }
                             {
-                              uint32_t
-                              cipher_len_ =
-                                (uint32_t)(uint64_t)cipher_len
-                                / (uint32_t)16U
-                                * (uint32_t)16U;
-                              uint32_t
-                              auth_len_ = (uint32_t)(uint64_t)ad_len / (uint32_t)16U * (uint32_t)16U;
-                              uint8_t *cipher_b_;
-                              if (cipher == NULL)
+                              uint8_t *auth_b_;
+                              if (ad == NULL)
                               {
-                                cipher_b_ = NULL;
+                                auth_b_ = NULL;
                               }
                               else
                               {
-                                cipher_b_ = cipher;
+                                auth_b_ = ad;
                               }
                               {
-                                uint8_t *out_b_;
-                                if (dst == NULL)
+                                bool uu____2 = cipher == NULL;
+                                if (!(uu____2 || inout_b == NULL))
                                 {
-                                  out_b_ = NULL;
+                                  memcpy(inout_b,
+                                    cipher + cipher_len_,
+                                    (uint32_t)(uint64_t)cipher_len
+                                    % (uint32_t)16U
+                                    * sizeof (cipher[0U]));
                                 }
-                                else
                                 {
-                                  out_b_ = dst;
-                                }
-                                {
-                                  uint8_t *auth_b_;
-                                  if (ad == NULL)
+                                  bool uu____3 = ad == NULL;
+                                  if (!(uu____3 || abytes_b == NULL))
                                   {
-                                    auth_b_ = NULL;
-                                  }
-                                  else
-                                  {
-                                    auth_b_ = ad;
+                                    memcpy(abytes_b,
+                                      ad + auth_len_,
+                                      (uint32_t)(uint64_t)ad_len % (uint32_t)16U * sizeof (ad[0U]));
                                   }
                                   {
-                                    bool uu____2 = cipher == NULL;
-                                    if (!(uu____2 || inout_b == NULL))
+                                    uint64_t
+                                    len128x6 = (uint64_t)cipher_len / (uint64_t)96U * (uint64_t)96U;
+                                    uint64_t c;
+                                    if (len128x6 / (uint64_t)16U >= (uint64_t)6U)
                                     {
-                                      memcpy(inout_b,
-                                        cipher + cipher_len_,
-                                        (uint32_t)(uint64_t)cipher_len
-                                        % (uint32_t)16U
-                                        * sizeof (cipher[0U]));
-                                    }
-                                    {
-                                      bool uu____3 = ad == NULL;
-                                      if (!(uu____3 || abytes_b == NULL))
+                                      uint64_t
+                                      len128_num =
+                                        (uint64_t)cipher_len
+                                        / (uint64_t)16U
+                                        * (uint64_t)16U
+                                        - len128x6;
+                                      uint8_t *in128x6_b;
+                                      if (cipher_b_ == NULL)
                                       {
-                                        memcpy(abytes_b,
-                                          ad + auth_len_,
-                                          (uint32_t)(uint64_t)ad_len
-                                          % (uint32_t)16U
-                                          * sizeof (ad[0U]));
+                                        in128x6_b = NULL;
+                                      }
+                                      else
+                                      {
+                                        in128x6_b = cipher_b_;
                                       }
                                       {
-                                        uint64_t
-                                        len128x6 =
-                                          (uint64_t)cipher_len
-                                          / (uint64_t)96U
-                                          * (uint64_t)96U;
-                                        uint64_t c;
-                                        if (len128x6 / (uint64_t)16U >= (uint64_t)6U)
+                                        uint8_t *out128x6_b;
+                                        if (out_b_ == NULL)
                                         {
-                                          uint64_t
-                                          len128_num =
-                                            (uint64_t)cipher_len
-                                            / (uint64_t)16U
-                                            * (uint64_t)16U
-                                            - len128x6;
-                                          uint8_t *in128x6_b;
-                                          if (cipher_b_ == NULL)
-                                          {
-                                            in128x6_b = NULL;
-                                          }
-                                          else
-                                          {
-                                            in128x6_b = cipher_b_;
-                                          }
-                                          {
-                                            uint8_t *out128x6_b;
-                                            if (out_b_ == NULL)
-                                            {
-                                              out128x6_b = NULL;
-                                            }
-                                            else
-                                            {
-                                              out128x6_b = out_b_;
-                                            }
-                                            {
-                                              uint8_t *in128_b;
-                                              if (cipher_b_ == NULL)
-                                              {
-                                                in128_b = NULL;
-                                              }
-                                              else
-                                              {
-                                                in128_b = cipher_b_ + (uint32_t)len128x6;
-                                              }
-                                              {
-                                                uint8_t *out128_b;
-                                                if (out_b_ == NULL)
-                                                {
-                                                  out128_b = NULL;
-                                                }
-                                                else
-                                                {
-                                                  out128_b = out_b_ + (uint32_t)len128x6;
-                                                }
-                                                {
-                                                  uint64_t
-                                                  auth_num = (uint64_t)ad_len / (uint64_t)16U;
-                                                  uint64_t len128x6_ = len128x6 / (uint64_t)16U;
-                                                  uint64_t len128_num_ = len128_num / (uint64_t)16U;
-                                                  uint64_t
-                                                  scrut2 =
-                                                    gcm128_decrypt_opt(auth_b_,
-                                                      (uint64_t)ad_len,
-                                                      auth_num,
-                                                      keys_b,
-                                                      tmp_iv,
-                                                      hkeys_b,
-                                                      abytes_b,
-                                                      in128x6_b,
-                                                      out128x6_b,
-                                                      len128x6_,
-                                                      in128_b,
-                                                      out128_b,
-                                                      len128_num_,
-                                                      inout_b,
-                                                      (uint64_t)cipher_len,
-                                                      scratch_b1,
-                                                      tag);
-                                                  uint64_t c0 = scrut2;
-                                                  c = c0;
-                                                }
-                                              }
-                                            }
-                                          }
+                                          out128x6_b = NULL;
                                         }
                                         else
                                         {
-                                          uint32_t len128x61 = (uint32_t)0U;
-                                          uint64_t
-                                          len128_num =
-                                            (uint64_t)cipher_len
-                                            / (uint64_t)16U
-                                            * (uint64_t)16U;
-                                          uint8_t *in128x6_b;
+                                          out128x6_b = out_b_;
+                                        }
+                                        {
+                                          uint8_t *in128_b;
                                           if (cipher_b_ == NULL)
                                           {
-                                            in128x6_b = NULL;
+                                            in128_b = NULL;
                                           }
                                           else
                                           {
-                                            in128x6_b = cipher_b_;
+                                            in128_b = cipher_b_ + (uint32_t)len128x6;
                                           }
                                           {
-                                            uint8_t *out128x6_b;
+                                            uint8_t *out128_b;
                                             if (out_b_ == NULL)
                                             {
-                                              out128x6_b = NULL;
+                                              out128_b = NULL;
                                             }
                                             else
                                             {
-                                              out128x6_b = out_b_;
+                                              out128_b = out_b_ + (uint32_t)len128x6;
                                             }
                                             {
-                                              uint8_t *in128_b;
-                                              if (cipher_b_ == NULL)
-                                              {
-                                                in128_b = NULL;
-                                              }
-                                              else
-                                              {
-                                                in128_b = cipher_b_ + len128x61;
-                                              }
-                                              {
-                                                uint8_t *out128_b;
-                                                if (out_b_ == NULL)
-                                                {
-                                                  out128_b = NULL;
-                                                }
-                                                else
-                                                {
-                                                  out128_b = out_b_ + len128x61;
-                                                }
-                                                {
-                                                  uint64_t
-                                                  auth_num = (uint64_t)ad_len / (uint64_t)16U;
-                                                  uint64_t len128_num_ = len128_num / (uint64_t)16U;
-                                                  uint64_t len128x6_ = (uint64_t)0U;
-                                                  uint64_t
-                                                  scrut2 =
-                                                    gcm128_decrypt_opt(auth_b_,
-                                                      (uint64_t)ad_len,
-                                                      auth_num,
-                                                      keys_b,
-                                                      tmp_iv,
-                                                      hkeys_b,
-                                                      abytes_b,
-                                                      in128x6_b,
-                                                      out128x6_b,
-                                                      len128x6_,
-                                                      in128_b,
-                                                      out128_b,
-                                                      len128_num_,
-                                                      inout_b,
-                                                      (uint64_t)cipher_len,
-                                                      scratch_b1,
-                                                      tag);
-                                                  uint64_t c0 = scrut2;
-                                                  c = c0;
-                                                }
-                                              }
+                                              uint64_t auth_num = (uint64_t)ad_len / (uint64_t)16U;
+                                              uint64_t len128x6_ = len128x6 / (uint64_t)16U;
+                                              uint64_t len128_num_ = len128_num / (uint64_t)16U;
+                                              uint64_t
+                                              scrut2 =
+                                                gcm128_decrypt_opt(auth_b_,
+                                                  (uint64_t)ad_len,
+                                                  auth_num,
+                                                  keys_b,
+                                                  tmp_iv,
+                                                  hkeys_b,
+                                                  abytes_b,
+                                                  in128x6_b,
+                                                  out128x6_b,
+                                                  len128x6_,
+                                                  in128_b,
+                                                  out128_b,
+                                                  len128_num_,
+                                                  inout_b,
+                                                  (uint64_t)cipher_len,
+                                                  scratch_b1,
+                                                  tag);
+                                              uint64_t c0 = scrut2;
+                                              c = c0;
                                             }
                                           }
                                         }
+                                      }
+                                    }
+                                    else
+                                    {
+                                      uint32_t len128x61 = (uint32_t)0U;
+                                      uint64_t
+                                      len128_num =
+                                        (uint64_t)cipher_len
+                                        / (uint64_t)16U
+                                        * (uint64_t)16U;
+                                      uint8_t *in128x6_b;
+                                      if (cipher_b_ == NULL)
+                                      {
+                                        in128x6_b = NULL;
+                                      }
+                                      else
+                                      {
+                                        in128x6_b = cipher_b_;
+                                      }
+                                      {
+                                        uint8_t *out128x6_b;
+                                        if (out_b_ == NULL)
                                         {
-                                          bool uu____4 = inout_b == NULL;
-                                          if (!(uu____4 || dst == NULL))
+                                          out128x6_b = NULL;
+                                        }
+                                        else
+                                        {
+                                          out128x6_b = out_b_;
+                                        }
+                                        {
+                                          uint8_t *in128_b;
+                                          if (cipher_b_ == NULL)
                                           {
-                                            memcpy(dst
-                                              +
-                                                (uint32_t)(uint64_t)cipher_len
-                                                / (uint32_t)16U
-                                                * (uint32_t)16U,
-                                              inout_b,
-                                              (uint32_t)(uint64_t)cipher_len
-                                              % (uint32_t)16U
-                                              * sizeof (inout_b[0U]));
+                                            in128_b = NULL;
+                                          }
+                                          else
+                                          {
+                                            in128_b = cipher_b_ + len128x61;
                                           }
                                           {
-                                            uint64_t r = c;
-                                            if (r == (uint64_t)0U)
+                                            uint8_t *out128_b;
+                                            if (out_b_ == NULL)
                                             {
-                                              return EverCrypt_Error_Success;
+                                              out128_b = NULL;
                                             }
                                             else
                                             {
-                                              return EverCrypt_Error_AuthenticationFailure;
+                                              out128_b = out_b_ + len128x61;
+                                            }
+                                            {
+                                              uint64_t auth_num = (uint64_t)ad_len / (uint64_t)16U;
+                                              uint64_t len128_num_ = len128_num / (uint64_t)16U;
+                                              uint64_t len128x6_ = (uint64_t)0U;
+                                              uint64_t
+                                              scrut2 =
+                                                gcm128_decrypt_opt(auth_b_,
+                                                  (uint64_t)ad_len,
+                                                  auth_num,
+                                                  keys_b,
+                                                  tmp_iv,
+                                                  hkeys_b,
+                                                  abytes_b,
+                                                  in128x6_b,
+                                                  out128x6_b,
+                                                  len128x6_,
+                                                  in128_b,
+                                                  out128_b,
+                                                  len128_num_,
+                                                  inout_b,
+                                                  (uint64_t)cipher_len,
+                                                  scratch_b1,
+                                                  tag);
+                                              uint64_t c0 = scrut2;
+                                              c = c0;
                                             }
                                           }
+                                        }
+                                      }
+                                    }
+                                    {
+                                      bool uu____4 = inout_b == NULL;
+                                      if (!(uu____4 || dst == NULL))
+                                      {
+                                        memcpy(dst
+                                          +
+                                            (uint32_t)(uint64_t)cipher_len
+                                            / (uint32_t)16U
+                                            * (uint32_t)16U,
+                                          inout_b,
+                                          (uint32_t)(uint64_t)cipher_len
+                                          % (uint32_t)16U
+                                          * sizeof (inout_b[0U]));
+                                      }
+                                      {
+                                        uint64_t r = c;
+                                        if (r == (uint64_t)0U)
+                                        {
+                                          return EverCrypt_Error_Success;
+                                        }
+                                        else
+                                        {
+                                          return EverCrypt_Error_AuthenticationFailure;
                                         }
                                       }
                                     }
@@ -3187,387 +3060,360 @@ EverCrypt_AEAD_decrypt_expand_aes256_gcm(
   if (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe)
   {
     uint8_t ek[544U] = { 0U };
-    uint8_t *keys_b0;
-    if (ek == NULL)
+    uint8_t *keys_b0 = ek;
+    uint8_t *hkeys_b0 = ek + (uint32_t)240U;
+    uint64_t scrut = aes256_key_expansion(k, keys_b0);
+    uint64_t scrut0 = aes256_keyhash_init(keys_b0, hkeys_b0);
+    EverCrypt_AEAD_state_s lit;
+    lit.impl = Spec_Cipher_Expansion_Vale_AES256;
+    lit.ek = ek;
     {
-      keys_b0 = NULL;
-    }
-    else
-    {
-      keys_b0 = ek;
-    }
-    {
-      uint8_t *hkeys_b0;
-      if (ek == NULL)
+      EverCrypt_AEAD_state_s p = lit;
+      EverCrypt_AEAD_state_s *s = &p;
+      if (s == NULL)
       {
-        hkeys_b0 = NULL;
+        return EverCrypt_Error_InvalidKey;
+      }
+      else if (iv_len == (uint32_t)0U)
+      {
+        return EverCrypt_Error_InvalidIVLength;
       }
       else
       {
-        hkeys_b0 = ek + (uint32_t)240U;
-      }
-      {
-        uint64_t scrut = aes256_key_expansion(k, keys_b0);
-        uint64_t scrut0 = aes256_keyhash_init(keys_b0, hkeys_b0);
-        EverCrypt_AEAD_state_s lit;
-        lit.impl = Spec_Cipher_Expansion_Vale_AES256;
-        lit.ek = ek;
+        EverCrypt_AEAD_state_s scrut1 = *s;
+        uint8_t *ek0 = scrut1.ek;
+        uint8_t *scratch_b;
+        if (ek0 == NULL)
         {
-          EverCrypt_AEAD_state_s p = lit;
-          EverCrypt_AEAD_state_s *s = &p;
-          if (s == NULL)
+          scratch_b = NULL;
+        }
+        else
+        {
+          scratch_b = ek0 + (uint32_t)368U;
+        }
+        {
+          uint8_t *ek1;
+          if (ek0 == NULL)
           {
-            return EverCrypt_Error_InvalidKey;
-          }
-          else if (iv_len == (uint32_t)0U)
-          {
-            return EverCrypt_Error_InvalidIVLength;
+            ek1 = NULL;
           }
           else
           {
-            EverCrypt_AEAD_state_s scrut1 = *s;
-            uint8_t *ek0 = scrut1.ek;
-            uint8_t *scratch_b;
-            if (ek0 == NULL)
+            ek1 = ek0;
+          }
+          {
+            uint8_t *keys_b;
+            if (ek1 == NULL)
             {
-              scratch_b = NULL;
+              keys_b = NULL;
             }
             else
             {
-              scratch_b = ek0 + (uint32_t)368U;
+              keys_b = ek1;
             }
             {
-              uint8_t *ek1;
-              if (ek0 == NULL)
+              uint8_t *hkeys_b;
+              if (ek1 == NULL)
               {
-                ek1 = NULL;
+                hkeys_b = NULL;
               }
               else
               {
-                ek1 = ek0;
+                hkeys_b = ek1 + (uint32_t)240U;
               }
               {
-                uint8_t *keys_b;
-                if (ek1 == NULL)
+                uint8_t tmp_iv[16U] = { 0U };
+                uint32_t len = iv_len / (uint32_t)16U;
+                uint32_t bytes_len = len * (uint32_t)16U;
+                uint8_t *iv_b;
+                if (iv == NULL)
                 {
-                  keys_b = NULL;
+                  iv_b = NULL;
                 }
                 else
                 {
-                  keys_b = ek1;
+                  iv_b = iv;
                 }
                 {
-                  uint8_t *hkeys_b;
-                  if (ek1 == NULL)
+                  bool uu____0 = iv == NULL;
+                  if (!(uu____0 || tmp_iv == NULL))
                   {
-                    hkeys_b = NULL;
-                  }
-                  else
-                  {
-                    hkeys_b = ek1 + (uint32_t)240U;
+                    memcpy(tmp_iv, iv + bytes_len, iv_len % (uint32_t)16U * sizeof (iv[0U]));
                   }
                   {
-                    uint8_t tmp_iv[16U] = { 0U };
-                    uint32_t len = iv_len / (uint32_t)16U;
-                    uint32_t bytes_len = len * (uint32_t)16U;
-                    uint8_t *iv_b;
-                    if (iv == NULL)
+                    uint64_t
+                    uu____1 =
+                      compute_iv_stdcall(iv_b,
+                        (uint64_t)iv_len,
+                        (uint64_t)len,
+                        tmp_iv,
+                        tmp_iv,
+                        hkeys_b);
+                    uint8_t *inout_b;
+                    if (scratch_b == NULL)
                     {
-                      iv_b = NULL;
+                      inout_b = NULL;
                     }
                     else
                     {
-                      iv_b = iv;
+                      inout_b = scratch_b;
                     }
                     {
-                      bool uu____0 = iv == NULL;
-                      if (!(uu____0 || tmp_iv == NULL))
+                      uint8_t *abytes_b;
+                      if (scratch_b == NULL)
                       {
-                        memcpy(tmp_iv, iv + bytes_len, iv_len % (uint32_t)16U * sizeof (iv[0U]));
+                        abytes_b = NULL;
+                      }
+                      else
+                      {
+                        abytes_b = scratch_b + (uint32_t)16U;
                       }
                       {
-                        uint64_t
-                        uu____1 =
-                          compute_iv_stdcall(iv_b,
-                            (uint64_t)iv_len,
-                            (uint64_t)len,
-                            tmp_iv,
-                            tmp_iv,
-                            hkeys_b);
-                        uint8_t *inout_b;
+                        uint8_t *scratch_b1;
                         if (scratch_b == NULL)
                         {
-                          inout_b = NULL;
+                          scratch_b1 = NULL;
                         }
                         else
                         {
-                          inout_b = scratch_b;
+                          scratch_b1 = scratch_b + (uint32_t)32U;
                         }
                         {
-                          uint8_t *abytes_b;
-                          if (scratch_b == NULL)
+                          uint32_t
+                          cipher_len_ =
+                            (uint32_t)(uint64_t)cipher_len
+                            / (uint32_t)16U
+                            * (uint32_t)16U;
+                          uint32_t
+                          auth_len_ = (uint32_t)(uint64_t)ad_len / (uint32_t)16U * (uint32_t)16U;
+                          uint8_t *cipher_b_;
+                          if (cipher == NULL)
                           {
-                            abytes_b = NULL;
+                            cipher_b_ = NULL;
                           }
                           else
                           {
-                            abytes_b = scratch_b + (uint32_t)16U;
+                            cipher_b_ = cipher;
                           }
                           {
-                            uint8_t *scratch_b1;
-                            if (scratch_b == NULL)
+                            uint8_t *out_b_;
+                            if (dst == NULL)
                             {
-                              scratch_b1 = NULL;
+                              out_b_ = NULL;
                             }
                             else
                             {
-                              scratch_b1 = scratch_b + (uint32_t)32U;
+                              out_b_ = dst;
                             }
                             {
-                              uint32_t
-                              cipher_len_ =
-                                (uint32_t)(uint64_t)cipher_len
-                                / (uint32_t)16U
-                                * (uint32_t)16U;
-                              uint32_t
-                              auth_len_ = (uint32_t)(uint64_t)ad_len / (uint32_t)16U * (uint32_t)16U;
-                              uint8_t *cipher_b_;
-                              if (cipher == NULL)
+                              uint8_t *auth_b_;
+                              if (ad == NULL)
                               {
-                                cipher_b_ = NULL;
+                                auth_b_ = NULL;
                               }
                               else
                               {
-                                cipher_b_ = cipher;
+                                auth_b_ = ad;
                               }
                               {
-                                uint8_t *out_b_;
-                                if (dst == NULL)
+                                bool uu____2 = cipher == NULL;
+                                if (!(uu____2 || inout_b == NULL))
                                 {
-                                  out_b_ = NULL;
+                                  memcpy(inout_b,
+                                    cipher + cipher_len_,
+                                    (uint32_t)(uint64_t)cipher_len
+                                    % (uint32_t)16U
+                                    * sizeof (cipher[0U]));
                                 }
-                                else
                                 {
-                                  out_b_ = dst;
-                                }
-                                {
-                                  uint8_t *auth_b_;
-                                  if (ad == NULL)
+                                  bool uu____3 = ad == NULL;
+                                  if (!(uu____3 || abytes_b == NULL))
                                   {
-                                    auth_b_ = NULL;
-                                  }
-                                  else
-                                  {
-                                    auth_b_ = ad;
+                                    memcpy(abytes_b,
+                                      ad + auth_len_,
+                                      (uint32_t)(uint64_t)ad_len % (uint32_t)16U * sizeof (ad[0U]));
                                   }
                                   {
-                                    bool uu____2 = cipher == NULL;
-                                    if (!(uu____2 || inout_b == NULL))
+                                    uint64_t
+                                    len128x6 = (uint64_t)cipher_len / (uint64_t)96U * (uint64_t)96U;
+                                    uint64_t c;
+                                    if (len128x6 / (uint64_t)16U >= (uint64_t)6U)
                                     {
-                                      memcpy(inout_b,
-                                        cipher + cipher_len_,
-                                        (uint32_t)(uint64_t)cipher_len
-                                        % (uint32_t)16U
-                                        * sizeof (cipher[0U]));
-                                    }
-                                    {
-                                      bool uu____3 = ad == NULL;
-                                      if (!(uu____3 || abytes_b == NULL))
+                                      uint64_t
+                                      len128_num =
+                                        (uint64_t)cipher_len
+                                        / (uint64_t)16U
+                                        * (uint64_t)16U
+                                        - len128x6;
+                                      uint8_t *in128x6_b;
+                                      if (cipher_b_ == NULL)
                                       {
-                                        memcpy(abytes_b,
-                                          ad + auth_len_,
-                                          (uint32_t)(uint64_t)ad_len
-                                          % (uint32_t)16U
-                                          * sizeof (ad[0U]));
+                                        in128x6_b = NULL;
+                                      }
+                                      else
+                                      {
+                                        in128x6_b = cipher_b_;
                                       }
                                       {
-                                        uint64_t
-                                        len128x6 =
-                                          (uint64_t)cipher_len
-                                          / (uint64_t)96U
-                                          * (uint64_t)96U;
-                                        uint64_t c;
-                                        if (len128x6 / (uint64_t)16U >= (uint64_t)6U)
+                                        uint8_t *out128x6_b;
+                                        if (out_b_ == NULL)
                                         {
-                                          uint64_t
-                                          len128_num =
-                                            (uint64_t)cipher_len
-                                            / (uint64_t)16U
-                                            * (uint64_t)16U
-                                            - len128x6;
-                                          uint8_t *in128x6_b;
-                                          if (cipher_b_ == NULL)
-                                          {
-                                            in128x6_b = NULL;
-                                          }
-                                          else
-                                          {
-                                            in128x6_b = cipher_b_;
-                                          }
-                                          {
-                                            uint8_t *out128x6_b;
-                                            if (out_b_ == NULL)
-                                            {
-                                              out128x6_b = NULL;
-                                            }
-                                            else
-                                            {
-                                              out128x6_b = out_b_;
-                                            }
-                                            {
-                                              uint8_t *in128_b;
-                                              if (cipher_b_ == NULL)
-                                              {
-                                                in128_b = NULL;
-                                              }
-                                              else
-                                              {
-                                                in128_b = cipher_b_ + (uint32_t)len128x6;
-                                              }
-                                              {
-                                                uint8_t *out128_b;
-                                                if (out_b_ == NULL)
-                                                {
-                                                  out128_b = NULL;
-                                                }
-                                                else
-                                                {
-                                                  out128_b = out_b_ + (uint32_t)len128x6;
-                                                }
-                                                {
-                                                  uint64_t
-                                                  auth_num = (uint64_t)ad_len / (uint64_t)16U;
-                                                  uint64_t len128x6_ = len128x6 / (uint64_t)16U;
-                                                  uint64_t len128_num_ = len128_num / (uint64_t)16U;
-                                                  uint64_t
-                                                  scrut2 =
-                                                    gcm256_decrypt_opt(auth_b_,
-                                                      (uint64_t)ad_len,
-                                                      auth_num,
-                                                      keys_b,
-                                                      tmp_iv,
-                                                      hkeys_b,
-                                                      abytes_b,
-                                                      in128x6_b,
-                                                      out128x6_b,
-                                                      len128x6_,
-                                                      in128_b,
-                                                      out128_b,
-                                                      len128_num_,
-                                                      inout_b,
-                                                      (uint64_t)cipher_len,
-                                                      scratch_b1,
-                                                      tag);
-                                                  uint64_t c0 = scrut2;
-                                                  c = c0;
-                                                }
-                                              }
-                                            }
-                                          }
+                                          out128x6_b = NULL;
                                         }
                                         else
                                         {
-                                          uint32_t len128x61 = (uint32_t)0U;
-                                          uint64_t
-                                          len128_num =
-                                            (uint64_t)cipher_len
-                                            / (uint64_t)16U
-                                            * (uint64_t)16U;
-                                          uint8_t *in128x6_b;
+                                          out128x6_b = out_b_;
+                                        }
+                                        {
+                                          uint8_t *in128_b;
                                           if (cipher_b_ == NULL)
                                           {
-                                            in128x6_b = NULL;
+                                            in128_b = NULL;
                                           }
                                           else
                                           {
-                                            in128x6_b = cipher_b_;
+                                            in128_b = cipher_b_ + (uint32_t)len128x6;
                                           }
                                           {
-                                            uint8_t *out128x6_b;
+                                            uint8_t *out128_b;
                                             if (out_b_ == NULL)
                                             {
-                                              out128x6_b = NULL;
+                                              out128_b = NULL;
                                             }
                                             else
                                             {
-                                              out128x6_b = out_b_;
+                                              out128_b = out_b_ + (uint32_t)len128x6;
                                             }
                                             {
-                                              uint8_t *in128_b;
-                                              if (cipher_b_ == NULL)
-                                              {
-                                                in128_b = NULL;
-                                              }
-                                              else
-                                              {
-                                                in128_b = cipher_b_ + len128x61;
-                                              }
-                                              {
-                                                uint8_t *out128_b;
-                                                if (out_b_ == NULL)
-                                                {
-                                                  out128_b = NULL;
-                                                }
-                                                else
-                                                {
-                                                  out128_b = out_b_ + len128x61;
-                                                }
-                                                {
-                                                  uint64_t
-                                                  auth_num = (uint64_t)ad_len / (uint64_t)16U;
-                                                  uint64_t len128_num_ = len128_num / (uint64_t)16U;
-                                                  uint64_t len128x6_ = (uint64_t)0U;
-                                                  uint64_t
-                                                  scrut2 =
-                                                    gcm256_decrypt_opt(auth_b_,
-                                                      (uint64_t)ad_len,
-                                                      auth_num,
-                                                      keys_b,
-                                                      tmp_iv,
-                                                      hkeys_b,
-                                                      abytes_b,
-                                                      in128x6_b,
-                                                      out128x6_b,
-                                                      len128x6_,
-                                                      in128_b,
-                                                      out128_b,
-                                                      len128_num_,
-                                                      inout_b,
-                                                      (uint64_t)cipher_len,
-                                                      scratch_b1,
-                                                      tag);
-                                                  uint64_t c0 = scrut2;
-                                                  c = c0;
-                                                }
-                                              }
+                                              uint64_t auth_num = (uint64_t)ad_len / (uint64_t)16U;
+                                              uint64_t len128x6_ = len128x6 / (uint64_t)16U;
+                                              uint64_t len128_num_ = len128_num / (uint64_t)16U;
+                                              uint64_t
+                                              scrut2 =
+                                                gcm256_decrypt_opt(auth_b_,
+                                                  (uint64_t)ad_len,
+                                                  auth_num,
+                                                  keys_b,
+                                                  tmp_iv,
+                                                  hkeys_b,
+                                                  abytes_b,
+                                                  in128x6_b,
+                                                  out128x6_b,
+                                                  len128x6_,
+                                                  in128_b,
+                                                  out128_b,
+                                                  len128_num_,
+                                                  inout_b,
+                                                  (uint64_t)cipher_len,
+                                                  scratch_b1,
+                                                  tag);
+                                              uint64_t c0 = scrut2;
+                                              c = c0;
                                             }
                                           }
                                         }
+                                      }
+                                    }
+                                    else
+                                    {
+                                      uint32_t len128x61 = (uint32_t)0U;
+                                      uint64_t
+                                      len128_num =
+                                        (uint64_t)cipher_len
+                                        / (uint64_t)16U
+                                        * (uint64_t)16U;
+                                      uint8_t *in128x6_b;
+                                      if (cipher_b_ == NULL)
+                                      {
+                                        in128x6_b = NULL;
+                                      }
+                                      else
+                                      {
+                                        in128x6_b = cipher_b_;
+                                      }
+                                      {
+                                        uint8_t *out128x6_b;
+                                        if (out_b_ == NULL)
                                         {
-                                          bool uu____4 = inout_b == NULL;
-                                          if (!(uu____4 || dst == NULL))
+                                          out128x6_b = NULL;
+                                        }
+                                        else
+                                        {
+                                          out128x6_b = out_b_;
+                                        }
+                                        {
+                                          uint8_t *in128_b;
+                                          if (cipher_b_ == NULL)
                                           {
-                                            memcpy(dst
-                                              +
-                                                (uint32_t)(uint64_t)cipher_len
-                                                / (uint32_t)16U
-                                                * (uint32_t)16U,
-                                              inout_b,
-                                              (uint32_t)(uint64_t)cipher_len
-                                              % (uint32_t)16U
-                                              * sizeof (inout_b[0U]));
+                                            in128_b = NULL;
+                                          }
+                                          else
+                                          {
+                                            in128_b = cipher_b_ + len128x61;
                                           }
                                           {
-                                            uint64_t r = c;
-                                            if (r == (uint64_t)0U)
+                                            uint8_t *out128_b;
+                                            if (out_b_ == NULL)
                                             {
-                                              return EverCrypt_Error_Success;
+                                              out128_b = NULL;
                                             }
                                             else
                                             {
-                                              return EverCrypt_Error_AuthenticationFailure;
+                                              out128_b = out_b_ + len128x61;
+                                            }
+                                            {
+                                              uint64_t auth_num = (uint64_t)ad_len / (uint64_t)16U;
+                                              uint64_t len128_num_ = len128_num / (uint64_t)16U;
+                                              uint64_t len128x6_ = (uint64_t)0U;
+                                              uint64_t
+                                              scrut2 =
+                                                gcm256_decrypt_opt(auth_b_,
+                                                  (uint64_t)ad_len,
+                                                  auth_num,
+                                                  keys_b,
+                                                  tmp_iv,
+                                                  hkeys_b,
+                                                  abytes_b,
+                                                  in128x6_b,
+                                                  out128x6_b,
+                                                  len128x6_,
+                                                  in128_b,
+                                                  out128_b,
+                                                  len128_num_,
+                                                  inout_b,
+                                                  (uint64_t)cipher_len,
+                                                  scratch_b1,
+                                                  tag);
+                                              uint64_t c0 = scrut2;
+                                              c = c0;
                                             }
                                           }
+                                        }
+                                      }
+                                    }
+                                    {
+                                      bool uu____4 = inout_b == NULL;
+                                      if (!(uu____4 || dst == NULL))
+                                      {
+                                        memcpy(dst
+                                          +
+                                            (uint32_t)(uint64_t)cipher_len
+                                            / (uint32_t)16U
+                                            * (uint32_t)16U,
+                                          inout_b,
+                                          (uint32_t)(uint64_t)cipher_len
+                                          % (uint32_t)16U
+                                          * sizeof (inout_b[0U]));
+                                      }
+                                      {
+                                        uint64_t r = c;
+                                        if (r == (uint64_t)0U)
+                                        {
+                                          return EverCrypt_Error_Success;
+                                        }
+                                        else
+                                        {
+                                          return EverCrypt_Error_AuthenticationFailure;
                                         }
                                       }
                                     }
