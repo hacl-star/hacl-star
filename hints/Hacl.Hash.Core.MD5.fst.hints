@@ -27,7 +27,7 @@
         "typing_FStar.Monotonic.HyperStack.get_tip"
       ],
       0,
-      "5e8fd9f27a73cd5e3c1182bb18e837ac"
+      "10ce78b3870d12ed32070b837d0db5b7"
     ],
     [
       "Hacl.Hash.Core.MD5._t",
@@ -55,7 +55,7 @@
         "typing_FStar.Monotonic.HyperStack.get_tip"
       ],
       0,
-      "9d1c983f39af8422d5ce2b1eb5c55546"
+      "1c6d12996f31df13663ea67be2f8f639"
     ],
     [
       "Hacl.Hash.Core.MD5.legacy_alloca",
@@ -96,7 +96,7 @@
         "typing_Spec.MD5.init_as_list"
       ],
       0,
-      "755bdca5cd6cfbf88cc14eada0dcf163"
+      "c36323bd5906c6637ebbddd47efa7ac9"
     ],
     [
       "Hacl.Hash.Core.MD5.h0",
@@ -126,7 +126,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_none", "typing_Spec.MD5.init"
       ],
       0,
-      "459acebc06916d21b44ee64d89e9b22a"
+      "5f51f5605be7f51cc31ef3c091429b5c"
     ],
     [
       "Hacl.Hash.Core.MD5.t",
@@ -149,7 +149,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_none", "typing_Spec.MD5.t"
       ],
       0,
-      "516090ed6654214a78c426e22bf93d42"
+      "7e118706e5ac332998402d10ff7278ef"
     ],
     [
       "Hacl.Hash.Core.MD5.seq_index_upd",
@@ -173,7 +173,7 @@
         "refinement_interpretation_Tm_refine_df81b3f17797c6f405c1dbb191651292"
       ],
       0,
-      "508235bc46ddaaca3768a6646a54c77d"
+      "fa6e2fc1f152ce23f507cfdce5947b72"
     ],
     [
       "Hacl.Hash.Core.MD5.legacy_init",
@@ -249,7 +249,7 @@
         "typing_tok_Spec.Hash.Definitions.MD5@tok"
       ],
       0,
-      "c807503b31ca29e671b731706bc3ed85"
+      "29007fe3e29f5f7d532fe28df0f4baa7"
     ],
     [
       "Hacl.Hash.Core.MD5.round_op_gen",
@@ -299,7 +299,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "7c6723e2764d4ef3be282a51af20172a"
+      "c241c68857247b1f59cbe11723a50aac"
     ],
     [
       "Hacl.Hash.Core.MD5.round_op_gen",
@@ -400,7 +400,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "ac774ac693579a5e17e65dd142a86d94"
+      "1b5be74e889c36f83b6a8e462e85f25a"
     ],
     [
       "Hacl.Hash.Core.MD5.round1",
@@ -474,7 +474,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "3ef35892f8e9ad57115b74e162ff87d5"
+      "512b323660df000e9b0523cadaf19a2b"
     ],
     [
       "Hacl.Hash.Core.MD5.round2",
@@ -553,7 +553,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "4780db101892cd10694a272ec75b735c"
+      "4992e22056d341ab32b92ca42bc617c6"
     ],
     [
       "Hacl.Hash.Core.MD5.round3",
@@ -632,7 +632,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "1d6fc259fa9841452d884737e34643e9"
+      "343d490f968d7611a28b37963e29411d"
     ],
     [
       "Hacl.Hash.Core.MD5.round4",
@@ -711,7 +711,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "af60436f50722991c75dedbff645cee6"
+      "4aeb2447c1d72ae80e715c0cb900ba49"
     ],
     [
       "Hacl.Hash.Core.MD5.rounds",
@@ -768,7 +768,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "9986f315e96c05b44bbd2135ca0be960"
+      "aa07eefc39081ae05e890273d82d076e"
     ],
     [
       "Hacl.Hash.Core.MD5.overwrite",
@@ -831,7 +831,7 @@
         "typing_tok_Spec.Hash.Definitions.MD5@tok"
       ],
       0,
-      "7c1ad683a500c71cb377416f2b1b00fa"
+      "59d567dfbeb3dc6d48212fd9c2a9f229"
     ],
     [
       "Hacl.Hash.Core.MD5.update'",
@@ -840,6 +840,7 @@
       0,
       [
         "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "constructor_distinct_Lib.IntTypes.U1",
         "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Spec.Hash.Definitions.MD5",
         "equality_tok_Lib.IntTypes.SEC@tok",
@@ -887,11 +888,11 @@
         "typing_LowStar.Monotonic.Buffer.loc_buffer",
         "typing_Spec.Hash.Definitions.block_length",
         "typing_Spec.Hash.Definitions.word",
-        "typing_tok_Lib.IntTypes.U32@tok",
+        "typing_Spec.Hash.Definitions.word_t",
         "typing_tok_Spec.Hash.Definitions.MD5@tok"
       ],
       0,
-      "7170b9e9f9af7c111d86519c73504a9e"
+      "ed740931462fde39f2892ecedffd9296"
     ],
     [
       "Hacl.Hash.Core.MD5.legacy_update",
@@ -942,7 +943,7 @@
         "typing_tok_Spec.Hash.Definitions.MD5@tok"
       ],
       0,
-      "8178e5395e8d4f25bfe022b4c9b5596f"
+      "5083820bf04239c5b7d2fe33c0cc0e5e"
     ]
   ]
 ]

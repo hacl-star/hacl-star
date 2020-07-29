@@ -1,5 +1,5 @@
 [
-  "7Aw>±ñ^\u001f7ž]„î¶`^",
+  "\u0011Mb86ú˜*&6VªB™ªB",
   [
     [
       "Hacl.Impl.Salsa20.rounds",
@@ -51,7 +51,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "e6ab1ac2d3c2c38b6dea2a710b1561e6"
+      "72c24c4ec85d99ef6381df922f9fb11c"
     ],
     [
       "Hacl.Impl.Salsa20.rounds",
@@ -110,7 +110,7 @@
         "typing_Spec.Salsa20.size_key", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "2e545c713d396d9c08550bc96551ab03"
+      "5815007a41d8b184b4793398281dbbb1"
     ],
     [
       "Hacl.Impl.Salsa20.salsa20_core",
@@ -163,7 +163,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "c97a324d000a3965db42e6f5e6bb07dc"
+      "0f5a4337bacb811db5e4c44199f9e09b"
     ],
     [
       "Hacl.Impl.Salsa20.salsa20_core",
@@ -243,7 +243,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "2a402cc0ac1c344cf95085d8876f68c4"
+      "456e40dbc8058996335c531dc697b395"
     ],
     [
       "Hacl.Impl.Salsa20.salsa20_init",
@@ -296,7 +296,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "d8aa03c823537210f9259ac0a5053691"
+      "cfddfe63d26372983a73ad4d0dc96d87"
     ],
     [
       "Hacl.Impl.Salsa20.salsa20_init",
@@ -484,7 +484,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "c8d64f3004aa5444f8f9f70c97318ce7"
+      "52873cb1b6e8562f5b7f3d4d7bf305cb"
     ],
     [
       "Hacl.Impl.Salsa20.salsa20_encrypt_block",
@@ -541,7 +541,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "b102584d84c5aa4f8fc33b3570eb15ce"
+      "f35847babc0f891a6b2c0120d32f7c63"
     ],
     [
       "Hacl.Impl.Salsa20.salsa20_encrypt_block",
@@ -688,7 +688,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "87656262c171d883b5f68357e7b94fe8"
+      "23ac6b3143ea330b3c3e7abe94ee002a"
     ],
     [
       "Hacl.Impl.Salsa20.salsa20_encrypt_last",
@@ -699,52 +699,62 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
-        "b2t_def", "bool_inversion", "constructor_distinct_Lib.IntTypes.PUB",
+        "b2t_def", "bool_inversion", "constructor_distinct_Lib.Buffer.MUT",
+        "constructor_distinct_Lib.IntTypes.PUB",
         "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.Buffer.MUT@tok",
         "equality_tok_Lib.IntTypes.PUB@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
-        "equation_FStar.HyperStack.ST.equal_domains",
         "equation_FStar.Monotonic.HyperHeap.hmap",
+        "equation_FStar.Monotonic.HyperStack.is_tip",
         "equation_FStar.Monotonic.HyperStack.is_wf_with_ctr_and_tip",
         "equation_FStar.Monotonic.HyperStack.mem",
         "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
         "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
-        "equation_FStar.UInt.uint_t", "equation_Lib.Buffer.lbuffer_t",
-        "equation_Lib.Buffer.modifies", "equation_Lib.IntTypes.bits",
+        "equation_FStar.UInt.uint_t",
+        "equation_Hacl.Impl.Salsa20.Core32.state",
+        "equation_Lib.Buffer.buffer_t", "equation_Lib.Buffer.lbuffer_t",
+        "equation_Lib.Buffer.length", "equation_Lib.IntTypes.bits",
         "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.range",
-        "equation_Lib.IntTypes.uint8", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.IntTypes.v", "equation_Lib.Sequence.lseq",
-        "equation_Prims.nat", "equation_Spec.Salsa20.size_block",
-        "equation_Spec.Salsa20.size_key",
+        "equation_Lib.IntTypes.uint32", "equation_Lib.IntTypes.uint8",
+        "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
+        "equation_Lib.Sequence.lseq", "equation_LowStar.Buffer.buffer",
+        "equation_LowStar.Buffer.trivial_preorder",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
+        "equation_Spec.Salsa20.size_block", "equation_Spec.Salsa20.size_key",
         "function_token_typing_FStar.Monotonic.Heap.heap",
+        "function_token_typing_Lib.IntTypes.uint32",
         "function_token_typing_Lib.IntTypes.uint8", "int_typing",
-        "lemma_FStar.Map.lemma_ContainsDom",
-        "lemma_FStar.Set.lemma_equal_elim", "lemma_FStar.UInt.pow2_values",
-        "lemma_FStar.UInt32.vu_inv", "primitive_Prims.op_AmpAmp",
-        "primitive_Prims.op_LessThanOrEqual",
-        "primitive_Prims.op_Subtraction",
-        "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_BoxInt_proj_0",
+        "lemma_FStar.Map.lemma_ContainsDom", "lemma_FStar.UInt.pow2_values",
+        "lemma_FStar.UInt32.vu_inv",
+        "lemma_LowStar.Monotonic.Buffer.length_null_1",
+        "lemma_LowStar.Monotonic.Buffer.length_null_2",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
-        "refinement_interpretation_Tm_refine_34df948cfd5b7bc5cfe8f656e4ee9729",
+        "refinement_interpretation_Tm_refine_2637b8c155af1b3e54200b827eb29262",
+        "refinement_interpretation_Tm_refine_365abba901205a01d0ef28ebf2198c47",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
-        "refinement_interpretation_Tm_refine_d02d973dc3adf4174ff2dfa91b49155b",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
-        "typing_FStar.Map.contains", "typing_FStar.Map.domain",
-        "typing_FStar.Monotonic.HyperHeap.rid",
+        "typing_FStar.Map.contains", "typing_FStar.Monotonic.HyperHeap.rid",
+        "typing_FStar.Monotonic.HyperHeap.rid_freeable",
         "typing_FStar.Monotonic.HyperHeap.root",
         "typing_FStar.Monotonic.HyperStack.get_hmap",
+        "typing_FStar.Monotonic.HyperStack.get_tip",
+        "typing_FStar.UInt.fits", "typing_FStar.UInt32.v",
         "typing_Lib.Buffer.length", "typing_Lib.IntTypes.v",
+        "typing_LowStar.Buffer.trivial_preorder",
+        "typing_LowStar.Monotonic.Buffer.len",
         "typing_Spec.Salsa20.size_key", "typing_tok_Lib.Buffer.MUT@tok",
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "7211dadf3d7beea665f5bf6a2ad5edeb"
+      "fb96ea381c299a9c54faaaa5f2e9f498"
     ],
     [
       "Hacl.Impl.Salsa20.salsa20_encrypt_last",
@@ -861,6 +871,8 @@
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
         "refinement_interpretation_Tm_refine_0ea1fba779ad5718e28476faeef94d56",
         "refinement_interpretation_Tm_refine_156c49afb7e1e070fbb2e47dc0e3d4b2",
+        "refinement_interpretation_Tm_refine_15cf9ae158103c7a57a984b7be5d5526",
+        "refinement_interpretation_Tm_refine_2637b8c155af1b3e54200b827eb29262",
         "refinement_interpretation_Tm_refine_2fa5537f636f3c1341e54801e3385c12",
         "refinement_interpretation_Tm_refine_34df948cfd5b7bc5cfe8f656e4ee9729",
         "refinement_interpretation_Tm_refine_365abba901205a01d0ef28ebf2198c47",
@@ -871,12 +883,10 @@
         "refinement_interpretation_Tm_refine_9d3fd79fd314167f1a9c213a188da3ec",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
         "refinement_interpretation_Tm_refine_bc1872b3daa08a7fb30c1357d93b353b",
-        "refinement_interpretation_Tm_refine_d02d973dc3adf4174ff2dfa91b49155b",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Tm_refine_e4f2775750cec783bc27da289036c79e",
         "refinement_interpretation_Tm_refine_e9c32a5fb00a4e8c339597118c871180",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
-        "refinement_interpretation_Tm_refine_f5560f0b74a68fe1e66fb0f9c692d437",
         "refinement_kinding_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "token_correspondence_Prims.pow2.fuel_instrumented",
         "typing_FStar.Map.contains", "typing_FStar.Map.domain",
@@ -892,9 +902,9 @@
         "typing_FStar.Set.singleton", "typing_FStar.Set.union",
         "typing_FStar.UInt.fits", "typing_FStar.UInt32.uint_to_t",
         "typing_FStar.UInt32.v", "typing_Lib.Buffer.as_seq",
-        "typing_Lib.Buffer.loc", "typing_Lib.IntTypes.minint",
-        "typing_Lib.IntTypes.mk_int", "typing_Lib.IntTypes.v",
-        "typing_LowStar.Buffer.trivial_preorder",
+        "typing_Lib.Buffer.length", "typing_Lib.Buffer.loc",
+        "typing_Lib.IntTypes.minint", "typing_Lib.IntTypes.mk_int",
+        "typing_Lib.IntTypes.v", "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.address_liveness_insensitive_locs",
         "typing_LowStar.Monotonic.Buffer.as_addr",
         "typing_LowStar.Monotonic.Buffer.frameOf",
@@ -909,7 +919,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "ea39c485c8f2b0aacc252c26aa4bf7ff"
+      "129f3f8632015e7ed6a11c765bb7d8ee"
     ],
     [
       "Hacl.Impl.Salsa20.salsa20_update",
@@ -966,7 +976,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "20d72ac5cfb5ffa4fef4c3752df68a2e"
+      "ea795a670c579387f90bcb824ae4316c"
     ],
     [
       "Hacl.Impl.Salsa20.salsa20_update",
@@ -1063,7 +1073,6 @@
         "lemma_LowStar.Monotonic.Buffer.loc_includes_none",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_refl",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_region_region",
-        "lemma_LowStar.Monotonic.Buffer.loc_includes_trans_backwards",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_union_l_",
         "lemma_LowStar.Monotonic.Buffer.loc_union_comm",
         "lemma_LowStar.Monotonic.Buffer.modifies_buffer_elim",
@@ -1084,16 +1093,14 @@
         "refinement_interpretation_Tm_refine_156c49afb7e1e070fbb2e47dc0e3d4b2",
         "refinement_interpretation_Tm_refine_34df948cfd5b7bc5cfe8f656e4ee9729",
         "refinement_interpretation_Tm_refine_365abba901205a01d0ef28ebf2198c47",
-        "refinement_interpretation_Tm_refine_3daf9db14cb6bf038bffeeac550d9481",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Tm_refine_4643e5ded8fb983717b700af84920596",
         "refinement_interpretation_Tm_refine_4774b11388892ec5d912efb5b33f27c7",
-        "refinement_interpretation_Tm_refine_4fa8e2dd96f8bb1e23e6574326e9e019",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_666b2a7a803c8af0fea8a819ac6fc2a2",
         "refinement_interpretation_Tm_refine_7f5be58f4dbce11a04fa0d94aa476979",
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
         "refinement_interpretation_Tm_refine_859bd1cbd35fb8dc0db8d511d2f15b0c",
+        "refinement_interpretation_Tm_refine_8cd4aa0b5a78069c2c6a4fd0c35ff04e",
         "refinement_interpretation_Tm_refine_9d3fd79fd314167f1a9c213a188da3ec",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
         "refinement_interpretation_Tm_refine_9ff150f589411d5a40376aa0c5e1ca86",
@@ -1116,11 +1123,11 @@
         "typing_FStar.Set.complement", "typing_FStar.Set.mem",
         "typing_FStar.Set.singleton", "typing_FStar.Set.union",
         "typing_FStar.UInt.fits", "typing_FStar.UInt32.uint_to_t",
-        "typing_FStar.UInt32.v", "typing_Lib.Buffer.loc",
-        "typing_Lib.Buffer.op_Bar_Plus_Bar", "typing_Lib.IntTypes.minint",
-        "typing_Lib.IntTypes.mk_int", "typing_Lib.IntTypes.mul",
-        "typing_Lib.IntTypes.pub_int_v", "typing_Lib.IntTypes.v",
-        "typing_LowStar.Buffer.trivial_preorder",
+        "typing_FStar.UInt32.v", "typing_Lib.Buffer.length",
+        "typing_Lib.Buffer.loc", "typing_Lib.Buffer.op_Bar_Plus_Bar",
+        "typing_Lib.IntTypes.minint", "typing_Lib.IntTypes.mk_int",
+        "typing_Lib.IntTypes.mul", "typing_Lib.IntTypes.pub_int_v",
+        "typing_Lib.IntTypes.v", "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.address_liveness_insensitive_locs",
         "typing_LowStar.Monotonic.Buffer.as_addr",
         "typing_LowStar.Monotonic.Buffer.frameOf",
@@ -1130,13 +1137,12 @@
         "typing_LowStar.Monotonic.Buffer.loc_not_unused_in",
         "typing_LowStar.Monotonic.Buffer.loc_regions",
         "typing_LowStar.Monotonic.Buffer.loc_union",
-        "typing_LowStar.Monotonic.Buffer.mgsub",
         "typing_Spec.Salsa20.size_block", "typing_Spec.Salsa20.size_key",
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.PUB@tok",
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "84b72724e5377aff899017f39aab5e2a"
+      "46a0cb6c53305e404a910beb1dcfa36d"
     ],
     [
       "Hacl.Impl.Salsa20.salsa20_key_block0",
@@ -1194,7 +1200,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "db77edcc957a691c63b671e138867f70"
+      "26f5dafaa498aa3d94da057b8763bde7"
     ],
     [
       "Hacl.Impl.Salsa20.salsa20_key_block0",
@@ -1349,7 +1355,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "2f228963622064f82a2b02b9ba606d74"
+      "29948311afaa6860aac4e8d723364dd0"
     ],
     [
       "Hacl.Impl.Salsa20.salsa20_encrypt",
@@ -1416,7 +1422,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "db4e0d22387148cd8222dd9e5381450c"
+      "a8e86154c2052bcaebc6abc21ce2be94"
     ],
     [
       "Hacl.Impl.Salsa20.salsa20_encrypt",
@@ -1567,7 +1573,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "65bcb8840a18dd6557180fd3fd064c23"
+      "68381d12468bbfe2f1a5e2438ba0eac0"
     ],
     [
       "Hacl.Impl.Salsa20.salsa20_decrypt",
@@ -1634,7 +1640,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "853ac3c443972e40fab93cc5d2d6e817"
+      "c51b4882fbef9684d44bd326ee2757ee"
     ],
     [
       "Hacl.Impl.Salsa20.salsa20_decrypt",
@@ -1785,7 +1791,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "8c273143d907ea55a274f112753d5faa"
+      "352ea09014e80d806d5cde539838e0cd"
     ]
   ]
 ]
