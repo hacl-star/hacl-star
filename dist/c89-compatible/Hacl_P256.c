@@ -2623,6 +2623,16 @@ ecdsa_verification_(
               sz = (uint32_t)64U;
               break;
             }
+          case Spec_Hash_Definitions_Blake2S:
+            {
+              sz = (uint32_t)32U;
+              break;
+            }
+          case Spec_Hash_Definitions_Blake2B:
+            {
+              sz = (uint32_t)64U;
+              break;
+            }
           default:
             {
               KRML_HOST_PRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
@@ -2787,6 +2797,16 @@ ecdsa_signature_core(
             break;
           }
         case Spec_Hash_Definitions_SHA2_512:
+          {
+            sz = (uint32_t)64U;
+            break;
+          }
+        case Spec_Hash_Definitions_Blake2S:
+          {
+            sz = (uint32_t)32U;
+            break;
+          }
+        case Spec_Hash_Definitions_Blake2B:
           {
             sz = (uint32_t)64U;
             break;

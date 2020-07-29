@@ -111,6 +111,44 @@ EverCrypt_HKDF_extract_sha2_512(
 );
 
 void
+EverCrypt_HKDF_expand_blake2s(
+  uint8_t *okm,
+  uint8_t *prk,
+  uint32_t prklen,
+  uint8_t *info,
+  uint32_t infolen,
+  uint32_t len
+);
+
+void
+EverCrypt_HKDF_extract_blake2s(
+  uint8_t *prk,
+  uint8_t *salt,
+  uint32_t saltlen,
+  uint8_t *ikm,
+  uint32_t ikmlen
+);
+
+void
+EverCrypt_HKDF_expand_blake2b(
+  uint8_t *okm,
+  uint8_t *prk,
+  uint32_t prklen,
+  uint8_t *info,
+  uint32_t infolen,
+  uint32_t len
+);
+
+void
+EverCrypt_HKDF_extract_blake2b(
+  uint8_t *prk,
+  uint8_t *salt,
+  uint32_t saltlen,
+  uint8_t *ikm,
+  uint32_t ikmlen
+);
+
+void
 EverCrypt_HKDF_expand(
   Spec_Hash_Definitions_hash_alg a,
   uint8_t *okm,
