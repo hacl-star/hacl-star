@@ -497,8 +497,8 @@ let update_small #index c i t t' p data len =
   let sz = rest c i total_len in
   add_len_small c i total_len len;
   let h0 = ST.get () in
-  let buf1 = B.sub buf 0ul sz in
-  let buf2 = B.sub buf sz len in
+  let buf1 = B.sub_non_null buf 0ul sz in
+  let buf2 = B.sub_non_null buf sz len in
 
   B.blit data 0ul buf2 0ul len;
   let h1 = ST.get () in
@@ -584,7 +584,7 @@ let update_empty_buf #index c i t t' p data len =
   let h01 = ST.get () in
   optional_frame #_ #i #c.km #c.key (c.state.footprint h0 block_state) k' h0 h01;
 
-  let dst = B.sub buf 0ul data2_len in
+  let dst = B.sub_non_null buf 0ul data2_len in
   let h1 = ST.get () in
   B.blit data2 0ul dst 0ul data2_len;
   let h2 = ST.get () in
@@ -662,12 +662,12 @@ let update_round #index c i t t' p data len =
   let h0 = ST.get () in
   let sz = rest c i total_len in
   let diff = c.block_len i `U32.sub` sz in
-  let buf0 = B.sub buf_ 0ul (c.block_len i) in
-  let buf1 = B.sub buf0 0ul sz in
-  let buf2 = B.sub buf0 sz diff in
+  let buf0 = B.sub_non_null buf_ 0ul (c.block_len i) in
+  let buf1 = B.sub_non_null buf0 0ul sz in
+  let buf2 = B.sub_non_null buf0 sz diff in
   assert (B.(loc_pairwise_disjoint
     [ loc_buffer buf1; loc_buffer buf2; loc_buffer data; ]));
-  B.blit data 0ul buf2 0ul diff;
+  B.blit_non_null data 0ul buf2 0ul diff;
   let h1 = ST.get () in
   assert (S.equal (B.as_seq h1 buf0) (S.append (B.as_seq h1 buf1) (B.as_seq h1 data)));
   c.state.frame_invariant (B.loc_buffer buf_) block_state h0 h1;
@@ -731,8 +731,8 @@ let update #index c i t t' p data len =
   else begin
     let h0 = ST.get () in
     let diff = c.block_len i `U32.sub` sz in
-    let data1 = B.sub data 0ul diff in
-    let data2 = B.sub data diff (len `U32.sub` diff) in
+    let data1 = B.sub_non_null data 0ul diff in
+    let data2 = B.sub_non_null data diff (len `U32.sub` diff) in
     update_round c (G.hide i) t t' p data1 diff;
     let h1 = ST.get () in
     update_empty_buf c (G.hide i) t t' p data2 (len `U32.sub` diff);
@@ -770,7 +770,7 @@ let mk_finish #index c i t t' p dst =
   c.state.frame_freeable #i B.loc_none block_state h0 h1;
   optional_frame #_ #i #c.km #c.key B.loc_none k' h0 h1;
 
-  let buf_ = B.sub buf_ 0ul (rest c i total_len) in
+  let buf_ = B.sub_non_null buf_ 0ul (rest c i total_len) in
   assert (
     let r = rest c i total_len in
     (U64.v total_len - U32.v r) % U32.v (c.block_len i) = 0);

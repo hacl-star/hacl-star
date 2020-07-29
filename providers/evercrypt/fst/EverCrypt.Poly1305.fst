@@ -38,7 +38,7 @@ let poly1305_vale
   // Vale wants a large context
   let ctx = B.alloca 0uy 192ul in
   // With the key located at bytes [ 24; 56 )
-  B.blit key 0ul ctx 24ul 32ul;
+  B.blit_non_null key 0ul ctx 24ul 32ul;
 
   let n_blocks = len / 16ul in
   let n_extra = len % 16ul in
@@ -65,8 +65,8 @@ let poly1305_vale
   end else begin
     let tmp = B.alloca 0uy 16ul in // space for last 0..15 bytes
     let len16 = n_blocks * 16ul in
-    let src16 = B.sub src 0ul len16 in
-    B.blit src len16 tmp 0ul n_extra;
+    let src16 = B.sub_non_null src 0ul len16 in
+    B.blit_non_null src len16 tmp 0ul n_extra;
     // Call Vale: all but last bytes
     let h1 = ST.get () in
     // Initial hash (0) is located at bytes [ 0; 24 )
@@ -79,7 +79,7 @@ let poly1305_vale
       (Vale.Arch.BufferFriend.to_bytes (B.as_seq h1 src16))
       (Vale.Arch.BufferFriend.to_bytes (B.as_seq h1 key));
     // Call Vale: last 0..15 bytes
-    B.blit key 0ul ctx 24ul 32ul;
+    B.blit_non_null key 0ul ctx 24ul 32ul;
     let h1'' = ST.get () in
     assert (forall (i:int).{:pattern (Seq.index (B.as_seq h1'' ctx) i)} 0 <= i /\ i < 24 ==>
       Seq.index (Seq.slice (B.as_seq h1'' ctx) 0 24) i ==
@@ -92,7 +92,7 @@ let poly1305_vale
       let open Vale.Poly1305.Spec_s in
       let open Vale.Def.Words_s in
       let open Vale.Poly1305.Util in
-      let tmps = B.sub tmp 0ul n_extra in
+      let tmps = B.sub_non_null tmp 0ul n_extra in
       let src' = Vale.Arch.BufferFriend.to_bytes (B.as_seq h1 src) in
       let src16' = Vale.Arch.BufferFriend.to_bytes (B.as_seq h1 src16) in
       let tmps' = Vale.Arch.BufferFriend.to_bytes (B.as_seq h1'' tmps) in
@@ -116,7 +116,7 @@ let poly1305_vale
     ()
   end;
 
-  B.blit ctx 0ul dst 0ul 16ul;
+  B.blit_non_null ctx 0ul dst 0ul 16ul;
   pop_frame ();
 
   let h3 = ST.get () in

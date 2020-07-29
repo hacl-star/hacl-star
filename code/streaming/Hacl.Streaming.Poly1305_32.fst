@@ -78,7 +78,7 @@ let stateful_poly1305_ctx32: I.stateful unit =
     (fun _ s -> B.free s)
     (fun _ src dst ->
       let h0 = ST.get () in
-      B.blit src 0ul dst 0ul 25ul;
+      B.blit_non_null src 0ul dst 0ul 25ul;
       let h1 = ST.get () in
       P.reveal_ctx_inv' (as_lib src) (as_lib dst) h0 h1
     )
@@ -318,7 +318,7 @@ let poly1305_32: I.block unit =
       let tmp = B.alloca (F32xN.zero 1) 25ul in
       let h2 = ST.get () in
       B.modifies_only_not_unused_in B.loc_none h1 h2;
-      B.blit s 0ul tmp 0ul 25ul;
+      B.blit_non_null s 0ul tmp 0ul 25ul;
       let h3 = ST.get () in
       B.modifies_only_not_unused_in B.loc_none h1 h3;
       P.reveal_ctx_inv' (as_lib s) (as_lib tmp) h0 h3;

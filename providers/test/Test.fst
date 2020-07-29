@@ -182,13 +182,13 @@ let test_aead_st alg key key_len iv iv_len aad aad_len tag tag_len plaintext pla
       push_frame ();
       let plaintext_blen = if plaintext_len = 0ul then 1ul else plaintext_len in
       let plaintext'    = B.alloca 0uy plaintext_blen in
-      let plaintext'    = B.sub plaintext' 0ul plaintext_len in
+      let plaintext'    = B.sub_non_null plaintext' 0ul plaintext_len in
       let ciphertext_blen = if ciphertext_len = 0ul then 1ul else ciphertext_len in
       let ciphertext'   = B.alloca 0uy ciphertext_blen in
-      let ciphertext'   = B.sub ciphertext' 0ul ciphertext_len in
+      let ciphertext'   = B.sub_non_null ciphertext' 0ul ciphertext_len in
       let tag_blen = if tag_len = 0ul then 1ul else tag_len in
       let tag' = B.alloca 0uy tag_len in
-      let tag' = B.sub tag' 0ul tag_len in
+      let tag' = B.sub_non_null tag' 0ul tag_len in
       let h2 = HST.get () in
       EverCrypt.AEAD.frame_invariant B.loc_none st h1 h2;
 
@@ -340,8 +340,8 @@ let rec test_ctr_st (a: Spec.Agile.Cipher.cipher_alg)
         C.Failure.failwith !$"test_ctr_st: create_in <> Success"
       else begin
         let s = B.index s 0ul in
-        let input_block = B.sub input 0ul (block_len a) in
-        let output_block = B.sub output 0ul (block_len a) in
+        let input_block = B.sub_non_null input 0ul (block_len a) in
+        let output_block = B.sub_non_null output 0ul (block_len a) in
         update_block (Ghost.hide a) s output' input_block;
         free (Ghost.hide a) s;
 
@@ -351,8 +351,8 @@ let rec test_ctr_st (a: Spec.Agile.Cipher.cipher_alg)
         if rest `U32.gt` 0ul then begin
           LowStar.Endianness.store32_be counter (ctr `U32.add_mod` 1ul);
           test_ctr_st a counter counter_len nonce nonce_len k k_len
-            (B.sub input (block_len a) rest) rest
-            (B.sub output (block_len a) rest) rest
+            (B.sub_non_null input (block_len a) rest) rest
+            (B.sub_non_null output (block_len a) rest) rest
         end
       end;
       pop_frame ()

@@ -64,8 +64,8 @@ let mk_wrap_key (a: hash_alg) (hash: Hacl.Hash.Definitions.hash_st a): wrap_key_
 fun output key len ->
   //[@inline_let] //18-08-02 does *not* prevents unused-but-set-variable warning in C
   let i = helper_smtpat a len in
-  let nkey = B.sub output 0ul i in
-  let zeroes = B.sub output i (D.block_len a - i) in
+  let nkey = B.sub_non_null output 0ul i in
+  let zeroes = B.sub_non_null output i (D.block_len a - i) in
   assert B.(loc_disjoint (loc_buffer nkey) (loc_buffer zeroes));
   let h0 = ST.get () in
   assert (Seq.equal (B.as_seq h0 zeroes) (Seq.create (v (D.block_len a - i)) (u8 0)));
@@ -138,7 +138,7 @@ let part1 a init update_multi update_last finish s key data len =
   (**) assert (B.as_seq h3 s `Seq.equal`
     Spec.Hash.Incremental.update_last a
       (Spec.Agile.Hash.(update_multi a (init a) (B.as_seq h0 key))) (block_length a) (B.as_seq h0 data));
-  let dst = B.sub key 0ul (D.hash_len a) in
+  let dst = B.sub_non_null key 0ul (D.hash_len a) in
   finish s dst;
   (**) let h4 = ST.get () in
   begin
@@ -281,7 +281,7 @@ let mk_compute a hash alloca init update_multi update_last finish dst key key_le
   (**) let h5 = ST.get () in
   (**) S.lemma_eq_intro (S.slice (B.as_seq h5 ipad) 0 (hash_length a))
       (Spec.Agile.Hash.hash a S.(append (xor (u8 0x36) (wrap a (B.as_seq h0 key))) (B.as_seq h0 data)));
-  let hash1 = B.sub ipad 0ul (D.hash_len a) in
+  let hash1 = B.sub_non_null ipad 0ul (D.hash_len a) in
   part2 a init update_multi update_last finish s dst opad hash1 (D.hash_len a);
   (**) let h6 = ST.get () in
   (**) assert (B.as_seq h6 dst `S.equal`

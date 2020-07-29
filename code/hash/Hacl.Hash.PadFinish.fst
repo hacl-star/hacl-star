@@ -194,15 +194,15 @@ let pad_3 (a: hash_alg) (len: len_t a) (dst: B.buffer uint8):
 noextract inline_for_extraction
 let pad a len dst =
   (* i) Append a single 1 bit. *)
-  let dst1 = B.sub dst 0ul 1ul in
+  let dst1 = B.sub_non_null dst 0ul 1ul in
   pad_1 a dst1;
 
   (* ii) Fill with zeroes *)
-  let dst2 = B.sub dst 1ul (pad0_len a len) in
+  let dst2 = B.sub_non_null dst 1ul (pad0_len a len) in
   pad_2 a len dst2;
 
   (* iii) Encoded length *)
-  let dst3 = B.sub dst U32.(1ul +^ (pad0_len a len)) (len_len a) in
+  let dst3 = B.sub_non_null dst U32.(1ul +^ (pad0_len a len)) (len_len a) in
   pad_3 a len dst3;
 
   (**) let h2 = ST.get () in
@@ -237,5 +237,5 @@ let hash_word_len (a: hash_alg): n:U32.t { U32.v n = hash_word_length a } =
 noextract inline_for_extraction
 let finish a s dst =
   match a with
-  | MD5 -> Lib.ByteBuffer.uints_to_bytes_le #U32 #SEC (hash_word_len a) dst (B.sub s 0ul (hash_word_len a))
-  | _ -> Lib.ByteBuffer.uints_to_bytes_be #(word_t a) #SEC (hash_word_len a) dst (B.sub s 0ul (hash_word_len a))
+  | MD5 -> Lib.ByteBuffer.uints_to_bytes_le #U32 #SEC (hash_word_len a) dst (B.sub_non_null s 0ul (hash_word_len a))
+  | _ -> Lib.ByteBuffer.uints_to_bytes_be #(word_t a) #SEC (hash_word_len a) dst (B.sub_non_null s 0ul (hash_word_len a))
