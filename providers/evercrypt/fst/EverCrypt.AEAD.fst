@@ -228,11 +228,11 @@ fun s iv iv_len ad ad_len plain plain_len cipher tag ->
         Vale.AES.AES_s.is_aes_key_LE (vale_alg_of_alg a) k_w);
 
       push_frame();
-      let scratch_b = B.sub ek (concrete_xkey_len i) 176ul in
+      let scratch_b = B.sub_non_null ek (concrete_xkey_len i) 176ul in
 
-      let ek = B.sub ek 0ul (concrete_xkey_len i) in
-      let keys_b = B.sub ek 0ul (key_offset i) in
-      let hkeys_b = B.sub ek (key_offset i) 128ul in
+      let ek = B.sub_non_null ek 0ul (concrete_xkey_len i) in
+      let keys_b = B.sub_non_null ek 0ul (key_offset i) in
+      let hkeys_b = B.sub_non_null ek (key_offset i) 128ul in
 
       let h0 = get() in
 
@@ -441,11 +441,11 @@ fun s iv iv_len ad ad_len cipher cipher_len tag dst ->
           Vale.AES.AES_s.is_aes_key_LE (vale_alg_of_alg a) k_w);
 
         push_frame();
-        let scratch_b = B.sub ek (concrete_xkey_len i) 176ul in
+        let scratch_b = B.sub_non_null ek (concrete_xkey_len i) 176ul in
 
-        let ek = B.sub ek 0ul (concrete_xkey_len i) in
-        let keys_b = B.sub ek 0ul (key_offset i) in
-        let hkeys_b = B.sub ek (key_offset i) 128ul in
+        let ek = B.sub_non_null ek 0ul (concrete_xkey_len i) in
+        let keys_b = B.sub_non_null ek 0ul (key_offset i) in
+        let hkeys_b = B.sub_non_null ek (key_offset i) 128ul in
 
         let h0 = get() in
 
