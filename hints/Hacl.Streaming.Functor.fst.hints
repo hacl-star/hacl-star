@@ -1,5 +1,5 @@
 [
-  "mZƒK\u001f©Ïí›÷Üž¥_6£",
+  "'¢•š°\u0004=_âÒQ´Í.34",
   [
     [
       "Hacl.Streaming.Functor.optional_freeable",
@@ -1160,7 +1160,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_union"
       ],
       0,
-      "8b8a890e859cdec3a15b2c3ab336e69f"
+      "8b67a609e0e8930fa5105e59616b74a5"
     ],
     [
       "Hacl.Streaming.Functor.update_empty_buf",
@@ -1173,7 +1173,7 @@
         "refinement_interpretation_Tm_refine_eed61e872c76c9d08d9c5e037b1dc22d"
       ],
       0,
-      "8bf3557c94691750080439293b81a70d"
+      "313d567cb4f68540a7e25496fe62e4ee"
     ],
     [
       "Hacl.Streaming.Functor.update_empty_buf",
@@ -1301,7 +1301,6 @@
         "refinement_interpretation_Tm_refine_02951fd03552320d928a2182ed63fa53",
         "refinement_interpretation_Tm_refine_11aa9d0047a3c4ad74e606ea7b75060e",
         "refinement_interpretation_Tm_refine_1ba8fd8bb363097813064c67740b2de5",
-        "refinement_interpretation_Tm_refine_24ebdb01384333d8b57512c65ab36c03",
         "refinement_interpretation_Tm_refine_282b371e484f60711d2ac598c6e009a2",
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
         "refinement_interpretation_Tm_refine_40e700662e0905a07e8f290efe910d4e",
@@ -1352,7 +1351,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_union"
       ],
       0,
-      "631f1ddefdb566c773b40dfccd97802c"
+      "d776f5ce2de0fc6176eaf714255e6b1f"
     ],
     [
       "Hacl.Streaming.Functor.update_round",
@@ -1371,7 +1370,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Block__item__block_len"
       ],
       0,
-      "7c200591e1e77892dcfd99b66c2ed750"
+      "31765d84a3117d4405e898fcd298af41"
     ],
     [
       "Hacl.Streaming.Functor.update_round",
@@ -1391,7 +1390,8 @@
         "equation_FStar.Monotonic.HyperStack.live_region",
         "equation_FStar.Seq.Properties.split", "equation_FStar.UInt.fits",
         "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
-        "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
+        "equation_FStar.UInt.mod", "equation_FStar.UInt.size",
+        "equation_FStar.UInt.uint_t",
         "equation_Hacl.Streaming.Functor.footprint",
         "equation_Hacl.Streaming.Functor.footprint_s",
         "equation_Hacl.Streaming.Functor.invariant",
@@ -1448,8 +1448,10 @@
         "lemma_LowStar.Monotonic.Buffer.as_seq_gsub",
         "lemma_LowStar.Monotonic.Buffer.frameOf_gsub",
         "lemma_LowStar.Monotonic.Buffer.gsub_gsub",
+        "lemma_LowStar.Monotonic.Buffer.gsub_is_null",
         "lemma_LowStar.Monotonic.Buffer.len_gsub",
         "lemma_LowStar.Monotonic.Buffer.length_as_seq",
+        "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.live_gsub",
         "lemma_LowStar.Monotonic.Buffer.live_region_frameOf",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_gsub_buffer",
@@ -1491,6 +1493,7 @@
         "refinement_interpretation_Tm_refine_06f2bf4950bb76094f7b7f43daea2409",
         "refinement_interpretation_Tm_refine_0ea1fba779ad5718e28476faeef94d56",
         "refinement_interpretation_Tm_refine_11aa9d0047a3c4ad74e606ea7b75060e",
+        "refinement_interpretation_Tm_refine_1ba8fd8bb363097813064c67740b2de5",
         "refinement_interpretation_Tm_refine_282b371e484f60711d2ac598c6e009a2",
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
         "refinement_interpretation_Tm_refine_35a0739c434508f48d0bb1d5cd5df9e8",
@@ -1531,7 +1534,8 @@
         "typing_FStar.Seq.Base.slice", "typing_FStar.Set.singleton",
         "typing_FStar.UInt32.add", "typing_FStar.UInt32.t",
         "typing_FStar.UInt32.uint_to_t", "typing_FStar.UInt32.v",
-        "typing_FStar.UInt64.rem", "typing_Hacl.Streaming.Functor.footprint",
+        "typing_FStar.UInt64.rem", "typing_FStar.UInt64.v",
+        "typing_Hacl.Streaming.Functor.footprint",
         "typing_Hacl.Streaming.Functor.optional_footprint",
         "typing_Hacl.Streaming.Functor.optional_reveal",
         "typing_Hacl.Streaming.Functor.rest",
@@ -1553,7 +1557,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_union"
       ],
       0,
-      "f52de758c6b0d5bdc91ed3bab602c79d"
+      "535159c1125a52f04951c742b77078ae"
     ],
     [
       "Hacl.Streaming.Functor.update",
@@ -1566,7 +1570,7 @@
         "refinement_interpretation_Tm_refine_eed61e872c76c9d08d9c5e037b1dc22d"
       ],
       0,
-      "5cb474cb099ce08cbdd48e1a340c3f30"
+      "31bd3c4db356d642d1ea64456d5af987"
     ],
     [
       "Hacl.Streaming.Functor.update",
@@ -1621,6 +1625,7 @@
         "lemma_LowStar.Monotonic.Buffer.freeable_length",
         "lemma_LowStar.Monotonic.Buffer.len_gsub",
         "lemma_LowStar.Monotonic.Buffer.length_as_seq",
+        "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.live_gsub",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_includes_r",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_sym_",
@@ -1674,7 +1679,7 @@
         "unit_typing"
       ],
       0,
-      "31435d70f4f5198c1c8483907df62c0c"
+      "b13510089484390ef0ee4e0cdee42d9a"
     ],
     [
       "Hacl.Streaming.Functor.finish_st",
@@ -1691,7 +1696,7 @@
         "refinement_interpretation_Tm_refine_a997f7fc0ee9057c4f6335ecd3b55d00"
       ],
       0,
-      "930b6c6ce47a6335a99801497ed47e56"
+      "dcb2c54e5aefa689ca1ac87b412d6406"
     ],
     [
       "Hacl.Streaming.Functor.mk_finish",
@@ -1921,7 +1926,7 @@
         "typing_tok_Hacl.Streaming.Interface.Erased@tok"
       ],
       0,
-      "ff7779de192f2c05edd81d33036f0858"
+      "231b1605f185ce0ef94a13302da7fdcd"
     ],
     [
       "Hacl.Streaming.Functor.free",
@@ -1934,7 +1939,7 @@
         "refinement_interpretation_Tm_refine_eed61e872c76c9d08d9c5e037b1dc22d"
       ],
       0,
-      "dbe8569befa1b4850785e0b8b3da0cd8"
+      "dfb78ed76c5950db86e99cf9e56de666"
     ],
     [
       "Hacl.Streaming.Functor.free",
@@ -2036,7 +2041,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_union"
       ],
       0,
-      "ccce1eaa8706f16d0d0509f01139940b"
+      "d68d895d58733b2a51976e3c5ca07473"
     ]
   ]
 ]
