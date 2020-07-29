@@ -26,28 +26,4 @@ module Bindings(F:Cstubs.FOREIGN) =
         (ocaml_bytes @->
            (ocaml_bytes @->
               (uint32_t @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))))
-    let hacl_HKDF_expand_blake2s_32 =
-      foreign "Hacl_HKDF_expand_blake2s_32"
-        (ocaml_bytes @->
-           (ocaml_bytes @->
-              (uint32_t @->
-                 (ocaml_bytes @->
-                    (uint32_t @-> (uint32_t @-> (returning void)))))))
-    let hacl_HKDF_extract_blake2s_32 =
-      foreign "Hacl_HKDF_extract_blake2s_32"
-        (ocaml_bytes @->
-           (ocaml_bytes @->
-              (uint32_t @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))))
-    let hacl_HKDF_expand_blake2b_32 =
-      foreign "Hacl_HKDF_expand_blake2b_32"
-        (ocaml_bytes @->
-           (ocaml_bytes @->
-              (uint32_t @->
-                 (ocaml_bytes @->
-                    (uint32_t @-> (uint32_t @-> (returning void)))))))
-    let hacl_HKDF_extract_blake2b_32 =
-      foreign "Hacl_HKDF_extract_blake2b_32"
-        (ocaml_bytes @->
-           (ocaml_bytes @->
-              (uint32_t @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))))
   end

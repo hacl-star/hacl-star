@@ -52,30 +52,6 @@ module Bindings(F:Cstubs.FOREIGN) =
         (ocaml_bytes @->
            (ocaml_bytes @->
               (uint32_t @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))))
-    let everCrypt_HKDF_expand_blake2s =
-      foreign "EverCrypt_HKDF_expand_blake2s"
-        (ocaml_bytes @->
-           (ocaml_bytes @->
-              (uint32_t @->
-                 (ocaml_bytes @->
-                    (uint32_t @-> (uint32_t @-> (returning void)))))))
-    let everCrypt_HKDF_extract_blake2s =
-      foreign "EverCrypt_HKDF_extract_blake2s"
-        (ocaml_bytes @->
-           (ocaml_bytes @->
-              (uint32_t @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))))
-    let everCrypt_HKDF_expand_blake2b =
-      foreign "EverCrypt_HKDF_expand_blake2b"
-        (ocaml_bytes @->
-           (ocaml_bytes @->
-              (uint32_t @->
-                 (ocaml_bytes @->
-                    (uint32_t @-> (uint32_t @-> (returning void)))))))
-    let everCrypt_HKDF_extract_blake2b =
-      foreign "EverCrypt_HKDF_extract_blake2b"
-        (ocaml_bytes @->
-           (ocaml_bytes @->
-              (uint32_t @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))))
     let everCrypt_HKDF_expand =
       foreign "EverCrypt_HKDF_expand"
         (spec_Hash_Definitions_hash_alg @->

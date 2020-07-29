@@ -33,15 +33,9 @@
 
 #include "Hacl_Kremlib.h"
 #include "Lib_Memzero0.h"
+#include "Hacl_Blake2b_32.h"
 #include "Hacl_Impl_Blake2_Constants.h"
 
-
-typedef struct K___uint32_t_uint32_t_s
-{
-  uint32_t fst;
-  uint32_t snd;
-}
-K___uint32_t_uint32_t;
 
 void
 Hacl_Blake2s_32_blake2s(

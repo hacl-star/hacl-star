@@ -427,11 +427,7 @@ static void toUint8(u64 *i, u8 *o)
 {
   u32 i0;
   for (i0 = (u32)0U; i0 < (u32)4U; i0++)
-  {
-    u8 *x0 = o + i0 * (u32)8U;
-    u64 x2 = i[i0];
-    store64_be(x0, x2);
-  }
+    store64_be(o + i0 * (u32)8U, i[i0]);
 }
 
 static void changeEndian(u64 *i)
@@ -2530,16 +2526,6 @@ ecdsa_verification_(
               sz = (u32)64U;
               break;
             }
-          case Spec_Hash_Definitions_Blake2S:
-            {
-              sz = (u32)32U;
-              break;
-            }
-          case Spec_Hash_Definitions_Blake2B:
-            {
-              sz = (u32)64U;
-              break;
-            }
           default:
             {
               KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
@@ -2696,16 +2682,6 @@ ecdsa_signature_core(
             break;
           }
         case Spec_Hash_Definitions_SHA2_512:
-          {
-            sz = (u32)64U;
-            break;
-          }
-        case Spec_Hash_Definitions_Blake2S:
-          {
-            sz = (u32)32U;
-            break;
-          }
-        case Spec_Hash_Definitions_Blake2B:
           {
             sz = (u32)64U;
             break;

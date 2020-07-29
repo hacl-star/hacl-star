@@ -428,9 +428,7 @@ void Hacl_Impl_P256_LowLevel_toUint8(uint64_t *i, uint8_t *o)
 {
   for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0++)
   {
-    uint8_t *x0 = o + i0 * (uint32_t)8U;
-    uint64_t x2 = i[i0];
-    store64_be(x0, x2);
+    store64_be(o + i0 * (uint32_t)8U, i[i0]);
   }
 }
 
@@ -2427,16 +2425,6 @@ ecdsa_verification_(
           sz = (uint32_t)64U;
           break;
         }
-      case Spec_Hash_Definitions_Blake2S:
-        {
-          sz = (uint32_t)32U;
-          break;
-        }
-      case Spec_Hash_Definitions_Blake2B:
-        {
-          sz = (uint32_t)64U;
-          break;
-        }
       default:
         {
           KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
@@ -2584,16 +2572,6 @@ ecdsa_signature_core(
           break;
         }
       case Spec_Hash_Definitions_SHA2_512:
-        {
-          sz = (uint32_t)64U;
-          break;
-        }
-      case Spec_Hash_Definitions_Blake2S:
-        {
-          sz = (uint32_t)32U;
-          break;
-        }
-      case Spec_Hash_Definitions_Blake2B:
         {
           sz = (uint32_t)64U;
           break;

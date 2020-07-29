@@ -32,7 +32,6 @@
 #define __EverCrypt_Hash_H
 
 #include "Hacl_Kremlib.h"
-#include "Hacl_Impl_Blake2_Constants.h"
 #include "Vale.h"
 #include "Hacl_Hash.h"
 #include "EverCrypt_AutoConfig2.h"
@@ -77,8 +76,6 @@ typedef void *EverCrypt_Hash_e_alg;
 #define EverCrypt_Hash_SHA2_256_s 3
 #define EverCrypt_Hash_SHA2_384_s 4
 #define EverCrypt_Hash_SHA2_512_s 5
-#define EverCrypt_Hash_Blake2S_s 6
-#define EverCrypt_Hash_Blake2B_s 7
 
 /* SNIPPET_END: EverCrypt_Hash_state_s_tags */
 
@@ -96,8 +93,6 @@ typedef struct EverCrypt_Hash_state_s_s
     uint32_t *case_SHA2_256_s;
     uint64_t *case_SHA2_384_s;
     uint64_t *case_SHA2_512_s;
-    uint32_t *case_Blake2S_s;
-    uint64_t *case_Blake2B_s;
   }
   ;
 }
@@ -109,7 +104,7 @@ EverCrypt_Hash_state_s;
 
 bool
 EverCrypt_Hash_uu___is_MD5_s(
-  Spec_Hash_Definitions_hash_alg uu____169,
+  Spec_Hash_Definitions_hash_alg uu____105,
   EverCrypt_Hash_state_s projectee
 );
 
@@ -119,7 +114,7 @@ EverCrypt_Hash_uu___is_MD5_s(
 
 uint32_t
 *EverCrypt_Hash___proj__MD5_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____194,
+  Spec_Hash_Definitions_hash_alg uu____130,
   EverCrypt_Hash_state_s projectee
 );
 
@@ -129,7 +124,7 @@ uint32_t
 
 bool
 EverCrypt_Hash_uu___is_SHA1_s(
-  Spec_Hash_Definitions_hash_alg uu____215,
+  Spec_Hash_Definitions_hash_alg uu____151,
   EverCrypt_Hash_state_s projectee
 );
 
@@ -139,7 +134,7 @@ EverCrypt_Hash_uu___is_SHA1_s(
 
 uint32_t
 *EverCrypt_Hash___proj__SHA1_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____240,
+  Spec_Hash_Definitions_hash_alg uu____176,
   EverCrypt_Hash_state_s projectee
 );
 
@@ -149,7 +144,7 @@ uint32_t
 
 bool
 EverCrypt_Hash_uu___is_SHA2_224_s(
-  Spec_Hash_Definitions_hash_alg uu____261,
+  Spec_Hash_Definitions_hash_alg uu____197,
   EverCrypt_Hash_state_s projectee
 );
 
@@ -159,7 +154,7 @@ EverCrypt_Hash_uu___is_SHA2_224_s(
 
 uint32_t
 *EverCrypt_Hash___proj__SHA2_224_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____286,
+  Spec_Hash_Definitions_hash_alg uu____222,
   EverCrypt_Hash_state_s projectee
 );
 
@@ -169,7 +164,7 @@ uint32_t
 
 bool
 EverCrypt_Hash_uu___is_SHA2_256_s(
-  Spec_Hash_Definitions_hash_alg uu____307,
+  Spec_Hash_Definitions_hash_alg uu____243,
   EverCrypt_Hash_state_s projectee
 );
 
@@ -179,7 +174,7 @@ EverCrypt_Hash_uu___is_SHA2_256_s(
 
 uint32_t
 *EverCrypt_Hash___proj__SHA2_256_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____332,
+  Spec_Hash_Definitions_hash_alg uu____268,
   EverCrypt_Hash_state_s projectee
 );
 
@@ -189,7 +184,7 @@ uint32_t
 
 bool
 EverCrypt_Hash_uu___is_SHA2_384_s(
-  Spec_Hash_Definitions_hash_alg uu____353,
+  Spec_Hash_Definitions_hash_alg uu____289,
   EverCrypt_Hash_state_s projectee
 );
 
@@ -199,7 +194,7 @@ EverCrypt_Hash_uu___is_SHA2_384_s(
 
 uint64_t
 *EverCrypt_Hash___proj__SHA2_384_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____378,
+  Spec_Hash_Definitions_hash_alg uu____314,
   EverCrypt_Hash_state_s projectee
 );
 
@@ -209,7 +204,7 @@ uint64_t
 
 bool
 EverCrypt_Hash_uu___is_SHA2_512_s(
-  Spec_Hash_Definitions_hash_alg uu____399,
+  Spec_Hash_Definitions_hash_alg uu____335,
   EverCrypt_Hash_state_s projectee
 );
 
@@ -219,51 +214,11 @@ EverCrypt_Hash_uu___is_SHA2_512_s(
 
 uint64_t
 *EverCrypt_Hash___proj__SHA2_512_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____424,
+  Spec_Hash_Definitions_hash_alg uu____360,
   EverCrypt_Hash_state_s projectee
 );
 
 /* SNIPPET_END: EverCrypt_Hash___proj__SHA2_512_s__item__p */
-
-/* SNIPPET_START: EverCrypt_Hash_uu___is_Blake2S_s */
-
-bool
-EverCrypt_Hash_uu___is_Blake2S_s(
-  Spec_Hash_Definitions_hash_alg uu____445,
-  EverCrypt_Hash_state_s projectee
-);
-
-/* SNIPPET_END: EverCrypt_Hash_uu___is_Blake2S_s */
-
-/* SNIPPET_START: EverCrypt_Hash___proj__Blake2S_s__item__p */
-
-uint32_t
-*EverCrypt_Hash___proj__Blake2S_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____470,
-  EverCrypt_Hash_state_s projectee
-);
-
-/* SNIPPET_END: EverCrypt_Hash___proj__Blake2S_s__item__p */
-
-/* SNIPPET_START: EverCrypt_Hash_uu___is_Blake2B_s */
-
-bool
-EverCrypt_Hash_uu___is_Blake2B_s(
-  Spec_Hash_Definitions_hash_alg uu____491,
-  EverCrypt_Hash_state_s projectee
-);
-
-/* SNIPPET_END: EverCrypt_Hash_uu___is_Blake2B_s */
-
-/* SNIPPET_START: EverCrypt_Hash___proj__Blake2B_s__item__p */
-
-uint64_t
-*EverCrypt_Hash___proj__Blake2B_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____516,
-  EverCrypt_Hash_state_s projectee
-);
-
-/* SNIPPET_END: EverCrypt_Hash___proj__Blake2B_s__item__p */
 
 /* SNIPPET_START: EverCrypt_Hash_alg_of_state */
 
@@ -297,19 +252,13 @@ void EverCrypt_Hash_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n);
 
 /* SNIPPET_START: EverCrypt_Hash_update */
 
-void EverCrypt_Hash_update(EverCrypt_Hash_state_s *s, uint64_t prevlen, uint8_t *block);
+void EverCrypt_Hash_update(EverCrypt_Hash_state_s *s, uint8_t *block);
 
 /* SNIPPET_END: EverCrypt_Hash_update */
 
 /* SNIPPET_START: EverCrypt_Hash_update_multi */
 
-void
-EverCrypt_Hash_update_multi(
-  EverCrypt_Hash_state_s *s,
-  uint64_t prevlen,
-  uint8_t *blocks,
-  uint32_t len
-);
+void EverCrypt_Hash_update_multi(EverCrypt_Hash_state_s *s, uint8_t *blocks, uint32_t len);
 
 /* SNIPPET_END: EverCrypt_Hash_update_multi */
 
@@ -318,22 +267,16 @@ EverCrypt_Hash_update_multi(
 void
 EverCrypt_Hash_update_last_256(
   uint32_t *s,
-  uint64_t input,
-  uint8_t *input_len,
-  uint32_t input_len1
+  uint64_t prev_len,
+  uint8_t *input,
+  uint32_t input_len
 );
 
 /* SNIPPET_END: EverCrypt_Hash_update_last_256 */
 
 /* SNIPPET_START: EverCrypt_Hash_update_last */
 
-void
-EverCrypt_Hash_update_last(
-  EverCrypt_Hash_state_s *s,
-  uint64_t prev_len,
-  uint8_t *last,
-  uint32_t last_len
-);
+void EverCrypt_Hash_update_last(EverCrypt_Hash_state_s *s, uint8_t *last, uint64_t total_len);
 
 /* SNIPPET_END: EverCrypt_Hash_update_last */
 
@@ -470,26 +413,6 @@ EverCrypt_Hash_Incremental_finish_sha512(
 );
 
 /* SNIPPET_END: EverCrypt_Hash_Incremental_finish_sha512 */
-
-/* SNIPPET_START: EverCrypt_Hash_Incremental_finish_blake2s */
-
-void
-EverCrypt_Hash_Incremental_finish_blake2s(
-  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *p,
-  uint8_t *dst
-);
-
-/* SNIPPET_END: EverCrypt_Hash_Incremental_finish_blake2s */
-
-/* SNIPPET_START: EverCrypt_Hash_Incremental_finish_blake2b */
-
-void
-EverCrypt_Hash_Incremental_finish_blake2b(
-  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *p,
-  uint8_t *dst
-);
-
-/* SNIPPET_END: EverCrypt_Hash_Incremental_finish_blake2b */
 
 /* SNIPPET_START: EverCrypt_Hash_Incremental_alg_of_state */
 

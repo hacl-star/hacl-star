@@ -32,53 +32,10 @@
 #define __Hacl_Blake2s_128_H
 
 #include "Hacl_Kremlib.h"
-#include "Hacl_Blake2s_32.h"
 #include "Lib_Memzero0.h"
+#include "Hacl_Blake2b_32.h"
 #include "Hacl_Impl_Blake2_Constants.h"
-#include "Hacl_Hash.h"
 
-
-/* SNIPPET_START: Hacl_Hash_Blake2s_128_finish_blake2s_128 */
-
-void
-Hacl_Hash_Blake2s_128_finish_blake2s_128(
-  Lib_IntVector_Intrinsics_vec128 *s,
-  uint64_t ev,
-  uint8_t *dst
-);
-
-/* SNIPPET_END: Hacl_Hash_Blake2s_128_finish_blake2s_128 */
-
-/* SNIPPET_START: Hacl_Hash_Blake2s_128_update_multi_blake2s_128 */
-
-uint64_t
-Hacl_Hash_Blake2s_128_update_multi_blake2s_128(
-  Lib_IntVector_Intrinsics_vec128 *s,
-  uint64_t ev,
-  uint8_t *blocks,
-  uint32_t n_blocks
-);
-
-/* SNIPPET_END: Hacl_Hash_Blake2s_128_update_multi_blake2s_128 */
-
-/* SNIPPET_START: Hacl_Hash_Blake2s_128_update_last_blake2s_128 */
-
-uint64_t
-Hacl_Hash_Blake2s_128_update_last_blake2s_128(
-  Lib_IntVector_Intrinsics_vec128 *s,
-  uint64_t ev,
-  uint64_t prev_len,
-  uint8_t *input,
-  uint32_t input_len
-);
-
-/* SNIPPET_END: Hacl_Hash_Blake2s_128_update_last_blake2s_128 */
-
-/* SNIPPET_START: Hacl_Hash_Blake2s_128_hash_blake2s_128 */
-
-void Hacl_Hash_Blake2s_128_hash_blake2s_128(uint8_t *input, uint32_t input_len, uint8_t *dst);
-
-/* SNIPPET_END: Hacl_Hash_Blake2s_128_hash_blake2s_128 */
 
 /* SNIPPET_START: Hacl_Blake2s_128_blake2s */
 

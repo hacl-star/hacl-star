@@ -85,30 +85,16 @@ Hacl_Streaming_SHA2_256_update(
 {
   Hacl_Streaming_Functor_state_s___uint32_t____ s = *p;
   uint64_t total_len = s.total_len;
-  uint32_t sz;
-  if (total_len % (uint64_t)(uint32_t)64U == (uint64_t)0U && total_len > (uint64_t)0U)
-  {
-    sz = (uint32_t)64U;
-  }
-  else
-  {
-    sz = (uint32_t)(total_len % (uint64_t)(uint32_t)64U);
-  }
-  if (len <= (uint32_t)64U - sz)
+  uint64_t x0 = total_len % (uint64_t)(uint32_t)64U;
+  uint32_t sz = (uint32_t)x0;
+  if (len < (uint32_t)64U - sz)
   {
     Hacl_Streaming_Functor_state_s___uint32_t____ s1 = *p;
     uint32_t *block_state1 = s1.block_state;
     uint8_t *buf = s1.buf;
     uint64_t total_len1 = s1.total_len;
-    uint32_t sz1;
-    if (total_len1 % (uint64_t)(uint32_t)64U == (uint64_t)0U && total_len1 > (uint64_t)0U)
-    {
-      sz1 = (uint32_t)64U;
-    }
-    else
-    {
-      sz1 = (uint32_t)(total_len1 % (uint64_t)(uint32_t)64U);
-    }
+    uint64_t x = total_len1 % (uint64_t)(uint32_t)64U;
+    uint32_t sz1 = (uint32_t)x;
     uint8_t *buf2 = buf + sz1;
     memcpy(buf2, data, len * sizeof (data[0U]));
     uint64_t total_len2 = total_len1 + (uint64_t)len;
@@ -129,29 +115,7 @@ Hacl_Streaming_SHA2_256_update(
     uint32_t *block_state1 = s1.block_state;
     uint8_t *buf = s1.buf;
     uint64_t total_len1 = s1.total_len;
-    uint32_t sz1;
-    if (total_len1 % (uint64_t)(uint32_t)64U == (uint64_t)0U && total_len1 > (uint64_t)0U)
-    {
-      sz1 = (uint32_t)64U;
-    }
-    else
-    {
-      sz1 = (uint32_t)(total_len1 % (uint64_t)(uint32_t)64U);
-    }
-    if (!(sz1 == (uint32_t)0U))
-    {
-      Hacl_Hash_SHA2_update_multi_256(block_state1, buf, (uint32_t)1U);
-    }
-    uint32_t ite;
-    if ((uint64_t)len % (uint64_t)(uint32_t)64U == (uint64_t)0U && (uint64_t)len > (uint64_t)0U)
-    {
-      ite = (uint32_t)64U;
-    }
-    else
-    {
-      ite = (uint32_t)((uint64_t)len % (uint64_t)(uint32_t)64U);
-    }
-    uint32_t n_blocks = (len - ite) / (uint32_t)64U;
+    uint32_t n_blocks = len / (uint32_t)64U;
     uint32_t data1_len = n_blocks * (uint32_t)64U;
     uint32_t data2_len = len - data1_len;
     uint8_t *data1 = data;
@@ -175,62 +139,29 @@ Hacl_Streaming_SHA2_256_update(
   uint8_t *data2 = data + diff;
   Hacl_Streaming_Functor_state_s___uint32_t____ s1 = *p;
   uint32_t *block_state10 = s1.block_state;
-  uint8_t *buf0 = s1.buf;
+  uint8_t *buf_1 = s1.buf;
   uint64_t total_len10 = s1.total_len;
-  uint32_t sz10;
-  if (total_len10 % (uint64_t)(uint32_t)64U == (uint64_t)0U && total_len10 > (uint64_t)0U)
-  {
-    sz10 = (uint32_t)64U;
-  }
-  else
-  {
-    sz10 = (uint32_t)(total_len10 % (uint64_t)(uint32_t)64U);
-  }
-  uint8_t *buf2 = buf0 + sz10;
-  memcpy(buf2, data1, diff * sizeof (data1[0U]));
-  uint64_t total_len2 = total_len10 + (uint64_t)diff;
+  uint64_t x = total_len10 % (uint64_t)(uint32_t)64U;
+  uint32_t sz1 = (uint32_t)x;
+  uint32_t diff1 = (uint32_t)64U - sz1;
+  uint8_t *buf0 = buf_1;
+  uint8_t *buf2 = buf0 + sz1;
+  memcpy(buf2, data1, diff1 * sizeof (data1[0U]));
+  Hacl_Hash_SHA2_update_multi_256(block_state10, buf0, (uint32_t)1U);
   *p
   =
     (
       (Hacl_Streaming_Functor_state_s___uint32_t____){
         .block_state = block_state10,
-        .buf = buf0,
-        .total_len = total_len2
+        .buf = buf_1,
+        .total_len = total_len10 + (uint64_t)diff
       }
     );
   Hacl_Streaming_Functor_state_s___uint32_t____ s10 = *p;
   uint32_t *block_state1 = s10.block_state;
   uint8_t *buf = s10.buf;
   uint64_t total_len1 = s10.total_len;
-  uint32_t sz1;
-  if (total_len1 % (uint64_t)(uint32_t)64U == (uint64_t)0U && total_len1 > (uint64_t)0U)
-  {
-    sz1 = (uint32_t)64U;
-  }
-  else
-  {
-    sz1 = (uint32_t)(total_len1 % (uint64_t)(uint32_t)64U);
-  }
-  if (!(sz1 == (uint32_t)0U))
-  {
-    Hacl_Hash_SHA2_update_multi_256(block_state1, buf, (uint32_t)1U);
-  }
-  uint32_t ite;
-  if
-  (
-    (uint64_t)(len - diff)
-    % (uint64_t)(uint32_t)64U
-    == (uint64_t)0U
-    && (uint64_t)(len - diff) > (uint64_t)0U
-  )
-  {
-    ite = (uint32_t)64U;
-  }
-  else
-  {
-    ite = (uint32_t)((uint64_t)(len - diff) % (uint64_t)(uint32_t)64U);
-  }
-  uint32_t n_blocks = (len - diff - ite) / (uint32_t)64U;
+  uint32_t n_blocks = (len - diff) / (uint32_t)64U;
   uint32_t data1_len = n_blocks * (uint32_t)64U;
   uint32_t data2_len = len - diff - data1_len;
   uint8_t *data11 = data2;
@@ -260,20 +191,13 @@ Hacl_Streaming_SHA2_256_finish(Hacl_Streaming_Functor_state_s___uint32_t____ *p,
   uint32_t *block_state = scrut.block_state;
   uint8_t *buf_ = scrut.buf;
   uint64_t total_len = scrut.total_len;
-  uint32_t r;
-  if (total_len % (uint64_t)(uint32_t)64U == (uint64_t)0U && total_len > (uint64_t)0U)
-  {
-    r = (uint32_t)64U;
-  }
-  else
-  {
-    r = (uint32_t)(total_len % (uint64_t)(uint32_t)64U);
-  }
   uint8_t *buf_1 = buf_;
   uint32_t tmp_block_state[8U] = { 0U };
   memcpy(tmp_block_state, block_state, (uint32_t)8U * sizeof (block_state[0U]));
-  uint64_t prev_len = total_len - (uint64_t)r;
-  Hacl_Hash_SHA2_update_last_256(tmp_block_state, prev_len, buf_1, r);
+  uint64_t last_len = total_len % (uint64_t)64U;
+  uint64_t prev_len = total_len - last_len;
+  uint32_t last_len1 = (uint32_t)last_len;
+  Hacl_Hash_SHA2_update_last_256(tmp_block_state, prev_len, buf_1, last_len1);
   Hacl_Hash_Core_SHA2_finish_256(tmp_block_state, dst);
 }
 

@@ -269,128 +269,6 @@ EverCrypt_HKDF_extract_sha2_512(
 }
 
 void
-EverCrypt_HKDF_expand_blake2s(
-  uint8_t *okm,
-  uint8_t *prk,
-  uint32_t prklen,
-  uint8_t *info,
-  uint32_t infolen,
-  uint32_t len
-)
-{
-  uint32_t tlen = (uint32_t)32U;
-  uint32_t n = len / tlen;
-  uint8_t *output = okm;
-  KRML_CHECK_SIZE(sizeof (uint8_t), tlen + infolen + (uint32_t)1U);
-  uint8_t text[tlen + infolen + (uint32_t)1U];
-  memset(text, 0U, (tlen + infolen + (uint32_t)1U) * sizeof (text[0U]));
-  uint8_t *text0 = text + tlen;
-  uint8_t *tag = text;
-  uint8_t *ctr = text + tlen + infolen;
-  memcpy(text + tlen, info, infolen * sizeof (info[0U]));
-  for (uint32_t i = (uint32_t)0U; i < n; i++)
-  {
-    ctr[0U] = (uint8_t)(i + (uint32_t)1U);
-    if (i == (uint32_t)0U)
-    {
-      EverCrypt_HMAC_compute_blake2s(tag, prk, prklen, text0, infolen + (uint32_t)1U);
-    }
-    else
-    {
-      EverCrypt_HMAC_compute_blake2s(tag, prk, prklen, text, tlen + infolen + (uint32_t)1U);
-    }
-    memcpy(output + i * tlen, tag, tlen * sizeof (tag[0U]));
-  }
-  if (n * tlen < len)
-  {
-    ctr[0U] = (uint8_t)(n + (uint32_t)1U);
-    if (n == (uint32_t)0U)
-    {
-      EverCrypt_HMAC_compute_blake2s(tag, prk, prklen, text0, infolen + (uint32_t)1U);
-    }
-    else
-    {
-      EverCrypt_HMAC_compute_blake2s(tag, prk, prklen, text, tlen + infolen + (uint32_t)1U);
-    }
-    uint8_t *block = okm + n * tlen;
-    memcpy(block, tag, (len - n * tlen) * sizeof (tag[0U]));
-  }
-}
-
-void
-EverCrypt_HKDF_extract_blake2s(
-  uint8_t *prk,
-  uint8_t *salt,
-  uint32_t saltlen,
-  uint8_t *ikm,
-  uint32_t ikmlen
-)
-{
-  EverCrypt_HMAC_compute_blake2s(prk, salt, saltlen, ikm, ikmlen);
-}
-
-void
-EverCrypt_HKDF_expand_blake2b(
-  uint8_t *okm,
-  uint8_t *prk,
-  uint32_t prklen,
-  uint8_t *info,
-  uint32_t infolen,
-  uint32_t len
-)
-{
-  uint32_t tlen = (uint32_t)64U;
-  uint32_t n = len / tlen;
-  uint8_t *output = okm;
-  KRML_CHECK_SIZE(sizeof (uint8_t), tlen + infolen + (uint32_t)1U);
-  uint8_t text[tlen + infolen + (uint32_t)1U];
-  memset(text, 0U, (tlen + infolen + (uint32_t)1U) * sizeof (text[0U]));
-  uint8_t *text0 = text + tlen;
-  uint8_t *tag = text;
-  uint8_t *ctr = text + tlen + infolen;
-  memcpy(text + tlen, info, infolen * sizeof (info[0U]));
-  for (uint32_t i = (uint32_t)0U; i < n; i++)
-  {
-    ctr[0U] = (uint8_t)(i + (uint32_t)1U);
-    if (i == (uint32_t)0U)
-    {
-      EverCrypt_HMAC_compute_blake2b(tag, prk, prklen, text0, infolen + (uint32_t)1U);
-    }
-    else
-    {
-      EverCrypt_HMAC_compute_blake2b(tag, prk, prklen, text, tlen + infolen + (uint32_t)1U);
-    }
-    memcpy(output + i * tlen, tag, tlen * sizeof (tag[0U]));
-  }
-  if (n * tlen < len)
-  {
-    ctr[0U] = (uint8_t)(n + (uint32_t)1U);
-    if (n == (uint32_t)0U)
-    {
-      EverCrypt_HMAC_compute_blake2b(tag, prk, prklen, text0, infolen + (uint32_t)1U);
-    }
-    else
-    {
-      EverCrypt_HMAC_compute_blake2b(tag, prk, prklen, text, tlen + infolen + (uint32_t)1U);
-    }
-    uint8_t *block = okm + n * tlen;
-    memcpy(block, tag, (len - n * tlen) * sizeof (tag[0U]));
-  }
-}
-
-void
-EverCrypt_HKDF_extract_blake2b(
-  uint8_t *prk,
-  uint8_t *salt,
-  uint32_t saltlen,
-  uint8_t *ikm,
-  uint32_t ikmlen
-)
-{
-  EverCrypt_HMAC_compute_blake2b(prk, salt, saltlen, ikm, ikmlen);
-}
-
-void
 EverCrypt_HKDF_expand(
   Spec_Hash_Definitions_hash_alg a,
   uint8_t *okm,
@@ -421,16 +299,6 @@ EverCrypt_HKDF_expand(
     case Spec_Hash_Definitions_SHA2_512:
       {
         EverCrypt_HKDF_expand_sha2_512(okm, prk, prklen, info, infolen, len);
-        break;
-      }
-    case Spec_Hash_Definitions_Blake2S:
-      {
-        EverCrypt_HKDF_expand_blake2s(okm, prk, prklen, info, infolen, len);
-        break;
-      }
-    case Spec_Hash_Definitions_Blake2B:
-      {
-        EverCrypt_HKDF_expand_blake2b(okm, prk, prklen, info, infolen, len);
         break;
       }
     default:
@@ -471,16 +339,6 @@ EverCrypt_HKDF_extract(
     case Spec_Hash_Definitions_SHA2_512:
       {
         EverCrypt_HKDF_extract_sha2_512(prk, salt, saltlen, ikm, ikmlen);
-        break;
-      }
-    case Spec_Hash_Definitions_Blake2S:
-      {
-        EverCrypt_HKDF_extract_blake2s(prk, salt, saltlen, ikm, ikmlen);
-        break;
-      }
-    case Spec_Hash_Definitions_Blake2B:
-      {
-        EverCrypt_HKDF_extract_blake2b(prk, salt, saltlen, ikm, ikmlen);
         break;
       }
     default:

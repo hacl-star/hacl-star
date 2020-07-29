@@ -22,14 +22,4 @@ module Bindings(F:Cstubs.FOREIGN) =
         (ocaml_bytes @->
            (ocaml_bytes @->
               (uint32_t @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))))
-    let hacl_HMAC_compute_blake2s_32 =
-      foreign "Hacl_HMAC_compute_blake2s_32"
-        (ocaml_bytes @->
-           (ocaml_bytes @->
-              (uint32_t @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))))
-    let hacl_HMAC_compute_blake2b_32 =
-      foreign "Hacl_HMAC_compute_blake2b_32"
-        (ocaml_bytes @->
-           (ocaml_bytes @->
-              (uint32_t @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))))
   end

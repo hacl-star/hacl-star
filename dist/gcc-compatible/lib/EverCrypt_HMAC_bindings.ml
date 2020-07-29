@@ -24,16 +24,6 @@ module Bindings(F:Cstubs.FOREIGN) =
         (ocaml_bytes @->
            (ocaml_bytes @->
               (uint32_t @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))))
-    let everCrypt_HMAC_compute_blake2s =
-      foreign "EverCrypt_HMAC_compute_blake2s"
-        (ocaml_bytes @->
-           (ocaml_bytes @->
-              (uint32_t @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))))
-    let everCrypt_HMAC_compute_blake2b =
-      foreign "EverCrypt_HMAC_compute_blake2b"
-        (ocaml_bytes @->
-           (ocaml_bytes @->
-              (uint32_t @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))))
     let everCrypt_HMAC_is_supported_alg =
       foreign "EverCrypt_HMAC_is_supported_alg"
         (spec_Hash_Definitions_hash_alg @-> (returning bool))
