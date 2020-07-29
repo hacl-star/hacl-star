@@ -535,7 +535,7 @@ val keccak:
       as_seq h1 output ==
       S.keccak (v rate) (v capacity) (v inputByteLen) (as_seq h0 input) delimitedSuffix (v outputByteLen))
 let keccak rate capacity inputByteLen input delimitedSuffix outputByteLen output =
-  if is_null output then begin
+  if outputByteLen = 0ul then begin
     let h0 = ST.get () in
     (* Nothing to do, just prove that the two zero-length sequences
      * are equal. *)
