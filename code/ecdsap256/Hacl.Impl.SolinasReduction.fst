@@ -645,7 +645,14 @@ let lemma_opened i =
   }
 
 
-let solinas_reduction_impl i o =
+val solinas_reduction_impl_p256: i: lbuffer uint64 (getCoordinateLenU64 P256 *. 2ul) 
+  -> o: lbuffer uint64 (getCoordinateLenU64 P256) -> 
+  Stack unit
+    (requires fun h -> live h i /\ live h o /\ disjoint i o)
+    (ensures fun h0 _ h1 -> modifies1 o h0 h1 /\ wide_as_nat P256 h0 i % (getPrime P256) == as_nat P256 h1 o)
+
+
+let solinas_reduction_impl_p256 i o =
   push_frame();
 
     let h0 = ST.get() in
@@ -698,3 +705,20 @@ let solinas_reduction_impl i o =
 
   modulo_lemma (as_nat P256 h2 o) prime;
   pop_frame()
+
+
+val solinas_reduction_impl_p384: i: lbuffer uint64 (getCoordinateLenU64 P384 *. 2ul) 
+  -> o: lbuffer uint64 (getCoordinateLenU64 P384) -> 
+  Stack unit
+    (requires fun h -> live h i /\ live h o /\ disjoint i o)
+    (ensures fun h0 _ h1 -> modifies1 o h0 h1 /\ wide_as_nat P384 h0 i % (getPrime P384) == as_nat P384 h1 o)
+
+
+let solinas_reduction_impl_p384 i o = 
+  ()
+
+
+let solinas_reduction_impl #c i o =
+  match c with 
+    |P256 -> solinas_reduction_impl_p256 i o 
+    |P384 -> solinas_reduction_impl_p384 i o

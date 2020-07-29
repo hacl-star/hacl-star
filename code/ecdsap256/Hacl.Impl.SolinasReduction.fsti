@@ -17,7 +17,9 @@ open Hacl.Spec.P256.Definition
 open FStar.Mul
 
 
-val solinas_reduction_impl: i: lbuffer uint64 (size 8) -> o: lbuffer uint64 (size 4) -> 
+val solinas_reduction_impl: #c: curve 
+  -> i: lbuffer uint64 (getCoordinateLenU64 c *. 2ul) 
+  -> o: lbuffer uint64 (getCoordinateLenU64 c) -> 
   Stack unit
     (requires fun h -> live h i /\ live h o /\ disjoint i o)
-    (ensures fun h0 _ h1 -> modifies1 o h0 h1 /\ wide_as_nat P256 h0 i % prime == as_nat P256 h1 o)
+    (ensures fun h0 _ h1 -> modifies1 o h0 h1 /\ wide_as_nat c h0 i % (getPrime c) == as_nat c h1 o)
