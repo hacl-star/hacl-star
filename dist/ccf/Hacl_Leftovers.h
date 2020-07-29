@@ -30,8 +30,31 @@
 #ifndef __Hacl_Leftovers_H
 #define __Hacl_Leftovers_H
 
+#include "Hacl_Kremlib.h"
+#include "Lib_Memzero0.h"
+#include "Hacl_Impl_Blake2_Constants.h"
 #include "Hacl_Spec.h"
 
+
+void
+Hacl_Blake2b_32_blake2b(
+  uint32_t nn,
+  uint8_t *output,
+  uint32_t ll,
+  uint8_t *d,
+  uint32_t kk,
+  uint8_t *k
+);
+
+void
+Hacl_Blake2s_32_blake2s(
+  uint32_t nn,
+  uint8_t *output,
+  uint32_t ll,
+  uint8_t *d,
+  uint32_t kk,
+  uint8_t *k
+);
 
 extern uint32_t Hacl_HMAC_DRBG_reseed_interval;
 

@@ -32,6 +32,7 @@
 #define __Hacl_HMAC_H
 
 #include "Hacl_Kremlib.h"
+#include "Hacl_Impl_Blake2_Constants.h"
 #include "Hacl_Hash.h"
 
 
@@ -64,6 +65,38 @@ Hacl_HMAC_compute_sha2_384(
 
 void
 Hacl_HMAC_compute_sha2_512(
+  uint8_t *dst,
+  uint8_t *key,
+  uint32_t key_len,
+  uint8_t *data,
+  uint32_t data_len
+);
+
+typedef struct K____uint32_t__uint64_t_s
+{
+  uint32_t *fst;
+  uint64_t snd;
+}
+K____uint32_t__uint64_t;
+
+void
+Hacl_HMAC_compute_blake2s_32(
+  uint8_t *dst,
+  uint8_t *key,
+  uint32_t key_len,
+  uint8_t *data,
+  uint32_t data_len
+);
+
+typedef struct K____uint64_t__FStar_UInt128_uint128_s
+{
+  uint64_t *fst;
+  uint128_t snd;
+}
+K____uint64_t__FStar_UInt128_uint128;
+
+void
+Hacl_HMAC_compute_blake2b_32(
   uint8_t *dst,
   uint8_t *key,
   uint32_t key_len,
