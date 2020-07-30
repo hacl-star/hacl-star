@@ -46,17 +46,33 @@ let widefelem (c: curve) = lbuffer uint64 (getCoordinateLenU64 c *. 2ul)
 
 
 inline_for_extraction noextract
-let felem4 = tuple4 uint64 uint64 uint64 uint64
+let felem_coordinate (c: curve) =
+  match c with 
+  |P256 -> tuple4 uint64 uint64 uint64 uint64
+  |P384 -> tuple6 uint64 uint64 uint64 uint64 uint64 uint64
+
+
 inline_for_extraction noextract
 let felem8 = tuple8 uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64
 
 noextract
-val as_nat4: f:felem4 -> GTot nat
-let as_nat4 f =
-  let (s0, s1, s2, s3) = f in
-  v s0 + v s1 * pow2 64 + v s2 * pow2 64 * pow2 64 +
-  v s3 * pow2 64 * pow2 64 * pow2 64
+val as_nat_coordinate: #c: curve -> f:felem_coordinate c -> GTot nat
 
+let as_nat_coordinate #c f =
+  match c with 
+  |P256 -> 
+    let (s0, s1, s2, s3) : tuple4 uint64 uint64 uint64 uint64 = f in
+    v s0 + v s1 * pow2 64 + v s2 * pow2 64 * pow2 64 +
+    v s3 * pow2 64 * pow2 64 * pow2 64
+  |P384 -> 
+    let (s0, s1, s2, s3, s4, s5) : tuple6 uint64 uint64 uint64 uint64 uint64 uint64 = f in
+    v s0 + 
+    v s1 * pow2 64 + 
+    v s2 * pow2 64 * pow2 64 +
+    v s3 * pow2 64 * pow2 64 * pow2 64 + 
+    v s4 * pow2 64 * pow2 64 * pow2 64 * pow2 64 + 
+    v s5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64
+    
 
 noextract
 val wide_as_nat4: f:felem8 -> GTot nat
@@ -72,12 +88,24 @@ let wide_as_nat4 f =
 
 noextract
 let as_nat (c: curve) (h:mem) (e:felem c) : GTot nat =
-  let s = as_seq h e in
-  let s0 = s.[0] in
-  let s1 = s.[1] in
-  let s2 = s.[2] in
-  let s3 = s.[3] in
-  as_nat4 (s0, s1, s2, s3)
+  match c with 
+  |P256 -> 
+    let s = as_seq h e in
+    let s0 = s.[0] in
+    let s1 = s.[1] in
+    let s2 = s.[2] in
+    let s3 = s.[3] in
+    as_nat_coordinate (s0, s1, s2, s3)
+  |P384 ->     
+    let s = as_seq h e in
+    let s0 = s.[0] in
+    let s1 = s.[1] in
+    let s2 = s.[2] in
+    let s3 = s.[3] in
+    let s4 = s.[4] in 
+    let s5 = s.[5] in 
+    as_nat_coordinate (s0, s1, s2, s3, s4, s5)
+    
   
 
 noextract

@@ -142,7 +142,7 @@ val _montgomery_ladder_power: #c: curve -> a: felem c -> b: felem c -> scalar: g
     (
       let a_ = fromDomain_ #c (as_nat c h0 a) in 
       let b_ = fromDomain_ #c (as_nat c h0 b) in 
-      let (r0D, r1D) = Lib.LoopCombinators.repeati 256 (_pow_step (as_seq h0 scalar)) (a_, b_) in 
+      let (r0D, r1D) = Lib.LoopCombinators.repeati 256 (_pow_step #c (as_seq h0 scalar)) (a_, b_) in 
       r0D == fromDomain_ #c (as_nat c h1 a) /\ r1D == fromDomain_ #c (as_nat c h1 b) /\
       as_nat c h1 a < getPrime c /\ as_nat c h1 b < getPrime c)
   )
@@ -151,7 +151,7 @@ val _montgomery_ladder_power: #c: curve -> a: felem c -> b: felem c -> scalar: g
 let _montgomery_ladder_power #c a b scalar = 
   let h0 = ST.get() in 
   [@inline_let]
-  let spec_exp h0  = _pow_step (as_seq h0 scalar) in 
+  let spec_exp h0  = _pow_step #c (as_seq h0 scalar) in 
   [@inline_let]
   let acc (h: mem) : GTot (tuple2 nat_prime nat_prime) = (fromDomain_ #c (as_nat c h a), fromDomain_ #c (as_nat c h b)) in 
   Lib.LoopCombinators.eq_repeati0 256 (spec_exp h0) (acc h0);
@@ -181,7 +181,8 @@ val montgomery_ladder_power: #c: curve -> a: felem c -> scalar: glbuffer uint8 (
 let montgomery_ladder_power #c a scalar result = 
   assert_norm (1 < prime256);
   push_frame(); 
-  let p = create (getCoordinateLenU64 c) (u64 0) in  
+  let sz: FStar.UInt32.t = getCoordinateLenU64 c in 
+  let p = create sz (u64 0) in  
     upload_one_montg_form #c p; 
       _montgomery_ladder_power #c p a scalar;
      lemmaToDomainAndBackIsTheSame #c 1;  

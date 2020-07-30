@@ -193,7 +193,7 @@ let montgomery_multiplication_round #c t round k0 =
       let h3 = ST.get() in 
       assert_by_tactic ((wide_as_nat c h0 t % pow2 64) * uint_v k0 == uint_v k0 * (wide_as_nat c h0 t % pow2 64)) canon;
       assert(wide_as_nat c h3 t3 = wide_as_nat c h0 t + prime_p256_order * ((((wide_as_nat c h0 t % pow2 64)) * uint_v k0) % pow2 64));
-    shift8 t3 round;
+    shift8 #c t3 round;
       let h4 = ST.get() in 
       assert(wide_as_nat c h4 round = (wide_as_nat c h0 t + prime_p256_order * ((((wide_as_nat c h0 t % pow2 64)) * uint_v k0) % pow2 64)) / pow2 64);
   pop_frame()

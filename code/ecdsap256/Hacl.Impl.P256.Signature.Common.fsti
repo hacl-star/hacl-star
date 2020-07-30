@@ -20,16 +20,17 @@ open Hacl.Impl.P256.Core
 open FStar.Mul
 
 
-val bufferToJac: #c: curve -> p:lbuffer uint64 (size 8) -> result:point c -> Stack unit
+val bufferToJac: #c: curve -> p: lbuffer uint64 (getCoordinateLenU64 c *. 2ul) -> result: point c -> Stack unit
   (requires fun h -> live h p /\ live h result /\ disjoint p result)
   (ensures  fun h0 _ h1 ->
     modifies (loc result) h0 h1 /\
-    as_nat c h1 (gsub result (size 8) (size 4)) == 1 /\
-    (let x = as_nat c h0 (gsub p (size 0) (size 4)) in
-     let y = as_nat c h0 (gsub p (size 4) (size 4)) in
-     let x3, y3, z3 = point_x_as_nat c h1 result, point_y_as_nat c h1 result, point_z_as_nat c h1 result in
-     let pointJacX, pointJacY, pointJacZ = toJacobianCoordinates (x, y) in
-     x3 == pointJacX /\ y3 == pointJacY /\ z3 == pointJacZ))
+    as_nat c h1 (gsub result (getCoordinateLenU64 c *. 2ul) (getCoordinateLenU64 c)) == 1 /\
+    (
+      let x = as_nat c h0 (gsub p (size 0) (getCoordinateLenU64 c)) in
+      let y = as_nat c h0 (gsub p (getCoordinateLenU64 c) (getCoordinateLenU64 c)) in
+      let x3, y3, z3 = point_x_as_nat c h1 result, point_y_as_nat c h1 result, point_z_as_nat c h1 result in
+      let pointJacX, pointJacY, pointJacZ = toJacobianCoordinates (x, y) in
+      x3 == pointJacX /\ y3 == pointJacY /\ z3 == pointJacZ))
 
 
 (* [@ (Comment "  This code is not side channel resistant")]  *)

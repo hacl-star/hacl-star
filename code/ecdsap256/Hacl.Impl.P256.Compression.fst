@@ -66,7 +66,7 @@ val computeYFromX: #c: curve -> x: felem c -> result: felem c -> sign: uint64 ->
     as_nat c h1 result < prime256 /\
     (
       let xD = fromDomain_ #c (as_nat c h0 x) in 
-      let sqRootWithoutSign = sq_root_spec (((xD * xD * xD + aCoordinate #P256 * xD + bCoordinate #P256) % prime256)) in 
+      let sqRootWithoutSign = sq_root_spec #c (((xD * xD * xD + aCoordinate #P256 * xD + bCoordinate #P256) % prime256)) in 
       
       if sqRootWithoutSign  % pow2 1 = uint_v sign then
 	as_nat c h1 result = sqRootWithoutSign 
@@ -87,10 +87,10 @@ let computeYFromX #c x result sign =
     
     montgomery_multiplication_buffer aCoordinateBuffer x aCoordinateBuffer;
   cube x result;
-    p256_add result aCoordinateBuffer result;
-    p256_add result bCoordinateBuffer result;
+    felem_add result aCoordinateBuffer result;
+    felem_add result bCoordinateBuffer result;
 
-    uploadZeroImpl aCoordinateBuffer; 
+    uploadZeroImpl #c aCoordinateBuffer; 
 
   let h6 = ST.get() in 
   
@@ -104,7 +104,7 @@ let computeYFromX #c x result sign =
     fromDomain result result; 
 
   let h8 = ST.get() in 
-    p256_sub aCoordinateBuffer result bCoordinateBuffer; 
+    felem_sub aCoordinateBuffer result bCoordinateBuffer; 
 
   let h9 = ST.get() in 
 
@@ -222,14 +222,14 @@ let decompressionCompressedForm #c b result =
 	    let h3 = ST.get() in 
 	    assert(    
 	      let xD = Lib.ByteSequence.nat_from_intseq_be (as_seq h0 x) in 
-	      let sqRootWithoutSign = sq_root_spec (((xD * xD * xD + Spec.P256.aCoordinate #P256 * xD + Spec.P256.bCoordinate #P256) % prime256)) in 
+	      let sqRootWithoutSign = sq_root_spec #c (((xD * xD * xD + Spec.P256.aCoordinate #P256 * xD + Spec.P256.bCoordinate #P256) % prime256)) in 
 	      if sqRootWithoutSign  % pow2 1 = uint_v identifierBit then
 		 as_nat c h3 t1 = sqRootWithoutSign 
 	      else
 		as_nat c h3 t1 = (0 - sqRootWithoutSign) % prime256);
     
 	  Hacl.Impl.P256.LowLevel.changeEndian #c t1;
-	  toUint8 t1 (sub result (size 32) (size 32)); 
+	  toUint8 #c t1 (sub result (size 32) (size 32)); 
 	   let h5 = ST.get() in 
 	   assert(as_seq h5 (gsub result (size 32) (size 32)) == Lib.ByteSequence.uints_to_bytes_be (changeEndian (as_seq h3 t1)));
 
@@ -240,7 +240,7 @@ let decompressionCompressedForm #c b result =
 	  
 	  assert(   
 	      let xD = Lib.ByteSequence.nat_from_intseq_be (as_seq h0 x) in 
-	      let sqRootWithoutSign = sq_root_spec (((xD * xD * xD + Spec.P256.aCoordinate #P256 * xD + Spec.P256.bCoordinate #P256) % prime256)) in 
+	      let sqRootWithoutSign = sq_root_spec #c (((xD * xD * xD + Spec.P256.aCoordinate #P256 * xD + Spec.P256.bCoordinate #P256) % prime256)) in 
 	      let to = as_seq h5 (gsub result (size 32) (size 32)) in 
 	      if sqRootWithoutSign  % pow2 1 = uint_v identifierBit then
 		 to == Lib.ByteSequence.nat_to_bytes_be 32 sqRootWithoutSign 

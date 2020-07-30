@@ -39,8 +39,8 @@ let ecp256dh_i c result scalar =
   changeEndian #c resultBufferX;
   changeEndian #c resultBufferY;
 
-  toUint8 resultBufferX resultX;
-  toUint8 resultBufferY resultY;
+  toUint8 #c resultBufferX resultX;
+  toUint8 #c resultBufferY resultY;
 
   lemma_core_0 c resultBufferX h0;
   lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h0 resultBufferX);
@@ -141,8 +141,8 @@ let ecp256dh_r c result pubKey scalar =
   
   changeEndian #c resultBufferFelemX;
   changeEndian #c resultBufferFelemY;
-  toUint8 resultBufferFelemX resultX;
-  toUint8 resultBufferFelemY resultY;
+  toUint8 #c resultBufferFelemX resultX;
+  toUint8 #c resultBufferFelemY resultY;
 
   lemma_core_0 c resultBufferFelemX h2;
   lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h2 resultBufferFelemX);

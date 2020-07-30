@@ -69,7 +69,8 @@ let ecdsa_signature_step12 #c alg mLen m result =
   
   (* TO CHANGE! *)
   (* Copy the mininum between the two *)
-  let cutHash = create (getScalarLen c) (u8 0) in 
+  let sz: FStar.UInt32.t = getScalarLen c in 
+  let cutHash = create sz (u8 0) in 
 
   begin
   match alg with 
@@ -264,10 +265,11 @@ val ecdsa_signature_core: #c: curve -> alg: hash_alg_ecdsa
 let ecdsa_signature_core #c alg r s mLen m privKeyAsFelem k = 
   push_frame();
   let h0 = ST.get() in 
-  let hashAsFelem = create (getCoordinateLenU64 c) (u64 0) in     
+    let sz: FStar.UInt32.t = getCoordinateLenU64 c in 
+  let hashAsFelem = create sz (u64 0) in     
   let tempBuffer = create (size 100) (u64 0) in 
-  let kAsFelem = create (getCoordinateLenU64 c) (u64 0) in 
-  toUint64ChangeEndian k kAsFelem;
+  let kAsFelem = create sz (u64 0) in 
+  toUint64ChangeEndian #c k kAsFelem;
   ecdsa_signature_step12 #c alg mLen m hashAsFelem;
   let h1 = ST.get() in 
   lemma_core_0 c kAsFelem h1;
@@ -337,12 +339,12 @@ let ecdsa_signature c alg result mLen m privKey k =
   let h2 = ST.get() in 
   
   changeEndian #c r;
-  toUint8 r resultR;
+  toUint8 #c r resultR;
   lemma_core_0 c r h2;
   lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h2 r);
 
   changeEndian #c s;
-  toUint8 s resultS;
+  toUint8 #c s resultS;
   let h3 = ST.get() in 
   lemma_core_0 c s h2;
   lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h2 s);

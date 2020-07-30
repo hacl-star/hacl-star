@@ -359,9 +359,9 @@ val compute_common_params_point_add: #c: curve -> h: felem c -> r: felem c -> uh
 let compute_common_params_point_add h r uh hCube u1 u2 s1 s2 tempBuffer =  
     let h0 = ST.get() in 
   let temp = sub tempBuffer (size 0) (size 4) in 
-  p256_sub u2 u1 h; 
+  felem_sub u2 u1 h; 
     let h1 = ST.get() in 
-  p256_sub s2 s1 r; 
+  felem_sub s2 s1 r; 
     let h2 = ST.get() in   
   montgomery_square_buffer h temp;
     let h3 = ST.get() in   
@@ -397,11 +397,11 @@ let computeX3_point_add #c x3 hCube uh r tempBuffer =
   let twoUh = sub tempBuffer (size 8) (size 4) in 
   montgomery_square_buffer r rSquare; 
     let h1 = ST.get() in 
-  p256_sub rSquare hCube rH;
+  felem_sub rSquare hCube rH;
     let h2 = ST.get() in 
   multByTwo uh twoUh;
     let h3 = ST.get() in 
-  p256_sub rH twoUh x3;  ()
+  felem_sub rH twoUh x3;  ()
   (*
     lemma_mod_add_distr (-fromDomain_  (as_nat c h1 hCube)) (fromDomain_ (as_nat c h0 r) * fromDomain_ (as_nat h0 r)) prime256;
     lemma_mod_add_distr (-fromDomain_ (as_nat h3 twoUh)) (fromDomain_ (as_nat h0 r) * fromDomain_ (as_nat h0 r) - fromDomain_ (as_nat h1 hCube)) prime256;
@@ -442,7 +442,7 @@ let computeY3_point_add y3 s1 hCube uh x3 r tempBuffer =
   let ru1hx3 = sub tempBuffer (size 8) (size 4) in 
 
   montgomery_multiplication_buffer s1 hCube s1hCube;
-  p256_sub uh x3 u1hx3;
+  felem_sub uh x3 u1hx3;
   montgomery_multiplication_buffer u1hx3 r ru1hx3;
   
     let h3 = ST.get() in () (*

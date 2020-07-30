@@ -320,7 +320,7 @@ val decompression_compressed_form: b: compressedForm -> result: lbuffer uint8 (s
           r == true /\ 
         (
           let y = 
-            let sq = sq_root_spec (((x * x * x + aCoordinate #P256 * x + bCoordinate #P256) % prime256)) in 
+            let sq = sq_root_spec #P256 (((x * x * x + aCoordinate #P256 * x + bCoordinate #P256) % prime256)) in 
               if (uint_v id) % 2 = (sq % 2) then 
                 sq
               else

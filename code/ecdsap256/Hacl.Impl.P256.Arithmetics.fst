@@ -93,7 +93,9 @@ let multByMinusThree #c a result  =
   let h0 = ST.get() in 
     push_frame();
     multByThree a result;
-    let zeros = create (getCoordinateLenU64 c) (u64 0) in 
+    
+    let sz: FStar.UInt32.t = getCoordinateLenU64 c in 
+    let zeros = create sz (u64 0) in 
     felem_sub zeros result result; 
     admit();
     

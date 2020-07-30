@@ -24,15 +24,15 @@ open FStar.Mul
 
 inline_for_extraction noextract 
 val toDomain: #c: curve -> value: felem c -> result: felem c ->  Stack unit 
-  (requires fun h ->  as_nat c h value < prime256 /\ live h value /\live h result /\ eq_or_disjoint value result)
+  (requires fun h ->  as_nat c h value < getPrime c /\ live h value /\live h result /\ eq_or_disjoint value result)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat c h1 result = toDomain_ #c (as_nat c h0 value))
  
  
 inline_for_extraction noextract
 val fromDomain: #c: curve -> f: felem c -> result: felem c -> Stack unit 
-  (requires fun h -> live h f /\ live h result /\ as_nat c h f < prime256)
+  (requires fun h -> live h f /\ live h result /\ as_nat c h f < getPrime c)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
-    as_nat c h1 result = (as_nat c h0 f * modp_inv2 #c (pow2 256)) % prime256 /\ 
+    as_nat c h1 result = (as_nat c h0 f * modp_inv2 #c (getPower2 c)) % getPrime c /\ 
     as_nat c h1 result = fromDomain_ #c (as_nat c h0 f))
 
 

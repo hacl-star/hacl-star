@@ -36,21 +36,33 @@ friend Hacl.Spec.P256.MontgomeryMultiplication
 
 #push-options "--ifuel 1"
 
-let bufferToJac p result = 
-  let partPoint = sub result (size 0) (size 8) in 
+let bufferToJac #c p result = 
+  let lengthXY = getCoordinateLenU64 c *. 2ul in 
+  let partPoint = sub result (size 0) lengthXY in 
   copy partPoint p;
-  upd result (size 8) (u64 1);
-  upd result (size 9) (u64 0);
-  upd result (size 10) (u64 0);
-  upd result (size 11) (u64 0)
+  match c with 
+  |P256 -> 
+    upd result lengthXY (u64 1);
+    upd result (lengthXY +. 1ul) (u64 0);
+    upd result (lengthXY +. 2ul) (u64 0);
+    upd result (lengthXY +. 3ul) (u64 0)
+  |P384 -> 
+    upd result lengthXY (u64 1);
+    upd result (lengthXY +. 1ul) (u64 0);
+    upd result (lengthXY +. 2ul) (u64 0);
+    upd result (lengthXY +. 3ul) (u64 0);
+    upd result (lengthXY +. 4ul) (u64 0);
+    upd result (lengthXY +. 5ul) (u64 0);
+    admit()
 
 #pop-options
 
 
 inline_for_extraction noextract
 val y_2: #c: curve -> y: felem c -> r: felem c -> Stack unit
-  (requires fun h -> as_nat c h y < prime /\ live h y /\ live h r /\ eq_or_disjoint y r)
-  (ensures fun h0 _ h1 -> modifies (loc r) h0 h1 /\ as_nat c h1 r == toDomain_ #c ((as_nat c h0 y) * (as_nat c h0 y) % prime))
+  (requires fun h -> as_nat c h y < getPrime c /\ live h y /\ live h r /\ eq_or_disjoint y r)
+  (ensures fun h0 _ h1 -> modifies (loc r) h0 h1 /\ 
+    as_nat c h1 r == toDomain_ #c ((as_nat c h0 y) * (as_nat c h0 y) % getPrime c))
 
 let y_2 #c y r = 
   toDomain #c y r;
@@ -58,23 +70,41 @@ let y_2 #c y r =
 
 
 inline_for_extraction noextract
-val upload_p256_point_on_curve_constant: #c: curve ->  x: felem c -> Stack unit
+val upload_b_constant: #c: curve -> x: felem c -> Stack unit
   (requires fun h -> live h x)
   (ensures fun h0 _ h1 -> modifies (loc x) h0 h1 /\ 
-    as_nat c h1 x == toDomain_ #c (bCoordinate #P256) /\
-    as_nat c h1 x < prime
+    as_nat c h1 x == toDomain_ #c (bCoordinate #c) /\
+    as_nat c h1 x < getPrime c
  )
 
-let upload_p256_point_on_curve_constant x = 
-  upd x (size 0) (u64 15608596021259845087);
-  upd x (size 1) (u64 12461466548982526096);
-  upd x (size 2) (u64 16546823903870267094);
-  upd x (size 3) (u64 15866188208926050356);
-  assert_norm (
-    15608596021259845087 + 12461466548982526096 * pow2 64 + 
-    16546823903870267094 * pow2 64 * pow2 64 + 
-    15866188208926050356 * pow2 64 * pow2 64 * pow2 64 == bCoordinate #P256 * pow2 256 % prime)
-
+let upload_b_constant #c x = 
+  match c with 
+  |P256 -> 
+    upd x (size 0) (u64 15608596021259845087);
+    upd x (size 1) (u64 12461466548982526096);
+    upd x (size 2) (u64 16546823903870267094);
+    upd x (size 3) (u64 15866188208926050356);
+    assert_norm (
+      15608596021259845087 + 12461466548982526096 * pow2 64 + 
+      16546823903870267094 * pow2 64 * pow2 64 + 
+      15866188208926050356 * pow2 64 * pow2 64 * pow2 64 ==
+      bCoordinate #P256 * pow2 256 % getPrime P256)
+  |P384 -> 
+    upd x (size 0) (u64 581395848458481100);
+    upd x (size 1) (u64 17809957346689692396);
+    upd x (size 2) (u64 8643006485390950958);
+    upd x (size 3) (u64 16372638458395724514);
+    upd x (size 4) (u64 13126622871277412500);
+    upd x (size 5) (u64 14774077593024970745);
+    assert_norm (
+      581395848458481100 + 
+      17809957346689692396 * pow2 64 + 
+      8643006485390950958 * pow2 64 * pow2 64 + 
+      16372638458395724514 * pow2 64 * pow2 64 * pow2 64 + 
+      13126622871277412500 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+      14774077593024970745 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64
+      == bCoordinate #P384 * pow2 384 % getPrime P384)
+    
 
 val lemma_xcube: x_: nat {x_ < prime} -> Lemma 
   (((x_ * x_ * x_ % prime) - (3 * x_ % prime)) % prime == (x_ * x_ * x_ - 3 * x_) % prime)
@@ -111,9 +141,9 @@ let xcube_minus_x #c x r =
   montgomery_multiplication_buffer #c r xToDomainBuffer r;
     lemma_mod_mul_distr_l ((as_nat c h0 x) * (as_nat c h0 x)) (as_nat c h0 x) prime;
   multByThree #c xToDomainBuffer minusThreeXBuffer;
-  p256_sub r minusThreeXBuffer r;
+  felem_sub #c r minusThreeXBuffer r;
     upload_p256_point_on_curve_constant #c p256_constant;
-  p256_add r p256_constant r;
+  felem_add #c r p256_constant r;
   pop_frame(); 
   
   let x_ = as_nat c h0 x in 

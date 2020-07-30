@@ -48,7 +48,7 @@ val decompressionCompressedForm: #c: curve -> b: compressedForm -> result: lbuff
 	  r == true /\ 
 	  (
 	    let y = 
-              let sq = sq_root_spec (((x * x * x + aCoordinate #P256 * x + bCoordinate #P256) % prime256)) in 
+              let sq = sq_root_spec  #c (((x * x * x + aCoordinate #P256 * x + bCoordinate #P256) % prime256)) in 
               if (uint_v id) % 2 = (sq % 2) then 
 		sq
               else

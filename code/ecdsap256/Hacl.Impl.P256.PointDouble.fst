@@ -480,11 +480,11 @@ val point_double_y3: #c: curve -> y3: felem c -> x3: felem c -> alpha: felem c -
 
 let point_double_y3 #c y3 x3 alpha gamma eightGamma fourBeta = 
     let h0 = ST.get() in 
-  p256_sub fourBeta x3 y3; (* y3 = 4 * beta - x3 *)
+  felem_sub fourBeta x3 y3; (* y3 = 4 * beta - x3 *)
   montgomery_multiplication_buffer alpha y3 y3; (* y3 = alpha * (4 * beta - x3) *)
   montgomery_square_buffer gamma gamma; (* gamma = gamma ** 2 *)
   multByEight gamma eightGamma; (* gamma = 8 * gamma ** 2 *)
-  p256_sub y3 eightGamma y3; (* y3 = alpha * y3 - 8 * gamma **2 *)
+  felem_sub y3 eightGamma y3; (* y3 = alpha * y3 - 8 * gamma **2 *)
 
 
   let alphaD = fromDomain_ #c (as_nat c h0 alpha) in 

@@ -239,7 +239,7 @@ let normalisation_update #c z2x z3y p resultPoint =
   let bit = isPointAtInfinityPrivate p in
   fromDomain z2x resultX;
   fromDomain z3y resultY;
-  uploadOneImpl resultZ;
+  uploadOneImpl #c resultZ;
     let h1 = ST.get() in 
   copy_conditional #c resultZ zeroBuffer bit;
     let h2 = ST.get() in 
@@ -607,7 +607,7 @@ val scalarMultiplication_t: #c: curve -> #t:buftype -> p: point c -> result: poi
 let scalarMultiplication_t #c #t p result scalar tempBuffer  = 
     let h0 = ST.get() in 
   let q = sub tempBuffer (size 0) (size 12) in 
-  uploadZeroPoint q;
+  uploadZeroPoint #c q;
   let buff = sub tempBuffer (size 12) (size 88) in 
   pointToDomain p result;
     let h2 = ST.get() in 
@@ -683,7 +683,7 @@ let uploadBasePoint #c p =
 let scalarMultiplicationWithoutNorm #c p result scalar tempBuffer = 
   let h0 = ST.get() in  
   let q = sub tempBuffer (size 0) (size 12) in 
-  uploadZeroPoint q;
+  uploadZeroPoint #c q;
   let buff = sub tempBuffer (size 12) (size 88) in 
   pointToDomain p result;
     let h1 = ST.get() in 
@@ -699,7 +699,7 @@ let secretToPublic #c result scalar tempBuffer =
   uploadBasePoint #c basePoint;
     let q = sub tempBuffer (size 0) (size 12) in 
     let buff = sub tempBuffer (size 12) (size 88) in 
-  uploadZeroPoint q; 
+  uploadZeroPoint #c q; 
   let h1 = ST.get() in 
     lemma_pif_to_domain #c h1 q;
   montgomery_ladder #c q basePoint scalar buff; 
@@ -713,7 +713,7 @@ let secretToPublicWithoutNorm #c result scalar tempBuffer =
   uploadBasePoint #c basePoint;
       let q = sub tempBuffer (size 0) (size 12) in 
       let buff = sub tempBuffer (size 12) (size 88) in 
-  uploadZeroPoint q; 
+  uploadZeroPoint #c q; 
       let h1 = ST.get() in 
       lemma_pif_to_domain #c h1 q; 
   montgomery_ladder #c q basePoint scalar buff; 

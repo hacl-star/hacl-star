@@ -41,7 +41,7 @@ let reduction_8_32 #c x result =
     reduction_prime_2prime_order #c xAsFelem xAsFelem;
     let h2 = ST.get() in 
     changeEndian #c xAsFelem;
-    toUint8 xAsFelem result;
+    toUint8 #c xAsFelem result;
       lemma_core_0 c xAsFelem h2;
       lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h2 xAsFelem);
       changeEndian_le_be (as_nat c h2 xAsFelem);

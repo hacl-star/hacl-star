@@ -195,8 +195,8 @@ let ecdsa_verification_step4 #c bufferU1 bufferU2 r s hash =
   let h1 = ST.get() in 
     Hacl.Impl.P256.LowLevel.changeEndian #c u1;
     Hacl.Impl.P256.LowLevel.changeEndian #c u2;
-    toUint8 u1 bufferU1;
-    toUint8 u2 bufferU2;
+    toUint8 #c u1 bufferU1;
+    toUint8 #c u2 bufferU2;
   
   let h2 = ST.get() in
 
