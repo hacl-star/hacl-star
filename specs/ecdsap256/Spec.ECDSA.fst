@@ -440,6 +440,54 @@ let hashSpec a mLen m =
 
 open Lib.ByteSequence 
 
+(** 
+  Important changed was done comparing to the previous version:
+  The point addition routine used in the code doesnot work correctly in case the points are equal to each other. In this case the produced result is equal to 0. To solve it, before the execution we check that points are equal and then call either point double, if the points are identical, or point add. 
+
+  Sage script:
+
+  prime = 2** 256 - 2**224 + 2**192 + 2**96 -1
+
+  def pointAdd(x1, y1, z1, x2, y2, z2):
+    z2z2 = z2 * z2
+    z1z1 = z1 * z1
+    u1 = x1 * z2 * z2
+    u2 = x2 * z1 * z1
+    s1 = y1 * z2 * z2 * z2
+    s2 = y2 * z1 * z1 * z1
+    h = u2 - u1
+    r = s2 - s1
+    rr = r * r
+    hh = h * h
+    hhh = h * h * h
+    x3 = (rr - hhh - 2 * u1 * hh) % prime
+    y3 = (r * (u1 * hh - x3) - s1 * hhh) % prime
+    z3 = (h * z1 * z2) % prime
+    return x3, y3, z3
+    
+    pointAdd(94616602910890750895476491097843493117917747793373442062816991926475923005642,
+    36020885031736900871498807428940761284168967909318796815085487081314546588335, 1, 
+    94616602910890750895476491097843493117917747793373442062816991926475923005642, 
+    36020885031736900871498807428940761284168967909318796815085487081314546588335, 1)
+
+    The result is (0, 0, 0)
+
+    The correct result: 
+
+    prime = 2** 256 - 2**224 + 2**192 + 2**96 -1
+    p = Zmod(prime)
+    a = -3
+    b = 41058363725152142129326129780047268409114441015993725554835256314039467401291
+
+    c = EllipticCurve(p, [a, b])
+
+    point = c(94616602910890750895476491097843493117917747793373442062816991926475923005642, 36020885031736900871498807428940761284168967909318796815085487081314546588335)
+    doublePoint = point + point
+    
+    (50269061329272915414642095420870671498020143477290467295126614723791645001065, 13163180605447792593340701861458269296763094398473012191314473475747756843689)
+    
+**)
+
 
 val ecdsa_verification_agile:
   alg: hash_alg_ecdsa

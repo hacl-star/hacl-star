@@ -73,7 +73,7 @@ val isMoreThanZeroLessThanOrderMinusOne: f:felem -> Stack bool
 let isMoreThanZeroLessThanOrderMinusOne f =
   push_frame();
   let tempBuffer = create (size 4) (u64 0) in
-  recall_contents prime256order_buffer (Lib.Sequence.of_list p256_order_prime_list);
+    recall_contents prime256order_buffer (Lib.Sequence.of_list p256_order_prime_list);
   let carry = sub4_il f prime256order_buffer tempBuffer in
   let less = eq_u64_nCT carry (u64 1) in
   let more = isZero_uint64_nCT f in
@@ -117,7 +117,6 @@ let ecdsa_verification_step23 alg mLen m result =
   assert_norm (pow2 32 < pow2 61);
   assert_norm (pow2 32 < pow2 125);
   push_frame(); 
-    let h0 = ST.get() in 
   let sz: FStar.UInt32.t = match alg with |NoHash -> mLen |Hash a ->  hash_len a in
   let mHash = create sz (u8 0) in    
   
@@ -132,14 +131,12 @@ let ecdsa_verification_step23 alg mLen m result =
   
   let cutHash = sub mHash (size 0) (size 32) in 
   toUint64ChangeEndian cutHash result;
-  
   let h1 = ST.get() in 
- 
   reduction_prime_2prime_order result result;
 
-  lemma_core_0 result h1;
-  Spec.ECDSA.changeEndianLemma (uints_from_bytes_be #U64 #_ #4 (as_seq h1 cutHash));
-  uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 cutHash);
+    lemma_core_0 result h1;
+    Spec.ECDSA.changeEndianLemma (uints_from_bytes_be #U64 #_ #4 (as_seq h1 cutHash));
+    uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 cutHash);
 
   pop_frame()
 
@@ -190,8 +187,8 @@ let ecdsa_verification_step4 bufferU1 bufferU2 r s hash =
     multPowerPartial s inverseS r u2;
   
   let h1 = ST.get() in 
-    Hacl.Impl.P256.LowLevel .changeEndian u1;
-    Hacl.Impl.P256.LowLevel .changeEndian u2;
+    Hacl.Impl.P256.LowLevel.changeEndian u1;
+    Hacl.Impl.P256.LowLevel.changeEndian u2;
     toUint8 u1 bufferU1;
     toUint8 u2 bufferU2;
   
@@ -274,7 +271,7 @@ let ecdsa_verification_step5_0 points pubKeyAsPoint u1 u2 tempBuffer =
   scalarMultiplicationWithoutNorm pubKeyAsPoint pointU2Q u2 tempBuffer
 
 
-(* [@ (Comment "  This code is not side channel resistant")] *)
+[@ (Comment "  This code is not side channel resistant")]
 
 val compare_felem_bool: a: felem -> b: felem -> Stack bool
   (requires fun h -> live h a /\ live h b)
@@ -331,6 +328,7 @@ let compare_points_bool a b =
   let zEqual = compare_felem_bool z0 z1 in 
   xEqual && yEqual && zEqual
 
+
 inline_for_extraction noextract
 val ecdsa_verification_step5_1: points:lbuffer uint64 (size 24) -> Stack bool
   (requires fun h -> live h points /\
@@ -353,13 +351,14 @@ val ecdsa_verification_step5_1: points:lbuffer uint64 (size 24) -> Stack bool
 
 let ecdsa_verification_step5_1 points = 
   push_frame();
-    let tmp = create (size 112) (u64 0) in 
-    let tmpForNorm = sub tmp (size 0) (size 88) in 
-    let result0Norm = sub tmp (size 88) (size 12) in 
-    let result1Norm = sub tmp (size 100) (size 12) in 
-
+  
+  let tmp = create (size 112) (u64 0) in 
+  let tmpForNorm = sub tmp (size 0) (size 88) in 
+  let result0Norm = sub tmp (size 88) (size 12) in 
+  let result1Norm = sub tmp (size 100) (size 12) in 
   let pointU1G = sub points (size 0) (size 12) in
   let pointU2Q = sub points (size 12) (size 12) in 
+  
   norm pointU1G result0Norm tmpForNorm;
   norm pointU2Q result1Norm tmpForNorm;
   let equalX = compare_points_bool result0Norm result1Norm in 
@@ -410,10 +409,9 @@ val ecdsa_verification_step5_2:
    )
 
 
-
 let ecdsa_verification_step5_2 pointSum pubKeyAsPoint u1 u2 tempBuffer =
   push_frame();
-    let points = create (size 24) (u64 0) in 
+  let points = create (size 24) (u64 0) in 
   let buff = sub tempBuffer (size 12) (size 88) in
   ecdsa_verification_step5_0 points pubKeyAsPoint u1 u2 tempBuffer;
   let pointU1G = sub points (size 0) (size 12) in
@@ -421,14 +419,14 @@ let ecdsa_verification_step5_2 pointSum pubKeyAsPoint u1 u2 tempBuffer =
 
   let equalX = ecdsa_verification_step5_1 points in 
   begin
-  match equalX with
-  | true -> point_double pointU1G pointSum buff
-  | _ -> point_add pointU1G pointU2Q pointSum buff end;
+  if equalX then
+  	point_double pointU1G pointSum buff
+  else	
+  	point_add pointU1G pointU2Q pointSum buff end;
   norm pointSum pointSum buff; 
   pop_frame()
 
 
-(* This code is not side channel resistant *)
 inline_for_extraction noextract
 val ecdsa_verification_step5:
     x:felem
@@ -558,7 +556,7 @@ let ecdsa_verification_core alg publicKeyBuffer hashAsFelem r s mLen m xBuffer t
   r
 
 
-(* [@ (Comment "  This code is not side channel resistant")] *)
+[@ (Comment "  This code is not side channel resistant")]
 
 val ecdsa_verification_:alg:hash_alg_ecdsa
   -> pubKey:lbuffer uint64 (size 8)
@@ -642,33 +640,33 @@ let ecdsa_verification alg pubKey r s mLen m =
   assert_norm (pow2 32 < pow2 125);
   push_frame();
   let h0 = ST.get() in 
-    let publicKeyAsFelem = create (size 8) (u64 0) in
-      let publicKeyFelemX = sub publicKeyAsFelem (size 0) (size 4) in 
-      let publicKeyFelemY = sub publicKeyAsFelem (size 4) (size 4) in 
-    let rAsFelem = create (size 4) (u64 0) in 
-    let sAsFelem = create (size 4) (u64 0) in 
-      let pubKeyX = sub pubKey (size 0) (size 32) in
-      let pubKeyY = sub pubKey (size 32) (size 32) in 
+  let publicKeyAsFelem = create (size 8) (u64 0) in
+  let publicKeyFelemX = sub publicKeyAsFelem (size 0) (size 4) in 
+  let publicKeyFelemY = sub publicKeyAsFelem (size 4) (size 4) in 
+  let rAsFelem = create (size 4) (u64 0) in 
+  let sAsFelem = create (size 4) (u64 0) in 
+  let pubKeyX = sub pubKey (size 0) (size 32) in
+  let pubKeyY = sub pubKey (size 32) (size 32) in 
       
-    toUint64ChangeEndian pubKeyX publicKeyFelemX;
-    toUint64ChangeEndian pubKeyY publicKeyFelemY;
+  toUint64ChangeEndian pubKeyX publicKeyFelemX;
+  toUint64ChangeEndian pubKeyY publicKeyFelemY;
    
-    toUint64ChangeEndian r rAsFelem;
-    toUint64ChangeEndian s sAsFelem;
+  toUint64ChangeEndian r rAsFelem;
+  toUint64ChangeEndian s sAsFelem;
 
   let h1 = ST.get() in 
-      lemma_core_0 publicKeyFelemX h1;
-      uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 pubKeyX);  
-      lemma_core_0 publicKeyFelemY h1;
-      uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 pubKeyY);
+    lemma_core_0 publicKeyFelemX h1;
+    uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 pubKeyX);  
+    lemma_core_0 publicKeyFelemY h1;
+    uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 pubKeyY);
 
-      lemma_core_0 rAsFelem h1;
-      uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 r);
-      lemma_core_0 sAsFelem h1;
-      uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 s);
+    lemma_core_0 rAsFelem h1;
+    uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 r);
+    lemma_core_0 sAsFelem h1;
+    uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 s);
 
-    let result = ecdsa_verification_ alg publicKeyAsFelem rAsFelem sAsFelem mLen m in 
-    pop_frame();
+  let result = ecdsa_verification_ alg publicKeyAsFelem rAsFelem sAsFelem mLen m in 
+  pop_frame();
 
     changeEndianLemma (uints_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))));
     uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 (gsub pubKey (size 0) (size 32)));
