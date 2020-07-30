@@ -386,11 +386,6 @@ static void pad_384(FStar_UInt128_uint128 len, uint8_t *dst)
   uint8_t *dst1 = dst;
   dst1[0U] = (uint8_t)0x80U;
   uint8_t *dst2 = dst + (uint32_t)1U;
-  uint32_t
-  len_zero =
-    ((uint32_t)256U
-    - ((uint32_t)17U + (uint32_t)(FStar_UInt128_uint128_to_uint64(len) % (uint64_t)(uint32_t)128U)))
-    % (uint32_t)128U;
   for
   (uint32_t
     i = (uint32_t)0U;
@@ -425,11 +420,6 @@ static void pad_512(FStar_UInt128_uint128 len, uint8_t *dst)
   uint8_t *dst1 = dst;
   dst1[0U] = (uint8_t)0x80U;
   uint8_t *dst2 = dst + (uint32_t)1U;
-  uint32_t
-  len_zero =
-    ((uint32_t)256U
-    - ((uint32_t)17U + (uint32_t)(FStar_UInt128_uint128_to_uint64(len) % (uint64_t)(uint32_t)128U)))
-    % (uint32_t)128U;
   for
   (uint32_t
     i = (uint32_t)0U;
