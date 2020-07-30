@@ -2747,15 +2747,10 @@ void Hacl_Hash_Core_SHA2_pad_384(FStar_UInt128_uint128 len, uint8_t *dst)
 {
   uint8_t *dst1 = dst;
   uint8_t *dst2;
-  uint32_t len_zero;
   uint8_t *dst3;
   FStar_UInt128_uint128 len_;
   dst1[0U] = (uint8_t)0x80U;
   dst2 = dst + (uint32_t)1U;
-  len_zero =
-    ((uint32_t)256U
-    - ((uint32_t)17U + (uint32_t)(FStar_UInt128_uint128_to_uint64(len) % (uint64_t)(uint32_t)128U)))
-    % (uint32_t)128U;
   {
     uint32_t i;
     for
@@ -2791,15 +2786,10 @@ void Hacl_Hash_Core_SHA2_pad_512(FStar_UInt128_uint128 len, uint8_t *dst)
 {
   uint8_t *dst1 = dst;
   uint8_t *dst2;
-  uint32_t len_zero;
   uint8_t *dst3;
   FStar_UInt128_uint128 len_;
   dst1[0U] = (uint8_t)0x80U;
   dst2 = dst + (uint32_t)1U;
-  len_zero =
-    ((uint32_t)256U
-    - ((uint32_t)17U + (uint32_t)(FStar_UInt128_uint128_to_uint64(len) % (uint64_t)(uint32_t)128U)))
-    % (uint32_t)128U;
   {
     uint32_t i;
     for
