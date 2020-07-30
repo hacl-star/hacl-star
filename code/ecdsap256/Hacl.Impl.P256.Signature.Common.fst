@@ -106,50 +106,60 @@ let upload_b_constant #c x =
       == bCoordinate #P384 * pow2 384 % getPrime P384)
     
 
-val lemma_xcube: x_: nat {x_ < prime} -> Lemma 
-  (((x_ * x_ * x_ % prime) - (3 * x_ % prime)) % prime == (x_ * x_ * x_ - 3 * x_) % prime)
+val lemma_xcube: #c: curve -> x_: nat {x_ < getPrime c} -> Lemma 
+  (
+    let prime = getPrime c in 
+    ((x_ * x_ * x_ % prime) - (3 * x_ % prime)) % prime == (x_ * x_ * x_ - 3 * x_) % prime)
 
-let lemma_xcube x_ = 
+let lemma_xcube #c x_ = 
+  let prime = getPrime c in 
   lemma_mod_add_distr (- (3 * x_ % prime)) (x_ * x_ * x_) prime;
   lemma_mod_sub_distr (x_ * x_ * x_ ) (3 * x_) prime
 
 
-val lemma_xcube2: #c: curve -> x_ : nat {x_ < prime} -> Lemma (toDomain_ #c (((((x_ * x_ * x_) - (3 * x_)) % prime) + bCoordinate #P256) % prime) == toDomain_ #c ((x_ * x_ * x_  + aCoordinate #P256 * x_ + bCoordinate #P256) % prime))
+val lemma_xcube2: #c: curve 
+  -> x_ : nat {x_ < getPrime c} 
+  -> Lemma (
+    let prime = getPrime c in 
+    toDomain_ #c (((((x_ * x_ * x_) - (3 * x_)) % prime) + bCoordinate #P256) % prime) == 
+    toDomain_ #c ((x_ * x_ * x_  + aCoordinate #P256 * x_ + bCoordinate #P256) % prime))
 
-let lemma_xcube2 x_ = 
+let lemma_xcube2 #c x_ = 
+  let prime = getPrime c in 
   lemma_mod_add_distr (bCoordinate #P256) ((x_ * x_ * x_) - (3 * x_)) prime
 
 
-inline_for_extraction noextract
 val xcube_minus_x: #c: curve -> x: felem c -> r: felem c -> Stack unit 
-  (requires fun h -> as_nat c h x < prime /\ live h x  /\ live h r /\ eq_or_disjoint x r)
+  (requires fun h -> as_nat c h x < getPrime c /\ live h x  /\ live h r /\ eq_or_disjoint x r)
   (ensures fun h0 _ h1 -> 
     modifies (loc r) h0 h1 /\
     (
       let x_ = as_nat c h0 x in 
-      as_nat c h1 r = toDomain_ #c ((x_ * x_ * x_ - 3 * x_ + bCoordinate #P256) % prime))
-    )
+      as_nat c h1 r = toDomain_ #c ((x_ * x_ * x_ - 3 * x_ + bCoordinate #c) % getPrime c)))
 
 let xcube_minus_x #c x r = 
   push_frame();
-      let h0 = ST.get() in 
-    let xToDomainBuffer = create (size 4) (u64 0) in 
-    let minusThreeXBuffer = create (size 4) (u64 0) in 
-    let p256_constant = create (size 4) (u64 0) in 
-  toDomain #c x xToDomainBuffer;
+  let h0 = ST.get() in 
+  let sz: FStar.UInt32.t = getCoordinateLenU64 c in 
+  let xToDomainBuffer = create sz (u64 0) in 
+  let minusThreeXBuffer = create sz (u64 0) in 
+  let b_constant = create sz (u64 0) in 
+
+  toDomain #c x xToDomainBuffer; 
   montgomery_square_buffer #c xToDomainBuffer r;
   montgomery_multiplication_buffer #c r xToDomainBuffer r;
     lemma_mod_mul_distr_l ((as_nat c h0 x) * (as_nat c h0 x)) (as_nat c h0 x) prime;
   multByThree #c xToDomainBuffer minusThreeXBuffer;
   felem_sub #c r minusThreeXBuffer r;
-    upload_p256_point_on_curve_constant #c p256_constant;
-  felem_add #c r p256_constant r;
+  upload_b_constant #c b_constant;
+  felem_add #c r b_constant r;
   pop_frame(); 
-  
-  let x_ = as_nat c h0 x in 
-  lemma_xcube x_;
-  lemma_mod_add_distr (bCoordinate #P256) ((x_ * x_ * x_) - (3 * x_)) prime;
-  lemma_xcube2 #c x_
+
+    admit();
+    let x_ = as_nat c h0 x in 
+    lemma_xcube #c x_;
+    lemma_mod_add_distr (bCoordinate #c) ((x_ * x_ * x_) - (3 * x_)) (getPrime c);
+    lemma_xcube2 #c x_
 
 
 let isPointAtInfinityPublic p =  
