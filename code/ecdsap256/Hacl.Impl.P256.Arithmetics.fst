@@ -30,63 +30,63 @@ let cube #c a result =
     montgomery_multiplication_buffer result a result;
  let h1 = ST.get() in 
  lemma_mod_mul_distr_l (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 a)) (fromDomain_ #c (as_nat c h0 a)) (getPrime c);
-inDomain_mod_is_not_mod #c (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 a)); 
-  admit()
+inDomain_mod_is_not_mod #c (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 a))
 
 
-let quatre a result = 
+let quatre #c a result = 
     let h0 = ST.get() in 
   montgomery_square_buffer a result;
-  montgomery_square_buffer result result ;
-    admit()
-    (*inDomain_mod_is_not_mod ((fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a) % prime256) * (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a) % prime256));
-    modulo_distributivity_mult2 (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a)) (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a)) 1 prime256;
-    lemma_brackets (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a)) (fromDomain_ (as_nat h0 a)) (fromDomain_ (as_nat h0 a));
-    inDomain_mod_is_not_mod (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a)) *)
+  montgomery_square_buffer result result;
+
+  let prime = getPrime c in 
+  
+  inDomain_mod_is_not_mod #c ((fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 a) % prime) * (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 a) % prime));
+    modulo_distributivity_mult2 (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 a)) (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 a)) 1 prime;
+    lemma_brackets (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 a)) (fromDomain_ #c (as_nat c h0 a)) (fromDomain_ #c (as_nat c h0 a));
+    inDomain_mod_is_not_mod #c (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 a))
 
 
-let multByTwo a out = 
+let multByTwo #c a out = 
   let h0 = ST.get() in 
-  felem_add a a out (*;
-    inDomain_mod_is_not_mod (2 * fromDomain_ (as_nat h0 a)) *)
+  felem_add a a out;
+  inDomain_mod_is_not_mod #c (2 * fromDomain_ #c (as_nat c h0 a))
 
 
-let multByThree a result = 
+let multByThree #c a result = 
     let h0 = ST.get() in 
   multByTwo a result;
-    let h1 = ST.get() in (*
-      assert(as_nat h1 result == toDomain_ (2 * fromDomain_ (as_nat h0 a) % prime256)); *)
+    let h1 = ST.get() in 
+      assert(as_nat c h1 result == toDomain_ #c (2 * fromDomain_ #c (as_nat c h0 a) % getPrime c));
   felem_add a result result;
-  admit() 
-  (*;
     let h2 = ST.get() in 
-    lemma_mod_add_distr (fromDomain_ (as_nat h0 a)) (2 * fromDomain_ (as_nat h0 a)) prime256;
-    inDomain_mod_is_not_mod (3 * fromDomain_ (as_nat h0 a)) *)
+    lemma_mod_add_distr (fromDomain_ #c (as_nat c h0 a)) (2 * fromDomain_ #c (as_nat c h0 a)) (getPrime c);
+    inDomain_mod_is_not_mod #c (3 * fromDomain_ #c (as_nat c h0 a))
   
 
-let multByFour a result  = 
+let multByFour #c a result  = 
     let h0 = ST.get() in 
   multByTwo a result;
   multByTwo result result;
-   admit () (*
-    lemma_mod_mul_distr_r 2 (2 * fromDomain_ (as_nat h0 a)) prime256;
-    lemma_brackets 2 2 (fromDomain_ (as_nat h0 a)); 
-    inDomain_mod_is_not_mod (4 * fromDomain_ (as_nat h0 a)) *)
+
+  let prime = getPrime c in 
+    lemma_mod_mul_distr_r 2 (2 * fromDomain_ #c (as_nat c h0 a)) prime;
+    lemma_brackets 2 2 (fromDomain_ #c (as_nat c h0 a)); 
+    inDomain_mod_is_not_mod #c (4 * fromDomain_ #c (as_nat c h0 a))
 
 
-let multByEight a result  = 
+let multByEight #c a result  = 
     let h0 = ST.get() in 
   multByTwo a result;
-  multByTwo result result; (*
-    lemma_mod_mul_distr_r 2 (2 * fromDomain_ (as_nat h0 a)) prime256;
-    lemma_brackets 2 2 (fromDomain_ (as_nat h0 a)); 
-    inDomain_mod_is_not_mod (4 * fromDomain_ (as_nat h0 a)); *)
   multByTwo result result; 
-  admit() (*
-    lemma_mod_mul_distr_r 2 (4 * fromDomain_ (as_nat h0 a)) prime256;
-    lemma_brackets 2 4 (fromDomain_ (as_nat h0 a));
-    inDomain_mod_is_not_mod (8 * fromDomain_ (as_nat h0 a))
-*)
+  multByTwo result result; 
+
+    let prime = getPrime c in 
+    lemma_mod_mul_distr_r 2 (2 * fromDomain_ #c (as_nat c h0 a)) prime;
+    lemma_brackets 2 2 (fromDomain_ #c (as_nat c h0 a)); 
+    inDomain_mod_is_not_mod #c (4 * fromDomain_ #c (as_nat c h0 a)); 
+    lemma_mod_mul_distr_r 2 (4 * fromDomain_ #c (as_nat c h0 a)) prime;
+    lemma_brackets 2 4 (fromDomain_ #c (as_nat c h0 a));
+    inDomain_mod_is_not_mod #c (8 * fromDomain_ #c (as_nat c h0 a))
 
 
 let multByMinusThree #c a result  = 
@@ -97,13 +97,19 @@ let multByMinusThree #c a result  =
     let sz: FStar.UInt32.t = getCoordinateLenU64 c in 
     let zeros = create sz (u64 0) in 
     felem_sub zeros result result; 
-    admit();
-    
-    (*
-      lemmaFromDomain 0; 
-      assert_norm( 0 * modp_inv2 #P256 (pow2 256) % prime256 == 0);
-      assert_norm (fromDomain_ 0 == 0); 
-      lemma_mod_sub_distr 0 (3 * fromDomain_ (as_nat h0 a)) prime256;
-      inDomain_mod_is_not_mod ((-3) * fromDomain_ (as_nat h0 a));   *)
+
+
+      let prime = getPrime c in 
+      lemmaFromDomain #c 0; 
+
+      assert_norm(0 * modp_inv2 #P256 (getPower2 P256) % getPrime P256 == 0);
+      assert_norm(0 * modp_inv2 #P384 (getPower2 P384) % getPrime P384 == 0);
+
+      assert_norm(0 * modp_inv2 #c (getPower2 c) % getPrime c == 0);
+
+      assert_norm (fromDomain_ #c 0 == 0); 
+
+      lemma_mod_sub_distr 0 (3 * fromDomain_ #c (as_nat c h0 a)) prime;
+      inDomain_mod_is_not_mod #c ((-3) * fromDomain_ #c (as_nat c h0 a));  
   pop_frame()
 

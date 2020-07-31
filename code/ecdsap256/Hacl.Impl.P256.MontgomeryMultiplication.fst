@@ -319,7 +319,7 @@ let fsquarePowNminusOne n a b =
       lemmaToDomain #P256 1;
       assert_norm (1 + pow2 64 * 18446744069414584320 + pow2 64 * pow2 64 * 18446744073709551615 + pow2 64 * pow2 64 * pow2 64 * 4294967294 = 26959946660873538059280334323183841250350249843923952699046031785985);
       assert_norm (pow2 256 % prime256 == 26959946660873538059280334323183841250350249843923952699046031785985);
-      assert_norm (as_nat4 one = toDomain_ #P256 1);
+      assert_norm (as_nat_coordinate #P256 one = toDomain_ #P256 1);
 
   let inv (h0: HyperStack.mem) (h1: HyperStack.mem) (i: nat) : Type0 = 
     let k = fromDomain_ #P256 (as_nat P256 h0 a) in 

@@ -30,13 +30,13 @@ open FStar.Math.Lemmas
 friend Hacl.Spec.P256.MontgomeryMultiplication
 open FStar.Mul
 
-val swap: p: point_prime -> q: point_prime -> Tot (r: tuple2 point_prime point_prime {let pNew, qNew = r in 
+val swap: #c: curve ->  p: point_prime c -> q: point_prime c -> Tot (r: tuple2 (point_prime c) (point_prime c) {let pNew, qNew = r in 
   pNew == q /\ qNew == p})
 
 let swap p q = (q, p)
 
 
-val conditional_swap: i: uint64 -> p: point_prime -> q: point_prime -> Tot (r: tuple2 point_prime point_prime
+val conditional_swap: #c: curve -> i: uint64 -> p: point_prime c -> q: point_prime c -> Tot (r: tuple2 (point_prime c) (point_prime c)
   {
     let pNew, qNew = r in 
     if uint_v i = 0 then pNew == p /\ qNew == q
@@ -169,7 +169,7 @@ val cswap: #c: curve ->  bit:uint64{v bit <= 1} -> p:point c -> q:point c
       modifies (loc p |+| loc q) h0 h1 /\
       (let pBefore = as_seq h0 p in let qBefore = as_seq h0 q in 
   let pAfter = as_seq h1 p in let qAfter = as_seq h1 q in 
-  let condP0, condP1 = conditional_swap bit pBefore qBefore  in 
+  let condP0, condP1 = conditional_swap #c bit pBefore qBefore  in 
   condP0 == pAfter /\ condP1 == qAfter) /\ 
 
       (v bit == 1 ==> as_seq h1 p == as_seq h0 q /\ as_seq h1 q == as_seq h0 p) /\
@@ -481,12 +481,12 @@ val montgomery_ladder: #c: curve -> #buf_type: buftype->  p: point c -> q: point
 
 
       (
-	let p1 = fromDomainPoint #c (point_prime_to_coordinates (as_seq h1 p)) in 
-	let q1 = fromDomainPoint #c (point_prime_to_coordinates (as_seq h1 q)) in 
+	let p1 = fromDomainPoint #c (point_prime_to_coordinates c (as_seq h1 p)) in 
+	let q1 = fromDomainPoint #c (point_prime_to_coordinates c (as_seq h1 q)) in 
 	let rN, qN = montgomery_ladder_spec #P256 (as_seq h0 scalar) 
 	  (
-	    fromDomainPoint #c (point_prime_to_coordinates (as_seq h0 p)),  
-	    fromDomainPoint #c (point_prime_to_coordinates (as_seq h0 q))
+	    fromDomainPoint #c (point_prime_to_coordinates c (as_seq h0 p)),  
+	    fromDomainPoint #c (point_prime_to_coordinates c (as_seq h0 q))
 	  ) in 
 	rN == p1 /\ qN == q1
 	)
@@ -503,8 +503,8 @@ let montgomery_ladder #c #a p q scalar tempBuffer =
   [@inline_let] 
   let acc (h:mem) : GTot (tuple2 point_nat_prime point_nat_prime) = 
   (fromDomainPoint #c 
-    (point_prime_to_coordinates (as_seq h p)),
-  fromDomainPoint #c (point_prime_to_coordinates (as_seq h q)))  in 
+    (point_prime_to_coordinates c (as_seq h p)),
+  fromDomainPoint #c (point_prime_to_coordinates c (as_seq h q)))  in 
   
   Lib.LoopCombinators.eq_repeati0 256 (spec_ml h0) (acc h0);
   [@inline_let]
@@ -540,10 +540,10 @@ val lemma_point_to_domain: #c: curve ->  h0: mem -> h1: mem
        point_z_as_nat c h1 result == toDomain_ #c (point_z_as_nat c h0 p) 
      )
    )
-   (ensures (fromDomainPoint #c (point_prime_to_coordinates (as_seq h1 result)) == point_prime_to_coordinates (as_seq h0 p)))
+   (ensures (fromDomainPoint #c (point_prime_to_coordinates c (as_seq h1 result)) == point_prime_to_coordinates c (as_seq h0 p)))
 
-let lemma_point_to_domain h0 h1 p result = 
-  let (x, y, z) = point_prime_to_coordinates (as_seq h1 result) in ()
+let lemma_point_to_domain #c h0 h1 p result = 
+  let (x, y, z) = point_prime_to_coordinates c (as_seq h1 result) in ()
 
 
 val lemma_pif_to_domain: #c: curve -> h: mem ->  p: point c -> Lemma
@@ -552,11 +552,11 @@ val lemma_pif_to_domain: #c: curve -> h: mem ->  p: point c -> Lemma
     point_y_as_nat c h p == 0 /\ 
     point_z_as_nat c h p == 0))
   (ensures (fromDomainPoint #c 
-    (point_prime_to_coordinates (as_seq h p)) == 
-    point_prime_to_coordinates (as_seq h p)))
+    (point_prime_to_coordinates c (as_seq h p)) == 
+    point_prime_to_coordinates c (as_seq h p)))
 
 let lemma_pif_to_domain #c h p = 
-  let (x, y, z) = point_prime_to_coordinates (as_seq h p) in 
+  let (x, y, z) = point_prime_to_coordinates c (as_seq h p) in 
   let (x3, y3, z3) = fromDomainPoint #c (x, y, z) in 
   lemmaFromDomain #c x;
   lemmaFromDomain #c y;
@@ -567,7 +567,7 @@ let lemma_pif_to_domain #c h p =
 
 
 val lemma_coord: #c: curve -> h3: mem -> q: point c -> Lemma (
-   let (r0, r1, r2) = fromDomainPoint #c (point_prime_to_coordinates (as_seq h3 q)) in 
+   let (r0, r1, r2) = fromDomainPoint #c (point_prime_to_coordinates c (as_seq h3 q)) in 
 	let xD = fromDomain_ #c (point_x_as_nat c h3 q) in 
 	let yD = fromDomain_ #c (point_y_as_nat c h3 q) in 
 	let zD = fromDomain_ #c (point_z_as_nat c h3 q) in 

@@ -33,12 +33,12 @@ val bufferToJac: #c: curve -> p: lbuffer uint64 (getCoordinateLenU64 c *. 2ul) -
       x3 == pointJacX /\ y3 == pointJacY /\ z3 == pointJacZ))
 
 
-(* [@ (Comment "  This code is not side channel resistant")]  *)
-
+[@ (Comment "  This code is not side channel resistant")]  
 val isPointAtInfinityPublic: #c: curve -> p:point c -> Stack bool
   (requires fun h -> live h p)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    r == Spec.P256.isPointAtInfinity (point_prime_to_coordinates (as_seq h0 p)))
+    r == Spec.P256.isPointAtInfinity (point_prime_to_coordinates c (as_seq h0 p)))
+
 
 [@ (Comment "  This code is not side channel resistant")]
 val isPointOnCurvePublic: #c: curve -> p: point c -> Stack bool
@@ -66,7 +66,7 @@ val verifyQValidCurvePoint: #c: curve -> pubKeyAsPoint: point c
   )
   (ensures  fun h0 r h1 ->
     modifies (loc tempBuffer) h0 h1 /\
-    r == verifyQValidCurvePointSpec #P256 (point_prime_to_coordinates (as_seq h0 pubKeyAsPoint)))
+    r == verifyQValidCurvePointSpec #P256 (point_prime_to_coordinates c (as_seq h0 pubKeyAsPoint)))
 
 inline_for_extraction
 val verifyQ: 

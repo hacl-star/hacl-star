@@ -204,10 +204,10 @@ let felem_seq_as_nat_8 (a: lseq uint64 8) : Tot nat =
 open FStar.Mul
 
 noextract
-let felem_seq_prime = a: felem_seq {felem_seq_as_nat a < prime256}
+let felem_seq_prime (c: curve) = a: felem_seq c {felem_seq_as_nat c a < getPrime c}
 noextract
-let point_prime =  p: point_seq {let x = Lib.Sequence.sub p 0 4 in let y = Lib.Sequence.sub p 4 4 in let z = Lib.Sequence.sub p 8 4 in 
-  felem_seq_as_nat x < prime256 /\ felem_seq_as_nat y < prime256 /\ felem_seq_as_nat z < prime256} 
+let point_prime (c: curve) =  p: point_seq c {let x = Lib.Sequence.sub p 0 4 in let y = Lib.Sequence.sub p 4 4 in let z = Lib.Sequence.sub p 8 4 in 
+  felem_seq_as_nat c x < prime256 /\ felem_seq_as_nat c y < prime256 /\ felem_seq_as_nat c z < prime256} 
 
 
 inline_for_extraction

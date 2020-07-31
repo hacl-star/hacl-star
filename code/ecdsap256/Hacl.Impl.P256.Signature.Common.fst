@@ -155,11 +155,11 @@ let xcube_minus_x #c x r =
   felem_add #c r b_constant r;
   pop_frame(); 
 
-    admit();
     let x_ = as_nat c h0 x in 
     lemma_xcube #c x_;
-    lemma_mod_add_distr (bCoordinate #c) ((x_ * x_ * x_) - (3 * x_)) (getPrime c);
-    lemma_xcube2 #c x_
+    lemma_mod_add_distr (bCoordinate #c) (x_ * x_ * x_ - 3 * x_) (getPrime c);
+    lemma_xcube2 #c x_;
+    admit()
 
 
 let isPointAtInfinityPublic p =  
@@ -186,20 +186,21 @@ let lemma_modular_multiplication_p256_2_d #c a b =
 
 let isPointOnCurvePublic #c p = 
   push_frame(); 
-    let y2Buffer = create (size 4) (u64 0) in 
-    let xBuffer = create (size 4) (u64 0) in 
+  let sz: FStar.UInt32.t = getCoordinateLenU64 c in 
+  let y2Buffer = create sz (u64 0) in 
+  let xBuffer = create sz (u64 0) in 
   let h0 = ST.get() in 
-    let x = sub p (size 0) (size 4) in 
-    let y = sub p (size 4) (size 4) in 
-    y_2 #c y y2Buffer;
-    xcube_minus_x #c x xBuffer;
+  let x = sub p (size 0) sz in 
+  let y = sub p sz sz in 
+  y_2 #c y y2Buffer;
+  xcube_minus_x #c x xBuffer;
     
     lemma_modular_multiplication_p256_2_d #c ((as_nat c h0 y) * (as_nat c h0 y) % prime) (let x_ = as_nat c h0 x in (x_ * x_ * x_ - 3 * x_ + bCoordinate #P256) % prime);
     
-    let r = compare_felem #c y2Buffer xBuffer in 
-    let z = not (eq_0_u64 r) in 
+  let r = compare_felem #c y2Buffer xBuffer in 
+  let z = not (eq_0_u64 r) in 
   pop_frame();
-     z
+  z
 
 
 val isCoordinateValid: #c: curve -> p: point c -> Stack bool 
@@ -239,7 +240,7 @@ val multByOrder: #c: curve -> result: point c ->  p: point c -> tempBuffer: lbuf
   (ensures fun h0 _ h1 ->
     modifies (loc result |+| loc p |+| loc tempBuffer) h0 h1 /\
     (
-      let xN, yN, zN = scalar_multiplication #P256 (prime_order_seq #P256) (point_prime_to_coordinates (as_seq h0 p)) in 
+      let xN, yN, zN = scalar_multiplication #P256 (prime_order_seq #P256) (point_prime_to_coordinates c (as_seq h0 p)) in 
       let x3, y3, z3 = point_x_as_nat c h1 result, point_y_as_nat c h1 result, point_z_as_nat c h1 result in 
       x3 == xN /\ y3 == yN /\ z3 == zN 
     ) 
@@ -269,7 +270,7 @@ val multByOrder2: #c: curve -> result: point c ->  p: point c -> tempBuffer: lbu
   )
   (ensures fun h0 _ h1  -> modifies (loc result |+| loc tempBuffer) h0 h1 /\
     (
-      let xN, yN, zN = scalar_multiplication (prime_order_seq #P256) (point_prime_to_coordinates (as_seq h0 p)) in 
+      let xN, yN, zN = scalar_multiplication (prime_order_seq #P256) (point_prime_to_coordinates c (as_seq h0 p)) in 
       let x3, y3, z3 = point_x_as_nat c h1 result, point_y_as_nat c h1 result, point_z_as_nat c h1 result in 
       x3 == xN /\ y3 == yN /\ z3 == zN 
     )
@@ -297,7 +298,7 @@ val isOrderCorrect: #c: curve -> p: point c -> tempBuffer: lbuffer uint64 (size 
   )
   (ensures fun h0 r h1 -> 
     modifies(loc tempBuffer) h0 h1 /\ 
-    (let (xN, yN, zN) = scalar_multiplication (prime_order_seq #P256) (point_prime_to_coordinates (as_seq h0 p)) in 
+    (let (xN, yN, zN) = scalar_multiplication (prime_order_seq #P256) (point_prime_to_coordinates c (as_seq h0 p)) in 
      r == Spec.P256.isPointAtInfinity (xN, yN, zN))
   )
 

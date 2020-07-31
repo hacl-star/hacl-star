@@ -53,17 +53,17 @@ let lemma_equ_felem a b c d  a1 b1 c1 d1  =
   assert(c == c1);
   assert(d == d1)
 
-val lemma_equality: a: felem4 -> b: felem4 -> Lemma (
-  let (a_0, a_1, a_2, a_3) = a in 
+val lemma_equality: #c: curve -> a: felem_coordinate c -> b: felem_coordinate c -> Lemma (True
+  (*let (a_0, a_1, a_2, a_3) = a in 
   let (b_0, b_1, b_2, b_3) = b in 
   if  (uint_v a_0 = uint_v b_0 && uint_v a_1 = uint_v b_1 && uint_v a_2 = uint_v b_2 && uint_v a_3 = uint_v b_3) 
-  then as_nat4 a == as_nat4 b else as_nat4 a <> as_nat4 b)
+  then as_nat_coordinate c a == as_nat_coordinate c b else as_nat_coordinate c a <> as_nat_coordinate c b *) )
 
 let lemma_equality a b = ()
 
 
-val lemma_eq_funct: a: felem_seq -> b: felem_seq -> Lemma
-   (requires (felem_seq_as_nat a == felem_seq_as_nat b))
+val lemma_eq_funct: #c: curve -> a: felem_seq c -> b: felem_seq c -> Lemma
+   (requires (felem_seq_as_nat c a == felem_seq_as_nat c b))
    (ensures (a == b))
 
 let lemma_eq_funct a b = 
@@ -85,11 +85,11 @@ let lemma_eq_funct a b =
   assert(Lib.Sequence.equal a b)
 
 
-val lemma_eq_funct_: a: felem_seq -> b: felem_seq -> Lemma
-   (if felem_seq_as_nat a = felem_seq_as_nat b then a == b else True)
+val lemma_eq_funct_: #c: curve -> a: felem_seq c -> b: felem_seq c -> Lemma
+   (if felem_seq_as_nat c a = felem_seq_as_nat c b then a == b else True)
 
-let lemma_eq_funct_ a b = 
-  if felem_seq_as_nat a = felem_seq_as_nat b then 
+let lemma_eq_funct_ #c a b = 
+  if felem_seq_as_nat c a = felem_seq_as_nat c b then 
     lemma_eq_funct a b 
 
 

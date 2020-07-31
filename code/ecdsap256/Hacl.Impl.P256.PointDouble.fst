@@ -549,8 +549,8 @@ let point_double #c p result tempBuffer =
   let len = getCoordinateLenU64 c in 
 
   let pX = sub p (size 0) (len) in 
-  let pY = sub p ( len) (len) in 
-  let pZ = sub p (size (2ul *. len)) (len) in 
+  let pY = sub p len len in 
+  let pZ = sub p (2ul *. len) (len) in 
 
   let x3 = sub result (size 0) (len) in 
   let y3 = sub result (len) (len) in 

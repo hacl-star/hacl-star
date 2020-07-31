@@ -40,31 +40,63 @@ noextract
 let point_x_as_nat (c: curve) (h: mem) (e: point c) : GTot nat = 
   let open Lib.Sequence in 
   let s = as_seq h e in 
-  let s0 = s.[0] in
-  let s1 = s.[1] in 
-  let s2 = s.[2] in 
-  let s3 = s.[3] in 
-  as_nat4 (s0, s1, s2, s3)
+  match c with 
+  |P256 -> 
+    let s0 = s.[0] in
+    let s1 = s.[1] in 
+    let s2 = s.[2] in 
+    let s3 = s.[3] in 
+    as_nat_coordinate #c (s0, s1, s2, s3)
+  |P384 -> 
+    let s0 = s.[0] in
+    let s1 = s.[1] in 
+    let s2 = s.[2] in 
+    let s3 = s.[3] in 
+    let s4 = s.[4] in 
+    let s5 = s.[5] in 
+    as_nat_coordinate #c (s0, s1, s2, s3, s4, s5)
+    
 
 noextract 
 let point_y_as_nat (c: curve) (h: mem) (e: point c) : GTot nat = 
   let open Lib.Sequence in 
   let s = as_seq h e in 
-  let s0 = s.[4] in
-  let s1 = s.[5] in 
-  let s2 = s.[6] in 
-  let s3 = s.[7] in 
-  as_nat4 (s0, s1, s2, s3)
+  match c with 
+  |P256 -> 
+    let s0 = s.[4] in
+    let s1 = s.[5] in 
+    let s2 = s.[6] in 
+    let s3 = s.[7] in 
+    as_nat_coordinate #P256 (s0, s1, s2, s3)
+  |P384 -> 
+    let s0 = s.[6] in
+    let s1 = s.[7] in 
+    let s2 = s.[8] in 
+    let s3 = s.[9] in 
+    let s4 = s.[10] in 
+    let s5 = s.[11] in 
+    as_nat_coordinate #P384 (s0, s1, s2, s3, s4, s5)
+
 
 noextract 
 let point_z_as_nat (c: curve) (h: mem) (e: point c) : GTot nat = 
   let open Lib.Sequence in 
   let s = as_seq h e in 
-  let s0 = s.[8] in
-  let s1 = s.[9] in 
-  let s2 = s.[10] in 
-  let s3 = s.[11] in 
-  as_nat4 (s0, s1, s2, s3)
+  match c with 
+  |P256 -> 
+    let s0 = s.[8] in
+    let s1 = s.[9] in 
+    let s2 = s.[10] in 
+    let s3 = s.[11] in 
+    as_nat_coordinate #c (s0, s1, s2, s3)
+  |P384 -> 
+    let s0 = s.[12] in
+    let s1 = s.[13] in 
+    let s2 = s.[14] in 
+    let s3 = s.[15] in 
+    let s4 = s.[16] in 
+    let s5 = s.[7] in 
+    as_nat_coordinate #c (s0, s1, s2, s3, s4, s5)
 
 
 val pointToDomain: #c: curve -> p: point c -> result: point c -> Stack unit 
@@ -91,11 +123,11 @@ val isPointAtInfinityPrivate: #c: curve -> p: point c -> Stack uint64
     (
       (uint_v r == 0 \/ uint_v r == maxint U64) /\ 
       (
-	let x, y, z = fromDomainPoint #c (point_prime_to_coordinates (as_seq h0 p)) in 
+	let x, y, z = fromDomainPoint #c (point_prime_to_coordinates c (as_seq h0 p)) in 
 	if Spec.P256.isPointAtInfinity (x, y, z) then uint_v r = maxint U64 else uint_v r = 0
       ) /\
       (
-	let x, y, z = point_prime_to_coordinates (as_seq h0 p) in 
+	let x, y, z = point_prime_to_coordinates c (as_seq h0 p) in 
 	if Spec.P256.isPointAtInfinity (x, y, z) then uint_v r = maxint U64 else uint_v r = 0
       )
    )
@@ -110,8 +142,8 @@ val norm: #c: curve -> p: point c -> resultPoint: point c -> tempBuffer: lbuffer
   (ensures fun h0 _ h1 -> 
       modifies (loc tempBuffer |+| loc resultPoint) h0 h1 /\
       (
-      let resultPoint =  point_prime_to_coordinates (as_seq h1 resultPoint) in 
-      let pointD = fromDomainPoint #c (point_prime_to_coordinates (as_seq h0 p)) in 
+      let resultPoint =  point_prime_to_coordinates c (as_seq h1 resultPoint) in 
+      let pointD = fromDomainPoint #c (point_prime_to_coordinates c (as_seq h0 p)) in 
       let pointNorm = _norm #P256 pointD in 
       pointNorm == resultPoint
    )   
@@ -159,7 +191,7 @@ val scalarMultiplication: #c: curve -> #buf_type: buftype->  p: point c -> resul
     as_nat c h1 (gsub result (size 8) (size 4)) < prime256 /\
     (
       let x3, y3, z3 = point_x_as_nat c h1 result, point_y_as_nat c h1 result, point_z_as_nat c h1 result in 
-      let (xN, yN, zN) = scalar_multiplication #P256 (as_seq h0 scalar) (point_prime_to_coordinates (as_seq h0 p)) in 
+      let (xN, yN, zN) = scalar_multiplication #P256 (as_seq h0 scalar) (point_prime_to_coordinates c (as_seq h0 p)) in 
       x3 == xN /\ y3 == yN /\ z3 == zN 
   )
 ) 
@@ -185,8 +217,8 @@ val scalarMultiplicationWithoutNorm: #c: curve -> p: point c -> result: point c 
     
     modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\
     (
-      let p1 = fromDomainPoint #c (point_prime_to_coordinates (as_seq h1 result)) in 
-      let rN, _ = montgomery_ladder_spec #P256 (as_seq h0 scalar) ((0, 0, 0),  point_prime_to_coordinates (as_seq h0 p)) in 
+      let p1 = fromDomainPoint #c (point_prime_to_coordinates c (as_seq h1 result)) in 
+      let rN, _ = montgomery_ladder_spec #P256 (as_seq h0 scalar) ((0, 0, 0),  point_prime_to_coordinates c (as_seq h0 p)) in 
       rN == p1
   )
 ) 
@@ -223,6 +255,6 @@ val secretToPublicWithoutNorm: #c: curve -> result: point c -> scalar: lbuffer u
       as_nat c h1 (gsub result (size 4) (size 4)) < prime256 /\ 
       as_nat c h1 (gsub result (size 8) (size 4)) < prime256 /\
       (
-	let p1 = fromDomainPoint #c (point_prime_to_coordinates (as_seq h1 result)) in 
+	let p1 = fromDomainPoint #c (point_prime_to_coordinates c (as_seq h1 result)) in 
 	let rN, _ = montgomery_ladder_spec (as_seq h0 scalar) ((0, 0, 0), (basePoint #P256)) in 
 	rN == p1))  

@@ -375,8 +375,8 @@ val sub4_il: x: felem P256 -> y: glbuffer uint64 (size 4) -> result: felem P256 
     (requires fun h -> live h x /\ live h y /\ live h result /\ disjoint x result /\ disjoint result y)
     (ensures fun h0 c h1 -> modifies1 result h0 h1 /\ v c <= 1 /\
       (
-  as_nat P256 h1 result - v c * pow2 256 == as_nat P256 h0 x  - as_nat_il h0 y /\
-  (if uint_v c = 0 then as_nat P256 h0 x >= as_nat_il h0 y else as_nat P256 h0 x < as_nat_il h0 y)
+  as_nat P256 h1 result - v c * pow2 256 == as_nat P256 h0 x  - as_nat_il P256 h0 y /\
+  (if uint_v c = 0 then as_nat P256 h0 x >= as_nat_il P256 h0 y else as_nat P256 h0 x < as_nat_il P256 h0 y)
       )
     )
 
@@ -495,8 +495,8 @@ inline_for_extraction noextract
 val mul1_il: f:  glbuffer uint64 (size 4) -> u: uint64 -> result: lbuffer uint64 (size 4) -> Stack uint64
   (requires fun h -> live h result /\ live h f)
   (ensures fun h0 c h1 -> modifies (loc result) h0 h1 /\ 
-    as_nat_il h0 f * uint_v u = uint_v c * pow2 64 * pow2 64 * pow2 64 * pow2 64 + as_nat P256 h1 result /\ 
-    as_nat_il h0 f * uint_v u < pow2 320 /\
+    as_nat_il P256 h0 f * uint_v u = uint_v c * pow2 64 * pow2 64 * pow2 64 * pow2 64 + as_nat P256 h1 result /\ 
+    as_nat_il P256 h0 f * uint_v u < pow2 320 /\
     uint_v c < pow2 64 - 1 
   )
 
@@ -533,7 +533,7 @@ let mul1_il f u result =
   let temp0 = index temp (size 0) in 
     lemma_low_level0 (uint_v(Seq.index (as_seq h1 o0) 0)) (uint_v (Seq.index (as_seq h2 o1) 0)) (uint_v (Seq.index (as_seq h3 o2) 0)) (uint_v (Seq.index (as_seq h4 o3) 0)) (uint_v f0) (uint_v f1) (uint_v f2) (uint_v f3) (uint_v u) (uint_v (Seq.index (as_seq h2 temp) 0)) (uint_v c1) (uint_v c2) (uint_v c3) (uint_v (Seq.index (as_seq h3 temp) 0)) (uint_v temp0); 
     
-  mul_lemma_4 (as_nat_il h0 f) (uint_v u) (pow2 256 - 1) (pow2 64 - 1);
+  mul_lemma_4 (as_nat_il P256 h0 f) (uint_v u) (pow2 256 - 1) (pow2 64 - 1);
   assert_norm((pow2 256 - 1) * (pow2 64 - 1) == pow2 320 - pow2 256 - pow2 64 + 1);
   assert_norm((pow2 320 - pow2 256) / pow2 256 == pow2 64 - 1);
 
@@ -1617,7 +1617,7 @@ inline_for_extraction noextract
 val shortened_mul: a: glbuffer uint64 (size 4) -> b: uint64 -> result: widefelem P256 -> Stack unit
   (requires fun h -> live h a /\ live h result /\ wide_as_nat P256 h result = 0)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
-    as_nat_il h0 a * uint_v b = wide_as_nat P256 h1 result /\ 
+    as_nat_il P256 h0 a * uint_v b = wide_as_nat P256 h1 result /\ 
     wide_as_nat P256 h1 result < pow2 320)
 
 let shortened_mul a b result = 

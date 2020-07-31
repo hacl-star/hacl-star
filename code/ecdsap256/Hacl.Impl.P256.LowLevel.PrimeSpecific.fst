@@ -237,8 +237,8 @@ let p256_sub arg1 arg2 out =
 	    modulo_lemma (as_nat P256 h2 out) prime256;
             as_nat P256 h2 out == (as_nat P256 h0 arg1 - as_nat P256 h0 arg2) % prime256
 	  end);
-    substractionInDomain #P256 (felem_seq_as_nat (as_seq h0 arg1)) (felem_seq_as_nat (as_seq h0 arg2));
-    inDomain_mod_is_not_mod #P256 (fromDomain_ #P256 (felem_seq_as_nat (as_seq h0 arg1)) - fromDomain_ #P256 (felem_seq_as_nat (as_seq h0 arg2)))
+    substractionInDomain #P256 (felem_seq_as_nat P256 (as_seq h0 arg1)) (felem_seq_as_nat P256 (as_seq h0 arg2));
+    inDomain_mod_is_not_mod #P256 (fromDomain_ #P256 (felem_seq_as_nat P256 (as_seq #c h0 arg1)) - fromDomain_ #P256 (felem_seq_as_nat P256 (as_seq h0 arg2)))
 
 
 
