@@ -251,7 +251,11 @@ EverCrypt_CTR_init(
   uint8_t *ek = scrut0.xkey;
   uint8_t *iv_ = scrut0.iv;
   Spec_Cipher_Expansion_impl i = scrut0.i;
-  memcpy(iv_, iv, iv_len * sizeof (iv[0U]));
+  bool uu____0 = iv == NULL;
+  if (!(uu____0 || iv_ == NULL))
+  {
+    memcpy(iv_, iv, iv_len * sizeof (iv[0U]));
+  }
   switch (i)
   {
     case Spec_Cipher_Expansion_Vale_AES128:
@@ -315,11 +319,31 @@ void EverCrypt_CTR_update_block(EverCrypt_CTR_state_s *p, uint8_t *dst, uint8_t 
         uint8_t inout_b[16U] = { 0U };
         uint32_t num_blocks = (uint32_t)(uint64_t)16U / (uint32_t)16U;
         uint32_t num_bytes_ = num_blocks * (uint32_t)16U;
-        uint8_t *in_b_ = src;
-        uint8_t *out_b_ = dst;
-        memcpy(inout_b,
-          src + num_bytes_,
-          (uint32_t)(uint64_t)16U % (uint32_t)16U * sizeof (src[0U]));
+        uint8_t *in_b_;
+        if (src == NULL)
+        {
+          in_b_ = NULL;
+        }
+        else
+        {
+          in_b_ = src;
+        }
+        uint8_t *out_b_;
+        if (dst == NULL)
+        {
+          out_b_ = NULL;
+        }
+        else
+        {
+          out_b_ = dst;
+        }
+        bool uu____2 = src == NULL;
+        if (!(uu____2 || inout_b == NULL))
+        {
+          memcpy(inout_b,
+            src + num_bytes_,
+            (uint32_t)(uint64_t)16U % (uint32_t)16U * sizeof (src[0U]));
+        }
         uint64_t
         scrut1 =
           gctr128_bytes(in_b_,
@@ -329,9 +353,13 @@ void EverCrypt_CTR_update_block(EverCrypt_CTR_state_s *p, uint8_t *dst, uint8_t 
             uu____1,
             ctr_block,
             (uint64_t)num_blocks);
-        memcpy(dst + num_bytes_,
-          inout_b,
-          (uint32_t)(uint64_t)16U % (uint32_t)16U * sizeof (inout_b[0U]));
+        bool uu____3 = inout_b == NULL;
+        if (!(uu____3 || dst == NULL))
+        {
+          memcpy(dst + num_bytes_,
+            inout_b,
+            (uint32_t)(uint64_t)16U % (uint32_t)16U * sizeof (inout_b[0U]));
+        }
         uint32_t c1 = c01 + (uint32_t)1U;
         *p
         =
@@ -357,31 +385,55 @@ void EverCrypt_CTR_update_block(EverCrypt_CTR_state_s *p, uint8_t *dst, uint8_t 
         uint8_t *iv1 = scrut0.iv;
         uint8_t ctr_block[16U] = { 0U };
         memcpy(ctr_block, iv1, iv_len1 * sizeof (iv1[0U]));
-        FStar_UInt128_uint128 uu____2 = load128_be(ctr_block);
+        FStar_UInt128_uint128 uu____4 = load128_be(ctr_block);
         FStar_UInt128_uint128
-        c = FStar_UInt128_add_mod(uu____2, FStar_UInt128_uint64_to_uint128((uint64_t)c01));
+        c = FStar_UInt128_add_mod(uu____4, FStar_UInt128_uint64_to_uint128((uint64_t)c01));
         store128_le(ctr_block, c);
-        uint8_t *uu____3 = ek1;
+        uint8_t *uu____5 = ek1;
         uint8_t inout_b[16U] = { 0U };
         uint32_t num_blocks = (uint32_t)(uint64_t)16U / (uint32_t)16U;
         uint32_t num_bytes_ = num_blocks * (uint32_t)16U;
-        uint8_t *in_b_ = src;
-        uint8_t *out_b_ = dst;
-        memcpy(inout_b,
-          src + num_bytes_,
-          (uint32_t)(uint64_t)16U % (uint32_t)16U * sizeof (src[0U]));
+        uint8_t *in_b_;
+        if (src == NULL)
+        {
+          in_b_ = NULL;
+        }
+        else
+        {
+          in_b_ = src;
+        }
+        uint8_t *out_b_;
+        if (dst == NULL)
+        {
+          out_b_ = NULL;
+        }
+        else
+        {
+          out_b_ = dst;
+        }
+        bool uu____6 = src == NULL;
+        if (!(uu____6 || inout_b == NULL))
+        {
+          memcpy(inout_b,
+            src + num_bytes_,
+            (uint32_t)(uint64_t)16U % (uint32_t)16U * sizeof (src[0U]));
+        }
         uint64_t
         scrut1 =
           gctr256_bytes(in_b_,
             (uint64_t)16U,
             out_b_,
             inout_b,
-            uu____3,
+            uu____5,
             ctr_block,
             (uint64_t)num_blocks);
-        memcpy(dst + num_bytes_,
-          inout_b,
-          (uint32_t)(uint64_t)16U % (uint32_t)16U * sizeof (inout_b[0U]));
+        bool uu____7 = inout_b == NULL;
+        if (!(uu____7 || dst == NULL))
+        {
+          memcpy(dst + num_bytes_,
+            inout_b,
+            (uint32_t)(uint64_t)16U % (uint32_t)16U * sizeof (inout_b[0U]));
+        }
         uint32_t c1 = c01 + (uint32_t)1U;
         *p
         =

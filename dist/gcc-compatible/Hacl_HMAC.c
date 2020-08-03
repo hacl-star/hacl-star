@@ -49,7 +49,11 @@ Hacl_HMAC_legacy_compute_sha1(
   uint8_t *nkey = key_block;
   if (key_len <= (uint32_t)64U)
   {
-    memcpy(nkey, key, key_len * sizeof (key[0U]));
+    bool uu____0 = key == NULL;
+    if (!(uu____0 || nkey == NULL))
+    {
+      memcpy(nkey, key, key_len * sizeof (key[0U]));
+    }
   }
   else
   {
@@ -116,7 +120,11 @@ Hacl_HMAC_compute_sha2_256(
   uint8_t *nkey = key_block;
   if (key_len <= (uint32_t)64U)
   {
-    memcpy(nkey, key, key_len * sizeof (key[0U]));
+    bool uu____0 = key == NULL;
+    if (!(uu____0 || nkey == NULL))
+    {
+      memcpy(nkey, key, key_len * sizeof (key[0U]));
+    }
   }
   else
   {
@@ -183,7 +191,11 @@ Hacl_HMAC_compute_sha2_384(
   uint8_t *nkey = key_block;
   if (key_len <= (uint32_t)128U)
   {
-    memcpy(nkey, key, key_len * sizeof (key[0U]));
+    bool uu____0 = key == NULL;
+    if (!(uu____0 || nkey == NULL))
+    {
+      memcpy(nkey, key, key_len * sizeof (key[0U]));
+    }
   }
   else
   {
@@ -257,7 +269,11 @@ Hacl_HMAC_compute_sha2_512(
   uint8_t *nkey = key_block;
   if (key_len <= (uint32_t)128U)
   {
-    memcpy(nkey, key, key_len * sizeof (key[0U]));
+    bool uu____0 = key == NULL;
+    if (!(uu____0 || nkey == NULL))
+    {
+      memcpy(nkey, key, key_len * sizeof (key[0U]));
+    }
   }
   else
   {

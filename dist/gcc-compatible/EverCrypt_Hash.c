@@ -526,9 +526,25 @@ EverCrypt_Hash_update_last_256(
 {
   uint32_t blocks_n = input_len / (uint32_t)64U;
   uint32_t blocks_len = blocks_n * (uint32_t)64U;
-  uint8_t *blocks = input;
+  uint8_t *blocks;
+  if (input == NULL)
+  {
+    blocks = NULL;
+  }
+  else
+  {
+    blocks = input;
+  }
   uint32_t rest_len = input_len - blocks_len;
-  uint8_t *rest = input + blocks_len;
+  uint8_t *rest;
+  if (input == NULL)
+  {
+    rest = NULL;
+  }
+  else
+  {
+    rest = input + blocks_len;
+  }
   EverCrypt_Hash_update_multi_256(s, blocks, blocks_n);
   uint64_t total_input_len = prev_len + (uint64_t)input_len;
   uint32_t
@@ -540,10 +556,38 @@ EverCrypt_Hash_update_last_256(
     + (uint32_t)8U;
   uint32_t tmp_len = rest_len + pad_len;
   uint8_t tmp_twoblocks[128U] = { 0U };
-  uint8_t *tmp = tmp_twoblocks;
-  uint8_t *tmp_rest = tmp;
-  uint8_t *tmp_pad = tmp + rest_len;
-  memcpy(tmp_rest, rest, rest_len * sizeof (rest[0U]));
+  uint8_t *tmp;
+  if (tmp_twoblocks == NULL)
+  {
+    tmp = NULL;
+  }
+  else
+  {
+    tmp = tmp_twoblocks;
+  }
+  uint8_t *tmp_rest;
+  if (tmp == NULL)
+  {
+    tmp_rest = NULL;
+  }
+  else
+  {
+    tmp_rest = tmp;
+  }
+  uint8_t *tmp_pad;
+  if (tmp == NULL)
+  {
+    tmp_pad = NULL;
+  }
+  else
+  {
+    tmp_pad = tmp + rest_len;
+  }
+  bool uu____0 = rest == NULL;
+  if (!(uu____0 || tmp_rest == NULL))
+  {
+    memcpy(tmp_rest, rest, rest_len * sizeof (rest[0U]));
+  }
   Hacl_Hash_Core_SHA2_pad_256(total_input_len, tmp_pad);
   EverCrypt_Hash_update_multi_256(s, tmp, tmp_len / (uint32_t)64U);
 }
@@ -812,9 +856,25 @@ void EverCrypt_Hash_hash_256(uint8_t *input, uint32_t input_len, uint8_t *dst)
     };
   uint32_t blocks_n = input_len / (uint32_t)64U;
   uint32_t blocks_len = blocks_n * (uint32_t)64U;
-  uint8_t *blocks = input;
+  uint8_t *blocks;
+  if (input == NULL)
+  {
+    blocks = NULL;
+  }
+  else
+  {
+    blocks = input;
+  }
   uint32_t rest_len = input_len - blocks_len;
-  uint8_t *rest = input + blocks_len;
+  uint8_t *rest;
+  if (input == NULL)
+  {
+    rest = NULL;
+  }
+  else
+  {
+    rest = input + blocks_len;
+  }
   EverCrypt_Hash_update_multi_256(s, blocks, blocks_n);
   EverCrypt_Hash_update_last_256(s, (uint64_t)blocks_len, rest, rest_len);
   Hacl_Hash_Core_SHA2_finish_256(s, dst);
@@ -830,9 +890,25 @@ void EverCrypt_Hash_hash_224(uint8_t *input, uint32_t input_len, uint8_t *dst)
     };
   uint32_t blocks_n = input_len / (uint32_t)64U;
   uint32_t blocks_len = blocks_n * (uint32_t)64U;
-  uint8_t *blocks = input;
+  uint8_t *blocks;
+  if (input == NULL)
+  {
+    blocks = NULL;
+  }
+  else
+  {
+    blocks = input;
+  }
   uint32_t rest_len = input_len - blocks_len;
-  uint8_t *rest = input + blocks_len;
+  uint8_t *rest;
+  if (input == NULL)
+  {
+    rest = NULL;
+  }
+  else
+  {
+    rest = input + blocks_len;
+  }
   EverCrypt_Hash_update_multi_256(s, blocks, blocks_n);
   EverCrypt_Hash_update_last_256(s, (uint64_t)blocks_len, rest, rest_len);
   Hacl_Hash_Core_SHA2_finish_224(s, dst);
@@ -1108,7 +1184,11 @@ EverCrypt_Hash_Incremental_update(
     uint64_t x0 = total_len1 % (uint64_t)sw;
     uint32_t sz1 = (uint32_t)x0;
     uint8_t *buf2 = buf + sz1;
-    memcpy(buf2, data, len * sizeof (data[0U]));
+    bool uu____0 = data == NULL;
+    if (!(uu____0 || buf2 == NULL))
+    {
+      memcpy(buf2, data, len * sizeof (data[0U]));
+    }
     uint64_t total_len2 = total_len1 + (uint64_t)len;
     *p
     =
@@ -1250,11 +1330,31 @@ EverCrypt_Hash_Incremental_update(
     }
     uint32_t data1_len = n_blocks * sw;
     uint32_t data2_len = len - data1_len;
-    uint8_t *data1 = data;
-    uint8_t *data2 = data + data1_len;
+    uint8_t *data1;
+    if (data == NULL)
+    {
+      data1 = NULL;
+    }
+    else
+    {
+      data1 = data;
+    }
+    uint8_t *data2;
+    if (data == NULL)
+    {
+      data2 = NULL;
+    }
+    else
+    {
+      data2 = data + data1_len;
+    }
     EverCrypt_Hash_update_multi(block_state1, data1, data1_len);
     uint8_t *dst = buf;
-    memcpy(dst, data2, data2_len * sizeof (data2[0U]));
+    bool uu____1 = data2 == NULL;
+    if (!(uu____1 || dst == NULL))
+    {
+      memcpy(dst, data2, data2_len * sizeof (data2[0U]));
+    }
     *p
     =
       (
@@ -1573,11 +1673,31 @@ EverCrypt_Hash_Incremental_update(
   }
   uint32_t data1_len = n_blocks * sw;
   uint32_t data2_len = len - diff - data1_len;
-  uint8_t *data11 = data2;
-  uint8_t *data21 = data2 + data1_len;
+  uint8_t *data11;
+  if (data2 == NULL)
+  {
+    data11 = NULL;
+  }
+  else
+  {
+    data11 = data2;
+  }
+  uint8_t *data21;
+  if (data2 == NULL)
+  {
+    data21 = NULL;
+  }
+  else
+  {
+    data21 = data2 + data1_len;
+  }
   EverCrypt_Hash_update_multi(block_state1, data11, data1_len);
   uint8_t *dst = buf;
-  memcpy(dst, data21, data2_len * sizeof (data21[0U]));
+  bool uu____2 = data21 == NULL;
+  if (!(uu____2 || dst == NULL))
+  {
+    memcpy(dst, data21, data2_len * sizeof (data21[0U]));
+  }
   *p
   =
     (

@@ -97,7 +97,11 @@ Hacl_Streaming_Poly1305_32_update(
     uint64_t x = total_len1 % (uint64_t)(uint32_t)16U;
     uint32_t sz1 = (uint32_t)x;
     uint8_t *buf2 = buf + sz1;
-    memcpy(buf2, data, len * sizeof (data[0U]));
+    bool uu____0 = data == NULL;
+    if (!(uu____0 || buf2 == NULL))
+    {
+      memcpy(buf2, data, len * sizeof (data[0U]));
+    }
     uint64_t total_len2 = total_len1 + (uint64_t)len;
     *p
     =
@@ -121,11 +125,31 @@ Hacl_Streaming_Poly1305_32_update(
     uint32_t n_blocks = len / (uint32_t)16U;
     uint32_t data1_len = n_blocks * (uint32_t)16U;
     uint32_t data2_len = len - data1_len;
-    uint8_t *data1 = data;
-    uint8_t *data2 = data + data1_len;
+    uint8_t *data1;
+    if (data == NULL)
+    {
+      data1 = NULL;
+    }
+    else
+    {
+      data1 = data;
+    }
+    uint8_t *data2;
+    if (data == NULL)
+    {
+      data2 = NULL;
+    }
+    else
+    {
+      data2 = data + data1_len;
+    }
     Hacl_Poly1305_32_poly1305_update(block_state1, data1_len, data1);
     uint8_t *dst = buf;
-    memcpy(dst, data2, data2_len * sizeof (data2[0U]));
+    bool uu____1 = data2 == NULL;
+    if (!(uu____1 || dst == NULL))
+    {
+      memcpy(dst, data2, data2_len * sizeof (data2[0U]));
+    }
     *p
     =
       (
@@ -171,11 +195,31 @@ Hacl_Streaming_Poly1305_32_update(
   uint32_t n_blocks = (len - diff) / (uint32_t)16U;
   uint32_t data1_len = n_blocks * (uint32_t)16U;
   uint32_t data2_len = len - diff - data1_len;
-  uint8_t *data11 = data2;
-  uint8_t *data21 = data2 + data1_len;
+  uint8_t *data11;
+  if (data2 == NULL)
+  {
+    data11 = NULL;
+  }
+  else
+  {
+    data11 = data2;
+  }
+  uint8_t *data21;
+  if (data2 == NULL)
+  {
+    data21 = NULL;
+  }
+  else
+  {
+    data21 = data2 + data1_len;
+  }
   Hacl_Poly1305_32_poly1305_update(block_state1, data1_len, data11);
   uint8_t *dst = buf;
-  memcpy(dst, data21, data2_len * sizeof (data21[0U]));
+  bool uu____2 = data21 == NULL;
+  if (!(uu____2 || dst == NULL))
+  {
+    memcpy(dst, data21, data2_len * sizeof (data21[0U]));
+  }
   *p
   =
     (
