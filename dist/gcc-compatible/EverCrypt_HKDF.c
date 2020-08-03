@@ -83,15 +83,6 @@ EverCrypt_HKDF_expand_sha1(
   }
   for (uint32_t i = (uint32_t)0U; i < n; i++)
   {
-    uint8_t *block;
-    if (output == NULL)
-    {
-      block = NULL;
-    }
-    else
-    {
-      block = output + i * tlen;
-    }
     ctr[0U] = (uint8_t)(i + (uint32_t)1U);
     if (i == (uint32_t)0U)
     {
@@ -203,15 +194,6 @@ EverCrypt_HKDF_expand_sha2_256(
   }
   for (uint32_t i = (uint32_t)0U; i < n; i++)
   {
-    uint8_t *block;
-    if (output == NULL)
-    {
-      block = NULL;
-    }
-    else
-    {
-      block = output + i * tlen;
-    }
     ctr[0U] = (uint8_t)(i + (uint32_t)1U);
     if (i == (uint32_t)0U)
     {
@@ -323,15 +305,6 @@ EverCrypt_HKDF_expand_sha2_384(
   }
   for (uint32_t i = (uint32_t)0U; i < n; i++)
   {
-    uint8_t *block;
-    if (output == NULL)
-    {
-      block = NULL;
-    }
-    else
-    {
-      block = output + i * tlen;
-    }
     ctr[0U] = (uint8_t)(i + (uint32_t)1U);
     if (i == (uint32_t)0U)
     {
@@ -443,15 +416,6 @@ EverCrypt_HKDF_expand_sha2_512(
   }
   for (uint32_t i = (uint32_t)0U; i < n; i++)
   {
-    uint8_t *block;
-    if (output == NULL)
-    {
-      block = NULL;
-    }
-    else
-    {
-      block = output + i * tlen;
-    }
     ctr[0U] = (uint8_t)(i + (uint32_t)1U);
     if (i == (uint32_t)0U)
     {

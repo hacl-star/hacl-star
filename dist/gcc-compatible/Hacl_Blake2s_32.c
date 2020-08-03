@@ -564,28 +564,10 @@ Hacl_Blake2s_32_blake2s(
   uint32_t *row1 = b + (uint32_t)1U * (uint32_t)4U;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
-    uint8_t *block;
-    if (first == NULL)
-    {
-      block = NULL;
-    }
-    else
-    {
-      block = first + i * (uint32_t)4U;
-    }
     store32_le(first + i * (uint32_t)4U, row0[i]);
   }
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
-    uint8_t *block;
-    if (second == NULL)
-    {
-      block = NULL;
-    }
-    else
-    {
-      block = second + i * (uint32_t)4U;
-    }
     store32_le(second + i * (uint32_t)4U, row1[i]);
   }
   uint8_t *final = b2;

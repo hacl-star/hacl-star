@@ -139,15 +139,6 @@ static inline void salsa20_key_block0(uint8_t *out, uint8_t *key, uint8_t *n)
   salsa20_core(k, ctx, (uint32_t)0U);
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
   {
-    uint8_t *block;
-    if (out == NULL)
-    {
-      block = NULL;
-    }
-    else
-    {
-      block = out + i * (uint32_t)4U;
-    }
     store32_le(out + i * (uint32_t)4U, k[i]);
   }
 }
@@ -254,15 +245,6 @@ salsa20_encrypt(
       }
       for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
       {
-        uint8_t *block1;
-        if (uu____3 == NULL)
-        {
-          block1 = NULL;
-        }
-        else
-        {
-          block1 = uu____3 + i * (uint32_t)4U;
-        }
         store32_le(uu____3 + i * (uint32_t)4U, bl[i]);
       }
     }
@@ -296,15 +278,6 @@ salsa20_encrypt(
       }
       for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
       {
-        uint8_t *block;
-        if (plain == NULL)
-        {
-          block = NULL;
-        }
-        else
-        {
-          block = plain + i * (uint32_t)4U;
-        }
         store32_le(plain + i * (uint32_t)4U, bl[i]);
       }
       memcpy(uu____5, plain, rem * sizeof (plain[0U]));
@@ -414,15 +387,6 @@ salsa20_decrypt(
       }
       for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
       {
-        uint8_t *block1;
-        if (uu____3 == NULL)
-        {
-          block1 = NULL;
-        }
-        else
-        {
-          block1 = uu____3 + i * (uint32_t)4U;
-        }
         store32_le(uu____3 + i * (uint32_t)4U, bl[i]);
       }
     }
@@ -456,15 +420,6 @@ salsa20_decrypt(
       }
       for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
       {
-        uint8_t *block;
-        if (plain == NULL)
-        {
-          block = NULL;
-        }
-        else
-        {
-          block = plain + i * (uint32_t)4U;
-        }
         store32_le(plain + i * (uint32_t)4U, bl[i]);
       }
       memcpy(uu____5, plain, rem * sizeof (plain[0U]));
@@ -528,15 +483,6 @@ static inline void hsalsa20(uint8_t *out, uint8_t *key, uint8_t *n)
   uint32_t res[8U] = { r0, r1, r2, r3, r4, r5, r6, r7 };
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
   {
-    uint8_t *block;
-    if (out == NULL)
-    {
-      block = NULL;
-    }
-    else
-    {
-      block = out + i * (uint32_t)4U;
-    }
     store32_le(out + i * (uint32_t)4U, res[i]);
   }
 }

@@ -1244,15 +1244,6 @@ void Hacl_Hash_Core_MD5_legacy_finish(uint32_t *s, uint8_t *dst)
   uint32_t *uu____0 = s;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
-    uint8_t *block;
-    if (dst == NULL)
-    {
-      block = NULL;
-    }
-    else
-    {
-      block = dst + i * (uint32_t)4U;
-    }
     store32_le(dst + i * (uint32_t)4U, uu____0[i]);
   }
 }
@@ -1513,15 +1504,6 @@ void Hacl_Hash_Core_SHA1_legacy_finish(uint32_t *s, uint8_t *dst)
   uint32_t *uu____0 = s;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)5U; i++)
   {
-    uint8_t *block;
-    if (dst == NULL)
-    {
-      block = NULL;
-    }
-    else
-    {
-      block = dst + i * (uint32_t)4U;
-    }
     store32_be(dst + i * (uint32_t)4U, uu____0[i]);
   }
 }
@@ -2560,15 +2542,6 @@ void Hacl_Hash_Core_SHA2_finish_224(uint32_t *s, uint8_t *dst)
   uint32_t *uu____0 = s;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)7U; i++)
   {
-    uint8_t *block;
-    if (dst == NULL)
-    {
-      block = NULL;
-    }
-    else
-    {
-      block = dst + i * (uint32_t)4U;
-    }
     store32_be(dst + i * (uint32_t)4U, uu____0[i]);
   }
 }
@@ -2578,15 +2551,6 @@ void Hacl_Hash_Core_SHA2_finish_256(uint32_t *s, uint8_t *dst)
   uint32_t *uu____0 = s;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
   {
-    uint8_t *block;
-    if (dst == NULL)
-    {
-      block = NULL;
-    }
-    else
-    {
-      block = dst + i * (uint32_t)4U;
-    }
     store32_be(dst + i * (uint32_t)4U, uu____0[i]);
   }
 }
@@ -2596,15 +2560,6 @@ void Hacl_Hash_Core_SHA2_finish_384(uint64_t *s, uint8_t *dst)
   uint64_t *uu____0 = s;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)6U; i++)
   {
-    uint8_t *block;
-    if (dst == NULL)
-    {
-      block = NULL;
-    }
-    else
-    {
-      block = dst + i * (uint32_t)8U;
-    }
     store64_be(dst + i * (uint32_t)8U, uu____0[i]);
   }
 }
@@ -2614,15 +2569,6 @@ void Hacl_Hash_Core_SHA2_finish_512(uint64_t *s, uint8_t *dst)
   uint64_t *uu____0 = s;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
   {
-    uint8_t *block;
-    if (dst == NULL)
-    {
-      block = NULL;
-    }
-    else
-    {
-      block = dst + i * (uint32_t)8U;
-    }
     store64_be(dst + i * (uint32_t)8U, uu____0[i]);
   }
 }

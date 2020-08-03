@@ -158,30 +158,12 @@ static inline void
 chacha20_init_128(Lib_IntVector_Intrinsics_vec128 *ctx, uint8_t *k, uint8_t *n, uint32_t ctr)
 {
   uint32_t ctx1[16U] = { 0U };
-  uint32_t *tmp;
-  if (ctx1 == NULL)
-  {
-    tmp = NULL;
-  }
-  else
-  {
-    tmp = ctx1;
-  }
   uint32_t *uu____0 = ctx1;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
     uint32_t *os = uu____0;
     uint32_t x = Hacl_Impl_Chacha20_Vec_chacha20_constants[i];
     os[i] = x;
-  }
-  uint32_t *tmp0;
-  if (ctx1 == NULL)
-  {
-    tmp0 = NULL;
-  }
-  else
-  {
-    tmp0 = ctx1 + (uint32_t)4U;
   }
   uint32_t *uu____1 = ctx1 + (uint32_t)4U;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
@@ -194,15 +176,6 @@ chacha20_init_128(Lib_IntVector_Intrinsics_vec128 *ctx, uint8_t *k, uint8_t *n, 
     os[i] = x;
   }
   ctx1[12U] = ctr;
-  uint32_t *tmp1;
-  if (ctx1 == NULL)
-  {
-    tmp1 = NULL;
-  }
-  else
-  {
-    tmp1 = ctx1 + (uint32_t)13U;
-  }
   uint32_t *uu____2 = ctx1 + (uint32_t)13U;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)3U; i++)
   {

@@ -563,25 +563,7 @@ void Hacl_Poly1305_32_poly1305_finish(uint8_t *tag, uint8_t *key, uint64_t *ctx)
   uint64_t r11 = r1 + c;
   uint64_t f30 = r0;
   uint64_t f31 = r11;
-  uint8_t *tmp;
-  if (tag == NULL)
-  {
-    tmp = NULL;
-  }
-  else
-  {
-    tmp = tag;
-  }
   store64_le(tag, f30);
-  uint8_t *tmp5;
-  if (tag == NULL)
-  {
-    tmp5 = NULL;
-  }
-  else
-  {
-    tmp5 = tag + (uint32_t)8U;
-  }
   store64_le(tag + (uint32_t)8U, f31);
 }
 

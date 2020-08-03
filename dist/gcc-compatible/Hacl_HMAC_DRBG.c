@@ -942,15 +942,6 @@ Hacl_HMAC_DRBG_generate(
         }
         for (uint32_t i = (uint32_t)0U; i < max; i++)
         {
-          uint8_t *block;
-          if (out == NULL)
-          {
-            block = NULL;
-          }
-          else
-          {
-            block = out + i * (uint32_t)20U;
-          }
           Hacl_HMAC_legacy_compute_sha1(v, k, (uint32_t)20U, v, (uint32_t)20U);
           memcpy(out + i * (uint32_t)20U, v, (uint32_t)20U * sizeof (v[0U]));
         }
@@ -1059,15 +1050,6 @@ Hacl_HMAC_DRBG_generate(
         }
         for (uint32_t i = (uint32_t)0U; i < max; i++)
         {
-          uint8_t *block;
-          if (out == NULL)
-          {
-            block = NULL;
-          }
-          else
-          {
-            block = out + i * (uint32_t)32U;
-          }
           Hacl_HMAC_compute_sha2_256(v, k, (uint32_t)32U, v, (uint32_t)32U);
           memcpy(out + i * (uint32_t)32U, v, (uint32_t)32U * sizeof (v[0U]));
         }
@@ -1176,15 +1158,6 @@ Hacl_HMAC_DRBG_generate(
         }
         for (uint32_t i = (uint32_t)0U; i < max; i++)
         {
-          uint8_t *block;
-          if (out == NULL)
-          {
-            block = NULL;
-          }
-          else
-          {
-            block = out + i * (uint32_t)48U;
-          }
           Hacl_HMAC_compute_sha2_384(v, k, (uint32_t)48U, v, (uint32_t)48U);
           memcpy(out + i * (uint32_t)48U, v, (uint32_t)48U * sizeof (v[0U]));
         }
@@ -1293,15 +1266,6 @@ Hacl_HMAC_DRBG_generate(
         }
         for (uint32_t i = (uint32_t)0U; i < max; i++)
         {
-          uint8_t *block;
-          if (out == NULL)
-          {
-            block = NULL;
-          }
-          else
-          {
-            block = out + i * (uint32_t)64U;
-          }
           Hacl_HMAC_compute_sha2_512(v, k, (uint32_t)64U, v, (uint32_t)64U);
           memcpy(out + i * (uint32_t)64U, v, (uint32_t)64U * sizeof (v[0U]));
         }

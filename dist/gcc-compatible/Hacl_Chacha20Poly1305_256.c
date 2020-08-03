@@ -955,25 +955,7 @@ poly1305_do_256(
   Hacl_Poly1305_256_poly1305_init(ctx, k);
   poly1305_padded_256(ctx, aadlen, aad);
   poly1305_padded_256(ctx, mlen, m);
-  uint8_t *tmp;
-  if (block == NULL)
-  {
-    tmp = NULL;
-  }
-  else
-  {
-    tmp = block;
-  }
   store64_le(block, (uint64_t)aadlen);
-  uint8_t *tmp0;
-  if (block == NULL)
-  {
-    tmp0 = NULL;
-  }
-  else
-  {
-    tmp0 = block + (uint32_t)8U;
-  }
   store64_le(block + (uint32_t)8U, (uint64_t)mlen);
   Lib_IntVector_Intrinsics_vec256 *pre = ctx + (uint32_t)5U;
   Lib_IntVector_Intrinsics_vec256 *acc = ctx;

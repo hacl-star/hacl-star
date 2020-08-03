@@ -362,15 +362,6 @@ void Hacl_Impl_P256_LowLevel_toUint8(uint64_t *i, uint8_t *o)
 {
   for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0++)
   {
-    uint8_t *block;
-    if (o == NULL)
-    {
-      block = NULL;
-    }
-    else
-    {
-      block = o + i0 * (uint32_t)8U;
-    }
     store64_be(o + i0 * (uint32_t)8U, i[i0]);
   }
 }
