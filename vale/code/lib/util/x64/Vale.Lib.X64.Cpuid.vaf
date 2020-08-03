@@ -125,7 +125,7 @@ procedure Check_avx_support()
     {:quick}
     modifies rax; rbx; rcx; rdx; r9; efl;
     ensures
-        rax != 0 ==> avx_enabled;
+        rax != 0 ==> avx_cpuid_enabled;
         rbx == old(rbx);
 {
     Mov64(r9, rbx);     // Callee-save
@@ -150,7 +150,7 @@ procedure Check_avx2_support()
     {:quick}
     modifies rax; rbx; rcx; rdx; r9; efl;
     ensures
-        rax != 0 ==> avx2_enabled;
+        rax != 0 ==> avx2_cpuid_enabled;
         rbx == old(rbx);
 {
     Mov64(r9, rbx);     // Callee-save
@@ -267,7 +267,7 @@ procedure Check_avx512_support()
     {:quick}
     modifies rax; rbx; rcx; rdx; r9; r10; r11; efl;
     ensures
-        rax != 0 ==> avx512_enabled;
+        rax != 0 ==> avx512_cpuid_enabled;
         rbx == old(rbx);
 {
     Mov64(r9, rbx);     // Callee-save
@@ -319,5 +319,103 @@ procedure Check_avx512_support()
     And64(rax, r11);
 
     Mov64(rbx, r9);     // Callee-restore
+}
+
+procedure Check_osxsave_support()
+    {:public}
+    {:quick}
+    modifies rax; rbx; rcx; rdx; r9; efl;
+    ensures
+        rax != 0 ==> osxsave_enabled;
+        rbx == old(rbx);
+{
+    Mov64(r9, rbx);     // Callee-save
+
+    Mov64(rcx, 0);      // Dummy for taint analysis
+    Mov64(rax, 1);
+    Cpuid_Osxsave();
+    lemma_iand_pow2_64(rcx, 27); // ==> rcx & pow2(27) == 0 or pow2(27)
+    Mov64(rax, rcx);
+    And64(rax, 0x8000000);
+    assert_normalize(0x8000000 == pow2(27));
+
+    Shr64(rax, 26);
+    lemma_ishr_pow2_diff64(1, 27); // ==> shr(pow2(27), 26) == pow2(1)
+    lemma_ishr_zero64(26);         // ==> shr(0, 27) == 0
+
+    Mov64(rbx, r9);     // Callee-restore
+}
+
+procedure Check_avx_xcr0_support()
+    {:public}
+    {:quick}
+    modifies rax; rcx; rdx; efl;
+    requires
+        osxsave_enabled;
+    ensures
+        rax != 0 ==> avx_xcr0;
+{
+    Mov64(rcx, 0);
+    Xgetbv_Avx();
+    lemma_iand_pow2_64(rax, 1);
+    lemma_iand_pow2_64(rax, 2);
+    Mov64(rcx, rax);    // Save a copy
+
+    And64(rax, 0x4);
+
+    assert_normalize(0x2 == pow2(1));
+    assert_normalize(0x4 == pow2(2));
+
+    Shr64(rax, 1);
+    lemma_ishr_pow2_diff64(1, 2); // ==> shr(pow2(2), 1) == pow2(1)
+    lemma_ishr_zero64(1);         // ==> shr(0, 1) == 0
+
+    And64(rcx, 0x2);
+    lemma_iand_maybe_pow2_64(rax, rcx, 1); // Post condition
+    And64(rax, rcx);
+}
+
+
+procedure Check_avx512_xcr0_support()
+    {:public}
+    {:quick}
+    modifies rax; rcx; rdx; efl;
+    requires
+        osxsave_enabled;
+        avx_xcr0;
+    ensures
+        rax != 0 ==> avx512_xcr0;
+{
+    Mov64(rcx, 0);
+    Xgetbv_Avx512();
+
+    Mov64(rcx, rax);
+    Mov64(rdx, rax);
+
+    lemma_iand_pow2_64(rax, 5); // ==> rax & pow2(5) == 0 or pow2(5)
+    lemma_iand_pow2_64(rcx, 6); // ==> rcx & pow2(6) == 0 or pow2(6)
+    lemma_iand_pow2_64(rdx, 7); // ==> rdx & pow2(7) == 0 or pow2(7)
+
+    And64(rax, 0x20);
+    And64(rcx, 0x40);
+    And64(rdx, 0x80);
+
+    assert_normalize(0x20 == pow2(5));
+    assert_normalize(0x40 == pow2(6));
+    assert_normalize(0x80 == pow2(7));
+
+    Shr64(rdx, 2);
+    lemma_ishr_pow2_diff64(5, 7); // ==> shr(pow2(7), 2) == pow2(7)
+    lemma_ishr_zero64(2);         // ==> shr(0, 2) == 0;
+
+    Shr64(rcx, 1);
+    lemma_ishr_pow2_diff64(5, 6); // ==> shr(pow2(6), 1) == pow2(5)
+    lemma_ishr_zero64(1);         // ==> shr(0, 1) == 0;
+ 
+    lemma_iand_maybe_pow2_64(rax, rdx, 5);
+    lemma_iand_pow2_64(rax, 5);
+    And64(rax, rdx);
+    lemma_iand_maybe_pow2_64(rax, rcx, 5);
+    And64(rax, rcx);
 }
 
