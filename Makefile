@@ -103,7 +103,8 @@ all:
 all-unstaged: compile-gcc-compatible compile-msvc-compatible compile-gcc64-only \
   compile-evercrypt-external-headers compile-c89-compatible compile-ccf \
   compile-portable-gcc-compatible compile-mozilla dist/linux/Makefile.basic \
-  dist/wasm/package.json dist/merkle-tree/Makefile.basic compile-mitls
+  dist/wasm/package.json dist/merkle-tree/Makefile.basic compile-mitls \
+  obj/libhaclml.cmxa
 
 # Automatic staging.
 %-staged: .last_vale_version
@@ -1145,6 +1146,18 @@ dist/test/ml/%.exe: $(ALL_CMX_FILES) dist/test/ml/%_AutoTest.ml
 
 test-ml-%: dist/test/ml/%.exe
 	$<
+
+#################
+# OCaml library #
+#################
+
+# This is good for users of HACL* who want to extract specs and link them
+# against HACL*-extracted-to-ML
+
+obj/libhaclml.cmxa: $(filter-out $(HACL_HOME)/obj/Meta_Interface.cmx,$(ALL_CMX_FILES))
+	# JP: doesn't work because a PPX is prepended for some reason
+	#ocamlfind mklib -o haclml -package fstarlib -g -I $(HACL_HOME)/obj $(addprefix $(HACL_HOME)/obj/*.,cmo cmx ml o)
+	ocamlfind opt -a -o $@ -package fstarlib -g -I $(HACL_HOME)/obj $^
 
 
 ########
