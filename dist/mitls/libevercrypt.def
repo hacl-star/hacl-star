@@ -1,8 +1,20 @@
 LIBRARY libevercrypt
 
 EXPORTS
-  LowStar_Vector_new_capacity
   Spec_Cipher_Expansion_cipher_alg_of_impl
+  LowStar_Vector_new_capacity
+  Hacl_Blake2s_32_blake2s
+  Hacl_Blake2b_32_blake2b
+  Hacl_Hash_Core_Blake2_update_blake2s_32
+  Hacl_Hash_Core_Blake2_finish_blake2s_32
+  Hacl_Hash_Core_Blake2_update_blake2b_32
+  Hacl_Hash_Core_Blake2_finish_blake2b_32
+  Hacl_Hash_Blake2_update_multi_blake2s_32
+  Hacl_Hash_Blake2_update_multi_blake2b_32
+  Hacl_Hash_Blake2_update_last_blake2s_32
+  Hacl_Hash_Blake2_update_last_blake2b_32
+  Hacl_Hash_Blake2_hash_blake2s_32
+  Hacl_Hash_Blake2_hash_blake2b_32
   Hacl_Hash_MD5_legacy_update_multi
   Hacl_Hash_MD5_legacy_update_last
   Hacl_Hash_MD5_legacy_hash
@@ -49,6 +61,16 @@ EXPORTS
   Hacl_Hash_Definitions_block_len
   Hacl_Hash_Definitions_hash_word_len
   Hacl_Hash_Definitions_hash_len
+  Hacl_Hash_Blake2b_256_finish_blake2b_256
+  Hacl_Hash_Blake2b_256_update_multi_blake2b_256
+  Hacl_Hash_Blake2b_256_update_last_blake2b_256
+  Hacl_Hash_Blake2b_256_hash_blake2b_256
+  Hacl_Blake2b_256_blake2b
+  Hacl_Hash_Blake2s_128_finish_blake2s_128
+  Hacl_Hash_Blake2s_128_update_multi_blake2s_128
+  Hacl_Hash_Blake2s_128_update_last_blake2s_128
+  Hacl_Hash_Blake2s_128_hash_blake2s_128
+  Hacl_Blake2s_128_blake2s
   EverCrypt_AutoConfig2_has_shaext
   EverCrypt_AutoConfig2_has_aesni
   EverCrypt_AutoConfig2_has_pclmulqdq
@@ -94,6 +116,10 @@ EXPORTS
   EverCrypt_Hash___proj__SHA2_384_s__item__p
   EverCrypt_Hash_uu___is_SHA2_512_s
   EverCrypt_Hash___proj__SHA2_512_s__item__p
+  EverCrypt_Hash_uu___is_Blake2S_s
+  EverCrypt_Hash___proj__Blake2S_s__item__p
+  EverCrypt_Hash_uu___is_Blake2B_s
+  EverCrypt_Hash___proj__Blake2B_s__item__p
   EverCrypt_Hash_alg_of_state
   EverCrypt_Hash_create_in
   EverCrypt_Hash_create
@@ -118,6 +144,8 @@ EXPORTS
   EverCrypt_Hash_Incremental_finish_sha256
   EverCrypt_Hash_Incremental_finish_sha384
   EverCrypt_Hash_Incremental_finish_sha512
+  EverCrypt_Hash_Incremental_finish_blake2s
+  EverCrypt_Hash_Incremental_finish_blake2b
   EverCrypt_Hash_Incremental_alg_of_state
   EverCrypt_Hash_Incremental_finish
   EverCrypt_Hash_Incremental_free
@@ -324,22 +352,27 @@ EXPORTS
   Hacl_HMAC_compute_sha2_256
   Hacl_HMAC_compute_sha2_384
   Hacl_HMAC_compute_sha2_512
+  Hacl_HMAC_compute_blake2s_32
+  Hacl_HMAC_compute_blake2b_32
   Hacl_HKDF_expand_sha2_256
   Hacl_HKDF_extract_sha2_256
   Hacl_HKDF_expand_sha2_512
   Hacl_HKDF_extract_sha2_512
+  Hacl_HKDF_expand_blake2s_32
+  Hacl_HKDF_extract_blake2s_32
+  Hacl_HKDF_expand_blake2b_32
+  Hacl_HKDF_extract_blake2b_32
   Hacl_HPKE_Curve51_CP128_SHA512_setupBaseI
   Hacl_HPKE_Curve51_CP128_SHA512_setupBaseR
   Hacl_HPKE_Curve51_CP128_SHA512_sealBase
   Hacl_HPKE_Curve51_CP128_SHA512_openBase
-  Hacl_Blake2b_32_blake2b
-  Hacl_Chacha20_Vec32_chacha20_encrypt_32
-  Hacl_Chacha20_Vec32_chacha20_decrypt_32
   EverCrypt_Ed25519_sign
   EverCrypt_Ed25519_verify
   EverCrypt_Ed25519_secret_to_public
   EverCrypt_Ed25519_expand_keys
   EverCrypt_Ed25519_sign_expanded
+  Hacl_Chacha20_Vec32_chacha20_encrypt_32
+  Hacl_Chacha20_Vec32_chacha20_decrypt_32
   Hacl_HPKE_Curve64_CP128_SHA512_setupBaseI
   Hacl_HPKE_Curve64_CP128_SHA512_setupBaseR
   Hacl_HPKE_Curve64_CP128_SHA512_sealBase
@@ -356,6 +389,9 @@ EXPORTS
   Hacl_HPKE_Curve51_CP256_SHA512_setupBaseR
   Hacl_HPKE_Curve51_CP256_SHA512_sealBase
   Hacl_HPKE_Curve51_CP256_SHA512_openBase
+  Hacl_HMAC_Blake2s_128_compute_blake2s_128
+  Hacl_HKDF_Blake2s_128_expand_blake2s_128
+  Hacl_HKDF_Blake2s_128_extract_blake2s_128
   Hacl_HPKE_Curve64_CP256_SHA512_setupBaseI
   Hacl_HPKE_Curve64_CP256_SHA512_setupBaseR
   Hacl_HPKE_Curve64_CP256_SHA512_sealBase
@@ -383,8 +419,6 @@ EXPORTS
   Hacl_Streaming_Poly1305_32_update
   Hacl_Streaming_Poly1305_32_finish
   Hacl_Streaming_Poly1305_32_free
-  Hacl_Blake2b_256_blake2b
-  Hacl_Blake2s_32_blake2s
   Hacl_HPKE_Curve51_CP32_SHA512_setupBaseI
   Hacl_HPKE_Curve51_CP32_SHA512_setupBaseR
   Hacl_HPKE_Curve51_CP32_SHA512_sealBase
@@ -397,7 +431,9 @@ EXPORTS
   Hacl_HPKE_P256_CP32_SHA256_setupBaseR
   Hacl_HPKE_P256_CP32_SHA256_sealBase
   Hacl_HPKE_P256_CP32_SHA256_openBase
-  Hacl_Blake2s_128_blake2s
+  Hacl_HMAC_Blake2b_256_compute_blake2b_256
+  Hacl_HKDF_Blake2b_256_expand_blake2b_256
+  Hacl_HKDF_Blake2b_256_extract_blake2b_256
   Hacl_HPKE_Curve64_CP32_SHA256_setupBaseI
   Hacl_HPKE_Curve64_CP32_SHA256_setupBaseR
   Hacl_HPKE_Curve64_CP32_SHA256_sealBase
@@ -508,6 +544,8 @@ EXPORTS
   EverCrypt_HMAC_compute_sha2_256
   EverCrypt_HMAC_compute_sha2_384
   EverCrypt_HMAC_compute_sha2_512
+  EverCrypt_HMAC_compute_blake2s
+  EverCrypt_HMAC_compute_blake2b
   EverCrypt_HMAC_is_supported_alg
   EverCrypt_HMAC_compute
   EverCrypt_HKDF_expand_sha1
@@ -518,6 +556,10 @@ EXPORTS
   EverCrypt_HKDF_extract_sha2_384
   EverCrypt_HKDF_expand_sha2_512
   EverCrypt_HKDF_extract_sha2_512
+  EverCrypt_HKDF_expand_blake2s
+  EverCrypt_HKDF_extract_blake2s
+  EverCrypt_HKDF_expand_blake2b
+  EverCrypt_HKDF_extract_blake2b
   EverCrypt_HKDF_expand
   EverCrypt_HKDF_extract
   EverCrypt_HKDF_hkdf_expand

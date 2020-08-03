@@ -24,6 +24,1859 @@
 
 #include "Hacl_Hash.h"
 
+uint64_t Hacl_Hash_Core_Blake2_update_blake2s_32(uint32_t *s, uint64_t totlen, uint8_t *block)
+{
+  uint32_t wv[16U] = { 0U };
+  uint64_t totlen1 = totlen + (uint64_t)(uint32_t)64U;
+  uint32_t m_w[16U] = { 0U };
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
+  {
+    uint32_t *os = m_w;
+    uint8_t *bj = block + i * (uint32_t)4U;
+    uint32_t u = load32_le(bj);
+    uint32_t r = u;
+    uint32_t x = r;
+    os[i] = x;
+  }
+  uint32_t mask[4U] = { 0U };
+  uint32_t wv_14 = (uint32_t)0U;
+  uint32_t wv_15 = (uint32_t)0U;
+  mask[0U] = (uint32_t)totlen1;
+  mask[1U] = (uint32_t)(totlen1 >> (uint32_t)32U);
+  mask[2U] = wv_14;
+  mask[3U] = wv_15;
+  memcpy(wv, s, (uint32_t)4U * (uint32_t)4U * sizeof (s[0U]));
+  uint32_t *wv3 = wv + (uint32_t)3U * (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+  {
+    uint32_t *os = wv3;
+    uint32_t x = wv3[i] ^ mask[i];
+    os[i] = x;
+  }
+  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)10U; i0++)
+  {
+    uint32_t start_idx = i0 % (uint32_t)10U * (uint32_t)16U;
+    KRML_CHECK_SIZE(sizeof (uint32_t), (uint32_t)4U * (uint32_t)4U);
+    uint32_t m_st[(uint32_t)4U * (uint32_t)4U];
+    memset(m_st, 0U, (uint32_t)4U * (uint32_t)4U * sizeof (m_st[0U]));
+    uint32_t *r00 = m_st + (uint32_t)0U * (uint32_t)4U;
+    uint32_t *r10 = m_st + (uint32_t)1U * (uint32_t)4U;
+    uint32_t *r20 = m_st + (uint32_t)2U * (uint32_t)4U;
+    uint32_t *r30 = m_st + (uint32_t)3U * (uint32_t)4U;
+    uint32_t s0 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx];
+    uint32_t s1 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)1U];
+    uint32_t s2 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)2U];
+    uint32_t s3 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)3U];
+    uint32_t s4 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)4U];
+    uint32_t s5 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)5U];
+    uint32_t s6 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)6U];
+    uint32_t s7 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)7U];
+    uint32_t s8 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)8U];
+    uint32_t s9 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)9U];
+    uint32_t s10 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)10U];
+    uint32_t s11 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)11U];
+    uint32_t s12 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)12U];
+    uint32_t s13 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)13U];
+    uint32_t s14 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)14U];
+    uint32_t s15 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)15U];
+    uint32_t uu____0 = m_w[s2];
+    uint32_t uu____1 = m_w[s4];
+    uint32_t uu____2 = m_w[s6];
+    r00[0U] = m_w[s0];
+    r00[1U] = uu____0;
+    r00[2U] = uu____1;
+    r00[3U] = uu____2;
+    uint32_t uu____3 = m_w[s3];
+    uint32_t uu____4 = m_w[s5];
+    uint32_t uu____5 = m_w[s7];
+    r10[0U] = m_w[s1];
+    r10[1U] = uu____3;
+    r10[2U] = uu____4;
+    r10[3U] = uu____5;
+    uint32_t uu____6 = m_w[s10];
+    uint32_t uu____7 = m_w[s12];
+    uint32_t uu____8 = m_w[s14];
+    r20[0U] = m_w[s8];
+    r20[1U] = uu____6;
+    r20[2U] = uu____7;
+    r20[3U] = uu____8;
+    uint32_t uu____9 = m_w[s11];
+    uint32_t uu____10 = m_w[s13];
+    uint32_t uu____11 = m_w[s15];
+    r30[0U] = m_w[s9];
+    r30[1U] = uu____9;
+    r30[2U] = uu____10;
+    r30[3U] = uu____11;
+    uint32_t *x = m_st + (uint32_t)0U * (uint32_t)4U;
+    uint32_t *y = m_st + (uint32_t)1U * (uint32_t)4U;
+    uint32_t *z = m_st + (uint32_t)2U * (uint32_t)4U;
+    uint32_t *w = m_st + (uint32_t)3U * (uint32_t)4U;
+    uint32_t a = (uint32_t)0U;
+    uint32_t b0 = (uint32_t)1U;
+    uint32_t c0 = (uint32_t)2U;
+    uint32_t d0 = (uint32_t)3U;
+    uint32_t r01 = Hacl_Impl_Blake2_Constants_rTable_S[0U];
+    uint32_t r12 = Hacl_Impl_Blake2_Constants_rTable_S[1U];
+    uint32_t r21 = Hacl_Impl_Blake2_Constants_rTable_S[2U];
+    uint32_t r31 = Hacl_Impl_Blake2_Constants_rTable_S[3U];
+    uint32_t *wv_a0 = wv + a * (uint32_t)4U;
+    uint32_t *wv_b0 = wv + b0 * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = wv_a0;
+      uint32_t x1 = wv_a0[i] + wv_b0[i];
+      os[i] = x1;
+    }
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = wv_a0;
+      uint32_t x1 = wv_a0[i] + x[i];
+      os[i] = x1;
+    }
+    uint32_t *wv_a1 = wv + d0 * (uint32_t)4U;
+    uint32_t *wv_b1 = wv + a * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = wv_a1;
+      uint32_t x1 = wv_a1[i] ^ wv_b1[i];
+      os[i] = x1;
+    }
+    uint32_t *r110 = wv_a1;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = r110;
+      uint32_t x1 = r110[i];
+      uint32_t x10 = x1 >> r01 | x1 << ((uint32_t)32U - r01);
+      os[i] = x10;
+    }
+    uint32_t *wv_a2 = wv + c0 * (uint32_t)4U;
+    uint32_t *wv_b2 = wv + d0 * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = wv_a2;
+      uint32_t x1 = wv_a2[i] + wv_b2[i];
+      os[i] = x1;
+    }
+    uint32_t *wv_a3 = wv + b0 * (uint32_t)4U;
+    uint32_t *wv_b3 = wv + c0 * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = wv_a3;
+      uint32_t x1 = wv_a3[i] ^ wv_b3[i];
+      os[i] = x1;
+    }
+    uint32_t *r111 = wv_a3;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = r111;
+      uint32_t x1 = r111[i];
+      uint32_t x10 = x1 >> r12 | x1 << ((uint32_t)32U - r12);
+      os[i] = x10;
+    }
+    uint32_t *wv_a4 = wv + a * (uint32_t)4U;
+    uint32_t *wv_b4 = wv + b0 * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = wv_a4;
+      uint32_t x1 = wv_a4[i] + wv_b4[i];
+      os[i] = x1;
+    }
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = wv_a4;
+      uint32_t x1 = wv_a4[i] + y[i];
+      os[i] = x1;
+    }
+    uint32_t *wv_a5 = wv + d0 * (uint32_t)4U;
+    uint32_t *wv_b5 = wv + a * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = wv_a5;
+      uint32_t x1 = wv_a5[i] ^ wv_b5[i];
+      os[i] = x1;
+    }
+    uint32_t *r112 = wv_a5;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = r112;
+      uint32_t x1 = r112[i];
+      uint32_t x10 = x1 >> r21 | x1 << ((uint32_t)32U - r21);
+      os[i] = x10;
+    }
+    uint32_t *wv_a6 = wv + c0 * (uint32_t)4U;
+    uint32_t *wv_b6 = wv + d0 * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = wv_a6;
+      uint32_t x1 = wv_a6[i] + wv_b6[i];
+      os[i] = x1;
+    }
+    uint32_t *wv_a7 = wv + b0 * (uint32_t)4U;
+    uint32_t *wv_b7 = wv + c0 * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = wv_a7;
+      uint32_t x1 = wv_a7[i] ^ wv_b7[i];
+      os[i] = x1;
+    }
+    uint32_t *r113 = wv_a7;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = r113;
+      uint32_t x1 = r113[i];
+      uint32_t x10 = x1 >> r31 | x1 << ((uint32_t)32U - r31);
+      os[i] = x10;
+    }
+    uint32_t *r13 = wv + (uint32_t)1U * (uint32_t)4U;
+    uint32_t *r22 = wv + (uint32_t)2U * (uint32_t)4U;
+    uint32_t *r32 = wv + (uint32_t)3U * (uint32_t)4U;
+    uint32_t *r114 = r13;
+    uint32_t x00 = r114[1U];
+    uint32_t x10 = r114[((uint32_t)1U + (uint32_t)1U) % (uint32_t)4U];
+    uint32_t x20 = r114[((uint32_t)1U + (uint32_t)2U) % (uint32_t)4U];
+    uint32_t x30 = r114[((uint32_t)1U + (uint32_t)3U) % (uint32_t)4U];
+    r114[0U] = x00;
+    r114[1U] = x10;
+    r114[2U] = x20;
+    r114[3U] = x30;
+    uint32_t *r115 = r22;
+    uint32_t x01 = r115[2U];
+    uint32_t x11 = r115[((uint32_t)2U + (uint32_t)1U) % (uint32_t)4U];
+    uint32_t x21 = r115[((uint32_t)2U + (uint32_t)2U) % (uint32_t)4U];
+    uint32_t x31 = r115[((uint32_t)2U + (uint32_t)3U) % (uint32_t)4U];
+    r115[0U] = x01;
+    r115[1U] = x11;
+    r115[2U] = x21;
+    r115[3U] = x31;
+    uint32_t *r116 = r32;
+    uint32_t x02 = r116[3U];
+    uint32_t x12 = r116[((uint32_t)3U + (uint32_t)1U) % (uint32_t)4U];
+    uint32_t x22 = r116[((uint32_t)3U + (uint32_t)2U) % (uint32_t)4U];
+    uint32_t x32 = r116[((uint32_t)3U + (uint32_t)3U) % (uint32_t)4U];
+    r116[0U] = x02;
+    r116[1U] = x12;
+    r116[2U] = x22;
+    r116[3U] = x32;
+    uint32_t a0 = (uint32_t)0U;
+    uint32_t b = (uint32_t)1U;
+    uint32_t c = (uint32_t)2U;
+    uint32_t d = (uint32_t)3U;
+    uint32_t r0 = Hacl_Impl_Blake2_Constants_rTable_S[0U];
+    uint32_t r1 = Hacl_Impl_Blake2_Constants_rTable_S[1U];
+    uint32_t r23 = Hacl_Impl_Blake2_Constants_rTable_S[2U];
+    uint32_t r33 = Hacl_Impl_Blake2_Constants_rTable_S[3U];
+    uint32_t *wv_a = wv + a0 * (uint32_t)4U;
+    uint32_t *wv_b8 = wv + b * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = wv_a;
+      uint32_t x1 = wv_a[i] + wv_b8[i];
+      os[i] = x1;
+    }
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = wv_a;
+      uint32_t x1 = wv_a[i] + z[i];
+      os[i] = x1;
+    }
+    uint32_t *wv_a8 = wv + d * (uint32_t)4U;
+    uint32_t *wv_b9 = wv + a0 * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = wv_a8;
+      uint32_t x1 = wv_a8[i] ^ wv_b9[i];
+      os[i] = x1;
+    }
+    uint32_t *r117 = wv_a8;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = r117;
+      uint32_t x1 = r117[i];
+      uint32_t x13 = x1 >> r0 | x1 << ((uint32_t)32U - r0);
+      os[i] = x13;
+    }
+    uint32_t *wv_a9 = wv + c * (uint32_t)4U;
+    uint32_t *wv_b10 = wv + d * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = wv_a9;
+      uint32_t x1 = wv_a9[i] + wv_b10[i];
+      os[i] = x1;
+    }
+    uint32_t *wv_a10 = wv + b * (uint32_t)4U;
+    uint32_t *wv_b11 = wv + c * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = wv_a10;
+      uint32_t x1 = wv_a10[i] ^ wv_b11[i];
+      os[i] = x1;
+    }
+    uint32_t *r118 = wv_a10;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = r118;
+      uint32_t x1 = r118[i];
+      uint32_t x13 = x1 >> r1 | x1 << ((uint32_t)32U - r1);
+      os[i] = x13;
+    }
+    uint32_t *wv_a11 = wv + a0 * (uint32_t)4U;
+    uint32_t *wv_b12 = wv + b * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = wv_a11;
+      uint32_t x1 = wv_a11[i] + wv_b12[i];
+      os[i] = x1;
+    }
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = wv_a11;
+      uint32_t x1 = wv_a11[i] + w[i];
+      os[i] = x1;
+    }
+    uint32_t *wv_a12 = wv + d * (uint32_t)4U;
+    uint32_t *wv_b13 = wv + a0 * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = wv_a12;
+      uint32_t x1 = wv_a12[i] ^ wv_b13[i];
+      os[i] = x1;
+    }
+    uint32_t *r119 = wv_a12;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = r119;
+      uint32_t x1 = r119[i];
+      uint32_t x13 = x1 >> r23 | x1 << ((uint32_t)32U - r23);
+      os[i] = x13;
+    }
+    uint32_t *wv_a13 = wv + c * (uint32_t)4U;
+    uint32_t *wv_b14 = wv + d * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = wv_a13;
+      uint32_t x1 = wv_a13[i] + wv_b14[i];
+      os[i] = x1;
+    }
+    uint32_t *wv_a14 = wv + b * (uint32_t)4U;
+    uint32_t *wv_b = wv + c * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = wv_a14;
+      uint32_t x1 = wv_a14[i] ^ wv_b[i];
+      os[i] = x1;
+    }
+    uint32_t *r1110 = wv_a14;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = r1110;
+      uint32_t x1 = r1110[i];
+      uint32_t x13 = x1 >> r33 | x1 << ((uint32_t)32U - r33);
+      os[i] = x13;
+    }
+    uint32_t *r14 = wv + (uint32_t)1U * (uint32_t)4U;
+    uint32_t *r2 = wv + (uint32_t)2U * (uint32_t)4U;
+    uint32_t *r3 = wv + (uint32_t)3U * (uint32_t)4U;
+    uint32_t *r11 = r14;
+    uint32_t x03 = r11[3U];
+    uint32_t x13 = r11[((uint32_t)3U + (uint32_t)1U) % (uint32_t)4U];
+    uint32_t x23 = r11[((uint32_t)3U + (uint32_t)2U) % (uint32_t)4U];
+    uint32_t x33 = r11[((uint32_t)3U + (uint32_t)3U) % (uint32_t)4U];
+    r11[0U] = x03;
+    r11[1U] = x13;
+    r11[2U] = x23;
+    r11[3U] = x33;
+    uint32_t *r1111 = r2;
+    uint32_t x04 = r1111[2U];
+    uint32_t x14 = r1111[((uint32_t)2U + (uint32_t)1U) % (uint32_t)4U];
+    uint32_t x24 = r1111[((uint32_t)2U + (uint32_t)2U) % (uint32_t)4U];
+    uint32_t x34 = r1111[((uint32_t)2U + (uint32_t)3U) % (uint32_t)4U];
+    r1111[0U] = x04;
+    r1111[1U] = x14;
+    r1111[2U] = x24;
+    r1111[3U] = x34;
+    uint32_t *r1112 = r3;
+    uint32_t x0 = r1112[1U];
+    uint32_t x1 = r1112[((uint32_t)1U + (uint32_t)1U) % (uint32_t)4U];
+    uint32_t x2 = r1112[((uint32_t)1U + (uint32_t)2U) % (uint32_t)4U];
+    uint32_t x3 = r1112[((uint32_t)1U + (uint32_t)3U) % (uint32_t)4U];
+    r1112[0U] = x0;
+    r1112[1U] = x1;
+    r1112[2U] = x2;
+    r1112[3U] = x3;
+  }
+  uint32_t *s0 = s + (uint32_t)0U * (uint32_t)4U;
+  uint32_t *s1 = s + (uint32_t)1U * (uint32_t)4U;
+  uint32_t *r0 = wv + (uint32_t)0U * (uint32_t)4U;
+  uint32_t *r1 = wv + (uint32_t)1U * (uint32_t)4U;
+  uint32_t *r2 = wv + (uint32_t)2U * (uint32_t)4U;
+  uint32_t *r3 = wv + (uint32_t)3U * (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+  {
+    uint32_t *os = s0;
+    uint32_t x = s0[i] ^ r0[i];
+    os[i] = x;
+  }
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+  {
+    uint32_t *os = s0;
+    uint32_t x = s0[i] ^ r2[i];
+    os[i] = x;
+  }
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+  {
+    uint32_t *os = s1;
+    uint32_t x = s1[i] ^ r1[i];
+    os[i] = x;
+  }
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+  {
+    uint32_t *os = s1;
+    uint32_t x = s1[i] ^ r3[i];
+    os[i] = x;
+  }
+  return totlen1;
+}
+
+void Hacl_Hash_Core_Blake2_finish_blake2s_32(uint32_t *s, uint64_t ev, uint8_t *dst)
+{
+  uint32_t double_row = (uint32_t)2U * (uint32_t)4U * (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint8_t), double_row);
+  uint8_t b[double_row];
+  memset(b, 0U, double_row * sizeof (b[0U]));
+  uint8_t *first = b;
+  uint8_t *second = b + (uint32_t)4U * (uint32_t)4U;
+  uint32_t *row0 = s + (uint32_t)0U * (uint32_t)4U;
+  uint32_t *row1 = s + (uint32_t)1U * (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+  {
+    store32_le(first + i * (uint32_t)4U, row0[i]);
+  }
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+  {
+    store32_le(second + i * (uint32_t)4U, row1[i]);
+  }
+  uint8_t *final = b;
+  memcpy(dst, final, (uint32_t)32U * sizeof (final[0U]));
+  Lib_Memzero0_memzero(b, double_row * sizeof (b[0U]));
+}
+
+uint128_t
+Hacl_Hash_Core_Blake2_update_blake2b_32(uint64_t *s, uint128_t totlen, uint8_t *block)
+{
+  uint64_t wv[16U] = { 0U };
+  uint128_t totlen1 = totlen + (uint128_t)(uint64_t)(uint32_t)128U;
+  uint64_t m_w[16U] = { 0U };
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
+  {
+    uint64_t *os = m_w;
+    uint8_t *bj = block + i * (uint32_t)8U;
+    uint64_t u = load64_le(bj);
+    uint64_t r = u;
+    uint64_t x = r;
+    os[i] = x;
+  }
+  uint64_t mask[4U] = { 0U };
+  uint64_t wv_14 = (uint64_t)0U;
+  uint64_t wv_15 = (uint64_t)0U;
+  mask[0U] = (uint64_t)totlen1;
+  mask[1U] = (uint64_t)(totlen1 >> (uint32_t)64U);
+  mask[2U] = wv_14;
+  mask[3U] = wv_15;
+  memcpy(wv, s, (uint32_t)4U * (uint32_t)4U * sizeof (s[0U]));
+  uint64_t *wv3 = wv + (uint32_t)3U * (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+  {
+    uint64_t *os = wv3;
+    uint64_t x = wv3[i] ^ mask[i];
+    os[i] = x;
+  }
+  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)12U; i0++)
+  {
+    uint32_t start_idx = i0 % (uint32_t)10U * (uint32_t)16U;
+    KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)4U * (uint32_t)4U);
+    uint64_t m_st[(uint32_t)4U * (uint32_t)4U];
+    memset(m_st, 0U, (uint32_t)4U * (uint32_t)4U * sizeof (m_st[0U]));
+    uint64_t *r00 = m_st + (uint32_t)0U * (uint32_t)4U;
+    uint64_t *r10 = m_st + (uint32_t)1U * (uint32_t)4U;
+    uint64_t *r20 = m_st + (uint32_t)2U * (uint32_t)4U;
+    uint64_t *r30 = m_st + (uint32_t)3U * (uint32_t)4U;
+    uint32_t s0 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx];
+    uint32_t s1 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)1U];
+    uint32_t s2 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)2U];
+    uint32_t s3 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)3U];
+    uint32_t s4 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)4U];
+    uint32_t s5 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)5U];
+    uint32_t s6 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)6U];
+    uint32_t s7 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)7U];
+    uint32_t s8 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)8U];
+    uint32_t s9 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)9U];
+    uint32_t s10 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)10U];
+    uint32_t s11 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)11U];
+    uint32_t s12 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)12U];
+    uint32_t s13 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)13U];
+    uint32_t s14 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)14U];
+    uint32_t s15 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)15U];
+    uint64_t uu____0 = m_w[s2];
+    uint64_t uu____1 = m_w[s4];
+    uint64_t uu____2 = m_w[s6];
+    r00[0U] = m_w[s0];
+    r00[1U] = uu____0;
+    r00[2U] = uu____1;
+    r00[3U] = uu____2;
+    uint64_t uu____3 = m_w[s3];
+    uint64_t uu____4 = m_w[s5];
+    uint64_t uu____5 = m_w[s7];
+    r10[0U] = m_w[s1];
+    r10[1U] = uu____3;
+    r10[2U] = uu____4;
+    r10[3U] = uu____5;
+    uint64_t uu____6 = m_w[s10];
+    uint64_t uu____7 = m_w[s12];
+    uint64_t uu____8 = m_w[s14];
+    r20[0U] = m_w[s8];
+    r20[1U] = uu____6;
+    r20[2U] = uu____7;
+    r20[3U] = uu____8;
+    uint64_t uu____9 = m_w[s11];
+    uint64_t uu____10 = m_w[s13];
+    uint64_t uu____11 = m_w[s15];
+    r30[0U] = m_w[s9];
+    r30[1U] = uu____9;
+    r30[2U] = uu____10;
+    r30[3U] = uu____11;
+    uint64_t *x = m_st + (uint32_t)0U * (uint32_t)4U;
+    uint64_t *y = m_st + (uint32_t)1U * (uint32_t)4U;
+    uint64_t *z = m_st + (uint32_t)2U * (uint32_t)4U;
+    uint64_t *w = m_st + (uint32_t)3U * (uint32_t)4U;
+    uint32_t a = (uint32_t)0U;
+    uint32_t b0 = (uint32_t)1U;
+    uint32_t c0 = (uint32_t)2U;
+    uint32_t d0 = (uint32_t)3U;
+    uint32_t r01 = Hacl_Impl_Blake2_Constants_rTable_B[0U];
+    uint32_t r12 = Hacl_Impl_Blake2_Constants_rTable_B[1U];
+    uint32_t r21 = Hacl_Impl_Blake2_Constants_rTable_B[2U];
+    uint32_t r31 = Hacl_Impl_Blake2_Constants_rTable_B[3U];
+    uint64_t *wv_a0 = wv + a * (uint32_t)4U;
+    uint64_t *wv_b0 = wv + b0 * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = wv_a0;
+      uint64_t x1 = wv_a0[i] + wv_b0[i];
+      os[i] = x1;
+    }
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = wv_a0;
+      uint64_t x1 = wv_a0[i] + x[i];
+      os[i] = x1;
+    }
+    uint64_t *wv_a1 = wv + d0 * (uint32_t)4U;
+    uint64_t *wv_b1 = wv + a * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = wv_a1;
+      uint64_t x1 = wv_a1[i] ^ wv_b1[i];
+      os[i] = x1;
+    }
+    uint64_t *r110 = wv_a1;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = r110;
+      uint64_t x1 = r110[i];
+      uint64_t x10 = x1 >> r01 | x1 << ((uint32_t)64U - r01);
+      os[i] = x10;
+    }
+    uint64_t *wv_a2 = wv + c0 * (uint32_t)4U;
+    uint64_t *wv_b2 = wv + d0 * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = wv_a2;
+      uint64_t x1 = wv_a2[i] + wv_b2[i];
+      os[i] = x1;
+    }
+    uint64_t *wv_a3 = wv + b0 * (uint32_t)4U;
+    uint64_t *wv_b3 = wv + c0 * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = wv_a3;
+      uint64_t x1 = wv_a3[i] ^ wv_b3[i];
+      os[i] = x1;
+    }
+    uint64_t *r111 = wv_a3;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = r111;
+      uint64_t x1 = r111[i];
+      uint64_t x10 = x1 >> r12 | x1 << ((uint32_t)64U - r12);
+      os[i] = x10;
+    }
+    uint64_t *wv_a4 = wv + a * (uint32_t)4U;
+    uint64_t *wv_b4 = wv + b0 * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = wv_a4;
+      uint64_t x1 = wv_a4[i] + wv_b4[i];
+      os[i] = x1;
+    }
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = wv_a4;
+      uint64_t x1 = wv_a4[i] + y[i];
+      os[i] = x1;
+    }
+    uint64_t *wv_a5 = wv + d0 * (uint32_t)4U;
+    uint64_t *wv_b5 = wv + a * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = wv_a5;
+      uint64_t x1 = wv_a5[i] ^ wv_b5[i];
+      os[i] = x1;
+    }
+    uint64_t *r112 = wv_a5;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = r112;
+      uint64_t x1 = r112[i];
+      uint64_t x10 = x1 >> r21 | x1 << ((uint32_t)64U - r21);
+      os[i] = x10;
+    }
+    uint64_t *wv_a6 = wv + c0 * (uint32_t)4U;
+    uint64_t *wv_b6 = wv + d0 * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = wv_a6;
+      uint64_t x1 = wv_a6[i] + wv_b6[i];
+      os[i] = x1;
+    }
+    uint64_t *wv_a7 = wv + b0 * (uint32_t)4U;
+    uint64_t *wv_b7 = wv + c0 * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = wv_a7;
+      uint64_t x1 = wv_a7[i] ^ wv_b7[i];
+      os[i] = x1;
+    }
+    uint64_t *r113 = wv_a7;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = r113;
+      uint64_t x1 = r113[i];
+      uint64_t x10 = x1 >> r31 | x1 << ((uint32_t)64U - r31);
+      os[i] = x10;
+    }
+    uint64_t *r13 = wv + (uint32_t)1U * (uint32_t)4U;
+    uint64_t *r22 = wv + (uint32_t)2U * (uint32_t)4U;
+    uint64_t *r32 = wv + (uint32_t)3U * (uint32_t)4U;
+    uint64_t *r114 = r13;
+    uint64_t x00 = r114[1U];
+    uint64_t x10 = r114[((uint32_t)1U + (uint32_t)1U) % (uint32_t)4U];
+    uint64_t x20 = r114[((uint32_t)1U + (uint32_t)2U) % (uint32_t)4U];
+    uint64_t x30 = r114[((uint32_t)1U + (uint32_t)3U) % (uint32_t)4U];
+    r114[0U] = x00;
+    r114[1U] = x10;
+    r114[2U] = x20;
+    r114[3U] = x30;
+    uint64_t *r115 = r22;
+    uint64_t x01 = r115[2U];
+    uint64_t x11 = r115[((uint32_t)2U + (uint32_t)1U) % (uint32_t)4U];
+    uint64_t x21 = r115[((uint32_t)2U + (uint32_t)2U) % (uint32_t)4U];
+    uint64_t x31 = r115[((uint32_t)2U + (uint32_t)3U) % (uint32_t)4U];
+    r115[0U] = x01;
+    r115[1U] = x11;
+    r115[2U] = x21;
+    r115[3U] = x31;
+    uint64_t *r116 = r32;
+    uint64_t x02 = r116[3U];
+    uint64_t x12 = r116[((uint32_t)3U + (uint32_t)1U) % (uint32_t)4U];
+    uint64_t x22 = r116[((uint32_t)3U + (uint32_t)2U) % (uint32_t)4U];
+    uint64_t x32 = r116[((uint32_t)3U + (uint32_t)3U) % (uint32_t)4U];
+    r116[0U] = x02;
+    r116[1U] = x12;
+    r116[2U] = x22;
+    r116[3U] = x32;
+    uint32_t a0 = (uint32_t)0U;
+    uint32_t b = (uint32_t)1U;
+    uint32_t c = (uint32_t)2U;
+    uint32_t d = (uint32_t)3U;
+    uint32_t r0 = Hacl_Impl_Blake2_Constants_rTable_B[0U];
+    uint32_t r1 = Hacl_Impl_Blake2_Constants_rTable_B[1U];
+    uint32_t r23 = Hacl_Impl_Blake2_Constants_rTable_B[2U];
+    uint32_t r33 = Hacl_Impl_Blake2_Constants_rTable_B[3U];
+    uint64_t *wv_a = wv + a0 * (uint32_t)4U;
+    uint64_t *wv_b8 = wv + b * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = wv_a;
+      uint64_t x1 = wv_a[i] + wv_b8[i];
+      os[i] = x1;
+    }
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = wv_a;
+      uint64_t x1 = wv_a[i] + z[i];
+      os[i] = x1;
+    }
+    uint64_t *wv_a8 = wv + d * (uint32_t)4U;
+    uint64_t *wv_b9 = wv + a0 * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = wv_a8;
+      uint64_t x1 = wv_a8[i] ^ wv_b9[i];
+      os[i] = x1;
+    }
+    uint64_t *r117 = wv_a8;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = r117;
+      uint64_t x1 = r117[i];
+      uint64_t x13 = x1 >> r0 | x1 << ((uint32_t)64U - r0);
+      os[i] = x13;
+    }
+    uint64_t *wv_a9 = wv + c * (uint32_t)4U;
+    uint64_t *wv_b10 = wv + d * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = wv_a9;
+      uint64_t x1 = wv_a9[i] + wv_b10[i];
+      os[i] = x1;
+    }
+    uint64_t *wv_a10 = wv + b * (uint32_t)4U;
+    uint64_t *wv_b11 = wv + c * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = wv_a10;
+      uint64_t x1 = wv_a10[i] ^ wv_b11[i];
+      os[i] = x1;
+    }
+    uint64_t *r118 = wv_a10;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = r118;
+      uint64_t x1 = r118[i];
+      uint64_t x13 = x1 >> r1 | x1 << ((uint32_t)64U - r1);
+      os[i] = x13;
+    }
+    uint64_t *wv_a11 = wv + a0 * (uint32_t)4U;
+    uint64_t *wv_b12 = wv + b * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = wv_a11;
+      uint64_t x1 = wv_a11[i] + wv_b12[i];
+      os[i] = x1;
+    }
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = wv_a11;
+      uint64_t x1 = wv_a11[i] + w[i];
+      os[i] = x1;
+    }
+    uint64_t *wv_a12 = wv + d * (uint32_t)4U;
+    uint64_t *wv_b13 = wv + a0 * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = wv_a12;
+      uint64_t x1 = wv_a12[i] ^ wv_b13[i];
+      os[i] = x1;
+    }
+    uint64_t *r119 = wv_a12;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = r119;
+      uint64_t x1 = r119[i];
+      uint64_t x13 = x1 >> r23 | x1 << ((uint32_t)64U - r23);
+      os[i] = x13;
+    }
+    uint64_t *wv_a13 = wv + c * (uint32_t)4U;
+    uint64_t *wv_b14 = wv + d * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = wv_a13;
+      uint64_t x1 = wv_a13[i] + wv_b14[i];
+      os[i] = x1;
+    }
+    uint64_t *wv_a14 = wv + b * (uint32_t)4U;
+    uint64_t *wv_b = wv + c * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = wv_a14;
+      uint64_t x1 = wv_a14[i] ^ wv_b[i];
+      os[i] = x1;
+    }
+    uint64_t *r1110 = wv_a14;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = r1110;
+      uint64_t x1 = r1110[i];
+      uint64_t x13 = x1 >> r33 | x1 << ((uint32_t)64U - r33);
+      os[i] = x13;
+    }
+    uint64_t *r14 = wv + (uint32_t)1U * (uint32_t)4U;
+    uint64_t *r2 = wv + (uint32_t)2U * (uint32_t)4U;
+    uint64_t *r3 = wv + (uint32_t)3U * (uint32_t)4U;
+    uint64_t *r11 = r14;
+    uint64_t x03 = r11[3U];
+    uint64_t x13 = r11[((uint32_t)3U + (uint32_t)1U) % (uint32_t)4U];
+    uint64_t x23 = r11[((uint32_t)3U + (uint32_t)2U) % (uint32_t)4U];
+    uint64_t x33 = r11[((uint32_t)3U + (uint32_t)3U) % (uint32_t)4U];
+    r11[0U] = x03;
+    r11[1U] = x13;
+    r11[2U] = x23;
+    r11[3U] = x33;
+    uint64_t *r1111 = r2;
+    uint64_t x04 = r1111[2U];
+    uint64_t x14 = r1111[((uint32_t)2U + (uint32_t)1U) % (uint32_t)4U];
+    uint64_t x24 = r1111[((uint32_t)2U + (uint32_t)2U) % (uint32_t)4U];
+    uint64_t x34 = r1111[((uint32_t)2U + (uint32_t)3U) % (uint32_t)4U];
+    r1111[0U] = x04;
+    r1111[1U] = x14;
+    r1111[2U] = x24;
+    r1111[3U] = x34;
+    uint64_t *r1112 = r3;
+    uint64_t x0 = r1112[1U];
+    uint64_t x1 = r1112[((uint32_t)1U + (uint32_t)1U) % (uint32_t)4U];
+    uint64_t x2 = r1112[((uint32_t)1U + (uint32_t)2U) % (uint32_t)4U];
+    uint64_t x3 = r1112[((uint32_t)1U + (uint32_t)3U) % (uint32_t)4U];
+    r1112[0U] = x0;
+    r1112[1U] = x1;
+    r1112[2U] = x2;
+    r1112[3U] = x3;
+  }
+  uint64_t *s0 = s + (uint32_t)0U * (uint32_t)4U;
+  uint64_t *s1 = s + (uint32_t)1U * (uint32_t)4U;
+  uint64_t *r0 = wv + (uint32_t)0U * (uint32_t)4U;
+  uint64_t *r1 = wv + (uint32_t)1U * (uint32_t)4U;
+  uint64_t *r2 = wv + (uint32_t)2U * (uint32_t)4U;
+  uint64_t *r3 = wv + (uint32_t)3U * (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+  {
+    uint64_t *os = s0;
+    uint64_t x = s0[i] ^ r0[i];
+    os[i] = x;
+  }
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+  {
+    uint64_t *os = s0;
+    uint64_t x = s0[i] ^ r2[i];
+    os[i] = x;
+  }
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+  {
+    uint64_t *os = s1;
+    uint64_t x = s1[i] ^ r1[i];
+    os[i] = x;
+  }
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+  {
+    uint64_t *os = s1;
+    uint64_t x = s1[i] ^ r3[i];
+    os[i] = x;
+  }
+  return totlen1;
+}
+
+void Hacl_Hash_Core_Blake2_finish_blake2b_32(uint64_t *s, uint128_t ev, uint8_t *dst)
+{
+  uint32_t double_row = (uint32_t)2U * (uint32_t)4U * (uint32_t)8U;
+  KRML_CHECK_SIZE(sizeof (uint8_t), double_row);
+  uint8_t b[double_row];
+  memset(b, 0U, double_row * sizeof (b[0U]));
+  uint8_t *first = b;
+  uint8_t *second = b + (uint32_t)4U * (uint32_t)8U;
+  uint64_t *row0 = s + (uint32_t)0U * (uint32_t)4U;
+  uint64_t *row1 = s + (uint32_t)1U * (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+  {
+    store64_le(first + i * (uint32_t)8U, row0[i]);
+  }
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+  {
+    store64_le(second + i * (uint32_t)8U, row1[i]);
+  }
+  uint8_t *final = b;
+  memcpy(dst, final, (uint32_t)64U * sizeof (final[0U]));
+  Lib_Memzero0_memzero(b, double_row * sizeof (b[0U]));
+}
+
+uint64_t
+Hacl_Hash_Blake2_update_multi_blake2s_32(
+  uint32_t *s,
+  uint64_t ev,
+  uint8_t *blocks,
+  uint32_t n_blocks
+)
+{
+  for (uint32_t i = (uint32_t)0U; i < n_blocks; i++)
+  {
+    uint32_t sz = (uint32_t)64U;
+    uint8_t *block = blocks + sz * i;
+    uint64_t
+    v_ =
+      Hacl_Hash_Core_Blake2_update_blake2s_32(s,
+        ev + (uint64_t)i * (uint64_t)(uint32_t)64U,
+        block);
+  }
+  return ev + (uint64_t)n_blocks * (uint64_t)(uint32_t)64U;
+}
+
+uint128_t
+Hacl_Hash_Blake2_update_multi_blake2b_32(
+  uint64_t *s,
+  uint128_t ev,
+  uint8_t *blocks,
+  uint32_t n_blocks
+)
+{
+  for (uint32_t i = (uint32_t)0U; i < n_blocks; i++)
+  {
+    uint32_t sz = (uint32_t)128U;
+    uint8_t *block = blocks + sz * i;
+    uint128_t
+    v_ =
+      Hacl_Hash_Core_Blake2_update_blake2b_32(s,
+        ev + (uint128_t)((uint64_t)i * (uint64_t)(uint32_t)128U),
+        block);
+  }
+  return ev + (uint128_t)((uint64_t)n_blocks * (uint64_t)(uint32_t)128U);
+}
+
+typedef struct __uint32_t_uint32_t_uint32_t__uint8_t___uint8_t__s
+{
+  uint32_t fst;
+  uint32_t snd;
+  uint32_t thd;
+  uint8_t *f3;
+  uint8_t *f4;
+}
+__uint32_t_uint32_t_uint32_t__uint8_t___uint8_t_;
+
+typedef struct __uint32_t_uint32_t_uint32_t_s
+{
+  uint32_t fst;
+  uint32_t snd;
+  uint32_t thd;
+}
+__uint32_t_uint32_t_uint32_t;
+
+uint64_t
+Hacl_Hash_Blake2_update_last_blake2s_32(
+  uint32_t *s,
+  uint64_t ev,
+  uint64_t prev_len,
+  uint8_t *input,
+  uint32_t input_len
+)
+{
+  uint32_t blocks_n = input_len / (uint32_t)64U;
+  uint32_t blocks_len0 = blocks_n * (uint32_t)64U;
+  uint32_t rest_len0 = input_len - blocks_len0;
+  __uint32_t_uint32_t_uint32_t scrut;
+  if (rest_len0 == (uint32_t)0U && blocks_n > (uint32_t)0U)
+  {
+    uint32_t blocks_n1 = blocks_n - (uint32_t)1U;
+    uint32_t blocks_len1 = blocks_len0 - (uint32_t)64U;
+    uint32_t rest_len1 = (uint32_t)64U;
+    scrut =
+      ((__uint32_t_uint32_t_uint32_t){ .fst = blocks_n1, .snd = blocks_len1, .thd = rest_len1 });
+  }
+  else
+  {
+    scrut =
+      ((__uint32_t_uint32_t_uint32_t){ .fst = blocks_n, .snd = blocks_len0, .thd = rest_len0 });
+  }
+  uint32_t num_blocks0 = scrut.fst;
+  uint32_t blocks_len = scrut.snd;
+  uint32_t rest_len1 = scrut.thd;
+  uint8_t *blocks0 = input;
+  uint8_t *rest0 = input + blocks_len;
+  __uint32_t_uint32_t_uint32_t__uint8_t___uint8_t_
+  scrut0 =
+    { .fst = num_blocks0, .snd = blocks_len, .thd = rest_len1, .f3 = blocks0, .f4 = rest0 };
+  uint32_t num_blocks = scrut0.fst;
+  uint32_t rest_len = scrut0.thd;
+  uint8_t *blocks = scrut0.f3;
+  uint8_t *rest = scrut0.f4;
+  uint64_t ev_ = Hacl_Hash_Blake2_update_multi_blake2s_32(s, ev, blocks, num_blocks);
+  KRML_CHECK_SIZE(sizeof (uint32_t), (uint32_t)4U * (uint32_t)4U);
+  uint32_t wv[(uint32_t)4U * (uint32_t)4U];
+  memset(wv, 0U, (uint32_t)4U * (uint32_t)4U * sizeof (wv[0U]));
+  uint8_t tmp[64U] = { 0U };
+  uint8_t *tmp_rest = tmp;
+  memcpy(tmp_rest, rest, rest_len * sizeof (rest[0U]));
+  uint64_t totlen = ev_ + (uint64_t)rest_len;
+  uint32_t m_w[16U] = { 0U };
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
+  {
+    uint32_t *os = m_w;
+    uint8_t *bj = tmp + i * (uint32_t)4U;
+    uint32_t u = load32_le(bj);
+    uint32_t r = u;
+    uint32_t x = r;
+    os[i] = x;
+  }
+  uint32_t mask[4U] = { 0U };
+  uint32_t wv_14 = (uint32_t)0xFFFFFFFFU;
+  uint32_t wv_15 = (uint32_t)0U;
+  mask[0U] = (uint32_t)totlen;
+  mask[1U] = (uint32_t)(totlen >> (uint32_t)32U);
+  mask[2U] = wv_14;
+  mask[3U] = wv_15;
+  memcpy(wv, s, (uint32_t)4U * (uint32_t)4U * sizeof (s[0U]));
+  uint32_t *wv3 = wv + (uint32_t)3U * (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+  {
+    uint32_t *os = wv3;
+    uint32_t x = wv3[i] ^ mask[i];
+    os[i] = x;
+  }
+  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)10U; i0++)
+  {
+    uint32_t start_idx = i0 % (uint32_t)10U * (uint32_t)16U;
+    KRML_CHECK_SIZE(sizeof (uint32_t), (uint32_t)4U * (uint32_t)4U);
+    uint32_t m_st[(uint32_t)4U * (uint32_t)4U];
+    memset(m_st, 0U, (uint32_t)4U * (uint32_t)4U * sizeof (m_st[0U]));
+    uint32_t *r00 = m_st + (uint32_t)0U * (uint32_t)4U;
+    uint32_t *r10 = m_st + (uint32_t)1U * (uint32_t)4U;
+    uint32_t *r20 = m_st + (uint32_t)2U * (uint32_t)4U;
+    uint32_t *r30 = m_st + (uint32_t)3U * (uint32_t)4U;
+    uint32_t s0 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx];
+    uint32_t s1 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)1U];
+    uint32_t s2 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)2U];
+    uint32_t s3 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)3U];
+    uint32_t s4 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)4U];
+    uint32_t s5 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)5U];
+    uint32_t s6 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)6U];
+    uint32_t s7 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)7U];
+    uint32_t s8 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)8U];
+    uint32_t s9 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)9U];
+    uint32_t s10 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)10U];
+    uint32_t s11 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)11U];
+    uint32_t s12 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)12U];
+    uint32_t s13 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)13U];
+    uint32_t s14 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)14U];
+    uint32_t s15 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)15U];
+    uint32_t uu____0 = m_w[s2];
+    uint32_t uu____1 = m_w[s4];
+    uint32_t uu____2 = m_w[s6];
+    r00[0U] = m_w[s0];
+    r00[1U] = uu____0;
+    r00[2U] = uu____1;
+    r00[3U] = uu____2;
+    uint32_t uu____3 = m_w[s3];
+    uint32_t uu____4 = m_w[s5];
+    uint32_t uu____5 = m_w[s7];
+    r10[0U] = m_w[s1];
+    r10[1U] = uu____3;
+    r10[2U] = uu____4;
+    r10[3U] = uu____5;
+    uint32_t uu____6 = m_w[s10];
+    uint32_t uu____7 = m_w[s12];
+    uint32_t uu____8 = m_w[s14];
+    r20[0U] = m_w[s8];
+    r20[1U] = uu____6;
+    r20[2U] = uu____7;
+    r20[3U] = uu____8;
+    uint32_t uu____9 = m_w[s11];
+    uint32_t uu____10 = m_w[s13];
+    uint32_t uu____11 = m_w[s15];
+    r30[0U] = m_w[s9];
+    r30[1U] = uu____9;
+    r30[2U] = uu____10;
+    r30[3U] = uu____11;
+    uint32_t *x = m_st + (uint32_t)0U * (uint32_t)4U;
+    uint32_t *y = m_st + (uint32_t)1U * (uint32_t)4U;
+    uint32_t *z = m_st + (uint32_t)2U * (uint32_t)4U;
+    uint32_t *w = m_st + (uint32_t)3U * (uint32_t)4U;
+    uint32_t a = (uint32_t)0U;
+    uint32_t b0 = (uint32_t)1U;
+    uint32_t c0 = (uint32_t)2U;
+    uint32_t d0 = (uint32_t)3U;
+    uint32_t r01 = Hacl_Impl_Blake2_Constants_rTable_S[0U];
+    uint32_t r12 = Hacl_Impl_Blake2_Constants_rTable_S[1U];
+    uint32_t r21 = Hacl_Impl_Blake2_Constants_rTable_S[2U];
+    uint32_t r31 = Hacl_Impl_Blake2_Constants_rTable_S[3U];
+    uint32_t *wv_a0 = wv + a * (uint32_t)4U;
+    uint32_t *wv_b0 = wv + b0 * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = wv_a0;
+      uint32_t x1 = wv_a0[i] + wv_b0[i];
+      os[i] = x1;
+    }
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = wv_a0;
+      uint32_t x1 = wv_a0[i] + x[i];
+      os[i] = x1;
+    }
+    uint32_t *wv_a1 = wv + d0 * (uint32_t)4U;
+    uint32_t *wv_b1 = wv + a * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = wv_a1;
+      uint32_t x1 = wv_a1[i] ^ wv_b1[i];
+      os[i] = x1;
+    }
+    uint32_t *r110 = wv_a1;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = r110;
+      uint32_t x1 = r110[i];
+      uint32_t x10 = x1 >> r01 | x1 << ((uint32_t)32U - r01);
+      os[i] = x10;
+    }
+    uint32_t *wv_a2 = wv + c0 * (uint32_t)4U;
+    uint32_t *wv_b2 = wv + d0 * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = wv_a2;
+      uint32_t x1 = wv_a2[i] + wv_b2[i];
+      os[i] = x1;
+    }
+    uint32_t *wv_a3 = wv + b0 * (uint32_t)4U;
+    uint32_t *wv_b3 = wv + c0 * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = wv_a3;
+      uint32_t x1 = wv_a3[i] ^ wv_b3[i];
+      os[i] = x1;
+    }
+    uint32_t *r111 = wv_a3;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = r111;
+      uint32_t x1 = r111[i];
+      uint32_t x10 = x1 >> r12 | x1 << ((uint32_t)32U - r12);
+      os[i] = x10;
+    }
+    uint32_t *wv_a4 = wv + a * (uint32_t)4U;
+    uint32_t *wv_b4 = wv + b0 * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = wv_a4;
+      uint32_t x1 = wv_a4[i] + wv_b4[i];
+      os[i] = x1;
+    }
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = wv_a4;
+      uint32_t x1 = wv_a4[i] + y[i];
+      os[i] = x1;
+    }
+    uint32_t *wv_a5 = wv + d0 * (uint32_t)4U;
+    uint32_t *wv_b5 = wv + a * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = wv_a5;
+      uint32_t x1 = wv_a5[i] ^ wv_b5[i];
+      os[i] = x1;
+    }
+    uint32_t *r112 = wv_a5;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = r112;
+      uint32_t x1 = r112[i];
+      uint32_t x10 = x1 >> r21 | x1 << ((uint32_t)32U - r21);
+      os[i] = x10;
+    }
+    uint32_t *wv_a6 = wv + c0 * (uint32_t)4U;
+    uint32_t *wv_b6 = wv + d0 * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = wv_a6;
+      uint32_t x1 = wv_a6[i] + wv_b6[i];
+      os[i] = x1;
+    }
+    uint32_t *wv_a7 = wv + b0 * (uint32_t)4U;
+    uint32_t *wv_b7 = wv + c0 * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = wv_a7;
+      uint32_t x1 = wv_a7[i] ^ wv_b7[i];
+      os[i] = x1;
+    }
+    uint32_t *r113 = wv_a7;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = r113;
+      uint32_t x1 = r113[i];
+      uint32_t x10 = x1 >> r31 | x1 << ((uint32_t)32U - r31);
+      os[i] = x10;
+    }
+    uint32_t *r13 = wv + (uint32_t)1U * (uint32_t)4U;
+    uint32_t *r22 = wv + (uint32_t)2U * (uint32_t)4U;
+    uint32_t *r32 = wv + (uint32_t)3U * (uint32_t)4U;
+    uint32_t *r114 = r13;
+    uint32_t x00 = r114[1U];
+    uint32_t x10 = r114[((uint32_t)1U + (uint32_t)1U) % (uint32_t)4U];
+    uint32_t x20 = r114[((uint32_t)1U + (uint32_t)2U) % (uint32_t)4U];
+    uint32_t x30 = r114[((uint32_t)1U + (uint32_t)3U) % (uint32_t)4U];
+    r114[0U] = x00;
+    r114[1U] = x10;
+    r114[2U] = x20;
+    r114[3U] = x30;
+    uint32_t *r115 = r22;
+    uint32_t x01 = r115[2U];
+    uint32_t x11 = r115[((uint32_t)2U + (uint32_t)1U) % (uint32_t)4U];
+    uint32_t x21 = r115[((uint32_t)2U + (uint32_t)2U) % (uint32_t)4U];
+    uint32_t x31 = r115[((uint32_t)2U + (uint32_t)3U) % (uint32_t)4U];
+    r115[0U] = x01;
+    r115[1U] = x11;
+    r115[2U] = x21;
+    r115[3U] = x31;
+    uint32_t *r116 = r32;
+    uint32_t x02 = r116[3U];
+    uint32_t x12 = r116[((uint32_t)3U + (uint32_t)1U) % (uint32_t)4U];
+    uint32_t x22 = r116[((uint32_t)3U + (uint32_t)2U) % (uint32_t)4U];
+    uint32_t x32 = r116[((uint32_t)3U + (uint32_t)3U) % (uint32_t)4U];
+    r116[0U] = x02;
+    r116[1U] = x12;
+    r116[2U] = x22;
+    r116[3U] = x32;
+    uint32_t a0 = (uint32_t)0U;
+    uint32_t b = (uint32_t)1U;
+    uint32_t c = (uint32_t)2U;
+    uint32_t d = (uint32_t)3U;
+    uint32_t r0 = Hacl_Impl_Blake2_Constants_rTable_S[0U];
+    uint32_t r1 = Hacl_Impl_Blake2_Constants_rTable_S[1U];
+    uint32_t r23 = Hacl_Impl_Blake2_Constants_rTable_S[2U];
+    uint32_t r33 = Hacl_Impl_Blake2_Constants_rTable_S[3U];
+    uint32_t *wv_a = wv + a0 * (uint32_t)4U;
+    uint32_t *wv_b8 = wv + b * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = wv_a;
+      uint32_t x1 = wv_a[i] + wv_b8[i];
+      os[i] = x1;
+    }
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = wv_a;
+      uint32_t x1 = wv_a[i] + z[i];
+      os[i] = x1;
+    }
+    uint32_t *wv_a8 = wv + d * (uint32_t)4U;
+    uint32_t *wv_b9 = wv + a0 * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = wv_a8;
+      uint32_t x1 = wv_a8[i] ^ wv_b9[i];
+      os[i] = x1;
+    }
+    uint32_t *r117 = wv_a8;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = r117;
+      uint32_t x1 = r117[i];
+      uint32_t x13 = x1 >> r0 | x1 << ((uint32_t)32U - r0);
+      os[i] = x13;
+    }
+    uint32_t *wv_a9 = wv + c * (uint32_t)4U;
+    uint32_t *wv_b10 = wv + d * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = wv_a9;
+      uint32_t x1 = wv_a9[i] + wv_b10[i];
+      os[i] = x1;
+    }
+    uint32_t *wv_a10 = wv + b * (uint32_t)4U;
+    uint32_t *wv_b11 = wv + c * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = wv_a10;
+      uint32_t x1 = wv_a10[i] ^ wv_b11[i];
+      os[i] = x1;
+    }
+    uint32_t *r118 = wv_a10;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = r118;
+      uint32_t x1 = r118[i];
+      uint32_t x13 = x1 >> r1 | x1 << ((uint32_t)32U - r1);
+      os[i] = x13;
+    }
+    uint32_t *wv_a11 = wv + a0 * (uint32_t)4U;
+    uint32_t *wv_b12 = wv + b * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = wv_a11;
+      uint32_t x1 = wv_a11[i] + wv_b12[i];
+      os[i] = x1;
+    }
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = wv_a11;
+      uint32_t x1 = wv_a11[i] + w[i];
+      os[i] = x1;
+    }
+    uint32_t *wv_a12 = wv + d * (uint32_t)4U;
+    uint32_t *wv_b13 = wv + a0 * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = wv_a12;
+      uint32_t x1 = wv_a12[i] ^ wv_b13[i];
+      os[i] = x1;
+    }
+    uint32_t *r119 = wv_a12;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = r119;
+      uint32_t x1 = r119[i];
+      uint32_t x13 = x1 >> r23 | x1 << ((uint32_t)32U - r23);
+      os[i] = x13;
+    }
+    uint32_t *wv_a13 = wv + c * (uint32_t)4U;
+    uint32_t *wv_b14 = wv + d * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = wv_a13;
+      uint32_t x1 = wv_a13[i] + wv_b14[i];
+      os[i] = x1;
+    }
+    uint32_t *wv_a14 = wv + b * (uint32_t)4U;
+    uint32_t *wv_b = wv + c * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = wv_a14;
+      uint32_t x1 = wv_a14[i] ^ wv_b[i];
+      os[i] = x1;
+    }
+    uint32_t *r1110 = wv_a14;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint32_t *os = r1110;
+      uint32_t x1 = r1110[i];
+      uint32_t x13 = x1 >> r33 | x1 << ((uint32_t)32U - r33);
+      os[i] = x13;
+    }
+    uint32_t *r14 = wv + (uint32_t)1U * (uint32_t)4U;
+    uint32_t *r2 = wv + (uint32_t)2U * (uint32_t)4U;
+    uint32_t *r3 = wv + (uint32_t)3U * (uint32_t)4U;
+    uint32_t *r11 = r14;
+    uint32_t x03 = r11[3U];
+    uint32_t x13 = r11[((uint32_t)3U + (uint32_t)1U) % (uint32_t)4U];
+    uint32_t x23 = r11[((uint32_t)3U + (uint32_t)2U) % (uint32_t)4U];
+    uint32_t x33 = r11[((uint32_t)3U + (uint32_t)3U) % (uint32_t)4U];
+    r11[0U] = x03;
+    r11[1U] = x13;
+    r11[2U] = x23;
+    r11[3U] = x33;
+    uint32_t *r1111 = r2;
+    uint32_t x04 = r1111[2U];
+    uint32_t x14 = r1111[((uint32_t)2U + (uint32_t)1U) % (uint32_t)4U];
+    uint32_t x24 = r1111[((uint32_t)2U + (uint32_t)2U) % (uint32_t)4U];
+    uint32_t x34 = r1111[((uint32_t)2U + (uint32_t)3U) % (uint32_t)4U];
+    r1111[0U] = x04;
+    r1111[1U] = x14;
+    r1111[2U] = x24;
+    r1111[3U] = x34;
+    uint32_t *r1112 = r3;
+    uint32_t x0 = r1112[1U];
+    uint32_t x1 = r1112[((uint32_t)1U + (uint32_t)1U) % (uint32_t)4U];
+    uint32_t x2 = r1112[((uint32_t)1U + (uint32_t)2U) % (uint32_t)4U];
+    uint32_t x3 = r1112[((uint32_t)1U + (uint32_t)3U) % (uint32_t)4U];
+    r1112[0U] = x0;
+    r1112[1U] = x1;
+    r1112[2U] = x2;
+    r1112[3U] = x3;
+  }
+  uint32_t *s0 = s + (uint32_t)0U * (uint32_t)4U;
+  uint32_t *s1 = s + (uint32_t)1U * (uint32_t)4U;
+  uint32_t *r0 = wv + (uint32_t)0U * (uint32_t)4U;
+  uint32_t *r1 = wv + (uint32_t)1U * (uint32_t)4U;
+  uint32_t *r2 = wv + (uint32_t)2U * (uint32_t)4U;
+  uint32_t *r3 = wv + (uint32_t)3U * (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+  {
+    uint32_t *os = s0;
+    uint32_t x = s0[i] ^ r0[i];
+    os[i] = x;
+  }
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+  {
+    uint32_t *os = s0;
+    uint32_t x = s0[i] ^ r2[i];
+    os[i] = x;
+  }
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+  {
+    uint32_t *os = s1;
+    uint32_t x = s1[i] ^ r1[i];
+    os[i] = x;
+  }
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+  {
+    uint32_t *os = s1;
+    uint32_t x = s1[i] ^ r3[i];
+    os[i] = x;
+  }
+  return (uint64_t)0U;
+}
+
+uint128_t
+Hacl_Hash_Blake2_update_last_blake2b_32(
+  uint64_t *s,
+  uint128_t ev,
+  uint128_t prev_len,
+  uint8_t *input,
+  uint32_t input_len
+)
+{
+  uint32_t blocks_n = input_len / (uint32_t)128U;
+  uint32_t blocks_len0 = blocks_n * (uint32_t)128U;
+  uint32_t rest_len0 = input_len - blocks_len0;
+  __uint32_t_uint32_t_uint32_t scrut;
+  if (rest_len0 == (uint32_t)0U && blocks_n > (uint32_t)0U)
+  {
+    uint32_t blocks_n1 = blocks_n - (uint32_t)1U;
+    uint32_t blocks_len1 = blocks_len0 - (uint32_t)128U;
+    uint32_t rest_len1 = (uint32_t)128U;
+    scrut =
+      ((__uint32_t_uint32_t_uint32_t){ .fst = blocks_n1, .snd = blocks_len1, .thd = rest_len1 });
+  }
+  else
+  {
+    scrut =
+      ((__uint32_t_uint32_t_uint32_t){ .fst = blocks_n, .snd = blocks_len0, .thd = rest_len0 });
+  }
+  uint32_t num_blocks0 = scrut.fst;
+  uint32_t blocks_len = scrut.snd;
+  uint32_t rest_len1 = scrut.thd;
+  uint8_t *blocks0 = input;
+  uint8_t *rest0 = input + blocks_len;
+  __uint32_t_uint32_t_uint32_t__uint8_t___uint8_t_
+  scrut0 =
+    { .fst = num_blocks0, .snd = blocks_len, .thd = rest_len1, .f3 = blocks0, .f4 = rest0 };
+  uint32_t num_blocks = scrut0.fst;
+  uint32_t rest_len = scrut0.thd;
+  uint8_t *blocks = scrut0.f3;
+  uint8_t *rest = scrut0.f4;
+  uint128_t ev_ = Hacl_Hash_Blake2_update_multi_blake2b_32(s, ev, blocks, num_blocks);
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)4U * (uint32_t)4U);
+  uint64_t wv[(uint32_t)4U * (uint32_t)4U];
+  memset(wv, 0U, (uint32_t)4U * (uint32_t)4U * sizeof (wv[0U]));
+  uint8_t tmp[128U] = { 0U };
+  uint8_t *tmp_rest = tmp;
+  memcpy(tmp_rest, rest, rest_len * sizeof (rest[0U]));
+  uint128_t totlen = ev_ + (uint128_t)(uint64_t)rest_len;
+  uint64_t m_w[16U] = { 0U };
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
+  {
+    uint64_t *os = m_w;
+    uint8_t *bj = tmp + i * (uint32_t)8U;
+    uint64_t u = load64_le(bj);
+    uint64_t r = u;
+    uint64_t x = r;
+    os[i] = x;
+  }
+  uint64_t mask[4U] = { 0U };
+  uint64_t wv_14 = (uint64_t)0xFFFFFFFFFFFFFFFFU;
+  uint64_t wv_15 = (uint64_t)0U;
+  mask[0U] = (uint64_t)totlen;
+  mask[1U] = (uint64_t)(totlen >> (uint32_t)64U);
+  mask[2U] = wv_14;
+  mask[3U] = wv_15;
+  memcpy(wv, s, (uint32_t)4U * (uint32_t)4U * sizeof (s[0U]));
+  uint64_t *wv3 = wv + (uint32_t)3U * (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+  {
+    uint64_t *os = wv3;
+    uint64_t x = wv3[i] ^ mask[i];
+    os[i] = x;
+  }
+  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)12U; i0++)
+  {
+    uint32_t start_idx = i0 % (uint32_t)10U * (uint32_t)16U;
+    KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)4U * (uint32_t)4U);
+    uint64_t m_st[(uint32_t)4U * (uint32_t)4U];
+    memset(m_st, 0U, (uint32_t)4U * (uint32_t)4U * sizeof (m_st[0U]));
+    uint64_t *r00 = m_st + (uint32_t)0U * (uint32_t)4U;
+    uint64_t *r10 = m_st + (uint32_t)1U * (uint32_t)4U;
+    uint64_t *r20 = m_st + (uint32_t)2U * (uint32_t)4U;
+    uint64_t *r30 = m_st + (uint32_t)3U * (uint32_t)4U;
+    uint32_t s0 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx];
+    uint32_t s1 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)1U];
+    uint32_t s2 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)2U];
+    uint32_t s3 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)3U];
+    uint32_t s4 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)4U];
+    uint32_t s5 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)5U];
+    uint32_t s6 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)6U];
+    uint32_t s7 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)7U];
+    uint32_t s8 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)8U];
+    uint32_t s9 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)9U];
+    uint32_t s10 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)10U];
+    uint32_t s11 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)11U];
+    uint32_t s12 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)12U];
+    uint32_t s13 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)13U];
+    uint32_t s14 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)14U];
+    uint32_t s15 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)15U];
+    uint64_t uu____0 = m_w[s2];
+    uint64_t uu____1 = m_w[s4];
+    uint64_t uu____2 = m_w[s6];
+    r00[0U] = m_w[s0];
+    r00[1U] = uu____0;
+    r00[2U] = uu____1;
+    r00[3U] = uu____2;
+    uint64_t uu____3 = m_w[s3];
+    uint64_t uu____4 = m_w[s5];
+    uint64_t uu____5 = m_w[s7];
+    r10[0U] = m_w[s1];
+    r10[1U] = uu____3;
+    r10[2U] = uu____4;
+    r10[3U] = uu____5;
+    uint64_t uu____6 = m_w[s10];
+    uint64_t uu____7 = m_w[s12];
+    uint64_t uu____8 = m_w[s14];
+    r20[0U] = m_w[s8];
+    r20[1U] = uu____6;
+    r20[2U] = uu____7;
+    r20[3U] = uu____8;
+    uint64_t uu____9 = m_w[s11];
+    uint64_t uu____10 = m_w[s13];
+    uint64_t uu____11 = m_w[s15];
+    r30[0U] = m_w[s9];
+    r30[1U] = uu____9;
+    r30[2U] = uu____10;
+    r30[3U] = uu____11;
+    uint64_t *x = m_st + (uint32_t)0U * (uint32_t)4U;
+    uint64_t *y = m_st + (uint32_t)1U * (uint32_t)4U;
+    uint64_t *z = m_st + (uint32_t)2U * (uint32_t)4U;
+    uint64_t *w = m_st + (uint32_t)3U * (uint32_t)4U;
+    uint32_t a = (uint32_t)0U;
+    uint32_t b0 = (uint32_t)1U;
+    uint32_t c0 = (uint32_t)2U;
+    uint32_t d0 = (uint32_t)3U;
+    uint32_t r01 = Hacl_Impl_Blake2_Constants_rTable_B[0U];
+    uint32_t r12 = Hacl_Impl_Blake2_Constants_rTable_B[1U];
+    uint32_t r21 = Hacl_Impl_Blake2_Constants_rTable_B[2U];
+    uint32_t r31 = Hacl_Impl_Blake2_Constants_rTable_B[3U];
+    uint64_t *wv_a0 = wv + a * (uint32_t)4U;
+    uint64_t *wv_b0 = wv + b0 * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = wv_a0;
+      uint64_t x1 = wv_a0[i] + wv_b0[i];
+      os[i] = x1;
+    }
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = wv_a0;
+      uint64_t x1 = wv_a0[i] + x[i];
+      os[i] = x1;
+    }
+    uint64_t *wv_a1 = wv + d0 * (uint32_t)4U;
+    uint64_t *wv_b1 = wv + a * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = wv_a1;
+      uint64_t x1 = wv_a1[i] ^ wv_b1[i];
+      os[i] = x1;
+    }
+    uint64_t *r110 = wv_a1;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = r110;
+      uint64_t x1 = r110[i];
+      uint64_t x10 = x1 >> r01 | x1 << ((uint32_t)64U - r01);
+      os[i] = x10;
+    }
+    uint64_t *wv_a2 = wv + c0 * (uint32_t)4U;
+    uint64_t *wv_b2 = wv + d0 * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = wv_a2;
+      uint64_t x1 = wv_a2[i] + wv_b2[i];
+      os[i] = x1;
+    }
+    uint64_t *wv_a3 = wv + b0 * (uint32_t)4U;
+    uint64_t *wv_b3 = wv + c0 * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = wv_a3;
+      uint64_t x1 = wv_a3[i] ^ wv_b3[i];
+      os[i] = x1;
+    }
+    uint64_t *r111 = wv_a3;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = r111;
+      uint64_t x1 = r111[i];
+      uint64_t x10 = x1 >> r12 | x1 << ((uint32_t)64U - r12);
+      os[i] = x10;
+    }
+    uint64_t *wv_a4 = wv + a * (uint32_t)4U;
+    uint64_t *wv_b4 = wv + b0 * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = wv_a4;
+      uint64_t x1 = wv_a4[i] + wv_b4[i];
+      os[i] = x1;
+    }
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = wv_a4;
+      uint64_t x1 = wv_a4[i] + y[i];
+      os[i] = x1;
+    }
+    uint64_t *wv_a5 = wv + d0 * (uint32_t)4U;
+    uint64_t *wv_b5 = wv + a * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = wv_a5;
+      uint64_t x1 = wv_a5[i] ^ wv_b5[i];
+      os[i] = x1;
+    }
+    uint64_t *r112 = wv_a5;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = r112;
+      uint64_t x1 = r112[i];
+      uint64_t x10 = x1 >> r21 | x1 << ((uint32_t)64U - r21);
+      os[i] = x10;
+    }
+    uint64_t *wv_a6 = wv + c0 * (uint32_t)4U;
+    uint64_t *wv_b6 = wv + d0 * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = wv_a6;
+      uint64_t x1 = wv_a6[i] + wv_b6[i];
+      os[i] = x1;
+    }
+    uint64_t *wv_a7 = wv + b0 * (uint32_t)4U;
+    uint64_t *wv_b7 = wv + c0 * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = wv_a7;
+      uint64_t x1 = wv_a7[i] ^ wv_b7[i];
+      os[i] = x1;
+    }
+    uint64_t *r113 = wv_a7;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = r113;
+      uint64_t x1 = r113[i];
+      uint64_t x10 = x1 >> r31 | x1 << ((uint32_t)64U - r31);
+      os[i] = x10;
+    }
+    uint64_t *r13 = wv + (uint32_t)1U * (uint32_t)4U;
+    uint64_t *r22 = wv + (uint32_t)2U * (uint32_t)4U;
+    uint64_t *r32 = wv + (uint32_t)3U * (uint32_t)4U;
+    uint64_t *r114 = r13;
+    uint64_t x00 = r114[1U];
+    uint64_t x10 = r114[((uint32_t)1U + (uint32_t)1U) % (uint32_t)4U];
+    uint64_t x20 = r114[((uint32_t)1U + (uint32_t)2U) % (uint32_t)4U];
+    uint64_t x30 = r114[((uint32_t)1U + (uint32_t)3U) % (uint32_t)4U];
+    r114[0U] = x00;
+    r114[1U] = x10;
+    r114[2U] = x20;
+    r114[3U] = x30;
+    uint64_t *r115 = r22;
+    uint64_t x01 = r115[2U];
+    uint64_t x11 = r115[((uint32_t)2U + (uint32_t)1U) % (uint32_t)4U];
+    uint64_t x21 = r115[((uint32_t)2U + (uint32_t)2U) % (uint32_t)4U];
+    uint64_t x31 = r115[((uint32_t)2U + (uint32_t)3U) % (uint32_t)4U];
+    r115[0U] = x01;
+    r115[1U] = x11;
+    r115[2U] = x21;
+    r115[3U] = x31;
+    uint64_t *r116 = r32;
+    uint64_t x02 = r116[3U];
+    uint64_t x12 = r116[((uint32_t)3U + (uint32_t)1U) % (uint32_t)4U];
+    uint64_t x22 = r116[((uint32_t)3U + (uint32_t)2U) % (uint32_t)4U];
+    uint64_t x32 = r116[((uint32_t)3U + (uint32_t)3U) % (uint32_t)4U];
+    r116[0U] = x02;
+    r116[1U] = x12;
+    r116[2U] = x22;
+    r116[3U] = x32;
+    uint32_t a0 = (uint32_t)0U;
+    uint32_t b = (uint32_t)1U;
+    uint32_t c = (uint32_t)2U;
+    uint32_t d = (uint32_t)3U;
+    uint32_t r0 = Hacl_Impl_Blake2_Constants_rTable_B[0U];
+    uint32_t r1 = Hacl_Impl_Blake2_Constants_rTable_B[1U];
+    uint32_t r23 = Hacl_Impl_Blake2_Constants_rTable_B[2U];
+    uint32_t r33 = Hacl_Impl_Blake2_Constants_rTable_B[3U];
+    uint64_t *wv_a = wv + a0 * (uint32_t)4U;
+    uint64_t *wv_b8 = wv + b * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = wv_a;
+      uint64_t x1 = wv_a[i] + wv_b8[i];
+      os[i] = x1;
+    }
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = wv_a;
+      uint64_t x1 = wv_a[i] + z[i];
+      os[i] = x1;
+    }
+    uint64_t *wv_a8 = wv + d * (uint32_t)4U;
+    uint64_t *wv_b9 = wv + a0 * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = wv_a8;
+      uint64_t x1 = wv_a8[i] ^ wv_b9[i];
+      os[i] = x1;
+    }
+    uint64_t *r117 = wv_a8;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = r117;
+      uint64_t x1 = r117[i];
+      uint64_t x13 = x1 >> r0 | x1 << ((uint32_t)64U - r0);
+      os[i] = x13;
+    }
+    uint64_t *wv_a9 = wv + c * (uint32_t)4U;
+    uint64_t *wv_b10 = wv + d * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = wv_a9;
+      uint64_t x1 = wv_a9[i] + wv_b10[i];
+      os[i] = x1;
+    }
+    uint64_t *wv_a10 = wv + b * (uint32_t)4U;
+    uint64_t *wv_b11 = wv + c * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = wv_a10;
+      uint64_t x1 = wv_a10[i] ^ wv_b11[i];
+      os[i] = x1;
+    }
+    uint64_t *r118 = wv_a10;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = r118;
+      uint64_t x1 = r118[i];
+      uint64_t x13 = x1 >> r1 | x1 << ((uint32_t)64U - r1);
+      os[i] = x13;
+    }
+    uint64_t *wv_a11 = wv + a0 * (uint32_t)4U;
+    uint64_t *wv_b12 = wv + b * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = wv_a11;
+      uint64_t x1 = wv_a11[i] + wv_b12[i];
+      os[i] = x1;
+    }
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = wv_a11;
+      uint64_t x1 = wv_a11[i] + w[i];
+      os[i] = x1;
+    }
+    uint64_t *wv_a12 = wv + d * (uint32_t)4U;
+    uint64_t *wv_b13 = wv + a0 * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = wv_a12;
+      uint64_t x1 = wv_a12[i] ^ wv_b13[i];
+      os[i] = x1;
+    }
+    uint64_t *r119 = wv_a12;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = r119;
+      uint64_t x1 = r119[i];
+      uint64_t x13 = x1 >> r23 | x1 << ((uint32_t)64U - r23);
+      os[i] = x13;
+    }
+    uint64_t *wv_a13 = wv + c * (uint32_t)4U;
+    uint64_t *wv_b14 = wv + d * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = wv_a13;
+      uint64_t x1 = wv_a13[i] + wv_b14[i];
+      os[i] = x1;
+    }
+    uint64_t *wv_a14 = wv + b * (uint32_t)4U;
+    uint64_t *wv_b = wv + c * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = wv_a14;
+      uint64_t x1 = wv_a14[i] ^ wv_b[i];
+      os[i] = x1;
+    }
+    uint64_t *r1110 = wv_a14;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      uint64_t *os = r1110;
+      uint64_t x1 = r1110[i];
+      uint64_t x13 = x1 >> r33 | x1 << ((uint32_t)64U - r33);
+      os[i] = x13;
+    }
+    uint64_t *r14 = wv + (uint32_t)1U * (uint32_t)4U;
+    uint64_t *r2 = wv + (uint32_t)2U * (uint32_t)4U;
+    uint64_t *r3 = wv + (uint32_t)3U * (uint32_t)4U;
+    uint64_t *r11 = r14;
+    uint64_t x03 = r11[3U];
+    uint64_t x13 = r11[((uint32_t)3U + (uint32_t)1U) % (uint32_t)4U];
+    uint64_t x23 = r11[((uint32_t)3U + (uint32_t)2U) % (uint32_t)4U];
+    uint64_t x33 = r11[((uint32_t)3U + (uint32_t)3U) % (uint32_t)4U];
+    r11[0U] = x03;
+    r11[1U] = x13;
+    r11[2U] = x23;
+    r11[3U] = x33;
+    uint64_t *r1111 = r2;
+    uint64_t x04 = r1111[2U];
+    uint64_t x14 = r1111[((uint32_t)2U + (uint32_t)1U) % (uint32_t)4U];
+    uint64_t x24 = r1111[((uint32_t)2U + (uint32_t)2U) % (uint32_t)4U];
+    uint64_t x34 = r1111[((uint32_t)2U + (uint32_t)3U) % (uint32_t)4U];
+    r1111[0U] = x04;
+    r1111[1U] = x14;
+    r1111[2U] = x24;
+    r1111[3U] = x34;
+    uint64_t *r1112 = r3;
+    uint64_t x0 = r1112[1U];
+    uint64_t x1 = r1112[((uint32_t)1U + (uint32_t)1U) % (uint32_t)4U];
+    uint64_t x2 = r1112[((uint32_t)1U + (uint32_t)2U) % (uint32_t)4U];
+    uint64_t x3 = r1112[((uint32_t)1U + (uint32_t)3U) % (uint32_t)4U];
+    r1112[0U] = x0;
+    r1112[1U] = x1;
+    r1112[2U] = x2;
+    r1112[3U] = x3;
+  }
+  uint64_t *s0 = s + (uint32_t)0U * (uint32_t)4U;
+  uint64_t *s1 = s + (uint32_t)1U * (uint32_t)4U;
+  uint64_t *r0 = wv + (uint32_t)0U * (uint32_t)4U;
+  uint64_t *r1 = wv + (uint32_t)1U * (uint32_t)4U;
+  uint64_t *r2 = wv + (uint32_t)2U * (uint32_t)4U;
+  uint64_t *r3 = wv + (uint32_t)3U * (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+  {
+    uint64_t *os = s0;
+    uint64_t x = s0[i] ^ r0[i];
+    os[i] = x;
+  }
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+  {
+    uint64_t *os = s0;
+    uint64_t x = s0[i] ^ r2[i];
+    os[i] = x;
+  }
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+  {
+    uint64_t *os = s1;
+    uint64_t x = s1[i] ^ r1[i];
+    os[i] = x;
+  }
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+  {
+    uint64_t *os = s1;
+    uint64_t x = s1[i] ^ r3[i];
+    os[i] = x;
+  }
+  return (uint128_t)(uint64_t)0U;
+}
+
+void Hacl_Hash_Blake2_hash_blake2s_32(uint8_t *input, uint32_t input_len, uint8_t *dst)
+{
+  Hacl_Blake2s_32_blake2s((uint32_t)32U, dst, input_len, input, (uint32_t)0U, NULL);
+}
+
+void Hacl_Hash_Blake2_hash_blake2b_32(uint8_t *input, uint32_t input_len, uint8_t *dst)
+{
+  Hacl_Blake2b_32_blake2b((uint32_t)64U, dst, input_len, input, (uint32_t)0U, NULL);
+}
+
 void Hacl_Hash_MD5_legacy_update_multi(uint32_t *s, uint8_t *blocks, uint32_t n_blocks)
 {
   for (uint32_t i = (uint32_t)0U; i < n_blocks; i++)
@@ -66,16 +1919,33 @@ Hacl_Hash_MD5_legacy_update_last(
   Hacl_Hash_MD5_legacy_update_multi(s, tmp, tmp_len / (uint32_t)64U);
 }
 
+typedef uint32_t *___uint32_t____;
+
 void Hacl_Hash_MD5_legacy_hash(uint8_t *input, uint32_t input_len, uint8_t *dst)
 {
   uint32_t
-  s[4U] =
+  scrut[4U] =
     { (uint32_t)0x67452301U, (uint32_t)0xefcdab89U, (uint32_t)0x98badcfeU, (uint32_t)0x10325476U };
-  uint32_t blocks_n = input_len / (uint32_t)64U;
-  uint32_t blocks_len = blocks_n * (uint32_t)64U;
-  uint8_t *blocks = input;
-  uint32_t rest_len = input_len - blocks_len;
-  uint8_t *rest = input + blocks_len;
+  uint32_t *s = scrut;
+  uint32_t blocks_n0 = input_len / (uint32_t)64U;
+  uint32_t blocks_n1;
+  if (input_len % (uint32_t)64U == (uint32_t)0U && blocks_n0 > (uint32_t)0U)
+  {
+    blocks_n1 = blocks_n0 - (uint32_t)1U;
+  }
+  else
+  {
+    blocks_n1 = blocks_n0;
+  }
+  uint32_t blocks_len0 = blocks_n1 * (uint32_t)64U;
+  uint8_t *blocks0 = input;
+  uint32_t rest_len0 = input_len - blocks_len0;
+  uint8_t *rest0 = input + blocks_len0;
+  uint32_t blocks_n = blocks_n1;
+  uint32_t blocks_len = blocks_len0;
+  uint8_t *blocks = blocks0;
+  uint32_t rest_len = rest_len0;
+  uint8_t *rest = rest0;
   Hacl_Hash_MD5_legacy_update_multi(s, blocks, blocks_n);
   Hacl_Hash_MD5_legacy_update_last(s, (uint64_t)blocks_len, rest, rest_len);
   Hacl_Hash_Core_MD5_legacy_finish(s, dst);
@@ -1233,16 +3103,31 @@ Hacl_Hash_SHA1_legacy_update_last(
 void Hacl_Hash_SHA1_legacy_hash(uint8_t *input, uint32_t input_len, uint8_t *dst)
 {
   uint32_t
-  s[5U] =
+  scrut[5U] =
     {
       (uint32_t)0x67452301U, (uint32_t)0xefcdab89U, (uint32_t)0x98badcfeU, (uint32_t)0x10325476U,
       (uint32_t)0xc3d2e1f0U
     };
-  uint32_t blocks_n = input_len / (uint32_t)64U;
-  uint32_t blocks_len = blocks_n * (uint32_t)64U;
-  uint8_t *blocks = input;
-  uint32_t rest_len = input_len - blocks_len;
-  uint8_t *rest = input + blocks_len;
+  uint32_t *s = scrut;
+  uint32_t blocks_n0 = input_len / (uint32_t)64U;
+  uint32_t blocks_n1;
+  if (input_len % (uint32_t)64U == (uint32_t)0U && blocks_n0 > (uint32_t)0U)
+  {
+    blocks_n1 = blocks_n0 - (uint32_t)1U;
+  }
+  else
+  {
+    blocks_n1 = blocks_n0;
+  }
+  uint32_t blocks_len0 = blocks_n1 * (uint32_t)64U;
+  uint8_t *blocks0 = input;
+  uint32_t rest_len0 = input_len - blocks_len0;
+  uint8_t *rest0 = input + blocks_len0;
+  uint32_t blocks_n = blocks_n1;
+  uint32_t blocks_len = blocks_len0;
+  uint8_t *blocks = blocks0;
+  uint32_t rest_len = rest_len0;
+  uint8_t *rest = rest0;
   Hacl_Hash_SHA1_legacy_update_multi(s, blocks, blocks_n);
   Hacl_Hash_SHA1_legacy_update_last(s, (uint64_t)blocks_len, rest, rest_len);
   Hacl_Hash_Core_SHA1_legacy_finish(s, dst);
@@ -1561,16 +3446,31 @@ Hacl_Hash_SHA2_update_last_512(
 void Hacl_Hash_SHA2_hash_224(uint8_t *input, uint32_t input_len, uint8_t *dst)
 {
   uint32_t
-  s[8U] =
+  scrut[8U] =
     {
       (uint32_t)0xc1059ed8U, (uint32_t)0x367cd507U, (uint32_t)0x3070dd17U, (uint32_t)0xf70e5939U,
       (uint32_t)0xffc00b31U, (uint32_t)0x68581511U, (uint32_t)0x64f98fa7U, (uint32_t)0xbefa4fa4U
     };
-  uint32_t blocks_n = input_len / (uint32_t)64U;
-  uint32_t blocks_len = blocks_n * (uint32_t)64U;
-  uint8_t *blocks = input;
-  uint32_t rest_len = input_len - blocks_len;
-  uint8_t *rest = input + blocks_len;
+  uint32_t *s = scrut;
+  uint32_t blocks_n0 = input_len / (uint32_t)64U;
+  uint32_t blocks_n1;
+  if (input_len % (uint32_t)64U == (uint32_t)0U && blocks_n0 > (uint32_t)0U)
+  {
+    blocks_n1 = blocks_n0 - (uint32_t)1U;
+  }
+  else
+  {
+    blocks_n1 = blocks_n0;
+  }
+  uint32_t blocks_len0 = blocks_n1 * (uint32_t)64U;
+  uint8_t *blocks0 = input;
+  uint32_t rest_len0 = input_len - blocks_len0;
+  uint8_t *rest0 = input + blocks_len0;
+  uint32_t blocks_n = blocks_n1;
+  uint32_t blocks_len = blocks_len0;
+  uint8_t *blocks = blocks0;
+  uint32_t rest_len = rest_len0;
+  uint8_t *rest = rest0;
   Hacl_Hash_SHA2_update_multi_224(s, blocks, blocks_n);
   Hacl_Hash_SHA2_update_last_224(s, (uint64_t)blocks_len, rest, rest_len);
   Hacl_Hash_Core_SHA2_finish_224(s, dst);
@@ -1579,35 +3479,67 @@ void Hacl_Hash_SHA2_hash_224(uint8_t *input, uint32_t input_len, uint8_t *dst)
 void Hacl_Hash_SHA2_hash_256(uint8_t *input, uint32_t input_len, uint8_t *dst)
 {
   uint32_t
-  s[8U] =
+  scrut[8U] =
     {
       (uint32_t)0x6a09e667U, (uint32_t)0xbb67ae85U, (uint32_t)0x3c6ef372U, (uint32_t)0xa54ff53aU,
       (uint32_t)0x510e527fU, (uint32_t)0x9b05688cU, (uint32_t)0x1f83d9abU, (uint32_t)0x5be0cd19U
     };
-  uint32_t blocks_n = input_len / (uint32_t)64U;
-  uint32_t blocks_len = blocks_n * (uint32_t)64U;
-  uint8_t *blocks = input;
-  uint32_t rest_len = input_len - blocks_len;
-  uint8_t *rest = input + blocks_len;
+  uint32_t *s = scrut;
+  uint32_t blocks_n0 = input_len / (uint32_t)64U;
+  uint32_t blocks_n1;
+  if (input_len % (uint32_t)64U == (uint32_t)0U && blocks_n0 > (uint32_t)0U)
+  {
+    blocks_n1 = blocks_n0 - (uint32_t)1U;
+  }
+  else
+  {
+    blocks_n1 = blocks_n0;
+  }
+  uint32_t blocks_len0 = blocks_n1 * (uint32_t)64U;
+  uint8_t *blocks0 = input;
+  uint32_t rest_len0 = input_len - blocks_len0;
+  uint8_t *rest0 = input + blocks_len0;
+  uint32_t blocks_n = blocks_n1;
+  uint32_t blocks_len = blocks_len0;
+  uint8_t *blocks = blocks0;
+  uint32_t rest_len = rest_len0;
+  uint8_t *rest = rest0;
   Hacl_Hash_SHA2_update_multi_256(s, blocks, blocks_n);
   Hacl_Hash_SHA2_update_last_256(s, (uint64_t)blocks_len, rest, rest_len);
   Hacl_Hash_Core_SHA2_finish_256(s, dst);
 }
 
+typedef uint64_t *___uint64_t____;
+
 void Hacl_Hash_SHA2_hash_384(uint8_t *input, uint32_t input_len, uint8_t *dst)
 {
   uint64_t
-  s[8U] =
+  scrut[8U] =
     {
       (uint64_t)0xcbbb9d5dc1059ed8U, (uint64_t)0x629a292a367cd507U, (uint64_t)0x9159015a3070dd17U,
       (uint64_t)0x152fecd8f70e5939U, (uint64_t)0x67332667ffc00b31U, (uint64_t)0x8eb44a8768581511U,
       (uint64_t)0xdb0c2e0d64f98fa7U, (uint64_t)0x47b5481dbefa4fa4U
     };
-  uint32_t blocks_n = input_len / (uint32_t)128U;
-  uint32_t blocks_len = blocks_n * (uint32_t)128U;
-  uint8_t *blocks = input;
-  uint32_t rest_len = input_len - blocks_len;
-  uint8_t *rest = input + blocks_len;
+  uint64_t *s = scrut;
+  uint32_t blocks_n0 = input_len / (uint32_t)128U;
+  uint32_t blocks_n1;
+  if (input_len % (uint32_t)128U == (uint32_t)0U && blocks_n0 > (uint32_t)0U)
+  {
+    blocks_n1 = blocks_n0 - (uint32_t)1U;
+  }
+  else
+  {
+    blocks_n1 = blocks_n0;
+  }
+  uint32_t blocks_len0 = blocks_n1 * (uint32_t)128U;
+  uint8_t *blocks0 = input;
+  uint32_t rest_len0 = input_len - blocks_len0;
+  uint8_t *rest0 = input + blocks_len0;
+  uint32_t blocks_n = blocks_n1;
+  uint32_t blocks_len = blocks_len0;
+  uint8_t *blocks = blocks0;
+  uint32_t rest_len = rest_len0;
+  uint8_t *rest = rest0;
   Hacl_Hash_SHA2_update_multi_384(s, blocks, blocks_n);
   Hacl_Hash_SHA2_update_last_384(s, (uint128_t)(uint64_t)blocks_len, rest, rest_len);
   Hacl_Hash_Core_SHA2_finish_384(s, dst);
@@ -1616,17 +3548,32 @@ void Hacl_Hash_SHA2_hash_384(uint8_t *input, uint32_t input_len, uint8_t *dst)
 void Hacl_Hash_SHA2_hash_512(uint8_t *input, uint32_t input_len, uint8_t *dst)
 {
   uint64_t
-  s[8U] =
+  scrut[8U] =
     {
       (uint64_t)0x6a09e667f3bcc908U, (uint64_t)0xbb67ae8584caa73bU, (uint64_t)0x3c6ef372fe94f82bU,
       (uint64_t)0xa54ff53a5f1d36f1U, (uint64_t)0x510e527fade682d1U, (uint64_t)0x9b05688c2b3e6c1fU,
       (uint64_t)0x1f83d9abfb41bd6bU, (uint64_t)0x5be0cd19137e2179U
     };
-  uint32_t blocks_n = input_len / (uint32_t)128U;
-  uint32_t blocks_len = blocks_n * (uint32_t)128U;
-  uint8_t *blocks = input;
-  uint32_t rest_len = input_len - blocks_len;
-  uint8_t *rest = input + blocks_len;
+  uint64_t *s = scrut;
+  uint32_t blocks_n0 = input_len / (uint32_t)128U;
+  uint32_t blocks_n1;
+  if (input_len % (uint32_t)128U == (uint32_t)0U && blocks_n0 > (uint32_t)0U)
+  {
+    blocks_n1 = blocks_n0 - (uint32_t)1U;
+  }
+  else
+  {
+    blocks_n1 = blocks_n0;
+  }
+  uint32_t blocks_len0 = blocks_n1 * (uint32_t)128U;
+  uint8_t *blocks0 = input;
+  uint32_t rest_len0 = input_len - blocks_len0;
+  uint8_t *rest0 = input + blocks_len0;
+  uint32_t blocks_n = blocks_n1;
+  uint32_t blocks_len = blocks_len0;
+  uint8_t *blocks = blocks0;
+  uint32_t rest_len = rest_len0;
+  uint8_t *rest = rest0;
   Hacl_Hash_SHA2_update_multi_512(s, blocks, blocks_n);
   Hacl_Hash_SHA2_update_last_512(s, (uint128_t)(uint64_t)blocks_len, rest, rest_len);
   Hacl_Hash_Core_SHA2_finish_512(s, dst);
@@ -2098,10 +4045,6 @@ void Hacl_Hash_Core_SHA2_pad_384(uint128_t len, uint8_t *dst)
   uint8_t *dst1 = dst;
   dst1[0U] = (uint8_t)0x80U;
   uint8_t *dst2 = dst + (uint32_t)1U;
-  uint32_t
-  len_zero =
-    ((uint32_t)256U - ((uint32_t)17U + (uint32_t)((uint64_t)len % (uint64_t)(uint32_t)128U)))
-    % (uint32_t)128U;
   for
   (uint32_t
     i = (uint32_t)0U;
@@ -2130,10 +4073,6 @@ void Hacl_Hash_Core_SHA2_pad_512(uint128_t len, uint8_t *dst)
   uint8_t *dst1 = dst;
   dst1[0U] = (uint8_t)0x80U;
   uint8_t *dst2 = dst + (uint32_t)1U;
-  uint32_t
-  len_zero =
-    ((uint32_t)256U - ((uint32_t)17U + (uint32_t)((uint64_t)len % (uint64_t)(uint32_t)128U)))
-    % (uint32_t)128U;
   for
   (uint32_t
     i = (uint32_t)0U;
@@ -2193,6 +4132,12 @@ void Hacl_Hash_Core_SHA2_finish_512(uint64_t *s, uint8_t *dst)
   }
 }
 
+#define Mkdtuple2 0
+
+typedef uint8_t dtuple2__Spec_Hash_Definitions_hash_alg_any_tags;
+
+typedef Spec_Hash_Definitions_hash_alg dtuple2__Spec_Hash_Definitions_hash_alg_any;
+
 uint32_t Hacl_Hash_Definitions_word_len(Spec_Hash_Definitions_hash_alg a)
 {
   switch (a)
@@ -2218,6 +4163,14 @@ uint32_t Hacl_Hash_Definitions_word_len(Spec_Hash_Definitions_hash_alg a)
         return (uint32_t)8U;
       }
     case Spec_Hash_Definitions_SHA2_512:
+      {
+        return (uint32_t)8U;
+      }
+    case Spec_Hash_Definitions_Blake2S:
+      {
+        return (uint32_t)4U;
+      }
+    case Spec_Hash_Definitions_Blake2B:
       {
         return (uint32_t)8U;
       }
@@ -2257,6 +4210,14 @@ uint32_t Hacl_Hash_Definitions_block_len(Spec_Hash_Definitions_hash_alg a)
       {
         return (uint32_t)128U;
       }
+    case Spec_Hash_Definitions_Blake2S:
+      {
+        return (uint32_t)64U;
+      }
+    case Spec_Hash_Definitions_Blake2B:
+      {
+        return (uint32_t)128U;
+      }
     default:
       {
         KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
@@ -2293,6 +4254,14 @@ uint32_t Hacl_Hash_Definitions_hash_word_len(Spec_Hash_Definitions_hash_alg a)
       {
         return (uint32_t)8U;
       }
+    case Spec_Hash_Definitions_Blake2S:
+      {
+        return (uint32_t)8U;
+      }
+    case Spec_Hash_Definitions_Blake2B:
+      {
+        return (uint32_t)8U;
+      }
     default:
       {
         KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
@@ -2326,6 +4295,14 @@ uint32_t Hacl_Hash_Definitions_hash_len(Spec_Hash_Definitions_hash_alg a)
         return (uint32_t)48U;
       }
     case Spec_Hash_Definitions_SHA2_512:
+      {
+        return (uint32_t)64U;
+      }
+    case Spec_Hash_Definitions_Blake2S:
+      {
+        return (uint32_t)32U;
+      }
+    case Spec_Hash_Definitions_Blake2B:
       {
         return (uint32_t)64U;
       }

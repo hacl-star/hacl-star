@@ -8,7 +8,7 @@
       0,
       [ "@query" ],
       0,
-      "0e11834dfa27c2b472ab799bd16e850f"
+      "fda5ffee4f6dba0018b57b05162754ca"
     ],
     [
       "Vale.Interop.Heap_s.__proj__InteropHeap__item__addrs",
@@ -17,7 +17,7 @@
       0,
       [ "@query", "equation_Vale.Interop.Heap_s.mk_addr_map" ],
       0,
-      "ee651624ae4a6a0cffb8aee5586dfcdc"
+      "87d8d9c7a20462dc282cbf5ba82f954c"
     ],
     [
       "Vale.Interop.Heap_s.__proj__InteropHeap__item__hs",
@@ -29,7 +29,7 @@
         "projection_inverse_Vale.Interop.Heap_s.InteropHeap_ptrs"
       ],
       0,
-      "ac2434c8e9a0a6b1550b6c8eeefcd2a8"
+      "1a90df3c22b746f396fdae4f67164a5c"
     ],
     [
       "Vale.Interop.Heap_s.addrs_ptr",
@@ -60,7 +60,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "6e457c7180f41c6c62d569074f92b11a"
+      "9375eb4e28fda52552aa1819a3f68092"
     ],
     [
       "Vale.Interop.Heap_s.addrs_set",
@@ -82,7 +82,7 @@
         "typing_Vale.Interop.Types.get_downview"
       ],
       0,
-      "841f7ebf2ecf0eb471105e5b1349b76a"
+      "d2cb684802627a4356d0667c56a11e64"
     ],
     [
       "Vale.Interop.Heap_s.correct_down_p",
@@ -91,7 +91,90 @@
       0,
       [ "@query" ],
       0,
-      "4eb74bbdbb75e87288151bbdfeb9b9a4"
+      "820e8470ec8a46a7ecf9dbe7ab0444ed"
+    ],
+    [
+      "Vale.Interop.Heap_s.__proj__InteropHeap__item__addrs",
+      2,
+      1,
+      0,
+      [ "@query", "equation_Vale.Interop.Heap_s.mk_addr_map" ],
+      0,
+      "31a715099abfd19e295899f5c84701e9"
+    ],
+    [
+      "Vale.Interop.Heap_s.__proj__InteropHeap__item__hs",
+      2,
+      1,
+      0,
+      [
+        "@query", "proj_equation_Vale.Interop.Heap_s.InteropHeap_ptrs",
+        "projection_inverse_Vale.Interop.Heap_s.InteropHeap_ptrs"
+      ],
+      0,
+      "8e5a7fa6950f08bfffda235707c1732f"
+    ],
+    [
+      "Vale.Interop.Heap_s.addrs_ptr",
+      2,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "binder_x_a2b389b19c9bd00c88f8324fd9c67eb4_2",
+        "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_0",
+        "equality_tok_Prims.LexTop@tok", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Vale.Interop.Types.base_typ_as_type",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2", "int_inversion",
+        "int_typing", "primitive_Prims.op_Equality",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_dd20688ba5635abfb47e96fd328dd7c1",
+        "typing_FStar.UInt8.t", "typing_LowStar.BufferView.Down.length",
+        "typing_Vale.Interop.Types.__proj__Buffer__item__bsrc",
+        "typing_Vale.Interop.Types.__proj__Buffer__item__src",
+        "typing_Vale.Interop.Types.__proj__Buffer__item__writeable",
+        "typing_Vale.Interop.Types.b8_preorder",
+        "typing_Vale.Interop.Types.base_typ_as_type",
+        "typing_Vale.Interop.Types.get_downview",
+        "well-founded-ordering-on-nat"
+      ],
+      0,
+      "f2ec81c5a4ceb981289c218c0438151d"
+    ],
+    [
+      "Vale.Interop.Heap_s.addrs_set",
+      2,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Vale.Interop.Types.base_typ_as_type",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "typing_FStar.UInt8.t", "typing_LowStar.BufferView.Down.length",
+        "typing_Vale.Interop.Types.__proj__Buffer__item__bsrc",
+        "typing_Vale.Interop.Types.__proj__Buffer__item__src",
+        "typing_Vale.Interop.Types.__proj__Buffer__item__writeable",
+        "typing_Vale.Interop.Types.b8_preorder",
+        "typing_Vale.Interop.Types.base_typ_as_type",
+        "typing_Vale.Interop.Types.get_downview"
+      ],
+      0,
+      "1115bcacf6a873185e6531af6ac4a40e"
+    ],
+    [
+      "Vale.Interop.Heap_s.correct_down_p",
+      2,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "96530df1a26dc762820e3064a6fa4170"
     ]
   ]
 ]
