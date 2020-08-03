@@ -151,7 +151,7 @@ let update_sub #t #a #len dst start n src =
         (Seq.update_sub #a #(v len) (as_seq h0 dst) (v start) (v n) (as_seq h0 src))
 
 let update_sub_f #a #len h0 buf start n spec f =
-  let tmp = sub_generic buf start n in
+  let tmp = Ghost.hide (gsub buf start n) in
   let h0 = ST.get () in
   f ();
   let h1 = ST.get () in
@@ -398,7 +398,7 @@ let fill_blocks #t h0 len n output a_spec refl footprint spec impl =
       (Sequence.generate_blocks_inner t (v len) (v n) a_spec (spec h0)) (refl' h0 0) (v i);
     assert ((v i + 1) * v len == v i * v len + v len);
     assert (v i * v len <= max_size_t);
-    let block = sub_generic output (i *! len) len in
+    let block = Ghost.hide (gsub output (i *! len) len) in
     let h0_ = ST.get() in
     impl i;
     let h = ST.get() in
@@ -453,7 +453,7 @@ let fill_blocks_simple #a h0 bs n output spec_f impl_f =
     FStar.Math.Lemmas.lemma_mult_le_right (v bs) (v i + 1) (v n);
     assert (v i * v bs <= maxint U32);
     assert (v (i *! bs) + v bs <= v n * v bs);
-    let block = sub output (i *! bs) bs in
+    let block = Ghost.hide (gsub output (i *! bs) bs) in
     let h0_ = ST.get() in
     impl_f i;
     let h = ST.get() in
@@ -593,7 +593,7 @@ let map_blocks_multi #t #a h0 bs nb inp output spec_f impl_f =
     Loop.unfold_repeat_gen (v nb) (Seq.map_blocks_a a (v bs) (v nb))
       (Seq.map_blocks_f #a (v bs) (v nb) (as_seq h0 inp) (spec_f h0)) (refl h0 0) (v i);
     FStar.Math.Lemmas.lemma_mult_le_right (v bs) (v i + 1) (v nb);
-    let block = sub output (i *! bs) bs in
+    let block = Ghost.hide (gsub output (i *! bs) bs) in
     let h0_ = ST.get() in
     impl_f i;
     let h = ST.get() in
