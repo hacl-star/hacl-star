@@ -32,11 +32,8 @@ open FStar.Mul
 val lemma_x3_0: #c: curve -> x: int -> y: int -> z: int -> 
   Lemma (
     let prime = getPrime c in 
-    ((3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) 
-    * (3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) 
-    - 8 * (x * (y * y % prime) % prime)) % prime == 
-    ((3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) 
-    * (3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) - 8 * x * y * y) % prime)
+    ((3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime)  * (3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) - 8 * (x * (y * y % prime) % prime)) % prime == 
+    ((3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) * (3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) - 8 * x * y * y) % prime)
 
 let lemma_x3_0 #c x y z = 
   let prime = getPrime c in
@@ -45,17 +42,29 @@ let lemma_x3_0 #c x y z =
   calc (==)
   {
     (t0 * t0 - 8 * (x * (y * y % prime) % prime)) % prime;
+    
     (==) {lemma_mod_mul_distr_r x (y * y) prime}
+    
     (t0 * t0 - 8 * ((x * (y * y)) % prime)) % prime;
+    
     (==) {assert_by_tactic (x * (y * y) == x * y * y) canon}
+    
     (t0 * t0 - 8 * (x * y * y % prime)) % prime;
+    
     (==) {lemma_mod_sub_distr (t0 * t0) (8 * (x * y * y % prime)) prime}
+    
     (t0 * t0 - (8 * (x * y * y % prime)) % prime) % prime;
+    
     (==) {lemma_mod_mul_distr_r 8 (x * y * y) prime}
+    
     (t0 * t0 - (8 * (x * y * y)) % prime) % prime;
+    
     (==) {assert_by_tactic (8 * (x * y * y) == 8 * x * y * y) canon}
+    
     (t0 * t0 - (8 * x * y * y) % prime) % prime;
+    
     (==) {lemma_mod_sub_distr (t0 * t0) (8 * x * y * y) prime}
+    
     (t0 * t0 - 8 * x * y * y) % prime;
   }
 
@@ -71,20 +80,24 @@ let lemma_x3_1 #c a b =
   calc (==)
   {
     ((a % prime) * (a % prime) - b) % prime;
+    
     (==) {lemma_mod_add_distr (- b) ((a % prime) * (a % prime)) prime}
+    
     ((a % prime) * (a % prime) % prime - b) % prime;
+    
     (==) {lemma_mod_mul_distr_l a (a % prime) prime; lemma_mod_mul_distr_r a a prime}
+    
     (a * a % prime - b) % prime;
+    
     (==) {lemma_mod_add_distr (- b) (a * a) prime}
+    
     (a * a - b) % prime;
   }
   
 
 val lemma_x3: #c: curve -> x: int -> y: int -> z: int -> Lemma (
   let prime = getPrime c in 
-  ((3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) * 
-  (3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) 
-  - 8 * (x * (y * y % prime) % prime)) % prime == 
+  ((3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) * (3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime)  - 8 * (x * (y * y % prime) % prime)) % prime == 
   ((3 * (x - z * z) * (x + z * z)) * (3 * (x - z * z) * (x + z * z)) - 8 * x * (y * y)) % prime
 )
 
@@ -95,59 +108,40 @@ let lemma_x3 #c x y z =
 
   calc (==)
   {
-    (
-      (3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) * 
-      (3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) - 8 * x * y * y) % prime;
+    ((3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) *  (3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) - 8 * x * y * y) % prime;
     
     (==) {lemma_mod_mul_distr_l (3 * (x - (z * z % prime))) (x + (z * z % prime)) prime}
     
-    (
-      (3 * (x - (z * z % prime)) % prime * (x + (z * z % prime)) % prime) * 
-      (3 * (x - (z * z % prime)) % prime * (x + (z * z % prime)) % prime) - 8 * x * y * y) % prime;
+    ((3 * (x - (z * z % prime)) % prime * (x + (z * z % prime)) % prime) * (3 * (x - (z * z % prime)) % prime * (x + (z * z % prime)) % prime) - 8 * x * y * y) % prime;
     
-  (==) {lemma_mod_mul_distr_r 3 (x - (z * z % prime)) prime}
+    (==) {lemma_mod_mul_distr_r 3 (x - (z * z % prime)) prime}
   
-     (
-       (3 * ((x - (z * z % prime)) % prime) % prime * (x + (z * z % prime)) % prime) * 
-       (3 * ((x - (z * z % prime)) % prime) % prime * (x + (z * z % prime)) % prime) - 8 * x * y * y) % prime;
+    ((3 * ((x - (z * z % prime)) % prime) % prime * (x + (z * z % prime)) % prime) * (3 * ((x - (z * z % prime)) % prime) % prime * (x + (z * z % prime)) % prime) - 8 * x * y * y) % prime;
 
-   (==) {lemma_mod_sub_distr x (z * z) prime}
+    (==) {lemma_mod_sub_distr x (z * z) prime}
 
-     (
-       (3 * ((x - z * z) % prime) % prime * (x + (z * z % prime)) % prime) *
-       (3 * ((x - z * z) % prime) % prime * (x + (z * z % prime)) % prime) - 8 * x * y * y) % prime;
+    ((3 * ((x - z * z) % prime) % prime * (x + (z * z % prime)) % prime) * (3 * ((x - z * z) % prime) % prime * (x + (z * z % prime)) % prime) - 8 * x * y * y) % prime;
 
-  (==) {lemma_mod_mul_distr_r 3 (x - (z * z)) prime}
+    (==) {lemma_mod_mul_distr_r 3 (x - (z * z)) prime}
+  
+    ((3 * ((x - z * z)) % prime * (x + (z * z % prime)) % prime) * (3 * ((x - z * z)) % prime * (x + (z * z % prime)) % prime) - 8 * x * y * y) % prime;
 
-     (
-       (3 * ((x - z * z)) % prime * (x + (z * z % prime)) % prime) * 
-       (3 * ((x - z * z)) % prime * (x + (z * z % prime)) % prime) - 8 * x * y * y) % prime;
+    (==) {lemma_mod_mul_distr_l (3 * (x - z * z)) (x + (z * z % prime)) prime}
 
-  (==) {lemma_mod_mul_distr_l (3 * (x - z * z)) (x + (z * z % prime)) prime}
-
-     (
-       (3 * (x - z * z) * (x + (z * z % prime)) % prime) * 
-       (3 * (x - z * z) * (x + (z * z % prime)) % prime) - 8 * x * y * y) % prime;
+    ((3 * (x - z * z) * (x + (z * z % prime)) % prime) * (3 * (x - z * z) * (x + (z * z % prime)) % prime) - 8 * x * y * y) % prime;
      
-  (==) {lemma_mod_mul_distr_r (3 * (x - z * z)) (x + (z * z % prime)) prime; 
-       lemma_mod_add_distr x (z * z) prime; 
-       lemma_mod_mul_distr_r (3 * (x - z * z)) (x + z * z) prime}
+    (==) {lemma_mod_mul_distr_r (3 * (x - z * z)) (x + (z * z % prime)) prime; lemma_mod_add_distr x (z * z) prime; lemma_mod_mul_distr_r (3 * (x - z * z)) (x + z * z) prime}
 
-    (  
-      (3 * (x - z * z) * (x + (z * z)) % prime) * 
-      (3 * (x - z * z) * (x + (z * z)) % prime) - 8 * x * y * y) % prime;
+    ((3 * (x - z * z) * (x + (z * z)) % prime) * (3 * (x - z * z) * (x + (z * z)) % prime) - 8 * x * y * y) % prime;
   
-  (==) {lemma_x3_1 #c (3 * (x - z * z) * (x + (z * z))) (8 * x * y * y)}
+    (==) {lemma_x3_1 #c (3 * (x - z * z) * (x + (z * z))) (8 * x * y * y)}
 
-    (  
-      (3 * (x - z * z) * (x + z * z)) * 
-      (3 * (x - z * z) * (x + z * z)) - 8 * x * y * y) % prime;
+    ((3 * (x - z * z) * (x + z * z)) * (3 * (x - z * z) * (x + z * z)) - 8 * x * y * y) % prime;
 
- (==) {assert_by_tactic (8 * x * y * y == 8 * x * (y * y)) canon}
-     (  
-      (3 * (x - z * z) * (x + z * z)) * 
-      (3 * (x - z * z) * (x + z * z)) - 8 * x * (y * y)) % prime;
-}
+    (==) {assert_by_tactic (8 * x * y * y == 8 * x * (y * y)) canon}
+     
+    ((3 * (x - z * z) * (x + z * z)) * (3 * (x - z * z) * (x + z * z)) - 8 * x * (y * y)) % prime;
+  }
 
 
 val y3_lemma_0: #c: curve -> x: int ->  y: int -> z: int ->  t0: int -> Lemma (
@@ -181,7 +175,6 @@ val y3_lemma_1: #c: curve -> x: int ->  y: int -> z: int -> Lemma (
   3 * (x + z * z) * (x - z * z)  % prime)
 
 let y3_lemma_1 #c x y z = 
-  admit();
   let prime = getPrime c in 
   let open FStar.Tactics.Canon in 
   calc (==)
@@ -208,7 +201,8 @@ let y3_lemma_1 #c x y z =
 
 val lemma_y3: #c: curve -> x: int -> y: int -> z: int -> x3: int -> Lemma (
   let prime = getPrime c in 
-  ((3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) *  ((4 * (x * (y * y % prime) % prime) % prime) - x3) - 8 * (y * y % prime) * (y * y % prime)) % prime == (3 * (x - z * z) * (x + z * z) *  (4 * x * (y * y) - x3) - 8 * (y * y) * (y * y)) % prime)
+  ((3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime) *  ((4 * (x * (y * y % prime) % prime) % prime) - x3) - 8 * (y * y % prime) * (y * y % prime)) % prime == 
+  (3 * (x - z * z) * (x + z * z) *  (4 * x * (y * y) - x3) - 8 * (y * y) * (y * y)) % prime)
   
 
 let lemma_y3 #c x y z x3 = 
@@ -285,31 +279,30 @@ val lemma_point_abd: xD: int -> dlt: int ->
 let lemma_point_abd xD dlt = ()
 
 
-
 val point_double_a_b_g: #c: curve 
   -> p: point c 
   -> alpha: felem c 
   -> beta: felem c 
   -> gamma: felem c
   -> delta: felem c 
-  -> tempBuffer: lbuffer uint64 (getCoordinateLenU64 c *. 3ul) -> 
+  -> tempBuffer: lbuffer uint64 (getCoordinateLenU64 c *! 3ul) -> 
   Stack unit
     (requires fun h -> 
-      let coordinateLen = uint_v (getCoordinateLenU64 c) in 
+      let len = getCoordinateLenU64 c in 
       let prime = getPrime c in 
       live h p /\ live h alpha /\ live h beta /\ live h gamma /\ live h delta /\ live h tempBuffer /\ 
       LowStar.Monotonic.Buffer.all_disjoint [loc p; loc alpha; loc beta; loc gamma; loc delta; loc tempBuffer] /\
-      as_nat c h (gsub p (size 0) (size coordinateLen)) < prime /\ 
-      as_nat c h (gsub p (size coordinateLen) (size coordinateLen)) < prime /\
-      as_nat c h (gsub p (size (coordinateLen * 2)) (size coordinateLen)) < prime
+      as_nat c h (gsub p (size 0) len) < prime /\ 
+      as_nat c h (gsub p len len) < prime /\
+      as_nat c h (gsub p (size 2 *! len) len) < prime
     )
     (ensures fun h0 _ h1 -> modifies (loc alpha |+| loc beta |+| loc gamma |+| loc delta |+| loc tempBuffer) h0 h1 /\
       (
-	let coordinateLen = uint_v (getCoordinateLenU64 c) in 
+	let len = getCoordinateLenU64 c in 
 	let prime = getPrime c in 
-	let x = fromDomain_ #c (as_nat c h0 (gsub p (size 0) (size coordinateLen))) in 
-	let y = fromDomain_ #c (as_nat c h0 (gsub p (size coordinateLen) (size coordinateLen))) in 
-	let z = fromDomain_ #c (as_nat c h0 (gsub p (size (2 * coordinateLen)) (size coordinateLen))) in 
+	let x = fromDomain_ #c (as_nat c h0 (gsub p (size 0) len)) in 
+	let y = fromDomain_ #c (as_nat c h0 (gsub p len len)) in 
+	let z = fromDomain_ #c (as_nat c h0 (gsub p (size 2 *! len) len)) in 
 	as_nat c h1 delta = toDomain_ #c (z * z % prime) /\
 	as_nat c h1 gamma = toDomain_ #c (y * y % prime) /\
 	as_nat c h1 beta = toDomain_ #c (x * fromDomain_ #c (as_nat c h1 gamma) % prime) /\
@@ -323,13 +316,12 @@ let point_double_a_b_g #c p alpha beta gamma delta tempBuffer =
   
   let pX = sub p (size 0) coordinateLen in 
   let pY = sub p (coordinateLen) (coordinateLen) in 
-  let pZ = sub p ((2ul *. coordinateLen)) coordinateLen in 
+  let pZ = sub p (size 2 *! coordinateLen) coordinateLen in 
 
   let a0 = sub tempBuffer (size 0) (coordinateLen) in 
   let a1 = sub tempBuffer (coordinateLen) (coordinateLen) in 
-  let alpha0 = sub tempBuffer ((2ul *. coordinateLen)) (coordinateLen) in 
+  let alpha0 = sub tempBuffer (size 2 *! coordinateLen) (coordinateLen) in 
 
-  
   montgomery_square_buffer pZ delta; (* delta = z * z*)
   montgomery_square_buffer pY gamma; (* gamma = y * y *)
   montgomery_multiplication_buffer pX gamma beta; (* beta = x * gamma *)
@@ -350,17 +342,23 @@ let point_double_a_b_g #c p alpha beta gamma delta tempBuffer =
     calc (==) 
     {
       (3 * (((xD - dlt) % prime) *  ((xD + dlt) % prime) % prime) % prime);
-    (==) {lemma_mod_mul_distr_l (xD - dlt) ((xD + dlt) % prime) prime; lemma_mod_mul_distr_r (xD - dlt) (xD + dlt) prime}
+   
+      (==) {lemma_mod_mul_distr_l (xD - dlt) ((xD + dlt) % prime) prime; lemma_mod_mul_distr_r (xD - dlt) (xD + dlt) prime}
+      
       (3 * ((xD - dlt) *  (xD + dlt) % prime) % prime);
+    
     (==) {lemma_mod_mul_distr_r 3 ((xD - dlt) * (xD + dlt)) prime}
+    
       (3 * ((xD - dlt) * (xD + dlt)) % prime);
+    
     (==) {lemma_point_abd xD dlt}
+    
       (3 * (xD - dlt) * (xD + dlt)) % prime;
-  };
-  admit()
+  }
 
 
-val point_double_x3: #c: curve -> x3: felem c -> alpha: felem c -> fourBeta: felem c -> beta: felem c -> eightBeta: felem c ->
+val point_double_x3: #c: curve -> x3: felem c -> alpha: felem c -> fourBeta: felem c 
+  -> beta: felem c -> eightBeta: felem c ->
   Stack unit
     (requires fun h -> live h x3 /\ live h alpha /\ live h fourBeta /\ live h beta /\ live h eightBeta /\
       LowStar.Monotonic.Buffer.all_disjoint [loc x3; loc alpha; loc fourBeta; loc beta; loc eightBeta] /\
@@ -382,7 +380,7 @@ let point_double_x3 #c x3 alpha fourBeta beta eightBeta  =
   multByTwo fourBeta eightBeta; (* eightBeta = beta * 8 *)
   felem_sub x3 eightBeta x3 (* x3 = alpha ** 2 - beta * 8 *);
 
-  admit();
+
   let prime = getPrime c in 
   calc(==)
   {
@@ -394,11 +392,11 @@ let point_double_x3 #c x3 alpha fourBeta beta eightBeta  =
      
      (==) {lemma_mod_sub_distr (fromDomain_ #c (as_nat c h0 alpha) * fromDomain_ #c (as_nat c h0 alpha) % prime) (8 * fromDomain_ #c (as_nat c h0 beta)) prime}
      
-    toDomain_ #c (((fromDomain_ #c (as_nat c h0 alpha) * fromDomain_ #c (as_nat c h0 alpha) % prime) - (8 * fromDomain_ #c (as_nat c h0 beta))) % prime256);
+    toDomain_ #c (((fromDomain_ #c (as_nat c h0 alpha) * fromDomain_ #c (as_nat c h0 alpha) % prime) - (8 * fromDomain_ #c (as_nat c h0 beta))) % prime);
  
     (==) {lemma_mod_add_distr (- 8 * fromDomain_ #c (as_nat c h0 beta)) (fromDomain_ #c (as_nat c h0 alpha) * fromDomain_ #c (as_nat c h0 alpha)) prime}
       
-    toDomain_ #c ((fromDomain_ #c (as_nat c h0 alpha) * fromDomain_ #c (as_nat c h0 alpha) - 8 * fromDomain_ #c (as_nat c h0 beta)) % prime256);
+    toDomain_ #c ((fromDomain_ #c (as_nat c h0 alpha) * fromDomain_ #c (as_nat c h0 alpha) - 8 * fromDomain_ #c (as_nat c h0 beta)) % prime);
   }
 
 
@@ -423,6 +421,7 @@ val point_double_z3: #c: curve -> z3: felem c -> pY: felem c -> pZ: felem c -> g
       )
     )
 
+
 let point_double_z3 #c z3 pY pZ gamma delta  = 
     let h0 = ST.get() in 
 
@@ -431,22 +430,22 @@ let point_double_z3 #c z3 pY pZ gamma delta  =
   felem_sub z3 gamma z3; (* z3 =  (py + pz) ** 2 - gamma  *)
   felem_sub z3 delta z3 (* z3 = (py + pz) ** 2 - gamma - delta *);
 
-  admit();
+
     let pyD = fromDomain_ #c (as_nat c h0 pY) in 
     let pzD = fromDomain_ #c (as_nat c h0 pZ) in 
     
     let prime = getPrime c in 
 
-  calc (==)
-  {
-    toDomain_ #c (((((( ((pyD + pzD) % prime) * ((pyD + pzD) % prime) % prime)) - fromDomain_ #c (as_nat c h0 gamma)) % prime) - fromDomain_ #c (as_nat c h0 delta)) % prime);
+    calc (==)
+    {
+      toDomain_ #c (((((( ((pyD + pzD) % prime) * ((pyD + pzD) % prime) % prime)) - fromDomain_ #c (as_nat c h0 gamma)) % prime) - fromDomain_ #c (as_nat c h0 delta)) % prime);
   
     (==) {lemma_mod_mul_distr_l (pyD + pzD) ((pyD + pzD) % prime) prime; 
       lemma_mod_mul_distr_r (pyD + pzD) (pyD + pzD) prime}
     
     toDomain_ #c ((((((pyD + pzD) * (pyD + pzD) % prime) - fromDomain_ #c (as_nat c h0 gamma)) % prime) - fromDomain_ #c (as_nat c h0 delta)) % prime);
     
-  (==) {lemma_mod_add_distr (- fromDomain_ #c (as_nat c h0 gamma)) ((pyD + pzD) * (pyD + pzD)) prime }
+    (==) {lemma_mod_add_distr (- fromDomain_ #c (as_nat c h0 gamma)) ((pyD + pzD) * (pyD + pzD)) prime }
     
     toDomain_ #c (((((pyD + pzD) * (pyD + pzD) - fromDomain_ #c (as_nat c h0 gamma)) % prime) - fromDomain_ #c (as_nat c h0 delta)) % prime);
  
@@ -489,7 +488,6 @@ let point_double_y3 #c y3 x3 alpha gamma eightGamma fourBeta =
 
   let alphaD = fromDomain_ #c (as_nat c h0 alpha) in 
   let gammaD = fromDomain_ #c (as_nat c h0 gamma) in  
-  admit();
 
   let open FStar.Tactics.Canon in 
 
@@ -543,51 +541,49 @@ let lemma_pd_to_spec #c x y z x3 y3 z3 =
   assert(let xN, yN, zN = _point_double #c  (xD, yD, zD) in 
       x3D == xN /\ y3D == yN /\ z3D == zN)
 
-  
 
 let point_double #c p result tempBuffer = 
-  let len = getCoordinateLenU64 c in 
+  let len:size_t = getCoordinateLenU64 c in 
 
-  let pX = sub p (size 0) (len) in 
+  let pX = sub p (size 0) len in 
   let pY = sub p len len in 
-  let pZ = sub p (2ul *. len) (len) in 
+  let pZ = sub p (size 2 *! len) len in 
 
-  let x3 = sub result (size 0) (len) in 
-  let y3 = sub result (len) (len) in 
-  let z3 = sub result ( (2ul *. len))  len in 
-
-  let delta = sub tempBuffer (size 0) (len) in 
-  let gamma = sub tempBuffer (len) (len) in 
-  let beta = sub tempBuffer ((2ul *. len)) (len) in 
-  let alpha = sub tempBuffer ( (3ul *. len)) (len) in 
+  let x3 = sub result (size 0) len in 
+  let y3 = sub result len len in 
+  let z3 = sub result (size 2 *! len) len in 
   
-  let fourBeta = sub tempBuffer ( (4ul *. len)) (len) in 
-  let eightBeta = sub tempBuffer ((5ul *. len)) (len) in 
-  let eightGamma = sub tempBuffer ((6ul *. len)) (len) in 
+  let delta = sub tempBuffer (size 0) len in 
+  let gamma = sub tempBuffer len len in 
+  let beta = sub tempBuffer (size 2 *! len) len in 
+  let alpha = sub tempBuffer (size 3 *! len) len in 
+  let fourBeta = sub tempBuffer (size 4 *! len) len in 
+  let eightBeta = sub tempBuffer (size 5 *! len) len in 
+  let eightGamma = sub tempBuffer (size 6 *! len) len in 
 
-  let tmp = sub tempBuffer ((7ul *. len)) ((3ul *. len)) in 
-  
+  let tmp = sub tempBuffer (7ul *! len) (3ul *! len) in 
+    let h0 = ST.get() in 
 
-  let h0 = ST.get() in 
-    point_double_a_b_g #c p alpha beta gamma delta tmp;
+    point_double_a_b_g #c p alpha beta gamma delta tmp;  
     point_double_x3 #c x3 alpha fourBeta beta eightBeta; 
     point_double_z3 #c z3 pY pZ gamma delta;
     point_double_y3 #c y3 x3 alpha gamma eightGamma fourBeta;
 
   let h4 = ST.get() in
 
-  let x = fromDomain_ #c (as_nat c h0 (gsub p (size 0) (len))) in 
-  let y = fromDomain_ #c (as_nat c h0 (gsub p (len) (len))) in 
-  let z = fromDomain_ #c (as_nat c h0 (gsub p ((2ul *. len)) (len))) in 
-  
+  let x = fromDomain_ #c (as_nat c h0 (gsub p (size 0) len)) in 
+  let y = fromDomain_ #c (as_nat c h0 (gsub p len len)) in 
+  let z = fromDomain_ #c (as_nat c h0 (gsub p (size 2 *! len) len)) in 
+
   lemma_x3 #c x y z;
-  lemma_z3 #c x y z;
+  lemma_z3 #c x y z; 
   lemma_y3 #c x y z (fromDomain_ #c (as_nat c h4 x3));
+
   lemma_pd_to_spec #c
-    (as_nat c h0 (gsub p (size 0) (len))) 
-      (as_nat c h0 (gsub p (len) (len))) 
-	(as_nat c h0 (gsub p ( (2ul *. len)) len)) 
-    (as_nat c h4 (gsub result (size 0) (len))) 
-      (as_nat c h4 (gsub result (len) ( len))) 
-	(as_nat c h4 (gsub result ((2ul *. len)) (len)))
+    (as_nat c h0 (gsub p (size 0) len)) 
+      (as_nat c h0 (gsub p len len)) 
+	(as_nat c h0 (gsub p (size 2 *! len) len)) 
+    (as_nat c h4 (gsub result (size 0) len)) 
+      (as_nat c h4 (gsub result len len)) 
+	(as_nat c h4 (gsub result (size 2 *! len) len))
 
