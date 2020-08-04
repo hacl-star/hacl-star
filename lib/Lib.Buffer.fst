@@ -577,7 +577,7 @@ let mapi #a #b h0 clen out spec_f f inp =
       let xi = inp.(i) in f i xi)
 
 #reset-options "--z3rlimit 500 --max_fuel 2"
-let map_blocks_multi #t #a h0 bs nb inp output spec_f impl_f =
+let map_blocks_multi #t #a h0 bs nb len inp output spec_f impl_f =
   Math.Lemmas.multiple_division_lemma (v nb) (v bs);
   [@inline_let]
   let refl h (i:nat{i <= v nb}) : GTot (Seq.map_blocks_a a (v bs) (v nb) i) =
@@ -586,12 +586,12 @@ let map_blocks_multi #t #a h0 bs nb inp output spec_f impl_f =
   [@inline_let]
   let footprint (i:nat{i <= v nb}) = loc (gsub output 0ul (size i *! bs)) in
   [@inline_let]
-  let spec h0 = Seq.map_blocks_f #a (v bs) (v nb) (as_seq h0 inp) (spec_f h0) in
+  let spec h0 = Seq.map_blocks_f #a (v bs) (v nb) (Seq.sub (as_seq h0 inp) 0 (v nb * v bs)) (spec_f h0) in
   let h0 = ST.get () in
   loop h0 nb (Seq.map_blocks_a a (v bs) (v nb)) refl footprint spec
   (fun i ->
     Loop.unfold_repeat_gen (v nb) (Seq.map_blocks_a a (v bs) (v nb))
-      (Seq.map_blocks_f #a (v bs) (v nb) (as_seq h0 inp) (spec_f h0)) (refl h0 0) (v i);
+      (Seq.map_blocks_f #a (v bs) (v nb) (Seq.sub (as_seq h0 inp) 0 (v nb * v bs)) (spec_f h0)) (refl h0 0) (v i);
     FStar.Math.Lemmas.lemma_mult_le_right (v bs) (v i + 1) (v nb);
     let block = Ghost.hide (gsub output (i *! bs) bs) in
     let h0_ = ST.get() in
@@ -609,30 +609,15 @@ let div_mul_le b a = ()
 #reset-options "--z3rlimit 2000 --fuel 0 --ifuel 0"
 
 let map_blocks #t #a h0 len blocksize inp output spec_f spec_l impl_f impl_l =
-if len = 0ul
-then begin
-  (* Can this be made into a lemma like:
-     empty_seq_eq : Lemma (forall s1 s2. len s1 == 0 /\ len s2 == 0 ==> s1 == s2)
-     ? Will it trigger? *)
-  let h = ST.get () in
-  FStar.Seq.lemma_empty (as_seq h output);
-  FStar.Seq.lemma_empty (Seq.map_blocks (v blocksize) (as_seq h0 inp) (spec_f h0) (spec_l h0));
-  ()
-end else begin
   div_mul_le (v blocksize) (v len);
   let nb = len /. blocksize in
   let rem = len %. blocksize in
   let blen = nb *! blocksize in
-  let ib = sub_generic inp 0ul blen in
-  let ob = sub_generic output 0ul blen in
-  //let il = sub_generic inp blen rem in
-  //let ol = sub_generic inp blen rem in
   Math.Lemmas.lemma_div_mod (v len) (v blocksize);
   Math.Lemmas.multiple_division_lemma (v nb) (v blocksize);
-  map_blocks_multi #t #a h0 blocksize nb ib ob spec_f impl_f;
+  map_blocks_multi #t #a h0 blocksize nb len inp output spec_f impl_f;
   if rem >. 0ul then
      (impl_l nb;
       let h1 = ST.get() in
       FStar.Seq.lemma_split (as_seq h1 output) (v nb * v blocksize))
   else ()
-end

@@ -325,10 +325,10 @@ let recallable (#t:buftype) (#a:Type0) (#len:size_t) (b:lbuffer_t t a len) =
 
 inline_for_extraction noextract
 val recall:
-    #t:buftype 
+    #t:buftype
   -> #a:Type0
   -> #len:size_t
-  -> b:lbuffer_t t a len -> 
+  -> b:lbuffer_t t a len ->
   Stack unit
     (requires fun _ -> recallable b)
     (ensures  fun h0 _ h1 -> h0 == h1 /\ live h0 b)
@@ -1153,8 +1153,9 @@ val map_blocks_multi:
   -> h0: mem
   -> blocksize:size_t{v blocksize > 0}
   -> nb:size_t{v nb * v blocksize <= max_size_t}
-  -> inp:lbuffer_t t a (nb *! blocksize)
-  -> output:lbuffer a (nb *! blocksize)
+  -> len:size_t{v nb * v blocksize <= v len}
+  -> inp:lbuffer_t t a len
+  -> output:lbuffer a len
   -> spec_f:(mem -> GTot (i:nat{i < v nb} -> Seq.lseq a (v blocksize) -> Seq.lseq a (v blocksize)))
   -> impl_f:(i:size_t{v i < v nb} -> Stack unit
       (requires fun h1 ->
@@ -1169,8 +1170,9 @@ val map_blocks_multi:
         as_seq h2 oblock == ob))
   -> Stack unit
     (requires fun h -> h0 == h /\ live h output /\ live h inp /\ eq_or_disjoint inp output)
-    (ensures  fun _ _ h1 -> modifies1 output h0 h1 /\
-	as_seq h1 output == Seq.map_blocks_multi (v blocksize) (v nb) (v nb) (as_seq h0 inp) (spec_f h0))
+    (ensures  fun _ _ h1 -> modifies1 (gsub output 0ul (nb *! blocksize)) h0 h1 /\
+      Seq.sub (as_seq h1 output) 0 (v nb * v blocksize) ==
+      Seq.map_blocks_multi (v blocksize) (v nb) (v nb) (Seq.sub (as_seq h0 inp) 0 (v nb * v blocksize)) (spec_f h0))
 
 // GM: brittle on batch mode?
 #push-options "--z3rlimit 250 --retry 5"
@@ -1211,4 +1213,3 @@ val map_blocks:
     (requires fun h -> h0 == h /\ live h output /\ live h inp /\ eq_or_disjoint inp output)
     (ensures  fun _ _ h1 -> modifies1 output h0 h1 /\
 	as_seq h1 output == Seq.map_blocks (v blocksize) (as_seq h0 inp) (spec_f h0) (spec_l h0))
-

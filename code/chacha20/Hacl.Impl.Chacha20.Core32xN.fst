@@ -171,7 +171,7 @@ val xor_block:
       as_seq h1 o == Spec.xor_block #w (as_seq h0 st) (as_seq h0 b)))
 let xor_block #w o st b =
   let h0 = ST.get () in
-  map_blocks_multi h0 (size w *! 4ul) 16ul b o
+  map_blocks_multi h0 (size w *! 4ul) 16ul ((4ul *! size w) *! 16ul) b o
   (fun h -> Spec.xor_block_f #w (as_seq h0 st))
   (fun i ->
     [@inline_let]
@@ -179,7 +179,11 @@ let xor_block #w o st b =
     let x = vec_load_le U32 w (sub b (i *! bs) bs) in
     let y = x ^| st.(i) in
     vec_store_le #U32 #w (sub o (i *! bs) bs) y
-  )
+  );
+  let h1 = ST.get () in
+  Seq.slice_length (as_seq h0 b);
+  Seq.slice_length (as_seq h1 o)
+
 
 inline_for_extraction noextract
 val line:
