@@ -19,8 +19,6 @@ module Vec = Hacl.Spec.Poly1305.Vec
 module Equiv = Hacl.Spec.Poly1305.Equiv
 module F32xN = Hacl.Impl.Poly1305.Field32xN
 
-friend Lib.LoopCombinators
-
 
 let _: squash (inversion field_spec) = allow_inversion field_spec
 
@@ -169,6 +167,34 @@ let poly1305_encode_blocks #s f b =
 
 
 inline_for_extraction noextract
+val load_felem_le_last:
+    #s:field_spec
+  -> f:felem s
+  -> len:size_t{0 < v len /\ v len < 16}
+  -> b:lbuffer uint8 len ->
+  Stack unit
+  (requires fun h ->
+    live h b /\ live h f /\ disjoint b f)
+  (ensures  fun h0 _ h1 -> modifies (loc f) h0 h1 /\
+    felem_fits h1 f (1, 1, 1, 1, 1) /\
+    F32xN.felem_less #(width s) h1 f (pow2 (v len * 8)) /\
+    feval h1 f == LSeq.create (width s) (BSeq.nat_from_bytes_le (as_seq h0 b)))
+
+let load_felem_le_last #s f len b =
+  push_frame();
+  let tmp = create 16ul (u8 0) in
+  update_sub tmp 0ul len b;
+  let h0 = ST.get () in
+  Hacl.Impl.Poly1305.Lemmas.nat_from_bytes_le_eq_lemma (v len) (as_seq h0 b);
+  assert (BSeq.nat_from_bytes_le (as_seq h0 b) == BSeq.nat_from_bytes_le (as_seq h0 tmp));
+  assert (BSeq.nat_from_bytes_le (as_seq h0 b) < pow2 (v len * 8));
+  load_felem_le f tmp;
+  let h1 = ST.get () in
+  lemma_feval_is_fas_nat h1 f;
+  pop_frame()
+
+
+inline_for_extraction noextract
 val poly1305_encode_last:
     #s:field_spec
   -> f:felem s
@@ -183,20 +209,8 @@ val poly1305_encode_last:
     (feval h1 f).[0] == S.encode (v len) (as_seq h0 b))
 
 let poly1305_encode_last #s f len b =
-  push_frame();
-  let tmp = create 16ul (u8 0) in
-  update_sub tmp 0ul len b;
-  let h0 = ST.get () in
-  Hacl.Impl.Poly1305.Lemmas.nat_from_bytes_le_eq_lemma (v len) (as_seq h0 b);
-  assert (BSeq.nat_from_bytes_le (as_seq h0 b) == BSeq.nat_from_bytes_le (as_seq h0 tmp));
-  assert (BSeq.nat_from_bytes_le (as_seq h0 b) < pow2 (v len * 8));
-
-  load_felem_le f tmp;
-  let h1 = ST.get () in
-  lemma_feval_is_fas_nat h1 f;
-  assert (v (len *! 8ul) = v len * 8);
-  set_bit f (len *! 8ul);
-  pop_frame()
+  load_felem_le_last #s f len b;
+  set_bit f (len *! 8ul)
 
 
 inline_for_extraction noextract
@@ -389,6 +403,8 @@ let poly1305_update_scalar #s len text pre acc =
     F32xN.fmul_precomp_r_pre #(width s) h pre /\
     (feval h acc).[0] == Lib.LoopCombinators.repeati i (spec_fh h0) (feval h0 acc).[0] in
 
+  Lib.LoopCombinators.eq_repeati0 (v nb) (spec_fh h0) (feval h0 acc).[0];
+
   Lib.Loops.for (size 0) nb inv
     (fun i ->
       Lib.LoopCombinators.unfold_repeati (v nb) (spec_fh h0) (feval h0 acc).[0] (v i);
@@ -479,6 +495,7 @@ let poly1305_update_multi_loop #s bs len text pre acc =
     F32xN.load_precompute_r_post #(width s) h pre /\
     feval h acc == Lib.LoopCombinators.repeati i (spec_fh h0) (feval h0 acc) in
 
+  Lib.LoopCombinators.eq_repeati0 (v nb) (spec_fh h0) (feval h0 acc);
   Lib.Loops.for (size 0) nb inv
     (fun i ->
       Lib.LoopCombinators.unfold_repeati (v nb) (spec_fh h0) (feval h0 acc) (v i);
