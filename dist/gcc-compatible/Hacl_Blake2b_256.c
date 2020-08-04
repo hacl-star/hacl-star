@@ -300,18 +300,9 @@ Hacl_Blake2b_256_blake2b(
     blake2b_update_block(b1, b, false, totlen, b2);
   }
   uint8_t b21[128U] = { 0U };
-  uint8_t *last;
-  if (d == NULL)
+  if (ll > (uint32_t)0U)
   {
-    last = NULL;
-  }
-  else
-  {
-    last = d + ll - rem;
-  }
-  bool uu____0 = last == NULL;
-  if (!(uu____0 || b21 == NULL))
-  {
+    uint8_t *last = d + ll - rem;
     memcpy(b21, last, rem * sizeof (last[0U]));
   }
   FStar_UInt128_uint128

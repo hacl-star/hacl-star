@@ -510,13 +510,12 @@ let blake2_update_last #al #ms blake2_update_block #len wv hash prev rem d =
   let spec _ h1 = state_v h1 hash == Spec.blake2_update_last al (v prev) (v rem) h0.[|d|] (state_v h0 hash) in
   salloc1 h0 (size_block al) (u8 0) (Ghost.hide (loc hash |+| loc wv)) spec
   (fun last_block ->
-    let last = sub_generic d (len -! rem) rem in
     let h1 = ST.get() in
-    update_sub_generic last_block 0ul rem last;
-    let h2 = ST.get() in
-    as_seq_gsub h1 d (len -! rem) rem;
-    assert (as_seq h1 last == Seq.sub (as_seq h1 d) (v len - v rem) (v rem));
-    assert (as_seq h1 last == Seq.slice (as_seq h0 d) (v len - v rem) (v len));
+    if len >. 0ul then begin
+      let last = sub d (len -! rem) rem in
+      update_sub last_block 0ul rem last end;
+    let h2 = ST.get () in
+    Lib.Sequence.eq_intro (as_seq h2 last_block) (Spec.get_last_padded_block al (as_seq h0 d) (v rem));
     assert (as_seq h2 last_block == Spec.get_last_padded_block al (as_seq h0 d) (v rem));
     let totlen = prev +. (size_to_limb al len) in
     blake2_update_block wv hash true totlen last_block;
