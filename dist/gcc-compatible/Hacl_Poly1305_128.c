@@ -1249,11 +1249,7 @@ Hacl_Poly1305_128_poly1305_update(
     for (uint32_t _i = 0U; _i < (uint32_t)5U; ++_i)
       e[_i] = Lib_IntVector_Intrinsics_vec128_zero;
     uint8_t tmp[16U] = { 0U };
-    bool uu____0 = last == NULL;
-    if (!(uu____0 || tmp == NULL))
-    {
-      memcpy(tmp, last, rem * sizeof (last[0U]));
-    }
+    memcpy(tmp, last, rem * sizeof (last[0U]));
     uint64_t u0 = load64_le(tmp);
     uint64_t lo = u0;
     uint64_t u = load64_le(tmp + (uint32_t)8U);

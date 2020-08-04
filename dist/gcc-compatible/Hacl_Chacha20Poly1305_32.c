@@ -37,19 +37,10 @@ static inline void poly1305_padded_32(uint64_t *ctx, uint32_t len, uint8_t *text
   {
     blocks = text;
   }
-  uint8_t *rem;
-  if (text == NULL)
-  {
-    rem = NULL;
-  }
-  else
-  {
-    rem = text + n * (uint32_t)16U;
-  }
   uint64_t *pre = ctx + (uint32_t)5U;
   uint64_t *acc0 = ctx;
   uint32_t nb = n * (uint32_t)16U / (uint32_t)16U;
-  uint32_t rem1 = n * (uint32_t)16U % (uint32_t)16U;
+  uint32_t rem0 = n * (uint32_t)16U % (uint32_t)16U;
   for (uint32_t i = (uint32_t)0U; i < nb; i++)
   {
     uint8_t *block = blocks + i * (uint32_t)16U;
@@ -170,16 +161,12 @@ static inline void poly1305_padded_32(uint64_t *ctx, uint32_t len, uint8_t *text
     acc0[3U] = o3;
     acc0[4U] = o4;
   }
-  if (rem1 > (uint32_t)0U)
+  if (rem0 > (uint32_t)0U)
   {
     uint8_t *last = blocks + nb * (uint32_t)16U;
     uint64_t e[5U] = { 0U };
     uint8_t tmp[16U] = { 0U };
-    bool uu____0 = last == NULL;
-    if (!(uu____0 || tmp == NULL))
-    {
-      memcpy(tmp, last, rem1 * sizeof (last[0U]));
-    }
+    memcpy(tmp, last, rem0 * sizeof (last[0U]));
     uint64_t u0 = load64_le(tmp);
     uint64_t lo = u0;
     uint64_t u = load64_le(tmp + (uint32_t)8U);
@@ -201,10 +188,10 @@ static inline void poly1305_padded_32(uint64_t *ctx, uint32_t len, uint8_t *text
     e[2U] = f2;
     e[3U] = f3;
     e[4U] = f4;
-    uint64_t b = (uint64_t)1U << rem1 * (uint32_t)8U % (uint32_t)26U;
+    uint64_t b = (uint64_t)1U << rem0 * (uint32_t)8U % (uint32_t)26U;
     uint64_t mask = b;
-    uint64_t fi = e[rem1 * (uint32_t)8U / (uint32_t)26U];
-    e[rem1 * (uint32_t)8U / (uint32_t)26U] = fi | mask;
+    uint64_t fi = e[rem0 * (uint32_t)8U / (uint32_t)26U];
+    e[rem0 * (uint32_t)8U / (uint32_t)26U] = fi | mask;
     uint64_t *r1 = pre;
     uint64_t *r5 = pre + (uint32_t)5U;
     uint64_t r0 = r1[0U];
@@ -297,13 +284,10 @@ static inline void poly1305_padded_32(uint64_t *ctx, uint32_t len, uint8_t *text
     acc0[4U] = o4;
   }
   uint8_t tmp[16U] = { 0U };
-  bool uu____1 = rem == NULL;
-  if (!(uu____1 || tmp == NULL))
-  {
-    memcpy(tmp, rem, r * sizeof (rem[0U]));
-  }
   if (r > (uint32_t)0U)
   {
+    uint8_t *rem = text + n * (uint32_t)16U;
+    memcpy(tmp, rem, r * sizeof (rem[0U]));
     uint64_t *pre0 = ctx + (uint32_t)5U;
     uint64_t *acc = ctx;
     uint64_t e[5U] = { 0U };

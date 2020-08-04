@@ -353,11 +353,7 @@ Hacl_Chacha20_Vec128_chacha20_encrypt_128(
     uint8_t *uu____2 = out + nb * (uint32_t)256U;
     uint8_t *uu____3 = text + nb * (uint32_t)256U;
     uint8_t plain[256U] = { 0U };
-    bool uu____4 = uu____3 == NULL;
-    if (!(uu____4 || plain == NULL))
-    {
-      memcpy(plain, uu____3, rem * sizeof (uu____3[0U]));
-    }
+    memcpy(plain, uu____3, rem * sizeof (uu____3[0U]));
     Lib_IntVector_Intrinsics_vec128 k[16U];
     for (uint32_t _i = 0U; _i < (uint32_t)16U; ++_i)
       k[_i] = Lib_IntVector_Intrinsics_vec128_zero;
@@ -635,11 +631,7 @@ Hacl_Chacha20_Vec128_chacha20_decrypt_128(
     uint8_t *uu____2 = out + nb * (uint32_t)256U;
     uint8_t *uu____3 = cipher + nb * (uint32_t)256U;
     uint8_t plain[256U] = { 0U };
-    bool uu____4 = uu____3 == NULL;
-    if (!(uu____4 || plain == NULL))
-    {
-      memcpy(plain, uu____3, rem * sizeof (uu____3[0U]));
-    }
+    memcpy(plain, uu____3, rem * sizeof (uu____3[0U]));
     Lib_IntVector_Intrinsics_vec128 k[16U];
     for (uint32_t _i = 0U; _i < (uint32_t)16U; ++_i)
       k[_i] = Lib_IntVector_Intrinsics_vec128_zero;

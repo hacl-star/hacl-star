@@ -180,11 +180,7 @@ static inline void
 chacha20_encrypt_last(uint32_t *ctx, uint32_t len, uint8_t *out, uint32_t incr, uint8_t *text)
 {
   uint8_t plain[64U] = { 0U };
-  bool uu____0 = text == NULL;
-  if (!(uu____0 || plain == NULL))
-  {
-    memcpy(plain, text, len * sizeof (text[0U]));
-  }
+  memcpy(plain, text, len * sizeof (text[0U]));
   Hacl_Impl_Chacha20_chacha20_encrypt_block(ctx, plain, incr, plain);
   memcpy(out, plain, len * sizeof (plain[0U]));
 }

@@ -511,11 +511,7 @@ Hacl_Blake2b_32_blake2b(
   r1[3U] = iv7;
   if (!(kk == (uint32_t)0U))
   {
-    bool uu____0 = k == NULL;
-    if (!(uu____0 || b20 == NULL))
-    {
-      memcpy(b20, k, kk * sizeof (k[0U]));
-    }
+    memcpy(b20, k, kk * sizeof (k[0U]));
     FStar_UInt128_uint128
     totlen =
       FStar_UInt128_add_mod(FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)0U),
@@ -558,8 +554,8 @@ Hacl_Blake2b_32_blake2b(
   {
     last = d + ll - rem;
   }
-  bool uu____1 = last == NULL;
-  if (!(uu____1 || b21 == NULL))
+  bool uu____0 = last == NULL;
+  if (!(uu____0 || b21 == NULL))
   {
     memcpy(b21, last, rem * sizeof (last[0U]));
   }

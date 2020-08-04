@@ -1012,22 +1012,14 @@ static void exponent(uint64_t *a, uint64_t *result, uint64_t *tempBuffer)
   uint64_t *buffer_result2 = tempBuffer + (uint32_t)8U;
   uint64_t *buffer_norm_3 = tempBuffer + (uint32_t)12U;
   uint64_t *buffer_result3 = tempBuffer + (uint32_t)16U;
-  bool uu____0 = a == NULL;
-  if (!(uu____0 || buffer_norm_1 == NULL))
-  {
-    memcpy(buffer_norm_1, a, (uint32_t)4U * sizeof (a[0U]));
-  }
+  memcpy(buffer_norm_1, a, (uint32_t)4U * sizeof (a[0U]));
   uint64_t *buffer_a = buffer_norm_1;
   uint64_t *buffer_b0 = buffer_norm_1 + (uint32_t)4U;
   fsquarePowNminusOne((uint32_t)32U, buffer_a, buffer_b0);
   fsquarePowN((uint32_t)224U, buffer_b0);
   memcpy(buffer_result2, a, (uint32_t)4U * sizeof (a[0U]));
   fsquarePowN((uint32_t)192U, buffer_result2);
-  bool uu____1 = a == NULL;
-  if (!(uu____1 || buffer_norm_3 == NULL))
-  {
-    memcpy(buffer_norm_3, a, (uint32_t)4U * sizeof (a[0U]));
-  }
+  memcpy(buffer_norm_3, a, (uint32_t)4U * sizeof (a[0U]));
   uint64_t *buffer_a0 = buffer_norm_3;
   uint64_t *buffer_b = buffer_norm_3 + (uint32_t)4U;
   fsquarePowNminusOne((uint32_t)94U, buffer_a0, buffer_b);

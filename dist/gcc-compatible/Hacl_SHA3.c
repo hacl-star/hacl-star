@@ -125,11 +125,7 @@ void Hacl_Impl_SHA3_state_permute(uint64_t *s)
 void Hacl_Impl_SHA3_loadState(uint32_t rateInBytes, uint8_t *input, uint64_t *s)
 {
   uint8_t b[200U] = { 0U };
-  bool uu____0 = input == NULL;
-  if (!(uu____0 || b == NULL))
-  {
-    memcpy(b, input, rateInBytes * sizeof (input[0U]));
-  }
+  memcpy(b, input, rateInBytes * sizeof (input[0U]));
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)25U; i++)
   {
     uint64_t u = load64_le(b + i * (uint32_t)8U);
