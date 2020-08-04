@@ -460,6 +460,23 @@ val update_sub:
   -> n:size_t{v start + v n <= v len}
   -> src:lbuffer_t t a n ->
   Stack unit
+    (requires fun h ->
+      live h dst /\ live h src /\ disjoint dst src /\
+      non_null dst /\ non_null src)
+    (ensures  fun h0 _ h1 ->
+      modifies1 dst h0 h1 /\
+      as_seq h1 dst == Seq.update_sub (as_seq h0 dst) (v start) (v n) (as_seq h0 src))
+
+inline_for_extraction
+val update_sub_generic:
+    #t:buftype
+  -> #a:Type
+  -> #len:size_t
+  -> dst:lbuffer a len
+  -> start:size_t
+  -> n:size_t{v start + v n <= v len}
+  -> src:lbuffer_t t a n ->
+  Stack unit
     (requires fun h -> live h dst /\ live h src /\ disjoint dst src)
     (ensures  fun h0 _ h1 ->
       modifies1 dst h0 h1 /\

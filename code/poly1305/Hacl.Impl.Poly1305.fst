@@ -172,7 +172,7 @@ inline_for_extraction noextract
 val poly1305_encode_last:
     #s:field_spec
   -> f:felem s
-  -> len:size_t{v len < 16}
+  -> len:size_t{0 < v len /\ v len < 16}
   -> b:lbuffer uint8 len ->
   Stack unit
   (requires fun h ->
@@ -194,6 +194,7 @@ let poly1305_encode_last #s f len b =
   load_felem_le f tmp;
   let h1 = ST.get () in
   lemma_feval_is_fas_nat h1 f;
+  assert (v (len *! 8ul) = v len * 8);
   set_bit f (len *! 8ul);
   pop_frame()
 
@@ -266,7 +267,7 @@ inline_for_extraction noextract
 val poly1305_update_last:
     #s:field_spec
   -> p:precomp_r s
-  -> len:size_t{v len < 16}
+  -> len:size_t{0 < v len /\ v len < 16}
   -> b:lbuffer uint8 len
   -> acc:felem s ->
   Stack unit

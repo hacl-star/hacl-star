@@ -44,15 +44,21 @@ let poly1305_padded #w ctx len text =
   let n = len /. 16ul in
   let r = len %. 16ul in
   let blocks = sub_generic text 0ul (n *! 16ul) in
-  let rem = sub_generic text (n *! 16ul) r in // the extra part of the input data
+
   Poly.poly1305_update #w ctx (n *! 16ul) blocks;
   let h2 = ST.get () in
   let tmp = create 16ul (u8 0) in
-  update_sub tmp 0ul r rem;
-  let h3 = ST.get() in
+  let h3 = ST.get () in
   Poly.reveal_ctx_inv ctx h2 h3;
-  if r >. 0ul then
-    Poly.poly1305_update1 ctx tmp;
+
+  if r >. 0ul then begin
+    let h4 = ST.get () in
+    let rem = sub text (n *! 16ul) r in // the extra part of the input data
+    update_sub tmp 0ul r rem;
+    let h5 = ST.get () in
+    Poly.reveal_ctx_inv ctx h4 h5;
+    Poly.poly1305_update1 ctx tmp end;
+
   let h4 = ST.get () in
   pop_frame();
   let h5 = ST.get () in

@@ -84,7 +84,7 @@ let secretbox_detached_cipher mlen c k xkeys n m =
   let m1 = sub_generic m mlen0 mlen1 in
 
   let block0 = create 32ul (u8 0) in
-  update_sub block0 0ul mlen0 m0;
+  update_sub_generic block0 0ul mlen0 m0;
   map2T 32ul block0 ( ^. ) block0 ekey0;
 
   let c0 = sub_generic c 0ul mlen0 in
@@ -177,7 +177,7 @@ let secretbox_open_detached_plain mlen m xkeys n c =
   let c1 = sub_generic c mlen0 mlen1 in
 
   let block0 = create 32ul (u8 0) in
-  update_sub block0 0ul mlen0 c0;
+  update_sub_generic block0 0ul mlen0 c0;
   map2T 32ul block0 ( ^. ) block0 ekey0;
 
   let m0 = sub_generic m 0ul mlen0 in

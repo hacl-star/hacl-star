@@ -309,7 +309,7 @@ let state_permute s =
     state_iota s round)
 
 val loadState:
-    rateInBytes:size_t{v rateInBytes <= 200}
+    rateInBytes:size_t{0 < v rateInBytes /\ v rateInBytes <= 200}
   -> input:lbuffer uint8 rateInBytes
   -> s:state
   -> Stack unit
@@ -421,7 +421,7 @@ let absorb_last delimitedSuffix rateInBytes rem input s =
   salloc1 h0 rateInBytes (u8 0) (Ghost.hide (loc s)) spec
     (fun lastBlock ->
       let open Lib.RawIntTypes in
-       update_sub lastBlock (size 0) rem input;
+      update_sub_generic lastBlock (size 0) rem input;
       lastBlock.(rem) <- byte_to_uint8 delimitedSuffix;
       loadState rateInBytes lastBlock s;
       if not ((delimitedSuffix &. byte 0x80) =. byte 0) &&

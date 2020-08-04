@@ -512,7 +512,7 @@ let blake2_update_last #al #ms blake2_update_block #len wv hash prev rem d =
   (fun last_block ->
     let last = sub_generic d (len -! rem) rem in
     let h1 = ST.get() in
-    update_sub last_block 0ul rem last;
+    update_sub_generic last_block 0ul rem last;
     let h2 = ST.get() in
     as_seq_gsub h1 d (len -! rem) rem;
     assert (as_seq h1 last == Seq.sub (as_seq h1 d) (v len - v rem) (v rem));

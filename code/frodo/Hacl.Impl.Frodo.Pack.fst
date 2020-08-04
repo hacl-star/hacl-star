@@ -27,7 +27,7 @@ let lemma_split #a #len s i =
 
 inline_for_extraction noextract
 val frodo_pack8:
-    d:size_t{v d <= 16}
+    d:size_t{0 < v d /\ v d <= 16}
   -> a:lbuffer uint16 8ul
   -> res:lbytes d
   -> Stack unit
@@ -59,14 +59,15 @@ let frodo_pack8 d a res =
     |. to_u128 a7 <<. (size 0 *! d)
   in
   uint_to_bytes_be v16 templong;
+  assert (v (size 16 -! d) = 16 - v d);
   let src = sub v16 (size 16 -! d) d in // Skips the 1st byte when d = 15
-  copy_generic res src;
+  copy res src;
   pop_frame()
 
 val frodo_pack:
     #n1:size_t
   -> #n2:size_t{v n1 * v n2 <= max_size_t /\ (v n1 * v n2) % 8 = 0}
-  -> d:size_t{v d * ((v n1 * v n2) / 8) <= max_size_t /\ v d <= 16}
+  -> d:size_t{0 < v d /\ v d * ((v n1 * v n2) / 8) <= max_size_t /\ v d <= 16}
   -> a:matrix_t n1 n2
   -> res:lbytes (d *! ((n1 *! n2) /. size 8))
   -> Stack unit
@@ -91,8 +92,8 @@ let frodo_pack #n1 #n2 d a res =
       FStar.Math.Lemmas.lemma_mult_le_left (v d) (v i + 1) (v n);
       assert (v (d *! i +! d) <= v (d *! ((n1 *! n2) /. size 8)));
       Loops.unfold_repeat_gen (v n) a_spec (spec h0) (refl h0 0) (v i);
-      let a = sub_generic a (size 8 *! i) (size 8) in
-      let r = sub_generic res (d *! i) d in
+      let a = sub a (size 8 *! i) (size 8) in
+      let r = sub res (d *! i) d in
       frodo_pack8 d a r;
       let h = ST.get() in
       lemma_split (refl h (v i + 1)) (v d * v i)
@@ -105,7 +106,7 @@ let frodo_pack #n1 #n2 d a res =
 inline_for_extraction noextract
 [@"opaque_to_smt"]
 val frodo_unpack8:
-    d:size_t{v d <= 16}
+    d:size_t{0 < v d /\ v d <= 16}
   -> b:lbytes d
   -> res:lbuffer uint16 8ul
   -> Stack unit
@@ -135,7 +136,7 @@ inline_for_extraction noextract
 val frodo_unpack_loop:
     n1:size_t
   -> n2:size_t{v n1 * v n2 <= max_size_t /\ (v n1 * v n2) % 8 = 0}
-  -> d:size_t{v d * (v n1 * v n2 / 8) <= max_size_t /\ v d <= 16}
+  -> d:size_t{0 < v d /\ v d * (v n1 * v n2 / 8) <= max_size_t /\ v d <= 16}
   -> b:lbytes (d *! (n1 *! n2 /. size 8))
   -> res:matrix_t n1 n2
   -> h0:mem{live h0 b /\ live h0 res /\ disjoint b res}
@@ -164,7 +165,7 @@ let frodo_unpack_loop n1 n2 d b res h0 i =
   [@inline_let]
   let spec h0 = S.frodo_unpack_inner #(v n1) #(v n2) (v d) (as_seq h0 b) in
   Loops.unfold_repeat_gen (v n) a_spec (spec h0) (refl h0 0) (v i);
-  let b = sub_generic b (d *! i) d in
+  let b = sub b (d *! i) d in
   let r = sub res (size 8 *! i) (size 8) in
   frodo_unpack8 d b r;
   let h = ST.get() in
@@ -173,7 +174,7 @@ let frodo_unpack_loop n1 n2 d b res h0 i =
 val frodo_unpack:
     n1:size_t
   -> n2:size_t{v n1 * v n2 <= max_size_t /\ (v n1 * v n2) % 8 = 0}
-  -> d:size_t{v d * (v n1 * v n2 / 8) <= max_size_t /\ v d <= 16}
+  -> d:size_t{0 < v d /\ v d * (v n1 * v n2 / 8) <= max_size_t /\ v d <= 16}
   -> b:lbytes (d *! (n1 *! n2 /. size 8))
   -> res:matrix_t n1 n2
   -> Stack unit
