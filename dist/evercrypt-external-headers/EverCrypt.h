@@ -26,9 +26,9 @@
 #include <kremlin/internal/types.h>
 #include <kremlin/internal/target.h>
 
+
 #ifndef __EverCrypt_H
 #define __EverCrypt_H
-
 
 
 
@@ -839,7 +839,9 @@ EverCrypt_HMAC_compute(
 
 typedef Spec_Hash_Definitions_hash_alg EverCrypt_Hash_alg;
 
-extern C_String_t EverCrypt_Hash_string_of_alg(Spec_Hash_Definitions_hash_alg uu___0_5);
+extern bool EverCrypt_Hash_is_blake(Spec_Hash_Definitions_hash_alg a);
+
+extern C_String_t EverCrypt_Hash_string_of_alg(Spec_Hash_Definitions_hash_alg uu___0_13);
 
 typedef Spec_Hash_Definitions_hash_alg EverCrypt_Hash_broken_alg;
 
@@ -877,97 +879,97 @@ EverCrypt_Hash_state_s;
 
 extern bool
 EverCrypt_Hash_uu___is_MD5_s(
-  Spec_Hash_Definitions_hash_alg uu____169,
+  Spec_Hash_Definitions_hash_alg uu____177,
   EverCrypt_Hash_state_s projectee
 );
 
 extern uint32_t
 *EverCrypt_Hash___proj__MD5_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____194,
+  Spec_Hash_Definitions_hash_alg uu____202,
   EverCrypt_Hash_state_s projectee
 );
 
 extern bool
 EverCrypt_Hash_uu___is_SHA1_s(
-  Spec_Hash_Definitions_hash_alg uu____215,
+  Spec_Hash_Definitions_hash_alg uu____223,
   EverCrypt_Hash_state_s projectee
 );
 
 extern uint32_t
 *EverCrypt_Hash___proj__SHA1_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____240,
+  Spec_Hash_Definitions_hash_alg uu____248,
   EverCrypt_Hash_state_s projectee
 );
 
 extern bool
 EverCrypt_Hash_uu___is_SHA2_224_s(
-  Spec_Hash_Definitions_hash_alg uu____261,
+  Spec_Hash_Definitions_hash_alg uu____269,
   EverCrypt_Hash_state_s projectee
 );
 
 extern uint32_t
 *EverCrypt_Hash___proj__SHA2_224_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____286,
+  Spec_Hash_Definitions_hash_alg uu____294,
   EverCrypt_Hash_state_s projectee
 );
 
 extern bool
 EverCrypt_Hash_uu___is_SHA2_256_s(
-  Spec_Hash_Definitions_hash_alg uu____307,
+  Spec_Hash_Definitions_hash_alg uu____315,
   EverCrypt_Hash_state_s projectee
 );
 
 extern uint32_t
 *EverCrypt_Hash___proj__SHA2_256_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____332,
+  Spec_Hash_Definitions_hash_alg uu____340,
   EverCrypt_Hash_state_s projectee
 );
 
 extern bool
 EverCrypt_Hash_uu___is_SHA2_384_s(
-  Spec_Hash_Definitions_hash_alg uu____353,
+  Spec_Hash_Definitions_hash_alg uu____361,
   EverCrypt_Hash_state_s projectee
 );
 
 extern uint64_t
 *EverCrypt_Hash___proj__SHA2_384_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____378,
+  Spec_Hash_Definitions_hash_alg uu____386,
   EverCrypt_Hash_state_s projectee
 );
 
 extern bool
 EverCrypt_Hash_uu___is_SHA2_512_s(
-  Spec_Hash_Definitions_hash_alg uu____399,
+  Spec_Hash_Definitions_hash_alg uu____407,
   EverCrypt_Hash_state_s projectee
 );
 
 extern uint64_t
 *EverCrypt_Hash___proj__SHA2_512_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____424,
+  Spec_Hash_Definitions_hash_alg uu____432,
   EverCrypt_Hash_state_s projectee
 );
 
 extern bool
 EverCrypt_Hash_uu___is_Blake2S_s(
-  Spec_Hash_Definitions_hash_alg uu____445,
+  Spec_Hash_Definitions_hash_alg uu____453,
   EverCrypt_Hash_state_s projectee
 );
 
 extern uint32_t
 *EverCrypt_Hash___proj__Blake2S_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____470,
+  Spec_Hash_Definitions_hash_alg uu____478,
   EverCrypt_Hash_state_s projectee
 );
 
 extern bool
 EverCrypt_Hash_uu___is_Blake2B_s(
-  Spec_Hash_Definitions_hash_alg uu____491,
+  Spec_Hash_Definitions_hash_alg uu____499,
   EverCrypt_Hash_state_s projectee
 );
 
 extern uint64_t
 *EverCrypt_Hash___proj__Blake2B_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____516,
+  Spec_Hash_Definitions_hash_alg uu____524,
   EverCrypt_Hash_state_s projectee
 );
 
@@ -981,15 +983,24 @@ extern void EverCrypt_Hash_init(EverCrypt_Hash_state_s *a);
 
 extern void EverCrypt_Hash_update_multi_256(uint32_t *s, uint8_t *ev, uint32_t blocks);
 
-extern void EverCrypt_Hash_update(EverCrypt_Hash_state_s *a, uint64_t s, uint8_t *prevlen);
+extern void EverCrypt_Hash_update2(EverCrypt_Hash_state_s *a, uint64_t s, uint8_t *prevlen);
+
+KRML_DEPRECATED("Use update2 instead")
+
+extern void EverCrypt_Hash_update(EverCrypt_Hash_state_s *a, uint8_t *s);
 
 extern void
-EverCrypt_Hash_update_multi(
+EverCrypt_Hash_update_multi2(
   EverCrypt_Hash_state_s *a,
   uint64_t s,
   uint8_t *prevlen,
   uint32_t blocks
 );
+
+KRML_DEPRECATED("Use update_multi2 instead")
+
+extern void
+EverCrypt_Hash_update_multi(EverCrypt_Hash_state_s *a, uint8_t *s, uint32_t blocks);
 
 extern void
 EverCrypt_Hash_update_last_256(
@@ -1000,12 +1011,16 @@ EverCrypt_Hash_update_last_256(
 );
 
 extern void
-EverCrypt_Hash_update_last(
+EverCrypt_Hash_update_last2(
   EverCrypt_Hash_state_s *a,
   uint64_t s,
   uint8_t *prev_len,
   uint32_t last
 );
+
+KRML_DEPRECATED("Use update_last2 instead")
+
+extern void EverCrypt_Hash_update_last(EverCrypt_Hash_state_s *ga, uint8_t *s, uint64_t last);
 
 extern void EverCrypt_Hash_finish(EverCrypt_Hash_state_s *a, uint8_t *s);
 

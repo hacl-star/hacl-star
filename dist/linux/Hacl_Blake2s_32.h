@@ -27,13 +27,13 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __Hacl_Blake2s_32_H
 #define __Hacl_Blake2s_32_H
 
 #include "Hacl_Kremlib.h"
 #include "Lib_Memzero0.h"
 #include "Hacl_Impl_Blake2_Constants.h"
-
 
 typedef struct K___u32_u32_s
 {

@@ -28,6 +28,7 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __EverCrypt_Poly1305_H
 #define __EverCrypt_Poly1305_H
 
@@ -36,7 +37,6 @@
 #include "Hacl_Poly1305_32.h"
 #include "Hacl_Poly1305_256.h"
 #include "Hacl_Poly1305_128.h"
-
 
 /* SNIPPET_START: EverCrypt_Poly1305_poly1305 */
 

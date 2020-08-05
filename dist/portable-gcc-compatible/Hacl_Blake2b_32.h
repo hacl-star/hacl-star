@@ -28,6 +28,7 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __Hacl_Blake2b_32_H
 #define __Hacl_Blake2b_32_H
 
@@ -35,7 +36,6 @@
 #include "Hacl_Blake2s_32.h"
 #include "Lib_Memzero0.h"
 #include "Hacl_Impl_Blake2_Constants.h"
-
 
 /* SNIPPET_START: Hacl_Blake2b_32_blake2b */
 

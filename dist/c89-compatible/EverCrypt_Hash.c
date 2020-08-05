@@ -24,9 +24,28 @@
 
 #include "EverCrypt_Hash.h"
 
-C_String_t EverCrypt_Hash_string_of_alg(Spec_Hash_Definitions_hash_alg uu___0_5)
+bool EverCrypt_Hash_is_blake(Spec_Hash_Definitions_hash_alg a)
 {
-  switch (uu___0_5)
+  switch (a)
+  {
+    case Spec_Hash_Definitions_Blake2S:
+      {
+        return true;
+      }
+    case Spec_Hash_Definitions_Blake2B:
+      {
+        return true;
+      }
+    default:
+      {
+        return false;
+      }
+  }
+}
+
+C_String_t EverCrypt_Hash_string_of_alg(Spec_Hash_Definitions_hash_alg uu___0_13)
+{
+  switch (uu___0_13)
   {
     case Spec_Hash_Definitions_MD5:
       {
@@ -70,7 +89,7 @@ C_String_t EverCrypt_Hash_string_of_alg(Spec_Hash_Definitions_hash_alg uu___0_5)
 
 bool
 EverCrypt_Hash_uu___is_MD5_s(
-  Spec_Hash_Definitions_hash_alg uu____169,
+  Spec_Hash_Definitions_hash_alg uu____177,
   EverCrypt_Hash_state_s projectee
 )
 {
@@ -83,7 +102,7 @@ EverCrypt_Hash_uu___is_MD5_s(
 
 uint32_t
 *EverCrypt_Hash___proj__MD5_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____194,
+  Spec_Hash_Definitions_hash_alg uu____202,
   EverCrypt_Hash_state_s projectee
 )
 {
@@ -100,7 +119,7 @@ uint32_t
 
 bool
 EverCrypt_Hash_uu___is_SHA1_s(
-  Spec_Hash_Definitions_hash_alg uu____215,
+  Spec_Hash_Definitions_hash_alg uu____223,
   EverCrypt_Hash_state_s projectee
 )
 {
@@ -113,7 +132,7 @@ EverCrypt_Hash_uu___is_SHA1_s(
 
 uint32_t
 *EverCrypt_Hash___proj__SHA1_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____240,
+  Spec_Hash_Definitions_hash_alg uu____248,
   EverCrypt_Hash_state_s projectee
 )
 {
@@ -130,7 +149,7 @@ uint32_t
 
 bool
 EverCrypt_Hash_uu___is_SHA2_224_s(
-  Spec_Hash_Definitions_hash_alg uu____261,
+  Spec_Hash_Definitions_hash_alg uu____269,
   EverCrypt_Hash_state_s projectee
 )
 {
@@ -143,7 +162,7 @@ EverCrypt_Hash_uu___is_SHA2_224_s(
 
 uint32_t
 *EverCrypt_Hash___proj__SHA2_224_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____286,
+  Spec_Hash_Definitions_hash_alg uu____294,
   EverCrypt_Hash_state_s projectee
 )
 {
@@ -160,7 +179,7 @@ uint32_t
 
 bool
 EverCrypt_Hash_uu___is_SHA2_256_s(
-  Spec_Hash_Definitions_hash_alg uu____307,
+  Spec_Hash_Definitions_hash_alg uu____315,
   EverCrypt_Hash_state_s projectee
 )
 {
@@ -173,7 +192,7 @@ EverCrypt_Hash_uu___is_SHA2_256_s(
 
 uint32_t
 *EverCrypt_Hash___proj__SHA2_256_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____332,
+  Spec_Hash_Definitions_hash_alg uu____340,
   EverCrypt_Hash_state_s projectee
 )
 {
@@ -190,7 +209,7 @@ uint32_t
 
 bool
 EverCrypt_Hash_uu___is_SHA2_384_s(
-  Spec_Hash_Definitions_hash_alg uu____353,
+  Spec_Hash_Definitions_hash_alg uu____361,
   EverCrypt_Hash_state_s projectee
 )
 {
@@ -203,7 +222,7 @@ EverCrypt_Hash_uu___is_SHA2_384_s(
 
 uint64_t
 *EverCrypt_Hash___proj__SHA2_384_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____378,
+  Spec_Hash_Definitions_hash_alg uu____386,
   EverCrypt_Hash_state_s projectee
 )
 {
@@ -220,7 +239,7 @@ uint64_t
 
 bool
 EverCrypt_Hash_uu___is_SHA2_512_s(
-  Spec_Hash_Definitions_hash_alg uu____399,
+  Spec_Hash_Definitions_hash_alg uu____407,
   EverCrypt_Hash_state_s projectee
 )
 {
@@ -233,7 +252,7 @@ EverCrypt_Hash_uu___is_SHA2_512_s(
 
 uint64_t
 *EverCrypt_Hash___proj__SHA2_512_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____424,
+  Spec_Hash_Definitions_hash_alg uu____432,
   EverCrypt_Hash_state_s projectee
 )
 {
@@ -250,7 +269,7 @@ uint64_t
 
 bool
 EverCrypt_Hash_uu___is_Blake2S_s(
-  Spec_Hash_Definitions_hash_alg uu____445,
+  Spec_Hash_Definitions_hash_alg uu____453,
   EverCrypt_Hash_state_s projectee
 )
 {
@@ -263,7 +282,7 @@ EverCrypt_Hash_uu___is_Blake2S_s(
 
 uint32_t
 *EverCrypt_Hash___proj__Blake2S_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____470,
+  Spec_Hash_Definitions_hash_alg uu____478,
   EverCrypt_Hash_state_s projectee
 )
 {
@@ -280,7 +299,7 @@ uint32_t
 
 bool
 EverCrypt_Hash_uu___is_Blake2B_s(
-  Spec_Hash_Definitions_hash_alg uu____491,
+  Spec_Hash_Definitions_hash_alg uu____499,
   EverCrypt_Hash_state_s projectee
 )
 {
@@ -293,7 +312,7 @@ EverCrypt_Hash_uu___is_Blake2B_s(
 
 uint64_t
 *EverCrypt_Hash___proj__Blake2B_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____516,
+  Spec_Hash_Definitions_hash_alg uu____524,
   EverCrypt_Hash_state_s projectee
 )
 {
@@ -622,7 +641,7 @@ void EverCrypt_Hash_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n)
   Hacl_Hash_SHA2_update_multi_256(s, blocks, n);
 }
 
-void EverCrypt_Hash_update(EverCrypt_Hash_state_s *s, uint64_t prevlen, uint8_t *block)
+void EverCrypt_Hash_update2(EverCrypt_Hash_state_s *s, uint64_t prevlen, uint8_t *block)
 {
   EverCrypt_Hash_state_s scrut = *s;
   if (scrut.tag == EverCrypt_Hash_MD5_s)
@@ -684,8 +703,15 @@ void EverCrypt_Hash_update(EverCrypt_Hash_state_s *s, uint64_t prevlen, uint8_t 
   KRML_HOST_EXIT(255U);
 }
 
+KRML_DEPRECATED("Use update2 instead")
+
+void EverCrypt_Hash_update(EverCrypt_Hash_state_s *s, uint8_t *block)
+{
+  EverCrypt_Hash_update2(s, (uint64_t)0U, block);
+}
+
 void
-EverCrypt_Hash_update_multi(
+EverCrypt_Hash_update_multi2(
   EverCrypt_Hash_state_s *s,
   uint64_t prevlen,
   uint8_t *blocks,
@@ -761,6 +787,13 @@ EverCrypt_Hash_update_multi(
   KRML_HOST_EXIT(255U);
 }
 
+KRML_DEPRECATED("Use update_multi2 instead")
+
+void EverCrypt_Hash_update_multi(EverCrypt_Hash_state_s *s, uint8_t *blocks, uint32_t len)
+{
+  EverCrypt_Hash_update_multi2(s, (uint64_t)0U, blocks, len);
+}
+
 void
 EverCrypt_Hash_update_last_256(
   uint32_t *s,
@@ -798,7 +831,7 @@ EverCrypt_Hash_update_last_256(
 }
 
 void
-EverCrypt_Hash_update_last(
+EverCrypt_Hash_update_last2(
   EverCrypt_Hash_state_s *s,
   uint64_t prev_len,
   uint8_t *last,
@@ -865,6 +898,67 @@ EverCrypt_Hash_update_last(
     __LINE__,
     "unreachable (pattern matches are exhaustive in F*)");
   KRML_HOST_EXIT(255U);
+}
+
+KRML_DEPRECATED("Use update_last2 instead")
+
+void EverCrypt_Hash_update_last(EverCrypt_Hash_state_s *s, uint8_t *last, uint64_t total_len)
+{
+  Spec_Hash_Definitions_hash_alg a = EverCrypt_Hash_alg_of_state(s);
+  uint32_t sw;
+  switch (a)
+  {
+    case Spec_Hash_Definitions_MD5:
+      {
+        sw = (uint32_t)64U;
+        break;
+      }
+    case Spec_Hash_Definitions_SHA1:
+      {
+        sw = (uint32_t)64U;
+        break;
+      }
+    case Spec_Hash_Definitions_SHA2_224:
+      {
+        sw = (uint32_t)64U;
+        break;
+      }
+    case Spec_Hash_Definitions_SHA2_256:
+      {
+        sw = (uint32_t)64U;
+        break;
+      }
+    case Spec_Hash_Definitions_SHA2_384:
+      {
+        sw = (uint32_t)128U;
+        break;
+      }
+    case Spec_Hash_Definitions_SHA2_512:
+      {
+        sw = (uint32_t)128U;
+        break;
+      }
+    case Spec_Hash_Definitions_Blake2S:
+      {
+        sw = (uint32_t)64U;
+        break;
+      }
+    case Spec_Hash_Definitions_Blake2B:
+      {
+        sw = (uint32_t)128U;
+        break;
+      }
+    default:
+      {
+        KRML_HOST_PRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+  {
+    uint64_t last_len = total_len % (uint64_t)sw;
+    uint64_t prev_len = total_len - last_len;
+    EverCrypt_Hash_update_last2(s, prev_len, last, (uint32_t)last_len);
+  }
 }
 
 void EverCrypt_Hash_finish(EverCrypt_Hash_state_s *s, uint8_t *dst)
@@ -1967,7 +2061,7 @@ EverCrypt_Hash_Incremental_update(
                     KRML_HOST_EXIT(253U);
                   }
               }
-              EverCrypt_Hash_update_multi(block_state1, prevlen, buf, sw);
+              EverCrypt_Hash_update_multi2(block_state1, prevlen, buf, sw);
             }
             switch (i2)
             {
@@ -2222,7 +2316,7 @@ EverCrypt_Hash_Incremental_update(
             data2_len = len - data1_len;
             data1 = data;
             data2 = data + data1_len;
-            EverCrypt_Hash_update_multi(block_state1, total_len1, data1, data1_len);
+            EverCrypt_Hash_update_multi2(block_state1, total_len1, data1, data1_len);
             dst = buf;
             memcpy(dst, data2, data2_len * sizeof (data2[0U]));
             {
@@ -2687,7 +2781,7 @@ EverCrypt_Hash_Incremental_update(
                         KRML_HOST_EXIT(253U);
                       }
                   }
-                  EverCrypt_Hash_update_multi(block_state1, prevlen, buf, sw);
+                  EverCrypt_Hash_update_multi2(block_state1, prevlen, buf, sw);
                 }
                 switch (i2)
                 {
@@ -2948,7 +3042,7 @@ EverCrypt_Hash_Incremental_update(
                 data2_len = len - diff - data1_len;
                 data11 = data2;
                 data21 = data2 + data1_len;
-                EverCrypt_Hash_update_multi(block_state1, total_len1, data11, data1_len);
+                EverCrypt_Hash_update_multi2(block_state1, total_len1, data11, data1_len);
                 dst = buf;
                 memcpy(dst, data21, data2_len * sizeof (data21[0U]));
                 {
@@ -2998,7 +3092,7 @@ EverCrypt_Hash_Incremental_finish_md5(
         uint64_t prev_len;
         EverCrypt_Hash_copy(block_state, &tmp_block_state);
         prev_len = total_len - (uint64_t)r;
-        EverCrypt_Hash_update_last(&tmp_block_state, prev_len, buf_1, r);
+        EverCrypt_Hash_update_last2(&tmp_block_state, prev_len, buf_1, r);
         EverCrypt_Hash_finish(&tmp_block_state, dst);
       }
     }
@@ -3036,7 +3130,7 @@ EverCrypt_Hash_Incremental_finish_sha1(
         uint64_t prev_len;
         EverCrypt_Hash_copy(block_state, &tmp_block_state);
         prev_len = total_len - (uint64_t)r;
-        EverCrypt_Hash_update_last(&tmp_block_state, prev_len, buf_1, r);
+        EverCrypt_Hash_update_last2(&tmp_block_state, prev_len, buf_1, r);
         EverCrypt_Hash_finish(&tmp_block_state, dst);
       }
     }
@@ -3074,7 +3168,7 @@ EverCrypt_Hash_Incremental_finish_sha224(
         uint64_t prev_len;
         EverCrypt_Hash_copy(block_state, &tmp_block_state);
         prev_len = total_len - (uint64_t)r;
-        EverCrypt_Hash_update_last(&tmp_block_state, prev_len, buf_1, r);
+        EverCrypt_Hash_update_last2(&tmp_block_state, prev_len, buf_1, r);
         EverCrypt_Hash_finish(&tmp_block_state, dst);
       }
     }
@@ -3112,7 +3206,7 @@ EverCrypt_Hash_Incremental_finish_sha256(
         uint64_t prev_len;
         EverCrypt_Hash_copy(block_state, &tmp_block_state);
         prev_len = total_len - (uint64_t)r;
-        EverCrypt_Hash_update_last(&tmp_block_state, prev_len, buf_1, r);
+        EverCrypt_Hash_update_last2(&tmp_block_state, prev_len, buf_1, r);
         EverCrypt_Hash_finish(&tmp_block_state, dst);
       }
     }
@@ -3150,7 +3244,7 @@ EverCrypt_Hash_Incremental_finish_sha384(
         uint64_t prev_len;
         EverCrypt_Hash_copy(block_state, &tmp_block_state);
         prev_len = total_len - (uint64_t)r;
-        EverCrypt_Hash_update_last(&tmp_block_state, prev_len, buf_1, r);
+        EverCrypt_Hash_update_last2(&tmp_block_state, prev_len, buf_1, r);
         EverCrypt_Hash_finish(&tmp_block_state, dst);
       }
     }
@@ -3188,7 +3282,7 @@ EverCrypt_Hash_Incremental_finish_sha512(
         uint64_t prev_len;
         EverCrypt_Hash_copy(block_state, &tmp_block_state);
         prev_len = total_len - (uint64_t)r;
-        EverCrypt_Hash_update_last(&tmp_block_state, prev_len, buf_1, r);
+        EverCrypt_Hash_update_last2(&tmp_block_state, prev_len, buf_1, r);
         EverCrypt_Hash_finish(&tmp_block_state, dst);
       }
     }
@@ -3226,7 +3320,7 @@ EverCrypt_Hash_Incremental_finish_blake2s(
         uint64_t prev_len;
         EverCrypt_Hash_copy(block_state, &tmp_block_state);
         prev_len = total_len - (uint64_t)r;
-        EverCrypt_Hash_update_last(&tmp_block_state, prev_len, buf_1, r);
+        EverCrypt_Hash_update_last2(&tmp_block_state, prev_len, buf_1, r);
         EverCrypt_Hash_finish(&tmp_block_state, dst);
       }
     }
@@ -3264,7 +3358,7 @@ EverCrypt_Hash_Incremental_finish_blake2b(
         uint64_t prev_len;
         EverCrypt_Hash_copy(block_state, &tmp_block_state);
         prev_len = total_len - (uint64_t)r;
-        EverCrypt_Hash_update_last(&tmp_block_state, prev_len, buf_1, r);
+        EverCrypt_Hash_update_last2(&tmp_block_state, prev_len, buf_1, r);
         EverCrypt_Hash_finish(&tmp_block_state, dst);
       }
     }

@@ -28,11 +28,11 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __Hacl_Poly1305_32_H
 #define __Hacl_Poly1305_32_H
 
 #include "Hacl_Kremlib.h"
-
 
 /* SNIPPET_START: Hacl_Poly1305_32_blocklen */
 

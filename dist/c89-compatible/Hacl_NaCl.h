@@ -28,6 +28,7 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __Hacl_NaCl_H
 #define __Hacl_NaCl_H
 
@@ -35,7 +36,6 @@
 #include "Hacl_Salsa20.h"
 #include "Hacl_Poly1305_32.h"
 #include "Hacl_Curve25519_51.h"
-
 
 uint32_t
 Hacl_NaCl_crypto_secretbox_detached(

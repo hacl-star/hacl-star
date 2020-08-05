@@ -28,11 +28,11 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __Hacl_Streaming_SHA2_256_H
 #define __Hacl_Streaming_SHA2_256_H
 
 #include "Hacl_Hash.h"
-
 
 typedef struct Hacl_Streaming_Functor_state_s___uint32_t_____s
 Hacl_Streaming_Functor_state_s___uint32_t____;

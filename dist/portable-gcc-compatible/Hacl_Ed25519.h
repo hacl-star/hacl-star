@@ -28,13 +28,13 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __Hacl_Ed25519_H
 #define __Hacl_Ed25519_H
 
 #include "Hacl_Kremlib.h"
 #include "Hacl_Hash.h"
 #include "Hacl_Curve25519_51.h"
-
 
 /* SNIPPET_START: Hacl_Ed25519_sign */
 

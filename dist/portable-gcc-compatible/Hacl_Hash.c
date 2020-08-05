@@ -4407,20 +4407,6 @@ void Hacl_Hash_Core_SHA2_finish_512(uint64_t *s, uint8_t *dst)
 
 /* SNIPPET_END: Hacl_Hash_Core_SHA2_finish_512 */
 
-/* SNIPPET_START: dtuple2__Spec_Hash_Definitions_hash_alg_any_tags */
-
-#define Mkdtuple2 0
-
-/* SNIPPET_END: dtuple2__Spec_Hash_Definitions_hash_alg_any_tags */
-
-typedef uint8_t dtuple2__Spec_Hash_Definitions_hash_alg_any_tags;
-
-/* SNIPPET_START: dtuple2__Spec_Hash_Definitions_hash_alg_any */
-
-typedef Spec_Hash_Definitions_hash_alg dtuple2__Spec_Hash_Definitions_hash_alg_any;
-
-/* SNIPPET_END: dtuple2__Spec_Hash_Definitions_hash_alg_any */
-
 /* SNIPPET_START: Hacl_Hash_Definitions_word_len */
 
 uint32_t Hacl_Hash_Definitions_word_len(Spec_Hash_Definitions_hash_alg a)

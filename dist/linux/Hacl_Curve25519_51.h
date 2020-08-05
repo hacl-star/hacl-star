@@ -27,11 +27,11 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __Hacl_Curve25519_51_H
 #define __Hacl_Curve25519_51_H
 
 #include "Hacl_Kremlib.h"
-
 
 void Hacl_Impl_Curve25519_Field51_fadd(u64 *out, u64 *f1, u64 *f2);
 

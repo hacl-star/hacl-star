@@ -28,11 +28,11 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __EverCrypt_AutoConfig2_H
 #define __EverCrypt_AutoConfig2_H
 
 #include "Vale.h"
-
 
 /* SNIPPET_START: EverCrypt_AutoConfig2_has_shaext */
 

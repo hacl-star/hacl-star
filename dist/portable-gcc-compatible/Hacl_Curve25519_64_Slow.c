@@ -24,36 +24,6 @@
 
 #include "Hacl_Curve25519_64_Slow.h"
 
-/* SNIPPET_START: __uint64_t_uint64_t_uint64_t_uint64_t */
-
-typedef struct __uint64_t_uint64_t_uint64_t_uint64_t_s
-{
-  uint64_t fst;
-  uint64_t snd;
-  uint64_t thd;
-  uint64_t f3;
-}
-__uint64_t_uint64_t_uint64_t_uint64_t;
-
-/* SNIPPET_END: __uint64_t_uint64_t_uint64_t_uint64_t */
-
-/* SNIPPET_START: __uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t */
-
-typedef struct __uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_s
-{
-  uint64_t fst;
-  uint64_t snd;
-  uint64_t thd;
-  uint64_t f3;
-  uint64_t f4;
-  uint64_t f5;
-  uint64_t f6;
-  uint64_t f7;
-}
-__uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t;
-
-/* SNIPPET_END: __uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t */
-
 /* SNIPPET_START: __uint64_t_uint64_t */
 
 typedef struct __uint64_t_uint64_t_s
@@ -159,21 +129,33 @@ static inline __uint64_t_uint64_t add0carry(uint64_t x, uint64_t y)
 
 /* SNIPPET_END: add0carry */
 
-/* SNIPPET_START: __uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t */
+/* SNIPPET_START: felem4 */
 
-typedef struct __uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t_s
+typedef struct felem4_s
 {
   uint64_t fst;
-  __uint64_t_uint64_t_uint64_t_uint64_t snd;
+  uint64_t snd;
+  uint64_t thd;
+  uint64_t f3;
 }
-__uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t;
+felem4;
 
-/* SNIPPET_END: __uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t */
+/* SNIPPET_END: felem4 */
+
+/* SNIPPET_START: __uint64_t_Hacl_Spec_Curve25519_Field64_Definition_felem4 */
+
+typedef struct __uint64_t_Hacl_Spec_Curve25519_Field64_Definition_felem4_s
+{
+  uint64_t fst;
+  felem4 snd;
+}
+__uint64_t_Hacl_Spec_Curve25519_Field64_Definition_felem4;
+
+/* SNIPPET_END: __uint64_t_Hacl_Spec_Curve25519_Field64_Definition_felem4 */
 
 /* SNIPPET_START: add1 */
 
-static __uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t
-add1(__uint64_t_uint64_t_uint64_t_uint64_t f, uint64_t cin)
+static __uint64_t_Hacl_Spec_Curve25519_Field64_Definition_felem4 add1(felem4 f, uint64_t cin)
 {
   uint64_t f0 = f.fst;
   uint64_t f1 = f.snd;
@@ -191,16 +173,15 @@ add1(__uint64_t_uint64_t_uint64_t_uint64_t f, uint64_t cin)
   __uint64_t_uint64_t scrut2 = add0carry(f3, c2);
   uint64_t o3 = scrut2.fst;
   uint64_t c3 = scrut2.snd;
-  __uint64_t_uint64_t_uint64_t_uint64_t out = { .fst = o0, .snd = o1, .thd = o2, .f3 = o3 };
-  return ((__uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t){ .fst = c3, .snd = out });
+  felem4 out = { .fst = o0, .snd = o1, .thd = o2, .f3 = o3 };
+  return ((__uint64_t_Hacl_Spec_Curve25519_Field64_Definition_felem4){ .fst = c3, .snd = out });
 }
 
 /* SNIPPET_END: add1 */
 
 /* SNIPPET_START: sub1 */
 
-static __uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t
-sub1(__uint64_t_uint64_t_uint64_t_uint64_t f, uint64_t cin)
+static __uint64_t_Hacl_Spec_Curve25519_Field64_Definition_felem4 sub1(felem4 f, uint64_t cin)
 {
   uint64_t f0 = f.fst;
   uint64_t f1 = f.snd;
@@ -218,16 +199,15 @@ sub1(__uint64_t_uint64_t_uint64_t_uint64_t f, uint64_t cin)
   __uint64_t_uint64_t scrut2 = subborrow(f3, (uint64_t)0U, c2);
   uint64_t o3 = scrut2.fst;
   uint64_t c3 = scrut2.snd;
-  __uint64_t_uint64_t_uint64_t_uint64_t out = { .fst = o0, .snd = o1, .thd = o2, .f3 = o3 };
-  return ((__uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t){ .fst = c3, .snd = out });
+  felem4 out = { .fst = o0, .snd = o1, .thd = o2, .f3 = o3 };
+  return ((__uint64_t_Hacl_Spec_Curve25519_Field64_Definition_felem4){ .fst = c3, .snd = out });
 }
 
 /* SNIPPET_END: sub1 */
 
 /* SNIPPET_START: mul1 */
 
-static __uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t
-mul1(__uint64_t_uint64_t_uint64_t_uint64_t f, uint64_t u)
+static __uint64_t_Hacl_Spec_Curve25519_Field64_Definition_felem4 mul1(felem4 f, uint64_t u)
 {
   uint64_t f0 = f.fst;
   uint64_t f1 = f.snd;
@@ -255,25 +235,21 @@ mul1(__uint64_t_uint64_t_uint64_t_uint64_t f, uint64_t u)
   __uint64_t_uint64_t scrut5 = addcarry(l3, h2, c1);
   uint64_t o3 = scrut5.fst;
   uint64_t c2 = scrut5.snd;
-  __uint64_t_uint64_t_uint64_t_uint64_t out = { .fst = o0, .snd = o1, .thd = o2, .f3 = o3 };
+  felem4 out = { .fst = o0, .snd = o1, .thd = o2, .f3 = o3 };
   uint64_t c3 = h3 + c2;
-  return ((__uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t){ .fst = c3, .snd = out });
+  return ((__uint64_t_Hacl_Spec_Curve25519_Field64_Definition_felem4){ .fst = c3, .snd = out });
 }
 
 /* SNIPPET_END: mul1 */
 
 /* SNIPPET_START: mul1_add */
 
-static __uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t
-mul1_add(
-  __uint64_t_uint64_t_uint64_t_uint64_t f1,
-  uint64_t u2,
-  __uint64_t_uint64_t_uint64_t_uint64_t f3
-)
+static __uint64_t_Hacl_Spec_Curve25519_Field64_Definition_felem4
+mul1_add(felem4 f1, uint64_t u2, felem4 f3)
 {
-  __uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t scrut0 = mul1(f1, u2);
+  __uint64_t_Hacl_Spec_Curve25519_Field64_Definition_felem4 scrut0 = mul1(f1, u2);
   uint64_t c = scrut0.fst;
-  __uint64_t_uint64_t_uint64_t_uint64_t out0 = scrut0.snd;
+  felem4 out0 = scrut0.snd;
   uint64_t o0 = out0.fst;
   uint64_t o1 = out0.snd;
   uint64_t o2 = out0.thd;
@@ -294,35 +270,50 @@ mul1_add(
   __uint64_t_uint64_t scrut3 = addcarry(f33, o3, c2);
   uint64_t o3_ = scrut3.fst;
   uint64_t c3 = scrut3.snd;
-  __uint64_t_uint64_t_uint64_t_uint64_t out = { .fst = o0_, .snd = o1_, .thd = o2_, .f3 = o3_ };
+  felem4 out = { .fst = o0_, .snd = o1_, .thd = o2_, .f3 = o3_ };
   uint64_t c4 = c + c3;
-  return ((__uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t){ .fst = c4, .snd = out });
+  return ((__uint64_t_Hacl_Spec_Curve25519_Field64_Definition_felem4){ .fst = c4, .snd = out });
 }
 
 /* SNIPPET_END: mul1_add */
 
 /* SNIPPET_START: carry_pass */
 
-static __uint64_t_uint64_t_uint64_t_uint64_t
-carry_pass(__uint64_t_uint64_t_uint64_t_uint64_t f, uint64_t cin)
+static felem4 carry_pass(felem4 f, uint64_t cin)
 {
-  __uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t scrut = add1(f, cin * (uint64_t)38U);
+  __uint64_t_Hacl_Spec_Curve25519_Field64_Definition_felem4 scrut = add1(f, cin * (uint64_t)38U);
   uint64_t carry = scrut.fst;
-  __uint64_t_uint64_t_uint64_t_uint64_t out0 = scrut.snd;
+  felem4 out0 = scrut.snd;
   uint64_t o0 = out0.fst;
   uint64_t o1 = out0.snd;
   uint64_t o2 = out0.thd;
   uint64_t o3 = out0.f3;
   uint64_t o0_ = o0 + carry * (uint64_t)38U;
-  return ((__uint64_t_uint64_t_uint64_t_uint64_t){ .fst = o0_, .snd = o1, .thd = o2, .f3 = o3 });
+  return ((felem4){ .fst = o0_, .snd = o1, .thd = o2, .f3 = o3 });
 }
 
 /* SNIPPET_END: carry_pass */
 
+/* SNIPPET_START: felem_wide4 */
+
+typedef struct felem_wide4_s
+{
+  uint64_t fst;
+  uint64_t snd;
+  uint64_t thd;
+  uint64_t f3;
+  uint64_t f4;
+  uint64_t f5;
+  uint64_t f6;
+  uint64_t f7;
+}
+felem_wide4;
+
+/* SNIPPET_END: felem_wide4 */
+
 /* SNIPPET_START: carry_wide */
 
-static __uint64_t_uint64_t_uint64_t_uint64_t
-carry_wide(__uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t f)
+static felem4 carry_wide(felem_wide4 f)
 {
   uint64_t f0 = f.fst;
   uint64_t f1 = f.snd;
@@ -332,14 +323,14 @@ carry_wide(__uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint
   uint64_t f5 = f.f5;
   uint64_t f6 = f.f6;
   uint64_t f7 = f.f7;
-  __uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t
+  __uint64_t_Hacl_Spec_Curve25519_Field64_Definition_felem4
   scrut =
-    mul1_add(((__uint64_t_uint64_t_uint64_t_uint64_t){ .fst = f4, .snd = f5, .thd = f6, .f3 = f7 }),
+    mul1_add(((felem4){ .fst = f4, .snd = f5, .thd = f6, .f3 = f7 }),
       (uint64_t)38U,
-      ((__uint64_t_uint64_t_uint64_t_uint64_t){ .fst = f0, .snd = f1, .thd = f2, .f3 = f3 }));
+      ((felem4){ .fst = f0, .snd = f1, .thd = f2, .f3 = f3 }));
   uint64_t c0 = scrut.fst;
-  __uint64_t_uint64_t_uint64_t_uint64_t out0 = scrut.snd;
-  __uint64_t_uint64_t_uint64_t_uint64_t out1 = carry_pass(out0, c0);
+  felem4 out0 = scrut.snd;
+  felem4 out1 = carry_pass(out0, c0);
   return out1;
 }
 
@@ -347,8 +338,7 @@ carry_wide(__uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint
 
 /* SNIPPET_START: add4 */
 
-static __uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t
-add4(__uint64_t_uint64_t_uint64_t_uint64_t f1, __uint64_t_uint64_t_uint64_t_uint64_t f2)
+static __uint64_t_Hacl_Spec_Curve25519_Field64_Definition_felem4 add4(felem4 f1, felem4 f2)
 {
   uint64_t f10 = f1.fst;
   uint64_t f11 = f1.snd;
@@ -370,21 +360,20 @@ add4(__uint64_t_uint64_t_uint64_t_uint64_t f1, __uint64_t_uint64_t_uint64_t_uint
   __uint64_t_uint64_t scrut2 = addcarry(f13, f23, c2);
   uint64_t o3 = scrut2.fst;
   uint64_t c3 = scrut2.snd;
-  __uint64_t_uint64_t_uint64_t_uint64_t out = { .fst = o0, .snd = o1, .thd = o2, .f3 = o3 };
-  return ((__uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t){ .fst = c3, .snd = out });
+  felem4 out = { .fst = o0, .snd = o1, .thd = o2, .f3 = o3 };
+  return ((__uint64_t_Hacl_Spec_Curve25519_Field64_Definition_felem4){ .fst = c3, .snd = out });
 }
 
 /* SNIPPET_END: add4 */
 
 /* SNIPPET_START: fadd4 */
 
-static __uint64_t_uint64_t_uint64_t_uint64_t
-fadd4(__uint64_t_uint64_t_uint64_t_uint64_t f1, __uint64_t_uint64_t_uint64_t_uint64_t f2)
+static felem4 fadd4(felem4 f1, felem4 f2)
 {
-  __uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t scrut = add4(f1, f2);
+  __uint64_t_Hacl_Spec_Curve25519_Field64_Definition_felem4 scrut = add4(f1, f2);
   uint64_t c0 = scrut.fst;
-  __uint64_t_uint64_t_uint64_t_uint64_t out0 = scrut.snd;
-  __uint64_t_uint64_t_uint64_t_uint64_t out = carry_pass(out0, c0);
+  felem4 out0 = scrut.snd;
+  felem4 out = carry_pass(out0, c0);
   return out;
 }
 
@@ -392,8 +381,7 @@ fadd4(__uint64_t_uint64_t_uint64_t_uint64_t f1, __uint64_t_uint64_t_uint64_t_uin
 
 /* SNIPPET_START: sub4 */
 
-static __uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t
-sub4(__uint64_t_uint64_t_uint64_t_uint64_t f1, __uint64_t_uint64_t_uint64_t_uint64_t f2)
+static __uint64_t_Hacl_Spec_Curve25519_Field64_Definition_felem4 sub4(felem4 f1, felem4 f2)
 {
   uint64_t f10 = f1.fst;
   uint64_t f11 = f1.snd;
@@ -415,78 +403,68 @@ sub4(__uint64_t_uint64_t_uint64_t_uint64_t f1, __uint64_t_uint64_t_uint64_t_uint
   __uint64_t_uint64_t scrut2 = subborrow(f13, f23, c2);
   uint64_t o3 = scrut2.fst;
   uint64_t c3 = scrut2.snd;
-  __uint64_t_uint64_t_uint64_t_uint64_t out = { .fst = o0, .snd = o1, .thd = o2, .f3 = o3 };
-  return ((__uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t){ .fst = c3, .snd = out });
+  felem4 out = { .fst = o0, .snd = o1, .thd = o2, .f3 = o3 };
+  return ((__uint64_t_Hacl_Spec_Curve25519_Field64_Definition_felem4){ .fst = c3, .snd = out });
 }
 
 /* SNIPPET_END: sub4 */
 
 /* SNIPPET_START: fsub4 */
 
-static __uint64_t_uint64_t_uint64_t_uint64_t
-fsub4(__uint64_t_uint64_t_uint64_t_uint64_t f1, __uint64_t_uint64_t_uint64_t_uint64_t f2)
+static felem4 fsub4(felem4 f1, felem4 f2)
 {
-  __uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t scrut = sub4(f1, f2);
+  __uint64_t_Hacl_Spec_Curve25519_Field64_Definition_felem4 scrut = sub4(f1, f2);
   uint64_t c0 = scrut.fst;
-  __uint64_t_uint64_t_uint64_t_uint64_t out0 = scrut.snd;
-  __uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t scrut0 = sub1(out0, c0 * (uint64_t)38U);
+  felem4 out0 = scrut.snd;
+  __uint64_t_Hacl_Spec_Curve25519_Field64_Definition_felem4
+  scrut0 = sub1(out0, c0 * (uint64_t)38U);
   uint64_t c1 = scrut0.fst;
-  __uint64_t_uint64_t_uint64_t_uint64_t out1 = scrut0.snd;
+  felem4 out1 = scrut0.snd;
   uint64_t o0 = out1.fst;
   uint64_t o1 = out1.snd;
   uint64_t o2 = out1.thd;
   uint64_t o3 = out1.f3;
   uint64_t o0_ = o0 - c1 * (uint64_t)38U;
-  return ((__uint64_t_uint64_t_uint64_t_uint64_t){ .fst = o0_, .snd = o1, .thd = o2, .f3 = o3 });
+  return ((felem4){ .fst = o0_, .snd = o1, .thd = o2, .f3 = o3 });
 }
 
 /* SNIPPET_END: fsub4 */
 
 /* SNIPPET_START: mul4 */
 
-static __uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-mul4(__uint64_t_uint64_t_uint64_t_uint64_t f, __uint64_t_uint64_t_uint64_t_uint64_t r)
+static felem_wide4 mul4(felem4 f, felem4 r)
 {
   uint64_t f0 = f.fst;
   uint64_t f1 = f.snd;
   uint64_t f2 = f.thd;
   uint64_t f3 = f.f3;
-  __uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t scrut = mul1(r, f0);
+  __uint64_t_Hacl_Spec_Curve25519_Field64_Definition_felem4 scrut = mul1(r, f0);
   uint64_t c0 = scrut.fst;
-  __uint64_t_uint64_t_uint64_t_uint64_t out0 = scrut.snd;
+  felem4 out0 = scrut.snd;
   uint64_t o00 = out0.fst;
   uint64_t o01 = out0.snd;
   uint64_t o02 = out0.thd;
   uint64_t o03 = out0.f3;
-  __uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t
-  scrut0 =
-    mul1_add(r,
-      f1,
-      ((__uint64_t_uint64_t_uint64_t_uint64_t){ .fst = o01, .snd = o02, .thd = o03, .f3 = c0 }));
+  __uint64_t_Hacl_Spec_Curve25519_Field64_Definition_felem4
+  scrut0 = mul1_add(r, f1, ((felem4){ .fst = o01, .snd = o02, .thd = o03, .f3 = c0 }));
   uint64_t c1 = scrut0.fst;
-  __uint64_t_uint64_t_uint64_t_uint64_t out1 = scrut0.snd;
+  felem4 out1 = scrut0.snd;
   uint64_t o11 = out1.fst;
   uint64_t o12 = out1.snd;
   uint64_t o13 = out1.thd;
   uint64_t o14 = out1.f3;
-  __uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t
-  scrut1 =
-    mul1_add(r,
-      f2,
-      ((__uint64_t_uint64_t_uint64_t_uint64_t){ .fst = o12, .snd = o13, .thd = o14, .f3 = c1 }));
+  __uint64_t_Hacl_Spec_Curve25519_Field64_Definition_felem4
+  scrut1 = mul1_add(r, f2, ((felem4){ .fst = o12, .snd = o13, .thd = o14, .f3 = c1 }));
   uint64_t c2 = scrut1.fst;
-  __uint64_t_uint64_t_uint64_t_uint64_t out2 = scrut1.snd;
+  felem4 out2 = scrut1.snd;
   uint64_t o22 = out2.fst;
   uint64_t o23 = out2.snd;
   uint64_t o24 = out2.thd;
   uint64_t o25 = out2.f3;
-  __uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t
-  scrut2 =
-    mul1_add(r,
-      f3,
-      ((__uint64_t_uint64_t_uint64_t_uint64_t){ .fst = o23, .snd = o24, .thd = o25, .f3 = c2 }));
+  __uint64_t_Hacl_Spec_Curve25519_Field64_Definition_felem4
+  scrut2 = mul1_add(r, f3, ((felem4){ .fst = o23, .snd = o24, .thd = o25, .f3 = c2 }));
   uint64_t c3 = scrut2.fst;
-  __uint64_t_uint64_t_uint64_t_uint64_t out3 = scrut2.snd;
+  felem4 out3 = scrut2.snd;
   uint64_t o33 = out3.fst;
   uint64_t o34 = out3.snd;
   uint64_t o35 = out3.thd;
@@ -494,7 +472,7 @@ mul4(__uint64_t_uint64_t_uint64_t_uint64_t f, __uint64_t_uint64_t_uint64_t_uint6
   uint64_t o37 = c3;
   return
     (
-      (__uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t){
+      (felem_wide4){
         .fst = o00,
         .snd = o11,
         .thd = o22,
@@ -511,11 +489,10 @@ mul4(__uint64_t_uint64_t_uint64_t_uint64_t f, __uint64_t_uint64_t_uint64_t_uint6
 
 /* SNIPPET_START: fmul4 */
 
-static __uint64_t_uint64_t_uint64_t_uint64_t
-fmul4(__uint64_t_uint64_t_uint64_t_uint64_t f1, __uint64_t_uint64_t_uint64_t_uint64_t r)
+static felem4 fmul4(felem4 f1, felem4 r)
 {
-  __uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t tmp = mul4(f1, r);
-  __uint64_t_uint64_t_uint64_t_uint64_t out = carry_wide(tmp);
+  felem_wide4 tmp = mul4(f1, r);
+  felem4 out = carry_wide(tmp);
   return out;
 }
 
@@ -523,13 +500,12 @@ fmul4(__uint64_t_uint64_t_uint64_t_uint64_t f1, __uint64_t_uint64_t_uint64_t_uin
 
 /* SNIPPET_START: fmul14 */
 
-static __uint64_t_uint64_t_uint64_t_uint64_t
-fmul14(__uint64_t_uint64_t_uint64_t_uint64_t f1, uint64_t f2)
+static felem4 fmul14(felem4 f1, uint64_t f2)
 {
-  __uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t scrut = mul1(f1, f2);
+  __uint64_t_Hacl_Spec_Curve25519_Field64_Definition_felem4 scrut = mul1(f1, f2);
   uint64_t c0 = scrut.fst;
-  __uint64_t_uint64_t_uint64_t_uint64_t out0 = scrut.snd;
-  __uint64_t_uint64_t_uint64_t_uint64_t out1 = carry_pass(out0, c0);
+  felem4 out0 = scrut.snd;
+  felem4 out1 = carry_pass(out0, c0);
   return out1;
 }
 
@@ -543,10 +519,8 @@ static inline uint64_t add1_(uint64_t *out, uint64_t *f1, uint64_t f2)
   uint64_t f11 = f1[1U];
   uint64_t f12 = f1[2U];
   uint64_t f13 = f1[3U];
-  __uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t
-  scrut =
-    add1(((__uint64_t_uint64_t_uint64_t_uint64_t){ .fst = f10, .snd = f11, .thd = f12, .f3 = f13 }),
-      f2);
+  __uint64_t_Hacl_Spec_Curve25519_Field64_Definition_felem4
+  scrut = add1(((felem4){ .fst = f10, .snd = f11, .thd = f12, .f3 = f13 }), f2);
   uint64_t o3 = scrut.snd.f3;
   uint64_t o2 = scrut.snd.thd;
   uint64_t o1 = scrut.snd.snd;
@@ -573,12 +547,10 @@ static inline void fadd_(uint64_t *out, uint64_t *f1, uint64_t *f2)
   uint64_t f21 = f2[1U];
   uint64_t f22 = f2[2U];
   uint64_t f23 = f2[3U];
-  __uint64_t_uint64_t_uint64_t_uint64_t
+  felem4
   scrut =
-    fadd4((
-        (__uint64_t_uint64_t_uint64_t_uint64_t){ .fst = f10, .snd = f11, .thd = f12, .f3 = f13 }
-      ),
-      ((__uint64_t_uint64_t_uint64_t_uint64_t){ .fst = f20, .snd = f21, .thd = f22, .f3 = f23 }));
+    fadd4(((felem4){ .fst = f10, .snd = f11, .thd = f12, .f3 = f13 }),
+      ((felem4){ .fst = f20, .snd = f21, .thd = f22, .f3 = f23 }));
   uint64_t o0 = scrut.fst;
   uint64_t o1 = scrut.snd;
   uint64_t o2 = scrut.thd;
@@ -603,12 +575,10 @@ static inline void fsub_(uint64_t *out, uint64_t *f1, uint64_t *f2)
   uint64_t f21 = f2[1U];
   uint64_t f22 = f2[2U];
   uint64_t f23 = f2[3U];
-  __uint64_t_uint64_t_uint64_t_uint64_t
+  felem4
   scrut =
-    fsub4((
-        (__uint64_t_uint64_t_uint64_t_uint64_t){ .fst = f10, .snd = f11, .thd = f12, .f3 = f13 }
-      ),
-      ((__uint64_t_uint64_t_uint64_t_uint64_t){ .fst = f20, .snd = f21, .thd = f22, .f3 = f23 }));
+    fsub4(((felem4){ .fst = f10, .snd = f11, .thd = f12, .f3 = f13 }),
+      ((felem4){ .fst = f20, .snd = f21, .thd = f22, .f3 = f23 }));
   uint64_t o0 = scrut.fst;
   uint64_t o1 = scrut.snd;
   uint64_t o2 = scrut.thd;
@@ -633,12 +603,10 @@ static inline void fmul_(uint64_t *out, uint64_t *f1, uint64_t *f2)
   uint64_t f21 = f2[1U];
   uint64_t f22 = f2[2U];
   uint64_t f23 = f2[3U];
-  __uint64_t_uint64_t_uint64_t_uint64_t
+  felem4
   scrut =
-    fmul4((
-        (__uint64_t_uint64_t_uint64_t_uint64_t){ .fst = f10, .snd = f11, .thd = f12, .f3 = f13 }
-      ),
-      ((__uint64_t_uint64_t_uint64_t_uint64_t){ .fst = f20, .snd = f21, .thd = f22, .f3 = f23 }));
+    fmul4(((felem4){ .fst = f10, .snd = f11, .thd = f12, .f3 = f13 }),
+      ((felem4){ .fst = f20, .snd = f21, .thd = f22, .f3 = f23 }));
   uint64_t o0 = scrut.fst;
   uint64_t o1 = scrut.snd;
   uint64_t o2 = scrut.thd;
@@ -675,12 +643,7 @@ static inline void fmul1_(uint64_t *out, uint64_t *f1, uint64_t f2)
   uint64_t f11 = f1[1U];
   uint64_t f12 = f1[2U];
   uint64_t f13 = f1[3U];
-  __uint64_t_uint64_t_uint64_t_uint64_t
-  scrut =
-    fmul14((
-        (__uint64_t_uint64_t_uint64_t_uint64_t){ .fst = f10, .snd = f11, .thd = f12, .f3 = f13 }
-      ),
-      f2);
+  felem4 scrut = fmul14(((felem4){ .fst = f10, .snd = f11, .thd = f12, .f3 = f13 }), f2);
   uint64_t o0 = scrut.fst;
   uint64_t o1 = scrut.snd;
   uint64_t o2 = scrut.thd;

@@ -146,9 +146,6 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Hash_Core_SHA2_finish_512 =
       foreign "Hacl_Hash_Core_SHA2_finish_512"
         ((ptr uint64_t) @-> (ocaml_bytes @-> (returning void)))
-    type hacl_Hash_Definitions_impl = spec_Hash_Definitions_hash_alg
-    let hacl_Hash_Definitions_impl =
-      typedef spec_Hash_Definitions_hash_alg "Hacl_Hash_Definitions_impl"
     let hacl_Hash_Definitions_word_len =
       foreign "Hacl_Hash_Definitions_word_len"
         (spec_Hash_Definitions_hash_alg @-> (returning uint32_t))

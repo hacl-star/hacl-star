@@ -28,11 +28,11 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __Hacl_Chacha20_H
 #define __Hacl_Chacha20_H
 
 #include "Hacl_Kremlib.h"
-
 
 /* SNIPPET_START: Hacl_Impl_Chacha20_Vec_chacha20_constants */
 

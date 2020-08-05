@@ -27,12 +27,12 @@
 #include <string.h>
 #include <stdbool.h>
 
+
 #ifndef __Hacl_Chacha20_Vec128_H
 #define __Hacl_Chacha20_Vec128_H
 
 #include "Hacl_Chacha20.h"
 #include "Hacl_Kremlib.h"
-
 
 void
 Hacl_Chacha20_Vec128_chacha20_encrypt_128(

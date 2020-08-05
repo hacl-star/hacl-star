@@ -5785,12 +5785,6 @@ void Hacl_Hash_Core_SHA2_finish_512(u64 *s, u8 *dst)
     store64_be(dst + i * (u32)8U, uu____0[i]);
 }
 
-#define Mkdtuple2 0
-
-typedef u8 dtuple2__Spec_Hash_Definitions_hash_alg_any_tags;
-
-typedef Spec_Hash_Definitions_hash_alg dtuple2__Spec_Hash_Definitions_hash_alg_any;
-
 u32 Hacl_Hash_Definitions_word_len(Spec_Hash_Definitions_hash_alg a)
 {
   switch (a)

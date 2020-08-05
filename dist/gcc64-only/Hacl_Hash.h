@@ -28,6 +28,7 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __Hacl_Hash_H
 #define __Hacl_Hash_H
 
@@ -37,7 +38,6 @@
 #include "Hacl_Blake2b_32.h"
 #include "Hacl_Impl_Blake2_Constants.h"
 #include "Hacl_Spec.h"
-
 
 uint64_t Hacl_Hash_Core_Blake2_update_blake2s_32(uint32_t *s, uint64_t totlen, uint8_t *block);
 
@@ -223,8 +223,6 @@ void Hacl_Hash_Core_SHA2_finish_256(uint32_t *s, uint8_t *dst);
 void Hacl_Hash_Core_SHA2_finish_384(uint64_t *s, uint8_t *dst);
 
 void Hacl_Hash_Core_SHA2_finish_512(uint64_t *s, uint8_t *dst);
-
-typedef Spec_Hash_Definitions_hash_alg Hacl_Hash_Definitions_impl;
 
 uint32_t Hacl_Hash_Definitions_word_len(Spec_Hash_Definitions_hash_alg a);
 

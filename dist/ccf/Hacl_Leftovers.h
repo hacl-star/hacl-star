@@ -27,6 +27,7 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __Hacl_Leftovers_H
 #define __Hacl_Leftovers_H
 
@@ -34,7 +35,6 @@
 #include "Lib_Memzero0.h"
 #include "Hacl_Impl_Blake2_Constants.h"
 #include "Hacl_Spec.h"
-
 
 void
 Hacl_Blake2b_32_blake2b(

@@ -28,12 +28,12 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __EverCrypt_HKDF_H
 #define __EverCrypt_HKDF_H
 
 #include "EverCrypt_HMAC.h"
 #include "Hacl_Spec.h"
-
 
 void
 EverCrypt_HKDF_expand_sha1(
