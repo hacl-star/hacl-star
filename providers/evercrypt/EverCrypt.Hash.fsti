@@ -244,14 +244,14 @@ val update_multi_256: Hacl.Hash.Definitions.update_multi_st (|SHA2_256, ()|)
 inline_for_extraction noextract
 val update_multi_224: Hacl.Hash.Definitions.update_multi_st (|SHA2_224, ()|)
 
-/// The general ``update`` method (with support for blake2)
+/// The new ``update`` method (with support for blake2)
 // Note: this function relies implicitly on the fact that we are running with
 // code/lib/kremlin and that we know that machine integers and secret integers
 // are the same. In the long run, we should standardize on a secret integer type
 // in F*'s ulib and have evercrypt use it.
 (** @type: true
 *)
-val gupdate:
+val update2:
   #a:e_alg -> (
   let a = Ghost.reveal a in
   s:state a ->
@@ -271,7 +271,7 @@ val gupdate:
     preserves_freeable s h0 h1))
 
 /// The deprecated ``update`` method with no support for blake2
-[@deprecated]
+[@(deprecated "Use update2 instead") ]
 val update:
   #a:e_alg{not (is_blake a)} -> (
   let a = Ghost.reveal a in
@@ -289,11 +289,11 @@ val update:
     repr s h1 == fst(Spec.Agile.Hash.update a (repr s h0, ()) (B.as_seq h0 block)) /\
     preserves_freeable s h0 h1))
 
-/// The general ``update_multi`` method
+/// The new ``update_multi`` method
 // Note that we pass the data length in bytes (rather than blocks).
 (** @type: true
 *)
-val gupdate_multi:
+val update_multi2:
   #a:e_alg -> (
   let a = Ghost.reveal a in
   s:state a ->
@@ -314,7 +314,7 @@ val gupdate_multi:
     preserves_freeable s h0 h1))
 
 /// The deprecated ``update_multi`` method with no support for blake2
-[@deprecated]
+[@(deprecated "Use update_multi2 instead") ]
 val update_multi:
   #a:e_alg{not (is_blake a)} -> (
   let a = Ghost.reveal a in
@@ -338,7 +338,7 @@ val update_last_256: Hacl.Hash.Definitions.update_last_st (|SHA2_256, ()|)
 inline_for_extraction noextract
 val update_last_224: Hacl.Hash.Definitions.update_last_st (|SHA2_224, ()|)
 
-/// The general ``update_last`` method with support for blake2
+/// The new ``update_last`` method with support for blake2
 // 18-03-05 note the *new* length-passing convention!
 // 18-03-03 it is best to let the caller keep track of lengths.
 // 18-03-03 the last block is *never* complete so there is room for the 1st byte of padding.
@@ -349,7 +349,7 @@ val update_last_224: Hacl.Hash.Definitions.update_last_st (|SHA2_224, ()|)
 //   about that sequence concatenation
 (** @type: true
 *)
-val gupdate_last:
+val update_last2:
   #a:e_alg -> (
   let a = Ghost.reveal a in
   s:state a ->
@@ -373,6 +373,7 @@ val gupdate_last:
     footprint s h0 == footprint s h1 /\
     preserves_freeable s h0 h1))
 
+[@(deprecated "Use update_last2 instead") ]
 val update_last:
   #a:e_alg{not (is_blake a)} -> (
   let a = Ghost.reveal a in

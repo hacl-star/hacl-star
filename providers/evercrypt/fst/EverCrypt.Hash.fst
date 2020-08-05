@@ -207,7 +207,7 @@ let update_multi_224 s ev blocks n =
 
 // Need to unroll the definition of update_multi once to prove that it's update
 #push-options "--fuel 1 --ifuel 1"
-let gupdate #a s prevlen block =
+let update2 #a s prevlen block =
   match !*s with
   | MD5_s p -> Hacl.Hash.MD5.legacy_update p () block
   | SHA1_s p -> Hacl.Hash.SHA1.legacy_update p () block
@@ -226,11 +226,11 @@ let gupdate #a s prevlen block =
 
 // The deprecated update just calls the new update
 let update #a s block =
-  gupdate #a s 0UL block
+  update2 #a s 0UL block
 
 #push-options "--ifuel 1"
 
-let gupdate_multi #a s prevlen blocks len =
+let update_multi2 #a s prevlen blocks len =
   match !*s with
   | MD5_s p ->
       let n = len / block_len MD5 in
@@ -264,7 +264,7 @@ let gupdate_multi #a s prevlen blocks len =
 
 // The deprecated update_multi just calls the new update_multi
 let update_multi #a s blocks len =
-  gupdate_multi #a s 0UL blocks len
+  update_multi2 #a s 0UL blocks len
 
 // Re-using the higher-order stateful combinator to get an instance of
 // update_last that is capable of calling Vale under the hood
@@ -387,7 +387,7 @@ let update_last_blake2b p prev_len last last_len =
                     prev_len last last_len in
   ()
 
-let gupdate_last #a s prev_len last last_len =
+let update_last2 #a s prev_len last last_len =
   match !*s with
   | MD5_s p ->
       update_last_64 a Hacl.Hash.MD5.legacy_update_last p () prev_len last last_len
@@ -469,7 +469,7 @@ let update_last #ga s last total_len =
   (**) let h0 = ST.get () in
   (**) modulo_sub_lemma (v total_len) (B.length last) (block_length a);
   (**) assert(v last_len = B.length last);
-  gupdate_last #ga s prev_len last last_len;
+  update_last2 #ga s prev_len last last_len;
   (**) let h1 = ST.get () in
   // The following assertions need non-linear arithmetic.
   // Note that for now, the proof is stable as it is.
