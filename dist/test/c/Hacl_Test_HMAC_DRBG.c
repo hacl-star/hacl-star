@@ -4562,35 +4562,34 @@ vectors_low176[255U] =
     (uint8_t)251U, (uint8_t)239U, (uint8_t)172U
   };
 
-typedef struct lbuffer__uint8_t_s
+typedef struct vec8_s
 {
   uint32_t len;
   uint8_t *b;
 }
-lbuffer__uint8_t;
+vec8;
 
-typedef struct __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_s
+typedef struct __Hacl_Test_HMAC_DRBG_vec8_Hacl_Test_HMAC_DRBG_vec8_s
 {
-  lbuffer__uint8_t fst;
-  lbuffer__uint8_t snd;
+  vec8 fst;
+  vec8 snd;
 }
-__Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t;
+__Hacl_Test_HMAC_DRBG_vec8_Hacl_Test_HMAC_DRBG_vec8;
 
-typedef struct
-__Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_s
+typedef struct vector_s
 {
   hash_alg fst;
-  lbuffer__uint8_t snd;
-  lbuffer__uint8_t thd;
-  lbuffer__uint8_t f3;
-  lbuffer__uint8_t f4;
-  lbuffer__uint8_t f5;
-  __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t f6;
-  lbuffer__uint8_t f7;
+  vec8 snd;
+  vec8 thd;
+  vec8 f3;
+  vec8 f4;
+  vec8 f5;
+  __Hacl_Test_HMAC_DRBG_vec8_Hacl_Test_HMAC_DRBG_vec8 f6;
+  vec8 f7;
 }
-__Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t;
+vector;
 
-static __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+static vector
 vectors_low177[28U] =
   {
     {
@@ -4856,16 +4855,14 @@ vectors_low177[28U] =
     }
   };
 
-typedef struct
-lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_s
+typedef struct lbuffer__Hacl_Test_HMAC_DRBG_vector_s
 {
   uint32_t len;
-  __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  *b;
+  vector *b;
 }
-lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t;
+lbuffer__Hacl_Test_HMAC_DRBG_vector;
 
-static lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+static lbuffer__Hacl_Test_HMAC_DRBG_vector
 vectors_low = { .len = (uint32_t)28U, .b = vectors_low177 };
 
 static bool compare_and_print(uint8_t *b1, uint8_t *b2, uint32_t len)
@@ -4895,11 +4892,7 @@ static bool compare_and_print(uint8_t *b1, uint8_t *b2, uint32_t len)
   return b;
 }
 
-static void
-test_one(
-  __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  vec
-)
+static void test_one(vector vec)
 {
   uint8_t *returned_bits = vec.f7.b;
   uint32_t returned_bits_len = vec.f7.len;
@@ -5095,8 +5088,7 @@ exit_code main()
   C_String_print("[HMAC_DRBG]");
   C_String_print("\n");
   uint32_t len = vectors_low.len;
-  __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  *vs = vectors_low.b;
+  vector *vs = vectors_low.b;
   for (uint32_t i = (uint32_t)0U; i < len; i++)
   {
     LowStar_Printf_print_string("HMAC-DRBG Test ");
