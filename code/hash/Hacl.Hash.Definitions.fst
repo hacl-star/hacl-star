@@ -128,6 +128,7 @@ let alloca_st (i:impl) = unit -> ST.StackInline (state i & extra_state (get_alg 
     M.(modifies M.loc_none h0 h1) /\
     B.frameOf s == HS.get_tip h0 /\
     (as_seq h1 s, v) == Spec.Agile.Hash.init (get_alg i) /\
+    B.live h1 s /\
     B.fresh_loc (M.loc_buffer s) h0 h1))
 
 noextract inline_for_extraction
