@@ -16,6 +16,9 @@ open LowStar.BufferOps
 open FStar.Integers
 open C.Failure
 
+module U64 = FStar.UInt64
+module U32 = FStar.UInt32
+
 // Allow *just* the alg type to be inverted, so that the entire module can run
 // with ifuel 0
 let _: squash (inversion alg) = allow_inversion alg
@@ -203,8 +206,8 @@ let update_multi_224 s ev blocks n =
   update_multi_256 s ev blocks n
 
 // Need to unroll the definition of update_multi once to prove that it's update
-#push-options "--max_fuel 1 --ifuel 1"
-let update #a s prevlen block =
+#push-options "--fuel 1 --ifuel 1"
+let gupdate #a s prevlen block =
   match !*s with
   | MD5_s p -> Hacl.Hash.MD5.legacy_update p () block
   | SHA1_s p -> Hacl.Hash.SHA1.legacy_update p () block
@@ -221,9 +224,13 @@ let update #a s prevlen block =
       ()
 #pop-options
 
+// The deprecated update just calls the new update
+let update #a s block =
+  gupdate #a s 0UL block
+
 #push-options "--ifuel 1"
 
-let update_multi #a s prevlen blocks len =
+let gupdate_multi #a s prevlen blocks len =
   match !*s with
   | MD5_s p ->
       let n = len / block_len MD5 in
@@ -254,6 +261,10 @@ let update_multi #a s prevlen blocks len =
       ()
 
 #pop-options
+
+// The deprecated update_multi just calls the new update_multi
+let update_multi #a s blocks len =
+  gupdate_multi #a s 0UL blocks len
 
 // Re-using the higher-order stateful combinator to get an instance of
 // update_last that is capable of calling Vale under the hood
@@ -331,7 +342,6 @@ let state_s_to_words_state (#a:alg) (s:state_s a) (h:HS.mem) (counter:uint64_t) 
 /// Besides, even with this the Blake functions tend to loop.
 inline_for_extraction noextract
 let update_last_with_internal_st (a : alg) =
-//  s:state_s a ->
   p:Hacl.Hash.Definitions.state (impl_of_alg a) ->
   prev_len:uint64_t ->
   last:B.buffer Lib.IntTypes.uint8 { B.length last <= block_length a } ->
@@ -356,61 +366,6 @@ let update_last_with_internal_st (a : alg) =
     M.(modifies (footprint_s s) h0 h1) /\
     footprint_s s == footprint_s s)
 
-(*inline_for_extraction noextract
-let update_last_with_internal_st (a : alg) =
-  s:state_s a ->
-  p:Hacl.Hash.Definitions.state (impl_of_alg a) ->
-  prev_len:uint64_t ->
-  last:B.buffer Lib.IntTypes.uint8 { B.length last <= block_length a } ->
-  last_len:uint32_t {
-    v last_len = B.length last /\
-    v prev_len + v last_len <= max_input_length a /\
-    v prev_len % block_length a = 0
-    } ->
-  Stack unit
-  (requires fun h0 ->
-    invariant_s s h0 /\
-    s == mk_state_s p /\
-    B.live h0 last /\
-    M.(loc_disjoint (footprint_s s) (loc_buffer last) /\
-    v prev_len + v last_len <= max_input_length a))
-  (ensures fun h0 _ h1 ->
-    invariant_s s h1 /\
-    as_seq h1 p ==
-      fst (Spec.Hash.Incremental.update_last a (state_s_to_words_state s h0 prev_len) (v prev_len)
-                                             (B.as_seq h0 last)) /\
-    M.(modifies (footprint_s s) h0 h1) /\
-    footprint_s s == footprint_s s) *)
-
-
-(*
-inline_for_extraction noextract
-let update_last_with_internal_st (a : alg) =
-  s:state_s a ->
-  p:Hacl.Hash.Definitions.state (impl_of_alg a) ->
-  prev_len:uint64_t ->
-  last:B.buffer Lib.IntTypes.uint8 { B.length last <= block_length a } ->
-  last_len:uint32_t {
-    v last_len = B.length last /\
-    v prev_len + v last_len <= max_input_length a /\
-    v prev_len % block_length a = 0
-    } ->
-  Stack unit
-  (requires fun h0 ->
-    invariant_s s h0 /\
-    s == mk_state_s p /\
-    B.live h0 last /\
-    M.(loc_disjoint (footprint s h0) (loc_buffer last) /\
-    v prev_len + v last_len <= max_input_length a))
-  (ensures fun h0 _ h1 ->
-    invariant s h1 /\
-    repr s h1 ==
-      fst (Spec.Hash.Incremental.update_last a (repr_with_counter s h0 prev_len) (v prev_len)
-                                             (B.as_seq h0 last)) /\
-    M.(modifies (footprint s h0) h0 h1) /\
-    footprint s h0 == footprint s h1 /\
-    preserves_freeable s h0 h1)
-*)
 
 inline_for_extraction noextract
 val update_last_blake2s : update_last_with_internal_st Blake2S
@@ -432,7 +387,7 @@ let update_last_blake2b p prev_len last last_len =
                     prev_len last last_len in
   ()
 
-let update_last #a s prev_len last last_len =
+let gupdate_last #a s prev_len last last_len =
   match !*s with
   | MD5_s p ->
       update_last_64 a Hacl.Hash.MD5.legacy_update_last p () prev_len last last_len
@@ -450,6 +405,82 @@ let update_last #a s prev_len last last_len =
       update_last_blake2s p prev_len last last_len
   | Blake2B_s p ->
       update_last_blake2b p prev_len last last_len
+
+// TODO: move to FStar.Math.Lemmas
+val modulo_sub_lemma (a : int) (b : nat) (c : pos) :
+  Lemma
+  (requires (b < c /\ (a - b) % c = 0))
+  (ensures (b = a % c))
+let modulo_sub_lemma a b c =
+  calc(==) {
+    (a - b) % c;
+  (==) { Math.Lemmas.lemma_mod_add_distr (-b) a c }
+    ((a % c) - b) % c;
+  };
+  assert(- c < (a % c) - b);
+  assert((a % c) - b < c);
+  Math.Lemmas.euclidean_division_definition ((a % c) - b) c;
+  assert(a % c - b = ((a % c - b) / c) * c);
+  assert(1 * c = c);
+  assert((-1) * c = - c);
+  let d = (a % c - b) / c in
+  if 1 <= d then
+    begin
+    Math.Lemmas.lemma_mult_le_right c 1 d;
+    assert(d * c >= 1 * c);
+    assert(False)
+    end;
+  if d <= -1 then
+    begin
+    Math.Lemmas.lemma_mult_le_right c d (-1);
+    assert(d * c <= (-1) * c);
+    assert(d * c <= - c);
+    assert(False)
+    end;
+  assert(d = 0);
+  assert(d * c = 0);
+  assert(a % c - b = 0);
+  assert(a % c = b)
+
+// The deprecated update_last just calls the new update_last.
+// This one is a bit trickier than the others because we need to recompute
+// the length of the data seen so far.
+#push-options "--z3rlimit 200"
+let update_last #ga s last total_len =
+  let a = alg_of_state ga s in
+  let last_len = U64.(total_len %^ Int.Cast.uint32_to_uint64 (block_len a)) in
+  (**) Math.Lemmas.euclidean_division_definition (U64.v total_len) (block_length a);
+  (**) Math.Lemmas.nat_over_pos_is_nat (U64.v total_len) (block_length a);
+  (**) Math.Lemmas.nat_times_nat_is_nat (U64.v total_len / block_length a) (block_length a);
+  (**) Math.Lemmas.modulo_range_lemma (U64.v total_len) (block_length a);
+  (**) assert(U64.v last_len = U64.v total_len % block_length a);
+  (**) assert(UInt64.v last_len <= UInt64.v total_len);
+  let prev_len = U64.(total_len -^ last_len) in
+  (**) assert(block_length a < pow2 32);
+  (**) Math.Lemmas.modulo_lemma (U64.v last_len) (pow2 32);
+  (**) assert(U64.v last_len = U32.v (Int.Cast.uint64_to_uint32 last_len));
+  [@inline_let]
+  let last_len = Int.Cast.uint64_to_uint32 last_len in
+  (**) assert(U32.v last_len < Spec.Hash.Definitions.block_length a);  
+  (**) assert(v prev_len + v last_len <= max_input_length a);
+  (**) assert(v prev_len = v total_len - v last_len);
+  (**) Math.Lemmas.cancel_mul_mod (v total_len / block_length a) (block_length a);
+  (**) assert(v prev_len % block_length a = 0);
+  (**) let h0 = ST.get () in
+  (**) modulo_sub_lemma (v total_len) (B.length last) (block_length a);
+  (**) assert(v last_len = B.length last);
+  gupdate_last #ga s prev_len last last_len;
+  (**) let h1 = ST.get () in
+  // The following assertions need non-linear arithmetic.
+  // Note that for now, the proof is stable as it is.
+  (**) assert(
+  (**)   (B.length last + Seq.length (Spec.Hash.PadFinish.pad a (v total_len)))
+  (**)     % block_length a = 0);
+  (**) assert(
+  (**)   repr s h1 ==
+  (**)   fst (Spec.Agile.Hash.update_multi a (repr s h0, ())
+  (**)         (Seq.append (B.as_seq h0 last) (Spec.Hash.PadFinish.pad a (v total_len)))))
+#pop-options
 
 #push-options "--ifuel 1"
 
