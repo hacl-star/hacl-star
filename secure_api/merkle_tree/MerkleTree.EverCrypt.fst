@@ -43,7 +43,7 @@ let mt_sha256_compress src1 src2 dst =
                     (Rgl?.r_repr(hreg hash_size) hh0 src2))
                   (B.as_seq hh1 cb));
 
-  EHS.update #(Ghost.hide hash_alg) st 0UL cb;
+  EHS.update2 #(Ghost.hide hash_alg) st 0UL cb;
   let hh2 = HST.get () in
   assert ((EHS.repr st hh2, ()) ==
             Spec.Agile.Hash.update hash_alg (Spec.Agile.Hash.init hash_alg)
