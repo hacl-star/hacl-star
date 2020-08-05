@@ -10,6 +10,8 @@ module MTLD = MerkleTree.Low.Datastructures
 
 open LowStar.Regional
 
+#set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
+
 let hash #hash_size = MTLD.hash #hash_size
 let mt_p = MerkleTree.Low.mt_p
 let mt_loc = MerkleTree.Low.mt_loc

@@ -13,7 +13,7 @@ module Hash = Spec.Hash.Definitions
 
 open LowStar.Regional
 
-// ---
+#set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 module S = FStar.Seq
 
@@ -23,7 +23,7 @@ open MerkleTree.Low.Datastructures
 
 open Lib.IntTypes
 
-#push-options "--z3rlimit 40 --max_fuel 0"
+#push-options "--ifuel 1"
 let mt_sha256_compress src1 src2 dst =
   let hash_size = 32ul in
   let hash_alg = Spec.Hash.Definitions.SHA2_256 in
@@ -69,7 +69,6 @@ let mt_sha256_compress src1 src2 dst =
                     (Rgl?.r_repr(hreg hash_size) hh0 src1)
                     (Rgl?.r_repr(hreg hash_size) hh0 src2)))
 #pop-options
-
 
 let mt_create r init =
   mt_create_custom 32ul (MerkleTree.New.High.sha256_compress) r init mt_sha256_compress
