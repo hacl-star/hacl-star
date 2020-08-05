@@ -1372,22 +1372,9 @@ static void point_add(uint64_t *p, uint64_t *q, uint64_t *result, uint64_t *temp
   montgomery_multiplication_buffer(z1z2, h, z3_out1);
   copy_point_conditional(x3_out1, y3_out1, z3_out1, q, p);
   copy_point_conditional(x3_out1, y3_out1, z3_out1, p, q);
-  bool uu____0 = x3_out1 == NULL;
-  if (!(uu____0 || result == NULL))
-  {
-    memcpy(result, x3_out1, (uint32_t)4U * sizeof (x3_out1[0U]));
-  }
-  bool uu____1 = y3_out1 == NULL;
-  if (!(uu____1 || result == NULL))
-  {
-    memcpy(result + (uint32_t)4U, y3_out1, (uint32_t)4U * sizeof (y3_out1[0U]));
-  }
-  bool uu____2 = z3_out1 == NULL;
-  if (!(uu____2 || result == NULL))
-  {
-    memcpy(result + (uint32_t)8U, z3_out1, (uint32_t)4U * sizeof (z3_out1[0U]));
-    return;
-  }
+  memcpy(result, x3_out1, (uint32_t)4U * sizeof (x3_out1[0U]));
+  memcpy(result + (uint32_t)4U, y3_out1, (uint32_t)4U * sizeof (y3_out1[0U]));
+  memcpy(result + (uint32_t)8U, z3_out1, (uint32_t)4U * sizeof (z3_out1[0U]));
 }
 
 static void pointToDomain(uint64_t *p, uint64_t *result)

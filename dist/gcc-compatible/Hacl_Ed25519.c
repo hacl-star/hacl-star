@@ -1592,13 +1592,9 @@ static void sha512_pre_msg(uint8_t *h, uint8_t *prefix, uint32_t len, uint8_t *i
   KRML_CHECK_SIZE(sizeof (uint8_t), len + (uint32_t)32U);
   uint8_t pre_msg[len + (uint32_t)32U];
   memset(pre_msg, 0U, (len + (uint32_t)32U) * sizeof (pre_msg[0U]));
-  bool uu____0 = prefix == NULL;
+  memcpy(pre_msg, prefix, (uint32_t)32U * sizeof (prefix[0U]));
+  bool uu____0 = input == NULL;
   if (!(uu____0 || pre_msg == NULL))
-  {
-    memcpy(pre_msg, prefix, (uint32_t)32U * sizeof (prefix[0U]));
-  }
-  bool uu____1 = input == NULL;
-  if (!(uu____1 || pre_msg == NULL))
   {
     memcpy(pre_msg + (uint32_t)32U, input, len * sizeof (input[0U]));
   }
@@ -1617,18 +1613,10 @@ sha512_pre_pre2_msg(
   KRML_CHECK_SIZE(sizeof (uint8_t), len + (uint32_t)64U);
   uint8_t pre_msg[len + (uint32_t)64U];
   memset(pre_msg, 0U, (len + (uint32_t)64U) * sizeof (pre_msg[0U]));
-  bool uu____0 = prefix == NULL;
+  memcpy(pre_msg, prefix, (uint32_t)32U * sizeof (prefix[0U]));
+  memcpy(pre_msg + (uint32_t)32U, prefix2, (uint32_t)32U * sizeof (prefix2[0U]));
+  bool uu____0 = input == NULL;
   if (!(uu____0 || pre_msg == NULL))
-  {
-    memcpy(pre_msg, prefix, (uint32_t)32U * sizeof (prefix[0U]));
-  }
-  bool uu____1 = prefix2 == NULL;
-  if (!(uu____1 || pre_msg == NULL))
-  {
-    memcpy(pre_msg + (uint32_t)32U, prefix2, (uint32_t)32U * sizeof (prefix2[0U]));
-  }
-  bool uu____2 = input == NULL;
-  if (!(uu____2 || pre_msg == NULL))
   {
     memcpy(pre_msg + (uint32_t)64U, input, len * sizeof (input[0U]));
   }
@@ -2045,16 +2033,8 @@ void Hacl_Ed25519_sign(uint8_t *signature, uint8_t *priv, uint32_t len, uint8_t 
   sign_step_3(tmp_bytes, tmp_ints);
   sign_step_4(len, msg, tmp_bytes, tmp_ints);
   sign_step_5(tmp_bytes, tmp_ints);
-  bool uu____0 = rs_ == NULL;
-  if (!(uu____0 || signature == NULL))
-  {
-    memcpy(signature, rs_, (uint32_t)32U * sizeof (rs_[0U]));
-  }
-  bool uu____1 = s_ == NULL;
-  if (!(uu____1 || signature == NULL))
-  {
-    memcpy(signature + (uint32_t)32U, s_, (uint32_t)32U * sizeof (s_[0U]));
-  }
+  memcpy(signature, rs_, (uint32_t)32U * sizeof (rs_[0U]));
+  memcpy(signature + (uint32_t)32U, s_, (uint32_t)32U * sizeof (s_[0U]));
 }
 
 bool Hacl_Ed25519_verify(uint8_t *pub, uint32_t len, uint8_t *msg, uint8_t *signature)
@@ -2137,15 +2117,7 @@ void Hacl_Ed25519_sign_expanded(uint8_t *signature, uint8_t *ks, uint32_t len, u
   sign_step_3(tmp_bytes, tmp_ints);
   sign_step_4(len, msg, tmp_bytes, tmp_ints);
   sign_step_5(tmp_bytes, tmp_ints);
-  bool uu____0 = rs_ == NULL;
-  if (!(uu____0 || signature == NULL))
-  {
-    memcpy(signature, rs_, (uint32_t)32U * sizeof (rs_[0U]));
-  }
-  bool uu____1 = s_ == NULL;
-  if (!(uu____1 || signature == NULL))
-  {
-    memcpy(signature + (uint32_t)32U, s_, (uint32_t)32U * sizeof (s_[0U]));
-  }
+  memcpy(signature, rs_, (uint32_t)32U * sizeof (rs_[0U]));
+  memcpy(signature + (uint32_t)32U, s_, (uint32_t)32U * sizeof (s_[0U]));
 }
 

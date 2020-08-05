@@ -453,16 +453,8 @@ static inline void crypto_kem_enc_ss(uint8_t *g, uint8_t *ct, uint8_t *ss)
   memset(ss_init, 0U, ss_init_len * sizeof (ss_init[0U]));
   uint8_t *c12 = ct;
   uint8_t *kd = g + (uint32_t)16U;
-  bool uu____0 = c12 == NULL;
-  if (!(uu____0 || ss_init == NULL))
-  {
-    memcpy(ss_init, c12, (crypto_ciphertextbytes - (uint32_t)16U) * sizeof (c12[0U]));
-  }
-  bool uu____1 = kd == NULL;
-  if (!(uu____1 || ss_init == NULL))
-  {
-    memcpy(ss_init + crypto_ciphertextbytes - (uint32_t)16U, kd, (uint32_t)32U * sizeof (kd[0U]));
-  }
+  memcpy(ss_init, c12, (crypto_ciphertextbytes - (uint32_t)16U) * sizeof (c12[0U]));
+  memcpy(ss_init + crypto_ciphertextbytes - (uint32_t)16U, kd, (uint32_t)32U * sizeof (kd[0U]));
   uint64_t s[25U] = { 0U };
   s[0U] = (uint64_t)0x10010001a801U | (uint64_t)(uint16_t)7U << (uint32_t)48U;
   Hacl_Impl_SHA3_state_permute(s);
@@ -497,16 +489,8 @@ uint32_t Hacl_Frodo_KEM_crypto_kem_enc(uint8_t *ct, uint8_t *ss, uint8_t *pk)
   randombytes_(bytes_mu, coins);
   uint8_t g[48U] = { 0U };
   uint8_t pk_coins[992U] = { 0U };
-  bool uu____0 = pk == NULL;
-  if (!(uu____0 || pk_coins == NULL))
-  {
-    memcpy(pk_coins, pk, crypto_publickeybytes * sizeof (pk[0U]));
-  }
-  bool uu____1 = coins == NULL;
-  if (!(uu____1 || pk_coins == NULL))
-  {
-    memcpy(pk_coins + crypto_publickeybytes, coins, bytes_mu * sizeof (coins[0U]));
-  }
+  memcpy(pk_coins, pk, crypto_publickeybytes * sizeof (pk[0U]));
+  memcpy(pk_coins + crypto_publickeybytes, coins, bytes_mu * sizeof (coins[0U]));
   uint64_t s[25U] = { 0U };
   s[0U] = (uint64_t)0x10010001a801U | (uint64_t)(uint16_t)3U << (uint32_t)48U;
   Hacl_Impl_SHA3_state_permute(s);
@@ -546,16 +530,8 @@ uint32_t Hacl_Frodo_KEM_crypto_kem_dec(uint8_t *ss, uint8_t *ct, uint8_t *sk)
   uint8_t pk_mu_decode[pk_mu_decode_len];
   memset(pk_mu_decode, 0U, pk_mu_decode_len * sizeof (pk_mu_decode[0U]));
   uint8_t *pk0 = sk + (uint32_t)16U;
-  bool uu____0 = pk0 == NULL;
-  if (!(uu____0 || pk_mu_decode == NULL))
-  {
-    memcpy(pk_mu_decode, pk0, crypto_publickeybytes * sizeof (pk0[0U]));
-  }
-  bool uu____1 = mu_decode1 == NULL;
-  if (!(uu____1 || pk_mu_decode == NULL))
-  {
-    memcpy(pk_mu_decode + crypto_publickeybytes, mu_decode1, bytes_mu * sizeof (mu_decode1[0U]));
-  }
+  memcpy(pk_mu_decode, pk0, crypto_publickeybytes * sizeof (pk0[0U]));
+  memcpy(pk_mu_decode + crypto_publickeybytes, mu_decode1, bytes_mu * sizeof (mu_decode1[0U]));
   uint64_t s0[25U] = { 0U };
   s0[0U] = (uint64_t)0x10010001a801U | (uint64_t)(uint16_t)3U << (uint32_t)48U;
   Hacl_Impl_SHA3_state_permute(s0);
@@ -593,8 +569,8 @@ uint32_t Hacl_Frodo_KEM_crypto_kem_dec(uint8_t *ss, uint8_t *ct, uint8_t *sk)
   uint8_t res = (uint8_t)255U;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
   {
-    uint8_t uu____2 = FStar_UInt8_eq_mask(d0[i], dp[i]);
-    res = uu____2 & res;
+    uint8_t uu____0 = FStar_UInt8_eq_mask(d0[i], dp[i]);
+    res = uu____0 & res;
   }
   uint8_t z = res;
   bool b1 = z == (uint8_t)255U;
@@ -619,25 +595,13 @@ uint32_t Hacl_Frodo_KEM_crypto_kem_dec(uint8_t *ss, uint8_t *ct, uint8_t *sk)
   KRML_CHECK_SIZE(sizeof (uint8_t), ss_init_len);
   uint8_t ss_init[ss_init_len];
   memset(ss_init, 0U, ss_init_len * sizeof (ss_init[0U]));
-  bool uu____3 = c12 == NULL;
-  if (!(uu____3 || ss_init == NULL))
-  {
-    memcpy(ss_init, c12, (crypto_ciphertextbytes - (uint32_t)16U) * sizeof (c12[0U]));
-  }
-  bool uu____4 = kp_s == NULL;
-  if (!(uu____4 || ss_init == NULL))
-  {
-    memcpy(ss_init + crypto_ciphertextbytes - (uint32_t)16U,
-      kp_s,
-      (uint32_t)16U * sizeof (kp_s[0U]));
-  }
-  bool uu____5 = d == NULL;
-  if (!(uu____5 || ss_init == NULL))
-  {
-    memcpy(ss_init + crypto_ciphertextbytes - (uint32_t)16U + (uint32_t)16U,
-      d,
-      (uint32_t)16U * sizeof (d[0U]));
-  }
+  memcpy(ss_init, c12, (crypto_ciphertextbytes - (uint32_t)16U) * sizeof (c12[0U]));
+  memcpy(ss_init + crypto_ciphertextbytes - (uint32_t)16U,
+    kp_s,
+    (uint32_t)16U * sizeof (kp_s[0U]));
+  memcpy(ss_init + crypto_ciphertextbytes - (uint32_t)16U + (uint32_t)16U,
+    d,
+    (uint32_t)16U * sizeof (d[0U]));
   uint64_t s1[25U] = { 0U };
   s1[0U] = (uint64_t)0x10010001a801U | (uint64_t)(uint16_t)7U << (uint32_t)48U;
   Hacl_Impl_SHA3_state_permute(s1);
