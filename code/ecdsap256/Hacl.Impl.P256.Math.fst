@@ -156,11 +156,11 @@ let lemma_l_ferm () =
   lemma_pow_mod_n_is_fpow prime_p256_order r (prime_p256_order - 1)
   
 
-val lemma_multiplication_not_mod_prime_left: a:nat{a < prime256} -> Lemma
+val lemma_multiplication_not_mod_prime_left_p256: a:nat{a < prime256} -> Lemma
   (requires a * (modp_inv2 #P256 (pow2 256)) % prime256 == 0)
   (ensures a == 0)
 
-let lemma_multiplication_not_mod_prime_left a =
+let lemma_multiplication_not_mod_prime_left_p256 a =
   let b = modp_inv2 #P256 (pow2 256) in
   lemma_mod_mul_distr_r a b prime256;
   assert (a * b % prime256 == a * (b % prime256) % prime256);
@@ -173,11 +173,38 @@ let lemma_multiplication_not_mod_prime_left a =
   assert (a % prime256 == 0);
   small_mod a prime256
 
-val lemma_multiplication_not_mod_prime: a:nat{a < prime256} ->
+
+val lemma_multiplication_not_mod_prime_left_p384: a:nat{a < prime384} -> Lemma
+  (requires a * (modp_inv2 #P384 (pow2 384)) % prime384 == 0)
+  (ensures a == 0)
+
+let lemma_multiplication_not_mod_prime_left_p384 a =
+  let b = modp_inv2 #P384 (pow2 84) in
+  lemma_mod_mul_distr_r a b prime384;
+  assert (a * b % prime384 == a * (b % prime384) % prime384);
+  admit();
+    (* and some other stuff I don´t want to compute for now *)
+  let r = -26959946654596436328278158470660195847911760999080590586820792680449 in
+  let s = 26959946660873538059280334323183841250350249843923952699046031785985 in
+  assert_norm (r * prime256 + s * b == 1);
+  swap_mul a b;
+  assert (b * a % prime256 == 0);
+  euclid prime256 b a r s;
+  assert (a % prime256 == 0);
+  small_mod a prime256
+
+
+val lemma_multiplication_not_mod_prime_p256: a:nat{a < prime256} ->
   Lemma (a * (modp_inv2 #P256 (pow2 256)) % prime256 == 0 <==> a == 0)
 
+let lemma_multiplication_not_mod_prime_p256 a =
+  Classical.move_requires lemma_multiplication_not_mod_prime_left_p256 a
+
+val lemma_multiplication_not_mod_prime_p384: a:nat{a < prime384} ->
+  Lemma (a * (modp_inv2 #P384 (pow2 384)) % prime384 == 0 <==> a == 0)
+
 let lemma_multiplication_not_mod_prime a =
-  Classical.move_requires lemma_multiplication_not_mod_prime_left a
+  Classical.move_requires lemma_multiplication_not_mod_prime_left_p384 a
 
 
 val lemma_modular_multiplication_p256: a:nat{a < prime256} -> b:nat{b < prime256} -> Lemma

@@ -98,7 +98,7 @@ let point_z_as_nat (c: curve) (h: mem) (e: point c) : GTot nat =
     let s2 = s.[14] in 
     let s3 = s.[15] in 
     let s4 = s.[16] in 
-    let s5 = s.[7] in 
+    let s5 = s.[17] in 
     as_nat_coordinate #P384 (s0, s1, s2, s3, s4, s5)
 
 
@@ -197,88 +197,104 @@ val normX: #c: curve -> p: point c -> result: felem c -> tempBuffer: lbuffer uin
 
 inline_for_extraction noextract
 val scalarMultiplication: #c: curve -> #buf_type: buftype->  p: point c -> result: point c -> 
-  scalar: lbuffer_t buf_type uint8 (size 32) -> 
-  tempBuffer: lbuffer uint64 (size 100) ->
+  scalar: lbuffer_t buf_type uint8 (getScalarLen c) -> 
+  tempBuffer: lbuffer uint64 (size 25 *! getCoordinateLenU64 c) ->
   Stack unit
     (requires fun h -> 
+      let prime = getPrime c in 
+      let len = getCoordinateLenU64 c in 
       live h p /\ live h result /\ live h scalar /\ live h tempBuffer /\
-    LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc scalar; loc result] /\
-    as_nat c h (gsub p (size 0) (size 4)) < prime256 /\ 
-    as_nat c h (gsub p (size 4) (size 4)) < prime256 /\
-    as_nat c h (gsub p (size 8) (size 4)) < prime256
+      LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc scalar; loc result] /\
+      as_nat c h (gsub p (size 0) len) < prime /\ 
+      as_nat c h (gsub p len len) < prime /\
+      as_nat c h (gsub p (size 2 *! len) len) < prime
     )
   (ensures fun h0 _ h1 -> 
-    modifies3 p result tempBuffer h0 h1 /\ 
+    let prime = getPrime c in 
+    let len = getCoordinateLenU64 c in
+  
     modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\
-    as_nat c h1 (gsub result (size 0) (size 4)) < prime256 /\ 
-    as_nat c h1 (gsub result (size 4) (size 4)) < prime256 /\
-    as_nat c h1 (gsub result (size 8) (size 4)) < prime256 /\
+    as_nat c h1 (gsub result (size 0) len) < prime /\ 
+    as_nat c h1 (gsub result len len) < prime /\
+    as_nat c h1 (gsub result (size 2 *! len) len) < prime /\
     (
       let x3, y3, z3 = point_x_as_nat c h1 result, point_y_as_nat c h1 result, point_z_as_nat c h1 result in 
-      let (xN, yN, zN) = scalar_multiplication #P256 (as_seq h0 scalar) (point_prime_to_coordinates c (as_seq h0 p)) in 
+      let (xN, yN, zN) = scalar_multiplication #c (as_seq h0 scalar) (point_prime_to_coordinates c (as_seq h0 p)) in 
       x3 == xN /\ y3 == yN /\ z3 == zN 
   )
 ) 
 
 
 val scalarMultiplicationWithoutNorm: #c: curve -> p: point c -> result: point c -> 
-  scalar: lbuffer  uint8 (size 32) -> 
-  tempBuffer: lbuffer uint64 (size 100) ->
+  scalar: lbuffer uint8 (getScalarLen c) -> 
+  tempBuffer: lbuffer uint64 (size 25 *! getCoordinateLenU64 c) ->
   Stack unit
     (requires fun h -> 
+      let prime = getPrime c in 
+      let len = getCoordinateLenU64 c in
+    
       live h p /\ live h result /\ live h scalar /\ live h tempBuffer /\
-    LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc scalar; loc result] /\
-    as_nat c h (gsub p (size 0) (size 4)) < prime256 /\ 
-    as_nat c h (gsub p (size 4) (size 4)) < prime256 /\
-    as_nat c h (gsub p (size 8) (size 4)) < prime256
+      LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc scalar; loc result] /\
+      as_nat c h (gsub p (size 0) len) < prime /\ 
+      as_nat c h (gsub p len len) < prime /\
+      as_nat c h (gsub p (size 2 *! len) len) < prime
     )
   (ensures fun h0 _ h1 -> 
-    modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\ 
+    let prime = getPrime c in 
+    let len = getCoordinateLenU64 c in
     
-    as_nat c h1 (gsub result (size 0) (size 4)) < prime256 /\ 
-    as_nat c h1 (gsub result (size 4) (size 4)) < prime256 /\
-    as_nat c h1 (gsub result (size 8) (size 4)) < prime256 /\
+    as_nat c h1 (gsub result (size 0) len) < prime /\ 
+    as_nat c h1 (gsub result len len) < prime /\
+    as_nat c h1 (gsub result (size 2 *! len) len) < prime /\
     
     modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\
     (
       let p1 = fromDomainPoint #c (point_prime_to_coordinates c (as_seq h1 result)) in 
-      let rN, _ = montgomery_ladder_spec #P256 (as_seq h0 scalar) ((0, 0, 0),  point_prime_to_coordinates c (as_seq h0 p)) in 
+      let rN, _ = montgomery_ladder_spec #c (as_seq h0 scalar) ((0, 0, 0),  point_prime_to_coordinates c (as_seq h0 p)) in 
       rN == p1
   )
 ) 
 
 
-val secretToPublic: #c: curve -> result: point c  -> scalar: lbuffer uint8 (size 32) -> tempBuffer: lbuffer uint64 (size 100) ->
+val secretToPublic: #c: curve -> result: point c  -> scalar: lbuffer uint8 (getScalarLen c) 
+  -> tempBuffer: lbuffer uint64 (size 25 *! getCoordinateLenU64 c) ->
   Stack unit
     (requires fun h -> 
       live h result /\ live h scalar /\ live h tempBuffer /\ 
       LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer; loc scalar; loc result]
     )
-  (
-    ensures fun h0 _ h1 -> modifies (loc result |+| loc tempBuffer) h0 h1 /\
-    as_nat c h1 (gsub result (size 0) (size 4)) < prime256 /\ 
-    as_nat c h1 (gsub result (size 4) (size 4)) < prime256 /\ 
-    as_nat c h1 (gsub result (size 8) (size 4)) < prime256 /\
+  (ensures fun h0 _ h1 -> 
+    let prime = getPrime c in 
+    let len = getCoordinateLenU64 c in
+    
+    modifies (loc result |+| loc tempBuffer) h0 h1 /\
+    
+    as_nat c h1 (gsub result (size 0) len) < prime /\ 
+    as_nat c h1 (gsub result len len) < prime /\ 
+    as_nat c h1 (gsub result (size 2 *! len) len) < prime /\
     (
       let x3, y3, z3 = point_x_as_nat c h1 result, point_y_as_nat c h1 result, point_z_as_nat c h1 result in 
-      let (xN, yN, zN) = secret_to_public #P256 (as_seq h0 scalar)  in 
+      let (xN, yN, zN) = secret_to_public #c (as_seq h0 scalar)  in 
       x3 == xN /\ y3 == yN /\ z3 == zN 
     )
   )
 
-val secretToPublicWithoutNorm: #c: curve -> result: point c -> scalar: lbuffer uint8 (size 32) -> 
- tempBuffer: lbuffer uint64 (size 100) ->
+val secretToPublicWithoutNorm: #c: curve -> result: point c -> scalar: lbuffer uint8 (getScalarLen c) -> 
+ tempBuffer: lbuffer uint64 (size 25 *! getCoordinateLenU64 c) ->
   Stack unit
     (requires fun h -> 
       live h result /\ live h scalar /\ live h tempBuffer /\
       LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer; loc scalar; loc result]
     )
-  (
-    ensures fun h0 _ h1 -> modifies (loc result |+| loc tempBuffer) h0 h1 /\
-      as_nat c h1 (gsub result (size 0) (size 4)) < prime256 /\ 
-      as_nat c h1 (gsub result (size 4) (size 4)) < prime256 /\ 
-      as_nat c h1 (gsub result (size 8) (size 4)) < prime256 /\
-      (
+  (ensures fun h0 _ h1 ->
+    let prime = getPrime c in 
+    let len = getCoordinateLenU64 c in
+  
+    modifies (loc result |+| loc tempBuffer) h0 h1 /\
+    as_nat c h1 (gsub result (size 0) len) < prime /\ 
+    as_nat c h1 (gsub result len len) < prime /\ 
+    as_nat c h1 (gsub result (size 2 *! len) len) < prime /\
+    (
 	let p1 = fromDomainPoint #c (point_prime_to_coordinates c (as_seq h1 result)) in 
-	let rN, _ = montgomery_ladder_spec (as_seq h0 scalar) ((0, 0, 0), (basePoint #P256)) in 
+	let rN, _ = montgomery_ladder_spec (as_seq h0 scalar) ((0, 0, 0), (basePoint #c)) in 
 	rN == p1))  

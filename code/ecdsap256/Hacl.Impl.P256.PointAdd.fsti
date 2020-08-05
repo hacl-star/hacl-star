@@ -31,7 +31,8 @@ open FStar.Mul
 
 #set-options "--z3rlimit 100"
 
-val point_add: #c: curve -> p: point c -> q: point c -> result: point c -> tempBuffer: lbuffer uint64 (size 88) -> 
+val point_add: #c: curve -> p: point c -> q: point c -> result: point c 
+  -> tempBuffer: lbuffer uint64 (size 22 *! getCoordinateLenU64 c) -> 
    Stack unit (requires fun h -> 
      live h p /\ live h q /\ live h result /\ live h tempBuffer /\ 
      eq_or_disjoint q result /\ disjoint p q /\ disjoint p tempBuffer /\ 

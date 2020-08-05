@@ -30,6 +30,7 @@ open FStar.Math.Lemmas
 friend Hacl.Spec.P256.MontgomeryMultiplication
 open FStar.Mul
 
+
 val swap: #c: curve ->  p: point_prime c -> q: point_prime c -> Tot (r: tuple2 (point_prime c) (point_prime c) {let pNew, qNew = r in 
   pNew == q /\ qNew == p})
 
@@ -51,11 +52,11 @@ let conditional_swap i p q =
     (q, p)
 
 
-#set-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 0" 
+#set-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0" 
 
-let toDomain  value result = 
+let toDomain #c value result = 
   push_frame();
-    let multBuffer = create (size 8) (u64 0) in 
+    let multBuffer = create (size 2 *! getCoordinateLenU64 c) (u64 0) in 
     shiftLeftWord value multBuffer;
     solinas_reduction_impl multBuffer result;
   pop_frame()  
@@ -66,31 +67,35 @@ let fromDomain f result =
 
 
 let pointToDomain #c p result = 
-    let p_x = sub p (size 0) (size 4) in 
-    let p_y = sub p (size 4) (size 4) in 
-    let p_z = sub p (size 8) (size 4) in 
+  let len = getCoordinateLenU64 c in 
+  
+  let p_x = sub p (size 0) len in 
+  let p_y = sub p len len in 
+  let p_z = sub p (size 2 *! len) len in 
     
-    let r_x = sub result (size 0) (size 4) in 
-    let r_y = sub result (size 4) (size 4) in 
-    let r_z = sub result (size 8) (size 4) in 
+  let r_x = sub result (size 0) len in 
+  let r_y = sub result len len in 
+  let r_z = sub result (size 2 *! len) len in 
 
-    toDomain #c p_x r_x;
-    toDomain #c p_y r_y;
-    toDomain #c p_z r_z
+  toDomain #c p_x r_x;
+  toDomain #c p_y r_y;
+  toDomain #c p_z r_z
 
 
 let pointFromDomain #c p result = 
-    let p_x = sub p (size 0) (size 4) in 
-    let p_y = sub p (size 4) (size 4) in 
-    let p_z = sub p (size 8) (size 4) in 
+  let len = getCoordinateLenU64 c in 
 
-    let r_x = sub result (size 0) (size 4) in 
-    let r_y = sub result (size 4) (size 4) in 
-    let r_z = sub result (size 8) (size 4) in 
+  let p_x = sub p (size 0) len in 
+  let p_y = sub p len len in 
+  let p_z = sub p (size 2 *! len) len in 
 
-    fromDomain #c p_x r_x;
-    fromDomain #c p_y r_y;
-    fromDomain #c p_z r_z
+  let r_x = sub result (size 0) len in 
+  let r_y = sub result len len in 
+  let r_z = sub result (size 2 *! len) len in 
+
+  fromDomain #c p_x r_x;
+  fromDomain #c p_y r_y;
+  fromDomain #c p_z r_z
 
 
 val copy_point: #c: curve ->  p: point c -> result: point c -> Stack unit 
@@ -101,48 +106,96 @@ let copy_point p result = copy result p
  
 
 (* https://crypto.stackexchange.com/questions/43869/point-at-infinity-and-error-handling*)
-val lemma_pointAtInfInDomain: #c: curve -> x: nat -> y: nat -> z: nat {z < prime256} -> 
-  Lemma (isPointAtInfinity (x, y, z) == isPointAtInfinity ((fromDomain_ #c x), (fromDomain_ #c y), (fromDomain_ #c z)))
+val lemma_pointAtInfInDomain: #c: curve -> x: nat -> y: nat -> z: nat {z < getPrime c} -> 
+  Lemma (
+    isPointAtInfinity (x, y, z) == 
+    isPointAtInfinity ((fromDomain_ #c x), (fromDomain_ #c y), (fromDomain_ #c z)))
 
 let lemma_pointAtInfInDomain #c x y z =
-  admit() (*
   assert (if isPointAtInfinity (x, y, z) then z == 0 else z <> 0);
-  assert_norm (modp_inv2 #P256 (pow2 256) % prime256 <> 0);
-  lemmaFromDomain z;
-  assert (fromDomain_ z == (z * modp_inv2 #P256 (pow2 256) % prime256));
-  assert_norm (0 * modp_inv2 #P256 (pow2 256) % prime256 == 0);
-  lemma_multiplication_not_mod_prime z;
-  assert (if z = 0 then z * modp_inv2 #P256 (pow2 256) % prime256 == 0
-                   else fromDomain_ #c z <> 0) *)
+    assert_norm (modp_inv2 #P256 (getPower2 P256) % (getPrime P256) <> 0);
+    assert_norm (modp_inv2 #P384 (getPower2 P384) % (getPrime P384) <> 0);
+  lemmaFromDomain #c z;
+  assert (fromDomain_ #c z == (z * modp_inv2 #c (getPower2 c) % (getPrime c)));
+    assert_norm (0 * modp_inv2 #P256 (getPower2 P256) % (getPrime P256) == 0);
+    assert_norm (0 * modp_inv2 #P384 (getPower2 P384) % (getPrime P384) == 0);
+  begin
+  match c with 
+    |P256 -> lemma_multiplication_not_mod_prime_p256 z
+    |P384 -> lemma_multiplication_not_mod_prime_p384 z
+ end;
+  assert (if z = 0 then z * modp_inv2 #c (getPower2 c) % (getPrime c) == 0
+                   else fromDomain_ #c z <> 0)
 
 
 let isPointAtInfinityPrivate #c p =  
-  let h0 = ST.get() in
-  let z0 = index p (size 8) in 
-  let z1 = index p (size 9) in 
-  let z2 = index p (size 10) in 
-  let z3 = index p (size 11) in 
-  let z0_zero = eq_mask z0 (u64 0) in 
-  let z1_zero = eq_mask z1 (u64 0) in 
-  let z2_zero = eq_mask z2 (u64 0) in 
-  let z3_zero = eq_mask z3 (u64 0) in 
-     eq_mask_lemma z0 (u64 0);
-     eq_mask_lemma z1 (u64 0);
-     eq_mask_lemma z2 (u64 0);
-     eq_mask_lemma z3 (u64 0);   
-  let r = logand(logand z0_zero z1_zero) (logand z2_zero z3_zero) in 
-    lemma_pointAtInfInDomain #c (as_nat c h0 (gsub p (size 0) (size 4))) (as_nat c h0 (gsub p (size 4) (size 4))) (as_nat c h0 (gsub p (size 8) (size 4)));
-  r
+  match c with 
+  |P256 -> 
+    let h0 = ST.get() in
+    let z0 = index p (size 8) in 
+    let z1 = index p (size 9) in 
+    let z2 = index p (size 10) in 
+    let z3 = index p (size 11) in 
+    let z0_zero = eq_mask z0 (u64 0) in 
+    let z1_zero = eq_mask z1 (u64 0) in 
+    let z2_zero = eq_mask z2 (u64 0) in 
+    let z3_zero = eq_mask z3 (u64 0) in 
+      eq_mask_lemma z0 (u64 0);
+      eq_mask_lemma z1 (u64 0);
+      eq_mask_lemma z2 (u64 0);
+      eq_mask_lemma z3 (u64 0);   
+    let r = logand(logand z0_zero z1_zero) (logand z2_zero z3_zero) in 
+      lemma_pointAtInfInDomain #c (as_nat c h0 (gsub p (size 0) (size 4))) (as_nat c h0 (gsub p (size 4) (size 4))) (as_nat c h0 (gsub p (size 8) (size 4)));
+    r
+  |P384 ->     
+    let h0 = ST.get() in
+    
+    let z0 = index p (size 12) in 
+    let z1 = index p (size 13) in 
+    let z2 = index p (size 14) in 
+    let z3 = index p (size 15) in 
+    let z4 = index p (size 16) in 
+    let z5 = index p (size 17) in 
+    
+    let z0_zero = eq_mask z0 (u64 0) in 
+    let z1_zero = eq_mask z1 (u64 0) in 
+    let z2_zero = eq_mask z2 (u64 0) in 
+    let z3_zero = eq_mask z3 (u64 0) in 
+    let z4_zero = eq_mask z4 (u64 0) in 
+    let z5_zero = eq_mask z5 (u64 0) in 
+    
+      eq_mask_lemma z0 (u64 0);
+      eq_mask_lemma z1 (u64 0);
+      eq_mask_lemma z2 (u64 0);
+      eq_mask_lemma z3 (u64 0);   
+      eq_mask_lemma z4 (u64 0);
+      eq_mask_lemma z5 (u64 0);
+
+  let r01 = logand z0_zero z1_zero in 
+  let r23 = logand z2_zero z3_zero in 
+  let r45 = logand z4_zero z5_zero in 
+
+  let r0123 = logand r01 r23 in 
+  let r = logand r0123 r45 in 
+
+  
+  lemma_pointAtInfInDomain #c 
+    (as_nat c h0 (gsub p (size 0) (getCoordinateLenU64 c))) 
+    (as_nat c h0 (gsub p (getCoordinateLenU64 c) (getCoordinateLenU64 c))) 
+    (as_nat c h0 (gsub p (size 2 *! getCoordinateLenU64 c) (getCoordinateLenU64 c)));
+    r
 
 
-val lemma_norm_as_specification: #c: curve -> xD: nat{xD < prime256} -> yD: nat{yD < prime256} -> 
-  zD: nat {zD < prime256} -> 
+val lemma_norm_as_specification: #c: curve 
+  -> xD: nat {xD < getPrime c} 
+  -> yD: nat {yD < getPrime c} 
+  -> zD: nat {zD < getPrime c} -> 
   x3 : nat {x3 == xD * (pow (zD * zD) (getPrime c - 2) % getPrime c) % getPrime c}-> 
   y3 : nat {y3 == yD * (pow (zD * zD * zD) (getPrime c -2) % getPrime c) % getPrime c} -> 
   z3: nat {if isPointAtInfinity(xD, yD, zD) then z3 == 0 else z3 == 1} -> 
   Lemma (
-  let (xN, yN, zN) = _norm #P256 (xD, yD, zD) in 
-  x3 == xN /\ y3 == yN /\ z3 == zN)
+    let (xN, yN, zN) = _norm #c (xD, yD, zD) in 
+    x3 == xN /\ y3 == yN /\ z3 == zN)
 
 
 let lemma_norm_as_specification #c xD yD zD x3 y3 z3 = 
@@ -176,22 +229,22 @@ val cswap: #c: curve ->  bit:uint64{v bit <= 1} -> p:point c -> q:point c
       (v bit == 0 ==> as_seq h1 p == as_seq h0 p /\ as_seq h1 q == as_seq h0 q))
 
 
-let cswap bit p1 p2 =
+let cswap #c bit p1 p2 =
   let open Lib.Sequence in 
   let h0 = ST.get () in
   let mask = u64 0 -. bit in
 
   [@ inline_let]
-  let inv h1 (i:nat{i <= 12}) =
+  let inv h1 (i:nat{i <= uint_v (getCoordinateLenU64 c) * 3}) =
     (forall (k:nat{k < i}).
       if v bit = 1
       then (as_seq h1 p1).[k] == (as_seq h0 p2).[k] /\ (as_seq h1 p2).[k] == (as_seq h0 p1).[k]
       else (as_seq h1 p1).[k] == (as_seq h0 p1).[k] /\ (as_seq h1 p2).[k] == (as_seq h0 p2).[k]) /\
-    (forall (k:nat{i <= k /\ k < 12}).
+    (forall (k:nat{i <= k /\ k < uint_v (getCoordinateLenU64 c) * 3}).
       (as_seq h1 p1).[k] == (as_seq h0 p1).[k] /\ (as_seq h1 p2).[k] == (as_seq h0 p2).[k]) /\
     modifies (loc p1 |+| loc p2) h0 h1 in
  
-  Lib.Loops.for 0ul 12ul inv
+  Lib.Loops.for 0ul (getCoordinateLenU64 c *! 3) inv
     (fun i ->
       let dummy = mask &. (p1.(i) ^. p2.(i)) in
       p1.(i) <- p1.(i) ^. dummy;
@@ -207,34 +260,44 @@ let cswap bit p1 p2 =
 inline_for_extraction noextract
 val normalisation_update: #c: curve -> z2x: felem c -> z3y: felem c -> p: point c 
 -> resultPoint: point c -> Stack unit 
-  (requires fun h -> live h z2x /\ live h z3y /\ live h resultPoint /\ live h p /\ 
-    as_nat c h z2x < prime256 /\ as_nat c h z3y < getPrime c /\
-    as_nat c h (gsub p (size 8) (size 4)) < prime256 /\
+  (requires fun h -> 
+    let prime = getPrime c in 
+    let len = getCoordinateLenU64 c in 
+  
+    live h z2x /\ live h z3y /\ live h resultPoint /\ live h p /\ 
+    as_nat c h z2x < prime /\ as_nat c h z3y < prime /\
+    as_nat c h (gsub p (size 2 *! len) len) < prime /\
     disjoint z2x z3y /\ disjoint z2x resultPoint /\ disjoint z3y resultPoint)
-  (ensures fun h0 _ h1 -> modifies (loc resultPoint) h0 h1 /\
+  (ensures fun h0 _ h1 -> 
+    let prime = getPrime c in 
+    let len = getCoordinateLenU64 c in 
+    modifies (loc resultPoint) h0 h1 /\
     (
-      let x0 = as_nat c h0 (gsub p (size 0) (size 4)) in 
-      let y0 = as_nat c h0 (gsub p (size 4) (size 4)) in 
-      let z0 = as_nat c h0 (gsub p (size 8) (size 4)) in 
+      let x0 = as_nat c h0 (gsub p (size 0) len) in 
+      let y0 = as_nat c h0 (gsub p len len) in 
+      let z0 = as_nat c h0 (gsub p (size 2 *! len) len) in 
 
-      let x1 = as_nat c h1 (gsub resultPoint (size 0) (size 4)) in 
-      let y1 = as_nat c h1 (gsub resultPoint (size 4) (size 4)) in 
-      let z1 = as_nat c h1 (gsub resultPoint (size 8) (size 4)) in 
+      let x1 = as_nat c h1 (gsub resultPoint (size 0) len) in 
+      let y1 = as_nat c h1 (gsub resultPoint len len) in 
+      let z1 = as_nat c h1 (gsub resultPoint (size 2 *! len) len) in 
 
       x1 == fromDomain_ #c (as_nat c h0 z2x) /\ y1 == fromDomain_ #c (as_nat c h0 z3y)  /\ 
       (
-	if Spec.P256.isPointAtInfinity (fromDomain_ #c x0, fromDomain_ #c y0, fromDomain_ #c z0) then  z1 == 0 else z1 == 1
+	if Spec.P256.isPointAtInfinity (fromDomain_ #c x0, fromDomain_ #c y0, fromDomain_ #c z0) 
+	then z1 == 0 else z1 == 1
       ))
   )
 
 
 let normalisation_update #c z2x z3y p resultPoint = 
   push_frame(); 
-    let zeroBuffer = create (size 4) (u64 0) in 
-    
-  let resultX = sub resultPoint (size 0) (size 4) in 
-  let resultY = sub resultPoint (size 4) (size 4) in 
-  let resultZ = sub resultPoint (size 8) (size 4) in 
+    let len = getCoordinateLenU64 c in 
+
+
+  let zeroBuffer = create len (u64 0) in   
+  let resultX = sub resultPoint (size 0) len in 
+  let resultY = sub resultPoint len len in 
+  let resultZ = sub resultPoint (size 2 *! len) len in 
     let h0 = ST.get() in 
   let bit = isPointAtInfinityPrivate p in
   fromDomain z2x resultX;
@@ -247,16 +310,16 @@ let normalisation_update #c z2x z3y p resultPoint =
   
 
 let norm #c  p resultPoint tempBuffer = 
-(*  let prime = getPrime c in  *)
-  
-  let xf = sub p (size 0) (size 4) in 
-  let yf = sub p (size 4) (size 4) in 
-  let zf = sub p (size 8) (size 4) in 
 
+  let len = getCoordinateLenU64 c in 
+
+  let xf = sub p (size 0) len in 
+  let yf = sub p len in 
+  let zf = sub p (size 2 *! len) len in 
   
-  let z2f = sub tempBuffer (size 4) (size 4) in 
-  let z3f = sub tempBuffer (size 8) (size 4) in
-  let tempBuffer20 = sub tempBuffer (size 12) (size 20) in 
+  let z2f = sub tempBuffer len len in 
+  let z3f = sub tempBuffer (size 2 *! len) len in
+  let tempBuffer20 = sub tempBuffer (size 3 *! len) (size 5 *! len) in 
 
     let h0 = ST.get() in 
   montgomery_square_buffer #c zf z2f; 
@@ -294,13 +357,15 @@ let norm #c  p resultPoint tempBuffer =
 *)
 
 let normX #c p result tempBuffer = 
-  let xf = sub p (size 0) (size 4) in 
-  let yf = sub p (size 4) (size 4) in 
-  let zf = sub p (size 8) (size 4) in 
+  let len = getCoordinateLenU64 c in 
   
-  let z2f = sub tempBuffer (size 4) (size 4) in 
-  let z3f = sub tempBuffer (size 8) (size 4) in
-  let tempBuffer20 = sub tempBuffer (size 12) (size 20) in 
+  let xf = sub p (size 0) len in 
+  let yf = sub p len (size 4) in 
+  let zf = sub p (size 2 *! len) (size 4) in 
+  
+  let z2f = sub tempBuffer len len in 
+  let z3f = sub tempBuffer (size 2 *! len) len in
+  let tempBuffer20 = sub tempBuffer (size 3 *! len) (size 5 *! len) in 
 
     let h0 = ST.get() in 
   montgomery_square_buffer #c zf z2f; 
@@ -311,60 +376,62 @@ let normX #c p result tempBuffer =
     power_distributivity (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf)) (prime -2) prime
 *)
 
+
 (* this piece of code is taken from Hacl.Curve25519 *)
 (* changed Endian for Scalar Bit access *)
 inline_for_extraction noextract
-val scalar_bit:
-    #buf_type: buftype -> 
-    s:lbuffer_t buf_type uint8 (size 32)
-  -> n:size_t{v n < 256}
+val scalar_bit: #c: curve 
+  -> #buf_type: buftype 
+  -> s:lbuffer_t buf_type uint8 (getScalarLen c) 
+  -> n:size_t{v n < getPower c}
   -> Stack uint64
     (requires fun h0 -> live h0 s)
-    (ensures  fun h0 r h1 -> h0 == h1 /\ r == ith_bit #P256 (as_seq h0 s) (v n) /\ v r <= 1)
+    (ensures  fun h0 r h1 -> h0 == h1 /\ r == ith_bit #c (as_seq h0 s) (v n) /\ v r <= 1)
 
-let scalar_bit #buf_type s n =
+let scalar_bit #c #buf_type s n =
   let h0 = ST.get () in
-  mod_mask_lemma ((Lib.Sequence.index (as_seq h0 s) (31 - v n / 8)) >>. (n %. 8ul)) 1ul;
+  mod_mask_lemma ((Lib.Sequence.index (as_seq h0 s) (getScalarLenNat c -1 - v n / 8)) >>. (n %. 8ul)) 1ul;
   assert_norm (1 = pow2 1 - 1);
   assert (v (mod_mask #U8 #SEC 1ul) == v (u8 1)); 
-  to_u64 ((s.(31ul -. n /. 8ul) >>. (n %. 8ul)) &. u8 1)
+  to_u64 ((s.(getScalarLen c -. 1 -. n /. 8ul) >>. (n %. 8ul)) &. u8 1)
 
 
 inline_for_extraction noextract  
-val montgomery_ladder_step1: #c : curve ->  p: point c -> q: point c ->tempBuffer: lbuffer uint64 (size 88) -> Stack unit
-  (requires fun h -> live h p /\ live h q /\ live h tempBuffer /\ 
+val montgomery_ladder_step1: #c : curve ->  p: point c -> q: point c 
+  -> tempBuffer: lbuffer uint64 (size 22 *! getCoordinateLenU64 c) -> Stack unit
+  (requires fun h -> 
+    let prime = getPrime c in 
+    let len = getCoordinateLenU64 c in 
+    live h p /\ live h q /\ live h tempBuffer /\ 
     LowStar.Monotonic.Buffer.all_disjoint [loc p; loc q; loc tempBuffer] /\
-
-    (
-      let prime = getPrime c in 
-  
-    as_nat c h (gsub p (size 0) (size 4)) < prime /\ 
-    as_nat c h (gsub p (size 4) (size 4)) < prime /\
-    as_nat c h (gsub p (size 8) (size 4)) < prime /\
-	
-    as_nat c h (gsub q (size 0) (size 4)) < prime /\  
-    as_nat c h (gsub q (size 4) (size 4)) < prime /\
-    as_nat c h (gsub q (size 8) (size 4)) < prime
-    )
-  
+    as_nat c h (gsub p (size 0) len) < prime /\ 
+    as_nat c h (gsub p len len) < prime /\
+    as_nat c h (gsub p (size 2 *! len) len) < prime /\
+	     
+    as_nat c h (gsub q (size 0) len) < prime /\  
+    as_nat c h (gsub q len len) < prime /\
+    as_nat c h (gsub q (size 2 *! len) len) < prime
   )
-  (ensures fun h0 _ h1 -> modifies (loc p |+| loc q |+|  loc tempBuffer) h0 h1 /\ 
+  (ensures fun h0 _ h1 -> 
+    let prime = getPrime c in 
+    let len = getCoordinateLenU64 c in 
+    modifies (loc p |+| loc q |+|  loc tempBuffer) h0 h1 /\ 
     (
-      let pX = as_nat c h0 (gsub p (size 0) (size 4)) in
-      let pY = as_nat c h0 (gsub p (size 4) (size 4)) in
-      let pZ = as_nat c h0 (gsub p (size 8) (size 4)) in
+      let pX = as_nat c h0 (gsub p (size 0) len) in
+      let pY = as_nat c h0 (gsub p len len) in
+      let pZ = as_nat c h0 (gsub p (size 2 *! len) len) in
 
-      let qX = as_nat c h0 (gsub q (size 0) (size 4)) in
-      let qY = as_nat c h0 (gsub q (size 4) (size 4)) in
-      let qZ = as_nat c h0 (gsub q (size 8) (size 4)) in
+      let qX = as_nat c h0 (gsub q (size 0) len) in
+      let qY = as_nat c h0 (gsub q len len) in
+      let qZ = as_nat c h0 (gsub q (size 2 *! len) len) in
 
-      let r0X = as_nat c h1 (gsub p (size 0) (size 4)) in
-      let r0Y = as_nat c h1 (gsub p (size 4) (size 4)) in
-      let r0Z = as_nat c h1 (gsub p (size 8) (size 4)) in
+      let r0X = as_nat c h1 (gsub p (size 0) len) in
+      let r0Y = as_nat c h1 (gsub p len len) in
+      let r0Z = as_nat c h1 (gsub p (size 2 *! len) len) in
 
-      let r1X = as_nat c h1 (gsub q (size 0) (size 4)) in
-      let r1Y = as_nat c h1 (gsub q (size 4) (size 4)) in
-      let r1Z = as_nat c h1 (gsub q (size 8) (size 4)) in
+      let r1X = as_nat c h1 (gsub q (size 0) len) in
+      let r1Y = as_nat c h1 (gsub q len len) in
+      let r1Z = as_nat c h1 (gsub q (size 2 *! len) len) in
 
       let prime = getPrime c in 
       let (rN0X, rN0Y, rN0Z), (rN1X, rN1Y, rN1Z) = _ml_step1 #c
