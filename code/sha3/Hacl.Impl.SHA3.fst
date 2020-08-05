@@ -421,7 +421,11 @@ let absorb_last delimitedSuffix rateInBytes rem input s =
   salloc1 h0 rateInBytes (u8 0) (Ghost.hide (loc s)) spec
     (fun lastBlock ->
       let open Lib.RawIntTypes in
-      update_sub_generic lastBlock (size 0) rem input;
+      let h0 = ST.get () in
+      if rem >. 0ul then
+        update_sub lastBlock (size 0) rem input;
+      let h1 = ST.get () in
+      LSeq.eq_intro (as_seq h1 lastBlock) (LSeq.update_sub (as_seq h0 lastBlock) 0 (v rem) (as_seq h0 input));
       lastBlock.(rem) <- byte_to_uint8 delimitedSuffix;
       loadState rateInBytes lastBlock s;
       if not ((delimitedSuffix &. byte 0x80) =. byte 0) &&

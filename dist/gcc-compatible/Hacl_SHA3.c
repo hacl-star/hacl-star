@@ -176,8 +176,7 @@ Hacl_Impl_SHA3_absorb(
   KRML_CHECK_SIZE(sizeof (uint8_t), rateInBytes);
   uint8_t b[rateInBytes];
   memset(b, 0U, rateInBytes * sizeof (b[0U]));
-  bool uu____0 = last == NULL;
-  if (!(uu____0 || b == NULL))
+  if (rem > (uint32_t)0U)
   {
     memcpy(b, last, rem * sizeof (last[0U]));
   }
