@@ -53,7 +53,6 @@ inline_for_extraction
 type state (i:impl) =
   b:B.buffer (impl_word i) { B.length b = impl_state_length i }
 
-(* TODO: make generic in the implementation *)
 inline_for_extraction noextract
 let as_seq (#i:impl) (h:HS.mem) (s:state i) : GTot (words_state' (get_alg i)) =
   match get_alg i with
