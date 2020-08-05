@@ -195,12 +195,4 @@ let expand_blake2b_32: expand_st Blake2B =
 let extract_blake2b_32: extract_st Blake2B =
   mk_extract Blake2B Hacl.HMAC.compute_blake2b_32
 
-val while_items: ni : nat -> ni_max: nat -> nw: nat{nw > 0} ->
-  Tot bool
-  (decreases (if ni <= ni_max then ni_max - ni else 0))
-let rec while_items ni ni_max nw =
-  if ni < ni_max
-  then while_items (ni + nw) ni_max nw
-  else true
-
 
