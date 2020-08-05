@@ -16,10 +16,11 @@ open Hacl.Spec.P256.MontgomeryMultiplication
 
 val montgomery_multiplication_buffer_by_one: #c: curve -> a: felem c  -> result: felem c -> 
   Stack unit
-    (requires (fun h -> live h a /\ as_nat c h a < prime256 /\ live h result)) 
+    (requires (fun h -> live h a /\ as_nat c h a < getPrime c /\ live h result)) 
     (ensures (fun h0 _ h1 -> 
+      let prime = getPrime c in 
       modifies (loc result) h0 h1 /\ 
-      as_nat c h1 result  = (as_nat c h0 a * modp_inv2_prime (pow2 256) prime256) % prime256 /\
+      as_nat c h1 result  = (as_nat c h0 a * modp_inv2_prime (getPower2 c) prime) % prime /\
       as_nat c h1 result = fromDomain_ #c (as_nat c h0 a)))
 
 

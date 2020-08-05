@@ -53,7 +53,7 @@ let conditional_swap i p q =
 
 #set-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 0" 
 
-let toDomain value result = 
+let toDomain  value result = 
   push_frame();
     let multBuffer = create (size 8) (u64 0) in 
     shiftLeftWord value multBuffer;

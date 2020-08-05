@@ -471,11 +471,12 @@ let computeY3_point_add #c y3 s1 hCube uh x3 r tempBuffer =
   montgomery_multiplication_buffer s1 hCube s1hCube;
   felem_sub uh x3 u1hx3;
   montgomery_multiplication_buffer u1hx3 r ru1hx3;
+  felem_sub #c ru1hx3 s1hCube y3;
   
   let h3 = ST.get() in 
   let prime = getPrime c in
     lemma_mod_mul_distr_l (fromDomain_ #c (as_nat c h0 uh) - fromDomain_ #c (as_nat c h0 x3)) (fromDomain_ #c (as_nat c h0 r)) prime;
-    felem_sub #c ru1hx3 s1hCube y3;
+
     lemma_mod_add_distr (- (fromDomain_ #c (as_nat c h3 s1hCube)))  ((fromDomain_ #c (as_nat c h0 uh) - fromDomain_ #c (as_nat c h0 x3)) * fromDomain_ #c (as_nat c h0 r)) prime;
     lemma_mod_sub_distr ((fromDomain_ #c (as_nat c h0 uh) - fromDomain_ #c (as_nat c h0 x3)) * fromDomain_ #c (as_nat c h0 r)) (fromDomain_ #c (as_nat c h0 s1) * fromDomain_ #c (as_nat c h0 hCube)) prime
 

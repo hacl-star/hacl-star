@@ -105,7 +105,7 @@ let montgomery_multiplication_round_twice t result =
 
 let montgomery_multiplication_buffer_by_one #c a result = 
   match c with 
-  |P384 -> ()
+  |P384 -> admit()
   |P256 -> 
     assert_norm (prime256 > 3);
     push_frame();
