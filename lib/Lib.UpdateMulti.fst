@@ -143,9 +143,6 @@ let split_at_last
 /// version "lazy" because it is used to differ the processing of the last full
 /// block in the hash implementations (incremental, streaming...).
 
-/// A lemma I could not find in FStar.Math.Lemmas
-let mul_zero_left_is_zero (n : nat) : Lemma(0 * n = 0) = ()
-
 #push-options "--z3cliopt smt.arith.nl=false"
 let split_at_last_lazy_nb_rem
   (l: pos)
@@ -203,7 +200,7 @@ let split_at_last_lazy_nb_rem
     (**)   begin
     (**)        assert(n = 0);
     (**)        assert(d = n * l + rem);
-    (**)   mul_zero_left_is_zero l;
+    (**)   Math.Lemmas.mul_zero_left_is_zero l;
     (**)        assert(n * l = 0);
     (**)        assert(d = rem)
     (**)   end

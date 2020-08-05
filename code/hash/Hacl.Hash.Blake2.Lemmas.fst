@@ -11,10 +11,6 @@ friend Spec.Agile.Hash
 
 #push-options "--fuel 0 --ifuel 0"
 
-/// TODO: A lemma I could not find in FStar.Math.Lemmas -
-/// note: duplicated in Spec.Hash.Incremental, Hash.Streaming.Spec.fst
-let mul_zero_left_is_zero (n : int) : Lemma(0 * n = 0) = ()
-
 module B2 = Spec.Blake2
 
 /// Proving spec equivalence
@@ -129,10 +125,10 @@ let add_extra_s_assoc (a:hash_alg{is_blake a}) (ev:nat) (i j:nat) :
     ((add_extra_s a ev j) + (i * size_block a)) % pow2 n;
     (==) { }
     ((ev + (j * size_block a)) % pow2 n + (i * size_block a)) % pow2 n;
-    (==) { FStar.Math.Lemmas.lemma_mod_add_distr (i * size_block a)
+    (==) { Math.Lemmas.lemma_mod_add_distr (i * size_block a)
       (ev + (j * size_block a)) (pow2 n) }
     (ev + i * size_block a + j * size_block a) % pow2 n;
-    (==) { FStar.Math.Lemmas.distributivity_add_left i j (size_block a) }
+    (==) { Math.Lemmas.distributivity_add_left i j (size_block a) }
     add_extra_s a ev (i+j);
  }
 #pop-options
@@ -164,7 +160,7 @@ let rec lemma_update_s a h i input =
 
   if i = 0 then
     begin
-    mul_zero_left_is_zero (block_length a);
+    Math.Lemmas.mul_zero_left_is_zero (block_length a);
     assert(Seq.length input = 0);
     assert(input `Seq.equal` Seq.empty);
     update_multi_zero a h;

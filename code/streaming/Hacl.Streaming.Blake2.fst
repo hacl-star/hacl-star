@@ -42,10 +42,6 @@ module Incr = Spec.Hash.Incremental
 
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
 
-/// Some lemmas I could not find in Math.Lemmas
-let add_zero_left_is_same (n : int) :
-  Lemma(0 + n = n) = ()
-
 inline_for_extraction noextract
 let to_hash_alg (a : Spec.alg) = Hash.to_hash_alg a
 
@@ -464,7 +460,7 @@ let blake2_hash_incremental_s_is_hash_incremental a no_key key_size i key input 
                                     (blake2_prevlength a (U32.v key_size) (S.length bs)) in
   let s2' = (acc2, es2) in
   blake2_prevlength_add_right_eq a (U32.v key_size) 0 (S.length bs);
-  add_zero_left_is_same (S.length bs);
+  Math.Lemmas.add_zero_left_is_same (S.length bs);
   assert(blake2_prevlength a (U32.v key_size) 0 + S.length bs =
          blake2_prevlength a (U32.v key_size) (S.length bs));
   assert(s2' == s2);

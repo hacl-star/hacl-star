@@ -9,73 +9,72 @@ let split_at_last_lazy_nb_rem_spec (l : pos) (d n rest: nat) :
     (rest = 0 ==> d = 0) /\
     d = n * l + rest))
   (ensures ((n, rest) = split_at_last_lazy_nb_rem l d)) =
- (* We call ``split_at_last_lazy_nb_rem`` at the beginning to have its
-  * postcondition in the context (the return values are only used in the second
-  * branch *)
- let n', rest' = split_at_last_lazy_nb_rem l d in
- if d = 0 then
-    begin
-    Math.Lemmas.nat_times_nat_is_nat n l;
-    add_equal_zero (n * l) rest;
-    mul_equal_zero n l;
-    assert(n = 0)
-    end
- else
-  begin
-    assert(d > 0);
-    (* In order to prove the equality between all the lengths, we use the unicity
-    * of the modulo to prove that the rests are equal, then that the numbers
-    * of blocks are equal. *)
-    let blocks = n * l in
-    let rest = d - blocks in
-    let blocks' = n' * l in
-    Math.Lemmas.cancel_mul_mod n l;
-    assert(blocks % l = 0);
-    assert(blocks' % l = 0); (* comes from the spec of [split_at_last_lazy_nb_rem] *)
-    Math.Lemmas.euclidean_division_definition blocks l;
+  (* We call ``split_at_last_lazy_nb_rem`` at the beginning to have its
+   * postcondition in the context (the return values are only used in the second
+   * branch *)
+  let n', rest' = split_at_last_lazy_nb_rem l d in 
+  if d = 0 then
+     begin
+     Math.Lemmas.nat_times_nat_is_nat n l;
+     Math.Lemmas.int_times_int_equal_zero_lemma n l;
+     assert(n = 0)
+     end
+  else
+   begin
+     assert(d > 0);
+     (* In order to prove the equality between all the lengths, we use the unicity
+     * of the modulo to prove that the rests are equal, then that the numbers
+     * of blocks are equal. *)
+     let blocks = n * l in
+     let rest = d - blocks in
+     let blocks' = n' * l in
+     Math.Lemmas.cancel_mul_mod n l;
+     assert(blocks % l = 0);
+     assert(blocks' % l = 0); (* comes from the spec of [split_at_last_lazy_nb_rem] *)
+     Math.Lemmas.euclidean_division_definition blocks l;
 
-    (* First, prove that the lengths of the rests are equal modulo the size of
-    * a block *)
-    assert(rest' % l = d % l); (* comes from the spec of [split_at_last] *)
-    assert(rest + n * l = d);
-    Math.Lemmas.lemma_mod_plus rest n l; (* doesn't work inside a calc: typing problem with squash *)
-    assert(d % l = rest % l);
-    assert(rest % l = rest' % l);
+     (* First, prove that the lengths of the rests are equal modulo the size of
+     * a block *)
+     assert(rest' % l = d % l); (* comes from the spec of [split_at_last] *)
+     assert(rest + n * l = d);
+     Math.Lemmas.lemma_mod_plus rest n l; (* doesn't work inside a calc: typing problem with squash *)
+     assert(d % l = rest % l);
+     assert(rest % l = rest' % l);
 
-    (* If both rests are stricly smaller than a block, we can directly apply
-     * the modulo injectivity and the rest follows immediately *)
-    if rest < l && rest' < l then
-      begin
-      Math.Lemmas.lemma_mod_injective l rest rest';
-      assert(rest = rest');
-      assert(n * l + rest = n' * l + rest');
-      assert(n * l = n' * l);
-      Math.Lemmas.lemma_cancel_mul n n' l;
-      assert(n = n')
-      end
-    (* Otherwise, case one: both rests are equal to block length (even easier) *)
-    else if rest = l && rest' = l then
-      Math.Lemmas.lemma_cancel_mul n n' l
-    (* Last two cases: one of the rests is smaller than a block, and the other is
-     * of the size of a block. Because of modulo properties, the smaller rest
-     * must be equal to 0, which gives us that the data is actually of length 0:
-     * contradiction. *)
-    else
-      begin
-      assert((rest = l && rest' < l) \/ (rest < l && rest' = l));
-      let rest, rest' = if rest = l then rest, rest' else rest', rest in
-      assert(rest = l && rest' < l);
-      (* [rest % l = 0] *)
-      assert(rest = 1 * l);
-      Math.Lemmas.cancel_mul_mod 1 l;
-      assert(rest % l = 0);
-      (* [rest' = 0 ] *)
-      Math.Lemmas.modulo_lemma rest' l;
-      assert(rest' = 0);
-      (* By the current hypotheses, if rest' = 0 then d = 0 (contradiction) *)
-      assert(False)
-      end
-    end
+     (* If both rests are stricly smaller than a block, we can directly apply
+      * the modulo injectivity and the rest follows immediately *)
+     if rest < l && rest' < l then
+       begin
+       Math.Lemmas.lemma_mod_injective l rest rest';
+       assert(rest = rest');
+       assert(n * l + rest = n' * l + rest');
+       assert(n * l = n' * l);
+       Math.Lemmas.lemma_cancel_mul n n' l;
+       assert(n = n')
+       end
+     (* Otherwise, case one: both rests are equal to block length (even easier) *)
+     else if rest = l && rest' = l then
+       Math.Lemmas.lemma_cancel_mul n n' l
+     (* Last two cases: one of the rests is smaller than a block, and the other is
+      * of the size of a block. Because of modulo properties, the smaller rest
+      * must be equal to 0, which gives us that the data is actually of length 0:
+      * contradiction. *)
+     else
+       begin
+       assert((rest = l && rest' < l) \/ (rest < l && rest' = l));
+       let rest, rest' = if rest = l then rest, rest' else rest', rest in
+       assert(rest = l && rest' < l);
+       (* [rest % l = 0] *)
+       assert(rest = 1 * l);
+       Math.Lemmas.cancel_mul_mod 1 l;
+       assert(rest % l = 0);
+       (* [rest' = 0 ] *)
+       Math.Lemmas.modulo_lemma rest' l;
+       assert(rest' = 0);
+       (* By the current hypotheses, if rest' = 0 then d = 0 (contradiction) *)
+       assert(False)
+       end
+     end
 #pop-options
 
 /// This second lemma characterizes the sequences themselves.

@@ -18,16 +18,6 @@ module Loops = Lib.LoopCombinators
 /// A declaration whose sole purpose is to force synchronize the .fst and the .fsti
 let _sync_decl = unit
 
-/// TODO: A lemma I could not find in FStar.Math.Lemmas -
-/// note: duplicated in Hash.Streaming.Spec.fst and other places (make a grep)
-let mul_zero_left_is_zero (n : int) : Lemma(0 * n = 0) = ()
-
-/// TODO: A lemma I could not find in FStar.Math.Lemmas
-let add_zero_right_is_same (n : int) : Lemma(n + 0 = n) = ()
-
-/// TODO: A lemma I could not find in FStar.Math.Lemmas
-let mul_one_left_is_same (n : int) : Lemma(1 * n = n) = ()
-
 /// Below we prove once and for all properties about the values returned by
 /// some utility functions. Note that some of those functions have post-conditions,
 /// so don't be surprise not to see obvious properties which are already given by
@@ -181,7 +171,7 @@ let nb_nonzero_blocks_props (a:hash_alg{is_blake a}) (nb prev data_length : nat)
   Math.Lemmas.lemma_div_le (nb * block_length a) data_length (block_length a);
   Math.Lemmas.cancel_mul_div nb (block_length a);
   Math.Lemmas.distributivity_sub_left nb (nb-1) (block_length a);
-  mul_one_left_is_same (block_length a)
+  Math.Lemmas.mul_one_left_is_same (block_length a)
 
 #push-options "--z3cliopt smt.arith.nl=false"
 let repeati_blake2_update1_eq
@@ -260,15 +250,15 @@ let rec repeati_blake2_update1_is_update_multi_aux a nb prev d hash =
     begin
     Loops.eq_repeati0 #(words_state' a) nb update1 hash;
     assert(Loops.repeati #(words_state' a) nb (Blake2.blake2_update1 (to_blake_alg a) prev d) hash == hash);
-    mul_zero_left_is_zero (block_length a);
+    Math.Lemmas.mul_zero_left_is_zero (block_length a);
     assert(Seq.length blocks = 0);
     Spec.Hash.Lemmas.update_multi_zero a (hash, nat_to_extra_state a prev);
     assert(update_multi a (hash, nat_to_extra_state a prev) blocks == (hash, nat_to_extra_state a prev));
     calc (==) {
       prev + nb * block_length a;
-      (==) { mul_zero_left_is_zero (block_length a) }
+      (==) { Math.Lemmas.mul_zero_left_is_zero (block_length a) }
       prev + 0;
-      (==) { add_zero_right_is_same prev }
+      (==) { Math.Lemmas.add_zero_right_is_same prev }
       prev;
     }
     end
@@ -294,7 +284,7 @@ let rec repeati_blake2_update1_is_update_multi_aux a nb prev d hash =
       (nb * block_length a) - ((nb-1) * block_length a);
       (==) { Math.Lemmas.distributivity_sub_left nb (nb-1) (block_length a) }
       1 * block_length a;
-      (==) { mul_one_left_is_same (block_length a) }
+      (==) { Math.Lemmas.mul_one_left_is_same (block_length a) }
       block_length a;
     };
     calc (==) {

@@ -13,10 +13,6 @@ open Spec.Hash.Incremental
 
 #reset-options "--fuel 0 --ifuel 0 --z3rlimit 50"
 
-/// TODO: A lemma I could not find in FStar.Math.Lemmas
-/// Note: duplicated in Hash.Streaming.Spec.fst and Spec.Hash.Incremental
-let mul_zero_left_is_zero (n : int) : Lemma(0 * n = 0) = ()
-
 let update_multi_empty_extra_state_eq
   (a: hash_alg{is_blake a}) (h: words_state a) :
   Lemma
@@ -107,7 +103,7 @@ let lemma_split_blocks_assoc (a:hash_alg) (s1 s2:bytes)
   Math.Lemmas.division_addition_lemma (S.length s2) (block_length a) n_s1;
   assert (n1 == n2 + n_s1);
 
-  mul_zero_left_is_zero (block_length a);
+  Math.Lemmas.mul_zero_left_is_zero (block_length a);
   Math.Lemmas.nat_over_pos_is_nat (S.length s) (block_length a);
   Math.Lemmas.euclidean_division_definition (S.length s) (block_length a);
   assert(S.length s % block_length a = 0 ==> n1 > 0);

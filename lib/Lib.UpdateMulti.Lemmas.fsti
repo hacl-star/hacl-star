@@ -20,17 +20,6 @@ let uint8 = Lib.IntTypes.uint8
 /// buffer so that its content is actually the correct remainder of the data seen
 /// so far.
 
-/// TODO: small lemmas I couldn't find in FStar.Math.Lemmas
-let add_equal_zero (a b : nat) :
-  Lemma
-  (requires (a + b = 0))
-  (ensures (a = 0 /\ b = 0)) = ()
-
-let mul_equal_zero (a b : nat) :
-  Lemma
-  (requires (a * b = 0))
-  (ensures (a = 0 \/ b = 0)) = ()
-
 /// This first auxiliary lemma only manipulates the lengths of the sequences.
 val split_at_last_lazy_nb_rem_spec (l : pos) (d n rest: nat) :
   Lemma
