@@ -177,7 +177,7 @@ let isIdentifierCorrect compressedIdentifier =
 
 
 
-#push-options "--z3rlimit 750"
+#push-options "--z3rlimit 300"
 
 let decompressionCompressedForm b result = 
   push_frame();
@@ -192,6 +192,7 @@ let decompressionCompressedForm b result =
 
       let x = sub b (size 1) (size 32) in 
       copy (sub result (size 0) (size 32)) x;
+      assert (gsub b 1ul 32ul == x);
       toUint64ChangeEndian x t0;
 	let h1 = ST.get() in 
       Spec.P256.Lemmas.lemma_core_0 t0 h1;
