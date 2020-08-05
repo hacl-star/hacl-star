@@ -191,19 +191,19 @@ let update_sub_f #a #len h0 buf start n spec f =
 
 let concat2 #a #t0 #t1 len0 s0 len1 s1 s =
   let h0 = ST.get () in
-  update_sub_generic s (size 0) len0 s0;
-  update_sub_generic s len0 len1 s1;
+  update_sub s (size 0) len0 s0;
+  update_sub s len0 len1 s1;
   let h1 = ST.get () in
   Seq.eq_intro (Seq.sub (as_seq h1 s) 0 (v len0)) (as_seq h0 s0);
   Seq.lemma_concat2 (v len0) (as_seq h0 s0) (v len1) (as_seq h0 s1) (as_seq h1 s)
 
 let concat3 #a #t0 #t1 #t2 len0 s0 len1 s1 len2 s2 s =
   let h0 = ST.get () in
-  update_sub_generic s (size 0) len0 s0;
-  update_sub_generic s len0 len1 s1;
+  update_sub s (size 0) len0 s0;
+  update_sub s len0 len1 s1;
   let h1 = ST.get () in
   Seq.eq_intro (Seq.sub (as_seq h1 s) 0 (v len0)) (as_seq h0 s0);
-  update_sub_generic s (len0 +! len1) len2 s2;
+  update_sub s (len0 +! len1) len2 s2;
   let h2 = ST.get () in
   Seq.eq_intro (Seq.sub (as_seq h2 s) 0 (v len0)) (as_seq h0 s0);
   Seq.eq_intro (Seq.sub (as_seq h2 s) (v len0) (v len1)) (as_seq h0 s1);

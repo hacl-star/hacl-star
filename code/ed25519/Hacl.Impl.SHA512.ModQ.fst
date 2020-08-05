@@ -5,10 +5,10 @@ open FStar.HyperStack.All
 
 open Lib.IntTypes
 open Lib.ByteSequence
-open Lib.Sequence
 open Lib.Buffer
 
 module F56 = Hacl.Impl.Ed25519.Field56
+module LSeq = Lib.Sequence
 
 #reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
 
@@ -24,13 +24,18 @@ val sha512_pre_msg:
       disjoint input hash /\ disjoint prefix hash)
     (ensures fun h0 _ h1 -> modifies (loc hash) h0 h1 /\
       as_seq h1 hash == Spec.Agile.Hash.hash Spec.Hash.Definitions.SHA2_512
-           (concat #uint8 #32 #(v len) (as_seq h0 prefix) (as_seq h0 input))
+           (LSeq.concat #uint8 #32 #(v len) (as_seq h0 prefix) (as_seq h0 input))
     )
 let sha512_pre_msg h prefix len input =
   push_frame ();
   assert_norm(pow2 32 <= pow2 125 - 1);
   let pre_msg = create (len +. 32ul) (u8 0) in
-  concat2 32ul prefix len input pre_msg;
+  let h0 = ST.get () in
+  update_sub pre_msg 0ul 32ul prefix;
+  update_sub_generic pre_msg 32ul len input;
+  let h1 = ST.get () in
+  LSeq.eq_intro (LSeq.sub (as_seq h1 pre_msg) 0 32) (as_seq h0 prefix);
+  LSeq.lemma_concat2 32 (as_seq h0 prefix) (v len) (as_seq h0 input) (as_seq h1 pre_msg);
   Hacl.Hash.SHA2.hash_512_lib (len +. 32ul) pre_msg h;
   pop_frame ()
 
@@ -48,8 +53,8 @@ val sha512_pre_pre2_msg:
     )
     (ensures fun h0 _ h1 -> modifies (loc hash) h0 h1 /\
       as_seq h1 hash == Spec.Agile.Hash.hash Spec.Hash.Definitions.SHA2_512
-        (concat #uint8 #64 #(v len)
-          (concat #uint8 #32 #32 (as_seq h0 prefix) (as_seq h0 prefix2))
+        (LSeq.concat #uint8 #64 #(v len)
+          (LSeq.concat #uint8 #32 #32 (as_seq h0 prefix) (as_seq h0 prefix2))
           (as_seq h0 input)
         )
     )
@@ -59,7 +64,16 @@ let sha512_pre_pre2_msg h prefix prefix2 len input =
   push_frame ();
   let pre_msg = create (len +. 64ul) (u8 0) in
   assert_norm(pow2 32 <= pow2 125 - 1);
-  concat3 32ul prefix 32ul prefix2 len input pre_msg;
+  let h0 = ST.get () in
+  update_sub pre_msg 0ul 32ul prefix;
+  update_sub pre_msg 32ul 32ul prefix2;
+  let h1 = ST.get () in
+  LSeq.eq_intro (LSeq.sub (as_seq h1 pre_msg) 0 32) (as_seq h0 prefix);
+  update_sub_generic pre_msg 64ul len input;
+  let h2 = ST.get () in
+  LSeq.eq_intro (LSeq.sub (as_seq h2 pre_msg) 0 32) (as_seq h0 prefix);
+  LSeq.eq_intro (LSeq.sub (as_seq h2 pre_msg) 32 32) (as_seq h0 prefix2);
+  LSeq.lemma_concat3 32 (as_seq h0 prefix) 32 (as_seq h0 prefix2) (v len) (as_seq h0 input) (as_seq h2 pre_msg);
   Hacl.Hash.SHA2.hash_512_lib (len +. 64ul) pre_msg h;
   pop_frame ()
 
@@ -81,7 +95,7 @@ val sha512_modq_pre:
        v (Seq.index s 4) < pow2 32) /\
       F56.as_nat h1 out ==
       Spec.Ed25519.sha512_modq (32 + v len)
-        (concat #uint8 #32 #(v len) (as_seq h0 prefix) (as_seq h0 input))
+        (LSeq.concat #uint8 #32 #(v len) (as_seq h0 prefix) (as_seq h0 input))
     )
 
 let sha512_modq_pre out prefix len input =
@@ -113,8 +127,8 @@ val sha512_modq_pre_pre2:
        v (Seq.index s 4) < pow2 32) /\
      F56.as_nat h1 out ==
       Spec.Ed25519.sha512_modq (64 + v len)
-        (concat #uint8 #64 #(v len)
-          (concat #uint8 #32 #32
+        (LSeq.concat #uint8 #64 #(v len)
+          (LSeq.concat #uint8 #32 #32
             (as_seq h0 prefix)
             (as_seq h0 prefix2))
           (as_seq h0 input)

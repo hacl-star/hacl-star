@@ -518,7 +518,8 @@ val concat2:
   -> Stack unit
     (requires fun h ->
       live h s0 /\ live h s1 /\ live h s /\
-      disjoint s s0 /\ disjoint s s1)
+      disjoint s s0 /\ disjoint s s1 /\
+      non_null s0 /\ non_null s1 /\ non_null s)
     (ensures fun h0 _ h1 ->
       modifies1 s h0 h1 /\
       as_seq h1 s == Seq.concat (as_seq h0 s0) (as_seq h0 s1))
@@ -540,7 +541,8 @@ val concat3:
   -> Stack unit
     (requires fun h ->
       live h s0 /\ live h s1 /\ live h s2 /\ live h s /\
-      disjoint s s0 /\ disjoint s s1 /\ disjoint s s2)
+      disjoint s s0 /\ disjoint s s1 /\ disjoint s s2 /\
+      non_null s0 /\ non_null s1 /\ non_null s2 /\ non_null s)
     (ensures fun h0 _ h1 ->
       modifies1 s h0 h1 /\
       as_seq h1 s == Seq.concat (Seq.concat (as_seq h0 s0) (as_seq h0 s1)) (as_seq h0 s2))
