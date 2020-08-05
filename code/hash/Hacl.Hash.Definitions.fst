@@ -126,12 +126,9 @@ let alloca_st (i:impl) = unit -> ST.StackInline (state i & extra_state (get_alg 
     HS.is_stack_region (HS.get_tip h)))
   (ensures (fun h0 (s, v) h1 ->
     M.(modifies M.loc_none h0 h1) /\
-    B.live h1 s /\
     B.frameOf s == HS.get_tip h0 /\
     (as_seq h1 s, v) == Spec.Agile.Hash.init (get_alg i) /\
-    B.unused_in s h0 /\
-    Map.domain (HS.get_hmap h1) `Set.equal` Map.domain (HS.get_hmap h0) /\
-    (HS.get_tip h1) == (HS.get_tip h0)))
+    B.fresh_loc (M.loc_buffer s) h0 h1))
 
 noextract inline_for_extraction
 let init_st (i:impl) = s:state i -> ST.Stack (extra_state (get_alg i))
