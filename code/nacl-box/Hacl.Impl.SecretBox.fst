@@ -48,6 +48,40 @@ let get_len0 (len:size_t) : Tot (r:size_t{v r <= 32 /\ v r == Spec.get_len0 (v l
   if len <=. 32ul then len else 32ul
 
 
+inline_for_extraction noextract
+val get_c0:
+    mlen0:size_t{v mlen0 <= 32}
+  -> m0:lbuffer uint8 mlen0
+  -> c0:lbuffer uint8 mlen0
+  -> ekey0:lbuffer uint8 32ul ->
+  Stack unit
+  (requires fun h ->
+    live h m0 /\ live h c0 /\ live h ekey0 /\
+    eq_or_disjoint m0 c0 /\ disjoint m0 ekey0 /\ disjoint c0 ekey0)
+  (ensures  fun h0 _ h1 -> modifies (loc c0) h0 h1 /\
+   (let block0 = LSeq.create 32 (u8 0) in
+    let block0 = LSeq.update_sub block0 0 (v mlen0) (as_seq h0 m0) in
+    let block0 = LSeq.map2 (^.) block0 (as_seq h0 ekey0) in
+    as_seq h1 c0 == LSeq.sub block0 0 (v mlen0)))
+
+let get_c0 mlen0 m0 c0 ekey0 =
+  push_frame ();
+  let block0 = create 32ul (u8 0) in
+  let h0 = ST.get () in
+  if mlen0 >. 0ul then
+    update_sub block0 0ul mlen0 m0;
+  let h1 = ST.get () in
+  LSeq.eq_intro (as_seq h1 block0) (LSeq.update_sub (as_seq h0 block0) 0 (v mlen0) (as_seq h0 m0));
+  map2T 32ul block0 ( ^. ) block0 ekey0;
+
+  let h2 = ST.get () in
+  if mlen0 >. 0ul then
+    copy c0 (sub block0 0ul mlen0);
+  let h3 = ST.get () in
+  LSeq.eq_intro (as_seq h3 c0) (LSeq.sub (as_seq h2 block0) 0 (v mlen0));
+  pop_frame ()
+
+
 #set-options "--z3rlimit 100"
 
 inline_for_extraction noextract
@@ -72,7 +106,6 @@ val secretbox_detached_cipher:
 
 let secretbox_detached_cipher mlen c k xkeys n m =
   let h0 = ST.get () in
-  push_frame ();
   let n1 = sub n 16ul 8ul in
   let subkey = sub xkeys 0ul 32ul in
   let mkey = sub xkeys 32ul 32ul in
@@ -83,16 +116,10 @@ let secretbox_detached_cipher mlen c k xkeys n m =
   let m0 = sub_generic m 0ul mlen0 in
   let m1 = sub_generic m mlen0 mlen1 in
 
-  let block0 = create 32ul (u8 0) in
-  update_sub_generic block0 0ul mlen0 m0;
-  map2T 32ul block0 ( ^. ) block0 ekey0;
-
   let c0 = sub_generic c 0ul mlen0 in
   let c1 = sub_generic c mlen0 mlen1 in
-  let h1 = ST.get () in
-  copy_generic c0 (sub block0 0ul mlen0);
+  get_c0 mlen0 m0 c0 ekey0;
   let h2 = ST.get () in
-  //assert (as_seq h2 c0 == LSeq.sub (as_seq h1 block0) 0 (v mlen0));
   salsa20_encrypt mlen1 c1 m1 subkey n1 1ul;
   let h3 = ST.get () in
   //assert (as_seq h3 c1 == Spec.Salsa20.salsa20_encrypt_bytes (as_seq h2 subkey) (as_seq h2 n1) 1 (as_seq h2 m1));
@@ -101,8 +128,7 @@ let secretbox_detached_cipher mlen c k xkeys n m =
   assert (as_seq h3 c == Seq.append (as_seq h2 c0) (as_seq h3 c1));
   assert (
     let (tag, cipher) = Spec.secretbox_detached (as_seq h0 k) (as_seq h0 n) (as_seq h0 m) in
-    as_seq h3 c == cipher);
-  pop_frame ()
+    as_seq h3 c == cipher)
 
 
 val secretbox_detached:
@@ -166,7 +192,6 @@ val secretbox_open_detached_plain:
     as_seq h1 m == msg))
 
 let secretbox_open_detached_plain mlen m xkeys n c =
-  push_frame ();
   let subkey = sub xkeys 0ul 32ul in
   let ekey0 = sub xkeys 64ul 32ul in
   let n1 = sub n 16ul 8ul in
@@ -176,17 +201,12 @@ let secretbox_open_detached_plain mlen m xkeys n c =
   let c0 = sub_generic c 0ul mlen0 in
   let c1 = sub_generic c mlen0 mlen1 in
 
-  let block0 = create 32ul (u8 0) in
-  update_sub_generic block0 0ul mlen0 c0;
-  map2T 32ul block0 ( ^. ) block0 ekey0;
-
   let m0 = sub_generic m 0ul mlen0 in
   let m1 = sub_generic m mlen0 mlen1 in
-  copy_generic m0 (sub block0 0ul mlen0);
+  get_c0 mlen0 c0 m0 ekey0;
   salsa20_decrypt mlen1 m1 c1 subkey n1 1ul;
   let h1 = ST.get () in
-  FStar.Seq.Properties.lemma_split (as_seq h1 m) (v mlen0);
-  pop_frame ()
+  FStar.Seq.Properties.lemma_split (as_seq h1 m) (v mlen0)
 
 
 val secretbox_open_detached:
