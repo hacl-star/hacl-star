@@ -1593,8 +1593,7 @@ static void sha512_pre_msg(uint8_t *h, uint8_t *prefix, uint32_t len, uint8_t *i
   uint8_t pre_msg[len + (uint32_t)32U];
   memset(pre_msg, 0U, (len + (uint32_t)32U) * sizeof (pre_msg[0U]));
   memcpy(pre_msg, prefix, (uint32_t)32U * sizeof (prefix[0U]));
-  bool uu____0 = input == NULL;
-  if (!(uu____0 || pre_msg == NULL))
+  if (len > (uint32_t)0U)
   {
     memcpy(pre_msg + (uint32_t)32U, input, len * sizeof (input[0U]));
   }
@@ -1615,8 +1614,7 @@ sha512_pre_pre2_msg(
   memset(pre_msg, 0U, (len + (uint32_t)64U) * sizeof (pre_msg[0U]));
   memcpy(pre_msg, prefix, (uint32_t)32U * sizeof (prefix[0U]));
   memcpy(pre_msg + (uint32_t)32U, prefix2, (uint32_t)32U * sizeof (prefix2[0U]));
-  bool uu____0 = input == NULL;
-  if (!(uu____0 || pre_msg == NULL))
+  if (len > (uint32_t)0U)
   {
     memcpy(pre_msg + (uint32_t)64U, input, len * sizeof (input[0U]));
   }

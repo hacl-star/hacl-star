@@ -32,10 +32,13 @@ let sha512_pre_msg h prefix len input =
   let pre_msg = create (len +. 32ul) (u8 0) in
   let h0 = ST.get () in
   update_sub pre_msg 0ul 32ul prefix;
-  update_sub_generic pre_msg 32ul len input;
   let h1 = ST.get () in
-  LSeq.eq_intro (LSeq.sub (as_seq h1 pre_msg) 0 32) (as_seq h0 prefix);
-  LSeq.lemma_concat2 32 (as_seq h0 prefix) (v len) (as_seq h0 input) (as_seq h1 pre_msg);
+  if len >. 0ul then
+    update_sub pre_msg 32ul len input;
+  let h2 = ST.get () in
+  LSeq.eq_intro (as_seq h2 pre_msg) (LSeq.update_sub (as_seq h1 pre_msg) 32 (v len) (as_seq h0 input));
+  LSeq.eq_intro (LSeq.sub (as_seq h2 pre_msg) 0 32) (as_seq h0 prefix);
+  LSeq.lemma_concat2 32 (as_seq h0 prefix) (v len) (as_seq h0 input) (as_seq h2 pre_msg);
   Hacl.Hash.SHA2.hash_512_lib (len +. 32ul) pre_msg h;
   pop_frame ()
 
@@ -69,8 +72,10 @@ let sha512_pre_pre2_msg h prefix prefix2 len input =
   update_sub pre_msg 32ul 32ul prefix2;
   let h1 = ST.get () in
   LSeq.eq_intro (LSeq.sub (as_seq h1 pre_msg) 0 32) (as_seq h0 prefix);
-  update_sub_generic pre_msg 64ul len input;
+  if len >. 0ul then
+    update_sub pre_msg 64ul len input;
   let h2 = ST.get () in
+  LSeq.eq_intro (as_seq h2 pre_msg) (LSeq.update_sub (as_seq h1 pre_msg) 64 (v len) (as_seq h0 input));
   LSeq.eq_intro (LSeq.sub (as_seq h2 pre_msg) 0 32) (as_seq h0 prefix);
   LSeq.eq_intro (LSeq.sub (as_seq h2 pre_msg) 32 32) (as_seq h0 prefix2);
   LSeq.lemma_concat3 32 (as_seq h0 prefix) 32 (as_seq h0 prefix2) (v len) (as_seq h0 input) (as_seq h2 pre_msg);
