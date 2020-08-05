@@ -28,6 +28,7 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __EverCrypt_AEAD_H
 #define __EverCrypt_AEAD_H
 
@@ -37,7 +38,6 @@
 #include "EverCrypt_AutoConfig2.h"
 #include "EverCrypt_Error.h"
 #include "Hacl_Spec.h"
-
 
 typedef struct EverCrypt_AEAD_state_s_s EverCrypt_AEAD_state_s;
 

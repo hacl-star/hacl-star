@@ -26,9 +26,9 @@
 #include <string.h>
 #include <stdbool.h>
 
+
 #ifndef __Vale_Inline_H
 #define __Vale_Inline_H
-
 
 
 

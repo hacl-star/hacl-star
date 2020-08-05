@@ -27,9 +27,9 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __EverCrypt_StaticConfig_H
 #define __EverCrypt_StaticConfig_H
-
 
 
 

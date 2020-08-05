@@ -28,6 +28,7 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __EverCrypt_DRBG_H
 #define __EverCrypt_DRBG_H
 
@@ -36,7 +37,6 @@
 #include "Hacl_Spec.h"
 #include "Hacl_HMAC_DRBG.h"
 #include "Hacl_Lib.h"
-
 
 typedef Spec_Hash_Definitions_hash_alg EverCrypt_DRBG_supported_alg;
 

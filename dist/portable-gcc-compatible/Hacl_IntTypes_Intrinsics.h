@@ -28,11 +28,11 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __Hacl_IntTypes_Intrinsics_H
 #define __Hacl_IntTypes_Intrinsics_H
 
 #include "Hacl_Kremlib.h"
-
 
 /* SNIPPET_START: Hacl_IntTypes_Intrinsics_add_carry_u64 */
 

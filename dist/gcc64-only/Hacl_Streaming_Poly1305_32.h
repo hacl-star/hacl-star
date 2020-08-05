@@ -28,11 +28,11 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __Hacl_Streaming_Poly1305_32_H
 #define __Hacl_Streaming_Poly1305_32_H
 
 #include "Hacl_Poly1305_32.h"
-
 
 typedef struct Hacl_Streaming_Functor_state_s___uint64_t___uint8_t__s
 Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_;

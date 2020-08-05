@@ -28,6 +28,7 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __EverCrypt_CTR_H
 #define __EverCrypt_CTR_H
 
@@ -37,7 +38,6 @@
 #include "EverCrypt_AutoConfig2.h"
 #include "EverCrypt_Error.h"
 #include "Hacl_Spec.h"
-
 
 /* SNIPPET_START: EverCrypt_CTR_state_s */
 

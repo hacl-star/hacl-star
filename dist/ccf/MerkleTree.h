@@ -27,13 +27,13 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __MerkleTree_H
 #define __MerkleTree_H
 
 #include "Hacl_Kremlib.h"
 #include "Hacl_Spec.h"
 #include "EverCrypt_Hash.h"
-
 
 typedef struct LowStar_Vector_vector_str___uint8_t__s
 {

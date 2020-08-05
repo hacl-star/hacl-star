@@ -27,11 +27,11 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __Hacl_Chacha20_H
 #define __Hacl_Chacha20_H
 
 #include "Hacl_Kremlib.h"
-
 
 void Hacl_Impl_Chacha20_chacha20_init(uint32_t *ctx, uint8_t *k, uint8_t *n, uint32_t ctr);
 

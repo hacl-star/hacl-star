@@ -27,11 +27,11 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __Hacl_Poly1305_128_H
 #define __Hacl_Poly1305_128_H
 
 #include "Hacl_Kremlib.h"
-
 
 void Hacl_Impl_Poly1305_Field32xN_128_load_acc2(Lib_IntVector_Intrinsics_vec128 *acc, u8 *b);
 

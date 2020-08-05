@@ -28,6 +28,7 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __EverCrypt_HMAC_H
 #define __EverCrypt_HMAC_H
 
@@ -35,7 +36,6 @@
 #include "Hacl_Hash.h"
 #include "Hacl_Spec.h"
 #include "EverCrypt_Hash.h"
-
 
 /* SNIPPET_START: EverCrypt_HMAC_compute_sha1 */
 

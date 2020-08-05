@@ -26,11 +26,11 @@
 #include <string.h>
 #include <stdbool.h>
 
+
 #ifndef __Hacl_Poly1305_32_H
 #define __Hacl_Poly1305_32_H
 
 #include "Hacl_Kremlib.h"
-
 
 extern uint32_t Hacl_Poly1305_32_blocklen;
 

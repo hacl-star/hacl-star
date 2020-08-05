@@ -28,12 +28,12 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __Hacl_HMAC_DRBG_H
 #define __Hacl_HMAC_DRBG_H
 
 #include "Hacl_HMAC.h"
 #include "Hacl_Spec.h"
-
 
 typedef Spec_Hash_Definitions_hash_alg Hacl_HMAC_DRBG_supported_alg;
 

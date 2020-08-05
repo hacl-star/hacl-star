@@ -27,12 +27,12 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __Hacl_Chacha20_Vec256_H
 #define __Hacl_Chacha20_Vec256_H
 
 #include "Hacl_Chacha20.h"
 #include "Hacl_Kremlib.h"
-
 
 void
 Hacl_Chacha20_Vec256_chacha20_encrypt_256(u32 len, u8 *out, u8 *text, u8 *key, u8 *n, u32 ctr);

@@ -28,6 +28,7 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __EverCrypt_Chacha20Poly1305_H
 #define __EverCrypt_Chacha20Poly1305_H
 
@@ -35,7 +36,6 @@
 #include "Hacl_Chacha20Poly1305_128.h"
 #include "Hacl_Chacha20Poly1305_32.h"
 #include "Hacl_Chacha20Poly1305_256.h"
-
 
 void
 EverCrypt_Chacha20Poly1305_aead_encrypt(

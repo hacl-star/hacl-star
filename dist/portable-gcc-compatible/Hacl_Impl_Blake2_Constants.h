@@ -28,9 +28,9 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __Hacl_Impl_Blake2_Constants_H
 #define __Hacl_Impl_Blake2_Constants_H
-
 
 
 

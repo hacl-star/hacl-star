@@ -28,9 +28,9 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __EverCrypt_Helpers_H
 #define __EverCrypt_Helpers_H
-
 
 
 

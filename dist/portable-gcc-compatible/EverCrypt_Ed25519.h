@@ -28,11 +28,11 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __EverCrypt_Ed25519_H
 #define __EverCrypt_Ed25519_H
 
 #include "Hacl_Ed25519.h"
-
 
 /* SNIPPET_START: EverCrypt_Ed25519_sign */
 

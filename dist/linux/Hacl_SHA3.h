@@ -27,12 +27,12 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __Hacl_SHA3_H
 #define __Hacl_SHA3_H
 
 #include "Hacl_Kremlib.h"
 #include "Lib_Memzero0.h"
-
 
 extern const u32 Hacl_Impl_SHA3_keccak_rotc[24U];
 

@@ -26,9 +26,9 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __MerkleTree_H
 #define __MerkleTree_H
-
 
 
 

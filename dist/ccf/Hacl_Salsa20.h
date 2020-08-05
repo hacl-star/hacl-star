@@ -27,11 +27,11 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __Hacl_Salsa20_H
 #define __Hacl_Salsa20_H
 
 #include "Hacl_Kremlib.h"
-
 
 void
 Hacl_Salsa20_salsa20_encrypt(

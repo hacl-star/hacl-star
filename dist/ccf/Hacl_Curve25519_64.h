@@ -28,13 +28,13 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __Hacl_Curve25519_64_H
 #define __Hacl_Curve25519_64_H
 
 #include "Hacl_Kremlib.h"
 #include "Vale.h"
 #include "Vale_Inline.h"
-
 
 void Hacl_Curve25519_64_scalarmult(uint8_t *out, uint8_t *priv, uint8_t *pub);
 

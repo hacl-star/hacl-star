@@ -28,6 +28,7 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __EverCrypt_Hash_H
 #define __EverCrypt_Hash_H
 
@@ -36,7 +37,6 @@
 #include "Hacl_Hash.h"
 #include "EverCrypt_AutoConfig2.h"
 #include "Hacl_Spec.h"
-
 
 /* SNIPPET_START: EverCrypt_Hash_alg */
 
