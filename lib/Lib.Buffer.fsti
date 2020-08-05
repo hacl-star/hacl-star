@@ -1225,6 +1225,7 @@ val map_blocks:
       (ensures  fun h1 _ h2 ->
 	let iblock = gsub inp (i *! blocksize) (len %. blocksize)  in
 	let oblock = gsub output (i *! blocksize) (len %. blocksize) in
+	assert (v (len %. blocksize) == v len % v blocksize);
         let ob = spec_l h0 (v i) (v len % v blocksize) (as_seq h1 iblock) in
         B.modifies (loc oblock) h1 h2 /\
         as_seq h2 oblock == ob))
