@@ -49,7 +49,8 @@ val montgomery_square_buffer: #c: curve -> a: felem c -> result: felem c ->
 	as_nat c h1 result = toDomain_ #c (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 a)))))
 
 
-val exponent: #c: curve -> a: felem c -> result: felem c -> tempBuffer: lbuffer uint64 (size 20) 
+val exponent: #c: curve -> a: felem c -> result: felem c 
+  -> tempBuffer: lbuffer uint64 (size 5 *! getCoordinateLenU64 c) 
   -> Stack unit
     (requires fun h -> 
       live h a /\ live h tempBuffer /\ live h result /\  disjoint tempBuffer result /\ 

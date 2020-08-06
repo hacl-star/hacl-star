@@ -125,7 +125,7 @@ val pointFromDomain: #c : curve -> p: point c -> result: point c-> Stack unit
     
 
 val isPointAtInfinityPrivate: #c: curve -> p: point c -> Stack uint64
-  (requires fun h -> live h p /\ as_nat c h (gsub p (size 2 *! getCoordinateLenU64 c) (getCoordinateLenU64 c)) < getPower c)
+  (requires fun h -> live h p /\ as_nat c h (gsub p (size 2 *! getCoordinateLenU64 c) (getCoordinateLenU64 c)) < getPrime c)
   (ensures fun h0 r h1 -> modifies0 h0 h1  /\      
     (
       (uint_v r == 0 \/ uint_v r == maxint U64) /\ 

@@ -73,6 +73,13 @@ let getPower curve =
   |P384 -> 384
 
 inline_for_extraction
+let getPowerU curve = 
+  match curve with 
+  |P256 -> 256ul
+  |P384 -> 384ul
+
+
+inline_for_extraction
 let getPower2 curve = pow2 (getPower curve)
 
 inline_for_extraction
@@ -273,7 +280,7 @@ let _ml_step1 r0 r1 =
   (r0, r1)
 
 
-val _ml_step: #c: curve -> k:scalar_bytes #c -> i:nat{i < 256} -> tuple2 (point_nat_prime #c) (point_nat_prime #c) -> tuple2 (point_nat_prime #c) (point_nat_prime #c)
+val _ml_step: #c: curve -> k:scalar_bytes #c -> i:nat{i < getPower c} -> tuple2 (point_nat_prime #c) (point_nat_prime #c) -> tuple2 (point_nat_prime #c) (point_nat_prime #c)
 
 let _ml_step #c k i (p, q) =
   let bit = (getPower c - 1) - i in
