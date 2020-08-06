@@ -15,6 +15,11 @@ open Spec.Agile.HMAC
 
 #set-options "--max_fuel 0 --max_ifuel 0"
 
+// This definition was previously in Spec.Agile.HMAC
+let is_supported_alg = function
+  | SHA1 | SHA2_256 | SHA2_384 | SHA2_512 -> true
+  | _ -> false
+
 let supported_alg = a:hash_alg{ is_supported_alg a }
 
 let reseed_interval                   = pow2 10

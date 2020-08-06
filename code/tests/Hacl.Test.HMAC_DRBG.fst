@@ -69,7 +69,7 @@ let test_one (vec:vector) : Stack unit (requires fun _ -> True) (ensures fun _ _
   B.recall additional_input_2;  
   B.recall returned_bits;
   // We need to check this at runtime because Low*-ized vectors don't carry any refinements
-  if not (Spec.Agile.HMAC.is_supported_alg a &&
+  if not (is_supported_alg a &&
           min_length a <=. entropy_input_len && 
           entropy_input_len <=. max_length &&
           min_length a /. 2ul <=. nonce_len && 
