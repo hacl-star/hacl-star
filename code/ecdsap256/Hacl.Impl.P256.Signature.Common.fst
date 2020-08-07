@@ -52,8 +52,7 @@ let bufferToJac #c p result =
     upd result (lengthXY +. 2ul) (u64 0);
     upd result (lengthXY +. 3ul) (u64 0);
     upd result (lengthXY +. 4ul) (u64 0);
-    upd result (lengthXY +. 5ul) (u64 0);
-    admit()
+    upd result (lengthXY +. 5ul) (u64 0)
 
 #pop-options
 
@@ -162,26 +161,44 @@ let xcube_minus_x #c x r =
     admit()
 
 
-let isPointAtInfinityPublic p =  
-  let z0 = index p (size 8) in 
-  let z1 = index p (size 9) in 
-  let z2 = index p (size 10) in 
-  let z3 = index p (size 11) in 
-  let z0_zero = eq_0_u64 z0 in 
-  let z1_zero = eq_0_u64 z1 in 
-  let z2_zero = eq_0_u64 z2 in 
-  let z3_zero = eq_0_u64 z3 in 
-  z0_zero && z1_zero && z2_zero && z3_zero
+let isPointAtInfinityPublic #c p =  
+  match c with 
+  |P256 -> 
+    let z0 = index p (size 8) in 
+    let z1 = index p (size 9) in 
+    let z2 = index p (size 10) in 
+    let z3 = index p (size 11) in 
+    let z0_zero = eq_0_u64 z0 in 
+    let z1_zero = eq_0_u64 z1 in 
+    let z2_zero = eq_0_u64 z2 in 
+    let z3_zero = eq_0_u64 z3 in 
+    z0_zero && z1_zero && z2_zero && z3_zero
+  |P384 -> 
+    let z0 = index p (size 12) in 
+    let z1 = index p (size 13) in 
+    let z2 = index p (size 14) in 
+    let z3 = index p (size 15) in 
+    let z4 = index p (size 16) in 
+    let z5 = index p (size 17) in 
+    let z0_zero = eq_0_u64 z0 in 
+    let z1_zero = eq_0_u64 z1 in 
+    let z2_zero = eq_0_u64 z2 in 
+    let z3_zero = eq_0_u64 z3 in 
+    let z4_zero = eq_0_u64 z4 in 
+    let z5_zero = eq_0_u64 z5 in 
+    z0_zero && z1_zero && z2_zero && z3_zero && z4_zero && z5_zero
+    
 
-
-val lemma_modular_multiplication_p256_2_d: #c: curve -> 
-  a:nat {a < prime256} -> b:nat {b < prime256} -> 
+val lemma_modular_multiplication_2_d: #c: curve -> 
+  a:nat {a < getPrime c} -> b:nat {b < getPrime c } -> 
   Lemma (toDomain_ #c a = toDomain_ #c b <==> a == b)
 
-let lemma_modular_multiplication_p256_2_d #c a b = 
+let lemma_modular_multiplication_2_d #c a b = 
    lemmaToDomain #c a;
    lemmaToDomain #c b;
-   lemma_modular_multiplication_p256_2 a b
+   match c with 
+   |P256 -> lemma_modular_multiplication_p256_2 a b
+   |P384 -> lemma_modular_multiplication_p384_2 a b
 
 
 let isPointOnCurvePublic #c p = 
@@ -191,14 +208,19 @@ let isPointOnCurvePublic #c p =
   let xBuffer = create sz (u64 0) in 
   let h0 = ST.get() in 
   let x = sub p (size 0) sz in 
-  let y = sub p sz sz in 
+  let y = sub p sz sz in
+  
   y_2 #c y y2Buffer;
   xcube_minus_x #c x xBuffer;
-    
-    lemma_modular_multiplication_p256_2_d #c ((as_nat c h0 y) * (as_nat c h0 y) % prime) (let x_ = as_nat c h0 x in (x_ * x_ * x_ - 3 * x_ + bCoordinate #P256) % prime);
+
+    admit();
+
+  lemma_modular_multiplication_2_d #c ((as_nat c h0 y) * (as_nat c h0 y) % prime) 
+    (let x_ = as_nat c h0 x in (x_ * x_ * x_ - 3 * x_ + bCoordinate #c) % prime);
     
   let r = compare_felem #c y2Buffer xBuffer in 
   let z = not (eq_0_u64 r) in 
+  admit();
   pop_frame();
   z
 
@@ -206,16 +228,24 @@ let isPointOnCurvePublic #c p =
 val isCoordinateValid: #c: curve -> p: point c -> Stack bool 
   (requires fun h -> live h p /\ point_z_as_nat c h p == 1)
   (ensures fun h0 r h1 -> 
+    let prime = getPrime c in 
     modifies0 h0 h1 /\ 
-    r == (point_x_as_nat c h0 p < prime256 && point_y_as_nat c h0 p < prime256 && point_z_as_nat c h0 p < prime256)
+    r == (point_x_as_nat c h0 p < prime && point_y_as_nat c h0 p < prime && point_z_as_nat c h0 p < prime)
   )
 
-let isCoordinateValid p = 
+
+let isCoordinateValid #c p = 
   push_frame();
-  let tempBuffer = create (size 4) (u64 0) in 
+
+  let len = getCoordinateLenU64 c in 
+
+  let tempBuffer = create len (u64 0) in 
+  recall_contents #_ #(getCoordinateLenU64 c) (prime_buffer #c) (Lib.Sequence.of_list (prime_list c));
+  
   recall_contents prime256_buffer (Lib.Sequence.of_list p256_prime_list);
-  let x = sub p (size 0) (size 4) in 
-  let y = sub p (size 4) (size 4) in 
+  
+  let x = sub p (size 0) len in 
+  let y = sub p len len in 
   
   let carryX = sub4_il x prime256_buffer tempBuffer in
   let carryY = sub4_il y prime256_buffer tempBuffer in 

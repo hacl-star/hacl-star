@@ -234,6 +234,8 @@ let cswap #c bit p1 p2 =
   let open Lib.Sequence in 
   let h0 = ST.get () in
   let mask = u64 0 -. bit in
+  
+  let len = getCoordinateLenU64 c *! size 3 in 
 
   [@ inline_let]
   let inv h1 (i:nat{i <= uint_v (getCoordinateLenU64 c) * 3}) =
@@ -245,7 +247,7 @@ let cswap #c bit p1 p2 =
       (as_seq h1 p1).[k] == (as_seq h0 p1).[k] /\ (as_seq h1 p2).[k] == (as_seq h0 p2).[k]) /\
     modifies (loc p1 |+| loc p2) h0 h1 in
  
-  Lib.Loops.for 0ul (getCoordinateLenU64 c *! size 3) inv
+  Lib.Loops.for 0ul len inv
     (fun i ->
       let dummy = mask &. (p1.(i) ^. p2.(i)) in
       p1.(i) <- p1.(i) ^. dummy;
@@ -257,7 +259,6 @@ let cswap #c bit p1 p2 =
   Lib.Sequence.eq_intro (as_seq h1 p2) (if v bit = 1 then as_seq h0 p1 else as_seq h0 p2)
 
 
-inline_for_extraction noextract
 val normalisation_update: #c: curve -> z2x: felem c -> z3y: felem c -> p: point c 
 -> resultPoint: point c -> Stack unit 
   (requires fun h -> 
@@ -312,7 +313,7 @@ let norm #c  p resultPoint tempBuffer =
   let len = getCoordinateLenU64 c in 
 
   let xf = sub p (size 0) len in 
-  let yf = sub p len in 
+  let yf = sub p len len in 
   let zf = sub p (size 2 *! len) len in 
   
   let z2f = sub tempBuffer len len in 
@@ -378,7 +379,7 @@ let normX #c p result tempBuffer =
 
 (* this piece of code is taken from Hacl.Curve25519 *)
 (* changed Endian for Scalar Bit access *)
-inline_for_extraction noextract
+
 val scalar_bit: #c: curve 
   -> #buf_type: buftype 
   -> s:lbuffer_t buf_type uint8 (getScalarLen c) 
@@ -395,7 +396,6 @@ let scalar_bit #c #buf_type s n =
   to_u64 ((s.(getScalarLen c -. 1ul -. n /. 8ul) >>. (n %. 8ul)) &. u8 1)
 
 
-inline_for_extraction noextract  
 val montgomery_ladder_step1: #c : curve ->  p: point c -> q: point c 
   -> tempBuffer: lbuffer uint64 (size 22 *! getCoordinateLenU64 c) -> Stack unit
   (requires fun h -> 
@@ -524,7 +524,6 @@ let montgomery_ladder_step #c #buf_type r0 r1 tempBuffer scalar i =
     admit()
 
 
-inline_for_extraction noextract
 val montgomery_ladder: #c: curve -> #buf_type: buftype->  p: point c -> q: point c ->
   scalar: lbuffer_t buf_type uint8 (getScalarLen c) -> 
   tempBuffer:  lbuffer uint64 (size 22 *! getCoordinateLenU64 c)  -> 
@@ -574,6 +573,7 @@ val montgomery_ladder: #c: curve -> #buf_type: buftype->  p: point c -> q: point
 let montgomery_ladder #c #a p q scalar tempBuffer =  
   let h0 = ST.get() in 
   let len = getCoordinateLenU64 c in 
+  let cycleLoop = getPowerU c in 
 
   [@inline_let]
   let spec_ml h0 = _ml_step #c (as_seq h0 scalar) in 
@@ -598,7 +598,7 @@ let montgomery_ladder #c #a p q scalar tempBuffer =
 
     in 
 
-  for 0ul (getPowerU c) inv 
+  for 0ul cycleLoop inv 
     (fun i -> let h2 = ST.get() in
       montgomery_ladder_step p q tempBuffer scalar i; 
       Lib.LoopCombinators.unfold_repeati (getPower c) (spec_ml h0) (acc h0) (uint_v i)
@@ -652,7 +652,6 @@ val lemma_coord: #c: curve -> h3: mem -> q: point c -> Lemma (
 
 let lemma_coord h3 q = ()
 
-
 inline_for_extraction
 val scalarMultiplication_t: #c: curve -> #t:buftype -> p: point c -> result: point c -> 
   scalar: lbuffer_t t uint8 (getScalarLen c) -> 
@@ -687,7 +686,7 @@ val scalarMultiplication_t: #c: curve -> #t:buftype -> p: point c -> result: poi
 
 let scalarMultiplication_t #c #t p result scalar tempBuffer  = 
     let h0 = ST.get() in 
-  let len = getCoordinateLenU64 c in 
+  let len = size 4 in 
   let q = sub tempBuffer (size 0) (size 3 *! len) in 
   uploadZeroPoint #c q;
   let buff = sub tempBuffer (size 3 *! len) (size 22 *! len) in 
@@ -711,9 +710,9 @@ let scalarMultiplicationC #c = scalarMultiplication_t #c #CONST
 
 let scalarMultiplication #c #buf_type p result scalar tempBuffer = 
   match buf_type with 
-  |MUT -> scalarMultiplicationL p result scalar tempBuffer 
-  |IMMUT -> scalarMultiplicationI p result scalar tempBuffer
-  |CONST -> scalarMultiplicationC p result scalar tempBuffer
+  |MUT -> scalarMultiplicationL #c p result scalar tempBuffer 
+  |IMMUT -> scalarMultiplicationI #c p result scalar tempBuffer
+  |CONST -> scalarMultiplicationC #c p result scalar tempBuffer
 
 
 val uploadBasePoint: #c: curve -> p: point c -> Stack unit 

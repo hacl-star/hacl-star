@@ -84,12 +84,30 @@ let lemma_modular_multiplication_p256_2_left a b =
   FStar.Math.Lemmas.modulo_lemma a prime256;
   FStar.Math.Lemmas.modulo_lemma b prime256
 
+
+val lemma_modular_multiplication_p384_2_left:
+  a: nat{ a < prime384} -> b: nat {b < prime384} -> Lemma
+  (requires a * pow2 384 % prime384 = b * pow2 384 % prime384)
+  (ensures a == b)
+
+let lemma_modular_multiplication_p384_2_left a b =
+  admit()
+  
 val lemma_modular_multiplication_p256_2: a: nat{a < prime256} -> b: nat{b < prime256} ->
   Lemma
   (a * pow2 256 % prime256 = b * pow2 256 % prime256 <==> a == b)
 
 let lemma_modular_multiplication_p256_2 a b =
   Classical.move_requires_2 lemma_modular_multiplication_p256_2_left a b
+
+
+val lemma_modular_multiplication_p384_2: a: nat {a < prime384} -> b: nat {b < prime384} ->
+  Lemma
+    (a * pow2 384 % prime384 = b * pow2 384 % prime384 <==> a == b)
+
+let lemma_modular_multiplication_p384_2 a b = 
+  Classical.move_requires_2 lemma_modular_multiplication_p384_2_left a b
+
 
 noextract
 let prime_p256_order:pos =
@@ -99,6 +117,7 @@ let prime_p256_order:pos =
 val lemma_montgomery_mod_inverse_addition: a:nat -> Lemma (
   a * modp_inv2_prime (pow2 64) prime256 * modp_inv2_prime (pow2 64) prime256 % prime256 ==
   a * modp_inv2_prime (pow2 128) prime256 % prime256)
+
 
 let lemma_montgomery_mod_inverse_addition a =
   calc (==) {
