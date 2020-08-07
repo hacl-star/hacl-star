@@ -69,7 +69,7 @@ let evercrypt_hash //: block hash_alg =
     (stateful_unused hash_alg)
 
     (* TODO: this general max length definition shouldn't be in the SHA2 256 file! *)
-    Hacl.Streaming.SHA2_256.max_input_length64
+    Hacl.Streaming.SHA2.max_input_length64
     Hacl.Hash.Definitions.hash_len
     Hacl.Hash.Definitions.block_len
 
