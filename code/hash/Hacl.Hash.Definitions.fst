@@ -12,6 +12,8 @@ open Lib.IntTypes
 open Spec.Hash.Definitions
 open FStar.Mul
 
+#set-options "--z3rlimit 25 --fuel 0 --ifuel 1"
+
 (** The low-level types that our clients need to be aware of, in order to
     successfully call this module. *)
 
@@ -49,6 +51,22 @@ let impl_state_length (i:impl) =
   | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 -> state_word_length a
   | Blake2S | Blake2B -> UInt32.v (4ul *. Blake2.row_len (to_blake_alg a) (get_spec i))
 
+inline_for_extraction noextract
+let impl_state_len (i:impl) : s:size_t{size_v s == impl_state_length i} =
+  [@inline_let] let a = get_alg i in
+  [@inline_let] let m = get_spec i in
+  match a with
+  | MD5 -> 4ul
+  | SHA1 -> 5ul
+  | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 -> 8ul
+  | _ ->
+    (**) mul_mod_lemma 4ul (Blake2.row_len (to_blake_alg a) (get_spec i));
+    match a, m with
+    | Blake2S, Blake2.M32
+    | Blake2B, Blake2.M32 | Blake2B, Blake2.M128 -> 16ul
+    | Blake2S, Blake2.M128 | Blake2S, Blake2.M256
+    | Blake2B, Blake2.M256 -> 4ul
+  
 inline_for_extraction
 type state (i:impl) =
   b:B.buffer (impl_word i) { B.length b = impl_state_length i }
