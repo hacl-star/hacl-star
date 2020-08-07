@@ -136,7 +136,7 @@ let test_one_hmac_drbg vec =
   B.recall additional_input_reseed;
   B.recall additional_input_1;
   B.recall additional_input_2;
-  if not (Spec.Agile.HMAC.is_supported_alg a &&
+  if not (Spec.HMAC_DRBG.is_supported_alg a &&
           0ul <. returned_bits_len &&
           returned_bits_len <. 0xFFFFFFFFul)
   then C.exit (-1l)
