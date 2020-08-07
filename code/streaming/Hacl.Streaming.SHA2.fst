@@ -85,8 +85,6 @@ let update_multi_associative (a : alg) () acc (prevlen1 prevlen2 : nat)
   Spec.Hash.Lemmas.update_multi_associative a (acc, ()) input1 input2
 #pop-options
 
-module FEM = FEM.Process
-
 
 /// This proof usually succeeds fast but we increase the rlimit for safety
 #push-options "--z3rlimit 200 --ifuel 1"
