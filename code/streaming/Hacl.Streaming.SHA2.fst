@@ -50,8 +50,10 @@ open Hacl.Hash.Definitions
 module D = Hacl.Hash.Definitions
 module Agile = Spec.Agile.Hash
 
+inline_for_extraction noextract
 let alg = a:hash_alg{is_sha2 a}
 
+inline_for_extraction noextract
 let init_elem (a : alg) : word a =
   match a with
   | SHA2_224 | SHA2_256 -> Lib.IntTypes.u32 0
