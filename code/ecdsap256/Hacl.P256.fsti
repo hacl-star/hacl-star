@@ -19,7 +19,7 @@ open Hacl.Spec.ECDSA.Definition
 open Hacl.Impl.P256.Compression
 open Hacl.Spec.P256.MontgomeryMultiplication
 
-
+(*
 (* [@ (Comment " Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. 
   \n Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
   \n The private key and the nonce are expected to be less than the curve order.")]
@@ -393,7 +393,7 @@ val reduction_8_32: x: lbuffer uint8 (size 32) -> result: lbuffer uint8 (size 32
   ")]
 *)
 
-
+*)
 val ecp256dh_i:
     result:lbuffer uint8 (size 64)
   -> scalar:lbuffer uint8 (size 32)
@@ -408,6 +408,7 @@ val ecp256dh_i:
     as_seq h1 (gsub result (size 0) (size 32)) == pointX /\
     as_seq h1 (gsub result (size 32) (size 32)) == pointY)
 
+(*
 (*
 [@ (Comment " This code is not side channel resistant on pub_key. \n Input: result: uint8[64], \n pub(lic)Key: uint8[64], \n scalar: uint8[32].
   \n Output: uint64, where 0 stands for the correct key generation. All the other values mean that an error has occurred. 
@@ -434,3 +435,4 @@ val ecp256dh_r:
       as_seq h1 (gsub result (size 32) (size 32)) == pointY)
 
 
+*)

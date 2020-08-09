@@ -36,6 +36,25 @@ friend Hacl.Spec.P256.MontgomeryMultiplication
 
 #push-options "--ifuel 1"
 
+val sub_felem: #c: curve -> x: felem c -> y: glbuffer uint64 (getCoordinateLenU64 c) -> result: felem c -> 
+  Stack uint64
+    (requires fun h -> live h x /\ live h y /\ live h result /\ disjoint x result /\ disjoint y result)
+    (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ 
+      as_nat c h1 result - v r * pow2 256 == as_nat c h0 x  - as_nat_il c h0 y /\
+      (
+	if uint_v r = 0 then 
+	  as_nat c h0 x >= as_nat_il c h0 y 
+	else 
+	  as_nat c h0 x < as_nat_il c h0 y)
+      )
+
+
+let sub_felem #c x y result = 
+  match c with 
+  |P256 -> sub4_il x y result
+  |P384 -> admit()
+
+
 let bufferToJac #c p result = 
   let lengthXY = getCoordinateLenU64 c *. 2ul in 
   let partPoint = sub result (size 0) lengthXY in 
@@ -238,39 +257,39 @@ let isCoordinateValid #c p =
   push_frame();
 
   let len = getCoordinateLenU64 c in 
-
   let tempBuffer = create len (u64 0) in 
   recall_contents #_ #(getCoordinateLenU64 c) (prime_buffer #c) (Lib.Sequence.of_list (prime_list c));
-  
-  recall_contents prime256_buffer (Lib.Sequence.of_list p256_prime_list);
   
   let x = sub p (size 0) len in 
   let y = sub p len len in 
   
-  let carryX = sub4_il x prime256_buffer tempBuffer in
-  let carryY = sub4_il y prime256_buffer tempBuffer in 
+  let carryX = sub_felem #c x (prime_buffer #c) tempBuffer in
+  let carryY = sub_felem #c y (prime_buffer #c) tempBuffer in 
   
   let lessX = eq_u64_nCT carryX (u64 1) in   
   let lessY = eq_u64_nCT carryY (u64 1) in 
 
-  let r = lessX && lessY in 
+  let r = lessX && lessY in admit();
   pop_frame();
   r  
 
 
-inline_for_extraction noextract
-val multByOrder: #c: curve -> result: point c ->  p: point c -> tempBuffer: lbuffer uint64 (size 100) -> Stack unit 
+val multByOrder: #c: curve -> result: point c ->  p: point c -> 
+  tempBuffer: lbuffer uint64 (size 25 *! getCoordinateLenU64 c) -> Stack unit 
   (requires fun h -> 
+    let prime = getPrime c in 
+    
     live h result /\ live h p /\ live h tempBuffer /\
     LowStar.Monotonic.Buffer.all_disjoint [loc result; loc p; loc tempBuffer] /\
-    point_x_as_nat c h p < prime256 /\ 
-    point_y_as_nat c h p < prime256 /\
-    point_z_as_nat c h p < prime256
+    point_x_as_nat c h p < prime /\ 
+    point_y_as_nat c h p < prime /\
+    point_z_as_nat c h p < prime
   )
   (ensures fun h0 _ h1 ->
+    let prime = getPrime c in 
     modifies (loc result |+| loc p |+| loc tempBuffer) h0 h1 /\
     (
-      let xN, yN, zN = scalar_multiplication #P256 (prime_order_seq #P256) (point_prime_to_coordinates c (as_seq h0 p)) in 
+      let xN, yN, zN = scalar_multiplication #c (prime_order_seq #c) (point_prime_to_coordinates c (as_seq h0 p)) in 
       let x3, y3, z3 = point_x_as_nat c h1 result, point_y_as_nat c h1 result, point_z_as_nat c h1 result in 
       x3 == xN /\ y3 == yN /\ z3 == zN 
     ) 
@@ -279,8 +298,9 @@ val multByOrder: #c: curve -> result: point c ->  p: point c -> tempBuffer: lbuf
 
 #push-options "--z3rlimit 100"
 
-let multByOrder result p tempBuffer =
-  recall_contents order_buffer (prime_order_seq #P256);
+let multByOrder #c result p tempBuffer =
+  admit();
+  recall_contents order_buffer (prime_order_seq #c);
   assert (disjoint p order_buffer);
   assert (disjoint result order_buffer);
   assert (disjoint tempBuffer order_buffer);
@@ -289,7 +309,6 @@ let multByOrder result p tempBuffer =
 #pop-options
 
 
-inline_for_extraction noextract
 val multByOrder2: #c: curve -> result: point c ->  p: point c -> tempBuffer: lbuffer uint64 (size 100) -> Stack unit 
   (requires fun h -> 
     live h result /\ live h p /\ live h tempBuffer /\

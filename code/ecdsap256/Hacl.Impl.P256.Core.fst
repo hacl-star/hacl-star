@@ -56,7 +56,8 @@ let conditional_swap i p q =
 
 let toDomain #c value result = 
   push_frame();
-    let multBuffer = create (size 2 *! getCoordinateLenU64 c) (u64 0) in 
+    let len = getCoordinateLenU64 c in 
+    let multBuffer = create (size 2 *! len) (u64 0) in 
     shiftLeftWord value multBuffer;
     solinas_reduction_impl multBuffer result;
   pop_frame()  

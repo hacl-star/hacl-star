@@ -10,7 +10,6 @@ open Lib.Buffer
 open Hacl.Lemmas.P256
 open Hacl.Spec.P256.Definition
 
-open Hacl.Impl.P256.LowLevel 
 open Hacl.Impl.P256.LowLevel.PrimeSpecific
 open Hacl.Impl.P256.MontgomeryMultiplication
 open Spec.P256

@@ -41,7 +41,8 @@ let eq1_u64 a =
 
 val isZero_uint64_CT: #c: curve ->  f: felem c -> Stack uint64
   (requires fun h -> live h f)
-  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ (if as_nat c h0 f = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0))
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ 
+    (if as_nat c h0 f = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0))
  
 let isZero_uint64_CT #c f = 
   match c with 
@@ -63,7 +64,7 @@ let isZero_uint64_CT #c f =
     let r = logand r01 r23 in 
       logand_lemma r01 r23;
     r
-  |P384 -> admit();
+  |P384 -> 
     let a0 = index f (size 0) in 
     let a1 = index f (size 1) in 
     let a2 = index f (size 2) in 
@@ -151,6 +152,7 @@ let compare_felem #c a b =
       let r45 = logand r_4 r_5 in 
 
       let r = logand(logand r01 r23) r45 in 
+      lemma_equality (a_0, a_1, a_2, a_3, a_4, a_5) (b_0, b_1, b_2, b_3, b_4, b_5);
       r
     
 (*
@@ -200,8 +202,7 @@ val copy_conditional: #c: curve -> out: felem c -> x: felem c
   -> mask: uint64 {uint_v mask = 0 \/ uint_v mask = pow2 64 - 1} -> Stack unit 
   (requires fun h -> live h out /\ live h x)
   (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\ 
-    (if uint_v mask = 0 then as_seq h1 out == as_seq h0 out else as_seq h1 out == as_seq h0 x)
-  ) 
+    (if uint_v mask = 0 then as_seq h1 out == as_seq h0 out else as_seq h1 out == as_seq h0 x)) 
 
 let copy_conditional #c out x mask = 
   match c with 
@@ -235,7 +236,48 @@ let copy_conditional #c out x mask =
 
     lemma_eq_funct_ (as_seq h1 out) (as_seq h0 out);
     lemma_eq_funct_ (as_seq h1 out) (as_seq h0 x)
-  |P384 -> ()
+  |P384 -> 
+    let h0 = ST.get() in 
+    
+    let out_0 = index out (size 0) in 
+    let out_1 = index out (size 1) in 
+    let out_2 = index out (size 2) in 
+    let out_3 = index out (size 3) in 
+    let out_4 = index out (size 4) in 
+    let out_5 = index out (size 5) in 
+
+    let x_0 = index x (size 0) in 
+    let x_1 = index x (size 1) in 
+    let x_2 = index x (size 2) in 
+    let x_3 = index x (size 3) in 
+    let x_4 = index x (size 4) in 
+    let x_5 = index x (size 5) in 
+
+    let r_0 = logxor out_0 (logand mask (logxor out_0 x_0)) in 
+    let r_1 = logxor out_1 (logand mask (logxor out_1 x_1)) in 
+    let r_2 = logxor out_2 (logand mask (logxor out_2 x_2)) in 
+    let r_3 = logxor out_3 (logand mask (logxor out_3 x_3)) in
+    let r_4 = logxor out_4 (logand mask (logxor out_4 x_4)) in 
+    let r_5 = logxor out_5 (logand mask (logxor out_5 x_5)) in 
+  
+    lemma_xor_copy_cond out_0 x_0 mask;
+    lemma_xor_copy_cond out_1 x_1 mask;
+    lemma_xor_copy_cond out_2 x_2 mask;
+    lemma_xor_copy_cond out_3 x_3 mask;
+    lemma_xor_copy_cond out_4 x_4 mask;
+    lemma_xor_copy_cond out_5 x_5 mask;
+
+    upd out (size 0) r_0;
+    upd out (size 1) r_1;
+    upd out (size 2) r_2;
+    upd out (size 3) r_3;
+    upd out (size 4) r_4;
+    upd out (size 5) r_5;
+      let h1 = ST.get() in 
+
+    lemma_eq_funct_ (as_seq h1 out) (as_seq h0 out);
+    lemma_eq_funct_ (as_seq h1 out) (as_seq h0 x)
+
 
 
 val add4: x: felem P256 -> y: felem P256 -> result: felem P256 -> 
@@ -373,7 +415,7 @@ let add4_variables x cin y0 y1 y2 y3 result =
 val sub4_il: x: felem P256 -> y: glbuffer uint64 (size 4) -> result: felem P256 -> 
   Stack uint64
     (requires fun h -> live h x /\ live h y /\ live h result /\ disjoint x result /\ disjoint result y)
-    (ensures fun h0 c h1 -> modifies1 result h0 h1 /\ v c <= 1 /\
+    (ensures fun h0 c h1 -> modifies (loc result) h0 h1 /\ v c <= 1 /\
       (
   as_nat P256 h1 result - v c * pow2 256 == as_nat P256 h0 x  - as_nat_il P256 h0 y /\
   (if uint_v c = 0 then as_nat P256 h0 x >= as_nat_il P256 h0 y else as_nat P256 h0 x < as_nat_il P256 h0 y)

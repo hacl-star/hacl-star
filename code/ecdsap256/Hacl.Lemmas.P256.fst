@@ -53,14 +53,94 @@ let lemma_equ_felem a b c d  a1 b1 c1 d1  =
   assert(c == c1);
   assert(d == d1)
 
-val lemma_equality: #c: curve -> a: felem_coordinate c -> b: felem_coordinate c -> Lemma (True
-  (*let (a_0, a_1, a_2, a_3) = a in 
-  let (b_0, b_1, b_2, b_3) = b in 
-  if  (uint_v a_0 = uint_v b_0 && uint_v a_1 = uint_v b_1 && uint_v a_2 = uint_v b_2 && uint_v a_3 = uint_v b_3) 
-  then as_nat_coordinate c a == as_nat_coordinate c b else as_nat_coordinate c a <> as_nat_coordinate c b *) )
+val lemma_equality_: 
+  a0: nat {a0 < pow2 64} -> b0: nat {b0 < pow2 64} -> 
+  a1: nat {a1 < pow2 64} -> b1: nat {b1 < pow2 64} ->
+  a2: nat {a2 < pow2 64} -> b2: nat {b2 < pow2 64} ->
+  a3: nat {a3 < pow2 64} -> b3: nat {b3 < pow2 64} ->
+  a4: nat {a4 < pow2 64} -> b4: nat {b4 < pow2 64} ->
+  a5: nat {a5 < pow2 64} -> b5: nat {b5 < pow2 64} ->
+  Lemma
+    (a0 = b0 && a1 = b1  && a2 = b2 && a3 = b3 && a4 = b4 && a5 = b5  <==> 
+	a0 + 
+	a1 * pow2 64 +
+	a2 * pow2 64 * pow2 64  + 
+	a3 * pow2 64 * pow2 64 * pow2 64 + 
+	a4 * pow2 64 * pow2 64 * pow2 64 * pow2 64 + 
+	a5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64  = 
+	
+	b0 + 
+	b1 * pow2 64  + 
+	b2 * pow2 64 * pow2 64  +
+	b3 * pow2 64 * pow2 64 * pow2 64  + 
+	b4 * pow2 64 * pow2 64 * pow2 64 * pow2 64  + 
+	b5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64) 
 
-let lemma_equality a b = ()
 
+let lemma_equality_ a0 b0 a1 b1 a2 b2 a3 b3 a4 b4 a5 b5 = 
+  assert
+    (a0 = b0 && a1 = b1  && a2 = b2 && a3 = b3 && a4 = b4 && a5 = b5 ==> 
+	a0 + 
+	a1 * pow2 64 +
+	a2 * pow2 64 * pow2 64  + 
+	a3 * pow2 64 * pow2 64 * pow2 64 + 
+	a4 * pow2 64 * pow2 64 * pow2 64 * pow2 64  + 
+	a5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64  = 
+	
+	b0 + 
+	b1 * pow2 64  + 
+	b2 * pow2 64 * pow2 64  +
+	b3 * pow2 64 * pow2 64 * pow2 64  + 
+	b4 * pow2 64 * pow2 64 * pow2 64 * pow2 64  + 
+	b5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 );  
+
+    assert
+    (
+      	a0 + 
+	a1 * pow2 64 +
+	a2 * pow2 64 * pow2 64  + 
+	a3 * pow2 64 * pow2 64 * pow2 64 + 
+	a4 * pow2 64 * pow2 64 * pow2 64 * pow2 64  + 
+	a5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 = 
+	
+	b0 + 
+	b1 * pow2 64  + 
+	b2 * pow2 64 * pow2 64  +
+	b3 * pow2 64 * pow2 64 * pow2 64  + 
+	b4 * pow2 64 * pow2 64 * pow2 64 * pow2 64  + 
+	b5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 ==>
+   
+	a0 = b0 && a1 = b1  && a2 = b2 && a3 = b3 && a4 = b4 && a5 = b5)
+
+
+
+val lemma_equality: #c: curve ->  a: felem_coordinate c -> b: felem_coordinate c -> 
+  Lemma (
+    match c with 
+    |P256 -> 
+      let (a_0, a_1, a_2, a_3) : felem_coordinate P256 = a in 
+      let (b_0, b_1, b_2, b_3) : felem_coordinate P256 = b in 
+      if (uint_v a_0 = uint_v b_0 && uint_v a_1 = uint_v b_1 && uint_v a_2 = uint_v b_2 && uint_v a_3 = uint_v b_3) 
+      then as_nat_coordinate #P256 a == as_nat_coordinate #P256 b 
+      else 
+	as_nat_coordinate #P256 a <> as_nat_coordinate #P256 b
+    |P384 -> 
+      let (a_0, a_1, a_2, a_3, a_4, a_5) : felem_coordinate P384 = a in 
+      let (b_0, b_1, b_2, b_3, b_4, b_5) : felem_coordinate P384 = b in 
+      if (uint_v a_0 = uint_v b_0 && uint_v a_1 = uint_v b_1 && uint_v a_2 = uint_v b_2 && uint_v a_3 = uint_v b_3 && uint_v a_4 = uint_v b_4 && uint_v a_5 = uint_v b_5 ) 
+	then as_nat_coordinate #P384 a == as_nat_coordinate #P384 b 
+      else 
+	as_nat_coordinate #P384 a <> as_nat_coordinate #P384 b
+  )
+
+let lemma_equality #c a b = 
+  match c with 
+    |P256 -> ()
+    |P384 -> 
+      let (a_0, a_1, a_2, a_3, a_4, a_5) : felem_coordinate P384 = a in 
+      let (b_0, b_1, b_2, b_3, b_4, b_5) : felem_coordinate P384 = b in 
+      lemma_equality_ (v a_0) (v b_0) (v a_1) (v b_1) (v a_2) (v b_2) (v a_3) (v b_3) (v a_4) (v b_4) (v a_5) (v b_5)
+      
 
 val lemma_eq_funct: #c: curve -> a: felem_seq c -> b: felem_seq c -> Lemma
    (requires (felem_seq_as_nat c a == felem_seq_as_nat c b))
