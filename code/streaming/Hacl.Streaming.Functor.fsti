@@ -84,9 +84,14 @@ let loc_includes_union_l_footprint_s
 
 val invariant_s (#index: Type0) (c: block index) (i: index) (h: HS.mem) (s: state_s' c i): Type0
 
+val freeable (#index : Type0) (c: block index) (i: index) (h: HS.mem) (s: state' c i) : Type0
+
+let preserves_freeable (#index : Type0) (c: block index) (i: index) (s: state' c i) (h0 h1 : HS.mem): Type0 =
+  freeable c i h0 s ==> freeable c i h1 s
+
 let invariant #index (c: block index) (i: index) (m: HS.mem) (s: state' c i) =
   invariant_s c i m (B.get m s 0) /\
-  B.freeable s /\
+//  B.freeable s /\
   B.live m s /\
   B.(loc_disjoint (loc_addr_of_buffer s) (footprint_s c i m (B.deref m s)))
 
@@ -192,7 +197,8 @@ val frame_invariant: #index:Type0 -> c:block index -> i:index -> l:B.loc -> s:st
     B.modifies l h0 h1))
   (ensures (
     invariant c i h1 s /\
-    footprint c i h0 s == footprint c i h1 s))
+    footprint c i h0 s == footprint c i h1 s /\
+    preserves_freeable c i s h0 h1))
   [ SMTPat (invariant c i h1 s); SMTPat (B.modifies l h0 h1) ]
 
 val frame_seen: #index:Type0 -> c:block index -> i:index -> l:B.loc -> s:state' c i -> h0:HS.mem -> h1:HS.mem -> Lemma
@@ -235,11 +241,31 @@ val create_in:
     HyperStack.ST.is_eternal_region r))
   (ensures (fun h0 s h1 ->
     invariant c i h1 s /\
+    freeable c i h1 s /\
     seen c i h1 s == S.empty /\
     key c i h1 s == c.key.v i h0 k /\
     B.(modifies loc_none h0 h1) /\
     B.fresh_loc (footprint c i h1 s) h0 h1 /\
     B.(loc_includes (loc_region_only true r) (footprint c i h1 s))))
+
+inline_for_extraction noextract
+val alloca:
+  #index: Type0 ->
+  c:block index ->
+  i:index ->
+  t:Type0 { t == c.state.s i } ->
+  t':Type0 { t' == optional_key i c.km c.key } ->
+  k:c.key.s i ->
+  StackInline (state c i t t')
+  (requires (fun h0 ->
+    c.key.invariant #i h0 k))
+  (ensures (fun h0 s h1 ->
+    invariant c i h1 s /\
+    seen c i h1 s == S.empty /\
+    key c i h1 s == c.key.v i h0 k /\
+    B.(modifies loc_none h0 h1) /\
+    B.fresh_loc (footprint c i h1 s) h0 h1 /\
+    B.(loc_includes (loc_region_only true (HS.get_tip h1)) (footprint c i h1 s))))
 
 /// Note: this is more like a "reinit" function so that clients can reuse the state.
 inline_for_extraction noextract
@@ -364,6 +390,7 @@ val free:
   s:state c i t t' ->
   ST unit
   (requires fun h0 ->
-    invariant c i h0 s)
+    invariant c i h0 s /\
+    freeable c i h0 s)
   (ensures fun h0 _ h1 ->
     B.modifies (footprint c i h0 s) h0 h1))
