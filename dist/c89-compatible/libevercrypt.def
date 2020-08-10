@@ -102,7 +102,6 @@ EXPORTS
   EverCrypt_AutoConfig2_disable_hacl
   EverCrypt_AutoConfig2_disable_openssl
   EverCrypt_AutoConfig2_disable_bcrypt
-  EverCrypt_Hash_is_blake
   EverCrypt_Hash_string_of_alg
   EverCrypt_Hash_uu___is_MD5_s
   EverCrypt_Hash___proj__MD5_s__item__p
@@ -370,11 +369,26 @@ EXPORTS
   Hacl_HPKE_Curve64_CP32_SHA512_setupBaseR
   Hacl_HPKE_Curve64_CP32_SHA512_sealBase
   Hacl_HPKE_Curve64_CP32_SHA512_openBase
-  Hacl_Streaming_SHA2_256_create_in
-  Hacl_Streaming_SHA2_256_init
-  Hacl_Streaming_SHA2_256_update
-  Hacl_Streaming_SHA2_256_finish
-  Hacl_Streaming_SHA2_256_free
+  Hacl_Streaming_SHA2_create_in_224
+  Hacl_Streaming_SHA2_init_224
+  Hacl_Streaming_SHA2_update_224
+  Hacl_Streaming_SHA2_finish_224
+  Hacl_Streaming_SHA2_free_224
+  Hacl_Streaming_SHA2_create_in_256
+  Hacl_Streaming_SHA2_init_256
+  Hacl_Streaming_SHA2_update_256
+  Hacl_Streaming_SHA2_finish_256
+  Hacl_Streaming_SHA2_free_256
+  Hacl_Streaming_SHA2_create_in_384
+  Hacl_Streaming_SHA2_init_384
+  Hacl_Streaming_SHA2_update_384
+  Hacl_Streaming_SHA2_finish_384
+  Hacl_Streaming_SHA2_free_384
+  Hacl_Streaming_SHA2_create_in_512
+  Hacl_Streaming_SHA2_init_512
+  Hacl_Streaming_SHA2_update_512
+  Hacl_Streaming_SHA2_finish_512
+  Hacl_Streaming_SHA2_free_512
   Hacl_HPKE_Curve51_CP256_SHA256_setupBaseI
   Hacl_HPKE_Curve51_CP256_SHA256_setupBaseR
   Hacl_HPKE_Curve51_CP256_SHA256_sealBase

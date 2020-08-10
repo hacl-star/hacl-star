@@ -839,9 +839,7 @@ EverCrypt_HMAC_compute(
 
 typedef Spec_Hash_Definitions_hash_alg EverCrypt_Hash_alg;
 
-extern bool EverCrypt_Hash_is_blake(Spec_Hash_Definitions_hash_alg a);
-
-extern C_String_t EverCrypt_Hash_string_of_alg(Spec_Hash_Definitions_hash_alg uu___0_13);
+extern C_String_t EverCrypt_Hash_string_of_alg(Spec_Hash_Definitions_hash_alg uu___0_5);
 
 typedef Spec_Hash_Definitions_hash_alg EverCrypt_Hash_broken_alg;
 
@@ -879,97 +877,97 @@ EverCrypt_Hash_state_s;
 
 extern bool
 EverCrypt_Hash_uu___is_MD5_s(
-  Spec_Hash_Definitions_hash_alg uu____177,
+  Spec_Hash_Definitions_hash_alg uu____169,
   EverCrypt_Hash_state_s projectee
 );
 
 extern uint32_t
 *EverCrypt_Hash___proj__MD5_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____202,
+  Spec_Hash_Definitions_hash_alg uu____194,
   EverCrypt_Hash_state_s projectee
 );
 
 extern bool
 EverCrypt_Hash_uu___is_SHA1_s(
-  Spec_Hash_Definitions_hash_alg uu____223,
+  Spec_Hash_Definitions_hash_alg uu____215,
   EverCrypt_Hash_state_s projectee
 );
 
 extern uint32_t
 *EverCrypt_Hash___proj__SHA1_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____248,
+  Spec_Hash_Definitions_hash_alg uu____240,
   EverCrypt_Hash_state_s projectee
 );
 
 extern bool
 EverCrypt_Hash_uu___is_SHA2_224_s(
-  Spec_Hash_Definitions_hash_alg uu____269,
+  Spec_Hash_Definitions_hash_alg uu____261,
   EverCrypt_Hash_state_s projectee
 );
 
 extern uint32_t
 *EverCrypt_Hash___proj__SHA2_224_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____294,
+  Spec_Hash_Definitions_hash_alg uu____286,
   EverCrypt_Hash_state_s projectee
 );
 
 extern bool
 EverCrypt_Hash_uu___is_SHA2_256_s(
-  Spec_Hash_Definitions_hash_alg uu____315,
+  Spec_Hash_Definitions_hash_alg uu____307,
   EverCrypt_Hash_state_s projectee
 );
 
 extern uint32_t
 *EverCrypt_Hash___proj__SHA2_256_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____340,
+  Spec_Hash_Definitions_hash_alg uu____332,
   EverCrypt_Hash_state_s projectee
 );
 
 extern bool
 EverCrypt_Hash_uu___is_SHA2_384_s(
-  Spec_Hash_Definitions_hash_alg uu____361,
+  Spec_Hash_Definitions_hash_alg uu____353,
   EverCrypt_Hash_state_s projectee
 );
 
 extern uint64_t
 *EverCrypt_Hash___proj__SHA2_384_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____386,
+  Spec_Hash_Definitions_hash_alg uu____378,
   EverCrypt_Hash_state_s projectee
 );
 
 extern bool
 EverCrypt_Hash_uu___is_SHA2_512_s(
-  Spec_Hash_Definitions_hash_alg uu____407,
+  Spec_Hash_Definitions_hash_alg uu____399,
   EverCrypt_Hash_state_s projectee
 );
 
 extern uint64_t
 *EverCrypt_Hash___proj__SHA2_512_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____432,
+  Spec_Hash_Definitions_hash_alg uu____424,
   EverCrypt_Hash_state_s projectee
 );
 
 extern bool
 EverCrypt_Hash_uu___is_Blake2S_s(
-  Spec_Hash_Definitions_hash_alg uu____453,
+  Spec_Hash_Definitions_hash_alg uu____445,
   EverCrypt_Hash_state_s projectee
 );
 
 extern uint32_t
 *EverCrypt_Hash___proj__Blake2S_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____478,
+  Spec_Hash_Definitions_hash_alg uu____470,
   EverCrypt_Hash_state_s projectee
 );
 
 extern bool
 EverCrypt_Hash_uu___is_Blake2B_s(
-  Spec_Hash_Definitions_hash_alg uu____499,
+  Spec_Hash_Definitions_hash_alg uu____491,
   EverCrypt_Hash_state_s projectee
 );
 
 extern uint64_t
 *EverCrypt_Hash___proj__Blake2B_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____524,
+  Spec_Hash_Definitions_hash_alg uu____516,
   EverCrypt_Hash_state_s projectee
 );
 

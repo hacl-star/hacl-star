@@ -7,9 +7,6 @@ module Bindings(F:Cstubs.FOREIGN) =
     type everCrypt_Hash_alg = spec_Hash_Definitions_hash_alg
     let everCrypt_Hash_alg =
       typedef spec_Hash_Definitions_hash_alg "EverCrypt_Hash_alg"
-    let everCrypt_Hash_is_blake =
-      foreign "EverCrypt_Hash_is_blake"
-        (spec_Hash_Definitions_hash_alg @-> (returning bool))
     let constant everCrypt_Hash_string_of_alg =
       foreign "EverCrypt_Hash_string_of_alg"
         (spec_Hash_Definitions_hash_alg @-> (returning string))
