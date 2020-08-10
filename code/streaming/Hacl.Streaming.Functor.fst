@@ -714,7 +714,7 @@ let update_small #index c i t t' p data len =
 /// there is no buffered data. Of course, the data we append has to be non-empty,
 /// otherwise we might end-up with an empty internal buffer.
 
-#push-options "--z3rlimit 100"
+#push-options "--z3rlimit 200"
 inline_for_extraction noextract
 val update_empty_or_full_buf:
   #index:Type0 ->
