@@ -113,7 +113,7 @@ let optional_hide #index
 /// This lemma is used to convert the Hacl.Streaming.Interface.stateful.frame_freeable
 /// lemma, written with freeable in its precondition, into a lemma of the form:
 /// [> freeable h0 s => freeable h1 s
-val stateful_frame_freeable:
+val stateful_frame_preserves_freeable:
   #index:Type0 -> #sc:stateful index -> #i:index -> l:B.loc -> s:sc.s i -> h0:HS.mem -> h1:HS.mem ->
   Lemma
   (requires (
@@ -123,8 +123,8 @@ val stateful_frame_freeable:
   (ensures (
     sc.freeable h0 s ==> sc.freeable h1 s))
 
-let stateful_frame_freeable #index #sc #i l s h0 h1 =
-  let frame_freeable_ h0 h1 :
+let stateful_frame_preserves_freeable #index #sc #i l s h0 h1 =
+  let lem h0 h1 :
     Lemma
     (requires (
       sc.invariant h0 s /\
@@ -149,7 +149,6 @@ let optional_frame #index
   Lemma
     (requires (
       optional_invariant h0 s /\
-//      optional_freeable h0 s /\
       B.loc_disjoint l (optional_footprint h0 s) /\
       B.modifies l h0 h1))
     (ensures (
@@ -163,8 +162,7 @@ let optional_frame #index
   | Erased -> ()
   | Runtime ->
       key.frame_invariant #i l s h0 h1;
-      stateful_frame_freeable #index #key #i l s h0 h1      
-//      key.frame_freeable #i l s h0 h1
+      stateful_frame_preserves_freeable #index #key #i l s h0 h1      
 
 let footprint_s #index (c: block index) (i: index) (h: HS.mem) s =
   let State block_state buf_ _ _ p_key = s in
@@ -185,7 +183,6 @@ let invariant_s #index (c: block index) (i: index) h s =
   B.(loc_disjoint (loc_buffer buf_) (c.state.footprint h block_state)) /\
   B.(loc_disjoint (loc_buffer buf_) (optional_footprint h key)) /\
   B.(loc_disjoint (optional_footprint h key) (c.state.footprint h block_state)) /\
-  //B.freeable buf_ /\ c.state.freeable h block_state /\ optional_freeable h key /\
 
   // Formerly, the "hashes" predicate
   S.length blocks + S.length rest = U64.v total_len /\
@@ -221,48 +218,16 @@ let seen_bounded #index c i h s =
 let key #index c i h s =
   optional_reveal h (State?.p_key (B.deref h s))
 
-(*/// This lemma is used in the proof of frame_invariant below.
-/// We have to trick a bit in order to use the Hacl.Streaming.Interface.stateful.frame_freeable,
-/// which is written in terms of pre and post, to prove preserves_freeable, which is
-/// written with an implication.
-val frame_freeable: #index:Type0 -> c:block index -> i:index -> l:B.loc -> s:state' c i -> h0:HS.mem -> h1:HS.mem -> Lemma
-  (requires (
-    invariant c i h0 s /\
-    B.loc_disjoint l (footprint c i h0 s) /\
-    B.modifies l h0 h1))
-  (ensures (
-    freeable c i h0 s ==> freeable c i h1 s))
-
-let frame_freeable #index c i l s h0 h1 =
-  let state_t = B.deref h0 s in
-  let State block_state _ _ _ p_key = state_t in
-  let frame_freeable_ h0 h1 :
-    Lemma
-    (requires (
-      invariant c i h0 s /\
-      B.loc_disjoint l (footprint c i h0 s) /\
-      B.modifies l h0 h1))
-    (ensures (
-      freeable c i h0 s ==> freeable c i h1 s))
-    [SMTPat (freeable c i h0 s);
-     SMTPat (freeable c i h1 s)] =
-     admit()
-  in
-  () *)
-
 let frame_invariant #index c i l s h0 h1 =
   let state_t = B.deref h0 s in
   let State block_state _ _ _ p_key = state_t in
   c.state.frame_invariant #i l block_state h0 h1;
-//  frame_freeable #index c i l s h0 h1;
-  stateful_frame_freeable #index #c.state #i l block_state h0 h1;
-//  c.state.frame_freeable #i l block_state h0 h1;
+  stateful_frame_preserves_freeable #index #c.state #i l block_state h0 h1;
   allow_inversion key_management;
   match c.km with
   | Erased -> ()
   | Runtime ->
-//      c.key.frame_freeable #i l p_key h0 h1;
-      stateful_frame_freeable #index #c.key #i l p_key h0 h1;
+      stateful_frame_preserves_freeable #index #c.key #i l p_key h0 h1;
       c.key.frame_invariant #i l p_key h0 h1
 
 let frame_seen #_ _ _ _ _ _ _ =
@@ -477,9 +442,7 @@ let alloca #index c i t t' k =
 
 let init #index c i t t' k s =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
-//  [@inline_let] let _ = c.state.frame_freeable #i in
   [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
-//  [@inline_let] let _ = c.key.frame_freeable #i in
   allow_inversion key_management;
 
   let open LowStar.BufferOps in
@@ -506,8 +469,7 @@ let init #index c i t t' k s =
         (**) assert (c.key.invariant #i h4 k');
         (**) c.key.frame_invariant (c.key.footprint #i h2 k') k h2 h4;
         (**) c.state.frame_invariant (c.key.footprint #i h2 k') block_state h2 h4;
-//        (**) c.state.frame_freeable (c.key.footprint #i h2 k') block_state h2 h4;
-        (**) stateful_frame_freeable (c.key.footprint #i h2 k') block_state h2 h4;
+        (**) stateful_frame_preserves_freeable (c.key.footprint #i h2 k') block_state h2 h4;
         k'
     | Erased ->
         G.hide (c.key.v i h1 k)
@@ -527,7 +489,6 @@ let init #index c i t t' k s =
   // AR: 07/22: same old `Seq.equal` and `==` story
   assert (Seq.equal (seen c i h3 s) Seq.empty);
 
-  //assert (hashed h3 s == S.empty);
   assert (footprint c i h1 s == footprint c i h3 s);
   assert (B.(modifies (footprint c i h1 s) h1 h3));
   assert (
@@ -695,9 +656,7 @@ val update_small:
 #push-options "--z3rlimit 500 --z3cliopt smt.arith.nl=false"
 let update_small #index c i t t' p data len =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
-//  [@inline_let] let _ = c.state.frame_freeable #i in
   [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
-//  [@inline_let] let _ = c.key.frame_freeable #i in
 
   let open LowStar.BufferOps in
   let h00 = ST.get () in
@@ -781,9 +740,7 @@ let seen_pred = seen
 
 let update_empty_or_full_buf #index c i t t' p data len =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
-//  [@inline_let] let _ = c.state.frame_freeable #i in
   [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
-//  [@inline_let] let _ = c.key.frame_freeable #i in
   [@inline_let] let _ = c.update_multi_associative i in
 
   let open LowStar.BufferOps in
@@ -938,8 +895,6 @@ val update_round:
 let update_round #index c i t t' p data len =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
-//  [@inline_let] let _ = c.key.frame_freeable #i in
-//  [@inline_let] let _ = c.key.frame_freeable #i in
   [@inline_let] let _ = c.update_multi_associative i in
 
   let open LowStar.BufferOps in
@@ -991,9 +946,7 @@ let update #index c i t t' p data len =
 #push-options "--z3rlimit 200"
 let mk_finish #index c i t t' p dst =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
-//  [@inline_let] let _ = c.state.frame_freeable #i in
   [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
-//  [@inline_let] let _ = c.key.frame_freeable #i in
   [@inline_let] let _ = c.update_multi_associative i in
   [@inline_let] let _ = allow_inversion key_management in
 
@@ -1004,8 +957,7 @@ let mk_finish #index c i t t' p dst =
   push_frame ();
   let h1 = ST.get () in
   c.state.frame_invariant #i B.loc_none block_state h0 h1;
-//  c.state.frame_freeable #i B.loc_none block_state h0 h1;
-  stateful_frame_freeable #index #c.state #i B.loc_none block_state h0 h1;
+  stateful_frame_preserves_freeable #index #c.state #i B.loc_none block_state h0 h1;
   optional_frame #_ #i #c.km #c.key B.loc_none k' h0 h1;
   
   let r = rest c i total_len in
@@ -1020,16 +972,14 @@ let mk_finish #index c i t t' p dst =
   assert (B.(loc_disjoint (c.state.footprint #i h2 tmp_block_state) (c.state.footprint #i h1 block_state)));
   B.modifies_only_not_unused_in B.loc_none h1 h2;
   c.state.frame_invariant #i B.loc_none block_state h1 h2;
-//  c.state.frame_freeable #i B.loc_none block_state h1 h2;
-  stateful_frame_freeable #index #c.state #i B.loc_none block_state h1 h2;
+  stateful_frame_preserves_freeable #index #c.state #i B.loc_none block_state h1 h2;
   optional_frame #_ #i #c.km #c.key B.loc_none k' h1 h2;
 
   c.state.copy (G.hide i) block_state tmp_block_state;
 
   let h3 = ST.get () in
   c.state.frame_invariant #i (c.state.footprint h2 tmp_block_state) block_state h2 h3;
-//  c.state.frame_freeable #i (c.state.footprint h2 tmp_block_state) block_state h2 h3;
-  stateful_frame_freeable #index #c.state #i (c.state.footprint h2 tmp_block_state) block_state h2 h3;
+  stateful_frame_preserves_freeable #index #c.state #i (c.state.footprint h2 tmp_block_state) block_state h2 h3;
   optional_frame #_ #i #c.km #c.key (c.state.footprint h2 tmp_block_state) k' h2 h3;
 
   let prev_len = U64.(total_len `sub` FStar.Int.Cast.uint32_to_uint64 r) in
@@ -1037,8 +987,7 @@ let mk_finish #index c i t t' p dst =
 
   let h4 = ST.get () in
   c.state.frame_invariant #i (c.state.footprint h3 tmp_block_state) block_state h3 h4;
-//  c.state.frame_freeable #i (c.state.footprint h3 tmp_block_state) block_state h3 h4;
-  stateful_frame_freeable #index #c.state #i (c.state.footprint h3 tmp_block_state) block_state h3 h4;
+  stateful_frame_preserves_freeable #index #c.state #i (c.state.footprint h3 tmp_block_state) block_state h3 h4;
   optional_frame #_ #i #c.km #c.key (c.state.footprint h3 tmp_block_state) k' h3 h4;
 
   c.finish (G.hide i) k' tmp_block_state dst;
@@ -1078,15 +1027,13 @@ let mk_finish #index c i t t' p dst =
   end;
 
   c.state.frame_invariant #i (B.loc_buffer dst) block_state h4 h5;
-//  c.state.frame_freeable #i (B.loc_buffer dst) block_state h4 h5;
-  stateful_frame_freeable #index #c.state #i (B.loc_buffer dst) block_state h4 h5;
+  stateful_frame_preserves_freeable #index #c.state #i (B.loc_buffer dst) block_state h4 h5;
   optional_frame #_ #i #c.km #c.key (B.loc_buffer dst) k' h4 h5;
 
   pop_frame ();
   let h6 = ST.get () in
   c.state.frame_invariant #i B.(loc_region_only false (HS.get_tip h5)) block_state h5 h6;
-//  c.state.frame_freeable #i B.(loc_region_only false (HS.get_tip h5)) block_state h5 h6;
-  stateful_frame_freeable #index #c.state #i B.(loc_region_only false (HS.get_tip h5)) block_state h5 h6;
+  stateful_frame_preserves_freeable #index #c.state #i B.(loc_region_only false (HS.get_tip h5)) block_state h5 h6;
   optional_frame #_ #i #c.km #c.key B.(loc_region_only false (HS.get_tip h5)) k' h5 h6;
   assert (seen_h c i h6 p `S.equal` (G.reveal seen));
 
