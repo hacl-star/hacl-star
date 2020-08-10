@@ -1015,6 +1015,7 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt \
 	  -ccopt -Wno-unused \
 	  -warn-error @2@4-6@15@18@21+22 \
 	  -fparentheses \
+	  -fextern-c \
 	  $(notdir $(HACL_OLD_FILES)) \
 	  $(notdir $(HAND_WRITTEN_FILES)) \
 	  -o libevercrypt.a
@@ -1036,6 +1037,7 @@ dist/evercrypt-external-headers/Makefile.basic: $(ALL_KRML_FILES)
 	  -add-include '<kremlin/internal/target.h>' \
 	  -header dist/LICENSE.txt \
 	  -skip-compilation \
+	  -fextern-c \
 	  -tmpdir $(dir $@) \
 	  $^
 
