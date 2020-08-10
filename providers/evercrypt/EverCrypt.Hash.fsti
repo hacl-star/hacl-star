@@ -23,13 +23,6 @@ open Hacl.Hash.Definitions
 unfold
 let alg = hash_alg
 
-// TODO: we use this predicate to define functions which don't support blake, so
-// as to keep the old hash API. Remove once we don't need the old API anymore.
-let is_blake (a : alg) =
-  match a with
-  | Blake2S | Blake2B -> true
-  | _ -> false
-
 /// TODO: move this one to Hacl.Hash.Definitions
 val string_of_alg: alg -> C.String.t
 
