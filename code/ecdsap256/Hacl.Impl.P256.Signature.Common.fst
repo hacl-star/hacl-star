@@ -17,10 +17,10 @@ open Spec.ECDSA
 open Hacl.Spec.ECDSA.Definition
 
 open Hacl.Impl.P256.LowLevel 
+open Hacl.Impl.P.LowLevel
 open Hacl.Impl.P256.MontgomeryMultiplication
 open Hacl.Impl.ECDSA.MontgomeryMultiplication
 
-open Hacl.Impl.P256.LowLevel.PrimeSpecific
 open Hacl.Impl.P256.Core
 
 open Hacl.Impl.P256.Math 
@@ -35,24 +35,6 @@ friend Hacl.Spec.P256.MontgomeryMultiplication
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
 #push-options "--ifuel 1"
-
-val sub_felem: #c: curve -> x: felem c -> y: glbuffer uint64 (getCoordinateLenU64 c) -> result: felem c -> 
-  Stack uint64
-    (requires fun h -> live h x /\ live h y /\ live h result /\ disjoint x result /\ disjoint y result)
-    (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ 
-      as_nat c h1 result - v r * pow2 256 == as_nat c h0 x  - as_nat_il c h0 y /\
-      (
-	if uint_v r = 0 then 
-	  as_nat c h0 x >= as_nat_il c h0 y 
-	else 
-	  as_nat c h0 x < as_nat_il c h0 y)
-      )
-
-
-let sub_felem #c x y result = 
-  match c with 
-  |P256 -> sub4_il x y result
-  |P384 -> admit()
 
 
 let bufferToJac #c p result = 

@@ -11,7 +11,7 @@ open Hacl.Lemmas.P256
 
 open Hacl.Spec.P256.Definition
 open Hacl.Spec.ECDSA.Definition
-open Hacl.Impl.P256.LowLevel 
+open Hacl.Impl.P.LowLevel 
 open Hacl.Impl.P256.Core
 open Hacl.Spec.P256.MontgomeryMultiplication
 open Hacl.Impl.ECDSA.MontgomeryMultiplication
@@ -23,7 +23,6 @@ open Spec.P256
 (* open Spec.P256.Lemmas *)
 
 open Hacl.Impl.P256.PointAdd
-open Hacl.Impl.P256.LowLevel.PrimeSpecific
 open Hacl.Impl.P256.LowLevel.RawCmp
 
 open Hacl.Hash.SHA2
@@ -74,7 +73,7 @@ let isMoreThanZeroLessThanOrderMinusOne f =
   push_frame();
   let tempBuffer = create (size 4) (u64 0) in
   recall_contents prime256order_buffer (Lib.Sequence.of_list p256_order_prime_list);
-  let carry = sub4_il f prime256order_buffer tempBuffer in
+  let carry = sub_felem #P256 f prime256order_buffer tempBuffer in
   let less = eq_u64_nCT carry (u64 1) in
   let more = isZero_uint64_nCT f in
   let result = less && not more in
@@ -193,8 +192,8 @@ let ecdsa_verification_step4 #c bufferU1 bufferU2 r s hash =
     multPowerPartial s inverseS r u2;
   
   let h1 = ST.get() in 
-    Hacl.Impl.P256.LowLevel.changeEndian #c u1;
-    Hacl.Impl.P256.LowLevel.changeEndian #c u2;
+    Hacl.Impl.P.LowLevel.changeEndian #c u1;
+    Hacl.Impl.P.LowLevel.changeEndian #c u2;
     toUint8 #c u1 bufferU1;
     toUint8 #c u2 bufferU2;
   

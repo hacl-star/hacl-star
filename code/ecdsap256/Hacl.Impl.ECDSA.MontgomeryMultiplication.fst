@@ -12,7 +12,7 @@ open FStar.Math.Lemmas
 
 open Hacl.Lemmas.P256
 open Hacl.Spec.ECDSA.Definition
-open Hacl.Impl.P256.LowLevel 
+open Hacl.Impl.P.LowLevel 
 
 open FStar.Tactics
 open FStar.Tactics.Canon 
@@ -372,7 +372,7 @@ let montgomery_multiplication_ecdsa_module #c  a b result =
     let k0 = upload_k0() in 
 
       let h0 = ST.get() in     
-    mul a b t;
+    mul #c a b t;
       assert_by_tactic (as_nat c h0 b * as_nat c h0 a == as_nat c h0 a * as_nat c h0 b) canon;
       mul_lemma_ (as_nat c h0 a) (as_nat c h0 b) prime_p256_order;
    montgomery_multiplication_round_twice #P256 t round2 k0; 

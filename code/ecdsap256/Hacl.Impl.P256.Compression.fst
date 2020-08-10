@@ -7,9 +7,9 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
+open Hacl.Impl.P.LowLevel
+
 open Hacl.Impl.P256.Core
-open Hacl.Impl.P256.LowLevel 
-open Hacl.Impl.P256.LowLevel.PrimeSpecific
 open Hacl.Impl.P256.MM.Exponent
 open Hacl.Impl.P256.MontgomeryMultiplication
 open Hacl.Impl.P256.Arithmetics
@@ -150,6 +150,7 @@ let decompressionNotCompressedForm b result =
     copy result (sub b (size 1) (size 64));
   correctIdentifier
 
+
 inline_for_extraction noextract
 val lessThanPrime: #c: curve ->  f: felem c -> Stack bool
   (requires fun h -> live h f)
@@ -159,7 +160,7 @@ let lessThanPrime f =
   push_frame();
     let tempBuffer = create (size 4) (u64 0) in 
     recall_contents prime256_buffer (Lib.Sequence.of_list p256_prime_list);
-    let carry = sub4_il f prime256_buffer tempBuffer in 
+    let carry = sub_felem f prime256_buffer tempBuffer in 
     let less = eq_u64_nCT carry (u64 1) in 
   pop_frame();
     less
@@ -228,7 +229,7 @@ let decompressionCompressedForm #c b result =
 	      else
 		as_nat c h3 t1 = (0 - sqRootWithoutSign) % prime256);
     
-	  Hacl.Impl.P256.LowLevel.changeEndian #c t1;
+	  Hacl.Impl.P.LowLevel.changeEndian #c t1;
 	  toUint8 #c t1 (sub result (size 32) (size 32)); 
 	   let h5 = ST.get() in 
 	   assert(as_seq h5 (gsub result (size 32) (size 32)) == Lib.ByteSequence.uints_to_bytes_be (changeEndian (as_seq h3 t1)));

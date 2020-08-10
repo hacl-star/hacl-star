@@ -14,8 +14,7 @@ open Hacl.Spec.P256.Definition
 open Hacl.Spec.P256.MontgomeryMultiplication
 open Spec.P256
 open Hacl.Impl.SolinasReduction
-open Hacl.Impl.P256.LowLevel 
-open Hacl.Impl.P256.LowLevel.PrimeSpecific
+open Hacl.Impl.P.LowLevel 
 open Hacl.Impl.P256.MontgomeryMultiplication
 open Hacl.Impl.P256.Math 
 
@@ -813,4 +812,6 @@ let secretToPublicWithoutNorm #c result scalar tempBuffer =
   montgomery_ladder #c q basePoint scalar buff; 
   copy_point q result;
   pop_frame()  
+
+
 

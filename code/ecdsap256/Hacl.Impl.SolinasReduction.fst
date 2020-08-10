@@ -11,8 +11,7 @@ open Lib.Buffer
 
 open Hacl.SolinasReduction.Lemmas
 open Spec.P256
-open Hacl.Impl.P256.LowLevel
-open Hacl.Impl.P256.LowLevel.PrimeSpecific
+open Hacl.Impl.P.LowLevel
 
 open Hacl.Spec.P256.Definition
 open FStar.Mul

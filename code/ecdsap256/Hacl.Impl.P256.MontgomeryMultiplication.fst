@@ -17,8 +17,8 @@ open Hacl.Lemmas.P256
 open Spec.P256
 open Spec.ECDSA.Lemmas
 
-open Hacl.Impl.P256.LowLevel 
-open Hacl.Impl.P256.LowLevel.PrimeSpecific
+open Hacl.Impl.P256.LowLevel
+open Hacl.Impl.P.LowLevel
 
 open Lib.Loops
 open Hacl.Spec.P256.MontgomeryMultiplication

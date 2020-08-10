@@ -19,7 +19,6 @@ open Lib.Loops
 open Hacl.Impl.P256.MontgomeryMultiplication
 open Hacl.Spec.P256.MontgomeryMultiplication
 
-open Hacl.Impl.P256.LowLevel.PrimeSpecific
 open Hacl.Impl.P256.Core
 
 open Hacl.Spec.P256.Definition
