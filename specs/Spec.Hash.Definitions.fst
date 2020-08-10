@@ -261,7 +261,7 @@ let size_hash = hash_length
 (** Padding *)
 
 (* Number of zeroes that should go into the padding *)
-let pad0_length (a:hash_alg{not (is_blake a)}) (len:nat): Tot (n:nat{(len + 1 + n + len_length a) % block_length a = 0}) =
+let pad0_length (a:hash_alg{is_md a}) (len:nat): Tot (n:nat{(len + 1 + n + len_length a) % block_length a = 0}) =
   (block_length a - (len + len_length a + 1)) % block_length a
 
 (* Total length for the padding, a.k.a. the suffix length. *)
@@ -272,12 +272,12 @@ let pad_length (a: hash_alg) (len: nat): Tot (n:nat { (len + n) % block_length a
 (** Endian-ness *)
 
 (* Define word based operators *)
-let bytes_of_words: a:hash_alg{not (is_blake a)} -> Tot (#len:size_nat{FStar.Mul.(len * word_length a) <= max_size_t} -> s:lseq (word a) len -> Tot (lbytes FStar.Mul.(word_length a * len))) = function
+let bytes_of_words: a:hash_alg{is_md a} -> Tot (#len:size_nat{FStar.Mul.(len * word_length a) <= max_size_t} -> s:lseq (word a) len -> Tot (lbytes FStar.Mul.(word_length a * len))) = function
   | MD5 -> Lib.ByteSequence.uints_to_bytes_le #U32 #SEC
   | SHA1 | SHA2_224 | SHA2_256 -> Lib.ByteSequence.uints_to_bytes_be #U32 #SEC
   | SHA2_384 | SHA2_512 -> Lib.ByteSequence.uints_to_bytes_be #U64 #SEC
 
-let words_of_bytes: a:hash_alg{not (is_blake a)} -> Tot (#len:size_nat{FStar.Mul.(len * word_length a) <= max_size_t} -> b:lbytes FStar.Mul.(word_length a * len) -> Tot (lseq (word a) len)) = function
+let words_of_bytes: a:hash_alg{is_md a} -> Tot (#len:size_nat{FStar.Mul.(len * word_length a) <= max_size_t} -> b:lbytes FStar.Mul.(word_length a * len) -> Tot (lseq (word a) len)) = function
   | MD5 -> Lib.ByteSequence.uints_from_bytes_le #U32 #SEC
   | SHA1 | SHA2_224 | SHA2_256 -> Lib.ByteSequence.uints_from_bytes_be #U32 #SEC
   | SHA2_384 | SHA2_512 -> Lib.ByteSequence.uints_from_bytes_be #U64 #SEC

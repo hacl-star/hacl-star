@@ -67,7 +67,7 @@ val pad_invariant_block (a: hash_alg) (blocks: nat) (rest: nat): Lemma
   [ SMTPat (pad_length a (blocks + rest)) ]
 
 (* A useful lemma for all the operations that involve going from bytes to bits. *)
-val max_input_size_len (a: hash_alg{not (is_blake a)}):
+val max_input_size_len (a: hash_alg{is_md a}):
   Lemma (FStar.Mul.((max_input_length a) * 8 + 8 = pow2 (len_length a * 8)))
 
 (* *)

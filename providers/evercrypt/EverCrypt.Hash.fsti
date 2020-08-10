@@ -273,7 +273,7 @@ val update2:
 /// The deprecated ``update`` method with no support for blake2
 [@(deprecated "Use update2 instead") ]
 val update:
-  #a:e_alg{not (is_blake a)} -> (
+  #a:e_alg{is_md a} -> (
   let a = Ghost.reveal a in
   s:state a ->
   block:B.buffer Lib.IntTypes.uint8 { B.length block = block_length a } ->
@@ -316,7 +316,7 @@ val update_multi2:
 /// The deprecated ``update_multi`` method with no support for blake2
 [@(deprecated "Use update_multi2 instead") ]
 val update_multi:
-  #a:e_alg{not (is_blake a)} -> (
+  #a:e_alg{is_md a} -> (
   let a = Ghost.reveal a in
   s:state a ->
   blocks:B.buffer Lib.IntTypes.uint8 { B.length blocks % block_length a = 0 } ->
@@ -375,7 +375,7 @@ val update_last2:
 
 [@(deprecated "Use update_last2 instead") ]
 val update_last:
-  #a:e_alg{not (is_blake a)} -> (
+  #a:e_alg{is_md a} -> (
   let a = Ghost.reveal a in
   s:state a ->
   last:B.buffer Lib.IntTypes.uint8 { B.length last < block_length a } ->

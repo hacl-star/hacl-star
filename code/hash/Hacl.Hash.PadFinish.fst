@@ -29,7 +29,7 @@ open Spec.Hash.Lemmas
 
 #set-options "--z3rlimit 50"
 inline_for_extraction
-val store_len: a:hash_alg{not (is_blake a)} -> len:len_t a -> b:B.buffer uint8 ->
+val store_len: a:hash_alg{is_md a} -> len:len_t a -> b:B.buffer uint8 ->
   ST.Stack unit
     (requires (fun h ->
       B.live h b /\
@@ -78,7 +78,7 @@ let len_mod_32 (a: hash_alg) (len: len_t a):
 // there's a high rlimit
 #push-options "--z3rlimit 200"
 inline_for_extraction
-let pad0_len (a: hash_alg{not (is_blake a)}) (len: len_t a):
+let pad0_len (a: hash_alg{is_md a}) (len: len_t a):
   Tot (n:U32.t { U32.v n = pad0_length a (len_v a len) })
 =
   let open U32 in
@@ -118,7 +118,7 @@ let pad0_len (a: hash_alg{not (is_blake a)}) (len: len_t a):
 #reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
 
 inline_for_extraction
-let pad_1 (a: hash_alg{not (is_blake a)}) (dst: B.buffer uint8):
+let pad_1 (a: hash_alg{is_md a}) (dst: B.buffer uint8):
   ST.Stack unit
     (requires (fun h ->
       B.live h dst /\ B.length dst = 1))
@@ -129,7 +129,7 @@ let pad_1 (a: hash_alg{not (is_blake a)}) (dst: B.buffer uint8):
   dst.(0ul) <- u8 0x80
 
 inline_for_extraction
-let pad_2 (a: hash_alg{not (is_blake a)}) (len: len_t a) (dst: B.buffer uint8):
+let pad_2 (a: hash_alg{is_md a}) (len: len_t a) (dst: B.buffer uint8):
   ST.Stack unit
     (requires (fun h ->
       B.live h dst /\ B.length dst = pad0_length a (len_v a len)))
@@ -156,7 +156,7 @@ let pad_2 (a: hash_alg{not (is_blake a)}) (len: len_t a) (dst: B.buffer uint8):
   C.Loops.for 0ul (pad0_len a len) inv f
 
 inline_for_extraction
-let pad_3 (a: hash_alg{not (is_blake a)}) (len: len_t a) (dst: B.buffer uint8):
+let pad_3 (a: hash_alg{is_md a}) (len: len_t a) (dst: B.buffer uint8):
   ST.Stack unit
     (requires (fun h ->
       len_v a len <= max_input_length a /\
@@ -194,7 +194,7 @@ let pad_3 (a: hash_alg{not (is_blake a)}) (len: len_t a) (dst: B.buffer uint8):
 #push-options "--max_fuel 1 --max_ifuel 1 --z3rlimit 200"
 
 noextract inline_for_extraction
-val pad_md: a:hash_alg{not (is_blake a)} -> pad_st a
+val pad_md: a:hash_alg{is_md a} -> pad_st a
 
 noextract inline_for_extraction
 let pad_md a len dst =

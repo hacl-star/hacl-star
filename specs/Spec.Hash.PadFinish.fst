@@ -14,7 +14,7 @@ open Spec.Hash.Definitions
 
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 10"
 
-let pad_md (a:hash_alg{not (is_blake a)})
+let pad_md (a:hash_alg{is_md a})
   (total_len:nat{total_len <= max_input_length a}):
   Tot (b:bytes{(S.length b + total_len) % block_length a = 0})
   = let open FStar.Mul in
@@ -45,7 +45,7 @@ let pad (a:hash_alg)
 (** Extracting the hash, which we call "finish" *)
 
 (* Unflatten the hash from the sequence of words to bytes up to the correct size *)
-let finish_md (a:hash_alg{not (is_blake a)}) (hashw:words_state a): Tot (lbytes (hash_length a)) =
+let finish_md (a:hash_alg{is_md a}) (hashw:words_state a): Tot (lbytes (hash_length a)) =
   let hashw, extra = hashw in
   let hash_final_w = S.slice hashw 0 (hash_word_length a) in
   bytes_of_words a #(hash_word_length a) hash_final_w

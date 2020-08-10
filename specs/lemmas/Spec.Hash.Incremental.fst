@@ -599,7 +599,7 @@ let blake2_is_hash_incremental
 
 #push-options "--z3rlimit 100"
 let md_is_hash_incremental
-  (a:hash_alg{not (is_blake a)})
+  (a:hash_alg{is_md a})
   (input: bytes { S.length input <= max_input_length a })
   (s:words_state a)
   : Lemma (

@@ -149,7 +149,7 @@ let pad_invariant_block (a: hash_alg) (blocks: nat) (rest: nat): Lemma
 #pop-options
 
 (* A useful lemma for all the operations that involve going from bytes to bits. *)
-let max_input_size_len (a: hash_alg{not (is_blake a)}):
+let max_input_size_len (a: hash_alg{is_md a}):
   Lemma (FStar.Mul.((max_input_length a) * 8 + 8 = pow2 (len_length a * 8)))
 =
   let open FStar.Mul in
