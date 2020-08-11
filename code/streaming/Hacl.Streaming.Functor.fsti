@@ -304,7 +304,8 @@ let init_st
     seen c i h1 s == S.empty /\
     key c i h1 s == c.key.v i h0 k /\
     footprint c i h0 s == footprint c i h1 s /\
-    B.(modifies (footprint c i h0 s) h0 h1)))
+    B.(modifies (footprint c i h0 s) h0 h1) /\
+    preserves_freeable c i s h0 h1))
 
 inline_for_extraction noextract
 val init:
@@ -346,7 +347,8 @@ let update_post
   B.(modifies (footprint c i h0 s) h0 h1) /\
   footprint c i h0 s == footprint c i h1 s /\
   seen c i h1 s == seen c i h0 s `S.append` B.as_seq h0 data /\
-  key c i h1 s == key c i h0 s
+  key c i h1 s == key c i h0 s /\
+  preserves_freeable c i s h0 h1
 
 inline_for_extraction noextract
 let update_st
@@ -393,7 +395,8 @@ let finish_st
       footprint c i h0 s == footprint c i h1 s /\
       B.(modifies (loc_union (loc_buffer dst) (footprint c i h0 s)) h0 h1) /\ (
       seen_bounded c i h0 s;
-      S.equal (B.as_seq h1 dst) (c.spec_s i (key c i h0 s) (seen c i h0 s))))
+      S.equal (B.as_seq h1 dst) (c.spec_s i (key c i h0 s) (seen c i h0 s))) /\
+      preserves_freeable c i s h0 h1)
 
 /// A word of caution. Once partially applied to a type class, this function
 /// will generate a stack allocation at type ``state i`` via ``c.alloca``. If

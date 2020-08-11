@@ -475,6 +475,7 @@ let init #index c i t t' k s =
         G.hide (c.key.v i h1 k)
   in
   (**) let h2 = ST.get () in
+  (**) assert(preserves_freeable c i s h1 h2);
 
   [@ inline_let ]
   let tmp: state_s c i t t' = State block_state buf 0UL (G.hide S.empty) k' in
@@ -482,28 +483,31 @@ let init #index c i t t' k s =
   (**) let h3 = ST.get () in
   (**) c.state.frame_invariant B.(loc_buffer s) block_state h2 h3;
   (**) optional_frame #_ #i #c.km #c.key B.(loc_buffer s) k' h2 h3;
+  (**) stateful_frame_preserves_freeable B.(loc_buffer s) block_state h2 h3;
+  (**) assert(preserves_freeable c i s h2 h3);
 
   // This seems to cause insurmountable difficulties. Puzzled.
   ST.lemma_equal_domains_trans h1 h2 h3;
 
   // AR: 07/22: same old `Seq.equal` and `==` story
-  assert (Seq.equal (seen c i h3 s) Seq.empty);
+  (**) assert (Seq.equal (seen c i h3 s) Seq.empty);
 
-  assert (footprint c i h1 s == footprint c i h3 s);
-  assert (B.(modifies (footprint c i h1 s) h1 h3));
-  assert (
-    let h = h3 in
-    let s = B.get h3 s 0 in
-    let State block_state buf_ total_len seen _ = s in
-    let seen = G.reveal seen in
-    let blocks, rest = split_at_last c i seen in
+  (**) assert (footprint c i h1 s == footprint c i h3 s);
+  (**) assert (B.(modifies (footprint c i h1 s) h1 h3));
+  (**) assert (
+  (**)   let h = h3 in
+  (**)   let s = B.get h3 s 0 in
+  (**)   let State block_state buf_ total_len seen _ = s in
+  (**)   let seen = G.reveal seen in
+  (**)   let blocks, rest = split_at_last c i seen in
 
-    // Formerly, the "hashes" predicate
-    S.length blocks + S.length rest = U64.v total_len /\
-    S.length seen = U64.v total_len /\
-    U64.v total_len < c.max_input_length i
-  );
-  assert (invariant_s c i h3 (B.get h3 s 0))
+  (**)   // Formerly, the "hashes" predicate
+  (**)   S.length blocks + S.length rest = U64.v total_len /\
+  (**)   S.length seen = U64.v total_len /\
+  (**)   U64.v total_len < c.max_input_length i
+  (**) );
+  (**) assert (invariant_s c i h3 (B.get h3 s 0));
+  (**) assert(preserves_freeable c i s h1 h3)
 
 /// Some helpers to minimize modulo-reasoning
 /// =========================================
@@ -681,7 +685,10 @@ let update_small #index c i t t' p data len =
   split_at_last_small c i (G.reveal seen_) (B.as_seq h0 data);
   c.state.frame_invariant (B.loc_buffer buf) block_state h0 h1;
   optional_frame #_ #i #c.km #c.key (B.loc_buffer buf) k' h0 h1;
+  stateful_frame_preserves_freeable #index #(Block?.state c) #i (B.loc_buffer buf2)
+                                    (State?.block_state s) h0 h1;
   assert (B.as_seq h1 data == B.as_seq h0 data);
+  assert(preserves_freeable c i p h00 h1);
 
   let total_len = add_len c i total_len len in
   [@inline_let]
@@ -694,6 +701,10 @@ let update_small #index c i t t' p data len =
   assert (B.as_seq h2 data == B.as_seq h1 data);
   c.state.frame_invariant (B.loc_buffer p) block_state h1 h2;
   optional_frame #_ #i #c.km #c.key (B.loc_buffer p) k' h1 h2;
+  stateful_frame_preserves_freeable #index #(Block?.state c) #i
+                                    (B.loc_buffer p)
+                                    (State?.block_state s) h1 h2;
+  assert(preserves_freeable c i p h1 h2);
 
   assert (
     let b = S.append (G.reveal seen_) (B.as_seq h0 data) in
@@ -771,8 +782,9 @@ let update_empty_or_full_buf #index c i t t' p data len =
   (* Start by "flushing" the buffer: hash it so that all the data seen so far
    * has been processed and we can consider the buffer as empty *)
   if U32.(sz =^ 0ul) then
-    assert(c.state.v i h0 block_state ==
-      c.update_multi_s i init_state 0 seen)
+    begin
+    assert(c.state.v i h0 block_state == c.update_multi_s i init_state 0 seen)
+    end
   else
     begin
     let prevlen = U64.(total_len `sub` FStar.Int.Cast.uint32_to_uint64 sz) in
@@ -806,6 +818,7 @@ let update_empty_or_full_buf #index c i t t' p data len =
   c.update_multi (G.hide i) block_state total_len data1 data1_len;
   let h01 = ST.get () in
   optional_frame #_ #i #c.km #c.key (c.state.footprint h0 block_state) k' h0 h01;
+  assert(preserves_freeable c i p h0 h01);
   
   begin
     let data1_v = B.as_seq h01 data1 in
@@ -819,6 +832,10 @@ let update_empty_or_full_buf #index c i t t' p data len =
   let h2 = ST.get () in
   c.state.frame_invariant (B.loc_buffer buf) block_state h1 h2;
   optional_frame #_ #i #c.km #c.key (B.loc_buffer buf) k' h1 h2;
+  stateful_frame_preserves_freeable #index #(Block?.state c) #i
+                                    (B.loc_buffer dst)
+                                    (State?.block_state s) h1 h2;
+  assert(preserves_freeable c i p h01 h2);
 
   S.append_assoc (G.reveal seen) (B.as_seq h0 data1) (B.as_seq h0 data2);
   assert (S.equal
@@ -835,6 +852,11 @@ let update_empty_or_full_buf #index c i t t' p data len =
   let h3 = ST.get () in
   c.state.frame_invariant (B.loc_buffer p) block_state h2 h3;
   optional_frame #_ #i #c.km #c.key (B.loc_buffer p) k' h2 h3;
+  stateful_frame_preserves_freeable #index #(Block?.state c) #i
+                                    (B.loc_buffer p)
+                                    (State?.block_state s) h2 h3;
+  assert(preserves_freeable c i p h2 h3);
+  assert(preserves_freeable c i p h0 h3);
 
   // After careful diagnosis, those are the difficult proof obligations that send
   // z3 off the rails.
