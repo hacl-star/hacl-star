@@ -448,6 +448,7 @@ let modulo_sub_lemma a b c =
 #push-options "--z3rlimit 200"
 let update_last #ga s last total_len =
   let a = alg_of_state ga s in
+  (**) assert_norm(v (block_len a) > 0);
   let last_len = U64.(total_len %^ Int.Cast.uint32_to_uint64 (block_len a)) in
   (**) Math.Lemmas.euclidean_division_definition (U64.v total_len) (block_length a);
   (**) Math.Lemmas.nat_over_pos_is_nat (U64.v total_len) (block_length a);
