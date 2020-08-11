@@ -518,7 +518,7 @@ let rest #index (c: block index) (i: index)
   (total_len: UInt64.t): (x:UInt32.t {
     let n = split_at_last_num_blocks c i (U64.v total_len) in
     let l = U32.v (c.block_len i) in
-    U32.v x = U64.v total_len - (n * l) })
+    U32.v x = U64.v total_len - (n * l)})
 =
   let open FStar.Int.Cast in
   [@inline_let] let l = uint32_to_uint64 (c.block_len i) in
@@ -675,6 +675,9 @@ let update_small #index c i t t' p data len =
 
   B.blit data 0ul buf2 0ul len;
   let h1 = ST.get () in
+  assert(
+    let _, r = split_at_last c i (Ghost.reveal seen_) in
+    Seq.length r == U32.v sz);
   split_at_last_small c i (G.reveal seen_) (B.as_seq h0 data);
   c.state.frame_invariant (B.loc_buffer buf) block_state h0 h1;
   optional_frame #_ #i #c.km #c.key (B.loc_buffer buf) k' h0 h1;
