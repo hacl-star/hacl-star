@@ -718,8 +718,7 @@ let mk_update_last a m no_key key_size i acc prevlen last last_len =
 
 #push-options "--ifuel 1 --z3cliopt smt.arith.nl=false"
 inline_for_extraction noextract
-let blake2 (a : alg) (m : m_spec) (no_key : bool) (key_size : key_size_t a no_key)
-//  I.block unit
+let blake2 (a : alg) (m : m_spec) (no_key : bool) (key_size : key_size_t a no_key) : I.block unit
   =
   I.Block
     I.Erased (* key management *)
