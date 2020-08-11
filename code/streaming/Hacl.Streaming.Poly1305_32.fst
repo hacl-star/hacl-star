@@ -456,6 +456,8 @@ let poly1305_32: I.block unit =
 /// The hardest part is done, just the instantiations now
 /// =====================================================
 
+noextract
+let alloca = F.alloca poly1305_32 () t (k.I.s ())
 let create_in = F.create_in poly1305_32 () t (k.I.s ())
 let init = F.init poly1305_32 (G.hide ()) t (k.I.s ())
 let update = F.update poly1305_32 (G.hide ()) t (k.I.s ())
