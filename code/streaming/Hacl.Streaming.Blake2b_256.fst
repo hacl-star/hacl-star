@@ -10,7 +10,7 @@ open Hacl.Streaming.Blake2
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 /// No key
-noextract
+inline_for_extraction noextract
 let blake2b_256_no_key_alloca =
   F.alloca (blake2b_256 true 0ul) () (s Spec.Blake2B M256)
            (optional_key_blake2b true 0ul)
@@ -36,7 +36,7 @@ let blake2b_256_no_key_free =
          (optional_key_blake2b true 0ul)
 
 /// With key
-noextract
+inline_for_extraction noextract
 let blake2b_256_with_key_alloca (key_size : key_size_t Spec.Blake2B false) =
   F.alloca (blake2b_256 false key_size) () (s Spec.Blake2B M256)
            (optional_key_blake2b false key_size)

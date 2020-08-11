@@ -882,7 +882,7 @@ let mk_blake2b_256_free (no_key : bool) (key_size : key_size_t Spec.Blake2B no_k
 
 /// First, the functions which don't use a key
 
-noextract
+inline_for_extraction noextract
 let blake2s_32_no_key_alloca =
   F.alloca (blake2s_32 true 0ul) () (s Spec.Blake2S M32)
            (optional_key_blake2s true 0ul)
@@ -907,7 +907,7 @@ let blake2s_32_no_key_free =
   F.free (blake2s_32 true 0ul) (G.hide ()) (s Spec.Blake2S M32)
          (optional_key_blake2s true 0ul)
 
-noextract
+inline_for_extraction noextract
 [@ (Comment "  State allocation function when there is no key")]
 let blake2b_32_no_key_alloca =
   F.alloca (blake2b_32 true 0ul) () (s Spec.Blake2B M32)
@@ -935,7 +935,7 @@ let blake2b_32_no_key_free =
 
 /// Second, the functions which may use a key
 
-noextract
+inline_for_extraction noextract
 [@ (Comment "  State allocation function when using a (potentially null) key")]
 let blake2s_32_with_key_alloca (key_size : key_size_t Spec.Blake2S false) =
   F.alloca (blake2s_32 false key_size) () (s Spec.Blake2S M32)
@@ -961,7 +961,7 @@ let blake2s_32_with_key_free (key_size : key_size_t Spec.Blake2S false) =
   F.free (blake2s_32 false key_size) (G.hide ()) (s Spec.Blake2S M32)
          (optional_key_blake2s false key_size)
 
-noextract
+inline_for_extraction noextract
 let blake2b_32_with_key_alloca (key_size : key_size_t Spec.Blake2B false) =
   F.alloca (blake2b_32 false key_size) () (s Spec.Blake2B M32)
               (optional_key_blake2b false key_size)
