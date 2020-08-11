@@ -212,7 +212,7 @@ let finish_384 = F.mk_finish hacl_sha2_384 () (state_t_384.s ()) (G.erased unit)
 let free_384 = F.free hacl_sha2_384 (G.hide ()) (state_t_384.s ()) (G.erased unit)
 
 noextract
-let alloc_512 = F.alloca hacl_sha2_512 () (state_t_512.s ()) (G.erased unit)
+let alloca_512 = F.alloca hacl_sha2_512 () (state_t_512.s ()) (G.erased unit)
 let create_in_512 = F.create_in hacl_sha2_512 () (state_t_512.s ()) (G.erased unit)
 let init_512 = F.init hacl_sha2_512 (G.hide ()) (state_t_512.s ()) (G.erased unit)
 let update_512 = F.update hacl_sha2_512 (G.hide ()) (state_t_512.s ()) (G.erased unit)

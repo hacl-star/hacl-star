@@ -923,7 +923,7 @@ let blake2s_128_no_key_update =
            (optional_key_blake2s true 0ul)
 
 [@ (Comment "  Finish function when there is no key")]
-let blake2s_128_no_key_128_finish =
+let blake2s_128_no_key_finish =
   F.mk_finish (blake2s_128 true 0ul) () (s Spec.Blake2S M128)
               (optional_key_blake2s true 0ul)
 
@@ -1027,7 +1027,7 @@ let blake2s_128_with_key_update (key_size : key_size_t Spec.Blake2S false) =
            (optional_key_blake2s false key_size)
 
 [@ (Comment "  Finish function when using a (potentially null) key")]
-let blake2s_128_with_key_128_finish (key_size : key_size_t Spec.Blake2S false) =
+let blake2s_128_with_key_finish (key_size : key_size_t Spec.Blake2S false) =
   F.mk_finish (blake2s_128 false key_size) () (s Spec.Blake2S M128)
               (optional_key_blake2s false key_size)
 
