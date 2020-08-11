@@ -201,14 +201,18 @@ let stateful_key (a : alg) (no_key : bool) (key_size : key_size_t a no_key) :
        else buffer_to_stateful_key_t a key_size B.null)
 
     (* free *)
-    (fun _ s -> if U32.(key_size >^ 0ul) then B.free (s <: B.buffer uint8) else ())
+    (fun _ s ->
+      if no_key then ()
+      else if U32.(key_size >^ 0ul) then B.free (s <: B.buffer uint8) else ())
 
     (* copy *)
     (fun _ s_src s_dst ->
-      if U32.(key_size >^ 0ul) then
-        B.blit (s_src <: B.buffer uint8) 0ul
-               (s_dst <: B.buffer uint8) 0ul key_size
-      else ())
+      if no_key then ()
+      else
+        if U32.(key_size >^ 0ul) then
+          B.blit (s_src <: B.buffer uint8) 0ul
+                 (s_dst <: B.buffer uint8) 0ul key_size
+        else ())
 
 inline_for_extraction noextract
 let stateful_key_to_buffer (#a : alg) (#no_key : bool) (#key_size : key_size_t a no_key)
