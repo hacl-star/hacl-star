@@ -33,6 +33,9 @@
 #define __Hacl_Streaming_SHA2_256_H
 
 #include "Hacl_Hash.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 typedef struct Hacl_Streaming_Functor_state_s___uint32_t_____s
 Hacl_Streaming_Functor_state_s___uint32_t____;
@@ -52,6 +55,10 @@ void
 Hacl_Streaming_SHA2_256_finish(Hacl_Streaming_Functor_state_s___uint32_t____ *p, uint8_t *dst);
 
 void Hacl_Streaming_SHA2_256_free(Hacl_Streaming_Functor_state_s___uint32_t____ *s);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Streaming_SHA2_256_H_DEFINED
 #endif

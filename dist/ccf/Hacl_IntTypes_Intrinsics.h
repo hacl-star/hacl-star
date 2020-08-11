@@ -32,6 +32,9 @@
 #define __Hacl_IntTypes_Intrinsics_H
 
 #include "Hacl_Kremlib.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 static inline uint64_t
 Hacl_IntTypes_Intrinsics_add_carry_u64(uint64_t cin, uint64_t x, uint64_t y, uint64_t *result1)
@@ -60,6 +63,10 @@ Hacl_IntTypes_Intrinsics_sub_borrow_u64(
   result1[0U] = res;
   return c1;
 }
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_IntTypes_Intrinsics_H_DEFINED
 #endif

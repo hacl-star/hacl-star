@@ -36,6 +36,9 @@
 #include "Hacl_Hash.h"
 #include "EverCrypt_AutoConfig2.h"
 #include "Hacl_Spec.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 typedef Spec_Hash_Definitions_hash_alg EverCrypt_Hash_alg;
 
@@ -250,6 +253,10 @@ EverCrypt_Hash_Incremental_finish(
 
 void
 EverCrypt_Hash_Incremental_free(Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *s);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __EverCrypt_Hash_H_DEFINED
 #endif

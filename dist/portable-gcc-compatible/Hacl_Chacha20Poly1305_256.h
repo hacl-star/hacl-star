@@ -35,6 +35,9 @@
 #include "Hacl_Kremlib.h"
 #include "Hacl_Chacha20_Vec256.h"
 #include "Hacl_Poly1305_256.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 /* SNIPPET_START: Hacl_Chacha20Poly1305_256_aead_encrypt */
 
@@ -67,6 +70,10 @@ Hacl_Chacha20Poly1305_256_aead_decrypt(
 );
 
 /* SNIPPET_END: Hacl_Chacha20Poly1305_256_aead_decrypt */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Chacha20Poly1305_256_H_DEFINED
 #endif

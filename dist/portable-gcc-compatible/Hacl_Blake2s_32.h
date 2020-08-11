@@ -36,6 +36,9 @@
 #include "Lib_Memzero0.h"
 #include "Hacl_Blake2b_32.h"
 #include "Hacl_Impl_Blake2_Constants.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 /* SNIPPET_START: Hacl_Blake2s_32_blake2s */
 
@@ -50,6 +53,10 @@ Hacl_Blake2s_32_blake2s(
 );
 
 /* SNIPPET_END: Hacl_Blake2s_32_blake2s */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Blake2s_32_H_DEFINED
 #endif

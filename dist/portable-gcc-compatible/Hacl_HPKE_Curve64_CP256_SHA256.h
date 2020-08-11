@@ -37,6 +37,9 @@
 #include "Hacl_HKDF.h"
 #include "Hacl_Chacha20Poly1305_256.h"
 #include "Hacl_Curve25519_64.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 /* SNIPPET_START: Hacl_HPKE_Curve64_CP256_SHA256_setupBaseI */
 
@@ -96,6 +99,10 @@ Hacl_HPKE_Curve64_CP256_SHA256_openBase(
 );
 
 /* SNIPPET_END: Hacl_HPKE_Curve64_CP256_SHA256_openBase */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_HPKE_Curve64_CP256_SHA256_H_DEFINED
 #endif

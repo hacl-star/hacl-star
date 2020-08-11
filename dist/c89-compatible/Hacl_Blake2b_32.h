@@ -35,6 +35,9 @@
 #include "Hacl_Kremlib.h"
 #include "Lib_Memzero0.h"
 #include "Hacl_Impl_Blake2_Constants.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 typedef struct K___uint32_t_uint32_t_s
 {
@@ -52,6 +55,10 @@ Hacl_Blake2b_32_blake2b(
   uint32_t kk,
   uint8_t *k
 );
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Blake2b_32_H_DEFINED
 #endif

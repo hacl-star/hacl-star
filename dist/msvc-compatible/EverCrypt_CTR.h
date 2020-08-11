@@ -38,6 +38,9 @@
 #include "EverCrypt_AutoConfig2.h"
 #include "EverCrypt_Error.h"
 #include "Hacl_Spec.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 typedef struct EverCrypt_CTR_state_s_s EverCrypt_CTR_state_s;
 
@@ -104,6 +107,10 @@ EverCrypt_CTR_init(
 void EverCrypt_CTR_update_block(EverCrypt_CTR_state_s *p, uint8_t *dst, uint8_t *src);
 
 void EverCrypt_CTR_free(EverCrypt_CTR_state_s *p);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __EverCrypt_CTR_H_DEFINED
 #endif

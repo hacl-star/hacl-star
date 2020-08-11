@@ -35,8 +35,15 @@
 #include "Lib_Memzero0.h"
 #include "Hacl_Blake2b_32.h"
 #include "Hacl_Impl_Blake2_Constants.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 void Hacl_Blake2s_128_blake2s(u32 nn, u8 *output, u32 ll, u8 *d, u32 kk, u8 *k);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Blake2s_128_H_DEFINED
 #endif

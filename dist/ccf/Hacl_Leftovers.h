@@ -32,6 +32,9 @@
 #define __Hacl_Leftovers_H
 
 #include "Hacl_Spec.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 extern uint32_t Hacl_HMAC_DRBG_reseed_interval;
 
@@ -50,6 +53,10 @@ typedef struct Hacl_HMAC_DRBG_state_s
   uint32_t *reseed_counter;
 }
 Hacl_HMAC_DRBG_state;
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Leftovers_H_DEFINED
 #endif

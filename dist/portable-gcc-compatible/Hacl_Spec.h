@@ -33,6 +33,9 @@
 #define __Hacl_Spec_H
 
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 /* SNIPPET_START: Spec_Hash_Definitions_hash_alg */
 
@@ -107,6 +110,10 @@ Spec_Cipher_Expansion_cipher_alg_of_impl(Spec_Cipher_Expansion_impl i);
 /* SNIPPET_END: Spec_Agile_AEAD_alg */
 
 typedef uint8_t Spec_Agile_AEAD_alg;
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Spec_H_DEFINED
 #endif

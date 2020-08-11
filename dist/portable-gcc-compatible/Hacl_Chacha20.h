@@ -33,6 +33,9 @@
 #define __Hacl_Chacha20_H
 
 #include "Hacl_Kremlib.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 /* SNIPPET_START: Hacl_Impl_Chacha20_Vec_chacha20_constants */
 
@@ -92,6 +95,10 @@ Hacl_Chacha20_chacha20_decrypt(
 );
 
 /* SNIPPET_END: Hacl_Chacha20_chacha20_decrypt */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Chacha20_H_DEFINED
 #endif

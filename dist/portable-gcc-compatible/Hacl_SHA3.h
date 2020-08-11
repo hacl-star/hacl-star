@@ -34,6 +34,9 @@
 
 #include "Hacl_Kremlib.h"
 #include "Lib_Memzero0.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 /* SNIPPET_START: Hacl_Impl_SHA3_keccak_rotc */
 
@@ -164,6 +167,10 @@ void Hacl_SHA3_sha3_384(uint32_t inputByteLen, uint8_t *input, uint8_t *output);
 void Hacl_SHA3_sha3_512(uint32_t inputByteLen, uint8_t *input, uint8_t *output);
 
 /* SNIPPET_END: Hacl_SHA3_sha3_512 */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_SHA3_H_DEFINED
 #endif

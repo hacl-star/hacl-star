@@ -35,6 +35,9 @@
 #include "EverCrypt_AutoConfig2.h"
 #include "Hacl_Curve25519_64.h"
 #include "Hacl_Curve25519_51.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 /* SNIPPET_START: EverCrypt_Curve25519_secret_to_public */
 
@@ -53,6 +56,10 @@ void EverCrypt_Curve25519_scalarmult(uint8_t *shared, uint8_t *my_priv, uint8_t 
 bool EverCrypt_Curve25519_ecdh(uint8_t *shared, uint8_t *my_priv, uint8_t *their_pub);
 
 /* SNIPPET_END: EverCrypt_Curve25519_ecdh */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __EverCrypt_Curve25519_H_DEFINED
 #endif

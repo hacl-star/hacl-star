@@ -36,6 +36,9 @@
 #include "Hacl_Hash.h"
 #include "Hacl_HKDF.h"
 #include "Hacl_Chacha20Poly1305_32.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 /* SNIPPET_START: Hacl_HPKE_P256_CP32_SHA256_setupBaseI */
 
@@ -95,6 +98,10 @@ Hacl_HPKE_P256_CP32_SHA256_openBase(
 );
 
 /* SNIPPET_END: Hacl_HPKE_P256_CP32_SHA256_openBase */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_HPKE_P256_CP32_SHA256_H_DEFINED
 #endif

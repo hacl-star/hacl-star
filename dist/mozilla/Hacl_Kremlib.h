@@ -31,6 +31,9 @@
 #define __Hacl_Kremlib_H
 
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 static inline uint8_t FStar_UInt8_eq_mask(uint8_t a, uint8_t b);
 
@@ -49,6 +52,10 @@ static inline FStar_UInt128_uint128 FStar_UInt128_uint64_to_uint128(uint64_t a);
 static inline uint64_t FStar_UInt128_uint128_to_uint64(FStar_UInt128_uint128 a);
 
 static inline FStar_UInt128_uint128 FStar_UInt128_mul_wide(uint64_t x, uint64_t y);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Kremlib_H_DEFINED
 #endif

@@ -34,6 +34,9 @@
 
 #include "Hacl_Kremlib.h"
 #include "Hacl_Spec.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 /* SNIPPET_START: Hacl_Hash_MD5_legacy_update_multi */
 
@@ -346,6 +349,10 @@ uint32_t Hacl_Hash_Definitions_hash_word_len(Spec_Hash_Definitions_hash_alg a);
 uint32_t Hacl_Hash_Definitions_hash_len(Spec_Hash_Definitions_hash_alg a);
 
 /* SNIPPET_END: Hacl_Hash_Definitions_hash_len */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Hash_H_DEFINED
 #endif

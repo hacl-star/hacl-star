@@ -33,6 +33,9 @@
 #define __Vale_H
 
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 /* SNIPPET_START: add_scalar_e */
 
@@ -339,6 +342,10 @@ gctr256_bytes(
 );
 
 /* SNIPPET_END: gctr256_bytes */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Vale_H_DEFINED
 #endif

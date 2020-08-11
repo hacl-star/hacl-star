@@ -32,6 +32,9 @@
 #define __TestLib_H
 
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 extern void TestLib_touch(int32_t uu____7);
 
@@ -82,6 +85,10 @@ TestLib_print_cycles_per_round(
   TestLib_cycles uu____277,
   uint32_t uu____278
 );
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __TestLib_H_DEFINED
 #endif

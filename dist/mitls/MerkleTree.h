@@ -35,6 +35,9 @@
 #include "Hacl_Kremlib.h"
 #include "Hacl_Spec.h"
 #include "EverCrypt_Hash.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 typedef struct MerkleTree_Low_Datastructures_hash_vec_s
 {
@@ -560,6 +563,10 @@ MerkleTree_Low_path
 uint8_t *MerkleTree_Low_Hashfunctions_init_hash(uint32_t hsz);
 
 void MerkleTree_Low_Hashfunctions_free_hash(uint8_t *h);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __MerkleTree_H_DEFINED
 #endif
