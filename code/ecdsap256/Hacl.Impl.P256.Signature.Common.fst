@@ -245,8 +245,8 @@ let isCoordinateValid #c p =
   let x = sub p (size 0) len in 
   let y = sub p len len in 
   
-  let carryX = sub_felem #c x (prime_buffer #c) tempBuffer in
-  let carryY = sub_felem #c y (prime_buffer #c) tempBuffer in 
+  let carryX = sub_bn_gl #c x (prime_buffer #c) tempBuffer in
+  let carryY = sub_bn_gl #c y (prime_buffer #c) tempBuffer in 
   
   let lessX = eq_u64_nCT carryX (u64 1) in   
   let lessY = eq_u64_nCT carryY (u64 1) in 

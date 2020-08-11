@@ -29,108 +29,7 @@ open Hacl.Impl.P384.LowLevel
 open Hacl.Spec.P256.MontgomeryMultiplication
 
 
-
-
-val uploadZeroImpl: #c: curve -> f: felem c -> Stack unit 
-  (requires fun h -> live h f)
-  (ensures fun h0 _ h1 -> as_nat c h1 f == 0 /\ modifies (loc f) h0 h1)
-
-
-val uploadZeroPoint: #c: curve -> p: point c -> 
-  Stack unit
-    (requires fun h -> live h p)
-    (ensures fun h0 _ h1 ->     
-      modifies (loc p) h0 h1 /\
-      as_nat P256 h1 (gsub p (size 0) (size 4)) == 0 /\ 
-      as_nat P256 h1 (gsub p (size 4) (size 4)) == 0 /\
-      as_nat P256 h1 (gsub p (size 8) (size 4)) == 0) 
-
-
-
-
-val cmovznz4: #c: curve -> cin: uint64 -> x: felem c -> y: felem c -> result: felem c ->
-  Stack unit
-    (requires fun h -> live h x /\ live h y /\ live h result /\ disjoint x result /\ eq_or_disjoint y result)
-    (ensures fun h0 _ h1 -> modifies1 result h0 h1 /\ 
-      (if uint_v cin = 0 then as_nat c h1 result == as_nat c h0 x else as_nat c h1 result == as_nat c  h0 y))
-
-
-
-val sub_felem: #c: curve -> x: felem c -> y: glbuffer uint64 (getCoordinateLenU64 c) -> result: felem c -> 
-  Stack uint64
-    (requires fun h -> live h x /\ live h y /\ live h result /\ disjoint x result /\ disjoint y result)
-    (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ 
-      as_nat c h1 result - v r * pow2 256 == as_nat c h0 x  - as_nat_il c h0 y /\
-      (
-	if uint_v r = 0 then 
-	  as_nat c h0 x >= as_nat_il c h0 y 
-	else 
-	  as_nat c h0 x < as_nat_il c h0 y)
-      )
-
-
-
-val uploadOneImpl: #c: curve -> f: felem c -> Stack unit
-  (requires fun h -> live h f)
-  (ensures fun h0 _ h1 -> as_nat c h1 f == 1 /\ modifies (loc f) h0 h1)
-
-
-
-val toUint8P256: i: felem P256 -> o: lbuffer uint8 (getScalarLen P256) -> Stack unit
-  (requires fun h -> live h i /\ live h o /\ disjoint i o)
-  (ensures fun h0 _ h1 -> modifies (loc o) h0 h1)
-
-
-
-
-val toUint8P384: i: felem P384 -> o: lbuffer uint8 (getScalarLen P384) -> Stack unit
-  (requires fun h -> live h i /\ live h o /\ disjoint i o)
-  (ensures fun h0 _ h1 -> modifies (loc o) h0 h1)
-
-
-
-
-
-  val toUint8: #c: curve -> i: felem c ->  o: lbuffer uint8 (getScalarLen c) -> Stack unit
-  (requires fun h -> live h i /\ live h o /\ disjoint i o)
-  (ensures fun h0 _ h1 -> 
-    modifies (loc o) h0 h1 (*/\ 
-    as_seq h1 o == Lib.ByteSequence.uints_to_bytes_be #_ #_ #4 (as_seq h0 i)  *)
-  )
-
-
-
-val changeEndian: #c: curve -> i: felem c -> Stack unit 
-  (requires fun h -> live h i)
-  (ensures  fun h0 _ h1 -> modifies1 i h0 h1 (*/\ 
-    as_seq h1 i == Hacl.Spec.ECDSA.Definition.changeEndian (as_seq h0 i) /\
-    as_nat P256 h1 i < pow2 256
-  *)  ) 
-
-
-
-val toUint64ChangeEndianP256: i: lbuffer uint8 (size 32) -> o: felem P256 -> 
-  Stack unit
-  (requires fun h -> live h i /\ live h o /\ disjoint i o)
-  (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1)
-
-
-
-val toUint64ChangeEndianP384: i: lbuffer uint8 (size 48) -> o: felem P384 -> 
-  Stack unit
-  (requires fun h -> live h i /\ live h o /\ disjoint i o)
-  (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1)
-
-
-
-
-val toUint64ChangeEndian: #c: curve -> i:lbuffer uint8 (getScalarLen c) -> o: felem c -> Stack unit
-  (requires fun h -> live h i /\ live h o /\ disjoint i o)
-  (ensures  fun h0 _ h1 ->
-    modifies (loc o) h0 h1 (* /\
-    as_seq h1 o == Hacl.Spec.ECDSA.Definition.changeEndian (Lib.ByteSequence.uints_from_bytes_be (as_seq h0 i)) *)
-  )
-
+#set-options "--z3rlimit 100"
 
 
 
@@ -140,11 +39,88 @@ let prime256_buffer: x: glbuffer uint64 4ul {witnessed #uint64 #(size 4) x (Lib.
   createL_global p256_prime_list
 
 
+
 inline_for_extraction
 let prime384_buffer: x: glbuffer uint64 6ul {witnessed #uint64 #(size 6) x (Lib.Sequence.of_list
 p384_prime_list) /\ recallable x /\ felem_seq_as_nat P384 (Lib.Sequence.of_list (p384_prime_list)) == prime384}  = 
   assert_norm (felem_seq_as_nat P384 (Lib.Sequence.of_list (p384_prime_list)) == prime384);
   createL_global p384_prime_list
+
+
+val uploadZeroImpl: #c: curve -> f: felem c -> Stack unit 
+  (requires fun h -> live h f)
+  (ensures fun h0 _ h1 -> as_nat c h1 f == 0 /\ modifies (loc f) h0 h1)
+
+val uploadZeroPoint: #c: curve -> p: point c -> 
+  Stack unit
+  (requires fun h -> live h p)
+  (ensures fun h0 _ h1 ->
+    let len = getCoordinateLenU64 c in 
+    modifies (loc p) h0 h1 /\
+    as_nat c h1 (gsub p (size 0) len) == 0 /\ 
+    as_nat c h1 (gsub p len len) == 0 /\
+    as_nat c h1 (gsub p (size 2 *! len) len) == 0) 
+
+
+val cmovznz4: #c: curve -> cin: uint64 -> x: felem c -> y: felem c -> result: felem c ->
+  Stack unit
+    (requires fun h -> live h x /\ live h y /\ live h result /\ disjoint x result /\ eq_or_disjoint y result)
+    (ensures fun h0 _ h1 -> modifies1 result h0 h1 /\ (
+      if uint_v cin = 0 then 
+	as_nat c h1 result == as_nat c h0 x 
+      else 
+	as_nat c h1 result == as_nat c h0 y))
+
+
+val add_bn: #c: curve -> x: felem c -> y: felem c -> result: felem c -> 
+  Stack uint64
+    (requires fun h -> live h x /\ live h y /\ live h result /\ eq_or_disjoint x result /\ eq_or_disjoint y result)
+    (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ v r <= 1 /\ 
+      as_nat c h1 result + v r * getPower2 c == as_nat c h0 x + as_nat c h0 y)   
+
+
+val sub_bn: #c: curve -> x: felem c -> y:felem c -> result: felem c -> 
+  Stack uint64
+    (requires fun h -> live h x /\ live h y /\ live h result /\ eq_or_disjoint x result /\ eq_or_disjoint y result)
+    (ensures fun h0 r h1 -> modifies1 result h0 h1 /\ v r <= 1 /\ 
+      as_nat c h1 result - v r * getPower2 c == as_nat c h0 x - as_nat c h0 y)
+
+
+val sub_bn_gl: #c: curve -> x: felem c -> y: glbuffer uint64 (getCoordinateLenU64 c) -> 
+  result: felem c -> Stack uint64
+    (requires fun h -> live h x /\ live h y /\ live h result /\ disjoint x result /\ disjoint y result)
+    (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ v r <= 1 /\ 
+    as_nat c h1 result - v r * getPower2 c == as_nat c h0 x  - as_nat_il c h0 y /\ (
+    if uint_v r = 0 then 
+      as_nat c h0 x >= as_nat_il c h0 y 
+    else 
+      as_nat c h0 x < as_nat_il c h0 y))
+
+
+val uploadOneImpl: #c: curve -> f: felem c -> Stack unit
+  (requires fun h -> live h f)
+  (ensures fun h0 _ h1 -> as_nat c h1 f == 1 /\ modifies (loc f) h0 h1)
+
+val toUint8: #c: curve -> i: felem c ->  o: lbuffer uint8 (getScalarLen c) -> Stack unit
+  (requires fun h -> live h i /\ live h o /\ disjoint i o)
+  (ensures fun h0 _ h1 -> 
+    modifies (loc o) h0 h1 /\ 
+      as_seq h1 o == Lib.ByteSequence.uints_to_bytes_be (as_seq h0 i))
+
+
+val changeEndian: #c: curve -> i: felem c -> Stack unit 
+  (requires fun h -> live h i)
+  (ensures  fun h0 _ h1 -> modifies1 i h0 h1 (*/\ 
+    as_seq h1 i == Hacl.Spec.ECDSA.Definition.changeEndian (as_seq h0 i) /\
+    as_nat P256 h1 i < pow2 256*)) 
+
+val toUint64ChangeEndian: #c: curve -> i:lbuffer uint8 (getScalarLen c) -> o: felem c -> Stack unit
+  (requires fun h -> live h i /\ live h o /\ disjoint i o)
+  (ensures  fun h0 _ h1 ->
+    modifies (loc o) h0 h1 (* /\
+    as_seq h1 o == Hacl.Spec.ECDSA.Definition.changeEndian (Lib.ByteSequence.uints_from_bytes_be (as_seq h0 i)) *)
+  )
+
 
 
 inline_for_extraction

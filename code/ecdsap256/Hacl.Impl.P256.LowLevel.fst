@@ -169,35 +169,46 @@ let add8 x y result =
   carry1
 
 
-val add4_variables: x: felem P256 -> cin: uint64 {uint_v cin <=1} ->  y0: uint64 -> y1: uint64 -> y2: uint64 -> y3: uint64 -> 
+val add_dep_prime_p256: x: felem P256 -> t: uint64 {uint_v t == 0 \/ uint_v t == 1} ->
   result: felem P256 -> 
   Stack uint64
     (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result)
-    (ensures fun h0 c h1 -> modifies (loc result) h0 h1 /\ v c <= 1 /\  
-      as_nat P256 h1 result  + uint_v c * pow2 256 == as_nat P256 h0 x + uint_v y0 + uint_v y1 * pow2 64 + uint_v y2 * pow2 128 + uint_v y3 * pow2 192 + uint_v cin)   
+    (ensures fun h0 c h1 -> modifies (loc result) h0 h1 /\ (
+      if uint_v t = 1 then 
+	as_nat P256 h1 result + uint_v c * pow2 256 == as_nat P256 h0 x + prime256
+      else
+	as_nat P256 h1 result  == as_nat P256 h0 x))  
 
-let add4_variables x cin y0 y1 y2 y3 result = 
-    let h0 = ST.get() in 
-    
-    let r0 = sub result (size 0) (size 1) in      
-    let r1 = sub result (size 1) (size 1) in 
-    let r2 = sub result (size 2) (size 1) in 
-    let r3 = sub result (size 3) (size 1) in 
+let add_dep_prime_p256 x t result = 
+  let h0 = ST.get() in 
 
-    let cc = add_carry_u64 cin x.(0ul) y0 r0 in 
-    let cc = add_carry_u64 cc x.(1ul) y1 r1 in 
-    let cc = add_carry_u64 cc x.(2ul) y2 r2 in 
-    let cc = add_carry_u64 cc x.(3ul) y3 r3 in      
+  let y0 = (u64 0) -. t in 
+  let y1 = ((u64 0) -. t) >>. (size 32) in 
+  let y2 = u64 0 in 
+  let y3 = t -. (t <<. (size 32)) in 
 
-    assert_norm (pow2 64 * pow2 64 = pow2 128);
-    assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192);
-    assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
+  let r0 = sub result (size 0) (size 1) in      
+  let r1 = sub result (size 1) (size 1) in 
+  let r2 = sub result (size 2) (size 1) in 
+  let r3 = sub result (size 3) (size 1) in 
+
+  let cc = add_carry_u64 (u64 0) x.(0ul) y0 r0 in 
+  let cc = add_carry_u64 cc x.(1ul) y1 r1 in 
+  let cc = add_carry_u64 cc x.(2ul) y2 r2 in 
+  let cc = add_carry_u64 cc x.(3ul) y3 r3 in     
+
+  let h1 = ST.get() in 
+  assert_norm(18446744073709551615 + 4294967295 * pow2 64 + 18446744069414584321 * pow2 192 = prime256);
+
+  assert_norm (pow2 64 * pow2 64 = pow2 128);
+  assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192);
+  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
     
-    assert(let r1_0 = as_seq h0 r1 in let r0_ = as_seq h0 result in Seq.index r0_ 1 == Seq.index r1_0 0);
-    assert(let r2_0 = as_seq h0 r2 in let r0_ = as_seq h0 result in Seq.index r0_ 2 == Seq.index r2_0 0);
-    assert(let r3_0 = as_seq h0 r3 in let r0_ = as_seq h0 result in Seq.index r0_ 3 == Seq.index r3_0 0);
-    
-    cc
+  assert(let r1_0 = as_seq h0 r1 in let r0_ = as_seq h0 result in Seq.index r0_ 1 == Seq.index r1_0 0);
+  assert(let r2_0 = as_seq h0 r2 in let r0_ = as_seq h0 result in Seq.index r0_ 2 == Seq.index r2_0 0);
+  assert(let r3_0 = as_seq h0 r3 in let r0_ = as_seq h0 result in Seq.index r0_ 3 == Seq.index r3_0 0); 
+
+  cc
 
 
 val sub4_il: x: felem P256 -> y: glbuffer uint64 (size 4) -> result: felem P256 -> 
@@ -1445,5 +1456,3 @@ let scalar_bit #buf_type s n =
   assert_norm (1 = pow2 1 - 1);
   assert (v (mod_mask #U8 #SEC 1ul) == v (u8 1));
   to_u64 ((s.(n /. 8ul) >>. (n %. 8ul)) &. u8 1)
-
-

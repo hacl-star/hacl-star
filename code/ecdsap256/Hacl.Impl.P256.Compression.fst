@@ -160,7 +160,7 @@ let lessThanPrime f =
   push_frame();
     let tempBuffer = create (size 4) (u64 0) in 
     recall_contents prime256_buffer (Lib.Sequence.of_list p256_prime_list);
-    let carry = sub_felem f prime256_buffer tempBuffer in 
+    let carry = sub_bn_gl f prime256_buffer tempBuffer in 
     let less = eq_u64_nCT carry (u64 1) in 
   pop_frame();
     less

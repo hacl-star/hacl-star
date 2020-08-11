@@ -73,7 +73,7 @@ let isMoreThanZeroLessThanOrderMinusOne f =
   push_frame();
   let tempBuffer = create (size 4) (u64 0) in
   recall_contents prime256order_buffer (Lib.Sequence.of_list p256_order_prime_list);
-  let carry = sub_felem #P256 f prime256order_buffer tempBuffer in
+  let carry = sub_bn_gl #P256 f prime256order_buffer tempBuffer in
   let less = eq_u64_nCT carry (u64 1) in
   let more = isZero_uint64_nCT f in
   let result = less && not more in
