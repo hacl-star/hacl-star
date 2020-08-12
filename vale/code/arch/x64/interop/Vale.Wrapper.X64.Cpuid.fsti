@@ -30,14 +30,14 @@ inline_for_extraction
 val check_avx: unit -> Stack UInt64.t
     (requires fun h0 -> True)
     (ensures fun h0 ret_val h1 ->
-      ((UInt64.v ret_val) =!= 0 ==> avx_enabled) /\
+      ((UInt64.v ret_val) =!= 0 ==> avx_cpuid_enabled) /\
       B.modifies B.loc_none h0 h1)
 
 inline_for_extraction
 val check_avx2: unit -> Stack UInt64.t
     (requires fun h0 -> True)
     (ensures fun h0 ret_val h1 ->
-      ((UInt64.v ret_val) =!= 0 ==> avx2_enabled) /\
+      ((UInt64.v ret_val) =!= 0 ==> avx2_cpuid_enabled) /\
       B.modifies B.loc_none h0 h1)
 
 inline_for_extraction
@@ -65,5 +65,26 @@ inline_for_extraction
 val check_avx512: unit -> Stack UInt64.t
     (requires fun h0 -> True)
     (ensures fun h0 ret_val h1 ->
-      ((UInt64.v ret_val) =!= 0 ==> avx512_enabled) /\
+      ((UInt64.v ret_val) =!= 0 ==> avx512_cpuid_enabled) /\
+      B.modifies B.loc_none h0 h1)
+
+inline_for_extraction
+val check_osxsave: unit -> Stack UInt64.t
+    (requires fun h0 -> True)
+    (ensures fun h0 ret_val h1 ->
+      ((UInt64.v ret_val) =!= 0 ==> osxsave_enabled) /\
+      B.modifies B.loc_none h0 h1)
+
+inline_for_extraction
+val check_avx_xcr0: unit -> Stack UInt64.t
+    (requires fun h0 -> osxsave_enabled)
+    (ensures fun h0 ret_val h1 ->
+      ((UInt64.v ret_val) =!= 0 ==> avx_xcr0) /\
+      B.modifies B.loc_none h0 h1)
+
+inline_for_extraction
+val check_avx512_xcr0: unit -> Stack UInt64.t
+    (requires fun h0 -> osxsave_enabled /\ avx_xcr0)
+    (ensures fun h0 ret_val h1 ->
+      ((UInt64.v ret_val) =!= 0 ==> avx512_xcr0) /\
       B.modifies B.loc_none h0 h1)

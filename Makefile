@@ -103,7 +103,8 @@ all:
 all-unstaged: compile-gcc-compatible compile-msvc-compatible compile-gcc64-only \
   compile-evercrypt-external-headers compile-c89-compatible compile-ccf \
   compile-portable-gcc-compatible compile-mozilla dist/linux/Makefile.basic \
-  dist/wasm/package.json dist/merkle-tree/Makefile.basic compile-mitls
+  dist/wasm/package.json dist/merkle-tree/Makefile.basic compile-mitls \
+  obj/libhaclml.cmxa
 
 # Automatic staging.
 %-staged: .last_vale_version
@@ -269,7 +270,7 @@ ifndef MAKE_RESTARTS
 	@if ! [ -f .didhelp ]; then echo "💡 Did you know? If your dependency graph didn't change (e.g. no files added or removed, no reference to a new module in your code), run NODEPEND=1 make <your-target> to skip dependency graph regeneration!"; touch .didhelp; fi
 	$(call run-with-log,\
 	  $(FSTAR_NO_FLAGS) --dep $* $(notdir $(FSTAR_ROOTS)) --warn_error '-285' $(FSTAR_DEPEND_FLAGS) \
-	    --extract '-* +FStar.Kremlin.Endianness +Vale.Arch +Vale.X64 -Vale.X64.MemoryAdapters +Vale.Def +Vale.Lib +Vale.Bignum.X64 -Vale.Lib.Tactics +Vale.Math +Vale.Transformers +Vale.AES +Vale.Interop +Vale.Arch.Types +Vale.Arch.BufferFriend +Vale.Lib.X64 +Vale.SHA.X64 +Vale.SHA.SHA_helpers +Vale.Curve25519.X64 +Vale.Poly1305.X64 +Vale.Inline +Vale.AsLowStar +Vale.Test +Spec +Lib -Lib.IntVector +C' > $@ && \
+	    --extract '-* +FStar.Kremlin.Endianness +Vale.Arch +Vale.X64 -Vale.X64.MemoryAdapters +Vale.Def +Vale.Lib +Vale.Bignum.X64 -Vale.Lib.Tactics +Vale.Math +Vale.Transformers +Vale.AES +Vale.Interop +Vale.Arch.Types +Vale.Arch.BufferFriend +Vale.Lib.X64 +Vale.SHA.X64 +Vale.SHA.SHA_helpers +Vale.Curve25519.X64 +Vale.Poly1305.X64 +Vale.Inline +Vale.AsLowStar +Vale.Test +Spec +Lib -Lib.IntVector +C -C.String -C.Failure' > $@ && \
 	  $(SED) -i 's!$(HACL_HOME)/obj/\(.*.checked\)!obj/\1!;s!/bin/../ulib/!/ulib/!g' $@ \
 	  ,[FSTAR-DEPEND ($*)],$(call to-obj-dir,$@))
 
@@ -1021,6 +1022,7 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt \
 	  -ccopt -Wno-unused \
 	  -warn-error @2@4-6@15@18@21+22 \
 	  -fparentheses \
+	  -fextern-c \
 	  $(notdir $(HACL_OLD_FILES)) \
 	  $(notdir $(HAND_WRITTEN_FILES)) \
 	  -o libevercrypt.a
@@ -1042,6 +1044,7 @@ dist/evercrypt-external-headers/Makefile.basic: $(ALL_KRML_FILES)
 	  -add-include '<kremlin/internal/target.h>' \
 	  -header dist/LICENSE.txt \
 	  -skip-compilation \
+	  -fextern-c \
 	  -tmpdir $(dir $@) \
 	  $^
 
@@ -1152,6 +1155,18 @@ dist/test/ml/%.exe: $(ALL_CMX_FILES) dist/test/ml/%_AutoTest.ml
 
 test-ml-%: dist/test/ml/%.exe
 	$<
+
+#################
+# OCaml library #
+#################
+
+# This is good for users of HACL* who want to extract specs and link them
+# against HACL*-extracted-to-ML
+
+obj/libhaclml.cmxa: $(filter-out $(HACL_HOME)/obj/Meta_Interface.cmx,$(ALL_CMX_FILES))
+	# JP: doesn't work because a PPX is prepended for some reason
+	#ocamlfind mklib -o haclml -package fstarlib -g -I $(HACL_HOME)/obj $(addprefix $(HACL_HOME)/obj/*.,cmo cmx ml o)
+	ocamlfind opt -a -o $@ -package fstarlib -g -I $(HACL_HOME)/obj $^
 
 
 ########

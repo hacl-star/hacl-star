@@ -539,7 +539,7 @@ poly1305_padded_256(Lib_IntVector_Intrinsics_vec256 *ctx, uint32_t len, uint8_t 
     }
     {
       uint8_t tmp[16U] = { 0U };
-      memcpy(tmp, last, rem1 * sizeof (last[0U]));
+      memcpy(tmp, last, rem1 * sizeof (uint8_t));
       {
         uint64_t u0 = load64_le(tmp);
         uint64_t lo = u0;
@@ -752,7 +752,7 @@ poly1305_padded_256(Lib_IntVector_Intrinsics_vec256 *ctx, uint32_t len, uint8_t 
   }
   {
     uint8_t tmp[16U] = { 0U };
-    memcpy(tmp, rem, r * sizeof (rem[0U]));
+    memcpy(tmp, rem, r * sizeof (uint8_t));
     if (r > (uint32_t)0U)
     {
       Lib_IntVector_Intrinsics_vec256 *pre = ctx + (uint32_t)5U;

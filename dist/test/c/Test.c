@@ -35,11 +35,11 @@ typedef uint8_t hash_alg;
 
 extern void portable_exit(int32_t uu____31);
 
-extern void C_String_print(C_String_t uu____68);
+extern void C_String_print(C_String_t uu____71);
 
-extern uint32_t C_String_strlen(C_String_t uu____74);
+extern uint32_t C_String_strlen(C_String_t uu____77);
 
-extern void C_String_memcpy(uint8_t *uu____92, C_String_t uu____93, uint32_t uu____94);
+extern void C_String_memcpy(uint8_t *uu____95, C_String_t uu____96, uint32_t uu____97);
 
 static bool whatever()
 {
@@ -5303,24 +5303,23 @@ hash_vectors_low23[64U] =
     (uint8_t)63U, (uint8_t)183U, (uint8_t)186U, (uint8_t)233U
   };
 
-typedef struct lbuffer__uint8_t_s
+typedef struct vec8_s
 {
   uint32_t len;
   uint8_t *b;
 }
-lbuffer__uint8_t;
+vec8;
 
-typedef struct
-__Spec_Hash_Definitions_hash_alg_C_String_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t_s
+typedef struct hash_vector_s
 {
   hash_alg fst;
   C_String_t snd;
-  lbuffer__uint8_t thd;
+  vec8 thd;
   uint32_t f3;
 }
-__Spec_Hash_Definitions_hash_alg_C_String_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t;
+hash_vector;
 
-static __Spec_Hash_Definitions_hash_alg_C_String_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t
+static hash_vector
 hash_vectors_low24[24U] =
   {
     {
@@ -5469,15 +5468,14 @@ hash_vectors_low24[24U] =
     }
   };
 
-typedef struct
-lbuffer__K___Spec_Hash_Definitions_hash_alg_C_String_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t_s
+typedef struct lbuffer__Test_NoHeap_hash_vector_s
 {
   uint32_t len;
-  __Spec_Hash_Definitions_hash_alg_C_String_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t *b;
+  hash_vector *b;
 }
-lbuffer__K___Spec_Hash_Definitions_hash_alg_C_String_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t;
+lbuffer__Test_NoHeap_hash_vector;
 
-static lbuffer__K___Spec_Hash_Definitions_hash_alg_C_String_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t
+static lbuffer__Test_NoHeap_hash_vector
 hash_vectors_low = { .len = (uint32_t)24U, .b = hash_vectors_low24 };
 
 static uint8_t
@@ -5536,17 +5534,16 @@ hmac_vectors_low5[48U] =
     (uint8_t)82U, (uint8_t)232U, (uint8_t)178U, (uint8_t)250U, (uint8_t)156U, (uint8_t)182U
   };
 
-typedef struct
-__Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_s
+typedef struct hmac_vector_s
 {
   hash_alg fst;
-  lbuffer__uint8_t snd;
-  lbuffer__uint8_t thd;
-  lbuffer__uint8_t f3;
+  vec8 snd;
+  vec8 thd;
+  vec8 f3;
 }
-__Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t;
+hmac_vector;
 
-static __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+static hmac_vector
 hmac_vectors_low6[2U] =
   {
     {
@@ -5563,16 +5560,14 @@ hmac_vectors_low6[2U] =
     }
   };
 
-typedef struct
-lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_s
+typedef struct lbuffer__Test_NoHeap_hmac_vector_s
 {
   uint32_t len;
-  __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  *b;
+  hmac_vector *b;
 }
-lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t;
+lbuffer__Test_NoHeap_hmac_vector;
 
-static lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+static lbuffer__Test_NoHeap_hmac_vector
 hmac_vectors_low = { .len = (uint32_t)2U, .b = hmac_vectors_low6 };
 
 static uint8_t
@@ -7991,28 +7986,27 @@ hmac_drbg_vectors_low176[255U] =
     (uint8_t)251U, (uint8_t)239U, (uint8_t)172U
   };
 
-typedef struct __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_s
+typedef struct __Test_NoHeap_vec8_Test_NoHeap_vec8_s
 {
-  lbuffer__uint8_t fst;
-  lbuffer__uint8_t snd;
+  vec8 fst;
+  vec8 snd;
 }
-__Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t;
+__Test_NoHeap_vec8_Test_NoHeap_vec8;
 
-typedef struct
-__Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_s
+typedef struct hmac_drbg_vector_s
 {
   hash_alg fst;
-  lbuffer__uint8_t snd;
-  lbuffer__uint8_t thd;
-  lbuffer__uint8_t f3;
-  lbuffer__uint8_t f4;
-  lbuffer__uint8_t f5;
-  __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t f6;
-  lbuffer__uint8_t f7;
+  vec8 snd;
+  vec8 thd;
+  vec8 f3;
+  vec8 f4;
+  vec8 f5;
+  __Test_NoHeap_vec8_Test_NoHeap_vec8 f6;
+  vec8 f7;
 }
-__Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t;
+hmac_drbg_vector;
 
-static __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+static hmac_drbg_vector
 hmac_drbg_vectors_low177[28U] =
   {
     {
@@ -8305,16 +8299,14 @@ hmac_drbg_vectors_low177[28U] =
     }
   };
 
-typedef struct
-lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_s
+typedef struct lbuffer__Test_NoHeap_hmac_drbg_vector_s
 {
   uint32_t len;
-  __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  *b;
+  hmac_drbg_vector *b;
 }
-lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t;
+lbuffer__Test_NoHeap_hmac_drbg_vector;
 
-static lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+static lbuffer__Test_NoHeap_hmac_drbg_vector
 hmac_drbg_vectors_low = { .len = (uint32_t)28U, .b = hmac_drbg_vectors_low177 };
 
 static uint8_t
@@ -8481,19 +8473,18 @@ hkdf_vectors_low12[42U] =
     (uint8_t)250U, (uint8_t)164U, (uint8_t)182U, (uint8_t)26U, (uint8_t)150U, (uint8_t)200U
   };
 
-typedef struct
-__Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_s
+typedef struct hkdf_vector_s
 {
   hash_alg fst;
-  lbuffer__uint8_t snd;
-  lbuffer__uint8_t thd;
-  lbuffer__uint8_t f3;
-  lbuffer__uint8_t f4;
-  lbuffer__uint8_t f5;
+  vec8 snd;
+  vec8 thd;
+  vec8 f3;
+  vec8 f4;
+  vec8 f5;
 }
-__Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t;
+hkdf_vector;
 
-static __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+static hkdf_vector
 hkdf_vectors_low13[3U] =
   {
     {
@@ -8518,16 +8509,14 @@ hkdf_vectors_low13[3U] =
     }
   };
 
-typedef struct
-lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_s
+typedef struct lbuffer__Test_NoHeap_hkdf_vector_s
 {
   uint32_t len;
-  __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  *b;
+  hkdf_vector *b;
 }
-lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t;
+lbuffer__Test_NoHeap_hkdf_vector;
 
-static lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+static lbuffer__Test_NoHeap_hkdf_vector
 hkdf_vectors_low = { .len = (uint32_t)3U, .b = hkdf_vectors_low13 };
 
 static uint8_t
@@ -8595,18 +8584,17 @@ chacha20_vectors_low3[114U] =
     (uint8_t)242U, (uint8_t)120U, (uint8_t)94U, (uint8_t)66U, (uint8_t)135U, (uint8_t)77U
   };
 
-typedef struct
-__Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_s
+typedef struct chacha20_vector_s
 {
-  lbuffer__uint8_t fst;
-  lbuffer__uint8_t snd;
+  vec8 fst;
+  vec8 snd;
   uint32_t thd;
-  lbuffer__uint8_t f3;
-  lbuffer__uint8_t f4;
+  vec8 f3;
+  vec8 f4;
 }
-__Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t;
+chacha20_vector;
 
-static __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+static chacha20_vector
 chacha20_vectors_low4[1U] =
   {
     {
@@ -8617,16 +8605,14 @@ chacha20_vectors_low4[1U] =
     }
   };
 
-typedef struct
-lbuffer__K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_s
+typedef struct lbuffer__Test_NoHeap_chacha20_vector_s
 {
   uint32_t len;
-  __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  *b;
+  chacha20_vector *b;
 }
-lbuffer__K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t;
+lbuffer__Test_NoHeap_chacha20_vector;
 
-static lbuffer__K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+static lbuffer__Test_NoHeap_chacha20_vector
 chacha20_vectors_low = { .len = (uint32_t)1U, .b = chacha20_vectors_low4 };
 
 #define AES_128_GCM 0
@@ -9792,20 +9778,19 @@ aead_vectors_low108[80U] =
     (uint8_t)76U, (uint8_t)197U
   };
 
-typedef struct
-__Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_s
+typedef struct aead_vector_s
 {
   cipher fst;
-  lbuffer__uint8_t snd;
-  lbuffer__uint8_t thd;
-  lbuffer__uint8_t f3;
-  lbuffer__uint8_t f4;
-  lbuffer__uint8_t f5;
-  lbuffer__uint8_t f6;
+  vec8 snd;
+  vec8 thd;
+  vec8 f3;
+  vec8 f4;
+  vec8 f5;
+  vec8 f6;
 }
-__Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t;
+aead_vector;
 
-static __Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+static aead_vector
 aead_vectors_low109[21U] =
   {
     {
@@ -9975,16 +9960,14 @@ aead_vectors_low109[21U] =
     }
   };
 
-typedef struct
-lbuffer__K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_s
+typedef struct lbuffer__Test_aead_vector_s
 {
   uint32_t len;
-  __Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  *b;
+  aead_vector *b;
 }
-lbuffer__K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t;
+lbuffer__Test_aead_vector;
 
-static lbuffer__K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+static lbuffer__Test_aead_vector
 aead_vectors_low = { .len = (uint32_t)21U, .b = aead_vectors_low109 };
 
 static void Test_Hash_main()
@@ -10153,10 +10136,7 @@ static void failwith____(C_String_t s)
   failwith____(s);
 }
 
-static void
-test_one_hash(
-  __Spec_Hash_Definitions_hash_alg_C_String_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t vec
-)
+static void test_one_hash(hash_vector vec)
 {
   uint32_t repeat = vec.f3;
   uint8_t *expected = vec.thd.b;
@@ -10219,11 +10199,11 @@ test_one_hash(
   {
     KRML_CHECK_SIZE(sizeof (uint8_t), tlen);
     uint8_t computed[tlen];
-    memset(computed, 0U, tlen * sizeof (computed[0U]));
+    memset(computed, 0U, tlen * sizeof (uint8_t));
     uint32_t total_input_len = input_len * repeat;
     KRML_CHECK_SIZE(sizeof (uint8_t), total_input_len + (uint32_t)1U);
     uint8_t total_input[total_input_len + (uint32_t)1U];
-    memset(total_input, 0U, (total_input_len + (uint32_t)1U) * sizeof (total_input[0U]));
+    memset(total_input, 0U, (total_input_len + (uint32_t)1U) * sizeof (uint8_t));
     uint8_t *total_input1 = total_input;
     for (uint32_t i = (uint32_t)0U; i < repeat; i++)
     {
@@ -10235,17 +10215,12 @@ test_one_hash(
   }
 }
 
-static void
-test_hash(
-  lbuffer__K___Spec_Hash_Definitions_hash_alg_C_String_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t
-  vec
-)
+static void test_hash(lbuffer__Test_NoHeap_hash_vector vec)
 {
   C_String_print("Hashes");
   C_String_print("\n");
   uint32_t len = vec.len;
-  __Spec_Hash_Definitions_hash_alg_C_String_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t
-  *vs = vec.b;
+  hash_vector *vs = vec.b;
   for (uint32_t i = (uint32_t)0U; i < len; i++)
   {
     test_one_hash(vs[i]);
@@ -10315,11 +10290,7 @@ static bool keysized(hash_alg a, uint32_t l)
   return l <= (uint32_t)0xffffffffU - sw;
 }
 
-static void
-test_one_hmac(
-  __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  vec
-)
+static void test_one_hmac(hmac_vector vec)
 {
   uint8_t *expected = vec.f3.b;
   uint32_t expectedlen = vec.f3.len;
@@ -10463,7 +10434,7 @@ test_one_hmac(
       }
       KRML_CHECK_SIZE(sizeof (uint8_t), sw2);
       uint8_t computed[sw2];
-      memset(computed, 0U, sw2 * sizeof (computed[0U]));
+      memset(computed, 0U, sw2 * sizeof (uint8_t));
       EverCrypt_HMAC_compute(ha, computed, key, keylen, data, datalen);
       C_String_t str = EverCrypt_Hash_string_of_alg(ha);
       uint32_t sw;
@@ -10510,28 +10481,19 @@ test_one_hmac(
   }
 }
 
-static void
-test_hmac(
-  lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  vec
-)
+static void test_hmac(lbuffer__Test_NoHeap_hmac_vector vec)
 {
   C_String_print("HMAC");
   C_String_print("\n");
   uint32_t len = vec.len;
-  __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  *vs = vec.b;
+  hmac_vector *vs = vec.b;
   for (uint32_t i = (uint32_t)0U; i < len; i++)
   {
     test_one_hmac(vs[i]);
   }
 }
 
-static void
-test_one_hmac_drbg(
-  __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  vec
-)
+static void test_one_hmac_drbg(hmac_drbg_vector vec)
 {
   uint32_t returned_bits_len = vec.f7.len;
   uint8_t *additional_input_2 = vec.f6.snd.b;
@@ -10556,7 +10518,7 @@ test_one_hmac_drbg(
   {
     KRML_CHECK_SIZE(sizeof (uint8_t), returned_bits_len);
     uint8_t output[returned_bits_len];
-    memset(output, 0U, returned_bits_len * sizeof (output[0U]));
+    memset(output, 0U, returned_bits_len * sizeof (uint8_t));
     uint32_t ctr0;
     uint8_t buf0[64U];
     uint8_t buf1[48U];
@@ -11091,28 +11053,19 @@ test_one_hmac_drbg(
   }
 }
 
-static void
-test_hmac_drbg(
-  lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  vec
-)
+static void test_hmac_drbg(lbuffer__Test_NoHeap_hmac_drbg_vector vec)
 {
   C_String_print("HMAC-DRBG");
   C_String_print("\n");
   uint32_t len = vec.len;
-  __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  *vs = vec.b;
+  hmac_drbg_vector *vs = vec.b;
   for (uint32_t i = (uint32_t)0U; i < len; i++)
   {
     test_one_hmac_drbg(vs[i]);
   }
 }
 
-static void
-test_one_hkdf(
-  __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  vec
-)
+static void test_one_hkdf(hkdf_vector vec)
 {
   uint8_t *expected_okm = vec.f5.b;
   uint32_t okmlen = vec.f5.len;
@@ -11394,7 +11347,7 @@ test_one_hkdf(
           }
           KRML_CHECK_SIZE(sizeof (uint8_t), sw5);
           uint8_t computed_prk[sw5];
-          memset(computed_prk, 0U, sw5 * sizeof (computed_prk[0U]));
+          memset(computed_prk, 0U, sw5 * sizeof (uint8_t));
           EverCrypt_HKDF_extract(ha, computed_prk, salt, saltlen, ikm, ikmlen);
           uint32_t sw;
           switch (ha)
@@ -11438,7 +11391,7 @@ test_one_hkdf(
           TestLib_compare_and_print(str, expected_prk, computed_prk, sw);
           KRML_CHECK_SIZE(sizeof (uint8_t), okmlen + (uint32_t)1U);
           uint8_t computed_okm[okmlen + (uint32_t)1U];
-          memset(computed_okm, 0U, (okmlen + (uint32_t)1U) * sizeof (computed_okm[0U]));
+          memset(computed_okm, 0U, (okmlen + (uint32_t)1U) * sizeof (uint8_t));
           uint8_t *computed_okm1 = computed_okm;
           EverCrypt_HKDF_expand(ha, computed_okm1, computed_prk, prklen, info, infolen, okmlen);
           TestLib_compare_and_print(str, expected_okm, computed_okm1, okmlen);
@@ -11448,28 +11401,19 @@ test_one_hkdf(
   }
 }
 
-static void
-test_hkdf(
-  lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  vec
-)
+static void test_hkdf(lbuffer__Test_NoHeap_hkdf_vector vec)
 {
   C_String_print("HKDF");
   C_String_print("\n");
   uint32_t len = vec.len;
-  __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  *vs = vec.b;
+  hkdf_vector *vs = vec.b;
   for (uint32_t i = (uint32_t)0U; i < len; i++)
   {
     test_one_hkdf(vs[i]);
   }
 }
 
-static void
-test_one_chacha20(
-  __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  v
-)
+static void test_one_chacha20(chacha20_vector v)
 {
   uint8_t *cipher0 = v.f4.b;
   uint32_t cipher_len = v.f4.len;
@@ -11504,24 +11448,19 @@ test_one_chacha20(
   {
     KRML_CHECK_SIZE(sizeof (uint8_t), cipher_len + (uint32_t)1U);
     uint8_t cipher_[cipher_len + (uint32_t)1U];
-    memset(cipher_, 0U, (cipher_len + (uint32_t)1U) * sizeof (cipher_[0U]));
+    memset(cipher_, 0U, (cipher_len + (uint32_t)1U) * sizeof (uint8_t));
     uint8_t *cipher_1 = cipher_;
     EverCrypt_Cipher_chacha20(plain_len, cipher_1, plain, key, iv, ctr);
     TestLib_compare_and_print("of ChaCha20 message", cipher0, cipher_1, cipher_len);
   }
 }
 
-static void
-test_chacha20(
-  lbuffer__K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  vec
-)
+static void test_chacha20(lbuffer__Test_NoHeap_chacha20_vector vec)
 {
   C_String_print("CHACHA20");
   C_String_print("\n");
   uint32_t len = vec.len;
-  __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  *vs = vec.b;
+  chacha20_vector *vs = vec.b;
   for (uint32_t i = (uint32_t)0U; i < len; i++)
   {
     test_one_chacha20(vs[i]);
@@ -11639,7 +11578,7 @@ static void test_one_chacha20poly1305(vector v)
   {
     KRML_CHECK_SIZE(sizeof (uint8_t), plain_len + (uint32_t)16U);
     uint8_t tmp[plain_len + (uint32_t)16U];
-    memset(tmp, 0U, (plain_len + (uint32_t)16U) * sizeof (tmp[0U]));
+    memset(tmp, 0U, (plain_len + (uint32_t)16U) * sizeof (uint8_t));
     uint8_t *tmp_msg_ = tmp;
     uint8_t *tag_ = tmp + plain_len;
     EverCrypt_Chacha20Poly1305_aead_encrypt(key,
@@ -12248,7 +12187,7 @@ test_aead_st(
           }
           KRML_CHECK_SIZE(sizeof (uint8_t), plaintext_blen);
           uint8_t plaintext_[plaintext_blen];
-          memset(plaintext_, 0U, plaintext_blen * sizeof (plaintext_[0U]));
+          memset(plaintext_, 0U, plaintext_blen * sizeof (uint8_t));
           uint8_t *plaintext_1 = plaintext_;
           uint32_t ciphertext_blen;
           if (ciphertext_len == (uint32_t)0U)
@@ -12261,7 +12200,7 @@ test_aead_st(
           }
           KRML_CHECK_SIZE(sizeof (uint8_t), ciphertext_blen);
           uint8_t ciphertext_[ciphertext_blen];
-          memset(ciphertext_, 0U, ciphertext_blen * sizeof (ciphertext_[0U]));
+          memset(ciphertext_, 0U, ciphertext_blen * sizeof (uint8_t));
           uint8_t *ciphertext_1 = ciphertext_;
           uint32_t tag_blen;
           if (tag_len == (uint32_t)0U)
@@ -12274,7 +12213,7 @@ test_aead_st(
           }
           KRML_CHECK_SIZE(sizeof (uint8_t), tag_len);
           uint8_t tag_[tag_len];
-          memset(tag_, 0U, tag_len * sizeof (tag_[0U]));
+          memset(tag_, 0U, tag_len * sizeof (uint8_t));
           uint8_t *tag_1 = tag_;
           if
           (
@@ -12411,20 +12350,13 @@ static bool __eq__Test_Vectors_cipher(cipher y, cipher x)
   }
 }
 
-static void
-test_aead_loop(
-  cipher alg0,
-  lbuffer__K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  uu____905
-)
+static void test_aead_loop(cipher alg0, lbuffer__Test_aead_vector uu____905)
 {
   uint32_t len = uu____905.len;
-  __Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  *vs = uu____905.b;
+  aead_vector *vs = uu____905.b;
   if (!(len == (uint32_t)0U))
   {
-    __Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-    v = vs[0U];
+    aead_vector v = vs[0U];
     uint8_t *ciphertext = v.f6.b;
     uint32_t ciphertext_len = v.f6.len;
     uint8_t *plaintext = v.f5.b;
@@ -12455,12 +12387,7 @@ test_aead_loop(
         ciphertext_len);
     }
     test_aead_loop(alg0,
-      (
-        (lbuffer__K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t){
-          .len = len - (uint32_t)1U,
-          .b = vs + (uint32_t)1U
-        }
-      ));
+      ((lbuffer__Test_aead_vector){ .len = len - (uint32_t)1U, .b = vs + (uint32_t)1U }));
   }
 }
 
@@ -12608,7 +12535,7 @@ test_ctr_st(
     {
       KRML_CHECK_SIZE(sizeof (uint8_t), block_len(a));
       uint8_t output_[block_len(a)];
-      memset(output_, 0U, block_len(a) * sizeof (output_[0U]));
+      memset(output_, 0U, block_len(a) * sizeof (uint8_t));
       state_s2 *s = NULL;
       error_code r = EverCrypt_CTR_create_in(a, &s, k, nonce, nonce_len, ctr);
       if (__neq__EverCrypt_Error_error_code(r, Success))
@@ -12645,19 +12572,13 @@ test_ctr_st(
   }
 }
 
-static void
-test_chacha20_ctr_loop(
-  lbuffer__K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  vs
-)
+static void test_chacha20_ctr_loop(lbuffer__Test_NoHeap_chacha20_vector vs)
 {
   uint32_t len = vs.len;
-  __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  *vs1 = vs.b;
+  chacha20_vector *vs1 = vs.b;
   if (len != (uint32_t)0U)
   {
-    __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-    v = vs1[0U];
+    chacha20_vector v = vs1[0U];
     uint8_t *cipher0 = v.f4.b;
     uint32_t cipher_len = v.f4.len;
     uint8_t *plain = v.f3.b;
@@ -12691,10 +12612,7 @@ test_chacha20_ctr_loop(
         round_len);
     }
     test_chacha20_ctr_loop((
-        (lbuffer__K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t){
-          .len = len - (uint32_t)1U,
-          .b = vs1 + (uint32_t)1U
-        }
+        (lbuffer__Test_NoHeap_chacha20_vector){ .len = len - (uint32_t)1U, .b = vs1 + (uint32_t)1U }
       ));
   }
 }

@@ -26,11 +26,14 @@
 #include <kremlin/internal/types.h>
 #include <kremlin/internal/target.h>
 
+
 #ifndef __EverCrypt_H
 #define __EverCrypt_H
 
 
-
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 #define Spec_Hash_Definitions_SHA2_224 0
 #define Spec_Hash_Definitions_SHA2_256 1
@@ -1037,6 +1040,10 @@ extern void
 EverCrypt_Curve25519_scalarmult(uint8_t *shared, uint8_t *my_priv, uint8_t *their_pub);
 
 extern bool EverCrypt_Curve25519_ecdh(uint8_t *shared, uint8_t *my_priv, uint8_t *their_pub);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __EverCrypt_H_DEFINED
 #endif

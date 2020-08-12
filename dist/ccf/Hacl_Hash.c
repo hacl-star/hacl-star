@@ -61,7 +61,7 @@ Hacl_Hash_MD5_legacy_update_last(
   uint8_t *tmp = tmp_twoblocks;
   uint8_t *tmp_rest = tmp;
   uint8_t *tmp_pad = tmp + rest_len;
-  memcpy(tmp_rest, rest, rest_len * sizeof (rest[0U]));
+  memcpy(tmp_rest, rest, rest_len * sizeof (uint8_t));
   Hacl_Hash_Core_MD5_legacy_pad(total_input_len, tmp_pad);
   Hacl_Hash_MD5_legacy_update_multi(s, tmp, tmp_len / (uint32_t)64U);
 }
@@ -1225,7 +1225,7 @@ Hacl_Hash_SHA1_legacy_update_last(
   uint8_t *tmp = tmp_twoblocks;
   uint8_t *tmp_rest = tmp;
   uint8_t *tmp_pad = tmp + rest_len;
-  memcpy(tmp_rest, rest, rest_len * sizeof (rest[0U]));
+  memcpy(tmp_rest, rest, rest_len * sizeof (uint8_t));
   Hacl_Hash_Core_SHA1_legacy_pad(total_input_len, tmp_pad);
   Hacl_Hash_SHA1_legacy_update_multi(s, tmp, tmp_len / (uint32_t)64U);
 }
@@ -1455,7 +1455,7 @@ Hacl_Hash_SHA2_update_last_224(
   uint8_t *tmp = tmp_twoblocks;
   uint8_t *tmp_rest = tmp;
   uint8_t *tmp_pad = tmp + rest_len;
-  memcpy(tmp_rest, rest, rest_len * sizeof (rest[0U]));
+  memcpy(tmp_rest, rest, rest_len * sizeof (uint8_t));
   Hacl_Hash_Core_SHA2_pad_224(total_input_len, tmp_pad);
   Hacl_Hash_SHA2_update_multi_224(s, tmp, tmp_len / (uint32_t)64U);
 }
@@ -1487,7 +1487,7 @@ Hacl_Hash_SHA2_update_last_256(
   uint8_t *tmp = tmp_twoblocks;
   uint8_t *tmp_rest = tmp;
   uint8_t *tmp_pad = tmp + rest_len;
-  memcpy(tmp_rest, rest, rest_len * sizeof (rest[0U]));
+  memcpy(tmp_rest, rest, rest_len * sizeof (uint8_t));
   Hacl_Hash_Core_SHA2_pad_256(total_input_len, tmp_pad);
   Hacl_Hash_SHA2_update_multi_256(s, tmp, tmp_len / (uint32_t)64U);
 }
@@ -1520,7 +1520,7 @@ Hacl_Hash_SHA2_update_last_384(
   uint8_t *tmp = tmp_twoblocks;
   uint8_t *tmp_rest = tmp;
   uint8_t *tmp_pad = tmp + rest_len;
-  memcpy(tmp_rest, rest, rest_len * sizeof (rest[0U]));
+  memcpy(tmp_rest, rest, rest_len * sizeof (uint8_t));
   Hacl_Hash_Core_SHA2_pad_384(total_input_len, tmp_pad);
   Hacl_Hash_SHA2_update_multi_384(s, tmp, tmp_len / (uint32_t)128U);
 }
@@ -1553,7 +1553,7 @@ Hacl_Hash_SHA2_update_last_512(
   uint8_t *tmp = tmp_twoblocks;
   uint8_t *tmp_rest = tmp;
   uint8_t *tmp_pad = tmp + rest_len;
-  memcpy(tmp_rest, rest, rest_len * sizeof (rest[0U]));
+  memcpy(tmp_rest, rest, rest_len * sizeof (uint8_t));
   Hacl_Hash_Core_SHA2_pad_512(total_input_len, tmp_pad);
   Hacl_Hash_SHA2_update_multi_512(s, tmp, tmp_len / (uint32_t)128U);
 }
@@ -1777,7 +1777,7 @@ void Hacl_Hash_Core_SHA2_update_224(uint32_t *hash, uint8_t *block)
       computed_ws[i] = w;
     }
   }
-  memcpy(hash1, hash, (uint32_t)8U * sizeof (hash[0U]));
+  memcpy(hash1, hash, (uint32_t)8U * sizeof (uint32_t));
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
   {
     uint32_t a0 = hash1[0U];
@@ -1850,7 +1850,7 @@ void Hacl_Hash_Core_SHA2_update_256(uint32_t *hash, uint8_t *block)
       computed_ws[i] = w;
     }
   }
-  memcpy(hash1, hash, (uint32_t)8U * sizeof (hash[0U]));
+  memcpy(hash1, hash, (uint32_t)8U * sizeof (uint32_t));
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
   {
     uint32_t a0 = hash1[0U];
@@ -1923,7 +1923,7 @@ void Hacl_Hash_Core_SHA2_update_384(uint64_t *hash, uint8_t *block)
       computed_ws[i] = w;
     }
   }
-  memcpy(hash1, hash, (uint32_t)8U * sizeof (hash[0U]));
+  memcpy(hash1, hash, (uint32_t)8U * sizeof (uint64_t));
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)80U; i++)
   {
     uint64_t a0 = hash1[0U];
@@ -1998,7 +1998,7 @@ void Hacl_Hash_Core_SHA2_update_512(uint64_t *hash, uint8_t *block)
       computed_ws[i] = w;
     }
   }
-  memcpy(hash1, hash, (uint32_t)8U * sizeof (hash[0U]));
+  memcpy(hash1, hash, (uint32_t)8U * sizeof (uint64_t));
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)80U; i++)
   {
     uint64_t a0 = hash1[0U];
@@ -2098,10 +2098,6 @@ void Hacl_Hash_Core_SHA2_pad_384(uint128_t len, uint8_t *dst)
   uint8_t *dst1 = dst;
   dst1[0U] = (uint8_t)0x80U;
   uint8_t *dst2 = dst + (uint32_t)1U;
-  uint32_t
-  len_zero =
-    ((uint32_t)256U - ((uint32_t)17U + (uint32_t)((uint64_t)len % (uint64_t)(uint32_t)128U)))
-    % (uint32_t)128U;
   for
   (uint32_t
     i = (uint32_t)0U;
@@ -2130,10 +2126,6 @@ void Hacl_Hash_Core_SHA2_pad_512(uint128_t len, uint8_t *dst)
   uint8_t *dst1 = dst;
   dst1[0U] = (uint8_t)0x80U;
   uint8_t *dst2 = dst + (uint32_t)1U;
-  uint32_t
-  len_zero =
-    ((uint32_t)256U - ((uint32_t)17U + (uint32_t)((uint64_t)len % (uint64_t)(uint32_t)128U)))
-    % (uint32_t)128U;
   for
   (uint32_t
     i = (uint32_t)0U;

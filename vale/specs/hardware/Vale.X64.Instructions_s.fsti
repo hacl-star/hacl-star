@@ -85,6 +85,16 @@ val ins_Cpuid :
     [inOut (one64Reg rRax); out (one64Reg rRbx); inOut (one64Reg rRcx); out (one64Reg rRdx)]
     [] PreserveFlags eval_Cpuid
 
+// The XGETBV instruction requires that OSXSAVE (in CPUID) is enabled.
+// We underspecify XGETBV here to only support fetching XCR0, which
+// is supported on any processor supporting the XGETBV instruction
+let eval_Xgetbv (rcx:nat64) : option (nat64 & nat64) =
+  if osxsave_enabled && rcx = 0 then Some (xgetbv rRax rcx, xgetbv rRdx rcx) else None
+val ins_Xgetbv :
+  instr_dep
+    [out (one64Reg rRax); out (one64Reg rRdx)]
+    [one64Reg rRcx] PreserveFlags eval_Xgetbv
+
 let check_avx (#a:Type0) (x:option a) : option a =
   if avx_enabled then x else None
 

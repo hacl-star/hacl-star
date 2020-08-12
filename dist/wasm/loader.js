@@ -481,5 +481,6 @@ if (typeof module !== "undefined")
   module.exports = {
     link: link,
     reserve: reserve,
-    dump: dump
+    dump: dump,
+    hex: hex
   };

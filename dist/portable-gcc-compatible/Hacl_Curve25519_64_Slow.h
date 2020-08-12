@@ -28,11 +28,14 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __Hacl_Curve25519_64_Slow_H
 #define __Hacl_Curve25519_64_Slow_H
 
 #include "Hacl_Kremlib.h"
-
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 /* SNIPPET_START: Hacl_Curve25519_64_Slow_scalarmult */
 
@@ -51,6 +54,10 @@ void Hacl_Curve25519_64_Slow_secret_to_public(uint8_t *pub, uint8_t *priv);
 bool Hacl_Curve25519_64_Slow_ecdh(uint8_t *out, uint8_t *priv, uint8_t *pub);
 
 /* SNIPPET_END: Hacl_Curve25519_64_Slow_ecdh */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Curve25519_64_Slow_H_DEFINED
 #endif
