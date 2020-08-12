@@ -28,12 +28,15 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __Hacl_HMAC_H
 #define __Hacl_HMAC_H
 
 #include "Hacl_Kremlib.h"
 #include "Hacl_Hash.h"
-
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 void
 Hacl_HMAC_legacy_compute_sha1(
@@ -70,6 +73,10 @@ Hacl_HMAC_compute_sha2_512(
   uint8_t *data,
   uint32_t data_len
 );
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_HMAC_H_DEFINED
 #endif

@@ -28,6 +28,7 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __EverCrypt_Hash_H
 #define __EverCrypt_Hash_H
 
@@ -36,7 +37,9 @@
 #include "Hacl_Hash.h"
 #include "EverCrypt_AutoConfig2.h"
 #include "Hacl_Spec.h"
-
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 /* SNIPPET_START: EverCrypt_Hash_alg */
 
@@ -439,6 +442,10 @@ void
 EverCrypt_Hash_Incremental_free(Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *s);
 
 /* SNIPPET_END: EverCrypt_Hash_Incremental_free */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __EverCrypt_Hash_H_DEFINED
 #endif

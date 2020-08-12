@@ -1421,13 +1421,13 @@ static void cipher_loop(uint8_t *state, uint8_t *w, uint8_t *sbox1, uint32_t rou
 void Crypto_Symmetric_AES_cipher(uint8_t *out, uint8_t *input, uint8_t *w, uint8_t *sbox1)
 {
   uint8_t state[16U] = { 0U };
-  memcpy(state, input, (uint32_t)16U * sizeof (input[0U]));
+  memcpy(state, input, (uint32_t)16U * sizeof (uint8_t));
   addRoundKey(state, w, (uint32_t)0U);
   cipher_loop(state, w, sbox1, (uint32_t)1U);
   subBytes_sbox(state, sbox1);
   shiftRows(state);
   addRoundKey(state, w, (uint32_t)14U);
-  memcpy(out, state, (uint32_t)16U * sizeof (state[0U]));
+  memcpy(out, state, (uint32_t)16U * sizeof (uint8_t));
 }
 
 static void rotWord(uint8_t *word)
@@ -1465,7 +1465,7 @@ static uint8_t rcon(uint32_t i, uint8_t tmp)
 
 static void keyExpansion_aux_0(uint8_t *w, uint8_t *temp, uint8_t *sbox1, uint32_t j)
 {
-  memcpy(temp, w + (uint32_t)4U * j - (uint32_t)4U, (uint32_t)4U * sizeof (w[0U]));
+  memcpy(temp, w + (uint32_t)4U * j - (uint32_t)4U, (uint32_t)4U * sizeof (uint8_t));
   if (j % (uint32_t)8U == (uint32_t)0U)
   {
     uint8_t t0;
@@ -1514,7 +1514,7 @@ static void keyExpansion_aux(uint8_t *w, uint8_t *temp, uint8_t *sbox1, uint32_t
 void Crypto_Symmetric_AES_keyExpansion(uint8_t *key, uint8_t *w, uint8_t *sbox1)
 {
   uint8_t temp[4U] = { 0U };
-  memcpy(w, key, (uint32_t)32U * sizeof (key[0U]));
+  memcpy(w, key, (uint32_t)32U * sizeof (uint8_t));
   keyExpansion_aux(w, temp, sbox1, (uint32_t)8U);
 }
 
@@ -1610,13 +1610,13 @@ static void inv_cipher_loop(uint8_t *state, uint8_t *w, uint8_t *sbox1, uint32_t
 void Crypto_Symmetric_AES_inv_cipher(uint8_t *out, uint8_t *input, uint8_t *w, uint8_t *sbox1)
 {
   uint8_t state[16U] = { 0U };
-  memcpy(state, input, (uint32_t)16U * sizeof (input[0U]));
+  memcpy(state, input, (uint32_t)16U * sizeof (uint8_t));
   addRoundKey(state, w, (uint32_t)14U);
   inv_cipher_loop(state, w, sbox1, (uint32_t)13U);
   invShiftRows(state);
   invSubBytes_sbox(state, sbox1);
   addRoundKey(state, w, (uint32_t)0U);
-  memcpy(out, state, (uint32_t)16U * sizeof (state[0U]));
+  memcpy(out, state, (uint32_t)16U * sizeof (uint8_t));
 }
 
 static uint8_t multiply0(uint8_t a, uint8_t b)
@@ -3016,13 +3016,13 @@ static void cipher_loop0(uint8_t *state, uint8_t *w, uint8_t *sbox1, uint32_t ro
 void Crypto_Symmetric_AES128_cipher(uint8_t *out, uint8_t *input, uint8_t *w, uint8_t *sbox1)
 {
   uint8_t state[16U] = { 0U };
-  memcpy(state, input, (uint32_t)16U * sizeof (input[0U]));
+  memcpy(state, input, (uint32_t)16U * sizeof (uint8_t));
   addRoundKey0(state, w, (uint32_t)0U);
   cipher_loop0(state, w, sbox1, (uint32_t)1U);
   subBytes_sbox0(state, sbox1);
   shiftRows0(state);
   addRoundKey0(state, w, (uint32_t)10U);
-  memcpy(out, state, (uint32_t)16U * sizeof (state[0U]));
+  memcpy(out, state, (uint32_t)16U * sizeof (uint8_t));
 }
 
 static void rotWord0(uint8_t *word)
@@ -3060,7 +3060,7 @@ static uint8_t rcon0(uint32_t i, uint8_t tmp)
 
 static void keyExpansion_aux_00(uint8_t *w, uint8_t *temp, uint8_t *sbox1, uint32_t j)
 {
-  memcpy(temp, w + (uint32_t)4U * j - (uint32_t)4U, (uint32_t)4U * sizeof (w[0U]));
+  memcpy(temp, w + (uint32_t)4U * j - (uint32_t)4U, (uint32_t)4U * sizeof (uint8_t));
   if (j % (uint32_t)4U == (uint32_t)0U)
   {
     uint8_t t0;
@@ -3109,7 +3109,7 @@ static void keyExpansion_aux0(uint8_t *w, uint8_t *temp, uint8_t *sbox1, uint32_
 void Crypto_Symmetric_AES128_keyExpansion(uint8_t *key, uint8_t *w, uint8_t *sbox1)
 {
   uint8_t temp[4U] = { 0U };
-  memcpy(w, key, (uint32_t)16U * sizeof (key[0U]));
+  memcpy(w, key, (uint32_t)16U * sizeof (uint8_t));
   keyExpansion_aux0(w, temp, sbox1, (uint32_t)4U);
 }
 
@@ -3210,12 +3210,12 @@ void
 Crypto_Symmetric_AES128_inv_cipher(uint8_t *out, uint8_t *input, uint8_t *w, uint8_t *sbox1)
 {
   uint8_t state[16U] = { 0U };
-  memcpy(state, input, (uint32_t)16U * sizeof (input[0U]));
+  memcpy(state, input, (uint32_t)16U * sizeof (uint8_t));
   addRoundKey0(state, w, (uint32_t)10U);
   inv_cipher_loop0(state, w, sbox1, (uint32_t)9U);
   invShiftRows0(state);
   invSubBytes_sbox0(state, sbox1);
   addRoundKey0(state, w, (uint32_t)0U);
-  memcpy(out, state, (uint32_t)16U * sizeof (state[0U]));
+  memcpy(out, state, (uint32_t)16U * sizeof (uint8_t));
 }
 

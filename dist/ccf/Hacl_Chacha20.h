@@ -27,11 +27,14 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __Hacl_Chacha20_H
 #define __Hacl_Chacha20_H
 
 #include "Hacl_Kremlib.h"
-
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 void Hacl_Impl_Chacha20_chacha20_init(uint32_t *ctx, uint8_t *k, uint8_t *n, uint32_t ctr);
 
@@ -65,6 +68,10 @@ Hacl_Chacha20_chacha20_decrypt(
   uint8_t *n,
   uint32_t ctr
 );
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Chacha20_H_DEFINED
 #endif

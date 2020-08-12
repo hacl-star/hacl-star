@@ -59,7 +59,7 @@ blake2b_update_block(
       (uint64_t)(totlen >> (uint32_t)64U),
       wv_14,
       wv_15);
-  memcpy(wv, hash, (uint32_t)4U * (uint32_t)1U * sizeof (hash[0U]));
+  memcpy(wv, hash, (uint32_t)4U * (uint32_t)1U * sizeof (Lib_IntVector_Intrinsics_vec256));
   Lib_IntVector_Intrinsics_vec256 *wv3 = wv + (uint32_t)3U * (uint32_t)1U;
   wv3[0U] = Lib_IntVector_Intrinsics_vec256_xor(wv3[0U], mask);
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)12U; i++)
@@ -266,7 +266,7 @@ Hacl_Blake2b_256_blake2b(
   r1[0U] = Lib_IntVector_Intrinsics_vec256_load64s(iv4, iv5, iv6, iv7);
   if (!(kk == (uint32_t)0U))
   {
-    memcpy(b20, k, kk * sizeof (k[0U]));
+    memcpy(b20, k, kk * sizeof (uint8_t));
     uint128_t totlen = (uint128_t)(uint64_t)(uint32_t)0U + (uint128_t)(uint64_t)(uint32_t)128U;
     uint8_t *b3 = b20 + (uint32_t)0U * (uint32_t)128U;
     blake2b_update_block(b1, b, false, totlen, b3);
@@ -295,14 +295,14 @@ Hacl_Blake2b_256_blake2b(
   }
   uint8_t b21[128U] = { 0U };
   uint8_t *last = d + ll - rem;
-  memcpy(b21, last, rem * sizeof (last[0U]));
+  memcpy(b21, last, rem * sizeof (uint8_t));
   uint128_t totlen = prev0 + (uint128_t)(uint64_t)ll;
   blake2b_update_block(b1, b, true, totlen, b21);
   Lib_Memzero0_memzero(b21, (uint32_t)128U * sizeof (b21[0U]));
   uint32_t double_row = (uint32_t)2U * (uint32_t)4U * (uint32_t)8U;
   KRML_CHECK_SIZE(sizeof (uint8_t), double_row);
   uint8_t b2[double_row];
-  memset(b2, 0U, double_row * sizeof (b2[0U]));
+  memset(b2, 0U, double_row * sizeof (uint8_t));
   uint8_t *first = b2;
   uint8_t *second = b2 + (uint32_t)4U * (uint32_t)8U;
   Lib_IntVector_Intrinsics_vec256 *row0 = b + (uint32_t)0U * (uint32_t)1U;
@@ -310,7 +310,7 @@ Hacl_Blake2b_256_blake2b(
   Lib_IntVector_Intrinsics_vec256_store_le(first, row0[0U]);
   Lib_IntVector_Intrinsics_vec256_store_le(second, row1[0U]);
   uint8_t *final = b2;
-  memcpy(output, final, nn * sizeof (final[0U]));
+  memcpy(output, final, nn * sizeof (uint8_t));
   Lib_Memzero0_memzero(b2, double_row * sizeof (b2[0U]));
   Lib_Memzero0_memzero(b1, stlen * sizeof (b1[0U]));
   Lib_Memzero0_memzero(b, stlen * sizeof (b[0U]));

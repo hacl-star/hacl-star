@@ -27,12 +27,15 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __Hacl_Hash_H
 #define __Hacl_Hash_H
 
 #include "Hacl_Kremlib.h"
 #include "Hacl_Spec.h"
-
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 void Hacl_Hash_MD5_legacy_update_multi(u32 *s, u8 *blocks, u32 n_blocks);
 
@@ -125,6 +128,10 @@ u32 Hacl_Hash_Definitions_block_len(Spec_Hash_Definitions_hash_alg a);
 u32 Hacl_Hash_Definitions_hash_word_len(Spec_Hash_Definitions_hash_alg a);
 
 u32 Hacl_Hash_Definitions_hash_len(Spec_Hash_Definitions_hash_alg a);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Hash_H_DEFINED
 #endif

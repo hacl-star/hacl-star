@@ -138,7 +138,7 @@ Hacl_P256_ecdsa_verif_p256_sha512(
   uint8_t *s
 );
 
-extern void C_String_print(C_String_t uu____68);
+extern void C_String_print(C_String_t uu____71);
 
 extern void LowStar_Printf_print_string(Prims_string uu____39);
 
@@ -1211,26 +1211,25 @@ sigver_vectors256_low74[32U] =
     (uint8_t)125U, (uint8_t)206U
   };
 
-typedef struct lbuffer__uint8_t_s
+typedef struct vec8_s
 {
   uint32_t len;
   uint8_t *b;
 }
-lbuffer__uint8_t;
+vec8;
 
-typedef struct
-__Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_bool_s
+typedef struct sigver_vector_s
 {
-  lbuffer__uint8_t fst;
-  lbuffer__uint8_t snd;
-  lbuffer__uint8_t thd;
-  lbuffer__uint8_t f3;
-  lbuffer__uint8_t f4;
+  vec8 fst;
+  vec8 snd;
+  vec8 thd;
+  vec8 f3;
+  vec8 f4;
   bool f5;
 }
-__Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_bool;
+sigver_vector;
 
-static __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_bool
+static sigver_vector
 sigver_vectors256_low75[15U] =
   {
     {
@@ -1340,16 +1339,14 @@ sigver_vectors256_low75[15U] =
     }
   };
 
-typedef struct
-lbuffer__K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_bool_s
+typedef struct lbuffer__Hacl_Test_ECDSA_sigver_vector_s
 {
   uint32_t len;
-  __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_bool
-  *b;
+  sigver_vector *b;
 }
-lbuffer__K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_bool;
+lbuffer__Hacl_Test_ECDSA_sigver_vector;
 
-static lbuffer__K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_bool
+static lbuffer__Hacl_Test_ECDSA_sigver_vector
 sigver_vectors256_low = { .len = (uint32_t)15U, .b = sigver_vectors256_low75 };
 
 static uint8_t
@@ -2417,7 +2414,7 @@ sigver_vectors384_low74[32U] =
     (uint8_t)96U, (uint8_t)58U
   };
 
-static __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_bool
+static sigver_vector
 sigver_vectors384_low75[15U] =
   {
     {
@@ -2527,7 +2524,7 @@ sigver_vectors384_low75[15U] =
     }
   };
 
-static lbuffer__K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_bool
+static lbuffer__Hacl_Test_ECDSA_sigver_vector
 sigver_vectors384_low = { .len = (uint32_t)15U, .b = sigver_vectors384_low75 };
 
 static uint8_t
@@ -3595,7 +3592,7 @@ sigver_vectors512_low74[32U] =
     (uint8_t)92U, (uint8_t)140U
   };
 
-static __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_bool
+static sigver_vector
 sigver_vectors512_low75[15U] =
   {
     {
@@ -3705,7 +3702,7 @@ sigver_vectors512_low75[15U] =
     }
   };
 
-static lbuffer__K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_bool
+static lbuffer__Hacl_Test_ECDSA_sigver_vector
 sigver_vectors512_low = { .len = (uint32_t)15U, .b = sigver_vectors512_low75 };
 
 static uint8_t
@@ -5103,20 +5100,19 @@ siggen_vectors256_low104[32U] =
     (uint8_t)182U, (uint8_t)111U
   };
 
-typedef struct
-__Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_s
+typedef struct siggen_vector_s
 {
-  lbuffer__uint8_t fst;
-  lbuffer__uint8_t snd;
-  lbuffer__uint8_t thd;
-  lbuffer__uint8_t f3;
-  lbuffer__uint8_t f4;
-  lbuffer__uint8_t f5;
-  lbuffer__uint8_t f6;
+  vec8 fst;
+  vec8 snd;
+  vec8 thd;
+  vec8 f3;
+  vec8 f4;
+  vec8 f5;
+  vec8 f6;
 }
-__Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t;
+siggen_vector;
 
-static __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+static siggen_vector
 siggen_vectors256_low105[15U] =
   {
     {
@@ -5256,16 +5252,14 @@ siggen_vectors256_low105[15U] =
     }
   };
 
-typedef struct
-lbuffer__K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_s
+typedef struct lbuffer__Hacl_Test_ECDSA_siggen_vector_s
 {
   uint32_t len;
-  __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  *b;
+  siggen_vector *b;
 }
-lbuffer__K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t;
+lbuffer__Hacl_Test_ECDSA_siggen_vector;
 
-static lbuffer__K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+static lbuffer__Hacl_Test_ECDSA_siggen_vector
 siggen_vectors256_low = { .len = (uint32_t)15U, .b = siggen_vectors256_low105 };
 
 static uint8_t
@@ -6663,7 +6657,7 @@ siggen_vectors384_low104[32U] =
     (uint8_t)211U, (uint8_t)162U
   };
 
-static __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+static siggen_vector
 siggen_vectors384_low105[15U] =
   {
     {
@@ -6803,7 +6797,7 @@ siggen_vectors384_low105[15U] =
     }
   };
 
-static lbuffer__K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+static lbuffer__Hacl_Test_ECDSA_siggen_vector
 siggen_vectors384_low = { .len = (uint32_t)15U, .b = siggen_vectors384_low105 };
 
 static uint8_t
@@ -8201,7 +8195,7 @@ siggen_vectors512_low104[32U] =
     (uint8_t)29U, (uint8_t)243U
   };
 
-static __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+static siggen_vector
 siggen_vectors512_low105[15U] =
   {
     {
@@ -8341,7 +8335,7 @@ siggen_vectors512_low105[15U] =
     }
   };
 
-static lbuffer__K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+static lbuffer__Hacl_Test_ECDSA_siggen_vector
 siggen_vectors512_low = { .len = (uint32_t)15U, .b = siggen_vectors512_low105 };
 
 static bool compare_and_print(uint8_t *b1, uint8_t *b2, uint32_t len)
@@ -8371,11 +8365,7 @@ static bool compare_and_print(uint8_t *b1, uint8_t *b2, uint32_t len)
   return b;
 }
 
-static void
-test_sigver256(
-  __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_bool
-  vec
-)
+static void test_sigver256(sigver_vector vec)
 {
   bool result = vec.f5;
   uint8_t *s = vec.f4.b;
@@ -8402,8 +8392,8 @@ test_sigver256(
   else
   {
     uint8_t qxy[64U] = { 0U };
-    memcpy(qxy, qx, (uint32_t)32U * sizeof (qx[0U]));
-    memcpy(qxy + (uint32_t)32U, qy, (uint32_t)32U * sizeof (qy[0U]));
+    memcpy(qxy, qx, (uint32_t)32U * sizeof (uint8_t));
+    memcpy(qxy + (uint32_t)32U, qy, (uint32_t)32U * sizeof (uint8_t));
     bool result_ = Hacl_P256_ecdsa_verif_p256_sha2(msg_len, msg, qxy, r, s);
     if (!(result_ == result))
     {
@@ -8413,11 +8403,7 @@ test_sigver256(
   }
 }
 
-static void
-test_sigver384(
-  __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_bool
-  vec
-)
+static void test_sigver384(sigver_vector vec)
 {
   bool result = vec.f5;
   uint8_t *s = vec.f4.b;
@@ -8444,8 +8430,8 @@ test_sigver384(
   else
   {
     uint8_t qxy[64U] = { 0U };
-    memcpy(qxy, qx, (uint32_t)32U * sizeof (qx[0U]));
-    memcpy(qxy + (uint32_t)32U, qy, (uint32_t)32U * sizeof (qy[0U]));
+    memcpy(qxy, qx, (uint32_t)32U * sizeof (uint8_t));
+    memcpy(qxy + (uint32_t)32U, qy, (uint32_t)32U * sizeof (uint8_t));
     bool result_ = Hacl_P256_ecdsa_verif_p256_sha384(msg_len, msg, qxy, r, s);
     if (!(result_ == result))
     {
@@ -8455,11 +8441,7 @@ test_sigver384(
   }
 }
 
-static void
-test_sigver512(
-  __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_bool
-  vec
-)
+static void test_sigver512(sigver_vector vec)
 {
   bool result = vec.f5;
   uint8_t *s = vec.f4.b;
@@ -8486,8 +8468,8 @@ test_sigver512(
   else
   {
     uint8_t qxy[64U] = { 0U };
-    memcpy(qxy, qx, (uint32_t)32U * sizeof (qx[0U]));
-    memcpy(qxy + (uint32_t)32U, qy, (uint32_t)32U * sizeof (qy[0U]));
+    memcpy(qxy, qx, (uint32_t)32U * sizeof (uint8_t));
+    memcpy(qxy + (uint32_t)32U, qy, (uint32_t)32U * sizeof (uint8_t));
     bool result_ = Hacl_P256_ecdsa_verif_p256_sha512(msg_len, msg, qxy, r, s);
     if (!(result_ == result))
     {
@@ -8521,11 +8503,7 @@ static bool check_bound(uint8_t *b)
     || (x11 == q4 && (x21 < q3 || (x21 == q3 && (x31 < q2 || (x31 == q2 && x41 < q1)))));
 }
 
-static void
-test_siggen_256(
-  __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  vec
-)
+static void test_siggen_256(siggen_vector vec)
 {
   uint8_t *s = vec.f6.b;
   uint32_t s_len = vec.f6.len;
@@ -8563,8 +8541,8 @@ test_siggen_256(
   {
     uint8_t rs[64U] = { 0U };
     uint8_t qxy[64U] = { 0U };
-    memcpy(qxy, qx, (uint32_t)32U * sizeof (qx[0U]));
-    memcpy(qxy + (uint32_t)32U, qy, (uint32_t)32U * sizeof (qy[0U]));
+    memcpy(qxy, qx, (uint32_t)32U * sizeof (uint8_t));
+    memcpy(qxy + (uint32_t)32U, qy, (uint32_t)32U * sizeof (uint8_t));
     uint64_t flag = Hacl_P256_ecdsa_sign_p256_sha2(rs, msg_len, msg, d, k);
     if (flag == (uint64_t)0U)
     {
@@ -8593,11 +8571,7 @@ test_siggen_256(
   }
 }
 
-static void
-test_siggen_384(
-  __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  vec
-)
+static void test_siggen_384(siggen_vector vec)
 {
   uint8_t *s = vec.f6.b;
   uint32_t s_len = vec.f6.len;
@@ -8635,8 +8609,8 @@ test_siggen_384(
   {
     uint8_t rs[64U] = { 0U };
     uint8_t qxy[64U] = { 0U };
-    memcpy(qxy, qx, (uint32_t)32U * sizeof (qx[0U]));
-    memcpy(qxy + (uint32_t)32U, qy, (uint32_t)32U * sizeof (qy[0U]));
+    memcpy(qxy, qx, (uint32_t)32U * sizeof (uint8_t));
+    memcpy(qxy + (uint32_t)32U, qy, (uint32_t)32U * sizeof (uint8_t));
     uint64_t flag = Hacl_P256_ecdsa_sign_p256_sha384(rs, msg_len, msg, d, k);
     if (flag == (uint64_t)0U)
     {
@@ -8665,11 +8639,7 @@ test_siggen_384(
   }
 }
 
-static void
-test_siggen_512(
-  __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  vec
-)
+static void test_siggen_512(siggen_vector vec)
 {
   uint8_t *s = vec.f6.b;
   uint32_t s_len = vec.f6.len;
@@ -8707,8 +8677,8 @@ test_siggen_512(
   {
     uint8_t rs[64U] = { 0U };
     uint8_t qxy[64U] = { 0U };
-    memcpy(qxy, qx, (uint32_t)32U * sizeof (qx[0U]));
-    memcpy(qxy + (uint32_t)32U, qy, (uint32_t)32U * sizeof (qy[0U]));
+    memcpy(qxy, qx, (uint32_t)32U * sizeof (uint8_t));
+    memcpy(qxy + (uint32_t)32U, qy, (uint32_t)32U * sizeof (uint8_t));
     uint64_t flag = Hacl_P256_ecdsa_sign_p256_sha512(rs, msg_len, msg, d, k);
     if (flag == (uint64_t)0U)
     {
@@ -8742,8 +8712,7 @@ exit_code main()
   C_String_print("[ECDSA SigVer]");
   C_String_print("\n");
   uint32_t len = sigver_vectors256_low.len;
-  __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_bool
-  *vs0 = sigver_vectors256_low.b;
+  sigver_vector *vs0 = sigver_vectors256_low.b;
   for (uint32_t i = (uint32_t)0U; i < len; i++)
   {
     LowStar_Printf_print_string("ECDSA Test ");
@@ -8756,8 +8725,7 @@ exit_code main()
   C_String_print("[ECDSA SigGen]");
   C_String_print("\n");
   uint32_t len0 = siggen_vectors256_low.len;
-  __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  *vs1 = siggen_vectors256_low.b;
+  siggen_vector *vs1 = siggen_vectors256_low.b;
   for (uint32_t i = (uint32_t)0U; i < len0; i++)
   {
     LowStar_Printf_print_string("ECDSA Test ");
@@ -8770,8 +8738,7 @@ exit_code main()
   C_String_print("[ECDSA SigVer - SHA384]");
   C_String_print("\n");
   uint32_t len1 = sigver_vectors384_low.len;
-  __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_bool
-  *vs2 = sigver_vectors384_low.b;
+  sigver_vector *vs2 = sigver_vectors384_low.b;
   for (uint32_t i = (uint32_t)0U; i < len1; i++)
   {
     LowStar_Printf_print_string("ECDSA Test ");
@@ -8784,8 +8751,7 @@ exit_code main()
   C_String_print("[ECDSA SigGen - SHA384]");
   C_String_print("\n");
   uint32_t len2 = siggen_vectors384_low.len;
-  __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  *vs3 = siggen_vectors384_low.b;
+  siggen_vector *vs3 = siggen_vectors384_low.b;
   for (uint32_t i = (uint32_t)0U; i < len2; i++)
   {
     LowStar_Printf_print_string("ECDSA Test ");
@@ -8798,8 +8764,7 @@ exit_code main()
   C_String_print("[ECDSA SigVer - SHA512]");
   C_String_print("\n");
   uint32_t len3 = sigver_vectors512_low.len;
-  __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_bool
-  *vs4 = sigver_vectors512_low.b;
+  sigver_vector *vs4 = sigver_vectors512_low.b;
   for (uint32_t i = (uint32_t)0U; i < len3; i++)
   {
     LowStar_Printf_print_string("ECDSA Test ");
@@ -8812,8 +8777,7 @@ exit_code main()
   C_String_print("[ECDSA SigGen - SHA512]");
   C_String_print("\n");
   uint32_t len4 = siggen_vectors512_low.len;
-  __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  *vs = siggen_vectors512_low.b;
+  siggen_vector *vs = siggen_vectors512_low.b;
   for (uint32_t i = (uint32_t)0U; i < len4; i++)
   {
     LowStar_Printf_print_string("ECDSA Test ");

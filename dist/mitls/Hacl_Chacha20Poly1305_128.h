@@ -28,13 +28,16 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __Hacl_Chacha20Poly1305_128_H
 #define __Hacl_Chacha20Poly1305_128_H
 
 #include "Hacl_Kremlib.h"
 #include "Hacl_Chacha20_Vec128.h"
 #include "Hacl_Poly1305_128.h"
-
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 void
 Hacl_Chacha20Poly1305_128_aead_encrypt(
@@ -59,6 +62,10 @@ Hacl_Chacha20Poly1305_128_aead_decrypt(
   uint8_t *cipher,
   uint8_t *mac
 );
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Chacha20Poly1305_128_H_DEFINED
 #endif

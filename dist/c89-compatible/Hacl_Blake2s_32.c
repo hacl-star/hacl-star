@@ -64,7 +64,7 @@ blake2s_update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, u
       mask[1U] = (uint32_t)(totlen >> (uint32_t)32U);
       mask[2U] = wv_14;
       mask[3U] = wv_15;
-      memcpy(wv, hash, (uint32_t)4U * (uint32_t)4U * sizeof (hash[0U]));
+      memcpy(wv, hash, (uint32_t)4U * (uint32_t)4U * sizeof (uint32_t));
       wv3 = wv + (uint32_t)3U * (uint32_t)4U;
       {
         uint32_t i;
@@ -83,7 +83,7 @@ blake2s_update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, u
           KRML_CHECK_SIZE(sizeof (uint32_t), (uint32_t)4U * (uint32_t)4U);
           {
             uint32_t m_st[(uint32_t)4U * (uint32_t)4U];
-            memset(m_st, 0U, (uint32_t)4U * (uint32_t)4U * sizeof (m_st[0U]));
+            memset(m_st, 0U, (uint32_t)4U * (uint32_t)4U * sizeof (uint32_t));
             {
               uint32_t *r01 = m_st + (uint32_t)0U * (uint32_t)4U;
               uint32_t *r12 = m_st + (uint32_t)1U * (uint32_t)4U;
@@ -899,7 +899,7 @@ Hacl_Blake2s_32_blake2s(
           r1[3U] = iv7;
           if (!(kk == (uint32_t)0U))
           {
-            memcpy(b20, k, kk * sizeof (k[0U]));
+            memcpy(b20, k, kk * sizeof (uint8_t));
             {
               uint64_t totlen = (uint64_t)(uint32_t)0U + (uint64_t)(uint32_t)64U;
               uint8_t *b3 = b20 + (uint32_t)0U * (uint32_t)64U;
@@ -941,7 +941,7 @@ Hacl_Blake2s_32_blake2s(
             uint8_t *last = d + ll - rem;
             uint64_t totlen;
             uint32_t double_row;
-            memcpy(b21, last, rem * sizeof (last[0U]));
+            memcpy(b21, last, rem * sizeof (uint8_t));
             totlen = prev0 + (uint64_t)ll;
             blake2s_update_block(b1, b, true, totlen, b21);
             Lib_Memzero0_memzero(b21, (uint32_t)64U * sizeof (b21[0U]));
@@ -949,7 +949,7 @@ Hacl_Blake2s_32_blake2s(
             KRML_CHECK_SIZE(sizeof (uint8_t), double_row);
             {
               uint8_t b2[double_row];
-              memset(b2, 0U, double_row * sizeof (b2[0U]));
+              memset(b2, 0U, double_row * sizeof (uint8_t));
               {
                 uint8_t *first = b2;
                 uint8_t *second = b2 + (uint32_t)4U * (uint32_t)4U;
@@ -971,7 +971,7 @@ Hacl_Blake2s_32_blake2s(
                   }
                 }
                 final = b2;
-                memcpy(output, final, nn * sizeof (final[0U]));
+                memcpy(output, final, nn * sizeof (uint8_t));
                 Lib_Memzero0_memzero(b2, double_row * sizeof (b2[0U]));
                 Lib_Memzero0_memzero(b1, stlen * sizeof (b1[0U]));
                 Lib_Memzero0_memzero(b, stlen * sizeof (b[0U]));

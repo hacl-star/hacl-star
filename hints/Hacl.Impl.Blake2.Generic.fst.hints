@@ -31,7 +31,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "217d29b0a922b0fd6777dd9bad3eefae"
+      "990852c32cf4d732dadf5cd1f56172ad"
     ],
     [
       "Hacl.Impl.Blake2.Generic.get_iv",
@@ -105,7 +105,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok", "unit_typing"
       ],
       0,
-      "098e32d66ca5f74e6a2fd02c37d78ebb"
+      "0fdd35b93ad5f052e889e08bd0c92621"
     ],
     [
       "Hacl.Impl.Blake2.Generic.get_sigma",
@@ -180,7 +180,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "d26b2506ae09045ffd9d69130a1e21e8"
+      "f3b47db14d1e7e8eba0e3348578ba538"
     ],
     [
       "Hacl.Impl.Blake2.Generic.get_sigma_sub",
@@ -223,26 +223,34 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "bool_inversion", "constructor_distinct_Lib.IntTypes.U1",
+        "b2t_def", "bool_inversion", "constructor_distinct_Lib.IntTypes.PUB",
+        "constructor_distinct_Lib.IntTypes.U1",
         "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U8",
         "constructor_distinct_Spec.Blake2.Blake2S",
         "equality_tok_Lib.IntTypes.PUB@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
-        "equality_tok_Spec.Blake2.Blake2S@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
+        "equality_tok_Spec.Blake2.Blake2S@tok", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
+        "equation_FStar.UInt.uint_t", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.maxint",
+        "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.op_At_Percent_Dot",
+        "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.pub_int_v",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.v",
         "equation_Prims.nat", "equation_Spec.Blake2.wt", "int_inversion",
         "int_typing", "lemma_FStar.UInt.pow2_values",
         "lemma_Lib.IntTypes.add_mod_lemma", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Modulus", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_387e6d282145573240ab7b8a4b94cce5",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_706a571d537805a11fbbda390d80e0d2",
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
-        "typing_Lib.IntTypes.op_At_Percent_Dot",
+        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
+        "typing_FStar.UInt32.v", "typing_Lib.IntTypes.op_At_Percent_Dot",
         "typing_Lib.IntTypes.unsigned", "typing_Lib.IntTypes.v",
         "typing_Spec.Blake2.wt", "typing_tok_Lib.IntTypes.PUB@tok",
         "typing_tok_Lib.IntTypes.U32@tok",
@@ -352,7 +360,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok", "unit_typing"
       ],
       0,
-      "9c9f0a9671af47a87696596109bfad08"
+      "f0e1f70bb7c23634c12100f474f96208"
     ],
     [
       "Hacl.Impl.Blake2.Generic.rounds_t",
@@ -392,7 +400,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "46d655f9d349e391829503f5e2540e7e"
+      "5ed7e38df9a977a93b99ab5dd12bf404"
     ],
     [
       "Hacl.Impl.Blake2.Generic.size_to_word",
@@ -501,7 +509,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok", "unit_typing"
       ],
       0,
-      "4c26f7c33618e2a33029ace062e6004c"
+      "7388dd2ee3bbf4c41b46d363f7b9ad8a"
     ],
     [
       "Hacl.Impl.Blake2.Generic.size_to_limb",
@@ -601,7 +609,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok", "unit_typing"
       ],
       0,
-      "9bd5cce2650a9351a63dde207ef9b26f"
+      "687f1d9119757a058835b26ec85c323b"
     ],
     [
       "Hacl.Impl.Blake2.Generic.g1",
@@ -630,7 +638,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "3128d5ddc9d427ab55b207798e70117f"
+      "db336ce1b610afd90b08da86dbb07b53"
     ],
     [
       "Hacl.Impl.Blake2.Generic.g1",
@@ -654,13 +662,12 @@
         "equation_Hacl.Impl.Blake2.Core.element_t",
         "equation_Hacl.Impl.Blake2.Core.row_len",
         "equation_Lib.Buffer.buffer_t", "equation_Lib.Buffer.lbuffer_t",
-        "equation_Lib.Buffer.live", "equation_Lib.Buffer.loc",
-        "equation_Lib.Buffer.modifies", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.maxint",
-        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.range",
-        "equation_Lib.IntTypes.v", "equation_Lib.Sequence.lseq",
-        "equation_Lib.Sequence.seq", "equation_Lib.Sequence.to_seq",
-        "equation_LowStar.Buffer.buffer",
+        "equation_Lib.Buffer.live", "equation_Lib.Buffer.modifies",
+        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.int_t",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
+        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.v",
+        "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.seq",
+        "equation_Lib.Sequence.to_seq", "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder", "equation_Prims.nat",
         "equation_Spec.Blake2.g1", "equation_Spec.Blake2.row_idx",
         "equation_Spec.Blake2.wt", "int_inversion", "int_typing",
@@ -671,10 +678,8 @@
         "lemma_Hacl.Impl.Blake2.Core.modifies_row_state",
         "lemma_Hacl.Impl.Blake2.Core.state_v_rowi_lemma",
         "lemma_Lib.IntTypes.v_injective", "lemma_Lib.Sequence.eq_elim",
-        "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
         "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_refl",
-        "lemma_LowStar.Monotonic.Buffer.modifies_liveness_insensitive_buffer_weak",
         "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
@@ -738,7 +743,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "0bc06b1717686c1b9ac9e8eb63c01480"
+      "26888bf3e21e84dd243d96d74b640930"
     ],
     [
       "Hacl.Impl.Blake2.Generic.g2",
@@ -787,10 +792,12 @@
         "lemma_Hacl.Impl.Blake2.Core.row_v_lemma",
         "lemma_Hacl.Impl.Blake2.Core.state_v_rowi_lemma",
         "lemma_Lib.IntTypes.v_injective", "lemma_Lib.Sequence.eq_elim",
+        "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
         "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_sym_",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_refl",
         "lemma_LowStar.Monotonic.Buffer.modifies_buffer_elim",
+        "lemma_LowStar.Monotonic.Buffer.modifies_liveness_insensitive_buffer_weak",
         "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
@@ -854,7 +861,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "356e0c9c48d1e20618293053c11371e4"
+      "2000a502796415bfb845b65839c4e731"
     ],
     [
       "Hacl.Impl.Blake2.Generic.g2z",
@@ -865,7 +872,9 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
-        "bool_inversion", "constructor_distinct_Lib.IntTypes.U32",
+        "bool_inversion", "constructor_distinct_Lib.IntTypes.U1",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U8",
         "constructor_distinct_Spec.Blake2.Blake2S",
         "equality_tok_Lib.IntTypes.PUB@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
@@ -1081,7 +1090,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "75c2cd2a9bb0b0c7b1d069d4e2aac3a1"
+      "686b524209a73ce2d109412b670c0571"
     ],
     [
       "Hacl.Impl.Blake2.Generic.diag",
@@ -1176,7 +1185,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok", "unit_typing"
       ],
       0,
-      "cd92a5291b61dfe204327dfa685f2dcb"
+      "10e8dfbcbf2d0b998dbbec229cf45142"
     ],
     [
       "Hacl.Impl.Blake2.Generic.undiag",
@@ -1263,7 +1272,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok", "unit_typing"
       ],
       0,
-      "d4d711206a9b17efc83e0659d32a6293"
+      "fe19584ba5f3b84ebc2adab59ac3063a"
     ],
     [
       "Hacl.Impl.Blake2.Generic.gather_state",
@@ -1328,7 +1337,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "af219cb3c01c5399d806bd06f62c8406"
+      "bace4ff1336933c29239823a9fa779f1"
     ],
     [
       "Hacl.Impl.Blake2.Generic.gather_state",
@@ -1464,7 +1473,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "033678e706d74d23a961ec1be36f103d"
+      "b8f57cda52afb0a33683d5cc36d0da53"
     ],
     [
       "Hacl.Impl.Blake2.Generic.blake2_round",
@@ -1529,7 +1538,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "04035b8d5718f95c9bbbe1acd6437e66"
+      "e4821088eac2181572f6ead0839da489"
     ],
     [
       "Hacl.Impl.Blake2.Generic.blake2_round",
@@ -1727,7 +1736,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "e8535cc027343f22f8bc781fd9593252"
+      "e46bb83741a736c13113c2316aab4a03"
     ],
     [
       "Hacl.Impl.Blake2.Generic.blake2_compress0",
@@ -1750,7 +1759,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "2c5bcc67dc61320700134e24995a2424"
+      "57369e664a6210d57709ea0e0ff29545"
     ],
     [
       "Hacl.Impl.Blake2.Generic.blake2_compress0",
@@ -1852,7 +1861,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "46bc488e2373e46b14ac5c6b1e9c4c7f"
+      "9d9cd305dbb4283c5f87bf24b2031812"
     ],
     [
       "Hacl.Impl.Blake2.Generic.blake2_compress1",
@@ -2057,7 +2066,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok", "unit_typing"
       ],
       0,
-      "7bc18a96f2ae73a75613af5eddb60851"
+      "2d9bc9c147a78ef02800e9431a6fd059"
     ],
     [
       "Hacl.Impl.Blake2.Generic.blake2_compress2",
@@ -2107,7 +2116,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "9db7b8e5ea6fe3b7c21d22a3aa2878bd"
+      "3cf21f8d1038b481fac98bcf61c60c87"
     ],
     [
       "Hacl.Impl.Blake2.Generic.blake2_compress2",
@@ -2208,7 +2217,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "510947db60d36020a3a6a3a56fe6c08e"
+      "55b98434a8b4f755a3daeb25a0cd4da1"
     ],
     [
       "Hacl.Impl.Blake2.Generic.blake2_compress3",
@@ -2315,7 +2324,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "2182af0d669e109273a258b70c375fad"
+      "4058d244506e8284bc1294b6e7536a72"
     ],
     [
       "Hacl.Impl.Blake2.Generic.compress_t",
@@ -2331,7 +2340,7 @@
         "typing_Hacl.Impl.Blake2.Core.size_block"
       ],
       0,
-      "1a1047c9531aabd53b17a4f0a98641e7"
+      "865aecf179dcf7e09e41405fca6565ba"
     ],
     [
       "Hacl.Impl.Blake2.Generic.blake2_compress",
@@ -2520,7 +2529,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "b58874b6550dfe164143005c17dc0ae5"
+      "a62e6ebce1b0aac91af3daf62ed15938"
     ],
     [
       "Hacl.Impl.Blake2.Generic.blake2_update_block_t",
@@ -2555,7 +2564,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "8de8c8377f5186d906b4b5d93ff4ba53"
+      "67aa4c015e8c3a4d11b8d6438c2ce64d"
     ],
     [
       "Hacl.Impl.Blake2.Generic.blake2_update_block",
@@ -2594,7 +2603,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "9d744243a69c5dcc84219db87b7a6726"
+      "0e94a950e7e9ff438af97d55eecc0491"
     ],
     [
       "Hacl.Impl.Blake2.Generic.blake2_update1_t",
@@ -2662,7 +2671,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok", "unit_typing"
       ],
       0,
-      "4d1067061ac56d8a717fd426e9b306e7"
+      "e15cb35e80c14ea9fd44fddfc58766c5"
     ],
     [
       "Hacl.Impl.Blake2.Generic.blake2_update1",
@@ -2714,7 +2723,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "d29d4d8706f477d25b877368b7f55a8e"
+      "23f8a035e13f5055fdaa46a4bcff2f63"
     ],
     [
       "Hacl.Impl.Blake2.Generic.blake2_update1",
@@ -2879,7 +2888,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok", "unit_typing"
       ],
       0,
-      "eb9326d7c4706c3de27a4f90712cbb8b"
+      "67250b0fd5b75f1c256d752a47c3bf50"
     ],
     [
       "Hacl.Impl.Blake2.Generic.blake2_update_last_t",
@@ -2926,7 +2935,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "226e103716e2bbb060e0494c06efda75"
+      "02c2b0654e1010a47004f00b676a4e2b"
     ],
     [
       "Hacl.Impl.Blake2.Generic.blake2_update_last",
@@ -3127,7 +3136,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok", "unit_typing"
       ],
       0,
-      "0fb87fe95fd9a44d3a9488b8f7340046"
+      "a9a172e3e0eb88dd38d5eaadec6a1292"
     ],
     [
       "Hacl.Impl.Blake2.Generic.blake2_init_hash",
@@ -3138,6 +3147,7 @@
         "@MaxIFuel_assumption", "@query", "bool_inversion",
         "constructor_distinct_Spec.Blake2.Blake2S",
         "equality_tok_Lib.IntTypes.PUB@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Spec.Blake2.Blake2S@tok",
         "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.v",
@@ -3277,7 +3287,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "b36cb987947e0e84a9dc44be7fb899f0"
+      "1586caf7dcf41276a18cb2b402a84b12"
     ],
     [
       "Hacl.Impl.Blake2.Generic.blake2_init_t",
@@ -3314,7 +3324,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "ac6f3b5e3c30df73fb6b718d8e436338"
+      "48e6d4b281fc9d525fd25036ac6be6ce"
     ],
     [
       "Hacl.Impl.Blake2.Generic.blake2_init",
@@ -3502,7 +3512,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "9cb9467addfcc09246faed83b737e09d"
+      "07a0d5ab249a6266c3002047cd2266bd"
     ],
     [
       "Hacl.Impl.Blake2.Generic.uu___573",
@@ -3511,7 +3521,7 @@
       0,
       [ "@query" ],
       0,
-      "a79a4f8bf0271897dc465681462810fe"
+      "7409a0553b0def73e69293444f1c5fef"
     ],
     [
       "Hacl.Impl.Blake2.Generic.split_blocks",
@@ -3602,7 +3612,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "847acefa1766f1c67a3b72e20ac5f95b"
+      "3300c24847607bc8e5a77d1fc5a68798"
     ],
     [
       "Hacl.Impl.Blake2.Generic.split_blocks",
@@ -3697,7 +3707,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "f8e3de05af34519b502eb43b67786429"
+      "72ada1274adde17ef739ef289d92838e"
     ],
     [
       "Hacl.Impl.Blake2.Generic.blake2_update_blocks",
@@ -3735,7 +3745,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "22a23731f7f671a2043f5dc279973ca4"
+      "b8863810e1dc7bf2b9f1320f1b08f320"
     ],
     [
       "Hacl.Impl.Blake2.Generic.blake2_update_blocks",
@@ -3871,7 +3881,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "3f5c6b75833a844756f18f7539d22db3"
+      "3b6afc0bd3928c4a096dc998c868431c"
     ],
     [
       "Hacl.Impl.Blake2.Generic.blake2_finish_t",
@@ -3895,7 +3905,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "71bf5baba1df8d74650f4e1fc527dc9f"
+      "c52b5decac30dd3442244f0ad2dfde8c"
     ],
     [
       "Hacl.Impl.Blake2.Generic.blake2_finish",
@@ -4103,7 +4113,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "58f3d1129097be94b3da2dbc7e2900a2"
+      "fd000cb79915cc204bc7ede0c139d81a"
     ],
     [
       "Hacl.Impl.Blake2.Generic.blake2_t",
@@ -4274,7 +4284,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "d5c9b7356f5524d2b2b4c7e87a3119c0"
+      "0791f757adc881aa4db69569822a0137"
     ],
     [
       "Hacl.Impl.Blake2.Generic.blake2",
@@ -4468,7 +4478,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "2f773d89a853fb666fd6ef1c157bdad0"
+      "99f0ded79acae633a6c1ceaa0a849874"
     ]
   ]
 ]

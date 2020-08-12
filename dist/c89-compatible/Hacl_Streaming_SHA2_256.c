@@ -86,7 +86,7 @@ Hacl_Streaming_SHA2_256_update(
     uint32_t sz1 = (uint32_t)x;
     uint8_t *buf2 = buf + sz1;
     uint64_t total_len2;
-    memcpy(buf2, data, len * sizeof (data[0U]));
+    memcpy(buf2, data, len * sizeof (uint8_t));
     total_len2 = total_len1 + (uint64_t)len;
     {
       Hacl_Streaming_Functor_state_s___uint32_t____ lit;
@@ -111,7 +111,7 @@ Hacl_Streaming_SHA2_256_update(
     uint8_t *dst;
     Hacl_Hash_SHA2_update_multi_256(block_state1, data1, data1_len / (uint32_t)64U);
     dst = buf;
-    memcpy(dst, data2, data2_len * sizeof (data2[0U]));
+    memcpy(dst, data2, data2_len * sizeof (uint8_t));
     {
       Hacl_Streaming_Functor_state_s___uint32_t____ lit;
       lit.block_state = block_state1;
@@ -134,7 +134,7 @@ Hacl_Streaming_SHA2_256_update(
     uint32_t diff1 = (uint32_t)64U - sz1;
     uint8_t *buf0 = buf_1;
     uint8_t *buf2 = buf0 + sz1;
-    memcpy(buf2, data1, diff1 * sizeof (data1[0U]));
+    memcpy(buf2, data1, diff1 * sizeof (uint8_t));
     Hacl_Hash_SHA2_update_multi_256(block_state10, buf0, (uint32_t)1U);
     {
       Hacl_Streaming_Functor_state_s___uint32_t____ lit;
@@ -163,7 +163,7 @@ Hacl_Streaming_SHA2_256_update(
       data21 = data2 + data1_len;
       Hacl_Hash_SHA2_update_multi_256(block_state1, data11, data1_len / (uint32_t)64U);
       dst = buf;
-      memcpy(dst, data21, data2_len * sizeof (data21[0U]));
+      memcpy(dst, data21, data2_len * sizeof (uint8_t));
       {
         Hacl_Streaming_Functor_state_s___uint32_t____ lit0;
         lit0.block_state = block_state1;
@@ -187,7 +187,7 @@ Hacl_Streaming_SHA2_256_finish(Hacl_Streaming_Functor_state_s___uint32_t____ *p,
   uint64_t last_len;
   uint64_t prev_len;
   uint32_t last_len1;
-  memcpy(tmp_block_state, block_state, (uint32_t)8U * sizeof (block_state[0U]));
+  memcpy(tmp_block_state, block_state, (uint32_t)8U * sizeof (uint32_t));
   last_len = total_len % (uint64_t)64U;
   prev_len = total_len - last_len;
   last_len1 = (uint32_t)last_len;
