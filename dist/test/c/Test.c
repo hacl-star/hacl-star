@@ -35,11 +35,11 @@ typedef uint8_t hash_alg;
 
 extern void portable_exit(int32_t uu____31);
 
-extern void C_String_print(C_String_t uu____68);
+extern void C_String_print(C_String_t uu____71);
 
-extern uint32_t C_String_strlen(C_String_t uu____74);
+extern uint32_t C_String_strlen(C_String_t uu____77);
 
-extern void C_String_memcpy(uint8_t *uu____92, C_String_t uu____93, uint32_t uu____94);
+extern void C_String_memcpy(uint8_t *uu____95, C_String_t uu____96, uint32_t uu____97);
 
 static bool whatever()
 {
@@ -10199,11 +10199,11 @@ static void test_one_hash(hash_vector vec)
   {
     KRML_CHECK_SIZE(sizeof (uint8_t), tlen);
     uint8_t computed[tlen];
-    memset(computed, 0U, tlen * sizeof (computed[0U]));
+    memset(computed, 0U, tlen * sizeof (uint8_t));
     uint32_t total_input_len = input_len * repeat;
     KRML_CHECK_SIZE(sizeof (uint8_t), total_input_len + (uint32_t)1U);
     uint8_t total_input[total_input_len + (uint32_t)1U];
-    memset(total_input, 0U, (total_input_len + (uint32_t)1U) * sizeof (total_input[0U]));
+    memset(total_input, 0U, (total_input_len + (uint32_t)1U) * sizeof (uint8_t));
     uint8_t *total_input1 = total_input;
     for (uint32_t i = (uint32_t)0U; i < repeat; i++)
     {
@@ -10434,7 +10434,7 @@ static void test_one_hmac(hmac_vector vec)
       }
       KRML_CHECK_SIZE(sizeof (uint8_t), sw2);
       uint8_t computed[sw2];
-      memset(computed, 0U, sw2 * sizeof (computed[0U]));
+      memset(computed, 0U, sw2 * sizeof (uint8_t));
       EverCrypt_HMAC_compute(ha, computed, key, keylen, data, datalen);
       C_String_t str = EverCrypt_Hash_string_of_alg(ha);
       uint32_t sw;
@@ -10518,7 +10518,7 @@ static void test_one_hmac_drbg(hmac_drbg_vector vec)
   {
     KRML_CHECK_SIZE(sizeof (uint8_t), returned_bits_len);
     uint8_t output[returned_bits_len];
-    memset(output, 0U, returned_bits_len * sizeof (output[0U]));
+    memset(output, 0U, returned_bits_len * sizeof (uint8_t));
     uint32_t ctr0;
     uint8_t buf0[64U];
     uint8_t buf1[48U];
@@ -11347,7 +11347,7 @@ static void test_one_hkdf(hkdf_vector vec)
           }
           KRML_CHECK_SIZE(sizeof (uint8_t), sw5);
           uint8_t computed_prk[sw5];
-          memset(computed_prk, 0U, sw5 * sizeof (computed_prk[0U]));
+          memset(computed_prk, 0U, sw5 * sizeof (uint8_t));
           EverCrypt_HKDF_extract(ha, computed_prk, salt, saltlen, ikm, ikmlen);
           uint32_t sw;
           switch (ha)
@@ -11391,7 +11391,7 @@ static void test_one_hkdf(hkdf_vector vec)
           TestLib_compare_and_print(str, expected_prk, computed_prk, sw);
           KRML_CHECK_SIZE(sizeof (uint8_t), okmlen + (uint32_t)1U);
           uint8_t computed_okm[okmlen + (uint32_t)1U];
-          memset(computed_okm, 0U, (okmlen + (uint32_t)1U) * sizeof (computed_okm[0U]));
+          memset(computed_okm, 0U, (okmlen + (uint32_t)1U) * sizeof (uint8_t));
           uint8_t *computed_okm1 = computed_okm;
           EverCrypt_HKDF_expand(ha, computed_okm1, computed_prk, prklen, info, infolen, okmlen);
           TestLib_compare_and_print(str, expected_okm, computed_okm1, okmlen);
@@ -11448,7 +11448,7 @@ static void test_one_chacha20(chacha20_vector v)
   {
     KRML_CHECK_SIZE(sizeof (uint8_t), cipher_len + (uint32_t)1U);
     uint8_t cipher_[cipher_len + (uint32_t)1U];
-    memset(cipher_, 0U, (cipher_len + (uint32_t)1U) * sizeof (cipher_[0U]));
+    memset(cipher_, 0U, (cipher_len + (uint32_t)1U) * sizeof (uint8_t));
     uint8_t *cipher_1 = cipher_;
     EverCrypt_Cipher_chacha20(plain_len, cipher_1, plain, key, iv, ctr);
     TestLib_compare_and_print("of ChaCha20 message", cipher0, cipher_1, cipher_len);
@@ -11578,7 +11578,7 @@ static void test_one_chacha20poly1305(vector v)
   {
     KRML_CHECK_SIZE(sizeof (uint8_t), plain_len + (uint32_t)16U);
     uint8_t tmp[plain_len + (uint32_t)16U];
-    memset(tmp, 0U, (plain_len + (uint32_t)16U) * sizeof (tmp[0U]));
+    memset(tmp, 0U, (plain_len + (uint32_t)16U) * sizeof (uint8_t));
     uint8_t *tmp_msg_ = tmp;
     uint8_t *tag_ = tmp + plain_len;
     EverCrypt_Chacha20Poly1305_aead_encrypt(key,
@@ -12187,7 +12187,7 @@ test_aead_st(
           }
           KRML_CHECK_SIZE(sizeof (uint8_t), plaintext_blen);
           uint8_t plaintext_[plaintext_blen];
-          memset(plaintext_, 0U, plaintext_blen * sizeof (plaintext_[0U]));
+          memset(plaintext_, 0U, plaintext_blen * sizeof (uint8_t));
           uint8_t *plaintext_1 = plaintext_;
           uint32_t ciphertext_blen;
           if (ciphertext_len == (uint32_t)0U)
@@ -12200,7 +12200,7 @@ test_aead_st(
           }
           KRML_CHECK_SIZE(sizeof (uint8_t), ciphertext_blen);
           uint8_t ciphertext_[ciphertext_blen];
-          memset(ciphertext_, 0U, ciphertext_blen * sizeof (ciphertext_[0U]));
+          memset(ciphertext_, 0U, ciphertext_blen * sizeof (uint8_t));
           uint8_t *ciphertext_1 = ciphertext_;
           uint32_t tag_blen;
           if (tag_len == (uint32_t)0U)
@@ -12213,7 +12213,7 @@ test_aead_st(
           }
           KRML_CHECK_SIZE(sizeof (uint8_t), tag_len);
           uint8_t tag_[tag_len];
-          memset(tag_, 0U, tag_len * sizeof (tag_[0U]));
+          memset(tag_, 0U, tag_len * sizeof (uint8_t));
           uint8_t *tag_1 = tag_;
           if
           (
@@ -12535,7 +12535,7 @@ test_ctr_st(
     {
       KRML_CHECK_SIZE(sizeof (uint8_t), block_len(a));
       uint8_t output_[block_len(a)];
-      memset(output_, 0U, block_len(a) * sizeof (output_[0U]));
+      memset(output_, 0U, block_len(a) * sizeof (uint8_t));
       state_s2 *s = NULL;
       error_code r = EverCrypt_CTR_create_in(a, &s, k, nonce, nonce_len, ctr);
       if (__neq__EverCrypt_Error_error_code(r, Success))

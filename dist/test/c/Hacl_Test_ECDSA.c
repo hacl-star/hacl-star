@@ -138,7 +138,7 @@ Hacl_P256_ecdsa_verif_p256_sha512(
   uint8_t *s
 );
 
-extern void C_String_print(C_String_t uu____68);
+extern void C_String_print(C_String_t uu____71);
 
 extern void LowStar_Printf_print_string(Prims_string uu____39);
 
@@ -8392,8 +8392,8 @@ static void test_sigver256(sigver_vector vec)
   else
   {
     uint8_t qxy[64U] = { 0U };
-    memcpy(qxy, qx, (uint32_t)32U * sizeof (qx[0U]));
-    memcpy(qxy + (uint32_t)32U, qy, (uint32_t)32U * sizeof (qy[0U]));
+    memcpy(qxy, qx, (uint32_t)32U * sizeof (uint8_t));
+    memcpy(qxy + (uint32_t)32U, qy, (uint32_t)32U * sizeof (uint8_t));
     bool result_ = Hacl_P256_ecdsa_verif_p256_sha2(msg_len, msg, qxy, r, s);
     if (!(result_ == result))
     {
@@ -8430,8 +8430,8 @@ static void test_sigver384(sigver_vector vec)
   else
   {
     uint8_t qxy[64U] = { 0U };
-    memcpy(qxy, qx, (uint32_t)32U * sizeof (qx[0U]));
-    memcpy(qxy + (uint32_t)32U, qy, (uint32_t)32U * sizeof (qy[0U]));
+    memcpy(qxy, qx, (uint32_t)32U * sizeof (uint8_t));
+    memcpy(qxy + (uint32_t)32U, qy, (uint32_t)32U * sizeof (uint8_t));
     bool result_ = Hacl_P256_ecdsa_verif_p256_sha384(msg_len, msg, qxy, r, s);
     if (!(result_ == result))
     {
@@ -8468,8 +8468,8 @@ static void test_sigver512(sigver_vector vec)
   else
   {
     uint8_t qxy[64U] = { 0U };
-    memcpy(qxy, qx, (uint32_t)32U * sizeof (qx[0U]));
-    memcpy(qxy + (uint32_t)32U, qy, (uint32_t)32U * sizeof (qy[0U]));
+    memcpy(qxy, qx, (uint32_t)32U * sizeof (uint8_t));
+    memcpy(qxy + (uint32_t)32U, qy, (uint32_t)32U * sizeof (uint8_t));
     bool result_ = Hacl_P256_ecdsa_verif_p256_sha512(msg_len, msg, qxy, r, s);
     if (!(result_ == result))
     {
@@ -8541,8 +8541,8 @@ static void test_siggen_256(siggen_vector vec)
   {
     uint8_t rs[64U] = { 0U };
     uint8_t qxy[64U] = { 0U };
-    memcpy(qxy, qx, (uint32_t)32U * sizeof (qx[0U]));
-    memcpy(qxy + (uint32_t)32U, qy, (uint32_t)32U * sizeof (qy[0U]));
+    memcpy(qxy, qx, (uint32_t)32U * sizeof (uint8_t));
+    memcpy(qxy + (uint32_t)32U, qy, (uint32_t)32U * sizeof (uint8_t));
     uint64_t flag = Hacl_P256_ecdsa_sign_p256_sha2(rs, msg_len, msg, d, k);
     if (flag == (uint64_t)0U)
     {
@@ -8609,8 +8609,8 @@ static void test_siggen_384(siggen_vector vec)
   {
     uint8_t rs[64U] = { 0U };
     uint8_t qxy[64U] = { 0U };
-    memcpy(qxy, qx, (uint32_t)32U * sizeof (qx[0U]));
-    memcpy(qxy + (uint32_t)32U, qy, (uint32_t)32U * sizeof (qy[0U]));
+    memcpy(qxy, qx, (uint32_t)32U * sizeof (uint8_t));
+    memcpy(qxy + (uint32_t)32U, qy, (uint32_t)32U * sizeof (uint8_t));
     uint64_t flag = Hacl_P256_ecdsa_sign_p256_sha384(rs, msg_len, msg, d, k);
     if (flag == (uint64_t)0U)
     {
@@ -8677,8 +8677,8 @@ static void test_siggen_512(siggen_vector vec)
   {
     uint8_t rs[64U] = { 0U };
     uint8_t qxy[64U] = { 0U };
-    memcpy(qxy, qx, (uint32_t)32U * sizeof (qx[0U]));
-    memcpy(qxy + (uint32_t)32U, qy, (uint32_t)32U * sizeof (qy[0U]));
+    memcpy(qxy, qx, (uint32_t)32U * sizeof (uint8_t));
+    memcpy(qxy + (uint32_t)32U, qy, (uint32_t)32U * sizeof (uint8_t));
     uint64_t flag = Hacl_P256_ecdsa_sign_p256_sha512(rs, msg_len, msg, d, k);
     if (flag == (uint64_t)0U)
     {

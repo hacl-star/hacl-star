@@ -41,7 +41,7 @@ Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_
   uint64_t *block_state = r1;
   uint8_t *k_ = KRML_HOST_CALLOC((uint32_t)32U, sizeof (uint8_t));
   uint8_t *k_0;
-  memcpy(k_, k1, (uint32_t)32U * sizeof (k1[0U]));
+  memcpy(k_, k1, (uint32_t)32U * sizeof (uint8_t));
   k_0 = k_;
   {
     Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_ s;
@@ -72,7 +72,7 @@ Hacl_Streaming_Poly1305_32_init(
   uint64_t *block_state = scrut.block_state;
   uint8_t *k_1;
   Hacl_Poly1305_32_poly1305_init(block_state, k1);
-  memcpy(k_, k1, (uint32_t)32U * sizeof (k1[0U]));
+  memcpy(k_, k1, (uint32_t)32U * sizeof (uint8_t));
   k_1 = k_;
   {
     Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_ lit;
@@ -106,7 +106,7 @@ Hacl_Streaming_Poly1305_32_update(
     uint32_t sz1 = (uint32_t)x;
     uint8_t *buf2 = buf + sz1;
     uint64_t total_len2;
-    memcpy(buf2, data, len * sizeof (data[0U]));
+    memcpy(buf2, data, len * sizeof (uint8_t));
     total_len2 = total_len1 + (uint64_t)len;
     {
       Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_ lit;
@@ -133,7 +133,7 @@ Hacl_Streaming_Poly1305_32_update(
     uint8_t *dst;
     Hacl_Poly1305_32_poly1305_update(block_state1, data1_len, data1);
     dst = buf;
-    memcpy(dst, data2, data2_len * sizeof (data2[0U]));
+    memcpy(dst, data2, data2_len * sizeof (uint8_t));
     {
       Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_ lit;
       lit.block_state = block_state1;
@@ -158,7 +158,7 @@ Hacl_Streaming_Poly1305_32_update(
     uint32_t diff1 = (uint32_t)16U - sz1;
     uint8_t *buf0 = buf_1;
     uint8_t *buf2 = buf0 + sz1;
-    memcpy(buf2, data1, diff1 * sizeof (data1[0U]));
+    memcpy(buf2, data1, diff1 * sizeof (uint8_t));
     Hacl_Poly1305_32_poly1305_update(block_state10, (uint32_t)16U, buf0);
     {
       Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_ lit;
@@ -190,7 +190,7 @@ Hacl_Streaming_Poly1305_32_update(
       data21 = data2 + data1_len;
       Hacl_Poly1305_32_poly1305_update(block_state1, data1_len, data11);
       dst = buf;
-      memcpy(dst, data21, data2_len * sizeof (data21[0U]));
+      memcpy(dst, data21, data2_len * sizeof (uint8_t));
       {
         Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_ lit0;
         lit0.block_state = block_state1;
@@ -218,7 +218,7 @@ Hacl_Streaming_Poly1305_32_finish(
   uint64_t r[25U] = { 0U };
   uint64_t *tmp_block_state = r;
   uint32_t len;
-  memcpy(tmp_block_state, block_state, (uint32_t)25U * sizeof (block_state[0U]));
+  memcpy(tmp_block_state, block_state, (uint32_t)25U * sizeof (uint64_t));
   len = (uint32_t)(total_len % (uint64_t)16U);
   if (len != (uint32_t)0U)
   {
@@ -226,7 +226,7 @@ Hacl_Streaming_Poly1305_32_finish(
   }
   {
     uint64_t tmp[25U] = { 0U };
-    memcpy(tmp, tmp_block_state, (uint32_t)25U * sizeof (tmp_block_state[0U]));
+    memcpy(tmp, tmp_block_state, (uint32_t)25U * sizeof (uint64_t));
     Hacl_Poly1305_32_poly1305_finish(dst, k_, tmp);
   }
 }
