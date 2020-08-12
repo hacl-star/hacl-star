@@ -29,12 +29,15 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __Hacl_Bignum4096_H
 #define __Hacl_Bignum4096_H
 
 #include "Hacl_Kremlib.h"
 #include "Hacl_Bignum.h"
-
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 /************************/
 /* Arithmetic functions */
@@ -114,6 +117,10 @@ void Hacl_Bignum4096_bn_to_bytes_be(uint64_t *b, uint8_t *res);
 Returns true if and only if argument a is strictly less than the argument b.
 */
 bool Hacl_Bignum4096_lt(uint64_t *a, uint64_t *b);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Bignum4096_H_DEFINED
 #endif

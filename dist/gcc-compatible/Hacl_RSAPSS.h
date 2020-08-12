@@ -29,6 +29,7 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __Hacl_RSAPSS_H
 #define __Hacl_RSAPSS_H
 
@@ -36,7 +37,9 @@
 #include "Hacl_Bignum.h"
 #include "Hacl_Hash.h"
 #include "Hacl_Spec.h"
-
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 void
 Hacl_RSAPSS_rsapss_sign(
@@ -71,6 +74,10 @@ void Hacl_Bignum_Convert_bn_from_bytes_le(uint32_t len, uint8_t *b, uint64_t *re
 void Hacl_Bignum_Convert_bn_to_bytes_be(uint32_t len, uint64_t *b, uint8_t *res);
 
 void Hacl_Bignum_Convert_bn_to_bytes_le(uint32_t len, uint64_t *b, uint8_t *res);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_RSAPSS_H_DEFINED
 #endif

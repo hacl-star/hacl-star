@@ -108,7 +108,7 @@ Write `a * b` in `res`.
 void Hacl_Bignum4096_mul(uint64_t *a, uint64_t *b, uint64_t *res)
 {
   uint32_t resLen = (uint32_t)128U;
-  memset(res, 0U, resLen * sizeof (res[0U]));
+  memset(res, 0U, resLen * sizeof (uint64_t));
   for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)64U; i0++)
   {
     uint64_t uu____0 = b[i0];
@@ -217,7 +217,7 @@ static void add_mod_n(uint64_t *n1, uint64_t *a, uint64_t *b, uint64_t *res)
 static void sqr(uint64_t *a, uint64_t *res)
 {
   uint32_t resLen = (uint32_t)128U;
-  memset(res, 0U, resLen * sizeof (res[0U]));
+  memset(res, 0U, resLen * sizeof (uint64_t));
   for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)64U; i0++)
   {
     uint64_t *uu____0 = a;
@@ -281,7 +281,7 @@ static void sqr(uint64_t *a, uint64_t *res)
   uint64_t uu____2 = c0;
   KRML_CHECK_SIZE(sizeof (uint64_t), resLen);
   uint64_t tmp[resLen];
-  memset(tmp, 0U, resLen * sizeof (tmp[0U]));
+  memset(tmp, 0U, resLen * sizeof (uint64_t));
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
   {
     FStar_UInt128_uint128 a2 = FStar_UInt128_mul_wide(a[i], a[i]);
@@ -317,7 +317,7 @@ static void sqr(uint64_t *a, uint64_t *res)
 
 static void precomp(uint32_t modBits, uint64_t *n1, uint64_t *res)
 {
-  memset(res, 0U, (uint32_t)64U * sizeof (res[0U]));
+  memset(res, 0U, (uint32_t)64U * sizeof (uint64_t));
   bit_set(res, modBits - (uint32_t)1U);
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)8193U - modBits; i++)
   {
@@ -369,7 +369,7 @@ static void reduction(uint64_t *n1, uint64_t nInv_u64, uint64_t *c, uint64_t *re
         c[(uint32_t)64U + i0],
         c + (uint32_t)64U + i0);
   }
-  memcpy(res, c + (uint32_t)64U, (uint32_t)64U * sizeof ((c + (uint32_t)64U)[0U]));
+  memcpy(res, c + (uint32_t)64U, (uint32_t)64U * sizeof (uint64_t));
   uint64_t uu____0 = c0;
   uint64_t tmp[64U] = { 0U };
   uint64_t c1 = (uint64_t)0U;
@@ -423,7 +423,7 @@ static void to(uint64_t *n1, uint64_t nInv_u64, uint64_t *r2, uint64_t *a, uint6
 static void from(uint64_t *n1, uint64_t nInv_u64, uint64_t *aM, uint64_t *a)
 {
   uint64_t tmp[128U] = { 0U };
-  memcpy(tmp, aM, (uint32_t)64U * sizeof (aM[0U]));
+  memcpy(tmp, aM, (uint32_t)64U * sizeof (uint64_t));
   reduction(n1, nInv_u64, tmp, a);
 }
 
@@ -475,7 +475,7 @@ void
 Hacl_Bignum4096_mod_exp(uint64_t *n1, uint64_t *a, uint32_t bBits, uint64_t *b, uint64_t *res)
 {
   uint64_t acc[64U] = { 0U };
-  memset(acc, 0U, (uint32_t)64U * sizeof (acc[0U]));
+  memset(acc, 0U, (uint32_t)64U * sizeof (uint64_t));
   acc[0U] = (uint64_t)1U;
   uint32_t bLen = (bBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
   uint64_t nInv_u64 = Hacl_Bignum_ModInv64_mod_inv_u64(n1[0U]);
@@ -525,8 +525,8 @@ uint64_t *Hacl_Bignum4096_new_bn_from_bytes_be(uint32_t len, uint8_t *b)
   uint32_t tmpLen = (uint32_t)8U * bnLen;
   KRML_CHECK_SIZE(sizeof (uint8_t), tmpLen);
   uint8_t tmp[tmpLen];
-  memset(tmp, 0U, tmpLen * sizeof (tmp[0U]));
-  memcpy(tmp + tmpLen - len, b, len * sizeof (b[0U]));
+  memset(tmp, 0U, tmpLen * sizeof (uint8_t));
+  memcpy(tmp + tmpLen - len, b, len * sizeof (uint8_t));
   for (uint32_t i = (uint32_t)0U; i < bnLen; i++)
   {
     uint64_t *os = res2;
@@ -549,14 +549,12 @@ void Hacl_Bignum4096_bn_to_bytes_be(uint64_t *b, uint8_t *res)
   uint32_t tmpLen = (uint32_t)8U * bnLen;
   KRML_CHECK_SIZE(sizeof (uint8_t), tmpLen);
   uint8_t tmp[tmpLen];
-  memset(tmp, 0U, tmpLen * sizeof (tmp[0U]));
+  memset(tmp, 0U, tmpLen * sizeof (uint8_t));
   for (uint32_t i = (uint32_t)0U; i < bnLen; i++)
   {
     store64_be(tmp + i * (uint32_t)8U, b[bnLen - i - (uint32_t)1U]);
   }
-  memcpy(res,
-    tmp + tmpLen - (uint32_t)64U,
-    (uint32_t)64U * sizeof ((tmp + tmpLen - (uint32_t)64U)[0U]));
+  memcpy(res, tmp + tmpLen - (uint32_t)64U, (uint32_t)64U * sizeof (uint8_t));
 }
 
 

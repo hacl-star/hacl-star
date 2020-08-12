@@ -26,7 +26,7 @@
 
 static void precomp_runtime(uint32_t len, uint32_t modBits, uint64_t *n, uint64_t *res)
 {
-  memset(res, 0U, len * sizeof (res[0U]));
+  memset(res, 0U, len * sizeof (uint64_t));
   Hacl_Bignum_bn_bit_set(len, res, modBits - (uint32_t)1U);
   for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)128U * len + (uint32_t)1U - modBits; i0++)
   {
@@ -64,7 +64,7 @@ static void precomp_runtime(uint32_t len, uint32_t modBits, uint64_t *n, uint64_
     uint64_t c00 = c0;
     KRML_CHECK_SIZE(sizeof (uint64_t), len);
     uint64_t tmp[len];
-    memset(tmp, 0U, len * sizeof (tmp[0U]));
+    memset(tmp, 0U, len * sizeof (uint64_t));
     uint64_t c = (uint64_t)0U;
     uint32_t k = len / (uint32_t)4U * (uint32_t)4U;
     for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
@@ -146,11 +146,11 @@ mont_reduction_runtime(
     uint64_t c10 = r;
     c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, c10, c[len + i0], c + len + i0);
   }
-  memcpy(res, c + len, (len + len - len) * sizeof ((c + len)[0U]));
+  memcpy(res, c + len, (len + len - len) * sizeof (uint64_t));
   uint64_t uu____0 = c0;
   KRML_CHECK_SIZE(sizeof (uint64_t), len);
   uint64_t tmp[len];
-  memset(tmp, 0U, len * sizeof (tmp[0U]));
+  memset(tmp, 0U, len * sizeof (uint64_t));
   uint64_t c1 = (uint64_t)0U;
   uint32_t k = len / (uint32_t)4U * (uint32_t)4U;
   for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
@@ -204,9 +204,9 @@ to_runtime(
 {
   KRML_CHECK_SIZE(sizeof (uint64_t), len + len);
   uint64_t c[len + len];
-  memset(c, 0U, (len + len) * sizeof (c[0U]));
+  memset(c, 0U, (len + len) * sizeof (uint64_t));
   uint32_t resLen = len + len;
-  memset(c, 0U, resLen * sizeof (c[0U]));
+  memset(c, 0U, resLen * sizeof (uint64_t));
   for (uint32_t i0 = (uint32_t)0U; i0 < len; i0++)
   {
     uint64_t uu____0 = r2[i0];
@@ -251,8 +251,8 @@ from_runtime(uint32_t len, uint64_t *n, uint64_t nInv_u64, uint64_t *aM, uint64_
 {
   KRML_CHECK_SIZE(sizeof (uint64_t), len + len);
   uint64_t tmp[len + len];
-  memset(tmp, 0U, (len + len) * sizeof (tmp[0U]));
-  memcpy(tmp, aM, len * sizeof (aM[0U]));
+  memset(tmp, 0U, (len + len) * sizeof (uint64_t));
+  memcpy(tmp, aM, len * sizeof (uint64_t));
   mont_reduction_runtime(len, n, nInv_u64, tmp, a);
 }
 
@@ -268,9 +268,9 @@ mul_runtime(
 {
   KRML_CHECK_SIZE(sizeof (uint64_t), len + len);
   uint64_t c[len + len];
-  memset(c, 0U, (len + len) * sizeof (c[0U]));
+  memset(c, 0U, (len + len) * sizeof (uint64_t));
   uint32_t resLen = len + len;
-  memset(c, 0U, resLen * sizeof (c[0U]));
+  memset(c, 0U, resLen * sizeof (uint64_t));
   for (uint32_t i0 = (uint32_t)0U; i0 < len; i0++)
   {
     uint64_t uu____0 = bM[i0];
@@ -315,9 +315,9 @@ sqr_runtime(uint32_t len, uint64_t *n, uint64_t nInv_u64, uint64_t *aM, uint64_t
 {
   KRML_CHECK_SIZE(sizeof (uint64_t), len + len);
   uint64_t c[len + len];
-  memset(c, 0U, (len + len) * sizeof (c[0U]));
+  memset(c, 0U, (len + len) * sizeof (uint64_t));
   uint32_t resLen = len + len;
-  memset(c, 0U, resLen * sizeof (c[0U]));
+  memset(c, 0U, resLen * sizeof (uint64_t));
   for (uint32_t i0 = (uint32_t)0U; i0 < len; i0++)
   {
     uint64_t *uu____0 = aM;
@@ -381,7 +381,7 @@ sqr_runtime(uint32_t len, uint64_t *n, uint64_t nInv_u64, uint64_t *aM, uint64_t
   uint64_t uu____2 = c10;
   KRML_CHECK_SIZE(sizeof (uint64_t), resLen);
   uint64_t tmp[resLen];
-  memset(tmp, 0U, resLen * sizeof (tmp[0U]));
+  memset(tmp, 0U, resLen * sizeof (uint64_t));
   for (uint32_t i = (uint32_t)0U; i < len; i++)
   {
     FStar_UInt128_uint128 a2 = FStar_UInt128_mul_wide(aM[i], aM[i]);
@@ -491,14 +491,14 @@ mgf_hash(
 {
   KRML_CHECK_SIZE(sizeof (uint8_t), len + (uint32_t)4U);
   uint8_t mgfseed_counter[len + (uint32_t)4U];
-  memset(mgfseed_counter, 0U, (len + (uint32_t)4U) * sizeof (mgfseed_counter[0U]));
-  memcpy(mgfseed_counter, mgfseed, len * sizeof (mgfseed[0U]));
+  memset(mgfseed_counter, 0U, (len + (uint32_t)4U) * sizeof (uint8_t));
+  memcpy(mgfseed_counter, mgfseed, len * sizeof (uint8_t));
   uint32_t hLen = hash_len(a);
   uint32_t n = (maskLen - (uint32_t)1U) / hLen + (uint32_t)1U;
   uint32_t accLen = n * hLen;
   KRML_CHECK_SIZE(sizeof (uint8_t), accLen);
   uint8_t acc[accLen];
-  memset(acc, 0U, accLen * sizeof (acc[0U]));
+  memset(acc, 0U, accLen * sizeof (uint8_t));
   for (uint32_t i = (uint32_t)0U; i < n; i++)
   {
     uint8_t *uu____0 = acc + i * hLen;
@@ -509,7 +509,7 @@ mgf_hash(
     uu____1[3U] = (uint8_t)i;
     hash(a, uu____0, len + (uint32_t)4U, mgfseed_counter);
   }
-  memcpy(res, acc, maskLen * sizeof (acc[0U]));
+  memcpy(res, acc, maskLen * sizeof (uint8_t));
 }
 
 static void
@@ -547,21 +547,21 @@ bn_mod_exp(
 {
   KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
   uint64_t acc[nLen];
-  memset(acc, 0U, nLen * sizeof (acc[0U]));
-  memset(acc, 0U, nLen * sizeof (acc[0U]));
+  memset(acc, 0U, nLen * sizeof (uint64_t));
+  memset(acc, 0U, nLen * sizeof (uint64_t));
   acc[0U] = (uint64_t)1U;
   uint32_t bLen = (bBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
   uint64_t nInv_u64 = Hacl_Bignum_ModInv64_mod_inv_u64(n[0U]);
   KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
   uint64_t r2[nLen];
-  memset(r2, 0U, nLen * sizeof (r2[0U]));
+  memset(r2, 0U, nLen * sizeof (uint64_t));
   precomp_runtime(nLen, modBits, n, r2);
   KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
   uint64_t aM[nLen];
-  memset(aM, 0U, nLen * sizeof (aM[0U]));
+  memset(aM, 0U, nLen * sizeof (uint64_t));
   KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
   uint64_t accM[nLen];
-  memset(accM, 0U, nLen * sizeof (accM[0U]));
+  memset(accM, 0U, nLen * sizeof (uint64_t));
   to_runtime(nLen, n, nInv_u64, r2, a, aM);
   to_runtime(nLen, n, nInv_u64, r2, acc, accM);
   bn_mod_exp_loop_runtime(nLen, n, nInv_u64, bBits, bLen, b, aM, accM);
@@ -592,25 +592,25 @@ pss_encode(
   uint32_t hLen = hash_len(a);
   KRML_CHECK_SIZE(sizeof (uint8_t), hLen);
   uint8_t m1Hash[hLen];
-  memset(m1Hash, 0U, hLen * sizeof (m1Hash[0U]));
+  memset(m1Hash, 0U, hLen * sizeof (uint8_t));
   uint32_t m1Len = (uint32_t)8U + hLen + sLen;
   KRML_CHECK_SIZE(sizeof (uint8_t), m1Len);
   uint8_t m1[m1Len];
-  memset(m1, 0U, m1Len * sizeof (m1[0U]));
+  memset(m1, 0U, m1Len * sizeof (uint8_t));
   hash(a, m1 + (uint32_t)8U, msgLen, msg);
-  memcpy(m1 + (uint32_t)8U + hLen, salt, sLen * sizeof (salt[0U]));
+  memcpy(m1 + (uint32_t)8U + hLen, salt, sLen * sizeof (uint8_t));
   hash(a, m1Hash, m1Len, m1);
   uint32_t emLen = (emBits - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
   uint32_t dbLen = emLen - hLen - (uint32_t)1U;
   KRML_CHECK_SIZE(sizeof (uint8_t), dbLen);
   uint8_t db[dbLen];
-  memset(db, 0U, dbLen * sizeof (db[0U]));
+  memset(db, 0U, dbLen * sizeof (uint8_t));
   uint32_t last_before_salt = dbLen - sLen - (uint32_t)1U;
   db[last_before_salt] = (uint8_t)1U;
-  memcpy(db + last_before_salt + (uint32_t)1U, salt, sLen * sizeof (salt[0U]));
+  memcpy(db + last_before_salt + (uint32_t)1U, salt, sLen * sizeof (uint8_t));
   KRML_CHECK_SIZE(sizeof (uint8_t), dbLen);
   uint8_t dbMask[dbLen];
-  memset(dbMask, 0U, dbLen * sizeof (dbMask[0U]));
+  memset(dbMask, 0U, dbLen * sizeof (uint8_t));
   mgf_hash(a, hLen, m1Hash, dbLen, dbMask);
   xor_bytes(dbLen, db, dbMask);
   uint32_t msBits = emBits % (uint32_t)8U;
@@ -618,8 +618,8 @@ pss_encode(
   {
     db[0U] = db[0U] & (uint8_t)0xffU >> ((uint32_t)8U - msBits);
   }
-  memcpy(em, db, dbLen * sizeof (db[0U]));
-  memcpy(em + dbLen, m1Hash, hLen * sizeof (m1Hash[0U]));
+  memcpy(em, db, dbLen * sizeof (uint8_t));
+  memcpy(em + dbLen, m1Hash, hLen * sizeof (uint8_t));
   em[emLen - (uint32_t)1U] = (uint8_t)0xbcU;
 }
 
@@ -657,13 +657,13 @@ pss_verify(
   uint32_t hLen = hash_len(a);
   KRML_CHECK_SIZE(sizeof (uint8_t), hLen);
   uint8_t m1Hash0[hLen];
-  memset(m1Hash0, 0U, hLen * sizeof (m1Hash0[0U]));
+  memset(m1Hash0, 0U, hLen * sizeof (uint8_t));
   uint32_t dbLen = emLen1 - hLen - (uint32_t)1U;
   uint8_t *maskedDB = em;
   uint8_t *m1Hash = em + dbLen;
   KRML_CHECK_SIZE(sizeof (uint8_t), dbLen);
   uint8_t dbMask[dbLen];
-  memset(dbMask, 0U, dbLen * sizeof (dbMask[0U]));
+  memset(dbMask, 0U, dbLen * sizeof (uint8_t));
   mgf_hash(a, hLen, m1Hash, dbLen, dbMask);
   xor_bytes(dbLen, dbMask, maskedDB);
   uint32_t msBits1 = emBits % (uint32_t)8U;
@@ -674,7 +674,7 @@ pss_verify(
   uint32_t padLen = emLen1 - sLen - hLen - (uint32_t)1U;
   KRML_CHECK_SIZE(sizeof (uint8_t), padLen);
   uint8_t pad2[padLen];
-  memset(pad2, 0U, padLen * sizeof (pad2[0U]));
+  memset(pad2, 0U, padLen * sizeof (uint8_t));
   pad2[padLen - (uint32_t)1U] = (uint8_t)0x01U;
   uint8_t *pad = dbMask;
   uint8_t *salt = dbMask + padLen;
@@ -692,9 +692,9 @@ pss_verify(
   uint32_t m1Len = (uint32_t)8U + hLen + sLen;
   KRML_CHECK_SIZE(sizeof (uint8_t), m1Len);
   uint8_t m1[m1Len];
-  memset(m1, 0U, m1Len * sizeof (m1[0U]));
+  memset(m1, 0U, m1Len * sizeof (uint8_t));
   hash(a, m1 + (uint32_t)8U, msgLen, msg);
-  memcpy(m1 + (uint32_t)8U + hLen, salt, sLen * sizeof (salt[0U]));
+  memcpy(m1 + (uint32_t)8U + hLen, salt, sLen * sizeof (uint8_t));
   hash(a, m1Hash0, m1Len, m1);
   uint8_t res0 = (uint8_t)255U;
   for (uint32_t i = (uint32_t)0U; i < hLen; i++)
@@ -729,13 +729,13 @@ Hacl_RSAPSS_rsapss_sign(
   uint32_t emLen = (emBits - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
   KRML_CHECK_SIZE(sizeof (uint8_t), emLen);
   uint8_t em[emLen];
-  memset(em, 0U, emLen * sizeof (em[0U]));
+  memset(em, 0U, emLen * sizeof (uint8_t));
   KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
   uint64_t m[nLen];
-  memset(m, 0U, nLen * sizeof (m[0U]));
+  memset(m, 0U, nLen * sizeof (uint64_t));
   KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
   uint64_t s[nLen];
-  memset(s, 0U, nLen * sizeof (s[0U]));
+  memset(s, 0U, nLen * sizeof (uint64_t));
   pss_encode(a, sLen, salt, msgLen, msg, emBits, em);
   Hacl_Bignum_Convert_bn_from_bytes_be(emLen, em, m);
   bn_mod_exp(modBits, nLen, n, m, dBits, d, s);
@@ -762,13 +762,13 @@ Hacl_RSAPSS_rsapss_verify(
   uint32_t emLen = (emBits - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
   KRML_CHECK_SIZE(sizeof (uint8_t), emLen);
   uint8_t em[emLen];
-  memset(em, 0U, emLen * sizeof (em[0U]));
+  memset(em, 0U, emLen * sizeof (uint8_t));
   KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
   uint64_t m[nLen];
-  memset(m, 0U, nLen * sizeof (m[0U]));
+  memset(m, 0U, nLen * sizeof (uint64_t));
   KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
   uint64_t s[nLen];
-  memset(s, 0U, nLen * sizeof (s[0U]));
+  memset(s, 0U, nLen * sizeof (uint64_t));
   Hacl_Bignum_Convert_bn_from_bytes_be(k, sgnt, s);
   if (Hacl_Bignum_bn_is_less(nLen, s, n))
   {
@@ -802,8 +802,8 @@ inline void Hacl_Bignum_Convert_bn_from_bytes_be(uint32_t len, uint8_t *b, uint6
   uint32_t tmpLen = (uint32_t)8U * bnLen;
   KRML_CHECK_SIZE(sizeof (uint8_t), tmpLen);
   uint8_t tmp[tmpLen];
-  memset(tmp, 0U, tmpLen * sizeof (tmp[0U]));
-  memcpy(tmp + tmpLen - len, b, len * sizeof (b[0U]));
+  memset(tmp, 0U, tmpLen * sizeof (uint8_t));
+  memcpy(tmp + tmpLen - len, b, len * sizeof (uint8_t));
   for (uint32_t i = (uint32_t)0U; i < bnLen; i++)
   {
     uint64_t *os = res;
@@ -819,8 +819,8 @@ inline void Hacl_Bignum_Convert_bn_from_bytes_le(uint32_t len, uint8_t *b, uint6
   uint32_t tmpLen = (uint32_t)8U * bnLen;
   KRML_CHECK_SIZE(sizeof (uint8_t), tmpLen);
   uint8_t tmp[tmpLen];
-  memset(tmp, 0U, tmpLen * sizeof (tmp[0U]));
-  memcpy(tmp, b, len * sizeof (b[0U]));
+  memset(tmp, 0U, tmpLen * sizeof (uint8_t));
+  memcpy(tmp, b, len * sizeof (uint8_t));
   for (uint32_t i = (uint32_t)0U; i < (len - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U; i++)
   {
     uint64_t *os = res;
@@ -838,12 +838,12 @@ inline void Hacl_Bignum_Convert_bn_to_bytes_be(uint32_t len, uint64_t *b, uint8_
   uint32_t tmpLen = (uint32_t)8U * bnLen;
   KRML_CHECK_SIZE(sizeof (uint8_t), tmpLen);
   uint8_t tmp[tmpLen];
-  memset(tmp, 0U, tmpLen * sizeof (tmp[0U]));
+  memset(tmp, 0U, tmpLen * sizeof (uint8_t));
   for (uint32_t i = (uint32_t)0U; i < bnLen; i++)
   {
     store64_be(tmp + i * (uint32_t)8U, b[bnLen - i - (uint32_t)1U]);
   }
-  memcpy(res, tmp + tmpLen - len, len * sizeof ((tmp + tmpLen - len)[0U]));
+  memcpy(res, tmp + tmpLen - len, len * sizeof (uint8_t));
 }
 
 inline void Hacl_Bignum_Convert_bn_to_bytes_le(uint32_t len, uint64_t *b, uint8_t *res)
@@ -852,11 +852,11 @@ inline void Hacl_Bignum_Convert_bn_to_bytes_le(uint32_t len, uint64_t *b, uint8_
   uint32_t tmpLen = (uint32_t)8U * bnLen;
   KRML_CHECK_SIZE(sizeof (uint8_t), tmpLen);
   uint8_t tmp[tmpLen];
-  memset(tmp, 0U, tmpLen * sizeof (tmp[0U]));
+  memset(tmp, 0U, tmpLen * sizeof (uint8_t));
   for (uint32_t i = (uint32_t)0U; i < bnLen; i++)
   {
     store64_le(tmp + i * (uint32_t)8U, b[i]);
   }
-  memcpy(res, tmp, len * sizeof (tmp[0U]));
+  memcpy(res, tmp, len * sizeof (uint8_t));
 }
 

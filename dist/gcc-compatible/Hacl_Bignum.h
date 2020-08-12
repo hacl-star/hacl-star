@@ -28,11 +28,14 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __Hacl_Bignum_H
 #define __Hacl_Bignum_H
 
 #include "Hacl_Kremlib.h"
-
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 static inline uint64_t
 Hacl_Bignum_Multiplication_mul_carry_add_u64_st(
@@ -101,6 +104,10 @@ static inline uint64_t Hacl_Bignum_ModInv64_mod_inv_u64(uint64_t n0)
   }
   return vb;
 }
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Bignum_H_DEFINED
 #endif
