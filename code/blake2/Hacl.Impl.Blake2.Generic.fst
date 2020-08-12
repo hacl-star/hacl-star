@@ -601,7 +601,9 @@ let blake2_init #al #ms blake2_update_block wv hash kk k nn =
   (fun _ h1 -> live h1 hash /\ state_v h1 hash == Spec.blake2_init al (v kk) h0.[|k|] (v nn))
   (fun key_block ->
     blake2_init_hash hash kk nn;
-    if kk =. 0ul then ()
+    (* We convert to UInt32.t and use decidable equality to allow normalization
+     * at extraction *)
+    if (kk <: UInt32.t) = (0ul <: UInt32.t) then ()
     else (
        update_sub key_block (size 0) kk k;
        blake2_update1 blake2_update_block wv hash (size_to_limb al 0ul) key_block 0ul))
