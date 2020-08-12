@@ -35,6 +35,9 @@
 #include "Hacl_Kremlib.h"
 #include "Lib_Memzero0.h"
 #include "Hacl_Impl_Blake2_Constants.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 typedef struct K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256__s
 {
@@ -121,6 +124,10 @@ Hacl_Streaming_Blake2b_256_blake2b_256_with_key_free(
   Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
   *s
 );
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Streaming_Blake2b_256_H_DEFINED
 #endif

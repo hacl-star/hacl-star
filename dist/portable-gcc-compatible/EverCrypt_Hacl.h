@@ -33,6 +33,9 @@
 #define __EverCrypt_Hacl_H
 
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 /* SNIPPET_START: EverCrypt_Hacl_aes128_mk_sbox */
 
@@ -83,6 +86,10 @@ extern void
 EverCrypt_Hacl_aes256_cipher(uint8_t *cipher, uint8_t *plain, uint8_t *w, uint8_t *sb);
 
 /* SNIPPET_END: EverCrypt_Hacl_aes256_cipher */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __EverCrypt_Hacl_H_DEFINED
 #endif

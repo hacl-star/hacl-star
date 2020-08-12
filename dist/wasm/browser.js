@@ -31,7 +31,7 @@ function kremlin_start () {
         my_print("... no main in current window");
         throw "Aborting";
       }
-      return main(scope);
+      return main({ reserve, dump, my_print, hex }, scope);
     }).then(err => {
       my_print("... main exited with " + err);
       if (err != 0)

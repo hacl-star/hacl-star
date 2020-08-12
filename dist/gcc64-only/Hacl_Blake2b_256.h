@@ -37,6 +37,9 @@
 #include "Lib_Memzero0.h"
 #include "Hacl_Impl_Blake2_Constants.h"
 #include "Hacl_Hash.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 void
 Hacl_Hash_Blake2b_256_finish_blake2b_256(
@@ -73,6 +76,10 @@ Hacl_Blake2b_256_blake2b(
   uint32_t kk,
   uint8_t *k
 );
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Blake2b_256_H_DEFINED
 #endif

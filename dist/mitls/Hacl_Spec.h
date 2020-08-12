@@ -33,6 +33,9 @@
 #define __Hacl_Spec_H
 
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 #define Spec_Hash_Definitions_SHA2_224 0
 #define Spec_Hash_Definitions_SHA2_256 1
@@ -81,6 +84,10 @@ Spec_Cipher_Expansion_cipher_alg_of_impl(Spec_Cipher_Expansion_impl i);
 #define Spec_Agile_AEAD_AES256_CCM8 6
 
 typedef uint8_t Spec_Agile_AEAD_alg;
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Spec_H_DEFINED
 #endif

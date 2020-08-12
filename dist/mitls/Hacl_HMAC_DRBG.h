@@ -34,6 +34,9 @@
 
 #include "Hacl_HMAC.h"
 #include "Hacl_Spec.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 typedef Spec_Hash_Definitions_hash_alg Hacl_HMAC_DRBG_supported_alg;
 
@@ -111,6 +114,10 @@ Hacl_HMAC_DRBG_generate(
   uint32_t additional_input_len,
   uint8_t *additional_input
 );
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_HMAC_DRBG_H_DEFINED
 #endif

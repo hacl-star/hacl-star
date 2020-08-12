@@ -35,6 +35,9 @@
 #include "Hacl_Kremlib.h"
 #include "Lib_Memzero0.h"
 #include "Hacl_Impl_Blake2_Constants.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 /* SNIPPET_START: K____uint32_t___uint32_t_ */
 
@@ -273,6 +276,10 @@ Hacl_Streaming_Blake2_blake2b_32_with_key_free(
 );
 
 /* SNIPPET_END: Hacl_Streaming_Blake2_blake2b_32_with_key_free */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Streaming_Blake2_H_DEFINED
 #endif

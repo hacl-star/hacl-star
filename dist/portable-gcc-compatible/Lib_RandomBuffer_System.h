@@ -33,12 +33,19 @@
 #define __Lib_RandomBuffer_System_H
 
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 /* SNIPPET_START: Lib_RandomBuffer_System_randombytes */
 
 extern bool Lib_RandomBuffer_System_randombytes(uint8_t *buf, uint32_t len);
 
 /* SNIPPET_END: Lib_RandomBuffer_System_randombytes */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Lib_RandomBuffer_System_H_DEFINED
 #endif

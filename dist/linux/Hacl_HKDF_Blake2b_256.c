@@ -40,12 +40,12 @@ Hacl_HKDF_Blake2b_256_expand_blake2b_256(
   KRML_CHECK_SIZE(sizeof (u8), tlen + infolen + (u32)1U);
   {
     u8 text[tlen + infolen + (u32)1U];
-    memset(text, 0U, (tlen + infolen + (u32)1U) * sizeof (text[0U]));
+    memset(text, 0U, (tlen + infolen + (u32)1U) * sizeof (u8));
     {
       u8 *text0 = text + tlen;
       u8 *tag = text;
       u8 *ctr = text + tlen + infolen;
-      memcpy(text + tlen, info, infolen * sizeof (info[0U]));
+      memcpy(text + tlen, info, infolen * sizeof (u8));
       {
         u32 i;
         for (i = (u32)0U; i < n; i++)
@@ -59,7 +59,7 @@ Hacl_HKDF_Blake2b_256_expand_blake2b_256(
               prklen,
               text,
               tlen + infolen + (u32)1U);
-          memcpy(output + i * tlen, tag, tlen * sizeof (tag[0U]));
+          memcpy(output + i * tlen, tag, tlen * sizeof (u8));
         }
       }
       if (n * tlen < len)
@@ -75,7 +75,7 @@ Hacl_HKDF_Blake2b_256_expand_blake2b_256(
             tlen + infolen + (u32)1U);
         {
           u8 *block = okm + n * tlen;
-          memcpy(block, tag, (len - n * tlen) * sizeof (tag[0U]));
+          memcpy(block, tag, (len - n * tlen) * sizeof (u8));
         }
       }
     }

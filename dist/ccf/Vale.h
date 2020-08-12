@@ -32,6 +32,9 @@
 #define __Vale_H
 
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 extern uint64_t add_scalar_e(uint64_t *x0, uint64_t *x1, uint64_t x2);
 
@@ -106,6 +109,10 @@ gctr256_bytes(
   uint8_t *x5,
   uint64_t x6
 );
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Vale_H_DEFINED
 #endif

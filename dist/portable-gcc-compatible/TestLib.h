@@ -33,6 +33,9 @@
 #define __TestLib_H
 
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 /* SNIPPET_START: TestLib_touch */
 
@@ -159,6 +162,10 @@ TestLib_print_cycles_per_round(
 );
 
 /* SNIPPET_END: TestLib_print_cycles_per_round */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __TestLib_H_DEFINED
 #endif

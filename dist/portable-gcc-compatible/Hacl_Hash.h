@@ -38,6 +38,9 @@
 #include "Hacl_Blake2b_32.h"
 #include "Hacl_Impl_Blake2_Constants.h"
 #include "Hacl_Spec.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 /* SNIPPET_START: Hacl_Hash_Core_Blake2_update_blake2s_32 */
 
@@ -468,6 +471,10 @@ uint32_t Hacl_Hash_Definitions_hash_word_len(Spec_Hash_Definitions_hash_alg a);
 uint32_t Hacl_Hash_Definitions_hash_len(Spec_Hash_Definitions_hash_alg a);
 
 /* SNIPPET_END: Hacl_Hash_Definitions_hash_len */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Hash_H_DEFINED
 #endif

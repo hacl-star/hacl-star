@@ -35,6 +35,9 @@
 #include "Hacl_Kremlib.h"
 #include "Hacl_Salsa20.h"
 #include "Hacl_Curve25519_51.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 uint32_t
 Hacl_NaCl_crypto_secretbox_detached(
@@ -149,6 +152,10 @@ Hacl_NaCl_crypto_box_open_easy(
   uint8_t *pk,
   uint8_t *sk
 );
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_NaCl_H_DEFINED
 #endif

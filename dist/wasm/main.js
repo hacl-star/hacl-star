@@ -41,12 +41,12 @@ if (typeof WebAssembly === "undefined")
 
 // Load extra modules... with the understanding that shell.js is written by
 // kreMLin
-var link, reserve, dump;
+var link, reserve, dump, hex;
 var my_js_files, my_modules, my_debug, my_imports = {};
 
 my_print("... loader.js");
 if (is_node) {
-  ({ link, reserve, dump } = require("./loader.js"));
+  ({ link, reserve, dump, hex } = require("./loader.js"));
   ({ my_js_files, my_modules, my_debug } = require("./shell.js"));
 } else {
   my_load("loader.js");
@@ -57,6 +57,7 @@ my_print("... custom JS modules " + my_js_files);
 for (let f of my_js_files) {
   if (is_node) {
     var m = require(f);
+    my_print(f + " exports " + Object.keys(m));
     if (m.main)
       this.main = m.main;
     if (m.my_imports)
@@ -68,6 +69,7 @@ for (let f of my_js_files) {
 
 my_print("... assembling WASM modules " + my_modules + "\n");
 var scope = link(my_imports, my_modules.map(m => ({ name: m, buf: my_readbuffer(m+".wasm") })));
+var global = this;
 scope.then(scope => {
   if (debug) {
     for (let m of Object.keys(scope))
@@ -91,11 +93,11 @@ scope.then(scope => {
     }
   }
   if (!found) {
-    if (!("main" in this)) {
+    if (!("main" in global)) {
       my_print("... no main in current scope");
       throw new Error("Aborting");
     }
-    with_debug(main);
+    with_debug((imports) => global.main({ reserve, dump, my_print, hex }, imports));
   }
   my_print("... done running main");
   my_quit(err);

@@ -33,6 +33,9 @@
 #define __Hacl_Streaming_Poly1305_32_H
 
 #include "Hacl_Poly1305_32.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 /* SNIPPET_START: Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_ */
 
@@ -84,6 +87,10 @@ Hacl_Streaming_Poly1305_32_finish(
 void Hacl_Streaming_Poly1305_32_free(Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_ *s);
 
 /* SNIPPET_END: Hacl_Streaming_Poly1305_32_free */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Streaming_Poly1305_32_H_DEFINED
 #endif

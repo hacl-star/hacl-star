@@ -33,6 +33,9 @@
 #define __EverCrypt_Hacl_H
 
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 #define EverCrypt_Hacl_aes128_mk_sbox Crypto_Symmetric_AES128_mk_sbox
 
@@ -59,6 +62,10 @@ extern void EverCrypt_Hacl_aes256_keyExpansion(uint8_t *key, uint8_t *w, uint8_t
 
 extern void
 EverCrypt_Hacl_aes256_cipher(uint8_t *cipher, uint8_t *plain, uint8_t *w, uint8_t *sb);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __EverCrypt_Hacl_H_DEFINED
 #endif

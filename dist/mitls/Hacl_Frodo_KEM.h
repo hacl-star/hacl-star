@@ -36,12 +36,19 @@
 #include "Lib_RandomBuffer_System.h"
 #include "Hacl_SHA3.h"
 #include "Hacl_Lib.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 uint32_t Hacl_Frodo_KEM_crypto_kem_keypair(uint8_t *pk, uint8_t *sk);
 
 uint32_t Hacl_Frodo_KEM_crypto_kem_enc(uint8_t *ct, uint8_t *ss, uint8_t *pk);
 
 uint32_t Hacl_Frodo_KEM_crypto_kem_dec(uint8_t *ss, uint8_t *ct, uint8_t *sk);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Frodo_KEM_H_DEFINED
 #endif

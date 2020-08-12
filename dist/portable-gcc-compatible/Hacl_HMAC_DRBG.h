@@ -34,6 +34,9 @@
 
 #include "Hacl_HMAC.h"
 #include "Hacl_Spec.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 /* SNIPPET_START: Hacl_HMAC_DRBG_supported_alg */
 
@@ -175,6 +178,10 @@ Hacl_HMAC_DRBG_generate(
 );
 
 /* SNIPPET_END: Hacl_HMAC_DRBG_generate */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_HMAC_DRBG_H_DEFINED
 #endif

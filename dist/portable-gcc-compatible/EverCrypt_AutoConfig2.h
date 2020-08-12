@@ -33,6 +33,9 @@
 #define __EverCrypt_AutoConfig2_H
 
 #include "Vale.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 /* SNIPPET_START: EverCrypt_AutoConfig2_has_shaext */
 
@@ -231,6 +234,10 @@ void EverCrypt_AutoConfig2_disable_openssl();
 void EverCrypt_AutoConfig2_disable_bcrypt();
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_disable_bcrypt */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __EverCrypt_AutoConfig2_H_DEFINED
 #endif

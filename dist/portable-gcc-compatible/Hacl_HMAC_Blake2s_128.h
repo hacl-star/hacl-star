@@ -34,6 +34,9 @@
 
 #include "Hacl_Impl_Blake2_Constants.h"
 #include "Hacl_Blake2s_128.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 /* SNIPPET_START: Hacl_HMAC_Blake2s_128_compute_blake2s_128 */
 
@@ -47,6 +50,10 @@ Hacl_HMAC_Blake2s_128_compute_blake2s_128(
 );
 
 /* SNIPPET_END: Hacl_HMAC_Blake2s_128_compute_blake2s_128 */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_HMAC_Blake2s_128_H_DEFINED
 #endif

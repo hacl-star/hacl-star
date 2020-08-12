@@ -32,10 +32,17 @@
 #define __Hacl_AES128_H
 
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 extern void Hacl_AES128_aes128_key_expansion(u8 *key, u8 *expanded_key);
 
 extern void Hacl_AES128_aes128_encrypt_block(u16 *cipher, u16 *plain, u8 *expanded_key);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_AES128_H_DEFINED
 #endif

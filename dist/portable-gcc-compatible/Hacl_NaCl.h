@@ -36,6 +36,9 @@
 #include "Hacl_Salsa20.h"
 #include "Hacl_Poly1305_32.h"
 #include "Hacl_Curve25519_51.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 /* SNIPPET_START: Hacl_NaCl_crypto_secretbox_detached */
 
@@ -202,6 +205,10 @@ Hacl_NaCl_crypto_box_open_easy(
 );
 
 /* SNIPPET_END: Hacl_NaCl_crypto_box_open_easy */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_NaCl_H_DEFINED
 #endif

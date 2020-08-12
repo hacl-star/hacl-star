@@ -34,6 +34,9 @@
 #include "Hacl_Kremlib.h"
 #include "Hacl_Impl_Blake2_Constants.h"
 #include "Hacl_Blake2b_256.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 void
 Hacl_HMAC_Blake2b_256_compute_blake2b_256(
@@ -43,6 +46,10 @@ Hacl_HMAC_Blake2b_256_compute_blake2b_256(
   u8 *data,
   u32 data_len
 );
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_HMAC_Blake2b_256_H_DEFINED
 #endif

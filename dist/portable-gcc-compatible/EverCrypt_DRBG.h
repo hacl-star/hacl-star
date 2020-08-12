@@ -37,6 +37,9 @@
 #include "Hacl_Spec.h"
 #include "Hacl_HMAC_DRBG.h"
 #include "Hacl_Lib.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 /* SNIPPET_START: EverCrypt_DRBG_supported_alg */
 
@@ -387,6 +390,10 @@ EverCrypt_DRBG_generate(
 void EverCrypt_DRBG_uninstantiate(EverCrypt_DRBG_state_s *st);
 
 /* SNIPPET_END: EverCrypt_DRBG_uninstantiate */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __EverCrypt_DRBG_H_DEFINED
 #endif

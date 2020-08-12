@@ -37,8 +37,15 @@
 #include "Hacl_Poly1305_32.h"
 #include "Hacl_Poly1305_256.h"
 #include "Hacl_Poly1305_128.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 void EverCrypt_Poly1305_poly1305(uint8_t *dst, uint8_t *src, uint32_t len, uint8_t *key);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __EverCrypt_Poly1305_H_DEFINED
 #endif

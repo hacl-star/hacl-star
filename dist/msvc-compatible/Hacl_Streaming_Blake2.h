@@ -35,6 +35,9 @@
 #include "Hacl_Kremlib.h"
 #include "Lib_Memzero0.h"
 #include "Hacl_Impl_Blake2_Constants.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 typedef struct K____uint32_t___uint32_t__s
 {
@@ -193,6 +196,10 @@ Hacl_Streaming_Blake2_blake2b_32_with_key_free(
   uint32_t key_size,
   Hacl_Streaming_Functor_state_s__K____uint64_t___uint64_t____ *s1
 );
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Streaming_Blake2_H_DEFINED
 #endif

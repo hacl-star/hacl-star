@@ -35,6 +35,9 @@
 #include "Lib_Memzero0.h"
 #include "Hacl_Impl_Blake2_Constants.h"
 #include "Hacl_Spec.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 void
 Hacl_Blake2b_32_blake2b(
@@ -73,6 +76,10 @@ typedef struct Hacl_HMAC_DRBG_state_s
   uint32_t *reseed_counter;
 }
 Hacl_HMAC_DRBG_state;
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Leftovers_H_DEFINED
 #endif

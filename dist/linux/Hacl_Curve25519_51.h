@@ -32,6 +32,9 @@
 #define __Hacl_Curve25519_51_H
 
 #include "Hacl_Kremlib.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 void Hacl_Impl_Curve25519_Field51_fadd(u64 *out, u64 *f1, u64 *f2);
 
@@ -52,6 +55,10 @@ void Hacl_Curve25519_51_scalarmult(u8 *out, u8 *priv, u8 *pub);
 void Hacl_Curve25519_51_secret_to_public(u8 *pub, u8 *priv);
 
 bool Hacl_Curve25519_51_ecdh(u8 *out, u8 *priv, u8 *pub);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Curve25519_51_H_DEFINED
 #endif

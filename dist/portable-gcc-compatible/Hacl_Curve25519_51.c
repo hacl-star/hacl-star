@@ -782,7 +782,7 @@ static void montgomery_ladder(uint64_t *out, uint8_t *key, uint64_t *init)
   uint64_t *p01 = p01_tmp1_swap;
   uint64_t *p03 = p01;
   uint64_t *p11 = p01 + (uint32_t)10U;
-  memcpy(p11, init, (uint32_t)10U * sizeof (init[0U]));
+  memcpy(p11, init, (uint32_t)10U * sizeof (uint64_t));
   uint64_t *x0 = p03;
   uint64_t *z0 = p03 + (uint32_t)5U;
   x0[0U] = (uint64_t)1U;
@@ -827,7 +827,7 @@ static void montgomery_ladder(uint64_t *out, uint8_t *key, uint64_t *init)
   point_double(nq10, tmp1, tmp2);
   point_double(nq10, tmp1, tmp2);
   point_double(nq10, tmp1, tmp2);
-  memcpy(out, p0, (uint32_t)10U * sizeof (p0[0U]));
+  memcpy(out, p0, (uint32_t)10U * sizeof (uint64_t));
 }
 
 /* SNIPPET_END: montgomery_ladder */

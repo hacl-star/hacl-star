@@ -35,6 +35,9 @@
 #include "Hacl_Kremlib.h"
 #include "Hacl_Impl_Blake2_Constants.h"
 #include "Hacl_Hash.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 void
 Hacl_HMAC_legacy_compute_sha1(
@@ -103,6 +106,10 @@ Hacl_HMAC_compute_blake2b_32(
   uint8_t *data,
   uint32_t data_len
 );
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_HMAC_H_DEFINED
 #endif

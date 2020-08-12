@@ -34,6 +34,9 @@
 
 #include "Hacl_Kremlib.h"
 #include "Hacl_Hash.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 typedef struct Hacl_Streaming_Functor_state_s___uint32_t_____s
 Hacl_Streaming_Functor_state_s___uint32_t____;
@@ -104,6 +107,10 @@ void
 Hacl_Streaming_SHA2_finish_512(Hacl_Streaming_Functor_state_s___uint64_t____ *p, uint8_t *dst);
 
 void Hacl_Streaming_SHA2_free_512(Hacl_Streaming_Functor_state_s___uint64_t____ *s);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Streaming_SHA2_H_DEFINED
 #endif

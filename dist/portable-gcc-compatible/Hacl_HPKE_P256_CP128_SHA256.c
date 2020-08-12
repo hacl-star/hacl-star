@@ -75,7 +75,7 @@ Hacl_HPKE_P256_CP128_SHA256_setupBaseI(
   Hacl_Impl_P256_LowLevel_toUint8(resultBufferFelemX, resultX);
   Hacl_Impl_P256_LowLevel_toUint8(resultBufferFelemY, resultY);
   uint64_t res0 = flag0;
-  memcpy(o_zz_, tmp0, (uint32_t)64U * sizeof (tmp0[0U]));
+  memcpy(o_zz_, tmp0, (uint32_t)64U * sizeof (uint8_t));
   uint64_t r_0 = res0 & (uint64_t)1U;
   uint32_t res2 = (uint32_t)r_0;
   zz[0U] = (uint8_t)4U;
@@ -87,7 +87,7 @@ Hacl_HPKE_P256_CP128_SHA256_setupBaseI(
   context_len = (uint32_t)7U + (uint32_t)3U * (uint32_t)65U + (uint32_t)2U * (uint32_t)32U;
   KRML_CHECK_SIZE(sizeof (uint8_t), context_len);
   uint8_t context[context_len];
-  memset(context, 0U, context_len * sizeof (context[0U]));
+  memset(context, 0U, context_len * sizeof (uint8_t));
   uint8_t
   label_key[8U] =
     {
@@ -102,7 +102,7 @@ Hacl_HPKE_P256_CP128_SHA256_setupBaseI(
     };
   KRML_CHECK_SIZE(sizeof (uint8_t), (uint32_t)10U + context_len);
   uint8_t tmp[(uint32_t)10U + context_len];
-  memset(tmp, 0U, ((uint32_t)10U + context_len) * sizeof (tmp[0U]));
+  memset(tmp, 0U, ((uint32_t)10U + context_len) * sizeof (uint8_t));
   uint8_t secret[32U] = { 0U };
   uint8_t *info_hash = tmp;
   uint8_t *pskID_hash = tmp + (uint32_t)32U;
@@ -120,29 +120,29 @@ Hacl_HPKE_P256_CP128_SHA256_setupBaseI(
   uint8_t *uu____4 = uu____1 + (uint32_t)4U;
   uu____4[0U] = (uint8_t)0U;
   uu____4[1U] = (uint8_t)3U;
-  memcpy(context + (uint32_t)7U, o_pkE, (uint32_t)65U * sizeof (o_pkE[0U]));
-  memcpy(context + (uint32_t)7U + (uint32_t)65U, pkR, (uint32_t)65U * sizeof (pkR[0U]));
+  memcpy(context + (uint32_t)7U, o_pkE, (uint32_t)65U * sizeof (uint8_t));
+  memcpy(context + (uint32_t)7U + (uint32_t)65U, pkR, (uint32_t)65U * sizeof (uint8_t));
   memcpy(context + (uint32_t)7U + (uint32_t)65U + (uint32_t)65U,
     default_pkI,
-    (uint32_t)65U * sizeof (default_pkI[0U]));
+    (uint32_t)65U * sizeof (uint8_t));
   uint8_t *pskhash_b = context + (uint32_t)7U + (uint32_t)65U + (uint32_t)65U + (uint32_t)65U;
-  memcpy(pskhash_b, pskID_hash, (uint32_t)32U * sizeof (pskID_hash[0U]));
+  memcpy(pskhash_b, pskID_hash, (uint32_t)32U * sizeof (uint8_t));
   uint8_t
   *output_info =
     context
     + (uint32_t)7U + (uint32_t)65U + (uint32_t)65U + (uint32_t)65U + (uint32_t)32U;
-  memcpy(output_info, info_hash, (uint32_t)32U * sizeof (info_hash[0U]));
+  memcpy(output_info, info_hash, (uint32_t)32U * sizeof (uint8_t));
   Hacl_HKDF_extract_sha2_256(secret, default_psk, (uint32_t)32U, zz, (uint32_t)65U);
   uint8_t *info_key = tmp + (uint32_t)2U;
-  memcpy(info_key, label_key, (uint32_t)8U * sizeof (label_key[0U]));
-  memcpy(info_key + (uint32_t)8U, context, context_len * sizeof (context[0U]));
+  memcpy(info_key, label_key, (uint32_t)8U * sizeof (uint8_t));
+  memcpy(info_key + (uint32_t)8U, context, context_len * sizeof (uint8_t));
   Hacl_HKDF_expand_sha2_256(o_k,
     secret,
     (uint32_t)32U,
     info_key,
     (uint32_t)8U + context_len,
     (uint32_t)32U);
-  memcpy(tmp, label_nonce, (uint32_t)10U * sizeof (label_nonce[0U]));
+  memcpy(tmp, label_nonce, (uint32_t)10U * sizeof (uint8_t));
   Hacl_HKDF_expand_sha2_256(o_n,
     secret,
     (uint32_t)32U,
@@ -206,7 +206,7 @@ Hacl_HPKE_P256_CP128_SHA256_setupBaseR(
   Hacl_Impl_P256_LowLevel_toUint8(resultBufferFelemX, resultX);
   Hacl_Impl_P256_LowLevel_toUint8(resultBufferFelemY, resultY);
   uint64_t res0 = flag0;
-  memcpy(o_pkR_, tmp0, (uint32_t)64U * sizeof (tmp0[0U]));
+  memcpy(o_pkR_, tmp0, (uint32_t)64U * sizeof (uint8_t));
   uint64_t r_0 = res0 & (uint64_t)1U;
   uint32_t res2 = (uint32_t)r_0;
   zz[0U] = (uint8_t)4U;
@@ -217,7 +217,7 @@ Hacl_HPKE_P256_CP128_SHA256_setupBaseR(
   context_len = (uint32_t)7U + (uint32_t)3U * (uint32_t)65U + (uint32_t)2U * (uint32_t)32U;
   KRML_CHECK_SIZE(sizeof (uint8_t), context_len);
   uint8_t context[context_len];
-  memset(context, 0U, context_len * sizeof (context[0U]));
+  memset(context, 0U, context_len * sizeof (uint8_t));
   uint8_t
   label_key[8U] =
     {
@@ -232,7 +232,7 @@ Hacl_HPKE_P256_CP128_SHA256_setupBaseR(
     };
   KRML_CHECK_SIZE(sizeof (uint8_t), (uint32_t)10U + context_len);
   uint8_t tmp[(uint32_t)10U + context_len];
-  memset(tmp, 0U, ((uint32_t)10U + context_len) * sizeof (tmp[0U]));
+  memset(tmp, 0U, ((uint32_t)10U + context_len) * sizeof (uint8_t));
   uint8_t secret[32U] = { 0U };
   uint8_t *info_hash = tmp;
   uint8_t *pskID_hash = tmp + (uint32_t)32U;
@@ -250,29 +250,29 @@ Hacl_HPKE_P256_CP128_SHA256_setupBaseR(
   uint8_t *uu____4 = uu____1 + (uint32_t)4U;
   uu____4[0U] = (uint8_t)0U;
   uu____4[1U] = (uint8_t)3U;
-  memcpy(context + (uint32_t)7U, pkE, (uint32_t)65U * sizeof (pkE[0U]));
-  memcpy(context + (uint32_t)7U + (uint32_t)65U, pkR, (uint32_t)65U * sizeof (pkR[0U]));
+  memcpy(context + (uint32_t)7U, pkE, (uint32_t)65U * sizeof (uint8_t));
+  memcpy(context + (uint32_t)7U + (uint32_t)65U, pkR, (uint32_t)65U * sizeof (uint8_t));
   memcpy(context + (uint32_t)7U + (uint32_t)65U + (uint32_t)65U,
     default_pkI,
-    (uint32_t)65U * sizeof (default_pkI[0U]));
+    (uint32_t)65U * sizeof (uint8_t));
   uint8_t *pskhash_b = context + (uint32_t)7U + (uint32_t)65U + (uint32_t)65U + (uint32_t)65U;
-  memcpy(pskhash_b, pskID_hash, (uint32_t)32U * sizeof (pskID_hash[0U]));
+  memcpy(pskhash_b, pskID_hash, (uint32_t)32U * sizeof (uint8_t));
   uint8_t
   *output_info =
     context
     + (uint32_t)7U + (uint32_t)65U + (uint32_t)65U + (uint32_t)65U + (uint32_t)32U;
-  memcpy(output_info, info_hash, (uint32_t)32U * sizeof (info_hash[0U]));
+  memcpy(output_info, info_hash, (uint32_t)32U * sizeof (uint8_t));
   Hacl_HKDF_extract_sha2_256(secret, default_psk, (uint32_t)32U, zz, (uint32_t)65U);
   uint8_t *info_key = tmp + (uint32_t)2U;
-  memcpy(info_key, label_key, (uint32_t)8U * sizeof (label_key[0U]));
-  memcpy(info_key + (uint32_t)8U, context, context_len * sizeof (context[0U]));
+  memcpy(info_key, label_key, (uint32_t)8U * sizeof (uint8_t));
+  memcpy(info_key + (uint32_t)8U, context, context_len * sizeof (uint8_t));
   Hacl_HKDF_expand_sha2_256(o_key_aead,
     secret,
     (uint32_t)32U,
     info_key,
     (uint32_t)8U + context_len,
     (uint32_t)32U);
-  memcpy(tmp, label_nonce, (uint32_t)10U * sizeof (label_nonce[0U]));
+  memcpy(tmp, label_nonce, (uint32_t)10U * sizeof (uint8_t));
   Hacl_HKDF_expand_sha2_256(o_nonce_aead,
     secret,
     (uint32_t)32U,

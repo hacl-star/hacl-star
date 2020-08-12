@@ -33,6 +33,9 @@
 #define __Hacl_Impl_Blake2_Constants_H
 
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 static const
 uint32_t
@@ -93,6 +96,10 @@ static const
 uint32_t
 Hacl_Impl_Blake2_Constants_rTable_B[4U] =
   { (uint32_t)32U, (uint32_t)24U, (uint32_t)16U, (uint32_t)63U };
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Impl_Blake2_Constants_H_DEFINED
 #endif

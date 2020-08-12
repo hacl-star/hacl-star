@@ -33,6 +33,9 @@
 #define __EverCrypt_Helpers_H
 
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 /* SNIPPET_START: EverCrypt_Helpers_uint8_t */
 
@@ -81,6 +84,10 @@ typedef uint32_t *EverCrypt_Helpers_uint32_p;
 typedef uint64_t *EverCrypt_Helpers_uint64_p;
 
 /* SNIPPET_END: EverCrypt_Helpers_uint64_p */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __EverCrypt_Helpers_H_DEFINED
 #endif

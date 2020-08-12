@@ -34,6 +34,9 @@
 #include "Hacl_Chacha20.h"
 #include "Hacl_Kremlib.h"
 #include "Hacl_Poly1305_32.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 void
 Hacl_Chacha20Poly1305_32_aead_encrypt(
@@ -58,6 +61,10 @@ Hacl_Chacha20Poly1305_32_aead_decrypt(
   u8 *cipher,
   u8 *mac
 );
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Chacha20Poly1305_32_H_DEFINED
 #endif

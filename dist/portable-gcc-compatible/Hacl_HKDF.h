@@ -33,6 +33,9 @@
 #define __Hacl_HKDF_H
 
 #include "Hacl_HMAC.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 /* SNIPPET_START: Hacl_HKDF_expand_sha2_256 */
 
@@ -141,6 +144,10 @@ Hacl_HKDF_extract_blake2b_32(
 );
 
 /* SNIPPET_END: Hacl_HKDF_extract_blake2b_32 */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_HKDF_H_DEFINED
 #endif

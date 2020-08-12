@@ -31,6 +31,9 @@
 #define __MerkleTree_H
 
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 static inline uint8_t FStar_UInt8_eq_mask(uint8_t a, uint8_t b);
 
@@ -544,6 +547,10 @@ MerkleTree_Low_path
 uint8_t *MerkleTree_Low_Hashfunctions_init_hash(uint32_t hsz);
 
 void MerkleTree_Low_Hashfunctions_free_hash(uint8_t *h);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __MerkleTree_H_DEFINED
 #endif

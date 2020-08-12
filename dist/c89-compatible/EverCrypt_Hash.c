@@ -805,7 +805,7 @@ EverCrypt_Hash_update_last_256(
     uint8_t *tmp = tmp_twoblocks;
     uint8_t *tmp_rest = tmp;
     uint8_t *tmp_pad = tmp + rest_len;
-    memcpy(tmp_rest, rest, rest_len * sizeof (rest[0U]));
+    memcpy(tmp_rest, rest, rest_len * sizeof (uint8_t));
     Hacl_Hash_Core_SHA2_pad_256(total_input_len, tmp_pad);
     EverCrypt_Hash_update_multi_256(s, tmp, tmp_len / (uint32_t)64U);
   }
@@ -1076,7 +1076,7 @@ void EverCrypt_Hash_copy(EverCrypt_Hash_state_s *s_src, EverCrypt_Hash_state_s *
     {
       p_dst = KRML_EABORT(uint32_t *, "unreachable (pattern matches are exhaustive in F*)");
     }
-    memcpy(p_dst, p_src, (uint32_t)4U * sizeof (p_src[0U]));
+    memcpy(p_dst, p_src, (uint32_t)4U * sizeof (uint32_t));
     return;
   }
   if (scrut.tag == EverCrypt_Hash_SHA1_s)
@@ -1092,7 +1092,7 @@ void EverCrypt_Hash_copy(EverCrypt_Hash_state_s *s_src, EverCrypt_Hash_state_s *
     {
       p_dst = KRML_EABORT(uint32_t *, "unreachable (pattern matches are exhaustive in F*)");
     }
-    memcpy(p_dst, p_src, (uint32_t)5U * sizeof (p_src[0U]));
+    memcpy(p_dst, p_src, (uint32_t)5U * sizeof (uint32_t));
     return;
   }
   if (scrut.tag == EverCrypt_Hash_SHA2_224_s)
@@ -1108,7 +1108,7 @@ void EverCrypt_Hash_copy(EverCrypt_Hash_state_s *s_src, EverCrypt_Hash_state_s *
     {
       p_dst = KRML_EABORT(uint32_t *, "unreachable (pattern matches are exhaustive in F*)");
     }
-    memcpy(p_dst, p_src, (uint32_t)8U * sizeof (p_src[0U]));
+    memcpy(p_dst, p_src, (uint32_t)8U * sizeof (uint32_t));
     return;
   }
   if (scrut.tag == EverCrypt_Hash_SHA2_256_s)
@@ -1124,7 +1124,7 @@ void EverCrypt_Hash_copy(EverCrypt_Hash_state_s *s_src, EverCrypt_Hash_state_s *
     {
       p_dst = KRML_EABORT(uint32_t *, "unreachable (pattern matches are exhaustive in F*)");
     }
-    memcpy(p_dst, p_src, (uint32_t)8U * sizeof (p_src[0U]));
+    memcpy(p_dst, p_src, (uint32_t)8U * sizeof (uint32_t));
     return;
   }
   if (scrut.tag == EverCrypt_Hash_SHA2_384_s)
@@ -1140,7 +1140,7 @@ void EverCrypt_Hash_copy(EverCrypt_Hash_state_s *s_src, EverCrypt_Hash_state_s *
     {
       p_dst = KRML_EABORT(uint64_t *, "unreachable (pattern matches are exhaustive in F*)");
     }
-    memcpy(p_dst, p_src, (uint32_t)8U * sizeof (p_src[0U]));
+    memcpy(p_dst, p_src, (uint32_t)8U * sizeof (uint64_t));
     return;
   }
   if (scrut.tag == EverCrypt_Hash_SHA2_512_s)
@@ -1156,7 +1156,7 @@ void EverCrypt_Hash_copy(EverCrypt_Hash_state_s *s_src, EverCrypt_Hash_state_s *
     {
       p_dst = KRML_EABORT(uint64_t *, "unreachable (pattern matches are exhaustive in F*)");
     }
-    memcpy(p_dst, p_src, (uint32_t)8U * sizeof (p_src[0U]));
+    memcpy(p_dst, p_src, (uint32_t)8U * sizeof (uint64_t));
     return;
   }
   if (scrut.tag == EverCrypt_Hash_Blake2S_s)
@@ -1172,7 +1172,7 @@ void EverCrypt_Hash_copy(EverCrypt_Hash_state_s *s_src, EverCrypt_Hash_state_s *
     {
       p_dst = KRML_EABORT(uint32_t *, "unreachable (pattern matches are exhaustive in F*)");
     }
-    memcpy(p_dst, p_src, (uint32_t)16U * sizeof (p_src[0U]));
+    memcpy(p_dst, p_src, (uint32_t)16U * sizeof (uint32_t));
     return;
   }
   if (scrut.tag == EverCrypt_Hash_Blake2B_s)
@@ -1188,7 +1188,7 @@ void EverCrypt_Hash_copy(EverCrypt_Hash_state_s *s_src, EverCrypt_Hash_state_s *
     {
       p_dst = KRML_EABORT(uint64_t *, "unreachable (pattern matches are exhaustive in F*)");
     }
-    memcpy(p_dst, p_src, (uint32_t)16U * sizeof (p_src[0U]));
+    memcpy(p_dst, p_src, (uint32_t)16U * sizeof (uint64_t));
     return;
   }
   KRML_HOST_PRINTF("KreMLin abort at %s:%d\n%s\n",
@@ -1804,7 +1804,7 @@ EverCrypt_Hash_Incremental_update(
           {
             uint8_t *buf2 = buf + sz1;
             uint64_t total_len2;
-            memcpy(buf2, data, len * sizeof (data[0U]));
+            memcpy(buf2, data, len * sizeof (uint8_t));
             total_len2 = total_len1 + (uint64_t)len;
             {
               Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ lit;
@@ -2299,7 +2299,7 @@ EverCrypt_Hash_Incremental_update(
             data2 = data + data1_len;
             EverCrypt_Hash_update_multi2(block_state1, total_len1, data1, data1_len);
             dst = buf;
-            memcpy(dst, data2, data2_len * sizeof (data2[0U]));
+            memcpy(dst, data2, data2_len * sizeof (uint8_t));
             {
               Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ lit;
               lit.block_state = block_state1;
@@ -2528,7 +2528,7 @@ EverCrypt_Hash_Incremental_update(
             {
               uint8_t *buf2 = buf0 + sz10;
               uint64_t total_len2;
-              memcpy(buf2, data1, diff * sizeof (data1[0U]));
+              memcpy(buf2, data1, diff * sizeof (uint8_t));
               total_len2 = total_len10 + (uint64_t)diff;
               {
                 Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ lit;
@@ -3025,7 +3025,7 @@ EverCrypt_Hash_Incremental_update(
                 data21 = data2 + data1_len;
                 EverCrypt_Hash_update_multi2(block_state1, total_len1, data11, data1_len);
                 dst = buf;
-                memcpy(dst, data21, data2_len * sizeof (data21[0U]));
+                memcpy(dst, data21, data2_len * sizeof (uint8_t));
                 {
                   Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ lit0;
                   lit0.block_state = block_state1;

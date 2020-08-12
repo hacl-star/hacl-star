@@ -32,6 +32,9 @@
 #define __EverCrypt_Error_H
 
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 #define EverCrypt_Error_Success 0
 #define EverCrypt_Error_UnsupportedAlgorithm 1
@@ -53,6 +56,10 @@ bool EverCrypt_Error_uu___is_AuthenticationFailure(EverCrypt_Error_error_code pr
 bool EverCrypt_Error_uu___is_InvalidIVLength(EverCrypt_Error_error_code projectee);
 
 bool EverCrypt_Error_uu___is_DecodeError(EverCrypt_Error_error_code projectee);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __EverCrypt_Error_H_DEFINED
 #endif

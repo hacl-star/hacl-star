@@ -35,6 +35,9 @@
 #include "Hacl_Kremlib.h"
 #include "Hacl_Hash.h"
 #include "Hacl_Spec.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 /*
  Input: result buffer: uint8[64], 
@@ -220,6 +223,10 @@ u64 Hacl_P256_ecp256dh_i(u8 *result, u8 *scalar);
   
 */
 u64 Hacl_P256_ecp256dh_r(u8 *result, u8 *pubKey, u8 *scalar);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_P256_H_DEFINED
 #endif

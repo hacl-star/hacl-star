@@ -33,6 +33,9 @@
 #define __Hacl_Chacha20_H
 
 #include "Hacl_Kremlib.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 extern const uint32_t Hacl_Impl_Chacha20_Vec_chacha20_constants[4U];
 
@@ -68,6 +71,10 @@ Hacl_Chacha20_chacha20_decrypt(
   uint8_t *n,
   uint32_t ctr
 );
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Chacha20_H_DEFINED
 #endif

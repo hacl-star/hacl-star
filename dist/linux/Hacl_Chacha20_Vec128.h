@@ -33,6 +33,9 @@
 
 #include "Hacl_Chacha20.h"
 #include "Hacl_Kremlib.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 void
 Hacl_Chacha20_Vec128_chacha20_encrypt_128(u32 len, u8 *out, u8 *text, u8 *key, u8 *n, u32 ctr);
@@ -46,6 +49,10 @@ Hacl_Chacha20_Vec128_chacha20_decrypt_128(
   u8 *n,
   u32 ctr
 );
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Chacha20_Vec128_H_DEFINED
 #endif

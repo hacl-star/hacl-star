@@ -32,6 +32,9 @@
 #define __Hacl_HKDF_Blake2b_256_H
 
 #include "Hacl_HMAC_Blake2b_256.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 void
 Hacl_HKDF_Blake2b_256_expand_blake2b_256(
@@ -45,6 +48,10 @@ Hacl_HKDF_Blake2b_256_expand_blake2b_256(
 
 void
 Hacl_HKDF_Blake2b_256_extract_blake2b_256(u8 *prk, u8 *salt, u32 saltlen, u8 *ikm, u32 ikmlen);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_HKDF_Blake2b_256_H_DEFINED
 #endif

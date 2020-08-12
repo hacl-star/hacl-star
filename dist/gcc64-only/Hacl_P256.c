@@ -447,7 +447,7 @@ static void montgomery_multiplication_buffer_by_one(uint64_t *a, uint64_t *resul
   uint64_t *t_low = t;
   uint64_t round2[8U] = { 0U };
   uint64_t round4[8U] = { 0U };
-  memcpy(t_low, a, (uint32_t)4U * sizeof (a[0U]));
+  memcpy(t_low, a, (uint32_t)4U * sizeof (uint64_t));
   uint64_t tempRound[8U] = { 0U };
   uint64_t t20[8U] = { 0U };
   uint64_t t30[8U] = { 0U };
@@ -1012,14 +1012,14 @@ static void exponent(uint64_t *a, uint64_t *result, uint64_t *tempBuffer)
   uint64_t *buffer_result2 = tempBuffer + (uint32_t)8U;
   uint64_t *buffer_norm_3 = tempBuffer + (uint32_t)12U;
   uint64_t *buffer_result3 = tempBuffer + (uint32_t)16U;
-  memcpy(buffer_norm_1, a, (uint32_t)4U * sizeof (a[0U]));
+  memcpy(buffer_norm_1, a, (uint32_t)4U * sizeof (uint64_t));
   uint64_t *buffer_a = buffer_norm_1;
   uint64_t *buffer_b0 = buffer_norm_1 + (uint32_t)4U;
   fsquarePowNminusOne((uint32_t)32U, buffer_a, buffer_b0);
   fsquarePowN((uint32_t)224U, buffer_b0);
-  memcpy(buffer_result2, a, (uint32_t)4U * sizeof (a[0U]));
+  memcpy(buffer_result2, a, (uint32_t)4U * sizeof (uint64_t));
   fsquarePowN((uint32_t)192U, buffer_result2);
-  memcpy(buffer_norm_3, a, (uint32_t)4U * sizeof (a[0U]));
+  memcpy(buffer_norm_3, a, (uint32_t)4U * sizeof (uint64_t));
   uint64_t *buffer_a0 = buffer_norm_3;
   uint64_t *buffer_b = buffer_norm_3 + (uint32_t)4U;
   fsquarePowNminusOne((uint32_t)94U, buffer_a0, buffer_b);
@@ -1027,7 +1027,7 @@ static void exponent(uint64_t *a, uint64_t *result, uint64_t *tempBuffer)
   montgomery_multiplication_buffer(buffer_result1, buffer_result2, buffer_result1);
   montgomery_multiplication_buffer(buffer_result1, buffer_result3, buffer_result1);
   montgomery_multiplication_buffer(buffer_result1, a, buffer_result1);
-  memcpy(result, buffer_result1, (uint32_t)4U * sizeof (buffer_result1[0U]));
+  memcpy(result, buffer_result1, (uint32_t)4U * sizeof (uint64_t));
 }
 
 static void cube(uint64_t *a, uint64_t *result)
@@ -1372,9 +1372,9 @@ static void point_add(uint64_t *p, uint64_t *q, uint64_t *result, uint64_t *temp
   montgomery_multiplication_buffer(z1z2, h, z3_out1);
   copy_point_conditional(x3_out1, y3_out1, z3_out1, q, p);
   copy_point_conditional(x3_out1, y3_out1, z3_out1, p, q);
-  memcpy(result, x3_out1, (uint32_t)4U * sizeof (x3_out1[0U]));
-  memcpy(result + (uint32_t)4U, y3_out1, (uint32_t)4U * sizeof (y3_out1[0U]));
-  memcpy(result + (uint32_t)8U, z3_out1, (uint32_t)4U * sizeof (z3_out1[0U]));
+  memcpy(result, x3_out1, (uint32_t)4U * sizeof (uint64_t));
+  memcpy(result + (uint32_t)4U, y3_out1, (uint32_t)4U * sizeof (uint64_t));
+  memcpy(result + (uint32_t)8U, z3_out1, (uint32_t)4U * sizeof (uint64_t));
 }
 
 static void pointToDomain(uint64_t *p, uint64_t *result)
@@ -1398,7 +1398,7 @@ static void pointToDomain(uint64_t *p, uint64_t *result)
 
 static void copy_point(uint64_t *p, uint64_t *result)
 {
-  memcpy(result, p, (uint32_t)12U * sizeof (p[0U]));
+  memcpy(result, p, (uint32_t)12U * sizeof (uint64_t));
 }
 
 uint64_t Hacl_Impl_P256_Core_isPointAtInfinityPrivate(uint64_t *p)
@@ -1841,7 +1841,7 @@ static void montgomery_multiplication_ecdsa_module(uint64_t *a, uint64_t *b, uin
 static void bufferToJac(uint64_t *p, uint64_t *result)
 {
   uint64_t *partPoint = result;
-  memcpy(partPoint, p, (uint32_t)8U * sizeof (p[0U]));
+  memcpy(partPoint, p, (uint32_t)8U * sizeof (uint64_t));
   result[8U] = (uint64_t)1U;
   result[9U] = (uint64_t)0U;
   result[10U] = (uint64_t)0U;
@@ -1915,7 +1915,7 @@ static bool isOrderCorrect(uint64_t *p, uint64_t *tempBuffer)
 {
   uint64_t multResult[12U] = { 0U };
   uint64_t pBuffer[12U] = { 0U };
-  memcpy(pBuffer, p, (uint32_t)12U * sizeof (p[0U]));
+  memcpy(pBuffer, p, (uint32_t)12U * sizeof (uint64_t));
   scalarMultiplicationC(pBuffer, multResult, order_buffer, tempBuffer);
   bool result = isPointAtInfinityPublic(multResult);
   return result;
@@ -1983,7 +1983,7 @@ static void montgomery_ladder_exponent(uint64_t *r)
     montgomery_multiplication_ecdsa_module(p, p, p);
     cswap0(bit, p, r);
   }
-  memcpy(r, p, (uint32_t)4U * sizeof (p[0U]));
+  memcpy(r, p, (uint32_t)4U * sizeof (uint64_t));
 }
 
 static void fromDomainImpl(uint64_t *a, uint64_t *result)
@@ -2134,10 +2134,10 @@ ecdsa_verification_(
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), sz);
   uint8_t mHash[sz];
-  memset(mHash, 0U, sz * sizeof (mHash[0U]));
+  memset(mHash, 0U, sz * sizeof (uint8_t));
   if (alg.tag == Spec_ECDSA_NoHash)
   {
-    memcpy(mHash, m, sz * sizeof (m[0U]));
+    memcpy(mHash, m, sz * sizeof (uint8_t));
   }
   else if (alg.tag == Spec_ECDSA_Hash)
   {
@@ -2202,7 +2202,7 @@ ecdsa_verification_(
   norm(pointSum, pointSum, buff);
   bool resultIsPAI = isPointAtInfinityPublic(pointSum);
   uint64_t *xCoordinateSum = pointSum;
-  memcpy(xBuffer, xCoordinateSum, (uint32_t)4U * sizeof (xCoordinateSum[0U]));
+  memcpy(xBuffer, xCoordinateSum, (uint32_t)4U * sizeof (uint64_t));
   bool r1 = !resultIsPAI;
   bool state = r1;
   if (state == false)
@@ -2291,10 +2291,10 @@ ecdsa_signature_core(
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), sz);
   uint8_t mHash[sz];
-  memset(mHash, 0U, sz * sizeof (mHash[0U]));
+  memset(mHash, 0U, sz * sizeof (uint8_t));
   if (alg.tag == Spec_ECDSA_NoHash)
   {
-    memcpy(mHash, m, sz * sizeof (m[0U]));
+    memcpy(mHash, m, sz * sizeof (uint8_t));
   }
   else if (alg.tag == Spec_ECDSA_Hash)
   {
@@ -2352,7 +2352,7 @@ ecdsa_signature_core(
   uint64_t
   carry = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t, (uint64_t)0U, &tempBufferForSubborrow);
   cmovznz4(carry, tempBuffer1, zBuffer, zBuffer);
-  memcpy(kInv, kAsFelem, (uint32_t)4U * sizeof (kAsFelem[0U]));
+  memcpy(kInv, kAsFelem, (uint32_t)4U * sizeof (uint64_t));
   montgomery_ladder_exponent(kInv);
   montgomery_multiplication_ecdsa_module(zBuffer, kInv, s);
   uint64_t sIsZero = isZero_uint64_CT(s);
@@ -2386,7 +2386,7 @@ static void montgomery_ladder_power(uint64_t *a, const uint8_t *scalar, uint64_t
     montgomery_square_buffer(p, p);
     cswap1(bit, p, a);
   }
-  memcpy(result, p, (uint32_t)4U * sizeof (p[0U]));
+  memcpy(result, p, (uint32_t)4U * sizeof (uint64_t));
 }
 
 static const
@@ -2825,7 +2825,7 @@ bool Hacl_P256_decompression_not_compressed_form(uint8_t *b, uint8_t *result)
   bool correctIdentifier = (uint8_t)4U == compressionIdentifier;
   if (correctIdentifier)
   {
-    memcpy(result, b + (uint32_t)1U, (uint32_t)64U * sizeof ((b + (uint32_t)1U)[0U]));
+    memcpy(result, b + (uint32_t)1U, (uint32_t)64U * sizeof (uint8_t));
   }
   return correctIdentifier;
 }
@@ -2850,7 +2850,7 @@ bool Hacl_P256_decompression_compressed_form(uint8_t *b, uint8_t *result)
   if (flag)
   {
     uint8_t *x = b + (uint32_t)1U;
-    memcpy(result, x, (uint32_t)32U * sizeof (x[0U]));
+    memcpy(result, x, (uint32_t)32U * sizeof (uint8_t));
     Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(x, t0);
     uint64_t tempBuffer[4U] = { 0U };
     uint64_t carry = sub4_il(t0, prime256_buffer, tempBuffer);
@@ -2878,7 +2878,7 @@ bool Hacl_P256_decompression_compressed_form(uint8_t *b, uint8_t *result)
 void Hacl_P256_compression_not_compressed_form(uint8_t *b, uint8_t *result)
 {
   uint8_t *to = result + (uint32_t)1U;
-  memcpy(to, b, (uint32_t)64U * sizeof (b[0U]));
+  memcpy(to, b, (uint32_t)64U * sizeof (uint8_t));
   result[0U] = (uint8_t)4U;
 }
 
@@ -2892,7 +2892,7 @@ void Hacl_P256_compression_compressed_form(uint8_t *b, uint8_t *result)
   uint8_t lastWordY = y[31U];
   uint8_t lastBitY = lastWordY & (uint8_t)1U;
   uint8_t identifier = lastBitY + (uint8_t)2U;
-  memcpy(result + (uint32_t)1U, b, (uint32_t)32U * sizeof (b[0U]));
+  memcpy(result + (uint32_t)1U, b, (uint32_t)32U * sizeof (uint8_t));
   result[0U] = identifier;
 }
 

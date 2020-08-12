@@ -85,7 +85,7 @@ create_in_chacha20_poly1305(EverCrypt_AEAD_state_s **dst, uint8_t *k)
   {
     EverCrypt_AEAD_state_s *p = KRML_HOST_MALLOC(sizeof (EverCrypt_AEAD_state_s));
     p[0U] = lit;
-    memcpy(ek, k, (uint32_t)32U * sizeof (k[0U]));
+    memcpy(ek, k, (uint32_t)32U * sizeof (uint8_t));
     dst[0U] = p;
     return EverCrypt_Error_Success;
   }
@@ -210,7 +210,7 @@ encrypt_aes128_gcm(
     uint32_t len = iv_len / (uint32_t)16U;
     uint32_t bytes_len = len * (uint32_t)16U;
     uint8_t *iv_b = iv;
-    memcpy(tmp_iv, iv + bytes_len, iv_len % (uint32_t)16U * sizeof (iv[0U]));
+    memcpy(tmp_iv, iv + bytes_len, iv_len % (uint32_t)16U * sizeof (uint8_t));
     {
       uint64_t
       uu____0 = compute_iv_stdcall(iv_b, (uint64_t)iv_len, (uint64_t)len, tmp_iv, tmp_iv, hkeys_b);
@@ -224,10 +224,10 @@ encrypt_aes128_gcm(
       uint8_t *auth_b_ = ad;
       memcpy(inout_b,
         plain + plain_len_,
-        (uint32_t)(uint64_t)plain_len % (uint32_t)16U * sizeof (plain[0U]));
+        (uint32_t)(uint64_t)plain_len % (uint32_t)16U * sizeof (uint8_t));
       memcpy(abytes_b,
         ad + auth_len_,
-        (uint32_t)(uint64_t)ad_len % (uint32_t)16U * sizeof (ad[0U]));
+        (uint32_t)(uint64_t)ad_len % (uint32_t)16U * sizeof (uint8_t));
       {
         uint64_t len128x6 = (uint64_t)plain_len / (uint64_t)96U * (uint64_t)96U;
         if (len128x6 / (uint64_t)16U >= (uint64_t)18U)
@@ -293,7 +293,7 @@ encrypt_aes128_gcm(
         }
         memcpy(cipher + (uint32_t)(uint64_t)plain_len / (uint32_t)16U * (uint32_t)16U,
           inout_b,
-          (uint32_t)(uint64_t)plain_len % (uint32_t)16U * sizeof (inout_b[0U]));
+          (uint32_t)(uint64_t)plain_len % (uint32_t)16U * sizeof (uint8_t));
         return EverCrypt_Error_Success;
       }
     }
@@ -337,7 +337,7 @@ encrypt_aes256_gcm(
     uint32_t len = iv_len / (uint32_t)16U;
     uint32_t bytes_len = len * (uint32_t)16U;
     uint8_t *iv_b = iv;
-    memcpy(tmp_iv, iv + bytes_len, iv_len % (uint32_t)16U * sizeof (iv[0U]));
+    memcpy(tmp_iv, iv + bytes_len, iv_len % (uint32_t)16U * sizeof (uint8_t));
     {
       uint64_t
       uu____0 = compute_iv_stdcall(iv_b, (uint64_t)iv_len, (uint64_t)len, tmp_iv, tmp_iv, hkeys_b);
@@ -351,10 +351,10 @@ encrypt_aes256_gcm(
       uint8_t *auth_b_ = ad;
       memcpy(inout_b,
         plain + plain_len_,
-        (uint32_t)(uint64_t)plain_len % (uint32_t)16U * sizeof (plain[0U]));
+        (uint32_t)(uint64_t)plain_len % (uint32_t)16U * sizeof (uint8_t));
       memcpy(abytes_b,
         ad + auth_len_,
-        (uint32_t)(uint64_t)ad_len % (uint32_t)16U * sizeof (ad[0U]));
+        (uint32_t)(uint64_t)ad_len % (uint32_t)16U * sizeof (uint8_t));
       {
         uint64_t len128x6 = (uint64_t)plain_len / (uint64_t)96U * (uint64_t)96U;
         if (len128x6 / (uint64_t)16U >= (uint64_t)18U)
@@ -420,7 +420,7 @@ encrypt_aes256_gcm(
         }
         memcpy(cipher + (uint32_t)(uint64_t)plain_len / (uint32_t)16U * (uint32_t)16U,
           inout_b,
-          (uint32_t)(uint64_t)plain_len % (uint32_t)16U * sizeof (inout_b[0U]));
+          (uint32_t)(uint64_t)plain_len % (uint32_t)16U * sizeof (uint8_t));
         return EverCrypt_Error_Success;
       }
     }
@@ -540,7 +540,7 @@ EverCrypt_AEAD_encrypt_expand_aes128_gcm(
         uint32_t len = iv_len / (uint32_t)16U;
         uint32_t bytes_len = len * (uint32_t)16U;
         uint8_t *iv_b = iv;
-        memcpy(tmp_iv, iv + bytes_len, iv_len % (uint32_t)16U * sizeof (iv[0U]));
+        memcpy(tmp_iv, iv + bytes_len, iv_len % (uint32_t)16U * sizeof (uint8_t));
         {
           uint64_t
           uu____0 =
@@ -560,10 +560,10 @@ EverCrypt_AEAD_encrypt_expand_aes128_gcm(
           uint8_t *auth_b_ = ad;
           memcpy(inout_b,
             plain + plain_len_,
-            (uint32_t)(uint64_t)plain_len % (uint32_t)16U * sizeof (plain[0U]));
+            (uint32_t)(uint64_t)plain_len % (uint32_t)16U * sizeof (uint8_t));
           memcpy(abytes_b,
             ad + auth_len_,
-            (uint32_t)(uint64_t)ad_len % (uint32_t)16U * sizeof (ad[0U]));
+            (uint32_t)(uint64_t)ad_len % (uint32_t)16U * sizeof (uint8_t));
           {
             uint64_t len128x6 = (uint64_t)plain_len / (uint64_t)96U * (uint64_t)96U;
             if (len128x6 / (uint64_t)16U >= (uint64_t)18U)
@@ -629,7 +629,7 @@ EverCrypt_AEAD_encrypt_expand_aes128_gcm(
             }
             memcpy(cipher + (uint32_t)(uint64_t)plain_len / (uint32_t)16U * (uint32_t)16U,
               inout_b,
-              (uint32_t)(uint64_t)plain_len % (uint32_t)16U * sizeof (inout_b[0U]));
+              (uint32_t)(uint64_t)plain_len % (uint32_t)16U * sizeof (uint8_t));
             r = EverCrypt_Error_Success;
           }
         }
@@ -694,7 +694,7 @@ EverCrypt_AEAD_encrypt_expand_aes256_gcm(
         uint32_t len = iv_len / (uint32_t)16U;
         uint32_t bytes_len = len * (uint32_t)16U;
         uint8_t *iv_b = iv;
-        memcpy(tmp_iv, iv + bytes_len, iv_len % (uint32_t)16U * sizeof (iv[0U]));
+        memcpy(tmp_iv, iv + bytes_len, iv_len % (uint32_t)16U * sizeof (uint8_t));
         {
           uint64_t
           uu____0 =
@@ -714,10 +714,10 @@ EverCrypt_AEAD_encrypt_expand_aes256_gcm(
           uint8_t *auth_b_ = ad;
           memcpy(inout_b,
             plain + plain_len_,
-            (uint32_t)(uint64_t)plain_len % (uint32_t)16U * sizeof (plain[0U]));
+            (uint32_t)(uint64_t)plain_len % (uint32_t)16U * sizeof (uint8_t));
           memcpy(abytes_b,
             ad + auth_len_,
-            (uint32_t)(uint64_t)ad_len % (uint32_t)16U * sizeof (ad[0U]));
+            (uint32_t)(uint64_t)ad_len % (uint32_t)16U * sizeof (uint8_t));
           {
             uint64_t len128x6 = (uint64_t)plain_len / (uint64_t)96U * (uint64_t)96U;
             if (len128x6 / (uint64_t)16U >= (uint64_t)18U)
@@ -783,7 +783,7 @@ EverCrypt_AEAD_encrypt_expand_aes256_gcm(
             }
             memcpy(cipher + (uint32_t)(uint64_t)plain_len / (uint32_t)16U * (uint32_t)16U,
               inout_b,
-              (uint32_t)(uint64_t)plain_len % (uint32_t)16U * sizeof (inout_b[0U]));
+              (uint32_t)(uint64_t)plain_len % (uint32_t)16U * sizeof (uint8_t));
             r = EverCrypt_Error_Success;
           }
         }
@@ -817,7 +817,7 @@ EverCrypt_AEAD_encrypt_expand_chacha20_poly1305(
     EverCrypt_AEAD_state_s *s;
     EverCrypt_AEAD_state_s scrut;
     uint8_t *ek;
-    memcpy(ek0, k, (uint32_t)32U * sizeof (k[0U]));
+    memcpy(ek0, k, (uint32_t)32U * sizeof (uint8_t));
     s = &p;
     scrut = *s;
     ek = scrut.ek;
@@ -922,7 +922,7 @@ decrypt_aes128_gcm(
     uint32_t len = iv_len / (uint32_t)16U;
     uint32_t bytes_len = len * (uint32_t)16U;
     uint8_t *iv_b = iv;
-    memcpy(tmp_iv, iv + bytes_len, iv_len % (uint32_t)16U * sizeof (iv[0U]));
+    memcpy(tmp_iv, iv + bytes_len, iv_len % (uint32_t)16U * sizeof (uint8_t));
     {
       uint64_t
       uu____0 = compute_iv_stdcall(iv_b, (uint64_t)iv_len, (uint64_t)len, tmp_iv, tmp_iv, hkeys_b);
@@ -936,10 +936,10 @@ decrypt_aes128_gcm(
       uint8_t *auth_b_ = ad;
       memcpy(inout_b,
         cipher + cipher_len_,
-        (uint32_t)(uint64_t)cipher_len % (uint32_t)16U * sizeof (cipher[0U]));
+        (uint32_t)(uint64_t)cipher_len % (uint32_t)16U * sizeof (uint8_t));
       memcpy(abytes_b,
         ad + auth_len_,
-        (uint32_t)(uint64_t)ad_len % (uint32_t)16U * sizeof (ad[0U]));
+        (uint32_t)(uint64_t)ad_len % (uint32_t)16U * sizeof (uint8_t));
       {
         uint64_t len128x6 = (uint64_t)cipher_len / (uint64_t)96U * (uint64_t)96U;
         uint64_t c;
@@ -1010,7 +1010,7 @@ decrypt_aes128_gcm(
         }
         memcpy(dst + (uint32_t)(uint64_t)cipher_len / (uint32_t)16U * (uint32_t)16U,
           inout_b,
-          (uint32_t)(uint64_t)cipher_len % (uint32_t)16U * sizeof (inout_b[0U]));
+          (uint32_t)(uint64_t)cipher_len % (uint32_t)16U * sizeof (uint8_t));
         {
           uint64_t r = c;
           if (r == (uint64_t)0U)
@@ -1061,7 +1061,7 @@ decrypt_aes256_gcm(
     uint32_t len = iv_len / (uint32_t)16U;
     uint32_t bytes_len = len * (uint32_t)16U;
     uint8_t *iv_b = iv;
-    memcpy(tmp_iv, iv + bytes_len, iv_len % (uint32_t)16U * sizeof (iv[0U]));
+    memcpy(tmp_iv, iv + bytes_len, iv_len % (uint32_t)16U * sizeof (uint8_t));
     {
       uint64_t
       uu____0 = compute_iv_stdcall(iv_b, (uint64_t)iv_len, (uint64_t)len, tmp_iv, tmp_iv, hkeys_b);
@@ -1075,10 +1075,10 @@ decrypt_aes256_gcm(
       uint8_t *auth_b_ = ad;
       memcpy(inout_b,
         cipher + cipher_len_,
-        (uint32_t)(uint64_t)cipher_len % (uint32_t)16U * sizeof (cipher[0U]));
+        (uint32_t)(uint64_t)cipher_len % (uint32_t)16U * sizeof (uint8_t));
       memcpy(abytes_b,
         ad + auth_len_,
-        (uint32_t)(uint64_t)ad_len % (uint32_t)16U * sizeof (ad[0U]));
+        (uint32_t)(uint64_t)ad_len % (uint32_t)16U * sizeof (uint8_t));
       {
         uint64_t len128x6 = (uint64_t)cipher_len / (uint64_t)96U * (uint64_t)96U;
         uint64_t c;
@@ -1149,7 +1149,7 @@ decrypt_aes256_gcm(
         }
         memcpy(dst + (uint32_t)(uint64_t)cipher_len / (uint32_t)16U * (uint32_t)16U,
           inout_b,
-          (uint32_t)(uint64_t)cipher_len % (uint32_t)16U * sizeof (inout_b[0U]));
+          (uint32_t)(uint64_t)cipher_len % (uint32_t)16U * sizeof (uint8_t));
         {
           uint64_t r = c;
           if (r == (uint64_t)0U)
@@ -1296,7 +1296,7 @@ EverCrypt_AEAD_decrypt_expand_aes128_gcm(
         uint32_t len = iv_len / (uint32_t)16U;
         uint32_t bytes_len = len * (uint32_t)16U;
         uint8_t *iv_b = iv;
-        memcpy(tmp_iv, iv + bytes_len, iv_len % (uint32_t)16U * sizeof (iv[0U]));
+        memcpy(tmp_iv, iv + bytes_len, iv_len % (uint32_t)16U * sizeof (uint8_t));
         {
           uint64_t
           uu____0 =
@@ -1316,10 +1316,10 @@ EverCrypt_AEAD_decrypt_expand_aes128_gcm(
           uint8_t *auth_b_ = ad;
           memcpy(inout_b,
             cipher + cipher_len_,
-            (uint32_t)(uint64_t)cipher_len % (uint32_t)16U * sizeof (cipher[0U]));
+            (uint32_t)(uint64_t)cipher_len % (uint32_t)16U * sizeof (uint8_t));
           memcpy(abytes_b,
             ad + auth_len_,
-            (uint32_t)(uint64_t)ad_len % (uint32_t)16U * sizeof (ad[0U]));
+            (uint32_t)(uint64_t)ad_len % (uint32_t)16U * sizeof (uint8_t));
           {
             uint64_t len128x6 = (uint64_t)cipher_len / (uint64_t)96U * (uint64_t)96U;
             uint64_t c;
@@ -1390,7 +1390,7 @@ EverCrypt_AEAD_decrypt_expand_aes128_gcm(
             }
             memcpy(dst + (uint32_t)(uint64_t)cipher_len / (uint32_t)16U * (uint32_t)16U,
               inout_b,
-              (uint32_t)(uint64_t)cipher_len % (uint32_t)16U * sizeof (inout_b[0U]));
+              (uint32_t)(uint64_t)cipher_len % (uint32_t)16U * sizeof (uint8_t));
             {
               uint64_t r = c;
               if (r == (uint64_t)0U)
@@ -1463,7 +1463,7 @@ EverCrypt_AEAD_decrypt_expand_aes256_gcm(
         uint32_t len = iv_len / (uint32_t)16U;
         uint32_t bytes_len = len * (uint32_t)16U;
         uint8_t *iv_b = iv;
-        memcpy(tmp_iv, iv + bytes_len, iv_len % (uint32_t)16U * sizeof (iv[0U]));
+        memcpy(tmp_iv, iv + bytes_len, iv_len % (uint32_t)16U * sizeof (uint8_t));
         {
           uint64_t
           uu____0 =
@@ -1483,10 +1483,10 @@ EverCrypt_AEAD_decrypt_expand_aes256_gcm(
           uint8_t *auth_b_ = ad;
           memcpy(inout_b,
             cipher + cipher_len_,
-            (uint32_t)(uint64_t)cipher_len % (uint32_t)16U * sizeof (cipher[0U]));
+            (uint32_t)(uint64_t)cipher_len % (uint32_t)16U * sizeof (uint8_t));
           memcpy(abytes_b,
             ad + auth_len_,
-            (uint32_t)(uint64_t)ad_len % (uint32_t)16U * sizeof (ad[0U]));
+            (uint32_t)(uint64_t)ad_len % (uint32_t)16U * sizeof (uint8_t));
           {
             uint64_t len128x6 = (uint64_t)cipher_len / (uint64_t)96U * (uint64_t)96U;
             uint64_t c;
@@ -1557,7 +1557,7 @@ EverCrypt_AEAD_decrypt_expand_aes256_gcm(
             }
             memcpy(dst + (uint32_t)(uint64_t)cipher_len / (uint32_t)16U * (uint32_t)16U,
               inout_b,
-              (uint32_t)(uint64_t)cipher_len % (uint32_t)16U * sizeof (inout_b[0U]));
+              (uint32_t)(uint64_t)cipher_len % (uint32_t)16U * sizeof (uint8_t));
             {
               uint64_t r = c;
               if (r == (uint64_t)0U)
@@ -1599,7 +1599,7 @@ EverCrypt_AEAD_decrypt_expand_chacha20_poly1305(
     EverCrypt_AEAD_state_s p = lit;
     EverCrypt_AEAD_state_s *s;
     EverCrypt_Error_error_code r;
-    memcpy(ek, k, (uint32_t)32U * sizeof (k[0U]));
+    memcpy(ek, k, (uint32_t)32U * sizeof (uint8_t));
     s = &p;
     r = decrypt_chacha20_poly1305(s, iv, iv_len, ad, ad_len, cipher, cipher_len, tag, dst);
     return r;

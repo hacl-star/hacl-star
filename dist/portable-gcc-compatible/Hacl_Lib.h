@@ -33,6 +33,9 @@
 #define __Hacl_Lib_H
 
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 /* SNIPPET_START: Lib_Memzero_clear_words_u16 */
 
@@ -45,6 +48,10 @@ extern void Lib_Memzero_clear_words_u16(uint32_t nwords, uint16_t *b);
 extern void Lib_Memzero_clear_words_u8(uint32_t nwords, uint8_t *b);
 
 /* SNIPPET_END: Lib_Memzero_clear_words_u8 */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Lib_H_DEFINED
 #endif

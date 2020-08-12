@@ -34,6 +34,9 @@
 #include "Hacl_Kremlib.h"
 #include "Hacl_Impl_Blake2_Constants.h"
 #include "Hacl_Hash.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 void Hacl_HMAC_legacy_compute_sha1(u8 *dst, u8 *key, u32 key_len, u8 *data, u32 data_len);
 
@@ -46,6 +49,10 @@ void Hacl_HMAC_compute_sha2_512(u8 *dst, u8 *key, u32 key_len, u8 *data, u32 dat
 void Hacl_HMAC_compute_blake2s_32(u8 *dst, u8 *key, u32 key_len, u8 *data, u32 data_len);
 
 void Hacl_HMAC_compute_blake2b_32(u8 *dst, u8 *key, u32 key_len, u8 *data, u32 data_len);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_HMAC_H_DEFINED
 #endif

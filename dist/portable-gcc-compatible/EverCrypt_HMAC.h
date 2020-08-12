@@ -38,6 +38,9 @@
 #include "Hacl_Hash.h"
 #include "Hacl_Spec.h"
 #include "EverCrypt_Hash.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 /* SNIPPET_START: EverCrypt_HMAC_compute_sha1 */
 
@@ -142,6 +145,10 @@ EverCrypt_HMAC_compute(
 );
 
 /* SNIPPET_END: EverCrypt_HMAC_compute */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __EverCrypt_HMAC_H_DEFINED
 #endif

@@ -301,13 +301,13 @@ static void point_add(uint64_t *out, uint64_t *p, uint64_t *q)
   uint64_t *y1 = p + (uint32_t)5U;
   uint64_t *x2 = q;
   uint64_t *y2 = q + (uint32_t)5U;
-  memcpy(tmp1, x1, (uint32_t)5U * sizeof (x1[0U]));
-  memcpy(tmp20, x2, (uint32_t)5U * sizeof (x2[0U]));
+  memcpy(tmp1, x1, (uint32_t)5U * sizeof (uint64_t));
+  memcpy(tmp20, x2, (uint32_t)5U * sizeof (uint64_t));
   fdifference(tmp1, y1);
   fdifference(tmp20, y2);
   fmul0(tmp30, tmp1, tmp20);
-  memcpy(tmp1, y1, (uint32_t)5U * sizeof (y1[0U]));
-  memcpy(tmp20, y2, (uint32_t)5U * sizeof (y2[0U]));
+  memcpy(tmp1, y1, (uint32_t)5U * sizeof (uint64_t));
+  memcpy(tmp20, y2, (uint32_t)5U * sizeof (uint64_t));
   fsum(tmp1, x1);
   fsum(tmp20, x2);
   fmul0(tmp40, tmp1, tmp20);
@@ -325,8 +325,8 @@ static void point_add(uint64_t *out, uint64_t *p, uint64_t *q)
   fmul0(tmp2, tmp10, t2);
   times_2(tmp10, z1);
   fmul0(tmp50, tmp10, z2);
-  memcpy(tmp10, tmp3, (uint32_t)5U * sizeof (tmp3[0U]));
-  memcpy(tmp60, tmp2, (uint32_t)5U * sizeof (tmp2[0U]));
+  memcpy(tmp10, tmp3, (uint32_t)5U * sizeof (uint64_t));
+  memcpy(tmp60, tmp2, (uint32_t)5U * sizeof (uint64_t));
   fdifference(tmp10, tmp41);
   fdifference(tmp60, tmp50);
   fsum(tmp50, tmp2);
@@ -367,7 +367,7 @@ static void point_double(uint64_t *out, uint64_t *p)
   fsquare(tmp210, y10);
   fsquare(tmp310, z1);
   times_2(tmp410, tmp310);
-  memcpy(tmp310, tmp11, (uint32_t)5U * sizeof (tmp11[0U]));
+  memcpy(tmp310, tmp11, (uint32_t)5U * sizeof (uint64_t));
   fsum(tmp310, tmp210);
   uint64_t *tmp110 = tmp;
   uint64_t *tmp21 = tmp + (uint32_t)5U;
@@ -377,10 +377,10 @@ static void point_double(uint64_t *out, uint64_t *p)
   uint64_t *tmp61 = tmp + (uint32_t)25U;
   uint64_t *x1 = p;
   uint64_t *y1 = p + (uint32_t)5U;
-  memcpy(tmp51, x1, (uint32_t)5U * sizeof (x1[0U]));
+  memcpy(tmp51, x1, (uint32_t)5U * sizeof (uint64_t));
   fsum(tmp51, y1);
   fsquare(tmp61, tmp51);
-  memcpy(tmp51, tmp31, (uint32_t)5U * sizeof (tmp31[0U]));
+  memcpy(tmp51, tmp31, (uint32_t)5U * sizeof (uint64_t));
   reduce_513(tmp51);
   fdifference(tmp61, tmp51);
   fdifference(tmp21, tmp110);
@@ -495,7 +495,7 @@ static void point_mul(uint64_t *result, uint8_t *scalar, uint64_t *q)
   t[2U] = (uint64_t)0U;
   t[3U] = (uint64_t)0U;
   t[4U] = (uint64_t)0U;
-  memcpy(nqpq, q, (uint32_t)20U * sizeof (q[0U]));
+  memcpy(nqpq, q, (uint32_t)20U * sizeof (uint64_t));
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)256U; i++)
   {
     uint64_t *nq1 = b;
@@ -511,7 +511,7 @@ static void point_mul(uint64_t *result, uint8_t *scalar, uint64_t *q)
     point_add(nqpq2, nq1, nqpq1);
     swap_conditional(nq1, nqpq1, nq2, nqpq2, (uint64_t)i1);
   }
-  memcpy(result, nq, (uint32_t)20U * sizeof (nq[0U]));
+  memcpy(result, nq, (uint32_t)20U * sizeof (uint64_t));
 }
 
 static void point_mul_g(uint64_t *result, uint8_t *scalar)
@@ -1379,9 +1379,9 @@ static void sha512_pre_msg(uint8_t *h, uint8_t *prefix, uint32_t len, uint8_t *i
 {
   KRML_CHECK_SIZE(sizeof (uint8_t), len + (uint32_t)32U);
   uint8_t pre_msg[len + (uint32_t)32U];
-  memset(pre_msg, 0U, (len + (uint32_t)32U) * sizeof (pre_msg[0U]));
-  memcpy(pre_msg, prefix, (uint32_t)32U * sizeof (prefix[0U]));
-  memcpy(pre_msg + (uint32_t)32U, input, len * sizeof (input[0U]));
+  memset(pre_msg, 0U, (len + (uint32_t)32U) * sizeof (uint8_t));
+  memcpy(pre_msg, prefix, (uint32_t)32U * sizeof (uint8_t));
+  memcpy(pre_msg + (uint32_t)32U, input, len * sizeof (uint8_t));
   Hacl_Hash_SHA2_hash_512(pre_msg, len + (uint32_t)32U, h);
 }
 
@@ -1396,10 +1396,10 @@ sha512_pre_pre2_msg(
 {
   KRML_CHECK_SIZE(sizeof (uint8_t), len + (uint32_t)64U);
   uint8_t pre_msg[len + (uint32_t)64U];
-  memset(pre_msg, 0U, (len + (uint32_t)64U) * sizeof (pre_msg[0U]));
-  memcpy(pre_msg, prefix, (uint32_t)32U * sizeof (prefix[0U]));
-  memcpy(pre_msg + (uint32_t)32U, prefix2, (uint32_t)32U * sizeof (prefix2[0U]));
-  memcpy(pre_msg + (uint32_t)64U, input, len * sizeof (input[0U]));
+  memset(pre_msg, 0U, (len + (uint32_t)64U) * sizeof (uint8_t));
+  memcpy(pre_msg, prefix, (uint32_t)32U * sizeof (uint8_t));
+  memcpy(pre_msg + (uint32_t)32U, prefix2, (uint32_t)32U * sizeof (uint8_t));
+  memcpy(pre_msg + (uint32_t)64U, input, len * sizeof (uint8_t));
   Hacl_Hash_SHA2_hash_512(pre_msg, len + (uint32_t)64U, h);
 }
 
@@ -1627,7 +1627,7 @@ static bool recover_x(uint64_t *x, uint64_t *y, uint64_t sign)
       uint64_t *t10 = tmp + (uint32_t)15U;
       pow2_252m2(x31, x210);
       fsquare(t00, x31);
-      memcpy(t10, x210, (uint32_t)5U * sizeof (x210[0U]));
+      memcpy(t10, x210, (uint32_t)5U * sizeof (uint64_t));
       fdifference(t10, t00);
       reduce_513(t10);
       reduce(t10);
@@ -1641,7 +1641,7 @@ static bool recover_x(uint64_t *x, uint64_t *y, uint64_t sign)
       uint64_t *t01 = tmp + (uint32_t)10U;
       uint64_t *t1 = tmp + (uint32_t)15U;
       fsquare(t01, x3);
-      memcpy(t1, x211, (uint32_t)5U * sizeof (x211[0U]));
+      memcpy(t1, x211, (uint32_t)5U * sizeof (uint64_t));
       fdifference(t1, t01);
       reduce_513(t1);
       reduce(t1);
@@ -1668,7 +1668,7 @@ static bool recover_x(uint64_t *x, uint64_t *y, uint64_t sign)
           reduce_513(x32);
           reduce(x32);
         }
-        memcpy(x, x32, (uint32_t)5U * sizeof (x32[0U]));
+        memcpy(x, x32, (uint32_t)5U * sizeof (uint64_t));
         res = true;
       }
     }
@@ -1698,8 +1698,8 @@ static bool point_decompress(uint64_t *out, uint8_t *s)
     uint64_t *outy = out + (uint32_t)5U;
     uint64_t *outz = out + (uint32_t)10U;
     uint64_t *outt = out + (uint32_t)15U;
-    memcpy(outx, x, (uint32_t)5U * sizeof (x[0U]));
-    memcpy(outy, y, (uint32_t)5U * sizeof (y[0U]));
+    memcpy(outx, x, (uint32_t)5U * sizeof (uint64_t));
+    memcpy(outy, y, (uint32_t)5U * sizeof (uint64_t));
     outz[0U] = (uint64_t)1U;
     outz[1U] = (uint64_t)0U;
     outz[2U] = (uint64_t)0U;
@@ -1813,8 +1813,8 @@ void Hacl_Ed25519_sign(uint8_t *signature, uint8_t *priv, uint32_t len, uint8_t 
   sign_step_3(tmp_bytes, tmp_ints);
   sign_step_4(len, msg, tmp_bytes, tmp_ints);
   sign_step_5(tmp_bytes, tmp_ints);
-  memcpy(signature, rs_, (uint32_t)32U * sizeof (rs_[0U]));
-  memcpy(signature + (uint32_t)32U, s_, (uint32_t)32U * sizeof (s_[0U]));
+  memcpy(signature, rs_, (uint32_t)32U * sizeof (uint8_t));
+  memcpy(signature + (uint32_t)32U, s_, (uint32_t)32U * sizeof (uint8_t));
 }
 
 bool Hacl_Ed25519_verify(uint8_t *pub, uint32_t len, uint8_t *msg, uint8_t *signature)
@@ -1891,13 +1891,13 @@ void Hacl_Ed25519_sign_expanded(uint8_t *signature, uint8_t *ks, uint32_t len, u
   uint8_t *s_ = tmp_bytes + (uint32_t)192U;
   uint8_t *tmp_public = tmp_bytes + (uint32_t)96U;
   uint8_t *tmp_xsecret = tmp_bytes + (uint32_t)224U;
-  memcpy(tmp_public, ks, (uint32_t)32U * sizeof (ks[0U]));
-  memcpy(tmp_xsecret, ks + (uint32_t)32U, (uint32_t)64U * sizeof ((ks + (uint32_t)32U)[0U]));
+  memcpy(tmp_public, ks, (uint32_t)32U * sizeof (uint8_t));
+  memcpy(tmp_xsecret, ks + (uint32_t)32U, (uint32_t)64U * sizeof (uint8_t));
   sign_step_2(len, msg, tmp_bytes, tmp_ints);
   sign_step_3(tmp_bytes, tmp_ints);
   sign_step_4(len, msg, tmp_bytes, tmp_ints);
   sign_step_5(tmp_bytes, tmp_ints);
-  memcpy(signature, rs_, (uint32_t)32U * sizeof (rs_[0U]));
-  memcpy(signature + (uint32_t)32U, s_, (uint32_t)32U * sizeof (s_[0U]));
+  memcpy(signature, rs_, (uint32_t)32U * sizeof (uint8_t));
+  memcpy(signature + (uint32_t)32U, s_, (uint32_t)32U * sizeof (uint8_t));
 }
 

@@ -36,6 +36,9 @@
 #include "Lib_Memzero0.h"
 #include "Hacl_Impl_Blake2_Constants.h"
 #include "Hacl_Hash.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 void
 Hacl_Hash_Blake2s_128_finish_blake2s_128(Lib_IntVector_Intrinsics_vec128 *s, u64 ev, u8 *dst);
@@ -60,6 +63,10 @@ Hacl_Hash_Blake2s_128_update_last_blake2s_128(
 void Hacl_Hash_Blake2s_128_hash_blake2s_128(u8 *input, u32 input_len, u8 *dst);
 
 void Hacl_Blake2s_128_blake2s(u32 nn, u8 *output, u32 ll, u8 *d, u32 kk, u8 *k);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Blake2s_128_H_DEFINED
 #endif

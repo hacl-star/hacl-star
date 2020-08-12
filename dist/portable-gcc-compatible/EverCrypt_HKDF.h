@@ -34,6 +34,9 @@
 
 #include "EverCrypt_HMAC.h"
 #include "Hacl_Spec.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 /* SNIPPET_START: EverCrypt_HKDF_expand_sha1 */
 
@@ -258,6 +261,10 @@ EverCrypt_HKDF_hkdf_extract(
 );
 
 /* SNIPPET_END: EverCrypt_HKDF_hkdf_extract */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __EverCrypt_HKDF_H_DEFINED
 #endif

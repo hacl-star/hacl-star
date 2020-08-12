@@ -32,8 +32,15 @@
 #define __Hacl_Poly1305_H
 
 #include "Hacl_Kremlib.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 void Hacl_Poly1305_32_poly1305_mac(uint8_t *tag, uint32_t len, uint8_t *text, uint8_t *key);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Poly1305_H_DEFINED
 #endif

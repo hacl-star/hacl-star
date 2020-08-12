@@ -44,7 +44,7 @@ Hacl_HMAC_Blake2s_128_compute_blake2s_128(
   KRML_CHECK_SIZE(sizeof (u8), l);
   {
     u8 key_block[l];
-    memset(key_block, 0U, l * sizeof (key_block[0U]));
+    memset(key_block, 0U, l * sizeof (u8));
     {
       u32 i0;
       if (key_len <= (u32)64U)
@@ -54,13 +54,13 @@ Hacl_HMAC_Blake2s_128_compute_blake2s_128(
       {
         u8 *nkey = key_block;
         if (key_len <= (u32)64U)
-          memcpy(nkey, key, key_len * sizeof (key[0U]));
+          memcpy(nkey, key, key_len * sizeof (u8));
         else
           Hacl_Hash_Blake2s_128_hash_blake2s_128(key, key_len, nkey);
         KRML_CHECK_SIZE(sizeof (u8), l);
         {
           u8 ipad[l];
-          memset(ipad, (u8)0x36U, l * sizeof (ipad[0U]));
+          memset(ipad, (u8)0x36U, l * sizeof (u8));
           {
             u32 i;
             for (i = (u32)0U; i < l; i++)
@@ -73,7 +73,7 @@ Hacl_HMAC_Blake2s_128_compute_blake2s_128(
           KRML_CHECK_SIZE(sizeof (u8), l);
           {
             u8 opad[l];
-            memset(opad, (u8)0x5cU, l * sizeof (opad[0U]));
+            memset(opad, (u8)0x5cU, l * sizeof (u8));
             {
               u32 i;
               for (i = (u32)0U; i < l; i++)

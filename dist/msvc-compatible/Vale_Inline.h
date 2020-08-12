@@ -33,6 +33,9 @@
 #define __Vale_Inline_H
 
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 static inline void cswap2(uint64_t bit, uint64_t *p0, uint64_t *p1);
 
@@ -51,6 +54,10 @@ static inline uint64_t add_scalar(uint64_t *out, uint64_t *f1, uint64_t f2);
 static inline void fadd(uint64_t *out, uint64_t *f1, uint64_t *f2);
 
 static inline void fsub(uint64_t *out, uint64_t *f1, uint64_t *f2);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Vale_Inline_H_DEFINED
 #endif

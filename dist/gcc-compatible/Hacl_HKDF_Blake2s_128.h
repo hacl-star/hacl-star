@@ -33,6 +33,9 @@
 #define __Hacl_HKDF_Blake2s_128_H
 
 #include "Hacl_HMAC_Blake2s_128.h"
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 void
 Hacl_HKDF_Blake2s_128_expand_blake2s_128(
@@ -52,6 +55,10 @@ Hacl_HKDF_Blake2s_128_extract_blake2s_128(
   uint8_t *ikm,
   uint32_t ikmlen
 );
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_HKDF_Blake2s_128_H_DEFINED
 #endif

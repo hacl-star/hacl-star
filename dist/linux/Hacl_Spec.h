@@ -32,6 +32,9 @@
 #define __Hacl_Spec_H
 
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 #define Spec_Hash_Definitions_SHA2_224 0
 #define Spec_Hash_Definitions_SHA2_256 1
@@ -55,6 +58,10 @@ typedef struct Spec_ECDSA_hash_alg_ecdsa_s
   Spec_Hash_Definitions_hash_alg _0;
 }
 Spec_ECDSA_hash_alg_ecdsa;
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Spec_H_DEFINED
 #endif
