@@ -3,6 +3,7 @@ module Spec.RSAPSS
 open FStar.Mul
 open Lib.IntTypes
 
+open Lib.NatMod
 open Lib.Sequence
 open Lib.ByteSequence
 open Lib.LoopCombinators
@@ -67,19 +68,6 @@ let os2ip #len b = nat_from_bytes_be b
 
 val i2osp: #len:size_nat -> n:nat{n < pow2 (8 * len)} -> Tot (lbytes len)
 let i2osp #len n = nat_to_intseq_be len n
-
-(* Modular arithmetic *)
-type elem (n:pos) = x:nat{x < n}
-
-let fmul (#n:pos) (x:elem n) (y:elem n) : elem n = (x * y) % n
-
-val fpow: #n:pos -> a:elem n -> b:pos -> Tot (elem n) (decreases b)
-let rec fpow #n a b =
-  if b = 1 then a
-  else
-    if b % 2 = 0 then fpow (fmul a a) (b / 2)
-    else fmul a (fpow (fmul a a) (b / 2))
-
 
 ///
 ///  RSA
@@ -271,7 +259,7 @@ let rsapss_sign #a #sLen #msgLen modBits skey salt msg =
   let em = pss_encode #a salt msg emBits in
   let m = os2ip #emLen em in
   os2ip_lemma emBits em;
-  let s = fpow #n m d in
+  let s = pow_mod #n m d in
   i2osp #nLen s
 
 
@@ -296,7 +284,7 @@ let rsapss_verify #a #msgLen modBits pkey sLen msg sgnt =
 
   let s = os2ip #nLen sgnt in
   if s < n then begin
-    let m = fpow #n s e in
+    let m = pow_mod #n s e in
     if m < pow2 (emLen * 8) then
       let em = i2osp #emLen m in
       pss_verify #a #msgLen sLen msg emBits em

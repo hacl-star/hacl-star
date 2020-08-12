@@ -1,8 +1,8 @@
 module Hacl.Spec.Exponentiation.Lemmas
 
 open FStar.Mul
+open Lib.NatMod
 
-module S = Spec.RSAPSS
 module M = Hacl.Spec.Montgomery.Lemmas
 module Loops = Lib.LoopCombinators
 
@@ -59,170 +59,6 @@ let lemma_mod_mul_distr_aux a b c n =
     (==) { Math.Lemmas.lemma_mod_mul_distr_l (a % n * (b % n)) c n }
     a % n * (b % n) * c % n;
   }
-
-
-///
-///  Definition of pow
-///
-
-val pow: x:int -> n:nat -> Tot int
-let rec pow x n =
-  if n = 0 then 1
-  else x * pow x (n - 1)
-
-///
-///  Lemma (S.fpow #n a b == pow a b % n)
-///
-
-#set-options "--fuel 2"
-
-val lemma_pow_unfold: a:int -> b:pos -> Lemma (a * pow a (b - 1) == pow a b)
-let lemma_pow_unfold a b = ()
-
-val lemma_pow_greater: a:pos -> b:nat ->
-  Lemma (pow a b > 0)
-  [SMTPat (pow a b)]
-let rec lemma_pow_greater a b =
-  if b = 0 then ()
-  else lemma_pow_greater a (b - 1)
-
-val lemma_pow0: a:int -> Lemma (pow a 0 = 1)
-let lemma_pow0 a = ()
-
-val lemma_pow1: a:int -> Lemma (pow a 1 = a)
-let lemma_pow1 a = ()
-
-val lemma_pow_add: x:int -> n:nat -> m:nat -> Lemma
-  (pow x n * pow x m = pow x (n + m))
-let rec lemma_pow_add x n m =
-  if n = 0 then ()
-  else begin
-    lemma_pow_add x (n-1) m;
-    Math.Lemmas.paren_mul_right x (pow x (n-1)) (pow x m) end
-
-val lemma_pow_double: a:int -> b:nat -> Lemma
-  (pow (a * a) b == pow a (b + b))
-let rec lemma_pow_double a b =
-  if b = 0 then ()
-  else begin
-    calc (==) {
-      pow (a * a) b;
-      (==) { lemma_pow_unfold (a * a) b }
-      a * a * pow (a * a) (b - 1);
-      (==) { lemma_pow_double a (b - 1) }
-      a * a * pow a (b + b - 2);
-      (==) { lemma_pow1 a }
-      pow a 1 * pow a 1 * pow a (b + b - 2);
-      (==) { lemma_pow_add a 1 1 }
-      pow a 2 * pow a (b + b - 2);
-      (==) { lemma_pow_add a 2 (b + b - 2) }
-      pow a (b + b);
-    };
-    assert (pow (a * a) b == pow a (b + b))
-  end
-
-
-val lemma_pow_mul_base: a:int -> b:int -> n:nat -> Lemma
-  (pow a n * pow b n == pow (a * b) n)
-let rec lemma_pow_mul_base a b n =
-  if n = 0 then ()
-  else begin
-    calc (==) {
-      pow a n * pow b n;
-      (==) { lemma_pow_unfold a n; lemma_pow_unfold b n }
-      a * pow a (n - 1) * (b * pow b (n - 1));
-      (==) { Math.Lemmas.paren_mul_right (a * pow a (n - 1)) b (pow b (n - 1)) }
-      a * pow a (n - 1) * b * pow b (n - 1);
-      (==) { lemma_mul_ass3 a (pow a (n - 1)) b }
-      a * b * pow a (n - 1) * pow b (n - 1);
-      (==) { Math.Lemmas.paren_mul_right (a * b) (pow a (n - 1)) (pow b (n - 1)) }
-      a * b * (pow a (n - 1) * pow b (n - 1));
-      (==) { lemma_pow_mul_base a b (n - 1) }
-      a * b * pow (a * b) (n - 1);
-      (==) { lemma_pow_unfold (a * b) n }
-      pow (a * b) n;
-    };
-    assert (pow a n * pow b n == pow (a * b) n)
-  end
-
-
-val lemma_pow_mod_base: a:int -> b:nat -> n:pos -> Lemma
-  (pow a b % n == pow (a % n) b % n)
-let rec lemma_pow_mod_base a b n =
-  if b = 0 then ()
-  else begin
-    calc (==) {
-      pow a b % n;
-      (==) { lemma_pow_unfold a b }
-      a * pow a (b - 1) % n;
-      (==) { Math.Lemmas.lemma_mod_mul_distr_r a (pow a (b - 1)) n }
-      a * (pow a (b - 1) % n) % n;
-      (==) { lemma_pow_mod_base a (b - 1) n }
-      a * (pow (a % n) (b - 1) % n) % n;
-      (==) { Math.Lemmas.lemma_mod_mul_distr_r a (pow (a % n) (b - 1)) n }
-      a * pow (a % n) (b - 1) % n;
-      (==) { Math.Lemmas.lemma_mod_mul_distr_l a (pow (a % n) (b - 1)) n }
-      a % n * pow (a % n) (b - 1) % n;
-      (==) { lemma_pow_unfold (a % n) b }
-      pow (a % n) b % n;
-    };
-    assert (pow a b % n == pow (a % n) b % n)
-  end
-
-
-val lemma_fpow_unfold0: n:pos -> a:nat{a < n} -> b:pos{1 < b /\ b % 2 = 0} -> Lemma
-  (S.fpow #n a b == S.fpow (S.fmul a a) (b / 2))
-let lemma_fpow_unfold0 n a b = ()
-
-val lemma_fpow_unfold1: n:pos -> a:nat{a < n} -> b:pos{1 < b /\ b % 2 = 1} -> Lemma
-  (S.fpow #n a b == S.fmul a (S.fpow (S.fmul a a) (b / 2)))
-let lemma_fpow_unfold1 n a b = ()
-
-val lemma_pow_mod_n_is_fpow: n:pos -> a:nat{a < n} -> b:pos -> Lemma
-  (ensures (S.fpow #n a b == pow a b % n))
-  (decreases b)
-
-let rec lemma_pow_mod_n_is_fpow n a b =
-  if b = 1 then ()
-  else begin
-    if b % 2 = 0 then begin
-      calc (==) {
-	S.fpow #n a b;
-	(==) { lemma_fpow_unfold0 n a b }
-	S.fpow #n (S.fmul #n a a) (b / 2);
-	(==) { lemma_pow_mod_n_is_fpow n (S.fmul #n a a) (b / 2) }
-	pow (S.fmul #n a a) (b / 2) % n;
-	(==) { lemma_pow_mod_base (a * a) (b / 2) n }
-	pow (a * a) (b / 2) % n;
-	(==) { lemma_pow_double a (b / 2) }
-	pow a b % n;
-      };
-      assert (S.fpow #n a b == pow a b % n) end
-    else begin
-      calc (==) {
-	S.fpow #n a b;
-	(==) { lemma_fpow_unfold1 n a b }
-	S.fmul a (S.fpow (S.fmul #n a a) (b / 2));
-	(==) { lemma_pow_mod_n_is_fpow n (S.fmul #n a a) (b / 2) }
-	S.fmul a (pow (S.fmul #n a a) (b / 2) % n);
-	(==) { lemma_pow_mod_base (a * a) (b / 2) n }
-	S.fmul a (pow (a * a) (b / 2) % n);
-	(==) { lemma_pow_double a (b / 2) }
-	S.fmul a (pow a (b / 2 * 2) % n);
-	(==) { Math.Lemmas.lemma_mod_mul_distr_r a (pow a (b / 2 * 2)) n }
-	a * pow a (b / 2 * 2) % n;
-	(==) { lemma_pow1 a }
-	pow a 1 * pow a (b / 2 * 2) % n;
-	(==) { lemma_pow_add a 1 (b / 2 * 2) }
-	pow a (b / 2 * 2 + 1) % n;
-	(==) { Math.Lemmas.euclidean_division_definition b 2 }
-	pow a b % n;
-      };
-      assert (S.fpow #n a b == pow a b % n) end
-  end
-
-
-#set-options "--fuel 0"
 
 ///
 ///  High-level specification of Montgomery exponentiation
@@ -593,8 +429,8 @@ val mod_exp_mont_ll_lemma:
   (requires
     (1 + n * mu) % pow2 64 == 0 /\ pow2 (64 * rLen) * d % n == 1 /\
     1 < n /\ n < pow2 (64 * rLen) /\ a < n)
-  (ensures mod_exp_mont_ll rLen n mu a bBits b == S.fpow #n a b)
+  (ensures mod_exp_mont_ll rLen n mu a bBits b == pow_mod #n a b)
 
 let mod_exp_mont_ll_lemma rLen n d mu a bBits b =
   mod_exp_mont_ll_lemma_eval rLen n d mu a bBits b;
-  lemma_pow_mod_n_is_fpow n a b
+  lemma_pow_mod #n a b

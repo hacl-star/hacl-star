@@ -32,4 +32,4 @@ val bn_mod_exp_lemma:
     0 < bn_v b /\ bn_v b < pow2 bBits /\ bn_v a < bn_v n /\
     pow2 (modBits - 1) < bn_v n) //needed for precomp_r2_mod_n
   (ensures
-    bn_v (bn_mod_exp modBits nLen n a bBits b) == Spec.RSAPSS.fpow #(bn_v n) (bn_v a) (bn_v b))
+    bn_v (bn_mod_exp modBits nLen n a bBits b) == Lib.NatMod.pow_mod #(bn_v n) (bn_v a) (bn_v b))
