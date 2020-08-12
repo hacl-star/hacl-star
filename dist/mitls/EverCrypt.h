@@ -28,6 +28,7 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __EverCrypt_H
 #define __EverCrypt_H
 
@@ -36,7 +37,9 @@
 #include "Hacl_Chacha20Poly1305_32.h"
 #include "EverCrypt_OpenSSL.h"
 #include "EverCrypt_Vale.h"
-
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 uint32_t EverCrypt_random_init();
 
@@ -357,6 +360,10 @@ void EverCrypt_ecdh_keygen(EverCrypt__ecdh_state *st, uint8_t *outx, uint8_t *ou
 
 uint32_t
 EverCrypt_ecdh_compute(EverCrypt__ecdh_state *st, uint8_t *inx, uint8_t *iny, uint8_t *out);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __EverCrypt_H_DEFINED
 #endif

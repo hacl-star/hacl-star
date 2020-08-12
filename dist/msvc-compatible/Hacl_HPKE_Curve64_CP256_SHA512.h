@@ -28,6 +28,7 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __Hacl_HPKE_Curve64_CP256_SHA512_H
 #define __Hacl_HPKE_Curve64_CP256_SHA512_H
 
@@ -36,7 +37,9 @@
 #include "Hacl_HKDF.h"
 #include "Hacl_Chacha20Poly1305_256.h"
 #include "Hacl_Curve25519_64.h"
-
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 uint32_t
 Hacl_HPKE_Curve64_CP256_SHA512_setupBaseI(
@@ -80,6 +83,10 @@ Hacl_HPKE_Curve64_CP256_SHA512_openBase(
   uint8_t *info,
   uint8_t *output
 );
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_HPKE_Curve64_CP256_SHA512_H_DEFINED
 #endif

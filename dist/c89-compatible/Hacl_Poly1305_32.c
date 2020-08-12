@@ -568,7 +568,7 @@ void Hacl_Poly1305_32_poly1305_update(uint64_t *ctx, uint32_t len, uint8_t *text
     uint64_t o2;
     uint64_t o3;
     uint64_t o4;
-    memcpy(tmp, last, rem * sizeof (last[0U]));
+    memcpy(tmp, last, rem * sizeof (uint8_t));
     u0 = load64_le(tmp);
     lo = u0;
     u = load64_le(tmp + (uint32_t)8U);

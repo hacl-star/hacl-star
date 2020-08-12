@@ -26,17 +26,24 @@
 #include <string.h>
 #include <stdbool.h>
 
+
 #ifndef __Hacl_Curve25519_51_H
 #define __Hacl_Curve25519_51_H
 
 #include "Hacl_Kremlib.h"
-
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 void Hacl_Curve25519_51_scalarmult(uint8_t *out, uint8_t *priv, uint8_t *pub);
 
 void Hacl_Curve25519_51_secret_to_public(uint8_t *pub, uint8_t *priv);
 
 bool Hacl_Curve25519_51_ecdh(uint8_t *out, uint8_t *priv, uint8_t *pub);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Curve25519_51_H_DEFINED
 #endif

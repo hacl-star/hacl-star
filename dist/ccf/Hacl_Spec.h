@@ -27,11 +27,14 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __Hacl_Spec_H
 #define __Hacl_Spec_H
 
 
-
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 #define Spec_Hash_Definitions_SHA2_224 0
 #define Spec_Hash_Definitions_SHA2_256 1
@@ -56,6 +59,10 @@ typedef uint8_t Spec_Cipher_Expansion_impl;
 
 Spec_Agile_Cipher_cipher_alg
 Spec_Cipher_Expansion_cipher_alg_of_impl(Spec_Cipher_Expansion_impl i);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Spec_H_DEFINED
 #endif

@@ -27,11 +27,14 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __EverCrypt_StaticConfig_H
 #define __EverCrypt_StaticConfig_H
 
 
-
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 extern bool EverCrypt_StaticConfig_hacl;
 
@@ -40,6 +43,10 @@ extern bool EverCrypt_StaticConfig_vale;
 extern bool EverCrypt_StaticConfig_openssl;
 
 extern bool EverCrypt_StaticConfig_bcrypt;
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __EverCrypt_StaticConfig_H_DEFINED
 #endif

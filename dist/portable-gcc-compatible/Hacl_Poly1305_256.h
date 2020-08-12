@@ -28,11 +28,14 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __Hacl_Poly1305_256_H
 #define __Hacl_Poly1305_256_H
 
 #include "Hacl_Kremlib.h"
-
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 /* SNIPPET_START: Hacl_Impl_Poly1305_Field32xN_256_load_acc4 */
 
@@ -102,6 +105,10 @@ Hacl_Poly1305_256_poly1305_finish(
 void Hacl_Poly1305_256_poly1305_mac(uint8_t *tag, uint32_t len, uint8_t *text, uint8_t *key);
 
 /* SNIPPET_END: Hacl_Poly1305_256_poly1305_mac */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Poly1305_256_H_DEFINED
 #endif

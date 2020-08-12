@@ -28,11 +28,14 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __Hacl_Streaming_SHA2_256_H
 #define __Hacl_Streaming_SHA2_256_H
 
 #include "Hacl_Hash.h"
-
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 /* SNIPPET_START: Hacl_Streaming_Functor_state_s___uint32_t____ */
 
@@ -76,6 +79,10 @@ Hacl_Streaming_SHA2_256_finish(Hacl_Streaming_Functor_state_s___uint32_t____ *p,
 void Hacl_Streaming_SHA2_256_free(Hacl_Streaming_Functor_state_s___uint32_t____ *s);
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_256_free */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Streaming_SHA2_256_H_DEFINED
 #endif

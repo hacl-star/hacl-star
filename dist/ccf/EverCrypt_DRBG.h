@@ -27,6 +27,7 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __EverCrypt_DRBG_H
 #define __EverCrypt_DRBG_H
 
@@ -35,7 +36,9 @@
 #include "Lib_RandomBuffer_System.h"
 #include "Hacl_Spec.h"
 #include "Hacl_Lib.h"
-
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 typedef Spec_Hash_Definitions_hash_alg EverCrypt_DRBG_supported_alg;
 
@@ -234,6 +237,10 @@ EverCrypt_DRBG_generate(
 );
 
 void EverCrypt_DRBG_uninstantiate(EverCrypt_DRBG_state_s *st);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __EverCrypt_DRBG_H_DEFINED
 #endif

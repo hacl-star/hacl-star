@@ -28,13 +28,20 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __Lib_Memzero0_H
 #define __Lib_Memzero0_H
 
 
-
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 extern void Lib_Memzero0_memzero(void *x0, uint64_t x1);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Lib_Memzero0_H_DEFINED
 #endif

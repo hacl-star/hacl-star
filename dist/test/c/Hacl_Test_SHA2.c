@@ -113,7 +113,7 @@ static void update_224(uint32_t *hash, uint8_t *block)
       computed_ws[i] = w;
     }
   }
-  memcpy(hash1, hash, (uint32_t)8U * sizeof (hash[0U]));
+  memcpy(hash1, hash, (uint32_t)8U * sizeof (uint32_t));
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
   {
     uint32_t a0 = hash1[0U];
@@ -186,7 +186,7 @@ static void update_256(uint32_t *hash, uint8_t *block)
       computed_ws[i] = w;
     }
   }
-  memcpy(hash1, hash, (uint32_t)8U * sizeof (hash[0U]));
+  memcpy(hash1, hash, (uint32_t)8U * sizeof (uint32_t));
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
   {
     uint32_t a0 = hash1[0U];
@@ -259,7 +259,7 @@ static void update_384(uint64_t *hash, uint8_t *block)
       computed_ws[i] = w;
     }
   }
-  memcpy(hash1, hash, (uint32_t)8U * sizeof (hash[0U]));
+  memcpy(hash1, hash, (uint32_t)8U * sizeof (uint64_t));
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)80U; i++)
   {
     uint64_t a0 = hash1[0U];
@@ -334,7 +334,7 @@ static void update_512(uint64_t *hash, uint8_t *block)
       computed_ws[i] = w;
     }
   }
-  memcpy(hash1, hash, (uint32_t)8U * sizeof (hash[0U]));
+  memcpy(hash1, hash, (uint32_t)8U * sizeof (uint64_t));
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)80U; i++)
   {
     uint64_t a0 = hash1[0U];
@@ -594,7 +594,7 @@ static void update_last_224(uint32_t *s, uint64_t prev_len, uint8_t *input, uint
   uint8_t *tmp = tmp_twoblocks;
   uint8_t *tmp_rest = tmp;
   uint8_t *tmp_pad = tmp + rest_len;
-  memcpy(tmp_rest, rest, rest_len * sizeof (rest[0U]));
+  memcpy(tmp_rest, rest, rest_len * sizeof (uint8_t));
   pad_224(total_input_len, tmp_pad);
   update_multi_224(s, tmp, tmp_len / (uint32_t)64U);
 }
@@ -620,7 +620,7 @@ static void update_last_256(uint32_t *s, uint64_t prev_len, uint8_t *input, uint
   uint8_t *tmp = tmp_twoblocks;
   uint8_t *tmp_rest = tmp;
   uint8_t *tmp_pad = tmp + rest_len;
-  memcpy(tmp_rest, rest, rest_len * sizeof (rest[0U]));
+  memcpy(tmp_rest, rest, rest_len * sizeof (uint8_t));
   pad_256(total_input_len, tmp_pad);
   update_multi_256(s, tmp, tmp_len / (uint32_t)64U);
 }
@@ -658,7 +658,7 @@ update_last_384(
   uint8_t *tmp = tmp_twoblocks;
   uint8_t *tmp_rest = tmp;
   uint8_t *tmp_pad = tmp + rest_len;
-  memcpy(tmp_rest, rest, rest_len * sizeof (rest[0U]));
+  memcpy(tmp_rest, rest, rest_len * sizeof (uint8_t));
   pad_384(total_input_len, tmp_pad);
   update_multi_384(s, tmp, tmp_len / (uint32_t)128U);
 }
@@ -696,7 +696,7 @@ update_last_512(
   uint8_t *tmp = tmp_twoblocks;
   uint8_t *tmp_rest = tmp;
   uint8_t *tmp_pad = tmp + rest_len;
-  memcpy(tmp_rest, rest, rest_len * sizeof (rest[0U]));
+  memcpy(tmp_rest, rest, rest_len * sizeof (uint8_t));
   pad_512(total_input_len, tmp_pad);
   update_multi_512(s, tmp, tmp_len / (uint32_t)128U);
 }
@@ -775,7 +775,7 @@ static void hash_512(uint8_t *input, uint32_t input_len, uint8_t *dst)
   finish_512(s, dst);
 }
 
-extern void C_String_print(C_String_t uu____68);
+extern void C_String_print(C_String_t uu____71);
 
 extern void
 Lib_PrintBuffer_print_compare_display(uint32_t len, const uint8_t *buf0, const uint8_t *buf1);
@@ -816,8 +816,8 @@ test_sha2(
 {
   KRML_CHECK_SIZE(sizeof (uint8_t), msg_len);
   uint8_t msg_[msg_len];
-  memset(msg_, 0U, msg_len * sizeof (msg_[0U]));
-  memcpy(msg_, (uint8_t *)msg, msg_len * sizeof (((uint8_t *)msg)[0U]));
+  memset(msg_, 0U, msg_len * sizeof (uint8_t));
+  memcpy(msg_, (uint8_t *)msg, msg_len * sizeof (uint8_t));
   uint8_t test224[28U] = { 0U };
   uint8_t test256[32U] = { 0U };
   uint8_t test384[48U] = { 0U };

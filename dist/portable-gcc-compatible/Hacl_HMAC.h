@@ -28,12 +28,15 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __Hacl_HMAC_H
 #define __Hacl_HMAC_H
 
 #include "Hacl_Kremlib.h"
 #include "Hacl_Hash.h"
-
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 /* SNIPPET_START: Hacl_HMAC_legacy_compute_sha1 */
 
@@ -86,6 +89,10 @@ Hacl_HMAC_compute_sha2_512(
 );
 
 /* SNIPPET_END: Hacl_HMAC_compute_sha2_512 */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_HMAC_H_DEFINED
 #endif

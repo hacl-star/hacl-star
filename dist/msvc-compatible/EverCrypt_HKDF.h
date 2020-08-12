@@ -28,12 +28,15 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __EverCrypt_HKDF_H
 #define __EverCrypt_HKDF_H
 
 #include "EverCrypt_HMAC.h"
 #include "Hacl_Spec.h"
-
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 void
 EverCrypt_HKDF_expand_sha1(
@@ -156,6 +159,10 @@ EverCrypt_HKDF_hkdf_extract(
   uint8_t *ikm,
   uint32_t ikmlen
 );
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __EverCrypt_HKDF_H_DEFINED
 #endif
