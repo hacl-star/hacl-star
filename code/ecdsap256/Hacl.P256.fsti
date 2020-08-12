@@ -356,18 +356,6 @@ val compression_compressed_form: b: lbuffer uint8 (size 64) -> result: compresse
   )
 
 
-[@ (Comment " The function takes an arbitraty 32 bytes buffer and reduces it to contain a value that is less than the curve order.
-  \n Input: x: uint8[32], \n result: uint8[32], such that by the end of the function the value stored in the buffer result equal to the value stored in the buffer x modulo curveOrder.")]
-
-val reduction_8_32: x: lbuffer uint8 (size 32) -> result: lbuffer uint8 (size 32) -> 
-  Stack unit 
-    (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result)
-    (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
-      nat_from_bytes_be (as_seq h1 result) == nat_from_bytes_be (as_seq h0 x) % prime_p256_order /\
-      nat_from_bytes_be (as_seq h1 result) < prime_p256_order
-    )
-
-
 [@ (Comment " Input: result: uint8[64], \n scalar: uint8[32].
   \n Output: uint64, where 0 stands for the correct key generation. All the other values mean that an error has occurred. 
   ")]
