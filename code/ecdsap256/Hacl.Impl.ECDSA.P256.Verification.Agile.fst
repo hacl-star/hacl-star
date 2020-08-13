@@ -63,8 +63,7 @@ let isZero_uint64_nCT f =
     z0_zero && z1_zero && z2_zero && z3_zero
 
 
-(*[@ (Comment "  This code is not side channel resistant")] *)
-
+[@ (Comment "  This code is not side channel resistant")] 
 val isMoreThanZeroLessThanOrderMinusOne: f:felem -> Stack bool
   (requires fun h -> live h f)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
