@@ -9,4 +9,4 @@
 
 (rule (targets config.h) (deps)
  (action
-  (copy %{lib:hacl-star-raw:config.h} .)))
+  (bash "cp %{lib:hacl-star-raw:config.h} .")))
