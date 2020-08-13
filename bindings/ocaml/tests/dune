@@ -17,4 +17,4 @@
 
 (rule (targets config.h) (deps)
  (action
-  (bash "cp $(ocamlfind printconf destdir)/hacl-star-raw/config.h .")))
+  (bash "cp $(ocamlfind query hacl-star-raw)/config.h .")))
