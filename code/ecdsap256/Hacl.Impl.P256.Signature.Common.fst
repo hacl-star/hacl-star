@@ -238,7 +238,6 @@ let multByOrder2 result p tempBuffer =
     
 
 [@ (Comment "  This code is not side channel resistant")]
-
 val isOrderCorrect: p: point -> tempBuffer: lbuffer uint64 (size 100) -> Stack bool
   (requires fun h -> 
     live h p /\ live h tempBuffer /\ 
@@ -300,3 +299,40 @@ let verifyQ pubKey =
   let r = verifyQValidCurvePoint publicKeyJ tempBufferV in 
   pop_frame();
   r
+
+
+val isMoreThanZeroLessThanOrder: x: lbuffer uint8 (size 32) -> Stack uint64
+  (requires fun h -> live h x)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+    (
+      let scalar = nat_from_bytes_be (as_seq h0 x) in 
+      uint_v r = 0 <==> (scalar > 0 && scalar < prime_p256_order
+    )
+   )
+  )
+
+let isMoreThanZeroLessThanOrder x =
+  push_frame();
+    let h0 = ST.get() in 
+      let xAsFelem = create (size 4) (u64 0) in 
+      toUint64ChangeEndian x xAsFelem;
+    let h1 = ST.get() in 
+      
+      lemma_core_0 xAsFelem h1;
+      Spec.ECDSA.changeEndianLemma (uints_from_bytes_be (as_seq h0 x));
+      uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 x); 
+      
+  let tempBuffer = create (size 4) (u64 0) in
+    recall_contents prime256order_buffer (Lib.Sequence.of_list p256_order_prime_list);
+  let carry = sub4_il xAsFelem prime256order_buffer tempBuffer in
+  let less = eq_mask carry (u64 1) in
+  let more = isZero_uint64_CT xAsFelem in 
+  let notMore = lognot more in
+    lognot_lemma more;
+  let result = logand less notMore in
+    logand_lemma less notMore;
+    lognot_lemma result;
+    
+  pop_frame();
+
+  lognot result

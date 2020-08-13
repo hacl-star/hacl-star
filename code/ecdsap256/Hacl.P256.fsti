@@ -398,3 +398,15 @@ val ecp256dh_r:
       as_seq h1 (gsub result (size 32) (size 32)) == pointY)
 
 
+[@ (Comment " Input: scalar: uint8[32].
+  \n Output: uint64, where 0 stands for the scalar to be more than 0 and less than order.")]
+
+val isMoreThanZeroLessThanOrder: x: lbuffer uint8 (size 32) -> Stack uint64
+  (requires fun h -> live h x)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+    (
+      let scalar = nat_from_bytes_be (as_seq h0 x) in 
+      uint_v r = 0 <==> (scalar > 0 && scalar < prime_p256_order
+    )
+   )
+  )
