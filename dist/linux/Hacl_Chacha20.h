@@ -31,10 +31,11 @@
 #ifndef __Hacl_Chacha20_H
 #define __Hacl_Chacha20_H
 
-#include "Hacl_Kremlib.h"
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+#include "Hacl_Kremlib.h"
 
 extern const u32 Hacl_Impl_Chacha20_Vec_chacha20_constants[4U];
 

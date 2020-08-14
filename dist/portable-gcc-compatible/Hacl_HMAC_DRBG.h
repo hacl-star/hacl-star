@@ -32,11 +32,12 @@
 #ifndef __Hacl_HMAC_DRBG_H
 #define __Hacl_HMAC_DRBG_H
 
-#include "Hacl_HMAC.h"
-#include "Hacl_Spec.h"
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+#include "Hacl_HMAC.h"
+#include "Hacl_Spec.h"
 
 /* SNIPPET_START: Hacl_HMAC_DRBG_supported_alg */
 

@@ -32,11 +32,12 @@
 #ifndef __Hacl_HMAC_H
 #define __Hacl_HMAC_H
 
-#include "Hacl_Kremlib.h"
-#include "Hacl_Hash.h"
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+#include "Hacl_Kremlib.h"
+#include "Hacl_Hash.h"
 
 void
 Hacl_HMAC_legacy_compute_sha1(

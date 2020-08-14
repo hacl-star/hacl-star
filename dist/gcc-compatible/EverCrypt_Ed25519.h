@@ -32,10 +32,11 @@
 #ifndef __EverCrypt_Ed25519_H
 #define __EverCrypt_Ed25519_H
 
-#include "Hacl_Ed25519.h"
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+#include "Hacl_Ed25519.h"
 
 void EverCrypt_Ed25519_sign(uint8_t *signature, uint8_t *secret, uint32_t len, uint8_t *msg);
 

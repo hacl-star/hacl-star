@@ -31,10 +31,11 @@
 #ifndef __Hacl_Leftovers_H
 #define __Hacl_Leftovers_H
 
-#include "Hacl_Spec.h"
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+#include "Hacl_Spec.h"
 
 extern uint32_t Hacl_HMAC_DRBG_reseed_interval;
 

@@ -32,10 +32,11 @@
 #ifndef __EverCrypt_Cipher_H
 #define __EverCrypt_Cipher_H
 
-#include "Hacl_Chacha20.h"
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+#include "Hacl_Chacha20.h"
 
 void
 EverCrypt_Cipher_chacha20(

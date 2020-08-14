@@ -32,10 +32,11 @@
 #ifndef __EverCrypt_OpenSSL_H
 #define __EverCrypt_OpenSSL_H
 
-
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+
 
 extern uint32_t EverCrypt_OpenSSL_random_init();
 

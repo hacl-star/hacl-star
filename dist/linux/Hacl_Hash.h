@@ -31,11 +31,12 @@
 #ifndef __Hacl_Hash_H
 #define __Hacl_Hash_H
 
-#include "Hacl_Kremlib.h"
-#include "Hacl_Spec.h"
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+#include "Hacl_Kremlib.h"
+#include "Hacl_Spec.h"
 
 void Hacl_Hash_MD5_legacy_update_multi(u32 *s, u8 *blocks, u32 n_blocks);
 

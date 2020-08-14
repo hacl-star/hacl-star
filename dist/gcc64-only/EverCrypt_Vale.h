@@ -32,10 +32,11 @@
 #ifndef __EverCrypt_Vale_H
 #define __EverCrypt_Vale_H
 
-
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+
 
 extern void aes128_key_expansion_sbox(uint8_t *key, uint8_t *w, uint8_t *sbox);
 

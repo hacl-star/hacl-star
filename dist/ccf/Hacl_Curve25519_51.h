@@ -31,10 +31,11 @@
 #ifndef __Hacl_Curve25519_51_H
 #define __Hacl_Curve25519_51_H
 
-#include "Hacl_Kremlib.h"
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+#include "Hacl_Kremlib.h"
 
 void Hacl_Impl_Curve25519_Field51_fadd(uint64_t *out, uint64_t *f1, uint64_t *f2);
 

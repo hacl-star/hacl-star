@@ -32,14 +32,15 @@
 #ifndef __EverCrypt_DRBG_H
 #define __EverCrypt_DRBG_H
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "EverCrypt_HMAC.h"
 #include "Lib_RandomBuffer_System.h"
 #include "Hacl_Spec.h"
 #include "Hacl_HMAC_DRBG.h"
 #include "Hacl_Lib.h"
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 /* SNIPPET_START: EverCrypt_DRBG_supported_alg */
 

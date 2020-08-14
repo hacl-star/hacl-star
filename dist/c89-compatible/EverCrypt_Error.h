@@ -32,10 +32,11 @@
 #ifndef __EverCrypt_Error_H
 #define __EverCrypt_Error_H
 
-
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+
 
 #define EverCrypt_Error_Success 0
 #define EverCrypt_Error_UnsupportedAlgorithm 1

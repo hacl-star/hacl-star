@@ -31,15 +31,16 @@
 #ifndef __EverCrypt_CTR_H
 #define __EverCrypt_CTR_H
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "Hacl_Chacha20.h"
 #include "Hacl_Kremlib.h"
 #include "Vale.h"
 #include "EverCrypt_AutoConfig2.h"
 #include "EverCrypt_Error.h"
 #include "Hacl_Spec.h"
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 typedef struct EverCrypt_CTR_state_s_s EverCrypt_CTR_state_s;
 

@@ -31,13 +31,14 @@
 #ifndef __Hacl_Blake2b_256_H
 #define __Hacl_Blake2b_256_H
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "Hacl_Kremlib.h"
 #include "Lib_Memzero0.h"
 #include "Hacl_Blake2b_32.h"
 #include "Hacl_Impl_Blake2_Constants.h"
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 void Hacl_Blake2b_256_blake2b(u32 nn, u8 *output, u32 ll, u8 *d, u32 kk, u8 *k);
 

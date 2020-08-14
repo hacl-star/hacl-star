@@ -32,10 +32,11 @@
 #ifndef __EverCrypt_StaticConfig_H
 #define __EverCrypt_StaticConfig_H
 
-
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+
 
 /* SNIPPET_START: EverCrypt_StaticConfig_hacl */
 

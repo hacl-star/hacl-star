@@ -31,10 +31,11 @@
 #ifndef __Hacl_Poly1305_256_H
 #define __Hacl_Poly1305_256_H
 
-#include "Hacl_Kremlib.h"
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+#include "Hacl_Kremlib.h"
 
 void Hacl_Impl_Poly1305_Field32xN_256_load_acc4(Lib_IntVector_Intrinsics_vec256 *acc, u8 *b);
 

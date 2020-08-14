@@ -32,10 +32,11 @@
 #ifndef __Hacl_HKDF_H
 #define __Hacl_HKDF_H
 
-#include "Hacl_HMAC.h"
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+#include "Hacl_HMAC.h"
 
 /* SNIPPET_START: Hacl_HKDF_expand_sha2_256 */
 

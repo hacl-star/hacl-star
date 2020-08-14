@@ -32,13 +32,14 @@
 #ifndef __Hacl_HPKE_P256_CP32_SHA256_H
 #define __Hacl_HPKE_P256_CP32_SHA256_H
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "Hacl_P256.h"
 #include "Hacl_Hash.h"
 #include "Hacl_HKDF.h"
 #include "Hacl_Chacha20Poly1305_32.h"
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 uint32_t
 Hacl_HPKE_P256_CP32_SHA256_setupBaseI(

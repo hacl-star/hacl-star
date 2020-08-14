@@ -31,10 +31,11 @@
 #ifndef __Hacl_Kremlib_H
 #define __Hacl_Kremlib_H
 
-
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+
 
 static inline u8 FStar_UInt8_eq_mask(u8 a, u8 b);
 

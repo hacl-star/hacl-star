@@ -32,13 +32,14 @@
 #ifndef __Hacl_Frodo_KEM_H
 #define __Hacl_Frodo_KEM_H
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "Hacl_Kremlib.h"
 #include "Lib_RandomBuffer_System.h"
 #include "Hacl_SHA3.h"
 #include "Hacl_Lib.h"
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 uint32_t Hacl_Frodo_KEM_crypto_kem_keypair(uint8_t *pk, uint8_t *sk);
 

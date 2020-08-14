@@ -32,10 +32,11 @@
 #ifndef __Lib_RandomBuffer_System_H
 #define __Lib_RandomBuffer_System_H
 
-
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+
 
 /* SNIPPET_START: Lib_RandomBuffer_System_randombytes */
 

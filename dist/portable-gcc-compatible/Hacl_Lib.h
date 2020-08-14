@@ -32,10 +32,11 @@
 #ifndef __Hacl_Lib_H
 #define __Hacl_Lib_H
 
-
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+
 
 /* SNIPPET_START: Lib_Memzero_clear_words_u16 */
 

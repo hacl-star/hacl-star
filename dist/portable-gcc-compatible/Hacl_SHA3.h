@@ -32,11 +32,12 @@
 #ifndef __Hacl_SHA3_H
 #define __Hacl_SHA3_H
 
-#include "Hacl_Kremlib.h"
-#include "Lib_Memzero0.h"
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+#include "Hacl_Kremlib.h"
+#include "Lib_Memzero0.h"
 
 /* SNIPPET_START: Hacl_Impl_SHA3_keccak_rotc */
 

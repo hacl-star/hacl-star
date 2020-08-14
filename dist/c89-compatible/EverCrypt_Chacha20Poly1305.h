@@ -32,13 +32,14 @@
 #ifndef __EverCrypt_Chacha20Poly1305_H
 #define __EverCrypt_Chacha20Poly1305_H
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "EverCrypt_AutoConfig2.h"
 #include "Hacl_Chacha20Poly1305_128.h"
 #include "Hacl_Chacha20Poly1305_32.h"
 #include "Hacl_Chacha20Poly1305_256.h"
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 void
 EverCrypt_Chacha20Poly1305_aead_encrypt(

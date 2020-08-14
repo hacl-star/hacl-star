@@ -32,10 +32,11 @@
 #ifndef __Hacl_Salsa20_H
 #define __Hacl_Salsa20_H
 
-#include "Hacl_Kremlib.h"
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+#include "Hacl_Kremlib.h"
 
 /* SNIPPET_START: Hacl_Salsa20_salsa20_encrypt */
 

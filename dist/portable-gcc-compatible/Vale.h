@@ -32,10 +32,11 @@
 #ifndef __Vale_H
 #define __Vale_H
 
-
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+
 
 /* SNIPPET_START: add_scalar_e */
 

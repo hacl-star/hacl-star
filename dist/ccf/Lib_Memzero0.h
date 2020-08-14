@@ -31,10 +31,11 @@
 #ifndef __Lib_Memzero0_H
 #define __Lib_Memzero0_H
 
-
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+
 
 extern void Lib_Memzero0_memzero(void *x0, uint64_t x1);
 

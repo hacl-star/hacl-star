@@ -31,12 +31,13 @@
 #ifndef __Hacl_Ed25519_H
 #define __Hacl_Ed25519_H
 
-#include "Hacl_Kremlib.h"
-#include "Hacl_Hash.h"
-#include "Hacl_Curve25519_51.h"
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+#include "Hacl_Kremlib.h"
+#include "Hacl_Hash.h"
+#include "Hacl_Curve25519_51.h"
 
 void Hacl_Ed25519_sign(u8 *signature, u8 *priv, u32 len, u8 *msg);
 

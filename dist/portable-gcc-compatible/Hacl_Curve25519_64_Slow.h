@@ -32,10 +32,11 @@
 #ifndef __Hacl_Curve25519_64_Slow_H
 #define __Hacl_Curve25519_64_Slow_H
 
-#include "Hacl_Kremlib.h"
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+#include "Hacl_Kremlib.h"
 
 /* SNIPPET_START: Hacl_Curve25519_64_Slow_scalarmult */
 

@@ -31,10 +31,11 @@
 #ifndef __Hacl_Curve25519_64_Slow_H
 #define __Hacl_Curve25519_64_Slow_H
 
-#include "Hacl_Kremlib.h"
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+#include "Hacl_Kremlib.h"
 
 void Hacl_Curve25519_64_Slow_scalarmult(u8 *out, u8 *priv, u8 *pub);
 

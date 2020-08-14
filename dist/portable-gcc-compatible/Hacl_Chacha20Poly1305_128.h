@@ -32,12 +32,13 @@
 #ifndef __Hacl_Chacha20Poly1305_128_H
 #define __Hacl_Chacha20Poly1305_128_H
 
-#include "Hacl_Kremlib.h"
-#include "Hacl_Chacha20_Vec128.h"
-#include "Hacl_Poly1305_128.h"
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+#include "Hacl_Kremlib.h"
+#include "Hacl_Chacha20_Vec128.h"
+#include "Hacl_Poly1305_128.h"
 
 /* SNIPPET_START: Hacl_Chacha20Poly1305_128_aead_encrypt */
 

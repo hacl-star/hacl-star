@@ -31,10 +31,11 @@
 #ifndef __Hacl_HKDF_H
 #define __Hacl_HKDF_H
 
-#include "Hacl_HMAC.h"
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+#include "Hacl_HMAC.h"
 
 void Hacl_HKDF_expand_sha2_256(u8 *okm, u8 *prk, u32 prklen, u8 *info, u32 infolen, u32 len);
 

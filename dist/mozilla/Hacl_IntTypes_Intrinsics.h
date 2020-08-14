@@ -30,10 +30,11 @@
 #ifndef __Hacl_IntTypes_Intrinsics_H
 #define __Hacl_IntTypes_Intrinsics_H
 
-#include "Hacl_Kremlib.h"
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+#include "Hacl_Kremlib.h"
 
 static inline uint64_t
 Hacl_IntTypes_Intrinsics_add_carry_u64(uint64_t cin, uint64_t x, uint64_t y, uint64_t *result1)

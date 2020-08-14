@@ -32,10 +32,11 @@
 #ifndef __Lib_Memzero0_H
 #define __Lib_Memzero0_H
 
-
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+
 
 /* SNIPPET_START: Lib_Memzero0_memzero */
 

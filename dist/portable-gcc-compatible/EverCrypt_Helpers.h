@@ -32,10 +32,11 @@
 #ifndef __EverCrypt_Helpers_H
 #define __EverCrypt_Helpers_H
 
-
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+
 
 /* SNIPPET_START: EverCrypt_Helpers_uint8_t */
 

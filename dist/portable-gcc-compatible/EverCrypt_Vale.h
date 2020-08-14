@@ -32,10 +32,11 @@
 #ifndef __EverCrypt_Vale_H
 #define __EverCrypt_Vale_H
 
-
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+
 
 /* SNIPPET_START: aes128_key_expansion_sbox */
 

@@ -32,14 +32,15 @@
 #ifndef __EverCrypt_H
 #define __EverCrypt_H
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "EverCrypt_Hacl.h"
 #include "EverCrypt_AutoConfig2.h"
 #include "Hacl_Chacha20Poly1305_32.h"
 #include "EverCrypt_OpenSSL.h"
 #include "EverCrypt_Vale.h"
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 uint32_t EverCrypt_random_init();
 

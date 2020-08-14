@@ -32,10 +32,11 @@
 #ifndef __EverCrypt_Hacl_H
 #define __EverCrypt_Hacl_H
 
-
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+
 
 /* SNIPPET_START: EverCrypt_Hacl_aes128_mk_sbox */
 

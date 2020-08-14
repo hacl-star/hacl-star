@@ -32,10 +32,11 @@
 #ifndef __EverCrypt_AutoConfig2_H
 #define __EverCrypt_AutoConfig2_H
 
-#include "Vale.h"
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+#include "Vale.h"
 
 bool EverCrypt_AutoConfig2_has_shaext();
 

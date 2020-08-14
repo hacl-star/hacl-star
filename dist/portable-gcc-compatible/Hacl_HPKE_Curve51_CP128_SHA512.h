@@ -32,14 +32,15 @@
 #ifndef __Hacl_HPKE_Curve51_CP128_SHA512_H
 #define __Hacl_HPKE_Curve51_CP128_SHA512_H
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "Hacl_Kremlib.h"
 #include "Hacl_Hash.h"
 #include "Hacl_Chacha20Poly1305_128.h"
 #include "Hacl_HKDF.h"
 #include "Hacl_Curve25519_51.h"
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 /* SNIPPET_START: Hacl_HPKE_Curve51_CP128_SHA512_setupBaseI */
 

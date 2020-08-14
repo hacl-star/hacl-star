@@ -31,10 +31,11 @@
 #ifndef __Hacl_Poly1305_32_H
 #define __Hacl_Poly1305_32_H
 
-#include "Hacl_Kremlib.h"
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+#include "Hacl_Kremlib.h"
 
 extern u32 Hacl_Poly1305_32_blocklen;
 

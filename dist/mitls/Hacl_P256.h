@@ -33,12 +33,13 @@
 #ifndef __Hacl_P256_H
 #define __Hacl_P256_H
 
-#include "Hacl_Kremlib.h"
-#include "Hacl_Hash.h"
-#include "Hacl_Spec.h"
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+#include "Hacl_Kremlib.h"
+#include "Hacl_Hash.h"
+#include "Hacl_Spec.h"
 
 void Hacl_Impl_P256_LowLevel_toUint8(uint64_t *i, uint8_t *o);
 

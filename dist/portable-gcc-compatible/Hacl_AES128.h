@@ -32,10 +32,11 @@
 #ifndef __Hacl_AES128_H
 #define __Hacl_AES128_H
 
-
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+
 
 /* SNIPPET_START: Hacl_AES128_aes128_key_expansion */
 

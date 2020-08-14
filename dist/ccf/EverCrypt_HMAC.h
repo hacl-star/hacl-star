@@ -31,13 +31,14 @@
 #ifndef __EverCrypt_HMAC_H
 #define __EverCrypt_HMAC_H
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "Hacl_Kremlib.h"
 #include "Hacl_Hash.h"
 #include "Hacl_Spec.h"
 #include "EverCrypt_Hash.h"
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 void
 EverCrypt_HMAC_compute_sha1(

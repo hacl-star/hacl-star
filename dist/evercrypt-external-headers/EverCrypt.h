@@ -30,10 +30,11 @@
 #ifndef __EverCrypt_H
 #define __EverCrypt_H
 
-
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+
 
 #define Spec_Hash_Definitions_SHA2_224 0
 #define Spec_Hash_Definitions_SHA2_256 1

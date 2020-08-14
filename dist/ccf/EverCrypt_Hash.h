@@ -31,14 +31,15 @@
 #ifndef __EverCrypt_Hash_H
 #define __EverCrypt_Hash_H
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "Hacl_Kremlib.h"
 #include "Vale.h"
 #include "Hacl_Hash.h"
 #include "EverCrypt_AutoConfig2.h"
 #include "Hacl_Spec.h"
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 typedef Spec_Hash_Definitions_hash_alg EverCrypt_Hash_alg;
 

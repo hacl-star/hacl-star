@@ -32,10 +32,11 @@
 #ifndef __Hacl_Poly1305_32_H
 #define __Hacl_Poly1305_32_H
 
-#include "Hacl_Kremlib.h"
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+#include "Hacl_Kremlib.h"
 
 /* SNIPPET_START: Hacl_Poly1305_32_blocklen */
 
