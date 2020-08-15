@@ -896,7 +896,7 @@ test1_expected_sha2_512[64U] =
     (uint8_t)0xa5U, (uint8_t)0x4cU, (uint8_t)0xa4U, (uint8_t)0x9fU
   };
 
-static const uint8_t test2_plaintext[0U] = { (uint32_t)0U };
+static const uint8_t test2_plaintext[0U] = {  };
 
 static const
 uint8_t

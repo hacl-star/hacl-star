@@ -242,7 +242,7 @@ test_shake256(uint32_t msg_len, const uint8_t *msg, uint32_t out_len, const uint
   }
 }
 
-static const uint8_t test1_plaintext[0U] = { (uint32_t)0U };
+static const uint8_t test1_plaintext[0U] = {  };
 
 static const
 uint8_t
@@ -503,7 +503,7 @@ test4_expected_sha3_512[64U] =
     (uint8_t)0xf2U, (uint8_t)0x1dU, (uint8_t)0xd1U, (uint8_t)0x85U
   };
 
-static const uint8_t test5_plaintext_shake128[0U] = { (uint32_t)0U };
+static const uint8_t test5_plaintext_shake128[0U] = {  };
 
 static const
 uint8_t
@@ -582,7 +582,7 @@ test8_expected_shake128[16U] =
     (uint8_t)0xe9U, (uint8_t)0xd4U, (uint8_t)0xddU, (uint8_t)0x30U
   };
 
-static const uint8_t test9_plaintext_shake256[0U] = { (uint32_t)0U };
+static const uint8_t test9_plaintext_shake256[0U] = {  };
 
 static const
 uint8_t

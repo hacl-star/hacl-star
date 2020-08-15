@@ -489,9 +489,9 @@ nonce1[12U] =
     (uint8_t)0x33U, (uint8_t)0x71U, (uint8_t)0x32U, (uint8_t)0x45U, (uint8_t)0x77U, (uint8_t)0x8eU
   };
 
-static uint8_t aad1[0U] = { (uint32_t)0U };
+static uint8_t aad1[0U] = {  };
 
-static uint8_t input1[0U] = { (uint32_t)0U };
+static uint8_t input1[0U] = {  };
 
 static uint8_t
 output1[16U] =
@@ -526,7 +526,7 @@ aad2[8U] =
     (uint8_t)0xd2U, (uint8_t)0x6bU
   };
 
-static uint8_t input2[0U] = { (uint32_t)0U };
+static uint8_t input2[0U] = {  };
 
 static uint8_t
 output2[16U] =
@@ -589,7 +589,7 @@ nonce4[12U] =
     (uint8_t)0xaaU, (uint8_t)0x5fU, (uint8_t)0x9cU, (uint8_t)0xbfU, (uint8_t)0x92U, (uint8_t)0x30U
   };
 
-static uint8_t aad4[0U] = { (uint32_t)0U };
+static uint8_t aad4[0U] = {  };
 
 static uint8_t input4[1U] = { (uint8_t)0x2dU };
 
@@ -701,7 +701,7 @@ nonce6[12U] =
     (uint8_t)0xefU, (uint8_t)0xc3U, (uint8_t)0x65U, (uint8_t)0x1bU, (uint8_t)0x68U, (uint8_t)0xb0U
   };
 
-static uint8_t aad6[0U] = { (uint32_t)0U };
+static uint8_t aad6[0U] = {  };
 
 static uint8_t
 input6[256U] =
@@ -820,7 +820,7 @@ nonce7[12U] =
     (uint8_t)0x57U, (uint8_t)0xbbU, (uint8_t)0x7bU, (uint8_t)0x40U, (uint8_t)0x54U, (uint8_t)0x02U
   };
 
-static uint8_t aad7[0U] = { (uint32_t)0U };
+static uint8_t aad7[0U] = {  };
 
 static uint8_t
 input7[512U] =
@@ -3409,7 +3409,7 @@ tag1[16U] =
     (uint8_t)0xb8U, (uint8_t)0x19U, (uint8_t)0x53U, (uint8_t)0xdeU
   };
 
-static uint8_t input20[0U] = { (uint32_t)0U };
+static uint8_t input20[0U] = {  };
 
 static uint8_t
 key20[32U] =
@@ -4132,7 +4132,7 @@ tag16[16U] =
     (uint8_t)0x25U, (uint8_t)0x8eU, (uint8_t)0xc4U, (uint8_t)0x2fU
   };
 
-static uint8_t input17[0U] = { (uint32_t)0U };
+static uint8_t input17[0U] = {  };
 
 static uint8_t
 key17[32U] =
@@ -11667,9 +11667,9 @@ nonce01[12U] =
     (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U
   };
 
-static uint8_t aad00[0U] = { (uint32_t)0U };
+static uint8_t aad00[0U] = {  };
 
-static uint8_t input02[0U] = { (uint32_t)0U };
+static uint8_t input02[0U] = {  };
 
 static uint8_t
 tag00[16U] =
@@ -11679,7 +11679,7 @@ tag00[16U] =
     (uint8_t)0xa4U, (uint8_t)0xe7U, (uint8_t)0x45U, (uint8_t)0x5aU
   };
 
-static uint8_t output01[0U] = { (uint32_t)0U };
+static uint8_t output01[0U] = {  };
 
 static uint8_t
 key112[16U] =
@@ -11696,7 +11696,7 @@ nonce13[12U] =
     (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U
   };
 
-static uint8_t aad12[0U] = { (uint32_t)0U };
+static uint8_t aad12[0U] = {  };
 
 static uint8_t
 input112[16U] =
@@ -11737,7 +11737,7 @@ nonce21[12U] =
     (uint8_t)0xdbU, (uint8_t)0xadU, (uint8_t)0xdeU, (uint8_t)0xcaU, (uint8_t)0xf8U, (uint8_t)0x88U
   };
 
-static uint8_t aad20[0U] = { (uint32_t)0U };
+static uint8_t aad20[0U] = {  };
 
 static uint8_t
 input211[64U] =
