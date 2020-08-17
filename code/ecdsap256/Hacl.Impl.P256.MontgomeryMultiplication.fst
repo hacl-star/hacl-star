@@ -43,7 +43,6 @@ let add_long_without_carry #c t t1 result  =
     assert_norm (getPower2 P384 * pow2 64 + getPrime P384 * getPrime P384 < getLongPower2 P384)
 
 
-inline_for_extraction
 val montgomery_multiplication_round: t: widefelem P256 -> round: widefelem P256 -> Stack unit 
   (requires fun h -> live h t /\ live h round /\ wide_as_nat P256 h t < prime256 * prime256)
   (ensures fun h0 _ h1 -> modifies (loc round)  h0 h1 /\

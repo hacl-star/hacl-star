@@ -186,7 +186,7 @@ let montgomery_multiplication_round #c t round k0 =
       assert(uint_v (Lib.Sequence.index (as_seq h1 y) 0) == uint_v y_);
       assert(uint_v y_ == (uint_v t1 * uint_v k0) % pow2 64);
 
-    shortened_mul prime256order_buffer y_ t2;
+    short_mul_bn #P256 prime256order_buffer y_ t2;
       let h2 = ST.get() in 
       assert(wide_as_nat c h2 t2 = prime_p256_order * ((uint_v t1 * uint_v k0) % pow2 64));
     add8_without_carry1 t t2 t3;

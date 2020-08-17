@@ -12,7 +12,7 @@ test: all
 # Defines rules for producing .checked, .krml, .depend, etc.
 include ../../Makefile.local
 
-FSTAR_ROOTS += Hacl.Impl.P256.PointDouble.fst
+FSTAR_ROOTS = Hacl.P256.fst
 # P256_BUNDLE=-bundle Hacl.Impl.P256.PointDouble=Hacl.Impl.ECDSA.*,Hacl.Impl.SolinasReduction,Hacl.Impl.P256.*
 
 #BASE_FLAGS+= -funroll-loops 4

@@ -524,6 +524,7 @@ let lemma_powers () =
 
 #push-options "--z3rlimit 300"
 
+
 inline_for_extraction noextract
 val mul_p256: f: felem P256 -> r: felem P256 -> out: widefelem P256 -> 
   Stack unit
@@ -1349,7 +1350,7 @@ val shortened_mul_p256: a: glbuffer uint64 (size 4) -> b: uint64 -> result: wide
   (requires fun h -> live h a /\ live h result /\ wide_as_nat P256 h result = 0)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
     as_nat_il P256 h0 a * uint_v b = wide_as_nat P256 h1 result /\ 
-    wide_as_nat P256 h1 result < pow2 320)
+    wide_as_nat P256 h1 result < getPower2 P256 * pow2 64)
 
 let shortened_mul_p256 a b result = 
   let result04 = sub result (size 0) (size 4) in 

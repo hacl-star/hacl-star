@@ -162,7 +162,6 @@ let uploadOneImpl #c f =
 
 
 let toUint8 #c i o =
-
   match c with
   |P256 -> Lib.ByteBuffer.uints_to_bytes_be (getCoordinateLenU64 P256) o i
   |P384 -> Lib.ByteBuffer.uints_to_bytes_be (getCoordinateLenU64 P384) o i
@@ -210,27 +209,83 @@ val reduction_prime_2prime_with_carry_cin: #c: curve ->
   cin: uint64 -> x: felem c -> result: felem c ->
   Stack unit
     (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result /\
-      (as_nat c h x + uint_v cin * getPower2 c) < 2 * getPower2 c)
+      (as_nat c h x + uint_v cin * getPower2 c) < 2 * getPrime c)
     (ensures fun h0 _ h1 ->
       modifies (loc result) h0 h1 /\
-      as_nat c h1 result = (as_nat c h0 x + uint_v cin * getPower2 c) % getPrime c)
+      as_nat c h1 result = (as_nat c h0 x + uint_v cin * getPower2 c) % getPrime c
+      
+      )
+
+
+#set-options " --z3rlimit 400"
+
+val lemma_test: 
+  c: curve ->
+  cin: nat {cin <= 1} ->
+  x: nat {x + cin * getPower2 c < 2 * getPrime c /\ x < getPower2 c} -> 
+  carry0 : nat {carry0 <= 1 /\ (if carry0 = 0 then x >= getPrime c else x < getPrime c)} -> 
+  result: nat {if cin < carry0 then result = x else result = x - getPrime c + carry0 * getPower2 c}
+  -> Lemma (result = (x + cin * getPower2 c) % getPrime c)
+
+let lemma_test c cin x carry0 result = 
+  let n = x + cin * getPower2 c in 
+  assert(if cin < carry0 then result = x else result = x - getPrime c + carry0 * getPower2 c);
+  assert(cin < carry0 <==> cin = 0 && carry0 = 1);
+  assert(if (cin = 0 && carry0 = 1) then result = x else result = x - getPrime c + carry0 * getPower2 c);
+  assert(if (cin = 0 && carry0 = 1) then result = x else result = x - getPrime c + carry0 * getPower2 c);
+  assert(if ((cin = 1 && carry0 = 1) || (cin = 0 && carry0 = 0)) then 
+    result = x - getPrime c + carry0 * getPower2 c else result = x);
+
+  assert(if cin = 0 && carry0 = 0 then
+    begin
+      small_modulo_lemma_1 result (getPrime c);
+      result = n % getPrime c end else True);
+
+
+  assert(if cin = 1 && carry0 = 1 then 
+    begin 
+      modulo_addition_lemma result (getPrime c) 1; 
+      result = n % getPrime c end 
+   else True); 
+
+    assert (if (cin = 0 && carry0 = 1) then begin
+      small_modulo_lemma_1 result(getPrime c); 
+      result = n % getPrime c end else True)
+  
+
+val lemma_cin_1: #c: curve -> x: nat -> cin : nat {x + cin * getPower2 c < 2 * getPrime c} -> 
+  Lemma (cin <= 1)
+
+
+let lemma_cin_1 #c x cin = 
+  assert_norm(getPower2 P256 < 2 * getPrime P256);
+  assert_norm(getPower2 P384 < 2 * getPrime P384)
+
 
 
 let reduction_prime_2prime_with_carry_cin #c cin x result =
   push_frame();
+
+  let h0 = ST.get() in 
+
   let len = getCoordinateLenU64 c in
 
   let tempBuffer = create len (u64 0) in
   let tempBufferForSubborrow = create (size 1) (u64 0) in
-
+ 
   recall_contents (prime_buffer #c) (Lib.Sequence.of_list (prime_list c));
-  let c = sub_bn_gl x prime_buffer tempBuffer in
-  let carry = sub_borrow_u64 c cin (u64 0) tempBufferForSubborrow in
+  let carry0 = sub_bn_gl x prime_buffer tempBuffer in
+  let carry = sub_borrow_u64 carry0 cin (u64 0) tempBufferForSubborrow in
   cmovznz4 carry tempBuffer x result;
+  pop_frame();
+  
+  let h2 = ST.get() in 
 
-    admit();
-  pop_frame()
+  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
+  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 384);
 
+  lemma_cin_1 #c (as_nat c h0 x) (uint_v cin);
+  lemma_test c (v cin) (as_nat c h0 x) (uint_v carry0) (as_nat c h2 result)
 
 
 let reduction_prime_2prime_with_carry #c x result =
