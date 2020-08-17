@@ -11,6 +11,24 @@ open Hacl.Spec.Bignum.Definitions
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+val bn_from_uint: len:size_pos -> x:uint64 -> lbignum len
+let bn_from_uint len x =
+  let b = create len (u64 0) in
+  b.[0] <- x
+
+val bn_from_uint_lemma: len:size_pos -> x:uint64 ->
+  Lemma (bn_v (bn_from_uint len x) == uint_v x)
+let bn_from_uint_lemma len x =
+  let b = create len (u64 0) in
+  let b = b.[0] <- x in
+  bn_eval_split_i b 1;
+  assert (bn_v b == bn_v (slice b 0 1) + pow2 64 * bn_v (slice b 1 len));
+  eq_intro (slice b 1 len) (create (len - 1) (u64 0));
+  bn_eval_zeroes (len - 1) (len - 1);
+  assert (bn_v b == bn_v (slice b 0 1));
+  bn_eval1 (slice b 0 1)
+
+
 val bn_from_bytes_be_f: len:size_nat{8 * len <= max_size_t} -> lseq uint8 (8 * len) -> i:nat{i < len} -> uint64
 let bn_from_bytes_be_f len b i =
   uint_from_bytes_be (sub b ((len - i - 1) * 8) 8)

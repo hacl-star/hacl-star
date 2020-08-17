@@ -22,6 +22,21 @@ module HS = FStar.HyperStack
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
+val bn_from_uint:
+    len:size_t{0 < v len}
+  -> x:uint64
+  -> b:lbignum len ->
+  Stack unit
+  (requires fun h -> live h b)
+  (ensures  fun h0 _ h1 -> modifies (loc b) h0 h1 /\
+    as_seq h1 b == S.bn_from_uint (v len) x)
+
+let bn_from_uint len x b =
+  memset b (u64 0) len;
+  b.(0ul) <- x
+
+
+inline_for_extraction noextract
 val bn_from_bytes_be_:
     len:size_t{8 * v len <= max_size_t}
   -> b:lbuffer uint8 (8ul *! len)

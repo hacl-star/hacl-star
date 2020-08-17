@@ -8,6 +8,7 @@ open Lib.LoopCombinators
 
 open Hacl.Spec.Bignum.Definitions
 open Hacl.Spec.Bignum.Base
+open Hacl.Spec.Bignum.Lib
 open Hacl.Spec.Lib
 
 open Hacl.Spec.Bignum.Addition
@@ -16,45 +17,6 @@ open Hacl.Spec.Bignum.Multiplication
 module K = Hacl.Spec.Karatsuba.Lemmas
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
-
-val bn_mod_pow2: #aLen:size_nat -> a:lbignum aLen -> i:nat{i <= aLen} -> lbignum i
-let bn_mod_pow2 #aLen a i = sub a 0 i
-
-val bn_mod_pow2_lemma: #aLen:size_nat -> a:lbignum aLen -> i:nat{i <= aLen} -> Lemma
-  (bn_v (bn_mod_pow2 a i) == bn_v a % pow2 (64 * i))
-
-let bn_mod_pow2_lemma #aLen a i =
-  calc (==) {
-    bn_v a % pow2 (64 * i);
-    (==) { bn_eval_split_i a i }
-    (bn_v (slice a 0 i) + pow2 (64 * i) * bn_v (slice a i aLen)) % pow2 (64 * i);
-    (==) { Math.Lemmas.modulo_addition_lemma (bn_v (slice a 0 i)) (pow2 (64 * i)) (bn_v (slice a i aLen)) }
-    (bn_v (slice a 0 i)) % pow2 (64 * i);
-    (==) { bn_eval_bound (slice a 0 i) i; Math.Lemmas.small_mod (bn_v (slice a 0 i)) (pow2 (64 * i)) }
-    bn_v (slice a 0 i);
-    }
-
-
-//== bn_rshift
-val bn_div_pow2: #aLen:size_nat -> a:lbignum aLen -> i:nat{i <= aLen} -> lbignum (aLen - i)
-let bn_div_pow2 #aLen a i = slice a i aLen
-
-//== bn_rshift_lemma
-val bn_div_pow2_lemma: #aLen:size_nat -> a:lbignum aLen -> i:nat{i <= aLen} -> Lemma
-  (bn_v (bn_div_pow2 a i) == bn_v a / pow2 (64 * i))
-
-let bn_div_pow2_lemma #len c i =
-  calc (==) {
-    bn_v c / pow2 (64 * i);
-    (==) { bn_eval_split_i c i }
-    (bn_v (slice c 0 i) + pow2 (64 * i) * bn_v (slice c i len)) / pow2 (64 * i);
-    (==) { Math.Lemmas.division_addition_lemma (bn_v (slice c 0 i)) (pow2 (64 * i)) (bn_v (slice c i len)) }
-    bn_v (slice c 0 i) / pow2 (64 * i) + bn_v (slice c i len);
-    (==) { bn_eval_bound (slice c 0 i) i; Math.Lemmas.small_division_lemma_1 (bn_v (slice c 0 i)) (pow2 (64 * i)) }
-    bn_v (slice c i len);
-  };
-  assert (bn_v (slice c i len) == bn_v c / pow2 (64 * i))
-
 
 (* this carry means nothing but the sign of the result *)
 val bn_sign_abs: #aLen:size_nat -> a:lbignum aLen -> b:lbignum aLen -> tuple2 carry (lbignum aLen)
