@@ -86,8 +86,16 @@ let felem_coordinate (c: curve) =
   |P256 -> tuple4 uint64 uint64 uint64 uint64
   |P384 -> tuple6 uint64 uint64 uint64 uint64 uint64 uint64
 
+
 inline_for_extraction noextract
-let felem8 = tuple8 uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64
+let widefelem_t (c: curve) = 
+  match c with 
+  |P256 -> 
+    tuple8 uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64 
+  |P384 -> 
+    tuple12 uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64
+
+
 inline_for_extraction noextract
 let felem8_32 = tuple8 uint32 uint32 uint32 uint32 uint32 uint32 uint32 uint32
 inline_for_extraction noextract
@@ -111,19 +119,35 @@ let as_nat_coordinate #c f =
     v s3 * pow2 64 * pow2 64 * pow2 64 + 
     v s4 * pow2 64 * pow2 64 * pow2 64 * pow2 64 + 
     v s5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64
-    
 
+
+#set-options " --z3rlimit 200"
 
 noextract
-val wide_as_nat4: f:felem8 -> GTot nat
-let wide_as_nat4 f =
-  let (s0, s1, s2, s3, s4, s5, s6, s7) = f in
-  v s0 + v s1 * pow2 64 + v s2 * pow2 64 * pow2 64 +
-  v s3 * pow2 64 * pow2 64 * pow2 64 +
-  v s4 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
-  v s5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
-  v s6 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
-  v s7 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64
+val wide_as_nat4: #c: curve -> f: widefelem_t c -> GTot nat
+
+let wide_as_nat4 #c f =
+  match c with 
+  |P256 -> 
+    let (s0, s1, s2, s3, s4, s5, s6, s7) : widefelem_t P256 = f in
+    v s0 + v s1 * pow2 64 + v s2 * pow2 64 * pow2 64 +
+    v s3 * pow2 64 * pow2 64 * pow2 64 +
+    v s4 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+    v s5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+    v s6 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+    v s7 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64
+  |P384 -> 
+    let (s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11) : widefelem_t P384 = f in
+    v s0 + v s1 * pow2 64 + v s2 * pow2 64 * pow2 64 +
+    v s3 * pow2 64 * pow2 64 * pow2 64 +
+    v s4 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+    v s5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+    v s6 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+    v s7 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64  +
+    v s8 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 + 
+    v s9 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+   v s10 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 + 
+    v s11 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 
 
 
 noextract
@@ -216,16 +240,33 @@ let as_nat_il (c: curve) (h:mem) (e:glbuffer uint64 (getCoordinateLenU64 c)) : G
 
 noextract
 let wide_as_nat (c: curve) (h:mem) (e: widefelem c) : GTot nat =
-  let s = as_seq h e in
-  let s0 = s.[0] in
-  let s1 = s.[1] in
-  let s2 = s.[2] in
-  let s3 = s.[3] in
-  let s4 = s.[4] in
-  let s5 = s.[5] in
-  let s6 = s.[6] in
-  let s7 = s.[7] in
-  wide_as_nat4 (s0, s1, s2, s3, s4, s5, s6, s7)
+  match c with 
+  |P256 -> 
+    let s = as_seq h e in
+    let s0 = s.[0] in
+    let s1 = s.[1] in
+    let s2 = s.[2] in
+    let s3 = s.[3] in
+    let s4 = s.[4] in
+    let s5 = s.[5] in
+    let s6 = s.[6] in
+    let s7 = s.[7] in
+    wide_as_nat4 (s0, s1, s2, s3, s4, s5, s6, s7)
+  |P384 ->
+    let s = as_seq h e in
+    let s0 = s.[0] in
+    let s1 = s.[1] in
+    let s2 = s.[2] in
+    let s3 = s.[3] in
+    let s4 = s.[4] in
+    let s5 = s.[5] in
+    let s6 = s.[6] in
+    let s7 = s.[7] in
+    let s8 = s.[8] in 
+    let s9 = s.[9] in 
+    let s10 = s.[10] in 
+    let s11 = s.[11] in 
+    wide_as_nat4 (s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11)
 
 
 noextract
@@ -254,6 +295,7 @@ open FStar.Mul
 
 noextract
 let felem_seq_prime (c: curve) = a: felem_seq c {felem_seq_as_nat c a < getPrime c}
+
 noextract
 let point_prime (c: curve) =  p: point_seq c {let x = Lib.Sequence.sub p 0 4 in let y = Lib.Sequence.sub p 4 4 in let z = Lib.Sequence.sub p 8 4 in 
   felem_seq_as_nat c x < prime256 /\ felem_seq_as_nat c y < prime256 /\ felem_seq_as_nat c z < prime256} 

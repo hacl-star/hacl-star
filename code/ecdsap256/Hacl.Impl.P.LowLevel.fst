@@ -388,28 +388,15 @@ let felem_sub #c arg1 arg2 out =
     cc
 
 
-
-
-
-let felem_sub #c arg1 arg2 out = 
-  match c with 
-  |P256 -> p256_sub arg1 arg2 out
-  |P384 -> admit()
-
-
-
 let mul #c f r out =
   match c with 
   |P256 -> mul_p256 f r out
-  |P384 -> ()
-
-
+  |P384 -> mul_p384 f r out
 
 
 let eq0_u64 a = 
   eq_mask_lemma a (u64 0);
   eq_mask a (u64 0)
-
 
 
 let eq1_u64 a = 
@@ -527,8 +514,6 @@ let compare_felem #c a b =
       r
     
 
-
-
 let copy_conditional #c out x mask = 
   match c with 
   |P256 -> 
@@ -604,25 +589,24 @@ let copy_conditional #c out x mask =
     lemma_eq_funct_ (as_seq h1 out) (as_seq h0 x)
 
 
-
-
-
-val lemma_shift_256: a: int -> b: int -> c: int -> d: int -> Lemma (
-    a * pow2 64 * pow2 64 * pow2 64 * pow2 64 + 
-    b * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 + 
-    c * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64  + 
-    d * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 ==
-    (a + b * pow2 64 + c * pow2 64 * pow2 64 + d * pow2 64 * pow2 64 * pow2 64) * pow2 64 * pow2 64 * pow2 64 * pow2 64)
-
-let lemma_shift_256 a b c d = ()
-
-
 let shiftLeftWord #c i o = 
+  assert_norm(pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
+  assert_norm(pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 384);
   match c with 
-  |P384 -> ()
+  |P384 -> 
+    upd o (size 0) (u64 0);
+    upd o (size 1) (u64 0);
+    upd o (size 2) (u64 0);
+    upd o (size 3) (u64 0);
+    upd o (size 4) (u64 0);
+    upd o (size 5) (u64 0);
+    upd o (size 6) i.(size 0);
+    upd o (size 7) i.(size 1);
+    upd o (size 8) i.(size 2);
+    upd o (size 9) i.(size 3);
+    upd o (size 10) i.(size 4);
+    upd o (size 11) i.(size 5)
   |P256 -> 
-    assert_norm(pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
-    let h0 = ST.get() in 
     upd o (size 0) (u64 0);
     upd o (size 1) (u64 0);
     upd o (size 2) (u64 0);
@@ -630,6 +614,4 @@ let shiftLeftWord #c i o =
     upd o (size 4) i.(size 0);
     upd o (size 5) i.(size 1);
     upd o (size 6) i.(size 2);
-    upd o (size 7) i.(size 3);
-
-    lemma_shift_256 (v (Lib.Sequence.index (as_seq h0 i) 0)) (v (Lib.Sequence.index (as_seq h0 i) 1)) (v (Lib.Sequence.index (as_seq h0 i) 2)) (v (Lib.Sequence.index (as_seq h0 i) 3))
+    upd o (size 7) i.(size 3)

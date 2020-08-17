@@ -79,6 +79,16 @@ val add_bn: #c: curve -> x: felem c -> y: felem c -> result: felem c ->
       as_nat c h1 result + v r * getPower2 c == as_nat c h0 x + as_nat c h0 y)   
 
 
+val add_dep_prime: #c: curve -> x: felem c -> t: uint64 {uint_v t == 0 \/ uint_v t == 1} -> result: felem c -> 
+  Stack uint64
+    (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result)
+    (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ (
+      if uint_v t = 1 then 
+	as_nat c h1 result + uint_v r * getPower2 c == as_nat c h0 x + getPrime c
+      else
+	as_nat c h1 result  == as_nat c h0 x))  
+ 
+
 val sub_bn: #c: curve -> x: felem c -> y:felem c -> result: felem c -> 
   Stack uint64
     (requires fun h -> live h x /\ live h y /\ live h result /\ eq_or_disjoint x result /\ eq_or_disjoint y result)
