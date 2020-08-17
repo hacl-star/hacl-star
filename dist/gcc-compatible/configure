@@ -95,7 +95,9 @@ detect_x64 () {
 }
 
 detect_arm () {
-  [[ $(uname -m | cut -c 1-3) == "arm" ]] || [[ $(uname -m | cut -c 1-7) == "aarch64" ]];
+  [[ $(uname -m | cut -c 1-3) == "arm" ]] || \
+  [[ $(uname -m | cut -c 1-7) == "aarch64" ]] || \
+  [[ "$1" == "arm" ]] || [[ "$1" == "aarch64" ]];
 }
 
 detect_arm_cc () {
@@ -152,11 +154,36 @@ EOF
 echo -n > Makefile.config
 echo -n > config.h
 
-if detect_arm; then
+# Parse command line arguments.
+all_args=("$@")
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -target) build_target="$2"; shift ;;
+        -arm) build_arch="arm" ;;
+        -aarch64) build_arch="aarch64" ;;
+    esac
+    shift
+done
+
+if [ ! -z "$build_arch" ]; then
+  echo "Doing cross build for $build_arch. Make sure that your toolchain is configured properly."
+  echo "CFLAGS += -DCROSS_COMPILATION -DTARGET_ARCH=$build_arch" >> Makefile.config
+else
+  build_arch=$(uname -m)
+fi
+
+if [ ! -z "$build_target" ]; then
+  echo "Doing cross build for $build_target. Make sure that your toolchain is configured properly."
+  if [[ "$build_target" == "iOS" ]]; then
+    export SDKROOT="/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk"
+  fi
+fi
+
+if detect_arm $build_arch; then
   echo "... detected ARM platform"
-  echo "... $(uname -m) does not support 256-bit arithmetic"
+  echo "... $build_arch does not support 256-bit arithmetic"
   echo "BLACKLIST += $(ls *CP256*.c *_256.c *_Vec256.c | xargs)" >> Makefile.config
-  echo "... $(uname -m) does not support legacy vale stubs"
+  echo "... $build_arch does not support legacy vale stubs"
   echo "BLACKLIST += evercrypt_vale_stubs.c" >> Makefile.config
   echo "CFLAGS += -DLib_IntVector_Intrinsics_vec256=\"void *\"" >> Makefile.config
   if detect_arm_cc; then
@@ -167,13 +194,14 @@ if detect_arm; then
     echo "$CC cannot compile 128-bit vector arithmetic, disabling"
     echo "BLACKLIST += $(ls *CP128*.c *_128.c *_Vec128.c | xargs)" >> Makefile.config
     echo "#define IS_ARM_7 1" >> config.h
+    echo "CFLAGS += -DLib_IntVector_Intrinsics_vec128=\"void *\"" >> Makefile.config
   fi
 fi
 
-if ! detect_x64; then
-  echo "$(uname -m) does not support x64 assembly, disabling Curve64"
+if [[ ! detect_x64 ]] || [[ ! -z "$build_target" ]]; then
+  echo "$build_arch does not support x64 assembly, disabling Curve64"
   echo "BLACKLIST += Hacl_Curve25519_64.c $(ls Hacl_HPKE_Curve64_*.c | xargs)" >> Makefile.config
-  echo "$(uname -m) does not support _addcarry_u64, using a C implementation"
+  echo "$build_arch does not support _addcarry_u64, using a C implementation"
   echo "#define BROKEN_INTRINSICS 1" >> config.h
   echo "#define IS_NOT_X64 1" >> config.h
 else

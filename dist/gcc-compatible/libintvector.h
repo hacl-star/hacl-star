@@ -5,7 +5,7 @@
 
 #define Lib_IntVector_Intrinsics_bit_mask64(x) -((x) & 1)
 
-#if defined(__x86_64__) || defined(_M_X64)
+#if (defined(__x86_64__) || defined(_M_X64)) && !defined(CROSS_COMPILATION)
 
 // The following functions are only available on machines that support Intel AVX
 
