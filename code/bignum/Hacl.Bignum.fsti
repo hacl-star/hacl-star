@@ -104,6 +104,27 @@ let bn_add_mod_n_st (len:size_t{v len > 0}) =
 inline_for_extraction noextract
 val bn_add_mod_n: len:size_t{v len > 0} -> bn_add_mod_n_st len
 
+
+inline_for_extraction noextract
+let bn_karatsuba_mul_st (#aLen:size_t{0 < v aLen /\ 4 * v aLen <= max_size_t})
+  (a:lbignum aLen)
+  (b:lbignum aLen) =
+  res:lbignum (aLen +! aLen) ->
+  Stack unit
+  (requires fun h ->
+    live h a /\ live h b /\ live h res /\
+    disjoint res a /\ disjoint res b /\ eq_or_disjoint a b)
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_seq h1 res == S.bn_karatsuba_mul (as_seq h0 a) (as_seq h0 b))
+
+inline_for_extraction noextract
+val bn_karatsuba_mul:
+    aLen:size_t{0 < v aLen /\ 4 * v aLen <= max_size_t}
+  -> a:lbignum aLen
+  -> b:lbignum aLen
+  -> bn_karatsuba_mul_st a b
+
+
 inline_for_extraction noextract
 let bn_mul_st (#aLen:size_t)
   (a:lbignum aLen)

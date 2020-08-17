@@ -207,7 +207,6 @@ let rec bn_karatsuba_mul_ i aLen a b tmp res =
     () end
 
 
-(*)
 inline_for_extraction noextract
 val get_len_pow2: aLen:size_t -> Tot (res:size_t{v res > 0 ==> v aLen = pow2 (v res)})
 let get_len_pow2 aLen =
@@ -228,15 +227,17 @@ val bn_karatsuba_mul:
   (requires fun h ->
     live h a /\ live h b /\ live h res /\
     disjoint res a /\ disjoint res b /\ eq_or_disjoint a b)
-  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_seq h1 res == K.bn_karatsuba_mul (as_seq h0 a) (as_seq h0 b))
 
 [@CInline]
 let bn_karatsuba_mul aLen a b res =
   push_frame ();
   let tmp = create (4ul *! aLen) (u64 0) in
   let i = get_len_pow2 aLen in
-  if i >. 0ul then
-    bn_karatsuba_mul_ i aLen a b tmp res
+  if i >. 0ul then begin
+    bn_karatsuba_mul_ i aLen a b tmp res;
+    admit() end
   else
     bn_mul aLen a aLen b res;
   pop_frame ()

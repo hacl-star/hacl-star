@@ -62,6 +62,13 @@ let bn_add_mod_n_lemma #len n a b =
   bn_add_lemma a b;
   bn_reduce_once_lemma #len n c0 res0
 
+let bn_karatsuba_mul #aLen a b =
+  Hacl.Spec.Bignum.Karatsuba.bn_karatsuba_mul a b
+
+let bn_karatsuba_mul_lemma #aLen a b =
+  let _ = Hacl.Spec.Bignum.Karatsuba.bn_karatsuba_mul a b in
+  ()
+
 let bn_mul #aLen #bLen a b =
   Hacl.Spec.Bignum.Multiplication.bn_mul a b
 

@@ -28,6 +28,9 @@ let bn_add_mod_n len n a b res =
   let c0 = bn_add_eq_len len a b res in
   bn_reduce_once len n c0 res
 
+let bn_karatsuba_mul aLen a b res =
+  Hacl.Bignum.Karatsuba.bn_karatsuba_mul aLen a b res
+
 let bn_mul aLen a bLen b res =
   Hacl.Bignum.Multiplication.bn_mul aLen a bLen b res
 

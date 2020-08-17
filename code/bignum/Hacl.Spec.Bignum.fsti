@@ -35,6 +35,10 @@ val bn_add_mod_n_lemma: #len:size_nat -> n:lbignum len -> a:lbignum len -> b:lbi
   (requires bn_v a < bn_v n /\ bn_v b < bn_v n)
   (ensures  bn_v (bn_add_mod_n n a b) == (bn_v a + bn_v b) % bn_v n)
 
+val bn_karatsuba_mul: #aLen:size_nat{aLen + aLen <= max_size_t} -> a:lbignum aLen -> b:lbignum aLen -> lbignum (aLen + aLen)
+
+val bn_karatsuba_mul_lemma: #aLen:size_nat{aLen + aLen <= max_size_t} -> a:lbignum aLen -> b:lbignum aLen ->
+  Lemma (bn_v (bn_karatsuba_mul a b) == bn_v a * bn_v b)
 
 val bn_mul: #aLen:size_nat -> #bLen:size_nat{aLen + bLen <= max_size_t} -> a:lbignum aLen -> b:lbignum bLen -> lbignum (aLen + bLen)
 

@@ -487,3 +487,28 @@ let rec bn_karatsuba_mul_ i aLen a b =
     (**) bn_karatsuba_no_last_carry #aLen a b c res;
     assert (v c = 0);
     res end
+
+
+val get_len_pow2: aLen:size_nat -> Tot (res:size_nat{res > 0 ==> aLen = pow2 res})
+let get_len_pow2 aLen =
+  match aLen with
+  | 16 -> assert_norm (pow2 4 = 16); 4
+  | 32 -> assert_norm (pow2 5 = 32); 5
+  | 64 -> assert_norm (pow2 6 = 64); 6
+  | 128 -> assert_norm (pow2 7 = 128); 7
+  | _ -> 0
+
+
+val bn_karatsuba_mul:
+    #aLen:size_nat{aLen + aLen <= max_size_t}
+  -> a:lbignum aLen
+  -> b:lbignum aLen ->
+  Tot (res:lbignum (aLen + aLen){bn_v res == bn_v a * bn_v b})
+
+let bn_karatsuba_mul #aLen a b =
+  let i = get_len_pow2 aLen in
+  if i > 0 then
+    bn_karatsuba_mul_ i aLen a b
+  else begin
+    bn_mul_lemma a b;
+    bn_mul a b end
