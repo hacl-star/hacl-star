@@ -25,6 +25,15 @@ val add6: x: felem P384 -> y: felem P384 -> result: felem P384 ->
 
 let add6 x y result = admit()
 
+
+val add12: x: widefelem P384 -> y: widefelem P384 -> result: widefelem P384 -> Stack uint64 
+  (requires fun h -> live h x /\ live h y /\ live h result /\ eq_or_disjoint x result /\ eq_or_disjoint y result)
+  (ensures fun h0 c h1 -> modifies (loc result) h0 h1 /\ v c <= 1 /\ 
+    wide_as_nat P384 h1 result + v c * pow2 768 == wide_as_nat P384 h0 x + wide_as_nat P384 h0 y)
+
+let add12 x y result = admit()
+
+
 (* 
 val lemma_t_computation_p384: t: uint64 {uint_v t == 0 \/ uint_v t == 1} ->
   Lemma
@@ -84,6 +93,17 @@ val mul_p384: f: felem P384 -> r: felem P384 -> out: widefelem P384 ->
       wide_as_nat P384 h1 out = as_nat P384 h0 r * as_nat P384 h0 f)
 
 let mul_p384 f r out = admit()
+
+
+val shortened_mul_p384: a: glbuffer uint64 (size 6) -> b: uint64 -> result: widefelem P384 -> Stack unit
+  (requires fun h -> live h a /\ live h result /\ wide_as_nat P384 h result = 0)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
+    as_nat_il P384 h0 a * uint_v b = wide_as_nat P384 h1 result /\ 
+    wide_as_nat P384 h1 result < pow2 384 * pow2 64)
+
+
+let shortened_mul_p384 a b result = admit()
+
 
 
 val square_p384: f: felem P384 -> out: widefelem P384 -> Stack unit

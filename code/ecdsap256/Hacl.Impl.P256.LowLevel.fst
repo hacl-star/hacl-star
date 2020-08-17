@@ -1344,59 +1344,14 @@ let square_p256 f out =
   pop_frame()
 
 
-val square: #c: curve -> f: felem c -> out: widefelem c -> Stack unit
-    (requires fun h -> live h out /\ live h f /\ eq_or_disjoint f out)
-    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\ wide_as_nat c h1 out = as_nat c h0 f * as_nat c h0 f)
-
-let square #c f out = 
-  match c with 
-  |P384 -> ()
-  |P256 -> square_p256 f out
-
-
-
 inline_for_extraction noextract
-val mod64: #c: curve -> a: widefelem c -> Stack uint64 
-  (requires fun h -> live h a) 
-  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ wide_as_nat c h1 a % pow2 64 = uint_v r)
-
-let mod64 #c a =
-  match c with 
-  |P256 -> 
-    let r = index a (size 0) in 
-    let h1 = ST.get() in 
-	assert(
-	let open Lib.Sequence in
-	let s = as_seq h1 a in
-	let s0 = s.[0] in
-	let s1 = s.[1] in
-	let s2 = s.[2] in
-	let s3 = s.[3] in
-	let s4 = s.[4] in
-	let s5 = s.[5] in
-	let s6 = s.[6] in
-	let s7 = s.[7] in
-	wide_as_nat c h1 a ==  
-	v s0 + v s1 * pow2 64 + v s2 * pow2 64 * pow2 64 +
-	v s3 * pow2 64 * pow2 64 * pow2 64 +
-	v s4 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
-	v s5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
-	v s6 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
-	v s7 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 /\
-	wide_as_nat c h1 a % pow2 64 == v s0);
-	r
-   |P384 -> index a (size 0)
-
-
-
-inline_for_extraction noextract
-val shortened_mul: a: glbuffer uint64 (size 4) -> b: uint64 -> result: widefelem P256 -> Stack unit
+val shortened_mul_p256: a: glbuffer uint64 (size 4) -> b: uint64 -> result: widefelem P256 -> Stack unit
   (requires fun h -> live h a /\ live h result /\ wide_as_nat P256 h result = 0)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
     as_nat_il P256 h0 a * uint_v b = wide_as_nat P256 h1 result /\ 
     wide_as_nat P256 h1 result < pow2 320)
 
-let shortened_mul a b result = 
+let shortened_mul_p256 a b result = 
   let result04 = sub result (size 0) (size 4) in 
   let result48 = sub result (size 4) (size 4) in 
   let c = mul1_il a b result04 in 

@@ -114,6 +114,11 @@ let add_bn #c x y result =
   |P256 -> add4 x y result
   |P384 -> add6 x y result
 
+let add_long_bn #c x y result = 
+  match c with 
+  |P256 -> add8 x y result
+  |P384 -> add12 x y result
+
 let add_dep_prime #c x t result =
   match c with
   |P256 -> add_dep_prime_p256 x t result
@@ -129,6 +134,15 @@ let sub_bn_gl #c x y result =
   |P256 -> sub4_il x y result
   |P384 -> sub6_il x y result
 
+let short_mul_bn #c x y result = 
+  match c with
+  | P256 -> shortened_mul_p256 x y result
+  | P384 -> shortened_mul_p384 x y result
+
+let square_bn #c x result = 
+  match c with 
+  |P256 -> square_p256 x result
+  |P384 -> square_p384 x result
 
 
 let uploadOneImpl #c f =
@@ -541,3 +555,29 @@ let shiftLeftWord #c i o =
     upd o (size 7) i.(size 3)
 
 
+let mod64 #c a =
+  match c with 
+  |P256 -> 
+    let r = index a (size 0) in 
+    (* let h1 = ST.get() in  *)
+(*   assert(
+  let open Lib.Sequence in
+  let s = as_seq h1 a in
+  let s0 = s.[0] in
+  let s1 = s.[1] in
+  let s2 = s.[2] in
+  let s3 = s.[3] in
+  let s4 = s.[4] in
+  let s5 = s.[5] in
+  let s6 = s.[6] in
+  let s7 = s.[7] in
+  wide_as_nat c h1 a ==  
+  v s0 + v s1 * pow2 64 + v s2 * pow2 64 * pow2 64 +
+  v s3 * pow2 64 * pow2 64 * pow2 64 +
+  v s4 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+  v s5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+  v s6 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+  v s7 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 /\
+  wide_as_nat c h1 a % pow2 64 == v s0); *)
+  r
+   |P384 -> index a (size 0)

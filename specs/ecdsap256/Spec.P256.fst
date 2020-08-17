@@ -72,15 +72,20 @@ let getPower curve =
   |P256 -> 256
   |P384 -> 384
 
+inline_for_extraction 
+let getLongPower curve = getPower curve * 2
+
 inline_for_extraction
 let getPowerU curve = 
   match curve with 
   |P256 -> 256ul
   |P384 -> 384ul
 
-
 inline_for_extraction
 let getPower2 curve = pow2 (getPower curve)
+
+inline_for_extraction
+let getLongPower2 curve = pow2 (getLongPower curve)
 
 inline_for_extraction
 let getPrime curve = 

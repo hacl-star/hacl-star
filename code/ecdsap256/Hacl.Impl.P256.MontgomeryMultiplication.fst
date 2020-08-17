@@ -17,7 +17,6 @@ open Hacl.Lemmas.P256
 open Spec.P256
 open Spec.ECDSA.Lemmas
 
-open Hacl.Impl.P256.LowLevel
 open Hacl.Impl.P.LowLevel
 
 open Lib.Loops
@@ -25,18 +24,23 @@ open Hacl.Spec.P256.MontgomeryMultiplication
 
 #set-options "--z3rlimit 100"
 
+
 inline_for_extraction noextract
-val add8_without_carry1: t: widefelem P256 -> t1: widefelem P256 -> result: widefelem P256 -> Stack unit
+val add_long_without_carry: #c: curve -> t: widefelem c -> t1: widefelem c -> result: widefelem c -> Stack unit
   (requires fun h -> 
     live h t /\ live h t1 /\ live h result /\ eq_or_disjoint t1 result /\ 
-    eq_or_disjoint t result /\ wide_as_nat P256 h t1 < pow2 320 /\ wide_as_nat P256 h t < prime256 * prime256
+    eq_or_disjoint t result /\ 
+    wide_as_nat c h t1 < getPower2 c * pow2 64 /\ 
+    wide_as_nat c h t < getPrime c * getPrime c
   )
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ wide_as_nat P256 h1 result = wide_as_nat P256 h0 t + wide_as_nat P256 h0 t1)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
+    wide_as_nat c h1 result = wide_as_nat c h0 t + wide_as_nat c h0 t1)
 
 
-let add8_without_carry1 t t1 result  = 
-  let _  = add8 t t1 result in 
-    assert_norm (pow2 320 + prime256 * prime256 < pow2 512)
+let add_long_without_carry #c t t1 result  = 
+  let _  = add_long_bn t t1 result in 
+    assert_norm (getPower2 P256 * pow2 64 + getPrime P256 * getPrime P256 < getLongPower2 P256);
+    assert_norm (getPower2 P384 * pow2 64 + getPrime P384 * getPrime P384 < getLongPower2 P384)
 
 
 inline_for_extraction
@@ -46,6 +50,7 @@ val montgomery_multiplication_round: t: widefelem P256 -> round: widefelem P256 
     wide_as_nat P256 h1 round = (wide_as_nat P256 h0 t + prime256 * (wide_as_nat P256 h0 t % pow2 64)) / pow2 64
   )
 
+
 let montgomery_multiplication_round t round =
   push_frame(); 
     let h0 = ST.get() in 
@@ -53,9 +58,9 @@ let montgomery_multiplication_round t round =
     let t3 = create (size 8) (u64 0) in 
     let t1 = mod64 t in 
       recall_contents prime256_buffer (Lib.Sequence.of_list p256_prime_list); 
-    shortened_mul prime256_buffer t1 t2;
-    add8_without_carry1 t t2 t3;
-    shift8 t3 round;
+    short_mul_bn prime256_buffer t1 t2;
+    add_long_without_carry t t2 t3;
+    shiftLeftWord t3 round;
   pop_frame()  
 
 
@@ -226,7 +231,7 @@ let montgomery_square_buffer_p256 a result =
     let round2 = create (size 8) (u64 0) in 
     let round4 = create (size 8) (u64 0) in  
       let h0 = ST.get() in 
-    square_p256 a t;  
+    square_bn a t;  
       let h1 = ST.get() in 
       mul_lemma_ (as_nat P256 h0 a) (as_nat P256 h0 a) prime256;
     montgomery_multiplication_round_twice t round2;

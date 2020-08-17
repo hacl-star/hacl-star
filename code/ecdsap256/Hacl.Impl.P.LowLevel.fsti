@@ -79,6 +79,13 @@ val add_bn: #c: curve -> x: felem c -> y: felem c -> result: felem c ->
       as_nat c h1 result + v r * getPower2 c == as_nat c h0 x + as_nat c h0 y)   
 
 
+val add_long_bn: #c: curve -> x: widefelem c -> y: widefelem c -> result: widefelem c -> 
+  Stack uint64 
+  (requires fun h -> live h x /\ live h y /\ live h result /\ eq_or_disjoint x result /\ eq_or_disjoint y result)
+  (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ v r <= 1 /\ 
+    wide_as_nat c h1 result + v r * getLongPower2 c == wide_as_nat c h0 x + wide_as_nat c h0 y)
+
+
 val add_dep_prime: #c: curve -> x: felem c -> t: uint64 {uint_v t == 0 \/ uint_v t == 1} -> result: felem c -> 
   Stack uint64
     (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result)
@@ -106,6 +113,18 @@ val sub_bn_gl: #c: curve -> x: felem c -> y: glbuffer uint64 (getCoordinateLenU6
     else 
       as_nat c h0 x < as_nat_il c h0 y))
 
+
+val short_mul_bn: #c: curve -> a: glbuffer uint64 (getCoordinateLenU64 c) -> b: uint64 -> result: widefelem c -> Stack unit
+  (requires fun h -> live h a /\ live h result /\ wide_as_nat c h result = 0)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
+    as_nat_il c h0 a * uint_v b = wide_as_nat c h1 result /\ 
+    wide_as_nat c h1 result < getPower2 c * pow2 64)
+
+
+val square_bn: #c: curve -> f: felem c -> out: widefelem c -> Stack unit
+    (requires fun h -> live h out /\ live h f /\ eq_or_disjoint f out)
+    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\ wide_as_nat c h1 out = as_nat c h0 f * as_nat c h0 f)
+      
 
 val uploadOneImpl: #c: curve -> f: felem c -> Stack unit
   (requires fun h -> live h f)
@@ -239,3 +258,9 @@ val shiftLeftWord: #c: curve -> i: felem c -> o: lbuffer uint64 (getCoordinateLe
   Stack unit 
     (requires fun h -> live h i /\ live h o /\ disjoint i o)
     (ensures fun h0 _ h1 -> modifies1 o h0 h1 /\ wide_as_nat c h1 o == as_nat c h0 i * getPower2 c)
+
+
+inline_for_extraction noextract
+val mod64: #c: curve -> a: widefelem c -> Stack uint64 
+  (requires fun h -> live h a) 
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ wide_as_nat c h1 a % pow2 64 = uint_v r)
