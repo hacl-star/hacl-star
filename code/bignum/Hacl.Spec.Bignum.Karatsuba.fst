@@ -273,31 +273,22 @@ val bn_lshift_add_lemma:
 let bn_lshift_add_lemma #aLen #bLen a b i =
   let r = sub a i (aLen - i) in
   let c, r' = bn_add r b in
-  bn_add_lemma r b;
-  assert (bn_v r' + v c * pow2 (64 * (aLen - i)) == bn_v r + bn_v b);
   let a' = update_sub a i (aLen - i) r' in
   let p = pow2 (64 * aLen) in
 
   calc (==) {
     bn_v a' + v c * p;
-    (==) { bn_eval_split_i a' i }
-    bn_v (slice a' 0 i) + pow2 (64 * i) * bn_v (slice a' i aLen) + v c * p;
-    (==) { eq_intro (slice a' i aLen) r' }
-    bn_v (slice a' 0 i) + pow2 (64 * i) * bn_v r' + v c * p;
-    (==) { eq_intro (slice a' 0 i) (slice a 0 i) }
-    bn_v (slice a 0 i) + pow2 (64 * i) * bn_v r' + v c * p;
-    (==) {  }
-    bn_v (slice a 0 i) + pow2 (64 * i) * (bn_v r + bn_v b - v c * pow2 (64 * (aLen - i))) + v c * p;
-    (==) { Math.Lemmas.distributivity_add_right
-      (pow2 (64 * i)) (bn_v r) (bn_v b - v c * pow2 (64 * (aLen - i))) }
-    bn_v (slice a 0 i) + pow2 (64 * i) * bn_v r + pow2 (64 * i) * (bn_v b - v c * pow2 (64 * (aLen - i))) + v c * p;
-    (==) { Math.Lemmas.distributivity_sub_right (pow2 (64 * i)) (bn_v b) (v c * pow2 (64 * (aLen - i))) }
-    bn_v (slice a 0 i) + pow2 (64 * i) * bn_v r + pow2 (64 * i) * bn_v b - pow2 (64 * i) * v c * pow2 (64 * (aLen - i)) + v c * p;
-    (==) { Math.Lemmas.paren_mul_right (v c) (pow2 (64 * i)) (pow2 (64 * (aLen - i)));
-           Math.Lemmas.pow2_plus (64 * i) (64 * (aLen - i)) }
-    bn_v (slice a 0 i) + pow2 (64 * i) * bn_v r + pow2 (64 * i) * bn_v b;
-    (==) { bn_eval_split_i a i }
-    bn_v a + pow2 (64 * i) * bn_v b;
+    (==) { bn_update_sub_eval a r' i }
+    bn_v a - bn_v r * pow2 (64 * i) + bn_v r' * pow2 (64 * i) + v c * p;
+    (==) { bn_add_lemma r b }
+    bn_v a - bn_v r * pow2 (64 * i) + (bn_v r + bn_v b - v c * pow2 (64 * (aLen - i))) * pow2 (64 * i) + v c * p;
+    (==) { Math.Lemmas.distributivity_add_left (bn_v r) (bn_v b - v c * pow2 (64 * (aLen - i))) (pow2 (64 * i)) }
+    bn_v a + (bn_v b - v c * pow2 (64 * (aLen - i))) * pow2 (64 * i) + v c * p;
+    (==) { Math.Lemmas.distributivity_sub_left  (bn_v b) (v c * pow2 (64 * (aLen - i))) (pow2 (64 * i)) }
+    bn_v a + bn_v b * pow2 (64 * i) - (v c * pow2 (64 * (aLen - i))) * pow2 (64 * i) + v c * p;
+    (==) { Math.Lemmas.paren_mul_right (v c) (pow2 (64 * (aLen - i))) (pow2 (64 * i));
+           Math.Lemmas.pow2_plus (64 * (aLen - i)) (64 * i) }
+    bn_v a + bn_v b * pow2 (64 * i);
     }
 
 
@@ -333,40 +324,18 @@ let bn_lshift_add_early_stop_lemma #aLen #bLen a b i =
 
   calc (==) {
     bn_v a' + v c * p;
-    (==) { bn_eval_split_i a' i }
-    bn_v (slice a' 0 i) + pow2 (64 * i) * bn_v (slice a' i aLen) + v c * p;
-    (==) { eq_intro (slice a 0 i) (slice a' 0 i) }
-    bn_v (slice a 0 i) + pow2 (64 * i) * bn_v (slice a' i aLen) + v c * p;
-    (==) { bn_eval_split_i (slice a' i aLen) bLen }
-    bn_v (slice a 0 i) + pow2 (64 * i) * (bn_v (sub a' i bLen) + pow2 (64 * bLen) * bn_v (slice a' (i + bLen) aLen)) + v c * p;
-    (==) { eq_intro (sub a' i bLen) r' }
-    bn_v (slice a 0 i) + pow2 (64 * i) * (bn_v r' + pow2 (64 * bLen) * bn_v (slice a' (i + bLen) aLen)) + v c * p;
-    (==) { eq_intro (slice a' (i + bLen) aLen) (slice a (i + bLen) aLen) }
-    bn_v (slice a 0 i) + pow2 (64 * i) * (bn_v r' + pow2 (64 * bLen) * bn_v (slice a (i + bLen) aLen)) + v c * p;
-    (==) { Math.Lemmas.distributivity_add_right (pow2 (64 * i)) (bn_v r') (pow2 (64 * bLen) * bn_v (slice a (i + bLen) aLen)) }
-    bn_v (slice a 0 i) + pow2 (64 * i) * bn_v r' + pow2 (64 * i) * (pow2 (64 * bLen) * bn_v (slice a (i + bLen) aLen)) + v c * p;
+    (==) { bn_update_sub_eval a r' i }
+    bn_v a - bn_v r * pow2 (64 * i) + bn_v r' * pow2 (64 * i) + v c * p;
     (==) { bn_add_lemma r b }
-    bn_v (slice a 0 i) + pow2 (64 * i) * (bn_v r + bn_v b - v c * pow2 (64 * bLen)) +
-      pow2 (64 * i) * (pow2 (64 * bLen) * bn_v (slice a (i + bLen) aLen)) + v c * p;
-    (==) { Math.Lemmas.distributivity_sub_right (pow2 (64 * i)) (bn_v r + bn_v b) (v c * pow2 (64 * bLen)) }
-    bn_v (slice a 0 i) + pow2 (64 * i) * (bn_v r + bn_v b) - pow2 (64 * i) * (v c * pow2 (64 * bLen)) +
-      pow2 (64 * i) * (pow2 (64 * bLen) * bn_v (slice a (i + bLen) aLen)) + v c * p;
-    (==) { Math.Lemmas.paren_mul_right (v c) (pow2 (64 * i)) (pow2 (64 * bLen));
-           Math.Lemmas.pow2_plus (64 * i) (64 * bLen) }
-    bn_v (slice a 0 i) + pow2 (64 * i) * (bn_v r + bn_v b) +
-      pow2 (64 * i) * (pow2 (64 * bLen) * bn_v (slice a (i + bLen) aLen));
-    (==) { Math.Lemmas.distributivity_add_right (pow2 (64 * i)) (bn_v r) (bn_v b) }
-    bn_v (slice a 0 i) + pow2 (64 * i) * bn_v r + pow2 (64 * i) * bn_v b +
-      pow2 (64 * i) * (pow2 (64 * bLen) * bn_v (slice a (i + bLen) aLen));
-    (==) { bn_eval_split_i (slice a 0 (i + bLen)) i }
-    bn_v (slice a 0 (i + bLen)) + pow2 (64 * i) * bn_v b +
-      pow2 (64 * i) * (pow2 (64 * bLen) * bn_v (slice a (i + bLen) aLen));
-    (==) { Math.Lemmas.paren_mul_right (pow2 (64 * i)) (pow2 (64 * bLen)) (bn_v (slice a (i + bLen) aLen));
-           Math.Lemmas.pow2_plus (64 * i) (64 * bLen) }
-    bn_v (slice a 0 (i + bLen)) + pow2 (64 * i) * bn_v b + pow2 (64 * (i + bLen)) * bn_v (slice a (i + bLen) aLen);
-    (==) { bn_eval_split_i a (i + bLen) }
-    bn_v a + pow2 (64 * i) * bn_v b;
-  }
+    bn_v a - bn_v r * pow2 (64 * i) + (bn_v r + bn_v b - v c * pow2 (64 * bLen)) * pow2 (64 * i) + v c * p;
+    (==) { Math.Lemmas.distributivity_add_left (bn_v r) (bn_v b - v c * pow2 (64 * bLen)) (pow2 (64 * i)) }
+    bn_v a + (bn_v b - v c * pow2 (64 * bLen)) * pow2 (64 * i) + v c * p;
+    (==) { Math.Lemmas.distributivity_sub_left  (bn_v b) (v c * pow2 (64 * bLen)) (pow2 (64 * i)) }
+    bn_v a + bn_v b * pow2 (64 * i) - (v c * pow2 (64 * bLen)) * pow2 (64 * i) + v c * p;
+    (==) { Math.Lemmas.paren_mul_right (v c) (pow2 (64 * bLen)) (pow2 (64 * i));
+           Math.Lemmas.pow2_plus (64 * bLen) (64 * i) }
+    bn_v a + bn_v b * pow2 (64 * i);
+    }
 
 
 val bn_karatsuba_res:

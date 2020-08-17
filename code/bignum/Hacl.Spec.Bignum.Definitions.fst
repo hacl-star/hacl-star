@@ -305,3 +305,39 @@ let bn_eval_lt len a b k =
   bn_eval_bound b (k - 1);
   assert (eval_ len b (k - 1) - eval_ len a (k - 1) > - pow2 (64 * (k - 1)));
   assert ((v b.[k - 1] - v a.[k - 1]) * pow2 (64 * (k - 1)) >= pow2 (64 * (k - 1)))
+
+
+val bn_update_sub_eval:
+    #aLen:size_nat
+  -> #bLen:size_nat
+  -> a:lbignum aLen
+  -> b:lbignum bLen
+  -> i:nat{i + bLen <= aLen} ->
+  Lemma (bn_v (update_sub a i bLen b) == bn_v a - bn_v (sub a i bLen) * pow2 (64 * i) + bn_v b * pow2 (64 * i))
+
+let bn_update_sub_eval #aLen #bLen a b i =
+  let a' = update_sub a i bLen b in
+  let c = bn_v (sub a i bLen) * pow2 (64 * i) in
+
+  calc (==) {
+    bn_v a' + c;
+    (==) { bn_eval_split_i a' i }
+    bn_v (slice a' 0 i) + pow2 (64 * i) * bn_v (slice a' i aLen) + c;
+    (==) { eq_intro (slice a 0 i) (slice a' 0 i) }
+    bn_v (slice a 0 i) + pow2 (64 * i) * bn_v (slice a' i aLen) + c;
+    (==) { bn_eval_split_i (slice a' i aLen) bLen }
+    bn_v (slice a 0 i) + pow2 (64 * i) * (bn_v (sub a' i bLen) + pow2 (64 * bLen) * bn_v (slice a' (i + bLen) aLen)) + c;
+    (==) { eq_intro (slice a' (i + bLen) aLen) (slice a (i + bLen) aLen) }
+    bn_v (slice a 0 i) + pow2 (64 * i) * (bn_v (sub a' i bLen) + pow2 (64 * bLen) * bn_v (slice a (i + bLen) aLen)) + c;
+    (==) {eq_intro (sub a' i bLen) b }
+    bn_v (slice a 0 i) + pow2 (64 * i) * (bn_v b + pow2 (64 * bLen) * bn_v (slice a (i + bLen) aLen)) + c;
+    (==) { Math.Lemmas.distributivity_add_right (pow2 (64 * i)) (bn_v b) (pow2 (64 * bLen) * bn_v (slice a (i + bLen) aLen)) }
+    bn_v (slice a 0 i) + pow2 (64 * i) * bn_v b + pow2 (64 * i) * (pow2 (64 * bLen) * bn_v (slice a (i + bLen) aLen)) + c;
+    (==) { Math.Lemmas.paren_mul_right (pow2 (64 * i)) (pow2 (64 * bLen)) (bn_v (slice a (i + bLen) aLen));
+           Math.Lemmas.pow2_plus (64 * i) (64 * bLen) }
+    bn_v (slice a 0 i) + pow2 (64 * i) * bn_v b + pow2 (64 * (i + bLen)) * bn_v (slice a (i + bLen) aLen) + c;
+    (==) { bn_eval_split_i (slice a 0 (i + bLen)) i }
+    bn_v (slice a 0 (i + bLen)) + pow2 (64 * i) * bn_v b + pow2 (64 * (i + bLen)) * bn_v (slice a (i + bLen) aLen);
+    (==) { bn_eval_split_i a (i + bLen) }
+    bn_v a + pow2 (64 * i) * bn_v b;
+    }
