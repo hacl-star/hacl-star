@@ -37,7 +37,7 @@ val sub: Hacl.Bignum.Addition.bn_sub_eq_len_st n
 
   The arguments a and b are meant to be 4096-bit bignums, i.e. uint64_t[64].
   The outparam res is meant to be a 8192-bit bignum, i.e. uint64_t[128]."]
-val mul: a:lbignum n -> b:lbignum n -> BN.bn_mul_st a b
+val mul: a:lbignum n -> b:lbignum n -> BN.bn_karatsuba_mul_st a b
 
 [@@ Comment "Write `a ^ b mod n1` in `res`.
 

@@ -254,7 +254,7 @@ inline_for_extraction noextract
 class bn (len: meta_len) = {
   bit_set: bn_bit_set_st len;
   add_mod_n: bn_add_mod_n_st len;
-  mul: a:lbignum len -> b:lbignum len -> bn_mul_st a b;
+  mul: a:lbignum len -> b:lbignum len -> bn_karatsuba_mul_st a b;
   sqr: a:lbignum len -> bn_sqr_st a;
   sub_mask: bn_sub_mask_st len;
 }
@@ -266,7 +266,7 @@ inline_for_extraction noextract
 let mk_runtime_bn (len: meta_len) = {
   bit_set = bn_bit_set len;
   add_mod_n = bn_add_mod_n len;
-  mul = (fun a b -> bn_mul len a len b);
+  mul = (fun a b -> bn_karatsuba_mul len a b);
   sqr = (fun a -> bn_sqr len a);
   sub_mask = bn_sub_mask len;
 }
