@@ -77,7 +77,7 @@ EverCrypt_DRBG_state_s;
 
 bool
 EverCrypt_DRBG_uu___is_SHA1_s(
-  Spec_Hash_Definitions_hash_alg uu____121,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_DRBG_state_s projectee
 )
 {
@@ -90,7 +90,7 @@ EverCrypt_DRBG_uu___is_SHA1_s(
 
 Hacl_HMAC_DRBG_state
 EverCrypt_DRBG___proj__SHA1_s__item___0(
-  Spec_Hash_Definitions_hash_alg uu____146,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_DRBG_state_s projectee
 )
 {
@@ -107,7 +107,7 @@ EverCrypt_DRBG___proj__SHA1_s__item___0(
 
 bool
 EverCrypt_DRBG_uu___is_SHA2_256_s(
-  Spec_Hash_Definitions_hash_alg uu____167,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_DRBG_state_s projectee
 )
 {
@@ -120,7 +120,7 @@ EverCrypt_DRBG_uu___is_SHA2_256_s(
 
 Hacl_HMAC_DRBG_state
 EverCrypt_DRBG___proj__SHA2_256_s__item___0(
-  Spec_Hash_Definitions_hash_alg uu____192,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_DRBG_state_s projectee
 )
 {
@@ -137,7 +137,7 @@ EverCrypt_DRBG___proj__SHA2_256_s__item___0(
 
 bool
 EverCrypt_DRBG_uu___is_SHA2_384_s(
-  Spec_Hash_Definitions_hash_alg uu____213,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_DRBG_state_s projectee
 )
 {
@@ -150,7 +150,7 @@ EverCrypt_DRBG_uu___is_SHA2_384_s(
 
 Hacl_HMAC_DRBG_state
 EverCrypt_DRBG___proj__SHA2_384_s__item___0(
-  Spec_Hash_Definitions_hash_alg uu____238,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_DRBG_state_s projectee
 )
 {
@@ -167,7 +167,7 @@ EverCrypt_DRBG___proj__SHA2_384_s__item___0(
 
 bool
 EverCrypt_DRBG_uu___is_SHA2_512_s(
-  Spec_Hash_Definitions_hash_alg uu____259,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_DRBG_state_s projectee
 )
 {
@@ -180,7 +180,7 @@ EverCrypt_DRBG_uu___is_SHA2_512_s(
 
 Hacl_HMAC_DRBG_state
 EverCrypt_DRBG___proj__SHA2_512_s__item___0(
-  Spec_Hash_Definitions_hash_alg uu____284,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_DRBG_state_s projectee
 )
 {
@@ -1286,10 +1286,10 @@ EverCrypt_DRBG_generate_sha1(
   }
   {
     uint32_t entropy_input_len = Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_SHA1);
-    bool ok0;
+    bool ok;
     if (additional_input_len > Hacl_HMAC_DRBG_max_additional_input_length)
     {
-      ok0 = false;
+      ok = false;
     }
     else
     {
@@ -1299,9 +1299,9 @@ EverCrypt_DRBG_generate_sha1(
         uint8_t entropy_input[entropy_input_len1];
         memset(entropy_input, 0U, entropy_input_len1 * sizeof (uint8_t));
         {
-          bool ok = Lib_RandomBuffer_System_randombytes(entropy_input, entropy_input_len1);
+          bool ok1 = Lib_RandomBuffer_System_randombytes(entropy_input, entropy_input_len1);
           bool result;
-          if (!ok)
+          if (!ok1)
           {
             result = false;
           }
@@ -1384,11 +1384,11 @@ EverCrypt_DRBG_generate_sha1(
               }
             }
           }
-          ok0 = result;
+          ok = result;
         }
       }
     }
-    if (!ok0)
+    if (!ok)
     {
       return false;
     }
@@ -1569,10 +1569,10 @@ EverCrypt_DRBG_generate_sha2_256(
   }
   {
     uint32_t entropy_input_len = Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_SHA2_256);
-    bool ok0;
+    bool ok;
     if (additional_input_len > Hacl_HMAC_DRBG_max_additional_input_length)
     {
-      ok0 = false;
+      ok = false;
     }
     else
     {
@@ -1582,9 +1582,9 @@ EverCrypt_DRBG_generate_sha2_256(
         uint8_t entropy_input[entropy_input_len1];
         memset(entropy_input, 0U, entropy_input_len1 * sizeof (uint8_t));
         {
-          bool ok = Lib_RandomBuffer_System_randombytes(entropy_input, entropy_input_len1);
+          bool ok1 = Lib_RandomBuffer_System_randombytes(entropy_input, entropy_input_len1);
           bool result;
-          if (!ok)
+          if (!ok1)
           {
             result = false;
           }
@@ -1675,11 +1675,11 @@ EverCrypt_DRBG_generate_sha2_256(
               }
             }
           }
-          ok0 = result;
+          ok = result;
         }
       }
     }
-    if (!ok0)
+    if (!ok)
     {
       return false;
     }
@@ -1860,10 +1860,10 @@ EverCrypt_DRBG_generate_sha2_384(
   }
   {
     uint32_t entropy_input_len = Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_SHA2_384);
-    bool ok0;
+    bool ok;
     if (additional_input_len > Hacl_HMAC_DRBG_max_additional_input_length)
     {
-      ok0 = false;
+      ok = false;
     }
     else
     {
@@ -1873,9 +1873,9 @@ EverCrypt_DRBG_generate_sha2_384(
         uint8_t entropy_input[entropy_input_len1];
         memset(entropy_input, 0U, entropy_input_len1 * sizeof (uint8_t));
         {
-          bool ok = Lib_RandomBuffer_System_randombytes(entropy_input, entropy_input_len1);
+          bool ok1 = Lib_RandomBuffer_System_randombytes(entropy_input, entropy_input_len1);
           bool result;
-          if (!ok)
+          if (!ok1)
           {
             result = false;
           }
@@ -1966,11 +1966,11 @@ EverCrypt_DRBG_generate_sha2_384(
               }
             }
           }
-          ok0 = result;
+          ok = result;
         }
       }
     }
-    if (!ok0)
+    if (!ok)
     {
       return false;
     }
@@ -2151,10 +2151,10 @@ EverCrypt_DRBG_generate_sha2_512(
   }
   {
     uint32_t entropy_input_len = Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_SHA2_512);
-    bool ok0;
+    bool ok;
     if (additional_input_len > Hacl_HMAC_DRBG_max_additional_input_length)
     {
-      ok0 = false;
+      ok = false;
     }
     else
     {
@@ -2164,9 +2164,9 @@ EverCrypt_DRBG_generate_sha2_512(
         uint8_t entropy_input[entropy_input_len1];
         memset(entropy_input, 0U, entropy_input_len1 * sizeof (uint8_t));
         {
-          bool ok = Lib_RandomBuffer_System_randombytes(entropy_input, entropy_input_len1);
+          bool ok1 = Lib_RandomBuffer_System_randombytes(entropy_input, entropy_input_len1);
           bool result;
-          if (!ok)
+          if (!ok1)
           {
             result = false;
           }
@@ -2257,11 +2257,11 @@ EverCrypt_DRBG_generate_sha2_512(
               }
             }
           }
-          ok0 = result;
+          ok = result;
         }
       }
     }
-    if (!ok0)
+    if (!ok)
     {
       return false;
     }

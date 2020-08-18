@@ -21,6 +21,11 @@
  * SOFTWARE.
  */
 
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -31,10 +36,6 @@
 
 #ifndef __Hacl_Kremlib_H
 #define __Hacl_Kremlib_H
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 
 
@@ -73,9 +74,10 @@ static inline FStar_UInt128_uint128 load128_be(uint8_t *x0);
 
 uint32_t LowStar_Vector_new_capacity(uint32_t cap);
 
+#define __Hacl_Kremlib_H_DEFINED
+#endif
+
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_Kremlib_H_DEFINED
-#endif

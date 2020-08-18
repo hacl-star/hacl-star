@@ -21,6 +21,11 @@
  * SOFTWARE.
  */
 
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -31,10 +36,6 @@
 
 #ifndef __Hacl_Frodo_KEM_H
 #define __Hacl_Frodo_KEM_H
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 #include "Hacl_Kremlib.h"
 #include "Lib_RandomBuffer_System.h"
@@ -47,9 +48,10 @@ uint32_t Hacl_Frodo_KEM_crypto_kem_enc(uint8_t *ct, uint8_t *ss, uint8_t *pk);
 
 uint32_t Hacl_Frodo_KEM_crypto_kem_dec(uint8_t *ss, uint8_t *ct, uint8_t *sk);
 
+#define __Hacl_Frodo_KEM_H_DEFINED
+#endif
+
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_Frodo_KEM_H_DEFINED
-#endif

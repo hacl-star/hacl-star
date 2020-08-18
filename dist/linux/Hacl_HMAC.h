@@ -21,6 +21,11 @@
  * SOFTWARE.
  */
 
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
@@ -30,10 +35,6 @@
 
 #ifndef __Hacl_HMAC_H
 #define __Hacl_HMAC_H
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 #include "Hacl_Kremlib.h"
 #include "Hacl_Hash.h"
@@ -46,9 +47,10 @@ void Hacl_HMAC_compute_sha2_384(u8 *dst, u8 *key, u32 key_len, u8 *data, u32 dat
 
 void Hacl_HMAC_compute_sha2_512(u8 *dst, u8 *key, u32 key_len, u8 *data, u32 data_len);
 
+#define __Hacl_HMAC_H_DEFINED
+#endif
+
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_HMAC_H_DEFINED
-#endif

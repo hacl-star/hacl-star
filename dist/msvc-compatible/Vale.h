@@ -21,6 +21,11 @@
  * SOFTWARE.
  */
 
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -31,10 +36,6 @@
 
 #ifndef __Vale_H
 #define __Vale_H
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 
 
@@ -208,9 +209,10 @@ gctr256_bytes(
   uint64_t x6
 );
 
+#define __Vale_H_DEFINED
+#endif
+
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Vale_H_DEFINED
-#endif

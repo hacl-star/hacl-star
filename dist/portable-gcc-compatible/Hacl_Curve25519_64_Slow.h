@@ -21,6 +21,11 @@
  * SOFTWARE.
  */
 
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -31,10 +36,6 @@
 
 #ifndef __Hacl_Curve25519_64_Slow_H
 #define __Hacl_Curve25519_64_Slow_H
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 #include "Hacl_Kremlib.h"
 
@@ -56,9 +57,10 @@ bool Hacl_Curve25519_64_Slow_ecdh(uint8_t *out, uint8_t *priv, uint8_t *pub);
 
 /* SNIPPET_END: Hacl_Curve25519_64_Slow_ecdh */
 
+#define __Hacl_Curve25519_64_Slow_H_DEFINED
+#endif
+
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_Curve25519_64_Slow_H_DEFINED
-#endif

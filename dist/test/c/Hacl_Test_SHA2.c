@@ -775,7 +775,7 @@ static void hash_512(uint8_t *input, uint32_t input_len, uint8_t *dst)
   finish_512(s, dst);
 }
 
-extern void C_String_print(C_String_t uu____71);
+extern void C_String_print(C_String_t uu___);
 
 extern void
 Lib_PrintBuffer_print_compare_display(uint32_t len, const uint8_t *buf0, const uint8_t *buf1);

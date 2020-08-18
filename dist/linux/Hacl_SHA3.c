@@ -98,9 +98,9 @@ void Hacl_Impl_SHA3_state_permute(u64 *s)
         for (i = (u32)0U; i < (u32)24U; i++)
         {
           u32 _Y = Hacl_Impl_SHA3_keccak_piln[i];
-          u32 r = Hacl_Impl_SHA3_keccak_rotc[i];
+          u32 r1 = Hacl_Impl_SHA3_keccak_rotc[i];
           u64 temp = s[_Y];
-          s[_Y] = Hacl_Impl_SHA3_rotl(b0, r);
+          s[_Y] = Hacl_Impl_SHA3_rotl(b0, r1);
           b0 = temp;
         }
       }

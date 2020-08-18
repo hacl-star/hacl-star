@@ -21,6 +21,11 @@
  * SOFTWARE.
  */
 
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -31,10 +36,6 @@
 
 #ifndef __Hacl_Blake2b_32_H
 #define __Hacl_Blake2b_32_H
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 #include "Hacl_Kremlib.h"
 #include "Lib_Memzero0.h"
@@ -65,9 +66,10 @@ Hacl_Blake2b_32_blake2b(
 
 /* SNIPPET_END: Hacl_Blake2b_32_blake2b */
 
+#define __Hacl_Blake2b_32_H_DEFINED
+#endif
+
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_Blake2b_32_H_DEFINED
-#endif

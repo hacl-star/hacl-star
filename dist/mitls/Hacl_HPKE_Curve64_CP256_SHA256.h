@@ -21,6 +21,11 @@
  * SOFTWARE.
  */
 
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -31,10 +36,6 @@
 
 #ifndef __Hacl_HPKE_Curve64_CP256_SHA256_H
 #define __Hacl_HPKE_Curve64_CP256_SHA256_H
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 #include "Hacl_Kremlib.h"
 #include "Hacl_Hash.h"
@@ -85,9 +86,10 @@ Hacl_HPKE_Curve64_CP256_SHA256_openBase(
   uint8_t *output
 );
 
+#define __Hacl_HPKE_Curve64_CP256_SHA256_H_DEFINED
+#endif
+
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_HPKE_Curve64_CP256_SHA256_H_DEFINED
-#endif

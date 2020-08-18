@@ -21,6 +21,11 @@
  * SOFTWARE.
  */
 
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "curve25519-inline.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
@@ -30,10 +35,6 @@
 
 #ifndef __Hacl_Curve25519_64_H
 #define __Hacl_Curve25519_64_H
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 #include "Hacl_Kremlib.h"
 #include "Vale.h"
@@ -45,9 +46,10 @@ void Hacl_Curve25519_64_secret_to_public(uint8_t *pub, uint8_t *priv);
 
 bool Hacl_Curve25519_64_ecdh(uint8_t *out, uint8_t *priv, uint8_t *pub);
 
+#define __Hacl_Curve25519_64_H_DEFINED
+#endif
+
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_Curve25519_64_H_DEFINED
-#endif

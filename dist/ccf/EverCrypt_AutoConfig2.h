@@ -21,6 +21,11 @@
  * SOFTWARE.
  */
 
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
@@ -30,10 +35,6 @@
 
 #ifndef __EverCrypt_AutoConfig2_H
 #define __EverCrypt_AutoConfig2_H
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 #include "Vale.h"
 
@@ -103,9 +104,10 @@ void EverCrypt_AutoConfig2_disable_openssl();
 
 void EverCrypt_AutoConfig2_disable_bcrypt();
 
+#define __EverCrypt_AutoConfig2_H_DEFINED
+#endif
+
 #if defined(__cplusplus)
 }
 #endif
 
-#define __EverCrypt_AutoConfig2_H_DEFINED
-#endif

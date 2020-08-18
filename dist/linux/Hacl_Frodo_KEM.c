@@ -322,13 +322,13 @@ static inline void frodo_key_encode(u32 b, u8 *a, u16 *res)
     u8 v8[8U] = { 0U };
     u8 *chunk = a + i0 * b;
     u64 u;
-    u64 x0;
+    u64 x1;
     u64 x;
     u32 i;
     memcpy(v8, chunk, b * sizeof (u8));
     u = load64_le(v8);
-    x0 = u;
-    x = x0;
+    x1 = u;
+    x = x1;
     for (i = (u32)0U; i < (u32)8U; i++)
     {
       u64 rk = x >> b * i & (((u64)1U << b) - (u64)1U);
@@ -342,7 +342,7 @@ static inline void frodo_key_decode(u32 b, u16 *a, u8 *res)
   u32 i;
   for (i = (u32)0U; i < (u32)8U; i++)
   {
-    u64 templong0 = (u64)0U;
+    u64 templong1 = (u64)0U;
     u64 templong;
     {
       u32 i0;
@@ -350,10 +350,10 @@ static inline void frodo_key_decode(u32 b, u16 *a, u8 *res)
       {
         u16 aik = a[i * (u32)8U + i0];
         u16 res1 = (aik + ((u16)1U << ((u32)15U - b - (u32)1U))) >> ((u32)15U - b);
-        templong0 = templong0 | (u64)(res1 & (((u16)1U << b) - (u16)1U)) << b * i0;
+        templong1 = templong1 | (u64)(res1 & (((u16)1U << b) - (u16)1U)) << b * i0;
       }
     }
-    templong = templong0;
+    templong = templong1;
     {
       u8 v8[8U] = { 0U };
       u8 *tmp;
@@ -539,7 +539,7 @@ u32 Hacl_Frodo_KEM_crypto_kem_dec(u8 *ss, u8 *ct, u8 *sk)
               u16 cp_matrix[64U] = { 0U };
               u8 *pk = sk + (u32)16U;
               u8 *seed_a = pk;
-              u8 *b0 = pk + (u32)16U;
+              u8 *b10 = pk + (u32)16U;
               u8 *seed_ep = g;
               u16 sp_matrix[512U] = { 0U };
               frodo_sample_matrix((u32)8U, (u32)64U, (u32)16U, seed_ep, (u16)4U, sp_matrix);
@@ -551,15 +551,15 @@ u32 Hacl_Frodo_KEM_crypto_kem_dec(u8 *ss, u8 *ct, u8 *sk)
                 matrix_mul((u32)8U, (u32)64U, (u32)64U, sp_matrix, a_matrix, bpp_matrix);
                 matrix_add((u32)8U, (u32)64U, bpp_matrix, ep_matrix);
                 Lib_Memzero_clear_words_u16((u32)512U, ep_matrix);
-                frodo_mul_add_sb_plus_e_plus_mu(b0, seed_ep, mu_decode1, sp_matrix, cp_matrix);
+                frodo_mul_add_sb_plus_e_plus_mu(b10, seed_ep, mu_decode1, sp_matrix, cp_matrix);
                 Lib_Memzero_clear_words_u16((u32)512U, sp_matrix);
                 {
                   u8 res = (u8)255U;
                   u8 z;
-                  bool b1;
+                  bool b11;
                   bool b2;
                   bool b3;
-                  bool b4;
+                  bool b1;
                   bool b;
                   u8 *kp;
                   u8 *s;
@@ -573,11 +573,11 @@ u32 Hacl_Frodo_KEM_crypto_kem_dec(u8 *ss, u8 *ct, u8 *sk)
                     }
                   }
                   z = res;
-                  b1 = z == (u8)255U;
+                  b11 = z == (u8)255U;
                   b2 = matrix_eq((u32)8U, (u32)64U, (u32)15U, bp_matrix, bpp_matrix);
                   b3 = matrix_eq((u32)8U, (u32)8U, (u32)15U, c_matrix, cp_matrix);
-                  b4 = b1 && b2 && b3;
-                  b = b4;
+                  b1 = b11 && b2 && b3;
+                  b = b1;
                   kp = g + (u32)16U;
                   s = sk;
                   if (b)

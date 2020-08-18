@@ -21,6 +21,11 @@
  * SOFTWARE.
  */
 
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -31,10 +36,6 @@
 
 #ifndef __Hacl_Salsa20_H
 #define __Hacl_Salsa20_H
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 #include "Hacl_Kremlib.h"
 
@@ -78,9 +79,10 @@ void Hacl_Salsa20_hsalsa20(uint8_t *out, uint8_t *key, uint8_t *n);
 
 /* SNIPPET_END: Hacl_Salsa20_hsalsa20 */
 
+#define __Hacl_Salsa20_H_DEFINED
+#endif
+
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_Salsa20_H_DEFINED
-#endif

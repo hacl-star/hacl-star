@@ -21,6 +21,11 @@
  * SOFTWARE.
  */
 
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -31,10 +36,6 @@
 
 #ifndef __EverCrypt_Hash_H
 #define __EverCrypt_Hash_H
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 #include "Hacl_Kremlib.h"
 #include "Vale.h"
@@ -50,7 +51,7 @@ typedef Spec_Hash_Definitions_hash_alg EverCrypt_Hash_alg;
 
 /* SNIPPET_START: EverCrypt_Hash_string_of_alg */
 
-C_String_t EverCrypt_Hash_string_of_alg(Spec_Hash_Definitions_hash_alg uu___0_5);
+C_String_t EverCrypt_Hash_string_of_alg(Spec_Hash_Definitions_hash_alg uu___);
 
 /* SNIPPET_END: EverCrypt_Hash_string_of_alg */
 
@@ -108,7 +109,7 @@ EverCrypt_Hash_state_s;
 
 bool
 EverCrypt_Hash_uu___is_MD5_s(
-  Spec_Hash_Definitions_hash_alg uu____105,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_Hash_state_s projectee
 );
 
@@ -118,7 +119,7 @@ EverCrypt_Hash_uu___is_MD5_s(
 
 uint32_t
 *EverCrypt_Hash___proj__MD5_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____130,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_Hash_state_s projectee
 );
 
@@ -128,7 +129,7 @@ uint32_t
 
 bool
 EverCrypt_Hash_uu___is_SHA1_s(
-  Spec_Hash_Definitions_hash_alg uu____151,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_Hash_state_s projectee
 );
 
@@ -138,7 +139,7 @@ EverCrypt_Hash_uu___is_SHA1_s(
 
 uint32_t
 *EverCrypt_Hash___proj__SHA1_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____176,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_Hash_state_s projectee
 );
 
@@ -148,7 +149,7 @@ uint32_t
 
 bool
 EverCrypt_Hash_uu___is_SHA2_224_s(
-  Spec_Hash_Definitions_hash_alg uu____197,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_Hash_state_s projectee
 );
 
@@ -158,7 +159,7 @@ EverCrypt_Hash_uu___is_SHA2_224_s(
 
 uint32_t
 *EverCrypt_Hash___proj__SHA2_224_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____222,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_Hash_state_s projectee
 );
 
@@ -168,7 +169,7 @@ uint32_t
 
 bool
 EverCrypt_Hash_uu___is_SHA2_256_s(
-  Spec_Hash_Definitions_hash_alg uu____243,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_Hash_state_s projectee
 );
 
@@ -178,7 +179,7 @@ EverCrypt_Hash_uu___is_SHA2_256_s(
 
 uint32_t
 *EverCrypt_Hash___proj__SHA2_256_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____268,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_Hash_state_s projectee
 );
 
@@ -188,7 +189,7 @@ uint32_t
 
 bool
 EverCrypt_Hash_uu___is_SHA2_384_s(
-  Spec_Hash_Definitions_hash_alg uu____289,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_Hash_state_s projectee
 );
 
@@ -198,7 +199,7 @@ EverCrypt_Hash_uu___is_SHA2_384_s(
 
 uint64_t
 *EverCrypt_Hash___proj__SHA2_384_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____314,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_Hash_state_s projectee
 );
 
@@ -208,7 +209,7 @@ uint64_t
 
 bool
 EverCrypt_Hash_uu___is_SHA2_512_s(
-  Spec_Hash_Definitions_hash_alg uu____335,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_Hash_state_s projectee
 );
 
@@ -218,7 +219,7 @@ EverCrypt_Hash_uu___is_SHA2_512_s(
 
 uint64_t
 *EverCrypt_Hash___proj__SHA2_512_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____360,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_Hash_state_s projectee
 );
 
@@ -444,9 +445,10 @@ EverCrypt_Hash_Incremental_free(Hacl_Streaming_Functor_state_s___EverCrypt_Hash_
 
 /* SNIPPET_END: EverCrypt_Hash_Incremental_free */
 
+#define __EverCrypt_Hash_H_DEFINED
+#endif
+
 #if defined(__cplusplus)
 }
 #endif
 
-#define __EverCrypt_Hash_H_DEFINED
-#endif

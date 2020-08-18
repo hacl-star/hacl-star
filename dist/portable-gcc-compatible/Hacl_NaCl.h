@@ -21,6 +21,11 @@
  * SOFTWARE.
  */
 
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -31,10 +36,6 @@
 
 #ifndef __Hacl_NaCl_H
 #define __Hacl_NaCl_H
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 #include "Hacl_Kremlib.h"
 #include "Hacl_Salsa20.h"
@@ -207,9 +208,10 @@ Hacl_NaCl_crypto_box_open_easy(
 
 /* SNIPPET_END: Hacl_NaCl_crypto_box_open_easy */
 
+#define __Hacl_NaCl_H_DEFINED
+#endif
+
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_NaCl_H_DEFINED
-#endif

@@ -21,6 +21,11 @@
  * SOFTWARE.
  */
 
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
@@ -31,39 +36,35 @@
 #ifndef __TestLib_H
 #define __TestLib_H
 
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 
+extern void TestLib_touch(s32 uu___);
 
-extern void TestLib_touch(s32 uu____7);
+extern void TestLib_check(bool uu___);
 
-extern void TestLib_check(bool uu____15);
+extern void TestLib_check8(s8 uu___, s8 uu___1);
 
-extern void TestLib_check8(s8 uu____30, s8 uu____31);
+extern void TestLib_check16(s16 uu___, s16 uu___1);
 
-extern void TestLib_check16(s16 uu____46, s16 uu____47);
+extern void TestLib_check32(s32 uu___, s32 uu___1);
 
-extern void TestLib_check32(s32 uu____62, s32 uu____63);
+extern void TestLib_check64(s64 uu___, s64 uu___1);
 
-extern void TestLib_check64(s64 uu____78, s64 uu____79);
+extern void TestLib_checku8(u8 uu___, u8 uu___1);
 
-extern void TestLib_checku8(u8 uu____94, u8 uu____95);
+extern void TestLib_checku16(u16 uu___, u16 uu___1);
 
-extern void TestLib_checku16(u16 uu____110, u16 uu____111);
+extern void TestLib_checku32(u32 uu___, u32 uu___1);
 
-extern void TestLib_checku32(u32 uu____126, u32 uu____127);
+extern void TestLib_checku64(u64 uu___, u64 uu___1);
 
-extern void TestLib_checku64(u64 uu____142, u64 uu____143);
-
-extern void TestLib_compare_and_print(C_String_t uu____176, u8 *b1, u8 *b2, u32 l);
+extern void TestLib_compare_and_print(C_String_t uu___, u8 *b1, u8 *b2, u32 l);
 
 extern u8 *TestLib_unsafe_malloc(u32 l);
 
-extern void TestLib_perr(u32 uu____203);
+extern void TestLib_perr(u32 uu___);
 
-extern void TestLib_print_clock_diff(clock_t uu____218, clock_t uu____219);
+extern void TestLib_print_clock_diff(clock_t uu___, clock_t uu___1);
 
 KRML_DEPRECATED("p_null from TestLib; use LowStar.Buffer.null instead")
 
@@ -80,15 +81,12 @@ extern u64 *TestLib_uint64_p_null;
 extern TestLib_cycles TestLib_cpucycles();
 
 extern void
-TestLib_print_cycles_per_round(
-  TestLib_cycles uu____276,
-  TestLib_cycles uu____277,
-  u32 uu____278
-);
+TestLib_print_cycles_per_round(TestLib_cycles uu___, TestLib_cycles uu___1, u32 uu___2);
+
+#define __TestLib_H_DEFINED
+#endif
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __TestLib_H_DEFINED
-#endif

@@ -21,6 +21,11 @@
  * SOFTWARE.
  */
 
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
@@ -29,10 +34,6 @@
 
 #ifndef __Hacl_Chacha20Poly1305_32_H
 #define __Hacl_Chacha20Poly1305_32_H
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 #include "Hacl_Chacha20.h"
 #include "Hacl_Kremlib.h"
@@ -62,9 +63,10 @@ Hacl_Chacha20Poly1305_32_aead_decrypt(
   uint8_t *mac
 );
 
+#define __Hacl_Chacha20Poly1305_32_H_DEFINED
+#endif
+
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_Chacha20Poly1305_32_H_DEFINED
-#endif

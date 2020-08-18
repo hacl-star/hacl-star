@@ -21,6 +21,11 @@
  * SOFTWARE.
  */
 
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -31,10 +36,6 @@
 
 #ifndef __EverCrypt_Error_H
 #define __EverCrypt_Error_H
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 
 
@@ -87,9 +88,10 @@ bool EverCrypt_Error_uu___is_DecodeError(EverCrypt_Error_error_code projectee);
 
 /* SNIPPET_END: EverCrypt_Error_uu___is_DecodeError */
 
+#define __EverCrypt_Error_H_DEFINED
+#endif
+
 #if defined(__cplusplus)
 }
 #endif
 
-#define __EverCrypt_Error_H_DEFINED
-#endif

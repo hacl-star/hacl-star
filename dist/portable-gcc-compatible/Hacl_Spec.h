@@ -21,6 +21,11 @@
  * SOFTWARE.
  */
 
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -31,10 +36,6 @@
 
 #ifndef __Hacl_Spec_H
 #define __Hacl_Spec_H
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 
 
@@ -112,9 +113,10 @@ Spec_Cipher_Expansion_cipher_alg_of_impl(Spec_Cipher_Expansion_impl i);
 
 typedef uint8_t Spec_Agile_AEAD_alg;
 
+#define __Hacl_Spec_H_DEFINED
+#endif
+
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_Spec_H_DEFINED
-#endif

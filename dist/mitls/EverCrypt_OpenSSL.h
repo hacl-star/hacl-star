@@ -21,6 +21,11 @@
  * SOFTWARE.
  */
 
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -31,10 +36,6 @@
 
 #ifndef __EverCrypt_OpenSSL_H
 #define __EverCrypt_OpenSSL_H
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 
 
@@ -163,9 +164,10 @@ extern void EverCrypt_OpenSSL_ecdh_keygen(FStar_Dyn_dyn st, uint8_t *outx, uint8
 extern uint32_t
 EverCrypt_OpenSSL_ecdh_compute(FStar_Dyn_dyn st, uint8_t *inx, uint8_t *iny, uint8_t *out);
 
+#define __EverCrypt_OpenSSL_H_DEFINED
+#endif
+
 #if defined(__cplusplus)
 }
 #endif
 
-#define __EverCrypt_OpenSSL_H_DEFINED
-#endif

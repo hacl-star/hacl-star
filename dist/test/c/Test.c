@@ -33,13 +33,13 @@
 
 typedef uint8_t hash_alg;
 
-extern void portable_exit(int32_t uu____31);
+extern void portable_exit(int32_t uu___);
 
-extern void C_String_print(C_String_t uu____71);
+extern void C_String_print(C_String_t uu___);
 
-extern uint32_t C_String_strlen(C_String_t uu____77);
+extern uint32_t C_String_strlen(C_String_t uu___);
 
-extern void C_String_memcpy(uint8_t *uu____95, C_String_t uu____96, uint32_t uu____97);
+extern void C_String_memcpy(uint8_t *uu___, C_String_t uu___1, uint32_t uu___2);
 
 static bool whatever()
 {
@@ -80,7 +80,7 @@ extern void EverCrypt_AutoConfig2_disable_openssl();
 
 extern void EverCrypt_AutoConfig2_disable_bcrypt();
 
-extern C_String_t EverCrypt_Hash_string_of_alg(hash_alg uu___0_5);
+extern C_String_t EverCrypt_Hash_string_of_alg(hash_alg uu___);
 
 #define MD5_s 0
 #define SHA1_s 1
@@ -112,9 +112,9 @@ extern void EverCrypt_Hash_init(state_s *a);
 
 extern void EverCrypt_Hash_hash(hash_alg a, uint8_t *dst, uint8_t *input, uint32_t len);
 
-static bool is_supported_alg(hash_alg uu___0_6)
+static bool is_supported_alg(hash_alg uu___)
 {
-  switch (uu___0_6)
+  switch (uu___)
   {
     case SHA1:
       {
@@ -341,8 +341,7 @@ EverCrypt_AEAD_decrypt(
   uint8_t *tag
 );
 
-extern void
-TestLib_compare_and_print(C_String_t uu____176, uint8_t *b1, uint8_t *b2, uint32_t l);
+extern void TestLib_compare_and_print(C_String_t uu___, uint8_t *b1, uint8_t *b2, uint32_t l);
 
 static uint8_t
 key0[32U] =
@@ -10555,7 +10554,7 @@ static void test_one_hmac_drbg(hmac_drbg_vector vec)
     uint8_t buf29[48U];
     uint8_t buf30[32U];
     uint8_t buf[20U];
-    state_s0 st;
+    state_s0 st1;
     switch (a)
     {
       case SHA1:
@@ -10659,7 +10658,7 @@ static void test_one_hmac_drbg(hmac_drbg_vector vec)
               }
           }
           ctr0 = (uint32_t)1U;
-          st =
+          st1 =
             (
               (state_s0){
                 .tag = SHA1_s0,
@@ -10769,7 +10768,7 @@ static void test_one_hmac_drbg(hmac_drbg_vector vec)
               }
           }
           ctr1 = (uint32_t)1U;
-          st =
+          st1 =
             (
               (state_s0){
                 .tag = SHA2_256_s0,
@@ -10879,7 +10878,7 @@ static void test_one_hmac_drbg(hmac_drbg_vector vec)
               }
           }
           ctr2 = (uint32_t)1U;
-          st =
+          st1 =
             (
               (state_s0){
                 .tag = SHA2_384_s0,
@@ -10989,7 +10988,7 @@ static void test_one_hmac_drbg(hmac_drbg_vector vec)
               }
           }
           ctr = (uint32_t)1U;
-          st =
+          st1 =
             (
               (state_s0){
                 .tag = SHA2_512_s0,
@@ -11004,17 +11003,17 @@ static void test_one_hmac_drbg(hmac_drbg_vector vec)
           KRML_HOST_EXIT(253U);
         }
     }
-    state_s0 st0 = st;
-    bool ok = EverCrypt_DRBG_instantiate(&st0, personalization_string, personalization_string_len);
+    state_s0 st = st1;
+    bool ok = EverCrypt_DRBG_instantiate(&st, personalization_string, personalization_string_len);
     if (ok)
     {
-      bool ok1 = EverCrypt_DRBG_reseed(&st0, additional_input_reseed, additional_input_reseed_len);
+      bool ok1 = EverCrypt_DRBG_reseed(&st, additional_input_reseed, additional_input_reseed_len);
       if (ok1)
       {
         bool
         ok2 =
           EverCrypt_DRBG_generate(output,
-            &st0,
+            &st,
             returned_bits_len,
             additional_input_1,
             additional_input_1_len);
@@ -11023,7 +11022,7 @@ static void test_one_hmac_drbg(hmac_drbg_vector vec)
           bool
           ok3 =
             EverCrypt_DRBG_generate(output,
-              &st0,
+              &st,
               returned_bits_len,
               additional_input_2,
               additional_input_2_len);
@@ -12270,9 +12269,9 @@ test_aead_st(
   }
 }
 
-static alg alg_of_alg(cipher uu___0_867)
+static alg alg_of_alg(cipher uu___)
 {
-  switch (uu___0_867)
+  switch (uu___)
   {
     case CHACHA20_POLY13050:
       {
@@ -12350,10 +12349,10 @@ static bool __eq__Test_Vectors_cipher(cipher y, cipher x)
   }
 }
 
-static void test_aead_loop(cipher alg0, lbuffer__Test_aead_vector uu____905)
+static void test_aead_loop(cipher alg0, lbuffer__Test_aead_vector uu___)
 {
-  uint32_t len = uu____905.len;
-  aead_vector *vs = uu____905.b;
+  uint32_t len = uu___.len;
+  aead_vector *vs = uu___.b;
   if (!(len == (uint32_t)0U))
   {
     aead_vector v = vs[0U];

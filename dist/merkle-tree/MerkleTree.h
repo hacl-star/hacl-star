@@ -21,6 +21,11 @@
  * SOFTWARE.
  */
 
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
@@ -29,10 +34,6 @@
 
 #ifndef __MerkleTree_H
 #define __MerkleTree_H
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 
 
@@ -549,9 +550,10 @@ uint8_t *MerkleTree_Low_Hashfunctions_init_hash(uint32_t hsz);
 
 void MerkleTree_Low_Hashfunctions_free_hash(uint8_t *h);
 
+#define __MerkleTree_H_DEFINED
+#endif
+
 #if defined(__cplusplus)
 }
 #endif
 
-#define __MerkleTree_H_DEFINED
-#endif

@@ -21,6 +21,11 @@
  * SOFTWARE.
  */
 
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -31,10 +36,6 @@
 
 #ifndef __EverCrypt_Helpers_H
 #define __EverCrypt_Helpers_H
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 
 
@@ -86,9 +87,10 @@ typedef uint64_t *EverCrypt_Helpers_uint64_p;
 
 /* SNIPPET_END: EverCrypt_Helpers_uint64_p */
 
+#define __EverCrypt_Helpers_H_DEFINED
+#endif
+
 #if defined(__cplusplus)
 }
 #endif
 
-#define __EverCrypt_Helpers_H_DEFINED
-#endif

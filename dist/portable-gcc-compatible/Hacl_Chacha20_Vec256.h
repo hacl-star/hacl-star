@@ -21,6 +21,11 @@
  * SOFTWARE.
  */
 
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -31,10 +36,6 @@
 
 #ifndef __Hacl_Chacha20_Vec256_H
 #define __Hacl_Chacha20_Vec256_H
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 #include "Hacl_Chacha20.h"
 #include "Hacl_Kremlib.h"
@@ -67,9 +68,10 @@ Hacl_Chacha20_Vec256_chacha20_decrypt_256(
 
 /* SNIPPET_END: Hacl_Chacha20_Vec256_chacha20_decrypt_256 */
 
+#define __Hacl_Chacha20_Vec256_H_DEFINED
+#endif
+
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_Chacha20_Vec256_H_DEFINED
-#endif

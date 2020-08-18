@@ -21,6 +21,11 @@
  * SOFTWARE.
  */
 
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
@@ -31,10 +36,6 @@
 #ifndef __Hacl_Chacha20_H
 #define __Hacl_Chacha20_H
 
-#if defined(__cplusplus)
-extern "C" {
-#endif
-
 #include "Hacl_Kremlib.h"
 
 extern const u32 Hacl_Impl_Chacha20_Vec_chacha20_constants[4U];
@@ -43,9 +44,10 @@ void Hacl_Chacha20_chacha20_encrypt(u32 len, u8 *out, u8 *text, u8 *key, u8 *n, 
 
 void Hacl_Chacha20_chacha20_decrypt(u32 len, u8 *out, u8 *cipher, u8 *key, u8 *n, u32 ctr);
 
+#define __Hacl_Chacha20_H_DEFINED
+#endif
+
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_Chacha20_H_DEFINED
-#endif

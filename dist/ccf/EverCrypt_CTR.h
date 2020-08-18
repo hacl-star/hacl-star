@@ -21,6 +21,11 @@
  * SOFTWARE.
  */
 
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
@@ -30,10 +35,6 @@
 
 #ifndef __EverCrypt_CTR_H
 #define __EverCrypt_CTR_H
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 #include "Hacl_Chacha20.h"
 #include "Hacl_Kremlib.h"
@@ -108,9 +109,10 @@ void EverCrypt_CTR_update_block(EverCrypt_CTR_state_s *p, uint8_t *dst, uint8_t 
 
 void EverCrypt_CTR_free(EverCrypt_CTR_state_s *p);
 
+#define __EverCrypt_CTR_H_DEFINED
+#endif
+
 #if defined(__cplusplus)
 }
 #endif
 
-#define __EverCrypt_CTR_H_DEFINED
-#endif

@@ -21,6 +21,11 @@
  * SOFTWARE.
  */
 
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
@@ -30,10 +35,6 @@
 
 #ifndef __Hacl_Spec_H
 #define __Hacl_Spec_H
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 
 
@@ -58,9 +59,10 @@ typedef struct Spec_ECDSA_hash_alg_ecdsa_s
 }
 Spec_ECDSA_hash_alg_ecdsa;
 
+#define __Hacl_Spec_H_DEFINED
+#endif
+
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_Spec_H_DEFINED
-#endif

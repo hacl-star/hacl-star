@@ -21,6 +21,11 @@
  * SOFTWARE.
  */
 
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
@@ -30,10 +35,6 @@
 
 #ifndef __Hacl_Poly1305_32_H
 #define __Hacl_Poly1305_32_H
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 #include "Hacl_Kremlib.h"
 
@@ -51,9 +52,10 @@ void Hacl_Poly1305_32_poly1305_finish(u8 *tag, u8 *key, u64 *ctx);
 
 void Hacl_Poly1305_32_poly1305_mac(u8 *tag, u32 len, u8 *text, u8 *key);
 
+#define __Hacl_Poly1305_32_H_DEFINED
+#endif
+
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_Poly1305_32_H_DEFINED
-#endif

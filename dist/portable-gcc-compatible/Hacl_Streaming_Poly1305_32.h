@@ -21,6 +21,11 @@
  * SOFTWARE.
  */
 
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -31,10 +36,6 @@
 
 #ifndef __Hacl_Streaming_Poly1305_32_H
 #define __Hacl_Streaming_Poly1305_32_H
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 #include "Hacl_Poly1305_32.h"
 
@@ -89,9 +90,10 @@ void Hacl_Streaming_Poly1305_32_free(Hacl_Streaming_Functor_state_s___uint64_t__
 
 /* SNIPPET_END: Hacl_Streaming_Poly1305_32_free */
 
+#define __Hacl_Streaming_Poly1305_32_H_DEFINED
+#endif
+
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_Streaming_Poly1305_32_H_DEFINED
-#endif

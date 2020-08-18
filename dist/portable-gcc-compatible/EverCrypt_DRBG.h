@@ -21,6 +21,11 @@
  * SOFTWARE.
  */
 
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -31,10 +36,6 @@
 
 #ifndef __EverCrypt_DRBG_H
 #define __EverCrypt_DRBG_H
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 #include "EverCrypt_HMAC.h"
 #include "Lib_RandomBuffer_System.h"
@@ -105,7 +106,7 @@ typedef struct EverCrypt_DRBG_state_s_s EverCrypt_DRBG_state_s;
 
 bool
 EverCrypt_DRBG_uu___is_SHA1_s(
-  Spec_Hash_Definitions_hash_alg uu____121,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_DRBG_state_s projectee
 );
 
@@ -115,7 +116,7 @@ EverCrypt_DRBG_uu___is_SHA1_s(
 
 Hacl_HMAC_DRBG_state
 EverCrypt_DRBG___proj__SHA1_s__item___0(
-  Spec_Hash_Definitions_hash_alg uu____146,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_DRBG_state_s projectee
 );
 
@@ -125,7 +126,7 @@ EverCrypt_DRBG___proj__SHA1_s__item___0(
 
 bool
 EverCrypt_DRBG_uu___is_SHA2_256_s(
-  Spec_Hash_Definitions_hash_alg uu____167,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_DRBG_state_s projectee
 );
 
@@ -135,7 +136,7 @@ EverCrypt_DRBG_uu___is_SHA2_256_s(
 
 Hacl_HMAC_DRBG_state
 EverCrypt_DRBG___proj__SHA2_256_s__item___0(
-  Spec_Hash_Definitions_hash_alg uu____192,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_DRBG_state_s projectee
 );
 
@@ -145,7 +146,7 @@ EverCrypt_DRBG___proj__SHA2_256_s__item___0(
 
 bool
 EverCrypt_DRBG_uu___is_SHA2_384_s(
-  Spec_Hash_Definitions_hash_alg uu____213,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_DRBG_state_s projectee
 );
 
@@ -155,7 +156,7 @@ EverCrypt_DRBG_uu___is_SHA2_384_s(
 
 Hacl_HMAC_DRBG_state
 EverCrypt_DRBG___proj__SHA2_384_s__item___0(
-  Spec_Hash_Definitions_hash_alg uu____238,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_DRBG_state_s projectee
 );
 
@@ -165,7 +166,7 @@ EverCrypt_DRBG___proj__SHA2_384_s__item___0(
 
 bool
 EverCrypt_DRBG_uu___is_SHA2_512_s(
-  Spec_Hash_Definitions_hash_alg uu____259,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_DRBG_state_s projectee
 );
 
@@ -175,7 +176,7 @@ EverCrypt_DRBG_uu___is_SHA2_512_s(
 
 Hacl_HMAC_DRBG_state
 EverCrypt_DRBG___proj__SHA2_512_s__item___0(
-  Spec_Hash_Definitions_hash_alg uu____284,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_DRBG_state_s projectee
 );
 
@@ -392,9 +393,10 @@ void EverCrypt_DRBG_uninstantiate(EverCrypt_DRBG_state_s *st);
 
 /* SNIPPET_END: EverCrypt_DRBG_uninstantiate */
 
+#define __EverCrypt_DRBG_H_DEFINED
+#endif
+
 #if defined(__cplusplus)
 }
 #endif
 
-#define __EverCrypt_DRBG_H_DEFINED
-#endif
