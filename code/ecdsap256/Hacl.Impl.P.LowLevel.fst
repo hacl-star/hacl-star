@@ -306,6 +306,7 @@ let reduction_prime_2prime_with_carry #c x result =
     admit();
  pop_frame()
 
+
 val lemma_reduction1: #c: curve -> a: nat {a < getPower2 c}
   -> r: nat{if a >= getPrime c then r = a - getPrime c else r = a} ->
   Lemma (r = a % getPrime c)
@@ -330,7 +331,6 @@ let reduction_prime_2prime #c x result =
   let r = sub_bn_gl x (prime_buffer #c) tempBuffer in
   cmovznz4 r tempBuffer x result;
     let h1 = ST.get() in
-  admit();
     lemma_reduction1 #c (as_nat c h0 x) (as_nat c h1 result);
   pop_frame()
 
@@ -636,3 +636,25 @@ let mod64 #c a =
   wide_as_nat c h1 a % pow2 64 == v s0); *)
   r
    |P384 -> index a (size 0)
+
+
+let shift1 #c t out = 
+  match c with 
+  |P384 -> ()
+  |P256 -> 
+    let t1 = index t (size 1) in 
+    let t2 = index t (size 2) in 
+    let t3 = index t (size 3) in 
+    let t4 = index t (size 4) in 
+    let t5 = index t (size 5) in 
+    let t6 = index t (size 6) in 
+    let t7 = index t (size 7) in 
+
+    upd out (size 0) t1;
+    upd out (size 1) t2;
+    upd out (size 2) t3;
+    upd out (size 3) t4;
+    upd out (size 4) t5;
+    upd out (size 5) t6;
+    upd out (size 6) t7;
+    upd out (size 7) (u64 0)

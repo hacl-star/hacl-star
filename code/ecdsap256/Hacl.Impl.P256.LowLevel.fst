@@ -1366,31 +1366,6 @@ let shortened_mul_p256 a b result =
     assert_norm( pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256)
    
 
-val shift8: #c: curve -> t: widefelem c -> t1: widefelem c -> Stack unit 
-  (requires fun h -> live h t /\ live h t1 /\ eq_or_disjoint t t1)
-  (ensures fun h0 _ h1 -> modifies (loc t1) h0 h1 /\ 
-    wide_as_nat c h0 t / pow2 64 = wide_as_nat c h1 t1)
-
-let shift8 #c t out = 
-  match c with 
-  |P384 -> ()
-  |P256 -> 
-    let t1 = index t (size 1) in 
-    let t2 = index t (size 2) in 
-    let t3 = index t (size 3) in 
-    let t4 = index t (size 4) in 
-    let t5 = index t (size 5) in 
-    let t6 = index t (size 6) in 
-    let t7 = index t (size 7) in 
-
-    upd out (size 0) t1;
-    upd out (size 1) t2;
-    upd out (size 2) t3;
-    upd out (size 3) t4;
-    upd out (size 4) t5;
-    upd out (size 5) t6;
-    upd out (size 6) t7;
-    upd out (size 7) (u64 0)
 
 
 (* this piece of code is taken from Hacl.Curve25519 *)

@@ -56,10 +56,12 @@ let montgomery_multiplication_round t round =
     let t2 = create (size 8) (u64 0) in 
     let t3 = create (size 8) (u64 0) in 
     let t1 = mod64 t in 
+
       recall_contents prime256_buffer (Lib.Sequence.of_list p256_prime_list); 
-    short_mul_bn prime256_buffer t1 t2;
+    short_mul_bn prime256_buffer t1 t2; 
     add_long_without_carry t t2 t3;
-    shiftLeftWord t3 round;
+    shift1 t3 round; admit();
+    admit();
   pop_frame()  
 
 

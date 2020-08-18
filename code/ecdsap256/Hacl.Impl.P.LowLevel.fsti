@@ -264,3 +264,10 @@ inline_for_extraction noextract
 val mod64: #c: curve -> a: widefelem c -> Stack uint64 
   (requires fun h -> live h a) 
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\ wide_as_nat c h1 a % pow2 64 = uint_v r)
+
+
+
+val shift1: #c: curve -> t: widefelem c -> t1: widefelem c -> Stack unit 
+  (requires fun h -> live h t /\ live h t1 /\ eq_or_disjoint t t1)
+  (ensures fun h0 _ h1 -> modifies (loc t1) h0 h1 /\ 
+    wide_as_nat c h0 t / pow2 64 = wide_as_nat c h1 t1)
