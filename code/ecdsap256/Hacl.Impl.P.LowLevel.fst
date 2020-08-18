@@ -26,23 +26,15 @@ open Lib.IntTypes.Intrinsics
 open Hacl.Impl.P256.LowLevel
 open Hacl.Impl.P384.LowLevel
 
+open Lib.Loops
+
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
 
 let uploadZeroImpl #c f =
-  match c with
-  |P384 ->
-    upd f (size 0) (u64 0);
-    upd f (size 1) (u64 0);
-    upd f (size 2) (u64 0);
-    upd f (size 3) (u64 0);
-    upd f (size 4) (u64 0);
-    upd f (size 5) (u64 0)
-  |P256 ->
-    upd f (size 0) (u64 0);
-    upd f (size 1) (u64 0);
-    upd f (size 2) (u64 0);
-    upd f (size 3) (u64 0)
+  let len = getCoordinateLenU64 c in 
+  let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = True in 
+  for 0ul len inv (fun i -> upd f i (u64 0))
 
 
 let uploadZeroPoint #c p =
@@ -58,56 +50,16 @@ let uploadZeroPoint #c p =
 
 
 let cmovznz4 #c  cin x y r =
-  match c with
-  |P256 ->
-    let h0 = ST.get() in
+  let h0 = ST.get() in
+  let mask = neq_mask cin (u64 0) in
 
-    let mask = neq_mask cin (u64 0) in
-    let r0 = logor (logand y.(size 0) mask) (logand x.(size 0) (lognot mask)) in
-    let r1 = logor (logand y.(size 1) mask) (logand x.(size 1) (lognot mask)) in
-    let r2 = logor (logand y.(size 2) mask) (logand x.(size 2) (lognot mask)) in
-    let r3 = logor (logand y.(size 3) mask) (logand x.(size 3) (lognot mask)) in
-
-    upd r (size 0) r0;
-    upd r (size 1) r1;
-    upd r (size 2) r2;
-    upd r (size 3) r3;
-
-    let x = as_seq h0 x in
-    let y = as_seq h0 y in
-
-    cmovznz4_lemma cin (Seq.index x 0) (Seq.index y 0);
-    cmovznz4_lemma cin (Seq.index x 1) (Seq.index y 1);
-    cmovznz4_lemma cin (Seq.index x 2) (Seq.index y 2);
-    cmovznz4_lemma cin (Seq.index x 3) (Seq.index y 3)
-  |P384 ->
-      let h0 = ST.get() in
-
-      let mask = neq_mask cin (u64 0) in
-      let r0 = logor (logand y.(size 0) mask) (logand x.(size 0) (lognot mask)) in
-      let r1 = logor (logand y.(size 1) mask) (logand x.(size 1) (lognot mask)) in
-      let r2 = logor (logand y.(size 2) mask) (logand x.(size 2) (lognot mask)) in
-      let r3 = logor (logand y.(size 3) mask) (logand x.(size 3) (lognot mask)) in
-      let r4 = logor (logand y.(size 4) mask) (logand x.(size 4) (lognot mask)) in
-      let r5 = logor (logand y.(size 5) mask) (logand x.(size 5) (lognot mask)) in
-
-      upd r (size 0) r0;
-      upd r (size 1) r1;
-      upd r (size 2) r2;
-      upd r (size 3) r3;
-      upd r (size 4) r4;
-      upd r (size 5) r5;
-
-      let x = as_seq h0 x in
-      let y = as_seq h0 y in
-
-      cmovznz4_lemma cin (Seq.index x 0) (Seq.index y 0);
-      cmovznz4_lemma cin (Seq.index x 1) (Seq.index y 1);
-      cmovznz4_lemma cin (Seq.index x 2) (Seq.index y 2);
-      cmovznz4_lemma cin (Seq.index x 3) (Seq.index y 3);
-      cmovznz4_lemma cin (Seq.index x 4) (Seq.index y 4);
-      cmovznz4_lemma cin (Seq.index x 5) (Seq.index y 5)
-
+  let len = getCoordinateLenU64 c in 
+  let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = True in 
+  for 0ul len inv (fun i -> 
+    let r_i = logor (logand y.(i) mask) (logand x.(i) (lognot mask)) in 
+    upd r i r_i;
+    cmovznz4_lemma cin (Seq.index (as_seq h0 x) i) (Seq.index (as_seq h0 y) i))
+    
 
 let add_bn #c x y result =
   match c with
@@ -640,7 +592,33 @@ let mod64 #c a =
 
 let shift1 #c t out = 
   match c with 
-  |P384 -> ()
+  |P384 ->     
+
+    let t1 = index t (size 1) in 
+    let t2 = index t (size 2) in 
+    let t3 = index t (size 3) in 
+    let t4 = index t (size 4) in 
+    let t5 = index t (size 5) in 
+    let t6 = index t (size 6) in 
+    let t7 = index t (size 7) in 
+    let t8 = index t (size 8) in 
+    let t9 = index t (size 9) in 
+    let t10 = index t (size 10) in 
+    let t11 = index t (size 11) in 
+
+    upd out (size 0) t1;
+    upd out (size 1) t2;
+    upd out (size 2) t3;
+    upd out (size 3) t4;
+    upd out (size 4) t5;
+    upd out (size 5) t6;
+    upd out (size 6) t7;
+    upd out (size 7) t8;
+    upd out (size 8) t9;
+    upd out (size 9) t10;
+    upd out (size 10) t11;
+    upd out (size 11) (u64 0)
+
   |P256 -> 
     let t1 = index t (size 1) in 
     let t2 = index t (size 2) in 
