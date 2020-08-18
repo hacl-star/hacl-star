@@ -93,6 +93,11 @@ uint32_t
 Hacl_Impl_Blake2_Constants_rTable_S[4U] =
   { (uint32_t)16U, (uint32_t)12U, (uint32_t)8U, (uint32_t)7U };
 
+#define Hacl_Impl_Blake2_Constants_rTable_S_0 16
+#define Hacl_Impl_Blake2_Constants_rTable_S_1 12
+#define Hacl_Impl_Blake2_Constants_rTable_S_2 8
+#define Hacl_Impl_Blake2_Constants_rTable_S_3 7
+
 static const
 uint32_t
 Hacl_Impl_Blake2_Constants_rTable_B[4U] =
