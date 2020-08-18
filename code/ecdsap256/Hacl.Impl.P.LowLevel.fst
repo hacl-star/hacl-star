@@ -98,19 +98,10 @@ let square_bn #c x result =
 
 
 let uploadOneImpl #c f =
-  match c with
-  |P384 ->
-    upd f (size 0) (u64 1);
-    upd f (size 1) (u64 0);
-    upd f (size 2) (u64 0);
-    upd f (size 3) (u64 0);
-    upd f (size 4) (u64 0);
-    upd f (size 5) (u64 0)
-  |P256 ->
-    upd f (size 0) (u64 1);
-    upd f (size 1) (u64 0);
-    upd f (size 2) (u64 0);
-    upd f (size 3) (u64 0)
+  upd f (size 0) (u64 1);
+  let len = getCoordinateLenU64 c in 
+  let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = True in 
+  for 1ul len inv (fun i -> upd f i (u64 0))
 
 
 let toUint8 #c i o =
@@ -121,35 +112,23 @@ let toUint8 #c i o =
 
 open Lib.ByteBuffer
 
+(* The laziest to prove *)
+let changeEndian #c b =
+  push_frame();
+    let len = getCoordinateLenU64 c in 
+    let tempBuffer = create len (u64 0) in 
+    
+  let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = True in 
+  for 0ul len inv (fun i -> 
+    let indexToRequest = len -! i -! 1 in 
+    let element = index b indexToRequest in 
+    let elemUpdated = logxor element (index b i) in 
+    upd tempBuffer i  element); 
 
-let changeEndian #c i =
-  match c with
-  |P256 ->
-    assert_norm (pow2 64 * pow2 64 = pow2 (2 * 64));
-    assert_norm (pow2 (2 * 64) * pow2 64 = pow2 (3 * 64));
-    assert_norm (pow2 (3 * 64) * pow2 64 = pow2 (4 * 64));
-    let zero =  index i (size 0) in
-    let one =   index i (size 1) in
-    let two =   index i (size 2) in
-    let three = index i (size 3) in
-    upd i (size 0) three;
-    upd i (size 1) two;
-    upd i (size 2) one;
-    upd i (size 3) zero
-  |P384 ->
-    let zero =  index i (size 0) in
-    let one =   index i (size 1) in
-    let two =   index i (size 2) in
-    let three = index i (size 3) in
-    let four =  index i (size 4) in
-    let five =  index i (size 5) in
+  for 0ul len inv (fun i ->
+    upd b i tempBuffer.(i));
 
-    upd i (size 0) five;
-    upd i (size 1) four;
-    upd i (size 2) three;
-    upd i (size 3) two;
-    upd i (size 4) one;
-    upd i (size 5) zero
+  pop_frame()
 
 
 let toUint64ChangeEndian #c i o =
@@ -398,7 +377,18 @@ let isZero_uint64_CT #c f =
 
 
 let compare_felem #c a b =
-  match c with
+  let len = getCoordinateLenU64 c in 
+  let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = True in
+  push_frame();
+    let tmp = create (size 1) (u64 0) in 
+    upd tmp (size 1) (u64 18446744073709551615);
+    
+  for 0ul len inv (fun i -> 
+    let a_i = index a i in 
+    let b_i = index b i in 
+    let r_i = eq_mask a_i b_i in 
+    upd tmp (size 0) (logand r_i (index tmp (size 0))))
+(*
   |P256 ->
     let a_0 = index a (size 0) in
     let a_1 = index a (size 1) in
@@ -457,9 +447,17 @@ let compare_felem #c a b =
       let r = logand(logand r01 r23) r45 in
       lemma_equality (a_0, a_1, a_2, a_3, a_4, a_5) (b_0, b_1, b_2, b_3, b_4, b_5);
       r
-
+*)
 
 let copy_conditional #c out x mask =
+  let len = getCoordinateLenU64 c in 
+  let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = True in 
+  for 0ul len inv (fun i -> 
+    let out_i = index out i in 
+    let x_i = index x i in 
+    let r_i = logxor out_i (logand mask (logxor out_i x_i)) in 
+    upd out i r_i)
+  (*
   match c with
   |P256 ->
     let h0 = ST.get() in
@@ -521,7 +519,7 @@ let copy_conditional #c out x mask =
     lemma_xor_copy_cond out_3 x_3 mask;
     lemma_xor_copy_cond out_4 x_4 mask;
     lemma_xor_copy_cond out_5 x_5 mask;
-
+ 
     upd out (size 0) r_0;
     upd out (size 1) r_1;
     upd out (size 2) r_2;
@@ -531,7 +529,7 @@ let copy_conditional #c out x mask =
       let h1 = ST.get() in
 
     lemma_eq_funct_ (as_seq h1 out) (as_seq h0 out);
-    lemma_eq_funct_ (as_seq h1 out) (as_seq h0 x)
+    lemma_eq_funct_ (as_seq h1 out) (as_seq h0 x) *)
 
 
 let shiftLeftWord #c i o =
