@@ -533,6 +533,15 @@ let copy_conditional #c out x mask =
 
 
 let shiftLeftWord #c i o =
+  let len = getCoordinateLenU64 c in 
+  let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = True in 
+  for 0ul len inv (fun j -> upd o j (u64 0));
+
+  for len (size 2 *! len) inv (fun j -> upd o j i.(j -! len))
+
+(*
+
+
   assert_norm(pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
   assert_norm(pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 384);
   match c with
@@ -557,7 +566,7 @@ let shiftLeftWord #c i o =
     upd o (size 4) i.(size 0);
     upd o (size 5) i.(size 1);
     upd o (size 6) i.(size 2);
-    upd o (size 7) i.(size 3)
+    upd o (size 7) i.(size 3) *)
 
 
 let mod64 #c a =
@@ -589,33 +598,14 @@ let mod64 #c a =
 
 
 let shift1 #c t out = 
-  match c with 
-  |P384 ->     
-
-    let t1 = index t (size 1) in 
-    let t2 = index t (size 2) in 
-    let t3 = index t (size 3) in 
-    let t4 = index t (size 4) in 
-    let t5 = index t (size 5) in 
-    let t6 = index t (size 6) in 
-    let t7 = index t (size 7) in 
-    let t8 = index t (size 8) in 
-    let t9 = index t (size 9) in 
-    let t10 = index t (size 10) in 
-    let t11 = index t (size 11) in 
-
-    upd out (size 0) t1;
-    upd out (size 1) t2;
-    upd out (size 2) t3;
-    upd out (size 3) t4;
-    upd out (size 4) t5;
-    upd out (size 5) t6;
-    upd out (size 6) t7;
-    upd out (size 7) t8;
-    upd out (size 8) t9;
-    upd out (size 9) t10;
-    upd out (size 10) t11;
-    upd out (size 11) (u64 0)
+  let len = getCoordinateLenU64 c *! 2 in 
+  let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = True in 
+  for 0ul (len -! 1) inv (fun i -> 
+    let elem = index t (size 1 +! i) in 
+    upd out i elem);
+ upd out (len -! 1) (u64 0)
+  
+(*
 
   |P256 -> 
     let t1 = index t (size 1) in 
@@ -634,3 +624,4 @@ let shift1 #c t out =
     upd out (size 5) t6;
     upd out (size 6) t7;
     upd out (size 7) (u64 0)
+*)
