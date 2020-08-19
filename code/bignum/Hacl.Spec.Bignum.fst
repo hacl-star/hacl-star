@@ -75,6 +75,13 @@ let bn_mul #aLen #bLen a b =
 let bn_mul_lemma #aLen #bLen a b =
   Hacl.Spec.Bignum.Multiplication.bn_mul_lemma a b
 
+let bn_karatsuba_sqr #aLen a =
+  Hacl.Spec.Bignum.Karatsuba.bn_karatsuba_sqr a
+
+let bn_karatsuba_sqr_lemma #aLen a =
+  let _ = Hacl.Spec.Bignum.Karatsuba.bn_karatsuba_sqr a in
+  ()
+
 let bn_sqr #aLen a =
   Hacl.Spec.Bignum.Multiplication.bn_sqr a
 

@@ -34,6 +34,9 @@ let bn_karatsuba_mul aLen a b res =
 let bn_mul aLen a bLen b res =
   Hacl.Bignum.Multiplication.bn_mul aLen a bLen b res
 
+let bn_karatsuba_sqr aLen a res =
+  Hacl.Bignum.Karatsuba.bn_karatsuba_sqr aLen a res
+
 let bn_sqr aLen a res =
   Hacl.Bignum.Multiplication.bn_sqr aLen a res
 

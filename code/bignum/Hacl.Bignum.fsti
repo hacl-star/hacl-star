@@ -146,6 +146,24 @@ val bn_mul:
   -> b:lbignum bLen
   -> bn_mul_st a b
 
+
+inline_for_extraction noextract
+let bn_karatsuba_sqr_st (#aLen:size_t{0 < v aLen /\ 4 * v aLen <= max_size_t})
+  (a:lbignum aLen) =
+  res:lbignum (aLen +! aLen) ->
+  Stack unit
+  (requires fun h -> live h a /\ live h res /\ disjoint res a)
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_seq h1 res == S.bn_karatsuba_sqr (as_seq h0 a))
+
+
+inline_for_extraction noextract
+val bn_karatsuba_sqr:
+    aLen:size_t{0 < v aLen /\ 4 * v aLen <= max_size_t}
+  -> a:lbignum aLen
+  -> bn_karatsuba_sqr_st a
+
+
 inline_for_extraction noextract
 let bn_sqr_st (#aLen:size_t{0 < v aLen /\ v aLen + v aLen <= max_size_t})
   (a:lbignum aLen) =
@@ -255,7 +273,7 @@ class bn (len: meta_len) = {
   bit_set: bn_bit_set_st len;
   add_mod_n: bn_add_mod_n_st len;
   mul: a:lbignum len -> b:lbignum len -> bn_karatsuba_mul_st a b;
-  sqr: a:lbignum len -> bn_sqr_st a;
+  sqr: a:lbignum len -> bn_karatsuba_sqr_st a;
   sub_mask: bn_sub_mask_st len;
 }
 
@@ -267,7 +285,7 @@ let mk_runtime_bn (len: meta_len) = {
   bit_set = bn_bit_set len;
   add_mod_n = bn_add_mod_n len;
   mul = (fun a b -> bn_karatsuba_mul len a b);
-  sqr = (fun a -> bn_sqr len a);
+  sqr = (fun a -> bn_karatsuba_sqr len a);
   sub_mask = bn_sub_mask len;
 }
 
