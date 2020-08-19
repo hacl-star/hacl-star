@@ -165,7 +165,8 @@ show_help () {
   printf "                  Clang target triple convention.\n"
   printf "                  Details: https://clang.llvm.org/docs/CrossCompilation.html\n"
   printf "                  Currently supported triples are:\n"
-  printf "                  * aarch64-linux-android\n"
+  printf "                  * aarch64-none-linux-android\n"
+  printf "                  * aarch64-none-linux-gnu\n"
   printf "\n"
 }
 
@@ -193,24 +194,41 @@ done
 
 if [ ! -z "$build_target" ]; then
   echo "Doing cross build for $build_target. Make sure that your toolchain is configured properly."
-  if [[ "$build_target" == "aarch64-linux-android" ]]; then
+  if [[ "$build_target" == "aarch64-none-linux-android" ]]; then
     target_arch="aarch64"
     target_sys="Linux"
     target_abi="android"
-    AR=$NDK_TOOLCHAIN/aarch64-linux-android/ar
+    LD="$NDK_TOOLCHAIN/aarch64-linux-android/ld"
+    AR="$NDK_TOOLCHAIN/aarch64-linux-android/ar"
     CROSS_TARGET="-target $build_target"
     CROSS_SYSROOT="--sysroot=$SYSROOT"
     CROSS_INCLUDES="-I$SYSROOT/usr/include/"
+  elif [[ "$build_target" == "aarch64-none-linux-gnu" ]]; then
+    target_arch="aarch64"
+    target_sys="Linux"
+    target_abi="gnu"
+    LD="$SYSROOT/bin/ld"
+    AR="$SYSROOT/bin/ar"
+    CROSS_TARGET="-target $build_target"
+    CROSS_SYSROOT="--sysroot=$SYSROOT"
+    CROSS_INCLUDES="-I$SYSROOT/libc/usr/include/"
   else
     show_help
     exit 0
   fi
   CROSS_CFLAGS="$CROSS_TARGET $CROSS_SYSROOT $CROSS_INCLUDES"
   echo "CFLAGS += $CROSS_CFLAGS" >> Makefile.config
+  echo "LD=$LD" >> Makefile.config
+  echo "AR=$AR" >> Makefile.config
 else
   target_arch=$(uname -m)
   target_sys=$(uname)
   target_abi="native"
+fi
+
+if [[ $target_arch == "aarch64" ]]; then
+  # Cross-compiling on Linux for ARM has to remove the x86 assembly code.
+  echo "ARM_CROSS = 1" >> Makefile.config
 fi
 
 if detect_arm; then
@@ -271,5 +289,8 @@ if [[ $target_sys == "Linux" ]]; then
   else
     echo "toolchain does not support explicit_bzero"
     echo "#define LINUX_NO_EXPLICIT_BZERO" >> config.h
+  fi
+  if [[ ! $target_arch == "aarch64" ]]; then
+    echo "LDFLAGS	+= -Xlinker -z -Xlinker noexecstack -Xlinker --unresolved-symbols=report-all" >> Makefile.config
   fi
 fi

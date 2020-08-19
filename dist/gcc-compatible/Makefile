@@ -34,7 +34,6 @@ else ifeq ($(UNAME),Linux)
   CFLAGS	+= -fPIC
   VARIANT	= -linux
   SO 		= so
-  LDFLAGS	+= -Xlinker -z -Xlinker noexecstack -Xlinker --unresolved-symbols=report-all
 else ifeq ($(OS),Windows_NT)
   CFLAGS        += -fno-asynchronous-unwind-tables
   CC		= $(MARCH)-w64-mingw32-gcc
@@ -71,10 +70,12 @@ ifneq (,$(wildcard EverCrypt_BCrypt.h))
   SOURCES	+= evercrypt_bcrypt.c
 endif
 
-OBJS 		+= $(patsubst %.S,%.o,$(wildcard *-$(MARCH)$(VARIANT).S))
-
 -include Makefile.config
 include Makefile.basic
+
+ifeq (,$(ARM_CROSS))
+OBJS 		+= $(patsubst %.S,%.o,$(wildcard *-$(MARCH)$(VARIANT).S))
+endif
 
 CFLAGS		+= -Wno-parentheses -Wno-deprecated-declarations -Wno-\#warnings -Wno-error=cpp -Wno-cpp -g -std=gnu11 -O3
 CFLAGS_128 ?= -mavx
@@ -84,6 +85,8 @@ Hacl_Blake2s_128.o Hacl_Poly1305_128.o Hacl_Chacha20_Vec128.o Hacl_Chacha20Poly1
 Hacl_Blake2b_256.o Hacl_Poly1305_256.o Hacl_Chacha20_Vec256.o Hacl_Chacha20Poly1305_256.o: CFLAGS += $(CFLAGS_256)
 
 all: libevercrypt.$(SO)
+
+# LD ?= $(CC)
 
 libevercrypt.$(SO): config.h $(OBJS)
 	$(CC) $(CFLAGS) -shared -o $@ $(filter-out %.h,$^) $(LDFLAGS)
