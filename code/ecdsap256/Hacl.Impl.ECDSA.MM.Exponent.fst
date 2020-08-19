@@ -105,7 +105,7 @@ val montgomery_ladder_exponent_step: #c: curve -> a: felem c -> b: felem c -> sc
 let montgomery_ladder_exponent_step #c a b scalar i = 
     let h0 = ST.get() in 
   let bit0 = (size 255) -. i in 
-  let bit = scalar_bit scalar bit0 in 
+  let bit = scalar_bit #P256 scalar bit0 in 
   cswap bit a b;
   montgomery_ladder_exponent_step0 a b;
   cswap bit a b;

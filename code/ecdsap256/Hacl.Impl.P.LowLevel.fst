@@ -345,8 +345,7 @@ let isZero_uint64_CT #c f =
   let len = getCoordinateLenU64 c in 
   let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = True in
   push_frame();
-    let tmp = create (size 1) (u64 0) in 
-    upd tmp (size 0) (u64 18446744073709551615); 
+    let tmp = create (size 1) (u64 18446744073709551615) in
 
    for 0ul len inv (fun i -> 
     let a_i = index f i in 
@@ -675,3 +674,11 @@ let upload_one_montg_form #c b =
     upd b (size 3) (u64 0);
     upd b (size 4) (u64 0);
     upd b (size 5) (u64 0)
+
+
+let scalar_bit #buf_type s n =
+  let h0 = ST.get () in
+  mod_mask_lemma ((Lib.Sequence.index (as_seq h0 s) (v n / 8)) >>. (n %. 8ul)) 1ul;
+  assert_norm (1 = pow2 1 - 1);
+  assert (v (mod_mask #U8 #SEC 1ul) == v (u8 1));
+  to_u64 ((s.(n /. 8ul) >>. (n %. 8ul)) &. u8 1)

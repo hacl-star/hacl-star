@@ -54,17 +54,3 @@ let prime_inverse_buffer: x: glbuffer uint8 32ul {witnessed x (prime_inverse_seq
   createL_global (prime_inverse_list #P256)
 
 
-val exponent: #c: curve -> a: felem c -> result: felem c 
-  -> tempBuffer: lbuffer uint64 (size 5 *! getCoordinateLenU64 c) 
-  -> Stack unit
-    (requires fun h -> 
-      live h a /\ live h tempBuffer /\ live h result /\  disjoint tempBuffer result /\ 
-      disjoint a tempBuffer /\ as_nat c h a < getPrime c)
-    (ensures fun h0 _ h1 -> 
-      modifies2 result tempBuffer h0 h1 /\
-      (let k = fromDomain_ #c (as_nat c h0 a) in 
-      as_nat c h1 result =  toDomain_ #c (pow k (getPrime c - 2) % getPrime c)))
-
-
-
-

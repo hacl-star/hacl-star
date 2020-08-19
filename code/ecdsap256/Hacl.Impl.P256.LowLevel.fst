@@ -1366,24 +1366,3 @@ let shortened_mul_p256 a b result =
     assert_norm( pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256)
    
 
-
-
-(* this piece of code is taken from Hacl.Curve25519 *)
-(* I am not sure that it's used *)
-
-inline_for_extraction noextract
-val scalar_bit:
-    #buf_type: buftype -> 
-    s:lbuffer_t buf_type uint8 (size 32)
-  -> n:size_t{v n < 256}
-  -> Stack uint64
-    (requires fun h0 -> live h0 s)
-    (ensures  fun h0 r h1 -> h0 == h1 /\
-      r == ith_bit #P256 (as_seq h0 s) (v n) /\ v r <= 1)
-      
-let scalar_bit #buf_type s n =
-  let h0 = ST.get () in
-  mod_mask_lemma ((Lib.Sequence.index (as_seq h0 s) (v n / 8)) >>. (n %. 8ul)) 1ul;
-  assert_norm (1 = pow2 1 - 1);
-  assert (v (mod_mask #U8 #SEC 1ul) == v (u8 1));
-  to_u64 ((s.(n /. 8ul) >>. (n %. 8ul)) &. u8 1)

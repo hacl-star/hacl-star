@@ -53,6 +53,8 @@ let lemma_t_computation_p384 t =
     0xffffffffffffffff * pow2 192 +  0xffffffffffffffff * pow2 256 +  0xffffffffffffffff * pow2 320 == prime384)
  *)
 
+
+(* replace with tempBuffer *)
 val add_dep_prime_p384: x: felem P384 -> t: uint64 {uint_v t == 0 \/ uint_v t == 1} ->
   result: felem P384 -> 
   Stack uint64
@@ -63,6 +65,26 @@ val add_dep_prime_p384: x: felem P384 -> t: uint64 {uint_v t == 0 \/ uint_v t ==
       else
   as_nat P384 h1 result  == as_nat P384 h0 x))  
 
+let add_dep_prime_p384 x t result = 
+  push_frame();
+    let b = create (size 6) (u64 0) in 
+    
+    let t3 = (u64 0) -. t in 
+    let t2 = t3 -. t in 
+    let t1 = t3 <<. (size 32) in 
+    let t0 = ((u64 0) -. t) >>. (size 32) in 
+  
+  upd b (size 0) t0;
+  upd b (size 1) t1;
+  upd b (size 2) t2;
+  upd b (size 3) t3;
+  upd b (size 4) t3;
+  upd b (size 5) t3;
+
+  let r = add6 x b result in 
+    pop_frame();
+ r
+    
 
 val sub6: x: felem P384 -> y:felem P384 -> result: felem P384 -> 
   Stack uint64

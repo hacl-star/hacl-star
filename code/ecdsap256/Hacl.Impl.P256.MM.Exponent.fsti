@@ -12,10 +12,19 @@ open Hacl.Spec.P256.Definition
 open Spec.P256
 
 
+
+val exponent: #c: curve -> a: felem c -> result: felem c -> tempBuffer: lbuffer uint64 (size 20)
+  -> Stack unit
+    (requires fun h -> 
+      live h a /\ live h result /\  as_nat c h a < getPrime c)
+    (ensures fun h0 _ h1 -> 
+      (let k = fromDomain_ #c (as_nat c h0 a) in 
+      as_nat c h1 result =  toDomain_ #c (pow k (getPrime c - 2) % getPrime c)))
+
 val square_root: #c: curve -> a: felem c -> result: felem c -> Stack unit 
   (requires fun h -> live h a /\ live h result /\ as_nat c h a < prime256)
   (ensures fun h0 _ h1 -> modifies (loc a |+| loc result) h0 h1 /\
     as_nat c h1 result < prime256 /\
     fromDomain_ #c (as_nat c h1 result) = sq_root_spec #c (fromDomain_ #c (as_nat c h0 a)) /\
-    fromDomain_ #c (as_nat c h1 result) = pow (fromDomain_ #c (as_nat c h0 a)) ((getPrime c+ 1) / 4) % getPrime c
+    fromDomain_ #c (as_nat c h1 result) = pow (fromDomain_ #c (as_nat c h0 a)) ((getPrime c + 1) / 4) % getPrime c
   )

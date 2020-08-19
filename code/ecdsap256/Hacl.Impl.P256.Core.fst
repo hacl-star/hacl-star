@@ -16,6 +16,7 @@ open Spec.P256
 open Hacl.Impl.SolinasReduction
 open Hacl.Impl.P.LowLevel 
 open Hacl.Impl.P256.MontgomeryMultiplication
+open Hacl.Impl.P256.MM.Exponent
 open Hacl.Impl.P256.Math 
 
 open Hacl.Impl.P256.PointAdd
@@ -330,10 +331,10 @@ let norm #c  p resultPoint tempBuffer =
       assert (as_nat c h1 z2f = toDomain_ #c (fromDomain_ #c (as_nat c h0 zf) * fromDomain_ #c (as_nat c h0 zf) % getPrime c));
       assert (as_nat c h2 z3f = toDomain_ #c (fromDomain_ #c (as_nat c h0 zf) * fromDomain_ #c (as_nat c h0 zf) * fromDomain_ #c (as_nat c h0 zf) % prime256)); *)
 
-  exponent #c z2f z2f tempBuffer20; 
+  exponent #c z2f z2f tempBuffer20 ; 
     let h3 = ST.get() in 
       (*assert(as_nat h3 z2f = toDomain_ (pow (fromDomain_ (as_nat h2 z2f)) (prime256 - 2) % prime256)); *)
-  exponent #c z3f z3f tempBuffer20; admit();
+  exponent #c z3f z3f tempBuffer20 ; admit();
     let h4 = ST.get() in (*
       assert(as_nat c h4 z3f = toDomain_ #c (pow (fromDomain_ #c (as_nat c h3 z3f)) (prime256 - 2) % prime256));
      *)
@@ -370,7 +371,7 @@ let normX #c p result tempBuffer =
 
     let h0 = ST.get() in 
   montgomery_square_buffer #c zf z2f; 
-  exponent #c z2f z2f tempBuffer20;
+  exponent #c z2f z2f  tempBuffer20 ;
   montgomery_multiplication_buffer #c z2f xf z2f;
   fromDomain z2f result;
     let prime = getPrime c in 
