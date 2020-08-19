@@ -301,7 +301,7 @@ let bn_lshift_add_early_stop_lemma #aLen #bLen a b i =
 
 
 val bn_karatsuba_res:
-   #aLen:size_nat{2 * aLen <= max_size_t /\ 1 <= aLen / 2}
+   #aLen:size_pos{2 * aLen <= max_size_t}
   -> r01:lbignum aLen
   -> r23:lbignum aLen
   -> c5:uint64
@@ -346,7 +346,7 @@ let bn_concat_lemma #aLen #bLen a b =
 
 
 val bn_karatsuba_res_lemma:
-   #aLen:size_nat{2 * aLen <= max_size_t /\ 1 <= aLen / 2}
+   #aLen:size_pos{2 * aLen <= max_size_t}
   -> r01:lbignum aLen
   -> r23:lbignum aLen
   -> c5:uint64{v c5 <= 1}
@@ -388,8 +388,7 @@ let bn_karatsuba_res_lemma #aLen r01 r23 c5 t45 =
 
 
 val bn_middle_karatsuba_carry_bound:
-    i:size_pos
-  -> aLen:size_nat{aLen == pow2 i}
+    aLen:size_nat{aLen % 2 = 0}
   -> a0:lbignum (aLen / 2)
   -> a1:lbignum (aLen / 2)
   -> b0:lbignum (aLen / 2)
@@ -399,7 +398,7 @@ val bn_middle_karatsuba_carry_bound:
   (requires bn_v res + v c * pow2 (64 * aLen) == bn_v a0 * bn_v b1 + bn_v a1 * bn_v b0)
   (ensures  0 <= v c /\ v c <= 1)
 
-let bn_middle_karatsuba_carry_bound i aLen a0 a1 b0 b1 res c =
+let bn_middle_karatsuba_carry_bound aLen a0 a1 b0 b1 res c =
   let aLen2 = aLen / 2 in
   let p = pow2 (64 * aLen2) in
   bn_eval_bound a0 aLen2;
@@ -414,7 +413,7 @@ let bn_middle_karatsuba_carry_bound i aLen a0 a1 b0 b1 res c =
     p * p + bn_v a1 * bn_v b0;
     (<) { Math.Lemmas.lemma_mult_lt_sqr (bn_v a1) (bn_v b0) p }
     p * p + p * p;
-    (==) { K.lemma_double_p i aLen }
+    (==) { K.lemma_double_p aLen }
     pow2 (64 * aLen) + pow2 (64 * aLen);
     }
 
@@ -437,21 +436,17 @@ let bn_karatsuba_no_last_carry #aLen a b c res =
 
 
 val bn_karatsuba_mul_:
-    i:size_nat
-  -> aLen:size_nat{2 * aLen <= max_size_t /\ aLen == pow2 i}
+    aLen:size_nat{aLen + aLen <= max_size_t}
   -> a:lbignum aLen
   -> b:lbignum aLen ->
   Tot (res:lbignum (aLen + aLen){bn_v res == bn_v a * bn_v b}) (decreases aLen)
 
-let rec bn_karatsuba_mul_ i aLen a b =
-  if aLen < 16 then begin
+let rec bn_karatsuba_mul_ aLen a b =
+  if aLen < 16 || aLen % 2 = 1 then begin
     bn_mul_lemma a b;
     bn_mul a b end
   else begin
     let aLen2 = aLen / 2 in
-    let i2 = i - 1 in
-    Math.Lemmas.pow2_double_mult (i - 1);
-
     let a0 = bn_mod_pow2 a aLen2 in
     (**) bn_mod_pow2_lemma a aLen2;
     let a1 = bn_div_pow2 a aLen2 in
@@ -463,40 +458,30 @@ let rec bn_karatsuba_mul_ i aLen a b =
     (**) bn_div_pow2_lemma b aLen2;
     (**) bn_eval_bound a aLen;
     (**) bn_eval_bound b aLen;
-    (**) K.lemma_bn_halves i aLen (bn_v a);
-    (**) K.lemma_bn_halves i aLen (bn_v b);
+    (**) K.lemma_bn_halves aLen (bn_v a);
+    (**) K.lemma_bn_halves aLen (bn_v b);
 
     let c0, t0 = bn_sign_abs a0 a1 in
     (**) bn_sign_abs_lemma a0 a1;
     let c1, t1 = bn_sign_abs b0 b1 in
     (**) bn_sign_abs_lemma b0 b1;
 
-    let t23 = bn_karatsuba_mul_ i2 aLen2 t0 t1 in
-    let r01 = bn_karatsuba_mul_ i2 aLen2 a0 b0 in
-    let r23 = bn_karatsuba_mul_ i2 aLen2 a1 b1 in
+    let t23 = bn_karatsuba_mul_ aLen2 t0 t1 in
+    let r01 = bn_karatsuba_mul_ aLen2 a0 b0 in
+    let r23 = bn_karatsuba_mul_ aLen2 a1 b1 in
 
     let c2, t01 = bn_add r01 r23 in
     (**) bn_add_lemma r01 r23;
     let c5, t45 = bn_middle_karatsuba c0 c1 c2 t01 t23 in
     (**) bn_middle_karatsuba_eval a0 a1 b0 b1 c2 t01 t23;
-    (**) bn_middle_karatsuba_carry_bound i aLen a0 a1 b0 b1 t45 c5;
+    (**) bn_middle_karatsuba_carry_bound aLen a0 a1 b0 b1 t45 c5;
 
     let c, res = bn_karatsuba_res #aLen r01 r23 c5 t45 in
     (**) bn_karatsuba_res_lemma #aLen r01 r23 c5 t45;
-    (**) K.lemma_karatsuba i aLen (bn_v a0) (bn_v a1) (bn_v b0) (bn_v b1);
+    (**) K.lemma_karatsuba aLen (bn_v a0) (bn_v a1) (bn_v b0) (bn_v b1);
     (**) bn_karatsuba_no_last_carry #aLen a b c res;
     assert (v c = 0);
     res end
-
-
-val get_len_pow2: aLen:size_nat -> Tot (res:size_nat{res > 0 ==> aLen = pow2 res})
-let get_len_pow2 aLen =
-  match aLen with
-  | 16 -> assert_norm (pow2 4 = 16); 4
-  | 32 -> assert_norm (pow2 5 = 32); 5
-  | 64 -> assert_norm (pow2 6 = 64); 6
-  | 128 -> assert_norm (pow2 7 = 128); 7
-  | _ -> 0
 
 
 val bn_karatsuba_mul:
@@ -506,9 +491,4 @@ val bn_karatsuba_mul:
   Tot (res:lbignum (aLen + aLen){bn_v res == bn_v a * bn_v b})
 
 let bn_karatsuba_mul #aLen a b =
-  let i = get_len_pow2 aLen in
-  if i > 0 then
-    bn_karatsuba_mul_ i aLen a b
-  else begin
-    bn_mul_lemma a b;
-    bn_mul a b end
+  bn_karatsuba_mul_ aLen a b
