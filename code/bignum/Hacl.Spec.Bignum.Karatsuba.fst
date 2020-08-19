@@ -18,6 +18,9 @@ module K = Hacl.Spec.Karatsuba.Lemmas
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+inline_for_extraction noextract
+let bn_mul_threshold = 32
+
 (* this carry means nothing but the sign of the result *)
 val bn_sign_abs: #aLen:size_nat -> a:lbignum aLen -> b:lbignum aLen -> tuple2 carry (lbignum aLen)
 let bn_sign_abs #aLen a b =
@@ -442,7 +445,7 @@ val bn_karatsuba_mul_:
   Tot (res:lbignum (aLen + aLen){bn_v res == bn_v a * bn_v b}) (decreases aLen)
 
 let rec bn_karatsuba_mul_ aLen a b =
-  if aLen < 16 || aLen % 2 = 1 then begin
+  if aLen < bn_mul_threshold || aLen % 2 = 1 then begin
     bn_mul_lemma a b;
     bn_mul a b end
   else begin
@@ -527,7 +530,7 @@ val bn_karatsuba_sqr_: aLen:size_nat{aLen + aLen <= max_size_t} -> a:lbignum aLe
   Tot (res:lbignum (aLen + aLen){bn_v res == bn_v a * bn_v a}) (decreases aLen)
 
 let rec bn_karatsuba_sqr_ aLen a =
-  if aLen < 16 || aLen % 2 = 1 then begin
+  if aLen < bn_mul_threshold || aLen % 2 = 1 then begin
     bn_sqr_lemma a;
     bn_sqr a end
   else begin

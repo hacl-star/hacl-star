@@ -24,6 +24,9 @@ module K = Hacl.Spec.Bignum.Karatsuba
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
+let bn_mul_threshold = size K.bn_mul_threshold
+
+inline_for_extraction noextract
 val bn_sign_abs:
     #aLen:size_t
   -> a:lbignum aLen
@@ -197,7 +200,7 @@ let rec bn_karatsuba_mul_ aLen a b tmp res =
   let h0 = ST.get () in
   norm_spec [zeta; iota; primops; delta_only [`%K.bn_karatsuba_mul_]]
     (K.bn_karatsuba_mul_ (v aLen) (as_seq h0 a) (as_seq h0 b));
-  if aLen <. 16ul || aLen %. 2ul =. 1ul then
+  if aLen <. bn_mul_threshold || aLen %. 2ul =. 1ul then
     bn_mul aLen a aLen b res
   else begin
     let aLen2 = aLen /. 2ul in
@@ -301,7 +304,7 @@ let rec bn_karatsuba_sqr_ aLen a tmp res =
   let h0 = ST.get () in
   norm_spec [zeta; iota; primops; delta_only [`%K.bn_karatsuba_sqr_]]
     (K.bn_karatsuba_sqr_ (v aLen) (as_seq h0 a));
-  if aLen <. 16ul || aLen %. 2ul =. 1ul then
+  if aLen <. bn_mul_threshold || aLen %. 2ul =. 1ul then
     bn_sqr aLen a res
   else begin
     let aLen2 = aLen /. 2ul in
