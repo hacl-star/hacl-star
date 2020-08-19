@@ -492,3 +492,77 @@ val bn_karatsuba_mul:
 
 let bn_karatsuba_mul #aLen a b =
   bn_karatsuba_mul_ aLen a b
+
+
+val bn_middle_karatsuba_sqr:
+    #aLen:size_nat
+  -> c2:carry
+  -> t01:lbignum aLen
+  -> t23:lbignum aLen ->
+  uint64 & lbignum aLen
+
+let bn_middle_karatsuba_sqr #aLen c2 t01 t23 =
+  let c3, t45 = bn_sub t01 t23 in let c3 = c2 -. c3 in
+  c3, t45
+
+
+val bn_middle_karatsuba_sqr_lemma:
+    #aLen:size_nat
+  -> c0:carry
+  -> c2:carry
+  -> t01:lbignum aLen
+  -> t23:lbignum aLen ->
+  Lemma (bn_middle_karatsuba_sqr #aLen c2 t01 t23 == bn_middle_karatsuba c0 c0 c2 t01 t23)
+
+let bn_middle_karatsuba_sqr_lemma #aLen c0 c2 t01 t23 =
+  let (c, res) = bn_middle_karatsuba c0 c0 c2 t01 t23 in
+  let c3, t45 = bn_sub t01 t23 in let c3' = c2 -. c3 in
+  let c4, t67 = bn_add t01 t23 in let c4' = c2 +. c4 in
+  bn_middle_karatsuba_lemma #aLen c0 c0 c2 t01 t23;
+  assert (v c == v c3' /\ bn_v res == bn_v t45);
+  bn_eval_inj aLen t45 res
+
+
+val bn_karatsuba_sqr_: aLen:size_nat{aLen + aLen <= max_size_t} -> a:lbignum aLen ->
+  Tot (res:lbignum (aLen + aLen){bn_v res == bn_v a * bn_v a}) (decreases aLen)
+
+let rec bn_karatsuba_sqr_ aLen a =
+  if aLen < 16 || aLen % 2 = 1 then begin
+    bn_sqr_lemma a;
+    bn_sqr a end
+  else begin
+    let aLen2 = aLen / 2 in
+    let a0 = bn_mod_pow2 a aLen2 in
+    (**) bn_mod_pow2_lemma a aLen2;
+    let a1 = bn_div_pow2 a aLen2 in
+    (**) bn_div_pow2_lemma a aLen2;
+    (**) bn_eval_bound a aLen;
+    (**) K.lemma_bn_halves aLen (bn_v a);
+
+    let c0, t0 = bn_sign_abs a0 a1 in
+    (**) bn_sign_abs_lemma a0 a1;
+
+    let t23 = bn_karatsuba_sqr_ aLen2 t0 in
+    let r01 = bn_karatsuba_sqr_ aLen2 a0 in
+    let r23 = bn_karatsuba_sqr_ aLen2 a1 in
+
+    let c2, t01 = bn_add r01 r23 in
+    (**) bn_add_lemma r01 r23;
+    let c5, t45 = bn_middle_karatsuba_sqr c2 t01 t23 in
+    (**) bn_middle_karatsuba_sqr_lemma #aLen c0 c2 t01 t23;
+    (**) bn_middle_karatsuba_eval a0 a1 a0 a1 c2 t01 t23;
+    (**) bn_middle_karatsuba_carry_bound aLen a0 a1 a0 a1 t45 c5;
+
+    let c, res = bn_karatsuba_res #aLen r01 r23 c5 t45 in
+    (**) bn_karatsuba_res_lemma #aLen r01 r23 c5 t45;
+    (**) K.lemma_karatsuba aLen (bn_v a0) (bn_v a1) (bn_v a0) (bn_v a1);
+    (**) bn_karatsuba_no_last_carry #aLen a a c res;
+    assert (v c = 0);
+    res end
+
+
+val bn_karatsuba_sqr: #aLen:size_nat{aLen + aLen <= max_size_t} -> a:lbignum aLen ->
+  Tot (res:lbignum (aLen + aLen){bn_v res == bn_v a * bn_v a})
+
+let bn_karatsuba_sqr #aLen a =
+  bn_karatsuba_sqr_ aLen a
