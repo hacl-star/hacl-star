@@ -140,7 +140,46 @@ let bn_karatsuba_res #aLen r01 r23 c5 t45 res =
   c8
 
 
-#set-options "--z3rlimit 150"
+inline_for_extraction noextract
+val karatsuba_last:
+    i:size_t{0 < v i}
+  -> aLen:size_t{4 * v aLen <= max_size_t /\ v aLen == pow2 (v i)}
+  -> c0:carry
+  -> c1:carry
+  -> tmp:lbignum (4ul *! aLen)
+  -> res:lbignum (aLen +! aLen) ->
+  Stack uint64
+  (requires fun h -> live h res /\ live h tmp /\ disjoint res tmp)
+  (ensures  fun h0 c h1 -> modifies (loc res |+| loc tmp) h0 h1 /\
+    (Math.Lemmas.pow2_double_mult (v i - 1);
+     let sr01 = LSeq.sub (as_seq h0 res) 0 (v aLen) in
+     let sr23 = LSeq.sub (as_seq h0 res) (v aLen) (v aLen) in
+     let st23 = LSeq.sub (as_seq h0 tmp) (v aLen) (v aLen) in
+     let sc2, st01 = Hacl.Spec.Bignum.Addition.bn_add sr01 sr23 in
+     let sc5, sres = K.bn_middle_karatsuba c0 c1 sc2 st01 st23 in
+     let sc, sres = K.bn_karatsuba_res sr01 sr23 sc5 sres in
+     (c, as_seq h1 res) == (sc, sres)))
+
+let karatsuba_last i aLen c0 c1 tmp res =
+  Math.Lemmas.pow2_double_mult (v i - 1);
+  let r01 = sub res 0ul aLen in
+  let r23 = sub res aLen aLen in
+  (**) let h = ST.get () in
+  (**) LSeq.lemma_concat2 (v aLen) (as_seq h r01) (v aLen) (as_seq h r23) (as_seq h res);
+  (**) assert (as_seq h res == LSeq.concat (as_seq h r01) (as_seq h r23));
+
+  let t01 = sub tmp 0ul aLen in
+  let t23 = sub tmp aLen aLen in
+  let t45 = sub tmp (2ul *! aLen) aLen in
+  let t67 = sub tmp (3ul *! aLen) aLen in
+
+  let c2 = bn_add_eq_len aLen r01 r23 t01 in
+  let c5 = bn_middle_karatsuba c0 c1 c2 t01 t23 t67 t45 in
+  let c = bn_karatsuba_res r01 r23 c5 t45 res in
+  c
+
+
+#push-options "--z3rlimit 150"
 
 val bn_karatsuba_mul_:
     i:size_t
@@ -154,12 +193,14 @@ val bn_karatsuba_mul_:
     live h a /\ live h b /\ live h res /\ live h tmp /\
     disjoint res tmp /\ disjoint tmp a /\ disjoint tmp b /\
     disjoint res a /\ disjoint res b /\ eq_or_disjoint a b)
-  (ensures  fun h0 _ h1 -> modifies (loc res |+| loc tmp) h0 h1)
-//    as_seq h1 res == K.bn_karatsuba_mul_ (v i) (v aLen) (as_seq h0 a) (as_seq h0 b))
+  (ensures  fun h0 _ h1 -> modifies (loc res |+| loc tmp) h0 h1 /\
+    as_seq h1 res == K.bn_karatsuba_mul_ (v i) (v aLen) (as_seq h0 a) (as_seq h0 b))
 
 [@CInline]
 let rec bn_karatsuba_mul_ i aLen a b tmp res =
   let h0 = ST.get () in
+  norm_spec [zeta; iota; primops; delta_only [`%K.bn_karatsuba_mul_]]
+    (K.bn_karatsuba_mul_ (v i) (v aLen) (as_seq h0 a) (as_seq h0 b));
   if aLen <. 16ul then
     bn_mul aLen a aLen b res
   else begin
@@ -182,28 +223,27 @@ let rec bn_karatsuba_mul_ i aLen a b tmp res =
     let c1 = bn_sign_abs b0 b1 tmp' t1 in
 
     // tmp = [ t0_aLen2; t1_aLen2; t23_aLen; ..]
+    (**) let h0 = ST.get () in
     let t23 = sub tmp aLen aLen in
     let tmp1 = sub tmp (aLen +! aLen) (aLen +! aLen) in
     bn_karatsuba_mul_ i2 aLen2 t0 t1 tmp1 t23;
+    //(**) let h1 = ST.get () in
+    //(**) assert (as_seq h1 t23 == K.bn_karatsuba_mul_ (v i2) (v aLen2) (as_seq h0 t0) (as_seq h0 t1));
 
     let r01 = sub res 0ul aLen in
     let r23 = sub res aLen aLen in
-    let h0 = ST.get () in
     bn_karatsuba_mul_ i2 aLen2 a0 b0 tmp1 r01;
-    let h1 = ST.get () in
-    B.modifies_buffer_elim (B.gsub #uint64 res aLen aLen) (loc r01 |+| loc tmp1) h0 h1;
+    //(**) let h2 = ST.get () in
+    //(**) B.modifies_buffer_elim (B.gsub #uint64 res aLen aLen) (loc r01 |+| loc tmp1) h1 h2;
+    //(**) assert (as_seq h2 r01 == K.bn_karatsuba_mul_ (v i2) (v aLen2) (as_seq h0 a0) (as_seq h0 b0));
+
     bn_karatsuba_mul_ i2 aLen2 a1 b1 tmp1 r23;
-    let h2 = ST.get () in
-    B.modifies_buffer_elim (B.gsub #uint64 res 0ul aLen) (loc r23 |+| loc tmp1) h1 h2;
-    LSeq.lemma_concat2 (v aLen) (as_seq h2 r01) (v aLen) (as_seq h2 r23) (as_seq h2 res);
+    //(**) let h3 = ST.get () in
+    //(**) B.modifies_buffer_elim (B.gsub #uint64 res 0ul aLen) (loc r23 |+| loc tmp1) h2 h3;
+    //(**) assert (as_seq h3 r23 == K.bn_karatsuba_mul_ (v i2) (v aLen2) (as_seq h0 a1) (as_seq h0 b1));
+    //(**) assert (as_seq h3 r01 == as_seq h2 r01);
 
-    let t01 = sub tmp 0ul aLen in
-    let c2 = bn_add_eq_len aLen r01 r23 t01 in
-
-    let t45 = sub tmp (aLen +! aLen) aLen in
-    let t67 = sub tmp (3ul *! aLen) aLen in
-    let c5 = bn_middle_karatsuba c0 c1 c2 t01 t23 t67 t45 in
-    let c = bn_karatsuba_res r01 r23 c5 t45 res in
+    let c = karatsuba_last i aLen c0 c1 tmp res in
     () end
 
 
@@ -235,9 +275,8 @@ let bn_karatsuba_mul aLen a b res =
   push_frame ();
   let tmp = create (4ul *! aLen) (u64 0) in
   let i = get_len_pow2 aLen in
-  if i >. 0ul then begin
-    bn_karatsuba_mul_ i aLen a b tmp res;
-    admit() end
+  if i >. 0ul then
+    bn_karatsuba_mul_ i aLen a b tmp res
   else
     bn_mul aLen a aLen b res;
   pop_frame ()
