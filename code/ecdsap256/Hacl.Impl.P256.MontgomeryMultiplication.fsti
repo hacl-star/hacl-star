@@ -49,6 +49,11 @@ val montgomery_square_buffer: #c: curve -> a: felem c -> result: felem c ->
 	as_nat c h1 result = toDomain_ #c (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 a)))))
 
 
+inline_for_extraction
+let prime_inverse_buffer: x: glbuffer uint8 32ul {witnessed x (prime_inverse_seq #P256) /\ recallable x} = 
+  createL_global (prime_inverse_list #P256)
+
+
 val exponent: #c: curve -> a: felem c -> result: felem c 
   -> tempBuffer: lbuffer uint64 (size 5 *! getCoordinateLenU64 c) 
   -> Stack unit
@@ -59,3 +64,7 @@ val exponent: #c: curve -> a: felem c -> result: felem c
       modifies2 result tempBuffer h0 h1 /\
       (let k = fromDomain_ #c (as_nat c h0 a) in 
       as_nat c h1 result =  toDomain_ #c (pow k (getPrime c - 2) % getPrime c)))
+
+
+
+

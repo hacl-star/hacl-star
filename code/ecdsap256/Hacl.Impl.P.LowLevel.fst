@@ -32,9 +32,21 @@ open Lib.Loops
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
 
 let uploadZeroImpl #c f =
+    let h0 = ST.get() in 
   let len = getCoordinateLenU64 c in 
-  let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = True in 
-  for 0ul len inv (fun i -> upd f i (u64 0))
+  let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = live h f /\ modifies (loc f) h0 h /\
+    (
+      forall (j: nat {j < i}). 
+	let elemUpdated = Lib.Sequence.index (as_seq h f) j in 
+	uint_v elemUpdated = 0) in 
+
+  for 0ul len inv (fun i -> 
+    upd f i (u64 0); 
+    let h = ST.get() in 
+    assert(
+      forall (j: nat {j < uint_v i}). 
+      let elemUpdated = Lib.Sequence.index (as_seq h f) j in uint_v elemUpdated = 0)
+  )
 
 
 let uploadZeroPoint #c p =
@@ -330,6 +342,22 @@ let eq1_u64 a =
 
 
 let isZero_uint64_CT #c f =
+  let len = getCoordinateLenU64 c in 
+  let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = True in
+  push_frame();
+    let tmp = create (size 1) (u64 0) in 
+    upd tmp (size 0) (u64 18446744073709551615); 
+
+   for 0ul len inv (fun i -> 
+    let a_i = index f i in 
+    let r_i = eq_mask a_i (u64 0) in 
+    upd tmp (size 0) (logand r_i (index tmp (size 0))));
+
+  let r = index tmp (size 0) in 
+  pop_frame();
+  r
+
+(*
   match c with
   |P256 ->
     let a0 = index f (size 0) in
@@ -373,7 +401,7 @@ let isZero_uint64_CT #c f =
     let r45 = logand r4 r5 in
     let r = logand r r45 in
     r
-
+*)
 
 
 let compare_felem #c a b =
@@ -381,13 +409,19 @@ let compare_felem #c a b =
   let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = True in
   push_frame();
     let tmp = create (size 1) (u64 0) in 
-    upd tmp (size 1) (u64 18446744073709551615);
+    upd tmp (size 0) (u64 18446744073709551615);
     
   for 0ul len inv (fun i -> 
     let a_i = index a i in 
     let b_i = index b i in 
     let r_i = eq_mask a_i b_i in 
-    upd tmp (size 0) (logand r_i (index tmp (size 0))))
+    upd tmp (size 0) (logand r_i (index tmp (size 0))));
+
+  let r = index tmp (size 0) in 
+  pop_frame(); 
+  r
+
+
 (*
   |P256 ->
     let a_0 = index a (size 0) in
@@ -625,3 +659,19 @@ let shift1 #c t out =
     upd out (size 6) t7;
     upd out (size 7) (u64 0)
 *)
+
+
+let upload_one_montg_form #c b =
+  match c with 
+  |P256 -> 
+    upd b (size 0) (u64 1);
+    upd b (size 1) (u64 18446744069414584320);
+    upd b (size 2) (u64 18446744073709551615);
+    upd b (size 3) (u64 4294967294)
+  |P384 -> 
+    upd b (size 0) (u64 18446744069414584321);
+    upd b (size 1) (u64 4294967295);
+    upd b (size 2) (u64 1);
+    upd b (size 3) (u64 0);
+    upd b (size 4) (u64 0);
+    upd b (size 5) (u64 0)

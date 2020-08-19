@@ -271,3 +271,10 @@ val shift1: #c: curve -> t: widefelem c -> t1: widefelem c -> Stack unit
   (requires fun h -> live h t /\ live h t1 /\ eq_or_disjoint t t1)
   (ensures fun h0 _ h1 -> modifies (loc t1) h0 h1 /\ 
     wide_as_nat c h0 t / pow2 64 = wide_as_nat c h1 t1)
+
+
+
+inline_for_extraction noextract 
+val upload_one_montg_form: #c: curve -> b: felem c -> Stack unit
+  (requires fun h -> live h b)
+  (ensures fun h0 _ h1 -> modifies (loc b) h0 h1 )

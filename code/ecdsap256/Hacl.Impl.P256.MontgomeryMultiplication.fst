@@ -88,33 +88,30 @@ let montgomery_multiplication_one_round_proof t result co =
 
 
 let montgomery_multiplication_buffer_by_one #c a result = 
-  match c with 
-  |P384 -> admit()
-  |P256 -> 
-    assert_norm (prime256 > 3);
-    push_frame();
-      let t = create (size 8) (u64 0) in 
-	let t_low = sub t (size 0) (size 4) in 
-	let t_high = sub t (size 4) (size 4) in 
-      copy t_low a; 
+  push_frame();
+  
+  let len = getCoordinateLenU64 c in 
+  let t = create (size 2 *! len) (u64 0) in 
+    let t_low = sub t (size 0) len in 
+    let t_high = sub t len len in 
+  copy t_low a; 
 
-      let len = getCoordinateLenU64 c in 
-      let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = 
-	True in 
-      for 0ul len inv (fun i -> montgomery_multiplication_round #c t t);
+  let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = True in 
+  for 0ul len inv (fun i -> montgomery_multiplication_round #c t t);
 
-      reduction_prime_2prime_with_carry t result;
-    pop_frame()  
+  reduction_prime_2prime_with_carry t result;
+  pop_frame()  
+
 
 
 let montgomery_multiplication_buffer #c a b result = 
   assert_norm(prime256 > 3);
   push_frame();
-    let t = create (size 8) (u64 0) in 
-    let round = create (size 8) (u64 0) in 
-      let h0 = ST.get() in 
-  mul a b round;  
   let len = getCoordinateLenU64 c in 
+  
+  let round = create (size 2 *! len) (u64 0) in 
+    let h0 = ST.get() in 
+  mul a b round;  
   let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = 
     True in 
 
@@ -125,27 +122,26 @@ let montgomery_multiplication_buffer #c a b result =
 
 
 let montgomery_square_buffer #c a result = 
-    assert_norm(prime256 > 3);
-    push_frame();
+  assert_norm(prime256 > 3);
+  push_frame();
     
-    let t = create (size 8) (u64 0) in 
-    let round2 = create (size 8) (u64 0) in 
-    let round4 = create (size 8) (u64 0) in  
-      let h0 = ST.get() in 
-    square_bn a t;  
-      let h1 = ST.get() in 
-      mul_lemma_ (as_nat P256 h0 a) (as_nat P256 h0 a) prime256;
+  let t = create (size 8) (u64 0) in 
+    let h0 = ST.get() in 
+  square_bn a t;  
+    let h1 = ST.get() in 
+    mul_lemma_ (as_nat P256 h0 a) (as_nat P256 h0 a) prime256;
 
-      
-      let len = getCoordinateLenU64 c in 
-      let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = 
-	True in 
-      for 0ul len inv (fun i -> montgomery_multiplication_round #c t t);
+  let len = getCoordinateLenU64 c in 
+  let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = True in 
+  for 0ul len inv (fun i -> montgomery_multiplication_round #c t t);
 
-   reduction_prime_2prime_with_carry t result; 
-   pop_frame()  
+  reduction_prime_2prime_with_carry t result; 
+   
+  pop_frame()  
 
 
+
+(* For p256 curve there is a special implementation of multiplication by prime - 2 *)
 #reset-options "--z3rlimit 500" 
 
 val fsquarePowN: n: size_t -> a: felem P256 -> Stack unit 
@@ -319,28 +315,30 @@ let lemma_mul_nat a b = ()
 
 
 
-#reset-options " --z3rlimit 200"
-let exponent #c a result tempBuffer = 
-  match c with 
-  |P384 -> ()
-  |P256 -> 
-    let h0 = ST.get () in 
-    let buffer_norm_1 = Lib.Buffer.sub  tempBuffer (size 0) (size 8) in 
-      let buffer_result1 = Lib.Buffer.sub tempBuffer (size 4) (size 4) in 
-    let buffer_result2 = Lib.Buffer.sub tempBuffer (size 8) (size 4) in 
-    let buffer_norm_3 = Lib.Buffer.sub tempBuffer (size 12) (size 8) in 
-      let buffer_result3 = Lib.Buffer.sub tempBuffer (size 16) (size 4) in 
+val exponent_p256: a: felem P256-> result: felem P256-> tempBuffer: lbuffer uint64 (size 20) ->  Stack unit
+  (requires fun h -> live h a /\ live h tempBuffer /\ live h result /\ disjoint tempBuffer result /\ 
+  disjoint a tempBuffer /\ as_nat P256 h a < prime256)
+  (ensures fun h0 _ h1 -> modifies2 result tempBuffer h0 h1 /\ (let k = fromDomain_ #P256 (as_nat P256 h0 a) in 
+    as_nat P256 h1 result =  toDomain_ #P256 ((pow k (prime256 - 2)) % prime256)))
+
+let exponent_p256 a result tempBuffer =    
+  let h0 = ST.get () in 
+  let buffer_norm_1 = Lib.Buffer.sub  tempBuffer (size 0) (size 8) in 
+  let buffer_result1 = Lib.Buffer.sub tempBuffer (size 4) (size 4) in 
+  let buffer_result2 = Lib.Buffer.sub tempBuffer (size 8) (size 4) in 
+  let buffer_norm_3 = Lib.Buffer.sub tempBuffer (size 12) (size 8) in 
+  let buffer_result3 = Lib.Buffer.sub tempBuffer (size 16) (size 4) in 
   
     norm_part_one a buffer_norm_1;
     norm_part_two a buffer_result2;
     norm_part_three a buffer_norm_3;
     
       let h1 = ST.get() in 
-    montgomery_multiplication_buffer #c buffer_result1 buffer_result2 buffer_result1;
+    montgomery_multiplication_buffer #P256 buffer_result1 buffer_result2 buffer_result1;
       let h2 = ST.get() in 
-    montgomery_multiplication_buffer #c buffer_result1 buffer_result3 buffer_result1;
+    montgomery_multiplication_buffer #P256 buffer_result1 buffer_result3 buffer_result1;
       let h3 = ST.get() in 
-    montgomery_multiplication_buffer #c buffer_result1 a buffer_result1;
+    montgomery_multiplication_buffer #P256 buffer_result1 a buffer_result1;
       let h4 = ST.get() in 
     copy result buffer_result1; 
       let h5 = ST.get() in 
@@ -349,7 +347,7 @@ let exponent #c a result tempBuffer =
     assert_norm ((pow2 94 - 1) * pow2 2 >= 0);
 
     
-    let k = fromDomain_ #c (as_nat P256 h0 a) in 
+    let k = fromDomain_ #P256 (as_nat P256 h0 a) in 
     let power1 = pow k ((pow2 32 - 1) * pow2 224) in 
     let power2 = pow k (pow2 192) in 
     let power3 = pow k ((pow2 94 - 1) * pow2 2) in 
@@ -359,7 +357,124 @@ let exponent #c a result tempBuffer =
 
     lemma_inDomainModulo power1 power2;
     lemma_inDomainModulo (power1 * power2) power3;
-    inDomain_mod_is_not_mod #c (((power1 * power2 * power3) % prime256 * power4));
+    inDomain_mod_is_not_mod #P256 (((power1 * power2 * power3) % prime256 * power4));
     lemma_mod_mul_distr_l (power1 * power2 * power3) power4 prime256;
     big_power k ((pow2 32 - 1) * pow2 224) (pow2 192) ((pow2 94 -1 ) * pow2 2) 1;
     assert_norm(((pow2 32 - 1) * pow2 224 + pow2 192 + (pow2 94 -1 ) * pow2 2 + 1) = prime256 - 2)
+
+
+[@ CInline]
+val cswap: #c: curve ->  bit:uint64{v bit <= 1} -> p:felem c -> q:felem c
+  -> Stack unit
+    (requires fun h -> True)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc p |+| loc q) h0 h1)
+
+
+let cswap #c bit p1 p2 =
+  let h0 = ST.get () in
+  let mask = u64 0 -. bit in
+  let len = getCoordinateLenU64 c in 
+  
+  let open Lib.Sequence in 
+  
+  [@ inline_let]
+  let inv h1 (i:nat{i <= uint_v len}) =
+    (forall (k:nat{k < i}).
+      if v bit = 1
+      then (as_seq h1 p1).[k] == (as_seq h0 p2).[k] /\ (as_seq h1 p2).[k] == (as_seq h0 p1).[k]
+      else (as_seq h1 p1).[k] == (as_seq h0 p1).[k] /\ (as_seq h1 p2).[k] == (as_seq h0 p2).[k]) /\
+    (forall (k:nat{i <= k /\ k < 4}).
+      (as_seq h1 p1).[k] == (as_seq h0 p1).[k] /\ (as_seq h1 p2).[k] == (as_seq h0 p2).[k]) /\
+    modifies (loc p1 |+| loc p2) h0 h1 in
+ 
+  Lib.Loops.for 0ul len inv
+    (fun i ->
+      let dummy = mask &. (p1.(i) ^. p2.(i)) in
+      p1.(i) <- p1.(i) ^. dummy;
+      p2.(i) <- p2.(i) ^. dummy;
+      lemma_cswap2_step bit ((as_seq h0 p1).[v i]) ((as_seq h0 p2).[v i])
+    );
+  let h1 = ST.get () in
+  Lib.Sequence.eq_intro (as_seq h1 p1) (if v bit = 1 then as_seq h0 p2 else as_seq h0 p1);
+  Lib.Sequence.eq_intro (as_seq h1 p2) (if v bit = 1 then as_seq h0 p1 else as_seq h0 p2)
+
+
+inline_for_extraction noextract
+val montgomery_ladder_exponent_step0: #c: curve -> a: felem c-> b: felem c -> Stack unit
+  (requires fun h -> live h a /\ live h b)
+  (ensures fun h0 _ h1 -> True)
+
+let montgomery_ladder_exponent_step0  #c a b = 
+  montgomery_multiplication_buffer a b b;
+  montgomery_multiplication_buffer a a a
+
+
+inline_for_extraction noextract
+val montgomery_ladder_exponent_step: #c: curve -> a: felem c -> b: felem c -> 
+  scalar: glbuffer uint8 (getScalarLen c) ->   i:size_t{v i < getPower c} ->  Stack unit
+  (requires fun h -> live h a  /\ live h b /\ live h scalar)
+  (ensures fun h0 _ h1 -> modifies (loc a |+| loc b) h0 h1  )  
+
+let montgomery_ladder_exponent_step #c a b scalar i = 
+    let h0 = ST.get() in 
+  let bit0 = (getPowerU c) -. 1 -. i in 
+  let bit = Hacl.Impl.P256.LowLevel.scalar_bit scalar bit0 in 
+  cswap bit a b;
+  montgomery_ladder_exponent_step0 a b;
+  cswap bit a b
+
+
+inline_for_extraction noextract 
+val _montgomery_ladder_exponent: #c: curve -> a: felem c ->b: felem c ->  
+  scalar: glbuffer uint8 (getScalarLen c) -> Stack unit
+  (requires fun h -> live h a /\ live h b /\ live h scalar /\ disjoint a b /\disjoint a scalar /\ disjoint b scalar)
+  (ensures fun h0 _ h1 -> modifies (loc a |+| loc b) h0 h1)
+
+  
+let _montgomery_ladder_exponent #c a b scalar = 
+  let h0 = ST.get() in 
+  let len = getPowerU c in 
+(*  [@inline_let]
+  let spec_exp h0  = _exp_step #P256 (as_seq h0 scalar) in  
+  [@inline_let]
+  let acc (h: mem) : GTot (tuple2 nat_prime nat_prime) = (fromDomain_ (as_nat c h a), fromDomain_ (as_nat c h b)) in 
+  Lib.LoopCombinators.eq_repeati0 256 (spec_exp h0) (acc h0); *)
+  [@inline_let]
+  let inv h (i: nat {i <= getPower c}) = 
+    live h a /\ live h b /\ live h scalar
+    (*modifies (loc a |+| loc b) h0 h /\ as_nat c h a < prime /\ as_nat c h b < prime /\
+    acc h == Lib.LoopCombinators.repeati i (spec_exp h0) (acc h0) *) in 
+  for 0ul len inv (
+    fun i -> 
+	  montgomery_ladder_exponent_step a b scalar i (*;
+	  Lib.LoopCombinators.unfold_repeati 256 (spec_exp h0) (acc h0) (uint_v i) *) )
+
+
+(* and the others *)
+val _exponent: #c: curve -> a: felem c -> result: felem c 
+  -> tempBuffer: lbuffer uint64 (size 5 *! getCoordinateLenU64 c) 
+  -> Stack unit
+    (requires fun h -> 
+      live h a /\ live h tempBuffer /\ live h result /\  disjoint tempBuffer result /\ 
+      disjoint a tempBuffer /\ as_nat c h a < getPrime c)
+    (ensures fun h0 _ h1 -> 
+      modifies2 result tempBuffer h0 h1 /\
+      (let k = fromDomain_ #c (as_nat c h0 a) in 
+      as_nat c h1 result =  toDomain_ #c (pow k (getPrime c - 2) % getPrime c)))
+
+let _exponent #c r result tempBuffer = 
+  let len = getCoordinateLenU64 c in 
+  let p = sub tempBuffer (size 0) len in 
+  upload_one_montg_form #c p; 
+  _montgomery_ladder_exponent p r prime_inverse_buffer;
+  copy result p;
+  pop_frame()  
+
+
+#reset-options " --z3rlimit 200"
+let exponent #c a result tempBuffer = 
+  match c with 
+  |P384 -> _exponent #P384 a result tempBuffer
+  |P256 -> exponent_p256 a result tempBuffer
+

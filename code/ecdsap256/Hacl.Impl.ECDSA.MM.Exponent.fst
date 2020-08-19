@@ -135,7 +135,8 @@ let _montgomery_ladder_exponent #c a b scalar =
   Lib.LoopCombinators.eq_repeati0 256 (spec_exp h0) (acc h0);
   [@inline_let]
   let inv h (i: nat {i <= 256}) = 
-    live h a /\ live h b /\ live h scalar /\ modifies (loc a |+| loc b) h0 h /\ as_nat c h a < prime /\ as_nat c h b < prime /\
+    live h a /\ live h b /\ live h scalar /\ 
+    modifies (loc a |+| loc b) h0 h /\ as_nat c h a < prime /\ as_nat c h b < prime /\
     acc h == Lib.LoopCombinators.repeati i (spec_exp h0) (acc h0) in 
   for 0ul 256ul inv (
     fun i -> 
