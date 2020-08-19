@@ -36,8 +36,8 @@ let add_mod_n: BN.bn_add_mod_n_st n =
 let sub_mask: BN.bn_sub_mask_st n =
   BN.bn_sub_mask n
 
-let sqr (a: lbignum n): BN.bn_sqr_st a =
-  BN.bn_sqr n a
+let sqr (a: lbignum n): BN.bn_karatsuba_sqr_st a =
+  BN.bn_karatsuba_sqr n a
 
 inline_for_extraction noextract
 instance bn_inst: BN.bn n = {

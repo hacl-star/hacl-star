@@ -42,6 +42,23 @@ extern "C" {
 #endif
 
 void
+Hacl_Bignum_Karatsuba_bn_karatsuba_mul_(
+  uint32_t aLen,
+  uint64_t *a,
+  uint64_t *b,
+  uint64_t *tmp,
+  uint64_t *res
+);
+
+void
+Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_(
+  uint32_t aLen,
+  uint64_t *a,
+  uint64_t *tmp,
+  uint64_t *res
+);
+
+void
 Hacl_RSAPSS_rsapss_sign(
   Spec_Hash_Definitions_hash_alg a,
   uint32_t modBits,

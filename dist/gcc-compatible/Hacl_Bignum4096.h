@@ -34,6 +34,7 @@
 #define __Hacl_Bignum4096_H
 
 #include "Hacl_Kremlib.h"
+#include "Hacl_RSAPSS.h"
 #include "Hacl_Bignum.h"
 #if defined(__cplusplus)
 extern "C" {
