@@ -7,6 +7,17 @@ module Bindings(F:Cstubs.FOREIGN) =
         (uint64_t @->
            (uint64_t @->
               (uint64_t @-> ((ptr uint64_t) @-> (returning uint64_t)))))
+    let hacl_Bignum_Karatsuba_bn_karatsuba_mul_ =
+      foreign "Hacl_Bignum_Karatsuba_bn_karatsuba_mul_"
+        (uint32_t @->
+           ((ptr uint64_t) @->
+              ((ptr uint64_t) @->
+                 ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void))))))
+    let hacl_Bignum_Karatsuba_bn_karatsuba_sqr_ =
+      foreign "Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_"
+        (uint32_t @->
+           ((ptr uint64_t) @->
+              ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void)))))
     let hacl_Bignum_bn_is_bit_set =
       foreign "Hacl_Bignum_bn_is_bit_set"
         (uint32_t @-> ((ptr uint64_t) @-> (uint32_t @-> (returning bool))))

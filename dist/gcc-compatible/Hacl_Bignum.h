@@ -22,6 +22,7 @@
  */
 
 #include "evercrypt_targetconfig.h"
+#include "lib_intrinsics.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
@@ -54,6 +55,23 @@ Hacl_Bignum_Multiplication_mul_carry_add_u64_st(
   out[0U] = FStar_UInt128_uint128_to_uint64(res);
   return FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(res, (uint32_t)64U));
 }
+
+void
+Hacl_Bignum_Karatsuba_bn_karatsuba_mul_(
+  uint32_t aLen,
+  uint64_t *a,
+  uint64_t *b,
+  uint64_t *tmp,
+  uint64_t *res
+);
+
+void
+Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_(
+  uint32_t aLen,
+  uint64_t *a,
+  uint64_t *tmp,
+  uint64_t *res
+);
 
 static inline bool Hacl_Bignum_bn_is_bit_set(uint32_t len, uint64_t *input, uint32_t ind)
 {
