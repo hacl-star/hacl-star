@@ -273,7 +273,7 @@ let ecdsa_signature_core #c alg r s mLen m privKeyAsFelem k =
   ecdsa_signature_step12 #c alg mLen m hashAsFelem;
   let h1 = ST.get() in 
   lemma_core_0 c kAsFelem h1;
-  changeEndianLemma (uints_from_bytes_be (as_seq h0 k));
+  changeEndianLemma #c (uints_from_bytes_be (as_seq h0 k));
   uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h0 k);
   let step5Flag = ecdsa_signature_step45 c r k tempBuffer in 
   assert_norm (pow2 32 < pow2 61);
@@ -332,7 +332,7 @@ let ecdsa_signature c alg result mLen m privKey k =
 
   let h1 = ST.get() in 
   lemma_core_0 privKeyAsFelem c h1;
-  changeEndianLemma (uints_from_bytes_be (as_seq h0 privKey));
+  changeEndianLemma #c (uints_from_bytes_be (as_seq h0 privKey));
   uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 privKey);    
   let flag = ecdsa_signature_core #c alg r s mLen m privKeyAsFelem k in 
 
@@ -349,8 +349,8 @@ let ecdsa_signature c alg result mLen m privKey k =
   lemma_core_0 c s h2;
   lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h2 s);
 
-  changeEndian_le_be (as_nat c h2 r);
-  changeEndian_le_be (as_nat c h2 s);
+  changeEndian_le_be #c (as_nat c h2 r);
+  changeEndian_le_be #c (as_nat c h2 s);
 
   pop_frame();
   flag  

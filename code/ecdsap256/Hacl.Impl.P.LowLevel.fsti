@@ -125,17 +125,17 @@ val toUint8: #c: curve -> i: felem c ->  o: lbuffer uint8 (getScalarLen c) -> St
 
 val changeEndian: #c: curve -> i: felem c -> Stack unit 
   (requires fun h -> live h i)
-  (ensures  fun h0 _ h1 -> modifies1 i h0 h1 (*/\ 
-    as_seq h1 i == Hacl.Spec.ECDSA.Definition.changeEndian (as_seq h0 i) /\
-    as_nat P256 h1 i < pow2 256 *) ) 
+  (ensures  fun h0 _ h1 -> modifies1 i h0 h1 /\ 
+    as_seq h1 i == Hacl.Spec.P256.Definition.changeEndian (as_seq h0 i) /\
+    as_nat c h1 i < getPower2 c) 
+
 
 val toUint64ChangeEndian: #c: curve -> i:lbuffer uint8 (getScalarLen c) -> o: felem c -> Stack unit
   (requires fun h -> live h i /\ live h o /\ disjoint i o)
   (ensures  fun h0 _ h1 ->
-    modifies (loc o) h0 h1 (* /\
-    as_seq h1 o == Hacl.Spec.ECDSA.Definition.changeEndian (Lib.ByteSequence.uints_from_bytes_be (as_seq h0 i)) *)
-  )
-
+    modifies (loc o) h0 h1  /\
+    as_seq h1 o == Hacl.Spec.P256.Definition.changeEndian (
+      Lib.ByteSequence.uints_from_bytes_be (as_seq h0 i)))
 
 
 inline_for_extraction
@@ -165,15 +165,11 @@ val felem_add: #c: curve -> a: felem c -> b: felem c -> out: felem c ->
   Stack unit
     (requires (fun h0 -> 
       live h0 a /\ live h0 b /\ live h0 out /\ eq_or_disjoint a out /\  eq_or_disjoint b out /\
-      as_nat c h0 a < getPrime c /\ as_nat c h0 b < getPrime c 
-      )
-    )
+      as_nat c h0 a < getPrime c /\ as_nat c h0 b < getPrime c))
     (ensures (fun h0 _ h1 -> 
       modifies (loc out) h0 h1 /\ 
       as_nat c h1 out == (as_nat c h0 a + as_nat c h0 b) % getPrime c /\
-      as_nat c h1 out == toDomain_ #c((fromDomain_ #c (as_nat c h0 a) + fromDomain_ #c (as_nat c h0 b)) % getPrime c)
-	)
-    )
+      as_nat c h1 out == toDomain_ #c((fromDomain_ #c (as_nat c h0 a) + fromDomain_ #c (as_nat c h0 b)) % getPrime c)))
 
 
 val felem_double: #c: curve -> a: felem c -> out: felem c -> 
@@ -183,25 +179,18 @@ val felem_double: #c: curve -> a: felem c -> out: felem c ->
     (ensures (fun h0 _ h1 -> 
       modifies (loc out) h0 h1 /\ 
       as_nat c h1 out == (2 * as_nat c h0 a) % getPrime c /\
-      as_nat c h1 out == toDomain_ #c (2 * fromDomain_ #c (as_nat c h0 a) % getPrime c)
-    )
-  )
+      as_nat c h1 out == toDomain_ #c (2 * fromDomain_ #c (as_nat c h0 a) % getPrime c)))
 
 
 val felem_sub: #c: curve -> a: felem c -> b: felem c -> out: felem c -> 
   Stack unit 
     (requires (fun h0 -> 
       live h0 out /\ live h0 a /\ live h0 b /\ eq_or_disjoint a out /\ eq_or_disjoint b out /\ 
-      as_nat c h0 a < getPrime c /\ as_nat c h0 b < getPrime c
-      )
-    )
+      as_nat c h0 a < getPrime c /\ as_nat c h0 b < getPrime c))
     (ensures (fun h0 _ h1 -> 
       modifies (loc out) h0 h1 /\ 
       as_nat c h1 out == (as_nat c h0 a - as_nat c h0 b) % getPrime c /\
-      as_nat c h1 out == toDomain_ #c ((fromDomain_ #c (as_nat c h0 a) - fromDomain_ #c (as_nat c h0 b)) % getPrime c)
-      )
-    )    
-
+      as_nat c h1 out == toDomain_ #c ((fromDomain_ #c (as_nat c h0 a) - fromDomain_ #c (as_nat c h0 b)) % getPrime c)))    
 
 
 inline_for_extraction noextract
@@ -209,13 +198,11 @@ val mul: #c: curve -> f: felem c -> r: felem c -> out: widefelem c ->
   Stack unit
     (requires fun h -> live h out /\ live h f /\ live h r /\ disjoint r out)
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\ 
-      wide_as_nat c h1 out = as_nat c h0 r * as_nat c h0 f
-    )
+      wide_as_nat c h1 out = as_nat c h0 r * as_nat c h0 f)
 
 
-
-  
 val eq0_u64: a: uint64 -> Tot (r: uint64 {if uint_v a = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0})
+
 
 val eq1_u64: a: uint64 -> Tot (r: uint64 {if uint_v a = 0 then uint_v r == 0 else uint_v r == pow2 64 - 1})
 
@@ -224,10 +211,9 @@ val isZero_uint64_CT: #c: curve ->  f: felem c -> Stack uint64
   (requires fun h -> live h f)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\ 
     (if as_nat c h0 f = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0))
- 
 
 
- val compare_felem: #c: curve -> a: felem c -> b: felem c -> Stack uint64
+val compare_felem: #c: curve -> a: felem c -> b: felem c -> Stack uint64
   (requires fun h -> live h a /\ live h b) 
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\ (if as_nat c h0 a = as_nat c h0 b then uint_v r == pow2 64 - 1 else uint_v r = 0))
 
@@ -251,12 +237,10 @@ val mod64: #c: curve -> a: widefelem c -> Stack uint64
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\ wide_as_nat c h1 a % pow2 64 = uint_v r)
 
 
-
 val shift1: #c: curve -> t: widefelem c -> t1: widefelem c -> Stack unit 
   (requires fun h -> live h t /\ live h t1 /\ eq_or_disjoint t t1)
   (ensures fun h0 _ h1 -> modifies (loc t1) h0 h1 /\ 
     wide_as_nat c h0 t / pow2 64 = wide_as_nat c h1 t1)
-
 
 
 inline_for_extraction noextract 
@@ -265,15 +249,11 @@ val upload_one_montg_form: #c: curve -> b: felem c -> Stack unit
   (ensures fun h0 _ h1 -> modifies (loc b) h0 h1 )
 
 
-
 inline_for_extraction noextract
-val scalar_bit:
-    #c: curve -> 
-    #buf_type: buftype -> 
-    s:lbuffer_t buf_type uint8 (getScalarLen c)
+val scalar_bit: #c: curve -> #buf_type: buftype
+  -> s:lbuffer_t buf_type uint8 (getScalarLen c)
   -> n:size_t{v n < getScalarLenNat c}
   -> Stack uint64
     (requires fun h0 -> live h0 s)
-    (ensures  fun h0 r h1 -> h0 == h1 /\
-      r == ith_bit #c (as_seq h0 s) (v n) /\ v r <= 1)
+    (ensures  fun h0 r h1 -> h0 == h1 /\ r == ith_bit #c (as_seq h0 s) (v n) /\ v r <= 1)
       

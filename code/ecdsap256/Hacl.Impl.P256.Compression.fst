@@ -200,7 +200,7 @@ let decompressionCompressedForm #c b result =
       lemma_core_0 c t0 h1;
 
       let lessThanPrimeXCoordinate = lessThanPrime #c t0 in 
-      changeEndianLemma (Lib.ByteSequence.uints_from_bytes_be (as_seq h0 x));
+      changeEndianLemma #c (Lib.ByteSequence.uints_from_bytes_be (as_seq h0 x));
 	Lib.ByteSequence.uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h0 x);
 
       if not (lessThanPrimeXCoordinate) then 
@@ -213,7 +213,7 @@ let decompressionCompressedForm #c b result =
 	  toDomain #c t0 t0;
 	  lemmaToDomain #c (as_nat c h1 t0);
 	    let h2 = ST.get() in 
-	    assert(as_nat c h2 t0 =  (toDomain_ #c (Lib.ByteSequence.nat_from_intseq_le (changeEndian (Lib.ByteSequence.uints_from_bytes_be (as_seq h0 x))))));
+	    assert(as_nat c h2 t0 =  (toDomain_ #c (Lib.ByteSequence.nat_from_intseq_le (changeEndian #c (Lib.ByteSequence.uints_from_bytes_be (as_seq h0 x))))));
 
 	  let identifierBit = to_u64 (logand compressedIdentifier (u8 1)) in 
 	  logand_mask compressedIdentifier (u8 1) 1;
@@ -232,12 +232,12 @@ let decompressionCompressedForm #c b result =
 	  Hacl.Impl.P.LowLevel.changeEndian #c t1;
 	  toUint8 #c t1 (sub result (size 32) (size 32)); 
 	   let h5 = ST.get() in 
-	   assert(as_seq h5 (gsub result (size 32) (size 32)) == Lib.ByteSequence.uints_to_bytes_be (changeEndian (as_seq h3 t1)));
+	   assert(as_seq h5 (gsub result (size 32) (size 32)) == Lib.ByteSequence.uints_to_bytes_be (changeEndian #c (as_seq h3 t1)));
 
 	  lemma_core_0 c t1 h3;
 	  
 	  Lib.ByteSequence.lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h3 t1);
-	  changeEndian_le_be (as_nat c h3 t1);
+	  changeEndian_le_be #c (as_nat c h3 t1);
 	  
 	  assert(   
 	      let xD = Lib.ByteSequence.nat_from_intseq_be (as_seq h0 x) in 

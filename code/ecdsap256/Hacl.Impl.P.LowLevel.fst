@@ -22,27 +22,26 @@ open FStar.Tactics.Canon
 open Hacl.Impl.P256.LowLevel
 open Hacl.Impl.P384.LowLevel
 
+open Lib.IntTypes.Intrinsics
+
+
 open Lib.Loops
 
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
 
 let uploadZeroImpl #c f =
-    let h0 = ST.get() in 
+  let h0 = ST.get() in 
   let len = getCoordinateLenU64 c in 
-  let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = live h f /\ modifies (loc f) h0 h /\
-    (
-      forall (j: nat {j < i}). 
-	let elemUpdated = Lib.Sequence.index (as_seq h f) j in 
-	uint_v elemUpdated = 0) in 
-
+  let inv h (i: nat {i <= uint_v (getCoordinateLenU64 c)}) = live h f /\ modifies (loc f) h0 h /\
+    (forall (j: nat {j < i}). 
+      let elemUpdated = Lib.Sequence.index (as_seq h f) j in uint_v elemUpdated = 0) in 
   for 0ul len inv (fun i -> 
     upd f i (u64 0); 
     let h = ST.get() in 
     assert(
       forall (j: nat {j < uint_v i}). 
-      let elemUpdated = Lib.Sequence.index (as_seq h f) j in uint_v elemUpdated = 0)
-  )
+      let elemUpdated = Lib.Sequence.index (as_seq h f) j in uint_v elemUpdated = 0))
 
 
 let uploadZeroPoint #c p =
@@ -60,14 +59,37 @@ let uploadZeroPoint #c p =
 let cmovznz4 #c  cin x y r =
   let h0 = ST.get() in
   let mask = neq_mask cin (u64 0) in
-
+  
   let len = getCoordinateLenU64 c in 
-  let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = True in 
-  for 0ul len inv (fun i -> 
-    let r_i = logor (logand y.(i) mask) (logand x.(i) (lognot mask)) in 
-    upd r i r_i;
-    cmovznz4_lemma cin (Seq.index (as_seq h0 x) i) (Seq.index (as_seq h0 y) i))
+  let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = 
+    live h x /\ live h y /\ modifies (loc r) h0 h /\ 
+    (
+      forall (j: nat {j >= i && j < v (getCoordinateLenU64 c)}).
+      let y_i = Lib.Sequence.index (as_seq h y) j in 
+      let y_0 = Lib.Sequence.index (as_seq h0 y) j in 
+      uint_v y_i == uint_v y_0
+    ) /\
     
+    (
+      forall (j: nat {j < i}).
+	let x_i = Lib.Sequence.index (as_seq h0 x) j in 
+	let y_i = Lib.Sequence.index (as_seq h0 y) j in 
+	let r_i = Lib.Sequence.index (as_seq h r) j in 
+	if uint_v cin = 0 then 
+	  uint_v r_i == uint_v x_i
+	else
+	  uint_v r_i == uint_v y_i
+    ) in 
+  for 0ul len inv (fun i -> 
+    let h_ = ST.get() in 
+    let x_i = index x i in 
+    let y_i = index y i in 
+    let r_i = logor (logand y_i mask) (logand x_i (lognot mask)) in 
+    upd r i r_i;
+    cmovznz4_lemma cin (Seq.index (as_seq h0 x) (v i)) (Seq.index (as_seq h0 y) (v i))
+  )
+
+
 
 let add_bn #c x y result =
   match c with

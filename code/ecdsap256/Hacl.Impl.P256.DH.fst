@@ -47,11 +47,11 @@ let ecp256dh_i c result scalar =
 
   lemma_core_0 c resultBufferX h0;
   lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h0 resultBufferX);
-  changeEndian_le_be (as_nat c h0 resultBufferX);
+  changeEndian_le_be #c (as_nat c h0 resultBufferX);
 
   lemma_core_0 c resultBufferY h0;
   lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h0 resultBufferY);
-  changeEndian_le_be (as_nat c h0 resultBufferY); 
+  changeEndian_le_be #c (as_nat c h0 resultBufferY); 
   pop_frame();
   flag
 
@@ -143,11 +143,11 @@ let ecp256dh_r c result pubKey scalar =
 
   let h1 = ST.get() in
   lemma_core_0 c publicKeyFelemX h1;
-  changeEndianLemma (uints_from_bytes_be (as_seq h0 pubKeyX));
+  changeEndianLemma #c (uints_from_bytes_be (as_seq h0 pubKeyX));
   uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 pubKeyX);
 
   lemma_core_0 c publicKeyFelemY h1;
-  changeEndianLemma (uints_from_bytes_be (as_seq h0 pubKeyY));
+  changeEndianLemma #c (uints_from_bytes_be (as_seq h0 pubKeyY));
   uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 pubKeyY);
 
   let flag = _ecp256dh_r #c resultBufferFelem publicKeyAsFelem scalar in
@@ -161,11 +161,11 @@ let ecp256dh_r c result pubKey scalar =
 
   lemma_core_0 c resultBufferFelemX h2;
   lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h2 resultBufferFelemX);
-  changeEndian_le_be (as_nat c h2 resultBufferFelemX);
+  changeEndian_le_be #c (as_nat c h2 resultBufferFelemX);
 
   lemma_core_0 c resultBufferFelemY h2;
   lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h2 resultBufferFelemY);
-  changeEndian_le_be (as_nat c h2 resultBufferFelemY);
+  changeEndian_le_be #c (as_nat c h2 resultBufferFelemY);
 
   pop_frame();
   flag
