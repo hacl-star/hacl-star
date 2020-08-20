@@ -297,8 +297,18 @@ noextract
 let felem_seq_prime (c: curve) = a: felem_seq c {felem_seq_as_nat c a < getPrime c}
 
 noextract
-let point_prime (c: curve) =  p: point_seq c {let x = Lib.Sequence.sub p 0 4 in let y = Lib.Sequence.sub p 4 4 in let z = Lib.Sequence.sub p 8 4 in 
-  felem_seq_as_nat c x < prime256 /\ felem_seq_as_nat c y < prime256 /\ felem_seq_as_nat c z < prime256} 
+let point_prime (c: curve) =  
+  p: point_seq c {
+    let len = uint_v (getCoordinateLenU64 c) in 
+    let prime = getPrime c in 
+
+    let x = Lib.Sequence.sub p 0 len in 
+    let y = Lib.Sequence.sub p len len in 
+    let z = Lib.Sequence.sub p (2 * len) len in 
+    
+    felem_seq_as_nat c x < prime /\ 
+    felem_seq_as_nat c y < prime /\ 
+    felem_seq_as_nat c z < prime} 
 
 
 inline_for_extraction

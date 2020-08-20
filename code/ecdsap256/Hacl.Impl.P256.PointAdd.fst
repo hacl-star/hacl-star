@@ -665,6 +665,7 @@ let point_add_if_second_branch_impl #c result p q u1 u2 s1 s2 r h uh hCube tempB
 
 
 let point_add #c p q result tempBuffer = 
+  admit();
   let h0 = ST.get() in 
 
   let len = getCoordinateLenU64 c in 

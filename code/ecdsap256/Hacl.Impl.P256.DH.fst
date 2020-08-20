@@ -22,15 +22,18 @@ open Hacl.Impl.P256.Signature.Common
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
 
 let ecp256dh_i c result scalar =
-  match c with 
-  |P256 -> 
   push_frame();
+  let len = getCoordinateLenU64 c in 
+  let scalarLen = getScalarLen c in 
+
   let tempBuffer = create (size 100) (u64 0) in
-  let resultBuffer = create (size 12) (u64 0) in
-  let resultBufferX = sub resultBuffer (size 0) (size 4) in
-  let resultBufferY = sub resultBuffer (size 4) (size 4) in
-  let resultX = sub result (size 0) (size 32) in
-  let resultY = sub result (size 32) (size 32) in
+    
+  let resultBuffer = create (size 3 *! len) (u64 0) in
+  let resultBufferX = sub resultBuffer (size 0) len in
+  let resultBufferY = sub resultBuffer len len in
+    
+  let resultX = sub result (size 0) scalarLen in
+  let resultY = sub result scalarLen scalarLen in
 
   secretToPublic #c resultBuffer scalar tempBuffer;
   let flag = isPointAtInfinityPrivate #c resultBuffer in
@@ -51,35 +54,44 @@ let ecp256dh_i c result scalar =
   changeEndian_le_be (as_nat c h0 resultBufferY); 
   pop_frame();
   flag
-  |P384 -> ()
+
 
 (*
 [@ (Comment "  This code is not side channel resistant on pubKey")]
 *)
 
-
 val _ecp256dh_r:
   #c: curve 
-  -> result:lbuffer uint64 (size 12) 
-  -> pubKey:lbuffer uint64 (size 8) 
-  -> scalar: lbuffer uint8 (size 32) 
+  -> result:lbuffer uint64 (size 3 *! getCoordinateLenU64 c) 
+  -> pubKey:lbuffer uint64 (size 2 *! getCoordinateLenU64 c) 
+  -> scalar: lbuffer uint8 (getScalarLen c) 
   -> Stack uint64
     (requires fun h -> 
+      let len = getCoordinateLenU64 c in 
+      
       live h result /\ live h pubKey /\ live h scalar /\
       disjoint result pubKey /\ disjoint result scalar /\
-      as_nat c h (gsub result (size 0) (size 4)) == 0 /\
-      as_nat c h (gsub result (size 4) (size 4)) == 0)
+      
+      as_nat c h (gsub result (size 0) len) == 0 /\
+      as_nat c h (gsub result len len) == 0
+   )
     (ensures fun h0 r h1 -> 
-      modifies (loc result) h0 h1 /\
-      (let x, y = as_nat c h0 (gsub pubKey (size 0) (size 4)), as_nat c h0 (gsub pubKey (size 4) (size 4)) in
+      let len = getCoordinateLenU64 c in 
+      let prime = getPrime c in       
+      
+      modifies (loc result) h0 h1 /\ (
+      
+      let x, y = as_nat c h0 (gsub pubKey (size 0) len), as_nat c h0 (gsub pubKey len len) in
+      
        let x3, y3, z3 = point_x_as_nat c h1 result, point_y_as_nat c h1 result, point_z_as_nat c h1 result in
        let pointJacX, pointJacY, pointJacZ = toJacobianCoordinates (x, y) in
-       if not (verifyQValidCurvePointSpec #P256 (pointJacX, pointJacY, pointJacZ)) then
-         uint_v r = maxint U64 /\ x3 == 0 /\ y3 == 0
+       if not (verifyQValidCurvePointSpec #c (pointJacX, pointJacY, pointJacZ)) then
+	 uint_v r = maxint U64 /\ x3 == 0 /\ y3 == 0
        else
-        x3 < prime256 /\ y3 < prime256 /\ z3 < prime256 /\
-        (let xN, yN, zN = scalar_multiplication #P256 (as_seq h0 scalar) (pointJacX, pointJacY, pointJacZ) in
-         xN == x3 /\ yN == y3 /\ zN == z3 /\
+	 x3 < prime /\ y3 < prime /\ z3 < prime /\
+         (
+	   let xN, yN, zN = scalar_multiplication #c (as_seq h0 scalar) (pointJacX, pointJacY, pointJacZ) in
+           xN == x3 /\ yN == y3 /\ zN == z3 /\
          (if isPointAtInfinity (xN, yN, zN) then
            uint_v r = maxint U64
          else
@@ -88,8 +100,10 @@ val _ecp256dh_r:
 
 let _ecp256dh_r #c result pubKey scalar =
   push_frame();
-  let tempBuffer = create (size 100) (u64 0) in
-  let publicKeyBuffer = create (size 12) (u64 0) in
+  admit();
+  let len = getCoordinateLenU64 c in 
+  let tempBuffer = create (size 25 *! len) (u64 0) in
+  let publicKeyBuffer = create (size 3 *! len) (u64 0) in
   bufferToJac #c pubKey publicKeyBuffer;
   let publicKeyCorrect = verifyQValidCurvePoint #c publicKeyBuffer tempBuffer in
   if publicKeyCorrect then
@@ -107,21 +121,22 @@ let _ecp256dh_r #c result pubKey scalar =
 
 
 let ecp256dh_r c result pubKey scalar =
-  match c with 
-  |P256 -> 
   push_frame();
   let h0 = ST.get() in
-  let resultBufferFelem = create (size 12) (u64 0) in
-  let resultBufferFelemX = sub resultBufferFelem (size 0) (size 4) in
-  let resultBufferFelemY = sub resultBufferFelem (size 4) (size 4) in
-  let resultX = sub result (size 0) (size 32) in
-  let resultY = sub result (size 32) (size 32) in
+  
+  let len = getCoordinateLenU64 c in 
 
-  let publicKeyAsFelem = create (size 8) (u64 0) in
-  let publicKeyFelemX = sub publicKeyAsFelem (size 0) (size 4) in
-  let publicKeyFelemY = sub publicKeyAsFelem (size 4) (size 4) in
-  let pubKeyX = sub pubKey (size 0) (size 32) in
-  let pubKeyY = sub pubKey (size 32) (size 32) in
+  let resultBufferFelem = create (size 3 *! len) (u64 0) in
+  let resultBufferFelemX = sub resultBufferFelem (size 0) len in
+  let resultBufferFelemY = sub resultBufferFelem len len in
+  let resultX = sub result (size 0) (getScalarLen c) in
+  let resultY = sub result (getScalarLen c) (getScalarLen c) in
+
+  let publicKeyAsFelem = create (size 2 *! len) (u64 0) in
+  let publicKeyFelemX = sub publicKeyAsFelem (size 0) len in
+  let publicKeyFelemY = sub publicKeyAsFelem len len in
+  let pubKeyX = sub pubKey (size 0) (getScalarLen c) in
+  let pubKeyY = sub pubKey (getScalarLen c) (getScalarLen c) in
 
   toUint64ChangeEndian #c pubKeyX publicKeyFelemX;
   toUint64ChangeEndian #c pubKeyY publicKeyFelemY;
@@ -154,4 +169,3 @@ let ecp256dh_r c result pubKey scalar =
 
   pop_frame();
   flag
-  |P384 -> ()

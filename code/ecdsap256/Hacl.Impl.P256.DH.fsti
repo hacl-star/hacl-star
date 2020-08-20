@@ -27,7 +27,7 @@ val ecp256dh_i:
     modifies (loc result) h0 h1 /\
     r == flag /\
     as_seq h1 (gsub result (size 0) (getCoordinateLen c)) == pointX /\
-    as_seq h1 (gsub result (size 32) (getCoordinateLen c)) == pointY
+    as_seq h1 (gsub result (getCoordinateLen c) (getCoordinateLen c)) == pointY
   )
 
 
@@ -49,4 +49,4 @@ val ecp256dh_r:
       r == flag /\
       modifies (loc result) h0 h1 /\
       as_seq h1 (gsub result (size 0) (size (getCoordinateLen c))) == pointX /\
-      as_seq h1 (gsub result (size (getCoordinateLen c)) (size (getCoordinateLen c))) == pointY)
+      as_seq h1 (gsub result (getCoordinateLen c) (getCoordinateLen c)) == pointY)

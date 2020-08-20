@@ -13,7 +13,7 @@ open Spec.P256
 
 
 
-val exponent: #c: curve -> a: felem c -> result: felem c -> tempBuffer: lbuffer uint64 (size 20)
+val exponent: #c: curve -> a: felem c -> result: felem c
   -> Stack unit
     (requires fun h -> 
       live h a /\ live h result /\  as_nat c h a < getPrime c)

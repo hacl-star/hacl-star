@@ -204,14 +204,17 @@ let lemma_mul_nat a b = ()
 
 
 
-val exponent_p256: a: felem P256-> result: felem P256-> tempBuffer: lbuffer uint64 (size 20) ->  Stack unit
-  (requires fun h -> live h a /\ live h tempBuffer /\ live h result /\ disjoint tempBuffer result /\ 
-  disjoint a tempBuffer /\ as_nat P256 h a < prime256)
-  (ensures fun h0 _ h1 -> modifies2 result tempBuffer h0 h1 /\ (let k = fromDomain_ #P256 (as_nat P256 h0 a) in 
+val exponent_p256: a: felem P256-> result: felem P256->  Stack unit
+  (requires fun h -> live h a /\ live h result /\ as_nat P256 h a < prime256)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
+    (let k = fromDomain_ #P256 (as_nat P256 h0 a) in 
     as_nat P256 h1 result =  toDomain_ #P256 ((pow k (prime256 - 2)) % prime256)))
 
-let exponent_p256 a result tempBuffer =    
+let exponent_p256 a result =    
   let h0 = ST.get () in 
+  push_frame();
+    let tempBuffer = create (size 20) (u64 0) in 
+
   let buffer_norm_1 = Lib.Buffer.sub  tempBuffer (size 0) (size 8) in 
   let buffer_result1 = Lib.Buffer.sub tempBuffer (size 4) (size 4) in 
   let buffer_result2 = Lib.Buffer.sub tempBuffer (size 8) (size 4) in 
@@ -230,6 +233,8 @@ let exponent_p256 a result tempBuffer =
     montgomery_multiplication_buffer #P256 buffer_result1 a buffer_result1;
       let h4 = ST.get() in 
     copy result buffer_result1; 
+    pop_frame();
+      
       let h5 = ST.get() in 
     assert_norm ((pow2 32 - 1) * pow2 224 >= 0);
     assert_norm (pow2 192 >= 0);
@@ -406,10 +411,10 @@ let montgomery_ladder_power #c a scalar result =
 
 
 #reset-options " --z3rlimit 200"
-let exponent #c a result tempBuffer = 
+let exponent #c a result = 
   match c with 
   |P384 -> montgomery_ladder_power #c a prime_inverse_buffer result
-  |P256 -> exponent_p256 a result tempBuffer
+  |P256 -> exponent_p256 a result
 
 
 

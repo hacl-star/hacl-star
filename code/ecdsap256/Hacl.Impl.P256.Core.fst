@@ -31,13 +31,14 @@ friend Hacl.Spec.P256.MontgomeryMultiplication
 open FStar.Mul
 
 
-val swap: #c: curve ->  p: point_prime c -> q: point_prime c -> Tot (r: tuple2 (point_prime c) (point_prime c) {let pNew, qNew = r in 
-  pNew == q /\ qNew == p})
+val swap: #c: curve ->  p: point_seq c -> q: point_seq c 
+  -> Tot (r: tuple2 (point_seq c) (point_seq c)
+    {let pNew, qNew = r in  pNew == q /\ qNew == p})
 
 let swap p q = (q, p)
 
 
-val conditional_swap: #c: curve -> i: uint64 -> p: point_prime c -> q: point_prime c -> Tot (r: tuple2 (point_prime c) (point_prime c)
+val conditional_swap: #c: curve -> i: uint64 -> p: point_seq c -> q: point_seq c -> Tot (r: tuple2 (point_seq c) (point_seq c)
   {
     let pNew, qNew = r in 
     if uint_v i = 0 then pNew == p /\ qNew == q
@@ -131,6 +132,22 @@ let lemma_pointAtInfInDomain #c x y z =
 
 
 let isPointAtInfinityPrivate #c p =  
+  push_frame();
+  admit();
+    let tmp = create (size 1) (u64 18446744073709551615) in 
+    let start = getCoordinateLenU64 c *! size 2 in 
+    let len = start +! getCoordinateLenU64 c  in 
+    let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = True in
+    for start len inv (fun i -> 
+      let a_i = index p i in 
+      let r_i = eq_mask a_i (u64 0) in 
+      upd tmp (size 0) (logand r_i (index tmp (size 0))));
+
+    let r = index tmp (size 0) in 
+    pop_frame();
+    r
+
+(*
   match c with 
   |P256 -> 
     let h0 = ST.get() in
@@ -186,7 +203,7 @@ let isPointAtInfinityPrivate #c p =
     (as_nat c h0 (gsub p (getCoordinateLenU64 c) (getCoordinateLenU64 c))) 
     (as_nat c h0 (gsub p (size 2 *! getCoordinateLenU64 c) (getCoordinateLenU64 c)));
     r
-
+*)
 
 val lemma_norm_as_specification: #c: curve 
   -> xD: nat {xD < getPrime c} 
@@ -202,24 +219,26 @@ val lemma_norm_as_specification: #c: curve
 
 let lemma_norm_as_specification #c xD yD zD x3 y3 z3 = 
   power_distributivity (zD * zD * zD) (getPrime c - 2) (getPrime c);
-  power_distributivity (zD * zD) (getPrime c - 2) (getPrime c)
+  power_distributivity (zD * zD) (getPrime c - 2) (getPrime c);
+  admit()
 
 
 [@ CInline]
 val cswap: #c: curve ->  bit:uint64{v bit <= 1} -> p:point c -> q:point c
   -> Stack unit
     (requires fun h ->
-      live h p /\ live h q /\ (disjoint p q \/ p == q) (*/\
+      let len = getCoordinateLenU64 c in 
+      let prime = getPrime c in 
+  
+      live h p /\ live h q /\ eq_or_disjoint p q /\
       
-
-      as_nat h (gsub p (size 0) (size 4)) < prime /\ 
-      as_nat h (gsub p (size 4) (size 4)) < prime /\
-      as_nat h (gsub p (size 8) (size 4)) < prime /\
+      as_nat c h (gsub p (size 0) len) < prime /\ 
+      as_nat c h (gsub p len len) < prime /\
+      as_nat c h (gsub p (size 2 *! len) len) < prime /\
        
-      as_nat h (gsub q (size 0) (size 4)) < prime /\  
-      as_nat h (gsub q (size 4) (size 4)) < prime /\
-      as_nat h (gsub q (size 8) (size 4)) < prime *)
-)
+      as_nat c h (gsub q (size 0) len) < prime /\  
+      as_nat c h (gsub q len len) < prime /\
+      as_nat c h (gsub q (size 2 *! len) len) < prime )
     (ensures  fun h0 _ h1 ->
       modifies (loc p |+| loc q) h0 h1 /\
       (let pBefore = as_seq h0 p in let qBefore = as_seq h0 q in 
@@ -261,7 +280,7 @@ let cswap #c bit p1 p2 =
 
 
 val normalisation_update: #c: curve -> z2x: felem c -> z3y: felem c -> p: point c 
--> resultPoint: point c -> Stack unit 
+  -> resultPoint: point c -> Stack unit 
   (requires fun h -> 
     let prime = getPrime c in 
     let len = getCoordinateLenU64 c in 
@@ -305,6 +324,7 @@ let normalisation_update #c z2x z3y p resultPoint =
   fromDomain z3y resultY;
   uploadOneImpl #c resultZ;
   copy_conditional #c resultZ zeroBuffer bit;
+  admit();
   
   pop_frame()
   
@@ -331,10 +351,10 @@ let norm #c  p resultPoint tempBuffer =
       assert (as_nat c h1 z2f = toDomain_ #c (fromDomain_ #c (as_nat c h0 zf) * fromDomain_ #c (as_nat c h0 zf) % getPrime c));
       assert (as_nat c h2 z3f = toDomain_ #c (fromDomain_ #c (as_nat c h0 zf) * fromDomain_ #c (as_nat c h0 zf) * fromDomain_ #c (as_nat c h0 zf) % prime256)); *)
 
-  exponent #c z2f z2f tempBuffer20 ; 
+  exponent #c z2f z2f (*tempBuffer20 *) ; 
     let h3 = ST.get() in 
       (*assert(as_nat h3 z2f = toDomain_ (pow (fromDomain_ (as_nat h2 z2f)) (prime256 - 2) % prime256)); *)
-  exponent #c z3f z3f tempBuffer20 ; admit();
+  exponent #c z3f z3f (* tempBuffer20 *) ; admit();
     let h4 = ST.get() in (*
       assert(as_nat c h4 z3f = toDomain_ #c (pow (fromDomain_ #c (as_nat c h3 z3f)) (prime256 - 2) % prime256));
      *)
@@ -359,22 +379,23 @@ let norm #c  p resultPoint tempBuffer =
 
 
 let normX #c p result tempBuffer = 
+  admit();
   let len = getCoordinateLenU64 c in 
   
   let xf = sub p (size 0) len in 
-  let yf = sub p len (size 4) in 
+  let yf = sub p len len in 
   let zf = sub p (size 2 *! len) len in 
   
   let z2f = sub tempBuffer len len in 
   let z3f = sub tempBuffer (size 2 *! len) len in
-  let tempBuffer20 = sub tempBuffer (size 3 *! len) (size 5 *! len) in 
 
     let h0 = ST.get() in 
   montgomery_square_buffer #c zf z2f; 
-  exponent #c z2f z2f  tempBuffer20 ;
+  exponent #c z2f z2f (* tempBuffer20 *) ;
   montgomery_multiplication_buffer #c z2f xf z2f;
   fromDomain z2f result;
     let prime = getPrime c in 
+    admit();
     power_distributivity (fromDomain_ #c (as_nat c h0 zf) * fromDomain_ #c (as_nat c h0 zf)) (prime - 2) prime
 
 
@@ -517,6 +538,7 @@ val montgomery_ladder_step: #c: curve -> #buf_type: buftype->
 
 let montgomery_ladder_step #c #buf_type r0 r1 tempBuffer scalar i = 
   let bit0 : size_t = getPowerU c -. i -. 1ul in 
+  admit();
   let bit = scalar_bit scalar bit0 in 
   cswap bit r0 r1; 
   montgomery_ladder_step1 r0 r1 tempBuffer; 
@@ -573,6 +595,7 @@ val montgomery_ladder: #c: curve -> #buf_type: buftype->  p: point c -> q: point
 
 let montgomery_ladder #c #a p q scalar tempBuffer =  
   let h0 = ST.get() in 
+    admit();
   let len = getCoordinateLenU64 c in 
   let cycleLoop = getPowerU c in 
 
@@ -653,6 +676,7 @@ val lemma_coord: #c: curve -> h3: mem -> q: point c -> Lemma (
 
 let lemma_coord h3 q = ()
 
+
 inline_for_extraction
 val scalarMultiplication_t: #c: curve -> #t:buftype -> p: point c -> result: point c -> 
   scalar: lbuffer_t t uint8 (getScalarLen c) -> 
@@ -687,7 +711,7 @@ val scalarMultiplication_t: #c: curve -> #t:buftype -> p: point c -> result: poi
 
 let scalarMultiplication_t #c #t p result scalar tempBuffer  = 
     let h0 = ST.get() in 
-  let len = size 4 in 
+  let len = getCoordinateLenU64 c in 
   let q = sub tempBuffer (size 0) (size 3 *! len) in 
   uploadZeroPoint #c q;
   let buff = sub tempBuffer (size 3 *! len) (size 22 *! len) in 
@@ -736,15 +760,42 @@ val uploadBasePoint: #c: curve -> p: point c -> Stack unit
     )
 )
 
+
 let uploadBasePoint #c p = 
   match c with
-  |P384 -> admit()
+  |P384 -> 
+    let h0 = ST.get() in
+    upd p (size 0) (u64 4454189113653900584);
+    upd p (size 1) (u64 2369870743683386936);
+    upd p (size 2) (u64 9771750146904378734);
+    upd p (size 3) (u64 7229551204834152191);
+    upd p (size 4) (u64 9308930686126579243);
+    upd p (size 5) (u64 5564951339003155731);
+
+
+    upd p (size 6) (u64 2523209505731486974);
+    upd p (size 7) (u64 11655219901025790380);
+    upd p (size 8) (u64 10064955099576512592);
+    upd p (size 9) (u64 14322381509056856025);
+    upd p (size 10) (u64 15960759442596276288);
+    upd p (size 11) (u64 3132442392059561449);
+
+    upd p (size 12) (u64 18446744069414584321);
+    upd p (size 13) (u64 4294967295);
+    upd p (size 14) (u64 1);
+    upd p (size 15) (u64 0);
+    upd p (size 16) (u64 0);
+    upd p (size 17) (u64 0)
+
+
+
   |P256 -> 
     let h0 = ST.get() in 
   upd p (size 0) (u64 8784043285714375740);
   upd p (size 1) (u64 8483257759279461889);
   upd p (size 2) (u64 8789745728267363600);
   upd p (size 3) (u64 1770019616739251654);
+
   assert_norm (8784043285714375740 + pow2 64 * 8483257759279461889 + pow2 64 * pow2 64 * 8789745728267363600 + pow2 64 * pow2 64 * pow2 64 * 1770019616739251654 < prime256); 
     assert_norm (8784043285714375740 + pow2 64 * 8483257759279461889 + pow2 64 * pow2 64 * 8789745728267363600 + pow2 64 * pow2 64 * pow2 64 * 1770019616739251654 = 11110593207902424140321080247206512405358633331993495164878354046817554469948); 
   assert_norm(0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296 == fromDomain_ #P256 11110593207902424140321080247206512405358633331993495164878354046817554469948);
@@ -753,6 +804,7 @@ let uploadBasePoint #c p =
   upd p (size 5) (u64 10037038012062884956);
   upd p (size 6) (u64 15197544864945402661);
   upd p (size 7) (u64 9615747158586711429);
+
   assert_norm(15992936863339206154 + pow2 64 * 10037038012062884956 + pow2 64 * pow2 64 * 15197544864945402661 + pow2 64 * pow2 64 * pow2 64 * 9615747158586711429 < prime256);
   assert_norm (15992936863339206154 + pow2 64 * 10037038012062884956 + pow2 64 * pow2 64 * 15197544864945402661 + pow2 64 * pow2 64 * pow2 64 * 9615747158586711429 = 60359023176204190920225817201443260813112970217682417638161152432929735267850);
   assert_norm (0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5 == fromDomain_ #P256 60359023176204190920225817201443260813112970217682417638161152432929735267850);
@@ -762,6 +814,8 @@ let uploadBasePoint #c p =
   upd p (size 9) (u64 18446744069414584320);
   upd p (size 10) (u64 18446744073709551615);
   upd p (size 11) (u64 4294967294);
+  
+  
   assert_norm (1 + pow2 64 * 18446744069414584320 + pow2 64 * pow2 64 * 18446744073709551615 + pow2 64 * pow2 64 * pow2 64 * 4294967294 < prime256);
   assert_norm (1 = fromDomain_ #P256 26959946660873538059280334323183841250350249843923952699046031785985);
   assert_norm (1 + pow2 64 * 18446744069414584320 + pow2 64 * pow2 64 * 18446744073709551615 + pow2 64 * pow2 64 * pow2 64 * 4294967294 = 26959946660873538059280334323183841250350249843923952699046031785985) 
