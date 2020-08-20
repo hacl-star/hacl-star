@@ -8,36 +8,18 @@ open Lib.IntTypes
 open Lib.Buffer
 
 open Hacl.Spec.P256.Definition
-open Hacl.Lemmas.P256
-(* open Spec.ECDSA.Lemmas *)
 open Spec.P256
-open Spec.ECDSA
-
-open FStar.Math
-open FStar.Math.Lemmas
 open FStar.Mul
-
-open FStar.Tactics
-open FStar.Tactics.Canon 
-
-(* open Spec.P256.Lemmas *)
-open Lib.IntTypes.Intrinsics
-
-open Hacl.Impl.P256.LowLevel
-open Hacl.Impl.P384.LowLevel
-
 open Hacl.Spec.P256.MontgomeryMultiplication
 
 
 #set-options "--z3rlimit 100"
 
 
-
 inline_for_extraction
 let prime256_buffer: x: glbuffer uint64 4ul {witnessed #uint64 #(size 4) x (Lib.Sequence.of_list p256_prime_list) /\ recallable x /\ felem_seq_as_nat P256 (Lib.Sequence.of_list (p256_prime_list)) == prime256} = 
   assert_norm (felem_seq_as_nat P256 (Lib.Sequence.of_list (p256_prime_list)) == prime256);
   createL_global p256_prime_list
-
 
 
 inline_for_extraction
@@ -50,6 +32,7 @@ p384_prime_list) /\ recallable x /\ felem_seq_as_nat P384 (Lib.Sequence.of_list 
 val uploadZeroImpl: #c: curve -> f: felem c -> Stack unit 
   (requires fun h -> live h f)
   (ensures fun h0 _ h1 -> as_nat c h1 f == 0 /\ modifies (loc f) h0 h1)
+
 
 val uploadZeroPoint: #c: curve -> p: point c -> 
   Stack unit
@@ -64,7 +47,8 @@ val uploadZeroPoint: #c: curve -> p: point c ->
 
 val cmovznz4: #c: curve -> cin: uint64 -> x: felem c -> y: felem c -> result: felem c ->
   Stack unit
-    (requires fun h -> live h x /\ live h y /\ live h result /\ disjoint x result /\ eq_or_disjoint y result)
+    (requires fun h -> live h x /\ live h y /\ live h result /\ disjoint x result /\ 
+      eq_or_disjoint y result)
     (ensures fun h0 _ h1 -> modifies1 result h0 h1 /\ (
       if uint_v cin = 0 then 
 	as_nat c h1 result == as_nat c h0 x 
@@ -107,11 +91,11 @@ val sub_bn_gl: #c: curve -> x: felem c -> y: glbuffer uint64 (getCoordinateLenU6
   result: felem c -> Stack uint64
     (requires fun h -> live h x /\ live h y /\ live h result /\ disjoint x result /\ disjoint y result)
     (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ v r <= 1 /\ 
-    as_nat c h1 result - v r * getPower2 c == as_nat c h0 x  - as_nat_il c h0 y /\ (
-    if uint_v r = 0 then 
-      as_nat c h0 x >= as_nat_il c h0 y 
-    else 
-      as_nat c h0 x < as_nat_il c h0 y))
+      as_nat c h1 result - v r * getPower2 c == as_nat c h0 x  - as_nat_il c h0 y /\ (
+      if uint_v r = 0 then 
+	as_nat c h0 x >= as_nat_il c h0 y 
+      else 
+	as_nat c h0 x < as_nat_il c h0 y))
 
 
 val short_mul_bn: #c: curve -> a: glbuffer uint64 (getCoordinateLenU64 c) -> b: uint64 -> result: widefelem c -> Stack unit
@@ -123,7 +107,8 @@ val short_mul_bn: #c: curve -> a: glbuffer uint64 (getCoordinateLenU64 c) -> b: 
 
 val square_bn: #c: curve -> f: felem c -> out: widefelem c -> Stack unit
     (requires fun h -> live h out /\ live h f /\ eq_or_disjoint f out)
-    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\ wide_as_nat c h1 out = as_nat c h0 f * as_nat c h0 f)
+    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\ 
+      wide_as_nat c h1 out = as_nat c h0 f * as_nat c h0 f)
       
 
 val uploadOneImpl: #c: curve -> f: felem c -> Stack unit
@@ -142,7 +127,7 @@ val changeEndian: #c: curve -> i: felem c -> Stack unit
   (requires fun h -> live h i)
   (ensures  fun h0 _ h1 -> modifies1 i h0 h1 (*/\ 
     as_seq h1 i == Hacl.Spec.ECDSA.Definition.changeEndian (as_seq h0 i) /\
-    as_nat P256 h1 i < pow2 256*)) 
+    as_nat P256 h1 i < pow2 256 *) ) 
 
 val toUint64ChangeEndian: #c: curve -> i:lbuffer uint8 (getScalarLen c) -> o: felem c -> Stack unit
   (requires fun h -> live h i /\ live h o /\ disjoint i o)

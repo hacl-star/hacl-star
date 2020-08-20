@@ -57,17 +57,6 @@ let load_buffer8 a0 a1 a2 a3 a4 a5 a6 a7  o =
   upd o (size 7) a7
 *)
 
-
-(** This is unused *)
-inline_for_extraction noextract
-val copy_conditional_u64: a: uint64 -> b: uint64 -> mask: uint64 {uint_v mask = 0 \/ uint_v mask = pow2 64 - 1} -> 
-  Tot (r: uint64 {if uint_v mask = 0 then uint_v r = uint_v a else uint_v r = uint_v b})
-
-let copy_conditional_u64 a b mask = 
-  lemma_xor_copy_cond a b mask;
-  logxor a (logand mask (logxor a b))
-
-
 val add4: x: felem P256 -> y: felem P256 -> result: felem P256 -> 
   Stack uint64
     (requires fun h -> live h x /\ live h y /\ live h result /\ eq_or_disjoint x result /\ eq_or_disjoint y result)

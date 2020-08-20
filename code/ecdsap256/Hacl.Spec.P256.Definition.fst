@@ -6,6 +6,7 @@ open FStar.Math.Lib
 
 open FStar.HyperStack
 open FStar.HyperStack.All
+open Lib.ByteSequence
 open Lib.Sequence
 open Lib.Buffer
 open FStar.Mul
@@ -297,7 +298,7 @@ noextract
 let felem_seq_prime (c: curve) = a: felem_seq c {felem_seq_as_nat c a < getPrime c}
 
 noextract
-let point_prime (c: curve) =  
+let point_primeF (c: curve) =  
   p: point_seq c {
     let len = uint_v (getCoordinateLenU64 c) in 
     let prime = getPrime c in 
@@ -316,3 +317,79 @@ type point (c: curve) = lbuffer uint64 (getCoordinateLenU64 c *. 3ul)
 
 type scalar (c: curve) = lbuffer uint8 (getScalarLen c)
 
+
+val changeEndian: #c: curve -> felem_seq c -> felem_seq c
+
+let changeEndian #c i =
+  
+  let zero =  Lib.Sequence.index i 0 in
+  let one =   Lib.Sequence.index i 1 in
+  let two =   Lib.Sequence.index i 2 in
+  let three = Lib.Sequence.index i 3 in
+
+  let o = Lib.Sequence.upd i 0 three in
+  let o = Lib.Sequence.upd o 1 two in
+  let o = Lib.Sequence.upd o 2 one in
+          Lib.Sequence.upd o 3 zero
+
+
+val changeEndianLemma: #c: curve -> k: lseq uint64 (getCoordinateLen c) -> Lemma
+  (nat_from_intseq_le (changeEndian #c k) == nat_from_intseq_be k)
+
+let changeEndianLemma #c k =
+  let k0 = changeEndian #c k in
+
+  nat_from_intseq_be_slice_lemma (slice k 2 4) 1;
+  nat_from_intseq_be_slice_lemma (slice k 1 4) 1;
+  nat_from_intseq_be_slice_lemma k 1;
+
+  nat_from_intseq_be_lemma0 (slice k 0 1);
+  nat_from_intseq_be_lemma0 (slice k 1 2);
+  nat_from_intseq_be_lemma0 (slice k 2 3);
+  nat_from_intseq_be_lemma0 (slice k 3 4);
+
+  nat_from_intseq_le_slice_lemma (slice k0 2 4) 1;
+  nat_from_intseq_le_slice_lemma (slice k0 1 4) 1;
+  nat_from_intseq_le_slice_lemma k0 1;
+
+  nat_from_intseq_le_lemma0 (slice k0 0 1);
+  nat_from_intseq_le_lemma0 (slice k0 1 2);
+  nat_from_intseq_le_lemma0 (slice k0 2 3);
+  nat_from_intseq_le_lemma0 (slice k0 3 4);
+
+  assert_norm (pow2 (2 * 64) * pow2 64 == pow2 (3 * 64))
+
+
+val changeEndianLemmaI: #c: curve -> a: nat {a < getPower2 c} -> Lemma
+  (changeEndian #c (nat_to_intseq_le (uint_v (getCoordinateLenU64 c)) a) == nat_to_intseq_be (uint_v (getCoordinateLenU64 c)) a)
+
+let changeEndianLemmaI #c a =
+  let len = getCoordinateLenU64 c in
+  let a0 = nat_to_intseq_le #U64 #SEC 4 a in
+  index_nat_to_intseq_le #U64 #SEC  4 a 0;
+  index_nat_to_intseq_le #U64 #SEC  4 a 1;
+  index_nat_to_intseq_le #U64 #SEC  4 a 2;
+  index_nat_to_intseq_le #U64 #SEC  4 a 3;
+
+  index_nat_to_intseq_be #U64 #SEC 4 a 0;
+  index_nat_to_intseq_be #U64 #SEC 4 a 2;
+  index_nat_to_intseq_be #U64 #SEC 4 a 3;
+  index_nat_to_intseq_be #U64 #SEC 4 a 1;
+
+
+  assert(Lib.Sequence.index #_ #4 (changeEndian #c (nat_to_intseq_le #U64 #SEC 4 a)) 3 == Lib.Sequence.index #_ #4 (nat_to_intseq_be #U64 #SEC 4 a) 3);
+
+  assert(Lib.Sequence.index #_ #4 (changeEndian #c (nat_to_intseq_le #U64 #SEC 4 a)) 2 == Lib.Sequence.index #_ #4 (nat_to_intseq_be #U64 #SEC 4 a) 2);
+
+  assert(Lib.Sequence.index #_ #4 (changeEndian #c (nat_to_intseq_le #U64 #SEC 4 a)) 1 == Lib.Sequence.index #_ #4 (nat_to_intseq_be #U64 #SEC 4 a) 1);
+
+  assert(Lib.Sequence.index #_ #4 (changeEndian #c (nat_to_intseq_le #U64 #SEC 4 a)) 0 == Lib.Sequence.index #_ #4 (nat_to_intseq_be #U64 #SEC 4 a) 0);
+  eq_intro (changeEndian #c (nat_to_intseq_le #U64 #SEC 4 a)) (nat_to_intseq_be 4 a)
+
+
+val changeEndian_le_be: #c: curve -> a:nat{a < getPower2 c} -> Lemma
+  (uints_to_bytes_be (changeEndian #c (nat_to_intseq_le (uint_v (getCoordinateLenU64 c)) a)) == nat_to_bytes_be (getCoordinateLen c) a)
+
+let changeEndian_le_be #c a =
+  changeEndianLemmaI #c a;
+  uints_to_bytes_be_nat_lemma #U64 #SEC (uint_v (getCoordinateLenU64 c)) a
