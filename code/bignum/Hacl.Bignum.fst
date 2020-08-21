@@ -21,7 +21,7 @@ let bn_reduce_once len n c0 res =
   let tmp = create len (u64 0) in
   let c1 = bn_sub_eq_len len res n tmp in
   let c = c0 -. c1 in
-  map2T len res (Hacl.Spec.Bignum.Definitions.mask_select c) res tmp;
+  map2T len res (mask_select c) res tmp;
   pop_frame()
 
 let bn_add_mod_n len n a b res =
@@ -63,26 +63,26 @@ let bn_set_ith_bit len input ind =
 
 (* bignum comparison and test functions *)
 
-let bn_is_zero len b =
-  Hacl.Bignum.Comparison.bn_is_zero len b
-
 let bn_is_odd len a =
   Hacl.Bignum.Comparison.bn_is_odd len a
 
-let bn_mask_lt len a b =
-  Hacl.Bignum.Comparison.bn_mask_lt len a b
+let bn_eq_mask len a b =
+  Hacl.Bignum.Comparison.bn_eq_mask len a b
 
-let mk_bn_is_less len a b =
-  Hacl.Bignum.Comparison.bn_is_less len a b
+let bn_is_zero_mask len b =
+  Hacl.Bignum.Comparison.bn_is_zero_mask len b
+
+let mk_bn_lt_mask len a b =
+  Hacl.Bignum.Comparison.bn_lt_mask len a b
 
 [@CInline]
-let bn_is_less = mk_bn_is_less
+let bn_lt_mask = mk_bn_lt_mask
 
-let bn_lt_pow2 len b x =
-  Hacl.Bignum.Comparison.bn_lt_pow2 len b x
+let bn_lt_pow2_mask len b x =
+  Hacl.Bignum.Comparison.bn_lt_pow2_mask len b x
 
-let bn_gt_pow2 len b x =
-  Hacl.Bignum.Comparison.bn_gt_pow2 len b x
+let bn_gt_pow2_mask len b x =
+  Hacl.Bignum.Comparison.bn_gt_pow2_mask len b x
 
 (* Convertion functions *)
 

@@ -36,7 +36,7 @@ let bn_reduce_once_lemma #len n c0 res0 =
     assert (v c0 == 0);
     assert (v c1 == 1);
     assert (v c == pow2 64 - 1);
-    bn_mask_select_lemma res0 res1 c;
+    lseq_mask_select_lemma res0 res1 c;
     assert (bn_v res == bn_v res0);
     Math.Lemmas.small_mod tmp (bn_v n);
     assert (bn_v res == tmp % bn_v n) end
@@ -45,7 +45,7 @@ let bn_reduce_once_lemma #len n c0 res0 =
     bn_eval_bound res1 len;
     bn_eval_bound n len;
     assert (v c == 0);
-    bn_mask_select_lemma res0 res1 c;
+    lseq_mask_select_lemma res0 res1 c;
     assert (bn_v res == bn_v res1);
     Math.Lemmas.modulo_addition_lemma tmp (bn_v n) (- 1);
     assert (bn_v res % bn_v n == tmp % bn_v n);
@@ -139,41 +139,41 @@ let bn_set_ith_bit_lemma #len input ind =
 
 (* Bignum comparison and test functions *)
 
-let bn_is_zero #len b =
-  Hacl.Spec.Bignum.Comparison.bn_is_zero #len b
-
-let bn_is_zero_lemma #len b =
-  Hacl.Spec.Bignum.Comparison.bn_is_zero_lemma #len b
-
 let bn_is_odd #len b =
   Hacl.Spec.Bignum.Comparison.bn_is_odd #len b
 
 let bn_is_odd_lemma #len b =
   Hacl.Spec.Bignum.Comparison.bn_is_odd_lemma #len b
 
-let bn_mask_lt #len a b =
-  Hacl.Spec.Bignum.Comparison.bn_mask_lt #len a b
+let bn_eq_mask #len a b =
+  Hacl.Spec.Bignum.Comparison.bn_eq_mask #len a b
 
-let bn_mask_lt_lemma #len a b =
-  Hacl.Spec.Bignum.Comparison.bn_mask_lt_lemma #len a b
+let bn_eq_mask_lemma #len a b =
+  Hacl.Spec.Bignum.Comparison.bn_eq_mask_lemma #len a b
 
-let bn_is_less #len a b =
-  Hacl.Spec.Bignum.Comparison.bn_is_less #len a b
+let bn_is_zero_mask #len b =
+  Hacl.Spec.Bignum.Comparison.bn_is_zero_mask #len b
 
-let bn_is_less_lemma #len a b =
-  Hacl.Spec.Bignum.Comparison.bn_is_less_lemma #len a b
+let bn_is_zero_mask_lemma #len b =
+  Hacl.Spec.Bignum.Comparison.bn_is_zero_mask_lemma #len b
 
-let bn_lt_pow2 #len b x =
-  Hacl.Spec.Bignum.Comparison.bn_lt_pow2 #len b x
+let bn_lt_mask #len a b =
+  Hacl.Spec.Bignum.Comparison.bn_lt_mask #len a b
 
-let bn_lt_pow2_lemma #len b x =
-  Hacl.Spec.Bignum.Comparison.bn_lt_pow2_lemma #len b x
+let bn_lt_mask_lemma #len a b =
+  Hacl.Spec.Bignum.Comparison.bn_lt_mask_lemma #len a b
 
-let bn_gt_pow2 #len b x =
-  Hacl.Spec.Bignum.Comparison.bn_gt_pow2 #len b x
+let bn_lt_pow2_mask #len b x =
+  Hacl.Spec.Bignum.Comparison.bn_lt_pow2_mask #len b x
 
-let bn_gt_pow2_lemma #len b x =
-  Hacl.Spec.Bignum.Comparison.bn_gt_pow2_lemma #len b x
+let bn_lt_pow2_mask_lemma #len b x =
+  Hacl.Spec.Bignum.Comparison.bn_lt_pow2_mask_lemma #len b x
+
+let bn_gt_pow2_mask #len b x =
+  Hacl.Spec.Bignum.Comparison.bn_gt_pow2_mask #len b x
+
+let bn_gt_pow2_mask_lemma #len b x =
+  Hacl.Spec.Bignum.Comparison.bn_gt_pow2_mask_lemma #len b x
 
 
 (* Conversion functions *)

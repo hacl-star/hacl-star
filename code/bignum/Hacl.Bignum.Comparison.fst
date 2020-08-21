@@ -23,51 +23,63 @@ module Loops = Lib.LoopCombinators
 ///
 
 inline_for_extraction noextract
-val bn_is_zero:
+val bn_is_odd:
     len:size_t{v len > 0}
   -> a:lbignum len ->
-  Stack bool
-  (requires fun h -> live h a)
-  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    r == S.bn_is_zero #(v len) (as_seq h0 a))
-
-let bn_is_zero len b =
-  push_frame ();
-  let bn_zero = create len (u64 0) in
-  let mask = create 1ul (ones U64 SEC) in
-  let mask = Lib.ByteBuffer.buf_eq_mask b bn_zero len mask in
-  let res = FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 mask =^ ones U64 PUB) in
-  pop_frame ();
-  res
-
-
-inline_for_extraction noextract
-val bn_is_odd:
-    len:size_t
-  -> a:lbignum len ->
-  Stack bool
+  Stack uint64
   (requires fun h -> live h a)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
     r == S.bn_is_odd #(v len) (as_seq h0 a))
 
-let bn_is_odd len a =
-  if len >. 0ul then
-    let tmp = a.(0ul) &. u64 1 in
-    FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 tmp =^ 1uL)
-  else false
+let bn_is_odd len a = a.(0ul) &. u64 1
 
 
 inline_for_extraction noextract
-val bn_mask_lt:
+val bn_eq_mask:
     len:size_t
   -> a:lbignum len
   -> b:lbignum len ->
   Stack uint64
   (requires fun h -> live h a /\ live h b)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    v r == v (S.bn_mask_lt (as_seq h0 a) (as_seq h0 b)))
+    r == S.bn_eq_mask #(v len) (as_seq h0 a) (as_seq h0 b))
 
-let bn_mask_lt len a b =
+let bn_eq_mask len a b =
+  push_frame ();
+  let mask = create 1ul (ones U64 SEC) in
+  let mask = Lib.ByteBuffer.buf_eq_mask a b len mask in
+  pop_frame ();
+  mask
+
+
+inline_for_extraction noextract
+val bn_is_zero_mask:
+    len:size_t{v len > 0}
+  -> a:lbignum len ->
+  Stack uint64
+  (requires fun h -> live h a)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+    r == S.bn_is_zero_mask #(v len) (as_seq h0 a))
+
+let bn_is_zero_mask len b =
+  push_frame ();
+  let bn_zero = create len (u64 0) in
+  let res = bn_eq_mask len b bn_zero in
+  pop_frame ();
+  res
+
+
+inline_for_extraction noextract
+val bn_lt_mask:
+    len:size_t
+  -> a:lbignum len
+  -> b:lbignum len ->
+  Stack uint64
+  (requires fun h -> live h a /\ live h b)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+    v r == v (S.bn_lt_mask (as_seq h0 a) (as_seq h0 b)))
+
+let bn_lt_mask len a b =
   push_frame ();
   let acc = create 1ul (u64 0) in
 
@@ -76,17 +88,15 @@ let bn_mask_lt len a b =
   [@inline_let]
   let footprint i = loc acc in
   [@inline_let]
-  let spec h = S.bn_mask_lt_f (as_seq h a) (as_seq h b) in
+  let spec h = S.bn_lt_mask_f (as_seq h a) (as_seq h b) in
 
   let h0 = ST.get () in
-  loop h0 len (S.bn_mask_lt_t (v len)) refl footprint spec
+  loop h0 len (S.bn_lt_mask_t (v len)) refl footprint spec
   (fun i ->
-    Loops.unfold_repeat_gen (v len) (S.bn_mask_lt_t (v len)) (spec h0) (refl h0 0) (v i);
+    Loops.unfold_repeat_gen (v len) (S.bn_lt_mask_t (v len)) (spec h0) (refl h0 0) (v i);
     let beq = eq_mask a.(i) b.(i) in
     let blt = lt_mask a.(i) b.(i) in
-    acc.(0ul) <-
-      Hacl.Spec.Bignum.Definitions.mask_select beq acc.(0ul)
-      (Hacl.Spec.Bignum.Definitions.mask_select blt (ones U64 SEC) (zeros U64 SEC))
+    acc.(0ul) <- mask_select beq acc.(0ul) (mask_select blt (ones U64 SEC) (zeros U64 SEC))
   );
   let mask = acc.(0ul) in
   pop_frame ();
@@ -94,61 +104,38 @@ let bn_mask_lt len a b =
 
 
 inline_for_extraction noextract
-val bn_is_less:
-    len:size_t
-  -> a:lbignum len
-  -> b:lbignum len ->
-  Stack bool
-  (requires fun h -> live h a /\ live h b)
-  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    r == S.bn_is_less (as_seq h0 a) (as_seq h0 b))
-
-let bn_is_less len a b =
-  let mask = bn_mask_lt len a b in
-  FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 mask =^ ones U64 PUB)
-
-
-inline_for_extraction noextract
-val bn_lt_pow2:
+val bn_lt_pow2_mask:
     len:size_t{0 < v len /\ 64 * v len <= max_size_t}
   -> b:lbignum len
-  -> x:size_t ->
-  Stack bool
+  -> x:size_t{v x < 64 * v len} ->
+  Stack uint64
   (requires fun h -> live h b)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    r == S.bn_lt_pow2 #(v len) (as_seq h0 b) (v x))
+    r == S.bn_lt_pow2_mask #(v len) (as_seq h0 b) (v x))
 
-let bn_lt_pow2 len b x =
+let bn_lt_pow2_mask len b x =
   push_frame ();
   let b2 = create len (u64 0) in
-
-  let res =
-    if (x >=. 64ul *! len) then true
-    else begin
-      bn_set_ith_bit len b2 x;
-      bn_is_less len b b2 end in
+  bn_set_ith_bit len b2 x;
+  let res = bn_lt_mask len b b2 in
   pop_frame ();
   res
 
 
 inline_for_extraction noextract
-val bn_gt_pow2:
+val bn_gt_pow2_mask:
     len:size_t{0 < v len /\ 64 * v len <= max_size_t}
   -> b:lbignum len
-  -> x:size_t ->
-  Stack bool
+  -> x:size_t{v x < 64 * v len} ->
+  Stack uint64
   (requires fun h -> live h b)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    r == S.bn_gt_pow2 #(v len) (as_seq h0 b) (v x))
+    r == S.bn_gt_pow2_mask #(v len) (as_seq h0 b) (v x))
 
-let bn_gt_pow2 len b x =
+let bn_gt_pow2_mask len b x =
   push_frame ();
   let b2 = create len (u64 0) in
-
-  let res =
-    if (x >=. 64ul *! len) then false
-    else begin
-      bn_set_ith_bit len b2 x;
-      bn_is_less len b2 b end in
+  bn_set_ith_bit len b2 x;
+  let res = bn_lt_mask len b2 b in
   pop_frame ();
   res

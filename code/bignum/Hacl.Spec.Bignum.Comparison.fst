@@ -5,6 +5,7 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Sequence
 
+open Hacl.Spec.Bignum.Base
 open Hacl.Spec.Bignum.Definitions
 open Hacl.Spec.Bignum.Lib
 
@@ -17,68 +18,73 @@ module Loops = Lib.LoopCombinators
 ///  Bignum comparison and test functions
 ///
 
-val bn_is_zero: #len:size_nat -> a:lbignum len -> bool
-let bn_is_zero #len b =
-  let bn_zero = create len (u64 0) in
-  let mask = BSeq.seq_eq_mask b bn_zero len in
-  FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 mask =^ ones U64 PUB)
+val bn_is_odd: #len:size_pos -> a:lbignum len -> uint64
+let bn_is_odd #len b = b.[0] &. u64 1
 
-val bn_is_zero_lemma: #len:size_nat -> a:lbignum len -> Lemma
-  (bn_is_zero #len a == (bn_v a = 0))
-let bn_is_zero_lemma #len b =
+val bn_is_odd_lemma: #len:size_pos -> a:lbignum len ->
+  Lemma (v (bn_is_odd #len a) == (bn_v a % 2))
+let bn_is_odd_lemma #len b =
+  bn_eval_split_i #len b 1;
+  bn_eval1 (slice b 0 1);
+  assert (bn_v b % 2 == (v b.[0] + pow2 64 * bn_v (slice b 1 len)) % 2);
+  Math.Lemmas.pow2_plus 1 63;
+  Math.Lemmas.modulo_addition_lemma (v b.[0]) 2 (pow2 63 * bn_v (slice b 1 len));
+  assert (bn_v b % 2 == v b.[0] % 2);
+  mod_mask_lemma b.[0] 1ul;
+  assert (v (mod_mask #U64 #SEC 1ul) == v (u64 1))
+
+
+val bn_eq_mask: #len:size_nat -> a:lbignum len -> b:lbignum len -> uint64
+let bn_eq_mask #len a b =
+  BSeq.seq_eq_mask a b len
+
+val bn_eq_mask_lemma: #len:size_nat -> a:lbignum len -> b:lbignum len ->
+  Lemma (mask_values (bn_eq_mask a b) /\
+    (if v (bn_eq_mask a b) = 0 then bn_v a <> bn_v b else bn_v a = bn_v b))
+let bn_eq_mask_lemma #len a b =
+  let mask = BSeq.seq_eq_mask a b len in
+  assert (a == b ==> v mask == v (ones U64 SEC));
+  assert (a =!= b ==> v mask == v (zeros U64 SEC));
+  Classical.move_requires_2 (bn_eval_inj len) a b
+
+
+val bn_is_zero_mask: #len:size_nat -> a:lbignum len -> uint64
+let bn_is_zero_mask #len b =
+  let bn_zero = create len (u64 0) in
+  bn_eq_mask b bn_zero
+
+val bn_is_zero_mask_lemma: #len:size_nat -> a:lbignum len ->
+  Lemma (mask_values (bn_is_zero_mask #len a) /\
+    (if v (bn_is_zero_mask #len a) = 0 then bn_v a <> 0 else bn_v a = 0))
+let bn_is_zero_mask_lemma #len b =
   let bn_zero = create len (u64 0) in
   bn_eval_zeroes len len;
-  let mask = BSeq.seq_eq_mask b bn_zero len in
-  assert (b == bn_zero ==> v mask == v (ones U64 SEC));
-  assert (b =!= bn_zero ==> v mask == v (zeros U64 SEC));
-  Classical.move_requires_2 (bn_eval_inj len) b bn_zero;
-  assert (bn_is_zero #len b == (if bn_v b = bn_v bn_zero then true else false))
+  bn_eq_mask_lemma b bn_zero
 
 
-val bn_is_odd: #len:size_nat -> a:lbignum len -> bool
-let bn_is_odd #len b =
-  if len > 0 then
-    FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 (b.[0] &. u64 1) =^ 1uL)
-  else false
-
-val bn_is_odd_lemma: #len:size_nat -> a:lbignum len -> Lemma
-  (bn_is_odd #len a == (bn_v a % 2 = 1))
-let bn_is_odd_lemma #len b =
-  if len > 0 then begin
-    bn_eval_split_i #len b 1;
-    bn_eval1 (slice b 0 1);
-    assert (bn_v b % 2 == (v b.[0] + pow2 64 * bn_v (slice b 1 len)) % 2);
-    Math.Lemmas.pow2_plus 1 63;
-    Math.Lemmas.modulo_addition_lemma (v b.[0]) 2 (pow2 63 * bn_v (slice b 1 len));
-    assert (bn_v b % 2 == v b.[0] % 2);
-    mod_mask_lemma b.[0] 1ul;
-    assert (v (mod_mask #U64 #SEC 1ul) == v (u64 1)) end
-  else bn_eval0 #len b
-
-
-val bn_mask_lt_f: #len:size_nat -> a:lbignum len -> b:lbignum len -> i:nat{i < len} -> acc:uint64 -> uint64
-let bn_mask_lt_f #len a b i acc =
+val bn_lt_mask_f: #len:size_nat -> a:lbignum len -> b:lbignum len -> i:nat{i < len} -> acc:uint64 -> uint64
+let bn_lt_mask_f #len a b i acc =
   let beq = eq_mask a.[i] b.[i] in
   let blt = lt_mask a.[i] b.[i] in
   mask_select beq acc (mask_select blt (ones U64 SEC) (zeros U64 SEC))
 
-let bn_mask_lt_t (len:size_nat) (i:nat{i <= len}) = uint64
+let bn_lt_mask_t (len:size_nat) (i:nat{i <= len}) = uint64
 
-val bn_mask_lt: #len:size_nat -> a:lbignum len -> b:lbignum len -> uint64
-let bn_mask_lt #len a b =
-  Loops.repeat_gen len (bn_mask_lt_t len) (bn_mask_lt_f #len a b) (u64 0)
+val bn_lt_mask: #len:size_nat -> a:lbignum len -> b:lbignum len -> uint64
+let bn_lt_mask #len a b =
+  Loops.repeat_gen len (bn_lt_mask_t len) (bn_lt_mask_f #len a b) (u64 0)
 
-val bn_mask_lt_lemma_step:
+val bn_lt_mask_lemma_step:
   #len:size_nat -> a:lbignum len -> b:lbignum len -> k:pos{k <= len} -> mask0:uint64 -> Lemma
   (requires
     (if v mask0 = 0 then eval_ len a (k - 1) >= eval_ len b (k - 1) else eval_ len a (k - 1) < eval_ len b (k - 1)) /\
-    (v mask0 == 0 \/ v mask0 == v (ones U64 SEC)))
-  (ensures (let mask = bn_mask_lt_f #len a b (k - 1) mask0 in
+    mask_values mask0)
+  (ensures (let mask = bn_lt_mask_f #len a b (k - 1) mask0 in
     (if v mask = 0 then eval_ len a k >= eval_ len b k else eval_ len a k < eval_ len b k) /\
-    (v mask == 0 \/ v mask == v (ones U64 SEC))))
+    mask_values mask))
 
-let bn_mask_lt_lemma_step #len a b k mask0 =
-  let mask = bn_mask_lt_f #len a b (k - 1) mask0 in
+let bn_lt_mask_lemma_step #len a b k mask0 =
+  let mask = bn_lt_mask_f #len a b (k - 1) mask0 in
   let ai = a.[k - 1] in
   let bi = b.[k - 1] in
   let beq = eq_mask ai bi in
@@ -88,7 +94,7 @@ let bn_mask_lt_lemma_step #len a b k mask0 =
 
   let res0 = mask_select blt (ones U64 SEC) (zeros U64 SEC) in
   let mask = mask_select beq mask0 res0 in
-  //assert (mask == bn_mask_lt_f #len a b (k - 1) mask0);
+  //assert (mask == bn_lt_mask_f #len a b (k - 1) mask0);
 
   mask_select_lemma blt (ones U64 SEC) (zeros U64 SEC);
   mask_select_lemma beq mask0 res0;
@@ -110,94 +116,72 @@ let bn_mask_lt_lemma_step #len a b k mask0 =
     () end
 
 
-val bn_mask_lt_lemma_loop:
+val bn_lt_mask_lemma_loop:
   #len:size_nat -> a:lbignum len -> b:lbignum len -> k:nat{k <= len} -> Lemma
-  (let mask = Loops.repeat_gen k (bn_mask_lt_t len) (bn_mask_lt_f #len a b) (u64 0) in
-   (v mask == 0 \/ v mask == v (ones U64 SEC)) /\
-   (if v mask = 0 then eval_ len a k >= eval_ len b k else eval_ len a k < eval_ len b k))
+  (let mask = Loops.repeat_gen k (bn_lt_mask_t len) (bn_lt_mask_f #len a b) (u64 0) in
+   mask_values mask /\ (if v mask = 0 then eval_ len a k >= eval_ len b k else eval_ len a k < eval_ len b k))
 
-let rec bn_mask_lt_lemma_loop #len a b k =
-  let mask = Loops.repeat_gen k (bn_mask_lt_t len) (bn_mask_lt_f #len a b) (u64 0) in
+let rec bn_lt_mask_lemma_loop #len a b k =
+  let mask = Loops.repeat_gen k (bn_lt_mask_t len) (bn_lt_mask_f #len a b) (u64 0) in
   if k = 0 then begin
-    Loops.eq_repeat_gen0 k (bn_mask_lt_t len) (bn_mask_lt_f #len a b) (u64 0);
+    Loops.eq_repeat_gen0 k (bn_lt_mask_t len) (bn_lt_mask_f #len a b) (u64 0);
     assert (v mask = 0);
     bn_eval0 a;
     bn_eval0 b end
   else begin
-    let mask0 = Loops.repeat_gen (k - 1) (bn_mask_lt_t len) (bn_mask_lt_f #len a b) (u64 0) in
-    Loops.unfold_repeat_gen k (bn_mask_lt_t len) (bn_mask_lt_f #len a b) (u64 0) (k - 1);
-    bn_mask_lt_lemma_loop #len a b (k - 1);
-    bn_mask_lt_lemma_step #len a b k mask0 end
-
-val bn_mask_lt_lemma: #len:size_nat -> a:lbignum len -> b:lbignum len -> Lemma
-  (let mask = bn_mask_lt a b in
-   (v mask = 0 \/ v mask = v (ones U64 SEC)) /\
-   (if v mask = 0 then bn_v a >= bn_v b else bn_v a < bn_v b))
-
-let bn_mask_lt_lemma #len a b =
-  bn_mask_lt_lemma_loop #len a b len
+    let mask0 = Loops.repeat_gen (k - 1) (bn_lt_mask_t len) (bn_lt_mask_f #len a b) (u64 0) in
+    Loops.unfold_repeat_gen k (bn_lt_mask_t len) (bn_lt_mask_f #len a b) (u64 0) (k - 1);
+    bn_lt_mask_lemma_loop #len a b (k - 1);
+    bn_lt_mask_lemma_step #len a b k mask0 end
 
 
-val bn_is_less: #len:size_nat -> a:lbignum len -> b:lbignum len -> bool
-let bn_is_less #len a b =
-  let mask = bn_mask_lt a b in
-  FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 mask =^ ones U64 PUB)
-
-val bn_is_less_lemma: #len:size_nat -> a:lbignum len -> b:lbignum len -> Lemma
-  (bn_is_less a b == (bn_v a < bn_v b))
-let bn_is_less_lemma #len a b =
-  bn_mask_lt_lemma #len a b
+val bn_lt_mask_lemma: #len:size_nat -> a:lbignum len -> b:lbignum len ->
+  Lemma (mask_values (bn_lt_mask a b) /\
+    (if v (bn_lt_mask a b) = 0 then bn_v a >= bn_v b else bn_v a < bn_v b))
+let bn_lt_mask_lemma #len a b =
+  bn_lt_mask_lemma_loop #len a b len
 
 
 // we could compare bBits with x, but we don't have the bn_num_bits function
-// bn_v b < pow2 x
-val bn_lt_pow2: #len:size_nat -> b:lbignum len -> x:size_nat -> bool
-let bn_lt_pow2 #len b x =
-  if x >= 64 * len then true
-  else begin
-    let b2 = create len (u64 0) in
-    let b2 = bn_set_ith_bit b2 x in
-    bn_is_less b b2 end
+val bn_lt_pow2_mask: #len:size_nat -> b:lbignum len -> x:size_nat{x < 64 * len} -> uint64
+let bn_lt_pow2_mask #len b x =
+  let b2 = create len (u64 0) in
+  let b2 = bn_set_ith_bit b2 x in
+  bn_lt_mask b b2
 
-val bn_lt_pow2_lemma: #len:size_nat -> b:lbignum len -> x:size_nat -> Lemma
-  (bn_lt_pow2 #len b x == (bn_v b < pow2 x))
-let bn_lt_pow2_lemma #len b x =
+val bn_lt_pow2_mask_lemma: #len:size_nat -> b:lbignum len -> x:size_nat{x < 64 * len} ->
+  Lemma (mask_values (bn_lt_pow2_mask #len b x) /\
+    (if v (bn_lt_pow2_mask #len b x) = 0 then bn_v b >= pow2 x else bn_v b < pow2 x))
+let bn_lt_pow2_mask_lemma #len b x =
   bn_eval_bound #len b len;
   assert (bn_v b < pow2 (64 * len));
-  if x >= 64 * len then
-    Math.Lemmas.pow2_le_compat x (64 * len)
-  else begin
-    let b2 = create len (u64 0) in
-    bn_eval_zeroes len len;
-    assert (bn_v b2 = 0);
-    //assert (bn_v b2 < pow2 x);
-    let b2' = bn_set_ith_bit b2 x in
-    bn_set_ith_bit_lemma b2 x;
-    assert (bn_v b2' == pow2 x);
-    bn_is_less_lemma b b2' end
+  let b2 = create len (u64 0) in
+  bn_eval_zeroes len len;
+  assert (bn_v b2 = 0);
+  //assert (bn_v b2 < pow2 x);
+  let b2' = bn_set_ith_bit b2 x in
+  bn_set_ith_bit_lemma b2 x;
+  assert (bn_v b2' == pow2 x);
+  bn_lt_mask_lemma b b2'
 
 
-val bn_gt_pow2: #len:size_nat -> b:lbignum len -> x:size_nat -> bool
-let bn_gt_pow2 #len b x =
-  if x >= 64 * len then false
-  else begin
-    let b2 = create len (u64 0) in
-    let b2 = bn_set_ith_bit b2 x in
-    bn_is_less b2 b end
+val bn_gt_pow2_mask: #len:size_nat -> b:lbignum len -> x:size_nat{x < 64 * len} -> uint64
+let bn_gt_pow2_mask #len b x =
+  let b2 = create len (u64 0) in
+  let b2 = bn_set_ith_bit b2 x in
+  bn_lt_mask b2 b
 
-val bn_gt_pow2_lemma: #len:size_nat -> b:lbignum len -> x:size_nat -> Lemma
-  (bn_gt_pow2 #len b x == (pow2 x < bn_v b))
-let bn_gt_pow2_lemma #len b x =
+val bn_gt_pow2_mask_lemma: #len:size_nat -> b:lbignum len -> x:size_nat{x < 64 * len} ->
+  Lemma (mask_values (bn_gt_pow2_mask #len b x) /\
+    (if v (bn_gt_pow2_mask #len b x) = 0 then pow2 x >= bn_v b else pow2 x < bn_v b))
+let bn_gt_pow2_mask_lemma #len b x =
   bn_eval_bound #len b len;
   assert (bn_v b < pow2 (64 * len));
-  if x >= 64 * len then
-    Math.Lemmas.pow2_le_compat x (64 * len)
-  else begin
-    let b2 = create len (u64 0) in
-    bn_eval_zeroes len len;
-    assert (bn_v b2 = 0);
-    //assert (bn_v b2 < pow2 x);
-    let b2' = bn_set_ith_bit b2 x in
-    bn_set_ith_bit_lemma b2 x;
-    assert (bn_v b2' == pow2 x);
-    bn_is_less_lemma b2' b end
+  let b2 = create len (u64 0) in
+  bn_eval_zeroes len len;
+  assert (bn_v b2 = 0);
+  //assert (bn_v b2 < pow2 x);
+  let b2' = bn_set_ith_bit b2 x in
+  bn_set_ith_bit_lemma b2 x;
+  assert (bn_v b2' == pow2 x);
+  bn_lt_mask_lemma b2' b

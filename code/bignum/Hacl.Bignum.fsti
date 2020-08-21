@@ -293,70 +293,72 @@ let mk_runtime_bn (len: meta_len) = {
 ///
 
 inline_for_extraction noextract
-val bn_is_zero:
+val bn_is_odd:
     len:size_t{v len > 0}
   -> a:lbignum len ->
-  Stack bool
-  (requires fun h -> live h a)
-  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    r == S.bn_is_zero #(v len) (as_seq h0 a))
-
-
-inline_for_extraction noextract
-val bn_is_odd:
-    len:size_t
-  -> a:lbignum len ->
-  Stack bool
+  Stack uint64
   (requires fun h -> live h a)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
     r == S.bn_is_odd #(v len) (as_seq h0 a))
 
 
 inline_for_extraction noextract
-val bn_mask_lt:
+val bn_eq_mask:
     len:size_t
   -> a:lbignum len
   -> b:lbignum len ->
   Stack uint64
   (requires fun h -> live h a /\ live h b)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    v r == v (S.bn_mask_lt (as_seq h0 a) (as_seq h0 b)))
+    r == S.bn_eq_mask #(v len) (as_seq h0 a) (as_seq h0 b))
 
 
 inline_for_extraction noextract
-let bn_is_less_st (len:size_t) =
+val bn_is_zero_mask:
+    len:size_t{v len > 0}
+  -> a:lbignum len ->
+  Stack uint64
+  (requires fun h -> live h a)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+    r == S.bn_is_zero_mask #(v len) (as_seq h0 a))
+
+
+inline_for_extraction noextract
+let bn_lt_mask_st (len:size_t) =
     a:lbignum len
   -> b:lbignum len ->
-  Stack bool
+  Stack uint64
   (requires fun h -> live h a /\ live h b)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    r == S.bn_is_less (as_seq h0 a) (as_seq h0 b))
+    v r == v (S.bn_lt_mask (as_seq h0 a) (as_seq h0 b)))
+
 
 inline_for_extraction noextract
-val mk_bn_is_less: len:size_t -> bn_is_less_st len
+val mk_bn_lt_mask: len:size_t -> bn_lt_mask_st len
 
-val bn_is_less: len:size_t -> bn_is_less_st len
+val bn_lt_mask: len:size_t -> bn_lt_mask_st len
+
 
 inline_for_extraction noextract
-val bn_lt_pow2:
+val bn_lt_pow2_mask:
     len:size_t{0 < v len /\ 64 * v len <= max_size_t}
   -> b:lbignum len
-  -> x:size_t ->
-  Stack bool
+  -> x:size_t{v x < 64 * v len} ->
+  Stack uint64
   (requires fun h -> live h b)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    r == S.bn_lt_pow2 #(v len) (as_seq h0 b) (v x))
+    r == S.bn_lt_pow2_mask #(v len) (as_seq h0 b) (v x))
 
 
 inline_for_extraction noextract
-val bn_gt_pow2:
+val bn_gt_pow2_mask:
     len:size_t{0 < v len /\ 64 * v len <= max_size_t}
   -> b:lbignum len
-  -> x:size_t ->
-  Stack bool
+  -> x:size_t{v x < 64 * v len} ->
+  Stack uint64
   (requires fun h -> live h b)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    r == S.bn_gt_pow2 #(v len) (as_seq h0 b) (v x))
+    r == S.bn_gt_pow2_mask #(v len) (as_seq h0 b) (v x))
 
 ///
 ///  Conversion functions for bignum

@@ -284,7 +284,8 @@ let rsapss_verify a modBits eBits pkey sLen sgnt msgLen msg =
   assert (blocks k 8 == nLen);
   let s = bn_from_bytes_be k sgnt in
 
-  if bn_is_less s n then begin
+  let mask = bn_lt_mask s n in
+  if FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 mask =^ ones U64 PUB) then begin
     let m = bn_mod_exp modBits nLen n s eBits e in
     em_blocks_lt_max_size_t modBits;
     assert (8 * blocks emLen 8 <= max_size_t);
@@ -335,9 +336,10 @@ let rsapss_verify_lemma a modBits eBits pkey sLen sgnt msgLen msg =
   let s = bn_from_bytes_be k sgnt in
   bn_from_bytes_be_lemma k sgnt;
 
-  bn_is_less_lemma s n;
+  let mask = bn_lt_mask s n in
+  bn_lt_mask_lemma s n;
   let res =
-  if bn_is_less s n then begin
+  if FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 mask =^ ones U64 PUB) then begin
     let m = bn_mod_exp modBits nLen n s eBits e in
     Math.Lemmas.pow2_le_compat (64 * nLen) modBits;
     bn_mod_exp_lemma modBits nLen n s eBits e;

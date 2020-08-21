@@ -49,7 +49,7 @@ let bn_sign_abs_lemma #aLen a b =
   let mask = u64 0 -. c0 in
   assert (v mask == (if v c0 = 0 then 0 else v (ones U64 SEC)));
   let res = map2 (mask_select mask) t1 t0 in
-  bn_mask_select_lemma t1 t0 mask;
+  lseq_mask_select_lemma t1 t0 mask;
   assert (bn_v res == (if v mask = 0 then bn_v t0 else bn_v t1));
 
   bn_eval_bound a aLen;
@@ -127,7 +127,7 @@ let bn_middle_karatsuba_lemma #aLen c0 c1 c2 t01 t23 =
 
   let mask = u64 0 -. c_sign in
   let t45' = map2 (mask_select mask) t67 t45 in
-  bn_mask_select_lemma t67 t45 mask;
+  lseq_mask_select_lemma t67 t45 mask;
   //assert (bn_v t45' == (if v mask = 0 then bn_v t45 else bn_v t67));
   let c5 = mask_select mask c4' c3' in
   mask_select_lemma mask c4' c3'

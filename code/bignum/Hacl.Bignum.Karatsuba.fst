@@ -44,7 +44,7 @@ val bn_sign_abs:
 let bn_sign_abs #aLen a b tmp res =
   let c0 = bn_sub_eq_len aLen a b tmp in
   let c1 = bn_sub_eq_len aLen b a res in
-  map2T aLen res (Hacl.Spec.Bignum.Definitions.mask_select (u64 0 -. c0)) res tmp;
+  map2T aLen res (mask_select (u64 0 -. c0)) res tmp;
   c0
 
 
@@ -71,8 +71,8 @@ let bn_middle_karatsuba #aLen c0 c1 c2 t01 t23 tmp res =
   let c3 = bn_sub_eq_len aLen t01 t23 tmp in let c3 = c2 -. c3 in
   let c4 = bn_add_eq_len aLen t01 t23 res in let c4 = c2 +. c4 in
   let mask = u64 0 -. c_sign in
-  map2T aLen res (Hacl.Spec.Bignum.Definitions.mask_select mask) res tmp;
-  Hacl.Spec.Bignum.Definitions.mask_select mask c4 c3
+  map2T aLen res (mask_select mask) res tmp;
+  mask_select mask c4 c3
 
 
 inline_for_extraction noextract

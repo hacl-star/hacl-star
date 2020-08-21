@@ -87,4 +87,4 @@ let new_bn_from_bytes_be = Hacl.Bignum.Convert.new_bn_from_bytes_be
 
 let bn_to_bytes_be = Hacl.Bignum.Convert.mk_bn_to_bytes_be n
 
-let lt = Hacl.Bignum.mk_bn_is_less n
+let lt_mask = Hacl.Bignum.mk_bn_lt_mask n

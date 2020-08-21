@@ -5,7 +5,7 @@ open Lib.IntTypes
 open Lib.Sequence
 
 
-#reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
+#set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 val blocks: x: size_pos -> m: size_pos -> Tot (r:size_pos{x <= m * r})
 let blocks x m = (x - 1) / m + 1
@@ -13,7 +13,6 @@ let blocks x m = (x - 1) / m + 1
 
 let lbignum len = lseq uint64 len
 
-// TODO: replace with the `nat_from_intseq_le` function?
 val eval_: len:size_nat -> s:lbignum len -> i:nat{i <= len} -> nat
 let rec eval_ len s i =
   if i = 0 then 0
@@ -32,8 +31,8 @@ let bn_eval0 #len b = ()
 val bn_eval1: b:lbignum 1 -> Lemma (bn_v b == v b.[0])
 let bn_eval1 b = ()
 
-val bn_eval_unfold_i: #len:size_pos -> b:lbignum len -> i:pos{i <= len} -> Lemma
-  (eval_ len b i == eval_ len b (i - 1) + v b.[i - 1] * pow2 (64 * (i - 1)))
+val bn_eval_unfold_i: #len:size_pos -> b:lbignum len -> i:pos{i <= len} ->
+  Lemma (eval_ len b i == eval_ len b (i - 1) + v b.[i - 1] * pow2 (64 * (i - 1)))
 let bn_eval_unfold_i #len b i = ()
 #pop-options
 
@@ -81,8 +80,8 @@ let rec bn_eval_extensionality_j #len1 #len2 b1 b2 j =
     () end
 
 
-val bn_eval_snoc: #len:size_nat{len + 1 <= max_size_t} -> b:lbignum len -> e:uint64 -> Lemma
-  (bn_v #(len + 1) (Seq.snoc b e) == bn_v #len b + v e * pow2 (64 * len))
+val bn_eval_snoc: #len:size_nat{len + 1 <= max_size_t} -> b:lbignum len -> e:uint64 ->
+  Lemma (bn_v #(len + 1) (Seq.snoc b e) == bn_v #len b + v e * pow2 (64 * len))
 
 let bn_eval_snoc #len b e =
   let b1 = Seq.snoc b e in
@@ -163,8 +162,8 @@ let rec bn_eval_inj len b1 b2 =
   end
 
 
-val bn_eval_bound: #len:size_nat -> b:lbignum len -> i:nat{i <= len} -> Lemma
-  (eval_ len b i < pow2 (64 * i))
+val bn_eval_bound: #len:size_nat -> b:lbignum len -> i:nat{i <= len} ->
+  Lemma (eval_ len b i < pow2 (64 * i))
 
 let rec bn_eval_bound #len b i =
   if i = 0 then
@@ -187,21 +186,8 @@ let rec bn_eval_bound #len b i =
     end
 
 
-val bn_eval_update_sub: len1:size_nat -> b1:lbignum len1 -> len2:size_nat{len1 <= len2} ->
-  Lemma (let b2 = create len2 (u64 0) in bn_v b1 == bn_v (update_sub b2 0 len1 b1))
-
-let bn_eval_update_sub len1 b1 len2 =
-  let b2 = create len2 (u64 0) in
-  let b2 = update_sub b2 0 len1 b1 in
-  bn_eval_split_i b2 len1;
-  assert (bn_v b2 == bn_v b1 + pow2 (64 * len1) * bn_v (slice b2 len1 len2));
-  let b_zeroes = create (len2 - len1) (u64 0) in
-  eq_intro b_zeroes (slice b2 len1 len2);
-  bn_eval_zeroes (len2 - len1) (len2 - len1)
-
-
-val bn_eval_index: #len:size_nat -> b:lbignum len -> i:nat{i < len} -> Lemma
-  (v b.[i] == bn_v b / pow2 (64 * i) % pow2 64)
+val bn_eval_index: #len:size_nat -> b:lbignum len -> i:nat{i < len} ->
+  Lemma (v b.[i] == bn_v b / pow2 (64 * i) % pow2 64)
 
 let bn_eval_index #len b i =
   calc (==) {
@@ -224,68 +210,6 @@ let bn_eval_index #len b i =
   assert (bn_v b / pow2 (64 * i) % pow2 64 == v b.[i])
 
 
-val bn_mask_lemma: #len:size_nat -> b:lbignum len -> mask:uint64 -> Lemma
-  (requires v mask == v (ones U64 SEC) \/ v mask == 0)
-  (ensures  bn_v (map (logand mask) b) == (if v mask = 0 then 0 else bn_v b))
-
-let bn_mask_lemma #len b mask =
-  let res = map (logand mask) b in
-  //assert (forall (i:nat{i < len}). res.[i] == (mask &. b.[i]));
-  let lemma_aux (i:nat{i < len}) : Lemma (v res.[i] == (if v mask = 0 then 0 else v b.[i])) =
-    logand_lemma mask b.[i] in
-
-  Classical.forall_intro lemma_aux;
-
-  if v mask = 0 then begin
-    eq_intro res (create len (u64 0));
-    bn_eval_zeroes len len;
-    assert (bn_v res == 0) end
-  else eq_intro res b
-
-
-inline_for_extraction noextract
-val mask_select: mask:uint64 -> a:uint64 -> b:uint64 -> uint64
-let mask_select mask a b =
-  (mask &. a) |. ((lognot mask) &. b)
-
-val mask_select_lemma: mask:uint64 -> a:uint64 -> b:uint64 -> Lemma
-  (requires v mask == v (ones U64 SEC) \/ v mask == 0)
-  (ensures  (mask_select mask a b) == (if v mask = 0 then b else a))
-
-let mask_select_lemma mask a b =
-  if v mask = 0 then begin
-    logand_lemma mask a;
-    assert (v (mask &. a) = 0);
-    lognot_lemma mask;
-    assert (v (lognot mask) = v (ones U64 SEC));
-    logand_lemma (lognot mask) b;
-    assert (v ((lognot mask) &. b) == v b);
-    logor_lemma (mask &. a) ((lognot mask) &. b);
-    assert (v (mask_select mask a b) == v b) end
-  else begin
-    logand_lemma mask a;
-    assert (v (mask &. a) = v a);
-    lognot_lemma mask;
-    assert (v (lognot mask) = 0);
-    logand_lemma (lognot mask) b;
-    assert (v ((lognot mask) &. b) == 0);
-    logor_zeros (mask &. a);
-    assert (v (mask_select mask a b) == v a) end
-
-
-val bn_mask_select_lemma: #len:size_nat -> a:lbignum len -> b:lbignum len -> mask:uint64 -> Lemma
-  (requires v mask == v (ones U64 SEC) \/ v mask == 0)
-  (ensures  bn_v (map2 (mask_select mask) a b) == (if v mask = 0 then bn_v b else bn_v a))
-
-let bn_mask_select_lemma #len a b mask =
-  let res = map2 (mask_select mask) a b in
-
-  let lemma_aux (i:nat{i < len}) : Lemma (v res.[i] == (if v mask = 0 then v b.[i] else v a.[i])) =
-    mask_select_lemma mask a.[i] b.[i] in
-
-  Classical.forall_intro lemma_aux;
-  if v mask = 0 then eq_intro res b else eq_intro res a
-
 
 val bn_eval_lt: len:size_nat -> a:lbignum len -> b:lbignum len -> k:pos{k <= len} -> Lemma
   (requires v a.[k - 1] < v b.[k - 1])
@@ -305,6 +229,19 @@ let bn_eval_lt len a b k =
   bn_eval_bound b (k - 1);
   assert (eval_ len b (k - 1) - eval_ len a (k - 1) > - pow2 (64 * (k - 1)));
   assert ((v b.[k - 1] - v a.[k - 1]) * pow2 (64 * (k - 1)) >= pow2 (64 * (k - 1)))
+
+
+val bn_eval_update_sub: len1:size_nat -> b1:lbignum len1 -> len2:size_nat{len1 <= len2} ->
+  Lemma (let b2 = create len2 (u64 0) in bn_v b1 == bn_v (update_sub b2 0 len1 b1))
+
+let bn_eval_update_sub len1 b1 len2 =
+  let b2 = create len2 (u64 0) in
+  let b2 = update_sub b2 0 len1 b1 in
+  bn_eval_split_i b2 len1;
+  assert (bn_v b2 == bn_v b1 + pow2 (64 * len1) * bn_v (slice b2 len1 len2));
+  let b_zeroes = create (len2 - len1) (u64 0) in
+  eq_intro b_zeroes (slice b2 len1 len2);
+  bn_eval_zeroes (len2 - len1) (len2 - len1)
 
 
 val bn_update_sub_eval:
@@ -341,3 +278,22 @@ let bn_update_sub_eval #aLen #bLen a b i =
     (==) { bn_eval_split_i a (i + bLen) }
     bn_v a + pow2 (64 * i) * bn_v b;
     }
+
+
+val bn_mask_lemma: #len:size_nat -> b:lbignum len -> mask:uint64 -> Lemma
+  (requires v mask == v (ones U64 SEC) \/ v mask == 0)
+  (ensures  bn_v (map (logand mask) b) == (if v mask = 0 then 0 else bn_v b))
+
+let bn_mask_lemma #len b mask =
+  let res = map (logand mask) b in
+  //assert (forall (i:nat{i < len}). res.[i] == (mask &. b.[i]));
+  let lemma_aux (i:nat{i < len}) : Lemma (v res.[i] == (if v mask = 0 then 0 else v b.[i])) =
+    logand_lemma mask b.[i] in
+
+  Classical.forall_intro lemma_aux;
+
+  if v mask = 0 then begin
+    eq_intro res (create len (u64 0));
+    bn_eval_zeroes len len;
+    assert (bn_v res == 0) end
+  else eq_intro res b

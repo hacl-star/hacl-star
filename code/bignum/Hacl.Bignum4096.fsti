@@ -73,5 +73,6 @@ val bn_to_bytes_be: Hacl.Bignum.Convert.bn_to_bytes_be_st n
 /* Comparisons */
 /***************/\n";
 Comment
-"Returns true if and only if argument a is strictly less than the argument b."]
-val lt: Hacl.Bignum.bn_is_less_st n
+"Returns 2 ^ 64 - 1 if and only if argument a is strictly less than the argument b,
+ otherwise returns 0."]
+val lt_mask: Hacl.Bignum.bn_lt_mask_st n

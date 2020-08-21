@@ -401,8 +401,10 @@ let rsapss_verify a modBits eBits pkey sLen sgnt msgLen msg =
   assert (v (blocks k 8ul) == v nLen);
   bn_from_bytes_be k sgnt s;
 
+
+  let mask = bn_lt_mask nLen s n in
   let res =
-    if (bn_is_less nLen s n) then begin
+    if FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 mask =^ ones U64 PUB) then begin
       bn_mod_exp modBits nLen n s eBits e m;
 
       LS.em_blocks_lt_max_size_t (v modBits);
