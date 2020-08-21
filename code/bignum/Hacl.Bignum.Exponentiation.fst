@@ -52,7 +52,9 @@ let bn_mod_exp_loop nLen #_ n nInv_u64 bBits bLen b aM accM =
   loop2 h0 bBits aM accM spec
   (fun i ->
     Lib.LoopCombinators.unfold_repeati (v bBits) (spec h0) (as_seq h0 aM, as_seq h0 accM) (v i);
-    if BN.bn_is_bit_set bLen b i then
+    let get_bit = BN.bn_get_ith_bit bLen b i in
+
+    if FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 get_bit =^ 1uL) then
       BM.mul n nInv_u64 aM accM accM; // acc = (acc * a) % n
     BM.sqr n nInv_u64 aM aM // a = (a * a) % n
   )

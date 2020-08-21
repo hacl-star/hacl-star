@@ -16,19 +16,16 @@ module Loops = Lib.LoopCombinators
 ///  Get and set i-th bit of a bignum
 ///
 
-val bn_is_bit_set: #len:size_nat -> b:lbignum len -> i:size_nat{i / 64 < len} -> bool
-let bn_is_bit_set #len input ind =
+val bn_get_ith_bit: #len:size_nat -> b:lbignum len -> i:size_nat{i / 64 < len} -> uint64
+let bn_get_ith_bit #len input ind =
   let i = ind / 64 in
   let j = ind % 64 in
-  let tmp = input.[i] in
-  let tmp = (tmp >>. size j) &. u64 1 in
-  FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 tmp =^ 1uL)
-
+  (input.[i] >>. size j) &. u64 1
 
 #push-options "--z3rlimit 100"
-val bn_is_bit_set_lemma: #len:size_nat -> b:lbignum len -> i:size_nat{i / 64 < len} ->
-  Lemma (bn_is_bit_set b i == (bn_v b / pow2 i % 2 = 1))
-let bn_is_bit_set_lemma #len b ind =
+val bn_get_ith_bit_lemma: #len:size_nat -> b:lbignum len -> i:size_nat{i / 64 < len} ->
+  Lemma (v (bn_get_ith_bit b i) == (bn_v b / pow2 i % 2))
+let bn_get_ith_bit_lemma #len b ind =
   let i = ind / 64 in
   let j = ind % 64 in
   let tmp1 = b.[i] >>. size j in
@@ -55,18 +52,18 @@ let bn_is_bit_set_lemma #len b ind =
   assert (v tmp2 == bn_v b / pow2 ind % 2)
 #pop-options
 
-val bn_bit_set: #len:size_nat -> b:lbignum len -> i:size_nat{i / 64 < len} -> lbignum len
-let bn_bit_set #len input ind =
+val bn_set_ith_bit: #len:size_nat -> b:lbignum len -> i:size_nat{i / 64 < len} -> lbignum len
+let bn_set_ith_bit #len input ind =
   let i = ind / 64 in
   let j = ind % 64 in
   let inp = input.[i] <- input.[i] |. (u64 1 <<. size j) in
   inp
 
 
-val bn_bit_set_lemma_aux: a:nat -> b:nat -> c:nat -> d:nat -> Lemma
+val bn_set_ith_bit_lemma_aux: a:nat -> b:nat -> c:nat -> d:nat -> Lemma
   (requires a + b * pow2 c < pow2 (c + d) /\ a < pow2 c)
   (ensures  b < pow2 d)
-let bn_bit_set_lemma_aux a b c d =
+let bn_set_ith_bit_lemma_aux a b c d =
   Math.Lemmas.lemma_div_lt_nat (a + b * pow2 c) (c + d) c;
   assert ((a + b * pow2 c) / pow2 c < pow2 d);
   Math.Lemmas.lemma_div_plus a b (pow2 c);
@@ -93,7 +90,7 @@ let bn_lt_pow2_index_lemma #len b ind =
   //assert (bn_v b == bn_v (slice b 0 (i + 1)) + pow2 (64 * (i + 1)) * bn_v (slice b (i + 1) len));
   bn_eval_bound (slice b 0 (i + 1)) (i + 1);
   //assert (bn_v (slice b 0 (i + 1)) < pow2 (64 * i + 64));
-  bn_bit_set_lemma_aux (bn_v (slice b 0 (i + 1))) (bn_v (slice b (i + 1) len)) (64 * (i + 1)) 0;
+  bn_set_ith_bit_lemma_aux (bn_v (slice b 0 (i + 1))) (bn_v (slice b (i + 1) len)) (64 * (i + 1)) 0;
   assert (bn_v b == bn_v (slice b 0 (i + 1)));
 
   bn_eval_split_i #(i + 1) (slice b 0 (i + 1)) i;
@@ -101,14 +98,14 @@ let bn_lt_pow2_index_lemma #len b ind =
   bn_eval1 (slice b i (i + 1));
   assert (bn_v b == bn_v (slice b 0 i) + pow2 (i * 64) * v b.[i]);
   bn_eval_bound #i (slice b 0 i) i;
-  bn_bit_set_lemma_aux (bn_v (slice b 0 i)) (v b.[i]) (i * 64) j;
+  bn_set_ith_bit_lemma_aux (bn_v (slice b 0 i)) (v b.[i]) (i * 64) j;
   assert (v b.[i] < pow2 j)
 
 
-val bn_bit_set_lemma: #len:size_nat -> b:lbignum len -> i:size_nat{i / 64 < len} -> Lemma
+val bn_set_ith_bit_lemma: #len:size_nat -> b:lbignum len -> i:size_nat{i / 64 < len} -> Lemma
   (requires bn_v b < pow2 i)
-  (ensures  bn_v (bn_bit_set b i) == bn_v b + pow2 i)
-let bn_bit_set_lemma #len input ind =
+  (ensures  bn_v (bn_set_ith_bit b i) == bn_v b + pow2 i)
+let bn_set_ith_bit_lemma #len input ind =
   let i = ind / 64 in
   let j = ind % 64 in
   bn_lt_pow2_index_lemma #len input ind;

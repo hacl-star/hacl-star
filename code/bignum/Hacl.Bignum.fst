@@ -55,11 +55,11 @@ let bn_sub_mask len n a =
   let _ = Hacl.Bignum.Addition.bn_sub_eq_len len a mod_mask a in
   pop_frame ()
 
-let bn_is_bit_set len input ind =
-  Hacl.Bignum.Lib.bn_is_bit_set len input ind
+let bn_get_ith_bit len input ind =
+  Hacl.Bignum.Lib.bn_get_ith_bit len input ind
 
-let bn_bit_set len input ind =
-  Hacl.Bignum.Lib.bn_bit_set len input ind
+let bn_set_ith_bit len input ind =
+  Hacl.Bignum.Lib.bn_set_ith_bit len input ind
 
 (* bignum comparison and test functions *)
 

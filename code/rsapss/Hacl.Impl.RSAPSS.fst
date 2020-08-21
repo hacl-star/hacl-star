@@ -337,7 +337,9 @@ val bn_is_less_pow2:
 
 let bn_is_less_pow2 modBits m =
   if not ((modBits -! 1ul) %. 8ul =. 0ul) then true
-  else not (bn_is_bit_set (blocks modBits 64ul) m (modBits -! 1ul))
+  else begin
+    let get_bit = bn_get_ith_bit (blocks modBits 64ul) m (modBits -! 1ul) in
+    FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 get_bit =^ 0uL) end
 
 
 inline_for_extraction noextract

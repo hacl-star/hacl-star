@@ -125,17 +125,17 @@ let bn_sub_mask_lemma #len n a =
 
 (* get and set i-th bit of a bignum *)
 
-let bn_is_bit_set #len input ind =
-  Hacl.Spec.Bignum.Lib.bn_is_bit_set #len input ind
+let bn_get_ith_bit #len input ind =
+  Hacl.Spec.Bignum.Lib.bn_get_ith_bit #len input ind
 
-let bn_is_bit_set_lemma #len b ind =
-  Hacl.Spec.Bignum.Lib.bn_is_bit_set_lemma #len b ind
+let bn_get_ith_bit_lemma #len b ind =
+  Hacl.Spec.Bignum.Lib.bn_get_ith_bit_lemma #len b ind
 
-let bn_bit_set #len input ind =
-  Hacl.Spec.Bignum.Lib.bn_bit_set #len input ind
+let bn_set_ith_bit #len input ind =
+  Hacl.Spec.Bignum.Lib.bn_set_ith_bit #len input ind
 
-let bn_bit_set_lemma #len input ind =
-  Hacl.Spec.Bignum.Lib.bn_bit_set_lemma #len input ind
+let bn_set_ith_bit_lemma #len input ind =
+  Hacl.Spec.Bignum.Lib.bn_set_ith_bit_lemma #len input ind
 
 (* Bignum comparison and test functions *)
 

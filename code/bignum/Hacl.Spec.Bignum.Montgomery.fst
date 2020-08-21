@@ -42,7 +42,7 @@ let rec bn_mul_by_pow2 len n b k =
 
 let precomp_r2_mod_n #nLen modBits n =
   let c = create nLen (u64 0) in
-  let c0 = bn_bit_set c (modBits - 1) in // c0 == pow2 (modBits - 1)
+  let c0 = bn_set_ith_bit c (modBits - 1) in // c0 == pow2 (modBits - 1)
   // pow2 (128 * nLen) / pow2 (modBits - 1) == pow2 (128 * nLen + 1 - modBits)
 
   repeati (128 * nLen + 1 - modBits) (bn_lshift1_mod_n n) c0
@@ -50,9 +50,9 @@ let precomp_r2_mod_n #nLen modBits n =
 
 let precomp_r2_mod_n_lemma #nLen modBits n =
   let c = create nLen (u64 0) in
-  let c0 = bn_bit_set c (modBits - 1) in
+  let c0 = bn_set_ith_bit c (modBits - 1) in
   bn_eval_zeroes nLen nLen;
-  bn_bit_set_lemma c (modBits - 1);
+  bn_set_ith_bit_lemma c (modBits - 1);
   assert (bn_v c0 == pow2 (modBits - 1));
   let res = repeati (128 * nLen + 1 - modBits) (bn_lshift1_mod_n n) c0 in
   bn_mul_by_pow2 nLen n c0 (128 * nLen + 1 - modBits);

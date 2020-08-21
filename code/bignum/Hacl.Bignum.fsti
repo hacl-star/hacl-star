@@ -220,28 +220,27 @@ val bn_sub_mask: len:size_t{v len > 0} -> bn_sub_mask_st len
 ///  Get and set i-th bit of a bignum
 ///
 
-val bn_is_bit_set:
+val bn_get_ith_bit:
     len:size_t
   -> b:lbignum len
   -> i:size_t{v i / 64 < v len} ->
-  Stack bool
+  Stack uint64
   (requires fun h -> live h b)
   (ensures  fun h0 r h1 -> h0 == h1 /\
-    r == S.bn_is_bit_set (as_seq h0 b) (v i))
+    r == S.bn_get_ith_bit (as_seq h0 b) (v i))
 
 /// A now common pattern in HACL*: inline_for_extraction and stateful type
 /// abbreviations, to maximize code sharing.
 inline_for_extraction noextract
-let bn_bit_set_st (len:size_t) =
+let bn_set_ith_bit_st (len:size_t) =
     b:lbignum len
   -> i:size_t{v i / 64 < v len} ->
   Stack unit
   (requires fun h -> live h b)
   (ensures  fun h0 _ h1 -> modifies (loc b) h0 h1 /\
-    as_seq h1 b == S.bn_bit_set (as_seq h0 b) (v i))
+    as_seq h1 b == S.bn_set_ith_bit (as_seq h0 b) (v i))
 
-val bn_bit_set:
-    len:size_t -> bn_bit_set_st len
+val bn_set_ith_bit: len:size_t -> bn_set_ith_bit_st len
 
 /// Start of the len-based specialization infrastructure.
 ///
@@ -270,7 +269,7 @@ let meta_len = len: size_t { 0 < v len /\ 128 * v len <= max_size_t }
 /// given bignum length.
 inline_for_extraction noextract
 class bn (len: meta_len) = {
-  bit_set: bn_bit_set_st len;
+  bit_set: bn_set_ith_bit_st len;
   add_mod_n: bn_add_mod_n_st len;
   mul: a:lbignum len -> b:lbignum len -> bn_karatsuba_mul_st a b;
   sqr: a:lbignum len -> bn_karatsuba_sqr_st a;
@@ -282,7 +281,7 @@ class bn (len: meta_len) = {
 /// functions!
 inline_for_extraction noextract
 let mk_runtime_bn (len: meta_len) = {
-  bit_set = bn_bit_set len;
+  bit_set = bn_set_ith_bit len;
   add_mod_n = bn_add_mod_n len;
   mul = (fun a b -> bn_karatsuba_mul len a b);
   sqr = (fun a -> bn_karatsuba_sqr len a);

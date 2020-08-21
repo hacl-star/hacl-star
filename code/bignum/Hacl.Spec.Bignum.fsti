@@ -96,17 +96,17 @@ val bn_sub_mask_lemma: #len:size_nat -> n:lbignum len -> a:lbignum len -> Lemma
 ///  Get and set i-th bit of a bignum
 ///
 
-val bn_is_bit_set: #len:size_nat -> b:lbignum len -> i:size_nat{i / 64 < len} -> bool
+val bn_get_ith_bit: #len:size_nat -> b:lbignum len -> i:size_nat{i / 64 < len} -> uint64
 
-val bn_is_bit_set_lemma: #len:size_nat -> b:lbignum len -> i:size_nat{i / 64 < len} ->
-  Lemma (bn_is_bit_set b i == (bn_v b / pow2 i % 2 = 1))
+val bn_get_ith_bit_lemma: #len:size_nat -> b:lbignum len -> i:size_nat{i / 64 < len} ->
+  Lemma (v (bn_get_ith_bit b i) == (bn_v b / pow2 i % 2))
 
 
-val bn_bit_set: #len:size_nat -> b:lbignum len -> i:size_nat{i / 64 < len} -> lbignum len
+val bn_set_ith_bit: #len:size_nat -> b:lbignum len -> i:size_nat{i / 64 < len} -> lbignum len
 
-val bn_bit_set_lemma: #len:size_nat -> b:lbignum len -> i:size_nat{i / 64 < len} -> Lemma
+val bn_set_ith_bit_lemma: #len:size_nat -> b:lbignum len -> i:size_nat{i / 64 < len} -> Lemma
   (requires bn_v b < pow2 i)
-  (ensures  bn_v (bn_bit_set b i) == bn_v b + pow2 i)
+  (ensures  bn_v (bn_set_ith_bit b i) == bn_v b + pow2 i)
 
 ///
 ///  Bignum comparison and test functions

@@ -27,8 +27,8 @@ let sub = Hacl.Bignum.Addition.bn_sub_eq_len n
 let mul (a b: lbignum n) : BN.bn_karatsuba_mul_st a b =
   BN.bn_karatsuba_mul n a b
 
-let bit_set: BN.bn_bit_set_st n =
-  BN.(norm [ zeta; primops; iota; delta_only [ `%bn_bit_set ] ] (bn_bit_set n))
+let bit_set: BN.bn_set_ith_bit_st n =
+  BN.(norm [ zeta; primops; iota; delta_only [ `%bn_set_ith_bit ] ] (bn_set_ith_bit n))
 
 let add_mod_n: BN.bn_add_mod_n_st n =
   BN.bn_add_mod_n n

@@ -28,7 +28,9 @@ val bn_mod_exp_f:
   tuple2 (lbignum nLen) (lbignum nLen)
 
 let bn_mod_exp_f #nLen n mu bBits bLen b i (aM, accM) =
-  let accM = if (bn_is_bit_set #bLen b i) then mont_mul n mu aM accM else accM in // acc = (acc * a) % n
+  [@inline_let]
+  let is_bit_set = FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 (bn_get_ith_bit #bLen b i) =^ 1uL) in
+  let accM = if is_bit_set then mont_mul n mu aM accM else accM in // acc = (acc * a) % n
   let aM = mont_sqr n mu aM in // a = (a * a) % n
   (aM, accM)
 
@@ -86,7 +88,7 @@ let bn_mod_exp_f_lemma #nLen n mu bBits bLen b i (aM0, accM0) =
   let (aM2, accM2) = BL.mod_exp_f_ll nLen (bn_v n) (v mu) bBits (bn_v b) i (bn_v aM0, bn_v accM0) in
   mont_sqr_lemma #nLen n mu aM0;
   assert (bn_v aM1 == aM2);
-  bn_is_bit_set_lemma #bLen b i;
+  bn_get_ith_bit_lemma #bLen b i;
   if (bn_v b / pow2 i % 2 = 1) then mont_mul_lemma #nLen n mu aM0 accM0;
   assert (bn_v accM1 == accM2)
 

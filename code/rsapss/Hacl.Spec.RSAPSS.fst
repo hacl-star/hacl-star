@@ -189,7 +189,7 @@ let bn_eval_lt_pow2_modBits modBits m =
 val bn_is_less_pow2: modBits:size_pos{1 < modBits} -> m:lbignum (blocks modBits 64) -> bool
 let bn_is_less_pow2 modBits m =
   if (modBits - 1) % 8 <> 0 then true
-  else not (bn_is_bit_set m (modBits - 1))
+  else FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 (bn_get_ith_bit m (modBits - 1)) =^ 0uL)
 
 val bn_is_less_pow2_lemma: modBits:size_pos{1 < modBits} -> m:lbignum (blocks modBits 64) -> Lemma
   (requires bn_v m < pow2 modBits)
@@ -210,8 +210,8 @@ let bn_is_less_pow2_lemma modBits m =
     assert (8 * emLen == modBits - 1);
 
     bn_eval_lt_pow2_modBits modBits m;
-    let r = bn_is_bit_set m (modBits - 1) in
-    bn_is_bit_set_lemma m (modBits - 1) end
+    let r = FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 (bn_get_ith_bit m (modBits - 1)) =^ 0uL) in
+    bn_get_ith_bit_lemma m (modBits - 1) end
 
 
 val bn_eval_sub: modBits:size_pos{1 < modBits} -> m:lbignum (blocks modBits 64) -> Lemma

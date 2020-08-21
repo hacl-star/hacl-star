@@ -156,7 +156,7 @@ let bn_lt_pow2 #len b x =
   if x >= 64 * len then true
   else begin
     let b2 = create len (u64 0) in
-    let b2 = bn_bit_set b2 x in
+    let b2 = bn_set_ith_bit b2 x in
     bn_is_less b b2 end
 
 val bn_lt_pow2_lemma: #len:size_nat -> b:lbignum len -> x:size_nat -> Lemma
@@ -171,8 +171,8 @@ let bn_lt_pow2_lemma #len b x =
     bn_eval_zeroes len len;
     assert (bn_v b2 = 0);
     //assert (bn_v b2 < pow2 x);
-    let b2' = bn_bit_set b2 x in
-    bn_bit_set_lemma b2 x;
+    let b2' = bn_set_ith_bit b2 x in
+    bn_set_ith_bit_lemma b2 x;
     assert (bn_v b2' == pow2 x);
     bn_is_less_lemma b b2' end
 
@@ -182,7 +182,7 @@ let bn_gt_pow2 #len b x =
   if x >= 64 * len then false
   else begin
     let b2 = create len (u64 0) in
-    let b2 = bn_bit_set b2 x in
+    let b2 = bn_set_ith_bit b2 x in
     bn_is_less b2 b end
 
 val bn_gt_pow2_lemma: #len:size_nat -> b:lbignum len -> x:size_nat -> Lemma
@@ -197,7 +197,7 @@ let bn_gt_pow2_lemma #len b x =
     bn_eval_zeroes len len;
     assert (bn_v b2 = 0);
     //assert (bn_v b2 < pow2 x);
-    let b2' = bn_bit_set b2 x in
-    bn_bit_set_lemma b2 x;
+    let b2' = bn_set_ith_bit b2 x in
+    bn_set_ith_bit_lemma b2 x;
     assert (bn_v b2' == pow2 x);
     bn_is_less_lemma b2' b end

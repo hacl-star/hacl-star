@@ -125,7 +125,7 @@ let bn_lt_pow2 len b x =
   let res =
     if (x >=. 64ul *! len) then true
     else begin
-      bn_bit_set len b2 x;
+      bn_set_ith_bit len b2 x;
       bn_is_less len b b2 end in
   pop_frame ();
   res
@@ -148,7 +148,7 @@ let bn_gt_pow2 len b x =
   let res =
     if (x >=. 64ul *! len) then false
     else begin
-      bn_bit_set len b2 x;
+      bn_set_ith_bit len b2 x;
       bn_is_less len b2 b end in
   pop_frame ();
   res
