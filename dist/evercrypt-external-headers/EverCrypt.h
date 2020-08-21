@@ -22,6 +22,9 @@
  */
 
 
+#ifndef __EverCrypt_H
+#define __EverCrypt_H
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -31,9 +34,6 @@ extern "C" {
 #include <kremlin/internal/types.h>
 #include <kremlin/internal/target.h>
 
-
-#ifndef __EverCrypt_H
-#define __EverCrypt_H
 
 
 
@@ -1043,10 +1043,9 @@ EverCrypt_Curve25519_scalarmult(uint8_t *shared, uint8_t *my_priv, uint8_t *thei
 
 extern bool EverCrypt_Curve25519_ecdh(uint8_t *shared, uint8_t *my_priv, uint8_t *their_pub);
 
-#define __EverCrypt_H_DEFINED
-#endif
-
 #if defined(__cplusplus)
 }
 #endif
 
+#define __EverCrypt_H_DEFINED
+#endif

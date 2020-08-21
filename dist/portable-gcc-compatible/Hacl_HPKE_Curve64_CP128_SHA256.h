@@ -22,6 +22,9 @@
  */
 
 
+#ifndef __Hacl_HPKE_Curve64_CP128_SHA256_H
+#define __Hacl_HPKE_Curve64_CP128_SHA256_H
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -33,9 +36,6 @@ extern "C" {
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-
-#ifndef __Hacl_HPKE_Curve64_CP128_SHA256_H
-#define __Hacl_HPKE_Curve64_CP128_SHA256_H
 
 #include "Hacl_Kremlib.h"
 #include "Hacl_Hash.h"
@@ -102,10 +102,9 @@ Hacl_HPKE_Curve64_CP128_SHA256_openBase(
 
 /* SNIPPET_END: Hacl_HPKE_Curve64_CP128_SHA256_openBase */
 
-#define __Hacl_HPKE_Curve64_CP128_SHA256_H_DEFINED
-#endif
-
 #if defined(__cplusplus)
 }
 #endif
 
+#define __Hacl_HPKE_Curve64_CP128_SHA256_H_DEFINED
+#endif

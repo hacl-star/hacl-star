@@ -22,6 +22,9 @@
  */
 
 
+#ifndef __EverCrypt_Ed25519_H
+#define __EverCrypt_Ed25519_H
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -33,9 +36,6 @@ extern "C" {
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-
-#ifndef __EverCrypt_Ed25519_H
-#define __EverCrypt_Ed25519_H
 
 #include "Hacl_Ed25519.h"
 
@@ -70,10 +70,9 @@ EverCrypt_Ed25519_sign_expanded(uint8_t *signature, uint8_t *ks, uint32_t len, u
 
 /* SNIPPET_END: EverCrypt_Ed25519_sign_expanded */
 
-#define __EverCrypt_Ed25519_H_DEFINED
-#endif
-
 #if defined(__cplusplus)
 }
 #endif
 
+#define __EverCrypt_Ed25519_H_DEFINED
+#endif

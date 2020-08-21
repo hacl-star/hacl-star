@@ -22,6 +22,9 @@
  */
 
 
+#ifndef __EverCrypt_Vale_H
+#define __EverCrypt_Vale_H
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -33,9 +36,6 @@ extern "C" {
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-
-#ifndef __EverCrypt_Vale_H
-#define __EverCrypt_Vale_H
 
 
 
@@ -153,10 +153,9 @@ extern uint32_t __stdcall old_gcm256_decrypt(gcm_args *uu___);
 
 /* SNIPPET_END: old_gcm256_decrypt */
 
-#define __EverCrypt_Vale_H_DEFINED
-#endif
-
 #if defined(__cplusplus)
 }
 #endif
 
+#define __EverCrypt_Vale_H_DEFINED
+#endif

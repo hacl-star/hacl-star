@@ -22,6 +22,9 @@
  */
 
 
+#ifndef __Hacl_Frodo_KEM_H
+#define __Hacl_Frodo_KEM_H
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -33,9 +36,6 @@ extern "C" {
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-
-#ifndef __Hacl_Frodo_KEM_H
-#define __Hacl_Frodo_KEM_H
 
 #include "Hacl_Kremlib.h"
 #include "Lib_RandomBuffer_System.h"
@@ -60,10 +60,9 @@ uint32_t Hacl_Frodo_KEM_crypto_kem_dec(uint8_t *ss, uint8_t *ct, uint8_t *sk);
 
 /* SNIPPET_END: Hacl_Frodo_KEM_crypto_kem_dec */
 
-#define __Hacl_Frodo_KEM_H_DEFINED
-#endif
-
 #if defined(__cplusplus)
 }
 #endif
 
+#define __Hacl_Frodo_KEM_H_DEFINED
+#endif

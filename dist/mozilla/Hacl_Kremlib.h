@@ -22,6 +22,9 @@
  */
 
 
+#ifndef __Hacl_Kremlib_H
+#define __Hacl_Kremlib_H
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -31,9 +34,6 @@ extern "C" {
 #include <string.h>
 #include <stdbool.h>
 
-
-#ifndef __Hacl_Kremlib_H
-#define __Hacl_Kremlib_H
 
 
 
@@ -55,10 +55,9 @@ static inline uint64_t FStar_UInt128_uint128_to_uint64(FStar_UInt128_uint128 a);
 
 static inline FStar_UInt128_uint128 FStar_UInt128_mul_wide(uint64_t x, uint64_t y);
 
-#define __Hacl_Kremlib_H_DEFINED
-#endif
-
 #if defined(__cplusplus)
 }
 #endif
 
+#define __Hacl_Kremlib_H_DEFINED
+#endif

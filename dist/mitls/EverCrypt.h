@@ -22,6 +22,9 @@
  */
 
 
+#ifndef __EverCrypt_H
+#define __EverCrypt_H
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -33,9 +36,6 @@ extern "C" {
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-
-#ifndef __EverCrypt_H
-#define __EverCrypt_H
 
 #include "EverCrypt_Hacl.h"
 #include "EverCrypt_AutoConfig2.h"
@@ -363,10 +363,9 @@ void EverCrypt_ecdh_keygen(EverCrypt__ecdh_state *st, uint8_t *outx, uint8_t *ou
 uint32_t
 EverCrypt_ecdh_compute(EverCrypt__ecdh_state *st, uint8_t *inx, uint8_t *iny, uint8_t *out);
 
-#define __EverCrypt_H_DEFINED
-#endif
-
 #if defined(__cplusplus)
 }
 #endif
 
+#define __EverCrypt_H_DEFINED
+#endif

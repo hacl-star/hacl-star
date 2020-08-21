@@ -22,6 +22,9 @@
  */
 
 
+#ifndef __EverCrypt_Helpers_H
+#define __EverCrypt_Helpers_H
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -33,9 +36,6 @@ extern "C" {
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-
-#ifndef __EverCrypt_Helpers_H
-#define __EverCrypt_Helpers_H
 
 
 
@@ -55,10 +55,9 @@ typedef uint32_t *EverCrypt_Helpers_uint32_p;
 
 typedef uint64_t *EverCrypt_Helpers_uint64_p;
 
-#define __EverCrypt_Helpers_H_DEFINED
-#endif
-
 #if defined(__cplusplus)
 }
 #endif
 
+#define __EverCrypt_Helpers_H_DEFINED
+#endif

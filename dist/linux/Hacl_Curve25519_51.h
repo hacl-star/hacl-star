@@ -22,6 +22,9 @@
  */
 
 
+#ifndef __Hacl_Curve25519_51_H
+#define __Hacl_Curve25519_51_H
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -32,9 +35,6 @@ extern "C" {
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-
-#ifndef __Hacl_Curve25519_51_H
-#define __Hacl_Curve25519_51_H
 
 #include "Hacl_Kremlib.h"
 
@@ -58,10 +58,9 @@ void Hacl_Curve25519_51_secret_to_public(u8 *pub, u8 *priv);
 
 bool Hacl_Curve25519_51_ecdh(u8 *out, u8 *priv, u8 *pub);
 
-#define __Hacl_Curve25519_51_H_DEFINED
-#endif
-
 #if defined(__cplusplus)
 }
 #endif
 
+#define __Hacl_Curve25519_51_H_DEFINED
+#endif

@@ -22,6 +22,9 @@
  */
 
 
+#ifndef __Hacl_Spec_H
+#define __Hacl_Spec_H
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -32,9 +35,6 @@ extern "C" {
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-
-#ifndef __Hacl_Spec_H
-#define __Hacl_Spec_H
 
 
 
@@ -59,10 +59,9 @@ typedef struct Spec_ECDSA_hash_alg_ecdsa_s
 }
 Spec_ECDSA_hash_alg_ecdsa;
 
-#define __Hacl_Spec_H_DEFINED
-#endif
-
 #if defined(__cplusplus)
 }
 #endif
 
+#define __Hacl_Spec_H_DEFINED
+#endif

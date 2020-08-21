@@ -22,6 +22,9 @@
  */
 
 
+#ifndef __MerkleTree_H
+#define __MerkleTree_H
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -33,9 +36,6 @@ extern "C" {
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-
-#ifndef __MerkleTree_H
-#define __MerkleTree_H
 
 #include "Hacl_Kremlib.h"
 #include "Hacl_Spec.h"
@@ -990,10 +990,9 @@ void MerkleTree_Low_Hashfunctions_free_hash(uint8_t *h);
 
 /* SNIPPET_END: MerkleTree_Low_Hashfunctions_free_hash */
 
-#define __MerkleTree_H_DEFINED
-#endif
-
 #if defined(__cplusplus)
 }
 #endif
 
+#define __MerkleTree_H_DEFINED
+#endif

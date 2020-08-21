@@ -7,6 +7,9 @@
  * F* version: 15104ff8
  * KreMLin version: 318b7fa8
  */
+
+#pragma once
+
 #include "kremlin/internal/types.h"
 #include "FStar_UInt128.h"
 #include "FStar_UInt_8_16_32_64.h"

@@ -22,6 +22,9 @@
  */
 
 
+#ifndef __Hacl_Impl_Blake2_Constants_H
+#define __Hacl_Impl_Blake2_Constants_H
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -32,9 +35,6 @@ extern "C" {
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-
-#ifndef __Hacl_Impl_Blake2_Constants_H
-#define __Hacl_Impl_Blake2_Constants_H
 
 
 
@@ -85,10 +85,9 @@ static const
 u32
 Hacl_Impl_Blake2_Constants_rTable_B[4U] = { (u32)32U, (u32)24U, (u32)16U, (u32)63U };
 
-#define __Hacl_Impl_Blake2_Constants_H_DEFINED
-#endif
-
 #if defined(__cplusplus)
 }
 #endif
 
+#define __Hacl_Impl_Blake2_Constants_H_DEFINED
+#endif

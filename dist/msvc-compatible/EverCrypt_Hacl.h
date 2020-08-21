@@ -22,6 +22,9 @@
  */
 
 
+#ifndef __EverCrypt_Hacl_H
+#define __EverCrypt_Hacl_H
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -33,9 +36,6 @@ extern "C" {
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-
-#ifndef __EverCrypt_Hacl_H
-#define __EverCrypt_Hacl_H
 
 
 
@@ -65,10 +65,9 @@ extern void EverCrypt_Hacl_aes256_keyExpansion(uint8_t *key, uint8_t *w, uint8_t
 extern void
 EverCrypt_Hacl_aes256_cipher(uint8_t *cipher, uint8_t *plain, uint8_t *w, uint8_t *sb);
 
-#define __EverCrypt_Hacl_H_DEFINED
-#endif
-
 #if defined(__cplusplus)
 }
 #endif
 
+#define __EverCrypt_Hacl_H_DEFINED
+#endif

@@ -22,6 +22,9 @@
  */
 
 
+#ifndef __EverCrypt_AEAD_H
+#define __EverCrypt_AEAD_H
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -33,9 +36,6 @@ extern "C" {
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-
-#ifndef __EverCrypt_AEAD_H
-#define __EverCrypt_AEAD_H
 
 #include "Hacl_Kremlib.h"
 #include "EverCrypt_Chacha20Poly1305.h"
@@ -261,10 +261,9 @@ void EverCrypt_AEAD_free(EverCrypt_AEAD_state_s *s);
 
 /* SNIPPET_END: EverCrypt_AEAD_free */
 
-#define __EverCrypt_AEAD_H_DEFINED
-#endif
-
 #if defined(__cplusplus)
 }
 #endif
 
+#define __EverCrypt_AEAD_H_DEFINED
+#endif

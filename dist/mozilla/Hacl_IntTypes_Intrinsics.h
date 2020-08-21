@@ -22,6 +22,9 @@
  */
 
 
+#ifndef __Hacl_IntTypes_Intrinsics_H
+#define __Hacl_IntTypes_Intrinsics_H
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -31,9 +34,6 @@ extern "C" {
 #include <string.h>
 #include <stdbool.h>
 
-
-#ifndef __Hacl_IntTypes_Intrinsics_H
-#define __Hacl_IntTypes_Intrinsics_H
 
 #include "Hacl_Kremlib.h"
 
@@ -65,10 +65,9 @@ Hacl_IntTypes_Intrinsics_sub_borrow_u64(
   return c1;
 }
 
-#define __Hacl_IntTypes_Intrinsics_H_DEFINED
-#endif
-
 #if defined(__cplusplus)
 }
 #endif
 
+#define __Hacl_IntTypes_Intrinsics_H_DEFINED
+#endif

@@ -22,6 +22,9 @@
  */
 
 
+#ifndef __EverCrypt_HMAC_H
+#define __EverCrypt_HMAC_H
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -33,9 +36,6 @@ extern "C" {
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-
-#ifndef __EverCrypt_HMAC_H
-#define __EverCrypt_HMAC_H
 
 #include "Hacl_Kremlib.h"
 #include "Hacl_Hash.h"
@@ -92,10 +92,9 @@ EverCrypt_HMAC_compute(
   uint32_t datalen
 );
 
-#define __EverCrypt_HMAC_H_DEFINED
-#endif
-
 #if defined(__cplusplus)
 }
 #endif
 
+#define __EverCrypt_HMAC_H_DEFINED
+#endif

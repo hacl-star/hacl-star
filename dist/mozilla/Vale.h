@@ -22,6 +22,9 @@
  */
 
 
+#ifndef __Vale_H
+#define __Vale_H
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -31,9 +34,6 @@ extern "C" {
 #include <string.h>
 #include <stdbool.h>
 
-
-#ifndef __Vale_H
-#define __Vale_H
 
 
 
@@ -55,10 +55,9 @@ extern uint64_t fmul_scalar_e(uint64_t *x0, uint64_t *x1, uint64_t x2);
 
 extern uint64_t fsub_e(uint64_t *x0, uint64_t *x1, uint64_t *x2);
 
-#define __Vale_H_DEFINED
-#endif
-
 #if defined(__cplusplus)
 }
 #endif
 
+#define __Vale_H_DEFINED
+#endif

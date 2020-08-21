@@ -22,6 +22,9 @@
  */
 
 
+#ifndef __EverCrypt_AutoConfig2_H
+#define __EverCrypt_AutoConfig2_H
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -33,9 +36,6 @@ extern "C" {
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-
-#ifndef __EverCrypt_AutoConfig2_H
-#define __EverCrypt_AutoConfig2_H
 
 #include "Vale.h"
 
@@ -237,10 +237,9 @@ void EverCrypt_AutoConfig2_disable_bcrypt();
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_disable_bcrypt */
 
-#define __EverCrypt_AutoConfig2_H_DEFINED
-#endif
-
 #if defined(__cplusplus)
 }
 #endif
 
+#define __EverCrypt_AutoConfig2_H_DEFINED
+#endif
