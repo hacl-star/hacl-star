@@ -19,10 +19,6 @@ let lemma_pow1 a = ()
 let lemma_pow_unfold a b = ()
 #pop-options
 
-val lemma_pow_greater: a:pos -> b:nat ->
-  Lemma (pow a b > 0)
-  [SMTPat (pow a b)]
-
 let rec lemma_pow_greater a b =
   if b = 0 then lemma_pow0 a
   else begin

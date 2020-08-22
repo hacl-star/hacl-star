@@ -19,6 +19,8 @@ val lemma_pow0: a:int -> Lemma (pow a 0 = 1)
 val lemma_pow1: a:int -> Lemma (pow a 1 = a)
 val lemma_pow_unfold: a:int -> b:pos -> Lemma (a * pow a (b - 1) == pow a b)
 
+val lemma_pow_greater: a:pos -> b:nat -> Lemma (pow a b > 0) [SMTPat (pow a b)]
+
 val lemma_pow_add: x:int -> n:nat -> m:nat -> Lemma (pow x n * pow x m = pow x (n + m))
 
 val lemma_pow_double: a:int -> b:nat -> Lemma (pow (a * a) b == pow a (b + b))
