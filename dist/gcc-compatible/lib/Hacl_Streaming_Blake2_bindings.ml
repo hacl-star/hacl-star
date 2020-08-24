@@ -20,18 +20,6 @@ module Bindings(F:Cstubs.FOREIGN) =
       =
       structure
         "Hacl_Streaming_Functor_state_s__K____uint32_t___uint32_t_____s"
-    let hacl_Streaming_Functor_state_s__K____uint32_t___uint32_t_____block_state
-      =
-      field hacl_Streaming_Functor_state_s__K____uint32_t___uint32_t____
-        "block_state" k____uint32_t___uint32_t_
-    let hacl_Streaming_Functor_state_s__K____uint32_t___uint32_t_____buf =
-      field hacl_Streaming_Functor_state_s__K____uint32_t___uint32_t____
-        "buf" (ptr uint8_t)
-    let hacl_Streaming_Functor_state_s__K____uint32_t___uint32_t_____total_len
-      =
-      field hacl_Streaming_Functor_state_s__K____uint32_t___uint32_t____
-        "total_len" uint64_t
-    let _ = seal hacl_Streaming_Functor_state_s__K____uint32_t___uint32_t____
     let hacl_Streaming_Blake2_blake2s_32_no_key_create_in =
       foreign "Hacl_Streaming_Blake2_blake2s_32_no_key_create_in"
         (void @->
@@ -68,18 +56,6 @@ module Bindings(F:Cstubs.FOREIGN) =
       =
       structure
         "Hacl_Streaming_Functor_state_s__K____uint64_t___uint64_t_____s"
-    let hacl_Streaming_Functor_state_s__K____uint64_t___uint64_t_____block_state
-      =
-      field hacl_Streaming_Functor_state_s__K____uint64_t___uint64_t____
-        "block_state" k____uint64_t___uint64_t_
-    let hacl_Streaming_Functor_state_s__K____uint64_t___uint64_t_____buf =
-      field hacl_Streaming_Functor_state_s__K____uint64_t___uint64_t____
-        "buf" (ptr uint8_t)
-    let hacl_Streaming_Functor_state_s__K____uint64_t___uint64_t_____total_len
-      =
-      field hacl_Streaming_Functor_state_s__K____uint64_t___uint64_t____
-        "total_len" uint64_t
-    let _ = seal hacl_Streaming_Functor_state_s__K____uint64_t___uint64_t____
     let hacl_Streaming_Blake2_blake2b_32_no_key_create_in =
       foreign "Hacl_Streaming_Blake2_blake2b_32_no_key_create_in"
         (void @->

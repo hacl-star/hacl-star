@@ -188,9 +188,9 @@ blake2s_update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, u
                             for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                             {
                               uint32_t *os = r110;
-                              uint32_t x2 = r110[i];
-                              uint32_t x1 = x2 >> r02 | x2 << ((uint32_t)32U - r02);
-                              os[i] = x1;
+                              uint32_t x1 = r110[i];
+                              uint32_t x10 = x1 >> r02 | x1 << ((uint32_t)32U - r02);
+                              os[i] = x10;
                             }
                           }
                           {
@@ -224,9 +224,9 @@ blake2s_update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, u
                                   for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                                   {
                                     uint32_t *os = r111;
-                                    uint32_t x2 = r111[i];
-                                    uint32_t x1 = x2 >> r13 | x2 << ((uint32_t)32U - r13);
-                                    os[i] = x1;
+                                    uint32_t x1 = r111[i];
+                                    uint32_t x10 = x1 >> r13 | x1 << ((uint32_t)32U - r13);
+                                    os[i] = x10;
                                   }
                                 }
                                 {
@@ -269,9 +269,9 @@ blake2s_update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, u
                                         for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                                         {
                                           uint32_t *os = r112;
-                                          uint32_t x2 = r112[i];
-                                          uint32_t x1 = x2 >> r22 | x2 << ((uint32_t)32U - r22);
-                                          os[i] = x1;
+                                          uint32_t x1 = r112[i];
+                                          uint32_t x10 = x1 >> r22 | x1 << ((uint32_t)32U - r22);
+                                          os[i] = x10;
                                         }
                                       }
                                       {
@@ -305,10 +305,10 @@ blake2s_update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, u
                                               for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                                               {
                                                 uint32_t *os = r113;
-                                                uint32_t x2 = r113[i];
+                                                uint32_t x1 = r113[i];
                                                 uint32_t
-                                                x1 = x2 >> r32 | x2 << ((uint32_t)32U - r32);
-                                                os[i] = x1;
+                                                x10 = x1 >> r32 | x1 << ((uint32_t)32U - r32);
+                                                os[i] = x10;
                                               }
                                             }
                                             {
@@ -433,13 +433,13 @@ blake2s_update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, u
                                                             i++)
                                                           {
                                                             uint32_t *os = r117;
-                                                            uint32_t x2 = r117[i];
+                                                            uint32_t x1 = r117[i];
                                                             uint32_t
-                                                            x1 =
-                                                              x2
+                                                            x13 =
+                                                              x1
                                                               >> r0
-                                                              | x2 << ((uint32_t)32U - r0);
-                                                            os[i] = x1;
+                                                              | x1 << ((uint32_t)32U - r0);
+                                                            os[i] = x13;
                                                           }
                                                         }
                                                         {
@@ -490,13 +490,13 @@ blake2s_update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, u
                                                                   i++)
                                                                 {
                                                                   uint32_t *os = r118;
-                                                                  uint32_t x2 = r118[i];
+                                                                  uint32_t x1 = r118[i];
                                                                   uint32_t
-                                                                  x1 =
-                                                                    x2
+                                                                  x13 =
+                                                                    x1
                                                                     >> r1
-                                                                    | x2 << ((uint32_t)32U - r1);
-                                                                  os[i] = x1;
+                                                                    | x1 << ((uint32_t)32U - r1);
+                                                                  os[i] = x13;
                                                                 }
                                                               }
                                                               {
@@ -565,15 +565,15 @@ blake2s_update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, u
                                                                         i++)
                                                                       {
                                                                         uint32_t *os = r119;
-                                                                        uint32_t x2 = r119[i];
+                                                                        uint32_t x1 = r119[i];
                                                                         uint32_t
-                                                                        x1 =
-                                                                          x2
+                                                                        x13 =
+                                                                          x1
                                                                           >> r24
                                                                           |
-                                                                            x2
+                                                                            x1
                                                                             << ((uint32_t)32U - r24);
-                                                                        os[i] = x1;
+                                                                        os[i] = x13;
                                                                       }
                                                                     }
                                                                     {
@@ -637,17 +637,17 @@ blake2s_update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, u
                                                                             {
                                                                               uint32_t *os = r1110;
                                                                               uint32_t
-                                                                              x2 = r1110[i];
+                                                                              x1 = r1110[i];
                                                                               uint32_t
-                                                                              x1 =
-                                                                                x2
+                                                                              x13 =
+                                                                                x1
                                                                                 >> r34
                                                                                 |
-                                                                                  x2
+                                                                                  x1
                                                                                   <<
                                                                                     ((uint32_t)32U
                                                                                     - r34);
-                                                                              os[i] = x1;
+                                                                              os[i] = x13;
                                                                             }
                                                                           }
                                                                           {
@@ -861,8 +861,8 @@ Hacl_Blake2s_32_blake2s(
         {
           uint8_t b20[64U] = { 0U };
           uint32_t *r0 = b + (uint32_t)0U * (uint32_t)4U;
-          uint32_t *r11 = b + (uint32_t)1U * (uint32_t)4U;
-          uint32_t *r21 = b + (uint32_t)2U * (uint32_t)4U;
+          uint32_t *r1 = b + (uint32_t)1U * (uint32_t)4U;
+          uint32_t *r2 = b + (uint32_t)2U * (uint32_t)4U;
           uint32_t *r3 = b + (uint32_t)3U * (uint32_t)4U;
           uint32_t iv0 = Hacl_Impl_Blake2_Constants_ivTable_S[0U];
           uint32_t iv1 = Hacl_Impl_Blake2_Constants_ivTable_S[1U];
@@ -879,10 +879,10 @@ Hacl_Blake2s_32_blake2s(
           K___uint32_t_uint32_t scrut;
           uint32_t nb;
           uint32_t rem;
-          r21[0U] = iv0;
-          r21[1U] = iv1;
-          r21[2U] = iv2;
-          r21[3U] = iv3;
+          r2[0U] = iv0;
+          r2[1U] = iv1;
+          r2[2U] = iv2;
+          r2[3U] = iv3;
           r3[0U] = iv4;
           r3[1U] = iv5;
           r3[2U] = iv6;
@@ -893,10 +893,10 @@ Hacl_Blake2s_32_blake2s(
           r0[1U] = iv1;
           r0[2U] = iv2;
           r0[3U] = iv3;
-          r11[0U] = iv4;
-          r11[1U] = iv5;
-          r11[2U] = iv6;
-          r11[3U] = iv7;
+          r1[0U] = iv4;
+          r1[1U] = iv5;
+          r1[2U] = iv6;
+          r1[3U] = iv7;
           if (!(kk == (uint32_t)0U))
           {
             memcpy(b20, k, kk * sizeof (uint8_t));

@@ -141,7 +141,7 @@ Hacl_HMAC_Blake2b_256_compute_blake2b_256(
                 u64 kk_shift_8;
                 u64 iv0_1;
                 uint128_t ev;
-                uint128_t ev11;
+                uint128_t ev1;
                 r20[0U] = Lib_IntVector_Intrinsics_vec256_load64s(iv00, iv10, iv20, iv30);
                 r30[0U] = Lib_IntVector_Intrinsics_vec256_load64s(iv40, iv50, iv60, iv70);
                 kk_shift_80 = (u64)(u32)0U << (u32)8U;
@@ -180,22 +180,22 @@ Hacl_HMAC_Blake2b_256_compute_blake2b_256(
                 if (data_len == (u32)0U)
                 {
                   uint128_t
-                  ev1 =
+                  ev2 =
                     Hacl_Hash_Blake2b_256_update_last_blake2b_256(s,
                       ev0,
                       (uint128_t)(u64)0U,
                       ipad,
                       (u32)128U);
-                  ev10 = ev1;
+                  ev10 = ev2;
                 }
                 else
                 {
                   uint128_t
-                  ev1 = Hacl_Hash_Blake2b_256_update_multi_blake2b_256(s, ev0, ipad, (u32)1U);
+                  ev11 = Hacl_Hash_Blake2b_256_update_multi_blake2b_256(s, ev0, ipad, (u32)1U);
                   uint128_t
                   ev2 =
                     Hacl_Hash_Blake2b_256_update_last_blake2b_256(s,
-                      ev1,
+                      ev11,
                       (uint128_t)(u64)(u32)128U,
                       data,
                       data_len);
@@ -225,28 +225,28 @@ Hacl_HMAC_Blake2b_256_compute_blake2b_256(
                 if ((u32)64U == (u32)0U)
                 {
                   uint128_t
-                  ev1 =
+                  ev2 =
                     Hacl_Hash_Blake2b_256_update_last_blake2b_256(s,
                       ev,
                       (uint128_t)(u64)0U,
                       opad,
                       (u32)128U);
-                  ev11 = ev1;
+                  ev1 = ev2;
                 }
                 else
                 {
                   uint128_t
-                  ev1 = Hacl_Hash_Blake2b_256_update_multi_blake2b_256(s, ev, opad, (u32)1U);
+                  ev11 = Hacl_Hash_Blake2b_256_update_multi_blake2b_256(s, ev, opad, (u32)1U);
                   uint128_t
                   ev2 =
                     Hacl_Hash_Blake2b_256_update_last_blake2b_256(s,
-                      ev1,
+                      ev11,
                       (uint128_t)(u64)(u32)128U,
                       hash1,
                       (u32)64U);
-                  ev11 = ev2;
+                  ev1 = ev2;
                 }
-                Hacl_Hash_Blake2b_256_finish_blake2b_256(s, ev11, dst);
+                Hacl_Hash_Blake2b_256_finish_blake2b_256(s, ev1, dst);
               }
             }
           }

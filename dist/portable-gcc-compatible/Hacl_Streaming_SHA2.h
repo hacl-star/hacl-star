@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_Streaming_SHA2_H
+#define __Hacl_Streaming_SHA2_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -29,14 +37,8 @@
 #include "kremlin/internal/target.h"
 
 
-#ifndef __Hacl_Streaming_SHA2_H
-#define __Hacl_Streaming_SHA2_H
-
 #include "Hacl_Kremlib.h"
 #include "Hacl_Hash.h"
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 /* SNIPPET_START: Hacl_Streaming_Functor_state_s___uint32_t____ */
 

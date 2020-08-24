@@ -128,22 +128,22 @@ Hacl_HMAC_Blake2b_256_compute_blake2b_256(
   if (data_len == (uint32_t)0U)
   {
     FStar_UInt128_uint128
-    ev1 =
+    ev2 =
       Hacl_Hash_Blake2b_256_update_last_blake2b_256(s0,
         ev,
         FStar_UInt128_uint64_to_uint128((uint64_t)0U),
         ipad,
         (uint32_t)128U);
-    ev10 = ev1;
+    ev10 = ev2;
   }
   else
   {
     FStar_UInt128_uint128
-    ev1 = Hacl_Hash_Blake2b_256_update_multi_blake2b_256(s0, ev, ipad, (uint32_t)1U);
+    ev11 = Hacl_Hash_Blake2b_256_update_multi_blake2b_256(s0, ev, ipad, (uint32_t)1U);
     FStar_UInt128_uint128
     ev2 =
       Hacl_Hash_Blake2b_256_update_last_blake2b_256(s0,
-        ev1,
+        ev11,
         FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U),
         data,
         data_len);
@@ -170,31 +170,31 @@ Hacl_HMAC_Blake2b_256_compute_blake2b_256(
   r0[0U] = Lib_IntVector_Intrinsics_vec256_load64s(iv0_1, iv1, iv2, iv3);
   r1[0U] = Lib_IntVector_Intrinsics_vec256_load64s(iv4, iv5, iv6, iv7);
   FStar_UInt128_uint128 ev0 = FStar_UInt128_uint64_to_uint128((uint64_t)0U);
-  FStar_UInt128_uint128 ev11;
+  FStar_UInt128_uint128 ev1;
   if ((uint32_t)64U == (uint32_t)0U)
   {
     FStar_UInt128_uint128
-    ev1 =
+    ev2 =
       Hacl_Hash_Blake2b_256_update_last_blake2b_256(s0,
         ev0,
         FStar_UInt128_uint64_to_uint128((uint64_t)0U),
         opad,
         (uint32_t)128U);
-    ev11 = ev1;
+    ev1 = ev2;
   }
   else
   {
     FStar_UInt128_uint128
-    ev1 = Hacl_Hash_Blake2b_256_update_multi_blake2b_256(s0, ev0, opad, (uint32_t)1U);
+    ev11 = Hacl_Hash_Blake2b_256_update_multi_blake2b_256(s0, ev0, opad, (uint32_t)1U);
     FStar_UInt128_uint128
     ev2 =
       Hacl_Hash_Blake2b_256_update_last_blake2b_256(s0,
-        ev1,
+        ev11,
         FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U),
         hash1,
         (uint32_t)64U);
-    ev11 = ev2;
+    ev1 = ev2;
   }
-  Hacl_Hash_Blake2b_256_finish_blake2b_256(s0, ev11, dst);
+  Hacl_Hash_Blake2b_256_finish_blake2b_256(s0, ev1, dst);
 }
 

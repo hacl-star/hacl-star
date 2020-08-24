@@ -136,18 +136,6 @@ module Bindings(F:Cstubs.FOREIGN) =
       =
       structure
         "Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s_____s"
-    let hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s_____block_state
-      =
-      field hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____
-        "block_state" (ptr everCrypt_Hash_state_s)
-    let hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s_____buf =
-      field hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ "buf"
-        (ptr uint8_t)
-    let hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s_____total_len
-      =
-      field hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____
-        "total_len" uint64_t
-    let _ = seal hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____
     let everCrypt_Hash_Incremental_create_in =
       foreign "EverCrypt_Hash_Incremental_create_in"
         (spec_Hash_Definitions_hash_alg @->

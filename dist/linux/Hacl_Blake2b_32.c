@@ -183,9 +183,9 @@ static inline void blake2b_update_block(u64 *wv, u64 *hash, bool flag, uint128_t
                             for (i = (u32)0U; i < (u32)4U; i++)
                             {
                               u64 *os = r110;
-                              u64 x2 = r110[i];
-                              u64 x1 = x2 >> r02 | x2 << ((u32)64U - r02);
-                              os[i] = x1;
+                              u64 x1 = r110[i];
+                              u64 x10 = x1 >> r02 | x1 << ((u32)64U - r02);
+                              os[i] = x10;
                             }
                           }
                           {
@@ -219,9 +219,9 @@ static inline void blake2b_update_block(u64 *wv, u64 *hash, bool flag, uint128_t
                                   for (i = (u32)0U; i < (u32)4U; i++)
                                   {
                                     u64 *os = r111;
-                                    u64 x2 = r111[i];
-                                    u64 x1 = x2 >> r13 | x2 << ((u32)64U - r13);
-                                    os[i] = x1;
+                                    u64 x1 = r111[i];
+                                    u64 x10 = x1 >> r13 | x1 << ((u32)64U - r13);
+                                    os[i] = x10;
                                   }
                                 }
                                 {
@@ -264,9 +264,9 @@ static inline void blake2b_update_block(u64 *wv, u64 *hash, bool flag, uint128_t
                                         for (i = (u32)0U; i < (u32)4U; i++)
                                         {
                                           u64 *os = r112;
-                                          u64 x2 = r112[i];
-                                          u64 x1 = x2 >> r22 | x2 << ((u32)64U - r22);
-                                          os[i] = x1;
+                                          u64 x1 = r112[i];
+                                          u64 x10 = x1 >> r22 | x1 << ((u32)64U - r22);
+                                          os[i] = x10;
                                         }
                                       }
                                       {
@@ -300,9 +300,9 @@ static inline void blake2b_update_block(u64 *wv, u64 *hash, bool flag, uint128_t
                                               for (i = (u32)0U; i < (u32)4U; i++)
                                               {
                                                 u64 *os = r113;
-                                                u64 x2 = r113[i];
-                                                u64 x1 = x2 >> r32 | x2 << ((u32)64U - r32);
-                                                os[i] = x1;
+                                                u64 x1 = r113[i];
+                                                u64 x10 = x1 >> r32 | x1 << ((u32)64U - r32);
+                                                os[i] = x10;
                                               }
                                             }
                                             {
@@ -390,10 +390,10 @@ static inline void blake2b_update_block(u64 *wv, u64 *hash, bool flag, uint128_t
                                                           for (i = (u32)0U; i < (u32)4U; i++)
                                                           {
                                                             u64 *os = r117;
-                                                            u64 x2 = r117[i];
+                                                            u64 x1 = r117[i];
                                                             u64
-                                                            x1 = x2 >> r0 | x2 << ((u32)64U - r0);
-                                                            os[i] = x1;
+                                                            x13 = x1 >> r0 | x1 << ((u32)64U - r0);
+                                                            os[i] = x13;
                                                           }
                                                         }
                                                         {
@@ -427,13 +427,13 @@ static inline void blake2b_update_block(u64 *wv, u64 *hash, bool flag, uint128_t
                                                                 for (i = (u32)0U; i < (u32)4U; i++)
                                                                 {
                                                                   u64 *os = r118;
-                                                                  u64 x2 = r118[i];
+                                                                  u64 x1 = r118[i];
                                                                   u64
-                                                                  x1 =
-                                                                    x2
+                                                                  x13 =
+                                                                    x1
                                                                     >> r1
-                                                                    | x2 << ((u32)64U - r1);
-                                                                  os[i] = x1;
+                                                                    | x1 << ((u32)64U - r1);
+                                                                  os[i] = x13;
                                                                 }
                                                               }
                                                               {
@@ -497,13 +497,13 @@ static inline void blake2b_update_block(u64 *wv, u64 *hash, bool flag, uint128_t
                                                                         i++)
                                                                       {
                                                                         u64 *os = r119;
-                                                                        u64 x2 = r119[i];
+                                                                        u64 x1 = r119[i];
                                                                         u64
-                                                                        x1 =
-                                                                          x2
+                                                                        x13 =
+                                                                          x1
                                                                           >> r24
-                                                                          | x2 << ((u32)64U - r24);
-                                                                        os[i] = x1;
+                                                                          | x1 << ((u32)64U - r24);
+                                                                        os[i] = x13;
                                                                       }
                                                                     }
                                                                     {
@@ -558,16 +558,16 @@ static inline void blake2b_update_block(u64 *wv, u64 *hash, bool flag, uint128_t
                                                                               i++)
                                                                             {
                                                                               u64 *os = r1110;
-                                                                              u64 x2 = r1110[i];
+                                                                              u64 x1 = r1110[i];
                                                                               u64
-                                                                              x1 =
-                                                                                x2
+                                                                              x13 =
+                                                                                x1
                                                                                 >> r34
                                                                                 |
-                                                                                  x2
+                                                                                  x1
                                                                                   <<
                                                                                     ((u32)64U - r34);
-                                                                              os[i] = x1;
+                                                                              os[i] = x13;
                                                                             }
                                                                           }
                                                                           {
@@ -760,8 +760,8 @@ void Hacl_Blake2b_32_blake2b(u32 nn, u8 *output, u32 ll, u8 *d, u32 kk, u8 *k)
         {
           u8 b20[128U] = { 0U };
           u64 *r0 = b + (u32)0U * (u32)4U;
-          u64 *r11 = b + (u32)1U * (u32)4U;
-          u64 *r21 = b + (u32)2U * (u32)4U;
+          u64 *r1 = b + (u32)1U * (u32)4U;
+          u64 *r2 = b + (u32)2U * (u32)4U;
           u64 *r3 = b + (u32)3U * (u32)4U;
           u64 iv0 = Hacl_Impl_Blake2_Constants_ivTable_B[0U];
           u64 iv1 = Hacl_Impl_Blake2_Constants_ivTable_B[1U];
@@ -778,10 +778,10 @@ void Hacl_Blake2b_32_blake2b(u32 nn, u8 *output, u32 ll, u8 *d, u32 kk, u8 *k)
           K___u32_u32 scrut;
           u32 nb;
           u32 rem;
-          r21[0U] = iv0;
-          r21[1U] = iv1;
-          r21[2U] = iv2;
-          r21[3U] = iv3;
+          r2[0U] = iv0;
+          r2[1U] = iv1;
+          r2[2U] = iv2;
+          r2[3U] = iv3;
           r3[0U] = iv4;
           r3[1U] = iv5;
           r3[2U] = iv6;
@@ -792,10 +792,10 @@ void Hacl_Blake2b_32_blake2b(u32 nn, u8 *output, u32 ll, u8 *d, u32 kk, u8 *k)
           r0[1U] = iv1;
           r0[2U] = iv2;
           r0[3U] = iv3;
-          r11[0U] = iv4;
-          r11[1U] = iv5;
-          r11[2U] = iv6;
-          r11[3U] = iv7;
+          r1[0U] = iv4;
+          r1[1U] = iv5;
+          r1[2U] = iv6;
+          r1[3U] = iv7;
           if (!(kk == (u32)0U))
           {
             memcpy(b20, k, kk * sizeof (u8));

@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_HMAC_Blake2s_128_H
+#define __Hacl_HMAC_Blake2s_128_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -29,14 +37,8 @@
 #include "kremlin/internal/target.h"
 
 
-#ifndef __Hacl_HMAC_Blake2s_128_H
-#define __Hacl_HMAC_Blake2s_128_H
-
 #include "Hacl_Impl_Blake2_Constants.h"
 #include "Hacl_Blake2s_128.h"
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 void
 Hacl_HMAC_Blake2s_128_compute_blake2s_128(

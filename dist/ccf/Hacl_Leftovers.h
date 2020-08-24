@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_Leftovers_H
+#define __Hacl_Leftovers_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
@@ -28,16 +36,10 @@
 #include "kremlin/internal/target.h"
 
 
-#ifndef __Hacl_Leftovers_H
-#define __Hacl_Leftovers_H
-
 #include "Hacl_Kremlib.h"
 #include "Lib_Memzero0.h"
 #include "Hacl_Impl_Blake2_Constants.h"
 #include "Hacl_Spec.h"
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 void
 Hacl_Blake2b_32_blake2b(

@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_Streaming_Blake2s_128_H
+#define __Hacl_Streaming_Blake2s_128_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -29,15 +37,9 @@
 #include "kremlin/internal/target.h"
 
 
-#ifndef __Hacl_Streaming_Blake2s_128_H
-#define __Hacl_Streaming_Blake2s_128_H
-
 #include "Hacl_Kremlib.h"
 #include "Lib_Memzero0.h"
 #include "Hacl_Impl_Blake2_Constants.h"
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 typedef struct K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128__s
 {

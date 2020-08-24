@@ -2,6 +2,20 @@ open Ctypes
 module Bindings(F:Cstubs.FOREIGN) =
   struct
     open F
+    type hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128____ =
+      [
+        `hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128____
+          ]
+        structure
+    let (hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128____
+      :
+      [
+        `hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128____
+          ]
+        structure typ)
+      =
+      structure
+        "Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128_____s"
     let hacl_Streaming_Blake2s_128_blake2s_128_no_key_create_in =
       foreign "Hacl_Streaming_Blake2s_128_blake2s_128_no_key_create_in"
         (void @->

@@ -967,8 +967,8 @@ decrypt_aes128_gcm(
         (uint64_t)cipher_len,
         scratch_b1,
         tag);
-    uint64_t c1 = scrut0;
-    c = c1;
+    uint64_t c0 = scrut0;
+    c = c0;
   }
   else
   {
@@ -1000,8 +1000,8 @@ decrypt_aes128_gcm(
         (uint64_t)cipher_len,
         scratch_b1,
         tag);
-    uint64_t c1 = scrut0;
-    c = c1;
+    uint64_t c0 = scrut0;
+    c = c0;
   }
   memcpy(dst + (uint32_t)(uint64_t)cipher_len / (uint32_t)16U * (uint32_t)16U,
     inout_b,
@@ -1105,8 +1105,8 @@ decrypt_aes256_gcm(
         (uint64_t)cipher_len,
         scratch_b1,
         tag);
-    uint64_t c1 = scrut0;
-    c = c1;
+    uint64_t c0 = scrut0;
+    c = c0;
   }
   else
   {
@@ -1138,8 +1138,8 @@ decrypt_aes256_gcm(
         (uint64_t)cipher_len,
         scratch_b1,
         tag);
-    uint64_t c1 = scrut0;
-    c = c1;
+    uint64_t c0 = scrut0;
+    c = c0;
   }
   memcpy(dst + (uint32_t)(uint64_t)cipher_len / (uint32_t)16U * (uint32_t)16U,
     inout_b,
@@ -1340,8 +1340,8 @@ EverCrypt_AEAD_decrypt_expand_aes128_gcm(
             (uint64_t)cipher_len,
             scratch_b1,
             tag);
-        uint64_t c1 = scrut2;
-        c = c1;
+        uint64_t c0 = scrut2;
+        c = c0;
       }
       else
       {
@@ -1373,14 +1373,14 @@ EverCrypt_AEAD_decrypt_expand_aes128_gcm(
             (uint64_t)cipher_len,
             scratch_b1,
             tag);
-        uint64_t c1 = scrut2;
-        c = c1;
+        uint64_t c0 = scrut2;
+        c = c0;
       }
       memcpy(dst + (uint32_t)(uint64_t)cipher_len / (uint32_t)16U * (uint32_t)16U,
         inout_b,
         (uint32_t)(uint64_t)cipher_len % (uint32_t)16U * sizeof (uint8_t));
-      uint64_t r1 = c;
-      if (r1 == (uint64_t)0U)
+      uint64_t r = c;
+      if (r == (uint64_t)0U)
       {
         return EverCrypt_Error_Success;
       }
@@ -1494,8 +1494,8 @@ EverCrypt_AEAD_decrypt_expand_aes256_gcm(
             (uint64_t)cipher_len,
             scratch_b1,
             tag);
-        uint64_t c1 = scrut2;
-        c = c1;
+        uint64_t c0 = scrut2;
+        c = c0;
       }
       else
       {
@@ -1527,14 +1527,14 @@ EverCrypt_AEAD_decrypt_expand_aes256_gcm(
             (uint64_t)cipher_len,
             scratch_b1,
             tag);
-        uint64_t c1 = scrut2;
-        c = c1;
+        uint64_t c0 = scrut2;
+        c = c0;
       }
       memcpy(dst + (uint32_t)(uint64_t)cipher_len / (uint32_t)16U * (uint32_t)16U,
         inout_b,
         (uint32_t)(uint64_t)cipher_len % (uint32_t)16U * sizeof (uint8_t));
-      uint64_t r1 = c;
-      if (r1 == (uint64_t)0U)
+      uint64_t r = c;
+      if (r == (uint64_t)0U)
       {
         return EverCrypt_Error_Success;
       }

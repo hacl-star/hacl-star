@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __EverCrypt_HMAC_H
+#define __EverCrypt_HMAC_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -29,18 +37,12 @@
 #include "kremlin/internal/target.h"
 
 
-#ifndef __EverCrypt_HMAC_H
-#define __EverCrypt_HMAC_H
-
 #include "Hacl_Kremlib.h"
 #include "Hacl_HMAC.h"
 #include "Hacl_Impl_Blake2_Constants.h"
 #include "Hacl_Hash.h"
 #include "Hacl_Spec.h"
 #include "EverCrypt_Hash.h"
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 /* SNIPPET_START: EverCrypt_HMAC_compute_sha1 */
 
@@ -122,7 +124,7 @@ EverCrypt_HMAC_compute_blake2b(
 
 /* SNIPPET_START: EverCrypt_HMAC_is_supported_alg */
 
-bool EverCrypt_HMAC_is_supported_alg(Spec_Hash_Definitions_hash_alg uu___0_8528);
+bool EverCrypt_HMAC_is_supported_alg(Spec_Hash_Definitions_hash_alg uu___);
 
 /* SNIPPET_END: EverCrypt_HMAC_is_supported_alg */
 
