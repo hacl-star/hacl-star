@@ -71,11 +71,13 @@ ifneq (,$(wildcard EverCrypt_BCrypt.h))
 endif
 
 -include Makefile.config
-include Makefile.basic
 
 ifeq (,$(ARM_CROSS))
 OBJS 		+= $(patsubst %.S,%.o,$(wildcard *-$(MARCH)$(VARIANT).S))
+USER_CFLAGS=-march=native -mtune=native -Wno-unused
 endif
+
+include Makefile.basic
 
 CFLAGS		+= -Wno-parentheses -Wno-deprecated-declarations -Wno-\#warnings -Wno-error=cpp -Wno-cpp -g -std=gnu11 -O3
 CFLAGS_128 ?= -mavx
