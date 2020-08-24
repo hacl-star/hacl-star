@@ -657,6 +657,7 @@ val update_small:
     (ensures fun h0 s' h1 ->
       update_post c i s data len h0 h1))
 
+#restart-solver
 #push-options "--z3rlimit 500 --z3cliopt smt.arith.nl=false"
 let update_small #index c i t t' p data len =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
