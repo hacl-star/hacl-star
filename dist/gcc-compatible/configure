@@ -300,7 +300,7 @@ if ! detect_uint128; then
   echo "CFLAGS += -DKRML_VERIFIED_UINT128" >> Makefile.config
 fi
 
-if [[ "$build_ocaml" == "0" || ! detect_ocaml ]]; then
+if [[ "$build_ocaml" == "0" ]] || ! detect_ocaml; then
   echo "OCaml bindings disabled"
   echo "DISABLE_OCAML_BINDINGS=1" >> Makefile.config
 fi
