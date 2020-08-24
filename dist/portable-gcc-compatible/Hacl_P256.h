@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_P256_H
+#define __Hacl_P256_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "lib_intrinsics.h"
 #include "libintvector.h"
@@ -29,13 +37,6 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-
-#ifndef __Hacl_P256_H
-#define __Hacl_P256_H
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 #include "Hacl_Kremlib.h"
 #include "Hacl_Hash.h"

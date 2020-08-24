@@ -98,7 +98,7 @@ secretbox_open_detached(
     uint8_t tag_[16U] = { 0U };
     Hacl_Poly1305_32_poly1305_mac(tag_, mlen, c, mkey);
     {
-      uint8_t res0 = (uint8_t)255U;
+      uint8_t res1 = (uint8_t)255U;
       uint8_t z;
       uint32_t res;
       {
@@ -106,10 +106,10 @@ secretbox_open_detached(
         for (i = (uint32_t)0U; i < (uint32_t)16U; i++)
         {
           uint8_t uu____0 = FStar_UInt8_eq_mask(tag[i], tag_[i]);
-          res0 = uu____0 & res0;
+          res1 = uu____0 & res1;
         }
       }
-      z = res0;
+      z = res1;
       if (z == (uint8_t)255U)
       {
         uint8_t *subkey = xkeys;

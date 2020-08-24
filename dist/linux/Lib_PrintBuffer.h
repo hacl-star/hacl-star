@@ -21,12 +21,6 @@
  * SOFTWARE.
  */
 
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
-
 
 #ifndef __Lib_PrintBuffer_H
 #define __Lib_PrintBuffer_H
@@ -34,6 +28,13 @@
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+#include "libintvector.h"
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include <string.h>
+#include "kremlin/internal/target.h"
+
 
 
 

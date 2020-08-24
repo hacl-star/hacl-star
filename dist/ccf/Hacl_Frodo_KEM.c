@@ -309,11 +309,11 @@ static inline void frodo_key_encode(uint32_t b, uint8_t *a, uint16_t *res)
     uint8_t *chunk = a + i0 * b;
     memcpy(v8, chunk, b * sizeof (uint8_t));
     uint64_t u = load64_le(v8);
-    uint64_t x = u;
-    uint64_t x0 = x;
+    uint64_t x1 = u;
+    uint64_t x = x1;
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
     {
-      uint64_t rk = x0 >> b * i & (((uint64_t)1U << b) - (uint64_t)1U);
+      uint64_t rk = x >> b * i & (((uint64_t)1U << b) - (uint64_t)1U);
       res[i0 * (uint32_t)8U + i] = (uint16_t)rk << ((uint32_t)15U - b);
     }
   }
@@ -323,17 +323,17 @@ static inline void frodo_key_decode(uint32_t b, uint16_t *a, uint8_t *res)
 {
   for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)8U; i0++)
   {
-    uint64_t templong = (uint64_t)0U;
+    uint64_t templong1 = (uint64_t)0U;
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
     {
       uint16_t aik = a[i0 * (uint32_t)8U + i];
       uint16_t
       res1 = (aik + ((uint16_t)1U << ((uint32_t)15U - b - (uint32_t)1U))) >> ((uint32_t)15U - b);
-      templong = templong | (uint64_t)(res1 & (((uint16_t)1U << b) - (uint16_t)1U)) << b * i;
+      templong1 = templong1 | (uint64_t)(res1 & (((uint16_t)1U << b) - (uint16_t)1U)) << b * i;
     }
-    uint64_t templong0 = templong;
+    uint64_t templong = templong1;
     uint8_t v8[8U] = { 0U };
-    store64_le(v8, templong0);
+    store64_le(v8, templong);
     uint8_t *tmp = v8;
     memcpy(res + i0 * b, tmp, b * sizeof (uint8_t));
   }
@@ -503,7 +503,7 @@ uint32_t Hacl_Frodo_KEM_crypto_kem_dec(uint8_t *ss, uint8_t *ct, uint8_t *sk)
   uint16_t cp_matrix[64U] = { 0U };
   uint8_t *pk = sk + (uint32_t)16U;
   uint8_t *seed_a = pk;
-  uint8_t *b = pk + (uint32_t)16U;
+  uint8_t *b1 = pk + (uint32_t)16U;
   uint8_t *seed_ep = g;
   uint16_t sp_matrix[512U] = { 0U };
   frodo_sample_matrix((uint32_t)8U,
@@ -524,7 +524,7 @@ uint32_t Hacl_Frodo_KEM_crypto_kem_dec(uint8_t *ss, uint8_t *ct, uint8_t *sk)
   matrix_mul((uint32_t)8U, (uint32_t)64U, (uint32_t)64U, sp_matrix, a_matrix, bpp_matrix);
   matrix_add((uint32_t)8U, (uint32_t)64U, bpp_matrix, ep_matrix);
   Lib_Memzero_clear_words_u16((uint32_t)512U, ep_matrix);
-  frodo_mul_add_sb_plus_e_plus_mu(b, seed_ep, mu_decode1, sp_matrix, cp_matrix);
+  frodo_mul_add_sb_plus_e_plus_mu(b1, seed_ep, mu_decode1, sp_matrix, cp_matrix);
   Lib_Memzero_clear_words_u16((uint32_t)512U, sp_matrix);
   uint8_t res = (uint8_t)255U;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
@@ -533,15 +533,15 @@ uint32_t Hacl_Frodo_KEM_crypto_kem_dec(uint8_t *ss, uint8_t *ct, uint8_t *sk)
     res = uu____0 & res;
   }
   uint8_t z = res;
-  bool b1 = z == (uint8_t)255U;
+  bool b11 = z == (uint8_t)255U;
   bool b2 = matrix_eq((uint32_t)8U, (uint32_t)64U, (uint32_t)15U, bp_matrix, bpp_matrix);
   bool b3 = matrix_eq((uint32_t)8U, (uint32_t)8U, (uint32_t)15U, c_matrix, cp_matrix);
-  bool b0 = b1 && b2 && b3;
-  bool b4 = b0;
+  bool b10 = b11 && b2 && b3;
+  bool b = b10;
   uint8_t *kp = g + (uint32_t)16U;
   uint8_t *s = sk;
   uint8_t *kp_s;
-  if (b4)
+  if (b)
   {
     kp_s = kp;
   }

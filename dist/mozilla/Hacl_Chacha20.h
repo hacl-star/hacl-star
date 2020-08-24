@@ -21,11 +21,6 @@
  * SOFTWARE.
  */
 
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include <stdbool.h>
-
 
 #ifndef __Hacl_Chacha20_H
 #define __Hacl_Chacha20_H
@@ -33,6 +28,12 @@
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include <string.h>
+#include <stdbool.h>
+
 
 #include "Hacl_Kremlib.h"
 

@@ -21,13 +21,6 @@
  * SOFTWARE.
  */
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
-
 
 #ifndef __Hacl_HPKE_Curve64_CP32_SHA512_H
 #define __Hacl_HPKE_Curve64_CP32_SHA512_H
@@ -35,6 +28,14 @@
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+#include "evercrypt_targetconfig.h"
+#include "libintvector.h"
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include <string.h>
+#include "kremlin/internal/target.h"
+
 
 #include "Hacl_Kremlib.h"
 #include "Hacl_Hash.h"

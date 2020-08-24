@@ -21,13 +21,6 @@
  * SOFTWARE.
  */
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
-
 
 #ifndef __EverCrypt_H
 #define __EverCrypt_H
@@ -35,6 +28,14 @@
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+#include "evercrypt_targetconfig.h"
+#include "libintvector.h"
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include <string.h>
+#include "kremlin/internal/target.h"
+
 
 #include "EverCrypt_Hacl.h"
 #include "EverCrypt_AutoConfig2.h"
@@ -195,9 +196,9 @@ bool EverCrypt_uu___is_AES256_CBC(EverCrypt_block_cipher_alg projectee);
 
 bool EverCrypt_uu___is_TDES_EDE_CBC(EverCrypt_block_cipher_alg projectee);
 
-uint32_t EverCrypt_block_cipher_keyLen(EverCrypt_block_cipher_alg uu___0_3525);
+uint32_t EverCrypt_block_cipher_keyLen(EverCrypt_block_cipher_alg uu___);
 
-uint32_t EverCrypt_block_cipher_blockLen(EverCrypt_block_cipher_alg uu___1_3531);
+uint32_t EverCrypt_block_cipher_blockLen(EverCrypt_block_cipher_alg uu___);
 
 #define EverCrypt_RC4_128 0
 
@@ -231,11 +232,11 @@ bool EverCrypt_uu___is_AES256_CCM8(EverCrypt_aead_alg projectee);
 
 KRML_DEPRECATED("Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")
 
-uint32_t EverCrypt_aead_keyLen(EverCrypt_aead_alg uu___2_3602);
+uint32_t EverCrypt_aead_keyLen(EverCrypt_aead_alg uu___);
 
 KRML_DEPRECATED("Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")
 
-uint32_t EverCrypt_aead_tagLen(EverCrypt_aead_alg uu___3_3608);
+uint32_t EverCrypt_aead_tagLen(EverCrypt_aead_alg uu___);
 
 KRML_DEPRECATED("Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")
 

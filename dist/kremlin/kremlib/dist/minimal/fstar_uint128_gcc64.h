@@ -20,6 +20,8 @@
  * such, it assumes that the machine integers have been bundled the exact same
  * way in both cases. */
 
+#pragma once
+
 #include "FStar_UInt128.h"
 #include "FStar_UInt_8_16_32_64.h"
 #include "LowStar_Endianness.h"

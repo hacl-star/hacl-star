@@ -21,11 +21,6 @@
  * SOFTWARE.
  */
 
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
-
 
 #ifndef __MerkleTree_H
 #define __MerkleTree_H
@@ -33,6 +28,12 @@
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include <string.h>
+#include "kremlin/internal/target.h"
+
 
 
 

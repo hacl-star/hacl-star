@@ -21,12 +21,6 @@
  * SOFTWARE.
  */
 
-#include "evercrypt_targetconfig.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
-
 
 #ifndef __MerkleTree_H
 #define __MerkleTree_H
@@ -34,6 +28,13 @@
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+#include "evercrypt_targetconfig.h"
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include <string.h>
+#include "kremlin/internal/target.h"
+
 
 #include "Hacl_Kremlib.h"
 #include "Hacl_Spec.h"

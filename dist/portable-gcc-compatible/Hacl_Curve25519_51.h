@@ -21,13 +21,6 @@
  * SOFTWARE.
  */
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
-
 
 #ifndef __Hacl_Curve25519_51_H
 #define __Hacl_Curve25519_51_H
@@ -35,6 +28,14 @@
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+#include "evercrypt_targetconfig.h"
+#include "libintvector.h"
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include <string.h>
+#include "kremlin/internal/target.h"
+
 
 #include "Hacl_Kremlib.h"
 
@@ -57,7 +58,7 @@ Hacl_Impl_Curve25519_Field51_fmul(
   uint64_t *out,
   uint64_t *f1,
   uint64_t *f2,
-  FStar_UInt128_uint128 *uu____1344
+  FStar_UInt128_uint128 *uu___
 );
 
 /* SNIPPET_END: Hacl_Impl_Curve25519_Field51_fmul */
@@ -71,11 +72,7 @@ void Hacl_Impl_Curve25519_Field51_fmul1(uint64_t *out, uint64_t *f1, uint64_t f2
 /* SNIPPET_START: Hacl_Impl_Curve25519_Field51_fsqr */
 
 void
-Hacl_Impl_Curve25519_Field51_fsqr(
-  uint64_t *out,
-  uint64_t *f,
-  FStar_UInt128_uint128 *uu____3296
-);
+Hacl_Impl_Curve25519_Field51_fsqr(uint64_t *out, uint64_t *f, FStar_UInt128_uint128 *uu___);
 
 /* SNIPPET_END: Hacl_Impl_Curve25519_Field51_fsqr */
 

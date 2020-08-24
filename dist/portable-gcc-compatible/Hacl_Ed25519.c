@@ -1953,23 +1953,23 @@ static bool recover_x(uint64_t *x, uint64_t *y, uint64_t sign)
 {
   uint64_t tmp[20U] = { 0U };
   uint64_t *x2 = tmp;
-  uint64_t x00 = y[0U];
+  uint64_t x0 = y[0U];
   uint64_t x1 = y[1U];
   uint64_t x21 = y[2U];
   uint64_t x30 = y[3U];
   uint64_t x4 = y[4U];
   bool
   b =
-    x00
+    x0
     >= (uint64_t)0x7ffffffffffedU
     && x1 == (uint64_t)0x7ffffffffffffU
     && x21 == (uint64_t)0x7ffffffffffffU
     && x30 == (uint64_t)0x7ffffffffffffU
     && x4 == (uint64_t)0x7ffffffffffffU;
-  bool res;
+  bool res1;
   if (b)
   {
-    res = false;
+    res1 = false;
   }
   else
   {
@@ -2015,11 +2015,11 @@ static bool recover_x(uint64_t *x, uint64_t *y, uint64_t sign)
     }
     if (z == (uint8_t)0U)
     {
-      res = false;
+      res1 = false;
     }
     else if (z == (uint8_t)1U)
     {
-      res = true;
+      res1 = true;
     }
     else
     {
@@ -2050,16 +2050,16 @@ static bool recover_x(uint64_t *x, uint64_t *y, uint64_t sign)
       bool z1 = is_0(t1);
       if (z1 == false)
       {
-        res = false;
+        res1 = false;
       }
       else
       {
         uint64_t *x32 = tmp + (uint32_t)5U;
         uint64_t *t0 = tmp + (uint32_t)10U;
         reduce(x32);
-        uint64_t x0 = x32[0U];
-        uint64_t x01 = x0 & (uint64_t)1U;
-        if (!(x01 == sign))
+        uint64_t x01 = x32[0U];
+        uint64_t x00 = x01 & (uint64_t)1U;
+        if (!(x00 == sign))
         {
           t0[0U] = (uint64_t)0U;
           t0[1U] = (uint64_t)0U;
@@ -2071,12 +2071,12 @@ static bool recover_x(uint64_t *x, uint64_t *y, uint64_t sign)
           reduce(x32);
         }
         memcpy(x, x32, (uint32_t)5U * sizeof (uint64_t));
-        res = true;
+        res1 = true;
       }
     }
   }
-  bool res0 = res;
-  return res0;
+  bool res = res1;
+  return res;
 }
 
 /* SNIPPET_END: recover_x */
@@ -2093,10 +2093,10 @@ static bool point_decompress(uint64_t *out, uint8_t *s)
   uint64_t sign = (uint64_t)z;
   load_51(y, s);
   bool z0 = recover_x(x, y, sign);
-  bool res;
+  bool res1;
   if (z0 == false)
   {
-    res = false;
+    res1 = false;
   }
   else
   {
@@ -2112,10 +2112,10 @@ static bool point_decompress(uint64_t *out, uint8_t *s)
     outz[3U] = (uint64_t)0U;
     outz[4U] = (uint64_t)0U;
     fmul0(outt, x, y);
-    res = true;
+    res1 = true;
   }
-  bool res0 = res;
-  return res0;
+  bool res = res1;
+  return res;
 }
 
 /* SNIPPET_END: point_decompress */
@@ -2258,7 +2258,7 @@ bool Hacl_Ed25519_verify(uint8_t *pub, uint32_t len, uint8_t *msg, uint8_t *sign
   uint64_t *a_ = tmp;
   uint64_t *r_ = tmp + (uint32_t)20U;
   bool b = point_decompress(a_, pub);
-  bool res;
+  bool res1;
   if (b)
   {
     uint8_t *rs = signature;
@@ -2273,7 +2273,7 @@ bool Hacl_Ed25519_verify(uint8_t *pub, uint32_t len, uint8_t *msg, uint8_t *sign
       bool b__ = gte_q(s1);
       if (b__)
       {
-        res = false;
+        res1 = false;
       }
       else
       {
@@ -2288,22 +2288,22 @@ bool Hacl_Ed25519_verify(uint8_t *pub, uint32_t len, uint8_t *msg, uint8_t *sign
         point_mul_g(sB, uu____0);
         point_mul(hA, tmp_, a_1);
         point_add(rhA, r_1, hA);
-        bool b1 = point_equal(sB, rhA);
-        bool b10 = b1;
-        res = b10;
+        bool b2 = point_equal(sB, rhA);
+        bool b1 = b2;
+        res1 = b1;
       }
     }
     else
     {
-      res = false;
+      res1 = false;
     }
   }
   else
   {
-    res = false;
+    res1 = false;
   }
-  bool res0 = res;
-  return res0;
+  bool res = res1;
+  return res;
 }
 
 /* SNIPPET_END: Hacl_Ed25519_verify */

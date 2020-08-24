@@ -47,7 +47,7 @@ Hacl_HPKE_Curve51_CP32_SHA256_setupBaseI(
     uint8_t zeros[32U] = { 0U };
     Hacl_Curve25519_51_scalarmult(o_zz_, skE, uu____0);
     {
-      uint8_t res0 = (uint8_t)255U;
+      uint8_t res4 = (uint8_t)255U;
       uint8_t z;
       uint32_t res3;
       uint32_t res2;
@@ -57,10 +57,10 @@ Hacl_HPKE_Curve51_CP32_SHA256_setupBaseI(
         for (i = (uint32_t)0U; i < (uint32_t)32U; i++)
         {
           uint8_t uu____1 = FStar_UInt8_eq_mask(o_zz_[i], zeros[i]);
-          res0 = uu____1 & res0;
+          res4 = uu____1 & res4;
         }
       }
-      z = res0;
+      z = res4;
       if (z == (uint8_t)255U)
       {
         res3 = (uint32_t)1U;
@@ -187,7 +187,7 @@ Hacl_HPKE_Curve51_CP32_SHA256_setupBaseR(
     uint8_t zeros[32U] = { 0U };
     Hacl_Curve25519_51_scalarmult(o_pkR_, skR, uu____0);
     {
-      uint8_t res0 = (uint8_t)255U;
+      uint8_t res4 = (uint8_t)255U;
       uint8_t z;
       uint32_t res3;
       uint32_t res;
@@ -197,10 +197,10 @@ Hacl_HPKE_Curve51_CP32_SHA256_setupBaseR(
         for (i = (uint32_t)0U; i < (uint32_t)32U; i++)
         {
           uint8_t uu____1 = FStar_UInt8_eq_mask(o_pkR_[i], zeros[i]);
-          res0 = uu____1 & res0;
+          res4 = uu____1 & res4;
         }
       }
-      z = res0;
+      z = res4;
       if (z == (uint8_t)255U)
       {
         res3 = (uint32_t)1U;
@@ -318,11 +318,11 @@ Hacl_HPKE_Curve51_CP32_SHA256_sealBase(
   uint8_t k[32U] = { 0U };
   uint8_t n[12U] = { 0U };
   uint8_t *pkE = output;
-  uint32_t res0 = Hacl_HPKE_Curve51_CP32_SHA256_setupBaseI(pkE, k, n, skE, pkR, infolen, info);
+  uint32_t res1 = Hacl_HPKE_Curve51_CP32_SHA256_setupBaseI(pkE, k, n, skE, pkR, infolen, info);
   uint8_t *dec = output + (uint32_t)32U;
   uint32_t res;
   Hacl_Chacha20Poly1305_32_aead_encrypt(k, n, infolen, info, mlen, m, dec, dec + mlen);
-  res = res0;
+  res = res1;
   return res;
 }
 
