@@ -318,19 +318,25 @@ type point (c: curve) = lbuffer uint64 (getCoordinateLenU64 c *. 3ul)
 type scalar (c: curve) = lbuffer uint8 (getScalarLen c)
 
 
+val changeEndianStep: #c: curve 
+  -> i: nat {i <= v (shift_right (getCoordinateLenU64 c) 1ul)}  -> felem_seq c -> felem_seq c 
+
+let changeEndianStep #c i b =
+  let len = v (getCoordinateLenU64 c) in 
+  let lenRight = len - 1 - i in 
+  let left = Lib.Sequence.index b i in 
+  let right = Lib.Sequence.index b lenRight in 
+  let b = Lib.Sequence.upd b i right in 
+  Lib.Sequence.upd b lenRight left
+
+
+(* If you have imagination, it's indeed like this *)
 val changeEndian: #c: curve -> felem_seq c -> felem_seq c
 
-let changeEndian #c i =
-  
-  let zero =  Lib.Sequence.index i 0 in
-  let one =   Lib.Sequence.index i 1 in
-  let two =   Lib.Sequence.index i 2 in
-  let three = Lib.Sequence.index i 3 in
-
-  let o = Lib.Sequence.upd i 0 three in
-  let o = Lib.Sequence.upd o 1 two in
-  let o = Lib.Sequence.upd o 2 one in
-          Lib.Sequence.upd o 3 zero
+let changeEndian #c b =
+  let len = getCoordinateLenU64 c in 
+  let lenByTwo = shift_right len 1ul in 
+  Lib.LoopCombinators.repeati (v lenByTwo) (changeEndianStep) b
 
 
 val changeEndianLemma: #c: curve -> k: lseq uint64 (getCoordinateLen c) -> Lemma

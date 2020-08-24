@@ -129,9 +129,19 @@ let square_bn #c x result =
 
 let uploadOneImpl #c f =
   upd f (size 0) (u64 1);
+  let h0 = ST.get() in 
   let len = getCoordinateLenU64 c in 
-  let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = True in 
-  for 1ul len inv (fun i -> upd f i (u64 0))
+  let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = live h f /\ modifies (loc f) h0 h /\
+    v (Lib.Sequence.index (as_seq h f) 0) == 1 /\
+    (forall (j: nat {j > 0 /\ j < i}). 
+      let elemUpdated = Lib.Sequence.index (as_seq h f) j in uint_v elemUpdated = 0)
+  in 
+  for 1ul len inv (fun i -> 
+    upd f i (u64 0);
+    let h = ST.get() in 
+        assert(
+      forall (j: nat {j > 0 /\ j < uint_v i}). 
+      let elemUpdated = Lib.Sequence.index (as_seq h f) j in uint_v elemUpdated = 0))
 
 
 let toUint8 #c i o =
@@ -142,23 +152,63 @@ let toUint8 #c i o =
 
 open Lib.ByteBuffer
 
-(* The laziest to prove *)
 let changeEndian #c b =
-  push_frame();
-    let len = getCoordinateLenU64 c in 
-    let tempBuffer = create len (u64 0) in 
+  let h0 = ST.get() in 
+  let len = getCoordinateLenU64 c in 
+  let lenByTwo = shift_right len 1ul in 
+
+  [@inline_let]
+  let spec h0 = Hacl.Spec.P256.Definition.changeEndianStep #c  in 
+
+   [@inline_let]
+  let acc (h: mem) : GTot (felem_seq c) = as_seq h b in 
+  Lib.LoopCombinators.eq_repeati0 256 (spec h0) (acc h0);
+
+   [@inline_let]
+  let inv h (i: nat { i <= uint_v lenByTwo}) = live h b /\ modifies (loc b) h0 h /\
+    (forall (j: nat {j < i}). 
+      let leftStart = Lib.Sequence.index (as_seq h0 b) j in 
+      let rightIndex = v len - 1 - j in 
+      let rightStart = Lib.Sequence.index (as_seq h0 b) rightIndex in 
+
+      let leftH = Lib.Sequence.index (as_seq h b) j in 
+      let rightH = Lib.Sequence.index (as_seq h b) rightIndex in 
+
+      uint_v leftStart == uint_v rightH /\
+      uint_v rightStart == uint_v leftH) /\
+    (forall (j: nat {j >= i && j < v lenByTwo}).
+      Lib.Sequence.index (as_seq h0 b) j == Lib.Sequence.index (as_seq h b) j) /\
+    (forall (j: nat {j >= v lenByTwo &&  j <= v len - 1 - i}).
+      Lib.Sequence.index (as_seq h0 b) j == Lib.Sequence.index (as_seq h b) j) in 
+  for 0ul lenByTwo inv (fun i -> 
+    let h_0 = ST.get() in 
     
-  let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = True in 
-  for 0ul len inv (fun i -> 
-    let indexToRequest = len -! i -! 1 in 
-    let element = index b indexToRequest in 
-    let elemUpdated = logxor element (index b i) in 
-    upd tempBuffer i  element); 
+    let left = index b i in 
+    let rightIndex = len -. 1ul -. i in 
+    let right = index b rightIndex in 
+    upd b i right;
+    upd b rightIndex left
+    
+    );
+    let h1 = ST.get() in 
+    assert(
+      forall (j: nat {j < v (shift_right len 1ul)}). 
+      
+      let leftStart = Lib.Sequence.index (as_seq h0 b) j in 
+      let rightIndex = v len - 1 - j in 
+      let rightStart = Lib.Sequence.index (as_seq h0 b) rightIndex in 
 
-  for 0ul len inv (fun i ->
-    upd b i tempBuffer.(i));
+      let leftH = Lib.Sequence.index (as_seq h1 b) j in 
+      let rightH = Lib.Sequence.index (as_seq h1 b) rightIndex in 
 
-  pop_frame()
+      uint_v leftStart == uint_v rightH /\
+      uint_v rightStart == uint_v leftH);
+      
+  
+    admit()
+  
+
+
 
 
 let toUint64ChangeEndian #c i o =
