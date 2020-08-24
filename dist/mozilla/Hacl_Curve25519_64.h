@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_Curve25519_64_H
+#define __Hacl_Curve25519_64_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "curve25519-inline.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
@@ -28,15 +36,9 @@
 #include <stdbool.h>
 
 
-#ifndef __Hacl_Curve25519_64_H
-#define __Hacl_Curve25519_64_H
-
 #include "Hacl_Kremlib.h"
 #include "Vale.h"
 #include "Vale_Inline.h"
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 void Hacl_Curve25519_64_scalarmult(uint8_t *out, uint8_t *priv, uint8_t *pub);
 

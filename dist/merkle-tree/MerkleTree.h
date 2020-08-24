@@ -21,19 +21,21 @@
  * SOFTWARE.
  */
 
+
+#ifndef __MerkleTree_H
+#define __MerkleTree_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
 
 
-#ifndef __MerkleTree_H
-#define __MerkleTree_H
 
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 static inline uint8_t FStar_UInt8_eq_mask(uint8_t a, uint8_t b);
 

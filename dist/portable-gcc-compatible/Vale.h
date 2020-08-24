@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Vale_H
+#define __Vale_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -29,13 +37,7 @@
 #include "kremlin/internal/target.h"
 
 
-#ifndef __Vale_H
-#define __Vale_H
 
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 /* SNIPPET_START: add_scalar_e */
 

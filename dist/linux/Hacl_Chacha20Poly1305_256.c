@@ -1365,7 +1365,7 @@ Hacl_Chacha20Poly1305_256_aead_decrypt(
   key = tmp;
   poly1305_do_256(key, aadlen, aad, mlen, cipher, computed_mac);
   {
-    u8 res0 = (u8)255U;
+    u8 res1 = (u8)255U;
     u8 z;
     u32 res;
     {
@@ -1373,10 +1373,10 @@ Hacl_Chacha20Poly1305_256_aead_decrypt(
       for (i = (u32)0U; i < (u32)16U; i++)
       {
         u8 uu____0 = FStar_UInt8_eq_mask(computed_mac[i], mac[i]);
-        res0 = uu____0 & res0;
+        res1 = uu____0 & res1;
       }
     }
-    z = res0;
+    z = res1;
     if (z == (u8)255U)
     {
       Hacl_Chacha20_Vec256_chacha20_encrypt_256(mlen, m, cipher, k, n, (u32)1U);

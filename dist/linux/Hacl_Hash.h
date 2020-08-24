@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_Hash_H
+#define __Hacl_Hash_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
@@ -28,18 +36,12 @@
 #include "kremlin/internal/target.h"
 
 
-#ifndef __Hacl_Hash_H
-#define __Hacl_Hash_H
-
 #include "Hacl_Kremlib.h"
 #include "Hacl_Blake2s_32.h"
 #include "Lib_Memzero0.h"
 #include "Hacl_Blake2b_32.h"
 #include "Hacl_Impl_Blake2_Constants.h"
 #include "Hacl_Spec.h"
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 void Hacl_Hash_Core_Blake2_finish_blake2s_32(u32 *s, u64 ev, u8 *dst);
 

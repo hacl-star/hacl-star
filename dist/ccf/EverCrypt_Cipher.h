@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __EverCrypt_Cipher_H
+#define __EverCrypt_Cipher_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
@@ -28,13 +36,7 @@
 #include "kremlin/internal/target.h"
 
 
-#ifndef __EverCrypt_Cipher_H
-#define __EverCrypt_Cipher_H
-
 #include "Hacl_Chacha20.h"
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 void
 EverCrypt_Cipher_chacha20(

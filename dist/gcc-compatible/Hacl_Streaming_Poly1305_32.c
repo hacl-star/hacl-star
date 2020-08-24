@@ -39,11 +39,11 @@ Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_
   uint8_t *buf = KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint8_t));
   uint64_t *r1 = KRML_HOST_CALLOC((uint32_t)25U, sizeof (uint64_t));
   uint64_t *block_state = r1;
-  uint8_t *k_ = KRML_HOST_CALLOC((uint32_t)32U, sizeof (uint8_t));
-  memcpy(k_, k1, (uint32_t)32U * sizeof (uint8_t));
-  uint8_t *k_0 = k_;
+  uint8_t *k_1 = KRML_HOST_CALLOC((uint32_t)32U, sizeof (uint8_t));
+  memcpy(k_1, k1, (uint32_t)32U * sizeof (uint8_t));
+  uint8_t *k_ = k_1;
   Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_
-  s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U, .p_key = k_0 };
+  s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U, .p_key = k_ };
   KRML_CHECK_SIZE(sizeof (Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_), (uint32_t)1U);
   Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_
   *p = KRML_HOST_MALLOC(sizeof (Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_));

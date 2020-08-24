@@ -45,7 +45,7 @@ Hacl_HPKE_P256_CP128_SHA256_setupBaseI(
   uint8_t *resultX0 = o_pkE_;
   uint8_t *resultY0 = o_pkE_ + (uint32_t)32U;
   uint64_t flag0;
-  uint64_t res0;
+  uint64_t res20;
   uint64_t r_;
   uint32_t res1;
   uint8_t *uu____0;
@@ -55,8 +55,8 @@ Hacl_HPKE_P256_CP128_SHA256_setupBaseI(
   Hacl_Impl_P256_LowLevel_changeEndian(resultBufferY);
   Hacl_Impl_P256_LowLevel_toUint8(resultBufferX, resultX0);
   Hacl_Impl_P256_LowLevel_toUint8(resultBufferY, resultY0);
-  res0 = flag0;
-  r_ = res0 & (uint64_t)1U;
+  res20 = flag0;
+  r_ = res20 & (uint64_t)1U;
   res1 = (uint32_t)r_;
   uu____0 = pkR + (uint32_t)1U;
   {
@@ -350,11 +350,11 @@ Hacl_HPKE_P256_CP128_SHA256_sealBase(
   uint8_t k[32U] = { 0U };
   uint8_t n[12U] = { 0U };
   uint8_t *pkE = output;
-  uint32_t res0 = Hacl_HPKE_P256_CP128_SHA256_setupBaseI(pkE, k, n, skE, pkR, infolen, info);
+  uint32_t res1 = Hacl_HPKE_P256_CP128_SHA256_setupBaseI(pkE, k, n, skE, pkR, infolen, info);
   uint8_t *dec = output + (uint32_t)65U;
   uint32_t res;
   Hacl_Chacha20Poly1305_128_aead_encrypt(k, n, infolen, info, mlen, m, dec, dec + mlen);
-  res = res0;
+  res = res1;
   return res;
 }
 

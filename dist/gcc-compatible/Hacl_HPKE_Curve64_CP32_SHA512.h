@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_HPKE_Curve64_CP32_SHA512_H
+#define __Hacl_HPKE_Curve64_CP32_SHA512_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -29,17 +37,11 @@
 #include "kremlin/internal/target.h"
 
 
-#ifndef __Hacl_HPKE_Curve64_CP32_SHA512_H
-#define __Hacl_HPKE_Curve64_CP32_SHA512_H
-
 #include "Hacl_Kremlib.h"
 #include "Hacl_Hash.h"
 #include "Hacl_HKDF.h"
 #include "Hacl_Chacha20Poly1305_32.h"
 #include "Hacl_Curve25519_64.h"
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 uint32_t
 Hacl_HPKE_Curve64_CP32_SHA512_setupBaseI(

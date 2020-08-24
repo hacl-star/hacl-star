@@ -1136,8 +1136,8 @@ void Hacl_Blake2b_256_blake2b(u32 nn, u8 *output, u32 ll, u8 *d, u32 kk, u8 *k)
         {
           u8 b20[128U] = { 0U };
           Lib_IntVector_Intrinsics_vec256 *r0 = b + (u32)0U * (u32)1U;
-          Lib_IntVector_Intrinsics_vec256 *r1 = b + (u32)1U * (u32)1U;
-          Lib_IntVector_Intrinsics_vec256 *r2 = b + (u32)2U * (u32)1U;
+          Lib_IntVector_Intrinsics_vec256 *r11 = b + (u32)1U * (u32)1U;
+          Lib_IntVector_Intrinsics_vec256 *r21 = b + (u32)2U * (u32)1U;
           Lib_IntVector_Intrinsics_vec256 *r3 = b + (u32)3U * (u32)1U;
           u64 iv0 = Hacl_Impl_Blake2_Constants_ivTable_B[0U];
           u64 iv1 = Hacl_Impl_Blake2_Constants_ivTable_B[1U];
@@ -1154,12 +1154,12 @@ void Hacl_Blake2b_256_blake2b(u32 nn, u8 *output, u32 ll, u8 *d, u32 kk, u8 *k)
           K___u32_u32 scrut;
           u32 nb;
           u32 rem;
-          r2[0U] = Lib_IntVector_Intrinsics_vec256_load64s(iv0, iv1, iv2, iv3);
+          r21[0U] = Lib_IntVector_Intrinsics_vec256_load64s(iv0, iv1, iv2, iv3);
           r3[0U] = Lib_IntVector_Intrinsics_vec256_load64s(iv4, iv5, iv6, iv7);
           kk_shift_8 = (u64)kk << (u32)8U;
           iv0_ = iv0 ^ ((u64)0x01010000U ^ (kk_shift_8 ^ (u64)nn));
           r0[0U] = Lib_IntVector_Intrinsics_vec256_load64s(iv0_, iv1, iv2, iv3);
-          r1[0U] = Lib_IntVector_Intrinsics_vec256_load64s(iv4, iv5, iv6, iv7);
+          r11[0U] = Lib_IntVector_Intrinsics_vec256_load64s(iv4, iv5, iv6, iv7);
           if (!(kk == (u32)0U))
           {
             memcpy(b20, k, kk * sizeof (u8));
