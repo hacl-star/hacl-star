@@ -10,10 +10,15 @@ fi
 # XXX: Only some defaults for testing. Remove before merging
 # Get the toolchain at https://developer.android.com/ndk/downloads/
 if [[ $SYSROOT == "" ]]; then
-  SYSROOT="$NDK/toolchains/llvm/prebuilt/darwin-x86_64/sysroot/"
+  SYSROOT="$NDK/toolchains/llvm/prebuilt/darwin-x86_64/sysroot"
 fi
 if [[ $NDK_TOOLCHAIN == "" ]]; then
-  NDK_TOOLCHAIN="$NDK/toolchains/llvm/prebuilt/darwin-x86_64/"
+  NDK_TOOLCHAIN="$NDK/toolchains/llvm/prebuilt/darwin-x86_64"
+fi
+# Sample toolchain for Linux to ARM cross builds.
+# Get the toolchain from https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-a/downloads
+if [[ $TOOLCHAIN == "" ]]; then
+  TOOLCHAIN="/home/ubuntu/gcc-aarch64-none-linux/gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu"
 fi
 
 # This script mostly detects the presence of ocamlfind as well as various ocaml
@@ -161,12 +166,13 @@ show_help () {
   # XXX: Alternatively do a cat help.txt
   printf "\nUsage: configure -target <triple>\n\n"
   printf "This script configures HACL/Evercrypt. You can specify the following options:\n\n"
-  printf "    -target       Specify the target triple for the build. This follows the\n"
-  printf "                  Clang target triple convention.\n"
-  printf "                  Details: https://clang.llvm.org/docs/CrossCompilation.html\n"
-  printf "                  Currently supported triples are:\n"
-  printf "                  * aarch64-none-linux-android\n"
-  printf "                  * aarch64-none-linux-gnu\n"
+  printf "    -target         Specify the target triple for the build. This follows the\n"
+  printf "                    Clang target triple convention.\n"
+  printf "                    Details: https://clang.llvm.org/docs/CrossCompilation.html\n"
+  printf "                    Currently supported triples are:\n"
+  printf "                    * aarch64-none-linux-android\n"
+  printf "                    * aarch64-none-linux-gnu\n"
+  printf "    --disable-ocaml Disable OCAML bindings\n"
   printf "\n"
 }
 
@@ -175,12 +181,17 @@ show_help () {
 echo -n > Makefile.config
 echo -n > config.h
 
+# Default arguments
+build_ocaml=1
+
 # Parse command line arguments.
 all_args=("$@")
 while [ $# -gt 0 ]; do
     case "$1" in
         -target) build_target="$2"; shift ;;
+        --disable-ocaml) build_ocaml=0 ;;
         --help) show_help; exit 0 ;;
+        *) show_help; exit 2 ;;
     esac
     shift
 done
@@ -198,28 +209,39 @@ if [ ! -z "$build_target" ]; then
     target_arch="aarch64"
     target_sys="Linux"
     target_abi="android"
-    LD="$NDK_TOOLCHAIN/aarch64-linux-android/ld"
-    AR="$NDK_TOOLCHAIN/aarch64-linux-android/ar"
     CROSS_TARGET="-target $build_target"
     CROSS_SYSROOT="--sysroot=$SYSROOT"
     CROSS_INCLUDES="-I$SYSROOT/usr/include/"
+
+    # Set compiler
+    CC="$NDK/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang"
+    echo "CC=$CC" >> Makefile.config
+
+    # Link the API libraries we want (27)
+    # TODO: make configurable
+    rm -f $SYSROOT/usr/lib/aarch64-linux-android/crtbegin_so.o
+    rm -f $SYSROOT/usr/lib/aarch64-linux-android/crtend_so.o
+    ln -s $SYSROOT/usr/lib/aarch64-linux-android/27/crtbegin_so.o $SYSROOT/usr/lib/aarch64-linux-android/
+    ln -s $SYSROOT/usr/lib/aarch64-linux-android/27/crtend_so.o $SYSROOT/usr/lib/aarch64-linux-android/
   elif [[ "$build_target" == "aarch64-none-linux-gnu" ]]; then
     target_arch="aarch64"
     target_sys="Linux"
     target_abi="gnu"
-    LD="$SYSROOT/bin/ld"
-    AR="$SYSROOT/bin/ar"
-    CROSS_TARGET="-target $build_target"
-    CROSS_SYSROOT="--sysroot=$SYSROOT"
-    CROSS_INCLUDES="-I$SYSROOT/libc/usr/include/"
+
+    # Using GCC here doesn't require setting these.
+    # CROSS_TARGET="-target $build_target"
+    # CROSS_SYSROOT="--sysroot=$SYSROOT"
+    # CROSS_INCLUDES="-I$SYSROOT/libc/usr/include/"
+
+    # Set compiler
+    CC="$TOOLCHAIN/bin/aarch64-none-linux-gnu-gcc"
+    echo "CC=$CC" >> Makefile.config
   else
     show_help
     exit 0
   fi
   CROSS_CFLAGS="$CROSS_TARGET $CROSS_SYSROOT $CROSS_INCLUDES"
   echo "CFLAGS += $CROSS_CFLAGS" >> Makefile.config
-  echo "LD=$LD" >> Makefile.config
-  echo "AR=$AR" >> Makefile.config
 else
   target_arch=$(uname -m)
   target_sys=$(uname)
@@ -278,7 +300,7 @@ if ! detect_uint128; then
   echo "CFLAGS += -DKRML_VERIFIED_UINT128" >> Makefile.config
 fi
 
-if ! detect_ocaml; then
+if [[ "$build_ocaml" == "0" || ! detect_ocaml ]]; then
   echo "OCaml bindings disabled"
   echo "DISABLE_OCAML_BINDINGS=1" >> Makefile.config
 fi

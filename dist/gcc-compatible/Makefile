@@ -86,8 +86,6 @@ Hacl_Blake2b_256.o Hacl_Poly1305_256.o Hacl_Chacha20_Vec256.o Hacl_Chacha20Poly1
 
 all: libevercrypt.$(SO)
 
-# LD ?= $(CC)
-
 libevercrypt.$(SO): config.h $(OBJS)
 	$(CC) $(CFLAGS) -shared -o $@ $(filter-out %.h,$^) $(LDFLAGS)
 
