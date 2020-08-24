@@ -193,7 +193,6 @@ val felem_sub: #c: curve -> a: felem c -> b: felem c -> out: felem c ->
       as_nat c h1 out == toDomain_ #c ((fromDomain_ #c (as_nat c h0 a) - fromDomain_ #c (as_nat c h0 b)) % getPrime c)))    
 
 
-inline_for_extraction noextract
 val mul: #c: curve -> f: felem c -> r: felem c -> out: widefelem c -> 
   Stack unit
     (requires fun h -> live h out /\ live h f /\ live h r /\ disjoint r out)
@@ -257,3 +256,14 @@ val scalar_bit: #c: curve -> #buf_type: buftype
     (requires fun h0 -> live h0 s)
     (ensures  fun h0 r h1 -> h0 == h1 /\ r == ith_bit #c (as_seq h0 s) (v n) /\ v r <= 1)
       
+
+inline_for_extraction noextract
+val add_long_without_carry: #c: curve -> t: widefelem c -> t1: widefelem c -> result: widefelem c -> Stack unit
+  (requires fun h -> 
+    live h t /\ live h t1 /\ live h result /\ eq_or_disjoint t1 result /\ 
+    eq_or_disjoint t result /\ 
+    wide_as_nat c h t1 < getPower2 c * pow2 64 /\ 
+    wide_as_nat c h t < getPrime c * getPrime c
+  )
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
+    wide_as_nat c h1 result = wide_as_nat c h0 t + wide_as_nat c h0 t1)

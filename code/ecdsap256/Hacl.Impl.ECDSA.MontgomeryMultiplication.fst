@@ -1,4 +1,3 @@
-
 module Hacl.Impl.ECDSA.MontgomeryMultiplication
 
 open FStar.HyperStack.All
@@ -13,6 +12,7 @@ open FStar.Math.Lemmas
 open Hacl.Lemmas.P256
 open Hacl.Spec.ECDSA.Definition
 open Hacl.Impl.P.LowLevel 
+open Hacl.Impl.P256.MontgomeryMultiplication
 
 open FStar.Tactics
 open FStar.Tactics.Canon 
@@ -21,17 +21,6 @@ open FStar.Mul
 open Lib.IntTypes.Intrinsics
 
 #reset-options "--z3rlimit 200"
-
-inline_for_extraction noextract
-val add8_without_carry1:  t: widefelem P256 -> t1: widefelem P256 -> result: widefelem P256 -> Stack unit
-  (requires fun h -> live h t /\ live h t1 /\ live h result /\ wide_as_nat P256 h t1 < pow2 320 /\
-    wide_as_nat P256 h t <  prime_p256_order * prime_p256_order /\ eq_or_disjoint t result /\ eq_or_disjoint t1 result  )
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\  wide_as_nat P256 h1 result = wide_as_nat P256 h0 t + wide_as_nat P256 h0 t1)
-
-let add8_without_carry1 t t1 result  = 
-  let _ = add8 t t1 result in 
-    assert_norm (pow2 320 + prime_p256_order * prime_p256_order < pow2 512)
-
 
 val lemma_montgomery_mult_1: t : int  -> 
   k0:nat {k0 = min_one_prime (pow2 64) (- prime)} -> 
@@ -189,7 +178,7 @@ let montgomery_multiplication_round #c t round k0 =
     short_mul_bn #P256 prime256order_buffer y_ t2;
       let h2 = ST.get() in 
       assert(wide_as_nat c h2 t2 = prime_p256_order * ((uint_v t1 * uint_v k0) % pow2 64));
-    add8_without_carry1 t t2 t3;
+    add_long_without_carry #c t t2 t3;
       let h3 = ST.get() in 
       assert_by_tactic ((wide_as_nat c h0 t % pow2 64) * uint_v k0 == uint_v k0 * (wide_as_nat c h0 t % pow2 64)) canon;
       assert(wide_as_nat c h3 t3 = wide_as_nat c h0 t + prime_p256_order * ((((wide_as_nat c h0 t % pow2 64)) * uint_v k0) % pow2 64));

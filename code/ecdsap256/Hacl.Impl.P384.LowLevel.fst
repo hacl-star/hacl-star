@@ -16,6 +16,8 @@ open FStar.Mul
 
 open Lib.IntTypes.Intrinsics
 
+open Hacl.Bignum
+
 
 val add6: x: felem P384 -> y: felem P384 -> result: felem P384 -> 
   Stack uint64
@@ -23,15 +25,17 @@ val add6: x: felem P384 -> y: felem P384 -> result: felem P384 ->
     (ensures fun h0 c h1 -> modifies (loc result) h0 h1 /\ v c <= 1 /\ 
       as_nat P384 h1 result + v c * pow2 384 == as_nat P384 h0 x + as_nat P384 h0 y)   
 
-let add6 x y result = admit()
+let add6 x y result = 
+  bn_add_eq_len (size 6) x y result
 
 
 val add12: x: widefelem P384 -> y: widefelem P384 -> result: widefelem P384 -> Stack uint64 
   (requires fun h -> live h x /\ live h y /\ live h result /\ eq_or_disjoint x result /\ eq_or_disjoint y result)
   (ensures fun h0 c h1 -> modifies (loc result) h0 h1 /\ v c <= 1 /\ 
     wide_as_nat P384 h1 result + v c * pow2 768 == wide_as_nat P384 h0 x + wide_as_nat P384 h0 y)
-
-let add12 x y result = admit()
+    
+let add12 x y result = 
+  bn_add_eq_len (size 12) x y result
 
 
 (* 
@@ -92,7 +96,10 @@ val sub6: x: felem P384 -> y:felem P384 -> result: felem P384 ->
     (ensures fun h0 c h1 -> modifies1 result h0 h1 /\ v c <= 1 /\ 
       as_nat P384 h1 result - v c * pow2 384 == as_nat P384 h0 x - as_nat P384 h0 y)
 
-let sub6 x y result = admit()
+let sub6 x y result = 
+  bn_sub_eq_len (size 6) x y result
+
+
 
 val sub6_il: x: felem P384 -> y: glbuffer uint64 (size 6) -> result: felem P384 -> 
   Stack uint64
@@ -105,7 +112,9 @@ val sub6_il: x: felem P384 -> y: glbuffer uint64 (size 6) -> result: felem P384 
       else 
 	as_nat P384 h0 x < as_nat_il P384 h0 y)))
 
-let sub6_il x y result = admit()
+let sub6_il x y result = 
+  let y_ = const_to_ilbuffer y in 
+  bn_sub_eq_len (size 6) x y_ result
 
 
 val mul_p384: f: felem P384 -> r: felem P384 -> out: widefelem P384 -> 
@@ -114,7 +123,8 @@ val mul_p384: f: felem P384 -> r: felem P384 -> out: widefelem P384 ->
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\ 
       wide_as_nat P384 h1 out = as_nat P384 h0 r * as_nat P384 h0 f)
 
-let mul_p384 f r out = admit()
+let mul_p384 f r out = 
+  bn_mul (size 6) f (size 6) r out
 
 
 val shortened_mul_p384: a: glbuffer uint64 (size 6) -> b: uint64 -> result: widefelem P384 -> Stack unit
@@ -124,7 +134,12 @@ val shortened_mul_p384: a: glbuffer uint64 (size 6) -> b: uint64 -> result: wide
     wide_as_nat P384 h1 result < pow2 384 * pow2 64)
 
 
-let shortened_mul_p384 a b result = admit()
+let shortened_mul_p384 a b result = 
+  push_frame();
+    let bBuffer = create (size 1) b in 
+    let a_ = const_to_ilbuffer a in 
+    bn_mul (size 6) a_ (size 1) bBuffer result;
+  pop_frame()
 
 
 
@@ -133,5 +148,6 @@ val square_p384: f: felem P384 -> out: widefelem P384 -> Stack unit
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\ 
       wide_as_nat P384 h1 out = as_nat P384 h0 f * as_nat P384 h0 f)
 
-let square_p384 f out = admit()
+let square_p384 f out =
+  mul_p384 f f out
 

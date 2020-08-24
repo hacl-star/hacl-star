@@ -26,7 +26,7 @@ let ecp256dh_i c result scalar =
   let len = getCoordinateLenU64 c in 
   let scalarLen = getScalarLen c in 
 
-  let tempBuffer = create (size 100) (u64 0) in
+  let tempBuffer = create (size 25 *! len) (u64 0) in
     
   let resultBuffer = create (size 3 *! len) (u64 0) in
   let resultBufferX = sub resultBuffer (size 0) len in

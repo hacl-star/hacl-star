@@ -19,7 +19,7 @@ open Hacl.Spec.ECDSA.Definition
 open Hacl.Impl.P256.Compression
 open Hacl.Spec.P256.MontgomeryMultiplication
 
-(*
+
 (* [@ (Comment " Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. 
   \n Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
   \n The private key and the nonce are expected to be less than the curve order.")]
@@ -373,19 +373,6 @@ val compression_compressed_form: b: lbuffer uint8 (size 64) -> result: compresse
       )  
   )
 
-(*
-[@ (Comment " The function takes an arbitraty 32 bytes buffer and reduces it to contain a value that is less than the curve order.
-  \n Input: x: uint8[32], \n result: uint8[32], such that by the end of the function the value stored in the buffer result equal to the value stored in the buffer x modulo curveOrder.")]
-*)
-
-
-val reduction_8_32: x: lbuffer uint8 (size 32) -> result: lbuffer uint8 (size 32) -> 
-  Stack unit 
-    (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result)
-    (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
-      nat_from_bytes_be (as_seq h1 result) == nat_from_bytes_be (as_seq h0 x) % prime_p256_order /\
-      nat_from_bytes_be (as_seq h1 result) < prime_p256_order
-    )
 
 (*
 [@ (Comment " Input: result: uint8[64], \n scalar: uint8[32].
@@ -393,7 +380,7 @@ val reduction_8_32: x: lbuffer uint8 (size 32) -> result: lbuffer uint8 (size 32
   ")]
 *)
 
-*)
+
 val ecp256dh_i:
     result:lbuffer uint8 (size 64)
   -> scalar:lbuffer uint8 (size 32)
@@ -408,7 +395,23 @@ val ecp256dh_i:
     as_seq h1 (gsub result (size 0) (size 32)) == pointX /\
     as_seq h1 (gsub result (size 32) (size 32)) == pointY)
 
-(*
+
+val ecp384dh_i:
+    result:lbuffer uint8 (size 96)
+  -> scalar:lbuffer uint8 (size 48)
+  -> Stack uint64
+  (requires fun h ->
+    live h result /\ live h scalar /\ 
+    disjoint result scalar)
+  (ensures fun h0 r h1 ->
+    let pointX, pointY, flag = ecp256_dh_i #P384 (as_seq h0 scalar) in
+    modifies (loc result) h0 h1 /\
+    r == flag /\
+    as_seq h1 (gsub result (size 0) (size 48)) == pointX /\
+    as_seq h1 (gsub result (size 48) (size 48)) == pointY)
+
+
+
 (*
 [@ (Comment " This code is not side channel resistant on pub_key. \n Input: result: uint8[64], \n pub(lic)Key: uint8[64], \n scalar: uint8[32].
   \n Output: uint64, where 0 stands for the correct key generation. All the other values mean that an error has occurred. 
@@ -435,4 +438,4 @@ val ecp256dh_r:
       as_seq h1 (gsub result (size 32) (size 32)) == pointY)
 
 
-*)
+

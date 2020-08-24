@@ -209,11 +209,34 @@ let changeEndian #c b =
   
 
 
+val toUint64CEP256: i:lbuffer uint8 (getScalarLen P256) -> o: felem P256 -> Stack unit
+  (requires fun h -> live h i /\ live h o /\ disjoint i o)
+  (ensures  fun h0 _ h1 ->
+    modifies (loc o) h0 h1  /\
+    as_seq h1 o == Hacl.Spec.P256.Definition.changeEndian (
+      Lib.ByteSequence.uints_from_bytes_be (as_seq h0 i)))
+
+let toUint64CEP256 i o = 
+  Lib.ByteBuffer.uints_from_bytes_be o i;
+  changeEndian o
+
+
+val toUint64CEP384: i:lbuffer uint8 (getScalarLen P384) -> o: felem P384 -> Stack unit
+  (requires fun h -> live h i /\ live h o /\ disjoint i o)
+  (ensures  fun h0 _ h1 ->
+    modifies (loc o) h0 h1  /\
+    as_seq h1 o == Hacl.Spec.P256.Definition.changeEndian (
+      Lib.ByteSequence.uints_from_bytes_be (as_seq h0 i)))
+
+let toUint64CEP384 i o = 
+  Lib.ByteBuffer.uints_from_bytes_be o i;
+  changeEndian o
 
 
 let toUint64ChangeEndian #c i o =
-  Lib.ByteBuffer.uints_from_bytes_be o i;
-  changeEndian o
+  match c with 
+  |P256 -> toUint64CEP256 i o
+  |P384 -> toUint64CEP384 i o
 
 
 val reduction_prime_2prime_with_carry_cin: #c: curve ->
@@ -750,3 +773,9 @@ let scalar_bit #buf_type s n =
   assert_norm (1 = pow2 1 - 1);
   assert (v (mod_mask #U8 #SEC 1ul) == v (u8 1));
   to_u64 ((s.(n /. 8ul) >>. (n %. 8ul)) &. u8 1)
+
+
+let add_long_without_carry #c t t1 result  = 
+  let _  = add_long_bn t t1 result in 
+    assert_norm (getPower2 P256 * pow2 64 + getPrime P256 * getPrime P256 < getLongPower2 P256);
+    assert_norm (getPower2 P384 * pow2 64 + getPrime P384 * getPrime P384 < getLongPower2 P384)

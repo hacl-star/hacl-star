@@ -25,24 +25,6 @@ open Hacl.Spec.P256.MontgomeryMultiplication
 #set-options "--z3rlimit 100"
 
 
-inline_for_extraction noextract
-val add_long_without_carry: #c: curve -> t: widefelem c -> t1: widefelem c -> result: widefelem c -> Stack unit
-  (requires fun h -> 
-    live h t /\ live h t1 /\ live h result /\ eq_or_disjoint t1 result /\ 
-    eq_or_disjoint t result /\ 
-    wide_as_nat c h t1 < getPower2 c * pow2 64 /\ 
-    wide_as_nat c h t < getPrime c * getPrime c
-  )
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
-    wide_as_nat c h1 result = wide_as_nat c h0 t + wide_as_nat c h0 t1)
-
-
-let add_long_without_carry #c t t1 result  = 
-  let _  = add_long_bn t t1 result in 
-    assert_norm (getPower2 P256 * pow2 64 + getPrime P256 * getPrime P256 < getLongPower2 P256);
-    assert_norm (getPower2 P384 * pow2 64 + getPrime P384 * getPrime P384 < getLongPower2 P384)
-
-
 val montgomery_multiplication_round: #c: curve -> t: widefelem c -> round: widefelem c -> 
   Stack unit 
   (requires fun h -> live h t /\ live h round /\ wide_as_nat c h t < getPrime c * getPrime c)
@@ -125,7 +107,8 @@ let montgomery_square_buffer #c a result =
   assert_norm(prime256 > 3);
   push_frame();
     
-  let t = create (size 8) (u64 0) in 
+  let len = getCoordinateLenU64 c in 
+  let t = create (size 2 *! len) (u64 0) in 
     let h0 = ST.get() in 
   square_bn a t;  
     let h1 = ST.get() in 
