@@ -160,13 +160,29 @@ void EverCrypt_AutoConfig2_init()
         uint64_t scrut2 = check_avx();
         if (scrut2 != (uint64_t)0U)
         {
-          cpu_has_avx[0U] = true;
+          uint64_t scrut3 = check_osxsave();
+          if (scrut3 != (uint64_t)0U)
+          {
+            uint64_t scrut4 = check_avx_xcr0();
+            if (scrut4 != (uint64_t)0U)
+            {
+              cpu_has_avx[0U] = true;
+            }
+          }
         }
         {
           uint64_t scrut3 = check_avx2();
           if (scrut3 != (uint64_t)0U)
           {
-            cpu_has_avx2[0U] = true;
+            uint64_t scrut4 = check_osxsave();
+            if (scrut4 != (uint64_t)0U)
+            {
+              uint64_t scrut5 = check_avx_xcr0();
+              if (scrut5 != (uint64_t)0U)
+              {
+                cpu_has_avx2[0U] = true;
+              }
+            }
           }
           {
             uint64_t scrut4 = check_sse();
@@ -190,7 +206,19 @@ void EverCrypt_AutoConfig2_init()
                   uint64_t scrut7 = check_avx512();
                   if (scrut7 != (uint64_t)0U)
                   {
-                    cpu_has_avx512[0U] = true;
+                    uint64_t scrut8 = check_osxsave();
+                    if (scrut8 != (uint64_t)0U)
+                    {
+                      uint64_t scrut9 = check_avx_xcr0();
+                      if (scrut9 != (uint64_t)0U)
+                      {
+                        uint64_t scrut10 = check_avx512_xcr0();
+                        if (scrut10 != (uint64_t)0U)
+                        {
+                          cpu_has_avx512[0U] = true;
+                        }
+                      }
+                    }
                   }
                 }
               }

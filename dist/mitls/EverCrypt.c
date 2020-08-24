@@ -564,20 +564,18 @@ EverCrypt_aes128_gcm_encrypt(
     *plaintext_ = alloca((len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
     memset(plaintext_,
       0U,
-      (len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (plaintext_[0U]));
+      (len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
     KRML_CHECK_SIZE(sizeof (uint8_t), (len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U);
     uint8_t
     *cipher_ = alloca((len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
-    memset(cipher_,
-      0U,
-      (len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (cipher_[0U]));
+    memset(cipher_, 0U, (len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
     KRML_CHECK_SIZE(sizeof (uint8_t), (adlen + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U);
     uint8_t
     *ad_ = alloca((adlen + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
-    memset(ad_, 0U, (adlen + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (ad_[0U]));
-    memcpy(iv_, iv, (uint32_t)12U * sizeof (iv[0U]));
-    memcpy(plaintext_, plaintext, len * sizeof (plaintext[0U]));
-    memcpy(ad_, ad, adlen * sizeof (ad[0U]));
+    memset(ad_, 0U, (adlen + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
+    memcpy(iv_, iv, (uint32_t)12U * sizeof (uint8_t));
+    memcpy(plaintext_, plaintext, len * sizeof (uint8_t));
+    memcpy(ad_, ad, adlen * sizeof (uint8_t));
     gcm_args
     b =
       {
@@ -585,7 +583,7 @@ EverCrypt_aes128_gcm_encrypt(
         .iv = iv_, .expanded_key = expanded, .cipher = cipher_, .tag = tag
       };
     old_gcm128_encrypt(&b);
-    memcpy(cipher, cipher_, len * sizeof (cipher_[0U]));
+    memcpy(cipher, cipher_, len * sizeof (uint8_t));
     return;
   }
   if (EverCrypt_AutoConfig2_wants_openssl())
@@ -633,20 +631,18 @@ EverCrypt_aes128_gcm_decrypt(
     *plaintext_ = alloca((len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
     memset(plaintext_,
       0U,
-      (len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (plaintext_[0U]));
+      (len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
     KRML_CHECK_SIZE(sizeof (uint8_t), (len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U);
     uint8_t
     *cipher_ = alloca((len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
-    memset(cipher_,
-      0U,
-      (len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (cipher_[0U]));
+    memset(cipher_, 0U, (len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
     KRML_CHECK_SIZE(sizeof (uint8_t), (adlen + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U);
     uint8_t
     *ad_ = alloca((adlen + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
-    memset(ad_, 0U, (adlen + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (ad_[0U]));
-    memcpy(iv_, iv, (uint32_t)12U * sizeof (iv[0U]));
-    memcpy(cipher_, cipher, len * sizeof (cipher[0U]));
-    memcpy(ad_, ad, adlen * sizeof (ad[0U]));
+    memset(ad_, 0U, (adlen + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
+    memcpy(iv_, iv, (uint32_t)12U * sizeof (uint8_t));
+    memcpy(cipher_, cipher, len * sizeof (uint8_t));
+    memcpy(ad_, ad, adlen * sizeof (uint8_t));
     gcm_args
     b =
       {
@@ -654,7 +650,7 @@ EverCrypt_aes128_gcm_decrypt(
         .iv = iv_, .expanded_key = expanded, .cipher = plaintext_, .tag = tag
       };
     uint32_t ret = old_gcm128_decrypt(&b);
-    memcpy(plaintext, plaintext_, len * sizeof (plaintext_[0U]));
+    memcpy(plaintext, plaintext_, len * sizeof (uint8_t));
     if (ret == (uint32_t)0U)
     {
       return (uint32_t)1U;
@@ -705,20 +701,18 @@ EverCrypt_aes256_gcm_encrypt(
     *plaintext_ = alloca((len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
     memset(plaintext_,
       0U,
-      (len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (plaintext_[0U]));
+      (len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
     KRML_CHECK_SIZE(sizeof (uint8_t), (len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U);
     uint8_t
     *cipher_ = alloca((len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
-    memset(cipher_,
-      0U,
-      (len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (cipher_[0U]));
+    memset(cipher_, 0U, (len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
     KRML_CHECK_SIZE(sizeof (uint8_t), (adlen + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U);
     uint8_t
     *ad_ = alloca((adlen + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
-    memset(ad_, 0U, (adlen + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (ad_[0U]));
-    memcpy(iv_, iv, (uint32_t)12U * sizeof (iv[0U]));
-    memcpy(plaintext_, plaintext, len * sizeof (plaintext[0U]));
-    memcpy(ad_, ad, adlen * sizeof (ad[0U]));
+    memset(ad_, 0U, (adlen + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
+    memcpy(iv_, iv, (uint32_t)12U * sizeof (uint8_t));
+    memcpy(plaintext_, plaintext, len * sizeof (uint8_t));
+    memcpy(ad_, ad, adlen * sizeof (uint8_t));
     gcm_args
     b =
       {
@@ -726,7 +720,7 @@ EverCrypt_aes256_gcm_encrypt(
         .iv = iv_, .expanded_key = expanded, .cipher = cipher_, .tag = tag
       };
     old_gcm256_encrypt(&b);
-    memcpy(cipher, cipher_, len * sizeof (cipher_[0U]));
+    memcpy(cipher, cipher_, len * sizeof (uint8_t));
     return;
   }
   if (EverCrypt_AutoConfig2_wants_openssl())
@@ -774,20 +768,18 @@ EverCrypt_aes256_gcm_decrypt(
     *plaintext_ = alloca((len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
     memset(plaintext_,
       0U,
-      (len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (plaintext_[0U]));
+      (len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
     KRML_CHECK_SIZE(sizeof (uint8_t), (len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U);
     uint8_t
     *cipher_ = alloca((len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
-    memset(cipher_,
-      0U,
-      (len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (cipher_[0U]));
+    memset(cipher_, 0U, (len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
     KRML_CHECK_SIZE(sizeof (uint8_t), (adlen + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U);
     uint8_t
     *ad_ = alloca((adlen + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
-    memset(ad_, 0U, (adlen + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (ad_[0U]));
-    memcpy(iv_, iv, (uint32_t)12U * sizeof (iv[0U]));
-    memcpy(cipher_, cipher, len * sizeof (cipher[0U]));
-    memcpy(ad_, ad, adlen * sizeof (ad[0U]));
+    memset(ad_, 0U, (adlen + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
+    memcpy(iv_, iv, (uint32_t)12U * sizeof (uint8_t));
+    memcpy(cipher_, cipher, len * sizeof (uint8_t));
+    memcpy(ad_, ad, adlen * sizeof (uint8_t));
     gcm_args
     b =
       {
@@ -795,7 +787,7 @@ EverCrypt_aes256_gcm_decrypt(
         .iv = iv_, .expanded_key = expanded, .cipher = plaintext_, .tag = tag
       };
     uint32_t ret = old_gcm256_decrypt(&b);
-    memcpy(plaintext, plaintext_, len * sizeof (plaintext_[0U]));
+    memcpy(plaintext, plaintext_, len * sizeof (uint8_t));
     if (ret == (uint32_t)0U)
     {
       return (uint32_t)1U;
@@ -858,9 +850,9 @@ bool EverCrypt_uu___is_TDES_EDE_CBC(EverCrypt_block_cipher_alg projectee)
   }
 }
 
-uint32_t EverCrypt_block_cipher_keyLen(EverCrypt_block_cipher_alg uu___0_9927)
+uint32_t EverCrypt_block_cipher_keyLen(EverCrypt_block_cipher_alg uu___0_3525)
 {
-  switch (uu___0_9927)
+  switch (uu___0_3525)
   {
     case EverCrypt_AES128_CBC:
       {
@@ -882,9 +874,9 @@ uint32_t EverCrypt_block_cipher_keyLen(EverCrypt_block_cipher_alg uu___0_9927)
   }
 }
 
-uint32_t EverCrypt_block_cipher_blockLen(EverCrypt_block_cipher_alg uu___1_9938)
+uint32_t EverCrypt_block_cipher_blockLen(EverCrypt_block_cipher_alg uu___1_3531)
 {
-  switch (uu___1_9938)
+  switch (uu___1_3531)
   {
     case EverCrypt_AES128_CBC:
       {
@@ -1018,9 +1010,9 @@ bool EverCrypt_uu___is_AES256_CCM8(EverCrypt_aead_alg projectee)
 
 KRML_DEPRECATED("Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")
 
-uint32_t EverCrypt_aead_keyLen(EverCrypt_aead_alg uu___2_10046)
+uint32_t EverCrypt_aead_keyLen(EverCrypt_aead_alg uu___2_3602)
 {
-  switch (uu___2_10046)
+  switch (uu___2_3602)
   {
     case EverCrypt_AES128_GCM:
       {
@@ -1060,9 +1052,9 @@ uint32_t EverCrypt_aead_keyLen(EverCrypt_aead_alg uu___2_10046)
 
 KRML_DEPRECATED("Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")
 
-uint32_t EverCrypt_aead_tagLen(EverCrypt_aead_alg uu___3_10061)
+uint32_t EverCrypt_aead_tagLen(EverCrypt_aead_alg uu___3_3608)
 {
-  switch (uu___3_10061)
+  switch (uu___3_3608)
   {
     case EverCrypt_AES128_CCM8:
       {
@@ -1259,7 +1251,7 @@ EverCrypt__aead_state *EverCrypt_aead_create(EverCrypt_aead_alg alg, uint8_t *k)
         if (EverCrypt_AutoConfig2_wants_hacl())
         {
           uint8_t *k0 = KRML_HOST_CALLOC((uint32_t)32U, sizeof (uint8_t));
-          memcpy(k0, k, (uint32_t)32U * sizeof (k[0U]));
+          memcpy(k0, k, (uint32_t)32U * sizeof (uint8_t));
           st =
             (
               (EverCrypt__aead_state){
@@ -1333,20 +1325,18 @@ EverCrypt_aead_encrypt(
     *plaintext_ = alloca((len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
     memset(plaintext_,
       0U,
-      (len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (plaintext_[0U]));
+      (len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
     KRML_CHECK_SIZE(sizeof (uint8_t), (len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U);
     uint8_t
     *cipher_ = alloca((len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
-    memset(cipher_,
-      0U,
-      (len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (cipher_[0U]));
+    memset(cipher_, 0U, (len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
     KRML_CHECK_SIZE(sizeof (uint8_t), (adlen + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U);
     uint8_t
     *ad_ = alloca((adlen + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
-    memset(ad_, 0U, (adlen + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (ad_[0U]));
-    memcpy(iv_, iv, (uint32_t)12U * sizeof (iv[0U]));
-    memcpy(plaintext_, plaintext, len * sizeof (plaintext[0U]));
-    memcpy(ad_, ad, adlen * sizeof (ad[0U]));
+    memset(ad_, 0U, (adlen + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
+    memcpy(iv_, iv, (uint32_t)12U * sizeof (uint8_t));
+    memcpy(plaintext_, plaintext, len * sizeof (uint8_t));
+    memcpy(ad_, ad, adlen * sizeof (uint8_t));
     gcm_args
     b =
       {
@@ -1354,7 +1344,7 @@ EverCrypt_aead_encrypt(
         .iv = iv_, .expanded_key = xk, .cipher = cipher_, .tag = tag
       };
     old_gcm128_encrypt(&b);
-    memcpy(cipher, cipher_, len * sizeof (cipher_[0U]));
+    memcpy(cipher, cipher_, len * sizeof (uint8_t));
     return;
   }
   if (true && uu___is_AEAD_AES256_GCM_VALE(k))
@@ -1374,20 +1364,18 @@ EverCrypt_aead_encrypt(
     *plaintext_ = alloca((len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
     memset(plaintext_,
       0U,
-      (len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (plaintext_[0U]));
+      (len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
     KRML_CHECK_SIZE(sizeof (uint8_t), (len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U);
     uint8_t
     *cipher_ = alloca((len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
-    memset(cipher_,
-      0U,
-      (len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (cipher_[0U]));
+    memset(cipher_, 0U, (len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
     KRML_CHECK_SIZE(sizeof (uint8_t), (adlen + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U);
     uint8_t
     *ad_ = alloca((adlen + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
-    memset(ad_, 0U, (adlen + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (ad_[0U]));
-    memcpy(iv_, iv, (uint32_t)12U * sizeof (iv[0U]));
-    memcpy(plaintext_, plaintext, len * sizeof (plaintext[0U]));
-    memcpy(ad_, ad, adlen * sizeof (ad[0U]));
+    memset(ad_, 0U, (adlen + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
+    memcpy(iv_, iv, (uint32_t)12U * sizeof (uint8_t));
+    memcpy(plaintext_, plaintext, len * sizeof (uint8_t));
+    memcpy(ad_, ad, adlen * sizeof (uint8_t));
     gcm_args
     b =
       {
@@ -1395,7 +1383,7 @@ EverCrypt_aead_encrypt(
         .iv = iv_, .expanded_key = xk, .cipher = cipher_, .tag = tag
       };
     old_gcm256_encrypt(&b);
-    memcpy(cipher, cipher_, len * sizeof (cipher_[0U]));
+    memcpy(cipher, cipher_, len * sizeof (uint8_t));
     return;
   }
   if (true && uu___is_AEAD_CHACHA20_POLY1305_HACL(k))
@@ -1465,20 +1453,18 @@ EverCrypt_aead_decrypt(
     *plaintext_ = alloca((len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
     memset(plaintext_,
       0U,
-      (len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (plaintext_[0U]));
+      (len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
     KRML_CHECK_SIZE(sizeof (uint8_t), (len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U);
     uint8_t
     *cipher_ = alloca((len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
-    memset(cipher_,
-      0U,
-      (len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (cipher_[0U]));
+    memset(cipher_, 0U, (len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
     KRML_CHECK_SIZE(sizeof (uint8_t), (adlen + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U);
     uint8_t
     *ad_ = alloca((adlen + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
-    memset(ad_, 0U, (adlen + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (ad_[0U]));
-    memcpy(iv_, iv, (uint32_t)12U * sizeof (iv[0U]));
-    memcpy(cipher_, cipher, len * sizeof (cipher[0U]));
-    memcpy(ad_, ad, adlen * sizeof (ad[0U]));
+    memset(ad_, 0U, (adlen + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
+    memcpy(iv_, iv, (uint32_t)12U * sizeof (uint8_t));
+    memcpy(cipher_, cipher, len * sizeof (uint8_t));
+    memcpy(ad_, ad, adlen * sizeof (uint8_t));
     gcm_args
     b =
       {
@@ -1486,7 +1472,7 @@ EverCrypt_aead_decrypt(
         .iv = iv_, .expanded_key = xk, .cipher = plaintext_, .tag = tag
       };
     uint32_t ret = old_gcm128_decrypt(&b);
-    memcpy(plaintext, plaintext_, len * sizeof (plaintext_[0U]));
+    memcpy(plaintext, plaintext_, len * sizeof (uint8_t));
     if (ret == (uint32_t)0U)
     {
       return (uint32_t)1U;
@@ -1510,20 +1496,18 @@ EverCrypt_aead_decrypt(
     *plaintext_ = alloca((len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
     memset(plaintext_,
       0U,
-      (len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (plaintext_[0U]));
+      (len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
     KRML_CHECK_SIZE(sizeof (uint8_t), (len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U);
     uint8_t
     *cipher_ = alloca((len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
-    memset(cipher_,
-      0U,
-      (len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (cipher_[0U]));
+    memset(cipher_, 0U, (len + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
     KRML_CHECK_SIZE(sizeof (uint8_t), (adlen + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U);
     uint8_t
     *ad_ = alloca((adlen + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
-    memset(ad_, 0U, (adlen + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (ad_[0U]));
-    memcpy(iv_, iv, (uint32_t)12U * sizeof (iv[0U]));
-    memcpy(cipher_, cipher, len * sizeof (cipher[0U]));
-    memcpy(ad_, ad, adlen * sizeof (ad[0U]));
+    memset(ad_, 0U, (adlen + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof (uint8_t));
+    memcpy(iv_, iv, (uint32_t)12U * sizeof (uint8_t));
+    memcpy(cipher_, cipher, len * sizeof (uint8_t));
+    memcpy(ad_, ad, adlen * sizeof (uint8_t));
     gcm_args
     b =
       {
@@ -1531,7 +1515,7 @@ EverCrypt_aead_decrypt(
         .iv = iv_, .expanded_key = xk, .cipher = plaintext_, .tag = tag
       };
     uint32_t ret = old_gcm256_decrypt(&b);
-    memcpy(plaintext, plaintext_, len * sizeof (plaintext_[0U]));
+    memcpy(plaintext, plaintext_, len * sizeof (uint8_t));
     if (ret == (uint32_t)0U)
     {
       return (uint32_t)1U;

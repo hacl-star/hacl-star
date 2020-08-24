@@ -249,9 +249,6 @@ let rec index_nat_to_intseq_be #t #l len n i =
     end
 
 
-let nat_to_bytes_be = nat_to_intseq_be_ #U8
-let nat_to_bytes_le = nat_to_intseq_le_ #U8
-
 let uint_to_bytes_le #t #l n =
   nat_to_bytes_le (numbytes t) (v n)
 

@@ -29,13 +29,16 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __Hacl_P256_H
 #define __Hacl_P256_H
 
 #include "Hacl_Kremlib.h"
 #include "Hacl_Hash.h"
 #include "Hacl_Spec.h"
-
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 void Hacl_Impl_P256_LowLevel_toUint8(uint64_t *i, uint8_t *o);
 
@@ -293,6 +296,10 @@ uint64_t Hacl_P256_ecp256dh_i(uint8_t *result, uint8_t *scalar);
   
 */
 uint64_t Hacl_P256_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_P256_H_DEFINED
 #endif

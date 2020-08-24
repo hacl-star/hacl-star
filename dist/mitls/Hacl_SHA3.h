@@ -28,12 +28,15 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __Hacl_SHA3_H
 #define __Hacl_SHA3_H
 
 #include "Hacl_Kremlib.h"
 #include "Lib_Memzero0.h"
-
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 extern const uint32_t Hacl_Impl_SHA3_keccak_rotc[24U];
 
@@ -100,6 +103,10 @@ void Hacl_SHA3_sha3_256(uint32_t inputByteLen, uint8_t *input, uint8_t *output);
 void Hacl_SHA3_sha3_384(uint32_t inputByteLen, uint8_t *input, uint8_t *output);
 
 void Hacl_SHA3_sha3_512(uint32_t inputByteLen, uint8_t *input, uint8_t *output);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_SHA3_H_DEFINED
 #endif

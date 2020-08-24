@@ -26,9 +26,9 @@
 
 /* SNIPPET_START: EverCrypt_Hash_string_of_alg */
 
-C_String_t EverCrypt_Hash_string_of_alg(Spec_Hash_Definitions_hash_alg uu___0_6)
+C_String_t EverCrypt_Hash_string_of_alg(Spec_Hash_Definitions_hash_alg uu___0_5)
 {
-  switch (uu___0_6)
+  switch (uu___0_5)
   {
     case Spec_Hash_Definitions_MD5:
       {
@@ -68,7 +68,7 @@ C_String_t EverCrypt_Hash_string_of_alg(Spec_Hash_Definitions_hash_alg uu___0_6)
 
 bool
 EverCrypt_Hash_uu___is_MD5_s(
-  Spec_Hash_Definitions_hash_alg uu____123,
+  Spec_Hash_Definitions_hash_alg uu____105,
   EverCrypt_Hash_state_s projectee
 )
 {
@@ -85,7 +85,7 @@ EverCrypt_Hash_uu___is_MD5_s(
 
 uint32_t
 *EverCrypt_Hash___proj__MD5_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____153,
+  Spec_Hash_Definitions_hash_alg uu____130,
   EverCrypt_Hash_state_s projectee
 )
 {
@@ -106,7 +106,7 @@ uint32_t
 
 bool
 EverCrypt_Hash_uu___is_SHA1_s(
-  Spec_Hash_Definitions_hash_alg uu____177,
+  Spec_Hash_Definitions_hash_alg uu____151,
   EverCrypt_Hash_state_s projectee
 )
 {
@@ -123,7 +123,7 @@ EverCrypt_Hash_uu___is_SHA1_s(
 
 uint32_t
 *EverCrypt_Hash___proj__SHA1_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____207,
+  Spec_Hash_Definitions_hash_alg uu____176,
   EverCrypt_Hash_state_s projectee
 )
 {
@@ -144,7 +144,7 @@ uint32_t
 
 bool
 EverCrypt_Hash_uu___is_SHA2_224_s(
-  Spec_Hash_Definitions_hash_alg uu____231,
+  Spec_Hash_Definitions_hash_alg uu____197,
   EverCrypt_Hash_state_s projectee
 )
 {
@@ -161,7 +161,7 @@ EverCrypt_Hash_uu___is_SHA2_224_s(
 
 uint32_t
 *EverCrypt_Hash___proj__SHA2_224_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____261,
+  Spec_Hash_Definitions_hash_alg uu____222,
   EverCrypt_Hash_state_s projectee
 )
 {
@@ -182,7 +182,7 @@ uint32_t
 
 bool
 EverCrypt_Hash_uu___is_SHA2_256_s(
-  Spec_Hash_Definitions_hash_alg uu____285,
+  Spec_Hash_Definitions_hash_alg uu____243,
   EverCrypt_Hash_state_s projectee
 )
 {
@@ -199,7 +199,7 @@ EverCrypt_Hash_uu___is_SHA2_256_s(
 
 uint32_t
 *EverCrypt_Hash___proj__SHA2_256_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____315,
+  Spec_Hash_Definitions_hash_alg uu____268,
   EverCrypt_Hash_state_s projectee
 )
 {
@@ -220,7 +220,7 @@ uint32_t
 
 bool
 EverCrypt_Hash_uu___is_SHA2_384_s(
-  Spec_Hash_Definitions_hash_alg uu____339,
+  Spec_Hash_Definitions_hash_alg uu____289,
   EverCrypt_Hash_state_s projectee
 )
 {
@@ -237,7 +237,7 @@ EverCrypt_Hash_uu___is_SHA2_384_s(
 
 uint64_t
 *EverCrypt_Hash___proj__SHA2_384_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____369,
+  Spec_Hash_Definitions_hash_alg uu____314,
   EverCrypt_Hash_state_s projectee
 )
 {
@@ -258,7 +258,7 @@ uint64_t
 
 bool
 EverCrypt_Hash_uu___is_SHA2_512_s(
-  Spec_Hash_Definitions_hash_alg uu____393,
+  Spec_Hash_Definitions_hash_alg uu____335,
   EverCrypt_Hash_state_s projectee
 )
 {
@@ -275,7 +275,7 @@ EverCrypt_Hash_uu___is_SHA2_512_s(
 
 uint64_t
 *EverCrypt_Hash___proj__SHA2_512_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____423,
+  Spec_Hash_Definitions_hash_alg uu____360,
   EverCrypt_Hash_state_s projectee
 )
 {
@@ -629,7 +629,7 @@ EverCrypt_Hash_update_last_256(
   uint8_t *tmp = tmp_twoblocks;
   uint8_t *tmp_rest = tmp;
   uint8_t *tmp_pad = tmp + rest_len;
-  memcpy(tmp_rest, rest, rest_len * sizeof (rest[0U]));
+  memcpy(tmp_rest, rest, rest_len * sizeof (uint8_t));
   Hacl_Hash_Core_SHA2_pad_256(total_input_len, tmp_pad);
   EverCrypt_Hash_update_multi_256(s, tmp, tmp_len / (uint32_t)64U);
 }
@@ -814,7 +814,7 @@ void EverCrypt_Hash_copy(EverCrypt_Hash_state_s *s_src, EverCrypt_Hash_state_s *
     {
       p_dst = KRML_EABORT(uint32_t *, "unreachable (pattern matches are exhaustive in F*)");
     }
-    memcpy(p_dst, p_src, (uint32_t)4U * sizeof (p_src[0U]));
+    memcpy(p_dst, p_src, (uint32_t)4U * sizeof (uint32_t));
     return;
   }
   if (scrut.tag == EverCrypt_Hash_SHA1_s)
@@ -830,7 +830,7 @@ void EverCrypt_Hash_copy(EverCrypt_Hash_state_s *s_src, EverCrypt_Hash_state_s *
     {
       p_dst = KRML_EABORT(uint32_t *, "unreachable (pattern matches are exhaustive in F*)");
     }
-    memcpy(p_dst, p_src, (uint32_t)5U * sizeof (p_src[0U]));
+    memcpy(p_dst, p_src, (uint32_t)5U * sizeof (uint32_t));
     return;
   }
   if (scrut.tag == EverCrypt_Hash_SHA2_224_s)
@@ -846,7 +846,7 @@ void EverCrypt_Hash_copy(EverCrypt_Hash_state_s *s_src, EverCrypt_Hash_state_s *
     {
       p_dst = KRML_EABORT(uint32_t *, "unreachable (pattern matches are exhaustive in F*)");
     }
-    memcpy(p_dst, p_src, (uint32_t)8U * sizeof (p_src[0U]));
+    memcpy(p_dst, p_src, (uint32_t)8U * sizeof (uint32_t));
     return;
   }
   if (scrut.tag == EverCrypt_Hash_SHA2_256_s)
@@ -862,7 +862,7 @@ void EverCrypt_Hash_copy(EverCrypt_Hash_state_s *s_src, EverCrypt_Hash_state_s *
     {
       p_dst = KRML_EABORT(uint32_t *, "unreachable (pattern matches are exhaustive in F*)");
     }
-    memcpy(p_dst, p_src, (uint32_t)8U * sizeof (p_src[0U]));
+    memcpy(p_dst, p_src, (uint32_t)8U * sizeof (uint32_t));
     return;
   }
   if (scrut.tag == EverCrypt_Hash_SHA2_384_s)
@@ -878,7 +878,7 @@ void EverCrypt_Hash_copy(EverCrypt_Hash_state_s *s_src, EverCrypt_Hash_state_s *
     {
       p_dst = KRML_EABORT(uint64_t *, "unreachable (pattern matches are exhaustive in F*)");
     }
-    memcpy(p_dst, p_src, (uint32_t)8U * sizeof (p_src[0U]));
+    memcpy(p_dst, p_src, (uint32_t)8U * sizeof (uint64_t));
     return;
   }
   if (scrut.tag == EverCrypt_Hash_SHA2_512_s)
@@ -894,7 +894,7 @@ void EverCrypt_Hash_copy(EverCrypt_Hash_state_s *s_src, EverCrypt_Hash_state_s *
     {
       p_dst = KRML_EABORT(uint64_t *, "unreachable (pattern matches are exhaustive in F*)");
     }
-    memcpy(p_dst, p_src, (uint32_t)8U * sizeof (p_src[0U]));
+    memcpy(p_dst, p_src, (uint32_t)8U * sizeof (uint64_t));
     return;
   }
   KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
@@ -1238,7 +1238,7 @@ EverCrypt_Hash_Incremental_update(
     uint64_t x0 = total_len1 % (uint64_t)sw;
     uint32_t sz1 = (uint32_t)x0;
     uint8_t *buf2 = buf + sz1;
-    memcpy(buf2, data, len * sizeof (data[0U]));
+    memcpy(buf2, data, len * sizeof (uint8_t));
     uint64_t total_len2 = total_len1 + (uint64_t)len;
     *p
     =
@@ -1384,7 +1384,7 @@ EverCrypt_Hash_Incremental_update(
     uint8_t *data2 = data + data1_len;
     EverCrypt_Hash_update_multi(block_state1, data1, data1_len);
     uint8_t *dst = buf;
-    memcpy(dst, data2, data2_len * sizeof (data2[0U]));
+    memcpy(dst, data2, data2_len * sizeof (uint8_t));
     *p
     =
       (
@@ -1526,7 +1526,7 @@ EverCrypt_Hash_Incremental_update(
   uint32_t diff1 = sw4 - sz1;
   uint8_t *buf0 = buf_1;
   uint8_t *buf2 = buf0 + sz1;
-  memcpy(buf2, data1, diff1 * sizeof (data1[0U]));
+  memcpy(buf2, data1, diff1 * sizeof (uint8_t));
   uint32_t sw5;
   switch (i20)
   {
@@ -1707,7 +1707,7 @@ EverCrypt_Hash_Incremental_update(
   uint8_t *data21 = data2 + data1_len;
   EverCrypt_Hash_update_multi(block_state1, data11, data1_len);
   uint8_t *dst = buf;
-  memcpy(dst, data21, data2_len * sizeof (data21[0U]));
+  memcpy(dst, data21, data2_len * sizeof (uint8_t));
   *p
   =
     (

@@ -30,7 +30,7 @@
 
 typedef uint8_t buftype;
 
-extern void C_String_print(C_String_t uu____102);
+extern void C_String_print(C_String_t uu____71);
 
 extern void Hacl_Impl_SHA3_state_permute(uint64_t *s);
 
@@ -89,11 +89,11 @@ test_cshake128(
 {
   KRML_CHECK_SIZE(sizeof (uint8_t), out_len);
   uint8_t test[out_len];
-  memset(test, 0U, out_len * sizeof (test[0U]));
+  memset(test, 0U, out_len * sizeof (uint8_t));
   KRML_CHECK_SIZE(sizeof (uint8_t), msg_len);
   uint8_t msg_[msg_len];
-  memset(msg_, 0U, msg_len * sizeof (msg_[0U]));
-  memcpy(msg_, (uint8_t *)msg, msg_len * sizeof (((uint8_t *)msg)[0U]));
+  memset(msg_, 0U, msg_len * sizeof (uint8_t));
+  memcpy(msg_, (uint8_t *)msg, msg_len * sizeof (uint8_t));
   uint64_t s[25U] = { 0U };
   s[0U] = (uint64_t)0x10010001a801U | (uint64_t)ctr << (uint32_t)48U;
   Hacl_Impl_SHA3_state_permute(s);

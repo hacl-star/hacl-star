@@ -23,13 +23,13 @@ include $(HACL_HOME)/Makefile.include
 INCLUDES = \
   $(ALL_HACL_DIRS) \
   $(FSTAR_HOME)/ulib/.cache \
+  $(KREMLIN_HOME)/kremlib/obj \
   $(KREMLIN_HOME)/kremlib
 
 # 0. Vale
 
 VALE_FSTAR_FLAGS=--z3cliopt smt.arith.nl=false \
   --z3cliopt smt.QI.EAGER_THRESHOLD=100 --z3cliopt smt.CASE_SPLIT=3 \
-  --use_extracted_interfaces true \
   --max_fuel 1 --max_ifuel 1 --initial_ifuel 0 \
   --smtencoding.elim_box true --smtencoding.l_arith_repr native \
   --smtencoding.nl_arith_repr wrapped
@@ -116,6 +116,7 @@ FRODO_BUNDLE=-bundle 'Hacl.Frodo.KEM=Frodo.Params,Hacl.Impl.Frodo.*,Hacl.Impl.Ma
 HPKE_BUNDLE=-bundle Hacl.HPKE.Interface.*
 STREAMING_BUNDLE=-bundle Hacl.Streaming.Interface,Hacl.Streaming.Lemmas
 INTTYPES_BUNDLE=-bundle Hacl.IntTypes.Intrinsics= -static-header Hacl.IntTypes.Intrinsics
+RSAPSS_BUNDLE=-bundle Hacl.Bignum,Hacl.Bignum.Multiplication,Hacl.Bignum.Karatsuba,Hacl.Bignum.ModInv64[rename=Hacl_Bignum] -static-header Hacl.Bignum,Hacl.Bignum.Multiplication,Hacl.Bignum.ModInv64 -bundle Hacl.RSAPSS+Hacl.Bignum.Convert=Hacl.Bignum.*,Hacl.Impl.MGF,Hacl.Impl.RSAPSS[rename=Hacl_RSAPSS]
 
 # 3. OCaml
 

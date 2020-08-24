@@ -7,7 +7,11 @@
 #endif
 
 #if !defined(BROKEN_INTRINSICS)
+#if defined(_MSC_VER)
+#include <immintrin.h>
+#else
 #include <x86intrin.h>
+#endif
 #endif
 
 #if defined(BROKEN_INTRINSICS)

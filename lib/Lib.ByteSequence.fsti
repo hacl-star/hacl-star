@@ -86,12 +86,12 @@ val index_nat_to_intseq_be:
            uint #t #l (n / pow2 (bits t * i) % pow2 (bits t)))
 
 inline_for_extraction
-val nat_to_bytes_be: #l:secrecy_level -> len:nat -> n:nat{n < pow2 (8 * len)}
-  -> b:bytes_l l{length b == len /\ n == nat_from_intseq_be #U8 b}
+let nat_to_bytes_be (#l:secrecy_level) (len:nat) (n:nat{n < pow2 (8 * len)}) : b:bytes_l l{length b == len /\ n == nat_from_intseq_be #U8 b} =
+  nat_to_intseq_be #U8 #l len n
 
 inline_for_extraction
-val nat_to_bytes_le: #l:secrecy_level -> len:nat -> n:nat{n < pow2 (8 * len)}
-  -> b:bytes_l l{length b == len /\ n == nat_from_intseq_le #U8 b}
+let nat_to_bytes_le (#l:secrecy_level) (len:nat) (n:nat{n < pow2 (8 * len)}) : b:bytes_l l{length b == len /\ n == nat_from_intseq_le #U8 b} =
+  nat_to_intseq_le #U8 #l len n
 
 inline_for_extraction
 val uint_to_bytes_le: #t:inttype{unsigned t} -> #l:secrecy_level -> uint_t t l -> lbytes_l l (numbytes t)

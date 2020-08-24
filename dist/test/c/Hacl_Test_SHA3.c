@@ -30,7 +30,7 @@
 
 typedef uint8_t buftype;
 
-extern void C_String_print(C_String_t uu____102);
+extern void C_String_print(C_String_t uu____71);
 
 extern void
 Hacl_Impl_SHA3_keccak(
@@ -150,8 +150,8 @@ test_sha3(
 {
   KRML_CHECK_SIZE(sizeof (uint8_t), msg_len);
   uint8_t msg_[msg_len];
-  memset(msg_, 0U, msg_len * sizeof (msg_[0U]));
-  memcpy(msg_, (uint8_t *)msg, msg_len * sizeof (((uint8_t *)msg)[0U]));
+  memset(msg_, 0U, msg_len * sizeof (uint8_t));
+  memcpy(msg_, (uint8_t *)msg, msg_len * sizeof (uint8_t));
   uint8_t test224[28U] = { 0U };
   uint8_t test256[32U] = { 0U };
   uint8_t test384[48U] = { 0U };
@@ -203,11 +203,11 @@ test_shake128(uint32_t msg_len, const uint8_t *msg, uint32_t out_len, const uint
 {
   KRML_CHECK_SIZE(sizeof (uint8_t), msg_len);
   uint8_t msg_[msg_len];
-  memset(msg_, 0U, msg_len * sizeof (msg_[0U]));
-  memcpy(msg_, (uint8_t *)msg, msg_len * sizeof (((uint8_t *)msg)[0U]));
+  memset(msg_, 0U, msg_len * sizeof (uint8_t));
+  memcpy(msg_, (uint8_t *)msg, msg_len * sizeof (uint8_t));
   KRML_CHECK_SIZE(sizeof (uint8_t), out_len);
   uint8_t test[out_len];
-  memset(test, 0U, out_len * sizeof (test[0U]));
+  memset(test, 0U, out_len * sizeof (uint8_t));
   shake128_hacl(msg_len, msg_, out_len, test);
   if
   (
@@ -225,11 +225,11 @@ test_shake256(uint32_t msg_len, const uint8_t *msg, uint32_t out_len, const uint
 {
   KRML_CHECK_SIZE(sizeof (uint8_t), msg_len);
   uint8_t msg_[msg_len];
-  memset(msg_, 0U, msg_len * sizeof (msg_[0U]));
-  memcpy(msg_, (uint8_t *)msg, msg_len * sizeof (((uint8_t *)msg)[0U]));
+  memset(msg_, 0U, msg_len * sizeof (uint8_t));
+  memcpy(msg_, (uint8_t *)msg, msg_len * sizeof (uint8_t));
   KRML_CHECK_SIZE(sizeof (uint8_t), out_len);
   uint8_t test[out_len];
-  memset(test, 0U, out_len * sizeof (test[0U]));
+  memset(test, 0U, out_len * sizeof (uint8_t));
   shake256_hacl(msg_len, msg_, out_len, test);
   if
   (

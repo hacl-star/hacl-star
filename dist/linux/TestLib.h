@@ -27,39 +27,42 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __TestLib_H
 #define __TestLib_H
 
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
+extern void TestLib_touch(s32 uu____7);
 
-extern void TestLib_touch(s32 uu____12);
+extern void TestLib_check(bool uu____15);
 
-extern void TestLib_check(bool uu____28);
+extern void TestLib_check8(s8 uu____30, s8 uu____31);
 
-extern void TestLib_check8(s8 uu____52, s8 uu____53);
+extern void TestLib_check16(s16 uu____46, s16 uu____47);
 
-extern void TestLib_check16(s16 uu____78, s16 uu____79);
+extern void TestLib_check32(s32 uu____62, s32 uu____63);
 
-extern void TestLib_check32(s32 uu____104, s32 uu____105);
+extern void TestLib_check64(s64 uu____78, s64 uu____79);
 
-extern void TestLib_check64(s64 uu____130, s64 uu____131);
+extern void TestLib_checku8(u8 uu____94, u8 uu____95);
 
-extern void TestLib_checku8(u8 uu____156, u8 uu____157);
+extern void TestLib_checku16(u16 uu____110, u16 uu____111);
 
-extern void TestLib_checku16(u16 uu____182, u16 uu____183);
+extern void TestLib_checku32(u32 uu____126, u32 uu____127);
 
-extern void TestLib_checku32(u32 uu____208, u32 uu____209);
+extern void TestLib_checku64(u64 uu____142, u64 uu____143);
 
-extern void TestLib_checku64(u64 uu____234, u64 uu____235);
-
-extern void TestLib_compare_and_print(C_String_t uu____279, u8 *b1, u8 *b2, u32 l);
+extern void TestLib_compare_and_print(C_String_t uu____176, u8 *b1, u8 *b2, u32 l);
 
 extern u8 *TestLib_unsafe_malloc(u32 l);
 
-extern void TestLib_perr(u32 uu____326);
+extern void TestLib_perr(u32 uu____203);
 
-extern void TestLib_print_clock_diff(clock_t uu____348, clock_t uu____349);
+extern void TestLib_print_clock_diff(clock_t uu____218, clock_t uu____219);
 
 KRML_DEPRECATED("p_null from TestLib; use LowStar.Buffer.null instead")
 
@@ -77,10 +80,14 @@ extern TestLib_cycles TestLib_cpucycles();
 
 extern void
 TestLib_print_cycles_per_round(
-  TestLib_cycles uu____434,
-  TestLib_cycles uu____435,
-  u32 uu____436
+  TestLib_cycles uu____276,
+  TestLib_cycles uu____277,
+  u32 uu____278
 );
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __TestLib_H_DEFINED
 #endif

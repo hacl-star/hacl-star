@@ -125,4 +125,42 @@ check_avx512 proc
   mov rbx, r9
   ret
 check_avx512 endp
+ALIGN 16
+check_osxsave proc
+  mov r9, rbx
+  mov rcx, 0
+  mov rax, 1
+  cpuid
+  mov rax, rcx
+  and rax, 134217728
+  shr rax, 26
+  mov rbx, r9
+  ret
+check_osxsave endp
+ALIGN 16
+check_avx_xcr0 proc
+  mov rcx, 0
+  xgetbv
+  mov rcx, rax
+  and rax, 4
+  shr rax, 1
+  and rcx, 2
+  and rax, rcx
+  ret
+check_avx_xcr0 endp
+ALIGN 16
+check_avx512_xcr0 proc
+  mov rcx, 0
+  xgetbv
+  mov rcx, rax
+  mov rdx, rax
+  and rax, 32
+  and rcx, 64
+  and rdx, 128
+  shr rdx, 2
+  shr rcx, 1
+  and rax, rdx
+  and rax, rcx
+  ret
+check_avx512_xcr0 endp
 end

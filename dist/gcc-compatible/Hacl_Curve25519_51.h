@@ -28,11 +28,14 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __Hacl_Curve25519_51_H
 #define __Hacl_Curve25519_51_H
 
 #include "Hacl_Kremlib.h"
-
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 void Hacl_Impl_Curve25519_Field51_fadd(uint64_t *out, uint64_t *f1, uint64_t *f2);
 
@@ -43,7 +46,7 @@ Hacl_Impl_Curve25519_Field51_fmul(
   uint64_t *out,
   uint64_t *f1,
   uint64_t *f2,
-  FStar_UInt128_uint128 *uu____3153
+  FStar_UInt128_uint128 *uu____1344
 );
 
 void Hacl_Impl_Curve25519_Field51_fmul1(uint64_t *out, uint64_t *f1, uint64_t f2);
@@ -52,7 +55,7 @@ void
 Hacl_Impl_Curve25519_Field51_fsqr(
   uint64_t *out,
   uint64_t *f,
-  FStar_UInt128_uint128 *uu____7683
+  FStar_UInt128_uint128 *uu____3296
 );
 
 void
@@ -70,6 +73,10 @@ void Hacl_Curve25519_51_scalarmult(uint8_t *out, uint8_t *priv, uint8_t *pub);
 void Hacl_Curve25519_51_secret_to_public(uint8_t *pub, uint8_t *priv);
 
 bool Hacl_Curve25519_51_ecdh(uint8_t *out, uint8_t *priv, uint8_t *pub);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Curve25519_51_H_DEFINED
 #endif

@@ -28,11 +28,14 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __Hacl_Impl_Blake2_Constants_H
 #define __Hacl_Impl_Blake2_Constants_H
 
 
-
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 /* SNIPPET_START: Hacl_Impl_Blake2_Constants_sigmaTable */
 
@@ -113,6 +116,10 @@ Hacl_Impl_Blake2_Constants_rTable_B[4U] =
   { (uint32_t)32U, (uint32_t)24U, (uint32_t)16U, (uint32_t)63U };
 
 /* SNIPPET_END: Hacl_Impl_Blake2_Constants_rTable_B */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Impl_Blake2_Constants_H_DEFINED
 #endif

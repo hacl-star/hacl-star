@@ -28,11 +28,14 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
+
 #ifndef __EverCrypt_Vale_H
 #define __EverCrypt_Vale_H
 
 
-
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 /* SNIPPET_START: aes128_key_expansion_sbox */
 
@@ -120,13 +123,13 @@ extern void __stdcall old_aes128_key_expansion(uint8_t *key_ptr, uint8_t *expand
 
 /* SNIPPET_START: old_gcm128_encrypt */
 
-extern void __stdcall old_gcm128_encrypt(gcm_args *uu____363);
+extern void __stdcall old_gcm128_encrypt(gcm_args *uu____329);
 
 /* SNIPPET_END: old_gcm128_encrypt */
 
 /* SNIPPET_START: old_gcm128_decrypt */
 
-extern uint32_t __stdcall old_gcm128_decrypt(gcm_args *uu____378);
+extern uint32_t __stdcall old_gcm128_decrypt(gcm_args *uu____341);
 
 /* SNIPPET_END: old_gcm128_decrypt */
 
@@ -138,15 +141,19 @@ extern void __stdcall old_aes256_key_expansion(uint8_t *key_ptr, uint8_t *expand
 
 /* SNIPPET_START: old_gcm256_encrypt */
 
-extern void __stdcall old_gcm256_encrypt(gcm_args *uu____411);
+extern void __stdcall old_gcm256_encrypt(gcm_args *uu____369);
 
 /* SNIPPET_END: old_gcm256_encrypt */
 
 /* SNIPPET_START: old_gcm256_decrypt */
 
-extern uint32_t __stdcall old_gcm256_decrypt(gcm_args *uu____426);
+extern uint32_t __stdcall old_gcm256_decrypt(gcm_args *uu____381);
 
 /* SNIPPET_END: old_gcm256_decrypt */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __EverCrypt_Vale_H_DEFINED
 #endif
