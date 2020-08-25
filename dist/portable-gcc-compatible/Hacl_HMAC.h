@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_HMAC_H
+#define __Hacl_HMAC_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -29,14 +37,8 @@
 #include "kremlin/internal/target.h"
 
 
-#ifndef __Hacl_HMAC_H
-#define __Hacl_HMAC_H
-
 #include "Hacl_Kremlib.h"
 #include "Hacl_Hash.h"
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 /* SNIPPET_START: Hacl_HMAC_legacy_compute_sha1 */
 

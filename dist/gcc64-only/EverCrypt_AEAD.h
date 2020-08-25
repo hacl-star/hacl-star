@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __EverCrypt_AEAD_H
+#define __EverCrypt_AEAD_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -29,18 +37,12 @@
 #include "kremlin/internal/target.h"
 
 
-#ifndef __EverCrypt_AEAD_H
-#define __EverCrypt_AEAD_H
-
 #include "Hacl_Kremlib.h"
 #include "EverCrypt_Chacha20Poly1305.h"
 #include "Vale.h"
 #include "EverCrypt_AutoConfig2.h"
 #include "EverCrypt_Error.h"
 #include "Hacl_Spec.h"
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 typedef struct EverCrypt_AEAD_state_s_s EverCrypt_AEAD_state_s;
 

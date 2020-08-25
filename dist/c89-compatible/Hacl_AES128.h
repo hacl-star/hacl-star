@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_AES128_H
+#define __Hacl_AES128_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -29,13 +37,7 @@
 #include "kremlin/internal/target.h"
 
 
-#ifndef __Hacl_AES128_H
-#define __Hacl_AES128_H
 
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 extern void Hacl_AES128_aes128_key_expansion(uint8_t *key, uint8_t *expanded_key);
 

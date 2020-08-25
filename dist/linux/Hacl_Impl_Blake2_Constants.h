@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_Impl_Blake2_Constants_H
+#define __Hacl_Impl_Blake2_Constants_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
@@ -28,13 +36,7 @@
 #include "kremlin/internal/target.h"
 
 
-#ifndef __Hacl_Impl_Blake2_Constants_H
-#define __Hacl_Impl_Blake2_Constants_H
 
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 static const
 u32

@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_Kremlib_H
+#define __Hacl_Kremlib_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -29,13 +37,7 @@
 #include "kremlin/internal/target.h"
 
 
-#ifndef __Hacl_Kremlib_H
-#define __Hacl_Kremlib_H
 
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 static inline uint8_t FStar_UInt8_eq_mask(uint8_t a, uint8_t b);
 

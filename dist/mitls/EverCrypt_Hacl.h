@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __EverCrypt_Hacl_H
+#define __EverCrypt_Hacl_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -29,13 +37,7 @@
 #include "kremlin/internal/target.h"
 
 
-#ifndef __EverCrypt_Hacl_H
-#define __EverCrypt_Hacl_H
 
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 #define EverCrypt_Hacl_aes128_mk_sbox Crypto_Symmetric_AES128_mk_sbox
 

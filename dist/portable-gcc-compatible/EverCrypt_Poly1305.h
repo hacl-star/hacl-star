@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __EverCrypt_Poly1305_H
+#define __EverCrypt_Poly1305_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -29,17 +37,11 @@
 #include "kremlin/internal/target.h"
 
 
-#ifndef __EverCrypt_Poly1305_H
-#define __EverCrypt_Poly1305_H
-
 #include "Vale.h"
 #include "EverCrypt_AutoConfig2.h"
 #include "Hacl_Poly1305_32.h"
 #include "Hacl_Poly1305_256.h"
 #include "Hacl_Poly1305_128.h"
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 /* SNIPPET_START: EverCrypt_Poly1305_poly1305 */
 

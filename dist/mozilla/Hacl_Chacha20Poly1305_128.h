@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_Chacha20Poly1305_128_H
+#define __Hacl_Chacha20Poly1305_128_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
@@ -28,15 +36,9 @@
 #include <stdbool.h>
 
 
-#ifndef __Hacl_Chacha20Poly1305_128_H
-#define __Hacl_Chacha20Poly1305_128_H
-
 #include "Hacl_Kremlib.h"
 #include "Hacl_Chacha20_Vec128.h"
 #include "Hacl_Poly1305_128.h"
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 void
 Hacl_Chacha20Poly1305_128_aead_encrypt(
