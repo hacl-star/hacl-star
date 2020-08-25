@@ -90,7 +90,6 @@ val montgomery_multiplication_ecdsa_module: #c: curve -> a: felem c -> b: felem 
       as_nat c h1 result = toDomain_ (fromDomain_ (as_nat c h0 a) * fromDomain_ (as_nat c h0 b) % prime_p256_order))
 
 
-inline_for_extraction noextract
 val felem_add: #c: curve -> arg1: felem c -> arg2: felem c -> out: felem c -> Stack unit 
   (requires (fun h0 ->  
     live h0 arg1 /\ live h0 arg2 /\ live h0 out /\ 

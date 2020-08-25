@@ -158,33 +158,21 @@ val montgomery_multiplication_round: #c: curve -> t: widefelem c
 let montgomery_multiplication_round #c t round k0 = 
   push_frame(); 
     let h0 = ST.get() in 
+    let len = getCoordinateLenU64 c in 
+    
     let temp = create (size 1) (u64 0) in 
     let y = create (size 1) (u64 0) in 
 
-    let t2 = create (size 8) (u64 0) in 
-    let t3 = create (size 8) (u64 0) in 
-    let t1 = mod64 #P256 t in
+    let t2 = create (size 2 *! len) (u64 0) in 
+    let t3 = create (size 2 *! len) (u64 0) in 
+    let t1 = mod64 #c t in
+    
     mul64 t1 k0 y temp;
-      let h1 = ST.get() in 
-      assert(uint_v (Lib.Sequence.index (as_seq h1 y) 0) + uint_v (Lib.Sequence.index (as_seq h1 temp) 0) * pow2 64 = uint_v t1 * uint_v k0);
-      assert((uint_v (Lib.Sequence.index (as_seq h1 y) 0) + uint_v (Lib.Sequence.index (as_seq h1 temp) 0) * pow2 64) % pow2 64 = uint_v (Lib.Sequence.index (as_seq h1 y) 0));
-      assert((uint_v (Lib.Sequence.index (as_seq h1 y) 0) + uint_v (Lib.Sequence.index (as_seq h1 temp) 0) * pow2 64) % pow2 64 = (uint_v t1 * uint_v k0) % pow2 64);
-      assert(uint_v (Lib.Sequence.index (as_seq h1 y) 0) = (uint_v t1 * uint_v k0) % pow2 64); 
       recall_contents prime256order_buffer (Lib.Sequence.of_list p256_order_prime_list);
     let y_ = index y (size 0) in   
-      assert(uint_v (Lib.Sequence.index (as_seq h1 y) 0) == uint_v y_);
-      assert(uint_v y_ == (uint_v t1 * uint_v k0) % pow2 64);
-
     short_mul_bn #P256 prime256order_buffer y_ t2;
-      let h2 = ST.get() in 
-      assert(wide_as_nat c h2 t2 = prime_p256_order * ((uint_v t1 * uint_v k0) % pow2 64));
     add_long_without_carry #c t t2 t3;
-      let h3 = ST.get() in 
-      assert_by_tactic ((wide_as_nat c h0 t % pow2 64) * uint_v k0 == uint_v k0 * (wide_as_nat c h0 t % pow2 64)) canon;
-      assert(wide_as_nat c h3 t3 = wide_as_nat c h0 t + prime_p256_order * ((((wide_as_nat c h0 t % pow2 64)) * uint_v k0) % pow2 64));
     shift1 #c t3 round;
-      let h4 = ST.get() in 
-      assert(wide_as_nat c h4 round = (wide_as_nat c h0 t + prime_p256_order * ((((wide_as_nat c h0 t % pow2 64)) * uint_v k0) % pow2 64)) / pow2 64);
   pop_frame()
 
 
@@ -205,7 +193,8 @@ val montgomery_multiplication_round_twice: #c: curve -> t: widefelem c
     
 let montgomery_multiplication_round_twice #c t result k0 = 
    push_frame();
-     let tempRound = create (size 8) (u64 0) in 
+     let len = getCoordinateLenU64 c in 
+     let tempRound = create (size 2 *! len) (u64 0) in 
        let h0 = ST.get() in 
    montgomery_multiplication_round #c t tempRound k0; 
        let h1 = ST.get() in 

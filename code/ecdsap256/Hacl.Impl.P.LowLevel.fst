@@ -657,13 +657,13 @@ let copy_conditional #c out x mask =
 
 
 let shiftLeftWord #c i o =
-  let len = getCoordinateLenU64 c in 
+ (* let len = getCoordinateLenU64 c in 
   let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = True in 
   for 0ul len inv (fun j -> upd o j (u64 0));
 
   for len (size 2 *! len) inv (fun j -> upd o j i.(j -! len))
+*)
 
-(*
 
 
   assert_norm(pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
@@ -690,7 +690,7 @@ let shiftLeftWord #c i o =
     upd o (size 4) i.(size 0);
     upd o (size 5) i.(size 1);
     upd o (size 6) i.(size 2);
-    upd o (size 7) i.(size 3) *)
+    upd o (size 7) i.(size 3) 
 
 
 let mod64 #c a =

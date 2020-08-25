@@ -7,7 +7,7 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Impl.P.LowLevel
+open Hacl.Impl.P.LowLevel 
 
 open Hacl.Impl.P256.Core
 open Hacl.Impl.P256.MM.Exponent
@@ -28,36 +28,54 @@ open FStar.Mul
 
 #set-options "--z3rlimit 100 --ifuel 0 --fuel 0"
 
+
 inline_for_extraction noextract
 val uploadA: #c: curve -> a: felem c -> Stack unit
   (requires fun h -> live h a)
-  (ensures fun h0 _ h1 -> modifies (loc a) h0 h1 /\ 
-    as_nat c h1 a == toDomain_ #c (aCoordinate #P256 % prime256) /\
-    as_nat c h1 a < prime256
+  (ensures fun h0 _ h1 ->
+    let prime = getPrime c in 
+    modifies (loc a) h0 h1 /\ 
+    as_nat c h1 a == toDomain_ #c (aCoordinate #c % prime) /\
+    as_nat c h1 a < prime
   )
 
 let uploadA #c a = 
-  lemmaToDomain #c (aCoordinate #P256 % prime256);
-  upd a (size 0) (u64 18446744073709551612);
-  upd a (size 1) (u64 17179869183);
-  upd a (size 2) (u64 0);
-  upd a (size 3) (u64 18446744056529682436);
-  assert_norm(18446744073709551612 + 17179869183 * pow2 64 + 18446744056529682436 * pow2 64 * pow2 64 * pow2 64 = (aCoordinate #P256 % prime256) * pow2 256 % prime256)
+  match c with 
+    |P256 -> 
+      upd a (size 0) (u64 18446744073709551612);
+      upd a (size 1) (u64 17179869183);
+      upd a (size 2) (u64 0);
+      upd a (size 3) (u64 18446744056529682436);
+      
+      let prime = getPrime c in 
+      lemmaToDomain #c (aCoordinate #c % prime);
+      assert_norm(18446744073709551612 + 17179869183 * pow2 64 + 18446744056529682436 * pow2 64 * pow2 64 * pow2 64 = (aCoordinate #P256 % prime256) * pow2 256 % prime256)
+
+    |P384 -> 
+      admit()
+
 
 inline_for_extraction noextract
 val uploadB: #c: curve -> b: felem c -> Stack unit 
   (requires fun h -> live h b)
-  (ensures fun h0 _ h1 -> modifies (loc b) h0 h1 /\ as_nat c h1 b < prime256 /\ 
-    as_nat c h1 b == toDomain_ #c (bCoordinate #P256)
+  (ensures fun h0 _ h1 -> 
+    let prime = getPrime c in 
+    modifies (loc b) h0 h1 /\ as_nat c h1 b < prime /\ 
+    as_nat c h1 b == toDomain_ #c (bCoordinate #c)
   )
 
 let uploadB #c b = 
-  lemmaToDomain #c (bCoordinate #P256);
-  upd b (size 0) (u64 15608596021259845087);
-  upd b (size 1) (u64 12461466548982526096);
-  upd b (size 2) (u64 16546823903870267094);
-  upd b (size 3) (u64 15866188208926050356);
-  assert_norm (15608596021259845087 + 12461466548982526096 * pow2 64 + 16546823903870267094 * pow2 64 * pow2 64 + 15866188208926050356 * pow2 64 * pow2 64 * pow2 64 == (bCoordinate #P256 * pow2 256 % prime256))
+  match c with 
+  |P256 -> 
+    upd b (size 0) (u64 15608596021259845087);
+    upd b (size 1) (u64 12461466548982526096);
+    upd b (size 2) (u64 16546823903870267094);
+    upd b (size 3) (u64 15866188208926050356);
+
+    lemmaToDomain #c (bCoordinate #c);
+    assert_norm (15608596021259845087 + 12461466548982526096 * pow2 64 + 16546823903870267094 * pow2 64 * pow2 64 + 15866188208926050356 * pow2 64 * pow2 64 * pow2 64 == (bCoordinate #P256 * pow2 256 % prime256))
+  |P384 -> 
+    admit()
 
 
 val computeYFromX: #c: curve -> x: felem c -> result: felem c -> sign: uint64 -> Stack unit 
@@ -78,8 +96,10 @@ val computeYFromX: #c: curve -> x: felem c -> result: felem c -> sign: uint64 ->
 
 let computeYFromX #c x result sign = 
   push_frame();
-    let aCoordinateBuffer = create (size 4) (u64 0) in 
-    let bCoordinateBuffer = create (size 4) (u64 0) in 
+    let len = getCoordinateLenU64 c in 
+    
+    let aCoordinateBuffer = create len (u64 0) in 
+    let bCoordinateBuffer = create len (u64 0) in 
 
   let h0 = ST.get() in 
     uploadA #c aCoordinateBuffer;
@@ -142,28 +162,32 @@ let computeYFromX #c x result sign =
     ((x_ * x_ * x_ + Spec.P256.aCoordinate #P256 * x_ + Spec.P256.bCoordinate #P256) % prime256); }
 
 
-let decompressionNotCompressedForm b result = 
+let decompressionNotCompressedForm #c b result = 
   let h0 = ST.get() in 
   let compressionIdentifier = index b (size 0) in
   let correctIdentifier = eq_u8_nCT (u8 4) compressionIdentifier in 
   if correctIdentifier then 
-    copy result (sub b (size 1) (size 64));
+    copy result (sub b (size 1) (size 2 *! getCoordinateLenU c));
   correctIdentifier
 
 
 inline_for_extraction noextract
-val lessThanPrime: #c: curve ->  f: felem c -> Stack bool
+val lessThanPrime: #c: curve -> f: felem c -> Stack bool
   (requires fun h -> live h f)
-  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ r = (as_nat c h0 f < prime256))
+  (ensures fun h0 r h1 ->
+    let prime = getPrime c in 
+    modifies0 h0 h1 /\ r = (as_nat c h0 f < prime))
 
-let lessThanPrime f = 
+let lessThanPrime #c f = 
   push_frame();
-    let tempBuffer = create (size 4) (u64 0) in 
-    recall_contents prime256_buffer (Lib.Sequence.of_list p256_prime_list);
-    let carry = sub_bn_gl f prime256_buffer tempBuffer in 
+    let len = getCoordinateLenU64 c in 
+    let tempBuffer = create c (u64 0) in 
+    recall_contents (prime_buffer #c) (Lib.Sequence.of_list (prime_list c));
+    let carry = sub_bn_gl f prime_buffer tempBuffer in 
     let less = eq_u64_nCT carry (u64 1) in 
   pop_frame();
     less
+
 
 inline_for_extraction noextract
 val isIdentifierCorrect: v: uint8 -> Tot (r: bool {r <==> uint_v v = 2 || uint_v v = 3})
@@ -185,16 +209,17 @@ let isIdentifierCorrect compressedIdentifier =
 let decompressionCompressedForm #c b result = 
   push_frame();
     let h0 = ST.get() in 
-    let temp = create (size 8) (u64 0) in 
-      let t0 = sub temp (size 0) (size 4) in 
-      let t1 = sub temp (size 4) (size 4) in 
+      let len = getCoordinateLenU64 c in 
+    let temp = create (size 2 *! len) (u64 0) in 
+      let t0 = sub temp (size 0) len in 
+      let t1 = sub temp len len in 
     let compressedIdentifier = index b (size 0) in 
     let flag = isIdentifierCorrect compressedIdentifier in 
     if flag then 
     begin
 
-      let x = sub b (size 1) (size 32) in 
-      copy (sub result (size 0) (size 32)) x;
+      let x = sub b (size 1) (getCoordinateLen c) in 
+      copy (sub result (size 0) (getCoordinateLenU c)) x;
       toUint64ChangeEndian #c x t0;
 	let h1 = ST.get() in 
       lemma_core_0 c t0 h1;
@@ -230,7 +255,7 @@ let decompressionCompressedForm #c b result =
 		as_nat c h3 t1 = (0 - sqRootWithoutSign) % prime256);
     
 	  Hacl.Impl.P.LowLevel.changeEndian #c t1;
-	  toUint8 #c t1 (sub result (size 32) (size 32)); 
+	  toUint8 #c t1 (sub result (getCoordinateLenU c) (getCoordinateLenU c)); 
 	   let h5 = ST.get() in 
 	   assert(as_seq h5 (gsub result (size 32) (size 32)) == Lib.ByteSequence.uints_to_bytes_be (changeEndian #c (as_seq h3 t1)));
 
@@ -262,24 +287,29 @@ let decompressionCompressedForm #c b result =
 #pop-options
 
 
-let compressionNotCompressedForm b result = 
-  let to = sub result (size 1) (size 64) in 
+let compressionNotCompressedForm #c b result = 
+  let lenCoordinate = getCoordinateLenU c in 
+  let to = sub result (size 1) (size 2 *! lenCoordinate) in 
   copy to b;
   upd result (size 0) (u8 4)
  
 
-let compressionCompressedForm b result = 
+let compressionCompressedForm #c b result = 
   let open Lib.ByteSequence in 
     let h0 = ST.get() in 
-  let y = sub b (size 32) (size 32) in
+    
+  let y = sub b (getCoordinateLenU c) (getCoordinateLenU c) in
     lemma_uint_to_bytes_be_preserves_value (Lib.Sequence.index (as_seq h0 y) 0);
-    lemma_nat_from_to_intseq_be_preserves_value 32 (as_seq h0 y);
+    lemma_nat_from_to_intseq_be_preserves_value (getCoordinateLen c) (as_seq h0 y);
 
-  let lastWordY = index y (size 31) in 
+  
+  let lastWordY = index y (getCoordinateLenU c -! 1ul) in 
   let lastBitY = logand lastWordY (u8 1) in 
     logand_mask lastWordY (u8 1) 1;
   let identifier = add lastBitY (u8 2) in 
-  copy (sub result (size 1) (size 32)) (sub b (size 0) (size 32)) ;
+  
+  copy (sub result (size 1) (getCoordinateLenU c)) (sub b (size 0) (getCoordinateLenU c)) ;
+  
   upd result (size 0) identifier;
     index_nat_to_intseq_be #U8 #SEC 32 (nat_from_bytes_be (as_seq h0 y)) 0;
     pow2_modulo_modulo_lemma_1 (nat_from_intseq_be (as_seq h0 y)) 1 8

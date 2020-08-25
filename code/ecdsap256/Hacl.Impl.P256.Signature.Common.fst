@@ -16,7 +16,6 @@ open Hacl.Lemmas.P256
 open Spec.ECDSA
 open Hacl.Spec.ECDSA.Definition
 
-open Hacl.Impl.P256.LowLevel 
 open Hacl.Impl.P.LowLevel
 open Hacl.Impl.P256.MontgomeryMultiplication
 open Hacl.Impl.ECDSA.MontgomeryMultiplication
@@ -128,7 +127,7 @@ let lemma_xcube2 #c x_ =
   let prime = getPrime c in 
   lemma_mod_add_distr (bCoordinate #P256) ((x_ * x_ * x_) - (3 * x_)) prime
 
-
+inline_for_extraction noextract
 val xcube_minus_x: #c: curve -> x: felem c -> r: felem c -> Stack unit 
   (requires fun h -> as_nat c h x < getPrime c /\ live h x  /\ live h r /\ eq_or_disjoint x r)
   (ensures fun h0 _ h1 -> 
@@ -152,7 +151,7 @@ let xcube_minus_x #c x r =
   multByThree #c xToDomainBuffer minusThreeXBuffer;
   felem_sub #c r minusThreeXBuffer r;
   upload_b_constant #c b_constant;
-  felem_add #c r b_constant r;
+  Hacl.Impl.P.LowLevel.felem_add #c r b_constant r;
   pop_frame(); 
 
     let x_ = as_nat c h0 x in 
@@ -307,9 +306,10 @@ val multByOrder2: #c: curve -> result: point c ->  p: point c -> tempBuffer: lbu
     )
   )
 
-let multByOrder2 result p tempBuffer = 
+let multByOrder2 #c result p tempBuffer = 
   push_frame();
-  let pBuffer = create (size 12) (u64 0) in 
+    let len = getCoordinateLenU64 c in 
+  let pBuffer = create (size 3 *! len) (u64 0) in 
   copy pBuffer p;
   multByOrder result pBuffer tempBuffer;
   pop_frame()  
@@ -335,7 +335,8 @@ val isOrderCorrect: #c: curve -> p: point c -> tempBuffer: lbuffer uint64 (size 
 
 let isOrderCorrect #c p tempBuffer = 
   push_frame(); 
-    let multResult = create (size 12) (u64 0) in 
+    let len = getCoordinateLenU64 c in 
+    let multResult = create (size 3 *! len) (u64 0) in 
     multByOrder2 multResult p tempBuffer;
     let result = isPointAtInfinityPublic #c multResult in  
   pop_frame();
@@ -353,14 +354,18 @@ let verifyQValidCurvePoint pubKeyAsPoint tempBuffer =
 let verifyQ #c pubKey = 
   push_frame();
     let h0 = ST.get() in
-    let pubKeyX = sub pubKey (size 0) (size 32) in 
-    let pubKeyY = sub pubKey (size 32) (size 32) in 
-    let tempBuffer = create (size 120) (u64 0) in 
-      let tempBufferV = sub tempBuffer (size 0) (size 100) in 
-      let publicKeyJ = sub tempBuffer (size 100) (size 12) in 
-      let publicKeyB = sub tempBuffer (size 112) (size 8) in  
-	let publicKeyX = sub publicKeyB (size 0) (size 4) in 
-	let publicKeyY = sub publicKeyB (size 4) (size 4) in 
+    let len = getCoordinateLenU64 c in 
+    let lenScalar = getScalarLen c in 
+    
+    let pubKeyX = sub pubKey (size 0) lenScalar in 
+    let pubKeyY = sub pubKey lenScalar lenScalar in 
+    
+    let tempBuffer = create (size 30 *! len) (u64 0) in 
+      let tempBufferV = sub tempBuffer (size 0) (size 25 *! len) in 
+      let publicKeyJ = sub tempBuffer (size 25 *! len) (size 3 *! len) in 
+      let publicKeyB = sub tempBuffer (size 28 *! len) (size 2 *! len) in  
+	let publicKeyX = sub publicKeyB (size 0) len in 
+	let publicKeyY = sub publicKeyB len len in 
     
     toUint64ChangeEndian #c pubKeyX publicKeyX;
     toUint64ChangeEndian #c pubKeyY publicKeyY;

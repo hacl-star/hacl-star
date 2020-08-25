@@ -75,7 +75,7 @@ val verifyQValidCurvePoint: #c: curve -> pubKeyAsPoint: point c
     modifies (loc tempBuffer) h0 h1 /\
     r == verifyQValidCurvePointSpec #c (point_prime_to_coordinates c (as_seq h0 pubKeyAsPoint)))
 
-inline_for_extraction
+
 val verifyQ: 
   #c: curve ->
   pubKey: lbuffer uint8 (size (getPointLen c)) ->
