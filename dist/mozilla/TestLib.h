@@ -22,6 +22,9 @@
  */
 
 
+#ifndef __TestLib_H
+#define __TestLib_H
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -31,9 +34,6 @@ extern "C" {
 #include <string.h>
 #include <stdbool.h>
 
-
-#ifndef __TestLib_H
-#define __TestLib_H
 
 
 
@@ -82,10 +82,9 @@ extern TestLib_cycles TestLib_cpucycles();
 extern void
 TestLib_print_cycles_per_round(TestLib_cycles uu___, TestLib_cycles uu___1, uint32_t uu___2);
 
-#define __TestLib_H_DEFINED
-#endif
-
 #if defined(__cplusplus)
 }
 #endif
 
+#define __TestLib_H_DEFINED
+#endif

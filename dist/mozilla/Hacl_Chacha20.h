@@ -22,6 +22,9 @@
  */
 
 
+#ifndef __Hacl_Chacha20_H
+#define __Hacl_Chacha20_H
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -31,9 +34,6 @@ extern "C" {
 #include <string.h>
 #include <stdbool.h>
 
-
-#ifndef __Hacl_Chacha20_H
-#define __Hacl_Chacha20_H
 
 #include "Hacl_Kremlib.h"
 
@@ -59,10 +59,9 @@ Hacl_Chacha20_chacha20_decrypt(
   uint32_t ctr
 );
 
-#define __Hacl_Chacha20_H_DEFINED
-#endif
-
 #if defined(__cplusplus)
 }
 #endif
 
+#define __Hacl_Chacha20_H_DEFINED
+#endif

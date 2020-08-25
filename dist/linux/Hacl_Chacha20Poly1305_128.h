@@ -22,6 +22,9 @@
  */
 
 
+#ifndef __Hacl_Chacha20Poly1305_128_H
+#define __Hacl_Chacha20Poly1305_128_H
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -32,9 +35,6 @@ extern "C" {
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-
-#ifndef __Hacl_Chacha20Poly1305_128_H
-#define __Hacl_Chacha20Poly1305_128_H
 
 #include "Hacl_Kremlib.h"
 #include "Hacl_Chacha20_Vec128.h"
@@ -64,10 +64,9 @@ Hacl_Chacha20Poly1305_128_aead_decrypt(
   u8 *mac
 );
 
-#define __Hacl_Chacha20Poly1305_128_H_DEFINED
-#endif
-
 #if defined(__cplusplus)
 }
 #endif
 
+#define __Hacl_Chacha20Poly1305_128_H_DEFINED
+#endif

@@ -22,6 +22,9 @@
  */
 
 
+#ifndef __Hacl_Kremlib_H
+#define __Hacl_Kremlib_H
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -33,9 +36,6 @@ extern "C" {
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-
-#ifndef __Hacl_Kremlib_H
-#define __Hacl_Kremlib_H
 
 
 
@@ -134,10 +134,9 @@ uint32_t LowStar_Vector_new_capacity(uint32_t cap);
 
 /* SNIPPET_END: LowStar_Vector_new_capacity */
 
-#define __Hacl_Kremlib_H_DEFINED
-#endif
-
 #if defined(__cplusplus)
 }
 #endif
 
+#define __Hacl_Kremlib_H_DEFINED
+#endif

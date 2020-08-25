@@ -22,6 +22,9 @@
  */
 
 
+#ifndef __Hacl_Ed25519_H
+#define __Hacl_Ed25519_H
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -32,9 +35,6 @@ extern "C" {
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-
-#ifndef __Hacl_Ed25519_H
-#define __Hacl_Ed25519_H
 
 #include "Hacl_Kremlib.h"
 #include "Hacl_Hash.h"
@@ -50,10 +50,9 @@ void Hacl_Ed25519_expand_keys(u8 *ks, u8 *priv);
 
 void Hacl_Ed25519_sign_expanded(u8 *signature, u8 *ks, u32 len, u8 *msg);
 
-#define __Hacl_Ed25519_H_DEFINED
-#endif
-
 #if defined(__cplusplus)
 }
 #endif
 
+#define __Hacl_Ed25519_H_DEFINED
+#endif

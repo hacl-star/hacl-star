@@ -22,6 +22,9 @@
  */
 
 
+#ifndef __Hacl_Poly1305_128_H
+#define __Hacl_Poly1305_128_H
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -32,9 +35,6 @@ extern "C" {
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-
-#ifndef __Hacl_Poly1305_128_H
-#define __Hacl_Poly1305_128_H
 
 #include "Hacl_Kremlib.h"
 
@@ -61,10 +61,9 @@ void Hacl_Poly1305_128_poly1305_finish(u8 *tag, u8 *key, Lib_IntVector_Intrinsic
 
 void Hacl_Poly1305_128_poly1305_mac(u8 *tag, u32 len, u8 *text, u8 *key);
 
-#define __Hacl_Poly1305_128_H_DEFINED
-#endif
-
 #if defined(__cplusplus)
 }
 #endif
 
+#define __Hacl_Poly1305_128_H_DEFINED
+#endif

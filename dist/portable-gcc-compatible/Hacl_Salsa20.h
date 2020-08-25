@@ -22,6 +22,9 @@
  */
 
 
+#ifndef __Hacl_Salsa20_H
+#define __Hacl_Salsa20_H
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -33,9 +36,6 @@ extern "C" {
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-
-#ifndef __Hacl_Salsa20_H
-#define __Hacl_Salsa20_H
 
 #include "Hacl_Kremlib.h"
 
@@ -79,10 +79,9 @@ void Hacl_Salsa20_hsalsa20(uint8_t *out, uint8_t *key, uint8_t *n);
 
 /* SNIPPET_END: Hacl_Salsa20_hsalsa20 */
 
-#define __Hacl_Salsa20_H_DEFINED
-#endif
-
 #if defined(__cplusplus)
 }
 #endif
 
+#define __Hacl_Salsa20_H_DEFINED
+#endif

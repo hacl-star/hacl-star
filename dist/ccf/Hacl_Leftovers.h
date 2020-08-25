@@ -22,6 +22,9 @@
  */
 
 
+#ifndef __Hacl_Leftovers_H
+#define __Hacl_Leftovers_H
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -32,9 +35,6 @@ extern "C" {
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-
-#ifndef __Hacl_Leftovers_H
-#define __Hacl_Leftovers_H
 
 #include "Hacl_Spec.h"
 
@@ -56,10 +56,9 @@ typedef struct Hacl_HMAC_DRBG_state_s
 }
 Hacl_HMAC_DRBG_state;
 
-#define __Hacl_Leftovers_H_DEFINED
-#endif
-
 #if defined(__cplusplus)
 }
 #endif
 
+#define __Hacl_Leftovers_H_DEFINED
+#endif

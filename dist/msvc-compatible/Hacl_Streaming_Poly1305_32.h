@@ -22,6 +22,9 @@
  */
 
 
+#ifndef __Hacl_Streaming_Poly1305_32_H
+#define __Hacl_Streaming_Poly1305_32_H
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -33,9 +36,6 @@ extern "C" {
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-
-#ifndef __Hacl_Streaming_Poly1305_32_H
-#define __Hacl_Streaming_Poly1305_32_H
 
 #include "Hacl_Poly1305_32.h"
 
@@ -66,10 +66,9 @@ Hacl_Streaming_Poly1305_32_finish(
 
 void Hacl_Streaming_Poly1305_32_free(Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_ *s);
 
-#define __Hacl_Streaming_Poly1305_32_H_DEFINED
-#endif
-
 #if defined(__cplusplus)
 }
 #endif
 
+#define __Hacl_Streaming_Poly1305_32_H_DEFINED
+#endif

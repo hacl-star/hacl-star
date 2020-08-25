@@ -22,6 +22,9 @@
  */
 
 
+#ifndef __EverCrypt_DRBG_H
+#define __EverCrypt_DRBG_H
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -32,9 +35,6 @@ extern "C" {
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-
-#ifndef __EverCrypt_DRBG_H
-#define __EverCrypt_DRBG_H
 
 #include "EverCrypt_HMAC.h"
 #include "Hacl_Leftovers.h"
@@ -240,10 +240,9 @@ EverCrypt_DRBG_generate(
 
 void EverCrypt_DRBG_uninstantiate(EverCrypt_DRBG_state_s *st);
 
-#define __EverCrypt_DRBG_H_DEFINED
-#endif
-
 #if defined(__cplusplus)
 }
 #endif
 
+#define __EverCrypt_DRBG_H_DEFINED
+#endif

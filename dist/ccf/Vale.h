@@ -22,6 +22,9 @@
  */
 
 
+#ifndef __Vale_H
+#define __Vale_H
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -32,9 +35,6 @@ extern "C" {
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-
-#ifndef __Vale_H
-#define __Vale_H
 
 
 
@@ -112,10 +112,9 @@ gctr256_bytes(
   uint64_t x6
 );
 
-#define __Vale_H_DEFINED
-#endif
-
 #if defined(__cplusplus)
 }
 #endif
 
+#define __Vale_H_DEFINED
+#endif

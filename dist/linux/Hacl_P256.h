@@ -22,6 +22,9 @@
  */
 
 
+#ifndef __Hacl_P256_H
+#define __Hacl_P256_H
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -33,9 +36,6 @@ extern "C" {
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-
-#ifndef __Hacl_P256_H
-#define __Hacl_P256_H
 
 #include "Hacl_Kremlib.h"
 #include "Hacl_Hash.h"
@@ -226,10 +226,9 @@ u64 Hacl_P256_ecp256dh_i(u8 *result, u8 *scalar);
 */
 u64 Hacl_P256_ecp256dh_r(u8 *result, u8 *pubKey, u8 *scalar);
 
-#define __Hacl_P256_H_DEFINED
-#endif
-
 #if defined(__cplusplus)
 }
 #endif
 
+#define __Hacl_P256_H_DEFINED
+#endif

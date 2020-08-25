@@ -22,6 +22,9 @@
  */
 
 
+#ifndef __EverCrypt_CTR_H
+#define __EverCrypt_CTR_H
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -32,9 +35,6 @@ extern "C" {
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-
-#ifndef __EverCrypt_CTR_H
-#define __EverCrypt_CTR_H
 
 #include "Hacl_Chacha20.h"
 #include "Hacl_Kremlib.h"
@@ -109,10 +109,9 @@ void EverCrypt_CTR_update_block(EverCrypt_CTR_state_s *p, uint8_t *dst, uint8_t 
 
 void EverCrypt_CTR_free(EverCrypt_CTR_state_s *p);
 
-#define __EverCrypt_CTR_H_DEFINED
-#endif
-
 #if defined(__cplusplus)
 }
 #endif
 
+#define __EverCrypt_CTR_H_DEFINED
+#endif

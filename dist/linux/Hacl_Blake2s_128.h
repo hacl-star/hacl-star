@@ -22,6 +22,9 @@
  */
 
 
+#ifndef __Hacl_Blake2s_128_H
+#define __Hacl_Blake2s_128_H
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -33,9 +36,6 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
-#ifndef __Hacl_Blake2s_128_H
-#define __Hacl_Blake2s_128_H
-
 #include "Hacl_Kremlib.h"
 #include "Lib_Memzero0.h"
 #include "Hacl_Blake2b_32.h"
@@ -43,10 +43,9 @@ extern "C" {
 
 void Hacl_Blake2s_128_blake2s(u32 nn, u8 *output, u32 ll, u8 *d, u32 kk, u8 *k);
 
-#define __Hacl_Blake2s_128_H_DEFINED
-#endif
-
 #if defined(__cplusplus)
 }
 #endif
 
+#define __Hacl_Blake2s_128_H_DEFINED
+#endif

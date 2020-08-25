@@ -22,6 +22,9 @@
  */
 
 
+#ifndef __Lib_Memzero0_H
+#define __Lib_Memzero0_H
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -34,9 +37,6 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
-#ifndef __Lib_Memzero0_H
-#define __Lib_Memzero0_H
-
 
 
 /* SNIPPET_START: Lib_Memzero0_memzero */
@@ -45,10 +45,9 @@ extern void Lib_Memzero0_memzero(void *x0, uint64_t x1);
 
 /* SNIPPET_END: Lib_Memzero0_memzero */
 
-#define __Lib_Memzero0_H_DEFINED
-#endif
-
 #if defined(__cplusplus)
 }
 #endif
 
+#define __Lib_Memzero0_H_DEFINED
+#endif

@@ -22,6 +22,9 @@
  */
 
 
+#ifndef __EverCrypt_Hash_H
+#define __EverCrypt_Hash_H
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -32,9 +35,6 @@ extern "C" {
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-
-#ifndef __EverCrypt_Hash_H
-#define __EverCrypt_Hash_H
 
 #include "Hacl_Kremlib.h"
 #include "Vale.h"
@@ -256,10 +256,9 @@ EverCrypt_Hash_Incremental_finish(
 void
 EverCrypt_Hash_Incremental_free(Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *s);
 
-#define __EverCrypt_Hash_H_DEFINED
-#endif
-
 #if defined(__cplusplus)
 }
 #endif
 
+#define __EverCrypt_Hash_H_DEFINED
+#endif

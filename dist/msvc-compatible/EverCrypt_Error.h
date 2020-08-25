@@ -22,6 +22,9 @@
  */
 
 
+#ifndef __EverCrypt_Error_H
+#define __EverCrypt_Error_H
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -33,9 +36,6 @@ extern "C" {
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-
-#ifndef __EverCrypt_Error_H
-#define __EverCrypt_Error_H
 
 
 
@@ -60,10 +60,9 @@ bool EverCrypt_Error_uu___is_InvalidIVLength(EverCrypt_Error_error_code projecte
 
 bool EverCrypt_Error_uu___is_DecodeError(EverCrypt_Error_error_code projectee);
 
-#define __EverCrypt_Error_H_DEFINED
-#endif
-
 #if defined(__cplusplus)
 }
 #endif
 
+#define __EverCrypt_Error_H_DEFINED
+#endif

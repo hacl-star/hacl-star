@@ -22,6 +22,9 @@
  */
 
 
+#ifndef __EverCrypt_Chacha20Poly1305_H
+#define __EverCrypt_Chacha20Poly1305_H
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -33,9 +36,6 @@ extern "C" {
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-
-#ifndef __EverCrypt_Chacha20Poly1305_H
-#define __EverCrypt_Chacha20Poly1305_H
 
 #include "EverCrypt_AutoConfig2.h"
 #include "Hacl_Chacha20Poly1305_128.h"
@@ -74,10 +74,9 @@ EverCrypt_Chacha20Poly1305_aead_decrypt(
 
 /* SNIPPET_END: EverCrypt_Chacha20Poly1305_aead_decrypt */
 
-#define __EverCrypt_Chacha20Poly1305_H_DEFINED
-#endif
-
 #if defined(__cplusplus)
 }
 #endif
 
+#define __EverCrypt_Chacha20Poly1305_H_DEFINED
+#endif

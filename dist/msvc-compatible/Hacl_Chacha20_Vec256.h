@@ -22,6 +22,9 @@
  */
 
 
+#ifndef __Hacl_Chacha20_Vec256_H
+#define __Hacl_Chacha20_Vec256_H
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -33,9 +36,6 @@ extern "C" {
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-
-#ifndef __Hacl_Chacha20_Vec256_H
-#define __Hacl_Chacha20_Vec256_H
 
 #include "Hacl_Chacha20.h"
 #include "Hacl_Kremlib.h"
@@ -60,10 +60,9 @@ Hacl_Chacha20_Vec256_chacha20_decrypt_256(
   uint32_t ctr
 );
 
-#define __Hacl_Chacha20_Vec256_H_DEFINED
-#endif
-
 #if defined(__cplusplus)
 }
 #endif
 
+#define __Hacl_Chacha20_Vec256_H_DEFINED
+#endif

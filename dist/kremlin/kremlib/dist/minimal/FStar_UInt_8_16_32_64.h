@@ -3,6 +3,9 @@
   Licensed under the Apache 2.0 License.
 */
 
+
+#ifndef __FStar_UInt_8_16_32_64_H
+#define __FStar_UInt_8_16_32_64_H
 #include <inttypes.h>
 #include <stdbool.h>
 #include "kremlin/internal/compat.h"
@@ -10,9 +13,6 @@
 #include "kremlin/internal/types.h"
 #include "kremlin/internal/target.h"
 
-
-#ifndef __FStar_UInt_8_16_32_64_H
-#define __FStar_UInt_8_16_32_64_H
 
 
 
@@ -193,6 +193,7 @@ extern Prims_string FStar_UInt8_to_string_hex_pad(uint8_t uu___);
 extern uint8_t FStar_UInt8_of_string(Prims_string uu___);
 
 typedef uint8_t FStar_UInt8_byte;
+
 
 #define __FStar_UInt_8_16_32_64_H_DEFINED
 #endif

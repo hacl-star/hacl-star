@@ -22,6 +22,9 @@
  */
 
 
+#ifndef __Hacl_Hash_H
+#define __Hacl_Hash_H
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -32,9 +35,6 @@ extern "C" {
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-
-#ifndef __Hacl_Hash_H
-#define __Hacl_Hash_H
 
 #include "Hacl_Kremlib.h"
 #include "Hacl_Spec.h"
@@ -131,10 +131,9 @@ u32 Hacl_Hash_Definitions_hash_word_len(Spec_Hash_Definitions_hash_alg a);
 
 u32 Hacl_Hash_Definitions_hash_len(Spec_Hash_Definitions_hash_alg a);
 
-#define __Hacl_Hash_H_DEFINED
-#endif
-
 #if defined(__cplusplus)
 }
 #endif
 
+#define __Hacl_Hash_H_DEFINED
+#endif

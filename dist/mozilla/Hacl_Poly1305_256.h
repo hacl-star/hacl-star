@@ -22,6 +22,9 @@
  */
 
 
+#ifndef __Hacl_Poly1305_256_H
+#define __Hacl_Poly1305_256_H
+
 #if defined(__cplusplus)
 extern "C" {
 #endif
@@ -32,9 +35,6 @@ extern "C" {
 #include <string.h>
 #include <stdbool.h>
 
-
-#ifndef __Hacl_Poly1305_256_H
-#define __Hacl_Poly1305_256_H
 
 #include "Hacl_Kremlib.h"
 
@@ -71,10 +71,9 @@ Hacl_Poly1305_256_poly1305_finish(
 
 void Hacl_Poly1305_256_poly1305_mac(uint8_t *tag, uint32_t len, uint8_t *text, uint8_t *key);
 
-#define __Hacl_Poly1305_256_H_DEFINED
-#endif
-
 #if defined(__cplusplus)
 }
 #endif
 
+#define __Hacl_Poly1305_256_H_DEFINED
+#endif
