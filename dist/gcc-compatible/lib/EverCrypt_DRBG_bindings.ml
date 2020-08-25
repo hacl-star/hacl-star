@@ -38,22 +38,6 @@ module Bindings(F:Cstubs.FOREIGN) =
     type everCrypt_DRBG_state_s = [ `everCrypt_DRBG_state_s ] structure
     let (everCrypt_DRBG_state_s : [ `everCrypt_DRBG_state_s ] structure typ)
       = structure "EverCrypt_DRBG_state_s_s"
-    let everCrypt_DRBG_state_s_tag =
-      field everCrypt_DRBG_state_s "tag" everCrypt_DRBG_state_s_tags
-    type everCrypt_DRBG_state_s_val = [ `anonymous ] union
-    let (everCrypt_DRBG_state_s_val : [ `anonymous ] union typ) = union ""
-    let everCrypt_DRBG_state_s_val_case_SHA1_s =
-      field everCrypt_DRBG_state_s_val "case_SHA1_s" hacl_HMAC_DRBG_state
-    let everCrypt_DRBG_state_s_val_case_SHA2_256_s =
-      field everCrypt_DRBG_state_s_val "case_SHA2_256_s" hacl_HMAC_DRBG_state
-    let everCrypt_DRBG_state_s_val_case_SHA2_384_s =
-      field everCrypt_DRBG_state_s_val "case_SHA2_384_s" hacl_HMAC_DRBG_state
-    let everCrypt_DRBG_state_s_val_case_SHA2_512_s =
-      field everCrypt_DRBG_state_s_val "case_SHA2_512_s" hacl_HMAC_DRBG_state
-    let _ = seal everCrypt_DRBG_state_s_val
-    let everCrypt_DRBG_state_s_u =
-      field everCrypt_DRBG_state_s "" everCrypt_DRBG_state_s_val
-    let _ = seal everCrypt_DRBG_state_s
     let everCrypt_DRBG_create =
       foreign "EverCrypt_DRBG_create"
         (spec_Hash_Definitions_hash_alg @->
