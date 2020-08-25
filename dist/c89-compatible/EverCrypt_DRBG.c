@@ -1286,10 +1286,10 @@ EverCrypt_DRBG_generate_sha1(
   }
   {
     uint32_t entropy_input_len = Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_SHA1);
-    bool ok;
+    bool ok0;
     if (additional_input_len > Hacl_HMAC_DRBG_max_additional_input_length)
     {
-      ok = false;
+      ok0 = false;
     }
     else
     {
@@ -1299,9 +1299,9 @@ EverCrypt_DRBG_generate_sha1(
         uint8_t entropy_input[entropy_input_len1];
         memset(entropy_input, 0U, entropy_input_len1 * sizeof (uint8_t));
         {
-          bool ok1 = Lib_RandomBuffer_System_randombytes(entropy_input, entropy_input_len1);
+          bool ok = Lib_RandomBuffer_System_randombytes(entropy_input, entropy_input_len1);
           bool result;
-          if (!ok1)
+          if (!ok)
           {
             result = false;
           }
@@ -1384,11 +1384,11 @@ EverCrypt_DRBG_generate_sha1(
               }
             }
           }
-          ok = result;
+          ok0 = result;
         }
       }
     }
-    if (!ok)
+    if (!ok0)
     {
       return false;
     }
@@ -1569,10 +1569,10 @@ EverCrypt_DRBG_generate_sha2_256(
   }
   {
     uint32_t entropy_input_len = Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_SHA2_256);
-    bool ok;
+    bool ok0;
     if (additional_input_len > Hacl_HMAC_DRBG_max_additional_input_length)
     {
-      ok = false;
+      ok0 = false;
     }
     else
     {
@@ -1582,9 +1582,9 @@ EverCrypt_DRBG_generate_sha2_256(
         uint8_t entropy_input[entropy_input_len1];
         memset(entropy_input, 0U, entropy_input_len1 * sizeof (uint8_t));
         {
-          bool ok1 = Lib_RandomBuffer_System_randombytes(entropy_input, entropy_input_len1);
+          bool ok = Lib_RandomBuffer_System_randombytes(entropy_input, entropy_input_len1);
           bool result;
-          if (!ok1)
+          if (!ok)
           {
             result = false;
           }
@@ -1675,11 +1675,11 @@ EverCrypt_DRBG_generate_sha2_256(
               }
             }
           }
-          ok = result;
+          ok0 = result;
         }
       }
     }
-    if (!ok)
+    if (!ok0)
     {
       return false;
     }
@@ -1860,10 +1860,10 @@ EverCrypt_DRBG_generate_sha2_384(
   }
   {
     uint32_t entropy_input_len = Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_SHA2_384);
-    bool ok;
+    bool ok0;
     if (additional_input_len > Hacl_HMAC_DRBG_max_additional_input_length)
     {
-      ok = false;
+      ok0 = false;
     }
     else
     {
@@ -1873,9 +1873,9 @@ EverCrypt_DRBG_generate_sha2_384(
         uint8_t entropy_input[entropy_input_len1];
         memset(entropy_input, 0U, entropy_input_len1 * sizeof (uint8_t));
         {
-          bool ok1 = Lib_RandomBuffer_System_randombytes(entropy_input, entropy_input_len1);
+          bool ok = Lib_RandomBuffer_System_randombytes(entropy_input, entropy_input_len1);
           bool result;
-          if (!ok1)
+          if (!ok)
           {
             result = false;
           }
@@ -1966,11 +1966,11 @@ EverCrypt_DRBG_generate_sha2_384(
               }
             }
           }
-          ok = result;
+          ok0 = result;
         }
       }
     }
-    if (!ok)
+    if (!ok0)
     {
       return false;
     }
@@ -2151,10 +2151,10 @@ EverCrypt_DRBG_generate_sha2_512(
   }
   {
     uint32_t entropy_input_len = Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_SHA2_512);
-    bool ok;
+    bool ok0;
     if (additional_input_len > Hacl_HMAC_DRBG_max_additional_input_length)
     {
-      ok = false;
+      ok0 = false;
     }
     else
     {
@@ -2164,9 +2164,9 @@ EverCrypt_DRBG_generate_sha2_512(
         uint8_t entropy_input[entropy_input_len1];
         memset(entropy_input, 0U, entropy_input_len1 * sizeof (uint8_t));
         {
-          bool ok1 = Lib_RandomBuffer_System_randombytes(entropy_input, entropy_input_len1);
+          bool ok = Lib_RandomBuffer_System_randombytes(entropy_input, entropy_input_len1);
           bool result;
-          if (!ok1)
+          if (!ok)
           {
             result = false;
           }
@@ -2257,11 +2257,11 @@ EverCrypt_DRBG_generate_sha2_512(
               }
             }
           }
-          ok = result;
+          ok0 = result;
         }
       }
     }
-    if (!ok)
+    if (!ok0)
     {
       return false;
     }

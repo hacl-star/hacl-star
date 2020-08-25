@@ -1606,22 +1606,22 @@ static bool recover_x(u64 *x, u64 *y, u64 sign)
 {
   u64 tmp[20U] = { 0U };
   u64 *x2 = tmp;
-  u64 x0 = y[0U];
+  u64 x00 = y[0U];
   u64 x1 = y[1U];
   u64 x21 = y[2U];
   u64 x30 = y[3U];
   u64 x4 = y[4U];
   bool
   b =
-    x0
+    x00
     >= (u64)0x7ffffffffffedU
     && x1 == (u64)0x7ffffffffffffU
     && x21 == (u64)0x7ffffffffffffU
     && x30 == (u64)0x7ffffffffffffU
     && x4 == (u64)0x7ffffffffffffU;
-  bool res1;
+  bool res;
   if (b)
-    res1 = false;
+    res = false;
   else
   {
     u64 tmp1[25U] = { 0U };
@@ -1660,9 +1660,9 @@ static bool recover_x(u64 *x, u64 *y, u64 sign)
       else
         z = (u8)2U;
       if (z == (u8)0U)
-        res1 = false;
+        res = false;
       else if (z == (u8)1U)
-        res1 = true;
+        res = true;
       else
       {
         u64 *x210 = tmp;
@@ -1692,16 +1692,16 @@ static bool recover_x(u64 *x, u64 *y, u64 sign)
             {
               bool z1 = is_0(t1);
               if (z1 == false)
-                res1 = false;
+                res = false;
               else
               {
                 u64 *x32 = tmp + (u32)5U;
                 u64 *t0 = tmp + (u32)10U;
                 reduce(x32);
                 {
-                  u64 x01 = x32[0U];
-                  u64 x00 = x01 & (u64)1U;
-                  if (!(x00 == sign))
+                  u64 x0 = x32[0U];
+                  u64 x01 = x0 & (u64)1U;
+                  if (!(x01 == sign))
                   {
                     t0[0U] = (u64)0U;
                     t0[1U] = (u64)0U;
@@ -1713,7 +1713,7 @@ static bool recover_x(u64 *x, u64 *y, u64 sign)
                     reduce(x32);
                   }
                   memcpy(x, x32, (u32)5U * sizeof (u64));
-                  res1 = true;
+                  res = true;
                 }
               }
             }
@@ -1723,8 +1723,8 @@ static bool recover_x(u64 *x, u64 *y, u64 sign)
     }
   }
   {
-    bool res = res1;
-    return res;
+    bool res0 = res;
+    return res0;
   }
 }
 
@@ -1737,12 +1737,12 @@ static bool point_decompress(u64 *out, u8 *s)
   u8 z0 = s31 >> (u32)7U;
   u64 sign = (u64)z0;
   bool z;
-  bool res1;
+  bool res0;
   bool res;
   load_51(y, s);
   z = recover_x(x, y, sign);
   if (z == false)
-    res1 = false;
+    res0 = false;
   else
   {
     u64 *outx = out;
@@ -1757,9 +1757,9 @@ static bool point_decompress(u64 *out, u8 *s)
     outz[3U] = (u64)0U;
     outz[4U] = (u64)0U;
     fmul(outt, x, y);
-    res1 = true;
+    res0 = true;
   }
-  res = res1;
+  res = res0;
   return res;
 }
 
@@ -1857,7 +1857,7 @@ bool Hacl_Ed25519_verify(u8 *pub, u32 len, u8 *msg, u8 *signature)
   u64 *a_ = tmp;
   u64 *r_ = tmp + (u32)20U;
   bool b = point_decompress(a_, pub);
-  bool res1;
+  bool res;
   if (b)
   {
     u8 *rs = signature;
@@ -1872,7 +1872,7 @@ bool Hacl_Ed25519_verify(u8 *pub, u32 len, u8 *msg, u8 *signature)
       {
         bool b__ = gte_q(s1);
         if (b__)
-          res1 = false;
+          res = false;
         else
         {
           u64 r_2[5U] = { 0U };
@@ -1888,22 +1888,22 @@ bool Hacl_Ed25519_verify(u8 *pub, u32 len, u8 *msg, u8 *signature)
             point_mul(hA, tmp_, a_1);
             point_add(rhA, r_1, hA);
             {
-              bool b2 = point_equal(sB, rhA);
-              bool b1 = b2;
-              res1 = b1;
+              bool b1 = point_equal(sB, rhA);
+              bool b10 = b1;
+              res = b10;
             }
           }
         }
       }
     }
     else
-      res1 = false;
+      res = false;
   }
   else
-    res1 = false;
+    res = false;
   {
-    bool res = res1;
-    return res;
+    bool res0 = res;
+    return res0;
   }
 }
 

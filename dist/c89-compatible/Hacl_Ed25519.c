@@ -1864,23 +1864,23 @@ static bool recover_x(uint64_t *x, uint64_t *y, uint64_t sign)
 {
   uint64_t tmp[20U] = { 0U };
   uint64_t *x2 = tmp;
-  uint64_t x0 = y[0U];
+  uint64_t x00 = y[0U];
   uint64_t x1 = y[1U];
   uint64_t x21 = y[2U];
   uint64_t x30 = y[3U];
   uint64_t x4 = y[4U];
   bool
   b =
-    x0
+    x00
     >= (uint64_t)0x7ffffffffffedU
     && x1 == (uint64_t)0x7ffffffffffffU
     && x21 == (uint64_t)0x7ffffffffffffU
     && x30 == (uint64_t)0x7ffffffffffffU
     && x4 == (uint64_t)0x7ffffffffffffU;
-  bool res1;
+  bool res;
   if (b)
   {
-    res1 = false;
+    res = false;
   }
   else
   {
@@ -1927,11 +1927,11 @@ static bool recover_x(uint64_t *x, uint64_t *y, uint64_t sign)
       }
       if (z == (uint8_t)0U)
       {
-        res1 = false;
+        res = false;
       }
       else if (z == (uint8_t)1U)
       {
-        res1 = true;
+        res = true;
       }
       else
       {
@@ -1965,7 +1965,7 @@ static bool recover_x(uint64_t *x, uint64_t *y, uint64_t sign)
               bool z1 = is_0(t1);
               if (z1 == false)
               {
-                res1 = false;
+                res = false;
               }
               else
               {
@@ -1973,9 +1973,9 @@ static bool recover_x(uint64_t *x, uint64_t *y, uint64_t sign)
                 uint64_t *t0 = tmp + (uint32_t)10U;
                 reduce(x32);
                 {
-                  uint64_t x01 = x32[0U];
-                  uint64_t x00 = x01 & (uint64_t)1U;
-                  if (!(x00 == sign))
+                  uint64_t x0 = x32[0U];
+                  uint64_t x01 = x0 & (uint64_t)1U;
+                  if (!(x01 == sign))
                   {
                     t0[0U] = (uint64_t)0U;
                     t0[1U] = (uint64_t)0U;
@@ -1987,7 +1987,7 @@ static bool recover_x(uint64_t *x, uint64_t *y, uint64_t sign)
                     reduce(x32);
                   }
                   memcpy(x, x32, (uint32_t)5U * sizeof (uint64_t));
-                  res1 = true;
+                  res = true;
                 }
               }
             }
@@ -1997,8 +1997,8 @@ static bool recover_x(uint64_t *x, uint64_t *y, uint64_t sign)
     }
   }
   {
-    bool res = res1;
-    return res;
+    bool res0 = res;
+    return res0;
   }
 }
 
@@ -2011,13 +2011,13 @@ static bool point_decompress(uint64_t *out, uint8_t *s)
   uint8_t z0 = s31 >> (uint32_t)7U;
   uint64_t sign = (uint64_t)z0;
   bool z;
-  bool res1;
+  bool res0;
   bool res;
   load_51(y, s);
   z = recover_x(x, y, sign);
   if (z == false)
   {
-    res1 = false;
+    res0 = false;
   }
   else
   {
@@ -2033,9 +2033,9 @@ static bool point_decompress(uint64_t *out, uint8_t *s)
     outz[3U] = (uint64_t)0U;
     outz[4U] = (uint64_t)0U;
     fmul0(outt, x, y);
-    res1 = true;
+    res0 = true;
   }
-  res = res1;
+  res = res0;
   return res;
 }
 
@@ -2151,7 +2151,7 @@ bool Hacl_Ed25519_verify(uint8_t *pub, uint32_t len, uint8_t *msg, uint8_t *sign
   uint64_t *a_ = tmp;
   uint64_t *r_ = tmp + (uint32_t)20U;
   bool b = point_decompress(a_, pub);
-  bool res1;
+  bool res;
   if (b)
   {
     uint8_t *rs = signature;
@@ -2167,7 +2167,7 @@ bool Hacl_Ed25519_verify(uint8_t *pub, uint32_t len, uint8_t *msg, uint8_t *sign
         bool b__ = gte_q(s1);
         if (b__)
         {
-          res1 = false;
+          res = false;
         }
         else
         {
@@ -2184,9 +2184,9 @@ bool Hacl_Ed25519_verify(uint8_t *pub, uint32_t len, uint8_t *msg, uint8_t *sign
             point_mul(hA, tmp_, a_1);
             point_add(rhA, r_1, hA);
             {
-              bool b2 = point_equal(sB, rhA);
-              bool b1 = b2;
-              res1 = b1;
+              bool b1 = point_equal(sB, rhA);
+              bool b10 = b1;
+              res = b10;
             }
           }
         }
@@ -2194,16 +2194,16 @@ bool Hacl_Ed25519_verify(uint8_t *pub, uint32_t len, uint8_t *msg, uint8_t *sign
     }
     else
     {
-      res1 = false;
+      res = false;
     }
   }
   else
   {
-    res1 = false;
+    res = false;
   }
   {
-    bool res = res1;
-    return res;
+    bool res0 = res;
+    return res0;
   }
 }
 
