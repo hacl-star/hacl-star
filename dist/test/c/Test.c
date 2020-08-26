@@ -10554,7 +10554,7 @@ static void test_one_hmac_drbg(hmac_drbg_vector vec)
     uint8_t buf29[48U];
     uint8_t buf30[32U];
     uint8_t buf[20U];
-    state_s0 st1;
+    state_s0 st;
     switch (a)
     {
       case SHA1:
@@ -10658,7 +10658,7 @@ static void test_one_hmac_drbg(hmac_drbg_vector vec)
               }
           }
           ctr0 = (uint32_t)1U;
-          st1 =
+          st =
             (
               (state_s0){
                 .tag = SHA1_s0,
@@ -10768,7 +10768,7 @@ static void test_one_hmac_drbg(hmac_drbg_vector vec)
               }
           }
           ctr1 = (uint32_t)1U;
-          st1 =
+          st =
             (
               (state_s0){
                 .tag = SHA2_256_s0,
@@ -10878,7 +10878,7 @@ static void test_one_hmac_drbg(hmac_drbg_vector vec)
               }
           }
           ctr2 = (uint32_t)1U;
-          st1 =
+          st =
             (
               (state_s0){
                 .tag = SHA2_384_s0,
@@ -10988,7 +10988,7 @@ static void test_one_hmac_drbg(hmac_drbg_vector vec)
               }
           }
           ctr = (uint32_t)1U;
-          st1 =
+          st =
             (
               (state_s0){
                 .tag = SHA2_512_s0,
@@ -11003,17 +11003,17 @@ static void test_one_hmac_drbg(hmac_drbg_vector vec)
           KRML_HOST_EXIT(253U);
         }
     }
-    state_s0 st = st1;
-    bool ok = EverCrypt_DRBG_instantiate(&st, personalization_string, personalization_string_len);
+    state_s0 st0 = st;
+    bool ok = EverCrypt_DRBG_instantiate(&st0, personalization_string, personalization_string_len);
     if (ok)
     {
-      bool ok1 = EverCrypt_DRBG_reseed(&st, additional_input_reseed, additional_input_reseed_len);
+      bool ok1 = EverCrypt_DRBG_reseed(&st0, additional_input_reseed, additional_input_reseed_len);
       if (ok1)
       {
         bool
         ok2 =
           EverCrypt_DRBG_generate(output,
-            &st,
+            &st0,
             returned_bits_len,
             additional_input_1,
             additional_input_1_len);
@@ -11022,7 +11022,7 @@ static void test_one_hmac_drbg(hmac_drbg_vector vec)
           bool
           ok3 =
             EverCrypt_DRBG_generate(output,
-              &st,
+              &st0,
               returned_bits_len,
               additional_input_2,
               additional_input_2_len);

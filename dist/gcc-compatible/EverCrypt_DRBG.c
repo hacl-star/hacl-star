@@ -975,10 +975,10 @@ EverCrypt_DRBG_generate_sha1(
     return false;
   }
   uint32_t entropy_input_len = Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_SHA1);
-  bool ok;
+  bool ok0;
   if (additional_input_len > Hacl_HMAC_DRBG_max_additional_input_length)
   {
-    ok = false;
+    ok0 = false;
   }
   else
   {
@@ -986,9 +986,9 @@ EverCrypt_DRBG_generate_sha1(
     KRML_CHECK_SIZE(sizeof (uint8_t), entropy_input_len1);
     uint8_t entropy_input[entropy_input_len1];
     memset(entropy_input, 0U, entropy_input_len1 * sizeof (uint8_t));
-    bool ok1 = Lib_RandomBuffer_System_randombytes(entropy_input, entropy_input_len1);
+    bool ok = Lib_RandomBuffer_System_randombytes(entropy_input, entropy_input_len1);
     bool result;
-    if (!ok1)
+    if (!ok)
     {
       result = false;
     }
@@ -1054,9 +1054,9 @@ EverCrypt_DRBG_generate_sha1(
       ctr[0U] = (uint32_t)1U;
       result = true;
     }
-    ok = result;
+    ok0 = result;
   }
-  if (!ok)
+  if (!ok0)
   {
     return false;
   }
@@ -1196,10 +1196,10 @@ EverCrypt_DRBG_generate_sha2_256(
     return false;
   }
   uint32_t entropy_input_len = Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_SHA2_256);
-  bool ok;
+  bool ok0;
   if (additional_input_len > Hacl_HMAC_DRBG_max_additional_input_length)
   {
-    ok = false;
+    ok0 = false;
   }
   else
   {
@@ -1207,9 +1207,9 @@ EverCrypt_DRBG_generate_sha2_256(
     KRML_CHECK_SIZE(sizeof (uint8_t), entropy_input_len1);
     uint8_t entropy_input[entropy_input_len1];
     memset(entropy_input, 0U, entropy_input_len1 * sizeof (uint8_t));
-    bool ok1 = Lib_RandomBuffer_System_randombytes(entropy_input, entropy_input_len1);
+    bool ok = Lib_RandomBuffer_System_randombytes(entropy_input, entropy_input_len1);
     bool result;
-    if (!ok1)
+    if (!ok)
     {
       result = false;
     }
@@ -1275,9 +1275,9 @@ EverCrypt_DRBG_generate_sha2_256(
       ctr[0U] = (uint32_t)1U;
       result = true;
     }
-    ok = result;
+    ok0 = result;
   }
-  if (!ok)
+  if (!ok0)
   {
     return false;
   }
@@ -1417,10 +1417,10 @@ EverCrypt_DRBG_generate_sha2_384(
     return false;
   }
   uint32_t entropy_input_len = Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_SHA2_384);
-  bool ok;
+  bool ok0;
   if (additional_input_len > Hacl_HMAC_DRBG_max_additional_input_length)
   {
-    ok = false;
+    ok0 = false;
   }
   else
   {
@@ -1428,9 +1428,9 @@ EverCrypt_DRBG_generate_sha2_384(
     KRML_CHECK_SIZE(sizeof (uint8_t), entropy_input_len1);
     uint8_t entropy_input[entropy_input_len1];
     memset(entropy_input, 0U, entropy_input_len1 * sizeof (uint8_t));
-    bool ok1 = Lib_RandomBuffer_System_randombytes(entropy_input, entropy_input_len1);
+    bool ok = Lib_RandomBuffer_System_randombytes(entropy_input, entropy_input_len1);
     bool result;
-    if (!ok1)
+    if (!ok)
     {
       result = false;
     }
@@ -1496,9 +1496,9 @@ EverCrypt_DRBG_generate_sha2_384(
       ctr[0U] = (uint32_t)1U;
       result = true;
     }
-    ok = result;
+    ok0 = result;
   }
-  if (!ok)
+  if (!ok0)
   {
     return false;
   }
@@ -1638,10 +1638,10 @@ EverCrypt_DRBG_generate_sha2_512(
     return false;
   }
   uint32_t entropy_input_len = Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_SHA2_512);
-  bool ok;
+  bool ok0;
   if (additional_input_len > Hacl_HMAC_DRBG_max_additional_input_length)
   {
-    ok = false;
+    ok0 = false;
   }
   else
   {
@@ -1649,9 +1649,9 @@ EverCrypt_DRBG_generate_sha2_512(
     KRML_CHECK_SIZE(sizeof (uint8_t), entropy_input_len1);
     uint8_t entropy_input[entropy_input_len1];
     memset(entropy_input, 0U, entropy_input_len1 * sizeof (uint8_t));
-    bool ok1 = Lib_RandomBuffer_System_randombytes(entropy_input, entropy_input_len1);
+    bool ok = Lib_RandomBuffer_System_randombytes(entropy_input, entropy_input_len1);
     bool result;
-    if (!ok1)
+    if (!ok)
     {
       result = false;
     }
@@ -1717,9 +1717,9 @@ EverCrypt_DRBG_generate_sha2_512(
       ctr[0U] = (uint32_t)1U;
       result = true;
     }
-    ok = result;
+    ok0 = result;
   }
-  if (!ok)
+  if (!ok0)
   {
     return false;
   }

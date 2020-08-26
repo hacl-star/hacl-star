@@ -95,13 +95,13 @@ secretbox_open_detached(
   uint8_t *mkey = xkeys + (uint32_t)32U;
   uint8_t tag_[16U] = { 0U };
   Hacl_Poly1305_32_poly1305_mac(tag_, mlen, c, mkey);
-  uint8_t res1 = (uint8_t)255U;
+  uint8_t res = (uint8_t)255U;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
   {
     uint8_t uu____0 = FStar_UInt8_eq_mask(tag[i], tag_[i]);
-    res1 = uu____0 & res1;
+    res = uu____0 & res;
   }
-  uint8_t z = res1;
+  uint8_t z = res;
   if (z == (uint8_t)255U)
   {
     uint8_t *subkey = xkeys;

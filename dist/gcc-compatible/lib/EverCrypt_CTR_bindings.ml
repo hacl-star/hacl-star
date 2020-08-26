@@ -10,17 +10,6 @@ module Bindings(F:Cstubs.FOREIGN) =
     type everCrypt_CTR_state_s = [ `everCrypt_CTR_state_s ] structure
     let (everCrypt_CTR_state_s : [ `everCrypt_CTR_state_s ] structure typ) =
       structure "EverCrypt_CTR_state_s_s"
-    let everCrypt_CTR_state_s_i =
-      field everCrypt_CTR_state_s "i" spec_Cipher_Expansion_impl
-    let everCrypt_CTR_state_s_iv =
-      field everCrypt_CTR_state_s "iv" (ptr uint8_t)
-    let everCrypt_CTR_state_s_iv_len =
-      field everCrypt_CTR_state_s "iv_len" uint32_t
-    let everCrypt_CTR_state_s_xkey =
-      field everCrypt_CTR_state_s "xkey" (ptr uint8_t)
-    let everCrypt_CTR_state_s_ctr =
-      field everCrypt_CTR_state_s "ctr" uint32_t
-    let _ = seal everCrypt_CTR_state_s
     let everCrypt_CTR_xor8 =
       foreign "EverCrypt_CTR_xor8"
         (uint8_t @-> (uint8_t @-> (returning uint8_t)))

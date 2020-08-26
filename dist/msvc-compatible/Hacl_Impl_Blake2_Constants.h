@@ -89,16 +89,6 @@ Hacl_Impl_Blake2_Constants_ivTable_B[8U] =
     (uint64_t)0x1F83D9ABFB41BD6BU, (uint64_t)0x5BE0CD19137E2179U
   };
 
-static const
-uint32_t
-Hacl_Impl_Blake2_Constants_rTable_S[4U] =
-  { (uint32_t)16U, (uint32_t)12U, (uint32_t)8U, (uint32_t)7U };
-
-static const
-uint32_t
-Hacl_Impl_Blake2_Constants_rTable_B[4U] =
-  { (uint32_t)32U, (uint32_t)24U, (uint32_t)16U, (uint32_t)63U };
-
 #if defined(__cplusplus)
 }
 #endif

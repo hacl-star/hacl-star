@@ -88,8 +88,8 @@ blake2b_update_block(
                 m_st[_i] = Lib_IntVector_Intrinsics_vec256_zero;
             }
             {
-              Lib_IntVector_Intrinsics_vec256 *r01 = m_st + (uint32_t)0U * (uint32_t)1U;
-              Lib_IntVector_Intrinsics_vec256 *r11 = m_st + (uint32_t)1U * (uint32_t)1U;
+              Lib_IntVector_Intrinsics_vec256 *r0 = m_st + (uint32_t)0U * (uint32_t)1U;
+              Lib_IntVector_Intrinsics_vec256 *r1 = m_st + (uint32_t)1U * (uint32_t)1U;
               Lib_IntVector_Intrinsics_vec256 *r21 = m_st + (uint32_t)2U * (uint32_t)1U;
               Lib_IntVector_Intrinsics_vec256 *r31 = m_st + (uint32_t)3U * (uint32_t)1U;
               uint32_t s0 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx];
@@ -108,8 +108,8 @@ blake2b_update_block(
               uint32_t s13 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)13U];
               uint32_t s14 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)14U];
               uint32_t s15 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)15U];
-              r01[0U] = Lib_IntVector_Intrinsics_vec256_load64s(m_w[s0], m_w[s2], m_w[s4], m_w[s6]);
-              r11[0U] = Lib_IntVector_Intrinsics_vec256_load64s(m_w[s1], m_w[s3], m_w[s5], m_w[s7]);
+              r0[0U] = Lib_IntVector_Intrinsics_vec256_load64s(m_w[s0], m_w[s2], m_w[s4], m_w[s6]);
+              r1[0U] = Lib_IntVector_Intrinsics_vec256_load64s(m_w[s1], m_w[s3], m_w[s5], m_w[s7]);
               r21[0U] =
                 Lib_IntVector_Intrinsics_vec256_load64s(m_w[s8],
                   m_w[s10],
@@ -129,10 +129,6 @@ blake2b_update_block(
                 uint32_t b0 = (uint32_t)1U;
                 uint32_t c0 = (uint32_t)2U;
                 uint32_t d10 = (uint32_t)3U;
-                uint32_t r02 = Hacl_Impl_Blake2_Constants_rTable_B[0U];
-                uint32_t r12 = Hacl_Impl_Blake2_Constants_rTable_B[1U];
-                uint32_t r22 = Hacl_Impl_Blake2_Constants_rTable_B[2U];
-                uint32_t r32 = Hacl_Impl_Blake2_Constants_rTable_B[3U];
                 Lib_IntVector_Intrinsics_vec256 *wv_a0 = wv + a * (uint32_t)1U;
                 Lib_IntVector_Intrinsics_vec256 *wv_b0 = wv + b0 * (uint32_t)1U;
                 wv_a0[0U] = Lib_IntVector_Intrinsics_vec256_add64(wv_a0[0U], wv_b0[0U]);
@@ -141,7 +137,9 @@ blake2b_update_block(
                   Lib_IntVector_Intrinsics_vec256 *wv_a1 = wv + d10 * (uint32_t)1U;
                   Lib_IntVector_Intrinsics_vec256 *wv_b1 = wv + a * (uint32_t)1U;
                   wv_a1[0U] = Lib_IntVector_Intrinsics_vec256_xor(wv_a1[0U], wv_b1[0U]);
-                  wv_a1[0U] = Lib_IntVector_Intrinsics_vec256_rotate_right64(wv_a1[0U], r02);
+                  wv_a1[0U] =
+                    Lib_IntVector_Intrinsics_vec256_rotate_right64(wv_a1[0U],
+                      (uint32_t)32U);
                   {
                     Lib_IntVector_Intrinsics_vec256 *wv_a2 = wv + c0 * (uint32_t)1U;
                     Lib_IntVector_Intrinsics_vec256 *wv_b2 = wv + d10 * (uint32_t)1U;
@@ -150,7 +148,9 @@ blake2b_update_block(
                       Lib_IntVector_Intrinsics_vec256 *wv_a3 = wv + b0 * (uint32_t)1U;
                       Lib_IntVector_Intrinsics_vec256 *wv_b3 = wv + c0 * (uint32_t)1U;
                       wv_a3[0U] = Lib_IntVector_Intrinsics_vec256_xor(wv_a3[0U], wv_b3[0U]);
-                      wv_a3[0U] = Lib_IntVector_Intrinsics_vec256_rotate_right64(wv_a3[0U], r12);
+                      wv_a3[0U] =
+                        Lib_IntVector_Intrinsics_vec256_rotate_right64(wv_a3[0U],
+                          (uint32_t)24U);
                       {
                         Lib_IntVector_Intrinsics_vec256 *wv_a4 = wv + a * (uint32_t)1U;
                         Lib_IntVector_Intrinsics_vec256 *wv_b4 = wv + b0 * (uint32_t)1U;
@@ -160,7 +160,9 @@ blake2b_update_block(
                           Lib_IntVector_Intrinsics_vec256 *wv_a5 = wv + d10 * (uint32_t)1U;
                           Lib_IntVector_Intrinsics_vec256 *wv_b5 = wv + a * (uint32_t)1U;
                           wv_a5[0U] = Lib_IntVector_Intrinsics_vec256_xor(wv_a5[0U], wv_b5[0U]);
-                          wv_a5[0U] = Lib_IntVector_Intrinsics_vec256_rotate_right64(wv_a5[0U], r22);
+                          wv_a5[0U] =
+                            Lib_IntVector_Intrinsics_vec256_rotate_right64(wv_a5[0U],
+                              (uint32_t)16U);
                           {
                             Lib_IntVector_Intrinsics_vec256 *wv_a6 = wv + c0 * (uint32_t)1U;
                             Lib_IntVector_Intrinsics_vec256 *wv_b6 = wv + d10 * (uint32_t)1U;
@@ -171,43 +173,39 @@ blake2b_update_block(
                               wv_a7[0U] = Lib_IntVector_Intrinsics_vec256_xor(wv_a7[0U], wv_b7[0U]);
                               wv_a7[0U] =
                                 Lib_IntVector_Intrinsics_vec256_rotate_right64(wv_a7[0U],
-                                  r32);
+                                  (uint32_t)63U);
                               {
                                 Lib_IntVector_Intrinsics_vec256
-                                *r13 = wv + (uint32_t)1U * (uint32_t)1U;
+                                *r11 = wv + (uint32_t)1U * (uint32_t)1U;
                                 Lib_IntVector_Intrinsics_vec256
-                                *r23 = wv + (uint32_t)2U * (uint32_t)1U;
+                                *r22 = wv + (uint32_t)2U * (uint32_t)1U;
                                 Lib_IntVector_Intrinsics_vec256
-                                *r33 = wv + (uint32_t)3U * (uint32_t)1U;
-                                Lib_IntVector_Intrinsics_vec256 v00 = r13[0U];
+                                *r32 = wv + (uint32_t)3U * (uint32_t)1U;
+                                Lib_IntVector_Intrinsics_vec256 v00 = r11[0U];
                                 Lib_IntVector_Intrinsics_vec256
                                 v1 =
                                   Lib_IntVector_Intrinsics_vec256_rotate_right_lanes64(v00,
                                     (uint32_t)1U);
-                                r13[0U] = v1;
+                                r11[0U] = v1;
                                 {
-                                  Lib_IntVector_Intrinsics_vec256 v01 = r23[0U];
+                                  Lib_IntVector_Intrinsics_vec256 v01 = r22[0U];
                                   Lib_IntVector_Intrinsics_vec256
                                   v10 =
                                     Lib_IntVector_Intrinsics_vec256_rotate_right_lanes64(v01,
                                       (uint32_t)2U);
-                                  r23[0U] = v10;
+                                  r22[0U] = v10;
                                   {
-                                    Lib_IntVector_Intrinsics_vec256 v02 = r33[0U];
+                                    Lib_IntVector_Intrinsics_vec256 v02 = r32[0U];
                                     Lib_IntVector_Intrinsics_vec256
                                     v11 =
                                       Lib_IntVector_Intrinsics_vec256_rotate_right_lanes64(v02,
                                         (uint32_t)3U);
-                                    r33[0U] = v11;
+                                    r32[0U] = v11;
                                     {
                                       uint32_t a0 = (uint32_t)0U;
                                       uint32_t b = (uint32_t)1U;
                                       uint32_t c = (uint32_t)2U;
                                       uint32_t d1 = (uint32_t)3U;
-                                      uint32_t r0 = Hacl_Impl_Blake2_Constants_rTable_B[0U];
-                                      uint32_t r1 = Hacl_Impl_Blake2_Constants_rTable_B[1U];
-                                      uint32_t r24 = Hacl_Impl_Blake2_Constants_rTable_B[2U];
-                                      uint32_t r34 = Hacl_Impl_Blake2_Constants_rTable_B[3U];
                                       Lib_IntVector_Intrinsics_vec256
                                       *wv_a = wv + a0 * (uint32_t)1U;
                                       Lib_IntVector_Intrinsics_vec256
@@ -228,7 +226,7 @@ blake2b_update_block(
                                             wv_b9[0U]);
                                         wv_a8[0U] =
                                           Lib_IntVector_Intrinsics_vec256_rotate_right64(wv_a8[0U],
-                                            r0);
+                                            (uint32_t)32U);
                                         {
                                           Lib_IntVector_Intrinsics_vec256
                                           *wv_a9 = wv + c * (uint32_t)1U;
@@ -247,7 +245,7 @@ blake2b_update_block(
                                                 wv_b11[0U]);
                                             wv_a10[0U] =
                                               Lib_IntVector_Intrinsics_vec256_rotate_right64(wv_a10[0U],
-                                                r1);
+                                                (uint32_t)24U);
                                             {
                                               Lib_IntVector_Intrinsics_vec256
                                               *wv_a11 = wv + a0 * (uint32_t)1U;
@@ -269,7 +267,7 @@ blake2b_update_block(
                                                     wv_b13[0U]);
                                                 wv_a12[0U] =
                                                   Lib_IntVector_Intrinsics_vec256_rotate_right64(wv_a12[0U],
-                                                    r24);
+                                                    (uint32_t)16U);
                                                 {
                                                   Lib_IntVector_Intrinsics_vec256
                                                   *wv_a13 = wv + c * (uint32_t)1U;
@@ -288,20 +286,20 @@ blake2b_update_block(
                                                         wv_b[0U]);
                                                     wv_a14[0U] =
                                                       Lib_IntVector_Intrinsics_vec256_rotate_right64(wv_a14[0U],
-                                                        r34);
+                                                        (uint32_t)63U);
                                                     {
                                                       Lib_IntVector_Intrinsics_vec256
-                                                      *r14 = wv + (uint32_t)1U * (uint32_t)1U;
+                                                      *r12 = wv + (uint32_t)1U * (uint32_t)1U;
                                                       Lib_IntVector_Intrinsics_vec256
                                                       *r2 = wv + (uint32_t)2U * (uint32_t)1U;
                                                       Lib_IntVector_Intrinsics_vec256
                                                       *r3 = wv + (uint32_t)3U * (uint32_t)1U;
-                                                      Lib_IntVector_Intrinsics_vec256 v0 = r14[0U];
+                                                      Lib_IntVector_Intrinsics_vec256 v0 = r12[0U];
                                                       Lib_IntVector_Intrinsics_vec256
                                                       v12 =
                                                         Lib_IntVector_Intrinsics_vec256_rotate_right_lanes64(v0,
                                                           (uint32_t)3U);
-                                                      r14[0U] = v12;
+                                                      r12[0U] = v12;
                                                       {
                                                         Lib_IntVector_Intrinsics_vec256
                                                         v03 = r2[0U];
@@ -399,8 +397,8 @@ Hacl_Blake2b_256_blake2b(
         {
           uint8_t b20[128U] = { 0U };
           Lib_IntVector_Intrinsics_vec256 *r0 = b + (uint32_t)0U * (uint32_t)1U;
-          Lib_IntVector_Intrinsics_vec256 *r11 = b + (uint32_t)1U * (uint32_t)1U;
-          Lib_IntVector_Intrinsics_vec256 *r21 = b + (uint32_t)2U * (uint32_t)1U;
+          Lib_IntVector_Intrinsics_vec256 *r1 = b + (uint32_t)1U * (uint32_t)1U;
+          Lib_IntVector_Intrinsics_vec256 *r2 = b + (uint32_t)2U * (uint32_t)1U;
           Lib_IntVector_Intrinsics_vec256 *r3 = b + (uint32_t)3U * (uint32_t)1U;
           uint64_t iv0 = Hacl_Impl_Blake2_Constants_ivTable_B[0U];
           uint64_t iv1 = Hacl_Impl_Blake2_Constants_ivTable_B[1U];
@@ -417,12 +415,12 @@ Hacl_Blake2b_256_blake2b(
           K___uint32_t_uint32_t scrut;
           uint32_t nb;
           uint32_t rem;
-          r21[0U] = Lib_IntVector_Intrinsics_vec256_load64s(iv0, iv1, iv2, iv3);
+          r2[0U] = Lib_IntVector_Intrinsics_vec256_load64s(iv0, iv1, iv2, iv3);
           r3[0U] = Lib_IntVector_Intrinsics_vec256_load64s(iv4, iv5, iv6, iv7);
           kk_shift_8 = (uint64_t)kk << (uint32_t)8U;
           iv0_ = iv0 ^ ((uint64_t)0x01010000U ^ (kk_shift_8 ^ (uint64_t)nn));
           r0[0U] = Lib_IntVector_Intrinsics_vec256_load64s(iv0_, iv1, iv2, iv3);
-          r11[0U] = Lib_IntVector_Intrinsics_vec256_load64s(iv4, iv5, iv6, iv7);
+          r1[0U] = Lib_IntVector_Intrinsics_vec256_load64s(iv4, iv5, iv6, iv7);
           if (!(kk == (uint32_t)0U))
           {
             memcpy(b20, k, kk * sizeof (uint8_t));
