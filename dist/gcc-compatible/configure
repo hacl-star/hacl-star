@@ -9,17 +9,11 @@ fi
 
 # XXX: Only some defaults for testing. Remove before merging
 # Get the toolchain at https://developer.android.com/ndk/downloads/
-if [[ $SYSROOT == "" ]]; then
-  SYSROOT="$NDK/toolchains/llvm/prebuilt/darwin-x86_64/sysroot"
-fi
-if [[ $NDK_TOOLCHAIN == "" ]]; then
-  NDK_TOOLCHAIN="$NDK/toolchains/llvm/prebuilt/darwin-x86_64"
-fi
-# Sample toolchain for Linux to ARM cross builds.
-# Get the toolchain from https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-a/downloads
-if [[ $TOOLCHAIN == "" ]]; then
-  TOOLCHAIN="/home/ubuntu/gcc-aarch64-none-linux/gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu"
-fi
+# # Sample toolchain for Linux to ARM cross builds.
+# # Get the toolchain from https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-a/downloads
+# if [[ $TOOLCHAIN == "" ]]; then
+#   TOOLCHAIN="/home/ubuntu/gcc-aarch64-none-linux/gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu"
+# fi
 
 # This script mostly detects the presence of ocamlfind as well as various ocaml
 # packages
@@ -206,6 +200,19 @@ done
 if [ ! -z "$build_target" ]; then
   echo "Doing cross build for $build_target. Make sure that your toolchain is configured properly."
   if [[ "$build_target" == "aarch64-none-linux-android" ]]; then
+    if [ -z $NDK ]; then
+      echo "Compiling for aarch64-none-linux-android requires an NDK toolchain."
+      echo "Then please set at least NDK appropriately. SYSROOT and NDK_TOOLCHAIN might be necessary as well."
+      echo "Get your toolchain here: https://developer.android.com/ndk/downloads/"
+      exit 1
+    fi
+    if [[ $SYSROOT == "" ]]; then
+      SYSROOT="$NDK/toolchains/llvm/prebuilt/darwin-x86_64/sysroot"
+    fi
+    if [[ $NDK_TOOLCHAIN == "" ]]; then
+      NDK_TOOLCHAIN="$NDK/toolchains/llvm/prebuilt/darwin-x86_64"
+    fi
+
     target_arch="aarch64"
     target_sys="Linux"
     target_abi="android"
@@ -224,18 +231,21 @@ if [ ! -z "$build_target" ]; then
     ln -s $SYSROOT/usr/lib/aarch64-linux-android/27/crtbegin_so.o $SYSROOT/usr/lib/aarch64-linux-android/
     ln -s $SYSROOT/usr/lib/aarch64-linux-android/27/crtend_so.o $SYSROOT/usr/lib/aarch64-linux-android/
   elif [[ "$build_target" == "aarch64-none-linux-gnu" ]]; then
+    if [ -z $TOOLCHAIN ]; then
+      echo "Compiling for aarch64-none-linux-gnu-gcc requires a GCC toolchain."
+      echo "This probably only works on Windows and Linux."
+      echo "Get your toolchain here: https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-a/downloads"
+      exit 1
+    fi
+
     target_arch="aarch64"
     target_sys="Linux"
     target_abi="gnu"
 
-    # Using GCC here doesn't require setting these.
-    # CROSS_TARGET="-target $build_target"
-    # CROSS_SYSROOT="--sysroot=$SYSROOT"
-    # CROSS_INCLUDES="-I$SYSROOT/libc/usr/include/"
-
     # Set compiler
     CC="$TOOLCHAIN/bin/aarch64-none-linux-gnu-gcc"
     echo "CC=$CC" >> Makefile.config
+    # Using GCC here doesn't require setting anything else.
   else
     show_help
     exit 0
