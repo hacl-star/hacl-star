@@ -7,14 +7,6 @@ if [[ $CC == "" ]]; then
   CC=cc
 fi
 
-# XXX: Only some defaults for testing. Remove before merging
-# Get the toolchain at https://developer.android.com/ndk/downloads/
-# # Sample toolchain for Linux to ARM cross builds.
-# # Get the toolchain from https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-a/downloads
-# if [[ $TOOLCHAIN == "" ]]; then
-#   TOOLCHAIN="/home/ubuntu/gcc-aarch64-none-linux/gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu"
-# fi
-
 # This script mostly detects the presence of ocamlfind as well as various ocaml
 # packages
 
@@ -157,7 +149,6 @@ EOF
 
 # Usage info
 show_help () {
-  # XXX: Alternatively do a cat help.txt
   printf "\nUsage: configure -target <triple>\n\n"
   printf "This script configures HACL/Evercrypt. You can specify the following options:\n\n"
   printf "    -target         Specify the target triple for the build. This follows the\n"
