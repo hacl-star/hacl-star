@@ -16,7 +16,7 @@ fi
 # ARM cross builds are handled a little different
 if [[  $ARM_CROSS_CI == "aarch64-none-linux-gnu" ]]; then
   pushd dist/gcc-compatible
-  export TOOLCHAIN=$HOME/gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu
+  export TOOLCHAIN=$PWD/../../../gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu
   ./configure -target aarch64-none-linux-gnu
   make -j
   popd
