@@ -8,7 +8,8 @@
  * KreMLin version: 318b7fa8
  */
 
-#pragma once
+#ifndef FSTAR_UINT128_MSVC
+#define FSTAR_UINT128_MSVC
 
 #include "kremlin/internal/types.h"
 #include "FStar_UInt128.h"
@@ -471,3 +472,5 @@ FStar_UInt128_uint128 FStar_UInt128_mul_wide(uint64_t x, uint64_t y) {
 
 #undef low
 #undef high
+
+#endif

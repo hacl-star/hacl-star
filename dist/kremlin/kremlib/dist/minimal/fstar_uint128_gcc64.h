@@ -20,7 +20,8 @@
  * such, it assumes that the machine integers have been bundled the exact same
  * way in both cases. */
 
-#pragma once
+#ifndef FSTAR_UINT128_GCC64
+#define FSTAR_UINT128_GCC64
 
 #include "FStar_UInt128.h"
 #include "FStar_UInt_8_16_32_64.h"
@@ -160,3 +161,5 @@ inline static bool FStar_UInt128_lte(uint128_t x, uint128_t y) {
 inline static uint128_t FStar_UInt128_mul32(uint64_t x, uint32_t y) {
   return (uint128_t) x * (uint128_t) y;
 }
+
+#endif
