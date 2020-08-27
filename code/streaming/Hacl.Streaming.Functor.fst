@@ -657,10 +657,11 @@ val update_small:
     (ensures fun h0 s' h1 ->
       update_post c i s data len h0 h1))
 
-/// SH: This proof has problems succeeding in command line mode: hence the
-/// restart-solver instruction and the crazy rlimit. Interestingly, the proof
-/// succeeds quite quickly with this rlimit but fails with a lower one.
-
+/// SH: The proof obligations for update_small have problem succeeding in command
+/// line mode: hence the restart-solver instruction, the crazy rlimit and the
+/// intermediate lemma. . Interestingly (and frustratingly), the proof succeeds
+/// quite quickly locally on command-line with this rlimit, but fails with a lower
+/// one. Besides, the lemma is needed only for the CI regression.
 let split_at_last_rest_eq (#index : Type0) (c: block index)
                           (i: index)
                           (t:Type0 { t == c.state.s i })
@@ -682,7 +683,7 @@ let split_at_last_rest_eq (#index : Type0) (c: block index)
   ()
 
 #restart-solver
-#push-options "--z3rlimit 2000 --z3cliopt smt.arith.nl=false"
+#push-options "--z3rlimit 500 --z3cliopt smt.arith.nl=false"
 let update_small #index c i t t' p data len =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
