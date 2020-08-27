@@ -661,7 +661,7 @@ val update_small:
 /// restart-solver instruction and the crazy rlimit. Interestingly, the proof
 /// succeeds quite quickly with this rlimit but fails with a lower one.
 #restart-solver
-#push-options "--z3rlimit 1000 --z3cliopt smt.arith.nl=false"
+#push-options "--z3rlimit 2000 --z3cliopt smt.arith.nl=false"
 let update_small #index c i t t' p data len =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
