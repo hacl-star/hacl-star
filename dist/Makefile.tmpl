@@ -34,7 +34,6 @@ else ifeq ($(UNAME),Linux)
   CFLAGS	+= -fPIC
   VARIANT	= -linux
   SO 		= so
-  LDFLAGS	+= -Xlinker -z -Xlinker noexecstack -Xlinker --unresolved-symbols=report-all
 else ifeq ($(OS),Windows_NT)
   CFLAGS        += -fno-asynchronous-unwind-tables
   CC		= $(MARCH)-w64-mingw32-gcc
@@ -71,9 +70,13 @@ ifneq (,$(wildcard EverCrypt_BCrypt.h))
   SOURCES	+= evercrypt_bcrypt.c
 endif
 
-OBJS 		+= $(patsubst %.S,%.o,$(wildcard *-$(MARCH)$(VARIANT).S))
-
 -include Makefile.config
+
+ifeq (,$(ARM_CROSS))
+OBJS 		+= $(patsubst %.S,%.o,$(wildcard *-$(MARCH)$(VARIANT).S))
+USER_CFLAGS=-march=native -mtune=native -Wno-unused
+endif
+
 include Makefile.basic
 
 CFLAGS		+= -Wno-parentheses -Wno-deprecated-declarations -Wno-\#warnings -Wno-error=cpp -Wno-cpp -g -std=gnu11 -O3
