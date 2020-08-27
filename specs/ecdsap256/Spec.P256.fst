@@ -29,7 +29,6 @@ type curve =
   |P384
 
 
-
 let invert_state_s (a: curve): Lemma
   (requires True)
   (ensures (inversion curve))
@@ -42,6 +41,13 @@ let getCoordinateLen curve =
   match curve with 
   |P256 -> 32
   |P384 -> 48
+
+
+inline_for_extraction
+let getCoordinateLenU curve =
+  match curve with 
+  |P256 -> 32ul
+  |P384 -> 48ul
 
 inline_for_extraction
 let getCoordinateLenU64 curve = 
@@ -95,6 +101,16 @@ let getPrime curve =
   |P384 -> prime384
 
 
+inline_for_extraction
+let getOrder (#c: curve) : (a: pos{a < pow2 (getPower c)}) =
+  match c with 
+  |P256 -> assert_norm (115792089210356248762697446949407573529996955224135760342422259061068512044369 < pow2 (getPower P256));
+  115792089210356248762697446949407573529996955224135760342422259061068512044369
+  |P384 -> 
+    assert_norm (39402006196394479212279040100143613805079739270465446667946905279627659399113263569398956308152294913554433653942643 < pow2 (getPower P384));
+39402006196394479212279040100143613805079739270465446667946905279627659399113263569398956308152294913554433653942643
+
+
 unfold let prime_inverse_list (#c: curve) : list uint8 = 
   match c with 
   |P256 -> 
@@ -124,17 +140,6 @@ let prime_inverse_seq (#c: curve) : (s:lseq uint8 (getCoordinateLen c) {nat_from
   assert_norm (nat_from_intlist_le (prime_order_inverse_list #P384) == getPrimeOrder #P384 - 2); *)
   of_list (prime_inverse_list #c)
 
-
-
-
-inline_for_extraction
-let getPrimeOrder (#c: curve) : (a: pos{a < pow2 (getPower c)}) =
-  match c with 
-  |P256 -> assert_norm (115792089210356248762697446949407573529996955224135760342422259061068512044369 < pow2 (getPower P256));
-  115792089210356248762697446949407573529996955224135760342422259061068512044369
-  |P384 -> 
-    assert_norm (39402006196394479212279040100143613805079739270465446667946905279627659399113263569398956308152294913554433653942643 < pow2 (getPower P384));
-39402006196394479212279040100143613805079739270465446667946905279627659399113263569398956308152294913554433653942643
 
 
 

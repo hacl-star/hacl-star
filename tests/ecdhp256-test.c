@@ -7,59 +7,32 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <time.h>
 
 #include "ecdhp256-tvs.h"
+#include "ecdhp256_tv_w.h"
+#include "ecdsap256_tv_w.h"
+
 #include "test_helpers.h"
+#include <inttypes.h>
 
 #include "Hacl_P256.h"
 
 
-static uint8_t point_compressed[64] = {
-	0x70, 0x0c, 0x48, 0xf7, 0x7f, 0x56, 0x58, 0x4c, 
-	0x5c, 0xc6, 0x32, 0xca, 0x65, 0x64, 0x0d, 0xb9, 
-	0x1b, 0x6b, 0xac, 0xce, 0x3a, 0x4d, 0xf6, 0xb4, 
-	0x2c, 0xe7, 0xcc, 0x83, 0x88, 0x33, 0xd2, 0x87, 
-	0xdb, 0x71, 0xe5, 0x09, 0xe3, 0xfd, 0x9b, 0x06, 
-	0x0d, 0xdb, 0x20, 0xba, 0x5c, 0x51, 0xdc, 0xc5, 
-	0x94, 0x8d, 0x46, 0xfb, 0xf6, 0x40, 0xdf, 0xe0, 
-	0x44, 0x17, 0x82, 0xca, 0xb8, 0x5f, 0xa4, 0xac 
-};
+uint64_t incorrect = UINT64_MAX;
+uint64_t correct = 0;
 
-
-static uint8_t x[48] = {
-	0xaa, 0x87, 0xca, 0x22, 0xbe, 0x8b, 0x05, 0x37, 
-	0x8e, 0xb1, 0xc7, 0x1e, 0xf3, 0x20, 0xad, 0x74, 
-	0x6e, 0x1d, 0x3b, 0x62, 0x8b, 0xa7, 0x9b, 0x98, 
-	0x59, 0xf7, 0x41, 0xe0, 0x82, 0x54, 0x2a, 0x38, 
-	0x55, 0x02, 0xf2, 0x5d, 0xbf, 0x55, 0x29, 0x6c,
-	0x3a, 0x54, 0x5e, 0x38, 0x72, 0x76, 0x0a, 0xb7
-};
-
-static uint8_t y[48] = {
-	0x36, 0x17, 0xde, 0x4a, 0x96, 0x26, 0x2c, 0x6f, 
-	0x5d, 0x9e, 0x98, 0xbf, 0x92, 0x92, 0xdc, 0x29, 
-	0xf8, 0xf4, 0x1d, 0xbd, 0x28, 0x9a, 0x14, 0x7c, 
-	0xe9, 0xda, 0x31, 0x13, 0xb5, 0xf0, 0xb8, 0xc0, 
-	0x0a, 0x60, 0xb1, 0xce, 0x1d, 0x7e, 0x81, 0x9d,
-	0x7a, 0x43, 0x1d, 0x7c, 0x90, 0xea, 0x0e, 0x5f
-};
-
-static uint8_t 
-	scalar384_0[48] = {
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01
-
-};
-
-int main()
+bool test_nist()
 {
+
 	uint8_t* result = (uint8_t*) malloc (sizeof (uint8_t) * 64);
+	uint8_t* pk = (uint8_t*) malloc (sizeof (uint8_t) * 64);
+	
 	bool ok = true;
+
+
+	printf("%s\n", "ECDH Initiator tests: \n");
 
 	for (int i = 0 ; i< sizeof(i_vectors)/sizeof(ecdhp256_tv_i); i++)
 	{
@@ -70,19 +43,8 @@ int main()
 		ok = ok && compare_and_print(32, result + 32, i_vectors[i].expectedPublicKeyY);
 	}
 
-	uint8_t* result384 = (uint8_t*) malloc (sizeof (uint8_t) * 96);
 
-	// printf("ËCDH Initiator Test 384\n" );
-	// uint64_t success = Hacl_P256_ecp384dh_i(result384, scalar384_0);
-	// ok = ok && (success == 0);
-	// ok = ok && compare_and_print(48, result384, x);
-	// ok = ok && compare_and_print(48, result384 + 48, y);
-
-
-
-
-	
-	uint8_t* pk = (uint8_t*) malloc (sizeof (uint8_t) * 64);
+	printf("%s\n", "ECDH Responder tests: \n");
 	
 	for (int i = 0 ; i< sizeof(i_vectors)/sizeof(ecdhp256_tv_i); i++)
 	{
@@ -97,40 +59,161 @@ int main()
 	}
 
 
+	free(result);
+	free(pk);
 
-	printf("Compression function test\n");
-
-	uint8_t* compressed0 = (uint8_t *) malloc (sizeof (uint8_t) * 65);
-	uint8_t* compressed1 = (uint8_t *) malloc (sizeof (uint8_t) * 64);
-	uint8_t* compressed2 = (uint8_t *) malloc (sizeof (uint8_t) * 65);
-	uint8_t* compressed3 = (uint8_t *) malloc (sizeof (uint8_t) * 64);
-
-	Hacl_P256_compression_not_compressed_form(point_compressed, compressed0);
-	Hacl_P256_decompression_not_compressed_form(compressed0, compressed1);
-	Hacl_P256_compression_not_compressed_form(compressed1, compressed2);
-	Hacl_P256_decompression_not_compressed_form(compressed2, compressed3);
-
-	ok = ok && compare_and_print(64, point_compressed, compressed3);
+	return ok;
+}
 
 
-	printf("Compression function test2\n");
+// bool test_compression()
+// {
+// 	// The start of compression tests
+// 	printf("Compression function test\n");
+// 	bool ok = true;
 
-	uint8_t* compressed4 = (uint8_t *) malloc (sizeof (uint8_t) * 33);
-	uint8_t* compressed5 = (uint8_t *) malloc (sizeof (uint8_t) * 64);
-	uint8_t* compressed6 = (uint8_t *) malloc (sizeof (uint8_t) * 33);
-	uint8_t* compressed7 = (uint8_t *) malloc (sizeof (uint8_t) * 64);
+// 	static uint8_t point_compressed[64] = {
+// 	0x70, 0x0c, 0x48, 0xf7, 0x7f, 0x56, 0x58, 0x4c, 
+// 	0x5c, 0xc6, 0x32, 0xca, 0x65, 0x64, 0x0d, 0xb9, 
+// 	0x1b, 0x6b, 0xac, 0xce, 0x3a, 0x4d, 0xf6, 0xb4, 
+// 	0x2c, 0xe7, 0xcc, 0x83, 0x88, 0x33, 0xd2, 0x87, 
+// 	0xdb, 0x71, 0xe5, 0x09, 0xe3, 0xfd, 0x9b, 0x06, 
+// 	0x0d, 0xdb, 0x20, 0xba, 0x5c, 0x51, 0xdc, 0xc5, 
+// 	0x94, 0x8d, 0x46, 0xfb, 0xf6, 0x40, 0xdf, 0xe0, 
+// 	0x44, 0x17, 0x82, 0xca, 0xb8, 0x5f, 0xa4, 0xac};
+
+// 	uint8_t* compressed0 = (uint8_t *) malloc (sizeof (uint8_t) * 65);
+// 	uint8_t* compressed1 = (uint8_t *) malloc (sizeof (uint8_t) * 64);
+// 	uint8_t* compressed2 = (uint8_t *) malloc (sizeof (uint8_t) * 65);
+// 	uint8_t* compressed3 = (uint8_t *) malloc (sizeof (uint8_t) * 64);
+
+// 	Hacl_P256_compression_not_compressed_form(point_compressed, compressed0);
+// 	Hacl_P256_decompression_not_compressed_form(compressed0, compressed1);
+// 	Hacl_P256_compression_not_compressed_form(compressed1, compressed2);
+// 	Hacl_P256_decompression_not_compressed_form(compressed2, compressed3);
+
+// 	ok = ok && compare_and_print(64, point_compressed, compressed3);
 
 
-	Hacl_P256_compression_compressed_form(point_compressed, compressed4);
-	Hacl_P256_decompression_compressed_form(compressed4, compressed5);
-	Hacl_P256_compression_compressed_form(compressed5, compressed6);
-	Hacl_P256_decompression_compressed_form(compressed6, compressed7);
+// 	printf("Compression function test2\n");
 
-	ok = ok && compare_and_print(64, point_compressed, compressed7);
-
-
+// 	uint8_t* compressed4 = (uint8_t *) malloc (sizeof (uint8_t) * 33);
+// 	uint8_t* compressed5 = (uint8_t *) malloc (sizeof (uint8_t) * 64);
+// 	uint8_t* compressed6 = (uint8_t *) malloc (sizeof (uint8_t) * 33);
+// 	uint8_t* compressed7 = (uint8_t *) malloc (sizeof (uint8_t) * 64);
 
 
-  	if (ok) return EXIT_SUCCESS;
-  	else return EXIT_FAILURE;
+// 	Hacl_P256_compression_compressed_form(point_compressed, compressed4);
+// 	Hacl_P256_decompression_compressed_form(compressed4, compressed5);
+// 	Hacl_P256_compression_compressed_form(compressed5, compressed6);
+// 	Hacl_P256_decompression_compressed_form(compressed6, compressed7);
+
+// 	ok = ok && compare_and_print(64, point_compressed, compressed7);
+
+// 	free(compressed0);
+// 	free(compressed1);
+// 	free(compressed2);
+// 	free(compressed3);
+// 	free(compressed4);
+// 	free(compressed5);
+// 	free(compressed6);
+// 	free(compressed7);
+
+// 	return ok;
+
+// }
+
+
+bool test_wycheproof()
+{
+
+	uint8_t* decompressedPoint = (uint8_t*) malloc (sizeof (uint8_t) * 64);
+	uint8_t* result = (uint8_t*) malloc (sizeof (uint8_t) * 64);
+	uint8_t* pk = (uint8_t*) malloc (sizeof (uint8_t) * 64);
+
+	bool ok = true;
+
+	// printf("%s\n", "Wycheproof tests ECDH: ");
+		
+	// for (int i = 0 ; i< sizeof(w_vectors)/sizeof(ecdhp256_w_i); i++)
+	// {
+	// 	printf("ECDH Wycheproof Test %d \n", i );
+
+	// 	bool flagDecompressSuccessful = Hacl_P256_decompression_not_compressed_form(w_vectors[i].publicKey, decompressedPoint);
+	// 	uint64_t success = Hacl_P256_ecp256dh_r(result, decompressedPoint, w_vectors[i].privateKey);
+		
+	// 	if (w_vectors[i].flag != 1) 
+	// 	{
+	// 		// We start with the check that the point was decompressed successfully and that the execution of the dh_r function was successul. 
+	// 		// If one of them has failed, we consider the result of the test to be false. This result is further compared with the expected flag.
+	// 		// If the execution was correct, we also check the results. 
+
+	// 		if (!flagDecompressSuccessful)
+	// 			success = incorrect;
+
+	// 		ok = ok && (success == w_vectors[i].flag);
+	// 		if (success == 0) 
+	// 			ok = ok && compare_and_print(32, result, w_vectors[i].sharedKey);
+	// 	}
+	// 	else
+	// 		if (success == 0)
+	// 			ok = ok && compare_and_print(32, result, w_vectors[i].sharedKey);
+
+	// 	if (!ok) 
+	// 		{
+	// 			printf("Test %d \n failed", i);
+	// 			break;
+	// 		}
+	// }
+
+
+	printf("%s\n", "Wycheproof tests ECDSA: ");
+		
+	// for (int i = 0 ; i< sizeof(w_ecdsa_vectors)/sizeof(ecdsap256_w_i) ; i++)
+	for (int i = 0 ; i< 10 ; i++)
+	{
+		printf("ECDSA Wycheproof Test %d \n", i );
+		
+		uint32_t mLen = w_ecdsa_vectors[i].mLen;
+
+		memcpy(pk, w_ecdsa_vectors[i].publicX, 32);
+		memcpy(pk + 32, w_ecdsa_vectors[i].publicY, 32);
+
+		bool verificationSuccessful = Hacl_P256_ecdsa_verif_p256_sha2(mLen, w_ecdsa_vectors[i].message, pk, w_ecdsa_vectors[i].r, w_ecdsa_vectors[i].s);	
+		
+		if (w_ecdsa_vectors[i].flag == incorrect && verificationSuccessful)
+		{
+			ok = false;
+		}	
+		if (w_ecdsa_vectors[i].flag == correct && !verificationSuccessful)
+		{
+			ok = false;
+		}
+
+
+		if (!ok) 
+		{
+			printf("\n Test %d failed \n", i);
+			compare_and_print(32, w_ecdsa_vectors[i].r, w_ecdsa_vectors[i].r);
+			compare_and_print(32, w_ecdsa_vectors[i].s, w_ecdsa_vectors[i].s);
+			break;
+		}
+	}
+
+	free(decompressedPoint);
+	free(result);
+	free(pk);
+}
+
+
+int main()
+{
+
+  if (!test_nist())
+    return EXIT_FAILURE;
+  // if (!test_compression())
+  //   return EXIT_FAILURE;
+  if (!test_wycheproof())
+    return EXIT_FAILURE;
+  return EXIT_SUCCESS;
 }

@@ -38,7 +38,7 @@ let ith_bit #c k i =
   res
 
 
-let ( *% ) (#c: curve) a b = (a * b) % (getPrimeOrder #c)
+let ( *% ) (#c: curve) a b = (a * b) % (getOrder #c)
 
 let fmul (#c: curve) (a: elem (getPrime c)) (b: elem (getPrime c)) : elem (getPrime c) = (a * b) % (getPrime c)
 
@@ -144,8 +144,8 @@ val lemma_exponen_spec: #c: curve -> k:lseq uint8 (getCoordinateLen c)
     let number = nat_from_bytes_le k in
     let newIndex = getPower c - index in
     let f0, f1 = Lib.LoopCombinators.repeati index (_exp_step k) start in
-    f0 == pow start1 (arithmetic_shift_right number newIndex) % getPrimeOrder #c /\
-    f1 == pow start1 (arithmetic_shift_right number newIndex + 1) % getPrimeOrder #c
+    f0 == pow start1 (arithmetic_shift_right number newIndex) % getOrder #c /\
+    f1 == pow start1 (arithmetic_shift_right number newIndex + 1) % getOrder #c
   )
 
 #push-options "--fuel 1"
@@ -157,8 +157,8 @@ val lemma_exponen_spec_0: #c: curve -> k:lseq uint8 (getCoordinateLen c)
     let number = nat_from_bytes_le k in
     let newIndex = getPower c in
     let f0, f1 = Lib.LoopCombinators.repeati 0 (_exp_step k) start in
-    f0 == pow start1 (arithmetic_shift_right number newIndex) % getPrimeOrder #c /\
-    f1 == pow start1 (arithmetic_shift_right number newIndex + 1) % getPrimeOrder #c
+    f0 == pow start1 (arithmetic_shift_right number newIndex) % getOrder #c /\
+    f1 == pow start1 (arithmetic_shift_right number newIndex + 1) % getOrder #c
   )
 
 let lemma_exponen_spec_0 #c k start =
@@ -174,7 +174,7 @@ let lemma_exponen_spec_0 #c k start =
 
 let rec lemma_exponen_spec #c k start index =
   admit();
-  let prime_order = getPrimeOrder #c in 
+  let prime_order = getOrder #c in 
   let power = getPower c in 
   let f = _exp_step k in
   let st0, st1 = start in
@@ -270,12 +270,12 @@ unfold let prime_order_inverse_list (#c: curve) : list uint8 =
    ]
 
 
-let prime_order_inverse_seq (#c: curve) : (s:lseq uint8 (getCoordinateLen c) {nat_from_intseq_le s == getPrimeOrder #c - 2}) =  
+let prime_order_inverse_seq (#c: curve) : (s:lseq uint8 (getCoordinateLen c) {nat_from_intseq_le s == getOrder #c - 2}) =  
   assert_norm (List.Tot.length (prime_order_inverse_list #P256) == getCoordinateLen P256);
   assert_norm (List.Tot.length (prime_order_inverse_list #P384) == getCoordinateLen P384);
   nat_from_intlist_seq_le (getCoordinateLen c) (prime_order_inverse_list #c); 
-  assert_norm (nat_from_intlist_le (prime_order_inverse_list #P256) == getPrimeOrder #P256 - 2);
-  assert_norm (nat_from_intlist_le (prime_order_inverse_list #P384) == getPrimeOrder #P384 - 2);
+  assert_norm (nat_from_intlist_le (prime_order_inverse_list #P256) == getOrder #P256 - 2);
+  assert_norm (nat_from_intlist_le (prime_order_inverse_list #P384) == getOrder #P384 - 2);
   of_list (prime_order_inverse_list #c)
 
 
@@ -300,17 +300,17 @@ unfold let prime_order_list (#c: curve) : list uint8 =
 
 
 let prime_order_seq (#c: curve) : s:lseq uint8 (getCoordinateLen c) 
-  {nat_from_intseq_be s == (getPrimeOrder #c)} =
+  {nat_from_intseq_be s == (getOrder #c)} =
   assert_norm (List.Tot.length (prime_order_list #P256) == getCoordinateLen P256);
   assert_norm (List.Tot.length (prime_order_list #P384) == getCoordinateLen P384);
   nat_from_intlist_seq_be (getCoordinateLen P256) (prime_order_list #P256);
   nat_from_intlist_seq_be (getCoordinateLen P384) (prime_order_list #P384); 
-  assert_norm (nat_from_intlist_be (prime_order_list #P256) == getPrimeOrder #P256);
-  assert_norm (nat_from_intlist_be (prime_order_list #P384) == getPrimeOrder #P384);
+  assert_norm (nat_from_intlist_be (prime_order_list #P256) == getOrder #P256);
+  assert_norm (nat_from_intlist_be (prime_order_list #P384) == getOrder #P384);
   of_list (prime_order_list #c)
 
 
-val exponent_spec: #c: curve -> a:nat_prime #c -> r:nat_prime #c{r = pow a (getPrimeOrder #c - 2) % getPrimeOrder #c}
+val exponent_spec: #c: curve -> a:nat_prime #c -> r:nat_prime #c{r = pow a (getOrder #c - 2) % getOrder #c}
 
 let exponent_spec #c a =
   let a0, _ = _exponent_spec prime_order_inverse_seq (1, a) in
@@ -409,7 +409,7 @@ val ecdsa_verification_agile:
 
 let ecdsa_verification_agile c alg publicKey r s mLen m =
   allow_inversion hash_alg_ecdsa; 
-  let order = getPrimeOrder #c in 
+  let order = getOrder #c in 
   let publicJacobian = toJacobianCoordinates publicKey in
   if not (verifyQValidCurvePointSpec #c publicJacobian) then false
   else
@@ -449,7 +449,7 @@ val ecdsa_signature_agile:
 let ecdsa_signature_agile c alg mLen m privateKey k =
   assert_norm (pow2 32 < pow2 61);
   assert_norm (pow2 32 < pow2 125);
-  let order = getPrimeOrder #c in 
+  let order = getOrder #c in 
   let r, _ = montgomery_ladder_spec k ((0,0,0), basePoint) in
   let (xN, _, _) = _norm r in
   let hashM = hashSpec c alg mLen m in 

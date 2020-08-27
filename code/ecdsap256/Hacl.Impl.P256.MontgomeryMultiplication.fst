@@ -22,15 +22,28 @@ open Hacl.Impl.P.LowLevel
 open Lib.Loops
 open Hacl.Spec.P256.MontgomeryMultiplication
 
-#set-options "--z3rlimit 100"
+#set-options "--z3rlimit 200"
 
 
 val montgomery_multiplication_round: #c: curve -> t: widefelem c -> round: widefelem c -> 
   Stack unit 
-  (requires fun h -> live h t /\ live h round /\ wide_as_nat c h t < getPrime c * getPrime c)
+  (requires fun h -> live h t /\ live h round /\ wide_as_nat c h t < getPrime c * getPrime c /\
+    eq_or_disjoint t round)
   (ensures fun h0 _ h1 -> modifies (loc round)  h0 h1 /\
-    wide_as_nat c h1 round = (wide_as_nat c h0 t + getPrime c * (wide_as_nat c h0 t % pow2 64)) / pow2 64
-  )
+    wide_as_nat c h1 round = (wide_as_nat c h0 t + getPrime c * (wide_as_nat c h0 t % pow2 64)) / pow2 64)
+
+
+val montgomery_multiplication_round_: #c: curve -> t: widefelem c -> t2: widefelem c -> 
+  Stack unit
+    (requires fun h -> True)
+    (ensures fun h0 _ h1 -> True)
+  
+
+let montgomery_multiplication_round_ #c t t2 =
+  let t1 = mod64 t in 
+  recall_contents (prime_buffer #c) (Lib.Sequence.of_list (prime_list c)); 
+  short_mul_bn (prime_buffer #c) t1 t2
+  
 
 
 let montgomery_multiplication_round #c t round =
@@ -39,15 +52,44 @@ let montgomery_multiplication_round #c t round =
     let len = getCoordinateLenU64 c in 
     
     let t2 = create (size 2 *! len) (u64 0) in 
-    let t3 = create (size 2 *! len) (u64 0) in 
-    let t1 = mod64 t in 
-    
-      recall_contents (prime_buffer #c) (Lib.Sequence.of_list (prime_list c)); 
-    short_mul_bn (prime_buffer #c) t1 t2; 
-    add_long_without_carry t t2 t3;
-    shift1 t3 round; 
+    montgomery_multiplication_round_ #c t t2;
+      admit();
+    add_long_without_carry t t2 round;
+    shift1 round round; 
     admit();
   pop_frame()  
+
+
+
+val montgomery_multiplication_round_k0: #c: curve -> t: widefelem c 
+  ->  round: widefelem c -> k0: uint64 ->
+  Stack unit 
+    (requires fun h -> live h t /\ live h round  /\ wide_as_nat c h t < prime_p256_order * prime_p256_order)
+    (ensures fun h0 _ h1 -> modifies (loc round) h0 h1 /\ 
+      wide_as_nat c h1 round = (wide_as_nat c h0 t + prime_p256_order * ((uint_v k0 * (wide_as_nat c h0 t % pow2 64)) % pow2 64)) / pow2 64)
+
+let montgomery_multiplication_round_k0 #c t round k0 = 
+  push_frame(); 
+    let h0 = ST.get() in 
+    let len = getCoordinateLenU64 c in 
+    
+    let temp = create (size 1) (u64 0) in 
+    let y = create (size 1) (u64 0) in 
+
+    let t2 = create (size 2 *! len) (u64 0) in 
+    let t3 = create (size 2 *! len) (u64 0) in 
+    let t1 = mod64 #c t in
+    
+    mul_atomic t1 k0 y temp;
+    recall_contents (prime_buffer #c) (Lib.Sequence.of_list (prime_list c)); 
+    let y_ = index y (size 0) in   
+    short_mul_bn #c (prime_buffer #c) y_ t2;
+    add_long_without_carry #c t t2 t3;
+    shift1 #c t3 round;
+    admit();
+  pop_frame()
+
+
 
 
 val montgomery_multiplication_one_round_proof: 

@@ -29,6 +29,32 @@ p384_prime_list) /\ recallable x /\ felem_seq_as_nat P384 (Lib.Sequence.of_list 
   createL_global p384_prime_list
 
 
+inline_for_extraction
+let prime256order_buffer: x: glbuffer uint64 (size 4)  
+  {witnessed #uint64 #(size 4) x 
+  (Lib.Sequence.of_list p256_order_list) /\ recallable x /\ 
+  felem_seq_as_nat P256 (Lib.Sequence.of_list (p256_order_list)) == getOrder #P256} = 
+  createL_global p256_order_list
+
+
+inline_for_extraction
+let prime384order_buffer: x: glbuffer uint64 (size 6)  
+  {witnessed #uint64 #(size 6) x 
+  (Lib.Sequence.of_list p384_order_list) /\ recallable x /\ 
+  felem_seq_as_nat P384 (Lib.Sequence.of_list (p384_order_list)) == getOrder #P384} = 
+  createL_global p384_order_list
+
+
+inline_for_extraction
+let order_buffer (#c: curve): (x: glbuffer uint64 (getCoordinateLenU64 c) 
+    {witnessed #uint64 #(getCoordinateLenU64 c) x (Lib.Sequence.of_list (prime_list c)) 
+    /\ recallable x /\ felem_seq_as_nat c (Lib.Sequence.of_list (order_list c)) == getOrder #c}) = 
+  match c with
+  | P256 -> prime256order_buffer
+  | P384 -> prime384order_buffer
+
+
+
 val uploadZeroImpl: #c: curve -> f: felem c -> Stack unit 
   (requires fun h -> live h f)
   (ensures fun h0 _ h1 -> as_nat c h1 f == 0 /\ modifies (loc f) h0 h1)
@@ -267,3 +293,13 @@ val add_long_without_carry: #c: curve -> t: widefelem c -> t1: widefelem c -> re
   )
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
     wide_as_nat c h1 result = wide_as_nat c h0 t + wide_as_nat c h0 t1)
+
+
+val mul_atomic: x: uint64 -> y: uint64 -> result: lbuffer uint64 (size 1) -> temp: lbuffer uint64 (size 1) ->
+  Stack unit
+    (requires fun h -> live h result /\ live h temp /\ disjoint result temp)
+  (ensures fun h0 _ h1 -> modifies (loc result |+| loc temp) h0 h1 /\ 
+    (
+      let h0 = Seq.index (as_seq h1 temp) 0 in 
+      let result = Seq.index (as_seq h1 result) 0 in 
+      uint_v result + uint_v h0 * pow2 64 = uint_v x * uint_v y))

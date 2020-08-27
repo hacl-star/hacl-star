@@ -167,17 +167,18 @@ let montgomery_multiplication_round #c t round k0 =
     let t3 = create (size 2 *! len) (u64 0) in 
     let t1 = mod64 #c t in
     
-    mul64 t1 k0 y temp;
-      recall_contents prime256order_buffer (Lib.Sequence.of_list p256_order_prime_list);
+    mul_atomic t1 k0 y temp;
+    recall_contents (order_buffer #c)  (Lib.Sequence.of_list (Hacl.Spec.P256.Definition.order_list c));
     let y_ = index y (size 0) in   
-    short_mul_bn #P256 prime256order_buffer y_ t2;
+    short_mul_bn #c order_buffer y_ t2;
     add_long_without_carry #c t t2 t3;
     shift1 #c t3 round;
+    admit();
   pop_frame()
 
 
 #reset-options "--z3rlimit 200"
-
+(*
 val montgomery_multiplication_round_twice: #c: curve -> t: widefelem c 
   -> result: widefelem c -> k0: uint64-> 
   Stack unit 
@@ -204,7 +205,7 @@ let montgomery_multiplication_round_twice #c t result k0 =
    montgomery_multiplication_one_round_proof (wide_as_nat c h1 tempRound) (uint_v k0) (wide_as_nat c h2 result) (wide_as_nat c h0 t * modp_inv2_prime (pow2 64) prime_p256_order); 
    lemma_montgomery_mod_inverse_addition (wide_as_nat c h0 t); 
   pop_frame()
-
+*)
 
 let reduction_prime_2prime_with_carry #c x result  = 
   match c with 
@@ -338,19 +339,21 @@ let lemmaToDomainFromDomain a =
 
 let montgomery_multiplication_ecdsa_module #c  a b result =
   (* Most probably it's gonna be like this *)
-  match c with 
-  |P384 -> ()
-  |P256 -> 
   push_frame();
-    let t = create (size 8) (u64 0) in 
-    let round2 = create (size 8) (u64 0) in 
-    let round4 = create (size 8) (u64 0) in  
-    let prime_p256_orderBuffer = create (size 4) (u64 0) in 
+    let len = getCoordinateLenU64 c in 
+    let t = create (size 2 *! len) (u64 0) in 
+    let prime_p256_orderBuffer = create len (u64 0) in 
 
     let k0 = upload_k0() in 
 
       let h0 = ST.get() in     
     mul #c a b t;
+    montgomery_multiplication_round #c t t k0;
+    montgomery_multiplication_round #c t t k0;
+    montgomery_multiplication_round #c t t k0;
+    montgomery_multiplication_round #c t t k0;
+(*
+
       assert_by_tactic (as_nat c h0 b * as_nat c h0 a == as_nat c h0 a * as_nat c h0 b) canon;
       mul_lemma_ (as_nat c h0 a) (as_nat c h0 b) prime_p256_order;
    montgomery_multiplication_round_twice #P256 t round2 k0; 
@@ -360,8 +363,8 @@ let montgomery_multiplication_ecdsa_module #c  a b result =
      lemma_mod_mul_distr_l (as_nat c h0 a * as_nat c h0 b * modp_inv2_prime (pow2 128) prime_p256_order) (modp_inv2_prime (pow2 128) prime_p256_order) prime_p256_order; 
      lemma_montgomery_mod_inverse_addition2 (as_nat c h0 a * as_nat c h0 b);
      
-     lemma_montgomery_mult_result_less_than_prime_p256_order (as_nat c h0 a) (as_nat c h0 b) (uint_v k0);
-   reduction_prime_2prime_with_carry round4 result;  
+     lemma_montgomery_mult_result_less_than_prime_p256_order (as_nat c h0 a) (as_nat c h0 b) (uint_v k0); *) 
+   reduction_prime_2prime_with_carry t result;  
      
      lemmaFromDomainToDomain (as_nat c h0 a);
      lemmaFromDomainToDomain (as_nat c h0 b);

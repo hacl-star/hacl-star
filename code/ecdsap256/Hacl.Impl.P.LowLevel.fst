@@ -779,3 +779,10 @@ let add_long_without_carry #c t t1 result  =
   let _  = add_long_bn t t1 result in 
     assert_norm (getPower2 P256 * pow2 64 + getPrime P256 * getPrime P256 < getLongPower2 P256);
     assert_norm (getPower2 P384 * pow2 64 + getPrime P384 * getPrime P384 < getLongPower2 P384)
+
+
+let mul_atomic x y result temp = 
+  let res = mul64_wide x y in 
+  let l0, h0 = to_u64 res, to_u64 (res >>. 64ul) in 
+  upd result (size 0) l0;
+  upd temp (size 0) h0
