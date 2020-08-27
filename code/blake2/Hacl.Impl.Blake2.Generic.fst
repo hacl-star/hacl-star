@@ -72,29 +72,6 @@ val get_sigma_sub:
 
 let get_sigma_sub start i = get_sigma (start +. i)
 
-
-inline_for_extraction noextract
-val get_r:
-  a: Spec.alg
-  -> s: size_t{v s < 4} ->
-  Stack (rotval (Spec.wt a))
-    (requires (fun h -> True))
-    (ensures  (fun h0 z h1 -> h0 == h1 /\ z == Lib.Sequence.((Spec.rTable a).[v s])))
-
-let get_r a s =
-  recall_contents #(rotval (Spec.wt Spec.Blake2S)) #4ul rTable_S (Spec.rTable Spec.Blake2S);
-  recall_contents #(rotval (Spec.wt Spec.Blake2B)) #4ul rTable_B (Spec.rTable Spec.Blake2B);
-  let h0 = ST.get() in
-  [@inline_let]
-  let rTable: (x:glbuffer (rotval (Spec.wt a)) 4ul{witnessed x (Spec.rTable a) /\ recallable x}) =
-    match a with
-    | Spec.Blake2S -> rTable_S
-    | Spec.Blake2B -> rTable_B
-  in
-  index rTable s
-
-
-
 inline_for_extraction noextract
 let rounds_t (a:Spec.alg): size_t = size (Spec.rounds a)
 
@@ -178,10 +155,18 @@ let blake2_mixing #al #m wv x y =
   let b = 1ul in
   let c = 2ul in
   let d = 3ul in
-  let r0 = get_r al (size 0) in
-  let r1 = get_r al (size 1) in
-  let r2 = get_r al (size 2) in
-  let r3 = get_r al (size 3) in
+  [@inline_let]
+  let r0 = normalize_term (Lib.Sequence.index (Spec.rTable al) 0) in
+  normalize_term_spec (Lib.Sequence.index (Spec.rTable al) 0);
+  [@inline_let]
+  let r1 = normalize_term (Lib.Sequence.index (Spec.rTable al) 1) in
+  normalize_term_spec (Lib.Sequence.index (Spec.rTable al) 1);
+  [@inline_let]
+  let r2 = normalize_term (Lib.Sequence.index (Spec.rTable al) 2) in
+  normalize_term_spec (Lib.Sequence.index (Spec.rTable al) 2);
+  [@inline_let]
+  let r3 = normalize_term (Lib.Sequence.index (Spec.rTable al) 3) in
+  normalize_term_spec (Lib.Sequence.index (Spec.rTable al) 3);
   let h1 = ST.get() in
   g2 wv a b x;
   g1 wv d a r0;
