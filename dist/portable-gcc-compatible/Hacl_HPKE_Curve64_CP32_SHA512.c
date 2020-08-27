@@ -45,24 +45,24 @@ Hacl_HPKE_Curve64_CP32_SHA512_setupBaseI(
   uint8_t *uu____0 = pkR;
   uint8_t zeros[32U] = { 0U };
   Hacl_Curve25519_64_scalarmult(o_zz_, skE, uu____0);
-  uint8_t res4 = (uint8_t)255U;
+  uint8_t res0 = (uint8_t)255U;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)32U; i++)
   {
     uint8_t uu____1 = FStar_UInt8_eq_mask(o_zz_[i], zeros[i]);
-    res4 = uu____1 & res4;
+    res0 = uu____1 & res0;
   }
-  uint8_t z = res4;
-  uint32_t res3;
+  uint8_t z = res0;
+  uint32_t res;
   if (z == (uint8_t)255U)
   {
-    res3 = (uint32_t)1U;
+    res = (uint32_t)1U;
   }
   else
   {
-    res3 = (uint32_t)0U;
+    res = (uint32_t)0U;
   }
-  uint32_t res2 = res3;
-  uint32_t res = res1 | res2;
+  uint32_t res2 = res;
+  uint32_t res3 = res1 | res2;
   uint8_t default_psk[64U] = { 0U };
   uint8_t default_pkI[32U] = { 0U };
   uint32_t
@@ -131,7 +131,7 @@ Hacl_HPKE_Curve64_CP32_SHA512_setupBaseI(
     tmp,
     (uint32_t)10U + context_len,
     (uint32_t)12U);
-  return res;
+  return res3;
 }
 
 /* SNIPPET_END: Hacl_HPKE_Curve64_CP32_SHA512_setupBaseI */
@@ -157,24 +157,24 @@ Hacl_HPKE_Curve64_CP32_SHA512_setupBaseR(
   uint8_t *uu____0 = pkE;
   uint8_t zeros[32U] = { 0U };
   Hacl_Curve25519_64_scalarmult(o_pkR_, skR, uu____0);
-  uint8_t res4 = (uint8_t)255U;
+  uint8_t res0 = (uint8_t)255U;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)32U; i++)
   {
     uint8_t uu____1 = FStar_UInt8_eq_mask(o_pkR_[i], zeros[i]);
-    res4 = uu____1 & res4;
+    res0 = uu____1 & res0;
   }
-  uint8_t z = res4;
-  uint32_t res3;
+  uint8_t z = res0;
+  uint32_t res;
   if (z == (uint8_t)255U)
   {
-    res3 = (uint32_t)1U;
+    res = (uint32_t)1U;
   }
   else
   {
-    res3 = (uint32_t)0U;
+    res = (uint32_t)0U;
   }
-  uint32_t res = res3;
   uint32_t res2 = res;
+  uint32_t res20 = res2;
   uint8_t default_psk[64U] = { 0U };
   uint8_t default_pkI[32U] = { 0U };
   uint32_t
@@ -243,7 +243,7 @@ Hacl_HPKE_Curve64_CP32_SHA512_setupBaseR(
     tmp,
     (uint32_t)10U + context_len,
     (uint32_t)12U);
-  return res1 | res2;
+  return res1 | res20;
 }
 
 /* SNIPPET_END: Hacl_HPKE_Curve64_CP32_SHA512_setupBaseR */
@@ -265,11 +265,11 @@ Hacl_HPKE_Curve64_CP32_SHA512_sealBase(
   uint8_t k[32U] = { 0U };
   uint8_t n[12U] = { 0U };
   uint8_t *pkE = output;
-  uint32_t res1 = Hacl_HPKE_Curve64_CP32_SHA512_setupBaseI(pkE, k, n, skE, pkR, infolen, info);
+  uint32_t res = Hacl_HPKE_Curve64_CP32_SHA512_setupBaseI(pkE, k, n, skE, pkR, infolen, info);
   uint8_t *dec = output + (uint32_t)32U;
   Hacl_Chacha20Poly1305_32_aead_encrypt(k, n, infolen, info, mlen, m, dec, dec + mlen);
-  uint32_t res = res1;
-  return res;
+  uint32_t res0 = res;
+  return res0;
 }
 
 /* SNIPPET_END: Hacl_HPKE_Curve64_CP32_SHA512_sealBase */

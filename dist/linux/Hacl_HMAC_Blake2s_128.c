@@ -141,7 +141,7 @@ Hacl_HMAC_Blake2s_128_compute_blake2s_128(
                 u32 kk_shift_8;
                 u32 iv0_1;
                 u64 ev;
-                u64 ev1;
+                u64 ev11;
                 r20[0U] = Lib_IntVector_Intrinsics_vec128_load32s(iv00, iv10, iv20, iv30);
                 r30[0U] = Lib_IntVector_Intrinsics_vec128_load32s(iv40, iv50, iv60, iv70);
                 kk_shift_80 = (u32)0U;
@@ -174,21 +174,21 @@ Hacl_HMAC_Blake2s_128_compute_blake2s_128(
                 if (data_len == (u32)0U)
                 {
                   u64
-                  ev2 =
+                  ev1 =
                     Hacl_Hash_Blake2s_128_update_last_blake2s_128(s,
                       ev0,
                       (u64)0U,
                       ipad,
                       (u32)64U);
-                  ev10 = ev2;
+                  ev10 = ev1;
                 }
                 else
                 {
-                  u64 ev11 = Hacl_Hash_Blake2s_128_update_multi_blake2s_128(s, ev0, ipad, (u32)1U);
+                  u64 ev1 = Hacl_Hash_Blake2s_128_update_multi_blake2s_128(s, ev0, ipad, (u32)1U);
                   u64
                   ev2 =
                     Hacl_Hash_Blake2s_128_update_last_blake2s_128(s,
-                      ev11,
+                      ev1,
                       (u64)(u32)64U,
                       data,
                       data_len);
@@ -218,27 +218,27 @@ Hacl_HMAC_Blake2s_128_compute_blake2s_128(
                 if ((u32)32U == (u32)0U)
                 {
                   u64
-                  ev2 =
+                  ev1 =
                     Hacl_Hash_Blake2s_128_update_last_blake2s_128(s,
                       ev,
                       (u64)0U,
                       opad,
                       (u32)64U);
-                  ev1 = ev2;
+                  ev11 = ev1;
                 }
                 else
                 {
-                  u64 ev11 = Hacl_Hash_Blake2s_128_update_multi_blake2s_128(s, ev, opad, (u32)1U);
+                  u64 ev1 = Hacl_Hash_Blake2s_128_update_multi_blake2s_128(s, ev, opad, (u32)1U);
                   u64
                   ev2 =
                     Hacl_Hash_Blake2s_128_update_last_blake2s_128(s,
-                      ev11,
+                      ev1,
                       (u64)(u32)64U,
                       hash1,
                       (u32)32U);
-                  ev1 = ev2;
+                  ev11 = ev2;
                 }
-                Hacl_Hash_Blake2s_128_finish_blake2s_128(s, ev1, dst);
+                Hacl_Hash_Blake2s_128_finish_blake2s_128(s, ev11, dst);
               }
             }
           }

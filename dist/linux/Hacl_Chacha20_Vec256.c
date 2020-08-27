@@ -241,9 +241,9 @@ chacha20_init_256(Lib_IntVector_Intrinsics_vec256 *ctx, u8 *k, u8 *n, u32 ctr)
     for (i = (u32)0U; i < (u32)16U; i++)
     {
       Lib_IntVector_Intrinsics_vec256 *os = ctx;
-      u32 x1 = ctx1[i];
-      Lib_IntVector_Intrinsics_vec256 x = Lib_IntVector_Intrinsics_vec256_load32(x1);
-      os[i] = x;
+      u32 x = ctx1[i];
+      Lib_IntVector_Intrinsics_vec256 x0 = Lib_IntVector_Intrinsics_vec256_load32(x);
+      os[i] = x0;
     }
   }
   ctr1 =

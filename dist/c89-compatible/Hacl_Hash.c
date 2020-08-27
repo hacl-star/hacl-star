@@ -180,9 +180,9 @@ uint64_t Hacl_Hash_Core_Blake2_update_blake2s_32(uint32_t *s, uint64_t totlen, u
                           for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                           {
                             uint32_t *os = r110;
-                            uint32_t x2 = r110[i];
-                            uint32_t x1 = x2 >> r02 | x2 << ((uint32_t)32U - r02);
-                            os[i] = x1;
+                            uint32_t x1 = r110[i];
+                            uint32_t x10 = x1 >> r02 | x1 << ((uint32_t)32U - r02);
+                            os[i] = x10;
                           }
                         }
                         {
@@ -216,9 +216,9 @@ uint64_t Hacl_Hash_Core_Blake2_update_blake2s_32(uint32_t *s, uint64_t totlen, u
                                 for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                                 {
                                   uint32_t *os = r111;
-                                  uint32_t x2 = r111[i];
-                                  uint32_t x1 = x2 >> r13 | x2 << ((uint32_t)32U - r13);
-                                  os[i] = x1;
+                                  uint32_t x1 = r111[i];
+                                  uint32_t x10 = x1 >> r13 | x1 << ((uint32_t)32U - r13);
+                                  os[i] = x10;
                                 }
                               }
                               {
@@ -261,9 +261,9 @@ uint64_t Hacl_Hash_Core_Blake2_update_blake2s_32(uint32_t *s, uint64_t totlen, u
                                       for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                                       {
                                         uint32_t *os = r112;
-                                        uint32_t x2 = r112[i];
-                                        uint32_t x1 = x2 >> r22 | x2 << ((uint32_t)32U - r22);
-                                        os[i] = x1;
+                                        uint32_t x1 = r112[i];
+                                        uint32_t x10 = x1 >> r22 | x1 << ((uint32_t)32U - r22);
+                                        os[i] = x10;
                                       }
                                     }
                                     {
@@ -297,9 +297,10 @@ uint64_t Hacl_Hash_Core_Blake2_update_blake2s_32(uint32_t *s, uint64_t totlen, u
                                             for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                                             {
                                               uint32_t *os = r113;
-                                              uint32_t x2 = r113[i];
-                                              uint32_t x1 = x2 >> r32 | x2 << ((uint32_t)32U - r32);
-                                              os[i] = x1;
+                                              uint32_t x1 = r113[i];
+                                              uint32_t
+                                              x10 = x1 >> r32 | x1 << ((uint32_t)32U - r32);
+                                              os[i] = x10;
                                             }
                                           }
                                           {
@@ -413,10 +414,13 @@ uint64_t Hacl_Hash_Core_Blake2_update_blake2s_32(uint32_t *s, uint64_t totlen, u
                                                           i++)
                                                         {
                                                           uint32_t *os = r117;
-                                                          uint32_t x2 = r117[i];
+                                                          uint32_t x1 = r117[i];
                                                           uint32_t
-                                                          x1 = x2 >> r0 | x2 << ((uint32_t)32U - r0);
-                                                          os[i] = x1;
+                                                          x13 =
+                                                            x1
+                                                            >> r0
+                                                            | x1 << ((uint32_t)32U - r0);
+                                                          os[i] = x13;
                                                         }
                                                       }
                                                       {
@@ -465,13 +469,13 @@ uint64_t Hacl_Hash_Core_Blake2_update_blake2s_32(uint32_t *s, uint64_t totlen, u
                                                                 i++)
                                                               {
                                                                 uint32_t *os = r118;
-                                                                uint32_t x2 = r118[i];
+                                                                uint32_t x1 = r118[i];
                                                                 uint32_t
-                                                                x1 =
-                                                                  x2
+                                                                x13 =
+                                                                  x1
                                                                   >> r1
-                                                                  | x2 << ((uint32_t)32U - r1);
-                                                                os[i] = x1;
+                                                                  | x1 << ((uint32_t)32U - r1);
+                                                                os[i] = x13;
                                                               }
                                                             }
                                                             {
@@ -540,15 +544,15 @@ uint64_t Hacl_Hash_Core_Blake2_update_blake2s_32(uint32_t *s, uint64_t totlen, u
                                                                       i++)
                                                                     {
                                                                       uint32_t *os = r119;
-                                                                      uint32_t x2 = r119[i];
+                                                                      uint32_t x1 = r119[i];
                                                                       uint32_t
-                                                                      x1 =
-                                                                        x2
+                                                                      x13 =
+                                                                        x1
                                                                         >> r24
                                                                         |
-                                                                          x2
+                                                                          x1
                                                                           << ((uint32_t)32U - r24);
-                                                                      os[i] = x1;
+                                                                      os[i] = x13;
                                                                     }
                                                                   }
                                                                   {
@@ -605,17 +609,17 @@ uint64_t Hacl_Hash_Core_Blake2_update_blake2s_32(uint32_t *s, uint64_t totlen, u
                                                                             i++)
                                                                           {
                                                                             uint32_t *os = r1110;
-                                                                            uint32_t x2 = r1110[i];
+                                                                            uint32_t x1 = r1110[i];
                                                                             uint32_t
-                                                                            x1 =
-                                                                              x2
+                                                                            x13 =
+                                                                              x1
                                                                               >> r34
                                                                               |
-                                                                                x2
+                                                                                x1
                                                                                 <<
                                                                                   ((uint32_t)32U
                                                                                   - r34);
-                                                                            os[i] = x1;
+                                                                            os[i] = x13;
                                                                           }
                                                                         }
                                                                         {
@@ -985,9 +989,9 @@ Hacl_Hash_Core_Blake2_update_blake2b_32(
                           for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                           {
                             uint64_t *os = r110;
-                            uint64_t x2 = r110[i];
-                            uint64_t x1 = x2 >> r02 | x2 << ((uint32_t)64U - r02);
-                            os[i] = x1;
+                            uint64_t x1 = r110[i];
+                            uint64_t x10 = x1 >> r02 | x1 << ((uint32_t)64U - r02);
+                            os[i] = x10;
                           }
                         }
                         {
@@ -1021,9 +1025,9 @@ Hacl_Hash_Core_Blake2_update_blake2b_32(
                                 for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                                 {
                                   uint64_t *os = r111;
-                                  uint64_t x2 = r111[i];
-                                  uint64_t x1 = x2 >> r13 | x2 << ((uint32_t)64U - r13);
-                                  os[i] = x1;
+                                  uint64_t x1 = r111[i];
+                                  uint64_t x10 = x1 >> r13 | x1 << ((uint32_t)64U - r13);
+                                  os[i] = x10;
                                 }
                               }
                               {
@@ -1066,9 +1070,9 @@ Hacl_Hash_Core_Blake2_update_blake2b_32(
                                       for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                                       {
                                         uint64_t *os = r112;
-                                        uint64_t x2 = r112[i];
-                                        uint64_t x1 = x2 >> r22 | x2 << ((uint32_t)64U - r22);
-                                        os[i] = x1;
+                                        uint64_t x1 = r112[i];
+                                        uint64_t x10 = x1 >> r22 | x1 << ((uint32_t)64U - r22);
+                                        os[i] = x10;
                                       }
                                     }
                                     {
@@ -1102,9 +1106,10 @@ Hacl_Hash_Core_Blake2_update_blake2b_32(
                                             for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                                             {
                                               uint64_t *os = r113;
-                                              uint64_t x2 = r113[i];
-                                              uint64_t x1 = x2 >> r32 | x2 << ((uint32_t)64U - r32);
-                                              os[i] = x1;
+                                              uint64_t x1 = r113[i];
+                                              uint64_t
+                                              x10 = x1 >> r32 | x1 << ((uint32_t)64U - r32);
+                                              os[i] = x10;
                                             }
                                           }
                                           {
@@ -1218,10 +1223,13 @@ Hacl_Hash_Core_Blake2_update_blake2b_32(
                                                           i++)
                                                         {
                                                           uint64_t *os = r117;
-                                                          uint64_t x2 = r117[i];
+                                                          uint64_t x1 = r117[i];
                                                           uint64_t
-                                                          x1 = x2 >> r0 | x2 << ((uint32_t)64U - r0);
-                                                          os[i] = x1;
+                                                          x13 =
+                                                            x1
+                                                            >> r0
+                                                            | x1 << ((uint32_t)64U - r0);
+                                                          os[i] = x13;
                                                         }
                                                       }
                                                       {
@@ -1270,13 +1278,13 @@ Hacl_Hash_Core_Blake2_update_blake2b_32(
                                                                 i++)
                                                               {
                                                                 uint64_t *os = r118;
-                                                                uint64_t x2 = r118[i];
+                                                                uint64_t x1 = r118[i];
                                                                 uint64_t
-                                                                x1 =
-                                                                  x2
+                                                                x13 =
+                                                                  x1
                                                                   >> r1
-                                                                  | x2 << ((uint32_t)64U - r1);
-                                                                os[i] = x1;
+                                                                  | x1 << ((uint32_t)64U - r1);
+                                                                os[i] = x13;
                                                               }
                                                             }
                                                             {
@@ -1345,15 +1353,15 @@ Hacl_Hash_Core_Blake2_update_blake2b_32(
                                                                       i++)
                                                                     {
                                                                       uint64_t *os = r119;
-                                                                      uint64_t x2 = r119[i];
+                                                                      uint64_t x1 = r119[i];
                                                                       uint64_t
-                                                                      x1 =
-                                                                        x2
+                                                                      x13 =
+                                                                        x1
                                                                         >> r24
                                                                         |
-                                                                          x2
+                                                                          x1
                                                                           << ((uint32_t)64U - r24);
-                                                                      os[i] = x1;
+                                                                      os[i] = x13;
                                                                     }
                                                                   }
                                                                   {
@@ -1410,17 +1418,17 @@ Hacl_Hash_Core_Blake2_update_blake2b_32(
                                                                             i++)
                                                                           {
                                                                             uint64_t *os = r1110;
-                                                                            uint64_t x2 = r1110[i];
+                                                                            uint64_t x1 = r1110[i];
                                                                             uint64_t
-                                                                            x1 =
-                                                                              x2
+                                                                            x13 =
+                                                                              x1
                                                                               >> r34
                                                                               |
-                                                                                x2
+                                                                                x1
                                                                                 <<
                                                                                   ((uint32_t)64U
                                                                                   - r34);
-                                                                            os[i] = x1;
+                                                                            os[i] = x13;
                                                                           }
                                                                         }
                                                                         {
@@ -1897,9 +1905,9 @@ Hacl_Hash_Blake2_update_last_blake2s_32(
                                   for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                                   {
                                     uint32_t *os = r110;
-                                    uint32_t x2 = r110[i];
-                                    uint32_t x1 = x2 >> r02 | x2 << ((uint32_t)32U - r02);
-                                    os[i] = x1;
+                                    uint32_t x1 = r110[i];
+                                    uint32_t x10 = x1 >> r02 | x1 << ((uint32_t)32U - r02);
+                                    os[i] = x10;
                                   }
                                 }
                                 {
@@ -1933,9 +1941,9 @@ Hacl_Hash_Blake2_update_last_blake2s_32(
                                         for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                                         {
                                           uint32_t *os = r111;
-                                          uint32_t x2 = r111[i];
-                                          uint32_t x1 = x2 >> r13 | x2 << ((uint32_t)32U - r13);
-                                          os[i] = x1;
+                                          uint32_t x1 = r111[i];
+                                          uint32_t x10 = x1 >> r13 | x1 << ((uint32_t)32U - r13);
+                                          os[i] = x10;
                                         }
                                       }
                                       {
@@ -1978,10 +1986,10 @@ Hacl_Hash_Blake2_update_last_blake2s_32(
                                               for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                                               {
                                                 uint32_t *os = r112;
-                                                uint32_t x2 = r112[i];
+                                                uint32_t x1 = r112[i];
                                                 uint32_t
-                                                x1 = x2 >> r22 | x2 << ((uint32_t)32U - r22);
-                                                os[i] = x1;
+                                                x10 = x1 >> r22 | x1 << ((uint32_t)32U - r22);
+                                                os[i] = x10;
                                               }
                                             }
                                             {
@@ -2015,10 +2023,10 @@ Hacl_Hash_Blake2_update_last_blake2s_32(
                                                     for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                                                     {
                                                       uint32_t *os = r113;
-                                                      uint32_t x2 = r113[i];
+                                                      uint32_t x1 = r113[i];
                                                       uint32_t
-                                                      x1 = x2 >> r32 | x2 << ((uint32_t)32U - r32);
-                                                      os[i] = x1;
+                                                      x10 = x1 >> r32 | x1 << ((uint32_t)32U - r32);
+                                                      os[i] = x10;
                                                     }
                                                   }
                                                   {
@@ -2161,13 +2169,13 @@ Hacl_Hash_Blake2_update_last_blake2s_32(
                                                                   i++)
                                                                 {
                                                                   uint32_t *os = r117;
-                                                                  uint32_t x2 = r117[i];
+                                                                  uint32_t x1 = r117[i];
                                                                   uint32_t
-                                                                  x1 =
-                                                                    x2
+                                                                  x13 =
+                                                                    x1
                                                                     >> r0
-                                                                    | x2 << ((uint32_t)32U - r0);
-                                                                  os[i] = x1;
+                                                                    | x1 << ((uint32_t)32U - r0);
+                                                                  os[i] = x13;
                                                                 }
                                                               }
                                                               {
@@ -2222,15 +2230,15 @@ Hacl_Hash_Blake2_update_last_blake2s_32(
                                                                         i++)
                                                                       {
                                                                         uint32_t *os = r118;
-                                                                        uint32_t x2 = r118[i];
+                                                                        uint32_t x1 = r118[i];
                                                                         uint32_t
-                                                                        x1 =
-                                                                          x2
+                                                                        x13 =
+                                                                          x1
                                                                           >> r1
                                                                           |
-                                                                            x2
+                                                                            x1
                                                                             << ((uint32_t)32U - r1);
-                                                                        os[i] = x1;
+                                                                        os[i] = x13;
                                                                       }
                                                                     }
                                                                     {
@@ -2310,17 +2318,17 @@ Hacl_Hash_Blake2_update_last_blake2s_32(
                                                                               i++)
                                                                             {
                                                                               uint32_t *os = r119;
-                                                                              uint32_t x2 = r119[i];
+                                                                              uint32_t x1 = r119[i];
                                                                               uint32_t
-                                                                              x1 =
-                                                                                x2
+                                                                              x13 =
+                                                                                x1
                                                                                 >> r24
                                                                                 |
-                                                                                  x2
+                                                                                  x1
                                                                                   <<
                                                                                     ((uint32_t)32U
                                                                                     - r24);
-                                                                              os[i] = x1;
+                                                                              os[i] = x13;
                                                                             }
                                                                           }
                                                                           {
@@ -2392,17 +2400,17 @@ Hacl_Hash_Blake2_update_last_blake2s_32(
                                                                                     uint32_t
                                                                                     *os = r1110;
                                                                                     uint32_t
-                                                                                    x2 = r1110[i];
+                                                                                    x1 = r1110[i];
                                                                                     uint32_t
-                                                                                    x1 =
-                                                                                      x2
+                                                                                    x13 =
+                                                                                      x1
                                                                                       >> r34
                                                                                       |
-                                                                                        x2
+                                                                                        x1
                                                                                         <<
                                                                                           ((uint32_t)32U
                                                                                           - r34);
-                                                                                    os[i] = x1;
+                                                                                    os[i] = x13;
                                                                                   }
                                                                                 }
                                                                                 {
@@ -2808,9 +2816,9 @@ Hacl_Hash_Blake2_update_last_blake2b_32(
                                   for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                                   {
                                     uint64_t *os = r110;
-                                    uint64_t x2 = r110[i];
-                                    uint64_t x1 = x2 >> r02 | x2 << ((uint32_t)64U - r02);
-                                    os[i] = x1;
+                                    uint64_t x1 = r110[i];
+                                    uint64_t x10 = x1 >> r02 | x1 << ((uint32_t)64U - r02);
+                                    os[i] = x10;
                                   }
                                 }
                                 {
@@ -2844,9 +2852,9 @@ Hacl_Hash_Blake2_update_last_blake2b_32(
                                         for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                                         {
                                           uint64_t *os = r111;
-                                          uint64_t x2 = r111[i];
-                                          uint64_t x1 = x2 >> r13 | x2 << ((uint32_t)64U - r13);
-                                          os[i] = x1;
+                                          uint64_t x1 = r111[i];
+                                          uint64_t x10 = x1 >> r13 | x1 << ((uint32_t)64U - r13);
+                                          os[i] = x10;
                                         }
                                       }
                                       {
@@ -2889,10 +2897,10 @@ Hacl_Hash_Blake2_update_last_blake2b_32(
                                               for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                                               {
                                                 uint64_t *os = r112;
-                                                uint64_t x2 = r112[i];
+                                                uint64_t x1 = r112[i];
                                                 uint64_t
-                                                x1 = x2 >> r22 | x2 << ((uint32_t)64U - r22);
-                                                os[i] = x1;
+                                                x10 = x1 >> r22 | x1 << ((uint32_t)64U - r22);
+                                                os[i] = x10;
                                               }
                                             }
                                             {
@@ -2926,10 +2934,10 @@ Hacl_Hash_Blake2_update_last_blake2b_32(
                                                     for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                                                     {
                                                       uint64_t *os = r113;
-                                                      uint64_t x2 = r113[i];
+                                                      uint64_t x1 = r113[i];
                                                       uint64_t
-                                                      x1 = x2 >> r32 | x2 << ((uint32_t)64U - r32);
-                                                      os[i] = x1;
+                                                      x10 = x1 >> r32 | x1 << ((uint32_t)64U - r32);
+                                                      os[i] = x10;
                                                     }
                                                   }
                                                   {
@@ -3072,13 +3080,13 @@ Hacl_Hash_Blake2_update_last_blake2b_32(
                                                                   i++)
                                                                 {
                                                                   uint64_t *os = r117;
-                                                                  uint64_t x2 = r117[i];
+                                                                  uint64_t x1 = r117[i];
                                                                   uint64_t
-                                                                  x1 =
-                                                                    x2
+                                                                  x13 =
+                                                                    x1
                                                                     >> r0
-                                                                    | x2 << ((uint32_t)64U - r0);
-                                                                  os[i] = x1;
+                                                                    | x1 << ((uint32_t)64U - r0);
+                                                                  os[i] = x13;
                                                                 }
                                                               }
                                                               {
@@ -3133,15 +3141,15 @@ Hacl_Hash_Blake2_update_last_blake2b_32(
                                                                         i++)
                                                                       {
                                                                         uint64_t *os = r118;
-                                                                        uint64_t x2 = r118[i];
+                                                                        uint64_t x1 = r118[i];
                                                                         uint64_t
-                                                                        x1 =
-                                                                          x2
+                                                                        x13 =
+                                                                          x1
                                                                           >> r1
                                                                           |
-                                                                            x2
+                                                                            x1
                                                                             << ((uint32_t)64U - r1);
-                                                                        os[i] = x1;
+                                                                        os[i] = x13;
                                                                       }
                                                                     }
                                                                     {
@@ -3221,17 +3229,17 @@ Hacl_Hash_Blake2_update_last_blake2b_32(
                                                                               i++)
                                                                             {
                                                                               uint64_t *os = r119;
-                                                                              uint64_t x2 = r119[i];
+                                                                              uint64_t x1 = r119[i];
                                                                               uint64_t
-                                                                              x1 =
-                                                                                x2
+                                                                              x13 =
+                                                                                x1
                                                                                 >> r24
                                                                                 |
-                                                                                  x2
+                                                                                  x1
                                                                                   <<
                                                                                     ((uint32_t)64U
                                                                                     - r24);
-                                                                              os[i] = x1;
+                                                                              os[i] = x13;
                                                                             }
                                                                           }
                                                                           {
@@ -3303,17 +3311,17 @@ Hacl_Hash_Blake2_update_last_blake2b_32(
                                                                                     uint64_t
                                                                                     *os = r1110;
                                                                                     uint64_t
-                                                                                    x2 = r1110[i];
+                                                                                    x1 = r1110[i];
                                                                                     uint64_t
-                                                                                    x1 =
-                                                                                      x2
+                                                                                    x13 =
+                                                                                      x1
                                                                                       >> r34
                                                                                       |
-                                                                                        x2
+                                                                                        x1
                                                                                         <<
                                                                                           ((uint32_t)64U
                                                                                           - r34);
-                                                                                    os[i] = x1;
+                                                                                    os[i] = x13;
                                                                                   }
                                                                                 }
                                                                                 {
