@@ -33,7 +33,6 @@ open Lib.IntVector.Intrinsics
 
 
 open Spec.Hash.Definitions
-open Hacl.Hash.Definitions
 
 open FStar.Mul
 
@@ -63,7 +62,6 @@ let isZero_uint64_nCT f =
 
 
 [@ (Comment "  This code is not side channel resistant")]
-
 val isMoreThanZeroLessThanOrderMinusOne: f:felem -> Stack bool
   (requires fun h -> live h f)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
@@ -117,7 +115,7 @@ let ecdsa_verification_step23 alg mLen m result =
   assert_norm (pow2 32 < pow2 125);
   push_frame(); 
     let h0 = ST.get() in 
-  let sz: FStar.UInt32.t = match alg with |NoHash -> mLen |Hash a ->  hash_len a in
+  let sz: FStar.UInt32.t = match alg with |NoHash -> mLen |Hash a ->  Hacl.Hash.Definitions.hash_len a in
   let mHash = create sz (u8 0) in    
   
   begin
@@ -369,7 +367,6 @@ let ecdsa_verification_step5 x pubKeyAsPoint u1 u2 tempBuffer =
 
 
 [@ (Comment "  This code is not side channel resistant")]
-
 val compare_felem_bool: a: felem -> b: felem -> Stack bool
   (requires fun h -> live h a /\ live h b)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\ r == (as_nat h0 a = as_nat h0 b))
@@ -465,7 +462,6 @@ let ecdsa_verification_core alg publicKeyBuffer hashAsFelem r s mLen m xBuffer t
 
 
 [@ (Comment "  This code is not side channel resistant")]
-
 val ecdsa_verification_:alg:hash_alg_ecdsa
   -> pubKey:lbuffer uint64 (size 8)
   -> r:lbuffer uint64 (size 4)

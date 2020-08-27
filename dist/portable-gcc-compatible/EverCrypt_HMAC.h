@@ -38,6 +38,8 @@ extern "C" {
 
 
 #include "Hacl_Kremlib.h"
+#include "Hacl_HMAC.h"
+#include "Hacl_Impl_Blake2_Constants.h"
 #include "Hacl_Hash.h"
 #include "Hacl_Spec.h"
 #include "EverCrypt_Hash.h"
@@ -93,6 +95,32 @@ EverCrypt_HMAC_compute_sha2_512(
 );
 
 /* SNIPPET_END: EverCrypt_HMAC_compute_sha2_512 */
+
+/* SNIPPET_START: EverCrypt_HMAC_compute_blake2s */
+
+void
+EverCrypt_HMAC_compute_blake2s(
+  uint8_t *dst,
+  uint8_t *key,
+  uint32_t key_len,
+  uint8_t *data,
+  uint32_t data_len
+);
+
+/* SNIPPET_END: EverCrypt_HMAC_compute_blake2s */
+
+/* SNIPPET_START: EverCrypt_HMAC_compute_blake2b */
+
+void
+EverCrypt_HMAC_compute_blake2b(
+  uint8_t *dst,
+  uint8_t *key,
+  uint32_t key_len,
+  uint8_t *data,
+  uint32_t data_len
+);
+
+/* SNIPPET_END: EverCrypt_HMAC_compute_blake2b */
 
 /* SNIPPET_START: EverCrypt_HMAC_is_supported_alg */
 

@@ -9,7 +9,7 @@
 #include <stdbool.h>
 #include <time.h>
 
-#include "Hacl_Streaming_SHA2_256.h"
+#include "Hacl_Streaming_SHA2.h"
 
 #include "test_helpers.h"
 #include "sha2_vectors.h"
@@ -26,28 +26,28 @@ int main() {
   uint8_t tag[32] = {};
   sha2_test_vector *v = vectors;
 
-  sha2_state *s = Hacl_Streaming_SHA2_256_create_in();
-  Hacl_Streaming_SHA2_256_update(s, v->input, 3);
-  Hacl_Streaming_SHA2_256_finish(s, tag);
+  sha2_state *s = Hacl_Streaming_SHA2_create_in_256();
+  Hacl_Streaming_SHA2_update_256(s, v->input, 3);
+  Hacl_Streaming_SHA2_finish_256(s, tag);
   ok &= compare_and_print(32, tag, v->tag_256);
 
   v++;
-  Hacl_Streaming_SHA2_256_init(s);
-  Hacl_Streaming_SHA2_256_update(s, NULL, 0);
-  Hacl_Streaming_SHA2_256_update(s, v->input, v->input_len);
-  Hacl_Streaming_SHA2_256_finish(s, tag);
+  Hacl_Streaming_SHA2_init_256(s);
+  Hacl_Streaming_SHA2_update_256(s, NULL, 0);
+  Hacl_Streaming_SHA2_update_256(s, v->input, v->input_len);
+  Hacl_Streaming_SHA2_finish_256(s, tag);
   ok &= compare_and_print(32, tag, v->tag_256);
 
   v++;
-  Hacl_Streaming_SHA2_256_init(s);
-  Hacl_Streaming_SHA2_256_update(s, NULL, 0);
-  Hacl_Streaming_SHA2_256_update(s, v->input, 16);
-  Hacl_Streaming_SHA2_256_update(s, v->input+16, 16);
-  Hacl_Streaming_SHA2_256_update(s, v->input+32, v->input_len - 32);
-  Hacl_Streaming_SHA2_256_finish(s, tag);
+  Hacl_Streaming_SHA2_init_256(s);
+  Hacl_Streaming_SHA2_update_256(s, NULL, 0);
+  Hacl_Streaming_SHA2_update_256(s, v->input, 16);
+  Hacl_Streaming_SHA2_update_256(s, v->input+16, 16);
+  Hacl_Streaming_SHA2_update_256(s, v->input+32, v->input_len - 32);
+  Hacl_Streaming_SHA2_finish_256(s, tag);
   ok &= compare_and_print(32, tag, v->tag_256);
 
-  Hacl_Streaming_SHA2_256_free(s);
+  Hacl_Streaming_SHA2_free_256(s);
 
   if (ok)
     return EXIT_SUCCESS;

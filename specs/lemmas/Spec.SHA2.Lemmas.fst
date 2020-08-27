@@ -6,9 +6,12 @@ module S = FStar.Seq
 
 open Spec.Hash.Definitions
 open Spec.SHA2
+open Spec.Hash.Lemmas
 
 friend Spec.SHA2
 friend Spec.Agile.Hash
+
+#set-options "--z3rlimit 25 --fuel 0 --ifuel 0"
 
 (* Scheduling function *)
 
@@ -29,7 +32,7 @@ let rec ws_aux (a:sha2_alg) (b:block_w a) (t:counter{t < size_k_w a}): Tot (word
 let ws = ws_aux
 
 (* Core shuffling function *)
-let shuffle_core_ (a:sha2_alg) (block:block_w a) (hash:words_state a) (t:counter{t < size_k_w a}): Tot (words_state a) =
+let shuffle_core_ (a:sha2_alg) (block:block_w a) (hash:words_state' a) (t:counter{t < size_k_w a}): Tot (words_state' a) =
   (**) assert(7 <= S.length hash);
   let a0 = hash.[0] in
   let b0 = hash.[1] in
@@ -53,12 +56,12 @@ let shuffle_core_ (a:sha2_alg) (block:block_w a) (hash:words_state a) (t:counter
 let shuffle_core = shuffle_core_
 
 (* Full shuffling function *)
-let shuffle_aux (a:sha2_alg) (hash:words_state a) (block:block_w a): Tot (words_state a) =
+let shuffle_aux (a:sha2_alg) (hash:words_state' a) (block:block_w a): Tot (words_state' a) =
   Spec.Loops.repeat_range 0 (size_k_w a) (shuffle_core a block) hash
 
 #push-options "--max_fuel 1 --max_ifuel 0"
 
-val shuffle_is_shuffle_pre: a:sha2_alg -> hash:words_state a -> block:block_w a ->
+val shuffle_is_shuffle_pre: a:sha2_alg -> hash:words_state' a -> block:block_w a ->
   Lemma (shuffle a hash block == shuffle_aux a hash block)
 let shuffle_is_shuffle_pre a hash block =
   let rec repeati_is_repeat_range #a (n:nat)
@@ -120,13 +123,15 @@ let shuffle_is_shuffle_pre a hash block =
 
 (* Compression function *)
 let update_aux (a:sha2_alg) (hash:words_state a) (block:bytes{S.length block = block_length a}): Tot (words_state a) =
+  let hash, _ = hash in
   let block_w = words_of_bytes a #block_word_length block in
   let hash_1 = shuffle_aux a hash block_w in
-  Lib.Sequence.map2 ( +. ) (hash <: Lib.Sequence.lseq (word a) (state_word_length a)) hash_1
+  Lib.Sequence.map2 ( +. ) (hash <: Lib.Sequence.lseq (word a) (state_word_length a)) hash_1, ()
 
 val update_is_update_pre: a:sha2_alg -> hash:words_state a -> block:bytes{S.length block = block_length a} ->
   Lemma (update a hash block == update_aux a hash block)
 let update_is_update_pre a hash block =
+  let hash, _ = hash in
   let block_w = words_of_bytes a #block_word_length block in
   let hash_1 = shuffle a hash block_w in
   shuffle_is_shuffle_pre a hash block_w;
@@ -142,8 +147,9 @@ let update_is_update_pre a hash block =
   in Classical.forall_intro aux;
   assert (s1 `Seq.equal` s2)
 
-#push-options "--max_fuel 1 --max_ifuel 0 --z3rlimit 200"
+#push-options "--max_fuel 1 --max_ifuel 1 --z3rlimit 200"
 let update_224_256 hash block =
+  assert_norm (words_state SHA2_224 == words_state SHA2_256);
   let rec ws_224_256 (b: block_w SHA2_256) (t:counter{t < size_k_w SHA2_256}):
     Lemma
       (ensures (ws SHA2_224 b t == ws SHA2_256 b t))
@@ -164,7 +170,7 @@ let update_224_256 hash block =
       ws_224_256 b (t - 2)
     end
   in
-  let shuffle_core_224_256 (block:block_w SHA2_256) (hash:words_state SHA2_256) (t:counter{t < size_k_w SHA2_256}):
+  let shuffle_core_224_256 (block:block_w SHA2_256) (hash:words_state' SHA2_256) (t:counter{t < size_k_w SHA2_256}):
     Lemma (ensures (shuffle_core SHA2_224 block hash t == shuffle_core SHA2_256 block hash t))
     [ SMTPat (shuffle_core SHA2_256 block hash t) ]
   =
@@ -182,7 +188,7 @@ let update_224_256 hash block =
     else
       repeat_range_f (min + 1) max f g (f x min)
   in
-  let shuffle_224_256 (hash:words_state SHA2_256) (block:block_w SHA2_256):
+  let shuffle_224_256 (hash:words_state' SHA2_256) (block:block_w SHA2_256):
     Lemma (ensures (shuffle SHA2_224 hash block == shuffle SHA2_256 hash block))
     [ SMTPat (shuffle SHA2_256 hash block) ]
   =
@@ -210,13 +216,32 @@ let update_224_256 hash block =
   reveal_opaque (`%shuffle) shuffle;
   reveal_opaque (`%update) update
 
-
 #pop-options
 
 let rec update_multi_224_256 hash blocks =
+  let a = SHA2_256 in
+  let a' = SHA2_224 in
+  assert_norm (words_state a == words_state a');
   if S.length blocks = 0 then
-    ()
+    begin
+    assert(blocks `S.equal` S.empty);
+    Spec.Hash.Lemmas.update_multi_zero a hash;
+    Spec.Hash.Lemmas.update_multi_zero a' hash
+    end
   else
-    let block, rem = Lib.UpdateMulti.split_block (block_length SHA2_256) blocks 1 in
-    update_224_256 hash block;
-    update_multi_224_256 (update SHA2_224 hash block) rem
+    begin
+    assert(block_length a = block_length a');
+    let block1, blocks_end = S.split blocks (block_length a) in
+    assert(S.length block1 = block_length a);
+    assert(S.length blocks_end % block_length a = 0);
+    assert(S.append block1 blocks_end `S.equal` blocks);
+    update_multi_associative a hash block1 blocks_end;
+    update_multi_associative a' hash block1 blocks_end;
+    update_multi_update a hash block1;
+    update_multi_update a' hash block1;
+    let hash1 = Spec.Agile.Hash.update a hash block1 in
+    let hash2 = Spec.Agile.Hash.update a' hash block1 in
+    update_224_256 hash block1;
+    assert(hash1 == hash2);
+    update_multi_224_256 hash1 blocks_end
+    end

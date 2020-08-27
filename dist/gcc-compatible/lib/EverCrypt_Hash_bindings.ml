@@ -31,6 +31,10 @@ module Bindings(F:Cstubs.FOREIGN) =
       Unsigned.UInt8.of_int 4
     let everCrypt_Hash_state_s_tags_EverCrypt_Hash_SHA2_512_s =
       Unsigned.UInt8.of_int 5
+    let everCrypt_Hash_state_s_tags_EverCrypt_Hash_Blake2S_s =
+      Unsigned.UInt8.of_int 6
+    let everCrypt_Hash_state_s_tags_EverCrypt_Hash_Blake2B_s =
+      Unsigned.UInt8.of_int 7
     type everCrypt_Hash_state_s = [ `everCrypt_Hash_state_s ] structure
     let (everCrypt_Hash_state_s : [ `everCrypt_Hash_state_s ] structure typ)
       = structure "EverCrypt_Hash_state_s_s"
@@ -50,6 +54,10 @@ module Bindings(F:Cstubs.FOREIGN) =
       field everCrypt_Hash_state_s_val "case_SHA2_384_s" (ptr uint64_t)
     let everCrypt_Hash_state_s_val_case_SHA2_512_s =
       field everCrypt_Hash_state_s_val "case_SHA2_512_s" (ptr uint64_t)
+    let everCrypt_Hash_state_s_val_case_Blake2S_s =
+      field everCrypt_Hash_state_s_val "case_Blake2S_s" (ptr uint32_t)
+    let everCrypt_Hash_state_s_val_case_Blake2B_s =
+      field everCrypt_Hash_state_s_val "case_Blake2B_s" (ptr uint64_t)
     let _ = seal everCrypt_Hash_state_s_val
     let everCrypt_Hash_state_s_u =
       field everCrypt_Hash_state_s "" everCrypt_Hash_state_s_val
@@ -72,9 +80,17 @@ module Bindings(F:Cstubs.FOREIGN) =
     let everCrypt_Hash_update_multi_256 =
       foreign "EverCrypt_Hash_update_multi_256"
         ((ptr uint32_t) @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))
+    let everCrypt_Hash_update2 =
+      foreign "EverCrypt_Hash_update2"
+        ((ptr everCrypt_Hash_state_s) @->
+           (uint64_t @-> (ocaml_bytes @-> (returning void))))
     let everCrypt_Hash_update =
       foreign "EverCrypt_Hash_update"
         ((ptr everCrypt_Hash_state_s) @-> (ocaml_bytes @-> (returning void)))
+    let everCrypt_Hash_update_multi2 =
+      foreign "EverCrypt_Hash_update_multi2"
+        ((ptr everCrypt_Hash_state_s) @->
+           (uint64_t @-> (ocaml_bytes @-> (uint32_t @-> (returning void)))))
     let everCrypt_Hash_update_multi =
       foreign "EverCrypt_Hash_update_multi"
         ((ptr everCrypt_Hash_state_s) @->
@@ -82,6 +98,10 @@ module Bindings(F:Cstubs.FOREIGN) =
     let everCrypt_Hash_update_last_256 =
       foreign "EverCrypt_Hash_update_last_256"
         ((ptr uint32_t) @->
+           (uint64_t @-> (ocaml_bytes @-> (uint32_t @-> (returning void)))))
+    let everCrypt_Hash_update_last2 =
+      foreign "EverCrypt_Hash_update_last2"
+        ((ptr everCrypt_Hash_state_s) @->
            (uint64_t @-> (ocaml_bytes @-> (uint32_t @-> (returning void)))))
     let everCrypt_Hash_update_last =
       foreign "EverCrypt_Hash_update_last"
@@ -152,6 +172,14 @@ module Bindings(F:Cstubs.FOREIGN) =
            @-> (ocaml_bytes @-> (returning void)))
     let everCrypt_Hash_Incremental_finish_sha512 =
       foreign "EverCrypt_Hash_Incremental_finish_sha512"
+        ((ptr hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____)
+           @-> (ocaml_bytes @-> (returning void)))
+    let everCrypt_Hash_Incremental_finish_blake2s =
+      foreign "EverCrypt_Hash_Incremental_finish_blake2s"
+        ((ptr hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____)
+           @-> (ocaml_bytes @-> (returning void)))
+    let everCrypt_Hash_Incremental_finish_blake2b =
+      foreign "EverCrypt_Hash_Incremental_finish_blake2b"
         ((ptr hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____)
            @-> (ocaml_bytes @-> (returning void)))
     let everCrypt_Hash_Incremental_alg_of_state =

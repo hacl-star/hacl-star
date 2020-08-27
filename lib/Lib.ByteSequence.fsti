@@ -244,3 +244,27 @@ val lemma_reveal_uint_to_bytes_le: #t:inttype{unsigned t /\ t <> U1} -> #l:secre
 
 val lemma_reveal_uint_to_bytes_be: #t:inttype{unsigned t /\ t <> U1} -> #l:secrecy_level -> b:bytes_l l{Lib.Sequence.length b == numbytes t} ->
   Lemma (nat_from_bytes_be b == uint_v (uint_from_bytes_be #t #l b))
+
+val lemma_uint_to_from_bytes_le_preserves_value :
+  #t : inttype{unsigned t /\ ~(U1? t)} ->
+  #l : secrecy_level ->
+  i : uint_t t l ->
+  Lemma(uint_from_bytes_le #t #l (uint_to_bytes_le #t #l i) == i)
+
+val lemma_uint_to_from_bytes_be_preserves_value :
+  #t : inttype{unsigned t /\ ~(U1? t)} ->
+  #l : secrecy_level ->
+  i : uint_t t l ->
+  Lemma(uint_from_bytes_be #t #l (uint_to_bytes_be #t #l i) == i)
+
+val lemma_uint_from_to_bytes_le_preserves_value :
+  #t : inttype{unsigned t /\ ~(U1? t)} ->
+  #l : secrecy_level ->
+  s : lbytes_l l (numbytes t) ->
+  Lemma(uint_to_bytes_le #t #l (uint_from_bytes_le #t #l s) `equal` s)
+
+val lemma_uint_from_to_bytes_be_preserves_value :
+  #t : inttype{unsigned t /\ ~(U1? t)} ->
+  #l : secrecy_level ->
+  s : lbytes_l l (numbytes t) ->
+  Lemma(uint_to_bytes_be #t #l (uint_from_bytes_be #t #l s) `equal` s)

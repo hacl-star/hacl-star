@@ -30,6 +30,8 @@
 #define SHA2_512 3
 #define SHA1 4
 #define MD5 5
+#define Blake2S 6
+#define Blake2B 7
 
 typedef uint8_t hash_alg;
 
@@ -88,6 +90,8 @@ extern C_String_t EverCrypt_Hash_string_of_alg(hash_alg uu___);
 #define SHA2_256_s 3
 #define SHA2_384_s 4
 #define SHA2_512_s 5
+#define Blake2S_s 6
+#define Blake2B_s 7
 
 typedef uint8_t state_s_tags;
 
@@ -101,6 +105,8 @@ typedef struct state_s_s
     uint32_t *case_SHA2_256_s;
     uint64_t *case_SHA2_384_s;
     uint64_t *case_SHA2_512_s;
+    uint32_t *case_Blake2S_s;
+    uint64_t *case_Blake2B_s;
   }
   ;
 }
@@ -111,6 +117,32 @@ extern state_s *EverCrypt_Hash_create(hash_alg a);
 extern void EverCrypt_Hash_init(state_s *a);
 
 extern void EverCrypt_Hash_hash(hash_alg a, uint8_t *dst, uint8_t *input, uint32_t len);
+
+extern void
+EverCrypt_Cipher_chacha20(
+  uint32_t len,
+  uint8_t *dst,
+  uint8_t *src,
+  uint8_t *key,
+  uint8_t *iv,
+  uint32_t ctr
+);
+
+extern void
+EverCrypt_Curve25519_scalarmult(uint8_t *shared, uint8_t *my_priv, uint8_t *their_pub);
+
+extern void
+EverCrypt_Poly1305_poly1305(uint8_t *dst, uint8_t *src, uint32_t len, uint8_t *key);
+
+extern void
+EverCrypt_HMAC_compute(
+  hash_alg a,
+  uint8_t *mac,
+  uint8_t *key,
+  uint32_t keylen,
+  uint8_t *data,
+  uint32_t datalen
+);
 
 static bool is_supported_alg(hash_alg uu___)
 {
@@ -138,32 +170,6 @@ static bool is_supported_alg(hash_alg uu___)
       }
   }
 }
-
-extern void
-EverCrypt_Cipher_chacha20(
-  uint32_t len,
-  uint8_t *dst,
-  uint8_t *src,
-  uint8_t *key,
-  uint8_t *iv,
-  uint32_t ctr
-);
-
-extern void
-EverCrypt_Curve25519_scalarmult(uint8_t *shared, uint8_t *my_priv, uint8_t *their_pub);
-
-extern void
-EverCrypt_Poly1305_poly1305(uint8_t *dst, uint8_t *src, uint32_t len, uint8_t *key);
-
-extern void
-EverCrypt_HMAC_compute(
-  hash_alg a,
-  uint8_t *mac,
-  uint8_t *key,
-  uint32_t keylen,
-  uint8_t *data,
-  uint32_t datalen
-);
 
 typedef struct state_s
 {
@@ -10123,6 +10129,30 @@ vectors2[3U] =
 
 static uint32_t vectors_len2 = (uint32_t)3U;
 
+typedef struct state_s2_s
+{
+  impl i;
+  uint8_t *iv;
+  uint32_t iv_len;
+  uint8_t *xkey;
+  uint32_t ctr;
+}
+state_s2;
+
+extern error_code
+EverCrypt_CTR_create_in(
+  cipher_alg a,
+  state_s2 **r,
+  uint8_t *dst,
+  uint8_t *k,
+  uint32_t iv,
+  uint32_t iv_len
+);
+
+extern void EverCrypt_CTR_update_block(state_s2 *a, uint8_t *p, uint8_t *dst);
+
+extern void EverCrypt_CTR_free(state_s2 *a);
+
 KRML_DEPRECATED("LowStar.Failure.failwith")
 
 static void failwith____(C_String_t s)
@@ -10172,6 +10202,16 @@ static void test_one_hash(hash_vector vec)
         break;
       }
     case SHA2_512:
+      {
+        tlen = (uint32_t)64U;
+        break;
+      }
+    case Blake2S:
+      {
+        tlen = (uint32_t)32U;
+        break;
+      }
+    case Blake2B:
       {
         tlen = (uint32_t)64U;
         break;
@@ -10280,6 +10320,16 @@ static bool keysized(hash_alg a, uint32_t l)
         sw = (uint32_t)128U;
         break;
       }
+    case Blake2S:
+      {
+        sw = (uint32_t)64U;
+        break;
+      }
+    case Blake2B:
+      {
+        sw = (uint32_t)128U;
+        break;
+      }
     default:
       {
         KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
@@ -10327,6 +10377,16 @@ static void test_one_hmac(hmac_vector vec)
         break;
       }
     case SHA2_512:
+      {
+        sw0 = (uint32_t)64U;
+        break;
+      }
+    case Blake2S:
+      {
+        sw0 = (uint32_t)32U;
+        break;
+      }
+    case Blake2B:
       {
         sw0 = (uint32_t)64U;
         break;
@@ -10380,6 +10440,16 @@ static void test_one_hmac(hmac_vector vec)
           sw1 = (uint32_t)128U;
           break;
         }
+      case Blake2S:
+        {
+          sw1 = (uint32_t)64U;
+          break;
+        }
+      case Blake2B:
+        {
+          sw1 = (uint32_t)128U;
+          break;
+        }
       default:
         {
           KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
@@ -10425,6 +10495,16 @@ static void test_one_hmac(hmac_vector vec)
             sw2 = (uint32_t)64U;
             break;
           }
+        case Blake2S:
+          {
+            sw2 = (uint32_t)32U;
+            break;
+          }
+        case Blake2B:
+          {
+            sw2 = (uint32_t)64U;
+            break;
+          }
         default:
           {
             KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
@@ -10465,6 +10545,16 @@ static void test_one_hmac(hmac_vector vec)
             break;
           }
         case SHA2_512:
+          {
+            sw = (uint32_t)64U;
+            break;
+          }
+        case Blake2S:
+          {
+            sw = (uint32_t)32U;
+            break;
+          }
+        case Blake2B:
           {
             sw = (uint32_t)64U;
             break;
@@ -11110,6 +11200,16 @@ static void test_one_hkdf(hkdf_vector vec)
         sw0 = (uint32_t)64U;
         break;
       }
+    case Blake2S:
+      {
+        sw0 = (uint32_t)32U;
+        break;
+      }
+    case Blake2B:
+      {
+        sw0 = (uint32_t)64U;
+        break;
+      }
     default:
       {
         KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
@@ -11151,6 +11251,16 @@ static void test_one_hkdf(hkdf_vector vec)
           break;
         }
       case SHA2_512:
+        {
+          sw1 = (uint32_t)64U;
+          break;
+        }
+      case Blake2S:
+        {
+          sw1 = (uint32_t)32U;
+          break;
+        }
+      case Blake2B:
         {
           sw1 = (uint32_t)64U;
           break;
@@ -11208,6 +11318,16 @@ static void test_one_hkdf(hkdf_vector vec)
             sw2 = (uint32_t)128U;
             break;
           }
+        case Blake2S:
+          {
+            sw2 = (uint32_t)64U;
+            break;
+          }
+        case Blake2B:
+          {
+            sw2 = (uint32_t)128U;
+            break;
+          }
         default:
           {
             KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
@@ -11253,6 +11373,16 @@ static void test_one_hkdf(hkdf_vector vec)
               sw3 = (uint32_t)128U;
               break;
             }
+          case Blake2S:
+            {
+              sw3 = (uint32_t)64U;
+              break;
+            }
+          case Blake2B:
+            {
+              sw3 = (uint32_t)128U;
+              break;
+            }
           default:
             {
               KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
@@ -11288,6 +11418,16 @@ static void test_one_hkdf(hkdf_vector vec)
               break;
             }
           case SHA2_512:
+            {
+              sw4 = (uint32_t)64U;
+              break;
+            }
+          case Blake2S:
+            {
+              sw4 = (uint32_t)32U;
+              break;
+            }
+          case Blake2B:
             {
               sw4 = (uint32_t)64U;
               break;
@@ -11338,6 +11478,16 @@ static void test_one_hkdf(hkdf_vector vec)
                 sw5 = (uint32_t)64U;
                 break;
               }
+            case Blake2S:
+              {
+                sw5 = (uint32_t)32U;
+                break;
+              }
+            case Blake2B:
+              {
+                sw5 = (uint32_t)64U;
+                break;
+              }
             default:
               {
                 KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
@@ -11377,6 +11527,16 @@ static void test_one_hkdf(hkdf_vector vec)
                 break;
               }
             case SHA2_512:
+              {
+                sw = (uint32_t)64U;
+                break;
+              }
+            case Blake2S:
+              {
+                sw = (uint32_t)32U;
+                break;
+              }
+            case Blake2B:
               {
                 sw = (uint32_t)64U;
                 break;
@@ -11626,30 +11786,6 @@ static void test_chacha20poly1305()
     test_one_chacha20poly1305(vs[i]);
   }
 }
-
-typedef struct state_s2_s
-{
-  impl i;
-  uint8_t *iv;
-  uint32_t iv_len;
-  uint8_t *xkey;
-  uint32_t ctr;
-}
-state_s2;
-
-extern error_code
-EverCrypt_CTR_create_in(
-  cipher_alg a,
-  state_s2 **r,
-  uint8_t *dst,
-  uint8_t *k,
-  uint32_t iv,
-  uint32_t iv_len
-);
-
-extern void EverCrypt_CTR_update_block(state_s2 *a, uint8_t *p, uint8_t *dst);
-
-extern void EverCrypt_CTR_free(state_s2 *a);
 
 static uint8_t
 key02[16U] =

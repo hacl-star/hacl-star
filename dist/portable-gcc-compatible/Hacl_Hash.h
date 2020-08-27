@@ -38,7 +38,129 @@ extern "C" {
 
 
 #include "Hacl_Kremlib.h"
+#include "Hacl_Blake2s_32.h"
+#include "Lib_Memzero0.h"
+#include "Hacl_Blake2b_32.h"
+#include "Hacl_Impl_Blake2_Constants.h"
 #include "Hacl_Spec.h"
+
+/* SNIPPET_START: Hacl_Hash_Core_Blake2_update_blake2s_32 */
+
+uint64_t Hacl_Hash_Core_Blake2_update_blake2s_32(uint32_t *s, uint64_t totlen, uint8_t *block);
+
+/* SNIPPET_END: Hacl_Hash_Core_Blake2_update_blake2s_32 */
+
+/* SNIPPET_START: Hacl_Hash_Core_Blake2_finish_blake2s_32 */
+
+void Hacl_Hash_Core_Blake2_finish_blake2s_32(uint32_t *s, uint64_t ev, uint8_t *dst);
+
+/* SNIPPET_END: Hacl_Hash_Core_Blake2_finish_blake2s_32 */
+
+/* SNIPPET_START: Hacl_Hash_Core_Blake2_update_blake2b_32 */
+
+FStar_UInt128_uint128
+Hacl_Hash_Core_Blake2_update_blake2b_32(
+  uint64_t *s,
+  FStar_UInt128_uint128 totlen,
+  uint8_t *block
+);
+
+/* SNIPPET_END: Hacl_Hash_Core_Blake2_update_blake2b_32 */
+
+/* SNIPPET_START: Hacl_Hash_Core_Blake2_finish_blake2b_32 */
+
+void
+Hacl_Hash_Core_Blake2_finish_blake2b_32(uint64_t *s, FStar_UInt128_uint128 ev, uint8_t *dst);
+
+/* SNIPPET_END: Hacl_Hash_Core_Blake2_finish_blake2b_32 */
+
+/* SNIPPET_START: Hacl_Hash_Blake2_update_multi_blake2s_32 */
+
+uint64_t
+Hacl_Hash_Blake2_update_multi_blake2s_32(
+  uint32_t *s,
+  uint64_t ev,
+  uint8_t *blocks,
+  uint32_t n_blocks
+);
+
+/* SNIPPET_END: Hacl_Hash_Blake2_update_multi_blake2s_32 */
+
+/* SNIPPET_START: Hacl_Hash_Blake2_update_multi_blake2b_32 */
+
+FStar_UInt128_uint128
+Hacl_Hash_Blake2_update_multi_blake2b_32(
+  uint64_t *s,
+  FStar_UInt128_uint128 ev,
+  uint8_t *blocks,
+  uint32_t n_blocks
+);
+
+/* SNIPPET_END: Hacl_Hash_Blake2_update_multi_blake2b_32 */
+
+/* SNIPPET_START: K___uint32_t_uint32_t_uint32_t__uint8_t___uint8_t_ */
+
+typedef struct K___uint32_t_uint32_t_uint32_t__uint8_t___uint8_t__s
+{
+  uint32_t fst;
+  uint32_t snd;
+  uint32_t thd;
+  uint8_t *f3;
+  uint8_t *f4;
+}
+K___uint32_t_uint32_t_uint32_t__uint8_t___uint8_t_;
+
+/* SNIPPET_END: K___uint32_t_uint32_t_uint32_t__uint8_t___uint8_t_ */
+
+/* SNIPPET_START: K___uint32_t_uint32_t_uint32_t */
+
+typedef struct K___uint32_t_uint32_t_uint32_t_s
+{
+  uint32_t fst;
+  uint32_t snd;
+  uint32_t thd;
+}
+K___uint32_t_uint32_t_uint32_t;
+
+/* SNIPPET_END: K___uint32_t_uint32_t_uint32_t */
+
+/* SNIPPET_START: Hacl_Hash_Blake2_update_last_blake2s_32 */
+
+uint64_t
+Hacl_Hash_Blake2_update_last_blake2s_32(
+  uint32_t *s,
+  uint64_t ev,
+  uint64_t prev_len,
+  uint8_t *input,
+  uint32_t input_len
+);
+
+/* SNIPPET_END: Hacl_Hash_Blake2_update_last_blake2s_32 */
+
+/* SNIPPET_START: Hacl_Hash_Blake2_update_last_blake2b_32 */
+
+FStar_UInt128_uint128
+Hacl_Hash_Blake2_update_last_blake2b_32(
+  uint64_t *s,
+  FStar_UInt128_uint128 ev,
+  FStar_UInt128_uint128 prev_len,
+  uint8_t *input,
+  uint32_t input_len
+);
+
+/* SNIPPET_END: Hacl_Hash_Blake2_update_last_blake2b_32 */
+
+/* SNIPPET_START: Hacl_Hash_Blake2_hash_blake2s_32 */
+
+void Hacl_Hash_Blake2_hash_blake2s_32(uint8_t *input, uint32_t input_len, uint8_t *dst);
+
+/* SNIPPET_END: Hacl_Hash_Blake2_hash_blake2s_32 */
+
+/* SNIPPET_START: Hacl_Hash_Blake2_hash_blake2b_32 */
+
+void Hacl_Hash_Blake2_hash_blake2b_32(uint8_t *input, uint32_t input_len, uint8_t *dst);
+
+/* SNIPPET_END: Hacl_Hash_Blake2_hash_blake2b_32 */
 
 /* SNIPPET_START: Hacl_Hash_MD5_legacy_update_multi */
 

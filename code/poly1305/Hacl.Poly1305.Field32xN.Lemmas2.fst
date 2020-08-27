@@ -74,6 +74,7 @@ val load_tup64_lemma0:
     v f4 == v hi / pow2 40))
   (ensures as_nat5 f == v hi * pow2 64 + v lo)
 
+#push-options"--z3rlimit 100"
 let load_tup64_lemma0 f lo hi =
   let (f0, f1, f2, f3, f4) = f in
   calc (==) {
@@ -92,7 +93,7 @@ let load_tup64_lemma0 f lo hi =
     v lo + v hi * pow2 64;
   };
   assert (as_nat5 f == v hi * pow2 64 + v lo)
-
+#pop-options
 
 val load_tup64_fits_lemma:
     f:tup64_5
@@ -250,6 +251,7 @@ val load_tup64_4_compact_lemma_f2: lo:uint64 -> hi:uint64 -> Lemma
   (let t3 = (lo >>. 48ul) |. (hi <<. 16ul) in
    v ((t3 >>. 4ul) &. u64 0x3ffffff) == v lo / pow2 52 + (v hi % pow2 14) * pow2 12)
 
+#push-options "--z3rlimit 100"
 let load_tup64_4_compact_lemma_f2 lo hi =
   let t3 = (lo >>. 48ul) |. (hi <<. 16ul) in
   let f2 = (t3 >>. 4ul) &. u64 0x3ffffff in
@@ -289,11 +291,13 @@ let load_tup64_4_compact_lemma_f2 lo hi =
     v lo / pow2 52 + (v hi % pow2 14) * pow2 12;
   };
   assert (v f2 == v lo / pow2 52 + (v hi % pow2 14) * pow2 12)
-
+#pop-options
 
 val load_tup64_4_compact_lemma_f3: lo:uint64 -> hi:uint64 -> Lemma
   (let t3 = (lo >>. 48ul) |. (hi <<. 16ul) in
    v ((t3 >>. 30ul) &. u64 0x3ffffff) == (v hi / pow2 14) % pow2 26)
+
+#push-options "--z3rlimit 200"
 let load_tup64_4_compact_lemma_f3 lo hi =
   let t3 = (lo >>. 48ul) |. (hi <<. 16ul) in
   let f3 = (t3 >>. 30ul) &. u64 0x3ffffff in
@@ -325,6 +329,7 @@ let load_tup64_4_compact_lemma_f3 lo hi =
   assert (v f3 == v (t3 >>. 30ul) % pow2 26);
   assert (v f3 == ((v hi / pow2 14) % pow2 34) % pow2 26);
   Math.Lemmas.pow2_modulo_modulo_lemma_1 (v hi / pow2 14) 26 34
+#pop-options
 
 val load_tup64_4_compact_lemma: lo:uint64 -> hi:uint64 ->
   Lemma (load_tup64_4_compact lo hi == load_tup64_lemma lo hi)

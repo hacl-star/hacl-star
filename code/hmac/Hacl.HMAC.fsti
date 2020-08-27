@@ -15,9 +15,9 @@ open Spec.Hash.Definitions
 open FStar.HyperStack.ST
 open Lib.IntTypes
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
-
 open EverCrypt.Helpers
+
+#set-options "--z3rlimit 25 --fuel 0 --ifuel 0"
 
 let key_and_data_fits (a: hash_alg): Lemma
   (ensures (block_length a + pow2 32 <= max_input_length a))
@@ -42,14 +42,14 @@ let compute_st (a: hash_alg) =
 
 inline_for_extraction noextract
 val mk_compute:
-  a: hash_alg ->
-  hash: D.hash_st a ->
-  alloca: D.alloca_st a ->
-  init: D.init_st a ->
-  update_multi: D.update_multi_st a ->
-  update_last: D.update_last_st a ->
-  finish: D.finish_st a ->
-  compute_st a
+  i: D.impl ->
+  hash: D.hash_st (D.get_alg i) ->
+  alloca: D.alloca_st i ->
+  init: D.init_st i ->
+  update_multi: D.update_multi_st i ->
+  update_last: D.update_last_st i ->
+  finish: D.finish_st i ->
+  compute_st (D.get_alg i)
 
 val legacy_compute_sha1: compute_st SHA1
 
@@ -58,3 +58,7 @@ val compute_sha2_256: compute_st SHA2_256
 val compute_sha2_384: compute_st SHA2_384
 
 val compute_sha2_512: compute_st SHA2_512
+
+val compute_blake2s_32: compute_st Blake2S
+
+val compute_blake2b_32: compute_st Blake2B

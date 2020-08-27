@@ -105,6 +105,11 @@ inline_for_extraction noextract
 let update_ (acc, r) (block: block) =
   Spec.Poly1305.poly1305_update1 r Spec.Poly1305.size_block block acc, r
 
+/// Same as [update_], but with the input not necessarily a full block (can be smaller)
+inline_for_extraction noextract
+let update__ (acc, r) (input: S.seq uint8{S.length input <= Spec.Poly1305.size_block}) =
+  Spec.Poly1305.poly1305_update1 r (S.length input) input acc, r
+
 inline_for_extraction noextract
 let update' r acc (block: block) =
   Spec.Poly1305.poly1305_update1 r Spec.Poly1305.size_block block acc
@@ -136,14 +141,14 @@ let rec with_or_without_r (acc r: Spec.Poly1305.felem) (blocks: S.seq uint8):
 #pop-options
 
 inline_for_extraction noextract
-let update_last (acc, r) (input: S.seq uint8 { S.length input < Spec.Poly1305.size_block }) =
+let update_last (acc, r) (input: S.seq uint8 { S.length input <= Spec.Poly1305.size_block }) =
   if S.length input = 0 then
     acc, r
   else
     Spec.Poly1305.poly1305_update1 r (S.length input) input acc, r
 
 inline_for_extraction noextract
-let update_last' r acc (input: S.seq uint8 { S.length input < Spec.Poly1305.size_block }) =
+let update_last' r acc (input: S.seq uint8 { S.length input <= Spec.Poly1305.size_block }) =
   if S.length input = 0 then
     acc
   else
@@ -157,7 +162,7 @@ inline_for_extraction noextract
 let spec k input =
   Spec.Poly1305.poly1305_mac input k
 
-val update_last_is_update
+val update_last_not_block_is_update
   (input: S.seq uint8)
   (acc: Spec.Poly1305.felem)
   (r: Spec.Poly1305.felem):
@@ -165,7 +170,7 @@ val update_last_is_update
     (requires (S.length input < Spec.Poly1305.size_block))
     (ensures (update_last (acc, r) input == (Spec.Poly1305.poly1305_update input acc r, r)))
 
-let update_last_is_update input acc r =
+let update_last_not_block_is_update input acc r =
   let open Lib.UpdateMulti.Lemmas in
   let block_length = Spec.Poly1305.size_block in
   assert_norm (block_length < pow2 32);
@@ -192,6 +197,78 @@ let update_last_is_update input acc r =
       Spec.Poly1305.(poly1305_update_last r)
       acc, r;
   }
+
+val update_last_block_is_update
+  (input: S.seq uint8)
+  (acc: Spec.Poly1305.felem)
+  (r: Spec.Poly1305.felem):
+  Lemma
+    (requires (S.length input = Spec.Poly1305.size_block))
+    (ensures (update_last (acc, r) input == (Spec.Poly1305.poly1305_update input acc r, r)))
+
+open FStar.Tactics
+
+#push-options "--fuel 1 --print_implicits"
+let update_last_block_is_update input acc r =
+  let open Lib.UpdateMulti.Lemmas in
+  let block_length = Spec.Poly1305.size_block in
+  assert_norm (block_length < pow2 32);
+  assert(input `S.equal` S.append input S.empty);
+  let acc1 = update' r acc input in
+  let acc1' = update_multi' r acc input in
+  // SH: fun fact: this lemma call and the following assert should be the
+  // last part of the below calc. However, if put below/inside the calc,
+  // the proof loops.
+  Lib.Sequence.Lemmas.repeat_blocks_extensionality block_length input
+      (repeat_f block_length (update' r))
+      Spec.Poly1305.(poly1305_update1 r size_block)
+      (repeat_l block_length (update_last' r) input)
+      Spec.Poly1305.(poly1305_update_last r)
+      acc;
+  assert(
+    Lib.Sequence.repeat_blocks #uint8 #Spec.Poly1305.felem block_length input
+      (repeat_f block_length (update' r))
+      (repeat_l block_length (update_last' r) input)
+      acc ==
+    Lib.Sequence.repeat_blocks #uint8 #Spec.Poly1305.felem block_length input
+     Spec.Poly1305.(poly1305_update1 r size_block)
+     Spec.Poly1305.(poly1305_update_last r)
+     acc);
+  assert(
+    let block, rem = Lib.UpdateMulti.split_block block_length input 1 in
+    block `S.equal` input /\ rem `S.equal` S.empty);
+  assert(
+    Lib.UpdateMulti.mk_update_multi block_length (update' r) acc1 S.empty ==
+    acc1');
+  assert(acc1 == acc1');
+  calc (==) {
+    update_last (acc, r) input;
+  (==) { }
+    update_last' r acc input, r;
+  (==) { }
+    update_last' r (update' r acc input) S.empty, r;
+  (==) {  }
+   update_last' r (update_multi' r acc input) S.empty, r;
+  (==) { update_full_is_repeat_blocks block_length (update' r) (update_last' r) acc input input }
+    Lib.Sequence.repeat_blocks #uint8 #Spec.Poly1305.felem block_length input
+      (repeat_f block_length (update' r))
+      (repeat_l block_length (update_last' r) input)
+      acc, r;
+  }
+#pop-options
+
+val update_last_is_update
+  (input: S.seq uint8)
+  (acc: Spec.Poly1305.felem)
+  (r: Spec.Poly1305.felem):
+  Lemma
+    (requires (S.length input <= Spec.Poly1305.size_block))
+    (ensures (update_last (acc, r) input == (Spec.Poly1305.poly1305_update input acc r, r)))
+
+let update_last_is_update input acc r =
+  if S.length input = Spec.Poly1305.size_block
+  then update_last_block_is_update input acc r
+  else update_last_not_block_is_update input acc r
 
 val update_multi_is_update
   (input: S.seq uint8)
@@ -248,7 +325,8 @@ let poly_is_incremental key input =
     finish_ key (update_last (update_multi (acc, r) bs) l);
   (S.equal) { with_or_without_r acc r bs }
     Spec.Poly1305.poly1305_finish key (update_last' r (update_multi' r acc bs) l);
-  (S.equal) { update_full_is_repeat_blocks block_length (update' r) (update_last' r) acc input input }
+  (S.equal) { update_full_is_repeat_blocks block_length (update' r) (update_last' r)
+              acc input input }
     Spec.Poly1305.poly1305_finish key (Lib.Sequence.repeat_blocks #uint8 #Spec.Poly1305.felem block_length input
       (repeat_f block_length (update' r))
       (repeat_l block_length (update_last' r) input)
@@ -266,9 +344,51 @@ let poly_is_incremental key input =
       acc);
   }
 
+/// Same lemma as above, but we take into account the fact that the hash stream
+/// processes the buffer lazily.
+val poly_is_incremental_lazy:
+  key: S.seq uint8 { S.length key = 32 } ->
+  input:S.seq uint8 { S.length input <= pow2 32 - 1 } ->
+  Lemma (ensures (
+    let hash = Lib.UpdateMulti.update_full_lazy Spec.Poly1305.size_block update_ update_last (Spec.Poly1305.poly1305_init key) input in
+    finish_ key hash `S.equal` spec key input))
+
+#push-options "--fuel 1"
+let poly_is_incremental_lazy key input =
+  let open Lib.UpdateMulti.Lemmas in
+  let block_length = Spec.Poly1305.size_block in
+  assert_norm (block_length < pow2 32);
+  let n = S.length input / block_length in
+  let rem = S.length input % block_length in
+  let n', rem' = if rem = 0 && n > 0 then n - 1, block_length else n, rem in (**)
+  let bs, l = S.split input (n' * block_length) in
+  let acc, r = Spec.Poly1305.poly1305_init key in
+  let acc1 = update_multi (acc, r) bs in
+  let acc_f = update_last acc1 l in
+  if rem = 0 && n > 0 then
+    begin
+    assert(acc_f == update__ acc1 l);
+    assert(
+      let block, rem = Lib.UpdateMulti.split_block Spec.Poly1305.size_block l 1 in
+      block `S.equal` l /\ rem `S.equal` S.empty);
+    let acc2 = update__ acc1 l in
+    assert_norm(Lib.UpdateMulti.mk_update_multi Spec.Poly1305.size_block update_ acc2 S.empty
+           == acc2);
+    assert(acc_f == update_multi acc1 l);
+    Lib.UpdateMulti.update_multi_associative Spec.Poly1305.size_block update_ (acc, r) bs l;
+    assert(input `S.equal` S.append bs l);
+    assert(acc_f = update_multi (acc, r) input);
+    assert(update_last acc_f S.empty == acc_f);
+    assert(input `S.equal` S.append input S.empty);
+    poly_is_incremental key input
+    end
+  else poly_is_incremental key input
+#pop-options
+
 /// The block instance for poly1305!
 /// ================================
 
+#push-options "--z3rlimit 300"
 inline_for_extraction noextract
 let poly1305_32: I.block unit =
   I.Block
@@ -282,19 +402,21 @@ let poly1305_32: I.block unit =
     (fun () -> 16ul)
 
     (fun () -> Spec.Poly1305.poly1305_init)
-    (fun () x y -> update_multi x y)
+    (fun () acc prevlen data -> update_multi acc data)
     (fun () x _ y -> update_last x y)
     (fun () -> finish_)
 
     (fun () -> spec)
 
-    (fun () -> Lib.UpdateMulti.update_multi_zero Spec.Poly1305.size_block update_)
-    (fun () -> Lib.UpdateMulti.update_multi_associative Spec.Poly1305.size_block update_)
-    (fun () -> poly_is_incremental)
+    (fun () acc prevlen -> Lib.UpdateMulti.update_multi_zero Spec.Poly1305.size_block update_ acc)
+    (fun () acc prevlen1 prevlen2 input1 input2 ->
+      Lib.UpdateMulti.update_multi_associative Spec.Poly1305.size_block update_
+                                               acc input1 input2)
+    (fun () -> poly_is_incremental_lazy)
 
     (fun _ _ -> ())
     (fun _ k s -> Hacl.Poly1305_32.poly1305_init s k)
-    (fun _ s blocks len ->
+    (fun _ s prevlen blocks len ->
       let h0 = ST.get () in
       begin
         let acc, r = P.as_get_acc h0 (as_lib s), P.as_get_r h0 (as_lib s) in
@@ -302,15 +424,13 @@ let poly1305_32: I.block unit =
       end;
       Hacl.Poly1305_32.poly1305_update s len blocks
     )
-    (fun _ s last total_len ->
+    (fun _ s prev_len last last_len ->
       let h0 = ST.get () in
       begin
         let acc, r = P.as_get_acc h0 (as_lib s), P.as_get_r h0 (as_lib s) in
         update_last_is_update (B.as_seq h0 last) acc r
       end;
-      let len = FStar.Int.Cast.Full.uint64_to_uint32 (total_len `U64.rem` 16UL) in
-      if len <> 0ul then
-        Hacl.Poly1305_32.poly1305_update s len last)
+      Hacl.Poly1305_32.poly1305_update s last_len last)
     (fun _ k s dst ->
       let h0 = ST.get () in
       ST.push_frame ();
@@ -331,10 +451,13 @@ let poly1305_32: I.block unit =
       assert B.(loc_disjoint (loc_buffer s) (loc_buffer dst));
       P.reveal_ctx_inv (as_lib s) h0 h5
     )
+#pop-options
 
 /// The hardest part is done, just the instantiations now
 /// =====================================================
 
+noextract
+let alloca = F.alloca poly1305_32 () t (k.I.s ())
 let create_in = F.create_in poly1305_32 () t (k.I.s ())
 let init = F.init poly1305_32 (G.hide ()) t (k.I.s ())
 let update = F.update poly1305_32 (G.hide ()) t (k.I.s ())

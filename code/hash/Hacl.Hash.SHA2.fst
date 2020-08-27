@@ -7,22 +7,22 @@ include Hacl.Hash.Core.SHA2
 
 friend Hacl.Hash.MD
 
-let update_multi_224: update_multi_st SHA2_224 =
+let update_multi_224 =
   Hacl.Hash.MD.mk_update_multi SHA2_224 update_224
-let update_multi_256: update_multi_st SHA2_256 =
+let update_multi_256 =
   Hacl.Hash.MD.mk_update_multi SHA2_256 update_256
-let update_multi_384: update_multi_st SHA2_384 =
+let update_multi_384 =
   Hacl.Hash.MD.mk_update_multi SHA2_384 update_384
-let update_multi_512: update_multi_st SHA2_512 =
+let update_multi_512 =
   Hacl.Hash.MD.mk_update_multi SHA2_512 update_512
 
-let update_last_224: update_last_st SHA2_224 =
+let update_last_224 =
   Hacl.Hash.MD.mk_update_last SHA2_224 update_multi_224 pad_224
-let update_last_256: update_last_st SHA2_256 =
+let update_last_256 =
   Hacl.Hash.MD.mk_update_last SHA2_256 update_multi_256 pad_256
-let update_last_384: update_last_st SHA2_384 =
+let update_last_384 =
   Hacl.Hash.MD.mk_update_last SHA2_384 update_multi_384 pad_384
-let update_last_512: update_last_st SHA2_512 =
+let update_last_512 =
   Hacl.Hash.MD.mk_update_last SHA2_512 update_multi_512 pad_512
 
 let hash_224: hash_st SHA2_224 =

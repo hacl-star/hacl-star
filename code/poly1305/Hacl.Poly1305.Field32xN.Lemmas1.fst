@@ -10,7 +10,7 @@ open Hacl.Spec.Poly1305.Vec
 include Hacl.Spec.Poly1305.Field32xN
 
 
-#reset-options "--z3rlimit 50 --using_facts_from '* -FStar.Seq' --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 50 --using_facts_from '* -FStar.Seq' --max_fuel 0 --max_ifuel 0"
 
 val lemma_prime: unit -> Lemma (pow2 130 % prime = 5)
 let lemma_prime () =
@@ -118,6 +118,7 @@ val carry26_wide_fits_lemma:
   (let (l0, l1) = carry26 #w l cin in
   felem_fits1 l0 1 /\ uint64xN_fits l1 ((m + 1) * max26))
 
+#push-options "--z3rlimit 100"
 let carry26_wide_fits_lemma #w #m l cin =
   match w with
   | 1 ->
@@ -130,7 +131,7 @@ let carry26_wide_fits_lemma #w #m l cin =
     carry26_wide_lemma_i #w #m l cin 1;
     carry26_wide_lemma_i #w #m l cin 2;
     carry26_wide_lemma_i #w #m l cin 3
-
+#pop-options
 
 val carry26_wide_eval_lemma:
     #w:lanes
@@ -274,7 +275,7 @@ val carry_wide_felem5_fits_lemma:
   (requires felem_wide_fits5 inp (126, 102, 78, 54, 30))
   (ensures  felem_fits5 (carry_wide_felem5 inp) (1, 2, 1, 1, 2))
 
-#push-options "--z3rlimit 100"
+#push-options "--z3rlimit 200"
 let carry_wide_felem5_fits_lemma #w inp =
   let (x0, x1, x2, x3, x4) = inp in
   let t0, c0 = carry26_wide_zero x0 in
@@ -413,6 +414,7 @@ val carry_wide_felem5_eval_lemma_i:
   -> i:nat{i < w} ->
   Lemma ((feval5 (carry_wide_felem5 #w inp)).[i] == (feval5 inp).[i])
 
+#push-options "--z3rlimit 100"
 let carry_wide_felem5_eval_lemma_i #w inp i =
   let (x0, x1, x2, x3, x4) = inp in
   let tmp0, c0 = carry26_wide_zero x0 in
@@ -452,7 +454,7 @@ let carry_wide_felem5_eval_lemma_i #w inp i =
   assert ((feval5 inp).[i] == (v t0 + vc4 * 5 + v t1 * pow26 + v t2 * pow52 + v t3 * pow78 + v t4 * pow104) % prime);
   assert ((feval5 out).[i] == (feval5 inp).[i]);
   vec_smul_mod_five c4
-
+#pop-options
 
 val carry_wide_felem5_eval_lemma:
     #w:lanes
@@ -567,6 +569,7 @@ val subtract_p5_s:
     tup64_fits5 out (1, 1, 1, 1, 1) /\
     as_nat5 out == as_nat5 (as_tup64_i f i) % prime)
 
+#push-options "--z3rlimit 100"
 let subtract_p5_s #w f i =
   let (f0, f1, f2, f3, f4) = as_tup64_i f i in
   let mask0 = eq_mask f4 (u64 0x3ffffff) in
@@ -590,6 +593,7 @@ let subtract_p5_s #w f i =
   let f4' = f4 -. p4 in
   lemma_subtract_p5 (f0, f1, f2, f3, f4) (f0', f1', f2', f3', f4');
   (f0', f1', f2', f3', f4')
+#pop-options
 
 #push-options "--max_ifuel 1"
 val subtract_p5_felem5_lemma_i:
@@ -905,7 +909,7 @@ let carry_reduce_lemma_i #w l cin i =
   FStar.Math.Lemmas.pow2_minus 32 26
 
 
-#push-options "--z3rlimit 400"
+#push-options "--z3rlimit 600"
 val carry_reduce_felem5_fits_lemma_i0:
     #w:lanes
   -> f:felem5 w{acc_inv_t f}
@@ -997,7 +1001,7 @@ let carry_reduce_felem5_fits_lemma_i #w f i =
   assert (tup64_fits5 (as_tup64_i res i) (1, 1, 1, 1, 1))
 #pop-options
 
-
+#push-options "--z3rlimit 100"
 val carry_reduce_felem5_fits_lemma:
     #w:lanes
   -> f:felem5 w{acc_inv_t f} ->
@@ -1027,3 +1031,4 @@ val carry_reduce_felem5_lemma:
 let carry_reduce_felem5_lemma #w f =
   carry_reduce_felem5_fits_lemma #w f;
   carry_full_felem5_eval_lemma f
+#pop-options
