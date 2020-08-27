@@ -660,6 +660,27 @@ val update_small:
 /// SH: This proof has problems succeeding in command line mode: hence the
 /// restart-solver instruction and the crazy rlimit. Interestingly, the proof
 /// succeeds quite quickly with this rlimit but fails with a lower one.
+
+let split_at_last_rest_eq (#index : Type0) (c: block index)
+                          (i: index)
+                          (t:Type0 { t == c.state.s i })
+                          (t':Type0 { t' == optional_key i c.km c.key })
+                          (s: state c i t t') (h0: HS.mem) :
+  Lemma
+  (requires (
+    invariant c i h0 s))
+  (ensures (
+    let s = B.get h0 s 0 in
+    let State block_state buf total_len seen_ k' = s in
+    let _, r = split_at_last c i seen_ in
+    let sz = rest c i total_len in
+    Seq.length r == U32.v sz)) =
+  let s = B.get h0 s 0 in
+  let State block_state buf total_len seen_ k' = s in
+  let _, r = split_at_last c i seen_ in
+  let sz = rest c i total_len in
+  ()
+
 #restart-solver
 #push-options "--z3rlimit 2000 --z3cliopt smt.arith.nl=false"
 let update_small #index c i t t' p data len =
@@ -683,6 +704,7 @@ let update_small #index c i t t' p data len =
 
   B.blit data 0ul buf2 0ul len;
   let h1 = ST.get () in
+  split_at_last_rest_eq c i t t' p h00;
   assert(
     let _, r = split_at_last c i (Ghost.reveal seen_) in
     Seq.length r == U32.v sz);
