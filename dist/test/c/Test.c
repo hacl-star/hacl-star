@@ -10129,30 +10129,6 @@ vectors2[3U] =
 
 static uint32_t vectors_len2 = (uint32_t)3U;
 
-typedef struct state_s2_s
-{
-  impl i;
-  uint8_t *iv;
-  uint32_t iv_len;
-  uint8_t *xkey;
-  uint32_t ctr;
-}
-state_s2;
-
-extern error_code
-EverCrypt_CTR_create_in(
-  cipher_alg a,
-  state_s2 **r,
-  uint8_t *dst,
-  uint8_t *k,
-  uint32_t iv,
-  uint32_t iv_len
-);
-
-extern void EverCrypt_CTR_update_block(state_s2 *a, uint8_t *p, uint8_t *dst);
-
-extern void EverCrypt_CTR_free(state_s2 *a);
-
 KRML_DEPRECATED("LowStar.Failure.failwith")
 
 static void failwith____(C_String_t s)
@@ -11786,6 +11762,30 @@ static void test_chacha20poly1305()
     test_one_chacha20poly1305(vs[i]);
   }
 }
+
+typedef struct state_s2_s
+{
+  impl i;
+  uint8_t *iv;
+  uint32_t iv_len;
+  uint8_t *xkey;
+  uint32_t ctr;
+}
+state_s2;
+
+extern error_code
+EverCrypt_CTR_create_in(
+  cipher_alg a,
+  state_s2 **r,
+  uint8_t *dst,
+  uint8_t *k,
+  uint32_t iv,
+  uint32_t iv_len
+);
+
+extern void EverCrypt_CTR_update_block(state_s2 *a, uint8_t *p, uint8_t *dst);
+
+extern void EverCrypt_CTR_free(state_s2 *a);
 
 static uint8_t
 key02[16U] =
