@@ -22,6 +22,7 @@ open Hacl.Impl.P.LowLevel
 open Lib.Loops
 open Hacl.Spec.P256.MontgomeryMultiplication
 
+
 #set-options "--z3rlimit 200 --fuel  0 --ifuel 0"
 
 
@@ -112,24 +113,45 @@ let montgomery_multiplication_round_k0 #c t round k0 =
 
 
 
-
-val montgomery_multiplication_one_round_proof: 
-  #c: curve ->
-  t: nat {t <  getPrime c * getPrime c} -> 
+val montgomery_multiplication_one_round_proof_st: 
+  #c: curve {(getPrime c + 1) % pow2 64 == 0} ->
+  t: nat {t < getPrime c * getPrime c} -> 
   result: nat {result = (t + (t % pow2 64) * getPrime c) / pow2 64} ->
   co: nat {co % getPrime c == t % getPrime c} -> 
   Lemma (
-    result % getPrime c == co * modp_inv2 #c (pow2 64) % getPrime c /\
-    result < getPrime c * getPrime c)
+    result % getPrime c == co * modp_inv2 #c (pow2 64) % getPrime c  /\
+     result < getPrime c * getPrime c)
 
 
-let montgomery_multiplication_one_round_proof t result co = 
-  admit();
-  mult_one_round t co;
-  mul_lemma_1 (t % pow2 64) (pow2 64) prime256;
-  assert_norm (prime256 * prime256 + pow2 64 * prime256 < pow2 575);
-  lemma_div_lt (t + (t % pow2 64) * prime256) 575 64; 
-  assert_norm (prime256 * prime256 > pow2 (575 - 64))
+val lemma_add_lt: a : int -> b: int -> q: int -> q1: int -> Lemma
+  (requires (a < q /\ b < q1))
+  (ensures (a + b < q + q1))
+
+let lemma_add_lt a b q q1 = ()
+
+
+let montgomery_multiplication_one_round_proof_st #c t result co = 
+  let prime = getPrime c in 
+  mult_one_round #c t co; 
+  mul_lemma_1 (t % pow2 64) (pow2 64) prime; 
+  
+  lemma_mult_lt_sqr prime prime (getPower2 c);
+  lemma_mult_lt_left (pow2 64) prime (getPower2 c);
+  lemma_add_lt (prime * prime) (pow2 64 * prime) (getPower2 c * getPower2 c) (pow2 64 * getPower2 c);
+  assert(prime * prime + pow2 64 * prime < getPower2 c * getPower2 c + pow2 64 * getPower2 c);
+  assume (pow2 64 < getPower2 c);
+  lemma_mult_lt_right (getPower2 c) (pow2 64) (getPower2 c);
+  assert (getPower2 c * getPower2 c + pow2 64 * getPower2 c < 2 * getPower2 c * getPower2 c);
+  pow2_plus (getPower c) (getPower c);
+  pow2_double_mult (2 * getPower c); 
+  assert (getPower2 c * getPower2 c + pow2 64 * getPower2 c < pow2 (2 * getPower c + 1));
+  lemma_div_lt_nat (getPower2 c * getPower2 c + pow2 64 * getPower2 c) (2 * getPower c + 1) 64;
+  assert ((getPower2 c * getPower2 c + pow2 64 * getPower2 c) / pow2 64 < pow2 (2 * getPower c + 1 - 64));
+  assume (getPrime c > pow2 (getPower c - 1));
+
+  pow2_plus (getPower c - 1) (getPower c - 1);
+  lemma_mult_lt_sqr (pow2 (getPower c - 1)) (pow2 (getPower c - 1)) (getPrime c);
+  pow2_lt_compat (2 * getPower c - 2) (2 * getPower c - 63)
 
 
 let montgomery_multiplication_buffer_by_one #c a result = 

@@ -557,6 +557,7 @@ let mult_one_round #c t co =
       assert(t3 % pow2 64 == 0);
       assert(let rem = t3/ pow2 64 in rem * pow2 64 = t3);
       assert(exists (k: nat). k * pow2 64 = t3);
+      assume (is_prime (getPrime c) /\ getPrime c > pow2 64);
       lemma_division_is_multiplication t3 prime;
       lemma_multiplication_to_same_number t3 co (modp_inv2 #c (pow2 64)) prime
    end
