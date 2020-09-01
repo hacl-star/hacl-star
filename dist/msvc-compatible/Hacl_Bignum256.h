@@ -51,7 +51,7 @@ Write `a + b mod 2^256` in `res`.
 
   This functions returns the carry.
 
-  The arguments a, b and res are meant to be 256-bit bignums, i.e. uint64_t[64]
+  The arguments a, b and res are meant to be 256-bit bignums, i.e. uint64_t[4]
 */
 uint64_t Hacl_Bignum256_add(uint64_t *a, uint64_t *b, uint64_t *res);
 
@@ -60,22 +60,22 @@ Write `a - b mod 2^256` in `res`.
 
   This functions returns the carry.
 
-  The arguments a, b and res are meant to be 256-bit bignums, i.e. uint64_t[64]
+  The arguments a, b and res are meant to be 256-bit bignums, i.e. uint64_t[4]
 */
 uint64_t Hacl_Bignum256_sub(uint64_t *a, uint64_t *b, uint64_t *res);
 
 /*
 Write `a * b` in `res`.
 
-  The arguments a and b are meant to be 256-bit bignums, i.e. uint64_t[64].
-  The outparam res is meant to be a 8192-bit bignum, i.e. uint64_t[128].
+  The arguments a and b are meant to be 256-bit bignums, i.e. uint64_t[4].
+  The outparam res is meant to be a 512-bit bignum, i.e. uint64_t[8].
 */
 void Hacl_Bignum256_mul(uint64_t *a, uint64_t *b, uint64_t *res);
 
 /*
 Write `a ^ b mod n1` in `res`.
 
-  The arguments a, n1 and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[64].
+  The arguments a, n1 and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
   The argument b is a bignum of any size, and bBits is an upper bound on the
   number of significant bits of b. For instance, if b is a 256-bit bignum,
   bBits should be 256.
@@ -105,7 +105,7 @@ uint64_t *Hacl_Bignum256_new_bn_from_bytes_be(uint32_t len, uint8_t *b);
 Serialize a bignum into big-endian memory.
 
   The argument b points to a 256-bit bignum.
-  The outparam res points to 512 bytes of valid memory.
+  The outparam res points to 32 bytes of valid memory.
 */
 void Hacl_Bignum256_bn_to_bytes_be(uint64_t *b, uint8_t *res);
 
