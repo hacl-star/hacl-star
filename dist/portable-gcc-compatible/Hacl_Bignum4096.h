@@ -41,6 +41,8 @@ extern "C" {
 #include "Hacl_Kremlib.h"
 #include "Hacl_Bignum.h"
 
+/* SNIPPET_START: Hacl_Bignum4096_add */
+
 /************************/
 /* Arithmetic functions */
 /************************/
@@ -55,6 +57,10 @@ Write `a + b mod 2^4096` in `res`.
 */
 uint64_t Hacl_Bignum4096_add(uint64_t *a, uint64_t *b, uint64_t *res);
 
+/* SNIPPET_END: Hacl_Bignum4096_add */
+
+/* SNIPPET_START: Hacl_Bignum4096_sub */
+
 /*
 Write `a - b mod 2^4096` in `res`.
 
@@ -64,6 +70,10 @@ Write `a - b mod 2^4096` in `res`.
 */
 uint64_t Hacl_Bignum4096_sub(uint64_t *a, uint64_t *b, uint64_t *res);
 
+/* SNIPPET_END: Hacl_Bignum4096_sub */
+
+/* SNIPPET_START: Hacl_Bignum4096_mul */
+
 /*
 Write `a * b` in `res`.
 
@@ -71,6 +81,10 @@ Write `a * b` in `res`.
   The outparam res is meant to be a 8192-bit bignum, i.e. uint64_t[128].
 */
 void Hacl_Bignum4096_mul(uint64_t *a, uint64_t *b, uint64_t *res);
+
+/* SNIPPET_END: Hacl_Bignum4096_mul */
+
+/* SNIPPET_START: Hacl_Bignum4096_mod_exp */
 
 /*
 Write `a ^ b mod n1` in `res`.
@@ -82,6 +96,10 @@ Write `a ^ b mod n1` in `res`.
 */
 void
 Hacl_Bignum4096_mod_exp(uint64_t *n, uint64_t *a, uint32_t bBits, uint64_t *b, uint64_t *res);
+
+/* SNIPPET_END: Hacl_Bignum4096_mod_exp */
+
+/* SNIPPET_START: Hacl_Bignum4096_new_bn_from_bytes_be */
 
 
 /********************/
@@ -101,6 +119,10 @@ Load a bid-endian bignum from memory.
 */
 uint64_t *Hacl_Bignum4096_new_bn_from_bytes_be(uint32_t len, uint8_t *b);
 
+/* SNIPPET_END: Hacl_Bignum4096_new_bn_from_bytes_be */
+
+/* SNIPPET_START: Hacl_Bignum4096_bn_to_bytes_be */
+
 /*
 Serialize a bignum into big-endian memory.
 
@@ -108,6 +130,10 @@ Serialize a bignum into big-endian memory.
   The outparam res points to 512 bytes of valid memory.
 */
 void Hacl_Bignum4096_bn_to_bytes_be(uint64_t *b, uint8_t *res);
+
+/* SNIPPET_END: Hacl_Bignum4096_bn_to_bytes_be */
+
+/* SNIPPET_START: Hacl_Bignum4096_lt */
 
 
 /***************/
@@ -119,6 +145,8 @@ void Hacl_Bignum4096_bn_to_bytes_be(uint64_t *b, uint8_t *res);
 Returns true if and only if argument a is strictly less than the argument b.
 */
 bool Hacl_Bignum4096_lt(uint64_t *a, uint64_t *b);
+
+/* SNIPPET_END: Hacl_Bignum4096_lt */
 
 #if defined(__cplusplus)
 }

@@ -76,13 +76,17 @@ static inline void Hacl_Bignum_bn_bit_set(uint32_t len, uint64_t *input, uint32_
 static inline bool Hacl_Bignum_bn_is_less(uint32_t len, uint64_t *a, uint64_t *b)
 {
   uint64_t acc = (uint64_t)0U;
-  for (uint32_t i = (uint32_t)0U; i < len; i++)
+  uint64_t mask;
   {
-    uint64_t beq = FStar_UInt64_eq_mask(a[i], b[i]);
-    uint64_t blt = ~FStar_UInt64_gte_mask(a[i], b[i]);
-    acc = (beq & acc) | (~beq & ((blt & (uint64_t)0xFFFFFFFFFFFFFFFFU) | (~blt & (uint64_t)0U)));
+    uint32_t i;
+    for (i = (uint32_t)0U; i < len; i++)
+    {
+      uint64_t beq = FStar_UInt64_eq_mask(a[i], b[i]);
+      uint64_t blt = ~FStar_UInt64_gte_mask(a[i], b[i]);
+      acc = (beq & acc) | (~beq & ((blt & (uint64_t)0xFFFFFFFFFFFFFFFFU) | (~blt & (uint64_t)0U)));
+    }
   }
-  uint64_t mask = acc;
+  mask = acc;
   return mask == (uint64_t)0xFFFFFFFFFFFFFFFFU;
 }
 
@@ -94,15 +98,20 @@ static inline uint64_t Hacl_Bignum_ModInv64_mod_inv_u64(uint64_t n0)
   uint64_t vb = (uint64_t)0U;
   ub = (uint64_t)1U;
   vb = (uint64_t)0U;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
   {
-    uint64_t us = ub;
-    uint64_t vs = vb;
-    uint64_t u_is_odd = (uint64_t)0U - (us & (uint64_t)1U);
-    uint64_t beta_if_u_is_odd = beta & u_is_odd;
-    ub = ((us ^ beta_if_u_is_odd) >> (uint32_t)1U) + (us & beta_if_u_is_odd);
-    uint64_t alpha_if_u_is_odd = alpha & u_is_odd;
-    vb = (vs >> (uint32_t)1U) + alpha_if_u_is_odd;
+    uint32_t i;
+    for (i = (uint32_t)0U; i < (uint32_t)64U; i++)
+    {
+      uint64_t us = ub;
+      uint64_t vs = vb;
+      uint64_t u_is_odd = (uint64_t)0U - (us & (uint64_t)1U);
+      uint64_t beta_if_u_is_odd = beta & u_is_odd;
+      ub = ((us ^ beta_if_u_is_odd) >> (uint32_t)1U) + (us & beta_if_u_is_odd);
+      {
+        uint64_t alpha_if_u_is_odd = alpha & u_is_odd;
+        vb = (vs >> (uint32_t)1U) + alpha_if_u_is_odd;
+      }
+    }
   }
   return vb;
 }

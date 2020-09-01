@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __Hacl_Bignum4096_H
-#define __Hacl_Bignum4096_H
+#ifndef __Hacl_Bignum256_H
+#define __Hacl_Bignum256_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -41,47 +41,65 @@ extern "C" {
 #include "Hacl_Kremlib.h"
 #include "Hacl_Bignum.h"
 
+/* SNIPPET_START: Hacl_Bignum256_add */
+
 /************************/
 /* Arithmetic functions */
 /************************/
 
 
 /*
-Write `a + b mod 2^4096` in `res`.
+Write `a + b mod 2^256` in `res`.
 
   This functions returns the carry.
 
-  The arguments a, b and res are meant to be 4096-bit bignums, i.e. uint64_t[64]
+  The arguments a, b and res are meant to be 256-bit bignums, i.e. uint64_t[64]
 */
-uint64_t Hacl_Bignum4096_add(uint64_t *a, uint64_t *b, uint64_t *res);
+uint64_t Hacl_Bignum256_add(uint64_t *a, uint64_t *b, uint64_t *res);
+
+/* SNIPPET_END: Hacl_Bignum256_add */
+
+/* SNIPPET_START: Hacl_Bignum256_sub */
 
 /*
-Write `a - b mod 2^4096` in `res`.
+Write `a - b mod 2^256` in `res`.
 
   This functions returns the carry.
 
-  The arguments a, b and res are meant to be 4096-bit bignums, i.e. uint64_t[64]
+  The arguments a, b and res are meant to be 256-bit bignums, i.e. uint64_t[64]
 */
-uint64_t Hacl_Bignum4096_sub(uint64_t *a, uint64_t *b, uint64_t *res);
+uint64_t Hacl_Bignum256_sub(uint64_t *a, uint64_t *b, uint64_t *res);
+
+/* SNIPPET_END: Hacl_Bignum256_sub */
+
+/* SNIPPET_START: Hacl_Bignum256_mul */
 
 /*
 Write `a * b` in `res`.
 
-  The arguments a and b are meant to be 4096-bit bignums, i.e. uint64_t[64].
+  The arguments a and b are meant to be 256-bit bignums, i.e. uint64_t[64].
   The outparam res is meant to be a 8192-bit bignum, i.e. uint64_t[128].
 */
-void Hacl_Bignum4096_mul(uint64_t *a, uint64_t *b, uint64_t *res);
+void Hacl_Bignum256_mul(uint64_t *a, uint64_t *b, uint64_t *res);
+
+/* SNIPPET_END: Hacl_Bignum256_mul */
+
+/* SNIPPET_START: Hacl_Bignum256_mod_exp */
 
 /*
 Write `a ^ b mod n1` in `res`.
 
-  The arguments a, n1 and the outparam res are meant to be 4096-bit bignums, i.e. uint64_t[64].
+  The arguments a, n1 and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[64].
   The argument b is a bignum of any size, and bBits is an upper bound on the
-  number of significant bits of b. For instance, if b is a 4096-bit bignum,
-  bBits should be 4096.
+  number of significant bits of b. For instance, if b is a 256-bit bignum,
+  bBits should be 256.
 */
 void
-Hacl_Bignum4096_mod_exp(uint64_t *n, uint64_t *a, uint32_t bBits, uint64_t *b, uint64_t *res);
+Hacl_Bignum256_mod_exp(uint64_t *n, uint64_t *a, uint32_t bBits, uint64_t *b, uint64_t *res);
+
+/* SNIPPET_END: Hacl_Bignum256_mod_exp */
+
+/* SNIPPET_START: Hacl_Bignum256_new_bn_from_bytes_be */
 
 
 /********************/
@@ -99,15 +117,23 @@ Load a bid-endian bignum from memory.
   If the return value is non-null, clients must eventually call free(3) on it to
   avoid memory leaks.
 */
-uint64_t *Hacl_Bignum4096_new_bn_from_bytes_be(uint32_t len, uint8_t *b);
+uint64_t *Hacl_Bignum256_new_bn_from_bytes_be(uint32_t len, uint8_t *b);
+
+/* SNIPPET_END: Hacl_Bignum256_new_bn_from_bytes_be */
+
+/* SNIPPET_START: Hacl_Bignum256_bn_to_bytes_be */
 
 /*
 Serialize a bignum into big-endian memory.
 
-  The argument b points to a 4096-bit bignum.
+  The argument b points to a 256-bit bignum.
   The outparam res points to 512 bytes of valid memory.
 */
-void Hacl_Bignum4096_bn_to_bytes_be(uint64_t *b, uint8_t *res);
+void Hacl_Bignum256_bn_to_bytes_be(uint64_t *b, uint8_t *res);
+
+/* SNIPPET_END: Hacl_Bignum256_bn_to_bytes_be */
+
+/* SNIPPET_START: Hacl_Bignum256_lt */
 
 
 /***************/
@@ -118,11 +144,13 @@ void Hacl_Bignum4096_bn_to_bytes_be(uint64_t *b, uint8_t *res);
 /*
 Returns true if and only if argument a is strictly less than the argument b.
 */
-bool Hacl_Bignum4096_lt(uint64_t *a, uint64_t *b);
+bool Hacl_Bignum256_lt(uint64_t *a, uint64_t *b);
+
+/* SNIPPET_END: Hacl_Bignum256_lt */
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_Bignum4096_H_DEFINED
+#define __Hacl_Bignum256_H_DEFINED
 #endif

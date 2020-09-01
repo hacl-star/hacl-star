@@ -22,7 +22,9 @@
  */
 
 
-#include "Hacl_Bignum4096.h"
+#include "Hacl_Bignum256.h"
+
+/* SNIPPET_START: Hacl_Bignum256_add */
 
 /************************/
 /* Arithmetic functions */
@@ -30,16 +32,16 @@
 
 
 /*
-Write `a + b mod 2^4096` in `res`.
+Write `a + b mod 2^256` in `res`.
 
   This functions returns the carry.
 
-  The arguments a, b and res are meant to be 4096-bit bignums, i.e. uint64_t[64]
+  The arguments a, b and res are meant to be 256-bit bignums, i.e. uint64_t[64]
 */
-uint64_t Hacl_Bignum4096_add(uint64_t *a, uint64_t *b, uint64_t *res)
+uint64_t Hacl_Bignum256_add(uint64_t *a, uint64_t *b, uint64_t *res)
 {
   uint64_t c = (uint64_t)0U;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
     uint64_t t1 = a[i];
     uint64_t t2 = b[i];
@@ -48,17 +50,21 @@ uint64_t Hacl_Bignum4096_add(uint64_t *a, uint64_t *b, uint64_t *res)
   return c;
 }
 
+/* SNIPPET_END: Hacl_Bignum256_add */
+
+/* SNIPPET_START: Hacl_Bignum256_sub */
+
 /*
-Write `a - b mod 2^4096` in `res`.
+Write `a - b mod 2^256` in `res`.
 
   This functions returns the carry.
 
-  The arguments a, b and res are meant to be 4096-bit bignums, i.e. uint64_t[64]
+  The arguments a, b and res are meant to be 256-bit bignums, i.e. uint64_t[64]
 */
-uint64_t Hacl_Bignum4096_sub(uint64_t *a, uint64_t *b, uint64_t *res)
+uint64_t Hacl_Bignum256_sub(uint64_t *a, uint64_t *b, uint64_t *res)
 {
   uint64_t c = (uint64_t)0U;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
     uint64_t t1 = a[i];
     uint64_t t2 = b[i];
@@ -67,29 +73,37 @@ uint64_t Hacl_Bignum4096_sub(uint64_t *a, uint64_t *b, uint64_t *res)
   return c;
 }
 
+/* SNIPPET_END: Hacl_Bignum256_sub */
+
+/* SNIPPET_START: Hacl_Bignum256_mul */
+
 /*
 Write `a * b` in `res`.
 
-  The arguments a and b are meant to be 4096-bit bignums, i.e. uint64_t[64].
+  The arguments a and b are meant to be 256-bit bignums, i.e. uint64_t[64].
   The outparam res is meant to be a 8192-bit bignum, i.e. uint64_t[128].
 */
-void Hacl_Bignum4096_mul(uint64_t *a, uint64_t *b, uint64_t *res)
+void Hacl_Bignum256_mul(uint64_t *a, uint64_t *b, uint64_t *res)
 {
-  uint32_t resLen = (uint32_t)128U;
+  uint32_t resLen = (uint32_t)8U;
   memset(res, 0U, resLen * sizeof (uint64_t));
-  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)64U; i0++)
+  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0++)
   {
     uint64_t uu____0 = b[i0];
     uint64_t *res_ = res + i0;
     uint64_t c = (uint64_t)0U;
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
     {
       c = Hacl_Bignum_Multiplication_mul_carry_add_u64_st(c, a[i], uu____0, res_ + i);
     }
     uint64_t r = c;
-    res[(uint32_t)64U + i0] = r;
+    res[(uint32_t)4U + i0] = r;
   }
 }
+
+/* SNIPPET_END: Hacl_Bignum256_mul */
+
+/* SNIPPET_START: bit_set */
 
 static void bit_set(uint64_t *input, uint32_t ind)
 {
@@ -98,11 +112,15 @@ static void bit_set(uint64_t *input, uint32_t ind)
   input[i] = input[i] | (uint64_t)1U << j;
 }
 
+/* SNIPPET_END: bit_set */
+
+/* SNIPPET_START: add_mod_n */
+
 static void add_mod_n(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *res)
 {
-  uint64_t tmp[64U] = { 0U };
+  uint64_t tmp[4U] = { 0U };
   uint64_t c0 = (uint64_t)0U;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
     uint64_t t1 = a[i];
     uint64_t t2 = b[i];
@@ -110,7 +128,7 @@ static void add_mod_n(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *res)
   }
   uint64_t c00 = c0;
   uint64_t c = (uint64_t)0U;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
     uint64_t t1 = res[i];
     uint64_t t2 = n[i];
@@ -118,7 +136,7 @@ static void add_mod_n(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *res)
   }
   uint64_t c1 = c;
   uint64_t c2 = c00 - c1;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
     uint64_t *os = res;
     uint64_t x = (c2 & res[i]) | (~c2 & tmp[i]);
@@ -126,17 +144,21 @@ static void add_mod_n(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *res)
   }
 }
 
+/* SNIPPET_END: add_mod_n */
+
+/* SNIPPET_START: sub_mask */
+
 static void sub_mask(uint64_t *n, uint64_t *a)
 {
   uint64_t mask = (uint64_t)0xFFFFFFFFFFFFFFFFU;
-  uint64_t mod_mask[64U] = { 0U };
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
+  uint64_t mod_mask[4U] = { 0U };
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
     uint64_t uu____0 = FStar_UInt64_eq_mask(n[i], a[i]);
     mask = uu____0 & mask;
   }
   uint64_t mask1 = mask;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
     uint64_t *os = mod_mask;
     uint64_t x = n[i];
@@ -144,7 +166,7 @@ static void sub_mask(uint64_t *n, uint64_t *a)
     os[i] = x0;
   }
   uint64_t c = (uint64_t)0U;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
     uint64_t t1 = a[i];
     uint64_t t2 = mod_mask[i];
@@ -153,49 +175,61 @@ static void sub_mask(uint64_t *n, uint64_t *a)
   uint64_t uu____1 = c;
 }
 
+/* SNIPPET_END: sub_mask */
+
+/* SNIPPET_START: mul_ */
+
 static void mul_(uint64_t *a, uint64_t *b, uint64_t *res)
 {
-  uint32_t resLen = (uint32_t)130U;
+  uint32_t resLen = (uint32_t)10U;
   memset(res, 0U, resLen * sizeof (uint64_t));
-  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)65U; i0++)
+  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)5U; i0++)
   {
     uint64_t uu____0 = b[i0];
     uint64_t *res_ = res + i0;
     uint64_t c = (uint64_t)0U;
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)65U; i++)
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)5U; i++)
     {
       c = Hacl_Bignum_Multiplication_mul_carry_add_u64_st(c, a[i], uu____0, res_ + i);
     }
     uint64_t r = c;
-    res[(uint32_t)65U + i0] = r;
+    res[(uint32_t)5U + i0] = r;
   }
 }
 
+/* SNIPPET_END: mul_ */
+
+/* SNIPPET_START: precomp */
+
 static void precomp(uint32_t modBits, uint64_t *n, uint64_t *res)
 {
-  memset(res, 0U, (uint32_t)64U * sizeof (uint64_t));
+  memset(res, 0U, (uint32_t)4U * sizeof (uint64_t));
   bit_set(res, modBits - (uint32_t)1U);
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)8321U - modBits; i++)
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)641U - modBits; i++)
   {
     add_mod_n(n, res, res, res);
   }
 }
 
+/* SNIPPET_END: precomp */
+
+/* SNIPPET_START: reduction */
+
 static void reduction(uint64_t *n, uint64_t nInv_u64, uint64_t *c, uint64_t *res)
 {
-  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)64U + (uint32_t)1U; i0++)
+  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)4U + (uint32_t)1U; i0++)
   {
     uint64_t qj = nInv_u64 * c[i0];
     uint64_t *res_ = c + i0;
     uint64_t c1 = (uint64_t)0U;
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
     {
       c1 = Hacl_Bignum_Multiplication_mul_carry_add_u64_st(c1, n[i], qj, res_ + i);
     }
     uint64_t r0 = c1;
     uint64_t c10 = r0;
     uint64_t c2 = c10;
-    uint64_t *res2 = c + i0 + (uint32_t)64U;
+    uint64_t *res2 = c + i0 + (uint32_t)4U;
     uint64_t *a0 = res2;
     uint64_t *res0 = res2;
     uint64_t c30 = (uint64_t)0U;
@@ -208,18 +242,15 @@ static void reduction(uint64_t *n, uint64_t nInv_u64, uint64_t *c, uint64_t *res
     uint64_t c0 = c30;
     uint64_t r;
     if
-    (
-      (uint32_t)1U
-      < (uint32_t)64U + (uint32_t)1U + (uint32_t)64U + (uint32_t)1U - i0 - (uint32_t)64U
-    )
+    ((uint32_t)1U < (uint32_t)4U + (uint32_t)1U + (uint32_t)4U + (uint32_t)1U - i0 - (uint32_t)4U)
     {
       uint32_t
       rLen =
-        (uint32_t)64U
+        (uint32_t)4U
         + (uint32_t)1U
-        + (uint32_t)64U + (uint32_t)1U
+        + (uint32_t)4U + (uint32_t)1U
         - i0
-        - (uint32_t)64U
+        - (uint32_t)4U
         - (uint32_t)1U;
       uint64_t *a1 = res2 + (uint32_t)1U;
       uint64_t *res1 = res2 + (uint32_t)1U;
@@ -239,52 +270,63 @@ static void reduction(uint64_t *n, uint64_t nInv_u64, uint64_t *c, uint64_t *res
     uint64_t uu____0 = r;
   }
   memcpy(res,
-    c + (uint32_t)64U + (uint32_t)1U,
-    ((uint32_t)64U + (uint32_t)1U + (uint32_t)64U + (uint32_t)1U - ((uint32_t)64U + (uint32_t)1U))
+    c + (uint32_t)4U + (uint32_t)1U,
+    ((uint32_t)4U + (uint32_t)1U + (uint32_t)4U + (uint32_t)1U - ((uint32_t)4U + (uint32_t)1U))
     * sizeof (uint64_t));
 }
 
+/* SNIPPET_END: reduction */
+
+/* SNIPPET_START: to */
+
 static void to(uint64_t *n, uint64_t nInv_u64, uint64_t *r2, uint64_t *a, uint64_t *aM)
 {
-  KRML_CHECK_SIZE(sizeof (uint64_t),
-    (uint32_t)64U + (uint32_t)1U + (uint32_t)64U + (uint32_t)1U);
-  uint64_t tmp[(uint32_t)64U + (uint32_t)1U + (uint32_t)64U + (uint32_t)1U];
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)4U + (uint32_t)1U + (uint32_t)4U + (uint32_t)1U);
+  uint64_t tmp[(uint32_t)4U + (uint32_t)1U + (uint32_t)4U + (uint32_t)1U];
   memset(tmp,
     0U,
-    ((uint32_t)64U + (uint32_t)1U + (uint32_t)64U + (uint32_t)1U) * sizeof (uint64_t));
+    ((uint32_t)4U + (uint32_t)1U + (uint32_t)4U + (uint32_t)1U) * sizeof (uint64_t));
   uint64_t *c = tmp;
-  Hacl_Bignum4096_mul(a, r2, c);
+  Hacl_Bignum256_mul(a, r2, c);
   reduction(n, nInv_u64, tmp, aM);
 }
 
+/* SNIPPET_END: to */
+
+/* SNIPPET_START: from */
+
 static void from(uint64_t *n, uint64_t nInv_u64, uint64_t *aM, uint64_t *a)
 {
-  KRML_CHECK_SIZE(sizeof (uint64_t),
-    (uint32_t)64U + (uint32_t)1U + (uint32_t)64U + (uint32_t)1U);
-  uint64_t tmp[(uint32_t)64U + (uint32_t)1U + (uint32_t)64U + (uint32_t)1U];
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)4U + (uint32_t)1U + (uint32_t)4U + (uint32_t)1U);
+  uint64_t tmp[(uint32_t)4U + (uint32_t)1U + (uint32_t)4U + (uint32_t)1U];
   memset(tmp,
     0U,
-    ((uint32_t)64U + (uint32_t)1U + (uint32_t)64U + (uint32_t)1U) * sizeof (uint64_t));
-  memcpy(tmp, aM, ((uint32_t)64U + (uint32_t)1U) * sizeof (uint64_t));
-  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)64U + (uint32_t)1U);
-  uint64_t a_[(uint32_t)64U + (uint32_t)1U];
-  memset(a_, 0U, ((uint32_t)64U + (uint32_t)1U) * sizeof (uint64_t));
+    ((uint32_t)4U + (uint32_t)1U + (uint32_t)4U + (uint32_t)1U) * sizeof (uint64_t));
+  memcpy(tmp, aM, ((uint32_t)4U + (uint32_t)1U) * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)4U + (uint32_t)1U);
+  uint64_t a_[(uint32_t)4U + (uint32_t)1U];
+  memset(a_, 0U, ((uint32_t)4U + (uint32_t)1U) * sizeof (uint64_t));
   reduction(n, nInv_u64, tmp, a_);
-  memcpy(a, a_, (uint32_t)64U * sizeof (uint64_t));
+  memcpy(a, a_, (uint32_t)4U * sizeof (uint64_t));
 }
+
+/* SNIPPET_END: from */
+
+/* SNIPPET_START: mont_mul */
 
 static void
 mont_mul(uint64_t *n, uint64_t nInv_u64, uint64_t *aM, uint64_t *bM, uint64_t *resM)
 {
-  KRML_CHECK_SIZE(sizeof (uint64_t),
-    (uint32_t)64U + (uint32_t)1U + (uint32_t)64U + (uint32_t)1U);
-  uint64_t c[(uint32_t)64U + (uint32_t)1U + (uint32_t)64U + (uint32_t)1U];
-  memset(c,
-    0U,
-    ((uint32_t)64U + (uint32_t)1U + (uint32_t)64U + (uint32_t)1U) * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)4U + (uint32_t)1U + (uint32_t)4U + (uint32_t)1U);
+  uint64_t c[(uint32_t)4U + (uint32_t)1U + (uint32_t)4U + (uint32_t)1U];
+  memset(c, 0U, ((uint32_t)4U + (uint32_t)1U + (uint32_t)4U + (uint32_t)1U) * sizeof (uint64_t));
   mul_(aM, bM, c);
   reduction(n, nInv_u64, c, resM);
 }
+
+/* SNIPPET_END: mont_mul */
+
+/* SNIPPET_START: mod_exp_loop */
 
 static void
 mod_exp_loop(
@@ -307,25 +349,29 @@ mod_exp_loop(
   }
 }
 
+/* SNIPPET_END: mod_exp_loop */
+
+/* SNIPPET_START: Hacl_Bignum256_mod_exp */
+
 /*
 Write `a ^ b mod n1` in `res`.
 
-  The arguments a, n1 and the outparam res are meant to be 4096-bit bignums, i.e. uint64_t[64].
+  The arguments a, n1 and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[64].
   The argument b is a bignum of any size, and bBits is an upper bound on the
-  number of significant bits of b. For instance, if b is a 4096-bit bignum,
-  bBits should be 4096.
+  number of significant bits of b. For instance, if b is a 256-bit bignum,
+  bBits should be 256.
 */
 void
-Hacl_Bignum4096_mod_exp(uint64_t *n, uint64_t *a, uint32_t bBits, uint64_t *b, uint64_t *res)
+Hacl_Bignum256_mod_exp(uint64_t *n, uint64_t *a, uint32_t bBits, uint64_t *b, uint64_t *res)
 {
-  uint64_t acc[64U] = { 0U };
-  memset(acc, 0U, (uint32_t)64U * sizeof (uint64_t));
+  uint64_t acc[4U] = { 0U };
+  memset(acc, 0U, (uint32_t)4U * sizeof (uint64_t));
   acc[0U] = (uint64_t)1U;
-  uint32_t rLen = (uint32_t)65U;
+  uint32_t rLen = (uint32_t)5U;
   uint32_t bLen = (bBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
   uint64_t nInv_u64 = Hacl_Bignum_ModInv64_mod_inv_u64(n[0U]);
-  uint64_t r2[64U] = { 0U };
-  precomp((uint32_t)4096U, n, r2);
+  uint64_t r2[4U] = { 0U };
+  precomp((uint32_t)256U, n, r2);
   KRML_CHECK_SIZE(sizeof (uint64_t), rLen);
   uint64_t aM[rLen];
   memset(aM, 0U, rLen * sizeof (uint64_t));
@@ -338,6 +384,10 @@ Hacl_Bignum4096_mod_exp(uint64_t *n, uint64_t *a, uint32_t bBits, uint64_t *b, u
   from(n, nInv_u64, accM, res);
   sub_mask(n, res);
 }
+
+/* SNIPPET_END: Hacl_Bignum256_mod_exp */
+
+/* SNIPPET_START: Hacl_Bignum256_new_bn_from_bytes_be */
 
 
 /********************/
@@ -355,7 +405,7 @@ Load a bid-endian bignum from memory.
   If the return value is non-null, clients must eventually call free(3) on it to
   avoid memory leaks.
 */
-uint64_t *Hacl_Bignum4096_new_bn_from_bytes_be(uint32_t len, uint8_t *b)
+uint64_t *Hacl_Bignum256_new_bn_from_bytes_be(uint32_t len, uint8_t *b)
 {
   if
   (
@@ -387,15 +437,19 @@ uint64_t *Hacl_Bignum4096_new_bn_from_bytes_be(uint32_t len, uint8_t *b)
   return res2;
 }
 
+/* SNIPPET_END: Hacl_Bignum256_new_bn_from_bytes_be */
+
+/* SNIPPET_START: Hacl_Bignum256_bn_to_bytes_be */
+
 /*
 Serialize a bignum into big-endian memory.
 
-  The argument b points to a 4096-bit bignum.
+  The argument b points to a 256-bit bignum.
   The outparam res points to 512 bytes of valid memory.
 */
-void Hacl_Bignum4096_bn_to_bytes_be(uint64_t *b, uint8_t *res)
+void Hacl_Bignum256_bn_to_bytes_be(uint64_t *b, uint8_t *res)
 {
-  uint32_t bnLen = ((uint32_t)512U - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
+  uint32_t bnLen = ((uint32_t)32U - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
   uint32_t tmpLen = (uint32_t)8U * bnLen;
   KRML_CHECK_SIZE(sizeof (uint8_t), tmpLen);
   uint8_t tmp[tmpLen];
@@ -404,8 +458,12 @@ void Hacl_Bignum4096_bn_to_bytes_be(uint64_t *b, uint8_t *res)
   {
     store64_be(tmp + i * (uint32_t)8U, b[bnLen - i - (uint32_t)1U]);
   }
-  memcpy(res, tmp + tmpLen - (uint32_t)512U, (uint32_t)512U * sizeof (uint8_t));
+  memcpy(res, tmp + tmpLen - (uint32_t)32U, (uint32_t)32U * sizeof (uint8_t));
 }
+
+/* SNIPPET_END: Hacl_Bignum256_bn_to_bytes_be */
+
+/* SNIPPET_START: Hacl_Bignum256_lt */
 
 
 /***************/
@@ -416,10 +474,10 @@ void Hacl_Bignum4096_bn_to_bytes_be(uint64_t *b, uint8_t *res)
 /*
 Returns true if and only if argument a is strictly less than the argument b.
 */
-bool Hacl_Bignum4096_lt(uint64_t *a, uint64_t *b)
+bool Hacl_Bignum256_lt(uint64_t *a, uint64_t *b)
 {
   uint64_t acc = (uint64_t)0U;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
     uint64_t beq = FStar_UInt64_eq_mask(a[i], b[i]);
     uint64_t blt = ~FStar_UInt64_gte_mask(a[i], b[i]);
@@ -428,4 +486,6 @@ bool Hacl_Bignum4096_lt(uint64_t *a, uint64_t *b)
   uint64_t mask = acc;
   return mask == (uint64_t)0xFFFFFFFFFFFFFFFFU;
 }
+
+/* SNIPPET_END: Hacl_Bignum256_lt */
 

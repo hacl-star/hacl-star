@@ -42,6 +42,8 @@ extern "C" {
 #include "Hacl_Bignum.h"
 #include "Hacl_Hash.h"
 
+/* SNIPPET_START: Hacl_RSAPSS_rsapss_sign */
+
 void
 Hacl_RSAPSS_rsapss_sign(
   uint32_t modBits,
@@ -55,6 +57,10 @@ Hacl_RSAPSS_rsapss_sign(
   uint8_t *sgnt
 );
 
+/* SNIPPET_END: Hacl_RSAPSS_rsapss_sign */
+
+/* SNIPPET_START: Hacl_RSAPSS_rsapss_verify */
+
 bool
 Hacl_RSAPSS_rsapss_verify(
   uint32_t modBits,
@@ -65,6 +71,8 @@ Hacl_RSAPSS_rsapss_verify(
   uint32_t msgLen,
   uint8_t *msg
 );
+
+/* SNIPPET_END: Hacl_RSAPSS_rsapss_verify */
 
 #if defined(__cplusplus)
 }

@@ -347,6 +347,13 @@ EXPORTS
   Hacl_Frodo_KEM_crypto_kem_dec
   Hacl_IntTypes_Intrinsics_add_carry_u64
   Hacl_IntTypes_Intrinsics_sub_borrow_u64
+  Hacl_Bignum_Multiplication_mul_carry_add_u64_st
+  Hacl_Bignum_bn_is_bit_set
+  Hacl_Bignum_bn_bit_set
+  Hacl_Bignum_bn_is_less
+  Hacl_Bignum_ModInv64_mod_inv_u64
+  Hacl_RSAPSS_rsapss_sign
+  Hacl_RSAPSS_rsapss_verify
   Hacl_Streaming_Blake2b_256_blake2b_256_no_key_create_in
   Hacl_Streaming_Blake2b_256_blake2b_256_no_key_update
   Hacl_Streaming_Blake2b_256_blake2b_256_no_key_finish
@@ -385,13 +392,27 @@ EXPORTS
   Hacl_HPKE_Curve51_CP128_SHA512_setupBaseR
   Hacl_HPKE_Curve51_CP128_SHA512_sealBase
   Hacl_HPKE_Curve51_CP128_SHA512_openBase
-  Hacl_Chacha20_Vec32_chacha20_encrypt_32
-  Hacl_Chacha20_Vec32_chacha20_decrypt_32
+  Hacl_Bignum256_add
+  Hacl_Bignum256_sub
+  Hacl_Bignum256_mul
+  Hacl_Bignum256_mod_exp
+  Hacl_Bignum256_new_bn_from_bytes_be
+  Hacl_Bignum256_bn_to_bytes_be
+  Hacl_Bignum256_lt
+  Hacl_Bignum4096_add
+  Hacl_Bignum4096_sub
+  Hacl_Bignum4096_mul
+  Hacl_Bignum4096_mod_exp
+  Hacl_Bignum4096_new_bn_from_bytes_be
+  Hacl_Bignum4096_bn_to_bytes_be
+  Hacl_Bignum4096_lt
   EverCrypt_Ed25519_sign
   EverCrypt_Ed25519_verify
   EverCrypt_Ed25519_secret_to_public
   EverCrypt_Ed25519_expand_keys
   EverCrypt_Ed25519_sign_expanded
+  Hacl_Chacha20_Vec32_chacha20_encrypt_32
+  Hacl_Chacha20_Vec32_chacha20_decrypt_32
   Hacl_HPKE_Curve64_CP128_SHA512_setupBaseI
   Hacl_HPKE_Curve64_CP128_SHA512_setupBaseR
   Hacl_HPKE_Curve64_CP128_SHA512_sealBase

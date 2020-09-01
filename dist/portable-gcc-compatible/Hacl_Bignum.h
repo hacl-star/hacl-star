@@ -39,6 +39,8 @@ extern "C" {
 
 #include "Hacl_Kremlib.h"
 
+/* SNIPPET_START: Hacl_Bignum_Multiplication_mul_carry_add_u64_st */
+
 static inline uint64_t
 Hacl_Bignum_Multiplication_mul_carry_add_u64_st(
   uint64_t c_in,
@@ -57,6 +59,10 @@ Hacl_Bignum_Multiplication_mul_carry_add_u64_st(
   return FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(res, (uint32_t)64U));
 }
 
+/* SNIPPET_END: Hacl_Bignum_Multiplication_mul_carry_add_u64_st */
+
+/* SNIPPET_START: Hacl_Bignum_bn_is_bit_set */
+
 static inline bool Hacl_Bignum_bn_is_bit_set(uint32_t len, uint64_t *input, uint32_t ind)
 {
   uint32_t i = ind / (uint32_t)64U;
@@ -66,12 +72,20 @@ static inline bool Hacl_Bignum_bn_is_bit_set(uint32_t len, uint64_t *input, uint
   return tmp1 == (uint64_t)1U;
 }
 
+/* SNIPPET_END: Hacl_Bignum_bn_is_bit_set */
+
+/* SNIPPET_START: Hacl_Bignum_bn_bit_set */
+
 static inline void Hacl_Bignum_bn_bit_set(uint32_t len, uint64_t *input, uint32_t ind)
 {
   uint32_t i = ind / (uint32_t)64U;
   uint32_t j = ind % (uint32_t)64U;
   input[i] = input[i] | (uint64_t)1U << j;
 }
+
+/* SNIPPET_END: Hacl_Bignum_bn_bit_set */
+
+/* SNIPPET_START: Hacl_Bignum_bn_is_less */
 
 static inline bool Hacl_Bignum_bn_is_less(uint32_t len, uint64_t *a, uint64_t *b)
 {
@@ -85,6 +99,10 @@ static inline bool Hacl_Bignum_bn_is_less(uint32_t len, uint64_t *a, uint64_t *b
   uint64_t mask = acc;
   return mask == (uint64_t)0xFFFFFFFFFFFFFFFFU;
 }
+
+/* SNIPPET_END: Hacl_Bignum_bn_is_less */
+
+/* SNIPPET_START: Hacl_Bignum_ModInv64_mod_inv_u64 */
 
 static inline uint64_t Hacl_Bignum_ModInv64_mod_inv_u64(uint64_t n0)
 {
@@ -106,6 +124,8 @@ static inline uint64_t Hacl_Bignum_ModInv64_mod_inv_u64(uint64_t n0)
   }
   return vb;
 }
+
+/* SNIPPET_END: Hacl_Bignum_ModInv64_mod_inv_u64 */
 
 #if defined(__cplusplus)
 }

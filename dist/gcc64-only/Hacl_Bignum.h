@@ -47,14 +47,10 @@ Hacl_Bignum_Multiplication_mul_carry_add_u64_st(
   uint64_t *out
 )
 {
-  FStar_UInt128_uint128 uu____0 = FStar_UInt128_uint64_to_uint128(out[0U]);
-  FStar_UInt128_uint128
-  res =
-    FStar_UInt128_add(FStar_UInt128_add(FStar_UInt128_mul_wide(a, b),
-        FStar_UInt128_uint64_to_uint128(c_in)),
-      uu____0);
-  out[0U] = FStar_UInt128_uint128_to_uint64(res);
-  return FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(res, (uint32_t)64U));
+  uint128_t uu____0 = (uint128_t)out[0U];
+  uint128_t res = (uint128_t)a * b + (uint128_t)c_in + uu____0;
+  out[0U] = (uint64_t)res;
+  return (uint64_t)(res >> (uint32_t)64U);
 }
 
 static inline bool Hacl_Bignum_bn_is_bit_set(uint32_t len, uint64_t *input, uint32_t ind)

@@ -24,6 +24,8 @@
 
 #include "Hacl_RSAPSS.h"
 
+/* SNIPPET_START: bn_from_bytes_be */
+
 static inline void bn_from_bytes_be(uint32_t len, uint8_t *b, uint64_t *res)
 {
   uint32_t bnLen = (len - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
@@ -41,6 +43,10 @@ static inline void bn_from_bytes_be(uint32_t len, uint8_t *b, uint64_t *res)
   }
 }
 
+/* SNIPPET_END: bn_from_bytes_be */
+
+/* SNIPPET_START: bn_to_bytes_be */
+
 static inline void bn_to_bytes_be(uint32_t len, uint64_t *b, uint8_t *res)
 {
   uint32_t bnLen = (len - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
@@ -54,6 +60,10 @@ static inline void bn_to_bytes_be(uint32_t len, uint64_t *b, uint8_t *res)
   }
   memcpy(res, tmp + tmpLen - len, len * sizeof (uint8_t));
 }
+
+/* SNIPPET_END: bn_to_bytes_be */
+
+/* SNIPPET_START: precomp_runtime */
 
 static void precomp_runtime(uint32_t len, uint32_t modBits, uint64_t *n, uint64_t *res)
 {
@@ -89,6 +99,10 @@ static void precomp_runtime(uint32_t len, uint32_t modBits, uint64_t *n, uint64_
     }
   }
 }
+
+/* SNIPPET_END: precomp_runtime */
+
+/* SNIPPET_START: mont_reduction_runtime */
 
 static void
 mont_reduction_runtime(
@@ -148,6 +162,10 @@ mont_reduction_runtime(
     (len + (uint32_t)1U + len + (uint32_t)1U - (len + (uint32_t)1U)) * sizeof (uint64_t));
 }
 
+/* SNIPPET_END: mont_reduction_runtime */
+
+/* SNIPPET_START: to_runtime */
+
 static void
 to_runtime(
   uint32_t len,
@@ -179,6 +197,10 @@ to_runtime(
   mont_reduction_runtime(len, n, nInv_u64, tmp, aM);
 }
 
+/* SNIPPET_END: to_runtime */
+
+/* SNIPPET_START: from_runtime */
+
 static void
 from_runtime(uint32_t len, uint64_t *n, uint64_t nInv_u64, uint64_t *aM, uint64_t *a)
 {
@@ -192,6 +214,10 @@ from_runtime(uint32_t len, uint64_t *n, uint64_t nInv_u64, uint64_t *aM, uint64_
   mont_reduction_runtime(len, n, nInv_u64, tmp, a_);
   memcpy(a, a_, len * sizeof (uint64_t));
 }
+
+/* SNIPPET_END: from_runtime */
+
+/* SNIPPET_START: mul_runtime */
 
 static void
 mul_runtime(
@@ -223,10 +249,18 @@ mul_runtime(
   mont_reduction_runtime(len, n, nInv_u64, c, resM);
 }
 
+/* SNIPPET_END: mul_runtime */
+
+/* SNIPPET_START: hash_sha256 */
+
 static void hash_sha256(uint8_t *mHash, uint32_t msgLen, uint8_t *msg)
 {
   Hacl_Hash_SHA2_hash_256(msg, msgLen, mHash);
 }
+
+/* SNIPPET_END: hash_sha256 */
+
+/* SNIPPET_START: mgf_sha256 */
 
 static inline void mgf_sha256(uint32_t len, uint8_t *mgfseed, uint32_t maskLen, uint8_t *res)
 {
@@ -252,6 +286,10 @@ static inline void mgf_sha256(uint32_t len, uint8_t *mgfseed, uint32_t maskLen, 
   memcpy(res, acc, maskLen * sizeof (uint8_t));
 }
 
+/* SNIPPET_END: mgf_sha256 */
+
+/* SNIPPET_START: bn_mod_exp_loop_runtime */
+
 static void
 bn_mod_exp_loop_runtime(
   uint32_t nLen,
@@ -273,6 +311,10 @@ bn_mod_exp_loop_runtime(
     mul_runtime(nLen, n, nInv_u64, aM, aM, aM);
   }
 }
+
+/* SNIPPET_END: bn_mod_exp_loop_runtime */
+
+/* SNIPPET_START: bn_mod_exp */
 
 static inline void
 bn_mod_exp(
@@ -334,6 +376,10 @@ bn_mod_exp(
   uint64_t uu____1 = c;
 }
 
+/* SNIPPET_END: bn_mod_exp */
+
+/* SNIPPET_START: xor_bytes */
+
 static inline void xor_bytes(uint32_t len, uint8_t *b1, uint8_t *b2)
 {
   for (uint32_t i = (uint32_t)0U; i < len; i++)
@@ -343,6 +389,10 @@ static inline void xor_bytes(uint32_t len, uint8_t *b1, uint8_t *b2)
     os[i] = x;
   }
 }
+
+/* SNIPPET_END: xor_bytes */
+
+/* SNIPPET_START: pss_encode */
 
 static inline void
 pss_encode(
@@ -384,6 +434,10 @@ pss_encode(
   memcpy(em + dbLen, m1Hash, (uint32_t)32U * sizeof (uint8_t));
   em[emLen - (uint32_t)1U] = (uint8_t)0xbcU;
 }
+
+/* SNIPPET_END: pss_encode */
+
+/* SNIPPET_START: pss_verify */
 
 static inline bool
 pss_verify(uint32_t sLen, uint32_t msgLen, uint8_t *msg, uint32_t emBits, uint8_t *em)
@@ -463,6 +517,10 @@ pss_verify(uint32_t sLen, uint32_t msgLen, uint8_t *msg, uint32_t emBits, uint8_
   return z0 == (uint8_t)255U;
 }
 
+/* SNIPPET_END: pss_verify */
+
+/* SNIPPET_START: rsapss_sign */
+
 static void
 rsapss_sign(
   uint32_t modBits,
@@ -497,6 +555,10 @@ rsapss_sign(
   bn_mod_exp(modBits, nLen, n, m, dBits, d, s);
   bn_to_bytes_be(k, s, sgnt);
 }
+
+/* SNIPPET_END: rsapss_sign */
+
+/* SNIPPET_START: rsapss_verify */
 
 static bool
 rsapss_verify(
@@ -551,6 +613,10 @@ rsapss_verify(
   return false;
 }
 
+/* SNIPPET_END: rsapss_verify */
+
+/* SNIPPET_START: Hacl_RSAPSS_rsapss_sign */
+
 void
 Hacl_RSAPSS_rsapss_sign(
   uint32_t modBits,
@@ -567,6 +633,10 @@ Hacl_RSAPSS_rsapss_sign(
   rsapss_sign(modBits, eBits, dBits, skey, sLen, salt, msgLen, msg, sgnt);
 }
 
+/* SNIPPET_END: Hacl_RSAPSS_rsapss_sign */
+
+/* SNIPPET_START: Hacl_RSAPSS_rsapss_verify */
+
 bool
 Hacl_RSAPSS_rsapss_verify(
   uint32_t modBits,
@@ -580,4 +650,6 @@ Hacl_RSAPSS_rsapss_verify(
 {
   return rsapss_verify(modBits, eBits, pkey, sLen, sgnt, msgLen, msg);
 }
+
+/* SNIPPET_END: Hacl_RSAPSS_rsapss_verify */
 

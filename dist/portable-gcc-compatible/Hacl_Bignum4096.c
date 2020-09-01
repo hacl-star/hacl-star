@@ -24,6 +24,8 @@
 
 #include "Hacl_Bignum4096.h"
 
+/* SNIPPET_START: Hacl_Bignum4096_add */
+
 /************************/
 /* Arithmetic functions */
 /************************/
@@ -48,6 +50,10 @@ uint64_t Hacl_Bignum4096_add(uint64_t *a, uint64_t *b, uint64_t *res)
   return c;
 }
 
+/* SNIPPET_END: Hacl_Bignum4096_add */
+
+/* SNIPPET_START: Hacl_Bignum4096_sub */
+
 /*
 Write `a - b mod 2^4096` in `res`.
 
@@ -66,6 +72,10 @@ uint64_t Hacl_Bignum4096_sub(uint64_t *a, uint64_t *b, uint64_t *res)
   }
   return c;
 }
+
+/* SNIPPET_END: Hacl_Bignum4096_sub */
+
+/* SNIPPET_START: Hacl_Bignum4096_mul */
 
 /*
 Write `a * b` in `res`.
@@ -91,12 +101,20 @@ void Hacl_Bignum4096_mul(uint64_t *a, uint64_t *b, uint64_t *res)
   }
 }
 
+/* SNIPPET_END: Hacl_Bignum4096_mul */
+
+/* SNIPPET_START: bit_set */
+
 static void bit_set(uint64_t *input, uint32_t ind)
 {
   uint32_t i = ind / (uint32_t)64U;
   uint32_t j = ind % (uint32_t)64U;
   input[i] = input[i] | (uint64_t)1U << j;
 }
+
+/* SNIPPET_END: bit_set */
+
+/* SNIPPET_START: add_mod_n */
 
 static void add_mod_n(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *res)
 {
@@ -126,6 +144,10 @@ static void add_mod_n(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *res)
   }
 }
 
+/* SNIPPET_END: add_mod_n */
+
+/* SNIPPET_START: sub_mask */
+
 static void sub_mask(uint64_t *n, uint64_t *a)
 {
   uint64_t mask = (uint64_t)0xFFFFFFFFFFFFFFFFU;
@@ -153,6 +175,10 @@ static void sub_mask(uint64_t *n, uint64_t *a)
   uint64_t uu____1 = c;
 }
 
+/* SNIPPET_END: sub_mask */
+
+/* SNIPPET_START: mul_ */
+
 static void mul_(uint64_t *a, uint64_t *b, uint64_t *res)
 {
   uint32_t resLen = (uint32_t)130U;
@@ -171,6 +197,10 @@ static void mul_(uint64_t *a, uint64_t *b, uint64_t *res)
   }
 }
 
+/* SNIPPET_END: mul_ */
+
+/* SNIPPET_START: precomp */
+
 static void precomp(uint32_t modBits, uint64_t *n, uint64_t *res)
 {
   memset(res, 0U, (uint32_t)64U * sizeof (uint64_t));
@@ -180,6 +210,10 @@ static void precomp(uint32_t modBits, uint64_t *n, uint64_t *res)
     add_mod_n(n, res, res, res);
   }
 }
+
+/* SNIPPET_END: precomp */
+
+/* SNIPPET_START: reduction */
 
 static void reduction(uint64_t *n, uint64_t nInv_u64, uint64_t *c, uint64_t *res)
 {
@@ -244,6 +278,10 @@ static void reduction(uint64_t *n, uint64_t nInv_u64, uint64_t *c, uint64_t *res
     * sizeof (uint64_t));
 }
 
+/* SNIPPET_END: reduction */
+
+/* SNIPPET_START: to */
+
 static void to(uint64_t *n, uint64_t nInv_u64, uint64_t *r2, uint64_t *a, uint64_t *aM)
 {
   KRML_CHECK_SIZE(sizeof (uint64_t),
@@ -256,6 +294,10 @@ static void to(uint64_t *n, uint64_t nInv_u64, uint64_t *r2, uint64_t *a, uint64
   Hacl_Bignum4096_mul(a, r2, c);
   reduction(n, nInv_u64, tmp, aM);
 }
+
+/* SNIPPET_END: to */
+
+/* SNIPPET_START: from */
 
 static void from(uint64_t *n, uint64_t nInv_u64, uint64_t *aM, uint64_t *a)
 {
@@ -273,6 +315,10 @@ static void from(uint64_t *n, uint64_t nInv_u64, uint64_t *aM, uint64_t *a)
   memcpy(a, a_, (uint32_t)64U * sizeof (uint64_t));
 }
 
+/* SNIPPET_END: from */
+
+/* SNIPPET_START: mont_mul */
+
 static void
 mont_mul(uint64_t *n, uint64_t nInv_u64, uint64_t *aM, uint64_t *bM, uint64_t *resM)
 {
@@ -285,6 +331,10 @@ mont_mul(uint64_t *n, uint64_t nInv_u64, uint64_t *aM, uint64_t *bM, uint64_t *r
   mul_(aM, bM, c);
   reduction(n, nInv_u64, c, resM);
 }
+
+/* SNIPPET_END: mont_mul */
+
+/* SNIPPET_START: mod_exp_loop */
 
 static void
 mod_exp_loop(
@@ -306,6 +356,10 @@ mod_exp_loop(
     mont_mul(n, nInv_u64, aM, aM, aM);
   }
 }
+
+/* SNIPPET_END: mod_exp_loop */
+
+/* SNIPPET_START: Hacl_Bignum4096_mod_exp */
 
 /*
 Write `a ^ b mod n1` in `res`.
@@ -338,6 +392,10 @@ Hacl_Bignum4096_mod_exp(uint64_t *n, uint64_t *a, uint32_t bBits, uint64_t *b, u
   from(n, nInv_u64, accM, res);
   sub_mask(n, res);
 }
+
+/* SNIPPET_END: Hacl_Bignum4096_mod_exp */
+
+/* SNIPPET_START: Hacl_Bignum4096_new_bn_from_bytes_be */
 
 
 /********************/
@@ -387,6 +445,10 @@ uint64_t *Hacl_Bignum4096_new_bn_from_bytes_be(uint32_t len, uint8_t *b)
   return res2;
 }
 
+/* SNIPPET_END: Hacl_Bignum4096_new_bn_from_bytes_be */
+
+/* SNIPPET_START: Hacl_Bignum4096_bn_to_bytes_be */
+
 /*
 Serialize a bignum into big-endian memory.
 
@@ -406,6 +468,10 @@ void Hacl_Bignum4096_bn_to_bytes_be(uint64_t *b, uint8_t *res)
   }
   memcpy(res, tmp + tmpLen - (uint32_t)512U, (uint32_t)512U * sizeof (uint8_t));
 }
+
+/* SNIPPET_END: Hacl_Bignum4096_bn_to_bytes_be */
+
+/* SNIPPET_START: Hacl_Bignum4096_lt */
 
 
 /***************/
@@ -428,4 +494,6 @@ bool Hacl_Bignum4096_lt(uint64_t *a, uint64_t *b)
   uint64_t mask = acc;
   return mask == (uint64_t)0xFFFFFFFFFFFFFFFFU;
 }
+
+/* SNIPPET_END: Hacl_Bignum4096_lt */
 

@@ -642,7 +642,7 @@ INTRINSIC_FLAGS = -add-include '"libintvector.h"'
 INTRINSIC_INT_FLAGS = \
   -add-include 'Hacl_Bignum4096:"lib_intrinsics.h"' \
   -add-include 'Hacl_Bignum256:"lib_intrinsics.h"' \
-  -add-include 'Hacl_RSAPSS:"lib_intrinsics.h"'
+  -add-include 'Hacl_RSAPSS:"lib_intrinsics.h"' \
   -add-include 'Hacl_P256:"lib_intrinsics.h"'
 
 # Disabled for dist/portable
@@ -774,7 +774,7 @@ dist/wasm/Makefile.basic: STREAMING_BUNDLE = -bundle Hacl.Streaming.*
 # And Merkle trees
 dist/wasm/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree,MerkleTree.*'
 dist/wasm/Makefile.basic: CTR_BUNDLE =
-dist/wasm/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.RSAPSS,Hacl.Bignum.*,Hacl.Bignum,Hacl.Impl.MGF,Hacl.Impl.RSAPSS
+dist/wasm/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.RSAPSS,Hacl.Bignum.*,Hacl.Bignum,Hacl.Bignum256,Hacl.Bignum4096,Hacl.Impl.MGF,Hacl.Impl.RSAPSS
 dist/wasm/Makefile.basic: DEFAULT_FLAGS += -bundle 'EverCrypt,EverCrypt.*'
 
 dist/wasm/package.json: dist/wasm/Makefile.basic $(wildcard bindings/js/*.js) bindings/js/README.md $(wildcard bindings/js/*.json) bindings/js/.npmignore
@@ -946,7 +946,7 @@ dist/mozilla/Makefile.basic: BLAKE2_BUNDLE = -bundle Hacl.Impl.Blake2.*,Hacl.Bla
 dist/mozilla/Makefile.basic: SHA3_BUNDLE = -bundle Hacl.SHA3
 dist/mozilla/Makefile.basic: HASH_BUNDLE = -bundle Hacl.Hash.*,Hacl.HKDF,Hacl.HMAC,Hacl.HMAC_DRBG
 dist/mozilla/Makefile.basic: HPKE_BUNDLE = -bundle 'Hacl.HPKE.*'
-dist/mozilla/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.RSAPSS,Hacl.Bignum.*,Hacl.Bignum,Hacl.Impl.MGF,Hacl.Impl.RSAPSS
+dist/mozilla/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.RSAPSS,Hacl.Bignum.*,Hacl.Bignum,Hacl.Bignum4096,Hacl.Bignum256,Hacl.Impl.MGF,Hacl.Impl.RSAPSS
 dist/mozilla/Makefile.basic: P256_BUNDLE= -bundle Hacl.P256,Hacl.Impl.ECDSA.*,Hacl.Impl.SolinasReduction,Hacl.Impl.P256.*
 dist/mozilla/Makefile.basic: STREAMING_BUNDLE = -bundle Hacl.Streaming.*
 dist/mozilla/Makefile.basic: FRODO_BUNDLE = -bundle Hacl.Frodo.*,Hacl.SHA3,Hacl.Keccak,Frodo.Params
