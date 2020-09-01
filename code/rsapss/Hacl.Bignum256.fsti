@@ -31,25 +31,25 @@ Comment
 
   This functions returns the carry.
 
-  The arguments a, b and res are meant to be 256-bit bignums, i.e. uint64_t[64]"]
+  The arguments a, b and res are meant to be 256-bit bignums, i.e. uint64_t[4]"]
 val add: Hacl.Bignum.Addition.bn_add_eq_len_st n_limbs
 
 [@@ Comment "Write `a - b mod 2^256` in `res`.
 
   This functions returns the carry.
 
-  The arguments a, b and res are meant to be 256-bit bignums, i.e. uint64_t[64]"]
+  The arguments a, b and res are meant to be 256-bit bignums, i.e. uint64_t[4]"]
 val sub: Hacl.Bignum.Addition.bn_sub_eq_len_st n_limbs
 
 [@@ Comment "Write `a * b` in `res`.
 
-  The arguments a and b are meant to be 256-bit bignums, i.e. uint64_t[64].
-  The outparam res is meant to be a 8192-bit bignum, i.e. uint64_t[128]."]
+  The arguments a and b are meant to be 256-bit bignums, i.e. uint64_t[4].
+  The outparam res is meant to be a 512-bit bignum, i.e. uint64_t[8]."]
 val mul: a:lbignum n_limbs -> b:lbignum n_limbs -> BN.bn_mul_st a b
 
 [@@ Comment "Write `a ^ b mod n1` in `res`.
 
-  The arguments a, n1 and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[64].
+  The arguments a, n1 and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
   The argument b is a bignum of any size, and bBits is an upper bound on the
   number of significant bits of b. For instance, if b is a 256-bit bignum,
   bBits should be 256."]
@@ -73,7 +73,7 @@ val new_bn_from_bytes_be: Hacl.Bignum.Convert.new_bn_from_bytes_be_st
 [@@ Comment "Serialize a bignum into big-endian memory.
 
   The argument b points to a 256-bit bignum.
-  The outparam res points to 512 bytes of valid memory."]
+  The outparam res points to 32 bytes of valid memory."]
 val bn_to_bytes_be: Hacl.Bignum.Convert.bn_to_bytes_be_st n_bytes
 
 [@@ CPrologue
