@@ -6,6 +6,8 @@ module BN = Hacl.Bignum
 module BM = Hacl.Bignum.Montgomery
 module BE = Hacl.Bignum.Exponentiation
 
+#set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
+
 let _ = assert_norm (4096ul = 64ul `FStar.UInt32.mul` 64ul)
 
 inline_for_extraction noextract
@@ -66,7 +68,7 @@ val new_bn_from_bytes_be: Hacl.Bignum.Convert.new_bn_from_bytes_be_st
 
   The argument b points to a 4096-bit bignum.
   The outparam res points to 512 bytes of valid memory."]
-val bn_to_bytes_be: Hacl.Bignum.Convert.bn_to_bytes_be_st n
+val bn_to_bytes_be: Hacl.Bignum.Convert.bn_to_bytes_be_st 512ul
 
 [@@ CPrologue
 "\n/***************/

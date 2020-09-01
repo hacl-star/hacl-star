@@ -8,6 +8,8 @@ module BE = Hacl.Bignum.Exponentiation
 
 friend Hacl.Bignum.Exponentiation
 
+#set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
+
 let _ = assert_norm (4096ul = 64ul `FStar.UInt32.mul` 64ul)
 
 /// A note about the style of normalization used in this file. Normally,
@@ -85,6 +87,6 @@ let mod_exp =
 
 let new_bn_from_bytes_be = Hacl.Bignum.Convert.new_bn_from_bytes_be
 
-let bn_to_bytes_be = Hacl.Bignum.Convert.mk_bn_to_bytes_be n
+let bn_to_bytes_be = Hacl.Bignum.Convert.mk_bn_to_bytes_be 512ul
 
 let lt_mask = Hacl.Bignum.mk_bn_lt_mask n
