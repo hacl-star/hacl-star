@@ -27,7 +27,7 @@
 static void precomp_runtime(uint32_t len, uint32_t modBits, uint64_t *n, uint64_t *res)
 {
   memset(res, 0U, len * sizeof (uint64_t));
-  Hacl_Bignum_bn_bit_set(len, res, modBits - (uint32_t)1U);
+  Hacl_Bignum_bn_set_ith_bit(len, res, modBits - (uint32_t)1U);
   for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)128U * len + (uint32_t)1U - modBits; i0++)
   {
     uint64_t c0 = (uint64_t)0U;
@@ -365,7 +365,8 @@ bn_mod_exp_loop_runtime(
 {
   for (uint32_t i = (uint32_t)0U; i < bBits; i++)
   {
-    if (Hacl_Bignum_bn_is_bit_set(bLen, b, i))
+    uint64_t get_bit = Hacl_Bignum_bn_get_ith_bit(bLen, b, i);
+    if (get_bit == (uint64_t)1U)
     {
       mul_runtime(nLen, n, nInv_u64, aM, accM, accM);
     }
@@ -609,7 +610,8 @@ Hacl_RSAPSS_rsapss_verify(
   uint64_t s[nLen];
   memset(s, 0U, nLen * sizeof (uint64_t));
   Hacl_Bignum_Convert_bn_from_bytes_be(k, sgnt, s);
-  if (Hacl_Bignum_bn_is_less(nLen, s, n))
+  uint64_t mask = Hacl_Bignum_bn_lt_mask(nLen, s, n);
+  if (mask == (uint64_t)0xFFFFFFFFFFFFFFFFU)
   {
     bn_mod_exp(modBits, nLen, n, s, eBits, e, m);
     bool ite;
@@ -619,10 +621,12 @@ Hacl_RSAPSS_rsapss_verify(
     }
     else
     {
-      ite =
-        !Hacl_Bignum_bn_is_bit_set((modBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U,
+      uint64_t
+      get_bit =
+        Hacl_Bignum_bn_get_ith_bit((modBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U,
           m,
           modBits - (uint32_t)1U);
+      ite = get_bit == (uint64_t)0U;
     }
     if (ite)
     {

@@ -114,9 +114,10 @@ void Hacl_Bignum4096_bn_to_bytes_be(uint64_t *b, uint8_t *res);
 
 
 /*
-Returns true if and only if argument a is strictly less than the argument b.
+Returns 2 ^ 64 - 1 if and only if argument a is strictly less than the argument b,
+ otherwise returns 0.
 */
-bool Hacl_Bignum4096_lt(uint64_t *a, uint64_t *b);
+uint64_t Hacl_Bignum4096_lt_mask(uint64_t *a, uint64_t *b);
 
 #if defined(__cplusplus)
 }

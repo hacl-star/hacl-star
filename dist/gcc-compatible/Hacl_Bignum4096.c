@@ -324,7 +324,8 @@ mod_exp_loop(
 {
   for (uint32_t i = (uint32_t)0U; i < bBits; i++)
   {
-    if (Hacl_Bignum_bn_is_bit_set(bLen, b, i))
+    uint64_t get_bit = Hacl_Bignum_bn_get_ith_bit(bLen, b, i);
+    if (get_bit == (uint64_t)1U)
     {
       mont_mul(n1, nInv_u64, aM, accM, accM);
     }
@@ -414,7 +415,7 @@ Serialize a bignum into big-endian memory.
 */
 void Hacl_Bignum4096_bn_to_bytes_be(uint64_t *b, uint8_t *res)
 {
-  uint32_t bnLen = ((uint32_t)64U - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
+  uint32_t bnLen = ((uint32_t)512U - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
   uint32_t tmpLen = (uint32_t)8U * bnLen;
   KRML_CHECK_SIZE(sizeof (uint8_t), tmpLen);
   uint8_t tmp[tmpLen];
@@ -423,7 +424,7 @@ void Hacl_Bignum4096_bn_to_bytes_be(uint64_t *b, uint8_t *res)
   {
     store64_be(tmp + i * (uint32_t)8U, b[bnLen - i - (uint32_t)1U]);
   }
-  memcpy(res, tmp + tmpLen - (uint32_t)64U, (uint32_t)64U * sizeof (uint8_t));
+  memcpy(res, tmp + tmpLen - (uint32_t)512U, (uint32_t)512U * sizeof (uint8_t));
 }
 
 
@@ -433,9 +434,10 @@ void Hacl_Bignum4096_bn_to_bytes_be(uint64_t *b, uint8_t *res)
 
 
 /*
-Returns true if and only if argument a is strictly less than the argument b.
+Returns 2 ^ 64 - 1 if and only if argument a is strictly less than the argument b,
+ otherwise returns 0.
 */
-bool Hacl_Bignum4096_lt(uint64_t *a, uint64_t *b)
+uint64_t Hacl_Bignum4096_lt_mask(uint64_t *a, uint64_t *b)
 {
   uint64_t acc = (uint64_t)0U;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
@@ -444,7 +446,6 @@ bool Hacl_Bignum4096_lt(uint64_t *a, uint64_t *b)
     uint64_t blt = ~FStar_UInt64_gte_mask(a[i], b[i]);
     acc = (beq & acc) | (~beq & ((blt & (uint64_t)0xFFFFFFFFFFFFFFFFU) | (~blt & (uint64_t)0U)));
   }
-  uint64_t mask = acc;
-  return mask == (uint64_t)0xFFFFFFFFFFFFFFFFU;
+  return acc;
 }
 

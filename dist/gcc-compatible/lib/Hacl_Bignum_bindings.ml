@@ -18,16 +18,17 @@ module Bindings(F:Cstubs.FOREIGN) =
         (uint32_t @->
            ((ptr uint64_t) @->
               ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void)))))
-    let hacl_Bignum_bn_is_bit_set =
-      foreign "Hacl_Bignum_bn_is_bit_set"
-        (uint32_t @-> ((ptr uint64_t) @-> (uint32_t @-> (returning bool))))
-    let hacl_Bignum_bn_bit_set =
-      foreign "Hacl_Bignum_bn_bit_set"
-        (uint32_t @-> ((ptr uint64_t) @-> (uint32_t @-> (returning void))))
-    let hacl_Bignum_bn_is_less =
-      foreign "Hacl_Bignum_bn_is_less"
+    let hacl_Bignum_bn_get_ith_bit =
+      foreign "Hacl_Bignum_bn_get_ith_bit"
         (uint32_t @->
-           ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning bool))))
+           ((ptr uint64_t) @-> (uint32_t @-> (returning uint64_t))))
+    let hacl_Bignum_bn_set_ith_bit =
+      foreign "Hacl_Bignum_bn_set_ith_bit"
+        (uint32_t @-> ((ptr uint64_t) @-> (uint32_t @-> (returning void))))
+    let hacl_Bignum_bn_lt_mask =
+      foreign "Hacl_Bignum_bn_lt_mask"
+        (uint32_t @->
+           ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning uint64_t))))
     let hacl_Bignum_ModInv64_mod_inv_u64 =
       foreign "Hacl_Bignum_ModInv64_mod_inv_u64"
         (uint64_t @-> (returning uint64_t))
