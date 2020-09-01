@@ -22,10 +22,6 @@ open FStar.Tactics.Canon
 
 open Spec.P256
 
-open FStar.Math.Euclid 
-open FStar.Math.Fermat
-
-
 #set-options " --z3rlimit 200" 
 
 val lemma_scalar_ith: c: curve ->  sc:lbytes (getScalarLenNat c) -> k:nat{k < getScalarLenNat c} -> Lemma
@@ -499,7 +495,10 @@ val lemma_multiplication_to_same_number: a: nat -> b: nat ->c: nat -> prime: pos
 let lemma_multiplication_to_same_number a b c prime = 
   lemma_mod_mul_distr_l a c prime;
   lemma_mod_mul_distr_l b c prime
+  
 
+open FStar.Math.Euclid 
+open FStar.Math.Fermat
 
 val lemma_division_is_multiplication:
   t3: nat{exists (k: nat) . k * pow2 64 = t3} ->

@@ -154,6 +154,87 @@ let montgomery_multiplication_one_round_proof_st #c t result co =
   pow2_lt_compat (2 * getPower c - 2) (2 * getPower c - 63)
 
 
+
+val lemma_mod_inv: #c: curve ->  t: int -> Lemma (t % getPrime c = t * modp_inv2 #c (pow2 0) % getPrime c)
+
+let lemma_mod_inv #c t = 
+  let prime = getPrime c in 
+  lemma_pow_mod_n_is_fpow prime 1 (prime - 2);
+  power_one (prime - 2)
+
+
+(* 
+
+val montgomery_multiplication_buffer_by_one: #c: curve -> a: felem c -> result: felem c -> 
+  Stack unit
+    (requires (fun h -> live h a /\ as_nat c h a < getPrime c /\ live h result)) 
+    (ensures (fun h0 _ h1 -> 
+      let prime = getPrime c in 
+      modifies (loc result) h0 h1 /\ 
+      as_nat c h1 result  = (as_nat c h0 a * modp_inv2_prime (getPower2 c) prime) % prime /\
+      as_nat c h1 result = fromDomain_ #c (as_nat c h0 a)))
+
+*)
+
+val lemma_inv1: a: int -> b: int{a < b} -> Lemma (a < b * b)
+
+let lemma_inv1 a b = ()
+
+
+val lemma_modp_as_pow: #c: curve -> a: nat -> Lemma
+    (modp_inv2 #c a == pow (a % getPrime c) (getPrime c - 2) % getPrime c)
+
+let lemma_modp_as_pow #c a = 
+  let prime = getPrime c in 
+  lemma_pow_mod_n_is_fpow prime (a % prime) (prime - 2)
+
+
+val lemma_inv2: #c: curve{(getPrime c + 1) % pow2 64 == 0} 
+  -> a0: nat -> a_i: nat {a_i < getPrime c * getPrime c} 
+  -> a_i1: nat {a_i1 = (a_i + getPrime c * (a_i % pow2 64)) / pow2 64} 
+  -> i: nat {i < uint_v (getCoordinateLenU64 c)} -> 
+  Lemma 
+    (requires (a_i % getPrime c = a0 * modp_inv2 #c (pow2 (i * 64)) % getPrime c))
+    (ensures (a_i1 % getPrime c = a0 * modp_inv2 #c (pow2 ((i + 1) * 64)) % getPrime c))
+
+
+val lemma_inv3: a: int -> b: int -> c: int -> Lemma (a * b * c == a * (b * c))
+
+let lemma_inv3 a b c = ()
+
+
+let lemma_inv2 #c a0 a_i a_i1 i = 
+  let prime = getPrime c in 
+  montgomery_multiplication_one_round_proof_st #c a_i a_i1 (a0 * modp_inv2 #c (pow2 (i * 64)));
+
+
+  lemma_inv3 a0 (modp_inv2 #c (pow2 (i * 64))) (modp_inv2 #c (pow2 64));
+  lemma_mod_mul_distr_r a0 (modp_inv2 #c (pow2 (i * 64)) * modp_inv2 #c (pow2 64)) prime;
+
+  calc(==)
+  {
+    modp_inv2 #c (pow2 (i * 64)) * modp_inv2 #c (pow2 64) % prime;
+    (==) {lemma_modp_as_pow #c (pow2 (i * 64)); lemma_modp_as_pow #c (pow2 64)}
+    (pow (pow2 64 % prime) (prime - 2) % prime) * (pow (pow2 (i * 64) % prime) (prime - 2) % prime) % prime;
+    (==) {power_distributivity (pow2 64) (prime - 2) prime}
+    (pow (pow2 64) (prime - 2) % prime) * (pow (pow2 (i * 64) % prime) (prime - 2) % prime) % prime;
+    (==) {power_distributivity (pow2 (i * 64)) (prime - 2) prime}
+    (pow (pow2 64) (prime - 2) % prime) * (pow (pow2 (i * 64)) (prime - 2) % prime) % prime;
+    (==) {lemma_mod_mul_distr_l (pow (pow2 64) (prime - 2)) (pow (pow2 (i * 64)) (prime - 2) % prime) prime}
+    (pow (pow2 64) (prime - 2)) * (pow (pow2 (i * 64)) (prime - 2) % prime) % prime;
+    (==) {lemma_mod_mul_distr_r (pow (pow2 64) (prime - 2)) (pow (pow2 (i * 64)) (prime - 2)) prime}
+    (pow (pow2 64) (prime - 2)) * (pow (pow2 (i * 64)) (prime - 2)) % prime;
+    (==) {power_distributivity_2 (pow2 64) (pow2 (i * 64)) (prime - 2)}
+    (pow (pow2 64 * pow2 (i * 64)) (prime - 2)) % prime;
+    (==) {pow2_plus 64 (i * 64)}
+    (pow (pow2 ((i + 1) * 64)) (prime - 2)) % prime; 
+    (==) {power_distributivity (pow2 ((i + 1) * 64)) (prime - 2) prime}
+    (pow (pow2 ((i + 1) * 64) % prime) (prime - 2)) % prime; 
+    (==) {lemma_modp_as_pow #c (pow2 ((i + 1) * 64))}
+    modp_inv2 #c (pow2 ((i + 1) * 64));}
+
+
+
 let montgomery_multiplication_buffer_by_one #c a result = 
   push_frame();
   
@@ -161,12 +242,47 @@ let montgomery_multiplication_buffer_by_one #c a result =
   let t = create (size 2 *! len) (u64 0) in 
     let t_low = sub t (size 0) len in 
     let t_high = sub t len len in 
+
+  let h0 = ST.get() in 
+
   copy t_low a; 
 
-  let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = True in 
-  for 0ul len inv (fun i -> montgomery_multiplication_round #c t t);
+  let h1 = ST.get() in 
+  
+  let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = 
+    let prime = getPrime c in 
+    live h t /\ wide_as_nat c h t < prime * prime  /\
+    wide_as_nat c h t % prime = wide_as_nat c h1 t * modp_inv2 #c (pow2 (i * 64)) % prime
+  in 
 
+  assert(wide_as_nat c h0 t = as_nat c h0 t_low + as_nat c h0 t_high * pow2 (v (getCoordinateLenU64 c) * 64));
+  
+  lemma_inv1 (wide_as_nat c h1 t) (getPrime c);
+  lemma_mod_inv #c (wide_as_nat c h1 t);
+  
+  for 0ul len inv (fun i ->
+    let h0_ = ST.get() in 
+    montgomery_multiplication_round #c t t; 
+    let h1_ = ST.get() in
+    montgomery_multiplication_one_round_proof_st #c (wide_as_nat c h0_ t) (wide_as_nat c h1_ t) (wide_as_nat c h0_ t);
+    lemma_inv2 #c (wide_as_nat c h1 t) (wide_as_nat c h0_ t) (wide_as_nat c h1_ t) (v i)
+  );
+
+  let h2 = ST.get() in 
+
+  assert (inv h2 (uint_v len));
+  assert (wide_as_nat c h2 t % getPrime c =  wide_as_nat c h1 t * modp_inv2 #c (pow2 ((uint_v len) * 64)) % getPrime c);
+
+  
+  assume (wide_as_nat c h2 t < 2 * getPrime c);
+  
   reduction_prime_2prime_with_carry t result;
+
+  let h3 = ST.get() in 
+  
+  assume (as_nat c h3 result = wide_as_nat c h1 t * modp_inv2 #c (pow2 ((uint_v len) * 64)) % getPrime c);
+  admit();
+  
   pop_frame()  
 
 

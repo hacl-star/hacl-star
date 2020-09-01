@@ -14,7 +14,9 @@ open Spec.P256
 open Hacl.Spec.P256.MontgomeryMultiplication
 
 
-val montgomery_multiplication_buffer_by_one: #c: curve -> a: felem c -> result: felem c -> 
+val montgomery_multiplication_buffer_by_one: #c: curve {(getPrime c + 1) % pow2 64 == 0} 
+  -> a: felem c
+  -> result: felem c -> 
   Stack unit
     (requires (fun h -> live h a /\ as_nat c h a < getPrime c /\ live h result)) 
     (ensures (fun h0 _ h1 -> 
