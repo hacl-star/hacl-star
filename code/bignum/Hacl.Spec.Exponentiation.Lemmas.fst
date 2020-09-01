@@ -16,6 +16,10 @@ val lemma_mul_ass3: a:int -> b:int -> c:int ->
   Lemma (a * b * c == a * c * b)
 let lemma_mul_ass3 a b c = ()
 
+val lemma_mul_ass4: a:int -> b:int -> c:int -> d:int ->
+  Lemma ((a * b) * (c * d) == (a * c) * (b * d))
+let lemma_mul_ass4 a b c d = ()
+
 val lemma_mul_ass5_aux: a:int -> b:int -> c:int -> d:int -> e:int ->
   Lemma (a * b * c * d * e == a * b * (c * d * e))
 let lemma_mul_ass5_aux a b c d e =
@@ -166,6 +170,48 @@ val exp_lr: a:nat -> bBits:nat -> b:nat{b < pow2 bBits} -> nat
 let exp_lr a bBits b = Loops.repeati bBits (exp_lr_f a bBits b) 1
 
 
+val exp_lr_lemma_step0:
+    a:int -> bBits:nat -> b:nat{b < pow2 bBits}
+  -> i:nat{i < bBits} -> acc0:nat ->
+  Lemma (let acc1 = pow a (b / pow2 (bBits - i)) * acc0 in
+    acc1 * acc1 == pow a (b / pow2 (bBits - i - 1) - b / pow2 (bBits - i - 1) % 2) * (acc0 * acc0))
+
+let exp_lr_lemma_step0 a bBits b i acc0 =
+  let acc1 = pow a (b / pow2 (bBits - i)) * acc0 in
+  lemma_b_div_pow2i bBits b (i + 1);
+  assert (b / pow2 (bBits - i - 1) == b / pow2 (bBits - i) * 2 + b / pow2 (bBits - i - 1) % 2);
+
+  let a1 = pow a (b / pow2 (bBits - i)) in
+  calc (==) {
+    acc1 * acc1;
+    (==) { }
+    (a1 * acc0) * (a1 * acc0);
+    (==) { lemma_mul_ass4 a1 acc0 a1 acc0 }
+    a1 * a1 * (acc0 * acc0);
+    (==) { lemma_pow_add a (b / pow2 (bBits - i)) (b / pow2 (bBits - i)) }
+    pow a (b / pow2 (bBits - i) * 2) * (acc0 * acc0);
+    }
+
+
+val exp_lr_lemma_step1:
+    a:int -> bBits:nat -> b:nat{b < pow2 bBits}
+  -> i:nat{i < bBits} -> acc0:nat ->
+  Lemma (let acc1 = pow a (b / pow2 (bBits - i)) * acc0 in
+    acc1 * acc1 * a == pow a (b / pow2 (bBits - i - 1) - b / pow2 (bBits - i - 1) % 2 + 1) * (acc0 * acc0))
+
+let exp_lr_lemma_step1 a bBits b i acc0 =
+  let acc1 = pow a (b / pow2 (bBits - i)) * acc0 in
+  calc (==) {
+    acc1 * acc1 * a;
+    (==) { exp_lr_lemma_step0 a bBits b i acc0 }
+    pow a (b / pow2 (bBits - i - 1) - b / pow2 (bBits - i - 1) % 2) * (acc0 * acc0) * a;
+    (==) { Math.Lemmas.paren_mul_right (acc0 * acc0) (pow a (b / pow2 (bBits - i - 1) - b / pow2 (bBits - i - 1) % 2)) a }
+    (acc0 * acc0) * (pow a (b / pow2 (bBits - i - 1) - b / pow2 (bBits - i - 1) % 2) * a);
+    (==) { lemma_pow1 a; lemma_pow_add a (b / pow2 (bBits - i - 1) - b / pow2 (bBits - i - 1) % 2) 1 }
+    (acc0 * acc0) * pow a (b / pow2 (bBits - i - 1) - b / pow2 (bBits - i - 1) % 2 + 1);
+    }
+
+
 val exp_lr_lemma_step:
     a:nat -> bBits:nat -> b:nat{b < pow2 bBits}
   -> i:nat{i < bBits}
@@ -176,16 +222,11 @@ val exp_lr_lemma_step:
 
 let exp_lr_lemma_step a bBits b i acc0 acc1 =
   let acc = exp_lr_f a bBits b i acc1 in
-  lemma_pow_add a (b / pow2 (bBits - i)) (b / pow2 (bBits - i));
-  lemma_b_div_pow2i bBits b (i + 1);
-  assert (b / pow2 (bBits - i - 1) == b / pow2 (bBits - i) * 2 + b / pow2 (bBits - i - 1) % 2);
 
-  if (b / pow2 (bBits - i - 1) % 2 = 0) then ()
-  else begin
-    assert (acc == acc1 * acc1 * a);
-    lemma_pow1 a;
-    lemma_pow_add a (b / pow2 (bBits - i) * 2) 1;
-    () end
+  if (b / pow2 (bBits - i - 1) % 2 = 0) then
+    exp_lr_lemma_step0 a bBits b i acc0
+  else
+    exp_lr_lemma_step1 a bBits b i acc0
 
 
 val exp_lr_lemma_loop:
@@ -200,7 +241,6 @@ let rec exp_lr_lemma_loop a bBits b i acc0 =
   let acc = Loops.repeati i (exp_lr_f a bBits b) acc0 in
   if i = 0 then begin
     Loops.eq_repeati0 i (exp_lr_f a bBits b) acc0;
-    assert_norm (pow2 0 = 1);
     lemma_pow0 a;
     () end
   else begin
@@ -219,8 +259,7 @@ let exp_lr_lemma a bBits b =
   let acc = Loops.repeati bBits (exp_lr_f a bBits b) 1 in
   exp_lr_lemma_loop a bBits b bBits 1;
   assert (acc == pow a (b / pow2 0));
-  assert_norm (pow2 0 = 1);
-  assert (acc = pow a b)
+  assert_norm (pow2 0 = 1)
 
 
 // Montgomery ladder for exponentiation
@@ -240,39 +279,6 @@ let exp_mont_ladder a bBits b =
   r0'
 
 
-val exp_mont_ladder_lemma_step1:
-    a:nat -> bBits:nat -> b:nat{b < pow2 bBits}
-  -> r0:nat{r0 * r0 == r0}
-  -> i:nat{i < bBits} -> Lemma
-  (requires
-    b / pow2 (bBits - i - 1) % 2 = 1)
-  (ensures
-   (let r0'' = pow a (b / pow2 (bBits - i)) * r0 in
-    r0''* r0'' * a == pow a (b / pow2 (bBits - i - 1)) * r0))
-
-let exp_mont_ladder_lemma_step1 a bBits b r0 i =
-  let r0'' = pow a (b / pow2 (bBits - i)) * r0 in
-  calc (==) {
-    r0''* r0'' * a;
-    (==) { }
-    (pow a (b / pow2 (bBits - i)) * r0) * (pow a (b / pow2 (bBits - i)) * r0) * a;
-    (==) { Math.Lemmas.paren_mul_right (pow a (b / pow2 (bBits - i)) * r0) (pow a (b / pow2 (bBits - i))) r0;
-      Math.Lemmas.paren_mul_right r0 (pow a (b / pow2 (bBits - i))) (pow a (b / pow2 (bBits - i))) }
-    (r0 * (pow a (b / pow2 (bBits - i)) * pow a (b / pow2 (bBits - i)))) * r0 * a;
-    (==) { lemma_pow_add a (b / pow2 (bBits - i)) (b / pow2 (bBits - i)) }
-    (r0 * pow a (b / pow2 (bBits - i) * 2)) * r0 * a;
-    (==) { Math.Lemmas.paren_mul_right (pow a (b / pow2 (bBits - i) * 2)) r0 r0 }
-    pow a (b / pow2 (bBits - i) * 2) * r0 * a;
-    (==) { Math.Lemmas.paren_mul_right r0 (pow a (b / pow2 (bBits - i) * 2)) a }
-    r0 * (pow a (b / pow2 (bBits - i) * 2) * a);
-    (==) { lemma_pow1 a; lemma_pow_add a (b / pow2 (bBits - i) * 2) 1 }
-    r0 * (pow a (b / pow2 (bBits - i) * 2 + 1));
-    (==) { lemma_b_div_pow2i bBits b (i + 1) }
-    r0 * (pow a (b / pow2 (bBits - i - 1)));
-    }
-
-
-
 val exp_mont_ladder_lemma_step:
     a:nat -> bBits:nat -> b:nat{b < pow2 bBits}
   -> r0:nat{r0 * r0 == r0} -> r1:nat{r1 == r0 * a}
@@ -288,19 +294,19 @@ let exp_mont_ladder_lemma_step a bBits b r0 r1 r0'' r1'' i =
   let (r0', r1') = exp_mont_ladder_f bBits b i (r0'', r1'') in
 
   if (b / pow2 (bBits - i - 1) % 2 = 0) then begin
-    lemma_pow_add a (b / pow2 (bBits - i)) (b / pow2 (bBits - i));
-    lemma_b_div_pow2i bBits b (i + 1);
-    assert (b / pow2 (bBits - i - 1) == b / pow2 (bBits - i) * 2);
+    assert (r0' == r0'' * r0'');
+    assert (r1' == r1'' * r0'');
+    exp_lr_lemma_step0 a bBits b i r0;
     () end
   else begin
-    exp_mont_ladder_lemma_step1 a bBits b r0 i;
-    calc (==) {
-      (r0'' * a) * (r0'' * a);
-      (==) { Math.Lemmas.paren_mul_right (r0'' * a) r0'' a }
-      (r0'' * a) * r0'' * a;
-      (==) { Math.Lemmas.paren_mul_right r0'' a r0''; Math.Lemmas.paren_mul_right r0'' r0'' a }
-      r0' * a;
-    }; () end
+    assert (r0' == r0'' * r1'');
+    //assert (r0' == r0'' * (r0'' * a));
+    assert (r1' == r1'' * r1'');
+
+    Math.Lemmas.paren_mul_right r0'' r0'' a;
+    exp_lr_lemma_step1 a bBits b i r0;
+    lemma_mul_ass4 r0'' a r0'' a;
+    () end
 
 
 val exp_mont_ladder_lemma_loop:
@@ -316,7 +322,6 @@ let rec exp_mont_ladder_lemma_loop a bBits b r0 r1 i =
   if i = 0 then begin
     Loops.eq_repeati0 i (exp_mont_ladder_f bBits b) (r0, r1);
     Math.Lemmas.small_div b (pow2 bBits);
-    assert_norm (pow2 0 = 1);
     lemma_pow0 a;
     () end
   else begin
@@ -338,8 +343,7 @@ let exp_mont_ladder_lemma a bBits b =
   let (r0', r1') = Loops.repeati bBits (exp_mont_ladder_f bBits b) (r0, r1) in
   exp_mont_ladder_lemma_loop a bBits b r0 r1 bBits;
   assert (r0' == pow a (b / pow2 0) * r0);
-  assert_norm (pow2 0 = 1);
-  assert (r0' == pow a b)
+  assert_norm (pow2 0 = 1)
 
 
 // Montgomery ladder for exponentiation with cswap
@@ -411,7 +415,7 @@ let exp_mont_ladder_swap a bBits b =
   let r1 = a in
   let sw = 0 in
   let (r0', r1', sw') = Loops.repeati bBits (exp_mont_ladder_swap_f bBits b) (r0, r1, sw) in
-  let r0', r1' = cswap (b % 2) r0' r1' in
+  let r0', r1' = cswap sw' r0' r1' in
   r0'
 
 
@@ -444,11 +448,7 @@ let exp_mont_ladder_swap_lemma a bBits b =
   let r0 = 1 in
   let r1 = a in
   let sw = 0 in
-  assert ((cswap sw r0 r1) == (r0, r1));
-  exp_mont_ladder_swap_lemma_loop a bBits b r0 r1 sw bBits;
-  let bit = b / pow2 0 % 2 in
-  assert_norm (pow2 0 = 1);
-  assert (bit == b % 2)
+  exp_mont_ladder_swap_lemma_loop a bBits b r0 r1 sw bBits
 
 
 ///
@@ -812,3 +812,172 @@ val mod_exp_mont_ll_lemma:
 let mod_exp_mont_ll_lemma rLen n d mu a bBits b =
   mod_exp_mont_ll_lemma_eval rLen n d mu a bBits b;
   lemma_pow_mod #n a b
+
+///
+///  A left-to-right binary method with Montgomery arithmetic
+///
+
+val mod_exp_lr_f: n:pos -> d:int -> aM:nat -> bBits:nat -> b:nat{b < pow2 bBits} -> i:nat{i < bBits} -> accM:nat -> nat
+let mod_exp_lr_f n d aM bBits b i accM =
+  let accM = accM * accM * d % n in
+  let accM = if (b / pow2 (bBits - i - 1) % 2 = 0) then accM else accM * aM * d % n in
+  accM
+
+
+val mod_exp_lr: n:pos -> r:pos -> d:int{r * d % n = 1} -> a:nat -> bBits:nat -> b:nat{b < pow2 bBits} -> nat
+let mod_exp_lr n r d a bBits b =
+  let rM = 1 * r % n in
+  let aM = a * r % n in
+  let rM'= Loops.repeati bBits (mod_exp_lr_f n d aM bBits b) rM in
+  rM' * d % n
+
+
+val mod_exp_lr_lemma_step0:
+    n:pos -> r:pos -> d:int{r * d % n = 1}
+  -> aM:nat -> bBits:nat -> b:nat{b < pow2 bBits}
+  -> i:nat{i < bBits}
+  -> accM0:nat{accM0 * accM0 * d % n = accM0 % n /\ accM0 < n} ->
+  Lemma (let accM1 = pow (aM * d) (b / pow2 (bBits - i)) * accM0 % n in
+    let aM2 = pow (aM * d) (b / pow2 (bBits - i - 1) - b / pow2 (bBits - i - 1) % 2) in
+    accM1 * accM1 * d % n == aM2 * accM0 % n)
+
+let mod_exp_lr_lemma_step0 n r d aM bBits b i accM0 =
+  let accM1 = pow (aM * d) (b / pow2 (bBits - i)) * accM0 % n in
+  let aM1 = pow (aM * d) (b / pow2 (bBits - i)) in
+  let aM2 = pow (aM * d) (b / pow2 (bBits - i - 1) - b / pow2 (bBits - i - 1) % 2) in
+
+  calc (==) {
+    accM1 * accM1 * d % n;
+    (==) { }
+    (aM1 * accM0 % n) * (aM1 * accM0 % n) * d % n;
+    (==) { Math.Lemmas.paren_mul_right (aM1 * accM0 % n) (aM1 * accM0 % n) d;
+           Math.Lemmas.lemma_mod_mul_distr_l (aM1 * accM0) ((aM1 * accM0 % n) * d) n;
+	   Math.Lemmas.paren_mul_right (aM1 * accM0) (aM1 * accM0 % n) d }
+    (aM1 * accM0) * (aM1 * accM0 % n) * d % n;
+    (==) { Math.Lemmas.paren_mul_right (aM1 * accM0 % n) (aM1 * accM0) d;
+           Math.Lemmas.lemma_mod_mul_distr_l (aM1 * accM0) (aM1 * accM0 * d) n;
+	   Math.Lemmas.paren_mul_right (aM1 * accM0) (aM1 * accM0) d }
+    aM1 * accM0 * (aM1 * accM0) * d % n;
+    (==) { exp_lr_lemma_step0 (aM * d) bBits b i accM0 }
+    aM2 * (accM0 * accM0) * d % n;
+    (==) { Math.Lemmas.paren_mul_right aM2 (accM0 * accM0) d }
+    aM2 * (accM0 * accM0 * d) % n;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_r aM2 (accM0 * accM0 * d) n }
+    aM2 * (accM0 % n) % n;
+    (==) {  Math.Lemmas.lemma_mod_mul_distr_r aM2 accM0 n }
+    aM2 * accM0 % n;
+    }
+
+
+val mod_exp_lr_lemma_step1:
+    n:pos -> r:pos -> d:int{r * d % n = 1}
+  -> aM:nat -> bBits:nat -> b:nat{b < pow2 bBits}
+  -> i:nat{i < bBits}
+  -> accM0:nat{accM0 * accM0 * d % n = accM0 % n /\ accM0 < n} ->
+  Lemma (let acc1 = pow (aM * d) (b / pow2 (bBits - i)) * accM0 % n in
+    let a3 = pow (aM * d) (b / pow2 (bBits - i - 1) - b / pow2 (bBits - i - 1) % 2 + 1) in
+    (acc1 * acc1 * d % n) * aM * d % n == a3 * accM0 % n)
+
+let mod_exp_lr_lemma_step1 n r d aM bBits b i accM0 =
+  let accM1 = pow (aM * d) (b / pow2 (bBits - i)) * accM0 % n in
+  let aM1 = pow (aM * d) (b / pow2 (bBits - i)) in
+  let aM2 = pow (aM * d) (b / pow2 (bBits - i - 1) - b / pow2 (bBits - i - 1) % 2) in
+  let aM3 = pow (aM * d) (b / pow2 (bBits - i - 1) - b / pow2 (bBits - i - 1) % 2 + 1) in
+
+  calc (==) {
+    (accM1 * accM1 * d % n) * aM * d % n;
+    (==) { mod_exp_lr_lemma_step0 n r d aM bBits b i accM0 }
+    (aM2 * accM0 % n) * aM * d % n;
+    (==) { Math.Lemmas.paren_mul_right (aM2 * accM0 % n) aM d;
+           Math.Lemmas.lemma_mod_mul_distr_l (aM2 * accM0) (aM * d) n }
+    (aM2 * accM0) * (aM * d) % n;
+    (==) { Math.Lemmas.paren_mul_right accM0 aM2 (aM * d) }
+    aM2 * (aM * d) * accM0 % n;
+    (==) { lemma_pow1 (aM * d); lemma_pow_add (aM * d) (b / pow2 (bBits - i - 1) - b / pow2 (bBits - i - 1) % 2) 1 }
+    aM3 * accM0 % n;
+    }
+
+
+val mod_exp_lr_lemma_step:
+    n:pos -> r:pos -> d:int{r * d % n = 1}
+  -> aM:nat -> bBits:nat -> b:nat{b < pow2 bBits}
+  -> i:nat{i < bBits}
+  -> accM0:nat
+  -> accM1:nat -> Lemma
+  (requires
+    accM0 * accM0 * d % n = accM0 % n /\ accM0 < n /\
+    accM1 == pow (aM * d) (b / pow2 (bBits - i)) * accM0 % n)
+  (ensures
+    mod_exp_lr_f n d aM bBits b i accM1 == pow (aM * d) (b / pow2 (bBits - i - 1)) * accM0 % n)
+
+let mod_exp_lr_lemma_step n r d aM bBits b i accM0 accM1 =
+  let acc = mod_exp_lr_f n d aM bBits b i accM1 in
+  if (b / pow2 (bBits - i - 1) % 2 = 0) then
+    mod_exp_lr_lemma_step0 n r d aM bBits b i accM0
+  else
+    mod_exp_lr_lemma_step1 n r d aM bBits b i accM0
+
+
+val mod_exp_lr_lemma_loop:
+    n:pos -> r:pos -> d:int{r * d % n = 1}
+  -> aM:nat -> bBits:nat -> b:nat{b < pow2 bBits}
+  -> i:nat{i <= bBits}
+  -> accM0:nat{accM0 * accM0 * d % n = accM0 % n /\ accM0 < n} ->
+  Lemma
+   (let accM = Loops.repeati i (mod_exp_lr_f n d aM bBits b) accM0 in
+    accM == pow (aM * d) (b / pow2 (bBits - i)) * accM0 % n)
+
+let rec mod_exp_lr_lemma_loop n r d aM bBits b i accM0 =
+  let acc = Loops.repeati i (mod_exp_lr_f n d aM bBits b) accM0 in
+
+  if i = 0 then begin
+    Loops.eq_repeati0 i (mod_exp_lr_f n d aM bBits b) accM0;
+    lemma_pow0 (aM * d);
+    Math.Lemmas.small_mod accM0 n;
+    assert (acc == accM0 % n);
+    () end
+  else begin
+    let accM1 = Loops.repeati (i - 1) (mod_exp_lr_f n d aM bBits b) accM0 in
+    Loops.unfold_repeati i (mod_exp_lr_f n d aM bBits b) accM0 (i - 1);
+    //assert (acc == mod_exp_lr_f n d a bBits b (i - 1) acc1);
+    mod_exp_lr_lemma_loop n r d aM bBits b (i - 1) accM0;
+    //assert (acc1 == pow a (b / pow2 (bBits - i + 1)) * acc0 * pow d (b / pow2 (bBits - i + 1)) % n);
+    mod_exp_lr_lemma_step n r d aM bBits b (i - 1) accM0 accM1;
+    () end
+
+
+val lemma_one_mont: n:pos -> r:pos -> d:int{r * d % n = 1} ->
+  Lemma (let r0 = 1 * r % n in r0 * r0 * d % n == r0 % n)
+
+let lemma_one_mont n r d =
+  let r0 = 1 * r % n in
+  calc (==) {
+    r0 * r0 * d % n;
+    (==) { Math.Lemmas.paren_mul_right r0 r0 d; Math.Lemmas.lemma_mod_mul_distr_r r0 (r0 * d) n }
+    r0 * (r0 * d % n) % n;
+    (==) {lemma_mont_aux n r d 1 }
+    r0 * (1 % n) % n;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_r r0 1 n }
+    r0 % n;
+    }
+
+
+val mod_exp_lr_lemma:
+    n:pos -> r:pos -> d:int{r * d % n = 1}
+  -> a:nat -> bBits:nat -> b:pos{b < pow2 bBits} ->
+  Lemma (mod_exp_lr n r d a bBits b == pow a b % n)
+
+let mod_exp_lr_lemma n r d a bBits b =
+  let aM = a * r % n in
+  let rM = 1 * r % n in
+  let rM' = Loops.repeati bBits (mod_exp_lr_f n d aM bBits b) rM in
+  lemma_one_mont n r d;
+  mod_exp_lr_lemma_loop n r d aM bBits b bBits rM;
+  assert_norm (pow2 0 = 1);
+  assert (rM' == pow (aM * d) b * rM % n);
+  lemma_pow_mul_base aM d b;
+  mont_mod_exp_lemma_before_to_mont n r d bBits b a rM;
+  assert (rM' == pow a b * rM % n);
+  let res = rM' * d % n in
+  assert (res == pow a b * rM % n * d % n);
+  mont_mod_exp_lemma_after_to_mont n r d a bBits b
