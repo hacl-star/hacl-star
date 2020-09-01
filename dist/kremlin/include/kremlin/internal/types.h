@@ -59,7 +59,7 @@ typedef const char *Prims_string;
     defined(__aarch64__) || \
     (defined(__powerpc64__) && defined(__LITTLE_ENDIAN__)) || \
     defined(__s390x__) || \
-    (defined(_MSC_VER) && !defined(_M_X64) && defined(__clang__)) || \
+    (defined(_MSC_VER) && defined(_M_X64) && defined(__clang__)) || \
     (defined(__mips__) && defined(__LP64__)) || \
     (defined(__riscv) && __riscv_xlen == 64) || \
     defined(__SIZEOF_INT128__))
@@ -86,6 +86,12 @@ typedef struct FStar_UInt128_uint128_s {
 typedef FStar_UInt128_uint128 FStar_UInt128_t, uint128_t;
 
 #include "kremlin/lowstar_endianness.h"
+
+#endif
+
+/* Avoid a circular loop: if this header is included via FStar_UInt8_16_32_64,
+ * then don't bring the uint128 definitions into scope. */
+#ifndef __FStar_UInt_8_16_32_64_H
 
 #if !defined(KRML_VERIFIED_UINT128) && defined(IS_MSVC64)
 #include "fstar_uint128_msvc.h"

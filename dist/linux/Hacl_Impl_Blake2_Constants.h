@@ -21,14 +21,19 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_Impl_Blake2_Constants_H
+#define __Hacl_Impl_Blake2_Constants_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
-
-#ifndef __Hacl_Impl_Blake2_Constants_H
-#define __Hacl_Impl_Blake2_Constants_H
 
 
 
@@ -72,13 +77,9 @@ Hacl_Impl_Blake2_Constants_ivTable_B[8U] =
     (u64)0x1F83D9ABFB41BD6BU, (u64)0x5BE0CD19137E2179U
   };
 
-static const
-u32
-Hacl_Impl_Blake2_Constants_rTable_S[4U] = { (u32)16U, (u32)12U, (u32)8U, (u32)7U };
-
-static const
-u32
-Hacl_Impl_Blake2_Constants_rTable_B[4U] = { (u32)32U, (u32)24U, (u32)16U, (u32)63U };
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Impl_Blake2_Constants_H_DEFINED
 #endif

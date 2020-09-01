@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_Blake2s_32_H
+#define __Hacl_Blake2s_32_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -28,14 +36,17 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-#ifndef __Hacl_Blake2s_32_H
-#define __Hacl_Blake2s_32_H
 
 #include "Hacl_Kremlib.h"
 #include "Lib_Memzero0.h"
-#include "Hacl_Blake2b_32.h"
 #include "Hacl_Impl_Blake2_Constants.h"
 
+typedef struct K___uint32_t_uint32_t_s
+{
+  uint32_t fst;
+  uint32_t snd;
+}
+K___uint32_t_uint32_t;
 
 void
 Hacl_Blake2s_32_blake2s(
@@ -46,6 +57,10 @@ Hacl_Blake2s_32_blake2s(
   uint32_t kk,
   uint8_t *k
 );
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Blake2s_32_H_DEFINED
 #endif

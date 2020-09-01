@@ -79,6 +79,8 @@ let const_to_lbuffer #a #len (b:clbuffer a len{CB.qual_of (b <: cbuffer a) == CB
 let const_to_ilbuffer #a #len (b:glbuffer a len)  : r:ilbuffer a len =
   const_to_ibuffer #a b
 
+unfold let null (a: Type0) : lbuffer a (size 0) = B.null #a
+
 //val live: #t:buftype -> #a:Type0 -> h:HS.mem -> b:buffer_t t a -> Type
 let live (#t:buftype) (#a:Type0) (h:HS.mem) (b:buffer_t t a) : Type =
   match t with
@@ -138,15 +140,28 @@ let modifies2 (#a0:Type0) (#a1:Type0)
   (b0:buffer_t MUT a0) (b1:buffer_t MUT a1) (h1 h2: HS.mem) =
   modifies (loc b0 |+| loc b1) h1 h2
 
-(** Modification three buffers *)
+(** Modifies three buffers *)
 let modifies3 (#a0:Type0) (#a1:Type0) (#a2:Type0)
   (b0:buffer_t MUT a0) (b1:buffer_t MUT a1) (b2:buffer_t MUT a2) (h1 h2: HS.mem) =
   modifies (loc b0 |+| loc b1 |+| loc b2) h1 h2
 
-(** Modification four buffers *)
+(** Modifies four buffers *)
 let modifies4 (#a0:Type0) (#a1:Type0) (#a2:Type0) (#a3:Type0)
-  (b0:buffer_t MUT a0) (b1:buffer_t MUT a1) (b2:buffer_t MUT a2) (b3:buffer_t MUT a3) (h1 h2: HS.mem) =
+  (b0:buffer_t MUT a0) (b1:buffer_t MUT a1) (b2:buffer_t MUT a2) (b3:buffer_t MUT a3)
+  (h1 h2: HS.mem) =
   modifies (loc b0 |+| loc b1 |+| loc b2 |+| loc b3) h1 h2
+
+(** Modifies five buffers *)
+let modifies5 (#a0:Type0) (#a1:Type0) (#a2:Type0) (#a3:Type0) (#a4:Type0)
+  (b0:buffer_t MUT a0) (b1:buffer_t MUT a1) (b2:buffer_t MUT a2) (b3:buffer_t MUT a3)
+  (b4:buffer_t MUT a4) (h1 h2: HS.mem) =
+  modifies (loc b0 |+| loc b1 |+| loc b2 |+| loc b3 |+| loc b4) h1 h2
+
+(** Modifies six buffers *)
+let modifies6 (#a0:Type0) (#a1:Type0) (#a2:Type0) (#a3:Type0) (#a4:Type0) (#a5:Type0)
+  (b0:buffer_t MUT a0) (b1:buffer_t MUT a1) (b2:buffer_t MUT a2) (b3:buffer_t MUT a3)
+  (b4:buffer_t MUT a4) (b5:buffer_t MUT a5) (h1 h2: HS.mem) =
+  modifies (loc b0 |+| loc b1 |+| loc b2 |+| loc b3 |+| loc b4 |+| loc b5) h1 h2
 
 (** Ghost reveal a buffer as a sequence *)
 let as_seq (#t:buftype) (#a:Type0) (#len:size_t) (h:HS.mem) (b:lbuffer_t t a len) :

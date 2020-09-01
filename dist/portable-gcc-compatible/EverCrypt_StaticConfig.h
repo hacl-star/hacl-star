@@ -21,15 +21,20 @@
  * SOFTWARE.
  */
 
+
+#ifndef __EverCrypt_StaticConfig_H
+#define __EverCrypt_StaticConfig_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
-
-#ifndef __EverCrypt_StaticConfig_H
-#define __EverCrypt_StaticConfig_H
 
 
 
@@ -57,6 +62,10 @@ extern bool EverCrypt_StaticConfig_openssl;
 extern bool EverCrypt_StaticConfig_bcrypt;
 
 /* SNIPPET_END: EverCrypt_StaticConfig_bcrypt */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __EverCrypt_StaticConfig_H_DEFINED
 #endif

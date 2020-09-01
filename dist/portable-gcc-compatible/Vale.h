@@ -21,15 +21,20 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Vale_H
+#define __Vale_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
-
-#ifndef __Vale_H
-#define __Vale_H
 
 
 
@@ -111,6 +116,24 @@ extern uint64_t check_rdrand();
 extern uint64_t check_avx512();
 
 /* SNIPPET_END: check_avx512 */
+
+/* SNIPPET_START: check_osxsave */
+
+extern uint64_t check_osxsave();
+
+/* SNIPPET_END: check_osxsave */
+
+/* SNIPPET_START: check_avx_xcr0 */
+
+extern uint64_t check_avx_xcr0();
+
+/* SNIPPET_END: check_avx_xcr0 */
+
+/* SNIPPET_START: check_avx512_xcr0 */
+
+extern uint64_t check_avx512_xcr0();
+
+/* SNIPPET_END: check_avx512_xcr0 */
 
 /* SNIPPET_START: cswap2_e */
 
@@ -321,6 +344,10 @@ gctr256_bytes(
 );
 
 /* SNIPPET_END: gctr256_bytes */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Vale_H_DEFINED
 #endif

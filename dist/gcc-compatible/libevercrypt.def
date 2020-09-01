@@ -1,8 +1,20 @@
 LIBRARY libevercrypt
 
 EXPORTS
-  LowStar_Vector_new_capacity
   Spec_Cipher_Expansion_cipher_alg_of_impl
+  LowStar_Vector_new_capacity
+  Hacl_Blake2s_32_blake2s
+  Hacl_Blake2b_32_blake2b
+  Hacl_Hash_Core_Blake2_update_blake2s_32
+  Hacl_Hash_Core_Blake2_finish_blake2s_32
+  Hacl_Hash_Core_Blake2_update_blake2b_32
+  Hacl_Hash_Core_Blake2_finish_blake2b_32
+  Hacl_Hash_Blake2_update_multi_blake2s_32
+  Hacl_Hash_Blake2_update_multi_blake2b_32
+  Hacl_Hash_Blake2_update_last_blake2s_32
+  Hacl_Hash_Blake2_update_last_blake2b_32
+  Hacl_Hash_Blake2_hash_blake2s_32
+  Hacl_Hash_Blake2_hash_blake2b_32
   Hacl_Hash_MD5_legacy_update_multi
   Hacl_Hash_MD5_legacy_update_last
   Hacl_Hash_MD5_legacy_hash
@@ -49,6 +61,16 @@ EXPORTS
   Hacl_Hash_Definitions_block_len
   Hacl_Hash_Definitions_hash_word_len
   Hacl_Hash_Definitions_hash_len
+  Hacl_Hash_Blake2b_256_finish_blake2b_256
+  Hacl_Hash_Blake2b_256_update_multi_blake2b_256
+  Hacl_Hash_Blake2b_256_update_last_blake2b_256
+  Hacl_Hash_Blake2b_256_hash_blake2b_256
+  Hacl_Blake2b_256_blake2b
+  Hacl_Hash_Blake2s_128_finish_blake2s_128
+  Hacl_Hash_Blake2s_128_update_multi_blake2s_128
+  Hacl_Hash_Blake2s_128_update_last_blake2s_128
+  Hacl_Hash_Blake2s_128_hash_blake2s_128
+  Hacl_Blake2s_128_blake2s
   EverCrypt_AutoConfig2_has_shaext
   EverCrypt_AutoConfig2_has_aesni
   EverCrypt_AutoConfig2_has_pclmulqdq
@@ -94,14 +116,21 @@ EXPORTS
   EverCrypt_Hash___proj__SHA2_384_s__item__p
   EverCrypt_Hash_uu___is_SHA2_512_s
   EverCrypt_Hash___proj__SHA2_512_s__item__p
+  EverCrypt_Hash_uu___is_Blake2S_s
+  EverCrypt_Hash___proj__Blake2S_s__item__p
+  EverCrypt_Hash_uu___is_Blake2B_s
+  EverCrypt_Hash___proj__Blake2B_s__item__p
   EverCrypt_Hash_alg_of_state
   EverCrypt_Hash_create_in
   EverCrypt_Hash_create
   EverCrypt_Hash_init
   EverCrypt_Hash_update_multi_256
+  EverCrypt_Hash_update2
   EverCrypt_Hash_update
+  EverCrypt_Hash_update_multi2
   EverCrypt_Hash_update_multi
   EverCrypt_Hash_update_last_256
+  EverCrypt_Hash_update_last2
   EverCrypt_Hash_update_last
   EverCrypt_Hash_finish
   EverCrypt_Hash_free
@@ -118,6 +147,8 @@ EXPORTS
   EverCrypt_Hash_Incremental_finish_sha256
   EverCrypt_Hash_Incremental_finish_sha384
   EverCrypt_Hash_Incremental_finish_sha512
+  EverCrypt_Hash_Incremental_finish_blake2s
+  EverCrypt_Hash_Incremental_finish_blake2b
   EverCrypt_Hash_Incremental_alg_of_state
   EverCrypt_Hash_Incremental_finish
   EverCrypt_Hash_Incremental_free
@@ -159,10 +190,6 @@ EXPORTS
   Hacl_Curve25519_51_scalarmult
   Hacl_Curve25519_51_secret_to_public
   Hacl_Curve25519_51_ecdh
-  Hacl_Impl_P256_DH_ecp256dh_i
-  Hacl_Impl_P256_DH_ecp256dh_r
-  Hacl_Impl_ECDSA_ecdsa_p256_sha2_sign
-  Hacl_Impl_ECDSA_ecdsa_p256_sha2_verify
   Hacl_Ed25519_sign
   Hacl_Ed25519_verify
   Hacl_Ed25519_secret_to_public
@@ -293,6 +320,28 @@ EXPORTS
   EverCrypt_CTR_init
   EverCrypt_CTR_update_block
   EverCrypt_CTR_free
+  Hacl_Impl_P256_LowLevel_toUint8
+  Hacl_Impl_P256_LowLevel_changeEndian
+  Hacl_Impl_P256_LowLevel_toUint64ChangeEndian
+  Hacl_Impl_P256_Core_isPointAtInfinityPrivate
+  Hacl_Impl_P256_Core_secretToPublic
+  Hacl_Impl_P256_DH__ecp256dh_r
+  Hacl_P256_ecdsa_sign_p256_sha2
+  Hacl_P256_ecdsa_sign_p256_sha384
+  Hacl_P256_ecdsa_sign_p256_sha512
+  Hacl_P256_ecdsa_sign_p256_without_hash
+  Hacl_P256_ecdsa_verif_p256_sha2
+  Hacl_P256_ecdsa_verif_p256_sha384
+  Hacl_P256_ecdsa_verif_p256_sha512
+  Hacl_P256_ecdsa_verif_without_hash
+  Hacl_P256_verify_q
+  Hacl_P256_decompression_not_compressed_form
+  Hacl_P256_decompression_compressed_form
+  Hacl_P256_compression_not_compressed_form
+  Hacl_P256_compression_compressed_form
+  Hacl_P256_reduction_8_32
+  Hacl_P256_ecp256dh_i
+  Hacl_P256_ecp256dh_r
   Hacl_Frodo_KEM_crypto_kem_keypair
   Hacl_Frodo_KEM_crypto_kem_enc
   Hacl_Frodo_KEM_crypto_kem_dec
@@ -313,10 +362,16 @@ EXPORTS
   Hacl_HMAC_compute_sha2_256
   Hacl_HMAC_compute_sha2_384
   Hacl_HMAC_compute_sha2_512
+  Hacl_HMAC_compute_blake2s_32
+  Hacl_HMAC_compute_blake2b_32
   Hacl_HKDF_expand_sha2_256
   Hacl_HKDF_extract_sha2_256
   Hacl_HKDF_expand_sha2_512
   Hacl_HKDF_extract_sha2_512
+  Hacl_HKDF_expand_blake2s_32
+  Hacl_HKDF_extract_blake2s_32
+  Hacl_HKDF_expand_blake2b_32
+  Hacl_HKDF_extract_blake2b_32
   Hacl_HPKE_Curve51_CP128_SHA512_setupBaseI
   Hacl_HPKE_Curve51_CP128_SHA512_setupBaseR
   Hacl_HPKE_Curve51_CP128_SHA512_sealBase
@@ -352,6 +407,9 @@ EXPORTS
   Hacl_HPKE_Curve51_CP256_SHA512_setupBaseR
   Hacl_HPKE_Curve51_CP256_SHA512_sealBase
   Hacl_HPKE_Curve51_CP256_SHA512_openBase
+  Hacl_HMAC_Blake2s_128_compute_blake2s_128
+  Hacl_HKDF_Blake2s_128_expand_blake2s_128
+  Hacl_HKDF_Blake2s_128_extract_blake2s_128
   Hacl_HPKE_Curve64_CP256_SHA512_setupBaseI
   Hacl_HPKE_Curve64_CP256_SHA512_setupBaseR
   Hacl_HPKE_Curve64_CP256_SHA512_sealBase
@@ -379,8 +437,6 @@ EXPORTS
   Hacl_Streaming_Poly1305_32_update
   Hacl_Streaming_Poly1305_32_finish
   Hacl_Streaming_Poly1305_32_free
-  Hacl_Blake2b_256_blake2b
-  Hacl_Blake2s_32_blake2s
   Hacl_HPKE_Curve51_CP32_SHA512_setupBaseI
   Hacl_HPKE_Curve51_CP32_SHA512_setupBaseR
   Hacl_HPKE_Curve51_CP32_SHA512_sealBase
@@ -393,7 +449,9 @@ EXPORTS
   Hacl_HPKE_P256_CP32_SHA256_setupBaseR
   Hacl_HPKE_P256_CP32_SHA256_sealBase
   Hacl_HPKE_P256_CP32_SHA256_openBase
-  Hacl_Blake2s_128_blake2s
+  Hacl_HMAC_Blake2b_256_compute_blake2b_256
+  Hacl_HKDF_Blake2b_256_expand_blake2b_256
+  Hacl_HKDF_Blake2b_256_extract_blake2b_256
   Hacl_HPKE_Curve64_CP32_SHA256_setupBaseI
   Hacl_HPKE_Curve64_CP32_SHA256_setupBaseR
   Hacl_HPKE_Curve64_CP32_SHA256_sealBase
@@ -402,11 +460,42 @@ EXPORTS
   Hacl_HPKE_Curve64_CP32_SHA512_setupBaseR
   Hacl_HPKE_Curve64_CP32_SHA512_sealBase
   Hacl_HPKE_Curve64_CP32_SHA512_openBase
-  Hacl_Streaming_SHA2_256_create_in
-  Hacl_Streaming_SHA2_256_init
-  Hacl_Streaming_SHA2_256_update
-  Hacl_Streaming_SHA2_256_finish
-  Hacl_Streaming_SHA2_256_free
+  Hacl_Streaming_SHA2_create_in_224
+  Hacl_Streaming_SHA2_init_224
+  Hacl_Streaming_SHA2_update_224
+  Hacl_Streaming_SHA2_finish_224
+  Hacl_Streaming_SHA2_free_224
+  Hacl_Streaming_SHA2_create_in_256
+  Hacl_Streaming_SHA2_init_256
+  Hacl_Streaming_SHA2_update_256
+  Hacl_Streaming_SHA2_finish_256
+  Hacl_Streaming_SHA2_free_256
+  Hacl_Streaming_SHA2_create_in_384
+  Hacl_Streaming_SHA2_init_384
+  Hacl_Streaming_SHA2_update_384
+  Hacl_Streaming_SHA2_finish_384
+  Hacl_Streaming_SHA2_free_384
+  Hacl_Streaming_SHA2_create_in_512
+  Hacl_Streaming_SHA2_init_512
+  Hacl_Streaming_SHA2_update_512
+  Hacl_Streaming_SHA2_finish_512
+  Hacl_Streaming_SHA2_free_512
+  Hacl_Streaming_Blake2_blake2s_32_no_key_create_in
+  Hacl_Streaming_Blake2_blake2s_32_no_key_update
+  Hacl_Streaming_Blake2_blake2s_32_no_key_finish
+  Hacl_Streaming_Blake2_blake2s_32_no_key_free
+  Hacl_Streaming_Blake2_blake2b_32_no_key_create_in
+  Hacl_Streaming_Blake2_blake2b_32_no_key_update
+  Hacl_Streaming_Blake2_blake2b_32_no_key_finish
+  Hacl_Streaming_Blake2_blake2b_32_no_key_free
+  Hacl_Streaming_Blake2_blake2s_32_with_key_create_in
+  Hacl_Streaming_Blake2_blake2s_32_with_key_update
+  Hacl_Streaming_Blake2_blake2s_32_with_key_finish
+  Hacl_Streaming_Blake2_blake2s_32_with_key_free
+  Hacl_Streaming_Blake2_blake2b_32_with_key_create_in
+  Hacl_Streaming_Blake2_blake2b_32_with_key_update
+  Hacl_Streaming_Blake2_blake2b_32_with_key_finish
+  Hacl_Streaming_Blake2_blake2b_32_with_key_free
   Hacl_HPKE_Curve51_CP256_SHA256_setupBaseI
   Hacl_HPKE_Curve51_CP256_SHA256_setupBaseR
   Hacl_HPKE_Curve51_CP256_SHA256_sealBase
@@ -433,6 +522,8 @@ EXPORTS
   EverCrypt_HMAC_compute_sha2_256
   EverCrypt_HMAC_compute_sha2_384
   EverCrypt_HMAC_compute_sha2_512
+  EverCrypt_HMAC_compute_blake2s
+  EverCrypt_HMAC_compute_blake2b
   EverCrypt_HMAC_is_supported_alg
   EverCrypt_HMAC_compute
   EverCrypt_HKDF_expand_sha1
@@ -443,6 +534,10 @@ EXPORTS
   EverCrypt_HKDF_extract_sha2_384
   EverCrypt_HKDF_expand_sha2_512
   EverCrypt_HKDF_extract_sha2_512
+  EverCrypt_HKDF_expand_blake2s
+  EverCrypt_HKDF_extract_blake2s
+  EverCrypt_HKDF_expand_blake2b
+  EverCrypt_HKDF_extract_blake2b
   EverCrypt_HKDF_expand
   EverCrypt_HKDF_extract
   EverCrypt_HKDF_hkdf_expand

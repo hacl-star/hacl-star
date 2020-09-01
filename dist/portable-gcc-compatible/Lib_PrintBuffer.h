@@ -21,15 +21,20 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Lib_PrintBuffer_H
+#define __Lib_PrintBuffer_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
-
-#ifndef __Lib_PrintBuffer_H
-#define __Lib_PrintBuffer_H
 
 
 
@@ -59,6 +64,10 @@ extern bool
 Lib_PrintBuffer_result_compare_display(uint32_t len, const uint8_t *buf0, const uint8_t *buf1);
 
 /* SNIPPET_END: Lib_PrintBuffer_result_compare_display */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Lib_PrintBuffer_H_DEFINED
 #endif

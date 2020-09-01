@@ -21,20 +21,25 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_NaCl_H
+#define __Hacl_NaCl_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-#ifndef __Hacl_NaCl_H
-#define __Hacl_NaCl_H
 
 #include "Hacl_Poly1305.h"
 #include "Hacl_Kremlib.h"
 #include "Hacl_Salsa20.h"
 #include "Hacl_Curve25519_51.h"
-
 
 uint32_t
 Hacl_NaCl_crypto_secretbox_detached(
@@ -149,6 +154,10 @@ Hacl_NaCl_crypto_box_open_easy(
   uint8_t *pk,
   uint8_t *sk
 );
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_NaCl_H_DEFINED
 #endif

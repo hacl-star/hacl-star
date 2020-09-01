@@ -21,14 +21,19 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_Lib_H
+#define __Hacl_Lib_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
-
-#ifndef __Hacl_Lib_H
-#define __Hacl_Lib_H
 
 
 
@@ -36,6 +41,10 @@
 extern void Lib_Memzero_clear_words_u16(uint32_t nwords, uint16_t *b);
 
 extern void Lib_Memzero_clear_words_u8(uint32_t nwords, uint8_t *b);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Lib_H_DEFINED
 #endif

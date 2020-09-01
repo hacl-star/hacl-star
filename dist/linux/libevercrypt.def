@@ -1,6 +1,16 @@
 LIBRARY libevercrypt
 
 EXPORTS
+  Hacl_Blake2s_32_blake2s
+  Hacl_Blake2b_32_blake2b
+  Hacl_Hash_Core_Blake2_finish_blake2s_32
+  Hacl_Hash_Core_Blake2_finish_blake2b_32
+  Hacl_Hash_Blake2_update_multi_blake2s_32
+  Hacl_Hash_Blake2_update_multi_blake2b_32
+  Hacl_Hash_Blake2_update_last_blake2s_32
+  Hacl_Hash_Blake2_update_last_blake2b_32
+  Hacl_Hash_Blake2_hash_blake2s_32
+  Hacl_Hash_Blake2_hash_blake2b_32
   Hacl_Hash_MD5_legacy_update_multi
   Hacl_Hash_MD5_legacy_update_last
   Hacl_Hash_MD5_legacy_hash
@@ -47,6 +57,16 @@ EXPORTS
   Hacl_Hash_Definitions_block_len
   Hacl_Hash_Definitions_hash_word_len
   Hacl_Hash_Definitions_hash_len
+  Hacl_Hash_Blake2b_256_finish_blake2b_256
+  Hacl_Hash_Blake2b_256_update_multi_blake2b_256
+  Hacl_Hash_Blake2b_256_update_last_blake2b_256
+  Hacl_Hash_Blake2b_256_hash_blake2b_256
+  Hacl_Blake2b_256_blake2b
+  Hacl_Hash_Blake2s_128_finish_blake2s_128
+  Hacl_Hash_Blake2s_128_update_multi_blake2s_128
+  Hacl_Hash_Blake2s_128_update_last_blake2s_128
+  Hacl_Hash_Blake2s_128_hash_blake2s_128
+  Hacl_Blake2s_128_blake2s
   Hacl_Impl_SHA3_rotl
   Hacl_Impl_SHA3_state_permute
   Hacl_Impl_SHA3_loadState
@@ -79,8 +99,6 @@ EXPORTS
   Hacl_Curve25519_51_scalarmult
   Hacl_Curve25519_51_secret_to_public
   Hacl_Curve25519_51_ecdh
-  Hacl_Impl_ECDSA_ecdsa_p256_sha2_sign
-  Hacl_Impl_ECDSA_ecdsa_p256_sha2_verify
   Hacl_Ed25519_sign
   Hacl_Ed25519_verify
   Hacl_Ed25519_secret_to_public
@@ -118,17 +136,35 @@ EXPORTS
   Hacl_NaCl_crypto_box_easy
   Hacl_NaCl_crypto_box_open_easy_afternm
   Hacl_NaCl_crypto_box_open_easy
+  Hacl_P256_ecdsa_sign_p256_sha2
+  Hacl_P256_ecdsa_sign_p256_sha384
+  Hacl_P256_ecdsa_sign_p256_sha512
+  Hacl_P256_ecdsa_sign_p256_without_hash
+  Hacl_P256_ecdsa_verif_p256_sha2
+  Hacl_P256_ecdsa_verif_p256_sha384
+  Hacl_P256_ecdsa_verif_p256_sha512
+  Hacl_P256_ecdsa_verif_without_hash
+  Hacl_P256_verify_q
+  Hacl_P256_decompression_not_compressed_form
+  Hacl_P256_decompression_compressed_form
+  Hacl_P256_compression_not_compressed_form
+  Hacl_P256_compression_compressed_form
+  Hacl_P256_reduction_8_32
+  Hacl_P256_ecp256dh_i
+  Hacl_P256_ecp256dh_r
   Hacl_Frodo_KEM_crypto_kem_keypair
   Hacl_Frodo_KEM_crypto_kem_enc
   Hacl_Frodo_KEM_crypto_kem_dec
   Hacl_IntTypes_Intrinsics_add_carry_u64
   Hacl_IntTypes_Intrinsics_sub_borrow_u64
-  Hacl_Blake2b_32_blake2b
   Hacl_Chacha20_Vec32_chacha20_encrypt_32
   Hacl_Chacha20_Vec32_chacha20_decrypt_32
-  Hacl_Blake2b_256_blake2b
-  Hacl_Blake2s_32_blake2s
-  Hacl_Blake2s_128_blake2s
+  Hacl_HMAC_Blake2s_128_compute_blake2s_128
+  Hacl_HKDF_Blake2s_128_expand_blake2s_128
+  Hacl_HKDF_Blake2s_128_extract_blake2s_128
+  Hacl_HMAC_Blake2b_256_compute_blake2b_256
+  Hacl_HKDF_Blake2b_256_expand_blake2b_256
+  Hacl_HKDF_Blake2b_256_extract_blake2b_256
   Hacl_Chacha20_Vec128_chacha20_encrypt_128
   Hacl_Chacha20_Vec128_chacha20_decrypt_128
   Hacl_Chacha20Poly1305_128_aead_encrypt
@@ -137,10 +173,16 @@ EXPORTS
   Hacl_HMAC_compute_sha2_256
   Hacl_HMAC_compute_sha2_384
   Hacl_HMAC_compute_sha2_512
+  Hacl_HMAC_compute_blake2s_32
+  Hacl_HMAC_compute_blake2b_32
   Hacl_HKDF_expand_sha2_256
   Hacl_HKDF_extract_sha2_256
   Hacl_HKDF_expand_sha2_512
   Hacl_HKDF_extract_sha2_512
+  Hacl_HKDF_expand_blake2s_32
+  Hacl_HKDF_extract_blake2s_32
+  Hacl_HKDF_expand_blake2b_32
+  Hacl_HKDF_extract_blake2b_32
   Hacl_HMAC_DRBG_min_length
   Hacl_HMAC_DRBG_uu___is_State
   Hacl_HMAC_DRBG___proj__State__item__k

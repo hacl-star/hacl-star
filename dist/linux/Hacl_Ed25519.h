@@ -21,19 +21,24 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_Ed25519_H
+#define __Hacl_Ed25519_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-#ifndef __Hacl_Ed25519_H
-#define __Hacl_Ed25519_H
 
 #include "Hacl_Kremlib.h"
 #include "Hacl_Hash.h"
 #include "Hacl_Curve25519_51.h"
-
 
 void Hacl_Ed25519_sign(u8 *signature, u8 *priv, u32 len, u8 *msg);
 
@@ -44,6 +49,10 @@ void Hacl_Ed25519_secret_to_public(u8 *pub, u8 *priv);
 void Hacl_Ed25519_expand_keys(u8 *ks, u8 *priv);
 
 void Hacl_Ed25519_sign_expanded(u8 *signature, u8 *ks, u32 len, u8 *msg);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Ed25519_H_DEFINED
 #endif

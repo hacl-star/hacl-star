@@ -21,10 +21,10 @@
  * SOFTWARE.
  */
 
-#include "kremlib.h"
 
 #ifndef __Hacl_AES_H
 #define __Hacl_AES_H
+#include "kremlib.h"
 
 
 
@@ -77,6 +77,7 @@ void Crypto_Symmetric_AES128_keyExpansion(uint8_t *key, uint8_t *w, uint8_t *sbo
 
 void
 Crypto_Symmetric_AES128_inv_cipher(uint8_t *out, uint8_t *input, uint8_t *w, uint8_t *sbox1);
+
 
 #define __Hacl_AES_H_DEFINED
 #endif

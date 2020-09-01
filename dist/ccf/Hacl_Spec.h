@@ -21,14 +21,19 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_Spec_H
+#define __Hacl_Spec_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
-
-#ifndef __Hacl_Spec_H
-#define __Hacl_Spec_H
 
 
 
@@ -39,6 +44,8 @@
 #define Spec_Hash_Definitions_SHA2_512 3
 #define Spec_Hash_Definitions_SHA1 4
 #define Spec_Hash_Definitions_MD5 5
+#define Spec_Hash_Definitions_Blake2S 6
+#define Spec_Hash_Definitions_Blake2B 7
 
 typedef uint8_t Spec_Hash_Definitions_hash_alg;
 
@@ -56,6 +63,10 @@ typedef uint8_t Spec_Cipher_Expansion_impl;
 
 Spec_Agile_Cipher_cipher_alg
 Spec_Cipher_Expansion_cipher_alg_of_impl(Spec_Cipher_Expansion_impl i);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Spec_H_DEFINED
 #endif

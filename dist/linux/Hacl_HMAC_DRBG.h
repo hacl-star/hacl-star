@@ -21,18 +21,23 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_HMAC_DRBG_H
+#define __Hacl_HMAC_DRBG_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-#ifndef __Hacl_HMAC_DRBG_H
-#define __Hacl_HMAC_DRBG_H
 
 #include "Hacl_HMAC.h"
 #include "Hacl_Spec.h"
-
 
 typedef Spec_Hash_Definitions_hash_alg Hacl_HMAC_DRBG_supported_alg;
 
@@ -110,6 +115,10 @@ Hacl_HMAC_DRBG_generate(
   u32 additional_input_len,
   u8 *additional_input
 );
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_HMAC_DRBG_H_DEFINED
 #endif

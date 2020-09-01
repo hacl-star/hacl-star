@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_Curve25519_64_H
+#define __Hacl_Curve25519_64_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "curve25519-inline.h"
 #include "kremlin/internal/types.h"
@@ -28,19 +36,20 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-#ifndef __Hacl_Curve25519_64_H
-#define __Hacl_Curve25519_64_H
 
 #include "Hacl_Kremlib.h"
 #include "Vale.h"
 #include "Vale_Inline.h"
-
 
 void Hacl_Curve25519_64_scalarmult(uint8_t *out, uint8_t *priv, uint8_t *pub);
 
 void Hacl_Curve25519_64_secret_to_public(uint8_t *pub, uint8_t *priv);
 
 bool Hacl_Curve25519_64_ecdh(uint8_t *out, uint8_t *priv, uint8_t *pub);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Curve25519_64_H_DEFINED
 #endif

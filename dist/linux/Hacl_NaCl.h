@@ -21,20 +21,25 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_NaCl_H
+#define __Hacl_NaCl_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-#ifndef __Hacl_NaCl_H
-#define __Hacl_NaCl_H
 
 #include "Hacl_Kremlib.h"
 #include "Hacl_Salsa20.h"
 #include "Hacl_Poly1305_32.h"
 #include "Hacl_Curve25519_51.h"
-
 
 u32 Hacl_NaCl_crypto_secretbox_detached(u8 *c, u8 *tag, u8 *m, u32 mlen, u8 *n, u8 *k);
 
@@ -61,6 +66,10 @@ u32 Hacl_NaCl_crypto_box_easy(u8 *c, u8 *m, u32 mlen, u8 *n, u8 *pk, u8 *sk);
 u32 Hacl_NaCl_crypto_box_open_easy_afternm(u8 *m, u8 *c, u32 clen, u8 *n, u8 *k);
 
 u32 Hacl_NaCl_crypto_box_open_easy(u8 *m, u8 *c, u32 clen, u8 *n, u8 *pk, u8 *sk);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_NaCl_H_DEFINED
 #endif

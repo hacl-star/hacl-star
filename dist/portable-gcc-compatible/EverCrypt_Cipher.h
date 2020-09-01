@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __EverCrypt_Cipher_H
+#define __EverCrypt_Cipher_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -28,11 +36,8 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-#ifndef __EverCrypt_Cipher_H
-#define __EverCrypt_Cipher_H
 
 #include "Hacl_Chacha20.h"
-
 
 /* SNIPPET_START: EverCrypt_Cipher_chacha20 */
 
@@ -47,6 +52,10 @@ EverCrypt_Cipher_chacha20(
 );
 
 /* SNIPPET_END: EverCrypt_Cipher_chacha20 */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __EverCrypt_Cipher_H_DEFINED
 #endif

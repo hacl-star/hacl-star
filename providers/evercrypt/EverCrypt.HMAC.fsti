@@ -56,9 +56,17 @@ val compute_sha2_384: compute_st SHA2_384
 *)
 val compute_sha2_512: compute_st SHA2_512
 
+(** @type: true
+*)
+val compute_blake2s: compute_st Blake2S
+
+(** @type: true
+*)
+val compute_blake2b: compute_st Blake2B
+
 
 let is_supported_alg = function
-| SHA1 | SHA2_256 | SHA2_384 | SHA2_512 -> true
+| SHA1 | SHA2_256 | SHA2_384 | SHA2_512 | Blake2S | Blake2B -> true
 | _ -> false
 
 let supported_alg = a:hash_alg{ is_supported_alg a }

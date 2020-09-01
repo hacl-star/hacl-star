@@ -21,17 +21,22 @@
  * SOFTWARE.
  */
 
+
+#ifndef __EverCrypt_Ed25519_H
+#define __EverCrypt_Ed25519_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-#ifndef __EverCrypt_Ed25519_H
-#define __EverCrypt_Ed25519_H
 
 #include "Hacl_Ed25519.h"
-
 
 void EverCrypt_Ed25519_sign(uint8_t *signature, uint8_t *secret, uint32_t len, uint8_t *msg);
 
@@ -43,6 +48,10 @@ void EverCrypt_Ed25519_expand_keys(uint8_t *ks, uint8_t *secret);
 
 void
 EverCrypt_Ed25519_sign_expanded(uint8_t *signature, uint8_t *ks, uint32_t len, uint8_t *msg);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __EverCrypt_Ed25519_H_DEFINED
 #endif

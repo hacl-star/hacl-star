@@ -126,7 +126,7 @@ static inline void double_round_32(uint32_t *st)
 
 static inline void chacha20_core_32(uint32_t *k, uint32_t *ctx, uint32_t ctr)
 {
-  memcpy(k, ctx, (uint32_t)16U * sizeof (ctx[0U]));
+  memcpy(k, ctx, (uint32_t)16U * sizeof (uint32_t));
   uint32_t ctr_u32 = (uint32_t)1U * ctr;
   uint32_t cv = ctr_u32;
   k[12U] = k[12U] + cv;
@@ -225,7 +225,7 @@ Hacl_Chacha20_Vec32_chacha20_encrypt_32(
     uint8_t *uu____2 = out + nb * (uint32_t)64U;
     uint8_t *uu____3 = text + nb * (uint32_t)64U;
     uint8_t plain[64U] = { 0U };
-    memcpy(plain, uu____3, rem * sizeof (uu____3[0U]));
+    memcpy(plain, uu____3, rem * sizeof (uint8_t));
     uint32_t k[16U] = { 0U };
     chacha20_core_32(k, ctx, nb);
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
@@ -235,7 +235,7 @@ Hacl_Chacha20_Vec32_chacha20_encrypt_32(
       uint32_t y = x ^ k[i];
       store32_le(plain + i * (uint32_t)4U, y);
     }
-    memcpy(uu____2, plain, rem * sizeof (plain[0U]));
+    memcpy(uu____2, plain, rem * sizeof (uint8_t));
   }
 }
 
@@ -273,7 +273,7 @@ Hacl_Chacha20_Vec32_chacha20_decrypt_32(
     uint8_t *uu____2 = out + nb * (uint32_t)64U;
     uint8_t *uu____3 = cipher + nb * (uint32_t)64U;
     uint8_t plain[64U] = { 0U };
-    memcpy(plain, uu____3, rem * sizeof (uu____3[0U]));
+    memcpy(plain, uu____3, rem * sizeof (uint8_t));
     uint32_t k[16U] = { 0U };
     chacha20_core_32(k, ctx, nb);
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
@@ -283,7 +283,7 @@ Hacl_Chacha20_Vec32_chacha20_decrypt_32(
       uint32_t y = x ^ k[i];
       store32_le(plain + i * (uint32_t)4U, y);
     }
-    memcpy(uu____2, plain, rem * sizeof (plain[0U]));
+    memcpy(uu____2, plain, rem * sizeof (uint8_t));
   }
 }
 

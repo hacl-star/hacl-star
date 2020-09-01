@@ -21,15 +21,20 @@
  * SOFTWARE.
  */
 
+
+#ifndef __EverCrypt_Vale_H
+#define __EverCrypt_Vale_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
-
-#ifndef __EverCrypt_Vale_H
-#define __EverCrypt_Vale_H
 
 
 
@@ -70,15 +75,19 @@ uint8_t *__proj__Mkgcm_args__item__tag(gcm_args projectee);
 
 extern void __stdcall old_aes128_key_expansion(uint8_t *key_ptr, uint8_t *expanded_key_ptr);
 
-extern void __stdcall old_gcm128_encrypt(gcm_args *uu____363);
+extern void __stdcall old_gcm128_encrypt(gcm_args *uu___);
 
-extern uint32_t __stdcall old_gcm128_decrypt(gcm_args *uu____378);
+extern uint32_t __stdcall old_gcm128_decrypt(gcm_args *uu___);
 
 extern void __stdcall old_aes256_key_expansion(uint8_t *key_ptr, uint8_t *expanded_key_ptr);
 
-extern void __stdcall old_gcm256_encrypt(gcm_args *uu____411);
+extern void __stdcall old_gcm256_encrypt(gcm_args *uu___);
 
-extern uint32_t __stdcall old_gcm256_decrypt(gcm_args *uu____426);
+extern uint32_t __stdcall old_gcm256_decrypt(gcm_args *uu___);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __EverCrypt_Vale_H_DEFINED
 #endif

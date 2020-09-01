@@ -190,6 +190,43 @@ module Make_HKDF_generic (C: Buffer)
     Impl.extract (C.ctypes_buf prk) (C.ctypes_buf salt) (C.size_uint32 salt) (C.ctypes_buf ikm) (C.size_uint32 ikm)
 end
 
+module Make_ECDSA_generic (C: Buffer)
+    (Impl : sig
+       val min_msg_size : int
+       val sign : C.buf -> uint32 -> C.buf -> C.buf -> C.buf -> uint64
+       val verify : uint32 -> C.buf -> C.buf -> C.buf -> C.buf -> bool
+     end)
+= struct
+  type t = C.t
+  let get_result r =
+    if r = UInt64.zero then
+      true
+    else
+    if r = UInt64.max_int then
+      false
+    else
+      failwith "Unknown return value"
+  let prime_p256_order = Z.of_string "115792089210356248762697446949407573529996955224135760342422259061068512044369"
+  let sign priv msg k signature =
+    (* Hacl.Interface.P256.ECDSA.ecdsa_sign_p256_without_hash/sha2/sha384 *)
+    assert (C.size signature = 64);
+    assert (C.size priv = 32);
+    assert (C.size k = 32);
+    assert (C.size msg >= Impl.min_msg_size);
+    assert (C.disjoint signature msg);
+    assert (C.z_compare priv prime_p256_order < 0);
+    assert (C.z_compare k prime_p256_order < 0);
+    get_result @@ Impl.sign (C.ctypes_buf signature) (C.size_uint32 msg) (C.ctypes_buf msg) (C.ctypes_buf priv) (C.ctypes_buf k)
+  let verify pub msg signature =
+    (* Hacl.Interface.P256.ECDSA.ecdsa_verif_without_hash/sha2/sha384 *)
+    assert (C.size signature = 64);
+    assert (C.size pub = 64);
+    assert (C.size msg >= Impl.min_msg_size);
+    let r, s = C.sub signature 0 32, C.sub signature 32 32 in
+    Impl.verify (C.size_uint32 msg) (C.ctypes_buf msg) (C.ctypes_buf pub) (C.ctypes_buf r) (C.ctypes_buf s)
+end
+
+
 module Make_Blake2b_generic (C: Buffer)
     (Impl : sig
        val reqs : feature list
@@ -241,5 +278,6 @@ module Make_HashFunction = Make_HashFunction_generic (CBytes)
 module Make_Poly1305 = Make_Poly1305_generic (CBytes)
 module Make_HMAC = Make_HMAC_generic (CBytes)
 module Make_HKDF = Make_HKDF_generic (CBytes)
+module Make_ECDSA = Make_ECDSA_generic (CBytes)
 module Make_Blake2b = Make_Blake2b_generic (CBytes)
 module Make_Blake2s = Make_Blake2s_generic (CBytes)

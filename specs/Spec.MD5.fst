@@ -15,7 +15,9 @@ let init_as_list : list uint32 = [
   u32 0x10325476;
 ]
 
-let init = Seq.seq_of_list init_as_list
+let h0 : words_state' MD5 = Seq.seq_of_list init_as_list
+
+let init = h0, ()
 
 (* Section 3.4 *)
 
@@ -275,7 +277,8 @@ let overwrite_aux (abcd: abcd_t) (a' b' c' d' : uint32) : Tot abcd_t =
 [@"opaque_to_smt"]
 let overwrite = overwrite_aux
 
-let update_aux abcd x =
+let update_aux (abcd:words_state MD5) x : Tot (words_state MD5) =
+  let abcd, _ = abcd in
   let x = words_of_bytes MD5 #16 x in
   let aa = Seq.index abcd ia in
   let bb = Seq.index abcd ib in
@@ -287,7 +290,8 @@ let update_aux abcd x =
     (Seq.index abcd ia +. aa)
     (Seq.index abcd ib +. bb)
     (Seq.index abcd ic +. cc)
-    (Seq.index abcd id +. dd)
+    (Seq.index abcd id +. dd),
+   ()
 
 [@"opaque_to_smt"]
 let update = update_aux
@@ -299,4 +303,3 @@ let pad = Spec.Hash.PadFinish.pad MD5
 (* Section 3.5 *)
 
 let finish = Spec.Hash.PadFinish.finish MD5
-
