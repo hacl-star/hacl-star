@@ -1,4 +1,4 @@
-module Hacl.Bignum4096
+module Hacl.Bignum256
 
 open FStar.Mul
 
@@ -6,10 +6,10 @@ module BN = Hacl.Bignum
 module BM = Hacl.Bignum.Montgomery
 module BE = Hacl.Bignum.Exponentiation
 
-let _ = assert_norm (4096ul = 64ul `FStar.UInt32.mul` 64ul)
+let _ = assert_norm (256ul = 64ul `FStar.UInt32.mul` 4ul)
 
 inline_for_extraction noextract
-let n_limbs: BN.meta_len = 64ul
+let n_limbs: BN.meta_len = 4ul
 
 inline_for_extraction noextract
 let n_bytes = n_limbs `FStar.UInt32.mul` 8ul
@@ -27,33 +27,33 @@ let lbignum = Hacl.Bignum.Definitions.lbignum
 /* Arithmetic functions */
 /************************/\n";
 Comment
-"Write `a + b mod 2^4096` in `res`.
+"Write `a + b mod 2^256` in `res`.
 
   This functions returns the carry.
 
-  The arguments a, b and res are meant to be 4096-bit bignums, i.e. uint64_t[64]"]
+  The arguments a, b and res are meant to be 256-bit bignums, i.e. uint64_t[64]"]
 val add: Hacl.Bignum.Addition.bn_add_eq_len_st n_limbs
 
-[@@ Comment "Write `a - b mod 2^4096` in `res`.
+[@@ Comment "Write `a - b mod 2^256` in `res`.
 
   This functions returns the carry.
 
-  The arguments a, b and res are meant to be 4096-bit bignums, i.e. uint64_t[64]"]
+  The arguments a, b and res are meant to be 256-bit bignums, i.e. uint64_t[64]"]
 val sub: Hacl.Bignum.Addition.bn_sub_eq_len_st n_limbs
 
 [@@ Comment "Write `a * b` in `res`.
 
-  The arguments a and b are meant to be 4096-bit bignums, i.e. uint64_t[64].
+  The arguments a and b are meant to be 256-bit bignums, i.e. uint64_t[64].
   The outparam res is meant to be a 8192-bit bignum, i.e. uint64_t[128]."]
 val mul: a:lbignum n_limbs -> b:lbignum n_limbs -> BN.bn_mul_st a b
 
 [@@ Comment "Write `a ^ b mod n1` in `res`.
 
-  The arguments a, n1 and the outparam res are meant to be 4096-bit bignums, i.e. uint64_t[64].
+  The arguments a, n1 and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[64].
   The argument b is a bignum of any size, and bBits is an upper bound on the
-  number of significant bits of b. For instance, if b is a 4096-bit bignum,
-  bBits should be 4096."]
-val mod_exp: BE.bn_mod_exp_st 4096ul n_limbs
+  number of significant bits of b. For instance, if b is a 256-bit bignum,
+  bBits should be 256."]
+val mod_exp: BE.bn_mod_exp_st 256ul n_limbs
 
 [@@ CPrologue
 "\n/********************/
@@ -72,7 +72,7 @@ val new_bn_from_bytes_be: Hacl.Bignum.Convert.new_bn_from_bytes_be_st
 
 [@@ Comment "Serialize a bignum into big-endian memory.
 
-  The argument b points to a 4096-bit bignum.
+  The argument b points to a 256-bit bignum.
   The outparam res points to 512 bytes of valid memory."]
 val bn_to_bytes_be: Hacl.Bignum.Convert.bn_to_bytes_be_st n_bytes
 

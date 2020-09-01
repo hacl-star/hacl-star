@@ -1,4 +1,4 @@
-module Hacl.Bignum4096
+module Hacl.Bignum256
 
 open FStar.Mul
 
@@ -8,10 +8,10 @@ module BE = Hacl.Bignum.Exponentiation
 
 friend Hacl.Bignum.Exponentiation
 
-let _ = assert_norm (4096ul = 64ul `FStar.UInt32.mul` 64ul)
+let _ = assert_norm (256ul = 64ul `FStar.UInt32.mul` 4ul)
 
 inline_for_extraction noextract
-let n': BN.meta_len = 65ul
+let n': BN.meta_len = 5ul
 
 /// A note about the style of normalization used in this file. Normally,
 /// bn_sub_eq_len and others would be marked as inline_for_extraction. However,
@@ -80,7 +80,7 @@ let mod_exp_loop: BE.bn_mod_exp_loop_st n_limbs =
   norm [ zeta; primops; iota; delta_only [ `%BE.bn_mod_exp_loop ] ] (BE.bn_mod_exp_loop n_limbs #mont_inst)
 
 let mod_exp =
-  BE.mk_bn_mod_exp 4096ul n_limbs #mont_inst mod_exp_loop
+  BE.mk_bn_mod_exp 256ul n_limbs #mont_inst mod_exp_loop
 
 let new_bn_from_bytes_be = Hacl.Bignum.Convert.new_bn_from_bytes_be
 
