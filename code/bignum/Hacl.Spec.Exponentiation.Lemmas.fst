@@ -975,8 +975,18 @@ let mod_exp_lr_lemma n r d a bBits b =
   mod_exp_lr_lemma_loop n r d aM bBits b bBits rM;
   assert_norm (pow2 0 = 1);
   assert (rM' == pow (aM * d) b * rM % n);
-  lemma_pow_mul_base aM d b;
-  mont_mod_exp_lemma_before_to_mont n r d bBits b a rM;
+
+  calc (==) {
+    pow (aM * d) b * rM % n;
+    (==) { lemma_pow_mul_base aM d b }
+    pow aM b * pow d b * rM % n;
+    (==) { Math.Lemmas.paren_mul_right (pow aM b) (pow d b) rM }
+    pow aM b * (rM * pow d b) % n;
+    (==) { Math.Lemmas.paren_mul_right (pow aM b) rM (pow d b) }
+    pow aM b * rM * pow d b % n;
+    (==) { mont_mod_exp_lemma_before_to_mont n r d bBits b a rM }
+    pow a b * rM % n;
+    };
   assert (rM' == pow a b * rM % n);
   let res = rM' * d % n in
   assert (res == pow a b * rM % n * d % n);
