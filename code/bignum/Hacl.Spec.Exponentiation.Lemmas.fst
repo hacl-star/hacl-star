@@ -1112,3 +1112,162 @@ let mod_exp_mont_ladder_lemma n r d a bBits b =
   assert_norm (pow2 0 = 1);
   assert (rM0' == pow (rM1 * d) b * rM0 % n);
   mont_mod_pow_lemma1 n r d bBits b a
+
+
+///
+///  Montgomery ladder for exponentiation with Montgomery arithmetic and
+///  conditional swap
+///
+
+val mod_exp_mont_ladder_swap_f: n:pos -> d:int -> bBits:nat -> b:nat{b < pow2 bBits} -> i:nat{i < bBits} -> tuple3 nat nat nat -> tuple3 nat nat nat
+let mod_exp_mont_ladder_swap_f n d bBits b i (rM0, rM1, privbit) =
+  let bit = b / pow2 (bBits - i - 1) % 2 in
+  let sw = (bit + privbit) % 2 in
+  let rM0, rM1 = cswap sw rM0 rM1 in
+  let rM0, rM1 = (rM0 * rM0 * d % n, rM1 * rM0 * d % n) in
+  (rM0, rM1, bit)
+
+
+val mod_exp_mont_ladder_swap: n:pos -> r:pos -> d:int{r * d % n = 1} -> a:nat -> bBits:nat -> b:nat{b < pow2 bBits} -> nat
+let mod_exp_mont_ladder_swap n r d a bBits b =
+  let rM0 = 1 * r % n in
+  let rM1 = a * r % n in
+  let sw = 0 in
+  let (rM0', rM1', sw') = Loops.repeati bBits (mod_exp_mont_ladder_swap_f n d bBits b) (rM0, rM1, sw) in
+  let rM0', rM1' = cswap sw' rM0' rM1' in
+  rM0' * d % n
+
+
+val mod_exp_mont_ladder_swap_lemma_loop:
+    n:pos -> d:int
+  -> bBits:pos -> b:nat{b < pow2 bBits}
+  -> rM0:nat -> rM1:nat -> sw0:nat{sw0 == b / pow2 bBits % 2}
+  -> i:nat{i <= bBits} ->
+  Lemma
+  (let (rM0', rM1', sw) = Loops.repeati i (mod_exp_mont_ladder_swap_f n d bBits b) (rM0, rM1, sw0) in
+   let (rM0'', rM1'') = Loops.repeati i (mod_exp_mont_ladder_f n d bBits b) (cswap sw0 rM0 rM1) in
+   let bit = b / pow2 (bBits - i) % 2 in
+   sw == bit /\ cswap bit rM0' rM1' == (rM0'', rM1''))
+
+let rec mod_exp_mont_ladder_swap_lemma_loop n d bBits b rM0 rM1 sw0 i =
+  if i = 0 then begin
+    Loops.eq_repeati0 i (mod_exp_mont_ladder_swap_f n d bBits b) (rM0, rM1, sw0);
+    Loops.eq_repeati0 i (mod_exp_mont_ladder_f n d bBits b) (cswap sw0 rM0 rM1);
+    () end
+  else begin
+    Loops.unfold_repeati i (mod_exp_mont_ladder_swap_f n d bBits b) (rM0, rM1, sw0) (i - 1);
+    Loops.unfold_repeati i (mod_exp_mont_ladder_f n d bBits b) (cswap sw0 rM0 rM1) (i - 1);
+    mod_exp_mont_ladder_swap_lemma_loop n d bBits b rM0 rM1 sw0 (i - 1);
+    () end
+
+
+val mod_exp_mont_ladder_swap_lemma: n:pos -> r:pos -> d:int{r * d % n = 1} -> a:nat -> bBits:pos -> b:nat{b < pow2 bBits} ->
+  Lemma (mod_exp_mont_ladder_swap n r d a bBits b == mod_exp_mont_ladder n r d a bBits b)
+
+let mod_exp_mont_ladder_swap_lemma n r d a bBits b =
+  let rM0 = 1 * r % n in
+  let rM1 = a * r % n in
+  let sw0 = 0 in
+  mod_exp_mont_ladder_swap_lemma_loop n d bBits b rM0 rM1 sw0 bBits
+
+
+///
+///  Montgomery ladder for exponentiation with Montgomery arithmetic and
+///  conditional swap using functions defined in Hacl.Spec.Montgomery.Lemmas
+///
+
+
+val mod_exp_mont_ladder_swap_f_ll: rLen:nat -> n:pos -> mu:nat -> bBits:nat -> b:nat{b < pow2 bBits} -> i:nat{i < bBits} -> tuple3 nat nat nat -> tuple3 nat nat nat
+let mod_exp_mont_ladder_swap_f_ll rLen n mu bBits b i (rM0, rM1, privbit) =
+  let bit = b / pow2 (bBits - i - 1) % 2 in
+  let sw = (bit + privbit) % 2 in
+  let rM0, rM1 = cswap sw rM0 rM1 in
+  let rM0, rM1 = (M.mont_mul rLen n mu rM0 rM0, M.mont_mul rLen n mu rM1 rM0) in
+  (rM0, rM1, bit)
+
+
+val mod_exp_mont_ladder_swap_ll: rLen:nat -> n:pos -> mu:nat -> a:nat -> bBits:nat -> b:nat{b < pow2 bBits} -> nat
+let mod_exp_mont_ladder_swap_ll rLen n mu a bBits b =
+  let rM0 = M.to_mont rLen n mu 1 in
+  let rM1 = M.to_mont rLen n mu a in
+  let sw = 0 in
+  let (rM0', rM1', sw') = Loops.repeati bBits (mod_exp_mont_ladder_swap_f_ll rLen n mu bBits b) (rM0, rM1, sw) in
+  let rM0', rM1' = cswap sw' rM0' rM1' in
+  M.from_mont rLen n mu rM0'
+
+
+val mod_exp_mont_lader_swap_ll_lemma_loop:
+    rLen:nat -> n:pos -> d:int -> mu:nat -> bBits:nat -> b:pos{b < pow2 bBits}
+  -> i:nat{i <= bBits} -> rM0:nat -> rM1:nat -> sw0:nat -> Lemma
+  (requires
+    (1 + n * mu) % pow2 64 == 0 /\ pow2 (64 * rLen) * d % n == 1 /\
+    n < pow2 (64 * rLen) /\ rM0 < n /\ rM1 < n /\ sw0 == b / pow2 bBits % 2)
+  (ensures
+    (let (rM0', rM1', sw') = Loops.repeati i (mod_exp_mont_ladder_swap_f_ll rLen n mu bBits b) (rM0, rM1, sw0) in
+     let (rM0'', rM1'', sw'') = Loops.repeati i (mod_exp_mont_ladder_swap_f n d bBits b) (rM0, rM1, sw0) in
+     rM0' == rM0'' /\ rM1' == rM1'' /\ sw' == sw'' /\ rM0' < n /\ rM1' < n))
+
+let rec mod_exp_mont_lader_swap_ll_lemma_loop rLen n d mu bBits b i rM0 rM1 sw0 =
+  let (rM0', rM1', sw') = Loops.repeati i (mod_exp_mont_ladder_swap_f_ll rLen n mu bBits b) (rM0, rM1, sw0) in
+  let (rM0'', rM1'', sw'') = Loops.repeati i (mod_exp_mont_ladder_swap_f n d bBits b) (rM0, rM1, sw0) in
+
+  if i = 0 then begin
+    Loops.eq_repeati0 i (mod_exp_mont_ladder_swap_f_ll rLen n mu bBits b) (rM0, rM1, sw0);
+    Loops.eq_repeati0 i (mod_exp_mont_ladder_swap_f n d bBits b) (rM0, rM1, sw0);
+    () end
+  else begin
+    let (rM2, rM3, sw1) = Loops.repeati (i - 1) (mod_exp_mont_ladder_swap_f_ll rLen n mu bBits b) (rM0, rM1, sw0) in
+    let (rM2', rM3', sw1') = Loops.repeati (i - 1) (mod_exp_mont_ladder_swap_f n d bBits b) (rM0, rM1, sw0) in
+    Loops.unfold_repeati i (mod_exp_mont_ladder_swap_f_ll rLen n mu bBits b) (rM0, rM1, sw0) (i - 1);
+    Loops.unfold_repeati i (mod_exp_mont_ladder_swap_f n d bBits b) (rM0, rM1, sw0) (i - 1);
+    //assert ((rM0', rM1', sw') == mod_exp_mont_ladder_swap_f_ll rLen n mu bBits b (i - 1) (rM2, rM3, sw1));
+    //assert ((rM0'', rM1'', sw'') == mod_exp_mont_ladder_swap_f n d bBits b (i - 1) (rM2', rM3', sw1'));
+    mod_exp_mont_lader_swap_ll_lemma_loop rLen n d mu bBits b (i - 1) rM0 rM1 sw0;
+    assert (rM2 == rM2' /\ rM3 == rM3' /\ sw1 == sw1' /\ rM2 < n /\ rM3 < n);
+
+    let bit = b / pow2 (bBits - i) % 2 in
+    let sw = (bit + sw1) % 2 in
+    let rM2, rM3 = cswap sw rM2 rM3 in
+
+    Math.Lemmas.lemma_mult_lt_sqr rM2 rM2 n;
+    M.mont_reduction_lemma rLen n d mu (rM2 * rM2);
+
+    Math.Lemmas.lemma_mult_lt_sqr rM3 rM2 n;
+    M.mont_reduction_lemma rLen n d mu (rM3 * rM2);
+    () end
+
+
+val mod_exp_mont_ladder_swap_ll_lemma_eval:
+  rLen:nat -> n:pos -> d:int -> mu:nat -> a:nat -> bBits:nat -> b:pos{b < pow2 bBits} -> Lemma
+  (requires
+    (1 + n * mu) % pow2 64 == 0 /\ pow2 (64 * rLen) * d % n == 1 /\
+    1 < n /\ n < pow2 (64 * rLen) /\ a < n)
+  (ensures mod_exp_mont_ladder_swap_ll rLen n mu a bBits b == pow a b % n)
+
+let mod_exp_mont_ladder_swap_ll_lemma_eval rLen n d mu a bBits b =
+  let r = pow2 (64 * rLen) in
+  let rM0 = M.to_mont rLen n mu 1 in
+  let rM1 = M.to_mont rLen n mu a in
+  M.to_mont_lemma rLen n d mu 1;
+  M.to_mont_lemma rLen n d mu a;
+
+  let sw0 = 0 in
+  let (rM0', rM1', sw') = Loops.repeati bBits (mod_exp_mont_ladder_swap_f_ll rLen n mu bBits b) (rM0, rM1, sw0) in
+  mod_exp_mont_lader_swap_ll_lemma_loop rLen n d mu bBits b bBits rM0 rM1 sw0;
+  let rM0', rM1' = cswap sw' rM0' rM1' in
+  let res = M.from_mont rLen n mu rM0' in
+  M.from_mont_lemma rLen n d mu rM0';
+  mod_exp_mont_ladder_swap_lemma n r d a bBits b;
+  mod_exp_mont_ladder_lemma n r d a bBits b
+
+
+val mod_exp_mont_ladder_swap_ll_lemma:
+  rLen:nat -> n:pos -> d:int -> mu:nat -> a:nat -> bBits:nat -> b:pos{b < pow2 bBits} -> Lemma
+  (requires
+    (1 + n * mu) % pow2 64 == 0 /\ pow2 (64 * rLen) * d % n == 1 /\
+    1 < n /\ n < pow2 (64 * rLen) /\ a < n)
+  (ensures mod_exp_mont_ladder_swap_ll rLen n mu a bBits b == pow_mod #n a b)
+
+let mod_exp_mont_ladder_swap_ll_lemma rLen n d mu a bBits b =
+  mod_exp_mont_ladder_swap_ll_lemma_eval rLen n d mu a bBits b;
+  lemma_pow_mod #n a b
