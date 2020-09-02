@@ -179,3 +179,103 @@ let bn_mod_pow2_lemma #aLen a i =
     (==) { bn_eval_bound (slice a 0 i) i; Math.Lemmas.small_mod (bn_v (slice a 0 i)) (pow2 (64 * i)) }
     bn_v (slice a 0 i);
     }
+
+
+//the same as in curve25519
+val lemma_cswap2_step:
+    bit:uint64{v bit <= 1}
+  -> p1:uint64
+  -> p2:uint64 ->
+  Lemma
+   (let mask = u64 0 -. bit in
+    let dummy = mask &. (p1 ^. p2) in
+    let p1' = p1 ^. dummy in
+    let p2' = p2 ^. dummy in
+    if v bit = 1 then p1' == p2 /\ p2' == p1 else p1' == p1 /\ p2' == p2)
+
+let lemma_cswap2_step bit p1 p2 =
+  let mask = u64 0 -. bit in
+  assert (v bit == 0 ==> v mask == 0);
+  assert (v bit == 1 ==> v mask == pow2 64 - 1);
+  let dummy = mask &. (p1 ^. p2) in
+  logand_lemma mask (p1 ^. p2);
+  assert (v bit == 1 ==> v dummy == v (p1 ^. p2));
+  assert (v bit == 0 ==> v dummy == 0);
+  let p1' = p1 ^. dummy in
+  assert (v dummy == v (if v bit = 1 then (p1 ^. p2) else u64 0));
+  logxor_lemma p1 p2;
+  let p2' = p2 ^. dummy in
+  logxor_lemma p2 p1
+
+
+val cswap2_f:
+    #len:size_nat
+  -> mask:uint64
+  -> i:nat{i < len}
+  -> tuple2 (lseq uint64 len) (lseq uint64 len) ->
+  tuple2 (lseq uint64 len) (lseq uint64 len)
+
+let cswap2_f #len mask i (p1, p2) =
+  let dummy = mask &. (p1.[i] ^. p2.[i]) in
+  let p1 = p1.[i] <- p1.[i] ^. dummy in
+  let p2 = p2.[i] <- p2.[i] ^. dummy in
+  (p1, p2)
+
+
+val cswap2:
+    #len:size_nat
+  -> bit:uint64
+  -> b1:lseq uint64 len
+  -> b2:lseq uint64 len ->
+  tuple2 (lseq uint64 len) (lseq uint64 len)
+
+let cswap2 #len bit b1 b2 =
+  let mask = u64 0 -. bit in
+  Loops.repeati len (cswap2_f #len mask) (b1, b2)
+
+
+val cswap2_lemma_:
+    #len:size_nat
+  -> bit:uint64{v bit <= 1}
+  -> b1:lseq uint64 len
+  -> b2:lseq uint64 len ->
+  Pure (tuple2 (lseq uint64 len) (lseq uint64 len))
+  (requires True)
+  (ensures fun (p1, p2) ->
+   (let mask = u64 0 -. bit in
+    (p1, p2) == Loops.repeati len (cswap2_f #len mask) (b1, b2) /\
+    (if v bit = 1 then p1 == b2 /\ p2 == b1 else p1 == b1 /\ p2 == b2)))
+
+let cswap2_lemma_ #len bit b1 b2 =
+  let mask = u64 0 -. bit in
+  Loops.eq_repeati0 len (cswap2_f #len mask) (b1, b2);
+  let (p1, p2) =
+  Loops.repeati_inductive #(tuple2 (lseq uint64 len) (lseq uint64 len)) len
+  (fun i (p1, p2) ->
+    (p1, p2) == Loops.repeati i (cswap2_f #len mask) (b1, b2) /\
+    (forall (k:nat{k < i}).
+      (if v bit = 1 then p1.[k] == b2.[k] /\ p2.[k] == b1.[k] else p1.[k] == b1.[k] /\ p2.[k] == b2.[k])) /\
+    (forall (k:nat{i <= k /\ k < len}). p1.[k] == b1.[k] /\ p2.[k] == b2.[k]))
+  (fun i (p1, p2) ->
+    Loops.unfold_repeati (i + 1) (cswap2_f #len mask) (b1, b2) i;
+    lemma_cswap2_step bit p1.[i] p2.[i];
+    cswap2_f #len mask i (p1, p2)) (b1, b2) in
+
+  assert (if v bit = 1 then (eq_intro p1 b2; p1 == b2) else (eq_intro p1 b1; p1 == b1));
+  assert (if v bit = 1 then (eq_intro p2 b1; p2 == b1) else (eq_intro p2 b2; p2 == b2));
+  //eq_intro p1 (if v bit = 1 then b2 else b1);
+  //eq_intro p2 (if v bit = 1 then b1 else b2);
+  (p1, p2)
+
+
+val cswap2_lemma:
+    #len:size_nat
+  -> bit:uint64{v bit <= 1}
+  -> b1:lseq uint64 len
+  -> b2:lseq uint64 len ->
+  Lemma (let (p1, p2) = cswap2 bit b1 b2 in
+    (if v bit = 1 then p1 == b2 /\ p2 == b1 else p1 == b1 /\ p2 == b2))
+
+let cswap2_lemma #len bit b1 b2 =
+  let _ = cswap2_lemma_ #len bit b1 b2 in
+  ()

@@ -51,3 +51,30 @@ let bn_set_ith_bit len input ind =
   let i = ind /. 64ul in
   let j = ind %. 64ul in
   input.(i) <- input.(i) |. (u64 1 <<. j)
+
+
+inline_for_extraction noextract
+val cswap2_st:
+    len:size_t
+  -> bit:uint64
+  -> b1:lbuffer uint64 len
+  -> b2:lbuffer uint64 len ->
+  Stack unit
+  (requires fun h -> live h b1 /\ live h b2 /\ disjoint b1 b2)
+  (ensures  fun h0 _ h1 -> modifies (loc b1 |+| loc b2) h0 h1 /\
+    (as_seq h1 b1, as_seq h1 b2) == S.cswap2 bit (as_seq h0 b1) (as_seq h0 b2))
+
+let cswap2_st len bit b1 b2 =
+  [@inline_let]
+  let mask = u64 0 -. bit in
+  [@inline_let]
+  let spec h0 = S.cswap2_f mask in
+
+  let h0 = ST.get () in
+  loop2 h0 len b1 b2 spec
+  (fun i ->
+    Lib.LoopCombinators.unfold_repeati (v len) (spec h0) (as_seq h0 b1, as_seq h0 b2) (v i);
+    let dummy = mask &. (b1.(i) ^. b2.(i)) in
+    b1.(i) <- b1.(i) ^. dummy;
+    b2.(i) <- b2.(i) ^. dummy
+  )
