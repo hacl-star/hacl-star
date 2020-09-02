@@ -491,3 +491,39 @@ val from_mont_lemma: rLen:nat -> n:pos -> d:int -> mu:nat -> aM:nat -> Lemma
 
 let from_mont_lemma rLen n d mu aM =
   mont_reduction_lemma rLen n d mu aM
+
+///
+///  Properties of Montgomery arithmetic
+///
+
+// from_mont (to_mont a) = a % n
+val lemma_mont_id: n:pos -> r:pos -> d:int{r * d % n == 1} -> a:nat ->
+  Lemma (a * r % n * d % n == a % n)
+let lemma_mont_id n r d a =
+  calc (==) {
+    a * r % n * d % n;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l (a * r) d n }
+    a * r * d % n;
+    (==) { Math.Lemmas.paren_mul_right a r d; Math.Lemmas.lemma_mod_mul_distr_r a (r * d) n }
+    a * (r * d % n) % n;
+    (==) { assert (r * d % n == 1) }
+    a % n;
+  }
+
+
+//  one_M * a = a
+val lemma_mont_mul_one: n:pos -> r:pos -> d:int{r * d % n = 1} -> a:nat ->
+  Lemma (let r0 = 1 * r % n in let r1 = a * r % n in r0 * r1 * d % n == r1 % n)
+let lemma_mont_mul_one n r d a =
+  let r0 = 1 * r % n in
+  let r1 = a * r % n in
+
+  calc (==) {
+    r1 * r0 * d % n;
+    (==) { Math.Lemmas.paren_mul_right r1 r0 d; Math.Lemmas.lemma_mod_mul_distr_r r1 (r0 * d) n }
+    r1 * (r0 * d % n) % n;
+    (==) { lemma_mont_id n r d 1 }
+    r1 * (1 % n) % n;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_r r1 1 n }
+    r1 % n;
+    }
