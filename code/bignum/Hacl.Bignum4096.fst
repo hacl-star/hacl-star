@@ -85,6 +85,12 @@ let mod_exp_loop: BE.bn_mod_exp_loop_st n =
 let mod_exp =
   BE.mk_bn_mod_exp 4096ul n #mont_inst mod_exp_loop
 
+let mod_exp_mont_ladder_loop: BE.bn_mod_exp_mont_ladder_loop_st n =
+  norm [ zeta; primops; iota; delta_only [ `%BE.bn_mod_exp_mont_ladder_loop ] ] (BE.bn_mod_exp_mont_ladder_loop n #mont_inst)
+
+let mod_exp_mont_ladder =
+  BE.mk_bn_mod_exp_mont_ladder 4096ul n #mont_inst mod_exp_mont_ladder_loop
+
 let new_bn_from_bytes_be = Hacl.Bignum.Convert.new_bn_from_bytes_be
 
 let bn_to_bytes_be = Hacl.Bignum.Convert.mk_bn_to_bytes_be 512ul

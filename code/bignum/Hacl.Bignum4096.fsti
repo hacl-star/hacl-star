@@ -46,8 +46,16 @@ val mul: a:lbignum n -> b:lbignum n -> BN.bn_karatsuba_mul_st a b
   The arguments a, n1 and the outparam res are meant to be 4096-bit bignums, i.e. uint64_t[64].
   The argument b is a bignum of any size, and bBits is an upper bound on the
   number of significant bits of b. For instance, if b is a 4096-bit bignum,
-  bBits should be 4096."]
+  bBits should be 4096. The function is *NOT* constant-time on the argument b."]
 val mod_exp: BE.bn_mod_exp_st 4096ul n
+
+[@@ Comment "Write `a ^ b mod n1` in `res`.
+
+  The arguments a, n1 and the outparam res are meant to be 4096-bit bignums, i.e. uint64_t[64].
+  The argument b is a bignum of any size, and bBits is an upper bound on the
+  number of significant bits of b. For instance, if b is a 4096-bit bignum,
+  bBits should be 4096. The function is constant-time on the argument b."]
+val mod_exp_mont_ladder: BE.bn_mod_exp_mont_ladder_st 4096ul n
 
 [@@ CPrologue
 "\n/********************/
