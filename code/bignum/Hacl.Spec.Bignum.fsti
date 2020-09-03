@@ -35,25 +35,25 @@ val bn_add_mod_n_lemma: #len:size_nat -> n:lbignum len -> a:lbignum len -> b:lbi
   (requires bn_v a < bn_v n /\ bn_v b < bn_v n)
   (ensures  bn_v (bn_add_mod_n n a b) == (bn_v a + bn_v b) % bn_v n)
 
-val bn_karatsuba_mul: #aLen:size_nat{aLen + aLen <= max_size_t} -> a:lbignum aLen -> b:lbignum aLen -> lbignum (aLen + aLen)
-
-val bn_karatsuba_mul_lemma: #aLen:size_nat{aLen + aLen <= max_size_t} -> a:lbignum aLen -> b:lbignum aLen ->
-  Lemma (bn_v (bn_karatsuba_mul a b) == bn_v a * bn_v b)
-
 val bn_mul: #aLen:size_nat -> #bLen:size_nat{aLen + bLen <= max_size_t} -> a:lbignum aLen -> b:lbignum bLen -> lbignum (aLen + bLen)
 
 val bn_mul_lemma: #aLen:size_nat -> #bLen:size_nat{aLen + bLen <= max_size_t} -> a:lbignum aLen -> b:lbignum bLen ->
   Lemma (bn_v (bn_mul a b) == bn_v a * bn_v b)
 
-val bn_karatsuba_sqr: #aLen:size_nat{aLen + aLen <= max_size_t} -> a:lbignum aLen -> lbignum (aLen + aLen)
+val bn_karatsuba_mul: #aLen:size_nat{aLen + aLen <= max_size_t} -> a:lbignum aLen -> b:lbignum aLen -> lbignum (aLen + aLen)
 
-val bn_karatsuba_sqr_lemma: #aLen:size_nat{aLen + aLen <= max_size_t} -> a:lbignum aLen ->
-  Lemma (bn_v (bn_karatsuba_sqr a) == bn_v a * bn_v a)
+val bn_karatsuba_mul_lemma: #aLen:size_nat{aLen + aLen <= max_size_t} -> a:lbignum aLen -> b:lbignum aLen ->
+  Lemma (bn_karatsuba_mul a b == bn_mul a b /\ bn_v (bn_karatsuba_mul a b) == bn_v a * bn_v b)
 
 val bn_sqr: #aLen:size_nat{aLen + aLen <= max_size_t} -> a:lbignum aLen -> lbignum (aLen + aLen)
 
 val bn_sqr_lemma: #aLen:size_nat{aLen + aLen <= max_size_t} -> a:lbignum aLen ->
   Lemma (bn_v (bn_sqr a) == bn_v a * bn_v a)
+
+val bn_karatsuba_sqr: #aLen:size_nat{aLen + aLen <= max_size_t} -> a:lbignum aLen -> lbignum (aLen + aLen)
+
+val bn_karatsuba_sqr_lemma: #aLen:size_nat{aLen + aLen <= max_size_t} -> a:lbignum aLen ->
+  Lemma (bn_karatsuba_sqr a == bn_sqr a /\ bn_v (bn_karatsuba_sqr a) == bn_v a * bn_v a)
 
 
 val bn_mul1_lshift_add:

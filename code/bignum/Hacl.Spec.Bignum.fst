@@ -62,31 +62,29 @@ let bn_add_mod_n_lemma #len n a b =
   bn_add_lemma a b;
   bn_reduce_once_lemma #len n c0 res0
 
-let bn_karatsuba_mul #aLen a b =
-  Hacl.Spec.Bignum.Karatsuba.bn_karatsuba_mul a b
-
-let bn_karatsuba_mul_lemma #aLen a b =
-  let _ = Hacl.Spec.Bignum.Karatsuba.bn_karatsuba_mul a b in
-  ()
-
 let bn_mul #aLen #bLen a b =
   Hacl.Spec.Bignum.Multiplication.bn_mul a b
 
 let bn_mul_lemma #aLen #bLen a b =
   Hacl.Spec.Bignum.Multiplication.bn_mul_lemma a b
 
-let bn_karatsuba_sqr #aLen a =
-  Hacl.Spec.Bignum.Karatsuba.bn_karatsuba_sqr a
+let bn_karatsuba_mul #aLen a b =
+  Hacl.Spec.Bignum.Karatsuba.bn_karatsuba_mul a b
 
-let bn_karatsuba_sqr_lemma #aLen a =
-  let _ = Hacl.Spec.Bignum.Karatsuba.bn_karatsuba_sqr a in
-  ()
+let bn_karatsuba_mul_lemma #aLen a b =
+  Hacl.Spec.Bignum.Karatsuba.bn_karatsuba_mul_lemma a b
 
 let bn_sqr #aLen a =
   Hacl.Spec.Bignum.Multiplication.bn_sqr a
 
 let bn_sqr_lemma #aLen a =
   Hacl.Spec.Bignum.Multiplication.bn_sqr_lemma a
+
+let bn_karatsuba_sqr #aLen a =
+  Hacl.Spec.Bignum.Karatsuba.bn_karatsuba_sqr a
+
+let bn_karatsuba_sqr_lemma #aLen a =
+  Hacl.Spec.Bignum.Karatsuba.bn_karatsuba_sqr_lemma a
 
 let bn_mul1_lshift_add #aLen #resLen a b j acc =
   Hacl.Spec.Bignum.Multiplication.bn_mul1_lshift_add a b j acc

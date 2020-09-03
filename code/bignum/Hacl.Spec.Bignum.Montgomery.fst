@@ -88,8 +88,7 @@ let mont_reduction #nLen n mu c =
   bn_reduce_once n c0 res
 
 let to_mont #nLen n mu r2 a =
-  //let c = bn_mul a r2 in // c = a * r2
-  let c = bn_karatsuba_mul a r2 in
+  let c = bn_mul a r2 in // c = a * r2
   mont_reduction #nLen n mu c // aM = c % n
 
 let from_mont #nLen n mu aM =
@@ -98,13 +97,11 @@ let from_mont #nLen n mu aM =
   mont_reduction #nLen n mu tmp
 
 let mont_mul #nLen n mu aM bM =
-  //let c = bn_mul aM bM in // c = aM * bM
-  let c = bn_karatsuba_mul aM bM in
+  let c = bn_mul aM bM in // c = aM * bM
   mont_reduction n mu c // resM = c % n
 
 let mont_sqr #nLen n mu aM =
-  //let c = bn_sqr aM in // c = aM * aM
-  let c = bn_karatsuba_sqr aM in
+  let c = bn_sqr aM in // c = aM * aM
   mont_reduction n mu c // resM = c % n
 
 
@@ -310,8 +307,8 @@ let mont_reduction_lemma #nLen n mu res0 =
 
 
 let to_mont_lemma #nLen n mu r2 a =
-  let c = bn_karatsuba_mul a r2 in // c = a * r2
-  bn_karatsuba_mul_lemma a r2;
+  let c = bn_mul a r2 in // c = a * r2
+  bn_mul_lemma a r2;
   Math.Lemmas.lemma_mult_lt_sqr (bn_v a) (bn_v r2) (bn_v n);
   assert (bn_v c < bn_v n * bn_v n);
 
@@ -332,8 +329,8 @@ let from_mont_lemma #nLen n mu aM =
 
 
 let mont_mul_lemma #nLen n mu aM bM =
-  let c = bn_karatsuba_mul aM bM in
-  bn_karatsuba_mul_lemma aM bM;
+  let c = bn_mul aM bM in
+  bn_mul_lemma aM bM;
   assert (bn_v c == bn_v aM * bn_v bM);
   Math.Lemmas.lemma_mult_lt_sqr (bn_v aM) (bn_v bM) (bn_v n);
   assert (bn_v c < bn_v n * bn_v n);
@@ -341,8 +338,8 @@ let mont_mul_lemma #nLen n mu aM bM =
 
 
 let mont_sqr_lemma #nLen n mu aM =
-  let c = bn_karatsuba_sqr aM in
-  bn_karatsuba_sqr_lemma aM;
+  let c = bn_sqr aM in
+  bn_sqr_lemma aM;
   assert (bn_v c == bn_v aM * bn_v aM);
   Math.Lemmas.lemma_mult_lt_sqr (bn_v aM) (bn_v aM) (bn_v n);
   assert (bn_v c < bn_v n * bn_v n);

@@ -487,14 +487,24 @@ let rec bn_karatsuba_mul_ aLen a b =
     res end
 
 
-val bn_karatsuba_mul:
+val bn_karatsuba_mul: #aLen:size_nat{aLen + aLen <= max_size_t} -> a:lbignum aLen -> b:lbignum aLen -> lbignum (aLen + aLen)
+let bn_karatsuba_mul #aLen a b = bn_karatsuba_mul_ aLen a b
+
+
+val bn_karatsuba_mul_lemma:
     #aLen:size_nat{aLen + aLen <= max_size_t}
   -> a:lbignum aLen
   -> b:lbignum aLen ->
-  Tot (res:lbignum (aLen + aLen){bn_v res == bn_v a * bn_v b})
+  Lemma (bn_karatsuba_mul a b == bn_mul a b /\ bn_v (bn_karatsuba_mul a b) == bn_v a * bn_v b)
 
-let bn_karatsuba_mul #aLen a b =
-  bn_karatsuba_mul_ aLen a b
+let bn_karatsuba_mul_lemma #aLen a b =
+  let res = bn_karatsuba_mul_ aLen a b in
+  assert (bn_v res == bn_v a * bn_v b);
+  let res' = bn_mul a b in
+  bn_mul_lemma a b;
+  assert (bn_v res' == bn_v a * bn_v b);
+  bn_eval_inj (aLen + aLen) res res';
+  assert (bn_karatsuba_mul_ aLen a b == bn_mul a b)
 
 
 val bn_middle_karatsuba_sqr:
@@ -564,8 +574,19 @@ let rec bn_karatsuba_sqr_ aLen a =
     res end
 
 
-val bn_karatsuba_sqr: #aLen:size_nat{aLen + aLen <= max_size_t} -> a:lbignum aLen ->
-  Tot (res:lbignum (aLen + aLen){bn_v res == bn_v a * bn_v a})
-
+val bn_karatsuba_sqr: #aLen:size_nat{aLen + aLen <= max_size_t} -> a:lbignum aLen -> lbignum (aLen + aLen)
 let bn_karatsuba_sqr #aLen a =
   bn_karatsuba_sqr_ aLen a
+
+
+val bn_karatsuba_sqr_lemma: #aLen:size_nat{aLen + aLen <= max_size_t} -> a:lbignum aLen ->
+  Lemma (bn_karatsuba_sqr a == bn_sqr a /\ bn_v (bn_karatsuba_sqr a) == bn_v a * bn_v a)
+
+let bn_karatsuba_sqr_lemma #aLen a =
+  let res = bn_karatsuba_sqr_ aLen a in
+  assert (bn_v res == bn_v a * bn_v a);
+  let res' = bn_sqr a in
+  bn_sqr_lemma a;
+  assert (bn_v res' == bn_v a * bn_v a);
+  bn_eval_inj (aLen + aLen) res res';
+  assert (bn_karatsuba_sqr_ aLen a == bn_sqr a)

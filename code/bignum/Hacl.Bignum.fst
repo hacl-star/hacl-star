@@ -29,12 +29,16 @@ let bn_add_mod_n len n a b res =
   bn_reduce_once len n c0 res
 
 let bn_karatsuba_mul aLen a b res =
+  let h0 = ST.get () in
+  Hacl.Spec.Bignum.bn_karatsuba_mul_lemma (as_seq h0 a) (as_seq h0 b);
   Hacl.Bignum.Karatsuba.bn_karatsuba_mul aLen a b res
 
 let bn_mul aLen a bLen b res =
   Hacl.Bignum.Multiplication.bn_mul aLen a bLen b res
 
 let bn_karatsuba_sqr aLen a res =
+  let h0 = ST.get () in
+  Hacl.Spec.Bignum.bn_karatsuba_sqr_lemma (as_seq h0 a);
   Hacl.Bignum.Karatsuba.bn_karatsuba_sqr aLen a res
 
 let bn_sqr aLen a res =
