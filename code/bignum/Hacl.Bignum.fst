@@ -42,6 +42,8 @@ let bn_karatsuba_sqr aLen a res =
   Hacl.Bignum.Karatsuba.bn_karatsuba_sqr aLen a res
 
 let bn_sqr aLen a res =
+  let h0 = ST.get () in
+  Hacl.Spec.Bignum.bn_sqr_lemma (as_seq h0 a);
   Hacl.Bignum.Multiplication.bn_sqr aLen a res
 
 let bn_mul1_lshift_add_in_place aLen a b j res =

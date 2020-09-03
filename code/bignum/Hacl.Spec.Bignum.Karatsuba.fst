@@ -580,13 +580,13 @@ let bn_karatsuba_sqr #aLen a =
 
 
 val bn_karatsuba_sqr_lemma: #aLen:size_nat{aLen + aLen <= max_size_t} -> a:lbignum aLen ->
-  Lemma (bn_karatsuba_sqr a == bn_sqr a /\ bn_v (bn_karatsuba_sqr a) == bn_v a * bn_v a)
+  Lemma (bn_karatsuba_sqr a == bn_mul a a /\ bn_v (bn_karatsuba_sqr a) == bn_v a * bn_v a)
 
 let bn_karatsuba_sqr_lemma #aLen a =
   let res = bn_karatsuba_sqr_ aLen a in
   assert (bn_v res == bn_v a * bn_v a);
-  let res' = bn_sqr a in
-  bn_sqr_lemma a;
+  let res' = bn_mul a a in
+  bn_mul_lemma a a;
   assert (bn_v res' == bn_v a * bn_v a);
   bn_eval_inj (aLen + aLen) res res';
-  assert (bn_karatsuba_sqr_ aLen a == bn_sqr a)
+  assert (bn_karatsuba_sqr_ aLen a == bn_mul a a)

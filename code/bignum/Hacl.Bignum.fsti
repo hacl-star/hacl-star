@@ -154,7 +154,7 @@ let bn_karatsuba_sqr_st (#aLen:size_t{0 < v aLen /\ 4 * v aLen <= max_size_t})
   Stack unit
   (requires fun h -> live h a /\ live h res /\ disjoint res a)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_seq h1 res == S.bn_sqr (as_seq h0 a))
+    as_seq h1 res == S.bn_mul (as_seq h0 a) (as_seq h0 a))
 
 
 inline_for_extraction noextract
@@ -171,7 +171,7 @@ let bn_sqr_st (#aLen:size_t{0 < v aLen /\ v aLen + v aLen <= max_size_t})
   Stack unit
   (requires fun h -> live h a /\ live h res /\ disjoint res a)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_seq h1 res == S.bn_sqr (as_seq h0 a))
+    as_seq h1 res == S.bn_mul (as_seq h0 a) (as_seq h0 a))
 
 inline_for_extraction noextract
 val bn_sqr:

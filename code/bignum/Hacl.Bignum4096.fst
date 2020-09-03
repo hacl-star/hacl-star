@@ -27,6 +27,7 @@ let add = Hacl.Bignum.Addition.bn_add_eq_len n
 let sub = Hacl.Bignum.Addition.bn_sub_eq_len n
 
 let mul (a b: lbignum n) : BN.bn_karatsuba_mul_st a b =
+  //BN.bn_karatsuba_mul n a b
   BN.bn_mul n a n b
 
 let bit_set: BN.bn_set_ith_bit_st n =
@@ -39,7 +40,9 @@ let sub_mask: BN.bn_sub_mask_st n =
   BN.bn_sub_mask n
 
 let sqr (a: lbignum n): BN.bn_karatsuba_sqr_st a =
-  BN.bn_sqr n a
+  //BN.bn_karatsuba_sqr n a
+  //BN.bn_sqr n a
+  BN.bn_mul n a n a
 
 inline_for_extraction noextract
 instance bn_inst: BN.bn n = {

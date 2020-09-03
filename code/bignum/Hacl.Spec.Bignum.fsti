@@ -48,12 +48,12 @@ val bn_karatsuba_mul_lemma: #aLen:size_nat{aLen + aLen <= max_size_t} -> a:lbign
 val bn_sqr: #aLen:size_nat{aLen + aLen <= max_size_t} -> a:lbignum aLen -> lbignum (aLen + aLen)
 
 val bn_sqr_lemma: #aLen:size_nat{aLen + aLen <= max_size_t} -> a:lbignum aLen ->
-  Lemma (bn_v (bn_sqr a) == bn_v a * bn_v a)
+  Lemma (bn_sqr a == bn_mul a a /\ bn_v (bn_sqr a) == bn_v a * bn_v a)
 
 val bn_karatsuba_sqr: #aLen:size_nat{aLen + aLen <= max_size_t} -> a:lbignum aLen -> lbignum (aLen + aLen)
 
 val bn_karatsuba_sqr_lemma: #aLen:size_nat{aLen + aLen <= max_size_t} -> a:lbignum aLen ->
-  Lemma (bn_karatsuba_sqr a == bn_sqr a /\ bn_v (bn_karatsuba_sqr a) == bn_v a * bn_v a)
+  Lemma (bn_karatsuba_sqr a == bn_mul a a /\ bn_v (bn_karatsuba_sqr a) == bn_v a * bn_v a)
 
 
 val bn_mul1_lshift_add:

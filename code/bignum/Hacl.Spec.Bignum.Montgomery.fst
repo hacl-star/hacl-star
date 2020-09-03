@@ -101,7 +101,7 @@ let mont_mul #nLen n mu aM bM =
   mont_reduction n mu c // resM = c % n
 
 let mont_sqr #nLen n mu aM =
-  let c = bn_sqr aM in // c = aM * aM
+  let c = bn_mul aM aM in // c = aM * aM
   mont_reduction n mu c // resM = c % n
 
 
@@ -338,8 +338,8 @@ let mont_mul_lemma #nLen n mu aM bM =
 
 
 let mont_sqr_lemma #nLen n mu aM =
-  let c = bn_sqr aM in
-  bn_sqr_lemma aM;
+  let c = bn_mul aM aM in
+  bn_mul_lemma aM aM;
   assert (bn_v c == bn_v aM * bn_v aM);
   Math.Lemmas.lemma_mult_lt_sqr (bn_v aM) (bn_v aM) (bn_v n);
   assert (bn_v c < bn_v n * bn_v n);

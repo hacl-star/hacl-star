@@ -656,10 +656,10 @@ let rec bn_sqr_loop_lemma #aLen a i =
     }; () end
 
 
-val bn_sqr_lemma: #aLen:size_nat{aLen + aLen <= max_size_t} -> a:lbignum aLen -> Lemma
+val bn_sqr_lemma_eval: #aLen:size_nat{aLen + aLen <= max_size_t} -> a:lbignum aLen -> Lemma
   (bn_v (bn_sqr a) == bn_v a * bn_v a)
 
-let bn_sqr_lemma #aLen a =
+let bn_sqr_lemma_eval #aLen a =
   let resLen = aLen + aLen in
   let res0 = create (aLen + aLen) (u64 0) in
   let res1 = repeati aLen (bn_sqr_f a) res0 in
@@ -677,3 +677,16 @@ let bn_sqr_lemma #aLen a =
   assert (bn_v a * bn_v a < pow2 (64 * resLen));
   bn_eval_bound res3 resLen;
   assert ((v c0 + v c1) = 0)
+
+val bn_sqr_lemma: #aLen:size_nat{aLen + aLen <= max_size_t} -> a:lbignum aLen ->
+  Lemma (bn_sqr a == bn_mul a a /\ bn_v (bn_sqr a) == bn_v a * bn_v a)
+
+let bn_sqr_lemma #aLen a =
+  let res = bn_sqr a in
+  bn_sqr_lemma_eval a;
+  assert (bn_v res == bn_v a * bn_v a);
+  let res' = bn_mul a a in
+  bn_mul_lemma a a;
+  assert (bn_v res' == bn_v a * bn_v a);
+  bn_eval_inj (aLen + aLen) res res';
+  assert (bn_sqr a == bn_mul a a)
