@@ -314,7 +314,7 @@ let rsapss_sign a modBits eBits dBits skey sLen salt msgLen msg sgnt =
     (fun h -> Hacl.Spec.Bignum.bn_from_bytes_be (v emLen) (as_seq h' em))
     (fun _ -> bn_from_bytes_be emLen em (sub m 0ul (blocks emLen 8ul)));
 
-  bn_mod_exp modBits nLen n m dBits d s;
+  bn_mod_exp_mont_ladder modBits nLen n m dBits d s;
   LS.sgnt_blocks_eq_nLen (v modBits);
   assert (v (blocks k 8ul) == v nLen);
   bn_to_bytes_be k s sgnt;
