@@ -408,6 +408,77 @@ bn_mod_exp(
   from_runtime(nLen, n, nInv_u64, accM, res);
 }
 
+static void
+bn_mod_exp_mont_ladder_loop_runtime(
+  uint32_t nLen,
+  uint64_t *n,
+  uint64_t nInv_u64,
+  uint32_t bBits,
+  uint32_t bLen,
+  uint64_t *b,
+  uint64_t *rM0,
+  uint64_t *rM1,
+  uint64_t *sw
+)
+{
+  for (uint32_t i0 = (uint32_t)0U; i0 < bBits; i0++)
+  {
+    uint64_t bit = Hacl_Bignum_bn_get_ith_bit(bLen, b, bBits - i0 - (uint32_t)1U);
+    uint64_t sw1 = bit ^ sw[0U];
+    for (uint32_t i = (uint32_t)0U; i < nLen; i++)
+    {
+      uint64_t dummy = ((uint64_t)0U - sw1) & (rM0[i] ^ rM1[i]);
+      rM0[i] = rM0[i] ^ dummy;
+      rM1[i] = rM1[i] ^ dummy;
+    }
+    mul_runtime(nLen, n, nInv_u64, rM1, rM0, rM1);
+    sqr_runtime(nLen, n, nInv_u64, rM0, rM0);
+    sw[0U] = bit;
+  }
+}
+
+static inline void
+bn_mod_exp_mont_ladder(
+  uint32_t modBits,
+  uint32_t nLen,
+  uint64_t *n,
+  uint64_t *a,
+  uint32_t bBits,
+  uint64_t *b,
+  uint64_t *res
+)
+{
+  KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
+  uint64_t one[nLen];
+  memset(one, 0U, nLen * sizeof (uint64_t));
+  memset(one, 0U, nLen * sizeof (uint64_t));
+  one[0U] = (uint64_t)1U;
+  uint32_t bLen = (bBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
+  uint64_t nInv_u64 = Hacl_Bignum_ModInv64_mod_inv_u64(n[0U]);
+  KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
+  uint64_t r2[nLen];
+  memset(r2, 0U, nLen * sizeof (uint64_t));
+  precomp_runtime(nLen, modBits, n, r2);
+  KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
+  uint64_t rM0[nLen];
+  memset(rM0, 0U, nLen * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
+  uint64_t rM1[nLen];
+  memset(rM1, 0U, nLen * sizeof (uint64_t));
+  uint64_t sw = (uint64_t)0U;
+  to_runtime(nLen, n, nInv_u64, r2, one, rM0);
+  to_runtime(nLen, n, nInv_u64, r2, a, rM1);
+  bn_mod_exp_mont_ladder_loop_runtime(nLen, n, nInv_u64, bBits, bLen, b, rM0, rM1, &sw);
+  uint64_t uu____0 = sw;
+  for (uint32_t i = (uint32_t)0U; i < nLen; i++)
+  {
+    uint64_t dummy = ((uint64_t)0U - uu____0) & (rM0[i] ^ rM1[i]);
+    rM0[i] = rM0[i] ^ dummy;
+    rM1[i] = rM1[i] ^ dummy;
+  }
+  from_runtime(nLen, n, nInv_u64, rM0, res);
+}
+
 static inline void xor_bytes(uint32_t len, uint8_t *b1, uint8_t *b2)
 {
   for (uint32_t i = (uint32_t)0U; i < len; i++)
@@ -578,7 +649,7 @@ Hacl_RSAPSS_rsapss_sign(
   memset(s, 0U, nLen * sizeof (uint64_t));
   pss_encode(a, sLen, salt, msgLen, msg, emBits, em);
   Hacl_Bignum_Convert_bn_from_bytes_be(emLen, em, m);
-  bn_mod_exp(modBits, nLen, n, m, dBits, d, s);
+  bn_mod_exp_mont_ladder(modBits, nLen, n, m, dBits, d, s);
   Hacl_Bignum_Convert_bn_to_bytes_be(k, s, sgnt);
 }
 

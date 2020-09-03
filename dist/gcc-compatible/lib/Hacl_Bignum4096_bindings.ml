@@ -20,6 +20,12 @@ module Bindings(F:Cstubs.FOREIGN) =
            ((ptr uint64_t) @->
               (uint32_t @->
                  ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void))))))
+    let hacl_Bignum4096_mod_exp_mont_ladder =
+      foreign "Hacl_Bignum4096_mod_exp_mont_ladder"
+        ((ptr uint64_t) @->
+           ((ptr uint64_t) @->
+              (uint32_t @->
+                 ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void))))))
     let hacl_Bignum4096_new_bn_from_bytes_be =
       foreign "Hacl_Bignum4096_new_bn_from_bytes_be"
         (uint32_t @-> (ocaml_bytes @-> (returning (ptr uint64_t))))

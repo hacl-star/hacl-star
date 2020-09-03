@@ -339,7 +339,7 @@ Write `a ^ b mod n1` in `res`.
   The arguments a, n1 and the outparam res are meant to be 4096-bit bignums, i.e. uint64_t[64].
   The argument b is a bignum of any size, and bBits is an upper bound on the
   number of significant bits of b. For instance, if b is a 4096-bit bignum,
-  bBits should be 4096.
+  bBits should be 4096. The function is *NOT* constant-time on the argument b.
 */
 void
 Hacl_Bignum4096_mod_exp(uint64_t *n1, uint64_t *a, uint32_t bBits, uint64_t *b, uint64_t *res)
@@ -357,6 +357,74 @@ Hacl_Bignum4096_mod_exp(uint64_t *n1, uint64_t *a, uint32_t bBits, uint64_t *b, 
   to(n1, nInv_u64, r2, acc, accM);
   mod_exp_loop(n1, nInv_u64, bBits, bLen, b, aM, accM);
   from(n1, nInv_u64, accM, res);
+}
+
+static void
+mod_exp_mont_ladder_loop(
+  uint64_t *n1,
+  uint64_t nInv_u64,
+  uint32_t bBits,
+  uint32_t bLen,
+  uint64_t *b,
+  uint64_t *rM0,
+  uint64_t *rM1,
+  uint64_t *sw
+)
+{
+  for (uint32_t i0 = (uint32_t)0U; i0 < bBits; i0++)
+  {
+    uint64_t bit = Hacl_Bignum_bn_get_ith_bit(bLen, b, bBits - i0 - (uint32_t)1U);
+    uint64_t sw1 = bit ^ sw[0U];
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
+    {
+      uint64_t dummy = ((uint64_t)0U - sw1) & (rM0[i] ^ rM1[i]);
+      rM0[i] = rM0[i] ^ dummy;
+      rM1[i] = rM1[i] ^ dummy;
+    }
+    mont_mul(n1, nInv_u64, rM1, rM0, rM1);
+    mont_sqr(n1, nInv_u64, rM0, rM0);
+    sw[0U] = bit;
+  }
+}
+
+/*
+Write `a ^ b mod n1` in `res`.
+
+  The arguments a, n1 and the outparam res are meant to be 4096-bit bignums, i.e. uint64_t[64].
+  The argument b is a bignum of any size, and bBits is an upper bound on the
+  number of significant bits of b. For instance, if b is a 4096-bit bignum,
+  bBits should be 4096. The function is constant-time on the argument b.
+*/
+void
+Hacl_Bignum4096_mod_exp_mont_ladder(
+  uint64_t *n1,
+  uint64_t *a,
+  uint32_t bBits,
+  uint64_t *b,
+  uint64_t *res
+)
+{
+  uint64_t one[64U] = { 0U };
+  memset(one, 0U, (uint32_t)64U * sizeof (uint64_t));
+  one[0U] = (uint64_t)1U;
+  uint32_t bLen = (bBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
+  uint64_t nInv_u64 = Hacl_Bignum_ModInv64_mod_inv_u64(n1[0U]);
+  uint64_t r2[64U] = { 0U };
+  precomp((uint32_t)4096U, n1, r2);
+  uint64_t rM0[64U] = { 0U };
+  uint64_t rM1[64U] = { 0U };
+  uint64_t sw = (uint64_t)0U;
+  to(n1, nInv_u64, r2, one, rM0);
+  to(n1, nInv_u64, r2, a, rM1);
+  mod_exp_mont_ladder_loop(n1, nInv_u64, bBits, bLen, b, rM0, rM1, &sw);
+  uint64_t uu____0 = sw;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
+  {
+    uint64_t dummy = ((uint64_t)0U - uu____0) & (rM0[i] ^ rM1[i]);
+    rM0[i] = rM0[i] ^ dummy;
+    rM1[i] = rM1[i] ^ dummy;
+  }
+  from(n1, nInv_u64, rM0, res);
 }
 
 
