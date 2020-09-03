@@ -78,10 +78,27 @@ Write `a ^ b mod n1` in `res`.
   The arguments a, n1 and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
   The argument b is a bignum of any size, and bBits is an upper bound on the
   number of significant bits of b. For instance, if b is a 256-bit bignum,
-  bBits should be 256.
+  bBits should be 256. The function is *NOT* constant-time on the argument b.
 */
 void
 Hacl_Bignum256_mod_exp(uint64_t *n, uint64_t *a, uint32_t bBits, uint64_t *b, uint64_t *res);
+
+/*
+Write `a ^ b mod n1` in `res`.
+
+  The arguments a, n1 and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
+  The argument b is a bignum of any size, and bBits is an upper bound on the
+  number of significant bits of b. For instance, if b is a 256-bit bignum,
+  bBits should be 256. The function is constant-time on the argument b.
+*/
+void
+Hacl_Bignum256_mod_exp_mont_ladder(
+  uint64_t *n,
+  uint64_t *a,
+  uint32_t bBits,
+  uint64_t *b,
+  uint64_t *res
+);
 
 
 /********************/
@@ -116,9 +133,10 @@ void Hacl_Bignum256_bn_to_bytes_be(uint64_t *b, uint8_t *res);
 
 
 /*
-Returns true if and only if argument a is strictly less than the argument b.
+Returns 2 ^ 64 - 1 if and only if argument a is strictly less than the argument b,
+otherwise returns 0.
 */
-bool Hacl_Bignum256_lt(uint64_t *a, uint64_t *b);
+uint64_t Hacl_Bignum256_lt_mask(uint64_t *a, uint64_t *b);
 
 #if defined(__cplusplus)
 }

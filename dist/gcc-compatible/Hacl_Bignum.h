@@ -30,6 +30,7 @@ extern "C" {
 #endif
 
 #include "evercrypt_targetconfig.h"
+#include "lib_intrinsics.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
@@ -57,23 +58,39 @@ Hacl_Bignum_Multiplication_mul_carry_add_u64_st(
   return FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(res, (uint32_t)64U));
 }
 
-static inline bool Hacl_Bignum_bn_is_bit_set(uint32_t len, uint64_t *input, uint32_t ind)
+void
+Hacl_Bignum_Karatsuba_bn_karatsuba_mul_(
+  uint32_t aLen,
+  uint64_t *a,
+  uint64_t *b,
+  uint64_t *tmp,
+  uint64_t *res
+);
+
+void
+Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_(
+  uint32_t aLen,
+  uint64_t *a,
+  uint64_t *tmp,
+  uint64_t *res
+);
+
+static inline uint64_t Hacl_Bignum_bn_get_ith_bit(uint32_t len, uint64_t *input, uint32_t ind)
 {
   uint32_t i = ind / (uint32_t)64U;
   uint32_t j = ind % (uint32_t)64U;
   uint64_t tmp = input[i];
-  uint64_t tmp1 = tmp >> j & (uint64_t)1U;
-  return tmp1 == (uint64_t)1U;
+  return tmp >> j & (uint64_t)1U;
 }
 
-static inline void Hacl_Bignum_bn_bit_set(uint32_t len, uint64_t *input, uint32_t ind)
+static inline void Hacl_Bignum_bn_set_ith_bit(uint32_t len, uint64_t *input, uint32_t ind)
 {
   uint32_t i = ind / (uint32_t)64U;
   uint32_t j = ind % (uint32_t)64U;
   input[i] = input[i] | (uint64_t)1U << j;
 }
 
-static inline bool Hacl_Bignum_bn_is_less(uint32_t len, uint64_t *a, uint64_t *b)
+static inline uint64_t Hacl_Bignum_bn_lt_mask(uint32_t len, uint64_t *a, uint64_t *b)
 {
   uint64_t acc = (uint64_t)0U;
   for (uint32_t i = (uint32_t)0U; i < len; i++)
@@ -82,8 +99,7 @@ static inline bool Hacl_Bignum_bn_is_less(uint32_t len, uint64_t *a, uint64_t *b
     uint64_t blt = ~FStar_UInt64_gte_mask(a[i], b[i]);
     acc = (beq & acc) | (~beq & ((blt & (uint64_t)0xFFFFFFFFFFFFFFFFU) | (~blt & (uint64_t)0U)));
   }
-  uint64_t mask = acc;
-  return mask == (uint64_t)0xFFFFFFFFFFFFFFFFU;
+  return acc;
 }
 
 static inline uint64_t Hacl_Bignum_ModInv64_mod_inv_u64(uint64_t n0)
