@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __MerkleTree_H
+#define __MerkleTree_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
@@ -28,15 +36,9 @@
 #include "kremlin/internal/target.h"
 
 
-#ifndef __MerkleTree_H
-#define __MerkleTree_H
-
 #include "Hacl_Kremlib.h"
 #include "Hacl_Spec.h"
 #include "EverCrypt_Hash.h"
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 typedef struct MerkleTree_Low_Datastructures_hash_vec_s
 {

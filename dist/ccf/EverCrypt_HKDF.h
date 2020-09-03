@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __EverCrypt_HKDF_H
+#define __EverCrypt_HKDF_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
@@ -28,14 +36,8 @@
 #include "kremlin/internal/target.h"
 
 
-#ifndef __EverCrypt_HKDF_H
-#define __EverCrypt_HKDF_H
-
 #include "EverCrypt_HMAC.h"
 #include "Hacl_Spec.h"
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 void
 EverCrypt_HKDF_expand_sha1(
@@ -106,6 +108,44 @@ EverCrypt_HKDF_expand_sha2_512(
 
 void
 EverCrypt_HKDF_extract_sha2_512(
+  uint8_t *prk,
+  uint8_t *salt,
+  uint32_t saltlen,
+  uint8_t *ikm,
+  uint32_t ikmlen
+);
+
+void
+EverCrypt_HKDF_expand_blake2s(
+  uint8_t *okm,
+  uint8_t *prk,
+  uint32_t prklen,
+  uint8_t *info,
+  uint32_t infolen,
+  uint32_t len
+);
+
+void
+EverCrypt_HKDF_extract_blake2s(
+  uint8_t *prk,
+  uint8_t *salt,
+  uint32_t saltlen,
+  uint8_t *ikm,
+  uint32_t ikmlen
+);
+
+void
+EverCrypt_HKDF_expand_blake2b(
+  uint8_t *okm,
+  uint8_t *prk,
+  uint32_t prklen,
+  uint8_t *info,
+  uint32_t infolen,
+  uint32_t len
+);
+
+void
+EverCrypt_HKDF_extract_blake2b(
   uint8_t *prk,
   uint8_t *salt,
   uint32_t saltlen,

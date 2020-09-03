@@ -10,11 +10,6 @@ module Bindings(F:Cstubs.FOREIGN) =
     type everCrypt_AEAD_state_s = [ `everCrypt_AEAD_state_s ] structure
     let (everCrypt_AEAD_state_s : [ `everCrypt_AEAD_state_s ] structure typ)
       = structure "EverCrypt_AEAD_state_s_s"
-    let everCrypt_AEAD_state_s_impl =
-      field everCrypt_AEAD_state_s "impl" spec_Cipher_Expansion_impl
-    let everCrypt_AEAD_state_s_ek =
-      field everCrypt_AEAD_state_s "ek" (ptr uint8_t)
-    let _ = seal everCrypt_AEAD_state_s
     let everCrypt_AEAD_alg_of_state =
       foreign "EverCrypt_AEAD_alg_of_state"
         ((ptr everCrypt_AEAD_state_s) @-> (returning spec_Agile_AEAD_alg))

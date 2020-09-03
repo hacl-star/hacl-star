@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_Curve25519_64_H
+#define __Hacl_Curve25519_64_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "curve25519-inline.h"
@@ -30,15 +38,9 @@
 #include "kremlin/internal/target.h"
 
 
-#ifndef __Hacl_Curve25519_64_H
-#define __Hacl_Curve25519_64_H
-
 #include "Hacl_Kremlib.h"
 #include "Vale.h"
 #include "Vale_Inline.h"
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 /* SNIPPET_START: Hacl_Curve25519_64_scalarmult */
 

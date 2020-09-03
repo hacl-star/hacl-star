@@ -11,7 +11,15 @@ module BE = Hacl.Bignum.Exponentiation
 let _ = assert_norm (4096ul = 64ul `FStar.UInt32.mul` 64ul)
 
 inline_for_extraction noextract
-let n: BN.meta_len = 64ul
+let n_limbs: BN.meta_len = 64ul
+
+inline_for_extraction noextract
+let n_bytes = n_limbs `FStar.UInt32.mul` 8ul
+
+// A static assert that the number of bytes vs number of blocks matches. This is
+// important for bn_to_bytes_be which takes a number of bytes, not a number of
+// limbs. (It would be nice to fix this.)
+let _ = assert_norm (Hacl.Bignum.Definitions.blocks n_bytes 8ul = n_limbs)
 
 inline_for_extraction noextract
 let lbignum = Hacl.Bignum.Definitions.lbignum
@@ -26,20 +34,20 @@ Comment
   This functions returns the carry.
 
   The arguments a, b and res are meant to be 4096-bit bignums, i.e. uint64_t[64]"]
-val add: Hacl.Bignum.Addition.bn_add_eq_len_st n
+val add: Hacl.Bignum.Addition.bn_add_eq_len_st n_limbs
 
 [@@ Comment "Write `a - b mod 2^4096` in `res`.
 
   This functions returns the carry.
 
   The arguments a, b and res are meant to be 4096-bit bignums, i.e. uint64_t[64]"]
-val sub: Hacl.Bignum.Addition.bn_sub_eq_len_st n
+val sub: Hacl.Bignum.Addition.bn_sub_eq_len_st n_limbs
 
 [@@ Comment "Write `a * b` in `res`.
 
   The arguments a and b are meant to be 4096-bit bignums, i.e. uint64_t[64].
   The outparam res is meant to be a 8192-bit bignum, i.e. uint64_t[128]."]
-val mul: a:lbignum n -> b:lbignum n -> BN.bn_karatsuba_mul_st a b
+val mul: a:lbignum n_limbs -> b:lbignum n_limbs -> BN.bn_karatsuba_mul_st a b
 
 [@@ Comment "Write `a ^ b mod n1` in `res`.
 
@@ -47,7 +55,7 @@ val mul: a:lbignum n -> b:lbignum n -> BN.bn_karatsuba_mul_st a b
   The argument b is a bignum of any size, and bBits is an upper bound on the
   number of significant bits of b. For instance, if b is a 4096-bit bignum,
   bBits should be 4096. The function is *NOT* constant-time on the argument b."]
-val mod_exp: BE.bn_mod_exp_st 4096ul n
+val mod_exp: BE.bn_mod_exp_st 4096ul n_limbs
 
 [@@ Comment "Write `a ^ b mod n1` in `res`.
 
@@ -55,7 +63,7 @@ val mod_exp: BE.bn_mod_exp_st 4096ul n
   The argument b is a bignum of any size, and bBits is an upper bound on the
   number of significant bits of b. For instance, if b is a 4096-bit bignum,
   bBits should be 4096. The function is constant-time on the argument b."]
-val mod_exp_mont_ladder: BE.bn_mod_exp_mont_ladder_st 4096ul n
+val mod_exp_mont_ladder: BE.bn_mod_exp_mont_ladder_st 4096ul n_limbs
 
 [@@ CPrologue
 "\n/********************/
@@ -76,13 +84,12 @@ val new_bn_from_bytes_be: Hacl.Bignum.Convert.new_bn_from_bytes_be_st
 
   The argument b points to a 4096-bit bignum.
   The outparam res points to 512 bytes of valid memory."]
-val bn_to_bytes_be: Hacl.Bignum.Convert.bn_to_bytes_be_st 512ul
+val bn_to_bytes_be: Hacl.Bignum.Convert.bn_to_bytes_be_st n_bytes
 
 [@@ CPrologue
 "\n/***************/
 /* Comparisons */
 /***************/\n";
-Comment
 "Returns 2 ^ 64 - 1 if and only if argument a is strictly less than the argument b,
  otherwise returns 0."]
-val lt_mask: Hacl.Bignum.bn_lt_mask_st n
+val lt_mask: Hacl.Bignum.bn_lt_mask_st n_limbs

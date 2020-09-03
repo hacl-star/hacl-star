@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_Blake2s_128_H
+#define __Hacl_Blake2s_128_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
@@ -28,16 +36,33 @@
 #include "kremlin/internal/target.h"
 
 
-#ifndef __Hacl_Blake2s_128_H
-#define __Hacl_Blake2s_128_H
-
 #include "Hacl_Kremlib.h"
+#include "Hacl_Blake2s_32.h"
 #include "Lib_Memzero0.h"
-#include "Hacl_Blake2b_32.h"
 #include "Hacl_Impl_Blake2_Constants.h"
-#if defined(__cplusplus)
-extern "C" {
-#endif
+#include "Hacl_Hash.h"
+
+void
+Hacl_Hash_Blake2s_128_finish_blake2s_128(Lib_IntVector_Intrinsics_vec128 *s, u64 ev, u8 *dst);
+
+u64
+Hacl_Hash_Blake2s_128_update_multi_blake2s_128(
+  Lib_IntVector_Intrinsics_vec128 *s,
+  u64 ev,
+  u8 *blocks,
+  u32 n_blocks
+);
+
+u64
+Hacl_Hash_Blake2s_128_update_last_blake2s_128(
+  Lib_IntVector_Intrinsics_vec128 *s,
+  u64 ev,
+  u64 prev_len,
+  u8 *input,
+  u32 input_len
+);
+
+void Hacl_Hash_Blake2s_128_hash_blake2s_128(u8 *input, u32 input_len, u8 *dst);
 
 void Hacl_Blake2s_128_blake2s(u32 nn, u8 *output, u32 ll, u8 *d, u32 kk, u8 *k);
 

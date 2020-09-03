@@ -642,6 +642,7 @@ INTRINSIC_FLAGS = -add-include '"libintvector.h"'
 INTRINSIC_INT_FLAGS = \
   -add-include 'Hacl_P256:"lib_intrinsics.h"' \
   -add-include 'Hacl_Bignum4096:"lib_intrinsics.h"' \
+  -add-include 'Hacl_Bignum256:"lib_intrinsics.h"' \
   -add-include 'Hacl_Bignum:"lib_intrinsics.h"' \
   -add-include 'Hacl_RSAPSS:"lib_intrinsics.h"'
 
@@ -669,10 +670,10 @@ WASMSUPPORT_BUNDLE = -bundle WasmSupport
 LEGACY_BUNDLE = -bundle EverCrypt[rename=EverCrypt_Legacy]
 
 BUNDLE_FLAGS	=\
+  $(BLAKE2_BUNDLE) \
   $(HASH_BUNDLE) \
   $(E_HASH_BUNDLE) \
   $(SHA3_BUNDLE) \
-  $(BLAKE2_BUNDLE) \
   $(CHACHA20_BUNDLE) \
   $(SALSA20_BUNDLE) \
   $(CURVE_BUNDLE) \
@@ -766,13 +767,15 @@ dist/wasm/Makefile.basic: CHACHAPOLY_BUNDLE += \
 dist/wasm/Makefile.basic: POLY_BUNDLE = \
   -bundle 'Hacl.Poly1305_32=Hacl.Impl.Poly1305.Field32xN_32' \
   -bundle 'Hacl.Poly1305_128,Hacl.Poly1305_256,Hacl.Impl.Poly1305.*'
+dist/wasm/Makefile.basic: BLAKE2_BUNDLE += \
+  -bundle 'Hacl.Blake2s_128,Hacl.Blake2b_256,Hacl.HMAC.Blake2s_128,Hacl.HMAC.Blake2b_256,Hacl.HKDF.Blake2s_128,Hacl.HKDF.Blake2b_256,Hacl.Streaming.Blake2s_128,Hacl.Streaming.Blake2b_256'
 
 dist/wasm/Makefile.basic: STREAMING_BUNDLE = -bundle Hacl.Streaming.*
 
 # And Merkle trees
 dist/wasm/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree,MerkleTree.*'
 dist/wasm/Makefile.basic: CTR_BUNDLE =
-dist/wasm/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.RSAPSS,Hacl.Bignum.*,Hacl.Bignum,Hacl.Impl.MGF,Hacl.Impl.RSAPSS,Hacl.Bignum4096
+dist/wasm/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.RSAPSS,Hacl.Bignum.*,Hacl.Bignum,Hacl.Impl.MGF,Hacl.Impl.RSAPSS,Hacl.Bignum4096,Hacl.Bignum256
 dist/wasm/Makefile.basic: DEFAULT_FLAGS += -bundle 'EverCrypt,EverCrypt.*'
 
 dist/wasm/package.json: dist/wasm/Makefile.basic $(wildcard bindings/js/*.js) bindings/js/README.md $(wildcard bindings/js/*.json) bindings/js/.npmignore
@@ -914,6 +917,11 @@ dist/ccf/Makefile.basic: POLY_BUNDLE =
 dist/ccf/Makefile.basic: P256_BUNDLE=-bundle Hacl.P256,Hacl.Impl.ECDSA.*,Hacl.Impl.SolinasReduction,Hacl.Impl.P256.*
 dist/ccf/Makefile.basic: RSAPSS_BUNDLE =
 dist/ccf/Makefile.basic: HPKE_BUNDLE = -bundle 'Hacl.HPKE.*'
+dist/ccf/Makefile.basic: BLAKE2_BUNDLE=-bundle Hacl.Impl.Blake2.Constants \
+  -static-header Hacl.Impl.Blake2.Constants \
+  -bundle Hacl.HKDF.Blake2b_256,Hacl.HMAC.Blake2b_256,Hacl.Blake2b_256,Hacl.Hash.Blake2b_256,Hacl.Streaming.Blake2b_256 \
+  -bundle Hacl.HKDF.Blake2s_128,Hacl.HMAC.Blake2s_128,Hacl.Blake2s_128,Hacl.Hash.Blake2s_128,Hacl.Streaming.Blake2s_256 \
+  -bundle 'Hacl.Impl.Blake2.\*'
 
 # Mozilla distribution
 # --------------------
@@ -935,12 +943,12 @@ dist/mozilla/Makefile.basic: NACLBOX_BUNDLE = -bundle Hacl.NaCl
 dist/mozilla/Makefile.basic: E_HASH_BUNDLE =
 dist/mozilla/Makefile.basic: MERKLE_BUNDLE = -bundle MerkleTree.*,MerkleTree
 dist/mozilla/Makefile.basic: CTR_BUNDLE =
-dist/mozilla/Makefile.basic: BLAKE2_BUNDLE = -bundle Hacl.Impl.Blake2.*,Hacl.Blake2b_256,Hacl.Blake2s_128,Hacl.Blake2b_32,Hacl.Blake2s_32
+dist/mozilla/Makefile.basic: BLAKE2_BUNDLE = -bundle Hacl.Impl.Blake2.*,Hacl.Blake2b_256,Hacl.Blake2s_128,Hacl.Blake2b_32,Hacl.Streaming.Blake2s_128,Hacl.Streaming.Blake2b_256,Hacl.Blake2s_32,Hacl.HMAC.Blake2b_256,Hacl.HMAC.Blake2s_128,Hacl.HKDF.Blake2b_256,Hacl.HKDF.Blake2s_128
 dist/mozilla/Makefile.basic: SHA3_BUNDLE = -bundle Hacl.SHA3
 dist/mozilla/Makefile.basic: HASH_BUNDLE = -bundle Hacl.Hash.*,Hacl.HKDF,Hacl.HMAC,Hacl.HMAC_DRBG
 dist/mozilla/Makefile.basic: HPKE_BUNDLE = -bundle 'Hacl.HPKE.*'
 dist/mozilla/Makefile.basic: P256_BUNDLE= -bundle Hacl.P256,Hacl.Impl.ECDSA.*,Hacl.Impl.SolinasReduction,Hacl.Impl.P256.*
-dist/mozilla/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.RSAPSS,Hacl.Bignum.*,Hacl.Bignum,Hacl.Impl.MGF,Hacl.Impl.RSAPSS,Hacl.Bignum4096
+dist/mozilla/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.RSAPSS,Hacl.Bignum.*,Hacl.Bignum,Hacl.Impl.MGF,Hacl.Impl.RSAPSS,Hacl.Bignum4096,Hacl.Bignum256
 dist/mozilla/Makefile.basic: STREAMING_BUNDLE = -bundle Hacl.Streaming.*
 dist/mozilla/Makefile.basic: FRODO_BUNDLE = -bundle Hacl.Frodo.*,Hacl.SHA3,Hacl.Keccak,Frodo.Params
 dist/mozilla/Makefile.basic: \

@@ -727,3 +727,40 @@ let lemma_nat_from_to_bytes_be_preserves_value #l b len =
 let lemma_reveal_uint_to_bytes_le #t #l b = ()
 
 let lemma_reveal_uint_to_bytes_be #t #l b = ()
+
+let lemma_uint_to_from_bytes_le_preserves_value #t #l i =
+  lemma_reveal_uint_to_bytes_le #t #l (uint_to_bytes_le #t #l i);
+  assert(nat_from_bytes_le (uint_to_bytes_le #t #l i) ==
+           uint_v (uint_from_bytes_le #t #l (uint_to_bytes_le #t #l i)));
+  lemma_uint_to_bytes_le_preserves_value #t #l i;
+  assert(nat_from_bytes_le (uint_to_bytes_le #t #l i) == uint_v i)
+
+let lemma_uint_to_from_bytes_be_preserves_value #t #l i =
+  lemma_reveal_uint_to_bytes_be #t #l (uint_to_bytes_be #t #l i);
+  lemma_uint_to_bytes_be_preserves_value #t #l i
+
+let lemma_uint_from_to_bytes_le_preserves_value #t #l s =
+  let i = uint_from_bytes_le #t #l s in
+  let s' = uint_to_bytes_le #t #l i in
+  lemma_nat_from_to_bytes_le_preserves_value #l s' (length s');
+  assert(nat_to_bytes_le #l (length s') (nat_from_bytes_le s') == s');
+  lemma_uint_to_bytes_le_preserves_value #t #l i;
+  assert(nat_from_bytes_le (uint_to_bytes_le #t #l i) == uint_v i);
+  assert(s' == nat_to_bytes_le #l (length s') (uint_v i));
+  assert(s' == nat_to_bytes_le #l (length s') (uint_v (uint_from_bytes_le #t #l s)));
+  lemma_reveal_uint_to_bytes_le #t #l s;
+  assert(s' == nat_to_bytes_le #l (length s') (nat_from_bytes_le s));
+  lemma_nat_from_to_bytes_le_preserves_value #l s (length s)
+
+let lemma_uint_from_to_bytes_be_preserves_value #t #l s =
+  let i = uint_from_bytes_be #t #l s in
+  let s' = uint_to_bytes_be #t #l i in
+  lemma_nat_from_to_bytes_be_preserves_value #l s' (length s');
+  assert(nat_to_bytes_be #l (length s') (nat_from_bytes_be s') == s');
+  lemma_uint_to_bytes_be_preserves_value #t #l i;
+  assert(nat_from_bytes_be (uint_to_bytes_be #t #l i) == uint_v i);
+  assert(s' == nat_to_bytes_be #l (length s') (uint_v i));
+  assert(s' == nat_to_bytes_be #l (length s') (uint_v (uint_from_bytes_be #t #l s)));
+  lemma_reveal_uint_to_bytes_be #t #l s;
+  assert(s' == nat_to_bytes_be #l (length s') (nat_from_bytes_be s));
+  lemma_nat_from_to_bytes_be_preserves_value #l s (length s)

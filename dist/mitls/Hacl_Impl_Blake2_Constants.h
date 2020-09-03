@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_Impl_Blake2_Constants_H
+#define __Hacl_Impl_Blake2_Constants_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -29,13 +37,7 @@
 #include "kremlin/internal/target.h"
 
 
-#ifndef __Hacl_Impl_Blake2_Constants_H
-#define __Hacl_Impl_Blake2_Constants_H
 
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 static const
 uint32_t
@@ -86,16 +88,6 @@ Hacl_Impl_Blake2_Constants_ivTable_B[8U] =
     (uint64_t)0xA54FF53A5F1D36F1U, (uint64_t)0x510E527FADE682D1U, (uint64_t)0x9B05688C2B3E6C1FU,
     (uint64_t)0x1F83D9ABFB41BD6BU, (uint64_t)0x5BE0CD19137E2179U
   };
-
-static const
-uint32_t
-Hacl_Impl_Blake2_Constants_rTable_S[4U] =
-  { (uint32_t)16U, (uint32_t)12U, (uint32_t)8U, (uint32_t)7U };
-
-static const
-uint32_t
-Hacl_Impl_Blake2_Constants_rTable_B[4U] =
-  { (uint32_t)32U, (uint32_t)24U, (uint32_t)16U, (uint32_t)63U };
 
 #if defined(__cplusplus)
 }

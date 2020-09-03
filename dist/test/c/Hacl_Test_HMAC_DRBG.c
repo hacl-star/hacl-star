@@ -30,6 +30,8 @@
 #define SHA2_512 3
 #define SHA1 4
 #define MD5 5
+#define Blake2S 6
+#define Blake2B 7
 
 typedef uint8_t hash_alg;
 
@@ -608,38 +610,72 @@ update_last_512(
   update_multi_512(s, tmp, tmp_len / (uint32_t)128U);
 }
 
+typedef uint32_t *___uint32_t____;
+
 static void hash_256(uint8_t *input, uint32_t input_len, uint8_t *dst)
 {
   uint32_t
-  s[8U] =
+  scrut[8U] =
     {
       (uint32_t)0x6a09e667U, (uint32_t)0xbb67ae85U, (uint32_t)0x3c6ef372U, (uint32_t)0xa54ff53aU,
       (uint32_t)0x510e527fU, (uint32_t)0x9b05688cU, (uint32_t)0x1f83d9abU, (uint32_t)0x5be0cd19U
     };
-  uint32_t blocks_n = input_len / (uint32_t)64U;
-  uint32_t blocks_len = blocks_n * (uint32_t)64U;
-  uint8_t *blocks = input;
-  uint32_t rest_len = input_len - blocks_len;
-  uint8_t *rest = input + blocks_len;
+  uint32_t *s = scrut;
+  uint32_t blocks_n0 = input_len / (uint32_t)64U;
+  uint32_t blocks_n1;
+  if (input_len % (uint32_t)64U == (uint32_t)0U && blocks_n0 > (uint32_t)0U)
+  {
+    blocks_n1 = blocks_n0 - (uint32_t)1U;
+  }
+  else
+  {
+    blocks_n1 = blocks_n0;
+  }
+  uint32_t blocks_len0 = blocks_n1 * (uint32_t)64U;
+  uint8_t *blocks0 = input;
+  uint32_t rest_len0 = input_len - blocks_len0;
+  uint8_t *rest0 = input + blocks_len0;
+  uint32_t blocks_n = blocks_n1;
+  uint32_t blocks_len = blocks_len0;
+  uint8_t *blocks = blocks0;
+  uint32_t rest_len = rest_len0;
+  uint8_t *rest = rest0;
   update_multi_256(s, blocks, blocks_n);
   update_last_256(s, (uint64_t)blocks_len, rest, rest_len);
   finish_256(s, dst);
 }
 
+typedef uint64_t *___uint64_t____;
+
 static void hash_384(uint8_t *input, uint32_t input_len, uint8_t *dst)
 {
   uint64_t
-  s[8U] =
+  scrut[8U] =
     {
       (uint64_t)0xcbbb9d5dc1059ed8U, (uint64_t)0x629a292a367cd507U, (uint64_t)0x9159015a3070dd17U,
       (uint64_t)0x152fecd8f70e5939U, (uint64_t)0x67332667ffc00b31U, (uint64_t)0x8eb44a8768581511U,
       (uint64_t)0xdb0c2e0d64f98fa7U, (uint64_t)0x47b5481dbefa4fa4U
     };
-  uint32_t blocks_n = input_len / (uint32_t)128U;
-  uint32_t blocks_len = blocks_n * (uint32_t)128U;
-  uint8_t *blocks = input;
-  uint32_t rest_len = input_len - blocks_len;
-  uint8_t *rest = input + blocks_len;
+  uint64_t *s = scrut;
+  uint32_t blocks_n0 = input_len / (uint32_t)128U;
+  uint32_t blocks_n1;
+  if (input_len % (uint32_t)128U == (uint32_t)0U && blocks_n0 > (uint32_t)0U)
+  {
+    blocks_n1 = blocks_n0 - (uint32_t)1U;
+  }
+  else
+  {
+    blocks_n1 = blocks_n0;
+  }
+  uint32_t blocks_len0 = blocks_n1 * (uint32_t)128U;
+  uint8_t *blocks0 = input;
+  uint32_t rest_len0 = input_len - blocks_len0;
+  uint8_t *rest0 = input + blocks_len0;
+  uint32_t blocks_n = blocks_n1;
+  uint32_t blocks_len = blocks_len0;
+  uint8_t *blocks = blocks0;
+  uint32_t rest_len = rest_len0;
+  uint8_t *rest = rest0;
   update_multi_384(s, blocks, blocks_n);
   update_last_384(s, FStar_UInt128_uint64_to_uint128((uint64_t)blocks_len), rest, rest_len);
   finish_384(s, dst);
@@ -648,17 +684,32 @@ static void hash_384(uint8_t *input, uint32_t input_len, uint8_t *dst)
 static void hash_512(uint8_t *input, uint32_t input_len, uint8_t *dst)
 {
   uint64_t
-  s[8U] =
+  scrut[8U] =
     {
       (uint64_t)0x6a09e667f3bcc908U, (uint64_t)0xbb67ae8584caa73bU, (uint64_t)0x3c6ef372fe94f82bU,
       (uint64_t)0xa54ff53a5f1d36f1U, (uint64_t)0x510e527fade682d1U, (uint64_t)0x9b05688c2b3e6c1fU,
       (uint64_t)0x1f83d9abfb41bd6bU, (uint64_t)0x5be0cd19137e2179U
     };
-  uint32_t blocks_n = input_len / (uint32_t)128U;
-  uint32_t blocks_len = blocks_n * (uint32_t)128U;
-  uint8_t *blocks = input;
-  uint32_t rest_len = input_len - blocks_len;
-  uint8_t *rest = input + blocks_len;
+  uint64_t *s = scrut;
+  uint32_t blocks_n0 = input_len / (uint32_t)128U;
+  uint32_t blocks_n1;
+  if (input_len % (uint32_t)128U == (uint32_t)0U && blocks_n0 > (uint32_t)0U)
+  {
+    blocks_n1 = blocks_n0 - (uint32_t)1U;
+  }
+  else
+  {
+    blocks_n1 = blocks_n0;
+  }
+  uint32_t blocks_len0 = blocks_n1 * (uint32_t)128U;
+  uint8_t *blocks0 = input;
+  uint32_t rest_len0 = input_len - blocks_len0;
+  uint8_t *rest0 = input + blocks_len0;
+  uint32_t blocks_n = blocks_n1;
+  uint32_t blocks_len = blocks_len0;
+  uint8_t *blocks = blocks0;
+  uint32_t rest_len = rest_len0;
+  uint8_t *rest = rest0;
   update_multi_512(s, blocks, blocks_n);
   update_last_512(s, FStar_UInt128_uint64_to_uint128((uint64_t)blocks_len), rest, rest_len);
   finish_512(s, dst);
@@ -844,49 +895,37 @@ legacy_update_last(uint32_t *s, uint64_t prev_len, uint8_t *input, uint32_t inpu
 static void legacy_hash(uint8_t *input, uint32_t input_len, uint8_t *dst)
 {
   uint32_t
-  s[5U] =
+  scrut[5U] =
     {
       (uint32_t)0x67452301U, (uint32_t)0xefcdab89U, (uint32_t)0x98badcfeU, (uint32_t)0x10325476U,
       (uint32_t)0xc3d2e1f0U
     };
-  uint32_t blocks_n = input_len / (uint32_t)64U;
-  uint32_t blocks_len = blocks_n * (uint32_t)64U;
-  uint8_t *blocks = input;
-  uint32_t rest_len = input_len - blocks_len;
-  uint8_t *rest = input + blocks_len;
+  uint32_t *s = scrut;
+  uint32_t blocks_n0 = input_len / (uint32_t)64U;
+  uint32_t blocks_n1;
+  if (input_len % (uint32_t)64U == (uint32_t)0U && blocks_n0 > (uint32_t)0U)
+  {
+    blocks_n1 = blocks_n0 - (uint32_t)1U;
+  }
+  else
+  {
+    blocks_n1 = blocks_n0;
+  }
+  uint32_t blocks_len0 = blocks_n1 * (uint32_t)64U;
+  uint8_t *blocks0 = input;
+  uint32_t rest_len0 = input_len - blocks_len0;
+  uint8_t *rest0 = input + blocks_len0;
+  uint32_t blocks_n = blocks_n1;
+  uint32_t blocks_len = blocks_len0;
+  uint8_t *blocks = blocks0;
+  uint32_t rest_len = rest_len0;
+  uint8_t *rest = rest0;
   legacy_update_multi(s, blocks, blocks_n);
   legacy_update_last(s, (uint64_t)blocks_len, rest, rest_len);
   legacy_finish(s, dst);
 }
 
-extern void C_String_print(C_String_t uu____71);
-
-static bool is_supported_alg(hash_alg uu___0_6)
-{
-  switch (uu___0_6)
-  {
-    case SHA1:
-      {
-        return true;
-      }
-    case SHA2_256:
-      {
-        return true;
-      }
-    case SHA2_384:
-      {
-        return true;
-      }
-    case SHA2_512:
-      {
-        return true;
-      }
-    default:
-      {
-        return false;
-      }
-  }
-}
+extern void C_String_print(C_String_t uu___);
 
 static void
 legacy_compute_sha1(
@@ -938,20 +977,35 @@ legacy_compute_sha1(
     opad[i] = xi ^ yi;
   }
   uint32_t
-  s[5U] =
+  scrut[5U] =
     {
       (uint32_t)0x67452301U, (uint32_t)0xefcdab89U, (uint32_t)0x98badcfeU, (uint32_t)0x10325476U,
       (uint32_t)0xc3d2e1f0U
     };
-  legacy_init(s);
-  legacy_update_multi(s, ipad, (uint32_t)1U);
-  legacy_update_last(s, (uint64_t)(uint32_t)64U, data, data_len);
+  uint32_t *s = scrut;
   uint8_t *dst1 = ipad;
+  legacy_init(s);
+  if (data_len == (uint32_t)0U)
+  {
+    legacy_update_last(s, (uint64_t)0U, ipad, (uint32_t)64U);
+  }
+  else
+  {
+    legacy_update_multi(s, ipad, (uint32_t)1U);
+    legacy_update_last(s, (uint64_t)(uint32_t)64U, data, data_len);
+  }
   legacy_finish(s, dst1);
   uint8_t *hash1 = ipad;
   legacy_init(s);
-  legacy_update_multi(s, opad, (uint32_t)1U);
-  legacy_update_last(s, (uint64_t)(uint32_t)64U, hash1, (uint32_t)20U);
+  if ((uint32_t)20U == (uint32_t)0U)
+  {
+    legacy_update_last(s, (uint64_t)0U, opad, (uint32_t)64U);
+  }
+  else
+  {
+    legacy_update_multi(s, opad, (uint32_t)1U);
+    legacy_update_last(s, (uint64_t)(uint32_t)64U, hash1, (uint32_t)20U);
+  }
   legacy_finish(s, dst);
 }
 
@@ -1005,20 +1059,35 @@ compute_sha2_256(
     opad[i] = xi ^ yi;
   }
   uint32_t
-  s[8U] =
+  scrut[8U] =
     {
       (uint32_t)0x6a09e667U, (uint32_t)0xbb67ae85U, (uint32_t)0x3c6ef372U, (uint32_t)0xa54ff53aU,
       (uint32_t)0x510e527fU, (uint32_t)0x9b05688cU, (uint32_t)0x1f83d9abU, (uint32_t)0x5be0cd19U
     };
-  init_256(s);
-  update_multi_256(s, ipad, (uint32_t)1U);
-  update_last_256(s, (uint64_t)(uint32_t)64U, data, data_len);
+  uint32_t *s = scrut;
   uint8_t *dst1 = ipad;
+  init_256(s);
+  if (data_len == (uint32_t)0U)
+  {
+    update_last_256(s, (uint64_t)0U, ipad, (uint32_t)64U);
+  }
+  else
+  {
+    update_multi_256(s, ipad, (uint32_t)1U);
+    update_last_256(s, (uint64_t)(uint32_t)64U, data, data_len);
+  }
   finish_256(s, dst1);
   uint8_t *hash1 = ipad;
   init_256(s);
-  update_multi_256(s, opad, (uint32_t)1U);
-  update_last_256(s, (uint64_t)(uint32_t)64U, hash1, (uint32_t)32U);
+  if ((uint32_t)32U == (uint32_t)0U)
+  {
+    update_last_256(s, (uint64_t)0U, opad, (uint32_t)64U);
+  }
+  else
+  {
+    update_multi_256(s, opad, (uint32_t)1U);
+    update_last_256(s, (uint64_t)(uint32_t)64U, hash1, (uint32_t)32U);
+  }
   finish_256(s, dst);
 }
 
@@ -1072,24 +1141,39 @@ compute_sha2_384(
     opad[i] = xi ^ yi;
   }
   uint64_t
-  s[8U] =
+  scrut[8U] =
     {
       (uint64_t)0xcbbb9d5dc1059ed8U, (uint64_t)0x629a292a367cd507U, (uint64_t)0x9159015a3070dd17U,
       (uint64_t)0x152fecd8f70e5939U, (uint64_t)0x67332667ffc00b31U, (uint64_t)0x8eb44a8768581511U,
       (uint64_t)0xdb0c2e0d64f98fa7U, (uint64_t)0x47b5481dbefa4fa4U
     };
-  init_384(s);
-  update_multi_384(s, ipad, (uint32_t)1U);
-  update_last_384(s, FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U), data, data_len);
+  uint64_t *s = scrut;
   uint8_t *dst1 = ipad;
+  init_384(s);
+  if (data_len == (uint32_t)0U)
+  {
+    update_last_384(s, FStar_UInt128_uint64_to_uint128((uint64_t)0U), ipad, (uint32_t)128U);
+  }
+  else
+  {
+    update_multi_384(s, ipad, (uint32_t)1U);
+    update_last_384(s, FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U), data, data_len);
+  }
   finish_384(s, dst1);
   uint8_t *hash1 = ipad;
   init_384(s);
-  update_multi_384(s, opad, (uint32_t)1U);
-  update_last_384(s,
-    FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U),
-    hash1,
-    (uint32_t)48U);
+  if ((uint32_t)48U == (uint32_t)0U)
+  {
+    update_last_384(s, FStar_UInt128_uint64_to_uint128((uint64_t)0U), opad, (uint32_t)128U);
+  }
+  else
+  {
+    update_multi_384(s, opad, (uint32_t)1U);
+    update_last_384(s,
+      FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U),
+      hash1,
+      (uint32_t)48U);
+  }
   finish_384(s, dst);
 }
 
@@ -1143,25 +1227,67 @@ compute_sha2_512(
     opad[i] = xi ^ yi;
   }
   uint64_t
-  s[8U] =
+  scrut[8U] =
     {
       (uint64_t)0x6a09e667f3bcc908U, (uint64_t)0xbb67ae8584caa73bU, (uint64_t)0x3c6ef372fe94f82bU,
       (uint64_t)0xa54ff53a5f1d36f1U, (uint64_t)0x510e527fade682d1U, (uint64_t)0x9b05688c2b3e6c1fU,
       (uint64_t)0x1f83d9abfb41bd6bU, (uint64_t)0x5be0cd19137e2179U
     };
-  init_512(s);
-  update_multi_512(s, ipad, (uint32_t)1U);
-  update_last_512(s, FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U), data, data_len);
+  uint64_t *s = scrut;
   uint8_t *dst1 = ipad;
+  init_512(s);
+  if (data_len == (uint32_t)0U)
+  {
+    update_last_512(s, FStar_UInt128_uint64_to_uint128((uint64_t)0U), ipad, (uint32_t)128U);
+  }
+  else
+  {
+    update_multi_512(s, ipad, (uint32_t)1U);
+    update_last_512(s, FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U), data, data_len);
+  }
   finish_512(s, dst1);
   uint8_t *hash1 = ipad;
   init_512(s);
-  update_multi_512(s, opad, (uint32_t)1U);
-  update_last_512(s,
-    FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U),
-    hash1,
-    (uint32_t)64U);
+  if ((uint32_t)64U == (uint32_t)0U)
+  {
+    update_last_512(s, FStar_UInt128_uint64_to_uint128((uint64_t)0U), opad, (uint32_t)128U);
+  }
+  else
+  {
+    update_multi_512(s, opad, (uint32_t)1U);
+    update_last_512(s,
+      FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U),
+      hash1,
+      (uint32_t)64U);
+  }
   finish_512(s, dst);
+}
+
+static bool is_supported_alg(hash_alg uu___)
+{
+  switch (uu___)
+  {
+    case SHA1:
+      {
+        return true;
+      }
+    case SHA2_256:
+      {
+        return true;
+      }
+    case SHA2_384:
+      {
+        return true;
+      }
+    case SHA2_512:
+      {
+        return true;
+      }
+    default:
+      {
+        return false;
+      }
+  }
 }
 
 static uint32_t reseed_interval = (uint32_t)1024U;
@@ -2132,9 +2258,9 @@ generate(
   }
 }
 
-extern void LowStar_Printf_print_string(Prims_string uu____39);
+extern void LowStar_Printf_print_string(Prims_string uu___);
 
-extern void LowStar_Printf_print_u32(uint32_t uu____71);
+extern void LowStar_Printf_print_u32(uint32_t uu___);
 
 extern void LowStar_Printf_print_lmbuffer_u8(uint32_t l, uint8_t *r);
 

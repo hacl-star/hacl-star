@@ -21,19 +21,21 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Vale_H
+#define __Vale_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include <stdbool.h>
 
 
-#ifndef __Vale_H
-#define __Vale_H
 
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 extern uint64_t add_scalar_e(uint64_t *x0, uint64_t *x1, uint64_t x2);
 

@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_Lib_H
+#define __Hacl_Lib_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
@@ -28,13 +36,7 @@
 #include "kremlin/internal/target.h"
 
 
-#ifndef __Hacl_Lib_H
-#define __Hacl_Lib_H
 
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 extern void Lib_Memzero_clear_words_u16(u32 nwords, u16 *b);
 

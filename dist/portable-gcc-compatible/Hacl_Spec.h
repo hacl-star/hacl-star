@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_Spec_H
+#define __Hacl_Spec_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -29,13 +37,7 @@
 #include "kremlin/internal/target.h"
 
 
-#ifndef __Hacl_Spec_H
-#define __Hacl_Spec_H
 
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 /* SNIPPET_START: Spec_Hash_Definitions_hash_alg */
 
@@ -45,6 +47,8 @@ extern "C" {
 #define Spec_Hash_Definitions_SHA2_512 3
 #define Spec_Hash_Definitions_SHA1 4
 #define Spec_Hash_Definitions_MD5 5
+#define Spec_Hash_Definitions_Blake2S 6
+#define Spec_Hash_Definitions_Blake2B 7
 
 /* SNIPPET_END: Spec_Hash_Definitions_hash_alg */
 

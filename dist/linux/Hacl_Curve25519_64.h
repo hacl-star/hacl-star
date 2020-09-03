@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_Curve25519_64_H
+#define __Hacl_Curve25519_64_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "libintvector.h"
 #include "curve25519-inline.h"
 #include "kremlin/internal/types.h"
@@ -29,13 +37,7 @@
 #include "kremlin/internal/target.h"
 
 
-#ifndef __Hacl_Curve25519_64_H
-#define __Hacl_Curve25519_64_H
-
 #include "Hacl_Kremlib.h"
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 void Hacl_Curve25519_64_scalarmult(u8 *out, u8 *priv, u8 *pub);
 

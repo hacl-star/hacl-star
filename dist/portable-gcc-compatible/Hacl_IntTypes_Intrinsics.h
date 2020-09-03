@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_IntTypes_Intrinsics_H
+#define __Hacl_IntTypes_Intrinsics_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -29,13 +37,7 @@
 #include "kremlin/internal/target.h"
 
 
-#ifndef __Hacl_IntTypes_Intrinsics_H
-#define __Hacl_IntTypes_Intrinsics_H
-
 #include "Hacl_Kremlib.h"
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 /* SNIPPET_START: Hacl_IntTypes_Intrinsics_add_carry_u64 */
 

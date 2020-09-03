@@ -21,19 +21,21 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_Poly1305_32_H
+#define __Hacl_Poly1305_32_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include <stdbool.h>
 
 
-#ifndef __Hacl_Poly1305_32_H
-#define __Hacl_Poly1305_32_H
-
 #include "Hacl_Kremlib.h"
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 extern uint32_t Hacl_Poly1305_32_blocklen;
 

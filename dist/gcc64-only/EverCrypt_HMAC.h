@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __EverCrypt_HMAC_H
+#define __EverCrypt_HMAC_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -29,16 +37,12 @@
 #include "kremlin/internal/target.h"
 
 
-#ifndef __EverCrypt_HMAC_H
-#define __EverCrypt_HMAC_H
-
 #include "Hacl_Kremlib.h"
+#include "Hacl_HMAC.h"
+#include "Hacl_Impl_Blake2_Constants.h"
 #include "Hacl_Hash.h"
 #include "Hacl_Spec.h"
 #include "EverCrypt_Hash.h"
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 void
 EverCrypt_HMAC_compute_sha1(
@@ -76,7 +80,25 @@ EverCrypt_HMAC_compute_sha2_512(
   uint32_t data_len
 );
 
-bool EverCrypt_HMAC_is_supported_alg(Spec_Hash_Definitions_hash_alg uu___0_2480);
+void
+EverCrypt_HMAC_compute_blake2s(
+  uint8_t *dst,
+  uint8_t *key,
+  uint32_t key_len,
+  uint8_t *data,
+  uint32_t data_len
+);
+
+void
+EverCrypt_HMAC_compute_blake2b(
+  uint8_t *dst,
+  uint8_t *key,
+  uint32_t key_len,
+  uint8_t *data,
+  uint32_t data_len
+);
+
+bool EverCrypt_HMAC_is_supported_alg(Spec_Hash_Definitions_hash_alg uu___);
 
 typedef Spec_Hash_Definitions_hash_alg EverCrypt_HMAC_supported_alg;
 

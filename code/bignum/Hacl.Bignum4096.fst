@@ -22,30 +22,30 @@ let _ = assert_norm (4096ul = 64ul `FStar.UInt32.mul` 64ul)
 /// we normalize pure terms.
 
 
-let add = Hacl.Bignum.Addition.bn_add_eq_len n
+let add = Hacl.Bignum.Addition.bn_add_eq_len n_limbs
 
-let sub = Hacl.Bignum.Addition.bn_sub_eq_len n
+let sub = Hacl.Bignum.Addition.bn_sub_eq_len n_limbs
 
-let mul (a b: lbignum n) : BN.bn_karatsuba_mul_st a b =
-  //BN.bn_karatsuba_mul n a b
-  BN.bn_mul n a n b
+let mul (a b: lbignum n_limbs) : BN.bn_karatsuba_mul_st a b =
+  //BN.bn_karatsuba_mul n_limbs a b
+  BN.bn_mul n_limbs a n_limbs b
 
-let bit_set: BN.bn_set_ith_bit_st n =
-  BN.(norm [ zeta; primops; iota; delta_only [ `%bn_set_ith_bit ] ] (bn_set_ith_bit n))
+let bit_set: BN.bn_set_ith_bit_st n_limbs =
+  BN.(norm [ zeta; primops; iota; delta_only [ `%bn_set_ith_bit ] ] (bn_set_ith_bit n_limbs))
 
-let add_mod_n: BN.bn_add_mod_n_st n =
-  BN.bn_add_mod_n n
+let add_mod_n: BN.bn_add_mod_n_st n_limbs =
+  BN.bn_add_mod_n n_limbs
 
-let sub_mask: BN.bn_sub_mask_st n =
-  BN.bn_sub_mask n
+let sub_mask: BN.bn_sub_mask_st n_limbs =
+  BN.bn_sub_mask n_limbs
 
-let sqr (a: lbignum n): BN.bn_karatsuba_sqr_st a =
-  //BN.bn_karatsuba_sqr n a
-  //BN.bn_sqr n a
-  BN.bn_mul n a n a
+let sqr (a: lbignum n_limbs): BN.bn_karatsuba_sqr_st a =
+  //BN.bn_karatsuba_sqr n_limbs a
+  //BN.bn_sqr n_limbs a
+  BN.bn_mul n_limbs a n_limbs a
 
 inline_for_extraction noextract
-instance bn_inst: BN.bn n = {
+instance bn_inst: BN.bn n_limbs = {
   BN.bit_set;
   BN.add_mod_n;
   BN.mul;
@@ -53,26 +53,26 @@ instance bn_inst: BN.bn n = {
   BN.sub_mask
 }
 
-let precomp: BM.precomp_r2_mod_n_st n =
-  BM.precomp_r2_mod_n #n #bn_inst
+let precomp: BM.precomp_r2_mod_n_st n_limbs =
+  BM.precomp_r2_mod_n #n_limbs #bn_inst
 
-let reduction: BM.mont_reduction_st n =
-  BM.mont_reduction n
+let reduction: BM.mont_reduction_st n_limbs =
+  BM.mont_reduction n_limbs
 
-let to: BM.to_mont_st n =
-  BM.to_mont #n #bn_inst reduction
+let to: BM.to_mont_st n_limbs =
+  BM.to_mont #n_limbs #bn_inst reduction
 
-let from: BM.from_mont_st n =
-  BM.from_mont #n reduction
+let from: BM.from_mont_st n_limbs =
+  BM.from_mont #n_limbs reduction
 
-let mont_mul: BM.mont_mul_st n =
-  BM.mont_mul #n #bn_inst reduction
+let mont_mul: BM.mont_mul_st n_limbs =
+  BM.mont_mul #n_limbs #bn_inst reduction
 
-let mont_sqr: BM.mont_sqr_st n =
-  BM.mont_sqr #n #bn_inst reduction
+let mont_sqr: BM.mont_sqr_st n_limbs =
+  BM.mont_sqr #n_limbs #bn_inst reduction
 
 inline_for_extraction noextract
-instance mont_inst: BM.mont n = {
+instance mont_inst: BM.mont n_limbs = {
   BM.bn = FStar.Tactics.Typeclasses.solve;
   BM.precomp;
   BM.reduction;
@@ -82,20 +82,20 @@ instance mont_inst: BM.mont n = {
   BM.sqr = mont_sqr;
 }
 
-let mod_exp_loop: BE.bn_mod_exp_loop_st n =
-  norm [ zeta; primops; iota; delta_only [ `%BE.bn_mod_exp_loop ] ] (BE.bn_mod_exp_loop n #mont_inst)
+let mod_exp_loop: BE.bn_mod_exp_loop_st n_limbs =
+  norm [ zeta; primops; iota; delta_only [ `%BE.bn_mod_exp_loop ] ] (BE.bn_mod_exp_loop n_limbs #mont_inst)
 
 let mod_exp =
-  BE.mk_bn_mod_exp 4096ul n #mont_inst mod_exp_loop
+  BE.mk_bn_mod_exp 4096ul n_limbs #mont_inst mod_exp_loop
 
-let mod_exp_mont_ladder_loop: BE.bn_mod_exp_mont_ladder_loop_st n =
-  norm [ zeta; primops; iota; delta_only [ `%BE.bn_mod_exp_mont_ladder_loop ] ] (BE.bn_mod_exp_mont_ladder_loop n #mont_inst)
+let mod_exp_mont_ladder_loop: BE.bn_mod_exp_mont_ladder_loop_st n_limbs =
+  norm [ zeta; primops; iota; delta_only [ `%BE.bn_mod_exp_mont_ladder_loop ] ] (BE.bn_mod_exp_mont_ladder_loop n_limbs #mont_inst)
 
 let mod_exp_mont_ladder =
-  BE.mk_bn_mod_exp_mont_ladder 4096ul n #mont_inst mod_exp_mont_ladder_loop
+  BE.mk_bn_mod_exp_mont_ladder 4096ul n_limbs #mont_inst mod_exp_mont_ladder_loop
 
 let new_bn_from_bytes_be = Hacl.Bignum.Convert.new_bn_from_bytes_be
 
-let bn_to_bytes_be = Hacl.Bignum.Convert.mk_bn_to_bytes_be 512ul
+let bn_to_bytes_be = Hacl.Bignum.Convert.mk_bn_to_bytes_be n_bytes
 
-let lt_mask = Hacl.Bignum.mk_bn_lt_mask n
+let lt_mask = Hacl.Bignum.mk_bn_lt_mask n_limbs

@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __EverCrypt_Curve25519_H
+#define __EverCrypt_Curve25519_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -29,15 +37,9 @@
 #include "kremlin/internal/target.h"
 
 
-#ifndef __EverCrypt_Curve25519_H
-#define __EverCrypt_Curve25519_H
-
 #include "EverCrypt_AutoConfig2.h"
 #include "Hacl_Curve25519_64.h"
 #include "Hacl_Curve25519_51.h"
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 void EverCrypt_Curve25519_secret_to_public(uint8_t *pub, uint8_t *priv);
 

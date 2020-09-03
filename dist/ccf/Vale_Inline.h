@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Vale_Inline_H
+#define __Vale_Inline_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
@@ -28,13 +36,7 @@
 #include "kremlin/internal/target.h"
 
 
-#ifndef __Vale_Inline_H
-#define __Vale_Inline_H
 
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 static inline void cswap2(uint64_t bit, uint64_t *p0, uint64_t *p1);
 

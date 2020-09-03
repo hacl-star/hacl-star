@@ -77,7 +77,7 @@ EverCrypt_DRBG_state_s;
 
 bool
 EverCrypt_DRBG_uu___is_SHA1_s(
-  Spec_Hash_Definitions_hash_alg uu____121,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_DRBG_state_s projectee
 )
 {
@@ -90,7 +90,7 @@ EverCrypt_DRBG_uu___is_SHA1_s(
 
 Hacl_HMAC_DRBG_state
 EverCrypt_DRBG___proj__SHA1_s__item___0(
-  Spec_Hash_Definitions_hash_alg uu____146,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_DRBG_state_s projectee
 )
 {
@@ -107,7 +107,7 @@ EverCrypt_DRBG___proj__SHA1_s__item___0(
 
 bool
 EverCrypt_DRBG_uu___is_SHA2_256_s(
-  Spec_Hash_Definitions_hash_alg uu____167,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_DRBG_state_s projectee
 )
 {
@@ -120,7 +120,7 @@ EverCrypt_DRBG_uu___is_SHA2_256_s(
 
 Hacl_HMAC_DRBG_state
 EverCrypt_DRBG___proj__SHA2_256_s__item___0(
-  Spec_Hash_Definitions_hash_alg uu____192,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_DRBG_state_s projectee
 )
 {
@@ -137,7 +137,7 @@ EverCrypt_DRBG___proj__SHA2_256_s__item___0(
 
 bool
 EverCrypt_DRBG_uu___is_SHA2_384_s(
-  Spec_Hash_Definitions_hash_alg uu____213,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_DRBG_state_s projectee
 )
 {
@@ -150,7 +150,7 @@ EverCrypt_DRBG_uu___is_SHA2_384_s(
 
 Hacl_HMAC_DRBG_state
 EverCrypt_DRBG___proj__SHA2_384_s__item___0(
-  Spec_Hash_Definitions_hash_alg uu____238,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_DRBG_state_s projectee
 )
 {
@@ -167,7 +167,7 @@ EverCrypt_DRBG___proj__SHA2_384_s__item___0(
 
 bool
 EverCrypt_DRBG_uu___is_SHA2_512_s(
-  Spec_Hash_Definitions_hash_alg uu____259,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_DRBG_state_s projectee
 )
 {
@@ -180,7 +180,7 @@ EverCrypt_DRBG_uu___is_SHA2_512_s(
 
 Hacl_HMAC_DRBG_state
 EverCrypt_DRBG___proj__SHA2_512_s__item___0(
-  Spec_Hash_Definitions_hash_alg uu____284,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_DRBG_state_s projectee
 )
 {

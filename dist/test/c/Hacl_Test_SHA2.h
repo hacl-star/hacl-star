@@ -21,11 +21,11 @@
  * SOFTWARE.
  */
 
-#include "kremlib.h"
-
 
 #ifndef __Hacl_Test_SHA2_H
 #define __Hacl_Test_SHA2_H
+#include "kremlib.h"
+
 
 
 
@@ -42,6 +42,7 @@ static inline uint64_t FStar_UInt128_uint128_to_uint64(FStar_UInt128_uint128 a);
 static inline void store128_be(uint8_t *x0, FStar_UInt128_uint128 x1);
 
 exit_code main();
+
 
 #define __Hacl_Test_SHA2_H_DEFINED
 #endif

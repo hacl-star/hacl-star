@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __EverCrypt_OpenSSL_H
+#define __EverCrypt_OpenSSL_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -29,13 +37,7 @@
 #include "kremlin/internal/target.h"
 
 
-#ifndef __EverCrypt_OpenSSL_H
-#define __EverCrypt_OpenSSL_H
 
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
 extern uint32_t EverCrypt_OpenSSL_random_init();
 

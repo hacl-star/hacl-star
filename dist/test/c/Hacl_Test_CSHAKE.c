@@ -30,7 +30,7 @@
 
 typedef uint8_t buftype;
 
-extern void C_String_print(C_String_t uu____71);
+extern void C_String_print(C_String_t uu___);
 
 extern void Hacl_Impl_SHA3_state_permute(uint64_t *s);
 
