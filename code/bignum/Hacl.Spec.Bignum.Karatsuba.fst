@@ -399,7 +399,7 @@ val bn_middle_karatsuba_carry_bound:
   -> res:lbignum aLen
   -> c:uint64 -> Lemma
   (requires bn_v res + v c * pow2 (64 * aLen) == bn_v a0 * bn_v b1 + bn_v a1 * bn_v b0)
-  (ensures  0 <= v c /\ v c <= 1)
+  (ensures  v c <= 1)
 
 let bn_middle_karatsuba_carry_bound aLen a0 a1 b0 b1 res c =
   let aLen2 = aLen / 2 in
@@ -408,7 +408,6 @@ let bn_middle_karatsuba_carry_bound aLen a0 a1 b0 b1 res c =
   bn_eval_bound a1 aLen2;
   bn_eval_bound b0 aLen2;
   bn_eval_bound b1 aLen2;
-  bn_eval_bound res aLen;
 
   calc (<) {
     bn_v a0 * bn_v b1 + bn_v a1 * bn_v b0;
@@ -418,7 +417,11 @@ let bn_middle_karatsuba_carry_bound aLen a0 a1 b0 b1 res c =
     p * p + p * p;
     (==) { K.lemma_double_p aLen }
     pow2 (64 * aLen) + pow2 (64 * aLen);
-    }
+    };
+
+  bn_eval_bound res aLen;
+  assert (bn_v res + v c * pow2 (64 * aLen) < pow2 (64 * aLen) + pow2 (64 * aLen));
+  assert (v c <= 1)
 
 
 val bn_karatsuba_no_last_carry:
