@@ -1,5 +1,5 @@
 [
-  "0Z\u0007°9\n“D÷,ž\u001e%I[\u0002",
+  "^\"\u0014ú\u0010jªôÖ°:‹\u000b\u0007ãž",
   [
     [
       "Hacl.Spec.Exponentiation.Lemmas.lemma_mul_ass3",
@@ -11,7 +11,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "25b89a206afe3bee31a19eb736b059d6"
+      "4c27eb6279f4794e4f888732c28728ab"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.lemma_mul_ass4",
@@ -23,7 +23,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "f03546bfd032744e85c91e31f736953a"
+      "59fc90281a8603ee3f55f4f941787732"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.lemma_mul_ass5_aux",
@@ -32,7 +32,7 @@
       0,
       [ "@query" ],
       0,
-      "882c47d7df090331e19715d61082068d"
+      "82eeb77199c5cf7368babb480e095ab2"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.lemma_mul_ass5",
@@ -41,10 +41,10 @@
       0,
       [ "@query" ],
       0,
-      "13fd575c7c5e1fdbc5287e3e7c934738"
+      "d8eb81302ab434b0f95e5133a8f73776"
     ],
     [
-      "Hacl.Spec.Exponentiation.Lemmas.lemma_mod_mul_distr_aux",
+      "Hacl.Spec.Exponentiation.Lemmas.lemma_mod_mul_distr3",
       1,
       0,
       0,
@@ -53,10 +53,10 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "fe5b9cb9dbb9169485f99c5fe4037eb0"
+      "09354a7a402c7549b6c2254fee0552da"
     ],
     [
-      "Hacl.Spec.Exponentiation.Lemmas.lemma_mod_mul_distr_aux",
+      "Hacl.Spec.Exponentiation.Lemmas.lemma_mod_mul_distr3",
       2,
       0,
       0,
@@ -65,7 +65,32 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "75cb2bb1d7e83343bca77f616ee6e6c0"
+      "d0acb820849f807ac0f15b9804e2f95f"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.lemma_mod_mul_swap_aux",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "b0a463df1f688d6fd3d4331181b1b142"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.lemma_mod_mul_swap_aux",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "int_inversion", "primitive_Prims.op_Multiply",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "cb19f0fa402d630f6156171292a810da"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.lemma_b_mod_pow2i",
@@ -79,7 +104,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "c8dc413d20d7ae976ef8a2218b6871bc"
+      "c321e0f35e2605ee4cbe366d1ec7d2f6"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.lemma_b_mod_pow2i",
@@ -93,7 +118,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "c90d77b514a5109250639ea489303cd2"
+      "4254f18326fa6a200a2847f0f7ee22c8"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.lemma_b_div_pow2i",
@@ -109,7 +134,7 @@
         "refinement_interpretation_Tm_refine_7e0b9b2dbca36eab00de093c1b701c6d"
       ],
       0,
-      "a8a24a2b4e354cecbe0b597aad685e4a"
+      "ac891d74a9ce2b8e5440b3e5291067e7"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.lemma_b_div_pow2i",
@@ -125,7 +150,7 @@
         "refinement_interpretation_Tm_refine_7e0b9b2dbca36eab00de093c1b701c6d"
       ],
       0,
-      "d64d784c7c23ae93f598be197e04d4c7"
+      "7b3816a2d1180d50ef2d69c2169000fa"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.exp_rl_f",
@@ -138,7 +163,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "8b230b512a24c32446ed69a1d2a91820"
+      "d37584f129ad800620e5d7dd50d9b969"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.exp_rl_lemma_loop",
@@ -155,7 +180,7 @@
         "refinement_interpretation_Tm_refine_baba3c4ff195e8afc82d572a0bec0709"
       ],
       0,
-      "961a47aea738d145ce0d19c619b82912"
+      "475b8c7256c51536f64a71882dafa292"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.exp_rl_lemma_loop",
@@ -170,7 +195,7 @@
         "refinement_interpretation_Tm_refine_7e0b9b2dbca36eab00de093c1b701c6d"
       ],
       0,
-      "898b225e7d8829b904523eb69e5d7b3a"
+      "c3579ce9a0c5c89a477ab6a74961cd71"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.exp_rl_lemma_loop",
@@ -204,7 +229,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "b5e214d37d45dc5919ee0de2aa6cfbd4"
+      "d2238fe69d0731ae218b27c59c4c0a98"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.exp_rl_lemma",
@@ -225,7 +250,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "d8a678056668e82f2569d609b3b7be74"
+      "4be680aa4c9b1ebd9753344db49f5faf"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.exp_lr_f",
@@ -241,7 +266,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "9c20fac888d2e7a83ea49ca24a7da18f"
+      "d5ebefc77a60aaa9cd6aa5a41d79246c"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.exp_lr_lemma_step0",
@@ -259,7 +284,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "64ec2d97531bba58ac08b554f30d6e1d"
+      "cbfbee427e0abfc843ed713ec6bae6e0"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.exp_lr_lemma_step0",
@@ -278,7 +303,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "3bf08e344e5aae371c4a06aa2be97d86"
+      "49a57e88612b39ffd715b81fae13e383"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.exp_lr_lemma_step1",
@@ -296,7 +321,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "6cbe4a7859cebd78971d4b78f79f9849"
+      "e83e82a89ddd33ac931453ddccdba108"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.exp_lr_lemma_step1",
@@ -315,7 +340,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "f6c57d424425743296ae1a6748fe7047"
+      "be591e284aaa6e2970996ecab65c3808"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.exp_lr_lemma_step",
@@ -334,7 +359,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "63961f831e5c6e4403f6a5ec85bdb680"
+      "7eff6762f8a22dd5b0d9cebd5fc64e5c"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.exp_lr_lemma_step",
@@ -358,7 +383,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "bbd6c284d7cb323f13d694aa95de491e"
+      "3de0291f5bf80750763802bbb91f4dad"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.exp_lr_lemma_loop",
@@ -375,7 +400,7 @@
         "refinement_interpretation_Tm_refine_baba3c4ff195e8afc82d572a0bec0709"
       ],
       0,
-      "bc35996c2738354904a60394866742a7"
+      "78c020211632d9908f2450d8036c593a"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.exp_lr_lemma_loop",
@@ -392,7 +417,7 @@
         "refinement_interpretation_Tm_refine_baba3c4ff195e8afc82d572a0bec0709"
       ],
       0,
-      "c4215527c671f2a1c9fccf83c80bf850"
+      "3e4ce392a1dba41de9302713f077c9a9"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.exp_lr_lemma_loop",
@@ -423,7 +448,7 @@
         "typing_Prims.pow2", "well-founded-ordering-on-nat"
       ],
       0,
-      "41c2644f1725a8c36749c10112cbf1a8"
+      "164660d4fde55adcab296475a6fc46c7"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.exp_lr_lemma",
@@ -445,7 +470,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "f31b3ac21d104e81d65699e429f7c078"
+      "99ee8562df3d840c2130fa46f76b66c1"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.exp_mont_ladder_f",
@@ -461,7 +486,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "0a1af6239cf97491bee04c59ef523a0d"
+      "48411f2fba33c792c51c36d69c0df903"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.exp_mont_ladder_lemma_step",
@@ -480,7 +505,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "9040fd7f5c9c0245d430f6d9986eb5a5"
+      "5c0ad43353cd263421a413aa8ebc36fa"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.exp_mont_ladder_lemma_step",
@@ -509,7 +534,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "7d496a589f22cf06c1c3124b2f7b17e3"
+      "8dd084c6e1f167e1e5ebf2bc7ebd3de3"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.exp_mont_ladder_lemma_loop",
@@ -526,7 +551,7 @@
         "refinement_interpretation_Tm_refine_baba3c4ff195e8afc82d572a0bec0709"
       ],
       0,
-      "d4460a23fb1992c97f4701fe4b5b46cc"
+      "eb85c19873e1b3cc5e5bb0bbfec698f6"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.exp_mont_ladder_lemma_loop",
@@ -538,12 +563,12 @@
         "equation_Prims.pos", "primitive_Prims.op_Division",
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_734f5424b32589f11ce5622d7b5b4d2d",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "refinement_interpretation_Tm_refine_baba3c4ff195e8afc82d572a0bec0709",
-        "refinement_interpretation_Tm_refine_c3bcd0fd8ed699aed515edf335607f9d"
+        "refinement_interpretation_Tm_refine_baba3c4ff195e8afc82d572a0bec0709"
       ],
       0,
-      "a960bcd592eacd41b3918f118bf93feb"
+      "fcc5602bfa1a03d621de4ae477fe5b49"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.exp_mont_ladder_lemma_loop",
@@ -551,14 +576,15 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query",
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Lib.NatMod.pow.fuel_instrumented",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "binder_x_317b05b122105a85b71fc97d2c3dcb72_4",
-        "binder_x_41fb25fbfc63988eb478454895242d90_2",
-        "binder_x_a303b52fd7fd596a26f8e990df986fa5_5",
-        "binder_x_b649ea689afe8a093dc28339ac24b4f5_3",
+        "binder_x_00e997aa27fb166c8a55d86dccd70865_4",
+        "binder_x_a975012d55cd0a5ce0f68b79b8b48718_3",
+        "binder_x_b649ea689afe8a093dc28339ac24b4f5_2",
         "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_0",
-        "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_1",
+        "binder_x_d4bca0c4915c238b6addaedcb52016ab_1",
         "equality_tok_Prims.LexTop@tok", "equation_Prims.nat",
         "equation_Prims.pos",
         "function_token_typing_Prims.__cache_version_number__",
@@ -569,16 +595,16 @@
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
-        "refinement_interpretation_Tm_refine_256b77e8b0d80b09358cd5ae0178f377",
+        "refinement_interpretation_Tm_refine_00bcd8319bec077649985b5de4f97724",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_5d8689c3031a6af8b5491cc44c84ab43",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_7e51825bf349a1008f4275a12ea7fa8b",
         "refinement_interpretation_Tm_refine_929707e04741f111228efe84f59c7094",
-        "refinement_interpretation_Tm_refine_df6822e98d84d8b92883c601f077a0b4",
-        "well-founded-ordering-on-nat"
+        "refinement_interpretation_Tm_refine_efc7313a418a482fe2c110ba0916c79a",
+        "typing_Prims.pow2", "well-founded-ordering-on-nat"
       ],
       0,
-      "d7fbf13d0b09e7e11394350579ccc49f"
+      "dc60b34c9b322fbc4b3c3311bba0b4d2"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.exp_mont_ladder_lemma",
@@ -601,7 +627,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "37dc40ece5df2e8242d35b1bfe891388"
+      "3319a1a495e88ba855e8365743ded4fe"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.exp_mont_ladder_swap2_f",
@@ -621,7 +647,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "64882af35ac371874ab9800cde56ca18"
+      "65879c96bd982c12a6be51fe3fcb7ead"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.exp_mont_ladder_swap2_lemma_loop",
@@ -634,7 +660,7 @@
         "refinement_interpretation_Tm_refine_7e0b9b2dbca36eab00de093c1b701c6d"
       ],
       0,
-      "9b8bc5eba6c0f997fcc322baf31f5c0e"
+      "613299826604548bab109f8e13c90e83"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.exp_mont_ladder_swap2_lemma_loop",
@@ -644,14 +670,14 @@
       [
         "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
         "equation_Prims.pos", "int_inversion",
-        "refinement_interpretation_Tm_refine_4c51f5dba6fc8e13c7665fd120dc45a5",
+        "refinement_interpretation_Tm_refine_35c77a802c04d2ec9773eb6ab833f873",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_7e0b9b2dbca36eab00de093c1b701c6d",
         "refinement_interpretation_Tm_refine_baba3c4ff195e8afc82d572a0bec0709"
       ],
       0,
-      "e060a1e2269e003254eb331bbc9e6ad9"
+      "fd9e8582636a55d7de941b024ca5ca98"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.exp_mont_ladder_swap2_lemma_loop",
@@ -698,7 +724,7 @@
         "typing_Lib.LoopCombinators.repeati", "well-founded-ordering-on-nat"
       ],
       0,
-      "fdf31f60b8eb65fb2de1f63f0fb68a40"
+      "407223ba8d2d943bdf5cfd2298c7e888"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.exp_mont_ladder_swap2_lemma_loop",
@@ -707,7 +733,7 @@
       0,
       [ "@query" ],
       0,
-      "34b95411029c8136c6b1430834f537b1"
+      "9c69b6d61f6800e5380dcba9e4cb1e9c"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.exp_mont_ladder_swap2_lemma_loop",
@@ -716,7 +742,7 @@
       0,
       [ "@query" ],
       0,
-      "6115f8117fd96dd7f6f346a464075a9f"
+      "61eb3ea0d858cf96aa589e8dd4c20aa3"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.exp_mont_ladder_swap2_lemma",
@@ -728,7 +754,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "2b510f91a1b4066fc4e07065d47fdb95"
+      "c415463b53568610525c4f42f908df08"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.exp_mont_ladder_swap2_lemma",
@@ -737,7 +763,7 @@
       0,
       [ "@query" ],
       0,
-      "b91973fbcf76af55fc00b6bad71a78cf"
+      "3e084dafbbdee82400ae783689996f13"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.exp_mont_ladder_swap2_lemma",
@@ -752,7 +778,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "83c981423f8ab3f9c8ff03f7b024b285"
+      "08701c476ea3996722a4c715e682e6e3"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.exp_mont_ladder_swap_f",
@@ -769,7 +795,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "fdba192f6834806e98ae11ddb8b60859"
+      "243923c9f3b9c47d749ad3a0b2b2b7d0"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.exp_mont_ladder_swap_lemma_loop",
@@ -785,7 +811,7 @@
         "refinement_interpretation_Tm_refine_7e0b9b2dbca36eab00de093c1b701c6d"
       ],
       0,
-      "b72ff4d2a7964db6db28c9d5f9e24379"
+      "f9e5ac529622af474cfd5fcb1df4493f"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.exp_mont_ladder_swap_lemma_loop",
@@ -801,10 +827,10 @@
         "refinement_interpretation_Tm_refine_7e0b9b2dbca36eab00de093c1b701c6d",
         "refinement_interpretation_Tm_refine_aa64bce61191644d6312a5ed528e56d8",
         "refinement_interpretation_Tm_refine_baba3c4ff195e8afc82d572a0bec0709",
-        "refinement_interpretation_Tm_refine_f0ee0d578052accfbcf730ed726a7c8f"
+        "refinement_interpretation_Tm_refine_d65a567b43d88faadda751488566c052"
       ],
       0,
-      "681d8aee89f1f340f016e2e9675f3f04"
+      "1149084c6a96bbedcf6bcb03e15d0f1b"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.exp_mont_ladder_swap_lemma_loop",
@@ -856,7 +882,7 @@
         "typing_Lib.LoopCombinators.repeati", "well-founded-ordering-on-nat"
       ],
       0,
-      "772f25292b843c164ccdccca44af63a3"
+      "9670b8c5e293cb5f2aa793da8d55ce38"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.exp_mont_ladder_swap_lemma_loop",
@@ -865,7 +891,7 @@
       0,
       [ "@query" ],
       0,
-      "39da4480b630a4420ae267bb7f50d8ce"
+      "002708bae95d49b7afbb3fb9a460dfea"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.exp_mont_ladder_swap_lemma_loop",
@@ -877,7 +903,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "f814b2979b5b832a7faf708149d4e845"
+      "d48f0d25710642b76c5975bf05bc0885"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.exp_mont_ladder_swap_lemma_loop",
@@ -886,7 +912,7 @@
       0,
       [ "@query" ],
       0,
-      "a68bd3a57aea814d8fc92f0e84f85107"
+      "b6a301dd35cbea9b8cd73dc25b1fdf8c"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.exp_mont_ladder_swap_lemma_loop",
@@ -898,7 +924,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "f64e43e0efae6cb3d4b4054765061fe1"
+      "1798ff5f0f745774a84d600f6ea1e3dd"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.exp_mont_ladder_swap_lemma",
@@ -910,7 +936,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "b34160a198cdb2fc511670243612fef2"
+      "a5a10c06758bfbd0e98db087bdb5b2cd"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.exp_mont_ladder_swap_lemma",
@@ -919,7 +945,7 @@
       0,
       [ "@query" ],
       0,
-      "d04a34e8769c2d68e53a4b4c9fffea03"
+      "563f562edeb154f9d4887671758e7a62"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.exp_mont_ladder_swap_lemma",
@@ -945,7 +971,160 @@
         "refinement_interpretation_Tm_refine_baba3c4ff195e8afc82d572a0bec0709"
       ],
       0,
-      "2a8aeb2154a82a599dd9efa834584040"
+      "3b9f710d35730908dea2c7a5568b6a29"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mont_mod_exp_lemma_before_to_mont",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_beb65d281c49d74d114c6a6b22df2641"
+      ],
+      0,
+      "93f938c80c85a913123b3d30865ff1a5"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mont_mod_exp_lemma_before_to_mont",
+      2,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "063c1b021fba68554c2cda9e7bc6092c"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mont_mod_exp_lemma_before_to_mont",
+      3,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Prims.pos", "int_inversion", "primitive_Prims.op_Modulus",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_beb65d281c49d74d114c6a6b22df2641"
+      ],
+      0,
+      "752bec7ecf2abc2bb1f016a5965c758c"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mont_mod_exp_lemma_after_to_mont",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_beb65d281c49d74d114c6a6b22df2641"
+      ],
+      0,
+      "cb79cf91b7820ef037de2eabc1eeab99"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mont_mod_exp_lemma_after_to_mont",
+      2,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "db71076c0232920e7d40080520b9d44e"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mont_mod_exp_lemma_after_to_mont",
+      3,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "int_inversion", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_beb65d281c49d74d114c6a6b22df2641"
+      ],
+      0,
+      "f99b492cf0dc5749f187dbb68ebaaf71"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mont_mod_pow_lemma",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_beb65d281c49d74d114c6a6b22df2641"
+      ],
+      0,
+      "16892fe196b994acc5b0f99aef2a0fd6"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mont_mod_pow_lemma",
+      2,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "76d6f6127ef44d58b100906fb55d5dd6"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mont_mod_pow_lemma",
+      3,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "int_inversion", "primitive_Prims.op_Modulus",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_beb65d281c49d74d114c6a6b22df2641",
+        "refinement_interpretation_Tm_refine_d093ed85dfadb407c50b8edbd11efe88"
+      ],
+      0,
+      "02aa1d3268d5d8b15503dc22c4337bed"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mont_mod_pow_lemma1",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_beb65d281c49d74d114c6a6b22df2641"
+      ],
+      0,
+      "323b08628b99c5612e58f7134de8de26"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mont_mod_pow_lemma1",
+      2,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "058db4d8e9d11545712f213cb692cdf7"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mont_mod_pow_lemma1",
+      3,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_beb65d281c49d74d114c6a6b22df2641"
+      ],
+      0,
+      "821d152596ba15aa571b42882924f6c4"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_f",
@@ -959,7 +1138,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "484db150b80cf737974717dcc86fbce6"
+      "2793a3fc955987679a7b312d00002e85"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont",
@@ -968,7 +1147,7 @@
       0,
       [ "@query" ],
       0,
-      "5ad471aa949faa098f76a3868bd8b67d"
+      "221fd76eb90b6093fe79eff672dd0fad"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont",
@@ -977,7 +1156,7 @@
       0,
       [ "@query" ],
       0,
-      "81dbceaeda7676f1272f24a0a88afd27"
+      "f869637f4e2d6e084dfb91d69935432c"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont",
@@ -991,7 +1170,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "ba0c90ced6291ddf944fa249efffa772"
+      "5aa59942fd924ec1fd6923d955fba6d8"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_lemma_step_a",
@@ -1012,7 +1191,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "66113f191466625091151fb834574aca"
+      "5ea8578e01bd82b45c362b686ca17301"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_lemma_step_a",
@@ -1033,7 +1212,7 @@
         "refinement_interpretation_Tm_refine_baba3c4ff195e8afc82d572a0bec0709"
       ],
       0,
-      "86054ff927df32d377b4b74a83b9c97c"
+      "5f72dd322a4981d7eba060ba9812f5c5"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_lemma_step_acc0",
@@ -1059,7 +1238,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "3bc2fdadd22d69df60ee8c5cf08a5d96"
+      "860398fd2eeb54d3861ed8e3f5b66ef3"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_lemma_step_acc0",
@@ -1090,7 +1269,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "623b6ad5acd9737ac2298e873a757716"
+      "fe6b05015d71429a0ee67a7ce41f760c"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_lemma_step_acc1",
@@ -1111,7 +1290,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "5bf6790d93e303185517e62f9714a7c5"
+      "439a5b8487b2b3dd59494f9f42ea9ee4"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_lemma_step_acc1",
@@ -1137,7 +1316,7 @@
         "refinement_interpretation_Tm_refine_baba3c4ff195e8afc82d572a0bec0709"
       ],
       0,
-      "52d98ea8298903d30c5afbaa2ec6df4c"
+      "c2fe083b4fa86d0bf3e6a5e36ea8a383"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_lemma_step_acc",
@@ -1158,7 +1337,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "4152e661da7359d1c29d9394386c35b6"
+      "9463e39b9c7e50a603fcf64fc7a1cdee"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_lemma_step_acc",
@@ -1179,7 +1358,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "c0036e6e6765412d04d8ffe792ea063b"
+      "618039291c707fd2125a1e76dcb171d6"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_lemma",
@@ -1200,7 +1379,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "41a30cb41123337b2a45a48899c82789"
+      "c56b756c456e20f4b60410f4c942ceb2"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_lemma",
@@ -1219,7 +1398,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "28d3cf4de8eaf4ef13e997643865b508"
+      "27d751e1ff5fdd67dcf70910c7f547e7"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_lemma",
@@ -1256,122 +1435,7 @@
         "typing_Prims.pow2", "well-founded-ordering-on-nat"
       ],
       0,
-      "9e48bbb956faf56fb9e6e3866dc71345"
-    ],
-    [
-      "Hacl.Spec.Exponentiation.Lemmas.lemma_mont_aux",
-      1,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
-      ],
-      0,
-      "5b793188fa3d962c2f3e920ecf11955b"
-    ],
-    [
-      "Hacl.Spec.Exponentiation.Lemmas.lemma_mont_aux",
-      2,
-      0,
-      0,
-      [ "@query" ],
-      0,
-      "0cb0d1daa47f50a6b45e01422ea11a7b"
-    ],
-    [
-      "Hacl.Spec.Exponentiation.Lemmas.lemma_mont_aux",
-      3,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
-        "equation_Prims.pos", "int_inversion", "primitive_Prims.op_Multiply",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "refinement_interpretation_Tm_refine_d093ed85dfadb407c50b8edbd11efe88"
-      ],
-      0,
-      "abdb4bc0214fa35a41ba1b25302de12d"
-    ],
-    [
-      "Hacl.Spec.Exponentiation.Lemmas.mont_mod_exp_lemma_before_to_mont",
-      1,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "refinement_interpretation_Tm_refine_beb65d281c49d74d114c6a6b22df2641"
-      ],
-      0,
-      "984cc4e7000ac3766f0d8639b095e090"
-    ],
-    [
-      "Hacl.Spec.Exponentiation.Lemmas.mont_mod_exp_lemma_before_to_mont",
-      2,
-      0,
-      0,
-      [ "@query" ],
-      0,
-      "606aa0182d8e299ea8007f4b793a0520"
-    ],
-    [
-      "Hacl.Spec.Exponentiation.Lemmas.mont_mod_exp_lemma_before_to_mont",
-      3,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
-        "equation_Prims.pos", "int_inversion", "primitive_Prims.op_Modulus",
-        "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "refinement_interpretation_Tm_refine_beb65d281c49d74d114c6a6b22df2641"
-      ],
-      0,
-      "2f9277b03e27198411a7f198c864f819"
-    ],
-    [
-      "Hacl.Spec.Exponentiation.Lemmas.mont_mod_exp_lemma_after_to_mont",
-      1,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "refinement_interpretation_Tm_refine_beb65d281c49d74d114c6a6b22df2641"
-      ],
-      0,
-      "98234859dcc34a9788378b906840427b"
-    ],
-    [
-      "Hacl.Spec.Exponentiation.Lemmas.mont_mod_exp_lemma_after_to_mont",
-      2,
-      0,
-      0,
-      [ "@query" ],
-      0,
-      "80307912f93a06761b3222a8244c2f1a"
-    ],
-    [
-      "Hacl.Spec.Exponentiation.Lemmas.mont_mod_exp_lemma_after_to_mont",
-      3,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
-        "int_inversion", "primitive_Prims.op_Multiply",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "refinement_interpretation_Tm_refine_beb65d281c49d74d114c6a6b22df2641"
-      ],
-      0,
-      "c6457706c4c1df4353b3aef1fc013245"
+      "ba2a7951fc8f8f3e00409211535ea0bd"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_lemma",
@@ -1385,7 +1449,7 @@
         "refinement_interpretation_Tm_refine_beb65d281c49d74d114c6a6b22df2641"
       ],
       0,
-      "f592c55a2fcc3b4ef18f15c8de54d4c1"
+      "75e2f169b3155ab2742d4703c1be7d9a"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_lemma",
@@ -1394,7 +1458,7 @@
       0,
       [ "@query" ],
       0,
-      "b5462e68903f8db1c2f30d3deb6f8ec7"
+      "9040748df7dc5b1d05b969114959b11a"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_lemma",
@@ -1413,7 +1477,7 @@
         "refinement_interpretation_Tm_refine_d093ed85dfadb407c50b8edbd11efe88"
       ],
       0,
-      "52b7231b2812e1818cd362ef5305b733"
+      "a152f93ca58c2f09e854ef4dfa4b08e2"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_f_ll",
@@ -1422,7 +1486,7 @@
       0,
       [ "@query" ],
       0,
-      "464440e6a6289634c3311cbaeb6ea331"
+      "7adfa5bd7a60f8ffdc02681fb78e1337"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ll",
@@ -1431,7 +1495,7 @@
       0,
       [ "@query" ],
       0,
-      "e493bb59e55004adc208eca85aba9795"
+      "d31a09fbf7f21721aaac40da9f577cb6"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ll_lemma_loop",
@@ -1448,7 +1512,7 @@
         "refinement_interpretation_Tm_refine_beb65d281c49d74d114c6a6b22df2641"
       ],
       0,
-      "418e3b7e28085254f86377d61d3b2e49"
+      "7fcc40502d5a996e103b1aae58092a0b"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ll_lemma_loop",
@@ -1465,7 +1529,7 @@
         "refinement_interpretation_Tm_refine_beb65d281c49d74d114c6a6b22df2641"
       ],
       0,
-      "c61c257d948776b2b9b6b55aa520a53f"
+      "24385c28a2cc962614f35954d0facc2c"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ll_lemma_loop",
@@ -1504,7 +1568,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "d4b0c8a40bee13cc8517baa923d56471"
+      "70c689a1b73d0d93f196ea356ec5aab7"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ll_lemma_eval",
@@ -1520,7 +1584,7 @@
         "refinement_interpretation_Tm_refine_beb65d281c49d74d114c6a6b22df2641"
       ],
       0,
-      "c7dccd963d48ded2d55fa3cde5346b0b"
+      "ddff467507a5ebfe543d6714a50459f9"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ll_lemma_eval",
@@ -1541,7 +1605,7 @@
         "refinement_interpretation_Tm_refine_beb65d281c49d74d114c6a6b22df2641"
       ],
       0,
-      "5bfcb8ce1f3032bb144725c2b5a9689f"
+      "3511baa3f38129c3adfe40d8a4d4a403"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ll_lemma",
@@ -1559,7 +1623,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "30563ee8bb3a1c268bd8fdb34f601747"
+      "c4e0ddb0096cd6927d5da1185ab030f3"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ll_lemma",
@@ -1584,7 +1648,7 @@
         "typing_Spec.RSAPSS.fpow"
       ],
       0,
-      "e84dee4050562ae8ec6077e18ac16914"
+      "c7a4a6821061c102835db950f3b520e7"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_lr_f",
@@ -1600,7 +1664,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "d28ca380b9db3f495ae7c59f12c5fefd"
+      "831fb9b9120c411f6e8a87b789191adf"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_lr",
@@ -1609,7 +1673,7 @@
       0,
       [ "@query" ],
       0,
-      "f983e6dd1f680b24ee40a5b0847cca88"
+      "26c69176e7295ce3f5431507e9c1dda1"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_lr",
@@ -1618,7 +1682,7 @@
       0,
       [ "@query" ],
       0,
-      "d8318191dea05e1b085b543a00dc8cab"
+      "f8150f188f4a5fde42a2bc046a8f1b53"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_lr",
@@ -1632,7 +1696,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "77b6d0ca8097bd26756d5dbc0d202f9d"
+      "078723a65e52757599872e828e567a33"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_lr_lemma_step0",
@@ -1650,7 +1714,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "6bdbdc3c403df35dba9580080b7b6fe2"
+      "8d9c119da07988ee589d6f11d9093db5"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_lr_lemma_step0",
@@ -1662,7 +1726,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "990a0634f0796116d6fee446e0afedec"
+      "417778c65fb1ea6165ed80d476740281"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_lr_lemma_step0",
@@ -1681,7 +1745,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "c1a1510ac51956b1f5938f841ba2324e"
+      "2500a0cccf2f2bea19db1b8e6c9e480b"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_lr_lemma_step1",
@@ -1699,7 +1763,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "fcd52fa580a728ad240091e5f0525efd"
+      "7a099d333996522dd89fb5fb383e1eab"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_lr_lemma_step1",
@@ -1711,7 +1775,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "6dee6c3dcaf453ad89a2ab8538f292ae"
+      "35d95eac07d621b1883eea3dbaa8e6f0"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_lr_lemma_step1",
@@ -1731,7 +1795,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "b27d3d0f5cc84e6d95f0962abaac351f"
+      "97a2ed7217c1194df818d2c686c29cdd"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_lr_lemma_step",
@@ -1750,7 +1814,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "200b849cee5e06c716a31ca756a7a2bd"
+      "29493f31fe03b062e524646997367e51"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_lr_lemma_step",
@@ -1759,7 +1823,7 @@
       0,
       [ "@query" ],
       0,
-      "edfa10c50eefc2ad8fe03cf0395b7080"
+      "5e06652e1893a88a1d2c5de340a45820"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_lr_lemma_step",
@@ -1784,7 +1848,7 @@
         "refinement_interpretation_Tm_refine_d093ed85dfadb407c50b8edbd11efe88"
       ],
       0,
-      "30638f8e59397df7263fc31d3cc8e42e"
+      "5b7af746ac421fe13106d3cba64a78e0"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_lr_lemma_loop",
@@ -1801,7 +1865,7 @@
         "refinement_interpretation_Tm_refine_baba3c4ff195e8afc82d572a0bec0709"
       ],
       0,
-      "c4b74bceb4780783a0ea809ca55c2a90"
+      "c77d8d214a0295514949476405ecfac5"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_lr_lemma_loop",
@@ -1818,7 +1882,7 @@
         "refinement_interpretation_Tm_refine_baba3c4ff195e8afc82d572a0bec0709"
       ],
       0,
-      "d34339e85b794ea62c194a8cb070d2b7"
+      "f687200f6658d3c47f902b9b7a2d4c05"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_lr_lemma_loop",
@@ -1854,7 +1918,7 @@
         "typing_Prims.pow2", "well-founded-ordering-on-nat"
       ],
       0,
-      "1fc11836622d862eba49a6107b75fb5c"
+      "6f20b84428f456efdf87421c8ea562e7"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_lr_lemma_loop",
@@ -1863,7 +1927,7 @@
       0,
       [ "@query" ],
       0,
-      "ef842a629fe65699eea5f5f520d41822"
+      "8d74b522dab6baa5fbba31739adbf5a5"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_lr_lemma_loop",
@@ -1876,7 +1940,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "0314fa1fc1be32be4e75194d2275cc4d"
+      "e5779fb87a02ee932841fe51bedd93b4"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_lr_lemma_loop",
@@ -1885,7 +1949,7 @@
       0,
       [ "@query" ],
       0,
-      "38259b354d86e1ed1a77d4aa56671e73"
+      "9b357dc12653f50a64c8b3c8a4b1e415"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_lr_lemma_loop",
@@ -1898,43 +1962,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "584f0c365632f326567f1d7702933410"
-    ],
-    [
-      "Hacl.Spec.Exponentiation.Lemmas.lemma_one_mont",
-      1,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
-      ],
-      0,
-      "4db13ef7362472864e96b32b48e4a433"
-    ],
-    [
-      "Hacl.Spec.Exponentiation.Lemmas.lemma_one_mont",
-      2,
-      0,
-      0,
-      [ "@query" ],
-      0,
-      "9d1acb82c0a0e5573e39ed775547bbcc"
-    ],
-    [
-      "Hacl.Spec.Exponentiation.Lemmas.lemma_one_mont",
-      3,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
-        "int_inversion", "primitive_Prims.op_Multiply",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
-      ],
-      0,
-      "114b7b3d547d1d4fcf32423e49457116"
+      "e232affb6910453b482d4ae3f5098e33"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_lr_lemma",
@@ -1948,7 +1976,7 @@
         "refinement_interpretation_Tm_refine_beb65d281c49d74d114c6a6b22df2641"
       ],
       0,
-      "4e390a850a700a0bd8edb5fe4d371197"
+      "dc208f0d85bb811235ec5c6e34623f5b"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_lr_lemma",
@@ -1957,7 +1985,7 @@
       0,
       [ "@query" ],
       0,
-      "fe03d47c4bca0a7eb9ff22149bd5f384"
+      "5ff2d6babba8b6d30e635d21b65113d1"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_lr_lemma",
@@ -1977,7 +2005,685 @@
         "refinement_interpretation_Tm_refine_d093ed85dfadb407c50b8edbd11efe88"
       ],
       0,
-      "82c6960ef98dcbd4ca05c2f1ee1a1793"
+      "5727951f546b3c2888ff0c2ca9082da4"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder_f",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+      ],
+      0,
+      "bdeae4195adc981755e63a736b45f193"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder",
+      1,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "2aecb1411a489aea174343a983c3f731"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder",
+      2,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "0ec257ba7d7853eb00097ff5923d46d9"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder",
+      3,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "int_inversion", "primitive_Prims.op_Modulus",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "6870ba7fc680f90e5994809820431d31"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder_lemma_step",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Prims.pos", "int_inversion",
+        "primitive_Prims.op_Division", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_baba3c4ff195e8afc82d572a0bec0709",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+      ],
+      0,
+      "b14a4600ba60a54e808a8d8215c1a2fe"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder_lemma_step",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "5f7ff91328f21d7cc5be937dbc59c4f9"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder_lemma_step",
+      3,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder_f",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Division",
+        "primitive_Prims.op_Equality", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_baba3c4ff195e8afc82d572a0bec0709",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+      ],
+      0,
+      "cb8c4bf1aad9d5730a6e0a95f8feea4f"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder_lemma_loop",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Prims.pos", "int_inversion", "primitive_Prims.op_Division",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_7e0b9b2dbca36eab00de093c1b701c6d",
+        "refinement_interpretation_Tm_refine_baba3c4ff195e8afc82d572a0bec0709"
+      ],
+      0,
+      "9e9af81ddb606e428a7d5fee441d59e1"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder_lemma_loop",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Prims.pos", "primitive_Prims.op_Division",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_7e0b9b2dbca36eab00de093c1b701c6d",
+        "refinement_interpretation_Tm_refine_baba3c4ff195e8afc82d572a0bec0709"
+      ],
+      0,
+      "451339a44289bcff0730b6ca4c09855a"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder_lemma_loop",
+      3,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "binder_x_18988f12dd35d50f260546908bebc21a_6",
+        "binder_x_2bc0fb8d8a51e866ade9581ab1e5467d_4",
+        "binder_x_4f329304922437b173cc2e3513266851_5",
+        "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_3",
+        "binder_x_c4b5f5405d8348e6d076286d5758842b_2",
+        "binder_x_e942756507137103221b6706f384656d_7",
+        "binder_x_f26957a7e62b271a8736230b1e9c83c1_0",
+        "binder_x_f26957a7e62b271a8736230b1e9c83c1_1", "equation_Prims.nat",
+        "equation_Prims.pos",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "int_typing", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Division", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
+        "refinement_interpretation_Tm_refine_49b785b1c5c889240c1ff2052bd92115",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_7cf6c7b7035f118b819e8c348d99ce16",
+        "refinement_interpretation_Tm_refine_b54a7e11fa6671063df70e2336bad7ce",
+        "refinement_interpretation_Tm_refine_c22d52c193ca1724670aac7b777e4612",
+        "refinement_interpretation_Tm_refine_de98c4c2113678e0ff1c4ebf2647883d",
+        "typing_Prims.pow2", "well-founded-ordering-on-nat"
+      ],
+      0,
+      "caf89077fbc7e43ccbd5214af5387766"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder_lemma_loop",
+      4,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "cf8889eb6673bed67a5243a8a33d29c8"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder_lemma_loop",
+      5,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "e39e0f5a46b86c6681551cf2959404c2"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder_lemma_loop",
+      6,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "92da99fa5cf46bf5d77da8849af10954"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder_lemma_loop",
+      7,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "7a54847e856856fd946b3e707c560796"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder_lemma_loop",
+      8,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "201a68c983223609cb420b05a3da3436"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder_lemma_loop",
+      9,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "532500c60d1a27b87d9d589844dbd3f0"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder_lemma",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_beb65d281c49d74d114c6a6b22df2641"
+      ],
+      0,
+      "e6ac167b97accf465bf7565288872e33"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder_lemma",
+      2,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "83e15b73392e42d5290f2a4975e805c0"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder_lemma",
+      3,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder",
+        "equation_Prims.nat", "equation_Prims.pos", "int_inversion",
+        "primitive_Prims.op_Division", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_beb65d281c49d74d114c6a6b22df2641",
+        "refinement_interpretation_Tm_refine_d093ed85dfadb407c50b8edbd11efe88"
+      ],
+      0,
+      "60babdca63899154cc9d7eb59d30a34c"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder_swap_f",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Prims.pos", "int_inversion", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+      ],
+      0,
+      "82111774ba2b59c1ac995677a522c26c"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder_swap",
+      1,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "9bdf5f2b6343fc246e3479c14e5b2bb6"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder_swap",
+      2,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "c407f7f6c95f26af18eac3f9e6065030"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder_swap",
+      3,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "int_inversion", "primitive_Prims.op_Modulus",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "f959f18e4da40a1119a4180754829802"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder_swap_lemma_loop",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Prims.pos", "int_inversion",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_7e0b9b2dbca36eab00de093c1b701c6d"
+      ],
+      0,
+      "3debfb6b5d8d66d25999cdff06e34ce3"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder_swap_lemma_loop",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Prims.pos", "int_inversion",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_7e0b9b2dbca36eab00de093c1b701c6d",
+        "refinement_interpretation_Tm_refine_aa64bce61191644d6312a5ed528e56d8",
+        "refinement_interpretation_Tm_refine_baba3c4ff195e8afc82d572a0bec0709",
+        "refinement_interpretation_Tm_refine_f2bd9ca74e6a672f0fcce6d674b67986"
+      ],
+      0,
+      "baf3325f2eb096ed1a79a0a341a62c5e"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder_swap_lemma_loop",
+      3,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "binder_x_7301f8dd1f269689209ccdc208d35823_7",
+        "binder_x_9803c586ee314eeea21bb5f73a05547a_3",
+        "binder_x_ae567c2fb75be05905677af440075565_1",
+        "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_4",
+        "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_5",
+        "binder_x_c6bea144c5e757d8f9b3d999b070746e_6",
+        "binder_x_f26957a7e62b271a8736230b1e9c83c1_0",
+        "binder_x_f26957a7e62b271a8736230b1e9c83c1_2",
+        "equality_tok_Prims.LexTop@tok",
+        "equation_Hacl.Spec.Exponentiation.Lemmas.cswap",
+        "equation_Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder_f",
+        "equation_Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder_swap_f",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple2",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "int_typing", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Equality", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple3__1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple3__2",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple3__3",
+        "refinement_interpretation_Tm_refine_0c0959bd16d32b105e98e14cf131e592",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_645312872732c21021c669c2c620f205",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_e28eb060a0e8f9740dd9f9af647ed30d",
+        "typing_Hacl.Spec.Exponentiation.Lemmas.cswap",
+        "well-founded-ordering-on-nat"
+      ],
+      0,
+      "c631b75ab0fd596c925ec9e20d9504c4"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder_swap_lemma_loop",
+      4,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "dd59bed29a50b69e98318dd20281be90"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder_swap_lemma_loop",
+      5,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "aba2b9077bef6c825b755ad6fa584233"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder_swap_lemma_loop",
+      6,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "7244bc1d0f0473fb9d1c763e1c2827e5"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder_swap_lemma_loop",
+      7,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "cfc597fbbe2b75c60795b96ce138bd99"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder_swap_lemma",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "13c375e7b8d293888ccf5913835725d2"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder_swap_lemma",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "57e621179b53aa603b2049914158f237"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder_swap_lemma",
+      3,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_Hacl.Spec.Exponentiation.Lemmas.cswap",
+        "equation_Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder",
+        "equation_Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder_swap",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "primitive_Prims.op_Division",
+        "primitive_Prims.op_Equality", "primitive_Prims.op_Modulus",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_baba3c4ff195e8afc82d572a0bec0709",
+        "refinement_interpretation_Tm_refine_d093ed85dfadb407c50b8edbd11efe88"
+      ],
+      0,
+      "3260a338aa06f3f3f5196a223645011f"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder_swap_f_ll",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Prims.pos", "int_inversion", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+      ],
+      0,
+      "1d9de819e69d3f420d707dff888a99ae"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_lader_swap_ll_lemma_loop",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Prims.pos", "int_inversion", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_7e0b9b2dbca36eab00de093c1b701c6d",
+        "refinement_interpretation_Tm_refine_beb65d281c49d74d114c6a6b22df2641"
+      ],
+      0,
+      "91f727d731c700dab4ba1c7cce62b497"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_lader_swap_ll_lemma_loop",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Prims.pos", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_7e0b9b2dbca36eab00de093c1b701c6d",
+        "refinement_interpretation_Tm_refine_beb65d281c49d74d114c6a6b22df2641"
+      ],
+      0,
+      "f8aa746eb5051a6d9530d404c0b49991"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_lader_swap_ll_lemma_loop",
+      3,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "binder_x_06cb1e5a41aa863bc40e82f55e3232cd_5",
+        "binder_x_ae567c2fb75be05905677af440075565_2",
+        "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_0",
+        "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_3",
+        "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_4",
+        "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_7",
+        "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_8",
+        "binder_x_f26957a7e62b271a8736230b1e9c83c1_1",
+        "binder_x_fa6b328f1b02cd5c04ee237d30efad9f_6",
+        "equation_Hacl.Spec.Exponentiation.Lemmas.cswap",
+        "equation_Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder_swap_f",
+        "equation_Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder_swap_f_ll",
+        "equation_Hacl.Spec.Montgomery.Lemmas.mont_mul",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "int_typing", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Equality", "primitive_Prims.op_LessThan",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple3__1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple3__2",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple3__3",
+        "refinement_interpretation_Tm_refine_26c6480a63d307118737550784d36483",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_60da758b1aceb0a55eaa4155854cadc8",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "well-founded-ordering-on-nat"
+      ],
+      0,
+      "cb0c52f3d0fba26722e0e4d25d4beea6"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder_swap_ll_lemma_eval",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Prims.pos", "int_inversion", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_beb65d281c49d74d114c6a6b22df2641"
+      ],
+      0,
+      "e6e7b17800e55b1a22a774b80628a367"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder_swap_ll_lemma_eval",
+      2,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Hacl.Spec.Exponentiation.Lemmas.cswap",
+        "equation_Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder_swap",
+        "equation_Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder_swap_ll",
+        "equation_Prims.nat", "equation_Prims.pos", "int_inversion",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Division",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple3__1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple3__2",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple3__3",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_beb65d281c49d74d114c6a6b22df2641"
+      ],
+      0,
+      "04bf78ed8a4c095b14981dcc38c5614a"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder_swap_ll_lemma",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "b2t_def", "equation_Prims.nat",
+        "equation_Prims.pos", "equation_Prims.squash", "int_inversion",
+        "l_and-interp", "primitive_Prims.op_LessThan",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_beb65d281c49d74d114c6a6b22df2641"
+      ],
+      0,
+      "aa13a43d61ef4241d707e3e9e017e90a"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ladder_swap_ll_lemma",
+      2,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "aa3a7c0e3a86787d11e1fd440cfdc159"
     ]
   ]
 ]
