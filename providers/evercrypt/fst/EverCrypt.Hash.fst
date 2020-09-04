@@ -8,6 +8,7 @@ module B = LowStar.Buffer
 module IB = LowStar.ImmutableBuffer
 module HS = FStar.HyperStack
 module ST = FStar.HyperStack.ST
+module M = FStar.Modifies
 
 module AC = EverCrypt.AutoConfig2
 module SC = EverCrypt.StaticConfig
