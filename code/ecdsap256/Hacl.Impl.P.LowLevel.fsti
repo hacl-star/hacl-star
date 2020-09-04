@@ -54,6 +54,31 @@ let order_buffer (#c: curve): (x: glbuffer uint64 (getCoordinateLenU64 c)
   | P384 -> prime384order_buffer
 
 
+inline_for_extraction
+let prime256_inverse_buffer: x: glbuffer uint8 (getCoordinateLenU P256)
+  {witnessed #uint8 #(v (getCoordinateLenU P256)) x 
+  (Lib.Sequence.of_list p256_inverse_list) /\ recallable x /\ 
+  felem_seq_as_nat P256 (Lib.Sequence.of_list (prime_inverse_list P256)) == getPrime P256 - 2} = 
+  createL_global (prime_inverse_list P256)
+
+
+inline_for_extraction
+let prime384_inverse_buffer: x: glbuffer uint8 (getCoordinateLenU P384)
+  {witnessed #uint8 #(v (getCoordinateLenU P384)) x 
+  (Lib.Sequence.of_list p256_inverse_list) /\ recallable x /\ 
+  felem_seq_as_nat P384 (Lib.Sequence.of_list (prime_inverse_list P384)) == getPrime P384 - 2} = 
+  createL_global (prime_inverse_list P384)
+
+
+
+inline_for_extraction
+let prime_inverse_buffer (#c: curve): (x: glbuffer uint8 (getCoordinateLenU c)
+  {witnessed #uint8 #(getCoordinateLenU c) x (Lib.Sequence.of_list (prime_inverse_list c)) 
+  /\ recallable x /\ felem_seq_as_nat c (Lib.Sequence.of_list (prime_inverse_list c)) == getPrime c - 2}) = 
+    match c with
+  | P256 -> prime256_inverse_buffer
+  | P384 -> prime384_inverse_buffer
+
 
 val uploadZeroImpl: #c: curve -> f: felem c -> Stack unit 
   (requires fun h -> live h f)

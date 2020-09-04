@@ -74,8 +74,8 @@ inline_for_extraction
 let getScalarLenNat curve = uint_v (getScalarLen curve)
 
 inline_for_extraction
-let getPower curve = 
-  match curve with 
+let getPower (c : curve) : a: nat {a = v (getCoordinateLenU64 c) * 64 } = 
+  match c with 
   |P256 -> 256
   |P384 -> 384
 
@@ -102,6 +102,13 @@ let getPrime curve =
 
 
 inline_for_extraction
+let getKo curve : uint64 = 
+  match curve with 
+  |P256 -> 1ul
+  |P384 -> (u64 4294967297)
+
+
+inline_for_extraction
 let getOrder (#c: curve) : (a: pos{a < pow2 (getPower c)}) =
   match c with 
   |P256 -> assert_norm (115792089210356248762697446949407573529996955224135760342422259061068512044369 < pow2 (getPower P256));
@@ -109,39 +116,6 @@ let getOrder (#c: curve) : (a: pos{a < pow2 (getPower c)}) =
   |P384 -> 
     assert_norm (39402006196394479212279040100143613805079739270465446667946905279627659399113263569398956308152294913554433653942643 < pow2 (getPower P384));
 39402006196394479212279040100143613805079739270465446667946905279627659399113263569398956308152294913554433653942643
-
-
-unfold let prime_inverse_list (#c: curve) : list uint8 = 
-  match c with 
-  |P256 -> 
-    [
-      u8 253; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255;
-      u8 255; u8 255; u8 255; u8 255; u8 0;   u8 0;   u8 0;   u8 0;
-      u8 0;   u8 0;   u8 0;   u8 0;   u8 0;   u8 0;   u8 0;   u8 0;
-      u8 1;   u8 0;   u8 0;   u8 0;   u8 255; u8 255; u8 255;  u8 255
-    ]
-  |P384 -> 
-    [ 
-      u8 253; u8 255; u8 255; u8 255; u8 0;   u8 0;   u8 0;   u8 0;
-      u8 0;   u8 0  ; u8 0  ; u8 0  ; u8 255; u8 255; u8 255; u8 255;
-      u8 254; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255;
-      u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255;
-      u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255;
-      u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255
-   ]
-
-
-
-let prime_inverse_seq (#c: curve) : (s:lseq uint8 (getCoordinateLen c) {nat_from_intseq_le s == getPrime c - 2}) =  
-(*   assert_norm (List.Tot.length (prime_order_inverse_list #P256) == getCoordinateLen P256);
-  assert_norm (List.Tot.length (prime_order_inverse_list #P384) == getCoordinateLen P384);
-  nat_from_intlist_seq_le (getCoordinateLen c) (prime_order_inverse_list #c); 
-  assert_norm (nat_from_intlist_le (prime_order_inverse_list #P256) == getPrimeOrder #P256 - 2);
-  assert_norm (nat_from_intlist_le (prime_order_inverse_list #P384) == getPrimeOrder #P384 - 2); *)
-  of_list (prime_inverse_list #c)
-
-
-
 
 
 (* for p256 and 384 are the same *)

@@ -151,6 +151,46 @@ let order_list (c: curve) :
     p384_order_list
 
 
+inline_for_extraction noextract
+let p256_inverse_list: x: list uint8 = 
+  [
+      u8 253; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255;
+      u8 255; u8 255; u8 255; u8 255; u8 0;   u8 0;   u8 0;   u8 0;
+      u8 0;   u8 0;   u8 0;   u8 0;   u8 0;   u8 0;   u8 0;   u8 0;
+      u8 1;   u8 0;   u8 0;   u8 0;   u8 255; u8 255; u8 255;  u8 255
+  ]
+
+
+inline_for_extraction noextract
+let p384_invserse_list: x: list uint8 = 
+  [ 
+    u8 253; u8 255; u8 255; u8 255; u8 0;   u8 0;   u8 0;   u8 0;
+    u8 0;   u8 0  ; u8 0  ; u8 0  ; u8 255; u8 255; u8 255; u8 255;
+    u8 254; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255;
+    u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255;
+    u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255;
+    u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255
+  ]
+
+
+inline_for_extraction noextract
+let prime_inverse_list (c: curve) : x: list uint8 = 
+  match c with 
+  |P256 -> 
+    p256_inverse_list
+  |P384 -> 
+    p384_invserse_list
+
+(* 
+
+let prime_inverse_seq (#c: curve) : (s:lseq uint8 (getCoordinateLen c) {nat_from_intseq_le s == getPrime c - 2}) =  
+  assert_norm (List.Tot.length (prime_order_inverse_list #P256) == getCoordinateLen P256);
+  assert_norm (List.Tot.length (prime_order_inverse_list #P384) == getCoordinateLen P384);
+  nat_from_intlist_seq_le (getCoordinateLen c) (prime_order_inverse_list #c); 
+  assert_norm (nat_from_intlist_le (prime_order_inverse_list #P256) == getPrimeOrder #P256 - 2);
+  assert_norm (nat_from_intlist_le (prime_order_inverse_list #P384) == getPrimeOrder #P384 - 2);
+  of_list (prime_inverse_list #c)
+ *)
 
 
 inline_for_extraction noextract
@@ -361,6 +401,45 @@ let felem_seq_as_nat_8 (a: lseq uint64 8) : Tot nat =
   uint_v a5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 + 
   uint_v a6 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 + 
   uint_v a7 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64
+
+noextract
+let felem_seq_as_nat_16 (a: lseq uint64 16) : Tot nat = 
+  let open FStar.Mul in 
+  let a0 = Lib.Sequence.index a 0 in 
+  let a1 = Lib.Sequence.index a 1 in 
+  let a2 = Lib.Sequence.index a 2 in 
+  let a3 = Lib.Sequence.index a 3 in 
+  let a4 = Lib.Sequence.index a 4 in 
+  let a5 = Lib.Sequence.index a 5 in 
+  let a6 = Lib.Sequence.index a 6 in 
+  let a7 = Lib.Sequence.index a 7 in
+
+  let a8 = Lib.Sequence.index a 8 in 
+  let a9 = Lib.Sequence.index a 9 in 
+  let a10 = Lib.Sequence.index a 10 in 
+  let a11 = Lib.Sequence.index a 11 in 
+  let a12 = Lib.Sequence.index a 12 in 
+  let a13 = Lib.Sequence.index a 13 in 
+  let a14 = Lib.Sequence.index a 14 in 
+  let a15 = Lib.Sequence.index a 15 in
+
+  uint_v a0 + 
+  uint_v a1 * pow2 64 + 
+  uint_v a2 * pow2 64 * pow2 64 + 
+  uint_v a3 * pow2 64 * pow2 64 * pow2 64 + 
+  uint_v a4 * pow2 64 * pow2 64 * pow2 64 * pow2 64 + 
+  uint_v a5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 + 
+  uint_v a6 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 + 
+  uint_v a7 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 + 
+  uint_v a8 * pow2 (8 * 64) + 
+  uint_v a9 * pow2 (9 * 64) + 
+  uint_v a10 * pow2 (10 * 64) + 
+  uint_v a11 * pow2 (11 * 64) + 
+  uint_v a12 * pow2 (12 * 64) + 
+  uint_v a13 * pow2 (13 * 64) + 
+  uint_v a14 * pow2 (14 * 64) + 
+  uint_v a15 * pow2 (15 * 64)
+
 
 
 

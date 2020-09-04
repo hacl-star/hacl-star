@@ -34,8 +34,9 @@ friend Hacl.Spec.P256.MontgomeryMultiplication
 val fsquarePowN: n: size_t -> a: felem P256 -> Stack unit 
   (requires (fun h -> live h a /\ as_nat P256 h a < prime256)) 
   (ensures (fun h0 _ h1 -> 
-    modifies (loc a) h0 h1 /\  as_nat P256 h1 a < prime256 /\ 
+    modifies (loc a) h0 h1 /\ as_nat P256 h1 a < prime256 /\ 
     (let k = fromDomain_ #P256 (as_nat P256 h0 a) in as_nat P256 h1 a = toDomain_ #P256 (pow k (pow2 (v n))))))
+
 
 let fsquarePowN n a = 
   let h0 = ST.get() in  
@@ -45,9 +46,9 @@ let fsquarePowN n a =
     let k = fromDomain_ #P256 (as_nat P256 h0 a) in 
     as_nat P256 h1 a = toDomain_ #P256 (pow k (pow2 i)) /\
     as_nat P256 h1 a < prime256 /\ live h1 a /\ modifies1 a h0 h1  in 
-  
-  power_one (fromDomain_ #P256 (as_nat P256 h0 a)); 
-  admit();
+
+  power_one_2 (fromDomain_ #P256 (as_nat P256 h0 a)); 
+
   for (size 0) n (inv h0) (fun x -> 
     let h0_ = ST.get() in 
      montgomery_square_buffer a a; 
@@ -141,9 +142,12 @@ let norm_part_one a tempBuffer =
  
 inline_for_extraction noextract   
 val norm_part_two: a: felem P256 -> tempBuffer: lbuffer uint64 (size 4) -> 
-  Stack unit (requires fun h -> live h a /\ live h tempBuffer /\ disjoint a tempBuffer /\  as_nat P256 h a < prime256)
-  (ensures fun h0 _ h1 -> as_nat P256 h1 tempBuffer < prime256 /\ modifies1 tempBuffer h0 h1 /\
-    (let k = fromDomain_ #P256 (as_nat P256 h0 a) in as_nat P256 h1 tempBuffer = toDomain_ #P256 (pow k (pow2 192) % prime256)))
+  Stack unit (requires fun h -> live h a /\ live h tempBuffer /\ disjoint a tempBuffer /\ 
+    as_nat P256 h a < prime256)
+  (ensures fun h0 _ h1 -> as_nat P256 h1 tempBuffer < prime256 /\ 
+    modifies1 tempBuffer h0 h1 /\
+    (let k = fromDomain_ #P256 (as_nat P256 h0 a) in 
+      as_nat P256 h1 tempBuffer = toDomain_ #P256 (pow k (pow2 192) % prime256)))
     
 let norm_part_two a tempBuffer = 
   let h0 = ST.get() in 
@@ -157,8 +161,12 @@ inline_for_extraction noextract
 val norm_part_three:a: felem P256 -> tempBuffer: lbuffer uint64 (size 8) -> 
   Stack unit (requires fun h -> live h a /\ live h tempBuffer /\ disjoint a tempBuffer /\  
    as_nat P256 h a < prime256)   
-  (ensures fun h0 _ h1 ->  modifies1 tempBuffer h0 h1 /\ (let buffer_result = gsub tempBuffer (size 4) (size 4) in as_nat P256 h1 buffer_result < prime256
-    /\ (let k = fromDomain_ #P256 (as_nat P256 h0 a) in as_nat P256 h1 buffer_result = toDomain_ #P256 (pow k ((pow2 94 - 1) * pow2 2) % prime256))))
+  (ensures fun h0 _ h1 -> 
+    let buffer_result = gsub tempBuffer (size 4) (size 4) in 
+    let k = fromDomain_ #P256 (as_nat P256 h0 a) in 
+    modifies1 tempBuffer h0 h1 /\ 
+    as_nat P256 h1 buffer_result < prime256
+    /\ as_nat P256 h1 buffer_result = toDomain_ #P256 (pow k ((pow2 94 - 1) * pow2 2) % prime256))
 
 let norm_part_three a tempBuffer = 
   let h0 = ST.get() in 
@@ -204,7 +212,7 @@ let lemma_mul_nat a b = ()
 
 
 
-val exponent_p256: a: felem P256-> result: felem P256->  Stack unit
+val exponent_p256: a: felem P256 -> result: felem P256 ->  Stack unit
   (requires fun h -> live h a /\ live h result /\ as_nat P256 h a < prime256)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
     (let k = fromDomain_ #P256 (as_nat P256 h0 a) in 
@@ -247,6 +255,7 @@ let exponent_p256 a result =
     let power3 = pow k ((pow2 94 - 1) * pow2 2) in 
     let power4 = pow k 1 in 
 
+    power_one_2 k;
     lemma_mul_nat power1 power2;
 
     lemma_inDomainModulo power1 power2;
@@ -254,9 +263,7 @@ let exponent_p256 a result =
     inDomain_mod_is_not_mod #P256 (((power1 * power2 * power3) % prime256 * power4));
     lemma_mod_mul_distr_l (power1 * power2 * power3) power4 prime256;
     big_power k ((pow2 32 - 1) * pow2 224) (pow2 192) ((pow2 94 -1 ) * pow2 2) 1;
-    assert_norm(((pow2 32 - 1) * pow2 224 + pow2 192 + (pow2 94 -1 ) * pow2 2 + 1) = prime256 - 2);
-    admit()
-
+    assert_norm(((pow2 32 - 1) * pow2 224 + pow2 192 + (pow2 94 -1 ) * pow2 2 + 1) = prime256 - 2)
 
 
 [@ CInline]
@@ -271,8 +278,8 @@ val cswap: #c: curve -> bit:uint64{v bit <= 1} -> p: felem c -> q: felem c
 	  let pBefore = as_seq h0 p in let qBefore = as_seq h0 q in 
 	  let pAfter = as_seq h1 p in let qAfter = as_seq h1 q in 
 	  as_nat c h1 p < getPrime c /\ as_nat c h1 q < getPrime c /\
-      (v bit == 1 ==> as_seq h1 p == as_seq h0 q /\ as_seq h1 q == as_seq h0 p) /\
-      (v bit == 0 ==> as_seq h1 p == as_seq h0 p /\ as_seq h1 q == as_seq h0 q)))
+	  (v bit == 1 ==> as_seq h1 p == as_seq h0 q /\ as_seq h1 q == as_seq h0 p) /\
+	  (v bit == 0 ==> as_seq h1 p == as_seq h0 p /\ as_seq h1 q == as_seq h0 q)))
 
 
 let cswap #c bit p1 p2 =
@@ -289,10 +296,10 @@ let cswap #c bit p1 p2 =
       if v bit = 1
       then (as_seq h1 p1).[k] == (as_seq h0 p2).[k] /\ (as_seq h1 p2).[k] == (as_seq h0 p1).[k]
       else (as_seq h1 p1).[k] == (as_seq h0 p1).[k] /\ (as_seq h1 p2).[k] == (as_seq h0 p2).[k]) /\
-    (forall (k:nat{i <= k /\ k < 4}).
+    (forall (k:nat{i <= k /\ k < v len}).
       (as_seq h1 p1).[k] == (as_seq h0 p1).[k] /\ (as_seq h1 p2).[k] == (as_seq h0 p2).[k]) /\
     modifies (loc p1 |+| loc p2) h0 h1 in
- 
+
   Lib.Loops.for 0ul len inv
     (fun i ->
       let dummy = mask &. (p1.(i) ^. p2.(i)) in
@@ -314,9 +321,7 @@ val montgomery_ladder_power_step0: #c: curve -> a: felem c -> b: felem c -> Stac
     as_nat c h1 a < getPrime c /\ as_nat c h1 b < getPrime c /\
     (
       let (r0D, r1D) = _pow_step0 #c (fromDomain_ #c (as_nat c h0 a)) (fromDomain_ #c (as_nat c h0 b)) in 
-      r0D == fromDomain_ #c (as_nat c h1 a) /\ r1D == fromDomain_ #c (as_nat c h1 b)
-    )
-)
+      r0D == fromDomain_ #c (as_nat c h1 a) /\ r1D == fromDomain_ #c (as_nat c h1 b)))
 
 let montgomery_ladder_power_step0 #c a b = 
   let h0 = ST.get() in 
@@ -349,7 +354,8 @@ let montgomery_ladder_power_step #c a b scalar i =
   cswap bit a b;
   montgomery_ladder_power_step0 a b;
   cswap bit a b;
-  lemma_swaped_steps #c (fromDomain_ #c (as_nat c h0 a)) (fromDomain_ #c (as_nat c h0 b))
+  lemma_swaped_steps #c (fromDomain_ #c (as_nat c h0 a)) (fromDomain_ #c (as_nat c h0 b));
+  admit()
 
 
 val _montgomery_ladder_power: #c: curve -> a: felem c -> b: felem c 

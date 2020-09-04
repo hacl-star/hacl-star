@@ -14,7 +14,7 @@ open Spec.P256
 open Hacl.Spec.P256.MontgomeryMultiplication
 
 
-val montgomery_multiplication_buffer_by_one: #c: curve {(getPrime c + 1) % pow2 64 == 0} 
+val montgomery_multiplication_buffer_by_one: #c: curve
   -> a: felem c
   -> result: felem c -> 
   Stack unit
@@ -26,7 +26,8 @@ val montgomery_multiplication_buffer_by_one: #c: curve {(getPrime c + 1) % pow2 
       as_nat c h1 result = fromDomain_ #c (as_nat c h0 a)))
 
 
-val montgomery_multiplication_buffer: #c: curve -> a: felem c -> b: felem c -> result: felem c ->  
+val montgomery_multiplication_buffer: #c: curve 
+  -> a: felem c -> b: felem c -> result: felem c ->  
   Stack unit
     (requires (fun h ->
       live h a /\ as_nat c h a < getPrime c /\ live h b /\ live h result /\ as_nat c h b < getPrime c)) 
@@ -50,9 +51,5 @@ val montgomery_square_buffer: #c: curve -> a: felem c -> result: felem c ->
 	as_nat c h1 result = toDomain_ #c (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 a) % prime) /\
 	as_nat c h1 result = toDomain_ #c (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 a)))))
 
-
-inline_for_extraction
-let prime_inverse_buffer: x: glbuffer uint8 32ul {witnessed x (prime_inverse_seq #P256) /\ recallable x} = 
-  createL_global (prime_inverse_list #P256)
 
 

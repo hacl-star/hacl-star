@@ -13,6 +13,8 @@ open Hacl.SolinasReduction.Lemmas
 open Spec.P256
 open Hacl.Impl.P.LowLevel
 
+open Hacl.Impl.SolinasReduction.P384
+
 open Hacl.Spec.P256.Definition
 open FStar.Mul
 
@@ -715,7 +717,7 @@ val solinas_reduction_impl_p384: i: lbuffer uint64 (getCoordinateLenU64 P384 *. 
 
 
 let solinas_reduction_impl_p384 i o = 
-  ()
+  solinasReduction384Impl i o
 
 
 let solinas_reduction_impl #c i o =

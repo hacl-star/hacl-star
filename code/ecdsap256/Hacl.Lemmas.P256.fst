@@ -330,12 +330,18 @@ let lemma_xor_copy_cond a b mask =
     logxor_lemma a snd;
     logxor_lemma a b
 
+
 val power_one: a: nat -> Lemma (pow 1 a == 1) 
 
 let rec power_one a = 
   match a with 
   | 0 -> assert_norm (pow 1 0 == 1)
   | _ -> power_one (a - 1) 
+
+
+val power_one_2: a: nat -> Lemma (pow a 1 == a) 
+
+let power_one_2 a = ()
 
 
 noextract
