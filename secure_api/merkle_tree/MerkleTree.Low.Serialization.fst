@@ -341,12 +341,12 @@ let rec deserialize_hash_vv_i
   (#hash_size:hash_size_t)
   (ok:bool) (buf:const_uint8_p) (sz:uint32_t{CB.length buf = U32.v sz}) (r:HST.erid) (pos:uint32_t) (res:hash_vv hash_size) (i:uint32_t{i < V.size_of res})
 : HST.ST (bool & uint32_t)
-  (requires (fun h0 -> CB.live h0 buf /\ V.live h0 res /\
+  (requires (fun h0 -> CB.live h0 buf /\ V.live h0 res /\ RV.rv_inv h0 res /\
                        B.loc_disjoint (CB.loc_buffer buf) (V.loc_vector res)))
   (ensures (fun h0 _ h1 -> modifies (B.loc_buffer (V.Vec?.vs res)) h0 h1 /\ RV.rv_inv h1 res))
 =
   let h0 = HST.get() in
-  assume(RV.rv_inv h0 res);
+  assert(RV.rv_inv h0 res);
   if not ok || pos >= sz then (false, 0ul)
   else begin
     let ok, pos, hv = deserialize_hash_vec ok buf sz r pos in
@@ -355,7 +355,7 @@ let rec deserialize_hash_vv_i
       else begin
         V.assign res i hv;
         let h1 = HST.get() in
-        assume(RV.rv_inv h1 res);
+        assert(RV.rv_inv h1 res);
         (*
         * AR: 04/01: The call deserialize_hash_vv_i below needs liveness of buf
         *            So we have to frame buf liveness for the V.assign call
@@ -370,44 +370,45 @@ let rec deserialize_hash_vv_i
         V.loc_vector_within_included res i (i + 1ul);
         let j = i + 1ul in
         if j = V.size_of res then (true, pos)
-        else deserialize_hash_vv_i ok buf sz r pos res j
+        else 
+          let r = deserialize_hash_vv_i ok buf sz r pos res j in
+          let h12 = HST.get() in
+          assume(RV.rv_inv h12 res);
+          r
       end in
     let h2 = HST.get() in
     assume(RV.rv_inv h2 res);
     r
   end
 
+// #set-options "--z3rlimit 3000 --initial_fuel 3 --max_fuel 3 --initial_ifuel 3 --max_ifuel 3"
 private let deserialize_hash_vv
   (#hash_size:hash_size_t)
   (ok:bool) (buf:const_uint8_p) (sz:uint32_t{CB.length buf = U32.v sz}) (r:HST.erid) (pos:uint32_t)
 : HST.ST (bool & uint32_t & hash_vv hash_size)
   (requires (fun h0 -> CB.live h0 buf))
   (ensures (fun h0 (_, _, r) h1 -> modifies B.loc_none h0 h1 /\ RV.rv_inv h1 r))
-= let h1 = HST.get() in
-  let (x, y, z) =
-  assert(RV.rv_inv h1 empty_vec);
-  let rg = hvreg hash_size in
-  let empty_vec = V.alloc_reserve 1ul (rg_dummy rg) r in
+= let rg = hvreg hash_size in
+  let (empty_vec:hash_vv hash_size) = V.alloc_reserve 1ul (rg_dummy rg) r in
+  // let (empty_vec:hash_vv hash_size) = RV.alloc_reserve rg 1ul r in
+  let h1 = HST.get() in
+  assert (RV.rv_inv h1 empty_vec);
   if not ok || pos >= sz then (false, pos, empty_vec)
   else begin
     let ok, pos, n = deserialize_uint32_t ok buf sz pos in
     if not ok then (false, pos, empty_vec)
     else if n = 0ul then (true, pos, empty_vec)
     else begin
-      let (res:hash_vv hash_size) = RV.alloc rg n in
-      let hx = HST.get() in
-      assert(RV.rv_inv hx res);
+      let (res:hash_vv hash_size) = V.alloc n (rg_dummy rg) in 
+      // let res = alloc_rid rg n r in
+      let h2 = HST.get() in
+      assume(RV.rv_inv h2 res);
       let ok, pos = deserialize_hash_vv_i ok buf sz r pos res 0ul in
-      let hy = HST.get() in
-      begin
-        assert(RV.rv_inv hy res);
-        (ok, pos, res)
-      end
+      let h3 = HST.get() in
+      assert(RV.rv_inv h3 res);
+      (ok, pos, res)
     end
-  end in
-  let h2 = HST.get() in
-  assert(RV.rv_inv h2 z);
-  (x, y, z)
+  end
 
 #push-options "--z3rlimit 10"
 val mt_serialize_size: mt:const_mt_p -> HST.ST uint64_t
@@ -506,8 +507,8 @@ let mt_deserialize #ghsz rid input sz hash_spec hash_fun =
         let r = B.malloc rid mtv 1ul in
         begin
           let h1 = HST.get() in
-          assume(RV.rv_inv h1 (MT?.hs mtv));
-          assume(RV.rv_inv h1 (MT?.rhs mtv));
+          assert(RV.rv_inv h1 (MT?.hs mtv));
+          assert(RV.rv_inv h1 (MT?.rhs mtv));
           assume(mt_safe_elts h1 0ul (MT?.hs mtv) (MT?.i mtv) (MT?.j mtv));
           assume(HH.extends (V.frameOf (MT?.hs mtv)) (B.frameOf r));
           assume(HH.extends (V.frameOf (MT?.rhs mtv)) (B.frameOf r));
