@@ -8,7 +8,6 @@ module B = LowStar.Buffer
 module IB = LowStar.ImmutableBuffer
 module HS = FStar.HyperStack
 module ST = FStar.HyperStack.ST
-module M = FStar.Modifies
 
 module AC = EverCrypt.AutoConfig2
 module SC = EverCrypt.StaticConfig
@@ -356,7 +355,7 @@ let update_last_with_internal_st (a : alg) =
     let s = mk_state_s p in
     invariant_s s h0 /\
     B.live h0 last /\
-    M.(loc_disjoint (footprint_s s) (loc_buffer last) /\
+    B.(loc_disjoint (footprint_s s) (loc_buffer last) /\
     v prev_len + v last_len <= max_input_length a))
   (ensures fun h0 _ h1 ->
     let s = mk_state_s p in
@@ -364,7 +363,7 @@ let update_last_with_internal_st (a : alg) =
     as_seq h1 p ==
       fst (Spec.Hash.Incremental.update_last a (state_s_to_words_state s h0 prev_len) (v prev_len)
                                              (B.as_seq h0 last)) /\
-    M.(modifies (footprint_s s) h0 h1) /\
+    B.(modifies (footprint_s s) h0 h1) /\
     footprint_s s == footprint_s s)
 
 
