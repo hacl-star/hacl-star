@@ -208,7 +208,7 @@ let pss_verify_ a sLen msgLen msg emBits em =
   res
 
 
-#set-options "--z3rlimit 150"
+#set-options "--z3rlimit 300"
 
 val pss_verify:
     a:Hash.algorithm{S.hash_is_supported a}
@@ -338,7 +338,6 @@ let rsapss_verify_st (a:Hash.algorithm{S.hash_is_supported a}) =
     LS.rsapss_verify_post a (v modBits) (v eBits) (as_seq h0 pkey)
       (v sLen) (as_seq h0 sgnt) (v msgLen) (as_seq h0 msg) r)
 
-#set-options "--z3rlimit 300"
 
 inline_for_extraction noextract
 val rsapss_verify: a:Hash.algorithm{S.hash_is_supported a} -> rsapss_verify_st a
