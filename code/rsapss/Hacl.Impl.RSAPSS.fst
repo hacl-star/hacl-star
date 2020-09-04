@@ -130,9 +130,9 @@ let get_maskedDB a sLen salt hLen m1Hash emBits dbLen db =
   pop_frame()
 
 
-inline_for_extraction noextract
-let pss_encode_st (a:Hash.algorithm{S.hash_is_supported a}) =
-    sLen:size_t{8 + Hash.hash_length a + v sLen <= max_size_t /\ 8 + Hash.hash_length a + v sLen <= Hash.max_input_length a}
+val pss_encode:
+    a:Hash.algorithm{S.hash_is_supported a}
+  -> sLen:size_t{8 + Hash.hash_length a + v sLen <= max_size_t /\ 8 + Hash.hash_length a + v sLen <= Hash.max_input_length a}
   -> salt:lbuffer uint8 sLen
   -> msgLen:size_t{v msgLen <= Hash.max_input_length a}
   -> msg:lbuffer uint8 msgLen
@@ -146,7 +146,6 @@ let pss_encode_st (a:Hash.algorithm{S.hash_is_supported a}) =
   (ensures  fun h0 _ h1 -> modifies (loc em) h0 h1 /\
     as_seq h1 em == S.pss_encode #a #(v sLen) #(v msgLen) (as_seq h0 salt) (as_seq h0 msg) (v emBits))
 
-val pss_encode: a:Hash.algorithm{S.hash_is_supported a} -> pss_encode_st a
 [@CInline]
 let pss_encode a sLen salt msgLen msg emBits em =
   push_frame ();
@@ -209,9 +208,11 @@ let pss_verify_ a sLen msgLen msg emBits em =
   res
 
 
-inline_for_extraction noextract
-let pss_verify_st (a:Hash.algorithm{S.hash_is_supported a}) =
-    sLen:size_t{8 + Hash.hash_length a + v sLen <= max_size_t /\ 8 + Hash.hash_length a + v sLen <= Hash.max_input_length a}
+#set-options "--z3rlimit 150"
+
+val pss_verify:
+    a:Hash.algorithm{S.hash_is_supported a}
+  -> sLen:size_t{v sLen + Hash.hash_length a + 8 <= max_size_t /\ v sLen + Hash.hash_length a + 8 <= Hash.max_input_length a}
   -> msgLen:size_t{v msgLen <= Hash.max_input_length a}
   -> msg:lbuffer uint8 msgLen
   -> emBits:size_t{0 < v emBits}
@@ -221,10 +222,6 @@ let pss_verify_st (a:Hash.algorithm{S.hash_is_supported a}) =
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
     r == S.pss_verify #a #(v msgLen) (v sLen) (as_seq h0 msg) (v emBits) (as_seq h0 em))
 
-
-#set-options "--z3rlimit 150"
-
-val pss_verify: a:Hash.algorithm{S.hash_is_supported a} -> pss_verify_st a
 [@CInline]
 let pss_verify a sLen msgLen msg emBits em =
   let open Lib.RawIntTypes in
@@ -257,32 +254,11 @@ let rsapss_sign_st (a:Hash.algorithm{S.hash_is_supported a}) =
     disjoint sgnt salt /\ disjoint sgnt msg /\ disjoint sgnt salt /\ disjoint sgnt skey /\
     disjoint salt msg /\
 
-    v sLen + Hash.hash_length a + 8 <= max_size_t /\ v sLen + Hash.hash_length a + 8 <= Hash.max_input_length a /\
-    v sLen + Hash.hash_length a + 2 <= v (blocks (modBits -! 1ul) 8ul) /\ v msgLen <= Hash.max_input_length a /\
-
-    128 * v (blocks modBits 64ul) <= max_size_t /\
-   (let nLen = blocks modBits 64ul in
-    let eLen = blocks eBits 64ul in
-    let dLen = blocks dBits 64ul in
-
-    let n = bn_v h (gsub skey 0ul nLen) in
-    let e = bn_v h (gsub skey nLen eLen) in
-    let d = bn_v h (gsub skey (nLen +! eLen) dLen) in
-    n % 2 = 1 /\
-    pow2 (v modBits - 1) < n /\ n < pow2 (v modBits) /\
-    0 < e /\ e < pow2 (v eBits) /\
-    0 < d /\ d < pow2 (v dBits)))
+    LS.rsapss_sign_pre a (v modBits) (v eBits) (v dBits) (as_seq h skey)
+      (v sLen) (as_seq h salt) (v msgLen) (as_seq h msg))
   (ensures  fun h0 _ h1 -> modifies (loc sgnt) h0 h1 /\
-   (let nLen = blocks modBits 64ul in
-    let eLen = blocks eBits 64ul in
-    let dLen = blocks dBits 64ul in
-
-    let n = bn_v h0 (gsub skey 0ul nLen) in
-    let e = bn_v h0 (gsub skey nLen eLen) in
-    let d = bn_v h0 (gsub skey (nLen +! eLen) dLen) in
-    let pkey : S.rsa_pubkey (v modBits) = S.Mk_rsa_pubkey n e in
-    let skey : S.rsa_privkey (v modBits) = S.Mk_rsa_privkey pkey d in
-    as_seq h1 sgnt == S.rsapss_sign #a #(v sLen) #(v msgLen) (v modBits) skey (as_seq h0 salt) (as_seq h0 msg)))
+    LS.rsapss_sign_post a (v modBits) (v eBits) (v dBits) (as_seq h0 skey)
+      (v sLen) (as_seq h0 salt) (v msgLen) (as_seq h0 msg) (as_seq h1 sgnt))
 
 
 inline_for_extraction noextract
@@ -327,15 +303,15 @@ let rsapss_sign a modBits eBits dBits skey sLen salt msgLen msg sgnt =
 
 
 inline_for_extraction noextract
-val bn_is_less_pow2:
+val bn_lt_pow2:
     modBits:size_t{1 < v modBits}
   -> m:lbignum (blocks modBits 64ul) ->
   Stack bool
   (requires fun h -> live h m)
   (ensures  fun h0 r h1 -> h0 == h1 /\
-    r == LS.bn_is_less_pow2 (v modBits) (as_seq h0 m))
+    r == LS.bn_lt_pow2 (v modBits) (as_seq h0 m))
 
-let bn_is_less_pow2 modBits m =
+let bn_lt_pow2 modBits m =
   if not ((modBits -! 1ul) %. 8ul =. 0ul) then true
   else begin
     let get_bit = bn_get_ith_bit (blocks modBits 64ul) m (modBits -! 1ul) in
@@ -356,26 +332,11 @@ let rsapss_verify_st (a:Hash.algorithm{S.hash_is_supported a}) =
     live h msg /\ live h sgnt /\ live h pkey /\
     disjoint msg sgnt /\
 
-    v sLen + Hash.hash_length a + 8 <= max_size_t /\ v sLen + Hash.hash_length a + 8 <= Hash.max_input_length a /\
-    v msgLen <= Hash.max_input_length a /\
-
-    128 * v (blocks modBits 64ul) <= max_size_t /\
-   (let nLen = blocks modBits 64ul in
-    let eLen = blocks eBits 64ul in
-
-    let n = bn_v h (gsub pkey 0ul nLen) in
-    let e = bn_v h (gsub pkey nLen eLen) in
-    n % 2 = 1 /\
-    pow2 (v modBits - 1) < n /\ n < pow2 (v modBits) /\
-    0 < e /\ e < pow2 (v eBits)))
+    LS.rsapss_verify_pre a (v modBits) (v eBits) (as_seq h pkey)
+      (v sLen) (as_seq h sgnt) (v msgLen) (as_seq h msg))
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-   (let nLen = blocks modBits 64ul in
-    let eLen = blocks eBits 64ul in
-
-    let n = bn_v h0 (gsub pkey 0ul nLen) in
-    let e = bn_v h0 (gsub pkey nLen eLen) in
-    let pkey : S.rsa_pubkey (v modBits) = S.Mk_rsa_pubkey n e in
-    r == S.rsapss_verify #a #(v msgLen) (v modBits) pkey (v sLen) (as_seq h0 msg) (as_seq h0 sgnt)))
+    LS.rsapss_verify_post a (v modBits) (v eBits) (as_seq h0 pkey)
+      (v sLen) (as_seq h0 sgnt) (v msgLen) (as_seq h0 msg) r)
 
 #set-options "--z3rlimit 300"
 
@@ -409,7 +370,7 @@ let rsapss_verify a modBits eBits pkey sLen sgnt msgLen msg =
 
       LS.em_blocks_lt_max_size_t (v modBits);
       assert (8 * v (blocks emLen 8ul) <= max_size_t);
-      if bn_is_less_pow2 modBits m then begin
+      if bn_lt_pow2 modBits m then begin
 	let m1 = sub m 0ul (blocks emLen 8ul) in
 	bn_to_bytes_be emLen m1 em;
 	pss_verify a sLen msgLen msg emBits em end

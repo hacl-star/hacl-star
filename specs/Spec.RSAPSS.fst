@@ -12,6 +12,12 @@ module Hash = Spec.Agile.Hash
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+(**
+ RFC spec of RSA-PSS: https://tools.ietf.org/html/rfc8017#section-8.1
+ List of supported hash functions: https://tools.ietf.org/html/rfc8446#appendix-B.3.1.3
+ Mask generation function: https://tools.ietf.org/html/rfc8017#page-67
+*)
+
 ///
 /// Auxillary functions
 ///
@@ -197,7 +203,7 @@ let pss_verify #a #msgLen sLen msg emBits em =
 
   if (emLen < sLen + Hash.hash_length a + 2) then false
   else begin
-    if (not (uint_to_nat #U8 em_last = 0xbc && uint_to_nat #U8 em_0 = 0)) then false
+    if not (FStar.UInt8.(u8_to_UInt8 em_last =^ 0xbcuy) && FStar.UInt8.(u8_to_UInt8 em_0 =^ 0uy)) then false
     else pss_verify_ #a #msgLen sLen msg emBits em end
 
 
