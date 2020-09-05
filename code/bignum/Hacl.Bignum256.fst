@@ -5,6 +5,7 @@ open FStar.Mul
 module BN = Hacl.Bignum
 module BM = Hacl.Bignum.Montgomery
 module BE = Hacl.Bignum.Exponentiation
+module BR = Hacl.Bignum.ModReduction
 
 friend Hacl.Bignum.Exponentiation
 
@@ -79,6 +80,10 @@ instance mont_inst: BM.mont n_limbs = {
   BM.mul = mont_mul;
   BM.sqr = mont_sqr;
 }
+
+let mod_precompr2 = BR.mk_bn_mod_slow_precompr2 n_limbs #mont_inst
+
+let mod = BR.mk_bn_mod_slow n_limbs #mont_inst
 
 let mod_exp_loop: BE.bn_mod_exp_loop_st n_limbs =
   norm [ zeta; primops; iota; delta_only [ `%BE.bn_mod_exp_loop ] ] (BE.bn_mod_exp_loop n_limbs #mont_inst)

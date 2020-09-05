@@ -511,6 +511,21 @@ let lemma_mont_id n r d a =
   }
 
 
+// to_mont (mont_reduction a) = a % n
+val lemma_mont_id1: n:pos -> r:pos -> d:int{r * d % n == 1} -> a:nat ->
+  Lemma (a * d % n * r % n == a % n)
+let lemma_mont_id1 n r d a =
+  calc (==) {
+    a * d % n * r % n;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l (a * d) r n }
+    a * d * r % n;
+    (==) { Math.Lemmas.paren_mul_right a d r; Math.Lemmas.lemma_mod_mul_distr_r a (d * r) n }
+    a * (d * r % n) % n;
+    (==) { assert (r * d % n == 1) }
+    a % n;
+  }
+
+
 //  one_M * a = a
 val lemma_mont_mul_one: n:pos -> r:pos -> d:int{r * d % n = 1} -> a:nat ->
   Lemma (let r0 = 1 * r % n in let r1 = a * r % n in r0 * r1 * d % n == r1 % n)

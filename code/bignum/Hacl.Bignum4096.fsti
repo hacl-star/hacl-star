@@ -5,6 +5,7 @@ open FStar.Mul
 module BN = Hacl.Bignum
 module BM = Hacl.Bignum.Montgomery
 module BE = Hacl.Bignum.Exponentiation
+module BR = Hacl.Bignum.ModReduction
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -49,6 +50,18 @@ val sub: Hacl.Bignum.Addition.bn_sub_eq_len_st n_limbs
   The outparam res is meant to be a 8192-bit bignum, i.e. uint64_t[128]."]
 val mul: a:lbignum n_limbs -> b:lbignum n_limbs -> BN.bn_karatsuba_mul_st a b
 
+[@@ Comment "Write `a mod n` in `res` if a < n * n.
+
+  The argument a is meant to be a 8192-bit bignum, i.e. uint64_t[128].
+  The argument n, r2 and the outparam res are meant to be a 4096-bit bignum, i.e. uint64_t[64].
+  The argument r2 is a precomputed constant 2 ^ 8192 mod n."]
+val mod_precompr2: BR.bn_mod_slow_precompr2_st n_limbs
+
+[@@ Comment "Write `a mod n` in `res` if a < n * n.
+
+  The argument a is meant to be a 8192-bit bignum, i.e. uint64_t[128].
+  The argument n and the outparam res are meant to be a 4096-bit bignum, i.e. uint64_t[64]."]
+val mod: BR.bn_mod_slow_st n_limbs
 
 [@@ Comment "Write `a ^ b mod n` in `res`.
 
