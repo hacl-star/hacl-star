@@ -36,30 +36,28 @@ let bn_mod_exp_f #nLen n mu bBits bLen b i (aM, accM) =
 
 
 val bn_mod_exp_mont:
-    modBits:size_pos
-  -> nLen:size_pos{128 * nLen <= max_size_t}
-  -> n:lbignum nLen{nLen == blocks modBits 64}
+    nLen:size_pos{128 * nLen <= max_size_t}
+  -> n:lbignum nLen
   -> a:lbignum nLen
   -> acc:lbignum nLen
   -> bBits:size_pos
-  -> b:lbignum (blocks bBits 64) ->
+  -> b:lbignum (blocks bBits 64)
+  -> r2:lbignum nLen ->
   lbignum nLen
 
-let bn_mod_exp_mont modBits nLen n a acc bBits b =
+let bn_mod_exp_mont nLen n a acc bBits b r2 =
   let bLen = blocks bBits 64 in
   let mu = mod_inv_u64 n.[0] in
 
-  let r2 = precomp_r2_mod_n #nLen modBits n in
   let aM = to_mont n mu r2 a in
   let accM = to_mont n mu r2 acc in
   let (aM, accM) = repeati bBits (bn_mod_exp_f #nLen n mu bBits bLen b) (aM, accM) in
   from_mont n mu accM
 
 
-let bn_mod_exp modBits nLen n a bBits b =
+let bn_mod_exp_precompr2 nLen n a bBits b r2 =
   let acc = bn_from_uint nLen (u64 1) in
-  bn_mod_exp_mont modBits nLen n a acc bBits b
-
+  bn_mod_exp_mont nLen n a acc bBits b r2
 
 
 val bn_mod_exp_f_lemma:
@@ -138,22 +136,23 @@ let rec bn_mod_exp_mont_loop_lemma #nLen n mu bBits bLen b i (aM0, accM0) =
 
 
 val bn_mod_exp_mont_lemma_aux:
-    modBits:size_pos
-  -> nLen:size_pos{nLen = (blocks modBits 64) /\ 128 * nLen <= max_size_t}
+    nLen:size_pos{128 * nLen <= max_size_t}
   -> n:lbignum nLen
   -> a:lbignum nLen
   -> bBits:size_pos
-  -> b:lbignum (blocks bBits 64) -> Lemma
+  -> b:lbignum (blocks bBits 64)
+  -> r2:lbignum nLen -> Lemma
   (requires
     bn_v n % 2 = 1 /\ 1 < bn_v n /\ bn_v n < pow2 (64 * nLen) /\
-    0 < bn_v b /\ bn_v b < pow2 bBits /\ bn_v a < bn_v n /\ pow2 (modBits - 1) < bn_v n)
+    0 < bn_v b /\ bn_v b < pow2 bBits /\ bn_v a < bn_v n /\
+    bn_v r2 == pow2 (128 * nLen) % bn_v n)
   (ensures
    (let mu = mod_inv_u64 n.[0] in
-    let res1 = bn_mod_exp modBits nLen n a bBits b in
+    let res1 = bn_mod_exp_precompr2 nLen n a bBits b r2 in
     let res2 = BL.mod_exp_mont_ll nLen (bn_v n) (v mu) (bn_v a) bBits (bn_v b) in
     bn_v res1 == res2 /\ bn_v res1 < bn_v n))
 
-let bn_mod_exp_mont_lemma_aux modBits nLen n a bBits b =
+let bn_mod_exp_mont_lemma_aux nLen n a bBits b r2 =
   let bLen = blocks bBits 64 in
 
   let acc = bn_from_uint nLen (u64 1) in
@@ -167,8 +166,6 @@ let bn_mod_exp_mont_lemma_aux modBits nLen n a bBits b =
   assert (v n.[0] % 2 = 1); // since bn_v n % 2 = 1
   mod_inv_u64_lemma n.[0];
 
-  let r2 = precomp_r2_mod_n modBits n in
-  precomp_r2_mod_n_lemma modBits n;
   let aM0 = to_mont #nLen n mu r2 a in
   to_mont_lemma #nLen n mu r2 a;
 
@@ -182,12 +179,11 @@ let bn_mod_exp_mont_lemma_aux modBits nLen n a bBits b =
   from_mont_lemma #nLen n mu accM1
 
 
-let bn_mod_exp_lemma modBits nLen n a bBits b =
+let bn_mod_exp_precompr2_lemma nLen n a bBits b r2 =
   let mu = mod_inv_u64 n.[0] in
-  let r2 = precomp_r2_mod_n modBits n in
-  let res1 = bn_mod_exp modBits nLen n a bBits b in
+  let res1 = bn_mod_exp_precompr2 nLen n a bBits b r2 in
   let res2 = BL.mod_exp_mont_ll nLen (bn_v n) (v mu) (bn_v a) bBits (bn_v b) in
-  bn_mod_exp_mont_lemma_aux modBits nLen n a bBits b;
+  bn_mod_exp_mont_lemma_aux nLen n a bBits b r2;
   assert (bn_v res1 == res2 /\ bn_v res1 < bn_v n);
 
   bn_eval_index n 0;
@@ -229,20 +225,19 @@ let bn_mod_exp_mont_ladder_f #nLen n mu bBits bLen b i (rM0, rM1, privbit) =
 
 
 val bn_mod_exp_mont_ladder_:
-    modBits:size_pos
-  -> nLen:size_pos{128 * nLen <= max_size_t}
-  -> n:lbignum nLen{nLen == blocks modBits 64}
+    nLen:size_pos{128 * nLen <= max_size_t}
+  -> n:lbignum nLen
   -> a:lbignum nLen
   -> acc:lbignum nLen
   -> bBits:size_pos
-  -> b:lbignum (blocks bBits 64) ->
+  -> b:lbignum (blocks bBits 64)
+  -> r2:lbignum nLen ->
   lbignum nLen
 
-let bn_mod_exp_mont_ladder_ modBits nLen n a one bBits b =
+let bn_mod_exp_mont_ladder_ nLen n a one bBits b r2 =
   let bLen = blocks bBits 64 in
   let mu = mod_inv_u64 n.[0] in
 
-  let r2 = precomp_r2_mod_n #nLen modBits n in
   let rM0 = to_mont n mu r2 one in
   let rM1 = to_mont n mu r2 a in
   let sw = u64 0 in
@@ -252,9 +247,9 @@ let bn_mod_exp_mont_ladder_ modBits nLen n a one bBits b =
   from_mont n mu rM0'
 
 
-let bn_mod_exp_mont_ladder modBits nLen n a bBits b =
+let bn_mod_exp_mont_ladder_precompr2 nLen n a bBits b r2 =
   let acc = bn_from_uint nLen (u64 1) in
-  bn_mod_exp_mont_ladder_ modBits nLen n a acc bBits b
+  bn_mod_exp_mont_ladder_ nLen n a acc bBits b r2
 
 
 val lemma_bit_xor_is_sum_mod2: a:uint64 -> b:uint64 -> Lemma
@@ -357,22 +352,23 @@ let rec bn_mod_exp_mont_ladder_loop_lemma #nLen n mu bBits bLen b i (rM0, rM1, s
 
 
 val bn_mod_exp_mont_ladder_lemma_aux:
-    modBits:size_pos
-  -> nLen:size_pos{nLen = blocks modBits 64 /\ 128 * nLen <= max_size_t}
+    nLen:size_pos{128 * nLen <= max_size_t}
   -> n:lbignum nLen
   -> a:lbignum nLen
   -> bBits:size_pos
-  -> b:lbignum (blocks bBits 64) -> Lemma
+  -> b:lbignum (blocks bBits 64)
+  -> r2:lbignum nLen -> Lemma
   (requires
     bn_v n % 2 = 1 /\ 1 < bn_v n /\ bn_v n < pow2 (64 * nLen) /\
-    0 < bn_v b /\ bn_v b < pow2 bBits /\ bn_v a < bn_v n /\ pow2 (modBits - 1) < bn_v n)
+    0 < bn_v b /\ bn_v b < pow2 bBits /\ bn_v a < bn_v n /\
+    bn_v r2 == pow2 (128 * nLen) % bn_v n)
   (ensures
    (let mu = mod_inv_u64 n.[0] in
-    let res1 = bn_mod_exp_mont_ladder modBits nLen n a bBits b in
+    let res1 = bn_mod_exp_mont_ladder_precompr2 nLen n a bBits b r2 in
     let res2 = BL.mod_exp_mont_ladder_swap_ll nLen (bn_v n) (v mu) (bn_v a) bBits (bn_v b) in
     bn_v res1 == res2 /\ bn_v res1 < bn_v n))
 
-let bn_mod_exp_mont_ladder_lemma_aux modBits nLen n a bBits b =
+let bn_mod_exp_mont_ladder_lemma_aux nLen n a bBits b r2 =
   let bLen = blocks bBits 64 in
 
   let one = bn_from_uint nLen (u64 1) in
@@ -385,9 +381,6 @@ let bn_mod_exp_mont_ladder_lemma_aux modBits nLen n a bBits b =
   Math.Lemmas.pow2_modulo_modulo_lemma_1 (bn_v n) 2 64;
   assert (v n.[0] % 2 = 1); // since bn_v n % 2 = 1
   mod_inv_u64_lemma n.[0];
-
-  let r2 = precomp_r2_mod_n modBits n in
-  precomp_r2_mod_n_lemma modBits n;
 
   let rM0 = to_mont #nLen n mu r2 one in
   to_mont_lemma #nLen n mu r2 one;
@@ -406,12 +399,11 @@ let bn_mod_exp_mont_ladder_lemma_aux modBits nLen n a bBits b =
   from_mont_lemma #nLen n mu rM0''
 
 
-let bn_mod_exp_mont_ladder_lemma modBits nLen n a bBits b =
+let bn_mod_exp_mont_ladder_precompr2_lemma nLen n a bBits b r2 =
   let mu = mod_inv_u64 n.[0] in
-  let r2 = precomp_r2_mod_n modBits n in
-  let res1 = bn_mod_exp_mont_ladder modBits nLen n a bBits b in
+  let res1 = bn_mod_exp_mont_ladder_precompr2 nLen n a bBits b r2 in
   let res2 = BL.mod_exp_mont_ladder_swap_ll nLen (bn_v n) (v mu) (bn_v a) bBits (bn_v b) in
-  bn_mod_exp_mont_ladder_lemma_aux modBits nLen n a bBits b;
+  bn_mod_exp_mont_ladder_lemma_aux nLen n a bBits b r2;
   assert (bn_v res1 == res2 /\ bn_v res1 < bn_v n);
 
   bn_eval_index n 0;
@@ -424,3 +416,25 @@ let bn_mod_exp_mont_ladder_lemma modBits nLen n a bBits b =
   let d, k = M.eea_pow2_odd (64 * nLen) (bn_v n) in
   M.mont_preconditions nLen (bn_v n) (v mu);
   BL.mod_exp_mont_ladder_swap_ll_lemma nLen (bn_v n) d (v mu) (bn_v a) bBits (bn_v b)
+
+
+let bn_mod_exp nLen nBits n a bBits b =
+  let r2 = precomp_r2_mod_n nBits n in
+  bn_mod_exp_precompr2 nLen n a bBits b r2
+
+
+let bn_mod_exp_lemma nLen nBits n a bBits b =
+  let r2 = precomp_r2_mod_n nBits n in
+  precomp_r2_mod_n_lemma nBits n;
+  bn_mod_exp_precompr2_lemma nLen n a bBits b r2
+
+
+let bn_mod_exp_mont_ladder nLen nBits n a bBits b =
+  let r2 = precomp_r2_mod_n nBits n in
+  bn_mod_exp_mont_ladder_precompr2 nLen n a bBits b r2
+
+
+let bn_mod_exp_mont_ladder_lemma nLen nBits n a bBits b =
+  let r2 = precomp_r2_mod_n nBits n in
+  precomp_r2_mod_n_lemma nBits n;
+  bn_mod_exp_mont_ladder_precompr2_lemma nLen n a bBits b r2

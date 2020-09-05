@@ -18,6 +18,7 @@ module B = LowStar.Buffer
 
 module S = Hacl.Spec.Bignum.Montgomery
 module SB = Hacl.Spec.Bignum
+module BC = Hacl.Bignum.Comparison
 
 module BN = Hacl.Bignum
 
@@ -25,22 +26,67 @@ friend Hacl.Spec.Bignum.Montgomery
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-let precomp_r2_mod_n #nLen #_ modBits n res =
+inline_for_extraction noextract
+let precomp_r2_mod_n_aux_st (nLen: BN.meta_len) =
+    nBits:size_t{0 < v nBits /\ v (blocks nBits 64ul) <= v nLen}
+  -> n:lbignum nLen
+  -> res:lbignum nLen ->
+  Stack unit
+  (requires fun h -> live h n /\ live h res /\ disjoint n res)
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_seq h1 res == S.precomp_r2_mod_n_ (v nBits) (as_seq h0 n))
+
+
+inline_for_extraction noextract
+val precomp_r2_mod_n_:
+    #nLen:BN.meta_len
+  -> (#[FStar.Tactics.Typeclasses.tcresolve ()] _ : BN.bn nLen)
+  -> precomp_r2_mod_n_aux_st nLen
+
+let precomp_r2_mod_n_ #nLen #_ nBits n res =
   memset res (u64 0) nLen;
   // Note here that BN.bit_set refers to the implicitly-defined projector for
   // the type class rather than the bn_bit_set operator. So we're really
   // selecting the implementation of bn_bit_set specialized for nLen!
-  BN.bit_set res (modBits -! 1ul);
+  BN.bit_set res (nBits -! 1ul);
 
   [@inline_let]
   let spec h = S.bn_lshift1_mod_n (as_seq h n) in
 
   let h0 = ST.get () in
-  loop1 h0 (128ul *! nLen +! 1ul -! modBits) res spec
+  loop1 h0 (128ul *! nLen +! 1ul -! nBits) res spec
   (fun i ->
-    Loops.unfold_repeati (128 * v nLen + 1 - v modBits) (spec h0) (as_seq h0 res) (v i);
+    Loops.unfold_repeati (128 * v nLen + 1 - v nBits) (spec h0) (as_seq h0 res) (v i);
     BN.add_mod_n n res res res
   )
+
+
+let precomp_r2_mod_n #nLen #_ nBits n res =
+  let mask =
+    if blocks nBits 64ul <=. nLen then
+      BC.bn_gt_pow2_mask nLen n (nBits -! 1ul)
+    else u64 0 in
+
+  let nBits = if FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 mask =^ 0uL) then 1ul else nBits in
+  precomp_r2_mod_n_ nBits n res
+
+
+let new_precomp_r2_mod_n r nBits nLen n =
+  if nLen =. 0ul || nBits =. 0ul
+  then B.null
+  else
+    let h0 = ST.get () in
+    let res = B.malloc r (u64 0) nLen in
+    let h1 = ST.get () in
+    B.(modifies_only_not_unused_in loc_none h0 h1);
+    assert (B.len res == nLen);
+    let res: Lib.Buffer.buffer Lib.IntTypes.uint64 = res in
+    assert (B.length res == FStar.UInt32.v nLen);
+    let res: lbignum nLen = res in
+    precomp_r2_mod_n #nLen #(BN.mk_runtime_bn nLen) nBits n res;
+    let h2 = ST.get () in
+    B.(modifies_only_not_unused_in loc_none h0 h2);
+    res
 
 
 inline_for_extraction noextract

@@ -49,21 +49,52 @@ val sub: Hacl.Bignum.Addition.bn_sub_eq_len_st n_limbs
   The outparam res is meant to be a 512-bit bignum, i.e. uint64_t[8]."]
 val mul: a:lbignum n_limbs -> b:lbignum n_limbs -> BN.bn_karatsuba_mul_st a b
 
-[@@ Comment "Write `a ^ b mod n1` in `res`.
+[@@ Comment "Write `a ^ b mod n` in `res`.
 
-  The arguments a, n1 and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
+  The arguments a, n, r2 and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
+  The argument r2 is a precomputed constant 2 ^ 512 mod n.
   The argument b is a bignum of any size, and bBits is an upper bound on the
   number of significant bits of b. For instance, if b is a 256-bit bignum,
   bBits should be 256. The function is *NOT* constant-time on the argument b."]
-val mod_exp: BE.bn_mod_exp_st 256ul n_limbs
+val mod_exp_precompr2: BE.bn_mod_exp_precompr2_st n_limbs
 
-[@@ Comment "Write `a ^ b mod n1` in `res`.
+[@@ Comment "Write `a ^ b mod n` in `res`.
 
-  The arguments a, n1 and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
+  The arguments a, n and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
+  The argument nBits can be less or equal to the exact number of bits of n, but not equal to 0.
+  The argument b is a bignum of any size, and bBits is an upper bound on the
+  number of significant bits of b. For instance, if b is a 256-bit bignum,
+  bBits should be 256. The function is *NOT* constant-time on the argument b."]
+val mod_exp: nBits:_ -> BE.bn_mod_exp_st n_limbs nBits
+
+[@@ Comment "Write `a ^ b mod n` in `res`.
+
+  The arguments a, n, r2 and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
+  The argument r2 is a precomputed constant 2 ^ 512 mod n.
   The argument b is a bignum of any size, and bBits is an upper bound on the
   number of significant bits of b. For instance, if b is a 256-bit bignum,
   bBits should be 256. The function is constant-time on the argument b."]
-val mod_exp_mont_ladder: BE.bn_mod_exp_mont_ladder_st 256ul n_limbs
+val mod_exp_mont_ladder_precompr2: BE.bn_mod_exp_mont_ladder_precompr2_st n_limbs
+
+[@@ Comment "Write `a ^ b mod n` in `res`.
+
+  The arguments a, n and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
+  The argument nBits can be less or equal to the exact number of bits of n, but not equal to 0.
+  The argument b is a bignum of any size, and bBits is an upper bound on the
+  number of significant bits of b. For instance, if b is a 256-bit bignum,
+  bBits should be 256. The function is constant-time on the argument b."]
+val mod_exp_mont_ladder: nBits:_ -> BE.bn_mod_exp_mont_ladder_st n_limbs nBits
+
+[@@ Comment "Compute `2 ^ (128 * nLen) mod n`.
+
+  The argument n points to a bignum of size nLen of valid memory.
+  The argument nBits can be less or equal to the exact number of bits of n.
+  The function returns a heap-allocated bignum of size nLen or NULL if nBits is equal to 0.
+
+  If the return value is non-null, clients must eventually call free(3) on it to
+  avoid memory leaks."]
+val new_precompr2: BM.new_precomp_r2_mod_n_st
+
 
 [@@ CPrologue
 "\n/********************/

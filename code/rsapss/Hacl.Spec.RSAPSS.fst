@@ -187,7 +187,7 @@ let rsapss_sign a modBits eBits dBits skey sLen salt msgLen msg =
   let m = create nLen (u64 0) in
   let m = update_sub m 0 (blocks emLen 8) emNat in
 
-  let s = bn_mod_exp_mont_ladder modBits nLen n m dBits d in
+  let s = bn_mod_exp_mont_ladder nLen modBits n m dBits d in
   sgnt_blocks_eq_nLen modBits;
   assert (blocks k 8 == nLen);
   let sgnt = bn_to_bytes_be k s in
@@ -236,9 +236,9 @@ let rsapss_sign_lemma a modBits eBits dBits skey sLen salt msgLen msg =
   S.os2ip_lemma emBits em;
 
   assert (bn_v m < bn_v n);
-  let s = bn_mod_exp_mont_ladder modBits nLen n m dBits d in
+  let s = bn_mod_exp_mont_ladder nLen modBits n m dBits d in
   Math.Lemmas.pow2_le_compat (64 * nLen) modBits;
-  bn_mod_exp_mont_ladder_lemma modBits nLen n m dBits d;
+  bn_mod_exp_mont_ladder_lemma nLen modBits n m dBits d;
 
   sgnt_blocks_eq_nLen modBits;
   assert (blocks k 8 == nLen);
@@ -325,7 +325,7 @@ let rsapss_verify a modBits eBits pkey sLen sgnt msgLen msg =
 
   let mask = bn_lt_mask s n in
   if FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 mask =^ ones U64 PUB) then begin
-    let m = bn_mod_exp modBits nLen n s eBits e in
+    let m = bn_mod_exp nLen modBits n s eBits e in
     em_blocks_lt_max_size_t modBits;
     assert (8 * blocks emLen 8 <= max_size_t);
 
@@ -373,9 +373,9 @@ let rsapss_verify_lemma a modBits eBits pkey sLen sgnt msgLen msg =
   bn_lt_mask_lemma s n;
   let res =
   if FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 mask =^ ones U64 PUB) then begin
-    let m = bn_mod_exp modBits nLen n s eBits e in
+    let m = bn_mod_exp nLen modBits n s eBits e in
     Math.Lemmas.pow2_le_compat (64 * nLen) modBits;
-    bn_mod_exp_lemma modBits nLen n s eBits e;
+    bn_mod_exp_lemma nLen modBits n s eBits e;
     em_blocks_lt_max_size_t modBits;
     assert (8 * blocks emLen 8 <= max_size_t);
 

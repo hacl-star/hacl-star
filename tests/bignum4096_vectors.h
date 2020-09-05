@@ -6,6 +6,7 @@
 
 //nBytesLen = 512
 typedef struct {
+  size_t nBits;
   uint8_t *nBytes;
   size_t bBits;
   uint8_t *bBytes;
@@ -15,6 +16,7 @@ typedef struct {
 
 //nLen = 64
 typedef struct {
+  size_t nBits;
   uint64_t *n;
   size_t bBits;
   uint64_t *b;
@@ -245,6 +247,7 @@ static uint64_t test1_res[64] = {
 
 static bignum4096_bytes_be_test_vector vectors_be[] = {
   {
+    .nBits = 4096,
     .nBytes = test1_nBytes,
     .bBits = 4096,
     .bBytes = test1_bBytes,
@@ -256,6 +259,7 @@ static bignum4096_bytes_be_test_vector vectors_be[] = {
 
 static bignum4096_test_vector vectors[] = {
   {
+    .nBits = 4096,
     .n = test1_n,
     .bBits = 4096,
     .b = test1_b,

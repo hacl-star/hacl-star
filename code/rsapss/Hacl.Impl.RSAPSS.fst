@@ -290,7 +290,7 @@ let rsapss_sign a modBits eBits dBits skey sLen salt msgLen msg sgnt =
     (fun h -> Hacl.Spec.Bignum.bn_from_bytes_be (v emLen) (as_seq h' em))
     (fun _ -> bn_from_bytes_be emLen em (sub m 0ul (blocks emLen 8ul)));
 
-  bn_mod_exp_mont_ladder modBits nLen n m dBits d s;
+  bn_mod_exp_mont_ladder nLen modBits n m dBits d s;
   LS.sgnt_blocks_eq_nLen (v modBits);
   assert (v (blocks k 8ul) == v nLen);
   bn_to_bytes_be k s sgnt;
@@ -365,7 +365,7 @@ let rsapss_verify a modBits eBits pkey sLen sgnt msgLen msg =
   let mask = bn_lt_mask nLen s n in
   let res =
     if FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 mask =^ ones U64 PUB) then begin
-      bn_mod_exp modBits nLen n s eBits e m;
+      bn_mod_exp nLen modBits n s eBits e m;
 
       LS.em_blocks_lt_max_size_t (v modBits);
       assert (8 * v (blocks emLen 8ul) <= max_size_t);
