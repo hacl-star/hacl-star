@@ -349,6 +349,7 @@ val montgomery_ladder_power_step: #c: curve -> a: felem c -> b: felem c
 let montgomery_ladder_power_step #c a b scalar i = 
     let h0 = ST.get() in 
   let bit0 = getScalarLenU64 c -. 1ul -. i in 
+  assume (v bit0 < getScalarLenNat c);
   let bit = scalar_bit scalar bit0 in 
   cswap bit a b;
   montgomery_ladder_power_step0 a b;

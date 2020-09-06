@@ -767,12 +767,13 @@ let upload_one_montg_form #c b =
     upd b (size 5) (u64 0)
 
 
-let scalar_bit #buf_type s n =
+let scalar_bit #c #buf_type s n =
   let h0 = ST.get () in
   mod_mask_lemma ((Lib.Sequence.index (as_seq h0 s) (v n / 8)) >>. (n %. 8ul)) 1ul;
-  assert_norm (1 = pow2 1 - 1);
+  assert_norm (1 = pow2 1 - 1); 
   assert (v (mod_mask #U8 #SEC 1ul) == v (u8 1));
   to_u64 ((s.(n /. 8ul) >>. (n %. 8ul)) &. u8 1)
+
 
 
 let add_long_without_carry #c t t1 result  = 

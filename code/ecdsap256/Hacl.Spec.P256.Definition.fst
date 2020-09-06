@@ -162,7 +162,7 @@ let p256_inverse_list: x: list uint8 =
 
 
 inline_for_extraction noextract
-let p384_invserse_list: x: list uint8 = 
+let p384_inverse_list: x: list uint8 = 
   [ 
     u8 253; u8 255; u8 255; u8 255; u8 0;   u8 0;   u8 0;   u8 0;
     u8 0;   u8 0  ; u8 0  ; u8 0  ; u8 255; u8 255; u8 255; u8 255;
@@ -179,7 +179,7 @@ let prime_inverse_list (c: curve) : x: list uint8 =
   |P256 -> 
     p256_inverse_list
   |P384 -> 
-    p384_invserse_list
+    p384_inverse_list
 
 (* 
 

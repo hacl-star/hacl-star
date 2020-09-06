@@ -70,8 +70,13 @@ let getScalarLen curve =
   |P256 -> 32ul
   |P384 -> 48ul
 
+
+inline_for_extraction
+let getScalarLenU64 (c : curve) = getScalarLen c *. 8ul
+
 inline_for_extraction
 let getScalarLenNat curve = uint_v (getScalarLen curve)
+
 
 inline_for_extraction
 let getPower (c : curve) : a: nat {a = v (getCoordinateLenU64 c) * 64 } = 
@@ -104,7 +109,7 @@ let getPrime curve =
 inline_for_extraction
 let getKo curve : uint64 = 
   match curve with 
-  |P256 -> 1ul
+  |P256 -> (u64 1)
   |P384 -> (u64 4294967297)
 
 
@@ -276,11 +281,15 @@ let _norm #curve (p:point_nat_prime #curve) : point_nat_prime #curve =
   (x3, y3, z3)
 
 
-let scalar_bytes (#c: curve) = lbytes (getCoordinateLen c)
+let scalar_bytes (#c: curve) = lbytes (getScalarLenNat c)
 
+(* let ith_bit (k:lbytes 32) (i:nat{i < 256}) : uint64 =
+  let q = 31 - i / 8 in let r = size (i % 8) in
+  to_u64 ((index k q >>. r) &. u8 1) *)
 
-let ith_bit (#c: curve) (k:lbytes (getCoordinateLen c)) (i:nat{i < getPower c}) : uint64 =
-  let q = (getCoordinateLen c - 1) - i / 8 in 
+let ith_bit (#c: curve) (k:lbytes (getScalarLenNat c)) 
+  (i:nat{i < v (getScalarLenU64 c)}) : uint64 =
+  let q = (getScalarLenNat c - 1) - i / 8 in 
   let r = size (i % 8) in
   to_u64 ((index k q >>. r) &. u8 1)
 

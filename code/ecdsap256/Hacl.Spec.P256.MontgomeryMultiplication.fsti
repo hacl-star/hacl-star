@@ -30,16 +30,20 @@ val toDomain_: #c: curve -> a: int -> Tot nat
 
 val lemmaFromDomain: #c: curve -> a: int -> Lemma (fromDomain_ #c a == a * modp_inv2 #c (pow2 (getPower c)) % getPrime c)
 
-val lemmaToDomain: #c: curve -> a: int -> Lemma (toDomain_ #c a == a * (pow2 (getPower c)) % getPower c)
+val lemmaToDomain: #c: curve -> a: int -> Lemma (toDomain_ #c a == a * (pow2 (getPower c)) % getPrime c)
 
-val lemmaToDomainAndBackIsTheSame: #c: curve -> a: nat {a < getPrime c} -> Lemma (fromDomain_ #c (toDomain_ #c a) == a)
+val lemmaToDomainAndBackIsTheSame: #c: curve -> a: nat {a < getPrime c} ->
+  Lemma (fromDomain_ #c (toDomain_ #c a) == a)
   [SMTPat (fromDomain_ #c (toDomain_ #c a))]
 
-val lemmaFromDomainToDomain: #c: curve -> a: nat {a < getPrime c} -> Lemma (toDomain_ #c (fromDomain_ #c a) == a)
+val lemmaFromDomainToDomain: #c: curve -> a: nat {a < getPrime c} -> 
+  Lemma (toDomain_ #c (fromDomain_ #c a) == a)
 
-val lemmaFromDomainToDomainModuloPrime: #c: curve -> a: int -> Lemma (a % (getPrime c) == fromDomain_ #c (toDomain_ #c a))
+val lemmaFromDomainToDomainModuloPrime: #c: curve -> a: int -> 
+  Lemma (a % (getPrime c) == fromDomain_ #c (toDomain_ #c a))
 
-val inDomain_mod_is_not_mod: #c: curve -> a: int -> Lemma (toDomain_ #c a == toDomain_ #c (a % getPrime c))
+val inDomain_mod_is_not_mod: #c: curve -> a: int ->
+  Lemma (toDomain_ #c a == toDomain_ #c (a % getPrime c))
 
 val multiplicationInDomainNat: #c: curve -> 
   #k: nat -> #l: nat ->

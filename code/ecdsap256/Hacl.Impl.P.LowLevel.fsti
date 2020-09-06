@@ -17,7 +17,7 @@ open Hacl.Spec.P256.MontgomeryMultiplication
 
 
 inline_for_extraction
-let prime256_buffer: x: glbuffer uint64 4ul {witnessed #uint64 #(size 4) x (Lib.Sequence.of_list p256_prime_list) /\ recallable x /\ felem_seq_as_nat P256 (Lib.Sequence.of_list (p256_prime_list)) == prime256} = 
+let prime256_buffer: x: glbuffer uint64 4ul {witnessed #uint64 #(size 4) x (Lib.Sequence.of_list p256_prime_list) /\ recallable x /\ felem_seq_as_nat P256 (Lib.Sequence.of_list (p256_prime_list)) == prime256} =
   assert_norm (felem_seq_as_nat P256 (Lib.Sequence.of_list (p256_prime_list)) == prime256);
   createL_global p256_prime_list
 
@@ -54,27 +54,48 @@ let order_buffer (#c: curve): (x: glbuffer uint64 (getCoordinateLenU64 c)
   | P384 -> prime384order_buffer
 
 
+let primep256_inverse_seq: s: Lib.Sequence.lseq uint8 32 {Lib.ByteSequence.nat_from_intseq_le s == getPrime P256 - 2} = 
+  let prime = prime_inverse_list P256 in 
+  assert_norm (List.Tot.length prime == 32);
+  assert_norm (Spec.ECDSA.Lemmas.nat_from_intlist_le prime == getPrime P256 - 2);
+  Spec.ECDSA.Lemmas.nat_from_intlist_seq_le 32 prime;
+  Lib.Sequence.of_list prime
+
+
+let primep384_inverse_seq: s: Lib.Sequence.lseq uint8 48 {Lib.ByteSequence.nat_from_intseq_le s == getPrime P384 - 2} = 
+  let prime = prime_inverse_list P384 in 
+  assert_norm (List.Tot.length prime == 48);
+  assert_norm (Spec.ECDSA.Lemmas.nat_from_intlist_le prime == getPrime P384 - 2);
+  Spec.ECDSA.Lemmas.nat_from_intlist_seq_le 48 prime;
+  Lib.Sequence.of_list prime
+
+
+let prime_inverse_seq (#c: curve) : s: Lib.Sequence.lseq uint8 (v (getCoordinateLenU c)) {Lib.ByteSequence.nat_from_intseq_le s == getPrime c - 2} = 
+    let prime = prime_inverse_list c in 
+    assert_norm (List.Tot.length (prime_inverse_list P256) == 32);
+    assert_norm (List.Tot.length (prime_inverse_list P384) == 48);
+    assert_norm (Spec.ECDSA.Lemmas.nat_from_intlist_le (prime_inverse_list P256) == getPrime P256 - 2);
+    assert_norm (Spec.ECDSA.Lemmas.nat_from_intlist_le (prime_inverse_list P384) == getPrime P384 - 2);
+    Spec.ECDSA.Lemmas.nat_from_intlist_seq_le (v (getCoordinateLenU c)) prime;
+    
+    Lib.Sequence.of_list (prime_inverse_list c)
+  
+  
+
 inline_for_extraction
-let prime256_inverse_buffer: x: glbuffer uint8 (getCoordinateLenU P256)
-  {witnessed #uint8 #(v (getCoordinateLenU P256)) x 
-  (Lib.Sequence.of_list p256_inverse_list) /\ recallable x /\ 
-  felem_seq_as_nat P256 (Lib.Sequence.of_list (prime_inverse_list P256)) == getPrime P256 - 2} = 
-  createL_global (prime_inverse_list P256)
-
+let prime256_inverse_buffer: x: glbuffer uint8 32ul
+  {witnessed #uint8 #(size 32) x primep256_inverse_seq /\ recallable x} = 
+  createL_global p256_inverse_list
 
 inline_for_extraction
-let prime384_inverse_buffer: x: glbuffer uint8 (getCoordinateLenU P384)
-  {witnessed #uint8 #(v (getCoordinateLenU P384)) x 
-  (Lib.Sequence.of_list p256_inverse_list) /\ recallable x /\ 
-  felem_seq_as_nat P384 (Lib.Sequence.of_list (prime_inverse_list P384)) == getPrime P384 - 2} = 
-  createL_global (prime_inverse_list P384)
-
+let prime384_inverse_buffer: x: glbuffer uint8 48ul
+  {witnessed #uint8 #(size 48) x primep384_inverse_seq /\ recallable x} = 
+  createL_global p384_inverse_list
 
 
 inline_for_extraction
 let prime_inverse_buffer (#c: curve): (x: glbuffer uint8 (getCoordinateLenU c)
-  {witnessed #uint8 #(getCoordinateLenU c) x (Lib.Sequence.of_list (prime_inverse_list c)) 
-  /\ recallable x /\ felem_seq_as_nat c (Lib.Sequence.of_list (prime_inverse_list c)) == getPrime c - 2}) = 
+  {witnessed #uint8 #(getCoordinateLenU c) x (prime_inverse_seq #c) /\ recallable x}) = 
     match c with
   | P256 -> prime256_inverse_buffer
   | P384 -> prime384_inverse_buffer
@@ -305,7 +326,8 @@ val scalar_bit: #c: curve -> #buf_type: buftype
   -> n:size_t{v n < getScalarLenNat c}
   -> Stack uint64
     (requires fun h0 -> live h0 s)
-    (ensures  fun h0 r h1 -> h0 == h1 /\ r == ith_bit #c (as_seq h0 s) (v n) /\ v r <= 1)
+    (ensures  fun h0 r h1 -> h0 == h1 /\ r == Spec.ECDSA.ith_bit_felem #c (as_seq h0 s) (v n) 
+    /\ v r <= 1)
       
 
 inline_for_extraction noextract
