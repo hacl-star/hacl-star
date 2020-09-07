@@ -34,8 +34,9 @@ friend Hacl.Spec.P256.MontgomeryMultiplication
 val fsquarePowN: n: size_t -> a: felem P256 -> Stack unit 
   (requires (fun h -> live h a /\ as_nat P256 h a < prime256)) 
   (ensures (fun h0 _ h1 -> 
+    let k = fromDomain_ #P256 (as_nat P256 h0 a) in
     modifies (loc a) h0 h1 /\ as_nat P256 h1 a < prime256 /\ 
-    (let k = fromDomain_ #P256 (as_nat P256 h0 a) in as_nat P256 h1 a = toDomain_ #P256 (pow k (pow2 (v n))))))
+    as_nat P256 h1 a = toDomain_ #P256 (pow k (pow2 (v n)))))
 
 
 let fsquarePowN n a = 
@@ -58,30 +59,22 @@ let fsquarePowN n a =
      modulo_distributivity_mult (pow k (pow2 (v x))) (pow k (pow2 (v x))) prime256; 
      pow_plus k  (pow2 (v x)) (pow2 (v x )); 
      pow2_double_sum (v x);
-     inDomain_mod_is_not_mod #P256 (pow k (pow2 (v x + 1)))
-  )
+     inDomain_mod_is_not_mod #P256 (pow k (pow2 (v x + 1))))
 
 
 val fsquarePowNminusOne: n: size_t -> a: felem P256 -> tempBuffer: felem P256 -> Stack unit 
   (requires (fun h -> live h a /\ live h tempBuffer /\ as_nat P256 h a < prime256 /\ disjoint a tempBuffer)) 
   (ensures (fun h0 _ h1 -> 
+    let k = fromDomain_ #P256 (as_nat P256 h0 a) in  
     as_nat P256 h1 a < prime256 /\ as_nat P256 h1 tempBuffer < prime256 /\ 
     modifies (loc a |+| loc tempBuffer) h0 h1 /\ 
-    (
-      let k = fromDomain_ #P256 (as_nat P256 h0 a) in  
-      as_nat P256 h1 a = toDomain_ #P256 (pow k (pow2 (v n))) /\ as_nat P256 h1 tempBuffer = 
-	toDomain_ #P256 (pow k (pow2 (v n) -1 )))
-    )
-   )
+    as_nat P256 h1 a = toDomain_ #P256 (pow k (pow2 (v n))) /\ as_nat P256 h1 tempBuffer = 
+    toDomain_ #P256 (pow k (pow2 (v n) -1 ))))
 
 let fsquarePowNminusOne n a b = 
   let h0 = ST.get() in
-  assert_norm(prime256 > 3);
-  Lib.Buffer.upd b (size 0) (u64 1);
-  Lib.Buffer.upd b (size 1) (u64 18446744069414584320);
-  Lib.Buffer.upd b (size 2) (u64 18446744073709551615);
-  Lib.Buffer.upd b (size 3) (u64 4294967294);
-
+  upload_one_montg_form #P256 b;
+  
   let one = (u64 1, u64 18446744069414584320, u64 18446744073709551615, u64 4294967294) in 
       lemmaFromDomainToDomain #P256 (as_nat P256 h0 a);
       lemmaToDomain #P256 1;
@@ -91,8 +84,17 @@ let fsquarePowNminusOne n a b =
 
   let inv (h0: HyperStack.mem) (h1: HyperStack.mem) (i: nat) : Type0 = 
     let k = fromDomain_ #P256 (as_nat P256 h0 a) in 
-    as_nat P256 h1 b = toDomain_ #P256 (pow k (pow2 i - 1)) /\ as_nat  P256 h1 a < prime256 /\ live h1 a /\
-    as_nat P256 h1 a = toDomain_ #P256 (pow k (pow2 i)) /\ as_nat P256 h1 b < prime256 /\ live h1 b /\ modifies (loc a |+| loc b) h0 h1 in 
+    as_nat P256 h1 b = toDomain_ #P256 (pow k (pow2 i - 1)) /\ 
+    as_nat  P256 h1 a < prime256 /\ 
+    live h1 a /\
+    as_nat P256 h1 a = toDomain_ #P256 (pow k (pow2 i)) /\ 
+    as_nat P256 h1 b < prime256 /\ 
+    live h1 b /\ modifies (loc a |+| loc b) h0 h1 in 
+
+  let h1 = ST.get() in 
+  power_one_2 (fromDomain_ #P256 (as_nat P256 h0 a));
+  power_zero (fromDomain_ #P256 (as_nat P256 h0 a));
+  
   for (size 0) n (inv h0) (fun x -> 
     let h0_ = ST.get() in 
     montgomery_multiplication_buffer b a b;
@@ -111,9 +113,9 @@ let fsquarePowNminusOne n a b =
     pow2_double_sum (v x);
 
     inDomain_mod_is_not_mod #P256 (pow k (pow2 (v x + 1)));
-    inDomain_mod_is_not_mod #P256 (pow k (pow2 (v x + 1) - 1))
-)
-
+    inDomain_mod_is_not_mod #P256 (pow k (pow2 (v x + 1) - 1)))
+    
+    
 
 inline_for_extraction noextract   
 val norm_part_one: a: felem P256 -> tempBuffer: lbuffer uint64 (size 8) -> 
@@ -349,6 +351,7 @@ val montgomery_ladder_power_step: #c: curve -> a: felem c -> b: felem c
 let montgomery_ladder_power_step #c a b scalar i = 
     let h0 = ST.get() in 
   let bit0 = getScalarLenU64 c -. 1ul -. i in 
+  assume (v bit0 < getScalarLenNat c);
   let bit = scalar_bit scalar bit0 in 
   cswap bit a b;
   montgomery_ladder_power_step0 a b;

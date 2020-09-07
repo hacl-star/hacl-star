@@ -159,7 +159,7 @@ let changeEndian #c b =
 
   [@inline_let]
   let spec h0 = Hacl.Spec.P256.Definition.changeEndianStep #c  in 
-
+  admit();
    [@inline_let]
   let acc (h: mem) : GTot (felem_seq c) = as_seq h b in 
   Lib.LoopCombinators.eq_repeati0 256 (spec h0) (acc h0);
@@ -208,7 +208,6 @@ let changeEndian #c b =
     admit()
   
 
-
 val toUint64CEP256: i:lbuffer uint8 (getScalarLen P256) -> o: felem P256 -> Stack unit
   (requires fun h -> live h i /\ live h o /\ disjoint i o)
   (ensures  fun h0 _ h1 ->
@@ -246,14 +245,12 @@ val reduction_prime_2prime_with_carry_cin: #c: curve ->
       (as_nat c h x + uint_v cin * getPower2 c) < 2 * getPrime c)
     (ensures fun h0 _ h1 ->
       modifies (loc result) h0 h1 /\
-      as_nat c h1 result = (as_nat c h0 x + uint_v cin * getPower2 c) % getPrime c
-      
-      )
+      as_nat c h1 result = (as_nat c h0 x + uint_v cin * getPower2 c) % getPrime c)
 
 
 #set-options " --z3rlimit 400"
 
-val lemma_test: 
+val lemma_reduction_prime_2prime_with_carry_cin: 
   c: curve ->
   cin: nat {cin <= 1} ->
   x: nat {x + cin * getPower2 c < 2 * getPrime c /\ x < getPower2 c} -> 
@@ -261,7 +258,7 @@ val lemma_test:
   result: nat {if cin < carry0 then result = x else result = x - getPrime c + carry0 * getPower2 c}
   -> Lemma (result = (x + cin * getPower2 c) % getPrime c)
 
-let lemma_test c cin x carry0 result = 
+let lemma_reduction_prime_2prime_with_carry_cin c cin x carry0 result = 
   let n = x + cin * getPower2 c in 
   assert(if cin < carry0 then result = x else result = x - getPrime c + carry0 * getPower2 c);
   assert(cin < carry0 <==> cin = 0 && carry0 = 1);
@@ -285,7 +282,7 @@ let lemma_test c cin x carry0 result =
     assert (if (cin = 0 && carry0 = 1) then begin
       small_modulo_lemma_1 result(getPrime c); 
       result = n % getPrime c end else True)
-  
+
 
 val lemma_cin_1: #c: curve -> x: nat -> cin : nat {x + cin * getPower2 c < 2 * getPrime c} -> 
   Lemma (cin <= 1)
@@ -319,26 +316,62 @@ let reduction_prime_2prime_with_carry_cin #c cin x result =
   assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 384);
 
   lemma_cin_1 #c (as_nat c h0 x) (uint_v cin);
-  lemma_test c (v cin) (as_nat c h0 x) (uint_v carry0) (as_nat c h2 result)
+  lemma_reduction_prime_2prime_with_carry_cin c (v cin) (as_nat c h0 x) (uint_v carry0) (as_nat c h2 result)
 
+
+val lemma_test0: #c: curve -> x: widefelem c -> h0: mem ->
+  Lemma (
+    let len = getCoordinateLenU64 c in 
+    wide_as_nat c h0 x = as_nat c h0 (gsub x (size 0) len) + as_nat c h0 (gsub x len len) * getPower2 c)
+
+let lemma_test0 #c x h0 = admit()
+
+
+val lemma_less_2prime_p256: h0: mem ->
+  x: widefelem P256 {wide_as_nat P256 h0 x < 2 * getPrime P256} -> 
+  Lemma 
+    (wide_as_nat P256 h0 x = as_nat P256 h0 (gsub x (size 0) (size 4)) +
+      v (Lib.Sequence.index (as_seq h0 x) 4) * getPower2 P256)
+
+let lemma_less_2prime_p256 h0 x = 
+  assert_norm (2 * getPrime P256 < pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64);
+  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 == pow2 256)
+
+
+val lemma_less_2prime_p384: h0: mem -> 
+  x: widefelem P384 {wide_as_nat P384 h0 x < 2 * getPrime P384} -> 
+  Lemma 
+    (wide_as_nat P384 h0 x = as_nat P384 h0 (gsub x (size 0) (size 6)) +
+      v (Lib.Sequence.index (as_seq h0 x) 6) * getPower2 P384)
+
+let lemma_less_2prime_p384 h0 x = 
+  assert_norm (2 * getPrime P384 < pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2
+64);
+  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 == pow2 384)
+
+
+val lemma_less_2prime: #c: curve -> h0: mem 
+  -> x: widefelem c {wide_as_nat c h0 x < 2 * getPrime c} -> 
+  Lemma (
+    let len = getCoordinateLenU64 c in 
+    wide_as_nat c h0 x = as_nat c h0 (gsub x (size 0) len) + v (Lib.Sequence.index (as_seq h0 x) (v len)) * getPower2 c)
+
+let lemma_less_2prime #c h0 x = 
+  match c with 
+  |P256 -> lemma_less_2prime_p256 h0 x
+  |P384 -> lemma_less_2prime_p384 h0 x
+  
 
 let reduction_prime_2prime_with_carry #c x result =
-  push_frame();
-    let h0 = ST.get() in
-    let len = getCoordinateLenU64 c in
-    let tempBuffer = create len (u64 0) in
-    let tempBufferForSubborrow = create (size 1) (u64 0) in
+  let len = getCoordinateLenU64 c in
+  
+  let cin = Lib.Buffer.index x len in
+  let x_ = Lib.Buffer.sub x (size 0) len in
+  let x__ = Lib.Buffer.sub x len len in 
 
-    let cin = Lib.Buffer.index x len in
-    let x_ = Lib.Buffer.sub x (size 0) len in
-
-    recall_contents (prime_buffer #c) (Lib.Sequence.of_list (prime_list c));
-
-    let c = sub_bn_gl x_ (prime_buffer #c) tempBuffer in
-    let carry = sub_borrow_u64 c cin (u64 0) tempBufferForSubborrow in
-    cmovznz4 carry tempBuffer x_ result;
-    admit();
- pop_frame()
+  let h0 = ST.get() in 
+  lemma_less_2prime #c h0 x;
+  reduction_prime_2prime_with_carry_cin cin x_ result
 
 
 val lemma_reduction1: #c: curve -> a: nat {a < getPower2 c}
@@ -365,7 +398,10 @@ let reduction_prime_2prime #c x result =
   let r = sub_bn_gl x (prime_buffer #c) tempBuffer in
   cmovznz4 r tempBuffer x result;
     let h1 = ST.get() in
-    lemma_reduction1 #c (as_nat c h0 x) (as_nat c h1 result);
+  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
+  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 384);
+  
+  lemma_reduction1 #c (as_nat c h0 x) (as_nat c h1 result);
   pop_frame()
 
 
@@ -379,6 +415,7 @@ let felem_add #c arg1 arg2 out =
   inDomain_mod_is_not_mod #c (fromDomain_ #c (as_nat c h0 arg1) + fromDomain_ #c (as_nat c h0 arg2))
 
 
+
 let felem_double #c arg1 out =
   let h0 = ST.get() in
 
@@ -389,30 +426,33 @@ let felem_double #c arg1 out =
   inDomain_mod_is_not_mod #c (fromDomain_ #c (as_nat c h0 arg1) + fromDomain_ #c (as_nat c h0 arg1))
 
 
+
 let felem_sub #c arg1 arg2 out =
   assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
+  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 384);
     let h0 = ST.get() in
   let t = sub_bn arg1 arg2 out in
-  let cc = add_dep_prime #c out t out in
-  (*
-  modulo_addition_lemma  (as_nat P256 h0 arg1 - as_nat P256  h0 arg2) prime256 1;
-    let h2 = ST.get() in
-      assert(
-      if as_nat P256 h0 arg1 - as_nat P256 h0 arg2 >= 0 then
-      begin
-	modulo_lemma (as_nat P256 h0 arg1 - as_nat P256 h0 arg2) prime256;
-	as_nat P256 h2 out == (as_nat P256 h0 arg1 - as_nat P256 h0 arg2) % prime256
-  end
-      else
-          begin
-      modulo_lemma (as_nat P256 h2 out) prime256;
-            as_nat P256 h2 out == (as_nat P256 h0 arg1 - as_nat P256 h0 arg2) % prime256
-    end);
+  let cc = add_dep_prime #c out t out in 
 
-    substractionInDomain #P256 (felem_seq_as_nat P256 (as_seq h0 arg1)) (felem_seq_as_nat P256 (as_seq h0 arg2));
-    inDomain_mod_is_not_mod #P256 (fromDomain_ #P256 (felem_seq_as_nat P256 (as_seq  h0 arg1)) - fromDomain_ #P256 (felem_seq_as_nat P256 (as_seq h0 arg2))) *)
-    admit();
-    cc
+  modulo_addition_lemma (as_nat c h0 arg1 - as_nat c h0 arg2) (getPrime c) 1;
+
+  let h2 = ST.get() in
+  assert(
+    let prime = getPrime c in 
+    if as_nat c h0 arg1 - as_nat c h0 arg2 >= 0 then
+      begin
+	modulo_lemma (as_nat c h0 arg1 - as_nat c h0 arg2) prime;
+	as_nat c h2 out == (as_nat c h0 arg1 - as_nat c h0 arg2) % prime
+      end
+    else
+      begin
+	modulo_lemma (as_nat c h2 out) prime;
+	as_nat c h2 out == (as_nat c h0 arg1 - as_nat c h0 arg2) % prime
+      end);
+
+  substractionInDomain #c (as_nat c h0 arg1) (as_nat c h0 arg2); 
+  inDomain_mod_is_not_mod #c (fromDomain_ #c (as_nat c h0 arg1) - fromDomain_ #c (as_nat c h0 arg2));
+  ()
 
 
 let mul #c f r out =
@@ -429,7 +469,6 @@ let eq0_u64 a =
 let eq1_u64 a =
   neq_mask_lemma a (u64 0);
   neq_mask a (u64 0)
-
 
 
 let isZero_uint64_CT #c f =

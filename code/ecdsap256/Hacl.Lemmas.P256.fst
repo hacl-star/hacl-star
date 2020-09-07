@@ -331,6 +331,11 @@ let lemma_xor_copy_cond a b mask =
     logxor_lemma a b
 
 
+val power_zero: a: nat -> Lemma (pow a 0 == 1)
+
+let power_zero a = ()
+
+
 val power_one: a: nat -> Lemma (pow 1 a == 1) 
 
 let rec power_one a = 
