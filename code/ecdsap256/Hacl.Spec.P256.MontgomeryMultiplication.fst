@@ -359,7 +359,7 @@ let rec lemma_exponen_spec #c k start index =
 
 
 let pow_spec #c k p =
-  let a, b = Lib.LoopCombinators.repeati (getPower c) (_pow_step k) (1, p) in 
+  let a, b = Lib.LoopCombinators.repeati (getScalarLenNat c) (_pow_step k) (1, p) in 
   lemma_exponen_spec k (1, p) (getPower c);
   a
 

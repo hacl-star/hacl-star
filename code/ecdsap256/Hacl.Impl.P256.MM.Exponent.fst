@@ -167,8 +167,8 @@ val norm_part_three:a: felem P256 -> tempBuffer: lbuffer uint64 (size 8) ->
     let buffer_result = gsub tempBuffer (size 4) (size 4) in 
     let k = fromDomain_ #P256 (as_nat P256 h0 a) in 
     modifies1 tempBuffer h0 h1 /\ 
-    as_nat P256 h1 buffer_result < prime256
-    /\ as_nat P256 h1 buffer_result = toDomain_ #P256 (pow k ((pow2 94 - 1) * pow2 2) % prime256))
+    as_nat P256 h1 buffer_result < prime256 /\ 
+    as_nat P256 h1 buffer_result = toDomain_ #P256 (pow k ((pow2 94 - 1) * pow2 2) % prime256))
 
 let norm_part_three a tempBuffer = 
   let h0 = ST.get() in 
@@ -191,6 +191,7 @@ let norm_part_three a tempBuffer =
 
 val lemma_inDomainModulo: a: nat -> b: nat -> Lemma ((toDomain_ #P256 ((a % prime256) * (b % prime256) % prime256) = toDomain_ #P256 (a * b % prime256)))
 
+
 let lemma_inDomainModulo a b = 
   lemma_mod_mul_distr_l a (b % prime256) prime256;
   lemma_mod_mul_distr_r a b prime256
@@ -208,10 +209,10 @@ let big_power a b c d e =
   pow_plus a d e;
   pow_plus a (b + c) (d + e)
 
+
 val lemma_mul_nat: a: nat -> b: nat -> Lemma (a * b >= 0)
 
 let lemma_mul_nat a b = ()
-
 
 
 val exponent_p256: a: felem P256 -> result: felem P256 ->  Stack unit
@@ -350,15 +351,13 @@ val montgomery_ladder_power_step: #c: curve -> a: felem c -> b: felem c
 
 let montgomery_ladder_power_step #c a b scalar i = 
     let h0 = ST.get() in 
-  let bit0 = getScalarLenU64 c -. 1ul -. i in 
-  assume (v bit0 < getScalarLenNat c);
+  let bit0 = getScalarLenU64 c -. 1ul -. i in  
   let bit = scalar_bit scalar bit0 in 
   cswap bit a b;
   montgomery_ladder_power_step0 a b;
   cswap bit a b;
-  lemma_swaped_steps #c (fromDomain_ #c (as_nat c h0 a)) (fromDomain_ #c (as_nat c h0 b));
-  admit()
-
+  lemma_swaped_steps #c (fromDomain_ #c (as_nat c h0 a)) (fromDomain_ #c (as_nat c h0 b))
+  
 
 val _montgomery_ladder_power: #c: curve -> a: felem c -> b: felem c 
   -> scalar: glbuffer uint8 (getScalarLen c) -> Stack unit
@@ -370,8 +369,7 @@ val _montgomery_ladder_power: #c: curve -> a: felem c -> b: felem c
       let b_ = fromDomain_ #c (as_nat c h0 b) in 
       let (r0D, r1D) = Lib.LoopCombinators.repeati (getScalarLenNat c) (_pow_step #c (as_seq h0 scalar)) (a_, b_) in 
       r0D == fromDomain_ #c (as_nat c h1 a) /\ r1D == fromDomain_ #c (as_nat c h1 b) /\
-      as_nat c h1 a < getPrime c /\ as_nat c h1 b < getPrime c)
-  )
+      as_nat c h1 a < getPrime c /\ as_nat c h1 b < getPrime c))
 
   
 let _montgomery_ladder_power #c a b scalar = 
@@ -401,28 +399,47 @@ val montgomery_ladder_power: #c: curve -> a: felem c
       (
 	let r0D = pow_spec #c (as_seq h0 scalar) (fromDomain_ #c (as_nat c h0 a)) in 
 	r0D == fromDomain_ #c (as_nat c h1 result)
-      ) 
-    )
+      ) /\
+
+      (
+      let k = fromDomain_ #c (as_nat c h0 a) in 
+      let scalar = as_seq h0 scalar in 
+      let prime = getPrime c in 
+      as_nat c h1 result = toDomain_ #c ((pow k (Lib.ByteSequence.nat_from_bytes_le scalar) % getPrime c
+      ))))
 
 
 let montgomery_ladder_power #c a scalar result = 
-  assert_norm (1 < prime256);
   push_frame(); 
-  let sz = getCoordinateLenU64 c in 
-  let p = create sz (u64 0) in  
+    let h0 = ST.get() in 
+  let len = getCoordinateLenU64 c in 
+  let p = create len (u64 0) in  
     upload_one_montg_form #c p; 
-      _montgomery_ladder_power #c p a scalar;
-     lemmaToDomainAndBackIsTheSame #c 1;  
+    _montgomery_ladder_power #c p a scalar;
+    lemmaToDomainAndBackIsTheSame #c 1;  
     copy result p;
-    admit(); 
+  let h1 = ST.get() in 
+ 
+  assert(
+    let k = as_seq h0 scalar in 
+    let a = fromDomain_ #c (as_nat c h0 a) in 
+    let r0D = pow_spec #c k a in 
+    
+    r0D == pow a (Lib.ByteSequence.nat_from_bytes_le k) % getPrime c /\
+    r0D == fromDomain_ #c (as_nat c h1 result));
+
+  lemmaFromDomainToDomain #c (as_nat c h1 result); 
   pop_frame()  
 
 
 #reset-options " --z3rlimit 200"
 let exponent #c a result = 
   match c with 
-  |P384 -> montgomery_ladder_power #c a prime_inverse_buffer result
-  |P256 -> exponent_p256 a result
+  |P384 ->
+    recall_contents (prime_inverse_buffer #c) (prime_inverse_seq #c);
+    montgomery_ladder_power #c a prime_inverse_buffer result
+  |P256 -> 
+    exponent_p256 a result
 
 
 
