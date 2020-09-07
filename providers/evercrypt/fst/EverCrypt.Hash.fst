@@ -445,7 +445,7 @@ let modulo_sub_lemma a b c =
 // The deprecated update_last just calls the new update_last.
 // This one is a bit trickier than the others because we need to recompute
 // the length of the data seen so far.
-#push-options "--z3rlimit 200"
+#push-options "--z3rlimit 800"
 let update_last #ga s last total_len =
   let a = alg_of_state ga s in
   (**) assert_norm(v (block_len a) > 0);
