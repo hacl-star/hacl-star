@@ -19,7 +19,7 @@ module BV = FStar.BitVector
 module Seq = FStar.Seq
 
 
-#set-options "--fuel 0 --ifuel 0 --z3rlimit 50"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 500"
 (* http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.46.2133&rep=rep1&type=pdf *)
 
 inline_for_extraction noextract
@@ -119,11 +119,11 @@ val load_buffer: a0: uint64 -> a1: uint64 -> a2: uint64 -> a3: uint64 -> a4: uin
 
 
 let load_buffer a0 a1 a2 a3 a4 a5 o =
-  assert(pow2 (2 * 32) = pow2 64);
-  assert(pow2 (4 * 32) = pow2 (2 * 64));
-  assert(pow2 (6 * 32) = pow2 (3 * 64));
-  assert(pow2 (8 * 32) = pow2 (4 * 64));
-  assert(pow2 (10 * 32) = pow2 (5 * 64));  
+  assert_norm(pow2 (2 * 32) = pow2 64);
+  assert_norm(pow2 (4 * 32) = pow2 64 * pow2 64);
+  assert_norm(pow2 (6 * 32) = pow2 64 * pow2 64 * pow2 64);
+  assert_norm(pow2 (8 * 32) = pow2 64 * pow2 64 * pow2 64 * pow2 64);
+  assert_norm(pow2 (10 * 32) = pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64);  
   
   upd o (size 0) a0;
   upd o (size 1) a1;
@@ -134,8 +134,8 @@ let load_buffer a0 a1 a2 a3 a4 a5 o =
 
 
 val upl_zer_buffer: c0: uint32 -> c1: uint32 ->  c2: uint32 ->  c3: uint32 ->  
-  c4: uint32 ->  c5: uint32 ->  c6: uint32 ->  c7: uint32 ->  c8: uint32 ->  c9: uint32 ->  
-  c10: uint32 ->  c11: uint32 -> o: lbuffer uint64 (size 6) -> 
+  c4: uint32 -> c5: uint32 ->  c6: uint32 ->  c7: uint32 ->  c8: uint32 -> c9: uint32 ->  
+  c10: uint32 -> c11: uint32 -> o: lbuffer uint64 (size 6) -> 
   Stack unit 
     (requires fun h -> live h o)
     (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\ 
@@ -153,6 +153,7 @@ let upl_zer_buffer c0 c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 o =
   assert_norm (pow2 (8 * 32) * pow2 (2 * 32) = pow2 (10 * 32));
   assert_norm (pow2 (9 * 32) * pow2 (2 * 32) = pow2 (11 * 32));
 
+  
   let b0 = store_high_low_u c1 c0 in 
   let b1 = store_high_low_u c3 c2 in 
   let b2 = store_high_low_u c5 c4 in 
@@ -591,7 +592,7 @@ let solinas_reduction_operations tempBuffer o =
 
 let _uint32 = n:nat{n < pow2 32}
 
-assume val solinas_reduction_mod:
+val solinas_reduction_mod:
   c0_n: _uint32->
   c1_n: _uint32 ->
   c2_n: _uint32 ->
@@ -628,6 +629,93 @@ assume val solinas_reduction_mod:
   s9: nat {s9 = (c23_n * pow2 (3 * 32) + c23_n * pow2 (4 * 32)) % prime384} ->
   n: int {n = (s0 + 2 * s1 + s2 + s3 + s4 + s5 + s6 - s7 - s8 - s9) % prime384} ->
   Lemma (n % prime384 == (c0_n + c1_n * pow2 32 + c2_n * pow2 (2 * 32) + c3_n * pow2 (3 * 32) + c4_n * pow2 (4 * 32) + c5_n * pow2 (5 * 32) + c6_n * pow2 (6 * 32) + c7_n * pow2 (7 * 32) + c8_n * pow2 256 + c9_n * pow2 (9 * 32) + c10_n * pow2 (10 * 32)  + c11_n * pow2 (11 * 32) + c12_n * pow2 (12 * 32) + c13_n* pow2 (13 * 32) + c14_n * pow2 (14 * 32) + c15_n * pow2 (15 * 32) + c16_n * pow2 (16 * 32) + c17_n * pow2 (17 * 32) + c18_n * pow2 (18 * 32) + c19_n * pow2 (19 * 32) + c20_n * pow2 (20 * 32) + c21_n * pow2 (21 * 32) + c22_n * pow2 (22 * 32) + c23_n * pow2 (23 * 32)) % prime384)
+
+
+val sr_mod_0: f0: int -> f1: int -> f2: int -> f3: int -> f4: int -> f5: int -> f6: int -> f7: int -> f8: int -> f9: int ->
+  Lemma (
+  let p = prime384 in 
+  ((f0 % p) + 2 * (f1 % p) + (f2 % p) + (f3 % p) + (f4 % p) + (f5 % p) + (f6 % p) - (f7 % p) - f8 % p - f9 % p) % p == 
+  (f0 + 2 * f1 + f2 + f3 + f4 + f5 + f6 - f7 - f8 - f9) % p)
+
+let sr_mod_0 f0 f1 f2 f3 f4 f5 f6 f7 f8 f9 = admit()
+
+
+val solinas_reduction_nat: 
+  c0: _uint32 -> 
+  c1: _uint32 -> 
+  c2: _uint32 -> 
+  c3: _uint32 ->
+  c4: _uint32 ->
+  c5: _uint32 ->
+  c6: _uint32 ->
+  c7: _uint32 ->
+  c8: _uint32 ->
+  c9: _uint32 ->
+  c10: _uint32 ->
+  c11: _uint32 ->
+  c12: _uint32 ->
+  c13: _uint32 ->
+  c14: _uint32 ->
+  c15: _uint32 ->
+  c16: _uint32 ->
+  c17: _uint32 ->
+  c18: _uint32 ->
+  c19: _uint32 ->
+  c20: _uint32 -> 
+  c21: _uint32 ->
+  c22: _uint32 -> 
+  c23: _uint32 -> 
+  f0: int {f0 = c0 + c1 * pow2 (1 * 32) + c2 * pow2 (2 * 32) + c3 * pow2 (3 * 32) + c4 * pow2 (4 * 32) + c5 * pow2 (5 * 32) + c6 * pow2 (6 * 32) + c7 * pow2 (7 * 32) + c8 * pow2 (8 * 32) + c9 * pow2 (9 * 32) + c10 * pow2 (10 * 32) + c11 * pow2 (11 * 32)} ->
+  f1: int {f1 = c21 * pow2 (4 * 32) + c22 * pow2 (5 * 32) + c23 * pow2 (6 * 32)} -> 
+
+  f2: int {f2 = c12 + c13 * pow2 (1 * 32) + c14 * pow2 (2 * 32) + c15 * pow2 (3 * 32) + c16 * pow2 (4 * 32) + c17 * pow2 (5 * 32) + c18 * pow2 (6 * 32) + c19 * pow2 (7 * 32) + c20 * pow2 (8 * 32) + c21 * pow2 (9 * 32) + c22 * pow2 (10 * 32) + c23 * pow2 (11 * 32)} -> 
+
+  f3: int {f3 = c21 + c22 * pow2 (1 * 32) + c23 * pow2 (2 * 32) + c12 * pow2 (3 * 32) + c13 * pow2 (4 * 32) + c14 * pow2 (5 * 32) + c15 * pow2 (6 * 32) + c16 * pow2 (7 * 32) + c17 * pow2 (8 * 32) + c18 * pow2 (9 * 32) + c19 * pow2 (10 * 32) + c20 * pow2 (11 * 32)} ->
+
+  f4: int {f4 = c23 * pow2 (1 * 32) + c20 * pow2 (3 * 32) + c12 * pow2 (4 * 32) + c13 * pow2 (5 * 32) + c14 * pow2 (6 * 32) + c15 * pow2 (7 * 32) + c16 * pow2 (8 * 32) + c17 * pow2 (9 * 32) + c18 * pow2 (10 * 32) + c19 * pow2 (11 * 32)} ->
+
+  f5: int {f5 = c20 * pow2 (4 * 32) + c21 * pow2 (5 * 32) + c22 * pow2 (6 * 32) + c23 * pow2 (7 * 32)} ->
+  
+  f6: int {f6 = c20 + c21 * pow2 (3 * 32) + c22 * pow2 (4 * 32) + c23 * pow2 (5 * 32)} ->
+  
+  f7: int {f7 = c23 + c12 * pow2 (1 * 32) + c13 * pow2 (2 * 32) + c14 * pow2 (3 * 32) + c15 * pow2 (4 * 32) + c16 * pow2 (5 * 32) + c17 * pow2 (6 * 32) + c18 * pow2 (7 * 32) + c19 * pow2 (8 * 32) + c20 * pow2 (9 * 32) + c21 * pow2 (10 * 32) + c22 * pow2 (11 * 32)} ->
+  
+  f8: int {f8 = c20 * pow2 (1 * 32) + c21 * pow2 (2 * 32) + c22 * pow2 (3 * 32) + c23 * pow2 (4 * 32)} ->
+  f9: int {f9 = c23 * pow2 (3 * 32) + c23 * pow2 (4 * 32)} ->
+  n: int {n = f0 + 2 * f1 + f2 + f3 + f4 + f5 + f6 - f7 - f8 - f9} ->
+  Lemma (n % prime384 ==  (c0 + c1 * pow2 32 + c2 * pow2 (2 * 32) + c3 * pow2 (3 * 32) + c4 * pow2 (4 * 32) + c5 * pow2 (5 * 32) + c6 * pow2 (6 * 32) + c7 * pow2 (7 * 32) + c8 * pow2 256 + c9 * pow2 (9 * 32) + c10 * pow2 (10 * 32)  + c11 * pow2 (11 * 32) + c12 * pow2 (12 * 32) + c13 * pow2 (13 * 32) + c14 * pow2 (14 * 32) + c15 * pow2 (15 * 32) + c16 * pow2 (16 * 32) + c17 * pow2 (17 * 32) + c18 * pow2 (18 * 32) + c19 * pow2 (19 * 32) + c20 * pow2 (20 * 32) + c21 * pow2 (21 * 32) + c22 * pow2 (22 * 32) + c23 * pow2 (23 * 32)) % prime384)
+
+let solinas_reduction_nat  c0 c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 c12 c13 c14 c15 c16 c17 c18 c19 c20 c21 c22 c23 f0 f1 f2 f3 f4 f5 f6 f7 f8 f9 n = admit()
+
+
+
+let solinas_reduction_mod c0 c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 c12 c13 c14 c15 c16 c17 c18 c19 c20 c21 c22 c23 s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 n = 
+
+  let f0 = c0 + c1 * pow2 (1 * 32) + c2 * pow2 (2 * 32) + c3 * pow2 (3 * 32) + c4 * pow2 (4 * 32) + c5 * pow2 (5 * 32) + c6 * pow2 (6 * 32) + c7 * pow2 (7 * 32) + c8 * pow2 (8 * 32) + c9 * pow2 (9 * 32) + c10 * pow2 (10 * 32) + c11 * pow2 (11 * 32) in 
+
+  let f1 = c21 * pow2 (4 * 32) + c22 * pow2 (5 * 32) + c23 * pow2 (6 * 32) in 
+
+  let f2 = c12 + c13 * pow2 (1 * 32) + c14 * pow2 (2 * 32) + c15 * pow2 (3 * 32) + c16 * pow2 (4 * 32) + c17 * pow2 (5 * 32) + c18 * pow2 (6 * 32) + c19 * pow2 (7 * 32) + c20 * pow2 (8 * 32) + c21 * pow2 (9 * 32) + c22 * pow2 (10 * 32) + c23 * pow2 (11 * 32) in 
+
+  let f3 = c21 + c22 * pow2 (1 * 32) + c23 * pow2 (2 * 32) + c12 * pow2 (3 * 32) + c13 * pow2 (4 * 32) + c14 * pow2 (5 * 32) + c15 * pow2 (6 * 32) + c16 * pow2 (7 * 32) + c17 * pow2 (8 * 32) + c18 * pow2 (9 * 32) + c19 * pow2 (10 * 32) + c20 * pow2 (11 * 32) in 
+
+  let f4 = c23 * pow2 (1 * 32) + c20 * pow2 (3 * 32) + c12 * pow2 (4 * 32) + c13 * pow2 (5 * 32) + c14 * pow2 (6 * 32) + c15 * pow2 (7 * 32) + c16 * pow2 (8 * 32) + c17 * pow2 (9 * 32) + c18 * pow2 (10 * 32) + c19 * pow2 (11 * 32) in 
+
+  let f5 = c20 * pow2 (4 * 32) + c21 * pow2 (5 * 32) + c22 * pow2 (6 * 32) + c23 * pow2 (7 * 32) in 
+  
+  let f6 = c20 + c21 * pow2 (3 * 32) + c22 * pow2 (4 * 32) + c23 * pow2 (5 * 32) in 
+  
+  let f7 = c23 + c12 * pow2 (1 * 32) + c13 * pow2 (2 * 32) + c14 * pow2 (3 * 32) + c15 * pow2 (4 * 32) + c16 * pow2 (5 * 32) + c17 * pow2 (6 * 32) + c18 * pow2 (7 * 32) + c19 * pow2 (8 * 32) + c20 * pow2 (9 * 32) + c21 * pow2 (10 * 32) + c22 * pow2 (11 * 32) in 
+  
+  let f8 = c20 * pow2 (1 * 32) + c21 * pow2 (2 * 32) + c22 * pow2 (3 * 32) + c23 * pow2 (4 * 32) in 
+ 
+  let f9 = c23 * pow2 (3 * 32) + c23 * pow2 (4 * 32) in  
+
+  let n_ = f0 + 2 * f1 + f2 + f3 + f4 + f5 + f6 - f7 - f8 - f9 in 
+
+  sr_mod_0 f0 f1 f2 f3 f4 f5 f6 f7 f8 f9;
+  solinas_reduction_nat c0 c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 c12 c13 c14 c15 c16 c17 c18 c19 c20 c21 c22 c23 f0 f1 f2 f3 f4 f5 f6 f7 f8 f9 n_;
+  small_modulo_lemma_1 ((f0 + 2 * f1 + f2 + f3 + f4 + f5 + f6 - f7 - f8 - f9) % prime384) prime384
 
 
 
