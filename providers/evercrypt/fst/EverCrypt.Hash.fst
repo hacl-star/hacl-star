@@ -502,15 +502,16 @@ let finish #a s dst =
 
 let free #ea s =
   begin match !*s with
-    | MD5_s p -> B.free p
-    | SHA1_s p -> B.free p
-    | SHA2_224_s p -> B.free p
-    | SHA2_256_s p -> B.free p
-    | SHA2_384_s p -> B.free p
-    | SHA2_512_s p -> B.free p
-    | Blake2S_s p -> B.free p
-    | Blake2B_s p -> B.free p
-  end
+  | MD5_s p -> B.free p
+  | SHA1_s p -> B.free p
+  | SHA2_224_s p -> B.free p
+  | SHA2_256_s p -> B.free p
+  | SHA2_384_s p -> B.free p
+  | SHA2_512_s p -> B.free p
+  | Blake2S_s p -> B.free p
+  | Blake2B_s p -> B.free p
+  end;
+  B.free s
 
 #push-options "--ifuel 1"
 
