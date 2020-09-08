@@ -251,15 +251,17 @@ let wide_as_nat4 #c f =
     v s7 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64
   |P384 -> 
     let (s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11) : widefelem_t P384 = f in
-    v s0 + v s1 * pow2 64 + v s2 * pow2 64 * pow2 64 +
-    v s3 * pow2 64 * pow2 64 * pow2 64 +
-    v s4 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
-    v s5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
-    v s6 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
-    v s7 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64  +
-    v s8 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 + 
-    v s9 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
-   v s10 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 + 
+     v s0 + 
+     v s1 * pow2 64 + 
+     v s2 * pow2 64 * pow2 64 +
+     v s3 * pow2 64 * pow2 64 * pow2 64 +
+     v s4 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+     v s5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+     v s6 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+     v s7 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64  +
+     v s8 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 + 
+     v s9 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+    v s10 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 + 
     v s11 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 
 
 
@@ -383,64 +385,36 @@ let wide_as_nat (c: curve) (h:mem) (e: widefelem c) : GTot nat =
 
 
 noextract
-let felem_seq_as_nat_8 (a: lseq uint64 8) : Tot nat = 
+let felem_seq_as_nat_8 (a: lseq uint64 8) : GTot nat = 
   let open FStar.Mul in 
-  let a0 = Lib.Sequence.index a 0 in 
-  let a1 = Lib.Sequence.index a 1 in 
-  let a2 = Lib.Sequence.index a 2 in 
-  let a3 = Lib.Sequence.index a 3 in 
-  let a4 = Lib.Sequence.index a 4 in 
-  let a5 = Lib.Sequence.index a 5 in 
-  let a6 = Lib.Sequence.index a 6 in 
-  let a7 = Lib.Sequence.index a 7 in
-  uint_v a0 + 
-  uint_v a1 * pow2 64 + 
-  uint_v a2 * pow2 64 * pow2 64 + 
-  uint_v a3 * pow2 64 * pow2 64 * pow2 64 + 
-  uint_v a4 * pow2 64 * pow2 64 * pow2 64 * pow2 64 + 
-  uint_v a5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 + 
-  uint_v a6 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 + 
-  uint_v a7 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64
+  let s0 = Lib.Sequence.index a 0 in 
+  let s1 = Lib.Sequence.index a 1 in 
+  let s2 = Lib.Sequence.index a 2 in 
+  let s3 = Lib.Sequence.index a 3 in 
+  let s4 = Lib.Sequence.index a 4 in 
+  let s5 = Lib.Sequence.index a 5 in 
+  let s6 = Lib.Sequence.index a 6 in 
+  let s7 = Lib.Sequence.index a 7 in
+  wide_as_nat4 (s0, s1, s2, s3, s4, s5, s6, s7)
 
 noextract
-let felem_seq_as_nat_16 (a: lseq uint64 16) : Tot nat = 
+let felem_seq_as_nat_12 (a: lseq uint64 12) : GTot nat = 
   let open FStar.Mul in 
-  let a0 = Lib.Sequence.index a 0 in 
-  let a1 = Lib.Sequence.index a 1 in 
-  let a2 = Lib.Sequence.index a 2 in 
-  let a3 = Lib.Sequence.index a 3 in 
-  let a4 = Lib.Sequence.index a 4 in 
-  let a5 = Lib.Sequence.index a 5 in 
-  let a6 = Lib.Sequence.index a 6 in 
-  let a7 = Lib.Sequence.index a 7 in
+  let s0 = Lib.Sequence.index a 0 in 
+  let s1 = Lib.Sequence.index a 1 in 
+  let s2 = Lib.Sequence.index a 2 in 
+  let s3 = Lib.Sequence.index a 3 in 
+  let s4 = Lib.Sequence.index a 4 in 
+  let s5 = Lib.Sequence.index a 5 in
 
-  let a8 = Lib.Sequence.index a 8 in 
-  let a9 = Lib.Sequence.index a 9 in 
-  let a10 = Lib.Sequence.index a 10 in 
-  let a11 = Lib.Sequence.index a 11 in 
-  let a12 = Lib.Sequence.index a 12 in 
-  let a13 = Lib.Sequence.index a 13 in 
-  let a14 = Lib.Sequence.index a 14 in 
-  let a15 = Lib.Sequence.index a 15 in
+  let s6 = Lib.Sequence.index a 6 in 
+  let s7 = Lib.Sequence.index a 7 in
+  let s8 = Lib.Sequence.index a 8 in 
+  let s9 = Lib.Sequence.index a 9 in 
+  let s10 = Lib.Sequence.index a 10 in 
+  let s11 = Lib.Sequence.index a 11 in 
 
-  uint_v a0 + 
-  uint_v a1 * pow2 64 + 
-  uint_v a2 * pow2 64 * pow2 64 + 
-  uint_v a3 * pow2 64 * pow2 64 * pow2 64 + 
-  uint_v a4 * pow2 64 * pow2 64 * pow2 64 * pow2 64 + 
-  uint_v a5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 + 
-  uint_v a6 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 + 
-  uint_v a7 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 + 
-  uint_v a8 * pow2 (8 * 64) + 
-  uint_v a9 * pow2 (9 * 64) + 
-  uint_v a10 * pow2 (10 * 64) + 
-  uint_v a11 * pow2 (11 * 64) + 
-  uint_v a12 * pow2 (12 * 64) + 
-  uint_v a13 * pow2 (13 * 64) + 
-  uint_v a14 * pow2 (14 * 64) + 
-  uint_v a15 * pow2 (15 * 64)
-
-
+  wide_as_nat4 #P384 (s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11)
 
 
 open FStar.Mul
