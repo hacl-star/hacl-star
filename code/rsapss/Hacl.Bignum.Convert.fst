@@ -88,17 +88,20 @@ let new_bn_from_bytes_be r len b =
     B.null
   else
     let h0 = ST.get () in
-    let res = B.malloc r (u64 0) (blocks len 8ul) in
-    let h1 = ST.get () in
-    B.(modifies_only_not_unused_in loc_none h0 h1);
-    assert (B.len res == blocks len 8ul);
-    let res: Lib.Buffer.buffer Lib.IntTypes.uint64 = res in
-    assert (B.length res == FStar.UInt32.v (blocks len 8ul));
-    let res: lbignum (blocks len 8ul) = res in
-    mk_bn_from_bytes_be len b res;
-    let h2 = ST.get () in
-    B.(modifies_only_not_unused_in loc_none h0 h2);
-    res
+    let res = LowStar.Monotonic.Buffer.mmalloc_partial r (u64 0) (blocks len 8ul) in
+    if B.is_null res then
+      res
+    else
+      let h1 = ST.get () in
+      B.(modifies_only_not_unused_in loc_none h0 h1);
+      assert (B.len res == blocks len 8ul);
+      let res: Lib.Buffer.buffer Lib.IntTypes.uint64 = res in
+      assert (B.length res == FStar.UInt32.v (blocks len 8ul));
+      let res: lbignum (blocks len 8ul) = res in
+      mk_bn_from_bytes_be len b res;
+      let h2 = ST.get () in
+      B.(modifies_only_not_unused_in loc_none h0 h2);
+      res
 
 val bn_from_bytes_le:
     len:size_t{0 < v len /\ 8 * v (blocks len 8ul) <= max_size_t}

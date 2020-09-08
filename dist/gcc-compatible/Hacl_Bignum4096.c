@@ -350,7 +350,8 @@ Load a bid-endian bignum from memory.
 
   The argument b points to len bytes of valid memory.
   The function returns a heap-allocated bignum of size sufficient to hold the
-    result of loading b, or NULL if the amount of required memory would exceed 4GB.
+    result of loading b, or NULL if either the allocation failed, or the amount of
+    required memory would exceed 4GB.
 
   If the return value is non-null, clients must eventually call free(3) on it to
   avoid memory leaks.
@@ -369,6 +370,10 @@ uint64_t *Hacl_Bignum4096_new_bn_from_bytes_be(uint32_t len, uint8_t *b)
   KRML_CHECK_SIZE(sizeof (uint64_t), (len - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U);
   uint64_t
   *res = KRML_HOST_CALLOC((len - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U, sizeof (uint64_t));
+  if (res == NULL)
+  {
+    return res;
+  }
   uint64_t *res1 = res;
   uint64_t *res2 = res1;
   uint32_t bnLen = (len - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
