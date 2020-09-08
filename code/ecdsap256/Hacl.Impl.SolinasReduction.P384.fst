@@ -631,13 +631,68 @@ val solinas_reduction_mod:
   Lemma (n % prime384 == (c0_n + c1_n * pow2 32 + c2_n * pow2 (2 * 32) + c3_n * pow2 (3 * 32) + c4_n * pow2 (4 * 32) + c5_n * pow2 (5 * 32) + c6_n * pow2 (6 * 32) + c7_n * pow2 (7 * 32) + c8_n * pow2 256 + c9_n * pow2 (9 * 32) + c10_n * pow2 (10 * 32)  + c11_n * pow2 (11 * 32) + c12_n * pow2 (12 * 32) + c13_n* pow2 (13 * 32) + c14_n * pow2 (14 * 32) + c15_n * pow2 (15 * 32) + c16_n * pow2 (16 * 32) + c17_n * pow2 (17 * 32) + c18_n * pow2 (18 * 32) + c19_n * pow2 (19 * 32) + c20_n * pow2 (20 * 32) + c21_n * pow2 (21 * 32) + c22_n * pow2 (22 * 32) + c23_n * pow2 (23 * 32)) % prime384)
 
 
-val sr_mod_0: f0: int -> f1: int -> f2: int -> f3: int -> f4: int -> f5: int -> f6: int -> f7: int -> f8: int -> f9: int ->
+val sr_mod_0: f0: int -> f1: int -> f2: int -> f3: int -> f4: int -> f5: int -> f6: int 
+  -> f7: int -> f8: int -> f9: int ->
   Lemma (
-  let p = prime384 in 
-  ((f0 % p) + 2 * (f1 % p) + (f2 % p) + (f3 % p) + (f4 % p) + (f5 % p) + (f6 % p) - (f7 % p) - f8 % p - f9 % p) % p == 
-  (f0 + 2 * f1 + f2 + f3 + f4 + f5 + f6 - f7 - f8 - f9) % p)
+    let p = prime384 in 
+    ((f0 % p) + 2 * (f1 % p) + (f2 % p) + (f3 % p) + (f4 % p) + (f5 % p) + (f6 % p) - (f7 % p) - f8 % p - f9 % p) % p == 
+    (f0 + 2 * f1 + f2 + f3 + f4 + f5 + f6 - f7 - f8 - f9) % p)
 
-let sr_mod_0 f0 f1 f2 f3 f4 f5 f6 f7 f8 f9 = admit()
+let sr_mod_0 f0 f1 f2 f3 f4 f5 f6 f7 f8 f9 = 
+  let p = prime384 in 
+  calc (==) {
+   ((f0 % p) + 2 * (f1 % p) + (f2 % p) + (f3 % p) + (f4 % p) + (f5 % p) + (f6 % p) - (f7 % p) - f8 % p - f9 % p) % p;
+   
+   (==) {lemma_mod_add_distr (2 * (f1 % p) + (f2 % p) + (f3 % p) + (f4 % p) + (f5 % p) + (f6 % p) - (f7 % p) - f8 % p - f9 % p) f0 p}
+
+  (2 * (f1 % p) + f0 + (f2 % p) + (f3 % p) + (f4 % p) + (f5 % p) + (f6 % p) - (f7 % p) - f8 % p - f9 % p) % p;
+
+  (==) {lemma_mod_add_distr (f0 + (f2 % p) + (f3 % p) + (f4 % p) + (f5 % p) + (f6 % p) - (f7 % p) - f8 % p - f9 % p) (2 * (f1 % p)) p}
+
+  (2 * (f1 % p) % p + f0 + (f2 % p) + (f3 % p) + (f4 % p) + (f5 % p) + (f6 % p) - (f7 % p) - f8 % p - f9 % p) % p;
+
+  (==) {lemma_mod_mul_distr_r 2 f1 p}
+
+  (2 * f1 % p + f0 + (f2 % p) + (f3 % p) + (f4 % p) + (f5 % p) + (f6 % p) - (f7 % p) - f8 % p - f9 % p) % p;
+
+  (==) {lemma_mod_add_distr (f0 + (f2 % p) + (f3 % p) + (f4 % p) + (f5 % p) + (f6 % p) - (f7 % p) - f8 % p - f9 % p) (2 * f1) p}
+
+  (2 * f1 + f0 + (f2 % p) + (f3 % p) + (f4 % p) + (f5 % p) + (f6 % p) - (f7 % p) - f8 % p - f9 % p) % p;
+
+  (==) {lemma_mod_add_distr (2 * f1 + f0 + (f3 % p) + (f4 % p) + (f5 % p) + (f6 % p) - (f7 % p) - f8 % p - f9 % p) f2 p}
+
+  (2 * f1 + f0 + f2 + (f3 % p) + (f4 % p) + (f5 % p) + (f6 % p) - (f7 % p) - f8 % p - f9 % p) % p;
+  
+  (==) {lemma_mod_add_distr (2 * f1 + f0 + f2 + (f4 % p) + (f5 % p) + (f6 % p) - (f7 % p) - f8 % p - f9 % p) f3 p}
+
+   (2 * f1 + f0 + f2 + f3 + (f4 % p) + (f5 % p) + (f6 % p) - (f7 % p) - f8 % p - f9 % p) % p;
+
+  (==) {lemma_mod_add_distr (2 * f1 + f0 + f2 + f3 + (f5 % p) + (f6 % p) - (f7 % p) - f8 % p - f9 % p) f4 p} 
+
+   (2 * f1 + f0 + f2 + f3 + f4 + (f5 % p) + (f6 % p) - (f7 % p) - f8 % p - f9 % p) % p;
+
+  (==) {lemma_mod_add_distr (2 * f1 + f0 + f2 + f3 + f4 + (f6 % p) - (f7 % p) - f8 % p - f9 % p) f5 p} 
+
+  (2 * f1 + f0 + f2 + f3 + f4 + f5 + (f6 % p) - (f7 % p) - f8 % p - f9 % p) % p;
+
+ (==) {lemma_mod_add_distr (2 * f1 + f0 + f2 + f3 + f4 + f5 - (f7 % p) - f8 % p - f9 % p) f6 p}
+
+  (2 * f1 + f0 + f2 + f3 + f4 + f5 + f6 - (f7 % p) - f8 % p - f9 % p) % p;
+
+  (==) {lemma_mod_sub_distr (2 * f1 + f0 + f2 + f3 + f4 + f5 + f6 - (f7 % p) - f8 % p) f9 p}
+
+  (2 * f1 + f0 + f2 + f3 + f4 + f5 + f6 - f9 - (f7 % p) - f8 % p) % p;
+
+  (==) {lemma_mod_sub_distr (2 * f1 + f0 + f2 + f3 + f4 + f5 + f6 - f9 - (f7 % p)) f8 p}
+
+  (2 * f1 + f0 + f2 + f3 + f4 + f5 + f6 - f9 - f8 - (f7 % p)) % p;
+
+  (==) {lemma_mod_sub_distr (2 * f1 + f0 + f2 + f3 + f4 + f5 + f6 - f9 - f8) f7 p}
+  
+  (2 * f1 + f0 + f2 + f3 + f4 + f5 + f6 - f9 - f8 - f7) % p; 
+
+  }
+
 
 
 val solinas_reduction_nat: 
