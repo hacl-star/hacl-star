@@ -115,7 +115,7 @@ let ecdsa_verification_step23 alg mLen m result =
   assert_norm (pow2 32 < pow2 61);
   assert_norm (pow2 32 < pow2 125);
   push_frame(); 
-  let sz: FStar.UInt32.t = match alg with |NoHash -> mLen |Hash a ->  hash_len a in
+  let sz: FStar.UInt32.t = match alg with |NoHash -> mLen |Hash a -> Hacl.Hash.Definitions.hash_len a in
   let mHash = create sz (u8 0) in    
   
   begin
