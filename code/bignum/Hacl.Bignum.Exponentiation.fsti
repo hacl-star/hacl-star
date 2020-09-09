@@ -65,7 +65,7 @@ let bn_mod_exp_st (nLen:size_t{0 < v nLen /\ 128 * v nLen <= max_size_t}) =
   -> b:lbignum (blocks bBits 64ul)
   -> res:lbignum nLen ->
   Stack unit
-  (requires fun h -> 1 < bn_v h n /\
+  (requires fun h ->
     live h n /\ live h a /\ live h b /\ live h res /\
     disjoint res a /\ disjoint res b /\ disjoint res n /\ disjoint n a)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
@@ -84,7 +84,7 @@ let bn_mod_exp_mont_ladder_st (nLen:size_t{0 < v nLen /\ 128 * v nLen <= max_siz
   -> b:lbignum (blocks bBits 64ul)
   -> res:lbignum nLen ->
   Stack unit
-  (requires fun h -> 1 < bn_v h n /\
+  (requires fun h ->
     live h n /\ live h a /\ live h b /\ live h res /\
     disjoint res a /\ disjoint res b /\ disjoint res n /\ disjoint n a)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
