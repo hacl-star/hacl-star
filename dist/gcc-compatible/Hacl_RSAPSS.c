@@ -24,6 +24,23 @@
 
 #include "Hacl_RSAPSS.h"
 
+static bool check_runtime(uint32_t len, uint64_t *n)
+{
+  KRML_CHECK_SIZE(sizeof (uint64_t), len);
+  uint64_t one[len];
+  memset(one, 0U, len * sizeof (uint64_t));
+  memset(one, 0U, len * sizeof (uint64_t));
+  one[0U] = (uint64_t)1U;
+  uint64_t m0 = n[0U] & (uint64_t)1U;
+  uint64_t m1 = Hacl_Bignum_bn_lt_mask(len, one, n);
+  uint64_t m = m0 & m1;
+  if (m == (uint64_t)0U)
+  {
+    return false;
+  }
+  return true;
+}
+
 static void precomp_runtime(uint32_t len, uint64_t *n, uint64_t *res)
 {
   KRML_CHECK_SIZE(sizeof (uint64_t), len);
@@ -448,9 +465,59 @@ bn_mod_exp_mont_ladder_loop_runtime(
   }
 }
 
-static inline void
+static inline bool
 bn_mod_exp(uint32_t nLen, uint64_t *n, uint64_t *a, uint32_t bBits, uint64_t *b, uint64_t *res)
 {
+  bool b0 = check_runtime(nLen, n);
+  uint32_t bLen0 = (bBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), bLen0);
+  uint64_t bn_zero[bLen0];
+  memset(bn_zero, 0U, bLen0 * sizeof (uint64_t));
+  uint64_t mask = (uint64_t)0xFFFFFFFFFFFFFFFFU;
+  for (uint32_t i = (uint32_t)0U; i < bLen0; i++)
+  {
+    uint64_t uu____0 = FStar_UInt64_eq_mask(b[i], bn_zero[i]);
+    mask = uu____0 & mask;
+  }
+  uint64_t mask1 = mask;
+  uint64_t res1 = mask1;
+  uint64_t m1 = res1;
+  uint64_t m1_ = ~m1;
+  uint64_t m2;
+  if (bBits < (uint32_t)64U * bLen0)
+  {
+    KRML_CHECK_SIZE(sizeof (uint64_t), bLen0);
+    uint64_t b2[bLen0];
+    memset(b2, 0U, bLen0 * sizeof (uint64_t));
+    uint32_t i0 = bBits / (uint32_t)64U;
+    uint32_t j = bBits % (uint32_t)64U;
+    b2[i0] = b2[i0] | (uint64_t)1U << j;
+    uint64_t acc = (uint64_t)0U;
+    for (uint32_t i = (uint32_t)0U; i < bLen0; i++)
+    {
+      uint64_t beq = FStar_UInt64_eq_mask(b[i], b2[i]);
+      uint64_t blt = ~FStar_UInt64_gte_mask(b[i], b2[i]);
+      acc = (beq & acc) | (~beq & ((blt & (uint64_t)0xFFFFFFFFFFFFFFFFU) | (~blt & (uint64_t)0U)));
+    }
+    uint64_t res10 = acc;
+    m2 = res10;
+  }
+  else
+  {
+    m2 = (uint64_t)0xFFFFFFFFFFFFFFFFU;
+  }
+  uint64_t m3 = Hacl_Bignum_bn_lt_mask(nLen, a, n);
+  uint64_t m = (m1_ & m2) & m3;
+  bool b1;
+  if (m == (uint64_t)0U)
+  {
+    b1 = false;
+  }
+  else
+  {
+    b1 = true;
+  }
+  bool is_valid = b0 && b1;
   KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
   uint64_t r2[nLen];
   memset(r2, 0U, nLen * sizeof (uint64_t));
@@ -472,9 +539,10 @@ bn_mod_exp(uint32_t nLen, uint64_t *n, uint64_t *a, uint32_t bBits, uint64_t *b,
   to_runtime(nLen, n, nInv_u64, r2, acc, accM);
   bn_mod_exp_loop_runtime(nLen, n, nInv_u64, bBits, bLen, b, aM, accM);
   from_runtime(nLen, n, nInv_u64, accM, res);
+  return is_valid;
 }
 
-static inline void
+static inline bool
 bn_mod_exp_mont_ladder(
   uint32_t nLen,
   uint64_t *n,
@@ -484,6 +552,56 @@ bn_mod_exp_mont_ladder(
   uint64_t *res
 )
 {
+  bool b0 = check_runtime(nLen, n);
+  uint32_t bLen0 = (bBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), bLen0);
+  uint64_t bn_zero[bLen0];
+  memset(bn_zero, 0U, bLen0 * sizeof (uint64_t));
+  uint64_t mask = (uint64_t)0xFFFFFFFFFFFFFFFFU;
+  for (uint32_t i = (uint32_t)0U; i < bLen0; i++)
+  {
+    uint64_t uu____0 = FStar_UInt64_eq_mask(b[i], bn_zero[i]);
+    mask = uu____0 & mask;
+  }
+  uint64_t mask1 = mask;
+  uint64_t res1 = mask1;
+  uint64_t m1 = res1;
+  uint64_t m1_ = ~m1;
+  uint64_t m2;
+  if (bBits < (uint32_t)64U * bLen0)
+  {
+    KRML_CHECK_SIZE(sizeof (uint64_t), bLen0);
+    uint64_t b2[bLen0];
+    memset(b2, 0U, bLen0 * sizeof (uint64_t));
+    uint32_t i0 = bBits / (uint32_t)64U;
+    uint32_t j = bBits % (uint32_t)64U;
+    b2[i0] = b2[i0] | (uint64_t)1U << j;
+    uint64_t acc = (uint64_t)0U;
+    for (uint32_t i = (uint32_t)0U; i < bLen0; i++)
+    {
+      uint64_t beq = FStar_UInt64_eq_mask(b[i], b2[i]);
+      uint64_t blt = ~FStar_UInt64_gte_mask(b[i], b2[i]);
+      acc = (beq & acc) | (~beq & ((blt & (uint64_t)0xFFFFFFFFFFFFFFFFU) | (~blt & (uint64_t)0U)));
+    }
+    uint64_t res10 = acc;
+    m2 = res10;
+  }
+  else
+  {
+    m2 = (uint64_t)0xFFFFFFFFFFFFFFFFU;
+  }
+  uint64_t m3 = Hacl_Bignum_bn_lt_mask(nLen, a, n);
+  uint64_t m = (m1_ & m2) & m3;
+  bool b1;
+  if (m == (uint64_t)0U)
+  {
+    b1 = false;
+  }
+  else
+  {
+    b1 = true;
+  }
+  bool is_valid = b0 && b1;
   KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
   uint64_t r2[nLen];
   memset(r2, 0U, nLen * sizeof (uint64_t));
@@ -505,14 +623,15 @@ bn_mod_exp_mont_ladder(
   to_runtime(nLen, n, nInv_u64, r2, one, rM0);
   to_runtime(nLen, n, nInv_u64, r2, a, rM1);
   bn_mod_exp_mont_ladder_loop_runtime(nLen, n, nInv_u64, bBits, bLen, b, rM0, rM1, &sw);
-  uint64_t uu____0 = sw;
+  uint64_t uu____1 = sw;
   for (uint32_t i = (uint32_t)0U; i < nLen; i++)
   {
-    uint64_t dummy = ((uint64_t)0U - uu____0) & (rM0[i] ^ rM1[i]);
+    uint64_t dummy = ((uint64_t)0U - uu____1) & (rM0[i] ^ rM1[i]);
     rM0[i] = rM0[i] ^ dummy;
     rM1[i] = rM1[i] ^ dummy;
   }
   from_runtime(nLen, n, nInv_u64, rM0, res);
+  return is_valid;
 }
 
 static inline void xor_bytes(uint32_t len, uint8_t *b1, uint8_t *b2)
@@ -685,7 +804,7 @@ Hacl_RSAPSS_rsapss_sign(
   memset(s, 0U, nLen * sizeof (uint64_t));
   pss_encode(a, sLen, salt, msgLen, msg, emBits, em);
   Hacl_Bignum_Convert_bn_from_bytes_be(emLen, em, m);
-  bn_mod_exp_mont_ladder(nLen, n, m, dBits, d, s);
+  bool uu____0 = bn_mod_exp_mont_ladder(nLen, n, m, dBits, d, s);
   Hacl_Bignum_Convert_bn_to_bytes_be(k, s, sgnt);
 }
 
@@ -720,7 +839,7 @@ Hacl_RSAPSS_rsapss_verify(
   uint64_t mask = Hacl_Bignum_bn_lt_mask(nLen, s, n);
   if (mask == (uint64_t)0xFFFFFFFFFFFFFFFFU)
   {
-    bn_mod_exp(nLen, n, s, eBits, e, m);
+    bool uu____0 = bn_mod_exp(nLen, n, s, eBits, e, m);
     bool ite;
     if (!((modBits - (uint32_t)1U) % (uint32_t)8U == (uint32_t)0U))
     {

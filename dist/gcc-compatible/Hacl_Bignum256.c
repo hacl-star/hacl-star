@@ -256,6 +256,21 @@ static void sqr(uint64_t *a, uint64_t *res)
   }
 }
 
+static bool check(uint64_t *n)
+{
+  uint64_t one[4U] = { 0U };
+  memset(one, 0U, (uint32_t)4U * sizeof (uint64_t));
+  one[0U] = (uint64_t)1U;
+  uint64_t m0 = n[0U] & (uint64_t)1U;
+  uint64_t m1 = Hacl_Bignum_bn_lt_mask((uint32_t)4U, one, n);
+  uint64_t m = m0 & m1;
+  if (m == (uint64_t)0U)
+  {
+    return false;
+  }
+  return true;
+}
+
 static void precomp(uint64_t *n, uint64_t *res)
 {
   uint64_t bn_zero[4U] = { 0U };
@@ -515,9 +530,59 @@ Write `a ^ b mod n` in `res`.
   number of significant bits of b. For instance, if b is a 256-bit bignum,
   bBits should be 256. The function is *NOT* constant-time on the argument b.
 */
-void
+bool
 Hacl_Bignum256_mod_exp(uint64_t *n, uint64_t *a, uint32_t bBits, uint64_t *b, uint64_t *res)
 {
+  bool b0 = check(n);
+  uint32_t bLen0 = (bBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), bLen0);
+  uint64_t bn_zero[bLen0];
+  memset(bn_zero, 0U, bLen0 * sizeof (uint64_t));
+  uint64_t mask = (uint64_t)0xFFFFFFFFFFFFFFFFU;
+  for (uint32_t i = (uint32_t)0U; i < bLen0; i++)
+  {
+    uint64_t uu____0 = FStar_UInt64_eq_mask(b[i], bn_zero[i]);
+    mask = uu____0 & mask;
+  }
+  uint64_t mask1 = mask;
+  uint64_t res1 = mask1;
+  uint64_t m1 = res1;
+  uint64_t m1_ = ~m1;
+  uint64_t m2;
+  if (bBits < (uint32_t)64U * bLen0)
+  {
+    KRML_CHECK_SIZE(sizeof (uint64_t), bLen0);
+    uint64_t b2[bLen0];
+    memset(b2, 0U, bLen0 * sizeof (uint64_t));
+    uint32_t i0 = bBits / (uint32_t)64U;
+    uint32_t j = bBits % (uint32_t)64U;
+    b2[i0] = b2[i0] | (uint64_t)1U << j;
+    uint64_t acc = (uint64_t)0U;
+    for (uint32_t i = (uint32_t)0U; i < bLen0; i++)
+    {
+      uint64_t beq = FStar_UInt64_eq_mask(b[i], b2[i]);
+      uint64_t blt = ~FStar_UInt64_gte_mask(b[i], b2[i]);
+      acc = (beq & acc) | (~beq & ((blt & (uint64_t)0xFFFFFFFFFFFFFFFFU) | (~blt & (uint64_t)0U)));
+    }
+    uint64_t res10 = acc;
+    m2 = res10;
+  }
+  else
+  {
+    m2 = (uint64_t)0xFFFFFFFFFFFFFFFFU;
+  }
+  uint64_t m3 = Hacl_Bignum_bn_lt_mask((uint32_t)4U, a, n);
+  uint64_t m = (m1_ & m2) & m3;
+  bool b1;
+  if (m == (uint64_t)0U)
+  {
+    b1 = false;
+  }
+  else
+  {
+    b1 = true;
+  }
+  bool is_valid = b0 && b1;
   uint64_t r2[4U] = { 0U };
   precomp(n, r2);
   uint64_t acc[4U] = { 0U };
@@ -531,6 +596,7 @@ Hacl_Bignum256_mod_exp(uint64_t *n, uint64_t *a, uint32_t bBits, uint64_t *b, ui
   to(n, nInv_u64, r2, acc, accM);
   mod_exp_loop(n, nInv_u64, bBits, bLen, b, aM, accM);
   from(n, nInv_u64, accM, res);
+  return is_valid;
 }
 
 static void
@@ -609,7 +675,7 @@ Write `a ^ b mod n` in `res`.
   number of significant bits of b. For instance, if b is a 256-bit bignum,
   bBits should be 256. The function is constant-time on the argument b.
 */
-void
+bool
 Hacl_Bignum256_mod_exp_mont_ladder(
   uint64_t *n,
   uint64_t *a,
@@ -618,6 +684,56 @@ Hacl_Bignum256_mod_exp_mont_ladder(
   uint64_t *res
 )
 {
+  bool b0 = check(n);
+  uint32_t bLen0 = (bBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), bLen0);
+  uint64_t bn_zero[bLen0];
+  memset(bn_zero, 0U, bLen0 * sizeof (uint64_t));
+  uint64_t mask = (uint64_t)0xFFFFFFFFFFFFFFFFU;
+  for (uint32_t i = (uint32_t)0U; i < bLen0; i++)
+  {
+    uint64_t uu____0 = FStar_UInt64_eq_mask(b[i], bn_zero[i]);
+    mask = uu____0 & mask;
+  }
+  uint64_t mask1 = mask;
+  uint64_t res1 = mask1;
+  uint64_t m1 = res1;
+  uint64_t m1_ = ~m1;
+  uint64_t m2;
+  if (bBits < (uint32_t)64U * bLen0)
+  {
+    KRML_CHECK_SIZE(sizeof (uint64_t), bLen0);
+    uint64_t b2[bLen0];
+    memset(b2, 0U, bLen0 * sizeof (uint64_t));
+    uint32_t i0 = bBits / (uint32_t)64U;
+    uint32_t j = bBits % (uint32_t)64U;
+    b2[i0] = b2[i0] | (uint64_t)1U << j;
+    uint64_t acc = (uint64_t)0U;
+    for (uint32_t i = (uint32_t)0U; i < bLen0; i++)
+    {
+      uint64_t beq = FStar_UInt64_eq_mask(b[i], b2[i]);
+      uint64_t blt = ~FStar_UInt64_gte_mask(b[i], b2[i]);
+      acc = (beq & acc) | (~beq & ((blt & (uint64_t)0xFFFFFFFFFFFFFFFFU) | (~blt & (uint64_t)0U)));
+    }
+    uint64_t res10 = acc;
+    m2 = res10;
+  }
+  else
+  {
+    m2 = (uint64_t)0xFFFFFFFFFFFFFFFFU;
+  }
+  uint64_t m3 = Hacl_Bignum_bn_lt_mask((uint32_t)4U, a, n);
+  uint64_t m = (m1_ & m2) & m3;
+  bool b1;
+  if (m == (uint64_t)0U)
+  {
+    b1 = false;
+  }
+  else
+  {
+    b1 = true;
+  }
+  bool is_valid = b0 && b1;
   uint64_t r2[4U] = { 0U };
   precomp(n, r2);
   uint64_t one[4U] = { 0U };
@@ -631,14 +747,15 @@ Hacl_Bignum256_mod_exp_mont_ladder(
   to(n, nInv_u64, r2, one, rM0);
   to(n, nInv_u64, r2, a, rM1);
   mod_exp_mont_ladder_loop(n, nInv_u64, bBits, bLen, b, rM0, rM1, &sw);
-  uint64_t uu____0 = sw;
+  uint64_t uu____1 = sw;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
-    uint64_t dummy = ((uint64_t)0U - uu____0) & (rM0[i] ^ rM1[i]);
+    uint64_t dummy = ((uint64_t)0U - uu____1) & (rM0[i] ^ rM1[i]);
     rM0[i] = rM0[i] ^ dummy;
     rM1[i] = rM1[i] ^ dummy;
   }
   from(n, nInv_u64, rM0, res);
+  return is_valid;
 }
 
 /*

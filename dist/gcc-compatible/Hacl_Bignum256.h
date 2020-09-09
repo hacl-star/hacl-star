@@ -116,7 +116,7 @@ Write `a ^ b mod n` in `res`.
   number of significant bits of b. For instance, if b is a 256-bit bignum,
   bBits should be 256. The function is *NOT* constant-time on the argument b.
 */
-void
+bool
 Hacl_Bignum256_mod_exp(uint64_t *n, uint64_t *a, uint32_t bBits, uint64_t *b, uint64_t *res);
 
 /*
@@ -146,7 +146,7 @@ Write `a ^ b mod n` in `res`.
   number of significant bits of b. For instance, if b is a 256-bit bignum,
   bBits should be 256. The function is constant-time on the argument b.
 */
-void
+bool
 Hacl_Bignum256_mod_exp_mont_ladder(
   uint64_t *n,
   uint64_t *a,

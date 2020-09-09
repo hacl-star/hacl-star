@@ -35,7 +35,7 @@ module Bindings(F:Cstubs.FOREIGN) =
         ((ptr uint64_t) @->
            ((ptr uint64_t) @->
               (uint32_t @->
-                 ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void))))))
+                 ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning bool))))))
     let hacl_Bignum256_mod_exp_mont_ladder_precompr2 =
       foreign "Hacl_Bignum256_mod_exp_mont_ladder_precompr2"
         ((ptr uint64_t) @->
@@ -48,7 +48,7 @@ module Bindings(F:Cstubs.FOREIGN) =
         ((ptr uint64_t) @->
            ((ptr uint64_t) @->
               (uint32_t @->
-                 ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void))))))
+                 ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning bool))))))
     let hacl_Bignum256_new_precompr2 =
       foreign "Hacl_Bignum256_new_precompr2"
         (uint32_t @-> ((ptr uint64_t) @-> (returning (ptr uint64_t))))
