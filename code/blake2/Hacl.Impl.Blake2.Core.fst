@@ -11,9 +11,9 @@ open Lib.IntVector
 
 module Spec = Spec.Blake2
 
-#set-options "--max_fuel 0 --max_ifuel 0"
+#set-options "--max_fuel 0 --max_ifuel 1"
 
-inline_for_extraction
+noextract inline_for_extraction
 let zero_element (a:Spec.alg) (m:m_spec) : element_t a m =
   match a,m with
   | Spec.Blake2S,M128 -> (vec_zero U32 4)
@@ -21,7 +21,7 @@ let zero_element (a:Spec.alg) (m:m_spec) : element_t a m =
   | Spec.Blake2B,M256 -> (vec_zero U64 4)
   | _ -> Spec.zero a
 
-inline_for_extraction
+noextract inline_for_extraction
 let row_v #a #m h r =
   match a,m with
   | Spec.Blake2S,M128 -> vec_v (Lib.Sequence.index (as_seq h r) 0)
@@ -106,12 +106,12 @@ let modifies_row_state a m h0 h1 st i =
 #pop-options
 
 
-inline_for_extraction
+noextract inline_for_extraction
 let rowi (#a:Spec.alg) (#m:m_spec) (st:state_p a m)  (idx:index_t) =
   sub st (idx *. row_len a m) (row_len a m)
 
 
-inline_for_extraction
+noextract inline_for_extraction
 let xor_row #a #m r1 r2 =
   match a,m with
   | Spec.Blake2S,M128 ->
@@ -123,7 +123,7 @@ let xor_row #a #m r1 r2 =
   | _ -> map2T 4ul r1 (logxor #(Spec.wt a) #SEC) r1 r2
 
 
-inline_for_extraction
+noextract inline_for_extraction
 let add_row #a #m r1 r2 =
   match a,m with
   | Spec.Blake2S,M128 ->
@@ -136,7 +136,7 @@ let add_row #a #m r1 r2 =
 
 
 #push-options "--z3rlimit 200"
-inline_for_extraction
+noextract inline_for_extraction
 let ror_row #a #m r1 r2 =
   match a,m with
   | Spec.Blake2S,M128 ->
@@ -151,7 +151,7 @@ let ror_row #a #m r1 r2 =
 #pop-options
 
 #push-options "--z3rlimit 50"
-inline_for_extraction
+noextract inline_for_extraction
 let permr_row #a #m r1 n =
   [@inline_let]
   let n0 = n in
@@ -204,11 +204,10 @@ let create4_lemma #a x0 x1 x2 x3 =
   eq_intro s1 s2
 #pop-options
 
-inline_for_extraction
+noextract inline_for_extraction
 let alloc_row a m = create (row_len a m) (zero_element a m)
 
-
-inline_for_extraction
+noextract inline_for_extraction
 let create_row #a #m r w0 w1 w2 w3 =
   match a,m with
   | Spec.Blake2S,M256
@@ -223,10 +222,10 @@ let create_row #a #m r w0 w1 w2 w3 =
     let h1 = ST.get() in
     Lib.Sequence.eq_intro (as_seq h1 r) (create4 w0 w1 w2 w3)
 
-inline_for_extraction
+noextract inline_for_extraction
 let load_row #a #m r ws = create_row r ws.(0ul) ws.(1ul) ws.(2ul) ws.(3ul)
 
-inline_for_extraction
+noextract inline_for_extraction
 let store_row #a #m b r =
   match a,m with
   | Spec.Blake2S,M256
@@ -237,7 +236,7 @@ let store_row #a #m b r =
   | _ ->
     uints_to_bytes_le #(Spec.wt a) 4ul b r
 
-inline_for_extraction
+noextract inline_for_extraction
 let gather_row #a #ms r m i0 i1 i2 i3 =
     create_row r m.(i0) m.(i1) m.(i2) m.(i3)
 

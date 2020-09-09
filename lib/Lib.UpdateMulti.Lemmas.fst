@@ -1,8 +1,116 @@
 module Lib.UpdateMulti.Lemmas
 
-/// This module establishes some equivalence between the update-multi style used
-/// for specifications in the streaming functor, and the lib-based repeat
-/// imperative combinators.
+/// This first auxiliary lemma only manipulates the lengths of the sequences.
+#push-options "--z3cliopt smt.arith.nl=false"
+let split_at_last_lazy_nb_rem_spec (l : pos) (d n rest: nat) :
+  Lemma
+  (requires (
+    rest <= l /\
+    (rest = 0 ==> d = 0) /\
+    d = n * l + rest))
+  (ensures ((n, rest) = split_at_last_lazy_nb_rem l d)) =
+  (* We call ``split_at_last_lazy_nb_rem`` at the beginning to have its
+   * postcondition in the context (the return values are only used in the second
+   * branch *)
+  let n', rest' = split_at_last_lazy_nb_rem l d in 
+  if d = 0 then
+     begin
+     Math.Lemmas.nat_times_nat_is_nat n l;
+     Math.Lemmas.int_times_int_equal_zero_lemma n l;
+     assert(n = 0)
+     end
+  else
+   begin
+     assert(d > 0);
+     (* In order to prove the equality between all the lengths, we use the unicity
+     * of the modulo to prove that the rests are equal, then that the numbers
+     * of blocks are equal. *)
+     let blocks = n * l in
+     let rest = d - blocks in
+     let blocks' = n' * l in
+     Math.Lemmas.cancel_mul_mod n l;
+     assert(blocks % l = 0);
+     assert(blocks' % l = 0); (* comes from the spec of [split_at_last_lazy_nb_rem] *)
+     Math.Lemmas.euclidean_division_definition blocks l;
+
+     (* First, prove that the lengths of the rests are equal modulo the size of
+     * a block *)
+     assert(rest' % l = d % l); (* comes from the spec of [split_at_last] *)
+     assert(rest + n * l = d);
+     Math.Lemmas.lemma_mod_plus rest n l; (* doesn't work inside a calc: typing problem with squash *)
+     assert(d % l = rest % l);
+     assert(rest % l = rest' % l);
+
+     (* If both rests are stricly smaller than a block, we can directly apply
+      * the modulo injectivity and the rest follows immediately *)
+     if rest < l && rest' < l then
+       begin
+       Math.Lemmas.lemma_mod_injective l rest rest';
+       assert(rest = rest');
+       assert(n * l + rest = n' * l + rest');
+       assert(n * l = n' * l);
+       Math.Lemmas.lemma_cancel_mul n n' l;
+       assert(n = n')
+       end
+     (* Otherwise, case one: both rests are equal to block length (even easier) *)
+     else if rest = l && rest' = l then
+       Math.Lemmas.lemma_cancel_mul n n' l
+     (* Last two cases: one of the rests is smaller than a block, and the other is
+      * of the size of a block. Because of modulo properties, the smaller rest
+      * must be equal to 0, which gives us that the data is actually of length 0:
+      * contradiction. *)
+     else
+       begin
+       assert((rest = l && rest' < l) \/ (rest < l && rest' = l));
+       let rest, rest' = if rest = l then rest, rest' else rest', rest in
+       assert(rest = l && rest' < l);
+       (* [rest % l = 0] *)
+       assert(rest = 1 * l);
+       Math.Lemmas.cancel_mul_mod 1 l;
+       assert(rest % l = 0);
+       (* [rest' = 0 ] *)
+       Math.Lemmas.modulo_lemma rest' l;
+       assert(rest' = 0);
+       (* By the current hypotheses, if rest' = 0 then d = 0 (contradiction) *)
+       assert(False)
+       end
+     end
+#pop-options
+
+/// This second lemma characterizes the sequences themselves.
+/// The proof strategy is to first prove that the blocks and rest sequences have
+/// the expected lengths, and the equality between the sequences is then trivial
+/// to get.
+#push-options "--z3cliopt smt.arith.nl=false"
+let split_at_last_lazy_spec (l : pos)
+                            (b blocks rest: S.seq uint8):
+  Lemma
+  (requires (
+    S.length blocks % l = 0 /\
+    S.length rest <= l /\
+    (S.length rest = 0 ==> S.length b = 0) /\
+    b `Seq.equal` Seq.append blocks rest))
+  (ensures (
+     (blocks, rest) == split_at_last_lazy l b)) =
+  (* We need to introduce the variables with which to call [split_at_last_lazy_nb_rem_spec] *)
+  let b_l = Seq.length b in
+  let blocks_l = Seq.length blocks in
+  let rest_l = Seq.length rest in
+  let blocks', rest' = split_at_last_lazy l b in
+  let n' = Seq.length blocks' / l in
+  let n = blocks_l / l in
+  Math.Lemmas.nat_over_pos_is_nat blocks_l l;
+  assert(n >= 0);
+  Math.Lemmas.euclidean_division_definition (S.length blocks) l;
+  split_at_last_lazy_nb_rem_spec l b_l n rest_l;
+  assert(((n <: nat), rest_l) = split_at_last_lazy_nb_rem l b_l);
+  assert(n = n'); (* comes from the spec of [split_at_last_lazy] *)
+  assert(rest_l = Seq.length rest');
+  (* We have the equalities between the sequence lengths, so the rest follows
+   * naturally *)
+  assert(blocks `Seq.equal` blocks');
+  assert(rest `Seq.equal` rest')
+#pop-options
 
 /// This is the reason why repeat_l is hoisted
 let repeat_l_input #a (block_length:pos { block_length < pow2 32 })
@@ -19,7 +127,7 @@ let repeat_l_input #a (block_length:pos { block_length < pow2 32 })
 =
   ()
 
-#set-options "--fuel 0 --ifuel 0 --z3rlimit 150"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 300"
 let rec update_full_is_repeat_blocks #a block_length update update_last acc input input' =
   // Lib.UpdateMulti side
   let n_blocks = S.length input / block_length in

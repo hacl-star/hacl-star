@@ -47,6 +47,8 @@ extern "C" {
 #define Spec_Hash_Definitions_SHA2_512 3
 #define Spec_Hash_Definitions_SHA1 4
 #define Spec_Hash_Definitions_MD5 5
+#define Spec_Hash_Definitions_Blake2S 6
+#define Spec_Hash_Definitions_Blake2B 7
 
 /* SNIPPET_END: Spec_Hash_Definitions_hash_alg */
 

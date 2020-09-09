@@ -46,6 +46,14 @@ void Hacl_HKDF_expand_sha2_512(u8 *okm, u8 *prk, u32 prklen, u8 *info, u32 infol
 
 void Hacl_HKDF_extract_sha2_512(u8 *prk, u8 *salt, u32 saltlen, u8 *ikm, u32 ikmlen);
 
+void Hacl_HKDF_expand_blake2s_32(u8 *okm, u8 *prk, u32 prklen, u8 *info, u32 infolen, u32 len);
+
+void Hacl_HKDF_extract_blake2s_32(u8 *prk, u8 *salt, u32 saltlen, u8 *ikm, u32 ikmlen);
+
+void Hacl_HKDF_expand_blake2b_32(u8 *okm, u8 *prk, u32 prklen, u8 *info, u32 infolen, u32 len);
+
+void Hacl_HKDF_extract_blake2b_32(u8 *prk, u8 *salt, u32 saltlen, u8 *ikm, u32 ikmlen);
+
 #if defined(__cplusplus)
 }
 #endif

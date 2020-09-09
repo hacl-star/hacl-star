@@ -43,6 +43,8 @@ extern "C" {
 #define Spec_Hash_Definitions_SHA2_512 3
 #define Spec_Hash_Definitions_SHA1 4
 #define Spec_Hash_Definitions_MD5 5
+#define Spec_Hash_Definitions_Blake2S 6
+#define Spec_Hash_Definitions_Blake2B 7
 
 typedef uint8_t Spec_Hash_Definitions_hash_alg;
 
@@ -689,6 +691,44 @@ EverCrypt_HKDF_extract_sha2_512(
 );
 
 extern void
+EverCrypt_HKDF_expand_blake2s(
+  uint8_t *okm,
+  uint8_t *prk,
+  uint32_t prklen,
+  uint8_t *info,
+  uint32_t infolen,
+  uint32_t len
+);
+
+extern void
+EverCrypt_HKDF_extract_blake2s(
+  uint8_t *prk,
+  uint8_t *salt,
+  uint32_t saltlen,
+  uint8_t *ikm,
+  uint32_t ikmlen
+);
+
+extern void
+EverCrypt_HKDF_expand_blake2b(
+  uint8_t *okm,
+  uint8_t *prk,
+  uint32_t prklen,
+  uint8_t *info,
+  uint32_t infolen,
+  uint32_t len
+);
+
+extern void
+EverCrypt_HKDF_extract_blake2b(
+  uint8_t *prk,
+  uint8_t *salt,
+  uint32_t saltlen,
+  uint8_t *ikm,
+  uint32_t ikmlen
+);
+
+extern void
 EverCrypt_HKDF_expand(
   Spec_Hash_Definitions_hash_alg a,
   uint8_t *okm,
@@ -770,6 +810,24 @@ EverCrypt_HMAC_compute_sha2_512(
   uint32_t data_len
 );
 
+extern void
+EverCrypt_HMAC_compute_blake2s(
+  uint8_t *dst,
+  uint8_t *key,
+  uint32_t key_len,
+  uint8_t *data,
+  uint32_t data_len
+);
+
+extern void
+EverCrypt_HMAC_compute_blake2b(
+  uint8_t *dst,
+  uint8_t *key,
+  uint32_t key_len,
+  uint8_t *data,
+  uint32_t data_len
+);
+
 extern bool EverCrypt_HMAC_is_supported_alg(Spec_Hash_Definitions_hash_alg uu___);
 
 typedef Spec_Hash_Definitions_hash_alg EverCrypt_HMAC_supported_alg;
@@ -800,6 +858,8 @@ typedef void *EverCrypt_Hash_e_alg;
 #define EverCrypt_Hash_SHA2_256_s 3
 #define EverCrypt_Hash_SHA2_384_s 4
 #define EverCrypt_Hash_SHA2_512_s 5
+#define EverCrypt_Hash_Blake2S_s 6
+#define EverCrypt_Hash_Blake2B_s 7
 
 typedef uint8_t EverCrypt_Hash_state_s_tags;
 
@@ -813,6 +873,8 @@ typedef struct EverCrypt_Hash_state_s_s
     uint32_t *case_SHA2_256_s;
     uint64_t *case_SHA2_384_s;
     uint64_t *case_SHA2_512_s;
+    uint32_t *case_Blake2S_s;
+    uint64_t *case_Blake2B_s;
   }
   ;
 }
@@ -890,6 +952,30 @@ extern uint64_t
   EverCrypt_Hash_state_s projectee
 );
 
+extern bool
+EverCrypt_Hash_uu___is_Blake2S_s(
+  Spec_Hash_Definitions_hash_alg uu___,
+  EverCrypt_Hash_state_s projectee
+);
+
+extern uint32_t
+*EverCrypt_Hash___proj__Blake2S_s__item__p(
+  Spec_Hash_Definitions_hash_alg uu___,
+  EverCrypt_Hash_state_s projectee
+);
+
+extern bool
+EverCrypt_Hash_uu___is_Blake2B_s(
+  Spec_Hash_Definitions_hash_alg uu___,
+  EverCrypt_Hash_state_s projectee
+);
+
+extern uint64_t
+*EverCrypt_Hash___proj__Blake2B_s__item__p(
+  Spec_Hash_Definitions_hash_alg uu___,
+  EverCrypt_Hash_state_s projectee
+);
+
 extern Spec_Hash_Definitions_hash_alg EverCrypt_Hash_alg_of_state(EverCrypt_Hash_state_s *a);
 
 extern EverCrypt_Hash_state_s *EverCrypt_Hash_create_in(Spec_Hash_Definitions_hash_alg a);
@@ -898,9 +984,23 @@ extern EverCrypt_Hash_state_s *EverCrypt_Hash_create(Spec_Hash_Definitions_hash_
 
 extern void EverCrypt_Hash_init(EverCrypt_Hash_state_s *a);
 
-extern void EverCrypt_Hash_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n);
+extern void EverCrypt_Hash_update_multi_256(uint32_t *s, uint8_t *ev, uint32_t blocks);
+
+extern void EverCrypt_Hash_update2(EverCrypt_Hash_state_s *a, uint64_t s, uint8_t *prevlen);
+
+KRML_DEPRECATED("Use update2 instead")
 
 extern void EverCrypt_Hash_update(EverCrypt_Hash_state_s *a, uint8_t *s);
+
+extern void
+EverCrypt_Hash_update_multi2(
+  EverCrypt_Hash_state_s *a,
+  uint64_t s,
+  uint8_t *prevlen,
+  uint32_t blocks
+);
+
+KRML_DEPRECATED("Use update_multi2 instead")
 
 extern void
 EverCrypt_Hash_update_multi(EverCrypt_Hash_state_s *a, uint8_t *s, uint32_t blocks);
@@ -913,7 +1013,17 @@ EverCrypt_Hash_update_last_256(
   uint32_t input_len
 );
 
-extern void EverCrypt_Hash_update_last(EverCrypt_Hash_state_s *a, uint8_t *s, uint64_t last);
+extern void
+EverCrypt_Hash_update_last2(
+  EverCrypt_Hash_state_s *a,
+  uint64_t s,
+  uint8_t *prev_len,
+  uint32_t last
+);
+
+KRML_DEPRECATED("Use update_last2 instead")
+
+extern void EverCrypt_Hash_update_last(EverCrypt_Hash_state_s *ga, uint8_t *s, uint64_t last);
 
 extern void EverCrypt_Hash_finish(EverCrypt_Hash_state_s *a, uint8_t *s);
 
@@ -981,6 +1091,18 @@ EverCrypt_Hash_Incremental_finish_sha384(
 
 extern void
 EverCrypt_Hash_Incremental_finish_sha512(
+  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *p,
+  uint8_t *dst
+);
+
+extern void
+EverCrypt_Hash_Incremental_finish_blake2s(
+  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *p,
+  uint8_t *dst
+);
+
+extern void
+EverCrypt_Hash_Incremental_finish_blake2b(
   Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *p,
   uint8_t *dst
 );

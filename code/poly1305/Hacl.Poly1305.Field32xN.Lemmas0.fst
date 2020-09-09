@@ -69,6 +69,7 @@ val fadd5_eval_lemma_i:
   -> i:nat{i < w} ->
   Lemma ((feval5 (fadd5 f1 f2)).[i] == pfadd (feval5 f1).[i] (feval5 f2).[i])
 
+#push-options "--z3rlimit 100"
 let fadd5_eval_lemma_i #w f1 f2 i =
   let o = fadd5 f1 f2 in
   let (f10, f11, f12, f13, f14) = as_tup64_i f1 i in
@@ -86,7 +87,7 @@ let fadd5_eval_lemma_i #w f1 f2 i =
     (as_nat5 (f10, f11, f12, f13, f14)) (as_nat5 (f20, f21, f22, f23, f24)) prime;
   FStar.Math.Lemmas.lemma_mod_plus_distr_r
     (as_nat5 (f10, f11, f12, f13, f14) % prime) (as_nat5 (f20, f21, f22, f23, f24)) prime
-
+#pop-options
 
 val smul_felem5_fits_lemma_i:
     #w:lanes
@@ -211,13 +212,14 @@ val smul_add_felem5_fits_lemma_i:
   -> i:nat{i < w} ->
   Lemma ((uint64xN_v (vec_add_mod acc1 (vec_mul_mod f2 u1))).[i] <= (m3 + m1 * m2) * max26 * max26)
 
+#push-options "--z3rlimit 200"
 let smul_add_felem5_fits_lemma_i #w #m1 #m2 #m3 u1 f2 acc1 i =
   let o = vec_add_mod acc1 (vec_mul_mod f2 u1) in
   smul_add_mod_lemma #m1 #m2 #m3 (uint64xN_v u1).[i] (uint64xN_v f2).[i] (uint64xN_v acc1).[i];
   assert ((uint64xN_v o).[i] == (uint64xN_v acc1).[i] + (uint64xN_v u1).[i] * (uint64xN_v f2).[i]);
   lemma_mult_le (uint64xN_v u1).[i] (m1 * max26) (uint64xN_v f2).[i] (m2 * max26);
   assert ((uint64xN_v o).[i] <= m3 * max26 * max26 + m1 * m2 * max26 * max26)
-
+#pop-options
 
 val smul_add_felem5_eval_lemma_i:
     #w:lanes

@@ -34,7 +34,6 @@ open Lib.IntVector.Intrinsics
 
 
 open Spec.Hash.Definitions
-open Hacl.Hash.Definitions
 
 open FStar.Mul
 
@@ -556,7 +555,6 @@ let ecdsa_verification_core alg publicKeyBuffer hashAsFelem r s mLen m xBuffer t
 
 
 [@ (Comment "  This code is not side channel resistant")]
-
 val ecdsa_verification_:alg:hash_alg_ecdsa
   -> pubKey:lbuffer uint64 (size 8)
   -> r:lbuffer uint64 (size 4)

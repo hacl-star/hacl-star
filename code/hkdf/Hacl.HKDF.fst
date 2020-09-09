@@ -46,6 +46,10 @@ let hmac_input_fits a =
     assert_norm (pow2 32 + block_length SHA2_384 <= max_input_length SHA2_384)
   | SHA2_512 ->
     assert_norm (pow2 32 + block_length SHA2_512 <= max_input_length SHA2_512)
+  | Blake2S ->
+    assert_norm (pow2 32 + block_length Blake2S <= max_input_length Blake2S)
+  | Blake2B ->
+    assert_norm (pow2 32 + block_length Blake2B <= max_input_length Blake2B)
 
 #push-options "--z3rlimit 300"
 
@@ -54,7 +58,6 @@ let mk_expand a hmac okm prk prklen info infolen len =
   let n = len /. tlen in
 
   Math.Lemmas.lemma_div_mod (v len) (v tlen);
-  //assert (v len - (v len / v tlen) * v tlen == v len % v tlen);
   hmac_input_fits a;
 
   [@inline_let]
@@ -149,11 +152,6 @@ let mk_expand a hmac okm prk prklen info infolen len =
       end;
     let block = B.sub okm (n *! tlen) (len -! (n *! tlen)) in
     B.copy block (B.sub tag 0ul (len -! (n *! tlen)))
-    // let h3 = ST.get() in
-    // assert (
-    //   B.as_seq h3 tag ==
-    //   Spec.Agile.HMAC.hmac a (B.as_seq h0 prk)
-    //     (refl h1 (v n) @| B.as_seq h0 info @| Seq.create 1 (u8 (v n + 1))))
   end;
 
   let h4 = ST.get() in
@@ -161,7 +159,6 @@ let mk_expand a hmac okm prk prklen info infolen len =
     let tag', output' =
       Seq.generate_blocks (v tlen) (v n) (v n) a_spec (spec h0) (FStar.Seq.empty #uint8)
     in
-    // refl h1 (v n) == tag' /\ B.as_seq h1 output == output' /\
     Seq.equal
       (B.as_seq h4 okm)
       (output' @| Seq.sub (B.as_seq h4 tag) 0 (v len - v n * v tlen)));
@@ -178,3 +175,17 @@ let expand_sha2_512: expand_st SHA2_512 =
 
 let extract_sha2_512: extract_st SHA2_512 =
   mk_extract SHA2_512 Hacl.HMAC.compute_sha2_512
+
+let expand_blake2s_32: expand_st Blake2S =
+  mk_expand Blake2S Hacl.HMAC.compute_blake2s_32
+
+let extract_blake2s_32: extract_st Blake2S =
+  mk_extract Blake2S Hacl.HMAC.compute_blake2s_32
+
+let expand_blake2b_32: expand_st Blake2B =
+  mk_expand Blake2B Hacl.HMAC.compute_blake2b_32
+
+let extract_blake2b_32: extract_st Blake2B =
+  mk_extract Blake2B Hacl.HMAC.compute_blake2b_32
+
+

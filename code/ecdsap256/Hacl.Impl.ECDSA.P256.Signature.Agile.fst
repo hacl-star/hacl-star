@@ -35,7 +35,6 @@ module H = Spec.Agile.Hash
 module Def = Spec.Hash.Definitions
 
 open Spec.Hash.Definitions
-open Hacl.Hash.Definitions
 
 
 #set-options "--z3rlimit 100 --ifuel 0 --fuel 0"
@@ -56,13 +55,12 @@ val ecdsa_signature_step12: alg:hash_alg_ecdsa
     )
   )
 
-
 let ecdsa_signature_step12 alg mLen m result = 
   assert_norm (pow2 32 < pow2 61);
   assert_norm (pow2 32 < pow2 125);
   push_frame(); 
     let h0 = ST.get() in 
-  let sz: FStar.UInt32.t = match alg with |NoHash -> mLen |Hash a ->  hash_len a in
+  let sz: FStar.UInt32.t = match alg with |NoHash -> mLen |Hash a ->  Hacl.Hash.Definitions.hash_len a in
   let mHash = create sz (u8 0) in    
   
   begin

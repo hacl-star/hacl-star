@@ -17,6 +17,10 @@ module Bindings(F:Cstubs.FOREIGN) =
       Unsigned.UInt8.of_int 4
     let spec_Hash_Definitions_hash_alg_Spec_Hash_Definitions_MD5 =
       Unsigned.UInt8.of_int 5
+    let spec_Hash_Definitions_hash_alg_Spec_Hash_Definitions_Blake2S =
+      Unsigned.UInt8.of_int 6
+    let spec_Hash_Definitions_hash_alg_Spec_Hash_Definitions_Blake2B =
+      Unsigned.UInt8.of_int 7
     type spec_Cipher_Expansion_impl = Unsigned.UInt8.t
     let spec_Cipher_Expansion_impl =
       typedef uint8_t "Spec_Cipher_Expansion_impl"
