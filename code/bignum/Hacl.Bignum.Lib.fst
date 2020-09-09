@@ -86,14 +86,14 @@ inline_for_extraction noextract
 val bn_leading_zero_index:
     len:size_t{0 < v len}
   -> b:lbignum len ->
-  Stack size_t
+  Stack uint64
   (requires fun h -> live h b)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
     v r == S.bn_leading_zero_index (as_seq h0 b))
 
 let bn_leading_zero_index len b =
   push_frame ();
-  let priv = create 1ul 0ul in
+  let priv = create 1ul (u64 0) in
 
   let h0 = ST.get () in
   [@ inline_let]
@@ -112,7 +112,9 @@ let bn_leading_zero_index len b =
   (fun i ->
     Loops.unfold_repeat_gen (v len) (S.bn_leading_zero_index_t (v len)) (spec h0) (refl h0 0) (v i);
     let mask = eq_mask b.(i) (zeros U64 SEC) in
-    priv.(0ul) <- if FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 mask =^ 0uL) then i else priv.(0ul));
+    let h1 = ST.get () in
+    priv.(0ul) <- mask_select mask priv.(0ul) (size_to_uint64 i);
+    mask_select_lemma mask (LSeq.index (as_seq h1 priv) 0) (size_to_uint64 i));
   let res = priv.(0ul) in
   pop_frame ();
   res
@@ -120,14 +122,14 @@ let bn_leading_zero_index len b =
 
 inline_for_extraction noextract
 val limb_leading_zero_index: a:uint64 ->
-  Stack size_t
+  Stack uint64
   (requires fun h -> True)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
     v r == S.limb_leading_zero_index a)
 
 let limb_leading_zero_index a =
   push_frame ();
-  let priv = create 1ul 0ul in
+  let priv = create 1ul (u64 0) in
 
   let h0 = ST.get () in
   [@ inline_let]
@@ -145,7 +147,10 @@ let limb_leading_zero_index a =
   (fun i ->
     Loops.unfold_repeat_gen 64 S.limb_leading_zero_index_t (spec h0) (refl h0 0) (v i);
     let bit_i = (a >>. i) &. u64 1 in
-    priv.(0ul) <- if FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 bit_i =^ 1uL) then i else priv.(0ul));
+    let mask = eq_mask bit_i (u64 1) in
+    let h1 = ST.get () in
+    priv.(0ul) <- mask_select mask (size_to_uint64 i) priv.(0ul);
+    mask_select_lemma mask (size_to_uint64 i) (LSeq.index (as_seq h1 priv) 0));
   let res = priv.(0ul) in
   pop_frame ();
   res
@@ -161,6 +166,7 @@ val bn_get_num_bits:
     v r == S.bn_get_num_bits (as_seq h0 b))
 
 let bn_get_num_bits len b =
+  //TODO: call `limb_leading_zero_index` for each limb
   let ind = bn_leading_zero_index len b in
-  let bits = limb_leading_zero_index b.(ind) in
-  64ul *! ind +! bits
+  let bits = limb_leading_zero_index b.(Lib.RawIntTypes.(size_from_UInt32 (u32_to_UInt32 (to_u32 ind)))) in
+  Lib.RawIntTypes.(size_from_UInt32 (u32_to_UInt32 (to_u32 (u64 64 *! ind +! bits))))

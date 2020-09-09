@@ -271,40 +271,23 @@ static void precomp(uint64_t *n, uint64_t *res)
   uint32_t bits;
   if (mask0 == (uint64_t)0U)
   {
-    uint32_t priv0 = (uint32_t)0U;
+    uint64_t priv0 = (uint64_t)0U;
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
     {
       uint64_t mask1 = FStar_UInt64_eq_mask(n[i], (uint64_t)0U);
-      uint32_t ite;
-      if (mask1 == (uint64_t)0U)
-      {
-        ite = i;
-      }
-      else
-      {
-        ite = priv0;
-      }
-      priv0 = ite;
+      priv0 = (mask1 & priv0) | (~mask1 & (uint64_t)i);
     }
-    uint32_t ind = priv0;
-    uint64_t uu____1 = n[ind];
-    uint32_t priv = (uint32_t)0U;
+    uint64_t ind = priv0;
+    uint64_t uu____1 = n[(uint32_t)ind];
+    uint64_t priv = (uint64_t)0U;
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
     {
       uint64_t bit_i = uu____1 >> i & (uint64_t)1U;
-      uint32_t ite;
-      if (bit_i == (uint64_t)1U)
-      {
-        ite = i;
-      }
-      else
-      {
-        ite = priv;
-      }
-      priv = ite;
+      uint64_t mask1 = FStar_UInt64_eq_mask(bit_i, (uint64_t)1U);
+      priv = (mask1 & (uint64_t)i) | (~mask1 & priv);
     }
-    uint32_t bits0 = priv;
-    bits = (uint32_t)64U * ind + bits0;
+    uint64_t bits0 = priv;
+    bits = (uint32_t)((uint64_t)64U * ind + bits0);
   }
   else
   {
@@ -698,40 +681,23 @@ uint64_t *Hacl_Bignum4096_new_precompr2(uint32_t nLen, uint64_t *n)
   uint32_t bits;
   if (mask0 == (uint64_t)0U)
   {
-    uint32_t priv0 = (uint32_t)0U;
+    uint64_t priv0 = (uint64_t)0U;
     for (uint32_t i = (uint32_t)0U; i < nLen; i++)
     {
       uint64_t mask1 = FStar_UInt64_eq_mask(n[i], (uint64_t)0U);
-      uint32_t ite;
-      if (mask1 == (uint64_t)0U)
-      {
-        ite = i;
-      }
-      else
-      {
-        ite = priv0;
-      }
-      priv0 = ite;
+      priv0 = (mask1 & priv0) | (~mask1 & (uint64_t)i);
     }
-    uint32_t ind = priv0;
-    uint64_t uu____1 = n[ind];
-    uint32_t priv = (uint32_t)0U;
+    uint64_t ind = priv0;
+    uint64_t uu____1 = n[(uint32_t)ind];
+    uint64_t priv = (uint64_t)0U;
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
     {
       uint64_t bit_i = uu____1 >> i & (uint64_t)1U;
-      uint32_t ite;
-      if (bit_i == (uint64_t)1U)
-      {
-        ite = i;
-      }
-      else
-      {
-        ite = priv;
-      }
-      priv = ite;
+      uint64_t mask1 = FStar_UInt64_eq_mask(bit_i, (uint64_t)1U);
+      priv = (mask1 & (uint64_t)i) | (~mask1 & priv);
     }
-    uint32_t bits0 = priv;
-    bits = (uint32_t)64U * ind + bits0;
+    uint64_t bits0 = priv;
+    bits = (uint32_t)((uint64_t)64U * ind + bits0);
   }
   else
   {
