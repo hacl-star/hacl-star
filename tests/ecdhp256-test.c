@@ -202,6 +202,8 @@ bool test_wycheproof()
 	free(decompressedPoint);
 	free(result);
 	free(pk);
+	
+	return ok; 
 }
 
 

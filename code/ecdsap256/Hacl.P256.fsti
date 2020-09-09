@@ -357,13 +357,14 @@ val compression_compressed_form: b: lbuffer uint8 (size 64) -> result: compresse
 
 
 [@ (Comment " Input: result: uint8[64], \n scalar: uint8[32].
-  \n Output: uint64, where 0 stands for the correct key generation. All the other values mean that an error has occurred. 
+  \n Output: bool, where True stands for the correct key generation. 
+  \n False means that an error has occurred (possibly that the result respresents point at infinity). 
   ")]
 
 val ecp256dh_i:
     result:lbuffer uint8 (size 64)
   -> scalar:lbuffer uint8 (size 32)
-  -> Stack uint64
+  -> Stack bool
   (requires fun h ->
     live h result /\ live h scalar /\ 
     disjoint result scalar)
@@ -376,14 +377,14 @@ val ecp256dh_i:
 
 
 [@ (Comment " This code is not side channel resistant on pub_key. \n Input: result: uint8[64], \n pub(lic)Key: uint8[64], \n scalar: uint8[32].
-  \n Output: uint64, where 0 stands for the correct key generation. All the other values mean that an error has occurred. 
+  \n Output: bool, where True stands for the correct key generation. Fale value means that an error has occurred (possibly the provided public key was incorrect or the result represents point at infinity). 
   ")]
 
 val ecp256dh_r:
     result:lbuffer uint8 (size 64)
   -> pubKey:lbuffer uint8 (size 64)
   -> scalar:lbuffer uint8 (size 32)
-  -> Stack uint64
+  -> Stack bool
     (requires fun h ->
       live h result /\ live h pubKey /\ live h scalar /\
       disjoint result pubKey /\ disjoint result scalar)
