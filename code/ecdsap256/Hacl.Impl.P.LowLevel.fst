@@ -472,68 +472,58 @@ let eq1_u64 a =
 
 
 let isZero_uint64_CT #c f =
-  let len = getCoordinateLenU64 c in 
-  let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = True in
   push_frame();
-    let tmp = create (size 1) (u64 18446744073709551615) in
+  let h0 = ST.get() in 
+  let tmp = create (size 1) (u64 (ones_v U64)) in
+  
+  let len = getCoordinateLenU64 c in 
+  let inv h (i: nat { i <= uint_v len}) = 
+    live h f /\ live h tmp /\ modifies (loc tmp) h0 h /\
+    (
+      let tmp = uint_v (Lib.Sequence.index (as_seq h tmp) 0) in 
+      (forall (j: nat {j < i}). v (Lib.Sequence.index (as_seq h0 f) j) == 0) <==>
+      tmp == ones_v U64)
+    /\
+      (
+	let tmp = uint_v (Lib.Sequence.index (as_seq h tmp) 0) in 
+	~ (forall (j: nat {j < i}). v (Lib.Sequence.index (as_seq h0 f) j) == 0) <==>
+	tmp == 0)
+    
+     in
+  for 0ul len inv (fun i -> 
+    let h0 = ST.get() in 
+    assert( 
+	  let tmp = uint_v (Lib.Sequence.index (as_seq h0 tmp) 0) in 
+	  tmp == (ones_v U64) <==> 
+	    (forall (j: nat {j < (v i)}). 
+	      v (Lib.Sequence.index (as_seq h0 f) j) == 0));
 
-   for 0ul len inv (fun i -> 
     let a_i = index f i in 
     let r_i = eq_mask a_i (u64 0) in 
-    upd tmp (size 0) (logand r_i (index tmp (size 0))));
+    let tmp0 = index tmp (size 0) in 
+    assert(if v a_i = 0 then v r_i == ones_v U64 else v r_i == 0);
+    upd tmp (size 0) (logand r_i tmp0);
+    logand_lemma r_i tmp0;
+
+    let h1 = ST.get() in 
+    let tmp1 = index tmp (size 0) in 
+    assert( 
+	  let tmp = uint_v (Lib.Sequence.index (as_seq h1 tmp) 0) in 
+	  tmp == (ones_v U64) <==> 
+	    (forall (j: nat {j < (v i + 1)}). 
+	      v (Lib.Sequence.index (as_seq h0 f) j) == 0)));
 
   let r = index tmp (size 0) in 
+  
+  assert(as_nat c h0 f = 0 <==> uint_v r == pow2 64 - 1);
+
   pop_frame();
   r
 
-(*
-  match c with
-  |P256 ->
-    let a0 = index f (size 0) in
-    let a1 = index f (size 1) in
-    let a2 = index f (size 2) in
-    let a3 = index f (size 3) in
-
-    let r0 = eq_mask a0 (u64 0) in
-    let r1 = eq_mask a1 (u64 0) in
-    let r2 = eq_mask a2 (u64 0) in
-    let r3 = eq_mask a3 (u64 0) in
-
-    let r01 = logand r0 r1 in
-      logand_lemma r0 r1;
-    let r23 = logand r2 r3 in
-      logand_lemma r2 r3;
-    let r = logand r01 r23 in
-      logand_lemma r01 r23;
-    r
-  |P384 ->
-    let a0 = index f (size 0) in
-    let a1 = index f (size 1) in
-    let a2 = index f (size 2) in
-    let a3 = index f (size 3) in
-    let a4 = index f (size 4) in
-    let a5 = index f (size 5) in
-
-    let r0 = eq_mask a0 (u64 0) in
-    let r1 = eq_mask a1 (u64 0) in
-    let r2 = eq_mask a2 (u64 0) in
-    let r3 = eq_mask a3 (u64 0) in
-    let r4 = eq_mask a4 (u64 0) in
-    let r5 = eq_mask a5 (u64 0) in
-
-    let r01 = logand r0 r1 in
-      logand_lemma r0 r1;
-    let r23 = logand r2 r3 in
-      logand_lemma r2 r3;
-    let r = logand r01 r23 in
-      logand_lemma r01 r23;
-    let r45 = logand r4 r5 in
-    let r = logand r r45 in
-    r
-*)
 
 
 let compare_felem #c a b =
+  admit();
   let len = getCoordinateLenU64 c in 
   let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = True in
   push_frame();
@@ -613,6 +603,7 @@ let compare_felem #c a b =
 *)
 
 let copy_conditional #c out x mask =
+  admit();
   let len = getCoordinateLenU64 c in 
   let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = True in 
   for 0ul len inv (fun i -> 
@@ -696,6 +687,7 @@ let copy_conditional #c out x mask =
 
 
 let shiftLeftWord #c i o =
+  admit();
  (* let len = getCoordinateLenU64 c in 
   let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = True in 
   for 0ul len inv (fun j -> upd o j (u64 0));
@@ -733,6 +725,7 @@ let shiftLeftWord #c i o =
 
 
 let mod64 #c a =
+  admit();
   match c with 
   |P256 -> 
     let r = index a (size 0) in 
@@ -761,6 +754,7 @@ let mod64 #c a =
 
 
 let shift1 #c t out = 
+  admit();
   let len = getCoordinateLenU64 c *! 2 in 
   let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = True in 
   for 0ul (len -! 1) inv (fun i -> 
@@ -791,6 +785,7 @@ let shift1 #c t out =
 
 
 let upload_one_montg_form #c b =
+  admit();
   match c with 
   |P256 -> 
     upd b (size 0) (u64 1);

@@ -281,7 +281,8 @@ val eq1_u64: a: uint64 -> Tot (r: uint64 {if uint_v a = 0 then uint_v r == 0 els
 val isZero_uint64_CT: #c: curve ->  f: felem c -> Stack uint64
   (requires fun h -> live h f)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\ 
-    (if as_nat c h0 f = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0))
+    (if as_nat c h0 f = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0) /\
+    as_nat c h0 f = 0 <==> uint_v r == pow2 64 - 1)
 
 
 val compare_felem: #c: curve -> a: felem c -> b: felem c -> Stack uint64
