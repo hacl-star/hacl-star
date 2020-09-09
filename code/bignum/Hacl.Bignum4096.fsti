@@ -95,7 +95,7 @@ val mod_exp_mont_ladder_precompr2: BE.bn_mod_exp_mont_ladder_precompr2_st n_limb
   The argument b is a bignum of any size, and bBits is an upper bound on the
   number of significant bits of b. For instance, if b is a 4096-bit bignum,
   bBits should be 4096. The function is constant-time on the argument b."]
-val mod_exp_mont_ladder: BE.bn_mod_exp_mont_ladder_st n_limbs
+val mod_exp_mont_ladder: BE.bn_mod_exp_st n_limbs
 
 [@@ Comment "Compute `2 ^ (128 * nLen) mod n`.
 

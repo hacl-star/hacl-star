@@ -22,6 +22,30 @@ friend Hacl.Spec.Bignum.Exponentiation
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+
+inline_for_extraction noextract
+val mk_check_mod_exp:
+    nLen:BN.meta_len
+  -> (#[FStar.Tactics.Typeclasses.tcresolve ()] _ : Hacl.Bignum.Montgomery.mont nLen)
+  -> check_mod_exp_st nLen
+
+let mk_check_mod_exp nLen #k n a bBits b =
+  let b0 = k.BM.check n in
+  let bLen = blocks bBits 64ul in
+  let m1 = BN.bn_is_zero_mask bLen b in
+  let m1' = lognot m1 in
+  let m2 = if bBits <. 64ul *! bLen then BN.bn_lt_pow2_mask bLen b bBits else ones U64 SEC in
+  let m3 = BN.bn_lt_mask nLen a n in
+  let m = m1' &. m2 &. m3 in
+  let b1 = if FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 m =^ 0uL) then false else true in
+  b0 && b1
+
+
+[@CInline]
+let check_mod_exp nLen =
+  mk_check_mod_exp nLen #(BM.mk_runtime_mont nLen)
+
+
 inline_for_extraction noextract
 let bn_mod_exp_loop_st (nLen: BN.meta_len) =
     n:lbignum nLen
@@ -64,7 +88,7 @@ let bn_mod_exp_loop nLen #_ n nInv_u64 bBits bLen b aM accM =
 
 inline_for_extraction noextract
 val bn_mod_exp_mont:
-    nLen:size_t{0 < v nLen /\ 128 * v nLen <= max_size_t}
+    nLen:BN.meta_len
   -> (#[FStar.Tactics.Typeclasses.tcresolve ()] _ : Hacl.Bignum.Montgomery.mont nLen)
   -> bn_mod_exp_loop:bn_mod_exp_loop_st nLen
   -> n:lbignum nLen
@@ -100,7 +124,7 @@ let bn_mod_exp_mont nLen #_ bn_mod_exp_loop n a acc bBits b r2 res =
 
 inline_for_extraction noextract
 val mk_bn_mod_exp_precompr2:
-    nLen:size_t{0 < v nLen /\ 128 * v nLen <= max_size_t}
+    nLen:BN.meta_len
   -> (#[FStar.Tactics.Typeclasses.tcresolve ()] _ : Hacl.Bignum.Montgomery.mont nLen)
   -> bn_mod_exp_loop:bn_mod_exp_loop_st nLen ->
   bn_mod_exp_precompr2_st nLen
@@ -177,7 +201,7 @@ let bn_mod_exp_mont_ladder_loop nLen #_ n nInv_u64 bBits bLen b rM0 rM1 sw =
 
 inline_for_extraction noextract
 val bn_mod_exp_mont_ladder_:
-    nLen:size_t{0 < v nLen /\ 128 * v nLen <= max_size_t}
+    nLen:BN.meta_len
   -> (#[FStar.Tactics.Typeclasses.tcresolve ()] _ : Hacl.Bignum.Montgomery.mont nLen)
   -> bn_mod_exp_mont_ladder_loop:bn_mod_exp_mont_ladder_loop_st nLen
   -> n:lbignum nLen
@@ -216,7 +240,7 @@ let bn_mod_exp_mont_ladder_ nLen #_ bn_mod_exp_mont_ladder_loop n a one bBits b 
 
 inline_for_extraction noextract
 val mk_bn_mod_exp_mont_ladder_precompr2:
-    nLen:size_t{0 < v nLen /\ 128 * v nLen <= max_size_t}
+    nLen:BN.meta_len
   -> (#[FStar.Tactics.Typeclasses.tcresolve ()] _ : Hacl.Bignum.Montgomery.mont nLen)
   -> bn_mod_exp_mont_ladder_loop:bn_mod_exp_mont_ladder_loop_st nLen ->
   bn_mod_exp_mont_ladder_precompr2_st nLen
@@ -239,17 +263,24 @@ let bn_mod_exp_mont_ladder_precompr2 nLen =
 
 inline_for_extraction noextract
 val mk_bn_mod_exp:
-    nLen:size_t{0 < v nLen /\ 128 * v nLen <= max_size_t}
+    nLen:BN.meta_len
   -> (#[FStar.Tactics.Typeclasses.tcresolve ()] _ : Hacl.Bignum.Montgomery.mont nLen)
   -> bn_mod_exp_loop:bn_mod_exp_loop_st nLen ->
   bn_mod_exp_st nLen
 
 let mk_bn_mod_exp nLen #k bn_mod_exp_loop n a bBits b res =
+  let h0 = ST.get () in
+  let is_valid = mk_check_mod_exp nLen #k n a bBits b in
   push_frame ();
   let r2 = create nLen (u64 0) in
   BM.precomp n r2;
   mk_bn_mod_exp_precompr2 nLen #k bn_mod_exp_loop n a bBits b r2 res;
-  pop_frame ()
+  let h1 = ST.get () in
+  if is_valid then begin
+    S.bn_mod_exp_lemma (v nLen) (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b);
+    assert (S.bn_mod_exp_post (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b) (as_seq h1 res)) end;
+  pop_frame ();
+  is_valid
 
 
 /// A fully runtime implementation of modular exponentiation.
@@ -261,17 +292,24 @@ let bn_mod_exp nLen =
 
 inline_for_extraction noextract
 val mk_bn_mod_exp_mont_ladder:
-    nLen:size_t{0 < v nLen /\ 128 * v nLen <= max_size_t}
+    nLen:BN.meta_len
   -> (#[FStar.Tactics.Typeclasses.tcresolve ()] _ : Hacl.Bignum.Montgomery.mont nLen)
   -> bn_mod_exp_mont_ladder_loop:bn_mod_exp_mont_ladder_loop_st nLen ->
-  bn_mod_exp_mont_ladder_st nLen
+  bn_mod_exp_st nLen
 
 let mk_bn_mod_exp_mont_ladder nLen #k bn_mod_exp_mont_ladder_loop n a bBits b res =
+  let h0 = ST.get () in
+  let is_valid = mk_check_mod_exp nLen #k n a bBits b in
   push_frame ();
   let r2 = create nLen (u64 0) in
   BM.precomp n r2;
   mk_bn_mod_exp_mont_ladder_precompr2 nLen #k bn_mod_exp_mont_ladder_loop n a bBits b r2 res;
-  pop_frame ()
+  let h1 = ST.get () in
+  if is_valid then begin
+    S.bn_mod_exp_mont_ladder_lemma (v nLen) (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b);
+    assert (S.bn_mod_exp_post (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b) (as_seq h1 res)) end;
+  pop_frame ();
+  is_valid
 
 
 /// A fully runtime implementation of modular exponentiation.

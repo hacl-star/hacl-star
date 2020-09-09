@@ -17,6 +17,40 @@ module M = Hacl.Spec.Montgomery.Lemmas
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+let check_mod_exp #nLen n a bBits b =
+  let b0 = check_modulus n in
+  let m1 = bn_is_zero_mask b in
+  bn_is_zero_mask_lemma b;
+  assert (if v m1 = 0 then bn_v b > 0 else bn_v b = 0);
+  assert (v m1 = 0 \/ v m1 = ones_v U64);
+  let m1' = lognot m1 in
+  lognot_lemma m1;
+  assert (if v m1' = 0 then bn_v b = 0 else bn_v b > 0);
+
+  bn_eval_bound b (blocks bBits 64);
+  let m2 =
+    if bBits < 64 * blocks bBits 64 then begin
+      bn_lt_pow2_mask_lemma b bBits;
+      bn_lt_pow2_mask b bBits end
+    else begin
+      Math.Lemmas.pow2_le_compat bBits (64 * blocks bBits 64);
+      ones U64 SEC end in
+  assert (if v m2 = 0 then pow2 bBits <= bn_v b else bn_v b < pow2 bBits);
+
+  let m3 = bn_lt_mask a n in
+  bn_lt_mask_lemma a n;
+  assert (if v m3 = 0 then bn_v a >= bn_v n else bn_v a < bn_v n);
+
+  let m = m1' &. m2 &. m3 in
+  logand_ones (m1' &. m2);
+  logand_zeros (m1' &. m2);
+  logand_ones m1';
+  logand_zeros m1';
+  let b1 = if FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 m =^ 0uL) then false else true in
+  assert (b1 == (0 < bn_v b && bn_v b < pow2 bBits && bn_v a < bn_v n));
+  b0 && b1
+
+
 val bn_mod_exp_f:
     #nLen:size_pos{nLen + nLen <= max_size_t}
   -> n:lbignum nLen
@@ -61,7 +95,7 @@ let bn_mod_exp_precompr2 nLen n a bBits b r2 =
 
 
 val bn_mod_exp_f_lemma:
-    #nLen:size_nat{nLen + nLen <= max_size_t}
+    #nLen:size_pos{nLen + nLen <= max_size_t}
   -> n:lbignum nLen
   -> mu:uint64
   -> bBits:size_pos
@@ -72,7 +106,7 @@ val bn_mod_exp_f_lemma:
   (requires
    (let (aM0, accM0) = aM_accM0 in
     (1 + (bn_v n % pow2 64) * v mu) % pow2 64 == 0 /\
-    bn_v n % 2 = 1 /\ 1 < bn_v n /\ bn_v n < pow2 (64 * nLen) /\
+    bn_v n % 2 = 1 /\ 1 < bn_v n /\
     0 < bn_v b /\ bn_v b < pow2 bBits /\
     bn_v aM0 < bn_v n /\ bn_v accM0 < bn_v n))
   (ensures
@@ -93,7 +127,7 @@ let bn_mod_exp_f_lemma #nLen n mu bBits bLen b i (aM0, accM0) =
 
 
 val bn_mod_exp_mont_loop_lemma:
-    #nLen:size_nat{nLen + nLen <= max_size_t}
+    #nLen:size_pos{nLen + nLen <= max_size_t}
   -> n:lbignum nLen
   -> mu:uint64
   -> bBits:size_pos
@@ -104,7 +138,7 @@ val bn_mod_exp_mont_loop_lemma:
   (requires
    (let (aM0, accM0) = aM_accM0 in
     (1 + (bn_v n % pow2 64) * v mu) % pow2 64 == 0 /\
-    bn_v n % 2 = 1 /\ 1 < bn_v n /\ bn_v n < pow2 (64 * nLen) /\
+    bn_v n % 2 = 1 /\ 1 < bn_v n /\
     0 < bn_v b /\ bn_v b < pow2 bBits /\
     bn_v aM0 < bn_v n /\ bn_v accM0 < bn_v n))
   (ensures
@@ -143,7 +177,7 @@ val bn_mod_exp_mont_lemma_aux:
   -> b:lbignum (blocks bBits 64)
   -> r2:lbignum nLen -> Lemma
   (requires
-    bn_v n % 2 = 1 /\ 1 < bn_v n /\ bn_v n < pow2 (64 * nLen) /\
+    bn_v n % 2 = 1 /\ 1 < bn_v n /\
     0 < bn_v b /\ bn_v b < pow2 bBits /\ bn_v a < bn_v n /\
     bn_v r2 == pow2 (128 * nLen) % bn_v n)
   (ensures
@@ -193,6 +227,7 @@ let bn_mod_exp_precompr2_lemma nLen n a bBits b r2 =
   mod_inv_u64_lemma n.[0];
   assert ((1 + (bn_v n % pow2 64) * v mu) % pow2 64 == 0);
 
+  bn_eval_bound n nLen;
   let d, k = M.eea_pow2_odd (64 * nLen) (bn_v n) in
   M.mont_preconditions nLen (bn_v n) (v mu);
   BL.mod_exp_mont_ll_lemma nLen (bn_v n) d (v mu) (bn_v a) bBits (bn_v b)
@@ -265,7 +300,7 @@ let lemma_bit_xor_is_sum_mod2 a b =
 
 
 val bn_mod_exp_mont_ladder_f_lemma:
-    #nLen:size_nat{nLen + nLen <= max_size_t}
+    #nLen:size_pos{nLen + nLen <= max_size_t}
   -> n:lbignum nLen
   -> mu:uint64
   -> bBits:size_pos
@@ -276,7 +311,7 @@ val bn_mod_exp_mont_ladder_f_lemma:
   (requires
    (let (rM0, rM1, sw) = rM0_rM1_sw in
     (1 + (bn_v n % pow2 64) * v mu) % pow2 64 == 0 /\
-    bn_v n % 2 = 1 /\ 1 < bn_v n /\ bn_v n < pow2 (64 * nLen) /\
+    bn_v n % 2 = 1 /\ 1 < bn_v n /\
     0 < bn_v b /\ bn_v b < pow2 bBits /\
     bn_v rM0 < bn_v n /\ bn_v rM1 < bn_v n /\ v sw <= 1))
   (ensures
@@ -305,7 +340,7 @@ let bn_mod_exp_mont_ladder_f_lemma #nLen n mu bBits bLen b i (rM0, rM1, sw) =
 
 
 val bn_mod_exp_mont_ladder_loop_lemma:
-    #nLen:size_nat{nLen + nLen <= max_size_t}
+    #nLen:size_pos{nLen + nLen <= max_size_t}
   -> n:lbignum nLen
   -> mu:uint64
   -> bBits:size_pos
@@ -316,7 +351,7 @@ val bn_mod_exp_mont_ladder_loop_lemma:
   (requires
    (let (rM0, rM1, sw) = rM0_rM1_sw in
     (1 + (bn_v n % pow2 64) * v mu) % pow2 64 == 0 /\
-    bn_v n % 2 = 1 /\ 1 < bn_v n /\ bn_v n < pow2 (64 * nLen) /\
+    bn_v n % 2 = 1 /\ 1 < bn_v n /\
     0 < bn_v b /\ bn_v b < pow2 bBits /\
     bn_v rM0 < bn_v n /\ bn_v rM1 < bn_v n /\ v sw <= 1))
   (ensures
@@ -359,7 +394,7 @@ val bn_mod_exp_mont_ladder_lemma_aux:
   -> b:lbignum (blocks bBits 64)
   -> r2:lbignum nLen -> Lemma
   (requires
-    bn_v n % 2 = 1 /\ 1 < bn_v n /\ bn_v n < pow2 (64 * nLen) /\
+    bn_v n % 2 = 1 /\ 1 < bn_v n /\
     0 < bn_v b /\ bn_v b < pow2 bBits /\ bn_v a < bn_v n /\
     bn_v r2 == pow2 (128 * nLen) % bn_v n)
   (ensures
@@ -413,6 +448,7 @@ let bn_mod_exp_mont_ladder_precompr2_lemma nLen n a bBits b r2 =
   mod_inv_u64_lemma n.[0];
   assert ((1 + (bn_v n % pow2 64) * v mu) % pow2 64 == 0);
 
+  bn_eval_bound n nLen;
   let d, k = M.eea_pow2_odd (64 * nLen) (bn_v n) in
   M.mont_preconditions nLen (bn_v n) (v mu);
   BL.mod_exp_mont_ladder_swap_ll_lemma nLen (bn_v n) d (v mu) (bn_v a) bBits (bn_v b)

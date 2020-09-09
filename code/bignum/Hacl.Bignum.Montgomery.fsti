@@ -19,6 +19,23 @@ include Hacl.Bignum.ModInv64
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+
+inline_for_extraction noextract
+let check_modulus_st (nLen:BN.meta_len) =
+  n:lbignum nLen ->
+  Stack bool
+  (requires fun h -> live h n)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+    r == S.check_modulus (as_seq h0 n))
+
+
+inline_for_extraction noextract
+val check_modulus:
+    #nLen:BN.meta_len
+  -> (#[FStar.Tactics.Typeclasses.tcresolve ()] _ : BN.bn nLen)
+  -> check_modulus_st nLen
+
+
 inline_for_extraction noextract
 let precomp_r2_mod_n_st (nLen: BN.meta_len) =
     n:lbignum nLen
@@ -174,6 +191,7 @@ val mont_sqr:
 inline_for_extraction noextract
 class mont (len: BN.meta_len)  = {
   bn: BN.bn len;
+  check: check_modulus_st len;
   precomp: precomp_r2_mod_n_st len;
   reduction: mont_reduction_st len;
   to: to_mont_st len;

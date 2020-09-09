@@ -353,7 +353,7 @@ let bn_lt_mask_st (len:size_t) =
   Stack uint64
   (requires fun h -> live h a /\ live h b)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    v r == v (S.bn_lt_mask (as_seq h0 a) (as_seq h0 b)))
+    r == S.bn_lt_mask (as_seq h0 a) (as_seq h0 b))
 
 
 inline_for_extraction noextract

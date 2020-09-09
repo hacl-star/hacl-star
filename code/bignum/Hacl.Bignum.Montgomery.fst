@@ -26,6 +26,18 @@ friend Hacl.Spec.Bignum.Montgomery
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+let check_modulus #nLen #_ n =
+  push_frame ();
+  let one = create nLen (u64 0) in
+  BN.bn_from_uint nLen (u64 1) one;
+  let m0 = BN.bn_is_odd nLen n in
+  let m1 = BN.bn_lt_mask nLen one n in
+  let m = m0 &. m1 in
+  let res = if FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 m =^ 0uL) then false else true in
+  pop_frame ();
+  res
+
+
 inline_for_extraction noextract
 let precomp_r2_mod_n_aux_st (nLen: BN.meta_len) =
     nBits:size_t{v nBits / 64 < v nLen}
@@ -191,6 +203,7 @@ let mont_sqr #nLen #k mont_reduction n nInv_u64 aM resM =
 /// runtime, to offer a version of mod_exp where all the parameters are present
 /// at run-time.
 
+let check_runtime len = check_modulus #len #(BN.mk_runtime_bn len)
 let precomp_runtime len = precomp_r2_mod_n #len #(BN.mk_runtime_bn len)
 let mont_reduction_runtime len = mont_reduction len
 let to_runtime len = to_mont #len #(BN.mk_runtime_bn len) (mont_reduction_runtime len)
@@ -201,6 +214,7 @@ let sqr_runtime len = mont_sqr #len #(BN.mk_runtime_bn len) (mont_reduction_runt
 inline_for_extraction noextract
 let mk_runtime_mont (len: BN.meta_len): mont len = {
   bn = BN.mk_runtime_bn len;
+  check = check_runtime len;
   precomp = precomp_runtime len;
   reduction = mont_reduction_runtime len;
   to = to_runtime len;

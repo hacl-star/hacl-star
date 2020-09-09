@@ -52,6 +52,9 @@ instance bn_inst: BN.bn n_limbs = {
   BN.sub_mask
 }
 
+let check : BM.check_modulus_st n_limbs =
+  BM.check_modulus #n_limbs #bn_inst
+
 let precomp: BM.precomp_r2_mod_n_st n_limbs =
   BM.precomp_r2_mod_n #n_limbs #bn_inst
 
@@ -73,6 +76,7 @@ let mont_sqr: BM.mont_sqr_st n_limbs =
 inline_for_extraction noextract
 instance mont_inst: BM.mont n_limbs = {
   BM.bn = FStar.Tactics.Typeclasses.solve;
+  BM.check;
   BM.precomp;
   BM.reduction;
   BM.to;

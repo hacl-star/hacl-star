@@ -13,6 +13,20 @@ open Hacl.Spec.Bignum
 
 #reset-options "--z3rlimit 100 --fuel 0 --ifuel 0"
 
+let check_modulus #nLen n =
+  let open Lib.RawIntTypes in
+  let one = bn_from_uint nLen (u64 1) in
+  bn_from_uint_lemma nLen (u64 1);
+  let m0 = bn_is_odd n in
+  bn_is_odd_lemma n;
+  let m1 = bn_lt_mask one n in
+  bn_lt_mask_lemma one n;
+  let m = m0 &. m1 in
+  logand_ones m0;
+  logand_zeros m0;
+  if FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 m =^ 0uL) then false else true
+
+
 val bn_lshift1_mod_n: #len:size_nat -> n:lbignum len -> i:nat -> b:lbignum len -> lbignum len
 let bn_lshift1_mod_n #len n i b = bn_add_mod_n n b b
 
@@ -326,6 +340,7 @@ let mont_reduction_lemma #nLen n mu res0 =
     };
 
   let d, k = M.eea_pow2_odd (64 * nLen) (bn_v n) in
+  bn_eval_bound n nLen;
   M.mont_preconditions nLen (bn_v n) (v mu);
   M.mont_mult_lemma_fits_aux nLen (bn_v n) (v mu) (bn_v res0);
   assert (resM / pow2 (64 * nLen) < 2 * bn_v n);

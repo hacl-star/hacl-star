@@ -12,6 +12,13 @@ module M = Hacl.Spec.Montgomery.Lemmas
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 ///
+///  check a modulus for Montgomery arithmetic
+///
+
+val check_modulus: #nLen:size_pos{128 * nLen <= max_size_t} -> n:lbignum nLen ->
+  res:bool{res == (bn_v n % 2 = 1 && 1 < bn_v n)}
+
+///
 ///  Precomputed constants for Montgomery arithmetic
 ///
 
@@ -77,7 +84,7 @@ val mont_reduction_lemma:
   -> c:lbignum (nLen + nLen) -> Lemma
   (requires
     (1 + (bn_v n % pow2 64) * v mu) % pow2 64 == 0 /\
-    bn_v n % 2 = 1 /\ 1 < bn_v n /\ bn_v n < pow2 (64 * nLen) /\
+    bn_v n % 2 = 1 /\ 1 < bn_v n /\
     bn_v c < bn_v n * bn_v n)
   (ensures
     (let res = bn_v (mont_reduction #nLen n mu c) in
@@ -93,7 +100,7 @@ val to_mont_lemma:
   -> a:lbignum nLen -> Lemma
   (requires
     (1 + (bn_v n % pow2 64) * v mu) % pow2 64 == 0 /\
-    bn_v n % 2 = 1 /\ 1 < bn_v n /\ bn_v n < pow2 (64 * nLen) /\
+    bn_v n % 2 = 1 /\ 1 < bn_v n /\
     bn_v a < bn_v n /\ bn_v r2 == pow2 (128 * nLen) % bn_v n)
   (ensures
    (let aM = bn_v (to_mont #nLen n mu r2 a) in
@@ -108,7 +115,7 @@ val from_mont_lemma:
   -> aM:lbignum nLen -> Lemma
   (requires
     (1 + (bn_v n % pow2 64) * v mu) % pow2 64 == 0 /\
-    bn_v n % 2 = 1 /\ 1 < bn_v n /\ bn_v n < pow2 (64 * nLen) /\
+    bn_v n % 2 = 1 /\ 1 < bn_v n /\
     bn_v aM < bn_v n)
   (ensures
    (let a = bn_v (from_mont #nLen n mu aM) in
@@ -124,7 +131,7 @@ val mont_mul_lemma:
   -> bM:lbignum nLen -> Lemma
   (requires
     (1 + (bn_v n % pow2 64) * v mu) % pow2 64 == 0 /\
-    bn_v n % 2 = 1 /\ 1 < bn_v n /\ bn_v n < pow2 (64 * nLen) /\
+    bn_v n % 2 = 1 /\ 1 < bn_v n /\
     bn_v aM < bn_v n /\ bn_v bM < bn_v n)
   (ensures
     (let res = bn_v (mont_mul #nLen n mu aM bM) in
@@ -139,7 +146,7 @@ val mont_sqr_lemma:
   -> aM:lbignum nLen -> Lemma
   (requires
     (1 + (bn_v n % pow2 64) * v mu) % pow2 64 == 0 /\
-    bn_v n % 2 = 1 /\ 1 < bn_v n /\ bn_v n < pow2 (64 * nLen) /\
+    bn_v n % 2 = 1 /\ 1 < bn_v n /\
     bn_v aM < bn_v n)
   (ensures
     (let res = bn_v (mont_sqr #nLen n mu aM) in

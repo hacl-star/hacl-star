@@ -10,12 +10,28 @@ open Lib.Buffer
 open Hacl.Bignum.Definitions
 
 module S = Hacl.Spec.Bignum.Exponentiation
+module BN = Hacl.Bignum
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-// This function is *NOT* constant-time on the exponent b
+
 inline_for_extraction noextract
-let bn_mod_exp_precompr2_st (nLen:size_t{0 < v nLen /\ 128 * v nLen <= max_size_t}) =
+let check_mod_exp_st (nLen:BN.meta_len) =
+    n:lbignum nLen
+  -> a:lbignum nLen
+  -> bBits:size_t{0 < v bBits /\ 64 * v (blocks bBits 64ul) <= max_size_t}
+  -> b:lbignum (blocks bBits 64ul) ->
+  Stack bool
+  (requires fun h ->
+    live h n /\ live h a /\ live h b)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+    r == S.check_mod_exp (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b))
+
+val check_mod_exp: nLen:_ -> check_mod_exp_st nLen
+
+// This function is *NOT* constant-time on the exponent b.
+inline_for_extraction noextract
+let bn_mod_exp_precompr2_st (nLen:BN.meta_len) =
     n:lbignum nLen
   -> a:lbignum nLen
   -> bBits:size_t{v bBits > 0}
@@ -34,9 +50,9 @@ let bn_mod_exp_precompr2_st (nLen:size_t{0 < v nLen /\ 128 * v nLen <= max_size_
 val bn_mod_exp_precompr2: nLen:_ -> bn_mod_exp_precompr2_st nLen
 
 
-// This function is constant-time on the exponent b
+// This function is constant-time on the exponent b.
 inline_for_extraction noextract
-let bn_mod_exp_mont_ladder_precompr2_st (nLen:size_t{0 < v nLen /\ 128 * v nLen <= max_size_t}) =
+let bn_mod_exp_mont_ladder_precompr2_st (nLen:BN.meta_len) =
     n:lbignum nLen
   -> a:lbignum nLen
   -> bBits:size_t{v bBits > 0}
@@ -56,39 +72,27 @@ let bn_mod_exp_mont_ladder_precompr2_st (nLen:size_t{0 < v nLen /\ 128 * v nLen 
 val bn_mod_exp_mont_ladder_precompr2: nLen:_ -> bn_mod_exp_mont_ladder_precompr2_st nLen
 
 
-// This function is *NOT* constant-time on the exponent b
+
 inline_for_extraction noextract
-let bn_mod_exp_st (nLen:size_t{0 < v nLen /\ 128 * v nLen <= max_size_t}) =
+let bn_mod_exp_st (nLen:BN.meta_len) =
     n:lbignum nLen
   -> a:lbignum nLen
-  -> bBits:size_t{v bBits > 0}
+  -> bBits:size_t{0 < v bBits /\ 64 * v (blocks bBits 64ul) <= max_size_t}
   -> b:lbignum (blocks bBits 64ul)
   -> res:lbignum nLen ->
-  Stack unit
+  Stack bool
   (requires fun h ->
     live h n /\ live h a /\ live h b /\ live h res /\
     disjoint res a /\ disjoint res b /\ disjoint res n /\ disjoint n a)
-  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_seq h1 res == S.bn_mod_exp (v nLen) (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b))
+  (ensures  fun h0 r h1 -> modifies (loc res) h0 h1 /\
+    r == S.check_mod_exp (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b) /\
+    r ==> S.bn_mod_exp_post #(v nLen) (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b) (as_seq h1 res))
+
 
 // This version is fully run-time.
+// This function is *NOT* constant-time on the exponent b.
 val bn_mod_exp: nLen:_ -> bn_mod_exp_st nLen
 
-
-// This function is constant-time on the exponent b
-inline_for_extraction noextract
-let bn_mod_exp_mont_ladder_st (nLen:size_t{0 < v nLen /\ 128 * v nLen <= max_size_t}) =
-    n:lbignum nLen
-  -> a:lbignum nLen
-  -> bBits:size_t{v bBits > 0}
-  -> b:lbignum (blocks bBits 64ul)
-  -> res:lbignum nLen ->
-  Stack unit
-  (requires fun h ->
-    live h n /\ live h a /\ live h b /\ live h res /\
-    disjoint res a /\ disjoint res b /\ disjoint res n /\ disjoint n a)
-  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_seq h1 res == S.bn_mod_exp_mont_ladder (v nLen) (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b))
-
 // This version is fully run-time.
-val bn_mod_exp_mont_ladder: nLen:_ -> bn_mod_exp_mont_ladder_st nLen
+// This function is constant-time on the exponent b.
+val bn_mod_exp_mont_ladder: nLen:_ -> bn_mod_exp_st nLen
