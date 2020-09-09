@@ -959,55 +959,51 @@ void EverCrypt_Hash_free(EverCrypt_Hash_state_s *s)
   {
     uint32_t *p1 = scrut.case_MD5_s;
     KRML_HOST_FREE(p1);
-    return;
   }
-  if (scrut.tag == EverCrypt_Hash_SHA1_s)
+  else if (scrut.tag == EverCrypt_Hash_SHA1_s)
   {
     uint32_t *p1 = scrut.case_SHA1_s;
     KRML_HOST_FREE(p1);
-    return;
   }
-  if (scrut.tag == EverCrypt_Hash_SHA2_224_s)
+  else if (scrut.tag == EverCrypt_Hash_SHA2_224_s)
   {
     uint32_t *p1 = scrut.case_SHA2_224_s;
     KRML_HOST_FREE(p1);
-    return;
   }
-  if (scrut.tag == EverCrypt_Hash_SHA2_256_s)
+  else if (scrut.tag == EverCrypt_Hash_SHA2_256_s)
   {
     uint32_t *p1 = scrut.case_SHA2_256_s;
     KRML_HOST_FREE(p1);
-    return;
   }
-  if (scrut.tag == EverCrypt_Hash_SHA2_384_s)
+  else if (scrut.tag == EverCrypt_Hash_SHA2_384_s)
   {
     uint64_t *p1 = scrut.case_SHA2_384_s;
     KRML_HOST_FREE(p1);
-    return;
   }
-  if (scrut.tag == EverCrypt_Hash_SHA2_512_s)
+  else if (scrut.tag == EverCrypt_Hash_SHA2_512_s)
   {
     uint64_t *p1 = scrut.case_SHA2_512_s;
     KRML_HOST_FREE(p1);
-    return;
   }
-  if (scrut.tag == EverCrypt_Hash_Blake2S_s)
+  else if (scrut.tag == EverCrypt_Hash_Blake2S_s)
   {
     uint32_t *p1 = scrut.case_Blake2S_s;
     KRML_HOST_FREE(p1);
-    return;
   }
-  if (scrut.tag == EverCrypt_Hash_Blake2B_s)
+  else if (scrut.tag == EverCrypt_Hash_Blake2B_s)
   {
     uint64_t *p1 = scrut.case_Blake2B_s;
     KRML_HOST_FREE(p1);
-    return;
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
-    __FILE__,
-    __LINE__,
-    "unreachable (pattern matches are exhaustive in F*)");
-  KRML_HOST_EXIT(255U);
+  else
+  {
+    KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+      __FILE__,
+      __LINE__,
+      "unreachable (pattern matches are exhaustive in F*)");
+    KRML_HOST_EXIT(255U);
+  }
+  KRML_HOST_FREE(s);
 }
 
 void EverCrypt_Hash_copy(EverCrypt_Hash_state_s *s_src, EverCrypt_Hash_state_s *s_dst)

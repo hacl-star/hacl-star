@@ -445,7 +445,7 @@ let modulo_sub_lemma a b c =
 // The deprecated update_last just calls the new update_last.
 // This one is a bit trickier than the others because we need to recompute
 // the length of the data seen so far.
-#push-options "--z3rlimit 400"
+#push-options "--z3rlimit 800"
 let update_last #ga s last total_len =
   let a = alg_of_state ga s in
   (**) assert_norm(v (block_len a) > 0);
@@ -502,15 +502,16 @@ let finish #a s dst =
 
 let free #ea s =
   begin match !*s with
-    | MD5_s p -> B.free p
-    | SHA1_s p -> B.free p
-    | SHA2_224_s p -> B.free p
-    | SHA2_256_s p -> B.free p
-    | SHA2_384_s p -> B.free p
-    | SHA2_512_s p -> B.free p
-    | Blake2S_s p -> B.free p
-    | Blake2B_s p -> B.free p
-  end
+  | MD5_s p -> B.free p
+  | SHA1_s p -> B.free p
+  | SHA2_224_s p -> B.free p
+  | SHA2_256_s p -> B.free p
+  | SHA2_384_s p -> B.free p
+  | SHA2_512_s p -> B.free p
+  | Blake2S_s p -> B.free p
+  | Blake2B_s p -> B.free p
+  end;
+  B.free s
 
 #push-options "--ifuel 1"
 
