@@ -67,10 +67,12 @@ let new_precomp_r2_mod_n_st =
     B.(modifies loc_none h0 h1) /\
     not (B.g_is_null res) ==> (
       0 < v nLen /\ 128 * v nLen <= max_size_t /\
+      1 < bn_v h0 n /\ bn_v h0 n % 2 = 1 /\
       B.len res == nLen /\
       B.(fresh_loc (loc_buffer res) h0 h1) /\
       B.(loc_includes (loc_region_only false r) (loc_buffer res)) /\
-      as_seq h1 (res <: lbignum nLen) == S.precomp_r2_mod_n #(v nLen) (as_seq h0 n)))
+      as_seq h1 (res <: lbignum nLen) == S.precomp_r2_mod_n #(v nLen) (as_seq h0 n) /\
+      bn_v #nLen h1 res == pow2 (128 * (v nLen)) % bn_v h0 n))
 
 
 inline_for_extraction noextract

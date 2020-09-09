@@ -791,12 +791,34 @@ uint64_t *Hacl_Bignum4096_new_precompr2(uint32_t nLen, uint64_t *n)
     return NULL;
   }
   KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
-  uint64_t *res = KRML_HOST_CALLOC(nLen, sizeof (uint64_t));
-  if (res == NULL)
+  uint64_t one[nLen];
+  memset(one, 0U, nLen * sizeof (uint64_t));
+  memset(one, 0U, nLen * sizeof (uint64_t));
+  one[0U] = (uint64_t)1U;
+  uint64_t m0 = n[0U] & (uint64_t)1U;
+  uint64_t m1 = Hacl_Bignum_bn_lt_mask(nLen, one, n);
+  uint64_t m = m0 & m1;
+  bool res;
+  if (m == (uint64_t)0U)
   {
-    return res;
+    res = false;
   }
-  uint64_t *res1 = res;
+  else
+  {
+    res = true;
+  }
+  bool is_valid = res;
+  if (!is_valid)
+  {
+    return NULL;
+  }
+  KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
+  uint64_t *res0 = KRML_HOST_CALLOC(nLen, sizeof (uint64_t));
+  if (res0 == NULL)
+  {
+    return res0;
+  }
+  uint64_t *res1 = res0;
   uint64_t *res2 = res1;
   KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
   uint64_t bn_zero[nLen];
