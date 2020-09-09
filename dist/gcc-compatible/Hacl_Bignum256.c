@@ -456,8 +456,22 @@ Write `a mod n` in `res` if a < n * n.
   The argument a is meant to be a 512-bit bignum, i.e. uint64_t[8].
   The argument n and the outparam res are meant to be a 256-bit bignum, i.e. uint64_t[4].
 */
-void Hacl_Bignum256_mod(uint64_t *n, uint64_t *a, uint64_t *res)
+bool Hacl_Bignum256_mod(uint64_t *n, uint64_t *a, uint64_t *res)
 {
+  bool b0 = check(n);
+  uint64_t n2[8U] = { 0U };
+  Hacl_Bignum256_mul(n, n, n2);
+  uint64_t m0 = Hacl_Bignum_bn_lt_mask((uint32_t)8U, a, n2);
+  bool b1;
+  if (m0 == (uint64_t)0U)
+  {
+    b1 = false;
+  }
+  else
+  {
+    b1 = true;
+  }
+  bool is_valid = b0 && b1;
   uint64_t r2[4U] = { 0U };
   precomp(n, r2);
   uint64_t a_mod[4U] = { 0U };
@@ -466,6 +480,7 @@ void Hacl_Bignum256_mod(uint64_t *n, uint64_t *a, uint64_t *res)
   uint64_t mu = Hacl_Bignum_ModInv64_mod_inv_u64(n[0U]);
   reduction(n, mu, a1, a_mod);
   to(n, mu, r2, a_mod, res);
+  return is_valid;
 }
 
 static void

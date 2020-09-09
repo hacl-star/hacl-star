@@ -87,7 +87,7 @@ Write `a mod n` in `res` if a < n * n.
   The argument a is meant to be a 512-bit bignum, i.e. uint64_t[8].
   The argument n and the outparam res are meant to be a 256-bit bignum, i.e. uint64_t[4].
 */
-void Hacl_Bignum256_mod(uint64_t *n, uint64_t *a, uint64_t *res);
+bool Hacl_Bignum256_mod(uint64_t *n, uint64_t *a, uint64_t *res);
 
 /*
 Write `a ^ b mod n` in `res`.

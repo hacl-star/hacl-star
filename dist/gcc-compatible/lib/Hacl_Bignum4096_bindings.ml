@@ -22,7 +22,7 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Bignum4096_mod =
       foreign "Hacl_Bignum4096_mod"
         ((ptr uint64_t) @->
-           ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void))))
+           ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning bool))))
     let hacl_Bignum4096_mod_exp_precompr2 =
       foreign "Hacl_Bignum4096_mod_exp_precompr2"
         ((ptr uint64_t) @->
