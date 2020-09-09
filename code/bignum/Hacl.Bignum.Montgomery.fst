@@ -78,17 +78,20 @@ let new_precomp_r2_mod_n r nLen n =
   then B.null
   else
     let h0 = ST.get () in
-    let res = B.malloc r (u64 0) nLen in
-    let h1 = ST.get () in
-    B.(modifies_only_not_unused_in loc_none h0 h1);
-    assert (B.len res == nLen);
-    let res: Lib.Buffer.buffer Lib.IntTypes.uint64 = res in
-    assert (B.length res == FStar.UInt32.v nLen);
-    let res: lbignum nLen = res in
-    precomp_r2_mod_n #nLen #(BN.mk_runtime_bn nLen) n res;
-    let h2 = ST.get () in
-    B.(modifies_only_not_unused_in loc_none h0 h2);
-    res
+    let res = LowStar.Monotonic.Buffer.mmalloc_partial r (u64 0) nLen in
+    if B.is_null res then
+      res
+    else
+      let h1 = ST.get () in
+      B.(modifies_only_not_unused_in loc_none h0 h1);
+      assert (B.len res == nLen);
+      let res: Lib.Buffer.buffer Lib.IntTypes.uint64 = res in
+      assert (B.length res == FStar.UInt32.v nLen);
+      let res: lbignum nLen = res in
+      precomp_r2_mod_n #nLen #(BN.mk_runtime_bn nLen) n res;
+      let h2 = ST.get () in
+      B.(modifies_only_not_unused_in loc_none h0 h2);
+      res
 
 
 inline_for_extraction noextract

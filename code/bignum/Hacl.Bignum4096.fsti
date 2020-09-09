@@ -101,7 +101,8 @@ val mod_exp_mont_ladder: BE.bn_mod_exp_mont_ladder_st n_limbs
 
   The argument n points to a bignum of size nLen of valid memory.
   The function returns a heap-allocated bignum of size nLen,
-  or NULL if the amount of required memory would exceed 4GB.
+   or NULL if either the allocation failed, or the amount of
+    required memory would exceed 4GB.
 
   If the return value is non-null, clients must eventually call free(3) on it to
   avoid memory leaks."]
@@ -116,7 +117,8 @@ Comment
 
   The argument b points to len bytes of valid memory.
   The function returns a heap-allocated bignum of size sufficient to hold the
-    result of loading b, or NULL if the amount of required memory would exceed 4GB.
+   result of loading b, or NULL if either the allocation failed, or the amount of
+    required memory would exceed 4GB.
 
   If the return value is non-null, clients must eventually call free(3) on it to
   avoid memory leaks."]
