@@ -20,6 +20,31 @@ module BM = Hacl.Bignum.Montgomery
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+inline_for_extraction noextract
+let check_bn_mod_st (nLen:BN.meta_len) =
+    n:lbignum nLen
+  -> a:lbignum (nLen +! nLen) ->
+  Stack bool
+  (requires fun h -> live h n /\ live h a)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+    r == S.check_bn_mod (as_seq h0 n) (as_seq h0 a))
+
+
+inline_for_extraction noextract
+val mk_check_bn_mod_st: nLen:BN.meta_len
+  -> (#[FStar.Tactics.Typeclasses.tcresolve ()] _ : Hacl.Bignum.Montgomery.mont nLen)
+  -> check_bn_mod_st nLen
+
+let mk_check_bn_mod_st nLen #_ n a =
+  push_frame ();
+  let b0 = BM.check n in
+  let n2 = create (nLen +! nLen) (u64 0) in
+  BN.mul n n n2;
+  let m0 = BN.bn_lt_mask (nLen +! nLen) a n2 in
+  let b1 = if FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 m0 =^ 0uL) then false else true in
+  pop_frame ();
+  b0 && b1
+
 
 inline_for_extraction noextract
 let bn_mod_slow_precompr2_st (nLen:BN.meta_len) =
@@ -62,12 +87,13 @@ let bn_mod_slow_st (nLen:BN.meta_len) =
     n:lbignum nLen
   -> a:lbignum (nLen +! nLen)
   -> res:lbignum nLen ->
-  Stack unit
+  Stack bool
   (requires fun h ->
     live h n /\ live h a /\ live h res /\
     disjoint res n /\ disjoint res a)
-  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_seq h1 res == S.bn_mod_slow (as_seq h0 n) (as_seq h0 a))
+  (ensures  fun h0 r h1 -> modifies (loc res) h0 h1 /\
+    r == S.check_bn_mod (as_seq h0 n) (as_seq h0 a) /\
+    r ==> bn_v h1 res == bn_v h0 a % bn_v h0 n)
 
 
 inline_for_extraction noextract
@@ -76,11 +102,18 @@ val mk_bn_mod_slow: nLen:BN.meta_len
   -> bn_mod_slow_st nLen
 
 let mk_bn_mod_slow nLen #k n a res =
+  let h0 = ST.get () in
+  let is_valid = mk_check_bn_mod_st nLen #k n a in
   push_frame ();
   let r2 = create nLen (u64 0) in
   BM.precomp n r2;
   mk_bn_mod_slow_precompr2 nLen #k n a r2 res;
-  pop_frame ()
+  let h1 = ST.get () in
+  if is_valid then begin
+    S.bn_mod_slow_lemma (as_seq h0 n) (as_seq h0 a);
+    assert (bn_v h1 res == bn_v h0 a % bn_v h0 n) end;
+  pop_frame ();
+  is_valid
 
 
 val bn_mod_slow: nLen:BN.meta_len -> bn_mod_slow_st nLen

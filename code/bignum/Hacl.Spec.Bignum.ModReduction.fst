@@ -10,12 +10,29 @@ open Hacl.Spec.Bignum.Definitions
 module M = Hacl.Spec.Montgomery.Lemmas
 module BM = Hacl.Spec.Bignum.Montgomery
 module BI = Hacl.Spec.Bignum.ModInv64
+module BN = Hacl.Spec.Bignum
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 ///
 ///  Modular reduction based on Montgomery arithmetic (it is slow!)
 ///
+
+val check_bn_mod:
+    #nLen:size_pos{128 * nLen <= max_size_t}
+  -> n:lbignum nLen
+  -> a:lbignum (nLen + nLen) ->
+  res:bool{res == (1 < bn_v n && bn_v n % 2 = 1 && bn_v a < bn_v n * bn_v n)}
+
+let check_bn_mod #nLen n a =
+  let b0 = BM.check_modulus n in
+  let n2 = BN.bn_mul n n in
+  BN.bn_mul_lemma n n;
+  let m0 = BN.bn_lt_mask a n2 in
+  BN.bn_lt_mask_lemma a n2;
+  let b1 = if FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 m0 =^ 0uL) then false else true in
+  b0 && b1
+
 
 // TODO: we can pass a constant mu as well
 val bn_mod_slow_precompr2:
