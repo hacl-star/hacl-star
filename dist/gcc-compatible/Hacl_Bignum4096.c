@@ -544,10 +544,10 @@ Hacl_Bignum4096_mod_exp(uint64_t *n, uint64_t *a, uint32_t bBits, uint64_t *b, u
   uint64_t nInv_u64 = Hacl_Bignum_ModInv64_mod_inv_u64(n[0U]);
   uint64_t aM[64U] = { 0U };
   uint64_t accM[64U] = { 0U };
-  Hacl_Bignum_Montgomery_to_runtime((uint32_t)64U, n, nInv_u64, r2, a, aM);
-  Hacl_Bignum_Montgomery_to_runtime((uint32_t)64U, n, nInv_u64, r2, acc, accM);
+  to(n, nInv_u64, r2, a, aM);
+  to(n, nInv_u64, r2, acc, accM);
   mod_exp_loop(n, nInv_u64, bBits, bLen, b, aM, accM);
-  Hacl_Bignum_Montgomery_from_runtime((uint32_t)64U, n, nInv_u64, accM, res);
+  from(n, nInv_u64, accM, res);
 }
 
 static void
@@ -645,8 +645,8 @@ Hacl_Bignum4096_mod_exp_mont_ladder(
   uint64_t rM0[64U] = { 0U };
   uint64_t rM1[64U] = { 0U };
   uint64_t sw = (uint64_t)0U;
-  Hacl_Bignum_Montgomery_to_runtime((uint32_t)64U, n, nInv_u64, r2, one, rM0);
-  Hacl_Bignum_Montgomery_to_runtime((uint32_t)64U, n, nInv_u64, r2, a, rM1);
+  to(n, nInv_u64, r2, one, rM0);
+  to(n, nInv_u64, r2, a, rM1);
   mod_exp_mont_ladder_loop(n, nInv_u64, bBits, bLen, b, rM0, rM1, &sw);
   uint64_t uu____0 = sw;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
@@ -655,7 +655,7 @@ Hacl_Bignum4096_mod_exp_mont_ladder(
     rM0[i] = rM0[i] ^ dummy;
     rM1[i] = rM1[i] ^ dummy;
   }
-  Hacl_Bignum_Montgomery_from_runtime((uint32_t)64U, n, nInv_u64, rM0, res);
+  from(n, nInv_u64, rM0, res);
 }
 
 /*

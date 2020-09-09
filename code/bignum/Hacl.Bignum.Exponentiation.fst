@@ -244,11 +244,11 @@ val mk_bn_mod_exp:
   -> bn_mod_exp_loop:bn_mod_exp_loop_st nLen ->
   bn_mod_exp_st nLen
 
-let mk_bn_mod_exp nLen #_ bn_mod_exp_loop n a bBits b res =
+let mk_bn_mod_exp nLen #k bn_mod_exp_loop n a bBits b res =
   push_frame ();
   let r2 = create nLen (u64 0) in
   BM.precomp n r2;
-  mk_bn_mod_exp_precompr2 nLen #(BM.mk_runtime_mont nLen) bn_mod_exp_loop n a bBits b r2 res;
+  mk_bn_mod_exp_precompr2 nLen #k bn_mod_exp_loop n a bBits b r2 res;
   pop_frame ()
 
 
@@ -266,11 +266,11 @@ val mk_bn_mod_exp_mont_ladder:
   -> bn_mod_exp_mont_ladder_loop:bn_mod_exp_mont_ladder_loop_st nLen ->
   bn_mod_exp_mont_ladder_st nLen
 
-let mk_bn_mod_exp_mont_ladder nLen #_ bn_mod_exp_mont_ladder_loop n a bBits b res =
+let mk_bn_mod_exp_mont_ladder nLen #k bn_mod_exp_mont_ladder_loop n a bBits b res =
   push_frame ();
   let r2 = create nLen (u64 0) in
   BM.precomp n r2;
-  mk_bn_mod_exp_mont_ladder_precompr2 nLen #(BM.mk_runtime_mont nLen) bn_mod_exp_mont_ladder_loop n a bBits b r2 res;
+  mk_bn_mod_exp_mont_ladder_precompr2 nLen #k bn_mod_exp_mont_ladder_loop n a bBits b r2 res;
   pop_frame ()
 
 

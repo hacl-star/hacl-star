@@ -38,7 +38,6 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
-#include "Hacl_RSAPSS.h"
 #include "Hacl_Kremlib.h"
 #include "Hacl_Bignum.h"
 

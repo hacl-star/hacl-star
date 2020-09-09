@@ -246,8 +246,8 @@ mont_reduction_runtime(
   }
 }
 
-void
-Hacl_Bignum_Montgomery_to_runtime(
+static void
+to_runtime(
   uint32_t len,
   uint64_t *n,
   uint64_t nInv_u64,
@@ -266,14 +266,8 @@ Hacl_Bignum_Montgomery_to_runtime(
   mont_reduction_runtime(len, n, nInv_u64, c, aM);
 }
 
-void
-Hacl_Bignum_Montgomery_from_runtime(
-  uint32_t len,
-  uint64_t *n,
-  uint64_t nInv_u64,
-  uint64_t *aM,
-  uint64_t *a
-)
+static void
+from_runtime(uint32_t len, uint64_t *n, uint64_t nInv_u64, uint64_t *aM, uint64_t *a)
 {
   KRML_CHECK_SIZE(sizeof (uint64_t), len + len);
   uint64_t tmp[len + len];
@@ -491,10 +485,10 @@ bn_mod_exp(uint32_t nLen, uint64_t *n, uint64_t *a, uint32_t bBits, uint64_t *b,
   KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
   uint64_t accM[nLen];
   memset(accM, 0U, nLen * sizeof (uint64_t));
-  Hacl_Bignum_Montgomery_to_runtime(nLen, n, nInv_u64, r2, a, aM);
-  Hacl_Bignum_Montgomery_to_runtime(nLen, n, nInv_u64, r2, acc, accM);
+  to_runtime(nLen, n, nInv_u64, r2, a, aM);
+  to_runtime(nLen, n, nInv_u64, r2, acc, accM);
   bn_mod_exp_loop_runtime(nLen, n, nInv_u64, bBits, bLen, b, aM, accM);
-  Hacl_Bignum_Montgomery_from_runtime(nLen, n, nInv_u64, accM, res);
+  from_runtime(nLen, n, nInv_u64, accM, res);
 }
 
 static inline void
@@ -525,8 +519,8 @@ bn_mod_exp_mont_ladder(
   uint64_t rM1[nLen];
   memset(rM1, 0U, nLen * sizeof (uint64_t));
   uint64_t sw = (uint64_t)0U;
-  Hacl_Bignum_Montgomery_to_runtime(nLen, n, nInv_u64, r2, one, rM0);
-  Hacl_Bignum_Montgomery_to_runtime(nLen, n, nInv_u64, r2, a, rM1);
+  to_runtime(nLen, n, nInv_u64, r2, one, rM0);
+  to_runtime(nLen, n, nInv_u64, r2, a, rM1);
   bn_mod_exp_mont_ladder_loop_runtime(nLen, n, nInv_u64, bBits, bLen, b, rM0, rM1, &sw);
   uint64_t uu____0 = sw;
   for (uint32_t i = (uint32_t)0U; i < nLen; i++)
@@ -535,7 +529,7 @@ bn_mod_exp_mont_ladder(
     rM0[i] = rM0[i] ^ dummy;
     rM1[i] = rM1[i] ^ dummy;
   }
-  Hacl_Bignum_Montgomery_from_runtime(nLen, n, nInv_u64, rM0, res);
+  from_runtime(nLen, n, nInv_u64, rM0, res);
 }
 
 static inline void xor_bytes(uint32_t len, uint8_t *b1, uint8_t *b2)

@@ -4,19 +4,6 @@ module Bindings(F:Cstubs.FOREIGN) =
     open F
     module Hacl_Spec_applied = (Hacl_Spec_bindings.Bindings)(Hacl_Spec_stubs)
     open Hacl_Spec_applied
-    let hacl_Bignum_Montgomery_to_runtime =
-      foreign "Hacl_Bignum_Montgomery_to_runtime"
-        (uint32_t @->
-           ((ptr uint64_t) @->
-              (uint64_t @->
-                 ((ptr uint64_t) @->
-                    ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void)))))))
-    let hacl_Bignum_Montgomery_from_runtime =
-      foreign "Hacl_Bignum_Montgomery_from_runtime"
-        (uint32_t @->
-           ((ptr uint64_t) @->
-              (uint64_t @->
-                 ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void))))))
     let hacl_RSAPSS_rsapss_sign =
       foreign "Hacl_RSAPSS_rsapss_sign"
         (spec_Hash_Definitions_hash_alg @->
