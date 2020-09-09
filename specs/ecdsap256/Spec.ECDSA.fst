@@ -538,7 +538,7 @@ val ecdsa_signature_agile:
   -> m:lseq uint8 mLen
   -> privateKey:lseq uint8 32
   -> k:lseq uint8 32
-  -> tuple3 nat nat uint64
+  -> tuple3 nat nat bool
 
 let ecdsa_signature_agile alg mLen m privateKey k =
   assert_norm (pow2 32 < pow2 61);
@@ -553,6 +553,6 @@ let ecdsa_signature_agile alg mLen m privateKey k =
   let resultR = xN % prime_p256_order in
   let resultS = (z + resultR * privateKeyFelem) * pow kFelem (prime_p256_order - 2) % prime_p256_order in
     if resultR = 0 || resultS = 0 then
-      resultR, resultS, u64 (pow2 64 - 1)
+      resultR, resultS, false
     else
-      resultR, resultS, u64 0
+      resultR, resultS, true

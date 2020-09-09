@@ -21,15 +21,14 @@ open Spec.P256.MontgomeryMultiplication
 
 
 [@ (Comment " Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. 
-  \n Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
+  \n Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
   \n The private key and the nonce are expected to be more than 0 and less than the curve order.")]
-
 val ecdsa_sign_p256_sha2: result: lbuffer uint8 (size 64) 
   -> mLen: size_t 
   -> m: lbuffer uint8 mLen 
   -> privKey: lbuffer uint8 (size 32) 
   -> k: lbuffer uint8 (size 32) -> 
-  Stack uint64
+  Stack bool
   (requires fun h -> 
     live h result /\ live h m /\ live h privKey /\ live h k /\
     disjoint result m /\
@@ -54,13 +53,12 @@ val ecdsa_sign_p256_sha2: result: lbuffer uint8 (size 64)
 
 
 [@ (Comment " Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. 
-  \n Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
+  \n Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
   \n The private key and the nonce are expected to be more than 0 and less than the curve order.")]
-
 val ecdsa_sign_p256_sha384: result: lbuffer uint8 (size 64) -> mLen: size_t -> m: lbuffer uint8 mLen ->
   privKey: lbuffer uint8 (size 32) -> 
   k: lbuffer uint8 (size 32) -> 
-  Stack uint64
+  Stack bool
   (requires fun h -> 
     live h result /\ live h m /\ live h privKey /\ live h k /\
     disjoint result m /\
@@ -85,15 +83,14 @@ val ecdsa_sign_p256_sha384: result: lbuffer uint8 (size 64) -> mLen: size_t -> m
 
 
 [@ (Comment " Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. 
-  \n Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
+  \n Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
   \n The private key and the nonce are expected to be more than 0 and less than the curve order.")]
-
 val ecdsa_sign_p256_sha512: result: lbuffer uint8 (size 64) 
   -> mLen: size_t 
   -> m: lbuffer uint8 mLen 
   -> privKey: lbuffer uint8 (size 32) 
   -> k: lbuffer uint8 (size 32) -> 
-  Stack uint64
+  Stack bool
   (requires fun h -> 
     live h result /\ live h m /\ live h privKey /\ live h k /\
     disjoint result m /\
@@ -118,16 +115,15 @@ val ecdsa_sign_p256_sha512: result: lbuffer uint8 (size 64)
 
 
 [@ (Comment " Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. 
-  \n Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
+  \n Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
   \n The private key and the nonce are expected to be more than 0 and less than the curve order.
   \n The message m is expected to be hashed by a strong hash function, the lenght of the message is expected to be 32 bytes and more.")]
-
 val ecdsa_sign_p256_without_hash: result: lbuffer uint8 (size 64) 
   -> mLen: size_t {uint_v mLen >= Spec.ECDSA.min_input_length Spec.ECDSA.NoHash}
   -> m: lbuffer uint8 mLen
   -> privKey: lbuffer uint8 (size 32) 
   -> k: lbuffer uint8 (size 32) -> 
-  Stack uint64
+  Stack bool
   (requires fun h -> 
     live h result /\ live h m /\ live h privKey /\ live h k /\
     disjoint result m /\
@@ -154,7 +150,6 @@ val ecdsa_sign_p256_without_hash: result: lbuffer uint8 (size 64)
 [@ (Comment " This code is not side-channel resistant.
   \n Input: m buffer: uint8 [mLen], \n pub(lic)Key: uint8[64], \n r: uint8[32], \n s: uint8[32]. 
   \n Output: bool, where true stands for the correct signature verification. ")]
-
 val ecdsa_verif_p256_sha2:
     mLen: size_t
   -> m: lbuffer uint8 mLen
@@ -177,7 +172,6 @@ val ecdsa_verif_p256_sha2:
 [@ (Comment " This code is not side-channel resistant.
   \n Input: m buffer: uint8 [mLen], \n pub(lic)Key: uint8[64], \n r: uint8[32], \n s: uint8[32]. 
   \n Output: bool, where true stands for the correct signature verification. ")]
-
 val ecdsa_verif_p256_sha384:
     mLen: size_t
   -> m: lbuffer uint8 mLen
@@ -200,7 +194,6 @@ val ecdsa_verif_p256_sha384:
 [@ (Comment " This code is not side-channel resistant.
   \n Input: m buffer: uint8 [mLen], \n pub(lic)Key: uint8[64], \n r: uint8[32], \n s: uint8[32]. 
   \n Output: bool, where true stands for the correct signature verification. ")]
-
 val ecdsa_verif_p256_sha512:
     mLen: size_t
   -> m: lbuffer uint8 mLen
@@ -223,7 +216,6 @@ val ecdsa_verif_p256_sha512:
   \n Input: m buffer: uint8 [mLen], \n pub(lic)Key: uint8[64], \n r: uint8[32], \n s: uint8[32]. 
   \n Output: bool, where true stands for the correct signature verification.
   \n The message m is expected to be hashed by a strong hash function, the lenght of the message is expected to be 32 bytes and more.")]
-
 val ecdsa_verif_without_hash:
   mLen: size_t {uint_v mLen >= Spec.ECDSA.min_input_length Spec.ECDSA.NoHash}
   -> m:lbuffer uint8 mLen
@@ -248,7 +240,6 @@ val ecdsa_verif_without_hash:
   \n Input: pub(lic)Key: uint8[64]. 
   \n Output: bool, where 0 stands for the public key to be correct with respect to SP 800-56A:  \n Verify that the public key is not the “point at infinity”, represented as O. \n Verify that the affine x and y coordinates of the point represented by the public key are in the range [0, p – 1] where p is the prime defining the finite field. \n Verify that y2 = x3 + ax + b where a and b are the coefficients of the curve equation. \n Verify that nQ = O (the point at infinity), where n is the order of the curve and Q is the public key point.
   \n The last extract is taken from : https://neilmadden.blog/2017/05/17/so-how-do-you-validate-nist-ecdh-public-keys/")]
-
 val verify_q: 
   pubKey: lbuffer uint8 (size 64) ->
   Stack bool
@@ -271,7 +262,6 @@ val verify_q:
   \n \n Input: a point in not compressed form (uint8[65]), \n result: uint8[64] (internal point representation).
   \n Output: bool, where true stands for the correct decompression.
  ")]
-
 val decompression_not_compressed_form: b: notCompressedForm -> result: lbuffer uint8 (size 64) -> Stack bool 
   (requires fun h -> live h b /\ live h result /\ disjoint b result)
   (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\
@@ -292,7 +282,6 @@ val decompression_not_compressed_form: b: notCompressedForm -> result: lbuffer u
 [@ (Comment " Input: a point in compressed form (uint8[33]), \n result: uint8[64] (internal point representation).
   \n Output: bool, where true stands for the correct decompression.
  ")]
-
 val decompression_compressed_form: b: compressedForm -> result: lbuffer uint8 (size 64) -> Stack bool 
   (requires fun h -> live h b /\ live h result /\ disjoint b result)
   (ensures fun h0 r h1 -> 
@@ -323,7 +312,6 @@ val decompression_compressed_form: b: compressedForm -> result: lbuffer uint8 (s
 
 
 [@ (Comment " Input: a point buffer (internal representation: uint8[64]), \n result: a point in not compressed form (uint8[65]).")]
-
 val compression_not_compressed_form: b: lbuffer uint8 (size 64) -> result: notCompressedForm -> 
   Stack unit 
     (requires fun h -> live h b /\ live h result /\ disjoint b result)
@@ -340,7 +328,6 @@ val compression_not_compressed_form: b: lbuffer uint8 (size 64) -> result: notCo
 
 
 [@ (Comment " Input: a point buffer (internal representation: uint8[64]), \n result: a point in not compressed form (uint8[33]).")]
-
 val compression_compressed_form: b: lbuffer uint8 (size 64) -> result: compressedForm -> 
   Stack unit 
     (requires fun h -> live h b /\ live h result /\ disjoint b result)
@@ -360,7 +347,6 @@ val compression_compressed_form: b: lbuffer uint8 (size 64) -> result: compresse
   \n Output: bool, where True stands for the correct key generation. 
   \n False means that an error has occurred (possibly that the result respresents point at infinity). 
   ")]
-
 val ecp256dh_i:
     result:lbuffer uint8 (size 64)
   -> scalar:lbuffer uint8 (size 32)
@@ -377,9 +363,8 @@ val ecp256dh_i:
 
 
 [@ (Comment " This code is not side channel resistant on pub_key. \n Input: result: uint8[64], \n pub(lic)Key: uint8[64], \n scalar: uint8[32].
-  \n Output: bool, where True stands for the correct key generation. Fale value means that an error has occurred (possibly the provided public key was incorrect or the result represents point at infinity). 
+  \n Output: bool, where True stands for the correct key generation. False value means that an error has occurred (possibly the provided public key was incorrect or the result represents point at infinity). 
   ")]
-
 val ecp256dh_r:
     result:lbuffer uint8 (size 64)
   -> pubKey:lbuffer uint8 (size 64)
@@ -401,7 +386,6 @@ val ecp256dh_r:
 
 [@ (Comment " Input: scalar: uint8[32].
   \n Output: uint64, where 0 stands for the scalar to be more than 0 and less than order.")]
-
 val isMoreThanZeroLessThanOrder: x: lbuffer uint8 (size 32) -> Stack uint64
   (requires fun h -> live h x)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
