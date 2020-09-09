@@ -38,6 +38,7 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
+#include "Hacl_RSAPSS.h"
 #include "Hacl_Kremlib.h"
 #include "Hacl_Bignum.h"
 
@@ -73,9 +74,45 @@ Write `a * b` in `res`.
 void Hacl_Bignum256_mul(uint64_t *a, uint64_t *b, uint64_t *res);
 
 /*
-Write `a ^ b mod n1` in `res`.
+Write `a mod n` in `res` if a < n * n.
 
-  The arguments a, n1 and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
+  The argument a is meant to be a 512-bit bignum, i.e. uint64_t[8].
+  The argument n, r2 and the outparam res are meant to be a 256-bit bignum, i.e. uint64_t[4].
+  The argument r2 is a precomputed constant 2 ^ 512 mod n.
+*/
+void Hacl_Bignum256_mod_precompr2(uint64_t *n, uint64_t *a, uint64_t *r2, uint64_t *res);
+
+/*
+Write `a mod n` in `res` if a < n * n.
+
+  The argument a is meant to be a 512-bit bignum, i.e. uint64_t[8].
+  The argument n and the outparam res are meant to be a 256-bit bignum, i.e. uint64_t[4].
+*/
+void Hacl_Bignum256_mod(uint64_t *n, uint64_t *a, uint64_t *res);
+
+/*
+Write `a ^ b mod n` in `res`.
+
+  The arguments a, n, r2 and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
+  The argument r2 is a precomputed constant 2 ^ 512 mod n.
+  The argument b is a bignum of any size, and bBits is an upper bound on the
+  number of significant bits of b. For instance, if b is a 256-bit bignum,
+  bBits should be 256. The function is *NOT* constant-time on the argument b.
+*/
+void
+Hacl_Bignum256_mod_exp_precompr2(
+  uint64_t *n,
+  uint64_t *a,
+  uint32_t bBits,
+  uint64_t *b,
+  uint64_t *r2,
+  uint64_t *res
+);
+
+/*
+Write `a ^ b mod n` in `res`.
+
+  The arguments a, n and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
   The argument b is a bignum of any size, and bBits is an upper bound on the
   number of significant bits of b. For instance, if b is a 256-bit bignum,
   bBits should be 256. The function is *NOT* constant-time on the argument b.
@@ -84,9 +121,28 @@ void
 Hacl_Bignum256_mod_exp(uint64_t *n, uint64_t *a, uint32_t bBits, uint64_t *b, uint64_t *res);
 
 /*
-Write `a ^ b mod n1` in `res`.
+Write `a ^ b mod n` in `res`.
 
-  The arguments a, n1 and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
+  The arguments a, n, r2 and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
+  The argument r2 is a precomputed constant 2 ^ 512 mod n.
+  The argument b is a bignum of any size, and bBits is an upper bound on the
+  number of significant bits of b. For instance, if b is a 256-bit bignum,
+  bBits should be 256. The function is constant-time on the argument b.
+*/
+void
+Hacl_Bignum256_mod_exp_mont_ladder_precompr2(
+  uint64_t *n,
+  uint64_t *a,
+  uint32_t bBits,
+  uint64_t *b,
+  uint64_t *r2,
+  uint64_t *res
+);
+
+/*
+Write `a ^ b mod n` in `res`.
+
+  The arguments a, n and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
   The argument b is a bignum of any size, and bBits is an upper bound on the
   number of significant bits of b. For instance, if b is a 256-bit bignum,
   bBits should be 256. The function is constant-time on the argument b.
@@ -100,6 +156,19 @@ Hacl_Bignum256_mod_exp_mont_ladder(
   uint64_t *res
 );
 
+/*
+Compute `2 ^ (128 * nLen) mod n`.
+
+  The argument n points to a bignum of size nLen of valid memory.
+  The function returns a heap-allocated bignum of size nLen,
+   or NULL if either the allocation failed, or the amount of
+    required memory would exceed 4GB.
+
+  If the return value is non-null, clients must eventually call free(3) on it to
+  avoid memory leaks.
+*/
+uint64_t *Hacl_Bignum256_new_precompr2(uint32_t nLen, uint64_t *n);
+
 
 /********************/
 /* Loads and stores */
@@ -111,7 +180,7 @@ Load a bid-endian bignum from memory.
 
   The argument b points to len bytes of valid memory.
   The function returns a heap-allocated bignum of size sufficient to hold the
-    result of loading b, or NULL if either the allocation failed, or the amount of
+   result of loading b, or NULL if either the allocation failed, or the amount of
     required memory would exceed 4GB.
 
   If the return value is non-null, clients must eventually call free(3) on it to

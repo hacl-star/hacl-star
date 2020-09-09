@@ -44,6 +44,25 @@ extern "C" {
 #include "Hacl_Spec.h"
 
 void
+Hacl_Bignum_Montgomery_to_runtime(
+  uint32_t len,
+  uint64_t *n,
+  uint64_t nInv_u64,
+  uint64_t *r2,
+  uint64_t *a,
+  uint64_t *aM
+);
+
+void
+Hacl_Bignum_Montgomery_from_runtime(
+  uint32_t len,
+  uint64_t *n,
+  uint64_t nInv_u64,
+  uint64_t *aM,
+  uint64_t *a
+);
+
+void
 Hacl_RSAPSS_rsapss_sign(
   Spec_Hash_Definitions_hash_alg a,
   uint32_t modBits,
