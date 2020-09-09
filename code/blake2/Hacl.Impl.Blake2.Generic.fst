@@ -707,7 +707,7 @@ let blake2_t (al:Spec.alg) (ms:m_spec) =
   -> output: lbuffer uint8 nn
   -> ll: size_t
   -> d: lbuffer uint8 ll
-  -> kk: size_t{v kk <= Spec.max_key al /\ (if v kk = 0 then v ll <= max_size_t else v ll + Spec.size_block al <= max_size_t)}
+  -> kk: size_t{v kk <= Spec.max_key al}
   -> k: lbuffer uint8 kk ->
   Stack unit
     (requires (fun h -> live h output /\ live h d /\ live h k
@@ -736,7 +736,6 @@ let blake2 #al #ms blake2_update_block nn output ll d kk k =
   salloc1 h0 stlen stzero (Ghost.hide (loc output)) spec
   (fun h ->
     let prev0 = compute_prev0 al kk in
-    assert (v prev0 + v ll <= max_size_t);
     assert (max_size_t <= Spec.max_limb al);
     let h1 = ST.get() in
     salloc1 h1 stlen stzero (Ghost.hide (loc output |+| loc h)) spec
