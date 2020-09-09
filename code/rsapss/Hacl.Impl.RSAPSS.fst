@@ -241,7 +241,8 @@ inline_for_extraction noextract
 let rsapss_sign_st (a:Hash.algorithm{S.hash_is_supported a}) =
     modBits:size_t{1 < v modBits}
   -> eBits:size_t{0 < v eBits}
-  -> dBits:size_t{0 < v dBits /\ v (blocks modBits 64ul) + v (blocks eBits 64ul) + v (blocks dBits 64ul) <= max_size_t}
+  -> dBits:size_t{0 < v dBits /\ 64 * v (blocks dBits 64ul) <= max_size_t /\
+    v (blocks modBits 64ul) + v (blocks eBits 64ul) + v (blocks dBits 64ul) <= max_size_t}
   -> skey:lbignum (blocks modBits 64ul +! blocks eBits 64ul +! blocks dBits 64ul)
   -> sLen:size_t
   -> salt:lbuffer uint8 sLen
@@ -290,7 +291,7 @@ let rsapss_sign a modBits eBits dBits skey sLen salt msgLen msg sgnt =
     (fun h -> Hacl.Spec.Bignum.bn_from_bytes_be (v emLen) (as_seq h' em))
     (fun _ -> bn_from_bytes_be emLen em (sub m 0ul (blocks emLen 8ul)));
 
-  bn_mod_exp_mont_ladder nLen n m dBits d s;
+  let _ = bn_mod_exp_mont_ladder nLen n m dBits d s in admit(); //TODO:use a precomputed version
   LS.sgnt_blocks_eq_nLen (v modBits);
   assert (v (blocks k 8ul) == v nLen);
   bn_to_bytes_be k s sgnt;
@@ -321,7 +322,8 @@ let bn_lt_pow2 modBits m =
 inline_for_extraction noextract
 let rsapss_verify_st (a:Hash.algorithm{S.hash_is_supported a}) =
     modBits:size_t{1 < v modBits}
-  -> eBits:size_t{0 < v eBits /\ v (blocks modBits 64ul) + v (blocks eBits 64ul) <= max_size_t}
+  -> eBits:size_t{0 < v eBits /\ 64 * v (blocks eBits 64ul) <= max_size_t /\
+    v (blocks modBits 64ul) + v (blocks eBits 64ul) <= max_size_t}
   -> pkey:lbignum (blocks modBits 64ul +! blocks eBits 64ul)
   -> sLen:size_t
   -> sgnt:lbuffer uint8 (blocks modBits 8ul)
@@ -365,7 +367,7 @@ let rsapss_verify a modBits eBits pkey sLen sgnt msgLen msg =
   let mask = bn_lt_mask nLen s n in
   let res =
     if FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 mask =^ ones U64 PUB) then begin
-      bn_mod_exp nLen n s eBits e m;
+      let _ = bn_mod_exp nLen n s eBits e m in admit(); //TODO:use a precomputed version
 
       LS.em_blocks_lt_max_size_t (v modBits);
       assert (8 * v (blocks emLen 8ul) <= max_size_t);
