@@ -10,7 +10,6 @@ open Hacl.Spec.Bignum.Base
 open Hacl.Spec.Bignum.Definitions
 open Hacl.Spec.Bignum
 
-module BC = Hacl.Spec.Bignum.Comparison
 
 #reset-options "--z3rlimit 100 --fuel 0 --ifuel 0"
 
@@ -44,59 +43,59 @@ let rec bn_mul_by_pow2 len n b k =
 
 val precomp_r2_mod_n_:
     #nLen:size_pos{128 * nLen <= max_size_t}
-  -> nBits:size_pos{blocks nBits 64 <= nLen}
+  -> nBits:size_nat{nBits / 64 < nLen }
   -> n:lbignum nLen ->
   lbignum nLen
 
 let precomp_r2_mod_n_ #nLen nBits n =
   let c = create nLen (u64 0) in
-  let c0 = bn_set_ith_bit c (nBits - 1) in // c0 == pow2 (nBits - 1)
+  let c0 = bn_set_ith_bit c nBits in // c0 == pow2 (nBits - 1)
   // pow2 (128 * nLen) / pow2 (nBits - 1) == pow2 (128 * nLen + 1 - nBits)
 
-  repeati (128 * nLen + 1 - nBits) (bn_lshift1_mod_n n) c0
+  repeati (128 * nLen - nBits) (bn_lshift1_mod_n n) c0
 
 
-val precomp_r2_mod_n_aux_lemma: #nLen:size_pos -> modBits:size_pos -> n:lbignum nLen -> Lemma
+val precomp_r2_mod_n_aux_lemma: #nLen:size_pos -> nBits:size_pos -> n:lbignum nLen -> Lemma
   (requires
-    0 < bn_v n /\ pow2 (modBits - 1) < bn_v n /\
-    128 * nLen <= max_size_t /\ blocks modBits 64 <= nLen)
-  (ensures  bn_v (precomp_r2_mod_n_ modBits n) == pow2 (128 * nLen) % bn_v n)
+    0 < bn_v n /\ pow2 nBits <= bn_v n /\ bn_v n % 2 = 1 /\
+    128 * nLen <= max_size_t /\ nBits / 64 < nLen)
+  (ensures  bn_v (precomp_r2_mod_n_ nBits n) == pow2 (128 * nLen) % bn_v n)
 
 let precomp_r2_mod_n_aux_lemma #nLen nBits n =
   let c = create nLen (u64 0) in
-  let c0 = bn_set_ith_bit c (nBits - 1) in
+  let c0 = bn_set_ith_bit c nBits in
   bn_eval_zeroes nLen nLen;
-  bn_set_ith_bit_lemma c (nBits - 1);
-  assert (bn_v c0 == pow2 (nBits - 1));
-  let res = repeati (128 * nLen + 1 - nBits) (bn_lshift1_mod_n n) c0 in
-  bn_mul_by_pow2 nLen n c0 (128 * nLen + 1 - nBits);
-  assert (bn_v res == pow2 (128 * nLen + 1 - nBits) * pow2 (nBits - 1) % bn_v n);
-  Math.Lemmas.pow2_plus (128 * nLen + 1 - nBits) (nBits - 1);
+  bn_set_ith_bit_lemma c nBits;
+  assert (bn_v c0 == pow2 nBits);
+  let res = repeati (128 * nLen - nBits) (bn_lshift1_mod_n n) c0 in
+  Math.Lemmas.pow2_multiplication_modulo_lemma_1 1 1 nBits;
+  assert (pow2 nBits % pow2 1 = 0);
+  bn_mul_by_pow2 nLen n c0 (128 * nLen - nBits);
+  assert (bn_v res == pow2 (128 * nLen - nBits) * pow2 nBits % bn_v n);
+  Math.Lemmas.pow2_plus (128 * nLen - nBits) nBits;
   assert (bn_v res == pow2 (128 * nLen) % bn_v n)
 
-// TODO: add bn_get_num_bits
-let precomp_r2_mod_n #nLen nBits n =
-  let mask =
-    if blocks nBits 64 <= nLen
-    then begin
-      BC.bn_gt_pow2_mask_lemma #nLen n (nBits - 1);
-      BC.bn_gt_pow2_mask #nLen n (nBits - 1) end
-    else u64 0 in
 
-  let nBits = if v mask = 0 then 1 else nBits in
-  precomp_r2_mod_n_ #nLen nBits n
+let precomp_r2_mod_n #nLen n =
+  let mask = bn_is_zero_mask n in
+  bn_is_zero_mask_lemma n;
+  let bits =
+    if v mask = 0 then begin
+      bn_get_num_bits_lemma n;
+      bn_get_num_bits n end
+    else 0 in
+  precomp_r2_mod_n_ #nLen bits n
 
 
-let precomp_r2_mod_n_lemma #nLen nBits n =
-  let mask =
-    if blocks nBits 64 <= nLen
-    then begin
-      BC.bn_gt_pow2_mask_lemma #nLen n (nBits - 1);
-      BC.bn_gt_pow2_mask #nLen n (nBits - 1) end
-    else u64 0 in
-
-  let nBits = if v mask = 0 then 1 else nBits in
-  precomp_r2_mod_n_aux_lemma #nLen nBits n
+let precomp_r2_mod_n_lemma #nLen n =
+  let mask = bn_is_zero_mask n in
+  bn_is_zero_mask_lemma n;
+  let bits =
+    if v mask = 0 then begin
+      bn_get_num_bits_lemma n;
+      bn_get_num_bits n end
+    else 0 in
+  precomp_r2_mod_n_aux_lemma #nLen bits n
 
 ///
 ///  Low-level specification of Montgomery arithmetic

@@ -15,15 +15,11 @@ module M = Hacl.Spec.Montgomery.Lemmas
 ///  Precomputed constants for Montgomery arithmetic
 ///
 
-val precomp_r2_mod_n:
-    #nLen:size_pos{128 * nLen <= max_size_t}
-  -> nBits:size_pos
-  -> n:lbignum nLen ->
-  lbignum nLen
+val precomp_r2_mod_n: #nLen:size_pos{128 * nLen <= max_size_t} -> n:lbignum nLen -> lbignum nLen
 
-val precomp_r2_mod_n_lemma: #nLen:size_pos -> nBits:size_pos -> n:lbignum nLen -> Lemma
-  (requires 1 < bn_v n /\ 128 * nLen <= max_size_t)
-  (ensures  bn_v (precomp_r2_mod_n nBits n) == pow2 (128 * nLen) % bn_v n)
+val precomp_r2_mod_n_lemma: #nLen:size_pos -> n:lbignum nLen -> Lemma
+  (requires 1 < bn_v n /\ bn_v n % 2 = 1 /\ 128 * nLen <= max_size_t)
+  (ensures  bn_v (precomp_r2_mod_n n) == pow2 (128 * nLen) % bn_v n)
 
 ///
 ///  Conversion functions to/from the Montgomery domen and the Montgomery reduction

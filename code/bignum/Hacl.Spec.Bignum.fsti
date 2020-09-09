@@ -108,6 +108,23 @@ val bn_set_ith_bit_lemma: #len:size_nat -> b:lbignum len -> i:size_nat{i / 64 < 
   (requires bn_v b < pow2 i)
   (ensures  bn_v (bn_set_ith_bit b i) == bn_v b + pow2 i)
 
+val bn_get_num_bits: #len:size_pos{64 * len <= max_size_t} -> b:lbignum len -> size_nat
+
+val bn_get_num_bits_lemma: #len:size_pos{64 * len <= max_size_t} -> b:lbignum len -> Lemma
+  (requires 0 < bn_v b)
+  (ensures (let bits = bn_get_num_bits b in
+    bits <= 64 * len /\ blocks (bits + 1) 64 <= len /\
+    pow2 bits <= bn_v b /\ bn_v b < pow2 (bits + 1)))
+
+///
+///  Conditional swap
+///
+
+val cswap2: #len:size_nat -> bit:uint64 -> b1:lseq uint64 len -> b2:lseq uint64 len -> tuple2 (lseq uint64 len) (lseq uint64 len)
+
+val cswap2_lemma: #len:size_nat -> bit:uint64{v bit <= 1} -> b1:lseq uint64 len -> b2:lseq uint64 len ->
+  Lemma (let (p1, p2) = cswap2 bit b1 b2 in (if v bit = 1 then p1 == b2 /\ p2 == b1 else p1 == b1 /\ p2 == b2))
+
 ///
 ///  Bignum comparison and test functions
 ///

@@ -28,7 +28,7 @@ friend Hacl.Spec.Bignum.Montgomery
 
 inline_for_extraction noextract
 let precomp_r2_mod_n_aux_st (nLen: BN.meta_len) =
-    nBits:size_t{0 < v nBits /\ v (blocks nBits 64ul) <= v nLen}
+    nBits:size_t{v nBits / 64 < v nLen}
   -> n:lbignum nLen
   -> res:lbignum nLen ->
   Stack unit
@@ -48,31 +48,33 @@ let precomp_r2_mod_n_ #nLen #_ nBits n res =
   // Note here that BN.bit_set refers to the implicitly-defined projector for
   // the type class rather than the bn_bit_set operator. So we're really
   // selecting the implementation of bn_bit_set specialized for nLen!
-  BN.bit_set res (nBits -! 1ul);
+  BN.bit_set res nBits;
 
   [@inline_let]
   let spec h = S.bn_lshift1_mod_n (as_seq h n) in
 
   let h0 = ST.get () in
-  loop1 h0 (128ul *! nLen +! 1ul -! nBits) res spec
+  loop1 h0 (128ul *! nLen -! nBits) res spec
   (fun i ->
-    Loops.unfold_repeati (128 * v nLen + 1 - v nBits) (spec h0) (as_seq h0 res) (v i);
+    Loops.unfold_repeati (128 * v nLen - v nBits) (spec h0) (as_seq h0 res) (v i);
     BN.add_mod_n n res res res
   )
 
 
-let precomp_r2_mod_n #nLen #_ nBits n res =
-  let mask =
-    if blocks nBits 64ul <=. nLen then
-      BC.bn_gt_pow2_mask nLen n (nBits -! 1ul)
-    else u64 0 in
+let precomp_r2_mod_n #nLen #_ n res =
+  let h0 = ST.get () in
+  let mask = BN.bn_is_zero_mask nLen n in
+  SB.bn_is_zero_mask_lemma (as_seq h0 n);
+  let bits =
+    if FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 mask =^ 0uL) then begin
+      SB.bn_get_num_bits_lemma (as_seq h0 n);
+      BN.bn_get_num_bits nLen n end
+    else 0ul in
+  precomp_r2_mod_n_ bits n res
 
-  let nBits = if FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 mask =^ 0uL) then 1ul else nBits in
-  precomp_r2_mod_n_ nBits n res
 
-
-let new_precomp_r2_mod_n r nBits nLen n =
-  if nLen =. 0ul || nBits =. 0ul
+let new_precomp_r2_mod_n r nLen n =
+  if nLen = 0ul || not (nLen <=. 0xfffffffful `FStar.UInt32.div` 128ul)
   then B.null
   else
     let h0 = ST.get () in
@@ -83,7 +85,7 @@ let new_precomp_r2_mod_n r nBits nLen n =
     let res: Lib.Buffer.buffer Lib.IntTypes.uint64 = res in
     assert (B.length res == FStar.UInt32.v nLen);
     let res: lbignum nLen = res in
-    precomp_r2_mod_n #nLen #(BN.mk_runtime_bn nLen) nBits n res;
+    precomp_r2_mod_n #nLen #(BN.mk_runtime_bn nLen) n res;
     let h2 = ST.get () in
     B.(modifies_only_not_unused_in loc_none h0 h2);
     res

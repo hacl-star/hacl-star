@@ -67,6 +67,14 @@ let bn_get_ith_bit len input ind =
 let bn_set_ith_bit len input ind =
   Hacl.Bignum.Lib.bn_set_ith_bit len input ind
 
+let bn_get_num_bits len b =
+  Hacl.Bignum.Lib.bn_get_num_bits len b
+
+(* conditional swap *)
+
+let cswap2 len bit b1 b2 =
+  Hacl.Bignum.Lib.cswap2_st len bit b1 b2
+
 (* bignum comparison and test functions *)
 
 let bn_is_odd len a =

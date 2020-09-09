@@ -21,13 +21,13 @@ include Hacl.Bignum.ModInv64
 
 inline_for_extraction noextract
 let precomp_r2_mod_n_st (nLen: BN.meta_len) =
-    nBits:size_t{0 < v nBits}
-  -> n:lbignum nLen
+    n:lbignum nLen
   -> res:lbignum nLen ->
   Stack unit
-  (requires fun h -> live h n /\ live h res /\ disjoint n res)
+  (requires fun h ->
+    live h n /\ live h res /\ disjoint n res)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_seq h1 res == S.precomp_r2_mod_n (v nBits) (as_seq h0 n))
+    as_seq h1 res == S.precomp_r2_mod_n (as_seq h0 n))
 
 // Not marking this one as noextract, since it legitimately can execute with
 // nLen passed at run-time. It's just a little inefficient. (And it's helpful to
@@ -42,19 +42,18 @@ val precomp_r2_mod_n:
 inline_for_extraction noextract
 let new_precomp_r2_mod_n_st =
     r:HS.rid
-  -> nBits:size_t
-  -> nLen:BN.meta_len
+  -> nLen:size_t
   -> n:lbignum nLen ->
   ST (B.buffer uint64)
   (requires fun h -> live h n /\ ST.is_eternal_region r)
   (ensures  fun h0 res h1 ->
     B.(modifies loc_none h0 h1) /\
     not (B.g_is_null res) ==> (
-      v nBits > 0 /\
+      0 < v nLen /\ 128 * v nLen <= max_size_t /\
       B.len res == nLen /\
       B.(fresh_loc (loc_buffer res) h0 h1) /\
       B.(loc_includes (loc_region_only false r) (loc_buffer res)) /\
-      as_seq h1 (res <: lbignum nLen) == S.precomp_r2_mod_n #(v nLen) (v nBits) (as_seq h0 n)))
+      as_seq h1 (res <: lbignum nLen) == S.precomp_r2_mod_n #(v nLen) (as_seq h0 n)))
 
 
 inline_for_extraction noextract

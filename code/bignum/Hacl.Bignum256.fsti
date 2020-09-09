@@ -75,11 +75,10 @@ val mod_exp_precompr2: BE.bn_mod_exp_precompr2_st n_limbs
 [@@ Comment "Write `a ^ b mod n` in `res`.
 
   The arguments a, n and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
-  The argument nBits can be less or equal to the exact number of bits of n, but not equal to 0.
   The argument b is a bignum of any size, and bBits is an upper bound on the
   number of significant bits of b. For instance, if b is a 256-bit bignum,
   bBits should be 256. The function is *NOT* constant-time on the argument b."]
-val mod_exp: nBits:_ -> BE.bn_mod_exp_st n_limbs nBits
+val mod_exp: BE.bn_mod_exp_st n_limbs
 
 [@@ Comment "Write `a ^ b mod n` in `res`.
 
@@ -93,17 +92,16 @@ val mod_exp_mont_ladder_precompr2: BE.bn_mod_exp_mont_ladder_precompr2_st n_limb
 [@@ Comment "Write `a ^ b mod n` in `res`.
 
   The arguments a, n and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
-  The argument nBits can be less or equal to the exact number of bits of n, but not equal to 0.
   The argument b is a bignum of any size, and bBits is an upper bound on the
   number of significant bits of b. For instance, if b is a 256-bit bignum,
   bBits should be 256. The function is constant-time on the argument b."]
-val mod_exp_mont_ladder: nBits:_ -> BE.bn_mod_exp_mont_ladder_st n_limbs nBits
+val mod_exp_mont_ladder: BE.bn_mod_exp_mont_ladder_st n_limbs
 
 [@@ Comment "Compute `2 ^ (128 * nLen) mod n`.
 
   The argument n points to a bignum of size nLen of valid memory.
-  The argument nBits can be less or equal to the exact number of bits of n.
-  The function returns a heap-allocated bignum of size nLen or NULL if nBits is equal to 0.
+  The function returns a heap-allocated bignum of size nLen,
+  or NULL if the amount of required memory would exceed 4GB.
 
   If the return value is non-null, clients must eventually call free(3) on it to
   avoid memory leaks."]

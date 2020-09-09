@@ -13,7 +13,7 @@ open Hacl.Spec.Bignum.ModInv64
 
 module BL = Hacl.Spec.Exponentiation.Lemmas
 module M = Hacl.Spec.Montgomery.Lemmas
-module L = Hacl.Spec.Bignum.Lib // for cswap
+
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -218,7 +218,7 @@ val bn_mod_exp_mont_ladder_f:
 let bn_mod_exp_mont_ladder_f #nLen n mu bBits bLen b i (rM0, rM1, privbit) =
   let bit = bn_get_ith_bit #bLen b (bBits - i - 1) in
   let sw = bit ^. privbit in
-  let rM0, rM1 = L.cswap2 sw rM0 rM1 in
+  let rM0, rM1 = cswap2 sw rM0 rM1 in
   let rM0' = mont_sqr n mu rM0 in // rM0 * rM0 % n
   let rM1' = mont_mul n mu rM1 rM0 in // rM1 * rM0 % n
   (rM0', rM1', bit)
@@ -243,7 +243,7 @@ let bn_mod_exp_mont_ladder_ nLen n a one bBits b r2 =
   let sw = u64 0 in
   let (rM0', rM1', sw') = repeat_gen bBits (bn_mod_exp_mont_ladder_t nLen bBits)
     (bn_mod_exp_mont_ladder_f #nLen n mu bBits bLen b) (rM0, rM1, sw) in
-  let (rM0', rM1') = L.cswap2 sw' rM0' rM1' in
+  let (rM0', rM1') = cswap2 sw' rM0' rM1' in
   from_mont n mu rM0'
 
 
@@ -294,8 +294,8 @@ let bn_mod_exp_mont_ladder_f_lemma #nLen n mu bBits bLen b i (rM0, rM1, sw) =
   //assert (v bit == bn_v b / pow2 (bBits - i - 1) % 2);
   let sw1 = bit ^. sw in
   lemma_bit_xor_is_sum_mod2 bit sw;
-  let rM2, rM3 = L.cswap2 sw1 rM0 rM1 in
-  L.cswap2_lemma sw1 rM0 rM1;
+  let rM2, rM3 = cswap2 sw1 rM0 rM1 in
+  cswap2_lemma sw1 rM0 rM1;
   let rM2' = mont_sqr n mu rM2 in
   mont_sqr_lemma #nLen n mu rM2;
   let rM3' = mont_mul n mu rM3 rM2 in
@@ -393,8 +393,8 @@ let bn_mod_exp_mont_ladder_lemma_aux nLen n a bBits b r2 =
     (bn_mod_exp_mont_ladder_f #nLen n mu bBits bLen b) (rM0, rM1, sw) in
   bn_mod_exp_mont_ladder_loop_lemma #nLen n mu bBits bLen b bBits (rM0, rM1, sw);
 
-  let (rM0'', rM1'') = L.cswap2 sw' rM0' rM1' in
-  L.cswap2_lemma sw' rM0' rM1';
+  let (rM0'', rM1'') = cswap2 sw' rM0' rM1' in
+  cswap2_lemma sw' rM0' rM1';
   let res = from_mont n mu rM0'' in
   from_mont_lemma #nLen n mu rM0''
 
@@ -418,23 +418,23 @@ let bn_mod_exp_mont_ladder_precompr2_lemma nLen n a bBits b r2 =
   BL.mod_exp_mont_ladder_swap_ll_lemma nLen (bn_v n) d (v mu) (bn_v a) bBits (bn_v b)
 
 
-let bn_mod_exp nLen nBits n a bBits b =
-  let r2 = precomp_r2_mod_n nBits n in
+let bn_mod_exp nLen n a bBits b =
+  let r2 = precomp_r2_mod_n n in
   bn_mod_exp_precompr2 nLen n a bBits b r2
 
 
-let bn_mod_exp_lemma nLen nBits n a bBits b =
-  let r2 = precomp_r2_mod_n nBits n in
-  precomp_r2_mod_n_lemma nBits n;
+let bn_mod_exp_lemma nLen n a bBits b =
+  let r2 = precomp_r2_mod_n n in
+  precomp_r2_mod_n_lemma n;
   bn_mod_exp_precompr2_lemma nLen n a bBits b r2
 
 
-let bn_mod_exp_mont_ladder nLen nBits n a bBits b =
-  let r2 = precomp_r2_mod_n nBits n in
+let bn_mod_exp_mont_ladder nLen n a bBits b =
+  let r2 = precomp_r2_mod_n n in
   bn_mod_exp_mont_ladder_precompr2 nLen n a bBits b r2
 
 
-let bn_mod_exp_mont_ladder_lemma nLen nBits n a bBits b =
-  let r2 = precomp_r2_mod_n nBits n in
-  precomp_r2_mod_n_lemma nBits n;
+let bn_mod_exp_mont_ladder_lemma nLen n a bBits b =
+  let r2 = precomp_r2_mod_n n in
+  precomp_r2_mod_n_lemma n;
   bn_mod_exp_mont_ladder_precompr2_lemma nLen n a bBits b r2

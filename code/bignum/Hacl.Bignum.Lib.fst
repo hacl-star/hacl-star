@@ -13,6 +13,8 @@ open Hacl.Bignum.Definitions
 module S = Hacl.Spec.Bignum.Lib
 module ST = FStar.HyperStack.ST
 module Loops = Lib.LoopCombinators
+module LSeq = Lib.Sequence
+
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -78,3 +80,87 @@ let cswap2_st len bit b1 b2 =
     b1.(i) <- b1.(i) ^. dummy;
     b2.(i) <- b2.(i) ^. dummy
   )
+
+
+inline_for_extraction noextract
+val bn_leading_zero_index:
+    len:size_t{0 < v len}
+  -> b:lbignum len ->
+  Stack size_t
+  (requires fun h -> live h b)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+    v r == S.bn_leading_zero_index (as_seq h0 b))
+
+let bn_leading_zero_index len b =
+  push_frame ();
+  let priv = create 1ul 0ul in
+
+  let h0 = ST.get () in
+  [@ inline_let]
+  let refl h i = v (LSeq.index (as_seq h priv) 0) in
+  [@ inline_let]
+  let spec h0 = S.bn_leading_zero_index_f (as_seq h0 b) in
+
+  [@ inline_let]
+  let inv h (i:nat{i <= v len}) =
+    modifies1 priv h0 h /\
+    live h priv /\ live h b /\ disjoint priv b /\
+    refl h i == Loops.repeat_gen i (S.bn_leading_zero_index_t (v len)) (spec h0) (refl h0 0) in
+
+  Loops.eq_repeat_gen0 (v len) (S.bn_leading_zero_index_t (v len)) (spec h0) (refl h0 0);
+  Lib.Loops.for 0ul len inv
+  (fun i ->
+    Loops.unfold_repeat_gen (v len) (S.bn_leading_zero_index_t (v len)) (spec h0) (refl h0 0) (v i);
+    let mask = eq_mask b.(i) (zeros U64 SEC) in
+    priv.(0ul) <- if FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 mask =^ 0uL) then i else priv.(0ul));
+  let res = priv.(0ul) in
+  pop_frame ();
+  res
+
+
+inline_for_extraction noextract
+val limb_leading_zero_index: a:uint64 ->
+  Stack size_t
+  (requires fun h -> True)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+    v r == S.limb_leading_zero_index a)
+
+let limb_leading_zero_index a =
+  push_frame ();
+  let priv = create 1ul 0ul in
+
+  let h0 = ST.get () in
+  [@ inline_let]
+  let refl h i = v (LSeq.index (as_seq h priv) 0) in
+  [@ inline_let]
+  let spec h0 = S.limb_leading_zero_index_f a in
+
+  [@ inline_let]
+  let inv h (i:nat{i <= 64}) =
+    modifies1 priv h0 h /\ live h priv /\
+    refl h i == Loops.repeat_gen i S.limb_leading_zero_index_t (spec h0) (refl h0 0) in
+
+  Loops.eq_repeat_gen0 64 S.limb_leading_zero_index_t (spec h0) (refl h0 0);
+  Lib.Loops.for 0ul 64ul inv
+  (fun i ->
+    Loops.unfold_repeat_gen 64 S.limb_leading_zero_index_t (spec h0) (refl h0 0) (v i);
+    let bit_i = (a >>. i) &. u64 1 in
+    priv.(0ul) <- if FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 bit_i =^ 1uL) then i else priv.(0ul));
+  let res = priv.(0ul) in
+  pop_frame ();
+  res
+
+
+inline_for_extraction noextract
+val bn_get_num_bits:
+    len:size_t{0 < v len /\ 64 * v len <= max_size_t}
+  -> b:lbignum len ->
+  Stack size_t
+  (requires fun h -> live h b)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+    v r == S.bn_get_num_bits (as_seq h0 b))
+
+let bn_get_num_bits len b =
+  let ind = bn_leading_zero_index len b in
+  let bits = limb_leading_zero_index b.(ind) in
+  64ul *! ind +! bits

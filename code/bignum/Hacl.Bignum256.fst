@@ -91,8 +91,8 @@ let mod_exp_loop: BE.bn_mod_exp_loop_st n_limbs =
 let mod_exp_precompr2 =
   BE.mk_bn_mod_exp_precompr2 n_limbs #mont_inst mod_exp_loop
 
-let mod_exp nBits =
-  BE.mk_bn_mod_exp n_limbs nBits #mont_inst mod_exp_loop
+let mod_exp =
+  BE.mk_bn_mod_exp n_limbs #mont_inst mod_exp_loop
 
 let mod_exp_mont_ladder_loop: BE.bn_mod_exp_mont_ladder_loop_st n_limbs =
   norm [ zeta; primops; iota; delta_only [ `%BE.bn_mod_exp_mont_ladder_loop ] ] (BE.bn_mod_exp_mont_ladder_loop n_limbs #mont_inst)
@@ -100,8 +100,8 @@ let mod_exp_mont_ladder_loop: BE.bn_mod_exp_mont_ladder_loop_st n_limbs =
 let mod_exp_mont_ladder_precompr2 =
   BE.mk_bn_mod_exp_mont_ladder_precompr2 n_limbs #mont_inst mod_exp_mont_ladder_loop
 
-let mod_exp_mont_ladder nBits =
-  BE.mk_bn_mod_exp_mont_ladder n_limbs nBits #mont_inst mod_exp_mont_ladder_loop
+let mod_exp_mont_ladder =
+  BE.mk_bn_mod_exp_mont_ladder n_limbs #mont_inst mod_exp_mont_ladder_loop
 
 let new_precompr2 = BM.new_precomp_r2_mod_n
 

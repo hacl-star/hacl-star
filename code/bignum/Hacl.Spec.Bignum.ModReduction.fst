@@ -75,7 +75,7 @@ val bn_mod_slow:
   lbignum nLen
 
 let bn_mod_slow #nLen n a =
-  let r2 = BM.precomp_r2_mod_n 1 n in
+  let r2 = BM.precomp_r2_mod_n n in
   bn_mod_slow_precompr2 #nLen n a r2
 
 
@@ -84,6 +84,6 @@ val bn_mod_slow_lemma: #nLen:size_pos{128 * nLen <= max_size_t} -> n:lbignum nLe
   (ensures  bn_v (bn_mod_slow n a) == bn_v a % bn_v n)
 
 let bn_mod_slow_lemma #nLen n a =
-  let r2 = BM.precomp_r2_mod_n 1 n in
-  BM.precomp_r2_mod_n_lemma 1 n;
+  let r2 = BM.precomp_r2_mod_n n in
+  BM.precomp_r2_mod_n_lemma n;
   bn_mod_slow_precompr2_lemma #nLen n a r2

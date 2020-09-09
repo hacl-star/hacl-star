@@ -242,6 +242,29 @@ let bn_set_ith_bit_st (len:size_t) =
 
 val bn_set_ith_bit: len:size_t -> bn_set_ith_bit_st len
 
+
+inline_for_extraction noextract
+val bn_get_num_bits:
+    len:size_t{0 < v len /\ 64 * v len <= max_size_t}
+  -> b:lbignum len ->
+  Stack size_t
+  (requires fun h -> live h b)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+    v r == S.bn_get_num_bits (as_seq h0 b))
+
+
+inline_for_extraction noextract
+val cswap2:
+    len:size_t
+  -> bit:uint64
+  -> b1:lbuffer uint64 len
+  -> b2:lbuffer uint64 len ->
+  Stack unit
+  (requires fun h -> live h b1 /\ live h b2 /\ disjoint b1 b2)
+  (ensures  fun h0 _ h1 -> modifies (loc b1 |+| loc b2) h0 h1 /\
+    (as_seq h1 b1, as_seq h1 b2) == S.cswap2 bit (as_seq h0 b1) (as_seq h0 b2))
+
+
 /// Start of the len-based specialization infrastructure.
 ///
 /// Essentially, we wish to describe a type class of basic bignum operations

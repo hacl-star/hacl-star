@@ -78,7 +78,7 @@ val mk_bn_mod_slow: nLen:BN.meta_len
 let mk_bn_mod_slow nLen #k n a res =
   push_frame ();
   let r2 = create nLen (u64 0) in
-  BM.precomp 1ul n r2;
+  BM.precomp n r2;
   mk_bn_mod_slow_precompr2 nLen #k n a r2 res;
   pop_frame ()
 

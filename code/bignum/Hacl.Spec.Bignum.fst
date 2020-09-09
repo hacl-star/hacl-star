@@ -135,6 +135,20 @@ let bn_set_ith_bit #len input ind =
 let bn_set_ith_bit_lemma #len input ind =
   Hacl.Spec.Bignum.Lib.bn_set_ith_bit_lemma #len input ind
 
+let bn_get_num_bits #len b =
+  Hacl.Spec.Bignum.Lib.bn_get_num_bits b
+
+let bn_get_num_bits_lemma #len b =
+  Hacl.Spec.Bignum.Lib.bn_get_num_bits_lemma b
+
+(* conditional swap *)
+
+let cswap2 #len bit b1 b2 =
+  Hacl.Spec.Bignum.Lib.cswap2 bit b1 b2
+
+let cswap2_lemma #len bit b1 b2 =
+  Hacl.Spec.Bignum.Lib.cswap2_lemma bit b1 b2
+
 (* Bignum comparison and test functions *)
 
 let bn_is_odd #len b =
@@ -172,7 +186,6 @@ let bn_gt_pow2_mask #len b x =
 
 let bn_gt_pow2_mask_lemma #len b x =
   Hacl.Spec.Bignum.Comparison.bn_gt_pow2_mask_lemma #len b x
-
 
 (* Conversion functions *)
 

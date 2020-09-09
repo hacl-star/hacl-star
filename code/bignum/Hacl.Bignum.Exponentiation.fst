@@ -9,7 +9,6 @@ open Lib.Buffer
 
 module BN = Hacl.Bignum
 module BM = Hacl.Bignum.Montgomery
-module BL = Hacl.Bignum.Lib
 
 open Hacl.Bignum.Definitions
 
@@ -167,7 +166,7 @@ let bn_mod_exp_mont_ladder_loop nLen #_ n nInv_u64 bBits bLen b rM0 rM1 sw =
     Loops.unfold_repeat_gen (v bBits) (S.bn_mod_exp_mont_ladder_t (v nLen) (v bBits)) (spec h0) (refl h0 0) (v i);
     let bit = BN.bn_get_ith_bit bLen b (bBits -! i -! 1ul) in
     let sw1 = bit ^. sw.(0ul) in
-    BL.cswap2_st nLen sw1 rM0 rM1;
+    BN.cswap2 nLen sw1 rM0 rM1;
     BM.mul n nInv_u64 rM1 rM0 rM1;
     BM.sqr n nInv_u64 rM0 rM0;
     sw.(0ul) <- bit
@@ -210,7 +209,7 @@ let bn_mod_exp_mont_ladder_ nLen #_ bn_mod_exp_mont_ladder_loop n a one bBits b 
   BM.to n nInv_u64 r2 a rM1;
 
   bn_mod_exp_mont_ladder_loop n nInv_u64 bBits bLen b rM0 rM1 sw;
-  BL.cswap2_st nLen sw.(0ul) rM0 rM1;
+  BN.cswap2 nLen sw.(0ul) rM0 rM1;
   BM.from n nInv_u64 rM0 res;
   pop_frame ()
 
@@ -241,15 +240,14 @@ let bn_mod_exp_mont_ladder_precompr2 nLen =
 inline_for_extraction noextract
 val mk_bn_mod_exp:
     nLen:size_t{0 < v nLen /\ 128 * v nLen <= max_size_t}
-  -> nBits:size_t{0 < v nBits}
   -> (#[FStar.Tactics.Typeclasses.tcresolve ()] _ : Hacl.Bignum.Montgomery.mont nLen)
   -> bn_mod_exp_loop:bn_mod_exp_loop_st nLen ->
-  bn_mod_exp_st nLen nBits
+  bn_mod_exp_st nLen
 
-let mk_bn_mod_exp nLen nBits #_ bn_mod_exp_loop n a bBits b res =
+let mk_bn_mod_exp nLen #_ bn_mod_exp_loop n a bBits b res =
   push_frame ();
   let r2 = create nLen (u64 0) in
-  BM.precomp nBits n r2;
+  BM.precomp n r2;
   mk_bn_mod_exp_precompr2 nLen #(BM.mk_runtime_mont nLen) bn_mod_exp_loop n a bBits b r2 res;
   pop_frame ()
 
@@ -257,22 +255,21 @@ let mk_bn_mod_exp nLen nBits #_ bn_mod_exp_loop n a bBits b res =
 /// A fully runtime implementation of modular exponentiation.
 
 [@CInline]
-let bn_mod_exp nLen nBits =
-  mk_bn_mod_exp nLen nBits #(BM.mk_runtime_mont nLen) (bn_mod_exp_loop_runtime nLen)
+let bn_mod_exp nLen =
+  mk_bn_mod_exp nLen #(BM.mk_runtime_mont nLen) (bn_mod_exp_loop_runtime nLen)
 
 
 inline_for_extraction noextract
 val mk_bn_mod_exp_mont_ladder:
     nLen:size_t{0 < v nLen /\ 128 * v nLen <= max_size_t}
-  -> nBits:size_t{0 < v nBits}
   -> (#[FStar.Tactics.Typeclasses.tcresolve ()] _ : Hacl.Bignum.Montgomery.mont nLen)
   -> bn_mod_exp_mont_ladder_loop:bn_mod_exp_mont_ladder_loop_st nLen ->
-  bn_mod_exp_mont_ladder_st nLen nBits
+  bn_mod_exp_mont_ladder_st nLen
 
-let mk_bn_mod_exp_mont_ladder nLen nBits #_ bn_mod_exp_mont_ladder_loop n a bBits b res =
+let mk_bn_mod_exp_mont_ladder nLen #_ bn_mod_exp_mont_ladder_loop n a bBits b res =
   push_frame ();
   let r2 = create nLen (u64 0) in
-  BM.precomp nBits n r2;
+  BM.precomp n r2;
   mk_bn_mod_exp_mont_ladder_precompr2 nLen #(BM.mk_runtime_mont nLen) bn_mod_exp_mont_ladder_loop n a bBits b r2 res;
   pop_frame ()
 
@@ -280,5 +277,5 @@ let mk_bn_mod_exp_mont_ladder nLen nBits #_ bn_mod_exp_mont_ladder_loop n a bBit
 /// A fully runtime implementation of modular exponentiation.
 
 [@CInline]
-let bn_mod_exp_mont_ladder nLen nBits =
-  mk_bn_mod_exp_mont_ladder nLen nBits #(BM.mk_runtime_mont nLen) (bn_mod_exp_mont_ladder_loop_runtime nLen)
+let bn_mod_exp_mont_ladder nLen =
+  mk_bn_mod_exp_mont_ladder nLen #(BM.mk_runtime_mont nLen) (bn_mod_exp_mont_ladder_loop_runtime nLen)
