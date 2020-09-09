@@ -318,13 +318,14 @@ let reduction_prime_2prime_with_carry_cin #c cin x result =
   lemma_cin_1 #c (as_nat c h0 x) (uint_v cin);
   lemma_reduction_prime_2prime_with_carry_cin c (v cin) (as_nat c h0 x) (uint_v carry0) (as_nat c h2 result)
 
-
+(*
 val lemma_test0: #c: curve -> x: widefelem c -> h0: mem ->
   Lemma (
     let len = getCoordinateLenU64 c in 
     wide_as_nat c h0 x = as_nat c h0 (gsub x (size 0) len) + as_nat c h0 (gsub x len len) * getPower2 c)
 
 let lemma_test0 #c x h0 = admit()
+*)
 
 
 val lemma_less_2prime_p256: h0: mem ->
@@ -521,86 +522,78 @@ let isZero_uint64_CT #c f =
   r
 
 
+val lemma_felem_as_forall: #c: curve -> a: felem c -> b: felem c -> h0: mem ->
+  Lemma (
+    let len = getCoordinateLenU64 c in 
+    forall (i: nat {i < v len}). 
+      Lib.Sequence.index (as_seq h0 a) i == Lib.Sequence.index (as_seq h0 b) i 
+      <==> as_nat c h0 a == as_nat c h0 b) 
+
+let lemma_felem_as_forall #c a b h0 = 
+  admit()
+
 
 let compare_felem #c a b =
-  admit();
-  let len = getCoordinateLenU64 c in 
-  let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = True in
   push_frame();
-    let tmp = create (size 1) (u64 0) in 
-    upd tmp (size 0) (u64 18446744073709551615);
+  let h0 = ST.get() in 
+  let tmp = create (size 1) (u64 0) in 
+  upd tmp (size 0) (u64 18446744073709551615);
+    
+  let len = getCoordinateLenU64 c in 
+  
+  let inv h (i: nat { i <= uint_v len}) = 
+    live h a /\ live h b /\ live h tmp /\  modifies (loc tmp) h0 h /\
+    (
+      let tmp = v (Lib.Sequence.index (as_seq h tmp) 0) in 
+      (
+	forall (j: nat {j < i}). 
+	  v (Lib.Sequence.index (as_seq h0 a) j) == 
+	  v (Lib.Sequence.index (as_seq h0 b) j)) <==> tmp == ones_v U64) /\
+    (
+      let tmp = v (Lib.Sequence.index (as_seq h tmp) 0) in 
+      (
+	~ (forall (j: nat {j < i}). 
+	  v (Lib.Sequence.index (as_seq h0 a) j) == 
+	  v (Lib.Sequence.index (as_seq h0 b) j)) <==> tmp == 0))
+  in
+
     
   for 0ul len inv (fun i -> 
+    let h0 = ST.get() in 
+    assert(
+      let tmp = v (Lib.Sequence.index (as_seq h0 tmp) 0) in 
+       tmp == ones_v U64 <==> 
+	 (forall (j: nat {j < v i}). 
+	   v (Lib.Sequence.index (as_seq h0 a) j) == 
+	   v (Lib.Sequence.index (as_seq h0 b) j)));
     let a_i = index a i in 
     let b_i = index b i in 
     let r_i = eq_mask a_i b_i in 
-    upd tmp (size 0) (logand r_i (index tmp (size 0))));
+    let tmp0 = index tmp (size 0) in 
+
+    logand_lemma r_i tmp0;
+    upd tmp (size 0) (logand r_i tmp0);
+    
+    let h1 = ST.get() in 
+
+    assert(
+      let tmp = v (Lib.Sequence.index (as_seq h1 tmp) 0) in 
+      tmp == ones_v U64 <==> 
+      (
+	forall (j: nat {j < v i + 1}). 
+	  v (Lib.Sequence.index (as_seq h0 a) j) == 
+	  v (Lib.Sequence.index (as_seq h0 b) j)))
+
+  );
 
   let r = index tmp (size 0) in 
+
+  lemma_felem_as_forall #c a b h0;
+  assert(as_nat c h0 a == as_nat c h0 b <==> v r == ones_v U64);
+
   pop_frame(); 
   r
 
-
-(*
-  |P256 ->
-    let a_0 = index a (size 0) in
-    let a_1 = index a (size 1) in
-    let a_2 = index a (size 2) in
-    let a_3 = index a (size 3) in
-
-    let b_0 = index b (size 0) in
-    let b_1 = index b (size 1) in
-    let b_2 = index b (size 2) in
-    let b_3 = index b (size 3) in
-
-    let r_0 = eq_mask a_0 b_0 in
-  eq_mask_lemma a_0 b_0;
-    let r_1 = eq_mask a_1 b_1 in
-  eq_mask_lemma a_1 b_1;
-    let r_2 = eq_mask a_2 b_2 in
-  eq_mask_lemma a_2 b_2;
-    let r_3 = eq_mask a_3 b_3 in
-  eq_mask_lemma a_3 b_3;
-
-    let r01 = logand r_0 r_1 in
-  logand_lemma r_0 r_1;
-    let r23 = logand r_2 r_3 in
-  logand_lemma r_2 r_3;
-
-    let r = logand r01 r23 in
-  logand_lemma r01 r23;
-  lemma_equality (a_0, a_1, a_2, a_3) (b_0, b_1, b_2, b_3);
-    r
-  |P384 ->
-      let a_0 = index a (size 0) in
-      let a_1 = index a (size 1) in
-      let a_2 = index a (size 2) in
-      let a_3 = index a (size 3) in
-      let a_4 = index a (size 4) in
-      let a_5 = index a (size 5) in
-
-      let b_0 = index b (size 0) in
-      let b_1 = index b (size 1) in
-      let b_2 = index b (size 2) in
-      let b_3 = index b (size 3) in
-      let b_4 = index b (size 4) in
-      let b_5 = index b (size 5) in
-
-      let r_0 = eq_mask a_0 b_0 in
-      let r_1 = eq_mask a_1 b_1 in
-      let r_2 = eq_mask a_2 b_2 in
-      let r_3 = eq_mask a_3 b_3 in
-      let r_4 = eq_mask a_4 b_4 in
-      let r_5 = eq_mask a_5 b_5 in
-
-      let r01 = logand r_0 r_1 in
-      let r23 = logand r_2 r_3 in
-      let r45 = logand r_4 r_5 in
-
-      let r = logand(logand r01 r23) r45 in
-      lemma_equality (a_0, a_1, a_2, a_3, a_4, a_5) (b_0, b_1, b_2, b_3, b_4, b_5);
-      r
-*)
 
 let copy_conditional #c out x mask =
   admit();

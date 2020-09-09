@@ -287,7 +287,8 @@ val isZero_uint64_CT: #c: curve ->  f: felem c -> Stack uint64
 
 val compare_felem: #c: curve -> a: felem c -> b: felem c -> Stack uint64
   (requires fun h -> live h a /\ live h b) 
-  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ (if as_nat c h0 a = as_nat c h0 b then uint_v r == pow2 64 - 1 else uint_v r = 0))
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ 
+    (if as_nat c h0 a = as_nat c h0 b then uint_v r == pow2 64 - 1 else uint_v r = 0))
 
 
 val copy_conditional: #c: curve -> out: felem c -> x: felem c 
