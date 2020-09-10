@@ -41,9 +41,11 @@ extern "C" {
 #include "Hacl_Kremlib.h"
 #include "Hacl_Bignum.h"
 #include "Hacl_Hash.h"
+#include "Hacl_Spec.h"
 
 void
 Hacl_RSAPSS_rsapss_sign(
+  Spec_Hash_Definitions_hash_alg a,
   uint32_t modBits,
   uint32_t eBits,
   uint32_t dBits,
@@ -57,6 +59,7 @@ Hacl_RSAPSS_rsapss_sign(
 
 bool
 Hacl_RSAPSS_rsapss_verify(
+  Spec_Hash_Definitions_hash_alg a,
   uint32_t modBits,
   uint32_t eBits,
   uint64_t *pkey,
@@ -65,6 +68,14 @@ Hacl_RSAPSS_rsapss_verify(
   uint32_t msgLen,
   uint8_t *msg
 );
+
+void Hacl_Bignum_Convert_bn_from_bytes_be(uint32_t len, uint8_t *b, uint64_t *res);
+
+void Hacl_Bignum_Convert_bn_from_bytes_le(uint32_t len, uint8_t *b, uint64_t *res);
+
+void Hacl_Bignum_Convert_bn_to_bytes_be(uint32_t len, uint64_t *b, uint8_t *res);
+
+void Hacl_Bignum_Convert_bn_to_bytes_le(uint32_t len, uint64_t *b, uint8_t *res);
 
 #if defined(__cplusplus)
 }
