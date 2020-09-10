@@ -59,9 +59,9 @@ val mul: a:lbignum n_limbs -> b:lbignum n_limbs -> BN.bn_karatsuba_mul_st a b
   This function is *UNSAFE* and requires C clients to observe the precondition
   of bn_mod_slow_precompr2_lemma in Hacl.Spec.Bignum.ModReduction.fst, which
   amounts to:
-  - 1 < n
-  - n % 2 = 1
-  - a < n * n
+  • 1 < n
+  • n % 2 = 1
+  • a < n * n
 
   Owing to the absence of run-time checks, and factoring out the precomputation
   r2, this function is notably faster than mod below."]
@@ -83,17 +83,18 @@ val mod: BR.bn_mod_slow_st n_limbs
   The argument b is a bignum of any size, and bBits is an upper bound on the
   number of significant bits of b. A tighter bound results in faster execution
   time. When in doubt, the number of bits for the bignum size is always a safe
-  default, e.g. if if b is a 4096-bit bignum, bBits should be 4096.
+  default, e.g. if b is a 4096-bit bignum, bBits should be 4096.
 
   The function is *NOT* constant-time on the argument b. See the
   mod_exp_mont_ladder_* functions for constant-time variants.
 
   This function is *UNSAFE* and requires C clients to observe bn_mod_exp_pre
   from Hacl.Spec.Bignum.Exponentiation.fsti, which amounts to:
-  - n % 2 = 1
-  - 1 < n
-  - 0 < b
-  - a < n
+  • n % 2 = 1
+  • 1 < n
+  • 0 < b
+  • b < pow2 bBits
+  • a < n
 
   Owing to the absence of run-time checks, and factoring out the precomputation
   r2, this function is notably faster than mod_exp below."]
@@ -105,7 +106,7 @@ val mod_exp_precompr2: BE.bn_mod_exp_precompr2_st n_limbs
   The argument b is a bignum of any size, and bBits is an upper bound on the
   number of significant bits of b. A tighter bound results in faster execution
   time. When in doubt, the number of bits for the bignum size is always a safe
-  default, e.g. if if b is a 4096-bit bignum, bBits should be 4096.
+  default, e.g. if b is a 4096-bit bignum, bBits should be 4096.
 
   The function is *NOT* constant-time on the argument b. See the
   mod_exp_mont_ladder_* functions for constant-time variants.
@@ -121,17 +122,18 @@ val mod_exp: BE.bn_mod_exp_st n_limbs
   The argument b is a bignum of any size, and bBits is an upper bound on the
   number of significant bits of b. A tighter bound results in faster execution
   time. When in doubt, the number of bits for the bignum size is always a safe
-  default, e.g. if if b is a 4096-bit bignum, bBits should be 4096.
+  default, e.g. if b is a 4096-bit bignum, bBits should be 4096.
 
   This function is constant-time over its argument b, at the cost of a slower
   execution time than mod_exp_precompr2.
 
   This function is *UNSAFE* and requires C clients to observe bn_mod_exp_pre
   from Hacl.Spec.Bignum.Exponentiation.fsti, which amounts to:
-  - n % 2 = 1
-  - 1 < n
-  - 0 < b
-  - a < n
+  • n % 2 = 1
+  • 1 < n
+  • 0 < b
+  • b < pow2 bBits
+  • a < n
 
   Owing to the absence of run-time checks, and factoring out the precomputation
   r2, this function is notably faster than mod_exp_mont_ladder below."]
@@ -143,7 +145,7 @@ val mod_exp_mont_ladder_precompr2: BE.bn_mod_exp_mont_ladder_precompr2_st n_limb
   The argument b is a bignum of any size, and bBits is an upper bound on the
   number of significant bits of b. A tighter bound results in faster execution
   time. When in doubt, the number of bits for the bignum size is always a safe
-  default, e.g. if if b is a 4096-bit bignum, bBits should be 4096.
+  default, e.g. if b is a 4096-bit bignum, bBits should be 4096.
 
   This function is constant-time over its argument b, at the cost of a slower
   execution time than mod_exp.
@@ -155,8 +157,10 @@ val mod_exp_mont_ladder: BE.bn_mod_exp_st n_limbs
 [@@ Comment "Compute `2 ^ (128 * nLen) mod n`.
 
   The argument n points to a bignum of size nLen of valid memory.
-  The function returns a heap-allocated bignum of size nLen, or NULL if either
-  the allocation failed, or the amount of required memory would exceed 4GB.
+  The function returns a heap-allocated bignum of size nLen, or NULL if:
+  - the allocation failed, or
+  - the amount of required memory would exceed 4GB, or
+  - n % 2 = 1 && 1 < n does not hold
 
   If the return value is non-null, clients must eventually call free(3) on it to
   avoid memory leaks."]
