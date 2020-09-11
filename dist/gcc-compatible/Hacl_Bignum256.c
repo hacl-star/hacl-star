@@ -835,9 +835,9 @@ Compute `2 ^ (128 * nLen) mod n`.
 
   The argument n points to a bignum of size nLen of valid memory.
   The function returns a heap-allocated bignum of size nLen, or NULL if:
-  - the allocation failed, or
-  - the amount of required memory would exceed 4GB, or
-  - n % 2 = 1 && 1 < n does not hold
+  • the allocation failed, or
+  • the amount of required memory would exceed 4GB, or
+  • n % 2 = 1 && 1 < n does not hold
 
   If the return value is non-null, clients must eventually call free(3) on it to
   avoid memory leaks.
