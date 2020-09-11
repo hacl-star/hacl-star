@@ -19,7 +19,7 @@ dist/librsapss.a: dist/Makefile.basic
 	$(MAKE) -C dist -f Makefile.basic
 
 SHA2_BUNDLE=-bundle Hacl.Hash.SHA2=Hacl.Hash.*
-RSAPSS_BUNDLE=-bundle Hacl.RSAPSS+Hacl.Bignum.Convert=Hacl.Bignum.*,Hacl.Bignum,Hacl.Impl.MGF,Hacl.Impl.RSAPSS[rename=Hacl_RSAPSS]
+RSAPSS_BUNDLE=-bundle Hacl.RSAPSS=Hacl.Bignum.*,Hacl.Bignum,Hacl.Impl.MGF,Hacl.Impl.RSAPSS[rename=Hacl_RSAPSS]
 
 dist/Makefile.basic: $(filter-out %prims.krml,$(ALL_KRML_FILES))
 	$(KRML) $^ -o librsapss.a $(BASE_FLAGS) $(SHA2_BUNDLE) $(RSAPSS_BUNDLE) \
