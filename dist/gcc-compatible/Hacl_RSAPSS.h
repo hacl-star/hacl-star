@@ -69,13 +69,18 @@ Hacl_RSAPSS_rsapss_verify(
   uint8_t *msg
 );
 
-void Hacl_Bignum_Convert_bn_from_bytes_be(uint32_t len, uint8_t *b, uint64_t *res);
+uint64_t
+*Hacl_RSAPSS_new_rsapss_load_pkey(uint32_t modBits, uint32_t eBits, uint8_t *nb, uint8_t *eb);
 
-void Hacl_Bignum_Convert_bn_from_bytes_le(uint32_t len, uint8_t *b, uint64_t *res);
-
-void Hacl_Bignum_Convert_bn_to_bytes_be(uint32_t len, uint64_t *b, uint8_t *res);
-
-void Hacl_Bignum_Convert_bn_to_bytes_le(uint32_t len, uint64_t *b, uint8_t *res);
+uint64_t
+*Hacl_RSAPSS_new_rsapss_load_skey(
+  uint32_t modBits,
+  uint32_t eBits,
+  uint32_t dBits,
+  uint8_t *nb,
+  uint8_t *eb,
+  uint8_t *db
+);
 
 #if defined(__cplusplus)
 }

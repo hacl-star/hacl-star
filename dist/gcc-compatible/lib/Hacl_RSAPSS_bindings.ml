@@ -25,16 +25,17 @@ module Bindings(F:Cstubs.FOREIGN) =
                     (uint32_t @->
                        (ocaml_bytes @->
                           (uint32_t @-> (ocaml_bytes @-> (returning bool)))))))))
-    let hacl_Bignum_Convert_bn_from_bytes_be =
-      foreign "Hacl_Bignum_Convert_bn_from_bytes_be"
-        (uint32_t @-> (ocaml_bytes @-> ((ptr uint64_t) @-> (returning void))))
-    let hacl_Bignum_Convert_bn_from_bytes_le =
-      foreign "Hacl_Bignum_Convert_bn_from_bytes_le"
-        (uint32_t @-> (ocaml_bytes @-> ((ptr uint64_t) @-> (returning void))))
-    let hacl_Bignum_Convert_bn_to_bytes_be =
-      foreign "Hacl_Bignum_Convert_bn_to_bytes_be"
-        (uint32_t @-> ((ptr uint64_t) @-> (ocaml_bytes @-> (returning void))))
-    let hacl_Bignum_Convert_bn_to_bytes_le =
-      foreign "Hacl_Bignum_Convert_bn_to_bytes_le"
-        (uint32_t @-> ((ptr uint64_t) @-> (ocaml_bytes @-> (returning void))))
+    let hacl_RSAPSS_new_rsapss_load_pkey =
+      foreign "Hacl_RSAPSS_new_rsapss_load_pkey"
+        (uint32_t @->
+           (uint32_t @->
+              (ocaml_bytes @-> (ocaml_bytes @-> (returning (ptr uint64_t))))))
+    let hacl_RSAPSS_new_rsapss_load_skey =
+      foreign "Hacl_RSAPSS_new_rsapss_load_skey"
+        (uint32_t @->
+           (uint32_t @->
+              (uint32_t @->
+                 (ocaml_bytes @->
+                    (ocaml_bytes @->
+                       (ocaml_bytes @-> (returning (ptr uint64_t))))))))
   end
