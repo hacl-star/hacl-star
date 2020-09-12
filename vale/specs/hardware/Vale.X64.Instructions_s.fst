@@ -44,7 +44,9 @@ let ins_IMul64 = make_ins (fun dst src -> print_s "imul" [P64 dst; P64 src])
 
 let ins_And64 = make_ins (fun dst src -> print_s "and" [P64 dst; P64 src])
 
-let ins_Xor64 = make_ins (fun dst src -> print_s "xor" [P64 dst; P64 src])
+let ins_Xor64 = make_ins (fun dst src -> print_s "xor"
+  // special idiom for zeroing r: xor64 r, r --> xor32 r, r
+  (if OReg? dst && dst = src then [P32 dst; P32 src] else [P64 dst; P64 src]))
 
 let ins_Shr64 = make_ins (fun dst amt -> print_s "shr" [P64 dst; PShift amt])
 
