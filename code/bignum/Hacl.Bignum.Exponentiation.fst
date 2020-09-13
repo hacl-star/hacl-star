@@ -16,6 +16,7 @@ module ST = FStar.HyperStack.ST
 module S = Hacl.Spec.Bignum.Exponentiation
 module LSeq = Lib.Sequence
 module Loops = Lib.LoopCombinators
+module BD = Hacl.Spec.Bignum.Definitions
 
 friend Hacl.Spec.Bignum.Exponentiation
 
@@ -30,15 +31,14 @@ val mk_check_mod_exp:
   -> check_mod_exp_st nLen
 
 let mk_check_mod_exp nLen #k n a bBits b =
-  let b0 = k.BM.check n in
+  let m0 = k.BM.check n in
   let bLen = blocks bBits 64ul in
   let m1 = BN.bn_is_zero_mask bLen b in
   let m1' = lognot m1 in
   let m2 = if bBits <. 64ul *! bLen then BN.bn_lt_pow2_mask bLen b bBits else ones U64 SEC in
   let m3 = BN.bn_lt_mask nLen a n in
   let m = m1' &. m2 &. m3 in
-  let b1 = if FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 m =^ 0uL) then false else true in
-  b0 && b1
+  m0 &. m
 
 
 [@CInline]
@@ -270,17 +270,21 @@ val mk_bn_mod_exp:
 
 let mk_bn_mod_exp nLen #k bn_mod_exp_loop n a bBits b res =
   let h0 = ST.get () in
-  let is_valid = mk_check_mod_exp nLen #k n a bBits b in
+  let is_valid_m = mk_check_mod_exp nLen #k n a bBits b in
   push_frame ();
   let r2 = create nLen (u64 0) in
   BM.precomp n r2;
   mk_bn_mod_exp_precompr2 nLen #k bn_mod_exp_loop n a bBits b r2 res;
   let h1 = ST.get () in
-  if is_valid then begin
+  mapT nLen res (logand is_valid_m) res;
+  let h2 = ST.get () in
+  BD.bn_mask_lemma (as_seq h1 res) is_valid_m;
+
+  if BB.unsafe_bool_of_u64 is_valid_m then begin
     S.bn_mod_exp_lemma (v nLen) (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b);
-    assert (S.bn_mod_exp_post (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b) (as_seq h1 res)) end;
+    assert (S.bn_mod_exp_post (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b) (as_seq h2 res)) end;
   pop_frame ();
-  is_valid
+  BB.unsafe_bool_of_u64 is_valid_m
 
 
 /// A fully runtime implementation of modular exponentiation.
@@ -299,17 +303,21 @@ val mk_bn_mod_exp_mont_ladder:
 
 let mk_bn_mod_exp_mont_ladder nLen #k bn_mod_exp_mont_ladder_loop n a bBits b res =
   let h0 = ST.get () in
-  let is_valid = mk_check_mod_exp nLen #k n a bBits b in
+  let is_valid_m = mk_check_mod_exp nLen #k n a bBits b in
   push_frame ();
   let r2 = create nLen (u64 0) in
   BM.precomp n r2;
   mk_bn_mod_exp_mont_ladder_precompr2 nLen #k bn_mod_exp_mont_ladder_loop n a bBits b r2 res;
   let h1 = ST.get () in
-  if is_valid then begin
+  mapT nLen res (logand is_valid_m) res;
+  let h2 = ST.get () in
+  BD.bn_mask_lemma (as_seq h1 res) is_valid_m;
+
+  if BB.unsafe_bool_of_u64 is_valid_m then begin
     S.bn_mod_exp_mont_ladder_lemma (v nLen) (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b);
     assert (S.bn_mod_exp_post (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b) (as_seq h1 res)) end;
   pop_frame ();
-  is_valid
+  BB.unsafe_bool_of_u64 is_valid_m
 
 
 /// A fully runtime implementation of modular exponentiation.

@@ -14,17 +14,21 @@ open Hacl.Spec.Bignum
 #reset-options "--z3rlimit 100 --fuel 0 --ifuel 0"
 
 let check_modulus #nLen n =
-  let open Lib.RawIntTypes in
   let one = bn_from_uint nLen (u64 1) in
   bn_from_uint_lemma nLen (u64 1);
-  let m0 = bn_is_odd n in
+  let bit0 = bn_is_odd n in
   bn_is_odd_lemma n;
+  assert (v bit0 == bn_v n % 2);
+  let m0 = u64 0 -. bit0 in
+  assert (v m0 == (if bn_v n % 2 = 1 then v (ones U64 SEC) else v (zeros U64 SEC)));
+
   let m1 = bn_lt_mask one n in
   bn_lt_mask_lemma one n;
+  assert (v m1 == (if 1 < bn_v n then v (ones U64 SEC) else v (zeros U64 SEC)));
   let m = m0 &. m1 in
-  logand_ones m0;
-  logand_zeros m0;
-  if FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 m =^ 0uL) then false else true
+  logand_lemma m0 m1;
+  assert (v m == (if bn_v n % 2 = 1 && 1 < bn_v n then v (ones U64 SEC) else v (zeros U64 SEC)));
+  m
 
 
 val bn_lshift1_mod_n: #len:size_nat -> n:lbignum len -> i:nat -> b:lbignum len -> lbignum len

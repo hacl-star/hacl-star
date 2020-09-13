@@ -8,7 +8,6 @@ open Lib.Sequence
 open Hacl.Spec.Bignum.Definitions
 module M = Hacl.Spec.Montgomery.Lemmas
 
-
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 ///
@@ -16,7 +15,7 @@ module M = Hacl.Spec.Montgomery.Lemmas
 ///
 
 val check_modulus: #nLen:size_pos{128 * nLen <= max_size_t} -> n:lbignum nLen ->
-  res:bool{res == (bn_v n % 2 = 1 && 1 < bn_v n)}
+  res:uint64{v res == (if (bn_v n % 2 = 1 && 1 < bn_v n) then v (ones U64 SEC) else v (zeros U64 SEC))}
 
 ///
 ///  Precomputed constants for Montgomery arithmetic

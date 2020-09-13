@@ -160,7 +160,7 @@ inline_for_extraction noextract
 val bn_get_num_bits:
     len:size_t{0 < v len /\ 64 * v len <= max_size_t}
   -> b:lbignum len ->
-  Stack size_t
+  Stack uint64
   (requires fun h -> live h b)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
     v r == S.bn_get_num_bits (as_seq h0 b))
@@ -169,4 +169,4 @@ let bn_get_num_bits len b =
   //TODO: call `limb_leading_zero_index` for each limb
   let ind = bn_leading_zero_index len b in
   let bits = limb_leading_zero_index b.(Lib.RawIntTypes.(size_from_UInt32 (u32_to_UInt32 (to_u32 ind)))) in
-  Lib.RawIntTypes.(size_from_UInt32 (u32_to_UInt32 (to_u32 (u64 64 *! ind +! bits))))
+  u64 64 *! ind +! bits

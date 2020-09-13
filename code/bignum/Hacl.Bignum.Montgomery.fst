@@ -30,12 +30,12 @@ let check_modulus #nLen #_ n =
   push_frame ();
   let one = create nLen (u64 0) in
   BN.bn_from_uint nLen (u64 1) one;
-  let m0 = BN.bn_is_odd nLen n in
+  let bit0 = BN.bn_is_odd nLen n in
+  let m0 = u64 0 -. bit0 in
   let m1 = BN.bn_lt_mask nLen one n in
   let m = m0 &. m1 in
-  let res = if FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 m =^ 0uL) then false else true in
   pop_frame ();
-  res
+  m
 
 
 inline_for_extraction noextract
@@ -77,20 +77,26 @@ let precomp_r2_mod_n #nLen #_ n res =
   let h0 = ST.get () in
   let mask = BN.bn_is_zero_mask nLen n in
   SB.bn_is_zero_mask_lemma (as_seq h0 n);
-  let bits =
-    if FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 mask =^ 0uL) then begin
+  let bits = BN.bn_get_num_bits nLen n in
+  let bits0 = (lognot mask) &. bits in
+  lognot_lemma mask;
+  logand_lemma (lognot mask) bits;
+  let b = Lib.RawIntTypes.(size_from_UInt32 (u32_to_UInt32 (to_u32 bits0))) in
+  assert (
+    if v mask = 0 then begin
       SB.bn_get_num_bits_lemma (as_seq h0 n);
-      BN.bn_get_num_bits nLen n end
-    else 0ul in
-  precomp_r2_mod_n_ bits n res
+      v bits0 / 64 < v nLen end
+    else
+      v bits0 / 64 < v nLen);
+  precomp_r2_mod_n_ b n res
 
 
 let new_precomp_r2_mod_n r nLen n =
   if nLen = 0ul || not (nLen <=. 0xfffffffful `FStar.UInt32.div` 128ul)
   then B.null
   else
-    let is_valid = check_modulus #nLen #(BN.mk_runtime_bn nLen) n in
-    if not is_valid then
+    let is_valid_m = check_modulus #nLen #(BN.mk_runtime_bn nLen) n in
+    if not (Hacl.Bignum.Base.unsafe_bool_of_u64 is_valid_m) then
       B.null
     else
       let h0 = ST.get () in

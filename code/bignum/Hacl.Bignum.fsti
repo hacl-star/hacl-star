@@ -247,7 +247,7 @@ inline_for_extraction noextract
 val bn_get_num_bits:
     len:size_t{0 < v len /\ 64 * v len <= max_size_t}
   -> b:lbignum len ->
-  Stack size_t
+  Stack uint64
   (requires fun h -> live h b)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
     v r == S.bn_get_num_bits (as_seq h0 b))

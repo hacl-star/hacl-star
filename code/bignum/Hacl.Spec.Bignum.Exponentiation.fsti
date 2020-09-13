@@ -41,7 +41,9 @@ val check_mod_exp:
   -> a:lbignum nLen
   -> bBits:size_pos
   -> b:lbignum (blocks bBits 64) ->
-  res:bool{res <==> bn_mod_exp_pre n a bBits b}
+  res:uint64{
+    let b = bn_v n % 2 = 1 && 1 < bn_v n && 0 < bn_v b && bn_v b < pow2 bBits && bn_v a < bn_v n in
+    v res == (if b then v (ones U64 SEC) else v (zeros U64 SEC))}
 
 
 // This function is *NOT* constant-time on the exponent b

@@ -17,6 +17,8 @@ module B = LowStar.Buffer
 module S = Hacl.Spec.Bignum.ModReduction
 module BN = Hacl.Bignum
 module BM = Hacl.Bignum.Montgomery
+module BB = Hacl.Bignum.Base
+module BD = Hacl.Spec.Bignum.Definitions
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -24,7 +26,7 @@ inline_for_extraction noextract
 let check_bn_mod_st (nLen:BN.meta_len) =
     n:lbignum nLen
   -> a:lbignum (nLen +! nLen) ->
-  Stack bool
+  Stack uint64
   (requires fun h -> live h n /\ live h a)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
     r == S.check_bn_mod (as_seq h0 n) (as_seq h0 a))
@@ -37,13 +39,13 @@ val mk_check_bn_mod_st: nLen:BN.meta_len
 
 let mk_check_bn_mod_st nLen #_ n a =
   push_frame ();
-  let b0 = BM.check n in
+  let m0 = BM.check n in
   let n2 = create (nLen +! nLen) (u64 0) in
   BN.mul n n n2;
-  let m0 = BN.bn_lt_mask (nLen +! nLen) a n2 in
-  let b1 = if FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 m0 =^ 0uL) then false else true in
+  let m1 = BN.bn_lt_mask (nLen +! nLen) a n2 in
+  let r = m0 &. m1 in
   pop_frame ();
-  b0 && b1
+  r
 
 
 inline_for_extraction noextract
@@ -92,7 +94,7 @@ let bn_mod_slow_st (nLen:BN.meta_len) =
     live h n /\ live h a /\ live h res /\
     disjoint res n /\ disjoint res a)
   (ensures  fun h0 r h1 -> modifies (loc res) h0 h1 /\
-    r == S.check_bn_mod (as_seq h0 n) (as_seq h0 a) /\
+    r == BB.unsafe_bool_of_u64 (S.check_bn_mod (as_seq h0 n) (as_seq h0 a)) /\
     r ==> bn_v h1 res == bn_v h0 a % bn_v h0 n)
 
 
@@ -103,17 +105,21 @@ val mk_bn_mod_slow: nLen:BN.meta_len
 
 let mk_bn_mod_slow nLen #k n a res =
   let h0 = ST.get () in
-  let is_valid = mk_check_bn_mod_st nLen #k n a in
+  let is_valid_m = mk_check_bn_mod_st nLen #k n a in
   push_frame ();
   let r2 = create nLen (u64 0) in
   BM.precomp n r2;
   mk_bn_mod_slow_precompr2 nLen #k n a r2 res;
   let h1 = ST.get () in
-  if is_valid then begin
+  mapT nLen res (logand is_valid_m) res;
+  let h2 = ST.get () in
+  BD.bn_mask_lemma (as_seq h1 res) is_valid_m;
+
+  if BB.unsafe_bool_of_u64 is_valid_m then begin
     S.bn_mod_slow_lemma (as_seq h0 n) (as_seq h0 a);
-    assert (bn_v h1 res == bn_v h0 a % bn_v h0 n) end;
+    assert (bn_v h2 res == bn_v h0 a % bn_v h0 n) end;
   pop_frame ();
-  is_valid
+  BB.unsafe_bool_of_u64 is_valid_m
 
 
 val bn_mod_slow: nLen:BN.meta_len -> bn_mod_slow_st nLen

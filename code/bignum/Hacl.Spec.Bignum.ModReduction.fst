@@ -22,16 +22,18 @@ val check_bn_mod:
     #nLen:size_pos{128 * nLen <= max_size_t}
   -> n:lbignum nLen
   -> a:lbignum (nLen + nLen) ->
-  res:bool{res == (1 < bn_v n && bn_v n % 2 = 1 && bn_v a < bn_v n * bn_v n)}
+  res:uint64{
+    let b = 1 < bn_v n && bn_v n % 2 = 1 && bn_v a < bn_v n * bn_v n in
+    v res == (if b then v (ones U64 SEC) else v (zeros U64 SEC))}
 
 let check_bn_mod #nLen n a =
-  let b0 = BM.check_modulus n in
+  let m0 = BM.check_modulus n in
   let n2 = BN.bn_mul n n in
   BN.bn_mul_lemma n n;
-  let m0 = BN.bn_lt_mask a n2 in
+  let m1 = BN.bn_lt_mask a n2 in
   BN.bn_lt_mask_lemma a n2;
-  let b1 = if FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 m0 =^ 0uL) then false else true in
-  b0 && b1
+  logand_lemma m0 m1;
+  m0 &. m1
 
 
 // TODO: we can pass a constant mu as well

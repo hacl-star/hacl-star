@@ -18,7 +18,7 @@ module M = Hacl.Spec.Montgomery.Lemmas
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 let check_mod_exp #nLen n a bBits b =
-  let b0 = check_modulus n in
+  let m0 = check_modulus n in
   let m1 = bn_is_zero_mask b in
   bn_is_zero_mask_lemma b;
   assert (if v m1 = 0 then bn_v b > 0 else bn_v b = 0);
@@ -46,9 +46,9 @@ let check_mod_exp #nLen n a bBits b =
   logand_zeros (m1' &. m2);
   logand_ones m1';
   logand_zeros m1';
-  let b1 = if FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 m =^ 0uL) then false else true in
-  assert (b1 == (0 < bn_v b && bn_v b < pow2 bBits && bn_v a < bn_v n));
-  b0 && b1
+  let r = m0 &. m in
+  logand_lemma m0 m;
+  r
 
 
 val bn_mod_exp_f:

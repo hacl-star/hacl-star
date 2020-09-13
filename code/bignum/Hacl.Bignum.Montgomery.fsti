@@ -23,7 +23,7 @@ include Hacl.Bignum.ModInv64
 inline_for_extraction noextract
 let check_modulus_st (nLen:BN.meta_len) =
   n:lbignum nLen ->
-  Stack bool
+  Stack uint64
   (requires fun h -> live h n)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
     r == S.check_modulus (as_seq h0 n))
