@@ -713,34 +713,28 @@ uint64_t
   uint64_t mask10 = mask;
   uint64_t res = mask10;
   uint64_t mask0 = res;
-  uint32_t bits;
-  if (mask0 == (uint64_t)0U)
+  uint64_t priv0 = (uint64_t)0U;
+  for (uint32_t i = (uint32_t)0U; i < nLen1; i++)
   {
-    uint64_t priv0 = (uint64_t)0U;
-    for (uint32_t i = (uint32_t)0U; i < nLen1; i++)
-    {
-      uint64_t mask1 = FStar_UInt64_eq_mask(n[i], (uint64_t)0U);
-      priv0 = (mask1 & priv0) | (~mask1 & (uint64_t)i);
-    }
-    uint64_t ind = priv0;
-    uint64_t uu____1 = n[(uint32_t)ind];
-    uint64_t priv = (uint64_t)0U;
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
-    {
-      uint64_t bit_i = uu____1 >> i & (uint64_t)1U;
-      uint64_t mask1 = FStar_UInt64_eq_mask(bit_i, (uint64_t)1U);
-      priv = (mask1 & (uint64_t)i) | (~mask1 & priv);
-    }
-    uint64_t bits0 = priv;
-    bits = (uint32_t)((uint64_t)64U * ind + bits0);
+    uint64_t mask1 = FStar_UInt64_eq_mask(n[i], (uint64_t)0U);
+    priv0 = (mask1 & priv0) | (~mask1 & (uint64_t)i);
   }
-  else
+  uint64_t ind = priv0;
+  uint64_t uu____1 = n[(uint32_t)ind];
+  uint64_t priv = (uint64_t)0U;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
   {
-    bits = (uint32_t)0U;
+    uint64_t bit_i = uu____1 >> i & (uint64_t)1U;
+    uint64_t mask1 = FStar_UInt64_eq_mask(bit_i, (uint64_t)1U);
+    priv = (mask1 & (uint64_t)i) | (~mask1 & priv);
   }
+  uint64_t bits = priv;
+  uint64_t bits0 = (uint64_t)64U * ind + bits;
+  uint64_t bits00 = ~mask0 & bits0;
+  uint32_t b = (uint32_t)bits00;
   memset(r2, 0U, nLen1 * sizeof (uint64_t));
-  Hacl_Bignum_bn_set_ith_bit(nLen1, r2, bits);
-  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)128U * nLen1 - bits; i0++)
+  Hacl_Bignum_bn_set_ith_bit(nLen1, r2, b);
+  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)128U * nLen1 - b; i0++)
   {
     uint64_t c0 = (uint64_t)0U;
     uint32_t k0 = nLen1 / (uint32_t)4U * (uint32_t)4U;
@@ -866,34 +860,28 @@ uint64_t
   uint64_t mask10 = mask;
   uint64_t res = mask10;
   uint64_t mask0 = res;
-  uint32_t bits;
-  if (mask0 == (uint64_t)0U)
+  uint64_t priv0 = (uint64_t)0U;
+  for (uint32_t i = (uint32_t)0U; i < nLen2; i++)
   {
-    uint64_t priv0 = (uint64_t)0U;
-    for (uint32_t i = (uint32_t)0U; i < nLen2; i++)
-    {
-      uint64_t mask1 = FStar_UInt64_eq_mask(n[i], (uint64_t)0U);
-      priv0 = (mask1 & priv0) | (~mask1 & (uint64_t)i);
-    }
-    uint64_t ind = priv0;
-    uint64_t uu____1 = n[(uint32_t)ind];
-    uint64_t priv = (uint64_t)0U;
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
-    {
-      uint64_t bit_i = uu____1 >> i & (uint64_t)1U;
-      uint64_t mask1 = FStar_UInt64_eq_mask(bit_i, (uint64_t)1U);
-      priv = (mask1 & (uint64_t)i) | (~mask1 & priv);
-    }
-    uint64_t bits0 = priv;
-    bits = (uint32_t)((uint64_t)64U * ind + bits0);
+    uint64_t mask1 = FStar_UInt64_eq_mask(n[i], (uint64_t)0U);
+    priv0 = (mask1 & priv0) | (~mask1 & (uint64_t)i);
   }
-  else
+  uint64_t ind = priv0;
+  uint64_t uu____1 = n[(uint32_t)ind];
+  uint64_t priv = (uint64_t)0U;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
   {
-    bits = (uint32_t)0U;
+    uint64_t bit_i = uu____1 >> i & (uint64_t)1U;
+    uint64_t mask1 = FStar_UInt64_eq_mask(bit_i, (uint64_t)1U);
+    priv = (mask1 & (uint64_t)i) | (~mask1 & priv);
   }
+  uint64_t bits = priv;
+  uint64_t bits0 = (uint64_t)64U * ind + bits;
+  uint64_t bits00 = ~mask0 & bits0;
+  uint32_t b = (uint32_t)bits00;
   memset(r2, 0U, nLen2 * sizeof (uint64_t));
-  Hacl_Bignum_bn_set_ith_bit(nLen2, r2, bits);
-  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)128U * nLen2 - bits; i0++)
+  Hacl_Bignum_bn_set_ith_bit(nLen2, r2, b);
+  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)128U * nLen2 - b; i0++)
   {
     uint64_t c0 = (uint64_t)0U;
     uint32_t k0 = nLen2 / (uint32_t)4U * (uint32_t)4U;
