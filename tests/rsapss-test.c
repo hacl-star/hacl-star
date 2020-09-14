@@ -20,10 +20,10 @@ bool print_result(uint32_t len, uint8_t* comp, uint8_t* exp) {
 
 bool print_test(
   uint32_t modBits,
-  uint32_t eBits,
-  uint32_t dBits,
   uint8_t *nb,
+  uint32_t eBits,
   uint8_t *eb,
+  uint32_t dBits,
   uint8_t *db,
   uint32_t msgLen,
   uint8_t *msg,
@@ -44,7 +44,7 @@ bool print_test(
   bool ok = print_result(nbLen, sgnt, sgnt_expected);
 
   printf("RSAPSS verify Result:\n");
-  bool ver = Hacl_RSAPSS_rsapss_verify(Spec_Hash_Definitions_SHA2_256, modBits, eBits, pkey, saltLen, sgnt, msgLen, msg);
+  bool ver = Hacl_RSAPSS_rsapss_verify(Spec_Hash_Definitions_SHA2_256, modBits, eBits, pkey, saltLen, nbLen, sgnt, msgLen, msg);
   if (ver) printf("Success!\n");
   ok = ok && ver;
   return ok;
@@ -54,7 +54,7 @@ bool print_test(
 int main() {
   bool ok = true;
   for (int i = 0; i < sizeof(vectors)/sizeof(rsapss_test_vector); ++i) {
-    ok &= print_test(vectors[i].modBits,vectors[i].eBits,vectors[i].dBits,vectors[i].n,vectors[i].e,vectors[i].d,
+    ok &= print_test(vectors[i].modBits,vectors[i].n,vectors[i].eBits,vectors[i].e,vectors[i].dBits,vectors[i].d,
 		     vectors[i].msgLen,vectors[i].msg,vectors[i].saltLen,vectors[i].salt,vectors[i].sgnt_expected);
   }
 

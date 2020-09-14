@@ -211,110 +211,6 @@ sqr_runtime(uint32_t len, uint64_t *n, uint64_t nInv_u64, uint64_t *aM, uint64_t
   mont_reduction_runtime(len, n, nInv_u64, c, resM);
 }
 
-static inline uint32_t hash_len(Spec_Hash_Definitions_hash_alg a)
-{
-  switch (a)
-  {
-    case Spec_Hash_Definitions_MD5:
-      {
-        return (uint32_t)16U;
-      }
-    case Spec_Hash_Definitions_SHA1:
-      {
-        return (uint32_t)20U;
-      }
-    case Spec_Hash_Definitions_SHA2_224:
-      {
-        return (uint32_t)28U;
-      }
-    case Spec_Hash_Definitions_SHA2_256:
-      {
-        return (uint32_t)32U;
-      }
-    case Spec_Hash_Definitions_SHA2_384:
-      {
-        return (uint32_t)48U;
-      }
-    case Spec_Hash_Definitions_SHA2_512:
-      {
-        return (uint32_t)64U;
-      }
-    case Spec_Hash_Definitions_Blake2S:
-      {
-        return (uint32_t)32U;
-      }
-    case Spec_Hash_Definitions_Blake2B:
-      {
-        return (uint32_t)64U;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-}
-
-static inline void
-hash(Spec_Hash_Definitions_hash_alg a, uint8_t *mHash, uint32_t msgLen, uint8_t *msg)
-{
-  switch (a)
-  {
-    case Spec_Hash_Definitions_SHA2_256:
-      {
-        Hacl_Hash_SHA2_hash_256(msg, msgLen, mHash);
-        break;
-      }
-    case Spec_Hash_Definitions_SHA2_384:
-      {
-        Hacl_Hash_SHA2_hash_384(msg, msgLen, mHash);
-        break;
-      }
-    case Spec_Hash_Definitions_SHA2_512:
-      {
-        Hacl_Hash_SHA2_hash_512(msg, msgLen, mHash);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-}
-
-static inline void
-mgf_hash(
-  Spec_Hash_Definitions_hash_alg a,
-  uint32_t len,
-  uint8_t *mgfseed,
-  uint32_t maskLen,
-  uint8_t *res
-)
-{
-  KRML_CHECK_SIZE(sizeof (uint8_t), len + (uint32_t)4U);
-  uint8_t mgfseed_counter[len + (uint32_t)4U];
-  memset(mgfseed_counter, 0U, (len + (uint32_t)4U) * sizeof (uint8_t));
-  memcpy(mgfseed_counter, mgfseed, len * sizeof (uint8_t));
-  uint32_t hLen = hash_len(a);
-  uint32_t n = (maskLen - (uint32_t)1U) / hLen + (uint32_t)1U;
-  uint32_t accLen = n * hLen;
-  KRML_CHECK_SIZE(sizeof (uint8_t), accLen);
-  uint8_t acc[accLen];
-  memset(acc, 0U, accLen * sizeof (uint8_t));
-  for (uint32_t i = (uint32_t)0U; i < n; i++)
-  {
-    uint8_t *uu____0 = acc + i * hLen;
-    uint8_t *uu____1 = mgfseed_counter + len;
-    uu____1[0U] = (uint8_t)(i >> (uint32_t)24U);
-    uu____1[1U] = (uint8_t)(i >> (uint32_t)16U);
-    uu____1[2U] = (uint8_t)(i >> (uint32_t)8U);
-    uu____1[3U] = (uint8_t)i;
-    hash(a, uu____0, len + (uint32_t)4U, mgfseed_counter);
-  }
-  memcpy(res, acc, maskLen * sizeof (uint8_t));
-}
-
 static void
 bn_mod_exp_loop_runtime(
   uint32_t nLen,
@@ -433,6 +329,110 @@ bn_mod_exp_mont_ladder_precompr2(
     rM1[i] = rM1[i] ^ dummy;
   }
   from_runtime(nLen, n, nInv_u64, rM0, res);
+}
+
+static inline uint32_t hash_len(Spec_Hash_Definitions_hash_alg a)
+{
+  switch (a)
+  {
+    case Spec_Hash_Definitions_MD5:
+      {
+        return (uint32_t)16U;
+      }
+    case Spec_Hash_Definitions_SHA1:
+      {
+        return (uint32_t)20U;
+      }
+    case Spec_Hash_Definitions_SHA2_224:
+      {
+        return (uint32_t)28U;
+      }
+    case Spec_Hash_Definitions_SHA2_256:
+      {
+        return (uint32_t)32U;
+      }
+    case Spec_Hash_Definitions_SHA2_384:
+      {
+        return (uint32_t)48U;
+      }
+    case Spec_Hash_Definitions_SHA2_512:
+      {
+        return (uint32_t)64U;
+      }
+    case Spec_Hash_Definitions_Blake2S:
+      {
+        return (uint32_t)32U;
+      }
+    case Spec_Hash_Definitions_Blake2B:
+      {
+        return (uint32_t)64U;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+}
+
+static inline void
+hash(Spec_Hash_Definitions_hash_alg a, uint8_t *mHash, uint32_t msgLen, uint8_t *msg)
+{
+  switch (a)
+  {
+    case Spec_Hash_Definitions_SHA2_256:
+      {
+        Hacl_Hash_SHA2_hash_256(msg, msgLen, mHash);
+        break;
+      }
+    case Spec_Hash_Definitions_SHA2_384:
+      {
+        Hacl_Hash_SHA2_hash_384(msg, msgLen, mHash);
+        break;
+      }
+    case Spec_Hash_Definitions_SHA2_512:
+      {
+        Hacl_Hash_SHA2_hash_512(msg, msgLen, mHash);
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+}
+
+static inline void
+mgf_hash(
+  Spec_Hash_Definitions_hash_alg a,
+  uint32_t len,
+  uint8_t *mgfseed,
+  uint32_t maskLen,
+  uint8_t *res
+)
+{
+  KRML_CHECK_SIZE(sizeof (uint8_t), len + (uint32_t)4U);
+  uint8_t mgfseed_counter[len + (uint32_t)4U];
+  memset(mgfseed_counter, 0U, (len + (uint32_t)4U) * sizeof (uint8_t));
+  memcpy(mgfseed_counter, mgfseed, len * sizeof (uint8_t));
+  uint32_t hLen = hash_len(a);
+  uint32_t n = (maskLen - (uint32_t)1U) / hLen + (uint32_t)1U;
+  uint32_t accLen = n * hLen;
+  KRML_CHECK_SIZE(sizeof (uint8_t), accLen);
+  uint8_t acc[accLen];
+  memset(acc, 0U, accLen * sizeof (uint8_t));
+  for (uint32_t i = (uint32_t)0U; i < n; i++)
+  {
+    uint8_t *uu____0 = acc + i * hLen;
+    uint8_t *uu____1 = mgfseed_counter + len;
+    uu____1[0U] = (uint8_t)(i >> (uint32_t)24U);
+    uu____1[1U] = (uint8_t)(i >> (uint32_t)16U);
+    uu____1[2U] = (uint8_t)(i >> (uint32_t)8U);
+    uu____1[3U] = (uint8_t)i;
+    hash(a, uu____0, len + (uint32_t)4U, mgfseed_counter);
+  }
+  memcpy(res, acc, maskLen * sizeof (uint8_t));
 }
 
 static inline void xor_bytes(uint32_t len, uint8_t *b1, uint8_t *b2)
@@ -573,7 +573,7 @@ pss_verify(
   return z0 == (uint8_t)255U;
 }
 
-void
+bool
 Hacl_RSAPSS_rsapss_sign(
   Spec_Hash_Definitions_hash_alg a,
   uint32_t modBits,
@@ -587,27 +587,42 @@ Hacl_RSAPSS_rsapss_sign(
   uint8_t *sgnt
 )
 {
-  uint32_t nLen = (modBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
-  uint32_t eLen = (eBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
-  uint64_t *n = skey;
-  uint64_t *r2 = skey + nLen;
-  uint64_t *d = skey + nLen + nLen + eLen;
-  uint32_t k = (modBits - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
-  uint32_t emBits = modBits - (uint32_t)1U;
-  uint32_t emLen = (emBits - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
-  KRML_CHECK_SIZE(sizeof (uint8_t), emLen);
-  uint8_t em[emLen];
-  memset(em, 0U, emLen * sizeof (uint8_t));
-  KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
-  uint64_t m[nLen];
-  memset(m, 0U, nLen * sizeof (uint64_t));
-  KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
-  uint64_t s[nLen];
-  memset(s, 0U, nLen * sizeof (uint64_t));
-  pss_encode(a, sLen, salt, msgLen, msg, emBits, em);
-  bn_from_bytes_be(emLen, em, m);
-  bn_mod_exp_mont_ladder_precompr2(nLen, n, m, dBits, d, r2, s);
-  bn_to_bytes_be(k, s, sgnt);
+  uint32_t hLen = hash_len(a);
+  bool
+  b =
+    sLen
+    <= (uint32_t)0xffffffffU - hLen - (uint32_t)8U
+    &&
+      sLen
+      + hLen
+      + (uint32_t)2U
+      <= (modBits - (uint32_t)1U - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
+  if (b)
+  {
+    uint32_t nLen = (modBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
+    uint32_t eLen = (eBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
+    uint64_t *n = skey;
+    uint64_t *r2 = skey + nLen;
+    uint64_t *d = skey + nLen + nLen + eLen;
+    uint32_t k = (modBits - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
+    uint32_t emBits = modBits - (uint32_t)1U;
+    uint32_t emLen = (emBits - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
+    KRML_CHECK_SIZE(sizeof (uint8_t), emLen);
+    uint8_t em[emLen];
+    memset(em, 0U, emLen * sizeof (uint8_t));
+    KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
+    uint64_t m[nLen];
+    memset(m, 0U, nLen * sizeof (uint64_t));
+    KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
+    uint64_t s[nLen];
+    memset(s, 0U, nLen * sizeof (uint64_t));
+    pss_encode(a, sLen, salt, msgLen, msg, emBits, em);
+    bn_from_bytes_be(emLen, em, m);
+    bn_mod_exp_mont_ladder_precompr2(nLen, n, m, dBits, d, r2, s);
+    bn_to_bytes_be(k, s, sgnt);
+    return true;
+  }
+  return false;
 }
 
 bool
@@ -617,51 +632,62 @@ Hacl_RSAPSS_rsapss_verify(
   uint32_t eBits,
   uint64_t *pkey,
   uint32_t sLen,
+  uint32_t k,
   uint8_t *sgnt,
   uint32_t msgLen,
   uint8_t *msg
 )
 {
-  uint32_t nLen = (modBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
-  uint64_t *n = pkey;
-  uint64_t *r2 = pkey + nLen;
-  uint64_t *e = pkey + nLen + nLen;
-  uint32_t k = (modBits - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
-  uint32_t emBits = modBits - (uint32_t)1U;
-  uint32_t emLen = (emBits - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
-  KRML_CHECK_SIZE(sizeof (uint8_t), emLen);
-  uint8_t em[emLen];
-  memset(em, 0U, emLen * sizeof (uint8_t));
-  KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
-  uint64_t m[nLen];
-  memset(m, 0U, nLen * sizeof (uint64_t));
-  KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
-  uint64_t s[nLen];
-  memset(s, 0U, nLen * sizeof (uint64_t));
-  bn_from_bytes_be(k, sgnt, s);
-  uint64_t mask = Hacl_Bignum_bn_lt_mask(nLen, s, n);
-  if (mask == (uint64_t)0xFFFFFFFFFFFFFFFFU)
+  uint32_t hLen = hash_len(a);
+  bool
+  b =
+    sLen
+    <= (uint32_t)0xffffffffU - hLen - (uint32_t)8U
+    && k == (modBits - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
+  if (b)
   {
-    bn_mod_exp_precompr2(nLen, n, s, eBits, e, r2, m);
-    bool ite;
-    if (!((modBits - (uint32_t)1U) % (uint32_t)8U == (uint32_t)0U))
+    uint32_t nLen = (modBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
+    uint64_t *n = pkey;
+    uint64_t *r2 = pkey + nLen;
+    uint64_t *e = pkey + nLen + nLen;
+    uint32_t k1 = (modBits - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
+    uint32_t emBits = modBits - (uint32_t)1U;
+    uint32_t emLen = (emBits - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
+    KRML_CHECK_SIZE(sizeof (uint8_t), emLen);
+    uint8_t em[emLen];
+    memset(em, 0U, emLen * sizeof (uint8_t));
+    KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
+    uint64_t m[nLen];
+    memset(m, 0U, nLen * sizeof (uint64_t));
+    KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
+    uint64_t s[nLen];
+    memset(s, 0U, nLen * sizeof (uint64_t));
+    bn_from_bytes_be(k1, sgnt, s);
+    uint64_t mask = Hacl_Bignum_bn_lt_mask(nLen, s, n);
+    if (mask == (uint64_t)0xFFFFFFFFFFFFFFFFU)
     {
-      ite = true;
-    }
-    else
-    {
-      uint64_t
-      get_bit =
-        Hacl_Bignum_bn_get_ith_bit((modBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U,
-          m,
-          modBits - (uint32_t)1U);
-      ite = get_bit == (uint64_t)0U;
-    }
-    if (ite)
-    {
-      uint64_t *m1 = m;
-      bn_to_bytes_be(emLen, m1, em);
-      return pss_verify(a, sLen, msgLen, msg, emBits, em);
+      bn_mod_exp_precompr2(nLen, n, s, eBits, e, r2, m);
+      bool ite;
+      if (!((modBits - (uint32_t)1U) % (uint32_t)8U == (uint32_t)0U))
+      {
+        ite = true;
+      }
+      else
+      {
+        uint64_t
+        get_bit =
+          Hacl_Bignum_bn_get_ith_bit((modBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U,
+            m,
+            modBits - (uint32_t)1U);
+        ite = get_bit == (uint64_t)0U;
+      }
+      if (ite)
+      {
+        uint64_t *m1 = m;
+        bn_to_bytes_be(emLen, m1, em);
+        return pss_verify(a, sLen, msgLen, msg, emBits, em);
+      }
+      return false;
     }
     return false;
   }

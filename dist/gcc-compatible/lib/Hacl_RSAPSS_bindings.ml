@@ -15,7 +15,7 @@ module Bindings(F:Cstubs.FOREIGN) =
                           (ocaml_bytes @->
                              (uint32_t @->
                                 (ocaml_bytes @->
-                                   (ocaml_bytes @-> (returning void)))))))))))
+                                   (ocaml_bytes @-> (returning bool)))))))))))
     let hacl_RSAPSS_rsapss_verify =
       foreign "Hacl_RSAPSS_rsapss_verify"
         (spec_Hash_Definitions_hash_alg @->
@@ -23,8 +23,9 @@ module Bindings(F:Cstubs.FOREIGN) =
               (uint32_t @->
                  ((ptr uint64_t) @->
                     (uint32_t @->
-                       (ocaml_bytes @->
-                          (uint32_t @-> (ocaml_bytes @-> (returning bool)))))))))
+                       (uint32_t @->
+                          (ocaml_bytes @->
+                             (uint32_t @-> (ocaml_bytes @-> (returning bool))))))))))
     let hacl_RSAPSS_new_rsapss_load_pkey =
       foreign "Hacl_RSAPSS_new_rsapss_load_pkey"
         (uint32_t @->
