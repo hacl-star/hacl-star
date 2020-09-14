@@ -39,7 +39,7 @@ val fromDomain: #c: curve -> f: felem c -> result: felem c -> Stack unit
     as_nat c h1 result = fromDomain_ #c (as_nat c h0 f))
 
 
-noextract 
+(* noextract 
 let point_x_as_nat (c: curve) (h: mem) (e: point c) : GTot nat = 
   let open Lib.Sequence in 
   let s = as_seq h e in 
@@ -71,7 +71,7 @@ let point_y_as_nat (c: curve) (h: mem) (e: point c) : GTot nat =
     let s2 = s.[6] in 
     let s3 = s.[7] in 
     as_nat_coordinate #P256 (s0, s1, s2, s3)
-  |P384 -> 
+  |P384 ->
     let s0 = s.[6] in
     let s1 = s.[7] in 
     let s2 = s.[8] in 
@@ -79,27 +79,21 @@ let point_y_as_nat (c: curve) (h: mem) (e: point c) : GTot nat =
     let s4 = s.[10] in 
     let s5 = s.[11] in 
     as_nat_coordinate #P384 (s0, s1, s2, s3, s4, s5)
+ *)
+(*Test *)
+
+noextract 
+let point_x_as_nat (c: curve) (h: mem) (e: point c) : GTot nat = 
+  as_nat c h (gsub e (size 0) (getCoordinateLenU64 c))
 
 
 noextract 
+let point_y_as_nat (c: curve) (h: mem) (e: point c) : GTot nat = 
+  as_nat c h (gsub e (getCoordinateLenU64 c) (getCoordinateLenU64 c))
+
+noextract 
 let point_z_as_nat (c: curve) (h: mem) (e: point c) : GTot nat = 
-  let open Lib.Sequence in 
-  let s = as_seq h e in 
-  match c with 
-  |P256 -> 
-    let s0 = s.[8] in
-    let s1 = s.[9] in 
-    let s2 = s.[10] in 
-    let s3 = s.[11] in 
-    as_nat_coordinate #P256 (s0, s1, s2, s3)
-  |P384 -> 
-    let s0 = s.[12] in
-    let s1 = s.[13] in 
-    let s2 = s.[14] in 
-    let s3 = s.[15] in 
-    let s4 = s.[16] in 
-    let s5 = s.[17] in 
-    as_nat_coordinate #P384 (s0, s1, s2, s3, s4, s5)
+  as_nat c h (gsub e (size 2 *! getCoordinateLenU64 c) (getCoordinateLenU64 c))
 
 
 val pointToDomain: #c: curve -> p: point c -> result: point c -> Stack unit 

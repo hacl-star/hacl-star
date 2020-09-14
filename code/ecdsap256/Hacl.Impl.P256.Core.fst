@@ -114,114 +114,68 @@ val lemma_pointAtInfInDomain: #c: curve -> x: nat -> y: nat -> z: nat {z < getPr
     isPointAtInfinity ((fromDomain_ #c x), (fromDomain_ #c y), (fromDomain_ #c z)))
 
 let lemma_pointAtInfInDomain #c x y z =
-  assert (if isPointAtInfinity (x, y, z) then z == 0 else z <> 0);
     assert_norm (modp_inv2 #P256 (getPower2 P256) % (getPrime P256) <> 0);
     assert_norm (modp_inv2 #P384 (getPower2 P384) % (getPrime P384) <> 0);
   lemmaFromDomain #c z;
-  assert (fromDomain_ #c z == (z * modp_inv2 #c (getPower2 c) % (getPrime c)));
     assert_norm (0 * modp_inv2 #P256 (getPower2 P256) % (getPrime P256) == 0);
     assert_norm (0 * modp_inv2 #P384 (getPower2 P384) % (getPrime P384) == 0);
   begin
   match c with 
     |P256 -> lemma_multiplication_not_mod_prime_p256 z
     |P384 -> lemma_multiplication_not_mod_prime_p384 z
- end;
-  assert (if z = 0 then z * modp_inv2 #c (getPower2 c) % (getPrime c) == 0
-                   else fromDomain_ #c z <> 0);
-		admit()
+ end
 
 
+(* The point is a point at infinity iff z == 0 *)
 let isPointAtInfinityPrivate #c p =  
-  push_frame();
-  admit();
-    let tmp = create (size 1) (u64 18446744073709551615) in 
-    let start = getCoordinateLenU64 c *! size 2 in 
-    let len = start +! getCoordinateLenU64 c  in 
-    let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = True in
-    for start len inv (fun i -> 
-      let a_i = index p i in 
-      let r_i = eq_mask a_i (u64 0) in 
-      upd tmp (size 0) (logand r_i (index tmp (size 0))));
+  let h0 = ST.get() in 
+  let len = getCoordinateLenU64 c in 
+    
+  let start = len *! size 2 in 
 
-    let r = index tmp (size 0) in 
-    pop_frame();
-    r
+  let zCoordinate = sub p start len in 
+  let r = isZero_uint64_CT #c zCoordinate in 
+
+ lemma_pointAtInfInDomain #c
+    (as_nat c h0 (gsub p (size 0) len))
+    (as_nat c h0 (gsub p len len))
+    (as_nat c h0 (gsub p (2ul *! len) len)); 
+  r
 
 (*
-  match c with 
-  |P256 -> 
-    let h0 = ST.get() in
-    let z0 = index p (size 8) in 
-    let z1 = index p (size 9) in 
-    let z2 = index p (size 10) in 
-    let z3 = index p (size 11) in 
-    let z0_zero = eq_mask z0 (u64 0) in 
-    let z1_zero = eq_mask z1 (u64 0) in 
-    let z2_zero = eq_mask z2 (u64 0) in 
-    let z3_zero = eq_mask z3 (u64 0) in 
-      eq_mask_lemma z0 (u64 0);
-      eq_mask_lemma z1 (u64 0);
-      eq_mask_lemma z2 (u64 0);
-      eq_mask_lemma z3 (u64 0);   
-    let r = logand(logand z0_zero z1_zero) (logand z2_zero z3_zero) in 
-      lemma_pointAtInfInDomain #c (as_nat c h0 (gsub p (size 0) (size 4))) (as_nat c h0 (gsub p (size 4) (size 4))) (as_nat c h0 (gsub p (size 8) (size 4)));
-    r
-  |P384 ->     
-    let h0 = ST.get() in
-    
-    let z0 = index p (size 12) in 
-    let z1 = index p (size 13) in 
-    let z2 = index p (size 14) in 
-    let z3 = index p (size 15) in 
-    let z4 = index p (size 16) in 
-    let z5 = index p (size 17) in 
-    
-    let z0_zero = eq_mask z0 (u64 0) in 
-    let z1_zero = eq_mask z1 (u64 0) in 
-    let z2_zero = eq_mask z2 (u64 0) in 
-    let z3_zero = eq_mask z3 (u64 0) in 
-    let z4_zero = eq_mask z4 (u64 0) in 
-    let z5_zero = eq_mask z5 (u64 0) in 
-    
-      eq_mask_lemma z0 (u64 0);
-      eq_mask_lemma z1 (u64 0);
-      eq_mask_lemma z2 (u64 0);
-      eq_mask_lemma z3 (u64 0);   
-      eq_mask_lemma z4 (u64 0);
-      eq_mask_lemma z5 (u64 0);
-
-  let r01 = logand z0_zero z1_zero in 
-  let r23 = logand z2_zero z3_zero in 
-  let r45 = logand z4_zero z5_zero in 
-
-  let r0123 = logand r01 r23 in 
-  let r = logand r0123 r45 in 
-
-  
-  lemma_pointAtInfInDomain #c 
-    (as_nat c h0 (gsub p (size 0) (getCoordinateLenU64 c))) 
-    (as_nat c h0 (gsub p (getCoordinateLenU64 c) (getCoordinateLenU64 c))) 
-    (as_nat c h0 (gsub p (size 2 *! getCoordinateLenU64 c) (getCoordinateLenU64 c)));
-    r
-*)
-
 val lemma_norm_as_specification: #c: curve 
   -> xD: nat {xD < getPrime c} 
   -> yD: nat {yD < getPrime c} 
   -> zD: nat {zD < getPrime c} -> 
   x3 : nat {x3 == xD * (pow (zD * zD) (getPrime c - 2) % getPrime c) % getPrime c}-> 
   y3 : nat {y3 == yD * (pow (zD * zD * zD) (getPrime c -2) % getPrime c) % getPrime c} -> 
-  z3: nat {if isPointAtInfinity(xD, yD, zD) then z3 == 0 else z3 == 1} -> 
+  z3 : nat {if isPointAtInfinity(xD, yD, zD) then z3 == 0 else z3 == 1} -> 
   Lemma (
     let (xN, yN, zN) = _norm #c (xD, yD, zD) in 
     x3 == xN /\ y3 == yN /\ z3 == zN)
 
 
 let lemma_norm_as_specification #c xD yD zD x3 y3 z3 = 
-  power_distributivity (zD * zD * zD) (getPrime c - 2) (getPrime c);
-  power_distributivity (zD * zD) (getPrime c - 2) (getPrime c);
-  admit()
+  let prime = getPrime c in 
 
+  calc (==)
+  {
+    xD * (pow (zD * zD) (getPrime c - 2) % prime) % prime;
+    (==) {}
+    xD * (modp_inv2_pow #c (zD * zD)) % prime;
+    (==) {_ by (canon())}
+    modp_inv2_pow #c (zD * zD) * xD % prime;
+  };
+
+  calc (==)
+  {
+    yD * (pow (zD * zD * zD) (getPrime c -2) % prime) % prime;
+    (==) {}
+    yD * (modp_inv2_pow #c (zD * zD * zD)) % prime;
+    (==) {_ by (canon())}
+    modp_inv2_pow #c (zD * zD * zD) * yD % prime;
+  }
+*)
 
 [@ CInline]
 val cswap: #c: curve ->  bit:uint64{v bit <= 1} -> p:point c -> q:point c
@@ -305,9 +259,7 @@ val normalisation_update: #c: curve -> z2x: felem c -> z3y: felem c -> p: point 
       x1 == fromDomain_ #c (as_nat c h0 z2x) /\ y1 == fromDomain_ #c (as_nat c h0 z3y)  /\ 
       (
 	if Spec.P256.isPointAtInfinity (fromDomain_ #c x0, fromDomain_ #c y0, fromDomain_ #c z0) 
-	then z1 == 0 else z1 == 1
-      ))
-  )
+	then z1 == 0 else z1 == 1)))
 
 
 let normalisation_update #c z2x z3y p resultPoint = 
@@ -324,12 +276,25 @@ let normalisation_update #c z2x z3y p resultPoint =
   fromDomain z3y resultY;
   uploadOneImpl #c resultZ;
   copy_conditional #c resultZ zeroBuffer bit;
-  admit();
   
   pop_frame()
-  
 
-let norm #c  p resultPoint tempBuffer = 
+
+
+
+val lemma_two_mul_nat: a: nat -> b: nat -> Lemma (a * b >= 0)
+
+let lemma_two_mul_nat a b = ()
+
+
+val lemma_three_mul_nat: a: nat -> b: nat -> c: nat -> Lemma (a * b * c >= 0)
+
+let lemma_three_mul_nat a b c = ()
+
+
+
+
+let norm #c p resultPoint tempBuffer = 
 
   let len = getCoordinateLenU64 c in 
 
@@ -339,43 +304,60 @@ let norm #c  p resultPoint tempBuffer =
   
   let z2f = sub tempBuffer len len in 
   let z3f = sub tempBuffer (size 2 *! len) len in
-  let tempBuffer20 = sub tempBuffer (size 3 *! len) (size 5 *! len) in 
 
     let h0 = ST.get() in 
   montgomery_square_buffer #c zf z2f; 
-    let h1 = ST.get() in 
-  montgomery_multiplication_buffer #c z2f zf z3f; admit();
-    let h2 = ST.get() in
-      (* lemma_mod_mul_distr_l (fromDomain_ #c (as_nat c h0 zf) * fromDomain_ #c (as_nat c h0 zf)) (fromDomain_ #c (as_nat c h0 zf)) (getPrime c);
-      
-      assert (as_nat c h1 z2f = toDomain_ #c (fromDomain_ #c (as_nat c h0 zf) * fromDomain_ #c (as_nat c h0 zf) % getPrime c));
-      assert (as_nat c h2 z3f = toDomain_ #c (fromDomain_ #c (as_nat c h0 zf) * fromDomain_ #c (as_nat c h0 zf) * fromDomain_ #c (as_nat c h0 zf) % prime256)); *)
+  montgomery_multiplication_buffer #c z2f zf z3f; 
 
-  exponent #c z2f z2f (*tempBuffer20 *) ; 
-    let h3 = ST.get() in 
-      (*assert(as_nat h3 z2f = toDomain_ (pow (fromDomain_ (as_nat h2 z2f)) (prime256 - 2) % prime256)); *)
-  exponent #c z3f z3f (* tempBuffer20 *) ; admit();
-    let h4 = ST.get() in (*
-      assert(as_nat c h4 z3f = toDomain_ #c (pow (fromDomain_ #c (as_nat c h3 z3f)) (prime256 - 2) % prime256));
-     *)
+  exponent #c z2f z2f;
+  exponent #c z3f z3f; 
   montgomery_multiplication_buffer #c xf z2f z2f;
   montgomery_multiplication_buffer #c yf z3f z3f;
 
-  normalisation_update z2f z3f p resultPoint; admit() (*; 
-    let h3 = ST.get() in 
-    lemmaEraseToDomainFromDomain (fromDomain_ (as_nat h0 zf)); 
-    power_distributivity (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf)) (prime -2) prime;
-    power_distributivity (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf)) (prime -2) prime;
+  normalisation_update z2f z3f p resultPoint; 
 
-    lemma_norm_as_specification (fromDomain_ (point_x_as_nat h0 p)) (fromDomain_ (point_y_as_nat h0 p)) (fromDomain_ (point_z_as_nat h0 p)) (point_x_as_nat h3 resultPoint) (point_y_as_nat h3 resultPoint) (point_z_as_nat h3 resultPoint);
+  let h1 = ST.get() in 
+  
+  let prime = getPrime c in 
 
-    assert(
-       let zD = fromDomain_(point_z_as_nat h0 p) in 
-       let xD = fromDomain_(point_x_as_nat h0 p) in 
-       let yD = fromDomain_(point_y_as_nat h0 p) in 
-       let (xN, yN, zN) = _norm #P256 (xD, yD, zD) in 
-       point_x_as_nat h3 resultPoint == xN /\ point_y_as_nat h3 resultPoint == yN /\ point_z_as_nat h3 resultPoint == zN)
-*)
+  let xD = fromDomain_ #c (point_x_as_nat c h0 p) in
+  let yD = fromDomain_ #c (point_y_as_nat c h0 p) in 
+  let zD = fromDomain_ #c (point_z_as_nat c h0 p) in 
+
+  let x3 = point_x_as_nat c h1 resultPoint in 
+  let y3 = point_y_as_nat c h1 resultPoint in 
+
+  lemma_two_mul_nat zD zD;
+  lemma_three_mul_nat zD zD zD;
+
+  assert(x3 == (xD * (pow (zD * zD % prime) (prime - 2) % prime) % prime));
+  assert(y3 == (yD * (pow ((zD * zD % prime) * zD % prime) (prime - 2) % prime) % prime));
+
+  calc (==)
+  {
+    xD * (pow (zD * zD % prime) (prime - 2) % prime) % prime;
+    (==) {power_distributivity (zD * zD) (prime - 2) prime}
+    xD * (pow (zD * zD) (prime - 2) % prime) % prime;
+    (==) {}
+    xD * (modp_inv2_pow #c (zD * zD)) % prime;
+    (==) {_ by (canon())}
+    modp_inv2_pow #c (zD * zD) * xD % prime;
+  };  
+
+  calc (==) 
+  {
+    yD * (pow ((zD * zD % prime) * zD % prime) (prime - 2) % prime) % prime;
+    (==) {lemma_mod_mul_distr_l (zD * zD) zD prime}
+    yD * (pow (zD * zD * zD % prime) (prime - 2) % prime) % prime;
+    (==) {power_distributivity (zD * zD * zD) (prime - 2) prime}
+    yD * (pow (zD * zD * zD) (prime - 2) % prime) % prime;
+    (==) {}
+    yD * (modp_inv2_pow #c (zD * zD * zD)) % prime;
+    (==) {_ by (canon())}
+    modp_inv2_pow #c (zD * zD * zD) * yD % prime;
+  }
+
+
 
 
 let normX #c p result tempBuffer = 

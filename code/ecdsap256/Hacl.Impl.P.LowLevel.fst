@@ -475,7 +475,7 @@ let eq1_u64 a =
 let isZero_uint64_CT #c f =
   push_frame();
   let h0 = ST.get() in 
-  let tmp = create (size 1) (u64 (ones_v U64)) in
+  let tmp = create (size 1) (u64 18446744073709551615) in
   
   let len = getCoordinateLenU64 c in 
   let inv h (i: nat { i <= uint_v len}) = 
@@ -529,8 +529,8 @@ val lemma_felem_as_forall: #c: curve -> a: felem c -> b: felem c -> h0: mem ->
       Lib.Sequence.index (as_seq h0 a) i == Lib.Sequence.index (as_seq h0 b) i 
       <==> as_nat c h0 a == as_nat c h0 b) 
 
-let lemma_felem_as_forall #c a b h0 = 
-  admit()
+let lemma_felem_as_forall #c a b h0 = admit()
+
 
 
 let compare_felem #c a b =
@@ -717,33 +717,96 @@ let shiftLeftWord #c i o =
     upd o (size 7) i.(size 3) 
 
 
-let mod64 #c a =
-  admit();
+val lemma_wide_felem: c: curve -> h: mem -> e: widefelem c -> Lemma 
+  (
+    let s = as_seq h e in 
+    let s0 = Lib.Sequence.index s 0 in 
+    exists (n: nat). wide_as_nat c h e == v s0 + pow2 64 * n)
+
+let lemma_wide_felem c h e = 
+  let open Lib.Sequence in 
   match c with 
   |P256 -> 
-    let r = index a (size 0) in 
-    (* let h1 = ST.get() in  *)
-(*   assert(
-  let open Lib.Sequence in
-  let s = as_seq h1 a in
-  let s0 = s.[0] in
-  let s1 = s.[1] in
-  let s2 = s.[2] in
-  let s3 = s.[3] in
-  let s4 = s.[4] in
-  let s5 = s.[5] in
-  let s6 = s.[6] in
-  let s7 = s.[7] in
-  wide_as_nat c h1 a ==  
-  v s0 + v s1 * pow2 64 + v s2 * pow2 64 * pow2 64 +
-  v s3 * pow2 64 * pow2 64 * pow2 64 +
-  v s4 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
-  v s5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
-  v s6 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
-  v s7 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 /\
-  wide_as_nat c h1 a % pow2 64 == v s0); *)
-  r
-   |P384 -> index a (size 0)
+      let s = as_seq h e in
+      let s0 = s.[0] in
+      let s1 = s.[1] in
+      let s2 = s.[2] in
+      let s3 = s.[3] in
+      let s4 = s.[4] in
+      let s5 = s.[5] in
+      let s6 = s.[6] in
+      let s7 = s.[7] in
+     
+      calc (==) {
+	v s0 + v s1 * pow2 64 + v s2 * pow2 64 * pow2 64 +
+	v s3 * pow2 64 * pow2 64 * pow2 64 +
+	v s4 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+	v s5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+	v s6 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+	v s7 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64;
+	(==) { _ by (canon())}
+	v s0 + pow2 64 * 
+	  (v s1 + v s2 * pow2 64 +
+	  v s3 * pow2 64 * pow2 64 +
+	  v s4 * pow2 64 * pow2 64 * pow2 64 +
+	  v s5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+	  v s6 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+	  v s7 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64);
+	}
+  |P384 -> 
+      let s = as_seq h e in
+      let s0 = s.[0] in
+      let s1 = s.[1] in
+      let s2 = s.[2] in
+      let s3 = s.[3] in
+      
+      let s4 = s.[4] in
+      let s5 = s.[5] in
+      let s6 = s.[6] in
+      let s7 = s.[7] in
+      
+      let s8 = s.[8] in 
+      let s9 = s.[9] in 
+      let s10 = s.[10] in 
+      let s11 = s.[11] in 
+
+     
+      calc (==) 
+      {
+	v s0 + 
+	v s1 * pow2 64 + 
+	v s2 * pow2 64 * pow2 64 +
+	v s3 * pow2 64 * pow2 64 * pow2 64 +
+	v s4 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+	v s5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+	v s6 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+	v s7 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64  +
+	v s8 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 + 
+	v s9 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+	v s10 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 + 
+	v s11 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64;
+	(==) { _ by (canon())}
+	v s0 + pow2 64 * (
+	  v s1 + 
+	  v s2 * pow2 64 +
+	  v s3 * pow2 64 * pow2 64 +
+	  v s4 * pow2 64 * pow2 64 * pow2 64 +
+	  v s5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+	  v s6 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+	  v s7 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64  +
+	  v s8 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 + 
+	  v s9 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
+	  v s10 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 + 
+	  v s11 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64);
+	}
+
+
+
+
+let mod64 #c a =
+  let h0 = ST.get() in 
+  lemma_wide_felem c h0 a;
+  index a (size 0)
 
 
 let shift1 #c t out = 
@@ -776,22 +839,24 @@ let shift1 #c t out =
     upd out (size 7) (u64 0)
 *)
 
-
 let upload_one_montg_form #c b =
-  admit();
   match c with 
   |P256 -> 
     upd b (size 0) (u64 1);
     upd b (size 1) (u64 18446744069414584320);
     upd b (size 2) (u64 18446744073709551615);
-    upd b (size 3) (u64 4294967294)
+    upd b (size 3) (u64 4294967294);
+    lemmaToDomain #P256 1;
+    assert_norm(1 + 18446744069414584320 * pow2 64 + 18446744073709551615 * pow2 64 * pow2 64 + 4294967294 * pow2 64 * pow2 64 * pow2 64 == pow2 (getPower P256) % getPrime P256)
   |P384 -> 
     upd b (size 0) (u64 18446744069414584321);
     upd b (size 1) (u64 4294967295);
     upd b (size 2) (u64 1);
     upd b (size 3) (u64 0);
     upd b (size 4) (u64 0);
-    upd b (size 5) (u64 0)
+    upd b (size 5) (u64 0);
+    lemmaToDomain #P384 1;
+    assert_norm(18446744069414584321 + 4294967295 * pow2 64 + 1 * pow2 64 * pow2 64 == pow2 (getPower P384) % getPrime P384)
 
 
 let scalar_bit #c #buf_type s n =
