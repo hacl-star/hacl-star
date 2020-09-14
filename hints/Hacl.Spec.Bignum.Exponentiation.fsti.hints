@@ -1,6 +1,80 @@
 [
-  "-m\u001d5„çxΩy-wØ¥y˚ ",
+  "\u0011÷·ï/å\f˙Y®t\u001b\u0006¿ö~",
   [
+    [
+      "Hacl.Spec.Bignum.Exponentiation.bn_mod_exp_pre",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_56a99756680594080cf631d11f0eaeef",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "1d78fe2a4dad702419f64702692d0c12"
+    ],
+    [
+      "Hacl.Spec.Bignum.Exponentiation.bn_mod_exp_pre",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_44540322a5aeeac77ad2eb12638c2b4f",
+        "refinement_interpretation_Tm_refine_56a99756680594080cf631d11f0eaeef",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "1bbf5792d4af230b27d664260a8a10ec"
+    ],
+    [
+      "Hacl.Spec.Bignum.Exponentiation.bn_mod_exp_post",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_56a99756680594080cf631d11f0eaeef",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "da389de7195f7aebf25e5db651c67d80"
+    ],
+    [
+      "Hacl.Spec.Bignum.Exponentiation.bn_mod_exp_post",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_Hacl.Spec.Bignum.Exponentiation.bn_mod_exp_pre",
+        "equation_Prims.pos", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_56a99756680594080cf631d11f0eaeef",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "991ba30a08693f1f0c5a6adbe3a4f30e"
+    ],
+    [
+      "Hacl.Spec.Bignum.Exponentiation.check_mod_exp",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_44540322a5aeeac77ad2eb12638c2b4f",
+        "refinement_interpretation_Tm_refine_56a99756680594080cf631d11f0eaeef",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "2d398417cff50a978da62ece8ffe7ed6"
+    ],
     [
       "Hacl.Spec.Bignum.Exponentiation.bn_mod_exp_precompr2",
       1,
@@ -13,7 +87,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "19af4df0e2efce389ffdb5faaf586df8"
+      "72561ef841870051498de4bfaec0919e"
     ],
     [
       "Hacl.Spec.Bignum.Exponentiation.bn_mod_exp_precompr2_lemma",
@@ -21,18 +95,16 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "b2t_def", "equation_Prims.pos",
-        "equation_Prims.squash", "l_and-interp",
-        "primitive_Prims.op_LessThan", "primitive_Prims.op_Multiply",
-        "projection_inverse_BoxBool_proj_0",
+        "@MaxIFuel_assumption", "@query",
+        "equation_Hacl.Spec.Bignum.Exponentiation.bn_mod_exp_pre",
+        "equation_Prims.pos", "int_inversion", "primitive_Prims.op_Multiply",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
         "refinement_interpretation_Tm_refine_44540322a5aeeac77ad2eb12638c2b4f",
         "refinement_interpretation_Tm_refine_56a99756680594080cf631d11f0eaeef",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "7b000d7c20f6117e5f6e803a2989afb3"
+      "9e8fcceb57919ca29f681e7711750b15"
     ],
     [
       "Hacl.Spec.Bignum.Exponentiation.bn_mod_exp_mont_ladder_precompr2",
@@ -46,7 +118,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "b0329d97884dd6e56220799f03129f55"
+      "c8c99a7efbb9f04d1fe2ae633c63ab5d"
     ],
     [
       "Hacl.Spec.Bignum.Exponentiation.bn_mod_exp_mont_ladder_precompr2_lemma",
@@ -54,18 +126,16 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "b2t_def", "equation_Prims.pos",
-        "equation_Prims.squash", "l_and-interp",
-        "primitive_Prims.op_LessThan", "primitive_Prims.op_Multiply",
-        "projection_inverse_BoxBool_proj_0",
+        "@MaxIFuel_assumption", "@query",
+        "equation_Hacl.Spec.Bignum.Exponentiation.bn_mod_exp_pre",
+        "equation_Prims.pos", "int_inversion", "primitive_Prims.op_Multiply",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
         "refinement_interpretation_Tm_refine_44540322a5aeeac77ad2eb12638c2b4f",
         "refinement_interpretation_Tm_refine_56a99756680594080cf631d11f0eaeef",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "38f6a2a0558f93574a30706be67b9b84"
+      "d199cd33cbfda32f5c059c599e5935e8"
     ],
     [
       "Hacl.Spec.Bignum.Exponentiation.bn_mod_exp",
@@ -93,7 +163,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "f71f76d11542b5eae0476b406fe22ade"
+      "2535ea04e5090186400fd7eba2517284"
     ],
     [
       "Hacl.Spec.Bignum.Exponentiation.bn_mod_exp_lemma",
@@ -112,7 +182,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "264c16b32d4a1098c336823bcbfde044"
+      "342dc198ac30654ed45b011df0cd24f8"
     ],
     [
       "Hacl.Spec.Bignum.Exponentiation.bn_mod_exp_mont_ladder",
@@ -140,7 +210,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "f1a64db8a37aabe40a0af346be9dca1f"
+      "58c948daaa6b3b0611744bf8a43b4de6"
     ],
     [
       "Hacl.Spec.Bignum.Exponentiation.bn_mod_exp_mont_ladder_lemma",
@@ -159,7 +229,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "59c562894e481de7615f2b412e5ee810"
+      "1a5436d901b12c4971c93294611f605f"
     ]
   ]
 ]

@@ -492,6 +492,7 @@ let rsapss_verify a modBits eBits pkey sLen k sgnt msgLen msg =
   Math.Lemmas.pow2_lt_compat 61 32;
   Math.Lemmas.pow2_lt_compat 125 32;
   assert (max_size_t < Hash.max_input_length a);
+  assert (v msgLen <= max_size_t);
 
   let b =
     sLen <=. 0xfffffffful -! hLen -! 8ul &&

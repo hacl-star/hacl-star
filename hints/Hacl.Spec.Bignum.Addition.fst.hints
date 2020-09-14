@@ -242,13 +242,13 @@
         "@MaxIFuel_assumption", "@query", "equation_Lib.Sequence.length",
         "equation_Prims.nat", "primitive_Prims.op_Multiply",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_01c6aaaa2c83a972e1b39bffca99b611",
         "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_7b00963a19117145d0dc68e95e91a9e0",
         "refinement_interpretation_Tm_refine_8044b989c61dbf85fe1c70e8f2d34595"
       ],
       0,
-      "f7ef0eec9f26078093ac096f4655988a"
+      "047362b13c19f05705ffa520ed52acfa"
     ],
     [
       "Hacl.Spec.Bignum.Addition.bn_add1_lemma_loop",
@@ -292,7 +292,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "a470c6f6f8e00abff46b8afde53d7d9d"
+      "3a65239fc6d80dab8153b3bbc06595ab"
     ],
     [
       "Hacl.Spec.Bignum.Addition.bn_add1_lemma",
@@ -449,22 +449,31 @@
         "constructor_distinct_Lib.IntTypes.S32",
         "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U64",
-        "equality_tok_Lib.IntTypes.U64@tok", "equation_Lib.IntTypes.bits",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.IntTypes.U1@tok",
+        "equality_tok_Lib.IntTypes.U64@tok",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
         "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.Sequence.length", "equation_Prims.nat",
-        "equation_Prims.pos", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "equation_Prims.pos", "equation_Spec.AES.gf8",
+        "equation_Spec.AES.irred", "equation_Spec.GaloisField.gf",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.GaloisField.GF_t",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
-        "refinement_interpretation_Tm_refine_13cc0fddf9704beb264be299c641671b",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_8044b989c61dbf85fe1c70e8f2d34595",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "refinement_interpretation_Tm_refine_ef92dda56898993251b07557fdaea377",
         "typing_Lib.IntTypes.bits", "typing_Prims.pow2",
+        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "0670c3216ffeadb3ac1ce8804ec2e883"
+      "136a7c1b05ed7e896199cd583639a108"
     ],
     [
       "Hacl.Spec.Bignum.Addition.bn_add_lemma_loop",
@@ -512,7 +521,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "well-founded-ordering-on-nat"
       ],
       0,
-      "3f47f7c079941d0c511ccf2e49c7c3dc"
+      "1ae12284c8c2dd0fbeb505ebbeae5114"
     ],
     [
       "Hacl.Spec.Bignum.Addition.bn_add_lemma",
@@ -739,13 +748,13 @@
         "@MaxIFuel_assumption", "@query", "equation_Lib.Sequence.length",
         "equation_Prims.nat", "primitive_Prims.op_Multiply",
         "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_0689ede6a27eff8178489c8b0356b2ab",
         "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_72aeb868097bd7dec64d84b4abffba4f",
         "refinement_interpretation_Tm_refine_8044b989c61dbf85fe1c70e8f2d34595"
       ],
       0,
-      "c75e10fc6aa1feccc7b5058f21352e04"
+      "14066b220f97607b6477504c19cbad11"
     ],
     [
       "Hacl.Spec.Bignum.Addition.bn_sub1_lemma_loop",
@@ -790,7 +799,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "7e5da241df7dc8a49eba9998838d95f7"
+      "57746ddd2498beb83de414e4b8fe1872"
     ],
     [
       "Hacl.Spec.Bignum.Addition.bn_sub1_lemma",
@@ -950,22 +959,31 @@
         "constructor_distinct_Lib.IntTypes.S32",
         "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U64",
-        "equality_tok_Lib.IntTypes.U64@tok", "equation_Lib.IntTypes.bits",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.IntTypes.U1@tok",
+        "equality_tok_Lib.IntTypes.U64@tok",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
         "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.Sequence.length", "equation_Prims.nat",
-        "equation_Prims.pos", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "equation_Prims.pos", "equation_Spec.AES.gf8",
+        "equation_Spec.AES.irred", "equation_Spec.GaloisField.gf",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.GaloisField.GF_t",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_8044b989c61dbf85fe1c70e8f2d34595",
-        "refinement_interpretation_Tm_refine_a1428b224aa187d146e73bf8c5e48541",
+        "refinement_interpretation_Tm_refine_98bcb425a258d084ee219ce4fa4df7e8",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
         "typing_Lib.IntTypes.bits", "typing_Prims.pow2",
+        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "dfc72259295f3b575340f0a92b5f446c"
+      "5842c85485352c1471d01b589c7101a9"
     ],
     [
       "Hacl.Spec.Bignum.Addition.bn_sub_lemma_loop",
@@ -1013,7 +1031,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "well-founded-ordering-on-nat"
       ],
       0,
-      "99a829554fa62afbc2d448d286e127cd"
+      "33d378420d251381ce1b8f1b2b06c9f8"
     ],
     [
       "Hacl.Spec.Bignum.Addition.bn_sub_lemma",
