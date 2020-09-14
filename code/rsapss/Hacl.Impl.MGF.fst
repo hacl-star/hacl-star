@@ -95,7 +95,7 @@ let mgf_hash_st (a:Hash.algorithm{S.hash_is_supported a}) =
   Stack unit
   (requires fun h -> live h mgfseed /\ live h res /\ disjoint res mgfseed)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_seq h1 res == S.mgf_hash #a #(v len) (as_seq h0 mgfseed) (v maskLen))
+    as_seq h1 res == S.mgf_hash a (v len) (as_seq h0 mgfseed) (v maskLen))
 
 val mgf_hash: a:Hash.algorithm{S.hash_is_supported a} -> mgf_hash_st a
 [@CInline]
