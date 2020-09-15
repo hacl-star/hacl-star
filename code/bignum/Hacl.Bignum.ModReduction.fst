@@ -95,7 +95,7 @@ let bn_mod_slow_st (nLen:BN.meta_len) =
     disjoint res n /\ disjoint res a)
   (ensures  fun h0 r h1 -> modifies (loc res) h0 h1 /\
     r == BB.unsafe_bool_of_u64 (S.check_bn_mod (as_seq h0 n) (as_seq h0 a)) /\
-    r ==> bn_v h1 res == bn_v h0 a % bn_v h0 n)
+    (r ==> bn_v h1 res == bn_v h0 a % bn_v h0 n))
 
 
 inline_for_extraction noextract

@@ -87,7 +87,7 @@ let bn_mod_exp_st (nLen:BN.meta_len) =
     disjoint res a /\ disjoint res b /\ disjoint res n /\ disjoint n a)
   (ensures  fun h0 r h1 -> modifies (loc res) h0 h1 /\
     r == BB.unsafe_bool_of_u64 (S.check_mod_exp (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b)) /\
-    r ==> S.bn_mod_exp_post #(v nLen) (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b) (as_seq h1 res))
+    (r ==> S.bn_mod_exp_post #(v nLen) (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b) (as_seq h1 res)))
 
 
 // This version is fully run-time.
