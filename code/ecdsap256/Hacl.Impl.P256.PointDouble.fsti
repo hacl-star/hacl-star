@@ -5,54 +5,35 @@ open FStar.HyperStack
 module ST = FStar.HyperStack.ST
 
 open Lib.IntTypes
-open Hacl.Impl.P256.Arithmetics
-
 open Lib.Buffer
 
 open Hacl.Spec.P256.Definition
 open Hacl.Spec.P256.MontgomeryMultiplication
 open Spec.P256
 
-open Hacl.Impl.P.LowLevel 
-open Hacl.Impl.P256.MontgomeryMultiplication
-open Hacl.Impl.P256.Math 
-
-open FStar.Tactics 
-open FStar.Tactics.Canon
-
-open FStar.Math.Lemmas
-open FStar.Mul
-
-#reset-options "--z3rlimit 300" 
-
-val point_double: #c: curve -> p: point c -> result: point c -> tempBuffer: lbuffer uint64  (getCoordinateLenU64 c *. 22ul) -> Stack unit
-  (requires fun h -> live h p /\ live h tempBuffer /\ live h result /\
-    disjoint p tempBuffer /\ disjoint result tempBuffer /\
-    eq_or_disjoint p result /\
-    (
-      let prime = getPrime c in 
-      let len = getCoordinateLenU64 c in
-      as_nat c h (gsub p (size 0) len) < prime /\ 
-      as_nat c h (gsub p len len) < prime /\
-      as_nat c h (gsub p (size 2 *! len) len) < prime
-    )
-  )
-  (ensures fun h0 _ h1 -> modifies (loc tempBuffer |+| loc result)  h0 h1 /\  
+val point_double: #c: curve -> p: point c -> result: point c 
+  -> tempBuffer: lbuffer uint64  (getCoordinateLenU64 c *! 22ul) 
+  -> Stack unit
+    (requires fun h -> live h p /\ live h tempBuffer /\ live h result /\
+      disjoint p tempBuffer /\ disjoint result tempBuffer /\
+      eq_or_disjoint p result /\
+      (
+	let prime = getPrime c in 
+	point_x_as_nat c h p < prime /\ 
+	point_y_as_nat c h p < prime /\
+	point_z_as_nat c h p < prime))
+  (ensures fun h0 _ h1 -> modifies (loc tempBuffer |+| loc result) h0 h1 /\  
     (
       let prime = getPrime c in 
       let len = getCoordinateLenU64 c in 
       
-      as_nat c h1 (gsub result (size 0) len) < prime /\ 
-      as_nat c h1 (gsub result len len) < prime /\
-      as_nat c h1 (gsub result (size 2 *! len) len) < prime /\ 
+      point_x_as_nat c h1 result < prime /\ 
+      point_y_as_nat c h1 result < prime /\
+      point_z_as_nat c h1 result < prime /\ (
       
-      (
-	let x, y, z = gsub p (size 0) len, gsub p len len, gsub p (size 2 *! len) len in 
-	let x3, y3, z3 = gsub result (size 0) len, gsub result len len, gsub result (size 2 *! len) len in       
-	let xD, yD, zD = fromDomain_ #c (as_nat c h0 x), fromDomain_ #c (as_nat c h0 y), fromDomain_ #c (as_nat c h0 z) in 
-	let x3D, y3D, z3D = fromDomain_ #c (as_nat c h1 x3), fromDomain_ #c (as_nat c h1 y3), fromDomain_ #c (as_nat c h1 z3) in
-	let xN, yN, zN = _point_double #c (xD, yD, zD) in 
-	x3D == xN /\ y3D == yN /\ z3D == zN
-      )
-    ) 
-  )
+      let x, y, z = point_x_as_nat c h0 p, point_y_as_nat c h0 p, point_z_as_nat c h0 p in 
+      let x3, y3, z3 = point_x_as_nat c h1 result, point_y_as_nat c h1 result, point_z_as_nat c h1 result in       
+      let xD, yD, zD = fromDomain_ #c x, fromDomain_ #c y, fromDomain_ #c z in 
+      let x3D, y3D, z3D = fromDomain_ #c x3, fromDomain_ #c y3, fromDomain_ #c z3 in
+      let xN, yN, zN = _point_double #c (xD, yD, zD) in 
+      x3D == xN /\ y3D == yN /\ z3D == zN )))

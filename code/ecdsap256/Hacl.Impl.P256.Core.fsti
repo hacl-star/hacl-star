@@ -82,19 +82,6 @@ let point_y_as_nat (c: curve) (h: mem) (e: point c) : GTot nat =
  *)
 (*Test *)
 
-noextract 
-let point_x_as_nat (c: curve) (h: mem) (e: point c) : GTot nat = 
-  as_nat c h (gsub e (size 0) (getCoordinateLenU64 c))
-
-
-noextract 
-let point_y_as_nat (c: curve) (h: mem) (e: point c) : GTot nat = 
-  as_nat c h (gsub e (getCoordinateLenU64 c) (getCoordinateLenU64 c))
-
-noextract 
-let point_z_as_nat (c: curve) (h: mem) (e: point c) : GTot nat = 
-  as_nat c h (gsub e (size 2 *! getCoordinateLenU64 c) (getCoordinateLenU64 c))
-
 
 val pointToDomain: #c: curve -> p: point c -> result: point c -> Stack unit 
   (requires fun h ->

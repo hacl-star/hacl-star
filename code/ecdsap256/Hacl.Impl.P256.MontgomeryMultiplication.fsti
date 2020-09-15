@@ -18,11 +18,11 @@ val montgomery_multiplication_buffer_by_one: #c: curve
   -> a: felem c
   -> result: felem c -> 
   Stack unit
-    (requires (fun h -> live h a /\ as_nat c h a < getPrime c /\ live h result)) 
+    (requires (fun h -> live h a /\ felem_eval c h a /\ live h result)) 
     (ensures (fun h0 _ h1 -> 
       let prime = getPrime c in 
       modifies (loc result) h0 h1 /\ 
-      as_nat c h1 result  = (as_nat c h0 a * modp_inv2_prime (getPower2 c) prime) % prime /\
+      as_nat c h1 result = (as_nat c h0 a * modp_inv2_prime (getPower2 c) prime) % prime /\
       as_nat c h1 result = fromDomain_ #c (as_nat c h0 a)))
 
 
@@ -30,10 +30,10 @@ val montgomery_multiplication_buffer: #c: curve
   -> a: felem c -> b: felem c -> result: felem c ->  
   Stack unit
     (requires (fun h ->
-      live h a /\ as_nat c h a < getPrime c /\ live h b /\ live h result /\ as_nat c h b < getPrime c)) 
+      live h a /\ live h b /\ live h result /\ felem_eval c h a  /\ felem_eval c h b)) 
     (ensures (fun h0 _ h1 -> 
       modifies (loc result) h0 h1 /\  
-      as_nat c h1 result < getPrime c /\
+      felem_eval c h1 result /\
       as_nat c h1 result = (as_nat c h0 a * as_nat c h0 b * modp_inv2_prime (pow2 (getPower c)) (getPrime c)) % getPrime c /\
       as_nat c h1 result = toDomain_ #c (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 b) % getPrime c) /\
       as_nat c h1 result = toDomain_ #c (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 b))))
@@ -41,12 +41,12 @@ val montgomery_multiplication_buffer: #c: curve
 
 val montgomery_square_buffer: #c: curve -> a: felem c -> result: felem c ->  
   Stack unit
-    (requires (fun h -> live h a /\ as_nat c h a < (getPrime c) /\ live h result)) 
+    (requires (fun h -> live h a /\ felem_eval c h a /\ live h result)) 
     (ensures (fun h0 _ h1 -> 
       (
 	let prime = getPrime c in 
 	modifies (loc result) h0 h1 /\  
-	as_nat c h1 result < prime /\ 
+	felem_eval c h1 result /\ 
 	as_nat c h1 result = (as_nat c h0 a * as_nat c h0 a * modp_inv2_prime (getPower c) prime) % prime /\
 	as_nat c h1 result = toDomain_ #c (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 a) % prime) /\
 	as_nat c h1 result = toDomain_ #c (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 a)))))

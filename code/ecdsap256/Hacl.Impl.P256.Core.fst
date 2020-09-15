@@ -358,10 +358,7 @@ let norm #c p resultPoint tempBuffer =
   }
 
 
-
-
 let normX #c p result tempBuffer = 
-  admit();
   let len = getCoordinateLenU64 c in 
   
   let xf = sub p (size 0) len in 
@@ -373,11 +370,11 @@ let normX #c p result tempBuffer =
 
     let h0 = ST.get() in 
   montgomery_square_buffer #c zf z2f; 
-  exponent #c z2f z2f (* tempBuffer20 *) ;
+  exponent #c z2f z2f;
   montgomery_multiplication_buffer #c z2f xf z2f;
   fromDomain z2f result;
+
     let prime = getPrime c in 
-    admit();
     power_distributivity (fromDomain_ #c (as_nat c h0 zf) * fromDomain_ #c (as_nat c h0 zf)) (prime - 2) prime
 
 
@@ -404,37 +401,37 @@ val montgomery_ladder_step1: #c : curve ->  p: point c -> q: point c
   -> tempBuffer: lbuffer uint64 (size 22 *! getCoordinateLenU64 c) -> Stack unit
   (requires fun h -> 
     let prime = getPrime c in 
-    let len = getCoordinateLenU64 c in 
+    
     live h p /\ live h q /\ live h tempBuffer /\ 
     LowStar.Monotonic.Buffer.all_disjoint [loc p; loc q; loc tempBuffer] /\
-    as_nat c h (gsub p (size 0) len) < prime /\ 
-    as_nat c h (gsub p len len) < prime /\
-    as_nat c h (gsub p (size 2 *! len) len) < prime /\
+    point_x_as_nat c h p < prime /\ 
+    point_y_as_nat c h p < prime /\
+    point_z_as_nat c h p < prime /\
 	     
-    as_nat c h (gsub q (size 0) len) < prime /\  
-    as_nat c h (gsub q len len) < prime /\
-    as_nat c h (gsub q (size 2 *! len) len) < prime
+    point_x_as_nat c h q < prime /\ 
+    point_y_as_nat c h q < prime /\
+    point_z_as_nat c h q < prime
   )
   (ensures fun h0 _ h1 -> 
     let prime = getPrime c in 
     let len = getCoordinateLenU64 c in 
     modifies (loc p |+| loc q |+|  loc tempBuffer) h0 h1 /\ 
     (
-      let pX = as_nat c h0 (gsub p (size 0) len) in
-      let pY = as_nat c h0 (gsub p len len) in
-      let pZ = as_nat c h0 (gsub p (size 2 *! len) len) in
+      let pX = point_x_as_nat c h0 p in
+      let pY = point_y_as_nat c h0 p in
+      let pZ = point_z_as_nat c h0 p in
 
-      let qX = as_nat c h0 (gsub q (size 0) len) in
-      let qY = as_nat c h0 (gsub q len len) in
-      let qZ = as_nat c h0 (gsub q (size 2 *! len) len) in
+      let qX = point_x_as_nat c h0 q in
+      let qY = point_y_as_nat c h0 q in
+      let qZ = point_z_as_nat c h0 q in
 
-      let r0X = as_nat c h1 (gsub p (size 0) len) in
-      let r0Y = as_nat c h1 (gsub p len len) in
-      let r0Z = as_nat c h1 (gsub p (size 2 *! len) len) in
+      let r0X = point_x_as_nat c h1 p in
+      let r0Y = point_y_as_nat c h1 p in
+      let r0Z = point_z_as_nat c h1 p in
 
-      let r1X = as_nat c h1 (gsub q (size 0) len) in
-      let r1Y = as_nat c h1 (gsub q len len) in
-      let r1Z = as_nat c h1 (gsub q (size 2 *! len) len) in
+      let r1X = point_x_as_nat c h1 q in
+      let r1Y = point_y_as_nat c h1 q in
+      let r1Z = point_z_as_nat c h1 q in
 
       let prime = getPrime c in 
       let (rN0X, rN0Y, rN0Z), (rN1X, rN1Y, rN1Z) = _ml_step1 #c

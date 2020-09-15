@@ -443,6 +443,27 @@ type point (c: curve) = lbuffer uint64 (getCoordinateLenU64 c *. 3ul)
 type scalar (c: curve) = lbuffer uint8 (getScalarLen c)
 
 
+
+noextract 
+let point_x_as_nat (c: curve) (h: mem) (e: point c) : GTot nat = 
+  as_nat c h (gsub e (size 0) (getCoordinateLenU64 c))
+
+
+noextract 
+let point_y_as_nat (c: curve) (h: mem) (e: point c) : GTot nat = 
+  as_nat c h (gsub e (getCoordinateLenU64 c) (getCoordinateLenU64 c))
+
+noextract 
+let point_z_as_nat (c: curve) (h: mem) (e: point c) : GTot nat = 
+  as_nat c h (gsub e (size 2 *! getCoordinateLenU64 c) (getCoordinateLenU64 c))
+
+
+val felem_eval: c: curve -> h: mem -> f: felem c -> Type0
+
+let felem_eval c h f = as_nat c h f < getPrime c
+
+
+
 val changeEndianStep: #c: curve 
   -> i: nat {i <= v (shift_right (getCoordinateLenU64 c) 1ul)}  -> felem_seq c -> felem_seq c 
 

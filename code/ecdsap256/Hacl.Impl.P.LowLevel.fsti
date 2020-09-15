@@ -257,7 +257,7 @@ val felem_double: #c: curve -> a: felem c -> out: felem c ->
 val felem_sub: #c: curve -> a: felem c -> b: felem c -> out: felem c -> 
   Stack unit 
     (requires (fun h0 -> 
-      live h0 out /\ live h0 a /\ live h0 b /\ eq_or_disjoint a out /\ eq_or_disjoint b out /\ 
+      live h0 out /\ live h0 a /\ live h0 b /\ 
       as_nat c h0 a < getPrime c /\ as_nat c h0 b < getPrime c))
     (ensures (fun h0 _ h1 -> 
       modifies (loc out) h0 h1 /\ 
