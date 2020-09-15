@@ -6,6 +6,7 @@ module BN = Hacl.Bignum
 module BM = Hacl.Bignum.Montgomery
 module BE = Hacl.Bignum.Exponentiation
 module BR = Hacl.Bignum.ModReduction
+module BI = Hacl.Bignum.ModInv
 
 friend Hacl.Bignum.Exponentiation
 
@@ -108,6 +109,8 @@ let mod_exp_mont_ladder =
   BE.mk_bn_mod_exp_mont_ladder n_limbs #mont_inst mod_exp_mont_ladder_loop
 
 let new_precompr2 = BM.new_precomp_r2_mod_n
+
+let mod_inv_prime = BI.mk_bn_mod_inv_prime n_limbs mod_exp
 
 let new_bn_from_bytes_be = Hacl.Bignum.Convert.new_bn_from_bytes_be
 
