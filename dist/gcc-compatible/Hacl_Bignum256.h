@@ -226,6 +226,20 @@ Compute `2 ^ (128 * nLen) mod n`.
 */
 uint64_t *Hacl_Bignum256_new_precompr2(uint32_t nLen, uint64_t *n);
 
+/*
+Write `a ^ (-1) mod n` in `res`.
+
+  The arguments a, n and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
+  The function returns false if any of the preconditions of mod_exp_precompr2 are
+  violated, true otherwise.
+
+  This function is *UNSAFE* and requires C clients to observe bn_mod_inv_prime_lemma
+  from Hacl.Spec.Bignum.ModInv.fst, which amounts to:
+  • n is a prime
+  • 0 < a 
+*/
+bool Hacl_Bignum256_mod_inv_prime(uint64_t *n, uint64_t *a, uint64_t *res);
+
 
 /********************/
 /* Loads and stores */

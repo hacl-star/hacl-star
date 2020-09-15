@@ -983,6 +983,107 @@ uint64_t *Hacl_Bignum256_new_precompr2(uint32_t nLen, uint64_t *n)
   return res2;
 }
 
+/*
+Write `a ^ (-1) mod n` in `res`.
+
+  The arguments a, n and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
+  The function returns false if any of the preconditions of mod_exp_precompr2 are
+  violated, true otherwise.
+
+  This function is *UNSAFE* and requires C clients to observe bn_mod_inv_prime_lemma
+  from Hacl.Spec.Bignum.ModInv.fst, which amounts to:
+  • n is a prime
+  • 0 < a 
+*/
+bool Hacl_Bignum256_mod_inv_prime(uint64_t *n, uint64_t *a, uint64_t *res)
+{
+  uint64_t b2 = (uint64_t)2U;
+  uint64_t n2[4U] = { 0U };
+  uint64_t *a0 = n;
+  uint64_t *res0 = n2;
+  uint64_t c0 = (uint64_t)0U;
+  uint32_t k0 = (uint32_t)0U;
+  for (uint32_t i = (uint32_t)0U; i < k0 / (uint32_t)4U; i++)
+  {
+    uint64_t t1 = a0[(uint32_t)4U * i];
+    uint64_t t20 = (&b2)[(uint32_t)4U * i];
+    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t1, t20, res0 + (uint32_t)4U * i);
+    uint64_t t10 = a0[(uint32_t)4U * i + (uint32_t)1U];
+    uint64_t t21 = (&b2)[(uint32_t)4U * i + (uint32_t)1U];
+    c0 =
+      Lib_IntTypes_Intrinsics_sub_borrow_u64(c0,
+        t10,
+        t21,
+        res0 + (uint32_t)4U * i + (uint32_t)1U);
+    uint64_t t11 = a0[(uint32_t)4U * i + (uint32_t)2U];
+    uint64_t t22 = (&b2)[(uint32_t)4U * i + (uint32_t)2U];
+    c0 =
+      Lib_IntTypes_Intrinsics_sub_borrow_u64(c0,
+        t11,
+        t22,
+        res0 + (uint32_t)4U * i + (uint32_t)2U);
+    uint64_t t12 = a0[(uint32_t)4U * i + (uint32_t)3U];
+    uint64_t t2 = (&b2)[(uint32_t)4U * i + (uint32_t)3U];
+    c0 =
+      Lib_IntTypes_Intrinsics_sub_borrow_u64(c0,
+        t12,
+        t2,
+        res0 + (uint32_t)4U * i + (uint32_t)3U);
+  }
+  for (uint32_t i = k0; i < (uint32_t)1U; i++)
+  {
+    uint64_t t1 = a0[i];
+    uint64_t t2 = (&b2)[i];
+    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t1, t2, res0 + i);
+  }
+  uint64_t c00 = c0;
+  uint64_t c1;
+  if ((uint32_t)1U < (uint32_t)4U)
+  {
+    uint32_t rLen = (uint32_t)3U;
+    uint64_t *a1 = n + (uint32_t)1U;
+    uint64_t *res1 = n2 + (uint32_t)1U;
+    uint64_t c = c00;
+    uint32_t k = rLen / (uint32_t)4U * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
+    {
+      uint64_t t1 = a1[(uint32_t)4U * i];
+      c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, (uint64_t)0U, res1 + (uint32_t)4U * i);
+      uint64_t t10 = a1[(uint32_t)4U * i + (uint32_t)1U];
+      c =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(c,
+          t10,
+          (uint64_t)0U,
+          res1 + (uint32_t)4U * i + (uint32_t)1U);
+      uint64_t t11 = a1[(uint32_t)4U * i + (uint32_t)2U];
+      c =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(c,
+          t11,
+          (uint64_t)0U,
+          res1 + (uint32_t)4U * i + (uint32_t)2U);
+      uint64_t t12 = a1[(uint32_t)4U * i + (uint32_t)3U];
+      c =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(c,
+          t12,
+          (uint64_t)0U,
+          res1 + (uint32_t)4U * i + (uint32_t)3U);
+    }
+    for (uint32_t i = k; i < rLen; i++)
+    {
+      uint64_t t1 = a1[i];
+      c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, (uint64_t)0U, res1 + i);
+    }
+    uint64_t c10 = c;
+    c1 = c10;
+  }
+  else
+  {
+    c1 = c00;
+  }
+  bool is_valid = Hacl_Bignum256_mod_exp(n, a, (uint32_t)256U, n2, res);
+  return is_valid;
+}
+
 
 /********************/
 /* Loads and stores */
