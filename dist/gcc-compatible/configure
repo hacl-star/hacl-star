@@ -167,14 +167,14 @@ echo -n > Makefile.config
 echo -n > config.h
 
 # Default arguments
-build_ocaml=1
+disable_ocaml=0
 
 # Parse command line arguments.
 all_args=("$@")
 while [ $# -gt 0 ]; do
     case "$1" in
         -target) build_target="$2"; shift ;;
-        --disable-ocaml) build_ocaml=0 ;;
+        --disable-ocaml) disable_ocaml=1 ;;
         --help) show_help; exit 0 ;;
         *) show_help; exit 2 ;;
     esac
@@ -191,6 +191,9 @@ done
 if [ ! -z "$build_target" ]; then
   echo "Doing cross build for $build_target. Make sure that your toolchain is configured properly."
   if [[ "$build_target" == "aarch64-none-linux-android" ]]; then
+    # NOTE: We assume that the Android environment is set up correctly.
+    #       Make sure that `crtbegin_so.o` and `crtend_so.o` can be found.
+
     if [ -z $NDK ]; then
       echo "Compiling for aarch64-none-linux-android requires an NDK toolchain."
       echo "Then please set at least NDK appropriately. SYSROOT and NDK_TOOLCHAIN might be necessary as well."
@@ -214,18 +217,12 @@ if [ ! -z "$build_target" ]; then
     # Set compiler
     CC="$NDK/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang"
     echo "CC=$CC" >> Makefile.config
-
-    # Link the API libraries we want (27)
-    # TODO: make configurable
-    rm -f $SYSROOT/usr/lib/aarch64-linux-android/crtbegin_so.o
-    rm -f $SYSROOT/usr/lib/aarch64-linux-android/crtend_so.o
-    ln -s $SYSROOT/usr/lib/aarch64-linux-android/27/crtbegin_so.o $SYSROOT/usr/lib/aarch64-linux-android/
-    ln -s $SYSROOT/usr/lib/aarch64-linux-android/27/crtend_so.o $SYSROOT/usr/lib/aarch64-linux-android/
   elif [[ "$build_target" == "aarch64-none-linux-gnu" ]]; then
     if [ -z $TOOLCHAIN ]; then
       echo "Compiling for aarch64-none-linux-gnu-gcc requires a GCC toolchain."
       echo "This probably only works on Windows and Linux."
       echo "Get your toolchain here: https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-a/downloads"
+      echo "And then set TOOLCHAIN appropriately."
       exit 1
     fi
 
@@ -250,8 +247,9 @@ else
 fi
 
 if [[ $target_arch == "aarch64" ]]; then
-  # Cross-compiling on Linux for ARM has to remove the x86 assembly code.
-  echo "ARM_CROSS = 1" >> Makefile.config
+  # Set UNAME and MARCH when cross-compiling
+  echo "UNAME = Linux" >> Makefile.config
+  echo "MARCH = aarch64" >> Makefile.config
 fi
 
 if detect_arm; then
@@ -301,7 +299,7 @@ if ! detect_uint128; then
   echo "CFLAGS += -DKRML_VERIFIED_UINT128" >> Makefile.config
 fi
 
-if [[ "$build_ocaml" == "0" ]] || ! detect_ocaml; then
+if [[ "$disable_ocaml" == "1" ]] || ! detect_ocaml; then
   echo "OCaml bindings disabled"
   echo "DISABLE_OCAML_BINDINGS=1" >> Makefile.config
 fi

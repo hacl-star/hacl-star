@@ -23,10 +23,12 @@
 # By default, this Makefile relies on the local checkout of kremlib
 KREMLIN_HOME ?= ../kremlin
 
+-include Makefile.config
+
 # 1. The usual pseudo auto-configuration
 
-UNAME		= $(shell uname)
-MARCH		= $(shell uname -m)
+UNAME		?= $(shell uname)
+MARCH		?= $(shell uname -m)
 ifeq ($(UNAME),Darwin)
   VARIANT	= -darwin
   SO		= so
@@ -70,12 +72,7 @@ ifneq (,$(wildcard EverCrypt_BCrypt.h))
   SOURCES	+= evercrypt_bcrypt.c
 endif
 
--include Makefile.config
-
-ifeq (,$(ARM_CROSS))
 OBJS 		+= $(patsubst %.S,%.o,$(wildcard *-$(MARCH)$(VARIANT).S))
-USER_CFLAGS=-march=native -mtune=native -Wno-unused
-endif
 
 include Makefile.basic
 
