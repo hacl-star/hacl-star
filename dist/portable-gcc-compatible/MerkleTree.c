@@ -576,7 +576,9 @@ void mt_sha256_compress(uint8_t *src1, uint8_t *src2, uint8_t *dst)
   uint32_t buf2[8U];
   uint32_t buf3[8U];
   uint64_t buf4[8U];
-  uint64_t buf[8U];
+  uint64_t buf5[8U];
+  uint32_t buf6[16U];
+  uint64_t buf[16U];
   EverCrypt_Hash_state_s s;
   switch (hash_alg)
   {
@@ -653,10 +655,36 @@ void mt_sha256_compress(uint8_t *src1, uint8_t *src2, uint8_t *dst)
         uint64_t init = (uint64_t)0U;
         for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
         {
-          buf[i] = init;
+          buf5[i] = init;
         }
         s =
-          ((EverCrypt_Hash_state_s){ .tag = EverCrypt_Hash_SHA2_512_s, { .case_SHA2_512_s = buf } });
+          (
+            (EverCrypt_Hash_state_s){
+              .tag = EverCrypt_Hash_SHA2_512_s,
+              { .case_SHA2_512_s = buf5 }
+            }
+          );
+        break;
+      }
+    case Spec_Hash_Definitions_Blake2S:
+      {
+        uint32_t init = (uint32_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
+        {
+          buf6[i] = init;
+        }
+        s =
+          ((EverCrypt_Hash_state_s){ .tag = EverCrypt_Hash_Blake2S_s, { .case_Blake2S_s = buf6 } });
+        break;
+      }
+    case Spec_Hash_Definitions_Blake2B:
+      {
+        uint64_t init = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
+        {
+          buf[i] = init;
+        }
+        s = ((EverCrypt_Hash_state_s){ .tag = EverCrypt_Hash_Blake2B_s, { .case_Blake2B_s = buf } });
         break;
       }
     default:
@@ -667,7 +695,7 @@ void mt_sha256_compress(uint8_t *src1, uint8_t *src2, uint8_t *dst)
   }
   EverCrypt_Hash_state_s st = s;
   EverCrypt_Hash_init(&st);
-  EverCrypt_Hash_update(&st, cb);
+  EverCrypt_Hash_update2(&st, (uint64_t)0U, cb);
   EverCrypt_Hash_finish(&st, dst);
 }
 

@@ -38,9 +38,36 @@ extern "C" {
 
 
 #include "Hacl_Kremlib.h"
+#include "Hacl_Blake2s_32.h"
 #include "Lib_Memzero0.h"
-#include "Hacl_Blake2b_32.h"
 #include "Hacl_Impl_Blake2_Constants.h"
+#include "Hacl_Hash.h"
+
+void
+Hacl_Hash_Blake2b_256_finish_blake2b_256(
+  Lib_IntVector_Intrinsics_vec256 *s,
+  uint128_t ev,
+  uint8_t *dst
+);
+
+uint128_t
+Hacl_Hash_Blake2b_256_update_multi_blake2b_256(
+  Lib_IntVector_Intrinsics_vec256 *s,
+  uint128_t ev,
+  uint8_t *blocks,
+  uint32_t n_blocks
+);
+
+uint128_t
+Hacl_Hash_Blake2b_256_update_last_blake2b_256(
+  Lib_IntVector_Intrinsics_vec256 *s,
+  uint128_t ev,
+  uint128_t prev_len,
+  uint8_t *input,
+  uint32_t input_len
+);
+
+void Hacl_Hash_Blake2b_256_hash_blake2b_256(uint8_t *input, uint32_t input_len, uint8_t *dst);
 
 void
 Hacl_Blake2b_256_blake2b(

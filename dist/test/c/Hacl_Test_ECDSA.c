@@ -24,6 +24,8 @@
 
 #include "Hacl_Test_ECDSA.h"
 
+extern void C_String_print(C_String_t uu___);
+
 /*
  Input: result buffer: uint8[64], 
  m buffer: uint8 [mLen], 
@@ -137,8 +139,6 @@ Hacl_P256_ecdsa_verif_p256_sha512(
   uint8_t *r,
   uint8_t *s
 );
-
-extern void C_String_print(C_String_t uu___);
 
 extern void LowStar_Printf_print_string(Prims_string uu___);
 

@@ -4,6 +4,7 @@ module S = FStar.Seq
 
 include Spec.Hash.Definitions
 open Spec.Hash.PadFinish
+open FStar.Mul
 
 val init (a:hash_alg): init_t a
 val update (a:hash_alg): update_t a

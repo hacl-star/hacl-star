@@ -2,6 +2,8 @@ module Spec.SHA2.Lemmas
 
 open Spec.Hash.Definitions
 
+#push-options "--z3rlimit 25 --fuel 0 --ifuel 0"
+
 val update_224_256: hash:words_state SHA2_256 ->
   block:bytes{Seq.length block = block_length SHA2_256} ->
   Lemma
