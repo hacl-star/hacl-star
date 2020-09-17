@@ -43,6 +43,8 @@ module Error = struct
     | n -> error n
 end
 
+let at_exit_full_major = lazy (at_exit Gc.full_major)
+
 module AEAD = struct
   open Error
   open Hacl_Spec
@@ -73,7 +75,7 @@ module AEAD = struct
     | AES256_GCM -> spec_Agile_AEAD_alg_Spec_Agile_AEAD_AES256_GCM
     | CHACHA20_POLY1305 -> spec_Agile_AEAD_alg_Spec_Agile_AEAD_CHACHA20_POLY1305
   let init alg key : t result =
-    at_exit Gc.full_major;
+    Lazy.force at_exit_full_major;
     assert (C.size key = key_length alg);
     let st = allocate
         ~finalise:(fun st -> everCrypt_AEAD_free (!@ st))
@@ -141,7 +143,7 @@ module Hash = struct
 
   type t = alg * Z.t ref * hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ ptr
   let init alg =
-    at_exit Gc.full_major;
+    Lazy.force at_exit_full_major;
     let alg_spec = alg_definition alg in
     let st = everCrypt_Hash_Incremental_create_in alg_spec in
     everCrypt_Hash_Incremental_init st;

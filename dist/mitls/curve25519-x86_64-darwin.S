@@ -4,11 +4,11 @@ _add_scalar_e:
   push %rdi
   push %rsi
   ;# Clear registers to propagate the carry bit
-  xor %r8, %r8
-  xor %r9, %r9
-  xor %r10, %r10
-  xor %r11, %r11
-  xor %rax, %rax
+  xor %r8d, %r8d
+  xor %r9d, %r9d
+  xor %r10d, %r10d
+  xor %r11d, %r11d
+  xor %eax, %eax
   
   ;# Begin addition chain
   addq 0(%rsi), %rdx
@@ -44,7 +44,7 @@ _fadd_e:
   cmovc %rdx, %rax
   
   ;# Step 2: Add carry*38 to the original sum
-  xor %rcx, %rcx
+  xor %ecx, %ecx
   add %rax, %r8
   adcx %rcx, %r9
   movq %r9, 8(%rdi)
@@ -149,7 +149,7 @@ _fmul_e:
   ;# Compute src1[0] * src2
   movq 0(%rsi), %rdx
   mulxq 0(%rcx), %r8, %r9
-  xor %r10, %r10
+  xor %r10d, %r10d
   movq %r8, 0(%rdi)
   
   mulxq 8(%rcx), %r10, %r11
@@ -167,7 +167,7 @@ _fmul_e:
   ;# Compute src1[1] * src2
   movq 8(%rsi), %rdx
   mulxq 0(%rcx), %r8, %r9
-  xor %r10, %r10
+  xor %r10d, %r10d
   adcxq 8(%rdi), %r8
   movq %r8, 8(%rdi)
   mulxq 8(%rcx), %r10, %r11
@@ -189,7 +189,7 @@ _fmul_e:
   ;# Compute src1[2] * src2
   movq 16(%rsi), %rdx
   mulxq 0(%rcx), %r8, %r9
-  xor %r10, %r10
+  xor %r10d, %r10d
   adcxq 16(%rdi), %r8
   movq %r8, 16(%rdi)
   mulxq 8(%rcx), %r10, %r11
@@ -211,7 +211,7 @@ _fmul_e:
   ;# Compute src1[3] * src2
   movq 24(%rsi), %rdx
   mulxq 0(%rcx), %r8, %r9
-  xor %r10, %r10
+  xor %r10d, %r10d
   adcxq 24(%rdi), %r8
   movq %r8, 24(%rdi)
   mulxq 8(%rcx), %r10, %r11
@@ -240,7 +240,7 @@ _fmul_e:
   ;# Step 1: Compute dst + carry == tmp_hi * 38 + tmp_lo
   mov $38, %rdx
   mulxq 32(%rsi), %r8, %r13
-  xor %rcx, %rcx
+  xor %ecx, %ecx
   adoxq 0(%rsi), %r8
   mulxq 40(%rsi), %r9, %rbx
   adcx %r13, %r9
@@ -286,7 +286,7 @@ _fmul2_e:
   ;# Compute src1[0] * src2
   movq 0(%rsi), %rdx
   mulxq 0(%rcx), %r8, %r9
-  xor %r10, %r10
+  xor %r10d, %r10d
   movq %r8, 0(%rdi)
   
   mulxq 8(%rcx), %r10, %r11
@@ -304,7 +304,7 @@ _fmul2_e:
   ;# Compute src1[1] * src2
   movq 8(%rsi), %rdx
   mulxq 0(%rcx), %r8, %r9
-  xor %r10, %r10
+  xor %r10d, %r10d
   adcxq 8(%rdi), %r8
   movq %r8, 8(%rdi)
   mulxq 8(%rcx), %r10, %r11
@@ -326,7 +326,7 @@ _fmul2_e:
   ;# Compute src1[2] * src2
   movq 16(%rsi), %rdx
   mulxq 0(%rcx), %r8, %r9
-  xor %r10, %r10
+  xor %r10d, %r10d
   adcxq 16(%rdi), %r8
   movq %r8, 16(%rdi)
   mulxq 8(%rcx), %r10, %r11
@@ -348,7 +348,7 @@ _fmul2_e:
   ;# Compute src1[3] * src2
   movq 24(%rsi), %rdx
   mulxq 0(%rcx), %r8, %r9
-  xor %r10, %r10
+  xor %r10d, %r10d
   adcxq 24(%rdi), %r8
   movq %r8, 24(%rdi)
   mulxq 8(%rcx), %r10, %r11
@@ -373,7 +373,7 @@ _fmul2_e:
   ;# Compute src1[0] * src2
   movq 32(%rsi), %rdx
   mulxq 32(%rcx), %r8, %r9
-  xor %r10, %r10
+  xor %r10d, %r10d
   movq %r8, 64(%rdi)
   
   mulxq 40(%rcx), %r10, %r11
@@ -391,7 +391,7 @@ _fmul2_e:
   ;# Compute src1[1] * src2
   movq 40(%rsi), %rdx
   mulxq 32(%rcx), %r8, %r9
-  xor %r10, %r10
+  xor %r10d, %r10d
   adcxq 72(%rdi), %r8
   movq %r8, 72(%rdi)
   mulxq 40(%rcx), %r10, %r11
@@ -413,7 +413,7 @@ _fmul2_e:
   ;# Compute src1[2] * src2
   movq 48(%rsi), %rdx
   mulxq 32(%rcx), %r8, %r9
-  xor %r10, %r10
+  xor %r10d, %r10d
   adcxq 80(%rdi), %r8
   movq %r8, 80(%rdi)
   mulxq 40(%rcx), %r10, %r11
@@ -435,7 +435,7 @@ _fmul2_e:
   ;# Compute src1[3] * src2
   movq 56(%rsi), %rdx
   mulxq 32(%rcx), %r8, %r9
-  xor %r10, %r10
+  xor %r10d, %r10d
   adcxq 88(%rdi), %r8
   movq %r8, 88(%rdi)
   mulxq 40(%rcx), %r10, %r11
@@ -464,7 +464,7 @@ _fmul2_e:
   ;# Step 1: Compute dst + carry == tmp_hi * 38 + tmp_lo
   mov $38, %rdx
   mulxq 32(%rsi), %r8, %r13
-  xor %rcx, %rcx
+  xor %ecx, %ecx
   adoxq 0(%rsi), %r8
   mulxq 40(%rsi), %r9, %rbx
   adcx %r13, %r9
@@ -497,7 +497,7 @@ _fmul2_e:
   ;# Step 1: Compute dst + carry == tmp_hi * 38 + tmp_lo
   mov $38, %rdx
   mulxq 96(%rsi), %r8, %r13
-  xor %rcx, %rcx
+  xor %ecx, %ecx
   adoxq 64(%rsi), %r8
   mulxq 104(%rsi), %r9, %rbx
   adcx %r13, %r9
@@ -545,7 +545,7 @@ _fsqr_e:
   movq 0(%rsi), %rdx
   ;# f[0]
   mulxq 8(%rsi), %r8, %r14
-  xor %r15, %r15
+  xor %r15d, %r15d
   ;# f[1]*f[0]
   mulxq 16(%rsi), %r9, %r10
   adcx %r14, %r9
@@ -569,7 +569,7 @@ _fsqr_e:
   ;# f[2]*f[1]
   
   ;# Step 2: Compute two parallel carry chains
-  xor %r15, %r15
+  xor %r15d, %r15d
   adox %rax, %r10
   adcx %r8, %r8
   adox %rcx, %r11
@@ -627,7 +627,7 @@ _fsqr_e:
   ;# Step 1: Compute dst + carry == tmp_hi * 38 + tmp_lo
   mov $38, %rdx
   mulxq 32(%rsi), %r8, %r13
-  xor %rcx, %rcx
+  xor %ecx, %ecx
   adoxq 0(%rsi), %r8
   mulxq 40(%rsi), %r9, %rbx
   adcx %r13, %r9
@@ -675,7 +675,7 @@ _fsqr2_e:
   movq 0(%rsi), %rdx
   ;# f[0]
   mulxq 8(%rsi), %r8, %r14
-  xor %r15, %r15
+  xor %r15d, %r15d
   ;# f[1]*f[0]
   mulxq 16(%rsi), %r9, %r10
   adcx %r14, %r9
@@ -699,7 +699,7 @@ _fsqr2_e:
   ;# f[2]*f[1]
   
   ;# Step 2: Compute two parallel carry chains
-  xor %r15, %r15
+  xor %r15d, %r15d
   adox %rax, %r10
   adcx %r8, %r8
   adox %rcx, %r11
@@ -754,7 +754,7 @@ _fsqr2_e:
   movq 32(%rsi), %rdx
   ;# f[0]
   mulxq 40(%rsi), %r8, %r14
-  xor %r15, %r15
+  xor %r15d, %r15d
   ;# f[1]*f[0]
   mulxq 48(%rsi), %r9, %r10
   adcx %r14, %r9
@@ -778,7 +778,7 @@ _fsqr2_e:
   ;# f[2]*f[1]
   
   ;# Step 2: Compute two parallel carry chains
-  xor %r15, %r15
+  xor %r15d, %r15d
   adox %rax, %r10
   adcx %r8, %r8
   adox %rcx, %r11
@@ -836,7 +836,7 @@ _fsqr2_e:
   ;# Step 1: Compute dst + carry == tmp_hi * 38 + tmp_lo
   mov $38, %rdx
   mulxq 32(%rsi), %r8, %r13
-  xor %rcx, %rcx
+  xor %ecx, %ecx
   adoxq 0(%rsi), %r8
   mulxq 40(%rsi), %r9, %rbx
   adcx %r13, %r9
@@ -869,7 +869,7 @@ _fsqr2_e:
   ;# Step 1: Compute dst + carry == tmp_hi * 38 + tmp_lo
   mov $38, %rdx
   mulxq 96(%rsi), %r8, %r13
-  xor %rcx, %rcx
+  xor %ecx, %ecx
   adoxq 64(%rsi), %r8
   mulxq 104(%rsi), %r9, %rbx
   adcx %r13, %r9
