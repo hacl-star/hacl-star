@@ -603,6 +603,7 @@ Hacl_RSAPSS_rsapss_sign(
     uint32_t eLen = (eBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
     uint64_t *n = skey;
     uint64_t *r2 = skey + nLen;
+    uint64_t *e = skey + nLen + nLen;
     uint64_t *d = skey + nLen + nLen + eLen;
     uint32_t k = (modBits - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
     uint32_t emBits = modBits - (uint32_t)1U;
@@ -614,12 +615,35 @@ Hacl_RSAPSS_rsapss_sign(
     uint64_t m[nLen];
     memset(m, 0U, nLen * sizeof (uint64_t));
     KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
+    uint64_t m_[nLen];
+    memset(m_, 0U, nLen * sizeof (uint64_t));
+    KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
     uint64_t s[nLen];
     memset(s, 0U, nLen * sizeof (uint64_t));
     pss_encode(a, sLen, salt, msgLen, msg, emBits, em);
     bn_from_bytes_be(emLen, em, m);
     bn_mod_exp_mont_ladder_precompr2(nLen, n, m, dBits, d, r2, s);
+    bn_mod_exp_precompr2(nLen, n, s, eBits, e, r2, m_);
+    uint64_t mask = (uint64_t)0xFFFFFFFFFFFFFFFFU;
+    for (uint32_t i = (uint32_t)0U; i < nLen; i++)
+    {
+      uint64_t uu____0 = FStar_UInt64_eq_mask(m[i], m_[i]);
+      mask = uu____0 & mask;
+    }
+    uint64_t mask1 = mask;
+    uint64_t eq_m = mask1;
+    for (uint32_t i = (uint32_t)0U; i < nLen; i++)
+    {
+      uint64_t *os = s;
+      uint64_t x = s[i];
+      uint64_t x0 = eq_m & x;
+      os[i] = x0;
+    }
     bn_to_bytes_be(k, s, sgnt);
+    if (eq_m == (uint64_t)0U)
+    {
+      return false;
+    }
     return true;
   }
   return false;
