@@ -114,38 +114,46 @@ MerkleTree_Low_path *mt_init_path(uint32_t hash_size);
 /*
   Destructor for paths
 */
-void mt_free_path(MerkleTree_Low_path *p);
+void mt_free_path(MerkleTree_Low_path *path1);
 
 /*
   Length of a path
 
-  @param[in] p Path  
-  
+  @param[in] p Path
+
   return The length of the path
 */
-uint32_t mt_get_path_length(const MerkleTree_Low_path *p);
+uint32_t mt_get_path_length(const MerkleTree_Low_path *path1);
+
+/*
+  Insert hash into path
+
+  @param[in] p Path
+  @param[in] hash Hash to insert
+*/
+void mt_path_insert(MerkleTree_Low_path *path1, uint8_t *hash1);
 
 /*
   Get step on a path
 
   @param[in] p Path
   @param[in] i Path step index
-  
+
   return The hash at step i of p
 */
-uint8_t *mt_get_path_step(const MerkleTree_Low_path *p, uint32_t i);
+uint8_t *mt_get_path_step(const MerkleTree_Low_path *path1, uint32_t i);
 
 /*
   Precondition predicate for mt_get_path_step
 */
-bool mt_get_path_step_pre(const MerkleTree_Low_path *p, uint32_t i);
+bool mt_get_path_step_pre(const MerkleTree_Low_path *path1, uint32_t i);
 
 /*
   Construction with custom hash functions
 
   @param[in]  hash_size Hash size (in bytes)
   @param[in]  i         The initial hash
-  
+
   return The new Merkle tree
 */
 MerkleTree_Low_merkle_tree
@@ -156,7 +164,7 @@ MerkleTree_Low_merkle_tree
 );
 
 /*
-    Destruction
+  Destruction
 
   @param[in]  mt  The Merkle tree
 */
@@ -362,7 +370,7 @@ uint64_t mt_serialize_path(const MerkleTree_Low_path *path1, uint8_t *buf, uint6
 
  Note: buf must point to an allocated buffer.
 */
-MerkleTree_Low_path *mt_deserialize_path(uint32_t hash_size, const uint8_t *buf, uint64_t len);
+MerkleTree_Low_path *mt_deserialize_path(const uint8_t *buf, uint64_t len);
 
 typedef MerkleTree_Low_merkle_tree *mt_p0;
 
@@ -470,7 +478,7 @@ bool MerkleTree_Low_mt_get_root_pre(const MerkleTree_Low_merkle_tree *mt, uint8_
 
 void MerkleTree_Low_mt_get_root(const MerkleTree_Low_merkle_tree *mt, uint8_t *rt);
 
-void MerkleTree_Low_path_insert(uint32_t hsz, MerkleTree_Low_path *p, uint8_t *hp);
+void MerkleTree_Low_mt_path_insert(uint32_t hsz, MerkleTree_Low_path *p, uint8_t *hp);
 
 uint32_t MerkleTree_Low_mt_get_path_length(const MerkleTree_Low_path *p);
 
