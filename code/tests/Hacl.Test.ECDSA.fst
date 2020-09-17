@@ -311,7 +311,7 @@ let test_siggen_256 (vec:siggen_vector) : Stack unit (requires fun _ -> True) (e
     B.blit qy 0ul qxy 32ul 32ul; 
 
     let flag = ecdsa_sign_p256_sha2 rs msg_len msg d k in 
-    if Lib.RawIntTypes.u64_to_UInt64 flag = 0uL then
+    if flag then
       begin
       let okr = compare_and_print (B.sub rs 0ul 32ul) r 32ul in 
       let oks = compare_and_print (B.sub rs 32ul 32ul) s 32ul in 
@@ -376,7 +376,7 @@ let test_siggen_384 (vec:siggen_vector) : Stack unit (requires fun _ -> True) (e
     B.blit qy 0ul qxy 32ul 32ul; 
 
     let flag = ecdsa_sign_p256_sha384 rs msg_len msg d k in 
-    if Lib.RawIntTypes.u64_to_UInt64 flag = 0uL then
+    if flag then
       begin
       let okr = compare_and_print (B.sub rs 0ul 32ul) r 32ul in 
       let oks = compare_and_print (B.sub rs 32ul 32ul) s 32ul in 
@@ -441,7 +441,7 @@ let test_siggen_512 (vec:siggen_vector) : Stack unit (requires fun _ -> True) (e
     B.blit qy 0ul qxy 32ul 32ul; 
 
     let flag = ecdsa_sign_p256_sha512 rs msg_len msg d k in 
-    if Lib.RawIntTypes.u64_to_UInt64 flag = 0uL then
+    if flag then
       begin
       let okr = compare_and_print (B.sub rs 0ul 32ul) r 32ul in 
       let oks = compare_and_print (B.sub rs 32ul 32ul) s 32ul in 
