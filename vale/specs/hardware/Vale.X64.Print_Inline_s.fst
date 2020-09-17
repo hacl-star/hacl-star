@@ -342,7 +342,7 @@ let print_inline
 
   let inputs_use_rax = uses_rax args 0 of_arg in
   if reserved_regs rRax && Some? ret_val then
-    FStar.All.failwith "We require the annotation register uint64_t result(rax), but it would be ignored by gcc < 9"; 
+    FStar.All.failwith "We require the annotation register uint64_t result(rax), but it would be ignored by gcc < 9";
 
   if inputs_use_rax && Some? ret_val then
     FStar.All.failwith "inputs are not allowed to be passed in rax when there is a return argument";
@@ -372,8 +372,26 @@ let print_inline
   let input_str, inlined_reg_names, _ = print_nonmodified_inputs n of_arg regs_mod reserved_regs args output_reg_names output_nbr arg_names in
   let input_str = "  : " ^ input_str in
 
+  // Propagating the "numbered", implicit registers to reg32 and small_reg
+  let inlined_reg32_names r =
+    if ("%" ^ P.print_reg_name r) = inlined_reg_names r then "%" ^ P.print_reg32_name r
+    // In this case, this register is replaced by a number.
+    // We add the "k" prefix for 32-bit operands
+    else "k" ^ inlined_reg_names r
+  in
+  let inlined_small_reg_names r =
+    if r > 3 then P.print_small_reg_name r else
+    if ("%" ^ P.print_reg_name r) = inlined_reg_names r then "%" ^ P.print_small_reg_name r
+    // In this case, this register is replaced by a number.
+    // We add the "b" prefix for bytes
+    else "b" ^ inlined_reg_names r
+  in
+
   // In inline assembly, operands are prefixed by "%%" instead of "%" in regular GCC assembly
-  let printer = {P.gcc with P.print_reg_name = inlined_reg_names } in
+  let printer = {P.gcc with
+    P.print_reg_name = inlined_reg_names;
+    P.print_reg32_name = inlined_reg32_names;
+    P.print_small_reg_name = inlined_small_reg_names } in
 
   // The assembly should be compliant with gcc
   let (code_str, final_label) = print_code (remove_blank code) label printer in

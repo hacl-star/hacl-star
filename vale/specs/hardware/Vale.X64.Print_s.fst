@@ -11,6 +11,8 @@ open FStar.IO
 
 noeq type printer = {
   print_reg_name: reg_64 -> string;
+  print_reg32_name: reg_64 -> string;
+  print_small_reg_name: reg_64 -> string;
   reg_prefix : unit -> string;
   mem_prefix : string -> string;
   maddr      : string -> option (string & string) -> string -> string;
@@ -44,12 +46,8 @@ let print_reg_name (r:reg_64) : string =
   | 14 -> "r14"
   | 15 -> "r15"
 
-let print_reg64 (r:reg_64) (p:printer) : string =
-  p.reg_prefix() ^ p.print_reg_name r
-
-let print_reg32 (r:reg_64) (p:printer) : string =
-  p.reg_prefix() ^
-  (match r with
+let print_reg32_name (r:reg_64) : string =
+  match r with
   | 0 -> "eax"
   | 1 -> "ebx"
   | 2 -> "ecx"
@@ -59,17 +57,23 @@ let print_reg32 (r:reg_64) (p:printer) : string =
   | 6 -> "ebp"
   | 7 -> "esp"
   | _ -> print_reg_name r ^ "d"
-  )
 
-let print_small_reg (r:reg_64) (p:printer) : string =
-  p.reg_prefix() ^
-  (match r with
+let print_small_reg_name (r:reg_64) : string =
+  match r with
   | 0 -> "al"
   | 1 -> "bl"
   | 2 -> "cl"
   | 3 -> "dl"
   | _ -> " !!! INVALID small operand !!!  Expected al, bl, cl, or dl."
-  )
+
+let print_reg64 (r:reg_64) (p:printer) : string =
+  p.reg_prefix() ^ p.print_reg_name r
+
+let print_reg32 (r:reg_64) (p:printer) : string =
+  p.reg_prefix() ^ p.print_reg32_name r
+
+let print_small_reg (r:reg_64) (p:printer) : string =
+  p.reg_prefix() ^ p.print_small_reg_name r
 
 let print_maddr (m:maddr) (ptr_type:string) (reg_printer:reg -> printer -> string) (p:printer) : string =
   p.mem_prefix ptr_type ^
@@ -313,6 +317,8 @@ let masm : printer =
   let ret (name:string) = "  ret\n" ^ name ^ " endp\n" in
   {
   print_reg_name = print_reg_name;
+  print_reg32_name = print_reg32_name;
+  print_small_reg_name = print_small_reg_name;
   reg_prefix = reg_prefix;
   mem_prefix = mem_prefix;
   maddr      = maddr;
@@ -350,6 +356,8 @@ let gcc : printer =
   let ret (name:string) = "  ret\n\n" in
   {
   print_reg_name = print_reg_name;
+  print_reg32_name = print_reg32_name;
+  print_small_reg_name = print_small_reg_name;
   reg_prefix = reg_prefix;
   mem_prefix = mem_prefix;
   maddr      = maddr;

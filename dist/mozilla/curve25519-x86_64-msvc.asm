@@ -7,11 +7,11 @@ add_scalar_e proc
   mov rsi, rdx
   mov rdx, r8
   ;# Clear registers to propagate the carry bit
-  xor r8, r8
-  xor r9, r9
-  xor r10, r10
-  xor r11, r11
-  xor rax, rax
+  xor r8d, r8d
+  xor r9d, r9d
+  xor r10d, r10d
+  xor r11d, r11d
+  xor eax, eax
   
   ;# Begin addition chain
   add rdx, qword ptr [rsi + 0]
@@ -52,7 +52,7 @@ fadd_e proc
   cmovc rax, rdx
   
   ;# Step 2: Add carry*38 to the original sum
-  xor rcx, rcx
+  xor ecx, ecx
   add r8, rax
   adcx r9, rcx
   mov qword ptr [rdi + 8], r9
@@ -176,7 +176,7 @@ fmul_e proc
   ;# Compute src1[0] * src2
   mov rdx, qword ptr [rsi + 0]
   mulx r9, r8, qword ptr [rcx + 0]
-  xor r10, r10
+  xor r10d, r10d
   mov qword ptr [rdi + 0], r8
   
   mulx r11, r10, qword ptr [rcx + 8]
@@ -194,7 +194,7 @@ fmul_e proc
   ;# Compute src1[1] * src2
   mov rdx, qword ptr [rsi + 8]
   mulx r9, r8, qword ptr [rcx + 0]
-  xor r10, r10
+  xor r10d, r10d
   adcx r8, qword ptr [rdi + 8]
   mov qword ptr [rdi + 8], r8
   mulx r11, r10, qword ptr [rcx + 8]
@@ -216,7 +216,7 @@ fmul_e proc
   ;# Compute src1[2] * src2
   mov rdx, qword ptr [rsi + 16]
   mulx r9, r8, qword ptr [rcx + 0]
-  xor r10, r10
+  xor r10d, r10d
   adcx r8, qword ptr [rdi + 16]
   mov qword ptr [rdi + 16], r8
   mulx r11, r10, qword ptr [rcx + 8]
@@ -238,7 +238,7 @@ fmul_e proc
   ;# Compute src1[3] * src2
   mov rdx, qword ptr [rsi + 24]
   mulx r9, r8, qword ptr [rcx + 0]
-  xor r10, r10
+  xor r10d, r10d
   adcx r8, qword ptr [rdi + 24]
   mov qword ptr [rdi + 24], r8
   mulx r11, r10, qword ptr [rcx + 8]
@@ -267,7 +267,7 @@ fmul_e proc
   ;# Step 1: Compute dst + carry == tmp_hi * 38 + tmp_lo
   mov rdx, 38
   mulx r13, r8, qword ptr [rsi + 32]
-  xor rcx, rcx
+  xor ecx, ecx
   adox r8, qword ptr [rsi + 0]
   mulx rbx, r9, qword ptr [rsi + 40]
   adcx r9, r13
@@ -320,7 +320,7 @@ fmul2_e proc
   ;# Compute src1[0] * src2
   mov rdx, qword ptr [rsi + 0]
   mulx r9, r8, qword ptr [rcx + 0]
-  xor r10, r10
+  xor r10d, r10d
   mov qword ptr [rdi + 0], r8
   
   mulx r11, r10, qword ptr [rcx + 8]
@@ -338,7 +338,7 @@ fmul2_e proc
   ;# Compute src1[1] * src2
   mov rdx, qword ptr [rsi + 8]
   mulx r9, r8, qword ptr [rcx + 0]
-  xor r10, r10
+  xor r10d, r10d
   adcx r8, qword ptr [rdi + 8]
   mov qword ptr [rdi + 8], r8
   mulx r11, r10, qword ptr [rcx + 8]
@@ -360,7 +360,7 @@ fmul2_e proc
   ;# Compute src1[2] * src2
   mov rdx, qword ptr [rsi + 16]
   mulx r9, r8, qword ptr [rcx + 0]
-  xor r10, r10
+  xor r10d, r10d
   adcx r8, qword ptr [rdi + 16]
   mov qword ptr [rdi + 16], r8
   mulx r11, r10, qword ptr [rcx + 8]
@@ -382,7 +382,7 @@ fmul2_e proc
   ;# Compute src1[3] * src2
   mov rdx, qword ptr [rsi + 24]
   mulx r9, r8, qword ptr [rcx + 0]
-  xor r10, r10
+  xor r10d, r10d
   adcx r8, qword ptr [rdi + 24]
   mov qword ptr [rdi + 24], r8
   mulx r11, r10, qword ptr [rcx + 8]
@@ -407,7 +407,7 @@ fmul2_e proc
   ;# Compute src1[0] * src2
   mov rdx, qword ptr [rsi + 32]
   mulx r9, r8, qword ptr [rcx + 32]
-  xor r10, r10
+  xor r10d, r10d
   mov qword ptr [rdi + 64], r8
   
   mulx r11, r10, qword ptr [rcx + 40]
@@ -425,7 +425,7 @@ fmul2_e proc
   ;# Compute src1[1] * src2
   mov rdx, qword ptr [rsi + 40]
   mulx r9, r8, qword ptr [rcx + 32]
-  xor r10, r10
+  xor r10d, r10d
   adcx r8, qword ptr [rdi + 72]
   mov qword ptr [rdi + 72], r8
   mulx r11, r10, qword ptr [rcx + 40]
@@ -447,7 +447,7 @@ fmul2_e proc
   ;# Compute src1[2] * src2
   mov rdx, qword ptr [rsi + 48]
   mulx r9, r8, qword ptr [rcx + 32]
-  xor r10, r10
+  xor r10d, r10d
   adcx r8, qword ptr [rdi + 80]
   mov qword ptr [rdi + 80], r8
   mulx r11, r10, qword ptr [rcx + 40]
@@ -469,7 +469,7 @@ fmul2_e proc
   ;# Compute src1[3] * src2
   mov rdx, qword ptr [rsi + 56]
   mulx r9, r8, qword ptr [rcx + 32]
-  xor r10, r10
+  xor r10d, r10d
   adcx r8, qword ptr [rdi + 88]
   mov qword ptr [rdi + 88], r8
   mulx r11, r10, qword ptr [rcx + 40]
@@ -498,7 +498,7 @@ fmul2_e proc
   ;# Step 1: Compute dst + carry == tmp_hi * 38 + tmp_lo
   mov rdx, 38
   mulx r13, r8, qword ptr [rsi + 32]
-  xor rcx, rcx
+  xor ecx, ecx
   adox r8, qword ptr [rsi + 0]
   mulx rbx, r9, qword ptr [rsi + 40]
   adcx r9, r13
@@ -531,7 +531,7 @@ fmul2_e proc
   ;# Step 1: Compute dst + carry == tmp_hi * 38 + tmp_lo
   mov rdx, 38
   mulx r13, r8, qword ptr [rsi + 96]
-  xor rcx, rcx
+  xor ecx, ecx
   adox r8, qword ptr [rsi + 64]
   mulx rbx, r9, qword ptr [rsi + 104]
   adcx r9, r13
@@ -585,7 +585,7 @@ fsqr_e proc
   mov rdx, qword ptr [rsi + 0]
   ;# f[0]
   mulx r14, r8, qword ptr [rsi + 8]
-  xor r15, r15
+  xor r15d, r15d
   ;# f[1]*f[0]
   mulx r10, r9, qword ptr [rsi + 16]
   adcx r9, r14
@@ -609,7 +609,7 @@ fsqr_e proc
   ;# f[2]*f[1]
   
   ;# Step 2: Compute two parallel carry chains
-  xor r15, r15
+  xor r15d, r15d
   adox r10, rax
   adcx r8, r8
   adox r11, rcx
@@ -667,7 +667,7 @@ fsqr_e proc
   ;# Step 1: Compute dst + carry == tmp_hi * 38 + tmp_lo
   mov rdx, 38
   mulx r13, r8, qword ptr [rsi + 32]
-  xor rcx, rcx
+  xor ecx, ecx
   adox r8, qword ptr [rsi + 0]
   mulx rbx, r9, qword ptr [rsi + 40]
   adcx r9, r13
@@ -721,7 +721,7 @@ fsqr2_e proc
   mov rdx, qword ptr [rsi + 0]
   ;# f[0]
   mulx r14, r8, qword ptr [rsi + 8]
-  xor r15, r15
+  xor r15d, r15d
   ;# f[1]*f[0]
   mulx r10, r9, qword ptr [rsi + 16]
   adcx r9, r14
@@ -745,7 +745,7 @@ fsqr2_e proc
   ;# f[2]*f[1]
   
   ;# Step 2: Compute two parallel carry chains
-  xor r15, r15
+  xor r15d, r15d
   adox r10, rax
   adcx r8, r8
   adox r11, rcx
@@ -800,7 +800,7 @@ fsqr2_e proc
   mov rdx, qword ptr [rsi + 32]
   ;# f[0]
   mulx r14, r8, qword ptr [rsi + 40]
-  xor r15, r15
+  xor r15d, r15d
   ;# f[1]*f[0]
   mulx r10, r9, qword ptr [rsi + 48]
   adcx r9, r14
@@ -824,7 +824,7 @@ fsqr2_e proc
   ;# f[2]*f[1]
   
   ;# Step 2: Compute two parallel carry chains
-  xor r15, r15
+  xor r15d, r15d
   adox r10, rax
   adcx r8, r8
   adox r11, rcx
@@ -882,7 +882,7 @@ fsqr2_e proc
   ;# Step 1: Compute dst + carry == tmp_hi * 38 + tmp_lo
   mov rdx, 38
   mulx r13, r8, qword ptr [rsi + 32]
-  xor rcx, rcx
+  xor ecx, ecx
   adox r8, qword ptr [rsi + 0]
   mulx rbx, r9, qword ptr [rsi + 40]
   adcx r9, r13
@@ -915,7 +915,7 @@ fsqr2_e proc
   ;# Step 1: Compute dst + carry == tmp_hi * 38 + tmp_lo
   mov rdx, 38
   mulx r13, r8, qword ptr [rsi + 96]
-  xor rcx, rcx
+  xor ecx, ecx
   adox r8, qword ptr [rsi + 64]
   mulx rbx, r9, qword ptr [rsi + 104]
   adcx r9, r13
