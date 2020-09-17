@@ -157,7 +157,8 @@ let bn_to_bytes_be_ len b res =
   let spec (h:mem) = S.bn_to_bytes_be_f (v len) (as_seq h b) in
   fill_blocks h0 8ul len res a_spec (fun _ _ -> ()) (fun _ -> LowStar.Buffer.loc_none) spec
   (fun j -> uint_to_bytes_be (sub res (j *! 8ul) 8ul) b.(len -! j -! 1ul));
-  assert_norm (S.bn_to_bytes_be_ (v len) (as_seq h0 b) == norm [delta] S.bn_to_bytes_be_ (v len) (as_seq h0 b))
+  norm_spec [delta_only [`%S.bn_to_bytes_be_]] (S.bn_to_bytes_be_ (v len) (as_seq h0 b))
+
 
 inline_for_extraction noextract
 let bn_to_bytes_be_st (len:size_t{0 < v len /\ 8 * v (blocks len 8ul) <= max_size_t}) =
