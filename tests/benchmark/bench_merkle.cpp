@@ -261,7 +261,7 @@ class MerklePathVerification : public Benchmark
 
 void bench_merkle_insert(const BenchmarkSettings & s)
 {
-  size_t data_sizes[] = { 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576 };
+  size_t data_sizes[] = { 1024, 2048, 4096, 8192, 16384, 32768, 65536 };
   std::string data_filename = "bench_merkle_insert.csv";
 
   std::list<Benchmark*> todo;
@@ -305,7 +305,7 @@ void bench_merkle_insert(const BenchmarkSettings & s)
 
 void bench_merkle_get_path(const BenchmarkSettings & s)
 {
-  size_t data_sizes[] = { 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576 };
+  size_t data_sizes[] = { 1024, 2048, 4096, 8192, 16384, 32768, 65536 };
   std::string data_filename = "bench_merkle_get_path.csv";
 
   std::list<Benchmark*> todo;
@@ -349,7 +349,7 @@ void bench_merkle_get_path(const BenchmarkSettings & s)
 
 void bench_merkle_verify(const BenchmarkSettings & s)
 {
-  size_t data_sizes[] = { 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576 };
+  size_t data_sizes[] = { 1024, 2048, 4096, 8192, 16384, 32768, 65536 };
   std::string data_filename = "bench_merkle_verify.csv";
 
   std::list<Benchmark*> todo;
