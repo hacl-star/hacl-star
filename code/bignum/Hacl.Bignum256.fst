@@ -32,7 +32,7 @@ let mul (a b: lbignum n_limbs): BN.bn_karatsuba_mul_st a b =
   BN.bn_mul n_limbs a n_limbs b
 
 let bit_set: BN.bn_set_ith_bit_st n_limbs =
-  BN.(norm [ zeta; primops; iota; delta_only [ `%bn_set_ith_bit ] ] (bn_set_ith_bit n_limbs))
+  BN.bn_set_ith_bit n_limbs
 
 let add_mod_n: BN.bn_add_mod_n_st n_limbs =
   BN.bn_add_mod_n n_limbs
@@ -91,7 +91,7 @@ let mod_precompr2 = BR.mk_bn_mod_slow_precompr2 n_limbs #mont_inst
 let mod = BR.mk_bn_mod_slow n_limbs #mont_inst
 
 let mod_exp_loop: BE.bn_mod_exp_loop_st n_limbs =
-  norm [ zeta; primops; iota; delta_only [ `%BE.bn_mod_exp_loop ] ] (BE.bn_mod_exp_loop n_limbs #mont_inst)
+  BE.bn_mod_exp_loop n_limbs #mont_inst
 
 let mod_exp_precompr2 =
   BE.mk_bn_mod_exp_precompr2 n_limbs #mont_inst mod_exp_loop
@@ -100,7 +100,7 @@ let mod_exp =
   BE.mk_bn_mod_exp n_limbs #mont_inst mod_exp_loop
 
 let mod_exp_mont_ladder_loop: BE.bn_mod_exp_mont_ladder_loop_st n_limbs =
-  norm [ zeta; primops; iota; delta_only [ `%BE.bn_mod_exp_mont_ladder_loop ] ] (BE.bn_mod_exp_mont_ladder_loop n_limbs #mont_inst)
+  BE.bn_mod_exp_mont_ladder_loop n_limbs #mont_inst
 
 let mod_exp_mont_ladder_precompr2 =
   BE.mk_bn_mod_exp_mont_ladder_precompr2 n_limbs #mont_inst mod_exp_mont_ladder_loop

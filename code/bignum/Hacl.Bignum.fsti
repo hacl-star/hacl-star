@@ -240,6 +240,7 @@ let bn_set_ith_bit_st (len:size_t) =
   (ensures  fun h0 _ h1 -> modifies (loc b) h0 h1 /\
     as_seq h1 b == S.bn_set_ith_bit (as_seq h0 b) (v i))
 
+inline_for_extraction noextract
 val bn_set_ith_bit: len:size_t -> bn_set_ith_bit_st len
 
 
