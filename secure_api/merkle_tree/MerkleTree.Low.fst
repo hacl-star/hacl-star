@@ -1680,7 +1680,7 @@ let mt_get_root #hsz mt rt =
 #pop-options
 
 inline_for_extraction
-val path_insert:
+val mt_path_insert:
   #hsz:hash_size_t ->
   mtr:HH.rid -> p:path_p -> hp:hash #hsz ->
   HST.ST unit
@@ -1705,7 +1705,7 @@ val path_insert:
         (let hspec:(S.seq (MTH.hash #(U32.v hsz))) = (MTH.path_insert #(U32.v hsz) before (Rgl?.r_repr (hreg hsz) h0 hp)) in
           S.equal hspec after)))))
 #push-options "--z3rlimit 20 --initial_fuel 1 --max_fuel 1"
-let path_insert #hsz mtr p hp =  
+let mt_path_insert #hsz mtr p hp =  
   let pth = !*p in
   let pv = Path?.hashes pth in
   let hh0 = HST.get () in
@@ -1831,18 +1831,18 @@ let mt_make_path_step #hsz lv mtr hs rhs i j k p actd =
     assert (HH.includes mtr
              (B.frameOf (V.get hh0 (V.get hh0 hs lv) (k - 1ul - ofs))));
     assert(Path?.hash_size pth = hsz);
-    path_insert #hsz mtr p (V.index (V.index hs lv) (k - 1ul - ofs))
+    mt_path_insert #hsz mtr p (V.index (V.index hs lv) (k - 1ul - ofs))
   end
   else begin
     if k = j then ()
     else if k + 1ul = j
     then (if actd
          then (assert (HH.includes mtr (B.frameOf (V.get hh0 rhs lv)));
-              path_insert mtr p (V.index rhs lv)))
+              mt_path_insert mtr p (V.index rhs lv)))
     else (hash_vv_rv_inv_includes hh0 hs lv (k + 1ul - ofs);
          assert (HH.includes mtr
                   (B.frameOf (V.get hh0 (V.get hh0 hs lv) (k + 1ul - ofs))));
-         path_insert mtr p (V.index (V.index hs lv) (k + 1ul - ofs)))
+         mt_path_insert mtr p (V.index (V.index hs lv) (k + 1ul - ofs)))
   end
 #pop-options
 
@@ -1997,7 +1997,9 @@ val mt_get_path_pre:
      let mt = CB.cast mt in
      let p = CB.cast p in
      let dmt = B.get h0 mt 0 in
+     let dp = B.get h0 p 0 in
      MT?.hash_size dmt = (Ghost.reveal hsz) /\
+     Path?.hash_size dp = (Ghost.reveal hsz) /\
      mt_safe h0 mt /\
      path_safe h0 (B.frameOf mt) p /\    
      Rgl?.r_inv (hreg hsz) h0 root /\
@@ -2100,7 +2102,7 @@ let mt_get_path #hsz mt idx p root =
   hash_vv_as_seq_get_index hh1 hs 0ul (idx - ofs);
 
   let ih = V.index (V.index hs 0ul) (idx - ofs) in
-  path_insert #hsz mtframe p ih;
+  mt_path_insert #hsz mtframe p ih;
 
   let hh2 = HST.get () in
   assert (S.equal (lift_path hh2 mtframe p)
