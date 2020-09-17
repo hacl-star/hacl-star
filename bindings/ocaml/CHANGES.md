@@ -1,4 +1,10 @@
-# 0.2.0
+## 0.2.2
+- Fix for bug impacting performance
+
+## 0.2.1
+- Minor fixes
+
+## 0.2.0
 - Updated bindings for P-256
 - Bytecode files provided in hacl-star-raw to ease debugging
 
