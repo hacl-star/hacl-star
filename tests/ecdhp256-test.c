@@ -156,7 +156,7 @@ bool test_wycheproof()
 			if ((w_vectors[i].flag == incorrect) && success)
 				ok = false;
 
-			f ((w_vectors[i].flag == correct) && !success)
+			if ((w_vectors[i].flag == correct) && !success)
 				ok = false;
 
 			if (success) 
