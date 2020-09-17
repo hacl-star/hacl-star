@@ -759,8 +759,10 @@ uint64_t
   uint64_t bits00 = ~mask0 & bits0;
   uint32_t b = (uint32_t)bits00;
   memset(r2, 0U, nLen1 * sizeof (uint64_t));
-  Hacl_Bignum_bn_set_ith_bit(nLen1, r2, b);
-  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)128U * nLen1 - b; i0++)
+  uint32_t i0 = b / (uint32_t)64U;
+  uint32_t j = b % (uint32_t)64U;
+  r2[i0] = r2[i0] | (uint64_t)1U << j;
+  for (uint32_t i1 = (uint32_t)0U; i1 < (uint32_t)128U * nLen1 - b; i1++)
   {
     uint64_t c0 = (uint64_t)0U;
     uint32_t k0 = nLen1 / (uint32_t)4U * (uint32_t)4U;
@@ -906,8 +908,10 @@ uint64_t
   uint64_t bits00 = ~mask0 & bits0;
   uint32_t b = (uint32_t)bits00;
   memset(r2, 0U, nLen2 * sizeof (uint64_t));
-  Hacl_Bignum_bn_set_ith_bit(nLen2, r2, b);
-  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)128U * nLen2 - b; i0++)
+  uint32_t i0 = b / (uint32_t)64U;
+  uint32_t j = b % (uint32_t)64U;
+  r2[i0] = r2[i0] | (uint64_t)1U << j;
+  for (uint32_t i1 = (uint32_t)0U; i1 < (uint32_t)128U * nLen2 - b; i1++)
   {
     uint64_t c0 = (uint64_t)0U;
     uint32_t k0 = nLen2 / (uint32_t)4U * (uint32_t)4U;

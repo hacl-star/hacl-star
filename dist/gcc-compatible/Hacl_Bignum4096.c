@@ -906,8 +906,10 @@ uint64_t *Hacl_Bignum4096_new_precompr2(uint32_t nLen, uint64_t *n)
   uint64_t bits00 = ~mask0 & bits0;
   uint32_t b = (uint32_t)bits00;
   memset(res2, 0U, nLen * sizeof (uint64_t));
-  Hacl_Bignum_bn_set_ith_bit(nLen, res2, b);
-  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)128U * nLen - b; i0++)
+  uint32_t i0 = b / (uint32_t)64U;
+  uint32_t j = b % (uint32_t)64U;
+  res2[i0] = res2[i0] | (uint64_t)1U << j;
+  for (uint32_t i1 = (uint32_t)0U; i1 < (uint32_t)128U * nLen - b; i1++)
   {
     uint64_t c0 = (uint64_t)0U;
     uint32_t k0 = nLen / (uint32_t)4U * (uint32_t)4U;

@@ -22,9 +22,6 @@ module Bindings(F:Cstubs.FOREIGN) =
       foreign "Hacl_Bignum_bn_get_ith_bit"
         (uint32_t @->
            ((ptr uint64_t) @-> (uint32_t @-> (returning uint64_t))))
-    let hacl_Bignum_bn_set_ith_bit =
-      foreign "Hacl_Bignum_bn_set_ith_bit"
-        (uint32_t @-> ((ptr uint64_t) @-> (uint32_t @-> (returning void))))
     let hacl_Bignum_bn_lt_mask =
       foreign "Hacl_Bignum_bn_lt_mask"
         (uint32_t @->

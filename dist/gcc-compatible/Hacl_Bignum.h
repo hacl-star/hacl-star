@@ -83,13 +83,6 @@ static inline uint64_t Hacl_Bignum_bn_get_ith_bit(uint32_t len, uint64_t *input,
   return tmp >> j & (uint64_t)1U;
 }
 
-static inline void Hacl_Bignum_bn_set_ith_bit(uint32_t len, uint64_t *input, uint32_t ind)
-{
-  uint32_t i = ind / (uint32_t)64U;
-  uint32_t j = ind % (uint32_t)64U;
-  input[i] = input[i] | (uint64_t)1U << j;
-}
-
 static inline uint64_t Hacl_Bignum_bn_lt_mask(uint32_t len, uint64_t *a, uint64_t *b)
 {
   uint64_t acc = (uint64_t)0U;
