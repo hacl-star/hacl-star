@@ -276,7 +276,7 @@ val rsapss_sign_:
   -> msgLen:size_t
   -> msg:lbuffer uint8 msgLen
   -> sgnt:lbuffer uint8 (blocks modBits 8ul) ->
-  Stack unit
+  Stack bool
   (requires fun h ->
     live h salt /\ live h msg /\ live h sgnt /\ live h skey /\
     disjoint sgnt salt /\ disjoint sgnt msg /\ disjoint sgnt salt /\ disjoint sgnt skey /\
@@ -285,8 +285,17 @@ val rsapss_sign_:
     LS.rsapss_sign_pre a (v modBits) (v eBits) (v dBits) (as_seq h skey)
       (v sLen) (as_seq h salt) (v msgLen) (as_seq h msg))
   (ensures  fun h0 b h1 -> modifies (loc sgnt) h0 h1 /\
-    LS.rsapss_sign_post a (v modBits) (v eBits) (v dBits) (as_seq h0 skey)
-      (v sLen) (as_seq h0 salt) (v msgLen) (as_seq h0 msg) (as_seq h1 sgnt))
+   (let nLen = blocks modBits 64ul in
+    let eLen = blocks eBits 64ul in
+    let dLen = blocks dBits 64ul in
+
+    let n = bn_v h0 (gsub skey 0ul nLen) in
+    let e = bn_v h0 (gsub skey (nLen +! nLen) eLen) in
+    let d = bn_v h0 (gsub skey (nLen +! nLen +! eLen) dLen) in
+    let pkeys : S.rsa_pubkey (v modBits) = S.Mk_rsa_pubkey n e in
+    let skeys : S.rsa_privkey (v modBits) = S.Mk_rsa_privkey pkeys d in
+    let sgnt_s = S.rsapss_sign_ a (v modBits) skeys (v sLen) (as_seq h0 salt) (v msgLen) (as_seq h0 msg) in
+    if b then Some? sgnt_s /\ as_seq h1 sgnt == Some?.v sgnt_s else None? sgnt_s))
 
 let rsapss_sign_ a modBits eBits dBits skey sLen salt msgLen msg sgnt =
   push_frame ();
@@ -297,6 +306,7 @@ let rsapss_sign_ a modBits eBits dBits skey sLen salt msgLen msg sgnt =
 
   let n  = sub skey 0ul nLen in
   let r2 = sub skey nLen nLen in
+  let e  = sub skey (nLen +! nLen) eLen in
   let d  = sub skey (nLen +! nLen +! eLen) dLen in
 
   let k = blocks modBits 8ul in
@@ -304,8 +314,9 @@ let rsapss_sign_ a modBits eBits dBits skey sLen salt msgLen msg sgnt =
   let emLen = blocks emBits 8ul in
 
   let em = create emLen (u8 0) in
-  let m = create nLen (u64 0) in
-  let s = create nLen (u64 0) in
+  let m  = create nLen (u64 0) in
+  let m' = create nLen (u64 0) in
+  let s  = create nLen (u64 0) in
 
   pss_encode a sLen salt msgLen msg emBits em;
   LS.em_blocks_lt_max_size_t (v modBits);
@@ -317,15 +328,24 @@ let rsapss_sign_ a modBits eBits dBits skey sLen salt msgLen msg sgnt =
     (fun _ -> bn_from_bytes_be emLen em (sub m 0ul (blocks emLen 8ul)));
 
   let _ = bn_mod_exp_mont_ladder_precompr2 nLen n m dBits d r2 s in
+  let _ = bn_mod_exp_precompr2 nLen n s eBits e r2 m' in
+
+  let eq_m = bn_eq_mask nLen m m' in
+  let h_m = ST.get () in
+  Hacl.Spec.Bignum.bn_eq_mask_lemma (as_seq h_m m) (as_seq h_m m');
+  mapT nLen s (logand eq_m) s;
+
   LS.blocks_bits_lemma (v modBits);
   assert (v (blocks k 8ul) == v nLen);
   bn_to_bytes_be k s sgnt;
+
   let h_final = ST.get () in
   //assert (as_seq h_final sgnt == LS.rsapss_sign a (v modBits) (v eBits) (v dBits)
   //(as_seq h_init skey) (v sLen) (as_seq h_init salt) (v msgLen) (as_seq h_init msg));
   LS.rsapss_sign_lemma a (v modBits) (v eBits) (v dBits)
     (as_seq h_init skey) (v sLen) (as_seq h_init salt) (v msgLen) (as_seq h_init msg);
-  pop_frame ()
+  pop_frame ();
+  Hacl.Bignum.Base.unsafe_bool_of_u64 eq_m
 
 
 inline_for_extraction noextract
@@ -372,9 +392,8 @@ let rsapss_sign a modBits eBits dBits skey sLen salt msgLen msg sgnt =
     sLen <=. 0xfffffffful -! hLen -! 8ul &&
     sLen +! hLen +! 2ul <=. blocks (modBits -! 1ul) 8ul in
 
-  if b then begin
-    rsapss_sign_ a modBits eBits dBits skey sLen salt msgLen msg sgnt;
-    true end
+  if b then
+    rsapss_sign_ a modBits eBits dBits skey sLen salt msgLen msg sgnt
   else false
 
 

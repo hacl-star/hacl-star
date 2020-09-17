@@ -178,7 +178,7 @@ val rsapss_sign_post:
   -> salt:lseq uint8 sLen
   -> msgLen:nat
   -> msg:seq uint8{length msg == msgLen}
-  -> sgnt:lseq uint8 (blocks modBits 8) -> Type0
+  -> sgnt:option (lseq uint8 (blocks modBits 8)) -> Type0
 
 let rsapss_sign_post a modBits eBits dBits skey sLen salt msgLen msg sgnt =
   rsapss_sign_pre a modBits eBits dBits skey sLen salt msgLen msg /\
@@ -191,7 +191,7 @@ let rsapss_sign_post a modBits eBits dBits skey sLen salt msgLen msg sgnt =
   let d = bn_v (sub skey (nLen + nLen + eLen) dLen) in
   let pkeys : S.rsa_pubkey modBits = S.Mk_rsa_pubkey n e in
   let skeys : S.rsa_privkey modBits = S.Mk_rsa_privkey pkeys d in
-  sgnt `Seq.equal` S.rsapss_sign_ a modBits skeys sLen salt msgLen msg)
+  sgnt == S.rsapss_sign_ a modBits skeys sLen salt msgLen msg)
 
 
 val rsapss_verify_pre:
@@ -243,7 +243,7 @@ val rsapss_sign_:
   -> salt:lseq uint8 sLen
   -> msgLen:nat
   -> msg:seq uint8{length msg == msgLen}
-  -> Pure (lseq uint8 (blocks modBits 8))
+  -> Pure (option (lseq uint8 (blocks modBits 8)))
   (requires rsapss_sign_pre a modBits eBits dBits skey sLen salt msgLen msg)
   (ensures  fun sgnt -> True)
 
@@ -254,6 +254,7 @@ let rsapss_sign_ a modBits eBits dBits skey sLen salt msgLen msg =
 
   let n  = sub skey 0 nLen in
   let r2 = sub skey nLen nLen in
+  let e  = sub skey (nLen + nLen) eLen in
   let d  = sub skey (nLen + nLen + eLen) dLen in
 
   let k = blocks modBits 8 in
@@ -268,10 +269,15 @@ let rsapss_sign_ a modBits eBits dBits skey sLen salt msgLen msg =
   let m = update_sub m 0 (blocks emLen 8) emNat in
 
   let s = bn_mod_exp_mont_ladder_precompr2 nLen n m dBits d r2 in
+  let m' = bn_mod_exp_precompr2 nLen n s eBits e r2 in
+  let eq_m = bn_eq_mask m m' in
+  let s = map (logand eq_m) s in
+
   blocks_bits_lemma modBits;
   assert (blocks k 8 == nLen);
   let sgnt = bn_to_bytes_be k s in
-  sgnt
+
+  if Lib.RawIntTypes.u64_to_UInt64 eq_m = 0uL then None else Some sgnt
 
 
 val rsapss_sign_lemma:
@@ -295,8 +301,9 @@ let rsapss_sign_lemma a modBits eBits dBits skey sLen salt msgLen msg =
   let eLen = blocks eBits 64 in
   let dLen = blocks dBits 64 in
 
-  let n = sub skey 0 nLen in
+  let n  = sub skey 0 nLen in
   let r2 = sub skey nLen nLen in
+  let e  = sub skey (nLen + nLen) eLen in
   let d  = sub skey (nLen + nLen + eLen) dLen in
 
   let k = blocks modBits 8 in
@@ -321,12 +328,19 @@ let rsapss_sign_lemma a modBits eBits dBits skey sLen salt msgLen msg =
   SM.precomp_r2_mod_n_lemma n;
   bn_mod_exp_mont_ladder_precompr2_lemma nLen n m dBits d r2;
 
+  let m' = bn_mod_exp_precompr2 nLen n s eBits e r2 in
+  bn_mod_exp_precompr2_lemma nLen n s eBits e r2;
+  let eq_m = bn_eq_mask m m' in
+  bn_eq_mask_lemma m m';
+  let s' = map (logand eq_m) s in
+  bn_mask_lemma s eq_m;
+
   blocks_bits_lemma modBits;
   assert (blocks k 8 == nLen);
   Math.Lemmas.pow2_le_compat (8 * k) modBits;
-  assert (bn_v s < pow2 (8 * k));
-  let sgnt = bn_to_bytes_be k s in
-  bn_to_bytes_be_lemma k s
+  assert (bn_v s' < pow2 (8 * k));
+  let sgnt = bn_to_bytes_be k s' in
+  bn_to_bytes_be_lemma k s'
 
 
 val rsapss_verify_:

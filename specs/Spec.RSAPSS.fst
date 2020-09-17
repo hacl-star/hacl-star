@@ -251,7 +251,7 @@ val rsapss_sign_:
   -> salt:lbytes sLen
   -> msgLen:nat{msgLen <= Hash.max_input_length a}
   -> msg:bytes{length msg == msgLen} ->
-  lbytes (blocks modBits 8)
+  option (lbytes (blocks modBits 8))
 
 let rsapss_sign_ a modBits skey sLen salt msgLen msg =
   let pkey = Mk_rsa_privkey?.pkey skey in
@@ -269,8 +269,11 @@ let rsapss_sign_ a modBits skey sLen salt msgLen msg =
   let m = os2ip #emLen em in
   os2ip_lemma emBits em;
   let s = pow_mod #n m d in
-  let sb = i2osp nLen s in
-  sb
+  let m' = pow_mod #n s e in
+  if m = m' then
+    Some (i2osp nLen s)
+  else
+    None
 
 
 val rsapss_sign:
@@ -291,7 +294,7 @@ let rsapss_sign a modBits skey sLen salt msgLen msg =
     sLen + Hash.hash_length a + 2 <= blocks (modBits - 1) 8 in
 
   if b then
-    Some (rsapss_sign_ a modBits skey sLen salt msgLen msg)
+    rsapss_sign_ a modBits skey sLen salt msgLen msg
   else
     None
 
