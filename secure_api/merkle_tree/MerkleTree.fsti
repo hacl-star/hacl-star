@@ -38,7 +38,7 @@ let pt = fun _ _ _ -> True
 let mt_init_hash (hash_size:hash_size_t) (r:HST.erid): HST.ST (hash #hash_size) pf pt = MTNLHF.init_hash hash_size r
 
 [@ (Comment "  Destructor for hashes")  "c_inline"]
-let mt_free_hash (hash_size:Ghost.erased hash_size_t) (h:hash #hash_size): HST.ST unit pf pt = MTNLHF.free_hash #hash_size h
+let mt_free_hash (#hash_size:Ghost.erased hash_size_t) (h:hash #hash_size): HST.ST unit pf pt = MTNLHF.free_hash h
 
 
 [@ (Comment "  Constructor for paths") "c_inline"]
