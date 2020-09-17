@@ -260,8 +260,7 @@ let uints_to_bytes_le #t #l len o i =
   let spec (h:mem) = BS.uints_to_bytes_le_inner (as_seq h i) in
   fill_blocks h0 (size (numbytes t)) len o a_spec (fun _ _ -> ()) (fun _ -> loc_none) spec
     (fun j -> uint_to_bytes_le (sub o (mul_mod j (size (numbytes t))) (size (numbytes t))) i.(j));
-  assert_norm (BS.uints_to_bytes_le (as_seq h0 i) ==
-               norm [delta] BS.uints_to_bytes_le (as_seq h0 i))
+  norm_spec [delta_only [`%BS.uints_to_bytes_le]] (BS.uints_to_bytes_le (as_seq h0 i))
 
 let uints_to_bytes_be #t #l len o i =
   let h0 = ST.get () in
@@ -271,8 +270,7 @@ let uints_to_bytes_be #t #l len o i =
   let spec (h:mem) = BS.uints_to_bytes_be_inner (as_seq h i) in
   fill_blocks h0 (size (numbytes t)) len o a_spec (fun _ _ -> ()) (fun _ -> loc_none) spec
     (fun j -> uint_to_bytes_be (sub o (mul_mod j (size (numbytes t))) (size (numbytes t))) i.(j));
-  assert_norm (BS.uints_to_bytes_be (as_seq h0 i) ==
-               norm [delta] BS.uints_to_bytes_be (as_seq h0 i))
+  norm_spec [delta_only [`%BS.uints_to_bytes_be]] (BS.uints_to_bytes_be (as_seq h0 i))
 
 let uint_at_index_le #t #l #len i idx =
   let b = sub i (idx *! (size (numbytes t))) (size (numbytes t)) in
@@ -281,3 +279,4 @@ let uint_at_index_le #t #l #len i idx =
 let uint_at_index_be #t #l #len i idx =
   let b = sub i (idx *! (size (numbytes t))) (size (numbytes t)) in
   uint_from_bytes_be b
+  
