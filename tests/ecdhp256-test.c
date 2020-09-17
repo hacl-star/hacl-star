@@ -37,8 +37,8 @@ bool test_nist()
 	for (int i = 0 ; i< sizeof(i_vectors)/sizeof(ecdhp256_tv_i); i++)
 	{
 		printf("ECDH Initiator Test %d \n", i );
-		uint64_t success = Hacl_P256_ecp256dh_i(result, i_vectors[i].privateKey);
-		ok = ok && (success == 0);
+		bool success = Hacl_P256_ecp256dh_i(result, i_vectors[i].privateKey);
+		ok = ok && success;
 		ok = ok && compare_and_print(32, result, i_vectors[i].expectedPublicKeyX);
 		ok = ok && compare_and_print(32, result + 32, i_vectors[i].expectedPublicKeyY);
 	}
@@ -53,8 +53,8 @@ bool test_nist()
 		memcpy(pk, i_vectors[i].publicKeyX1,  32);
 		memcpy(pk+32, i_vectors[i].publicKeyY1,  32);
 	   
-	    uint64_t success = Hacl_P256_ecp256dh_r(result, pk, i_vectors[i].privateKey);
-	    ok = ok && (success == 0);
+	    bool success = Hacl_P256_ecp256dh_r(result, pk, i_vectors[i].privateKey);
+	    ok = ok && success;
 	    ok = ok && compare_and_print(32, result, i_vectors[i].expectedResult);
 	}
 
@@ -140,7 +140,7 @@ bool test_wycheproof()
 		printf("ECDH Wycheproof Test %d \n", i );
 
 		bool flagDecompressSuccessful = Hacl_P256_decompression_not_compressed_form(w_vectors[i].publicKey, decompressedPoint);
-		uint64_t success = Hacl_P256_ecp256dh_r(result, decompressedPoint, w_vectors[i].privateKey);
+		bool success = Hacl_P256_ecp256dh_r(result, decompressedPoint, w_vectors[i].privateKey);
 		
 		if (w_vectors[i].flag != 1) 
 		{
@@ -149,14 +149,21 @@ bool test_wycheproof()
 			// If the execution was correct, we also check the results. 
 
 			if (!flagDecompressSuccessful)
-				success = incorrect;
+				success = false;
 
-			ok = ok && (success == w_vectors[i].flag);
-			if (success == 0) 
+			// if the flag that the test returns states that the execution was INCORRECT but the flag we got is opposite - we consider the test to fail
+
+			if ((w_vectors[i].flag == incorrect) && success)
+				ok = false;
+
+			f ((w_vectors[i].flag == correct) && !success)
+				ok = false;
+
+			if (success) 
 				ok = ok && compare_and_print(32, result, w_vectors[i].sharedKey);
 		}
 		else
-			if (success == 0)
+			if (success)
 				ok = ok && compare_and_print(32, result, w_vectors[i].sharedKey);
 
 		if (!ok) 
