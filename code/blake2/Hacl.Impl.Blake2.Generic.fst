@@ -26,6 +26,9 @@ let is_valid_blake2_config (a : Spec.alg) (m : m_spec) =
   | Spec.Blake2B, M32 | Spec.Blake2B, M256 -> true
   | _ -> false
 
+inline_for_extraction noextract
+let valid_m_spec (a : Spec.alg) = m:m_spec{is_valid_blake2_config a m}
+
 /// Accessors for constants
 
 inline_for_extraction noextract
