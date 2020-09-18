@@ -34,7 +34,8 @@ module Spec = Spec.Blake2
 open Hacl.Impl.Blake2.Core
 module Core = Hacl.Impl.Blake2.Core
 open Hacl.Impl.Blake2.Generic
-module Impl = Hacl.Impl.Blake2.Generic
+open Hacl.Impl.Blake2.FGeneric
+module Impl = Hacl.Impl.Blake2.FGeneric
 module Incr = Spec.Hash.Incremental
 
 /// An instance of the stateful type class for blake2
@@ -607,7 +608,7 @@ let state_types_equalities a =
 inline_for_extraction noextract
 val mk_update_multi:
   a : alg ->
-  m : m_spec ->
+  m : valid_m_spec a ->
   no_key : bool ->
   key_size : key_size_t a no_key ->
   (i:G.erased index -> (
@@ -643,8 +644,7 @@ let mk_update_multi a m no_key key_size i acc prevlen blocks len =
   (**) Math.Lemmas.multiply_fractions (U32.v len) (U32.v (block_len a));
   [@inline_let] let prevlen' = blake2_prevlen a key_size prevlen in
   (**) assert(Lib.Buffer.disjoint wv h);
-  Impl.blake2_update_multi #a #m #len (Impl.blake2_update_block #a #m) wv h
-                           prevlen' blocks nb;
+  Impl.blake2_update_multi #a #m #len wv h prevlen' blocks nb;
   (**) let h3 = ST.get () in
   (**) assert(s_v h3 acc ==
   (**)    Loops.repeati #(Spec.Blake2.state a) (U32.v nb)
@@ -662,7 +662,7 @@ let mk_update_multi a m no_key key_size i acc prevlen blocks len =
 inline_for_extraction noextract
 val mk_update_last:
   a : alg ->
-  m : m_spec ->
+  m : valid_m_spec a ->
   no_key : bool ->
   key_size : key_size_t a no_key ->
   (i: G.erased index -> (
@@ -702,8 +702,7 @@ let mk_update_last a m no_key key_size i acc prevlen last last_len =
   (**) assert((U64.v prevlen) % Hash.block_length (to_hash_alg a) = 0);
   (**) assert(B.length last <= Hash.block_length (to_hash_alg a));
   (**) assert(U64.v prevlen + B.length last <= max_input_length a (U32.v key_size));
-  Impl.blake2_update_last #a #m (Impl.blake2_update_block #a #m) #last_len
-                          wv h prevlen' last_len last;
+  Impl.blake2_update_last #a #m #last_len wv h prevlen' last_len last;
   (* TODO: SH: if not put at the proper place, this call makes the proof loop or randomly fail *)
   (**) update_last_eq (U32.v key_size) (U64.v prevlen) (B.as_seq h0 last) (s_v h0 acc);
   (**) let h2 = ST.get () in
@@ -718,8 +717,8 @@ let mk_update_last a m no_key key_size i acc prevlen last last_len =
 
 #push-options "--ifuel 1 --z3cliopt smt.arith.nl=false"
 inline_for_extraction noextract
-let blake2 (a : alg) (m : m_spec) (no_key : bool) (key_size : key_size_t a no_key) : I.block unit
-  =
+let blake2 (a : alg) (m : valid_m_spec a) (no_key : bool) (key_size : key_size_t a no_key) :
+  I.block unit =
   I.Block
     I.Erased (* key management *)
     
@@ -751,9 +750,7 @@ let blake2 (a : alg) (m : m_spec) (no_key : bool) (key_size : key_size_t a no_ke
       [@inline_let]
       let key : b:B.buffer uint8{B.length b = U32.v key_size} =
         if no_key then B.null #uint8 else key in
-      Impl.blake2_init #a #m (Impl.blake2_update_block #a #m) wv h
-                       key_size key
-                       (output_len a))
+      Impl.blake2_init #a #m wv h key_size key (output_len a))
 
     (* update_multi *)
     (fun _ acc prevlen blocks len -> mk_update_multi a m no_key key_size () acc prevlen blocks len)
