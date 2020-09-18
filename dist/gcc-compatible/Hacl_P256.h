@@ -50,13 +50,10 @@ void Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(uint8_t *i, uint64_t *o);
 
 uint64_t Hacl_Impl_P256_Core_isPointAtInfinityPrivate(uint64_t *p);
 
+uint64_t Hacl_Impl_P256_DH__ecp256dh_r(uint64_t *result, uint64_t *pubKey, uint8_t *scalar);
+
 void
 Hacl_Impl_P256_Core_secretToPublic(uint64_t *result, uint8_t *scalar, uint64_t *tempBuffer);
-
-/*
-  This code is not side channel resistant on pubKey
-*/
-uint64_t Hacl_Impl_P256_DH__ecp256dh_r(uint64_t *result, uint64_t *pubKey, uint8_t *scalar);
 
 /*
  Input: result buffer: uint8[64], 
@@ -68,7 +65,7 @@ uint64_t Hacl_Impl_P256_DH__ecp256dh_r(uint64_t *result, uint64_t *pubKey, uint8
   
  The private key and the nonce are expected to be less than the curve order.
 */
-uint64_t
+bool
 Hacl_P256_ecdsa_sign_p256_sha2(
   uint8_t *result,
   uint32_t mLen,
@@ -87,7 +84,7 @@ Hacl_P256_ecdsa_sign_p256_sha2(
   
  The private key and the nonce are expected to be less than the curve order.
 */
-uint64_t
+bool
 Hacl_P256_ecdsa_sign_p256_sha384(
   uint8_t *result,
   uint32_t mLen,
@@ -106,7 +103,7 @@ Hacl_P256_ecdsa_sign_p256_sha384(
   
  The private key and the nonce are expected to be less than the curve order.
 */
-uint64_t
+bool
 Hacl_P256_ecdsa_sign_p256_sha512(
   uint8_t *result,
   uint32_t mLen,
@@ -127,7 +124,7 @@ Hacl_P256_ecdsa_sign_p256_sha512(
   
  The message m is expected to be hashed by a strong hash function, the lenght of the message is expected to be 32 bytes and more.
 */
-uint64_t
+bool
 Hacl_P256_ecdsa_sign_p256_without_hash(
   uint8_t *result,
   uint32_t mLen,
@@ -286,7 +283,7 @@ void Hacl_P256_reduction_8_32(uint8_t *x, uint8_t *result);
  Output: uint64, where 0 stands for the correct key generation. All the other values mean that an error has occurred. 
   
 */
-uint64_t Hacl_P256_ecp256dh_i(uint8_t *result, uint8_t *scalar);
+bool Hacl_P256_ecp256dh_i(uint8_t *result, uint8_t *scalar);
 
 /*
  This code is not side channel resistant on pub_key. 
@@ -297,7 +294,7 @@ uint64_t Hacl_P256_ecp256dh_i(uint8_t *result, uint8_t *scalar);
  Output: uint64, where 0 stands for the correct key generation. All the other values mean that an error has occurred. 
   
 */
-uint64_t Hacl_P256_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
+bool Hacl_P256_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
 
 #if defined(__cplusplus)
 }

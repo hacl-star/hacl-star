@@ -131,4 +131,5 @@ let dh_p256 : dh_st (DH.DH_P256) True = fun o k i ->
   let res = Hacl.Impl.P256.DH.ecp256dh_r tmp i k in
   copy o tmp;
   pop_frame();
+  (* change_error_code res *)
   if res then 0ul else 1ul 
