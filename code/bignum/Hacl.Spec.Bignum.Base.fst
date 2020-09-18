@@ -50,6 +50,12 @@ let mask_values (#t:inttype{unsigned t}) (x:uint_t t SEC) =
   v x = v (zeros t SEC) \/ v x = v (ones t SEC)
 
 inline_for_extraction noextract
+let unsafe_bool_of_u64 (m:uint64) : b:bool{b <==> v m = v (ones U64 SEC)} =
+  let open Lib.RawIntTypes in
+  FStar.UInt64.(u64_to_UInt64 m =^ u64_to_UInt64 (ones U64 SEC))
+
+
+inline_for_extraction noextract
 val mask_select: #t:inttype{unsigned t} -> mask:uint_t t SEC -> a:uint_t t SEC -> b:uint_t t SEC -> uint_t t SEC
 let mask_select mask a b =
   (mask &. a) |. ((lognot mask) &. b)

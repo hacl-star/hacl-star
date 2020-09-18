@@ -1,4 +1,4 @@
-module Hacl.Impl.MGF
+module Hacl.Impl.RSAPSS.MGF
 
 open FStar.HyperStack
 open FStar.HyperStack.ST

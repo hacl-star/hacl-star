@@ -4,7 +4,7 @@ module S = Spec.RSAPSS
 module Hash = Spec.Agile.Hash
 
 module IR = Hacl.Impl.RSAPSS
-module IK = Hacl.Impl.RSAKeys
+module IK = Hacl.Impl.RSAPSS.Keys
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 

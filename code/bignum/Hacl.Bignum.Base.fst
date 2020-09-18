@@ -50,8 +50,3 @@ val subborrow_u64_st: c_in:carry -> a:uint64 -> b:uint64 -> out:lbuffer uint64 1
 
 let subborrow_u64_st c_in a b out =
   Lib.IntTypes.Intrinsics.sub_borrow_u64 c_in a b out
-
-
-inline_for_extraction noextract
-let unsafe_bool_of_u64 (m:uint64{mask_values m}) : b:bool{b <==> v m = v (ones U64 SEC)} =
-  if FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 m =^ 0uL) then false else true
