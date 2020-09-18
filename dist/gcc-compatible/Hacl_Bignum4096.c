@@ -481,11 +481,7 @@ bool Hacl_Bignum4096_mod(uint64_t *n, uint64_t *a, uint64_t *res)
     uint64_t x0 = is_valid_m & x;
     os[i] = x0;
   }
-  if (is_valid_m == (uint64_t)0U)
-  {
-    return false;
-  }
-  return true;
+  return is_valid_m == (uint64_t)0xFFFFFFFFFFFFFFFFU;
 }
 
 static void
@@ -636,11 +632,7 @@ Hacl_Bignum4096_mod_exp(uint64_t *n, uint64_t *a, uint32_t bBits, uint64_t *b, u
     uint64_t x0 = is_valid_m & x;
     os[i] = x0;
   }
-  if (is_valid_m == (uint64_t)0U)
-  {
-    return false;
-  }
-  return true;
+  return is_valid_m == (uint64_t)0xFFFFFFFFFFFFFFFFU;
 }
 
 static void
@@ -819,11 +811,7 @@ Hacl_Bignum4096_mod_exp_mont_ladder(
     uint64_t x0 = is_valid_m & x;
     os[i] = x0;
   }
-  if (is_valid_m == (uint64_t)0U)
-  {
-    return false;
-  }
-  return true;
+  return is_valid_m == (uint64_t)0xFFFFFFFFFFFFFFFFU;
 }
 
 /*
@@ -853,16 +841,7 @@ uint64_t *Hacl_Bignum4096_new_precompr2(uint32_t nLen, uint64_t *n)
   uint64_t m0 = (uint64_t)0U - bit0;
   uint64_t m1 = Hacl_Bignum_bn_lt_mask(nLen, one, n);
   uint64_t is_valid_m = m0 & m1;
-  bool ite;
-  if (is_valid_m == (uint64_t)0U)
-  {
-    ite = false;
-  }
-  else
-  {
-    ite = true;
-  }
-  if (!ite)
+  if (!(is_valid_m == (uint64_t)0xFFFFFFFFFFFFFFFFU))
   {
     return NULL;
   }

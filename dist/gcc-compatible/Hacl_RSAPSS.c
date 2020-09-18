@@ -211,6 +211,110 @@ sqr_runtime(uint32_t len, uint64_t *n, uint64_t nInv_u64, uint64_t *aM, uint64_t
   mont_reduction_runtime(len, n, nInv_u64, c, resM);
 }
 
+static inline uint32_t hash_len(Spec_Hash_Definitions_hash_alg a)
+{
+  switch (a)
+  {
+    case Spec_Hash_Definitions_MD5:
+      {
+        return (uint32_t)16U;
+      }
+    case Spec_Hash_Definitions_SHA1:
+      {
+        return (uint32_t)20U;
+      }
+    case Spec_Hash_Definitions_SHA2_224:
+      {
+        return (uint32_t)28U;
+      }
+    case Spec_Hash_Definitions_SHA2_256:
+      {
+        return (uint32_t)32U;
+      }
+    case Spec_Hash_Definitions_SHA2_384:
+      {
+        return (uint32_t)48U;
+      }
+    case Spec_Hash_Definitions_SHA2_512:
+      {
+        return (uint32_t)64U;
+      }
+    case Spec_Hash_Definitions_Blake2S:
+      {
+        return (uint32_t)32U;
+      }
+    case Spec_Hash_Definitions_Blake2B:
+      {
+        return (uint32_t)64U;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+}
+
+static inline void
+hash(Spec_Hash_Definitions_hash_alg a, uint8_t *mHash, uint32_t msgLen, uint8_t *msg)
+{
+  switch (a)
+  {
+    case Spec_Hash_Definitions_SHA2_256:
+      {
+        Hacl_Hash_SHA2_hash_256(msg, msgLen, mHash);
+        break;
+      }
+    case Spec_Hash_Definitions_SHA2_384:
+      {
+        Hacl_Hash_SHA2_hash_384(msg, msgLen, mHash);
+        break;
+      }
+    case Spec_Hash_Definitions_SHA2_512:
+      {
+        Hacl_Hash_SHA2_hash_512(msg, msgLen, mHash);
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+}
+
+static inline void
+mgf_hash(
+  Spec_Hash_Definitions_hash_alg a,
+  uint32_t len,
+  uint8_t *mgfseed,
+  uint32_t maskLen,
+  uint8_t *res
+)
+{
+  KRML_CHECK_SIZE(sizeof (uint8_t), len + (uint32_t)4U);
+  uint8_t mgfseed_counter[len + (uint32_t)4U];
+  memset(mgfseed_counter, 0U, (len + (uint32_t)4U) * sizeof (uint8_t));
+  memcpy(mgfseed_counter, mgfseed, len * sizeof (uint8_t));
+  uint32_t hLen = hash_len(a);
+  uint32_t n = (maskLen - (uint32_t)1U) / hLen + (uint32_t)1U;
+  uint32_t accLen = n * hLen;
+  KRML_CHECK_SIZE(sizeof (uint8_t), accLen);
+  uint8_t acc[accLen];
+  memset(acc, 0U, accLen * sizeof (uint8_t));
+  for (uint32_t i = (uint32_t)0U; i < n; i++)
+  {
+    uint8_t *uu____0 = acc + i * hLen;
+    uint8_t *uu____1 = mgfseed_counter + len;
+    uu____1[0U] = (uint8_t)(i >> (uint32_t)24U);
+    uu____1[1U] = (uint8_t)(i >> (uint32_t)16U);
+    uu____1[2U] = (uint8_t)(i >> (uint32_t)8U);
+    uu____1[3U] = (uint8_t)i;
+    hash(a, uu____0, len + (uint32_t)4U, mgfseed_counter);
+  }
+  memcpy(res, acc, maskLen * sizeof (uint8_t));
+}
+
 static void
 bn_mod_exp_loop_runtime(
   uint32_t nLen,
@@ -331,118 +435,207 @@ bn_mod_exp_mont_ladder_precompr2(
   from_runtime(nLen, n, nInv_u64, rM0, res);
 }
 
-static inline uint32_t hash_len(Spec_Hash_Definitions_hash_alg a)
+static inline uint64_t bn_check_num_bits(uint32_t bits, uint64_t *b)
 {
-  switch (a)
+  uint32_t bLen = (bits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
+  if (bits == (uint32_t)64U * bLen)
   {
-    case Spec_Hash_Definitions_MD5:
-      {
-        return (uint32_t)16U;
-      }
-    case Spec_Hash_Definitions_SHA1:
-      {
-        return (uint32_t)20U;
-      }
-    case Spec_Hash_Definitions_SHA2_224:
-      {
-        return (uint32_t)28U;
-      }
-    case Spec_Hash_Definitions_SHA2_256:
-      {
-        return (uint32_t)32U;
-      }
-    case Spec_Hash_Definitions_SHA2_384:
-      {
-        return (uint32_t)48U;
-      }
-    case Spec_Hash_Definitions_SHA2_512:
-      {
-        return (uint32_t)64U;
-      }
-    case Spec_Hash_Definitions_Blake2S:
-      {
-        return (uint32_t)32U;
-      }
-    case Spec_Hash_Definitions_Blake2B:
-      {
-        return (uint32_t)64U;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
+    return (uint64_t)0xFFFFFFFFFFFFFFFFU;
   }
+  KRML_CHECK_SIZE(sizeof (uint64_t), bLen);
+  uint64_t b2[bLen];
+  memset(b2, 0U, bLen * sizeof (uint64_t));
+  uint32_t i0 = bits / (uint32_t)64U;
+  uint32_t j = bits % (uint32_t)64U;
+  b2[i0] = b2[i0] | (uint64_t)1U << j;
+  uint64_t acc = (uint64_t)0U;
+  for (uint32_t i = (uint32_t)0U; i < bLen; i++)
+  {
+    uint64_t beq = FStar_UInt64_eq_mask(b[i], b2[i]);
+    uint64_t blt = ~FStar_UInt64_gte_mask(b[i], b2[i]);
+    acc = (beq & acc) | (~beq & ((blt & (uint64_t)0xFFFFFFFFFFFFFFFFU) | (~blt & (uint64_t)0U)));
+  }
+  uint64_t res = acc;
+  return res;
 }
 
-static inline void
-hash(Spec_Hash_Definitions_hash_alg a, uint8_t *mHash, uint32_t msgLen, uint8_t *msg)
+static inline uint64_t rsapss_check_modulus(uint32_t modBits, uint64_t *n)
 {
-  switch (a)
+  uint32_t nLen = (modBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
+  uint64_t bits0 = n[0U] & (uint64_t)1U;
+  uint64_t m0 = (uint64_t)0U - bits0;
+  KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
+  uint64_t b2[nLen];
+  memset(b2, 0U, nLen * sizeof (uint64_t));
+  uint32_t i0 = (modBits - (uint32_t)1U) / (uint32_t)64U;
+  uint32_t j = (modBits - (uint32_t)1U) % (uint32_t)64U;
+  b2[i0] = b2[i0] | (uint64_t)1U << j;
+  uint64_t acc = (uint64_t)0U;
+  for (uint32_t i = (uint32_t)0U; i < nLen; i++)
   {
-    case Spec_Hash_Definitions_SHA2_256:
-      {
-        Hacl_Hash_SHA2_hash_256(msg, msgLen, mHash);
-        break;
-      }
-    case Spec_Hash_Definitions_SHA2_384:
-      {
-        Hacl_Hash_SHA2_hash_384(msg, msgLen, mHash);
-        break;
-      }
-    case Spec_Hash_Definitions_SHA2_512:
-      {
-        Hacl_Hash_SHA2_hash_512(msg, msgLen, mHash);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
+    uint64_t beq = FStar_UInt64_eq_mask(b2[i], n[i]);
+    uint64_t blt = ~FStar_UInt64_gte_mask(b2[i], n[i]);
+    acc = (beq & acc) | (~beq & ((blt & (uint64_t)0xFFFFFFFFFFFFFFFFU) | (~blt & (uint64_t)0U)));
   }
+  uint64_t res = acc;
+  uint64_t m1 = res;
+  uint64_t m2 = bn_check_num_bits(modBits, n);
+  return m0 & (m1 & m2);
 }
 
-static inline void
-mgf_hash(
-  Spec_Hash_Definitions_hash_alg a,
-  uint32_t len,
-  uint8_t *mgfseed,
-  uint32_t maskLen,
-  uint8_t *res
+static inline uint64_t rsapss_check_exponent(uint32_t eBits, uint64_t *e)
+{
+  uint32_t eLen = (eBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), eLen);
+  uint64_t bn_zero[eLen];
+  memset(bn_zero, 0U, eLen * sizeof (uint64_t));
+  uint64_t mask = (uint64_t)0xFFFFFFFFFFFFFFFFU;
+  for (uint32_t i = (uint32_t)0U; i < eLen; i++)
+  {
+    uint64_t uu____0 = FStar_UInt64_eq_mask(e[i], bn_zero[i]);
+    mask = uu____0 & mask;
+  }
+  uint64_t mask1 = mask;
+  uint64_t res = mask1;
+  uint64_t m0 = res;
+  uint64_t m1 = bn_check_num_bits(eBits, e);
+  return ~m0 & m1;
+}
+
+static inline bool
+rsapss_load_pkey(uint32_t modBits, uint32_t eBits, uint8_t *nb, uint8_t *eb, uint64_t *pkey)
+{
+  uint32_t nbLen = (modBits - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
+  uint32_t ebLen = (eBits - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
+  uint32_t nLen = (modBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
+  uint64_t *n = pkey;
+  uint64_t *r2 = pkey + nLen;
+  uint64_t *e = pkey + nLen + nLen;
+  bn_from_bytes_be(nbLen, nb, n);
+  KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
+  uint64_t bn_zero[nLen];
+  memset(bn_zero, 0U, nLen * sizeof (uint64_t));
+  uint64_t mask = (uint64_t)0xFFFFFFFFFFFFFFFFU;
+  for (uint32_t i = (uint32_t)0U; i < nLen; i++)
+  {
+    uint64_t uu____0 = FStar_UInt64_eq_mask(n[i], bn_zero[i]);
+    mask = uu____0 & mask;
+  }
+  uint64_t mask10 = mask;
+  uint64_t res = mask10;
+  uint64_t mask0 = res;
+  uint64_t priv0 = (uint64_t)0U;
+  for (uint32_t i = (uint32_t)0U; i < nLen; i++)
+  {
+    uint64_t mask1 = FStar_UInt64_eq_mask(n[i], (uint64_t)0U);
+    priv0 = (mask1 & priv0) | (~mask1 & (uint64_t)i);
+  }
+  uint64_t ind = priv0;
+  uint64_t uu____1 = n[(uint32_t)ind];
+  uint64_t priv = (uint64_t)0U;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
+  {
+    uint64_t bit_i = uu____1 >> i & (uint64_t)1U;
+    uint64_t mask1 = FStar_UInt64_eq_mask(bit_i, (uint64_t)1U);
+    priv = (mask1 & (uint64_t)i) | (~mask1 & priv);
+  }
+  uint64_t bits = priv;
+  uint64_t bits0 = (uint64_t)64U * ind + bits;
+  uint64_t bits00 = ~mask0 & bits0;
+  uint32_t b = (uint32_t)bits00;
+  memset(r2, 0U, nLen * sizeof (uint64_t));
+  uint32_t i0 = b / (uint32_t)64U;
+  uint32_t j = b % (uint32_t)64U;
+  r2[i0] = r2[i0] | (uint64_t)1U << j;
+  for (uint32_t i1 = (uint32_t)0U; i1 < (uint32_t)128U * nLen - b; i1++)
+  {
+    uint64_t c0 = (uint64_t)0U;
+    uint32_t k0 = nLen / (uint32_t)4U * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < k0 / (uint32_t)4U; i++)
+    {
+      uint64_t t1 = r2[(uint32_t)4U * i];
+      uint64_t t20 = r2[(uint32_t)4U * i];
+      c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t1, t20, r2 + (uint32_t)4U * i);
+      uint64_t t10 = r2[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t t21 = r2[(uint32_t)4U * i + (uint32_t)1U];
+      c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t10, t21, r2 + (uint32_t)4U * i + (uint32_t)1U);
+      uint64_t t11 = r2[(uint32_t)4U * i + (uint32_t)2U];
+      uint64_t t22 = r2[(uint32_t)4U * i + (uint32_t)2U];
+      c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t11, t22, r2 + (uint32_t)4U * i + (uint32_t)2U);
+      uint64_t t12 = r2[(uint32_t)4U * i + (uint32_t)3U];
+      uint64_t t2 = r2[(uint32_t)4U * i + (uint32_t)3U];
+      c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t12, t2, r2 + (uint32_t)4U * i + (uint32_t)3U);
+    }
+    for (uint32_t i = k0; i < nLen; i++)
+    {
+      uint64_t t1 = r2[i];
+      uint64_t t2 = r2[i];
+      c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t1, t2, r2 + i);
+    }
+    uint64_t c00 = c0;
+    KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
+    uint64_t tmp[nLen];
+    memset(tmp, 0U, nLen * sizeof (uint64_t));
+    uint64_t c = (uint64_t)0U;
+    uint32_t k = nLen / (uint32_t)4U * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
+    {
+      uint64_t t1 = r2[(uint32_t)4U * i];
+      uint64_t t20 = n[(uint32_t)4U * i];
+      c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, t20, tmp + (uint32_t)4U * i);
+      uint64_t t10 = r2[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t t21 = n[(uint32_t)4U * i + (uint32_t)1U];
+      c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t10, t21, tmp + (uint32_t)4U * i + (uint32_t)1U);
+      uint64_t t11 = r2[(uint32_t)4U * i + (uint32_t)2U];
+      uint64_t t22 = n[(uint32_t)4U * i + (uint32_t)2U];
+      c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t11, t22, tmp + (uint32_t)4U * i + (uint32_t)2U);
+      uint64_t t12 = r2[(uint32_t)4U * i + (uint32_t)3U];
+      uint64_t t2 = n[(uint32_t)4U * i + (uint32_t)3U];
+      c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t12, t2, tmp + (uint32_t)4U * i + (uint32_t)3U);
+    }
+    for (uint32_t i = k; i < nLen; i++)
+    {
+      uint64_t t1 = r2[i];
+      uint64_t t2 = n[i];
+      c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, t2, tmp + i);
+    }
+    uint64_t c1 = c;
+    uint64_t c2 = c00 - c1;
+    for (uint32_t i = (uint32_t)0U; i < nLen; i++)
+    {
+      uint64_t *os = r2;
+      uint64_t x = (c2 & r2[i]) | (~c2 & tmp[i]);
+      os[i] = x;
+    }
+  }
+  bn_from_bytes_be(ebLen, eb, e);
+  uint64_t m0 = rsapss_check_modulus(modBits, n);
+  uint64_t m1 = rsapss_check_exponent(eBits, e);
+  uint64_t m = m0 & m1;
+  return m == (uint64_t)0xFFFFFFFFFFFFFFFFU;
+}
+
+static inline bool
+rsapss_load_skey(
+  uint32_t modBits,
+  uint32_t eBits,
+  uint32_t dBits,
+  uint8_t *nb,
+  uint8_t *eb,
+  uint8_t *db,
+  uint64_t *skey
 )
 {
-  KRML_CHECK_SIZE(sizeof (uint8_t), len + (uint32_t)4U);
-  uint8_t mgfseed_counter[len + (uint32_t)4U];
-  memset(mgfseed_counter, 0U, (len + (uint32_t)4U) * sizeof (uint8_t));
-  memcpy(mgfseed_counter, mgfseed, len * sizeof (uint8_t));
-  uint32_t hLen = hash_len(a);
-  uint32_t n = (maskLen - (uint32_t)1U) / hLen + (uint32_t)1U;
-  uint32_t accLen = n * hLen;
-  KRML_CHECK_SIZE(sizeof (uint8_t), accLen);
-  uint8_t acc[accLen];
-  memset(acc, 0U, accLen * sizeof (uint8_t));
-  for (uint32_t i = (uint32_t)0U; i < n; i++)
-  {
-    uint8_t *uu____0 = acc + i * hLen;
-    uint8_t *uu____1 = mgfseed_counter + len;
-    uu____1[0U] = (uint8_t)(i >> (uint32_t)24U);
-    uu____1[1U] = (uint8_t)(i >> (uint32_t)16U);
-    uu____1[2U] = (uint8_t)(i >> (uint32_t)8U);
-    uu____1[3U] = (uint8_t)i;
-    hash(a, uu____0, len + (uint32_t)4U, mgfseed_counter);
-  }
-  memcpy(res, acc, maskLen * sizeof (uint8_t));
-}
-
-static inline void xor_bytes(uint32_t len, uint8_t *b1, uint8_t *b2)
-{
-  for (uint32_t i = (uint32_t)0U; i < len; i++)
-  {
-    uint8_t *os = b1;
-    uint8_t x = b1[i] ^ b2[i];
-    os[i] = x;
-  }
+  uint32_t dbLen = (dBits - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
+  uint32_t nLen = (modBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
+  uint32_t eLen = (eBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
+  uint32_t pkeyLen = nLen + nLen + eLen;
+  uint64_t *pkey = skey;
+  uint64_t *d = skey + pkeyLen;
+  bool b = rsapss_load_pkey(modBits, eBits, nb, eb, pkey);
+  bn_from_bytes_be(dbLen, db, d);
+  uint64_t m1 = rsapss_check_exponent(dBits, d);
+  return b && m1 == (uint64_t)0xFFFFFFFFFFFFFFFFU;
 }
 
 static inline void
@@ -479,7 +672,12 @@ pss_encode(
   uint8_t dbMask[dbLen];
   memset(dbMask, 0U, dbLen * sizeof (uint8_t));
   mgf_hash(a, hLen, m1Hash, dbLen, dbMask);
-  xor_bytes(dbLen, db, dbMask);
+  for (uint32_t i = (uint32_t)0U; i < dbLen; i++)
+  {
+    uint8_t *os = db;
+    uint8_t x = db[i] ^ dbMask[i];
+    os[i] = x;
+  }
   uint32_t msBits = emBits % (uint32_t)8U;
   if (msBits > (uint32_t)0U)
   {
@@ -532,7 +730,12 @@ pss_verify(
   uint8_t dbMask[dbLen];
   memset(dbMask, 0U, dbLen * sizeof (uint8_t));
   mgf_hash(a, hLen, m1Hash, dbLen, dbMask);
-  xor_bytes(dbLen, dbMask, maskedDB);
+  for (uint32_t i = (uint32_t)0U; i < dbLen; i++)
+  {
+    uint8_t *os = dbMask;
+    uint8_t x = dbMask[i] ^ maskedDB[i];
+    os[i] = x;
+  }
   uint32_t msBits1 = emBits % (uint32_t)8U;
   if (msBits1 > (uint32_t)0U)
   {
@@ -640,11 +843,7 @@ Hacl_RSAPSS_rsapss_sign(
       os[i] = x0;
     }
     bn_to_bytes_be(k, s, sgnt);
-    if (eq_m == (uint64_t)0U)
-    {
-      return false;
-    }
-    return true;
+    return eq_m == (uint64_t)0xFFFFFFFFFFFFFFFFU;
   }
   return false;
 }
@@ -744,111 +943,12 @@ uint64_t
   }
   uint64_t *pkey1 = pkey;
   uint64_t *pkey2 = pkey1;
-  uint32_t nbLen = (modBits - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
-  uint32_t ebLen = (eBits - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
-  uint32_t nLen1 = (modBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
-  uint64_t *n = pkey2;
-  uint64_t *r2 = pkey2 + nLen1;
-  uint64_t *e = pkey2 + nLen1 + nLen1;
-  bn_from_bytes_be(nbLen, nb, n);
-  KRML_CHECK_SIZE(sizeof (uint64_t), nLen1);
-  uint64_t bn_zero[nLen1];
-  memset(bn_zero, 0U, nLen1 * sizeof (uint64_t));
-  uint64_t mask = (uint64_t)0xFFFFFFFFFFFFFFFFU;
-  for (uint32_t i = (uint32_t)0U; i < nLen1; i++)
+  bool b = rsapss_load_pkey(modBits, eBits, nb, eb, pkey2);
+  if (b)
   {
-    uint64_t uu____0 = FStar_UInt64_eq_mask(n[i], bn_zero[i]);
-    mask = uu____0 & mask;
+    return pkey2;
   }
-  uint64_t mask10 = mask;
-  uint64_t res = mask10;
-  uint64_t mask0 = res;
-  uint64_t priv0 = (uint64_t)0U;
-  for (uint32_t i = (uint32_t)0U; i < nLen1; i++)
-  {
-    uint64_t mask1 = FStar_UInt64_eq_mask(n[i], (uint64_t)0U);
-    priv0 = (mask1 & priv0) | (~mask1 & (uint64_t)i);
-  }
-  uint64_t ind = priv0;
-  uint64_t uu____1 = n[(uint32_t)ind];
-  uint64_t priv = (uint64_t)0U;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
-  {
-    uint64_t bit_i = uu____1 >> i & (uint64_t)1U;
-    uint64_t mask1 = FStar_UInt64_eq_mask(bit_i, (uint64_t)1U);
-    priv = (mask1 & (uint64_t)i) | (~mask1 & priv);
-  }
-  uint64_t bits = priv;
-  uint64_t bits0 = (uint64_t)64U * ind + bits;
-  uint64_t bits00 = ~mask0 & bits0;
-  uint32_t b = (uint32_t)bits00;
-  memset(r2, 0U, nLen1 * sizeof (uint64_t));
-  uint32_t i0 = b / (uint32_t)64U;
-  uint32_t j = b % (uint32_t)64U;
-  r2[i0] = r2[i0] | (uint64_t)1U << j;
-  for (uint32_t i1 = (uint32_t)0U; i1 < (uint32_t)128U * nLen1 - b; i1++)
-  {
-    uint64_t c0 = (uint64_t)0U;
-    uint32_t k0 = nLen1 / (uint32_t)4U * (uint32_t)4U;
-    for (uint32_t i = (uint32_t)0U; i < k0 / (uint32_t)4U; i++)
-    {
-      uint64_t t1 = r2[(uint32_t)4U * i];
-      uint64_t t20 = r2[(uint32_t)4U * i];
-      c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t1, t20, r2 + (uint32_t)4U * i);
-      uint64_t t10 = r2[(uint32_t)4U * i + (uint32_t)1U];
-      uint64_t t21 = r2[(uint32_t)4U * i + (uint32_t)1U];
-      c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t10, t21, r2 + (uint32_t)4U * i + (uint32_t)1U);
-      uint64_t t11 = r2[(uint32_t)4U * i + (uint32_t)2U];
-      uint64_t t22 = r2[(uint32_t)4U * i + (uint32_t)2U];
-      c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t11, t22, r2 + (uint32_t)4U * i + (uint32_t)2U);
-      uint64_t t12 = r2[(uint32_t)4U * i + (uint32_t)3U];
-      uint64_t t2 = r2[(uint32_t)4U * i + (uint32_t)3U];
-      c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t12, t2, r2 + (uint32_t)4U * i + (uint32_t)3U);
-    }
-    for (uint32_t i = k0; i < nLen1; i++)
-    {
-      uint64_t t1 = r2[i];
-      uint64_t t2 = r2[i];
-      c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t1, t2, r2 + i);
-    }
-    uint64_t c00 = c0;
-    KRML_CHECK_SIZE(sizeof (uint64_t), nLen1);
-    uint64_t tmp[nLen1];
-    memset(tmp, 0U, nLen1 * sizeof (uint64_t));
-    uint64_t c = (uint64_t)0U;
-    uint32_t k = nLen1 / (uint32_t)4U * (uint32_t)4U;
-    for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-    {
-      uint64_t t1 = r2[(uint32_t)4U * i];
-      uint64_t t20 = n[(uint32_t)4U * i];
-      c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, t20, tmp + (uint32_t)4U * i);
-      uint64_t t10 = r2[(uint32_t)4U * i + (uint32_t)1U];
-      uint64_t t21 = n[(uint32_t)4U * i + (uint32_t)1U];
-      c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t10, t21, tmp + (uint32_t)4U * i + (uint32_t)1U);
-      uint64_t t11 = r2[(uint32_t)4U * i + (uint32_t)2U];
-      uint64_t t22 = n[(uint32_t)4U * i + (uint32_t)2U];
-      c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t11, t22, tmp + (uint32_t)4U * i + (uint32_t)2U);
-      uint64_t t12 = r2[(uint32_t)4U * i + (uint32_t)3U];
-      uint64_t t2 = n[(uint32_t)4U * i + (uint32_t)3U];
-      c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t12, t2, tmp + (uint32_t)4U * i + (uint32_t)3U);
-    }
-    for (uint32_t i = k; i < nLen1; i++)
-    {
-      uint64_t t1 = r2[i];
-      uint64_t t2 = n[i];
-      c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, t2, tmp + i);
-    }
-    uint64_t c1 = c;
-    uint64_t c2 = c00 - c1;
-    for (uint32_t i = (uint32_t)0U; i < nLen1; i++)
-    {
-      uint64_t *os = r2;
-      uint64_t x = (c2 & r2[i]) | (~c2 & tmp[i]);
-      os[i] = x;
-    }
-  }
-  bn_from_bytes_be(ebLen, eb, e);
-  return pkey2;
+  return NULL;
 }
 
 uint64_t
@@ -887,117 +987,11 @@ uint64_t
   }
   uint64_t *skey1 = skey;
   uint64_t *skey2 = skey1;
-  uint32_t dbLen = (dBits - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
-  uint32_t nLen1 = (modBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
-  uint32_t eLen1 = (eBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
-  uint32_t pkeyLen = nLen1 + nLen1 + eLen1;
-  uint64_t *pkey = skey2;
-  uint64_t *d = skey2 + pkeyLen;
-  uint32_t nbLen1 = (modBits - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
-  uint32_t ebLen1 = (eBits - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
-  uint32_t nLen2 = (modBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
-  uint64_t *n = pkey;
-  uint64_t *r2 = pkey + nLen2;
-  uint64_t *e = pkey + nLen2 + nLen2;
-  bn_from_bytes_be(nbLen1, nb, n);
-  KRML_CHECK_SIZE(sizeof (uint64_t), nLen2);
-  uint64_t bn_zero[nLen2];
-  memset(bn_zero, 0U, nLen2 * sizeof (uint64_t));
-  uint64_t mask = (uint64_t)0xFFFFFFFFFFFFFFFFU;
-  for (uint32_t i = (uint32_t)0U; i < nLen2; i++)
+  bool b = rsapss_load_skey(modBits, eBits, dBits, nb, eb, db, skey2);
+  if (b)
   {
-    uint64_t uu____0 = FStar_UInt64_eq_mask(n[i], bn_zero[i]);
-    mask = uu____0 & mask;
+    return skey2;
   }
-  uint64_t mask10 = mask;
-  uint64_t res = mask10;
-  uint64_t mask0 = res;
-  uint64_t priv0 = (uint64_t)0U;
-  for (uint32_t i = (uint32_t)0U; i < nLen2; i++)
-  {
-    uint64_t mask1 = FStar_UInt64_eq_mask(n[i], (uint64_t)0U);
-    priv0 = (mask1 & priv0) | (~mask1 & (uint64_t)i);
-  }
-  uint64_t ind = priv0;
-  uint64_t uu____1 = n[(uint32_t)ind];
-  uint64_t priv = (uint64_t)0U;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
-  {
-    uint64_t bit_i = uu____1 >> i & (uint64_t)1U;
-    uint64_t mask1 = FStar_UInt64_eq_mask(bit_i, (uint64_t)1U);
-    priv = (mask1 & (uint64_t)i) | (~mask1 & priv);
-  }
-  uint64_t bits = priv;
-  uint64_t bits0 = (uint64_t)64U * ind + bits;
-  uint64_t bits00 = ~mask0 & bits0;
-  uint32_t b = (uint32_t)bits00;
-  memset(r2, 0U, nLen2 * sizeof (uint64_t));
-  uint32_t i0 = b / (uint32_t)64U;
-  uint32_t j = b % (uint32_t)64U;
-  r2[i0] = r2[i0] | (uint64_t)1U << j;
-  for (uint32_t i1 = (uint32_t)0U; i1 < (uint32_t)128U * nLen2 - b; i1++)
-  {
-    uint64_t c0 = (uint64_t)0U;
-    uint32_t k0 = nLen2 / (uint32_t)4U * (uint32_t)4U;
-    for (uint32_t i = (uint32_t)0U; i < k0 / (uint32_t)4U; i++)
-    {
-      uint64_t t1 = r2[(uint32_t)4U * i];
-      uint64_t t20 = r2[(uint32_t)4U * i];
-      c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t1, t20, r2 + (uint32_t)4U * i);
-      uint64_t t10 = r2[(uint32_t)4U * i + (uint32_t)1U];
-      uint64_t t21 = r2[(uint32_t)4U * i + (uint32_t)1U];
-      c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t10, t21, r2 + (uint32_t)4U * i + (uint32_t)1U);
-      uint64_t t11 = r2[(uint32_t)4U * i + (uint32_t)2U];
-      uint64_t t22 = r2[(uint32_t)4U * i + (uint32_t)2U];
-      c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t11, t22, r2 + (uint32_t)4U * i + (uint32_t)2U);
-      uint64_t t12 = r2[(uint32_t)4U * i + (uint32_t)3U];
-      uint64_t t2 = r2[(uint32_t)4U * i + (uint32_t)3U];
-      c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t12, t2, r2 + (uint32_t)4U * i + (uint32_t)3U);
-    }
-    for (uint32_t i = k0; i < nLen2; i++)
-    {
-      uint64_t t1 = r2[i];
-      uint64_t t2 = r2[i];
-      c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t1, t2, r2 + i);
-    }
-    uint64_t c00 = c0;
-    KRML_CHECK_SIZE(sizeof (uint64_t), nLen2);
-    uint64_t tmp[nLen2];
-    memset(tmp, 0U, nLen2 * sizeof (uint64_t));
-    uint64_t c = (uint64_t)0U;
-    uint32_t k = nLen2 / (uint32_t)4U * (uint32_t)4U;
-    for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-    {
-      uint64_t t1 = r2[(uint32_t)4U * i];
-      uint64_t t20 = n[(uint32_t)4U * i];
-      c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, t20, tmp + (uint32_t)4U * i);
-      uint64_t t10 = r2[(uint32_t)4U * i + (uint32_t)1U];
-      uint64_t t21 = n[(uint32_t)4U * i + (uint32_t)1U];
-      c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t10, t21, tmp + (uint32_t)4U * i + (uint32_t)1U);
-      uint64_t t11 = r2[(uint32_t)4U * i + (uint32_t)2U];
-      uint64_t t22 = n[(uint32_t)4U * i + (uint32_t)2U];
-      c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t11, t22, tmp + (uint32_t)4U * i + (uint32_t)2U);
-      uint64_t t12 = r2[(uint32_t)4U * i + (uint32_t)3U];
-      uint64_t t2 = n[(uint32_t)4U * i + (uint32_t)3U];
-      c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t12, t2, tmp + (uint32_t)4U * i + (uint32_t)3U);
-    }
-    for (uint32_t i = k; i < nLen2; i++)
-    {
-      uint64_t t1 = r2[i];
-      uint64_t t2 = n[i];
-      c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, t2, tmp + i);
-    }
-    uint64_t c1 = c;
-    uint64_t c2 = c00 - c1;
-    for (uint32_t i = (uint32_t)0U; i < nLen2; i++)
-    {
-      uint64_t *os = r2;
-      uint64_t x = (c2 & r2[i]) | (~c2 & tmp[i]);
-      os[i] = x;
-    }
-  }
-  bn_from_bytes_be(ebLen1, eb, e);
-  bn_from_bytes_be(dbLen, db, d);
-  return skey2;
+  return NULL;
 }
 
