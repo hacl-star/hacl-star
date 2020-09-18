@@ -89,6 +89,7 @@ endif()
 # Hacl_Poly1305_256.o: CFLAGS += -mavx -mavx2
 set_source_files_properties(${EVERCRYPT_SRC_DIR}/Hacl_Poly1305_128.c PROPERTIES COMPILE_FLAGS "-mavx")
 set_source_files_properties(${EVERCRYPT_SRC_DIR}/Hacl_Poly1305_256.c PROPERTIES COMPILE_FLAGS "-mavx -mavx2")
+set_source_files_properties(${EVERCRYPT_SRC_DIR}/MerkleTree.c PROPERTIES COMPILE_FLAGS $<$<CONFIG:DEBUG>:-O2>)
 
 target_link_libraries(evercrypt PUBLIC kremlib)
 
