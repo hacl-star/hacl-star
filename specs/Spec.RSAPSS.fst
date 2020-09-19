@@ -82,7 +82,7 @@ let i2osp len n = nat_to_intseq_be len n
 type modBits_t = modBits:size_nat{1 < modBits}
 
 noeq type rsapss_pkey (modBits:modBits_t) =
-  | Mk_rsapss_pkey: n:pos{pow2 (modBits - 1) <= n /\ n < pow2 modBits} -> e:pos -> rsapss_pkey modBits
+  | Mk_rsapss_pkey: n:pos{pow2 (modBits - 1) < n /\ n < pow2 modBits} -> e:pos -> rsapss_pkey modBits
 
 noeq type rsapss_skey (modBits:modBits_t) =
   | Mk_rsapss_skey: pkey:rsapss_pkey modBits -> d:pos -> rsapss_skey modBits
@@ -273,6 +273,7 @@ let rsapss_sign_ a modBits skey sLen salt msgLen msg =
   let s = pow_mod #n m d in
   let m' = pow_mod #n s e in
   let eq_m = m = m' in
+  let s = if eq_m then s else 0 in
   (eq_m, i2osp nLen s)
 
 
@@ -366,7 +367,9 @@ let rsapss_load_pkey modBits eBits nb eb =
   let n = os2ip #(blocks modBits 8) nb in
   let e = os2ip #(blocks eBits 8) eb in
 
-  if (pow2 (modBits - 1) <= n && n < pow2 modBits && 0 < e && e < pow2 eBits) then
+  //`n % 2 = 1` is needed to store `r2 = r * r % n` as a part of pkey
+  if (n % 2 = 1 && pow2 (modBits - 1) < n && n < pow2 modBits &&
+      0 < e && e < pow2 eBits) then
     Some (Mk_rsapss_pkey n e)
   else
     None
@@ -389,3 +392,44 @@ let rsapss_load_skey modBits eBits dBits nb eb db =
     Some (Mk_rsapss_skey (Some?.v pkey) d)
   else
     None
+
+
+val rsapss_skey_sign:
+    a:Hash.algorithm{hash_is_supported a}
+  -> modBits:modBits_t
+  -> eBits:size_pos
+  -> dBits:size_pos
+  -> nb:lseq uint8 (blocks modBits 8)
+  -> eb:lseq uint8 (blocks eBits 8)
+  -> db:lseq uint8 (blocks dBits 8)
+  -> sLen:size_nat
+  -> salt:lbytes sLen
+  -> msgLen:nat
+  -> msg:bytes{length msg == msgLen} ->
+  option (lbytes (blocks modBits 8))
+
+let rsapss_skey_sign a modBits eBits dBits nb eb db sLen salt msgLen msg =
+  let skey = rsapss_load_skey modBits eBits dBits nb eb db in
+  match skey with
+  | Some vskey -> rsapss_sign a modBits vskey sLen salt msgLen msg
+  | None -> None
+
+
+val rsapss_pkey_verify:
+    a:Hash.algorithm{hash_is_supported a}
+  -> modBits:modBits_t
+  -> eBits:size_pos
+  -> nb:lseq uint8 (blocks modBits 8)
+  -> eb:lseq uint8 (blocks eBits 8)
+  -> sLen:size_nat
+  -> k:size_nat
+  -> sgnt:lbytes k
+  -> msgLen:nat
+  -> msg:bytes{length msg == msgLen} ->
+  Tot bool
+
+let rsapss_pkey_verify a modBits eBits nb eb sLen k sgnt msgLen msg =
+  let pkey = rsapss_load_pkey modBits eBits nb eb in
+  match pkey with
+  | Some vpkey -> rsapss_verify a modBits vpkey sLen k sgnt msgLen msg
+  | None -> false

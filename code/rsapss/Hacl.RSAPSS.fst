@@ -23,3 +23,11 @@ let new_rsapss_load_pkey r modBits eBits nb eb =
 val new_rsapss_load_skey: IK.new_rsapss_load_skey_st
 let new_rsapss_load_skey r modBits eBits dBits nb eb db =
   IK.new_rsapss_load_skey r modBits eBits dBits nb eb db
+
+val rsapss_skey_sign: a:Hash.algorithm{S.hash_is_supported a} -> IR.rsapss_skey_sign_st a
+let rsapss_skey_sign a modBits eBits dBits nb eb db sLen salt msgLen msg sgnt =
+  IR.rsapss_skey_sign a modBits eBits dBits nb eb db sLen salt msgLen msg sgnt
+
+val rsapss_pkey_verify: a:Hash.algorithm{S.hash_is_supported a} -> IR.rsapss_pkey_verify_st a
+let rsapss_pkey_verify a modBits eBits nb eb sLen k sgnt msgLen msg =
+  IR.rsapss_pkey_verify a modBits eBits nb eb sLen k sgnt msgLen msg
