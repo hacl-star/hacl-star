@@ -18,61 +18,61 @@ module BB = Hacl.Spec.Bignum.Base
 ///  Get and set i-th bit of a bignum
 ///
 
-val limb_get_ith_bit: a:uint64 -> i:nat{i < 64} -> uint64
-let limb_get_ith_bit a i = (a >>. size i) &. u64 1
+val limb_get_ith_bit: #t:limb_t -> a:limb t -> i:nat{i < bits t} -> limb t
+let limb_get_ith_bit #t a i = (a >>. size i) &. uint #t 1
 
-val limb_get_ith_bit_lemma: a:uint64 -> i:nat{i < 64} ->
+val limb_get_ith_bit_lemma: #t:limb_t -> a:limb t -> i:nat{i < bits t} ->
   Lemma (v (limb_get_ith_bit a i) == v a / pow2 i % 2)
 
-let limb_get_ith_bit_lemma a i =
+let limb_get_ith_bit_lemma #t a i =
   let tmp1 = a >>. size i in
-  let tmp2 = tmp1 &. u64 1 in
+  let tmp2 = tmp1 &. uint #t 1 in
   mod_mask_lemma tmp1 1ul;
-  assert (v (mod_mask #U64 #SEC 1ul) == v (u64 1));
+  assert (v (mod_mask #t #SEC 1ul) == v (uint #t #SEC 1));
   assert (v tmp2 == v a / pow2 i % 2)
 
-val bn_get_ith_bit: #len:size_nat -> b:lbignum len -> i:size_nat{i / 64 < len} -> uint64
-let bn_get_ith_bit #len input ind =
-  let i = ind / 64 in
-  let j = ind % 64 in
+val bn_get_ith_bit: #t:limb_t -> #len:size_nat -> b:lbignum t len -> i:size_nat{i / bits t < len} -> limb t
+let bn_get_ith_bit #t #len input ind =
+  let i = ind / bits t in
+  let j = ind % bits t in
   limb_get_ith_bit input.[i] j
 
 
 #push-options "--z3rlimit 100"
-val bn_get_ith_bit_lemma: #len:size_nat -> b:lbignum len -> i:size_nat{i / 64 < len} ->
+val bn_get_ith_bit_lemma: #t:limb_t -> #len:size_nat -> b:lbignum t len -> i:size_nat{i / bits t < len} ->
   Lemma (v (bn_get_ith_bit b i) == (bn_v b / pow2 i % 2))
 
-let bn_get_ith_bit_lemma #len b ind =
-  let i = ind / 64 in
-  let j = ind % 64 in
+let bn_get_ith_bit_lemma #t #len b ind =
+  let i = ind / bits t in
+  let j = ind % bits t in
   let res = limb_get_ith_bit b.[i] j in
   limb_get_ith_bit_lemma b.[i] j;
 
   calc (==) {
     v b.[i] / pow2 j % 2;
     (==) { bn_eval_index b i }
-    (bn_v b / pow2 (64 * i) % pow2 64) / pow2 j % 2;
-    (==) { Math.Lemmas.pow2_modulo_division_lemma_1 (bn_v b / pow2 (64 * i)) j 64 }
-    (bn_v b / pow2 (64 * i) / pow2 j) % pow2 (64 - j) % 2;
-    (==) { Math.Lemmas.division_multiplication_lemma (bn_v b) (pow2 (64 * i)) (pow2 j) }
-    (bn_v b / (pow2 (64 * i) * pow2 j)) % pow2 (64 - j) % 2;
-    (==) { Math.Lemmas.pow2_plus (64 * i) j }
-    (bn_v b / pow2 (64 * i + j)) % pow2 (64 - j) % 2;
-    (==) { Math.Lemmas.euclidean_div_axiom ind 64 }
-    (bn_v b / pow2 ind) % pow2 (64 - j) % 2;
+    (bn_v b / pow2 (bits t * i) % pow2 (bits t)) / pow2 j % 2;
+    (==) { Math.Lemmas.pow2_modulo_division_lemma_1 (bn_v b / pow2 (bits t * i)) j (bits t) }
+    (bn_v b / pow2 (bits t * i) / pow2 j) % pow2 (bits t - j) % 2;
+    (==) { Math.Lemmas.division_multiplication_lemma (bn_v b) (pow2 (bits t * i)) (pow2 j) }
+    (bn_v b / (pow2 (bits t * i) * pow2 j)) % pow2 (bits t - j) % 2;
+    (==) { Math.Lemmas.pow2_plus (bits t * i) j }
+    (bn_v b / pow2 (bits t * i + j)) % pow2 (bits t - j) % 2;
+    (==) { Math.Lemmas.euclidean_div_axiom ind (bits t) }
+    (bn_v b / pow2 ind) % pow2 (bits t - j) % 2;
     (==) { assert_norm (pow2 1 = 2);
-           Math.Lemmas.pow2_modulo_modulo_lemma_1 (bn_v b / pow2 ind) 1 (64 - j) }
+           Math.Lemmas.pow2_modulo_modulo_lemma_1 (bn_v b / pow2 ind) 1 (bits t - j) }
     (bn_v b / pow2 ind) % 2;
     };
   assert (v res == bn_v b / pow2 ind % 2)
 #pop-options
 
 
-val bn_set_ith_bit: #len:size_nat -> b:lbignum len -> i:size_nat{i / 64 < len} -> lbignum len
-let bn_set_ith_bit #len input ind =
-  let i = ind / 64 in
-  let j = ind % 64 in
-  let inp = input.[i] <- input.[i] |. (u64 1 <<. size j) in
+val bn_set_ith_bit: #t:limb_t -> #len:size_nat -> b:lbignum t len -> i:size_nat{i / bits t < len} -> lbignum t len
+let bn_set_ith_bit #t #len input ind =
+  let i = ind / bits t in
+  let j = ind % bits t in
+  let inp = input.[i] <- input.[i] |. (uint #t 1 <<. size j) in
   inp
 
 
@@ -88,72 +88,69 @@ let bn_set_ith_bit_lemma_aux a b c d =
   Math.Lemmas.small_division_lemma_1 a (pow2 c)
 
 
-val bn_lt_pow2_index_lemma: #len:size_nat -> b:lbignum len -> ind:size_nat{ind / 64 < len} -> Lemma
+val bn_lt_pow2_index_lemma: #t:limb_t -> #len:size_nat -> b:lbignum t len -> ind:size_nat{ind / bits t < len} -> Lemma
   (requires bn_v b < pow2 ind)
-  (ensures (let i = ind / 64 in v b.[ind / 64] < pow2 (ind % 64) /\
-    bn_v b == bn_v (slice b 0 i) + pow2 (i * 64) * v b.[i] /\
+  (ensures (let i = ind / bits t in v b.[i] < pow2 (ind % bits t) /\
+    bn_v b == bn_v (slice b 0 i) + pow2 (i * bits t) * v b.[i] /\
     bn_v (slice b (i + 1) len) = 0))
 
-let bn_lt_pow2_index_lemma #len b ind =
-  let i = ind / 64 in
-  let j = ind % 64 in
+let bn_lt_pow2_index_lemma #t #len b ind =
+  let i = ind / bits t in
+  let j = ind % bits t in
 
-  Math.Lemmas.euclidean_division_definition ind 64;
-  assert (bn_v b < pow2 (i * 64 + j));
-  Math.Lemmas.pow2_lt_compat (i * 64 + 64) (i * 64 + j);
-  assert (bn_v b < pow2 (i * 64 + 64));
+  Math.Lemmas.euclidean_division_definition ind (bits t);
+  assert (bn_v b < pow2 (i * bits t + j));
+  Math.Lemmas.pow2_lt_compat (i * bits t + bits t) (i * bits t + j);
+  assert (bn_v b < pow2 (i * bits t + bits t));
 
-  bn_eval_split_i #len b (i + 1);
-  //assert (bn_v b == bn_v (slice b 0 (i + 1)) + pow2 (64 * (i + 1)) * bn_v (slice b (i + 1) len));
+  bn_eval_split_i #t #len b (i + 1);
   bn_eval_bound (slice b 0 (i + 1)) (i + 1);
-  //assert (bn_v (slice b 0 (i + 1)) < pow2 (64 * i + 64));
-  bn_set_ith_bit_lemma_aux (bn_v (slice b 0 (i + 1))) (bn_v (slice b (i + 1) len)) (64 * (i + 1)) 0;
+  bn_set_ith_bit_lemma_aux (bn_v (slice b 0 (i + 1))) (bn_v (slice b (i + 1) len)) (bits t * (i + 1)) 0;
   assert (bn_v b == bn_v (slice b 0 (i + 1)));
 
-  bn_eval_split_i #(i + 1) (slice b 0 (i + 1)) i;
-  //assert (bn_v b == bn_v (slice b 0 i) + pow2 (i * 64) * bn_v (slice b i (i + 1)));
+  bn_eval_split_i #t #(i + 1) (slice b 0 (i + 1)) i;
   bn_eval1 (slice b i (i + 1));
-  assert (bn_v b == bn_v (slice b 0 i) + pow2 (i * 64) * v b.[i]);
-  bn_eval_bound #i (slice b 0 i) i;
-  bn_set_ith_bit_lemma_aux (bn_v (slice b 0 i)) (v b.[i]) (i * 64) j;
+  assert (bn_v b == bn_v (slice b 0 i) + pow2 (i * bits t) * v b.[i]);
+  bn_eval_bound #t #i (slice b 0 i) i;
+  bn_set_ith_bit_lemma_aux (bn_v (slice b 0 i)) (v b.[i]) (i * bits t) j;
   assert (v b.[i] < pow2 j)
 
 
-val bn_set_ith_bit_lemma: #len:size_nat -> b:lbignum len -> i:size_nat{i / 64 < len} -> Lemma
+val bn_set_ith_bit_lemma: #t:limb_t -> #len:size_nat -> b:lbignum t len -> i:size_nat{i / bits t < len} -> Lemma
   (requires bn_v b < pow2 i)
   (ensures  bn_v (bn_set_ith_bit b i) == bn_v b + pow2 i)
 
-let bn_set_ith_bit_lemma #len input ind =
-  let i = ind / 64 in
-  let j = ind % 64 in
-  bn_lt_pow2_index_lemma #len input ind;
+let bn_set_ith_bit_lemma #t #len input ind =
+  let i = ind / bits t in
+  let j = ind % bits t in
+  bn_lt_pow2_index_lemma #t #len input ind;
   assert (v input.[i] < pow2 j);
 
-  let b = u64 1 <<. size j in
+  let b = uint #t 1 <<. size j in
   let inp = input.[i] <- input.[i] |. b in
-  FStar.Math.Lemmas.pow2_lt_compat 64 j;
-  FStar.Math.Lemmas.modulo_lemma (pow2 j) (pow2 64);
+  FStar.Math.Lemmas.pow2_lt_compat (bits t) j;
+  FStar.Math.Lemmas.modulo_lemma (pow2 j) (pow2 (bits t));
   assert (v b == pow2 j);
   logor_disjoint (input.[i]) b j;
   assert (v inp.[i] == v input.[i] + v b);
 
   calc (==) {
     bn_v inp;
-    (==) { bn_eval_split_i #len inp (i + 1);
+    (==) { bn_eval_split_i #t #len inp (i + 1);
     bn_eval_extensionality_j (slice inp (i + 1) len) (slice input (i + 1) len) (len - i - 1) }
     bn_v (slice inp 0 (i + 1));
-    (==) { bn_eval_split_i #(i + 1) (slice inp 0 (i + 1)) i }
-    bn_v (slice inp 0 i) + pow2 (i * 64) * bn_v (slice inp i (i + 1));
+    (==) { bn_eval_split_i #t #(i + 1) (slice inp 0 (i + 1)) i }
+    bn_v (slice inp 0 i) + pow2 (i * bits t) * bn_v (slice inp i (i + 1));
     (==) { bn_eval1 (slice inp i (i + 1)) }
-    bn_v (slice inp 0 i) + pow2 (i * 64) * v inp.[i];
+    bn_v (slice inp 0 i) + pow2 (i * bits t) * v inp.[i];
     (==) { bn_eval_extensionality_j input inp i }
-    bn_v (slice input 0 i) + pow2 (i * 64) * v inp.[i];
+    bn_v (slice input 0 i) + pow2 (i * bits t) * v inp.[i];
     (==) { }
-    bn_v (slice input 0 i) + pow2 (i * 64) * (v input.[i] + v b);
-    (==) { Math.Lemmas.distributivity_add_right (pow2 (i * 64)) (v input.[i]) (v b) }
-    bn_v (slice input 0 i) + pow2 (i * 64) * v input.[i] + pow2 (i * 64) * v b;
-    (==) { Math.Lemmas.pow2_plus (i * 64) j; Math.Lemmas.euclidean_division_definition ind 64 }
-    bn_v (slice input 0 i) + pow2 (i * 64) * v input.[i] + pow2 ind;
+    bn_v (slice input 0 i) + pow2 (i * bits t) * (v input.[i] + v b);
+    (==) { Math.Lemmas.distributivity_add_right (pow2 (i * bits t)) (v input.[i]) (v b) }
+    bn_v (slice input 0 i) + pow2 (i * bits t) * v input.[i] + pow2 (i * bits t) * v b;
+    (==) { Math.Lemmas.pow2_plus (i * bits t) j; Math.Lemmas.euclidean_division_definition ind (bits t) }
+    bn_v (slice input 0 i) + pow2 (i * bits t) * v input.[i] + pow2 ind;
     (==) { }
     bn_v input + pow2 ind;
   }
@@ -163,39 +160,39 @@ let bn_set_ith_bit_lemma #len input ind =
 ///  % pow2 and / pow2
 ///
 
-val bn_div_pow2: #len:size_nat -> b:lbignum len -> i:size_nat{i <= len} -> lbignum (len - i)
-let bn_div_pow2 #len b i =
+val bn_div_pow2: #t:limb_t -> #len:size_nat -> b:lbignum t len -> i:size_nat{i <= len} -> lbignum t (len - i)
+let bn_div_pow2 #t #len b i =
   slice b i len
 
 
-val bn_div_pow2_lemma: #len:size_nat -> b:lbignum len -> i:size_nat{i < len} ->
-  Lemma (bn_v (bn_div_pow2 b i) == bn_v b / pow2 (64 * i))
-let bn_div_pow2_lemma #len c i =
+val bn_div_pow2_lemma: #t:limb_t -> #len:size_nat -> b:lbignum t len -> i:size_nat{i < len} ->
+  Lemma (bn_v (bn_div_pow2 b i) == bn_v b / pow2 (bits t * i))
+let bn_div_pow2_lemma #t #len c i =
   calc (==) {
-    bn_v c / pow2 (64 * i);
+    bn_v c / pow2 (bits t * i);
     (==) { bn_eval_split_i c i }
-    (bn_v (slice c 0 i) + pow2 (64 * i) * bn_v (slice c i len)) / pow2 (64 * i);
-    (==) { Math.Lemmas.division_addition_lemma (bn_v (slice c 0 i)) (pow2 (64 * i)) (bn_v (slice c i len)) }
-    bn_v (slice c 0 i) / pow2 (64 * i) + bn_v (slice c i len);
-    (==) { bn_eval_bound (slice c 0 i) i; Math.Lemmas.small_division_lemma_1 (bn_v (slice c 0 i)) (pow2 (64 * i)) }
+    (bn_v (slice c 0 i) + pow2 (bits t * i) * bn_v (slice c i len)) / pow2 (bits t * i);
+    (==) { Math.Lemmas.division_addition_lemma (bn_v (slice c 0 i)) (pow2 (bits t * i)) (bn_v (slice c i len)) }
+    bn_v (slice c 0 i) / pow2 (bits t * i) + bn_v (slice c i len);
+    (==) { bn_eval_bound (slice c 0 i) i; Math.Lemmas.small_division_lemma_1 (bn_v (slice c 0 i)) (pow2 (bits t * i)) }
     bn_v (slice c i len);
   };
-  assert (bn_v (slice c i len) == bn_v c / pow2 (64 * i))
+  assert (bn_v (slice c i len) == bn_v c / pow2 (bits t * i))
 
 
-val bn_mod_pow2: #aLen:size_nat -> a:lbignum aLen -> i:nat{i <= aLen} -> lbignum i
-let bn_mod_pow2 #aLen a i = sub a 0 i
+val bn_mod_pow2: #t:limb_t -> #aLen:size_nat -> a:lbignum t aLen -> i:nat{i <= aLen} -> lbignum t i
+let bn_mod_pow2 #t #aLen a i = sub a 0 i
 
-val bn_mod_pow2_lemma: #aLen:size_nat -> a:lbignum aLen -> i:nat{i <= aLen} ->
-  Lemma (bn_v (bn_mod_pow2 a i) == bn_v a % pow2 (64 * i))
-let bn_mod_pow2_lemma #aLen a i =
+val bn_mod_pow2_lemma: #t:limb_t -> #aLen:size_nat -> a:lbignum t aLen -> i:nat{i <= aLen} ->
+  Lemma (bn_v (bn_mod_pow2 a i) == bn_v a % pow2 (bits t * i))
+let bn_mod_pow2_lemma #t #aLen a i =
   calc (==) {
-    bn_v a % pow2 (64 * i);
+    bn_v a % pow2 (bits t * i);
     (==) { bn_eval_split_i a i }
-    (bn_v (slice a 0 i) + pow2 (64 * i) * bn_v (slice a i aLen)) % pow2 (64 * i);
-    (==) { Math.Lemmas.modulo_addition_lemma (bn_v (slice a 0 i)) (pow2 (64 * i)) (bn_v (slice a i aLen)) }
-    (bn_v (slice a 0 i)) % pow2 (64 * i);
-    (==) { bn_eval_bound (slice a 0 i) i; Math.Lemmas.small_mod (bn_v (slice a 0 i)) (pow2 (64 * i)) }
+    (bn_v (slice a 0 i) + pow2 (bits t * i) * bn_v (slice a i aLen)) % pow2 (bits t * i);
+    (==) { Math.Lemmas.modulo_addition_lemma (bn_v (slice a 0 i)) (pow2 (bits t * i)) (bn_v (slice a i aLen)) }
+    (bn_v (slice a 0 i)) % pow2 (bits t * i);
+    (==) { bn_eval_bound (slice a 0 i) i; Math.Lemmas.small_mod (bn_v (slice a 0 i)) (pow2 (bits t * i)) }
     bn_v (slice a 0 i);
     }
 
@@ -205,39 +202,41 @@ let bn_mod_pow2_lemma #aLen a i =
 
 //the same as in curve25519
 val lemma_cswap2_step:
-    bit:uint64{v bit <= 1}
-  -> p1:uint64
-  -> p2:uint64 ->
+   #t:limb_t
+  -> bit:limb t{v bit <= 1}
+  -> p1:limb t
+  -> p2:limb t ->
   Lemma
-   (let mask = u64 0 -. bit in
+   (let mask = uint #t 0 -. bit in
     let dummy = mask &. (p1 ^. p2) in
     let p1' = p1 ^. dummy in
     let p2' = p2 ^. dummy in
     if v bit = 1 then p1' == p2 /\ p2' == p1 else p1' == p1 /\ p2' == p2)
 
-let lemma_cswap2_step bit p1 p2 =
-  let mask = u64 0 -. bit in
+let lemma_cswap2_step #t bit p1 p2 =
+  let mask = uint #t 0 -. bit in
   assert (v bit == 0 ==> v mask == 0);
-  assert (v bit == 1 ==> v mask == pow2 64 - 1);
+  assert (v bit == 1 ==> v mask == pow2 (bits t) - 1);
   let dummy = mask &. (p1 ^. p2) in
   logand_lemma mask (p1 ^. p2);
   assert (v bit == 1 ==> v dummy == v (p1 ^. p2));
   assert (v bit == 0 ==> v dummy == 0);
   let p1' = p1 ^. dummy in
-  assert (v dummy == v (if v bit = 1 then (p1 ^. p2) else u64 0));
+  assert (v dummy == v (if v bit = 1 then (p1 ^. p2) else uint #t 0));
   logxor_lemma p1 p2;
   let p2' = p2 ^. dummy in
   logxor_lemma p2 p1
 
 
 val cswap2_f:
-    #len:size_nat
-  -> mask:uint64
+    #t:limb_t
+  -> #len:size_nat
+  -> mask:limb t
   -> i:nat{i < len}
-  -> tuple2 (lseq uint64 len) (lseq uint64 len) ->
-  tuple2 (lseq uint64 len) (lseq uint64 len)
+  -> tuple2 (lbignum t len) (lbignum t len) ->
+  tuple2 (lbignum t len) (lbignum t len)
 
-let cswap2_f #len mask i (p1, p2) =
+let cswap2_f #t #len mask i (p1, p2) =
   let dummy = mask &. (p1.[i] ^. p2.[i]) in
   let p1 = p1.[i] <- p1.[i] ^. dummy in
   let p2 = p2.[i] <- p2.[i] ^. dummy in
@@ -245,39 +244,41 @@ let cswap2_f #len mask i (p1, p2) =
 
 
 val cswap2:
-    #len:size_nat
-  -> bit:uint64
-  -> b1:lseq uint64 len
-  -> b2:lseq uint64 len ->
-  tuple2 (lseq uint64 len) (lseq uint64 len)
+    #t:limb_t
+  -> #len:size_nat
+  -> bit:limb t
+  -> b1:lbignum t len
+  -> b2:lbignum t len ->
+  tuple2 (lbignum t len) (lbignum t len)
 
-let cswap2 #len bit b1 b2 =
-  let mask = u64 0 -. bit in
-  Loops.repeati len (cswap2_f #len mask) (b1, b2)
+let cswap2 #t #len bit b1 b2 =
+  let mask = uint #t 0 -. bit in
+  Loops.repeati len (cswap2_f #t #len mask) (b1, b2)
 
 
 val cswap2_lemma:
-    #len:size_nat
-  -> bit:uint64{v bit <= 1}
-  -> b1:lseq uint64 len
-  -> b2:lseq uint64 len ->
+    #t:limb_t
+  -> #len:size_nat
+  -> bit:limb t{v bit <= 1}
+  -> b1:lbignum t len
+  -> b2:lbignum t len ->
   Lemma (let (p1, p2) = cswap2 bit b1 b2 in
     (if v bit = 1 then p1 == b2 /\ p2 == b1 else p1 == b1 /\ p2 == b2))
 
-let cswap2_lemma #len bit b1 b2 =
-  let mask = u64 0 -. bit in
-  Loops.eq_repeati0 len (cswap2_f #len mask) (b1, b2);
+let cswap2_lemma #t #len bit b1 b2 =
+  let mask = uint #t 0 -. bit in
+  Loops.eq_repeati0 len (cswap2_f #t #len mask) (b1, b2);
   let (p1, p2) =
-  Loops.repeati_inductive #(tuple2 (lseq uint64 len) (lseq uint64 len)) len
+  Loops.repeati_inductive #(tuple2 (lbignum t len) (lbignum t len)) len
   (fun i (p1, p2) ->
-    (p1, p2) == Loops.repeati i (cswap2_f #len mask) (b1, b2) /\
+    (p1, p2) == Loops.repeati i (cswap2_f #t #len mask) (b1, b2) /\
     (forall (k:nat{k < i}).
       (if v bit = 1 then p1.[k] == b2.[k] /\ p2.[k] == b1.[k] else p1.[k] == b1.[k] /\ p2.[k] == b2.[k])) /\
     (forall (k:nat{i <= k /\ k < len}). p1.[k] == b1.[k] /\ p2.[k] == b2.[k]))
   (fun i (p1, p2) ->
-    Loops.unfold_repeati (i + 1) (cswap2_f #len mask) (b1, b2) i;
+    Loops.unfold_repeati (i + 1) (cswap2_f #t #len mask) (b1, b2) i;
     lemma_cswap2_step bit p1.[i] p2.[i];
-    cswap2_f #len mask i (p1, p2)) (b1, b2) in
+    cswap2_f #t #len mask i (p1, p2)) (b1, b2) in
 
   assert (if v bit = 1 then (eq_intro p1 b2; p1 == b2) else (eq_intro p1 b1; p1 == b1));
   assert (if v bit = 1 then (eq_intro p2 b1; p2 == b1) else (eq_intro p2 b2; p2 == b2));
@@ -292,104 +293,109 @@ let cswap2_lemma #len bit b1 b2 =
 let bn_leading_zero_index_t (len:size_nat) (i:nat{i <= len}) = x:nat{x < len}
 
 val bn_leading_zero_index_f:
-    #len:size_nat
-  -> b:lbignum len
+    #t:limb_t
+  -> #len:size_nat
+  -> b:lbignum t len
   -> i:nat{i < len}
   -> priv:bn_leading_zero_index_t len i ->
   bn_leading_zero_index_t len (i + 1)
 
-let bn_leading_zero_index_f #len b i priv =
-  let mask = eq_mask b.[i] (zeros U64 SEC) in
+let bn_leading_zero_index_f #t #len b i priv =
+  let mask = eq_mask b.[i] (zeros t SEC) in
   if v mask = 0 then i else priv
 
-val bn_leading_zero_index: #len:size_pos -> b:lbignum len -> res:size_nat{res < len}
-let bn_leading_zero_index #len b =
-  Loops.repeat_gen len (bn_leading_zero_index_t len) (bn_leading_zero_index_f #len b) 0
+val bn_leading_zero_index: #t:limb_t -> #len:size_pos -> b:lbignum t len -> res:size_nat{res < len}
+let bn_leading_zero_index #t #len b =
+  Loops.repeat_gen len (bn_leading_zero_index_t len) (bn_leading_zero_index_f #t #len b) 0
 
 
-val bn_leading_zero_index_lemma: #len:size_pos -> b:lbignum len ->
-  Lemma (let ind = bn_leading_zero_index #len b in
+val bn_leading_zero_index_lemma: #t:limb_t -> #len:size_pos -> b:lbignum t len ->
+  Lemma (let ind = bn_leading_zero_index #t #len b in
     ind < len /\ (ind > 0 ==> v b.[ind] <> 0) /\ (forall (k:nat{ind < k /\ k < len}). v b.[k] = 0))
 
-let bn_leading_zero_index_lemma #len b =
-  Loops.eq_repeat_gen0 len (bn_leading_zero_index_t len) (bn_leading_zero_index_f #len b) 0;
+let bn_leading_zero_index_lemma #t #len b =
+  Loops.eq_repeat_gen0 len (bn_leading_zero_index_t len) (bn_leading_zero_index_f #t #len b) 0;
   let res =
   Loops.repeati_inductive #size_nat len
   (fun i priv ->
-    priv == Loops.repeat_gen i (bn_leading_zero_index_t len) (bn_leading_zero_index_f #len b) 0 /\
+    priv == Loops.repeat_gen i (bn_leading_zero_index_t len) (bn_leading_zero_index_f #t #len b) 0 /\
     priv < len /\ (priv > 0 ==> v b.[priv] <> 0) /\ (forall (k:nat{priv < k /\ k < i}). v b.[k] = 0))
   (fun i priv ->
-    Loops.unfold_repeat_gen (i + 1) (bn_leading_zero_index_t len) (bn_leading_zero_index_f #len b) 0 i;
-    let mask = eq_mask b.[i] (zeros U64 SEC) in
-    eq_mask_lemma b.[i] (zeros U64 SEC);
+    Loops.unfold_repeat_gen (i + 1) (bn_leading_zero_index_t len) (bn_leading_zero_index_f #t #len b) 0 i;
+    let mask = eq_mask b.[i] (zeros t SEC) in
+    eq_mask_lemma b.[i] (zeros t SEC);
     assert (if v mask = 0 then v b.[i] <> 0 else v b.[i] = 0);
     let res = if v mask = 0 then i else priv in
     res) 0 in
   ()
 
 
-val bn_leading_zero_index_eval_lemma: #len:size_pos -> b:lbignum len -> ind:nat -> Lemma
+val bn_leading_zero_index_eval_lemma: #t:limb_t -> #len:size_pos -> b:lbignum t len -> ind:nat -> Lemma
   (requires
     ind < len /\ (ind > 0 ==> v b.[ind] <> 0) /\ (forall (k:nat{ind < k /\ k < len}). v b.[k] = 0))
   (ensures
-    bn_v b == bn_v (slice b 0 ind) + pow2 (64 * ind) * v b.[ind])
+    bn_v b == bn_v (slice b 0 ind) + pow2 (bits t * ind) * v b.[ind])
 
-let bn_leading_zero_index_eval_lemma #len b ind =
+let bn_leading_zero_index_eval_lemma #t #len b ind =
   assert (forall (k:nat{ind < k /\ k < len}). v b.[k] = 0);
   bn_eval_split_i b (ind + 1);
-  assert (bn_v b == bn_v (slice b 0 (ind + 1)) + pow2 (64 * (ind + 1)) * bn_v (slice b (ind + 1) len));
-  eq_intro (slice b (ind + 1) len) (create (len - ind - 1) (u64 0));
-  bn_eval_zeroes (len - ind - 1) (len - ind - 1);
+  assert (bn_v b == bn_v (slice b 0 (ind + 1)) + pow2 (bits t * (ind + 1)) * bn_v (slice b (ind + 1) len));
+  eq_intro (slice b (ind + 1) len) (create (len - ind - 1) (uint #t 0));
+  bn_eval_zeroes #t (len - ind - 1) (len - ind - 1);
   assert (bn_v b == bn_v (slice b 0 (ind + 1)));
-  //Seq.slice_slice b 0 (ind + 1) 0 ind;
-  //assert (slice (slice b 0 (ind + 1)) 0 ind == slice b 0 ind);
   bn_eval_split_i (slice b 0 (ind + 1)) ind;
-  assert (bn_v b == bn_v (slice b 0 ind) + pow2 (64 * ind) * bn_v (slice b ind (ind + 1)));
+  assert (bn_v b == bn_v (slice b 0 ind) + pow2 (bits t * ind) * bn_v (slice b ind (ind + 1)));
   bn_eval1 (slice b ind (ind + 1));
-  assert (bn_v b == bn_v (slice b 0 ind) + pow2 (64 * ind) * v b.[ind])
+  assert (bn_v b == bn_v (slice b 0 ind) + pow2 (bits t * ind) * v b.[ind])
 
 
 
-let limb_leading_zero_index_t (i:nat{i <= 64}) = x:size_nat{x < 64}
+let limb_leading_zero_index_t (t:limb_t) (i:nat{i <= bits t}) = x:size_nat{x < bits t}
 
-val limb_leading_zero_index_f: a:uint64 -> i:nat{i < 64} -> priv:limb_leading_zero_index_t i -> limb_leading_zero_index_t (i + 1)
-let limb_leading_zero_index_f a i priv =
+val limb_leading_zero_index_f:
+    #t:limb_t
+  -> a:limb t
+  -> i:nat{i < bits t}
+  -> priv:limb_leading_zero_index_t t i ->
+  limb_leading_zero_index_t t (i + 1)
+
+let limb_leading_zero_index_f #t a i priv =
   if v (limb_get_ith_bit a i) = 1 then i else priv
 
 
-val limb_leading_zero_index: a:uint64 -> res:size_nat{res < 64}
-let limb_leading_zero_index a =
-  Loops.repeat_gen 64 limb_leading_zero_index_t (limb_leading_zero_index_f a) 0
+val limb_leading_zero_index: #t:limb_t -> a:limb t -> res:size_nat{res < bits t}
+let limb_leading_zero_index #t a =
+  Loops.repeat_gen (bits t) (limb_leading_zero_index_t t) (limb_leading_zero_index_f a) 0
 
 
-val limb_leading_zero_index_lemma: a:uint64 ->
+val limb_leading_zero_index_lemma: #t:limb_t -> a:limb t ->
   Lemma (let ind = limb_leading_zero_index a in
-    ind < 64 /\ (ind > 0 ==> v (limb_get_ith_bit a ind) = 1) /\
-    (forall (k:nat{ind < k /\ k < 64}). v (limb_get_ith_bit a k) = 0))
+    ind < bits t /\ (ind > 0 ==> v (limb_get_ith_bit a ind) = 1) /\
+    (forall (k:nat{ind < k /\ k < bits t}). v (limb_get_ith_bit a k) = 0))
 
-let limb_leading_zero_index_lemma a =
-  Loops.eq_repeat_gen0 64 limb_leading_zero_index_t (limb_leading_zero_index_f a) 0;
+let limb_leading_zero_index_lemma #t a =
+  Loops.eq_repeat_gen0 (bits t) (limb_leading_zero_index_t t) (limb_leading_zero_index_f a) 0;
   let res =
-  Loops.repeati_inductive #size_nat 64
+  Loops.repeati_inductive #size_nat (bits t)
   (fun i priv ->
-    priv == Loops.repeat_gen i limb_leading_zero_index_t (limb_leading_zero_index_f a) 0 /\
-    priv < 64 /\ (priv > 0 ==> v (limb_get_ith_bit a priv) = 1) /\
+    priv == Loops.repeat_gen i (limb_leading_zero_index_t t) (limb_leading_zero_index_f a) 0 /\
+    priv < bits t /\ (priv > 0 ==> v (limb_get_ith_bit a priv) = 1) /\
     (forall (k:nat{priv < k /\ k < i}). v (limb_get_ith_bit a k) = 0))
   (fun i priv ->
-    Loops.unfold_repeat_gen (i + 1) limb_leading_zero_index_t (limb_leading_zero_index_f a) 0 i;
+    Loops.unfold_repeat_gen (i + 1) (limb_leading_zero_index_t t) (limb_leading_zero_index_f a) 0 i;
     limb_get_ith_bit_lemma a i;
     let res = if v (limb_get_ith_bit a i) = 1 then i else priv in
     res) 0 in
   ()
 
 
-val limb_leading_zero_eval_lemma_aux: a:uint64 -> ind:nat{ind < 64} -> j:nat{ind < j /\ j <= 64} -> Lemma
-  (requires (forall (k:nat{ind < k /\ k < 64}). v a / pow2 k % 2 = 0))
+val limb_leading_zero_eval_lemma_aux: #t:limb_t -> a:limb t -> ind:nat{ind < bits t} -> j:nat{ind < j /\ j <= bits t} -> Lemma
+  (requires (forall (k:nat{ind < k /\ k < bits t}). v a / pow2 k % 2 = 0))
   (ensures  v a / pow2 j = 0)
-  (decreases (64 - j))
+  (decreases (bits t - j))
 
-let rec limb_leading_zero_eval_lemma_aux a ind j =
-  if j = 64 then ()
+let rec limb_leading_zero_eval_lemma_aux #t a ind j =
+  if j = bits t then ()
   else begin
     limb_leading_zero_eval_lemma_aux a ind (j + 1);
     assert (v a / pow2 (j + 1) = 0);
@@ -406,21 +412,21 @@ let rec limb_leading_zero_eval_lemma_aux a ind j =
       }; () end
 
 
-val limb_leading_zero_index_eval_lemma: a:uint64{v a > 0} -> ind:nat -> Lemma
+val limb_leading_zero_index_eval_lemma: #t:limb_t -> a:limb t{v a > 0} -> ind:nat -> Lemma
   (requires
-    ind < 64 /\ (ind > 0 ==> v (limb_get_ith_bit a ind) = 1) /\
-    (forall (k:nat{ind < k /\ k < 64}). v (limb_get_ith_bit a k) = 0))
+    ind < bits t /\ (ind > 0 ==> v (limb_get_ith_bit a ind) = 1) /\
+    (forall (k:nat{ind < k /\ k < bits t}). v (limb_get_ith_bit a k) = 0))
   (ensures
     pow2 ind <= v a /\ v a < pow2 (ind + 1))
 
-let limb_leading_zero_index_eval_lemma a ind =
-  let aux (k:nat{ind < k /\ k < 64}) : Lemma (v a / pow2 k % 2 = 0) =
+let limb_leading_zero_index_eval_lemma #t a ind =
+  let aux (k:nat{ind < k /\ k < bits t}) : Lemma (v a / pow2 k % 2 = 0) =
     assert (v (limb_get_ith_bit a k) = 0);
     limb_get_ith_bit_lemma a k;
     assert (v a / pow2 k % 2 = 0);
     () in
   Classical.forall_intro aux;
-  assert (forall (k:nat{ind < k /\ k < 64}). v a / pow2 k % 2 = 0);
+  assert (forall (k:nat{ind < k /\ k < bits t}). v a / pow2 k % 2 = 0);
 
   limb_leading_zero_eval_lemma_aux a ind (ind + 1);
   assert (v a / pow2 (ind + 1) = 0);
@@ -467,58 +473,58 @@ let limb_leading_zero_index_eval_lemma a ind =
   assert (pow2 ind <= v a)
 
 
-val bn_get_num_bits: #len:size_pos{64 * len <= max_size_t} -> b:lbignum len -> size_nat
-let bn_get_num_bits #len b =
-  let ind = bn_leading_zero_index #len b in
-  let bits = limb_leading_zero_index b.[ind] in
-  64 * ind + bits
+val bn_get_num_bits: #t:limb_t -> #len:size_pos{bits t * len <= max_size_t} -> b:lbignum t len -> size_nat
+let bn_get_num_bits #t #len b =
+  let ind = bn_leading_zero_index #t #len b in
+  let last_bits = limb_leading_zero_index b.[ind] in
+  bits t * ind + last_bits
 
 
-val bn_get_num_bits_lemma_aux: ind:size_nat -> bits:size_nat -> a:nat -> b:nat -> Lemma
+val bn_get_num_bits_lemma_aux: d:pos -> ind:size_nat -> bits:size_nat -> a:nat -> b:nat -> Lemma
   (requires
-    pow2 bits <= b /\ b < pow2 (bits + 1) /\ a < pow2 (64 * ind))
+    pow2 bits <= b /\ b < pow2 (bits + 1) /\ a < pow2 (d * ind))
   (ensures
-    pow2 (64 * ind + bits) <= a + pow2 (64 * ind) * b /\
-    a + pow2 (64 * ind) * b < pow2 (64 * ind + bits + 1))
+    pow2 (d * ind + bits) <= a + pow2 (d * ind) * b /\
+    a + pow2 (d * ind) * b < pow2 (d * ind + bits + 1))
 
-let bn_get_num_bits_lemma_aux ind bits a b =
+let bn_get_num_bits_lemma_aux d ind bits a b =
   calc (>=) {
-    a + pow2 (64 * ind) * b;
+    a + pow2 (d * ind) * b;
     (>=) { }
-    pow2 (64 * ind) * b;
+    pow2 (d * ind) * b;
     (>=) { }
-    pow2 (64 * ind) * pow2 bits;
-    (==) { Math.Lemmas.pow2_plus (64 * ind) bits }
-    pow2 (64 * ind + bits);
+    pow2 (d * ind) * pow2 bits;
+    (==) { Math.Lemmas.pow2_plus (d * ind) bits }
+    pow2 (d * ind + bits);
   };
-  assert (pow2 (64 * ind + bits) <= a + pow2 (64 * ind) * b);
+  assert (pow2 (d * ind + bits) <= a + pow2 (d * ind) * b);
 
   calc (<=) {
-    a + pow2 (64 * ind) * b;
+    a + pow2 (d * ind) * b;
     (<=) { }
-    pow2 (64 * ind) - 1 + pow2 (64 * ind) * b;
+    pow2 (d * ind) - 1 + pow2 (d * ind) * b;
     (<=) { }
-    pow2 (64 * ind) - 1 + pow2 (64 * ind) * (pow2 (bits + 1) - 1);
-    (==) { Math.Lemmas.distributivity_sub_right (pow2 (64 * ind)) (pow2 (bits + 1)) 1 }
-    pow2 (64 * ind) * pow2 (bits + 1) - 1;
-    (==) { Math.Lemmas.pow2_plus (64 * ind) (bits + 1) }
-    pow2 (64 * ind + bits + 1) - 1;
+    pow2 (d * ind) - 1 + pow2 (d * ind) * (pow2 (bits + 1) - 1);
+    (==) { Math.Lemmas.distributivity_sub_right (pow2 (d * ind)) (pow2 (bits + 1)) 1 }
+    pow2 (d * ind) * pow2 (bits + 1) - 1;
+    (==) { Math.Lemmas.pow2_plus (d * ind) (bits + 1) }
+    pow2 (d * ind + bits + 1) - 1;
     };
-  assert (a + pow2 (64 * ind) * b < pow2 (64 * ind + bits + 1))
+  assert (a + pow2 (d * ind) * b < pow2 (d * ind + bits + 1))
 
 
-val bn_get_num_bits_lemma: #len:size_pos{64 * len <= max_size_t} -> b:lbignum len -> Lemma
+val bn_get_num_bits_lemma: #t:limb_t -> #len:size_pos{bits t * len <= max_size_t} -> b:lbignum t len -> Lemma
   (requires 0 < bn_v b)
-  (ensures (let bits = bn_get_num_bits b in
-    bits <= 64 * len /\ blocks (bits + 1) 64 <= len /\
-    pow2 bits <= bn_v b /\ bn_v b < pow2 (bits + 1)))
+  (ensures (let bs = bn_get_num_bits b in
+    bs <= bits t * len /\ blocks (bs + 1) (bits t) <= len /\
+    pow2 bs <= bn_v b /\ bn_v b < pow2 (bs + 1)))
 
-let bn_get_num_bits_lemma #len b =
-  let ind = bn_leading_zero_index #len b in
+let bn_get_num_bits_lemma #t #len b =
+  let ind = bn_leading_zero_index #t #len b in
   bn_leading_zero_index_lemma b;
   bn_leading_zero_index_eval_lemma b ind;
-  assert (bn_v b == bn_v (slice b 0 ind) + pow2 (64 * ind) * v b.[ind]);
-  let bits = limb_leading_zero_index b.[ind] in
+  assert (bn_v b == bn_v (slice b 0 ind) + pow2 (bits t * ind) * v b.[ind]);
+  let bs = limb_leading_zero_index b.[ind] in
   if ind = 0 then begin
     bn_eval0 (slice b 0 ind);
     assert_norm (pow2 0 = 1);
@@ -527,11 +533,11 @@ let bn_get_num_bits_lemma #len b =
     () end;
   assert (v b.[ind] > 0);
   limb_leading_zero_index_lemma b.[ind];
-  limb_leading_zero_index_eval_lemma b.[ind] bits;
-  assert (pow2 bits <= v b.[ind] /\ v b.[ind] < pow2 (bits + 1));
+  limb_leading_zero_index_eval_lemma b.[ind] bs;
+  assert (pow2 bs <= v b.[ind] /\ v b.[ind] < pow2 (bs + 1));
 
   bn_eval_bound (slice b 0 ind) ind;
-  bn_get_num_bits_lemma_aux ind bits (bn_v (slice b 0 ind)) (v b.[ind])
+  bn_get_num_bits_lemma_aux (bits t) ind bs (bn_v (slice b 0 ind)) (v b.[ind])
 
 
 // val limb_get_num_bits_f: i:nat{i < 6} -> tuple2 uint64 pos -> tuple2 uint64 pos
