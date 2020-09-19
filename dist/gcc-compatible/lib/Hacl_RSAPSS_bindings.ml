@@ -39,4 +39,30 @@ module Bindings(F:Cstubs.FOREIGN) =
                  (ocaml_bytes @->
                     (ocaml_bytes @->
                        (ocaml_bytes @-> (returning (ptr uint64_t))))))))
+    let hacl_RSAPSS_rsapss_skey_sign =
+      foreign "Hacl_RSAPSS_rsapss_skey_sign"
+        (spec_Hash_Definitions_hash_alg @->
+           (uint32_t @->
+              (uint32_t @->
+                 (uint32_t @->
+                    (ocaml_bytes @->
+                       (ocaml_bytes @->
+                          (ocaml_bytes @->
+                             (uint32_t @->
+                                (ocaml_bytes @->
+                                   (uint32_t @->
+                                      (ocaml_bytes @->
+                                         (ocaml_bytes @-> (returning bool)))))))))))))
+    let hacl_RSAPSS_rsapss_pkey_verify =
+      foreign "Hacl_RSAPSS_rsapss_pkey_verify"
+        (spec_Hash_Definitions_hash_alg @->
+           (uint32_t @->
+              (uint32_t @->
+                 (ocaml_bytes @->
+                    (ocaml_bytes @->
+                       (uint32_t @->
+                          (uint32_t @->
+                             (ocaml_bytes @->
+                                (uint32_t @->
+                                   (ocaml_bytes @-> (returning bool)))))))))))
   end
