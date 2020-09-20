@@ -116,6 +116,7 @@ val bn_eval_split_i: #t:limb_t -> #len:size_nat -> b:lbignum t len -> i:nat{i <=
   (decreases (len - i))
 
 let rec bn_eval_split_i #t #len b i =
+  let pbits = bits t in
   if i = 0 then
     bn_eval0 (slice b 0 i)
   else begin
@@ -125,19 +126,19 @@ let rec bn_eval_split_i #t #len b i =
       let b1 = slice b i len in
       bn_eval_split_i b1 1;
       bn_eval1 (slice b1 0 1);
-      assert (bn_v b1 == v b1.[0] + pow2 (bits t) * bn_v (slice b1 1 (len - i)));
+      assert (bn_v b1 == v b1.[0] + pow2 pbits * bn_v (slice b1 1 (len - i)));
       Seq.lemma_index_slice b i len 0;
-      assert (bn_v b1 == v b.[i] + pow2 (bits t) * bn_v (slice b (i + 1) len));
+      assert (bn_v b1 == v b.[i] + pow2 pbits * bn_v (slice b (i + 1) len));
       calc (==) {
         bn_v b;
         (==) { bn_eval_split_i b (i + 1) }
-        bn_v (slice b 0 (i + 1)) + pow2 (bits t * (i + 1)) * bn_v (slice b (i + 1) len);
-        (==) { bn_eval_split_i_aux (bits t) (bn_v b1) (v b.[i]) (bn_v (slice b (i + 1) len)) i }
-        bn_v (slice b 0 (i + 1)) + pow2 (bits t * i) * bn_v b1 - pow2 (bits t * i) * v b.[i];
+        bn_v (slice b 0 (i + 1)) + pow2 (pbits * (i + 1)) * bn_v (slice b (i + 1) len);
+        (==) { bn_eval_split_i_aux pbits (bn_v b1) (v b.[i]) (bn_v (slice b (i + 1) len)) i }
+        bn_v (slice b 0 (i + 1)) + pow2 (pbits * i) * bn_v b1 - pow2 (pbits * i) * v b.[i];
         (==) { bn_eval_unfold_i (slice b 0 (i + 1)) (i + 1)}
-        eval_ (i + 1) (slice b 0 (i + 1)) i + pow2 (bits t * i) * bn_v b1;
+        eval_ (i + 1) (slice b 0 (i + 1)) i + pow2 (pbits * i) * bn_v b1;
         (==) { bn_eval_extensionality_j (slice b 0 (i + 1)) (slice b 0 i) i }
-        eval_ i (slice b 0 i) i + pow2 (bits t * i) * bn_v b1;
+        eval_ i (slice b 0 i) i + pow2 (pbits * i) * bn_v b1;
       }; () end end
 
 
@@ -163,23 +164,24 @@ val bn_eval_bound: #t:limb_t -> #len:size_nat -> b:lbignum t len -> i:nat{i <= l
   Lemma (eval_ len b i < pow2 (bits t * i))
 
 let rec bn_eval_bound #t #len b i =
+  let pbits = bits t in
   if i = 0 then
     bn_eval0 b
   else begin
     bn_eval_unfold_i b i;
-    assert (eval_ len b i == eval_ len b (i - 1) + pow2 (bits t * (i - 1)) * v b.[i - 1]);
+    assert (eval_ len b i == eval_ len b (i - 1) + pow2 (pbits * (i - 1)) * v b.[i - 1]);
     calc (<) {
-      eval_ len b (i - 1) + pow2 (bits t * (i - 1)) * v b.[i - 1];
+      eval_ len b (i - 1) + pow2 (pbits * (i - 1)) * v b.[i - 1];
       (<) { bn_eval_bound #t #len b (i - 1) }
-      pow2 (bits t * (i - 1)) + pow2 (bits t * (i - 1)) * v b.[i - 1];
-      (==) { Math.Lemmas.distributivity_add_right (pow2 (bits t * (i - 1))) 1 (v b.[i - 1]) }
-      pow2 (bits t * (i - 1)) * (1 + v b.[i - 1]);
-      (<=) { Math.Lemmas.lemma_mult_le_left (pow2 (bits t * (i - 1))) (1 + v b.[i - 1]) (pow2 (bits t)) }
-      pow2 (bits t * (i - 1)) * pow2 (bits t);
-      (==) { Math.Lemmas.pow2_plus (bits t * (i - 1)) (bits t) }
-      pow2 (bits t * i);
+      pow2 (pbits * (i - 1)) + pow2 (pbits * (i - 1)) * v b.[i - 1];
+      (==) { Math.Lemmas.distributivity_add_right (pow2 (pbits * (i - 1))) 1 (v b.[i - 1]) }
+      pow2 (pbits * (i - 1)) * (1 + v b.[i - 1]);
+      (<=) { Math.Lemmas.lemma_mult_le_left (pow2 (pbits * (i - 1))) (1 + v b.[i - 1]) (pow2 pbits) }
+      pow2 (pbits * (i - 1)) * pow2 pbits;
+      (==) { Math.Lemmas.pow2_plus (pbits * (i - 1)) pbits }
+      pow2 (pbits * i);
     };
-    assert (eval_ len b i < pow2 (bits t * i))
+    assert (eval_ len b i < pow2 (pbits * i))
     end
 
 
@@ -187,26 +189,26 @@ val bn_eval_index: #t:limb_t -> #len:size_nat -> b:lbignum t len -> i:nat{i < le
   Lemma (v b.[i] == bn_v b / pow2 (bits t * i) % pow2 (bits t))
 
 let bn_eval_index #t #len b i =
-  let p = pow2 (bits t) in
+  let pbits = bits t in
 
   calc (==) {
-    bn_v b / pow2 (bits t * i) % p;
+    bn_v b / pow2 (pbits * i) % pow2 pbits;
     (==) { bn_eval_split_i #t #len b i }
-    (bn_v (slice b 0 i) + pow2 (bits t * i) * bn_v (slice b i len)) / pow2 (bits t * i) % p;
-    (==) { Math.Lemmas.division_addition_lemma (bn_v (slice b 0 i)) (pow2 (bits t * i)) (bn_v (slice b i len)) }
-    (bn_v (slice b 0 i) / pow2 (bits t * i) + bn_v (slice b i len)) % p;
-    (==) { bn_eval_bound (slice b 0 i) i; Math.Lemmas.small_division_lemma_1 (bn_v (slice b 0 i)) (pow2 (bits t * i)) }
-    bn_v (slice b i len) % p;
+    (bn_v (slice b 0 i) + pow2 (pbits * i) * bn_v (slice b i len)) / pow2 (pbits * i) % pow2 pbits;
+    (==) { Math.Lemmas.division_addition_lemma (bn_v (slice b 0 i)) (pow2 (pbits * i)) (bn_v (slice b i len)) }
+    (bn_v (slice b 0 i) / pow2 (pbits * i) + bn_v (slice b i len)) % pow2 pbits;
+    (==) { bn_eval_bound (slice b 0 i) i; Math.Lemmas.small_division_lemma_1 (bn_v (slice b 0 i)) (pow2 (pbits * i)) }
+    bn_v (slice b i len) % pow2 pbits;
     (==) { bn_eval_split_i (slice b i len) 1 }
-    (bn_v (slice b i (i + 1)) + p * bn_v (slice b (i + 1) len)) % p;
-    (==) { Math.Lemmas.modulo_addition_lemma (bn_v (slice b i (i + 1))) p (bn_v (slice b (i + 1) len)) }
-    bn_v (slice b i (i + 1)) % p;
+    (bn_v (slice b i (i + 1)) + pow2 pbits * bn_v (slice b (i + 1) len)) % pow2 pbits;
+    (==) { Math.Lemmas.modulo_addition_lemma (bn_v (slice b i (i + 1))) (pow2 pbits) (bn_v (slice b (i + 1) len)) }
+    bn_v (slice b i (i + 1)) % pow2 pbits;
     (==) { bn_eval1 (slice b i (i + 1)); Seq.lemma_index_slice b i (i + 1) 0 }
-    v b.[i] % p;
-    (==) { Math.Lemmas.modulo_lemma (v b.[i]) p }
+    v b.[i] % pow2 pbits;
+    (==) { Math.Lemmas.modulo_lemma (v b.[i]) (pow2 pbits) }
     v b.[i];
   };
-  assert (bn_v b / pow2 (bits t * i) % p == v b.[i])
+  assert (bn_v b / pow2 (pbits * i) % pow2 pbits == v b.[i])
 
 
 
@@ -215,19 +217,21 @@ val bn_eval_lt: #t:limb_t -> len:size_nat -> a:lbignum t len -> b:lbignum t len 
   (ensures  eval_ len a k < eval_ len b k)
 
 let bn_eval_lt #t len a b k =
+  let pbits = bits t in
+  
   calc (==) {
     eval_ len b k - eval_ len a k;
     (==) { bn_eval_unfold_i b k }
-    eval_ len b (k - 1) + v b.[k - 1] * pow2 (bits t * (k - 1)) - eval_ len a k;
+    eval_ len b (k - 1) + v b.[k - 1] * pow2 (pbits * (k - 1)) - eval_ len a k;
     (==) { bn_eval_unfold_i a k }
-    eval_ len b (k - 1) + v b.[k - 1] * pow2 (bits t * (k - 1)) - eval_ len a (k - 1) - v a.[k - 1] * pow2 (bits t * (k - 1));
-    (==) { Math.Lemmas.distributivity_sub_left (v b.[k - 1]) (v a.[k - 1]) (pow2 (bits t * (k - 1))) }
-    eval_ len b (k - 1) - eval_ len a (k - 1) + (v b.[k - 1] - v a.[k - 1]) * pow2 (bits t * (k - 1));
+    eval_ len b (k - 1) + v b.[k - 1] * pow2 (pbits * (k - 1)) - eval_ len a (k - 1) - v a.[k - 1] * pow2 (pbits * (k - 1));
+    (==) { Math.Lemmas.distributivity_sub_left (v b.[k - 1]) (v a.[k - 1]) (pow2 (pbits * (k - 1))) }
+    eval_ len b (k - 1) - eval_ len a (k - 1) + (v b.[k - 1] - v a.[k - 1]) * pow2 (pbits * (k - 1));
   };
   bn_eval_bound a (k - 1);
   bn_eval_bound b (k - 1);
-  assert (eval_ len b (k - 1) - eval_ len a (k - 1) > - pow2 (bits t * (k - 1)));
-  assert ((v b.[k - 1] - v a.[k - 1]) * pow2 (bits t * (k - 1)) >= pow2 (bits t * (k - 1)))
+  assert (eval_ len b (k - 1) - eval_ len a (k - 1) > - pow2 (pbits * (k - 1)));
+  assert ((v b.[k - 1] - v a.[k - 1]) * pow2 (pbits * (k - 1)) >= pow2 (pbits * (k - 1)))
 
 
 val bn_eval_update_sub: #t:limb_t -> len1:size_nat -> b1:lbignum t len1 -> len2:size_nat{len1 <= len2} ->
@@ -253,30 +257,31 @@ val bn_update_sub_eval:
   Lemma (bn_v (update_sub a i bLen b) == bn_v a - bn_v (sub a i bLen) * pow2 (bits t * i) + bn_v b * pow2 (bits t * i))
 
 let bn_update_sub_eval #t #aLen #bLen a b i =
+  let pbits = bits t in
   let a' = update_sub a i bLen b in
   let c = bn_v (sub a i bLen) * pow2 (bits t * i) in
 
   calc (==) {
     bn_v a' + c;
     (==) { bn_eval_split_i a' i }
-    bn_v (slice a' 0 i) + pow2 (bits t * i) * bn_v (slice a' i aLen) + c;
+    bn_v (slice a' 0 i) + pow2 (pbits * i) * bn_v (slice a' i aLen) + c;
     (==) { eq_intro (slice a 0 i) (slice a' 0 i) }
-    bn_v (slice a 0 i) + pow2 (bits t * i) * bn_v (slice a' i aLen) + c;
+    bn_v (slice a 0 i) + pow2 (pbits * i) * bn_v (slice a' i aLen) + c;
     (==) { bn_eval_split_i (slice a' i aLen) bLen }
-    bn_v (slice a 0 i) + pow2 (bits t * i) * (bn_v (sub a' i bLen) + pow2 (bits t * bLen) * bn_v (slice a' (i + bLen) aLen)) + c;
+    bn_v (slice a 0 i) + pow2 (pbits * i) * (bn_v (sub a' i bLen) + pow2 (pbits * bLen) * bn_v (slice a' (i + bLen) aLen)) + c;
     (==) { eq_intro (slice a' (i + bLen) aLen) (slice a (i + bLen) aLen) }
-    bn_v (slice a 0 i) + pow2 (bits t * i) * (bn_v (sub a' i bLen) + pow2 (bits t * bLen) * bn_v (slice a (i + bLen) aLen)) + c;
+    bn_v (slice a 0 i) + pow2 (pbits * i) * (bn_v (sub a' i bLen) + pow2 (pbits * bLen) * bn_v (slice a (i + bLen) aLen)) + c;
     (==) {eq_intro (sub a' i bLen) b }
-    bn_v (slice a 0 i) + pow2 (bits t * i) * (bn_v b + pow2 (bits t * bLen) * bn_v (slice a (i + bLen) aLen)) + c;
-    (==) { Math.Lemmas.distributivity_add_right (pow2 (bits t * i)) (bn_v b) (pow2 (bits t * bLen) * bn_v (slice a (i + bLen) aLen)) }
-    bn_v (slice a 0 i) + pow2 (bits t * i) * bn_v b + pow2 (bits t * i) * (pow2 (bits t * bLen) * bn_v (slice a (i + bLen) aLen)) + c;
-    (==) { Math.Lemmas.paren_mul_right (pow2 (bits t * i)) (pow2 (bits t * bLen)) (bn_v (slice a (i + bLen) aLen));
-           Math.Lemmas.pow2_plus (bits t * i) (bits t * bLen) }
-    bn_v (slice a 0 i) + pow2 (bits t * i) * bn_v b + pow2 (bits t * (i + bLen)) * bn_v (slice a (i + bLen) aLen) + c;
+    bn_v (slice a 0 i) + pow2 (pbits * i) * (bn_v b + pow2 (pbits * bLen) * bn_v (slice a (i + bLen) aLen)) + c;
+    (==) { Math.Lemmas.distributivity_add_right (pow2 (pbits * i)) (bn_v b) (pow2 (pbits * bLen) * bn_v (slice a (i + bLen) aLen)) }
+    bn_v (slice a 0 i) + pow2 (pbits * i) * bn_v b + pow2 (pbits * i) * (pow2 (pbits * bLen) * bn_v (slice a (i + bLen) aLen)) + c;
+    (==) { Math.Lemmas.paren_mul_right (pow2 (pbits * i)) (pow2 (pbits * bLen)) (bn_v (slice a (i + bLen) aLen));
+           Math.Lemmas.pow2_plus (pbits * i) (pbits * bLen) }
+    bn_v (slice a 0 i) + pow2 (pbits * i) * bn_v b + pow2 (pbits * (i + bLen)) * bn_v (slice a (i + bLen) aLen) + c;
     (==) { bn_eval_split_i (slice a 0 (i + bLen)) i }
-    bn_v (slice a 0 (i + bLen)) + pow2 (bits t * i) * bn_v b + pow2 (bits t * (i + bLen)) * bn_v (slice a (i + bLen) aLen);
+    bn_v (slice a 0 (i + bLen)) + pow2 (pbits * i) * bn_v b + pow2 (pbits * (i + bLen)) * bn_v (slice a (i + bLen) aLen);
     (==) { bn_eval_split_i a (i + bLen) }
-    bn_v a + pow2 (bits t * i) * bn_v b;
+    bn_v a + pow2 (pbits * i) * bn_v b;
     }
 
 
