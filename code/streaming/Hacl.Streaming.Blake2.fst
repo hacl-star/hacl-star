@@ -10,7 +10,6 @@ module U128 = FStar.UInt128
 module Case = FStar.Int.Cast.Full
 module F = Hacl.Streaming.Functor
 module I = Hacl.Streaming.Interface
-module P = Hacl.Impl.Poly1305
 module ST = FStar.HyperStack.ST
 
 module Agile = Spec.Agile.Hash
