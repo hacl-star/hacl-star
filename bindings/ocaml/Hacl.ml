@@ -300,7 +300,7 @@ module P256 = struct
     assert (C.size result = 64);
     assert (C.size scalar = 32);
     assert (C.disjoint result scalar);
-    get_result @@ Hacl_P256.hacl_P256_ecp256dh_i (C.ctypes_buf result) (C.ctypes_buf scalar)
+    Hacl_P256.hacl_P256_ecp256dh_i (C.ctypes_buf result) (C.ctypes_buf scalar)
   let dh_responder result pub scalar =
     (* Hacl.Interface.P256.DH.ecp256dh_r *)
     assert (C.size result = 64);
@@ -308,12 +308,7 @@ module P256 = struct
     assert (C.size scalar = 32);
     assert (C.disjoint result scalar);
     assert (C.disjoint result pub);
-    get_result @@ Hacl_P256.hacl_P256_ecp256dh_r (C.ctypes_buf result) (C.ctypes_buf pub) (C.ctypes_buf scalar)
-  let reduction p result =
-    (* Hacl.Interface.P256.ECDSA.reduction_8_32 *)
-    assert (C.size p = 32);
-    assert (C.size result = 32);
-    Hacl_P256.hacl_P256_reduction_8_32 (C.ctypes_buf p) (C.ctypes_buf result)
+    Hacl_P256.hacl_P256_ecp256dh_r (C.ctypes_buf result) (C.ctypes_buf pub) (C.ctypes_buf scalar)
   let valid_pk pub =
     (* Hacl.Interface.P256.ECDSA.verifyQ *)
     assert (C.size pub = 64);
