@@ -267,14 +267,6 @@ module NaCl = struct
 end
 
 module P256 = struct
-  let get_result r =
-    if r = UInt64.zero then
-      true
-    else
-    if r = UInt64.max_int then
-      false
-    else
-      failwith "Unknown return value"
   let compress_c p out =
     (* Hacl.Impl.P256.Compression.compressionCompressedForm *)
     assert (C.size p = 64);
