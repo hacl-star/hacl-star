@@ -24,129 +24,7 @@
 
 #include "Hacl_Test_ECDSA.h"
 
-extern void C_String_print(C_String_t uu___);
-
-/*
- Input: result buffer: uint8[64], 
- m buffer: uint8 [mLen], 
- priv(ate)Key: uint8[32], 
- k (nonce): uint32[32]. 
-  
- Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
-  
- The private key and the nonce are expected to be less than the curve order.
-*/
-extern uint64_t
-Hacl_P256_ecdsa_sign_p256_sha2(
-  uint8_t *result,
-  uint32_t mLen,
-  uint8_t *m,
-  uint8_t *privKey,
-  uint8_t *k
-);
-
-/*
- Input: result buffer: uint8[64], 
- m buffer: uint8 [mLen], 
- priv(ate)Key: uint8[32], 
- k (nonce): uint32[32]. 
-  
- Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
-  
- The private key and the nonce are expected to be less than the curve order.
-*/
-extern uint64_t
-Hacl_P256_ecdsa_sign_p256_sha384(
-  uint8_t *result,
-  uint32_t mLen,
-  uint8_t *m,
-  uint8_t *privKey,
-  uint8_t *k
-);
-
-/*
- Input: result buffer: uint8[64], 
- m buffer: uint8 [mLen], 
- priv(ate)Key: uint8[32], 
- k (nonce): uint32[32]. 
-  
- Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
-  
- The private key and the nonce are expected to be less than the curve order.
-*/
-extern uint64_t
-Hacl_P256_ecdsa_sign_p256_sha512(
-  uint8_t *result,
-  uint32_t mLen,
-  uint8_t *m,
-  uint8_t *privKey,
-  uint8_t *k
-);
-
-/*
- This code is not side-channel resistant.
-  
- Input: m buffer: uint8 [mLen], 
- pub(lic)Key: uint8[64], 
- r: uint8[32], 
- s: uint8[32]. 
-  
- Output: bool, where true stands for the correct signature verification. 
-*/
-extern bool
-Hacl_P256_ecdsa_verif_p256_sha2(
-  uint32_t mLen,
-  uint8_t *m,
-  uint8_t *pubKey,
-  uint8_t *r,
-  uint8_t *s
-);
-
-/*
- This code is not side-channel resistant.
-  
- Input: m buffer: uint8 [mLen], 
- pub(lic)Key: uint8[64], 
- r: uint8[32], 
- s: uint8[32]. 
-  
- Output: bool, where true stands for the correct signature verification. 
-*/
-extern bool
-Hacl_P256_ecdsa_verif_p256_sha384(
-  uint32_t mLen,
-  uint8_t *m,
-  uint8_t *pubKey,
-  uint8_t *r,
-  uint8_t *s
-);
-
-/*
- This code is not side-channel resistant.
-  
- Input: m buffer: uint8 [mLen], 
- pub(lic)Key: uint8[64], 
- r: uint8[32], 
- s: uint8[32]. 
-  
- Output: bool, where true stands for the correct signature verification. 
-*/
-extern bool
-Hacl_P256_ecdsa_verif_p256_sha512(
-  uint32_t mLen,
-  uint8_t *m,
-  uint8_t *pubKey,
-  uint8_t *r,
-  uint8_t *s
-);
-
-extern void LowStar_Printf_print_string(Prims_string uu___);
-
-extern void LowStar_Printf_print_u32(uint32_t uu___);
-
-extern void LowStar_Printf_print_lmbuffer_u8(uint32_t l, uint8_t *r);
-
-static uint8_t
+uint8_t
 sigver_vectors256_low0[128U] =
   {
     (uint8_t)228U, (uint8_t)121U, (uint8_t)109U, (uint8_t)181U, (uint8_t)247U, (uint8_t)133U,
@@ -173,7 +51,7 @@ sigver_vectors256_low0[128U] =
     (uint8_t)196U, (uint8_t)160U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low1[32U] =
   {
     (uint8_t)135U, (uint8_t)248U, (uint8_t)242U, (uint8_t)178U, (uint8_t)24U, (uint8_t)244U,
@@ -184,7 +62,7 @@ sigver_vectors256_low1[32U] =
     (uint8_t)21U, (uint8_t)85U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low2[32U] =
   {
     (uint8_t)225U, (uint8_t)95U, (uint8_t)54U, (uint8_t)144U, (uint8_t)54U, (uint8_t)244U,
@@ -195,7 +73,7 @@ sigver_vectors256_low2[32U] =
     (uint8_t)5U, (uint8_t)233U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low3[32U] =
   {
     (uint8_t)209U, (uint8_t)159U, (uint8_t)244U, (uint8_t)139U, (uint8_t)50U, (uint8_t)73U,
@@ -206,7 +84,7 @@ sigver_vectors256_low3[32U] =
     (uint8_t)35U, (uint8_t)176U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low4[32U] =
   {
     (uint8_t)163U, (uint8_t)232U, (uint8_t)30U, (uint8_t)89U, (uint8_t)49U, (uint8_t)28U,
@@ -217,7 +95,7 @@ sigver_vectors256_low4[32U] =
     (uint8_t)71U, (uint8_t)198U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low5[128U] =
   {
     (uint8_t)6U, (uint8_t)154U, (uint8_t)110U, (uint8_t)107U, (uint8_t)147U, (uint8_t)223U,
@@ -244,7 +122,7 @@ sigver_vectors256_low5[128U] =
     (uint8_t)23U, (uint8_t)14U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low6[32U] =
   {
     (uint8_t)92U, (uint8_t)240U, (uint8_t)42U, (uint8_t)0U, (uint8_t)210U, (uint8_t)5U,
@@ -255,7 +133,7 @@ sigver_vectors256_low6[32U] =
     (uint8_t)247U, (uint8_t)210U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low7[32U] =
   {
     (uint8_t)236U, (uint8_t)83U, (uint8_t)12U, (uint8_t)227U, (uint8_t)204U, (uint8_t)92U,
@@ -266,7 +144,7 @@ sigver_vectors256_low7[32U] =
     (uint8_t)42U, (uint8_t)133U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low8[32U] =
   {
     (uint8_t)220U, (uint8_t)35U, (uint8_t)209U, (uint8_t)48U, (uint8_t)198U, (uint8_t)17U,
@@ -277,7 +155,7 @@ sigver_vectors256_low8[32U] =
     (uint8_t)102U, (uint8_t)147U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low9[32U] =
   {
     (uint8_t)214U, (uint8_t)206U, (uint8_t)119U, (uint8_t)8U, (uint8_t)193U, (uint8_t)141U,
@@ -288,7 +166,7 @@ sigver_vectors256_low9[32U] =
     (uint8_t)1U, (uint8_t)140U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low10[128U] =
   {
     (uint8_t)223U, (uint8_t)4U, (uint8_t)163U, (uint8_t)70U, (uint8_t)207U, (uint8_t)77U,
@@ -315,7 +193,7 @@ sigver_vectors256_low10[128U] =
     (uint8_t)1U, (uint8_t)222U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low11[32U] =
   {
     (uint8_t)45U, (uint8_t)223U, (uint8_t)209U, (uint8_t)69U, (uint8_t)118U, (uint8_t)120U,
@@ -326,7 +204,7 @@ sigver_vectors256_low11[32U] =
     (uint8_t)68U, (uint8_t)203U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low12[32U] =
   {
     (uint8_t)95U, (uint8_t)112U, (uint8_t)199U, (uint8_t)209U, (uint8_t)26U, (uint8_t)194U,
@@ -337,7 +215,7 @@ sigver_vectors256_low12[32U] =
     (uint8_t)154U, (uint8_t)100U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low13[32U] =
   {
     (uint8_t)153U, (uint8_t)19U, (uint8_t)17U, (uint8_t)28U, (uint8_t)255U, (uint8_t)111U,
@@ -348,7 +226,7 @@ sigver_vectors256_low13[32U] =
     (uint8_t)221U, (uint8_t)168U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low14[32U] =
   {
     (uint8_t)148U, (uint8_t)103U, (uint8_t)205U, (uint8_t)76U, (uint8_t)210U, (uint8_t)30U,
@@ -359,7 +237,7 @@ sigver_vectors256_low14[32U] =
     (uint8_t)197U, (uint8_t)204U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low15[128U] =
   {
     (uint8_t)225U, (uint8_t)19U, (uint8_t)10U, (uint8_t)246U, (uint8_t)163U, (uint8_t)140U,
@@ -386,7 +264,7 @@ sigver_vectors256_low15[128U] =
     (uint8_t)32U, (uint8_t)163U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low16[32U] =
   {
     (uint8_t)228U, (uint8_t)36U, (uint8_t)220U, (uint8_t)97U, (uint8_t)212U, (uint8_t)187U,
@@ -397,7 +275,7 @@ sigver_vectors256_low16[32U] =
     (uint8_t)191U, (uint8_t)60U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low17[32U] =
   {
     (uint8_t)151U, (uint8_t)14U, (uint8_t)237U, (uint8_t)122U, (uint8_t)162U, (uint8_t)188U,
@@ -408,7 +286,7 @@ sigver_vectors256_low17[32U] =
     (uint8_t)233U, (uint8_t)39U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low18[32U] =
   {
     (uint8_t)191U, (uint8_t)150U, (uint8_t)185U, (uint8_t)154U, (uint8_t)164U, (uint8_t)156U,
@@ -419,7 +297,7 @@ sigver_vectors256_low18[32U] =
     (uint8_t)127U, (uint8_t)79U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low19[32U] =
   {
     (uint8_t)23U, (uint8_t)197U, (uint8_t)80U, (uint8_t)149U, (uint8_t)129U, (uint8_t)144U,
@@ -430,7 +308,7 @@ sigver_vectors256_low19[32U] =
     (uint8_t)135U, (uint8_t)28U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low20[128U] =
   {
     (uint8_t)115U, (uint8_t)197U, (uint8_t)246U, (uint8_t)166U, (uint8_t)116U, (uint8_t)86U,
@@ -457,7 +335,7 @@ sigver_vectors256_low20[128U] =
     (uint8_t)28U, (uint8_t)8U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low21[32U] =
   {
     (uint8_t)224U, (uint8_t)252U, (uint8_t)106U, (uint8_t)111U, (uint8_t)80U, (uint8_t)225U,
@@ -468,7 +346,7 @@ sigver_vectors256_low21[32U] =
     (uint8_t)40U, (uint8_t)100U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low22[32U] =
   {
     (uint8_t)127U, (uint8_t)89U, (uint8_t)214U, (uint8_t)137U, (uint8_t)201U, (uint8_t)30U,
@@ -479,7 +357,7 @@ sigver_vectors256_low22[32U] =
     (uint8_t)242U, (uint8_t)42U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low23[32U] =
   {
     (uint8_t)29U, (uint8_t)117U, (uint8_t)131U, (uint8_t)12U, (uint8_t)211U, (uint8_t)111U,
@@ -490,7 +368,7 @@ sigver_vectors256_low23[32U] =
     (uint8_t)196U, (uint8_t)7U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low24[32U] =
   {
     (uint8_t)203U, (uint8_t)42U, (uint8_t)203U, (uint8_t)1U, (uint8_t)218U, (uint8_t)201U,
@@ -501,7 +379,7 @@ sigver_vectors256_low24[32U] =
     (uint8_t)192U, (uint8_t)90U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low25[128U] =
   {
     (uint8_t)102U, (uint8_t)96U, (uint8_t)54U, (uint8_t)217U, (uint8_t)180U, (uint8_t)162U,
@@ -528,7 +406,7 @@ sigver_vectors256_low25[128U] =
     (uint8_t)213U, (uint8_t)72U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low26[32U] =
   {
     (uint8_t)168U, (uint8_t)73U, (uint8_t)190U, (uint8_t)245U, (uint8_t)117U, (uint8_t)202U,
@@ -539,7 +417,7 @@ sigver_vectors256_low26[32U] =
     (uint8_t)173U, (uint8_t)134U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low27[32U] =
   {
     (uint8_t)191U, (uint8_t)95U, (uint8_t)228U, (uint8_t)247U, (uint8_t)133U, (uint8_t)143U,
@@ -550,7 +428,7 @@ sigver_vectors256_low27[32U] =
     (uint8_t)180U, (uint8_t)113U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low28[32U] =
   {
     (uint8_t)37U, (uint8_t)172U, (uint8_t)195U, (uint8_t)170U, (uint8_t)157U, (uint8_t)158U,
@@ -561,7 +439,7 @@ sigver_vectors256_low28[32U] =
     (uint8_t)185U, (uint8_t)214U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low29[32U] =
   {
     (uint8_t)155U, (uint8_t)33U, (uint8_t)213U, (uint8_t)181U, (uint8_t)37U, (uint8_t)158U,
@@ -572,7 +450,7 @@ sigver_vectors256_low29[32U] =
     (uint8_t)21U, (uint8_t)55U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low30[128U] =
   {
     (uint8_t)126U, (uint8_t)128U, (uint8_t)67U, (uint8_t)107U, (uint8_t)206U, (uint8_t)87U,
@@ -599,7 +477,7 @@ sigver_vectors256_low30[128U] =
     (uint8_t)88U, (uint8_t)205U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low31[32U] =
   {
     (uint8_t)61U, (uint8_t)251U, (uint8_t)111U, (uint8_t)64U, (uint8_t)242U, (uint8_t)71U,
@@ -610,7 +488,7 @@ sigver_vectors256_low31[32U] =
     (uint8_t)197U, (uint8_t)223U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low32[32U] =
   {
     (uint8_t)242U, (uint8_t)47U, (uint8_t)149U, (uint8_t)63U, (uint8_t)30U, (uint8_t)57U,
@@ -621,7 +499,7 @@ sigver_vectors256_low32[32U] =
     (uint8_t)209U, (uint8_t)187U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low33[32U] =
   {
     (uint8_t)84U, (uint8_t)136U, (uint8_t)134U, (uint8_t)39U, (uint8_t)142U, (uint8_t)94U,
@@ -632,7 +510,7 @@ sigver_vectors256_low33[32U] =
     (uint8_t)42U, (uint8_t)90U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low34[32U] =
   {
     (uint8_t)233U, (uint8_t)59U, (uint8_t)254U, (uint8_t)189U, (uint8_t)47U, (uint8_t)20U,
@@ -643,7 +521,7 @@ sigver_vectors256_low34[32U] =
     (uint8_t)238U, (uint8_t)117U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low35[128U] =
   {
     (uint8_t)22U, (uint8_t)105U, (uint8_t)191U, (uint8_t)182U, (uint8_t)87U, (uint8_t)253U,
@@ -670,7 +548,7 @@ sigver_vectors256_low35[128U] =
     (uint8_t)129U, (uint8_t)105U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low36[32U] =
   {
     (uint8_t)105U, (uint8_t)183U, (uint8_t)102U, (uint8_t)112U, (uint8_t)86U, (uint8_t)225U,
@@ -681,7 +559,7 @@ sigver_vectors256_low36[32U] =
     (uint8_t)2U, (uint8_t)20U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low37[32U] =
   {
     (uint8_t)211U, (uint8_t)249U, (uint8_t)177U, (uint8_t)46U, (uint8_t)180U, (uint8_t)108U,
@@ -692,7 +570,7 @@ sigver_vectors256_low37[32U] =
     (uint8_t)170U, (uint8_t)47U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low38[32U] =
   {
     (uint8_t)40U, (uint8_t)143U, (uint8_t)122U, (uint8_t)28U, (uint8_t)211U, (uint8_t)145U,
@@ -703,7 +581,7 @@ sigver_vectors256_low38[32U] =
     (uint8_t)151U, (uint8_t)144U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low39[32U] =
   {
     (uint8_t)36U, (uint8_t)123U, (uint8_t)60U, (uint8_t)78U, (uint8_t)137U, (uint8_t)163U,
@@ -714,7 +592,7 @@ sigver_vectors256_low39[32U] =
     (uint8_t)153U, (uint8_t)121U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low40[128U] =
   {
     (uint8_t)63U, (uint8_t)230U, (uint8_t)13U, (uint8_t)217U, (uint8_t)173U, (uint8_t)108U,
@@ -741,7 +619,7 @@ sigver_vectors256_low40[128U] =
     (uint8_t)201U, (uint8_t)112U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low41[32U] =
   {
     (uint8_t)191U, (uint8_t)2U, (uint8_t)203U, (uint8_t)207U, (uint8_t)109U, (uint8_t)140U,
@@ -752,7 +630,7 @@ sigver_vectors256_low41[32U] =
     (uint8_t)198U, (uint8_t)130U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low42[32U] =
   {
     (uint8_t)6U, (uint8_t)155U, (uint8_t)166U, (uint8_t)203U, (uint8_t)6U, (uint8_t)180U,
@@ -763,7 +641,7 @@ sigver_vectors256_low42[32U] =
     (uint8_t)186U, (uint8_t)3U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low43[32U] =
   {
     (uint8_t)245U, (uint8_t)172U, (uint8_t)176U, (uint8_t)108U, (uint8_t)89U, (uint8_t)194U,
@@ -774,7 +652,7 @@ sigver_vectors256_low43[32U] =
     (uint8_t)27U, (uint8_t)173U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low44[32U] =
   {
     (uint8_t)4U, (uint8_t)157U, (uint8_t)171U, (uint8_t)121U, (uint8_t)200U, (uint8_t)156U,
@@ -785,7 +663,7 @@ sigver_vectors256_low44[32U] =
     (uint8_t)254U, (uint8_t)93U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low45[128U] =
   {
     (uint8_t)152U, (uint8_t)58U, (uint8_t)113U, (uint8_t)185U, (uint8_t)153U, (uint8_t)77U,
@@ -812,7 +690,7 @@ sigver_vectors256_low45[128U] =
     (uint8_t)7U, (uint8_t)92U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low46[32U] =
   {
     (uint8_t)34U, (uint8_t)74U, (uint8_t)77U, (uint8_t)101U, (uint8_t)185U, (uint8_t)88U,
@@ -823,7 +701,7 @@ sigver_vectors256_low46[32U] =
     (uint8_t)169U, (uint8_t)222U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low47[32U] =
   {
     (uint8_t)23U, (uint8_t)141U, (uint8_t)81U, (uint8_t)253U, (uint8_t)218U, (uint8_t)218U,
@@ -834,7 +712,7 @@ sigver_vectors256_low47[32U] =
     (uint8_t)210U, (uint8_t)185U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low48[32U] =
   {
     (uint8_t)135U, (uint8_t)185U, (uint8_t)62U, (uint8_t)226U, (uint8_t)254U, (uint8_t)207U,
@@ -845,7 +723,7 @@ sigver_vectors256_low48[32U] =
     (uint8_t)147U, (uint8_t)210U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low49[32U] =
   {
     (uint8_t)64U, (uint8_t)68U, (uint8_t)162U, (uint8_t)77U, (uint8_t)248U, (uint8_t)91U,
@@ -856,7 +734,7 @@ sigver_vectors256_low49[32U] =
     (uint8_t)143U, (uint8_t)102U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low50[128U] =
   {
     (uint8_t)74U, (uint8_t)140U, (uint8_t)7U, (uint8_t)26U, (uint8_t)196U, (uint8_t)253U,
@@ -883,7 +761,7 @@ sigver_vectors256_low50[128U] =
     (uint8_t)181U, (uint8_t)175U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low51[32U] =
   {
     (uint8_t)67U, (uint8_t)105U, (uint8_t)28U, (uint8_t)119U, (uint8_t)149U, (uint8_t)165U,
@@ -894,7 +772,7 @@ sigver_vectors256_low51[32U] =
     (uint8_t)131U, (uint8_t)105U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low52[32U] =
   {
     (uint8_t)248U, (uint8_t)121U, (uint8_t)1U, (uint8_t)16U, (uint8_t)179U, (uint8_t)195U,
@@ -905,7 +783,7 @@ sigver_vectors256_low52[32U] =
     (uint8_t)204U, (uint8_t)172U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low53[32U] =
   {
     (uint8_t)138U, (uint8_t)205U, (uint8_t)98U, (uint8_t)232U, (uint8_t)194U, (uint8_t)98U,
@@ -916,7 +794,7 @@ sigver_vectors256_low53[32U] =
     (uint8_t)177U, (uint8_t)206U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low54[32U] =
   {
     (uint8_t)207U, (uint8_t)202U, (uint8_t)126U, (uint8_t)211U, (uint8_t)212U, (uint8_t)52U,
@@ -927,7 +805,7 @@ sigver_vectors256_low54[32U] =
     (uint8_t)33U, (uint8_t)84U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low55[128U] =
   {
     (uint8_t)10U, (uint8_t)58U, (uint8_t)18U, (uint8_t)195U, (uint8_t)8U, (uint8_t)76U,
@@ -954,7 +832,7 @@ sigver_vectors256_low55[128U] =
     (uint8_t)146U, (uint8_t)22U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low56[32U] =
   {
     (uint8_t)145U, (uint8_t)87U, (uint8_t)219U, (uint8_t)252U, (uint8_t)248U, (uint8_t)207U,
@@ -965,7 +843,7 @@ sigver_vectors256_low56[32U] =
     (uint8_t)181U, (uint8_t)150U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low57[32U] =
   {
     (uint8_t)151U, (uint8_t)37U, (uint8_t)112U, (uint8_t)244U, (uint8_t)49U, (uint8_t)61U,
@@ -976,7 +854,7 @@ sigver_vectors256_low57[32U] =
     (uint8_t)100U, (uint8_t)5U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low58[32U] =
   {
     (uint8_t)223U, (uint8_t)174U, (uint8_t)166U, (uint8_t)242U, (uint8_t)151U, (uint8_t)250U,
@@ -987,7 +865,7 @@ sigver_vectors256_low58[32U] =
     (uint8_t)142U, (uint8_t)235U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low59[32U] =
   {
     (uint8_t)143U, (uint8_t)120U, (uint8_t)10U, (uint8_t)215U, (uint8_t)19U, (uint8_t)249U,
@@ -998,7 +876,7 @@ sigver_vectors256_low59[32U] =
     (uint8_t)100U, (uint8_t)242U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low60[128U] =
   {
     (uint8_t)120U, (uint8_t)93U, (uint8_t)7U, (uint8_t)163U, (uint8_t)197U, (uint8_t)79U,
@@ -1025,7 +903,7 @@ sigver_vectors256_low60[128U] =
     (uint8_t)88U, (uint8_t)142U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low61[32U] =
   {
     (uint8_t)7U, (uint8_t)43U, (uint8_t)16U, (uint8_t)192U, (uint8_t)129U, (uint8_t)164U,
@@ -1036,7 +914,7 @@ sigver_vectors256_low61[32U] =
     (uint8_t)253U, (uint8_t)218U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low62[32U] =
   {
     (uint8_t)149U, (uint8_t)129U, (uint8_t)20U, (uint8_t)92U, (uint8_t)202U, (uint8_t)4U,
@@ -1047,7 +925,7 @@ sigver_vectors256_low62[32U] =
     (uint8_t)200U, (uint8_t)245U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low63[32U] =
   {
     (uint8_t)9U, (uint8_t)245U, (uint8_t)72U, (uint8_t)62U, (uint8_t)204U, (uint8_t)236U,
@@ -1058,7 +936,7 @@ sigver_vectors256_low63[32U] =
     (uint8_t)79U, (uint8_t)25U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low64[32U] =
   {
     (uint8_t)164U, (uint8_t)249U, (uint8_t)14U, (uint8_t)86U, (uint8_t)12U, (uint8_t)94U,
@@ -1069,7 +947,7 @@ sigver_vectors256_low64[32U] =
     (uint8_t)55U, (uint8_t)141U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low65[128U] =
   {
     (uint8_t)118U, (uint8_t)249U, (uint8_t)135U, (uint8_t)236U, (uint8_t)84U, (uint8_t)72U,
@@ -1096,7 +974,7 @@ sigver_vectors256_low65[128U] =
     (uint8_t)85U, (uint8_t)202U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low66[32U] =
   {
     (uint8_t)9U, (uint8_t)48U, (uint8_t)142U, (uint8_t)165U, (uint8_t)191U, (uint8_t)173U,
@@ -1107,7 +985,7 @@ sigver_vectors256_low66[32U] =
     (uint8_t)140U, (uint8_t)36U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low67[32U] =
   {
     (uint8_t)244U, (uint8_t)12U, (uint8_t)147U, (uint8_t)224U, (uint8_t)35U, (uint8_t)239U,
@@ -1118,7 +996,7 @@ sigver_vectors256_low67[32U] =
     (uint8_t)142U, (uint8_t)229U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low68[32U] =
   {
     (uint8_t)92U, (uint8_t)200U, (uint8_t)170U, (uint8_t)124U, (uint8_t)53U, (uint8_t)116U,
@@ -1129,7 +1007,7 @@ sigver_vectors256_low68[32U] =
     (uint8_t)78U, (uint8_t)115U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low69[32U] =
   {
     (uint8_t)156U, (uint8_t)156U, (uint8_t)4U, (uint8_t)94U, (uint8_t)186U, (uint8_t)161U,
@@ -1140,7 +1018,7 @@ sigver_vectors256_low69[32U] =
     (uint8_t)10U, (uint8_t)231U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low70[128U] =
   {
     (uint8_t)96U, (uint8_t)205U, (uint8_t)100U, (uint8_t)178U, (uint8_t)205U, (uint8_t)43U,
@@ -1167,7 +1045,7 @@ sigver_vectors256_low70[128U] =
     (uint8_t)42U, (uint8_t)132U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low71[32U] =
   {
     (uint8_t)45U, (uint8_t)152U, (uint8_t)234U, (uint8_t)1U, (uint8_t)247U, (uint8_t)84U,
@@ -1178,7 +1056,7 @@ sigver_vectors256_low71[32U] =
     (uint8_t)43U, (uint8_t)109U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low72[32U] =
   {
     (uint8_t)155U, (uint8_t)82U, (uint8_t)103U, (uint8_t)39U, (uint8_t)66U, (uint8_t)214U,
@@ -1189,7 +1067,7 @@ sigver_vectors256_low72[32U] =
     (uint8_t)35U, (uint8_t)10U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low73[32U] =
   {
     (uint8_t)6U, (uint8_t)16U, (uint8_t)142U, (uint8_t)82U, (uint8_t)95U, (uint8_t)132U,
@@ -1200,7 +1078,7 @@ sigver_vectors256_low73[32U] =
     (uint8_t)121U, (uint8_t)89U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors256_low74[32U] =
   {
     (uint8_t)98U, (uint8_t)181U, (uint8_t)205U, (uint8_t)213U, (uint8_t)145U, (uint8_t)229U,
@@ -1211,25 +1089,7 @@ sigver_vectors256_low74[32U] =
     (uint8_t)125U, (uint8_t)206U
   };
 
-typedef struct vec8_s
-{
-  uint32_t len;
-  uint8_t *b;
-}
-vec8;
-
-typedef struct sigver_vector_s
-{
-  vec8 fst;
-  vec8 snd;
-  vec8 thd;
-  vec8 f3;
-  vec8 f4;
-  bool f5;
-}
-sigver_vector;
-
-static sigver_vector
+sigver_vector
 sigver_vectors256_low75[15U] =
   {
     {
@@ -1339,17 +1199,10 @@ sigver_vectors256_low75[15U] =
     }
   };
 
-typedef struct lbuffer__Hacl_Test_ECDSA_sigver_vector_s
-{
-  uint32_t len;
-  sigver_vector *b;
-}
-lbuffer__Hacl_Test_ECDSA_sigver_vector;
-
-static lbuffer__Hacl_Test_ECDSA_sigver_vector
+Test_Lowstarize_lbuffer__Hacl_Test_ECDSA_sigver_vector
 sigver_vectors256_low = { .len = (uint32_t)15U, .b = sigver_vectors256_low75 };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low0[128U] =
   {
     (uint8_t)254U, (uint8_t)152U, (uint8_t)56U, (uint8_t)240U, (uint8_t)7U, (uint8_t)189U,
@@ -1376,7 +1229,7 @@ sigver_vectors384_low0[128U] =
     (uint8_t)34U, (uint8_t)164U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low1[32U] =
   {
     (uint8_t)64U, (uint8_t)222U, (uint8_t)209U, (uint8_t)61U, (uint8_t)187U, (uint8_t)231U,
@@ -1387,7 +1240,7 @@ sigver_vectors384_low1[32U] =
     (uint8_t)251U, (uint8_t)159U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low2[32U] =
   {
     (uint8_t)161U, (uint8_t)114U, (uint8_t)2U, (uint8_t)233U, (uint8_t)45U, (uint8_t)125U,
@@ -1398,7 +1251,7 @@ sigver_vectors384_low2[32U] =
     (uint8_t)166U, (uint8_t)108U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low3[32U] =
   {
     (uint8_t)190U, (uint8_t)52U, (uint8_t)115U, (uint8_t)12U, (uint8_t)49U, (uint8_t)115U,
@@ -1409,7 +1262,7 @@ sigver_vectors384_low3[32U] =
     (uint8_t)183U, (uint8_t)127U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low4[32U] =
   {
     (uint8_t)3U, (uint8_t)101U, (uint8_t)82U, (uint8_t)2U, (uint8_t)213U, (uint8_t)253U,
@@ -1420,7 +1273,7 @@ sigver_vectors384_low4[32U] =
     (uint8_t)43U, (uint8_t)16U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low5[128U] =
   {
     (uint8_t)182U, (uint8_t)144U, (uint8_t)67U, (uint8_t)185U, (uint8_t)179U, (uint8_t)49U,
@@ -1447,7 +1300,7 @@ sigver_vectors384_low5[128U] =
     (uint8_t)171U, (uint8_t)115U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low6[32U] =
   {
     (uint8_t)31U, (uint8_t)128U, (uint8_t)225U, (uint8_t)159U, (uint8_t)254U, (uint8_t)181U,
@@ -1458,7 +1311,7 @@ sigver_vectors384_low6[32U] =
     (uint8_t)132U, (uint8_t)184U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low7[32U] =
   {
     (uint8_t)155U, (uint8_t)57U, (uint8_t)87U, (uint8_t)135U, (uint8_t)55U, (uint8_t)29U,
@@ -1469,7 +1322,7 @@ sigver_vectors384_low7[32U] =
     (uint8_t)42U, (uint8_t)237U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low8[32U] =
   {
     (uint8_t)36U, (uint8_t)156U, (uint8_t)162U, (uint8_t)195U, (uint8_t)235U, (uint8_t)110U,
@@ -1480,7 +1333,7 @@ sigver_vectors384_low8[32U] =
     (uint8_t)247U, (uint8_t)7U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low9[32U] =
   {
     (uint8_t)151U, (uint8_t)54U, (uint8_t)58U, (uint8_t)5U, (uint8_t)32U, (uint8_t)43U,
@@ -1491,7 +1344,7 @@ sigver_vectors384_low9[32U] =
     (uint8_t)245U, (uint8_t)191U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low10[128U] =
   {
     (uint8_t)210U, (uint8_t)252U, (uint8_t)170U, (uint8_t)237U, (uint8_t)232U, (uint8_t)184U,
@@ -1518,7 +1371,7 @@ sigver_vectors384_low10[128U] =
     (uint8_t)33U, (uint8_t)147U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low11[32U] =
   {
     (uint8_t)206U, (uint8_t)77U, (uint8_t)207U, (uint8_t)167U, (uint8_t)56U, (uint8_t)76U,
@@ -1529,7 +1382,7 @@ sigver_vectors384_low11[32U] =
     (uint8_t)80U, (uint8_t)194U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low12[32U] =
   {
     (uint8_t)217U, (uint8_t)138U, (uint8_t)231U, (uint8_t)185U, (uint8_t)26U, (uint8_t)190U,
@@ -1540,7 +1393,7 @@ sigver_vectors384_low12[32U] =
     (uint8_t)176U, (uint8_t)214U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low13[32U] =
   {
     (uint8_t)89U, (uint8_t)126U, (uint8_t)30U, (uint8_t)4U, (uint8_t)217U, (uint8_t)58U,
@@ -1551,7 +1404,7 @@ sigver_vectors384_low13[32U] =
     (uint8_t)175U, (uint8_t)64U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low14[32U] =
   {
     (uint8_t)53U, (uint8_t)159U, (uint8_t)227U, (uint8_t)129U, (uint8_t)121U, (uint8_t)99U,
@@ -1562,7 +1415,7 @@ sigver_vectors384_low14[32U] =
     (uint8_t)20U, (uint8_t)210U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low15[128U] =
   {
     (uint8_t)6U, (uint8_t)205U, (uint8_t)134U, (uint8_t)72U, (uint8_t)24U, (uint8_t)101U,
@@ -1589,7 +1442,7 @@ sigver_vectors384_low15[128U] =
     (uint8_t)243U, (uint8_t)20U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low16[32U] =
   {
     (uint8_t)27U, (uint8_t)103U, (uint8_t)127U, (uint8_t)83U, (uint8_t)90U, (uint8_t)198U,
@@ -1600,7 +1453,7 @@ sigver_vectors384_low16[32U] =
     (uint8_t)39U, (uint8_t)224U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low17[32U] =
   {
     (uint8_t)93U, (uint8_t)202U, (uint8_t)44U, (uint8_t)115U, (uint8_t)236U, (uint8_t)137U,
@@ -1611,7 +1464,7 @@ sigver_vectors384_low17[32U] =
     (uint8_t)39U, (uint8_t)122U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low18[32U] =
   {
     (uint8_t)223U, (uint8_t)11U, (uint8_t)12U, (uint8_t)215U, (uint8_t)109U, (uint8_t)37U,
@@ -1622,7 +1475,7 @@ sigver_vectors384_low18[32U] =
     (uint8_t)100U, (uint8_t)45U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low19[32U] =
   {
     (uint8_t)18U, (uint8_t)130U, (uint8_t)153U, (uint8_t)170U, (uint8_t)191U, (uint8_t)31U,
@@ -1633,7 +1486,7 @@ sigver_vectors384_low19[32U] =
     (uint8_t)0U, (uint8_t)91U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low20[128U] =
   {
     (uint8_t)89U, (uint8_t)173U, (uint8_t)41U, (uint8_t)115U, (uint8_t)151U, (uint8_t)243U,
@@ -1660,7 +1513,7 @@ sigver_vectors384_low20[128U] =
     (uint8_t)66U, (uint8_t)81U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low21[32U] =
   {
     (uint8_t)127U, (uint8_t)252U, (uint8_t)40U, (uint8_t)83U, (uint8_t)243U, (uint8_t)225U,
@@ -1671,7 +1524,7 @@ sigver_vectors384_low21[32U] =
     (uint8_t)155U, (uint8_t)148U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low22[32U] =
   {
     (uint8_t)76U, (uint8_t)197U, (uint8_t)35U, (uint8_t)209U, (uint8_t)65U, (uint8_t)146U,
@@ -1682,7 +1535,7 @@ sigver_vectors384_low22[32U] =
     (uint8_t)35U, (uint8_t)162U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low23[32U] =
   {
     (uint8_t)49U, (uint8_t)86U, (uint8_t)23U, (uint8_t)109U, (uint8_t)82U, (uint8_t)235U,
@@ -1693,7 +1546,7 @@ sigver_vectors384_low23[32U] =
     (uint8_t)182U, (uint8_t)83U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low24[32U] =
   {
     (uint8_t)98U, (uint8_t)130U, (uint8_t)122U, (uint8_t)41U, (uint8_t)225U, (uint8_t)45U,
@@ -1704,7 +1557,7 @@ sigver_vectors384_low24[32U] =
     (uint8_t)192U, (uint8_t)238U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low25[128U] =
   {
     (uint8_t)130U, (uint8_t)21U, (uint8_t)218U, (uint8_t)202U, (uint8_t)135U, (uint8_t)230U,
@@ -1731,7 +1584,7 @@ sigver_vectors384_low25[128U] =
     (uint8_t)183U, (uint8_t)82U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low26[32U] =
   {
     (uint8_t)85U, (uint8_t)105U, (uint8_t)247U, (uint8_t)109U, (uint8_t)201U, (uint8_t)66U,
@@ -1742,7 +1595,7 @@ sigver_vectors384_low26[32U] =
     (uint8_t)0U, (uint8_t)88U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low27[32U] =
   {
     (uint8_t)18U, (uint8_t)8U, (uint8_t)195U, (uint8_t)141U, (uint8_t)190U, (uint8_t)37U,
@@ -1753,7 +1606,7 @@ sigver_vectors384_low27[32U] =
     (uint8_t)7U, (uint8_t)48U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low28[32U] =
   {
     (uint8_t)112U, (uint8_t)111U, (uint8_t)43U, (uint8_t)164U, (uint8_t)2U, (uint8_t)94U,
@@ -1764,7 +1617,7 @@ sigver_vectors384_low28[32U] =
     (uint8_t)108U, (uint8_t)251U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low29[32U] =
   {
     (uint8_t)180U, (uint8_t)231U, (uint8_t)90U, (uint8_t)195U, (uint8_t)74U, (uint8_t)150U,
@@ -1775,7 +1628,7 @@ sigver_vectors384_low29[32U] =
     (uint8_t)22U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low30[128U] =
   {
     (uint8_t)169U, (uint8_t)150U, (uint8_t)177U, (uint8_t)251U, (uint8_t)128U, (uint8_t)15U,
@@ -1802,7 +1655,7 @@ sigver_vectors384_low30[128U] =
     (uint8_t)207U, (uint8_t)99U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low31[32U] =
   {
     (uint8_t)228U, (uint8_t)180U, (uint8_t)112U, (uint8_t)198U, (uint8_t)91U, (uint8_t)44U,
@@ -1813,7 +1666,7 @@ sigver_vectors384_low31[32U] =
     (uint8_t)103U, (uint8_t)232U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low32[32U] =
   {
     (uint8_t)68U, (uint8_t)195U, (uint8_t)141U, (uint8_t)58U, (uint8_t)224U, (uint8_t)152U,
@@ -1824,7 +1677,7 @@ sigver_vectors384_low32[32U] =
     (uint8_t)69U, (uint8_t)50U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low33[32U] =
   {
     (uint8_t)201U, (uint8_t)195U, (uint8_t)71U, (uint8_t)238U, (uint8_t)87U, (uint8_t)23U,
@@ -1835,7 +1688,7 @@ sigver_vectors384_low33[32U] =
     (uint8_t)203U, (uint8_t)135U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low34[32U] =
   {
     (uint8_t)186U, (uint8_t)174U, (uint8_t)1U, (uint8_t)233U, (uint8_t)228U, (uint8_t)74U,
@@ -1846,7 +1699,7 @@ sigver_vectors384_low34[32U] =
     (uint8_t)235U, (uint8_t)64U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low35[128U] =
   {
     (uint8_t)26U, (uint8_t)110U, (uint8_t)73U, (uint8_t)163U, (uint8_t)119U, (uint8_t)160U,
@@ -1873,7 +1726,7 @@ sigver_vectors384_low35[128U] =
     (uint8_t)249U, (uint8_t)125U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low36[32U] =
   {
     (uint8_t)150U, (uint8_t)5U, (uint8_t)12U, (uint8_t)95U, (uint8_t)162U, (uint8_t)221U,
@@ -1884,7 +1737,7 @@ sigver_vectors384_low36[32U] =
     (uint8_t)232U, (uint8_t)220U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low37[32U] =
   {
     (uint8_t)224U, (uint8_t)136U, (uint8_t)138U, (uint8_t)158U, (uint8_t)120U, (uint8_t)174U,
@@ -1895,7 +1748,7 @@ sigver_vectors384_low37[32U] =
     (uint8_t)72U, (uint8_t)88U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low38[32U] =
   {
     (uint8_t)35U, (uint8_t)83U, (uint8_t)214U, (uint8_t)205U, (uint8_t)60U, (uint8_t)33U,
@@ -1906,7 +1759,7 @@ sigver_vectors384_low38[32U] =
     (uint8_t)134U, (uint8_t)122U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low39[32U] =
   {
     (uint8_t)133U, (uint8_t)245U, (uint8_t)96U, (uint8_t)39U, (uint8_t)60U, (uint8_t)217U,
@@ -1917,7 +1770,7 @@ sigver_vectors384_low39[32U] =
     (uint8_t)143U, (uint8_t)167U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low40[128U] =
   {
     (uint8_t)62U, (uint8_t)20U, (uint8_t)247U, (uint8_t)55U, (uint8_t)201U, (uint8_t)19U,
@@ -1944,7 +1797,7 @@ sigver_vectors384_low40[128U] =
     (uint8_t)211U, (uint8_t)59U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low41[32U] =
   {
     (uint8_t)12U, (uint8_t)7U, (uint8_t)187U, (uint8_t)121U, (uint8_t)244U, (uint8_t)64U,
@@ -1955,7 +1808,7 @@ sigver_vectors384_low41[32U] =
     (uint8_t)81U, (uint8_t)160U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low42[32U] =
   {
     (uint8_t)132U, (uint8_t)254U, (uint8_t)120U, (uint8_t)70U, (uint8_t)213U, (uint8_t)212U,
@@ -1966,7 +1819,7 @@ sigver_vectors384_low42[32U] =
     (uint8_t)27U, (uint8_t)19U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low43[32U] =
   {
     (uint8_t)73U, (uint8_t)233U, (uint8_t)66U, (uint8_t)95U, (uint8_t)130U, (uint8_t)208U,
@@ -1977,7 +1830,7 @@ sigver_vectors384_low43[32U] =
     (uint8_t)87U, (uint8_t)29U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low44[32U] =
   {
     (uint8_t)31U, (uint8_t)27U, (uint8_t)112U, (uint8_t)170U, (uint8_t)163U, (uint8_t)10U,
@@ -1988,7 +1841,7 @@ sigver_vectors384_low44[32U] =
     (uint8_t)180U, (uint8_t)51U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low45[128U] =
   {
     (uint8_t)64U, (uint8_t)0U, (uint8_t)16U, (uint8_t)97U, (uint8_t)39U, (uint8_t)167U,
@@ -2015,7 +1868,7 @@ sigver_vectors384_low45[128U] =
     (uint8_t)141U, (uint8_t)70U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low46[32U] =
   {
     (uint8_t)113U, (uint8_t)219U, (uint8_t)29U, (uint8_t)225U, (uint8_t)161U, (uint8_t)243U,
@@ -2026,7 +1879,7 @@ sigver_vectors384_low46[32U] =
     (uint8_t)72U, (uint8_t)109U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low47[32U] =
   {
     (uint8_t)236U, (uint8_t)221U, (uint8_t)111U, (uint8_t)251U, (uint8_t)23U, (uint8_t)74U,
@@ -2037,7 +1890,7 @@ sigver_vectors384_low47[32U] =
     (uint8_t)103U, (uint8_t)226U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low48[32U] =
   {
     (uint8_t)176U, (uint8_t)68U, (uint8_t)59U, (uint8_t)51U, (uint8_t)166U, (uint8_t)242U,
@@ -2048,7 +1901,7 @@ sigver_vectors384_low48[32U] =
     (uint8_t)112U, (uint8_t)191U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low49[32U] =
   {
     (uint8_t)49U, (uint8_t)109U, (uint8_t)190U, (uint8_t)226U, (uint8_t)125U, (uint8_t)153U,
@@ -2059,7 +1912,7 @@ sigver_vectors384_low49[32U] =
     (uint8_t)17U, (uint8_t)152U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low50[128U] =
   {
     (uint8_t)180U, (uint8_t)46U, (uint8_t)84U, (uint8_t)125U, (uint8_t)14U, (uint8_t)125U,
@@ -2086,7 +1939,7 @@ sigver_vectors384_low50[128U] =
     (uint8_t)4U, (uint8_t)165U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low51[32U] =
   {
     (uint8_t)130U, (uint8_t)25U, (uint8_t)178U, (uint8_t)37U, (uint8_t)170U, (uint8_t)21U,
@@ -2097,7 +1950,7 @@ sigver_vectors384_low51[32U] =
     (uint8_t)15U, (uint8_t)173U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low52[32U] =
   {
     (uint8_t)15U, (uint8_t)238U, (uint8_t)43U, (uint8_t)8U, (uint8_t)173U, (uint8_t)57U,
@@ -2108,7 +1961,7 @@ sigver_vectors384_low52[32U] =
     (uint8_t)96U, (uint8_t)55U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low53[32U] =
   {
     (uint8_t)19U, (uint8_t)79U, (uint8_t)182U, (uint8_t)137U, (uint8_t)16U, (uint8_t)26U,
@@ -2119,7 +1972,7 @@ sigver_vectors384_low53[32U] =
     (uint8_t)171U, (uint8_t)150U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low54[32U] =
   {
     (uint8_t)230U, (uint8_t)92U, (uint8_t)35U, (uint8_t)43U, (uint8_t)217U, (uint8_t)21U,
@@ -2130,7 +1983,7 @@ sigver_vectors384_low54[32U] =
     (uint8_t)93U, (uint8_t)111U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low55[128U] =
   {
     (uint8_t)170U, (uint8_t)86U, (uint8_t)50U, (uint8_t)35U, (uint8_t)167U, (uint8_t)213U,
@@ -2157,7 +2010,7 @@ sigver_vectors384_low55[128U] =
     (uint8_t)189U, (uint8_t)69U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low56[32U] =
   {
     (uint8_t)201U, (uint8_t)52U, (uint8_t)25U, (uint8_t)93U, (uint8_t)227U, (uint8_t)59U,
@@ -2168,7 +2021,7 @@ sigver_vectors384_low56[32U] =
     (uint8_t)38U, (uint8_t)23U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low57[32U] =
   {
     (uint8_t)181U, (uint8_t)136U, (uint8_t)221U, (uint8_t)95U, (uint8_t)153U, (uint8_t)101U,
@@ -2179,7 +2032,7 @@ sigver_vectors384_low57[32U] =
     (uint8_t)40U, (uint8_t)203U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low58[32U] =
   {
     (uint8_t)113U, (uint8_t)243U, (uint8_t)2U, (uint8_t)68U, (uint8_t)14U, (uint8_t)180U,
@@ -2190,7 +2043,7 @@ sigver_vectors384_low58[32U] =
     (uint8_t)243U, (uint8_t)137U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low59[32U] =
   {
     (uint8_t)84U, (uint8_t)234U, (uint8_t)160U, (uint8_t)235U, (uint8_t)156U, (uint8_t)215U,
@@ -2201,7 +2054,7 @@ sigver_vectors384_low59[32U] =
     (uint8_t)6U, (uint8_t)143U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low60[128U] =
   {
     (uint8_t)152U, (uint8_t)228U, (uint8_t)186U, (uint8_t)191U, (uint8_t)137U, (uint8_t)15U,
@@ -2228,7 +2081,7 @@ sigver_vectors384_low60[128U] =
     (uint8_t)148U, (uint8_t)53U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low61[32U] =
   {
     (uint8_t)158U, (uint8_t)26U, (uint8_t)220U, (uint8_t)212U, (uint8_t)142U, (uint8_t)46U,
@@ -2239,7 +2092,7 @@ sigver_vectors384_low61[32U] =
     (uint8_t)234U, (uint8_t)146U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low62[32U] =
   {
     (uint8_t)52U, (uint8_t)239U, (uint8_t)249U, (uint8_t)135U, (uint8_t)4U, (uint8_t)121U,
@@ -2250,7 +2103,7 @@ sigver_vectors384_low62[32U] =
     (uint8_t)174U, (uint8_t)178U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low63[32U] =
   {
     (uint8_t)206U, (uint8_t)79U, (uint8_t)13U, (uint8_t)116U, (uint8_t)128U, (uint8_t)82U,
@@ -2261,7 +2114,7 @@ sigver_vectors384_low63[32U] =
     (uint8_t)126U, (uint8_t)208U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low64[32U] =
   {
     (uint8_t)133U, (uint8_t)70U, (uint8_t)225U, (uint8_t)238U, (uint8_t)59U, (uint8_t)119U,
@@ -2272,7 +2125,7 @@ sigver_vectors384_low64[32U] =
     (uint8_t)86U, (uint8_t)251U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low65[128U] =
   {
     (uint8_t)187U, (uint8_t)107U, (uint8_t)3U, (uint8_t)173U, (uint8_t)96U, (uint8_t)214U,
@@ -2299,7 +2152,7 @@ sigver_vectors384_low65[128U] =
     (uint8_t)93U, (uint8_t)103U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low66[32U] =
   {
     (uint8_t)147U, (uint8_t)237U, (uint8_t)190U, (uint8_t)203U, (uint8_t)11U, (uint8_t)1U,
@@ -2310,7 +2163,7 @@ sigver_vectors384_low66[32U] =
     (uint8_t)174U, (uint8_t)19U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low67[32U] =
   {
     (uint8_t)180U, (uint8_t)148U, (uint8_t)233U, (uint8_t)41U, (uint8_t)94U, (uint8_t)8U,
@@ -2321,7 +2174,7 @@ sigver_vectors384_low67[32U] =
     (uint8_t)245U, (uint8_t)152U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low68[32U] =
   {
     (uint8_t)238U, (uint8_t)194U, (uint8_t)152U, (uint8_t)109U, (uint8_t)71U, (uint8_t)183U,
@@ -2332,7 +2185,7 @@ sigver_vectors384_low68[32U] =
     (uint8_t)77U, (uint8_t)223U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low69[32U] =
   {
     (uint8_t)138U, (uint8_t)108U, (uint8_t)30U, (uint8_t)222U, (uint8_t)182U, (uint8_t)69U,
@@ -2343,7 +2196,7 @@ sigver_vectors384_low69[32U] =
     (uint8_t)212U, (uint8_t)91U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low70[128U] =
   {
     (uint8_t)51U, (uint8_t)165U, (uint8_t)212U, (uint8_t)137U, (uint8_t)246U, (uint8_t)113U,
@@ -2370,7 +2223,7 @@ sigver_vectors384_low70[128U] =
     (uint8_t)122U, (uint8_t)53U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low71[32U] =
   {
     (uint8_t)50U, (uint8_t)5U, (uint8_t)186U, (uint8_t)232U, (uint8_t)118U, (uint8_t)249U,
@@ -2381,7 +2234,7 @@ sigver_vectors384_low71[32U] =
     (uint8_t)14U, (uint8_t)188U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low72[32U] =
   {
     (uint8_t)209U, (uint8_t)89U, (uint8_t)37U, (uint8_t)98U, (uint8_t)39U, (uint8_t)62U,
@@ -2392,7 +2245,7 @@ sigver_vectors384_low72[32U] =
     (uint8_t)202U, (uint8_t)250U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low73[32U] =
   {
     (uint8_t)1U, (uint8_t)36U, (uint8_t)243U, (uint8_t)241U, (uint8_t)198U, (uint8_t)30U,
@@ -2403,7 +2256,7 @@ sigver_vectors384_low73[32U] =
     (uint8_t)244U, (uint8_t)59U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors384_low74[32U] =
   {
     (uint8_t)104U, (uint8_t)138U, (uint8_t)92U, (uint8_t)95U, (uint8_t)192U, (uint8_t)199U,
@@ -2414,7 +2267,7 @@ sigver_vectors384_low74[32U] =
     (uint8_t)96U, (uint8_t)58U
   };
 
-static sigver_vector
+sigver_vector
 sigver_vectors384_low75[15U] =
   {
     {
@@ -2524,10 +2377,10 @@ sigver_vectors384_low75[15U] =
     }
   };
 
-static lbuffer__Hacl_Test_ECDSA_sigver_vector
+Test_Lowstarize_lbuffer__Hacl_Test_ECDSA_sigver_vector
 sigver_vectors384_low = { .len = (uint32_t)15U, .b = sigver_vectors384_low75 };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low0[128U] =
   {
     (uint8_t)39U, (uint8_t)59U, (uint8_t)6U, (uint8_t)50U, (uint8_t)36U, (uint8_t)171U,
@@ -2554,7 +2407,7 @@ sigver_vectors512_low0[128U] =
     (uint8_t)137U, (uint8_t)119U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low1[32U] =
   {
     (uint8_t)72U, (uint8_t)78U, (uint8_t)49U, (uint8_t)230U, (uint8_t)158U, (uint8_t)247U,
@@ -2565,7 +2418,7 @@ sigver_vectors512_low1[32U] =
     (uint8_t)39U, (uint8_t)191U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low2[32U] =
   {
     (uint8_t)225U, (uint8_t)255U, (uint8_t)129U, (uint8_t)119U, (uint8_t)244U, (uint8_t)6U,
@@ -2576,7 +2429,7 @@ sigver_vectors512_low2[32U] =
     (uint8_t)247U, (uint8_t)78U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low3[32U] =
   {
     (uint8_t)145U, (uint8_t)163U, (uint8_t)3U, (uint8_t)216U, (uint8_t)254U, (uint8_t)58U,
@@ -2587,7 +2440,7 @@ sigver_vectors512_low3[32U] =
     (uint8_t)133U, (uint8_t)24U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low4[32U] =
   {
     (uint8_t)225U, (uint8_t)82U, (uint8_t)17U, (uint8_t)156U, (uint8_t)239U, (uint8_t)162U,
@@ -2598,7 +2451,7 @@ sigver_vectors512_low4[32U] =
     (uint8_t)4U, (uint8_t)106U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low5[128U] =
   {
     (uint8_t)214U, (uint8_t)78U, (uint8_t)161U, (uint8_t)167U, (uint8_t)104U, (uint8_t)176U,
@@ -2625,7 +2478,7 @@ sigver_vectors512_low5[128U] =
     (uint8_t)156U, (uint8_t)19U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low6[32U] =
   {
     (uint8_t)139U, (uint8_t)117U, (uint8_t)252U, (uint8_t)1U, (uint8_t)41U, (uint8_t)201U,
@@ -2636,7 +2489,7 @@ sigver_vectors512_low6[32U] =
     (uint8_t)38U, (uint8_t)36U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low7[32U] =
   {
     (uint8_t)179U, (uint8_t)148U, (uint8_t)23U, (uint8_t)25U, (uint8_t)129U, (uint8_t)212U,
@@ -2647,7 +2500,7 @@ sigver_vectors512_low7[32U] =
     (uint8_t)121U, (uint8_t)220U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low8[32U] =
   {
     (uint8_t)23U, (uint8_t)226U, (uint8_t)152U, (uint8_t)230U, (uint8_t)122U, (uint8_t)210U,
@@ -2658,7 +2511,7 @@ sigver_vectors512_low8[32U] =
     (uint8_t)240U, (uint8_t)176U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low9[32U] =
   {
     (uint8_t)136U, (uint8_t)19U, (uint8_t)40U, (uint8_t)205U, (uint8_t)145U, (uint8_t)228U,
@@ -2669,7 +2522,7 @@ sigver_vectors512_low9[32U] =
     (uint8_t)246U, (uint8_t)180U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low10[128U] =
   {
     (uint8_t)29U, (uint8_t)184U, (uint8_t)84U, (uint8_t)69U, (uint8_t)201U, (uint8_t)216U,
@@ -2696,7 +2549,7 @@ sigver_vectors512_low10[128U] =
     (uint8_t)128U, (uint8_t)223U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low11[32U] =
   {
     (uint8_t)118U, (uint8_t)229U, (uint8_t)16U, (uint8_t)134U, (uint8_t)224U, (uint8_t)120U,
@@ -2707,7 +2560,7 @@ sigver_vectors512_low11[32U] =
     (uint8_t)131U, (uint8_t)29U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low12[32U] =
   {
     (uint8_t)202U, (uint8_t)126U, (uint8_t)96U, (uint8_t)154U, (uint8_t)11U, (uint8_t)29U,
@@ -2718,7 +2571,7 @@ sigver_vectors512_low12[32U] =
     (uint8_t)181U, (uint8_t)118U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low13[32U] =
   {
     (uint8_t)35U, (uint8_t)182U, (uint8_t)83U, (uint8_t)250U, (uint8_t)170U, (uint8_t)125U,
@@ -2729,7 +2582,7 @@ sigver_vectors512_low13[32U] =
     (uint8_t)85U, (uint8_t)146U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low14[32U] =
   {
     (uint8_t)160U, (uint8_t)60U, (uint8_t)111U, (uint8_t)92U, (uint8_t)84U, (uint8_t)161U,
@@ -2740,7 +2593,7 @@ sigver_vectors512_low14[32U] =
     (uint8_t)250U, (uint8_t)221U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low15[128U] =
   {
     (uint8_t)145U, (uint8_t)141U, (uint8_t)159U, (uint8_t)66U, (uint8_t)14U, (uint8_t)146U,
@@ -2767,7 +2620,7 @@ sigver_vectors512_low15[128U] =
     (uint8_t)47U, (uint8_t)73U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low16[32U] =
   {
     (uint8_t)188U, (uint8_t)124U, (uint8_t)142U, (uint8_t)9U, (uint8_t)189U, (uint8_t)9U,
@@ -2778,7 +2631,7 @@ sigver_vectors512_low16[32U] =
     (uint8_t)187U, (uint8_t)250U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low17[32U] =
   {
     (uint8_t)175U, (uint8_t)63U, (uint8_t)129U, (uint8_t)58U, (uint8_t)230U, (uint8_t)100U,
@@ -2789,7 +2642,7 @@ sigver_vectors512_low17[32U] =
     (uint8_t)16U, (uint8_t)252U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low18[32U] =
   {
     (uint8_t)107U, (uint8_t)215U, (uint8_t)206U, (uint8_t)149U, (uint8_t)175U, (uint8_t)37U,
@@ -2800,7 +2653,7 @@ sigver_vectors512_low18[32U] =
     (uint8_t)147U, (uint8_t)36U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low19[32U] =
   {
     (uint8_t)102U, (uint8_t)136U, (uint8_t)190U, (uint8_t)162U, (uint8_t)12U, (uint8_t)135U,
@@ -2811,7 +2664,7 @@ sigver_vectors512_low19[32U] =
     (uint8_t)134U, (uint8_t)80U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low20[128U] =
   {
     (uint8_t)110U, (uint8_t)41U, (uint8_t)50U, (uint8_t)21U, (uint8_t)51U, (uint8_t)1U,
@@ -2838,7 +2691,7 @@ sigver_vectors512_low20[128U] =
     (uint8_t)140U, (uint8_t)62U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low21[32U] =
   {
     (uint8_t)156U, (uint8_t)176U, (uint8_t)207U, (uint8_t)105U, (uint8_t)48U, (uint8_t)61U,
@@ -2849,7 +2702,7 @@ sigver_vectors512_low21[32U] =
     (uint8_t)214U, (uint8_t)247U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low22[32U] =
   {
     (uint8_t)45U, (uint8_t)81U, (uint8_t)35U, (uint8_t)58U, (uint8_t)23U, (uint8_t)136U,
@@ -2860,7 +2713,7 @@ sigver_vectors512_low22[32U] =
     (uint8_t)28U, (uint8_t)120U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low23[32U] =
   {
     (uint8_t)75U, (uint8_t)159U, (uint8_t)145U, (uint8_t)228U, (uint8_t)40U, (uint8_t)82U,
@@ -2871,7 +2724,7 @@ sigver_vectors512_low23[32U] =
     (uint8_t)186U, (uint8_t)61U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low24[32U] =
   {
     (uint8_t)40U, (uint8_t)196U, (uint8_t)95U, (uint8_t)144U, (uint8_t)29U, (uint8_t)113U,
@@ -2882,7 +2735,7 @@ sigver_vectors512_low24[32U] =
     (uint8_t)154U, (uint8_t)132U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low25[128U] =
   {
     (uint8_t)47U, (uint8_t)72U, (uint8_t)236U, (uint8_t)56U, (uint8_t)127U, (uint8_t)24U,
@@ -2909,7 +2762,7 @@ sigver_vectors512_low25[128U] =
     (uint8_t)69U, (uint8_t)110U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low26[32U] =
   {
     (uint8_t)227U, (uint8_t)16U, (uint8_t)150U, (uint8_t)194U, (uint8_t)213U, (uint8_t)18U,
@@ -2920,7 +2773,7 @@ sigver_vectors512_low26[32U] =
     (uint8_t)95U, (uint8_t)111U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low27[32U] =
   {
     (uint8_t)111U, (uint8_t)190U, (uint8_t)198U, (uint8_t)160U, (uint8_t)74U, (uint8_t)140U,
@@ -2931,7 +2784,7 @@ sigver_vectors512_low27[32U] =
     (uint8_t)107U, (uint8_t)186U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low28[32U] =
   {
     (uint8_t)27U, (uint8_t)36U, (uint8_t)76U, (uint8_t)33U, (uint8_t)192U, (uint8_t)140U,
@@ -2942,7 +2795,7 @@ sigver_vectors512_low28[32U] =
     (uint8_t)131U, (uint8_t)97U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low29[32U] =
   {
     (uint8_t)133U, (uint8_t)47U, (uint8_t)76U, (uint8_t)191U, (uint8_t)211U, (uint8_t)70U,
@@ -2953,7 +2806,7 @@ sigver_vectors512_low29[32U] =
     (uint8_t)92U, (uint8_t)127U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low30[128U] =
   {
     (uint8_t)253U, (uint8_t)46U, (uint8_t)93U, (uint8_t)228U, (uint8_t)33U, (uint8_t)238U,
@@ -2980,7 +2833,7 @@ sigver_vectors512_low30[128U] =
     (uint8_t)133U, (uint8_t)223U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low31[32U] =
   {
     (uint8_t)99U, (uint8_t)60U, (uint8_t)46U, (uint8_t)229U, (uint8_t)99U, (uint8_t)11U,
@@ -2991,7 +2844,7 @@ sigver_vectors512_low31[32U] =
     (uint8_t)145U, (uint8_t)35U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low32[32U] =
   {
     (uint8_t)75U, (uint8_t)102U, (uint8_t)138U, (uint8_t)26U, (uint8_t)109U, (uint8_t)26U,
@@ -3002,7 +2855,7 @@ sigver_vectors512_low32[32U] =
     (uint8_t)196U, (uint8_t)144U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low33[32U] =
   {
     (uint8_t)191U, (uint8_t)33U, (uint8_t)17U, (uint8_t)201U, (uint8_t)62U, (uint8_t)192U,
@@ -3013,7 +2866,7 @@ sigver_vectors512_low33[32U] =
     (uint8_t)153U, (uint8_t)78U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low34[32U] =
   {
     (uint8_t)134U, (uint8_t)176U, (uint8_t)52U, (uint8_t)18U, (uint8_t)8U, (uint8_t)160U,
@@ -3024,7 +2877,7 @@ sigver_vectors512_low34[32U] =
     (uint8_t)136U, (uint8_t)248U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low35[128U] =
   {
     (uint8_t)75U, (uint8_t)194U, (uint8_t)217U, (uint8_t)168U, (uint8_t)152U, (uint8_t)57U,
@@ -3051,7 +2904,7 @@ sigver_vectors512_low35[128U] =
     (uint8_t)66U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low36[32U] =
   {
     (uint8_t)247U, (uint8_t)141U, (uint8_t)206U, (uint8_t)64U, (uint8_t)209U, (uint8_t)203U,
@@ -3062,7 +2915,7 @@ sigver_vectors512_low36[32U] =
     (uint8_t)179U, (uint8_t)138U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low37[32U] =
   {
     (uint8_t)97U, (uint8_t)178U, (uint8_t)155U, (uint8_t)11U, (uint8_t)192U, (uint8_t)61U,
@@ -3073,7 +2926,7 @@ sigver_vectors512_low37[32U] =
     (uint8_t)184U, (uint8_t)101U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low38[32U] =
   {
     (uint8_t)74U, (uint8_t)150U, (uint8_t)22U, (uint8_t)154U, (uint8_t)93U, (uint8_t)234U,
@@ -3084,7 +2937,7 @@ sigver_vectors512_low38[32U] =
     (uint8_t)1U, (uint8_t)82U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low39[32U] =
   {
     (uint8_t)162U, (uint8_t)4U, (uint8_t)234U, (uint8_t)164U, (uint8_t)233U, (uint8_t)125U,
@@ -3095,7 +2948,7 @@ sigver_vectors512_low39[32U] =
     (uint8_t)77U, (uint8_t)130U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low40[128U] =
   {
     (uint8_t)211U, (uint8_t)53U, (uint8_t)106U, (uint8_t)104U, (uint8_t)52U, (uint8_t)23U,
@@ -3122,7 +2975,7 @@ sigver_vectors512_low40[128U] =
     (uint8_t)202U, (uint8_t)98U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low41[32U] =
   {
     (uint8_t)63U, (uint8_t)204U, (uint8_t)59U, (uint8_t)62U, (uint8_t)27U, (uint8_t)16U,
@@ -3133,7 +2986,7 @@ sigver_vectors512_low41[32U] =
     (uint8_t)249U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low42[32U] =
   {
     (uint8_t)127U, (uint8_t)9U, (uint8_t)237U, (uint8_t)209U, (uint8_t)236U, (uint8_t)135U,
@@ -3144,7 +2997,7 @@ sigver_vectors512_low42[32U] =
     (uint8_t)146U, (uint8_t)55U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low43[32U] =
   {
     (uint8_t)28U, (uint8_t)172U, (uint8_t)19U, (uint8_t)242U, (uint8_t)119U, (uint8_t)53U,
@@ -3155,7 +3008,7 @@ sigver_vectors512_low43[32U] =
     (uint8_t)213U, (uint8_t)56U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low44[32U] =
   {
     (uint8_t)93U, (uint8_t)131U, (uint8_t)117U, (uint8_t)46U, (uint8_t)84U, (uint8_t)5U,
@@ -3166,7 +3019,7 @@ sigver_vectors512_low44[32U] =
     (uint8_t)237U, (uint8_t)13U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low45[128U] =
   {
     (uint8_t)215U, (uint8_t)245U, (uint8_t)218U, (uint8_t)159U, (uint8_t)76U, (uint8_t)249U,
@@ -3193,7 +3046,7 @@ sigver_vectors512_low45[128U] =
     (uint8_t)152U, (uint8_t)169U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low46[32U] =
   {
     (uint8_t)94U, (uint8_t)199U, (uint8_t)2U, (uint8_t)212U, (uint8_t)58U, (uint8_t)103U,
@@ -3204,7 +3057,7 @@ sigver_vectors512_low46[32U] =
     (uint8_t)70U, (uint8_t)118U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low47[32U] =
   {
     (uint8_t)5U, (uint8_t)166U, (uint8_t)32U, (uint8_t)68U, (uint8_t)254U, (uint8_t)216U,
@@ -3215,7 +3068,7 @@ sigver_vectors512_low47[32U] =
     (uint8_t)86U, (uint8_t)217U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low48[32U] =
   {
     (uint8_t)117U, (uint8_t)243U, (uint8_t)3U, (uint8_t)114U, (uint8_t)152U, (uint8_t)241U,
@@ -3226,7 +3079,7 @@ sigver_vectors512_low48[32U] =
     (uint8_t)204U, (uint8_t)131U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low49[32U] =
   {
     (uint8_t)25U, (uint8_t)212U, (uint8_t)58U, (uint8_t)209U, (uint8_t)104U, (uint8_t)221U,
@@ -3237,7 +3090,7 @@ sigver_vectors512_low49[32U] =
     (uint8_t)39U, (uint8_t)239U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low50[128U] =
   {
     (uint8_t)104U, (uint8_t)244U, (uint8_t)180U, (uint8_t)68U, (uint8_t)225U, (uint8_t)204U,
@@ -3264,7 +3117,7 @@ sigver_vectors512_low50[128U] =
     (uint8_t)241U, (uint8_t)188U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low51[32U] =
   {
     (uint8_t)246U, (uint8_t)58U, (uint8_t)254U, (uint8_t)153U, (uint8_t)225U, (uint8_t)181U,
@@ -3275,7 +3128,7 @@ sigver_vectors512_low51[32U] =
     (uint8_t)53U, (uint8_t)209U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low52[32U] =
   {
     (uint8_t)246U, (uint8_t)225U, (uint8_t)156U, (uint8_t)229U, (uint8_t)147U, (uint8_t)94U,
@@ -3286,7 +3139,7 @@ sigver_vectors512_low52[32U] =
     (uint8_t)38U, (uint8_t)12U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low53[32U] =
   {
     (uint8_t)206U, (uint8_t)244U, (uint8_t)131U, (uint8_t)30U, (uint8_t)69U, (uint8_t)21U,
@@ -3297,7 +3150,7 @@ sigver_vectors512_low53[32U] =
     (uint8_t)191U, (uint8_t)114U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low54[32U] =
   {
     (uint8_t)242U, (uint8_t)13U, (uint8_t)192U, (uint8_t)27U, (uint8_t)243U, (uint8_t)142U,
@@ -3308,7 +3161,7 @@ sigver_vectors512_low54[32U] =
     (uint8_t)91U, (uint8_t)117U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low55[128U] =
   {
     (uint8_t)231U, (uint8_t)91U, (uint8_t)224U, (uint8_t)91U, (uint8_t)224U, (uint8_t)170U,
@@ -3335,7 +3188,7 @@ sigver_vectors512_low55[128U] =
     (uint8_t)14U, (uint8_t)126U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low56[32U] =
   {
     (uint8_t)109U, (uint8_t)17U, (uint8_t)176U, (uint8_t)157U, (uint8_t)39U, (uint8_t)103U,
@@ -3346,7 +3199,7 @@ sigver_vectors512_low56[32U] =
     (uint8_t)51U, (uint8_t)133U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low57[32U] =
   {
     (uint8_t)78U, (uint8_t)176U, (uint8_t)92U, (uint8_t)115U, (uint8_t)224U, (uint8_t)82U,
@@ -3357,7 +3210,7 @@ sigver_vectors512_low57[32U] =
     (uint8_t)52U, (uint8_t)198U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low58[32U] =
   {
     (uint8_t)21U, (uint8_t)166U, (uint8_t)151U, (uint8_t)205U, (uint8_t)182U, (uint8_t)20U,
@@ -3368,7 +3221,7 @@ sigver_vectors512_low58[32U] =
     (uint8_t)23U, (uint8_t)127U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low59[32U] =
   {
     (uint8_t)123U, (uint8_t)246U, (uint8_t)36U, (uint8_t)79U, (uint8_t)146U, (uint8_t)188U,
@@ -3379,7 +3232,7 @@ sigver_vectors512_low59[32U] =
     (uint8_t)13U, (uint8_t)253U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low60[128U] =
   {
     (uint8_t)13U, (uint8_t)196U, (uint8_t)163U, (uint8_t)234U, (uint8_t)182U, (uint8_t)107U,
@@ -3406,7 +3259,7 @@ sigver_vectors512_low60[128U] =
     (uint8_t)115U, (uint8_t)6U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low61[32U] =
   {
     (uint8_t)243U, (uint8_t)137U, (uint8_t)156U, (uint8_t)171U, (uint8_t)160U, (uint8_t)56U,
@@ -3417,7 +3270,7 @@ sigver_vectors512_low61[32U] =
     (uint8_t)182U, (uint8_t)230U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low62[32U] =
   {
     (uint8_t)110U, (uint8_t)166U, (uint8_t)177U, (uint8_t)116U, (uint8_t)2U, (uint8_t)252U,
@@ -3428,7 +3281,7 @@ sigver_vectors512_low62[32U] =
     (uint8_t)130U, (uint8_t)195U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low63[32U] =
   {
     (uint8_t)87U, (uint8_t)185U, (uint8_t)147U, (uint8_t)128U, (uint8_t)69U, (uint8_t)46U,
@@ -3439,7 +3292,7 @@ sigver_vectors512_low63[32U] =
     (uint8_t)30U, (uint8_t)106U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low64[32U] =
   {
     (uint8_t)223U, (uint8_t)89U, (uint8_t)156U, (uint8_t)58U, (uint8_t)55U, (uint8_t)16U,
@@ -3450,7 +3303,7 @@ sigver_vectors512_low64[32U] =
     (uint8_t)182U, (uint8_t)21U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low65[128U] =
   {
     (uint8_t)213U, (uint8_t)94U, (uint8_t)94U, (uint8_t)18U, (uint8_t)74U, (uint8_t)114U,
@@ -3477,7 +3330,7 @@ sigver_vectors512_low65[128U] =
     (uint8_t)76U, (uint8_t)7U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low66[32U] =
   {
     (uint8_t)31U, (uint8_t)214U, (uint8_t)244U, (uint8_t)185U, (uint8_t)141U, (uint8_t)7U,
@@ -3488,7 +3341,7 @@ sigver_vectors512_low66[32U] =
     (uint8_t)251U, (uint8_t)210U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low67[32U] =
   {
     (uint8_t)85U, (uint8_t)120U, (uint8_t)254U, (uint8_t)247U, (uint8_t)155U, (uint8_t)196U,
@@ -3499,7 +3352,7 @@ sigver_vectors512_low67[32U] =
     (uint8_t)5U, (uint8_t)215U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low68[32U] =
   {
     (uint8_t)151U, (uint8_t)169U, (uint8_t)158U, (uint8_t)150U, (uint8_t)228U, (uint8_t)7U,
@@ -3510,7 +3363,7 @@ sigver_vectors512_low68[32U] =
     (uint8_t)102U, (uint8_t)204U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low69[32U] =
   {
     (uint8_t)14U, (uint8_t)202U, (uint8_t)195U, (uint8_t)21U, (uint8_t)220U, (uint8_t)25U,
@@ -3521,7 +3374,7 @@ sigver_vectors512_low69[32U] =
     (uint8_t)117U, (uint8_t)74U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low70[128U] =
   {
     (uint8_t)119U, (uint8_t)83U, (uint8_t)192U, (uint8_t)59U, (uint8_t)66U, (uint8_t)2U,
@@ -3548,7 +3401,7 @@ sigver_vectors512_low70[128U] =
     (uint8_t)140U, (uint8_t)53U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low71[32U] =
   {
     (uint8_t)45U, (uint8_t)203U, (uint8_t)216U, (uint8_t)121U, (uint8_t)12U, (uint8_t)238U,
@@ -3559,7 +3412,7 @@ sigver_vectors512_low71[32U] =
     (uint8_t)56U, (uint8_t)116U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low72[32U] =
   {
     (uint8_t)93U, (uint8_t)188U, (uint8_t)139U, (uint8_t)184U, (uint8_t)129U, (uint8_t)60U,
@@ -3570,7 +3423,7 @@ sigver_vectors512_low72[32U] =
     (uint8_t)238U, (uint8_t)52U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low73[32U] =
   {
     (uint8_t)43U, (uint8_t)219U, (uint8_t)216U, (uint8_t)176U, (uint8_t)215U, (uint8_t)89U,
@@ -3581,7 +3434,7 @@ sigver_vectors512_low73[32U] =
     (uint8_t)188U, (uint8_t)159U
   };
 
-static uint8_t
+uint8_t
 sigver_vectors512_low74[32U] =
   {
     (uint8_t)126U, (uint8_t)125U, (uint8_t)240U, (uint8_t)200U, (uint8_t)184U, (uint8_t)111U,
@@ -3592,7 +3445,7 @@ sigver_vectors512_low74[32U] =
     (uint8_t)92U, (uint8_t)140U
   };
 
-static sigver_vector
+sigver_vector
 sigver_vectors512_low75[15U] =
   {
     {
@@ -3702,10 +3555,10 @@ sigver_vectors512_low75[15U] =
     }
   };
 
-static lbuffer__Hacl_Test_ECDSA_sigver_vector
+Test_Lowstarize_lbuffer__Hacl_Test_ECDSA_sigver_vector
 sigver_vectors512_low = { .len = (uint32_t)15U, .b = sigver_vectors512_low75 };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low0[128U] =
   {
     (uint8_t)89U, (uint8_t)5U, (uint8_t)35U, (uint8_t)136U, (uint8_t)119U, (uint8_t)199U,
@@ -3732,7 +3585,7 @@ siggen_vectors256_low0[128U] =
     (uint8_t)156U, (uint8_t)232U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low1[32U] =
   {
     (uint8_t)81U, (uint8_t)155U, (uint8_t)66U, (uint8_t)61U, (uint8_t)113U, (uint8_t)95U,
@@ -3743,7 +3596,7 @@ siggen_vectors256_low1[32U] =
     (uint8_t)180U, (uint8_t)100U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low2[32U] =
   {
     (uint8_t)28U, (uint8_t)203U, (uint8_t)233U, (uint8_t)28U, (uint8_t)7U, (uint8_t)95U,
@@ -3754,7 +3607,7 @@ siggen_vectors256_low2[32U] =
     (uint8_t)191U, (uint8_t)131U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low3[32U] =
   {
     (uint8_t)206U, (uint8_t)64U, (uint8_t)20U, (uint8_t)198U, (uint8_t)136U, (uint8_t)17U,
@@ -3765,7 +3618,7 @@ siggen_vectors256_low3[32U] =
     (uint8_t)76U, (uint8_t)169U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low4[32U] =
   {
     (uint8_t)148U, (uint8_t)161U, (uint8_t)187U, (uint8_t)177U, (uint8_t)75U, (uint8_t)144U,
@@ -3776,7 +3629,7 @@ siggen_vectors256_low4[32U] =
     (uint8_t)104U, (uint8_t)222U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low5[32U] =
   {
     (uint8_t)243U, (uint8_t)172U, (uint8_t)128U, (uint8_t)97U, (uint8_t)181U, (uint8_t)20U,
@@ -3787,7 +3640,7 @@ siggen_vectors256_low5[32U] =
     (uint8_t)194U, (uint8_t)172U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low6[32U] =
   {
     (uint8_t)139U, (uint8_t)247U, (uint8_t)120U, (uint8_t)25U, (uint8_t)202U, (uint8_t)5U,
@@ -3798,7 +3651,7 @@ siggen_vectors256_low6[32U] =
     (uint8_t)137U, (uint8_t)3U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low7[128U] =
   {
     (uint8_t)195U, (uint8_t)94U, (uint8_t)47U, (uint8_t)9U, (uint8_t)37U, (uint8_t)83U,
@@ -3825,7 +3678,7 @@ siggen_vectors256_low7[128U] =
     (uint8_t)74U, (uint8_t)241U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low8[32U] =
   {
     (uint8_t)15U, (uint8_t)86U, (uint8_t)219U, (uint8_t)120U, (uint8_t)202U, (uint8_t)70U,
@@ -3836,7 +3689,7 @@ siggen_vectors256_low8[32U] =
     (uint8_t)152U, (uint8_t)19U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low9[32U] =
   {
     (uint8_t)226U, (uint8_t)102U, (uint8_t)221U, (uint8_t)253U, (uint8_t)193U, (uint8_t)38U,
@@ -3847,7 +3700,7 @@ siggen_vectors256_low9[32U] =
     (uint8_t)250U, (uint8_t)138U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low10[32U] =
   {
     (uint8_t)191U, (uint8_t)168U, (uint8_t)100U, (uint8_t)4U, (uint8_t)162U, (uint8_t)233U,
@@ -3858,7 +3711,7 @@ siggen_vectors256_low10[32U] =
     (uint8_t)203U, (uint8_t)57U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low11[32U] =
   {
     (uint8_t)109U, (uint8_t)62U, (uint8_t)113U, (uint8_t)136U, (uint8_t)44U, (uint8_t)59U,
@@ -3869,7 +3722,7 @@ siggen_vectors256_low11[32U] =
     (uint8_t)52U, (uint8_t)198U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low12[32U] =
   {
     (uint8_t)151U, (uint8_t)109U, (uint8_t)58U, (uint8_t)78U, (uint8_t)157U, (uint8_t)35U,
@@ -3880,7 +3733,7 @@ siggen_vectors256_low12[32U] =
     (uint8_t)178U, (uint8_t)219U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low13[32U] =
   {
     (uint8_t)27U, (uint8_t)118U, (uint8_t)110U, (uint8_t)156U, (uint8_t)235U, (uint8_t)113U,
@@ -3891,7 +3744,7 @@ siggen_vectors256_low13[32U] =
     (uint8_t)25U, (uint8_t)50U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low14[128U] =
   {
     (uint8_t)60U, (uint8_t)5U, (uint8_t)78U, (uint8_t)51U, (uint8_t)58U, (uint8_t)148U,
@@ -3918,7 +3771,7 @@ siggen_vectors256_low14[128U] =
     (uint8_t)136U, (uint8_t)238U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low15[32U] =
   {
     (uint8_t)226U, (uint8_t)131U, (uint8_t)135U, (uint8_t)18U, (uint8_t)57U, (uint8_t)131U,
@@ -3929,7 +3782,7 @@ siggen_vectors256_low15[32U] =
     (uint8_t)194U, (uint8_t)239U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low16[32U] =
   {
     (uint8_t)116U, (uint8_t)204U, (uint8_t)216U, (uint8_t)166U, (uint8_t)47U, (uint8_t)186U,
@@ -3940,7 +3793,7 @@ siggen_vectors256_low16[32U] =
     (uint8_t)189U, (uint8_t)232U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low17[32U] =
   {
     (uint8_t)41U, (uint8_t)7U, (uint8_t)78U, (uint8_t)33U, (uint8_t)243U, (uint8_t)160U,
@@ -3951,7 +3804,7 @@ siggen_vectors256_low17[32U] =
     (uint8_t)38U, (uint8_t)20U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low18[32U] =
   {
     (uint8_t)173U, (uint8_t)94U, (uint8_t)136U, (uint8_t)126U, (uint8_t)178U, (uint8_t)179U,
@@ -3962,7 +3815,7 @@ siggen_vectors256_low18[32U] =
     (uint8_t)93U, (uint8_t)226U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low19[32U] =
   {
     (uint8_t)53U, (uint8_t)251U, (uint8_t)96U, (uint8_t)245U, (uint8_t)202U, (uint8_t)15U,
@@ -3973,7 +3826,7 @@ siggen_vectors256_low19[32U] =
     (uint8_t)107U, (uint8_t)209U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low20[32U] =
   {
     (uint8_t)238U, (uint8_t)89U, (uint8_t)216U, (uint8_t)27U, (uint8_t)201U, (uint8_t)219U,
@@ -3984,7 +3837,7 @@ siggen_vectors256_low20[32U] =
     (uint8_t)46U, (uint8_t)150U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low21[128U] =
   {
     (uint8_t)9U, (uint8_t)137U, (uint8_t)18U, (uint8_t)36U, (uint8_t)16U, (uint8_t)213U,
@@ -4011,7 +3864,7 @@ siggen_vectors256_low21[128U] =
     (uint8_t)124U, (uint8_t)48U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low22[32U] =
   {
     (uint8_t)163U, (uint8_t)210U, (uint8_t)211U, (uint8_t)183U, (uint8_t)89U, (uint8_t)111U,
@@ -4022,7 +3875,7 @@ siggen_vectors256_low22[32U] =
     (uint8_t)45U, (uint8_t)7U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low23[32U] =
   {
     (uint8_t)50U, (uint8_t)47U, (uint8_t)128U, (uint8_t)55U, (uint8_t)27U, (uint8_t)246U,
@@ -4033,7 +3886,7 @@ siggen_vectors256_low23[32U] =
     (uint8_t)137U, (uint8_t)225U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low24[32U] =
   {
     (uint8_t)60U, (uint8_t)21U, (uint8_t)213U, (uint8_t)74U, (uint8_t)92U, (uint8_t)198U,
@@ -4044,7 +3897,7 @@ siggen_vectors256_low24[32U] =
     (uint8_t)217U, (uint8_t)153U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low25[32U] =
   {
     (uint8_t)36U, (uint8_t)252U, (uint8_t)144U, (uint8_t)225U, (uint8_t)218U, (uint8_t)19U,
@@ -4055,7 +3908,7 @@ siggen_vectors256_low25[32U] =
     (uint8_t)79U, (uint8_t)24U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low26[32U] =
   {
     (uint8_t)215U, (uint8_t)197U, (uint8_t)98U, (uint8_t)55U, (uint8_t)10U, (uint8_t)246U,
@@ -4066,7 +3919,7 @@ siggen_vectors256_low26[32U] =
     (uint8_t)132U, (uint8_t)202U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low27[32U] =
   {
     (uint8_t)180U, (uint8_t)109U, (uint8_t)159U, (uint8_t)45U, (uint8_t)140U, (uint8_t)75U,
@@ -4077,7 +3930,7 @@ siggen_vectors256_low27[32U] =
     (uint8_t)13U, (uint8_t)137U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low28[128U] =
   {
     (uint8_t)220U, (uint8_t)102U, (uint8_t)227U, (uint8_t)159U, (uint8_t)155U, (uint8_t)191U,
@@ -4104,7 +3957,7 @@ siggen_vectors256_low28[128U] =
     (uint8_t)228U, (uint8_t)231U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low29[32U] =
   {
     (uint8_t)83U, (uint8_t)160U, (uint8_t)232U, (uint8_t)168U, (uint8_t)254U, (uint8_t)147U,
@@ -4115,7 +3968,7 @@ siggen_vectors256_low29[32U] =
     (uint8_t)40U, (uint8_t)13U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low30[32U] =
   {
     (uint8_t)27U, (uint8_t)206U, (uint8_t)196U, (uint8_t)87U, (uint8_t)14U, (uint8_t)30U,
@@ -4126,7 +3979,7 @@ siggen_vectors256_low30[32U] =
     (uint8_t)114U, (uint8_t)68U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low31[32U] =
   {
     (uint8_t)138U, (uint8_t)246U, (uint8_t)42U, (uint8_t)76U, (uint8_t)104U, (uint8_t)63U,
@@ -4137,7 +3990,7 @@ siggen_vectors256_low31[32U] =
     (uint8_t)148U, (uint8_t)225U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low32[32U] =
   {
     (uint8_t)93U, (uint8_t)131U, (uint8_t)62U, (uint8_t)141U, (uint8_t)36U, (uint8_t)204U,
@@ -4148,7 +4001,7 @@ siggen_vectors256_low32[32U] =
     (uint8_t)224U, (uint8_t)196U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low33[32U] =
   {
     (uint8_t)24U, (uint8_t)202U, (uint8_t)175U, (uint8_t)123U, (uint8_t)102U, (uint8_t)53U,
@@ -4159,7 +4012,7 @@ siggen_vectors256_low33[32U] =
     (uint8_t)38U, (uint8_t)4U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low34[32U] =
   {
     (uint8_t)119U, (uint8_t)198U, (uint8_t)137U, (uint8_t)40U, (uint8_t)172U, (uint8_t)59U,
@@ -4170,7 +4023,7 @@ siggen_vectors256_low34[32U] =
     (uint8_t)210U, (uint8_t)156U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low35[128U] =
   {
     (uint8_t)96U, (uint8_t)9U, (uint8_t)116U, (uint8_t)231U, (uint8_t)216U, (uint8_t)197U,
@@ -4197,7 +4050,7 @@ siggen_vectors256_low35[128U] =
     (uint8_t)157U, (uint8_t)113U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low36[32U] =
   {
     (uint8_t)74U, (uint8_t)241U, (uint8_t)7U, (uint8_t)232U, (uint8_t)226U, (uint8_t)25U,
@@ -4208,7 +4061,7 @@ siggen_vectors256_low36[32U] =
     (uint8_t)74U, (uint8_t)29U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low37[32U] =
   {
     (uint8_t)163U, (uint8_t)46U, (uint8_t)80U, (uint8_t)190U, (uint8_t)61U, (uint8_t)174U,
@@ -4219,7 +4072,7 @@ siggen_vectors256_low37[32U] =
     (uint8_t)158U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low38[32U] =
   {
     (uint8_t)214U, (uint8_t)35U, (uint8_t)191U, (uint8_t)100U, (uint8_t)17U, (uint8_t)96U,
@@ -4230,7 +4083,7 @@ siggen_vectors256_low38[32U] =
     (uint8_t)74U, (uint8_t)233U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low39[32U] =
   {
     (uint8_t)225U, (uint8_t)143U, (uint8_t)150U, (uint8_t)248U, (uint8_t)77U, (uint8_t)250U,
@@ -4241,7 +4094,7 @@ siggen_vectors256_low39[32U] =
     (uint8_t)208U, (uint8_t)171U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low40[32U] =
   {
     (uint8_t)133U, (uint8_t)36U, (uint8_t)197U, (uint8_t)2U, (uint8_t)78U, (uint8_t)45U,
@@ -4252,7 +4105,7 @@ siggen_vectors256_low40[32U] =
     (uint8_t)46U, (uint8_t)104U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low41[32U] =
   {
     (uint8_t)209U, (uint8_t)140U, (uint8_t)44U, (uint8_t)175U, (uint8_t)59U, (uint8_t)16U,
@@ -4263,7 +4116,7 @@ siggen_vectors256_low41[32U] =
     (uint8_t)5U, (uint8_t)203U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low42[128U] =
   {
     (uint8_t)223U, (uint8_t)166U, (uint8_t)203U, (uint8_t)155U, (uint8_t)57U, (uint8_t)173U,
@@ -4290,7 +4143,7 @@ siggen_vectors256_low42[128U] =
     (uint8_t)1U, (uint8_t)11U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low43[32U] =
   {
     (uint8_t)120U, (uint8_t)223U, (uint8_t)170U, (uint8_t)9U, (uint8_t)241U, (uint8_t)7U,
@@ -4301,7 +4154,7 @@ siggen_vectors256_low43[32U] =
     (uint8_t)244U, (uint8_t)171U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low44[32U] =
   {
     (uint8_t)139U, (uint8_t)207U, (uint8_t)226U, (uint8_t)167U, (uint8_t)33U, (uint8_t)202U,
@@ -4312,7 +4165,7 @@ siggen_vectors256_low44[32U] =
     (uint8_t)116U, (uint8_t)121U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low45[32U] =
   {
     (uint8_t)15U, (uint8_t)103U, (uint8_t)87U, (uint8_t)106U, (uint8_t)48U, (uint8_t)184U,
@@ -4323,7 +4176,7 @@ siggen_vectors256_low45[32U] =
     (uint8_t)171U, (uint8_t)150U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low46[32U] =
   {
     (uint8_t)41U, (uint8_t)85U, (uint8_t)68U, (uint8_t)219U, (uint8_t)178U, (uint8_t)218U,
@@ -4334,7 +4187,7 @@ siggen_vectors256_low46[32U] =
     (uint8_t)138U, (uint8_t)119U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low47[32U] =
   {
     (uint8_t)197U, (uint8_t)161U, (uint8_t)134U, (uint8_t)215U, (uint8_t)45U, (uint8_t)244U,
@@ -4345,7 +4198,7 @@ siggen_vectors256_low47[32U] =
     (uint8_t)178U, (uint8_t)84U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low48[32U] =
   {
     (uint8_t)132U, (uint8_t)165U, (uint8_t)143U, (uint8_t)158U, (uint8_t)157U, (uint8_t)158U,
@@ -4356,7 +4209,7 @@ siggen_vectors256_low48[32U] =
     (uint8_t)202U, (uint8_t)48U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low49[128U] =
   {
     (uint8_t)81U, (uint8_t)210U, (uint8_t)84U, (uint8_t)124U, (uint8_t)191U, (uint8_t)249U,
@@ -4383,7 +4236,7 @@ siggen_vectors256_low49[128U] =
     (uint8_t)252U, (uint8_t)139U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low50[32U] =
   {
     (uint8_t)128U, (uint8_t)230U, (uint8_t)146U, (uint8_t)227U, (uint8_t)235U, (uint8_t)159U,
@@ -4394,7 +4247,7 @@ siggen_vectors256_low50[32U] =
     (uint8_t)97U, (uint8_t)138U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low51[32U] =
   {
     (uint8_t)168U, (uint8_t)139U, (uint8_t)200U, (uint8_t)67U, (uint8_t)2U, (uint8_t)121U,
@@ -4405,7 +4258,7 @@ siggen_vectors256_low51[32U] =
     (uint8_t)231U, (uint8_t)103U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low52[32U] =
   {
     (uint8_t)45U, (uint8_t)54U, (uint8_t)90U, (uint8_t)30U, (uint8_t)239U, (uint8_t)37U,
@@ -4416,7 +4269,7 @@ siggen_vectors256_low52[32U] =
     (uint8_t)17U, (uint8_t)133U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low53[32U] =
   {
     (uint8_t)124U, (uint8_t)128U, (uint8_t)253U, (uint8_t)102U, (uint8_t)214U, (uint8_t)44U,
@@ -4427,7 +4280,7 @@ siggen_vectors256_low53[32U] =
     (uint8_t)75U, (uint8_t)34U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low54[32U] =
   {
     (uint8_t)157U, (uint8_t)12U, (uint8_t)106U, (uint8_t)251U, (uint8_t)109U, (uint8_t)243U,
@@ -4438,7 +4291,7 @@ siggen_vectors256_low54[32U] =
     (uint8_t)105U, (uint8_t)2U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low55[32U] =
   {
     (uint8_t)215U, (uint8_t)249U, (uint8_t)221U, (uint8_t)209U, (uint8_t)145U, (uint8_t)241U,
@@ -4449,7 +4302,7 @@ siggen_vectors256_low55[32U] =
     (uint8_t)115U, (uint8_t)159U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low56[128U] =
   {
     (uint8_t)85U, (uint8_t)140U, (uint8_t)42U, (uint8_t)193U, (uint8_t)48U, (uint8_t)38U,
@@ -4476,7 +4329,7 @@ siggen_vectors256_low56[128U] =
     (uint8_t)147U, (uint8_t)232U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low57[32U] =
   {
     (uint8_t)94U, (uint8_t)102U, (uint8_t)108U, (uint8_t)13U, (uint8_t)176U, (uint8_t)33U,
@@ -4487,7 +4340,7 @@ siggen_vectors256_low57[32U] =
     (uint8_t)184U, (uint8_t)129U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low58[32U] =
   {
     (uint8_t)27U, (uint8_t)196U, (uint8_t)135U, (uint8_t)87U, (uint8_t)15U, (uint8_t)4U,
@@ -4498,7 +4351,7 @@ siggen_vectors256_low58[32U] =
     (uint8_t)188U, (uint8_t)58U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low59[32U] =
   {
     (uint8_t)236U, (uint8_t)129U, (uint8_t)96U, (uint8_t)42U, (uint8_t)189U, (uint8_t)131U,
@@ -4509,7 +4362,7 @@ siggen_vectors256_low59[32U] =
     (uint8_t)93U, (uint8_t)143U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low60[32U] =
   {
     (uint8_t)46U, (uint8_t)118U, (uint8_t)37U, (uint8_t)164U, (uint8_t)136U, (uint8_t)116U,
@@ -4520,7 +4373,7 @@ siggen_vectors256_low60[32U] =
     (uint8_t)220U, (uint8_t)233U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low61[32U] =
   {
     (uint8_t)47U, (uint8_t)158U, (uint8_t)43U, (uint8_t)78U, (uint8_t)159U, (uint8_t)116U,
@@ -4531,7 +4384,7 @@ siggen_vectors256_low61[32U] =
     (uint8_t)15U, (uint8_t)217U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low62[32U] =
   {
     (uint8_t)245U, (uint8_t)65U, (uint8_t)59U, (uint8_t)253U, (uint8_t)133U, (uint8_t)148U,
@@ -4542,7 +4395,7 @@ siggen_vectors256_low62[32U] =
     (uint8_t)49U, (uint8_t)153U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low63[128U] =
   {
     (uint8_t)77U, (uint8_t)85U, (uint8_t)201U, (uint8_t)158U, (uint8_t)246U, (uint8_t)189U,
@@ -4569,7 +4422,7 @@ siggen_vectors256_low63[128U] =
     (uint8_t)55U, (uint8_t)142U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low64[32U] =
   {
     (uint8_t)247U, (uint8_t)63U, (uint8_t)69U, (uint8_t)82U, (uint8_t)113U, (uint8_t)200U,
@@ -4580,7 +4433,7 @@ siggen_vectors256_low64[32U] =
     (uint8_t)8U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low65[32U] =
   {
     (uint8_t)184U, (uint8_t)24U, (uint8_t)139U, (uint8_t)214U, (uint8_t)135U, (uint8_t)1U,
@@ -4591,7 +4444,7 @@ siggen_vectors256_low65[32U] =
     (uint8_t)93U, (uint8_t)222U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low66[32U] =
   {
     (uint8_t)66U, (uint8_t)63U, (uint8_t)5U, (uint8_t)136U, (uint8_t)16U, (uint8_t)242U,
@@ -4602,7 +4455,7 @@ siggen_vectors256_low66[32U] =
     (uint8_t)188U, (uint8_t)74U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low67[32U] =
   {
     (uint8_t)98U, (uint8_t)248U, (uint8_t)102U, (uint8_t)95U, (uint8_t)214U, (uint8_t)226U,
@@ -4613,7 +4466,7 @@ siggen_vectors256_low67[32U] =
     (uint8_t)214U, (uint8_t)21U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low68[32U] =
   {
     (uint8_t)28U, (uint8_t)198U, (uint8_t)40U, (uint8_t)83U, (uint8_t)61U, (uint8_t)0U, (uint8_t)4U,
@@ -4624,7 +4477,7 @@ siggen_vectors256_low68[32U] =
     (uint8_t)32U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low69[32U] =
   {
     (uint8_t)136U, (uint8_t)14U, (uint8_t)11U, (uint8_t)191U, (uint8_t)130U, (uint8_t)168U,
@@ -4635,7 +4488,7 @@ siggen_vectors256_low69[32U] =
     (uint8_t)68U, (uint8_t)48U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low70[128U] =
   {
     (uint8_t)248U, (uint8_t)36U, (uint8_t)138U, (uint8_t)212U, (uint8_t)125U, (uint8_t)151U,
@@ -4662,7 +4515,7 @@ siggen_vectors256_low70[128U] =
     (uint8_t)180U, (uint8_t)138U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low71[32U] =
   {
     (uint8_t)178U, (uint8_t)13U, (uint8_t)112U, (uint8_t)93U, (uint8_t)155U, (uint8_t)215U,
@@ -4673,7 +4526,7 @@ siggen_vectors256_low71[32U] =
     (uint8_t)121U, (uint8_t)6U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low72[32U] =
   {
     (uint8_t)81U, (uint8_t)249U, (uint8_t)157U, (uint8_t)45U, (uint8_t)82U, (uint8_t)212U,
@@ -4684,7 +4537,7 @@ siggen_vectors256_low72[32U] =
     (uint8_t)102U, (uint8_t)206U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low73[32U] =
   {
     (uint8_t)71U, (uint8_t)55U, (uint8_t)218U, (uint8_t)150U, (uint8_t)60U, (uint8_t)110U,
@@ -4695,7 +4548,7 @@ siggen_vectors256_low73[32U] =
     (uint8_t)202U, (uint8_t)209U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low74[32U] =
   {
     (uint8_t)114U, (uint8_t)182U, (uint8_t)86U, (uint8_t)246U, (uint8_t)179U, (uint8_t)91U,
@@ -4706,7 +4559,7 @@ siggen_vectors256_low74[32U] =
     (uint8_t)111U, (uint8_t)111U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low75[32U] =
   {
     (uint8_t)152U, (uint8_t)134U, (uint8_t)174U, (uint8_t)70U, (uint8_t)193U, (uint8_t)65U,
@@ -4717,7 +4570,7 @@ siggen_vectors256_low75[32U] =
     (uint8_t)92U, (uint8_t)66U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low76[32U] =
   {
     (uint8_t)43U, (uint8_t)243U, (uint8_t)168U, (uint8_t)11U, (uint8_t)192U, (uint8_t)79U,
@@ -4728,7 +4581,7 @@ siggen_vectors256_low76[32U] =
     (uint8_t)162U, (uint8_t)108U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low77[128U] =
   {
     (uint8_t)59U, (uint8_t)110U, (uint8_t)226U, (uint8_t)66U, (uint8_t)89U, (uint8_t)64U,
@@ -4755,7 +4608,7 @@ siggen_vectors256_low77[128U] =
     (uint8_t)148U, (uint8_t)164U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low78[32U] =
   {
     (uint8_t)212U, (uint8_t)35U, (uint8_t)75U, (uint8_t)235U, (uint8_t)251U, (uint8_t)200U,
@@ -4766,7 +4619,7 @@ siggen_vectors256_low78[32U] =
     (uint8_t)165U, (uint8_t)231U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low79[32U] =
   {
     (uint8_t)143U, (uint8_t)178U, (uint8_t)135U, (uint8_t)240U, (uint8_t)32U, (uint8_t)42U,
@@ -4777,7 +4630,7 @@ siggen_vectors256_low79[32U] =
     (uint8_t)47U, (uint8_t)183U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low80[32U] =
   {
     (uint8_t)31U, (uint8_t)109U, (uint8_t)175U, (uint8_t)241U, (uint8_t)170U, (uint8_t)45U,
@@ -4788,7 +4641,7 @@ siggen_vectors256_low80[32U] =
     (uint8_t)165U, (uint8_t)115U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low81[32U] =
   {
     (uint8_t)217U, (uint8_t)38U, (uint8_t)254U, (uint8_t)16U, (uint8_t)241U, (uint8_t)191U,
@@ -4799,7 +4652,7 @@ siggen_vectors256_low81[32U] =
     (uint8_t)167U, (uint8_t)120U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low82[32U] =
   {
     (uint8_t)73U, (uint8_t)14U, (uint8_t)253U, (uint8_t)16U, (uint8_t)107U, (uint8_t)225U,
@@ -4810,7 +4663,7 @@ siggen_vectors256_low82[32U] =
     (uint8_t)4U, (uint8_t)203U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low83[32U] =
   {
     (uint8_t)100U, (uint8_t)67U, (uint8_t)0U, (uint8_t)252U, (uint8_t)13U, (uint8_t)164U,
@@ -4821,7 +4674,7 @@ siggen_vectors256_low83[32U] =
     (uint8_t)122U, (uint8_t)167U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low84[128U] =
   {
     (uint8_t)197U, (uint8_t)32U, (uint8_t)75U, (uint8_t)129U, (uint8_t)236U, (uint8_t)10U,
@@ -4848,7 +4701,7 @@ siggen_vectors256_low84[128U] =
     (uint8_t)67U, (uint8_t)167U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low85[32U] =
   {
     (uint8_t)181U, (uint8_t)143U, (uint8_t)82U, (uint8_t)17U, (uint8_t)223U, (uint8_t)244U,
@@ -4859,7 +4712,7 @@ siggen_vectors256_low85[32U] =
     (uint8_t)93U, (uint8_t)140U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low86[32U] =
   {
     (uint8_t)104U, (uint8_t)34U, (uint8_t)155U, (uint8_t)72U, (uint8_t)194U, (uint8_t)254U,
@@ -4870,7 +4723,7 @@ siggen_vectors256_low86[32U] =
     (uint8_t)186U, (uint8_t)118U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low87[32U] =
   {
     (uint8_t)48U, (uint8_t)62U, (uint8_t)142U, (uint8_t)227U, (uint8_t)116U, (uint8_t)42U,
@@ -4881,7 +4734,7 @@ siggen_vectors256_low87[32U] =
     (uint8_t)194U, (uint8_t)76U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low88[32U] =
   {
     (uint8_t)225U, (uint8_t)88U, (uint8_t)191U, (uint8_t)74U, (uint8_t)45U, (uint8_t)25U,
@@ -4892,7 +4745,7 @@ siggen_vectors256_low88[32U] =
     (uint8_t)16U, (uint8_t)113U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low89[32U] =
   {
     (uint8_t)230U, (uint8_t)122U, (uint8_t)151U, (uint8_t)23U, (uint8_t)204U, (uint8_t)249U,
@@ -4903,7 +4756,7 @@ siggen_vectors256_low89[32U] =
     (uint8_t)50U, (uint8_t)235U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low90[32U] =
   {
     (uint8_t)154U, (uint8_t)230U, (uint8_t)186U, (uint8_t)109U, (uint8_t)99U, (uint8_t)119U,
@@ -4914,7 +4767,7 @@ siggen_vectors256_low90[32U] =
     (uint8_t)67U, (uint8_t)51U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low91[128U] =
   {
     (uint8_t)114U, (uint8_t)232U, (uint8_t)31U, (uint8_t)226U, (uint8_t)33U, (uint8_t)251U,
@@ -4941,7 +4794,7 @@ siggen_vectors256_low91[128U] =
     (uint8_t)219U, (uint8_t)1U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low92[32U] =
   {
     (uint8_t)84U, (uint8_t)192U, (uint8_t)102U, (uint8_t)113U, (uint8_t)28U, (uint8_t)219U,
@@ -4952,7 +4805,7 @@ siggen_vectors256_low92[32U] =
     (uint8_t)175U, (uint8_t)177U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low93[32U] =
   {
     (uint8_t)10U, (uint8_t)125U, (uint8_t)187U, (uint8_t)139U, (uint8_t)245U, (uint8_t)12U,
@@ -4963,7 +4816,7 @@ siggen_vectors256_low93[32U] =
     (uint8_t)152U, (uint8_t)187U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low94[32U] =
   {
     (uint8_t)242U, (uint8_t)109U, (uint8_t)215U, (uint8_t)215U, (uint8_t)153U, (uint8_t)147U,
@@ -4974,7 +4827,7 @@ siggen_vectors256_low94[32U] =
     (uint8_t)174U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low95[32U] =
   {
     (uint8_t)100U, (uint8_t)111U, (uint8_t)233U, (uint8_t)51U, (uint8_t)233U, (uint8_t)108U,
@@ -4985,7 +4838,7 @@ siggen_vectors256_low95[32U] =
     (uint8_t)6U, (uint8_t)26U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low96[32U] =
   {
     (uint8_t)181U, (uint8_t)60U, (uint8_t)228U, (uint8_t)218U, (uint8_t)26U, (uint8_t)167U,
@@ -4996,7 +4849,7 @@ siggen_vectors256_low96[32U] =
     (uint8_t)198U, (uint8_t)75U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low97[32U] =
   {
     (uint8_t)215U, (uint8_t)194U, (uint8_t)70U, (uint8_t)220U, (uint8_t)122U, (uint8_t)208U,
@@ -5007,7 +4860,7 @@ siggen_vectors256_low97[32U] =
     (uint8_t)8U, (uint8_t)81U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low98[128U] =
   {
     (uint8_t)33U, (uint8_t)24U, (uint8_t)140U, (uint8_t)62U, (uint8_t)221U, (uint8_t)93U,
@@ -5034,7 +4887,7 @@ siggen_vectors256_low98[128U] =
     (uint8_t)127U, (uint8_t)52U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low99[32U] =
   {
     (uint8_t)52U, (uint8_t)250U, (uint8_t)70U, (uint8_t)130U, (uint8_t)191U, (uint8_t)108U,
@@ -5045,7 +4898,7 @@ siggen_vectors256_low99[32U] =
     (uint8_t)180U, (uint8_t)177U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low100[32U] =
   {
     (uint8_t)16U, (uint8_t)93U, (uint8_t)34U, (uint8_t)217U, (uint8_t)198U, (uint8_t)38U,
@@ -5056,7 +4909,7 @@ siggen_vectors256_low100[32U] =
     (uint8_t)55U, (uint8_t)55U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low101[32U] =
   {
     (uint8_t)108U, (uint8_t)71U, (uint8_t)243U, (uint8_t)203U, (uint8_t)191U, (uint8_t)169U,
@@ -5067,7 +4920,7 @@ siggen_vectors256_low101[32U] =
     (uint8_t)30U, (uint8_t)244U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low102[32U] =
   {
     (uint8_t)166U, (uint8_t)244U, (uint8_t)99U, (uint8_t)238U, (uint8_t)114U, (uint8_t)201U,
@@ -5078,7 +4931,7 @@ siggen_vectors256_low102[32U] =
     (uint8_t)134U, (uint8_t)244U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low103[32U] =
   {
     (uint8_t)84U, (uint8_t)44U, (uint8_t)64U, (uint8_t)161U, (uint8_t)129U, (uint8_t)64U,
@@ -5089,7 +4942,7 @@ siggen_vectors256_low103[32U] =
     (uint8_t)38U, (uint8_t)99U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors256_low104[32U] =
   {
     (uint8_t)79U, (uint8_t)127U, (uint8_t)101U, (uint8_t)48U, (uint8_t)94U, (uint8_t)36U,
@@ -5100,19 +4953,7 @@ siggen_vectors256_low104[32U] =
     (uint8_t)182U, (uint8_t)111U
   };
 
-typedef struct siggen_vector_s
-{
-  vec8 fst;
-  vec8 snd;
-  vec8 thd;
-  vec8 f3;
-  vec8 f4;
-  vec8 f5;
-  vec8 f6;
-}
-siggen_vector;
-
-static siggen_vector
+siggen_vector
 siggen_vectors256_low105[15U] =
   {
     {
@@ -5252,17 +5093,10 @@ siggen_vectors256_low105[15U] =
     }
   };
 
-typedef struct lbuffer__Hacl_Test_ECDSA_siggen_vector_s
-{
-  uint32_t len;
-  siggen_vector *b;
-}
-lbuffer__Hacl_Test_ECDSA_siggen_vector;
-
-static lbuffer__Hacl_Test_ECDSA_siggen_vector
+Test_Lowstarize_lbuffer__Hacl_Test_ECDSA_siggen_vector
 siggen_vectors256_low = { .len = (uint32_t)15U, .b = siggen_vectors256_low105 };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low0[128U] =
   {
     (uint8_t)224U, (uint8_t)184U, (uint8_t)89U, (uint8_t)107U, (uint8_t)55U, (uint8_t)95U,
@@ -5289,7 +5123,7 @@ siggen_vectors384_low0[128U] =
     (uint8_t)51U, (uint8_t)6U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low1[32U] =
   {
     (uint8_t)182U, (uint8_t)250U, (uint8_t)242U, (uint8_t)200U, (uint8_t)146U, (uint8_t)34U,
@@ -5300,7 +5134,7 @@ siggen_vectors384_low1[32U] =
     (uint8_t)220U, (uint8_t)237U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low2[32U] =
   {
     (uint8_t)224U, (uint8_t)231U, (uint8_t)185U, (uint8_t)155U, (uint8_t)198U, (uint8_t)45U,
@@ -5311,7 +5145,7 @@ siggen_vectors384_low2[32U] =
     (uint8_t)242U, (uint8_t)67U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low3[32U] =
   {
     (uint8_t)99U, (uint8_t)251U, (uint8_t)253U, (uint8_t)2U, (uint8_t)50U, (uint8_t)185U,
@@ -5322,7 +5156,7 @@ siggen_vectors384_low3[32U] =
     (uint8_t)218U, (uint8_t)105U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low4[32U] =
   {
     (uint8_t)153U, (uint8_t)128U, (uint8_t)185U, (uint8_t)205U, (uint8_t)252U, (uint8_t)239U,
@@ -5333,7 +5167,7 @@ siggen_vectors384_low4[32U] =
     (uint8_t)112U, (uint8_t)7U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low5[32U] =
   {
     (uint8_t)245U, (uint8_t)8U, (uint8_t)120U, (uint8_t)120U, (uint8_t)226U, (uint8_t)18U,
@@ -5344,7 +5178,7 @@ siggen_vectors384_low5[32U] =
     (uint8_t)173U, (uint8_t)131U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low6[32U] =
   {
     (uint8_t)48U, (uint8_t)107U, (uint8_t)76U, (uint8_t)108U, (uint8_t)32U, (uint8_t)33U,
@@ -5355,7 +5189,7 @@ siggen_vectors384_low6[32U] =
     (uint8_t)124U, (uint8_t)138U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low7[128U] =
   {
     (uint8_t)9U, (uint8_t)154U, (uint8_t)1U, (uint8_t)49U, (uint8_t)23U, (uint8_t)159U,
@@ -5382,7 +5216,7 @@ siggen_vectors384_low7[128U] =
     (uint8_t)57U, (uint8_t)233U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low8[32U] =
   {
     (uint8_t)17U, (uint8_t)137U, (uint8_t)88U, (uint8_t)253U, (uint8_t)15U, (uint8_t)240U,
@@ -5393,7 +5227,7 @@ siggen_vectors384_low8[32U] =
     (uint8_t)33U, (uint8_t)129U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low9[32U] =
   {
     (uint8_t)175U, (uint8_t)218U, (uint8_t)130U, (uint8_t)38U, (uint8_t)12U, (uint8_t)159U,
@@ -5404,7 +5238,7 @@ siggen_vectors384_low9[32U] =
     (uint8_t)195U, (uint8_t)85U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low10[32U] =
   {
     (uint8_t)10U, (uint8_t)226U, (uint8_t)187U, (uint8_t)221U, (uint8_t)34U, (uint8_t)7U,
@@ -5415,7 +5249,7 @@ siggen_vectors384_low10[32U] =
     (uint8_t)5U, (uint8_t)139U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low11[32U] =
   {
     (uint8_t)35U, (uint8_t)18U, (uint8_t)154U, (uint8_t)153U, (uint8_t)238U, (uint8_t)218U,
@@ -5426,7 +5260,7 @@ siggen_vectors384_low11[32U] =
     (uint8_t)74U, (uint8_t)107U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low12[32U] =
   {
     (uint8_t)228U, (uint8_t)70U, (uint8_t)96U, (uint8_t)12U, (uint8_t)171U, (uint8_t)18U,
@@ -5437,7 +5271,7 @@ siggen_vectors384_low12[32U] =
     (uint8_t)121U, (uint8_t)70U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low13[32U] =
   {
     (uint8_t)207U, (uint8_t)137U, (uint8_t)177U, (uint8_t)39U, (uint8_t)147U, (uint8_t)238U,
@@ -5448,7 +5282,7 @@ siggen_vectors384_low13[32U] =
     (uint8_t)125U, (uint8_t)90U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low14[128U] =
   {
     (uint8_t)15U, (uint8_t)188U, (uint8_t)7U, (uint8_t)234U, (uint8_t)148U, (uint8_t)124U,
@@ -5475,7 +5309,7 @@ siggen_vectors384_low14[128U] =
     (uint8_t)98U, (uint8_t)249U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low15[32U] =
   {
     (uint8_t)62U, (uint8_t)100U, (uint8_t)115U, (uint8_t)87U, (uint8_t)205U, (uint8_t)91U,
@@ -5486,7 +5320,7 @@ siggen_vectors384_low15[32U] =
     (uint8_t)100U, (uint8_t)49U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low16[32U] =
   {
     (uint8_t)112U, (uint8_t)43U, (uint8_t)44U, (uint8_t)148U, (uint8_t)208U, (uint8_t)57U,
@@ -5497,7 +5331,7 @@ siggen_vectors384_low16[32U] =
     (uint8_t)213U, (uint8_t)237U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low17[32U] =
   {
     (uint8_t)12U, (uint8_t)40U, (uint8_t)137U, (uint8_t)78U, (uint8_t)144U, (uint8_t)122U,
@@ -5508,7 +5342,7 @@ siggen_vectors384_low17[32U] =
     (uint8_t)77U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low18[32U] =
   {
     (uint8_t)155U, (uint8_t)234U, (uint8_t)183U, (uint8_t)114U, (uint8_t)47U, (uint8_t)11U,
@@ -5519,7 +5353,7 @@ siggen_vectors384_low18[32U] =
     (uint8_t)139U, (uint8_t)53U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low19[32U] =
   {
     (uint8_t)196U, (uint8_t)2U, (uint8_t)31U, (uint8_t)183U, (uint8_t)24U, (uint8_t)90U,
@@ -5530,7 +5364,7 @@ siggen_vectors384_low19[32U] =
     (uint8_t)126U, (uint8_t)94U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low20[32U] =
   {
     (uint8_t)127U, (uint8_t)180U, (uint8_t)93U, (uint8_t)9U, (uint8_t)226U, (uint8_t)23U,
@@ -5541,7 +5375,7 @@ siggen_vectors384_low20[32U] =
     (uint8_t)168U, (uint8_t)241U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low21[128U] =
   {
     (uint8_t)30U, (uint8_t)56U, (uint8_t)215U, (uint8_t)80U, (uint8_t)217U, (uint8_t)54U,
@@ -5568,7 +5402,7 @@ siggen_vectors384_low21[128U] =
     (uint8_t)152U, (uint8_t)143U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low22[32U] =
   {
     (uint8_t)118U, (uint8_t)193U, (uint8_t)124U, (uint8_t)46U, (uint8_t)252U, (uint8_t)153U,
@@ -5579,7 +5413,7 @@ siggen_vectors384_low22[32U] =
     (uint8_t)176U, (uint8_t)253U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low23[32U] =
   {
     (uint8_t)209U, (uint8_t)37U, (uint8_t)18U, (uint8_t)233U, (uint8_t)52U, (uint8_t)195U,
@@ -5590,7 +5424,7 @@ siggen_vectors384_low23[32U] =
     (uint8_t)139U, (uint8_t)87U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low24[32U] =
   {
     (uint8_t)235U, (uint8_t)248U, (uint8_t)131U, (uint8_t)86U, (uint8_t)97U, (uint8_t)217U,
@@ -5601,7 +5435,7 @@ siggen_vectors384_low24[32U] =
     (uint8_t)78U, (uint8_t)35U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low25[32U] =
   {
     (uint8_t)119U, (uint8_t)207U, (uint8_t)250U, (uint8_t)111U, (uint8_t)154U, (uint8_t)115U,
@@ -5612,7 +5446,7 @@ siggen_vectors384_low25[32U] =
     (uint8_t)108U, (uint8_t)207U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low26[32U] =
   {
     (uint8_t)77U, (uint8_t)90U, (uint8_t)157U, (uint8_t)149U, (uint8_t)176U, (uint8_t)240U,
@@ -5623,7 +5457,7 @@ siggen_vectors384_low26[32U] =
     (uint8_t)242U, (uint8_t)50U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low27[32U] =
   {
     (uint8_t)125U, (uint8_t)60U, (uint8_t)1U, (uint8_t)76U, (uint8_t)164U, (uint8_t)112U,
@@ -5634,7 +5468,7 @@ siggen_vectors384_low27[32U] =
     (uint8_t)167U, (uint8_t)235U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low28[128U] =
   {
     (uint8_t)171U, (uint8_t)207U, (uint8_t)14U, (uint8_t)15U, (uint8_t)4U, (uint8_t)107U,
@@ -5661,7 +5495,7 @@ siggen_vectors384_low28[128U] =
     (uint8_t)98U, (uint8_t)171U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low29[32U] =
   {
     (uint8_t)103U, (uint8_t)185U, (uint8_t)222U, (uint8_t)166U, (uint8_t)165U, (uint8_t)117U,
@@ -5672,7 +5506,7 @@ siggen_vectors384_low29[32U] =
     (uint8_t)116U, (uint8_t)222U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low30[32U] =
   {
     (uint8_t)180U, (uint8_t)35U, (uint8_t)139U, (uint8_t)2U, (uint8_t)159U, (uint8_t)192U,
@@ -5683,7 +5517,7 @@ siggen_vectors384_low30[32U] =
     (uint8_t)5U, (uint8_t)190U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low31[32U] =
   {
     (uint8_t)140U, (uint8_t)179U, (uint8_t)255U, (uint8_t)248U, (uint8_t)246U, (uint8_t)204U,
@@ -5694,7 +5528,7 @@ siggen_vectors384_low31[32U] =
     (uint8_t)179U, (uint8_t)9U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low32[32U] =
   {
     (uint8_t)208U, (uint8_t)38U, (uint8_t)23U, (uint8_t)242U, (uint8_t)110U, (uint8_t)222U,
@@ -5705,7 +5539,7 @@ siggen_vectors384_low32[32U] =
     (uint8_t)67U, (uint8_t)241U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low33[32U] =
   {
     (uint8_t)38U, (uint8_t)253U, (uint8_t)145U, (uint8_t)71U, (uint8_t)208U, (uint8_t)200U,
@@ -5716,7 +5550,7 @@ siggen_vectors384_low33[32U] =
     (uint8_t)21U, (uint8_t)134U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low34[32U] =
   {
     (uint8_t)0U, (uint8_t)163U, (uint8_t)75U, (uint8_t)0U, (uint8_t)194U, (uint8_t)10U,
@@ -5727,7 +5561,7 @@ siggen_vectors384_low34[32U] =
     (uint8_t)109U, (uint8_t)79U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low35[128U] =
   {
     (uint8_t)220U, (uint8_t)61U, (uint8_t)72U, (uint8_t)132U, (uint8_t)199U, (uint8_t)65U,
@@ -5754,7 +5588,7 @@ siggen_vectors384_low35[128U] =
     (uint8_t)217U, (uint8_t)97U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low36[32U] =
   {
     (uint8_t)236U, (uint8_t)246U, (uint8_t)68U, (uint8_t)234U, (uint8_t)155U, (uint8_t)108U,
@@ -5765,7 +5599,7 @@ siggen_vectors384_low36[32U] =
     (uint8_t)181U, (uint8_t)102U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low37[32U] =
   {
     (uint8_t)195U, (uint8_t)189U, (uint8_t)199U, (uint8_t)199U, (uint8_t)149U, (uint8_t)236U,
@@ -5776,7 +5610,7 @@ siggen_vectors384_low37[32U] =
     (uint8_t)133U, (uint8_t)191U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low38[32U] =
   {
     (uint8_t)112U, (uint8_t)72U, (uint8_t)15U, (uint8_t)197U, (uint8_t)207U, (uint8_t)74U,
@@ -5787,7 +5621,7 @@ siggen_vectors384_low38[32U] =
     (uint8_t)28U, (uint8_t)163U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low39[32U] =
   {
     (uint8_t)83U, (uint8_t)41U, (uint8_t)29U, (uint8_t)81U, (uint8_t)246U, (uint8_t)141U,
@@ -5798,7 +5632,7 @@ siggen_vectors384_low39[32U] =
     (uint8_t)87U, (uint8_t)212U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low40[32U] =
   {
     (uint8_t)168U, (uint8_t)96U, (uint8_t)200U, (uint8_t)178U, (uint8_t)134U, (uint8_t)237U,
@@ -5809,7 +5643,7 @@ siggen_vectors384_low40[32U] =
     (uint8_t)223U, (uint8_t)139U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low41[32U] =
   {
     (uint8_t)86U, (uint8_t)48U, (uint8_t)249U, (uint8_t)134U, (uint8_t)177U, (uint8_t)196U,
@@ -5820,7 +5654,7 @@ siggen_vectors384_low41[32U] =
     (uint8_t)100U, (uint8_t)148U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low42[128U] =
   {
     (uint8_t)113U, (uint8_t)155U, (uint8_t)241U, (uint8_t)145U, (uint8_t)26U, (uint8_t)229U,
@@ -5847,7 +5681,7 @@ siggen_vectors384_low42[128U] =
     (uint8_t)221U, (uint8_t)246U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low43[32U] =
   {
     (uint8_t)73U, (uint8_t)97U, (uint8_t)72U, (uint8_t)92U, (uint8_t)188U, (uint8_t)151U,
@@ -5858,7 +5692,7 @@ siggen_vectors384_low43[32U] =
     (uint8_t)191U, (uint8_t)238U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low44[32U] =
   {
     (uint8_t)141U, (uint8_t)64U, (uint8_t)191U, (uint8_t)34U, (uint8_t)153U, (uint8_t)224U,
@@ -5869,7 +5703,7 @@ siggen_vectors384_low44[32U] =
     (uint8_t)239U, (uint8_t)3U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low45[32U] =
   {
     (uint8_t)86U, (uint8_t)116U, (uint8_t)230U, (uint8_t)247U, (uint8_t)127U, (uint8_t)139U,
@@ -5880,7 +5714,7 @@ siggen_vectors384_low45[32U] =
     (uint8_t)44U, (uint8_t)154U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low46[32U] =
   {
     (uint8_t)55U, (uint8_t)58U, (uint8_t)130U, (uint8_t)91U, (uint8_t)90U, (uint8_t)116U,
@@ -5891,7 +5725,7 @@ siggen_vectors384_low46[32U] =
     (uint8_t)144U, (uint8_t)175U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low47[32U] =
   {
     (uint8_t)239U, (uint8_t)111U, (uint8_t)179U, (uint8_t)134U, (uint8_t)173U, (uint8_t)4U,
@@ -5902,7 +5736,7 @@ siggen_vectors384_low47[32U] =
     (uint8_t)35U, (uint8_t)74U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low48[32U] =
   {
     (uint8_t)172U, (uint8_t)31U, (uint8_t)66U, (uint8_t)246U, (uint8_t)82U, (uint8_t)235U,
@@ -5913,7 +5747,7 @@ siggen_vectors384_low48[32U] =
     (uint8_t)108U, (uint8_t)101U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low49[128U] =
   {
     (uint8_t)124U, (uint8_t)241U, (uint8_t)159U, (uint8_t)76U, (uint8_t)133U, (uint8_t)30U,
@@ -5940,7 +5774,7 @@ siggen_vectors384_low49[128U] =
     (uint8_t)0U, (uint8_t)140U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low50[32U] =
   {
     (uint8_t)88U, (uint8_t)121U, (uint8_t)7U, (uint8_t)231U, (uint8_t)242U, (uint8_t)21U,
@@ -5951,7 +5785,7 @@ siggen_vectors384_low50[32U] =
     (uint8_t)92U, (uint8_t)189U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low51[32U] =
   {
     (uint8_t)102U, (uint8_t)13U, (uint8_t)164U, (uint8_t)92U, (uint8_t)65U, (uint8_t)60U,
@@ -5962,7 +5796,7 @@ siggen_vectors384_low51[32U] =
     (uint8_t)127U, (uint8_t)49U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low52[32U] =
   {
     (uint8_t)230U, (uint8_t)248U, (uint8_t)203U, (uint8_t)176U, (uint8_t)105U, (uint8_t)19U,
@@ -5973,7 +5807,7 @@ siggen_vectors384_low52[32U] =
     (uint8_t)100U, (uint8_t)57U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low53[32U] =
   {
     (uint8_t)107U, (uint8_t)142U, (uint8_t)183U, (uint8_t)192U, (uint8_t)216U, (uint8_t)175U,
@@ -5984,7 +5818,7 @@ siggen_vectors384_low53[32U] =
     (uint8_t)71U, (uint8_t)178U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low54[32U] =
   {
     (uint8_t)8U, (uint8_t)250U, (uint8_t)191U, (uint8_t)155U, (uint8_t)87U, (uint8_t)222U,
@@ -5995,7 +5829,7 @@ siggen_vectors384_low54[32U] =
     (uint8_t)56U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low55[32U] =
   {
     (uint8_t)165U, (uint8_t)141U, (uint8_t)25U, (uint8_t)155U, (uint8_t)29U, (uint8_t)235U,
@@ -6006,7 +5840,7 @@ siggen_vectors384_low55[32U] =
     (uint8_t)103U, (uint8_t)180U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low56[128U] =
   {
     (uint8_t)184U, (uint8_t)146U, (uint8_t)255U, (uint8_t)171U, (uint8_t)184U, (uint8_t)9U,
@@ -6033,7 +5867,7 @@ siggen_vectors384_low56[128U] =
     (uint8_t)228U, (uint8_t)5U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low57[32U] =
   {
     (uint8_t)36U, (uint8_t)177U, (uint8_t)229U, (uint8_t)103U, (uint8_t)109U, (uint8_t)26U,
@@ -6044,7 +5878,7 @@ siggen_vectors384_low57[32U] =
     (uint8_t)118U, (uint8_t)102U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low58[32U] =
   {
     (uint8_t)180U, (uint8_t)144U, (uint8_t)154U, (uint8_t)91U, (uint8_t)223U, (uint8_t)37U,
@@ -6055,7 +5889,7 @@ siggen_vectors384_low58[32U] =
     (uint8_t)231U, (uint8_t)166U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low59[32U] =
   {
     (uint8_t)118U, (uint8_t)10U, (uint8_t)224U, (uint8_t)21U, (uint8_t)250U, (uint8_t)106U,
@@ -6066,7 +5900,7 @@ siggen_vectors384_low59[32U] =
     (uint8_t)44U, (uint8_t)251U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low60[32U] =
   {
     (uint8_t)136U, (uint8_t)121U, (uint8_t)73U, (uint8_t)35U, (uint8_t)216U, (uint8_t)148U,
@@ -6077,7 +5911,7 @@ siggen_vectors384_low60[32U] =
     (uint8_t)15U, (uint8_t)214U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low61[32U] =
   {
     (uint8_t)110U, (uint8_t)201U, (uint8_t)163U, (uint8_t)64U, (uint8_t)183U, (uint8_t)127U,
@@ -6088,7 +5922,7 @@ siggen_vectors384_low61[32U] =
     (uint8_t)76U, (uint8_t)230U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low62[32U] =
   {
     (uint8_t)99U, (uint8_t)123U, (uint8_t)84U, (uint8_t)187U, (uint8_t)207U, (uint8_t)183U,
@@ -6099,7 +5933,7 @@ siggen_vectors384_low62[32U] =
     (uint8_t)118U, (uint8_t)247U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low63[128U] =
   {
     (uint8_t)129U, (uint8_t)68U, (uint8_t)227U, (uint8_t)112U, (uint8_t)20U, (uint8_t)201U,
@@ -6126,7 +5960,7 @@ siggen_vectors384_low63[128U] =
     (uint8_t)92U, (uint8_t)140U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low64[32U] =
   {
     (uint8_t)188U, (uint8_t)228U, (uint8_t)156U, (uint8_t)123U, (uint8_t)3U, (uint8_t)220U,
@@ -6137,7 +5971,7 @@ siggen_vectors384_low64[32U] =
     (uint8_t)236U, (uint8_t)103U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low65[32U] =
   {
     (uint8_t)199U, (uint8_t)134U, (uint8_t)217U, (uint8_t)66U, (uint8_t)29U, (uint8_t)103U,
@@ -6148,7 +5982,7 @@ siggen_vectors384_low65[32U] =
     (uint8_t)12U, (uint8_t)165U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low66[32U] =
   {
     (uint8_t)103U, (uint8_t)150U, (uint8_t)39U, (uint8_t)30U, (uint8_t)121U, (uint8_t)226U,
@@ -6159,7 +5993,7 @@ siggen_vectors384_low66[32U] =
     (uint8_t)58U, (uint8_t)186U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low67[32U] =
   {
     (uint8_t)137U, (uint8_t)230U, (uint8_t)144U, (uint8_t)215U, (uint8_t)138U, (uint8_t)94U,
@@ -6170,7 +6004,7 @@ siggen_vectors384_low67[32U] =
     (uint8_t)31U, (uint8_t)148U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low68[32U] =
   {
     (uint8_t)7U, (uint8_t)229U, (uint8_t)5U, (uint8_t)76U, (uint8_t)56U, (uint8_t)72U, (uint8_t)57U,
@@ -6181,7 +6015,7 @@ siggen_vectors384_low68[32U] =
     (uint8_t)77U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low69[32U] =
   {
     (uint8_t)247U, (uint8_t)230U, (uint8_t)101U, (uint8_t)184U, (uint8_t)134U, (uint8_t)20U,
@@ -6192,7 +6026,7 @@ siggen_vectors384_low69[32U] =
     (uint8_t)99U, (uint8_t)167U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low70[128U] =
   {
     (uint8_t)163U, (uint8_t)104U, (uint8_t)61U, (uint8_t)18U, (uint8_t)8U, (uint8_t)7U,
@@ -6219,7 +6053,7 @@ siggen_vectors384_low70[128U] =
     (uint8_t)202U, (uint8_t)168U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low71[32U] =
   {
     (uint8_t)115U, (uint8_t)24U, (uint8_t)138U, (uint8_t)146U, (uint8_t)59U, (uint8_t)192U,
@@ -6230,7 +6064,7 @@ siggen_vectors384_low71[32U] =
     (uint8_t)186U, (uint8_t)185U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low72[32U] =
   {
     (uint8_t)134U, (uint8_t)102U, (uint8_t)44U, (uint8_t)1U, (uint8_t)74U, (uint8_t)182U,
@@ -6241,7 +6075,7 @@ siggen_vectors384_low72[32U] =
     (uint8_t)151U, (uint8_t)185U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low73[32U] =
   {
     (uint8_t)242U, (uint8_t)107U, (uint8_t)51U, (uint8_t)7U, (uint8_t)166U, (uint8_t)80U,
@@ -6252,7 +6086,7 @@ siggen_vectors384_low73[32U] =
     (uint8_t)195U, (uint8_t)252U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low74[32U] =
   {
     (uint8_t)236U, (uint8_t)144U, (uint8_t)88U, (uint8_t)74U, (uint8_t)179U, (uint8_t)179U,
@@ -6263,7 +6097,7 @@ siggen_vectors384_low74[32U] =
     (uint8_t)134U, (uint8_t)102U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low75[32U] =
   {
     (uint8_t)19U, (uint8_t)233U, (uint8_t)173U, (uint8_t)89U, (uint8_t)17U, (uint8_t)47U,
@@ -6274,7 +6108,7 @@ siggen_vectors384_low75[32U] =
     (uint8_t)15U, (uint8_t)246U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low76[32U] =
   {
     (uint8_t)112U, (uint8_t)138U, (uint8_t)198U, (uint8_t)95U, (uint8_t)242U, (uint8_t)176U,
@@ -6285,7 +6119,7 @@ siggen_vectors384_low76[32U] =
     (uint8_t)43U, (uint8_t)229U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low77[128U] =
   {
     (uint8_t)177U, (uint8_t)223U, (uint8_t)128U, (uint8_t)81U, (uint8_t)178U, (uint8_t)19U,
@@ -6312,7 +6146,7 @@ siggen_vectors384_low77[128U] =
     (uint8_t)165U, (uint8_t)120U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low78[32U] =
   {
     (uint8_t)246U, (uint8_t)55U, (uint8_t)213U, (uint8_t)87U, (uint8_t)99U, (uint8_t)254U,
@@ -6323,7 +6157,7 @@ siggen_vectors384_low78[32U] =
     (uint8_t)235U, (uint8_t)206U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low79[32U] =
   {
     (uint8_t)116U, (uint8_t)164U, (uint8_t)98U, (uint8_t)12U, (uint8_t)87U, (uint8_t)134U,
@@ -6334,7 +6168,7 @@ siggen_vectors384_low79[32U] =
     (uint8_t)19U, (uint8_t)61U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low80[32U] =
   {
     (uint8_t)66U, (uint8_t)185U, (uint8_t)227U, (uint8_t)93U, (uint8_t)52U, (uint8_t)124U,
@@ -6345,7 +6179,7 @@ siggen_vectors384_low80[32U] =
     (uint8_t)69U, (uint8_t)161U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low81[32U] =
   {
     (uint8_t)77U, (uint8_t)87U, (uint8_t)143U, (uint8_t)80U, (uint8_t)153U, (uint8_t)99U,
@@ -6356,7 +6190,7 @@ siggen_vectors384_low81[32U] =
     (uint8_t)5U, (uint8_t)59U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low82[32U] =
   {
     (uint8_t)17U, (uint8_t)58U, (uint8_t)147U, (uint8_t)62U, (uint8_t)188U, (uint8_t)77U,
@@ -6367,7 +6201,7 @@ siggen_vectors384_low82[32U] =
     (uint8_t)219U, (uint8_t)186U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low83[32U] =
   {
     (uint8_t)48U, (uint8_t)5U, (uint8_t)189U, (uint8_t)78U, (uint8_t)198U, (uint8_t)61U,
@@ -6378,7 +6212,7 @@ siggen_vectors384_low83[32U] =
     (uint8_t)111U, (uint8_t)253U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low84[128U] =
   {
     (uint8_t)11U, (uint8_t)145U, (uint8_t)142U, (uint8_t)222U, (uint8_t)152U, (uint8_t)91U,
@@ -6405,7 +6239,7 @@ siggen_vectors384_low84[128U] =
     (uint8_t)205U, (uint8_t)216U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low85[32U] =
   {
     (uint8_t)46U, (uint8_t)53U, (uint8_t)125U, (uint8_t)81U, (uint8_t)81U, (uint8_t)127U,
@@ -6416,7 +6250,7 @@ siggen_vectors384_low85[32U] =
     (uint8_t)164U, (uint8_t)127U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low86[32U] =
   {
     (uint8_t)126U, (uint8_t)64U, (uint8_t)120U, (uint8_t)161U, (uint8_t)213U, (uint8_t)12U,
@@ -6427,7 +6261,7 @@ siggen_vectors384_low86[32U] =
     (uint8_t)65U, (uint8_t)134U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low87[32U] =
   {
     (uint8_t)0U, (uint8_t)20U, (uint8_t)228U, (uint8_t)110U, (uint8_t)144U, (uint8_t)204U,
@@ -6438,7 +6272,7 @@ siggen_vectors384_low87[32U] =
     (uint8_t)89U, (uint8_t)111U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low88[32U] =
   {
     (uint8_t)190U, (uint8_t)82U, (uint8_t)43U, (uint8_t)9U, (uint8_t)64U, (uint8_t)185U,
@@ -6449,7 +6283,7 @@ siggen_vectors384_low88[32U] =
     (uint8_t)170U, (uint8_t)92U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low89[32U] =
   {
     (uint8_t)162U, (uint8_t)107U, (uint8_t)154U, (uint8_t)215U, (uint8_t)117U, (uint8_t)172U,
@@ -6460,7 +6294,7 @@ siggen_vectors384_low89[32U] =
     (uint8_t)128U, (uint8_t)144U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low90[32U] =
   {
     (uint8_t)248U, (uint8_t)142U, (uint8_t)174U, (uint8_t)32U, (uint8_t)25U, (uint8_t)190U,
@@ -6471,7 +6305,7 @@ siggen_vectors384_low90[32U] =
     (uint8_t)61U, (uint8_t)255U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low91[128U] =
   {
     (uint8_t)15U, (uint8_t)171U, (uint8_t)38U, (uint8_t)253U, (uint8_t)225U, (uint8_t)164U,
@@ -6498,7 +6332,7 @@ siggen_vectors384_low91[128U] =
     (uint8_t)184U, (uint8_t)116U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low92[32U] =
   {
     (uint8_t)119U, (uint8_t)214U, (uint8_t)12U, (uint8_t)172U, (uint8_t)187U, (uint8_t)172U,
@@ -6509,7 +6343,7 @@ siggen_vectors384_low92[32U] =
     (uint8_t)245U, (uint8_t)11U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low93[32U] =
   {
     (uint8_t)166U, (uint8_t)32U, (uint8_t)50U, (uint8_t)223U, (uint8_t)219U, (uint8_t)135U,
@@ -6520,7 +6354,7 @@ siggen_vectors384_low93[32U] =
     (uint8_t)144U, (uint8_t)229U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low94[32U] =
   {
     (uint8_t)68U, (uint8_t)197U, (uint8_t)238U, (uint8_t)44U, (uint8_t)247U, (uint8_t)64U,
@@ -6531,7 +6365,7 @@ siggen_vectors384_low94[32U] =
     (uint8_t)217U, (uint8_t)118U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low95[32U] =
   {
     (uint8_t)6U, (uint8_t)193U, (uint8_t)230U, (uint8_t)146U, (uint8_t)176U, (uint8_t)69U,
@@ -6542,7 +6376,7 @@ siggen_vectors384_low95[32U] =
     (uint8_t)227U, (uint8_t)148U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low96[32U] =
   {
     (uint8_t)235U, (uint8_t)23U, (uint8_t)59U, (uint8_t)81U, (uint8_t)251U, (uint8_t)10U,
@@ -6553,7 +6387,7 @@ siggen_vectors384_low96[32U] =
     (uint8_t)65U, (uint8_t)125U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low97[32U] =
   {
     (uint8_t)202U, (uint8_t)44U, (uint8_t)19U, (uint8_t)87U, (uint8_t)75U, (uint8_t)241U,
@@ -6564,7 +6398,7 @@ siggen_vectors384_low97[32U] =
     (uint8_t)27U, (uint8_t)69U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low98[128U] =
   {
     (uint8_t)120U, (uint8_t)67U, (uint8_t)241U, (uint8_t)87U, (uint8_t)239U, (uint8_t)133U,
@@ -6591,7 +6425,7 @@ siggen_vectors384_low98[128U] =
     (uint8_t)33U, (uint8_t)166U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low99[32U] =
   {
     (uint8_t)72U, (uint8_t)104U, (uint8_t)84U, (uint8_t)231U, (uint8_t)121U, (uint8_t)98U,
@@ -6602,7 +6436,7 @@ siggen_vectors384_low99[32U] =
     (uint8_t)115U, (uint8_t)136U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low100[32U] =
   {
     (uint8_t)118U, (uint8_t)11U, (uint8_t)86U, (uint8_t)36U, (uint8_t)189U, (uint8_t)100U,
@@ -6613,7 +6447,7 @@ siggen_vectors384_low100[32U] =
     (uint8_t)156U, (uint8_t)250U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low101[32U] =
   {
     (uint8_t)254U, (uint8_t)202U, (uint8_t)21U, (uint8_t)206U, (uint8_t)147U, (uint8_t)80U,
@@ -6624,7 +6458,7 @@ siggen_vectors384_low101[32U] =
     (uint8_t)111U, (uint8_t)232U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low102[32U] =
   {
     (uint8_t)228U, (uint8_t)247U, (uint8_t)124U, (uint8_t)100U, (uint8_t)66U, (uint8_t)236U,
@@ -6635,7 +6469,7 @@ siggen_vectors384_low102[32U] =
     (uint8_t)164U, (uint8_t)26U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low103[32U] =
   {
     (uint8_t)189U, (uint8_t)255U, (uint8_t)20U, (uint8_t)228U, (uint8_t)96U, (uint8_t)3U,
@@ -6646,7 +6480,7 @@ siggen_vectors384_low103[32U] =
     (uint8_t)92U, (uint8_t)123U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors384_low104[32U] =
   {
     (uint8_t)176U, (uint8_t)71U, (uint8_t)156U, (uint8_t)219U, (uint8_t)61U, (uint8_t)247U,
@@ -6657,7 +6491,7 @@ siggen_vectors384_low104[32U] =
     (uint8_t)211U, (uint8_t)162U
   };
 
-static siggen_vector
+siggen_vector
 siggen_vectors384_low105[15U] =
   {
     {
@@ -6797,10 +6631,10 @@ siggen_vectors384_low105[15U] =
     }
   };
 
-static lbuffer__Hacl_Test_ECDSA_siggen_vector
+Test_Lowstarize_lbuffer__Hacl_Test_ECDSA_siggen_vector
 siggen_vectors384_low = { .len = (uint32_t)15U, .b = siggen_vectors384_low105 };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low0[128U] =
   {
     (uint8_t)108U, (uint8_t)133U, (uint8_t)114U, (uint8_t)182U, (uint8_t)163U, (uint8_t)164U,
@@ -6827,7 +6661,7 @@ siggen_vectors512_low0[128U] =
     (uint8_t)189U, (uint8_t)237U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low1[32U] =
   {
     (uint8_t)157U, (uint8_t)208U, (uint8_t)211U, (uint8_t)163U, (uint8_t)213U, (uint8_t)20U,
@@ -6838,7 +6672,7 @@ siggen_vectors512_low1[32U] =
     (uint8_t)244U, (uint8_t)153U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low2[32U] =
   {
     (uint8_t)107U, (uint8_t)115U, (uint8_t)141U, (uint8_t)227U, (uint8_t)57U, (uint8_t)139U,
@@ -6849,7 +6683,7 @@ siggen_vectors512_low2[32U] =
     (uint8_t)175U, (uint8_t)141U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low3[32U] =
   {
     (uint8_t)131U, (uint8_t)188U, (uint8_t)97U, (uint8_t)226U, (uint8_t)109U, (uint8_t)43U,
@@ -6860,7 +6694,7 @@ siggen_vectors512_low3[32U] =
     (uint8_t)109U, (uint8_t)87U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low4[32U] =
   {
     (uint8_t)145U, (uint8_t)6U, (uint8_t)25U, (uint8_t)33U, (uint8_t)112U, (uint8_t)204U,
@@ -6871,7 +6705,7 @@ siggen_vectors512_low4[32U] =
     (uint8_t)56U, (uint8_t)10U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low5[32U] =
   {
     (uint8_t)39U, (uint8_t)95U, (uint8_t)167U, (uint8_t)96U, (uint8_t)135U, (uint8_t)139U,
@@ -6882,7 +6716,7 @@ siggen_vectors512_low5[32U] =
     (uint8_t)63U, (uint8_t)177U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low6[32U] =
   {
     (uint8_t)105U, (uint8_t)157U, (uint8_t)144U, (uint8_t)107U, (uint8_t)184U, (uint8_t)67U,
@@ -6893,7 +6727,7 @@ siggen_vectors512_low6[32U] =
     (uint8_t)15U, (uint8_t)126U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low7[128U] =
   {
     (uint8_t)126U, (uint8_t)60U, (uint8_t)143U, (uint8_t)225U, (uint8_t)98U, (uint8_t)212U,
@@ -6920,7 +6754,7 @@ siggen_vectors512_low7[128U] =
     (uint8_t)209U, (uint8_t)38U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low8[32U] =
   {
     (uint8_t)249U, (uint8_t)191U, (uint8_t)144U, (uint8_t)155U, (uint8_t)121U, (uint8_t)115U,
@@ -6931,7 +6765,7 @@ siggen_vectors512_low8[32U] =
     (uint8_t)48U, (uint8_t)230U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low9[32U] =
   {
     (uint8_t)242U, (uint8_t)166U, (uint8_t)103U, (uint8_t)77U, (uint8_t)78U, (uint8_t)134U,
@@ -6942,7 +6776,7 @@ siggen_vectors512_low9[32U] =
     (uint8_t)135U, (uint8_t)146U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low10[32U] =
   {
     (uint8_t)199U, (uint8_t)37U, (uint8_t)101U, (uint8_t)194U, (uint8_t)79U, (uint8_t)14U,
@@ -6953,7 +6787,7 @@ siggen_vectors512_low10[32U] =
     (uint8_t)119U, (uint8_t)111U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low11[32U] =
   {
     (uint8_t)229U, (uint8_t)71U, (uint8_t)121U, (uint8_t)31U, (uint8_t)113U, (uint8_t)133U,
@@ -6964,7 +6798,7 @@ siggen_vectors512_low11[32U] =
     (uint8_t)175U, (uint8_t)186U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low12[32U] =
   {
     (uint8_t)71U, (uint8_t)130U, (uint8_t)144U, (uint8_t)61U, (uint8_t)42U, (uint8_t)175U,
@@ -6975,7 +6809,7 @@ siggen_vectors512_low12[32U] =
     (uint8_t)211U, (uint8_t)216U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low13[32U] =
   {
     (uint8_t)223U, (uint8_t)180U, (uint8_t)14U, (uint8_t)64U, (uint8_t)107U, (uint8_t)250U,
@@ -6986,7 +6820,7 @@ siggen_vectors512_low13[32U] =
     (uint8_t)57U, (uint8_t)218U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low14[128U] =
   {
     (uint8_t)213U, (uint8_t)170U, (uint8_t)138U, (uint8_t)201U, (uint8_t)33U, (uint8_t)140U,
@@ -7013,7 +6847,7 @@ siggen_vectors512_low14[128U] =
     (uint8_t)152U, (uint8_t)219U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low15[32U] =
   {
     (uint8_t)114U, (uint8_t)69U, (uint8_t)103U, (uint8_t)210U, (uint8_t)30U, (uint8_t)246U,
@@ -7024,7 +6858,7 @@ siggen_vectors512_low15[32U] =
     (uint8_t)110U, (uint8_t)173U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low16[32U] =
   {
     (uint8_t)112U, (uint8_t)184U, (uint8_t)119U, (uint8_t)181U, (uint8_t)227U, (uint8_t)101U,
@@ -7035,7 +6869,7 @@ siggen_vectors512_low16[32U] =
     (uint8_t)93U, (uint8_t)57U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low17[32U] =
   {
     (uint8_t)95U, (uint8_t)86U, (uint8_t)249U, (uint8_t)77U, (uint8_t)89U, (uint8_t)29U,
@@ -7046,7 +6880,7 @@ siggen_vectors512_low17[32U] =
     (uint8_t)178U, (uint8_t)1U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low18[32U] =
   {
     (uint8_t)121U, (uint8_t)214U, (uint8_t)201U, (uint8_t)103U, (uint8_t)237U, (uint8_t)35U,
@@ -7057,7 +6891,7 @@ siggen_vectors512_low18[32U] =
     (uint8_t)39U, (uint8_t)155U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low19[32U] =
   {
     (uint8_t)43U, (uint8_t)162U, (uint8_t)234U, (uint8_t)45U, (uint8_t)49U, (uint8_t)111U,
@@ -7068,7 +6902,7 @@ siggen_vectors512_low19[32U] =
     (uint8_t)4U, (uint8_t)209U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low20[32U] =
   {
     (uint8_t)100U, (uint8_t)254U, (uint8_t)148U, (uint8_t)150U, (uint8_t)141U, (uint8_t)24U,
@@ -7079,7 +6913,7 @@ siggen_vectors512_low20[32U] =
     (uint8_t)115U, (uint8_t)32U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low21[128U] =
   {
     (uint8_t)121U, (uint8_t)11U, (uint8_t)6U, (uint8_t)5U, (uint8_t)74U, (uint8_t)252U,
@@ -7106,7 +6940,7 @@ siggen_vectors512_low21[128U] =
     (uint8_t)165U, (uint8_t)8U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low22[32U] =
   {
     (uint8_t)41U, (uint8_t)197U, (uint8_t)213U, (uint8_t)77U, (uint8_t)125U, (uint8_t)31U,
@@ -7117,7 +6951,7 @@ siggen_vectors512_low22[32U] =
     (uint8_t)158U, (uint8_t)221U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low23[32U] =
   {
     (uint8_t)48U, (uint8_t)136U, (uint8_t)212U, (uint8_t)244U, (uint8_t)93U, (uint8_t)39U,
@@ -7128,7 +6962,7 @@ siggen_vectors512_low23[32U] =
     (uint8_t)236U, (uint8_t)71U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low24[32U] =
   {
     (uint8_t)99U, (uint8_t)77U, (uint8_t)180U, (uint8_t)129U, (uint8_t)152U, (uint8_t)18U,
@@ -7139,7 +6973,7 @@ siggen_vectors512_low24[32U] =
     (uint8_t)183U, (uint8_t)139U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low25[32U] =
   {
     (uint8_t)5U, (uint8_t)8U, (uint8_t)173U, (uint8_t)119U, (uint8_t)116U, (uint8_t)144U,
@@ -7150,7 +6984,7 @@ siggen_vectors512_low25[32U] =
     (uint8_t)100U, (uint8_t)96U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low26[32U] =
   {
     (uint8_t)172U, (uint8_t)217U, (uint8_t)243U, (uint8_t)182U, (uint8_t)54U, (uint8_t)38U,
@@ -7161,7 +6995,7 @@ siggen_vectors512_low26[32U] =
     (uint8_t)151U, (uint8_t)27U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low27[32U] =
   {
     (uint8_t)21U, (uint8_t)192U, (uint8_t)74U, (uint8_t)139U, (uint8_t)214U, (uint8_t)193U,
@@ -7172,7 +7006,7 @@ siggen_vectors512_low27[32U] =
     (uint8_t)42U, (uint8_t)135U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low28[128U] =
   {
     (uint8_t)109U, (uint8_t)84U, (uint8_t)154U, (uint8_t)168U, (uint8_t)122U, (uint8_t)253U,
@@ -7199,7 +7033,7 @@ siggen_vectors512_low28[128U] =
     (uint8_t)28U, (uint8_t)190U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low29[32U] =
   {
     (uint8_t)13U, (uint8_t)128U, (uint8_t)149U, (uint8_t)218U, (uint8_t)26U, (uint8_t)187U,
@@ -7210,7 +7044,7 @@ siggen_vectors512_low29[32U] =
     (uint8_t)49U, (uint8_t)23U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low30[32U] =
   {
     (uint8_t)117U, (uint8_t)164U, (uint8_t)87U, (uint8_t)88U, (uint8_t)206U, (uint8_t)212U,
@@ -7221,7 +7055,7 @@ siggen_vectors512_low30[32U] =
     (uint8_t)226U, (uint8_t)60U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low31[32U] =
   {
     (uint8_t)83U, (uint8_t)3U, (uint8_t)212U, (uint8_t)125U, (uint8_t)90U, (uint8_t)117U,
@@ -7232,7 +7066,7 @@ siggen_vectors512_low31[32U] =
     (uint8_t)30U, (uint8_t)173U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low32[32U] =
   {
     (uint8_t)81U, (uint8_t)101U, (uint8_t)197U, (uint8_t)77U, (uint8_t)239U, (uint8_t)64U,
@@ -7243,7 +7077,7 @@ siggen_vectors512_low32[32U] =
     (uint8_t)72U, (uint8_t)42U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low33[32U] =
   {
     (uint8_t)235U, (uint8_t)200U, (uint8_t)95U, (uint8_t)196U, (uint8_t)23U, (uint8_t)107U,
@@ -7254,7 +7088,7 @@ siggen_vectors512_low33[32U] =
     (uint8_t)11U, (uint8_t)89U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low34[32U] =
   {
     (uint8_t)139U, (uint8_t)44U, (uint8_t)9U, (uint8_t)66U, (uint8_t)142U, (uint8_t)98U,
@@ -7265,7 +7099,7 @@ siggen_vectors512_low34[32U] =
     (uint8_t)82U, (uint8_t)198U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low35[128U] =
   {
     (uint8_t)25U, (uint8_t)6U, (uint8_t)228U, (uint8_t)139U, (uint8_t)127U, (uint8_t)136U,
@@ -7292,7 +7126,7 @@ siggen_vectors512_low35[128U] =
     (uint8_t)91U, (uint8_t)189U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low36[32U] =
   {
     (uint8_t)82U, (uint8_t)254U, (uint8_t)87U, (uint8_t)218U, (uint8_t)52U, (uint8_t)39U,
@@ -7303,7 +7137,7 @@ siggen_vectors512_low36[32U] =
     (uint8_t)158U, (uint8_t)97U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low37[32U] =
   {
     (uint8_t)33U, (uint8_t)119U, (uint8_t)226U, (uint8_t)10U, (uint8_t)32U, (uint8_t)146U,
@@ -7314,7 +7148,7 @@ siggen_vectors512_low37[32U] =
     (uint8_t)1U, (uint8_t)213U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low38[32U] =
   {
     (uint8_t)85U, (uint8_t)14U, (uint8_t)70U, (uint8_t)143U, (uint8_t)38U, (uint8_t)38U,
@@ -7325,7 +7159,7 @@ siggen_vectors512_low38[32U] =
     (uint8_t)123U, (uint8_t)97U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low39[32U] =
   {
     (uint8_t)4U, (uint8_t)100U, (uint8_t)254U, (uint8_t)150U, (uint8_t)116U, (uint8_t)176U,
@@ -7336,7 +7170,7 @@ siggen_vectors512_low39[32U] =
     (uint8_t)24U, (uint8_t)92U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low40[32U] =
   {
     (uint8_t)248U, (uint8_t)37U, (uint8_t)15U, (uint8_t)7U, (uint8_t)63U, (uint8_t)52U, (uint8_t)3U,
@@ -7347,7 +7181,7 @@ siggen_vectors512_low40[32U] =
     (uint8_t)20U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low41[32U] =
   {
     (uint8_t)169U, (uint8_t)232U, (uint8_t)62U, (uint8_t)5U, (uint8_t)241U, (uint8_t)214U,
@@ -7358,7 +7192,7 @@ siggen_vectors512_low41[32U] =
     (uint8_t)116U, (uint8_t)152U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low42[128U] =
   {
     (uint8_t)123U, (uint8_t)89U, (uint8_t)254U, (uint8_t)241U, (uint8_t)61U, (uint8_t)175U,
@@ -7385,7 +7219,7 @@ siggen_vectors512_low42[128U] =
     (uint8_t)36U, (uint8_t)173U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low43[32U] =
   {
     (uint8_t)0U, (uint8_t)61U, (uint8_t)145U, (uint8_t)97U, (uint8_t)20U, (uint8_t)69U,
@@ -7396,7 +7230,7 @@ siggen_vectors512_low43[32U] =
     (uint8_t)13U, (uint8_t)242U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low44[32U] =
   {
     (uint8_t)123U, (uint8_t)156U, (uint8_t)89U, (uint8_t)47U, (uint8_t)97U, (uint8_t)170U,
@@ -7407,7 +7241,7 @@ siggen_vectors512_low44[32U] =
     (uint8_t)186U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low45[32U] =
   {
     (uint8_t)211U, (uint8_t)91U, (uint8_t)46U, (uint8_t)22U, (uint8_t)139U, (uint8_t)24U,
@@ -7418,7 +7252,7 @@ siggen_vectors512_low45[32U] =
     (uint8_t)59U, (uint8_t)160U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low46[32U] =
   {
     (uint8_t)239U, (uint8_t)157U, (uint8_t)242U, (uint8_t)145U, (uint8_t)234U, (uint8_t)39U,
@@ -7429,7 +7263,7 @@ siggen_vectors512_low46[32U] =
     (uint8_t)59U, (uint8_t)64U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low47[32U] =
   {
     (uint8_t)102U, (uint8_t)208U, (uint8_t)87U, (uint8_t)253U, (uint8_t)57U, (uint8_t)149U,
@@ -7440,7 +7274,7 @@ siggen_vectors512_low47[32U] =
     (uint8_t)250U, (uint8_t)187U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low48[32U] =
   {
     (uint8_t)108U, (uint8_t)133U, (uint8_t)59U, (uint8_t)136U, (uint8_t)158U, (uint8_t)24U,
@@ -7451,7 +7285,7 @@ siggen_vectors512_low48[32U] =
     (uint8_t)115U, (uint8_t)24U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low49[128U] =
   {
     (uint8_t)4U, (uint8_t)26U, (uint8_t)103U, (uint8_t)103U, (uint8_t)169U, (uint8_t)53U,
@@ -7478,7 +7312,7 @@ siggen_vectors512_low49[128U] =
     (uint8_t)95U, (uint8_t)11U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low50[32U] =
   {
     (uint8_t)72U, (uint8_t)241U, (uint8_t)61U, (uint8_t)57U, (uint8_t)56U, (uint8_t)153U,
@@ -7489,7 +7323,7 @@ siggen_vectors512_low50[32U] =
     (uint8_t)11U, (uint8_t)183U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low51[32U] =
   {
     (uint8_t)130U, (uint8_t)161U, (uint8_t)169U, (uint8_t)111U, (uint8_t)70U, (uint8_t)72U,
@@ -7500,7 +7334,7 @@ siggen_vectors512_low51[32U] =
     (uint8_t)75U, (uint8_t)192U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low52[32U] =
   {
     (uint8_t)232U, (uint8_t)203U, (uint8_t)240U, (uint8_t)60U, (uint8_t)52U, (uint8_t)181U,
@@ -7511,7 +7345,7 @@ siggen_vectors512_low52[32U] =
     (uint8_t)118U, (uint8_t)253U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low53[32U] =
   {
     (uint8_t)239U, (uint8_t)237U, (uint8_t)115U, (uint8_t)110U, (uint8_t)98U, (uint8_t)120U,
@@ -7522,7 +7356,7 @@ siggen_vectors512_low53[32U] =
     (uint8_t)143U, (uint8_t)125U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low54[32U] =
   {
     (uint8_t)207U, (uint8_t)127U, (uint8_t)194U, (uint8_t)75U, (uint8_t)218U, (uint8_t)160U,
@@ -7533,7 +7367,7 @@ siggen_vectors512_low54[32U] =
     (uint8_t)112U, (uint8_t)68U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low55[32U] =
   {
     (uint8_t)243U, (uint8_t)139U, (uint8_t)28U, (uint8_t)131U, (uint8_t)6U, (uint8_t)207U,
@@ -7544,7 +7378,7 @@ siggen_vectors512_low55[32U] =
     (uint8_t)21U, (uint8_t)37U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low56[128U] =
   {
     (uint8_t)121U, (uint8_t)5U, (uint8_t)169U, (uint8_t)3U, (uint8_t)110U, (uint8_t)2U,
@@ -7571,7 +7405,7 @@ siggen_vectors512_low56[128U] =
     (uint8_t)164U, (uint8_t)143U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low57[32U] =
   {
     (uint8_t)149U, (uint8_t)201U, (uint8_t)156U, (uint8_t)249U, (uint8_t)236U, (uint8_t)38U,
@@ -7582,7 +7416,7 @@ siggen_vectors512_low57[32U] =
     (uint8_t)232U, (uint8_t)112U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low58[32U] =
   {
     (uint8_t)66U, (uint8_t)194U, (uint8_t)146U, (uint8_t)176U, (uint8_t)251U, (uint8_t)204U,
@@ -7593,7 +7427,7 @@ siggen_vectors512_low58[32U] =
     (uint8_t)7U, (uint8_t)247U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low59[32U] =
   {
     (uint8_t)49U, (uint8_t)59U, (uint8_t)8U, (uint8_t)253U, (uint8_t)47U, (uint8_t)163U,
@@ -7604,7 +7438,7 @@ siggen_vectors512_low59[32U] =
     (uint8_t)231U, (uint8_t)12U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low60[32U] =
   {
     (uint8_t)76U, (uint8_t)8U, (uint8_t)221U, (uint8_t)15U, (uint8_t)139U, (uint8_t)114U,
@@ -7615,7 +7449,7 @@ siggen_vectors512_low60[32U] =
     (uint8_t)83U, (uint8_t)183U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low61[32U] =
   {
     (uint8_t)242U, (uint8_t)188U, (uint8_t)53U, (uint8_t)235U, (uint8_t)27U, (uint8_t)132U,
@@ -7626,7 +7460,7 @@ siggen_vectors512_low61[32U] =
     (uint8_t)235U, (uint8_t)59U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low62[32U] =
   {
     (uint8_t)237U, (uint8_t)154U, (uint8_t)46U, (uint8_t)192U, (uint8_t)67U, (uint8_t)161U,
@@ -7637,7 +7471,7 @@ siggen_vectors512_low62[32U] =
     (uint8_t)28U, (uint8_t)217U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low63[128U] =
   {
     (uint8_t)207U, (uint8_t)37U, (uint8_t)228U, (uint8_t)100U, (uint8_t)45U, (uint8_t)79U,
@@ -7664,7 +7498,7 @@ siggen_vectors512_low63[128U] =
     (uint8_t)126U, (uint8_t)7U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low64[32U] =
   {
     (uint8_t)225U, (uint8_t)94U, (uint8_t)131U, (uint8_t)93U, (uint8_t)14U, (uint8_t)34U,
@@ -7675,7 +7509,7 @@ siggen_vectors512_low64[32U] =
     (uint8_t)203U, (uint8_t)207U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low65[32U] =
   {
     (uint8_t)137U, (uint8_t)221U, (uint8_t)34U, (uint8_t)5U, (uint8_t)46U, (uint8_t)195U,
@@ -7686,7 +7520,7 @@ siggen_vectors512_low65[32U] =
     (uint8_t)185U, (uint8_t)174U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low66[32U] =
   {
     (uint8_t)233U, (uint8_t)22U, (uint8_t)9U, (uint8_t)186U, (uint8_t)53U, (uint8_t)199U,
@@ -7697,7 +7531,7 @@ siggen_vectors512_low66[32U] =
     (uint8_t)250U, (uint8_t)240U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low67[32U] =
   {
     (uint8_t)201U, (uint8_t)246U, (uint8_t)33U, (uint8_t)68U, (uint8_t)28U, (uint8_t)35U,
@@ -7708,7 +7542,7 @@ siggen_vectors512_low67[32U] =
     (uint8_t)198U, (uint8_t)11U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low68[32U] =
   {
     (uint8_t)167U, (uint8_t)13U, (uint8_t)26U, (uint8_t)45U, (uint8_t)85U, (uint8_t)93U,
@@ -7719,7 +7553,7 @@ siggen_vectors512_low68[32U] =
     (uint8_t)40U, (uint8_t)167U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low69[32U] =
   {
     (uint8_t)78U, (uint8_t)5U, (uint8_t)196U, (uint8_t)90U, (uint8_t)223U, (uint8_t)65U,
@@ -7730,7 +7564,7 @@ siggen_vectors512_low69[32U] =
     (uint8_t)75U, (uint8_t)55U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low70[128U] =
   {
     (uint8_t)117U, (uint8_t)98U, (uint8_t)196U, (uint8_t)69U, (uint8_t)179U, (uint8_t)88U,
@@ -7757,7 +7591,7 @@ siggen_vectors512_low70[128U] =
     (uint8_t)15U, (uint8_t)170U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low71[32U] =
   {
     (uint8_t)128U, (uint8_t)140U, (uint8_t)8U, (uint8_t)192U, (uint8_t)215U, (uint8_t)116U,
@@ -7768,7 +7602,7 @@ siggen_vectors512_low71[32U] =
     (uint8_t)249U, (uint8_t)140U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low72[32U] =
   {
     (uint8_t)176U, (uint8_t)192U, (uint8_t)173U, (uint8_t)94U, (uint8_t)31U, (uint8_t)96U,
@@ -7779,7 +7613,7 @@ siggen_vectors512_low72[32U] =
     (uint8_t)12U, (uint8_t)66U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low73[32U] =
   {
     (uint8_t)97U, (uint8_t)5U, (uint8_t)57U, (uint8_t)192U, (uint8_t)185U, (uint8_t)237U,
@@ -7790,7 +7624,7 @@ siggen_vectors512_low73[32U] =
     (uint8_t)98U, (uint8_t)237U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low74[32U] =
   {
     (uint8_t)31U, (uint8_t)109U, (uint8_t)74U, (uint8_t)144U, (uint8_t)92U, (uint8_t)118U,
@@ -7801,7 +7635,7 @@ siggen_vectors512_low74[32U] =
     (uint8_t)83U, (uint8_t)93U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low75[32U] =
   {
     (uint8_t)131U, (uint8_t)64U, (uint8_t)77U, (uint8_t)207U, (uint8_t)131U, (uint8_t)32U,
@@ -7812,7 +7646,7 @@ siggen_vectors512_low75[32U] =
     (uint8_t)7U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low76[32U] =
   {
     (uint8_t)63U, (uint8_t)117U, (uint8_t)220U, (uint8_t)241U, (uint8_t)2U, (uint8_t)0U,
@@ -7823,7 +7657,7 @@ siggen_vectors512_low76[32U] =
     (uint8_t)207U, (uint8_t)181U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low77[128U] =
   {
     (uint8_t)5U, (uint8_t)28U, (uint8_t)45U, (uint8_t)184U, (uint8_t)231U, (uint8_t)30U,
@@ -7850,7 +7684,7 @@ siggen_vectors512_low77[128U] =
     (uint8_t)167U, (uint8_t)201U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low78[32U] =
   {
     (uint8_t)247U, (uint8_t)198U, (uint8_t)49U, (uint8_t)95U, (uint8_t)0U, (uint8_t)129U,
@@ -7861,7 +7695,7 @@ siggen_vectors512_low78[32U] =
     (uint8_t)88U, (uint8_t)249U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low79[32U] =
   {
     (uint8_t)37U, (uint8_t)15U, (uint8_t)113U, (uint8_t)18U, (uint8_t)211U, (uint8_t)129U,
@@ -7872,7 +7706,7 @@ siggen_vectors512_low79[32U] =
     (uint8_t)254U, (uint8_t)187U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low80[32U] =
   {
     (uint8_t)73U, (uint8_t)251U, (uint8_t)169U, (uint8_t)239U, (uint8_t)231U, (uint8_t)53U,
@@ -7883,7 +7717,7 @@ siggen_vectors512_low80[32U] =
     (uint8_t)228U, (uint8_t)170U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low81[32U] =
   {
     (uint8_t)104U, (uint8_t)194U, (uint8_t)153U, (uint8_t)190U, (uint8_t)44U, (uint8_t)12U,
@@ -7894,7 +7728,7 @@ siggen_vectors512_low81[32U] =
     (uint8_t)120U, (uint8_t)102U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low82[32U] =
   {
     (uint8_t)123U, (uint8_t)25U, (uint8_t)94U, (uint8_t)146U, (uint8_t)210U, (uint8_t)186U,
@@ -7905,7 +7739,7 @@ siggen_vectors512_low82[32U] =
     (uint8_t)173U, (uint8_t)171U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low83[32U] =
   {
     (uint8_t)16U, (uint8_t)217U, (uint8_t)242U, (uint8_t)6U, (uint8_t)117U, (uint8_t)92U,
@@ -7916,7 +7750,7 @@ siggen_vectors512_low83[32U] =
     (uint8_t)17U, (uint8_t)229U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low84[128U] =
   {
     (uint8_t)77U, (uint8_t)203U, (uint8_t)123U, (uint8_t)98U, (uint8_t)186U, (uint8_t)49U,
@@ -7943,7 +7777,7 @@ siggen_vectors512_low84[128U] =
     (uint8_t)21U, (uint8_t)143U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low85[32U] =
   {
     (uint8_t)245U, (uint8_t)71U, (uint8_t)115U, (uint8_t)90U, (uint8_t)148U, (uint8_t)9U,
@@ -7954,7 +7788,7 @@ siggen_vectors512_low85[32U] =
     (uint8_t)229U, (uint8_t)165U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low86[32U] =
   {
     (uint8_t)76U, (uint8_t)168U, (uint8_t)124U, (uint8_t)88U, (uint8_t)69U, (uint8_t)251U,
@@ -7965,7 +7799,7 @@ siggen_vectors512_low86[32U] =
     (uint8_t)33U, (uint8_t)219U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low87[32U] =
   {
     (uint8_t)15U, (uint8_t)134U, (uint8_t)71U, (uint8_t)93U, (uint8_t)7U, (uint8_t)248U,
@@ -7976,7 +7810,7 @@ siggen_vectors512_low87[32U] =
     (uint8_t)72U, (uint8_t)128U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low88[32U] =
   {
     (uint8_t)145U, (uint8_t)189U, (uint8_t)125U, (uint8_t)151U, (uint8_t)247U, (uint8_t)237U,
@@ -7987,7 +7821,7 @@ siggen_vectors512_low88[32U] =
     (uint8_t)132U, (uint8_t)199U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low89[32U] =
   {
     (uint8_t)0U, (uint8_t)140U, (uint8_t)23U, (uint8_t)85U, (uint8_t)211U, (uint8_t)223U,
@@ -7998,7 +7832,7 @@ siggen_vectors512_low89[32U] =
     (uint8_t)83U, (uint8_t)151U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low90[32U] =
   {
     (uint8_t)119U, (uint8_t)223U, (uint8_t)68U, (uint8_t)60U, (uint8_t)114U, (uint8_t)155U,
@@ -8009,7 +7843,7 @@ siggen_vectors512_low90[32U] =
     (uint8_t)135U, (uint8_t)252U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low91[128U] =
   {
     (uint8_t)239U, (uint8_t)229U, (uint8_t)87U, (uint8_t)55U, (uint8_t)119U, (uint8_t)16U,
@@ -8036,7 +7870,7 @@ siggen_vectors512_low91[128U] =
     (uint8_t)195U, (uint8_t)35U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low92[32U] =
   {
     (uint8_t)38U, (uint8_t)161U, (uint8_t)170U, (uint8_t)75U, (uint8_t)146U, (uint8_t)122U,
@@ -8047,7 +7881,7 @@ siggen_vectors512_low92[32U] =
     (uint8_t)86U, (uint8_t)40U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low93[32U] =
   {
     (uint8_t)40U, (uint8_t)175U, (uint8_t)163U, (uint8_t)176U, (uint8_t)248U, (uint8_t)26U,
@@ -8058,7 +7892,7 @@ siggen_vectors512_low93[32U] =
     (uint8_t)168U, (uint8_t)178U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low94[32U] =
   {
     (uint8_t)187U, (uint8_t)74U, (uint8_t)193U, (uint8_t)190U, (uint8_t)132U, (uint8_t)5U,
@@ -8069,7 +7903,7 @@ siggen_vectors512_low94[32U] =
     (uint8_t)206U, (uint8_t)207U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low95[32U] =
   {
     (uint8_t)249U, (uint8_t)142U, (uint8_t)25U, (uint8_t)51U, (uint8_t)199U, (uint8_t)250U,
@@ -8080,7 +7914,7 @@ siggen_vectors512_low95[32U] =
     (uint8_t)86U, (uint8_t)206U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low96[32U] =
   {
     (uint8_t)21U, (uint8_t)169U, (uint8_t)165U, (uint8_t)65U, (uint8_t)45U, (uint8_t)106U,
@@ -8091,7 +7925,7 @@ siggen_vectors512_low96[32U] =
     (uint8_t)90U, (uint8_t)83U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low97[32U] =
   {
     (uint8_t)134U, (uint8_t)187U, (uint8_t)194U, (uint8_t)182U, (uint8_t)198U, (uint8_t)59U,
@@ -8102,7 +7936,7 @@ siggen_vectors512_low97[32U] =
     (uint8_t)77U, (uint8_t)195U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low98[128U] =
   {
     (uint8_t)234U, (uint8_t)149U, (uint8_t)133U, (uint8_t)156U, (uint8_t)193U, (uint8_t)60U,
@@ -8129,7 +7963,7 @@ siggen_vectors512_low98[128U] =
     (uint8_t)200U, (uint8_t)50U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low99[32U] =
   {
     (uint8_t)106U, (uint8_t)92U, (uint8_t)163U, (uint8_t)154U, (uint8_t)174U, (uint8_t)45U,
@@ -8140,7 +7974,7 @@ siggen_vectors512_low99[32U] =
     (uint8_t)78U, (uint8_t)73U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low100[32U] =
   {
     (uint8_t)198U, (uint8_t)44U, (uint8_t)196U, (uint8_t)163U, (uint8_t)154U, (uint8_t)206U,
@@ -8151,7 +7985,7 @@ siggen_vectors512_low100[32U] =
     (uint8_t)58U, (uint8_t)164U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low101[32U] =
   {
     (uint8_t)200U, (uint8_t)92U, (uint8_t)207U, (uint8_t)81U, (uint8_t)123U, (uint8_t)242U,
@@ -8162,7 +7996,7 @@ siggen_vectors512_low101[32U] =
     (uint8_t)254U, (uint8_t)111U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low102[32U] =
   {
     (uint8_t)218U, (uint8_t)192U, (uint8_t)12U, (uint8_t)70U, (uint8_t)43U, (uint8_t)200U,
@@ -8173,7 +8007,7 @@ siggen_vectors512_low102[32U] =
     (uint8_t)97U, (uint8_t)96U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low103[32U] =
   {
     (uint8_t)110U, (uint8_t)127U, (uint8_t)248U, (uint8_t)236U, (uint8_t)122U, (uint8_t)92U,
@@ -8184,7 +8018,7 @@ siggen_vectors512_low103[32U] =
     (uint8_t)38U, (uint8_t)173U
   };
 
-static uint8_t
+uint8_t
 siggen_vectors512_low104[32U] =
   {
     (uint8_t)61U, (uint8_t)250U, (uint8_t)195U, (uint8_t)32U, (uint8_t)185U, (uint8_t)200U,
@@ -8195,7 +8029,7 @@ siggen_vectors512_low104[32U] =
     (uint8_t)29U, (uint8_t)243U
   };
 
-static siggen_vector
+siggen_vector
 siggen_vectors512_low105[15U] =
   {
     {
@@ -8335,10 +8169,10 @@ siggen_vectors512_low105[15U] =
     }
   };
 
-static lbuffer__Hacl_Test_ECDSA_siggen_vector
+Test_Lowstarize_lbuffer__Hacl_Test_ECDSA_siggen_vector
 siggen_vectors512_low = { .len = (uint32_t)15U, .b = siggen_vectors512_low105 };
 
-static bool compare_and_print(uint8_t *b1, uint8_t *b2, uint32_t len)
+bool compare_and_print(uint8_t *b1, uint8_t *b2, uint32_t len)
 {
   LowStar_Printf_print_string("Expected: ");
   LowStar_Printf_print_lmbuffer_u8(len, (uint8_t *)b1);
@@ -8365,7 +8199,7 @@ static bool compare_and_print(uint8_t *b1, uint8_t *b2, uint32_t len)
   return b;
 }
 
-static void test_sigver256(sigver_vector vec)
+void test_sigver256(sigver_vector vec)
 {
   bool result = vec.f5;
   uint8_t *s = vec.f4.b;
@@ -8388,22 +8222,20 @@ static void test_sigver256(sigver_vector vec)
   )
   {
     exit((int32_t)-1);
+    return;
   }
-  else
+  uint8_t qxy[64U] = { 0U };
+  memcpy(qxy, qx, (uint32_t)32U * sizeof (uint8_t));
+  memcpy(qxy + (uint32_t)32U, qy, (uint32_t)32U * sizeof (uint8_t));
+  bool result_ = Hacl_P256_ecdsa_verif_p256_sha2(msg_len, msg, qxy, r, s);
+  if (!(result_ == result))
   {
-    uint8_t qxy[64U] = { 0U };
-    memcpy(qxy, qx, (uint32_t)32U * sizeof (uint8_t));
-    memcpy(qxy + (uint32_t)32U, qy, (uint32_t)32U * sizeof (uint8_t));
-    bool result_ = Hacl_P256_ecdsa_verif_p256_sha2(msg_len, msg, qxy, r, s);
-    if (!(result_ == result))
-    {
-      LowStar_Printf_print_string("FAIL\n");
-      exit((int32_t)1);
-    }
+    LowStar_Printf_print_string("FAIL\n");
+    exit((int32_t)1);
   }
 }
 
-static void test_sigver384(sigver_vector vec)
+void test_sigver384(sigver_vector vec)
 {
   bool result = vec.f5;
   uint8_t *s = vec.f4.b;
@@ -8426,22 +8258,20 @@ static void test_sigver384(sigver_vector vec)
   )
   {
     exit((int32_t)-1);
+    return;
   }
-  else
+  uint8_t qxy[64U] = { 0U };
+  memcpy(qxy, qx, (uint32_t)32U * sizeof (uint8_t));
+  memcpy(qxy + (uint32_t)32U, qy, (uint32_t)32U * sizeof (uint8_t));
+  bool result_ = Hacl_P256_ecdsa_verif_p256_sha384(msg_len, msg, qxy, r, s);
+  if (!(result_ == result))
   {
-    uint8_t qxy[64U] = { 0U };
-    memcpy(qxy, qx, (uint32_t)32U * sizeof (uint8_t));
-    memcpy(qxy + (uint32_t)32U, qy, (uint32_t)32U * sizeof (uint8_t));
-    bool result_ = Hacl_P256_ecdsa_verif_p256_sha384(msg_len, msg, qxy, r, s);
-    if (!(result_ == result))
-    {
-      LowStar_Printf_print_string("FAIL\n");
-      exit((int32_t)1);
-    }
+    LowStar_Printf_print_string("FAIL\n");
+    exit((int32_t)1);
   }
 }
 
-static void test_sigver512(sigver_vector vec)
+void test_sigver512(sigver_vector vec)
 {
   bool result = vec.f5;
   uint8_t *s = vec.f4.b;
@@ -8464,23 +8294,22 @@ static void test_sigver512(sigver_vector vec)
   )
   {
     exit((int32_t)-1);
+    return;
   }
-  else
+  uint8_t qxy[64U] = { 0U };
+  memcpy(qxy, qx, (uint32_t)32U * sizeof (uint8_t));
+  memcpy(qxy + (uint32_t)32U, qy, (uint32_t)32U * sizeof (uint8_t));
+  bool result_ = Hacl_P256_ecdsa_verif_p256_sha512(msg_len, msg, qxy, r, s);
+  if (!(result_ == result))
   {
-    uint8_t qxy[64U] = { 0U };
-    memcpy(qxy, qx, (uint32_t)32U * sizeof (uint8_t));
-    memcpy(qxy + (uint32_t)32U, qy, (uint32_t)32U * sizeof (uint8_t));
-    bool result_ = Hacl_P256_ecdsa_verif_p256_sha512(msg_len, msg, qxy, r, s);
-    if (!(result_ == result))
-    {
-      LowStar_Printf_print_string("FAIL\n");
-      exit((int32_t)1);
-    }
+    LowStar_Printf_print_string("FAIL\n");
+    exit((int32_t)1);
   }
 }
 
-static bool check_bound(uint8_t *b)
+bool check_bound(uint8_t *b)
 {
+  uint64_t zero = (uint64_t)0U;
   uint64_t q1 = (uint64_t)17562291160714782033U;
   uint64_t q2 = (uint64_t)13611842547513532036U;
   uint64_t q3 = (uint64_t)18446744073709551615U;
@@ -8497,13 +8326,16 @@ static bool check_bound(uint8_t *b)
   uint64_t x21 = x2;
   uint64_t x31 = x3;
   uint64_t x41 = x4;
-  return
+  bool
+  r =
     x11
     < q4
     || (x11 == q4 && (x21 < q3 || (x21 == q3 && (x31 < q2 || (x31 == q2 && x41 < q1)))));
+  bool r1 = x11 == zero && x21 == zero && x31 == zero && x41 == zero;
+  return r && !r1;
 }
 
-static void test_siggen_256(siggen_vector vec)
+void test_siggen_256(siggen_vector vec)
 {
   uint8_t *s = vec.f6.b;
   uint32_t s_len = vec.f6.len;
@@ -8536,30 +8368,23 @@ static void test_siggen_256(siggen_vector vec)
   )
   {
     exit((int32_t)-1);
+    return;
   }
-  else
+  uint8_t rs[64U] = { 0U };
+  uint8_t qxy[64U] = { 0U };
+  memcpy(qxy, qx, (uint32_t)32U * sizeof (uint8_t));
+  memcpy(qxy + (uint32_t)32U, qy, (uint32_t)32U * sizeof (uint8_t));
+  bool flag = Hacl_P256_ecdsa_sign_p256_sha2(rs, msg_len, msg, d, k);
+  if (flag)
   {
-    uint8_t rs[64U] = { 0U };
-    uint8_t qxy[64U] = { 0U };
-    memcpy(qxy, qx, (uint32_t)32U * sizeof (uint8_t));
-    memcpy(qxy + (uint32_t)32U, qy, (uint32_t)32U * sizeof (uint8_t));
-    uint64_t flag = Hacl_P256_ecdsa_sign_p256_sha2(rs, msg_len, msg, d, k);
-    if (flag == (uint64_t)0U)
+    bool okr = compare_and_print(rs, r, (uint32_t)32U);
+    bool oks = compare_and_print(rs + (uint32_t)32U, s, (uint32_t)32U);
+    if (okr && oks)
     {
-      bool okr = compare_and_print(rs, r, (uint32_t)32U);
-      bool oks = compare_and_print(rs + (uint32_t)32U, s, (uint32_t)32U);
-      if (okr && oks)
+      bool result = Hacl_P256_ecdsa_verif_p256_sha2(msg_len, msg, qxy, r, s);
+      if (!result)
       {
-        bool result = Hacl_P256_ecdsa_verif_p256_sha2(msg_len, msg, qxy, r, s);
-        if (!result)
-        {
-          LowStar_Printf_print_string("FAIL: verification\n");
-          exit((int32_t)1);
-        }
-      }
-      else
-      {
-        LowStar_Printf_print_string("FAIL: signing\n");
+        LowStar_Printf_print_string("FAIL: verification\n");
         exit((int32_t)1);
       }
     }
@@ -8569,9 +8394,14 @@ static void test_siggen_256(siggen_vector vec)
       exit((int32_t)1);
     }
   }
+  else
+  {
+    LowStar_Printf_print_string("FAIL: signing!!\n");
+    exit((int32_t)1);
+  }
 }
 
-static void test_siggen_384(siggen_vector vec)
+void test_siggen_384(siggen_vector vec)
 {
   uint8_t *s = vec.f6.b;
   uint32_t s_len = vec.f6.len;
@@ -8604,30 +8434,23 @@ static void test_siggen_384(siggen_vector vec)
   )
   {
     exit((int32_t)-1);
+    return;
   }
-  else
+  uint8_t rs[64U] = { 0U };
+  uint8_t qxy[64U] = { 0U };
+  memcpy(qxy, qx, (uint32_t)32U * sizeof (uint8_t));
+  memcpy(qxy + (uint32_t)32U, qy, (uint32_t)32U * sizeof (uint8_t));
+  bool flag = Hacl_P256_ecdsa_sign_p256_sha384(rs, msg_len, msg, d, k);
+  if (flag)
   {
-    uint8_t rs[64U] = { 0U };
-    uint8_t qxy[64U] = { 0U };
-    memcpy(qxy, qx, (uint32_t)32U * sizeof (uint8_t));
-    memcpy(qxy + (uint32_t)32U, qy, (uint32_t)32U * sizeof (uint8_t));
-    uint64_t flag = Hacl_P256_ecdsa_sign_p256_sha384(rs, msg_len, msg, d, k);
-    if (flag == (uint64_t)0U)
+    bool okr = compare_and_print(rs, r, (uint32_t)32U);
+    bool oks = compare_and_print(rs + (uint32_t)32U, s, (uint32_t)32U);
+    if (okr && oks)
     {
-      bool okr = compare_and_print(rs, r, (uint32_t)32U);
-      bool oks = compare_and_print(rs + (uint32_t)32U, s, (uint32_t)32U);
-      if (okr && oks)
+      bool result = Hacl_P256_ecdsa_verif_p256_sha384(msg_len, msg, qxy, r, s);
+      if (!result)
       {
-        bool result = Hacl_P256_ecdsa_verif_p256_sha384(msg_len, msg, qxy, r, s);
-        if (!result)
-        {
-          LowStar_Printf_print_string("FAIL: verification\n");
-          exit((int32_t)1);
-        }
-      }
-      else
-      {
-        LowStar_Printf_print_string("FAIL: signing\n");
+        LowStar_Printf_print_string("FAIL: verification\n");
         exit((int32_t)1);
       }
     }
@@ -8637,9 +8460,14 @@ static void test_siggen_384(siggen_vector vec)
       exit((int32_t)1);
     }
   }
+  else
+  {
+    LowStar_Printf_print_string("FAIL: signing\n");
+    exit((int32_t)1);
+  }
 }
 
-static void test_siggen_512(siggen_vector vec)
+void test_siggen_512(siggen_vector vec)
 {
   uint8_t *s = vec.f6.b;
   uint32_t s_len = vec.f6.len;
@@ -8672,30 +8500,23 @@ static void test_siggen_512(siggen_vector vec)
   )
   {
     exit((int32_t)-1);
+    return;
   }
-  else
+  uint8_t rs[64U] = { 0U };
+  uint8_t qxy[64U] = { 0U };
+  memcpy(qxy, qx, (uint32_t)32U * sizeof (uint8_t));
+  memcpy(qxy + (uint32_t)32U, qy, (uint32_t)32U * sizeof (uint8_t));
+  bool flag = Hacl_P256_ecdsa_sign_p256_sha512(rs, msg_len, msg, d, k);
+  if (flag)
   {
-    uint8_t rs[64U] = { 0U };
-    uint8_t qxy[64U] = { 0U };
-    memcpy(qxy, qx, (uint32_t)32U * sizeof (uint8_t));
-    memcpy(qxy + (uint32_t)32U, qy, (uint32_t)32U * sizeof (uint8_t));
-    uint64_t flag = Hacl_P256_ecdsa_sign_p256_sha512(rs, msg_len, msg, d, k);
-    if (flag == (uint64_t)0U)
+    bool okr = compare_and_print(rs, r, (uint32_t)32U);
+    bool oks = compare_and_print(rs + (uint32_t)32U, s, (uint32_t)32U);
+    if (okr && oks)
     {
-      bool okr = compare_and_print(rs, r, (uint32_t)32U);
-      bool oks = compare_and_print(rs + (uint32_t)32U, s, (uint32_t)32U);
-      if (okr && oks)
+      bool result = Hacl_P256_ecdsa_verif_p256_sha512(msg_len, msg, qxy, r, s);
+      if (!result)
       {
-        bool result = Hacl_P256_ecdsa_verif_p256_sha512(msg_len, msg, qxy, r, s);
-        if (!result)
-        {
-          LowStar_Printf_print_string("FAIL: verification\n");
-          exit((int32_t)1);
-        }
-      }
-      else
-      {
-        LowStar_Printf_print_string("FAIL: signing\n");
+        LowStar_Printf_print_string("FAIL: verification\n");
         exit((int32_t)1);
       }
     }
@@ -8704,6 +8525,11 @@ static void test_siggen_512(siggen_vector vec)
       LowStar_Printf_print_string("FAIL: signing\n");
       exit((int32_t)1);
     }
+  }
+  else
+  {
+    LowStar_Printf_print_string("FAIL: signing\n");
+    exit((int32_t)1);
   }
 }
 

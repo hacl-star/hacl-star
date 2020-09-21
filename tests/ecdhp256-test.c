@@ -218,10 +218,21 @@ int main()
 {
 
   if (!test_nist())
-    return EXIT_FAILURE;
+  	{
+  		printf("%s\n", "ECDH NIST tests have failed");
+    	return EXIT_FAILURE;
+    }
   if (!test_compression())
-    return EXIT_FAILURE;
+     {
+  		printf("%s\n", "ECDSA Compression tests have failed");
+    	return EXIT_FAILURE;
+    }
   if (!test_wycheproof())
-    return EXIT_FAILURE;
-  return EXIT_SUCCESS;
+    {
+  		printf("%s\n", "ECDSA Wycheproof tests have failed");
+    	return EXIT_FAILURE;
+    }
+
+    printf("%s\n", "ECDSA tests completed successfully");
+	return EXIT_SUCCESS;
 }
