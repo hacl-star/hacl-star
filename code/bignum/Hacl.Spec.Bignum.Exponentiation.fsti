@@ -13,124 +13,135 @@ module BM = Hacl.Spec.Bignum.Montgomery
 
 
 let bn_mod_exp_pre
-  (#nLen:size_pos{128 * nLen <= max_size_t})
-  (n:lbignum nLen)
-  (a:lbignum nLen)
+  (#t:limb_t)
+  (#nLen:size_pos{2 * bits t * nLen <= max_size_t})
+  (n:lbignum t nLen)
+  (a:lbignum t nLen)
   (bBits:size_pos)
-  (b:lbignum (blocks bBits 64))
+  (b:lbignum t (blocks bBits (bits t)))
  =
    bn_v n % 2 = 1 /\ 1 < bn_v n /\
    0 < bn_v b /\ bn_v b < pow2 bBits /\ bn_v a < bn_v n
 
 
 let bn_mod_exp_post
-  (#nLen:size_pos{128 * nLen <= max_size_t})
-  (n:lbignum nLen)
-  (a:lbignum nLen)
+  (#t:limb_t)
+  (#nLen:size_pos{2 * bits t * nLen <= max_size_t})
+  (n:lbignum t nLen)
+  (a:lbignum t nLen)
   (bBits:size_pos)
-  (b:lbignum (blocks bBits 64))
-  (res:lbignum nLen)
+  (b:lbignum t (blocks bBits (bits t)))
+  (res:lbignum t nLen)
  =
   bn_mod_exp_pre n a bBits b /\
   bn_v res == Lib.NatMod.pow_mod #(bn_v n) (bn_v a) (bn_v b)
 
 
 val check_mod_exp:
-    #nLen:size_pos{128 * nLen <= max_size_t}
-  -> n:lbignum nLen
-  -> a:lbignum nLen
+    #t:limb_t
+  -> #nLen:size_pos{2 * bits t * nLen <= max_size_t}
+  -> n:lbignum t nLen
+  -> a:lbignum t nLen
   -> bBits:size_pos
-  -> b:lbignum (blocks bBits 64) ->
-  res:uint64{
+  -> b:lbignum t (blocks bBits (bits t)) ->
+  res:limb t{
     let b = bn_v n % 2 = 1 && 1 < bn_v n && 0 < bn_v b && bn_v b < pow2 bBits && bn_v a < bn_v n in
-    v res == (if b then v (ones U64 SEC) else v (zeros U64 SEC))}
+    v res == (if b then v (ones t SEC) else v (zeros t SEC))}
 
 
 // This function is *NOT* constant-time on the exponent b
 val bn_mod_exp_precompr2:
-    nLen:size_pos{128 * nLen <= max_size_t}
-  -> n:lbignum nLen
-  -> a:lbignum nLen
+    #t:limb_t
+  -> nLen:size_pos{2 * bits t * nLen <= max_size_t}
+  -> n:lbignum t nLen
+  -> a:lbignum t nLen
   -> bBits:size_pos
-  -> b:lbignum (blocks bBits 64)
-  -> r2:lbignum nLen ->
-  lbignum nLen
+  -> b:lbignum t (blocks bBits (bits t))
+  -> r2:lbignum t nLen ->
+  lbignum t nLen
 
 
 val bn_mod_exp_precompr2_lemma:
-    nLen:size_pos{128 * nLen <= max_size_t}
-  -> n:lbignum nLen
-  -> a:lbignum nLen
+    #t:limb_t
+  -> nLen:size_pos{2 * bits t * nLen <= max_size_t}
+  -> n:lbignum t nLen
+  -> a:lbignum t nLen
   -> bBits:size_pos
-  -> b:lbignum (blocks bBits 64)
-  -> r2:lbignum nLen -> Lemma
+  -> b:lbignum t (blocks bBits (bits t))
+  -> r2:lbignum t nLen -> Lemma
   (requires
     bn_mod_exp_pre n a bBits b /\
-    bn_v r2 == pow2 (128 * nLen) % bn_v n)
+    bn_v r2 == pow2 (2 * bits t * nLen) % bn_v n)
   (ensures
     bn_mod_exp_post n a bBits b (bn_mod_exp_precompr2 nLen n a bBits b r2))
 
 
 // This function is constant-time on the exponent b
 val bn_mod_exp_mont_ladder_precompr2:
-    nLen:size_pos{128 * nLen <= max_size_t}
-  -> n:lbignum nLen
-  -> a:lbignum nLen
+    #t:limb_t
+  -> nLen:size_pos{2 * bits t * nLen <= max_size_t}
+  -> n:lbignum t nLen
+  -> a:lbignum t nLen
   -> bBits:size_pos
-  -> b:lbignum (blocks bBits 64)
-  -> r2:lbignum nLen ->
-  lbignum nLen
+  -> b:lbignum t (blocks bBits (bits t))
+  -> r2:lbignum t nLen ->
+  lbignum t nLen
 
 
 val bn_mod_exp_mont_ladder_precompr2_lemma:
-    nLen:size_pos{128 * nLen <= max_size_t}
-  -> n:lbignum nLen
-  -> a:lbignum nLen
+    #t:limb_t
+  -> nLen:size_pos{2 * bits t * nLen <= max_size_t}
+  -> n:lbignum t nLen
+  -> a:lbignum t nLen
   -> bBits:size_pos
-  -> b:lbignum (blocks bBits 64)
-  -> r2:lbignum nLen -> Lemma
+  -> b:lbignum t (blocks bBits (bits t))
+  -> r2:lbignum t nLen -> Lemma
   (requires
     bn_mod_exp_pre n a bBits b /\
-    bn_v r2 == pow2 (128 * nLen) % bn_v n)
+    bn_v r2 == pow2 (2 * bits t * nLen) % bn_v n)
   (ensures
     bn_mod_exp_post n a bBits b (bn_mod_exp_mont_ladder_precompr2 nLen n a bBits b r2))
 
 
 // This function is *NOT* constant-time on the exponent b
 val bn_mod_exp:
-    nLen:size_pos{128 * nLen <= max_size_t}
-  -> n:lbignum nLen
-  -> a:lbignum nLen
+    #t:limb_t
+  -> nLen:size_pos{2 * bits t * nLen <= max_size_t}
+  -> n:lbignum t nLen
+  -> a:lbignum t nLen
   -> bBits:size_pos
-  -> b:lbignum (blocks bBits 64) ->
-  lbignum nLen
+  -> b:lbignum t (blocks bBits (bits t)) ->
+  lbignum t nLen
 
 
 val bn_mod_exp_lemma:
-    nLen:size_pos{128 * nLen <= max_size_t}
-  -> n:lbignum nLen
-  -> a:lbignum nLen
+    #t:limb_t
+  -> nLen:size_pos{2 * bits t * nLen <= max_size_t}
+  -> n:lbignum t nLen
+  -> a:lbignum t nLen
   -> bBits:size_pos
-  -> b:lbignum (blocks bBits 64) -> Lemma
+  -> b:lbignum t (blocks bBits (bits t)) -> Lemma
   (requires bn_mod_exp_pre n a bBits b)
   (ensures  bn_mod_exp_post n a bBits b (bn_mod_exp nLen n a bBits b))
 
 
 // This function is constant-time on the exponent b
 val bn_mod_exp_mont_ladder:
-    nLen:size_pos{128 * nLen <= max_size_t}
-  -> n:lbignum nLen
-  -> a:lbignum nLen
+    #t:limb_t
+  -> nLen:size_pos{2 * bits t * nLen <= max_size_t}
+  -> n:lbignum t nLen
+  -> a:lbignum t nLen
   -> bBits:size_pos
-  -> b:lbignum (blocks bBits 64) ->
-  lbignum nLen
+  -> b:lbignum t (blocks bBits (bits t)) ->
+  lbignum t nLen
 
 
 val bn_mod_exp_mont_ladder_lemma:
-    nLen:size_pos{128 * nLen <= max_size_t}
-  -> n:lbignum nLen
-  -> a:lbignum nLen
+    #t:limb_t
+  -> nLen:size_pos{2 * bits t * nLen <= max_size_t}
+  -> n:lbignum t nLen
+  -> a:lbignum t nLen
   -> bBits:size_pos
-  -> b:lbignum (blocks bBits 64) -> Lemma
+  -> b:lbignum t (blocks bBits (bits t)) -> Lemma
   (requires bn_mod_exp_pre n a bBits b)
   (ensures  bn_mod_exp_post n a bBits b (bn_mod_exp_mont_ladder nLen n a bBits b))
