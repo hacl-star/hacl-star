@@ -154,7 +154,7 @@ int main(int argc, char *argv[]) {
       uint8_t buffer[2048];
       uint32_t spsz = mt_serialize_path(cur_path, buffer, 2048);
       assert(spsz > 0);
-      MerkleTree_Low_path *dpath = mt_deserialize_path(hash_size, buffer, 2048);
+      MerkleTree_Low_path *dpath = mt_deserialize_path(buffer, 2048);
       assert(dpath != NULL);
 
       bool dverified = mt_verify(mtd, k, j, dpath, root);

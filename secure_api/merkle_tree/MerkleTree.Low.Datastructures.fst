@@ -130,13 +130,14 @@ let hash_r_alloc #_ s r =
   B.malloc r (u8 0) s
 
 val hash_r_free:
-  #hsz:Ghost.erased hash_size_t ->
-  v:hash #hsz ->
+  #hsz':Ghost.erased hash_size_t ->
+  hsz:hash_size_t { hsz == Ghost.reveal hsz' } ->
+  v:hash #hsz' ->
   HST.ST unit
     (requires fun h0 -> hash_r_inv h0 v)
     (ensures  fun h0 _ h1 ->
       modifies (loc_all_regions_from false (hash_region_of v)) h0 h1)
-let hash_r_free #_ v =
+let hash_r_free #_ _ v =
   B.free v
 
 noextract inline_for_extraction
@@ -210,7 +211,7 @@ let hash_vec_r_inv #hsz h v = RV.rv_inv h v
 
 noextract
 val hash_vec_r_inv_reg:
-  #hsz:hash_size_t -> 
+  #hsz:hash_size_t ->
   h:HS.mem -> v:hash_vec #hsz ->
   Lemma (requires (hash_vec_r_inv h v))
   (ensures (MHS.live_region h (hash_vec_region_of v)))
@@ -223,14 +224,14 @@ let hash_vec_repr #hsz = MTH.hashes #(U32.v hsz)
 
 noextract
 val hash_vec_r_repr:
-  #hsz:hash_size_t -> 
+  #hsz:hash_size_t ->
   h:HS.mem -> v:hash_vec #hsz {hash_vec_r_inv h v} -> GTot (hash_vec_repr #hsz)
 let hash_vec_r_repr #_ h v =
   RV.as_seq h v
 
 noextract
 val hash_vec_r_sep:
-  #hsz:hash_size_t -> 
+  #hsz:hash_size_t ->
   v:hash_vec #hsz -> p:loc -> h0:HS.mem -> h1:HS.mem ->
   Lemma (requires (hash_vec_r_inv h0 v /\
       loc_disjoint
@@ -277,15 +278,15 @@ let hash_vec_r_alloc #_ hsz r =
 #pop-options
 
 val hash_vec_r_free:
-  #hsz:Ghost.erased hash_size_t ->
-  v:hash_vec ->
+  #hsz':Ghost.erased hash_size_t ->
+  hsz:hash_size_t { hsz == Ghost.reveal hsz' } ->
+  v:hash_vec #hsz ->
   HST.ST unit
     (requires (fun h0 -> hash_vec_r_inv h0 v))
     (ensures (fun h0 _ h1 ->
       modifies (loc_all_regions_from false (hash_vec_region_of #hsz v)) h0 h1))
-let hash_vec_r_free #_ v =
-  // RV.free v
-  V.free v
+let hash_vec_r_free #_ hsz v =
+  RV.free v
 
 /// This is nice because the only piece of state that we are keeping is one
 /// word, the hash size, since we are implementing a specialized instance of
