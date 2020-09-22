@@ -54,7 +54,6 @@ val isPointOnCurvePublic: p:point -> Stack bool
 
 
 [@ (Comment "  This code is not side channel resistant")]
-
 val verifyQValidCurvePoint: pubKeyAsPoint:point
   -> tempBuffer:lbuffer uint64 (size 100) -> Stack bool
   (requires fun h ->
@@ -80,3 +79,12 @@ val verifyQ:
 	r == verifyQValidCurvePointSpec pkJ
       )
     )
+
+val isMoreThanZeroLessThanOrder: x: lbuffer uint8 (size 32) -> Stack uint64
+  (requires fun h -> live h x)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+    (
+      let scalar = nat_from_bytes_be (as_seq h0 x) in 
+      uint_v r = 0 <==> (scalar > 0 && scalar < prime_p256_order)
+    )
+  )

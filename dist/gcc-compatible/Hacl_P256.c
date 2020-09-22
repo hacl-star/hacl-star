@@ -2196,13 +2196,43 @@ ecdsa_verification_(
   uint64_t *pointU2Q0 = points + (uint32_t)12U;
   secretToPublicWithoutNorm(pointU1G, bufferU1, tempBuffer);
   scalarMultiplicationWithoutNorm(publicKeyBuffer, pointU2Q0, bufferU2, tempBuffer);
+
+
   uint64_t *pointU1G0 = points;
   uint64_t *pointU2Q = points + (uint32_t)12U;
-  point_add(pointU1G0, pointU2Q, pointSum, buff);
+  uint64_t tmp[112U] = { 0U };
+  uint64_t *tmpForNorm = tmp;
+  uint64_t *result0Norm = tmp + (uint32_t)88U;
+  uint64_t *result1Norm = tmp + (uint32_t)100U;
+  uint64_t *pointU1G1 = points;
+  uint64_t *pointU2Q1 = points + (uint32_t)12U;
+  norm(pointU1G1, result0Norm, tmpForNorm);
+  norm(pointU2Q1, result1Norm, tmpForNorm);
+  uint64_t *x0 = result0Norm;
+  uint64_t *y0 = result0Norm + (uint32_t)4U;
+  uint64_t *z0 = result0Norm + (uint32_t)8U;
+  uint64_t *x1 = result1Norm;
+  uint64_t *y1 = result1Norm + (uint32_t)4U;
+  uint64_t *z1 = result1Norm + (uint32_t)8U;
+  bool xEqual = compare_felem_bool(x0, x1);
+  bool yEqual = compare_felem_bool(y0, y1);
+  bool zEqual = compare_felem_bool(z0, z1);
+  bool equalX = xEqual && yEqual && zEqual;
+  bool equalX0 = equalX;
+  if (equalX0)
+  {
+    point_double(pointU1G0, pointSum, buff);
+  }
+  else
+  {
+    point_add(pointU1G0, pointU2Q, pointSum, buff);
+  }
+
   norm(pointSum, pointSum, buff);
   bool resultIsPAI = isPointAtInfinityPublic(pointSum);
   uint64_t *xCoordinateSum = pointSum;
-  memcpy(xBuffer, xCoordinateSum, (uint32_t)4U * sizeof (uint64_t));
+  memcpy(xBuffer, xCoordinateSum, (uint32_t)4U * sizeof (xCoordinateSum[0U]));
+  reduction_prime_2prime_order(xBuffer, xBuffer);
   bool r1 = !resultIsPAI;
   bool state = r1;
   if (state == false)
@@ -2432,11 +2462,11 @@ static void computeYFromX(uint64_t *x, uint64_t *result, uint64_t sign)
  priv(ate)Key: uint8[32], 
  k (nonce): uint32[32]. 
   
- Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
+ Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
   
- The private key and the nonce are expected to be less than the curve order.
+ The private key and the nonce are expected to be more than 0 and less than the curve order.
 */
-uint64_t
+bool
 Hacl_P256_ecdsa_sign_p256_sha2(
   uint8_t *result,
   uint32_t mLen,
@@ -2466,7 +2496,17 @@ Hacl_P256_ecdsa_sign_p256_sha2(
   Hacl_Impl_P256_LowLevel_toUint8(r, resultR);
   Hacl_Impl_P256_LowLevel_changeEndian(s);
   Hacl_Impl_P256_LowLevel_toUint8(s, resultS);
-  return flag;
+  switch (flag)
+  {
+    case 0U:
+      {
+        return true;
+      }
+    default:
+      {
+        return false;
+      }
+  }
 }
 
 /*
@@ -2475,11 +2515,11 @@ Hacl_P256_ecdsa_sign_p256_sha2(
  priv(ate)Key: uint8[32], 
  k (nonce): uint32[32]. 
   
- Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
+ Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
   
- The private key and the nonce are expected to be less than the curve order.
+ The private key and the nonce are expected to be more than 0 and less than the curve order.
 */
-uint64_t
+bool
 Hacl_P256_ecdsa_sign_p256_sha384(
   uint8_t *result,
   uint32_t mLen,
@@ -2509,7 +2549,17 @@ Hacl_P256_ecdsa_sign_p256_sha384(
   Hacl_Impl_P256_LowLevel_toUint8(r, resultR);
   Hacl_Impl_P256_LowLevel_changeEndian(s);
   Hacl_Impl_P256_LowLevel_toUint8(s, resultS);
-  return flag;
+  switch (flag)
+  {
+    case 0U:
+      {
+        return true;
+      }
+    default:
+      {
+        return false;
+      }
+  }
 }
 
 /*
@@ -2518,11 +2568,11 @@ Hacl_P256_ecdsa_sign_p256_sha384(
  priv(ate)Key: uint8[32], 
  k (nonce): uint32[32]. 
   
- Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
+ Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
   
- The private key and the nonce are expected to be less than the curve order.
+ The private key and the nonce are expected to be more than 0 and less than the curve order.
 */
-uint64_t
+bool
 Hacl_P256_ecdsa_sign_p256_sha512(
   uint8_t *result,
   uint32_t mLen,
@@ -2552,7 +2602,17 @@ Hacl_P256_ecdsa_sign_p256_sha512(
   Hacl_Impl_P256_LowLevel_toUint8(r, resultR);
   Hacl_Impl_P256_LowLevel_changeEndian(s);
   Hacl_Impl_P256_LowLevel_toUint8(s, resultS);
-  return flag;
+  switch (flag)
+  {
+    case 0U:
+      {
+        return true;
+      }
+    default:
+      {
+        return false;
+      }
+  }
 }
 
 /*
@@ -2561,13 +2621,13 @@ Hacl_P256_ecdsa_sign_p256_sha512(
  priv(ate)Key: uint8[32], 
  k (nonce): uint32[32]. 
   
- Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
+ Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
   
- The private key and the nonce are expected to be less than the curve order. 
+ The private key and the nonce are expected to be more than 0 and less than the curve order.
   
  The message m is expected to be hashed by a strong hash function, the lenght of the message is expected to be 32 bytes and more.
 */
-uint64_t
+bool
 Hacl_P256_ecdsa_sign_p256_without_hash(
   uint8_t *result,
   uint32_t mLen,
@@ -2595,7 +2655,17 @@ Hacl_P256_ecdsa_sign_p256_without_hash(
   Hacl_Impl_P256_LowLevel_toUint8(r, resultR);
   Hacl_Impl_P256_LowLevel_changeEndian(s);
   Hacl_Impl_P256_LowLevel_toUint8(s, resultS);
-  return flag;
+  switch (flag)
+  {
+    case 0U:
+      {
+        return true;
+      }
+    default:
+      {
+        return false;
+      }
+  }
 }
 
 /*
@@ -2915,10 +2985,12 @@ void Hacl_P256_reduction_8_32(uint8_t *x, uint8_t *result)
  Input: result: uint8[64], 
  scalar: uint8[32].
   
- Output: uint64, where 0 stands for the correct key generation. All the other values mean that an error has occurred. 
+ Output: bool, where True stands for the correct key generation. 
+  
+ False means that an error has occurred (possibly that the result respresents point at infinity). 
   
 */
-uint64_t Hacl_P256_ecp256dh_i(uint8_t *result, uint8_t *scalar)
+bool Hacl_P256_ecp256dh_i(uint8_t *result, uint8_t *scalar)
 {
   uint64_t tempBuffer[100U] = { 0U };
   uint64_t resultBuffer[12U] = { 0U };
@@ -2932,7 +3004,17 @@ uint64_t Hacl_P256_ecp256dh_i(uint8_t *result, uint8_t *scalar)
   Hacl_Impl_P256_LowLevel_changeEndian(resultBufferY);
   Hacl_Impl_P256_LowLevel_toUint8(resultBufferX, resultX);
   Hacl_Impl_P256_LowLevel_toUint8(resultBufferY, resultY);
-  return flag;
+    switch (flag)
+  {
+    case 0U:
+      {
+        return true;
+      }
+    default:
+      {
+        return false;
+      }
+  }
 }
 
 /*
@@ -2941,10 +3023,10 @@ uint64_t Hacl_P256_ecp256dh_i(uint8_t *result, uint8_t *scalar)
  pub(lic)Key: uint8[64], 
  scalar: uint8[32].
   
- Output: uint64, where 0 stands for the correct key generation. All the other values mean that an error has occurred. 
+ Output: bool, where True stands for the correct key generation. False value means that an error has occurred (possibly the provided public key was incorrect or the result represents point at infinity). 
   
 */
-uint64_t Hacl_P256_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar)
+bool Hacl_P256_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar)
 {
   uint64_t resultBufferFelem[12U] = { 0U };
   uint64_t *resultBufferFelemX = resultBufferFelem;
@@ -2963,6 +3045,41 @@ uint64_t Hacl_P256_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar)
   Hacl_Impl_P256_LowLevel_changeEndian(resultBufferFelemY);
   Hacl_Impl_P256_LowLevel_toUint8(resultBufferFelemX, resultX);
   Hacl_Impl_P256_LowLevel_toUint8(resultBufferFelemY, resultY);
-  return flag;
+    switch (flag)
+  {
+    case 0U:
+      {
+        return true;
+      }
+    default:
+      {
+        return false;
+      }
+  }
+}
+
+
+static uint64_t isMoreThanZeroLessThanOrder(uint8_t *x)
+{
+  uint64_t xAsFelem[4U] = { 0U };
+  Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(x, xAsFelem);
+  uint64_t tempBuffer[4U] = { 0U };
+  uint64_t carry = sub4_il(xAsFelem, prime256order_buffer, tempBuffer);
+  uint64_t less = FStar_UInt64_eq_mask(carry, (uint64_t)1U);
+  uint64_t more = isZero_uint64_CT(xAsFelem);
+  uint64_t notMore = ~more;
+  uint64_t result = less & notMore;
+  return ~result;
+}
+
+
+/*
+ Input: scalar: uint8[32].
+  
+ Output: uint64, where 0 stands for the scalar to be more than 0 and less than order.
+*/
+uint64_t Hacl_P256_isMoreThanZeroLessThanOrder(uint8_t *x)
+{
+  return isMoreThanZeroLessThanOrder(x);
 }
 
