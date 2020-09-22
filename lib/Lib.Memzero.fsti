@@ -16,6 +16,15 @@ open Lib.Buffer
 /// post-condition. For a generic version without a functional specification,
 /// see Lib.Memzero0.
 
+
+val clear_words_u64: nwords: size_t -> b: buffer uint64{v nwords <= length b} -> 
+  Stack unit 
+    (requires fun h ->  live h b)
+    (ensures fun h0 _ h1 -> 
+      modifies (loc b) h0 h1 /\
+      as_seq h1 (gsub #MUT #uint64 #(size (length b)) b (size 0) nwords) ==
+      Seq.create (v nwords) (u64 0))
+
 val clear_words_u16:
     nwords:size_t{v nwords % 2 == 0}
   -> b:buffer uint16{v nwords <= length b}

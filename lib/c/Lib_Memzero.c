@@ -1,6 +1,12 @@
 #include <stdint.h>
 #include "Lib_Memzero0.h"
 
+
+void Lib_Memzero_clear_words_u64(unsigned int nwords, uint16_t *mem)
+{
+  Lib_Memzero0_memzero((void*)mem, 8*nwords);
+}
+
 void Lib_Memzero_clear_words_u16(unsigned int nwords, uint16_t *mem)
 {
   Lib_Memzero0_memzero((void*)mem, 2*nwords);
