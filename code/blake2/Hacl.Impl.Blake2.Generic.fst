@@ -224,7 +224,7 @@ val gather_state: #a:Spec.alg -> #ms:m_spec -> st:state_p a ms -> m:block_w a ->
 		  (ensures (fun h0 _ h1 -> modifies (loc st) h0 h1 /\
 					state_v h1 st == Spec.gather_state a (as_seq h0 m) (v start)))
 
-#push-options "--z3rlimit 200"
+#push-options "--z3rlimit 500"
 let gather_state #a #ms st m start =
   let h0 = ST.get() in
   let r0 = rowi st 0ul in
