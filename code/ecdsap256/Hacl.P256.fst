@@ -28,6 +28,8 @@ open Spec.Hash.Definitions
 open Hacl.Impl.ECDSA.P256.Signature.Agile
 open Hacl.Impl.ECDSA.P256.Verification.Agile
 
+open Hacl.Impl.P256.ECDSA.Defensive
+
 
 let ecdsa_sign_p256_sha2 result mLen m privKey k = 
   ecdsa_signature (Hash SHA2_256) result mLen m privKey k
@@ -82,3 +84,8 @@ let reduction_8_32 x result = Hacl.Impl.ECDSA.Reduction.reduction_8_32 x result
 let ecp256dh_i result scalar = Hacl.Impl.P256.DH.ecp256dh_i result scalar
 
 let ecp256dh_r result pubKey scalar = Hacl.Impl.P256.DH.ecp256dh_r result pubKey scalar
+
+
+
+let ecdsa_sign_p256_sha2_def result mLen m privKey k = 
+  Hacl.Impl.P256.ECDSA.Defensive.ecdsa_sign_p256_sha2_def (Hash SHA2_256) result mLen m privKey k
