@@ -164,8 +164,12 @@ val point_add_and_double:
       state_inv_t h1 (get_x nq_p1) /\ state_inv_t h1 (get_z nq_p1) /\
      (let p2, p3 = P.add_and_double (fget_xz h0 q) (fget_xz h0 nq) (fget_xz h0 nq_p1) in
       fget_xz h1 nq == p2 /\ fget_xz h1 nq_p1 == p3)))
+
+#push-options "--ifuel 0"
 [@ Meta.Attribute.specialize ]
-let point_add_and_double #s q p01_tmp1 tmp2 =
+let point_add_and_double #s =
+  [@inline_let] let _ = allow_inversion field_spec in
+  fun q p01_tmp1 tmp2 ->
   let h0 = ST.get () in
   let nq : point s = sub p01_tmp1 0ul (2ul *! nlimb s) in
   let nq_p1 : point s = sub p01_tmp1 (2ul *! nlimb s) (2ul *! nlimb s) in
@@ -188,6 +192,7 @@ let point_add_and_double #s q p01_tmp1 tmp2 =
   point_add_and_double1 #s nq nq_p1 tmp1 tmp2;
   fmul z3 z3 x1 tmp2; // z3 = x1 * (da - cb) ^ 2
   S.lemma_add_and_double (fget_xz h0 q) (fget_xz h0 nq) (fget_xz h0 nq_p1)
+#pop-options
 
 val point_double:
     #s:field_spec

@@ -137,6 +137,7 @@ val mul_add_wide128:
 let mul_add_wide128 #m1 #m2 #m3 x y z =
   z +! mul_wide64 #m1 #m2 x y
 
+#push-options "--z3rlimit 100"
 inline_for_extraction noextract
 val smul_add_felem5:
     #m1:scale64
@@ -165,6 +166,7 @@ let smul_add_felem5 #m1 #m2 #m3 u1 (f20, f21, f22, f23, f24) (o0, o1, o2, o3, o4
   let out = (o0', o1', o2', o3', o4') in
   lemma_smul_add_felem5 u1 (f20, f21, f22, f23, f24) (o0, o1, o2, o3, o4);
   out
+#pop-options
 
 inline_for_extraction noextract
 val precomp_r19:
@@ -255,6 +257,7 @@ let lemma_mul_inv f cin =
   assert_norm (pow51 = pow2 51)
 #pop-options
 
+#push-options "--z3rlimit 100"
 inline_for_extraction noextract
 val carry_wide5:
     inp:felem_wide5{felem_wide_fits5 inp (6579, 4797, 3340, 1881, 423)}
@@ -277,6 +280,7 @@ let carry_wide5 (i0, i1, i2, i3, i4) =
   let tmp1' = tmp1 +! c5 in
   lemma_mul_inv (tmp0', tmp1, tmp2, tmp3, tmp4) c5;
   (tmp0', tmp1', tmp2, tmp3, tmp4)
+#pop-options
 
 inline_for_extraction noextract
 val fmul5:
