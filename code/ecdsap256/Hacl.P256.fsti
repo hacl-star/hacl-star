@@ -406,7 +406,6 @@ val isMoreThanZeroLessThanOrder: x: lbuffer uint8 (size 32) -> Stack uint64
 [@ (Comment " Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. 
   \n Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
   \n The private key and the nonce are expected to be less than the curve order.")]
-
 val ecdsa_sign_p256_def: alg: Spec.ECDSA.hash_alg_ecdsa 
   -> result: lbuffer uint8 (size 64) 
   -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length alg}
@@ -440,3 +439,12 @@ val ecdsa_sign_p256_def: alg: Spec.ECDSA.hash_alg_ecdsa
       )    
     )
   )
+
+
+
+val decode: sigLen: size_t -> signature: lbuffer uint8 sigLen 
+  -> bufferForR: lbuffer uint8 32ul
+  -> bufferForS: lbuffer uint8 32ul -> 
+  Stack bool
+    (requires fun h -> live h signature /\ live h bufferForR /\ live h bufferForS)
+    (ensures fun h0 _ h1 -> True)

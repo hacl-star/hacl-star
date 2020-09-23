@@ -87,3 +87,7 @@ let isMoreThanZeroLessThanOrder x =
 
 let ecdsa_sign_p256_def alg result mLen m privKey k = 
   Hacl.Impl.P256.ECDSA.Defensive.ecdsa_sign_p256_def alg result mLen m privKey k
+
+
+let decode sigLen signature bufferForR bufferForS = 
+  Hacl.Impl.ECDSA.DER.decode sigLen signature bufferForR bufferForS
