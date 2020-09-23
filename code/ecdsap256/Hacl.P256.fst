@@ -85,7 +85,5 @@ let isMoreThanZeroLessThanOrder x =
   Hacl.Impl.P256.Signature.Common.isMoreThanZeroLessThanOrder x
 
 
-
-
-let ecdsa_sign_p256_sha2_def result mLen m privKey k = 
-  Hacl.Impl.P256.ECDSA.Defensive.ecdsa_sign_p256_sha2_def (Hash SHA2_256) result mLen m privKey k
+let ecdsa_sign_p256_def alg result mLen m privKey k = 
+  Hacl.Impl.P256.ECDSA.Defensive.ecdsa_sign_p256_def alg result mLen m privKey k

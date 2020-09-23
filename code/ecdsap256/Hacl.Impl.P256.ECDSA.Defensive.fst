@@ -127,7 +127,7 @@ let compareTo0TwoVariablesNotSC a b =
 
 
 inline_for_extraction noextract
-val ecdsa_sign_p256_sha2_def: alg: hash_alg_ecdsa 
+val ecdsa_sign_p256_def: alg: hash_alg_ecdsa 
   -> result: lbuffer uint8 (size 64) 
   -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length alg}
   -> m: lbuffer uint8 mLen 
@@ -141,39 +141,46 @@ val ecdsa_sign_p256_sha2_def: alg: hash_alg_ecdsa
     disjoint result k 
   )
   (ensures fun h0 flag h1 -> 
-    modifies (loc result) h0 h1 /\
-      if 
-     (assert_norm (pow2 32 < pow2 61);
-      let resultR = gsub result (size 0) (size 32) in 
-      let resultS = gsub result (size 32) (size 32) in 
-      let r, s, flagSpec = Spec.ECDSA.ecdsa_signature_agile alg (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in 
-      as_seq h1 resultR == nat_to_bytes_be 32 r /\
-      as_seq h1 resultS == nat_to_bytes_be 32 s /\
-      flag == flagSpec 
-    )    
+    modifies (loc result) h0 h1 /\ (
+    if 
+      nat_from_bytes_be (as_seq h0 k) >= prime_p256_order ||
+      nat_from_bytes_be (as_seq h0 privKey) >= prime_p256_order ||
+      nat_from_bytes_be (as_seq h0 k) = 0 ||
+      nat_from_bytes_be (as_seq h0 privKey) = 0
+      then
+	flag == false
+      else 
+	(assert_norm (pow2 32 < pow2 61);
+	let resultR = gsub result (size 0) (size 32) in 
+	let resultS = gsub result (size 32) (size 32) in 
+	let r, s, flagSpec = Spec.ECDSA.ecdsa_signature_agile alg (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in 
+	as_seq h1 resultR == nat_to_bytes_be 32 r /\
+	as_seq h1 resultS == nat_to_bytes_be 32 s /\
+	flag == flagSpec 
+      )    
+    )
   )
 
-
-let ecdsa_sign_p256_sha2_def alg result mLen m privKey k = 
+let ecdsa_sign_p256_def alg result mLen m privKey k = 
   push_frame();
+    let h0 = ST.get() in (*
   let crTemp = create (size 8) (u64 0) in 
   let cr0 = sub crTemp (size 0) (size 4) in 
-  let cr1 = sub crTemp (size 4) (size 4) in  
+  let cr1 = sub crTemp (size 4) (size 4) in   *)
     
-  let less0 = lessThanOrderU8 privKey cr0 cr1 in 
-  let less1 = lessThanOrderU8 k cr0 cr1 in 
+  let less0 = isMoreThanZeroLessThanOrder privKey in 
+  let less1 = isMoreThanZeroLessThanOrder k in
   let flagLessOrder = compareTo0TwoVariablesNotSC less0 less1 in 
 
+ 
   if not flagLessOrder then 
     begin 
-      admit();
       pop_frame();
       false
     end
   else
     begin
     let r = ecdsa_signature alg result mLen m privKey k in 
-    admit();
     pop_frame();
     r
     end
