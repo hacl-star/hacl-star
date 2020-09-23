@@ -18,7 +18,7 @@ module F64 = Hacl.Impl.Curve25519.Field64
 module P = Spec.Curve25519
 module S = Hacl.Spec.Curve25519.AddAndDouble
 
-#reset-options "--z3rlimit 150 --max_fuel 1 --using_facts_from '* -FStar.Seq' --record_options"
+#reset-options "--z3rlimit 300 --fuel 0 --ifuel 1 --using_facts_from '* -FStar.Seq' --record_options"
 
 inline_for_extraction noextract
 let point (s:field_spec) = lbuffer (limb s) (nlimb s +! nlimb s)
@@ -165,11 +165,8 @@ val point_add_and_double:
      (let p2, p3 = P.add_and_double (fget_xz h0 q) (fget_xz h0 nq) (fget_xz h0 nq_p1) in
       fget_xz h1 nq == p2 /\ fget_xz h1 nq_p1 == p3)))
 
-#push-options "--ifuel 0"
 [@ Meta.Attribute.specialize ]
-let point_add_and_double #s =
-  [@inline_let] let _ = allow_inversion field_spec in
-  fun q p01_tmp1 tmp2 ->
+let point_add_and_double #s q p01_tmp1 tmp2 =
   let h0 = ST.get () in
   let nq : point s = sub p01_tmp1 0ul (2ul *! nlimb s) in
   let nq_p1 : point s = sub p01_tmp1 (2ul *! nlimb s) (2ul *! nlimb s) in
@@ -192,7 +189,6 @@ let point_add_and_double #s =
   point_add_and_double1 #s nq nq_p1 tmp1 tmp2;
   fmul z3 z3 x1 tmp2; // z3 = x1 * (da - cb) ^ 2
   S.lemma_add_and_double (fget_xz h0 q) (fget_xz h0 nq) (fget_xz h0 nq_p1)
-#pop-options
 
 val point_double:
     #s:field_spec

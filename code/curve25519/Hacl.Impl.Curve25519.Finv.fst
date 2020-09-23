@@ -17,7 +17,7 @@ module C = Hacl.Impl.Curve25519.Fields.Core
 module S = Hacl.Spec.Curve25519.Finv
 module P = Spec.Curve25519
 
-#reset-options "--z3rlimit 50 --using_facts_from '* -FStar.Seq' --record_options"
+#reset-options "--z3rlimit 50 --fuel 0 --ifuel 1 --using_facts_from '* -FStar.Seq' --record_options"
 
 noextract
 val fsquare_times_inv: #s:field_spec -> h:mem -> f:felem s -> Type0
@@ -76,6 +76,7 @@ val fmul_s:
 let fmul_s #s out f1 f2 tmp =
   C.fmul #s out f1 f2 tmp
 
+#set-options "--fuel 1 --ifuel 1"
 val fsquare_times:
     #s:field_spec
   -> o:felem s
@@ -114,7 +115,7 @@ let fsquare_times #s o inp tmp n =
     S.lemma_pow_mul (feval #s h0 inp) (pow2 (v i + 1)) (pow2 1);
     assert_norm (pow2 (v i + 1) * pow2 1 = pow2 (v i + 2)))
 
-#set-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 3"
+#set-options "--z3rlimit 300 --fuel 0 --ifuel 1"
 
 val finv0:
     #s:field_spec
