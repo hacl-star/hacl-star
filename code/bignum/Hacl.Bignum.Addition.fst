@@ -116,7 +116,6 @@ val bn_sub:
     (let c, r = S.bn_sub (as_seq h0 a) (as_seq h0 b) in
     c_out == c /\ as_seq h1 res == r))
 
-[@CInline]
 let bn_sub #t aLen a bLen b res =
   let h0 = ST.get () in
   let a0 = sub a 0ul bLen in
@@ -233,7 +232,6 @@ val bn_add:
     (let c, r = S.bn_add (as_seq h0 a) (as_seq h0 b) in
     c_out == c /\ as_seq h1 res == r))
 
-[@CInline]
 let bn_add #t aLen a bLen b res =
   let h0 = ST.get () in
   let a0 = sub a 0ul bLen in

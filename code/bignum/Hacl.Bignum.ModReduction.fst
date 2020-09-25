@@ -82,8 +82,8 @@ let mk_bn_mod_slow_precompr2 #t nLen #_ n a r2 res =
   pop_frame ()
 
 
+inline_for_extraction noextract
 val bn_mod_slow_precompr2: #t:limb_t -> nLen:BN.meta_len t -> bn_mod_slow_precompr2_st t nLen
-[@CInline]
 let bn_mod_slow_precompr2 #t nLen =
   mk_bn_mod_slow_precompr2 nLen #(BM.mk_runtime_mont t nLen)
 
@@ -128,7 +128,7 @@ let mk_bn_mod_slow #t nLen #k n a res =
   BB.unsafe_bool_of_limb is_valid_m
 
 
+inline_for_extraction noextract
 val bn_mod_slow: #t:limb_t -> nLen:BN.meta_len t -> bn_mod_slow_st t nLen
-[@CInline]
 let bn_mod_slow #t nLen =
   mk_bn_mod_slow nLen #(BM.mk_runtime_mont t nLen)

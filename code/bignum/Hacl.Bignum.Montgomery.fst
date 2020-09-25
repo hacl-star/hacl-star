@@ -152,7 +152,6 @@ let mont_reduction_f #t nLen n nInv j c res =
   LSeq.eq_intro (as_seq h1 res) (LSeq.upd (as_seq h0 res) (v nLen + v j) (Seq.index (as_seq h1 res) (v nLen + v j)))
 
 
-[@CInline]
 let mont_reduction #t nLen n nInv c res =
   push_frame ();
   let c0 = create 1ul (uint #t 0) in
@@ -176,7 +175,6 @@ let mont_reduction #t nLen n nInv c res =
   pop_frame ()
 
 
-[@CInline]
 let to_mont #t #nLen #_ mont_reduction n nInv r2 a aM =
   push_frame ();
   let c = create (nLen +! nLen) (uint #t 0) in
@@ -185,7 +183,6 @@ let to_mont #t #nLen #_ mont_reduction n nInv r2 a aM =
   pop_frame ()
 
 
-[@CInline]
 let from_mont #t #nLen mont_reduction n nInv_u64 aM a =
   push_frame ();
   let tmp = create (nLen +! nLen) (uint #t 0) in
@@ -194,7 +191,6 @@ let from_mont #t #nLen mont_reduction n nInv_u64 aM a =
   pop_frame ()
 
 
-[@CInline]
 let mont_mul #t #nLen #k mont_reduction n nInv_u64 aM bM resM =
   push_frame ();
   let c = create (nLen +! nLen) (uint #t 0) in
@@ -204,7 +200,7 @@ let mont_mul #t #nLen #k mont_reduction n nInv_u64 aM bM resM =
   mont_reduction n nInv_u64 c resM; // resM = c % n
   pop_frame ()
 
-[@CInline]
+
 let mont_sqr #t #nLen #k mont_reduction n nInv_u64 aM resM =
   push_frame ();
   let c = create (nLen +! nLen) (uint #t 0) in

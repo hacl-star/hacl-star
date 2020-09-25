@@ -14,6 +14,7 @@ module S = Hacl.Spec.Bignum.ModInvLimb
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+inline_for_extraction noextract
 val mod_inv_limb: #t:limb_t -> n0:limb t ->
   Stack (limb t)
   (requires fun h -> True)

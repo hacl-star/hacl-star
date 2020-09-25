@@ -42,7 +42,6 @@ let mk_check_mod_exp #t nLen #k n a bBits b =
   m0 &. m
 
 
-[@CInline]
 let check_mod_exp #t nLen =
   mk_check_mod_exp nLen #(BM.mk_runtime_mont t nLen)
 
@@ -145,7 +144,6 @@ let mk_bn_mod_exp_precompr2 #t nLen #_ bn_mod_exp_loop n a bBits b r2 res =
 
 let bn_mod_exp_loop_runtime t nLen = bn_mod_exp_loop nLen #(BM.mk_runtime_mont t nLen)
 
-[@CInline]
 let bn_mod_exp_precompr2 #t nLen =
   mk_bn_mod_exp_precompr2 nLen #(BM.mk_runtime_mont t nLen) (bn_mod_exp_loop_runtime t nLen)
 
@@ -268,7 +266,6 @@ let mk_bn_mod_exp_mont_ladder_precompr2 #t nLen #_ bn_mod_exp_mont_ladder_loop n
 
 let bn_mod_exp_mont_ladder_loop_runtime t nLen = bn_mod_exp_mont_ladder_loop nLen #(BM.mk_runtime_mont t nLen)
 
-[@CInline]
 let bn_mod_exp_mont_ladder_precompr2 #t nLen =
   mk_bn_mod_exp_mont_ladder_precompr2 nLen #(BM.mk_runtime_mont t nLen) (bn_mod_exp_mont_ladder_loop_runtime t nLen)
 
@@ -302,7 +299,6 @@ let mk_bn_mod_exp #t nLen #k bn_mod_exp_loop n a bBits b res =
 
 /// A fully runtime implementation of modular exponentiation.
 
-[@CInline]
 let bn_mod_exp #t nLen =
   mk_bn_mod_exp nLen #(BM.mk_runtime_mont t nLen) (bn_mod_exp_loop_runtime t nLen)
 
@@ -336,6 +332,5 @@ let mk_bn_mod_exp_mont_ladder #t nLen #k bn_mod_exp_mont_ladder_loop n a bBits b
 
 /// A fully runtime implementation of modular exponentiation.
 
-[@CInline]
 let bn_mod_exp_mont_ladder #t nLen =
   mk_bn_mod_exp_mont_ladder nLen #(BM.mk_runtime_mont t nLen) (bn_mod_exp_mont_ladder_loop_runtime t nLen)

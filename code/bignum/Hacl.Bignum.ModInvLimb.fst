@@ -59,7 +59,6 @@ let mod_inv_limb_ #t alpha beta ub vb =
   )
 
 
-[@CInline]
 let mod_inv_limb #t n0 =
   push_frame ();
   let alpha = uint #t 1 <<. size (bits t - 1) in

@@ -377,6 +377,7 @@ let bn_lt_mask_st (t:limb_t) (len:size_t) =
 inline_for_extraction noextract
 val mk_bn_lt_mask: #t:limb_t -> len:size_t -> bn_lt_mask_st t len
 
+inline_for_extraction noextract
 val bn_lt_mask: #t:limb_t -> len:size_t -> bn_lt_mask_st t len
 
 

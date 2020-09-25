@@ -77,7 +77,8 @@ let mk_bn_from_bytes_be #t len b res =
   bn_from_bytes_be_ bnLen tmp res;
   pop_frame ()
 
-[@CInline]
+
+inline_for_extraction noextract
 let bn_from_bytes_be #t = mk_bn_from_bytes_be #t
 
 
@@ -125,6 +126,7 @@ let new_bn_from_bytes_be #t r len b =
       res
 
 
+inline_for_extraction noextract
 val bn_from_bytes_le:
     #t:limb_t
   -> len:size_t{0 < v len /\ numbytes t * v (blocks len (size (numbytes t))) <= max_size_t}
@@ -135,7 +137,6 @@ val bn_from_bytes_le:
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_seq h1 res == S.bn_from_bytes_le (v len) (as_seq h0 b))
 
-[@CInline]
 let bn_from_bytes_le #t len b res =
   [@inline_let]
   let numb = size (numbytes t) in
@@ -202,10 +203,11 @@ let mk_bn_to_bytes_be #t len b res =
 
 
 /// This wrapper avoids inlining in callers to preserve the shape of the RSAPSS code.
-[@CInline]
+inline_for_extraction noextract
 let bn_to_bytes_be #t = mk_bn_to_bytes_be #t
 
 
+inline_for_extraction noextract
 val bn_to_bytes_le:
     #t:limb_t
   -> len:size_t{0 < v len /\ numbytes t * v (blocks len (size (numbytes t))) <= max_size_t}
@@ -217,7 +219,6 @@ val bn_to_bytes_le:
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_seq h1 res == S.bn_to_bytes_le (v len) (as_seq h0 b))
 
-[@CInline]
 let bn_to_bytes_le #t len b res =
   [@inline_let]
   let numb = size (numbytes t) in

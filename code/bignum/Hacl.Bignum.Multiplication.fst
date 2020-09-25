@@ -138,7 +138,6 @@ val bn_mul:
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_seq h1 res == S.bn_mul (as_seq h0 a) (as_seq h0 b))
 
-[@CInline]
 let bn_mul #t aLen a bLen b res =
   let resLen = aLen +! bLen in
   memset res (uint #t 0) resLen;
@@ -194,7 +193,6 @@ val bn_sqr:
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_seq h1 res == S.bn_sqr (as_seq h0 a))
 
-[@CInline]
 let bn_sqr #t aLen a res =
   push_frame ();
   let resLen = aLen +! aLen in
