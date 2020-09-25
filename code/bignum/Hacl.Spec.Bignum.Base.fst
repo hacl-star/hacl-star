@@ -46,9 +46,28 @@ let subborrow #t cin x y =
   c, res
 
 
+inline_for_extraction noextract
+val mul_wide: #t:limb_t -> a:limb t -> b:limb t ->
+  Pure (tuple2 (limb t) (limb t))
+  (requires True)
+  (ensures  fun (hi, lo) ->
+    v lo + v hi * pow2 (bits t) == v a * v b)
 
+let mul_wide #t a b =
+  Math.Lemmas.lemma_mult_lt_sqr (v a) (v b) (pow2 (bits t));
+  match t with
+  | U32 ->
+    let res = to_u64 a *! to_u64 b in
+    to_u32 (res >>. 32ul), to_u32 res
+  | U64 ->
+    let res = mul64_wide a b in
+    to_u64 (res >>. 64ul), to_u64 res
+
+
+inline_for_extraction noextract
 let mask_values (#t:limb_t) (x:limb t) =
   v x = v (zeros t SEC) \/ v x = v (ones t SEC)
+
 
 inline_for_extraction noextract
 let unsafe_bool_of_limb (#t:limb_t) (m:limb t) : b:bool{b <==> v m = v (ones t SEC)} =
@@ -56,6 +75,13 @@ let unsafe_bool_of_limb (#t:limb_t) (m:limb t) : b:bool{b <==> v m = v (ones t S
   match t with
   | U32 -> FStar.UInt32.(u32_to_UInt32 m =^ u32_to_UInt32 (ones U32 SEC))
   | U64 -> FStar.UInt64.(u64_to_UInt64 m =^ u64_to_UInt64 (ones U64 SEC))
+
+
+inline_for_extraction noextract
+let size_to_limb (#t:limb_t) (x:size_t) : limb t =
+  match t with
+  | U32 -> size_to_uint32 x
+  | U64 -> size_to_uint64 x
 
 
 inline_for_extraction noextract

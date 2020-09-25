@@ -32,36 +32,26 @@ val mul_wide_add: #t:limb_t -> a:limb t -> b:limb t -> c:limb t -> d:limb t ->
 
 let mul_wide_add #t a b c d =
   lemma_mul_wide_add a b c d;
+  Math.Lemmas.small_mod (v a * v b + v c + v d) (pow2 (2 * bits t));
   match t with
   | U32 ->
     let res = to_u64 a *! to_u64 b +! to_u64 c +! to_u64 d in
     assert (v res == v a * v b + v c + v d);
     let hi = to_u32 (res >>. 32ul) in
+    assert (v hi == v res / pow2 32);
     let lo = to_u32 res in
+    assert (v lo == v res % pow2 32);
+    Math.Lemmas.euclidean_division_definition (v res) (pow2 32);
     hi, lo
   | U64 ->
     let res = mul64_wide a b +! to_u128 c +! to_u128 d in
     assert (v res == v a * v b + v c + v d);
     let hi = to_u64 (res >>. 64ul) in
+    assert (v hi == v res / pow2 64);
     let lo = to_u64 res in
+    assert (v lo == v res % pow2 64);
+    Math.Lemmas.euclidean_division_definition (v res) (pow2 64);
     hi, lo
-
-
-val mul_wide: #t:limb_t -> a:limb t -> b:limb t ->
-  Pure (tuple2 (limb t) (limb t))
-  (requires True)
-  (ensures  fun (hi, lo) ->
-    v lo + v hi * pow2 (bits t) == v a * v b)
-
-let mul_wide #t a b =
-  lemma_mul_wide_add #t a b (uint #t 0) (uint #t 0);
-  match t with
-  | U32 ->
-    let res = to_u64 a *! to_u64 b in
-    to_u32 (res >>. 32ul), to_u32 res
-  | U64 ->
-    let res = mul64_wide a b in
-    to_u64 (res >>. 64ul), to_u64 res
 
 
 val bn_mul1_add_in_place_f:
@@ -184,6 +174,7 @@ let bn_sqr #t #aLen a =
   res
 
 
+#push-options "--z3rlimit 150"
 val bn_mul1_add_in_place_lemma_loop_step:
      #t:limb_t
   -> #aLen:size_nat
@@ -237,6 +228,7 @@ let bn_mul1_add_in_place_lemma_loop_step #t #aLen a l acc i (c1, res1) =
     eval_ aLen acc i + eval_ aLen a i * v l;
   };
   assert (v c * b2 + bn_v #t #i res == eval_ aLen acc i + eval_ aLen a i * v l)
+#pop-options
 
 
 val bn_mul1_add_in_place_lemma_loop:
@@ -437,7 +429,36 @@ let bn_mul_lemma #t #aLen #bLen a b =
   bn_mul_loop_lemma a b bLen
 
 
-#push-options "--z3rlimit 300"
+val bn_sqr_diag_f_lemma:
+    #t:limb_t
+  -> #aLen:size_nat{aLen + aLen <= max_size_t}
+  -> a:lbignum t aLen
+  -> i:nat{i < aLen}
+  -> acc:lbignum t (aLen + aLen) ->
+  Lemma (let (hi, lo) = mul_wide a.[i] a.[i] in
+    let res = bn_sqr_diag_f a i acc in
+    res.[2 * i] == lo /\ res.[2 * i + 1] == hi /\
+    (forall (i0:nat{i0 < aLen /\ i0 <> i}).
+      acc.[2 * i0] == res.[2 * i0] /\
+      acc.[2 * i0 + 1] == res.[2 * i0 + 1]))
+
+let bn_sqr_diag_f_lemma #t #aLen a i acc =
+  let res = bn_sqr_diag_f a i acc in
+
+  let aux (i0:nat{i0 < aLen + aLen /\ i0 <> 2 * i /\ i0 <> 2 * i + 1}) :
+    Lemma (acc.[i0] == res.[i0]) = () in
+
+  let aux2 (i0:nat{i0 < aLen /\ i0 <> i}) :
+    Lemma (acc.[2 * i0] == res.[2 * i0] /\ acc.[2 * i0 + 1] == res.[2 * i0 + 1]) =
+    aux (2 * i0);
+    //assert (acc.[2 * i0] == res.[2 * i0]);
+    aux (2 * i0 + 1);
+    //assert (acc.[2 * i0 + 1] == res.[2 * i0 + 1]);
+    () in
+
+  Classical.forall_intro aux2
+
+
 val bn_sqr_diag_inductive:
     #t:limb_t
   -> #aLen:size_nat{aLen + aLen <= max_size_t}
@@ -458,6 +479,7 @@ val bn_sqr_diag_inductive:
 
 let bn_sqr_diag_inductive #t #aLen a k =
   let acc0 = create (aLen + aLen) (uint #t 0) in
+
   eq_repeati0 k (bn_sqr_diag_f a) acc0;
   repeati_inductive k
   (fun i acci ->
@@ -470,11 +492,11 @@ let bn_sqr_diag_inductive #t #aLen a k =
       Seq.index acci (2 * i0) == Seq.index acc0 (2 * i0) /\
       Seq.index acci (2 * i0 + 1) == Seq.index acc0 (2 * i0 + 1)))
   (fun i acci ->
+    unfold_repeati k (bn_sqr_diag_f a) acc0 i;
     let acc = bn_sqr_diag_f a i acci in
-    unfold_repeati (i + 1) (bn_sqr_diag_f a) acc0 i;
+    bn_sqr_diag_f_lemma #t #aLen a i acci;
     acc)
   acc0
-#pop-options
 
 
 val bn_sqr_diag_lemma:
@@ -612,13 +634,11 @@ let bn_sqr_inductive #t #aLen a k =
     acci == repeati i (bn_sqr_f a) acc0 /\
     (forall (i0:nat{i + i < i0 /\ i0 < aLen + aLen}). Seq.index acci i0 == Seq.index acc0 i0))
   (fun i acci ->
-    let c, res' = bn_mul1_add_in_place #t #i (sub a 0 i) a.[i] (sub acci i i) in
-    let acc = update_sub acci i i res' in
-    let acc1 = acc.[i + i] <- c in
-    //assert (forall (i0:nat{i + i < i0 /\ i0 < aLen + aLen}). index acc i0 == index acci i0);
-    assert (forall (i0:nat{i + i < i0 /\ i0 < aLen + aLen}). index acc1 i0 == index acc i0);
-    //assert (forall (i0:nat{i + i < i0 /\ i0 < aLen + aLen}). index acc1 i0 == index acci i0);
-    unfold_repeati (i + 1) (bn_sqr_f a) acc0 i;
+    unfold_repeati k (bn_sqr_f a) acc0 i;
+    let acc1 = bn_sqr_f a i acci in
+    assert (acc1 == repeati (i + 1) (bn_sqr_f a) acc0);
+    bn_sqr_f_lemma a i acci;
+    assert (forall (i0:nat{i + i + 2 < i0 /\ i0 < aLen + aLen}). index acc1 i0 == index acci i0);
     acc1)
   acc0
 
