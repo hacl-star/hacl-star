@@ -17,7 +17,7 @@ module BB = Hacl.Bignum.Base
 
 
 inline_for_extraction noextract
-let check_mod_exp_st (t:limb_t) (nLen:BN.meta_len) =
+let check_mod_exp_st (t:limb_t) (nLen:BN.meta_len t) =
     n:lbignum t nLen
   -> a:lbignum t nLen
   -> bBits:size_t{0 < v bBits /\ bits t * v (blocks bBits (size (bits t))) <= max_size_t}
@@ -32,7 +32,7 @@ val check_mod_exp: #t:_ -> nLen:_ -> check_mod_exp_st t nLen
 
 // This function is *NOT* constant-time on the exponent b.
 inline_for_extraction noextract
-let bn_mod_exp_precompr2_st (t:limb_t) (nLen:BN.meta_len) =
+let bn_mod_exp_precompr2_st (t:limb_t) (nLen:BN.meta_len t) =
     n:lbignum t nLen
   -> a:lbignum t nLen
   -> bBits:size_t{v bBits > 0}
@@ -53,7 +53,7 @@ val bn_mod_exp_precompr2: #t:_ -> nLen:_ -> bn_mod_exp_precompr2_st t nLen
 
 // This function is constant-time on the exponent b.
 inline_for_extraction noextract
-let bn_mod_exp_mont_ladder_precompr2_st (t:limb_t) (nLen:BN.meta_len) =
+let bn_mod_exp_mont_ladder_precompr2_st (t:limb_t) (nLen:BN.meta_len t) =
     n:lbignum t nLen
   -> a:lbignum t nLen
   -> bBits:size_t{v bBits > 0}
@@ -75,7 +75,7 @@ val bn_mod_exp_mont_ladder_precompr2: #t:_ -> nLen:_ -> bn_mod_exp_mont_ladder_p
 
 
 inline_for_extraction noextract
-let bn_mod_exp_st (t:limb_t) (nLen:BN.meta_len) =
+let bn_mod_exp_st (t:limb_t) (nLen:BN.meta_len t) =
     n:lbignum t nLen
   -> a:lbignum t nLen
   -> bBits:size_t{0 < v bBits /\ bits t * v (blocks bBits (size (bits t))) <= max_size_t}

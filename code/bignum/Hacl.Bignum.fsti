@@ -299,14 +299,14 @@ val cswap2:
 
 #set-options "--fuel 0 --ifuel 0"
 
-let meta_len = len: size_t { 0 < v len /\ 128 * v len <= max_size_t }
+let meta_len (t:limb_t) = len: size_t { 0 < v len /\ 2 * bits t * v len <= max_size_t }
 
 /// This type class is entirely meta-level and will not appear after partial
 /// evaluation in the resulting C code. Clients can take this type class as a
 /// parameter if they want the benefits of a function set specialized for a
 /// given bignum length.
 inline_for_extraction noextract
-class bn (t:limb_t) (len: meta_len) = {
+class bn (t:limb_t) (len: meta_len t) = {
   bit_set: bn_set_ith_bit_st t len;
   add_mod_n: bn_add_mod_n_st t len;
   mul: a:lbignum t len -> b:lbignum t len -> bn_karatsuba_mul_st a b;
@@ -318,7 +318,7 @@ class bn (t:limb_t) (len: meta_len) = {
 /// `len` at run-time! Only use if you want to generate run-time generic
 /// functions!
 inline_for_extraction noextract
-let mk_runtime_bn (t:limb_t) (len: meta_len) = {
+let mk_runtime_bn (t:limb_t) (len: meta_len t) = {
   bit_set = bn_set_ith_bit len;
   add_mod_n = bn_add_mod_n len;
   mul = (fun a b -> bn_karatsuba_mul len a b);

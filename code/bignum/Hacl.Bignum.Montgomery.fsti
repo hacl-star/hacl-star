@@ -21,7 +21,7 @@ include Hacl.Bignum.ModInvLimb
 
 
 inline_for_extraction noextract
-let check_modulus_st (t:limb_t) (nLen:BN.meta_len) =
+let check_modulus_st (t:limb_t) (nLen:BN.meta_len t) =
   n:lbignum t nLen ->
   Stack (limb t)
   (requires fun h -> live h n)
@@ -32,13 +32,13 @@ let check_modulus_st (t:limb_t) (nLen:BN.meta_len) =
 inline_for_extraction noextract
 val check_modulus:
     #t:limb_t
-  -> #nLen:BN.meta_len
+  -> #nLen:BN.meta_len t
   -> (#[FStar.Tactics.Typeclasses.tcresolve ()] _ : BN.bn t nLen)
   -> check_modulus_st t nLen
 
 
 inline_for_extraction noextract
-let precomp_r2_mod_n_st (t:limb_t) (nLen:BN.meta_len) =
+let precomp_r2_mod_n_st (t:limb_t) (nLen:BN.meta_len t) =
     n:lbignum t nLen
   -> res:lbignum t nLen ->
   Stack unit
@@ -53,7 +53,7 @@ let precomp_r2_mod_n_st (t:limb_t) (nLen:BN.meta_len) =
 inline_for_extraction noextract
 val precomp_r2_mod_n:
     #t:limb_t
-  -> #nLen:BN.meta_len
+  -> #nLen:BN.meta_len t
   -> (#[FStar.Tactics.Typeclasses.tcresolve ()] _ : BN.bn t nLen)
   -> precomp_r2_mod_n_st t nLen
 
@@ -68,7 +68,7 @@ let new_precomp_r2_mod_n_st (t:limb_t) =
   (ensures  fun h0 res h1 ->
     B.(modifies loc_none h0 h1) /\
     not (B.g_is_null res) ==> (
-      0 < v nLen /\ 128 * v nLen <= max_size_t /\
+      0 < v nLen /\ 2 * bits t * v nLen <= max_size_t /\
       1 < bn_v h0 n /\ bn_v h0 n % 2 = 1 /\
       B.len res == nLen /\
       B.(fresh_loc (loc_buffer res) h0 h1) /\
@@ -97,12 +97,12 @@ let mont_reduction_st (t:limb_t) (nLen:size_t{0 < v nLen /\ v nLen + v nLen <= m
 inline_for_extraction noextract
 val mont_reduction:
     #t:limb_t
-  -> nLen:BN.meta_len
+  -> nLen:BN.meta_len t
   -> mont_reduction_st t nLen
 
 
 inline_for_extraction noextract
-let to_mont_st (t:limb_t) (nLen:BN.meta_len) =
+let to_mont_st (t:limb_t) (nLen:BN.meta_len t) =
     n:lbignum t nLen
   -> mu:limb t
   -> r2:lbignum t nLen
@@ -119,14 +119,14 @@ let to_mont_st (t:limb_t) (nLen:BN.meta_len) =
 inline_for_extraction noextract
 val to_mont:
     #t:limb_t
-  -> #nLen:BN.meta_len
+  -> #nLen:BN.meta_len t
   -> (#[FStar.Tactics.Typeclasses.tcresolve ()] _ : BN.bn t nLen)
   -> mr:mont_reduction_st t nLen
   -> to_mont_st t nLen
 
 
 inline_for_extraction noextract
-let from_mont_st (t:limb_t) (nLen:BN.meta_len) =
+let from_mont_st (t:limb_t) (nLen:BN.meta_len t) =
     n:lbignum t nLen
   -> mu:limb t
   -> aM:lbignum t nLen
@@ -143,13 +143,13 @@ let from_mont_st (t:limb_t) (nLen:BN.meta_len) =
 inline_for_extraction noextract
 val from_mont:
     #t:limb_t
-  -> #nLen:BN.meta_len
+  -> #nLen:BN.meta_len t
   -> mr:mont_reduction_st t nLen
   -> from_mont_st t nLen
 
 
 inline_for_extraction noextract
-let mont_mul_st (t:limb_t) (nLen:BN.meta_len) =
+let mont_mul_st (t:limb_t) (nLen:BN.meta_len t) =
     n:lbignum t nLen
   -> mu:limb t
   -> aM:lbignum t nLen
@@ -167,14 +167,14 @@ let mont_mul_st (t:limb_t) (nLen:BN.meta_len) =
 inline_for_extraction noextract
 val mont_mul:
     #t:limb_t
-  -> #nLen:BN.meta_len
+  -> #nLen:BN.meta_len t
   -> (#[FStar.Tactics.Typeclasses.tcresolve ()] _ : BN.bn t nLen)
   -> mr:mont_reduction_st t nLen
   -> mont_mul_st t nLen
 
 
 inline_for_extraction noextract
-let mont_sqr_st (t:limb_t) (nLen:BN.meta_len) =
+let mont_sqr_st (t:limb_t) (nLen:BN.meta_len t) =
     n:lbignum t nLen
   -> mu:limb t
   -> aM:lbignum t nLen
@@ -190,7 +190,7 @@ let mont_sqr_st (t:limb_t) (nLen:BN.meta_len) =
 inline_for_extraction noextract
 val mont_sqr:
     #t:limb_t
-  -> #nLen:BN.meta_len
+  -> #nLen:BN.meta_len t
   -> (#[FStar.Tactics.Typeclasses.tcresolve ()] _ : BN.bn t nLen)
   -> mr:mont_reduction_st t nLen
   -> mont_sqr_st t nLen
@@ -198,7 +198,7 @@ val mont_sqr:
 
 /// A montgomery implementation specialized for a bignum length.
 inline_for_extraction noextract
-class mont (t:limb_t) (len: BN.meta_len)  = {
+class mont (t:limb_t) (len: BN.meta_len t)  = {
   bn: BN.bn t len;
   check: check_modulus_st t len;
   precomp: precomp_r2_mod_n_st t len;
@@ -211,8 +211,8 @@ class mont (t:limb_t) (len: BN.meta_len)  = {
 
 /// Encoding type-class hierarchies via a hook for type class resolution.
 inline_for_extraction noextract
-instance bn_of_mont (#t:limb_t) (#len:BN.meta_len) (x:mont t len): BN.bn t len = x.bn
+instance bn_of_mont (#t:limb_t) (#len:BN.meta_len t) (x:mont t len): BN.bn t len = x.bn
 
 // A completely run-time-only instance where the functions above exist in the C code.
 inline_for_extraction noextract
-val mk_runtime_mont (t:limb_t) (len: BN.meta_len): mont t len
+val mk_runtime_mont (t:limb_t) (len: BN.meta_len t): mont t len

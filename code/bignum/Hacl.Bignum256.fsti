@@ -13,7 +13,10 @@ module BI = Hacl.Bignum.ModInv
 let _ = assert_norm (256ul = 64ul `FStar.UInt32.mul` 4ul)
 
 inline_for_extraction noextract
-let n_limbs: BN.meta_len = 4ul
+let t_limbs: Hacl.Bignum.Definitions.limb_t = Lib.IntTypes.U64
+
+inline_for_extraction noextract
+let n_limbs: BN.meta_len t_limbs = 4ul
 
 inline_for_extraction noextract
 let n_bytes = n_limbs `FStar.UInt32.mul` 8ul
@@ -36,20 +39,20 @@ Comment
   This functions returns the carry.
 
   The arguments a, b and res are meant to be 256-bit bignums, i.e. uint64_t[4]"]
-val add: Hacl.Bignum.Addition.bn_add_eq_len_st n_limbs
+val add: Hacl.Bignum.Addition.bn_add_eq_len_st t_limbs n_limbs
 
 [@@ Comment "Write `a - b mod 2^256` in `res`.
 
   This functions returns the carry.
 
   The arguments a, b and res are meant to be 256-bit bignums, i.e. uint64_t[4]"]
-val sub: Hacl.Bignum.Addition.bn_sub_eq_len_st n_limbs
+val sub: Hacl.Bignum.Addition.bn_sub_eq_len_st t_limbs n_limbs
 
 [@@ Comment "Write `a * b` in `res`.
 
   The arguments a and b are meant to be 256-bit bignums, i.e. uint64_t[4].
   The outparam res is meant to be a 512-bit bignum, i.e. uint64_t[8]."]
-val mul: a:lbignum n_limbs -> b:lbignum n_limbs -> BN.bn_karatsuba_mul_st a b
+val mul: a:lbignum t_limbs n_limbs -> b:lbignum t_limbs n_limbs -> BN.bn_karatsuba_mul_st a b
 
 [@@ Comment "Write `a mod n` in `res`
 
@@ -66,7 +69,7 @@ val mul: a:lbignum n_limbs -> b:lbignum n_limbs -> BN.bn_karatsuba_mul_st a b
 
   Owing to the absence of run-time checks, and factoring out the precomputation
   r2, this function is notably faster than mod below."]
-val mod_precompr2: BR.bn_mod_slow_precompr2_st n_limbs
+val mod_precompr2: BR.bn_mod_slow_precompr2_st t_limbs n_limbs
 
 [@@ Comment "Write `a mod n` in `res`
 
@@ -75,7 +78,7 @@ val mod_precompr2: BR.bn_mod_slow_precompr2_st n_limbs
 
   The function returns false if any of the preconditions of mod_precompr2 above
   are violated, true otherwise."]
-val mod: BR.bn_mod_slow_st n_limbs
+val mod: BR.bn_mod_slow_st t_limbs n_limbs
 
 [@@ Comment "Write `a ^ b mod n` in `res`.
 
@@ -99,7 +102,7 @@ val mod: BR.bn_mod_slow_st n_limbs
 
   Owing to the absence of run-time checks, and factoring out the precomputation
   r2, this function is notably faster than mod_exp below."]
-val mod_exp_precompr2: BE.bn_mod_exp_precompr2_st n_limbs
+val mod_exp_precompr2: BE.bn_mod_exp_precompr2_st t_limbs n_limbs
 
 [@@ Comment "Write `a ^ b mod n` in `res`.
 
@@ -114,7 +117,7 @@ val mod_exp_precompr2: BE.bn_mod_exp_precompr2_st n_limbs
 
   The function returns false if any of the preconditions of mod_exp_precompr2 are
   violated, true otherwise."]
-val mod_exp: BE.bn_mod_exp_st n_limbs
+val mod_exp: BE.bn_mod_exp_st t_limbs n_limbs
 
 [@@ Comment "Write `a ^ b mod n` in `res`.
 
@@ -138,7 +141,7 @@ val mod_exp: BE.bn_mod_exp_st n_limbs
 
   Owing to the absence of run-time checks, and factoring out the precomputation
   r2, this function is notably faster than mod_exp_mont_ladder below."]
-val mod_exp_mont_ladder_precompr2: BE.bn_mod_exp_mont_ladder_precompr2_st n_limbs
+val mod_exp_mont_ladder_precompr2: BE.bn_mod_exp_mont_ladder_precompr2_st t_limbs n_limbs
 
 [@@ Comment "Write `a ^ b mod n` in `res`.
 
@@ -153,7 +156,7 @@ val mod_exp_mont_ladder_precompr2: BE.bn_mod_exp_mont_ladder_precompr2_st n_limb
 
   The function returns false if any of the preconditions of
   mod_exp_mont_ladder_precompr2 are violated, true otherwise."]
-val mod_exp_mont_ladder: BE.bn_mod_exp_st n_limbs
+val mod_exp_mont_ladder: BE.bn_mod_exp_st t_limbs n_limbs
 
 [@@ Comment "Compute `2 ^ (128 * nLen) mod n`.
 
@@ -165,7 +168,7 @@ val mod_exp_mont_ladder: BE.bn_mod_exp_st n_limbs
 
   If the return value is non-null, clients must eventually call free(3) on it to
   avoid memory leaks."]
-val new_precompr2: BM.new_precomp_r2_mod_n_st
+val new_precompr2: BM.new_precomp_r2_mod_n_st t_limbs
 
 [@@ Comment "Write `a ^ (-1) mod n` in `res`.
 
@@ -177,7 +180,7 @@ val new_precompr2: BM.new_precomp_r2_mod_n_st
   from Hacl.Spec.Bignum.ModInv.fst, which amounts to:
   • n is a prime
   • 0 < a "]
-val mod_inv_prime: BI.bn_mod_inv_prime_st n_limbs
+val mod_inv_prime: BI.bn_mod_inv_prime_st t_limbs n_limbs
 
 [@@ CPrologue
 "\n/********************/
@@ -193,13 +196,13 @@ Comment
 
   If the return value is non-null, clients must eventually call free(3) on it to
   avoid memory leaks."]
-val new_bn_from_bytes_be: Hacl.Bignum.Convert.new_bn_from_bytes_be_st
+val new_bn_from_bytes_be: Hacl.Bignum.Convert.new_bn_from_bytes_be_st t_limbs
 
 [@@ Comment "Serialize a bignum into big-endian memory.
 
   The argument b points to a 256-bit bignum.
   The outparam res points to 32 bytes of valid memory."]
-val bn_to_bytes_be: Hacl.Bignum.Convert.bn_to_bytes_be_st n_bytes
+val bn_to_bytes_be: Hacl.Bignum.Convert.bn_to_bytes_be_st t_limbs n_bytes
 
 [@@ CPrologue
 "\n/***************/
@@ -207,4 +210,4 @@ val bn_to_bytes_be: Hacl.Bignum.Convert.bn_to_bytes_be_st n_bytes
 /***************/\n";
 Comment
 "Returns 2 ^ 64 - 1 if and only if argument a is strictly less than the argument b, otherwise returns 0."]
-val lt_mask: Hacl.Bignum.bn_lt_mask_st n_limbs
+val lt_mask: Hacl.Bignum.bn_lt_mask_st t_limbs n_limbs

@@ -27,7 +27,7 @@ friend Hacl.Spec.Bignum.Exponentiation
 inline_for_extraction noextract
 val mk_check_mod_exp:
     #t:limb_t
-  -> nLen:BN.meta_len
+  -> nLen:BN.meta_len t
   -> (#[FStar.Tactics.Typeclasses.tcresolve ()] _ : Hacl.Bignum.Montgomery.mont t nLen)
   -> check_mod_exp_st t nLen
 
@@ -48,7 +48,7 @@ let check_mod_exp #t nLen =
 
 
 inline_for_extraction noextract
-let bn_mod_exp_loop_st (t:limb_t) (nLen:BN.meta_len) =
+let bn_mod_exp_loop_st (t:limb_t) (nLen:BN.meta_len t) =
     n:lbignum t nLen
   -> nInv:limb t
   -> bBits:size_t{v bBits > 0}
@@ -70,7 +70,7 @@ let bn_mod_exp_loop_st (t:limb_t) (nLen:BN.meta_len) =
 inline_for_extraction noextract
 val bn_mod_exp_loop:
     #t:limb_t
-  -> nLen:BN.meta_len
+  -> nLen:BN.meta_len t
   -> (#[FStar.Tactics.Typeclasses.tcresolve ()] _ : Hacl.Bignum.Montgomery.mont t nLen)
   -> bn_mod_exp_loop_st t nLen
 
@@ -92,7 +92,7 @@ let bn_mod_exp_loop #t nLen #_ n nInv bBits bLen b aM accM =
 inline_for_extraction noextract
 val bn_mod_exp_mont:
     #t:limb_t
-  -> nLen:BN.meta_len
+  -> nLen:BN.meta_len t
   -> (#[FStar.Tactics.Typeclasses.tcresolve ()] _ : Hacl.Bignum.Montgomery.mont t nLen)
   -> bn_mod_exp_loop:bn_mod_exp_loop_st t nLen
   -> n:lbignum t nLen
@@ -129,7 +129,7 @@ let bn_mod_exp_mont #t nLen #_ bn_mod_exp_loop n a acc bBits b r2 res =
 inline_for_extraction noextract
 val mk_bn_mod_exp_precompr2:
     #t:limb_t
-  -> nLen:BN.meta_len
+  -> nLen:BN.meta_len t
   -> (#[FStar.Tactics.Typeclasses.tcresolve ()] _ : Hacl.Bignum.Montgomery.mont t nLen)
   -> bn_mod_exp_loop:bn_mod_exp_loop_st t nLen ->
   bn_mod_exp_precompr2_st t nLen
@@ -155,7 +155,7 @@ let bn_mod_exp_precompr2 #t nLen =
 ///
 
 inline_for_extraction noextract
-let bn_mod_exp_mont_ladder_loop_st (t:limb_t) (nLen:BN.meta_len) =
+let bn_mod_exp_mont_ladder_loop_st (t:limb_t) (nLen:BN.meta_len t) =
     n:lbignum t nLen
   -> nInv:limb t
   -> bBits:size_t{v bBits > 0}
@@ -179,7 +179,7 @@ let bn_mod_exp_mont_ladder_loop_st (t:limb_t) (nLen:BN.meta_len) =
 inline_for_extraction noextract
 val bn_mod_exp_mont_ladder_loop:
     #t:limb_t
-  -> nLen:BN.meta_len
+  -> nLen:BN.meta_len t
   -> (#[FStar.Tactics.Typeclasses.tcresolve ()] _ : Hacl.Bignum.Montgomery.mont t nLen)
   -> bn_mod_exp_mont_ladder_loop_st t nLen
 
@@ -211,7 +211,7 @@ let bn_mod_exp_mont_ladder_loop #t nLen #_ n nInv bBits bLen b rM0 rM1 sw =
 inline_for_extraction noextract
 val bn_mod_exp_mont_ladder_:
     #t:limb_t
-  -> nLen:BN.meta_len
+  -> nLen:BN.meta_len t
   -> (#[FStar.Tactics.Typeclasses.tcresolve ()] _ : Hacl.Bignum.Montgomery.mont t nLen)
   -> bn_mod_exp_mont_ladder_loop:bn_mod_exp_mont_ladder_loop_st t nLen
   -> n:lbignum t nLen
@@ -252,7 +252,7 @@ let bn_mod_exp_mont_ladder_ #t nLen #_ bn_mod_exp_mont_ladder_loop n a one bBits
 inline_for_extraction noextract
 val mk_bn_mod_exp_mont_ladder_precompr2:
     #t:limb_t
-  -> nLen:BN.meta_len
+  -> nLen:BN.meta_len t
   -> (#[FStar.Tactics.Typeclasses.tcresolve ()] _ : Hacl.Bignum.Montgomery.mont t nLen)
   -> bn_mod_exp_mont_ladder_loop:bn_mod_exp_mont_ladder_loop_st t nLen ->
   bn_mod_exp_mont_ladder_precompr2_st t nLen
@@ -276,7 +276,7 @@ let bn_mod_exp_mont_ladder_precompr2 #t nLen =
 inline_for_extraction noextract
 val mk_bn_mod_exp:
     #t:limb_t
-  -> nLen:BN.meta_len
+  -> nLen:BN.meta_len t
   -> (#[FStar.Tactics.Typeclasses.tcresolve ()] _ : Hacl.Bignum.Montgomery.mont t nLen)
   -> bn_mod_exp_loop:bn_mod_exp_loop_st t nLen ->
   bn_mod_exp_st t nLen
@@ -310,7 +310,7 @@ let bn_mod_exp #t nLen =
 inline_for_extraction noextract
 val mk_bn_mod_exp_mont_ladder:
     #t:limb_t
-  -> nLen:BN.meta_len
+  -> nLen:BN.meta_len t
   -> (#[FStar.Tactics.Typeclasses.tcresolve ()] _ : Hacl.Bignum.Montgomery.mont t nLen)
   -> bn_mod_exp_mont_ladder_loop:bn_mod_exp_mont_ladder_loop_st t nLen ->
   bn_mod_exp_st t nLen

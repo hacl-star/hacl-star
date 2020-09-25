@@ -20,7 +20,7 @@ module BE = Hacl.Bignum.Exponentiation
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
-let bn_mod_inv_prime_st (t:limb_t) (nLen:BN.meta_len) =
+let bn_mod_inv_prime_st (t:limb_t) (nLen:BN.meta_len t) =
     n:lbignum t nLen
   -> a:lbignum t nLen
   -> res:lbignum t nLen ->
@@ -35,7 +35,7 @@ let bn_mod_inv_prime_st (t:limb_t) (nLen:BN.meta_len) =
 inline_for_extraction noextract
 val mk_bn_mod_inv_prime:
     #t:limb_t
-  -> nLen:BN.meta_len
+  -> nLen:BN.meta_len t
   -> bn_mod_exp:BE.bn_mod_exp_st t nLen
   -> bn_mod_inv_prime_st t nLen
 
@@ -57,6 +57,6 @@ let mk_bn_mod_inv_prime #t nLen bn_mod_exp n a res =
   is_valid
 
 
-val bn_mod_inv_prime: #t:limb_t -> nLen:BN.meta_len -> bn_mod_inv_prime_st t nLen
+val bn_mod_inv_prime: #t:limb_t -> nLen:BN.meta_len t -> bn_mod_inv_prime_st t nLen
 let bn_mod_inv_prime #t nLen =
   mk_bn_mod_inv_prime nLen (BE.bn_mod_exp nLen)

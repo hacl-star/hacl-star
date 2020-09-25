@@ -28,24 +28,24 @@ let add = Hacl.Bignum.Addition.bn_add_eq_len n_limbs
 
 let sub = Hacl.Bignum.Addition.bn_sub_eq_len n_limbs
 
-let mul (a b: lbignum n_limbs): BN.bn_karatsuba_mul_st a b =
+let mul (a b: lbignum t_limbs n_limbs): BN.bn_karatsuba_mul_st a b =
   BN.bn_mul n_limbs a n_limbs b
 
-let bit_set: BN.bn_set_ith_bit_st n_limbs =
+let bit_set: BN.bn_set_ith_bit_st t_limbs n_limbs =
   BN.bn_set_ith_bit n_limbs
 
-let add_mod_n: BN.bn_add_mod_n_st n_limbs =
+let add_mod_n: BN.bn_add_mod_n_st t_limbs n_limbs =
   BN.bn_add_mod_n n_limbs
 
-let sub_mask: BN.bn_sub_mask_st n_limbs =
+let sub_mask: BN.bn_sub_mask_st t_limbs n_limbs =
   BN.bn_sub_mask n_limbs
 
-let sqr (a: lbignum n_limbs): BN.bn_karatsuba_sqr_st a =
+let sqr (a: lbignum t_limbs n_limbs): BN.bn_karatsuba_sqr_st a =
   //BN.bn_sqr n_limbs a
   BN.bn_mul n_limbs a n_limbs a
 
 inline_for_extraction noextract
-instance bn_inst: BN.bn n_limbs = {
+instance bn_inst: BN.bn t_limbs n_limbs = {
   BN.bit_set;
   BN.add_mod_n;
   BN.mul;
@@ -53,29 +53,29 @@ instance bn_inst: BN.bn n_limbs = {
   BN.sub_mask
 }
 
-let check : BM.check_modulus_st n_limbs =
-  BM.check_modulus #n_limbs #bn_inst
+let check : BM.check_modulus_st t_limbs n_limbs =
+  BM.check_modulus #t_limbs #n_limbs #bn_inst
 
-let precomp: BM.precomp_r2_mod_n_st n_limbs =
-  BM.precomp_r2_mod_n #n_limbs #bn_inst
+let precomp: BM.precomp_r2_mod_n_st t_limbs n_limbs =
+  BM.precomp_r2_mod_n #t_limbs #n_limbs #bn_inst
 
-let reduction: BM.mont_reduction_st n_limbs =
+let reduction: BM.mont_reduction_st t_limbs n_limbs =
   BM.mont_reduction n_limbs
 
-let to: BM.to_mont_st n_limbs =
-  BM.to_mont #n_limbs #bn_inst reduction
+let to: BM.to_mont_st t_limbs n_limbs =
+  BM.to_mont #t_limbs #n_limbs #bn_inst reduction
 
-let from: BM.from_mont_st n_limbs =
-  BM.from_mont #n_limbs reduction
+let from: BM.from_mont_st t_limbs n_limbs =
+  BM.from_mont #t_limbs #n_limbs reduction
 
-let mont_mul: BM.mont_mul_st n_limbs =
-  BM.mont_mul #n_limbs #bn_inst reduction
+let mont_mul: BM.mont_mul_st t_limbs n_limbs =
+  BM.mont_mul #t_limbs #n_limbs #bn_inst reduction
 
-let mont_sqr: BM.mont_sqr_st n_limbs =
-  BM.mont_sqr #n_limbs #bn_inst reduction
+let mont_sqr: BM.mont_sqr_st t_limbs n_limbs =
+  BM.mont_sqr #t_limbs #n_limbs #bn_inst reduction
 
 inline_for_extraction noextract
-instance mont_inst: BM.mont n_limbs = {
+instance mont_inst: BM.mont t_limbs n_limbs = {
   BM.bn = FStar.Tactics.Typeclasses.solve;
   BM.check;
   BM.precomp;
@@ -90,7 +90,7 @@ let mod_precompr2 = BR.mk_bn_mod_slow_precompr2 n_limbs #mont_inst
 
 let mod = BR.mk_bn_mod_slow n_limbs #mont_inst
 
-let mod_exp_loop: BE.bn_mod_exp_loop_st n_limbs =
+let mod_exp_loop: BE.bn_mod_exp_loop_st t_limbs n_limbs =
   BE.bn_mod_exp_loop n_limbs #mont_inst
 
 let mod_exp_precompr2 =
@@ -99,7 +99,7 @@ let mod_exp_precompr2 =
 let mod_exp =
   BE.mk_bn_mod_exp n_limbs #mont_inst mod_exp_loop
 
-let mod_exp_mont_ladder_loop: BE.bn_mod_exp_mont_ladder_loop_st n_limbs =
+let mod_exp_mont_ladder_loop: BE.bn_mod_exp_mont_ladder_loop_st t_limbs n_limbs =
   BE.bn_mod_exp_mont_ladder_loop n_limbs #mont_inst
 
 let mod_exp_mont_ladder_precompr2 =
