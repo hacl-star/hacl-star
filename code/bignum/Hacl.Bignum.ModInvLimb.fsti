@@ -1,4 +1,4 @@
-module Hacl.Bignum.ModInv64
+module Hacl.Bignum.ModInvLimb
 
 open FStar.HyperStack
 open FStar.HyperStack.ST
@@ -7,13 +7,15 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Buffer
 
-module S = Hacl.Spec.Bignum.ModInv64
+open Hacl.Bignum.Definitions
+
+module S = Hacl.Spec.Bignum.ModInvLimb
 
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-val mod_inv_u64: n0:uint64 ->
-  Stack uint64
+val mod_inv_limb: #t:limb_t -> n0:limb t ->
+  Stack (limb t)
   (requires fun h -> True)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    r == S.mod_inv_u64 n0)
+    r == S.mod_inv_limb n0)

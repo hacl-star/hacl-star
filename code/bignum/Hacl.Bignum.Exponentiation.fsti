@@ -17,28 +17,28 @@ module BB = Hacl.Bignum.Base
 
 
 inline_for_extraction noextract
-let check_mod_exp_st (nLen:BN.meta_len) =
-    n:lbignum nLen
-  -> a:lbignum nLen
-  -> bBits:size_t{0 < v bBits /\ 64 * v (blocks bBits 64ul) <= max_size_t}
-  -> b:lbignum (blocks bBits 64ul) ->
-  Stack uint64
+let check_mod_exp_st (t:limb_t) (nLen:BN.meta_len) =
+    n:lbignum t nLen
+  -> a:lbignum t nLen
+  -> bBits:size_t{0 < v bBits /\ bits t * v (blocks bBits (size (bits t))) <= max_size_t}
+  -> b:lbignum t (blocks bBits (size (bits t))) ->
+  Stack (limb t)
   (requires fun h ->
     live h n /\ live h a /\ live h b)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
     r == S.check_mod_exp (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b))
 
-val check_mod_exp: nLen:_ -> check_mod_exp_st nLen
+val check_mod_exp: #t:_ -> nLen:_ -> check_mod_exp_st t nLen
 
 // This function is *NOT* constant-time on the exponent b.
 inline_for_extraction noextract
-let bn_mod_exp_precompr2_st (nLen:BN.meta_len) =
-    n:lbignum nLen
-  -> a:lbignum nLen
+let bn_mod_exp_precompr2_st (t:limb_t) (nLen:BN.meta_len) =
+    n:lbignum t nLen
+  -> a:lbignum t nLen
   -> bBits:size_t{v bBits > 0}
-  -> b:lbignum (blocks bBits 64ul)
-  -> r2:lbignum nLen
-  -> res:lbignum nLen ->
+  -> b:lbignum t (blocks bBits (size (bits t)))
+  -> r2:lbignum t nLen
+  -> res:lbignum t nLen ->
   Stack unit
   (requires fun h ->
     live h n /\ live h a /\ live h b /\ live h res /\ live h r2 /\
@@ -48,18 +48,18 @@ let bn_mod_exp_precompr2_st (nLen:BN.meta_len) =
     as_seq h1 res == S.bn_mod_exp_precompr2 (v nLen) (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b) (as_seq h0 r2))
 
 // This version is fully run-time.
-val bn_mod_exp_precompr2: nLen:_ -> bn_mod_exp_precompr2_st nLen
+val bn_mod_exp_precompr2: #t:_ -> nLen:_ -> bn_mod_exp_precompr2_st t nLen
 
 
 // This function is constant-time on the exponent b.
 inline_for_extraction noextract
-let bn_mod_exp_mont_ladder_precompr2_st (nLen:BN.meta_len) =
-    n:lbignum nLen
-  -> a:lbignum nLen
+let bn_mod_exp_mont_ladder_precompr2_st (t:limb_t) (nLen:BN.meta_len) =
+    n:lbignum t nLen
+  -> a:lbignum t nLen
   -> bBits:size_t{v bBits > 0}
-  -> b:lbignum (blocks bBits 64ul)
-  -> r2:lbignum nLen
-  -> res:lbignum nLen ->
+  -> b:lbignum t (blocks bBits (size (bits t)))
+  -> r2:lbignum t nLen
+  -> res:lbignum t nLen ->
   Stack unit
   (requires fun h ->
     live h n /\ live h a /\ live h b /\ live h res /\ live h r2 /\
@@ -70,30 +70,30 @@ let bn_mod_exp_mont_ladder_precompr2_st (nLen:BN.meta_len) =
       S.bn_mod_exp_mont_ladder_precompr2 (v nLen) (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b) (as_seq h0 r2))
 
 // This version is fully run-time.
-val bn_mod_exp_mont_ladder_precompr2: nLen:_ -> bn_mod_exp_mont_ladder_precompr2_st nLen
+val bn_mod_exp_mont_ladder_precompr2: #t:_ -> nLen:_ -> bn_mod_exp_mont_ladder_precompr2_st t nLen
 
 
 
 inline_for_extraction noextract
-let bn_mod_exp_st (nLen:BN.meta_len) =
-    n:lbignum nLen
-  -> a:lbignum nLen
-  -> bBits:size_t{0 < v bBits /\ 64 * v (blocks bBits 64ul) <= max_size_t}
-  -> b:lbignum (blocks bBits 64ul)
-  -> res:lbignum nLen ->
+let bn_mod_exp_st (t:limb_t) (nLen:BN.meta_len) =
+    n:lbignum t nLen
+  -> a:lbignum t nLen
+  -> bBits:size_t{0 < v bBits /\ bits t * v (blocks bBits (size (bits t))) <= max_size_t}
+  -> b:lbignum t (blocks bBits (size (bits t)))
+  -> res:lbignum t nLen ->
   Stack bool
   (requires fun h ->
     live h n /\ live h a /\ live h b /\ live h res /\
     disjoint res a /\ disjoint res b /\ disjoint res n /\ disjoint n a)
   (ensures  fun h0 r h1 -> modifies (loc res) h0 h1 /\
-    r == BB.unsafe_bool_of_u64 (S.check_mod_exp (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b)) /\
-    (r ==> S.bn_mod_exp_post #(v nLen) (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b) (as_seq h1 res)))
+    r == BB.unsafe_bool_of_limb (S.check_mod_exp (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b)) /\
+    (r ==> S.bn_mod_exp_post (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b) (as_seq h1 res)))
 
 
 // This version is fully run-time.
 // This function is *NOT* constant-time on the exponent b.
-val bn_mod_exp: nLen:_ -> bn_mod_exp_st nLen
+val bn_mod_exp: #t:_ -> nLen:_ -> bn_mod_exp_st t nLen
 
 // This version is fully run-time.
 // This function is constant-time on the exponent b.
-val bn_mod_exp_mont_ladder: nLen:_ -> bn_mod_exp_st nLen
+val bn_mod_exp_mont_ladder: #t:_ -> nLen:_ -> bn_mod_exp_st t nLen

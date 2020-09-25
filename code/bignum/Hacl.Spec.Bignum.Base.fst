@@ -70,6 +70,14 @@ let mask_values (#t:limb_t) (x:limb t) =
 
 
 inline_for_extraction noextract
+let unsafe_bool_of_limb0 (#t:limb_t) (m:limb t) : b:bool{b <==> v m = 0} =
+  let open Lib.RawIntTypes in
+  match t with
+  | U32 -> FStar.UInt32.(u32_to_UInt32 m =^ 0ul)
+  | U64 -> FStar.UInt64.(u64_to_UInt64 m =^ 0uL)
+
+
+inline_for_extraction noextract
 let unsafe_bool_of_limb (#t:limb_t) (m:limb t) : b:bool{b <==> v m = v (ones t SEC)} =
   let open Lib.RawIntTypes in
   match t with

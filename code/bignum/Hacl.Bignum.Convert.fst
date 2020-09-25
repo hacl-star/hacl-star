@@ -183,9 +183,12 @@ let bn_to_bytes_be_st (t:limb_t) (len:size_t{0 < v len /\ numbytes t * v (blocks
     as_seq h1 res == S.bn_to_bytes_be (v len) (as_seq h0 b))
 
 inline_for_extraction noextract
-val mk_bn_to_bytes_be: t:limb_t -> len:size_t{0 < v len /\ numbytes t * v (blocks len (size (numbytes t))) <= max_size_t} -> bn_to_bytes_be_st t len
+val mk_bn_to_bytes_be:
+    #t:limb_t
+  -> len:size_t{0 < v len /\ numbytes t * v (blocks len (size (numbytes t))) <= max_size_t} ->
+  bn_to_bytes_be_st t len
 
-let mk_bn_to_bytes_be t len b res =
+let mk_bn_to_bytes_be #t len b res =
   [@inline_let]
   let numb = size (numbytes t) in
   let h0 = ST.get () in
@@ -200,7 +203,7 @@ let mk_bn_to_bytes_be t len b res =
 
 /// This wrapper avoids inlining in callers to preserve the shape of the RSAPSS code.
 [@CInline]
-let bn_to_bytes_be = mk_bn_to_bytes_be
+let bn_to_bytes_be #t = mk_bn_to_bytes_be #t
 
 
 val bn_to_bytes_le:

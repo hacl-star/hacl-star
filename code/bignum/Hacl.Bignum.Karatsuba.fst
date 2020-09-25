@@ -28,12 +28,13 @@ let bn_mul_threshold = size K.bn_mul_threshold
 
 inline_for_extraction noextract
 val bn_sign_abs:
-    #aLen:size_t
-  -> a:lbignum aLen
-  -> b:lbignum aLen
-  -> tmp:lbignum aLen
-  -> res:lbignum aLen ->
-  Stack carry
+    #t:limb_t
+  -> #aLen:size_t
+  -> a:lbignum t aLen
+  -> b:lbignum t aLen
+  -> tmp:lbignum t aLen
+  -> res:lbignum t aLen ->
+  Stack (carry t)
   (requires fun h ->
     live h a /\ live h b /\ live h res /\ live h tmp /\
     eq_or_disjoint a b /\ disjoint a res /\ disjoint b res /\
@@ -41,24 +42,25 @@ val bn_sign_abs:
   (ensures  fun h0 c h1 -> modifies (loc res |+| loc tmp) h0 h1 /\
     (c, as_seq h1 res) == K.bn_sign_abs (as_seq h0 a) (as_seq h0 b))
 
-let bn_sign_abs #aLen a b tmp res =
+let bn_sign_abs #t #aLen a b tmp res =
   let c0 = bn_sub_eq_len aLen a b tmp in
   let c1 = bn_sub_eq_len aLen b a res in
-  map2T aLen res (mask_select (u64 0 -. c0)) res tmp;
+  map2T aLen res (mask_select (uint #t 0 -. c0)) res tmp;
   c0
 
 
 inline_for_extraction noextract
 val bn_middle_karatsuba:
-    #aLen:size_t
-  -> c0:carry
-  -> c1:carry
-  -> c2:carry
-  -> t01:lbignum aLen
-  -> t23:lbignum aLen
-  -> tmp:lbignum aLen
-  -> res:lbignum aLen ->
-  Stack uint64
+    #t:limb_t
+  -> #aLen:size_t
+  -> c0:carry t
+  -> c1:carry t
+  -> c2:carry t
+  -> t01:lbignum t aLen
+  -> t23:lbignum t aLen
+  -> tmp:lbignum t aLen
+  -> res:lbignum t aLen ->
+  Stack (limb t)
   (requires fun h ->
     live h t01 /\ live h t23 /\ live h tmp /\ live h res /\
     disjoint t01 t23 /\ disjoint tmp res /\ disjoint t01 res /\
@@ -66,28 +68,29 @@ val bn_middle_karatsuba:
   (ensures  fun h0 c h1 -> modifies (loc tmp |+| loc res) h0 h1 /\
     (c, as_seq h1 res) == K.bn_middle_karatsuba c0 c1 c2 (as_seq h0 t01) (as_seq h0 t23))
 
-let bn_middle_karatsuba #aLen c0 c1 c2 t01 t23 tmp res =
+let bn_middle_karatsuba #t #aLen c0 c1 c2 t01 t23 tmp res =
   let c_sign = c0 ^. c1 in
   let c3 = bn_sub_eq_len aLen t01 t23 tmp in let c3 = c2 -. c3 in
   let c4 = bn_add_eq_len aLen t01 t23 res in let c4 = c2 +. c4 in
-  let mask = u64 0 -. c_sign in
+  let mask = uint #t 0 -. c_sign in
   map2T aLen res (mask_select mask) res tmp;
   mask_select mask c4 c3
 
 
 inline_for_extraction noextract
 val bn_lshift_add_in_place:
-    #aLen:size_t
+    #t:limb_t
+  -> #aLen:size_t
   -> #bLen:size_t
-  -> a:lbignum aLen
-  -> b:lbignum bLen
+  -> a:lbignum t aLen
+  -> b:lbignum t bLen
   -> i:size_t{v i + v bLen <= v aLen} ->
-  Stack carry
+  Stack (carry t)
   (requires fun h -> live h a /\ live h b /\ disjoint a b)
   (ensures  fun h0 c h1 -> modifies (loc a) h0 h1 /\
     (c, as_seq h1 a) == K.bn_lshift_add (as_seq h0 a) (as_seq h0 b) (v i))
 
-let bn_lshift_add_in_place #aLen #bLen a b i =
+let bn_lshift_add_in_place #t #aLen #bLen a b i =
   let r = sub a i (aLen -! i) in
   let h0 = ST.get () in
   update_sub_f_carry h0 a i (aLen -! i)
@@ -97,17 +100,18 @@ let bn_lshift_add_in_place #aLen #bLen a b i =
 
 inline_for_extraction noextract
 val bn_lshift_add_early_stop_in_place:
-    #aLen:size_t
+    #t:limb_t
+  -> #aLen:size_t
   -> #bLen:size_t
-  -> a:lbignum aLen
-  -> b:lbignum bLen
+  -> a:lbignum t aLen
+  -> b:lbignum t bLen
   -> i:size_t{v i + v bLen <= v aLen} ->
-  Stack carry
+  Stack (carry t)
   (requires fun h -> live h a /\ live h b /\ disjoint a b)
   (ensures  fun h0 c h1 -> modifies (loc a) h0 h1 /\
     (c, as_seq h1 a) == K.bn_lshift_add_early_stop (as_seq h0 a) (as_seq h0 b) (v i))
 
-let bn_lshift_add_early_stop_in_place #aLen #bLen a b i =
+let bn_lshift_add_early_stop_in_place #t #aLen #bLen a b i =
   let r = sub a i bLen in
   let h0 = ST.get () in
   update_sub_f_carry h0 a i bLen
@@ -117,20 +121,21 @@ let bn_lshift_add_early_stop_in_place #aLen #bLen a b i =
 
 inline_for_extraction noextract
 val bn_karatsuba_res:
-    #aLen:size_t{2 * v aLen <= max_size_t /\ 0 < v aLen}
-  -> r01:lbignum aLen
-  -> r23:lbignum aLen
-  -> c5:uint64
-  -> t45:lbignum aLen
-  -> res:lbignum (aLen +! aLen) ->
-  Stack carry
+    #t:limb_t
+  -> #aLen:size_t{2 * v aLen <= max_size_t /\ 0 < v aLen}
+  -> r01:lbignum t aLen
+  -> r23:lbignum t aLen
+  -> c5:limb t
+  -> t45:lbignum t aLen
+  -> res:lbignum t (aLen +! aLen) ->
+  Stack (carry t)
   (requires fun h ->
     live h r01 /\ live h r23 /\ live h t45 /\ live h res /\ disjoint t45 res /\
     as_seq h res == LSeq.concat (as_seq h r01) (as_seq h r23))
   (ensures  fun h0 c h1 -> modifies (loc res) h0 h1 /\
     (c, as_seq h1 res) == K.bn_karatsuba_res (as_seq h0 r01) (as_seq h0 r23) c5 (as_seq h0 t45))
 
-let bn_karatsuba_res #aLen r01 r23 c5 t45 res =
+let bn_karatsuba_res #t #aLen r01 r23 c5 t45 res =
   push_frame ();
   let aLen2 = aLen /. 2ul in
   [@inline_let]
@@ -145,12 +150,13 @@ let bn_karatsuba_res #aLen r01 r23 c5 t45 res =
 
 inline_for_extraction noextract
 val bn_karatsuba_last:
-    aLen:size_t{4 * v aLen <= max_size_t /\ v aLen % 2 = 0 /\ 0 < v aLen}
-  -> c0:carry
-  -> c1:carry
-  -> tmp:lbignum (4ul *! aLen)
-  -> res:lbignum (aLen +! aLen) ->
-  Stack uint64
+    #t:limb_t
+  -> aLen:size_t{4 * v aLen <= max_size_t /\ v aLen % 2 = 0 /\ 0 < v aLen}
+  -> c0:carry t
+  -> c1:carry t
+  -> tmp:lbignum t (4ul *! aLen)
+  -> res:lbignum t (aLen +! aLen) ->
+  Stack (limb t)
   (requires fun h -> live h res /\ live h tmp /\ disjoint res tmp)
   (ensures  fun h0 c h1 -> modifies (loc res |+| loc tmp) h0 h1 /\
     (let sr01 = LSeq.sub (as_seq h0 res) 0 (v aLen) in
@@ -161,7 +167,7 @@ val bn_karatsuba_last:
      let sc, sres = K.bn_karatsuba_res sr01 sr23 sc5 sres in
      (c, as_seq h1 res) == (sc, sres)))
 
-let bn_karatsuba_last aLen c0 c1 tmp res =
+let bn_karatsuba_last #t aLen c0 c1 tmp res =
   let r01 = sub res 0ul aLen in
   let r23 = sub res aLen aLen in
   (**) let h = ST.get () in
@@ -182,11 +188,12 @@ let bn_karatsuba_last aLen c0 c1 tmp res =
 #push-options "--z3rlimit 150"
 
 val bn_karatsuba_mul_:
-    aLen:size_t{4 * v aLen <= max_size_t}
-  -> a:lbignum aLen
-  -> b:lbignum aLen
-  -> tmp:lbignum (4ul *! aLen)
-  -> res:lbignum (aLen +! aLen) ->
+    #t:limb_t
+  -> aLen:size_t{4 * v aLen <= max_size_t}
+  -> a:lbignum t aLen
+  -> b:lbignum t aLen
+  -> tmp:lbignum t (4ul *! aLen)
+  -> res:lbignum t (aLen +! aLen) ->
   Stack unit
   (requires fun h ->
     live h a /\ live h b /\ live h res /\ live h tmp /\
@@ -196,7 +203,7 @@ val bn_karatsuba_mul_:
     as_seq h1 res == K.bn_karatsuba_mul_ (v aLen) (as_seq h0 a) (as_seq h0 b))
 
 [@CInline]
-let rec bn_karatsuba_mul_ aLen a b tmp res =
+let rec bn_karatsuba_mul_ #t aLen a b tmp res =
   let h0 = ST.get () in
   norm_spec [zeta; iota; primops; delta_only [`%K.bn_karatsuba_mul_]]
     (K.bn_karatsuba_mul_ (v aLen) (as_seq h0 a) (as_seq h0 b));
@@ -235,10 +242,11 @@ let rec bn_karatsuba_mul_ aLen a b tmp res =
 //TODO: pass tmp as a parameter?
 inline_for_extraction noextract
 val bn_karatsuba_mul:
-    aLen:size_t{0 < v aLen /\ 4 * v aLen <= max_size_t}
-  -> a:lbignum aLen
-  -> b:lbignum aLen
-  -> res:lbignum (aLen +! aLen) ->
+    #t:limb_t
+  -> aLen:size_t{0 < v aLen /\ 4 * v aLen <= max_size_t}
+  -> a:lbignum t aLen
+  -> b:lbignum t aLen
+  -> res:lbignum t (aLen +! aLen) ->
   Stack unit
   (requires fun h ->
     live h a /\ live h b /\ live h res /\
@@ -246,19 +254,20 @@ val bn_karatsuba_mul:
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_seq h1 res == K.bn_karatsuba_mul (as_seq h0 a) (as_seq h0 b))
 
-let bn_karatsuba_mul aLen a b res =
+let bn_karatsuba_mul #t aLen a b res =
   push_frame ();
-  let tmp = create (4ul *! aLen) (u64 0) in
+  let tmp = create (4ul *! aLen) (uint #t 0) in
   bn_karatsuba_mul_ aLen a b tmp res;
   pop_frame ()
 
 
 inline_for_extraction noextract
 val bn_karatsuba_last_sqr:
-    aLen:size_t{4 * v aLen <= max_size_t /\ v aLen % 2 = 0 /\ 0 < v aLen}
-  -> tmp:lbignum (4ul *! aLen)
-  -> res:lbignum (aLen +! aLen) ->
-  Stack uint64
+    #t:limb_t
+  -> aLen:size_t{4 * v aLen <= max_size_t /\ v aLen % 2 = 0 /\ 0 < v aLen}
+  -> tmp:lbignum t (4ul *! aLen)
+  -> res:lbignum t (aLen +! aLen) ->
+  Stack (limb t)
   (requires fun h -> live h res /\ live h tmp /\ disjoint res tmp)
   (ensures  fun h0 c h1 -> modifies (loc res |+| loc tmp) h0 h1 /\
     (let sr01 = LSeq.sub (as_seq h0 res) 0 (v aLen) in
@@ -269,7 +278,7 @@ val bn_karatsuba_last_sqr:
      let sc, sres = K.bn_karatsuba_res sr01 sr23 sc5 sres in
      (c, as_seq h1 res) == (sc, sres)))
 
-let bn_karatsuba_last_sqr aLen tmp res =
+let bn_karatsuba_last_sqr #t aLen tmp res =
   let r01 = sub res 0ul aLen in
   let r23 = sub res aLen aLen in
   (**) let h = ST.get () in
@@ -288,10 +297,11 @@ let bn_karatsuba_last_sqr aLen tmp res =
 
 
 val bn_karatsuba_sqr_:
-    aLen:size_t{4 * v aLen <= max_size_t /\ 0 < v aLen}
-  -> a:lbignum aLen
-  -> tmp:lbignum (4ul *! aLen)
-  -> res:lbignum (aLen +! aLen) ->
+    #t:limb_t
+  -> aLen:size_t{4 * v aLen <= max_size_t /\ 0 < v aLen}
+  -> a:lbignum t aLen
+  -> tmp:lbignum t (4ul *! aLen)
+  -> res:lbignum t (aLen +! aLen) ->
   Stack unit
   (requires fun h ->
     live h a /\ live h res /\ live h tmp /\
@@ -300,7 +310,7 @@ val bn_karatsuba_sqr_:
     as_seq h1 res == K.bn_karatsuba_sqr_ (v aLen) (as_seq h0 a))
 
 [@CInline]
-let rec bn_karatsuba_sqr_ aLen a tmp res =
+let rec bn_karatsuba_sqr_ #t aLen a tmp res =
   let h0 = ST.get () in
   norm_spec [zeta; iota; primops; delta_only [`%K.bn_karatsuba_sqr_]]
     (K.bn_karatsuba_sqr_ (v aLen) (as_seq h0 a));
@@ -331,16 +341,17 @@ let rec bn_karatsuba_sqr_ aLen a tmp res =
 //TODO: pass tmp as a parameter?
 inline_for_extraction noextract
 val bn_karatsuba_sqr:
-    aLen:size_t{0 < v aLen /\ 4 * v aLen <= max_size_t}
-  -> a:lbignum aLen
-  -> res:lbignum (aLen +! aLen) ->
+    #t:limb_t
+  -> aLen:size_t{0 < v aLen /\ 4 * v aLen <= max_size_t}
+  -> a:lbignum t aLen
+  -> res:lbignum t (aLen +! aLen) ->
   Stack unit
   (requires fun h -> live h a /\ live h res /\ disjoint res a)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_seq h1 res == K.bn_karatsuba_sqr (as_seq h0 a))
 
-let bn_karatsuba_sqr aLen a res =
+let bn_karatsuba_sqr #t aLen a res =
   push_frame ();
-  let tmp = create (4ul *! aLen) (u64 0) in
+  let tmp = create (4ul *! aLen) (uint #t 0) in
   bn_karatsuba_sqr_ aLen a tmp res;
   pop_frame ()

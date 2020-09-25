@@ -52,19 +52,6 @@ let check_mod_exp #t #nLen n a bBits b =
   r
 
 
-val unsafe_bn_is_ith_bit_set:
-    #t:limb_t
-  -> #len:size_nat
-  -> b:lbignum t len
-  -> i:size_nat{i / bits t < len} ->
-  bool
-
-let unsafe_bn_is_ith_bit_set #t #len b i =
-  match t with
-  | U32 -> FStar.UInt32.(Lib.RawIntTypes.u32_to_UInt32 (bn_get_ith_bit b i) =^ 1ul)
-  | U64 -> FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 (bn_get_ith_bit b i) =^ 1uL)
-
-
 val bn_mod_exp_f:
     #t:limb_t
   -> #nLen:size_pos{nLen + nLen <= max_size_t}
@@ -78,7 +65,7 @@ val bn_mod_exp_f:
   tuple2 (lbignum t nLen) (lbignum t nLen)
 
 let bn_mod_exp_f #t #nLen n mu bBits bLen b i (aM, accM) =
-  let is_bit_set = unsafe_bn_is_ith_bit_set b i in
+  let is_bit_set = not (Hacl.Spec.Bignum.Base.unsafe_bool_of_limb0 (bn_get_ith_bit b i)) in
   let accM = if is_bit_set then mont_mul n mu aM accM else accM in // acc = (acc * a) % n
   let aM = mont_sqr n mu aM in // a = (a * a) % n
   (aM, accM)
