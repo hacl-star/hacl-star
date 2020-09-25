@@ -142,6 +142,7 @@ let mk_bn_mod_exp_precompr2 #t nLen #_ bn_mod_exp_loop n a bBits b r2 res =
 
 /// A fully runtime implementation of modular exponentiation.
 
+inline_for_extraction noextract
 let bn_mod_exp_loop_runtime t nLen = bn_mod_exp_loop nLen #(BM.mk_runtime_mont t nLen)
 
 let bn_mod_exp_precompr2 #t nLen =
@@ -264,6 +265,7 @@ let mk_bn_mod_exp_mont_ladder_precompr2 #t nLen #_ bn_mod_exp_mont_ladder_loop n
 
 /// A fully runtime implementation of modular exponentiation.
 
+inline_for_extraction noextract
 let bn_mod_exp_mont_ladder_loop_runtime t nLen = bn_mod_exp_mont_ladder_loop nLen #(BM.mk_runtime_mont t nLen)
 
 let bn_mod_exp_mont_ladder_precompr2 #t nLen =

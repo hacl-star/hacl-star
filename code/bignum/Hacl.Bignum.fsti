@@ -231,6 +231,7 @@ val bn_sub_mask: #t:limb_t -> len:size_t{v len > 0} -> bn_sub_mask_st t len
 ///  Get and set i-th bit of a bignum
 ///
 
+inline_for_extraction noextract
 val bn_get_ith_bit:
     #t:limb_t
   -> len:size_t

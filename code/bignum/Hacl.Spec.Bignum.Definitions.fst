@@ -10,7 +10,9 @@ open Lib.Sequence
 val blocks: x:size_pos -> m:size_pos -> Tot (r:size_pos{x <= m * r})
 let blocks x m = (x - 1) / m + 1
 
+inline_for_extraction noextract
 let limb_t = t:inttype{t = U32 \/ t = U64}
+inline_for_extraction noextract
 let limb (t:limb_t) = uint_t t SEC
 let lbignum (t:limb_t) len = lseq (limb t) len
 

@@ -10,7 +10,7 @@ open FStar.Mul
 
 #set-options "--z3rlimit 50 --ifuel 0 --fuel 0"
 
-noextract
+inline_for_extraction noextract
 let add_carry_st (t:inttype{t = U32 \/ t = U64}) =
     cin:uint_t t SEC
   -> x:uint_t t SEC
@@ -38,7 +38,7 @@ let add_carry (#t:inttype{t = U32 \/ t = U64}) : add_carry_st t =
   | U64 -> add_carry_u64
 
 
-noextract
+inline_for_extraction noextract
 let sub_borrow_st (t:inttype{t = U32 \/ t = U64}) =
     cin:uint_t t SEC
   -> x:uint_t t SEC
