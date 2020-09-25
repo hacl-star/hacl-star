@@ -6,6 +6,7 @@ open FStar.Mul
 
 open Lib.IntTypes
 open Lib.Buffer
+open Hacl.Bignum.Definitions
 
 include Hacl.Spec.Bignum.Base
 
@@ -24,14 +25,14 @@ and store the unsigned 64-bit result in out, and the carry-out in dst (carry or 
 *)
 
 inline_for_extraction noextract
-val addcarry_u64_st: c_in:carry -> a:uint64 -> b:uint64 -> out:lbuffer uint64 1ul ->
-  Stack carry
+val addcarry_st: #t:limb_t -> c_in:carry t -> a:limb t -> b:limb t -> out:lbuffer (limb t) 1ul ->
+  Stack (carry t)
   (requires fun h -> live h out)
   (ensures  fun h0 c_out h1 -> modifies (loc out) h0 h1 /\
-    (c_out, LSeq.index (as_seq h1 out) 0) == addcarry_u64 c_in a b)
+    (c_out, LSeq.index (as_seq h1 out) 0) == addcarry c_in a b)
 
-let addcarry_u64_st c_in a b out =
-  Lib.IntTypes.Intrinsics.add_carry_u64 c_in a b out
+let addcarry_st #t c_in a b out =
+  Lib.IntTypes.Intrinsics.add_carry c_in a b out
 
 (**
 unsigned char _subborrow_u64 (unsigned char b_in, unsigned __int64 a, unsigned __int64 b, unsigned __int64 * out)
@@ -42,11 +43,11 @@ unsigned 64-bit integer a. Store the unsigned 64-bit result in out, and the carr
 *)
 
 inline_for_extraction noextract
-val subborrow_u64_st: c_in:carry -> a:uint64 -> b:uint64 -> out:lbuffer uint64 1ul ->
-  Stack carry
+val subborrow_st: #t:limb_t -> c_in:carry t -> a:limb t -> b:limb t -> out:lbuffer (limb t) 1ul ->
+  Stack (carry t)
   (requires fun h -> live h out)
   (ensures  fun h0 c_out h1 -> modifies (loc out) h0 h1 /\
-    (c_out, LSeq.index (as_seq h1 out) 0) == subborrow_u64 c_in a b)
+    (c_out, LSeq.index (as_seq h1 out) 0) == subborrow c_in a b)
 
-let subborrow_u64_st c_in a b out =
-  Lib.IntTypes.Intrinsics.sub_borrow_u64 c_in a b out
+let subborrow_st c_in a b out =
+  Lib.IntTypes.Intrinsics.sub_borrow c_in a b out
