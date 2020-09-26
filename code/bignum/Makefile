@@ -27,5 +27,8 @@ dist/Makefile.basic: $(filter-out %prims.krml,$(ALL_KRML_FILES))
 
 dist/bignum-test.exe: $(HACL_HOME)/tests/bignum4096-test.o dist/libbignum.a
 
+%.exe:
+	$(CC) $(CFLAGS) $^ -o $@
+
 clean-c:
 	$(MAKE) -C dist/ -f Makefile.basic clean
