@@ -1,5 +1,6 @@
 module MerkleTree
 
+module HS = FStar.HyperStack
 module HST = FStar.HyperStack.ST
 module HH = FStar.Monotonic.HyperHeap
 
@@ -36,52 +37,76 @@ let pt = fun _ _ _ -> True
 [@ (Comment "  Constructor for hashes") "c_inline"]
 let mt_init_hash (hash_size:hash_size_t) (r:HST.erid): HST.ST (hash #hash_size) pf pt = MTNLHF.init_hash hash_size r
 
-[@ (Comment "  Destructor for hashes")  "c_inline"] 
-let mt_free_hash (hash_size:Ghost.erased hash_size_t) (h:hash #hash_size): HST.ST unit pf pt = MTNLHF.free_hash #hash_size h
+[@ (Comment "  Destructor for hashes")  "c_inline"]
+let mt_free_hash (#hash_size:Ghost.erased hash_size_t) (h:hash #hash_size): HST.ST unit pf pt = MTNLHF.free_hash h
 
 
 [@ (Comment "  Constructor for paths") "c_inline"]
 let mt_init_path (hash_size:hash_size_t) (mtr:HH.rid) (r:HST.erid): HST.ST path_p pf pt = MTNL.init_path hash_size mtr r
 
 [@ (Comment "  Destructor for paths") "c_inline"]
-let mt_free_path (p:path_p): HST.ST unit pf pt = MTNL.free_path p
+let mt_free_path (path:path_p): HST.ST unit pf pt = MTNL.free_path path
 
 [@ (Comment "  Length of a path
 
-  @param[in] p Path  
-  
-  return The length of the path") "c_inline"] 
-let mt_get_path_length (mtr:HH.rid) (p:const_path_p): HST.ST U32.t pf pt = MTNL.mt_get_path_length mtr p
+  @param[in] p Path
+
+  return The length of the path") "c_inline"]
+let mt_get_path_length (mtr:HH.rid) (path:const_path_p): HST.ST U32.t pf pt = MTNL.mt_get_path_length mtr path
+
+[@ (Comment "  Insert hash into path
+
+  @param[in] p Path
+  @param[in] hash Hash to insert") "c_inline"]
+let mt_path_insert
+  (#h:HS.mem)
+  (#mtr:HH.rid)
+  (path:path_p)
+  (hash:hash #(MTNL.Path?.hash_size (B.get h path 0)))
+: HST.ST unit pf pt
+= let hash_size = MTNL.Path?.hash_size (B.index path 0ul) in
+  MTNL.mt_path_insert #hash_size mtr path hash
+
+inline_for_extraction
+let path_hash_size (#h:HS.mem) (path:path_p) = MTNL.Path?.hash_size (B.get h path 0)
+inline_for_extraction
+let const_path_hash_size (#h:HS.mem) (path:const_path_p) = path_hash_size #h (CB.cast path)
+inline_for_extraction
+let tree_hash_size (#h:HS.mem) (mt:mt_p) = MTNL.MT?.hash_size (B.get h mt 0)
+inline_for_extraction
+let const_tree_hash_size (#h:HS.mem) (mt:const_mt_p) = tree_hash_size #h (CB.cast mt)
 
 [@ (Comment "  Get step on a path
 
   @param[in] p Path
   @param[in] i Path step index
-  
+
   return The hash at step i of p") "c_inline"]
-let mt_get_path_step 
-  (hash_size:Ghost.erased hash_size_t )
-  (mtr:HH.rid) 
-  (p:const_path_p) 
+let mt_get_path_step
+  (#h:HS.mem)
+  (#mtr:HH.rid)
+  (path:const_path_p)
   (i:U32.t)
-: HST.ST (hash #(Ghost.reveal hash_size)) pf pt 
-= MTNL.mt_get_path_step mtr p i
+: HST.ST (hash #(const_path_hash_size #h path)) pf pt
+= let hash_size = MTNL.Path?.hash_size (B.index (CB.cast path) 0ul) in
+  MTNL.mt_get_path_step #hash_size mtr path i
 
 [@ (Comment "  Precondition predicate for mt_get_path_step") "c_inline"]
 let mt_get_path_step_pre
-  (#hash_size:Ghost.erased hash_size_t)
-  (mtr:HH.rid) 
-  (p:const_path_p) 
+  (#h:HS.mem)
+  (mtr:HH.rid)
+  (path:const_path_p)
   (i:U32.t)
-: HST.ST bool pf pt 
-= MTNL.mt_get_path_step_pre #hash_size mtr p i
+: HST.ST bool pf pt
+= let hash_size = MTNL.Path?.hash_size (B.index (CB.cast path) 0ul) in
+  MTNL.mt_get_path_step_pre #hash_size mtr path i
 
 
 [@ (Comment "  Construction with custom hash functions
 
   @param[in]  hash_size Hash size (in bytes)
   @param[in]  i         The initial hash
-  
+
   return The new Merkle tree") "c_inline"]
 let mt_create_custom
   (hash_size:hash_size_t)
@@ -93,7 +118,7 @@ let mt_create_custom
 = MTNL.mt_create_custom hash_size hash_spec r i hash_fun
 
 
-[@ (Comment "    Destruction
+[@ (Comment "  Destruction
 
   @param[in]  mt  The Merkle tree") "c_inline"]
 let mt_free (mt:mt_p): HST.ST unit pf pt = MTNL.mt_free mt
@@ -105,20 +130,44 @@ let mt_free (mt:mt_p): HST.ST unit pf pt = MTNL.mt_free mt
   @param[in]  v   The tree does not take ownership of the hash, it makes a copy of its content.
 
  Note: The content of the hash will be overwritten with an arbitrary value.") "c_inline"]
-let mt_insert (hash_size:Ghost.erased hash_size_t) (mt:mt_p) (v:hash #hash_size): HST.ST unit pf pt = MTNL.mt_insert hash_size mt v
+let mt_insert
+  (#h:HS.mem)
+  (mt:mt_p)
+  (v:hash #(tree_hash_size #h mt))
+: HST.ST unit pf pt
+= let hash_size = MTNL.MT?.hash_size (B.index mt 0ul) in
+  MTNL.mt_insert hash_size mt v
 
 [@ (Comment "  Precondition predicate for mt_insert") "c_inline"]
-let mt_insert_pre (#hash_size:Ghost.erased hash_size_t) (mt:const_mt_p) (v:hash #hash_size): HST.ST bool pf pt = MTNL.mt_insert_pre #hash_size mt v
+let mt_insert_pre
+  (#h:HS.mem)
+  (mt:const_mt_p)
+  (v:hash #(const_tree_hash_size #h mt))
+: HST.ST bool pf pt
+= let hash_size = MTNL.MT?.hash_size (B.index (CB.cast mt) 0ul) in
+  MTNL.mt_insert_pre #hash_size mt v
 
 
 [@ (Comment "  Getting the Merkle root
 
   @param[in]  mt   The Merkle tree
   @param[out] root The Merkle root") "c_inline"]
-let mt_get_root (#hash_size:Ghost.erased hash_size_t) (mt:const_mt_p) (root:hash #hash_size): HST.ST unit pf pt = MTNL.mt_get_root #hash_size mt root
+let mt_get_root
+  (#h:HS.mem)
+  (mt:const_mt_p)
+  (root:hash #(const_tree_hash_size #h mt))
+: HST.ST unit pf pt
+= let hash_size = MTNL.MT?.hash_size (B.index (CB.cast mt) 0ul) in
+  MTNL.mt_get_root #hash_size mt root
 
 [@ (Comment "  Precondition predicate for mt_get_root") "c_inline"]
-let mt_get_root_pre (#hash_size:Ghost.erased hash_size_t) (mt:const_mt_p) (root:hash #hash_size): HST.ST bool pf pt = MTNL.mt_get_root_pre #hash_size mt root
+let mt_get_root_pre
+  (#h:HS.mem)
+  (mt:const_mt_p)
+  (root:hash #(const_tree_hash_size #h mt))
+: HST.ST bool pf pt
+= let hash_size = MTNL.MT?.hash_size (B.index (CB.cast mt) 0ul) in
+  MTNL.mt_get_root_pre #hash_size mt root
 
 
 [@ (Comment "  Getting a Merkle path
@@ -136,23 +185,25 @@ let mt_get_root_pre (#hash_size:Ghost.erased hash_size_t) (mt:const_mt_p) (root:
   - idx must be within the currently held indices in the tree (past the
     last flush index).") "c_inline"]
 let mt_get_path
-  (#hash_size:Ghost.erased hash_size_t)
+  (#h:HS.mem)
   (mt:const_mt_p)
   (idx:offset_t)
-  (path:path_p)
-  (root:hash #hash_size)
+  (path:path_p{path_hash_size #h path = const_tree_hash_size #h mt})
+  (root:hash #(path_hash_size #h path))
 : HST.ST index_t pf pt
-= MTNL.mt_get_path #hash_size mt idx path root
+= let hash_size = MTNL.MT?.hash_size (B.index (CB.cast mt) 0ul) in
+  MTNL.mt_get_path #hash_size mt idx path root
 
 [@ (Comment "  Precondition predicate for mt_get_path") "c_inline"]
 let mt_get_path_pre
-  (#hash_size:Ghost.erased hash_size_t)
+  (#h:HS.mem)
   (mt:const_mt_p)
   (idx:offset_t)
-  (path:const_path_p)
-  (root:hash #hash_size)
+  (path:const_path_p{const_path_hash_size #h path = const_tree_hash_size #h mt})
+  (root:hash #(const_path_hash_size #h path))
 : HST.ST bool pf pt
-= MTNL.mt_get_path_pre #hash_size mt idx path root
+= let hash_size = MTNL.MT?.hash_size (B.index (CB.cast mt) 0ul) in
+  MTNL.mt_get_path_pre #hash_size mt idx path root
 
 
 [@ (Comment "  Flush the Merkle tree
@@ -198,20 +249,32 @@ let mt_retract_to_pre (mt:const_mt_p) (idx:offset_t): HST.ST bool pf pt = MTNL.m
 
   Note: max - tgt must be less than 2^32.") "c_inline"]
 let mt_verify
+  (#h:HS.mem)
   (#hash_size:Ghost.erased hash_size_t)
   (#hash_spec:MTS.hash_fun_t #(U32.v hash_size))
   (mt:const_mt_p)
   (tgt:UInt64.t)
   (max:UInt64.t)
   (mtr:HH.rid)
-  (path:const_path_p)
-  (root:hash #hash_size)
+  (path:const_path_p{let phs = const_path_hash_size #h path in phs = const_tree_hash_size #h mt /\ phs = Ghost.reveal hash_size})
+  (root:hash #(const_path_hash_size #h path))
 : HST.ST bool pf pt
-= MTNL.mt_verify #hash_size #hash_spec mt tgt max mtr path root
+= let dmt = B.index (CB.cast mt) 0ul in
+  let hsz = MTNL.MT?.hash_size dmt in
+  MTNL.mt_verify #hsz #hash_spec mt tgt max mtr path root
 
 [@ (Comment "  Precondition predicate for mt_verify") "c_inline"]
-let mt_verify_pre (#hash_size:Ghost.erased hash_size_t) (mt:const_mt_p) (tgt:UInt64.t) (max:UInt64.t) (mtr:HH.rid) (path:const_path_p) (root:hash #hash_size): HST.ST bool pf pt
-= MTNL.mt_verify_pre #hash_size mt tgt max mtr path root
+let mt_verify_pre
+  (#h:HS.mem)
+  (mt:const_mt_p)
+  (tgt:UInt64.t)
+  (max:UInt64.t)
+  (mtr:HH.rid)
+  (path:const_path_p{const_path_hash_size #h path = const_tree_hash_size #h mt})
+  (root:hash #(const_path_hash_size #h path))
+: HST.ST bool pf pt
+= let hash_size = MTNL.MT?.hash_size (B.index (CB.cast mt) 0ul) in
+  MTNL.mt_verify_pre #hash_size mt tgt max mtr path root
 
 
 [@ (Comment "  Serialization size
@@ -264,12 +327,12 @@ let mt_deserialize
 
   return the number of bytes written") "c_inline"]
 let mt_serialize_path
-  (#hash_size:Ghost.erased hash_size_t)
   (path:const_path_p)
   (buf:MTNLS.uint8_p)
   (len:UInt64.t)
 : HST.ST UInt64.t pf pt
-= MTNLS.mt_serialize_path #hash_size path buf len
+= let hash_size = MTNL.Path?.hash_size (B.index (CB.cast path) 0ul) in
+  MTNLS.mt_serialize_path #hash_size path buf len
 
 
 [@ (Comment "  Path deserialization
@@ -281,7 +344,6 @@ let mt_serialize_path
 
  Note: buf must point to an allocated buffer.") "c_inline"]
 let mt_deserialize_path
-  (#hash_size:hash_size_t)
   (rid:HST.erid)
   (buf:MTNLS.const_uint8_p)
   (len:UInt64.t{CB.length buf = U64.v len})
