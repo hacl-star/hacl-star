@@ -41,6 +41,47 @@ extern "C" {
 #include "Lib_Memzero0.h"
 #include "Hacl_Impl_Blake2_Constants.h"
 
+/* SNIPPET_START: Hacl_Blake2s_32_blake2s_init */
+
+void
+Hacl_Blake2s_32_blake2s_init(
+  uint32_t *wv,
+  uint32_t *hash,
+  uint32_t kk,
+  uint8_t *k,
+  uint32_t nn
+);
+
+/* SNIPPET_END: Hacl_Blake2s_32_blake2s_init */
+
+/* SNIPPET_START: Hacl_Blake2s_32_blake2s_update_multi */
+
+void
+Hacl_Blake2s_32_blake2s_update_multi(
+  uint32_t len,
+  uint32_t *wv,
+  uint32_t *hash,
+  uint64_t prev,
+  uint8_t *blocks,
+  uint32_t nb
+);
+
+/* SNIPPET_END: Hacl_Blake2s_32_blake2s_update_multi */
+
+/* SNIPPET_START: Hacl_Blake2s_32_blake2s_update_last */
+
+void
+Hacl_Blake2s_32_blake2s_update_last(
+  uint32_t len,
+  uint32_t *wv,
+  uint32_t *hash,
+  uint64_t prev,
+  uint32_t rem,
+  uint8_t *d
+);
+
+/* SNIPPET_END: Hacl_Blake2s_32_blake2s_update_last */
+
 /* SNIPPET_START: K___uint32_t_uint32_t */
 
 typedef struct K___uint32_t_uint32_t_s
@@ -51,6 +92,12 @@ typedef struct K___uint32_t_uint32_t_s
 K___uint32_t_uint32_t;
 
 /* SNIPPET_END: K___uint32_t_uint32_t */
+
+/* SNIPPET_START: Hacl_Blake2s_32_blake2s_finish */
+
+void Hacl_Blake2s_32_blake2s_finish(uint32_t nn, uint8_t *output, uint32_t *hash);
+
+/* SNIPPET_END: Hacl_Blake2s_32_blake2s_finish */
 
 /* SNIPPET_START: Hacl_Blake2s_32_blake2s */
 
