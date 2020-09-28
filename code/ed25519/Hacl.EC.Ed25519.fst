@@ -108,6 +108,28 @@ let felem_inv a out =
   Hacl.Bignum25519.reduce_513 out
 
 
+val felem_load: b:lbuffer uint8 32ul -> out:F51.felem ->
+  Stack unit
+  (requires fun h -> live h b /\ live h out)
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    F51.mul_inv_t h1 out /\
+    F51.as_nat h1 out == Lib.ByteSequence.nat_from_bytes_le (as_seq h0 b) % pow2 255)
+
+let felem_load b out =
+  Hacl.Bignum25519.load_51 out b
+
+
+val felem_store: a:F51.felem -> out:lbuffer uint8 32ul ->
+  Stack unit
+  (requires fun h ->
+    live h a /\ live h out /\
+    F51.mul_inv_t h a)
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    as_seq h1 out == Lib.ByteSequence.nat_to_bytes_le 32 (F51.fevalh h0 a))
+
+let felem_store a out =
+  Hacl.Bignum25519.store_51 out a
+
 //
 // Elliptic curve operations
 //
