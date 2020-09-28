@@ -43,6 +43,11 @@ extern "C" {
 /* SNIPPET_START: Hacl_Streaming_Functor_state_s___uint32_t____ */
 
 typedef struct Hacl_Streaming_Functor_state_s___uint32_t_____s
+{
+  uint32_t *block_state;
+  uint8_t *buf;
+  uint64_t total_len;
+}
 Hacl_Streaming_Functor_state_s___uint32_t____;
 
 /* SNIPPET_END: Hacl_Streaming_Functor_state_s___uint32_t____ */
@@ -122,6 +127,11 @@ void Hacl_Streaming_SHA2_free_256(Hacl_Streaming_Functor_state_s___uint32_t____ 
 /* SNIPPET_START: Hacl_Streaming_Functor_state_s___uint64_t____ */
 
 typedef struct Hacl_Streaming_Functor_state_s___uint64_t_____s
+{
+  uint64_t *block_state;
+  uint8_t *buf;
+  uint64_t total_len;
+}
 Hacl_Streaming_Functor_state_s___uint64_t____;
 
 /* SNIPPET_END: Hacl_Streaming_Functor_state_s___uint64_t____ */
