@@ -641,9 +641,9 @@ let lemma_pif_to_domain #c h p =
   lemmaFromDomain #c x;
   lemmaFromDomain #c y;
   lemmaFromDomain #c z;
-  lemma_multiplication_not_mod_prime x; 
-  lemma_multiplication_not_mod_prime y;
-  lemma_multiplication_not_mod_prime z
+  lemma_multiplication_not_mod_prime #c x; 
+  lemma_multiplication_not_mod_prime #c y;
+  lemma_multiplication_not_mod_prime #c z
 
 
 val lemma_coord: #c: curve -> h3: mem -> q: point c -> Lemma (

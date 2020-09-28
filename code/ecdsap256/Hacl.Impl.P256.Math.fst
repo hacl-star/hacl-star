@@ -171,7 +171,7 @@ val lemma_l_ferm: unit -> Lemma
 
 let lemma_l_ferm () =
   let r = modp_inv2_prime (pow2 256) prime_p256_order in
-  assert_norm (exp (modp_inv2_prime (pow2 256) prime_p256_order) (prime_p256_order - 1)  == 1);
+  assert_norm (exp #prime_p256_order (modp_inv2_prime (pow2 256) prime_p256_order) (prime_p256_order - 1)  == 1);
   lemma_pow_mod_n_is_fpow prime_p256_order r (prime_p256_order - 1)
   
 
@@ -222,8 +222,18 @@ let lemma_multiplication_not_mod_prime_p256 a =
 val lemma_multiplication_not_mod_prime_p384: a:nat{a < prime384} ->
   Lemma (a * (modp_inv2 #P384 (pow2 384)) % prime384 == 0 <==> a == 0)
 
-let lemma_multiplication_not_mod_prime a =
+let lemma_multiplication_not_mod_prime_p384 a =
   Classical.move_requires lemma_multiplication_not_mod_prime_left_p384 a
+
+
+val lemma_multiplication_not_mod_prime: #c: curve -> a: nat {a < getPrime c} -> 
+  Lemma (a * (modp_inv2 #c (getPower2 c)) % getPrime c == 0 <==> a == 0)
+  
+let lemma_multiplication_not_mod_prime #c a = 
+  match c with 
+  |P256 -> lemma_multiplication_not_mod_prime_p256 a
+  |P384 -> lemma_multiplication_not_mod_prime_p384 a
+
 
 
 val lemma_modular_multiplication_p256: a:nat{a < prime256} -> b:nat{b < prime256} -> Lemma

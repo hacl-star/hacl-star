@@ -545,3 +545,17 @@ val changeEndian_le_be: #c: curve -> a:nat{a < getPower2 c} -> Lemma
 let changeEndian_le_be #c a =
   changeEndianLemmaI #c a;
   uints_to_bytes_be_nat_lemma #U64 #SEC (uint_v (getCoordinateLenU64 c)) a
+
+
+val lemmaPowerMoreThanU64: #c: curve -> Lemma (getPower2 c > pow2 64)
+
+let lemmaPowerMoreThanU64 #c = 
+  assert_norm (getPower2 P256 > pow2 64);
+  assert_norm (getPower2 P384 > pow2 64)
+
+
+val lemmaPrimeLowerBound: #c: curve -> Lemma (getPrime c > pow2 (getPower c - 1))
+
+let lemmaPrimeLowerBound #c = 
+  assert_norm (getPrime P256 > pow2 (getPower P256 - 1));  
+  assert_norm (getPrime P384 > pow2 (getPower P384 - 1))

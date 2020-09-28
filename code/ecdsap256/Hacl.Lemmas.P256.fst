@@ -404,13 +404,13 @@ let rec power_mult a b c =
 
 (* Start of Marina RSA PSS code *)
 val lemma_fpow_unfold0: a: nat -> b: pos {1 < b /\ b % 2 = 0} -> prime: pos {a < prime} -> Lemma (
-  exp #prime a b = exp #prime (fmul a a) (b / 2))
+  exp #prime a b = exp #prime (fmul #prime a a) (b / 2))
 
 let lemma_fpow_unfold0 a b prime = ()
 
 
 val lemma_fpow_unfold1: a: nat -> b: pos {1 < b /\ b % 2 = 1} -> prime: pos { a < prime} -> Lemma (
-  exp #prime a b = fmul (exp #prime (fmul a a) (b / 2)) a)
+  exp #prime a b = fmul #prime (exp #prime (fmul #prime a a) (b / 2)) a)
 
 let lemma_fpow_unfold1 a b prime = ()
 
@@ -468,13 +468,13 @@ let rec lemma_pow_mod_n_is_fpow n a b =
       calc (==) {
 	exp #n a b;
 	(==) { lemma_fpow_unfold1 a b n }
-	fmul a (exp (fmul #n a a) (b / 2));
+	fmul #n a (exp #n (fmul #n a a) (b / 2));
 	(==) { lemma_pow_mod_n_is_fpow n (fmul #n a a) (b / 2) }
-	fmul a (pow (fmul #n a a) (b / 2) % n);
+	fmul #n a (pow (fmul #n a a) (b / 2) % n);
 	(==) { power_distributivity (a * a) (b / 2) n }
-	fmul a (pow (a * a) (b / 2) % n);
+	fmul #n a (pow (a * a) (b / 2) % n);
 	(==) { lemma_pow_double a (b / 2) }
-	fmul a (pow a (b / 2 * 2) % n);
+	fmul #n a (pow a (b / 2 * 2) % n);
 	(==) { Math.Lemmas.lemma_mod_mul_distr_r a (pow a (b / 2 * 2)) n }
 	a * pow a (b / 2 * 2) % n;
 	(==) { power_one a }

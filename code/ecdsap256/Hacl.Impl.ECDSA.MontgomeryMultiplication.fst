@@ -22,95 +22,110 @@ open Lib.IntTypes.Intrinsics
 
 #reset-options "--z3rlimit 200"
 
-val lemma_montgomery_mult_1: t : int  -> 
+val lemma_montgomery_mult_1: #c: curve ->
+  t : int  -> 
   k0:nat {k0 = min_one_prime (pow2 64) (- prime)} -> 
   r: nat {t <= r} -> 
-  Lemma ((t + (((t % pow2 64) * k0) % pow2 64 * prime_p256_order)) / pow2 64 <= (pow2 64 * prime_p256_order + r) / pow2 64)
+  Lemma (
+    let order = getOrder #c in 
+    (t + (((t % pow2 64) * k0) % pow2 64 * order)) / pow2 64 <= (pow2 64 * order + r) / pow2 64)
 
-let lemma_montgomery_mult_1 t k0 r = 
+let lemma_montgomery_mult_1 #c t k0 r = 
+  let order = getOrder #c in 
   let t1 = t % pow2 64 in 
   let y = (t1 * k0) % pow2 64 in 
-  let t2 = y * prime_p256_order in 
-    mul_lemma_1 y (pow2 64) prime_p256_order
+  mul_lemma_1 y (pow2 64) order
 
 
 val lemma_montgomery_mult_result_less_than_prime_p256_order: 
-  a: nat{a < prime_p256_order} -> 
-  b: nat{b < prime_p256_order} -> 
+  #c: curve -> 
+  a: nat{a < getOrder #c} -> 
+  b: nat{b < getOrder #c} -> 
   k0:nat {k0 = min_one_prime (pow2 64) (- prime)} -> 
   Lemma
   (  
+    let order = getOrder #c in 
+    
     let t = a * b in 
     let s = 64 in 
   
     let t1 = t % pow2 s in 
     let y = (t1 * k0) % pow2 s in 
-    let t2 = y * prime_p256_order in 
+    let t2 = y * order in 
     let t3 = t + t2 in
     let t = t3 / pow2 s in 
   
     let t1 = t % pow2 s in 
     let y = (t1 * k0) % pow2 s in 
-    let t2 = y * prime_p256_order in 
+    let t2 = y * order in 
     let t3 = t + t2 in
     let t = t3 / pow2 s in 
   
     let t1 = t % pow2 s in 
     let y = (t1 * k0) % pow2 s in 
-    let t2 = y * prime_p256_order in 
+    let t2 = y * order in 
     let t3 = t + t2 in
     let t = t3 / pow2 s in 
     
     let t1 = t % pow2 s in 
     let y = (t1 * k0) % pow2 s in 
-    let t2 = y * prime_p256_order in 
+    let t2 = y * order in 
     let t3 = t + t2 in
     let t = t3 / pow2 s in 
-    t < 2 * prime_p256_order)
+    t < 2 * order)
 
 
-let lemma_montgomery_mult_result_less_than_prime_p256_order a b k0 = 
+let lemma_montgomery_mult_result_less_than_prime_p256_order #c a b k0 = 
+  let order = getOrder #c in 
+  
   let t = a * b in 
   let s = 64 in 
-    mul_lemma_ a b prime_p256_order;
+    mul_lemma_ a b order;
 
-  let r = prime_p256_order * prime_p256_order + 1 in 
+  let r = order * order + 1 in 
 
   let t1 = t % pow2 s in 
   let y = (t1 * k0) % pow2 s in 
-  let t2 = y * prime_p256_order in 
+  let t2 = y * order in 
   let t3 = t + t2 in
   let tU = t3 / pow2 s in 
-  lemma_montgomery_mult_1 t k0 r; 
+  lemma_montgomery_mult_1 #c t k0 r; 
 
   let t = tU in 
-  let r = (pow2 64 * prime_p256_order + r) / pow2 64 in 
+  let r = (pow2 64 * order + r) / pow2 64 in 
   let t1 = t % pow2 s in 
   let y = (t1 * k0) % pow2 s in 
-  let t2 = y * prime_p256_order in 
+  let t2 = y * order in 
   let t3 = t + t2 in
   let tU = t3 / pow2 s in 
-  lemma_montgomery_mult_1 t k0 r; 
+  lemma_montgomery_mult_1 #c t k0 r; 
 
   let t = tU in 
-  let r = (pow2 64 * prime_p256_order + r) / pow2 64 in 
+  let r = (pow2 64 * order + r) / pow2 64 in 
   let t1 = t % pow2 s in 
   let y = (t1 * k0) % pow2 s in 
-  let t2 = y * prime_p256_order in 
+  let t2 = y * order in 
   let t3 = t + t2 in
   let tU = t3 / pow2 s in 
-  lemma_montgomery_mult_1 t k0 r; 
+  lemma_montgomery_mult_1 #c t k0 r; 
 
-  let r = (pow2 64 * prime_p256_order + r) / pow2 64 in 
+  let r = (pow2 64 * order + r) / pow2 64 in 
   let t = tU in 
   let t1 = t % pow2 s in 
   let y = (t1 * k0) % pow2 s in 
-  let t2 = y * prime_p256_order in 
+  let t2 = y * order in 
   let t3 = t + t2 in
   let tU = t3 / pow2 s in 
-  lemma_montgomery_mult_1 t k0 r; 
-  assert_norm ((pow2 64 * prime_p256_order +  (pow2 64 * prime_p256_order +  (pow2 64 * prime_p256_order +  (pow2 64 * prime_p256_order +  prime_p256_order * prime_p256_order + 1) / pow2 64) / pow2 64) / pow2 64) / pow2 64 < 2 * prime_p256_order)
+  lemma_montgomery_mult_1 #c t k0 r; 
 
+  let order = getOrder #c in 
+  let orderP256 = getOrder #P256 in 
+  let orderP384 = getOrder #P384 in 
+
+  assert_norm ((pow2 64 * orderP256 + (pow2 64 * orderP256 + (pow2 64 * orderP256 + (pow2 64 * orderP256 + orderP256 * orderP256 + 1) / pow2 64) / pow2 64) / pow2 64) / pow2 64 < 2 * orderP256);
+
+  admit()
+  
 
 val lemma_montgomery_mod_inverse_addition: a: nat -> 
   Lemma (

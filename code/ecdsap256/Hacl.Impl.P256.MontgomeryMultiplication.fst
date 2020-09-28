@@ -57,6 +57,29 @@ let montgomery_multiplication_round #c t round =
   pop_frame()  
 
 
+(* n = 2 ** 256 - 2 **224 + 2 ** 192 + 2 ** 96
+
+r = 2 ** 64
+s = 4
+rs = r ** s
+
+k = rs - n
+
+- (((((k * n) / r) / r) / r) / r) + ((n / r ) /  r) + n / r*)
+
+
+val lemma_test: #c: curve -> n: nat ->  t: nat {t < n * n} -> r_minor: nat -> 
+  steps: nat {n < steps * r_minor} -> Lemma (t + n * (t % r_minor) < (steps + 1) * r_minor * n)
+
+let lemma_test #c n t r_minor steps = 
+  assert(t % r_minor < r_minor);
+  assert(n * (t % r_minor) < r_minor * n);
+  assert(t < n * n);
+  assert(t < (steps * r_minor) * n);
+  assert(t + n * (t % r_minor) < (steps + 1) * r_minor * n)
+
+
+
 #push-options "--z3rlimit 400"
 
 val montgomery_multiplication_round_k0_: #c: curve -> k0: uint64 -> t: widefelem c -> 
@@ -128,16 +151,26 @@ let lemma_one_round_0 a b1 b2 =
   lemma_div_plus b1 b2 (pow2 64)
 
 
+val montgomery_multiplication_one_round_proof_border: #c: curve ->
+  z: nat {z < pow2 64} -> 
+  t: nat {t < getPrime c * getPrime c} -> 
+  result: nat {result = (t + getPrime c * z) / pow2 64} ->
+  Lemma
+    (result < getPrime c * getPrime c)
+
+
+let montgomery_multiplication_one_round_proof_border #c z t result  = 
+  let prime = getPrime c in 
+  lemma_mult_lt_right prime z (pow2 64)
+
 
 val montgomery_multiplication_one_round_proof_w_ko: 
   #c: curve {(getPrime c + 1) % pow2 64 == 0} ->
   t: nat {t < getPrime c * getPrime c} -> 
-  result: nat {result = (t + (t % pow2 64) * getPrime c) / pow2 64} ->
+  result: nat {result = (t + getPrime c * (t % pow2 64)) / pow2 64} ->
   co: nat {co % getPrime c == t % getPrime c} -> 
   Lemma (
-    result % getPrime c == co * modp_inv2 #c (pow2 64) % getPrime c  /\
-     result < getPrime c * getPrime c /\
-     result <= t / pow2 64 + getPrime c)
+    result % getPrime c == co * modp_inv2 #c (pow2 64) % getPrime c)
 
 
 let montgomery_multiplication_one_round_proof_w_ko #c t result co = 
@@ -147,21 +180,7 @@ let montgomery_multiplication_one_round_proof_w_ko #c t result co =
   
   lemma_mult_lt_sqr prime prime (getPower2 c);
   lemma_mult_lt_left (pow2 64) prime (getPower2 c);
-  lemma_add_lt (prime * prime) (pow2 64 * prime) (getPower2 c * getPower2 c) (pow2 64 * getPower2 c);
-  assume (pow2 64 < getPower2 c);
-  lemma_mult_lt_right (getPower2 c) (pow2 64) (getPower2 c);
-  pow2_plus (getPower c) (getPower c);
-  pow2_double_mult (2 * getPower c); 
-  lemma_div_lt_nat (getPower2 c * getPower2 c + pow2 64 * getPower2 c) (2 * getPower c + 1) 64;
-  assume (getPrime c > pow2 (getPower c - 1));
-
-  pow2_plus (getPower c - 1) (getPower c - 1);
-  lemma_mult_lt_sqr (pow2 (getPower c - 1)) (pow2 (getPower c - 1)) (getPrime c);
-  pow2_lt_compat (2 * getPower c - 2) (2 * getPower c - 63);
-
-  lemma_mult_lt_right prime (t % pow2 64) (pow2 64);
-  lemma_one_round_0 result t prime
-  
+  lemma_add_lt (prime * prime) (pow2 64 * prime) (getPower2 c * getPower2 c) (pow2 64 * getPower2 c)
 
 
 val lemma_mod_inv: #c: curve ->  t: int -> Lemma (t % getPrime c = t * modp_inv2 #c (pow2 0) % getPrime c)
@@ -171,19 +190,6 @@ let lemma_mod_inv #c t =
   lemma_pow_mod_n_is_fpow prime 1 (prime - 2);
   power_one (prime - 2)
 
-
-(* 
-
-val montgomery_multiplication_buffer_by_one: #c: curve -> a: felem c -> result: felem c -> 
-  Stack unit
-    (requires (fun h -> live h a /\ as_nat c h a < getPrime c /\ live h result)) 
-    (ensures (fun h0 _ h1 -> 
-      let prime = getPrime c in 
-      modifies (loc result) h0 h1 /\ 
-      as_nat c h1 result  = (as_nat c h0 a * modp_inv2_prime (getPower2 c) prime) % prime /\
-      as_nat c h1 result = fromDomain_ #c (as_nat c h0 a)))
-
-*)
 
 val lemma_inv1: a: int -> b: int{a < b} -> Lemma (a < b * b)
 
@@ -198,7 +204,7 @@ let lemma_modp_as_pow #c a =
   lemma_pow_mod_n_is_fpow prime (a % prime) (prime - 2)
 
 
-val lemma_inv2: #c: curve{(getPrime c + 1) % pow2 64 == 0} 
+val lemma_multiplication_by_inverse_w_k0: #c: curve{(getPrime c + 1) % pow2 64 == 0} 
   -> a0: nat -> a_i: nat {a_i < getPrime c * getPrime c} 
   -> a_i1: nat {a_i1 = (a_i + getPrime c * (a_i % pow2 64)) / pow2 64} 
   -> i: nat {i < uint_v (getCoordinateLenU64 c)} -> 
@@ -207,40 +213,124 @@ val lemma_inv2: #c: curve{(getPrime c + 1) % pow2 64 == 0}
     (ensures (a_i1 % getPrime c = a0 * modp_inv2 #c (pow2 ((i + 1) * 64)) % getPrime c))
 
 
-val lemma_inv3: a: int -> b: int -> c: int -> Lemma (a * b * c == a * (b * c))
-
-let lemma_inv3 a b c = ()
-
-
-let lemma_inv2 #c a0 a_i a_i1 i = 
+let lemma_multiplication_by_inverse_w_k0 #c a0 a_i a_i1 i = 
   let prime = getPrime c in 
+
+  let open FStar.Tactics in 
+  let open FStar.Tactics.Canon in 
+ 
+  assert_by_tactic (a0 * (modp_inv2 #c (pow2 (i * 64))) * (modp_inv2 #c (pow2 64)) == a0 * ((modp_inv2 #c (pow2 (i * 64))) * (modp_inv2 #c (pow2 64)))) canon;
+ 
   montgomery_multiplication_one_round_proof_w_ko #c a_i a_i1 (a0 * modp_inv2 #c (pow2 (i * 64)));
-
-
-  lemma_inv3 a0 (modp_inv2 #c (pow2 (i * 64))) (modp_inv2 #c (pow2 64));
   lemma_mod_mul_distr_r a0 (modp_inv2 #c (pow2 (i * 64)) * modp_inv2 #c (pow2 64)) prime;
+
+
+  let pow2_64 = pow2 64 in 
 
   calc(==)
   {
-    modp_inv2 #c (pow2 (i * 64)) * modp_inv2 #c (pow2 64) % prime;
-    (==) {lemma_modp_as_pow #c (pow2 (i * 64)); lemma_modp_as_pow #c (pow2 64)}
-    (pow (pow2 64 % prime) (prime - 2) % prime) * (pow (pow2 (i * 64) % prime) (prime - 2) % prime) % prime;
-    (==) {power_distributivity (pow2 64) (prime - 2) prime}
-    (pow (pow2 64) (prime - 2) % prime) * (pow (pow2 (i * 64) % prime) (prime - 2) % prime) % prime;
+    modp_inv2 #c (pow2 (i * 64)) * modp_inv2 #c pow2_64 % prime;
+    (==) {lemma_modp_as_pow #c (pow2 (i * 64)); lemma_modp_as_pow #c pow2_64}
+    (pow (pow2_64 % prime) (prime - 2) % prime) * (pow (pow2 (i * 64) % prime) (prime - 2) % prime) % prime;
+    (==) {power_distributivity (pow2_64) (prime - 2) prime}
+    (pow (pow2_64) (prime - 2) % prime) * (pow (pow2 (i * 64) % prime) (prime - 2) % prime) % prime;
     (==) {power_distributivity (pow2 (i * 64)) (prime - 2) prime}
-    (pow (pow2 64) (prime - 2) % prime) * (pow (pow2 (i * 64)) (prime - 2) % prime) % prime;
-    (==) {lemma_mod_mul_distr_l (pow (pow2 64) (prime - 2)) (pow (pow2 (i * 64)) (prime - 2) % prime) prime}
-    (pow (pow2 64) (prime - 2)) * (pow (pow2 (i * 64)) (prime - 2) % prime) % prime;
-    (==) {lemma_mod_mul_distr_r (pow (pow2 64) (prime - 2)) (pow (pow2 (i * 64)) (prime - 2)) prime}
-    (pow (pow2 64) (prime - 2)) * (pow (pow2 (i * 64)) (prime - 2)) % prime;
-    (==) {power_distributivity_2 (pow2 64) (pow2 (i * 64)) (prime - 2)}
-    (pow (pow2 64 * pow2 (i * 64)) (prime - 2)) % prime;
+    (pow (pow2_64) (prime - 2) % prime) * (pow (pow2 (i * 64)) (prime - 2) % prime) % prime;
+    (==) {lemma_mod_mul_distr_l (pow (pow2_64) (prime - 2)) (pow (pow2 (i * 64)) (prime - 2) % prime) prime}
+    (pow (pow2_64) (prime - 2)) * (pow (pow2 (i * 64)) (prime - 2) % prime) % prime;
+    (==) {lemma_mod_mul_distr_r (pow (pow2_64) (prime - 2)) (pow (pow2 (i * 64)) (prime - 2)) prime}
+    (pow (pow2_64) (prime - 2)) * (pow (pow2 (i * 64)) (prime - 2)) % prime;
+    (==) {power_distributivity_2 pow2_64 (pow2 (i * 64)) (prime - 2)}
+    (pow (pow2_64 * pow2 (i * 64)) (prime - 2)) % prime;
     (==) {pow2_plus 64 (i * 64)}
     (pow (pow2 ((i + 1) * 64)) (prime - 2)) % prime; 
     (==) {power_distributivity (pow2 ((i + 1) * 64)) (prime - 2) prime}
     (pow (pow2 ((i + 1) * 64) % prime) (prime - 2)) % prime; 
     (==) {lemma_modp_as_pow #c (pow2 ((i + 1) * 64))}
-    modp_inv2 #c (pow2 ((i + 1) * 64));}
+    modp_inv2 #c (pow2 ((i + 1) * 64)); 
+    
+    }
+
+
+val lemma_reduce_mod_ecdsa_prime:
+  #c: curve 
+  -> t: nat 
+  -> k0: nat {k0 = min_one_prime (pow2 64) (- getPrime c)} ->  Lemma (
+    let prime = getPrime c in 
+    (t + prime * (k0 * (t % pow2 64) % pow2 64)) % pow2 64 == 0)
+    
+let lemma_reduce_mod_ecdsa_prime #c t k0 = 
+  let prime = getPrime c in 
+
+  assert_norm(exp #(pow2 64) ((- getPrime P384) % pow2 64) ( pow2 64) == 1);
+
+
+  admit()
+
+  
+
+
+
+(*
+  let f = prime * (k0 * (t % pow2 64) % pow2 64) in 
+  let t0 = (t + f) % pow2 64 in 
+  lemma_mod_add_distr t f (pow2 64);
+  modulo_addition_lemma t (pow2 64) f;
+  lemma_mod_mul_distr_r k0 t (pow2 64);
+  lemma_mod_mul_distr_r prime (k0 * t) (pow2 64); 
+    assert_by_tactic(prime * (k0 * t) == (prime * k0) * t) canon;
+  lemma_mod_mul_distr_l (prime * k0) t (pow2 64); 
+    assert_norm (exp #(pow2 64) 884452912994769583 (pow2 64  - 1)  = 14758798090332847183);
+  lemma_mod_mul_distr_l (-1) t (pow2 64);
+  lemma_mod_add_distr t (-t) (pow2 64) *)
+
+
+val mult_one_round_ecdsa_prime: 
+  #c: curve 
+  -> t: nat 
+  -> co: nat {t % getPrime c == co % getPrime c} 
+  -> k0: nat {k0 = min_one_prime (pow2 64) (- getPrime c)} -> 
+  Lemma (
+    let prime = getPrime c in 
+    let result = (t + getPrime c * ((k0 * (t % pow2 64)) % pow2 64)) / pow2 64 in 
+    result % prime == (co * modp_inv2_prime (pow2 64) prime) % prime)
+
+
+let mult_one_round_ecdsa_prime #c t co k0 = 
+  let prime = getPrime c in 
+  
+  let t2 = ((k0 * (t % pow2 64)) % pow2 64) * prime in 
+  let t3 = t + t2 in  
+
+  modulo_addition_lemma t prime ((k0 * (t % pow2 64)) % pow2 64); 
+  lemma_div_mod t3 (pow2 64);
+  admit();
+  lemma_reduce_mod_ecdsa_prime prime t k0;
+  admit();
+      assert(let rem = t3/ pow2 64 in rem * pow2 64 = t3);
+      assert(exists (k: nat). k * pow2 64 = t3);
+    lemma_division_is_multiplication t3 prime;
+    lemma_multiplication_to_same_number t3 co (modp_inv2_prime (pow2 64) prime) prime
+
+
+val lemma_multiplication_by_inverse_k0: 
+    #c: curve
+  -> a0: nat 
+  -> a_i: nat {a_i < getPrime c * getPrime c} 
+  -> a_i1: nat {a_i1 = (a_i + getPrime c * ((v (getKo c) * (a_i % pow2 64)) % pow2 64)) / pow2 64} 
+  -> i: nat {i < uint_v (getCoordinateLenU64 c)} -> 
+  Lemma 
+    (requires (a_i % getPrime c = a0 * modp_inv2 #c (pow2 (i * 64)) % getPrime c))
+    (ensures (a_i1 % getPrime c = a0 * modp_inv2 #c (pow2 ((i + 1) * 64)) % getPrime c))
+
+
+let lemma_multiplication_by_inverse_k0 #c a0 a_i a_i1 i = 
+  assert(a_i % getPrime c == a0 * modp_inv2 #c (pow2 (i * 64)) % getPrime c);
+  assert(a_i1 =  (a_i + getPrime c * ((v (getKo c) * (a_i % pow2 64)) % pow2 64)) / pow2 64);
+
+  assert(v (getKo c) = min_one_prime (pow2 64) (- getPrime c));
+
+  admit()
 
 
 val montgomery_multiplication_buffer_by_one_w_ko: #c: curve {(getPrime c + 1) % pow2 64 == 0} 
@@ -264,7 +354,6 @@ let montgomery_multiplication_buffer_by_one_w_ko #c a result =
     let t_low = sub t (size 0) len in 
     let t_high = sub t len len in 
 
-
   let h0 = ST.get() in 
 
   copy t_low a; 
@@ -274,7 +363,7 @@ let montgomery_multiplication_buffer_by_one_w_ko #c a result =
   let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = 
     let prime = getPrime c in 
     live h t /\ wide_as_nat c h t < prime * prime  /\
-    modifies (loc t) h0 h /\ 
+    modifies (loc t) h0 h /\
     wide_as_nat c h t % prime = wide_as_nat c h1 t * modp_inv2 #c (pow2 (i * 64)) % prime
   in 
 
@@ -289,10 +378,14 @@ let montgomery_multiplication_buffer_by_one_w_ko #c a result =
     let h0_ = ST.get() in 
     montgomery_multiplication_round #c t t; 
     let h1_ = ST.get() in
-    montgomery_multiplication_one_round_proof_w_ko #c (wide_as_nat c h0_ t) (wide_as_nat c h1_ t) (wide_as_nat c h0_ t);
-    lemma_inv2 #c (wide_as_nat c h1 t) (wide_as_nat c h0_ t) (wide_as_nat c h1_ t) (v i)
-  );
 
+
+    let a0 = wide_as_nat c h1 t in 
+    let a_i = wide_as_nat c h0_ t in 
+    let a_il = wide_as_nat c h1_ t in 
+    montgomery_multiplication_one_round_proof_border #c (a_i % pow2 64) a_i a_il;
+    lemma_multiplication_by_inverse_w_k0 #c a0 a_i a_il (v i)
+  );
 
   let h2 = ST.get() in 
   
@@ -302,6 +395,7 @@ let montgomery_multiplication_buffer_by_one_w_ko #c a result =
   pop_frame();
   
   lemmaFromDomain #c (as_nat c h0 a)
+
 
 
 val montgomery_multiplication_buffer_by_one_ko: #c: curve  
@@ -344,17 +438,19 @@ let montgomery_multiplication_buffer_by_one_ko #c a result =
 
   lemma_inv1 (wide_as_nat c h1 t) (getPrime c);
   lemma_mod_inv #c (wide_as_nat c h1 t);
-
-  admit();
-  let h3 = ST.get() in 
+  
   for 0ul len inv (fun i ->
     let h0_ = ST.get() in 
     montgomery_multiplication_round_k0 #c t t (getKo c); 
     let h1_ = ST.get() in
-    (* montgomery_multiplication_one_round_proof_w_ko #c (wide_as_nat c h0_ t) (wide_as_nat c h1_ t) (wide_as_nat c h0_ t); *)
-    lemma_inv2 #c (wide_as_nat c h1 t) (wide_as_nat c h0_ t) (wide_as_nat c h1_ t) (v i)
-  );
+    
+    let a0 = wide_as_nat c h1 t in 
+    let a_i = wide_as_nat c h0_ t in 
+    let a_il = wide_as_nat c h1_ t in 
 
+    montgomery_multiplication_one_round_proof_border #c (v (getKo c) * (a_i % pow2 64) % pow2 64) a_i a_il;
+    lemma_multiplication_by_inverse_k0 #c a0 a_i a_il (v i)
+  );
 
   let h2 = ST.get() in 
   
@@ -374,7 +470,7 @@ let montgomery_multiplication_buffer_by_one #c a result =
   |P384 -> montgomery_multiplication_buffer_by_one_ko a result
 
 
-
+(*
 val montgomery_multiplication_buffer_w_k0: #c: curve {(getPrime c + 1) % pow2 64 == 0}
   -> a: felem c -> b: felem c -> result: felem c ->  
   Stack unit
@@ -412,6 +508,7 @@ let montgomery_multiplication_buffer_w_k0 #c a b result =
     let h0_ = ST.get() in
     montgomery_multiplication_round #c t t; 
     let h1_ = ST.get() in
+    assert(
     montgomery_multiplication_one_round_proof_w_ko #c (wide_as_nat c h0_ t) (wide_as_nat c h1_ t) (wide_as_nat c h0_ t);
     lemma_inv2 #c (wide_as_nat c h1 t) (wide_as_nat c h0_ t) (wide_as_nat c h1_ t) (v i));
 
