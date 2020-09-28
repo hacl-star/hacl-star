@@ -41,6 +41,30 @@ extern "C" {
 #include "Lib_Memzero0.h"
 #include "Hacl_Impl_Blake2_Constants.h"
 
+void Hacl_Blake2b_32_blake2b_init(u64 *wv, u64 *hash, u32 kk, u8 *k, u32 nn);
+
+void
+Hacl_Blake2b_32_blake2b_update_multi(
+  u32 len,
+  u64 *wv,
+  u64 *hash,
+  uint128_t prev,
+  u8 *blocks,
+  u32 nb
+);
+
+void
+Hacl_Blake2b_32_blake2b_update_last(
+  u32 len,
+  u64 *wv,
+  u64 *hash,
+  uint128_t prev,
+  u32 rem,
+  u8 *d
+);
+
+void Hacl_Blake2b_32_blake2b_finish(u32 nn, u8 *output, u64 *hash);
+
 void Hacl_Blake2b_32_blake2b(u32 nn, u8 *output, u32 ll, u8 *d, u32 kk, u8 *k);
 
 #if defined(__cplusplus)

@@ -18,7 +18,7 @@ module F64 = Hacl.Impl.Curve25519.Field64
 module P = Spec.Curve25519
 module S = Hacl.Spec.Curve25519.AddAndDouble
 
-#reset-options "--z3rlimit 150 --max_fuel 1 --using_facts_from '* -FStar.Seq' --record_options"
+#reset-options "--z3rlimit 300 --fuel 0 --ifuel 1 --using_facts_from '* -FStar.Seq' --record_options"
 
 inline_for_extraction noextract
 let point (s:field_spec) = lbuffer (limb s) (nlimb s +! nlimb s)
@@ -164,6 +164,7 @@ val point_add_and_double:
       state_inv_t h1 (get_x nq_p1) /\ state_inv_t h1 (get_z nq_p1) /\
      (let p2, p3 = P.add_and_double (fget_xz h0 q) (fget_xz h0 nq) (fget_xz h0 nq_p1) in
       fget_xz h1 nq == p2 /\ fget_xz h1 nq_p1 == p3)))
+
 [@ Meta.Attribute.specialize ]
 let point_add_and_double #s q p01_tmp1 tmp2 =
   let h0 = ST.get () in

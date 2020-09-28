@@ -408,9 +408,26 @@ EverCrypt_Hash_hash(
 
 /* SNIPPET_END: EverCrypt_Hash_hash */
 
+/* SNIPPET_START: EverCrypt_Hash_Incremental_hash_len */
+
+uint32_t EverCrypt_Hash_Incremental_hash_len(Spec_Hash_Definitions_hash_alg a);
+
+/* SNIPPET_END: EverCrypt_Hash_Incremental_hash_len */
+
+/* SNIPPET_START: EverCrypt_Hash_Incremental_block_len */
+
+uint32_t EverCrypt_Hash_Incremental_block_len(Spec_Hash_Definitions_hash_alg a);
+
+/* SNIPPET_END: EverCrypt_Hash_Incremental_block_len */
+
 /* SNIPPET_START: Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ */
 
 typedef struct Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s_____s
+{
+  EverCrypt_Hash_state_s *block_state;
+  uint8_t *buf;
+  uint64_t total_len;
+}
 Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____;
 
 /* SNIPPET_END: Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ */

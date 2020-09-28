@@ -806,6 +806,174 @@ blake2b_update_block(
   }
 }
 
+inline void
+Hacl_Blake2b_32_blake2b_init(
+  uint64_t *wv,
+  uint64_t *hash,
+  uint32_t kk,
+  uint8_t *k,
+  uint32_t nn
+)
+{
+  uint8_t b[128U] = { 0U };
+  uint64_t *r0 = hash + (uint32_t)0U * (uint32_t)4U;
+  uint64_t *r1 = hash + (uint32_t)1U * (uint32_t)4U;
+  uint64_t *r2 = hash + (uint32_t)2U * (uint32_t)4U;
+  uint64_t *r3 = hash + (uint32_t)3U * (uint32_t)4U;
+  uint64_t iv0 = Hacl_Impl_Blake2_Constants_ivTable_B[0U];
+  uint64_t iv1 = Hacl_Impl_Blake2_Constants_ivTable_B[1U];
+  uint64_t iv2 = Hacl_Impl_Blake2_Constants_ivTable_B[2U];
+  uint64_t iv3 = Hacl_Impl_Blake2_Constants_ivTable_B[3U];
+  uint64_t iv4 = Hacl_Impl_Blake2_Constants_ivTable_B[4U];
+  uint64_t iv5 = Hacl_Impl_Blake2_Constants_ivTable_B[5U];
+  uint64_t iv6 = Hacl_Impl_Blake2_Constants_ivTable_B[6U];
+  uint64_t iv7 = Hacl_Impl_Blake2_Constants_ivTable_B[7U];
+  uint64_t kk_shift_8;
+  uint64_t iv0_;
+  r2[0U] = iv0;
+  r2[1U] = iv1;
+  r2[2U] = iv2;
+  r2[3U] = iv3;
+  r3[0U] = iv4;
+  r3[1U] = iv5;
+  r3[2U] = iv6;
+  r3[3U] = iv7;
+  kk_shift_8 = (uint64_t)kk << (uint32_t)8U;
+  iv0_ = iv0 ^ ((uint64_t)0x01010000U ^ (kk_shift_8 ^ (uint64_t)nn));
+  r0[0U] = iv0_;
+  r0[1U] = iv1;
+  r0[2U] = iv2;
+  r0[3U] = iv3;
+  r1[0U] = iv4;
+  r1[1U] = iv5;
+  r1[2U] = iv6;
+  r1[3U] = iv7;
+  if (!(kk == (uint32_t)0U))
+  {
+    memcpy(b, k, kk * sizeof (uint8_t));
+    {
+      FStar_UInt128_uint128
+      totlen =
+        FStar_UInt128_add_mod(FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)0U),
+          FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U));
+      uint8_t *b1 = b + (uint32_t)0U * (uint32_t)128U;
+      blake2b_update_block(wv, hash, false, totlen, b1);
+    }
+  }
+  Lib_Memzero0_memzero(b, (uint32_t)128U * sizeof (b[0U]));
+}
+
+inline void
+Hacl_Blake2b_32_blake2b_update_multi(
+  uint32_t len,
+  uint64_t *wv,
+  uint64_t *hash,
+  FStar_UInt128_uint128 prev,
+  uint8_t *blocks,
+  uint32_t nb
+)
+{
+  uint32_t i;
+  for (i = (uint32_t)0U; i < nb; i++)
+  {
+    FStar_UInt128_uint128
+    totlen =
+      FStar_UInt128_add_mod(prev,
+        FStar_UInt128_uint64_to_uint128((uint64_t)((i + (uint32_t)1U) * (uint32_t)128U)));
+    uint8_t *b = blocks + i * (uint32_t)128U;
+    blake2b_update_block(wv, hash, false, totlen, b);
+  }
+}
+
+inline void
+Hacl_Blake2b_32_blake2b_update_last(
+  uint32_t len,
+  uint64_t *wv,
+  uint64_t *hash,
+  FStar_UInt128_uint128 prev,
+  uint32_t rem,
+  uint8_t *d
+)
+{
+  uint8_t b[128U] = { 0U };
+  uint8_t *last = d + len - rem;
+  FStar_UInt128_uint128 totlen;
+  memcpy(b, last, rem * sizeof (uint8_t));
+  totlen = FStar_UInt128_add_mod(prev, FStar_UInt128_uint64_to_uint128((uint64_t)len));
+  blake2b_update_block(wv, hash, true, totlen, b);
+  Lib_Memzero0_memzero(b, (uint32_t)128U * sizeof (b[0U]));
+}
+
+static inline void
+blake2b_update_blocks(
+  uint32_t len,
+  uint64_t *wv,
+  uint64_t *hash,
+  FStar_UInt128_uint128 prev,
+  uint8_t *blocks
+)
+{
+  uint32_t nb0 = len / (uint32_t)128U;
+  uint32_t rem0 = len % (uint32_t)128U;
+  K___uint32_t_uint32_t scrut;
+  if (rem0 == (uint32_t)0U && nb0 > (uint32_t)0U)
+  {
+    uint32_t nb_ = nb0 - (uint32_t)1U;
+    uint32_t rem_ = (uint32_t)128U;
+    K___uint32_t_uint32_t lit;
+    lit.fst = nb_;
+    lit.snd = rem_;
+    scrut = lit;
+  }
+  else
+  {
+    K___uint32_t_uint32_t lit;
+    lit.fst = nb0;
+    lit.snd = rem0;
+    scrut = lit;
+  }
+  {
+    uint32_t nb = scrut.fst;
+    uint32_t rem = scrut.snd;
+    Hacl_Blake2b_32_blake2b_update_multi(len, wv, hash, prev, blocks, nb);
+    Hacl_Blake2b_32_blake2b_update_last(len, wv, hash, prev, rem, blocks);
+  }
+}
+
+inline void Hacl_Blake2b_32_blake2b_finish(uint32_t nn, uint8_t *output, uint64_t *hash)
+{
+  uint32_t double_row = (uint32_t)2U * (uint32_t)4U * (uint32_t)8U;
+  KRML_CHECK_SIZE(sizeof (uint8_t), double_row);
+  {
+    uint8_t b[double_row];
+    memset(b, 0U, double_row * sizeof (uint8_t));
+    {
+      uint8_t *first = b;
+      uint8_t *second = b + (uint32_t)4U * (uint32_t)8U;
+      uint64_t *row0 = hash + (uint32_t)0U * (uint32_t)4U;
+      uint64_t *row1 = hash + (uint32_t)1U * (uint32_t)4U;
+      uint8_t *final;
+      {
+        uint32_t i;
+        for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
+        {
+          store64_le(first + i * (uint32_t)8U, row0[i]);
+        }
+      }
+      {
+        uint32_t i;
+        for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
+        {
+          store64_le(second + i * (uint32_t)8U, row1[i]);
+        }
+      }
+      final = b;
+      memcpy(output, final, nn * sizeof (uint8_t));
+      Lib_Memzero0_memzero(b, double_row * sizeof (b[0U]));
+    }
+  }
+}
+
 void
 Hacl_Blake2b_32_blake2b(
   uint32_t nn,
@@ -844,133 +1012,11 @@ Hacl_Blake2b_32_blake2b(
           for (_i = 0U; _i < stlen; ++_i)
             b1[_i] = stzero;
         }
-        {
-          uint8_t b20[128U] = { 0U };
-          uint64_t *r0 = b + (uint32_t)0U * (uint32_t)4U;
-          uint64_t *r1 = b + (uint32_t)1U * (uint32_t)4U;
-          uint64_t *r2 = b + (uint32_t)2U * (uint32_t)4U;
-          uint64_t *r3 = b + (uint32_t)3U * (uint32_t)4U;
-          uint64_t iv0 = Hacl_Impl_Blake2_Constants_ivTable_B[0U];
-          uint64_t iv1 = Hacl_Impl_Blake2_Constants_ivTable_B[1U];
-          uint64_t iv2 = Hacl_Impl_Blake2_Constants_ivTable_B[2U];
-          uint64_t iv3 = Hacl_Impl_Blake2_Constants_ivTable_B[3U];
-          uint64_t iv4 = Hacl_Impl_Blake2_Constants_ivTable_B[4U];
-          uint64_t iv5 = Hacl_Impl_Blake2_Constants_ivTable_B[5U];
-          uint64_t iv6 = Hacl_Impl_Blake2_Constants_ivTable_B[6U];
-          uint64_t iv7 = Hacl_Impl_Blake2_Constants_ivTable_B[7U];
-          uint64_t kk_shift_8;
-          uint64_t iv0_;
-          uint32_t nb0;
-          uint32_t rem0;
-          K___uint32_t_uint32_t scrut;
-          uint32_t nb;
-          uint32_t rem;
-          r2[0U] = iv0;
-          r2[1U] = iv1;
-          r2[2U] = iv2;
-          r2[3U] = iv3;
-          r3[0U] = iv4;
-          r3[1U] = iv5;
-          r3[2U] = iv6;
-          r3[3U] = iv7;
-          kk_shift_8 = (uint64_t)kk << (uint32_t)8U;
-          iv0_ = iv0 ^ ((uint64_t)0x01010000U ^ (kk_shift_8 ^ (uint64_t)nn));
-          r0[0U] = iv0_;
-          r0[1U] = iv1;
-          r0[2U] = iv2;
-          r0[3U] = iv3;
-          r1[0U] = iv4;
-          r1[1U] = iv5;
-          r1[2U] = iv6;
-          r1[3U] = iv7;
-          if (!(kk == (uint32_t)0U))
-          {
-            memcpy(b20, k, kk * sizeof (uint8_t));
-            {
-              FStar_UInt128_uint128
-              totlen =
-                FStar_UInt128_add_mod(FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)0U),
-                  FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U));
-              uint8_t *b3 = b20 + (uint32_t)0U * (uint32_t)128U;
-              blake2b_update_block(b1, b, false, totlen, b3);
-            }
-          }
-          Lib_Memzero0_memzero(b20, (uint32_t)128U * sizeof (b20[0U]));
-          nb0 = ll / (uint32_t)128U;
-          rem0 = ll % (uint32_t)128U;
-          if (rem0 == (uint32_t)0U && nb0 > (uint32_t)0U)
-          {
-            uint32_t nb_ = nb0 - (uint32_t)1U;
-            uint32_t rem_ = (uint32_t)128U;
-            K___uint32_t_uint32_t lit;
-            lit.fst = nb_;
-            lit.snd = rem_;
-            scrut = lit;
-          }
-          else
-          {
-            K___uint32_t_uint32_t lit;
-            lit.fst = nb0;
-            lit.snd = rem0;
-            scrut = lit;
-          }
-          nb = scrut.fst;
-          rem = scrut.snd;
-          {
-            uint32_t i;
-            for (i = (uint32_t)0U; i < nb; i++)
-            {
-              FStar_UInt128_uint128
-              totlen =
-                FStar_UInt128_add_mod(prev0,
-                  FStar_UInt128_uint64_to_uint128((uint64_t)((i + (uint32_t)1U) * (uint32_t)128U)));
-              uint8_t *b2 = d + i * (uint32_t)128U;
-              blake2b_update_block(b1, b, false, totlen, b2);
-            }
-          }
-          {
-            uint8_t b21[128U] = { 0U };
-            uint8_t *last = d + ll - rem;
-            FStar_UInt128_uint128 totlen;
-            uint32_t double_row;
-            memcpy(b21, last, rem * sizeof (uint8_t));
-            totlen = FStar_UInt128_add_mod(prev0, FStar_UInt128_uint64_to_uint128((uint64_t)ll));
-            blake2b_update_block(b1, b, true, totlen, b21);
-            Lib_Memzero0_memzero(b21, (uint32_t)128U * sizeof (b21[0U]));
-            double_row = (uint32_t)2U * (uint32_t)4U * (uint32_t)8U;
-            KRML_CHECK_SIZE(sizeof (uint8_t), double_row);
-            {
-              uint8_t b2[double_row];
-              memset(b2, 0U, double_row * sizeof (uint8_t));
-              {
-                uint8_t *first = b2;
-                uint8_t *second = b2 + (uint32_t)4U * (uint32_t)8U;
-                uint64_t *row0 = b + (uint32_t)0U * (uint32_t)4U;
-                uint64_t *row1 = b + (uint32_t)1U * (uint32_t)4U;
-                uint8_t *final;
-                {
-                  uint32_t i;
-                  for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
-                  {
-                    store64_le(first + i * (uint32_t)8U, row0[i]);
-                  }
-                }
-                {
-                  uint32_t i;
-                  for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
-                  {
-                    store64_le(second + i * (uint32_t)8U, row1[i]);
-                  }
-                }
-                final = b2;
-                memcpy(output, final, nn * sizeof (uint8_t));
-                Lib_Memzero0_memzero(b2, double_row * sizeof (b2[0U]));
-                Lib_Memzero0_memzero(b1, stlen * sizeof (b1[0U]));
-                Lib_Memzero0_memzero(b, stlen * sizeof (b[0U]));
-              }
-            }
-          }
-        }
+        Hacl_Blake2b_32_blake2b_init(b1, b, kk, k, nn);
+        blake2b_update_blocks(ll, b1, b, prev0, d);
+        Hacl_Blake2b_32_blake2b_finish(nn, output, b);
+        Lib_Memzero0_memzero(b1, stlen * sizeof (b1[0U]));
+        Lib_Memzero0_memzero(b, stlen * sizeof (b[0U]));
       }
     }
   }
