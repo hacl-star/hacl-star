@@ -69,6 +69,23 @@ let generateRandomShares x shares l =
   sub_red x last last
 
 
+val rejoinShares: shares: size_t
+  -> l: lbuffer uint64 (size 4 *. shares) 
+  -> result: felem -> 
+  Stack unit 
+    (requires fun h -> True)
+    (ensures fun h0 _ h1 -> True)
+
+
+let rejoinShares shares l result = 
+  let inv h (i: nat) = True in 
+  for 0ul shares inv (fun i ->
+    admit();
+    let share = sub l (size 4 *. i) (size 4) in 
+    p256_add share result result)
+    
+
+
 val add4_secr: x: felem 
   -> y: felem 
   -> result: felem 
@@ -81,9 +98,23 @@ val add4_secr: x: felem
 
 let add4_secr x y result n randomness = 
   push_frame();
-    let shares = create (size 4 *. n) (u64 0) in 
-
+    let shares = create (size 4 *. n) (u64 0) in
+    copy shares randomness;
     generateRandomShares x n shares;
+    let inv h (i: nat) = True in 
+    
+
+    let shares2 = create (size 4 *. n) (u64 0) in 
+    copy shares randomness;
+    generateRandomShares y n shares2;
+    
+  for 0ul n inv (fun i -> 
+    let share = sub shares (size 4 *. i) (size 4) in  
+    let share2 = sub shares2 (size 4 *. i) (size 4) in 
+    p256_add share share2 share);
+
+  rejoinShares n shares result;
+  
 
   pop_frame();
     (u64 0)
