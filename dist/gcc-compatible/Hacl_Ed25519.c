@@ -112,7 +112,7 @@ static void fsquare_times_inplace(uint64_t *output, uint32_t count)
   Hacl_Curve25519_51_fsquare_times(output, output, tmp, count);
 }
 
-static void inverse(uint64_t *out, uint64_t *a)
+void Hacl_Bignum25519_inverse(uint64_t *out, uint64_t *a)
 {
   FStar_UInt128_uint128 tmp[10U];
   for (uint32_t _i = 0U; _i < (uint32_t)10U; ++_i)
@@ -555,7 +555,7 @@ void Hacl_Impl_Ed25519_PointCompress_point_compress(uint8_t *z, uint64_t *p)
   uint64_t *px = p;
   uint64_t *py = p + (uint32_t)5U;
   uint64_t *pz = p + (uint32_t)10U;
-  inverse(zinv1, pz);
+  Hacl_Bignum25519_inverse(zinv1, pz);
   fmul0(x1, px, zinv1);
   reduce(x1);
   fmul0(out1, py, zinv1);
@@ -1797,7 +1797,7 @@ static bool recover_x(uint64_t *x, uint64_t *y, uint64_t sign)
     times_d(dyy, y2);
     fsum(dyy, one);
     Hacl_Bignum25519_reduce_513(dyy);
-    inverse(dyyi, dyy);
+    Hacl_Bignum25519_inverse(dyyi, dyy);
     Hacl_Bignum25519_fdifference(one, y2);
     fmul0(x2, one, dyyi);
     reduce(x2);

@@ -8,6 +8,9 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Bignum25519_reduce_513 =
       foreign "Hacl_Bignum25519_reduce_513"
         ((ptr uint64_t) @-> (returning void))
+    let hacl_Bignum25519_inverse =
+      foreign "Hacl_Bignum25519_inverse"
+        ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void)))
     let hacl_Impl_Ed25519_PointAdd_point_add =
       foreign "Hacl_Impl_Ed25519_PointAdd_point_add"
         ((ptr uint64_t) @->

@@ -37,7 +37,21 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
+#include "Hacl_Kremlib.h"
 #include "Hacl_Ed25519.h"
+#include "Hacl_Curve25519_51.h"
+
+void Hacl_EC_Ed25519_mk_felem_zero(uint64_t *b);
+
+void Hacl_EC_Ed25519_mk_felem_one(uint64_t *b);
+
+void Hacl_EC_Ed25519_felem_add(uint64_t *a, uint64_t *b, uint64_t *out);
+
+void Hacl_EC_Ed25519_felem_sub(uint64_t *a, uint64_t *b, uint64_t *out);
+
+void Hacl_EC_Ed25519_felem_mul(uint64_t *a, uint64_t *b, uint64_t *out);
+
+void Hacl_EC_Ed25519_felem_inv(uint64_t *a, uint64_t *out);
 
 void Hacl_EC_Ed25519_mk_point_at_inf(uint64_t *p);
 

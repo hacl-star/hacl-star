@@ -45,6 +45,8 @@ void Hacl_Bignum25519_fdifference(uint64_t *a, uint64_t *b);
 
 void Hacl_Bignum25519_reduce_513(uint64_t *a);
 
+void Hacl_Bignum25519_inverse(uint64_t *out, uint64_t *a);
+
 void Hacl_Impl_Ed25519_PointAdd_point_add(uint64_t *out, uint64_t *p, uint64_t *q);
 
 void Hacl_Impl_Ed25519_Ladder_point_mul(uint64_t *result, uint8_t *scalar, uint64_t *q);

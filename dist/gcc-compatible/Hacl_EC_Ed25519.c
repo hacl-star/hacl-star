@@ -24,6 +24,50 @@
 
 #include "Hacl_EC_Ed25519.h"
 
+void Hacl_EC_Ed25519_mk_felem_zero(uint64_t *b)
+{
+  b[0U] = (uint64_t)0U;
+  b[1U] = (uint64_t)0U;
+  b[2U] = (uint64_t)0U;
+  b[3U] = (uint64_t)0U;
+  b[4U] = (uint64_t)0U;
+}
+
+void Hacl_EC_Ed25519_mk_felem_one(uint64_t *b)
+{
+  b[0U] = (uint64_t)1U;
+  b[1U] = (uint64_t)0U;
+  b[2U] = (uint64_t)0U;
+  b[3U] = (uint64_t)0U;
+  b[4U] = (uint64_t)0U;
+}
+
+void Hacl_EC_Ed25519_felem_add(uint64_t *a, uint64_t *b, uint64_t *out)
+{
+  Hacl_Impl_Curve25519_Field51_fadd(out, a, b);
+  Hacl_Bignum25519_reduce_513(out);
+}
+
+void Hacl_EC_Ed25519_felem_sub(uint64_t *a, uint64_t *b, uint64_t *out)
+{
+  Hacl_Impl_Curve25519_Field51_fsub(out, a, b);
+  Hacl_Bignum25519_reduce_513(out);
+}
+
+void Hacl_EC_Ed25519_felem_mul(uint64_t *a, uint64_t *b, uint64_t *out)
+{
+  FStar_UInt128_uint128 tmp[10U];
+  for (uint32_t _i = 0U; _i < (uint32_t)10U; ++_i)
+    tmp[_i] = FStar_UInt128_uint64_to_uint128((uint64_t)0U);
+  Hacl_Impl_Curve25519_Field51_fmul(out, a, b, tmp);
+}
+
+void Hacl_EC_Ed25519_felem_inv(uint64_t *a, uint64_t *out)
+{
+  Hacl_Bignum25519_inverse(out, a);
+  Hacl_Bignum25519_reduce_513(out);
+}
+
 void Hacl_EC_Ed25519_mk_point_at_inf(uint64_t *p)
 {
   uint64_t *x = p;

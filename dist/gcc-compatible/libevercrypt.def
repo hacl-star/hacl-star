@@ -192,6 +192,7 @@ EXPORTS
   Hacl_Curve25519_51_ecdh
   Hacl_Bignum25519_fdifference
   Hacl_Bignum25519_reduce_513
+  Hacl_Bignum25519_inverse
   Hacl_Impl_Ed25519_PointAdd_point_add
   Hacl_Impl_Ed25519_Ladder_point_mul
   Hacl_Impl_Ed25519_PointCompress_point_compress
@@ -505,6 +506,12 @@ EXPORTS
   Hacl_Streaming_Blake2_blake2b_32_with_key_update
   Hacl_Streaming_Blake2_blake2b_32_with_key_finish
   Hacl_Streaming_Blake2_blake2b_32_with_key_free
+  Hacl_EC_Ed25519_mk_felem_zero
+  Hacl_EC_Ed25519_mk_felem_one
+  Hacl_EC_Ed25519_felem_add
+  Hacl_EC_Ed25519_felem_sub
+  Hacl_EC_Ed25519_felem_mul
+  Hacl_EC_Ed25519_felem_inv
   Hacl_EC_Ed25519_mk_point_at_inf
   Hacl_EC_Ed25519_mk_base_point
   Hacl_EC_Ed25519_point_negate
