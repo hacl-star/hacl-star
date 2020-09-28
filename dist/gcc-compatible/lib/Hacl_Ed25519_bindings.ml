@@ -11,6 +11,12 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Bignum25519_inverse =
       foreign "Hacl_Bignum25519_inverse"
         ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void)))
+    let hacl_Bignum25519_load_51 =
+      foreign "Hacl_Bignum25519_load_51"
+        ((ptr uint64_t) @-> (ocaml_bytes @-> (returning void)))
+    let hacl_Bignum25519_store_51 =
+      foreign "Hacl_Bignum25519_store_51"
+        (ocaml_bytes @-> ((ptr uint64_t) @-> (returning void)))
     let hacl_Impl_Ed25519_PointAdd_point_add =
       foreign "Hacl_Impl_Ed25519_PointAdd_point_add"
         ((ptr uint64_t) @->

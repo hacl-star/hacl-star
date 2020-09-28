@@ -193,6 +193,8 @@ EXPORTS
   Hacl_Bignum25519_fdifference
   Hacl_Bignum25519_reduce_513
   Hacl_Bignum25519_inverse
+  Hacl_Bignum25519_load_51
+  Hacl_Bignum25519_store_51
   Hacl_Impl_Ed25519_PointAdd_point_add
   Hacl_Impl_Ed25519_Ladder_point_mul
   Hacl_Impl_Ed25519_PointCompress_point_compress
@@ -512,6 +514,8 @@ EXPORTS
   Hacl_EC_Ed25519_felem_sub
   Hacl_EC_Ed25519_felem_mul
   Hacl_EC_Ed25519_felem_inv
+  Hacl_EC_Ed25519_felem_load
+  Hacl_EC_Ed25519_felem_store
   Hacl_EC_Ed25519_mk_point_at_inf
   Hacl_EC_Ed25519_mk_base_point
   Hacl_EC_Ed25519_point_negate

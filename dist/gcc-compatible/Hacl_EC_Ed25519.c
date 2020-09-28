@@ -68,6 +68,16 @@ void Hacl_EC_Ed25519_felem_inv(uint64_t *a, uint64_t *out)
   Hacl_Bignum25519_reduce_513(out);
 }
 
+void Hacl_EC_Ed25519_felem_load(uint8_t *b, uint64_t *out)
+{
+  Hacl_Bignum25519_load_51(out, b);
+}
+
+void Hacl_EC_Ed25519_felem_store(uint64_t *a, uint8_t *out)
+{
+  Hacl_Bignum25519_store_51(out, a);
+}
+
 void Hacl_EC_Ed25519_mk_point_at_inf(uint64_t *p)
 {
   uint64_t *x = p;

@@ -53,6 +53,10 @@ void Hacl_EC_Ed25519_felem_mul(uint64_t *a, uint64_t *b, uint64_t *out);
 
 void Hacl_EC_Ed25519_felem_inv(uint64_t *a, uint64_t *out);
 
+void Hacl_EC_Ed25519_felem_load(uint8_t *b, uint64_t *out);
+
+void Hacl_EC_Ed25519_felem_store(uint64_t *a, uint8_t *out);
+
 void Hacl_EC_Ed25519_mk_point_at_inf(uint64_t *p);
 
 void Hacl_EC_Ed25519_mk_base_point(uint64_t *p);

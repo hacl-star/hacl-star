@@ -23,6 +23,12 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_EC_Ed25519_felem_inv =
       foreign "Hacl_EC_Ed25519_felem_inv"
         ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void)))
+    let hacl_EC_Ed25519_felem_load =
+      foreign "Hacl_EC_Ed25519_felem_load"
+        (ocaml_bytes @-> ((ptr uint64_t) @-> (returning void)))
+    let hacl_EC_Ed25519_felem_store =
+      foreign "Hacl_EC_Ed25519_felem_store"
+        ((ptr uint64_t) @-> (ocaml_bytes @-> (returning void)))
     let hacl_EC_Ed25519_mk_point_at_inf =
       foreign "Hacl_EC_Ed25519_mk_point_at_inf"
         ((ptr uint64_t) @-> (returning void))

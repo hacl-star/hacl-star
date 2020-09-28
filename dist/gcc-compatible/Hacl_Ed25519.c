@@ -197,7 +197,7 @@ static void reduce(uint64_t *out)
   out[4U] = a4_;
 }
 
-static void load_51(uint64_t *output, uint8_t *input)
+void Hacl_Bignum25519_load_51(uint64_t *output, uint8_t *input)
 {
   uint64_t u0 = load64_le(input);
   uint64_t i0 = u0;
@@ -233,7 +233,7 @@ static void store_4(uint8_t *output, uint64_t v0, uint64_t v1, uint64_t v2, uint
   store64_le(b3, v3);
 }
 
-static void store_51(uint8_t *output, uint64_t *input)
+void Hacl_Bignum25519_store_51(uint8_t *output, uint64_t *input)
 {
   uint64_t t0 = input[0U];
   uint64_t t1 = input[1U];
@@ -562,7 +562,7 @@ void Hacl_Impl_Ed25519_PointCompress_point_compress(uint8_t *z, uint64_t *p)
   Hacl_Bignum25519_reduce_513(out1);
   uint64_t x0 = x[0U];
   uint64_t b = x0 & (uint64_t)1U;
-  store_51(z, out);
+  Hacl_Bignum25519_store_51(z, out);
   uint8_t xbyte = (uint8_t)b;
   uint8_t o31 = z[31U];
   z[31U] = o31 + (xbyte << (uint32_t)7U);
@@ -1897,7 +1897,7 @@ bool Hacl_Impl_Ed25519_PointDecompress_point_decompress(uint64_t *out, uint8_t *
   uint8_t s31 = s[31U];
   uint8_t z = s31 >> (uint32_t)7U;
   uint64_t sign = (uint64_t)z;
-  load_51(y, s);
+  Hacl_Bignum25519_load_51(y, s);
   bool z0 = recover_x(x, y, sign);
   bool res;
   if (z0 == false)
