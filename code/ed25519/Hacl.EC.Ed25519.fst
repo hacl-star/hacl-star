@@ -15,6 +15,102 @@ module SC = Spec.Curve25519
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+//
+// Finite field arithmetic
+//
+
+val mk_felem_zero: b:F51.felem ->
+  Stack unit
+  (requires fun h -> live h b)
+  (ensures  fun h0 _ h1 -> modifies (loc b) h0 h1 /\
+    F51.mul_inv_t h1 b /\
+    F51.fevalh h1 b == SC.zero)
+
+let mk_felem_zero b =
+  Hacl.Bignum25519.make_zero b
+
+
+val mk_felem_one: b:F51.felem ->
+  Stack unit
+  (requires fun h -> live h b)
+  (ensures  fun h0 _ h1 -> modifies (loc b) h0 h1 /\
+    F51.mul_inv_t h1 b /\
+    F51.fevalh h1 b == SC.one)
+
+let mk_felem_one b =
+  Hacl.Bignum25519.make_one b
+
+
+val felem_add: a:F51.felem -> b:F51.felem -> out:F51.felem ->
+  Stack unit
+  (requires fun h ->
+    live h a /\ live h b /\ live h out /\
+    (disjoint out a \/ out == a) /\
+    (disjoint out b \/ out == b) /\
+    (disjoint a b \/ a == b) /\
+    F51.mul_inv_t h a /\
+    F51.mul_inv_t h b)
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    F51.mul_inv_t h1 out /\
+    F51.fevalh h1 out == SC.fadd (F51.fevalh h0 a) (F51.fevalh h0 b))
+
+let felem_add a b out =
+  Hacl.Impl.Curve25519.Field51.fadd out a b;
+  Hacl.Bignum25519.reduce_513 out
+
+
+val felem_sub: a:F51.felem -> b:F51.felem -> out:F51.felem ->
+  Stack unit
+  (requires fun h ->
+    live h a /\ live h b /\ live h out /\
+    (disjoint out a \/ out == a) /\
+    (disjoint out b \/ out == b) /\
+    (disjoint a b \/ a == b) /\
+    F51.mul_inv_t h a /\
+    F51.mul_inv_t h b)
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    F51.mul_inv_t h1 out /\
+    F51.fevalh h1 out == SC.fsub (F51.fevalh h0 a) (F51.fevalh h0 b))
+
+let felem_sub a b out =
+  Hacl.Impl.Curve25519.Field51.fsub out a b;
+  Hacl.Bignum25519.reduce_513 out
+
+
+val felem_mul: a:F51.felem -> b:F51.felem -> out:F51.felem ->
+  Stack unit
+  (requires fun h ->
+    live h a /\ live h b /\ live h out /\
+    F51.mul_inv_t h a /\
+    F51.mul_inv_t h b)
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    F51.mul_inv_t h1 out /\
+    F51.fevalh h1 out == SC.fmul (F51.fevalh h0 a) (F51.fevalh h0 b))
+
+let felem_mul a b out =
+  push_frame();
+  let tmp = create 10ul (u128 0) in
+  Hacl.Impl.Curve25519.Field51.fmul out a b tmp;
+  pop_frame()
+
+
+val felem_inv: a:F51.felem -> out:F51.felem ->
+  Stack unit
+  (requires fun h ->
+    live h a /\ live h out /\ disjoint a out /\
+    F51.mul_inv_t h a)
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    F51.mul_inv_t h1 out /\
+    F51.fevalh h1 out == SE.modp_inv (F51.fevalh h0 a))
+
+let felem_inv a out =
+  Hacl.Bignum25519.inverse out a;
+  Hacl.Bignum25519.reduce_513 out
+
+
+//
+// Elliptic curve operations
+//
 val mk_point_at_inf: p:F51.point ->
   Stack unit
   (requires fun h -> live h p)
