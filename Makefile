@@ -819,7 +819,7 @@ dist/gcc-compatible/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES += \
   dist/META dist/hacl-star-raw.opam dist/configure
 
 test-bindings-ocaml: compile-gcc-compatible
-	cd dist/gcc-compatible && make install-hacl-star-raw
+	if ! ocamlfind query hacl-star-raw ; then cd dist/gcc-compatible && make install-hacl-star-raw ; fi
 	cd bindings/ocaml && $(LD_EXTRA) dune runtest
 
 dist/msvc-compatible/Makefile.basic: DEFAULT_FLAGS += -falloca -ftail-calls
