@@ -38,8 +38,7 @@ extern "C" {
 
 
 #include "Hacl_Kremlib.h"
-#include "Lib_Memzero0.h"
-#include "Hacl_Impl_Blake2_Constants.h"
+#include "Hacl_Blake2b_256.h"
 
 typedef struct K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256__s
 {
@@ -50,6 +49,11 @@ K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_;
 
 typedef struct
 Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_____s
+{
+  K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_ block_state;
+  uint8_t *buf;
+  uint64_t total_len;
+}
 Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____;
 
 /*
