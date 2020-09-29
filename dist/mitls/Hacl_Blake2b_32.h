@@ -43,6 +43,37 @@ extern "C" {
 #include "Hacl_Impl_Blake2_Constants.h"
 
 void
+Hacl_Blake2b_32_blake2b_init(
+  uint64_t *wv,
+  uint64_t *hash,
+  uint32_t kk,
+  uint8_t *k,
+  uint32_t nn
+);
+
+void
+Hacl_Blake2b_32_blake2b_update_multi(
+  uint32_t len,
+  uint64_t *wv,
+  uint64_t *hash,
+  FStar_UInt128_uint128 prev,
+  uint8_t *blocks,
+  uint32_t nb
+);
+
+void
+Hacl_Blake2b_32_blake2b_update_last(
+  uint32_t len,
+  uint64_t *wv,
+  uint64_t *hash,
+  FStar_UInt128_uint128 prev,
+  uint32_t rem,
+  uint8_t *d
+);
+
+void Hacl_Blake2b_32_blake2b_finish(uint32_t nn, uint8_t *output, uint64_t *hash);
+
+void
 Hacl_Blake2b_32_blake2b(
   uint32_t nn,
   uint8_t *output,

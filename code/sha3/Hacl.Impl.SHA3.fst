@@ -516,9 +516,7 @@ let squeeze s rateInBytes outputByteLen output =
   storeState remOut s last;
   let h1 = ST.get() in
   Seq.lemma_split (as_seq h1 output) (v outBlocks * v rateInBytes);
-  assert_norm (norm [delta]
-    S.squeeze (as_seq h0 s) (v rateInBytes) (v outputByteLen) ==
-    S.squeeze (as_seq h0 s) (v rateInBytes) (v outputByteLen))
+  norm_spec [delta_only [`%S.squeeze]] (S.squeeze (as_seq h0 s) (v rateInBytes) (v outputByteLen))
 
 val keccak:
     rate:size_t{v rate % 8 == 0 /\ v rate / 8 > 0 /\ v rate <= 1600}

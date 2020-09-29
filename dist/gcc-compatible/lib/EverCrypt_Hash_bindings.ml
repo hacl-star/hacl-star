@@ -127,6 +127,12 @@ module Bindings(F:Cstubs.FOREIGN) =
       foreign "EverCrypt_Hash_hash"
         (spec_Hash_Definitions_hash_alg @->
            (ocaml_bytes @-> (ocaml_bytes @-> (uint32_t @-> (returning void)))))
+    let everCrypt_Hash_Incremental_hash_len =
+      foreign "EverCrypt_Hash_Incremental_hash_len"
+        (spec_Hash_Definitions_hash_alg @-> (returning uint32_t))
+    let everCrypt_Hash_Incremental_block_len =
+      foreign "EverCrypt_Hash_Incremental_block_len"
+        (spec_Hash_Definitions_hash_alg @-> (returning uint32_t))
     type hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ =
       [ `hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ ]
         structure
@@ -136,6 +142,18 @@ module Bindings(F:Cstubs.FOREIGN) =
       =
       structure
         "Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s_____s"
+    let hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s_____block_state
+      =
+      field hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____
+        "block_state" (ptr everCrypt_Hash_state_s)
+    let hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s_____buf =
+      field hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ "buf"
+        (ptr uint8_t)
+    let hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s_____total_len
+      =
+      field hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____
+        "total_len" uint64_t
+    let _ = seal hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____
     let everCrypt_Hash_Incremental_create_in =
       foreign "EverCrypt_Hash_Incremental_create_in"
         (spec_Hash_Definitions_hash_alg @->

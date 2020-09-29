@@ -3,7 +3,15 @@ LIBRARY libevercrypt
 EXPORTS
   Spec_Cipher_Expansion_cipher_alg_of_impl
   LowStar_Vector_new_capacity
+  Hacl_Blake2s_32_blake2s_init
+  Hacl_Blake2s_32_blake2s_update_multi
+  Hacl_Blake2s_32_blake2s_update_last
+  Hacl_Blake2s_32_blake2s_finish
   Hacl_Blake2s_32_blake2s
+  Hacl_Blake2b_32_blake2b_init
+  Hacl_Blake2b_32_blake2b_update_multi
+  Hacl_Blake2b_32_blake2b_update_last
+  Hacl_Blake2b_32_blake2b_finish
   Hacl_Blake2b_32_blake2b
   Hacl_Hash_Core_Blake2_update_blake2s_32
   Hacl_Hash_Core_Blake2_finish_blake2s_32
@@ -65,11 +73,19 @@ EXPORTS
   Hacl_Hash_Blake2b_256_update_multi_blake2b_256
   Hacl_Hash_Blake2b_256_update_last_blake2b_256
   Hacl_Hash_Blake2b_256_hash_blake2b_256
+  Hacl_Blake2b_256_blake2b_init
+  Hacl_Blake2b_256_blake2b_update_multi
+  Hacl_Blake2b_256_blake2b_update_last
+  Hacl_Blake2b_256_blake2b_finish
   Hacl_Blake2b_256_blake2b
   Hacl_Hash_Blake2s_128_finish_blake2s_128
   Hacl_Hash_Blake2s_128_update_multi_blake2s_128
   Hacl_Hash_Blake2s_128_update_last_blake2s_128
   Hacl_Hash_Blake2s_128_hash_blake2s_128
+  Hacl_Blake2s_128_blake2s_init
+  Hacl_Blake2s_128_blake2s_update_multi
+  Hacl_Blake2s_128_blake2s_update_last
+  Hacl_Blake2s_128_blake2s_finish
   Hacl_Blake2s_128_blake2s
   EverCrypt_AutoConfig2_has_shaext
   EverCrypt_AutoConfig2_has_aesni
@@ -138,6 +154,8 @@ EXPORTS
   EverCrypt_Hash_hash_256
   EverCrypt_Hash_hash_224
   EverCrypt_Hash_hash
+  EverCrypt_Hash_Incremental_hash_len
+  EverCrypt_Hash_Incremental_block_len
   EverCrypt_Hash_Incremental_create_in
   EverCrypt_Hash_Incremental_init
   EverCrypt_Hash_Incremental_update
@@ -232,6 +250,7 @@ EXPORTS
   mt_init_path
   mt_free_path
   mt_get_path_length
+  mt_path_insert
   mt_get_path_step
   mt_get_path_step_pre
   mt_create_custom
@@ -281,7 +300,7 @@ EXPORTS
   MerkleTree_Low_free_path
   MerkleTree_Low_mt_get_root_pre
   MerkleTree_Low_mt_get_root
-  MerkleTree_Low_path_insert
+  MerkleTree_Low_mt_path_insert
   MerkleTree_Low_mt_get_path_length
   MerkleTree_Low_mt_get_path_step_pre
   MerkleTree_Low_mt_get_path_step
@@ -355,6 +374,28 @@ EXPORTS
   Hacl_Streaming_Blake2b_256_blake2b_256_with_key_update
   Hacl_Streaming_Blake2b_256_blake2b_256_with_key_finish
   Hacl_Streaming_Blake2b_256_blake2b_256_with_key_free
+  Hacl_Streaming_SHA2_create_in_224
+  LowStar_BufferOps_op_Bang_Star__Hacl_Streaming_Functor_state_s__uint32_t_____LowStar_Buffer_trivial_preorder_Hacl_Streaming_Functor_state_s__uint32_t___________LowStar_Buffer_trivial_preorder_Hacl_Streaming_Functor_state_s__uint32_t__________
+  Hacl_Streaming_SHA2_init_224
+  LowStar_BufferOps_op_Star_Equals__Hacl_Streaming_Functor_state_s__uint32_t_____LowStar_Buffer_trivial_preorder_Hacl_Streaming_Functor_state_s__uint32_t___________LowStar_Buffer_trivial_preorder_Hacl_Streaming_Functor_state_s__uint32_t__________
+  Hacl_Streaming_SHA2_update_224
+  Hacl_Streaming_SHA2_finish_224
+  Hacl_Streaming_SHA2_free_224
+  Hacl_Streaming_SHA2_create_in_256
+  Hacl_Streaming_SHA2_init_256
+  Hacl_Streaming_SHA2_update_256
+  Hacl_Streaming_SHA2_finish_256
+  Hacl_Streaming_SHA2_free_256
+  Hacl_Streaming_SHA2_create_in_384
+  Hacl_Streaming_SHA2_init_384
+  Hacl_Streaming_SHA2_update_384
+  Hacl_Streaming_SHA2_finish_384
+  Hacl_Streaming_SHA2_free_384
+  Hacl_Streaming_SHA2_create_in_512
+  Hacl_Streaming_SHA2_init_512
+  Hacl_Streaming_SHA2_update_512
+  Hacl_Streaming_SHA2_finish_512
+  Hacl_Streaming_SHA2_free_512
   Hacl_Streaming_Blake2s_128_blake2s_128_no_key_create_in
   Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update
   Hacl_Streaming_Blake2s_128_blake2s_128_no_key_finish
@@ -411,10 +452,20 @@ EXPORTS
   Hacl_HMAC_Blake2s_128_compute_blake2s_128
   Hacl_HKDF_Blake2s_128_expand_blake2s_128
   Hacl_HKDF_Blake2s_128_extract_blake2s_128
+  Hacl_Streaming_Poly1305_256_create_in
+  Hacl_Streaming_Poly1305_256_init
+  Hacl_Streaming_Poly1305_256_update
+  Hacl_Streaming_Poly1305_256_finish
+  Hacl_Streaming_Poly1305_256_free
   Hacl_HPKE_Curve64_CP256_SHA512_setupBaseI
   Hacl_HPKE_Curve64_CP256_SHA512_setupBaseR
   Hacl_HPKE_Curve64_CP256_SHA512_sealBase
   Hacl_HPKE_Curve64_CP256_SHA512_openBase
+  Hacl_Streaming_Poly1305_128_create_in
+  Hacl_Streaming_Poly1305_128_init
+  Hacl_Streaming_Poly1305_128_update
+  Hacl_Streaming_Poly1305_128_finish
+  Hacl_Streaming_Poly1305_128_free
   Hacl_HPKE_Curve51_CP128_SHA256_setupBaseI
   Hacl_HPKE_Curve51_CP128_SHA256_setupBaseR
   Hacl_HPKE_Curve51_CP128_SHA256_sealBase
@@ -450,6 +501,16 @@ EXPORTS
   Hacl_HPKE_P256_CP32_SHA256_setupBaseR
   Hacl_HPKE_P256_CP32_SHA256_sealBase
   Hacl_HPKE_P256_CP32_SHA256_openBase
+  Hacl_Streaming_SHA1_legacy_create_in_sha1
+  Hacl_Streaming_SHA1_legacy_init_sha1
+  Hacl_Streaming_SHA1_legacy_update_sha1
+  Hacl_Streaming_SHA1_legacy_finish_sha1
+  Hacl_Streaming_SHA1_legacy_free_sha1
+  Hacl_Streaming_MD5_legacy_create_in_md5
+  Hacl_Streaming_MD5_legacy_init_md5
+  Hacl_Streaming_MD5_legacy_update_md5
+  Hacl_Streaming_MD5_legacy_finish_md5
+  Hacl_Streaming_MD5_legacy_free_md5
   Hacl_HMAC_Blake2b_256_compute_blake2b_256
   Hacl_HKDF_Blake2b_256_expand_blake2b_256
   Hacl_HKDF_Blake2b_256_extract_blake2b_256
@@ -461,26 +522,6 @@ EXPORTS
   Hacl_HPKE_Curve64_CP32_SHA512_setupBaseR
   Hacl_HPKE_Curve64_CP32_SHA512_sealBase
   Hacl_HPKE_Curve64_CP32_SHA512_openBase
-  Hacl_Streaming_SHA2_create_in_224
-  Hacl_Streaming_SHA2_init_224
-  Hacl_Streaming_SHA2_update_224
-  Hacl_Streaming_SHA2_finish_224
-  Hacl_Streaming_SHA2_free_224
-  Hacl_Streaming_SHA2_create_in_256
-  Hacl_Streaming_SHA2_init_256
-  Hacl_Streaming_SHA2_update_256
-  Hacl_Streaming_SHA2_finish_256
-  Hacl_Streaming_SHA2_free_256
-  Hacl_Streaming_SHA2_create_in_384
-  Hacl_Streaming_SHA2_init_384
-  Hacl_Streaming_SHA2_update_384
-  Hacl_Streaming_SHA2_finish_384
-  Hacl_Streaming_SHA2_free_384
-  Hacl_Streaming_SHA2_create_in_512
-  Hacl_Streaming_SHA2_init_512
-  Hacl_Streaming_SHA2_update_512
-  Hacl_Streaming_SHA2_finish_512
-  Hacl_Streaming_SHA2_free_512
   Hacl_Streaming_Blake2_blake2s_32_no_key_create_in
   Hacl_Streaming_Blake2_blake2s_32_no_key_update
   Hacl_Streaming_Blake2_blake2s_32_no_key_finish

@@ -386,9 +386,8 @@ let fill_blocks #t h0 len n output a_spec refl footprint spec impl =
   );
   assert (Seq.equal
     (as_seq h0 (gsub output (size 0) (size 0 *! len))) FStar.Seq.empty);
-  assert_norm (
-    Seq.generate_blocks (v len) (v n) (v n) a_spec (spec h0) (refl h0 0) ==
-    norm [delta] Seq.generate_blocks (v len) (v n) (v n) a_spec (spec h0) (refl h0 0));
+  norm_spec [delta_only [`%Seq.generate_blocks]]
+            (Seq.generate_blocks (v len) (v n) (v n) a_spec (spec h0) (refl h0 0));
   let h1 = ST.get() in
   assert(refl' h1 (v n) == Loop.repeat_gen (v n)
          (Sequence.generate_blocks_a t (v len) (v n) a_spec)

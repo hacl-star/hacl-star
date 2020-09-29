@@ -761,8 +761,10 @@ dist/wasm/Makefile.basic: CHACHAPOLY_BUNDLE += \
   -bundle Hacl.Chacha20Poly1305_128,Hacl.Chacha20Poly1305_256
 dist/wasm/Makefile.basic: POLY_BUNDLE = \
   -bundle 'Hacl.Poly1305_32=Hacl.Impl.Poly1305.Field32xN_32' \
-  -bundle 'Hacl.Poly1305_128,Hacl.Poly1305_256,Hacl.Impl.Poly1305.*'
-dist/wasm/Makefile.basic: BLAKE2_BUNDLE += \
+  -bundle 'Hacl.Poly1305_128,Hacl.Poly1305_256,Hacl.Impl.Poly1305.*' \
+  -bundle 'Hacl.Streaming.Poly1305_128,Hacl.Streaming.Poly1305_256'
+dist/wasm/Makefile.basic: BLAKE2_BUNDLE = \
+  -bundle Hacl.Impl.Blake2.Constants -static-header Hacl.Impl.Blake2.Constants -bundle 'Hacl.Impl.Blake2.\*' \
   -bundle 'Hacl.Blake2s_128,Hacl.Blake2b_256,Hacl.HMAC.Blake2s_128,Hacl.HMAC.Blake2b_256,Hacl.HKDF.Blake2s_128,Hacl.HKDF.Blake2b_256,Hacl.Streaming.Blake2s_128,Hacl.Streaming.Blake2b_256'
 
 dist/wasm/Makefile.basic: STREAMING_BUNDLE = -bundle Hacl.Streaming.*
@@ -907,7 +909,7 @@ dist/ccf/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
 dist/ccf/Makefile.basic: HAND_WRITTEN_FILES := $(filter-out %/Lib_PrintBuffer.c %_vale_stubs.c,$(HAND_WRITTEN_FILES))
 dist/ccf/Makefile.basic: HAND_WRITTEN_H_FILES := $(filter-out %/libintvector.h %/lib_intrinsics.h,$(HAND_WRITTEN_H_FILES))
 dist/ccf/Makefile.basic: HACL_OLD_FILES =
-dist/ccf/Makefile.basic: POLY_BUNDLE =
+dist/ccf/Makefile.basic: POLY_BUNDLE = -bundle Hacl.Streaming.Poly1305_128,Hacl.Streaming.Poly1305_256
 dist/ccf/Makefile.basic: P256_BUNDLE=-bundle Hacl.P256,Hacl.Impl.ECDSA.*,Hacl.Impl.SolinasReduction,Hacl.Impl.P256.*
 dist/ccf/Makefile.basic: HPKE_BUNDLE = -bundle 'Hacl.HPKE.*'
 dist/ccf/Makefile.basic: BLAKE2_BUNDLE=-bundle Hacl.Impl.Blake2.Constants \

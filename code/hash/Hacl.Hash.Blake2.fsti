@@ -42,7 +42,7 @@ noextract inline_for_extraction
 val mk_hash:
   a:hash_alg{is_blake a}
   -> m:m_spec a{Impl.is_valid_blake2_config (to_blake_alg a) m}
-  -> blake2_t:Impl.blake2_t (to_blake_alg a) m ->
+  -> blake2:Impl.blake2_st (to_blake_alg a) m ->
   hash_st a
 
 val hash_blake2s_32: hash_st Blake2S

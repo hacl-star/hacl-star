@@ -6,8 +6,36 @@ module F = Hacl.Streaming.Functor
 module Spec = Spec.Blake2
 open Hacl.Impl.Blake2.Core
 open Hacl.Streaming.Blake2
+module Blake2b256 = Hacl.Blake2b_256
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
+
+/// The functor
+inline_for_extraction noextract
+let blake2b_256 (no_key : bool) (key_size : key_size_t Spec.Blake2B no_key) =
+  blake2 Spec.Blake2B M256 Blake2b256.blake2b_init Blake2b256.blake2b_update_multi
+         Blake2b256.blake2b_update_last Blake2b256.blake2b_finish no_key key_size 
+
+/// Generic functions
+inline_for_extraction noextract
+let mk_blake2b_256_create_in (no_key : bool) (key_size : key_size_t Spec.Blake2B no_key) =
+  F.create_in (blake2b_256 no_key key_size) () (s Spec.Blake2B M256)
+              (optional_key_blake2b no_key key_size)
+
+inline_for_extraction noextract
+let mk_blake2b_256_update (no_key : bool) (key_size : key_size_t Spec.Blake2B no_key) =
+  F.update (blake2b_256 no_key key_size) (G.hide ()) (s Spec.Blake2B M256)
+           (optional_key_blake2b no_key key_size)
+
+inline_for_extraction noextract
+let mk_blake2b_256_finish (no_key : bool) (key_size : key_size_t Spec.Blake2B no_key) =
+  F.mk_finish (blake2b_256 no_key key_size) () (s Spec.Blake2B M256)
+              (optional_key_blake2b no_key key_size)
+
+inline_for_extraction noextract
+let mk_blake2b_256_free (no_key : bool) (key_size : key_size_t Spec.Blake2B no_key) =
+  F.free (blake2b_256 no_key key_size) (G.hide ()) (s Spec.Blake2B M256)
+         (optional_key_blake2b no_key key_size)
 
 /// No key
 inline_for_extraction noextract
