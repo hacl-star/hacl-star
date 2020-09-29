@@ -716,6 +716,128 @@ static inline void blake2s_update_block(u32 *wv, u32 *hash, bool flag, u64 totle
   }
 }
 
+inline void Hacl_Blake2s_32_blake2s_init(u32 *wv, u32 *hash, u32 kk, u8 *k, u32 nn)
+{
+  u8 b[64U] = { 0U };
+  u32 *r0 = hash + (u32)0U * (u32)4U;
+  u32 *r1 = hash + (u32)1U * (u32)4U;
+  u32 *r2 = hash + (u32)2U * (u32)4U;
+  u32 *r3 = hash + (u32)3U * (u32)4U;
+  u32 iv0 = Hacl_Impl_Blake2_Constants_ivTable_S[0U];
+  u32 iv1 = Hacl_Impl_Blake2_Constants_ivTable_S[1U];
+  u32 iv2 = Hacl_Impl_Blake2_Constants_ivTable_S[2U];
+  u32 iv3 = Hacl_Impl_Blake2_Constants_ivTable_S[3U];
+  u32 iv4 = Hacl_Impl_Blake2_Constants_ivTable_S[4U];
+  u32 iv5 = Hacl_Impl_Blake2_Constants_ivTable_S[5U];
+  u32 iv6 = Hacl_Impl_Blake2_Constants_ivTable_S[6U];
+  u32 iv7 = Hacl_Impl_Blake2_Constants_ivTable_S[7U];
+  u32 kk_shift_8;
+  u32 iv0_;
+  r2[0U] = iv0;
+  r2[1U] = iv1;
+  r2[2U] = iv2;
+  r2[3U] = iv3;
+  r3[0U] = iv4;
+  r3[1U] = iv5;
+  r3[2U] = iv6;
+  r3[3U] = iv7;
+  kk_shift_8 = kk << (u32)8U;
+  iv0_ = iv0 ^ ((u32)0x01010000U ^ (kk_shift_8 ^ nn));
+  r0[0U] = iv0_;
+  r0[1U] = iv1;
+  r0[2U] = iv2;
+  r0[3U] = iv3;
+  r1[0U] = iv4;
+  r1[1U] = iv5;
+  r1[2U] = iv6;
+  r1[3U] = iv7;
+  if (!(kk == (u32)0U))
+  {
+    memcpy(b, k, kk * sizeof (u8));
+    {
+      u64 totlen = (u64)(u32)0U + (u64)(u32)64U;
+      u8 *b1 = b + (u32)0U * (u32)64U;
+      blake2s_update_block(wv, hash, false, totlen, b1);
+    }
+  }
+  Lib_Memzero0_memzero(b, (u32)64U * sizeof (b[0U]));
+}
+
+inline void
+Hacl_Blake2s_32_blake2s_update_multi(u32 len, u32 *wv, u32 *hash, u64 prev, u8 *blocks, u32 nb)
+{
+  u32 i;
+  for (i = (u32)0U; i < nb; i++)
+  {
+    u64 totlen = prev + (u64)((i + (u32)1U) * (u32)64U);
+    u8 *b = blocks + i * (u32)64U;
+    blake2s_update_block(wv, hash, false, totlen, b);
+  }
+}
+
+inline void
+Hacl_Blake2s_32_blake2s_update_last(u32 len, u32 *wv, u32 *hash, u64 prev, u32 rem, u8 *d)
+{
+  u8 b[64U] = { 0U };
+  u8 *last = d + len - rem;
+  u64 totlen;
+  memcpy(b, last, rem * sizeof (u8));
+  totlen = prev + (u64)len;
+  blake2s_update_block(wv, hash, true, totlen, b);
+  Lib_Memzero0_memzero(b, (u32)64U * sizeof (b[0U]));
+}
+
+static inline void blake2s_update_blocks(u32 len, u32 *wv, u32 *hash, u64 prev, u8 *blocks)
+{
+  u32 nb0 = len / (u32)64U;
+  u32 rem0 = len % (u32)64U;
+  K___u32_u32 scrut;
+  if (rem0 == (u32)0U && nb0 > (u32)0U)
+  {
+    u32 nb_ = nb0 - (u32)1U;
+    u32 rem_ = (u32)64U;
+    scrut = ((K___u32_u32){ .fst = nb_, .snd = rem_ });
+  }
+  else
+    scrut = ((K___u32_u32){ .fst = nb0, .snd = rem0 });
+  {
+    u32 nb = scrut.fst;
+    u32 rem = scrut.snd;
+    Hacl_Blake2s_32_blake2s_update_multi(len, wv, hash, prev, blocks, nb);
+    Hacl_Blake2s_32_blake2s_update_last(len, wv, hash, prev, rem, blocks);
+  }
+}
+
+inline void Hacl_Blake2s_32_blake2s_finish(u32 nn, u8 *output, u32 *hash)
+{
+  u32 double_row = (u32)2U * (u32)4U * (u32)4U;
+  KRML_CHECK_SIZE(sizeof (u8), double_row);
+  {
+    u8 b[double_row];
+    memset(b, 0U, double_row * sizeof (u8));
+    {
+      u8 *first = b;
+      u8 *second = b + (u32)4U * (u32)4U;
+      u32 *row0 = hash + (u32)0U * (u32)4U;
+      u32 *row1 = hash + (u32)1U * (u32)4U;
+      u8 *final;
+      {
+        u32 i;
+        for (i = (u32)0U; i < (u32)4U; i++)
+          store32_le(first + i * (u32)4U, row0[i]);
+      }
+      {
+        u32 i;
+        for (i = (u32)0U; i < (u32)4U; i++)
+          store32_le(second + i * (u32)4U, row1[i]);
+      }
+      final = b;
+      memcpy(output, final, nn * sizeof (u8));
+      Lib_Memzero0_memzero(b, double_row * sizeof (b[0U]));
+    }
+  }
+}
+
 void Hacl_Blake2s_32_blake2s(u32 nn, u8 *output, u32 ll, u8 *d, u32 kk, u8 *k)
 {
   u32 stlen = (u32)4U * (u32)4U;
@@ -742,115 +864,11 @@ void Hacl_Blake2s_32_blake2s(u32 nn, u8 *output, u32 ll, u8 *d, u32 kk, u8 *k)
           for (_i = 0U; _i < stlen; ++_i)
             b1[_i] = stzero;
         }
-        {
-          u8 b20[64U] = { 0U };
-          u32 *r0 = b + (u32)0U * (u32)4U;
-          u32 *r1 = b + (u32)1U * (u32)4U;
-          u32 *r2 = b + (u32)2U * (u32)4U;
-          u32 *r3 = b + (u32)3U * (u32)4U;
-          u32 iv0 = Hacl_Impl_Blake2_Constants_ivTable_S[0U];
-          u32 iv1 = Hacl_Impl_Blake2_Constants_ivTable_S[1U];
-          u32 iv2 = Hacl_Impl_Blake2_Constants_ivTable_S[2U];
-          u32 iv3 = Hacl_Impl_Blake2_Constants_ivTable_S[3U];
-          u32 iv4 = Hacl_Impl_Blake2_Constants_ivTable_S[4U];
-          u32 iv5 = Hacl_Impl_Blake2_Constants_ivTable_S[5U];
-          u32 iv6 = Hacl_Impl_Blake2_Constants_ivTable_S[6U];
-          u32 iv7 = Hacl_Impl_Blake2_Constants_ivTable_S[7U];
-          u32 kk_shift_8;
-          u32 iv0_;
-          u32 nb0;
-          u32 rem0;
-          K___u32_u32 scrut;
-          u32 nb;
-          u32 rem;
-          r2[0U] = iv0;
-          r2[1U] = iv1;
-          r2[2U] = iv2;
-          r2[3U] = iv3;
-          r3[0U] = iv4;
-          r3[1U] = iv5;
-          r3[2U] = iv6;
-          r3[3U] = iv7;
-          kk_shift_8 = kk << (u32)8U;
-          iv0_ = iv0 ^ ((u32)0x01010000U ^ (kk_shift_8 ^ nn));
-          r0[0U] = iv0_;
-          r0[1U] = iv1;
-          r0[2U] = iv2;
-          r0[3U] = iv3;
-          r1[0U] = iv4;
-          r1[1U] = iv5;
-          r1[2U] = iv6;
-          r1[3U] = iv7;
-          if (!(kk == (u32)0U))
-          {
-            memcpy(b20, k, kk * sizeof (u8));
-            {
-              u64 totlen = (u64)(u32)0U + (u64)(u32)64U;
-              u8 *b3 = b20 + (u32)0U * (u32)64U;
-              blake2s_update_block(b1, b, false, totlen, b3);
-            }
-          }
-          Lib_Memzero0_memzero(b20, (u32)64U * sizeof (b20[0U]));
-          nb0 = ll / (u32)64U;
-          rem0 = ll % (u32)64U;
-          if (rem0 == (u32)0U && nb0 > (u32)0U)
-          {
-            u32 nb_ = nb0 - (u32)1U;
-            u32 rem_ = (u32)64U;
-            scrut = ((K___u32_u32){ .fst = nb_, .snd = rem_ });
-          }
-          else
-            scrut = ((K___u32_u32){ .fst = nb0, .snd = rem0 });
-          nb = scrut.fst;
-          rem = scrut.snd;
-          {
-            u32 i;
-            for (i = (u32)0U; i < nb; i++)
-            {
-              u64 totlen = prev0 + (u64)((i + (u32)1U) * (u32)64U);
-              u8 *b2 = d + i * (u32)64U;
-              blake2s_update_block(b1, b, false, totlen, b2);
-            }
-          }
-          {
-            u8 b21[64U] = { 0U };
-            u8 *last = d + ll - rem;
-            u64 totlen;
-            u32 double_row;
-            memcpy(b21, last, rem * sizeof (u8));
-            totlen = prev0 + (u64)ll;
-            blake2s_update_block(b1, b, true, totlen, b21);
-            Lib_Memzero0_memzero(b21, (u32)64U * sizeof (b21[0U]));
-            double_row = (u32)2U * (u32)4U * (u32)4U;
-            KRML_CHECK_SIZE(sizeof (u8), double_row);
-            {
-              u8 b2[double_row];
-              memset(b2, 0U, double_row * sizeof (u8));
-              {
-                u8 *first = b2;
-                u8 *second = b2 + (u32)4U * (u32)4U;
-                u32 *row0 = b + (u32)0U * (u32)4U;
-                u32 *row1 = b + (u32)1U * (u32)4U;
-                u8 *final;
-                {
-                  u32 i;
-                  for (i = (u32)0U; i < (u32)4U; i++)
-                    store32_le(first + i * (u32)4U, row0[i]);
-                }
-                {
-                  u32 i;
-                  for (i = (u32)0U; i < (u32)4U; i++)
-                    store32_le(second + i * (u32)4U, row1[i]);
-                }
-                final = b2;
-                memcpy(output, final, nn * sizeof (u8));
-                Lib_Memzero0_memzero(b2, double_row * sizeof (b2[0U]));
-                Lib_Memzero0_memzero(b1, stlen * sizeof (b1[0U]));
-                Lib_Memzero0_memzero(b, stlen * sizeof (b[0U]));
-              }
-            }
-          }
-        }
+        Hacl_Blake2s_32_blake2s_init(b1, b, kk, k, nn);
+        blake2s_update_blocks(ll, b1, b, prev0, d);
+        Hacl_Blake2s_32_blake2s_finish(nn, output, b);
+        Lib_Memzero0_memzero(b1, stlen * sizeof (b1[0U]));
+        Lib_Memzero0_memzero(b, stlen * sizeof (b[0U]));
       }
     }
   }

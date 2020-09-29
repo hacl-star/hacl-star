@@ -85,6 +85,58 @@ void Hacl_Hash_Blake2s_128_hash_blake2s_128(uint8_t *input, uint32_t input_len, 
 
 /* SNIPPET_END: Hacl_Hash_Blake2s_128_hash_blake2s_128 */
 
+/* SNIPPET_START: Hacl_Blake2s_128_blake2s_init */
+
+void
+Hacl_Blake2s_128_blake2s_init(
+  Lib_IntVector_Intrinsics_vec128 *wv,
+  Lib_IntVector_Intrinsics_vec128 *hash,
+  uint32_t kk,
+  uint8_t *k,
+  uint32_t nn
+);
+
+/* SNIPPET_END: Hacl_Blake2s_128_blake2s_init */
+
+/* SNIPPET_START: Hacl_Blake2s_128_blake2s_update_multi */
+
+void
+Hacl_Blake2s_128_blake2s_update_multi(
+  uint32_t len,
+  Lib_IntVector_Intrinsics_vec128 *wv,
+  Lib_IntVector_Intrinsics_vec128 *hash,
+  uint64_t prev,
+  uint8_t *blocks,
+  uint32_t nb
+);
+
+/* SNIPPET_END: Hacl_Blake2s_128_blake2s_update_multi */
+
+/* SNIPPET_START: Hacl_Blake2s_128_blake2s_update_last */
+
+void
+Hacl_Blake2s_128_blake2s_update_last(
+  uint32_t len,
+  Lib_IntVector_Intrinsics_vec128 *wv,
+  Lib_IntVector_Intrinsics_vec128 *hash,
+  uint64_t prev,
+  uint32_t rem,
+  uint8_t *d
+);
+
+/* SNIPPET_END: Hacl_Blake2s_128_blake2s_update_last */
+
+/* SNIPPET_START: Hacl_Blake2s_128_blake2s_finish */
+
+void
+Hacl_Blake2s_128_blake2s_finish(
+  uint32_t nn,
+  uint8_t *output,
+  Lib_IntVector_Intrinsics_vec128 *hash
+);
+
+/* SNIPPET_END: Hacl_Blake2s_128_blake2s_finish */
+
 /* SNIPPET_START: Hacl_Blake2s_128_blake2s */
 
 void
