@@ -17,9 +17,9 @@ module M = Hacl.Spec.Montgomery.Lemmas
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-let check_mod_exp #t #nLen n a bBits b =
+let bn_check_mod_exp #t #nLen n a bBits b =
   let pbits = bits t in
-  let m0 = check_modulus n in
+  let m0 = bn_check_modulus n in
   let m1 = bn_is_zero_mask b in
   bn_is_zero_mask_lemma b;
   assert (if v m1 = 0 then bn_v b > 0 else bn_v b = 0);
@@ -66,8 +66,8 @@ val bn_mod_exp_f:
 
 let bn_mod_exp_f #t #nLen n mu bBits bLen b i (aM, accM) =
   let is_bit_set = not (Hacl.Spec.Bignum.Base.unsafe_bool_of_limb0 (bn_get_ith_bit b i)) in
-  let accM = if is_bit_set then mont_mul n mu aM accM else accM in // acc = (acc * a) % n
-  let aM = mont_sqr n mu aM in // a = (a * a) % n
+  let accM = if is_bit_set then bn_mont_mul n mu aM accM else accM in // acc = (acc * a) % n
+  let aM = bn_mont_sqr n mu aM in // a = (a * a) % n
   (aM, accM)
 
 
@@ -86,10 +86,10 @@ let bn_mod_exp_mont #t nLen n a acc bBits b r2 =
   let bLen = blocks bBits (bits t) in
   let mu = mod_inv_limb n.[0] in
 
-  let aM = to_mont n mu r2 a in
-  let accM = to_mont n mu r2 acc in
+  let aM = bn_to_mont n mu r2 a in
+  let accM = bn_to_mont n mu r2 acc in
   let (aM, accM) = repeati bBits (bn_mod_exp_f n mu bBits bLen b) (aM, accM) in
-  from_mont n mu accM
+  bn_from_mont n mu accM
 
 
 let bn_mod_exp_precompr2 #t nLen n a bBits b r2 =
@@ -123,10 +123,10 @@ val bn_mod_exp_f_lemma:
 let bn_mod_exp_f_lemma #t #nLen n mu bBits bLen b i (aM0, accM0) =
   let (aM1, accM1) = bn_mod_exp_f n mu bBits bLen b i (aM0, accM0) in
   let (aM2, accM2) = BL.mod_exp_mont_f_ll (bits t) nLen (bn_v n) (v mu) bBits (bn_v b) i (bn_v aM0, bn_v accM0) in
-  mont_sqr_lemma n mu aM0;
+  bn_mont_sqr_lemma n mu aM0;
   assert (bn_v aM1 == aM2);
   bn_get_ith_bit_lemma b i;
-  if (bn_v b / pow2 i % 2 = 1) then mont_mul_lemma n mu aM0 accM0;
+  if (bn_v b / pow2 i % 2 = 1) then bn_mont_mul_lemma n mu aM0 accM0;
   assert (bn_v accM1 == accM2)
 
 
@@ -206,17 +206,17 @@ let bn_mod_exp_mont_lemma_aux #t nLen n a bBits b r2 =
   assert (v n.[0] % 2 = 1); // since bn_v n % 2 = 1
   mod_inv_limb_lemma n.[0];
 
-  let aM0 = to_mont n mu r2 a in
-  to_mont_lemma n mu r2 a;
+  let aM0 = bn_to_mont n mu r2 a in
+  bn_to_mont_lemma n mu r2 a;
 
-  let accM0 = to_mont n mu r2 acc in
-  to_mont_lemma n mu r2 acc;
+  let accM0 = bn_to_mont n mu r2 acc in
+  bn_to_mont_lemma n mu r2 acc;
 
   let (aM1, accM1) = repeati bBits (bn_mod_exp_f n mu bBits bLen b) (aM0, accM0) in
   bn_mod_exp_mont_loop_lemma n mu bBits bLen b bBits (aM0, accM0);
 
-  let res = from_mont n mu accM1 in
-  from_mont_lemma n mu accM1
+  let res = bn_from_mont n mu accM1 in
+  bn_from_mont_lemma n mu accM1
 
 
 let bn_mod_exp_precompr2_lemma #t nLen n a bBits b r2 =
@@ -261,8 +261,8 @@ let bn_mod_exp_mont_ladder_f #t #nLen n mu bBits bLen b i (rM0, rM1, privbit) =
   let bit = bn_get_ith_bit b (bBits - i - 1) in
   let sw = bit ^. privbit in
   let rM0, rM1 = cswap2 sw rM0 rM1 in
-  let rM0' = mont_sqr n mu rM0 in // rM0 * rM0 % n
-  let rM1' = mont_mul n mu rM1 rM0 in // rM1 * rM0 % n
+  let rM0' = bn_mont_sqr n mu rM0 in // rM0 * rM0 % n
+  let rM1' = bn_mont_mul n mu rM1 rM0 in // rM1 * rM0 % n
   (rM0', rM1', bit)
 
 
@@ -281,13 +281,13 @@ let bn_mod_exp_mont_ladder_ #t nLen n a one bBits b r2 =
   let bLen = blocks bBits (bits t) in
   let mu = mod_inv_limb n.[0] in
 
-  let rM0 = to_mont n mu r2 one in
-  let rM1 = to_mont n mu r2 a in
+  let rM0 = bn_to_mont n mu r2 one in
+  let rM1 = bn_to_mont n mu r2 a in
   let sw = uint #t 0 in
   let (rM0', rM1', sw') = repeat_gen bBits (bn_mod_exp_mont_ladder_t t nLen bBits)
     (bn_mod_exp_mont_ladder_f n mu bBits bLen b) (rM0, rM1, sw) in
   let (rM0', rM1') = cswap2 sw' rM0' rM1' in
-  from_mont n mu rM0'
+  bn_from_mont n mu rM0'
 
 
 let bn_mod_exp_mont_ladder_precompr2 #t nLen n a bBits b r2 =
@@ -348,10 +348,10 @@ let bn_mod_exp_mont_ladder_f_lemma #t #nLen n mu bBits bLen b i (rM0, rM1, sw) =
   lemma_bit_xor_is_sum_mod2 bit sw;
   let rM2, rM3 = cswap2 sw1 rM0 rM1 in
   cswap2_lemma sw1 rM0 rM1;
-  let rM2' = mont_sqr n mu rM2 in
-  mont_sqr_lemma n mu rM2;
-  let rM3' = mont_mul n mu rM3 rM2 in
-  mont_mul_lemma n mu rM3 rM2;
+  let rM2' = bn_mont_sqr n mu rM2 in
+  bn_mont_sqr_lemma n mu rM2;
+  let rM3' = bn_mont_mul n mu rM3 rM2 in
+  bn_mont_mul_lemma n mu rM3 rM2;
   assert (rM0' == rM2' /\ rM1' == rM3' /\ sw' == bit);
   assert (bn_v rM0' == rM0'' /\ bn_v rM1' == rM1'' /\ v sw' == sw'')
 
@@ -438,11 +438,11 @@ let bn_mod_exp_mont_ladder_lemma_aux #t nLen n a bBits b r2 =
   assert (v n.[0] % 2 = 1); // since bn_v n % 2 = 1
   mod_inv_limb_lemma n.[0];
 
-  let rM0 = to_mont n mu r2 one in
-  to_mont_lemma n mu r2 one;
+  let rM0 = bn_to_mont n mu r2 one in
+  bn_to_mont_lemma n mu r2 one;
 
-  let rM1 = to_mont n mu r2 a in
-  to_mont_lemma n mu r2 a;
+  let rM1 = bn_to_mont n mu r2 a in
+  bn_to_mont_lemma n mu r2 a;
 
   let sw = uint #t 0 in
   let (rM0', rM1', sw') = repeat_gen bBits (bn_mod_exp_mont_ladder_t t nLen bBits)
@@ -451,8 +451,8 @@ let bn_mod_exp_mont_ladder_lemma_aux #t nLen n a bBits b r2 =
 
   let (rM0'', rM1'') = cswap2 sw' rM0' rM1' in
   cswap2_lemma sw' rM0' rM1';
-  let res = from_mont n mu rM0'' in
-  from_mont_lemma n mu rM0''
+  let res = bn_from_mont n mu rM0'' in
+  bn_from_mont_lemma n mu rM0''
 
 
 let bn_mod_exp_mont_ladder_precompr2_lemma #t nLen n a bBits b r2 =
@@ -476,22 +476,22 @@ let bn_mod_exp_mont_ladder_precompr2_lemma #t nLen n a bBits b r2 =
 
 
 let bn_mod_exp #t nLen n a bBits b =
-  let r2 = precomp_r2_mod_n n in
+  let r2 = bn_precomp_r2_mod_n n in
   bn_mod_exp_precompr2 nLen n a bBits b r2
 
 
 let bn_mod_exp_lemma #t nLen n a bBits b =
-  let r2 = precomp_r2_mod_n n in
-  precomp_r2_mod_n_lemma n;
+  let r2 = bn_precomp_r2_mod_n n in
+  bn_precomp_r2_mod_n_lemma n;
   bn_mod_exp_precompr2_lemma nLen n a bBits b r2
 
 
 let bn_mod_exp_mont_ladder #t nLen n a bBits b =
-  let r2 = precomp_r2_mod_n n in
+  let r2 = bn_precomp_r2_mod_n n in
   bn_mod_exp_mont_ladder_precompr2 nLen n a bBits b r2
 
 
 let bn_mod_exp_mont_ladder_lemma #t nLen n a bBits b =
-  let r2 = precomp_r2_mod_n n in
-  precomp_r2_mod_n_lemma n;
+  let r2 = bn_precomp_r2_mod_n n in
+  bn_precomp_r2_mod_n_lemma n;
   bn_mod_exp_mont_ladder_precompr2_lemma nLen n a bBits b r2

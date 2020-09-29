@@ -39,14 +39,14 @@ Comment
   This functions returns the carry.
 
   The arguments a, b and res are meant to be 256-bit bignums, i.e. uint64_t[4]"]
-val add: Hacl.Bignum.Addition.bn_add_eq_len_st t_limbs n_limbs
+val add: a:lbignum t_limbs n_limbs -> b:lbignum t_limbs n_limbs -> BN.bn_add_eq_len_st a b
 
 [@@ Comment "Write `a - b mod 2^256` in `res`.
 
   This functions returns the carry.
 
   The arguments a, b and res are meant to be 256-bit bignums, i.e. uint64_t[4]"]
-val sub: Hacl.Bignum.Addition.bn_sub_eq_len_st t_limbs n_limbs
+val sub: a:lbignum t_limbs n_limbs -> b:lbignum t_limbs n_limbs -> BN.bn_sub_eq_len_st a b
 
 [@@ Comment "Write `a * b` in `res`.
 
@@ -168,7 +168,7 @@ val mod_exp_mont_ladder: BE.bn_mod_exp_st t_limbs n_limbs
 
   If the return value is non-null, clients must eventually call free(3) on it to
   avoid memory leaks."]
-val new_precompr2: BM.new_precomp_r2_mod_n_st t_limbs
+val new_precompr2: BM.new_bn_precomp_r2_mod_n_st t_limbs
 
 [@@ Comment "Write `a ^ (-1) mod n` in `res`.
 
@@ -210,4 +210,4 @@ val bn_to_bytes_be: Hacl.Bignum.Convert.bn_to_bytes_be_st t_limbs n_bytes
 /***************/\n";
 Comment
 "Returns 2 ^ 64 - 1 if and only if argument a is strictly less than the argument b, otherwise returns 0."]
-val lt_mask: Hacl.Bignum.bn_lt_mask_st t_limbs n_limbs
+val lt_mask: BN.bn_lt_mask_st t_limbs n_limbs

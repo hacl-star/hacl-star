@@ -26,6 +26,7 @@ module K = Hacl.Spec.Bignum.Karatsuba
 inline_for_extraction noextract
 let bn_mul_threshold = size K.bn_mul_threshold
 
+
 inline_for_extraction noextract
 val bn_sign_abs:
     #t:limb_t
@@ -186,58 +187,88 @@ let bn_karatsuba_last #t aLen c0 c1 tmp res =
 
 
 #push-options "--z3rlimit 150"
+(* from Jonathan:
+let karatsuba_t = dst:bignum -> a:bignum -> b:bignum -> Stack unit ensures dst = a * b
+inline_for_extraction
+let karatsuba_open (self: unit -> karastuba_t): fun dst a b ->
+  ... self () dst' a' b' ...
+let rec karatsuba () = karatsuba_open karastuba
+*)
 
-val bn_karatsuba_mul_:
-    #t:limb_t
-  -> aLen:size_t{4 * v aLen <= max_size_t}
-  -> a:lbignum t aLen
-  -> b:lbignum t aLen
-  -> tmp:lbignum t (4ul *! aLen)
-  -> res:lbignum t (aLen +! aLen) ->
+inline_for_extraction noextract
+let bn_karatsuba_mul_st (t:limb_t) =
+    len:size_t{4 * v len <= max_size_t}
+  -> a:lbignum t len
+  -> b:lbignum t len
+  -> tmp:lbignum t (4ul *! len)
+  -> res:lbignum t (len +! len) ->
   Stack unit
   (requires fun h ->
     live h a /\ live h b /\ live h res /\ live h tmp /\
     disjoint res tmp /\ disjoint tmp a /\ disjoint tmp b /\
     disjoint res a /\ disjoint res b /\ eq_or_disjoint a b)
   (ensures  fun h0 _ h1 -> modifies (loc res |+| loc tmp) h0 h1 /\
-    as_seq h1 res == K.bn_karatsuba_mul_ (v aLen) (as_seq h0 a) (as_seq h0 b))
+    as_seq h1 res == K.bn_karatsuba_mul_ (v len) (as_seq h0 a) (as_seq h0 b))
 
-[@CInline]
-let rec bn_karatsuba_mul_ #t aLen a b tmp res =
+
+inline_for_extraction noextract
+val bn_karatsuba_mul_open: #t:limb_t -> (self: unit -> bn_karatsuba_mul_st t) -> bn_karatsuba_mul_st t
+let bn_karatsuba_mul_open #t (self: unit -> bn_karatsuba_mul_st t) len a b tmp res =
   let h0 = ST.get () in
   norm_spec [zeta; iota; primops; delta_only [`%K.bn_karatsuba_mul_]]
-    (K.bn_karatsuba_mul_ (v aLen) (as_seq h0 a) (as_seq h0 b));
-  if aLen <. bn_mul_threshold || aLen %. 2ul =. 1ul then
-    bn_mul aLen a aLen b res
+    (K.bn_karatsuba_mul_ (v len) (as_seq h0 a) (as_seq h0 b));
+  if len <. bn_mul_threshold || len %. 2ul =. 1ul then
+    bn_mul len a len b res
   else begin
-    let aLen2 = aLen /. 2ul in
+    let len2 = len /. 2ul in
 
-    let a0 = sub a 0ul aLen2 in
-    let a1 = sub a aLen2 aLen2 in
+    let a0 = sub a 0ul len2 in
+    let a1 = sub a len2 len2 in
 
-    let b0 = sub b 0ul aLen2 in
-    let b1 = sub b aLen2 aLen2 in
+    let b0 = sub b 0ul len2 in
+    let b1 = sub b len2 len2 in
 
-    // tmp = [ t0_aLen2; t1_aLen2; ..]
-    let t0 = sub tmp 0ul aLen2 in
-    let t1 = sub tmp aLen2 aLen2 in
-    let tmp' = sub tmp aLen aLen2 in
+    // tmp = [ t0_len2; t1_len2; ..]
+    let t0 = sub tmp 0ul len2 in
+    let t1 = sub tmp len2 len2 in
+    let tmp' = sub tmp len len2 in
 
     let c0 = bn_sign_abs a0 a1 tmp' t0 in
     let c1 = bn_sign_abs b0 b1 tmp' t1 in
 
-    // tmp = [ t0_aLen2; t1_aLen2; t23_aLen; ..]
+    // tmp = [ t0_len2; t1_len2; t23_len; ..]
     (**) let h0 = ST.get () in
-    let t23 = sub tmp aLen aLen in
-    let tmp1 = sub tmp (aLen +! aLen) (aLen +! aLen) in
-    bn_karatsuba_mul_ aLen2 t0 t1 tmp1 t23;
+    let t23 = sub tmp len len in
+    let tmp1 = sub tmp (len +! len) (len +! len) in
+    self () len2 t0 t1 tmp1 t23;
 
-    let r01 = sub res 0ul aLen in
-    let r23 = sub res aLen aLen in
-    bn_karatsuba_mul_ aLen2 a0 b0 tmp1 r01;
-    bn_karatsuba_mul_ aLen2 a1 b1 tmp1 r23;
-    let c = bn_karatsuba_last aLen c0 c1 tmp res in
+    let r01 = sub res 0ul len in
+    let r23 = sub res len len in
+    self () len2 a0 b0 tmp1 r01;
+    self () len2 a1 b1 tmp1 r23;
+    let c = bn_karatsuba_last len c0 c1 tmp res in
     () end
+
+
+val bn_karatsuba_mul_uint32 : unit -> bn_karatsuba_mul_st U32
+[@CInline]
+let rec bn_karatsuba_mul_uint32 () aLen a b tmp res =
+  bn_karatsuba_mul_open bn_karatsuba_mul_uint32 aLen a b tmp res
+
+
+val bn_karatsuba_mul_uint64 : unit -> bn_karatsuba_mul_st U64
+[@CInline]
+let rec bn_karatsuba_mul_uint64 () aLen a b tmp res =
+  bn_karatsuba_mul_open bn_karatsuba_mul_uint64 aLen a b tmp res
+
+
+inline_for_extraction noextract
+val bn_karatsuba_mul_: #t:limb_t -> bn_karatsuba_mul_st t
+let bn_karatsuba_mul_ #t =
+  match t with
+  | U32 -> bn_karatsuba_mul_uint32 ()
+  | U64 -> bn_karatsuba_mul_uint64 ()
+
 
 //TODO: pass tmp as a parameter?
 inline_for_extraction noextract
@@ -296,46 +327,68 @@ let bn_karatsuba_last_sqr #t aLen tmp res =
   c
 
 
-val bn_karatsuba_sqr_:
-    #t:limb_t
-  -> aLen:size_t{4 * v aLen <= max_size_t /\ 0 < v aLen}
-  -> a:lbignum t aLen
-  -> tmp:lbignum t (4ul *! aLen)
-  -> res:lbignum t (aLen +! aLen) ->
+inline_for_extraction noextract
+let bn_karatsuba_sqr_st (t:limb_t) =
+    len:size_t{4 * v len <= max_size_t /\ 0 < v len}
+  -> a:lbignum t len
+  -> tmp:lbignum t (4ul *! len)
+  -> res:lbignum t (len +! len) ->
   Stack unit
   (requires fun h ->
     live h a /\ live h res /\ live h tmp /\
     disjoint res tmp /\ disjoint tmp a /\ disjoint res a)
   (ensures  fun h0 _ h1 -> modifies (loc res |+| loc tmp) h0 h1 /\
-    as_seq h1 res == K.bn_karatsuba_sqr_ (v aLen) (as_seq h0 a))
+    as_seq h1 res == K.bn_karatsuba_sqr_ (v len) (as_seq h0 a))
 
-[@CInline]
-let rec bn_karatsuba_sqr_ #t aLen a tmp res =
+
+inline_for_extraction noextract
+val bn_karatsuba_sqr_open: #t:limb_t -> (self: unit -> bn_karatsuba_sqr_st t) -> bn_karatsuba_sqr_st t
+let bn_karatsuba_sqr_open #t (self: unit -> bn_karatsuba_sqr_st t) len a tmp res =
   let h0 = ST.get () in
   norm_spec [zeta; iota; primops; delta_only [`%K.bn_karatsuba_sqr_]]
-    (K.bn_karatsuba_sqr_ (v aLen) (as_seq h0 a));
-  if aLen <. bn_mul_threshold || aLen %. 2ul =. 1ul then
-    bn_sqr aLen a res
+    (K.bn_karatsuba_sqr_ (v len) (as_seq h0 a));
+  if len <. bn_mul_threshold || len %. 2ul =. 1ul then
+    bn_sqr len a res
   else begin
-    let aLen2 = aLen /. 2ul in
+    let len2 = len /. 2ul in
 
-    let a0 = sub a 0ul aLen2 in
-    let a1 = sub a aLen2 aLen2 in
+    let a0 = sub a 0ul len2 in
+    let a1 = sub a len2 len2 in
 
-    let t0 = sub tmp 0ul aLen2 in
-    let tmp' = sub tmp aLen aLen2 in
+    let t0 = sub tmp 0ul len2 in
+    let tmp' = sub tmp len len2 in
     let c0 = bn_sign_abs a0 a1 tmp' t0 in
 
-    let t23 = sub tmp aLen aLen in
-    let tmp1 = sub tmp (aLen +! aLen) (aLen +! aLen) in
-    bn_karatsuba_sqr_ aLen2 t0 tmp1 t23;
+    let t23 = sub tmp len len in
+    let tmp1 = sub tmp (len +! len) (len +! len) in
+    self () len2 t0 tmp1 t23;
 
-    let r01 = sub res 0ul aLen in
-    let r23 = sub res aLen aLen in
-    bn_karatsuba_sqr_ aLen2 a0 tmp1 r01;
-    bn_karatsuba_sqr_ aLen2 a1 tmp1 r23;
-    let c = bn_karatsuba_last_sqr aLen tmp res in
+    let r01 = sub res 0ul len in
+    let r23 = sub res len len in
+    self () len2 a0 tmp1 r01;
+    self () len2 a1 tmp1 r23;
+    let c = bn_karatsuba_last_sqr len tmp res in
     () end
+
+
+val bn_karatsuba_sqr_uint32 : unit -> bn_karatsuba_sqr_st U32
+[@CInline]
+let rec bn_karatsuba_sqr_uint32 () aLen a tmp res =
+  bn_karatsuba_sqr_open bn_karatsuba_sqr_uint32 aLen a tmp res
+
+
+val bn_karatsuba_sqr_uint64 : unit -> bn_karatsuba_sqr_st U64
+[@CInline]
+let rec bn_karatsuba_sqr_uint64 () aLen a tmp res =
+  bn_karatsuba_sqr_open bn_karatsuba_sqr_uint64 aLen a tmp res
+
+
+inline_for_extraction noextract
+val bn_karatsuba_sqr_: #t:limb_t -> bn_karatsuba_sqr_st t
+let bn_karatsuba_sqr_ #t =
+  match t with
+  | U32 -> bn_karatsuba_sqr_uint32 ()
+  | U64 -> bn_karatsuba_sqr_uint64 ()
 
 
 //TODO: pass tmp as a parameter?

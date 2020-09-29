@@ -59,7 +59,9 @@ let mod_inv_limb_ #t alpha beta ub vb =
   )
 
 
-let mod_inv_limb #t n0 =
+inline_for_extraction noextract
+val mk_mod_inv_limb: #t:limb_t -> mod_inv_limb_st t
+let mk_mod_inv_limb #t n0 =
   push_frame ();
   let alpha = uint #t 1 <<. size (bits t - 1) in
   let beta = n0 in
@@ -71,3 +73,15 @@ let mod_inv_limb #t n0 =
   let res = vb.(0ul) in
   pop_frame ();
   res
+
+
+[@CInline]
+let mod_inv_limb_uint32 : mod_inv_limb_st U32 = mk_mod_inv_limb #U32
+[@CInline]
+let mod_inv_limb_uint64 : mod_inv_limb_st U64 = mk_mod_inv_limb #U64
+
+
+let mod_inv_limb #t =
+  match t with
+  | U32 -> mod_inv_limb_uint32
+  | U64 -> mod_inv_limb_uint64

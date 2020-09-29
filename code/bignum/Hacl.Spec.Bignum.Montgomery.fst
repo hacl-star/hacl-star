@@ -13,7 +13,7 @@ open Hacl.Spec.Bignum
 
 #reset-options "--z3rlimit 100 --fuel 0 --ifuel 0"
 
-let check_modulus #t #nLen n =
+let bn_check_modulus #t #nLen n =
   let one = bn_from_uint nLen (uint #t 1) in
   bn_from_uint_lemma nLen (uint #t 1);
   let bit0 = bn_is_odd n in
@@ -59,14 +59,14 @@ let rec bn_mul_by_pow2 #t len n b k =
     Math.Lemmas.pow2_plus 1 (k - 1) end
 
 
-val precomp_r2_mod_n_:
+val bn_precomp_r2_mod_n_:
     #t:limb_t
   -> #nLen:size_pos{2 * bits t * nLen <= max_size_t}
   -> nBits:size_nat{nBits / bits t < nLen }
   -> n:lbignum t nLen ->
   lbignum t nLen
 
-let precomp_r2_mod_n_ #t #nLen nBits n =
+let bn_precomp_r2_mod_n_ #t #nLen nBits n =
   let c = create nLen (uint #t 0) in
   let c0 = bn_set_ith_bit c nBits in // c0 == pow2 (nBits - 1)
   // pow2 (128 * nLen) / pow2 (nBits - 1) == pow2 (128 * nLen + 1 - nBits)
@@ -74,13 +74,17 @@ let precomp_r2_mod_n_ #t #nLen nBits n =
   repeati (2 * bits t * nLen - nBits) (bn_lshift1_mod_n n) c0
 
 
-val precomp_r2_mod_n_aux_lemma: #t:limb_t -> #nLen:size_pos -> nBits:size_pos -> n:lbignum t nLen -> Lemma
+val bn_precomp_r2_mod_n_aux_lemma:
+    #t:limb_t
+  -> #nLen:size_pos
+  -> nBits:size_pos
+  -> n:lbignum t nLen -> Lemma
   (requires
     0 < bn_v n /\ pow2 nBits <= bn_v n /\ bn_v n % 2 = 1 /\
     2 * bits t * nLen <= max_size_t /\ nBits / bits t < nLen)
-  (ensures  bn_v (precomp_r2_mod_n_ nBits n) == pow2 (2 * bits t * nLen) % bn_v n)
+  (ensures  bn_v (bn_precomp_r2_mod_n_ nBits n) == pow2 (2 * bits t * nLen) % bn_v n)
 
-let precomp_r2_mod_n_aux_lemma #t #nLen nBits n =
+let bn_precomp_r2_mod_n_aux_lemma #t #nLen nBits n =
   let c = create nLen (uint #t 0) in
   let c0 = bn_set_ith_bit c nBits in
   bn_eval_zeroes #t nLen nLen;
@@ -95,7 +99,7 @@ let precomp_r2_mod_n_aux_lemma #t #nLen nBits n =
   assert (bn_v res == pow2 (2 * bits t * nLen) % bn_v n)
 
 
-let precomp_r2_mod_n #t #nLen n =
+let bn_precomp_r2_mod_n #t #nLen n =
   let mask = bn_is_zero_mask n in
   bn_is_zero_mask_lemma n;
   let bits =
@@ -103,10 +107,10 @@ let precomp_r2_mod_n #t #nLen n =
       bn_get_num_bits_lemma n;
       bn_get_num_bits n end
     else 0 in
-  precomp_r2_mod_n_ bits n
+  bn_precomp_r2_mod_n_ bits n
 
 
-let precomp_r2_mod_n_lemma #t #nLen n =
+let bn_precomp_r2_mod_n_lemma #t #nLen n =
   let mask = bn_is_zero_mask n in
   bn_is_zero_mask_lemma n;
   let bits =
@@ -114,13 +118,13 @@ let precomp_r2_mod_n_lemma #t #nLen n =
       bn_get_num_bits_lemma n;
       bn_get_num_bits n end
     else 0 in
-  precomp_r2_mod_n_aux_lemma bits n
+  bn_precomp_r2_mod_n_aux_lemma bits n
 
 ///
 ///  Low-level specification of Montgomery arithmetic
 ///
 
-val mont_reduction_f:
+val bn_mont_reduction_f:
     #t:limb_t
   -> #nLen:size_nat{nLen + nLen <= max_size_t}
   -> n:lbignum t nLen
@@ -129,37 +133,37 @@ val mont_reduction_f:
   -> tuple2 (carry t) (lbignum t (nLen + nLen)) ->
   tuple2 (carry t) (lbignum t (nLen + nLen))
 
-let mont_reduction_f #t #nLen n mu j (c0, acc) =
+let bn_mont_reduction_f #t #nLen n mu j (c0, acc) =
   let qj = mu *. acc.[j] in
   let c1, res1 = bn_mul1_lshift_add n qj j acc in
   let c2, r = addcarry c0 c1 res1.[nLen + j] in
   let res = res1.[nLen + j] <- r in
   c2, res
 
-let mont_reduction_t (#t:limb_t) (#nLen:size_nat{nLen + nLen <= max_size_t}) (j:size_nat{j <= nLen}) =
+let bn_mont_reduction_t (#t:limb_t) (#nLen:size_nat{nLen + nLen <= max_size_t}) (j:size_nat{j <= nLen}) =
   tuple2 (carry t) (lbignum t (nLen + nLen))
 
-let mont_reduction #t #nLen n mu c =
-  let (c0, c) = repeat_gen nLen mont_reduction_t (mont_reduction_f n mu) (uint #t 0, c) in
+let bn_mont_reduction #t #nLen n mu c =
+  let (c0, c) = repeat_gen nLen bn_mont_reduction_t (bn_mont_reduction_f n mu) (uint #t 0, c) in
   let res = bn_rshift c nLen in
   bn_reduce_once n c0 res
 
-let to_mont #t #nLen n mu r2 a =
+let bn_to_mont #t #nLen n mu r2 a =
   let c = bn_mul a r2 in // c = a * r2
-  mont_reduction n mu c // aM = c % n
+  bn_mont_reduction n mu c // aM = c % n
 
-let from_mont #t #nLen n mu aM =
+let bn_from_mont #t #nLen n mu aM =
   let tmp = create (nLen + nLen) (uint #t 0) in
   let tmp = update_sub tmp 0 nLen aM in
-  mont_reduction n mu tmp
+  bn_mont_reduction n mu tmp
 
-let mont_mul #t #nLen n mu aM bM =
+let bn_mont_mul #t #nLen n mu aM bM =
   let c = bn_mul aM bM in // c = aM * bM
-  mont_reduction n mu c // resM = c % n
+  bn_mont_reduction n mu c // resM = c % n
 
-let mont_sqr #t #nLen n mu aM =
+let bn_mont_sqr #t #nLen n mu aM =
   let c = bn_mul aM aM in // c = aM * aM
-  mont_reduction n mu c // resM = c % n
+  bn_mont_reduction n mu c // resM = c % n
 
 
 val eq_slice: #a:Type0 -> #len:size_nat -> b1:lseq a len -> b2:lseq a len -> i:nat -> j:nat{i <= j /\ j <= len} -> Lemma
@@ -176,7 +180,7 @@ let eq_slice #a #len b1 b2 i j =
   eq_intro (slice b1 j len) (slice b2 j len)
 
 
-val mont_reduction_f_eval_lemma:
+val bn_mont_reduction_f_eval_lemma:
     #t:limb_t
   -> #nLen:size_nat{nLen + nLen <= max_size_t}
   -> n:lbignum t nLen
@@ -185,13 +189,13 @@ val mont_reduction_f_eval_lemma:
   -> cres0:tuple2 (carry t) (lbignum t (nLen + nLen)) ->
   Lemma (
     let (c0, res0) = cres0 in
-    let (c2, res) = mont_reduction_f n mu j (c0, res0) in
+    let (c2, res) = bn_mont_reduction_f n mu j (c0, res0) in
     let qj = mu *. res0.[j] in
     eval_ (nLen + nLen) res (nLen + j + 1) + v c2 * pow2 (bits t * (nLen + j + 1)) ==
     eval_ (nLen + nLen) res0 (nLen + j + 1) + bn_v n * v qj * pow2 (bits t * j) + v c0 * pow2 (bits t * (nLen + j)) /\
     slice res (nLen + j + 1) (nLen + nLen) == slice res0 (nLen + j + 1) (nLen + nLen))
 
-let mont_reduction_f_eval_lemma #t #nLen n mu j (c0, res0) =
+let bn_mont_reduction_f_eval_lemma #t #nLen n mu j (c0, res0) =
   let pbits = bits t in
   let p = pow2 (pbits * (nLen + j)) in
   let resLen = nLen + nLen in
@@ -230,7 +234,7 @@ let mont_reduction_f_eval_lemma #t #nLen n mu j (c0, res0) =
   eq_intro (slice res (nLen + j + 1) (nLen + nLen)) (slice res0 (nLen + j + 1) (nLen + nLen))
 
 
-val mont_reduction_f_lemma:
+val bn_mont_reduction_f_lemma:
     #t:limb_t
   -> #nLen:size_nat{nLen + nLen <= max_size_t}
   -> n:lbignum t nLen
@@ -239,21 +243,21 @@ val mont_reduction_f_lemma:
   -> cres0:tuple2 (carry t) (lbignum t (nLen + nLen)) ->
   Lemma (
     let (c0, res0) = cres0 in
-    let (c2, res) = mont_reduction_f n mu j (c0, res0) in
+    let (c2, res) = bn_mont_reduction_f n mu j (c0, res0) in
     let qj = mu *. res0.[j] in
     bn_v res + v c2 * pow2 (bits t * (nLen + j + 1)) ==
     bn_v res0 + bn_v n * v qj * pow2 (bits t * j) + v c0 * pow2 (bits t * (nLen + j)))
 
-let mont_reduction_f_lemma #t #nLen n mu j (c0, res0) =
-  let (c2, res) = mont_reduction_f n mu j (c0, res0) in
-  mont_reduction_f_eval_lemma n mu j (c0, res0);
+let bn_mont_reduction_f_lemma #t #nLen n mu j (c0, res0) =
+  let (c2, res) = bn_mont_reduction_f n mu j (c0, res0) in
+  bn_mont_reduction_f_eval_lemma n mu j (c0, res0);
   bn_eval_split_i res (nLen + j + 1);
   bn_eval_split_i res0 (nLen + j + 1);
   bn_eval_extensionality_j res (slice res 0 (nLen + j + 1)) (nLen + j + 1);
   bn_eval_extensionality_j res0 (slice res0 0 (nLen + j + 1)) (nLen + j + 1)
 
 
-val mont_reduction_loop_step_lemma:
+val bn_mont_reduction_loop_step_lemma:
     #t:limb_t
   -> #nLen:size_nat{nLen + nLen <= max_size_t}
   -> n:lbignum t nLen{0 < bn_v n}
@@ -265,15 +269,15 @@ val mont_reduction_loop_step_lemma:
   (requires
     v c1 * pow2 (bits t * (nLen + j)) + bn_v res1 == resM1)
   (ensures
-    (let (c2, res) = mont_reduction_f n mu j (c1, res1) in
+    (let (c2, res) = bn_mont_reduction_f n mu j (c1, res1) in
      let resM = M.mont_reduction_f (bits t) nLen (bn_v n) (v mu) j resM1 in
      v c2 * pow2 (bits t * (nLen + j + 1)) + bn_v res == resM))
 
-let mont_reduction_loop_step_lemma #t #nLen n mu j c1 res1 resM1 =
+let bn_mont_reduction_loop_step_lemma #t #nLen n mu j c1 res1 resM1 =
   let pbits = bits t in
-  let (c2, res) = mont_reduction_f n mu j (c1, res1) in
+  let (c2, res) = bn_mont_reduction_f n mu j (c1, res1) in
   let resM = M.mont_reduction_f pbits nLen (bn_v n) (v mu) j resM1 in
-  mont_reduction_f_lemma n mu j (c1, res1);
+  bn_mont_reduction_f_lemma n mu j (c1, res1);
   let qj = mu *. res1.[j] in
   assert (bn_v res + v c2 * pow2 (pbits * (nLen + j + 1)) ==
     bn_v res1 + bn_v n * v qj * pow2 (pbits * j) + v c1 * pow2 (pbits * (nLen + j)));
@@ -298,7 +302,7 @@ let mont_reduction_loop_step_lemma #t #nLen n mu j c1 res1 resM1 =
     }
 
 
-val mont_reduction_loop_lemma:
+val bn_mont_reduction_loop_lemma:
     #t:limb_t
   -> #nLen:size_nat{nLen + nLen <= max_size_t}
   -> n:lbignum t nLen{0 < bn_v n}
@@ -306,38 +310,38 @@ val mont_reduction_loop_lemma:
   -> j:size_nat{j <= nLen}
   -> res0:lbignum t (nLen + nLen) ->
   Lemma (
-    let (c2, res) = repeat_gen j mont_reduction_t (mont_reduction_f n mu) (uint #t 0, res0) in
+    let (c2, res) = repeat_gen j bn_mont_reduction_t (bn_mont_reduction_f n mu) (uint #t 0, res0) in
     let resM = repeati j (M.mont_reduction_f (bits t) nLen (bn_v n) (v mu)) (bn_v res0) in
     v c2 * pow2 (bits t * (nLen + j)) + bn_v res == resM)
 
-let rec mont_reduction_loop_lemma #t #nLen n mu j res0 =
+let rec bn_mont_reduction_loop_lemma #t #nLen n mu j res0 =
   let pbits = bits t in
-  let (c2, res) = repeat_gen j mont_reduction_t (mont_reduction_f n mu) (uint #t 0, res0) in
+  let (c2, res) = repeat_gen j bn_mont_reduction_t (bn_mont_reduction_f n mu) (uint #t 0, res0) in
   let resM = repeati j (M.mont_reduction_f pbits nLen (bn_v n) (v mu)) (bn_v res0) in
 
   if j = 0 then begin
     eq_repeati0 j (M.mont_reduction_f pbits nLen (bn_v n) (v mu)) (bn_v res0);
-    eq_repeat_gen0 j mont_reduction_t (mont_reduction_f n mu) (uint #t 0, res0);
+    eq_repeat_gen0 j bn_mont_reduction_t (bn_mont_reduction_f n mu) (uint #t 0, res0);
     () end
   else begin
-    let (c1, res1) = repeat_gen (j - 1) mont_reduction_t (mont_reduction_f n mu) (uint #t 0, res0) in
+    let (c1, res1) = repeat_gen (j - 1) bn_mont_reduction_t (bn_mont_reduction_f n mu) (uint #t 0, res0) in
     let resM1 = repeati (j - 1) (M.mont_reduction_f pbits nLen (bn_v n) (v mu)) (bn_v res0) in
-    unfold_repeat_gen j mont_reduction_t (mont_reduction_f n mu) (uint #t 0, res0) (j - 1);
-    assert ((c2, res) == mont_reduction_f n mu (j - 1) (c1, res1));
+    unfold_repeat_gen j bn_mont_reduction_t (bn_mont_reduction_f n mu) (uint #t 0, res0) (j - 1);
+    assert ((c2, res) == bn_mont_reduction_f n mu (j - 1) (c1, res1));
     unfold_repeati j (M.mont_reduction_f pbits nLen (bn_v n) (v mu)) (bn_v res0) (j - 1);
     assert (resM == M.mont_reduction_f pbits nLen (bn_v n) (v mu) (j - 1) resM1);
-    mont_reduction_loop_lemma n mu (j - 1) res0;
+    bn_mont_reduction_loop_lemma n mu (j - 1) res0;
     assert (v c1 * pow2 (pbits * (nLen + j - 1)) + bn_v res1 == resM1);
-    mont_reduction_loop_step_lemma n mu (j - 1) c1 res1 resM1;
+    bn_mont_reduction_loop_step_lemma n mu (j - 1) c1 res1 resM1;
     () end
 
 
-let mont_reduction_lemma #t #nLen n mu res0 =
+let bn_mont_reduction_lemma #t #nLen n mu res0 =
   let pbits = bits t in
   let resLen = nLen + nLen in
-  let (c0, res1) = repeat_gen nLen mont_reduction_t (mont_reduction_f n mu) (uint #t 0, res0) in
+  let (c0, res1) = repeat_gen nLen bn_mont_reduction_t (bn_mont_reduction_f n mu) (uint #t 0, res0) in
   let resM : nat = repeati nLen (M.mont_reduction_f pbits nLen (bn_v n) (v mu)) (bn_v res0) in
-  mont_reduction_loop_lemma n mu nLen res0;
+  bn_mont_reduction_loop_lemma n mu nLen res0;
   assert (v c0 * pow2 (pbits * resLen) + bn_v res1 == resM);
   let res2 = bn_rshift res1 nLen in
   bn_rshift_lemma res1 nLen;
@@ -372,41 +376,41 @@ let mont_reduction_lemma #t #nLen n mu res0 =
   assert (resM2 == resM1 % bn_v n)
 
 
-let to_mont_lemma #t #nLen n mu r2 a =
+let bn_to_mont_lemma #t #nLen n mu r2 a =
   let c = bn_mul a r2 in // c = a * r2
   bn_mul_lemma a r2;
   Math.Lemmas.lemma_mult_lt_sqr (bn_v a) (bn_v r2) (bn_v n);
   assert (bn_v c < bn_v n * bn_v n);
 
-  let aM = mont_reduction n mu c in // aM = c % n
-  mont_reduction_lemma n mu c;
+  let aM = bn_mont_reduction n mu c in // aM = c % n
+  bn_mont_reduction_lemma n mu c;
   assert (bn_v aM == M.mont_reduction (bits t) nLen (bn_v n) (v mu) (bn_v c))
 
 
-let from_mont_lemma #t #nLen n mu aM =
+let bn_from_mont_lemma #t #nLen n mu aM =
   let tmp = create (nLen + nLen) (uint #t 0) in
   let tmp = update_sub tmp 0 nLen aM in
   bn_eval_update_sub nLen aM (nLen + nLen);
   assert (bn_v tmp == bn_v aM);
 
-  let a = mont_reduction n mu tmp in
-  mont_reduction_lemma n mu tmp;
+  let a = bn_mont_reduction n mu tmp in
+  bn_mont_reduction_lemma n mu tmp;
   assert (bn_v a == M.mont_reduction (bits t) nLen (bn_v n) (v mu) (bn_v tmp))
 
 
-let mont_mul_lemma #t #nLen n mu aM bM =
+let bn_mont_mul_lemma #t #nLen n mu aM bM =
   let c = bn_mul aM bM in
   bn_mul_lemma aM bM;
   assert (bn_v c == bn_v aM * bn_v bM);
   Math.Lemmas.lemma_mult_lt_sqr (bn_v aM) (bn_v bM) (bn_v n);
   assert (bn_v c < bn_v n * bn_v n);
-  mont_reduction_lemma n mu c
+  bn_mont_reduction_lemma n mu c
 
 
-let mont_sqr_lemma #t #nLen n mu aM =
+let bn_mont_sqr_lemma #t #nLen n mu aM =
   let c = bn_mul aM aM in
   bn_mul_lemma aM aM;
   assert (bn_v c == bn_v aM * bn_v aM);
   Math.Lemmas.lemma_mult_lt_sqr (bn_v aM) (bn_v aM) (bn_v n);
   assert (bn_v c < bn_v n * bn_v n);
-  mont_reduction_lemma n mu c
+  bn_mont_reduction_lemma n mu c

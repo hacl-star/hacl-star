@@ -18,12 +18,10 @@ module Loops = Lib.LoopCombinators
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
-val bn_add_eq_len:
-    #t:limb_t
-  -> aLen:size_t
-  -> a:lbignum t aLen
-  -> b:lbignum t aLen
-  -> res:lbignum t aLen ->
+let bn_add_eq_len_st (#t:limb_t) (#len:size_t)
+  (a:lbignum t len)
+  (b:lbignum t len) =
+  res:lbignum t len ->
   Stack (carry t)
   (requires fun h ->
     live h a /\ live h b /\ live h res /\
@@ -33,18 +31,34 @@ val bn_add_eq_len:
 
 
 inline_for_extraction noextract
-val bn_sub_eq_len:
+val bn_add_eq_len:
     #t:limb_t
-  -> aLen:size_t
-  -> a:lbignum t aLen
-  -> b:lbignum t aLen
-  -> res:lbignum t aLen ->
+  -> len:size_t
+  -> a:lbignum t len
+  -> b:lbignum t len ->
+  bn_add_eq_len_st a b
+
+
+inline_for_extraction noextract
+let bn_sub_eq_len_st (#t:limb_t) (#len:size_t)
+  (a:lbignum t len)
+  (b:lbignum t len) =
+  res:lbignum t len ->
   Stack (carry t)
   (requires fun h ->
     live h a /\ live h b /\ live h res /\
     eq_or_disjoint a b /\ eq_or_disjoint a res /\ eq_or_disjoint b res)
   (ensures  fun h0 c_out h1 -> modifies (loc res) h0 h1 /\
    (c_out, as_seq h1 res) == S.bn_sub (as_seq h0 a) (as_seq h0 b))
+
+
+inline_for_extraction noextract
+val bn_sub_eq_len:
+    #t:limb_t
+  -> len:size_t
+  -> a:lbignum t len
+  -> b:lbignum t len ->
+  bn_sub_eq_len_st a b
 
 
 inline_for_extraction noextract
@@ -84,7 +98,7 @@ val bn_reduce_once:
     #t:limb_t
   -> aLen:size_t{v aLen > 0}
   -> n:lbignum t aLen
-  -> c:(carry t)
+  -> c:carry t
   -> a:lbignum t aLen ->
   Stack unit
   (requires fun h -> live h a /\ live h n /\ disjoint a n)
@@ -106,12 +120,14 @@ let bn_add_mod_n_st (t:limb_t) (len:size_t{v len > 0}) =
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_seq h1 res == S.bn_add_mod_n (as_seq h0 n) (as_seq h0 a) (as_seq h0 b))
 
+
 inline_for_extraction noextract
 val bn_add_mod_n: #t:limb_t -> len:size_t{v len > 0} -> bn_add_mod_n_st t len
 
 
 inline_for_extraction noextract
-let bn_karatsuba_mul_st (#t:limb_t) (#aLen:size_t{0 < v aLen /\ 4 * v aLen <= max_size_t})
+let bn_karatsuba_mul_st (#t:limb_t)
+  (#aLen:size_t{0 < v aLen /\ 4 * v aLen <= max_size_t})
   (a:lbignum t aLen)
   (b:lbignum t aLen) =
   res:lbignum t (aLen +! aLen) ->
@@ -121,6 +137,7 @@ let bn_karatsuba_mul_st (#t:limb_t) (#aLen:size_t{0 < v aLen /\ 4 * v aLen <= ma
     disjoint res a /\ disjoint res b /\ eq_or_disjoint a b)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_seq h1 res == S.bn_mul (as_seq h0 a) (as_seq h0 b))
+
 
 inline_for_extraction noextract
 val bn_karatsuba_mul:
@@ -143,6 +160,7 @@ let bn_mul_st (#t:limb_t) (#aLen:size_t)
     disjoint res a /\ disjoint res b /\ eq_or_disjoint a b)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_seq h1 res == S.bn_mul (as_seq h0 a) (as_seq h0 b))
+
 
 inline_for_extraction noextract
 val bn_mul:
@@ -181,12 +199,14 @@ let bn_sqr_st (#t:limb_t) (#aLen:size_t{0 < v aLen /\ v aLen + v aLen <= max_siz
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_seq h1 res == S.bn_mul (as_seq h0 a) (as_seq h0 a))
 
+
 inline_for_extraction noextract
 val bn_sqr:
     #t:limb_t
   -> aLen:size_t{0 < v aLen /\ v aLen + v aLen <= max_size_t}
   -> a:lbignum t aLen
   -> bn_sqr_st a
+
 
 inline_for_extraction noextract
 val bn_mul1_lshift_add_in_place:
@@ -225,8 +245,10 @@ let bn_sub_mask_st (t:limb_t) (len:size_t{v len > 0}) =
   (ensures  fun h0 _ h1 -> modifies (loc a) h0 h1 /\
     as_seq h1 a == S.bn_sub_mask (as_seq h0 n) (as_seq h0 a))
 
+
 inline_for_extraction noextract
 val bn_sub_mask: #t:limb_t -> len:size_t{v len > 0} -> bn_sub_mask_st t len
+
 ///
 ///  Get and set i-th bit of a bignum
 ///
@@ -242,6 +264,7 @@ val bn_get_ith_bit:
   (ensures  fun h0 r h1 -> h0 == h1 /\
     r == S.bn_get_ith_bit (as_seq h0 b) (v i))
 
+
 /// A now common pattern in HACL*: inline_for_extraction and stateful type
 /// abbreviations, to maximize code sharing.
 inline_for_extraction noextract
@@ -252,6 +275,7 @@ let bn_set_ith_bit_st (t:limb_t) (len:size_t) =
   (requires fun h -> live h b)
   (ensures  fun h0 _ h1 -> modifies (loc b) h0 h1 /\
     as_seq h1 b == S.bn_set_ith_bit (as_seq h0 b) (v i))
+
 
 inline_for_extraction noextract
 val bn_set_ith_bit: #t:limb_t -> len:size_t -> bn_set_ith_bit_st t len
@@ -298,33 +322,35 @@ val cswap2:
 /// whether they can be specialized for the bignum size, or whether they have to
 /// been inline-for-extraction'd.
 
-#set-options "--fuel 0 --ifuel 0"
-
-let meta_len (t:limb_t) = len: size_t { 0 < v len /\ 2 * bits t * v len <= max_size_t }
+let meta_len (t:limb_t) = len:size_t{0 < v len /\ 2 * bits t * v len <= max_size_t}
 
 /// This type class is entirely meta-level and will not appear after partial
 /// evaluation in the resulting C code. Clients can take this type class as a
 /// parameter if they want the benefits of a function set specialized for a
 /// given bignum length.
 inline_for_extraction noextract
-class bn (t:limb_t) (len: meta_len t) = {
-  bit_set: bn_set_ith_bit_st t len;
+class bn = {
+  t: limb_t;
+  len: meta_len t;
+  add: a:lbignum t len -> b:lbignum t len -> bn_add_eq_len_st a b;
+  sub: a:lbignum t len -> b:lbignum t len -> bn_sub_eq_len_st a b;
   add_mod_n: bn_add_mod_n_st t len;
   mul: a:lbignum t len -> b:lbignum t len -> bn_karatsuba_mul_st a b;
   sqr: a:lbignum t len -> bn_karatsuba_sqr_st a;
-  sub_mask: bn_sub_mask_st t len;
 }
 
 /// This is a default implementation that *will* generate code depending on
 /// `len` at run-time! Only use if you want to generate run-time generic
 /// functions!
 inline_for_extraction noextract
-let mk_runtime_bn (t:limb_t) (len: meta_len t) = {
-  bit_set = bn_set_ith_bit len;
+let mk_runtime_bn (t:limb_t) (len:meta_len t) = {
+  t = t;
+  len = len;
+  add = (fun a b -> bn_add_eq_len len a b);
+  sub = (fun a b -> bn_sub_eq_len len a b);
   add_mod_n = bn_add_mod_n len;
   mul = (fun a b -> bn_karatsuba_mul len a b);
   sqr = (fun a -> bn_karatsuba_sqr len a);
-  sub_mask = bn_sub_mask #t len;
 }
 
 ///
@@ -377,6 +403,7 @@ let bn_lt_mask_st (t:limb_t) (len:size_t) =
 
 inline_for_extraction noextract
 val mk_bn_lt_mask: #t:limb_t -> len:size_t -> bn_lt_mask_st t len
+
 
 inline_for_extraction noextract
 val bn_lt_mask: #t:limb_t -> len:size_t -> bn_lt_mask_st t len

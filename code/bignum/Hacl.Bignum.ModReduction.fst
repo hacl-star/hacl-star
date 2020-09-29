@@ -23,39 +23,36 @@ module BD = Hacl.Spec.Bignum.Definitions
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
-let check_bn_mod_st (t:limb_t) (nLen:BN.meta_len t) =
-    n:lbignum t nLen
-  -> a:lbignum t (nLen +! nLen) ->
+let bn_check_bn_mod_st (t:limb_t) (len:BN.meta_len t) =
+    n:lbignum t len
+  -> a:lbignum t (len +! len) ->
   Stack (limb t)
   (requires fun h -> live h n /\ live h a)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    r == S.check_bn_mod (as_seq h0 n) (as_seq h0 a))
+    r == S.bn_check_bn_mod (as_seq h0 n) (as_seq h0 a))
 
 
 inline_for_extraction noextract
-val mk_check_bn_mod_st:
-    #t:limb_t
-  -> nLen:BN.meta_len t
-  -> (#[FStar.Tactics.Typeclasses.tcresolve ()] _ : Hacl.Bignum.Montgomery.mont t nLen)
-  -> check_bn_mod_st t nLen
-
-let mk_check_bn_mod_st #t nLen #_ n a =
+val mk_bn_check_bn_mod: k:BM.mont -> bn_check_bn_mod_st k.BM.bn.BN.t k.BM.bn.BN.len
+let mk_bn_check_bn_mod k n a =
+  [@inline_let] let t = k.BM.bn.BN.t in
+  [@inline_let] let len = k.BM.bn.BN.len in
   push_frame ();
   let m0 = BM.check n in
-  let n2 = create (nLen +! nLen) (uint #t 0) in
+  let n2 = create (len +! len) (uint #t #SEC 0) in
   BN.mul n n n2;
-  let m1 = BN.bn_lt_mask (nLen +! nLen) a n2 in
+  let m1 = BN.bn_lt_mask (len +! len) a n2 in
   let r = m0 &. m1 in
   pop_frame ();
   r
 
 
 inline_for_extraction noextract
-let bn_mod_slow_precompr2_st (t:limb_t) (nLen:BN.meta_len t) =
-    n:lbignum t nLen
-  -> a:lbignum t (nLen +! nLen)
-  -> r2:lbignum t nLen
-  -> res:lbignum t nLen ->
+let bn_mod_slow_precompr2_st (t:limb_t) (len:BN.meta_len t) =
+    n:lbignum t len
+  -> a:lbignum t (len +! len)
+  -> r2:lbignum t len
+  -> res:lbignum t len ->
   Stack unit
   (requires fun h ->
     live h n /\ live h a /\ live h r2 /\ live h res /\
@@ -65,16 +62,13 @@ let bn_mod_slow_precompr2_st (t:limb_t) (nLen:BN.meta_len t) =
 
 
 inline_for_extraction noextract
-val mk_bn_mod_slow_precompr2:
-    #t:limb_t
-  -> nLen:BN.meta_len t
-  -> (#[FStar.Tactics.Typeclasses.tcresolve ()] _ : Hacl.Bignum.Montgomery.mont t nLen)
-  -> bn_mod_slow_precompr2_st t nLen
-
-let mk_bn_mod_slow_precompr2 #t nLen #_ n a r2 res =
+val mk_bn_mod_slow_precompr2: k:BM.mont -> bn_mod_slow_precompr2_st k.BM.bn.BN.t k.BM.bn.BN.len
+let mk_bn_mod_slow_precompr2 k n a r2 res =
+  [@inline_let] let t = k.BM.bn.BN.t in
+  [@inline_let] let len = k.BM.bn.BN.len in
   push_frame ();
-  let a_mod = create nLen (uint #t 0) in
-  let a1 = create (nLen +! nLen) (uint #t 0) in
+  let a_mod = create len (uint #t #SEC 0) in
+  let a1 = create (len +! len) (uint #t #SEC 0) in
   copy a1 a;
   let mu = BM.mod_inv_limb n.(0ul) in
   BM.reduction n mu a1 a_mod;
@@ -83,41 +77,32 @@ let mk_bn_mod_slow_precompr2 #t nLen #_ n a r2 res =
 
 
 inline_for_extraction noextract
-val bn_mod_slow_precompr2: #t:limb_t -> nLen:BN.meta_len t -> bn_mod_slow_precompr2_st t nLen
-let bn_mod_slow_precompr2 #t nLen =
-  mk_bn_mod_slow_precompr2 nLen #(BM.mk_runtime_mont t nLen)
-
-
-inline_for_extraction noextract
-let bn_mod_slow_st (t:limb_t) (nLen:BN.meta_len t) =
-    n:lbignum t nLen
-  -> a:lbignum t (nLen +! nLen)
-  -> res:lbignum t nLen ->
+let bn_mod_slow_st (t:limb_t) (len:BN.meta_len t) =
+    n:lbignum t len
+  -> a:lbignum t (len +! len)
+  -> res:lbignum t len ->
   Stack bool
   (requires fun h ->
     live h n /\ live h a /\ live h res /\
     disjoint res n /\ disjoint res a)
   (ensures  fun h0 r h1 -> modifies (loc res) h0 h1 /\
-    r == BB.unsafe_bool_of_limb (S.check_bn_mod (as_seq h0 n) (as_seq h0 a)) /\
+    r == BB.unsafe_bool_of_limb (S.bn_check_bn_mod (as_seq h0 n) (as_seq h0 a)) /\
     (r ==> bn_v h1 res == bn_v h0 a % bn_v h0 n))
 
 
 inline_for_extraction noextract
-val mk_bn_mod_slow:
-    #t:limb_t
-  -> nLen:BN.meta_len t
-  -> (#[FStar.Tactics.Typeclasses.tcresolve ()] _ : Hacl.Bignum.Montgomery.mont t nLen)
-  -> bn_mod_slow_st t nLen
-
-let mk_bn_mod_slow #t nLen #k n a res =
+val mk_bn_mod_slow: k:BM.mont -> bn_mod_slow_st k.BM.bn.BN.t k.BM.bn.BN.len
+let mk_bn_mod_slow k n a res =
+  [@inline_let] let t = k.BM.bn.BN.t in
+  [@inline_let] let len = k.BM.bn.BN.len in
   let h0 = ST.get () in
-  let is_valid_m = mk_check_bn_mod_st nLen #k n a in
+  let is_valid_m = mk_bn_check_bn_mod k n a in
   push_frame ();
-  let r2 = create nLen (uint #t 0) in
+  let r2 = create len (uint #t #SEC 0) in
   BM.precomp n r2;
-  mk_bn_mod_slow_precompr2 nLen #k n a r2 res;
+  mk_bn_mod_slow_precompr2 k n a r2 res;
   let h1 = ST.get () in
-  mapT nLen res (logand is_valid_m) res;
+  mapT len res (logand is_valid_m) res;
   let h2 = ST.get () in
   BD.bn_mask_lemma (as_seq h1 res) is_valid_m;
 
@@ -126,9 +111,3 @@ let mk_bn_mod_slow #t nLen #k n a res =
     assert (bn_v h2 res == bn_v h0 a % bn_v h0 n) end;
   pop_frame ();
   BB.unsafe_bool_of_limb is_valid_m
-
-
-inline_for_extraction noextract
-val bn_mod_slow: #t:limb_t -> nLen:BN.meta_len t -> bn_mod_slow_st t nLen
-let bn_mod_slow #t nLen =
-  mk_bn_mod_slow nLen #(BM.mk_runtime_mont t nLen)

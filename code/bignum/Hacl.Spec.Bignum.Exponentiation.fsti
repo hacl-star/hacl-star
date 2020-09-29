@@ -37,7 +37,7 @@ let bn_mod_exp_post
   bn_v res == Lib.NatMod.pow_mod #(bn_v n) (bn_v a) (bn_v b)
 
 
-val check_mod_exp:
+val bn_check_mod_exp:
     #t:limb_t
   -> #nLen:size_pos{2 * bits t * nLen <= max_size_t}
   -> n:lbignum t nLen

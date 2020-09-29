@@ -18,7 +18,7 @@ module BN = Hacl.Spec.Bignum
 ///  Modular reduction based on Montgomery arithmetic (it is slow!)
 ///
 
-val check_bn_mod:
+val bn_check_bn_mod:
     #t:limb_t
   -> #nLen:size_pos{2 * bits t * nLen <= max_size_t}
   -> n:lbignum t nLen
@@ -27,8 +27,8 @@ val check_bn_mod:
     let b = 1 < bn_v n && bn_v n % 2 = 1 && bn_v a < bn_v n * bn_v n in
     v res == (if b then v (ones t SEC) else v (zeros t SEC))}
 
-let check_bn_mod #t #nLen n a =
-  let m0 = BM.check_modulus n in
+let bn_check_bn_mod #t #nLen n a =
+  let m0 = BM.bn_check_modulus n in
   let n2 = BN.bn_mul n n in
   BN.bn_mul_lemma n n;
   let m1 = BN.bn_lt_mask a n2 in
@@ -48,8 +48,8 @@ val bn_mod_slow_precompr2:
 
 let bn_mod_slow_precompr2 #t #nLen n a r2 =
   let mu = BI.mod_inv_limb n.[0] in
-  let a_mod = BM.mont_reduction n mu a in
-  let res = BM.to_mont n mu r2 a_mod in
+  let a_mod = BM.bn_mont_reduction n mu a in
+  let res = BM.bn_to_mont n mu r2 a_mod in
   res
 
 
@@ -72,11 +72,11 @@ let bn_mod_slow_precompr2_lemma #t #nLen n a r2 =
   assert (v n.[0] % 2 = 1); // since bn_v n % 2 = 1
   BI.mod_inv_limb_lemma n.[0];
 
-  let a_mod = BM.mont_reduction n mu a in
-  let res = BM.to_mont n mu r2 a_mod in
+  let a_mod = BM.bn_mont_reduction n mu a in
+  let res = BM.bn_to_mont n mu r2 a_mod in
   bn_eval_bound n nLen;
-  BM.mont_reduction_lemma n mu a;
-  BM.to_mont_lemma n mu r2 a_mod;
+  BM.bn_mont_reduction_lemma n mu a;
+  BM.bn_to_mont_lemma n mu r2 a_mod;
 
   let d, k = M.eea_pow2_odd (bits t * nLen) (bn_v n) in
   M.mont_preconditions (bits t) nLen (bn_v n) (v mu);
@@ -98,7 +98,7 @@ val bn_mod_slow:
   lbignum t nLen
 
 let bn_mod_slow #t #nLen n a =
-  let r2 = BM.precomp_r2_mod_n n in
+  let r2 = BM.bn_precomp_r2_mod_n n in
   bn_mod_slow_precompr2 n a r2
 
 
@@ -111,6 +111,6 @@ val bn_mod_slow_lemma:
   (ensures  bn_v (bn_mod_slow n a) == bn_v a % bn_v n)
 
 let bn_mod_slow_lemma #t #nLen n a =
-  let r2 = BM.precomp_r2_mod_n n in
-  BM.precomp_r2_mod_n_lemma n;
+  let r2 = BM.bn_precomp_r2_mod_n n in
+  BM.bn_precomp_r2_mod_n_lemma n;
   bn_mod_slow_precompr2_lemma n a r2
