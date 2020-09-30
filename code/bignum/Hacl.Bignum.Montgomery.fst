@@ -24,14 +24,12 @@ friend Hacl.Spec.Bignum.Montgomery
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-let bn_check_modulus k n =
+let bn_check_modulus #t #len n =
   push_frame ();
-  [@inline_let]
-  let len = k.BN.len in
-  let one = create len (uint #k.BN.t 0) in
-  BN.bn_from_uint len (uint #k.BN.t 1) one;
+  let one = create len (uint #t 0) in
+  BN.bn_from_uint len (uint #t 1) one;
   let bit0 = BN.bn_is_odd len n in
-  let m0 = uint #k.BN.t 0 -. bit0 in
+  let m0 = uint #t 0 -. bit0 in
   let m1 = BN.bn_lt_mask len one n in
   let m = m0 &. m1 in
   pop_frame ();
@@ -39,10 +37,10 @@ let bn_check_modulus k n =
 
 
 inline_for_extraction noextract
-let bn_precomp_r2_mod_n_st1 (t:limb_t) (nLen:BN.meta_len t) =
-    nBits:size_t{v nBits / bits t < v nLen}
-  -> n:lbignum t nLen
-  -> res:lbignum t nLen ->
+let bn_precomp_r2_mod_n_st1 (t:limb_t) (len:BN.meta_len t) =
+    nBits:size_t{v nBits / bits t < v len}
+  -> n:lbignum t len
+  -> res:lbignum t len ->
   Stack unit
   (requires fun h -> live h n /\ live h res /\ disjoint n res)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
@@ -50,27 +48,23 @@ let bn_precomp_r2_mod_n_st1 (t:limb_t) (nLen:BN.meta_len t) =
 
 
 inline_for_extraction noextract
-val bn_precomp_r2_mod_n_: k:BN.bn -> bn_precomp_r2_mod_n_st1 k.BN.t k.BN.len
-let bn_precomp_r2_mod_n_ k nBits n res =
-  [@inline_let]
-  let len = k.BN.len in
-  memset res (uint #k.BN.t 0) len;
+val bn_precomp_r2_mod_n_: #t:limb_t -> #len:BN.meta_len t -> k:BN.bn t len -> bn_precomp_r2_mod_n_st1 t len
+let bn_precomp_r2_mod_n_ #t #len k nBits n res =
+  memset res (uint #t 0) len;
   BN.bn_set_ith_bit len res nBits;
 
   [@inline_let]
   let spec h = S.bn_lshift1_mod_n (as_seq h n) in
 
   let h0 = ST.get () in
-  loop1 h0 (2ul *! size (bits k.BN.t) *! len -! nBits) res spec
+  loop1 h0 (2ul *! size (bits t) *! len -! nBits) res spec
   (fun i ->
-    Loops.unfold_repeati (2 * bits k.BN.t * v len - v nBits) (spec h0) (as_seq h0 res) (v i);
+    Loops.unfold_repeati (2 * bits t * v len - v nBits) (spec h0) (as_seq h0 res) (v i);
     BN.add_mod_n n res res res
   )
 
 
-let bn_precomp_r2_mod_n k n res =
-  [@inline_let]
-  let len = k.BN.len in
+let bn_precomp_r2_mod_n #t #len k n res =
   let h0 = ST.get () in
   let mask = BN.bn_is_zero_mask len n in
   SB.bn_is_zero_mask_lemma (as_seq h0 n);
@@ -82,34 +76,34 @@ let bn_precomp_r2_mod_n k n res =
   assert (
     if v mask = 0 then begin
       SB.bn_get_num_bits_lemma (as_seq h0 n);
-      v bs0 / bits k.BN.t < v len end
+      v bs0 / bits t < v len end
     else
-      v bs0 / bits k.BN.t < v len);
+      v bs0 / bits t < v len);
   bn_precomp_r2_mod_n_ k b n res
 
 
-let new_bn_precomp_r2_mod_n #t r nLen n =
+let new_bn_precomp_r2_mod_n #t r len n =
   [@inline_let]
   let bs2 : x:size_t {0 < v x} = 2ul *! size (bits t) in
-  if nLen = 0ul || not (nLen <=. 0xfffffffful `FStar.UInt32.div` bs2)
+  if len = 0ul || not (len <=. 0xfffffffful `FStar.UInt32.div` bs2)
   then B.null
   else
-    let is_valid_m = bn_check_modulus (BN.mk_runtime_bn t nLen) n in
+    let is_valid_m = bn_check_modulus n in
     if not (Hacl.Bignum.Base.unsafe_bool_of_limb is_valid_m) then
       B.null
     else
       let h0 = ST.get () in
-      let res = LowStar.Monotonic.Buffer.mmalloc_partial r (uint #t 0) nLen in
+      let res = LowStar.Monotonic.Buffer.mmalloc_partial r (uint #t 0) len in
       if B.is_null res then
 	res
       else
 	let h1 = ST.get () in
 	B.(modifies_only_not_unused_in loc_none h0 h1);
-	assert (B.len res == nLen);
+	assert (B.len res == len);
 	let res: Lib.Buffer.buffer (limb t) = res in
-	assert (B.length res == FStar.UInt32.v nLen);
-	let res: lbignum t nLen = res in
-	bn_precomp_r2_mod_n (BN.mk_runtime_bn t nLen) n res;
+	assert (B.length res == FStar.UInt32.v len);
+	let res: lbignum t len = res in
+	bn_precomp_r2_mod_n (BN.mk_runtime_bn t len) n res;
 	let h2 = ST.get () in
 	B.(modifies_only_not_unused_in loc_none h0 h2);
 	S.bn_precomp_r2_mod_n_lemma (as_seq h0 n);
@@ -148,11 +142,9 @@ let bn_mont_reduction_f #t len n nInv j c res =
   LSeq.eq_intro (as_seq h1 res) (LSeq.upd (as_seq h0 res) (v len + v j) (Seq.index (as_seq h1 res) (v len + v j)))
 
 
-let bn_mont_reduction k n nInv c res =
+let bn_mont_reduction #t #len k n nInv c res =
   push_frame ();
-  [@inline_let]
-  let len = k.BN.len in
-  let c0 = create 1ul (uint #k.BN.t 0) in
+  let c0 = create 1ul (uint #t 0) in
   [@inline_let]
   let refl h i : GTot (S.bn_mont_reduction_t i) = Seq.index (as_seq h c0) 0, as_seq h c in
   [@inline_let]
@@ -173,31 +165,25 @@ let bn_mont_reduction k n nInv c res =
   pop_frame ()
 
 
-let bn_to_mont k mont_reduction n nInv r2 a aM =
+let bn_to_mont #t #len k mont_reduction n nInv r2 a aM =
   push_frame ();
-  [@inline_let]
-  let len = k.BN.len in
-  let c = create (len +! len) (uint #k.BN.t 0) in
+  let c = create (len +! len) (uint #t 0) in
   BN.mul a r2 c;
   mont_reduction n nInv c aM; // aM = c % n
   pop_frame ()
 
 
-let bn_from_mont k mont_reduction n nInv_u64 aM a =
+let bn_from_mont #t #len k mont_reduction n nInv_u64 aM a =
   push_frame ();
-  [@inline_let]
-  let len = k.BN.len in
-  let tmp = create (len +! len) (uint #k.BN.t 0) in
+  let tmp = create (len +! len) (uint #t 0) in
   update_sub tmp 0ul len aM;
   mont_reduction n nInv_u64 tmp a;
   pop_frame ()
 
 
-let bn_mont_mul k mont_reduction n nInv_u64 aM bM resM =
+let bn_mont_mul #t #len k mont_reduction n nInv_u64 aM bM resM =
   push_frame ();
-  [@inline_let]
-  let len = k.BN.len in
-  let c = create (len +! len) (uint #k.BN.t 0) in
+  let c = create (len +! len) (uint #t 0) in
   // In case you need to debug the type class projection, this is the explicit
   // syntax without referring to the implicitly-defined projector.
   k.BN.mul aM bM c; // c = aM * bM
@@ -205,11 +191,9 @@ let bn_mont_mul k mont_reduction n nInv_u64 aM bM resM =
   pop_frame ()
 
 
-let bn_mont_sqr k mont_reduction n nInv_u64 aM resM =
+let bn_mont_sqr #t #len k mont_reduction n nInv_u64 aM resM =
   push_frame ();
-  [@inline_let]
-  let len = k.BN.len in
-  let c = create (len +! len) (uint #k.BN.t 0) in
+  let c = create (len +! len) (uint #t 0) in
   k.BN.sqr aM c; // c = aM * aM
   mont_reduction n nInv_u64 c resM; // resM = c % n
   pop_frame ()
@@ -220,22 +204,22 @@ let bn_mont_sqr k mont_reduction n nInv_u64 aM resM =
 /// runtime, to offer a version of mod_exp where all the parameters are present
 /// at run-time.
 
-let check_runtime #t len = bn_check_modulus (BN.mk_runtime_bn t len)
-let precomp_runtime #t len = bn_precomp_r2_mod_n (BN.mk_runtime_bn t len)
-let mont_reduction_runtime #t len = bn_mont_reduction (BN.mk_runtime_bn t len)
-let to_runtime #t len = bn_to_mont (BN.mk_runtime_bn t len) (mont_reduction_runtime #t len)
-let from_runtime #t len = bn_from_mont (BN.mk_runtime_bn t len) (mont_reduction_runtime len)
-let mul_runtime #t len = bn_mont_mul (BN.mk_runtime_bn t len) (mont_reduction_runtime len)
-let sqr_runtime #t len = bn_mont_sqr (BN.mk_runtime_bn t len) (mont_reduction_runtime len)
+let mont_check_runtime t len = bn_check_modulus #t #len
+let precomp_runtime t len = bn_precomp_r2_mod_n (BN.mk_runtime_bn t len)
+let mont_reduction_runtime t len = bn_mont_reduction (BN.mk_runtime_bn t len)
+let to_runtime t len = bn_to_mont (BN.mk_runtime_bn t len) (mont_reduction_runtime t len)
+let from_runtime t len = bn_from_mont (BN.mk_runtime_bn t len) (mont_reduction_runtime t len)
+let mul_runtime t len = bn_mont_mul (BN.mk_runtime_bn t len) (mont_reduction_runtime t len)
+let sqr_runtime t len = bn_mont_sqr (BN.mk_runtime_bn t len) (mont_reduction_runtime t len)
 
 inline_for_extraction noextract
-let mk_runtime_mont (t:limb_t) (len: BN.meta_len t): mont = {
+let mk_runtime_mont (t:limb_t) (len: BN.meta_len t): mont t len = {
   bn = BN.mk_runtime_bn t len;
-  check = check_runtime len;
-  precomp = precomp_runtime len;
-  reduction = mont_reduction_runtime len;
-  to = to_runtime len;
-  from = from_runtime len;
-  mul = mul_runtime len;
-  sqr = sqr_runtime len;
+  mont_check = mont_check_runtime t len;
+  precomp = precomp_runtime t len;
+  reduction = mont_reduction_runtime t len;
+  to = to_runtime t len;
+  from = from_runtime t len;
+  mul = mul_runtime t len;
+  sqr = sqr_runtime t len;
 }

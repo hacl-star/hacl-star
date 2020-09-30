@@ -65,6 +65,7 @@ let bn_from_bytes_be_st (t:limb_t) =
     as_seq h1 res == S.bn_from_bytes_be (v len) (as_seq h0 b))
 
 
+inline_for_extraction noextract
 val mk_bn_from_bytes_be: #t:limb_t -> bn_from_bytes_be_st t
 let mk_bn_from_bytes_be #t len b res =
   [@inline_let]
@@ -138,9 +139,8 @@ let new_bn_from_bytes_be #t r len b =
 
 
 inline_for_extraction noextract
-val bn_from_bytes_le:
-    #t:limb_t
-  -> len:size_t{0 < v len /\ numbytes t * v (blocks len (size (numbytes t))) <= max_size_t}
+let bn_from_bytes_le_st (t:limb_t) =
+    len:size_t{0 < v len /\ numbytes t * v (blocks len (size (numbytes t))) <= max_size_t}
   -> b:lbuffer uint8 len
   -> res:lbignum t (blocks len (size (numbytes t))) ->
   Stack unit
@@ -148,7 +148,10 @@ val bn_from_bytes_le:
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_seq h1 res == S.bn_from_bytes_le (v len) (as_seq h0 b))
 
-let bn_from_bytes_le #t len b res =
+
+inline_for_extraction noextract
+val mk_bn_from_bytes_le: #t:limb_t -> bn_from_bytes_le_st t
+let mk_bn_from_bytes_le #t len b res =
   [@inline_let]
   let numb = size (numbytes t) in
   let h0 = ST.get () in
@@ -159,6 +162,20 @@ let bn_from_bytes_le #t len b res =
   update_sub tmp 0ul len b;
   uints_from_bytes_le res tmp;
   pop_frame ()
+
+
+[@CInline]
+let bn_from_bytes_le_uint32 : bn_from_bytes_le_st U32 = mk_bn_from_bytes_le #U32
+[@CInline]
+let bn_from_bytes_le_uint64 : bn_from_bytes_le_st U64 = mk_bn_from_bytes_le #U64
+
+
+inline_for_extraction noextract
+val bn_from_bytes_le: #t:limb_t -> bn_from_bytes_le_st t
+let bn_from_bytes_le #t =
+  match t with
+  | U32 -> bn_from_bytes_le_uint32
+  | U64 -> bn_from_bytes_le_uint64
 
 
 inline_for_extraction noextract
@@ -229,10 +246,8 @@ let bn_to_bytes_be #t =
 
 
 inline_for_extraction noextract
-val bn_to_bytes_le:
-    #t:limb_t
-  -> len:size_t{0 < v len /\ numbytes t * v (blocks len (size (numbytes t))) <= max_size_t}
-  -> b:lbignum t (blocks len (size (numbytes t)))
+let bn_to_bytes_le_st (t:limb_t) (len:size_t{0 < v len /\ numbytes t * v (blocks len (size (numbytes t))) <= max_size_t}) =
+    b:lbignum t (blocks len (size (numbytes t)))
   -> res:lbuffer uint8 len ->
   Stack unit
   (requires fun h ->
@@ -240,7 +255,14 @@ val bn_to_bytes_le:
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_seq h1 res == S.bn_to_bytes_le (v len) (as_seq h0 b))
 
-let bn_to_bytes_le #t len b res =
+
+inline_for_extraction noextract
+val mk_bn_to_bytes_le:
+    #t:limb_t
+  -> len:size_t{0 < v len /\ numbytes t * v (blocks len (size (numbytes t))) <= max_size_t} ->
+  bn_to_bytes_le_st t len
+
+let mk_bn_to_bytes_le #t len b res =
   [@inline_let]
   let numb = size (numbytes t) in
   let h0 = ST.get () in
@@ -251,3 +273,17 @@ let bn_to_bytes_le #t len b res =
   uints_to_bytes_le bnLen tmp b;
   copy res (sub tmp 0ul len);
   pop_frame ()
+
+
+[@CInline]
+let bn_to_bytes_le_uint32 len : bn_to_bytes_le_st U32 len = mk_bn_to_bytes_le #U32 len
+[@CInline]
+let bn_to_bytes_le_uint64 len : bn_to_bytes_le_st U64 len = mk_bn_to_bytes_le #U64 len
+
+
+inline_for_extraction noextract
+val bn_to_bytes_le: #t:_ -> len:_ -> bn_to_bytes_le_st t len
+let bn_to_bytes_le #t =
+  match t with
+  | U32 -> bn_to_bytes_le_uint32
+  | U64 -> bn_to_bytes_le_uint64

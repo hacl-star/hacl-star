@@ -76,12 +76,12 @@ let mk_mod_inv_limb #t n0 =
 
 
 [@CInline]
-let mod_inv_limb_uint32 : mod_inv_limb_st U32 = mk_mod_inv_limb #U32
+let mod_inv_uint32 : mod_inv_limb_st U32 = mk_mod_inv_limb #U32
 [@CInline]
-let mod_inv_limb_uint64 : mod_inv_limb_st U64 = mk_mod_inv_limb #U64
+let mod_inv_uint64 : mod_inv_limb_st U64 = mk_mod_inv_limb #U64
 
 
 let mod_inv_limb #t =
   match t with
-  | U32 -> mod_inv_limb_uint32
-  | U64 -> mod_inv_limb_uint64
+  | U32 -> mod_inv_uint32
+  | U64 -> mod_inv_uint64

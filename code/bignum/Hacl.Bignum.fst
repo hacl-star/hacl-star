@@ -86,10 +86,8 @@ let bn_eq_mask #t len a b =
 let bn_is_zero_mask #t len b =
   Hacl.Bignum.Comparison.bn_is_zero_mask len b
 
-let mk_bn_lt_mask #t len a b =
+let bn_lt_mask #t len a b =
   Hacl.Bignum.Comparison.bn_lt_mask len a b
-
-let bn_lt_mask = mk_bn_lt_mask
 
 let bn_lt_pow2_mask #t len b x =
   Hacl.Bignum.Comparison.bn_lt_pow2_mask len b x

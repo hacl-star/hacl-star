@@ -70,9 +70,9 @@ let bn_sub_eq_len_st (t:limb_t) (aLen:size_t) =
     (let c, r = SL.generate_elems (v aLen) (v aLen) (S.bn_sub_f (as_seq h0 a) (as_seq h0 b)) (uint #t 0) in
     c_out == c /\ as_seq h1 res == r))
 
+
 inline_for_extraction noextract
 val bn_sub_eq_len: #t:limb_t -> aLen:size_t -> bn_sub_eq_len_st t aLen
-
 let bn_sub_eq_len #t aLen a b res =
   push_frame ();
   let c = create 1ul (uint #t 0) in
@@ -186,9 +186,9 @@ let bn_add_eq_len_st (t:limb_t) (aLen:size_t) =
     (let c, r = SL.generate_elems (v aLen) (v aLen) (S.bn_add_f (as_seq h0 a) (as_seq h0 b)) (uint #t 0) in
     c_out == c /\ as_seq h1 res == r))
 
+
 inline_for_extraction noextract
 val bn_add_eq_len: #t:limb_t -> aLen:size_t -> bn_add_eq_len_st t aLen
-
 let bn_add_eq_len #t aLen a b res =
   push_frame ();
   let c = create 1ul (uint #t 0) in

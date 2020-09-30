@@ -31,7 +31,7 @@ let bn_check_mod_exp_st (t:limb_t) (len:BN.meta_len t) =
 
 
 inline_for_extraction noextract
-val bn_check_mod_exp: k:BM.mont -> bn_check_mod_exp_st k.BM.bn.BN.t k.BM.bn.BN.len
+val bn_check_mod_exp: #t:limb_t -> #len:BN.meta_len t -> k:BM.mont t len -> bn_check_mod_exp_st t len
 
 
 // This function is *NOT* constant-time on the exponent b.
@@ -55,7 +55,7 @@ let bn_mod_exp_precompr2_st (t:limb_t) (len:BN.meta_len t) =
 
 // This version is fully run-time.
 inline_for_extraction noextract
-val bn_mod_exp_precompr2: k:BM.mont -> bn_mod_exp_precompr2_st k.BM.bn.BN.t k.BM.bn.BN.len
+val bn_mod_exp_precompr2: #t:limb_t -> #len:BN.meta_len t -> k:BM.mont t len -> bn_mod_exp_precompr2_st t len
 
 
 // This function is constant-time on the exponent b.
@@ -79,7 +79,7 @@ let bn_mod_exp_mont_ladder_precompr2_st (t:limb_t) (len:BN.meta_len t) =
 
 // This version is fully run-time.
 inline_for_extraction noextract
-val bn_mod_exp_mont_ladder_precompr2: k:BM.mont -> bn_mod_exp_mont_ladder_precompr2_st k.BM.bn.BN.t k.BM.bn.BN.len
+val bn_mod_exp_mont_ladder_precompr2: #t:limb_t -> #len:BN.meta_len t -> k:BM.mont t len -> bn_mod_exp_mont_ladder_precompr2_st t len
 
 
 inline_for_extraction noextract
@@ -89,37 +89,60 @@ let bn_mod_exp_st (t:limb_t) (len:BN.meta_len t) =
   -> bBits:size_t{0 < v bBits /\ bits t * v (blocks bBits (size (bits t))) <= max_size_t}
   -> b:lbignum t (blocks bBits (size (bits t)))
   -> res:lbignum t len ->
-  Stack bool
+  Stack unit
   (requires fun h ->
     live h n /\ live h a /\ live h b /\ live h res /\
     disjoint res a /\ disjoint res b /\ disjoint res n /\ disjoint n a)
-  (ensures  fun h0 r h1 -> modifies (loc res) h0 h1 /\
-    r == BB.unsafe_bool_of_limb (S.bn_check_mod_exp (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b)) /\
-    (r ==> S.bn_mod_exp_post (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b) (as_seq h1 res)))
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_seq h1 res == S.bn_mod_exp (v len) (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b))
 
 
 // This version is fully run-time.
 // This function is *NOT* constant-time on the exponent b.
 inline_for_extraction noextract
-val bn_mod_exp: k:BM.mont -> bn_mod_exp_st k.BM.bn.BN.t k.BM.bn.BN.len
+val bn_mod_exp:
+    #t:limb_t
+  -> #len:BN.meta_len t
+  -> k:BM.mont t len
+  -> bn_mod_exp_precompr2:bn_mod_exp_precompr2_st t len ->
+  bn_mod_exp_st t len
 
+
+inline_for_extraction noextract
+let bn_mod_exp_mont_ladder_st (t:limb_t) (len:BN.meta_len t) =
+    n:lbignum t len
+  -> a:lbignum t len
+  -> bBits:size_t{0 < v bBits /\ bits t * v (blocks bBits (size (bits t))) <= max_size_t}
+  -> b:lbignum t (blocks bBits (size (bits t)))
+  -> res:lbignum t len ->
+  Stack unit
+  (requires fun h ->
+    live h n /\ live h a /\ live h b /\ live h res /\
+    disjoint res a /\ disjoint res b /\ disjoint res n /\ disjoint n a)
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_seq h1 res == S.bn_mod_exp_mont_ladder (v len) (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b))
 
 // This version is fully run-time.
 // This function is constant-time on the exponent b.
 inline_for_extraction noextract
-val bn_mod_exp_mont_ladder: k:BM.mont -> bn_mod_exp_st k.BM.bn.BN.t k.BM.bn.BN.len
+val bn_mod_exp_mont_ladder:
+    #t:limb_t
+  -> #len:BN.meta_len t
+  -> k:BM.mont t len
+  -> bn_mod_exp_mont_ladder_precompr2:bn_mod_exp_mont_ladder_precompr2_st t len ->
+  bn_mod_exp_mont_ladder_st t len
 
 
 inline_for_extraction noextract
-class exp = {
-  mont: BM.mont;
-  exp_check: bn_check_mod_exp_st mont.BM.bn.BN.t mont.BM.bn.BN.len;
-  mod_exp_precomp: bn_mod_exp_precompr2_st mont.BM.bn.BN.t mont.BM.bn.BN.len;
-  ct_mod_exp_precomp: bn_mod_exp_mont_ladder_precompr2_st mont.BM.bn.BN.t mont.BM.bn.BN.len;
-  mod_exp : bn_mod_exp_st mont.BM.bn.BN.t mont.BM.bn.BN.len;
-  ct_mod_exp : bn_mod_exp_st mont.BM.bn.BN.t mont.BM.bn.BN.len;
+class exp (t:limb_t) (len:BN.meta_len t) = {
+  mont: BM.mont t len;
+  exp_check: bn_check_mod_exp_st t len;
+  mod_exp_precomp: bn_mod_exp_precompr2_st t len;
+  ct_mod_exp_precomp: bn_mod_exp_mont_ladder_precompr2_st t len;
+  mod_exp : bn_mod_exp_st t len;
+  ct_mod_exp : bn_mod_exp_mont_ladder_st t len;
 }
 
 // A completely run-time-only instance where the functions above exist in the C code.
 inline_for_extraction noextract
-val mk_runtime_exp: t:limb_t -> len:BN.meta_len t -> exp
+val mk_runtime_exp: t:limb_t -> len:BN.meta_len t -> exp t len

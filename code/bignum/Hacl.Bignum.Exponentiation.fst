@@ -23,10 +23,8 @@ friend Hacl.Spec.Bignum.Exponentiation
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-let bn_check_mod_exp k n a bBits b =
-  [@inline_let] let t = k.BM.bn.BN.t in
-  [@inline_let] let len = k.BM.bn.BN.len in
-  let m0 = k.BM.check n in
+let bn_check_mod_exp #t #len k n a bBits b =
+  let m0 = k.BM.mont_check n in
   let bLen = blocks bBits (size (bits t)) in
   let m1 = BN.bn_is_zero_mask bLen b in
   let m1' = lognot m1 in
@@ -61,8 +59,8 @@ let bn_mod_exp_loop_st (t:limb_t) (nLen:BN.meta_len t) =
 
 
 inline_for_extraction noextract
-val bn_mod_exp_loop: k:BM.mont -> bn_mod_exp_loop_st k.BM.bn.BN.t k.BM.bn.BN.len
-let bn_mod_exp_loop k n nInv bBits bLen b aM accM =
+val bn_mod_exp_loop: #t:limb_t -> #len:BN.meta_len t -> k:BM.mont t len -> bn_mod_exp_loop_st t len
+let bn_mod_exp_loop #t #len k n nInv bBits bLen b aM accM =
   [@inline_let]
   let spec h0 = S.bn_mod_exp_f (as_seq h0 n) nInv (v bBits) (v bLen) (as_seq h0 b) in
   let h0 = ST.get () in
@@ -79,8 +77,7 @@ let bn_mod_exp_loop k n nInv bBits bLen b aM accM =
 
 inline_for_extraction noextract
 let bn_mod_exp_mont_st (t:limb_t) (len:BN.meta_len t) =
-     bn_mod_exp_loop:bn_mod_exp_loop_st t len
-  -> n:lbignum t len
+    n:lbignum t len
   -> a:lbignum t len
   -> acc:lbignum t len
   -> bBits:size_t{v bBits > 0}
@@ -99,10 +96,8 @@ let bn_mod_exp_mont_st (t:limb_t) (len:BN.meta_len t) =
 
 
 inline_for_extraction noextract
-val bn_mod_exp_mont: k:BM.mont -> bn_mod_exp_mont_st k.BM.bn.BN.t k.BM.bn.BN.len
-let bn_mod_exp_mont k bn_mod_exp_loop n a acc bBits b r2 res =
-  [@inline_let] let t = k.BM.bn.BN.t in
-  [@inline_let] let len = k.BM.bn.BN.len in
+val bn_mod_exp_mont: #t:limb_t -> #len:BN.meta_len t -> k:BM.mont t len -> bn_mod_exp_mont_st t len
+let bn_mod_exp_mont #t #len k n a acc bBits b r2 res =
   push_frame ();
   let bLen = blocks bBits (size (bits t)) in
   let nInv = BM.mod_inv_limb n.(0ul) in // n * nInv = 1 (mod (pow2 64))
@@ -111,28 +106,17 @@ let bn_mod_exp_mont k bn_mod_exp_loop n a acc bBits b r2 res =
   let accM = create len (uint #t #SEC 0) in
   BM.to n nInv r2 a aM;
   BM.to n nInv r2 acc accM;
-  bn_mod_exp_loop n nInv bBits bLen b aM accM;
+  bn_mod_exp_loop k n nInv bBits bLen b aM accM;
   BM.from n nInv accM res;
   pop_frame ()
 
 
-inline_for_extraction noextract
-val mk_bn_mod_exp_precompr2: k:BM.mont
-  -> bn_mod_exp_loop:bn_mod_exp_loop_st k.BM.bn.BN.t k.BM.bn.BN.len ->
-  bn_mod_exp_precompr2_st k.BM.bn.BN.t k.BM.bn.BN.len
-
-let mk_bn_mod_exp_precompr2 k bn_mod_exp_loop n a bBits b r2 res =
-  [@inline_let] let t = k.BM.bn.BN.t in
-  [@inline_let] let len = k.BM.bn.BN.len in
+let bn_mod_exp_precompr2 #t #len k n a bBits b r2 res =
   push_frame ();
   let acc  = create len (uint #t #SEC 0) in
   BN.bn_from_uint len (uint #t #SEC 1) acc;
-  bn_mod_exp_mont k bn_mod_exp_loop n a acc bBits b r2 res;
+  bn_mod_exp_mont k n a acc bBits b r2 res;
   pop_frame ()
-
-
-let bn_mod_exp_precompr2 k =
-  mk_bn_mod_exp_precompr2 k (bn_mod_exp_loop k)
 
 ///
 ///  Montgomery ladder for exponentiation
@@ -162,10 +146,8 @@ let bn_mod_exp_mont_ladder_loop_st (t:limb_t) (len:BN.meta_len t) =
 
 
 inline_for_extraction noextract
-val bn_mod_exp_mont_ladder_loop: k:BM.mont -> bn_mod_exp_mont_ladder_loop_st k.BM.bn.BN.t k.BM.bn.BN.len
-let bn_mod_exp_mont_ladder_loop k n nInv bBits bLen b rM0 rM1 sw =
-  [@inline_let] let t = k.BM.bn.BN.t in
-  [@inline_let] let len = k.BM.bn.BN.len in
+val bn_mod_exp_mont_ladder_loop: #t:limb_t -> #len:BN.meta_len t -> k:BM.mont t len -> bn_mod_exp_mont_ladder_loop_st t len
+let bn_mod_exp_mont_ladder_loop #t #len k n nInv bBits bLen b rM0 rM1 sw =
   [@inline_let]
   let refl h i : GTot (S.bn_mod_exp_mont_ladder_t t (v len) (v bBits) i) =
     (as_seq h rM0, as_seq h rM1, LSeq.index (as_seq h sw) 0) in
@@ -191,9 +173,8 @@ let bn_mod_exp_mont_ladder_loop k n nInv bBits bLen b rM0 rM1 sw =
 
 
 inline_for_extraction noextract
-let bn_mod_exp_mont_ladder_st (t:limb_t) (len:BN.meta_len t) =
-    bn_mod_exp_mont_ladder_loop:bn_mod_exp_mont_ladder_loop_st t len
-  -> n:lbignum t len
+let bn_mod_exp_mont_ladder_st1 (t:limb_t) (len:BN.meta_len t) =
+    n:lbignum t len
   -> a:lbignum t len
   -> acc:lbignum t len
   -> bBits:size_t{v bBits > 0}
@@ -211,11 +192,10 @@ let bn_mod_exp_mont_ladder_st (t:limb_t) (len:BN.meta_len t) =
       S.bn_mod_exp_mont_ladder_ (v len) (as_seq h0 n) (as_seq h0 a)
 	(as_seq h0 acc) (v bBits) (as_seq h0 b) (as_seq h0 r2))
 
+
 inline_for_extraction noextract
-val bn_mod_exp_mont_ladder_: k:BM.mont -> bn_mod_exp_mont_ladder_st k.BM.bn.BN.t k.BM.bn.BN.len
-let bn_mod_exp_mont_ladder_ k bn_mod_exp_mont_ladder_loop n a one bBits b r2 res =
-  [@inline_let] let t = k.BM.bn.BN.t in
-  [@inline_let] let len = k.BM.bn.BN.len in
+val bn_mod_exp_mont_ladder_: #t:limb_t -> #len:BN.meta_len t -> k:BM.mont t len -> bn_mod_exp_mont_ladder_st1 t len
+let bn_mod_exp_mont_ladder_ #t #len k n a one bBits b r2 res =
   push_frame ();
   let bLen = blocks bBits (size (bits t)) in
   let nInv = BM.mod_inv_limb n.(0ul) in // n * nInv = 1 (mod (pow2 64))
@@ -226,104 +206,50 @@ let bn_mod_exp_mont_ladder_ k bn_mod_exp_mont_ladder_loop n a one bBits b r2 res
   BM.to n nInv r2 one rM0;
   BM.to n nInv r2 a rM1;
 
-  bn_mod_exp_mont_ladder_loop n nInv bBits bLen b rM0 rM1 sw;
+  bn_mod_exp_mont_ladder_loop k n nInv bBits bLen b rM0 rM1 sw;
   BN.cswap2 len sw.(0ul) rM0 rM1;
   BM.from n nInv rM0 res;
   pop_frame ()
 
 
-inline_for_extraction noextract
-val mk_bn_mod_exp_mont_ladder_precompr2: k:BM.mont
-  -> bn_mod_exp_mont_ladder_loop:bn_mod_exp_mont_ladder_loop_st k.BM.bn.BN.t k.BM.bn.BN.len ->
-  bn_mod_exp_mont_ladder_precompr2_st k.BM.bn.BN.t k.BM.bn.BN.len
-
-let mk_bn_mod_exp_mont_ladder_precompr2 k bn_mod_exp_mont_ladder_loop n a bBits b r2 res =
-  [@inline_let] let t = k.BM.bn.BN.t in
-  [@inline_let] let len = k.BM.bn.BN.len in
+let bn_mod_exp_mont_ladder_precompr2 #t #len k n a bBits b r2 res =
   push_frame ();
   let one  = create len (uint #t 0) in
   BN.bn_from_uint len (uint #t 1) one;
-  bn_mod_exp_mont_ladder_ k bn_mod_exp_mont_ladder_loop n a one bBits b r2 res;
+  bn_mod_exp_mont_ladder_ k n a one bBits b r2 res;
   pop_frame ()
 
 
-let bn_mod_exp_mont_ladder_precompr2 k =
-  mk_bn_mod_exp_mont_ladder_precompr2 k (bn_mod_exp_mont_ladder_loop k)
-
-
-inline_for_extraction noextract
-val mk_bn_mod_exp: k:BM.mont
-  -> bn_mod_exp_loop:bn_mod_exp_loop_st k.BM.bn.BN.t k.BM.bn.BN.len ->
-  bn_mod_exp_st k.BM.bn.BN.t k.BM.bn.BN.len
-
-let mk_bn_mod_exp k bn_mod_exp_loop n a bBits b res =
-  [@inline_let] let t = k.BM.bn.BN.t in
-  [@inline_let] let len = k.BM.bn.BN.len in
-  let h0 = ST.get () in
-  let is_valid_m = bn_check_mod_exp k n a bBits b in
+let bn_mod_exp #t #len k bn_mod_exp_precompr2 n a bBits b res =
   push_frame ();
   let r2 = create len (uint #t #SEC 0) in
   BM.precomp n r2;
-  mk_bn_mod_exp_precompr2 k bn_mod_exp_loop n a bBits b r2 res;
-  let h1 = ST.get () in
-  mapT len res (logand is_valid_m) res;
-  let h2 = ST.get () in
-  BD.bn_mask_lemma (as_seq h1 res) is_valid_m;
-
-  if BB.unsafe_bool_of_limb is_valid_m then begin
-    S.bn_mod_exp_lemma (v len) (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b);
-    assert (S.bn_mod_exp_post (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b) (as_seq h2 res)) end;
-  pop_frame ();
-  BB.unsafe_bool_of_limb is_valid_m
+  bn_mod_exp_precompr2 n a bBits b r2 res;
+  pop_frame ()
 
 
-let bn_mod_exp k =
-  mk_bn_mod_exp k (bn_mod_exp_loop k)
-
-
-inline_for_extraction noextract
-val mk_bn_mod_exp_mont_ladder: k:BM.mont
-  -> bn_mod_exp_mont_ladder_loop:bn_mod_exp_mont_ladder_loop_st k.BM.bn.BN.t k.BM.bn.BN.len ->
-  bn_mod_exp_st k.BM.bn.BN.t k.BM.bn.BN.len
-
-let mk_bn_mod_exp_mont_ladder k bn_mod_exp_mont_ladder_loop n a bBits b res =
-  [@inline_let] let t = k.BM.bn.BN.t in
-  [@inline_let] let len = k.BM.bn.BN.len in
-  let h0 = ST.get () in
-  let is_valid_m = bn_check_mod_exp k n a bBits b in
+let bn_mod_exp_mont_ladder #t #len k bn_mod_exp_mont_ladder_precompr2 n a bBits b res =
   push_frame ();
   let r2 = create len (uint #t #SEC 0) in
   BM.precomp n r2;
-  mk_bn_mod_exp_mont_ladder_precompr2 k bn_mod_exp_mont_ladder_loop n a bBits b r2 res;
-  let h1 = ST.get () in
-  mapT len res (logand is_valid_m) res;
-  let h2 = ST.get () in
-  BD.bn_mask_lemma (as_seq h1 res) is_valid_m;
+  bn_mod_exp_mont_ladder_precompr2 n a bBits b r2 res;
+  pop_frame ()
 
-  if BB.unsafe_bool_of_limb is_valid_m then begin
-    S.bn_mod_exp_mont_ladder_lemma (v len) (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b);
-    assert (S.bn_mod_exp_post (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b) (as_seq h1 res)) end;
-  pop_frame ();
-  BB.unsafe_bool_of_limb is_valid_m
-
-
-let bn_mod_exp_mont_ladder k =
-  mk_bn_mod_exp_mont_ladder k (bn_mod_exp_mont_ladder_loop k)
 
 /// A fully runtime implementation of modular exponentiation.
 
-let exp_check_runtime #t len = bn_check_mod_exp (BM.mk_runtime_mont t len)
-let mod_exp_precomp_runtime #t len = bn_mod_exp_precompr2 (BM.mk_runtime_mont t len)
-let ct_mod_exp_precomp_runtime #t len = bn_mod_exp_mont_ladder_precompr2 (BM.mk_runtime_mont t len)
-let mod_exp_runtime #t len = bn_mod_exp (BM.mk_runtime_mont t len)
-let ct_mod_exp_runtime #t len = bn_mod_exp_mont_ladder (BM.mk_runtime_mont t len)
+let exp_check_runtime t len = bn_check_mod_exp (BM.mk_runtime_mont t len)
+let mod_exp_precomp_runtime t len = bn_mod_exp_precompr2 (BM.mk_runtime_mont t len)
+let ct_mod_exp_precomp_runtime t len = bn_mod_exp_mont_ladder_precompr2 (BM.mk_runtime_mont t len)
+let mod_exp_runtime t len = bn_mod_exp (BM.mk_runtime_mont t len) (mod_exp_precomp_runtime t len)
+let ct_mod_exp_runtime t len = bn_mod_exp_mont_ladder (BM.mk_runtime_mont t len) (ct_mod_exp_precomp_runtime t len)
 
 inline_for_extraction noextract
-let mk_runtime_exp (t:limb_t) (len: BN.meta_len t): exp = {
+let mk_runtime_exp (t:limb_t) (len: BN.meta_len t) : exp t len = {
   mont = BM.mk_runtime_mont t len;
-  exp_check = exp_check_runtime len;
-  mod_exp_precomp = mod_exp_precomp_runtime len;
-  ct_mod_exp_precomp = ct_mod_exp_precomp_runtime len;
-  mod_exp = mod_exp_runtime len;
-  ct_mod_exp = ct_mod_exp_runtime len;
+  exp_check = exp_check_runtime t len;
+  mod_exp_precomp = mod_exp_precomp_runtime t len;
+  ct_mod_exp_precomp = ct_mod_exp_precomp_runtime t len;
+  mod_exp = mod_exp_runtime t len;
+  ct_mod_exp = ct_mod_exp_runtime t len;
   }

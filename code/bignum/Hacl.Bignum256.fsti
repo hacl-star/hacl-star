@@ -156,7 +156,7 @@ val mod_exp_mont_ladder_precompr2: BE.bn_mod_exp_mont_ladder_precompr2_st t_limb
 
   The function returns false if any of the preconditions of
   mod_exp_mont_ladder_precompr2 are violated, true otherwise."]
-val mod_exp_mont_ladder: BE.bn_mod_exp_st t_limbs n_limbs
+val mod_exp_mont_ladder: BE.bn_mod_exp_mont_ladder_st t_limbs n_limbs
 
 [@@ Comment "Compute `2 ^ (128 * nLen) mod n`.
 

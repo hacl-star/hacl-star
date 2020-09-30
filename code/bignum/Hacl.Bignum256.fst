@@ -8,8 +8,6 @@ module BE = Hacl.Bignum.Exponentiation
 module BR = Hacl.Bignum.ModReduction
 module BI = Hacl.Bignum.ModInv
 
-friend Hacl.Bignum.Exponentiation
-
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 let _ = assert_norm (256ul = 64ul `FStar.UInt32.mul` 4ul)
@@ -41,9 +39,7 @@ let sqr (a: lbignum t_limbs n_limbs): BN.bn_karatsuba_sqr_st a =
   BN.bn_mul n_limbs a n_limbs a
 
 inline_for_extraction noextract
-instance bn_inst: BN.bn = {
-  BN.t = t_limbs;
-  BN.len = n_limbs;
+instance bn_inst: BN.bn t_limbs n_limbs = {
   BN.add;
   BN.sub;
   BN.add_mod_n;
@@ -51,8 +47,8 @@ instance bn_inst: BN.bn = {
   BN.sqr
 }
 
-let check : BM.bn_check_modulus_st t_limbs n_limbs =
-  BM.bn_check_modulus bn_inst
+let mont_check : BM.bn_check_modulus_st t_limbs n_limbs =
+  BM.bn_check_modulus
 
 let precomp: BM.bn_precomp_r2_mod_n_st t_limbs n_limbs =
   BM.bn_precomp_r2_mod_n bn_inst
@@ -73,9 +69,9 @@ let mont_sqr: BM.bn_mont_sqr_st t_limbs n_limbs =
   BM.bn_mont_sqr bn_inst reduction
 
 inline_for_extraction noextract
-instance mont_inst: BM.mont = {
-  BM.bn = FStar.Tactics.Typeclasses.solve;
-  BM.check;
+instance mont_inst: BM.mont t_limbs n_limbs = {
+  BM.bn = bn_inst;
+  BM.mont_check;
   BM.precomp;
   BM.reduction;
   BM.to;
@@ -84,37 +80,36 @@ instance mont_inst: BM.mont = {
   BM.sqr = mont_sqr;
 }
 
-let mod_precompr2 = BR.mk_bn_mod_slow_precompr2 mont_inst
+let mod_precompr2 = BR.bn_mod_slow_precompr2 mont_inst
 
-let mod = BR.mk_bn_mod_slow mont_inst
+let mod = BR.bn_mod_slow mont_inst mod_precompr2
 
 let exp_check = BE.bn_check_mod_exp mont_inst
 
 let mod_exp_precompr2 = BE.bn_mod_exp_precompr2 mont_inst
 
-let mod_exp = BE.bn_mod_exp mont_inst
+let mod_exp = BE.bn_mod_exp mont_inst mod_exp_precompr2
 
 let mod_exp_mont_ladder_precompr2 = BE.bn_mod_exp_mont_ladder_precompr2 mont_inst
 
-let mod_exp_mont_ladder = BE.bn_mod_exp_mont_ladder mont_inst
+let mod_exp_mont_ladder = BE.bn_mod_exp_mont_ladder mont_inst mod_exp_mont_ladder_precompr2
 
 inline_for_extraction noextract
-instance exp_inst: BE.exp = {
-  BE.mont = FStar.Tactics.Typeclasses.solve;
+instance exp_inst: BE.exp t_limbs n_limbs = {
+  BE.mont = mont_inst;
   BE.exp_check;
   BE.mod_exp_precomp = mod_exp_precompr2;
   BE.ct_mod_exp_precomp = mod_exp_mont_ladder_precompr2;
-  BE.mod_exp;
+  BE.mod_exp = mod_exp;
   BE.ct_mod_exp = mod_exp_mont_ladder;
 }
 
-
 let new_precompr2 = BM.new_bn_precomp_r2_mod_n
 
-let mod_inv_prime = BI.mk_bn_mod_inv_prime exp_inst
+let mod_inv_prime = BI.bn_mod_inv_prime exp_inst
 
 let new_bn_from_bytes_be = Hacl.Bignum.Convert.new_bn_from_bytes_be
 
 let bn_to_bytes_be = Hacl.Bignum.Convert.mk_bn_to_bytes_be n_bytes
 
-let lt_mask = BN.mk_bn_lt_mask n_limbs
+let lt_mask = BN.bn_lt_mask n_limbs

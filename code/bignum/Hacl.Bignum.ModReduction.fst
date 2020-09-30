@@ -33,12 +33,10 @@ let bn_check_bn_mod_st (t:limb_t) (len:BN.meta_len t) =
 
 
 inline_for_extraction noextract
-val mk_bn_check_bn_mod: k:BM.mont -> bn_check_bn_mod_st k.BM.bn.BN.t k.BM.bn.BN.len
-let mk_bn_check_bn_mod k n a =
-  [@inline_let] let t = k.BM.bn.BN.t in
-  [@inline_let] let len = k.BM.bn.BN.len in
+val bn_check_bn_mod: #t:limb_t -> #len:BN.meta_len t -> k:BM.mont t len -> bn_check_bn_mod_st t len
+let bn_check_bn_mod #t #len k n a =
   push_frame ();
-  let m0 = BM.check n in
+  let m0 = BM.mont_check n in
   let n2 = create (len +! len) (uint #t #SEC 0) in
   BN.mul n n n2;
   let m1 = BN.bn_lt_mask (len +! len) a n2 in
@@ -62,10 +60,8 @@ let bn_mod_slow_precompr2_st (t:limb_t) (len:BN.meta_len t) =
 
 
 inline_for_extraction noextract
-val mk_bn_mod_slow_precompr2: k:BM.mont -> bn_mod_slow_precompr2_st k.BM.bn.BN.t k.BM.bn.BN.len
-let mk_bn_mod_slow_precompr2 k n a r2 res =
-  [@inline_let] let t = k.BM.bn.BN.t in
-  [@inline_let] let len = k.BM.bn.BN.len in
+val bn_mod_slow_precompr2: #t:limb_t -> #len:BN.meta_len t -> k:BM.mont t len -> bn_mod_slow_precompr2_st t len
+let bn_mod_slow_precompr2 #t #len k n a r2 res =
   push_frame ();
   let a_mod = create len (uint #t #SEC 0) in
   let a1 = create (len +! len) (uint #t #SEC 0) in
@@ -81,33 +77,25 @@ let bn_mod_slow_st (t:limb_t) (len:BN.meta_len t) =
     n:lbignum t len
   -> a:lbignum t (len +! len)
   -> res:lbignum t len ->
-  Stack bool
+  Stack unit
   (requires fun h ->
     live h n /\ live h a /\ live h res /\
     disjoint res n /\ disjoint res a)
   (ensures  fun h0 r h1 -> modifies (loc res) h0 h1 /\
-    r == BB.unsafe_bool_of_limb (S.bn_check_bn_mod (as_seq h0 n) (as_seq h0 a)) /\
-    (r ==> bn_v h1 res == bn_v h0 a % bn_v h0 n))
+    as_seq h1 res == S.bn_mod_slow (as_seq h0 n) (as_seq h0 a))
 
 
 inline_for_extraction noextract
-val mk_bn_mod_slow: k:BM.mont -> bn_mod_slow_st k.BM.bn.BN.t k.BM.bn.BN.len
-let mk_bn_mod_slow k n a res =
-  [@inline_let] let t = k.BM.bn.BN.t in
-  [@inline_let] let len = k.BM.bn.BN.len in
-  let h0 = ST.get () in
-  let is_valid_m = mk_bn_check_bn_mod k n a in
+val bn_mod_slow:
+    #t:limb_t
+  -> #len:BN.meta_len t
+  -> k:BM.mont t len
+  -> bn_mod_slow_precompr2:bn_mod_slow_precompr2_st t len ->
+  bn_mod_slow_st t len
+
+let bn_mod_slow #t #len k bn_mod_slow_precompr2 n a res =
   push_frame ();
   let r2 = create len (uint #t #SEC 0) in
   BM.precomp n r2;
-  mk_bn_mod_slow_precompr2 k n a r2 res;
-  let h1 = ST.get () in
-  mapT len res (logand is_valid_m) res;
-  let h2 = ST.get () in
-  BD.bn_mask_lemma (as_seq h1 res) is_valid_m;
-
-  if BB.unsafe_bool_of_limb is_valid_m then begin
-    S.bn_mod_slow_lemma (as_seq h0 n) (as_seq h0 a);
-    assert (bn_v h2 res == bn_v h0 a % bn_v h0 n) end;
-  pop_frame ();
-  BB.unsafe_bool_of_limb is_valid_m
+  bn_mod_slow_precompr2 n a r2 res;
+  pop_frame ()
