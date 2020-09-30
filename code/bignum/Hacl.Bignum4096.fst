@@ -82,17 +82,26 @@ instance mont_inst: BM.mont t_limbs n_limbs = {
 
 let mod_precompr2 = BR.bn_mod_slow_precompr2 mont_inst
 
-let mod = BR.bn_mod_slow mont_inst mod_precompr2
+let mod_check : BR.bn_check_bn_mod_st t_limbs n_limbs =
+  BR.bn_check_bn_mod mont_inst
+
+let mod = BS.bn_mod_slow_safe mont_inst mod_check mod_precompr2
 
 let exp_check = BE.bn_check_mod_exp mont_inst
 
 let mod_exp_precompr2 = BE.bn_mod_exp_precompr2 mont_inst
 
-let mod_exp = BE.bn_mod_exp mont_inst mod_exp_precompr2
+let mod_exp = BS.bn_mod_exp_safe mont_inst exp_check mod_exp_precompr2
 
 let mod_exp_mont_ladder_precompr2 = BE.bn_mod_exp_mont_ladder_precompr2 mont_inst
 
-let mod_exp_mont_ladder = BE.bn_mod_exp_mont_ladder mont_inst mod_exp_mont_ladder_precompr2
+let mod_exp_mont_ladder = BS.bn_mod_exp_mont_ladder_safe mont_inst exp_check mod_exp_mont_ladder_precompr2
+
+let mod_exp' : BE.bn_mod_exp_st t_limbs n_limbs =
+  BE.bn_mod_exp mont_inst mod_exp_precompr2
+
+let mod_exp_mont_ladder' : BE.bn_mod_exp_mont_ladder_st t_limbs n_limbs =
+  BE.bn_mod_exp_mont_ladder mont_inst mod_exp_mont_ladder_precompr2
 
 inline_for_extraction noextract
 instance exp_inst: BE.exp t_limbs n_limbs = {
@@ -100,16 +109,15 @@ instance exp_inst: BE.exp t_limbs n_limbs = {
   BE.exp_check;
   BE.mod_exp_precomp = mod_exp_precompr2;
   BE.ct_mod_exp_precomp = mod_exp_mont_ladder_precompr2;
-  BE.mod_exp;
-  BE.ct_mod_exp = mod_exp_mont_ladder;
+  BE.mod_exp = mod_exp';
+  BE.ct_mod_exp = mod_exp_mont_ladder';
 }
 
-
-let new_precompr2 = BM.new_bn_precomp_r2_mod_n
+let new_precompr2 = BS.new_bn_precomp_r2_mod_n
 
 let mod_inv_prime = BI.bn_mod_inv_prime exp_inst
 
-let new_bn_from_bytes_be = Hacl.Bignum.Convert.new_bn_from_bytes_be
+let new_bn_from_bytes_be = BS.new_bn_from_bytes_be
 
 let bn_to_bytes_be = Hacl.Bignum.Convert.mk_bn_to_bytes_be n_bytes
 

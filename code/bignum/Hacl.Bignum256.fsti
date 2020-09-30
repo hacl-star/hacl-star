@@ -7,6 +7,7 @@ module BM = Hacl.Bignum.Montgomery
 module BE = Hacl.Bignum.Exponentiation
 module BR = Hacl.Bignum.ModReduction
 module BI = Hacl.Bignum.ModInv
+module BS = Hacl.Bignum.SafeAPI
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -78,7 +79,7 @@ val mod_precompr2: BR.bn_mod_slow_precompr2_st t_limbs n_limbs
 
   The function returns false if any of the preconditions of mod_precompr2 above
   are violated, true otherwise."]
-val mod: BR.bn_mod_slow_st t_limbs n_limbs
+val mod: BS.bn_mod_slow_safe_st t_limbs n_limbs
 
 [@@ Comment "Write `a ^ b mod n` in `res`.
 
@@ -117,7 +118,7 @@ val mod_exp_precompr2: BE.bn_mod_exp_precompr2_st t_limbs n_limbs
 
   The function returns false if any of the preconditions of mod_exp_precompr2 are
   violated, true otherwise."]
-val mod_exp: BE.bn_mod_exp_st t_limbs n_limbs
+val mod_exp: BS.bn_mod_exp_safe_st t_limbs n_limbs
 
 [@@ Comment "Write `a ^ b mod n` in `res`.
 
@@ -156,7 +157,7 @@ val mod_exp_mont_ladder_precompr2: BE.bn_mod_exp_mont_ladder_precompr2_st t_limb
 
   The function returns false if any of the preconditions of
   mod_exp_mont_ladder_precompr2 are violated, true otherwise."]
-val mod_exp_mont_ladder: BE.bn_mod_exp_mont_ladder_st t_limbs n_limbs
+val mod_exp_mont_ladder: BS.bn_mod_exp_safe_st t_limbs n_limbs
 
 [@@ Comment "Compute `2 ^ (128 * nLen) mod n`.
 
@@ -168,18 +169,19 @@ val mod_exp_mont_ladder: BE.bn_mod_exp_mont_ladder_st t_limbs n_limbs
 
   If the return value is non-null, clients must eventually call free(3) on it to
   avoid memory leaks."]
-val new_precompr2: BM.new_bn_precomp_r2_mod_n_st t_limbs
+val new_precompr2: BS.new_bn_precomp_r2_mod_n_st t_limbs
 
 [@@ Comment "Write `a ^ (-1) mod n` in `res`.
 
   The arguments a, n and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
-  The function returns false if any of the preconditions of mod_exp_precompr2 are
-  violated, true otherwise.
 
-  This function is *UNSAFE* and requires C clients to observe bn_mod_inv_prime_lemma
-  from Hacl.Spec.Bignum.ModInv.fst, which amounts to:
+  This function is *UNSAFE* and requires C clients to observe the precondition of
+  bn_mod_inv_prime_lemma from Hacl.Spec.Bignum.ModInv.fst, which amounts to:
   • n is a prime
-  • 0 < a "]
+  • n % 2 = 1
+  • 1 < n
+  • 0 < a
+  • a < n "]
 val mod_inv_prime: BI.bn_mod_inv_prime_st t_limbs n_limbs
 
 [@@ CPrologue
@@ -196,7 +198,7 @@ Comment
 
   If the return value is non-null, clients must eventually call free(3) on it to
   avoid memory leaks."]
-val new_bn_from_bytes_be: Hacl.Bignum.Convert.new_bn_from_bytes_be_st t_limbs
+val new_bn_from_bytes_be: BS.new_bn_from_bytes_be_st t_limbs
 
 [@@ Comment "Serialize a bignum into big-endian memory.
 

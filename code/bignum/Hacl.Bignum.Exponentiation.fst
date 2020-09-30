@@ -16,7 +16,6 @@ module ST = FStar.HyperStack.ST
 module S = Hacl.Spec.Bignum.Exponentiation
 module LSeq = Lib.Sequence
 module Loops = Lib.LoopCombinators
-module BD = Hacl.Spec.Bignum.Definitions
 
 friend Hacl.Spec.Bignum.Exponentiation
 

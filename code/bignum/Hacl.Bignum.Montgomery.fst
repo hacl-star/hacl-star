@@ -82,34 +82,6 @@ let bn_precomp_r2_mod_n #t #len k n res =
   bn_precomp_r2_mod_n_ k b n res
 
 
-let new_bn_precomp_r2_mod_n #t r len n =
-  [@inline_let]
-  let bs2 : x:size_t {0 < v x} = 2ul *! size (bits t) in
-  if len = 0ul || not (len <=. 0xfffffffful `FStar.UInt32.div` bs2)
-  then B.null
-  else
-    let is_valid_m = bn_check_modulus n in
-    if not (Hacl.Bignum.Base.unsafe_bool_of_limb is_valid_m) then
-      B.null
-    else
-      let h0 = ST.get () in
-      let res = LowStar.Monotonic.Buffer.mmalloc_partial r (uint #t 0) len in
-      if B.is_null res then
-	res
-      else
-	let h1 = ST.get () in
-	B.(modifies_only_not_unused_in loc_none h0 h1);
-	assert (B.len res == len);
-	let res: Lib.Buffer.buffer (limb t) = res in
-	assert (B.length res == FStar.UInt32.v len);
-	let res: lbignum t len = res in
-	bn_precomp_r2_mod_n (BN.mk_runtime_bn t len) n res;
-	let h2 = ST.get () in
-	B.(modifies_only_not_unused_in loc_none h0 h2);
-	S.bn_precomp_r2_mod_n_lemma (as_seq h0 n);
-	res
-
-
 inline_for_extraction noextract
 val bn_mont_reduction_f:
     #t:limb_t

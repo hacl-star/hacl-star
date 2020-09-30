@@ -10,9 +10,7 @@ open Lib.ByteBuffer
 
 open Hacl.Bignum.Definitions
 
-module HS = FStar.HyperStack
 module ST = FStar.HyperStack.ST
-module B = LowStar.Buffer
 module LSeq = Lib.Sequence
 
 module S = Hacl.Spec.Bignum.Convert
@@ -92,50 +90,6 @@ let bn_from_bytes_be #t =
   match t with
   | U32 -> bn_from_bytes_be_uint32
   | U64 -> bn_from_bytes_be_uint64
-
-
-inline_for_extraction noextract
-let new_bn_from_bytes_be_st (t:limb_t) =
-    r:HS.rid
-  -> len:size_t
-  -> b:lbuffer uint8 len ->
-  ST (B.buffer (limb t))
-  (requires fun h ->
-    live h b /\
-    ST.is_eternal_region r)
-  (ensures  fun h0 res h1 ->
-    B.(modifies loc_none h0 h1) /\
-    not (B.g_is_null res) ==> (
-      0 < v len /\ numbytes t * v (blocks len (size (numbytes t))) <= max_size_t /\
-      B.len res == blocks len (size (numbytes t)) /\
-      B.(fresh_loc (loc_buffer res) h0 h1) /\
-      B.(loc_includes (loc_region_only false r) (loc_buffer res)) /\
-      as_seq h1 (res <: lbignum t (blocks len (size (numbytes t)))) == S.bn_from_bytes_be (v len) (as_seq h0 b)))
-
-
-inline_for_extraction noextract
-val new_bn_from_bytes_be: #t:limb_t -> new_bn_from_bytes_be_st t
-let new_bn_from_bytes_be #t r len b =
-  [@inline_let]
-  let numb = size (numbytes t) in
-  if len = 0ul || not (blocks len numb <=. 0xfffffffful `FStar.UInt32.div` numb) then
-    B.null
-  else
-    let h0 = ST.get () in
-    let res = LowStar.Monotonic.Buffer.mmalloc_partial r (uint #t 0) (blocks len numb) in
-    if B.is_null res then
-      res
-    else
-      let h1 = ST.get () in
-      B.(modifies_only_not_unused_in loc_none h0 h1);
-      assert (B.len res == blocks len numb);
-      let res: Lib.Buffer.buffer (limb t) = res in
-      assert (B.length res == FStar.UInt32.v (blocks len numb));
-      let res: lbignum t (blocks len numb) = res in
-      mk_bn_from_bytes_be len b res;
-      let h2 = ST.get () in
-      B.(modifies_only_not_unused_in loc_none h0 h2);
-      res
 
 
 inline_for_extraction noextract

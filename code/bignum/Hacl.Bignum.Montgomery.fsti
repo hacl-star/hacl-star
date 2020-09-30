@@ -8,11 +8,9 @@ open Lib.IntTypes
 open Lib.Buffer
 
 open Hacl.Bignum.Definitions
+
 module S = Hacl.Spec.Bignum.Montgomery
 module BN = Hacl.Bignum
-
-module B = LowStar.Buffer
-module HS = FStar.HyperStack
 module ST = FStar.HyperStack.ST
 
 include Hacl.Bignum.ModInvLimb
@@ -46,29 +44,6 @@ let bn_precomp_r2_mod_n_st (t:limb_t) (len:BN.meta_len t) =
 
 inline_for_extraction noextract
 val bn_precomp_r2_mod_n: #t:limb_t -> #len:BN.meta_len t -> k:BN.bn t len -> bn_precomp_r2_mod_n_st t len
-
-
-inline_for_extraction noextract
-let new_bn_precomp_r2_mod_n_st (t:limb_t) =
-    r:HS.rid
-  -> nLen:size_t
-  -> n:lbignum t nLen ->
-  ST (B.buffer (limb t))
-  (requires fun h -> live h n /\ ST.is_eternal_region r)
-  (ensures  fun h0 res h1 ->
-    B.(modifies loc_none h0 h1) /\
-    not (B.g_is_null res) ==> (
-      0 < v nLen /\ 2 * bits t * v nLen <= max_size_t /\
-      1 < bn_v h0 n /\ bn_v h0 n % 2 = 1 /\
-      B.len res == nLen /\
-      B.(fresh_loc (loc_buffer res) h0 h1) /\
-      B.(loc_includes (loc_region_only false r) (loc_buffer res)) /\
-      as_seq h1 (res <: lbignum t nLen) == S.bn_precomp_r2_mod_n (as_seq h0 n) /\
-      bn_v #t #nLen h1 res == pow2 (2 * bits t * v nLen) % bn_v h0 n))
-
-
-inline_for_extraction noextract
-val new_bn_precomp_r2_mod_n: #t:limb_t -> new_bn_precomp_r2_mod_n_st t
 
 
 inline_for_extraction noextract

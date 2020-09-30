@@ -17,8 +17,6 @@ module B = LowStar.Buffer
 module S = Hacl.Spec.Bignum.ModReduction
 module BN = Hacl.Bignum
 module BM = Hacl.Bignum.Montgomery
-module BB = Hacl.Bignum.Base
-module BD = Hacl.Spec.Bignum.Definitions
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 

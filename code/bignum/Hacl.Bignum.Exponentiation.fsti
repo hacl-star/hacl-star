@@ -11,7 +11,6 @@ open Hacl.Bignum.Definitions
 
 module S = Hacl.Spec.Bignum.Exponentiation
 module BN = Hacl.Bignum
-module BB = Hacl.Bignum.Base
 module BM = Hacl.Bignum.Montgomery
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
