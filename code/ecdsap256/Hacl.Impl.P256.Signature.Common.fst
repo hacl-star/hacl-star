@@ -326,4 +326,5 @@ let isMoreThanZeroLessThanOrder x =
     
   pop_frame();
 
-  lognot result
+  let open Hacl.Impl.P256.LowLevel.RawCmp in 
+  unsafe_bool_of_u64 (lognot result)
