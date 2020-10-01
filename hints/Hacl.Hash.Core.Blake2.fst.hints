@@ -144,7 +144,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "04ae195514fd46998e02c795964040b4"
+      "33dfb9bceca1423d8c9f4136a5fa29be"
     ],
     [
       "Hacl.Hash.Core.Blake2.state_p_to_state",
@@ -194,7 +194,7 @@
         "typing_Spec.Hash.Definitions.to_blake_alg", "unit_typing"
       ],
       0,
-      "a62a4cade75115eca59ceb59c3eaabae"
+      "3179e16c823293467de9d2514536bc57"
     ],
     [
       "Hacl.Hash.Core.Blake2.mk_alloca",
@@ -340,7 +340,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "3a7acb0b7d01d44fb058c0fc49892a06"
+      "07c65c2e7f84493925fe694b69f1855c"
     ],
     [
       "Hacl.Hash.Core.Blake2.mk_update",
@@ -350,12 +350,12 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "Hacl.Impl.Blake2.Core_pretyping_738bced230d07a53885c00814ce7f1ee",
         "Prims_interpretation_Tm_arrow_2eaa01e78f73e9bab5d0955fc1a662da",
         "Spec.Blake2_pretyping_db784d5da91640e63403e359daacba94",
         "Spec.Hash.Definitions_interpretation_Tm_arrow_3ac874e39b1c409ba69a2358a6f73691",
         "assumption_FStar.Monotonic.HyperHeap.Mod_set_def", "b2t_def",
         "bool_inversion", "bool_typing",
-        "constructor_distinct_Lib.Buffer.CONST",
         "constructor_distinct_Lib.Buffer.MUT",
         "constructor_distinct_Lib.IntTypes.PUB",
         "constructor_distinct_Lib.IntTypes.S16",
@@ -371,7 +371,9 @@
         "constructor_distinct_Spec.Blake2.Blake2B",
         "constructor_distinct_Spec.Blake2.Blake2S",
         "data_typing_intro_Prims.Mkdtuple2@tok",
-        "disc_equation_Lib.IntTypes.U128", "equality_tok_Lib.Buffer.MUT@tok",
+        "disc_equation_Lib.IntTypes.U128",
+        "equality_tok_Hacl.Impl.Blake2.Core.M32@tok",
+        "equality_tok_Lib.Buffer.MUT@tok",
         "equality_tok_Lib.IntTypes.PUB@tok",
         "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U128@tok",
@@ -437,9 +439,11 @@
         "equation_Spec.Hash.Definitions.block_length",
         "equation_Spec.Hash.Definitions.block_word_length",
         "equation_Spec.Hash.Definitions.extra_state",
+        "equation_Spec.Hash.Definitions.extra_state_add_nat",
         "equation_Spec.Hash.Definitions.extra_state_int_type",
         "equation_Spec.Hash.Definitions.extra_state_v",
         "equation_Spec.Hash.Definitions.is_blake",
+        "equation_Spec.Hash.Definitions.max_extra_state",
         "equation_Spec.Hash.Definitions.size_block",
         "equation_Spec.Hash.Definitions.to_blake_alg",
         "equation_Spec.Hash.Definitions.word_length",
@@ -467,8 +471,8 @@
         "lemma_FStar.Set.lemma_equal_intro",
         "lemma_FStar.Set.mem_complement", "lemma_FStar.Set.mem_intersect",
         "lemma_FStar.Set.mem_singleton", "lemma_FStar.Set.mem_subset",
-        "lemma_FStar.Set.mem_union", "lemma_FStar.UInt.pow2_values",
-        "lemma_FStar.UInt32.uv_inv", "lemma_FStar.UInt32.vu_inv",
+        "lemma_FStar.UInt.pow2_values", "lemma_FStar.UInt32.uv_inv",
+        "lemma_FStar.UInt32.vu_inv",
         "lemma_Hacl.Impl.Blake2.Core.state_v_eq_lemma",
         "lemma_Lib.IntTypes.mul_mod_lemma",
         "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
@@ -514,6 +518,7 @@
         "projection_inverse_Prims.Mkdtuple2__2",
         "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_0101275d27c08e7046b6ba4d685ebb73",
+        "refinement_interpretation_Tm_refine_028e3d676128c000131df62014b3d4df",
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
         "refinement_interpretation_Tm_refine_0ea1fba779ad5718e28476faeef94d56",
         "refinement_interpretation_Tm_refine_156c49afb7e1e070fbb2e47dc0e3d4b2",
@@ -570,9 +575,11 @@
         "typing_Spec.Blake2.wt",
         "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_Spec.Hash.Definitions.block_length",
+        "typing_Spec.Hash.Definitions.extra_state_add_nat",
         "typing_Spec.Hash.Definitions.is_blake",
         "typing_Spec.Hash.Definitions.to_blake_alg",
         "typing_Spec.Hash.Definitions.word_length",
+        "typing_tok_Hacl.Impl.Blake2.Core.M32@tok",
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.PUB@tok",
         "typing_tok_Lib.IntTypes.SEC@tok",
         "typing_tok_Lib.IntTypes.U128@tok",
@@ -595,7 +602,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "e45ccf1f95dac11dfa9c17d226162655"
+      "6b218219f4cf36589a9bcee575d828a8"
     ],
     [
       "Hacl.Hash.Core.Blake2.alloca_blake2s_32",
@@ -618,7 +625,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "4e6271ad0d8c1cad306ea55de956d152"
+      "b5f7d1922e404c54edad12311e2992fb"
     ],
     [
       "Hacl.Hash.Core.Blake2.update_blake2s_32",
@@ -632,7 +639,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "fb4c030813315d9bbeaf3eb9d435a1da"
+      "707270e3d5cd5dce892230e853806fe7"
     ],
     [
       "Hacl.Hash.Core.Blake2.finish_blake2s_32",
@@ -646,7 +653,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "e9dc2a6b937f4b7ddf09003de1bd6f47"
+      "2c3f56313380a84e7d93bd7799ef9296"
     ],
     [
       "Hacl.Hash.Core.Blake2.init_blake2b_32",
@@ -678,7 +685,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "d67e0f65e0f347ba14b1bb92102043ef"
+      "ea6b0dee619a808e41f01bbe566f2cf3"
     ],
     [
       "Hacl.Hash.Core.Blake2.alloca_blake2b_32",
@@ -712,7 +719,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "422873dbb09bcb1de08a639397ae4799"
+      "0f1a4d3bef21381f7e8145f02fc37fc1"
     ],
     [
       "Hacl.Hash.Core.Blake2.update_blake2b_32",
@@ -744,7 +751,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "f0a631f30eb4d228760d427b4811de7e"
+      "4a094332171d1cb1adf981c24ca80858"
     ],
     [
       "Hacl.Hash.Core.Blake2.finish_blake2b_32",
@@ -767,7 +774,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "3246e0371157b9cf0f936838826b3c9f"
+      "f4332ba8ac437c60076becb0d44c67f1"
     ]
   ]
 ]
