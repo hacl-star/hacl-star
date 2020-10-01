@@ -147,7 +147,8 @@ val ecdsa_sign_p256_without_hash: result: lbuffer uint8 (size 64)
   )
 
 
-[@ (Comment " This code is not side-channel resistant.
+[@ (Comment " The input of the function is considered to be public, 
+  thus this code is not secret independent with respect to the operations done over the input.
   \n Input: m buffer: uint8 [mLen], \n pub(lic)Key: uint8[64], \n r: uint8[32], \n s: uint8[32]. 
   \n Output: bool, where true stands for the correct signature verification. ")]
 val ecdsa_verif_p256_sha2:
@@ -169,7 +170,8 @@ val ecdsa_verif_p256_sha2:
     )
 
 
-[@ (Comment " This code is not side-channel resistant.
+[@ (Comment "  The input of the function is considered to be public, 
+  thus this code is not secret independent with respect to the operations done over the input.
   \n Input: m buffer: uint8 [mLen], \n pub(lic)Key: uint8[64], \n r: uint8[32], \n s: uint8[32]. 
   \n Output: bool, where true stands for the correct signature verification. ")]
 val ecdsa_verif_p256_sha384:
@@ -191,7 +193,8 @@ val ecdsa_verif_p256_sha384:
    )
 
 
-[@ (Comment " This code is not side-channel resistant.
+[@ (Comment "  The input of the function is considered to be public, 
+  thus this code is not secret independent with respect to the operations done over the input.
   \n Input: m buffer: uint8 [mLen], \n pub(lic)Key: uint8[64], \n r: uint8[32], \n s: uint8[32]. 
   \n Output: bool, where true stands for the correct signature verification. ")]
 val ecdsa_verif_p256_sha512:
@@ -212,7 +215,8 @@ val ecdsa_verif_p256_sha512:
       result == Spec.ECDSA.ecdsa_verification_agile (Spec.ECDSA.Hash SHA2_512) (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m)
    )
 
-[@ (Comment "This code is not side-channel resistant.
+[@ (Comment " The input of the function is considered to be public, 
+  thus this code is not secret independent with respect to the operations done over the input.
   \n Input: m buffer: uint8 [mLen], \n pub(lic)Key: uint8[64], \n r: uint8[32], \n s: uint8[32]. 
   \n Output: bool, where true stands for the correct signature verification.
   \n The message m is expected to be hashed by a strong hash function, the lenght of the message is expected to be 32 bytes and more.")]
@@ -236,7 +240,8 @@ val ecdsa_verif_without_hash:
 
 
 [@ (Comment " Public key verification function. 
-  \n This code is not side-channel resistant.
+  \n  The input of the function is considered to be public, 
+  thus this code is not secret independent with respect to the operations done over the input.
   \n Input: pub(lic)Key: uint8[64]. 
   \n Output: bool, where 0 stands for the public key to be correct with respect to SP 800-56A:  \n Verify that the public key is not the “point at infinity”, represented as O. \n Verify that the affine x and y coordinates of the point represented by the public key are in the range [0, p – 1] where p is the prime defining the finite field. \n Verify that y2 = x3 + ax + b where a and b are the coefficients of the curve equation. \n Verify that nQ = O (the point at infinity), where n is the order of the curve and Q is the public key point.
   \n The last extract is taken from : https://neilmadden.blog/2017/05/17/so-how-do-you-validate-nist-ecdh-public-keys/")]
@@ -362,7 +367,10 @@ val ecp256dh_i:
     as_seq h1 (gsub result (size 32) (size 32)) == pointY)
 
 
-[@ (Comment " This code is not side channel resistant on pub_key. \n Input: result: uint8[64], \n pub(lic)Key: uint8[64], \n scalar: uint8[32].
+[@ (Comment " 
+   The pub(lic)_key input of the function is considered to be public, 
+  thus this code is not secret independent with respect to the operations done over this variable.
+  \n Input: result: uint8[64], \n pub(lic)Key: uint8[64], \n scalar: uint8[32].
   \n Output: bool, where True stands for the correct key generation. False value means that an error has occurred (possibly the provided public key was incorrect or the result represents point at infinity). 
   ")]
 val ecp256dh_r:

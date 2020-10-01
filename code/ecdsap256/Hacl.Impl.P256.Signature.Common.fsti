@@ -32,14 +32,16 @@ val bufferToJac: p:lbuffer uint64 (size 8) -> result:point -> Stack unit
      x3 == pointJacX /\ y3 == pointJacY /\ z3 == pointJacZ))
 
 
-[@ (Comment "  This code is not side channel resistant")]
+[@ (Comment "   The input of the function is considered to be public,
+thus this code is not secret independent with respect to the operations done over the input.")] 
 
 val isPointAtInfinityPublic: p:point -> Stack bool
   (requires fun h -> live h p)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
     r == Spec.P256.isPointAtInfinity (point_prime_to_coordinates (as_seq h0 p)))
 
-[@ (Comment "  This code is not side channel resistant")]
+[@ (Comment "   The input of the function is considered to be public,
+thus this code is not secret independent with respect to the operations done over the input.")] 
 val isPointOnCurvePublic: p:point -> Stack bool
   (requires fun h -> live h p /\    
     as_nat h (gsub p (size 0) (size 4)) < prime256 /\ 
@@ -53,7 +55,8 @@ val isPointOnCurvePublic: p:point -> Stack bool
   )
 
 
-[@ (Comment "  This code is not side channel resistant")]
+[@ (Comment "   The input of the function is considered to be public,
+thus this code is not secret independent with respect to the operations done over the input.")] 
 val verifyQValidCurvePoint: pubKeyAsPoint:point
   -> tempBuffer:lbuffer uint64 (size 100) -> Stack bool
   (requires fun h ->

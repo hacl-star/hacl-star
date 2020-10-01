@@ -62,7 +62,8 @@ let isZero_uint64_nCT f =
     z0_zero && z1_zero && z2_zero && z3_zero
 
 
-[@ (Comment "  This code is not side channel resistant")] 
+[@ (Comment "   The input of the function is considered to be public,
+thus this code is not secret independent with respect to the operations done over the input.")] 
 val isMoreThanZeroLessThanOrderMinusOne: f:felem -> Stack bool
   (requires fun h -> live h f)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
@@ -269,8 +270,8 @@ let ecdsa_verification_step5_0 points pubKeyAsPoint u1 u2 tempBuffer =
   scalarMultiplicationWithoutNorm pubKeyAsPoint pointU2Q u2 tempBuffer
 
 
-[@ (Comment "  This code is not side channel resistant")]
-
+[@ (Comment "   The input of the function is considered to be public,
+thus this code is not secret independent with respect to the operations done over the input.")] 
 val compare_felem_bool: a: felem -> b: felem -> Stack bool
   (requires fun h -> live h a /\ live h b)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\ r == (as_nat h0 a = as_nat h0 b))
@@ -554,7 +555,8 @@ let ecdsa_verification_core alg publicKeyBuffer hashAsFelem r s mLen m xBuffer t
   r
 
 
-[@ (Comment "  This code is not side channel resistant")]
+[@ (Comment "   The input of the function is considered to be public,
+thus this code is not secret independent with respect to the operations done over the input.")] 
 val ecdsa_verification_:alg:hash_alg_ecdsa
   -> pubKey:lbuffer uint64 (size 8)
   -> r:lbuffer uint64 (size 4)
