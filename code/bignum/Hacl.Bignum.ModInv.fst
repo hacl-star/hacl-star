@@ -34,8 +34,9 @@ let bn_mod_inv_prime_st (t:limb_t) (len:BN.meta_len t) =
 
 
 inline_for_extraction noextract
-val bn_mod_inv_prime: #t:limb_t -> #len:BN.meta_len t -> k:BE.exp t len -> bn_mod_inv_prime_st t len
-let bn_mod_inv_prime #t #len k n a res =
+val bn_mod_inv_prime: #t:limb_t -> k:BE.exp t -> bn_mod_inv_prime_st t k.BE.mont.BM.bn.BN.len
+let bn_mod_inv_prime #t k n a res =
+  [@inline_let] let len = k.BE.mont.BM.bn.BN.len in
   push_frame ();
   let b2 = create 1ul (uint #t #SEC 2) in
   let n2 = create len (uint #t #SEC 0) in

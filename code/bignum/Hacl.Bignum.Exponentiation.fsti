@@ -30,7 +30,7 @@ let bn_check_mod_exp_st (t:limb_t) (len:BN.meta_len t) =
 
 
 inline_for_extraction noextract
-val bn_check_mod_exp: #t:limb_t -> #len:BN.meta_len t -> k:BM.mont t len -> bn_check_mod_exp_st t len
+val bn_check_mod_exp: #t:limb_t -> k:BM.mont t -> bn_check_mod_exp_st t k.BM.bn.BN.len
 
 
 // This function is *NOT* constant-time on the exponent b.
@@ -54,7 +54,7 @@ let bn_mod_exp_precompr2_st (t:limb_t) (len:BN.meta_len t) =
 
 // This version is fully run-time.
 inline_for_extraction noextract
-val bn_mod_exp_precompr2: #t:limb_t -> #len:BN.meta_len t -> k:BM.mont t len -> bn_mod_exp_precompr2_st t len
+val bn_mod_exp_precompr2: #t:limb_t -> k:BM.mont t -> bn_mod_exp_precompr2_st t k.BM.bn.BN.len
 
 
 // This function is constant-time on the exponent b.
@@ -78,7 +78,7 @@ let bn_mod_exp_mont_ladder_precompr2_st (t:limb_t) (len:BN.meta_len t) =
 
 // This version is fully run-time.
 inline_for_extraction noextract
-val bn_mod_exp_mont_ladder_precompr2: #t:limb_t -> #len:BN.meta_len t -> k:BM.mont t len -> bn_mod_exp_mont_ladder_precompr2_st t len
+val bn_mod_exp_mont_ladder_precompr2: #t:limb_t -> k:BM.mont t -> bn_mod_exp_mont_ladder_precompr2_st t k.BM.bn.BN.len
 
 
 inline_for_extraction noextract
@@ -101,10 +101,9 @@ let bn_mod_exp_st (t:limb_t) (len:BN.meta_len t) =
 inline_for_extraction noextract
 val bn_mod_exp:
     #t:limb_t
-  -> #len:BN.meta_len t
-  -> k:BM.mont t len
-  -> bn_mod_exp_precompr2:bn_mod_exp_precompr2_st t len ->
-  bn_mod_exp_st t len
+  -> k:BM.mont t
+  -> bn_mod_exp_precompr2:bn_mod_exp_precompr2_st t k.BM.bn.BN.len ->
+  bn_mod_exp_st t k.BM.bn.BN.len
 
 
 inline_for_extraction noextract
@@ -126,22 +125,24 @@ let bn_mod_exp_mont_ladder_st (t:limb_t) (len:BN.meta_len t) =
 inline_for_extraction noextract
 val bn_mod_exp_mont_ladder:
     #t:limb_t
-  -> #len:BN.meta_len t
-  -> k:BM.mont t len
-  -> bn_mod_exp_mont_ladder_precompr2:bn_mod_exp_mont_ladder_precompr2_st t len ->
-  bn_mod_exp_mont_ladder_st t len
+  -> k:BM.mont t
+  -> bn_mod_exp_mont_ladder_precompr2:bn_mod_exp_mont_ladder_precompr2_st t k.BM.bn.BN.len ->
+  bn_mod_exp_mont_ladder_st t k.BM.bn.BN.len
 
 
 inline_for_extraction noextract
-class exp (t:limb_t) (len:BN.meta_len t) = {
-  mont: BM.mont t len;
-  exp_check: bn_check_mod_exp_st t len;
-  mod_exp_precomp: bn_mod_exp_precompr2_st t len;
-  ct_mod_exp_precomp: bn_mod_exp_mont_ladder_precompr2_st t len;
-  mod_exp : bn_mod_exp_st t len;
-  ct_mod_exp : bn_mod_exp_mont_ladder_st t len;
+class exp (t:limb_t) = {
+  mont: BM.mont t;
+  exp_check: bn_check_mod_exp_st t mont.BM.bn.BN.len;
+  mod_exp_precomp: bn_mod_exp_precompr2_st t mont.BM.bn.BN.len;
+  ct_mod_exp_precomp: bn_mod_exp_mont_ladder_precompr2_st t mont.BM.bn.BN.len;
+  mod_exp : bn_mod_exp_st t mont.BM.bn.BN.len;
+  ct_mod_exp : bn_mod_exp_mont_ladder_st t mont.BM.bn.BN.len;
 }
 
 // A completely run-time-only instance where the functions above exist in the C code.
 inline_for_extraction noextract
-val mk_runtime_exp: t:limb_t -> len:BN.meta_len t -> exp t len
+val mk_runtime_exp_uint32: len:BN.meta_len U32 -> exp U32
+
+inline_for_extraction noextract
+val mk_runtime_exp_uint64: len:BN.meta_len U64 -> exp U64

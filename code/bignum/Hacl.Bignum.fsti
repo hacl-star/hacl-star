@@ -329,7 +329,8 @@ let meta_len (t:limb_t) = len:size_t{0 < v len /\ 2 * bits t * v len <= max_size
 /// parameter if they want the benefits of a function set specialized for a
 /// given bignum length.
 inline_for_extraction noextract
-class bn (t:limb_t) (len:meta_len t) = {
+class bn (t:limb_t) = {
+  len: meta_len t;
   add: a:lbignum t len -> b:lbignum t len -> bn_add_eq_len_st a b;
   sub: a:lbignum t len -> b:lbignum t len -> bn_sub_eq_len_st a b;
   add_mod_n: bn_add_mod_n_st t len;
@@ -342,6 +343,7 @@ class bn (t:limb_t) (len:meta_len t) = {
 /// functions!
 inline_for_extraction noextract
 let mk_runtime_bn (t:limb_t) (len:meta_len t) = {
+  len = len;
   add = (fun a b -> bn_add_eq_len len a b);
   sub = (fun a b -> bn_sub_eq_len len a b);
   add_mod_n = bn_add_mod_n len;

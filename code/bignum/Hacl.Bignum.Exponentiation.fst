@@ -22,7 +22,8 @@ friend Hacl.Spec.Bignum.Exponentiation
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-let bn_check_mod_exp #t #len k n a bBits b =
+let bn_check_mod_exp #t k n a bBits b =
+  [@inline_let] let len = k.BM.bn.BN.len in
   let m0 = k.BM.mont_check n in
   let bLen = blocks bBits (size (bits t)) in
   let m1 = BN.bn_is_zero_mask bLen b in
@@ -58,8 +59,9 @@ let bn_mod_exp_loop_st (t:limb_t) (nLen:BN.meta_len t) =
 
 
 inline_for_extraction noextract
-val bn_mod_exp_loop: #t:limb_t -> #len:BN.meta_len t -> k:BM.mont t len -> bn_mod_exp_loop_st t len
-let bn_mod_exp_loop #t #len k n nInv bBits bLen b aM accM =
+val bn_mod_exp_loop: #t:limb_t -> k:BM.mont t -> bn_mod_exp_loop_st t k.BM.bn.BN.len
+let bn_mod_exp_loop #t k n nInv bBits bLen b aM accM =
+  [@inline_let] let len = k.BM.bn.BN.len in
   [@inline_let]
   let spec h0 = S.bn_mod_exp_f (as_seq h0 n) nInv (v bBits) (v bLen) (as_seq h0 b) in
   let h0 = ST.get () in
@@ -95,8 +97,9 @@ let bn_mod_exp_mont_st (t:limb_t) (len:BN.meta_len t) =
 
 
 inline_for_extraction noextract
-val bn_mod_exp_mont: #t:limb_t -> #len:BN.meta_len t -> k:BM.mont t len -> bn_mod_exp_mont_st t len
-let bn_mod_exp_mont #t #len k n a acc bBits b r2 res =
+val bn_mod_exp_mont: #t:limb_t -> k:BM.mont t -> bn_mod_exp_mont_st t k.BM.bn.BN.len
+let bn_mod_exp_mont #t k n a acc bBits b r2 res =
+  [@inline_let] let len = k.BM.bn.BN.len in
   push_frame ();
   let bLen = blocks bBits (size (bits t)) in
   let nInv = BM.mod_inv_limb n.(0ul) in // n * nInv = 1 (mod (pow2 64))
@@ -110,7 +113,8 @@ let bn_mod_exp_mont #t #len k n a acc bBits b r2 res =
   pop_frame ()
 
 
-let bn_mod_exp_precompr2 #t #len k n a bBits b r2 res =
+let bn_mod_exp_precompr2 #t k n a bBits b r2 res =
+  [@inline_let] let len = k.BM.bn.BN.len in
   push_frame ();
   let acc  = create len (uint #t #SEC 0) in
   BN.bn_from_uint len (uint #t #SEC 1) acc;
@@ -145,8 +149,9 @@ let bn_mod_exp_mont_ladder_loop_st (t:limb_t) (len:BN.meta_len t) =
 
 
 inline_for_extraction noextract
-val bn_mod_exp_mont_ladder_loop: #t:limb_t -> #len:BN.meta_len t -> k:BM.mont t len -> bn_mod_exp_mont_ladder_loop_st t len
-let bn_mod_exp_mont_ladder_loop #t #len k n nInv bBits bLen b rM0 rM1 sw =
+val bn_mod_exp_mont_ladder_loop: #t:limb_t -> k:BM.mont t -> bn_mod_exp_mont_ladder_loop_st t k.BM.bn.BN.len
+let bn_mod_exp_mont_ladder_loop #t k n nInv bBits bLen b rM0 rM1 sw =
+  [@inline_let] let len = k.BM.bn.BN.len in
   [@inline_let]
   let refl h i : GTot (S.bn_mod_exp_mont_ladder_t t (v len) (v bBits) i) =
     (as_seq h rM0, as_seq h rM1, LSeq.index (as_seq h sw) 0) in
@@ -193,8 +198,9 @@ let bn_mod_exp_mont_ladder_st1 (t:limb_t) (len:BN.meta_len t) =
 
 
 inline_for_extraction noextract
-val bn_mod_exp_mont_ladder_: #t:limb_t -> #len:BN.meta_len t -> k:BM.mont t len -> bn_mod_exp_mont_ladder_st1 t len
-let bn_mod_exp_mont_ladder_ #t #len k n a one bBits b r2 res =
+val bn_mod_exp_mont_ladder_: #t:limb_t -> k:BM.mont t -> bn_mod_exp_mont_ladder_st1 t k.BM.bn.BN.len
+let bn_mod_exp_mont_ladder_ #t k n a one bBits b r2 res =
+  [@inline_let] let len = k.BM.bn.BN.len in
   push_frame ();
   let bLen = blocks bBits (size (bits t)) in
   let nInv = BM.mod_inv_limb n.(0ul) in // n * nInv = 1 (mod (pow2 64))
@@ -211,7 +217,8 @@ let bn_mod_exp_mont_ladder_ #t #len k n a one bBits b r2 res =
   pop_frame ()
 
 
-let bn_mod_exp_mont_ladder_precompr2 #t #len k n a bBits b r2 res =
+let bn_mod_exp_mont_ladder_precompr2 #t k n a bBits b r2 res =
+  [@inline_let] let len = k.BM.bn.BN.len in
   push_frame ();
   let one  = create len (uint #t 0) in
   BN.bn_from_uint len (uint #t 1) one;
@@ -219,7 +226,8 @@ let bn_mod_exp_mont_ladder_precompr2 #t #len k n a bBits b r2 res =
   pop_frame ()
 
 
-let bn_mod_exp #t #len k bn_mod_exp_precompr2 n a bBits b res =
+let bn_mod_exp #t k bn_mod_exp_precompr2 n a bBits b res =
+  [@inline_let] let len = k.BM.bn.BN.len in
   push_frame ();
   let r2 = create len (uint #t #SEC 0) in
   BM.precomp n r2;
@@ -227,7 +235,8 @@ let bn_mod_exp #t #len k bn_mod_exp_precompr2 n a bBits b res =
   pop_frame ()
 
 
-let bn_mod_exp_mont_ladder #t #len k bn_mod_exp_mont_ladder_precompr2 n a bBits b res =
+let bn_mod_exp_mont_ladder #t k bn_mod_exp_mont_ladder_precompr2 n a bBits b res =
+  [@inline_let] let len = k.BM.bn.BN.len in
   push_frame ();
   let r2 = create len (uint #t #SEC 0) in
   BM.precomp n r2;
@@ -237,18 +246,45 @@ let bn_mod_exp_mont_ladder #t #len k bn_mod_exp_mont_ladder_precompr2 n a bBits 
 
 /// A fully runtime implementation of modular exponentiation.
 
-let exp_check_runtime t len = bn_check_mod_exp (BM.mk_runtime_mont t len)
-let mod_exp_precomp_runtime t len = bn_mod_exp_precompr2 (BM.mk_runtime_mont t len)
-let ct_mod_exp_precomp_runtime t len = bn_mod_exp_mont_ladder_precompr2 (BM.mk_runtime_mont t len)
-let mod_exp_runtime t len = bn_mod_exp (BM.mk_runtime_mont t len) (mod_exp_precomp_runtime t len)
-let ct_mod_exp_runtime t len = bn_mod_exp_mont_ladder (BM.mk_runtime_mont t len) (ct_mod_exp_precomp_runtime t len)
+let exp_check_runtime_u32 (len:BN.meta_len U32) : bn_check_mod_exp_st U32 (BM.mk_runtime_mont_uint32 len).BM.bn.BN.len =
+  bn_check_mod_exp (BM.mk_runtime_mont_uint32 len)
+let mod_exp_precomp_runtime_u32 (len:BN.meta_len U32) : bn_mod_exp_precompr2_st U32 (BM.mk_runtime_mont_uint32 len).BM.bn.BN.len =
+  bn_mod_exp_precompr2 (BM.mk_runtime_mont_uint32 len)
+let ct_mod_exp_precomp_runtime_u32 (len: BN.meta_len U32) : bn_mod_exp_mont_ladder_precompr2_st U32 (BM.mk_runtime_mont_uint32 len).BM.bn.BN.len =
+  bn_mod_exp_mont_ladder_precompr2 (BM.mk_runtime_mont_uint32 len)
+let mod_exp_runtime_u32 (len:BN.meta_len U32) : bn_mod_exp_st U32 (BM.mk_runtime_mont_uint32 len).BM.bn.BN.len =
+  bn_mod_exp (BM.mk_runtime_mont_uint32 len) (mod_exp_precomp_runtime_u32 len)
+let ct_mod_exp_runtime_u32 (len:BN.meta_len U32) : bn_mod_exp_mont_ladder_st U32 (BM.mk_runtime_mont_uint32 len).BM.bn.BN.len =
+  bn_mod_exp_mont_ladder (BM.mk_runtime_mont_uint32 len) (ct_mod_exp_precomp_runtime_u32 len)
 
 inline_for_extraction noextract
-let mk_runtime_exp (t:limb_t) (len: BN.meta_len t) : exp t len = {
-  mont = BM.mk_runtime_mont t len;
-  exp_check = exp_check_runtime t len;
-  mod_exp_precomp = mod_exp_precomp_runtime t len;
-  ct_mod_exp_precomp = ct_mod_exp_precomp_runtime t len;
-  mod_exp = mod_exp_runtime t len;
-  ct_mod_exp = ct_mod_exp_runtime t len;
+let mk_runtime_exp_uint32 (len: BN.meta_len U32) : exp U32 = {
+  mont = BM.mk_runtime_mont_uint32 len;
+  exp_check = exp_check_runtime_u32 len;
+  mod_exp_precomp = mod_exp_precomp_runtime_u32 len;
+  ct_mod_exp_precomp = ct_mod_exp_precomp_runtime_u32 len;
+  mod_exp = mod_exp_runtime_u32 len;
+  ct_mod_exp = ct_mod_exp_runtime_u32 len;
+  }
+
+
+let exp_check_runtime_u64 (len:BN.meta_len U64) : bn_check_mod_exp_st U64 (BM.mk_runtime_mont_uint64 len).BM.bn.BN.len =
+  bn_check_mod_exp (BM.mk_runtime_mont_uint64 len)
+let mod_exp_precomp_runtime_u64 (len:BN.meta_len U64) : bn_mod_exp_precompr2_st U64 (BM.mk_runtime_mont_uint64 len).BM.bn.BN.len =
+  bn_mod_exp_precompr2 (BM.mk_runtime_mont_uint64 len)
+let ct_mod_exp_precomp_runtime_u64 (len: BN.meta_len U64) : bn_mod_exp_mont_ladder_precompr2_st U64 (BM.mk_runtime_mont_uint64 len).BM.bn.BN.len =
+  bn_mod_exp_mont_ladder_precompr2 (BM.mk_runtime_mont_uint64 len)
+let mod_exp_runtime_u64 (len:BN.meta_len U64) : bn_mod_exp_st U64 (BM.mk_runtime_mont_uint64 len).BM.bn.BN.len =
+  bn_mod_exp (BM.mk_runtime_mont_uint64 len) (mod_exp_precomp_runtime_u64 len)
+let ct_mod_exp_runtime_u64 (len:BN.meta_len U64) : bn_mod_exp_mont_ladder_st U64 (BM.mk_runtime_mont_uint64 len).BM.bn.BN.len =
+  bn_mod_exp_mont_ladder (BM.mk_runtime_mont_uint64 len) (ct_mod_exp_precomp_runtime_u64 len)
+
+inline_for_extraction noextract
+let mk_runtime_exp_uint64 (len: BN.meta_len U64) : exp U64 = {
+  mont = BM.mk_runtime_mont_uint64 len;
+  exp_check = exp_check_runtime_u64 len;
+  mod_exp_precomp = mod_exp_precomp_runtime_u64 len;
+  ct_mod_exp_precomp = ct_mod_exp_precomp_runtime_u64 len;
+  mod_exp = mod_exp_runtime_u64 len;
+  ct_mod_exp = ct_mod_exp_runtime_u64 len;
   }

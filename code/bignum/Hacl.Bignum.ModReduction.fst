@@ -31,8 +31,9 @@ let bn_check_bn_mod_st (t:limb_t) (len:BN.meta_len t) =
 
 
 inline_for_extraction noextract
-val bn_check_bn_mod: #t:limb_t -> #len:BN.meta_len t -> k:BM.mont t len -> bn_check_bn_mod_st t len
-let bn_check_bn_mod #t #len k n a =
+val bn_check_bn_mod: #t:limb_t -> k:BM.mont t -> bn_check_bn_mod_st t k.BM.bn.BN.len
+let bn_check_bn_mod #t k n a =
+  [@inline_let] let len = k.BM.bn.BN.len in
   push_frame ();
   let m0 = BM.mont_check n in
   let n2 = create (len +! len) (uint #t #SEC 0) in
@@ -58,8 +59,9 @@ let bn_mod_slow_precompr2_st (t:limb_t) (len:BN.meta_len t) =
 
 
 inline_for_extraction noextract
-val bn_mod_slow_precompr2: #t:limb_t -> #len:BN.meta_len t -> k:BM.mont t len -> bn_mod_slow_precompr2_st t len
-let bn_mod_slow_precompr2 #t #len k n a r2 res =
+val bn_mod_slow_precompr2: #t:limb_t -> k:BM.mont t -> bn_mod_slow_precompr2_st t k.BM.bn.BN.len
+let bn_mod_slow_precompr2 #t k n a r2 res =
+  [@inline_let] let len = k.BM.bn.BN.len in
   push_frame ();
   let a_mod = create len (uint #t #SEC 0) in
   let a1 = create (len +! len) (uint #t #SEC 0) in
@@ -86,12 +88,12 @@ let bn_mod_slow_st (t:limb_t) (len:BN.meta_len t) =
 inline_for_extraction noextract
 val bn_mod_slow:
     #t:limb_t
-  -> #len:BN.meta_len t
-  -> k:BM.mont t len
-  -> bn_mod_slow_precompr2:bn_mod_slow_precompr2_st t len ->
-  bn_mod_slow_st t len
+  -> k:BM.mont t
+  -> bn_mod_slow_precompr2:bn_mod_slow_precompr2_st t k.BM.bn.BN.len ->
+  bn_mod_slow_st t k.BM.bn.BN.len
 
-let bn_mod_slow #t #len k bn_mod_slow_precompr2 n a res =
+let bn_mod_slow #t k bn_mod_slow_precompr2 n a res =
+  [@inline_let] let len = k.BM.bn.BN.len in
   push_frame ();
   let r2 = create len (uint #t #SEC 0) in
   BM.precomp n r2;

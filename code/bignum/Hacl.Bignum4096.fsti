@@ -174,8 +174,6 @@ val new_precompr2: BS.new_bn_precomp_r2_mod_n_st t_limbs
 [@@ Comment "Write `a ^ (-1) mod n` in `res`.
 
   The arguments a, n and the outparam res are meant to be 4096-bit bignums, i.e. uint64_t[64].
-  The function returns false if any of the preconditions of mod_exp_precompr2 are
-  violated, true otherwise.
 
   This function is *UNSAFE* and requires C clients to observe the precondition of
   bn_mod_inv_prime_lemma from Hacl.Spec.Bignum.ModInv.fst, which amounts to:

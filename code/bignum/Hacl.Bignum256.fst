@@ -39,7 +39,8 @@ let sqr (a: lbignum t_limbs n_limbs): BN.bn_karatsuba_sqr_st a =
   BN.bn_mul n_limbs a n_limbs a
 
 inline_for_extraction noextract
-instance bn_inst: BN.bn t_limbs n_limbs = {
+instance bn_inst: BN.bn t_limbs = {
+  BN.len = n_limbs;
   BN.add;
   BN.sub;
   BN.add_mod_n;
@@ -69,7 +70,7 @@ let mont_sqr: BM.bn_mont_sqr_st t_limbs n_limbs =
   BM.bn_mont_sqr bn_inst reduction
 
 inline_for_extraction noextract
-instance mont_inst: BM.mont t_limbs n_limbs = {
+instance mont_inst: BM.mont t_limbs = {
   BM.bn = bn_inst;
   BM.mont_check;
   BM.precomp;
@@ -104,7 +105,7 @@ let mod_exp_mont_ladder' : BE.bn_mod_exp_mont_ladder_st t_limbs n_limbs =
   BE.bn_mod_exp_mont_ladder mont_inst mod_exp_mont_ladder_precompr2
 
 inline_for_extraction noextract
-instance exp_inst: BE.exp t_limbs n_limbs = {
+instance exp_inst: BE.exp t_limbs = {
   BE.mont = mont_inst;
   BE.exp_check;
   BE.mod_exp_precomp = mod_exp_precompr2;

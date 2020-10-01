@@ -43,7 +43,7 @@ let bn_precomp_r2_mod_n_st (t:limb_t) (len:BN.meta_len t) =
 
 
 inline_for_extraction noextract
-val bn_precomp_r2_mod_n: #t:limb_t -> #len:BN.meta_len t -> k:BN.bn t len -> bn_precomp_r2_mod_n_st t len
+val bn_precomp_r2_mod_n: #t:limb_t -> k:BN.bn t -> bn_precomp_r2_mod_n_st t k.BN.len
 
 
 inline_for_extraction noextract
@@ -61,7 +61,7 @@ let bn_mont_reduction_st (t:limb_t) (len:size_t{0 < v len /\ v len + v len <= ma
 
 
 inline_for_extraction noextract
-val bn_mont_reduction: #t:limb_t -> #len:BN.meta_len t -> k:BN.bn t len -> bn_mont_reduction_st t len
+val bn_mont_reduction: #t:limb_t -> k:BN.bn t -> bn_mont_reduction_st t k.BN.len
 
 
 inline_for_extraction noextract
@@ -81,7 +81,7 @@ let bn_to_mont_st (t:limb_t) (nLen:BN.meta_len t) =
 
 
 inline_for_extraction noextract
-val bn_to_mont: #t:limb_t -> #len:BN.meta_len t -> k:BN.bn t len -> mr:bn_mont_reduction_st t len -> bn_to_mont_st t len
+val bn_to_mont: #t:limb_t -> k:BN.bn t -> mr:bn_mont_reduction_st t k.BN.len -> bn_to_mont_st t k.BN.len
 
 
 inline_for_extraction noextract
@@ -101,7 +101,7 @@ let bn_from_mont_st (t:limb_t) (len:BN.meta_len t) =
 // This one just needs a specialized implementation of mont_reduction. No point
 // in doing a type class for a single function , so we take it as a parameter.
 inline_for_extraction noextract
-val bn_from_mont: #t:limb_t -> #len:BN.meta_len t -> k:BN.bn t len -> mr:bn_mont_reduction_st t len -> bn_from_mont_st t len
+val bn_from_mont: #t:limb_t -> k:BN.bn t -> mr:bn_mont_reduction_st t k.BN.len -> bn_from_mont_st t k.BN.len
 
 
 inline_for_extraction noextract
@@ -122,7 +122,7 @@ let bn_mont_mul_st (t:limb_t) (len:BN.meta_len t) =
 
 /// This one needs both the type class and a specialized montgomery reduction.
 inline_for_extraction noextract
-val bn_mont_mul: #t:limb_t -> #len:BN.meta_len t -> k:BN.bn t len -> mr:bn_mont_reduction_st t len -> bn_mont_mul_st t len
+val bn_mont_mul: #t:limb_t -> k:BN.bn t -> mr:bn_mont_reduction_st t k.BN.len -> bn_mont_mul_st t k.BN.len
 
 
 inline_for_extraction noextract
@@ -141,25 +141,28 @@ let bn_mont_sqr_st (t:limb_t) (len:BN.meta_len t) =
 
 /// This one needs both the type class and a specialized montgomery reduction.
 inline_for_extraction noextract
-val bn_mont_sqr: #t:limb_t -> #len:BN.meta_len t -> k:BN.bn t len -> mr:bn_mont_reduction_st t len -> bn_mont_sqr_st t len
+val bn_mont_sqr: #t:limb_t -> k:BN.bn t -> mr:bn_mont_reduction_st t k.BN.len -> bn_mont_sqr_st t k.BN.len
 
 
 inline_for_extraction noextract
-class mont (t:limb_t) (len:BN.meta_len t) = {
-  bn: BN.bn t len;
-  mont_check: bn_check_modulus_st t len;
-  precomp: bn_precomp_r2_mod_n_st t len;
-  reduction: bn_mont_reduction_st t len;
-  to: bn_to_mont_st t len;
-  from: bn_from_mont_st t len;
-  mul: bn_mont_mul_st t len;
-  sqr: bn_mont_sqr_st t len;
+class mont (t:limb_t) = {
+  bn: BN.bn t;
+  mont_check: bn_check_modulus_st t bn.BN.len;
+  precomp: bn_precomp_r2_mod_n_st t bn.BN.len;
+  reduction: bn_mont_reduction_st t bn.BN.len;
+  to: bn_to_mont_st t bn.BN.len;
+  from: bn_from_mont_st t bn.BN.len;
+  mul: bn_mont_mul_st t bn.BN.len;
+  sqr: bn_mont_sqr_st t bn.BN.len;
 }
 
 /// Encoding type-class hierarchies via a hook for type class resolution.
 inline_for_extraction noextract
-instance bn_of_mont (t:limb_t) (len:BN.meta_len t) (x:mont t len) : BN.bn t len = x.bn
+instance bn_of_mont (t:limb_t) (x:mont t) : BN.bn t = x.bn
 
 // A completely run-time-only instance where the functions above exist in the C code.
 inline_for_extraction noextract
-val mk_runtime_mont: t:limb_t -> len:BN.meta_len t -> mont t len
+val mk_runtime_mont_uint32: len:BN.meta_len U32 -> mont U32
+
+inline_for_extraction noextract
+val mk_runtime_mont_uint64: len:BN.meta_len U64 -> mont U64
