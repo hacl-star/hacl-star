@@ -8,14 +8,15 @@ open Lib.IntTypes
 open Lib.Buffer
 
 open Hacl.Bignum.Definitions
-open Hacl.Bignum
-open Hacl.Bignum.Exponentiation
 
 module ST = FStar.HyperStack.ST
 
 module Hash = Spec.Agile.Hash
 module SB = Hacl.Spec.Bignum
 module BB = Hacl.Spec.Bignum.Base
+module BN = Hacl.Bignum
+module BE = Hacl.Bignum.Exponentiation
+module BM = Hacl.Bignum.Montgomery
 
 module S = Spec.RSAPSS
 module LS = Hacl.Spec.RSAPSS
@@ -24,15 +25,15 @@ open Hacl.Impl.RSAPSS.Padding
 open Hacl.Impl.RSAPSS.MGF
 open Hacl.Impl.RSAPSS.Keys
 
-#reset-options "--z3rlimit 150 --fuel 0 --ifuel 0"
+#reset-options "--z3rlimit 300 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
-val rsapss_sign_:
+let rsapss_sign_st1 (t:limb_t) =
     a:Hash.algorithm{S.hash_is_supported a}
   -> modBits:size_t
   -> eBits:size_t
-  -> dBits:size_t{LS.skey_len_pre (v modBits) (v eBits) (v dBits)}
-  -> skey:lbignum (2ul *! blocks modBits 64ul +! blocks eBits 64ul +! blocks dBits 64ul)
+  -> dBits:size_t{LS.skey_len_pre t (v modBits) (v eBits) (v dBits)}
+  -> skey:lbignum t (2ul *! blocks modBits (size (bits t)) +! blocks eBits (size (bits t)) +! blocks dBits (size (bits t)))
   -> sLen:size_t
   -> salt:lbuffer uint8 sLen
   -> msgLen:size_t
@@ -50,12 +51,19 @@ val rsapss_sign_:
     (eq_m, as_seq h1 sgnt) == LS.rsapss_sign_ a (v modBits) (v eBits) (v dBits)
       (as_seq h0 skey) (v sLen) (as_seq h0 salt) (v msgLen) (as_seq h0 msg))
 
-let rsapss_sign_ a modBits eBits dBits skey sLen salt msgLen msg sgnt =
+
+inline_for_extraction noextract
+val rsapss_sign_: #t:limb_t -> ke:BE.exp t -> rsapss_sign_st1 t
+let rsapss_sign_ #t ke a modBits eBits dBits skey sLen salt msgLen msg sgnt =
   push_frame ();
   let h_init = ST.get () in
-  let nLen = blocks modBits 64ul in
-  let eLen = blocks eBits 64ul in
-  let dLen = blocks dBits 64ul in
+  [@inline_let] let bits = size (bits t) in
+  [@inline_let] let numb = size (numbytes t) in
+  //let nLen = blocks modBits bits in
+  let nLen = ke.BE.mont.BM.bn.BN.len in
+  assume (v (blocks modBits bits) == v nLen);
+  let eLen = blocks eBits bits in
+  let dLen = blocks dBits bits in
 
   let n  = sub skey 0ul nLen in
   let r2 = sub skey nLen nLen in
@@ -67,39 +75,40 @@ let rsapss_sign_ a modBits eBits dBits skey sLen salt msgLen msg sgnt =
   let emLen = blocks emBits 8ul in
 
   let em = create emLen (u8 0) in
-  let m  = create nLen (u64 0) in
-  let m' = create nLen (u64 0) in
-  let s  = create nLen (u64 0) in
+  let m  = create nLen (uint #t 0) in
+  let m' = create nLen (uint #t 0) in
+  let s  = create nLen (uint #t 0) in
 
   pss_encode a sLen salt msgLen msg emBits em;
-  LS.em_blocks_lt_max_size_t (v modBits);
-  assert (8 * v (blocks emLen 8ul) <= max_size_t);
+  LS.blocks_bits_lemma t (v emBits);
+  assert (v (blocks emLen numb) == v (blocks emBits bits));
 
   let h' = ST.get () in
-  update_sub_f h' m 0ul (blocks emLen 8ul)
+  update_sub_f h' m 0ul (blocks emLen numb)
     (fun h -> SB.bn_from_bytes_be (v emLen) (as_seq h' em))
-    (fun _ -> bn_from_bytes_be emLen em (sub m 0ul (blocks emLen 8ul)));
+    (fun _ -> BN.bn_from_bytes_be emLen em (sub m 0ul (blocks emLen numb)));
 
-  let _ = bn_mod_exp_mont_ladder_precompr2 nLen n m dBits d r2 s in
-  let _ = bn_mod_exp_precompr2 nLen n s eBits e r2 m' in
+  let _ = ke.BE.ct_mod_exp_precomp n m dBits d r2 s in
+  let _ = ke.BE.mod_exp_precomp n s eBits e r2 m' in
 
-  let eq_m = bn_eq_mask nLen m m' in
+  let eq_m = BN.bn_eq_mask nLen m m' in
   mapT nLen s (logand eq_m) s;
 
-  LS.blocks_bits_lemma (v modBits);
-  assert (v (blocks k 8ul) == v nLen);
-  bn_to_bytes_be k s sgnt;
+  LS.blocks_bits_lemma t (v modBits);
+  assert (v (blocks k numb) == v nLen);
+  BN.bn_to_bytes_be k s sgnt;
 
   pop_frame ();
-  BB.unsafe_bool_of_u64 eq_m
+  BB.unsafe_bool_of_limb eq_m
 
 
 inline_for_extraction noextract
-let rsapss_sign_st (a:Hash.algorithm{S.hash_is_supported a}) =
-    modBits:size_t
+let rsapss_sign_st (t:limb_t) =
+    a:Hash.algorithm{S.hash_is_supported a}
+  -> modBits:size_t
   -> eBits:size_t
-  -> dBits:size_t{LS.skey_len_pre (v modBits) (v eBits) (v dBits)}
-  -> skey:lbignum (2ul *! blocks modBits 64ul +! blocks eBits 64ul +! blocks dBits 64ul)
+  -> dBits:size_t{LS.skey_len_pre t (v modBits) (v eBits) (v dBits)}
+  -> skey:lbignum t (2ul *! blocks modBits (size (bits t)) +! blocks eBits (size (bits t)) +! blocks dBits (size (bits t)))
   -> sLen:size_t
   -> salt:lbuffer uint8 sLen
   -> msgLen:size_t
@@ -116,9 +125,10 @@ let rsapss_sign_st (a:Hash.algorithm{S.hash_is_supported a}) =
     (b, as_seq h1 sgnt) == LS.rsapss_sign a (v modBits) (v eBits) (v dBits)
       (as_seq h0 skey) (v sLen) (as_seq h0 salt) (v msgLen) (as_seq h0 msg) (as_seq h0 sgnt))
 
-val rsapss_sign: a:Hash.algorithm{S.hash_is_supported a} -> rsapss_sign_st a
-[@CInline]
-let rsapss_sign a modBits eBits dBits skey sLen salt msgLen msg sgnt =
+
+inline_for_extraction noextract
+val rsapss_sign: #t:limb_t -> ke:BE.exp t -> rsapss_sign_st t
+let rsapss_sign #t ke a modBits eBits dBits skey sLen salt msgLen msg sgnt =
   let hLen = hash_len a in
   Math.Lemmas.pow2_lt_compat 61 32;
   Math.Lemmas.pow2_lt_compat 125 32;
@@ -129,7 +139,7 @@ let rsapss_sign a modBits eBits dBits skey sLen salt msgLen msg sgnt =
     sLen +! hLen +! 2ul <=. blocks (modBits -! 1ul) 8ul in
 
   if b then
-    rsapss_sign_ a modBits eBits dBits skey sLen salt msgLen msg sgnt
+    rsapss_sign_ ke a modBits eBits dBits skey sLen salt msgLen msg sgnt
   else
     false
 
@@ -137,26 +147,27 @@ let rsapss_sign a modBits eBits dBits skey sLen salt msgLen msg sgnt =
 
 inline_for_extraction noextract
 val bn_lt_pow2:
-    modBits:size_t{1 < v modBits}
-  -> m:lbignum (blocks modBits 64ul) ->
+    #t:limb_t
+  -> modBits:size_t{1 < v modBits}
+  -> m:lbignum t (blocks modBits (size (bits t))) ->
   Stack bool
   (requires fun h -> live h m)
   (ensures  fun h0 r h1 -> h0 == h1 /\
     r == LS.bn_lt_pow2 (v modBits) (as_seq h0 m))
 
-let bn_lt_pow2 modBits m =
+let bn_lt_pow2 #t modBits m =
   if not ((modBits -! 1ul) %. 8ul =. 0ul) then true
   else begin
-    let get_bit = bn_get_ith_bit (blocks modBits 64ul) m (modBits -! 1ul) in
-    FStar.UInt64.(Lib.RawIntTypes.u64_to_UInt64 get_bit =^ 0uL) end
+    let get_bit = BN.bn_get_ith_bit (blocks modBits (size (bits t))) m (modBits -! 1ul) in
+    BB.unsafe_bool_of_limb0 get_bit end
 
 
 inline_for_extraction noextract
-val rsapss_verify_:
+let rsapss_verify_st1 (t:limb_t) =
     a:Hash.algorithm{S.hash_is_supported a}
   -> modBits:size_t
-  -> eBits:size_t{LS.pkey_len_pre (v modBits) (v eBits)}
-  -> pkey:lbignum (2ul *! blocks modBits 64ul +! blocks eBits 64ul)
+  -> eBits:size_t{LS.pkey_len_pre t (v modBits) (v eBits)}
+  -> pkey:lbignum t (2ul *! blocks modBits (size (bits t)) +! blocks eBits (size (bits t)))
   -> sLen:size_t
   -> sgnt:lbuffer uint8 (blocks modBits 8ul)
   -> msgLen:size_t
@@ -172,11 +183,18 @@ val rsapss_verify_:
     r == LS.rsapss_verify_ a (v modBits) (v eBits) (as_seq h0 pkey)
       (v sLen) (as_seq h0 sgnt) (v msgLen) (as_seq h0 msg))
 
-let rsapss_verify_ a modBits eBits pkey sLen sgnt msgLen msg =
+
+inline_for_extraction noextract
+val rsapss_verify_: #t:limb_t -> ke:BE.exp t -> rsapss_verify_st1 t
+let rsapss_verify_ #t ke a modBits eBits pkey sLen sgnt msgLen msg =
   push_frame ();
   let h_init = ST.get () in
-  let nLen = blocks modBits 64ul in
-  let eLen = blocks eBits 64ul in
+  [@inline_let] let bits = size (bits t) in
+  [@inline_let] let numb = size (numbytes t) in
+
+  let nLen = blocks modBits bits in
+  assume (v nLen == v ke.BE.mont.BM.bn.BN.len);
+  let eLen = blocks eBits bits in
 
   let n  = sub pkey 0ul nLen in
   let r2 = sub pkey nLen nLen in
@@ -187,23 +205,23 @@ let rsapss_verify_ a modBits eBits pkey sLen sgnt msgLen msg =
   let emLen = blocks emBits 8ul in
 
   let em = create emLen (u8 0) in
-  let m = create nLen (u64 0) in
-  let s = create nLen (u64 0) in
-  LS.blocks_bits_lemma (v modBits);
-  assert (v (blocks k 8ul) == v nLen);
-  bn_from_bytes_be k sgnt s;
+  let m = create nLen (uint #t 0) in
+  let s = create nLen (uint #t 0) in
+  LS.blocks_bits_lemma t (v modBits);
+  assert (v (blocks k numb) == v nLen);
+  BN.bn_from_bytes_be k sgnt s;
 
 
-  let mask = bn_lt_mask nLen s n in
+  let mask = BN.bn_lt_mask nLen s n in
   let res =
-    if BB.unsafe_bool_of_u64 mask then begin
-      let _ = bn_mod_exp_precompr2 nLen n s eBits e r2 m in
-      LS.em_blocks_lt_max_size_t (v modBits);
-      assert (8 * v (blocks emLen 8ul) <= max_size_t);
+    if BB.unsafe_bool_of_limb mask then begin
+      let _ = ke.BE.mod_exp_precomp n s eBits e r2 m in
+      LS.blocks_bits_lemma t (v emBits);
+      assert (v (blocks emLen numb) == v (blocks emBits bits));
 
       if bn_lt_pow2 modBits m then begin
-	let m1 = sub m 0ul (blocks emLen 8ul) in
-	bn_to_bytes_be emLen m1 em;
+	let m1 = sub m 0ul (blocks emLen numb) in
+	BN.bn_to_bytes_be emLen m1 em;
 	pss_verify a sLen msgLen msg emBits em end
       else false end
     else false in
@@ -212,10 +230,11 @@ let rsapss_verify_ a modBits eBits pkey sLen sgnt msgLen msg =
 
 
 inline_for_extraction noextract
-let rsapss_verify_st (a:Hash.algorithm{S.hash_is_supported a}) =
-    modBits:size_t
-  -> eBits:size_t{LS.pkey_len_pre (v modBits) (v eBits)}
-  -> pkey:lbignum (2ul *! blocks modBits 64ul +! blocks eBits 64ul)
+let rsapss_verify_st (t:limb_t) =
+    a:Hash.algorithm{S.hash_is_supported a}
+  -> modBits:size_t
+  -> eBits:size_t{LS.pkey_len_pre t (v modBits) (v eBits)}
+  -> pkey:lbignum t (2ul *! blocks modBits (size (bits t)) +! blocks eBits (size (bits t)))
   -> sLen:size_t
   -> k:size_t
   -> sgnt:lbuffer uint8 k
@@ -232,9 +251,9 @@ let rsapss_verify_st (a:Hash.algorithm{S.hash_is_supported a}) =
       (v sLen) (v k) (as_seq h0 sgnt) (v msgLen) (as_seq h0 msg))
 
 
-val rsapss_verify: a:Hash.algorithm{S.hash_is_supported a} -> rsapss_verify_st a
-[@CInline]
-let rsapss_verify a modBits eBits pkey sLen k sgnt msgLen msg =
+inline_for_extraction noextract
+val rsapss_verify: #t:limb_t -> ke:BE.exp t -> rsapss_verify_st t
+let rsapss_verify #t ke a modBits eBits pkey sLen k sgnt msgLen msg =
   let hLen = hash_len a in
   Math.Lemmas.pow2_lt_compat 61 32;
   Math.Lemmas.pow2_lt_compat 125 32;
@@ -247,16 +266,17 @@ let rsapss_verify a modBits eBits pkey sLen k sgnt msgLen msg =
     k =. blocks modBits 8ul in
 
   if b then
-    rsapss_verify_ a modBits eBits pkey sLen sgnt msgLen msg
+    rsapss_verify_ ke a modBits eBits pkey sLen sgnt msgLen msg
   else
     false
 
 
 inline_for_extraction noextract
-let rsapss_skey_sign_st (a:Hash.algorithm{S.hash_is_supported a}) =
-    modBits:size_t
+let rsapss_skey_sign_st (t:limb_t) =
+    a:Hash.algorithm{S.hash_is_supported a}
+  -> modBits:size_t
   -> eBits:size_t
-  -> dBits:size_t{LS.skey_len_pre (v modBits) (v eBits) (v dBits)}
+  -> dBits:size_t{LS.skey_len_pre t (v modBits) (v eBits) (v dBits)}
   -> nb:lbuffer uint8 (blocks modBits 8ul)
   -> eb:lbuffer uint8 (blocks eBits 8ul)
   -> db:lbuffer uint8 (blocks dBits 8ul)
@@ -279,31 +299,33 @@ let rsapss_skey_sign_st (a:Hash.algorithm{S.hash_is_supported a}) =
 
 
 inline_for_extraction noextract
-val rsapss_skey_sign: a:Hash.algorithm{S.hash_is_supported a} -> rsapss_skey_sign_st a
-let rsapss_skey_sign a modBits eBits dBits nb eb db sLen salt msgLen msg sgnt =
+val rsapss_skey_sign: #t:limb_t -> ke:BE.exp t -> rsapss_skey_sign_st t
+let rsapss_skey_sign #t ke a modBits eBits dBits nb eb db sLen salt msgLen msg sgnt =
+  [@inline_let] let bits = size (bits t) in
   let h0 = ST.get () in
   push_frame ();
-  let skey = create (2ul *! blocks modBits 64ul +! blocks eBits 64ul +! blocks dBits 64ul) (u64 0) in
-  let b = rsapss_load_skey modBits eBits dBits nb eb db skey in
-  LS.rsapss_load_skey_lemma (v modBits) (v eBits) (v dBits) (as_seq h0 nb) (as_seq h0 eb) (as_seq h0 db);
+  let skey = create (2ul *! blocks modBits bits +! blocks eBits bits +! blocks dBits bits) (uint #t 0) in
+  let b = rsapss_load_skey #t modBits eBits dBits nb eb db skey in
+  LS.rsapss_load_skey_lemma #t (v modBits) (v eBits) (v dBits) (as_seq h0 nb) (as_seq h0 eb) (as_seq h0 db);
 
   let res =
     if b then
-      rsapss_sign a modBits eBits dBits skey sLen salt msgLen msg sgnt
+      rsapss_sign ke a modBits eBits dBits skey sLen salt msgLen msg sgnt
     else
       false in
   pop_frame ();
   let h1 = ST.get () in
-  assert ((res, as_seq h1 sgnt) == LS.rsapss_skey_sign a (v modBits) (v eBits) (v dBits)
+  assert ((res, as_seq h1 sgnt) == LS.rsapss_skey_sign #t a (v modBits) (v eBits) (v dBits)
       (as_seq h0 nb) (as_seq h0 eb) (as_seq h0 db) (v sLen) (as_seq h0 salt)
       (v msgLen) (as_seq h0 msg) (as_seq h0 sgnt));
   res
 
 
 inline_for_extraction noextract
-let rsapss_pkey_verify_st (a:Hash.algorithm{S.hash_is_supported a}) =
-    modBits:size_t
-  -> eBits:size_t{LS.pkey_len_pre (v modBits) (v eBits)}
+let rsapss_pkey_verify_st (t:limb_t) =
+    a:Hash.algorithm{S.hash_is_supported a}
+  -> modBits:size_t
+  -> eBits:size_t{LS.pkey_len_pre t (v modBits) (v eBits)}
   -> nb:lbuffer uint8 (blocks modBits 8ul)
   -> eb:lbuffer uint8 (blocks eBits 8ul)
   -> sLen:size_t
@@ -322,21 +344,22 @@ let rsapss_pkey_verify_st (a:Hash.algorithm{S.hash_is_supported a}) =
 
 
 inline_for_extraction noextract
-val rsapss_pkey_verify: a:Hash.algorithm{S.hash_is_supported a} -> rsapss_pkey_verify_st a
-let rsapss_pkey_verify a modBits eBits nb eb sLen k sgnt msgLen msg =
+val rsapss_pkey_verify: #t:limb_t -> ke:BE.exp t -> rsapss_pkey_verify_st t
+let rsapss_pkey_verify #t ke a modBits eBits nb eb sLen k sgnt msgLen msg =
   push_frame ();
-  let pkey = create (2ul *! blocks modBits 64ul +! blocks eBits 64ul) (u64 0) in
+  [@inline_let] let bits = size (bits t) in
+  let pkey = create (2ul *! blocks modBits bits +! blocks eBits bits) (uint #t 0) in
   let h0 = ST.get () in
   let b = rsapss_load_pkey modBits eBits nb eb pkey in
-  LS.rsapss_load_pkey_lemma (v modBits) (v eBits) (as_seq h0 nb) (as_seq h0 eb);
+  LS.rsapss_load_pkey_lemma #t (v modBits) (v eBits) (as_seq h0 nb) (as_seq h0 eb);
 
   let res =
     if b then
-      rsapss_verify a modBits eBits pkey sLen k sgnt msgLen msg
+      rsapss_verify ke a modBits eBits pkey sLen k sgnt msgLen msg
     else
       false in
   pop_frame ();
   let h1 = ST.get () in
-  assert (res == LS.rsapss_pkey_verify a (v modBits) (v eBits) (as_seq h0 nb) (as_seq h0 eb)
+  assert (res == LS.rsapss_pkey_verify #t a (v modBits) (v eBits) (as_seq h0 nb) (as_seq h0 eb)
     (v sLen) (v k) (as_seq h0 sgnt) (v msgLen) (as_seq h0 msg));
   res

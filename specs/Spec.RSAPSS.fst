@@ -261,8 +261,8 @@ let rsapss_sign_ a modBits skey sLen salt msgLen msg =
   let e = Mk_rsapss_pkey?.e pkey in
   let d = Mk_rsapss_skey?.d skey in
 
-  let nLen = blocks modBits 8 in
-  FStar.Math.Lemmas.pow2_le_compat (8 * nLen) modBits;
+  let k = blocks modBits 8 in
+  FStar.Math.Lemmas.pow2_le_compat (8 * k) modBits;
 
   let emBits = modBits - 1 in
   let emLen = blocks emBits 8 in
@@ -274,7 +274,7 @@ let rsapss_sign_ a modBits skey sLen salt msgLen msg =
   let m' = pow_mod #n s e in
   let eq_m = m = m' in
   let s = if eq_m then s else 0 in
-  (eq_m, i2osp nLen s)
+  (eq_m, i2osp k s)
 
 
 val rsapss_sign:
@@ -316,13 +316,13 @@ val rsapss_verify_:
 let rsapss_verify_ a modBits pkey sLen sgnt msgLen msg =
   let n = Mk_rsapss_pkey?.n pkey in
   let e = Mk_rsapss_pkey?.e pkey in
-  let nLen = blocks modBits 8 in
-  FStar.Math.Lemmas.pow2_le_compat (8 * nLen) modBits;
+  let k = blocks modBits 8 in
+  FStar.Math.Lemmas.pow2_le_compat (8 * k) modBits;
 
   let emBits = modBits - 1 in
   let emLen = blocks emBits 8 in
 
-  let s = os2ip #nLen sgnt in
+  let s = os2ip #k sgnt in
   if s < n then begin
     let m = pow_mod #n s e in
     if m < pow2 (emLen * 8) then
