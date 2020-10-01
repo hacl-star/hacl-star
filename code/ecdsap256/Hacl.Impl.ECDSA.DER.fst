@@ -37,7 +37,7 @@ val decode: sigLen: size_t -> signature: lbuffer uint8 sigLen
 
 assume val checkBorders: b: uint8 -> Tot (flag: bool { flag <==> v b = 0 || v b > v lenCoor + 1})
 
-assume val notCorrectFormalStartSignature: len: uint8 -> byteZero: uint8 -> byteOne: uint8 -> 
+assume val notCorrectFormatStartSignature: len: uint8 -> byteZero: uint8 -> byteOne: uint8 -> 
   Tot (flag: bool 
     {
       if (v len = 0x33 &&  v byteZero = 0  && v byteOne > 0x7F) 
@@ -67,23 +67,23 @@ let decode sigLen signature bufferForR bufferForS =
 
   (* |->0x30|SigLen|0x02|RLen|R|0x02|SLen|S  *)
   let pointer = size 0 in 
-  let zeroByte = index signature pointer in 
+  let identificationByte = index signature pointer in 
   (* the only allowed value is 0x30 *)
-  if unsafe_bool_of_u8 (neq_mask #U8 zeroByte (u8 30)) then false else
+  if unsafe_bool_of_u8 (neq_mask #U8 identificationByte (u8 30)) then false else
 
   (* |0x30| -> SigLen| 0x02| RLen| R | 0x02| SLen| S *)
   (* now pointer references the first byte (i.e. the sigLen byte) *)
   let pointer = incr pointer in 
   (* firstByte = sigLen *)
-  let firstByte = index signature pointer in
+  let signatureLengthByte = index signature pointer in
   
   (* the buffer is uint8, so we ask of the values we compare to be both in the uint8 range *)
-  if unsafe_bool_of_u8 (neq_mask #U8 firstByte (u8 255)) then false else begin
-    eq_mask_lemma firstByte (u8 255);
+  if unsafe_bool_of_u8 (neq_mask #U8 signatureLengthByte (u8 255)) then false else begin
+    eq_mask_lemma signatureLengthByte (u8 255);
 
   (*lengthFullsignature = sigLen + 1 -> to take into account the first byte *)
-  let lengthFullSignature = to_u32 (incr firstByte) in 
-    incr_lemma firstByte;
+  let lengthFullSignature = to_u32 (incr signatureLengthByte) in 
+    incr_lemma signatureLengthByte;
   let sizeAsUInt32 = size_to_uint32 sigLen in 
     eq_mask_lemma lengthFullSignature sizeAsUInt32;
   (* we compare the sigLen + 1 with the length of signature  *)
@@ -114,8 +114,8 @@ let decode sigLen signature bufferForR bufferForS =
 
   (* the second check of the length of the coordinates.
    we expect the length of the coordinate to be unconditionally more than 0 and less than 34. 33 is still a possible value in some cases. *)
-  let checkedBordersResult = checkBorders expectedLenR  in 
-  if checkedBordersResult then false else 
+  let checkedBordersResultR = checkBorders expectedLenR  in 
+  if checkedBordersResultR then false else 
 
   let pointer = incr pointer in 
   (* now the pointer references the forth byte of the signature *)
@@ -127,7 +127,7 @@ let decode sigLen signature bufferForR bufferForS =
   (* rFirstByte stands for the 1th byte of signature *)
 
   (* signature might be the size of 33 if and only if the 0th byte is 0 and the first byte is more or equal than 0x7f. In all the other cases the length is 32 and less *)
-  if notCorrectFormalStartSignature expectedLenR rZeroByte rFirstByte then false else 
+  if notCorrectFormatStartSignature expectedLenR rZeroByte rFirstByte then false else 
 
   (* if everything is fine, we copy the data  *)
   let r = sub signature pointer expectedLenR in 
@@ -135,33 +135,44 @@ let decode sigLen signature bufferForR bufferForS =
   (* The function copies from the last type till the first/zero/length one (depending on the length) *)
   copyBuffer expectedLenR r bufferForR;
     
+  let pointer = pointer +. expectedLenR in 
+  (* now the pointer references the start of the type identifier for S *)
+    (* |0x30|SigLen|0x02|RLen|R| -> 0x02|SLen|S  *)
+
+  let startOfSByte = index signature pointer in 
+
+  (* the only allowed value is 0x02 *)
+  if unsafe_bool_of_u8 (neq_mask #U8 startOfSByte (u8 2)) then false else begin
+
+  let pointer = incr pointer in
+  (* now the pointer references the start of the length for S *)
+  (* |0x30|SigLen|0x02|RLen|R|0x02| -> SLen|S  *)
+
+  let lengthSByte = index signature pointer in 
+  let expectedLengthS = sigLen -. pointer -. 1ul in 
+  (*  *)
+
+  let sc = unsafe_bool_of_u8 (eq_mask expectedLengthS lengthSByte) in 
+  (* if the length of the signature left is not equal to our computed length till this moment *)
+  if sc then false else
+
+  let checkedBordersResultS = checkBorders expectedLengthS  in 
+  (* the second check of the length of the coordinates.
+   we expect the length of the coordinate to be unconditionally more than 0 and less than 34. 33 is still a possible value in some cases. *)
+  if checkedBordersResultS then false else
+
+  let pointer = incr pointer in 
+  (* now pointer references the start of the S *)
+
+  let zeroByteS = index signature pointer in
+  let firstByteS = index signature (incr pointer) in 
+
+  (* signature might be the size of 33 if and only if the 0th byte is 0 and the first byte is more or equal than 0x7f. In all the other cases the length is 32 and less *)
+  if notCorrectFormatStartSignature expectedLengthS zeroByteS firstByteS  then false else 
+  let s = sub signature pointer expectedLengthS in 
+  copyBuffer expectedLengthS s bufferForS;
   
-  let startOfSIndex = size 3 +. expectedLenR +. (size 1) in 
-  if unsafe_bool_of_u8 (neq_mask #U8 startOfSIndex (u8 2)) then false else begin
-  let expectedLenS = incr startOfSIndex in 
-
-  
-  let lengthAfterR = lengthAfterThirdByte -. (u8 2) -. expectedLenS in 
-  
-  let expectedLenS = index signature (startOfSIndex +. (size 1)) in 
-
-  let sc = unsafe_bool_of_u8 (eq_mask expectedLenS lengthAfterR) in 
-  if checkBorders expectedLenS || sc then false else
-
-  let firstByteIndexS = incr expectedLenS in
-  let secondByteIndexS = incr firstByteIndexS in 
-
-  let zeroByteS = index signature firstByteIndexS in 
-  let firstByteS = index signature secondByteIndexS in 
-  
-
-  if notCorrectFormalStartSignature expectedLenS zeroByteS firstByteS  then false else 
-  let s = sub signature firstByteIndexS expectedLenS in 
-  copyBuffer expectedLenS s bufferForS;
-  
-
-
-    true
+  true
   end
 
   end
