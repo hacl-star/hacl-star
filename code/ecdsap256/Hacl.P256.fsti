@@ -394,7 +394,7 @@ val ecp256dh_r:
 
 [@ (Comment " Input: scalar: uint8[32].
   \n Output: bool, where true stands for the scalar to be more than 0 and less than order.")]
-val isMoreThanZeroLessThanOrder: x: lbuffer uint8 (size 32) -> Stack uint64
+val is_more_than_zero_less_than_order: x: lbuffer uint8 (size 32) -> Stack uint64
   (requires fun h -> live h x)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
     (
