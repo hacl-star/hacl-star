@@ -14,6 +14,47 @@ let lenCoor = 32ul
 let integerIdentificator = 2ul
 
 
+val checkBorders: b: uint8 -> Tot (flag: bool {(not flag) <==> v b <> 0 && v b <= v lenCoor + 1})
+
+let checkBorders b = 
+  let zero = eq_mask b (u8 0) in 
+  let moreThan33 = gt_mask b (u8 (FStar.UInt32.v lenCoor + 1)) in 
+  let both = lognot (logor zero moreThan33) in 
+    logor_lemma zero moreThan33;
+    lognot_lemma (logor zero moreThan33);
+  
+  unsafe_bool_of_u8 both
+
+
+val notCorrectFormatStartSignature: len: uint8 -> byteZero: uint8 -> byteOne: uint8 -> 
+  Tot (flag: bool 
+    {
+      if (v byteZero = 0 && v len = 33 && v byteOne >= 0x7F) ||  (v len <> 33 && v byteZero <> 0)
+      then 
+	flag == false 
+      else 
+	flag == true
+    })
+
+let notCorrectFormatStartSignature len byteZero byteOne = 
+  let zero = eq_mask byteZero (u8 0) in 
+  let len33 = eq_mask len (u8 33) in 
+  let byteOneMore7f = gte_mask byteOne (u8 0x7f) in 
+
+  let firstBranch = logand (logand zero len33) byteOneMore7f in 
+    logand_lemma zero len33;
+    logand_lemma (logand zero len33) byteOneMore7f;
+
+  let secondBranch = lognot (logor zero len33) in 
+    logor_lemma zero len33;
+    lognot_lemma (logor zero len33);
+
+  let twoBranched = logor firstBranch secondBranch in 
+  logor_lemma firstBranch secondBranch;
+
+  unsafe_bool_of_u8 twoBranched
+
+
 val decode: sigLen: size_t -> signature: lbuffer uint8 sigLen 
   -> bufferForR: lbuffer uint8 lenCoor
   -> bufferForS: lbuffer uint8 lenCoor -> 
@@ -34,19 +75,6 @@ val decode: sigLen: size_t -> signature: lbuffer uint8 sigLen
   )
 )
 
-
-assume val checkBorders: b: uint8 -> Tot (flag: bool { flag <==> v b = 0 || v b > v lenCoor + 1})
-
-assume val notCorrectFormatStartSignature: len: uint8 -> byteZero: uint8 -> byteOne: uint8 -> 
-  Tot (flag: bool 
-    {
-      if (v len = 0x33 &&  v byteZero = 0  && v byteOne > 0x7F) 
-	then flag = false
-      else if v len <> 33 then 
-	flag = false
-      else 
-	flag = true
-    })
 
 
 assume val copyBuffer: len: size_t -> from: lbuffer uint8 len -> to: lbuffer uint8 lenCoor ->
