@@ -36,7 +36,7 @@ of four unsigned 64-bit integers, i.e. uint64_t[64]. Furthermore, the
 limbs are stored in little-endian format, i.e. the least significant limb is at
 index 0. Each limb is stored in native format in memory. Example:
 
-  uint64_t two[64] = { 0x10 }
+  uint64_t sixteen[64] = { 0x10 }
 
   (relying on the fact that when an initializer-list is provided, the remainder
   of the object gets initialized as if it had static storage duration, i.e. with
