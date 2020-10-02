@@ -41,11 +41,13 @@ extern "C" {
 #include "Hacl_Kremlib.h"
 #include "Hacl_Bignum.h"
 #include "Hacl_Hash.h"
+#include "Hacl_Spec.h"
 
 /* SNIPPET_START: Hacl_RSAPSS_rsapss_sign */
 
-void
+bool
 Hacl_RSAPSS_rsapss_sign(
+  Spec_Hash_Definitions_hash_alg a,
   uint32_t modBits,
   uint32_t eBits,
   uint32_t dBits,
@@ -63,16 +65,77 @@ Hacl_RSAPSS_rsapss_sign(
 
 bool
 Hacl_RSAPSS_rsapss_verify(
+  Spec_Hash_Definitions_hash_alg a,
   uint32_t modBits,
   uint32_t eBits,
   uint64_t *pkey,
   uint32_t sLen,
+  uint32_t k,
   uint8_t *sgnt,
   uint32_t msgLen,
   uint8_t *msg
 );
 
 /* SNIPPET_END: Hacl_RSAPSS_rsapss_verify */
+
+/* SNIPPET_START: Hacl_RSAPSS_new_rsapss_load_pkey */
+
+uint64_t
+*Hacl_RSAPSS_new_rsapss_load_pkey(uint32_t modBits, uint32_t eBits, uint8_t *nb, uint8_t *eb);
+
+/* SNIPPET_END: Hacl_RSAPSS_new_rsapss_load_pkey */
+
+/* SNIPPET_START: Hacl_RSAPSS_new_rsapss_load_skey */
+
+uint64_t
+*Hacl_RSAPSS_new_rsapss_load_skey(
+  uint32_t modBits,
+  uint32_t eBits,
+  uint32_t dBits,
+  uint8_t *nb,
+  uint8_t *eb,
+  uint8_t *db
+);
+
+/* SNIPPET_END: Hacl_RSAPSS_new_rsapss_load_skey */
+
+/* SNIPPET_START: Hacl_RSAPSS_rsapss_skey_sign */
+
+bool
+Hacl_RSAPSS_rsapss_skey_sign(
+  Spec_Hash_Definitions_hash_alg a,
+  uint32_t modBits,
+  uint32_t eBits,
+  uint32_t dBits,
+  uint8_t *nb,
+  uint8_t *eb,
+  uint8_t *db,
+  uint32_t sLen,
+  uint8_t *salt,
+  uint32_t msgLen,
+  uint8_t *msg,
+  uint8_t *sgnt
+);
+
+/* SNIPPET_END: Hacl_RSAPSS_rsapss_skey_sign */
+
+/* SNIPPET_START: Hacl_RSAPSS_rsapss_pkey_verify */
+
+bool
+Hacl_RSAPSS_rsapss_pkey_verify(
+  Spec_Hash_Definitions_hash_alg a,
+  uint32_t modBits,
+  uint32_t eBits,
+  uint8_t *nb,
+  uint8_t *eb,
+  uint32_t sLen,
+  uint32_t k,
+  uint8_t *sgnt,
+  uint32_t msgLen,
+  uint8_t *msg
+);
+
+/* SNIPPET_END: Hacl_RSAPSS_rsapss_pkey_verify */
 
 #if defined(__cplusplus)
 }

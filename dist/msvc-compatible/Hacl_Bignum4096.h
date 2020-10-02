@@ -217,14 +217,28 @@ Compute `2 ^ (128 * nLen) mod n`.
 
   The argument n points to a bignum of size nLen of valid memory.
   The function returns a heap-allocated bignum of size nLen, or NULL if:
-  - the allocation failed, or
-  - the amount of required memory would exceed 4GB, or
-  - n % 2 = 1 && 1 < n does not hold
+  • the allocation failed, or
+  • the amount of required memory would exceed 4GB, or
+  • n % 2 = 1 && 1 < n does not hold
 
   If the return value is non-null, clients must eventually call free(3) on it to
   avoid memory leaks.
 */
 uint64_t *Hacl_Bignum4096_new_precompr2(uint32_t nLen, uint64_t *n);
+
+/*
+Write `a ^ (-1) mod n` in `res`.
+
+  The arguments a, n and the outparam res are meant to be 4096-bit bignums, i.e. uint64_t[64].
+  The function returns false if any of the preconditions of mod_exp_precompr2 are
+  violated, true otherwise.
+
+  This function is *UNSAFE* and requires C clients to observe bn_mod_inv_prime_lemma
+  from Hacl.Spec.Bignum.ModInv.fst, which amounts to:
+  • n is a prime
+  • 0 < a 
+*/
+bool Hacl_Bignum4096_mod_inv_prime(uint64_t *n, uint64_t *a, uint64_t *res);
 
 
 /********************/
