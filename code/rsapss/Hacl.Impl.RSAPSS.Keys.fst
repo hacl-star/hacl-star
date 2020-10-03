@@ -63,7 +63,7 @@ let rsapss_check_skey_len #t modBits eBits dBits =
 
   rsapss_check_pkey_len #t modBits eBits &&
   0ul <. dBits && dLen <=. 0xfffffffful /. bits &&
-  nLen +! nLen <=. 0xfffffffful -. eLen -. dLen
+  2ul *! nLen <=. 0xfffffffful -! eLen -! dLen
 
 
 inline_for_extraction noextract
@@ -173,6 +173,11 @@ let mk_runtime_rsapss_checks_uint64 = {
   check_exponent = check_exponent_u64;
 }
 
+inline_for_extraction noextract
+let mk_runtime_rsapss_checks (#t:limb_t) : rsapss_checks t =
+  match t with
+  | U32 -> mk_runtime_rsapss_checks_uint32
+  | U64 -> mk_runtime_rsapss_checks_uint64
 
 
 //pkey = [n; r2; e]
@@ -318,6 +323,13 @@ let mk_runtime_rsapss_load_keys_uint64 = {
 
 
 inline_for_extraction noextract
+let mk_runtime_rsapss_load_keys (#t:limb_t) : rsapss_load_keys t =
+  match t with
+  | U32 -> mk_runtime_rsapss_load_keys_uint32
+  | U64 -> mk_runtime_rsapss_load_keys_uint64
+
+
+inline_for_extraction noextract
 let new_rsapss_load_pkey_st (t:limb_t) =
     r:HS.rid
   -> modBits:size_t{0 < v modBits}
@@ -344,8 +356,8 @@ let new_rsapss_load_pkey_st (t:limb_t) =
 
 
 inline_for_extraction noextract
-val new_rsapss_load_pkey: #t:limb_t -> rsapss_load_pkey:rsapss_load_pkey_st t -> new_rsapss_load_pkey_st t
-let new_rsapss_load_pkey #t rsapss_load_pkey r modBits eBits nb eb =
+val new_rsapss_load_pkey: #t:limb_t -> kk:rsapss_load_keys t -> new_rsapss_load_pkey_st t
+let new_rsapss_load_pkey #t kk r modBits eBits nb eb =
   [@inline_let] let bits = size (bits t) in
   let nLen = blocks modBits bits in
   let eLen = blocks eBits bits in
@@ -365,7 +377,7 @@ let new_rsapss_load_pkey #t rsapss_load_pkey r modBits eBits nb eb =
       let pkey: Lib.Buffer.buffer (limb t) = pkey in
       assert (B.length pkey == FStar.UInt32.v pkeyLen);
       let pkey: lbignum t pkeyLen = pkey in
-      let b = rsapss_load_pkey modBits eBits nb eb pkey in
+      let b = kk.load_pkey modBits eBits nb eb pkey in
       let h2 = ST.get () in
       B.(modifies_only_not_unused_in loc_none h0 h2);
       LS.rsapss_load_pkey_lemma #t (v modBits) (v eBits) (as_seq h0 nb) (as_seq h0 eb);
