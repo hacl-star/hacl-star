@@ -27,6 +27,11 @@ val rsapss_verify: len:BN.meta_len t_limbs -> RI.rsapss_verify_st t_limbs (BE.mk
 let rsapss_verify len a modBits eBits pkey sLen k sgnt msgLen msg =
   RI.rsapss_verify (BE.mk_runtime_exp len) a modBits eBits pkey sLen k sgnt msgLen msg
 
+inline_for_extraction noextract
+instance rsapss_inst (len:BN.meta_len t_limbs) : RI.rsapss t_limbs (BE.mk_runtime_exp len) = {
+  RI.rverify = rsapss_verify len;
+  RI.rsign = rsapss_sign len;
+  }
 
 val new_rsapss_load_pkey: RK.new_rsapss_load_pkey_st t_limbs
 let new_rsapss_load_pkey r modBits eBits nb eb =
@@ -43,7 +48,7 @@ let rsapss_skey_sign len a modBits eBits dBits nb eb db sLen salt msgLen msg sgn
   RI.rsapss_skey_sign
     (BE.mk_runtime_exp len)
      RK.mk_runtime_rsapss_load_keys
-    (RI.mk_runtime_rsapss len)
+    (rsapss_inst len)
     a modBits eBits dBits nb eb db sLen salt msgLen msg sgnt
 
 
@@ -52,5 +57,5 @@ let rsapss_pkey_verify len a modBits eBits nb eb sLen k sgnt msgLen msg =
   RI.rsapss_pkey_verify
     (BE.mk_runtime_exp len)
      RK.mk_runtime_rsapss_load_keys
-    (RI.mk_runtime_rsapss len)
+    (rsapss_inst len)
      a modBits eBits nb eb sLen k sgnt msgLen msg
