@@ -142,7 +142,4 @@ class exp (t:limb_t) = {
 
 // A completely run-time-only instance where the functions above exist in the C code.
 inline_for_extraction noextract
-val mk_runtime_exp_uint32: len:BN.meta_len U32 -> exp U32
-
-inline_for_extraction noextract
-val mk_runtime_exp_uint64: len:BN.meta_len U64 -> exp U64
+val mk_runtime_exp: #t:limb_t -> len:BN.meta_len t -> exp t

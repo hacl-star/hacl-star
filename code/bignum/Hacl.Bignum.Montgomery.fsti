@@ -162,7 +162,4 @@ instance bn_of_mont (t:limb_t) (x:mont t) : BN.bn t = x.bn
 
 // A completely run-time-only instance where the functions above exist in the C code.
 inline_for_extraction noextract
-val mk_runtime_mont_uint32: len:BN.meta_len U32 -> mont U32
-
-inline_for_extraction noextract
-val mk_runtime_mont_uint64: len:BN.meta_len U64 -> mont U64
+val mk_runtime_mont: #t:limb_t -> len:BN.meta_len t -> mont t
