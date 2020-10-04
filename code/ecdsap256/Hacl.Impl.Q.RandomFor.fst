@@ -75,21 +75,6 @@ let makeShareSchedule shares b lenRandomness randomness =
   permutation shares b lenRandomness randomness
 
 
-(*
-inline_for_extraction
-val for:
-    start:size_t
-  -> finish:size_t{v finish >= v start}
-  -> inv:(mem -> (i:nat{v start <= i /\ i <= v finish}) -> Type0)
-  -> f:(i:size_t{v start <= v i /\ v i < v finish} -> Stack unit
-                  (requires fun h -> inv h (v i))
-                  (ensures  fun h_1 _ h_2 -> inv h_2 (v i + 1))) ->
-  Stack unit
-    (requires fun h -> inv h (v start))
-    (ensures  fun _ _ h_2 -> inv h_2 (v finish))
-
-*)
-
 open Spec.P256.Definitions
 
 inline_for_extraction noextract
@@ -133,6 +118,51 @@ let forRandom lenShares sharesFrom0 sharesFrom1 sharesTo inv f lenRandomness ran
       let shareFrom0 = index sharesFrom0 indexFrom0 in 
       let shareFrom1 = index sharesFrom1 indexFrom1 in 
       let shareTo = index sharesTo indexTo in 
+
+      f shareFrom0 shareFrom1 shareTo
+      
+      
+      );
+      
+  pop_frame()
+
+
+
+(* and less crazy version *)
+
+
+
+inline_for_extraction noextract
+val forRandom1: 
+  lenShares: size_t
+  -> sharesFrom0: lbuffer uint64 (sizeOfShare *. lenShares)
+  -> sharesFrom1: lbuffer uint64 (sizeOfShare *. lenShares) 
+  -> sharesTo: lbuffer uint64 (sizeOfShare *. lenShares)
+  
+  -> inv: (mem -> Type0)
+  -> f: (felem -> felem -> felem -> Stack unit (requires fun h -> inv h) (ensures fun h0 _ h1 -> inv h1))
+  
+  -> lenRandomness: size_t
+  -> randomness: lbuffer uint8 ( lenRandomness) 
+  ->
+  Stack unit 
+    (requires fun h -> True)
+    (ensures fun h0 _ h1 -> True)
+
+
+let forRandom1 lenShares sharesFrom0 sharesFrom1 sharesTo inv f lenRandomness randomness = 
+  push_frame();
+    let bufferSchedule = create lenShares (size 0) in 
+    let random = sub randomness 0ul lenRandomness in 
+    makeShareSchedule lenShares bufferSchedule lenRandomness random;
+    
+    let inv h (i: nat) = True in 
+    for 0ul lenShares inv (fun i -> 
+      let indexReference = index bufferSchedule i in 
+      
+      let shareFrom0 = index sharesFrom0 indexReference in 
+      let shareFrom1 = index sharesFrom1 indexReference in 
+      let shareTo = index sharesTo indexReference in 
 
       f shareFrom0 shareFrom1 shareTo
       
