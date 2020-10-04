@@ -15,10 +15,11 @@ open Lib.Loops
 
 
 (* Well, for now I invented the way to randomise the flow, it´s not based on any clever research *)
-
+(* https://youtu.be/QFFrkZOYojk *)
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
 
+let sizeOfShare = 4ul
 
 val swap: shares: size_t -> b: lbuffer size_t shares 
   -> i0: size_t {v i0 < v shares} 
@@ -89,20 +90,53 @@ val for:
 
 *)
 
+open Spec.P256.Definitions
+
+inline_for_extraction noextract
 val forRandom: 
-  finish: size_t
-  -> inv: (mem -> i : nat -> Type0) 
-  -> f: (i: nat -> Stack unit (requires fun h -> True) (ensures fun h0 _ h1 -> True))
+  lenShares: size_t
+  -> sharesFrom0: lbuffer uint64 (sizeOfShare *. lenShares)
+  -> sharesFrom1: lbuffer uint64 (sizeOfShare *. lenShares) 
+  -> sharesTo: lbuffer uint64 (sizeOfShare *. lenShares)
+  
+  -> inv: (mem -> Type0)
+  -> f: (felem -> felem -> felem -> Stack unit (requires fun h -> inv h) (ensures fun h0 _ h1 -> inv h1))
+  
   -> lenRandomness: size_t
-  -> randomness: lbuffer uint8 lenRandomness
+  -> randomness: lbuffer uint8 (3ul *. lenRandomness) 
   ->
   Stack unit 
     (requires fun h -> True)
     (ensures fun h0 _ h1 -> True)
 
 
-let forRandom finish inv f lenRandomness randomness = 
+let forRandom lenShares sharesFrom0 sharesFrom1 sharesTo inv f lenRandomness randomness = 
   push_frame();
-    let bufferSchedule = create finish (size 0) in 
-    let schedule = makeShareSchedule finish bufferSchedule lenRandomness randomness in 
+    let bufferSchedule0 = create lenShares (size 0) in 
+    let bufferSchedule1 = create lenShares (size 0) in 
+    let bufferSchedule2 = create lenShares (size 0) in 
+    
+    let random0 = sub randomness 0ul lenRandomness in 
+    let random1 = sub randomness lenRandomness lenRandomness in 
+    let random2 = sub randomness (2ul *. lenRandomness) lenRandomness in 
+    
+    makeShareSchedule lenShares bufferSchedule0 lenRandomness random0;		      
+    makeShareSchedule lenShares bufferSchedule1 lenRandomness random1;
+    makeShareSchedule lenShares bufferSchedule2 lenRandomness random2;
+    
+    let inv h (i: nat) = True in 
+    for 0ul lenShares inv (fun i -> 
+      let indexFrom0 = index bufferSchedule0 i in 
+      let indexFrom1 = index bufferSchedule1 i in 
+      let indexTo = index bufferSchedule2 i in 
+      
+      let shareFrom0 = index sharesFrom0 indexFrom0 in 
+      let shareFrom1 = index sharesFrom1 indexFrom1 in 
+      let shareTo = index sharesTo indexTo in 
+
+      f shareFrom0 shareFrom1 shareTo
+      
+      
+      );
+      
   pop_frame()
