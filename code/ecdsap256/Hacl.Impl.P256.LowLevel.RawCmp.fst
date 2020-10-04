@@ -38,6 +38,4 @@ val unsafe_bool_of_u64 (x: uint64 { v x == 0 \/ v x == pow2 64 - 1 }):
   (b:bool { b <==> v x == 0 })
 
 let unsafe_bool_of_u64 x = 
-  match u64_to_UInt64 x with 
-  | 0UL -> true
-  | _ -> false
+  FStar.UInt64.(u64_to_UInt64 x =^ 0uL)
