@@ -34,7 +34,10 @@ let uint32 = Lib.IntTypes.uint32
 /// State machinery
 /// ===============
 
-[@CAbstractStruct]
+// TODO: when state_s is declared as CAbstractStruct, it prevents Hacl_Streaming_MD5.c
+// and Hacl_Streaming_SHA1.c from compiling, because Kremlin tries to share the state_s
+// type definition with Hacl_Streaming_SHA2.c, which is hidden.
+//[@CAbstractStruct]
 val state_s (#index: Type0) (c: block index) (i: index)
   (t: Type0 { t == c.state.s i })
   (t': Type0 { t' == optional_key i c.km c.key }):

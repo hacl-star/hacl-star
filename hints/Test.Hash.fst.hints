@@ -49,7 +49,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_384@tok"
       ],
       0,
-      "474ddbc78de78e40eb609e79286fc6f5"
+      "654d75c318c6d47a0ad0b98f7608f60e"
     ],
     [
       "Test.Hash.test_incremental_api",
@@ -59,7 +59,7 @@
       [
         "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "Hacl.Streaming.SHA2_interpretation_Tm_arrow_044c017c58feaf8aab37cff2118fb570",
+        "Hacl.Streaming.MD_interpretation_Tm_arrow_044c017c58feaf8aab37cff2118fb570",
         "bool_inversion", "constructor_distinct_FStar.Integers.W64",
         "constructor_distinct_FStar.Integers.W8",
         "constructor_distinct_Hacl.Streaming.Interface.Erased",
@@ -77,6 +77,7 @@
         "equality_tok_Spec.Hash.Definitions.SHA2_256@tok",
         "equation_EverCrypt.Hash.Incremental.agile_state",
         "equation_EverCrypt.Hash.Incremental.evercrypt_hash",
+        "equation_EverCrypt.Hash.Incremental.hash_len",
         "equation_EverCrypt.Hash.Incremental.hashed",
         "equation_FStar.HyperStack.ST.equal_domains",
         "equation_FStar.HyperStack.ST.equal_stack_domains",
@@ -102,7 +103,7 @@
         "equation_Hacl.Streaming.Functor.uint8",
         "equation_Hacl.Streaming.Interface.optional_key",
         "equation_Hacl.Streaming.Interface.stateful_unused",
-        "equation_Hacl.Streaming.SHA2.max_input_length64",
+        "equation_Hacl.Streaming.MD.max_input_length64",
         "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.range",
         "equation_Lib.IntTypes.uint8", "equation_Lib.IntTypes.unsigned",
         "equation_LowStar.Buffer.trivial_preorder",
@@ -114,14 +115,14 @@
         "equation_Spec.Hash.Definitions.bytes",
         "function_token_typing_EverCrypt.Hash.state",
         "function_token_typing_FStar.Monotonic.Heap.heap",
-        "function_token_typing_Hacl.Streaming.SHA2.max_input_length64",
+        "function_token_typing_Hacl.Streaming.MD.max_input_length64",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.int",
         "function_token_typing_Spec.Hash.Definitions.bytes",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2", "int_inversion",
         "interpretation_Tm_abs_5b0a5035fa5841c294d07b56f6db9e4b",
         "interpretation_Tm_abs_7db19245573865e2013f96b9787edb72",
-        "interpretation_Tm_abs_e31a5a003667150c7f03500d74f8088f",
+        "interpretation_Tm_abs_d83a42cc5aa4f1e756aa03c5fe71bbb8",
         "interpretation_Tm_abs_f006d723251ddaabe831b91f6d482a4e",
         "kinding_Spec.Hash.Definitions.hash_alg@tok",
         "lemma_FStar.Ghost.reveal_hide",
@@ -205,7 +206,7 @@
         "refinement_interpretation_Tm_refine_ee8b234aa6cf07c6ef04345829148435",
         "refinement_interpretation_Tm_refine_f302e1c5e7902e028b3edb61ef25df5a",
         "refinement_kinding_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "token_correspondence_Hacl.Hash.Definitions.hash_len",
+        "token_correspondence_EverCrypt.Hash.Incremental.hash_len",
         "token_correspondence_Hacl.Streaming.Interface.__proj__Block__item__max_input_length",
         "token_correspondence_Hacl.Streaming.Interface.__proj__Block__item__output_len",
         "token_correspondence_Hacl.Streaming.Interface.__proj__Block__item__spec_s",
@@ -213,7 +214,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__invariant",
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__s",
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t",
-        "token_correspondence_Hacl.Streaming.SHA2.max_input_length64",
+        "token_correspondence_Hacl.Streaming.MD.max_input_length64",
         "token_correspondence_Spec.Agile.Hash.hash", "true_interp",
         "typing_EverCrypt.Hash.Incremental.evercrypt_hash",
         "typing_FStar.Map.contains", "typing_FStar.Map.domain",
@@ -245,7 +246,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_256@tok"
       ],
       0,
-      "a19255ab1b21a451398c65361a1fd53c"
+      "d2db252ae9687304d568eb16915c109f"
     ]
   ]
 ]

@@ -24,24 +24,15 @@
 
 #include "Hacl_Streaming_Poly1305_32.h"
 
-typedef struct Hacl_Streaming_Functor_state_s___uint64_t___uint8_t__s
-{
-  uint64_t *block_state;
-  uint8_t *buf;
-  uint64_t total_len;
-  uint8_t *p_key;
-}
-Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_;
-
 Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_
-*Hacl_Streaming_Poly1305_32_create_in(uint8_t *k1)
+*Hacl_Streaming_Poly1305_32_create_in(uint8_t *k)
 {
   uint8_t *buf = KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint8_t));
   uint64_t *r1 = KRML_HOST_CALLOC((uint32_t)25U, sizeof (uint64_t));
   uint64_t *block_state = r1;
   uint8_t *k_ = KRML_HOST_CALLOC((uint32_t)32U, sizeof (uint8_t));
   uint8_t *k_0;
-  memcpy(k_, k1, (uint32_t)32U * sizeof (uint8_t));
+  memcpy(k_, k, (uint32_t)32U * sizeof (uint8_t));
   k_0 = k_;
   {
     Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_ s;
@@ -54,7 +45,7 @@ Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_
       Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_
       *p = KRML_HOST_MALLOC(sizeof (Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_));
       p[0U] = s;
-      Hacl_Poly1305_32_poly1305_init(block_state, k1);
+      Hacl_Poly1305_32_poly1305_init(block_state, k);
       return p;
     }
   }
@@ -62,7 +53,7 @@ Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_
 
 void
 Hacl_Streaming_Poly1305_32_init(
-  uint8_t *k1,
+  uint8_t *k,
   Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_ *s
 )
 {
@@ -71,8 +62,8 @@ Hacl_Streaming_Poly1305_32_init(
   uint8_t *buf = scrut.buf;
   uint64_t *block_state = scrut.block_state;
   uint8_t *k_1;
-  Hacl_Poly1305_32_poly1305_init(block_state, k1);
-  memcpy(k_, k1, (uint32_t)32U * sizeof (uint8_t));
+  Hacl_Poly1305_32_poly1305_init(block_state, k);
+  memcpy(k_, k, (uint32_t)32U * sizeof (uint8_t));
   k_1 = k_;
   {
     Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_ lit;

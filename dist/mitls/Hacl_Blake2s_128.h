@@ -70,6 +70,42 @@ Hacl_Hash_Blake2s_128_update_last_blake2s_128(
 void Hacl_Hash_Blake2s_128_hash_blake2s_128(uint8_t *input, uint32_t input_len, uint8_t *dst);
 
 void
+Hacl_Blake2s_128_blake2s_init(
+  Lib_IntVector_Intrinsics_vec128 *wv,
+  Lib_IntVector_Intrinsics_vec128 *hash,
+  uint32_t kk,
+  uint8_t *k,
+  uint32_t nn
+);
+
+void
+Hacl_Blake2s_128_blake2s_update_multi(
+  uint32_t len,
+  Lib_IntVector_Intrinsics_vec128 *wv,
+  Lib_IntVector_Intrinsics_vec128 *hash,
+  uint64_t prev,
+  uint8_t *blocks,
+  uint32_t nb
+);
+
+void
+Hacl_Blake2s_128_blake2s_update_last(
+  uint32_t len,
+  Lib_IntVector_Intrinsics_vec128 *wv,
+  Lib_IntVector_Intrinsics_vec128 *hash,
+  uint64_t prev,
+  uint32_t rem,
+  uint8_t *d
+);
+
+void
+Hacl_Blake2s_128_blake2s_finish(
+  uint32_t nn,
+  uint8_t *output,
+  Lib_IntVector_Intrinsics_vec128 *hash
+);
+
+void
 Hacl_Blake2s_128_blake2s(
   uint32_t nn,
   uint8_t *output,

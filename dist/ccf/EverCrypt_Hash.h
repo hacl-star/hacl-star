@@ -243,7 +243,16 @@ EverCrypt_Hash_hash(
   uint32_t len
 );
 
+uint32_t EverCrypt_Hash_Incremental_hash_len(Spec_Hash_Definitions_hash_alg a);
+
+uint32_t EverCrypt_Hash_Incremental_block_len(Spec_Hash_Definitions_hash_alg a);
+
 typedef struct Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s_____s
+{
+  EverCrypt_Hash_state_s *block_state;
+  uint8_t *buf;
+  uint64_t total_len;
+}
 Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____;
 
 Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____

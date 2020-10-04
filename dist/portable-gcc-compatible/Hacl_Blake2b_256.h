@@ -85,6 +85,58 @@ void Hacl_Hash_Blake2b_256_hash_blake2b_256(uint8_t *input, uint32_t input_len, 
 
 /* SNIPPET_END: Hacl_Hash_Blake2b_256_hash_blake2b_256 */
 
+/* SNIPPET_START: Hacl_Blake2b_256_blake2b_init */
+
+void
+Hacl_Blake2b_256_blake2b_init(
+  Lib_IntVector_Intrinsics_vec256 *wv,
+  Lib_IntVector_Intrinsics_vec256 *hash,
+  uint32_t kk,
+  uint8_t *k,
+  uint32_t nn
+);
+
+/* SNIPPET_END: Hacl_Blake2b_256_blake2b_init */
+
+/* SNIPPET_START: Hacl_Blake2b_256_blake2b_update_multi */
+
+void
+Hacl_Blake2b_256_blake2b_update_multi(
+  uint32_t len,
+  Lib_IntVector_Intrinsics_vec256 *wv,
+  Lib_IntVector_Intrinsics_vec256 *hash,
+  FStar_UInt128_uint128 prev,
+  uint8_t *blocks,
+  uint32_t nb
+);
+
+/* SNIPPET_END: Hacl_Blake2b_256_blake2b_update_multi */
+
+/* SNIPPET_START: Hacl_Blake2b_256_blake2b_update_last */
+
+void
+Hacl_Blake2b_256_blake2b_update_last(
+  uint32_t len,
+  Lib_IntVector_Intrinsics_vec256 *wv,
+  Lib_IntVector_Intrinsics_vec256 *hash,
+  FStar_UInt128_uint128 prev,
+  uint32_t rem,
+  uint8_t *d
+);
+
+/* SNIPPET_END: Hacl_Blake2b_256_blake2b_update_last */
+
+/* SNIPPET_START: Hacl_Blake2b_256_blake2b_finish */
+
+void
+Hacl_Blake2b_256_blake2b_finish(
+  uint32_t nn,
+  uint8_t *output,
+  Lib_IntVector_Intrinsics_vec256 *hash
+);
+
+/* SNIPPET_END: Hacl_Blake2b_256_blake2b_finish */
+
 /* SNIPPET_START: Hacl_Blake2b_256_blake2b */
 
 void
