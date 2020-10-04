@@ -6,9 +6,12 @@ module ST = FStar.HyperStack.ST
 
 open Lib.IntTypes
 open Lib.Buffer
+open Lib.Loops
 
 open Hacl.Impl.P256.LowLevel.RawCmp
 open Lib.RawIntTypes
+
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
 
 let lenCoor = 32ul
 let integerIdentificator = 2ul
@@ -71,18 +74,53 @@ val decode: sigLen: size_t -> signature: lbuffer uint8 sigLen
       if v sigLen >= 256 then flag = false else (* well *)
       if v lengthIdentificator + 1 <> v sigLen then flag = false else 
       if v integerFirstIdentifier = v integerIdentificator then flag = false else True
-  
   )
 )
 
 
+val min: a: FStar.UInt32.t -> b: FStar.UInt32.t  -> Tot (r : FStar.UInt32.t  {if v a <= v b then r == a else r == b}) 
 
-assume val copyBuffer: len: size_t -> from: lbuffer uint8 len -> to: lbuffer uint8 lenCoor ->
+let min a b = 
+  if FStar.UInt32.gte b a then a else b
+
+val copyBuffer: len: size_t -> from: lbuffer uint8 len  -> to: lbuffer uint8 lenCoor ->
   Stack unit 
     (requires fun h -> live h from /\ live h to)
     (ensures fun h0 _ h1 -> True)
 
 
+let copyBuffer len from to = 
+  let h0 = ST.get() in 
+  let inv h (i: nat {i <= v lenCoor}) = live h to /\ modifies (loc to) h0 h /\
+    (
+      forall (j: nat {j < i}).
+	let elemUpdated = Lib.Sequence.index (as_seq h to) j in 	
+	uint_v elemUpdated = 0
+    ) in 
+  for 0ul lenCoor inv (fun i -> 
+    upd to i (u8 0);
+    let h = ST.get() in 
+    assert(
+      forall (j: nat {j < uint_v i}). 
+      let elemUpdated = Lib.Sequence.index (as_seq h to) j in uint_v elemUpdated = 0)
+    );
+
+  let lenLoop = min len lenCoor in 
+  let inv2 h (i: nat {i <= v lenLoop}) = live h to /\ live h from /\ modifies (loc to) h0 h /\
+    (
+      forall (j: nat {j < i}).
+	let indexToCopy = v lenLoop - 1 - j in 
+	let elemUpdated = Lib.Sequence.index (as_seq h to) indexToCopy in 
+	let elemToUpdateTo = Lib.Sequence.index (as_seq h0 from) indexToCopy in 
+	uint_v elemUpdated == uint_v elemToUpdateTo
+    )
+  in 
+    for 0ul lenLoop inv2 (fun i ->
+      admit();
+      let indexToCopy = lenCoor -. 1ul -. i in 
+      let element = index from indexToCopy in 
+      upd to indexToCopy element)
+  
 
 
 
