@@ -55,7 +55,7 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Bignum256_mod_inv_prime =
       foreign "Hacl_Bignum256_mod_inv_prime"
         ((ptr uint64_t) @->
-           ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning bool))))
+           ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void))))
     let hacl_Bignum256_new_bn_from_bytes_be =
       foreign "Hacl_Bignum256_new_bn_from_bytes_be"
         (uint32_t @-> (ocaml_bytes @-> (returning (ptr uint64_t))))

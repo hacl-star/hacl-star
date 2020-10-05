@@ -86,23 +86,25 @@ let mod_precompr2 = BR.bn_mod_slow_precompr2 mont_inst
 let mod_check : BR.bn_check_bn_mod_st t_limbs n_limbs =
   BR.bn_check_bn_mod mont_inst
 
-let mod = BS.bn_mod_slow_safe mont_inst mod_check mod_precompr2
+let mod' : BR.bn_mod_slow_st t_limbs n_limbs = BR.bn_mod_slow mont_inst mod_precompr2
+
+let mod = BS.bn_mod_slow_safe mont_inst mod_check mod'
 
 let exp_check = BE.bn_check_mod_exp mont_inst
 
 let mod_exp_precompr2 = BE.bn_mod_exp_precompr2 mont_inst
 
-let mod_exp = BS.bn_mod_exp_safe mont_inst exp_check mod_exp_precompr2
-
-let mod_exp_mont_ladder_precompr2 = BE.bn_mod_exp_mont_ladder_precompr2 mont_inst
-
-let mod_exp_mont_ladder = BS.bn_mod_exp_mont_ladder_safe mont_inst exp_check mod_exp_mont_ladder_precompr2
-
 let mod_exp' : BE.bn_mod_exp_st t_limbs n_limbs =
   BE.bn_mod_exp mont_inst mod_exp_precompr2
 
+let mod_exp = BS.bn_mod_exp_safe mont_inst exp_check mod_exp'
+
+let mod_exp_mont_ladder_precompr2 = BE.bn_mod_exp_mont_ladder_precompr2 mont_inst
+
 let mod_exp_mont_ladder' : BE.bn_mod_exp_mont_ladder_st t_limbs n_limbs =
   BE.bn_mod_exp_mont_ladder mont_inst mod_exp_mont_ladder_precompr2
+
+let mod_exp_mont_ladder = BS.bn_mod_exp_mont_ladder_safe mont_inst exp_check mod_exp_mont_ladder'
 
 inline_for_extraction noextract
 instance exp_inst: BE.exp t_limbs = {

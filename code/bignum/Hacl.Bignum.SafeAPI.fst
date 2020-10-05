@@ -140,14 +140,14 @@ val bn_mod_slow_safe:
     #t:limb_t
   -> k:BM.mont t
   -> bn_check_bn_mod:BR.bn_check_bn_mod_st t k.BM.bn.BN.len
-  -> bn_mod_slow_precompr2:BR.bn_mod_slow_precompr2_st t k.BM.bn.BN.len ->
+  -> bn_mod_slow:BR.bn_mod_slow_st t k.BM.bn.BN.len ->
   bn_mod_slow_safe_st t k.BM.bn.BN.len
 
-let bn_mod_slow_safe #t k bn_check_bn_mod bn_mod_slow_safe_st n a res =
+let bn_mod_slow_safe #t k bn_check_bn_mod bn_mod_slow n a res =
   [@inline_let] let len = k.BM.bn.BN.len in
   let h0 = ST.get () in
   let is_valid_m = bn_check_bn_mod n a in
-  BR.bn_mod_slow k bn_mod_slow_safe_st n a res;
+  bn_mod_slow n a res;
   let h1 = ST.get () in
   mapT len res (logand is_valid_m) res;
   let h2 = ST.get () in
@@ -180,14 +180,14 @@ val bn_mod_exp_safe:
     #t:limb_t
   -> k:BM.mont t
   -> bn_check_mod_exp:BE.bn_check_mod_exp_st t k.BM.bn.BN.len
-  -> bn_mod_exp_precompr2:BE.bn_mod_exp_precompr2_st t k.BM.bn.BN.len ->
+  -> bn_mod_exp:BE.bn_mod_exp_st t k.BM.bn.BN.len ->
   bn_mod_exp_safe_st t k.BM.bn.BN.len
 
-let bn_mod_exp_safe #t k bn_check_mod_exp bn_mod_exp_precompr2 n a bBits b res =
+let bn_mod_exp_safe #t k bn_check_mod_exp bn_mod_exp n a bBits b res =
   [@inline_let] let len = k.BM.bn.BN.len in
   let h0 = ST.get () in
   let is_valid_m = bn_check_mod_exp n a bBits b in
-  BE.bn_mod_exp #t k bn_mod_exp_precompr2 n a bBits b res;
+  bn_mod_exp n a bBits b res;
   let h1 = ST.get () in
   mapT len res (logand is_valid_m) res;
   let h2 = ST.get () in
@@ -204,14 +204,14 @@ val bn_mod_exp_mont_ladder_safe:
     #t:limb_t
   -> k:BM.mont t
   -> bn_check_mod_exp:BE.bn_check_mod_exp_st t k.BM.bn.BN.len
-  -> bn_mod_exp_mont_ladder_precompr2:BE.bn_mod_exp_mont_ladder_precompr2_st t k.BM.bn.BN.len ->
+  -> bn_mod_exp_mont_ladder:BE.bn_mod_exp_mont_ladder_st t k.BM.bn.BN.len ->
   bn_mod_exp_safe_st t k.BM.bn.BN.len
 
-let bn_mod_exp_mont_ladder_safe #t k bn_check_mod_exp bn_mod_exp_mont_ladder_precompr2 n a bBits b res =
+let bn_mod_exp_mont_ladder_safe #t k bn_check_mod_exp bn_mod_exp_mont_ladder n a bBits b res =
   [@inline_let] let len = k.BM.bn.BN.len in
   let h0 = ST.get () in
   let is_valid_m = bn_check_mod_exp n a bBits b in
-  BE.bn_mod_exp_mont_ladder #t k bn_mod_exp_mont_ladder_precompr2 n a bBits b res;
+  bn_mod_exp_mont_ladder n a bBits b res;
   let h1 = ST.get () in
   mapT len res (logand is_valid_m) res;
   let h2 = ST.get () in
