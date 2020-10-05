@@ -47,11 +47,11 @@ extern "C" {
  priv(ate)Key: uint8[32], 
  k (nonce): uint32[32]. 
   
- Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
+ Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
   
- The private key and the nonce are expected to be less than the curve order.
+ The private key and the nonce are expected to be more than 0 and less than the curve order.
 */
-u64 Hacl_P256_ecdsa_sign_p256_sha2(u8 *result, u32 mLen, u8 *m, u8 *privKey, u8 *k);
+bool Hacl_P256_ecdsa_sign_p256_sha2(u8 *result, u32 mLen, u8 *m, u8 *privKey, u8 *k);
 
 /*
  Input: result buffer: uint8[64], 
@@ -59,11 +59,11 @@ u64 Hacl_P256_ecdsa_sign_p256_sha2(u8 *result, u32 mLen, u8 *m, u8 *privKey, u8 
  priv(ate)Key: uint8[32], 
  k (nonce): uint32[32]. 
   
- Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
+ Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
   
- The private key and the nonce are expected to be less than the curve order.
+ The private key and the nonce are expected to be more than 0 and less than the curve order.
 */
-u64 Hacl_P256_ecdsa_sign_p256_sha384(u8 *result, u32 mLen, u8 *m, u8 *privKey, u8 *k);
+bool Hacl_P256_ecdsa_sign_p256_sha384(u8 *result, u32 mLen, u8 *m, u8 *privKey, u8 *k);
 
 /*
  Input: result buffer: uint8[64], 
@@ -71,11 +71,11 @@ u64 Hacl_P256_ecdsa_sign_p256_sha384(u8 *result, u32 mLen, u8 *m, u8 *privKey, u
  priv(ate)Key: uint8[32], 
  k (nonce): uint32[32]. 
   
- Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
+ Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
   
- The private key and the nonce are expected to be less than the curve order.
+ The private key and the nonce are expected to be more than 0 and less than the curve order.
 */
-u64 Hacl_P256_ecdsa_sign_p256_sha512(u8 *result, u32 mLen, u8 *m, u8 *privKey, u8 *k);
+bool Hacl_P256_ecdsa_sign_p256_sha512(u8 *result, u32 mLen, u8 *m, u8 *privKey, u8 *k);
 
 /*
  Input: result buffer: uint8[64], 
@@ -83,16 +83,17 @@ u64 Hacl_P256_ecdsa_sign_p256_sha512(u8 *result, u32 mLen, u8 *m, u8 *privKey, u
  priv(ate)Key: uint8[32], 
  k (nonce): uint32[32]. 
   
- Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
+ Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
   
- The private key and the nonce are expected to be less than the curve order. 
+ The private key and the nonce are expected to be more than 0 and less than the curve order.
   
  The message m is expected to be hashed by a strong hash function, the lenght of the message is expected to be 32 bytes and more.
 */
-u64 Hacl_P256_ecdsa_sign_p256_without_hash(u8 *result, u32 mLen, u8 *m, u8 *privKey, u8 *k);
+bool Hacl_P256_ecdsa_sign_p256_without_hash(u8 *result, u32 mLen, u8 *m, u8 *privKey, u8 *k);
 
 /*
- This code is not side-channel resistant.
+ The input of the function is considered to be public, 
+  thus this code is not secret independent with respect to the operations done over the input.
   
  Input: m buffer: uint8 [mLen], 
  pub(lic)Key: uint8[64], 
@@ -104,7 +105,8 @@ u64 Hacl_P256_ecdsa_sign_p256_without_hash(u8 *result, u32 mLen, u8 *m, u8 *priv
 bool Hacl_P256_ecdsa_verif_p256_sha2(u32 mLen, u8 *m, u8 *pubKey, u8 *r, u8 *s);
 
 /*
- This code is not side-channel resistant.
+  The input of the function is considered to be public, 
+  thus this code is not secret independent with respect to the operations done over the input.
   
  Input: m buffer: uint8 [mLen], 
  pub(lic)Key: uint8[64], 
@@ -116,7 +118,8 @@ bool Hacl_P256_ecdsa_verif_p256_sha2(u32 mLen, u8 *m, u8 *pubKey, u8 *r, u8 *s);
 bool Hacl_P256_ecdsa_verif_p256_sha384(u32 mLen, u8 *m, u8 *pubKey, u8 *r, u8 *s);
 
 /*
- This code is not side-channel resistant.
+  The input of the function is considered to be public, 
+  thus this code is not secret independent with respect to the operations done over the input.
   
  Input: m buffer: uint8 [mLen], 
  pub(lic)Key: uint8[64], 
@@ -128,7 +131,8 @@ bool Hacl_P256_ecdsa_verif_p256_sha384(u32 mLen, u8 *m, u8 *pubKey, u8 *r, u8 *s
 bool Hacl_P256_ecdsa_verif_p256_sha512(u32 mLen, u8 *m, u8 *pubKey, u8 *r, u8 *s);
 
 /*
-This code is not side-channel resistant.
+ The input of the function is considered to be public, 
+  thus this code is not secret independent with respect to the operations done over the input.
   
  Input: m buffer: uint8 [mLen], 
  pub(lic)Key: uint8[64], 
@@ -144,7 +148,8 @@ bool Hacl_P256_ecdsa_verif_without_hash(u32 mLen, u8 *m, u8 *pubKey, u8 *r, u8 *
 /*
  Public key verification function. 
   
- This code is not side-channel resistant.
+  The input of the function is considered to be public, 
+  thus this code is not secret independent with respect to the operations done over the input.
   
  Input: pub(lic)Key: uint8[64]. 
   
@@ -199,32 +204,36 @@ void Hacl_P256_compression_not_compressed_form(u8 *b, u8 *result);
 void Hacl_P256_compression_compressed_form(u8 *b, u8 *result);
 
 /*
- The function takes an arbitraty 32 bytes buffer and reduces it to contain a value that is less than the curve order.
-  
- Input: x: uint8[32], 
- result: uint8[32], such that by the end of the function the value stored in the buffer result equal to the value stored in the buffer x modulo curveOrder.
-*/
-void Hacl_P256_reduction_8_32(u8 *x, u8 *result);
-
-/*
  Input: result: uint8[64], 
  scalar: uint8[32].
   
- Output: uint64, where 0 stands for the correct key generation. All the other values mean that an error has occurred. 
+ Output: bool, where True stands for the correct key generation. 
+  
+ False means that an error has occurred (possibly that the result respresents point at infinity). 
   
 */
-u64 Hacl_P256_ecp256dh_i(u8 *result, u8 *scalar);
+bool Hacl_P256_ecp256dh_i(u8 *result, u8 *scalar);
 
 /*
- This code is not side channel resistant on pub_key. 
+ 
+   The pub(lic)_key input of the function is considered to be public, 
+  thus this code is not secret independent with respect to the operations done over this variable.
+  
  Input: result: uint8[64], 
  pub(lic)Key: uint8[64], 
  scalar: uint8[32].
   
- Output: uint64, where 0 stands for the correct key generation. All the other values mean that an error has occurred. 
+ Output: bool, where True stands for the correct key generation. False value means that an error has occurred (possibly the provided public key was incorrect or the result represents point at infinity). 
   
 */
-u64 Hacl_P256_ecp256dh_r(u8 *result, u8 *pubKey, u8 *scalar);
+bool Hacl_P256_ecp256dh_r(u8 *result, u8 *pubKey, u8 *scalar);
+
+/*
+ Input: scalar: uint8[32].
+  
+ Output: bool, where true stands for the scalar to be more than 0 and less than order.
+*/
+bool Hacl_P256_is_more_than_zero_less_than_order(u8 *x);
 
 #if defined(__cplusplus)
 }
