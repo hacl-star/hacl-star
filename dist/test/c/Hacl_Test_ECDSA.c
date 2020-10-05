@@ -36,7 +36,7 @@ extern void C_String_print(C_String_t uu___);
   
  The private key and the nonce are expected to be less than the curve order.
 */
-extern uint64_t
+extern bool
 Hacl_P256_ecdsa_sign_p256_sha2(
   uint8_t *result,
   uint32_t mLen,
@@ -55,7 +55,7 @@ Hacl_P256_ecdsa_sign_p256_sha2(
   
  The private key and the nonce are expected to be less than the curve order.
 */
-extern uint64_t
+extern bool
 Hacl_P256_ecdsa_sign_p256_sha384(
   uint8_t *result,
   uint32_t mLen,
@@ -74,7 +74,7 @@ Hacl_P256_ecdsa_sign_p256_sha384(
   
  The private key and the nonce are expected to be less than the curve order.
 */
-extern uint64_t
+extern bool
 Hacl_P256_ecdsa_sign_p256_sha512(
   uint8_t *result,
   uint32_t mLen,
@@ -8543,8 +8543,8 @@ static void test_siggen_256(siggen_vector vec)
     uint8_t qxy[64U] = { 0U };
     memcpy(qxy, qx, (uint32_t)32U * sizeof (uint8_t));
     memcpy(qxy + (uint32_t)32U, qy, (uint32_t)32U * sizeof (uint8_t));
-    uint64_t flag = Hacl_P256_ecdsa_sign_p256_sha2(rs, msg_len, msg, d, k);
-    if (flag == (uint64_t)0U)
+    bool flag = Hacl_P256_ecdsa_sign_p256_sha2(rs, msg_len, msg, d, k);
+    if (flag)
     {
       bool okr = compare_and_print(rs, r, (uint32_t)32U);
       bool oks = compare_and_print(rs + (uint32_t)32U, s, (uint32_t)32U);
@@ -8611,8 +8611,8 @@ static void test_siggen_384(siggen_vector vec)
     uint8_t qxy[64U] = { 0U };
     memcpy(qxy, qx, (uint32_t)32U * sizeof (uint8_t));
     memcpy(qxy + (uint32_t)32U, qy, (uint32_t)32U * sizeof (uint8_t));
-    uint64_t flag = Hacl_P256_ecdsa_sign_p256_sha384(rs, msg_len, msg, d, k);
-    if (flag == (uint64_t)0U)
+    bool flag = Hacl_P256_ecdsa_sign_p256_sha384(rs, msg_len, msg, d, k);
+    if (flag)
     {
       bool okr = compare_and_print(rs, r, (uint32_t)32U);
       bool oks = compare_and_print(rs + (uint32_t)32U, s, (uint32_t)32U);
@@ -8679,8 +8679,8 @@ static void test_siggen_512(siggen_vector vec)
     uint8_t qxy[64U] = { 0U };
     memcpy(qxy, qx, (uint32_t)32U * sizeof (uint8_t));
     memcpy(qxy + (uint32_t)32U, qy, (uint32_t)32U * sizeof (uint8_t));
-    uint64_t flag = Hacl_P256_ecdsa_sign_p256_sha512(rs, msg_len, msg, d, k);
-    if (flag == (uint64_t)0U)
+    bool flag = Hacl_P256_ecdsa_sign_p256_sha512(rs, msg_len, msg, d, k);
+    if (flag)
     {
       bool okr = compare_and_print(rs, r, (uint32_t)32U);
       bool oks = compare_and_print(rs + (uint32_t)32U, s, (uint32_t)32U);
@@ -8789,4 +8789,3 @@ exit_code main()
   }
   return EXIT_SUCCESS;
 }
-

@@ -278,7 +278,7 @@ val ecdsa_signature: alg: hash_alg_ecdsa
   -> m: lbuffer uint8 mLen 
   -> privKey: lbuffer uint8 (size 32) 
   -> k: lbuffer uint8 (size 32) -> 
-  Stack uint64
+  Stack bool
   (requires fun h -> 
     live h result /\ live h m /\ live h privKey /\ live h k /\
     disjoint result m /\
@@ -334,4 +334,6 @@ let ecdsa_signature alg result mLen m privKey k =
   Spec.ECDSA.changeEndian_le_be (as_nat h2 s);
 
   pop_frame();
-  flag  
+  
+  let open Hacl.Impl.P256.LowLevel.RawCmp in 
+  unsafe_bool_of_u64  flag
