@@ -33,15 +33,12 @@ function vale_test() {
       make -j $threads vale.build -k
 }
 
-# We compile each directory in dist with a variety of flags. We try out
-# respectively:
-# - optimizing for the host architecture and processor
-# - no optimizations to make sure we don't put an intrinsic in the wrong place
-# - a compiler strictly limited by c89
+# This is just out of complete obsessiveness about CI: we check that the code
+# compiles on antedeluvian machines: mtune=generic is the lowest target GCC
+# accepts, and seems to default to -mtune=core2 on most recent versions of GCC.
 declare -A cflags
 cflags[portable-gcc-compatible]="-mtune=generic"
 cflags[gcc-compatible]="-march=native -mtune=native"
-cflags[c89-compatible]="-std=c89 -Wno-typedef-redefinition"
 
 function hacl_test() {
     make_target=ci
