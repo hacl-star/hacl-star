@@ -1,5 +1,5 @@
 #ifdef __GNUC__
-#if !(defined(__aarch64__) || defined(_M_ARM64) || defined(__arm__) || defined(_M_ARM))
+#if defined(__x86_64__) || defined(_M_X64)
 #pragma once
 #include <inttypes.h>
 
@@ -747,5 +747,5 @@ static inline void fsqr2 (uint64_t *out, uint64_t *f, uint64_t *tmp)
   );
 }
 
-#endif
-#endif
+#endif /* defined(__x86_64__) || defined(_M_X64) */
+#endif /* __GNUC__ */

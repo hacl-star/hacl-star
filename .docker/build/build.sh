@@ -33,6 +33,16 @@ function vale_test() {
       make -j $threads vale.build -k
 }
 
+# We compile each directory in dist with a variety of flags. We try out
+# respectively:
+# - optimizing for the host architecture and processor
+# - no optimizations to make sure we don't put an intrinsic in the wrong place
+# - a compiler strictly limited by c89
+declare -A flags
+flags[portable-gcc-compatible]="CFLAGS=-mtune=generic"
+flags[gcc-compatible]="CFLAGS=\"-march=native -mtune=native\""
+flags[c89-compatible]="CFLAGS=\"-std=c89 -Wno-typedef-redefinition\""
+
 function hacl_test() {
     make_target=ci
     if [[ $target == "mozilla-ci" ]]; then
@@ -50,7 +60,7 @@ function hacl_test() {
           for a in *; do
             if [[ $a != "kremlin" && $a != "vale" && $a != "linux" && $a != "wasm" && $a != "merkle-tree" && $a != "test" && -d $a ]]; then
               echo "Building snapshot: $a"
-              make -C $a -j $threads || r=false
+              ${flags[$a]} make -C $a -j $threads || r=false
               echo
             fi
           done

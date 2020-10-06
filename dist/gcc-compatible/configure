@@ -157,6 +157,7 @@ show_help () {
   printf "                    Currently supported triples are:\n"
   printf "                    * aarch64-none-linux-android\n"
   printf "                    * aarch64-none-linux-gnu\n"
+  printf "    --disable-bzero Do not use explicit_bzero (binary will work with an old GLIBC)\n"
   printf "    --disable-ocaml Disable OCAML bindings\n"
   printf "\n"
 }
@@ -168,6 +169,7 @@ echo -n > config.h
 
 # Default arguments
 disable_ocaml=0
+disable_bzero=0
 
 # Parse command line arguments.
 all_args=("$@")
@@ -175,6 +177,7 @@ while [ $# -gt 0 ]; do
     case "$1" in
         -target) build_target="$2"; shift ;;
         --disable-ocaml) disable_ocaml=1 ;;
+        --disable-bzero) disable_bzero=1 ;;
         --help) show_help; exit 0 ;;
         *) show_help; exit 2 ;;
     esac
@@ -305,7 +308,10 @@ if [[ "$disable_ocaml" == "1" ]] || ! detect_ocaml; then
 fi
 
 if [[ $target_sys == "Linux" ]]; then
-  if check_explicit_bzero; then
+  if [[ "$disable_bzero" == "1" ]]; then
+    echo "disabling the use of explicit_bzero"
+    echo "#define LINUX_NO_EXPLICIT_BZERO" >> config.h
+  elif check_explicit_bzero; then
     echo "... glibc is recent enough for explicit_bzero"
   else
     echo "toolchain does not support explicit_bzero"

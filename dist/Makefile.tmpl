@@ -27,6 +27,9 @@ KREMLIN_HOME ?= ../kremlin
 
 # 1. The usual pseudo auto-configuration
 
+# TODO: this should all move to the configure script
+# TODO: Makefile.config: configure; ./$<
+# TODO: include Makefile.config
 UNAME		?= $(shell uname)
 MARCH		?= $(shell uname -m)
 ifeq ($(UNAME),Darwin)
@@ -77,8 +80,9 @@ OBJS 		+= $(patsubst %.S,%.o,$(wildcard *-$(MARCH)$(VARIANT).S))
 include Makefile.basic
 
 CFLAGS		+= -Wno-parentheses -Wno-deprecated-declarations -Wno-\#warnings -Wno-error=cpp -Wno-cpp -g -std=gnu11 -O3
-CFLAGS_128 ?= -mavx
-CFLAGS_256 ?= -mavx -mavx2
+# TODO: also move this to configure
+CFLAGS_128 	?= -mavx
+CFLAGS_256 	?= -mavx -mavx2
 
 Hacl_Poly1305_128.o Hacl_Streaming_Poly1305_128.o Hacl_Chacha20_Vec128.o Hacl_Chacha20Poly1305_128.o Hacl_Blake2s_128.o Hacl_HMAC_Blake2s_128.o Hacl_HKDF_Blake2s_128.o Hacl_Streaming_Blake2s_128.o: CFLAGS += $(CFLAGS_128)
 Hacl_Poly1305_256.o Hacl_Streaming_Poly1305_256.o Hacl_Chacha20_Vec256.o Hacl_Chacha20Poly1305_256.o Hacl_Blake2b_256.o Hacl_HMAC_Blake2b_256.o Hacl_HKDF_Blake2b_256.o Hacl_Streaming_Blake2b_256.o: CFLAGS += $(CFLAGS_256)
