@@ -14,16 +14,6 @@ module B = LowStar.Buffer
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
 
-(* let ecdsa_verif_p256_sha2 = Hacl_Interface_P256_Hacl_Interface_P256_ecdsa_verif_p256_sha2
-let ecdsa_verif_p256_sha384 = Hacl_Interface_P256_Hacl_Interface_P256_ecdsa_verif_p256_sha384
-let ecdsa_verif_p256_sha512 = Hacl_Interface_P256_Hacl_Interface_P256_ecdsa_verif_p256_sha512
-
-let ecdsa_sign_p256_sha2 = Hacl_Interface_P256_Hacl_Interface_P256_ecdsa_sign_p256_sha2
-let ecdsa_sign_p256_sha384 = Hacl_Interface_P256_Hacl_Interface_P256_ecdsa_sign_p256_sha384
-let ecdsa_sign_p256_sha512 = Hacl_Interface_P256_Hacl_Interface_P256_ecdsa_sign_p256_sha512
-
- *)
-
 noextract
 let sigver_vectors256_tmp = List.Tot.map
   (fun x -> h x.msg, h x.qx, h x.qy, h x.r, h x.s, x.result)
@@ -206,20 +196,25 @@ let test_sigver512 (vec:sigver_vector) : Stack unit (requires fun _ -> True) (en
     end
 
 
+#push-options "--fuel 1 --ifuel 1 --z3rlimit 200"
+
 
 val check_bound: b:Lib.Buffer.lbuffer uint8 32ul -> Stack bool
   (requires fun h -> Lib.Buffer.live h b)
   (ensures  fun h0 r h1 ->
     h0 == h1 /\
-    r == (Lib.ByteSequence.nat_from_bytes_be (Lib.Buffer.as_seq h0 b) <
-          Spec.ECDSAP256.Definition.prime_p256_order))
+    r == 
+      (
+	(Lib.ByteSequence.nat_from_bytes_be (Lib.Buffer.as_seq h0 b) > 0) &&
+	(Lib.ByteSequence.nat_from_bytes_be (Lib.Buffer.as_seq h0 b) <
+          Spec.ECDSAP256.Definition.prime_p256_order)))
 
 let check_bound b =
   let open FStar.Mul in
   let open Lib.ByteSequence in
   let open Spec.ECDSAP256.Definition in
   [@inline_let]
-  let q1 = normalize_term (prime_p256_order % pow2 64) in
+  let q1 = normalize_term (prime_p256_order % pow2 64) in 
   [@inline_let]
   let q2 = normalize_term ((prime_p256_order / pow2 64) % pow2 64) in
   [@inline_let]
@@ -228,6 +223,9 @@ let check_bound b =
   let q4 = normalize_term (((prime_p256_order / pow2 128) / pow2 64) % pow2 64) in
   assert_norm (pow2 128 * pow2 64 == pow2 192);
   assert (prime_p256_order == q1 + pow2 64 * q2 + pow2 128 * q3 + pow2 192 * q4); 
+
+  let zero = mk_int #U64 #PUB 0 in
+  
   let q1 = mk_int #U64 #PUB q1 in
   let q2 = mk_int #U64 #PUB q2 in
   let q3 = mk_int #U64 #PUB q3 in
@@ -254,10 +252,14 @@ let check_bound b =
   let x1 = Lib.RawIntTypes.u64_to_UInt64 x1 in
   let x2 = Lib.RawIntTypes.u64_to_UInt64 x2 in
   let x3 = Lib.RawIntTypes.u64_to_UInt64 x3 in
-  let x4 = Lib.RawIntTypes.u64_to_UInt64 x4 in
-  x1 <. q4 || (x1 =. q4 &&
+  let x4 = Lib.RawIntTypes.u64_to_UInt64 x4 in 
+
+  let r =  x1 <. q4 || (x1 =. q4 &&
     (x2 <. q3 || (x2 =. q3 &&
-      (x3 <. q2 || (x3 =. q2 && x4 <. q1)))))
+      (x3 <. q2 || (x3 =. q2 && x4 <. q1))))) in 
+
+  let r1 = x1 = zero &&  x2 = zero && x3 = zero && x4 = zero in 
+  r && not r1
 
 
 #push-options " --ifuel 1 --fuel 1"
@@ -299,7 +301,7 @@ let test_siggen_256 (vec:siggen_vector) : Stack unit (requires fun _ -> True) (e
     B.blit qy 0ul qxy 32ul 32ul; 
 
     let flag = ecdsa_sign_p256_sha2 rs msg_len msg d k in 
-    if Lib.RawIntTypes.u64_to_UInt64 flag = 0uL then
+    if flag then
       begin
       let okr = compare_and_print (B.sub rs 0ul 32ul) r 32ul in 
       let oks = compare_and_print (B.sub rs 32ul 32ul) s 32ul in 
@@ -364,7 +366,7 @@ let test_siggen_384 (vec:siggen_vector) : Stack unit (requires fun _ -> True) (e
     B.blit qy 0ul qxy 32ul 32ul; 
 
     let flag = ecdsa_sign_p256_sha384 rs msg_len msg d k in 
-    if Lib.RawIntTypes.u64_to_UInt64 flag = 0uL then
+    if flag then
       begin
       let okr = compare_and_print (B.sub rs 0ul 32ul) r 32ul in 
       let oks = compare_and_print (B.sub rs 32ul 32ul) s 32ul in 
@@ -429,7 +431,7 @@ let test_siggen_512 (vec:siggen_vector) : Stack unit (requires fun _ -> True) (e
     B.blit qy 0ul qxy 32ul 32ul; 
 
     let flag = ecdsa_sign_p256_sha512 rs msg_len msg d k in 
-    if Lib.RawIntTypes.u64_to_UInt64 flag = 0uL then
+    if flag then
       begin
       let okr = compare_and_print (B.sub rs 0ul 32ul) r 32ul in 
       let oks = compare_and_print (B.sub rs 32ul 32ul) s 32ul in 

@@ -20,16 +20,19 @@
     [
       "Spec.P256.MontgomeryMultiplication.fromDomainPoint",
       1,
-      2,
-      1,
+      0,
+      0,
       [
-        "@query", "equation_Prims.nat",
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
         "projection_inverse_FStar.Pervasives.Native.Mktuple3__1",
         "projection_inverse_FStar.Pervasives.Native.Mktuple3__2",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple3__3"
+        "projection_inverse_FStar.Pervasives.Native.Mktuple3__3",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_ff2b90c8f94db4f4bcfea92159681cf1",
+        "typing_Spec.P256.MontgomeryMultiplication.fromDomain_"
       ],
       0,
-      "929908e5e5e1c80490612f19ff9a64fa"
+      "36e0831439ecc008da7499e403f70815"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.toDomain_",
@@ -43,7 +46,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "779596f216ffacb6a1743b032ab50edf"
+      "8e8e522b34c358c87c176757eba83cc2"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.lemmaFromDomain",
@@ -52,7 +55,7 @@
       1,
       [ "@query" ],
       0,
-      "2323e5e4a8507b47c29def1d6a57f2e1"
+      "848a701eb62345d4c163bfe7e3d4ee42"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.lemmaFromDomain",
@@ -61,7 +64,7 @@
       1,
       [ "@query", "equation_Spec.P256.MontgomeryMultiplication.fromDomain_" ],
       0,
-      "04b2158eb2667357d62396a6de20e272"
+      "cc087ad757c54a6d7dd545e41d5c0089"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.lemmaToDomain",
@@ -70,7 +73,7 @@
       1,
       [ "@query" ],
       0,
-      "a2456684d22bcec3b36d0f9807ab13b1"
+      "3df8eaa1ae03295a3653b20794ad302e"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.lemmaToDomain",
@@ -79,7 +82,7 @@
       1,
       [ "@query", "equation_Spec.P256.MontgomeryMultiplication.toDomain_" ],
       0,
-      "0bf082a5d82358153b0c21a4cea3f455"
+      "3d6f18c37b7d272bd09bce78adfb2a3f"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.lemmaToDomainAndBackIsTheSame",
@@ -88,7 +91,7 @@
       1,
       [ "@query" ],
       0,
-      "ceb513beeab7707c46d7c0aebc25c399"
+      "e57d7c7dcf4e5e66e2d91bf34b89f071"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.lemmaToDomainAndBackIsTheSame",
@@ -106,7 +109,7 @@
         "typing_Spec.P256.Definitions.prime256"
       ],
       0,
-      "2cd3d2ae9cb1199a267a2cfc20003607"
+      "534c125cfcff5e62acdaa4247c41b704"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.lemmaFromDomainToDomain",
@@ -124,7 +127,7 @@
         "typing_Spec.P256.Definitions.prime256"
       ],
       0,
-      "6a9d4f40775d79b8e9a47fbab93e3256"
+      "c95df8f7c1295d2fcd520109d0a55623"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.lemmaFromDomainToDomainModuloPrime",
@@ -133,7 +136,7 @@
       1,
       [ "@query" ],
       0,
-      "75b4140fed586bdcc2d200712f816d3c"
+      "022ea58601a7ee70bfa234213fa6633e"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.lemmaFromDomainToDomainModuloPrime",
@@ -153,7 +156,7 @@
         "typing_Spec.P256.Definitions.prime256"
       ],
       0,
-      "49c9895043ba302eb2e926b30395d175"
+      "3bd958b008a8f4dcbd193c8c5f9e0cfb"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.inDomain_mod_is_not_mod",
@@ -162,7 +165,7 @@
       1,
       [ "@query" ],
       0,
-      "16d0228e0c0d5ef16395aba1f9e900b2"
+      "8825ffd88db15a89e4775416fc2e3235"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.inDomain_mod_is_not_mod",
@@ -174,7 +177,7 @@
         "primitive_Prims.op_Modulus"
       ],
       0,
-      "95aa35e4beb0e06f811956c74d77858f"
+      "7b8772450c92430017b9e00518c24c2d"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.multiplicationInDomainNat",
@@ -195,7 +198,7 @@
         "refinement_interpretation_Tm_refine_bef91fb8f30c6ed368faf74b3be171fb"
       ],
       0,
-      "560319323c1c2a0ad2e0f1044694eb00"
+      "59aee9d0f8447934a26c664a9bef6cb6"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.multiplicationInDomainNat",
@@ -217,7 +220,7 @@
         "typing_Spec.P256.Definitions.prime256"
       ],
       0,
-      "9eb366947584b91ab97a2a9d14ced918"
+      "2122ecc8f15c9635a533b922189428a2"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.additionInDomain",
@@ -226,7 +229,7 @@
       1,
       [ "@query" ],
       0,
-      "35e7df3a437e616703f79c5f7e713df8"
+      "a73cfb8fcfb73cf4e5dd9c34c8381467"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.additionInDomain",
@@ -253,7 +256,7 @@
         "token_correspondence_Prims.pow2.fuel_instrumented"
       ],
       0,
-      "463eddbd4fe05d72008648d450198ff3"
+      "37e9e43306c0f26622574192db4190b5"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.substractionInDomain",
@@ -262,7 +265,7 @@
       1,
       [ "@query" ],
       0,
-      "09759536df7968d466fb0432e90dea5b"
+      "977534d351d5f078a1bff01ab01dc373"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.substractionInDomain",
@@ -307,7 +310,7 @@
         "typing_Spec.P256.MontgomeryMultiplication.prime"
       ],
       0,
-      "8e38724101a610bc211610eb4da0a186"
+      "5e36fd0bbe11488fd9bb1eb4c11bd51d"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.op_Star_Percent",
@@ -316,7 +319,7 @@
       0,
       [ "@query" ],
       0,
-      "99ad51b31d0aef5b98874cf7b1588342"
+      "eab61530a6ded80a6bc2af2199d5324b"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.ith_bit_power",
@@ -340,7 +343,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "743112c29f7c863622abf141b02b1740"
+      "c2863f645da1d6e3077ba6971fad1c90"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.ith_bit_power",
@@ -359,7 +362,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "791635173f8c01b209942dbf12cd3ef4"
+      "a80176a3890189d62590118926844474"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.ith_bit_power",
@@ -415,7 +418,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "cdc69c551730705befcb74fb32070091"
+      "ad95f575c90a216fde499c82a9b99af0"
     ],
     [
       "Spec.P256.MontgomeryMultiplication._pow_step0",
@@ -437,7 +440,7 @@
         "typing_Spec.P256.Definitions.prime256"
       ],
       0,
-      "1c245c028fe85b6e1d1685292407cbb6"
+      "f605509a46716cd5b687840a08acd502"
     ],
     [
       "Spec.P256.MontgomeryMultiplication._pow_step1",
@@ -459,7 +462,7 @@
         "typing_Spec.P256.Definitions.prime256"
       ],
       0,
-      "c0d77d2aeabe8994f34f0cc98b1b0b99"
+      "7c861f0a1dfaa448da77405705214918"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.lemma_swaped_steps",
@@ -480,7 +483,7 @@
         "refinement_interpretation_Tm_refine_ff2b90c8f94db4f4bcfea92159681cf1"
       ],
       0,
-      "c13857814767603024ec87b432b5da8e"
+      "0f240e4b8435d10fa4ea2285b376d0f1"
     ],
     [
       "Spec.P256.MontgomeryMultiplication._pow_step",
@@ -499,7 +502,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "77b62fb8634e6277eed6b23755737ac8"
+      "17887a7af3f8e1dbede2e205075ad628"
     ],
     [
       "Spec.P256.MontgomeryMultiplication._pow_step",
@@ -518,7 +521,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "0e32ad7a22f3bf420ee1f7027f204786"
+      "3fe7be87d1027dc538df81d3becbf7bc"
     ],
     [
       "Spec.P256.MontgomeryMultiplication._pow_step",
@@ -543,7 +546,7 @@
         "typing_Spec.P256.Definitions.prime256"
       ],
       0,
-      "925063c8905ce3c13b65709ccb7c1457"
+      "91faaff86d39f3e067b552aaa54a2843"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.lemma_even",
@@ -574,7 +577,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "72bfa32b7626657db9cae3f25d7a7a38"
+      "86214d38d197915414eec1014c788aa2"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.lemma_even",
@@ -598,7 +601,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "da18c667ab83e8781a8967feffc7868f"
+      "05d8b7c0f139fe99448abad1a17addb1"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.lemma_even",
@@ -634,7 +637,7 @@
         "typing_Spec.P256.MontgomeryMultiplication.ith_bit_power"
       ],
       0,
-      "797bd8f372d9ada790c998e0b8024be2"
+      "fddffe38360fdab6baea43071e6e2114"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.lemma_odd",
@@ -668,7 +671,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "55f26f99f97721657f57a33e2fa1e759"
+      "0a6a0bd2821d960272a9abaab70c6900"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.lemma_odd",
@@ -695,7 +698,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "4f5e994cd4cf9ed1bbbeb8bfa2582070"
+      "0dbda4bd122a3290ad19e0fcd1e8bff2"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.lemma_odd",
@@ -731,7 +734,7 @@
         "typing_Spec.P256.MontgomeryMultiplication.ith_bit_power"
       ],
       0,
-      "83b58e7d0464eace63e0208ffb4a8edc"
+      "21626230abd05bfac47b968147659497"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.lemma_exponen_spec",
@@ -771,7 +774,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "895516b5697d6d6254175c45aef6c6a2"
+      "0bf211662458e1c4b8bb8bd1b0f2f0d1"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.lemma_exponen_spec_0",
@@ -811,7 +814,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "07877122020bc027d05025a464e951fe"
+      "7ae8197c8b8219a3fc183e04d515d559"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.lemma_exponen_spec_0",
@@ -831,7 +834,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "c1479917a49135d2a0f4101865c69c09"
+      "d4b0ee5b7cfaaf62d7e38b56b7330e0a"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.lemma_exponen_spec_0",
@@ -874,7 +877,7 @@
         "typing_Spec.P256.Lemmas.pow"
       ],
       0,
-      "3b5954d0ab0f36f8c223ccabdf240a99"
+      "d9d173e0a2050f99106de34f776b2fb2"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.lemma_exponen_spec",
@@ -912,7 +915,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "82a8e2ea5d6ad0acb0dc31e65c6222ed"
+      "fba72de90678920cdfe50cb2e0f856ac"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.lemma_exponen_spec",
@@ -971,7 +974,7 @@
         "unit_inversion", "unit_typing", "well-founded-ordering-on-nat"
       ],
       0,
-      "700a260906f83de13c97bc9cc74618f3"
+      "06effb29ad56792efc1d76303e0515b1"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.lemma_exponen_spec",
@@ -993,7 +996,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "ec152275c6107367a8d9a030fdaa5297"
+      "b395fa9a97a52cf886a46c988a050bdb"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.lemma_exponen_spec",
@@ -1015,7 +1018,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "c38861fed1809f617df933fd2356dad4"
+      "7114ccc440eb0d0e16bf56129b9dc65d"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.pow_spec",
@@ -1036,7 +1039,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "b3bee6dedf0eafbbba0a958faaff3caa"
+      "28891e6efb898a9a1a54f53173d08305"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.pow_spec",
@@ -1055,7 +1058,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "76b07e2119e76fa40cb69aa92938d6ae"
+      "5fc57e0ab7d6fd7abb314e4099a8cb96"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.pow_spec",
@@ -1088,7 +1091,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok"
       ],
       0,
-      "54f8869a5d21612501d96ca98b34d927"
+      "051e98345b43c54ba8f79eac159616ca"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.sq_root_spec",
@@ -1110,7 +1113,7 @@
         "typing_Spec.P256.Definitions.prime256"
       ],
       0,
-      "3cca96923b515b60e95b7c5f3fdf727c"
+      "9ba7324684d9dccab684cf811ec367f8"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.sq_root_spec",
@@ -1132,7 +1135,7 @@
         "typing_Spec.P256.Definitions.prime256"
       ],
       0,
-      "79ed34ff077fcf73cc4aea83265a741e"
+      "31f33953f2551fae49a9813c97cf28b0"
     ]
   ]
 ]

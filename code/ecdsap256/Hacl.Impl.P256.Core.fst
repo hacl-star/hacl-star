@@ -242,6 +242,7 @@ let normalisation_update z2x z3y p resultPoint =
     let h2 = ST.get() in 
   pop_frame()
   
+
 let norm p resultPoint tempBuffer = 
   let xf = sub p (size 0) (size 4) in 
   let yf = sub p (size 4) (size 4) in 
@@ -270,8 +271,8 @@ let norm p resultPoint tempBuffer =
      
   montgomery_multiplication_buffer xf z2f z2f;
   montgomery_multiplication_buffer yf z3f z3f;
-
   normalisation_update z2f z3f p resultPoint; 
+
     let h3 = ST.get() in 
     lemmaEraseToDomainFromDomain (fromDomain_ (as_nat h0 zf)); 
     power_distributivity (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf)) (prime -2) prime;

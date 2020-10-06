@@ -1,5 +1,5 @@
 [
-  "ÔÍ\t‡ð\u0010ú\u0013ùåÓª|X½ô",
+  "0©9çÙ›^mÁ¢\u001fî7ßËj",
   [
     [
       "Hacl.Impl.P256.LowLevel.RawCmp.eq_u8_nCT",
@@ -96,6 +96,30 @@
       ],
       0,
       "0b1a0b98d1759666f024816ac236f37d"
+    ],
+    [
+      "Hacl.Impl.P256.LowLevel.RawCmp.unsafe_bool_of_u64",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "b2t_def", "bool_inversion",
+        "bool_typing", "equality_tok_Lib.IntTypes.SEC@tok",
+        "equality_tok_Lib.IntTypes.U64@tok", "equation_FStar.UInt.eq",
+        "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
+        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
+        "equation_FStar.UInt.uint_t", "equation_FStar.UInt64.eq",
+        "equation_Lib.IntTypes.v", "int_typing", "lemma_FStar.UInt64.uv_inv",
+        "lemma_FStar.UInt64.vu_inv", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_Equality", "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_a6fce85b67bdd71ab9416e435ac3b18a",
+        "refinement_interpretation_Tm_refine_ea00864f59112084603b9e9c26fa7914",
+        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
+        "typing_FStar.UInt64.v", "typing_Lib.RawIntTypes.u64_to_UInt64"
+      ],
+      0,
+      "d6f04fa44711b354fedc9882acc9a865"
     ]
   ]
 ]
