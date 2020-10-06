@@ -372,6 +372,7 @@ val _compute_common_params_point_add: #c: curve -> h: felem c -> r: felem c -> u
 
 let _compute_common_params_point_add #c h r uh hCube u1 u2 s1 s2 tempBuffer =  
     let h0 = ST.get() in 
+  [@inline_let]
   let len = getCoordinateLenU64 c in
   let temp = sub tempBuffer (size 0) len in 
   
@@ -387,7 +388,6 @@ let _compute_common_params_point_add #c h r uh hCube u1 u2 s1 s2 tempBuffer =
   lemma_mod_mul_distr_l (fromDomain_ #c (as_nat c h1 h) * fromDomain_ #c (as_nat c h1 h)) (fromDomain_ #c (as_nat c h1 h)) prime
 
 
-inline_for_extraction noextract 
 val compute_common_params_point_add: #c: curve -> 
   tempBuffer22: lbuffer uint64 (size 22 *! getCoordinateLenU64 c) -> 
   Stack unit 
@@ -1049,6 +1049,7 @@ let point_add_if_second_branch_impl #c result p q u1 u2 s1 s2 r h uh hCube tempB
 let point_add #c p q result tempBuffer = 
   admit();
   let h0 = ST.get() in 
+
 
   let len = getCoordinateLenU64 c in 
   

@@ -458,7 +458,6 @@ val lemma_step: #c: curve -> i: size_t {uint_v i < getPower c} ->
 let lemma_step i = ()
 
 
-inline_for_extraction noextract 
 val montgomery_ladder_step: #c: curve -> #buf_type: buftype-> 
   p: point c -> q: point c -> tempBuffer: lbuffer uint64 (size 22 *! getCoordinateLenU64 c) -> 
   scalar: lbuffer_t buf_type uint8 (getScalarLen c) -> 
@@ -575,6 +574,7 @@ val montgomery_ladder: #c: curve -> #buf_type: buftype->  p: point c -> q: point
 let montgomery_ladder #c #a p q scalar tempBuffer =  
   let h0 = ST.get() in 
     admit();
+  [@inline_let]
   let len = getCoordinateLenU64 c in 
   let cycleLoop = getPowerU c in 
 

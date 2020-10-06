@@ -28,7 +28,6 @@ val cube: #c: curve -> a: felem c -> result: felem c -> Stack unit
     as_nat c h1 result = toDomain_ #c (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 a)))
 
 
-inline_for_extraction noextract
 val quatre: #c: curve -> a: felem c -> result: felem c -> Stack unit
   (requires fun h -> live h a /\ live h result /\ disjoint a result /\ as_nat c h a < getPrime c)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 

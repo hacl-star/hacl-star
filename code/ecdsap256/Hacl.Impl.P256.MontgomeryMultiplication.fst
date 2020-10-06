@@ -26,7 +26,6 @@ open Hacl.Spec.P256.MontgomeryMultiplication
 #set-options "--z3rlimit 200 --fuel  0 --ifuel 0"
 
 
-inline_for_extraction noextract
 val montgomery_multiplication_round_: #c: curve -> t: widefelem c -> t2: widefelem c -> 
   Stack unit
     (requires fun h -> live h t /\ live h t2 /\ wide_as_nat c h t2 = 0)
@@ -55,28 +54,6 @@ let montgomery_multiplication_round #c t round =
     add_long_without_carry t t2 round;
     shift1 round round; 
   pop_frame()  
-
-
-(* n = 2 ** 256 - 2 **224 + 2 ** 192 + 2 ** 96
-
-r = 2 ** 64
-s = 4
-rs = r ** s
-
-k = rs - n
-
-- (((((k * n) / r) / r) / r) / r) + ((n / r ) /  r) + n / r*)
-
-
-val lemma_test: #c: curve -> n: nat ->  t: nat {t < n * n} -> r_minor: nat -> 
-  steps: nat {n < steps * r_minor} -> Lemma (t + n * (t % r_minor) < (steps + 1) * r_minor * n)
-
-let lemma_test #c n t r_minor steps = 
-  assert(t % r_minor < r_minor);
-  assert(n * (t % r_minor) < r_minor * n);
-  assert(t < n * n);
-  assert(t < (steps * r_minor) * n);
-  assert(t + n * (t % r_minor) < (steps + 1) * r_minor * n)
 
 
 
@@ -304,8 +281,9 @@ let mult_one_round_ecdsa_prime #c t co k0 =
 
   modulo_addition_lemma t prime ((k0 * (t % pow2 64)) % pow2 64); 
   lemma_div_mod t3 (pow2 64);
-  admit();
+  (*admit();
   lemma_reduce_mod_ecdsa_prime prime t k0;
+  admit(); *)
   admit();
       assert(let rem = t3/ pow2 64 in rem * pow2 64 = t3);
       assert(exists (k: nat). k * pow2 64 = t3);
@@ -462,6 +440,7 @@ let montgomery_multiplication_buffer_by_one_ko #c a result =
   lemmaFromDomain #c (as_nat c h0 a)
 
 
+
 let montgomery_multiplication_buffer_by_one #c a result = 
   match c with 
   |P256 -> 
@@ -470,7 +449,6 @@ let montgomery_multiplication_buffer_by_one #c a result =
   |P384 -> montgomery_multiplication_buffer_by_one_ko a result
 
 
-(*
 val montgomery_multiplication_buffer_w_k0: #c: curve {(getPrime c + 1) % pow2 64 == 0}
   -> a: felem c -> b: felem c -> result: felem c ->  
   Stack unit
@@ -508,9 +486,14 @@ let montgomery_multiplication_buffer_w_k0 #c a b result =
     let h0_ = ST.get() in
     montgomery_multiplication_round #c t t; 
     let h1_ = ST.get() in
-    assert(
-    montgomery_multiplication_one_round_proof_w_ko #c (wide_as_nat c h0_ t) (wide_as_nat c h1_ t) (wide_as_nat c h0_ t);
-    lemma_inv2 #c (wide_as_nat c h1 t) (wide_as_nat c h0_ t) (wide_as_nat c h1_ t) (v i));
+    admit();
+    montgomery_multiplication_one_round_proof_w_ko #c (wide_as_nat c h0_ t) (wide_as_nat c h1_ t) (wide_as_nat c h0_ t)
+    );
+
+
+
+
+    (*lemma_inv2 #c (wide_as_nat c h1 t) (wide_as_nat c h0_ t) (wide_as_nat c h1_ t) (v i)); *)
 
   let h2 = ST.get() in 
   
@@ -525,7 +508,7 @@ let montgomery_multiplication_buffer_w_k0 #c a b result =
   let a_ = as_nat c h0 a in 
   let b_ = as_nat c h0 b in 
   let mod = modp_inv2_prime (pow2 (getPower c)) prime in 
- 
+  
   calc (==)
   {
     a_ * b_ * mod % prime;
@@ -593,8 +576,10 @@ let montgomery_multiplication_buffer_k0 #c a b result =
     montgomery_multiplication_round_k0 #c t t (getKo c); 
     let h1_ = ST.get() in
     admit();
-    montgomery_multiplication_one_round_proof_w_ko #c (wide_as_nat c h0_ t) (wide_as_nat c h1_ t) (wide_as_nat c h0_ t);
-    lemma_inv2 #c (wide_as_nat c h1 t) (wide_as_nat c h0_ t) (wide_as_nat c h1_ t) (v i));
+    montgomery_multiplication_one_round_proof_w_ko #c (wide_as_nat c h0_ t) (wide_as_nat c h1_ t) (wide_as_nat c h0_ t)
+    (*lemma_inv2 #c (wide_as_nat c h1 t) (wide_as_nat c h0_ t) (wide_as_nat c h1_ t) (v i) *)
+    
+    );
 
   let h2 = ST.get() in 
   
@@ -638,6 +623,7 @@ let montgomery_multiplication_buffer_k0 #c a b result =
   inDomain_mod_is_not_mod #c (fromDomain_ #c a_ * fromDomain_ #c b_)
 
 
+
 let montgomery_multiplication_buffer #c a b result = 
   match c with 
   |P256 ->
@@ -660,7 +646,6 @@ val montgomery_square_buffer_w_k0: #c: curve {(getPrime c + 1) % pow2 64 == 0} -
 
 
 let montgomery_square_buffer_w_k0 #c a result = 
-  assert_norm(prime256 > 3);
   push_frame();
     
   let len = getCoordinateLenU64 c in 
@@ -668,11 +653,33 @@ let montgomery_square_buffer_w_k0 #c a result =
     let h0 = ST.get() in 
   square_bn a t;  
     let h1 = ST.get() in 
-    (* mul_lemma_ (as_nat c h0 a) (as_nat P256 h0 a) prime256; *)
+  let inv h (i: nat { i <= uint_v len}) =     
+    let prime = getPrime c in 
+    live h t /\ wide_as_nat c h t < prime * prime  /\
+    modifies (loc t) h0 h /\
+    wide_as_nat c h t % prime = wide_as_nat c h1 t * modp_inv2 #c (pow2 (i * 64)) % prime
+    
+    in 
 
-  let inv h (i: nat { i <= uint_v len}) = True in 
-    for 0ul len inv (fun i ->  montgomery_multiplication_round #c t t);
+  assume (wide_as_nat c h1 t < getPrime c * getPrime c);
+  assume (wide_as_nat c h1 t % getPrime c = wide_as_nat c h1 t * modp_inv2 #c (pow2 (0 * 64)) % getPrime c);
+  
+  for 0ul len inv (fun i ->
+    let h0_ = ST.get() in 
+    montgomery_multiplication_round #c t t; 
+    let h1_ = ST.get() in
 
+
+    let a0 = wide_as_nat c h1 t in 
+    let a_i = wide_as_nat c h0_ t in 
+    let a_il = wide_as_nat c h1_ t in 
+    montgomery_multiplication_one_round_proof_border #c (a_i % pow2 64) a_i a_il;
+    lemma_multiplication_by_inverse_w_k0 #c a0 a_i a_il (v i)
+    
+    );
+
+  let h2 = ST.get() in 
+  assume (wide_as_nat c h2 t < 2 * getPrime c);
   reduction_prime_2prime_with_carry t result; 
   admit();
    
@@ -694,7 +701,6 @@ val montgomery_square_buffer_k0: #c: curve -> a: felem c -> result: felem c ->
 
 
 let montgomery_square_buffer_k0 #c a result = 
-  assert_norm(prime256 > 3);
   push_frame();
     
   let len = getCoordinateLenU64 c in 
@@ -702,8 +708,6 @@ let montgomery_square_buffer_k0 #c a result =
     let h0 = ST.get() in 
   square_bn a t;  
     let h1 = ST.get() in 
-    (* mul_lemma_ (as_nat c h0 a) (as_nat P256 h0 a) prime256; *)
-
   let inv h (i: nat { i <= uint_v len}) = True in 
     for 0ul len inv (fun i ->  montgomery_multiplication_round_k0 #c t t (getKo c) );
 
@@ -715,5 +719,7 @@ let montgomery_square_buffer_k0 #c a result =
 
 let montgomery_square_buffer #c a result = 
   match c with 
-  |P256 -> montgomery_square_buffer_w_k0 a result
+  |P256 ->
+     assume ((getPrime c + 1) % pow2 64 == 0);
+     montgomery_square_buffer_w_k0 a result
   |P384 -> montgomery_square_buffer_k0 a result
