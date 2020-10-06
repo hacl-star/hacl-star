@@ -3,6 +3,12 @@
 set -o pipefail
 set -e
 
+if ! [ -f lib_intrinsics.h ]; then
+  echo "This script is intended to be run from dist/foo."
+  exit 1
+fi
+
+
 if [[ $CC == "" ]]; then
   CC=cc
 fi
