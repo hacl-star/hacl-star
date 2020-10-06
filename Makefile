@@ -935,15 +935,15 @@ dist/election-guard/Makefile.basic: BUNDLE_FLAGS = \
   -bundle Hacl.Streaming.SHA2= \
   -bundle Hacl.Bignum256= \
   -bundle Hacl.Bignum4096= \
-  $(RSAPSS_BUNDLE) \
-  -bundle Hacl.HMAC_DRBG=
+  -bundle Hacl.Bignum,Hacl.Bignum.*[rename=Hacl_Bignum] \
+  -bundle Hacl.HMAC_DRBG= \
+  $(INTTYPES_BUNDLE)
 dist/election-guard/Makefile.basic: INTRINSIC_FLAGS =
 dist/election-guard/Makefile.basic: VALE_ASMS =
 dist/election-guard/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
-dist/election-guard/Makefile.basic: HAND_WRITTEN_H_FILES := $(filter %/lib_intrinsics.h %/evercrypt_targetconfig.h,$(HAND_WRITTEN_H_FILES))
 dist/election-guard/Makefile.basic: HACL_OLD_FILES =
-dist/election-guard/Makefile.basic: HAND_WRITTEN_FILES =
-dist/election-guard/Makefile.basic: HAND_WRITTEN_LIB_FLAGS = -bundle Lib.RandomBuffer.System= -bundle Lib.Memzero0
+dist/election-guard/Makefile.basic: HAND_WRITTEN_FILES := $(filter-out %/evercrypt_vale_stubs.c %/Lib_PrintBuffer.c,$(HAND_WRITTEN_FILES))
+dist/election-guard/Makefile.basic: HAND_WRITTEN_LIB_FLAGS = -bundle Lib.RandomBuffer.System= -bundle Lib.Memzero0=
 dist/election-guard/Makefile.basic: DEFAULT_FLAGS += \
   -bundle '\*[rename=Should_not_be_here]' \
   -falloca -ftail-calls
