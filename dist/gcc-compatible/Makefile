@@ -23,10 +23,12 @@
 # By default, this Makefile relies on the local checkout of kremlib
 KREMLIN_HOME ?= ../kremlin
 
+-include Makefile.config
+
 # 1. The usual pseudo auto-configuration
 
-UNAME		= $(shell uname)
-MARCH		= $(shell uname -m)
+UNAME		?= $(shell uname)
+MARCH		?= $(shell uname -m)
 ifeq ($(UNAME),Darwin)
   VARIANT	= -darwin
   SO		= so
@@ -34,7 +36,6 @@ else ifeq ($(UNAME),Linux)
   CFLAGS	+= -fPIC
   VARIANT	= -linux
   SO 		= so
-  LDFLAGS	+= -Xlinker -z -Xlinker noexecstack -Xlinker --unresolved-symbols=report-all
 else ifeq ($(OS),Windows_NT)
   CFLAGS        += -fno-asynchronous-unwind-tables
   CC		= $(MARCH)-w64-mingw32-gcc
@@ -73,7 +74,6 @@ endif
 
 OBJS 		+= $(patsubst %.S,%.o,$(wildcard *-$(MARCH)$(VARIANT).S))
 
--include Makefile.config
 include Makefile.basic
 
 CFLAGS		+= -Wno-parentheses -Wno-deprecated-declarations -Wno-\#warnings -Wno-error=cpp -Wno-cpp -g -std=gnu11 -O3

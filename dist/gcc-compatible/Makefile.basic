@@ -14,7 +14,7 @@ endif
 CFLAGS 	+= -I. -I $(KREMLIN_HOME)/include -I $(KREMLIN_HOME)/kremlib/dist/minimal
 CFLAGS 	+= -Wall -Wextra -Werror -std=c11 -Wno-unused-variable \
   -Wno-unknown-warning-option -Wno-unused-but-set-variable \
-  -Wno-unused-parameter -Wno-infinite-recursion \
+  -Wno-unused-parameter -Wno-infinite-recursion -Wno-unused-function \
   -g -fwrapv -D_BSD_SOURCE -D_DEFAULT_SOURCE
 ifeq ($(OS),Windows_NT)
 CFLAGS 	+= -D__USE_MINGW_ANSI_STDIO

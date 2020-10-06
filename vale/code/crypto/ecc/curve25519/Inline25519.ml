@@ -1,4 +1,5 @@
 let _ = print_string "#ifdef __GNUC__\n"
+let _ = print_string "#if defined(__x86_64__) || defined(_M_X64)\n"
 let _ = print_string "#pragma once\n"
 let _ = print_string "#include <inttypes.h>\n\n"
 
@@ -12,5 +13,5 @@ let _ = Vale_Inline_X64_Fswap_inline.cswap2_code_inline ()
 let _ = Vale_Inline_X64_Fsqr_inline.fsqr_code_inline ()
 let _ = Vale_Inline_X64_Fsqr_inline.fsqr2_code_inline ()
 
-let _ = print_string "#endif"
-
+let _ = print_string "#endif /* defined(__x86_64__) || defined(_M_X64) */\n"
+let _ = print_string "#endif /* __GNUC__ */\n"
