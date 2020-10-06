@@ -32,9 +32,9 @@ extern void C_String_print(C_String_t uu___);
  priv(ate)Key: uint8[32], 
  k (nonce): uint32[32]. 
   
- Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
+ Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
   
- The private key and the nonce are expected to be less than the curve order.
+ The private key and the nonce are expected to be more than 0 and less than the curve order.
 */
 extern bool
 Hacl_P256_ecdsa_sign_p256_sha2(
@@ -51,9 +51,9 @@ Hacl_P256_ecdsa_sign_p256_sha2(
  priv(ate)Key: uint8[32], 
  k (nonce): uint32[32]. 
   
- Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
+ Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
   
- The private key and the nonce are expected to be less than the curve order.
+ The private key and the nonce are expected to be more than 0 and less than the curve order.
 */
 extern bool
 Hacl_P256_ecdsa_sign_p256_sha384(
@@ -70,9 +70,9 @@ Hacl_P256_ecdsa_sign_p256_sha384(
  priv(ate)Key: uint8[32], 
  k (nonce): uint32[32]. 
   
- Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
+ Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
   
- The private key and the nonce are expected to be less than the curve order.
+ The private key and the nonce are expected to be more than 0 and less than the curve order.
 */
 extern bool
 Hacl_P256_ecdsa_sign_p256_sha512(
@@ -84,7 +84,8 @@ Hacl_P256_ecdsa_sign_p256_sha512(
 );
 
 /*
- This code is not side-channel resistant.
+ The input of the function is considered to be public, 
+  thus this code is not secret independent with respect to the operations done over the input.
   
  Input: m buffer: uint8 [mLen], 
  pub(lic)Key: uint8[64], 
@@ -103,7 +104,8 @@ Hacl_P256_ecdsa_verif_p256_sha2(
 );
 
 /*
- This code is not side-channel resistant.
+  The input of the function is considered to be public, 
+  thus this code is not secret independent with respect to the operations done over the input.
   
  Input: m buffer: uint8 [mLen], 
  pub(lic)Key: uint8[64], 
@@ -122,7 +124,8 @@ Hacl_P256_ecdsa_verif_p256_sha384(
 );
 
 /*
- This code is not side-channel resistant.
+  The input of the function is considered to be public, 
+  thus this code is not secret independent with respect to the operations done over the input.
   
  Input: m buffer: uint8 [mLen], 
  pub(lic)Key: uint8[64], 
@@ -8481,6 +8484,7 @@ static void test_sigver512(sigver_vector vec)
 
 static bool check_bound(uint8_t *b)
 {
+  uint64_t zero = (uint64_t)0U;
   uint64_t q1 = (uint64_t)17562291160714782033U;
   uint64_t q2 = (uint64_t)13611842547513532036U;
   uint64_t q3 = (uint64_t)18446744073709551615U;
@@ -8497,10 +8501,13 @@ static bool check_bound(uint8_t *b)
   uint64_t x21 = x2;
   uint64_t x31 = x3;
   uint64_t x41 = x4;
-  return
+  bool
+  r =
     x11
     < q4
     || (x11 == q4 && (x21 < q3 || (x21 == q3 && (x31 < q2 || (x31 == q2 && x41 < q1)))));
+  bool r1 = x11 == zero && x21 == zero && x31 == zero && x41 == zero;
+  return r && !r1;
 }
 
 static void test_siggen_256(siggen_vector vec)
@@ -8789,3 +8796,4 @@ exit_code main()
   }
   return EXIT_SUCCESS;
 }
+
