@@ -3,6 +3,12 @@
 set -o pipefail
 set -e
 
+if ! [ -f lib_intrinsics.h ]; then
+  echo "This script is intended to be run from dist/foo."
+  exit 1
+fi
+
+
 if [[ $CC == "" ]]; then
   CC=cc
 fi
@@ -79,23 +85,23 @@ int main() {
   return 0;
 }
 EOF
-  $CC -I. -I../kremlin/include -I../kremlin/kremlib/dist/minimal -march=native -O3 $file -o $out && $out > $out.test
-  $CC -I. -I../kremlin/include -I../kremlin/kremlib/dist/minimal -DBROKEN_INTRINSICS -march=native -O3 $file -o $out && $out > $out.ref
+  $CC $CROSS_CFLAGS -I. -I../kremlin/include -I../kremlin/kremlib/dist/minimal -march=native -O3 $file -o $out && $out > $out.test
+  $CC $CROSS_CFLAGS -I. -I../kremlin/include -I../kremlin/kremlib/dist/minimal -DBROKEN_INTRINSICS -march=native -O3 $file -o $out && $out > $out.ref
   diff $out.test $out.ref
 }
 
 detect_uint128 () {
   local file=$(mktemp /tmp/testint128.XXXXXXX).c
   echo "unsigned __int128 x = 0;" > $file
-  $CC -c $file -o /dev/null
+  $CC $CROSS_CFLAGS -c $file -o /dev/null
 }
 
 detect_x64 () {
-  [[ $(uname -m) == "x86_64" ]]
+  [[ $target_arch == "x86_64" ]]
 }
 
 detect_arm () {
-  [[ $(uname -m | cut -c 1-3) == "arm" ]] || [[ $(uname -m | cut -c 1-7) == "aarch64" ]];
+  [[ $target_arch == "arm" ]] || [[ $target_arch == "aarch64" ]];
 }
 
 detect_arm_cc () {
@@ -111,7 +117,7 @@ int main () {
   return 0;
 }
 EOF
-  $CC -I. -march=armv8-a+simd -c $file -o /dev/null
+  $CC $CROSS_CFLAGS -I. -march=armv8-a+simd -c $file -o /dev/null
 }
 
 detect_broken_xcode () {
@@ -144,7 +150,22 @@ int main () {
   return 0;
 }
 EOF
-  $CC -Werror -c $file -o /dev/null
+  $CC $CROSS_CFLAGS -Werror -c $file -o /dev/null
+}
+
+# Usage info
+show_help () {
+  printf "\nUsage: configure -target <triple>\n\n"
+  printf "This script configures HACL/Evercrypt. You can specify the following options:\n\n"
+  printf "    -target         Specify the target triple for the build. This follows the\n"
+  printf "                    Clang target triple convention.\n"
+  printf "                    Details: https://clang.llvm.org/docs/CrossCompilation.html\n"
+  printf "                    Currently supported triples are:\n"
+  printf "                    * aarch64-none-linux-android\n"
+  printf "                    * aarch64-none-linux-gnu\n"
+  printf "    --disable-bzero Do not use explicit_bzero (binary will work with an old GLIBC)\n"
+  printf "    --disable-ocaml Disable OCAML bindings\n"
+  printf "\n"
 }
 
 # Main auto-detection
@@ -152,28 +173,117 @@ EOF
 echo -n > Makefile.config
 echo -n > config.h
 
+# Default arguments
+disable_ocaml=0
+disable_bzero=0
+
+# Parse command line arguments.
+all_args=("$@")
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -target) build_target="$2"; shift ;;
+        --disable-ocaml) disable_ocaml=1 ;;
+        --disable-bzero) disable_bzero=1 ;;
+        --help) show_help; exit 0 ;;
+        *) show_help; exit 2 ;;
+    esac
+    shift
+done
+
+# We need to have the following to decide what to build and what not.
+# * build_target: the llvm target triplet, e.g. armv7a-none-eabi
+# This is being decomposed into the following information.
+# * target_arch: the target architecture, e.g. aarch64, arm, x86_64, i386
+# * target_sys: the target system, e.g. none, linux, win32, darwin
+# * target_abi: the target abi, e.g. eabi, gnu, android, macho
+
+if [ ! -z "$build_target" ]; then
+  echo "Doing cross build for $build_target. Make sure that your toolchain is configured properly."
+  if [[ "$build_target" == "aarch64-none-linux-android" ]]; then
+    # NOTE: We assume that the Android environment is set up correctly.
+    #       Make sure that `crtbegin_so.o` and `crtend_so.o` can be found.
+
+    if [ -z $NDK ]; then
+      echo "Compiling for aarch64-none-linux-android requires an NDK toolchain."
+      echo "Then please set at least NDK appropriately. SYSROOT and NDK_TOOLCHAIN might be necessary as well."
+      echo "Get your toolchain here: https://developer.android.com/ndk/downloads/"
+      exit 1
+    fi
+    if [[ $SYSROOT == "" ]]; then
+      SYSROOT="$NDK/toolchains/llvm/prebuilt/darwin-x86_64/sysroot"
+    fi
+    if [[ $NDK_TOOLCHAIN == "" ]]; then
+      NDK_TOOLCHAIN="$NDK/toolchains/llvm/prebuilt/darwin-x86_64"
+    fi
+
+    target_arch="aarch64"
+    target_sys="Linux"
+    target_abi="android"
+    CROSS_TARGET="-target $build_target"
+    CROSS_SYSROOT="--sysroot=$SYSROOT"
+    CROSS_INCLUDES="-I$SYSROOT/usr/include/"
+
+    # Set compiler
+    CC="$NDK/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang"
+    echo "CC=$CC" >> Makefile.config
+  elif [[ "$build_target" == "aarch64-none-linux-gnu" ]]; then
+    if [ -z $TOOLCHAIN ]; then
+      echo "Compiling for aarch64-none-linux-gnu-gcc requires a GCC toolchain."
+      echo "This probably only works on Windows and Linux."
+      echo "Get your toolchain here: https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-a/downloads"
+      echo "And then set TOOLCHAIN appropriately."
+      exit 1
+    fi
+
+    target_arch="aarch64"
+    target_sys="Linux"
+    target_abi="gnu"
+
+    # Set compiler
+    CC="$TOOLCHAIN/bin/aarch64-none-linux-gnu-gcc"
+    echo "CC=$CC" >> Makefile.config
+    # Using GCC here doesn't require setting anything else.
+  else
+    show_help
+    exit 0
+  fi
+  CROSS_CFLAGS="$CROSS_TARGET $CROSS_SYSROOT $CROSS_INCLUDES"
+  echo "CFLAGS += $CROSS_CFLAGS" >> Makefile.config
+else
+  target_arch=$(uname -m)
+  target_sys=$(uname)
+  target_abi="native"
+fi
+
+if [[ $target_arch == "aarch64" ]]; then
+  # Set UNAME and MARCH when cross-compiling
+  echo "UNAME = Linux" >> Makefile.config
+  echo "MARCH = aarch64" >> Makefile.config
+fi
+
 if detect_arm; then
   echo "... detected ARM platform"
-  echo "... $(uname -m) does not support 256-bit arithmetic"
+  echo "... $build_target does not support 256-bit arithmetic"
   echo "BLACKLIST += $(ls *CP256*.c *_256.c *_Vec256.c | xargs)" >> Makefile.config
-  echo "... $(uname -m) does not support legacy vale stubs"
+  echo "... $build_target does not support legacy vale stubs"
   echo "BLACKLIST += evercrypt_vale_stubs.c" >> Makefile.config
   echo "CFLAGS += -DLib_IntVector_Intrinsics_vec256=\"void *\"" >> Makefile.config
   if detect_arm_cc; then
-    echo "... $CC can cross-compile to ARM64 with SIMD"
+    echo "... $CC $CROSS_CFLAGS can cross-compile to ARM64 with SIMD"
     echo "CFLAGS_128 = -march=armv8-a+simd" >> Makefile.config
     echo "#define IS_ARM_8 1" >> config.h
   else
-    echo "$CC cannot compile 128-bit vector arithmetic, disabling"
+    echo "$CC $CROSS_CFLAGS cannot compile 128-bit vector arithmetic, disabling"
     echo "BLACKLIST += $(ls *CP128*.c *_128.c *_Vec128.c | xargs)" >> Makefile.config
     echo "#define IS_ARM_7 1" >> config.h
+    echo "CFLAGS += -DLib_IntVector_Intrinsics_vec128=\"void *\"" >> Makefile.config
   fi
 fi
 
 if ! detect_x64; then
-  echo "$(uname -m) does not support x64 assembly, disabling Curve64"
+  echo "$build_target does not support x64 assembly, disabling Curve64"
   echo "BLACKLIST += Hacl_Curve25519_64.c $(ls Hacl_HPKE_Curve64_*.c | xargs)" >> Makefile.config
-  echo "$(uname -m) does not support _addcarry_u64, using a C implementation"
+  echo "$build_target does not support _addcarry_u64, using a C implementation"
   echo "#define BROKEN_INTRINSICS 1" >> config.h
   echo "#define IS_NOT_X64 1" >> config.h
 else
@@ -194,20 +304,26 @@ fi
 if ! detect_uint128; then
   # Explicitly not supporting compilation with MSVC, which would entail not
   # defining KRML_VERIFIED_UINT128.
-  echo "$CC does not support unsigned __int128 -- using a fallback verified implementation"
+  echo "$CC $CROSS_CFLAGS does not support unsigned __int128 -- using a fallback verified implementation"
   echo "CFLAGS += -DKRML_VERIFIED_UINT128" >> Makefile.config
 fi
 
-if ! detect_ocaml; then
+if [[ "$disable_ocaml" == "1" ]] || ! detect_ocaml; then
   echo "OCaml bindings disabled"
   echo "DISABLE_OCAML_BINDINGS=1" >> Makefile.config
 fi
 
-if [[ $(uname) == "Linux" ]]; then
-  if check_explicit_bzero; then
+if [[ $target_sys == "Linux" ]]; then
+  if [[ "$disable_bzero" == "1" ]]; then
+    echo "disabling the use of explicit_bzero"
+    echo "#define LINUX_NO_EXPLICIT_BZERO" >> config.h
+  elif check_explicit_bzero; then
     echo "... glibc is recent enough for explicit_bzero"
   else
     echo "toolchain does not support explicit_bzero"
     echo "#define LINUX_NO_EXPLICIT_BZERO" >> config.h
+  fi
+  if [[ ! $target_arch == "aarch64" ]]; then
+    echo "LDFLAGS	+= -Xlinker -z -Xlinker noexecstack -Xlinker --unresolved-symbols=report-all" >> Makefile.config
   fi
 fi
