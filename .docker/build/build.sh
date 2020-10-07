@@ -34,7 +34,7 @@ function vale_test() {
 }
 
 # This is just out of complete obsessiveness about CI: we check that the code
-# compiles on antedeluvian machines: mtune=generic is the lowest target GCC
+# compiles on antediluvian machines: mtune=generic is the lowest target GCC
 # accepts, and seems to default to -mtune=core2 on most recent versions of GCC.
 declare -A cflags
 cflags[portable-gcc-compatible]="-mtune=generic"
