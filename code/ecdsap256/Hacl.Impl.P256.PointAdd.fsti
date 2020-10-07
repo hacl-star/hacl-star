@@ -15,7 +15,7 @@ open Hacl.Spec.P256.MontgomeryMultiplication
 #set-options "--z3rlimit 100"
 
 val point_add: #c: curve -> p: point c -> q: point c -> result: point c 
-  -> tempBuffer: lbuffer uint64 (size 22 *! getCoordinateLenU64 c) -> 
+  -> tempBuffer: lbuffer uint64 (size 27 *! getCoordinateLenU64 c) -> 
    Stack unit (requires fun h -> 
      let prime = getPrime c in 
      live h p /\ live h q /\ live h result /\ live h tempBuffer /\ 
