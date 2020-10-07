@@ -144,6 +144,8 @@ lib_gen/Lib_RandomBuffer_System_gen.exe: lib/Lib_RandomBuffer_System_bindings.cm
 # https://www.gnu.org/software/make/manual/html_node/Canceling-Rules.html
 %.exe:
 
+all: ocamlevercrypt.cmxa
+
 lib_gen/%_gen.exe: libevercrypt.a
 	$(OCAMLOPT) $(filter-out %.a,$^) libevercrypt.a -o $@
 
