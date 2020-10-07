@@ -189,13 +189,13 @@ ocamlevercrypt.cmxa: $(ALL_BINDINGS) $(ALL_ML_STUBS) $(ALL_C_STUBS) libevercrypt
 
 STUBLIBS_PATH=$(OPAM_SWITCH_PREFIX)/lib/stublibs
 
-dllocamlevercrypt.so: ocamlevercrypt.cmxa ocamlevercrypt.cma
+dllocamlevercrypt.$(SO): ocamlevercrypt.cmxa ocamlevercrypt.cma
 	ocamlmklib -o ocamlevercrypt $(ALL_C_STUBS) -L. -L$(STUBLIBS_PATH) -levercrypt
 
-install-hacl-star-raw: dllocamlevercrypt.so
+install-hacl-star-raw: dllocamlevercrypt.$(SO)
 	ocamlfind install hacl-star-raw META $(CTYPES_ML) $(CTYPES_CMX) $(CTYPES_CMO) $(CTYPES_CMI) \
-         libevercrypt.a libevercrypt.so ocamlevercrypt.cma ocamlevercrypt.cmxa ocamlevercrypt.a \
-         libocamlevercrypt.a dllocamlevercrypt.so config.h
+         libevercrypt.a libevercrypt.$(SO) ocamlevercrypt.cma ocamlevercrypt.cmxa ocamlevercrypt.a \
+         libocamlevercrypt.a dllocamlevercrypt.$(SO) config.h
 
 endif
 endif
