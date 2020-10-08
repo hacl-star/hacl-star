@@ -24,6 +24,27 @@
 
 #include "Hacl_Bignum4096.h"
 
+/*******************************************************************************
+
+A verified 4096-bit bignum library.
+
+This is a 64-bit optimized version, where bignums are represented as an array
+of four unsigned 64-bit integers, i.e. uint64_t[64]. Furthermore, the
+limbs are stored in little-endian format, i.e. the least significant limb is at
+index 0. Each limb is stored in native format in memory. Example:
+
+  uint64_t sixteen[64] = { 0x10 }
+
+  (relying on the fact that when an initializer-list is provided, the remainder
+  of the object gets initialized as if it had static storage duration, i.e. with
+  zeroes)
+
+We strongly encourage users to go through the conversion functions, e.g.
+bn_from_bytes_be, to i) not depend on internal representation choices and ii)
+have the ability to switch easily to a 32-bit optimized version in the future.
+
+*******************************************************************************/
+
 /************************/
 /* Arithmetic functions */
 /************************/

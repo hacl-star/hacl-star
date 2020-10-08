@@ -41,6 +41,23 @@ extern "C" {
 #include "Hacl_Kremlib.h"
 #include "Hacl_Bignum.h"
 
+/*******************************************************************************
+
+A verified 256-bit bignum library.
+
+This is a 64-bit optimized version, where bignums are represented as an array
+of four unsigned 64-bit integers, i.e. uint64_t[4]. Furthermore, the
+limbs are stored in little-endian format, i.e. the least significant limb is at
+index 0. Each limb is stored in native format in memory. Example:
+
+  uint64_t sixteen[4] = { 0x10; 0x00; 0x00; 0x00 }
+
+We strongly encourage users to go through the conversion functions, e.g.
+bn_from_bytes_be, to i) not depend on internal representation choices and ii)
+have the ability to switch easily to a 32-bit optimized version in the future.
+
+*******************************************************************************/
+
 /************************/
 /* Arithmetic functions */
 /************************/
@@ -225,6 +242,20 @@ Compute `2 ^ (128 * nLen) mod n`.
   avoid memory leaks.
 */
 uint64_t *Hacl_Bignum256_new_precompr2(uint32_t nLen, uint64_t *n);
+
+/*
+Write `a ^ (-1) mod n` in `res`.
+
+  The arguments a, n and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
+  The function returns false if any of the preconditions of mod_exp_precompr2 are
+  violated, true otherwise.
+
+  This function is *UNSAFE* and requires C clients to observe bn_mod_inv_prime_lemma
+  from Hacl.Spec.Bignum.ModInv.fst, which amounts to:
+  • n is a prime
+  • 0 < a 
+*/
+bool Hacl_Bignum256_mod_inv_prime(uint64_t *n, uint64_t *a, uint64_t *res);
 
 
 /********************/

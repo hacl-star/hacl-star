@@ -1,6 +1,73 @@
 A note on rewriting stateful code into higher-order combinators
 ===============================================================
 
+Preface to the new edition
+--------------------------
+
+This document describes the inner workings of what is referred to as the
+"specialize/inline tactic". It also reviews a style known as "wrappers"
+(solution #2, below) and a manual style known as "function parameters" (solution
+\#3, below). The "wrappers" style has mostly disappeared from the HACL codebase,
+but the "function parameters" style remains. Furthermore, there is a new style
+known as "type classes", currently used only for the bignum development.
+
+This, quite naturally, begs the question of which of these four styles should be
+used. Excerpt from a conversation with Marina.
+
+### Marina asks:
+
+in general, what should we use when we have a function that depends on t ?
+
+- a wrapper
+- a specialize/inline tactic
+- a type class
+- take a function as a parameter
+
+### My answer:
+
+so at least there's two that I'm not too keen on:
+
+- taking a function as a parameter is subsumed by taking a type class... this
+  has more syntactic support, allows you to pack multiple functions in the same
+  argument, has projectors... so the syntactic overhead is lower and at least
+  you can give your code some structure; for instance, for hmac/hkdf, you could
+  very well introduce a "hashable" type class and it would be much more natural
+  than taking 5 functions
+- wrappers (i.e. let f_32 = f_ 32 ... let f_64 = f_ 64 ... let f = function | 32
+  -> f_32 | 64 -> f_64): this style is easy to understand but it's a closed
+  parameterization, i.e. if you're stuck with one value of the index = one
+  implementation, this for instance caused problems in Curve25519, because you
+  had both the Hacl and the Vale implementation for Field64, and with a wrapper,
+  you have to commit to only one... same deal with the hashes, we have two
+  implementation for SHA256's compress function (the one from Vale), so we
+  cannot use wrappers in that case either
+
+now between the type class and the specialize/inline tactic...
+
+a general remark: bear in mind that all specialize/inline tactic, type class,
+and taking functions as parameters are exactly the same thing...
+specialize/inline rewrites your code to be in the style where it takes functions
+as parameters, it just saves you the trouble of having to do it yourself... and
+type classes are just a nicer way to take functions as parameters...
+
+now the question is, why type classes for bignums over specialize/inline... I
+think there's three reasons, none of which are very deep:
+
+- the specialize/inline tactic does not know how to deal with two indices
+  (bignum is parameterized over both the type of the limbs and the length of the
+  limbs)
+- the specialize/inline tactic requires a very specific syntactic form where the
+  index always comes first, which is something that wasn't necessarily true in
+  the development
+- the specialize/inline tactic has only been debugged on developments where the
+  index is an inductive, not a nat
+- the specialize/inline tactic can be hard to debug, so for bignum, since we
+  wanted very precise control over the reduction and it was a somewhat new
+  use-case, I did it "by hand", using type classes just as a mildly convenient
+  syntactic feature that gives some structure to the code
+
+### Moving on to the original document...
+
 This document describes the intent, usage and inner workings of the "higher-order
 tactic", whose goal is to rewrite agile, stateful code into a series of
 higher-order functions. The higher-order functions can then be specialized and

@@ -24,6 +24,23 @@
 
 #include "Hacl_Bignum256.h"
 
+/*******************************************************************************
+
+A verified 256-bit bignum library.
+
+This is a 64-bit optimized version, where bignums are represented as an array
+of four unsigned 64-bit integers, i.e. uint64_t[4]. Furthermore, the
+limbs are stored in little-endian format, i.e. the least significant limb is at
+index 0. Each limb is stored in native format in memory. Example:
+
+  uint64_t sixteen[4] = { 0x10; 0x00; 0x00; 0x00 }
+
+We strongly encourage users to go through the conversion functions, e.g.
+bn_from_bytes_be, to i) not depend on internal representation choices and ii)
+have the ability to switch easily to a 32-bit optimized version in the future.
+
+*******************************************************************************/
+
 /************************/
 /* Arithmetic functions */
 /************************/
@@ -256,19 +273,15 @@ static void sqr(uint64_t *a, uint64_t *res)
   }
 }
 
-static bool check(uint64_t *n)
+static uint64_t check(uint64_t *n)
 {
   uint64_t one[4U] = { 0U };
   memset(one, 0U, (uint32_t)4U * sizeof (uint64_t));
   one[0U] = (uint64_t)1U;
-  uint64_t m0 = n[0U] & (uint64_t)1U;
+  uint64_t bit0 = n[0U] & (uint64_t)1U;
+  uint64_t m0 = (uint64_t)0U - bit0;
   uint64_t m1 = Hacl_Bignum_bn_lt_mask((uint32_t)4U, one, n);
-  uint64_t m = m0 & m1;
-  if (m == (uint64_t)0U)
-  {
-    return false;
-  }
-  return true;
+  return m0 & m1;
 }
 
 static void precomp(uint64_t *n, uint64_t *res)
@@ -283,34 +296,28 @@ static void precomp(uint64_t *n, uint64_t *res)
   uint64_t mask10 = mask;
   uint64_t res1 = mask10;
   uint64_t mask0 = res1;
-  uint32_t bits;
-  if (mask0 == (uint64_t)0U)
+  uint64_t priv0 = (uint64_t)0U;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
-    uint64_t priv0 = (uint64_t)0U;
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
-    {
-      uint64_t mask1 = FStar_UInt64_eq_mask(n[i], (uint64_t)0U);
-      priv0 = (mask1 & priv0) | (~mask1 & (uint64_t)i);
-    }
-    uint64_t ind = priv0;
-    uint64_t uu____1 = n[(uint32_t)ind];
-    uint64_t priv = (uint64_t)0U;
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
-    {
-      uint64_t bit_i = uu____1 >> i & (uint64_t)1U;
-      uint64_t mask1 = FStar_UInt64_eq_mask(bit_i, (uint64_t)1U);
-      priv = (mask1 & (uint64_t)i) | (~mask1 & priv);
-    }
-    uint64_t bits0 = priv;
-    bits = (uint32_t)((uint64_t)64U * ind + bits0);
+    uint64_t mask1 = FStar_UInt64_eq_mask(n[i], (uint64_t)0U);
+    priv0 = (mask1 & priv0) | (~mask1 & (uint64_t)i);
   }
-  else
+  uint64_t ind = priv0;
+  uint64_t uu____1 = n[(uint32_t)ind];
+  uint64_t priv = (uint64_t)0U;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
   {
-    bits = (uint32_t)0U;
+    uint64_t bit_i = uu____1 >> i & (uint64_t)1U;
+    uint64_t mask1 = FStar_UInt64_eq_mask(bit_i, (uint64_t)1U);
+    priv = (mask1 & (uint64_t)i) | (~mask1 & priv);
   }
+  uint64_t bits = priv;
+  uint64_t bits0 = (uint64_t)64U * ind + bits;
+  uint64_t bits00 = ~mask0 & bits0;
+  uint32_t b = (uint32_t)bits00;
   memset(res, 0U, (uint32_t)4U * sizeof (uint64_t));
-  bit_set(res, bits);
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)512U - bits; i++)
+  bit_set(res, b);
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)512U - b; i++)
   {
     add_mod_n(n, res, res, res);
   }
@@ -471,20 +478,11 @@ Write `a mod n` in `res`
 */
 bool Hacl_Bignum256_mod(uint64_t *n, uint64_t *a, uint64_t *res)
 {
-  bool b0 = check(n);
+  uint64_t m0 = check(n);
   uint64_t n2[8U] = { 0U };
   Hacl_Bignum256_mul(n, n, n2);
-  uint64_t m0 = Hacl_Bignum_bn_lt_mask((uint32_t)8U, a, n2);
-  bool b1;
-  if (m0 == (uint64_t)0U)
-  {
-    b1 = false;
-  }
-  else
-  {
-    b1 = true;
-  }
-  bool is_valid = b0 && b1;
+  uint64_t m1 = Hacl_Bignum_bn_lt_mask((uint32_t)8U, a, n2);
+  uint64_t is_valid_m = m0 & m1;
   uint64_t r2[4U] = { 0U };
   precomp(n, r2);
   uint64_t a_mod[4U] = { 0U };
@@ -493,7 +491,14 @@ bool Hacl_Bignum256_mod(uint64_t *n, uint64_t *a, uint64_t *res)
   uint64_t mu = Hacl_Bignum_ModInv64_mod_inv_u64(n[0U]);
   reduction(n, mu, a1, a_mod);
   to(n, mu, r2, a_mod, res);
-  return is_valid;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+  {
+    uint64_t *os = res;
+    uint64_t x = res[i];
+    uint64_t x0 = is_valid_m & x;
+    os[i] = x0;
+  }
+  return is_valid_m == (uint64_t)0xFFFFFFFFFFFFFFFFU;
 }
 
 static void
@@ -583,7 +588,7 @@ Write `a ^ b mod n` in `res`.
 bool
 Hacl_Bignum256_mod_exp(uint64_t *n, uint64_t *a, uint32_t bBits, uint64_t *b, uint64_t *res)
 {
-  bool b0 = check(n);
+  uint64_t m0 = check(n);
   uint32_t bLen0 = (bBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
   KRML_CHECK_SIZE(sizeof (uint64_t), bLen0);
   uint64_t *bn_zero = alloca(bLen0 * sizeof (uint64_t));
@@ -623,16 +628,7 @@ Hacl_Bignum256_mod_exp(uint64_t *n, uint64_t *a, uint32_t bBits, uint64_t *b, ui
   }
   uint64_t m3 = Hacl_Bignum_bn_lt_mask((uint32_t)4U, a, n);
   uint64_t m = (m1_ & m2) & m3;
-  bool b1;
-  if (m == (uint64_t)0U)
-  {
-    b1 = false;
-  }
-  else
-  {
-    b1 = true;
-  }
-  bool is_valid = b0 && b1;
+  uint64_t is_valid_m = m0 & m;
   uint64_t r2[4U] = { 0U };
   precomp(n, r2);
   uint64_t acc[4U] = { 0U };
@@ -646,7 +642,14 @@ Hacl_Bignum256_mod_exp(uint64_t *n, uint64_t *a, uint32_t bBits, uint64_t *b, ui
   to(n, nInv_u64, r2, acc, accM);
   mod_exp_loop(n, nInv_u64, bBits, bLen, b, aM, accM);
   from(n, nInv_u64, accM, res);
-  return is_valid;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+  {
+    uint64_t *os = res;
+    uint64_t x = res[i];
+    uint64_t x0 = is_valid_m & x;
+    os[i] = x0;
+  }
+  return is_valid_m == (uint64_t)0xFFFFFFFFFFFFFFFFU;
 }
 
 static void
@@ -756,7 +759,7 @@ Hacl_Bignum256_mod_exp_mont_ladder(
   uint64_t *res
 )
 {
-  bool b0 = check(n);
+  uint64_t m0 = check(n);
   uint32_t bLen0 = (bBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
   KRML_CHECK_SIZE(sizeof (uint64_t), bLen0);
   uint64_t *bn_zero = alloca(bLen0 * sizeof (uint64_t));
@@ -796,16 +799,7 @@ Hacl_Bignum256_mod_exp_mont_ladder(
   }
   uint64_t m3 = Hacl_Bignum_bn_lt_mask((uint32_t)4U, a, n);
   uint64_t m = (m1_ & m2) & m3;
-  bool b1;
-  if (m == (uint64_t)0U)
-  {
-    b1 = false;
-  }
-  else
-  {
-    b1 = true;
-  }
-  bool is_valid = b0 && b1;
+  uint64_t is_valid_m = m0 & m;
   uint64_t r2[4U] = { 0U };
   precomp(n, r2);
   uint64_t one[4U] = { 0U };
@@ -827,7 +821,14 @@ Hacl_Bignum256_mod_exp_mont_ladder(
     rM1[i] = rM1[i] ^ dummy;
   }
   from(n, nInv_u64, rM0, res);
-  return is_valid;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+  {
+    uint64_t *os = res;
+    uint64_t x = res[i];
+    uint64_t x0 = is_valid_m & x;
+    os[i] = x0;
+  }
+  return is_valid_m == (uint64_t)0xFFFFFFFFFFFFFFFFU;
 }
 
 /*
@@ -853,30 +854,21 @@ uint64_t *Hacl_Bignum256_new_precompr2(uint32_t nLen, uint64_t *n)
   memset(one, 0U, nLen * sizeof (uint64_t));
   memset(one, 0U, nLen * sizeof (uint64_t));
   one[0U] = (uint64_t)1U;
-  uint64_t m0 = n[0U] & (uint64_t)1U;
+  uint64_t bit0 = n[0U] & (uint64_t)1U;
+  uint64_t m0 = (uint64_t)0U - bit0;
   uint64_t m1 = Hacl_Bignum_bn_lt_mask(nLen, one, n);
-  uint64_t m = m0 & m1;
-  bool res;
-  if (m == (uint64_t)0U)
-  {
-    res = false;
-  }
-  else
-  {
-    res = true;
-  }
-  bool is_valid = res;
-  if (!is_valid)
+  uint64_t is_valid_m = m0 & m1;
+  if (!(is_valid_m == (uint64_t)0xFFFFFFFFFFFFFFFFU))
   {
     return NULL;
   }
   KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
-  uint64_t *res0 = KRML_HOST_CALLOC(nLen, sizeof (uint64_t));
-  if (res0 == NULL)
+  uint64_t *res = KRML_HOST_CALLOC(nLen, sizeof (uint64_t));
+  if (res == NULL)
   {
-    return res0;
+    return res;
   }
-  uint64_t *res1 = res0;
+  uint64_t *res1 = res;
   uint64_t *res2 = res1;
   KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
   uint64_t *bn_zero = alloca(nLen * sizeof (uint64_t));
@@ -890,34 +882,30 @@ uint64_t *Hacl_Bignum256_new_precompr2(uint32_t nLen, uint64_t *n)
   uint64_t mask10 = mask;
   uint64_t res3 = mask10;
   uint64_t mask0 = res3;
-  uint32_t bits;
-  if (mask0 == (uint64_t)0U)
+  uint64_t priv0 = (uint64_t)0U;
+  for (uint32_t i = (uint32_t)0U; i < nLen; i++)
   {
-    uint64_t priv0 = (uint64_t)0U;
-    for (uint32_t i = (uint32_t)0U; i < nLen; i++)
-    {
-      uint64_t mask1 = FStar_UInt64_eq_mask(n[i], (uint64_t)0U);
-      priv0 = (mask1 & priv0) | (~mask1 & (uint64_t)i);
-    }
-    uint64_t ind = priv0;
-    uint64_t uu____1 = n[(uint32_t)ind];
-    uint64_t priv = (uint64_t)0U;
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
-    {
-      uint64_t bit_i = uu____1 >> i & (uint64_t)1U;
-      uint64_t mask1 = FStar_UInt64_eq_mask(bit_i, (uint64_t)1U);
-      priv = (mask1 & (uint64_t)i) | (~mask1 & priv);
-    }
-    uint64_t bits0 = priv;
-    bits = (uint32_t)((uint64_t)64U * ind + bits0);
+    uint64_t mask1 = FStar_UInt64_eq_mask(n[i], (uint64_t)0U);
+    priv0 = (mask1 & priv0) | (~mask1 & (uint64_t)i);
   }
-  else
+  uint64_t ind = priv0;
+  uint64_t uu____1 = n[(uint32_t)ind];
+  uint64_t priv = (uint64_t)0U;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
   {
-    bits = (uint32_t)0U;
+    uint64_t bit_i = uu____1 >> i & (uint64_t)1U;
+    uint64_t mask1 = FStar_UInt64_eq_mask(bit_i, (uint64_t)1U);
+    priv = (mask1 & (uint64_t)i) | (~mask1 & priv);
   }
+  uint64_t bits = priv;
+  uint64_t bits0 = (uint64_t)64U * ind + bits;
+  uint64_t bits00 = ~mask0 & bits0;
+  uint32_t b = (uint32_t)bits00;
   memset(res2, 0U, nLen * sizeof (uint64_t));
-  Hacl_Bignum_bn_set_ith_bit(nLen, res2, bits);
-  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)128U * nLen - bits; i0++)
+  uint32_t i0 = b / (uint32_t)64U;
+  uint32_t j = b % (uint32_t)64U;
+  res2[i0] = res2[i0] | (uint64_t)1U << j;
+  for (uint32_t i1 = (uint32_t)0U; i1 < (uint32_t)128U * nLen - b; i1++)
   {
     uint64_t c0 = (uint64_t)0U;
     uint32_t k0 = nLen / (uint32_t)4U * (uint32_t)4U;
@@ -991,6 +979,107 @@ uint64_t *Hacl_Bignum256_new_precompr2(uint32_t nLen, uint64_t *n)
     }
   }
   return res2;
+}
+
+/*
+Write `a ^ (-1) mod n` in `res`.
+
+  The arguments a, n and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
+  The function returns false if any of the preconditions of mod_exp_precompr2 are
+  violated, true otherwise.
+
+  This function is *UNSAFE* and requires C clients to observe bn_mod_inv_prime_lemma
+  from Hacl.Spec.Bignum.ModInv.fst, which amounts to:
+  • n is a prime
+  • 0 < a 
+*/
+bool Hacl_Bignum256_mod_inv_prime(uint64_t *n, uint64_t *a, uint64_t *res)
+{
+  uint64_t b2 = (uint64_t)2U;
+  uint64_t n2[4U] = { 0U };
+  uint64_t *a0 = n;
+  uint64_t *res0 = n2;
+  uint64_t c0 = (uint64_t)0U;
+  uint32_t k0 = (uint32_t)0U;
+  for (uint32_t i = (uint32_t)0U; i < k0 / (uint32_t)4U; i++)
+  {
+    uint64_t t1 = a0[(uint32_t)4U * i];
+    uint64_t t20 = (&b2)[(uint32_t)4U * i];
+    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t1, t20, res0 + (uint32_t)4U * i);
+    uint64_t t10 = a0[(uint32_t)4U * i + (uint32_t)1U];
+    uint64_t t21 = (&b2)[(uint32_t)4U * i + (uint32_t)1U];
+    c0 =
+      Lib_IntTypes_Intrinsics_sub_borrow_u64(c0,
+        t10,
+        t21,
+        res0 + (uint32_t)4U * i + (uint32_t)1U);
+    uint64_t t11 = a0[(uint32_t)4U * i + (uint32_t)2U];
+    uint64_t t22 = (&b2)[(uint32_t)4U * i + (uint32_t)2U];
+    c0 =
+      Lib_IntTypes_Intrinsics_sub_borrow_u64(c0,
+        t11,
+        t22,
+        res0 + (uint32_t)4U * i + (uint32_t)2U);
+    uint64_t t12 = a0[(uint32_t)4U * i + (uint32_t)3U];
+    uint64_t t2 = (&b2)[(uint32_t)4U * i + (uint32_t)3U];
+    c0 =
+      Lib_IntTypes_Intrinsics_sub_borrow_u64(c0,
+        t12,
+        t2,
+        res0 + (uint32_t)4U * i + (uint32_t)3U);
+  }
+  for (uint32_t i = k0; i < (uint32_t)1U; i++)
+  {
+    uint64_t t1 = a0[i];
+    uint64_t t2 = (&b2)[i];
+    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t1, t2, res0 + i);
+  }
+  uint64_t c00 = c0;
+  uint64_t c1;
+  if ((uint32_t)1U < (uint32_t)4U)
+  {
+    uint32_t rLen = (uint32_t)3U;
+    uint64_t *a1 = n + (uint32_t)1U;
+    uint64_t *res1 = n2 + (uint32_t)1U;
+    uint64_t c = c00;
+    uint32_t k = rLen / (uint32_t)4U * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
+    {
+      uint64_t t1 = a1[(uint32_t)4U * i];
+      c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, (uint64_t)0U, res1 + (uint32_t)4U * i);
+      uint64_t t10 = a1[(uint32_t)4U * i + (uint32_t)1U];
+      c =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(c,
+          t10,
+          (uint64_t)0U,
+          res1 + (uint32_t)4U * i + (uint32_t)1U);
+      uint64_t t11 = a1[(uint32_t)4U * i + (uint32_t)2U];
+      c =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(c,
+          t11,
+          (uint64_t)0U,
+          res1 + (uint32_t)4U * i + (uint32_t)2U);
+      uint64_t t12 = a1[(uint32_t)4U * i + (uint32_t)3U];
+      c =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(c,
+          t12,
+          (uint64_t)0U,
+          res1 + (uint32_t)4U * i + (uint32_t)3U);
+    }
+    for (uint32_t i = k; i < rLen; i++)
+    {
+      uint64_t t1 = a1[i];
+      c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, (uint64_t)0U, res1 + i);
+    }
+    uint64_t c10 = c;
+    c1 = c10;
+  }
+  else
+  {
+    c1 = c00;
+  }
+  bool is_valid = Hacl_Bignum256_mod_exp(n, a, (uint32_t)256U, n2, res);
+  return is_valid;
 }
 
 

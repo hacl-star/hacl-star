@@ -22,15 +22,14 @@
  */
 
 
-#ifndef __Hacl_RSAPSS_H
-#define __Hacl_RSAPSS_H
+#ifndef __Hacl_HMAC_H
+#define __Hacl_HMAC_H
 
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
-#include "lib_intrinsics.h"
-#include "libintvector.h"
+#include "evercrypt_targetconfig.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
@@ -38,36 +37,47 @@ extern "C" {
 
 
 #include "Hacl_Kremlib.h"
-#include "Hacl_Bignum.h"
 #include "Hacl_Hash.h"
 
 void
-Hacl_RSAPSS_rsapss_sign(
-  u32 modBits,
-  u32 eBits,
-  u32 dBits,
-  u64 *skey,
-  u32 sLen,
-  u8 *salt,
-  u32 msgLen,
-  u8 *msg,
-  u8 *sgnt
+Hacl_HMAC_legacy_compute_sha1(
+  uint8_t *dst,
+  uint8_t *key,
+  uint32_t key_len,
+  uint8_t *data,
+  uint32_t data_len
 );
 
-bool
-Hacl_RSAPSS_rsapss_verify(
-  u32 modBits,
-  u32 eBits,
-  u64 *pkey,
-  u32 sLen,
-  u8 *sgnt,
-  u32 msgLen,
-  u8 *msg
+void
+Hacl_HMAC_compute_sha2_256(
+  uint8_t *dst,
+  uint8_t *key,
+  uint32_t key_len,
+  uint8_t *data,
+  uint32_t data_len
+);
+
+void
+Hacl_HMAC_compute_sha2_384(
+  uint8_t *dst,
+  uint8_t *key,
+  uint32_t key_len,
+  uint8_t *data,
+  uint32_t data_len
+);
+
+void
+Hacl_HMAC_compute_sha2_512(
+  uint8_t *dst,
+  uint8_t *key,
+  uint32_t key_len,
+  uint8_t *data,
+  uint32_t data_len
 );
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_RSAPSS_H_DEFINED
+#define __Hacl_HMAC_H_DEFINED
 #endif
