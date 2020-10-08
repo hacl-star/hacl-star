@@ -40,6 +40,11 @@ extern "C" {
 #include "Hacl_Hash.h"
 
 typedef struct Hacl_Streaming_Functor_state_s___uint32_t_____s
+{
+  uint32_t *block_state;
+  uint8_t *buf;
+  uint64_t total_len;
+}
 Hacl_Streaming_Functor_state_s___uint32_t____;
 
 Hacl_Streaming_Functor_state_s___uint32_t____ *Hacl_Streaming_SHA2_create_in_224();
@@ -75,6 +80,11 @@ Hacl_Streaming_SHA2_finish_256(Hacl_Streaming_Functor_state_s___uint32_t____ *p,
 void Hacl_Streaming_SHA2_free_256(Hacl_Streaming_Functor_state_s___uint32_t____ *s);
 
 typedef struct Hacl_Streaming_Functor_state_s___uint64_t_____s
+{
+  uint64_t *block_state;
+  uint8_t *buf;
+  uint64_t total_len;
+}
 Hacl_Streaming_Functor_state_s___uint64_t____;
 
 Hacl_Streaming_Functor_state_s___uint64_t____ *Hacl_Streaming_SHA2_create_in_384();

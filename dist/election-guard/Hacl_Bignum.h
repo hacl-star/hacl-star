@@ -37,21 +37,9 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
-#include "Hacl_Kremlib.h"
 
-uint64_t
-Hacl_Bignum_Multiplication_mul_carry_add_u64_st(
-  uint64_t c_in,
-  uint64_t a,
-  uint64_t b,
-  uint64_t *out
-);
 
-uint64_t Hacl_Bignum_bn_get_ith_bit(uint32_t len, uint64_t *input, uint32_t ind);
-
-uint64_t Hacl_Bignum_bn_lt_mask(uint32_t len, uint64_t *a, uint64_t *b);
-
-uint64_t Hacl_Bignum_ModInv64_mod_inv_u64(uint64_t n0);
+uint64_t Hacl_Bignum_ModInvLimb_mod_inv_uint64(uint64_t n0);
 
 #if defined(__cplusplus)
 }

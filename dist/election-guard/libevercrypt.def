@@ -49,10 +49,7 @@ EXPORTS
   Hacl_Streaming_SHA2_update_512
   Hacl_Streaming_SHA2_finish_512
   Hacl_Streaming_SHA2_free_512
-  Hacl_Bignum_Multiplication_mul_carry_add_u64_st
-  Hacl_Bignum_bn_get_ith_bit
-  Hacl_Bignum_bn_lt_mask
-  Hacl_Bignum_ModInv64_mod_inv_u64
+  Hacl_Bignum_ModInvLimb_mod_inv_uint64
   Hacl_Bignum256_add
   Hacl_Bignum256_sub
   Hacl_Bignum256_mul
@@ -90,5 +87,7 @@ EXPORTS
   Hacl_HMAC_DRBG_instantiate
   Hacl_HMAC_DRBG_reseed
   Hacl_HMAC_DRBG_generate
+  Hacl_IntTypes_Intrinsics_add_carry_u32
   Hacl_IntTypes_Intrinsics_add_carry_u64
+  Hacl_IntTypes_Intrinsics_sub_borrow_u32
   Hacl_IntTypes_Intrinsics_sub_borrow_u64
