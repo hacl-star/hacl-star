@@ -210,11 +210,11 @@ let mont_mul pbits rLen n mu a b =
 
 
 val mont_reduction_lemma_step_bound_aux:
-  pbits:pos -> rLen:nat -> n:pos -> q_i:nat{q_i < pow2 pbits} -> i:pos{i <= rLen} -> c:nat -> res0:nat -> Lemma
+  pbits:pos -> n:pos -> q_i:nat{q_i < pow2 pbits} -> i:pos -> c:nat -> res0:nat -> Lemma
   (requires res0 <= c + (pow2 (pbits * (i - 1)) - 1) * n)
   (ensures  res0 + n * q_i * pow2 (pbits * (i - 1)) <= c + (pow2 (pbits * i) - 1) * n)
 
-let mont_reduction_lemma_step_bound_aux pbits rLen n q_i i c res0 =
+let mont_reduction_lemma_step_bound_aux pbits n q_i i c res0 =
   let b = pow2 (pbits * i) in
   let b1 = pow2 (pbits * (i - 1)) in
 
@@ -251,53 +251,67 @@ let mont_reduction_lemma_step_bound pbits rLen n mu i c res0 =
   let c_i = res0 / pow2 (pbits * (i - 1)) % pow2 pbits in
   let q_i = mu * c_i % pow2 pbits in
   assert (res == res0 + n * q_i * pow2 (pbits * (i - 1)));
-  mont_reduction_lemma_step_bound_aux pbits rLen n q_i i c res0;
+  mont_reduction_lemma_step_bound_aux pbits n q_i i c res0;
   assert (res <= c + (pow2 (pbits * i) - 1) * n)
 
 
+val mont_reduction_lemma_step_mod_pbits: pbits:pos -> n:pos -> mu:nat -> c_i:nat -> Lemma
+  (requires (1 + n * mu) % pow2 pbits == 0)
+  (ensures  (c_i + n * (mu * c_i % pow2 pbits)) % pow2 pbits == 0)
+
+let mont_reduction_lemma_step_mod_pbits pbits n mu c_i =
+  let q_i = mu * c_i % pow2 pbits in
+  calc (==) {
+    (c_i + n * q_i) % pow2 pbits;
+    (==) { Math.Lemmas.lemma_mod_plus_distr_r c_i (n * q_i) (pow2 pbits) }
+    (c_i + n * q_i % pow2 pbits) % pow2 pbits;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_r n (mu * c_i) (pow2 pbits) }
+    (c_i + n * (mu * c_i) % pow2 pbits) % pow2 pbits;
+    (==) { Math.Lemmas.paren_mul_right n mu c_i; Math.Lemmas.lemma_mod_plus_distr_r c_i (n * mu * c_i) (pow2 pbits) }
+    (c_i + n * mu * c_i) % pow2 pbits;
+    (==) { Math.Lemmas.distributivity_add_left 1 (n * mu) c_i }
+    ((1 + n * mu) * c_i) % pow2 pbits;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l (1 + n * mu) c_i (pow2 pbits) }
+    ((1 + n * mu) % pow2 pbits * c_i) % pow2 pbits;
+    (==) { assert ((1 + n * mu) % pow2 pbits = 0) }
+    0;
+  }
+
+
+val mont_reduction_lemma_step_modr_aux: pbits:pos -> n:pos -> q_i:nat -> i:pos -> res0:nat ->
+  Lemma (let b1 = pow2 (pbits * (i - 1)) in
+    (res0 / b1 * b1 + n * q_i * b1) % pow2 (pbits * i) == (res0 / b1 % pow2 pbits + n * q_i) % pow2 pbits * b1)
+
+let mont_reduction_lemma_step_modr_aux pbits n q_i i res0 =
+  let b1 = pow2 (pbits * (i - 1)) in
+  Math.Lemmas.distributivity_sub_right pbits i 1;
+  assert (pbits * i - pbits * (i - 1) == pbits);
+  
+  calc (==) {
+    (res0 / b1 * b1 + n * q_i * b1) % pow2 (pbits * i);
+    (==) { Math.Lemmas.distributivity_add_left (res0 / b1) (n * q_i) b1 }
+    (res0 / b1 + n * q_i) * b1 % pow2 (pbits * i);
+    (==) { Math.Lemmas.pow2_multiplication_modulo_lemma_2 (res0 / b1 + n * q_i) (pbits * i) (pbits * (i - 1)) }
+    (res0 / b1 + n * q_i) % pow2 pbits * b1;
+    (==) { Math.Lemmas.lemma_mod_plus_distr_l (res0 / b1) (n * q_i) (pow2 pbits) }
+    (res0 / b1 % pow2 pbits + n * q_i) % pow2 pbits * b1;
+    }
+
+
 val mont_reduction_lemma_step_modr:
-  pbits:pos -> rLen:nat -> n:pos -> mu:nat -> i:pos{i <= rLen} -> c:nat -> res0:nat -> Lemma
+  pbits:pos -> rLen:nat -> n:pos -> mu:nat -> i:pos{i <= rLen} -> res0:nat -> Lemma
   (requires res0 % pow2 (pbits * (i - 1)) == 0 /\ (1 + n * mu) % pow2 pbits == 0)
   (ensures  mont_reduction_f pbits rLen n mu (i - 1) res0 % pow2 (pbits * i) == 0)
 
-let mont_reduction_lemma_step_modr pbits rLen n mu i c res0 =
-  let b = pow2 (pbits * i) in
+let mont_reduction_lemma_step_modr pbits rLen n mu i res0 =
   let b1 = pow2 (pbits * (i - 1)) in
 
   let res = mont_reduction_f pbits rLen n mu (i - 1) res0 in
   let c_i = res0 / b1 % pow2 pbits in
   let q_i = mu * c_i % pow2 pbits in
-  assert (res == res0 + n * q_i * b1);
-  calc (==) {
-    res % b;
-    (==) { }
-    (res0 + n * q_i * b1) % b;
-    (==) { Math.Lemmas.euclidean_division_definition res0 b1 }
-    (res0 / b1 * b1 + n * q_i * b1) % b;
-    (==) { Math.Lemmas.lemma_mod_plus_distr_l (res0 / b1 * b1) (n * q_i * b1) b }
-    (res0 / b1 * b1 % b + n * q_i * b1) % b;
-    (==) { Math.Lemmas.pow2_multiplication_modulo_lemma_2 (res0 / b1) (pbits * i) (pbits * (i - 1)) }
-    (res0 / b1 % pow2 pbits * b1 + n * q_i * b1) % b;
-    (==) { Math.Lemmas.distributivity_add_left (res0 / b1 % pow2 pbits) (n * q_i) b1 }
-    (res0 / b1 % pow2 pbits + n * q_i) * b1 % b;
-    (==) { Math.Lemmas.pow2_multiplication_modulo_lemma_2 (res0 / b1 % pow2 pbits + n * q_i) (pbits * i) (pbits * (i - 1)) }
-    (res0 / b1 % pow2 pbits + n * q_i) % pow2 pbits * b1;
-    (==) { }
-    (c_i + n * (mu * c_i % pow2 pbits)) % pow2 pbits * b1;
-    (==) { Math.Lemmas.lemma_mod_plus_distr_r c_i (n * (mu * c_i % pow2 pbits)) (pow2 pbits) }
-    (c_i + n * (mu * c_i % pow2 pbits) % pow2 pbits) % pow2 pbits * b1;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_r n (mu * c_i) (pow2 pbits); Math.Lemmas.paren_mul_right n mu c_i }
-    (c_i + n * mu * c_i % pow2 pbits) % pow2 pbits * b1;
-    (==) { Math.Lemmas.lemma_mod_plus_distr_r c_i (n * mu * c_i) (pow2 pbits) }
-    (c_i + n * mu * c_i) % pow2 pbits * b1;
-    (==) { Math.Lemmas.distributivity_add_left 1 (n * mu) c_i }
-    ((1 + n * mu) * c_i) % pow2 pbits * b1;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_l (1 + n * mu) c_i (pow2 pbits) }
-    ((1 + n * mu) % pow2 pbits * c_i) % pow2 pbits * b1;
-    (==) { assert ((1 + n * mu) % pow2 pbits == 0) }
-    0;
-  };
-  assert (res % b == 0)
+  Math.Lemmas.lemma_div_exact res0 b1;
+  mont_reduction_lemma_step_modr_aux pbits n q_i i res0;
+  mont_reduction_lemma_step_mod_pbits pbits n mu c_i
 
 
 val mont_reduction_lemma_step_modn:
@@ -324,7 +338,7 @@ val mont_reduction_lemma_step:
 
 let mont_reduction_lemma_step pbits rLen n mu i c res0 =
   mont_reduction_lemma_step_bound pbits rLen n mu i c res0;
-  mont_reduction_lemma_step_modr pbits rLen n mu i c res0;
+  mont_reduction_lemma_step_modr pbits rLen n mu i res0;
   mont_reduction_lemma_step_modn pbits rLen n mu i c res0
 
 
@@ -349,6 +363,7 @@ val lemma_fits_aux: c:nat -> r:pos -> n:pos -> Lemma
   (ensures (c - n) / r < n)
 
 let lemma_fits_aux c r n =
+  Math.Lemmas.lemma_mult_le_right n n r;
   assert (c < r * n);
   assert (c / r < n);
   Math.Lemmas.lemma_div_le (c - n) c r

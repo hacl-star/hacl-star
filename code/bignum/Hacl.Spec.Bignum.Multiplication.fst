@@ -443,7 +443,9 @@ val bn_sqr_diag_f_lemma:
       acc.[2 * i0 + 1] == res.[2 * i0 + 1]))
 
 let bn_sqr_diag_f_lemma #t #aLen a i acc =
-  let res = bn_sqr_diag_f a i acc in
+  let (hi, lo) = mul_wide a.[i] a.[i] in
+  let res1 = acc.[2 * i] <- lo in
+  let res = res1.[2 * i + 1] <- hi in
 
   let aux (i0:nat{i0 < aLen + aLen /\ i0 <> 2 * i /\ i0 <> 2 * i + 1}) :
     Lemma (acc.[i0] == res.[i0]) = () in

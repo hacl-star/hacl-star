@@ -180,6 +180,29 @@ let eq_slice #a #len b1 b2 i j =
   eq_intro (slice b1 j len) (slice b2 j len)
 
 
+val bn_mont_reduction_f_eval_lemma_aux:
+  pbits:pos -> er0:nat -> rj:nat -> nLen:nat -> n:nat -> qj:nat -> j:nat -> c0:nat -> c1:nat -> c2:nat ->
+  Lemma (let p = pow2 (pbits * (nLen + j)) in
+    er0 + n * qj * pow2 (pbits * j) - c1 * p + p * (c0 + c1 + rj - c2 * pow2 pbits) ==
+    er0 + n * qj * pow2 (pbits * j) + p * rj + p * c0 - pow2 (pbits * (nLen + j + 1)) * c2)
+
+let bn_mont_reduction_f_eval_lemma_aux pbits er0 rj nLen n qj j c0 c1 c2 =
+  let p = pow2 (pbits * (nLen + j)) in
+  calc (==) {
+    er0 + n * qj * pow2 (pbits * j) - c1 * p + p * (c0 + c1 + rj - c2 * pow2 pbits);
+    (==) { Math.Lemmas.distributivity_add_right p c1 (c0 + rj - c2 * pow2 pbits) }
+    er0 + n * qj * pow2 (pbits * j) - c1 * p + p * c1 + p * (c0 + rj - c2 * pow2 pbits);
+    (==) { }
+    er0 + n * qj * pow2 (pbits * j) + p * (c0 + rj - c2 * pow2 pbits);
+    (==) { Math.Lemmas.distributivity_add_right p rj (c0 - c2 * pow2 pbits) }
+    er0 + n * qj * pow2 (pbits * j) + p * rj + p * (c0 - c2 * pow2 pbits);
+    (==) { Math.Lemmas.distributivity_sub_right p c0 (c2 * pow2 pbits); Math.Lemmas.paren_mul_right p c2 (pow2 pbits) }
+    er0 + n * qj * pow2 (pbits * j) + p * rj + p * c0 - p * c2 * pow2 pbits;
+    (==) { Math.Lemmas.pow2_plus (pbits * (nLen + j)) pbits; Math.Lemmas.paren_mul_right c2 p (pow2 pbits) }
+    er0 + n * qj * pow2 (pbits * j) + p * rj + p * c0 - c2 * pow2 (pbits * (nLen + j + 1));
+    }
+
+
 val bn_mont_reduction_f_eval_lemma:
     #t:limb_t
   -> #nLen:size_nat{nLen + nLen <= max_size_t}
@@ -216,17 +239,11 @@ let bn_mont_reduction_f_eval_lemma #t #nLen n mu j (c0, res0) =
     eval_ resLen res1 (nLen + j) + p * v res.[nLen + j];
     (==) { }
     eval_ resLen res0 (nLen + j) + bn_v n * v qj * pow2 (pbits * j) - v c1 * p + p * (v c0 + v c1 + v res1.[nLen + j] - v c2 * pow2 pbits);
-    (==) { Math.Lemmas.distributivity_add_right p (v c1) (v c0 + v res1.[nLen + j] - v c2 * pow2 pbits) }
-    eval_ resLen res0 (nLen + j) + bn_v n * v qj * pow2 (pbits * j) + p * (v c0 + v res1.[nLen + j] - v c2 * pow2 pbits);
-    (==) { Math.Lemmas.distributivity_add_right p (v res1.[nLen + j]) (v c0 - v c2 * pow2 pbits) }
-    eval_ resLen res0 (nLen + j) + bn_v n * v qj * pow2 (pbits * j) + p * v res1.[nLen + j] + p * (v c0 - v c2 * pow2 pbits);
+    (==) { bn_mont_reduction_f_eval_lemma_aux pbits (eval_ resLen res0 (nLen + j)) (v res1.[nLen + j]) nLen (bn_v n) (v qj) j (v c0) (v c1) (v c2) }
+    eval_ resLen res0 (nLen + j) + p * v res1.[nLen + j] + bn_v n * v qj * pow2 (pbits * j) + p * v c0 - pow2 (pbits * (nLen + j + 1)) * v c2;
     (==) { Seq.lemma_index_slice res1 (nLen + j) resLen 0 }
-    eval_ resLen res0 (nLen + j) + bn_v n * v qj * pow2 (pbits * j) + p * v res0.[nLen + j] + p * (v c0 - v c2 * pow2 pbits);
+    eval_ resLen res0 (nLen + j) + p * v res0.[nLen + j] + bn_v n * v qj * pow2 (pbits * j) + p * v c0 - pow2 (pbits * (nLen + j + 1)) * v c2;
     (==) { bn_eval_unfold_i res0 (nLen + j + 1) }
-    eval_ resLen res0 (nLen + j + 1) + bn_v n * v qj * pow2 (pbits * j) + p * (v c0 - v c2 * pow2 pbits);
-    (==) { Math.Lemmas.distributivity_sub_right p (v c0) (v c2 * pow2 pbits) }
-    eval_ resLen res0 (nLen + j + 1) + bn_v n * v qj * pow2 (pbits * j) + p * v c0 - p * v c2 * pow2 pbits;
-    (==) { Math.Lemmas.pow2_plus (pbits * (nLen + j)) pbits }
     eval_ resLen res0 (nLen + j + 1) + bn_v n * v qj * pow2 (pbits * j) + p * v c0 - pow2 (pbits * (nLen + j + 1)) * v c2;
   };
 

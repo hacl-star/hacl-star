@@ -803,6 +803,7 @@ let mod_exp_mont_ll pbits rLen n mu a bBits b =
   M.from_mont pbits rLen n mu accM
 
 
+#push-options "--z3rlimit 100"
 val mod_exp_mont_ll_lemma_loop:
     pbits:pos -> rLen:nat
   -> n:pos -> d:int -> mu:nat
@@ -838,6 +839,7 @@ let rec mod_exp_mont_ll_lemma_loop pbits rLen n d mu bBits b i aM0 accM0 =
     Math.Lemmas.lemma_mult_lt_sqr accM3 aM3 n;
     M.mont_reduction_lemma pbits rLen n d mu (accM3 * aM3);
     () end
+#pop-options
 
 
 val mod_exp_mont_ll_lemma_eval:
