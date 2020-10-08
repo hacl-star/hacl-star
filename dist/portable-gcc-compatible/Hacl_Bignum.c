@@ -24,6 +24,8 @@
 
 #include "Hacl_Bignum.h"
 
+/* SNIPPET_START: Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64 */
+
 inline void
 Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64(
   uint32_t aLen,
@@ -507,6 +509,10 @@ Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64(
   uint64_t c9 = c;
 }
 
+/* SNIPPET_END: Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64 */
+
+/* SNIPPET_START: Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint64 */
+
 inline void
 Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint64(
   uint32_t aLen,
@@ -623,7 +629,7 @@ Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint64(
     }
     uint64_t uu____22 = c0;
     KRML_CHECK_SIZE(sizeof (uint64_t), resLen);
-    uint64_t *tmp1 = alloca(resLen * sizeof (uint64_t));
+    uint64_t tmp1[resLen];
     memset(tmp1, 0U, resLen * sizeof (uint64_t));
     for (uint32_t i = (uint32_t)0U; i < aLen; i++)
     {
@@ -911,4 +917,6 @@ Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint64(
   uint64_t c = c80;
   uint64_t c9 = c;
 }
+
+/* SNIPPET_END: Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint64 */
 

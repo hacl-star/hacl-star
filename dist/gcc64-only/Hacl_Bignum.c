@@ -48,61 +48,41 @@ Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64(
         uint64_t uu____1 = a[(uint32_t)4U * i];
         uint64_t uu____2 = c;
         uint64_t *uu____3 = res_ + (uint32_t)4U * i;
-        FStar_UInt128_uint128 uu____4 = FStar_UInt128_uint64_to_uint128(uu____3[0U]);
-        FStar_UInt128_uint128
-        res1 =
-          FStar_UInt128_add(FStar_UInt128_add(FStar_UInt128_mul_wide(uu____1, uu____0),
-              FStar_UInt128_uint64_to_uint128(uu____2)),
-            uu____4);
-        uu____3[0U] = FStar_UInt128_uint128_to_uint64(res1);
-        c = FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(res1, (uint32_t)64U));
+        uint128_t uu____4 = (uint128_t)uu____3[0U];
+        uint128_t res1 = (uint128_t)uu____1 * uu____0 + (uint128_t)uu____2 + uu____4;
+        uu____3[0U] = (uint64_t)res1;
+        c = (uint64_t)(res1 >> (uint32_t)64U);
         uint64_t uu____5 = a[(uint32_t)4U * i + (uint32_t)1U];
         uint64_t uu____6 = c;
         uint64_t *uu____7 = res_ + (uint32_t)4U * i + (uint32_t)1U;
-        FStar_UInt128_uint128 uu____8 = FStar_UInt128_uint64_to_uint128(uu____7[0U]);
-        FStar_UInt128_uint128
-        res10 =
-          FStar_UInt128_add(FStar_UInt128_add(FStar_UInt128_mul_wide(uu____5, uu____0),
-              FStar_UInt128_uint64_to_uint128(uu____6)),
-            uu____8);
-        uu____7[0U] = FStar_UInt128_uint128_to_uint64(res10);
-        c = FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(res10, (uint32_t)64U));
+        uint128_t uu____8 = (uint128_t)uu____7[0U];
+        uint128_t res10 = (uint128_t)uu____5 * uu____0 + (uint128_t)uu____6 + uu____8;
+        uu____7[0U] = (uint64_t)res10;
+        c = (uint64_t)(res10 >> (uint32_t)64U);
         uint64_t uu____9 = a[(uint32_t)4U * i + (uint32_t)2U];
         uint64_t uu____10 = c;
         uint64_t *uu____11 = res_ + (uint32_t)4U * i + (uint32_t)2U;
-        FStar_UInt128_uint128 uu____12 = FStar_UInt128_uint64_to_uint128(uu____11[0U]);
-        FStar_UInt128_uint128
-        res11 =
-          FStar_UInt128_add(FStar_UInt128_add(FStar_UInt128_mul_wide(uu____9, uu____0),
-              FStar_UInt128_uint64_to_uint128(uu____10)),
-            uu____12);
-        uu____11[0U] = FStar_UInt128_uint128_to_uint64(res11);
-        c = FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(res11, (uint32_t)64U));
+        uint128_t uu____12 = (uint128_t)uu____11[0U];
+        uint128_t res11 = (uint128_t)uu____9 * uu____0 + (uint128_t)uu____10 + uu____12;
+        uu____11[0U] = (uint64_t)res11;
+        c = (uint64_t)(res11 >> (uint32_t)64U);
         uint64_t uu____13 = a[(uint32_t)4U * i + (uint32_t)3U];
         uint64_t uu____14 = c;
         uint64_t *uu____15 = res_ + (uint32_t)4U * i + (uint32_t)3U;
-        FStar_UInt128_uint128 uu____16 = FStar_UInt128_uint64_to_uint128(uu____15[0U]);
-        FStar_UInt128_uint128
-        res12 =
-          FStar_UInt128_add(FStar_UInt128_add(FStar_UInt128_mul_wide(uu____13, uu____0),
-              FStar_UInt128_uint64_to_uint128(uu____14)),
-            uu____16);
-        uu____15[0U] = FStar_UInt128_uint128_to_uint64(res12);
-        c = FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(res12, (uint32_t)64U));
+        uint128_t uu____16 = (uint128_t)uu____15[0U];
+        uint128_t res12 = (uint128_t)uu____13 * uu____0 + (uint128_t)uu____14 + uu____16;
+        uu____15[0U] = (uint64_t)res12;
+        c = (uint64_t)(res12 >> (uint32_t)64U);
       }
       for (uint32_t i = k; i < aLen; i++)
       {
         uint64_t uu____17 = a[i];
         uint64_t uu____18 = c;
         uint64_t *uu____19 = res_ + i;
-        FStar_UInt128_uint128 uu____20 = FStar_UInt128_uint64_to_uint128(uu____19[0U]);
-        FStar_UInt128_uint128
-        res1 =
-          FStar_UInt128_add(FStar_UInt128_add(FStar_UInt128_mul_wide(uu____17, uu____0),
-              FStar_UInt128_uint64_to_uint128(uu____18)),
-            uu____20);
-        uu____19[0U] = FStar_UInt128_uint128_to_uint64(res1);
-        c = FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(res1, (uint32_t)64U));
+        uint128_t uu____20 = (uint128_t)uu____19[0U];
+        uint128_t res1 = (uint128_t)uu____17 * uu____0 + (uint128_t)uu____18 + uu____20;
+        uu____19[0U] = (uint64_t)res1;
+        c = (uint64_t)(res1 >> (uint32_t)64U);
       }
       uint64_t r = c;
       res[aLen + i0] = r;
@@ -531,61 +511,41 @@ Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint64(
         uint64_t uu____2 = uu____0[(uint32_t)4U * i];
         uint64_t uu____3 = c;
         uint64_t *uu____4 = res_ + (uint32_t)4U * i;
-        FStar_UInt128_uint128 uu____5 = FStar_UInt128_uint64_to_uint128(uu____4[0U]);
-        FStar_UInt128_uint128
-        res1 =
-          FStar_UInt128_add(FStar_UInt128_add(FStar_UInt128_mul_wide(uu____2, uu____1),
-              FStar_UInt128_uint64_to_uint128(uu____3)),
-            uu____5);
-        uu____4[0U] = FStar_UInt128_uint128_to_uint64(res1);
-        c = FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(res1, (uint32_t)64U));
+        uint128_t uu____5 = (uint128_t)uu____4[0U];
+        uint128_t res1 = (uint128_t)uu____2 * uu____1 + (uint128_t)uu____3 + uu____5;
+        uu____4[0U] = (uint64_t)res1;
+        c = (uint64_t)(res1 >> (uint32_t)64U);
         uint64_t uu____6 = uu____0[(uint32_t)4U * i + (uint32_t)1U];
         uint64_t uu____7 = c;
         uint64_t *uu____8 = res_ + (uint32_t)4U * i + (uint32_t)1U;
-        FStar_UInt128_uint128 uu____9 = FStar_UInt128_uint64_to_uint128(uu____8[0U]);
-        FStar_UInt128_uint128
-        res10 =
-          FStar_UInt128_add(FStar_UInt128_add(FStar_UInt128_mul_wide(uu____6, uu____1),
-              FStar_UInt128_uint64_to_uint128(uu____7)),
-            uu____9);
-        uu____8[0U] = FStar_UInt128_uint128_to_uint64(res10);
-        c = FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(res10, (uint32_t)64U));
+        uint128_t uu____9 = (uint128_t)uu____8[0U];
+        uint128_t res10 = (uint128_t)uu____6 * uu____1 + (uint128_t)uu____7 + uu____9;
+        uu____8[0U] = (uint64_t)res10;
+        c = (uint64_t)(res10 >> (uint32_t)64U);
         uint64_t uu____10 = uu____0[(uint32_t)4U * i + (uint32_t)2U];
         uint64_t uu____11 = c;
         uint64_t *uu____12 = res_ + (uint32_t)4U * i + (uint32_t)2U;
-        FStar_UInt128_uint128 uu____13 = FStar_UInt128_uint64_to_uint128(uu____12[0U]);
-        FStar_UInt128_uint128
-        res11 =
-          FStar_UInt128_add(FStar_UInt128_add(FStar_UInt128_mul_wide(uu____10, uu____1),
-              FStar_UInt128_uint64_to_uint128(uu____11)),
-            uu____13);
-        uu____12[0U] = FStar_UInt128_uint128_to_uint64(res11);
-        c = FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(res11, (uint32_t)64U));
+        uint128_t uu____13 = (uint128_t)uu____12[0U];
+        uint128_t res11 = (uint128_t)uu____10 * uu____1 + (uint128_t)uu____11 + uu____13;
+        uu____12[0U] = (uint64_t)res11;
+        c = (uint64_t)(res11 >> (uint32_t)64U);
         uint64_t uu____14 = uu____0[(uint32_t)4U * i + (uint32_t)3U];
         uint64_t uu____15 = c;
         uint64_t *uu____16 = res_ + (uint32_t)4U * i + (uint32_t)3U;
-        FStar_UInt128_uint128 uu____17 = FStar_UInt128_uint64_to_uint128(uu____16[0U]);
-        FStar_UInt128_uint128
-        res12 =
-          FStar_UInt128_add(FStar_UInt128_add(FStar_UInt128_mul_wide(uu____14, uu____1),
-              FStar_UInt128_uint64_to_uint128(uu____15)),
-            uu____17);
-        uu____16[0U] = FStar_UInt128_uint128_to_uint64(res12);
-        c = FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(res12, (uint32_t)64U));
+        uint128_t uu____17 = (uint128_t)uu____16[0U];
+        uint128_t res12 = (uint128_t)uu____14 * uu____1 + (uint128_t)uu____15 + uu____17;
+        uu____16[0U] = (uint64_t)res12;
+        c = (uint64_t)(res12 >> (uint32_t)64U);
       }
       for (uint32_t i = k; i < i0; i++)
       {
         uint64_t uu____18 = uu____0[i];
         uint64_t uu____19 = c;
         uint64_t *uu____20 = res_ + i;
-        FStar_UInt128_uint128 uu____21 = FStar_UInt128_uint64_to_uint128(uu____20[0U]);
-        FStar_UInt128_uint128
-        res1 =
-          FStar_UInt128_add(FStar_UInt128_add(FStar_UInt128_mul_wide(uu____18, uu____1),
-              FStar_UInt128_uint64_to_uint128(uu____19)),
-            uu____21);
-        uu____20[0U] = FStar_UInt128_uint128_to_uint64(res1);
-        c = FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(res1, (uint32_t)64U));
+        uint128_t uu____21 = (uint128_t)uu____20[0U];
+        uint128_t res1 = (uint128_t)uu____18 * uu____1 + (uint128_t)uu____19 + uu____21;
+        uu____20[0U] = (uint64_t)res1;
+        c = (uint64_t)(res1 >> (uint32_t)64U);
       }
       uint64_t r = c;
       res[i0 + i0] = r;
@@ -623,13 +583,13 @@ Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint64(
     }
     uint64_t uu____22 = c0;
     KRML_CHECK_SIZE(sizeof (uint64_t), resLen);
-    uint64_t *tmp1 = alloca(resLen * sizeof (uint64_t));
+    uint64_t tmp1[resLen];
     memset(tmp1, 0U, resLen * sizeof (uint64_t));
     for (uint32_t i = (uint32_t)0U; i < aLen; i++)
     {
-      FStar_UInt128_uint128 res1 = FStar_UInt128_mul_wide(a[i], a[i]);
-      uint64_t hi = FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(res1, (uint32_t)64U));
-      uint64_t lo = FStar_UInt128_uint128_to_uint64(res1);
+      uint128_t res1 = (uint128_t)a[i] * a[i];
+      uint64_t hi = (uint64_t)(res1 >> (uint32_t)64U);
+      uint64_t lo = (uint64_t)res1;
       tmp1[(uint32_t)2U * i] = lo;
       tmp1[(uint32_t)2U * i + (uint32_t)1U] = hi;
     }

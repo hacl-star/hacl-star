@@ -45,6 +45,7 @@ extern "C" {
 
 bool
 Hacl_RSAPSS_rsapss_sign(
+  uint32_t len,
   Spec_Hash_Definitions_hash_alg a,
   uint32_t modBits,
   uint32_t eBits,
@@ -59,6 +60,7 @@ Hacl_RSAPSS_rsapss_sign(
 
 bool
 Hacl_RSAPSS_rsapss_verify(
+  uint32_t len,
   Spec_Hash_Definitions_hash_alg a,
   uint32_t modBits,
   uint32_t eBits,
@@ -85,6 +87,7 @@ uint64_t
 
 bool
 Hacl_RSAPSS_rsapss_skey_sign(
+  uint32_t len,
   Spec_Hash_Definitions_hash_alg a,
   uint32_t modBits,
   uint32_t eBits,
@@ -101,6 +104,7 @@ Hacl_RSAPSS_rsapss_skey_sign(
 
 bool
 Hacl_RSAPSS_rsapss_pkey_verify(
+  uint32_t len,
   Spec_Hash_Definitions_hash_alg a,
   uint32_t modBits,
   uint32_t eBits,

@@ -283,7 +283,7 @@ Compute `2 ^ (128 * nLen) mod n`.
   If the return value is non-null, clients must eventually call free(3) on it to
   avoid memory leaks.
 */
-uint64_t *Hacl_Bignum4096_new_precompr2(uint32_t nLen, uint64_t *n);
+uint64_t *Hacl_Bignum4096_new_precompr2(uint32_t len, uint64_t *n);
 
 /* SNIPPET_END: Hacl_Bignum4096_new_precompr2 */
 
@@ -293,15 +293,16 @@ uint64_t *Hacl_Bignum4096_new_precompr2(uint32_t nLen, uint64_t *n);
 Write `a ^ (-1) mod n` in `res`.
 
   The arguments a, n and the outparam res are meant to be 4096-bit bignums, i.e. uint64_t[64].
-  The function returns false if any of the preconditions of mod_exp_precompr2 are
-  violated, true otherwise.
 
-  This function is *UNSAFE* and requires C clients to observe bn_mod_inv_prime_lemma
-  from Hacl.Spec.Bignum.ModInv.fst, which amounts to:
+  This function is *UNSAFE* and requires C clients to observe the precondition of
+  bn_mod_inv_prime_lemma from Hacl.Spec.Bignum.ModInv.fst, which amounts to:
   • n is a prime
-  • 0 < a 
+  • n % 2 = 1
+  • 1 < n
+  • 0 < a
+  • a < n 
 */
-bool Hacl_Bignum4096_mod_inv_prime(uint64_t *n, uint64_t *a, uint64_t *res);
+void Hacl_Bignum4096_mod_inv_prime(uint64_t *n, uint64_t *a, uint64_t *res);
 
 /* SNIPPET_END: Hacl_Bignum4096_mod_inv_prime */
 

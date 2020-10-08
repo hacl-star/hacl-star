@@ -40,26 +40,8 @@ extern "C" {
 
 #include "Hacl_Kremlib.h"
 
-static inline uint64_t
-Hacl_Bignum_Multiplication_mul_carry_add_u64_st(
-  uint64_t c_in,
-  uint64_t a,
-  uint64_t b,
-  uint64_t *out
-)
-{
-  FStar_UInt128_uint128 uu____0 = FStar_UInt128_uint64_to_uint128(out[0U]);
-  FStar_UInt128_uint128
-  res =
-    FStar_UInt128_add(FStar_UInt128_add(FStar_UInt128_mul_wide(a, b),
-        FStar_UInt128_uint64_to_uint128(c_in)),
-      uu____0);
-  out[0U] = FStar_UInt128_uint128_to_uint64(res);
-  return FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(res, (uint32_t)64U));
-}
-
 void
-Hacl_Bignum_Karatsuba_bn_karatsuba_mul_(
+Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64(
   uint32_t aLen,
   uint64_t *a,
   uint64_t *b,
@@ -68,37 +50,14 @@ Hacl_Bignum_Karatsuba_bn_karatsuba_mul_(
 );
 
 void
-Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_(
+Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint64(
   uint32_t aLen,
   uint64_t *a,
   uint64_t *tmp,
   uint64_t *res
 );
 
-static inline uint64_t Hacl_Bignum_bn_get_ith_bit(uint32_t len, uint64_t *input, uint32_t ind)
-{
-  uint32_t i = ind / (uint32_t)64U;
-  uint32_t j = ind % (uint32_t)64U;
-  uint64_t tmp = input[i];
-  return tmp >> j & (uint64_t)1U;
-}
-
-static inline uint64_t Hacl_Bignum_bn_lt_mask(uint32_t len, uint64_t *a, uint64_t *b)
-{
-  uint64_t acc = (uint64_t)0U;
-  {
-    uint32_t i;
-    for (i = (uint32_t)0U; i < len; i++)
-    {
-      uint64_t beq = FStar_UInt64_eq_mask(a[i], b[i]);
-      uint64_t blt = ~FStar_UInt64_gte_mask(a[i], b[i]);
-      acc = (beq & acc) | (~beq & ((blt & (uint64_t)0xFFFFFFFFFFFFFFFFU) | (~blt & (uint64_t)0U)));
-    }
-  }
-  return acc;
-}
-
-static inline uint64_t Hacl_Bignum_ModInv64_mod_inv_u64(uint64_t n0)
+static inline uint64_t Hacl_Bignum_ModInvLimb_mod_inv_uint64(uint64_t n0)
 {
   uint64_t alpha = (uint64_t)9223372036854775808U;
   uint64_t beta = n0;
