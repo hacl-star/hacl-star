@@ -243,3 +243,5 @@ let mk_runtime_mont (#t:limb_t) (len:BN.meta_len t) : mont t =
   match t with
   | U32 -> mk_runtime_mont_uint32 len
   | U64 -> mk_runtime_mont_uint64 len
+
+let mk_runtime_mont_len_lemma #t len = ()

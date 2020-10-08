@@ -294,3 +294,6 @@ let mk_runtime_exp (#t:limb_t) (len:BN.meta_len t) : exp t =
   match t with
   | U32 -> mk_runtime_exp_uint32 len
   | U64 -> mk_runtime_exp_uint64 len
+
+let mk_runtime_exp_len_lemma #t len =
+  BM.mk_runtime_mont_len_lemma #t len

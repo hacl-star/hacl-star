@@ -143,3 +143,6 @@ class exp (t:limb_t) = {
 // A completely run-time-only instance where the functions above exist in the C code.
 inline_for_extraction noextract
 val mk_runtime_exp: #t:limb_t -> len:BN.meta_len t -> exp t
+
+val mk_runtime_exp_len_lemma: #t:limb_t -> len:BN.meta_len t ->
+  Lemma ((mk_runtime_exp #t len).mont.BM.bn.BN.len == len)

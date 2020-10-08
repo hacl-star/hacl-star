@@ -163,3 +163,6 @@ instance bn_of_mont (t:limb_t) (x:mont t) : BN.bn t = x.bn
 // A completely run-time-only instance where the functions above exist in the C code.
 inline_for_extraction noextract
 val mk_runtime_mont: #t:limb_t -> len:BN.meta_len t -> mont t
+
+val mk_runtime_mont_len_lemma: #t:limb_t -> len:BN.meta_len t ->
+  Lemma ((mk_runtime_mont #t len).bn.BN.len == len)
