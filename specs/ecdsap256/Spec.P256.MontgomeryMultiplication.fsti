@@ -20,7 +20,8 @@ val fromDomainPoint: a: tuple3 nat nat nat -> Tot (r: tuple3 nat nat nat
   {
     let x, y, z = a in
     let x3, y3, z3 = r in 
-    x3 == fromDomain_ x /\ y3 == fromDomain_ y /\ z3 == fromDomain_ z
+    x3 == fromDomain_ x /\ y3 == fromDomain_ y /\ z3 == fromDomain_ z /\
+    x3 < prime256 /\ y3 < prime256 /\ z3 < prime256
   }
 )
 

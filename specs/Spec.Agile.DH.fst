@@ -54,7 +54,7 @@ let dh a s p =
         not (lbytes_eq (create (size_public a) (u8 0)) output), output
     | DH_P256 ->
         let xN, yN, res = Spec.DH.ecp256_dh_r (sub p 0 32) (sub p 32 32) s in
-        v res = 0, xN @| yN
+        res, xN @| yN
   in
   if result then Some output else None
 
@@ -64,4 +64,4 @@ let secret_to_public a kpriv =
   | DH_Curve25519 -> Some (Spec.Curve25519.secret_to_public kpriv)
   | DH_P256 ->
       let xN, yN, res = Spec.DH.ecp256_dh_i kpriv in
-      if v res = 0 then Some (xN @| yN) else None
+      if res then Some (xN @| yN) else None

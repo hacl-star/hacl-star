@@ -646,8 +646,6 @@ INTRINSIC_INT_FLAGS = \
   -add-include 'Hacl_Bignum:"lib_intrinsics.h"' \
   -add-include 'Hacl_RSAPSS:"lib_intrinsics.h"'
 
-# Disabled for dist/portable
-OPT_FLAGS = -ccopts -march=native,-mtune=native
 # Disables tests; overriden in Wasm where tests indicate what can be compiled.
 TEST_FLAGS = -bundle Test,Test.*,Hacl.Test.*
 # Ensures that Lib_RandomBuffer_System.h and Lib_PrintBuffer.h have a constant name
@@ -696,7 +694,6 @@ DEFAULT_FLAGS = \
   $(HAND_WRITTEN_LIB_FLAGS) \
   $(TARGETCONFIG_FLAGS) \
   $(TEST_FLAGS) \
-  $(OPT_FLAGS) \
   $(INTRINSIC_INT_FLAGS) \
   $(INTRINSIC_FLAGS) \
   $(BUNDLE_FLAGS) \
@@ -854,8 +851,7 @@ dist/mitls/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES = \
 # - MerkleTree doesn't compile in C89 mode (FIXME?)
 # - Use C89 versions of ancient HACL code
 dist/c89-compatible/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree.*,MerkleTree'
-dist/c89-compatible/Makefile.basic: DEFAULT_FLAGS += \
-  -fc89 -ccopt -std=c89 -ccopt -Wno-typedef-redefinition
+dist/c89-compatible/Makefile.basic: DEFAULT_FLAGS += -fc89 -ccopt -std=c89 -ccopt -Wno-typedef-redefinition
 dist/c89-compatible/Makefile.basic: HACL_OLD_FILES := $(subst -c,-c89,$(HACL_OLD_FILES))
 
 # Linux distribution (not compiled on CI)
@@ -873,7 +869,7 @@ dist/c89-compatible/Makefile.basic: HACL_OLD_FILES := $(subst -c,-c89,$(HACL_OLD
 dist/linux/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree.*,MerkleTree'
 dist/linux/Makefile.basic: TARGETCONFIG_FLAGS =
 dist/linux/Makefile.basic: DEFAULT_FLAGS += \
-  -fc89-scope -fbuiltin-uint128 -flinux-ints -ccopt -Wno-typedef-redefinition
+  -fc89-scope -fbuiltin-uint128 -flinux-ints
 dist/linux/Makefile.basic: CTR_BUNDLE =
 dist/linux/Makefile.basic: E_HASH_BUNDLE =
 dist/linux/Makefile.basic: HPKE_BUNDLE = -bundle 'Hacl.HPKE.*'
@@ -978,7 +974,6 @@ dist/mozilla/Makefile.basic: TARGET_H_INCLUDE = -add-include '<stdbool.h>'
 # someone can download them onto their machine for debugging. Also enforces that
 # we don't have bundle errors where, say, an sse2-required function ends up in a
 # file that is *NOT* known to require sse2.
-dist/portable-gcc-compatible/Makefile.basic: OPT_FLAGS=-ccopts -mtune=generic
 dist/portable-gcc-compatible/Makefile.basic: DEFAULT_FLAGS += -rst-snippets
 
 # Merkle Tree standalone distribution

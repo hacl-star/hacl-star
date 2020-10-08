@@ -193,7 +193,7 @@ end
 module Make_ECDSA_generic (C: Buffer)
     (Impl : sig
        val min_msg_size : int
-       val sign : C.buf -> uint32 -> C.buf -> C.buf -> C.buf -> uint64
+       val sign : C.buf -> uint32 -> C.buf -> C.buf -> C.buf -> bool
        val verify : uint32 -> C.buf -> C.buf -> C.buf -> C.buf -> bool
      end)
 = struct
@@ -216,7 +216,7 @@ module Make_ECDSA_generic (C: Buffer)
     assert (C.disjoint signature msg);
     assert (C.z_compare priv prime_p256_order < 0);
     assert (C.z_compare k prime_p256_order < 0);
-    get_result @@ Impl.sign (C.ctypes_buf signature) (C.size_uint32 msg) (C.ctypes_buf msg) (C.ctypes_buf priv) (C.ctypes_buf k)
+    Impl.sign (C.ctypes_buf signature) (C.size_uint32 msg) (C.ctypes_buf msg) (C.ctypes_buf priv) (C.ctypes_buf k)
   let verify pub msg signature =
     (* Hacl.Interface.P256.ECDSA.ecdsa_verif_without_hash/sha2/sha384 *)
     assert (C.size signature = 64);

@@ -33,6 +33,13 @@ function vale_test() {
       make -j $threads vale.build -k
 }
 
+# This is just out of complete obsessiveness about CI: we check that the code
+# compiles on antediluvian machines: mtune=generic is the lowest target GCC
+# accepts, and seems to default to -mtune=core2 on most recent versions of GCC.
+declare -A cflags
+cflags[portable-gcc-compatible]="-mtune=generic"
+cflags[gcc-compatible]="-march=native -mtune=native"
+
 function hacl_test() {
     make_target=ci
     if [[ $target == "mozilla-ci" ]]; then
@@ -50,7 +57,7 @@ function hacl_test() {
           for a in *; do
             if [[ $a != "kremlin" && $a != "vale" && $a != "linux" && $a != "wasm" && $a != "merkle-tree" && $a != "test" && -d $a ]]; then
               echo "Building snapshot: $a"
-              make -C $a -j $threads || r=false
+              CFLAGS="${cflags[$a]}" make -C $a -j $threads || r=false
               echo
             fi
           done
