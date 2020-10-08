@@ -115,7 +115,7 @@ let fsquare_times #s o inp tmp n =
     S.lemma_pow_mul (feval #s h0 inp) (pow2 (v i + 1)) (pow2 1);
     assert_norm (pow2 (v i + 1) * pow2 1 = pow2 (v i + 2)))
 
-#set-options "--z3rlimit 300 --fuel 0 --ifuel 1"
+#set-options "--z3rlimit 500 --fuel 0 --ifuel 1"
 
 val finv0:
     #s:field_spec
