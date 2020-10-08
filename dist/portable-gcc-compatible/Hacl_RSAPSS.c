@@ -849,7 +849,6 @@ load_skey(
 
 bool
 Hacl_RSAPSS_rsapss_sign(
-  uint32_t len,
   Spec_Hash_Definitions_hash_alg a,
   uint32_t modBits,
   uint32_t eBits,
@@ -862,6 +861,7 @@ Hacl_RSAPSS_rsapss_sign(
   uint8_t *sgnt
 )
 {
+  uint32_t len = (modBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
   uint32_t hLen = hash_len(a);
   bool
   b =
@@ -928,7 +928,6 @@ Hacl_RSAPSS_rsapss_sign(
 
 bool
 Hacl_RSAPSS_rsapss_verify(
-  uint32_t len,
   Spec_Hash_Definitions_hash_alg a,
   uint32_t modBits,
   uint32_t eBits,
@@ -940,6 +939,7 @@ Hacl_RSAPSS_rsapss_verify(
   uint8_t *msg
 )
 {
+  uint32_t len = (modBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
   uint32_t hLen = hash_len(a);
   bool
   b =
@@ -1116,7 +1116,6 @@ uint64_t
 
 bool
 Hacl_RSAPSS_rsapss_skey_sign(
-  uint32_t len,
   Spec_Hash_Definitions_hash_alg a,
   uint32_t modBits,
   uint32_t eBits,
@@ -1151,18 +1150,7 @@ Hacl_RSAPSS_rsapss_skey_sign(
   bool b = load_skey(modBits, eBits, dBits, nb, eb, db, skey);
   if (b)
   {
-    return
-      Hacl_RSAPSS_rsapss_sign(len,
-        a,
-        modBits,
-        eBits,
-        dBits,
-        skey,
-        sLen,
-        salt,
-        msgLen,
-        msg,
-        sgnt);
+    return Hacl_RSAPSS_rsapss_sign(a, modBits, eBits, dBits, skey, sLen, salt, msgLen, msg, sgnt);
   }
   return false;
 }
@@ -1173,7 +1161,6 @@ Hacl_RSAPSS_rsapss_skey_sign(
 
 bool
 Hacl_RSAPSS_rsapss_pkey_verify(
-  uint32_t len,
   Spec_Hash_Definitions_hash_alg a,
   uint32_t modBits,
   uint32_t eBits,
@@ -1203,7 +1190,7 @@ Hacl_RSAPSS_rsapss_pkey_verify(
   bool b = load_pkey(modBits, eBits, nb, eb, pkey);
   if (b)
   {
-    return Hacl_RSAPSS_rsapss_verify(len, a, modBits, eBits, pkey, sLen, k, sgnt, msgLen, msg);
+    return Hacl_RSAPSS_rsapss_verify(a, modBits, eBits, pkey, sLen, k, sgnt, msgLen, msg);
   }
   return false;
 }
