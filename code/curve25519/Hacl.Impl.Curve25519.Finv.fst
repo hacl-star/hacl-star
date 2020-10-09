@@ -14,13 +14,13 @@ module C = Hacl.Impl.Curve25519.Fields.Core
 module S = Hacl.Spec.Curve25519.Finv
 module P = Spec.Curve25519
 
-#reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
+let _: squash (inversion field_spec) = allow_inversion field_spec
 
+#reset-options "--z3rlimit 50 --fuel 0 --ifuel 0 --record_options"
 
 noextract
 val fsquare_times_inv: #s:field_spec -> h:mem -> f:felem s -> Type0
 let fsquare_times_inv #s h f =
-  allow_inversion field_spec;
   match s with
   | M51 -> C.f51_felem_fits h f (1, 2, 1, 1, 1)
   | M64 -> True
@@ -50,7 +50,6 @@ let fsqr_s #s out f1 tmp =
 noextract
 val fmuls_pre: #s:field_spec -> h:mem -> f1:felem s -> f2:felem s -> Type0
 let fmuls_pre #s h f1 f2 =
-  allow_inversion field_spec;
   match s with
   | M51 -> f51_felem_fits h f1 (1, 2, 1, 1, 1) /\ f51_felem_fits h f2 (1, 2, 1, 1, 1)
   | M64 -> True
@@ -96,7 +95,7 @@ val fsquare_times:
     (ensures  fun h0 _ h1 ->
       modifies (loc o |+| loc tmp) h0 h1 /\
       fsquare_times_inv h1 o /\
-      feval h1 o == S.fsquare_times (feval #s h0 i) (v n))
+      feval h1 o == S.pow (feval #s h0 i) (pow2 (v n)))
 [@ Meta.Attribute.specialize ]
 let fsquare_times #s o inp tmp n =
   let h0 = ST.get() in
@@ -125,7 +124,7 @@ let fsquare_times #s o inp tmp n =
 
 
 val finv1:
-    #s:field_spec{range (4 * v (nlimb s)) U32}
+    #s:field_spec
   -> i:felem s
   -> t1:lbuffer (limb s) (4ul *! nlimb s)
   -> tmp:felem_wide2 s ->
@@ -168,7 +167,7 @@ let finv1 #s i t1 tmp =
 
 
 val finv2:
-    #s:field_spec{range (4 * v (nlimb s)) U32}
+    #s:field_spec
   -> t1:lbuffer (limb s) (4ul *! nlimb s)
   -> tmp:felem_wide2 s ->
   Stack unit
@@ -213,7 +212,7 @@ let finv2 #s t1 tmp =
 
 
 val finv3:
-    #s:field_spec{range (4 * v (nlimb s)) U32}
+    #s:field_spec
   -> t1:lbuffer (limb s) (4ul *! nlimb s)
   -> tmp:felem_wide2 s ->
   Stack unit
@@ -254,7 +253,7 @@ let finv3 #s t1 tmp =
 
 
 val finv0:
-    #s:field_spec{range (4 * v (nlimb s)) U32}
+    #s:field_spec
   -> i:felem s
   -> t1:lbuffer (limb s) (4ul *! nlimb s)
   -> tmp:felem_wide2 s
@@ -306,7 +305,6 @@ val finv:
       feval h1 o == P.fpow (feval #s h0 i) (pow2 255 - 21))
 [@ Meta.Attribute.specialize ]
 let finv #s o i tmp =
-  allow_inversion field_spec;
   push_frame();
   let t1 = create (4ul *! nlimb s) (limb_zero s) in
   let h0 = ST.get () in
