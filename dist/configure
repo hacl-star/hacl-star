@@ -269,7 +269,7 @@ if detect_arm; then
   echo "BLACKLIST += $(ls *CP256*.c *_256.c *_Vec256.c | xargs)" >> Makefile.config
   echo "... $build_target does not support legacy vale stubs"
   echo "BLACKLIST += evercrypt_vale_stubs.c" >> Makefile.config
-  echo "CFLAGS += -DLib_IntVector_Intrinsics_vec256=\"void *\"" >> Makefile.config
+  echo "#define Lib_IntVector_Intrinsics_vec256 void *" >> config.h
   if detect_arm_cc; then
     echo "... $CC $CROSS_CFLAGS can cross-compile to ARM64 with SIMD"
     echo "CFLAGS_128 = -march=armv8-a+simd" >> Makefile.config
@@ -278,7 +278,7 @@ if detect_arm; then
     echo "$CC $CROSS_CFLAGS cannot compile 128-bit vector arithmetic, disabling"
     echo "BLACKLIST += $(ls *CP128*.c *_128.c *_Vec128.c | xargs)" >> Makefile.config
     echo "#define IS_ARM_7 1" >> config.h
-    echo "CFLAGS += -DLib_IntVector_Intrinsics_vec128=\"void *\"" >> Makefile.config
+    echo "#define Lib_IntVector_Intrinsics_vec128 void *" >> config.h
   fi
 fi
 
