@@ -20,7 +20,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "dffabe7c47c0f8d3f652b871816820f0"
+      "238e107319b30505551e80499432b789"
     ],
     [
       "Test.NoHeap.test_one_hash",
@@ -205,7 +205,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "unit_inversion", "unit_typing"
       ],
       0,
-      "5420afdad23374eb4cc03ed1eabf9d0b"
+      "739288642c4759962a6151fc603a4550"
     ],
     [
       "Test.NoHeap.keysized",
@@ -265,7 +265,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "22cdc1572e1565c87fb867ead4b5c30f"
+      "1438a8cd8436f99a135e0d07076b7f65"
     ],
     [
       "Test.NoHeap.test_one_hmac",
@@ -425,7 +425,7 @@
         "typing_tok_Lib.IntTypes.U8@tok", "unit_inversion", "unit_typing"
       ],
       0,
-      "43d126fedf69c5288c25a2a09ef1a739"
+      "a347f025d5e810d527001cc465072f7b"
     ],
     [
       "Test.NoHeap.test_one_hmac_drbg",
@@ -482,6 +482,7 @@
         "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.eqtype",
         "equation_Prims.nat", "equation_Spec.AES.gf8",
         "equation_Spec.AES.irred", "equation_Spec.GaloisField.gf",
+        "equation_Spec.HMAC_DRBG.is_supported_alg",
         "equation_Spec.HMAC_DRBG.supported_alg",
         "equation_Spec.Poly1305.size_key",
         "function_token_typing_FStar.Integers.uint_8",
@@ -495,13 +496,14 @@
         "lemma_FStar.HyperStack.ST.lemma_same_refs_in_non_tip_regions_elim",
         "lemma_FStar.Map.lemma_ContainsDom",
         "lemma_FStar.Map.lemma_InDomRestrict",
-        "lemma_FStar.Map.lemma_InDomUpd2",
         "lemma_FStar.Map.lemma_SelRestrict", "lemma_FStar.Map.lemma_SelUpd2",
+        "lemma_FStar.Map.lemma_UpdDomain",
         "lemma_FStar.Monotonic.HyperStack.lemma_mk_mem__projectors",
         "lemma_FStar.Set.lemma_equal_elim",
         "lemma_FStar.Set.lemma_equal_intro",
         "lemma_FStar.Set.mem_complement", "lemma_FStar.Set.mem_intersect",
-        "lemma_FStar.Set.mem_singleton", "lemma_FStar.UInt32.vu_inv",
+        "lemma_FStar.Set.mem_singleton", "lemma_FStar.Set.mem_union",
+        "lemma_FStar.UInt32.vu_inv",
         "lemma_LowStar.Monotonic.Buffer.fresh_frame_modifies",
         "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
         "lemma_LowStar.Monotonic.Buffer.live_loc_not_unused_in",
@@ -515,7 +517,8 @@
         "lemma_LowStar.Monotonic.Buffer.modifies_liveness_insensitive_buffer_weak",
         "lemma_LowStar.Monotonic.Buffer.unused_in_loc_unused_in",
         "lemma_LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2",
-        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_BarBar",
+        "primitive_Prims.op_Equality",
         "primitive_Prims.op_GreaterThanOrEqual",
         "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Negation", "proj_equation_Spec.GaloisField.GF_t",
@@ -552,10 +555,10 @@
         "typing_FStar.Monotonic.HyperStack.is_stack_region",
         "typing_FStar.Monotonic.HyperStack.remove_elt",
         "typing_FStar.Set.complement", "typing_FStar.Set.mem",
-        "typing_FStar.Set.singleton", "typing_FStar.UInt.fits",
-        "typing_FStar.UInt32.v", "typing_Lib.IntTypes.minint",
-        "typing_Lib.IntTypes.unsigned", "typing_Lib.IntTypes.v",
-        "typing_LowStar.Buffer.trivial_preorder",
+        "typing_FStar.Set.singleton", "typing_FStar.Set.union",
+        "typing_FStar.UInt.fits", "typing_FStar.UInt32.v",
+        "typing_Lib.IntTypes.minint", "typing_Lib.IntTypes.unsigned",
+        "typing_Lib.IntTypes.v", "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.address_liveness_insensitive_locs",
         "typing_LowStar.Monotonic.Buffer.as_addr",
         "typing_LowStar.Monotonic.Buffer.frameOf",
@@ -564,6 +567,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_none", "typing_Spec.AES.gf8",
         "typing_Spec.AES.irred",
         "typing_Spec.GaloisField.__proj__GF__item__t",
+        "typing_Spec.HMAC_DRBG.is_supported_alg",
         "typing_Spec.Poly1305.size_key", "typing_tok_Lib.IntTypes.SEC@tok",
         "typing_tok_Lib.IntTypes.U8@tok", "unit_inversion", "unit_typing"
       ],
@@ -752,7 +756,7 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "c49968c5419bace58d529b4438d0b37d"
+      "672b859572039ac367f7a50a2b72292f"
     ],
     [
       "Test.NoHeap.test_one_chacha20",
@@ -905,7 +909,7 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "53490e74a7538ea4cd3f212d97ea775f"
+      "b765b4eabb12a68686c513e825134e39"
     ],
     [
       "Test.NoHeap.test_one_poly1305",
@@ -1032,7 +1036,7 @@
         "unit_inversion"
       ],
       0,
-      "b52a6eba400ddebaf1ef32e8b0574c1a"
+      "b108f0faeb12cbf677b7873615bff2e6"
     ],
     [
       "Test.NoHeap.test_poly1305",
@@ -1052,7 +1056,7 @@
         "typing_Test.Vectors.Poly1305.vectors"
       ],
       0,
-      "27bb3cf037bb81325d3d8737e03087b0"
+      "82c0c0754a873d836f92ce8fdf0a9eb3"
     ],
     [
       "Test.NoHeap.test_one_curve25519",
@@ -1182,7 +1186,7 @@
         "typing_Spec.Poly1305.size_key", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "d3aec6113b894df0fcf571a23ea82e35"
+      "29464f703cefa3a6b7474181da6b64f1"
     ],
     [
       "Test.NoHeap.test_curve25519",
@@ -1202,7 +1206,7 @@
         "typing_Test.Vectors.Curve25519.vectors"
       ],
       0,
-      "9f31c3da2bcb84341e795df0953499ee"
+      "263158642019ebf0ebe1bc016e8ab8dd"
     ],
     [
       "Test.NoHeap.test_one_chacha20poly1305",
@@ -1363,7 +1367,7 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "1307747b02e148aa241fc210e6fa4c66"
+      "b9030ff7ffe9f473e659841501fae064"
     ],
     [
       "Test.NoHeap.test_chacha20poly1305",
@@ -1383,7 +1387,7 @@
         "typing_Test.Vectors.Chacha20Poly1305.vectors"
       ],
       0,
-      "7f1ddd1aa0014a393783f06c52bf5908"
+      "35700f0bbc80fbdf376d10950be0392d"
     ],
     [
       "Test.NoHeap.main",
@@ -1420,7 +1424,7 @@
         "typing_FStar.Int32.int_to_t", "typing_Prims.pow2"
       ],
       0,
-      "f29e69ba75a199811a5e560b2654e06c"
+      "ca92e4a7b6090b4da43a255b4109b238"
     ]
   ]
 ]
