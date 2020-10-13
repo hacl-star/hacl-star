@@ -28,7 +28,7 @@ open Spec.Hash.Definitions
 open Hacl.Impl.ECDSA.P256.Signature.Agile
 open Hacl.Impl.ECDSA.P256.Verification.Agile
 
-
+(* 
 let ecdsa_sign_p256_sha2 result mLen m privKey k = 
   ecdsa_signature P256 (Hash SHA2_256) result mLen m privKey k
 
@@ -74,7 +74,7 @@ let compression_compressed_form b result =
   Hacl.Impl.P256.Compression.compressionCompressedForm #P256 b result
 
 
-
+ *)
 let ecp256dh_i result scalar = Hacl.Impl.P256.DH.ecp256dh_i P256 result scalar
 
 let ecp384dh_i result scalar = Hacl.Impl.P256.DH.ecp256dh_i P384 result scalar

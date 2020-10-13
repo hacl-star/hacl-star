@@ -276,7 +276,7 @@ let normalisation_update #c z2x z3y p resultPoint =
   fromDomain z3y resultY;
   uploadOneImpl #c resultZ;
   copy_conditional #c resultZ zeroBuffer bit;
-  
+  admit();
   pop_frame()
 
 
@@ -316,6 +316,7 @@ let norm #c p resultPoint tempBuffer =
 
   normalisation_update z2f z3f p resultPoint; 
 
+  admit();
   let h1 = ST.get() in 
   
   let prime = getPrime c in 
@@ -374,6 +375,7 @@ let normX #c p result tempBuffer =
   montgomery_multiplication_buffer #c z2f xf z2f;
   fromDomain z2f result;
 
+  admit();
     let prime = getPrime c in 
     power_distributivity (fromDomain_ #c (as_nat c h0 zf) * fromDomain_ #c (as_nat c h0 zf)) (prime - 2) prime
 
@@ -398,7 +400,7 @@ let scalar_bit #c #buf_type s n =
 
 
 val montgomery_ladder_step1: #c : curve ->  p: point c -> q: point c 
-  -> tempBuffer: lbuffer uint64 (size 22 *! getCoordinateLenU64 c) -> Stack unit
+  -> tempBuffer: lbuffer uint64 (size 27 *! getCoordinateLenU64 c) -> Stack unit
   (requires fun h -> 
     let prime = getPrime c in 
     
@@ -449,7 +451,8 @@ val montgomery_ladder_step1: #c : curve ->  p: point c -> q: point c
 
 let montgomery_ladder_step1 r0 r1 tempBuffer = 
   point_add r0 r1 r1 tempBuffer;
-  point_double r0 r0 tempBuffer
+  point_double r0 r0 tempBuffer;
+  admit()
       
 
 val lemma_step: #c: curve -> i: size_t {uint_v i < getPower c} -> 
@@ -459,7 +462,7 @@ let lemma_step i = ()
 
 
 val montgomery_ladder_step: #c: curve -> #buf_type: buftype-> 
-  p: point c -> q: point c -> tempBuffer: lbuffer uint64 (size 22 *! getCoordinateLenU64 c) -> 
+  p: point c -> q: point c -> tempBuffer: lbuffer uint64 (size 27 *! getCoordinateLenU64 c) -> 
   scalar: lbuffer_t buf_type uint8 (getScalarLen c) -> 
   i:size_t{v i < getPower c} -> 
   Stack unit
@@ -516,18 +519,17 @@ val montgomery_ladder_step: #c: curve -> #buf_type: buftype->
 
 let montgomery_ladder_step #c #buf_type r0 r1 tempBuffer scalar i = 
   let bit0 : size_t = getPowerU c -. i -. 1ul in 
-  admit();
   let bit = scalar_bit scalar bit0 in 
   cswap bit r0 r1; 
   montgomery_ladder_step1 r0 r1 tempBuffer; 
   cswap bit r0 r1; 
-    lemma_step #c i;
+  lemma_step #c i;
     admit()
 
 
 val montgomery_ladder: #c: curve -> #buf_type: buftype->  p: point c -> q: point c ->
   scalar: lbuffer_t buf_type uint8 (getScalarLen c) -> 
-  tempBuffer:  lbuffer uint64 (size 22 *! getCoordinateLenU64 c)  -> 
+  tempBuffer:  lbuffer uint64 (size 27 *! getCoordinateLenU64 c)  -> 
   Stack unit
   (requires fun h -> live h p /\ live h q /\ live h scalar /\  live h tempBuffer /\
     LowStar.Monotonic.Buffer.all_disjoint [loc p; loc q; loc tempBuffer; loc scalar] /\
@@ -573,7 +575,7 @@ val montgomery_ladder: #c: curve -> #buf_type: buftype->  p: point c -> q: point
 
 let montgomery_ladder #c #a p q scalar tempBuffer =  
   let h0 = ST.get() in 
-    admit();
+
   [@inline_let]
   let len = getCoordinateLenU64 c in 
   let cycleLoop = getPowerU c in 
@@ -659,7 +661,7 @@ let lemma_coord h3 q = ()
 inline_for_extraction
 val scalarMultiplication_t: #c: curve -> #t:buftype -> p: point c -> result: point c -> 
   scalar: lbuffer_t t uint8 (getScalarLen c) -> 
-  tempBuffer: lbuffer uint64 (size 25 *! getCoordinateLenU64 c) ->
+  tempBuffer: lbuffer uint64 (size 30 *! getCoordinateLenU64 c) ->
   Stack unit
     (requires fun h -> 
       let len = getCoordinateLenU64 c in 
@@ -693,10 +695,9 @@ let scalarMultiplication_t #c #t p result scalar tempBuffer  =
   let len = getCoordinateLenU64 c in 
   let q = sub tempBuffer (size 0) (size 3 *! len) in 
   uploadZeroPoint #c q;
-  let buff = sub tempBuffer (size 3 *! len) (size 22 *! len) in 
+  let buff = sub tempBuffer (size 3 *! len) (size 27 *! len) in 
   pointToDomain p result;
     let h2 = ST.get() in 
-  admit();
   montgomery_ladder q result scalar buff;
     admit();
     let h3 = ST.get() in 
@@ -764,7 +765,8 @@ let uploadBasePoint #c p =
     upd p (size 14) (u64 1);
     upd p (size 15) (u64 0);
     upd p (size 16) (u64 0);
-    upd p (size 17) (u64 0)
+    upd p (size 17) (u64 0);
+    admit()
 
 
 
@@ -775,29 +777,31 @@ let uploadBasePoint #c p =
   upd p (size 2) (u64 8789745728267363600);
   upd p (size 3) (u64 1770019616739251654);
 
+(*
   assert_norm (8784043285714375740 + pow2 64 * 8483257759279461889 + pow2 64 * pow2 64 * 8789745728267363600 + pow2 64 * pow2 64 * pow2 64 * 1770019616739251654 < prime256); 
     assert_norm (8784043285714375740 + pow2 64 * 8483257759279461889 + pow2 64 * pow2 64 * 8789745728267363600 + pow2 64 * pow2 64 * pow2 64 * 1770019616739251654 = 11110593207902424140321080247206512405358633331993495164878354046817554469948); 
   assert_norm(0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296 == fromDomain_ #P256 11110593207902424140321080247206512405358633331993495164878354046817554469948);
-
+*) 
   upd p (size 4) (u64 15992936863339206154);
   upd p (size 5) (u64 10037038012062884956);
   upd p (size 6) (u64 15197544864945402661);
   upd p (size 7) (u64 9615747158586711429);
-
+(* 
   assert_norm(15992936863339206154 + pow2 64 * 10037038012062884956 + pow2 64 * pow2 64 * 15197544864945402661 + pow2 64 * pow2 64 * pow2 64 * 9615747158586711429 < prime256);
   assert_norm (15992936863339206154 + pow2 64 * 10037038012062884956 + pow2 64 * pow2 64 * 15197544864945402661 + pow2 64 * pow2 64 * pow2 64 * 9615747158586711429 = 60359023176204190920225817201443260813112970217682417638161152432929735267850);
   assert_norm (0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5 == fromDomain_ #P256 60359023176204190920225817201443260813112970217682417638161152432929735267850);
-  
+  *)
   
   upd p (size 8) (u64 1);
   upd p (size 9) (u64 18446744069414584320);
   upd p (size 10) (u64 18446744073709551615);
   upd p (size 11) (u64 4294967294);
   
-  
+  (* 
   assert_norm (1 + pow2 64 * 18446744069414584320 + pow2 64 * pow2 64 * 18446744073709551615 + pow2 64 * pow2 64 * pow2 64 * 4294967294 < prime256);
   assert_norm (1 = fromDomain_ #P256 26959946660873538059280334323183841250350249843923952699046031785985);
-  assert_norm (1 + pow2 64 * 18446744069414584320 + pow2 64 * pow2 64 * 18446744073709551615 + pow2 64 * pow2 64 * pow2 64 * 4294967294 = 26959946660873538059280334323183841250350249843923952699046031785985) 
+  assert_norm (1 + pow2 64 * 18446744069414584320 + pow2 64 * pow2 64 * 18446744073709551615 + pow2 64 * pow2 64 * pow2 64 * 4294967294 = 26959946660873538059280334323183841250350249843923952699046031785985)  *)
+  admit()
 
 
 let scalarMultiplicationWithoutNorm #c p result scalar tempBuffer = 
@@ -805,7 +809,7 @@ let scalarMultiplicationWithoutNorm #c p result scalar tempBuffer =
   let len = getCoordinateLenU64 c in 
   let q = sub tempBuffer (size 0) (size 3 *! len) in 
   uploadZeroPoint #c q;
-  let buff = sub tempBuffer (size 3 *! len) (size 22 *! len) in 
+  let buff = sub tempBuffer (size 3 *! len) (size 27 *! len) in 
   pointToDomain p result;
     let h1 = ST.get() in 
     admit();
@@ -821,7 +825,7 @@ let secretToPublic #c result scalar tempBuffer =
     let basePoint = create (size 3 *! len) (u64 0) in 
   uploadBasePoint #c basePoint;
     let q = sub tempBuffer (size 0) (size 3 *! len) in 
-    let buff = sub tempBuffer (size 3 *! len) (size 22 *! len) in 
+    let buff = sub tempBuffer (size 3 *! len) (size 27 *! len) in 
   uploadZeroPoint #c q; 
   admit();
   let h1 = ST.get() in 
@@ -838,7 +842,7 @@ let secretToPublicWithoutNorm #c result scalar tempBuffer =
     let basePoint = create (size 3 *! len) (u64 0) in 
   uploadBasePoint #c basePoint;
       let q = sub tempBuffer (size 0) (size 3 *! len) in 
-      let buff = sub tempBuffer (size 3 *! len) (size 22 *! len) in 
+      let buff = sub tempBuffer (size 3 *! len) (size 27 *! len) in 
   uploadZeroPoint #c q; 
   admit();
       let h1 = ST.get() in 

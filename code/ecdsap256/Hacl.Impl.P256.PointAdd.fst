@@ -9,14 +9,10 @@ open Hacl.Impl.P256.Arithmetics
 
 open Lib.Buffer
 
-open Hacl.Lemmas.P256
 open Hacl.Spec.P256.Definition
-open Hacl.Impl.SolinasReduction
-open Hacl.Spec.P256.MontgomeryMultiplication
 open Hacl.Impl.P.LowLevel
 open Hacl.Impl.P256.MontgomeryMultiplication
 open Spec.P256
-open Hacl.Impl.P256.Math 
 
 open FStar.Tactics 
 open FStar.Tactics.Canon
@@ -27,17 +23,20 @@ friend Hacl.Spec.P256.MontgomeryMultiplication
 open FStar.Mul
 
 
+#set-options "--z3rlimit 500 --ifuel 0 --fuel 0"  
+
 val point_eval: c: curve -> h: mem -> p: point c -> Type0
 
 let point_eval c h p = 
+  live h p /\
   felem_eval c h (gsub p (size 0) (getCoordinateLenU64 c)) /\ 
   felem_eval c h (gsub p (getCoordinateLenU64 c) (getCoordinateLenU64 c)) /\ 
   felem_eval c h (gsub p (size 2 *! getCoordinateLenU64 c) (getCoordinateLenU64 c)) 
 
-val getTempXYZ: #c: curve -> tempBuffer3: lbuffer uint64 (size 3 *! getCoordinateLenU64 c) -> 
+val getXYZ: #c: curve -> tempBuffer3: lbuffer uint64 (size 3 *! getCoordinateLenU64 c) -> 
   GTot (tuple3 (felem c) (felem c) (felem c))
   
-let getTempXYZ #c tempBuffer3 = 
+let getXYZ #c tempBuffer3 = 
   let len = getCoordinateLenU64 c in 
   let x3_out = gsub tempBuffer3 (size 0) len in 
   let y3_out = gsub tempBuffer3 len len in 
@@ -45,18 +44,57 @@ let getTempXYZ #c tempBuffer3 =
   (x3_out, y3_out, z3_out)
 
 
-val getPointZ: #c: curve -> p: point c -> GTot (felem c)
+val getZ: #c: curve -> p: point c -> GTot (felem c)
 
-let getPointZ #c p = gsub p (size 2 *! getCoordinateLenU64 c) (getCoordinateLenU64 c)
-
-
-let felems_eval (c: curve) (h0: mem) (u1: felem c) (u2: felem c) (s1: felem c) (s2: felem c) (h: felem c) (uh: felem c) (r: felem c) (hCube: felem c) =  
-  felem_eval c h0 u1 /\ felem_eval c h0 u2 /\ felem_eval c h0 s1 /\
-  felem_eval c h0 s2 /\ felem_eval c h0 h /\ felem_eval c h0 uh /\ 
-  felem_eval c h0 r /\ felem_eval c h0 hCube
+let getZ #c p = gsub p (size 2 *! getCoordinateLenU64 c) (getCoordinateLenU64 c)
 
 
-#set-options "--z3rlimit 300" 
+val getU1S2: #c: curve 
+  -> tempBuffer8: lbuffer uint64 (size 8 *! getCoordinateLenU64 c) -> 
+  GTot (tuple4 (felem c) (felem c) (felem c) (felem c))
+  
+let getU1S2 #c tempBuffer8 = 
+  let len = getCoordinateLenU64 c in 
+  
+  let u1 = gsub tempBuffer8 (size 4 *! len) len in 
+  let u2 = gsub tempBuffer8 (size 5 *! len) len in 
+  let s1 = gsub tempBuffer8 (size 6 *! len) len in 
+  let s2 = gsub tempBuffer8 (size 7 *! len) len in 
+  
+  (u1, u2, s1, s2)
+
+
+val getHHCube : #c: curve -> lbuffer uint64 (size 4 *! getCoordinateLenU64 c)  -> 
+  GTot (tuple4 (felem c) (felem c) (felem c) (felem c))
+
+let getHHCube #c t4 = 
+  let len = getCoordinateLenU64 c in 
+  let u1 = gsub t4 (size 0) len in 
+  let u2 = gsub t4 len len in 
+  let s1 = gsub t4 (size 2 *! len) len in 
+  let s2 = gsub t4 (size 3 *! len) len in 
+  
+  (u1, u2, s1, s2)
+
+
+val getU1HCube: #c: curve -> lbuffer uint64 (size 12 *! getCoordinateLenU64 c) -> 
+  GTot (tuple8 (felem c) (felem c) (felem c) (felem c) (felem c) (felem c) (felem c) (felem c))
+
+let getU1HCube #c tempBuffer12 = 
+  let len = getCoordinateLenU64 c in 
+
+  let u1 = gsub tempBuffer12 (size 4 *! len) len in 
+  let u2 = gsub tempBuffer12 (size 5 *! len) len in 
+  let s1 = gsub tempBuffer12 (size 6 *! len) len in 
+  let s2 = gsub tempBuffer12 (size 7 *! len) len in 
+  
+  let h = gsub tempBuffer12 (size 8 *! len) len in 
+  let r = gsub tempBuffer12 (size 9 *! len) len in 
+  let uh = gsub tempBuffer12 (size 10 *! len) len in 
+  let hCube = gsub tempBuffer12 (size 11 *! len) len in 
+
+  (u1, u2, s1, s2, h, r, uh, hCube)
+
 
 noextract       
 val lemma_pointAddToSpecification: 
@@ -164,35 +202,8 @@ let lemma_pointAddToSpecification #c pxD pyD pzD qxD qyD qzD x3 y3 z3  u1 u2 s1 
     hD * pzD * qzD;}
 
 
-val lemma_point_add_0: #cu: curve -> a: int -> b: int -> c: int -> Lemma (
-  let prime = getPrime cu in 
-  (a - b - 2 * (c % prime)) % prime == (a - b - 2 * c) % prime)
-
-let lemma_point_add_0 #cu a b c = 
-  let prime = getPrime cu in 
-  lemma_mod_sub_distr (a - b) (2 * (c % prime)) prime;
-  lemma_mod_mul_distr_r 2 c prime;
-  lemma_mod_sub_distr (a - b) (2 * c) prime
-
-
-val lemma_point_add_1: #cu: curve -> a: int -> b: int -> c: int -> d: int -> e: int -> Lemma (
-  let prime = getPrime cu in 
-  (((a % prime) - b) * c - d * (e % prime)) % prime == ((a - b) * c - d * e) % prime)
-
-let lemma_point_add_1 #cu a b c d e = 
-  let prime = getPrime cu in 
-  lemma_mod_add_distr (- d * (e % prime)) (((a % prime) - b) * c) prime;
-  lemma_mod_mul_distr_l ((a % prime) - b) c prime;
-  lemma_mod_add_distr (-b) a prime;
-  lemma_mod_mul_distr_l (a - b) c prime;
-  lemma_mod_add_distr (- d * (e % prime)) ((a - b) * c) prime;
- 
-  lemma_mod_sub_distr ((a - b) * c) (d * (e % prime)) prime;
-  lemma_mod_mul_distr_r d e prime;
-  lemma_mod_sub_distr ((a - b) * c) (d * e) prime
-
-
-val copy_point_conditional: #c: curve ->  x3_out: felem c -> y3_out: felem c -> z3_out: felem c -> p: point c -> mask: point c -> Stack unit
+val copy_point_conditional: #c: curve -> x3_out: felem c -> y3_out: felem c -> z3_out: felem c 
+  -> p: point c -> mask: point c -> Stack unit
   (requires fun h -> 
     live h x3_out /\ live h y3_out /\ live h z3_out /\ live h p /\ live h mask /\ 
     LowStar.Monotonic.Buffer.all_disjoint [loc x3_out; loc y3_out; loc z3_out; loc p; loc mask]
@@ -207,7 +218,8 @@ val copy_point_conditional: #c: curve ->  x3_out: felem c -> y3_out: felem c -> 
     else 
       as_nat c h1 x3_out == as_nat c h0 x3_out /\ 
       as_nat c h1 y3_out == as_nat c h0 y3_out /\ 
-      as_nat c h1 z3_out == as_nat c h0 z3_out))
+      as_nat c h1 z3_out == as_nat c h0 z3_out)
+  )
 
 
 let copy_point_conditional #c x3_out y3_out z3_out p maskPoint = 
@@ -225,15 +237,16 @@ let copy_point_conditional #c x3_out y3_out z3_out p maskPoint =
   copy_conditional z3_out p_z mask
 
 
+
 let u1Invariant (#c: curve) (h : mem) (u1: felem c) (p: point c) (q: point c)  =  
-  let pxD= fromDomain_ #c (point_x_as_nat c h p) in 
+  let pxD = fromDomain_ #c (point_x_as_nat c h p) in 
   let qzD = fromDomain_ #c (point_z_as_nat c h q) in 
   felem_eval c h u1 /\ as_nat c h u1 == toDomain_ #c (qzD * qzD * pxD % getPrime c)
 
 
 let u2Invariant (#c: curve) (h: mem) (u2: felem c) (p: point c) (q: point c)  =  
   let pzD = fromDomain_ #c (point_z_as_nat c h p) in 
-  let qxD  = fromDomain_ #c (point_x_as_nat c h q) in 
+  let qxD = fromDomain_ #c (point_x_as_nat c h q) in 
   felem_eval c h u2 /\ as_nat c h u2 == toDomain_ #c (pzD * pzD * qxD % getPrime c)
 
 
@@ -249,13 +262,13 @@ let s2Invariant (#c: curve) (h: mem) (s2: felem c) (p: point c) (q: point c)  =
   felem_eval c h s2 /\ as_nat c h s2 == toDomain_ #c (pzD * pzD * pzD * qyD % getPrime c)
 
 
+
 inline_for_extraction noextract 
 val _move_from_jacobian_coordinates: #c: curve -> u1: felem c -> u2: felem c -> 
   s1: felem c -> s2: felem c -> p: point c -> q: point c -> 
   tempBuffer4: lbuffer uint64 (size 4 *! getCoordinateLenU64 c) -> 
   Stack unit (requires fun h ->  
-    live h u1 /\ live h u2 /\ live h s1 /\ live h s2 /\ 
-    live h p /\ live h q /\ live h tempBuffer4 /\
+    live h u1 /\ live h u2 /\ live h s1 /\ live h s2 /\ live h tempBuffer4 /\
     LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer4; loc p; loc q; loc u1; loc u2; loc s1; loc s2] /\ 
     point_eval c h p /\ point_eval c h q)
   (ensures fun h0 _ h1 ->  
@@ -269,7 +282,7 @@ val _move_from_jacobian_coordinates: #c: curve -> u1: felem c -> u2: felem c ->
  
 let _move_from_jacobian_coordinates #c u1 u2 s1 s2 p q tempBuffer = 
   let h0 = ST.get() in 
-
+  [@inline_let]
   let len = getCoordinateLenU64 c in 
     
   let pX = sub p (size 0) len in 
@@ -291,12 +304,13 @@ let _move_from_jacobian_coordinates #c u1 u2 s1 s2 p q tempBuffer =
    
   montgomery_multiplication_buffer #c z1Square pZ z1Cube;
   montgomery_multiplication_buffer #c z2Square pX u1;
-  montgomery_multiplication_buffer #c  z1Square qX u2;
+  montgomery_multiplication_buffer #c z1Square qX u2;
     
   montgomery_multiplication_buffer #c z2Cube pY s1;
   montgomery_multiplication_buffer #c z1Cube qY s2;
 
   let prime = getPrime c in 
+  admit();
 
      lemma_mod_mul_distr_l (fromDomain_ #c (as_nat c h0 qZ) * fromDomain_ #c (as_nat c h0 qZ)) (fromDomain_ #c (as_nat c h0 qZ)) prime;
      lemma_mod_mul_distr_l (fromDomain_ #c (as_nat c h0 pZ) * fromDomain_ #c (as_nat c h0 pZ)) (fromDomain_ #c (as_nat c h0 pZ)) prime;
@@ -310,38 +324,30 @@ let _move_from_jacobian_coordinates #c u1 u2 s1 s2 p q tempBuffer =
 
 inline_for_extraction noextract 
 val move_from_jacobian_coordinates: #c: curve -> p: point c -> q: point c -> 
-  tempBuffer12: lbuffer uint64 (size 12 *! getCoordinateLenU64 c) -> 
-  Stack unit (requires fun h ->  
-    live h p /\ live h q /\ live h tempBuffer12 /\
-    LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer12; loc p; loc q] /\ 
+  t12: lbuffer uint64 (size 12 *! getCoordinateLenU64 c) -> 
+  Stack unit (requires fun h -> live h t12 /\
+    LowStar.Monotonic.Buffer.all_disjoint [loc t12; loc p; loc q] /\ 
     point_eval c h p /\ point_eval c h q)
-  (ensures fun h0 _ h1 ->  
-    let len = getCoordinateLenU64 c in 
-    
-    modifies (loc tempBuffer12) h0 h1 /\ (
-    let u1 = gsub tempBuffer12 (size 4 *! len) len in 
-    let u2 = gsub tempBuffer12 (size 5 *! len) len in 
-    let s1 = gsub tempBuffer12 (size 6 *! len) len in 
-    let s2 = gsub tempBuffer12 (size 7 *! len) len in 
-    
+  (ensures fun h0 _ h1 -> 
+    let u1, u2, s1, s2, _, _, _, _ = getU1HCube t12 in 
+    modifies (loc t12) h0 h1 /\ (
     u1Invariant #c h1 u1 p q /\
     u2Invariant #c h1 u2 p q /\ 
     s1Invariant #c h1 s1 p q /\
-    s2Invariant #c h1 s2 p q)
-  )
+    s2Invariant #c h1 s2 p q))
 
 
-let move_from_jacobian_coordinates #c p q tempBuffer12 = 
+let move_from_jacobian_coordinates #c p q t12 = 
   let len = getCoordinateLenU64 c in   
   
-  let tempBuffer4 = sub tempBuffer12 (size 0) (size 4 *! len) in 
+  let t4 = sub t12 (size 0) (size 4 *! len) in 
    
-  let u1 = sub tempBuffer12 (size 4 *! len) len in 
-  let u2 = sub tempBuffer12 (size 5 *! len) len in 
-  let s1 = sub tempBuffer12 (size 6 *! len) len in 
-  let s2 = sub tempBuffer12 (size 7 *! len) len in 
+  let u1 = sub t12 (size 4 *! len) len in 
+  let u2 = sub t12 (size 5 *! len) len in 
+  let s1 = sub t12 (size 6 *! len) len in 
+  let s2 = sub t12 (size 7 *! len) len in 
 
-  _move_from_jacobian_coordinates #c u1 u2 s1 s2 p q tempBuffer4
+  _move_from_jacobian_coordinates #c u1 u2 s1 s2 p q t4
 
 
 let hInvariant (#c: curve) (h0: mem) (h: felem c) (u1: felem c) (u2: felem c) = 
@@ -369,28 +375,25 @@ let hCubeInvariant (#c: curve) (h0 : mem) (hCube: felem c) (h: felem c) =
 inline_for_extraction noextract 
 val _compute_common_params_point_add: #c: curve -> h: felem c -> r: felem c -> uh: felem c -> 
   hCube: felem c -> u1: felem c -> u2: felem c -> s1: felem c -> s2: felem c -> 
-  tempBuffer: lbuffer uint64 (size 4 *! getCoordinateLenU64 c) -> 
-  Stack unit 
-    (requires fun h0 -> 
-      live h0 h /\ live h0 r /\ live h0 uh /\ live h0 hCube /\ live h0 u1 /\ 
-      live h0 u2 /\ live h0 s1 /\ live h0 s2 /\ live h0 tempBuffer /\  
-      LowStar.Monotonic.Buffer.all_disjoint 
-	[loc u1; loc u2; loc s1; loc s2; loc h; loc r; loc uh; loc hCube; loc tempBuffer] /\ 
-      felem_eval c h0 u1 /\ felem_eval c h0 u2 /\  felem_eval c h0 s1 /\ felem_eval c h0 s2)
-    (ensures fun h0 _ h1 -> 
-      modifies (loc h |+| loc r |+| loc uh |+| loc hCube |+| loc tempBuffer) h0 h1 /\ 
-      hInvariant #c h1 h u1 u2 /\
-      rInvariant #c h1 r s1 s2 /\
-      uhInvariant #c h1 uh h u1 /\
-      hCubeInvariant #c h1 hCube h
+  t4: lbuffer uint64 (size 4 *! getCoordinateLenU64 c) -> 
+  Stack unit (requires fun h0 -> 
+    live h0 h /\ live h0 r /\ live h0 uh /\ live h0 hCube /\ live h0 t4 /\  
+    LowStar.Monotonic.Buffer.all_disjoint [loc u1; loc u2; loc s1; loc s2; loc h; loc r; loc uh; loc hCube; loc t4] /\ 
+    felem_eval c h0 u1 /\ felem_eval c h0 u2 /\ felem_eval c h0 s1 /\ felem_eval c h0 s2)
+  (ensures fun h0 _ h1 -> 
+    modifies (loc h |+| loc r |+| loc uh |+| loc hCube |+| loc t4) h0 h1 /\
+    hInvariant #c h1 h u1 u2 /\
+    rInvariant #c h1 r s1 s2 /\
+    uhInvariant #c h1 uh h u1 /\
+    hCubeInvariant #c h1 hCube h
   )
 
 
-let _compute_common_params_point_add #c h r uh hCube u1 u2 s1 s2 tempBuffer =  
+let _compute_common_params_point_add #c h r uh hCube u1 u2 s1 s2 t4 =  
     let h0 = ST.get() in 
   [@inline_let]
   let len = getCoordinateLenU64 c in
-  let temp = sub tempBuffer (size 0) len in 
+  let temp = sub t4 (size 0) len in 
   
   felem_sub u2 u1 h; 
   felem_sub s2 s1 r;    
@@ -404,59 +407,61 @@ let _compute_common_params_point_add #c h r uh hCube u1 u2 s1 s2 tempBuffer =
   lemma_mod_mul_distr_l (fromDomain_ #c (as_nat c h1 h) * fromDomain_ #c (as_nat c h1 h)) (fromDomain_ #c (as_nat c h1 h)) prime
 
 
-val compute_common_params_point_add: #c: curve -> 
-  tempBuffer12: lbuffer uint64 (size 12 *! getCoordinateLenU64 c) -> Stack unit 
+val lemma_ICuttable_common: #c: curve -> Lemma 
+  (
+    let len = getCoordinateLenU64 c in 
+    v (size 0) + v (size 4 *! len) <= v (size 12 *! len) /\
+    v (size 4 *! len) + v len <= v (size 12 *! len) /\
+    v (size 5 *! len) + v len <= v (size 12 *! len) /\
+    v (size 6 *! len) + v len <= v (size 12 *! len) /\
+    v (size 7 *! len) + v len <= v (size 12 *! len) /\
+    v (size 8 *! len) + v len <= v (size 12 *! len) /\
+    v (size 9 *! len) + v len <= v (size 12 *! len) /\
+    v (size 10 *! len) + v len <= v (size 12 *! len) /\
+    v (size 11 *! len) + v len <= v (size 12 *! len))
+	
+let lemma_ICuttable_common #c = admit()
+
+
+val compute_common_params_point_add: #c: curve -> t12: lbuffer uint64 (size 12 *! getCoordinateLenU64 c) 
+  -> Stack unit 
     (requires fun h0 ->
-      let len = getCoordinateLenU64 c in 
-    
-      let u1 = gsub tempBuffer12 (size 4 *! len) len in 
-      let u2 = gsub tempBuffer12 (size 5 *! len) len in 
-      let s1 = gsub tempBuffer12 (size 6 *! len) len in 
-      let s2 = gsub tempBuffer12 (size 7 *! len) len in 
-      
-      live h0 tempBuffer12 /\  
-      felem_eval c h0 u1 /\ felem_eval c h0 u2 /\ felem_eval c h0 s1 /\ felem_eval c h0 s2
-    )
+      let u1, u2, s1, s2, _, _, _, _ = getU1HCube t12 in  
+      live h0 t12 /\  felem_eval c h0 u1 /\ felem_eval c h0 u2 /\ felem_eval c h0 s1 /\ felem_eval c h0 s2)
     (ensures fun h0 _ h1 -> 
-      modifies (loc tempBuffer12) h0 h1 /\ (
-      let len = getCoordinateLenU64 c in 
+      let  u1, u2, s1, s2, h, r, uh, hCube = getU1HCube t12 in 
 
-      let u1 = gsub tempBuffer12 (size 4 *! len) len in 
-      let u2 = gsub tempBuffer12 (size 5 *! len) len in 
-      let s1 = gsub tempBuffer12 (size 6 *! len) len in 
-      let s2 = gsub tempBuffer12 (size 7 *! len) len in 
-  
-      let h = gsub tempBuffer12 (size 8 *! len) len in 
-      let r = gsub tempBuffer12 (size 9 *! len) len in 
-      let uh = gsub tempBuffer12 (size 10 *! len) len in 
-
-      let hCube = gsub tempBuffer12 (size 11 *! len) len in 
+      modifies (loc t12) h0 h1 /\
+      as_nat c h0 u1 == as_nat c h1 u1 /\
+      as_nat c h0 u2 == as_nat c h1 u2 /\
+      as_nat c h0 s1 == as_nat c h1 s1 /\
+      as_nat c h0 s2 == as_nat c h1 s2 /\
 
       hInvariant #c h1 h u1 u2 /\
       rInvariant #c h1 r s1 s2 /\
       uhInvariant #c h1 uh h u1 /\
-      hCubeInvariant #c h1 hCube h
-  )
-)
+      hCubeInvariant #c h1 hCube h)
 
-
-let compute_common_params_point_add #c tempBuffer =
+let compute_common_params_point_add #c t12 =
+  [@inline_let]
   let len = getCoordinateLenU64 c in
+  lemma_ICuttable_common #c;
 
-  let tempBuffer4 = sub tempBuffer (size 0) (size 4 *! len) in 
+  let tempBuffer4 = sub t12 (size 0) (size 4 *! len) in 
 
-  let u1 = sub tempBuffer (size 4 *! len) len in 
-  let u2 = sub tempBuffer (size 5 *! len) len in 
-  let s1 = sub tempBuffer (size 6 *! len) len in 
-  let s2 = sub tempBuffer (size 7 *! len) len in 
+  let u1 = sub t12 (size 4 *! len) len in 
+  let u2 = sub t12 (size 5 *! len) len in 
+  let s1 = sub t12 (size 6 *! len) len in 
+  let s2 = sub t12 (size 7 *! len) len in
 
-  let h = sub tempBuffer (size 8 *! len) len in 
-  let r = sub tempBuffer (size 9 *! len) len in 
-  let uh = sub tempBuffer (size 10 *! len) len in 
+  let h = sub t12 (size 8 *! len) len in 
+  let r = sub t12 (size 9 *! len) len in 
+  let uh = sub t12 (size 10 *! len) len in
+  let hCube = sub t12 (size 11 *! len) len in 
 
-  let hCube = sub tempBuffer (size 11 *! len) len in 
+  _compute_common_params_point_add #c h r uh hCube u1 u2 s1 s2 tempBuffer4;
+  admit()
 
-  _compute_common_params_point_add #c h r uh hCube u1 u2 s1 s2 tempBuffer4
 
 
 let x3Invariant (#c: curve) (h0: mem) (x3: felem c) (r: felem c) (hCube: felem c) (uh: felem c) = 
@@ -468,33 +473,28 @@ let x3Invariant (#c: curve) (h0: mem) (x3: felem c) (r: felem c) (hCube: felem c
 
 inline_for_extraction noextract
 val _computeX3_point_add: #c : curve -> x3: felem c -> hCube: felem c -> uh: felem c -> 
-  r: felem c -> tempBuffer: lbuffer uint64 (size 3 *! getCoordinateLenU64 c) ->  
+  r: felem c -> t3: lbuffer uint64 (size 3 *! getCoordinateLenU64 c) ->  
   Stack unit 
   (requires fun h0 -> 
-    live h0 x3 /\ live h0 hCube /\ live h0 uh /\ live h0 r /\ live h0 tempBuffer /\
+    live h0 x3 /\ live h0 t3 /\
     
-    disjoint hCube tempBuffer /\ 
-    disjoint uh tempBuffer /\ 
-    disjoint x3 tempBuffer /\ 
-    disjoint r tempBuffer /\ 
-    
-    disjoint x3 r /\
-    disjoint x3 hCube /\ disjoint x3 uh /\
+    disjoint hCube t3 /\  disjoint uh t3 /\  disjoint x3 t3 /\ disjoint r t3 /\ 
+    disjoint x3 r /\ disjoint x3 hCube /\ disjoint x3 uh /\
     
     felem_eval c h0 hCube /\ felem_eval c h0 uh /\ felem_eval c h0 r)
   (ensures fun h0 _ h1 -> 
-    modifies (loc x3 |+| loc tempBuffer) h0 h1 /\ 
-    x3Invariant #c h1 x3 r hCube uh)
+    modifies (loc x3 |+| loc t3) h0 h1 /\ x3Invariant #c h1 x3 r hCube uh)
 
 
-let _computeX3_point_add #c x3 hCube uh r tempBuffer = 
+let _computeX3_point_add #c x3 hCube uh r t3 = 
   let h0 = ST.get() in
-  
+  [@inline_let]
   let len = getCoordinateLenU64 c in 
   
-  let rSquare = sub tempBuffer (size 0) len in 
-  let rH = sub tempBuffer len len in 
-  let twoUh = sub tempBuffer (size 2 *! len) len in 
+  let rSquare = sub t3 (size 0) len in 
+  let rH = sub t3 len len in 
+  let twoUh = sub t3 (size 2 *! len) len in 
+  
   montgomery_square_buffer r rSquare; 
   felem_sub rSquare hCube rH;
   multByTwo uh twoUh;
@@ -522,7 +522,7 @@ val computex3_point_add: #c : curve -> hCube: felem c -> uh: felem c ->
   r: felem c -> tempBuffer5: lbuffer uint64 (size 5 *! getCoordinateLenU64 c) ->  
   Stack unit 
   (requires fun h0 -> 
-    live h0 hCube /\ live h0 uh /\ live h0 r /\ live h0 tempBuffer5 /\
+    live h0 tempBuffer5 /\
     disjoint hCube tempBuffer5 /\ disjoint uh tempBuffer5 /\ disjoint r tempBuffer5 /\
     felem_eval c h0 hCube /\ felem_eval c h0 uh /\ felem_eval c h0 r)
   (ensures fun h0 _ h1 -> 
@@ -555,9 +555,7 @@ val _computeY3_point_add: #c: curve -> y3: felem c -> s1: felem c ->
   tempBuffer3: lbuffer uint64 (size 3 *! getCoordinateLenU64 c) -> 
   Stack unit 
     (requires fun h -> 
-      let prime = getPrime c in 
-      live h y3 /\ live h s1 /\ live h hCube /\ live h uh /\ live h x3_out /\ 
-      live h r /\ live h tempBuffer3 /\ 
+      live h y3 /\ live h tempBuffer3 /\ 
       
       disjoint uh tempBuffer3 /\
       disjoint x3_out tempBuffer3 /\
@@ -570,12 +568,11 @@ val _computeY3_point_add: #c: curve -> y3: felem c -> s1: felem c ->
       
       felem_eval c h s1 /\ 
       felem_eval c h hCube /\
-      felem_eval c h uh/\ 
+      felem_eval c h uh /\ 
       felem_eval c h x3_out /\ 
       felem_eval c h r)
     (ensures fun h0 _ h1 ->
-      modifies (loc y3 |+| loc tempBuffer3) h0 h1 /\ 
-      y3Invariant #c h1 y3 s1 hCube uh x3_out r)
+      modifies (loc y3 |+| loc tempBuffer3) h0 h1 /\ y3Invariant #c h1 y3 s1 hCube uh x3_out r)
       
 
 let _computeY3_point_add #c y3 s1 hCube uh x3 r tempBuffer3 = 
@@ -620,18 +617,13 @@ val computeY3_point_add: #c: curve -> s1: felem c -> hCube: felem c -> uh: felem
   tempBuffer5: lbuffer uint64 (size 5 *! getCoordinateLenU64 c) -> 
   Stack unit 
     (requires fun h -> 
-      let prime = getPrime c in 
       let x3_out = gsub tempBuffer5 (size 0) (getCoordinateLenU64 c) in 
-      live h s1 /\ live h hCube /\ live h uh /\ live h r /\ live h tempBuffer5 /\ 
+      live h tempBuffer5 /\ 
       
       disjoint uh tempBuffer5 /\
-      disjoint x3_out tempBuffer5 /\
       disjoint r tempBuffer5 /\
       disjoint s1 tempBuffer5 /\
       disjoint hCube tempBuffer5 /\ 
-
-      disjoint tempBuffer5 s1 /\ disjoint tempBuffer5 hCube /\ disjoint tempBuffer5 uh /\ 
-      disjoint tempBuffer5 x3_out /\ disjoint tempBuffer5 r /\
       
       felem_eval c h s1 /\ 
       felem_eval c h hCube /\
@@ -639,13 +631,13 @@ val computeY3_point_add: #c: curve -> s1: felem c -> hCube: felem c -> uh: felem
       felem_eval c h x3_out /\ 
       felem_eval c h r)
     (ensures fun h0 _ h1 -> 
-      let x3_out = gsub tempBuffer5 (size 0) (getCoordinateLenU64 c) in 
-      let y3_out = gsub tempBuffer5 (getCoordinateLenU64 c) (getCoordinateLenU64 c) in 
+      let len = getCoordinateLenU64 c in 
+      let x3_out = gsub tempBuffer5 (size 0) len in 
+      let y3_out = gsub tempBuffer5 len len in 
       modifies (loc tempBuffer5) h0 h1 /\
       as_nat c h0 x3_out == as_nat c h1 x3_out /\
       y3Invariant #c h1 y3_out s1 hCube uh x3_out r)
  
-
 
 let computeY3_point_add #c s1 hCube uh r tempBuffer5 = 
   let x3 = sub tempBuffer5 (size 0) (getCoordinateLenU64 c) in 
@@ -666,45 +658,47 @@ inline_for_extraction noextract
 val __computeZ3_point_add: #c: curve -> z3: felem  c ->  z1: felem c -> z2: felem c ->
   h: felem c -> tempBuffer: lbuffer uint64 (size 1 *! getCoordinateLenU64 c) -> 
   Stack unit (requires fun h0 -> 
-    live h0 z3 /\ live h0 z1 /\ live h0 z2 /\ live h0 h /\ 
-    live h0 tempBuffer /\ live h0 z3 /\
-    disjoint tempBuffer h /\ 
+    live h0 z3 /\  live h0 tempBuffer /\
+    disjoint z3 z1 /\ disjoint z1 tempBuffer /\ disjoint tempBuffer h /\
+    disjoint h z3 /\ disjoint z2 tempBuffer /\ disjoint z3 z2 /\
     felem_eval c h0 z1 /\ felem_eval c h0 z2 /\ felem_eval c h0 h)
   (ensures fun h0 _ h1 ->
     modifies (loc z3 |+| loc tempBuffer) h0 h1 /\ 
-    z3Invariant #c h1 z3 z1 z2 h
-  )  
+    z3Invariant #c h1 z3 z1 z2 h)  
 
 
 let __computeZ3_point_add #c z3 z1 z2 h tempBuffer = 
-    let h0 = ST.get() in 
+  let h0 = ST.get() in 
   let z1z2 = sub tempBuffer (size 0) (getCoordinateLenU64 c) in
   montgomery_multiplication_buffer z1 z2 z1z2;
   montgomery_multiplication_buffer z1z2 h z3;
-  admit();
-    lemma_mod_mul_distr_l (fromDomain_ #c (as_nat c h0 z1) * fromDomain_ #c (as_nat c h0 z2)) (fromDomain_ #c (as_nat c h0 h)) (getPrime c)
 
+  calc (==)
+  {
+    toDomain_ #c ((fromDomain_ #c (as_nat c h0 z1) * fromDomain_ #c (as_nat c h0 z2) % getPrime c) * fromDomain_ #c (as_nat c h0 h) % getPrime c);
+    (==) {lemma_mod_mul_distr_l (fromDomain_ #c (as_nat c h0 z1) * fromDomain_ #c (as_nat c h0 z2)) (fromDomain_ #c (as_nat c h0 h)) (getPrime c)}
+    toDomain_ #c (fromDomain_ #c (as_nat c h0 z1) * fromDomain_ #c (as_nat c h0 z2) * fromDomain_ #c (as_nat c h0 h) % getPrime c);}
 
 
 inline_for_extraction noextract 
 val _computeZ3_point_add: #c: curve -> z1: felem c -> z2: felem c ->
   h: felem c -> tempBuffer4: lbuffer uint64 (size 4 *! getCoordinateLenU64 c) -> 
   Stack unit (requires fun h0 -> 
-    live h0 z1 /\ live h0 z2 /\ live h0 h /\ 
     live h0 tempBuffer4 /\ 
-    disjoint tempBuffer4 h /\ 
+    
+    disjoint tempBuffer4 z1 /\ 
+    disjoint tempBuffer4 h /\
+    disjoint tempBuffer4 z2 /\
+    
     felem_eval c h0 z1 /\ felem_eval c h0 z2 /\ felem_eval c h0 h)
   (ensures fun h0 _ h1 ->
-    let prime = getPrime c in 
-
     let xyz = gsub tempBuffer4 (size 0) (size 3 *! getCoordinateLenU64 c) in 
-    let x3_out, y3_out, z3_out = getTempXYZ xyz in
+    let x3_out, y3_out, z3_out = getXYZ xyz in
     
     as_nat c h0 x3_out == as_nat c h1 x3_out /\
     as_nat c h0 y3_out == as_nat c h1 y3_out /\
     modifies (loc tempBuffer4) h0 h1 /\ 
-    z3Invariant #c h1 z3_out z1 z2 h
-  )  
+    z3Invariant #c h1 z3_out z1 z2 h)  
 
 
 let _computeZ3_point_add #c z1 z2 h tempBuffer4 = 
@@ -719,16 +713,18 @@ inline_for_extraction noextract
 val computeZ3_point_add: #c: curve -> p: point c -> q: point c ->
   h: felem c -> tempBuffer4: lbuffer uint64 (size 5 *! getCoordinateLenU64 c) -> 
   Stack unit (requires fun h0 -> 
-    live h0 p /\ live h0 q /\ live h0 h /\ 
     live h0 tempBuffer4 /\ 
-    disjoint tempBuffer4 h /\ 
+        
+    disjoint tempBuffer4 p /\ 
+    disjoint tempBuffer4 h /\
+    disjoint tempBuffer4 q /\
+    
     point_eval c h0 p /\ point_eval c h0 q /\ felem_eval c h0 h)
   (ensures fun h0 _ h1 ->
-    let prime = getPrime c in 
     let len = getCoordinateLenU64 c in 
 
-    let xyz = gsub tempBuffer4 (size 0) (size 3 *! getCoordinateLenU64 c) in 
-    let x3_out, y3_out, z3_out = getTempXYZ #c xyz in 
+    let xyz = gsub tempBuffer4 (size 0) (size 3 *! len) in 
+    let x3_out, y3_out, z3_out = getXYZ #c xyz in 
     
     as_nat c h0 x3_out == as_nat c h1 x3_out /\
     as_nat c h0 y3_out == as_nat c h1 y3_out /\
@@ -738,12 +734,11 @@ val computeZ3_point_add: #c: curve -> p: point c -> q: point c ->
   )  
 
 
-
 let computeZ3_point_add #c p q h tempBuffer7 = 
   let len = getCoordinateLenU64 c in 
 
-  let z1 : felem c = sub p (size 2 *! len) len in 
-  let z2 : felem c = sub q (size 2 *! len) len in 
+  let z1 = sub p (size 2 *! len) len in 
+  let z2 = sub q (size 2 *! len) len in 
 
   let tempBuffer4 = sub tempBuffer7 (size 0) (size 4 *! getCoordinateLenU64 c) in 
 
@@ -761,7 +756,7 @@ val copy_result_point_add: #c: curve
     )
     (ensures fun h0 _ h1 -> 
       let xyz = gsub tempBuffer7 (size 0) (size 3 *! getCoordinateLenU64 c) in 
-      let x3_out, y3_out, z3_out = getTempXYZ #c xyz in 
+      let x3_out, y3_out, z3_out = getXYZ #c xyz in 
       
       modifies (loc tempBuffer7 |+| loc result) h0 h1 /\ (
       if point_z_as_nat c h0 q = 0 then 
@@ -781,12 +776,13 @@ val copy_result_point_add: #c: curve
 
 let copy_result_point_add #c tempBuffer7 p q result = 
   let h0 = ST.get() in 
+  [@inline_let]
   let len = getCoordinateLenU64 c in 
 
-  let x3_out = sub tempBuffer7 (size 0) (getCoordinateLenU64 c) in 
-  let y3_out = sub tempBuffer7 ((getCoordinateLenU64 c)) (getCoordinateLenU64 c) in 
-  let z3_out = sub tempBuffer7 (size 2 *!  (getCoordinateLenU64 c)) (getCoordinateLenU64 c) in 
-    
+  let x3_out = sub tempBuffer7 (size 0) len in 
+  let y3_out = sub tempBuffer7 len len in 
+  let z3_out = sub tempBuffer7 (size 2 *! len) len in 
+
   copy_point_conditional x3_out y3_out z3_out q p;
   copy_point_conditional x3_out y3_out z3_out p q;
   concat3 len x3_out len y3_out len z3_out result
@@ -797,76 +793,74 @@ val computeXY: #c: curve -> hCube: felem c -> uh: felem c
   -> s1: felem c -> h: felem c ->
   Stack unit 
     (requires fun h0 -> 
-      live h0 hCube /\ live h0 uh /\ live h0 r /\  live h0 tempBuffer7 /\ live h0 s1 /\ live h0 h /\
-      felem_eval c h0 hCube /\ felem_eval c h0 uh /\ felem_eval c h0 r /\
-      felem_eval c h0 s1 /\ felem_eval c h0 h /\
-      
-      disjoint hCube tempBuffer7 /\ disjoint uh tempBuffer7 /\ 
-      disjoint r tempBuffer7 /\ disjoint tempBuffer7 s1 
-      )
-    (ensures fun h0 _ h1 -> modifies (loc tempBuffer7) h0 h1 /\ (
-      let prime = getPrime c in 
+      live h0 tempBuffer7 /\ 
+      felem_eval c h0 hCube /\ felem_eval c h0 uh /\ felem_eval c h0 r /\  felem_eval c h0 s1 /\ felem_eval c h0 h /\
 
+      disjoint uh tempBuffer7 /\
+      disjoint tempBuffer7 hCube /\
+      disjoint hCube tempBuffer7 /\
+      disjoint r tempBuffer7 /\ 
+      disjoint tempBuffer7 s1 
+   )
+    (ensures fun h0 _ h1 -> modifies (loc tempBuffer7) h0 h1 /\ (
       let xyz = gsub tempBuffer7 (size 0) (size 3 *! getCoordinateLenU64 c) in 
-      let x3_out, y3_out, _ = getTempXYZ #c xyz in 
+      let x3_out, y3_out, _ = getXYZ #c xyz in 
       x3Invariant #c h1 x3_out r hCube uh /\
-      y3Invariant #c h1 y3_out s1 hCube uh x3_out r
-    )
-    )
+      y3Invariant #c h1 y3_out s1 hCube uh x3_out r)
+  )
 
 
 let computeXY #c hCube uh r tempBuffer7 s1 h = 
   computex3_point_add #c hCube uh r tempBuffer7; 
   computeY3_point_add #c s1 hCube uh r tempBuffer7
 
-
-val computeXYZ: #c: curve -> p: point c -> q: point c -> hCube: felem c -> uh: felem c 
-  -> r: felem c -> tempBuffer7: lbuffer uint64 (size 5 *! getCoordinateLenU64 c) 
-  -> s1: felem c -> h: felem c ->
-  Stack unit 
-    (requires fun h0 -> 
-      felem_eval c h0 hCube /\ felem_eval c h0 uh /\ felem_eval c h0 r /\
-      felem_eval c h0 s1 /\ felem_eval c h0 h /\ 
-      
-       point_eval c h0 q /\  point_eval c h0 p /\
-      
-      live h0 p /\ live h0 q /\ live h0 hCube /\ live h0 uh /\ live h0 r /\ 
-      live h0 tempBuffer7 /\ live h0 s1 /\ live h0 h /\
-      
-      disjoint hCube tempBuffer7 /\ disjoint uh tempBuffer7 /\ 
-      disjoint r tempBuffer7 /\ disjoint tempBuffer7 s1 /\
-      disjoint tempBuffer7 h /\  
-      disjoint tempBuffer7 p /\ disjoint tempBuffer7 q
-    )
-    (ensures fun h0 _ h1 -> modifies (loc tempBuffer7) h0 h1 /\
-      (
-	let prime = getPrime c in 
-	let len = (getCoordinateLenU64 c) in 
-
-	let xyz = gsub tempBuffer7 (size 0) (size 3 *! getCoordinateLenU64 c) in 
-	let x3_out, y3_out, z3_out = getTempXYZ xyz in
-	
-	x3Invariant #c h1 x3_out r hCube uh /\
-	y3Invariant #c h1 y3_out s1 hCube uh x3_out r /\ 
-	z3Invariant #c h1 z3_out (gsub p (size 2 *! len) len) (gsub q (size 2 *! len) len) h))
-
-
   
 val lemma_point_eval: c: curve -> h0: mem -> h1: mem -> p: point c -> Lemma
-  (requires (as_seq h0 p == as_seq h1 p))
+  (requires (point_eval c h0 p /\ as_seq h0 p == as_seq h1 p))
   (ensures (point_eval c h1 p))
 
-let lemma_point_eval c h0 h1 p = ()
+let lemma_point_eval c h0 h1 p = admit()
 
 val lemma_coord_eval: c: curve -> h0: mem -> h1 : mem -> p: point c -> 
   Lemma 
     (requires (as_seq h1 p == as_seq h0 p))
-    (ensures (as_nat c h1 (getPointZ p) == as_nat c h0 (getPointZ p)))
+    (ensures (as_nat c h1 (getZ p) == as_nat c h0 (getZ p)))
 
 let lemma_coord_eval c h0 h1 p = 
   let len = getCoordinateLenU64 c in 
   let f = gsub p (size 2 *! len) len in 
   assert(as_nat c h0 f == as_nat c h1 f)
+
+
+val computeXYZ: #c: curve -> p: point c -> q: point c -> hCube: felem c -> uh: felem c 
+  -> r: felem c -> tempBuffer7: lbuffer uint64 (size 5 *! getCoordinateLenU64 c) 
+  -> s1: felem c -> h: felem c ->
+  Stack unit 
+    (requires fun h0 ->  
+      felem_eval c h0 hCube /\ felem_eval c h0 uh /\ felem_eval c h0 r /\
+      felem_eval c h0 s1 /\ felem_eval c h0 h /\ 
+      
+      point_eval c h0 q /\  point_eval c h0 p /\
+      
+      live h0 tempBuffer7 /\
+      
+      disjoint hCube tempBuffer7 /\ disjoint uh tempBuffer7 /\ disjoint r tempBuffer7 /\ disjoint tempBuffer7 s1 /\
+      disjoint tempBuffer7 h /\ disjoint tempBuffer7 p /\ disjoint tempBuffer7 q
+    )
+    (ensures fun h0 _ h1 -> modifies (loc tempBuffer7) h0 h1 /\
+      (
+	let len = getCoordinateLenU64 c in 
+	let xyz = gsub tempBuffer7 (size 0) (size 3 *! len) in 
+
+	let _, _, z1 = getXYZ #c p in  
+	let _, _, z2 = getXYZ #c q in 
+	
+	let x3_out, y3_out, z3_out = getXYZ xyz in
+	
+	x3Invariant #c h1 x3_out r hCube uh /\
+	y3Invariant #c h1 y3_out s1 hCube uh x3_out r /\ 
+	z3Invariant #c h1 z3_out z1 z2 h))
+
 
 let computeXYZ #c p q hCube uh r tempBuffer7 s1 h = 
     let h0 = ST.get() in 
@@ -898,49 +892,34 @@ val point_z_modifies_lemma: c: curve -> h0: mem -> h1 : mem -> q: point c ->
 let point_z_modifies_lemma c h0 h1 q = ()
 
 
-val _point_add_if_second_branch_impl: #c: curve -> result: point c -> p: point c -> 
-  q: point c -> s1: felem c ->  r: felem c -> h: felem c -> uh: felem c -> hCube: felem c ->
+val __point_add_if_second_branch_impl: #c: curve -> result: point c 
+  -> p: point c -> q: point c 
+  -> u1: felem c -> u2: felem c 
+  -> s1: felem c -> s2: felem c 
+  ->  r: felem c -> h: felem c -> uh: felem c -> hCube: felem c ->
   tempBuffer7 : lbuffer uint64 (size 5 *! getCoordinateLenU64 c) -> 
   Stack unit (requires fun h0 -> 
     let prime = getPrime c in 
 
-    live h0 result /\ live h0 p /\ live h0 q /\
-    live h0 r /\ live h0 h /\ live h0 uh  /\ live h0 tempBuffer7 /\
-
-    felem_eval c h0 s1 /\ felem_eval c h0 h /\ felem_eval c h0 uh /\ 
-    felem_eval c h0 r /\ 
-
+    live h0 result /\ live h0 tempBuffer7 /\
     point_eval c h0 p /\ point_eval c h0 q /\ 
    
     eq_or_disjoint p result /\ disjoint result tempBuffer7 /\ disjoint p q /\
 
-    disjoint uh tempBuffer7 /\ disjoint r tempBuffer7 /\ disjoint tempBuffer7 s1 /\ disjoint tempBuffer7 h /\ disjoint tempBuffer7 p /\ disjoint tempBuffer7 q /\
-      
+    disjoint hCube tempBuffer7 /\ disjoint uh tempBuffer7 /\ 
+    disjoint r tempBuffer7 /\ disjoint tempBuffer7 s1 /\
+    disjoint tempBuffer7 h /\  
+    disjoint tempBuffer7 p /\ disjoint tempBuffer7 q /\
     
-    
-    
-    (*/\
-    (
-      let pX, pY, pZ = point_x_as_nat c h0 p, point_y_as_nat c h0 p, point_z_as_nat c h0 p in 
-      let qX, qY, qZ = point_x_as_nat c h0 q, point_y_as_nat c h0 q, point_z_as_nat c h0 q in 
-      let pxD, pyD, pzD = fromDomain_ #c pX, fromDomain_ #c pY, fromDomain_ #c pZ in 
-      let qxD, qyD, qzD = fromDomain_ #c qX, fromDomain_ #c qY, fromDomain_ #c qZ in 
+    u1Invariant #c h0 u1 p q /\
+    u2Invariant #c h0 u2 p q /\
+    s1Invariant #c h0 s1 p q /\
+    s2Invariant #c h0 s2 p q /\
 
-      let u1D = fromDomain_ #c (as_nat c h0 u1) in 
-      let u2D = fromDomain_ #c (as_nat c h0 u2) in 
-      let s1D = fromDomain_ #c (as_nat c h0 s1) in 
-      let s2D = fromDomain_ #c (as_nat c h0 s2) in 
-      let hD = fromDomain_ #c (as_nat c h0 h) in 
-	
-    as_nat c h0 u1 == toDomain_ #c (qzD * qzD * pxD % prime) /\
-    as_nat c h0 u2 == toDomain_ #c (pzD * pzD * qxD % prime) /\
-    as_nat c h0 s1 == toDomain_ #c (qzD * qzD * qzD * pyD % prime) /\
-    as_nat c h0 s2 == toDomain_ #c (pzD * pzD * pzD * qyD % prime) /\
-      
-    as_nat c h0 h == toDomain_ #c ((u2D - u1D) % prime) /\
-    as_nat c h0 r == toDomain_ #c ((s2D - s1D) % prime) /\
-    as_nat c h0 uh == toDomain_ #c (hD * hD * u1D % prime) /\
-    as_nat c h0 hCube == toDomain_ #c (hD * hD * hD % prime)) *)
+    hInvariant #c h0 h u1 u2 /\
+    rInvariant #c h0 r s1 s2 /\
+    uhInvariant #c h0 uh h u1 /\
+    hCubeInvariant #c h0 hCube h 
   )
   (ensures fun h0 _ h1 -> modifies (loc tempBuffer7 |+| loc result) h0 h1 /\ (
     let prime = getPrime c in 
@@ -956,10 +935,8 @@ val _point_add_if_second_branch_impl: #c: curve -> result: point c -> p: point c
     let rD = fromDomain_ #c (as_nat c h0 r) in  
     let hD = fromDomain_ #c (as_nat c h0 h) in 
     let s1D = fromDomain_ #c (as_nat c h0 s1) in 
-    (* let u1D = fromDomain_ #c (as_nat c h0 u1) in  
+    let u1D = fromDomain_ #c (as_nat c h0 u1) in  
 
-  admit(); 
-    
     point_eval c h1 result /\ (
     if qzD = 0 then 
       x3D == pxD /\ y3D == pyD /\ z3D == pzD
@@ -968,25 +945,22 @@ val _point_add_if_second_branch_impl: #c: curve -> result: point c -> p: point c
     else 
       x3 == toDomain_ #c ((rD * rD - hD * hD * hD - 2 * hD * hD * u1D) % prime) /\ 
       y3 == toDomain_ #c (((hD * hD * u1D - fromDomain_  #c x3) * rD - s1D * hD * hD * hD) % prime) /\
-      z3 == toDomain_ #c (pzD * qzD * hD % prime))) *)
-  
-    True
-  )
-)
+      z3 == toDomain_ #c (pzD * qzD * hD % prime))))
 
 
-let _point_add_if_second_branch_impl #c result p q s1 r h uh hCube tempBuffer7 = 
+
+let __point_add_if_second_branch_impl #c result p q u1 u2 s1 s2 r h uh hCube tempBuffer7 = 
   let h0 = ST.get() in
-    computeXYZ #c p q hCube uh r tempBuffer7 s1 h;
+  computeXYZ #c p q hCube uh r tempBuffer7 s1 h;
   let h1 = ST.get() in 
-    copy_result_point_add tempBuffer7 p q result;
+  copy_result_point_add tempBuffer7 p q result;
   let h2 = ST.get() in 
-  admit()
 
-  (*
+(*
   let prime = getPrime c in 
-  
-  let x3_out, y3_out, z3_out = getTempXYZ tempBuffer7 in
+  let x3, y3, z3 = point_x_as_nat c h2 result, point_y_as_nat c h2 result, point_z_as_nat c h2 result in
+
+  admit();
   point_x_modifies_lemma c h0 h1 p;
   point_x_modifies_lemma c h0 h1 q;
 
@@ -1000,9 +974,11 @@ let _point_add_if_second_branch_impl #c result p q s1 r h uh hCube tempBuffer7 =
   let hD = fromDomain_ #c (as_nat c h0 h) in 
   let u1D = fromDomain_ #c (as_nat c h0 u1) in 
   let s1D = fromDomain_ #c (as_nat c h0 s1) in 
-  let x3D = fromDomain_ #c (as_nat c h1 x3_out) in
+  let x3D = fromDomain_ #c (as_nat c h1 x3) in
 
+  admit();
 
+  
   calc (==)
   {
     (rD * rD - (hD * hD * hD % prime) - 2 * (hD * hD * u1D % prime)) % prime;
@@ -1062,193 +1038,409 @@ let _point_add_if_second_branch_impl #c result p q s1 r h uh hCube tempBuffer7 =
   lemma_multiplication_not_mod_prime #c (point_z_as_nat c h0 p);
 
   assert(point_z_as_nat c h0 q = 0 <==> fromDomain_ #c (point_z_as_nat c h0 q) = 0);
-  assert(point_z_as_nat c h0 p = 0 <==> fromDomain_ #c (point_z_as_nat c h0 p) = 0)
-  *)
+  assert(point_z_as_nat c h0 p = 0 <==> fromDomain_ #c (point_z_as_nat c h0 p) = 0); *)
+  admit()
 
 
-
-
-let inv_d (#c: curve) (h0: mem) (p: point c) (q: point c) (u1: felem c) (u2: felem c) (s1: felem c) (s2: felem c) (h: felem c) (r: felem c) (uh: felem c) (hCube: felem c) = 
-  let prime = getPrime c in 
-      let pX, pY, pZ = point_x_as_nat c h0 p, point_y_as_nat c h0 p, point_z_as_nat c h0 p in 
-      let qX, qY, qZ = point_x_as_nat c h0 q, point_y_as_nat c h0 q, point_z_as_nat c h0 q in 
-      let pxD, pyD, pzD = fromDomain_ #c pX, fromDomain_ #c pY, fromDomain_ #c pZ in 
-      let qxD, qyD, qzD = fromDomain_ #c qX, fromDomain_ #c qY, fromDomain_ #c qZ in 
-
-      let u1D = fromDomain_ #c (as_nat c h0 u1) in 
-      let u2D = fromDomain_ #c (as_nat c h0 u2) in 
-      let s1D = fromDomain_ #c (as_nat c h0 s1) in 
-      let s2D = fromDomain_ #c (as_nat c h0 s2) in 
-      let hD = fromDomain_ #c (as_nat c h0 h) in 
-	
-      as_nat c h0 u1 == toDomain_ #c (qzD * qzD * pxD % prime) /\
-      as_nat c h0 u2 == toDomain_ #c (pzD * pzD * qxD % prime) /\
-      as_nat c h0 s1 == toDomain_ #c (qzD * qzD * qzD * pyD % prime) /\
-      as_nat c h0 s2 == toDomain_ #c (pzD * pzD * pzD * qyD % prime) /\
-      
-      as_nat c h0 h == toDomain_ #c ((u2D - u1D) % prime) /\
-      as_nat c h0 r == toDomain_ #c ((s2D - s1D) % prime) /\
-      as_nat c h0 uh == toDomain_ #c (hD * hD * u1D % prime) /\
-      as_nat c h0 hCube == toDomain_ #c (hD * hD * hD % prime)
-  
-
-val point_add_if_second_branch_impl: #c: curve -> result: point c ->  p: point c -> q:point c 
-  -> tempBuffer17: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) -> 
-  Stack unit 
-    (requires fun h0 ->
-      let prime = getPrime c in 
-      let len = getCoordinateLenU64 c in 
-    
-      let u1 = gsub tempBuffer17 (size 4 *! len) len in 
-      let u2 = gsub tempBuffer17 (size 5 *! len) len in 
-      let s1 = gsub tempBuffer17 (size 6 *! len) len in 
-      let s2 = gsub tempBuffer17 (size 7 *! len) len in 
-      
-      let h = gsub tempBuffer17 (size 8 *! len) len in 
-      let r = gsub tempBuffer17 (size 9 *! len) len in 
-      let uh = gsub tempBuffer17 (size 10 *! len) len in 
-      let hCube = gsub tempBuffer17 (size 11 *! len) len in 
-
-      live h0 result /\ live h0 p /\ live h0 q /\ live h0 tempBuffer17 /\ 
-      
-       felems_eval c h0 u1 u2 s1 s2 h uh r hCube /\
-      point_eval c h0 p /\ point_eval c h0 q /\ 
-   
-      eq_or_disjoint p result /\ disjoint result tempBuffer17 /\ disjoint p q /\
-      disjoint p tempBuffer17 /\ disjoint q tempBuffer17  /\ 
-      inv_d h0 p q u1 u2 s1 s2 h r uh hCube
-      
-      )
-    (ensures fun h0 _ h -> True)
-
-assume val point_add_if_second_branch_impl_cuttable: #c : curve  ->
-  Lemma (   
+val lemma_ICuttable_point_add0: #c: curve  -> Lemma
+  (
     let len = getCoordinateLenU64 c in 
-    range (v (size 17) * v len) U64 /\
-    range (v (size 4) * v len) U64 /\
-    range (v (size 5) * v len) U64 /\
-    range (v (size 6) * v len) U64 /\
-    range (v (size 7) * v len) U64 /\
-    range (v (size 8) * v len) U64 /\
-    range (v (size 9) * v len) U64 /\
-    range (v (size 10) * v len) U64 /\
-    range (v (size 11) * v len) U64 /\
-    range (v (size 12) * v len) U64 /\
-  
-    v (size 4 *! len) + v len <= v (size 17 *! len) /\
-    v (size 5 *! len) + v len <= v (size 17 *! len) /\
-    v (size 6 *! len) + v len <= v (size 17 *! len) /\
-    v (size 7 *! len) + v len <= v (size 17 *! len) /\
-    v (size 8 *! len) + v len <= v (size 17 *! len) /\
-    v (size 9 *! len) + v len <= v (size 17 *! len) /\
-    v (size 10 *! len) + v len <= v (size 17 *! len) /\
-    v (size 11 *! len) + v len <= v (size 17 *! len) /\
-    v (size 12 *! len) + v (size 5 *! len) <= v (size 17 *! len))
+    v (size 4 *! len) + v len <= v (size 8 *! len) /\
+    v (size 5 *! len) + v len <= v (size 8 *! len) /\
+    v (size 6 *! len) + v len <= v (size 8 *! len) /\
+    v (size 7 *! len) + v len <= v (size 8 *! len)
+  )
+
+let lemma_ICuttable_point_add0 #c = admit()
 
 
-let point_add_if_second_branch_impl #c result p q tempBuffer = 
-  point_add_if_second_branch_impl_cuttable #c;
+val _point_add_if_second_branch_impl: #c: curve -> result: point c 
+  -> p: point c -> q: point c 
+  -> x3y3z3u1u2s1s2: lbuffer uint64 (size 8 *! getCoordinateLenU64 c) 
+  -> r: felem c -> h: felem c -> uh: felem c -> hCube: felem c ->
+  tempBuffer7 : lbuffer uint64 (size 5 *! getCoordinateLenU64 c) -> 
+  Stack unit (requires fun h0 -> 
 
-  let len = getCoordinateLenU64 c in 
+    let u1, u2, s1, s2 = getU1S2 x3y3z3u1u2s1s2 in 
 
-
-
-  let u1 = sub tempBuffer (size 4 *! len) len in  admit();
-  let u2 = sub tempBuffer (size 5 *! len) len in 
-  let s1 = sub tempBuffer (size 6 *! len) len in 
-  let s2 = sub tempBuffer (size 7 *! len) len in 
-
-
-  let h = sub tempBuffer (size 8 *! len) len in 
-  let r = sub tempBuffer (size 9 *! len) len in 
-  let uh = sub tempBuffer (size 10 *! len) len in 
-  let hCube = sub tempBuffer (size 11 *! len) len in 
-
-  let tempBuffer5 = sub tempBuffer (size 12 *! len) (size 5 *! len) in 
-
-  let h0 = ST.get() in 
-
-  assume (let prime = getPrime c in 
-
-    live h0 result /\ live h0 p /\ live h0 q /\ live h0 u1 /\ live h0 u2 /\ live h0 s1 /\ 
-    live h0 s2 /\ live h0 r /\ live h0 h /\ live h0 uh /\ live h0 hCube /\ live h0 tempBuffer5  (*/\
-
-    felem_eval c h0 u1 /\ felem_eval c h0 u2 /\ felem_eval c h0 s1 /\
-    felem_eval c h0 s2 /\ felem_eval c h0 h /\ felem_eval c h0 uh /\ 
-    felem_eval c h0 r /\ felem_eval c h0 hCube /\
+    live h0 result /\ live h0 x3y3z3u1u2s1s2 /\
     point_eval c h0 p /\ point_eval c h0 q /\ 
    
-    eq_or_disjoint p result /\ disjoint result tempBuffer5 /\ disjoint p q /\
+    eq_or_disjoint p result /\ disjoint result tempBuffer7 /\ disjoint p q /\
 
-    disjoint hCube tempBuffer5 /\ disjoint uh tempBuffer5 /\ disjoint r tempBuffer5 /\ disjoint tempBuffer5 s1 /\ disjoint tempBuffer5 h /\ disjoint tempBuffer5 p /\ disjoint tempBuffer5 q /\
-    (
-      let pX, pY, pZ = point_x_as_nat c h0 p, point_y_as_nat c h0 p, point_z_as_nat c h0 p in 
-      let qX, qY, qZ = point_x_as_nat c h0 q, point_y_as_nat c h0 q, point_z_as_nat c h0 q in 
-      let pxD, pyD, pzD = fromDomain_ #c pX, fromDomain_ #c pY, fromDomain_ #c pZ in 
-      let qxD, qyD, qzD = fromDomain_ #c qX, fromDomain_ #c qY, fromDomain_ #c qZ in 
-
-      let u1D = fromDomain_ #c (as_nat c h0 u1) in 
-      let u2D = fromDomain_ #c (as_nat c h0 u2) in 
-      let s1D = fromDomain_ #c (as_nat c h0 s1) in 
-      let s2D = fromDomain_ #c (as_nat c h0 s2) in 
-      let hD = fromDomain_ #c (as_nat c h0 h) in 
-	
-    as_nat c h0 u1 == toDomain_ #c (qzD * qzD * pxD % prime) /\
-    as_nat c h0 u2 == toDomain_ #c (pzD * pzD * qxD % prime) /\
-    as_nat c h0 s1 == toDomain_ #c (qzD * qzD * qzD * pyD % prime) /\
-    as_nat c h0 s2 == toDomain_ #c (pzD * pzD * pzD * qyD % prime) /\
-      
-    as_nat c h0 h == toDomain_ #c ((u2D - u1D) % prime) /\
-    as_nat c h0 r == toDomain_ #c ((s2D - s1D) % prime) /\
-    as_nat c h0 uh == toDomain_ #c (hD * hD * u1D % prime) /\
-    as_nat c h0 hCube == toDomain_ #c (hD * hD * hD % prime)) *)
+    disjoint hCube tempBuffer7 /\ disjoint uh tempBuffer7 /\ 
+    disjoint r tempBuffer7 /\ disjoint tempBuffer7 x3y3z3u1u2s1s2 /\
+    disjoint tempBuffer7 h /\  
+    disjoint tempBuffer7 p /\ disjoint tempBuffer7 q /\
     
-    
-    ); (*
-    admit();
-    
+    u1Invariant #c h0 u1 p q /\
+    u2Invariant #c h0 u2 p q /\
+    s1Invariant #c h0 s1 p q /\
+    s2Invariant #c h0 s2 p q /\
 
+    hInvariant #c h0 h u1 u2 /\
+    rInvariant #c h0 r s1 s2 /\
+    uhInvariant #c h0 uh h u1 /\
+    hCubeInvariant #c h0 hCube h 
+  )
+  (ensures fun h0 _ h1 -> modifies (loc tempBuffer7 |+| loc result) h0 h1 /\ (
+    let prime = getPrime c in 
 
-  _point_add_if_second_branch_impl result p q u1 u2 s1 s2 r h uh hCube tempBuffer5; *)
+    let u1, u2, s1, s2 = getU1S2 x3y3z3u1u2s1s2 in 
   
-  admit()
+    let x3, y3, z3 = point_x_as_nat c h1 result, point_y_as_nat c h1 result, point_z_as_nat c h1 result in
+    let pX, pY, pZ = point_x_as_nat c h0 p, point_y_as_nat c h0 p, point_z_as_nat c h0 p in 
+    let qX, qY, qZ = point_x_as_nat c h0 q, point_y_as_nat c h0 q, point_z_as_nat c h0 q in 
+
+    let pxD, pyD, pzD = fromDomain_ #c pX, fromDomain_ #c pY, fromDomain_ #c pZ in 
+    let qxD, qyD, qzD = fromDomain_ #c qX, fromDomain_ #c qY, fromDomain_ #c qZ in 
+    let x3D, y3D, z3D = fromDomain_ #c x3, fromDomain_ #c y3, fromDomain_ #c z3 in 
+
+    let rD = fromDomain_ #c (as_nat c h0 r) in  
+    let hD = fromDomain_ #c (as_nat c h0 h) in 
+    let s1D = fromDomain_ #c (as_nat c h0 s1) in 
+    let u1D = fromDomain_ #c (as_nat c h0 u1) in  
+
+    point_eval c h1 result /\ (
+    if qzD = 0 then 
+      x3D == pxD /\ y3D == pyD /\ z3D == pzD
+    else if pzD = 0 then 
+      x3D == qxD /\  y3D == qyD /\ z3D == qzD
+    else 
+      x3 == toDomain_ #c ((rD * rD - hD * hD * hD - 2 * hD * hD * u1D) % prime) /\ 
+      y3 == toDomain_ #c (((hD * hD * u1D - fromDomain_  #c x3) * rD - s1D * hD * hD * hD) % prime) /\
+      z3 == toDomain_ #c (pzD * qzD * hD % prime))))
+
+
+let _point_add_if_second_branch_impl #c result p q x3y3z3u1u2s1s2 r h uh hCube tempBuffer5 = 
+  let len = getCoordinateLenU64 c in 
+
+  lemma_ICuttable_point_add0 #c; 
+  let h0 = ST.get() in 
+  let u1 = sub x3y3z3u1u2s1s2 (size 4 *! len) len in 
+  let u2 = sub x3y3z3u1u2s1s2 (size 5 *! len) len in 
+  let s1 = sub x3y3z3u1u2s1s2 (size 6 *! len) len in 
+  let s2 = sub x3y3z3u1u2s1s2 (size 7 *! len) len in 
+
+  __point_add_if_second_branch_impl result p q u1 u2 s1 s2 r h uh hCube tempBuffer5
+
+
+val _point_add_if_second_branch_impl0: #c: curve -> result: point c 
+  -> p: point c -> q: point c 
+  -> x3y3z3u1u2s1s2: lbuffer uint64 (size 8 *! getCoordinateLenU64 c) 
+  -> rhuhhCube: lbuffer uint64 (size 4 *! getCoordinateLenU64 c)
+  -> tempBuffer7 : lbuffer uint64 (size 5 *! getCoordinateLenU64 c) -> 
+  Stack unit (requires fun h0 -> 
+    let prime = getPrime c in 
+    let len = getCoordinateLenU64 c in 
+
+    let u1, u2, s1, s2 = getU1S2 x3y3z3u1u2s1s2 in 
+    let h, r, uh, hCube = getHHCube rhuhhCube in 
+
+    live h0 result /\ live h0 p /\ live h0 q /\ live h0 x3y3z3u1u2s1s2 /\ live h0 rhuhhCube /\
+    live h0 tempBuffer7 /\ 
+
+    point_eval c h0 p /\ point_eval c h0 q /\ 
+   
+    eq_or_disjoint p result /\ disjoint result tempBuffer7 /\ disjoint p q /\
+
+    disjoint hCube tempBuffer7 /\ disjoint uh tempBuffer7 /\ 
+    disjoint r tempBuffer7 /\ disjoint tempBuffer7 x3y3z3u1u2s1s2 /\
+    disjoint tempBuffer7 h /\  
+    disjoint tempBuffer7 p /\ disjoint tempBuffer7 q /\
+    
+    u1Invariant #c h0 u1 p q /\
+    u2Invariant #c h0 u2 p q /\
+    s1Invariant #c h0 s1 p q /\
+    s2Invariant #c h0 s2 p q /\
+
+    hInvariant #c h0 h u1 u2 /\
+    rInvariant #c h0 r s1 s2 /\
+    uhInvariant #c h0 uh h u1 /\
+    hCubeInvariant #c h0 hCube h 
+  )
+  (ensures fun h0 _ h1 -> modifies (loc tempBuffer7 |+| loc result) h0 h1 /\ (
+    let prime = getPrime c in 
+    let len = getCoordinateLenU64 c in 
+
+    let u1, u2, s1, s2 = getU1S2 x3y3z3u1u2s1s2 in 
+    let h, r, uh, hCube = getHHCube rhuhhCube in 
+  
+    let x3, y3, z3 = point_x_as_nat c h1 result, point_y_as_nat c h1 result, point_z_as_nat c h1 result in
+    let pX, pY, pZ = point_x_as_nat c h0 p, point_y_as_nat c h0 p, point_z_as_nat c h0 p in 
+    let qX, qY, qZ = point_x_as_nat c h0 q, point_y_as_nat c h0 q, point_z_as_nat c h0 q in 
+
+    let pxD, pyD, pzD = fromDomain_ #c pX, fromDomain_ #c pY, fromDomain_ #c pZ in 
+    let qxD, qyD, qzD = fromDomain_ #c qX, fromDomain_ #c qY, fromDomain_ #c qZ in 
+    let x3D, y3D, z3D = fromDomain_ #c x3, fromDomain_ #c y3, fromDomain_ #c z3 in 
+
+    let rD = fromDomain_ #c (as_nat c h0 r) in  
+    let hD = fromDomain_ #c (as_nat c h0 h) in 
+    let s1D = fromDomain_ #c (as_nat c h0 s1) in 
+    let u1D = fromDomain_ #c (as_nat c h0 u1) in  
+
+    point_eval c h1 result /\ (
+    if qzD = 0 then 
+      x3D == pxD /\ y3D == pyD /\ z3D == pzD
+    else if pzD = 0 then 
+      x3D == qxD /\  y3D == qyD /\ z3D == qzD
+    else 
+      x3 == toDomain_ #c ((rD * rD - hD * hD * hD - 2 * hD * hD * u1D) % prime) /\ 
+      y3 == toDomain_ #c (((hD * hD * u1D - fromDomain_  #c x3) * rD - s1D * hD * hD * hD) % prime) /\
+      z3 == toDomain_ #c (pzD * qzD * hD % prime))))
+
+
+let _point_add_if_second_branch_impl0 #c result p q x3y3z3u1u2s1s2 rhuhhCube tempBuffer5 = 
+  [@inline_let]
+  let len = getCoordinateLenU64 c in 
+
+  let h = sub rhuhhCube (size 0) len in 
+  let r = sub rhuhhCube len len in 
+  let uh = sub rhuhhCube (size 2 *! len) len in 
+  let hCube = sub rhuhhCube (size 3 *! len) len in 
+  
+  _point_add_if_second_branch_impl result p q x3y3z3u1u2s1s2 r h uh hCube tempBuffer5
+
+
+
+val l_main: #c: curve -> a: lbuffer uint64 (size 12 *! getCoordinateLenU64 c) -> h0: mem -> 
+  Lemma (
+    let len = getCoordinateLenU64 c in 
+    let a0 = gsub a (size 0) (size 8 *! len) in 
+    let a1 = gsub a (size 8 *! len) (size 4 *! len) in 
+
+    gsub a (size 0 *! len) len == gsub a0 (size 0) len /\
+    gsub a (size 1 *! len) len == gsub a0 (size 1 *! len) len /\
+    gsub a (size 2 *! len) len == gsub a0 (size 2 *! len) len /\
+    gsub a (size 3 *! len) len == gsub a0 (size 3 *! len) len /\
+    gsub a (size 4 *! len) len == gsub a0 (size 4 *! len) len /\
+    gsub a (size 5 *! len) len == gsub a0 (size 5 *! len) len /\
+    gsub a (size 6 *! len) len == gsub a0 (size 6 *! len) len /\
+    gsub a (size 7 *! len) len == gsub a0 (size 7 *! len) len /\
+    
+    gsub a (size 8 *! len) len == gsub a1 (size 0) len /\
+    gsub a (size 9 *! len) len == gsub a1 (size 1 *! len) len /\
+    gsub a (size 10 *! len) len == gsub a1 (size 2 *! len) len /\
+    gsub a (size 11 *! len) len == gsub a1 (size 3 *! len) len)
+
+let l_main #c a h0 = admit()
+
+
+
+val l0: #c: curve -> a: lbuffer uint64 (size 12 *! getCoordinateLenU64 c) -> h0: mem -> p: point c -> q: point c ->
+  Lemma
+  (requires (
+      let  u1, u2, s1, s2, h, r, uh, hCube = getU1HCube a in 
+      u1Invariant #c h0 u1 p q /\
+      u2Invariant #c h0 u2 p q /\
+      s1Invariant #c h0 s1 p q /\
+      s2Invariant #c h0 s2 p q /\
+      hInvariant #c h0 h u1 u2 /\
+      rInvariant #c h0 r s1 s1 /\
+      uhInvariant #c h0 uh h u1 /\
+      hCubeInvariant #c h0 hCube h )) 
+  (ensures
+    (
+      let a0 = gsub a (size 0) (size 8 *! getCoordinateLenU64 c) in 
+      let a1 = gsub a (size 8 *! getCoordinateLenU64 c) (size 4 *! getCoordinateLenU64 c) in 
+      let h, r, uh, hCube = getHHCube #c a1 in 
+      let u1, u2, s1, s2 = getU1S2 a0 in 
+      u1Invariant #c h0 u1 p q /\
+      u2Invariant #c h0 u2 p q /\
+      s1Invariant #c h0 s1 p q /\
+      s2Invariant #c h0 s2 p q /\
+      hInvariant #c h0 h u1 u2 /\
+      rInvariant #c h0 r s1 s1 /\
+      uhInvariant #c h0 uh h u1 /\
+      hCubeInvariant #c h0 hCube h ))
+
+let l0 #c a h0 p q = l_main #c a h0 
+
+
+val lemma_forgotten: #c: curve -> a: lbuffer uint64 (size 12 *! getCoordinateLenU64 c) 
+  -> b: lbuffer uint64 (size 5 *! getCoordinateLenU64 c) -> 
+  Lemma 
+    (requires (disjoint a b))
+    (ensures (
+      let len = getCoordinateLenU64 c in 
+      let p1 = gsub a (size 8 *! len) (size 4 *! len) in 
+      let h, r, uh, hCube = getHHCube #c p1 in 
+      disjoint hCube b /\ 
+      disjoint uh b /\ 
+      disjoint r b /\ 
+      disjoint b h))
+      
+let lemma_forgotten #c a b = admit()
+
+
+
+val _point_add_if_second_branch_impl1: #c: curve -> result: point c 
+  -> p: point c -> q: point c 
+  -> x3hCube: lbuffer uint64 (size 12 *! getCoordinateLenU64 c) 
+  -> tempBuffer7 : lbuffer uint64 (size 5 *! getCoordinateLenU64 c) -> 
+  Stack unit (requires fun h0 -> 
+    let  u1, u2, s1, s2, h, r, uh, hCube = getU1HCube x3hCube in 
+
+    live h0 result /\ live h0 p /\ live h0 q /\ live h0 x3hCube /\ live h0 tempBuffer7 /\ 
+
+    point_eval c h0 p /\ point_eval c h0 q /\ 
+   
+    eq_or_disjoint p result /\ disjoint result tempBuffer7 /\ disjoint p q /\
+    
+    disjoint tempBuffer7 x3hCube /\  disjoint tempBuffer7 p /\ disjoint tempBuffer7 q /\
+    
+    u1Invariant #c h0 u1 p q /\
+    u2Invariant #c h0 u2 p q /\
+    s1Invariant #c h0 s1 p q /\
+    s2Invariant #c h0 s2 p q /\
+
+    hInvariant #c h0 h u1 u2 /\
+    rInvariant #c h0 r s1 s2 /\
+    uhInvariant #c h0 uh h u1 /\
+    hCubeInvariant #c h0 hCube h 
+  )
+  (ensures fun h0 _ h1 -> modifies (loc tempBuffer7 |+| loc result) h0 h1 /\ (
+    let prime = getPrime c in 
+
+    let  u1, u2, s1, s2, h, r, uh, hCube = getU1HCube x3hCube in 
+  
+    let x3, y3, z3 = point_x_as_nat c h1 result, point_y_as_nat c h1 result, point_z_as_nat c h1 result in
+    let pX, pY, pZ = point_x_as_nat c h0 p, point_y_as_nat c h0 p, point_z_as_nat c h0 p in 
+    let qX, qY, qZ = point_x_as_nat c h0 q, point_y_as_nat c h0 q, point_z_as_nat c h0 q in 
+
+    let pxD, pyD, pzD = fromDomain_ #c pX, fromDomain_ #c pY, fromDomain_ #c pZ in 
+    let qxD, qyD, qzD = fromDomain_ #c qX, fromDomain_ #c qY, fromDomain_ #c qZ in 
+    let x3D, y3D, z3D = fromDomain_ #c x3, fromDomain_ #c y3, fromDomain_ #c z3 in 
+
+    let rD = fromDomain_ #c (as_nat c h0 r) in  
+    let hD = fromDomain_ #c (as_nat c h0 h) in 
+    let s1D = fromDomain_ #c (as_nat c h0 s1) in 
+    let u1D = fromDomain_ #c (as_nat c h0 u1) in  
+
+    point_eval c h1 result /\ (
+    if qzD = 0 then 
+      x3D == pxD /\ y3D == pyD /\ z3D == pzD
+    else if pzD = 0 then 
+      x3D == qxD /\  y3D == qyD /\ z3D == qzD
+    else 
+      x3 == toDomain_ #c ((rD * rD - hD * hD * hD - 2 * hD * hD * u1D) % prime) /\ 
+      y3 == toDomain_ #c (((hD * hD * u1D - fromDomain_  #c x3) * rD - s1D * hD * hD * hD) % prime) /\
+      z3 == toDomain_ #c (pzD * qzD * hD % prime))))
+
+
+
+let _point_add_if_second_branch_impl1 #c result p q x3hCube tempBuffer7 = 
+  [@inline_let]
+  let len = getCoordinateLenU64 c in 
+  let p0 = sub x3hCube (size 0) (size 8 *! getCoordinateLenU64 c) in 
+  assume (v (size 8 *! getCoordinateLenU64 c) + v (size 4 *! getCoordinateLenU64 c) <= v (size 12 *! getCoordinateLenU64 c));
+  let p1 = sub x3hCube (size 8 *! getCoordinateLenU64 c) (size 4 *! getCoordinateLenU64 c) in 
+  let h0 = ST.get() in 
+  l0 #c x3hCube h0 p q;
+  lemma_forgotten #c x3hCube tempBuffer7;
+  
+  _point_add_if_second_branch_impl0 #c result p q p0 p1 tempBuffer7
+
+
+val lemma_u1_eval: c: curve -> h0: mem -> u1: felem c -> h1: mem -> p: point c -> q: point c -> Lemma 
+  (requires 
+    (
+      as_nat c h0 u1 == as_nat c h1 u1 /\
+      as_seq h0 p == as_seq h1 p /\
+      as_seq h0 q == as_seq h1 q /\
+      u1Invariant #c h0 u1 p q   
+    ))
+  (ensures 
+    (u1Invariant #c h1 u1 p q))
+
+let lemma_u1_eval c h0 u1 h1 p q = ()
+
+val lemma_u2_eval: c: curve -> h0: mem -> u1: felem c -> h1: mem -> p: point c -> q: point c -> Lemma 
+  (requires 
+    (
+      as_nat c h0 u1 == as_nat c h1 u1 /\
+      as_seq h0 p == as_seq h1 p /\
+      as_seq h0 q == as_seq h1 q /\
+      u2Invariant #c h0 u1 p q   
+    ))
+  (ensures 
+    (u2Invariant #c h1 u1 p q))
+
+let lemma_u2_eval c h0 u1 h1 p q = ()
+
+assume val lemma_s1_eval: c: curve -> h0: mem -> s1: felem c -> h1: mem -> p: point c -> q: point c -> Lemma 
+  (requires 
+    (
+      as_nat c h0 s1 == as_nat c h1 s1 /\
+      as_seq h0 p == as_seq h1 p /\
+      as_seq h0 q == as_seq h1 q /\
+      s1Invariant #c h0 s1 p q   
+    ))
+  (ensures (s1Invariant #c h1 s1 p q))
+
+assume val lemma_s2_eval: c: curve -> h0: mem -> s2: felem c -> h1: mem -> p: point c -> q: point c -> Lemma 
+  (requires 
+    (
+      as_nat c h0 s2 == as_nat c h1 s2 /\
+      as_seq h0 p == as_seq h1 p /\
+      as_seq h0 q == as_seq h1 q /\
+      s2Invariant #c h0 s2 p q   
+    ))
+  (ensures (s2Invariant #c h1 s2 p q))
+
+
+val _point_add_0: #c: curve -> p: point c -> q: point c -> t12: lbuffer uint64 (size 12 *! getCoordinateLenU64 c) -> 
+  Stack unit 
+    (requires fun h0 ->   
+      live h0 p /\ live h0 q /\ live h0 t12 /\
+      LowStar.Monotonic.Buffer.all_disjoint [loc t12; loc p; loc q] /\ 
+      point_eval c h0 p /\ point_eval c h0 q)
+    (ensures fun h0 _ h1 ->     
+      let len = getCoordinateLenU64 c in 
+    
+      modifies (loc t12) h0 h1 /\ (
+      let  u1, u2, s1, s2, h, r, uh, hCube = getU1HCube t12 in 
+      
+      u1Invariant #c h1 u1 p q /\
+      u2Invariant #c h1 u2 p q /\ 
+      s1Invariant #c h1 s1 p q /\
+      s2Invariant #c h1 s2 p q /\
+      hInvariant #c h1 h u1 u2 /\
+      rInvariant #c h1 r s1 s2 /\
+      uhInvariant #c h1 uh h u1 /\
+      hCubeInvariant #c h1 hCube h /\
+      point_eval c h1 p /\ point_eval c h1 q
+))
+      
+  
+let _point_add_0 #c p q t12 = 
+  let len = getCoordinateLenU64 c in 
+  let h0 = ST.get() in 
+  move_from_jacobian_coordinates p q t12;
+    let h1 = ST.get() in 
+  compute_common_params_point_add t12;
+    let h2 = ST.get() in 
+  let  u1, u2, s1, s2, h, r, uh, hCube = getU1HCube t12 in 
+  lemma_u1_eval c h1 u1 h2 p q;
+  lemma_u2_eval c h1 u2 h2 p q;
+  lemma_s1_eval c h1 s1 h2 p q;
+  lemma_s2_eval c h1 s2 h2 p q;
+  lemma_point_eval c h0 h2 p;
+  lemma_point_eval c h0 h2 q
+  
 
 
 
 let point_add #c p q result tempBuffer = 
-  admit();
   let h0 = ST.get() in 
+  let t12 = sub tempBuffer (size 0) (size 12 *! getCoordinateLenU64 c) in 
+  let t5 = sub tempBuffer (size 12 *! getCoordinateLenU64 c) (size 5 *! getCoordinateLenU64 c) in 
 
-
-  let len = getCoordinateLenU64 c in 
-  
-  let z1 = sub p (size 2 *! len) len in 
-  let z2 = sub q (size 2 *! len) len in 
-
-  let tempBuffer16 = sub tempBuffer (size 0) (size 4 *! len) in 
-   
-  let u1 = sub tempBuffer (size 4 *! len) len in 
-  let u2 = sub tempBuffer (size 5 *! len) len in 
-  let s1 = sub tempBuffer (size 6 *! len) len in 
-  let s2 = sub tempBuffer (size 7 *! len) len in 
-
-  let h = sub tempBuffer (size 8 *! len) len in 
-  let r = sub tempBuffer (size 9 *! len) len in 
-  let uh = sub tempBuffer (size 10 *! len) len in 
-
-  let hCube = sub tempBuffer (size 11 *! len) len in 
-  
-  let x3_out = sub tempBuffer (size 12 *! len) len in 
-  let y3_out = sub tempBuffer (size 13 *! len) len in 
-  let z3_out = sub tempBuffer (size 14 *! len) len in 
-  
-  let tempBuffer28 = sub tempBuffer (size 15 *! len) (size 12 *! len) in 
-  
-  move_from_jacobian_coordinates p q tempBuffer28;
-  compute_common_params_point_add #c tempBuffer28;
-  point_add_if_second_branch_impl result p q u1 u2 s1 s2 r h uh hCube tempBuffer28;
-  
+  _point_add_0 #c p q t12;
+  _point_add_if_second_branch_impl1 result p q t12 t5;
     let h1 = ST.get() in 
+    admit() (*
+    let len = getCoordinateLenU64 c in 
       let pxD = fromDomain_ #c (as_nat c h0 (gsub p (size 0) len)) in 
       let pyD = fromDomain_ #c (as_nat c h0 (gsub p len len)) in 
       let pzD = fromDomain_ #c (as_nat c h0 (gsub p (size 2 *! len) len)) in
@@ -1261,4 +1453,4 @@ let point_add #c p q result tempBuffer =
       let y3 = as_nat c h1 (gsub result len len) in 
       let z3 = as_nat c h1 (gsub result (size 2 *! len) len) in 
       lemma_pointAddToSpecification #c  pxD pyD pzD qxD qyD qzD x3 y3 z3 (as_nat c h1 u1) (as_nat c h1 u2) (as_nat c h1 s1) (as_nat c h1 s2) (as_nat c h1 h) (as_nat c h1 r)
-
+*)

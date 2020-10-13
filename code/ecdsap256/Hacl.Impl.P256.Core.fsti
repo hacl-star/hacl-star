@@ -23,7 +23,7 @@ module B = LowStar.Buffer
 open FStar.Mul
 
 
-#set-options "--z3rlimit 100" 
+#set-options "--z3rlimit 200" 
 
 inline_for_extraction noextract 
 val toDomain: #c: curve -> value: felem c -> result: felem c ->  Stack unit 
