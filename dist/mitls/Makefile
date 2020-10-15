@@ -184,18 +184,24 @@ CTYPES_CMX    =  $(filter-out $(BLACKLIST_CMX),$(CTYPES_DEPS))
 CTYPES_CMX    += lib/Lib_RandomBuffer_System_stubs.cmx lib/Lib_RandomBuffer_System_bindings.cmx
 CTYPES_ML     =  $(patsubst %.cmx,%.ml,$(CTYPES_CMX))
 CTYPES_CMI    =  $(patsubst %.cmx,%.cmi,$(CTYPES_CMX))
+CTYPES_CMO    = $(patsubst %.cmx,%.cmo,$(CTYPES_CMX))
+
+
+ocamlevercrypt.cma: $(ALL_BINDINGS) $(CTYPES_CMO) $(ALL_C_STUBS) $(CTYPES_CMX) libevercrypt.$(SO)
+	ocamlmklib -o ocamlevercrypt $(CTYPES_CMO) -L. -levercrypt
 
 ocamlevercrypt.cmxa: $(ALL_BINDINGS) $(ALL_ML_STUBS) $(ALL_C_STUBS) libevercrypt.$(SO)
-	ocamlfind mklib -o ocamlevercrypt $(CTYPES_CMX) $(ALL_C_STUBS) -ccopt -L. -cclib -levercrypt
+	ocamlmklib -o ocamlevercrypt $(CTYPES_CMX) -L. -levercrypt
 
-CTYPES_CMO    = $(patsubst %.cmx,%.cmo,$(CTYPES_CMX))
-ALL_ML_STUBS_CMO = $(patsubst %.cmx,%.cmo,$(ALL_ML_STUBS))
+STUBLIBS_PATH=$(OPAM_SWITCH_PREFIX)/lib/stublibs
 
-ocamlevercrypt.cma: $(ALL_BINDINGS) $(ALL_ML_STUBS_CMO) $(CTYPES_CMO) $(ALL_C_STUBS) libevercrypt.$(SO)
-	ocamlfind mklib -o ocamlevercrypt $(CTYPES_CMO) $(ALL_C_STUBS) -ccopt -L. -cclib -levercrypt
+dllocamlevercrypt.$(SO): ocamlevercrypt.cmxa ocamlevercrypt.cma
+	ocamlmklib -o ocamlevercrypt $(ALL_C_STUBS) -L. -L$(STUBLIBS_PATH) -levercrypt
 
-install-hacl-star-raw: ocamlevercrypt.cmxa ocamlevercrypt.cma libevercrypt.a
-	ocamlfind install hacl-star-raw META $(CTYPES_ML) $(CTYPES_CMX) $(CTYPES_CMO) $(CTYPES_CMI) ocamlevercrypt.cma ocamlevercrypt.cmxa *.a *.$(SO) config.h
+install-hacl-star-raw: dllocamlevercrypt.$(SO)
+	ocamlfind install hacl-star-raw META $(CTYPES_ML) $(CTYPES_CMX) $(CTYPES_CMO) $(CTYPES_CMI) \
+         libevercrypt.a libevercrypt.$(SO) ocamlevercrypt.cma ocamlevercrypt.cmxa ocamlevercrypt.a \
+         libocamlevercrypt.a dllocamlevercrypt.$(SO) config.h
 
 endif
 endif
