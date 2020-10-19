@@ -42,6 +42,53 @@ extern "C" {
 #include "Lib_Memzero0.h"
 #include "Hacl_Impl_Blake2_Constants.h"
 
+/* SNIPPET_START: Hacl_Blake2b_32_blake2b_init */
+
+void
+Hacl_Blake2b_32_blake2b_init(
+  uint64_t *wv,
+  uint64_t *hash,
+  uint32_t kk,
+  uint8_t *k,
+  uint32_t nn
+);
+
+/* SNIPPET_END: Hacl_Blake2b_32_blake2b_init */
+
+/* SNIPPET_START: Hacl_Blake2b_32_blake2b_update_multi */
+
+void
+Hacl_Blake2b_32_blake2b_update_multi(
+  uint32_t len,
+  uint64_t *wv,
+  uint64_t *hash,
+  FStar_UInt128_uint128 prev,
+  uint8_t *blocks,
+  uint32_t nb
+);
+
+/* SNIPPET_END: Hacl_Blake2b_32_blake2b_update_multi */
+
+/* SNIPPET_START: Hacl_Blake2b_32_blake2b_update_last */
+
+void
+Hacl_Blake2b_32_blake2b_update_last(
+  uint32_t len,
+  uint64_t *wv,
+  uint64_t *hash,
+  FStar_UInt128_uint128 prev,
+  uint32_t rem,
+  uint8_t *d
+);
+
+/* SNIPPET_END: Hacl_Blake2b_32_blake2b_update_last */
+
+/* SNIPPET_START: Hacl_Blake2b_32_blake2b_finish */
+
+void Hacl_Blake2b_32_blake2b_finish(uint32_t nn, uint8_t *output, uint64_t *hash);
+
+/* SNIPPET_END: Hacl_Blake2b_32_blake2b_finish */
+
 /* SNIPPET_START: Hacl_Blake2b_32_blake2b */
 
 void

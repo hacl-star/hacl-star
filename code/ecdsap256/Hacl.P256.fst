@@ -73,12 +73,11 @@ let compression_not_compressed_form b result =
 let compression_compressed_form b result = 
   Hacl.Impl.P256.Compression.compressionCompressedForm b result
 
- 
-
-let reduction_8_32 x result = Hacl.Impl.ECDSA.Reduction.reduction_8_32 x result 
-
-
 
 let ecp256dh_i result scalar = Hacl.Impl.P256.DH.ecp256dh_i result scalar
 
 let ecp256dh_r result pubKey scalar = Hacl.Impl.P256.DH.ecp256dh_r result pubKey scalar
+
+
+let is_more_than_zero_less_than_order x =
+  Hacl.Impl.P256.Signature.Common.isMoreThanZeroLessThanOrder x

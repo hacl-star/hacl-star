@@ -1,3 +1,7 @@
+## 0.3.0
+- Updates to P-256 API
+- Build fixes
+
 ## 0.2.2
 - Fix for bug impacting performance
 

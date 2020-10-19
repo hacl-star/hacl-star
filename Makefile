@@ -646,8 +646,6 @@ INTRINSIC_INT_FLAGS = \
   -add-include 'Hacl_Bignum:"lib_intrinsics.h"' \
   -add-include 'Hacl_RSAPSS:"lib_intrinsics.h"'
 
-# Disabled for dist/portable
-OPT_FLAGS = -ccopts -march=native,-mtune=native
 # Disables tests; overriden in Wasm where tests indicate what can be compiled.
 TEST_FLAGS = -bundle Test,Test.*,Hacl.Test.*
 # Ensures that Lib_RandomBuffer_System.h and Lib_PrintBuffer.h have a constant name
@@ -696,7 +694,6 @@ DEFAULT_FLAGS = \
   $(HAND_WRITTEN_LIB_FLAGS) \
   $(TARGETCONFIG_FLAGS) \
   $(TEST_FLAGS) \
-  $(OPT_FLAGS) \
   $(INTRINSIC_INT_FLAGS) \
   $(INTRINSIC_FLAGS) \
   $(BUNDLE_FLAGS) \
@@ -766,8 +763,10 @@ dist/wasm/Makefile.basic: CHACHAPOLY_BUNDLE += \
   -bundle Hacl.Chacha20Poly1305_128,Hacl.Chacha20Poly1305_256
 dist/wasm/Makefile.basic: POLY_BUNDLE = \
   -bundle 'Hacl.Poly1305_32=Hacl.Impl.Poly1305.Field32xN_32' \
-  -bundle 'Hacl.Poly1305_128,Hacl.Poly1305_256,Hacl.Impl.Poly1305.*'
-dist/wasm/Makefile.basic: BLAKE2_BUNDLE += \
+  -bundle 'Hacl.Poly1305_128,Hacl.Poly1305_256,Hacl.Impl.Poly1305.*' \
+  -bundle 'Hacl.Streaming.Poly1305_128,Hacl.Streaming.Poly1305_256'
+dist/wasm/Makefile.basic: BLAKE2_BUNDLE = \
+  -bundle Hacl.Impl.Blake2.Constants -static-header Hacl.Impl.Blake2.Constants -bundle 'Hacl.Impl.Blake2.\*' \
   -bundle 'Hacl.Blake2s_128,Hacl.Blake2b_256,Hacl.HMAC.Blake2s_128,Hacl.HMAC.Blake2b_256,Hacl.HKDF.Blake2s_128,Hacl.HKDF.Blake2b_256,Hacl.Streaming.Blake2s_128,Hacl.Streaming.Blake2b_256'
 
 dist/wasm/Makefile.basic: STREAMING_BUNDLE = -bundle Hacl.Streaming.*
@@ -823,7 +822,11 @@ dist/gcc-compatible/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES += \
   dist/META dist/hacl-star-raw.opam dist/configure
 
 test-bindings-ocaml: compile-gcc-compatible
-	cd dist/gcc-compatible && make install-hacl-star-raw
+	if ocamlfind query hacl-star-raw ; then \
+	    echo 'WARNING: OCaml package hacl-star-raw already installed' ; \
+	else \
+	    cd dist/gcc-compatible && make install-hacl-star-raw ; \
+	fi
 	cd bindings/ocaml && $(LD_EXTRA) dune runtest
 
 dist/msvc-compatible/Makefile.basic: DEFAULT_FLAGS += -falloca -ftail-calls
@@ -848,8 +851,7 @@ dist/mitls/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES = \
 # - MerkleTree doesn't compile in C89 mode (FIXME?)
 # - Use C89 versions of ancient HACL code
 dist/c89-compatible/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree.*,MerkleTree'
-dist/c89-compatible/Makefile.basic: DEFAULT_FLAGS += \
-  -fc89 -ccopt -std=c89 -ccopt -Wno-typedef-redefinition
+dist/c89-compatible/Makefile.basic: DEFAULT_FLAGS += -fc89 -ccopt -std=c89 -ccopt -Wno-typedef-redefinition
 dist/c89-compatible/Makefile.basic: HACL_OLD_FILES := $(subst -c,-c89,$(HACL_OLD_FILES))
 
 # Linux distribution (not compiled on CI)
@@ -867,7 +869,7 @@ dist/c89-compatible/Makefile.basic: HACL_OLD_FILES := $(subst -c,-c89,$(HACL_OLD
 dist/linux/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree.*,MerkleTree'
 dist/linux/Makefile.basic: TARGETCONFIG_FLAGS =
 dist/linux/Makefile.basic: DEFAULT_FLAGS += \
-  -fc89-scope -fbuiltin-uint128 -flinux-ints -ccopt -Wno-typedef-redefinition
+  -fc89-scope -fbuiltin-uint128 -flinux-ints
 dist/linux/Makefile.basic: CTR_BUNDLE =
 dist/linux/Makefile.basic: E_HASH_BUNDLE =
 dist/linux/Makefile.basic: HPKE_BUNDLE = -bundle 'Hacl.HPKE.*'
@@ -914,7 +916,7 @@ dist/ccf/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
 dist/ccf/Makefile.basic: HAND_WRITTEN_FILES := $(filter-out %/Lib_PrintBuffer.c %_vale_stubs.c,$(HAND_WRITTEN_FILES))
 dist/ccf/Makefile.basic: HAND_WRITTEN_H_FILES := $(filter-out %/libintvector.h %/lib_intrinsics.h,$(HAND_WRITTEN_H_FILES))
 dist/ccf/Makefile.basic: HACL_OLD_FILES =
-dist/ccf/Makefile.basic: POLY_BUNDLE =
+dist/ccf/Makefile.basic: POLY_BUNDLE = -bundle Hacl.Streaming.Poly1305_128,Hacl.Streaming.Poly1305_256
 dist/ccf/Makefile.basic: P256_BUNDLE=-bundle Hacl.P256,Hacl.Impl.ECDSA.*,Hacl.Impl.SolinasReduction,Hacl.Impl.P256.*
 dist/ccf/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.Bignum256,Hacl.Bignum4096,Hacl.Bignum,Hacl.Bignum.*,Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS,Hacl.RSAPSS
 dist/ccf/Makefile.basic: HPKE_BUNDLE = -bundle 'Hacl.HPKE.*'
@@ -997,7 +999,6 @@ dist/mozilla/Makefile.basic: TARGET_H_INCLUDE = -add-include '<stdbool.h>'
 # someone can download them onto their machine for debugging. Also enforces that
 # we don't have bundle errors where, say, an sse2-required function ends up in a
 # file that is *NOT* known to require sse2.
-dist/portable-gcc-compatible/Makefile.basic: OPT_FLAGS=-ccopts -mtune=generic
 dist/portable-gcc-compatible/Makefile.basic: DEFAULT_FLAGS += -rst-snippets
 
 # Merkle Tree standalone distribution

@@ -419,7 +419,8 @@ typedef __m256i Lib_IntVector_Intrinsics_vec256;
   (_mm256_permute2x128_si256(x1, x2, 0x31))
 
 
-#elif defined(__aarch64__) || defined(_M_ARM64) || defined(__arm__) || defined(_M_ARM)
+#elif (defined(__aarch64__) || defined(_M_ARM64) || defined(__arm__) || defined(_M_ARM)) \
+      && !defined(__ARM_32BIT_STATE)
 #include <arm_neon.h>
 
 typedef uint32x4_t Lib_IntVector_Intrinsics_vec128;

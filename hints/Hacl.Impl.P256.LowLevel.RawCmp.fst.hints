@@ -1,5 +1,5 @@
 [
-  "ÔÍ\t‡ð\u0010ú\u0013ùåÓª|X½ô",
+  "0©9çÙ›^mÁ¢\u001fî7ßËj",
   [
     [
       "Hacl.Impl.P256.LowLevel.RawCmp.eq_u8_nCT",
@@ -12,7 +12,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "2ba23b8d0db571d426f1001d65607c98"
+      "d309d2bfd36e1a06bca8873aab1fa816"
     ],
     [
       "Hacl.Impl.P256.LowLevel.RawCmp.eq_u8_nCT",
@@ -26,7 +26,7 @@
         "typing_Lib.RawIntTypes.u8_to_UInt8"
       ],
       0,
-      "970817ccbddeb75eca1420abf16f26b8"
+      "1bb65df62b73d5bc5eb105233d7091e5"
     ],
     [
       "Hacl.Impl.P256.LowLevel.RawCmp.eq_u64_nCT",
@@ -39,7 +39,7 @@
         "equation_Lib.IntTypes.unsigned", "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "093b6440a8497141efdfd546236ff925"
+      "89351c4db9cab18cdea3664c0ee50557"
     ],
     [
       "Hacl.Impl.P256.LowLevel.RawCmp.eq_u64_nCT",
@@ -53,7 +53,7 @@
         "typing_Lib.RawIntTypes.u64_to_UInt64"
       ],
       0,
-      "6ffb027d100e4945bbf9891865daa337"
+      "c835364ad9fa95f627cb9bb9abfd117a"
     ],
     [
       "Hacl.Impl.P256.LowLevel.RawCmp.eq_0_u64",
@@ -66,7 +66,7 @@
         "equation_Lib.IntTypes.unsigned", "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "0455c70d759d1c50c60f613d79a08166"
+      "ca8b6799a94f5cb0f4d6558743d07ce7"
     ],
     [
       "Hacl.Impl.P256.LowLevel.RawCmp.eq_0_u64",
@@ -95,7 +95,31 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "0b1a0b98d1759666f024816ac236f37d"
+      "c912a92dfaac42c0578c6e7b4ff97cc6"
+    ],
+    [
+      "Hacl.Impl.P256.LowLevel.RawCmp.unsafe_bool_of_u64",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "b2t_def", "bool_inversion",
+        "bool_typing", "equality_tok_Lib.IntTypes.SEC@tok",
+        "equality_tok_Lib.IntTypes.U64@tok", "equation_FStar.UInt.eq",
+        "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
+        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
+        "equation_FStar.UInt.uint_t", "equation_FStar.UInt64.eq",
+        "equation_Lib.IntTypes.v", "int_typing", "lemma_FStar.UInt64.uv_inv",
+        "lemma_FStar.UInt64.vu_inv", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_Equality", "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_a6fce85b67bdd71ab9416e435ac3b18a",
+        "refinement_interpretation_Tm_refine_ea00864f59112084603b9e9c26fa7914",
+        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
+        "typing_FStar.UInt64.v", "typing_Lib.RawIntTypes.u64_to_UInt64"
+      ],
+      0,
+      "559bff355e4d210da5fff674e6d5b108"
     ]
   ]
 ]

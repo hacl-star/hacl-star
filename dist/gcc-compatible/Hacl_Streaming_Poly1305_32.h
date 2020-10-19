@@ -40,14 +40,20 @@ extern "C" {
 #include "Hacl_Poly1305_32.h"
 
 typedef struct Hacl_Streaming_Functor_state_s___uint64_t___uint8_t__s
+{
+  uint64_t *block_state;
+  uint8_t *buf;
+  uint64_t total_len;
+  uint8_t *p_key;
+}
 Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_;
 
 Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_
-*Hacl_Streaming_Poly1305_32_create_in(uint8_t *k1);
+*Hacl_Streaming_Poly1305_32_create_in(uint8_t *k);
 
 void
 Hacl_Streaming_Poly1305_32_init(
-  uint8_t *k1,
+  uint8_t *k,
   Hacl_Streaming_Functor_state_s___uint64_t___uint8_t_ *s
 );
 

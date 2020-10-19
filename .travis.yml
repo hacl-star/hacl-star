@@ -35,5 +35,11 @@ jobs:
       osx_image: xcode11.3
     - name: vs2017 / compile-only
       os: windows
+    - name: ARM cross / aarch64-none-linux-gnu / build only
+      os: linux
+      before_script:
+        - curl -L -O https://developer.arm.com/-/media/Files/downloads/gnu-a/9.2-2019.12/binrel/gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu.tar.xz
+        - tar -xf gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu.tar.xz
+      env: ARM_CROSS_CI=aarch64-none-linux-gnu
 script:
   - .ci/script.sh

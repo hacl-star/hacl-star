@@ -38,8 +38,8 @@ extern "C" {
 
 
 #include "Hacl_Kremlib.h"
-#include "Lib_Memzero0.h"
-#include "Hacl_Impl_Blake2_Constants.h"
+#include "Hacl_Blake2s_32.h"
+#include "Hacl_Blake2b_32.h"
 
 /* SNIPPET_START: K____uint32_t___uint32_t_ */
 
@@ -55,6 +55,11 @@ K____uint32_t___uint32_t_;
 /* SNIPPET_START: Hacl_Streaming_Functor_state_s__K____uint32_t___uint32_t____ */
 
 typedef struct Hacl_Streaming_Functor_state_s__K____uint32_t___uint32_t_____s
+{
+  K____uint32_t___uint32_t_ block_state;
+  uint8_t *buf;
+  uint64_t total_len;
+}
 Hacl_Streaming_Functor_state_s__K____uint32_t___uint32_t____;
 
 /* SNIPPET_END: Hacl_Streaming_Functor_state_s__K____uint32_t___uint32_t____ */
@@ -122,6 +127,11 @@ K____uint64_t___uint64_t_;
 /* SNIPPET_START: Hacl_Streaming_Functor_state_s__K____uint64_t___uint64_t____ */
 
 typedef struct Hacl_Streaming_Functor_state_s__K____uint64_t___uint64_t_____s
+{
+  K____uint64_t___uint64_t_ block_state;
+  uint8_t *buf;
+  uint64_t total_len;
+}
 Hacl_Streaming_Functor_state_s__K____uint64_t___uint64_t____;
 
 /* SNIPPET_END: Hacl_Streaming_Functor_state_s__K____uint64_t___uint64_t____ */
