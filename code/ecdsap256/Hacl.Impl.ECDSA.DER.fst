@@ -147,8 +147,8 @@ let decode sigLen signature bufferForR bufferForS =
   if unsafe_bool_of_u8 (neq_mask #U8 signatureLengthByte (u8 255)) then false else begin
     eq_mask_lemma signatureLengthByte (u8 255);
 
-  (*lengthFullsignature = sigLen + 1 -> to take into account the first byte *)
-  let lengthFullSignature = to_u32 (incr signatureLengthByte) in 
+  (*lengthFullsignature = sigLen + 2 -> to take into account the first byte and these byte *)
+  let lengthFullSignature = to_u32 (signatureLengthByte+. 2ul) in 
     incr_lemma signatureLengthByte;
   let sizeAsUInt32 = size_to_uint32 sigLen in 
     eq_mask_lemma lengthFullSignature sizeAsUInt32;
@@ -172,7 +172,8 @@ let decode sigLen signature bufferForR bufferForS =
   (* the lengthAfterThirdByte has the length of the full signature - 3, meaning the shifted by the number of bytes we already looked at *)
 
   
-  let sc = unsafe_bool_of_u8 (gt_mask expectedLenR lengthAfterThirdByte) in 
+  let sc = unsafe_bool_of_u8 (gt_mask lengthAfterThirdByte expectedLenR) in 
+  gt_mask_lemma lengthAfterThirdByte expectedLenR;
   (* we compare the length of r with the length of the rest of the signature.
      It should be more than the length of the rest of the signature.   *)
 
