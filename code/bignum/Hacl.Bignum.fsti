@@ -338,6 +338,17 @@ class bn (t:limb_t) = {
   sqr: a:lbignum t len -> bn_karatsuba_sqr_st a;
 }
 
+let add_mod_n32: len:size_t{v len > 0} -> bn_add_mod_n_st U32 len
+ = bn_add_mod_n #U32
+
+let add_mod_n64: len:size_t{v len > 0} -> bn_add_mod_n_st U64 len
+ = bn_add_mod_n #U64
+
+// Prevent inlining
+inline_for_extraction noextract
+let add_mod_n' (#t:limb_t): len:size_t{v len > 0} -> bn_add_mod_n_st t len
+ = match t with | U32 -> add_mod_n32 | U64 -> add_mod_n64
+
 /// This is a default implementation that *will* generate code depending on
 /// `len` at run-time! Only use if you want to generate run-time generic
 /// functions!
@@ -346,7 +357,7 @@ let mk_runtime_bn (t:limb_t) (len:meta_len t) = {
   len = len;
   add = (fun a b -> bn_add_eq_len len a b);
   sub = (fun a b -> bn_sub_eq_len len a b);
-  add_mod_n = bn_add_mod_n len;
+  add_mod_n = add_mod_n' len;
   mul = (fun a b -> bn_karatsuba_mul len a b);
   sqr = (fun a -> bn_karatsuba_sqr len a);
 }

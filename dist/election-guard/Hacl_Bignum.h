@@ -39,6 +39,9 @@ extern "C" {
 
 
 
+void
+Hacl_Bignum_add_mod_n64(uint32_t len1, uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *res);
+
 uint64_t Hacl_Bignum_ModInvLimb_mod_inv_uint64(uint64_t n0);
 
 #if defined(__cplusplus)
