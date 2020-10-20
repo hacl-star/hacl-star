@@ -448,3 +448,13 @@ val decode: sigLen: size_t -> signature: lbuffer uint8 sigLen
   Stack bool
     (requires fun h -> live h signature /\ live h bufferForR /\ live h bufferForS)
     (ensures fun h0 _ h1 -> True)
+
+
+val encodeSize: r: lbuffer uint8 32ul -> s: lbuffer uint8 32ul -> Stack (len: size_t)
+  (requires fun h -> True)
+  (ensures fun h0 _ h1 -> True)
+
+val encode: len: size_t -> signature: lbuffer uint8 len -> r: lbuffer uint8 32ul -> s: lbuffer uint8 32ul -> 
+  Stack bool
+    (requires fun h -> live h r /\ live h s)
+    (ensures fun h0 _ h1 -> True)

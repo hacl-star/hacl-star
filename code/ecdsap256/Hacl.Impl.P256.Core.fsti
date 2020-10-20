@@ -167,6 +167,24 @@ val scalarMultiplication: #buf_type: buftype->  p: point -> result: point ->
 ) 
 
 
+val uploadBasePoint: p: point -> Stack unit 
+  (requires fun h -> live h p)
+  (ensures fun h0 _ h1 -> modifies (loc p) h0 h1 /\ 
+    as_nat h1 (gsub p (size 0) (size 4)) < prime256 /\ 
+    as_nat h1 (gsub p (size 4) (size 4)) < prime256 /\
+    as_nat h1 (gsub p (size 8) (size 4)) < prime256 /\
+      (
+	let x1 = as_nat h1 (gsub p (size 0) (size 4)) in 
+	let y1 = as_nat h1 (gsub p (size 4) (size 4)) in 
+	let z1 = as_nat h1 (gsub p (size 8) (size 4)) in 
+
+	let bpX, bpY, bpZ = basePoint in 
+
+	fromDomain_ x1  == bpX /\ fromDomain_ y1 == bpY /\ fromDomain_ z1 == bpZ
+    )
+)
+
+
 val scalarMultiplicationWithoutNorm: p: point -> result: point -> 
   scalar: lbuffer  uint8 (size 32) -> 
   tempBuffer: lbuffer uint64 (size 100) ->

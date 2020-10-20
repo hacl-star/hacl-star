@@ -37,6 +37,10 @@ let rec power_one a =
   | 0 -> assert_norm (pow 1 0 == 1)
   | _ -> power_one (a - 1) 
 
+val power_one2: a: nat -> Lemma (pow a 1 == a)
+
+let power_one2 a = ()
+
 
 noextract
 val pow_plus: a: nat -> b: nat -> c: nat -> 

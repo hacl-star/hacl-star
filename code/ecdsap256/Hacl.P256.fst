@@ -91,3 +91,9 @@ let ecdsa_sign_p256_def alg result mLen m privKey k =
 
 let decode sigLen signature bufferForR bufferForS = 
   Hacl.Impl.ECDSA.DER.decode sigLen signature bufferForR bufferForS
+
+
+
+let encodeSize r s = Hacl.Impl.ECDSA.DER.encode_size r s
+
+let encode len sign r s = Hacl.Impl.ECDSA.DER.encode len sign r s

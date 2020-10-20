@@ -1,4 +1,4 @@
-module Hacl.Impl.Q.LowLevel
+module Hacl.Impl.Q.RandomScalar
 
 
 open FStar.HyperStack.All
