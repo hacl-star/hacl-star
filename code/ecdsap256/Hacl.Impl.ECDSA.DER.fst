@@ -81,7 +81,7 @@ val decode: sigLen: size_t -> signature: lbuffer uint8 sigLen
 val min: a: FStar.UInt32.t -> b: FStar.UInt32.t  -> Tot (r : FStar.UInt32.t  {if v a <= v b then r == a else r == b}) 
 
 let min a b = 
-  if FStar.UInt32.gte b a then a else b
+  if FStar.UInt32.gte b a then b else a
 
 val copyBuffer: len: size_t -> from: lbuffer uint8 len  -> to: lbuffer uint8 lenCoor ->
   Stack unit 
@@ -105,20 +105,24 @@ let copyBuffer len from to =
       let elemUpdated = Lib.Sequence.index (as_seq h to) j in uint_v elemUpdated = 0)
     );
 
+
   let lenLoop = min len lenCoor in 
   let inv2 h (i: nat {i <= v lenLoop}) = live h to /\ live h from /\ modifies (loc to) h0 h /\
     (
       forall (j: nat {j < i}).
-	let indexToCopy = v lenLoop - 1 - j in 
+	let indexFromCopy = v lenLoop - 1 - j in 
+	let indexToCopy = v lenCoor - 1 - j in 
 	let elemUpdated = Lib.Sequence.index (as_seq h to) indexToCopy in 
 	let elemToUpdateTo = Lib.Sequence.index (as_seq h0 from) indexToCopy in 
 	uint_v elemUpdated == uint_v elemToUpdateTo
     )
   in 
-    for 0ul lenLoop inv2 (fun i ->
+    for 0ul lenCoor inv2 (fun i ->
       admit();
       let indexToCopy = lenCoor -. 1ul -. i in 
-      let element = index from indexToCopy in 
+      let indexFromCopy = lenLoop -. 1ul -. i in 
+      
+      let element = index from indexFromCopy in 
       upd to indexToCopy element)
   
 
@@ -129,7 +133,7 @@ let copyBuffer len from to =
 let decode sigLen signature bufferForR bufferForS = 
   (* |0x30|SigLen|0x02|RLen|R|0x02|SLen|S *)
 
-  if sigLen <. 6ul then false else
+  if sigLen <. 7ul then false else
 
   (* |->0x30|SigLen|0x02|RLen|R|0x02|SLen|S  *)
   let pointer = size 0 in 
@@ -242,4 +246,95 @@ let decode sigLen signature bufferForR bufferForS =
   true
   end
 
+  end
+
+
+val encode_size: r: lbuffer uint8 lenCoor -> s: lbuffer uint8 lenCoor -> Stack (len: size_t)
+  (requires fun h -> True)
+  (ensures fun h0 _ h1 -> True)
+
+let encode_size r s = 
+   let rZeroByte = index r 0ul in 
+  let sZeroByte = index s 0ul in 
+
+  assert_norm(0x7f < maxint U8);
+  let threshold = u8 0x7f in 
+
+  let maskR = gte_mask rZeroByte threshold in 
+  let sizeR = logand maskR (u8 2) in 
+
+  let maskS = gte_mask sZeroByte threshold in 
+  let sizeS = logand maskS (u8 2) in 
+
+  let sizeSignature = u8 70 +. sizeR +. sizeS in 
+  sizeSignature
+
+
+
+val encode: len: size_t -> signature: lbuffer uint8 len -> r: lbuffer uint8 lenCoor -> s: lbuffer uint8 lenCoor -> 
+  Stack bool
+    (requires fun h -> live h r /\ live h s)
+    (ensures fun h0 _ h1 -> True)
+
+let encode len signature r s = 
+  
+  let rZeroByte = index r 0ul in 
+  let sZeroByte = index s 0ul in 
+
+  assert_norm(0x7f < maxint U8);
+  let threshold = u8 0x7f in 
+
+  let maskR = gte_mask rZeroByte threshold in 
+  let sizeR = logand maskR (u8 2) in 
+  let zeroRequiredForR = unsafe_bool_of_u8 (lognot sizeR) in 
+
+  let maskS = gte_mask sZeroByte threshold in 
+  let sizeS = logand maskS (u8 2) in 
+  let zeroRequiredForS = unsafe_bool_of_u8 (lognot sizeS) in 
+
+
+  let sizeSignature = u8 70 +. sizeR +. sizeS in 
+
+
+  let eqLen = eq_mask len sizeSignature in 
+    neq_mask_lemma len sizeSignature;
+  let flag = unsafe_bool_of_u8 eqLen in 
+  if flag then false else begin
+
+
+  let identificatorSignature = (u8 0x30) in 
+  let identificatorInteger = (u8 0x02) in 
+
+
+    let pointer = size 0 in 
+  upd signature pointer identificatorSignature;
+    let pointer = incr pointer in 
+  upd signature pointer (sizeSignature -. 2uy);
+    let pointer = incr pointer in 
+  upd signature pointer identificatorInteger;
+    let pointer = incr pointer in 
+
+  let lenR = add (u8 32) sizeR in 
+  upd signature pointer lenR;
+    let pointer = incr pointer in 
+    let pointer = 
+      if zeroRequiredForR then begin  upd signature pointer (u8 0); incr pointer end else pointer in 
+
+  let placeR = sub signature pointer (size 32) in 
+  copy placeR r;
+
+
+    let pointer = pointer +. size 32 in 
+  upd signature pointer identificatorInteger;
+    let pointer = incr pointer in 
+  let lenS = add (u8 32) sizeS in 
+  upd signature pointer lenS;
+    let pointer = incr pointer in 
+    let pointer = 
+      if zeroRequiredForS then begin upd signature pointer (u8 0); incr pointer end else pointer in 
+  let placeS = sub signature pointer (size 32) in 
+  copy placeS s;
+
+
+  true
   end
