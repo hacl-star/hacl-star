@@ -122,7 +122,7 @@ bool Hacl_Bignum256_mod(uint64_t *n, uint64_t *a, uint64_t *res);
 Write `a ^ b mod n` in `res`.
 
   The arguments a, n, r2 and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
-  The argument r2 is a precomputed constant 2 ^ 512 mod n obtained through Hacl_Bignum4096_new_precompr2.
+  The argument r2 is a precomputed constant 2 ^ 512 mod n obtained through Hacl_Bignum256_new_precompr2.
   The argument b is a bignum of any size, and bBits is an upper bound on the
   number of significant bits of b. A tighter bound results in faster execution
   time. When in doubt, the number of bits for the bignum size is always a safe
