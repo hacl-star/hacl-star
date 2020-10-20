@@ -89,6 +89,13 @@ module Bindings(F:Cstubs.FOREIGN) =
         (ocaml_bytes @-> (ocaml_bytes @-> (returning bool)))
     let hacl_P256_ecp256dh_r =
       foreign "Hacl_P256_ecp256dh_r"
+<<<<<<< HEAD
         (ocaml_bytes @->
            (ocaml_bytes @-> (ocaml_bytes @-> (returning bool))))
+=======
+        (ocaml_bytes @-> (ocaml_bytes @-> (ocaml_bytes @-> (returning bool))))
+    let hacl_P256_is_more_than_zero_less_than_order =
+      foreign "Hacl_P256_is_more_than_zero_less_than_order"
+        (ocaml_bytes @-> (returning bool))
+>>>>>>> origin/master
   end

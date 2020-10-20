@@ -80,8 +80,6 @@ let decode_point #s o i =
   load_felem x tmp;
   pop_frame()
 
-
-
 val encode_point:
     #s:field_spec
   -> o:lbuffer uint8 32ul
@@ -133,7 +131,7 @@ val cswap2:
 let cswap2 #s bit p0 p1 =
   C.cswap2 #s bit p0 p1
 
-#set-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 3"
+#set-options "--z3rlimit 150 --fuel 0 --ifuel 1"
 
 val ladder_step:
     #s:field_spec
@@ -189,7 +187,7 @@ let ladder_step #s k q i p01_tmp1_swap tmp2 =
   point_add_and_double #s q p01_tmp1 tmp2;
   swap.(0ul) <- bit
 
-#set-options "--max_fuel 2"
+#set-options "--z3rlimit 300 --fuel 1 --ifuel 1"
 
 val ladder_step_loop:
     #s:field_spec
@@ -253,7 +251,7 @@ let ladder_step_loop #s k q p01_tmp1_swap tmp2 =
       Lib.LoopCombinators.unfold_repeati 251 (spec_fh h0) (acc h0) (v i);
       ladder_step #s k q i p01_tmp1_swap tmp2)
 
-#set-options "--max_fuel 0 --z3rlimit 150"
+#set-options "--z3refresh --fuel 0 --ifuel 1 --z3rlimit 800"
 
 val ladder0_:
     #s:field_spec
@@ -463,6 +461,8 @@ let montgomery_ladder #s out key init =
   ladder4_ #s key init p01_tmp1_swap tmp2;
   copy out p0;
   pop_frame ()
+
+#set-options "--fuel 0 --ifuel 1 --z3rlimit 300"
 
 inline_for_extraction noextract
 let g25519_t = x:glbuffer byte_t 32ul{witnessed x (Lib.Sequence.of_list S.basepoint_list) /\ recallable x}

@@ -53,7 +53,8 @@ let ecp256dh_i result scalar =
   unsafe_bool_of_u64  flag
 
 
-[@ (Comment "  This code is not side channel resistant on pubKey")]
+[@ (Comment "  The pub(lic)_key input of the function is considered to be public, 
+  thus this code is not secret independent with respect to the operations done over this variable.")] 
 val _ecp256dh_r:
     result:lbuffer uint64 (size 12) 
   -> pubKey:lbuffer uint64 (size 8) 

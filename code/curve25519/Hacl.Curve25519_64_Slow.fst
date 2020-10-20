@@ -17,7 +17,7 @@ let point_double =
 let montgomery_ladder =
   generic_montgomery_ladder_higher #M64 True point_double C.cswap2_ point_add_and_double
 let fsquare_times = finv_fsquare_times_higher #M64 True C.fsqr_
-let finv = finv_finv_higher #M64 True fsquare_times C.fmul_
+let finv = finv_finv_higher #M64 True C.fmul_ fsquare_times
 // Note that here, for implementations of Curve64, we have a generic store_felem
 // over an *implementation* of add1. (For Curve51, store_felem does not have
 // that generic aspect.)
@@ -26,4 +26,3 @@ let encode_point = generic_encode_point_higher #M64 True store_felem C.fmul_ fin
 let scalarmult = generic_scalarmult_higher #M64 True encode_point montgomery_ladder decode_point
 let secret_to_public = generic_secret_to_public_higher #M64 True scalarmult g25519
 let ecdh = generic_ecdh_higher #M64 True scalarmult
-

@@ -80,9 +80,10 @@ let ecp256dh_i result scalar = Hacl.Impl.P256.DH.ecp256dh_i result scalar
 
 let ecp256dh_r result pubKey scalar = Hacl.Impl.P256.DH.ecp256dh_r result pubKey scalar
 
-
-let isMoreThanZeroLessThanOrder x =
+let is_more_than_zero_less_than_order x =
   Hacl.Impl.P256.Signature.Common.isMoreThanZeroLessThanOrder x
+
+
 
 
 let ecdsa_sign_p256_def alg result mLen m privKey k = 
@@ -93,7 +94,7 @@ let decode sigLen signature bufferForR bufferForS =
   Hacl.Impl.ECDSA.DER.decode sigLen signature bufferForR bufferForS
 
 
-
 let encodeSize r s = Hacl.Impl.ECDSA.DER.encode_size r s
 
 let encode len sign r s = Hacl.Impl.ECDSA.DER.encode len sign r s
+

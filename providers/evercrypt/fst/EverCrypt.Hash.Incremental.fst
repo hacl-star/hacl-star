@@ -59,19 +59,22 @@ let mk_words_state (#a : hash_alg) (s : words_state' a)
  else (s, ())
 #pop-options    
 
+(* Adding some non-inlined definitions to factorize code *)
+let hash_len a = Hacl.Hash.Definitions.hash_len a
+let block_len a = Hacl.Hash.Definitions.block_len a
+
 #push-options "--ifuel 1"
 inline_for_extraction noextract
-let evercrypt_hash //: block hash_alg =
-  =
+let evercrypt_hash : block hash_alg =
   Block
     Erased
     agile_state
     (stateful_unused hash_alg)
 
-    (* TODO: this general max length definition shouldn't be in the SHA2 256 file! *)
-    Hacl.Streaming.SHA2.max_input_length64
-    Hacl.Hash.Definitions.hash_len
-    Hacl.Hash.Definitions.block_len
+    (* TODO: this general max length definition shouldn't be in the MD file! *)
+    Hacl.Streaming.MD.max_input_length64
+    hash_len
+    block_len
 
     (fun a _ -> fst (Spec.Agile.Hash.init a))
     (fun a s prevlen input -> fst (Spec.Agile.Hash.update_multi a (mk_words_state s prevlen) input))

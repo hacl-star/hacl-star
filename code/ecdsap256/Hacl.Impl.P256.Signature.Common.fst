@@ -237,7 +237,8 @@ let multByOrder2 result p tempBuffer =
   pop_frame()  
     
 
-[@ (Comment "  This code is not side channel resistant")]
+[@ (Comment "   The input of the function is considered to be public,
+thus this code is not secret independent with respect to the operations done over the input.")] 
 val isOrderCorrect: p: point -> tempBuffer: lbuffer uint64 (size 100) -> Stack bool
   (requires fun h -> 
     live h p /\ live h tempBuffer /\ 
@@ -325,4 +326,9 @@ let isMoreThanZeroLessThanOrder x =
     
   pop_frame();
 
+<<<<<<< HEAD
   lognot result
+=======
+  let open Hacl.Impl.P256.LowLevel.RawCmp in 
+  unsafe_bool_of_u64 (lognot result)
+>>>>>>> origin/master

@@ -23,10 +23,15 @@
 # By default, this Makefile relies on the local checkout of kremlib
 KREMLIN_HOME ?= ../kremlin
 
+-include Makefile.config
+
 # 1. The usual pseudo auto-configuration
 
-UNAME		= $(shell uname)
-MARCH		= $(shell uname -m)
+# TODO: this should all move to the configure script
+# TODO: Makefile.config: configure; ./$<
+# TODO: include Makefile.config
+UNAME		?= $(shell uname)
+MARCH		?= $(shell uname -m)
 ifeq ($(UNAME),Darwin)
   VARIANT	= -darwin
   SO		= so
@@ -34,7 +39,6 @@ else ifeq ($(UNAME),Linux)
   CFLAGS	+= -fPIC
   VARIANT	= -linux
   SO 		= so
-  LDFLAGS	+= -Xlinker -z -Xlinker noexecstack -Xlinker --unresolved-symbols=report-all
 else ifeq ($(OS),Windows_NT)
   CFLAGS        += -fno-asynchronous-unwind-tables
   CC		= $(MARCH)-w64-mingw32-gcc
@@ -73,15 +77,15 @@ endif
 
 OBJS 		+= $(patsubst %.S,%.o,$(wildcard *-$(MARCH)$(VARIANT).S))
 
--include Makefile.config
 include Makefile.basic
 
 CFLAGS		+= -Wno-parentheses -Wno-deprecated-declarations -Wno-\#warnings -Wno-error=cpp -Wno-cpp -g -std=gnu11 -O3
-CFLAGS_128 ?= -mavx
-CFLAGS_256 ?= -mavx -mavx2
+# TODO: also move this to configure
+CFLAGS_128 	?= -mavx
+CFLAGS_256 	?= -mavx -mavx2
 
-Hacl_Poly1305_128.o Hacl_Chacha20_Vec128.o Hacl_Chacha20Poly1305_128.o Hacl_Blake2s_128.o Hacl_HMAC_Blake2s_128.o Hacl_HKDF_Blake2s_128.o Hacl_Streaming_Blake2s_128.o: CFLAGS += $(CFLAGS_128)
-Hacl_Poly1305_256.o Hacl_Chacha20_Vec256.o Hacl_Chacha20Poly1305_256.o Hacl_Blake2b_256.o Hacl_HMAC_Blake2b_256.o Hacl_HKDF_Blake2b_256.o Hacl_Streaming_Blake2b_256.o: CFLAGS += $(CFLAGS_256)
+Hacl_Poly1305_128.o Hacl_Streaming_Poly1305_128.o Hacl_Chacha20_Vec128.o Hacl_Chacha20Poly1305_128.o Hacl_Blake2s_128.o Hacl_HMAC_Blake2s_128.o Hacl_HKDF_Blake2s_128.o Hacl_Streaming_Blake2s_128.o: CFLAGS += $(CFLAGS_128)
+Hacl_Poly1305_256.o Hacl_Streaming_Poly1305_256.o Hacl_Chacha20_Vec256.o Hacl_Chacha20Poly1305_256.o Hacl_Blake2b_256.o Hacl_HMAC_Blake2b_256.o Hacl_HKDF_Blake2b_256.o Hacl_Streaming_Blake2b_256.o: CFLAGS += $(CFLAGS_256)
 
 all: libevercrypt.$(SO)
 
@@ -180,18 +184,24 @@ CTYPES_CMX    =  $(filter-out $(BLACKLIST_CMX),$(CTYPES_DEPS))
 CTYPES_CMX    += lib/Lib_RandomBuffer_System_stubs.cmx lib/Lib_RandomBuffer_System_bindings.cmx
 CTYPES_ML     =  $(patsubst %.cmx,%.ml,$(CTYPES_CMX))
 CTYPES_CMI    =  $(patsubst %.cmx,%.cmi,$(CTYPES_CMX))
+CTYPES_CMO    = $(patsubst %.cmx,%.cmo,$(CTYPES_CMX))
+
+
+ocamlevercrypt.cma: $(ALL_BINDINGS) $(CTYPES_CMO) $(ALL_C_STUBS) $(CTYPES_CMX) libevercrypt.$(SO)
+	ocamlmklib -o ocamlevercrypt $(CTYPES_CMO) -L. -levercrypt
 
 ocamlevercrypt.cmxa: $(ALL_BINDINGS) $(ALL_ML_STUBS) $(ALL_C_STUBS) libevercrypt.$(SO)
-	ocamlfind mklib -o ocamlevercrypt $(CTYPES_CMX) $(ALL_C_STUBS) -ccopt -L. -cclib -levercrypt
+	ocamlmklib -o ocamlevercrypt $(CTYPES_CMX) -L. -levercrypt
 
-CTYPES_CMO    = $(patsubst %.cmx,%.cmo,$(CTYPES_CMX))
-ALL_ML_STUBS_CMO = $(patsubst %.cmx,%.cmo,$(ALL_ML_STUBS))
+STUBLIBS_PATH=$(OPAM_SWITCH_PREFIX)/lib/stublibs
 
-ocamlevercrypt.cma: $(ALL_BINDINGS) $(ALL_ML_STUBS_CMO) $(CTYPES_CMO) $(ALL_C_STUBS) libevercrypt.$(SO)
-	ocamlfind mklib -o ocamlevercrypt $(CTYPES_CMO) $(ALL_C_STUBS) -ccopt -L. -cclib -levercrypt
+dllocamlevercrypt.$(SO): ocamlevercrypt.cmxa ocamlevercrypt.cma
+	ocamlmklib -o ocamlevercrypt $(ALL_C_STUBS) -L. -L$(STUBLIBS_PATH) -levercrypt
 
-install-hacl-star-raw: ocamlevercrypt.cmxa ocamlevercrypt.cma libevercrypt.a
-	ocamlfind install hacl-star-raw META $(CTYPES_ML) $(CTYPES_CMX) $(CTYPES_CMO) $(CTYPES_CMI) ocamlevercrypt.cma ocamlevercrypt.cmxa *.a *.$(SO) config.h
+install-hacl-star-raw: dllocamlevercrypt.$(SO)
+	ocamlfind install hacl-star-raw META $(CTYPES_ML) $(CTYPES_CMX) $(CTYPES_CMO) $(CTYPES_CMI) \
+         libevercrypt.a libevercrypt.$(SO) ocamlevercrypt.cma ocamlevercrypt.cmxa ocamlevercrypt.a \
+         libocamlevercrypt.a dllocamlevercrypt.$(SO) config.h
 
 endif
 endif
