@@ -183,65 +183,65 @@ let bn_mont_sqr #t k mont_reduction n nInv_u64 aM resM =
 /// runtime, to offer a version of mod_exp where all the parameters are present
 /// at run-time.
 
-let mont_check_runtime_u32 (len: BN.meta_len U32) : bn_check_modulus_st U32 len =
+let bn_check_modulus_u32 (len: BN.meta_len U32) : bn_check_modulus_st U32 len =
   bn_check_modulus #U32 #len
-let precomp_runtime_u32 (len:BN.meta_len U32) : bn_precomp_r2_mod_n_st U32 len =
+let bn_precomp_r2_mod_n_u32 (len:BN.meta_len U32) : bn_precomp_r2_mod_n_st U32 len =
   bn_precomp_r2_mod_n (BN.mk_runtime_bn U32 len)
-let mont_reduction_runtime_u32 (len:BN.meta_len U32) : bn_mont_reduction_st U32 len =
+let bn_mont_reduction_u32 (len:BN.meta_len U32) : bn_mont_reduction_st U32 len =
   bn_mont_reduction (BN.mk_runtime_bn U32 len)
-let to_runtime_u32 (len: BN.meta_len U32) : bn_to_mont_st U32 len =
-  bn_to_mont (BN.mk_runtime_bn U32 len) (mont_reduction_runtime_u32 len)
-let from_runtime_u32 (len: BN.meta_len U32) : bn_from_mont_st U32 len =
-  bn_from_mont (BN.mk_runtime_bn U32 len) (mont_reduction_runtime_u32 len)
-let mul_runtime_u32 (len: BN.meta_len U32) : bn_mont_mul_st U32 len =
-  bn_mont_mul (BN.mk_runtime_bn U32 len) (mont_reduction_runtime_u32 len)
-let sqr_runtime_u32 (len: BN.meta_len U32) : bn_mont_sqr_st U32 len =
-  bn_mont_sqr (BN.mk_runtime_bn U32 len) (mont_reduction_runtime_u32 len)
+let bn_to_mont_u32 (len: BN.meta_len U32) : bn_to_mont_st U32 len =
+  bn_to_mont (BN.mk_runtime_bn U32 len) (bn_mont_reduction_u32 len)
+let bn_from_mont_u32 (len: BN.meta_len U32) : bn_from_mont_st U32 len =
+  bn_from_mont (BN.mk_runtime_bn U32 len) (bn_mont_reduction_u32 len)
+let bn_mont_mul_u32 (len: BN.meta_len U32) : bn_mont_mul_st U32 len =
+  bn_mont_mul (BN.mk_runtime_bn U32 len) (bn_mont_reduction_u32 len)
+let bn_mont_sqr_32 (len: BN.meta_len U32) : bn_mont_sqr_st U32 len =
+  bn_mont_sqr (BN.mk_runtime_bn U32 len) (bn_mont_reduction_u32 len)
 
 inline_for_extraction noextract
-let mk_runtime_mont_uint32 (len: BN.meta_len U32) : mont U32 = {
+let mk_runtime_mont_u32 (len: BN.meta_len U32) : mont U32 = {
   bn = BN.mk_runtime_bn U32 len;
-  mont_check = mont_check_runtime_u32 len;
-  precomp = precomp_runtime_u32 len;
-  reduction = mont_reduction_runtime_u32 len;
-  to = to_runtime_u32 len;
-  from = from_runtime_u32 len;
-  mul = mul_runtime_u32 len;
-  sqr = sqr_runtime_u32 len;
+  mont_check = bn_check_modulus_u32 len;
+  precomp = bn_precomp_r2_mod_n_u32 len;
+  reduction = bn_mont_reduction_u32 len;
+  to = bn_to_mont_u32 len;
+  from = bn_from_mont_u32 len;
+  mul = bn_mont_mul_u32 len;
+  sqr = bn_mont_sqr_32 len;
 }
 
 
-let mont_check_runtime_u64 (len: BN.meta_len U64) : bn_check_modulus_st U64 len =
+let bn_check_modulus_u64 (len: BN.meta_len U64) : bn_check_modulus_st U64 len =
   bn_check_modulus #U64 #len
-let precomp_runtime_u64 (len:BN.meta_len U64) : bn_precomp_r2_mod_n_st U64 len =
+let bn_precomp_r2_mod_n_u64 (len:BN.meta_len U64) : bn_precomp_r2_mod_n_st U64 len =
   bn_precomp_r2_mod_n (BN.mk_runtime_bn U64 len)
-let mont_reduction_runtime_u64 (len:BN.meta_len U64) : bn_mont_reduction_st U64 len =
+let bn_mont_reduction_u64 (len:BN.meta_len U64) : bn_mont_reduction_st U64 len =
   bn_mont_reduction (BN.mk_runtime_bn U64 len)
-let to_runtime_u64 (len: BN.meta_len U64) : bn_to_mont_st U64 len =
-  bn_to_mont (BN.mk_runtime_bn U64 len) (mont_reduction_runtime_u64 len)
-let from_runtime_u64 (len: BN.meta_len U64) : bn_from_mont_st U64 len =
-  bn_from_mont (BN.mk_runtime_bn U64 len) (mont_reduction_runtime_u64 len)
-let mul_runtime_u64 (len: BN.meta_len U64) : bn_mont_mul_st U64 len =
-  bn_mont_mul (BN.mk_runtime_bn U64 len) (mont_reduction_runtime_u64 len)
-let sqr_runtime_u64 (len: BN.meta_len U64) : bn_mont_sqr_st U64 len =
-  bn_mont_sqr (BN.mk_runtime_bn U64 len) (mont_reduction_runtime_u64 len)
+let bn_to_mont_u64 (len: BN.meta_len U64) : bn_to_mont_st U64 len =
+  bn_to_mont (BN.mk_runtime_bn U64 len) (bn_mont_reduction_u64 len)
+let bn_from_mont_u64 (len: BN.meta_len U64) : bn_from_mont_st U64 len =
+  bn_from_mont (BN.mk_runtime_bn U64 len) (bn_mont_reduction_u64 len)
+let bn_mont_mul_u64 (len: BN.meta_len U64) : bn_mont_mul_st U64 len =
+  bn_mont_mul (BN.mk_runtime_bn U64 len) (bn_mont_reduction_u64 len)
+let bn_mont_sqr_64 (len: BN.meta_len U64) : bn_mont_sqr_st U64 len =
+  bn_mont_sqr (BN.mk_runtime_bn U64 len) (bn_mont_reduction_u64 len)
 
 inline_for_extraction noextract
-let mk_runtime_mont_uint64 (len: BN.meta_len U64) : mont U64 = {
+let mk_runtime_mont_u64 (len: BN.meta_len U64) : mont U64 = {
   bn = BN.mk_runtime_bn U64 len;
-  mont_check = mont_check_runtime_u64 len;
-  precomp = precomp_runtime_u64 len;
-  reduction = mont_reduction_runtime_u64 len;
-  to = to_runtime_u64 len;
-  from = from_runtime_u64 len;
-  mul = mul_runtime_u64 len;
-  sqr = sqr_runtime_u64 len;
+  mont_check = bn_check_modulus_u64 len;
+  precomp = bn_precomp_r2_mod_n_u64 len;
+  reduction = bn_mont_reduction_u64 len;
+  to = bn_to_mont_u64 len;
+  from = bn_from_mont_u64 len;
+  mul = bn_mont_mul_u64 len;
+  sqr = bn_mont_sqr_64 len;
 }
 
 
 let mk_runtime_mont (#t:limb_t) (len:BN.meta_len t) : mont t =
   match t with
-  | U32 -> mk_runtime_mont_uint32 len
-  | U64 -> mk_runtime_mont_uint64 len
+  | U32 -> mk_runtime_mont_u32 len
+  | U64 -> mk_runtime_mont_u64 len
 
 let mk_runtime_mont_len_lemma #t len = ()

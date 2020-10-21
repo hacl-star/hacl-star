@@ -246,54 +246,54 @@ let bn_mod_exp_mont_ladder #t k bn_mod_exp_mont_ladder_precompr2 n a bBits b res
 
 /// A fully runtime implementation of modular exponentiation.
 
-let exp_check_runtime_u32 (len:BN.meta_len U32) : bn_check_mod_exp_st U32 (BM.mk_runtime_mont len).BM.bn.BN.len =
+let bn_check_mod_exp_u32 (len:BN.meta_len U32) : bn_check_mod_exp_st U32 len =
   bn_check_mod_exp (BM.mk_runtime_mont len)
-let mod_exp_precomp_runtime_u32 (len:BN.meta_len U32) : bn_mod_exp_precompr2_st U32 (BM.mk_runtime_mont len).BM.bn.BN.len =
+let bn_mod_exp_precompr2_u32 (len:BN.meta_len U32) : bn_mod_exp_precompr2_st U32 len =
   bn_mod_exp_precompr2 (BM.mk_runtime_mont len)
-let ct_mod_exp_precomp_runtime_u32 (len: BN.meta_len U32) : bn_mod_exp_mont_ladder_precompr2_st U32 (BM.mk_runtime_mont len).BM.bn.BN.len =
+let bn_mod_exp_mont_ladder_precompr2_u32 (len: BN.meta_len U32) : bn_mod_exp_mont_ladder_precompr2_st U32 len =
   bn_mod_exp_mont_ladder_precompr2 (BM.mk_runtime_mont len)
-let mod_exp_runtime_u32 (len:BN.meta_len U32) : bn_mod_exp_st U32 (BM.mk_runtime_mont len).BM.bn.BN.len =
-  bn_mod_exp (BM.mk_runtime_mont len) (mod_exp_precomp_runtime_u32 len)
-let ct_mod_exp_runtime_u32 (len:BN.meta_len U32) : bn_mod_exp_mont_ladder_st U32 (BM.mk_runtime_mont len).BM.bn.BN.len =
-  bn_mod_exp_mont_ladder (BM.mk_runtime_mont len) (ct_mod_exp_precomp_runtime_u32 len)
+let bn_mod_exp_u32 (len:BN.meta_len U32) : bn_mod_exp_st U32 len =
+  bn_mod_exp (BM.mk_runtime_mont len) (bn_mod_exp_precompr2_u32 len)
+let bn_mod_exp_mont_ladder_u32 (len:BN.meta_len U32) : bn_mod_exp_mont_ladder_st U32 len =
+  bn_mod_exp_mont_ladder (BM.mk_runtime_mont len) (bn_mod_exp_mont_ladder_precompr2_u32 len)
 
 inline_for_extraction noextract
-let mk_runtime_exp_uint32 (len: BN.meta_len U32) : exp U32 = {
+let mk_runtime_exp_u32 (len: BN.meta_len U32) : exp U32 = {
   mont = BM.mk_runtime_mont len;
-  exp_check = exp_check_runtime_u32 len;
-  mod_exp_precomp = mod_exp_precomp_runtime_u32 len;
-  ct_mod_exp_precomp = ct_mod_exp_precomp_runtime_u32 len;
-  mod_exp = mod_exp_runtime_u32 len;
-  ct_mod_exp = ct_mod_exp_runtime_u32 len;
+  exp_check = bn_check_mod_exp_u32 len;
+  mod_exp_precomp = bn_mod_exp_precompr2_u32 len;
+  ct_mod_exp_precomp = bn_mod_exp_mont_ladder_precompr2_u32 len;
+  mod_exp = bn_mod_exp_u32 len;
+  ct_mod_exp = bn_mod_exp_mont_ladder_u32 len;
   }
 
 
-let exp_check_runtime_u64 (len:BN.meta_len U64) : bn_check_mod_exp_st U64 (BM.mk_runtime_mont len).BM.bn.BN.len =
+let bn_check_mod_exp_u64 (len:BN.meta_len U64) : bn_check_mod_exp_st U64 len =
   bn_check_mod_exp (BM.mk_runtime_mont len)
-let mod_exp_precomp_runtime_u64 (len:BN.meta_len U64) : bn_mod_exp_precompr2_st U64 (BM.mk_runtime_mont len).BM.bn.BN.len =
+let bn_mod_exp_precompr2_u64 (len:BN.meta_len U64) : bn_mod_exp_precompr2_st U64 len =
   bn_mod_exp_precompr2 (BM.mk_runtime_mont len)
-let ct_mod_exp_precomp_runtime_u64 (len: BN.meta_len U64) : bn_mod_exp_mont_ladder_precompr2_st U64 (BM.mk_runtime_mont len).BM.bn.BN.len =
+let bn_mod_exp_mont_ladder_precompr2_u64 (len: BN.meta_len U64) : bn_mod_exp_mont_ladder_precompr2_st U64 len =
   bn_mod_exp_mont_ladder_precompr2 (BM.mk_runtime_mont len)
-let mod_exp_runtime_u64 (len:BN.meta_len U64) : bn_mod_exp_st U64 (BM.mk_runtime_mont len).BM.bn.BN.len =
-  bn_mod_exp (BM.mk_runtime_mont len) (mod_exp_precomp_runtime_u64 len)
-let ct_mod_exp_runtime_u64 (len:BN.meta_len U64) : bn_mod_exp_mont_ladder_st U64 (BM.mk_runtime_mont len).BM.bn.BN.len =
-  bn_mod_exp_mont_ladder (BM.mk_runtime_mont len) (ct_mod_exp_precomp_runtime_u64 len)
+let bn_mod_exp_u64 (len:BN.meta_len U64) : bn_mod_exp_st U64 len =
+  bn_mod_exp (BM.mk_runtime_mont len) (bn_mod_exp_precompr2_u64 len)
+let bn_mod_exp_mont_ladder_u64 (len:BN.meta_len U64) : bn_mod_exp_mont_ladder_st U64 len =
+  bn_mod_exp_mont_ladder (BM.mk_runtime_mont len) (bn_mod_exp_mont_ladder_precompr2_u64 len)
 
 inline_for_extraction noextract
-let mk_runtime_exp_uint64 (len: BN.meta_len U64) : exp U64 = {
+let mk_runtime_exp_u64 (len: BN.meta_len U64) : exp U64 = {
   mont = BM.mk_runtime_mont len;
-  exp_check = exp_check_runtime_u64 len;
-  mod_exp_precomp = mod_exp_precomp_runtime_u64 len;
-  ct_mod_exp_precomp = ct_mod_exp_precomp_runtime_u64 len;
-  mod_exp = mod_exp_runtime_u64 len;
-  ct_mod_exp = ct_mod_exp_runtime_u64 len;
+  exp_check = bn_check_mod_exp_u64 len;
+  mod_exp_precomp = bn_mod_exp_precompr2_u64 len;
+  ct_mod_exp_precomp = bn_mod_exp_mont_ladder_precompr2_u64 len;
+  mod_exp = bn_mod_exp_u64 len;
+  ct_mod_exp = bn_mod_exp_mont_ladder_u64 len;
   }
 
 
 let mk_runtime_exp (#t:limb_t) (len:BN.meta_len t) : exp t =
   match t with
-  | U32 -> mk_runtime_exp_uint32 len
-  | U64 -> mk_runtime_exp_uint64 len
+  | U32 -> mk_runtime_exp_u32 len
+  | U64 -> mk_runtime_exp_u64 len
 
 let mk_runtime_exp_len_lemma #t len =
   BM.mk_runtime_mont_len_lemma #t len

@@ -75,6 +75,47 @@ let bn_get_num_bits #t len b =
 let cswap2 #t len bit b1 b2 =
   Hacl.Bignum.Lib.cswap2_st len bit b1 b2
 
+
+let bn_add_eq_len_u32 (len:size_t) (a:lbignum U32 len) (b:lbignum U32 len) : bn_add_eq_len_st a b = bn_add_eq_len len a b
+let bn_sub_eq_len_u32 (len:size_t) (a:lbignum U32 len) (b:lbignum U32 len) : bn_sub_eq_len_st a b = bn_sub_eq_len len a b
+let bn_add_mod_n_u32 (len:size_t{v len > 0}) : bn_add_mod_n_st U32 len = bn_add_mod_n #U32 len
+
+/// This is a default implementation that *will* generate code depending on
+/// `len` at run-time! Only use if you want to generate run-time generic
+/// functions!
+inline_for_extraction noextract
+let mk_runtime_bn_u32 (len:meta_len U32) : bn U32 = {
+  len = len;
+  add = (fun a b -> bn_add_eq_len_u32 len a b);
+  sub = (fun a b -> bn_sub_eq_len_u32 len a b);
+  add_mod_n = bn_add_mod_n_u32 len;
+  mul = (fun a b -> bn_karatsuba_mul len a b);
+  sqr = (fun a -> bn_karatsuba_sqr len a);
+}
+
+
+let bn_add_eq_len_u64 (len:size_t) (a:lbignum U64 len) (b:lbignum U64 len) : bn_add_eq_len_st a b = bn_add_eq_len len a b
+let bn_sub_eq_len_u64 (len:size_t) (a:lbignum U64 len) (b:lbignum U64 len) : bn_sub_eq_len_st a b = bn_sub_eq_len len a b
+let bn_add_mod_n_u64 (len:size_t{v len > 0}) : bn_add_mod_n_st U64 len = bn_add_mod_n #U64 len
+
+inline_for_extraction noextract
+let mk_runtime_bn_u64 (len:meta_len U64) : bn U64 = {
+  len = len;
+  add = (fun a b -> bn_add_eq_len_u64 len a b);
+  sub = (fun a b -> bn_sub_eq_len_u64 len a b);
+  add_mod_n = bn_add_mod_n_u64 len;
+  mul = (fun a b -> bn_karatsuba_mul len a b);
+  sqr = (fun a -> bn_karatsuba_sqr len a);
+}
+
+let mk_runtime_bn (t:limb_t) (len:meta_len t) : bn t =
+  match t with
+  | U32 -> mk_runtime_bn_u32 len
+  | U64 -> mk_runtime_bn_u64 len
+
+let mk_runtime_bn_len_lemma t len = ()
+
+
 (* bignum comparison and test functions *)
 
 let bn_is_odd #t len a =

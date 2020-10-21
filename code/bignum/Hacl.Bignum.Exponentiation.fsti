@@ -145,4 +145,4 @@ inline_for_extraction noextract
 val mk_runtime_exp: #t:limb_t -> len:BN.meta_len t -> exp t
 
 val mk_runtime_exp_len_lemma: #t:limb_t -> len:BN.meta_len t ->
-  Lemma ((mk_runtime_exp #t len).mont.BM.bn.BN.len == len)
+  Lemma ((mk_runtime_exp #t len).mont.BM.bn.BN.len == len) [SMTPat (mk_runtime_exp #t len)]
