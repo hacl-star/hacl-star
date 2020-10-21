@@ -69,13 +69,7 @@ static inline void bn_to_bytes_be_uint64(uint32_t len, uint64_t *b, uint8_t *res
 }
 
 static void
-mont_reduction_runtime_u64(
-  uint32_t len,
-  uint64_t *n,
-  uint64_t nInv,
-  uint64_t *c,
-  uint64_t *res
-)
+bn_mont_reduction_u64(uint32_t len, uint64_t *n, uint64_t nInv, uint64_t *c, uint64_t *res)
 {
   uint64_t c0 = (uint64_t)0U;
   uint64_t uu____0;
@@ -356,7 +350,7 @@ mgf_hash(
 }
 
 static void
-mod_exp_precomp_runtime_u64(
+bn_mod_exp_precompr2_u64(
   uint32_t len,
   uint64_t *n,
   uint64_t *a,
@@ -391,7 +385,7 @@ mod_exp_precomp_runtime_u64(
               uint64_t tmp0[(uint32_t)4U * len];
               memset(tmp0, 0U, (uint32_t)4U * len * sizeof (uint64_t));
               Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64(len, a, r2, tmp0, c);
-              mont_reduction_runtime_u64(len, n, nInv, c, aM);
+              bn_mont_reduction_u64(len, n, nInv, c, aM);
               KRML_CHECK_SIZE(sizeof (uint64_t), len + len);
               {
                 uint64_t c0[len + len];
@@ -401,7 +395,7 @@ mod_exp_precomp_runtime_u64(
                   uint64_t tmp1[(uint32_t)4U * len];
                   memset(tmp1, 0U, (uint32_t)4U * len * sizeof (uint64_t));
                   Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64(len, acc, r2, tmp1, c0);
-                  mont_reduction_runtime_u64(len, n, nInv, c0, accM);
+                  bn_mont_reduction_u64(len, n, nInv, c0, accM);
                   {
                     uint32_t i;
                     for (i = (uint32_t)0U; i < bBits; i++)
@@ -421,7 +415,7 @@ mod_exp_precomp_runtime_u64(
                             uint64_t tmp[(uint32_t)4U * len];
                             memset(tmp, 0U, (uint32_t)4U * len * sizeof (uint64_t));
                             Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64(len, aM, accM, tmp, c1);
-                            mont_reduction_runtime_u64(len, n, nInv, c1, accM);
+                            bn_mont_reduction_u64(len, n, nInv, c1, accM);
                           }
                         }
                       }
@@ -434,7 +428,7 @@ mod_exp_precomp_runtime_u64(
                           uint64_t tmp[(uint32_t)4U * len];
                           memset(tmp, 0U, (uint32_t)4U * len * sizeof (uint64_t));
                           Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint64(len, aM, tmp, c1);
-                          mont_reduction_runtime_u64(len, n, nInv, c1, aM);
+                          bn_mont_reduction_u64(len, n, nInv, c1, aM);
                         }
                       }
                     }
@@ -444,7 +438,7 @@ mod_exp_precomp_runtime_u64(
                     uint64_t tmp[len + len];
                     memset(tmp, 0U, (len + len) * sizeof (uint64_t));
                     memcpy(tmp, accM, len * sizeof (uint64_t));
-                    mont_reduction_runtime_u64(len, n, nInv, tmp, res);
+                    bn_mont_reduction_u64(len, n, nInv, tmp, res);
                   }
                 }
               }
@@ -457,7 +451,7 @@ mod_exp_precomp_runtime_u64(
 }
 
 static void
-ct_mod_exp_precomp_runtime_u64(
+bn_mod_exp_mont_ladder_precompr2_u64(
   uint32_t len,
   uint64_t *n,
   uint64_t *a,
@@ -494,7 +488,7 @@ ct_mod_exp_precomp_runtime_u64(
                 uint64_t tmp0[(uint32_t)4U * len];
                 memset(tmp0, 0U, (uint32_t)4U * len * sizeof (uint64_t));
                 Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64(len, one, r2, tmp0, c);
-                mont_reduction_runtime_u64(len, n, nInv, c, rM0);
+                bn_mont_reduction_u64(len, n, nInv, c, rM0);
                 KRML_CHECK_SIZE(sizeof (uint64_t), len + len);
                 {
                   uint64_t c0[len + len];
@@ -506,7 +500,7 @@ ct_mod_exp_precomp_runtime_u64(
                     {
                       uint64_t uu____0;
                       Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64(len, a, r2, tmp1, c0);
-                      mont_reduction_runtime_u64(len, n, nInv, c0, rM1);
+                      bn_mont_reduction_u64(len, n, nInv, c0, rM1);
                       {
                         uint32_t i0;
                         for (i0 = (uint32_t)0U; i0 < bBits; i0++)
@@ -538,7 +532,7 @@ ct_mod_exp_precomp_runtime_u64(
                                 rM0,
                                 tmp3,
                                 c1);
-                              mont_reduction_runtime_u64(len, n, nInv, c1, rM1);
+                              bn_mont_reduction_u64(len, n, nInv, c1, rM1);
                               KRML_CHECK_SIZE(sizeof (uint64_t), len + len);
                               {
                                 uint64_t c2[len + len];
@@ -548,7 +542,7 @@ ct_mod_exp_precomp_runtime_u64(
                                   uint64_t tmp[(uint32_t)4U * len];
                                   memset(tmp, 0U, (uint32_t)4U * len * sizeof (uint64_t));
                                   Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint64(len, rM0, tmp, c2);
-                                  mont_reduction_runtime_u64(len, n, nInv, c2, rM0);
+                                  bn_mont_reduction_u64(len, n, nInv, c2, rM0);
                                   sw = bit;
                                 }
                               }
@@ -571,7 +565,7 @@ ct_mod_exp_precomp_runtime_u64(
                         uint64_t tmp[len + len];
                         memset(tmp, 0U, (len + len) * sizeof (uint64_t));
                         memcpy(tmp, rM0, len * sizeof (uint64_t));
-                        mont_reduction_runtime_u64(len, n, nInv, tmp, res);
+                        bn_mont_reduction_u64(len, n, nInv, tmp, res);
                       }
                     }
                   }
@@ -1177,8 +1171,8 @@ Hacl_RSAPSS_rsapss_sign(
               uint64_t *r2 = skey + nLen1;
               uint64_t *e = skey + nLen1 + nLen1;
               uint64_t *d = skey + nLen1 + nLen1 + eLen;
-              ct_mod_exp_precomp_runtime_u64(len, n, m, dBits, d, r2, s);
-              mod_exp_precomp_runtime_u64(len, n, s, eBits, e, r2, m_);
+              bn_mod_exp_mont_ladder_precompr2_u64(len, n, m, dBits, d, r2, s);
+              bn_mod_exp_precompr2_u64(len, n, s, eBits, e, r2, m_);
               {
                 uint64_t mask = (uint64_t)0xFFFFFFFFFFFFFFFFU;
                 {
@@ -1279,7 +1273,7 @@ Hacl_RSAPSS_rsapss_verify(
               bool res;
               if (mask == (uint64_t)0xFFFFFFFFFFFFFFFFU)
               {
-                mod_exp_precomp_runtime_u64(len, n, s, eBits, e, r2, m);
+                bn_mod_exp_precompr2_u64(len, n, s, eBits, e, r2, m);
                 {
                   bool ite;
                   if (!((modBits - (uint32_t)1U) % (uint32_t)8U == (uint32_t)0U))
