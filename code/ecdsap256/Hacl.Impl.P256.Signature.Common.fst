@@ -325,10 +325,5 @@ let isMoreThanZeroLessThanOrder x =
     lognot_lemma result;
     
   pop_frame();
-
-<<<<<<< HEAD
-  lognot result
-=======
   let open Hacl.Impl.P256.LowLevel.RawCmp in 
   unsafe_bool_of_u64 (lognot result)
->>>>>>> origin/master
