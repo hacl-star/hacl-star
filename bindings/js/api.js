@@ -128,13 +128,19 @@ var HaclWasm = (function() {
         - 'name', the name of the argument which will be shown in the JS Doc
         - 'kind', either `input` or `output` of the function
         - 'type', either 'int' or 'boolean' or 'buffer'
-        - 'size', either an integer of a string which is the 'name' of another
+        - 'size', either an integer or a string which is the 'name' of another
           argument of type 'int'
+        - 'size_offset', an integer, which will be added to 'size' if the latter
+          is a string
         - 'interface_index', for all `input` that should appear in JS, position
           inside the argument list of the JS function
         - 'tests', a list of values for this arguments, each value corresponding
           to a different test case
       - 'return', the return type of the WebAssembly function
+      - 'custom_module_name', if true, it signifies that the prefix of the name
+        of the WebAssembly function does not coincide with the name of the
+        WebAssembly module; the module name will not be used when calling it,
+        instead 'name' will contain the full name of the function
   */
 
   var check_if_byte_array = function(candidate, length, name) {
@@ -143,7 +149,7 @@ var HaclWasm = (function() {
       (candidate.constructor !== Uint8Array)
     ) {
       throw new Error(
-        "name: Please ensure the argument " + candidate + " is a " + length + "-bytes Uint8Array."
+        "name: Please ensure the argument " + name + " is a " + length + "-bytes Uint8Array."
       );
     }
   };
@@ -190,7 +196,11 @@ var HaclWasm = (function() {
       if (arg.type === "buffer") {
         var size;
         if (typeof arg.size === "string") {
-          size = var_lengths[arg.size];
+          if (arg.size_offset !== undefined) {
+            size = var_lengths[arg.size] + arg.size_offset;
+          } else {
+            size = var_lengths[arg.size];
+          }
         } else {
           size = arg.size;
         }
@@ -201,7 +211,7 @@ var HaclWasm = (function() {
         } else if (arg.kind === "output") {
           arg_byte_buffer = new Uint8Array(size);
         }
-        check_if_byte_array(arg_byte_buffer, size, proto.name);
+        check_if_byte_array(arg_byte_buffer, size, arg.name);
         var pointer = copy_array_to_stack(arg_byte_buffer);
         return {
           "value": pointer,
@@ -223,7 +233,12 @@ var HaclWasm = (function() {
       throw Error("Unimplemented !");
     });
     // Calling the wasm function !
-    var call_return = Module[proto.module][proto.module + "_" + proto.name](
+    if (proto.custom_module_name) {
+      var func_name = proto.name;
+    } else {
+      var func_name = proto.module + "_" + proto.name;
+    }
+    var call_return = Module[proto.module][func_name](
       ...args_pointers.map(function(x) {
         return x.value;
       })
@@ -235,7 +250,11 @@ var HaclWasm = (function() {
       var protoRet = proto.args[pointer.index];
       var size;
       if (typeof protoRet.size === "string") {
-        size = var_lengths[protoRet.size];
+        if (protoRet.size_offset !== undefined) {
+          size = var_lengths[protoRet.size] + protoRet.size_offset;
+        } else {
+          size = var_lengths[protoRet.size];
+        }
       } else {
         size = protoRet.size;
       }
@@ -249,7 +268,7 @@ var HaclWasm = (function() {
     if (proto.return.type === "bool") {
       return [call_return === 1, return_buffers];
     }
-    if (proto.return.type === "integer") {
+    if (proto.return.type === "int") {
       return [call_return, return_buffers];
     }
     if (proto.return.type === "void") {
@@ -271,9 +290,10 @@ var HaclWasm = (function() {
         api_obj[key_module] = {};
       }
       api_obj[key_module][key_func] = function(...args) {
-        return checkIfInitialized().then(function() {
-          return callWithProto(api_json[key_module][key_func], args);
-        });
+        if (isInitialized === false) {
+           throw 'Nope';
+        };
+        return callWithProto(api_json[key_module][key_func], args);
       };
     });
   });

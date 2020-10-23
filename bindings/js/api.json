@@ -66,6 +66,37 @@
       "return": {
         "type": "void"
       }
+    },
+    "scalarmult": {
+      "module": "Hacl_Curve25519_51",
+      "name": "scalarmult",
+      "args": [{
+          "type": "buffer",
+          "size": 32,
+          "kind": "output",
+          "name": "result",
+          "tests": []
+        },
+        {
+          "type": "buffer",
+          "size": 32,
+          "name": "scalar",
+          "kind": "input",
+          "interface_index": 0,
+          "tests": []
+        },
+        {
+          "type": "buffer",
+          "size": 32,
+          "name": "input",
+          "kind": "input",
+          "interface_index": 1,
+          "tests": []
+        }
+      ],
+      "return": {
+        "type": "void"
+      }
     }
   },
   "Chacha20Poly1305": {
@@ -205,7 +236,6 @@
           "interface_index": 3,
           "tests": [
             "d31a8d34648e60db7b86afbc53ef7ec2a4aded51296e08fea9e2b5a736ee62d63dbea45e8ca9671282fafb69da92728b1a71de0a9e060b2905d6a5b67ecd3b3692ddbd7f2d778b8c9803aee328091b58fab324e4fad675945585808b4831d7bc3ff4def08e4b7a9de576d26586cec64b6116"
-
           ]
         },
         {
@@ -755,6 +785,63 @@
       "return": {
         "type": "void"
       }
+    },
+    "keccak": {
+      "module": "Hacl_SHA3",
+      "name": "Hacl_Impl_SHA3_keccak",
+      "custom_module_name": true,
+      "args": [{
+          "name": "rate",
+          "kind": "input",
+          "type": "int",
+          "interface_index": 0,
+          "tests": [ ]
+        },
+        {
+          "name": "capacity",
+          "kind": "input",
+          "type": "int",
+          "interface_index": 1,
+          "tests": [ ]
+        },
+        {
+          "name": "input_len",
+          "kind": "input",
+          "type": "int"
+        },
+        {
+          "name": "input",
+          "kind": "input",
+          "type": "buffer",
+          "size": "input_len",
+          "interface_index": 2,
+          "tests": [ ]
+        },
+        {
+          "name": "suffix",
+          "kind": "input",
+          "type": "int",
+          "interface_index": 3,
+          "tests": [ ]
+        },
+        {
+          "name": "output_len",
+          "kind": "input",
+          "type": "int",
+          "interface_index": 4,
+          "tests": []
+        },
+        {
+          "name": "digest",
+          "kind": "output",
+          "type": "buffer",
+          "size": "output_len",
+          "tests": [ ]
+        }
+      ],
+      "return": {
+        "type": "void"
+      }
     }
   },
   "HMAC": {
@@ -801,6 +888,44 @@
             "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
             "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd"
           ]
+        }, {
+          "name": "data_len",
+          "kind": "input",
+          "type": "int"
+        }
+      ],
+      "return": {
+        "type": "void"
+      }
+    },
+    "sha512": {
+      "module": "Hacl_HMAC",
+      "name": "compute_sha2_512",
+      "args": [{
+          "name": "tag",
+          "kind": "output",
+          "type": "buffer",
+          "size": 64,
+          "tests": [ ]
+        },
+        {
+          "name": "key",
+          "kind": "input",
+          "type": "buffer",
+          "size": "key_len",
+          "interface_index": 0,
+          "tests": [ ]
+        }, {
+          "name": "key_len",
+          "kind": "input",
+          "type": "int"
+        }, {
+          "name": "data",
+          "kind": "input",
+          "type": "buffer",
+          "size": "data_len",
+          "interface_index": 1,
+          "tests": [ ]
         }, {
           "name": "data_len",
           "kind": "input",
@@ -925,6 +1050,336 @@
       ],
       "return": {
         "type": "void"
+      }
+    }
+  },
+  "NaCl": {
+    "secretbox_easy": {
+      "module": "Hacl_NaCl",
+      "name": "crypto_secretbox_easy",
+      "args": [
+        {
+          "name": "c",
+          "kind": "output",
+          "type": "buffer",
+          "size": "mlen",
+          "size_offset": 16,
+          "tests": [ ]
+        },
+        {
+          "name": "m",
+          "kind": "input",
+          "type": "buffer",
+          "size": "mlen",
+          "interface_index": 0,
+          "tests": [ ]
+        },
+        {
+          "name": "mlen",
+          "kind": "input",
+          "type": "int"
+        },
+        {
+          "name": "n",
+          "kind": "input",
+          "type": "buffer",
+          "size": 24,
+          "interface_index": 1,
+          "tests": [ ]
+        },
+        {
+          "name": "k",
+          "kind": "input",
+          "type": "buffer",
+          "size": 32,
+          "interface_index": 2,
+          "tests": [ ]
+        }
+      ],
+      "return": {
+        "type": "int",
+        "tests": [ ]
+      }
+    },
+    "secretbox_open_easy": {
+      "module": "Hacl_NaCl",
+      "name": "crypto_secretbox_open_easy",
+      "args": [
+        {
+          "name": "m",
+          "kind": "output",
+          "type": "buffer",
+          "size": "clen",
+          "size_offset": -16,
+          "tests": [ ]
+        },
+        {
+          "name": "c",
+          "kind": "input",
+          "type": "buffer",
+          "size": "clen",
+          "interface_index": 0,
+          "tests": [ ]
+        },
+        {
+          "name": "clen",
+          "kind": "input",
+          "type": "int"
+        },
+        {
+          "name": "n",
+          "kind": "input",
+          "type": "buffer",
+          "size": 24,
+          "interface_index": 1,
+          "tests": [ ]
+        },
+        {
+          "name": "k",
+          "kind": "input",
+          "type": "buffer",
+          "size": 32,
+          "interface_index": 2,
+          "tests": [ ]
+        }
+      ],
+      "return": {
+        "type": "int",
+        "tests": [ ]
+      }
+    },
+    "box_beforenm": {
+      "module": "Hacl_NaCl",
+      "name": "crypto_box_beforenm",
+      "args": [
+        {
+          "name": "k",
+          "kind": "output",
+          "type": "buffer",
+          "size": 32,
+          "tests": [ ]
+        },
+        {
+          "name": "pk",
+          "kind": "input",
+          "type": "buffer",
+          "size": 32,
+          "interface_index": 0,
+          "tests": [ ]
+        },
+        {
+          "name": "sk",
+          "kind": "input",
+          "type": "buffer",
+          "size": 32,
+          "interface_index": 1,
+          "tests": [ ]
+        }
+      ],
+      "return": {
+        "type": "int",
+        "tests": [ ]
+      }
+    },
+    "box_easy_afternm": {
+      "module": "Hacl_NaCl",
+      "name": "crypto_box_easy_afternm",
+      "args": [
+        {
+          "name": "c",
+          "kind": "output",
+          "type": "buffer",
+          "size": "mlen",
+          "size_offset": 16,
+          "tests": [ ]
+        },
+        {
+          "name": "m",
+          "kind": "input",
+          "type": "buffer",
+          "size": "mlen",
+          "interface_index": 0,
+          "tests": [ ]
+        },
+        {
+          "name": "mlen",
+          "kind": "input",
+          "type": "int"
+        },
+        {
+          "name": "n",
+          "kind": "input",
+          "type": "buffer",
+          "size": 24,
+          "interface_index": 1,
+          "tests": [ ]
+        },
+        {
+          "name": "k",
+          "kind": "input",
+          "type": "buffer",
+          "size": 32,
+          "interface_index": 2,
+          "tests": [ ]
+        }
+      ],
+      "return": {
+        "type": "int",
+        "tests": [ ]
+      }
+    },
+    "box_open_easy_afternm": {
+      "module": "Hacl_NaCl",
+      "name": "crypto_box_open_easy_afternm",
+      "args": [
+        {
+          "name": "m",
+          "kind": "output",
+          "type": "buffer",
+          "size": "clen",
+          "size_offset": -16,
+          "tests": [ ]
+        },
+        {
+          "name": "c",
+          "kind": "input",
+          "type": "buffer",
+          "size": "clen",
+          "interface_index": 0,
+          "tests": [ ]
+        },
+        {
+          "name": "clen",
+          "kind": "input",
+          "type": "int"
+        },
+        {
+          "name": "n",
+          "kind": "input",
+          "type": "buffer",
+          "size": 24,
+          "interface_index": 1,
+          "tests": [ ]
+        },
+        {
+          "name": "k",
+          "kind": "input",
+          "type": "buffer",
+          "size": 32,
+          "interface_index": 2,
+          "tests": [ ]
+        }
+      ],
+      "return": {
+        "type": "int",
+        "tests": [ ]
+      }
+    },
+    "box_detached_afternm": {
+      "module": "Hacl_NaCl",
+      "name": "crypto_box_detached_afternm",
+      "args": [
+        {
+          "name": "c",
+          "kind": "output",
+          "type": "buffer",
+          "size": "mlen",
+          "tests": [ ]
+        },
+        {
+          "name": "tag",
+          "kind": "output",
+          "type": "buffer",
+          "size": 16,
+          "tests": [ ]
+        },
+        {
+          "name": "m",
+          "kind": "input",
+          "type": "buffer",
+          "size": "mlen",
+          "interface_index": 0,
+          "tests": [ ]
+        },
+        {
+          "name": "mlen",
+          "kind": "input",
+          "type": "int"
+        },
+        {
+          "name": "n",
+          "kind": "input",
+          "type": "buffer",
+          "size": 24,
+          "interface_index": 1,
+          "tests": [ ]
+        },
+        {
+          "name": "k",
+          "kind": "input",
+          "type": "buffer",
+          "size": 32,
+          "interface_index": 2,
+          "tests": [ ]
+        }
+      ],
+      "return": {
+        "type": "int",
+        "tests": [ ]
+      }
+    },
+    "box_open_detached_afternm": {
+      "module": "Hacl_NaCl",
+      "name": "crypto_box_open_detached_afternm",
+      "args": [
+        {
+          "name": "m",
+          "kind": "output",
+          "type": "buffer",
+          "size": "mlen",
+          "tests": [ ]
+        },
+        {
+          "name": "c",
+          "kind": "input",
+          "type": "buffer",
+          "size": "mlen",
+          "interface_index": 0,
+          "tests": [ ]
+        },
+        {
+          "name": "tag",
+          "kind": "input",
+          "type": "buffer",
+          "size": 16,
+          "interface_index": 1,
+          "tests": [ ]
+        },
+        {
+          "name": "mlen",
+          "kind": "input",
+          "type": "int"
+        },
+        {
+          "name": "n",
+          "kind": "input",
+          "type": "buffer",
+          "size": 24,
+          "interface_index": 2,
+          "tests": [ ]
+        },
+        {
+          "name": "k",
+          "kind": "input",
+          "type": "buffer",
+          "size": 32,
+          "interface_index": 3,
+          "tests": [ ]
+        }
+      ],
+      "return": {
+        "type": "int",
+        "tests": [ ]
       }
     }
   }
