@@ -54,16 +54,9 @@ var passTest = async function(func_sig, func, msg, t) {
   });
   var result = await func.apply(null, args);
   if (func_sig.return.type !== "void") {
-    var result_val;
-    if (func_sig.args.filter(function(arg) {
-        return arg.kind === "output";
-      }).length > 0) {
-      result_val = result[0];
-    } else {
-      result_val = result;
-    }
     var expected_result = postprocessing(func_sig.return.type, func_sig.return.tests[t]);
-    if (result_val === expected_result) {
+    var result_val = postprocessing(func_sig.return.type, result[0]);
+    if (result_val !== expected_result) {
       throw "Wrong return value ! Expecting " + expected_result + ", got " + result_val;
     }
   }
