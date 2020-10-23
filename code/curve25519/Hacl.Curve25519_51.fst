@@ -17,7 +17,7 @@ let point_double =
 let montgomery_ladder =
   generic_montgomery_ladder_higher #M51 True point_double C.cswap2 point_add_and_double
 let fsquare_times = finv_fsquare_times_higher #M51 True C.fsqr
-let finv = finv_finv_higher #M51 True fsquare_times C.fmul
+let finv = finv_finv_higher #M51 True C.fmul fsquare_times
 let encode_point = generic_encode_point_higher #M51 True C.store_felem C.fmul finv
 let scalarmult = generic_scalarmult_higher #M51 True encode_point montgomery_ladder decode_point
 let secret_to_public = generic_secret_to_public_higher #M51 True scalarmult g25519

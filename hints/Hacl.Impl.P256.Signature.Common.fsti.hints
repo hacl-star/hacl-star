@@ -1,5 +1,5 @@
 [
-  "ïÕ,3+y%gÂS7ò\f)ÞÏ",
+  "ÇîQK\u0019vä}S‰ö¥Ef®¡",
   [
     [
       "Hacl.Impl.P256.Signature.Common.bufferToJac",
@@ -30,7 +30,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "65ad455cb631139daca4408ab1b3b900"
+      "40456c735f3fa44e7c7790ee106ef4b9"
     ],
     [
       "Hacl.Impl.P256.Signature.Common.isPointAtInfinityPublic",
@@ -56,7 +56,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "70bea322590973f8fab4488e8a4bacec"
+      "cf6e308310f68f9331bca44c521c440b"
     ],
     [
       "Hacl.Impl.P256.Signature.Common.isPointOnCurvePublic",
@@ -113,7 +113,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "0ab1c45ddae51dd1ce81b9a41780e749"
+      "4c9f416d68823f62e18cb793ac16e411"
     ],
     [
       "Hacl.Impl.P256.Signature.Common.verifyQValidCurvePoint",
@@ -171,7 +171,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "f7d77066cafae0a8d6b10fd3713607c7"
+      "fc1ae616ff8839b39e650d2ae1f166fe"
     ],
     [
       "Hacl.Impl.P256.Signature.Common.verifyQ",
@@ -211,7 +211,33 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "848a77eb63354e9bf657528a9a5e7afb"
+      "271dac5cccd65b9d477b273b4471369d"
+    ],
+    [
+      "Hacl.Impl.P256.Signature.Common.isMoreThanZeroLessThanOrder",
+      1,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.S8",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
+      ],
+      0,
+      "65b40eb53fae04e784d1951a4f2f4365"
     ]
   ]
 ]
