@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __Hacl_Ed25519_H
-#define __Hacl_Ed25519_H
+#ifndef __Hacl_EC_Ed25519_H
+#define __Hacl_EC_Ed25519_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -38,42 +38,44 @@ extern "C" {
 
 
 #include "Hacl_Kremlib.h"
-#include "Hacl_Hash.h"
+#include "Hacl_Ed25519.h"
 #include "Hacl_Curve25519_51.h"
 
-void Hacl_Bignum25519_fdifference(uint64_t *a, uint64_t *b);
+void Hacl_EC_Ed25519_mk_felem_zero(uint64_t *b);
 
-void Hacl_Bignum25519_reduce_513(uint64_t *a);
+void Hacl_EC_Ed25519_mk_felem_one(uint64_t *b);
 
-void Hacl_Bignum25519_inverse(uint64_t *out, uint64_t *a);
+void Hacl_EC_Ed25519_felem_add(uint64_t *a, uint64_t *b, uint64_t *out);
 
-void Hacl_Bignum25519_load_51(uint64_t *output, uint8_t *input);
+void Hacl_EC_Ed25519_felem_sub(uint64_t *a, uint64_t *b, uint64_t *out);
 
-void Hacl_Bignum25519_store_51(uint8_t *output, uint64_t *input);
+void Hacl_EC_Ed25519_felem_mul(uint64_t *a, uint64_t *b, uint64_t *out);
 
-void Hacl_Impl_Ed25519_PointAdd_point_add(uint64_t *out, uint64_t *p, uint64_t *q);
+void Hacl_EC_Ed25519_felem_inv(uint64_t *a, uint64_t *out);
 
-void Hacl_Impl_Ed25519_Ladder_point_mul(uint64_t *result, uint8_t *scalar, uint64_t *q);
+void Hacl_EC_Ed25519_felem_load(uint8_t *b, uint64_t *out);
 
-void Hacl_Impl_Ed25519_PointCompress_point_compress(uint8_t *z, uint64_t *p);
+void Hacl_EC_Ed25519_felem_store(uint64_t *a, uint8_t *out);
 
-bool Hacl_Impl_Ed25519_PointDecompress_point_decompress(uint64_t *out, uint8_t *s);
+void Hacl_EC_Ed25519_mk_point_at_inf(uint64_t *p);
 
-bool Hacl_Impl_Ed25519_PointEqual_point_equal(uint64_t *p, uint64_t *q);
+void Hacl_EC_Ed25519_mk_base_point(uint64_t *p);
 
-void Hacl_Ed25519_sign(uint8_t *signature, uint8_t *priv, uint32_t len, uint8_t *msg);
+void Hacl_EC_Ed25519_point_negate(uint64_t *p, uint64_t *out);
 
-bool Hacl_Ed25519_verify(uint8_t *pub, uint32_t len, uint8_t *msg, uint8_t *signature);
+void Hacl_EC_Ed25519_point_add(uint64_t *p, uint64_t *q, uint64_t *out);
 
-void Hacl_Ed25519_secret_to_public(uint8_t *pub, uint8_t *priv);
+void Hacl_EC_Ed25519_point_mul(uint8_t *scalar, uint64_t *p, uint64_t *out);
 
-void Hacl_Ed25519_expand_keys(uint8_t *ks, uint8_t *priv);
+bool Hacl_EC_Ed25519_point_eq(uint64_t *p, uint64_t *q);
 
-void Hacl_Ed25519_sign_expanded(uint8_t *signature, uint8_t *ks, uint32_t len, uint8_t *msg);
+void Hacl_EC_Ed25519_point_compress(uint64_t *p, uint8_t *out);
+
+bool Hacl_EC_Ed25519_point_decompress(uint8_t *s, uint64_t *out);
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_Ed25519_H_DEFINED
+#define __Hacl_EC_Ed25519_H_DEFINED
 #endif
