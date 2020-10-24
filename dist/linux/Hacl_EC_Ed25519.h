@@ -22,57 +22,59 @@
  */
 
 
-#ifndef __Hacl_Curve25519_51_H
-#define __Hacl_Curve25519_51_H
+#ifndef __Hacl_EC_Ed25519_H
+#define __Hacl_EC_Ed25519_H
 
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
+#include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
-#include <stdbool.h>
+#include "kremlin/internal/target.h"
 
 
 #include "Hacl_Kremlib.h"
+#include "Hacl_Ed25519.h"
+#include "Hacl_Curve25519_51.h"
 
-void Hacl_Impl_Curve25519_Field51_fadd(uint64_t *out, uint64_t *f1, uint64_t *f2);
+void Hacl_EC_Ed25519_mk_felem_zero(u64 *b);
 
-void Hacl_Impl_Curve25519_Field51_fsub(uint64_t *out, uint64_t *f1, uint64_t *f2);
+void Hacl_EC_Ed25519_mk_felem_one(u64 *b);
 
-void
-Hacl_Impl_Curve25519_Field51_fmul(
-  uint64_t *out,
-  uint64_t *f1,
-  uint64_t *f2,
-  FStar_UInt128_uint128 *uu___
-);
+void Hacl_EC_Ed25519_felem_add(u64 *a, u64 *b, u64 *out);
 
-void Hacl_Impl_Curve25519_Field51_fmul1(uint64_t *out, uint64_t *f1, uint64_t f2);
+void Hacl_EC_Ed25519_felem_sub(u64 *a, u64 *b, u64 *out);
 
-void
-Hacl_Impl_Curve25519_Field51_fsqr(uint64_t *out, uint64_t *f, FStar_UInt128_uint128 *uu___);
+void Hacl_EC_Ed25519_felem_mul(u64 *a, u64 *b, u64 *out);
 
-void
-Hacl_Curve25519_51_fsquare_times(
-  uint64_t *o,
-  uint64_t *inp,
-  FStar_UInt128_uint128 *tmp,
-  uint32_t n
-);
+void Hacl_EC_Ed25519_felem_inv(u64 *a, u64 *out);
 
-void Hacl_Curve25519_51_finv(uint64_t *o, uint64_t *i, FStar_UInt128_uint128 *tmp);
+void Hacl_EC_Ed25519_felem_load(u8 *b, u64 *out);
 
-void Hacl_Curve25519_51_scalarmult(uint8_t *out, uint8_t *priv, uint8_t *pub);
+void Hacl_EC_Ed25519_felem_store(u64 *a, u8 *out);
 
-void Hacl_Curve25519_51_secret_to_public(uint8_t *pub, uint8_t *priv);
+void Hacl_EC_Ed25519_mk_point_at_inf(u64 *p);
 
-bool Hacl_Curve25519_51_ecdh(uint8_t *out, uint8_t *priv, uint8_t *pub);
+void Hacl_EC_Ed25519_mk_base_point(u64 *p);
+
+void Hacl_EC_Ed25519_point_negate(u64 *p, u64 *out);
+
+void Hacl_EC_Ed25519_point_add(u64 *p, u64 *q, u64 *out);
+
+void Hacl_EC_Ed25519_point_mul(u8 *scalar, u64 *p, u64 *out);
+
+bool Hacl_EC_Ed25519_point_eq(u64 *p, u64 *q);
+
+void Hacl_EC_Ed25519_point_compress(u64 *p, u8 *out);
+
+bool Hacl_EC_Ed25519_point_decompress(u8 *s, u64 *out);
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_Curve25519_51_H_DEFINED
+#define __Hacl_EC_Ed25519_H_DEFINED
 #endif

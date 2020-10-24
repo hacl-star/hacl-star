@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __Hacl_Curve25519_51_H
-#define __Hacl_Curve25519_51_H
+#ifndef __Hacl_Impl_Hacl_Bignum25519_Hacl_Bignum25519_H
+#define __Hacl_Impl_Hacl_Bignum25519_Hacl_Bignum25519_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -36,43 +36,31 @@ extern "C" {
 
 
 #include "Hacl_Kremlib.h"
+#include "Hacl_Curve25519_51.h"
 
-void Hacl_Impl_Curve25519_Field51_fadd(uint64_t *out, uint64_t *f1, uint64_t *f2);
+void Hacl_Bignum25519_fdifference(uint64_t *a, uint64_t *b);
 
-void Hacl_Impl_Curve25519_Field51_fsub(uint64_t *out, uint64_t *f1, uint64_t *f2);
+void Hacl_Bignum25519_reduce_513(uint64_t *a);
 
-void
-Hacl_Impl_Curve25519_Field51_fmul(
-  uint64_t *out,
-  uint64_t *f1,
-  uint64_t *f2,
-  FStar_UInt128_uint128 *uu___
-);
+void Hacl_Bignum25519_inverse(uint64_t *out, uint64_t *a);
 
-void Hacl_Impl_Curve25519_Field51_fmul1(uint64_t *out, uint64_t *f1, uint64_t f2);
+void Hacl_Bignum25519_load_51(uint64_t *output, uint8_t *input);
 
-void
-Hacl_Impl_Curve25519_Field51_fsqr(uint64_t *out, uint64_t *f, FStar_UInt128_uint128 *uu___);
+void Hacl_Bignum25519_store_51(uint8_t *output, uint64_t *input);
 
-void
-Hacl_Curve25519_51_fsquare_times(
-  uint64_t *o,
-  uint64_t *inp,
-  FStar_UInt128_uint128 *tmp,
-  uint32_t n
-);
+void Hacl_Impl_Ed25519_PointAdd_point_add(uint64_t *out, uint64_t *p, uint64_t *q);
 
-void Hacl_Curve25519_51_finv(uint64_t *o, uint64_t *i, FStar_UInt128_uint128 *tmp);
+void Hacl_Impl_Ed25519_Ladder_point_mul(uint64_t *result, uint8_t *scalar, uint64_t *q);
 
-void Hacl_Curve25519_51_scalarmult(uint8_t *out, uint8_t *priv, uint8_t *pub);
+void Hacl_Impl_Ed25519_PointCompress_point_compress(uint8_t *z, uint64_t *p);
 
-void Hacl_Curve25519_51_secret_to_public(uint8_t *pub, uint8_t *priv);
+bool Hacl_Impl_Ed25519_PointDecompress_point_decompress(uint64_t *out, uint8_t *s);
 
-bool Hacl_Curve25519_51_ecdh(uint8_t *out, uint8_t *priv, uint8_t *pub);
+bool Hacl_Impl_Ed25519_PointEqual_point_equal(uint64_t *p, uint64_t *q);
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_Curve25519_51_H_DEFINED
+#define __Hacl_Impl_Hacl_Bignum25519_Hacl_Bignum25519_H_DEFINED
 #endif
