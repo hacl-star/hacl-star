@@ -1062,8 +1062,7 @@
           "name": "c",
           "kind": "output",
           "type": "buffer",
-          "size": "mlen",
-          "size_offset": 16,
+          "size": "mlen+16",
           "tests": [ ]
         },
         {
@@ -1109,8 +1108,7 @@
           "name": "m",
           "kind": "output",
           "type": "buffer",
-          "size": "clen",
-          "size_offset": -16,
+          "size": "clen-16",
           "tests": [ ]
         },
         {
@@ -1236,8 +1234,7 @@
           "name": "m",
           "kind": "output",
           "type": "buffer",
-          "size": "clen",
-          "size_offset": -16,
+          "size": "clen-16",
           "tests": [ ]
         },
         {

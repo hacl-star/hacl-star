@@ -57,7 +57,9 @@ var validateJSON = function(json) {
       });
       func_obj.args.map(function(arg, i) {
         if (arg.type === "buffer" && typeof arg.size === "string") {
-          if (!length_args_available.includes(arg.size)) {
+          if (!length_args_available.includes(arg.size) &&
+              !length_args_available.includes(arg.size.substring(0, arg.size.indexOf("+"))) &&
+              !length_args_available.includes(arg.size.substring(0, arg.size.indexOf("-")))) {
             throw Error("incorrect 'size' field value (" + arg.size + ")for argument #" + i + " of " + obj_name + " in api.json");
           }
         }
@@ -167,6 +169,28 @@ var HaclWasm = (function() {
     return new Uint8Array(result);
   };
 
+  var parseSizeWithOp = function(arg, op, var_lengths) {
+     if (arg.indexOf(op) >= 0) then
+       var terms = arg.split(op);
+       if (op === "+") {
+         return var_lengths[terms[0]] + parseInt(terms[1]);
+       } else if (op === "-") {
+         return var_lengths[terms[0]] - parseInt(terms[1]);
+       } else {
+         throw Error("Operator " + op + " not valid in `size` parameter, only at most one of {+,-} suppoted.")
+       }
+  };
+
+  var parseSize = function(arg, var_lengths) {
+    if (arg.indexOf("+") >= 0) {
+      return parseSizeWithOp(arg, "+");
+    } else if (arg.indexOf("-") >= 0) {
+      return parseSizeWithOp(arg, "-");
+    } else {
+      return var_lengths[arg];
+    }
+  };
+
   var callWithProto = function(proto, args, loc_name) {
     var expected_args_number = proto.args.filter(function(arg) {
       return arg.interface_index !== undefined;
@@ -196,11 +220,7 @@ var HaclWasm = (function() {
       if (arg.type === "buffer") {
         var size;
         if (typeof arg.size === "string") {
-          if (arg.size_offset !== undefined) {
-            size = var_lengths[arg.size] + arg.size_offset;
-          } else {
-            size = var_lengths[arg.size];
-          }
+          size = parseSize(arg.size, var_lengths);
         } else {
           size = arg.size;
         }
@@ -250,11 +270,7 @@ var HaclWasm = (function() {
       var protoRet = proto.args[pointer.index];
       var size;
       if (typeof protoRet.size === "string") {
-        if (protoRet.size_offset !== undefined) {
-          size = var_lengths[protoRet.size] + protoRet.size_offset;
-        } else {
-          size = var_lengths[protoRet.size];
-        }
+        size = parseSize(protoRet.size, var_lengths);
       } else {
         size = protoRet.size;
       }
