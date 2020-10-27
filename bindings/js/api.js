@@ -131,9 +131,8 @@ var HaclWasm = (function() {
         - 'kind', either `input` or `output` of the function
         - 'type', either 'int' or 'boolean' or 'buffer'
         - 'size', either an integer or a string which is the 'name' of another
-          argument of type 'int'
-        - 'size_offset', an integer, which will be added to 'size' if the latter
-          is a string
+          argument of type 'int'; in the latter case, it can be optionally
+          followed by '+' or '-' and an integer, e.g. "mlen+16"
         - 'interface_index', for all `input` that should appear in JS, position
           inside the argument list of the JS function
         - 'tests', a list of values for this arguments, each value corresponding
@@ -169,7 +168,7 @@ var HaclWasm = (function() {
     return new Uint8Array(result);
   };
 
-  var parseSizeWithOp = function(arg, op, var_lengths) {
+  var evalSizeWithOp = function(arg, op, var_lengths) {
      if (arg.indexOf(op) >= 0) then
        var terms = arg.split(op);
        if (op === "+") {
@@ -177,15 +176,15 @@ var HaclWasm = (function() {
        } else if (op === "-") {
          return var_lengths[terms[0]] - parseInt(terms[1]);
        } else {
-         throw Error("Operator " + op + " not valid in `size` parameter, only at most one of {+,-} suppoted.")
+         throw Error("Operator " + op + " not valid in `size` parameter, only '+' and '-' are supported.")
        }
   };
 
   var parseSize = function(arg, var_lengths) {
     if (arg.indexOf("+") >= 0) {
-      return parseSizeWithOp(arg, "+");
+      return evalSizeWithOp(arg, "+");
     } else if (arg.indexOf("-") >= 0) {
-      return parseSizeWithOp(arg, "-");
+      return evalSizeWithOp(arg, "-");
     } else {
       return var_lengths[arg];
     }
@@ -306,10 +305,9 @@ var HaclWasm = (function() {
         api_obj[key_module] = {};
       }
       api_obj[key_module][key_func] = function(...args) {
-        if (isInitialized === false) {
-           throw 'Nope';
-        };
-        return callWithProto(api_json[key_module][key_func], args);
+        return checkIfInitialized().then(function() {
+          return callWithProto(api_json[key_module][key_func], args);
+        });
       };
     });
   });
