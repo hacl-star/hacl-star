@@ -453,9 +453,14 @@ noextract
 let point_y_as_nat (c: curve) (h: mem) (e: point c) : GTot nat = 
   as_nat c h (gsub e (getCoordinateLenU64 c) (getCoordinateLenU64 c))
 
+
+val getZ: #c: curve -> p: point c -> GTot (felem c)
+
+let getZ #c p = gsub p (size 2 *! getCoordinateLenU64 c) (getCoordinateLenU64 c)
+
 noextract 
 let point_z_as_nat (c: curve) (h: mem) (e: point c) : GTot nat = 
-  as_nat c h (gsub e (size 2 *! getCoordinateLenU64 c) (getCoordinateLenU64 c))
+  as_nat c h (getZ #c e)
 
 
 val felem_eval: c: curve -> h: mem -> f: felem c -> Type0

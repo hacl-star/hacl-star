@@ -253,3 +253,10 @@ let lemma_modular_multiplication_p256 a b =
   assert (a % prime256 == b % prime256);
   FStar.Math.Lemmas.modulo_lemma a prime256;
   FStar.Math.Lemmas.modulo_lemma b prime256
+
+
+val lemma_modular_multiplication: #c: curve -> a: nat {a < getPrime c} -> b: nat {b < getPrime c} -> 
+  Lemma (
+    a == b <==> a * modp_inv2 #c (getPower2 c) % getPrime c == b * modp_inv2 #c (getPower2 c) % getPrime c)
+
+let lemma_modular_multiplication #c a b = admit()
