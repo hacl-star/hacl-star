@@ -38,7 +38,7 @@ let test (v: Bytes.t ecdsa_test) t sign verify =
   let pk = Test_utils.init_bytes 64 in
   assert (Hacl.P256.valid_sk v.sk);
   let _ = Hacl.P256.dh_initiator pk v.sk in
-  assert (Hacl.P256.valid_pk v.pk);
+  assert (Hacl.P256.valid_pk pk);
   if Bytes.compare pk v.pk <> 0 then
     test_result Failure "Key generation";
 
