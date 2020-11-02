@@ -5,8 +5,8 @@ module EverCrypt.Ed25519
 let sign signature secret len msg =
   Hacl.Ed25519.sign signature secret len msg
 
-let verify output len msg signature =
-  Hacl.Ed25519.verify output len msg signature
+let verify pubkey len msg signature =
+  Hacl.Ed25519.verify pubkey len msg signature
 
 let secret_to_public output secret =
   Hacl.Ed25519.secret_to_public output secret
