@@ -190,12 +190,6 @@ let must: _ -> Tac _ = function
 
 let tm_unit = `((()))
 
-val add_check_with : term -> sigelt -> Tac sigelt
-let add_check_with opts se =
-  let attrs = sigelt_attrs se in
-  let t = `(check_with (`#opts)) in
-  set_sigelt_attrs (t :: attrs) se
-
 /// Tactic core
 /// -----------
 

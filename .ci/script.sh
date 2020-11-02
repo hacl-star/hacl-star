@@ -13,6 +13,16 @@ if [[ $OS == "Windows_NT" ]]; then
   fi
 fi
 
+# ARM cross builds are handled a little different
+if [[ $ARM_CROSS_CI == "aarch64-none-linux-gnu" ]]; then
+  pushd dist/gcc-compatible
+  export TOOLCHAIN=$PWD/../../gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu
+  ./configure -target aarch64-none-linux-gnu
+  make -j
+  popd
+  exit 0
+fi
+
 # For OSX... seems like the most reliable way to figure out which OpenSSL is
 # installed? We have both 1.1.1d and 1.1.1f and neither can be installed on the
 # other configuration.

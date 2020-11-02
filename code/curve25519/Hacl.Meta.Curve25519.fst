@@ -20,7 +20,7 @@ let _ = ()
 // Hacl_Meta_Curve25519_finv_fsquare_times_higher
 //   (needs: Hacl_Impl_Curve25519_Fields_Core_fsqr)
 // Hacl_Meta_Curve25519_finv_finv_higher
-//   (needs: Hacl_Impl_Curve25519_Finv_fsquare_times, Hacl_Impl_Curve25519_Fields_Core_fmul)
+//   (needs: Hacl_Impl_Curve25519_Fields_Core_fmul, Hacl_Impl_Curve25519_Finv_fsquare_times)
 // Hacl_Meta_Curve25519_fields_store_felem_higher
 //   (needs: Hacl_Impl_Curve25519_Fields_Core_add1)
 // Hacl_Meta_Curve25519_generic_encode_point_higher
