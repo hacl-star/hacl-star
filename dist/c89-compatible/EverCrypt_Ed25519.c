@@ -29,9 +29,9 @@ void EverCrypt_Ed25519_sign(uint8_t *signature, uint8_t *secret, uint32_t len, u
   Hacl_Ed25519_sign(signature, secret, len, msg);
 }
 
-bool EverCrypt_Ed25519_verify(uint8_t *output, uint32_t len, uint8_t *msg, uint8_t *signature)
+bool EverCrypt_Ed25519_verify(uint8_t *pubkey, uint32_t len, uint8_t *msg, uint8_t *signature)
 {
-  return Hacl_Ed25519_verify(output, len, msg, signature);
+  return Hacl_Ed25519_verify(pubkey, len, msg, signature);
 }
 
 void EverCrypt_Ed25519_secret_to_public(uint8_t *output, uint8_t *secret)

@@ -29,12 +29,12 @@ static void fsum(uint64_t *a, uint64_t *b)
   Hacl_Impl_Curve25519_Field51_fadd(a, a, b);
 }
 
-static void fdifference(uint64_t *a, uint64_t *b)
+void Hacl_Bignum25519_fdifference(uint64_t *a, uint64_t *b)
 {
   Hacl_Impl_Curve25519_Field51_fsub(a, b, a);
 }
 
-static void reduce_513(uint64_t *a)
+void Hacl_Bignum25519_reduce_513(uint64_t *a)
 {
   Hacl_Impl_Curve25519_Field51_fmul1(a, a, (uint64_t)1U);
 }
@@ -112,7 +112,7 @@ static void fsquare_times_inplace(uint64_t *output, uint32_t count)
   Hacl_Curve25519_51_fsquare_times(output, output, tmp, count);
 }
 
-static void inverse(uint64_t *out, uint64_t *a)
+void Hacl_Bignum25519_inverse(uint64_t *out, uint64_t *a)
 {
   FStar_UInt128_uint128 tmp[10U];
   for (uint32_t _i = 0U; _i < (uint32_t)10U; ++_i)
@@ -197,7 +197,7 @@ static void reduce(uint64_t *out)
   out[4U] = a4_;
 }
 
-static void load_51(uint64_t *output, uint8_t *input)
+void Hacl_Bignum25519_load_51(uint64_t *output, uint8_t *input)
 {
   uint64_t u0 = load64_le(input);
   uint64_t i0 = u0;
@@ -233,7 +233,7 @@ static void store_4(uint8_t *output, uint64_t v0, uint64_t v1, uint64_t v2, uint
   store64_le(b3, v3);
 }
 
-static void store_51(uint8_t *output, uint64_t *input)
+void Hacl_Bignum25519_store_51(uint8_t *output, uint64_t *input)
 {
   uint64_t t0 = input[0U];
   uint64_t t1 = input[1U];
@@ -290,7 +290,7 @@ static void store_51(uint8_t *output, uint64_t *input)
   store_4(output, o0, o1, o2, o3);
 }
 
-static void point_add(uint64_t *out, uint64_t *p, uint64_t *q)
+void Hacl_Impl_Ed25519_PointAdd_point_add(uint64_t *out, uint64_t *p, uint64_t *q)
 {
   uint64_t tmp[30U] = { 0U };
   uint64_t *tmp1 = tmp;
@@ -303,8 +303,8 @@ static void point_add(uint64_t *out, uint64_t *p, uint64_t *q)
   uint64_t *y2 = q + (uint32_t)5U;
   memcpy(tmp1, x1, (uint32_t)5U * sizeof (uint64_t));
   memcpy(tmp20, x2, (uint32_t)5U * sizeof (uint64_t));
-  fdifference(tmp1, y1);
-  fdifference(tmp20, y2);
+  Hacl_Bignum25519_fdifference(tmp1, y1);
+  Hacl_Bignum25519_fdifference(tmp20, y2);
   fmul0(tmp30, tmp1, tmp20);
   memcpy(tmp1, y1, (uint32_t)5U * sizeof (uint64_t));
   memcpy(tmp20, y2, (uint32_t)5U * sizeof (uint64_t));
@@ -327,8 +327,8 @@ static void point_add(uint64_t *out, uint64_t *p, uint64_t *q)
   fmul0(tmp50, tmp10, z2);
   memcpy(tmp10, tmp3, (uint32_t)5U * sizeof (uint64_t));
   memcpy(tmp60, tmp2, (uint32_t)5U * sizeof (uint64_t));
-  fdifference(tmp10, tmp41);
-  fdifference(tmp60, tmp50);
+  Hacl_Bignum25519_fdifference(tmp10, tmp41);
+  Hacl_Bignum25519_fdifference(tmp60, tmp50);
   fsum(tmp50, tmp2);
   fsum(tmp41, tmp3);
   uint64_t *tmp11 = tmp;
@@ -381,11 +381,11 @@ static void point_double(uint64_t *out, uint64_t *p)
   fsum(tmp51, y1);
   fsquare(tmp61, tmp51);
   memcpy(tmp51, tmp31, (uint32_t)5U * sizeof (uint64_t));
-  reduce_513(tmp51);
-  fdifference(tmp61, tmp51);
-  fdifference(tmp21, tmp110);
-  reduce_513(tmp21);
-  reduce_513(tmp41);
+  Hacl_Bignum25519_reduce_513(tmp51);
+  Hacl_Bignum25519_fdifference(tmp61, tmp51);
+  Hacl_Bignum25519_fdifference(tmp21, tmp110);
+  Hacl_Bignum25519_reduce_513(tmp21);
+  Hacl_Bignum25519_reduce_513(tmp41);
   fsum(tmp41, tmp21);
   fmul0(x3, tmp4, tmp6);
   fmul0(y3, tmp2, tmp3);
@@ -466,7 +466,7 @@ static void swap_conditional_inplace(uint64_t *a, uint64_t *b, uint64_t iswap)
     swap);
 }
 
-static void point_mul(uint64_t *result, uint8_t *scalar, uint64_t *q)
+void Hacl_Impl_Ed25519_Ladder_point_mul(uint64_t *result, uint8_t *scalar, uint64_t *q)
 {
   uint64_t b[80U] = { 0U };
   uint64_t *nq = b;
@@ -508,7 +508,7 @@ static void point_mul(uint64_t *result, uint8_t *scalar, uint64_t *q)
     uint8_t i1 = kq >> r & (uint8_t)1U;
     swap_conditional_inplace(nq1, nqpq1, (uint64_t)i1);
     point_double(nq2, nq1);
-    point_add(nqpq2, nq1, nqpq1);
+    Hacl_Impl_Ed25519_PointAdd_point_add(nqpq2, nq1, nqpq1);
     swap_conditional(nq1, nqpq1, nq2, nqpq2, (uint64_t)i1);
   }
   memcpy(result, nq, (uint32_t)20U * sizeof (uint64_t));
@@ -541,10 +541,10 @@ static void point_mul_g(uint64_t *result, uint8_t *scalar)
   gt[2U] = (uint64_t)0x0002af8df483c27eU;
   gt[3U] = (uint64_t)0x000332b375274732U;
   gt[4U] = (uint64_t)0x00067875f0fd78b7U;
-  point_mul(result, scalar, g);
+  Hacl_Impl_Ed25519_Ladder_point_mul(result, scalar, g);
 }
 
-static void point_compress(uint8_t *z, uint64_t *p)
+void Hacl_Impl_Ed25519_PointCompress_point_compress(uint8_t *z, uint64_t *p)
 {
   uint64_t tmp[15U] = { 0U };
   uint64_t *x = tmp + (uint32_t)5U;
@@ -555,14 +555,14 @@ static void point_compress(uint8_t *z, uint64_t *p)
   uint64_t *px = p;
   uint64_t *py = p + (uint32_t)5U;
   uint64_t *pz = p + (uint32_t)10U;
-  inverse(zinv1, pz);
+  Hacl_Bignum25519_inverse(zinv1, pz);
   fmul0(x1, px, zinv1);
   reduce(x1);
   fmul0(out1, py, zinv1);
-  reduce_513(out1);
+  Hacl_Bignum25519_reduce_513(out1);
   uint64_t x0 = x[0U];
   uint64_t b = x0 & (uint64_t)1U;
-  store_51(z, out);
+  Hacl_Bignum25519_store_51(z, out);
   uint8_t xbyte = (uint8_t)b;
   uint8_t o31 = z[31U];
   z[31U] = o31 + (xbyte << (uint32_t)7U);
@@ -585,7 +585,7 @@ static void secret_to_public(uint8_t *out, uint8_t *secret)
   secret_expand(expanded_secret, secret);
   uint8_t *a = expanded_secret;
   point_mul_g(res, a);
-  point_compress(out, res);
+  Hacl_Impl_Ed25519_PointCompress_point_compress(out, res);
 }
 
 static void barrett_reduction(uint64_t *z, uint64_t *t)
@@ -1644,7 +1644,7 @@ static void point_mul_g_compress(uint8_t *out, uint8_t *s)
 {
   uint64_t tmp[20U] = { 0U };
   point_mul_g(tmp, s);
-  point_compress(out, tmp);
+  Hacl_Impl_Ed25519_PointCompress_point_compress(out, tmp);
 }
 
 static void sign_step_1(uint8_t *secret, uint8_t *tmp_bytes)
@@ -1796,9 +1796,9 @@ static bool recover_x(uint64_t *x, uint64_t *y, uint64_t sign)
     fsquare(y2, y);
     times_d(dyy, y2);
     fsum(dyy, one);
-    reduce_513(dyy);
-    inverse(dyyi, dyy);
-    fdifference(one, y2);
+    Hacl_Bignum25519_reduce_513(dyy);
+    Hacl_Bignum25519_inverse(dyyi, dyy);
+    Hacl_Bignum25519_fdifference(one, y2);
     fmul0(x2, one, dyyi);
     reduce(x2);
     bool x2_is_0 = is_0(x2);
@@ -1840,8 +1840,8 @@ static bool recover_x(uint64_t *x, uint64_t *y, uint64_t sign)
       pow2_252m2(x31, x210);
       fsquare(t00, x31);
       memcpy(t10, x210, (uint32_t)5U * sizeof (uint64_t));
-      fdifference(t10, t00);
-      reduce_513(t10);
+      Hacl_Bignum25519_fdifference(t10, t00);
+      Hacl_Bignum25519_reduce_513(t10);
       reduce(t10);
       bool t1_is_0 = is_0(t10);
       if (!t1_is_0)
@@ -1854,8 +1854,8 @@ static bool recover_x(uint64_t *x, uint64_t *y, uint64_t sign)
       uint64_t *t1 = tmp + (uint32_t)15U;
       fsquare(t01, x3);
       memcpy(t1, x211, (uint32_t)5U * sizeof (uint64_t));
-      fdifference(t1, t01);
-      reduce_513(t1);
+      Hacl_Bignum25519_fdifference(t1, t01);
+      Hacl_Bignum25519_reduce_513(t1);
       reduce(t1);
       bool z1 = is_0(t1);
       if (z1 == false)
@@ -1876,8 +1876,8 @@ static bool recover_x(uint64_t *x, uint64_t *y, uint64_t sign)
           t0[2U] = (uint64_t)0U;
           t0[3U] = (uint64_t)0U;
           t0[4U] = (uint64_t)0U;
-          fdifference(x32, t0);
-          reduce_513(x32);
+          Hacl_Bignum25519_fdifference(x32, t0);
+          Hacl_Bignum25519_reduce_513(x32);
           reduce(x32);
         }
         memcpy(x, x32, (uint32_t)5U * sizeof (uint64_t));
@@ -1889,7 +1889,7 @@ static bool recover_x(uint64_t *x, uint64_t *y, uint64_t sign)
   return res0;
 }
 
-static bool point_decompress(uint64_t *out, uint8_t *s)
+bool Hacl_Impl_Ed25519_PointDecompress_point_decompress(uint64_t *out, uint8_t *s)
 {
   uint64_t tmp[10U] = { 0U };
   uint64_t *y = tmp;
@@ -1897,7 +1897,7 @@ static bool point_decompress(uint64_t *out, uint8_t *s)
   uint8_t s31 = s[31U];
   uint8_t z = s31 >> (uint32_t)7U;
   uint64_t sign = (uint64_t)z;
-  load_51(y, s);
+  Hacl_Bignum25519_load_51(y, s);
   bool z0 = recover_x(x, y, sign);
   bool res;
   if (z0 == false)
@@ -2003,7 +2003,7 @@ static bool point_equal_2(uint64_t *p, uint64_t *q, uint64_t *tmp)
   return eq(pyqz, qypz);
 }
 
-static bool point_equal(uint64_t *p, uint64_t *q)
+bool Hacl_Impl_Ed25519_PointEqual_point_equal(uint64_t *p, uint64_t *q)
 {
   uint64_t tmp[20U] = { 0U };
   bool b = point_equal_1(p, q, tmp);
@@ -2035,12 +2035,12 @@ bool Hacl_Ed25519_verify(uint8_t *pub, uint32_t len, uint8_t *msg, uint8_t *sign
   uint8_t tmp_[32U] = { 0U };
   uint64_t *a_ = tmp;
   uint64_t *r_ = tmp + (uint32_t)20U;
-  bool b = point_decompress(a_, pub);
+  bool b = Hacl_Impl_Ed25519_PointDecompress_point_decompress(a_, pub);
   bool res;
   if (b)
   {
     uint8_t *rs = signature;
-    bool b_ = point_decompress(r_, rs);
+    bool b_ = Hacl_Impl_Ed25519_PointDecompress_point_decompress(r_, rs);
     if (b_)
     {
       uint8_t *rs1 = signature;
@@ -2064,9 +2064,9 @@ bool Hacl_Ed25519_verify(uint8_t *pub, uint32_t len, uint8_t *msg, uint8_t *sign
         uint64_t *rhA = tmp1 + (uint32_t)20U;
         uint64_t *sB = tmp1 + (uint32_t)40U;
         point_mul_g(sB, uu____0);
-        point_mul(hA, tmp_, a_1);
-        point_add(rhA, r_1, hA);
-        bool b1 = point_equal(sB, rhA);
+        Hacl_Impl_Ed25519_Ladder_point_mul(hA, tmp_, a_1);
+        Hacl_Impl_Ed25519_PointAdd_point_add(rhA, r_1, hA);
+        bool b1 = Hacl_Impl_Ed25519_PointEqual_point_equal(sB, rhA);
         bool b10 = b1;
         res = b10;
       }
