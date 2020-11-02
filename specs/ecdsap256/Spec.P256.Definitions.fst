@@ -11,14 +11,14 @@ open Lib.Buffer
 open FStar.Mul
 
 
-noextract
+
 let prime256: (a: pos {a > 3 && a < pow2 256}) =
   assert_norm (pow2 256 - pow2 224 + pow2 192 + pow2 96 -1 > 3);
   assert_norm (pow2 256 - pow2 224 + pow2 192 + pow2 96 -1 < pow2 256);
   pow2 256 - pow2 224 + pow2 192 + pow2 96 -1
 
 
-inline_for_extraction noextract
+inline_for_extraction 
 let p256_prime_list : x:list uint64{List.Tot.length x == 4 /\ 
   (
     let open FStar.Mul in 
@@ -35,18 +35,18 @@ let p256_prime_list : x:list uint64{List.Tot.length x == 4 /\
     assert_norm(0xffffffffffffffff + 0xffffffff * pow2 64 + 0xffffffff00000001 * pow2 192 == prime256);
   x
 
-inline_for_extraction noextract
+inline_for_extraction 
 let felem4 = tuple4 uint64 uint64 uint64 uint64
-inline_for_extraction noextract
+inline_for_extraction 
 let felem8 = tuple8 uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64
-inline_for_extraction noextract
+inline_for_extraction 
 let felem8_32 = tuple8 uint32 uint32 uint32 uint32 uint32 uint32 uint32 uint32
-inline_for_extraction noextract
+inline_for_extraction 
 let felem9 = tuple9 uint64 uint64 uint64  uint64 uint64 uint64 uint64 uint64 uint64
 
 
 
-noextract
+
 val as_nat4: f:felem4 -> GTot nat
 let as_nat4 f =
   let (s0, s1, s2, s3) = f in
@@ -54,7 +54,7 @@ let as_nat4 f =
   v s3 * pow2 64 * pow2 64 * pow2 64
 
 
-noextract
+
 val wide_as_nat4: f:felem8 -> GTot nat
 let wide_as_nat4 f =
   let (s0, s1, s2, s3, s4, s5, s6, s7) = f in
@@ -66,17 +66,17 @@ let wide_as_nat4 f =
   v s7 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64
 
 
-noextract
+
 let point_nat = tuple3 nat nat nat
 
-noextract
+
 let point_nat_prime = (p: point_nat {let (a, b, c) = p in a < prime256 /\ b < prime256 /\ c < prime256})
 
 
-noextract
+
 let point_seq = Lib.Sequence.lseq uint64 12 
 
-noextract
+
 let felem_seq = lseq uint64 4
 
 inline_for_extraction
@@ -84,7 +84,7 @@ let felem = lbuffer uint64 (size 4)
 inline_for_extraction 
 let widefelem = lbuffer uint64 (size 8)
 
-noextract
+
 let as_nat (h:mem) (e:felem) : GTot nat =
   let s = as_seq h e in
   let s0 = s.[0] in
@@ -93,7 +93,7 @@ let as_nat (h:mem) (e:felem) : GTot nat =
   let s3 = s.[3] in
   as_nat4 (s0, s1, s2, s3)
 
-noextract
+
 let as_nat_il (h:mem) (e:glbuffer uint64 (size 4)) : GTot nat =
   let s = as_seq h e in
   let s0 = s.[0] in
@@ -103,7 +103,7 @@ let as_nat_il (h:mem) (e:glbuffer uint64 (size 4)) : GTot nat =
   as_nat4 (s0, s1, s2, s3)
 
 
-noextract
+
 let wide_as_nat (h:mem) (e:widefelem) : GTot nat =
   let s = as_seq h e in
   let s0 = s.[0] in
@@ -118,7 +118,7 @@ let wide_as_nat (h:mem) (e:widefelem) : GTot nat =
 
 
 
-noextract
+
 let felem_seq_as_nat (a: felem_seq) : Tot nat  = 
   let open FStar.Mul in 
   let a0 = Lib.Sequence.index a 0 in 
@@ -128,7 +128,7 @@ let felem_seq_as_nat (a: felem_seq) : Tot nat  =
   uint_v a0 + uint_v a1 * pow2 64 + uint_v a2 * pow2 64 * pow2 64 + uint_v a3 * pow2 64 * pow2 64 * pow2 64
 
 
-noextract
+
 let felem_seq_as_nat_8 (a: lseq uint64 8) : Tot nat = 
   let open FStar.Mul in 
   let a0 = Lib.Sequence.index a 0 in 
@@ -152,9 +152,9 @@ let felem_seq_as_nat_8 (a: lseq uint64 8) : Tot nat =
 
 open FStar.Mul
 
-noextract
+
 let felem_seq_prime = a: felem_seq {felem_seq_as_nat a < prime256}
-noextract
+
 let point_prime =  p: point_seq{let x = Lib.Sequence.sub p 0 4 in let y = Lib.Sequence.sub p 4 4 in let z = Lib.Sequence.sub p 8 4 in 
   felem_seq_as_nat x < prime256 /\ felem_seq_as_nat y < prime256 /\ felem_seq_as_nat z < prime256} 
 

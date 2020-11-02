@@ -53,7 +53,7 @@ let compute_w_post_intro
 = Classical.forall_intro (Classical.move_requires f)
 
 inline_for_extraction
-noextract
+
 let compute_w_n'
   (mi: Seq.lseq (word SHA1) block_word_length)
   (n: nat { n <= 79 } )
@@ -67,7 +67,7 @@ let compute_w_n'
   r
 
 inline_for_extraction
-noextract
+
 let compute_w_n
   (mi: Seq.lseq (word SHA1) block_word_length)
   (n: nat { n <= 79 } )
@@ -80,7 +80,7 @@ let compute_w_n
   compute_w_n' mi n w
 
 inline_for_extraction
-noextract
+
 let compute_w_next
   (mi: Seq.lseq (word SHA1) block_word_length)
   (n: nat { n <= 79 } )

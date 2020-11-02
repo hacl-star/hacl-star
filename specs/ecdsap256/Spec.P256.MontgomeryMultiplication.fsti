@@ -12,10 +12,10 @@ open Lib.Sequence
 
 #set-options "--z3rlimit 40 --fuel 0 --ifuel 0"
 
-noextract
+
 val fromDomain_: a: int -> Tot (a: nat {a < prime256})
 
-noextract
+
 val fromDomainPoint: a: tuple3 nat nat nat -> Tot (r: tuple3 nat nat nat 
   {
     let x, y, z = a in
@@ -25,7 +25,7 @@ val fromDomainPoint: a: tuple3 nat nat nat -> Tot (r: tuple3 nat nat nat
   }
 )
 
-noextract
+
 val toDomain_: a: int -> Tot nat
 
 val lemmaFromDomain: a: int -> Lemma (fromDomain_ (a) == a * modp_inv2 (pow2 256) % prime256)
