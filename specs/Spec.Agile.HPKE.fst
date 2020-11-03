@@ -277,7 +277,8 @@ let auth_decap cs enc skR pkS =
 
 let default_psk (cs:ciphersuite):psk_s cs  = create (size_kdf cs) (u8 0)
 //let default_psk (cs:ciphersuite):psk_s cs  = lbytes_empty // TODO change as soon as test vectors have been updated
-let default_pskID (cs:ciphersuite):pskID_s cs = lbytes_empty
+//let default_pskID (cs:ciphersuite):pskID_s cs = lbytes_empty
+let default_pskID (cs:ciphersuite):pskID_s cs = create (size_kdf cs) (u8 0)
 
 
 /// def VerifyPSKInputs(mode, psk, pskID):
@@ -314,32 +315,42 @@ let lbytes_equal (#l1:nat) (#l2:size_nat) (b1:bytes{Seq.length b1 = l1}) (b2:lby
   if not (Seq.length b1 = Seq.length b2) then false else
   lbytes_eq #l2 b1 b2
 
-// TODO use heterogenous equality
-// TODO replace got_psk and got_pskID by match on an option type?
-let verify_psk_inputs (cs:ciphersuite) (m:mode) (psk:psk_s cs) (pskID:pskID_s cs) : bool =
-  let got_psk = not (lbytes_equal #(Seq.length psk) #(size_kdf cs) psk (default_psk cs)) in
-  let got_pskID = not (lbytes_equal #(Seq.length pskID) #0 pskID (default_pskID cs)) in
-  if not (got_psk = got_pskID) then false else // Inconsistent PSK inputs
-  match (m, got_psk) with
-  | (Base, true) -> false     // PSK input provided when not needed
-  | (Auth, true) -> false     // PSK input provided when not needed
-  | (PSK, false) -> false     // Missing required PSK input
-  | (AuthPSK, false) -> false // Missing required PSK input
-  | _ -> true
+(* // TODO use heterogenous equality *)
+(* // TODO replace got_psk and got_pskID by match on an option type? *)
+(* let verify_psk_inputs (cs:ciphersuite) (m:mode) (psk:psk_s cs) (pskID:pskID_s cs) : bool = *)
+(*   let got_psk = not (lbytes_equal #(Seq.length psk) #(size_kdf cs) psk (default_psk cs)) in *)
+(*   let got_pskID = not (lbytes_equal #(Seq.length pskID) #0 pskID (default_pskID cs)) in *)
+(*   if not (got_psk = got_pskID) then false else // Inconsistent PSK inputs *)
+(*   match (m, got_psk) with *)
+(*   | (Base, true) -> false     // PSK input provided when not needed *)
+(*   | (Auth, true) -> false     // PSK input provided when not needed *)
+(*   | (PSK, false) -> false     // Missing required PSK input *)
+(*   | (AuthPSK, false) -> false // Missing required PSK input *)
+(*   | _ -> true *)
 
+let verify_psk_inputs (cs:ciphersuite) (m:mode) (opsk:option(psk_s cs & pskID_s cs)) : bool =
+  match (m, opsk) with
+  | Base, None -> true
+  | PSK, Some _ -> true
+  | Auth, None -> true
+  | AuthPSK, Some _ -> true
+  | _, _ -> false
 
 val key_schedule:
     cs:ciphersuite
   -> m:mode
   -> zz:key_kem_s cs
   -> info:info_s cs
-  -> psk:psk_s cs
-  -> pskID:pskID_s cs ->
+  -> opsk:option (psk_s cs & pskID_s cs) ->
   Pure (encryption_context cs)
-    (requires verify_psk_inputs cs m psk pskID)
+    (requires verify_psk_inputs cs m opsk)
     (ensures fun _ -> True)
 
-let key_schedule cs m zz info psk pskID =
+let key_schedule cs m zz info opsk =
+  let (psk, pskID) =
+    match opsk with
+    | None -> (default_psk cs, default_pskID cs)
+    | Some (psk, pskID) -> (psk, pskID) in
   let pskID_hash = labeled_extract (hash_of_cs cs) lbytes_empty label_pskID_hash pskID in
   let info_hash = labeled_extract (hash_of_cs cs) lbytes_empty label_info_hash info in
   let context = build_context cs m pskID_hash info_hash in
@@ -411,7 +422,7 @@ let setupBaseS cs skE pkR info =
   match encap cs skE pkR with
   | None -> None
   | Some (zz, enc) ->
-    let enc_ctx = key_schedule cs Base zz info (default_psk cs) (default_pskID cs) in
+    let enc_ctx = key_schedule cs Base zz info None in
     Some (enc, enc_ctx)
 
 
@@ -424,7 +435,7 @@ let setupBaseR cs enc skR info =
   let zz = decap cs enc skR in
   match pkR, zz with
   | Some pkR, Some zz ->
-    Some (key_schedule cs Base zz info (default_psk cs) (default_pskID cs))
+    Some (key_schedule cs Base zz info None)
   | _ -> None
 
 let sealBase cs skE pkR info aad pt =
@@ -443,43 +454,124 @@ let openBase cs enc skR info aad ct =
     | None -> None
     | Some (ctx, pt) -> Some pt
 
-// /// def SetupPSKS(pkR, info, psk, pskID):
-// ///   zz, enc = Encap(pkR)
-// ///   return enc, KeySchedule(mode_psk, zz, info, psk, pskID)
+/// def SetupPSKS(pkR, info, psk, pskID):
+///   zz, enc = Encap(pkR)
+///   return enc, KeySchedule(mode_psk, zz, info, psk, pskID)
 
-// let setupPSKS cs skE pkR info psk pskID =
-//   match encap cs skE pkR with
-//   | None -> None
-//   | Some (zz, enc) ->
-//     assert (verify_psk_inputs cs PSK psk pskID);
-//     let enc_ctx = key_schedule cs PSK zz info psk pskID in
-//     Some (enc, enc_ctx)
+let setupPSKS cs skE pkR info psk pskID =
+  match encap cs skE pkR with
+  | None -> None
+  | Some (zz, enc) ->
+    assert (verify_psk_inputs cs PSK (Some (psk, pskID)));
+    let enc_ctx = key_schedule cs PSK zz info (Some (psk, pskID)) in
+    Some (enc, enc_ctx)
 
 
-// /// def SetupPSKR(enc, skR, info, psk, pskID):
-// ///   zz = Decap(enc, skR)
-// ///   return KeySchedule(mode_psk, zz, info, psk, pskID)
+/// def SetupPSKR(enc, skR, info, psk, pskID):
+///   zz = Decap(enc, skR)
+///   return KeySchedule(mode_psk, zz, info, psk, pskID)
 
-// let setupPSKR cs enc skR info psk pskID =
-//   let pkR = DH.secret_to_public (curve_of_cs cs) skR in
-//   let zz = decap cs enc skR in
-//   match pkR, zz with
-//   | Some pkR, Some zz ->
-//     Some (key_schedule cs PSK zz info psk pskID)
-//   | _ -> None
+let setupPSKR cs enc skR info psk pskID =
+  let pkR = DH.secret_to_public (curve_of_cs cs) skR in
+  let zz = decap cs enc skR in
+  match pkR, zz with
+  | Some pkR, Some zz ->
+    Some (key_schedule cs PSK zz info (Some (psk, pskID)))
+  | _ -> None
 
-// let sealPSK cs skE pkR info aad pt psk pskID =
-//   match setupPSKS cs skE pkR info psk pskID with
-//   | None -> None
-//   | Some (enc, ctx) ->
-//     match context_seal cs ctx aad pt with
-//     | None -> None
-//     | Some (ctx, ct) -> Some (enc, ct)
+let sealPSK cs skE pkR info aad pt psk pskID =
+  match setupPSKS cs skE pkR info psk pskID with
+  | None -> None
+  | Some (enc, ctx) ->
+    match context_seal cs ctx aad pt with
+    | None -> None
+    | Some (ctx, ct) -> Some (enc, ct)
 
-// let openPSK cs enc skR info aad ct psk pskID =
-//   match setupBaseR cs enc skR info psk pskID with
-//   | None -> None
-//   | Some ctx ->
-//     match context_open cs ctx aad ct with
-//     | None -> None
-//     | Some (ctx, pt) -> Some pt
+let openPSK cs enc skR info aad ct psk pskID =
+  match setupPSKR cs enc skR info psk pskID with
+  | None -> None
+  | Some ctx ->
+    match context_open cs ctx aad ct with
+    | None -> None
+    | Some (ctx, pt) -> Some pt
+
+/// def SetupAuthS(pkR, info, skS):
+///   zz, enc = AuthEncap(pkR, skS)
+///   return enc, KeySchedule(mode_auth, zz, info, default_psk, default_pskID)
+
+let setupAuthS cs skE pkR info skS =
+  match auth_encap cs skE pkR skS with
+  | None -> None
+  | Some (zz, enc) ->
+    let enc_ctx = key_schedule cs Auth zz info None in
+    Some (enc, enc_ctx)
+
+
+/// def SetupAuthR(enc, skR, info, pkS):
+///   zz = AuthDecap(enc, skR, pkS)
+///   return KeySchedule(mode_auth, zz, info, default_psk, default_pskID)
+
+let setupAuthR cs enc skR info pkS =
+  let pkR = DH.secret_to_public (curve_of_cs cs) skR in
+  let zz = auth_decap cs enc skR pkS in
+  match pkR, zz with
+  | Some pkR, Some zz ->
+    Some (key_schedule cs Auth zz info None)
+  | _ -> None
+
+let sealAuth cs skE pkR info aad pt skS =
+  match setupAuthS cs skE pkR info skS with
+  | None -> None
+  | Some (enc, ctx) ->
+    match context_seal cs ctx aad pt with
+    | None -> None
+    | Some (ctx, ct) -> Some (enc, ct)
+
+let openAuth cs enc skR info aad ct pkS =
+  match setupAuthR cs enc skR info pkS with
+  | None -> None
+  | Some ctx ->
+    match context_open cs ctx aad ct with
+    | None -> None
+    | Some (ctx, pt) -> Some pt
+
+/// def SetupAuthPSKS(pkR, info, psk, pskID, skS):
+///   zz, enc = AuthEncap(pkR, skS)
+///   return enc, KeySchedule(mode_auth_psk, zz, info, psk, pskID)
+
+let setupAuthPSKS cs skE pkR info psk pskID skS =
+  match auth_encap cs skE pkR skS with
+  | None -> None
+  | Some (zz, enc) ->
+    let enc_ctx = key_schedule cs AuthPSK zz info (Some (psk, pskID)) in
+    Some (enc, enc_ctx)
+
+
+/// def SetupAuthPSKR(enc, skR, info, psk, pskID, pkS):
+///   zz = AuthDecap(enc, skR, pkS)
+///   return KeySchedule(mode_auth_psk, zz, info, psk, pskID)
+
+let setupAuthPSKR cs enc skR info psk pskID pkS =
+  let pkR = DH.secret_to_public (curve_of_cs cs) skR in
+  let zz = auth_decap cs enc skR pkS in
+  match pkR, zz with
+  | Some pkR, Some zz ->
+    Some (key_schedule cs AuthPSK zz info (Some (psk, pskID)))
+  | _ -> None
+
+let sealAuthPSK cs skE pkR info aad pt psk pskID skS =
+  match setupAuthPSKS cs skE pkR info psk pskID skS with
+  | None -> None
+  | Some (enc, ctx) ->
+    match context_seal cs ctx aad pt with
+    | None -> None
+    | Some (ctx, ct) -> Some (enc, ct)
+
+let openAuthPSK cs enc skR info aad ct psk pskID pkS =
+  match setupAuthPSKR cs enc skR info psk pskID pkS with
+  | None -> None
+  | Some ctx ->
+    match context_open cs ctx aad ct with
+    | None -> None
+    | Some (ctx, pt) -> Some pt
+

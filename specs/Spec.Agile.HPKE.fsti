@@ -297,8 +297,8 @@ type exporter_secret_s (cs:ciphersuite) = lbytes (size_kdf cs)
 (* type pskID_s (cs:ciphersuite) = b:bytes{labeled_extract_ikm_length_pred (hash_of_cs cs) (size_label_pskID_hash + Seq.length b)} *)
 (* type info_s (cs:ciphersuite) = b:bytes{labeled_extract_ikm_length_pred (hash_of_cs cs) (size_label_info_hash + Seq.length b)} *)
 (* type exp_ctx_s (cs:ciphersuite) = b:bytes{labeled_expand_info_length_pred (hash_of_cs cs) (size_label_sec + Seq.length b)} *)
-type psk_s (cs:ciphersuite) =     b:bytes{Seq.length b <= max_length_psk (hash_of_cs cs)}
-type pskID_s (cs:ciphersuite) =   b:bytes{Seq.length b <= max_length_pskID (hash_of_cs cs)}
+type psk_s (cs:ciphersuite) =     b:bytes{Seq.length b >= 1 /\ Seq.length b <= max_length_psk (hash_of_cs cs)}
+type pskID_s (cs:ciphersuite) =   b:bytes{Seq.length b >= 1 /\ Seq.length b <= max_length_pskID (hash_of_cs cs)}
 type info_s (cs:ciphersuite) =    b:bytes{Seq.length b <= max_length_info (hash_of_cs cs)}
 type exp_ctx_s (cs:ciphersuite) = b:bytes{Seq.length b <= max_length_exp_ctx (hash_of_cs cs)}
 // TODO can we use lbytes here?
@@ -389,123 +389,123 @@ val openBase:
   -> ct:AEAD.cipher (aead_of_cs cs) ->
   Tot (option (AEAD.decrypted #(aead_of_cs cs) ct))
 
-(* val setupPSKS: *)
-(*     cs:ciphersuite *)
-(*   -> skE:key_dh_secret_s cs *)
-(*   -> pkR:DH.serialized_point (curve_of_cs cs) *)
-(*   -> info:info_s cs *)
-(*   -> psk:psk_s cs *)
-(*   -> pskID:pskID_s cs -> *)
-(*   Tot (option (key_dh_public_s cs & encryption_context cs)) *)
+val setupPSKS:
+    cs:ciphersuite
+  -> skE:key_dh_secret_s cs
+  -> pkR:DH.serialized_point (curve_of_cs cs)
+  -> info:info_s cs
+  -> psk:psk_s cs
+  -> pskID:pskID_s cs ->
+  Tot (option (key_dh_public_s cs & encryption_context cs))
 
-(* val setupPSKR: *)
-(*     cs:ciphersuite *)
-(*   -> enc:key_dh_public_s cs *)
-(*   -> skR:key_dh_secret_s cs *)
-(*   -> info:info_s cs *)
-(*   -> psk:psk_s cs *)
-(*   -> pskID:pskID_s cs -> *)
-(*   Tot (option (encryption_context cs)) *)
+val setupPSKR:
+    cs:ciphersuite
+  -> enc:key_dh_public_s cs
+  -> skR:key_dh_secret_s cs
+  -> info:info_s cs
+  -> psk:psk_s cs
+  -> pskID:pskID_s cs ->
+  Tot (option (encryption_context cs))
 
-(* val sealPSK: *)
-(*     cs:ciphersuite *)
-(*   -> skE:key_dh_secret_s cs *)
-(*   -> pkR:DH.serialized_point (curve_of_cs cs) *)
-(*   -> info:info_s cs *)
-(*   -> aad:AEAD.ad (aead_of_cs cs) *)
-(*   -> pt:AEAD.plain (aead_of_cs cs) *)
-(*   -> psk:psk_s cs *)
-(*   -> pskID:pskID_s cs -> *)
-(*   Tot (option (key_dh_public_s cs & AEAD.encrypted #(aead_of_cs cs) pt)) *)
+val sealPSK:
+    cs:ciphersuite
+  -> skE:key_dh_secret_s cs
+  -> pkR:DH.serialized_point (curve_of_cs cs)
+  -> info:info_s cs
+  -> aad:AEAD.ad (aead_of_cs cs)
+  -> pt:AEAD.plain (aead_of_cs cs)
+  -> psk:psk_s cs
+  -> pskID:pskID_s cs ->
+  Tot (option (key_dh_public_s cs & AEAD.encrypted #(aead_of_cs cs) pt))
 
-(* val openPSK: *)
-(*     cs:ciphersuite *)
-(*   -> enc:key_dh_public_s cs *)
-(*   -> skR:key_dh_secret_s cs *)
-(*   -> info:info_s cs *)
-(*   -> aad:AEAD.ad (aead_of_cs cs) *)
-(*   -> ct:AEAD.cipher (aead_of_cs cs) *)
-(*   -> psk:psk_s cs *)
-(*   -> pskID:pskID_s cs -> *)
-(*   Tot (option (AEAD.decrypted #(aead_of_cs cs) ct)) *)
+val openPSK:
+    cs:ciphersuite
+  -> enc:key_dh_public_s cs
+  -> skR:key_dh_secret_s cs
+  -> info:info_s cs
+  -> aad:AEAD.ad (aead_of_cs cs)
+  -> ct:AEAD.cipher (aead_of_cs cs)
+  -> psk:psk_s cs
+  -> pskID:pskID_s cs ->
+  Tot (option (AEAD.decrypted #(aead_of_cs cs) ct))
 
-(* val setupAuthS: *)
-(*     cs:ciphersuite *)
-(*   -> skE:key_dh_secret_s cs *)
-(*   -> pkR:DH.serialized_point (curve_of_cs cs) *)
-(*   -> info:info_s cs *)
-(*   -> skS:key_dh_secret_s cs -> *)
-(*   Tot (option (key_dh_public_s cs & encryption_context cs)) *)
+val setupAuthS:
+    cs:ciphersuite
+  -> skE:key_dh_secret_s cs
+  -> pkR:DH.serialized_point (curve_of_cs cs)
+  -> info:info_s cs
+  -> skS:key_dh_secret_s cs ->
+  Tot (option (key_dh_public_s cs & encryption_context cs))
 
-(* val setupAuthR: *)
-(*     cs:ciphersuite *)
-(*   -> enc:key_dh_public_s cs *)
-(*   -> skR:key_dh_secret_s cs *)
-(*   -> info:info_s cs *)
-(*   -> pkS:key_dh_public_s cs -> *)
-(*   Tot (option (encryption_context cs)) *)
+val setupAuthR:
+    cs:ciphersuite
+  -> enc:key_dh_public_s cs
+  -> skR:key_dh_secret_s cs
+  -> info:info_s cs
+  -> pkS:DH.serialized_point (curve_of_cs cs) ->
+  Tot (option (encryption_context cs))
 
-(* val sealAuth: *)
-(*     cs:ciphersuite *)
-(*   -> skE:key_dh_secret_s cs *)
-(*   -> pkR:DH.serialized_point (curve_of_cs cs) *)
-(*   -> info:info_s cs *)
-(*   -> aad:AEAD.ad (aead_of_cs cs) *)
-(*   -> pt:AEAD.plain (aead_of_cs cs) *)
-(*   -> skS:key_dh_secret_s cs -> *)
-(*   Tot (option (key_dh_public_s cs & AEAD.encrypted #(aead_of_cs cs) pt)) *)
+val sealAuth:
+    cs:ciphersuite
+  -> skE:key_dh_secret_s cs
+  -> pkR:DH.serialized_point (curve_of_cs cs)
+  -> info:info_s cs
+  -> aad:AEAD.ad (aead_of_cs cs)
+  -> pt:AEAD.plain (aead_of_cs cs)
+  -> skS:key_dh_secret_s cs ->
+  Tot (option (key_dh_public_s cs & AEAD.encrypted #(aead_of_cs cs) pt))
 
-(* val openAuth: *)
-(*     cs:ciphersuite *)
-(*   -> enc:key_dh_public_s cs *)
-(*   -> skR:key_dh_secret_s cs *)
-(*   -> info:info_s cs *)
-(*   -> aad:AEAD.ad (aead_of_cs cs) *)
-(*   -> ct:AEAD.cipher (aead_of_cs cs) *)
-(*   -> pkS:key_dh_public_s cs -> *)
-(*   Tot (option (AEAD.decrypted #(aead_of_cs cs) ct)) *)
+val openAuth:
+    cs:ciphersuite
+  -> enc:key_dh_public_s cs
+  -> skR:key_dh_secret_s cs
+  -> info:info_s cs
+  -> aad:AEAD.ad (aead_of_cs cs)
+  -> ct:AEAD.cipher (aead_of_cs cs)
+  -> pkS:DH.serialized_point (curve_of_cs cs) ->
+  Tot (option (AEAD.decrypted #(aead_of_cs cs) ct))
 
-(* val setupAuthPSKS: *)
-(*     cs:ciphersuite *)
-(*   -> skE:key_dh_secret_s cs *)
-(*   -> pkR:DH.serialized_point (curve_of_cs cs) *)
-(*   -> info:info_s cs *)
-(*   -> psk:psk_s cs *)
-(*   -> pskID:pskID_s cs *)
-(*   -> skS:key_dh_secret_s cs -> *)
-(*   Tot (option (key_dh_public_s cs & encryption_context cs)) *)
+val setupAuthPSKS:
+    cs:ciphersuite
+  -> skE:key_dh_secret_s cs
+  -> pkR:DH.serialized_point (curve_of_cs cs)
+  -> info:info_s cs
+  -> psk:psk_s cs
+  -> pskID:pskID_s cs
+  -> skS:key_dh_secret_s cs ->
+  Tot (option (key_dh_public_s cs & encryption_context cs))
 
-(* val setupAuthPSKR: *)
-(*     cs:ciphersuite *)
-(*   -> enc:key_dh_public_s cs *)
-(*   -> skR:key_dh_secret_s cs *)
-(*   -> info:info_s cs *)
-(*   -> psk:psk_s cs *)
-(*   -> pskID:pskID_s cs *)
-(*   -> pkS:key_dh_public_s cs -> *)
-(*   Tot (option (encryption_context cs)) *)
+val setupAuthPSKR:
+    cs:ciphersuite
+  -> enc:key_dh_public_s cs
+  -> skR:key_dh_secret_s cs
+  -> info:info_s cs
+  -> psk:psk_s cs
+  -> pskID:pskID_s cs
+  -> pkS:DH.serialized_point (curve_of_cs cs) ->
+  Tot (option (encryption_context cs))
 
-(* val sealAuthPSK: *)
-(*     cs:ciphersuite *)
-(*   -> skE:key_dh_secret_s cs *)
-(*   -> pkR:DH.serialized_point (curve_of_cs cs) *)
-(*   -> info:info_s cs *)
-(*   -> aad:AEAD.ad (aead_of_cs cs) *)
-(*   -> pt:AEAD.plain (aead_of_cs cs) *)
-(*   -> psk:psk_s cs *)
-(*   -> pskID:pskID_s cs *)
-(*   -> skS:key_dh_secret_s cs -> *)
-(*   Tot (option (key_dh_public_s cs & AEAD.encrypted #(aead_of_cs cs) pt)) *)
+val sealAuthPSK:
+    cs:ciphersuite
+  -> skE:key_dh_secret_s cs
+  -> pkR:DH.serialized_point (curve_of_cs cs)
+  -> info:info_s cs
+  -> aad:AEAD.ad (aead_of_cs cs)
+  -> pt:AEAD.plain (aead_of_cs cs)
+  -> psk:psk_s cs
+  -> pskID:pskID_s cs
+  -> skS:key_dh_secret_s cs ->
+  Tot (option (key_dh_public_s cs & AEAD.encrypted #(aead_of_cs cs) pt))
 
-(* val openAuthPSK: *)
-(*     cs:ciphersuite *)
-(*   -> enc:key_dh_public_s cs *)
-(*   -> skR:key_dh_secret_s cs *)
-(*   -> info:info_s cs *)
-(*   -> aad:AEAD.ad (aead_of_cs cs) *)
-(*   -> ct:AEAD.cipher (aead_of_cs cs) *)
-(*   -> psk:psk_s cs *)
-(*   -> pskID:pskID_s cs *)
-(*   -> pkS:key_dh_public_s cs -> *)
-(*   Tot (option (AEAD.decrypted #(aead_of_cs cs) ct)) *)
+val openAuthPSK:
+    cs:ciphersuite
+  -> enc:key_dh_public_s cs
+  -> skR:key_dh_secret_s cs
+  -> info:info_s cs
+  -> aad:AEAD.ad (aead_of_cs cs)
+  -> ct:AEAD.cipher (aead_of_cs cs)
+  -> psk:psk_s cs
+  -> pskID:pskID_s cs
+  -> pkS:DH.serialized_point (curve_of_cs cs) ->
+  Tot (option (AEAD.decrypted #(aead_of_cs cs) ct))
 
