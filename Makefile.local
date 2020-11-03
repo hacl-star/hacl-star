@@ -71,6 +71,9 @@ CFLAGS += -Idist -I$(KREMLIN_HOME)/include -I$(KREMLIN_HOME)/kremlib/dist/minima
 $(HACL_HOME)/obj/Meta_Interface.ml: CODEGEN = Plugin
 $(HACL_HOME)/obj/Meta_Interface.ml: $(HACL_HOME)/obj/Meta.Interface.fst.checked
 
+$(HACL_HOME)/obj/Lib_Memzero0.ml: $(HACL_HOME)/lib/ml/Lib_Memzero0.ml
+	cp $< $@
+
 $(HACL_HOME)/obj/Hacl.Meta.%.checked: FSTAR_FLAGS += --load Meta.Interface
 ifneq (,$(wildcard Hacl.Meta.*.fst))
 $(patsubst %,$(HACL_HOME)/obj/%.checked,$(wildcard Hacl.Meta.*.fst)): $(HACL_HOME)/obj/Meta_Interface.ml
