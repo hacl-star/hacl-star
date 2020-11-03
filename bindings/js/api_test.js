@@ -89,7 +89,7 @@ var passTest = async function(func_sig, func, msg, t) {
   console.log("Test #" + (t + 1) + " passed !");
 };
 
-async function checkTestVectors(func_sig, func, msg) {
+function checkTestVectors(func_sig, func, msg) {
   var number_of_tests = Infinity;
   func_sig.args.map(function(arg) {
     if (arg.tests !== undefined) {
@@ -104,18 +104,18 @@ async function checkTestVectors(func_sig, func, msg) {
     console.warn("No tests for " + msg + "!");
   }
   for (var t = 0; t < number_of_tests; t++) {
-    await passTest(func_sig, func, msg, t);
+    passTest(func_sig, func, msg, t);
   }
 }
 
-HaclWasm.checkIfInitialized().then(async function() {
+HaclWasm.getInitializedHaclModule().then(function(Hacl) {
   var tests = [];
   Promise.all(Object.keys(test_vectors).map(function(key_module) {
     Object.keys(test_vectors[key_module]).map(function(key_func) {
-      tests.push([test_vectors[key_module][key_func], HaclWasm[key_module][key_func], key_module + "." + key_func]);
+      tests.push([test_vectors[key_module][key_func], Hacl[key_module][key_func], key_module + "." + key_func]);
     });
   }));
   for (var i = 0; i < tests.length; i++) {
-    await checkTestVectors.apply(null, tests[i]);
+    checkTestVectors.apply(null, tests[i]);
   }
 });
