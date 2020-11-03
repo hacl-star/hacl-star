@@ -169,7 +169,7 @@ var HaclWasm = (function() {
   };
 
   var evalSizeWithOp = function(arg, op, var_lengths) {
-     if (arg.indexOf(op) >= 0) then
+     if (arg.indexOf(op) >= 0) {
        var terms = arg.split(op);
        if (op === "+") {
          return var_lengths[terms[0]] + parseInt(terms[1]);
@@ -178,13 +178,14 @@ var HaclWasm = (function() {
        } else {
          throw Error("Operator " + op + " not valid in `size` parameter, only '+' and '-' are supported.")
        }
+     }
   };
 
   var parseSize = function(arg, var_lengths) {
     if (arg.indexOf("+") >= 0) {
-      return evalSizeWithOp(arg, "+");
+      return evalSizeWithOp(arg, "+", var_lengths);
     } else if (arg.indexOf("-") >= 0) {
-      return evalSizeWithOp(arg, "-");
+      return evalSizeWithOp(arg, "-", var_lengths);
     } else {
       return var_lengths[arg];
     }
@@ -275,16 +276,13 @@ var HaclWasm = (function() {
       }
       return read_memory(pointer.value, size);
     });
-    if (return_buffers.length == 1) {
-      return_buffers = return_buffers[0];
-    }
     // Resetting the stack pointer to its old value
     memory[0] = sp;
     if (proto.return.type === "bool") {
-      return [call_return === 1, return_buffers];
+      return [call_return === 1, return_buffers].flat();
     }
     if (proto.return.type === "int") {
-      return [call_return, return_buffers];
+      return [call_return, return_buffers].flat();
     }
     if (proto.return.type === "void") {
       return return_buffers;

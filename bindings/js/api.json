@@ -52,7 +52,9 @@
           "size": 32,
           "kind": "output",
           "name": "result",
-          "tests": []
+          "tests": [
+              "5219010a3dd8979fd84a5bb97f536d78e7775fe0367b1120777112d00dc5455c"
+          ]
         },
         {
           "type": "buffer",
@@ -60,7 +62,9 @@
           "name": "scalar",
           "kind": "input",
           "interface_index": 0,
-          "tests": []
+          "tests": [
+              "e5210f12786811d3f4b7959d0538ae2c31dbe7106fc03c3efc4cd549c715a493"
+          ]
         }
       ],
       "return": {
@@ -75,7 +79,9 @@
           "size": 32,
           "kind": "output",
           "name": "result",
-          "tests": []
+          "tests": [
+              "5219010a3dd8979fd84a5bb97f536d78e7775fe0367b1120777112d00dc5455c"
+          ]
         },
         {
           "type": "buffer",
@@ -83,7 +89,9 @@
           "name": "scalar",
           "kind": "input",
           "interface_index": 0,
-          "tests": []
+          "tests": [
+              "e5210f12786811d3f4b7959d0538ae2c31dbe7106fc03c3efc4cd549c715a493"
+          ]
         },
         {
           "type": "buffer",
@@ -91,7 +99,9 @@
           "name": "input",
           "kind": "input",
           "interface_index": 1,
-          "tests": []
+          "tests": [
+              "0900000000000000000000000000000000000000000000000000000000000000"
+          ]
         }
       ],
       "return": {
@@ -795,14 +805,18 @@
           "kind": "input",
           "type": "int",
           "interface_index": 0,
-          "tests": [ ]
+          "tests": [
+              1088
+          ]
         },
         {
           "name": "capacity",
           "kind": "input",
           "type": "int",
           "interface_index": 1,
-          "tests": [ ]
+          "tests": [
+              512
+          ]
         },
         {
           "name": "input_len",
@@ -815,28 +829,36 @@
           "type": "buffer",
           "size": "input_len",
           "interface_index": 2,
-          "tests": [ ]
+          "tests": [
+              "4c6f6e6774656d70732c206a65206d65207375697320636f7563686520646520626f6e6e65206865757265"
+          ]
         },
         {
           "name": "suffix",
           "kind": "input",
           "type": "int",
           "interface_index": 3,
-          "tests": [ ]
+          "tests": [
+              1
+          ]
         },
         {
           "name": "output_len",
           "kind": "input",
           "type": "int",
           "interface_index": 4,
-          "tests": []
+          "tests": [
+              32
+          ]
         },
         {
           "name": "digest",
           "kind": "output",
           "type": "buffer",
           "size": "output_len",
-          "tests": [ ]
+          "tests": [
+              "9f3afe7d35d9bbc4efd98252357e73e85ce1234a48603a063bb7079174aafa68"
+          ]
         }
       ],
       "return": {
@@ -906,7 +928,9 @@
           "kind": "output",
           "type": "buffer",
           "size": 64,
-          "tests": [ ]
+          "tests": [
+              "164b7a7bfcf819e2e395fbe73b56e0a387bd64222e831fd610270cd7ea2505549758bf75c05a994a6d034f65f8f0e6fdcaeab1a34d4a6b4b636e070a38bce737"
+          ]
         },
         {
           "name": "key",
@@ -914,7 +938,9 @@
           "type": "buffer",
           "size": "key_len",
           "interface_index": 0,
-          "tests": [ ]
+          "tests": [
+              "4a656665"
+          ]
         }, {
           "name": "key_len",
           "kind": "input",
@@ -925,7 +951,9 @@
           "type": "buffer",
           "size": "data_len",
           "interface_index": 1,
-          "tests": [ ]
+          "tests": [
+              "7768617420646f2079612077616e7420666f72206e6f7468696e673f"
+          ]
         }, {
           "name": "data_len",
           "kind": "input",
@@ -1063,7 +1091,10 @@
           "kind": "output",
           "type": "buffer",
           "size": "mlen+16",
-          "tests": [ ]
+          "tests": [
+              "79b34551ed224fa17cb6460ccb90a0d9",
+              "0021f41724be3ac9a46bd56c19644d320eb9cb66303b98eda29e2281ed5e"
+          ]
         },
         {
           "name": "m",
@@ -1071,7 +1102,10 @@
           "type": "buffer",
           "size": "mlen",
           "interface_index": 0,
-          "tests": [ ]
+          "tests": [
+              "",
+              "a94d365d0f3a0a504c8c12762531"
+          ]
         },
         {
           "name": "mlen",
@@ -1084,7 +1118,10 @@
           "type": "buffer",
           "size": 24,
           "interface_index": 1,
-          "tests": [ ]
+          "tests": [
+              "72b90208d2800e36ad16c730941a038d7c3ad9d87030d329",
+              "661d42c48f71b31c30d5c265b168511afd58b870bf354f4f"
+          ]
         },
         {
           "name": "k",
@@ -1092,12 +1129,18 @@
           "type": "buffer",
           "size": 32,
           "interface_index": 2,
-          "tests": [ ]
+          "tests": [
+              "822bca3c7e05fde0dc204519730b35f81216a9c9f1df9525e2a900ec89718f57",
+              "49d13a966a761a6acffed8923b5ee50c2971ba7e12c01fd99e0d70de9132f6d7"
+          ]
         }
       ],
       "return": {
         "type": "int",
-        "tests": [ ]
+        "tests": [
+            0,
+            0
+        ]
       }
     },
     "secretbox_open_easy": {
@@ -1109,7 +1152,10 @@
           "kind": "output",
           "type": "buffer",
           "size": "clen-16",
-          "tests": [ ]
+          "tests": [
+              "",
+              "a94d365d0f3a0a504c8c12762531"
+          ]
         },
         {
           "name": "c",
@@ -1117,7 +1163,10 @@
           "type": "buffer",
           "size": "clen",
           "interface_index": 0,
-          "tests": [ ]
+          "tests": [
+              "79b34551ed224fa17cb6460ccb90a0d9",
+              "0021f41724be3ac9a46bd56c19644d320eb9cb66303b98eda29e2281ed5e"
+          ]
         },
         {
           "name": "clen",
@@ -1130,7 +1179,10 @@
           "type": "buffer",
           "size": 24,
           "interface_index": 1,
-          "tests": [ ]
+          "tests": [
+              "72b90208d2800e36ad16c730941a038d7c3ad9d87030d329",
+              "661d42c48f71b31c30d5c265b168511afd58b870bf354f4f"
+          ]
         },
         {
           "name": "k",
@@ -1138,14 +1190,21 @@
           "type": "buffer",
           "size": 32,
           "interface_index": 2,
-          "tests": [ ]
+          "tests": [
+              "822bca3c7e05fde0dc204519730b35f81216a9c9f1df9525e2a900ec89718f57",
+              "49d13a966a761a6acffed8923b5ee50c2971ba7e12c01fd99e0d70de9132f6d7"
+          ]
         }
       ],
       "return": {
         "type": "int",
-        "tests": [ ]
+        "tests": [
+            0,
+            0
+        ]
       }
     },
+
     "box_beforenm": {
       "module": "Hacl_NaCl",
       "name": "crypto_box_beforenm",
@@ -1155,7 +1214,10 @@
           "kind": "output",
           "type": "buffer",
           "size": 32,
-          "tests": [ ]
+          "tests": [
+              "e59943913e5a5fc3922f9fd67708bd59974b7afb1f183e854dc65daa7f3ff013",
+              "64a42f46310656f4d087635b02ff0292369b0597b3f0cd1187088b40f7dd10be"
+          ]
         },
         {
           "name": "pk",
@@ -1163,7 +1225,10 @@
           "type": "buffer",
           "size": 32,
           "interface_index": 0,
-          "tests": [ ]
+          "tests": [
+              "fe3804027014cf0c896811d5234032e5eb6ca1786f648c6486f3fadd264d1741",
+              "c799e1b6a10c609e449ba34838ecc79404989c69acb363d9527f7866e57ba64a"
+          ]
         },
         {
           "name": "sk",
@@ -1171,12 +1236,18 @@
           "type": "buffer",
           "size": 32,
           "interface_index": 1,
-          "tests": [ ]
+          "tests": [
+              "d57dffb810eb32ffaa87932446a0c6e36eb954a737e9cc3ac0d9803441e2beac",
+              "07bb38f5b2db98aee6021b5eb1e808e3e4677020a2609fa7d089b523c135f5df"
+          ]
         }
       ],
       "return": {
         "type": "int",
-        "tests": [ ]
+        "tests": [
+            0,
+            0
+]
       }
     },
     "box_easy_afternm": {
@@ -1187,9 +1258,11 @@
           "name": "c",
           "kind": "output",
           "type": "buffer",
-          "size": "mlen",
-          "size_offset": 16,
-          "tests": [ ]
+          "size": "mlen+16",
+          "tests": [
+              "062f0c611b5ad32df8d42fea326eb9c5b92ada4d98ea08",
+              "77878b2bce5abf2fac5a14ecd9580968a6976a8af34115ce023c950e"
+          ]
         },
         {
           "name": "m",
@@ -1197,7 +1270,10 @@
           "type": "buffer",
           "size": "mlen",
           "interface_index": 0,
-          "tests": [ ]
+          "tests": [
+              "178cb311d20f0a",
+              "93c69d5bceead524034e5c50"
+          ]
         },
         {
           "name": "mlen",
@@ -1210,7 +1286,10 @@
           "type": "buffer",
           "size": 24,
           "interface_index": 1,
-          "tests": [ ]
+          "tests": [
+              "000000000000000000000000000000000000000000000000",
+              "000000000000000000000000000000000000000000000000"
+          ]
         },
         {
           "name": "k",
@@ -1218,12 +1297,18 @@
           "type": "buffer",
           "size": 32,
           "interface_index": 2,
-          "tests": [ ]
+          "tests": [
+              "e59943913e5a5fc3922f9fd67708bd59974b7afb1f183e854dc65daa7f3ff013",
+              "64a42f46310656f4d087635b02ff0292369b0597b3f0cd1187088b40f7dd10be"
+          ]
         }
       ],
       "return": {
         "type": "int",
-        "tests": [ ]
+        "tests": [
+            0,
+            0
+        ]
       }
     },
     "box_open_easy_afternm": {
@@ -1235,7 +1320,10 @@
           "kind": "output",
           "type": "buffer",
           "size": "clen-16",
-          "tests": [ ]
+          "tests": [
+              "178cb311d20f0a",
+              "93c69d5bceead524034e5c50"
+          ]
         },
         {
           "name": "c",
@@ -1243,7 +1331,10 @@
           "type": "buffer",
           "size": "clen",
           "interface_index": 0,
-          "tests": [ ]
+          "tests": [
+              "062f0c611b5ad32df8d42fea326eb9c5b92ada4d98ea08",
+              "77878b2bce5abf2fac5a14ecd9580968a6976a8af34115ce023c950e"
+          ]
         },
         {
           "name": "clen",
@@ -1256,7 +1347,10 @@
           "type": "buffer",
           "size": 24,
           "interface_index": 1,
-          "tests": [ ]
+          "tests": [
+              "000000000000000000000000000000000000000000000000",
+              "000000000000000000000000000000000000000000000000"
+          ]
         },
         {
           "name": "k",
@@ -1264,12 +1358,18 @@
           "type": "buffer",
           "size": 32,
           "interface_index": 2,
-          "tests": [ ]
+          "tests": [
+              "e59943913e5a5fc3922f9fd67708bd59974b7afb1f183e854dc65daa7f3ff013",
+              "64a42f46310656f4d087635b02ff0292369b0597b3f0cd1187088b40f7dd10be"
+          ]
         }
       ],
       "return": {
         "type": "int",
-        "tests": [ ]
+        "tests": [
+            0,
+            0
+        ]
       }
     },
     "box_detached_afternm": {
@@ -1281,14 +1381,20 @@
           "kind": "output",
           "type": "buffer",
           "size": "mlen",
-          "tests": [ ]
+          "tests": [
+              "b92ada4d98ea08",
+              "a6976a8af34115ce023c950e"
+          ]
         },
         {
           "name": "tag",
           "kind": "output",
           "type": "buffer",
           "size": 16,
-          "tests": [ ]
+          "tests": [
+              "062f0c611b5ad32df8d42fea326eb9c5",
+              "77878b2bce5abf2fac5a14ecd9580968"
+          ]
         },
         {
           "name": "m",
@@ -1296,7 +1402,10 @@
           "type": "buffer",
           "size": "mlen",
           "interface_index": 0,
-          "tests": [ ]
+          "tests": [
+              "178cb311d20f0a",
+              "93c69d5bceead524034e5c50"
+          ]
         },
         {
           "name": "mlen",
@@ -1309,7 +1418,10 @@
           "type": "buffer",
           "size": 24,
           "interface_index": 1,
-          "tests": [ ]
+          "tests": [
+              "000000000000000000000000000000000000000000000000",
+              "000000000000000000000000000000000000000000000000"
+          ]
         },
         {
           "name": "k",
@@ -1317,12 +1429,18 @@
           "type": "buffer",
           "size": 32,
           "interface_index": 2,
-          "tests": [ ]
+          "tests": [
+              "e59943913e5a5fc3922f9fd67708bd59974b7afb1f183e854dc65daa7f3ff013",
+              "64a42f46310656f4d087635b02ff0292369b0597b3f0cd1187088b40f7dd10be"
+          ]
         }
       ],
       "return": {
         "type": "int",
-        "tests": [ ]
+        "tests": [
+            0,
+            0
+        ]
       }
     },
     "box_open_detached_afternm": {
@@ -1334,7 +1452,10 @@
           "kind": "output",
           "type": "buffer",
           "size": "mlen",
-          "tests": [ ]
+          "tests": [
+              "178cb311d20f0a",
+              "93c69d5bceead524034e5c50"
+          ]
         },
         {
           "name": "c",
@@ -1342,7 +1463,10 @@
           "type": "buffer",
           "size": "mlen",
           "interface_index": 0,
-          "tests": [ ]
+          "tests": [
+              "b92ada4d98ea08",
+              "a6976a8af34115ce023c950e"
+          ]
         },
         {
           "name": "tag",
@@ -1350,7 +1474,10 @@
           "type": "buffer",
           "size": 16,
           "interface_index": 1,
-          "tests": [ ]
+          "tests": [
+              "062f0c611b5ad32df8d42fea326eb9c5",
+              "77878b2bce5abf2fac5a14ecd9580968"
+          ]
         },
         {
           "name": "mlen",
@@ -1363,7 +1490,10 @@
           "type": "buffer",
           "size": 24,
           "interface_index": 2,
-          "tests": [ ]
+          "tests": [
+              "000000000000000000000000000000000000000000000000",
+              "000000000000000000000000000000000000000000000000"
+          ]
         },
         {
           "name": "k",
@@ -1371,12 +1501,18 @@
           "type": "buffer",
           "size": 32,
           "interface_index": 3,
-          "tests": [ ]
+          "tests": [
+              "e59943913e5a5fc3922f9fd67708bd59974b7afb1f183e854dc65daa7f3ff013",
+              "64a42f46310656f4d087635b02ff0292369b0597b3f0cd1187088b40f7dd10be"
+          ]
         }
       ],
       "return": {
         "type": "int",
-        "tests": [ ]
+        "tests": [
+            0,
+            0
+        ]
       }
     }
   },
@@ -1389,7 +1525,9 @@
           "kind": "output",
           "type": "buffer",
           "size": 64,
-          "tests": [ "f3ac8061b514795b8843e3d6629527ed2afd6b1f6a555a7acabb5e6f79c8c2accfa740fec76796d2e39216be7ebf580ea3c0ef4bb00ab2e7e4208434f45f8c9c" ]
+          "tests": [
+              "f3ac8061b514795b8843e3d6629527ed2afd6b1f6a555a7acabb5e6f79c8c2accfa740fec76796d2e39216be7ebf580ea3c0ef4bb00ab2e7e4208434f45f8c9c"
+          ]
         },
         {
           "name": "mlen",
