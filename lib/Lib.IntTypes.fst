@@ -977,7 +977,7 @@ let mod_mask_lemma #t #l a m =
   so that the result fits in t'; i.e.
   b = if a >= 2^(bits t' - 1) then a - 2^(bits t') else a
 *)
-inline_for_extraction noextract
+inline_for_extraction 
 val conditional_subtract:
     #t:inttype{signed t}
   -> #l:secrecy_level
