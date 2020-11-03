@@ -1,7 +1,10 @@
 open Test_utils
 
 type 'a ecdsa_test =
-  { name: string ; sk : 'a ; pk : 'a ; msg : 'a ; k : 'a ; expected_sig : 'a }
+  { name : string ; sk : 'a ; pk : 'a ; msg : 'a ; k : 'a ; expected_sig : 'a }
+
+type 'a compression_test =
+  { name : string; raw : 'a; compressed : 'a; uncompressed : 'a }
 
 let tests = [
   {name = "Test 1";
@@ -27,7 +30,15 @@ let tests_sha256 = [
     pk  = Bytes.of_string "\xe2\x66\xdd\xfd\xc1\x26\x68\xdb\x30\xd4\xca\x3e\x8f\x77\x49\x43\x2c\x41\x60\x44\xf2\xd2\xb8\xc1\x0b\xf3\xd4\x01\x2a\xef\xfa\x8a\xbf\xa8\x64\x04\xa2\xe9\xff\xe6\x7d\x47\xc5\x87\xef\x7a\x97\xa7\xf4\x56\xb8\x63\xb4\xd0\x2c\xfc\x69\x28\x97\x3a\xb5\xb1\xcb\x39";
     k    = Bytes.of_string "\x6d\x3e\x71\x88\x2c\x3b\x83\xb1\x56\xbb\x14\xe0\xab\x18\x4a\xa9\xfb\x72\x80\x68\xd3\xae\x9f\xac\x42\x11\x87\xae\x0b\x2f\x34\xc6";
     expected_sig   = Bytes.of_string "\x97\x6d\x3a\x4e\x9d\x23\x32\x6d\xc0\xba\xa9\xfa\x56\x0b\x7c\x4e\x53\xf4\x28\x64\xf5\x08\x48\x3a\x64\x73\xb6\xa1\x10\x79\xb2\xdb\x1b\x76\x6e\x9c\xeb\x71\xba\x6c\x01\xdc\xd4\x6e\x0a\xf4\x62\xcd\x4c\xfa\x65\x2a\xe5\x01\x7d\x45\x55\xb8\xee\xef\xe3\x6e\x19\x32";
-  };
+  }
+]
+
+let tests_compression = [
+  { name = "Test 1";
+    raw = Bytes.of_string "\x70\x0c\x48\xf7\x7f\x56\x58\x4c\x5c\xc6\x32\xca\x65\x64\x0d\xb9\x1b\x6b\xac\xce\x3a\x4d\xf6\xb4\x2c\xe7\xcc\x83\x88\x33\xd2\x87\xdb\x71\xe5\x09\xe3\xfd\x9b\x06\x0d\xdb\x20\xba\x5c\x51\xdc\xc5\x94\x8d\x46\xfb\xf6\x40\xdf\xe0\x44\x17\x82\xca\xb8\x5f\xa4\xac";
+    compressed = Bytes.of_string "\x02\x70\x0c\x48\xf7\x7f\x56\x58\x4c\x5c\xc6\x32\xca\x65\x64\x0d\xb9\x1b\x6b\xac\xce\x3a\x4d\xf6\xb4\x2c\xe7\xcc\x83\x88\x33\xd2\x87";
+    uncompressed = Bytes.of_string "\x04\x70\x0c\x48\xf7\x7f\x56\x58\x4c\x5c\xc6\x32\xca\x65\x64\x0d\xb9\x1b\x6b\xac\xce\x3a\x4d\xf6\xb4\x2c\xe7\xcc\x83\x88\x33\xd2\x87\xdb\x71\xe5\x09\xe3\xfd\x9b\x06\x0d\xdb\x20\xba\x5c\x51\xdc\xc5\x94\x8d\x46\xfb\xf6\x40\xdf\xe0\x44\x17\x82\xca\xb8\x5f\xa4\xac";
+  }
 ]
 
 let test (v: Bytes.t ecdsa_test) t sign verify =
@@ -53,6 +64,33 @@ let test (v: Bytes.t ecdsa_test) t sign verify =
   else
     test_result Failure "Signing"
 
+let test_p256_compression (v: Bytes.t compression_test) =
+  let test_result = test_result ("P-256 compression: " ^ v.name) in
+
+  let result = Test_utils.init_bytes 33 in
+  Hacl.P256.compress_c v.raw result;
+  if Bytes.compare result v.compressed <> 0 then
+    test_result Failure "Hacl.P256.compress_c";
+
+  let result = Test_utils.init_bytes 65 in
+  Hacl.P256.compress_n v.raw result;
+  if Bytes.compare result v.uncompressed <> 0 then
+    test_result Failure "Hacl.P256.compress_n";
+
+  let result = Test_utils.init_bytes 64 in
+  assert (Hacl.P256.decompress_c v.compressed result);
+  if Bytes.compare result v.raw <> 0 then
+    test_result Failure "Hacl.P256.decompress_c";
+
+  let result = Test_utils.init_bytes 64 in
+  assert (Hacl.P256.decompress_c v.compressed result);
+  if Bytes.compare result v.raw <> 0 then
+    test_result Failure "Hacl.P256.decompress_n";
+
+  test_result Success "P256 point compression/decompression"
+
+
 let _ =
   List.iter (fun v -> test v "Hacl.P256_SHA2" Hacl.P256.sign Hacl.P256.verify) tests;
-  List.iter (fun v -> test v "Hacl.P256_SHA2_256" Hacl.P256.SHA2_256.sign Hacl.P256.SHA2_256.verify) tests_sha256
+  List.iter (fun v -> test v "Hacl.P256_SHA2_256" Hacl.P256.SHA2_256.sign Hacl.P256.SHA2_256.verify) tests_sha256;
+  List.iter test_p256_compression tests_compression
