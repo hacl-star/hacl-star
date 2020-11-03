@@ -34,6 +34,60 @@ let print_and_compare_bytes (len:size_nat) (test_expected:lbytes len) (test_resu
   print "\n";
   compare_bytes len test_expected test_result
 
+let print_and_compare_setup
+  (cs:HPKE.ciphersuite)
+  (enc:HPKE.key_dh_public_s cs)
+  (key:HPKE.key_aead_s cs) (nonce:HPKE.nonce_aead_s cs) (exp_sec:HPKE.exporter_secret_s cs)
+  (enc_i:HPKE.key_dh_public_s cs) (ctx_i:HPKE.encryption_context cs)
+=
+  let r1 = print_and_compare_bytes (HPKE.size_dh_public cs) enc enc_i in
+  let r2 = print_and_compare_bytes (HPKE.size_aead_key cs) key (HPKE.key_of_ctx cs ctx_i) in
+  let r3 = print_and_compare_bytes (HPKE.size_aead_nonce cs) nonce (HPKE.nonce_of_ctx cs ctx_i) in
+  let r4 = print_and_compare_bytes (HPKE.size_kdf cs) exp_sec (HPKE.exp_sec_of_ctx cs ctx_i) in
+  r1 && r2 && r3 && r4
+
+
+let test_setupBase
+  (cs:HPKE.ciphersuite)
+  (skEm:HPKE.key_dh_secret_s cs) (pkEm:HPKE.key_dh_public_s cs) (skRm:HPKE.key_dh_secret_s cs) (pkRm:HPKE.key_dh_public_s cs) (info:HPKE.info_s cs)
+  (enc:HPKE.key_dh_public_s cs) (zz:HPKE.key_kem_s cs)
+  (ks_context:lbytes (HPKE.size_ks_ctx cs)) (secret:lbytes (HPKE.size_kdf cs))
+  (key:HPKE.key_aead_s cs) (nonce:HPKE.nonce_aead_s cs) (exp_sec:HPKE.exporter_secret_s cs)
+  (enc0_nonce:HPKE.nonce_aead_s cs) (enc1_nonce:HPKE.nonce_aead_s cs)
+=
+  print "Test setupBaseS\n";
+  let pkR = HPKE.unmarshal cs pkRm in
+  match HPKE.setupBaseS cs skEm pkR info with
+  | None -> false
+  | Some (enc_i, ctx_i) -> print_and_compare_setup cs enc key nonce exp_sec enc_i ctx_i
+
+let test_export
+  (cs:HPKE.ciphersuite)
+  (key:HPKE.key_aead_s cs) (nonce:HPKE.nonce_aead_s cs) (exp_sec:HPKE.exporter_secret_s cs)
+  (exp_ctx:HPKE.exp_ctx_s cs)
+  (exp_len:size_nat{HKDF.expand_output_length_pred (HPKE.hash_of_cs cs) exp_len})
+  (sec:lbytes exp_len)
+=
+  print "Test export\n";
+  let ctx:(HPKE.encryption_context cs) = (key, nonce, 0, exp_sec) in
+  let sec_i = HPKE.context_export cs ctx exp_ctx exp_len in
+  let r = print_and_compare_bytes exp_len sec sec_i in
+  r
+
+let test_encryption
+  (cs:HPKE.ciphersuite)
+  (key:HPKE.key_aead_s cs) (nonce:HPKE.nonce_aead_s cs) (exp_sec:HPKE.exporter_secret_s cs)
+  (aad:AEAD.ad (HPKE.aead_of_cs cs)) (pt:AEAD.plain (HPKE.aead_of_cs cs)) (seq:HPKE.seq_aead_s cs)
+  (ct:AEAD.cipher (HPKE.aead_of_cs cs)) (enc_nonce:HPKE.nonce_aead_s cs)
+=
+  print "Test encryption\n";
+  let ctx:(HPKE.encryption_context cs) = (key, nonce, seq, exp_sec) in
+  let enc_nonce_i = HPKE.context_compute_nonce cs ctx seq in
+  print_and_compare_bytes (HPKE.size_aead_nonce cs) enc_nonce enc_nonce_i
+
+
+// Skipped unsupported test case 0
+
 let test1_mode: HPKE.mode = HPKE.Base
 let test1_ciphersuite = DH.DH_Curve25519, Hash.SHA2_256, AEAD.AES128_GCM, Hash.SHA2_256
 
@@ -1052,63 +1106,6 @@ let test1_export4_exportValue : lbytes size_test1_export4_exportValue = createL 
 
 let test1_export4_len:size_nat = 32
 
-
-let print_and_compare_setup
-  (cs:HPKE.ciphersuite)
-  (enc:HPKE.key_dh_public_s cs)
-  (key:HPKE.key_aead_s cs) (nonce:HPKE.nonce_aead_s cs) (exp_sec:HPKE.exporter_secret_s cs)
-  (enc_i:HPKE.key_dh_public_s cs) (ctx_i:HPKE.encryption_context cs)
-=
-  let r1 = print_and_compare_bytes (HPKE.size_dh_public cs) enc enc_i in
-  let r2 = print_and_compare_bytes (HPKE.size_aead_key cs) key (HPKE.key_of_ctx cs ctx_i) in
-  let r3 = print_and_compare_bytes (HPKE.size_aead_nonce cs) nonce (HPKE.nonce_of_ctx cs ctx_i) in
-  let r4 = print_and_compare_bytes (HPKE.size_kdf cs) exp_sec (HPKE.exp_sec_of_ctx cs ctx_i) in
-  r1 && r2 && r3 && r4
-
-
-let test_setupBase
-  (cs:HPKE.ciphersuite)
-  (skEm:HPKE.key_dh_secret_s cs) (pkEm:HPKE.key_dh_public_s cs) (skRm:HPKE.key_dh_secret_s cs) (pkRm:HPKE.key_dh_public_s cs) (info:HPKE.info_s cs)
-  (enc:HPKE.key_dh_public_s cs) (zz:HPKE.key_kem_s cs)
-  (ks_context:lbytes (HPKE.size_ks_ctx cs)) (secret:lbytes (HPKE.size_kdf cs))
-  (key:HPKE.key_aead_s cs) (nonce:HPKE.nonce_aead_s cs) (exp_sec:HPKE.exporter_secret_s cs)
-  (enc0_nonce:HPKE.nonce_aead_s cs) (enc1_nonce:HPKE.nonce_aead_s cs)
-=
-  print "Test setupBaseS\n";
-  let pkR = HPKE.unmarshal cs pkRm in
-  match HPKE.setupBaseS cs skEm pkR info with
-  | None -> false
-  | Some (enc_i, ctx_i) -> print_and_compare_setup cs enc key nonce exp_sec enc_i ctx_i
-
-let test_export
-  (cs:HPKE.ciphersuite)
-  (key:HPKE.key_aead_s cs) (nonce:HPKE.nonce_aead_s cs) (exp_sec:HPKE.exporter_secret_s cs)
-  (exp_ctx:HPKE.exp_ctx_s cs)
-  (exp_len:size_nat{HKDF.expand_output_length_pred (HPKE.hash_of_cs cs) exp_len})
-  (sec:lbytes exp_len)
-=
-  print "Test export\n";
-  let ctx:(HPKE.encryption_context cs) = (key, nonce, 0, exp_sec) in
-  let sec_i = HPKE.context_export cs ctx exp_ctx exp_len in
-  let r = print_and_compare_bytes exp_len sec sec_i in
-  r
-
-let test_encryption
-  (cs:HPKE.ciphersuite)
-  (key:HPKE.key_aead_s cs) (nonce:HPKE.nonce_aead_s cs) (exp_sec:HPKE.exporter_secret_s cs)
-  (aad:AEAD.ad (HPKE.aead_of_cs cs)) (pt:AEAD.plain (HPKE.aead_of_cs cs)) (seq:HPKE.seq_aead_s cs)
-  (ct:AEAD.cipher (HPKE.aead_of_cs cs)) (enc_nonce:HPKE.nonce_aead_s cs)
-=
-  print "Test encryption\n";
-  let ctx:(HPKE.encryption_context cs) = (key, nonce, seq, exp_sec) in
-  let enc_nonce_i = HPKE.context_compute_nonce cs ctx seq in
-  print_and_compare_bytes (HPKE.size_aead_nonce cs) enc_nonce enc_nonce_i
-
-
-//
-// Main
-//
-
 let test1 () =
   let res = test_setupBase test1_ciphersuite test1_skEm test1_pkEm test1_skRm test1_pkRm test1_info test1_enc test1_zz test1_key_schedule_context test1_secret test1_key test1_nonce test1_exporterSecret test1_encryption0_nonce test1_encryption1_nonce in
   let seq0:HPKE.seq_aead_s test1_ciphersuite = 0 in
@@ -1162,9 +1159,48 @@ let test1 () =
 
   enc_res0 && enc_res1 && enc_res2 && enc_res3 && enc_res4 && enc_res5 && enc_res6 && enc_res7 && enc_res8 && enc_res9 && res && exp_res0 && exp_res1 && exp_res2 && exp_res3 && exp_res4
 
+
+//
+// Main
+//
+
+
 let test () =
-  let r0 = test1 () in
-  (* let r1 = test1 () in *)
-  (* let r2 = test2 () in *)
-  (* r1 && r2 *)
-  r0
+  let r1  = test1  () in
+  (* let r4  = test4  () in *)
+  (* let r8  = test8  () in *)
+  (* let r14 = test14 () in *)
+  (* let r16 = test16 () in *)
+  (* let r20 = test20 () in *)
+  (* let r50 = test50 () in *)
+  (* let r52 = test52 () in *)
+  (* let r56 = test56 () in *)
+  (* let r60 = test60 () in *)
+  (* let r66 = test66 () in *)
+  (* let r70 = test70 () in *)
+  (* print "Input limits"; *)
+  (* let h0 = Hash.SHA2_256 in *)
+  (* let h1 = Hash.SHA2_384 in *)
+  (* let h2 = Hash.SHA2_512 in *)
+
+  (* let bl0 = Spec.Hash.Definitions.block_length h0 in *)
+  (* let bl1 = Spec.Hash.Definitions.block_length h1 in *)
+  (* let bl2 = Spec.Hash.Definitions.block_length h2 in *)
+
+  (* print_bytes "psk" HPKE.size_label_psk_hash HPKE.label_psk_hash; *)
+  (* print "\n"; *)
+
+  (* let max_psk_0 = HPKE.max_length_psk h0 in *)
+  (* let max_psk_1 = HPKE.max_length_psk h1 in *)
+  (* let max_psk_2 = HPKE.max_length_psk h2 in *)
+
+  (* IO.print_uint32_dec (size_to_uint32 max_psk_0); *)
+  (* IO.print_uint32_dec (size_to_uint32 max_psk_1); *)
+  (* IO.print_uint32_dec (size_to_uint32 max_psk_2); *)
+
+  (* let max_length_psk (cs:ciphersuite) = labeled_extract_max_length_ikm cs size_label_psk_hash *)
+  (* let max_length_pskID (cs:ciphersuite) = labeled_extract_max_length_ikm cs size_label_pskID_hash *)
+  (* let max_length_info (cs:ciphersuite) = labeled_extract_max_length_ikm cs size_label_info_hash *)
+  (* let max_length_exp_ctx (cs:ciphersuite) = labeled_expand_max_length_info cs size_label_sec *)
+  r1
+  (* && r4 && r8 && r14 && r16 && r20 && r50 && r52 && r56 && r60 && r66 && r70 *)
