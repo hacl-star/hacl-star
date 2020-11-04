@@ -417,7 +417,7 @@ let min_input_length a =
     |Hash a -> 0
 
 (*
-noextract
+
 let hash_length (a : hash_alg_ecdsa) =
   match a with 
     |NoHash -> 32
