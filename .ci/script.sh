@@ -47,6 +47,12 @@ else
   make -C kremlin/kremlib/dist/generic -f Makefile.basic -j
   make -j -k
   popd
+
+  # Test 32-bit build; Tests don't work here yet.
+  pushd dist/gcc-compatible
+  ./configure -target ia32
+  make -j
+  popd
 fi
 
 if which opam; then
