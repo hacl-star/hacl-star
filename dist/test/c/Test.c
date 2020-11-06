@@ -12802,20 +12802,12 @@ static void test_all()
   EverCrypt_AutoConfig2_init();
   bool no_avx = !EverCrypt_AutoConfig2_has_avx();
   bool no_avx20 = !EverCrypt_AutoConfig2_has_avx2();
-  bool no_bmi20 = !EverCrypt_AutoConfig2_has_bmi2();
+  bool no_bmi2 = !EverCrypt_AutoConfig2_has_bmi2();
   bool no_adx0 = !EverCrypt_AutoConfig2_has_adx();
   bool no_aesni0 = !EverCrypt_AutoConfig2_has_aesni();
   bool no_shaext0 = !EverCrypt_AutoConfig2_has_shaext();
   bool ite0;
-  if
-  (
-    (false && no_avx)
-    || (true && no_avx20)
-    || (false && no_bmi20)
-    || (false && no_adx0)
-    || (false && no_aesni0)
-    || (false && no_shaext0)
-  )
+  if (no_avx20 || false || false || false || false)
   {
     ite0 = false;
   }
@@ -12847,20 +12839,12 @@ static void test_all()
   EverCrypt_AutoConfig2_init();
   bool no_avx0 = !EverCrypt_AutoConfig2_has_avx();
   bool no_avx21 = !EverCrypt_AutoConfig2_has_avx2();
-  bool no_bmi21 = !EverCrypt_AutoConfig2_has_bmi2();
+  bool no_bmi20 = !EverCrypt_AutoConfig2_has_bmi2();
   bool no_adx1 = !EverCrypt_AutoConfig2_has_adx();
   bool no_aesni1 = !EverCrypt_AutoConfig2_has_aesni();
   bool no_shaext1 = !EverCrypt_AutoConfig2_has_shaext();
   bool ite1;
-  if
-  (
-    (true && no_avx0)
-    || (false && no_avx21)
-    || (false && no_bmi21)
-    || (false && no_adx1)
-    || (false && no_aesni1)
-    || (false && no_shaext1)
-  )
+  if (no_avx0 || false || false || false || false || false)
   {
     ite1 = false;
   }
@@ -12892,7 +12876,7 @@ static void test_all()
   EverCrypt_AutoConfig2_init();
   bool no_avx1 = !EverCrypt_AutoConfig2_has_avx();
   bool no_avx22 = !EverCrypt_AutoConfig2_has_avx2();
-  bool no_bmi22 = !EverCrypt_AutoConfig2_has_bmi2();
+  bool no_bmi21 = !EverCrypt_AutoConfig2_has_bmi2();
   bool no_adx2 = !EverCrypt_AutoConfig2_has_adx();
   bool no_aesni2 = !EverCrypt_AutoConfig2_has_aesni();
   bool no_shaext2 = !EverCrypt_AutoConfig2_has_shaext();
@@ -12919,7 +12903,7 @@ static void test_all()
   EverCrypt_AutoConfig2_init();
   bool no_avx3 = !EverCrypt_AutoConfig2_has_avx();
   bool no_avx23 = !EverCrypt_AutoConfig2_has_avx2();
-  bool no_bmi23 = !EverCrypt_AutoConfig2_has_bmi2();
+  bool no_bmi22 = !EverCrypt_AutoConfig2_has_bmi2();
   bool no_adx3 = !EverCrypt_AutoConfig2_has_adx();
   bool no_aesni3 = !EverCrypt_AutoConfig2_has_aesni();
   bool no_shaext3 = !EverCrypt_AutoConfig2_has_shaext();
@@ -12947,20 +12931,12 @@ static void test_all()
   EverCrypt_AutoConfig2_init();
   bool no_avx4 = !EverCrypt_AutoConfig2_has_avx();
   bool no_avx24 = !EverCrypt_AutoConfig2_has_avx2();
-  bool no_bmi24 = !EverCrypt_AutoConfig2_has_bmi2();
-  bool no_adx4 = !EverCrypt_AutoConfig2_has_adx();
-  bool no_aesni4 = !EverCrypt_AutoConfig2_has_aesni();
+  bool no_bmi23 = !EverCrypt_AutoConfig2_has_bmi2();
+  bool no_adx = !EverCrypt_AutoConfig2_has_adx();
+  bool no_aesni = !EverCrypt_AutoConfig2_has_aesni();
   bool no_shaext4 = !EverCrypt_AutoConfig2_has_shaext();
   bool ite2;
-  if
-  (
-    (false && no_avx4)
-    || (false && no_avx24)
-    || (true && no_bmi24)
-    || (true && no_adx4)
-    || (false && no_aesni4)
-    || (false && no_shaext4)
-  )
+  if (no_bmi23 || no_adx || false || false)
   {
     ite2 = false;
   }
@@ -12993,9 +12969,9 @@ static void test_all()
   EverCrypt_AutoConfig2_init();
   bool no_avx5 = !EverCrypt_AutoConfig2_has_avx();
   bool no_avx25 = !EverCrypt_AutoConfig2_has_avx2();
-  bool no_bmi25 = !EverCrypt_AutoConfig2_has_bmi2();
-  bool no_adx5 = !EverCrypt_AutoConfig2_has_adx();
-  bool no_aesni5 = !EverCrypt_AutoConfig2_has_aesni();
+  bool no_bmi24 = !EverCrypt_AutoConfig2_has_bmi2();
+  bool no_adx4 = !EverCrypt_AutoConfig2_has_adx();
+  bool no_aesni4 = !EverCrypt_AutoConfig2_has_aesni();
   bool no_shaext5 = !EverCrypt_AutoConfig2_has_shaext();
   if (true)
   {
@@ -13021,20 +12997,12 @@ static void test_all()
   EverCrypt_AutoConfig2_init();
   bool no_avx6 = !EverCrypt_AutoConfig2_has_avx();
   bool no_avx26 = !EverCrypt_AutoConfig2_has_avx2();
-  bool no_bmi26 = !EverCrypt_AutoConfig2_has_bmi2();
-  bool no_adx6 = !EverCrypt_AutoConfig2_has_adx();
-  bool no_aesni6 = !EverCrypt_AutoConfig2_has_aesni();
+  bool no_bmi25 = !EverCrypt_AutoConfig2_has_bmi2();
+  bool no_adx5 = !EverCrypt_AutoConfig2_has_adx();
+  bool no_aesni5 = !EverCrypt_AutoConfig2_has_aesni();
   bool no_shaext6 = !EverCrypt_AutoConfig2_has_shaext();
   bool ite3;
-  if
-  (
-    (true && no_avx6)
-    || (false && no_avx26)
-    || (false && no_bmi26)
-    || (false && no_adx6)
-    || (true && no_aesni6)
-    || (false && no_shaext6)
-  )
+  if (no_avx6 || false || false || false || no_aesni5 || false)
   {
     ite3 = false;
   }
@@ -13077,21 +13045,13 @@ static void test_all()
   print_sep();
   EverCrypt_AutoConfig2_init();
   bool no_avx7 = !EverCrypt_AutoConfig2_has_avx();
-  bool no_avx27 = !EverCrypt_AutoConfig2_has_avx2();
-  bool no_bmi27 = !EverCrypt_AutoConfig2_has_bmi2();
-  bool no_adx7 = !EverCrypt_AutoConfig2_has_adx();
-  bool no_aesni7 = !EverCrypt_AutoConfig2_has_aesni();
-  bool no_shaext7 = !EverCrypt_AutoConfig2_has_shaext();
+  bool no_avx2 = !EverCrypt_AutoConfig2_has_avx2();
+  bool no_bmi26 = !EverCrypt_AutoConfig2_has_bmi2();
+  bool no_adx6 = !EverCrypt_AutoConfig2_has_adx();
+  bool no_aesni6 = !EverCrypt_AutoConfig2_has_aesni();
+  bool no_shaext = !EverCrypt_AutoConfig2_has_shaext();
   bool ite4;
-  if
-  (
-    (true && no_avx7)
-    || (false && no_avx27)
-    || (false && no_bmi27)
-    || (false && no_adx7)
-    || (true && no_aesni7)
-    || (false && no_shaext7)
-  )
+  if (no_avx7 || false || false || false || no_aesni6 || false)
   {
     ite4 = false;
   }
@@ -13124,11 +13084,11 @@ static void test_all()
   print_sep();
   EverCrypt_AutoConfig2_init();
   bool no_avx8 = !EverCrypt_AutoConfig2_has_avx();
-  bool no_avx28 = !EverCrypt_AutoConfig2_has_avx2();
-  bool no_bmi28 = !EverCrypt_AutoConfig2_has_bmi2();
-  bool no_adx8 = !EverCrypt_AutoConfig2_has_adx();
-  bool no_aesni8 = !EverCrypt_AutoConfig2_has_aesni();
-  bool no_shaext8 = !EverCrypt_AutoConfig2_has_shaext();
+  bool no_avx27 = !EverCrypt_AutoConfig2_has_avx2();
+  bool no_bmi27 = !EverCrypt_AutoConfig2_has_bmi2();
+  bool no_adx7 = !EverCrypt_AutoConfig2_has_adx();
+  bool no_aesni7 = !EverCrypt_AutoConfig2_has_aesni();
+  bool no_shaext7 = !EverCrypt_AutoConfig2_has_shaext();
   if (true)
   {
     EverCrypt_AutoConfig2_disable_vale();
@@ -13152,11 +13112,11 @@ static void test_all()
   print_sep();
   EverCrypt_AutoConfig2_init();
   bool no_avx9 = !EverCrypt_AutoConfig2_has_avx();
-  bool no_avx29 = !EverCrypt_AutoConfig2_has_avx2();
-  bool no_bmi29 = !EverCrypt_AutoConfig2_has_bmi2();
-  bool no_adx9 = !EverCrypt_AutoConfig2_has_adx();
-  bool no_aesni9 = !EverCrypt_AutoConfig2_has_aesni();
-  bool no_shaext9 = !EverCrypt_AutoConfig2_has_shaext();
+  bool no_avx28 = !EverCrypt_AutoConfig2_has_avx2();
+  bool no_bmi28 = !EverCrypt_AutoConfig2_has_bmi2();
+  bool no_adx8 = !EverCrypt_AutoConfig2_has_adx();
+  bool no_aesni8 = !EverCrypt_AutoConfig2_has_aesni();
+  bool no_shaext8 = !EverCrypt_AutoConfig2_has_shaext();
   if (true)
   {
     EverCrypt_AutoConfig2_disable_vale();
@@ -13183,11 +13143,11 @@ static void test_all()
   print_sep();
   EverCrypt_AutoConfig2_init();
   bool no_avx10 = !EverCrypt_AutoConfig2_has_avx();
-  bool no_avx210 = !EverCrypt_AutoConfig2_has_avx2();
-  bool no_bmi210 = !EverCrypt_AutoConfig2_has_bmi2();
-  bool no_adx10 = !EverCrypt_AutoConfig2_has_adx();
-  bool no_aesni10 = !EverCrypt_AutoConfig2_has_aesni();
-  bool no_shaext10 = !EverCrypt_AutoConfig2_has_shaext();
+  bool no_avx29 = !EverCrypt_AutoConfig2_has_avx2();
+  bool no_bmi29 = !EverCrypt_AutoConfig2_has_bmi2();
+  bool no_adx9 = !EverCrypt_AutoConfig2_has_adx();
+  bool no_aesni9 = !EverCrypt_AutoConfig2_has_aesni();
+  bool no_shaext9 = !EverCrypt_AutoConfig2_has_shaext();
   if (true)
   {
     EverCrypt_AutoConfig2_disable_hacl();
@@ -13222,21 +13182,13 @@ static void test_all()
   }
   EverCrypt_AutoConfig2_init();
   bool no_avx11 = !EverCrypt_AutoConfig2_has_avx();
-  bool no_avx2 = !EverCrypt_AutoConfig2_has_avx2();
-  bool no_bmi2 = !EverCrypt_AutoConfig2_has_bmi2();
-  bool no_adx = !EverCrypt_AutoConfig2_has_adx();
-  bool no_aesni = !EverCrypt_AutoConfig2_has_aesni();
-  bool no_shaext = !EverCrypt_AutoConfig2_has_shaext();
+  bool no_avx210 = !EverCrypt_AutoConfig2_has_avx2();
+  bool no_bmi210 = !EverCrypt_AutoConfig2_has_bmi2();
+  bool no_adx10 = !EverCrypt_AutoConfig2_has_adx();
+  bool no_aesni10 = !EverCrypt_AutoConfig2_has_aesni();
+  bool no_shaext10 = !EverCrypt_AutoConfig2_has_shaext();
   bool ite;
-  if
-  (
-    (false && no_avx11)
-    || (false && no_avx2)
-    || (false && no_bmi2)
-    || (false && no_adx)
-    || (false && no_aesni)
-    || (true && no_shaext)
-  )
+  if (no_shaext10)
   {
     ite = false;
   }
