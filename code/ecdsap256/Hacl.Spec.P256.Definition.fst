@@ -465,7 +465,7 @@ let point_z_as_nat (c: curve) (h: mem) (e: point c) : GTot nat =
 
 val felem_eval: c: curve -> h: mem -> f: felem c -> Type0
 
-let felem_eval c h f = live h f /\ as_nat c h f < getPrime c
+let felem_eval c h f = as_nat c h f < getPrime c
 
 
 
