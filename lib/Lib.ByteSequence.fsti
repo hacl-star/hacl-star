@@ -268,3 +268,11 @@ val lemma_uint_from_to_bytes_be_preserves_value :
   #l : secrecy_level ->
   s : lbytes_l l (numbytes t) ->
   Lemma(uint_to_bytes_be #t #l (uint_from_bytes_be #t #l s) `equal` s)
+
+val nat_from_intseq_be_public_to_secret:
+  #t:inttype{unsigned t} -> len:size_pos{len * bits t < pow2 32} -> b:lseq (uint_t t PUB) len ->
+  Lemma (nat_from_intseq_be b == nat_from_intseq_be (map secret b))
+
+val nat_from_intseq_le_public_to_secret:
+  #t:inttype{unsigned t} -> len:size_pos{len * bits t < pow2 32} -> b:lseq (uint_t t PUB) len ->
+  Lemma (nat_from_intseq_le b == nat_from_intseq_le (map secret b))
