@@ -15,7 +15,7 @@
         "refinement_interpretation_Tm_refine_a5c1b398f96e3506835dfbe23f668463"
       ],
       0,
-      "0c5f96c6334a264fa45eac7686173f8b"
+      "fc0a9898a774e6d9eca5a46a4e317278"
     ],
     [
       "Hacl.Impl.Frodo.Pack.lemma_split",
@@ -46,7 +46,7 @@
         "typing_Lib.Sequence.op_At_Bar", "typing_Lib.Sequence.sub"
       ],
       0,
-      "2b85020c093f8b1988bc1ef5eaf83436"
+      "ba7f6397fbec919e308a7d5ea6106ec3"
     ],
     [
       "Hacl.Impl.Frodo.Pack.frodo_pack8",
@@ -99,7 +99,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "caa2513c04b7f8133f384c8bc7b79284"
+      "2e504bf2965579ebfbbd9cccc36fffb0"
     ],
     [
       "Hacl.Impl.Frodo.Pack.frodo_pack8",
@@ -173,7 +173,6 @@
         "lemma_FStar.HyperStack.ST.lemma_same_refs_in_non_tip_regions_elim",
         "lemma_FStar.Map.lemma_ContainsDom",
         "lemma_FStar.Map.lemma_InDomRestrict",
-        "lemma_FStar.Map.lemma_InDomUpd2",
         "lemma_FStar.Map.lemma_SelRestrict", "lemma_FStar.Map.lemma_SelUpd2",
         "lemma_FStar.Map.lemma_UpdDomain",
         "lemma_FStar.Monotonic.HyperHeap.lemma_includes_refl",
@@ -216,9 +215,9 @@
         "lemma_LowStar.Monotonic.Buffer.unused_in_loc_unused_in",
         "lemma_LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2",
         "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
-        "primitive_Prims.op_Equality", "primitive_Prims.op_LessThanOrEqual",
-        "primitive_Prims.op_Multiply", "primitive_Prims.op_Negation",
-        "primitive_Prims.op_Subtraction",
+        "primitive_Prims.op_BarBar", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Negation", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
@@ -272,7 +271,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "823412d1f695f57e1bf1bd47fd0451d8"
+      "a9e2a409609b8295b4f2b335ac7375c2"
     ],
     [
       "Hacl.Impl.Frodo.Pack.frodo_pack",
@@ -339,7 +338,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "ec4387c90b1fc7d592eabfa8eead9c42"
+      "527a0eec17539cae11cb1ed5d031c802"
     ],
     [
       "Hacl.Impl.Frodo.Pack.frodo_pack",
@@ -385,7 +384,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "78d548b33544cc80171664c5cfd595ad"
+      "738a6bac7b71360a46d2c13e2792d664"
     ],
     [
       "Hacl.Impl.Frodo.Pack.frodo_pack",
@@ -437,7 +436,6 @@
         "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.abs",
         "equation_Prims.nat", "equation_Prims.pos",
         "equation_Spec.Frodo.Pack.frodo_pack",
-        "equation_Spec.Frodo.Pack.frodo_pack8",
         "equation_Spec.Frodo.Pack.frodo_pack_inner",
         "equation_Spec.Frodo.Pack.frodo_pack_state",
         "function_token_typing_FStar.Monotonic.Heap.heap",
@@ -452,13 +450,13 @@
         "interpretation_Tm_abs_c7bb29bc094a7f59c71fdfeafebefa0d",
         "lemma_FStar.Map.lemma_ContainsDom",
         "lemma_FStar.Seq.Base.lemma_len_append",
+        "lemma_FStar.Seq.Base.lemma_len_slice",
         "lemma_FStar.Seq.Properties.slice_length",
-        "lemma_FStar.Seq.Properties.slice_slice",
         "lemma_FStar.UInt.pow2_values", "lemma_FStar.UInt32.uv_inv",
         "lemma_Lib.Buffer.as_seq_gsub", "lemma_Lib.Buffer.modifies_sub",
         "lemma_Lib.IntTypes.add_lemma", "lemma_Lib.IntTypes.div_lemma",
-        "lemma_Lib.IntTypes.mul_lemma", "lemma_Lib.Sequence.eq_elim",
-        "lemma_Lib.Sequence.eq_intro",
+        "lemma_Lib.IntTypes.mul_lemma", "lemma_Lib.IntTypes.v_injective",
+        "lemma_Lib.Sequence.eq_elim", "lemma_Lib.Sequence.eq_intro",
         "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
         "lemma_LowStar.Monotonic.Buffer.as_seq_gsub",
         "lemma_LowStar.Monotonic.Buffer.gsub_gsub",
@@ -485,7 +483,6 @@
         "refinement_interpretation_Tm_refine_0f7f5bcf08e8db1ef86bd2d55b0d74fb",
         "refinement_interpretation_Tm_refine_11888fecf812f197898447624c24e106",
         "refinement_interpretation_Tm_refine_12a0c996bc412dba4057dcb00c925231",
-        "refinement_interpretation_Tm_refine_1ba8fd8bb363097813064c67740b2de5",
         "refinement_interpretation_Tm_refine_288fffd419394f450ebf29a6cb5759d8",
         "refinement_interpretation_Tm_refine_29df1888085853325a94ea8a11f8d3c0",
         "refinement_interpretation_Tm_refine_2ddc5df8817091057d11dad9867e2611",
@@ -496,10 +493,12 @@
         "refinement_interpretation_Tm_refine_4f55998d39af884394aa07c1f9207799",
         "refinement_interpretation_Tm_refine_4fa8e2dd96f8bb1e23e6574326e9e019",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_68ee6d2c8678eb431259a3d4f412550b",
         "refinement_interpretation_Tm_refine_6e0c40d9b0e603171a74b91b484a6c19",
         "refinement_interpretation_Tm_refine_709aff84c75b0fff77dcbf3b529649dd",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_7a22ac82553610633db0cd158a7e568f",
+        "refinement_interpretation_Tm_refine_81407705a0828c2c1b1976675443f647",
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
         "refinement_interpretation_Tm_refine_87b488a9cf5689c8094f1a153b9356a0",
         "refinement_interpretation_Tm_refine_9d3fd79fd314167f1a9c213a188da3ec",
@@ -513,8 +512,6 @@
         "refinement_interpretation_Tm_refine_b7b8a98d7f9dfc455cba52ccc6b99145",
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
         "refinement_interpretation_Tm_refine_ccfb92385650697b70eb17a3fc6b5425",
-        "refinement_interpretation_Tm_refine_d3d07693cd71377864ef84dc97d10ec1",
-        "refinement_interpretation_Tm_refine_d83f8da8ef6c1cb9f71d1465c1bb1c55",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Tm_refine_e450d0eda8ec6ce5c9eff42d01f0e81a",
         "refinement_interpretation_Tm_refine_e93917ab9e91cf16ffd49f2f0e44c9b6",
@@ -601,7 +598,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "90f1f4c731580a210a1ddef4d4aabfd4"
+      "c4b81d998939c46f792fba83a4089276"
     ],
     [
       "Hacl.Impl.Frodo.Pack.frodo_unpack8",
@@ -785,7 +782,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "786dcba9dd9c37ab3f8828dcaed767c9"
+      "1ca7f5b5ab9836488b3e51fa5721854c"
     ],
     [
       "Hacl.Impl.Frodo.Pack.frodo_unpack_loop",
@@ -851,7 +848,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "c7b75ac16931773e5b66669b2b975051"
+      "3e6b375129c671b530ea08dcac5e17f3"
     ],
     [
       "Hacl.Impl.Frodo.Pack.frodo_unpack_loop",
@@ -898,7 +895,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "e5db0591d58529f845412f82c5af6831"
+      "8da9e9c756a9459ac74eee9de64a2e16"
     ],
     [
       "Hacl.Impl.Frodo.Pack.frodo_unpack_loop",
@@ -1031,7 +1028,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "b2ea55407061bb144962604794d878ab"
+      "43be8ad7a9bdbae82bb3f57427218fb4"
     ],
     [
       "Hacl.Impl.Frodo.Pack.frodo_unpack",
@@ -1087,7 +1084,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "5ef14f0bc057127bcfc0baaa614a0643"
+      "6b2179333615f3b00b4349f1a516e356"
     ],
     [
       "Hacl.Impl.Frodo.Pack.frodo_unpack",
@@ -1134,7 +1131,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "46ffd5c5aab02de5368c4b2dcf55b2df"
+      "e7ad423311d983fa36f6880380a66e82"
     ],
     [
       "Hacl.Impl.Frodo.Pack.frodo_unpack",
@@ -1233,7 +1230,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "42d7493fb9f17d387d6be4fc675788fb"
+      "45e814e1880e3b6fd6e87469717bd653"
     ]
   ]
 ]
