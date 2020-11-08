@@ -280,7 +280,7 @@ let _move_from_jacobian_coordinates #c u1 u2 s1 s2 p q tempBuffer =
 
   let qX = sub q (size 0) len in 
   let qY = sub q len len in 
-  let qZ = sub q (size 2 *! len) len in 
+  let qZ = sub q (size 2 *! len) len in  
 
   let z2Square = sub tempBuffer (size 0) len in 
   let z1Square = sub tempBuffer len len in 
@@ -300,7 +300,6 @@ let _move_from_jacobian_coordinates #c u1 u2 s1 s2 p q tempBuffer =
     
   montgomery_multiplication_buffer #c z2Cube pY s1;
   montgomery_multiplication_buffer #c z1Cube qY s2;
-
 
   let prime = getPrime c in 
   
@@ -322,38 +321,39 @@ let _move_from_jacobian_coordinates #c u1 u2 s1 s2 p q tempBuffer =
 
   calc (==)
   {
-    (qzD * qzD % prime) * pxD % prime;
+    toDomain ((qzD * qzD % prime) * pxD % prime);
     (==) {lemma_mod_mul_distr_l (qzD * qzD) pxD prime}
-    qzD * qzD * pxD % prime;
+    toDomain (qzD * qzD * pxD % prime);
   };  
     
 
   calc (==)
   {
-    (pzD * pzD % prime) * qxD % prime;
+    toDomain ((pzD * pzD % prime) * qxD % prime);
     (==) {lemma_mod_mul_distr_l (pzD * pzD) qxD prime}
-    pzD * pzD * qxD % prime;
+    toDomain (pzD * pzD * qxD % prime);
   };
 
 
   calc (==)
   {
-    ((qzD * qzD % prime) * qzD % prime) * pyD % prime;
+    toDomain (((qzD * qzD % prime) * qzD % prime) * pyD % prime);
     (==) {lemma_mod_mul_distr_l (qzD * qzD) qzD prime}
-    (qzD * qzD * qzD % prime) * pyD % prime;
+    toDomain ((qzD * qzD * qzD % prime) * pyD % prime);
     (==) {lemma_mod_mul_distr_l (qzD * qzD * qzD) pyD prime}
-    qzD * qzD * qzD * pyD % prime;
+    toDomain (qzD * qzD * qzD * pyD % prime);
   };
 
   calc (==) 
   {
-    ((pzD * pzD % prime) * pzD % prime) * qyD % prime;
+    toDomain (((pzD * pzD % prime) * pzD % prime) * qyD % prime);
     (==) {lemma_mod_mul_distr_l (pzD * pzD) pzD prime}
-    ((pzD * pzD) * pzD % prime) * qyD % prime;
+    toDomain(((pzD * pzD) * pzD % prime) * qyD % prime);
     (==) {lemma_mod_mul_distr_l (pzD * pzD * pzD) qyD prime}
-    pzD * pzD * pzD * qyD % prime;
+    toDomain(pzD * pzD * pzD * qyD % prime);
   }
-  
+
+
 
 inline_for_extraction noextract 
 val move_from_jacobian_coordinates: #c: curve -> p: point c -> q: point c -> 
@@ -1545,7 +1545,60 @@ let point_add #c p q result tempBuffer =
   let t5 = sub tempBuffer (size 12 *! getCoordinateLenU64 c) (size 5 *! getCoordinateLenU64 c) in 
 
   _point_add_0 #c p q t12;
+
+  let h1 = ST.get() in 
+  assert(      
+    let  u1, u2, s1, s2, h, r, uh, hCube = getU1HCube t12 in 
+      
+      u1Invariant #c h1 u1 p q /\
+      u2Invariant #c h1 u2 p q /\ 
+      s1Invariant #c h1 s1 p q /\
+      s2Invariant #c h1 s2 p q /\ 
+      hInvariant #c h1 h u1 u2 /\
+      rInvariant #c h1 r s1 s2 /\
+      uhInvariant #c h1 uh h u1 /\
+      hCubeInvariant #c h1 hCube h);
+
   _point_add_if_second_branch_impl1 result p q t12 t5;
+  
+  let h2 = ST.get() in 
+  lemma_coord_eval c h0 h1 p;
+  lemma_coord_eval c h0 h1 q;
+  
+
+  assert( let prime = getPrime c in 
+
+    let  u1, u2, s1, s2, h, r, _, _ = getU1HCube t12 in 
+  
+    let x3, y3, z3 = point_x_as_nat c h2 result, point_y_as_nat c h2 result, point_z_as_nat c h2 result in
+    let pX, pY, pZ = point_x_as_nat c h0 p, point_y_as_nat c h0 p, point_z_as_nat c h0 p in 
+    let qX, qY, qZ = point_x_as_nat c h0 q, point_y_as_nat c h0 q, point_z_as_nat c h0 q in 
+
+    let pxD, pyD, pzD = fromDomain_ #c pX, fromDomain_ #c pY, fromDomain_ #c pZ in 
+    let qxD, qyD, qzD = fromDomain_ #c qX, fromDomain_ #c qY, fromDomain_ #c qZ in 
+    let x3D, y3D, z3D = fromDomain_ #c x3, fromDomain_ #c y3, fromDomain_ #c z3 in 
+
+    let rD = fromDomain_ #c (as_nat c h1 r) in  
+    let hD = fromDomain_ #c (as_nat c h1 h) in 
+    let s1D = fromDomain_ #c (as_nat c h1 s1) in 
+    let u1D = fromDomain_ #c (as_nat c h1 u1) in  
+
+      u1Invariant #c h1 u1 p q /\
+      u2Invariant #c h1 u2 p q /\ 
+      s1Invariant #c h1 s1 p q /\
+      s2Invariant #c h1 s2 p q /\ 
+      hInvariant #c h1 h u1 u2 /\
+      rInvariant #c h1 r s1 s2 /\ (
+    if qzD = 0 then 
+      x3D == pxD /\ y3D == pyD /\ z3D == pzD
+    else if pzD = 0 then 
+      x3D == qxD /\  y3D == qyD /\ z3D == qzD
+    else 
+      x3 == toDomain_ #c ((rD * rD - hD * hD * hD - 2 * hD * hD * u1D) % prime) /\ 
+      y3 == toDomain_ #c (((hD * hD * u1D - fromDomain_  #c x3) * rD - s1D * hD * hD * hD) % prime) /\
+      z3 == toDomain_ #c (pzD * qzD * hD % prime)));
+
+
   admit()
   
   (*;
