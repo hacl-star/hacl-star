@@ -24,14 +24,6 @@ open FStar.Mul
 
 #set-options "--z3rlimit 500 --ifuel 0 --fuel 0"  
 
-val point_eval: c: curve -> mem -> p: point c -> Type0
-
-let point_eval c h p = 
-  point_x_as_nat c h p < getPrime c /\
-  point_y_as_nat c h p < getPrime c /\
-  point_z_as_nat c h p < getPrime c 
-
-
 val getXYZ: #c: curve -> lbuffer uint64 (size 5 *! getCoordinateLenU64 c) -> GTot (tuple3 (felem c) (felem c) (felem c))
   
 let getXYZ #c t5 = 
@@ -87,112 +79,6 @@ let getU1HCube #c tempBuffer12 =
   (u1, u2, s1, s2, h, r, uh, hCube)
 
 
-noextract       
-val lemma_pointAddToSpecification: 
-  #c: curve ->
-  pxD: nat {pxD < getPrime c} -> pyD: nat {pyD < getPrime c} -> pzD: nat {pzD < getPrime c} -> 
-  qxD: nat {qxD < getPrime c} -> qyD: nat {qyD < getPrime c} -> qzD: nat {qzD < getPrime c} -> 
-  x3: nat -> y3: nat -> z3: nat -> 
-  u1: nat -> u2: nat -> s1: nat -> s2: nat -> 
-  h: nat -> r: nat -> 
-  Lemma
-    (requires (    
-      let prime = getPrime c in 
-      
-      let x3D, y3D, z3D = fromDomain_ #c x3, fromDomain_ #c y3, fromDomain_ #c z3 in 
-
-      let u1D, u2D = fromDomain_ #c u1, fromDomain_ #c u2 in 
-      let s1D, s2D = fromDomain_ #c s1, fromDomain_ #c s2 in 
-      let rD = fromDomain_ #c r in    
-      let hD = fromDomain_ #c h in 
-     
-      u1 == toDomain_ #c (qzD * qzD * pxD % prime) /\
-      u2 == toDomain_ #c (pzD * pzD * qxD % prime) /\
-      s1 == toDomain_ #c (qzD * qzD * qzD * pyD % prime) /\
-      s2 == toDomain_ #c (pzD * pzD * pzD * qyD % prime) /\
-      
-      h == toDomain_ #c ((u2D - u1D) % prime) /\
-      r == toDomain_ #c ((s2D - s1D) % prime) /\
-      (
-      if qzD = 0 then 
-	fromDomain_ #c x3 == pxD /\ fromDomain_ #c y3 == pyD /\ fromDomain_ #c z3 == pzD
-      else if pzD = 0 then 
-	fromDomain_ #c x3  == qxD /\ fromDomain_ #c y3 == qyD /\ fromDomain_ #c z3 == qzD 
-      else
-	x3 == toDomain_ #c ((rD * rD - hD * hD * hD - 2 * hD * hD * u1D) % prime) /\
-	y3 == toDomain_ #c (((hD * hD * u1D - x3D) * rD - s1D * hD * hD * hD) % prime) /\
-	z3 == toDomain_ #c ((pzD * qzD * hD) % prime)
-      )
-    )
-  )
-  (ensures 
-  (    
-    let x3D, y3D, z3D = fromDomain_ #c x3, fromDomain_ #c y3, fromDomain_ #c z3 in 
-    let (xN, yN, zN) = _point_add #c (pxD, pyD, pzD) (qxD, qyD, qzD) in
-    xN == x3D /\  yN == y3D /\ zN == z3D
-  )
-)
-
-
-let lemma_pointAddToSpecification #c pxD pyD pzD qxD qyD qzD x3 y3 z3  u1 u2 s1 s2 h r = 
-  let open FStar.Tactics in 
-  let open FStar.Tactics.Canon in 
-
-  let prime = getPrime c in 
-   
-  let u1D = fromDomain_ #c u1 in 
-  let u2D = fromDomain_ #c u2 in 
-  let s1D = fromDomain_ #c s1 in 
-  let s2D = fromDomain_ #c s2 in 
-
-  let hD = fromDomain_ #c h in 
-  let rD = fromDomain_ #c r in 
-
-  let x3D, y3D, z3D = fromDomain_ #c x3, fromDomain_ #c y3, fromDomain_ #c z3 in 
-
-  calc (==)
-  {
-    qzD * qzD * pxD;
-    (==) {_ by (canon())}
-    pxD * (qzD * qzD);};
-
-  calc (==)
-  {
-    pzD * pzD * qxD;
-    (==) {_ by (canon())}
-    qxD * (pzD * pzD);};  
-
-  calc (==) 
-  {
-    qzD * qzD * qzD * pyD;
-    (==) {_ by (canon())}
-    pyD * qzD * (qzD * qzD);};
-
-  calc (==)
-  {
-    pzD * pzD * pzD * qyD;
-    (==) {_ by (canon())}
-    qyD * pzD * (pzD * pzD);};
-
-  calc (==) 
-  {
-    rD * rD - hD * hD * hD - 2 * hD * hD * u1D;
-    (==) {_ by (canon())}
-    (rD * rD) - (hD * hD * hD) - 2 * u1D * (hD * hD);};
-
-  calc (==)
-  {
-    (hD * hD * u1D - x3D) * rD - s1D * hD * hD * hD;
-    (==) {_ by (canon())}
-    rD * (u1D * (hD * hD) - x3D) - s1D * (hD * hD * hD);};
-
-  calc (==) 
-  {
-    pzD * qzD * hD;
-    (==) {_ by (canon())}
-    hD * pzD * qzD;}
-
-
 val copy_point_conditional: #c: curve -> x3_out: felem c -> y3_out: felem c -> z3_out: felem c -> p: point c -> mask: point c ->
   Stack unit
   (requires fun h -> 
@@ -212,6 +98,7 @@ val copy_point_conditional: #c: curve -> x3_out: felem c -> y3_out: felem c -> z
 
 
 let copy_point_conditional #c x3_out y3_out z3_out p maskPoint = 
+  [@inline_let]
   let len  = getCoordinateLenU64 c in 
   
   let z = sub maskPoint (size 2 *! len) len in 
@@ -371,6 +258,7 @@ val move_from_jacobian_coordinates: #c: curve -> p: point c -> q: point c ->
 
 
 let move_from_jacobian_coordinates #c p q t12 = 
+  [@inline_let]
   let len = getCoordinateLenU64 c in   
   
   let t4 = sub t12 (size 0) (size 4 *! len) in 
@@ -568,10 +456,12 @@ val computex3_point_add: #c : curve -> hCube: felem c -> uh: felem c ->
   )
 
 
-let computex3_point_add #c hCube uh r tempBuffer4 = 
+let computex3_point_add #c hCube uh r t4 = 
+  [@inline_let]
   let len = getCoordinateLenU64 c in 
-  let x3 = sub tempBuffer4 (size 0) len in 
-  let tempBuffer3 = sub tempBuffer4 len (size 3 *! len) in 
+  
+  let x3 = sub t4 (size 0) len in 
+  let tempBuffer3 = sub t4 len (size 3 *! len) in 
   _computeX3_point_add x3 hCube uh r tempBuffer3
 
 
@@ -739,6 +629,7 @@ val computeZ3_point_add: #c: curve -> p: point c -> q: point c ->
     z3Invariant #c h0 h1 z3 z1 z2 h))
 
 let computeZ3_point_add #c p q h t5 = 
+  [@inline_let]
   let len = getCoordinateLenU64 c in 
 
   let z1 = sub p (size 2 *! len) len in 
@@ -1192,6 +1083,7 @@ val _point_add_if_second_branch_impl: #c: curve -> result: point c
 
 
 let _point_add_if_second_branch_impl #c result p q x3y3z3u1u2s1s2 r h uh hCube t5 = 
+  [@inline_let]
   let len = getCoordinateLenU64 c in 
 
   lemma_ICuttable_point_add0 #c; 
@@ -1396,61 +1288,6 @@ let _point_add_if_second_branch_impl1 #c result p q x3hCube t5 =
   _point_add_if_second_branch_impl0 #c result p q x3y3z3u1u2s1s2 rhuhhCube t5
 
 
-(*
-val lemma_u1_eval: c: curve -> h0: mem -> u1: felem c -> h1: mem -> p: point c -> q: point c -> Lemma 
-  (requires (
-    as_nat c h0 u1 == as_nat c h1 u1 /\
-    as_seq h0 p == as_seq h1 p /\
-    as_seq h0 q == as_seq h1 q /\
-    u1Invariant #c h0 h1 u1 p q ))
-  (ensures (u1Invariant #c h1 u1 p q))
-
-let lemma_u1_eval c h0 u1 h1 p q = 
-  point_z_modifies_lemma c h0 h1 q
-
-
-val lemma_u2_eval: c: curve -> h0: mem -> u1: felem c -> h1: mem -> p: point c -> q: point c -> Lemma 
-  (requires (
-      as_nat c h0 u1 == as_nat c h1 u1 /\
-      as_seq h0 p == as_seq h1 p /\
-      as_seq h0 q == as_seq h1 q /\
-      u2Invariant #c h0 u1 p q ))
-  (ensures 
-    (u2Invariant #c h1 u1 p q))
-
-let lemma_u2_eval c h0 u1 h1 p q = 
-  point_z_modifies_lemma c h0 h1 p
-
-
-val lemma_s1_eval: c: curve -> h0: mem -> s1: felem c -> h1: mem -> p: point c -> q: point c -> Lemma 
-  (requires 
-    (
-      as_nat c h0 s1 == as_nat c h1 s1 /\
-      as_seq h0 p == as_seq h1 p /\
-      as_seq h0 q == as_seq h1 q /\
-      s1Invariant #c h0 s1 p q))
-  (ensures (s1Invariant #c h1 s1 p q))
-
-let lemma_s1_eval c h0 s1 h1 p q = 
-  point_z_modifies_lemma c h0 h1 q;
-  point_z_modifies_lemma c h0 h1 p
-
-
-val lemma_s2_eval: c: curve -> h0: mem -> s2: felem c -> h1: mem -> p: point c -> q: point c -> Lemma 
-  (requires 
-    (
-      as_nat c h0 s2 == as_nat c h1 s2 /\
-      as_seq h0 p == as_seq h1 p /\
-      as_seq h0 q == as_seq h1 q /\
-      s2Invariant #c h0 s2 p q   
-    ))
-  (ensures (s2Invariant #c h1 s2 p q))
-
-let lemma_s2_eval c h0 s2 h1 p q = 
-  point_z_modifies_lemma c h0 h1 q;
-  point_z_modifies_lemma c h0 h1 p
-*)
-
 val _point_add_0: #c: curve -> p: point c -> q: point c -> t12: lbuffer uint64 (size 12 *! getCoordinateLenU64 c) -> 
   Stack unit 
     (requires fun h0 ->   
@@ -1472,8 +1309,10 @@ val _point_add_0: #c: curve -> p: point c -> q: point c -> t12: lbuffer uint64 (
       
   
 let _point_add_0 #c p q t12 = 
+  [@inline_let]
   let len = getCoordinateLenU64 c in 
   let h0 = ST.get() in 
+  
   move_from_jacobian_coordinates p q t12;
   compute_common_params_point_add t12;
   let h1 = ST.get() in
@@ -1488,71 +1327,79 @@ let point_add #c p q result tempBuffer =
   let t5 = sub tempBuffer (size 12 *! getCoordinateLenU64 c) (size 5 *! getCoordinateLenU64 c) in 
 
   _point_add_0 #c p q t12;
-
   let h1 = ST.get() in 
-  assert(      
-   let  u1, u2, s1, s2, h, r, uh, hCube = getU1HCube t12 in 
-      
-      u1Invariant #c h0 h1 u1 p q /\
-      u2Invariant #c h0 h1 u2 p q /\ 
-      s1Invariant #c h0 h1 s1 p q /\
-      s2Invariant #c h0 h1 s2 p q /\ 
-      hInvariant #c h1 h u1 u2 /\
-      rInvariant #c h1 r s1 s2 /\
-      uhInvariant #c h1 uh h u1 /\
-      hCubeInvariant #c h1 hCube h);
-
-  admit();
   _point_add_if_second_branch_impl1 result p q t12 t5;
-  admit();
+  
   let h2 = ST.get() in 
   lemma_coord_eval c h0 h1 p;
   lemma_coord_eval c h0 h1 q;
+
   
+  let prime = getPrime c in 
 
-  assert( let prime = getPrime c in 
+  let x3, y3, z3 = point_x_as_nat c h2 result, point_y_as_nat c h2 result, point_z_as_nat c h2 result in
+  let pX, pY, pZ = point_x_as_nat c h0 p, point_y_as_nat c h0 p, point_z_as_nat c h0 p in 
+  let qX, qY, qZ = point_x_as_nat c h0 q, point_y_as_nat c h0 q, point_z_as_nat c h0 q in 
 
-    let  u1, u2, s1, s2, h, r, _, _ = getU1HCube t12 in 
-  
-    let x3, y3, z3 = point_x_as_nat c h2 result, point_y_as_nat c h2 result, point_z_as_nat c h2 result in
-    let pX, pY, pZ = point_x_as_nat c h0 p, point_y_as_nat c h0 p, point_z_as_nat c h0 p in 
-    let qX, qY, qZ = point_x_as_nat c h0 q, point_y_as_nat c h0 q, point_z_as_nat c h0 q in 
-
-    let pxD, pyD, pzD = fromDomain_ #c pX, fromDomain_ #c pY, fromDomain_ #c pZ in 
-    let qxD, qyD, qzD = fromDomain_ #c qX, fromDomain_ #c qY, fromDomain_ #c qZ in 
-    let x3D, y3D, z3D = fromDomain_ #c x3, fromDomain_ #c y3, fromDomain_ #c z3 in 
-
-    let rD = fromDomain_ #c (as_nat c h1 r) in  
-    let hD = fromDomain_ #c (as_nat c h1 h) in 
-    let s1D = fromDomain_ #c (as_nat c h1 s1) in 
-    let u1D = fromDomain_ #c (as_nat c h1 u1) in  (
-    if qzD = 0 then 
-      x3D == pxD /\ y3D == pyD /\ z3D == pzD
-    else if pzD = 0 then 
-      x3D == qxD /\  y3D == qyD /\ z3D == qzD
-    else 
-      x3 == toDomain_ #c ((rD * rD - hD * hD * hD - 2 * hD * hD * u1D) % prime) /\ 
-      y3 == toDomain_ #c (((hD * hD * u1D - fromDomain_  #c x3) * rD - s1D * hD * hD * hD) % prime) /\
-      z3 == toDomain_ #c (pzD * qzD * hD % prime)));
+  let pxD, pyD, pzD = fromDomain_ #c pX, fromDomain_ #c pY, fromDomain_ #c pZ in 
+  let qxD, qyD, qzD = fromDomain_ #c qX, fromDomain_ #c qY, fromDomain_ #c qZ in 
+  let x3D, y3D, z3D = fromDomain_ #c x3, fromDomain_ #c y3, fromDomain_ #c z3 in 
 
 
-  admit()
-  
-  (*;
-    let h1 = ST.get() in 
+  calc (==)
+  {
+    qzD * qzD * pxD % prime;
+    (==) {_ by (canon())}
+    pxD * (qzD * qzD) % prime; };
+    
+  calc (==)
+  {
+    pzD * pzD * qxD % prime;
+    (==) {_ by (canon())}
+    qxD * (pzD * pzD) % prime;
+  };
+    
+  calc (==)
+  {
+    qzD * qzD * qzD * pyD % prime;
+    (==) {_ by (canon())}
+    pyD * qzD * (qzD * qzD) % prime;
+  };
+
+  calc(==)
+  {
+    pzD * pzD * pzD * qyD % prime;
+    (==) {_ by (canon())}
+    qyD * pzD * (pzD * pzD) % prime;
+  };
 
 
-    let len = getCoordinateLenU64 c in 
-      let pxD = fromDomain_ #c (as_nat c h0 (gsub p (size 0) len)) in 
-      let pyD = fromDomain_ #c (as_nat c h0 (gsub p len len)) in 
-      let pzD = fromDomain_ #c (as_nat c h0 (gsub p (size 2 *! len) len)) in
-      
-      let qxD = fromDomain_ #c (as_nat c h0 (gsub q (size 0) len)) in 
-      let qyD = fromDomain_ #c (as_nat c h0 (gsub q len len)) in 
-      let qzD = fromDomain_ #c (as_nat c h0 (gsub q (size 2 *! len) len)) in 
-      
-      let x3 = as_nat c h1 (gsub result (size 0) len) in 
-      let y3 = as_nat c h1 (gsub result len len) in 
-      let z3 = as_nat c h1 (gsub result (size 2 *! len) len) in 
-      lemma_pointAddToSpecification #c  pxD pyD pzD qxD qyD qzD x3 y3 z3 (as_nat c h1 u1) (as_nat c h1 u2) (as_nat c h1 s1) (as_nat c h1 s2) (as_nat c h1 h) (as_nat c h1 r)
-*)
+  let u1D = pxD * (qzD * qzD) % prime in
+  let u2D = qxD * (pzD * pzD) % prime in    
+
+  let s1D = pyD * qzD * (qzD * qzD) % prime in 
+  let s2D = qyD * pzD * (pzD * pzD) % prime in 
+    
+  let hD = (u2D - u1D) % prime in
+  let rD = (s2D - s1D) % prime in  
+
+  calc (==)
+  {
+    (rD * rD - hD * hD * hD - 2 * hD * hD * u1D) % prime;
+    (==) {_ by (canon())}
+    ((rD * rD) - (hD * hD * hD) - (2 * u1D * (hD * hD))) % prime;
+  };
+
+  calc (==)
+  {
+    (((hD * hD * u1D - fromDomain_  #c x3) * rD - s1D * hD * hD * hD) % prime);
+    (==) {_ by (canon())}
+    (rD * (u1D * (hD * hD) - fromDomain_  #c x3) - s1D * (hD * hD * hD)) % prime;
+  };
+
+  calc (==)
+  {
+    (pzD * qzD * hD % prime);
+    (==) {_ by (canon())}
+    (hD * pzD * qzD) % prime;
+  }

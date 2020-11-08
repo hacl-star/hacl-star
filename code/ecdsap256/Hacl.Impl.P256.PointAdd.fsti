@@ -14,24 +14,24 @@ open Hacl.Spec.P256.MontgomeryMultiplication
 
 #set-options "--z3rlimit 100"
 
+let point_eval (c: curve) (h:mem) (p:point c) = 
+  point_x_as_nat c h p < getPrime c /\
+  point_y_as_nat c h p < getPrime c /\
+  point_z_as_nat c h p < getPrime c 
+  
+
 val point_add: #c: curve -> p: point c -> q: point c -> result: point c 
   -> tempBuffer: lbuffer uint64 (size 27 *! getCoordinateLenU64 c) -> 
    Stack unit (requires fun h -> 
-     let prime = getPrime c in 
      live h p /\ live h q /\ live h result /\ live h tempBuffer /\ 
+     
      eq_or_disjoint q result /\ disjoint p q /\ disjoint p tempBuffer /\ 
      disjoint q tempBuffer /\ disjoint p result /\ disjoint result tempBuffer /\ 
      
-     point_x_as_nat c h p < prime /\ 
-     point_y_as_nat c h p < prime /\ 
-     point_z_as_nat c h p < prime /\
-      
-     point_x_as_nat c h q < prime /\ 
-     point_y_as_nat c h q < prime /\ 
-     point_z_as_nat c h q < prime
+     point_eval c h p /\ point_eval c h q
    )
    (ensures fun h0 _ h1 -> 
-     modifies (loc tempBuffer |+| loc result) h0 h1 /\ (
+     modifies (loc tempBuffer |+| loc result) h0 h1 /\ point_eval c h1 result /\ (
      let prime = getPrime c in 
     
      let pX, pY, pZ = point_x_as_nat c h0 p, point_y_as_nat c h0 p, point_z_as_nat c h0 p in 
@@ -43,5 +43,4 @@ val point_add: #c: curve -> p: point c -> q: point c -> result: point c
      let x3D, y3D, z3D = fromDomain_ #c x3, fromDomain_ #c y3, fromDomain_ #c z3 in
       
      let xN, yN, zN = _point_add #c (pxD, pyD, pzD) (qxD, qyD, qzD) in 
-
-     x3 < prime /\  y3 < prime /\ z3 < prime /\  x3D == xN /\ y3D == yN /\ z3D == zN))
+     x3D == xN /\ y3D == yN /\ z3D == zN))
