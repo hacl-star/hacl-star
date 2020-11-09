@@ -27,6 +27,8 @@ let ffdhe_compute_exp (a:S.ffdhe_alg) : DH.ffdhe_compute_exp_st t_limbs a (DH.ff
   DH.ffdhe_compute_exp a (DH.ffdhe_len a) (ke a)
 
 
+let ffdhe_len (a:S.ffdhe_alg) : DH.size_pos = DH.ffdhe_len a
+
 val ffdhe_secret_to_public: a:S.ffdhe_alg ->
   DH.ffdhe_secret_to_public_st t_limbs a (DH.ffdhe_len a) (ke a)
 let ffdhe_secret_to_public a sk pk =
