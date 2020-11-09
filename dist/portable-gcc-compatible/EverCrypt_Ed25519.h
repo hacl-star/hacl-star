@@ -47,7 +47,7 @@ void EverCrypt_Ed25519_sign(uint8_t *signature, uint8_t *secret, uint32_t len, u
 
 /* SNIPPET_START: EverCrypt_Ed25519_verify */
 
-bool EverCrypt_Ed25519_verify(uint8_t *output, uint32_t len, uint8_t *msg, uint8_t *signature);
+bool EverCrypt_Ed25519_verify(uint8_t *pubkey, uint32_t len, uint8_t *msg, uint8_t *signature);
 
 /* SNIPPET_END: EverCrypt_Ed25519_verify */
 

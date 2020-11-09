@@ -10,7 +10,7 @@ open FStar.Mul
 
 #set-options "--z3rlimit 50 --ifuel 0 --fuel 0"
 
-inline_for_extraction noextract
+inline_for_extraction
 let add_carry_st (t:inttype{t = U32 \/ t = U64}) =
     cin:uint_t t SEC
   -> x:uint_t t SEC
@@ -24,21 +24,19 @@ let add_carry_st (t:inttype{t = U32 \/ t = U64}) =
     v r + v c * pow2 (bits t) == v x + v y + v cin))
 
 
-noextract
 val add_carry_u32: add_carry_st U32
 
-noextract
 val add_carry_u64: add_carry_st U64
 
 
-inline_for_extraction noextract
+inline_for_extraction
 let add_carry (#t:inttype{t = U32 \/ t = U64}) : add_carry_st t =
   match t with
   | U32 -> add_carry_u32
   | U64 -> add_carry_u64
 
 
-inline_for_extraction noextract
+inline_for_extraction
 let sub_borrow_st (t:inttype{t = U32 \/ t = U64}) =
     cin:uint_t t SEC
   -> x:uint_t t SEC
@@ -52,14 +50,12 @@ let sub_borrow_st (t:inttype{t = U32 \/ t = U64}) =
     v r - v c * pow2 (bits t) == v x - v y - v cin))
 
 
-noextract
 val sub_borrow_u32: sub_borrow_st U32
 
-noextract
 val sub_borrow_u64: sub_borrow_st U64
 
 
-inline_for_extraction noextract
+inline_for_extraction
 let sub_borrow (#t:inttype{t = U32 \/ t = U64}) : sub_borrow_st t =
   match t with
   | U32 -> sub_borrow_u32

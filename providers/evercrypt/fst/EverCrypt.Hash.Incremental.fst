@@ -63,7 +63,7 @@ let mk_words_state (#a : hash_alg) (s : words_state' a)
 let hash_len a = Hacl.Hash.Definitions.hash_len a
 let block_len a = Hacl.Hash.Definitions.block_len a
 
-#push-options "--ifuel 1"
+#push-options "--ifuel 1 --retry 5"
 inline_for_extraction noextract
 let evercrypt_hash : block hash_alg =
   Block

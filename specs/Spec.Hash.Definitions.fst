@@ -44,7 +44,7 @@ let is_sha2 = function
   | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 -> true
   | _ -> false
 
-noextract inline_for_extraction
+ inline_for_extraction
 let is_blake = function
   | Blake2S | Blake2B -> true
   | _ -> false
@@ -56,12 +56,12 @@ let is_md = function
 let sha2_alg = a:hash_alg { is_sha2 a }
 let blake_alg = a:hash_alg { is_blake a }
 
-noextract inline_for_extraction
+ inline_for_extraction
 let to_blake_alg (a:blake_alg) = match a with
   | Blake2S -> Spec.Blake2.Blake2S
   | Blake2B -> Spec.Blake2.Blake2B
 
-noextract inline_for_extraction
+ inline_for_extraction
 let to_hash_alg (a : Spec.Blake2.alg) =
   match a with
   | Spec.Blake2.Blake2S -> Blake2S
@@ -72,7 +72,7 @@ let to_hash_alg (a : Spec.Blake2.alg) =
 (* In bytes. *)
 
 // BB. Needs to be renamed...
-inline_for_extraction noextract
+inline_for_extraction 
 let max_input_length: hash_alg -> Tot pos = function
   | MD5 | SHA1
   | SHA2_224 | SHA2_256 -> pow2 61 - 1
@@ -158,12 +158,12 @@ let word_length: hash_alg -> Tot nat = function
   | Blake2B -> 8
 
 (* Number of words for a block size *)
-noextract
+
 let block_word_length = 16
 
 (* Define the size block in bytes *)
 // BB. Needs to be renamed
-noextract
+
 let block_length a =
   let open FStar.Mul in
   word_length a * block_word_length
@@ -172,7 +172,7 @@ let block_length a =
 let size_block = block_length
 
 (* Number of words for intermediate hash, i.e. the working state. *)
-inline_for_extraction noextract
+inline_for_extraction 
 let state_word_length a =
   match a with
   | MD5 -> 4
@@ -180,7 +180,7 @@ let state_word_length a =
   | Blake2S | Blake2B -> 4
   | _ -> 8
 
-inline_for_extraction noextract
+inline_for_extraction 
 let extra_state a = match a with
   | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 -> unit
   // Directly storing the length instead of the number of blocks to avoid
@@ -190,48 +190,48 @@ let extra_state a = match a with
   | Blake2S -> uint_t U64 SEC
   | Blake2B -> uint_t U128 SEC
 
-inline_for_extraction noextract
+inline_for_extraction 
 let extra_state_v (#a:hash_alg) (s:extra_state a) : nat =
   match a with
   | MD5 | SHA1 | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 -> 0
   | Blake2S -> v #U64 #SEC s
   | Blake2B -> v #U128 #SEC s
 
-inline_for_extraction noextract
+inline_for_extraction 
 let extra_state_int_type : a:hash_alg{is_blake a} -> inttype = function
   | Blake2S -> U64
   | Blake2B -> U128
 
-inline_for_extraction noextract
+inline_for_extraction 
 let extra_state_int_t (a:hash_alg{is_blake a}) : Type0 =
   int_t (extra_state_int_type a) SEC
 
-noextract
+
 let max_extra_state (a:hash_alg{is_blake a}) : nat =
   maxint (extra_state_int_type a)
 
 // Do not use this in Low* code: it is not possible to directly convert a
 // constant nat to a uint128.
-noextract
+
 let nat_to_extra_state (a:hash_alg{is_blake a}) (n:nat{n <= max_extra_state a}) :
   extra_state a =
   match a with
   | Blake2S -> mk_int #U64 #SEC n
   | Blake2B -> mk_int #U128 #SEC n
 
-inline_for_extraction noextract
+inline_for_extraction 
 let extra_state_add_nat (#a:hash_alg{is_blake a}) (s : extra_state a)
                         (n:nat{n <= maxint (extra_state_int_type a)}) :
   extra_state a =
   (s <: extra_state_int_t a) +. nat_to_extra_state a n
 
-inline_for_extraction noextract
+inline_for_extraction 
 let extra_state_add_size_t (#a:hash_alg{is_blake a}) (s : extra_state a) (n : size_t) :
   s':extra_state a{s' == extra_state_add_nat s (size_v n)} =
   (s <: extra_state_int_t a) +. (cast (extra_state_int_type a) SEC n)
 
 (* The working state *)
-inline_for_extraction noextract
+inline_for_extraction 
 let words_state' a = m:Seq.seq (word a) {Seq.length m = state_word_length a}
 
 let words_state a = words_state' a & extra_state a
@@ -249,7 +249,7 @@ let hash_word_length: hash_alg -> Tot nat = function
 
 (* Define the final hash length in bytes *)
 // BB. Needs to be renamed
-noextract
+
 let hash_length a =
   let open FStar.Mul in
   word_length a * hash_word_length a

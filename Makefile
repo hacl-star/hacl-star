@@ -738,9 +738,6 @@ dist/wasm/Makefile.basic: HASH_BUNDLE += -bundle Hacl.HMAC_DRBG
 # Doesn't work in WASM because un-materialized externals for AES128
 dist/wasm/Makefile.basic: FRODO_BUNDLE = -bundle Hacl.Frodo.KEM,Frodo.Params,Hacl.Impl.Frodo.*,Hacl.Impl.Matrix,Hacl.Frodo.*,Hacl.Keccak,Hacl.AES128
 
-# Doesn't work in Wasm because it uses assembler intrinsics
-dist/wasm/Makefile.basic: P256_BUNDLE= -bundle Hacl.P256,Hacl.Impl.ECDSA.*,Hacl.Impl.SolinasReduction,Hacl.Impl.P256.*
-
 # No Vale Curve64 no "Local" or "Slow" Curve64, only Curve51 (local Makefile hack)
 dist/wasm/Makefile.basic: CURVE_BUNDLE_SLOW =
 dist/wasm/Makefile.basic: CURVE_BUNDLE = \

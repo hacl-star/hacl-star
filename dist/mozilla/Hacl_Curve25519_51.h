@@ -37,6 +37,33 @@ extern "C" {
 
 #include "Hacl_Kremlib.h"
 
+void Hacl_Impl_Curve25519_Field51_fadd(uint64_t *out, uint64_t *f1, uint64_t *f2);
+
+void Hacl_Impl_Curve25519_Field51_fsub(uint64_t *out, uint64_t *f1, uint64_t *f2);
+
+void
+Hacl_Impl_Curve25519_Field51_fmul(
+  uint64_t *out,
+  uint64_t *f1,
+  uint64_t *f2,
+  FStar_UInt128_uint128 *uu___
+);
+
+void Hacl_Impl_Curve25519_Field51_fmul1(uint64_t *out, uint64_t *f1, uint64_t f2);
+
+void
+Hacl_Impl_Curve25519_Field51_fsqr(uint64_t *out, uint64_t *f, FStar_UInt128_uint128 *uu___);
+
+void
+Hacl_Curve25519_51_fsquare_times(
+  uint64_t *o,
+  uint64_t *inp,
+  FStar_UInt128_uint128 *tmp,
+  uint32_t n
+);
+
+void Hacl_Curve25519_51_finv(uint64_t *o, uint64_t *i, FStar_UInt128_uint128 *tmp);
+
 void Hacl_Curve25519_51_scalarmult(uint8_t *out, uint8_t *priv, uint8_t *pub);
 
 void Hacl_Curve25519_51_secret_to_public(uint8_t *pub, uint8_t *priv);
