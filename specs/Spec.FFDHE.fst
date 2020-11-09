@@ -27,7 +27,6 @@ let list_ffdhe_g2: List.Tot.llist pub_uint8 1 =
   assert_norm (List.Tot.length l == 1);
   l
 
-inline_for_extraction
 let ffdhe_g2: lseq pub_uint8 1 = of_list list_ffdhe_g2
 
 
@@ -72,7 +71,6 @@ let list_ffdhe_p2048: List.Tot.llist pub_uint8 256 =
   assert_norm (List.Tot.length l == 256);
   l
 
-inline_for_extraction
 let ffdhe_p2048: lseq pub_uint8 256 = of_list list_ffdhe_p2048
 
 // The estimated symmetric-equivalent strength of this group is 103 bits.
@@ -137,7 +135,6 @@ let list_ffdhe_p3072: List.Tot.llist pub_uint8 384 =
   assert_norm (List.Tot.length l == 384);
   l
 
-inline_for_extraction
 let ffdhe_p3072: lseq pub_uint8 384 = of_list list_ffdhe_p3072
 
 // The estimated symmetric-equivalent strength of this group is 125 bits.
@@ -218,7 +215,6 @@ let list_ffdhe_p4096: List.Tot.llist pub_uint8 512 =
   assert_norm (List.Tot.length l == 512);
   l
 
-inline_for_extraction
 let ffdhe_p4096: lseq pub_uint8 512 = of_list list_ffdhe_p4096
 
 // The estimated symmetric-equivalent strength of this group is 150 bits.
@@ -331,7 +327,6 @@ let list_ffdhe_p6144: List.Tot.llist pub_uint8 768 =
   assert_norm (List.Tot.length l == 768);
   l
 
-inline_for_extraction
 let ffdhe_p6144: lseq pub_uint8 768 = of_list list_ffdhe_p6144
 
 // The estimated symmetric-equivalent strength of this group is 175 bits.
@@ -476,7 +471,6 @@ let list_ffdhe_p8192: List.Tot.llist pub_uint8 1024 =
   assert_norm (List.Tot.length l == 1024);
   l
 
-inline_for_extraction
 let ffdhe_p8192: lseq pub_uint8 1024 = of_list list_ffdhe_p8192
 
 // The estimated symmetric-equivalent strength of this group is 192 bits.
@@ -492,7 +486,6 @@ type ffdhe_alg =
   | FFDHE8192
 
 
-inline_for_extraction
 let get_ffdhe_params (a:ffdhe_alg) : ffdhe_params_t =
   allow_inversion ffdhe_alg;
   match a with
@@ -503,7 +496,6 @@ let get_ffdhe_params (a:ffdhe_alg) : ffdhe_params_t =
   | FFDHE8192 -> ffdhe_params_8192
 
 
-inline_for_extraction
 let ffdhe_len (a:ffdhe_alg) : size_pos =
   allow_inversion ffdhe_alg;
   match a with
