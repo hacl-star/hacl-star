@@ -13,22 +13,6 @@ module BE = Hacl.Bignum.Exponentiation
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-inline_for_extraction noextract
-let t_limbs = U64
-
-inline_for_extraction noextract
-let n_limbs = 64ul // =512/8
-
-inline_for_extraction noextract
-let a_ffdhe = Spec.FFDHE.FFDHE4096
-
-inline_for_extraction noextract
-let len = normalize_term (DH.ffdhe_len a_ffdhe) //=512ul
-
-// a specialized version of bignum
-// inline_for_extraction noextract
-// let ke_4096 = BE.mk_runtime_exp #t_limbs n_limbs
-
 let add (a b: BD.lbignum t_limbs n_limbs): BN.bn_add_eq_len_st a b =
   BN.bn_add_eq_len n_limbs a b
 
@@ -127,11 +111,9 @@ let ffdhe_compute_exp : DH.ffdhe_compute_exp_st t_limbs a_ffdhe len ke_4096 =
   DH.ffdhe_compute_exp a_ffdhe len ke_4096
 
 
-val ffdhe_secret_to_public: DH.ffdhe_secret_to_public_st t_limbs a_ffdhe len ke_4096
 let ffdhe_secret_to_public sk pk =
   DH.ffdhe_secret_to_public a_ffdhe len ke_4096 ffdhe_compute_exp sk pk
 
 
-val ffdhe_shared_secret: DH.ffdhe_shared_secret_st t_limbs a_ffdhe len ke_4096
 let ffdhe_shared_secret sk pk ss =
   DH.ffdhe_shared_secret a_ffdhe len ke_4096 ffdhe_check_pk ffdhe_compute_exp sk pk ss
