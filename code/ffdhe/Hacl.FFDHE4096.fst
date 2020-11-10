@@ -102,6 +102,11 @@ instance ke_4096: BE.exp t_limbs = {
 
 private
 [@CInline]
+let ffdhe_precomp_p : DH.ffdhe_precomp_p_st t_limbs a_ffdhe len ke_4096 =
+  DH.ffdhe_precomp_p a_ffdhe len ke_4096
+
+private
+[@CInline]
 let ffdhe_check_pk : DH.ffdhe_check_pk_st t_limbs a_ffdhe len =
   DH.ffdhe_check_pk #t_limbs a_ffdhe len
 
@@ -111,9 +116,17 @@ let ffdhe_compute_exp : DH.ffdhe_compute_exp_st t_limbs a_ffdhe len ke_4096 =
   DH.ffdhe_compute_exp a_ffdhe len ke_4096
 
 
-let ffdhe_secret_to_public sk pk =
-  DH.ffdhe_secret_to_public a_ffdhe len ke_4096 ffdhe_compute_exp sk pk
+let new_ffdhe_precomp_p =
+  DH.new_ffdhe_precomp_p a_ffdhe len ke_4096 ffdhe_precomp_p
 
+let ffdhe_secret_to_public_precomp p_r2_n sk pk =
+  DH.ffdhe_secret_to_public_precomp a_ffdhe len ke_4096 ffdhe_compute_exp p_r2_n sk pk
+
+let ffdhe_secret_to_public sk pk =
+  DH.ffdhe_secret_to_public a_ffdhe len ke_4096 ffdhe_secret_to_public_precomp ffdhe_precomp_p sk pk
+
+let ffdhe_shared_secret_precomp p_r2_n sk pk ss =
+  DH.ffdhe_shared_secret_precomp a_ffdhe len ke_4096 ffdhe_check_pk ffdhe_compute_exp p_r2_n sk pk ss
 
 let ffdhe_shared_secret sk pk ss =
-  DH.ffdhe_shared_secret a_ffdhe len ke_4096 ffdhe_check_pk ffdhe_compute_exp sk pk ss
+  DH.ffdhe_shared_secret a_ffdhe len ke_4096 ffdhe_shared_secret_precomp ffdhe_precomp_p sk pk ss
