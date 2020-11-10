@@ -28,7 +28,7 @@ inline_for_extraction
 val uint_from_le: #t:inttype{unsigned t /\ ~(U128? t)} -> #l:secrecy_level -> uint_t t l -> uint_t t l
 
 (** Constructs the equality mask for two buffers of secret integers in constant-time *)
-inline_for_extraction noextract
+inline_for_extraction 
 val buf_eq_mask:
     #t:inttype{~(S128? t)}
   -> #len1:size_t

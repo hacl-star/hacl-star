@@ -16,7 +16,7 @@ let prime = prime256
 
 #set-options "--z3rlimit 100"  
 
-noextract       
+       
 val lemma_pointAddToSpecification: 
   pxD: nat {pxD < prime256} -> pyD: nat{pyD < prime256} -> pzD: nat {pzD < prime256} -> 
   qxD: nat {qxD < prime256} -> qyD: nat {qyD < prime256} -> qzD: nat {qzD < prime256} -> 

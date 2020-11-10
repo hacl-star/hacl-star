@@ -210,7 +210,6 @@ let split_at_last_lazy_nb_rem
 #pop-options
 
 #push-options "--z3cliopt smt.arith.nl=false"
-noextract
 let split_at_last_lazy
   (l: pos)
   (b: S.seq uint8) :
