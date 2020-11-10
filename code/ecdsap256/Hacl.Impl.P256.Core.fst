@@ -174,31 +174,32 @@ let lemma_norm_as_specification #c xD yD zD x3 y3 z3 =
   }
 *)
 
+
 [@ CInline]
 val cswap: #c: curve ->  bit:uint64{v bit <= 1} -> p:point c -> q:point c
   -> Stack unit
     (requires fun h ->
-      let len = getCoordinateLenU64 c in 
-      let prime = getPrime c in 
-  
-      live h p /\ live h q /\ eq_or_disjoint p q /\
-      
-      as_nat c h (gsub p (size 0) len) < prime /\ 
-      as_nat c h (gsub p len len) < prime /\
-      as_nat c h (gsub p (size 2 *! len) len) < prime /\
-       
-      as_nat c h (gsub q (size 0) len) < prime /\  
-      as_nat c h (gsub q len len) < prime /\
-      as_nat c h (gsub q (size 2 *! len) len) < prime )
+      live h p /\ live h q /\ eq_or_disjoint p q /\ point_eval c h p /\ point_eval c h q)
     (ensures  fun h0 _ h1 ->
       modifies (loc p |+| loc q) h0 h1 /\
-      (let pBefore = as_seq h0 p in let qBefore = as_seq h0 q in 
-  let pAfter = as_seq h1 p in let qAfter = as_seq h1 q in 
-  let condP0, condP1 = conditional_swap #c bit pBefore qBefore  in 
-  condP0 == pAfter /\ condP1 == qAfter) /\ 
-
+      point_eval c h1 p /\ point_eval c h1 q /\ (
+      let pBefore = as_seq h0 p in let qBefore = as_seq h0 q in 
+      let pAfter = as_seq h1 p in let qAfter = as_seq h1 q in 
+      let condP0, condP1 = conditional_swap #c bit pBefore qBefore  in 
+      condP0 == pAfter /\ condP1 == qAfter) /\
       (v bit == 1 ==> as_seq h1 p == as_seq h0 q /\ as_seq h1 q == as_seq h0 p) /\
-      (v bit == 0 ==> as_seq h1 p == as_seq h0 p /\ as_seq h1 q == as_seq h0 q))
+      (v bit == 0 ==> as_seq h1 p == as_seq h0 p /\ as_seq h1 q == as_seq h0 q)
+      )
+
+val lemma_point_eval_swapped: c: curve -> h0: mem -> h1: mem -> p: point c -> q: point c ->
+  Lemma (requires (point_eval c h0 p /\ as_seq h0 p == as_seq h1 q))
+  (ensures (point_eval c h1 q))
+
+let lemma_point_eval_swapped c h0 h1 p q = 
+  assert(
+    as_nat c h0 (gsub p (size 2 *! getCoordinateLenU64 c) (getCoordinateLenU64 c)) == 
+    as_nat c h1 (gsub q (size 2 *! getCoordinateLenU64 c) (getCoordinateLenU64 c)))
+
 
 
 let cswap #c bit p1 p2 =
@@ -226,41 +227,46 @@ let cswap #c bit p1 p2 =
       lemma_cswap2_step bit ((as_seq h0 p1).[v i]) ((as_seq h0 p2).[v i])
     );
   let h1 = ST.get () in
+  
   Lib.Sequence.eq_intro (as_seq h1 p1) (if v bit = 1 then as_seq h0 p2 else as_seq h0 p1);
-  Lib.Sequence.eq_intro (as_seq h1 p2) (if v bit = 1 then as_seq h0 p1 else as_seq h0 p2)
+  Lib.Sequence.eq_intro (as_seq h1 p2) (if v bit = 1 then as_seq h0 p1 else as_seq h0 p2);
+
+    (*    (v bit == 1 ==> as_seq h1 p == as_seq h0 q /\ as_seq h1 q == as_seq h0 p) /\
+      (v bit == 0 ==> as_seq h1 p == as_seq h0 p /\ as_seq h1 q == as_seq h0 q) *)
+
+
+  if v bit = 1 then begin
+    lemma_point_eval_swapped c h0 h1 p1 p2;
+    lemma_point_eval_swapped c h0 h1 p2 p1 
+    end
+  else begin
+    lemma_point_eval c h0 h1 p1;
+    lemma_point_eval c h0 h1 p2 end
 
 
 val normalisation_update: #c: curve -> z2x: felem c -> z3y: felem c -> p: point c 
   -> resultPoint: point c -> Stack unit 
   (requires fun h -> 
-  
-    let prime = getPrime c in 
-    let len = getCoordinateLenU64 c in 
-  
     live h z2x /\ live h z3y /\ live h resultPoint /\ live h p /\ 
-    
-    as_nat c h z2x < prime /\ as_nat c h z3y < prime /\
-    as_nat c h (gsub p (size 2 *! len) len) < prime /\
-    
-    disjoint z2x z3y /\ disjoint z2x resultPoint /\ disjoint z3y resultPoint)
-  (ensures fun h0 _ h1 -> 
-    let prime = getPrime c in 
-    let len = getCoordinateLenU64 c in 
-    modifies (loc resultPoint) h0 h1 /\
-    (
-      let x0 = as_nat c h0 (gsub p (size 0) len) in 
-      let y0 = as_nat c h0 (gsub p len len) in 
-      let z0 = as_nat c h0 (gsub p (size 2 *! len) len) in 
+    felem_eval c h z2x /\ felem_eval c h z3y /\ felem_eval c h (getZ p) /\
+    disjoint z2x z3y /\ disjoint z2x resultPoint /\ disjoint z3y resultPoint
+  )
+  (ensures fun h0 _ h1 -> modifies (loc resultPoint) h0 h1 /\ (
+    let x0 = point_x_as_nat c h0 p in 
+    let y0 = point_y_as_nat c h0 p in 
+    let z0 = point_z_as_nat c h0 p in 
 
-      let x1 = as_nat c h1 (gsub resultPoint (size 0) len) in 
-      let y1 = as_nat c h1 (gsub resultPoint len len) in 
-      let z1 = as_nat c h1 (gsub resultPoint (size 2 *! len) len) in 
+    let x1 = point_x_as_nat c h1 resultPoint in 
+    let y1 = point_y_as_nat c h1 resultPoint in 
+    let z1 = point_z_as_nat c h1 resultPoint in 
 
-      x1 == fromDomain_ #c (as_nat c h0 z2x) /\ y1 == fromDomain_ #c (as_nat c h0 z3y)  /\ 
-      (
-	if Spec.P256.isPointAtInfinity (fromDomain_ #c x0, fromDomain_ #c y0, fromDomain_ #c z0) 
-	then z1 == 0 else z1 == 1)))
-
+    x1 == fromDomain_ #c (as_nat c h0 z2x) /\ 
+    y1 == fromDomain_ #c (as_nat c h0 z3y) /\ (
+    if Spec.P256.isPointAtInfinity (fromDomain_ #c x0, fromDomain_ #c y0, fromDomain_ #c z0) 
+    then 
+      z1 == 0 
+    else 
+      z1 == 1)))
 
 let normalisation_update #c z2x z3y p resultPoint = 
   push_frame(); 
@@ -277,9 +283,7 @@ let normalisation_update #c z2x z3y p resultPoint =
   uploadOneImpl #c resultZ;
   copy_conditional #c resultZ zeroBuffer bit;
 
-  admit();
   pop_frame()
-
 
 
 
@@ -293,7 +297,18 @@ val lemma_three_mul_nat: a: nat -> b: nat -> c: nat -> Lemma (a * b * c >= 0)
 let lemma_three_mul_nat a b c = ()
 
 
+(* val norm: #c: curve -> p: point c -> resultPoint: point c -> 
+  tempBuffer: lbuffer uint64 (size 22 *! getCoordinateLenU64 c) -> Stack unit
+  (requires fun h -> 
+    live h p /\ live h resultPoint /\ live h tempBuffer /\ 
+    disjoint p tempBuffer /\ disjoint tempBuffer resultPoint /\ 
+    point_eval c h p) 
+  (ensures fun h0 _ h1 -> modifies (loc tempBuffer |+| loc resultPoint) h0 h1 /\ (
+    let resultPoint =  point_prime_to_coordinates c (as_seq h1 resultPoint) in 
+    let pointD = fromDomainPoint #c (point_prime_to_coordinates c (as_seq h0 p)) in 
+    let pointNorm = _norm #c pointD in pointNorm == resultPoint))
 
+*)
 
 let norm #c p resultPoint tempBuffer = 
 
@@ -315,10 +330,12 @@ let norm #c p resultPoint tempBuffer =
   montgomery_multiplication_buffer #c xf z2f z2f;
   montgomery_multiplication_buffer #c yf z3f z3f;
 
+    let h1 = ST.get() in 
+
   normalisation_update z2f z3f p resultPoint; 
 
-  admit();
-  let h1 = ST.get() in 
+
+    let h2 = ST.get() in 
   
   let prime = getPrime c in 
 
@@ -326,8 +343,8 @@ let norm #c p resultPoint tempBuffer =
   let yD = fromDomain_ #c (point_y_as_nat c h0 p) in 
   let zD = fromDomain_ #c (point_z_as_nat c h0 p) in 
 
-  let x3 = point_x_as_nat c h1 resultPoint in 
-  let y3 = point_y_as_nat c h1 resultPoint in 
+  let x3 = point_x_as_nat c h2 resultPoint in 
+  let y3 = point_y_as_nat c h2 resultPoint in 
 
   lemma_two_mul_nat zD zD;
   lemma_three_mul_nat zD zD zD;
@@ -357,7 +374,31 @@ let norm #c p resultPoint tempBuffer =
     yD * (modp_inv2_pow #c (zD * zD * zD)) % prime;
     (==) {_ by (canon())}
     modp_inv2_pow #c (zD * zD * zD) * yD % prime;
-  }
+  };
+
+  assert(x3 == modp_inv2_pow #c (zD * zD) * xD % prime);
+  assert(y3 == modp_inv2_pow #c (zD * zD * zD) * yD % prime);
+
+  assert(    
+    let x0 = point_x_as_nat c h1 p in 
+    let y0 = point_y_as_nat c h1 p in 
+    let z0 = point_z_as_nat c h1 p in 
+
+    let z1 = point_z_as_nat c h2 resultPoint in 
+
+    x3 == fromDomain_ #c (as_nat c h1 z2f) /\ 
+    y3 == fromDomain_ #c (as_nat c h1 z3f) /\ (
+    if Spec.P256.isPointAtInfinity (fromDomain_ #c x0, fromDomain_ #c y0, fromDomain_ #c z0) 
+    then 
+      z1 == 0 
+    else 
+      z1 == 1));
+  
+
+  admit()
+
+
+
 
 
 let normX #c p result tempBuffer = 
@@ -403,22 +444,12 @@ let scalar_bit #c #buf_type s n =
 val montgomery_ladder_step1: #c : curve ->  p: point c -> q: point c 
   -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) -> Stack unit
   (requires fun h -> 
-    let prime = getPrime c in 
-    
     live h p /\ live h q /\ live h tempBuffer /\ 
     LowStar.Monotonic.Buffer.all_disjoint [loc p; loc q; loc tempBuffer] /\
-    point_x_as_nat c h p < prime /\ 
-    point_y_as_nat c h p < prime /\
-    point_z_as_nat c h p < prime /\
-	     
-    point_x_as_nat c h q < prime /\ 
-    point_y_as_nat c h q < prime /\
-    point_z_as_nat c h q < prime
-  )
+    point_eval c h p /\ point_eval c h q)
   (ensures fun h0 _ h1 -> 
-    let prime = getPrime c in 
-    let len = getCoordinateLenU64 c in 
-    modifies (loc p |+| loc q |+|  loc tempBuffer) h0 h1 /\ 
+    modifies (loc p |+| loc q |+| loc tempBuffer) h0 h1 /\ 
+    point_eval c h1 p /\ point_eval c h1 q /\
     (
       let pX = point_x_as_nat c h0 p in
       let pY = point_y_as_nat c h0 p in
@@ -436,24 +467,26 @@ val montgomery_ladder_step1: #c : curve ->  p: point c -> q: point c
       let r1Y = point_y_as_nat c h1 q in
       let r1Z = point_z_as_nat c h1 q in
 
-      let prime = getPrime c in 
       let (rN0X, rN0Y, rN0Z), (rN1X, rN1Y, rN1Z) = _ml_step1 #c
 	(fromDomain_ #c pX, fromDomain_ #c pY, fromDomain_ #c pZ) 
 	(fromDomain_ #c qX, fromDomain_ #c qY, fromDomain_ #c qZ) in 
       
       fromDomain_ #c r0X == rN0X /\ fromDomain_ #c r0Y == rN0Y /\ fromDomain_ #c r0Z == rN0Z /\
-      fromDomain_ #c r1X == rN1X /\ fromDomain_ #c r1Y == rN1Y /\ fromDomain_ #c r1Z == rN1Z /\ 
-
-      r0X < prime /\ r0Y < prime /\ r0Z < prime /\
-      r1X < prime /\ r1Y < prime /\ r1Z < prime
+      fromDomain_ #c r1X == rN1X /\ fromDomain_ #c r1Y == rN1Y /\ fromDomain_ #c r1Z == rN1Z
   ) 
 )
 
 
-let montgomery_ladder_step1 r0 r1 tempBuffer = 
+let montgomery_ladder_step1 #c r0 r1 tempBuffer = 
+    let h0 = ST.get() in 
   point_add r0 r1 r1 tempBuffer;
+    let h1 = ST.get() in 
+    Hacl.Impl.P256.PointAdd.lemma_point_eval c h0 h1 r0;
+    lemma_coord_eval c h0 h1 r0;
   point_double r0 r0 tempBuffer;
-  admit()
+    let h2 = ST.get() in 
+    lemma_point_eval c h1 h2 r1;
+    lemma_coord_eval c h1 h2 r1
       
 
 val lemma_step: #c: curve -> i: size_t {uint_v i < getPower c} -> 
@@ -469,60 +502,49 @@ val montgomery_ladder_step: #c: curve -> #buf_type: buftype->
   Stack unit
   (requires fun h -> live h p /\ live h q /\ live h tempBuffer /\ live h scalar /\
     LowStar.Monotonic.Buffer.all_disjoint [loc p; loc q; loc tempBuffer; loc scalar] /\
-
-    (
-      let prime = getPrime c in 
-      let len = getCoordinateLenU64 c in 
-      
-      as_nat c h (gsub p (size 0) len) < prime /\ 
-      as_nat c h (gsub p len len) < prime /\
-      as_nat c h (gsub p (size 2 *! len) len) < prime /\
-	     
-      as_nat c h (gsub q (size 0) len) < prime /\  
-      as_nat c h (gsub q len len) < prime /\
-      as_nat c h (gsub q (size 2 *! len) len) < prime
-    )
+    point_eval c h p /\ point_eval c h q
   )
   (ensures fun h0 _ h1 -> modifies (loc p |+| loc q |+| loc tempBuffer) h0 h1 /\ 
+    point_eval c h1 p /\ point_eval c h1 q /\
     (
-
-      let prime = getPrime c in 
       let len = getCoordinateLenU64 c in 
 
-      let pX = as_nat c h0 (gsub p (size 0) len) in
-      let pY = as_nat c h0 (gsub p len len) in
-      let pZ = as_nat c h0 (gsub p (size 2 *! len) len) in
+      let pX = point_x_as_nat c h0 p in
+      let pY = point_y_as_nat c h0 p in
+      let pZ = point_z_as_nat c h0 p in
 
-      let qX = as_nat c h0 (gsub q (size 0) len) in
-      let qY = as_nat c h0 (gsub q len len) in
-      let qZ = as_nat c h0 (gsub q (size 2 *! len) len) in
+      let qX = point_x_as_nat c h0 q in
+      let qY = point_y_as_nat c h0 q in
+      let qZ = point_z_as_nat c h0 q in
 
-      let r0X = as_nat c h1 (gsub p (size 0) len) in
-      let r0Y = as_nat c h1 (gsub p len len) in
-      let r0Z = as_nat c h1 (gsub p (size 2 *! len) len) in
+      let r0X = point_x_as_nat c h1 p in
+      let r0Y = point_y_as_nat c h1 p in
+      let r0Z = point_z_as_nat c h1 p in
 
-      let r1X = as_nat c h1 (gsub q (size 0) len) in
-      let r1Y = as_nat c h1 (gsub q len len) in
-      let r1Z = as_nat c h1 (gsub q (size 2 *! len) len) in
+      let r1X = point_x_as_nat c h1 q in
+      let r1Y = point_y_as_nat c h1 q in
+      let r1Z = point_z_as_nat c h1 q in
 
       let (rN0X, rN0Y, rN0Z), (rN1X, rN1Y, rN1Z) = _ml_step #c (as_seq h0 scalar) (uint_v i) (
 	(fromDomain_ #c pX, fromDomain_ #c pY, fromDomain_ #c pZ), 
 	(fromDomain_ #c qX, fromDomain_ #c qY, fromDomain_ #c qZ)) in 
       
       fromDomain_ #c r0X == rN0X /\ fromDomain_ #c r0Y == rN0Y /\ fromDomain_ #c r0Z == rN0Z /\
-      fromDomain_ #c r1X == rN1X /\ fromDomain_ #c r1Y == rN1Y /\ fromDomain_ #c r1Z == rN1Z /\ 
-
-      r0X < prime /\ r0Y < prime /\ r0Z < prime /\
-      r1X < prime /\ r1Y < prime /\ r1Z < prime
+      fromDomain_ #c r1X == rN1X /\ fromDomain_ #c r1Y == rN1Y /\ fromDomain_ #c r1Z == rN1Z
     ) 
   )
 
 
 let montgomery_ladder_step #c #buf_type r0 r1 tempBuffer scalar i = 
+    let h0 = ST.get() in 
   let bit0 : size_t = getPowerU c -. i -. 1ul in 
   let bit = scalar_bit scalar bit0 in 
   cswap bit r0 r1; 
+    let h1 = ST.get() in
+    assert(as_nat c h0 r0 == as_nat c h1 r1); 
+    assume (point_eval c h1 r1 /\ point_eval c h1 r0);
   montgomery_ladder_step1 r0 r1 tempBuffer; 
+  admit();
   cswap bit r0 r1; 
   lemma_step #c i;
     admit()

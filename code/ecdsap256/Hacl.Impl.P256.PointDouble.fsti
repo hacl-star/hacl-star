@@ -19,8 +19,6 @@ val point_double: #c: curve -> p: point c -> result: point c
       eq_or_disjoint p result /\ point_eval c h p)
   (ensures fun h0 _ h1 -> modifies (loc tempBuffer |+| loc result) h0 h1 /\  
     (
-      let prime = getPrime c in 
-      let len = getCoordinateLenU64 c in 
       point_eval c h1 result /\ (
       
       let x, y, z = point_x_as_nat c h0 p, point_y_as_nat c h0 p, point_z_as_nat c h0 p in 
