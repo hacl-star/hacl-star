@@ -27,6 +27,10 @@ jobs:
     - name: clang 7 / full tests
       os: linux
       compiler: clang
+    - name: 32-bit / compile-only
+      os: linux
+      install:
+        - export TARGET=IA32
     - name: xcode 10 / full tests
       os: osx
       osx_image: xcode10.1
