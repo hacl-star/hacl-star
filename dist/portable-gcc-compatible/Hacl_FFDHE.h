@@ -38,8 +38,8 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
-#include "Hacl_RSAPSS.h"
 #include "Hacl_Kremlib.h"
+#include "Hacl_RSAPSS.h"
 #include "Hacl_Spec.h"
 #include "Hacl_Impl_FFDHE_Constants.h"
 
@@ -55,11 +55,42 @@ uint32_t Hacl_FFDHE_ffdhe_len(Spec_FFDHE_ffdhe_alg a);
 
 /* SNIPPET_END: Hacl_FFDHE_ffdhe_len */
 
+/* SNIPPET_START: Hacl_FFDHE_new_ffdhe_precomp_p */
+
+uint64_t *Hacl_FFDHE_new_ffdhe_precomp_p(Spec_FFDHE_ffdhe_alg a);
+
+/* SNIPPET_END: Hacl_FFDHE_new_ffdhe_precomp_p */
+
+/* SNIPPET_START: Hacl_FFDHE_ffdhe_secret_to_public_precomp */
+
+void
+Hacl_FFDHE_ffdhe_secret_to_public_precomp(
+  Spec_FFDHE_ffdhe_alg a,
+  uint64_t *p_r2_n,
+  uint8_t *sk,
+  uint8_t *pk
+);
+
+/* SNIPPET_END: Hacl_FFDHE_ffdhe_secret_to_public_precomp */
+
 /* SNIPPET_START: Hacl_FFDHE_ffdhe_secret_to_public */
 
 void Hacl_FFDHE_ffdhe_secret_to_public(Spec_FFDHE_ffdhe_alg a, uint8_t *sk, uint8_t *pk);
 
 /* SNIPPET_END: Hacl_FFDHE_ffdhe_secret_to_public */
+
+/* SNIPPET_START: Hacl_FFDHE_ffdhe_shared_secret_precomp */
+
+uint64_t
+Hacl_FFDHE_ffdhe_shared_secret_precomp(
+  Spec_FFDHE_ffdhe_alg a,
+  uint64_t *p_r2_n,
+  uint8_t *sk,
+  uint8_t *pk,
+  uint8_t *ss
+);
+
+/* SNIPPET_END: Hacl_FFDHE_ffdhe_shared_secret_precomp */
 
 /* SNIPPET_START: Hacl_FFDHE_ffdhe_shared_secret */
 

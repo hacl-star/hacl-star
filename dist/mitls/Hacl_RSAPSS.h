@@ -49,6 +49,8 @@ void Hacl_Bignum_Convert_bn_to_bytes_be_uint64(uint32_t len, uint64_t *b, uint8_
 
 void Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u64(uint32_t len, uint64_t *n, uint64_t *res);
 
+uint32_t Hacl_Impl_RSAPSS_MGF_hash_len(Spec_Hash_Definitions_hash_alg a);
+
 void
 Hacl_Bignum_Exponentiation_bn_mod_exp_mont_ladder_precompr2_u64(
   uint32_t len,
@@ -58,6 +60,31 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_mont_ladder_precompr2_u64(
   uint64_t *b,
   uint64_t *r2,
   uint64_t *res
+);
+
+uint64_t Hacl_Impl_RSAPSS_Keys_check_modulus_u64(uint32_t modBits, uint64_t *n);
+
+uint64_t Hacl_Impl_RSAPSS_Keys_check_exponent_u64(uint32_t eBits, uint64_t *e);
+
+void
+Hacl_Impl_RSAPSS_Padding_pss_encode(
+  Spec_Hash_Definitions_hash_alg a,
+  uint32_t sLen,
+  uint8_t *salt,
+  uint32_t msgLen,
+  uint8_t *msg,
+  uint32_t emBits,
+  uint8_t *em
+);
+
+bool
+Hacl_Impl_RSAPSS_Padding_pss_verify(
+  Spec_Hash_Definitions_hash_alg a,
+  uint32_t sLen,
+  uint32_t msgLen,
+  uint8_t *msg,
+  uint32_t emBits,
+  uint8_t *em
 );
 
 bool

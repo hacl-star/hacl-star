@@ -45,7 +45,19 @@ extern "C" {
 #include "Hacl_Spec.h"
 #include "Hacl_Impl_FFDHE_Constants.h"
 
+uint64_t *Hacl_FFDHE4096_new_ffdhe_precomp_p();
+
+void Hacl_FFDHE4096_ffdhe_secret_to_public_precomp(uint64_t *p_r2_n, uint8_t *sk, uint8_t *pk);
+
 void Hacl_FFDHE4096_ffdhe_secret_to_public(uint8_t *sk, uint8_t *pk);
+
+uint64_t
+Hacl_FFDHE4096_ffdhe_shared_secret_precomp(
+  uint64_t *p_r2_n,
+  uint8_t *sk,
+  uint8_t *pk,
+  uint8_t *ss
+);
 
 uint64_t Hacl_FFDHE4096_ffdhe_shared_secret(uint8_t *sk, uint8_t *pk, uint8_t *ss);
 

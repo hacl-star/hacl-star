@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __Hacl_FFDHE_H
-#define __Hacl_FFDHE_H
+#ifndef __Hacl_RSAPSS2048_SHA256_H
+#define __Hacl_RSAPSS2048_SHA256_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -38,42 +38,75 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
-#include "Hacl_Kremlib.h"
 #include "Hacl_RSAPSS.h"
+#include "Hacl_Kremlib.h"
+#include "Hacl_Bignum.h"
 #include "Hacl_Spec.h"
-#include "Hacl_Impl_FFDHE_Constants.h"
 
-uint32_t Hacl_Impl_FFDHE_ffdhe_len(Spec_FFDHE_ffdhe_alg a);
-
-uint32_t Hacl_FFDHE_ffdhe_len(Spec_FFDHE_ffdhe_alg a);
-
-uint64_t *Hacl_FFDHE_new_ffdhe_precomp_p(Spec_FFDHE_ffdhe_alg a);
-
-void
-Hacl_FFDHE_ffdhe_secret_to_public_precomp(
-  Spec_FFDHE_ffdhe_alg a,
-  uint64_t *p_r2_n,
-  uint8_t *sk,
-  uint8_t *pk
+bool
+Hacl_RSAPSS2048_SHA256_rsapss_sign(
+  uint32_t eBits,
+  uint32_t dBits,
+  uint64_t *skey,
+  uint32_t sLen,
+  uint8_t *salt,
+  uint32_t msgLen,
+  uint8_t *msg,
+  uint8_t *sgnt
 );
 
-void Hacl_FFDHE_ffdhe_secret_to_public(Spec_FFDHE_ffdhe_alg a, uint8_t *sk, uint8_t *pk);
-
-uint64_t
-Hacl_FFDHE_ffdhe_shared_secret_precomp(
-  Spec_FFDHE_ffdhe_alg a,
-  uint64_t *p_r2_n,
-  uint8_t *sk,
-  uint8_t *pk,
-  uint8_t *ss
+bool
+Hacl_RSAPSS2048_SHA256_rsapss_verify(
+  uint32_t eBits,
+  uint64_t *pkey,
+  uint32_t sLen,
+  uint32_t k,
+  uint8_t *sgnt,
+  uint32_t msgLen,
+  uint8_t *msg
 );
 
 uint64_t
-Hacl_FFDHE_ffdhe_shared_secret(Spec_FFDHE_ffdhe_alg a, uint8_t *sk, uint8_t *pk, uint8_t *ss);
+*Hacl_RSAPSS2048_SHA256_new_rsapss_load_pkey(uint32_t eBits, uint8_t *nb, uint8_t *eb);
+
+uint64_t
+*Hacl_RSAPSS2048_SHA256_new_rsapss_load_skey(
+  uint32_t eBits,
+  uint32_t dBits,
+  uint8_t *nb,
+  uint8_t *eb,
+  uint8_t *db
+);
+
+bool
+Hacl_RSAPSS2048_SHA256_rsapss_skey_sign(
+  uint32_t eBits,
+  uint32_t dBits,
+  uint8_t *nb,
+  uint8_t *eb,
+  uint8_t *db,
+  uint32_t sLen,
+  uint8_t *salt,
+  uint32_t msgLen,
+  uint8_t *msg,
+  uint8_t *sgnt
+);
+
+bool
+Hacl_RSAPSS2048_SHA256_rsapss_pkey_verify(
+  uint32_t eBits,
+  uint8_t *nb,
+  uint8_t *eb,
+  uint32_t sLen,
+  uint32_t k,
+  uint8_t *sgnt,
+  uint32_t msgLen,
+  uint8_t *msg
+);
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_FFDHE_H_DEFINED
+#define __Hacl_RSAPSS2048_SHA256_H_DEFINED
 #endif

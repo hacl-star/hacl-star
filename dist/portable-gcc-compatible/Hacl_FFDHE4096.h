@@ -45,11 +45,35 @@ extern "C" {
 #include "Hacl_Spec.h"
 #include "Hacl_Impl_FFDHE_Constants.h"
 
+/* SNIPPET_START: Hacl_FFDHE4096_new_ffdhe_precomp_p */
+
+uint64_t *Hacl_FFDHE4096_new_ffdhe_precomp_p();
+
+/* SNIPPET_END: Hacl_FFDHE4096_new_ffdhe_precomp_p */
+
+/* SNIPPET_START: Hacl_FFDHE4096_ffdhe_secret_to_public_precomp */
+
+void Hacl_FFDHE4096_ffdhe_secret_to_public_precomp(uint64_t *p_r2_n, uint8_t *sk, uint8_t *pk);
+
+/* SNIPPET_END: Hacl_FFDHE4096_ffdhe_secret_to_public_precomp */
+
 /* SNIPPET_START: Hacl_FFDHE4096_ffdhe_secret_to_public */
 
 void Hacl_FFDHE4096_ffdhe_secret_to_public(uint8_t *sk, uint8_t *pk);
 
 /* SNIPPET_END: Hacl_FFDHE4096_ffdhe_secret_to_public */
+
+/* SNIPPET_START: Hacl_FFDHE4096_ffdhe_shared_secret_precomp */
+
+uint64_t
+Hacl_FFDHE4096_ffdhe_shared_secret_precomp(
+  uint64_t *p_r2_n,
+  uint8_t *sk,
+  uint8_t *pk,
+  uint8_t *ss
+);
+
+/* SNIPPET_END: Hacl_FFDHE4096_ffdhe_shared_secret_precomp */
 
 /* SNIPPET_START: Hacl_FFDHE4096_ffdhe_shared_secret */
 

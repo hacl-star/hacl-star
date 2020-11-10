@@ -478,6 +478,28 @@ mod_exp_mont_ladder_precompr2(
 
 /* SNIPPET_END: mod_exp_mont_ladder_precompr2 */
 
+/* SNIPPET_START: ffdhe_precomp_p */
+
+static inline void ffdhe_precomp_p(uint64_t *p_r2_n)
+{
+  uint32_t nLen = ((uint32_t)512U - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
+  uint64_t *p_n = p_r2_n;
+  uint64_t *r2_n = p_r2_n + nLen;
+  uint8_t p_s[512U] = { 0U };
+  const uint8_t *p = Hacl_Impl_FFDHE_Constants_ffdhe_p4096;
+  uint32_t len1 = Hacl_Impl_FFDHE_ffdhe_len(Spec_FFDHE_FFDHE4096);
+  for (uint32_t i = (uint32_t)0U; i < len1; i++)
+  {
+    uint8_t *os = p_s;
+    uint8_t x = p[i];
+    os[i] = x;
+  }
+  Hacl_Bignum_Convert_bn_from_bytes_be_uint64((uint32_t)512U, p_s, p_n);
+  precomp(p_n, r2_n);
+}
+
+/* SNIPPET_END: ffdhe_precomp_p */
+
 /* SNIPPET_START: ffdhe_check_pk */
 
 static inline uint64_t ffdhe_check_pk(uint64_t *pk_n, uint64_t *p_n)
@@ -600,13 +622,11 @@ static inline uint64_t ffdhe_check_pk(uint64_t *pk_n, uint64_t *p_n)
 /* SNIPPET_START: ffdhe_compute_exp */
 
 static inline void
-ffdhe_compute_exp(uint64_t *p_n, uint64_t *sk_n, uint64_t *b_n, uint8_t *res)
+ffdhe_compute_exp(uint64_t *p_r2_n, uint64_t *sk_n, uint64_t *b_n, uint8_t *res)
 {
   uint32_t nLen = ((uint32_t)512U - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
-  KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
-  uint64_t r2_n[nLen];
-  memset(r2_n, 0U, nLen * sizeof (uint64_t));
-  precomp(p_n, r2_n);
+  uint64_t *p_n = p_r2_n;
+  uint64_t *r2_n = p_r2_n + nLen;
   KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
   uint64_t res_n[nLen];
   memset(res_n, 0U, nLen * sizeof (uint64_t));
@@ -616,9 +636,28 @@ ffdhe_compute_exp(uint64_t *p_n, uint64_t *sk_n, uint64_t *b_n, uint8_t *res)
 
 /* SNIPPET_END: ffdhe_compute_exp */
 
-/* SNIPPET_START: Hacl_FFDHE4096_ffdhe_secret_to_public */
+/* SNIPPET_START: Hacl_FFDHE4096_new_ffdhe_precomp_p */
 
-void Hacl_FFDHE4096_ffdhe_secret_to_public(uint8_t *sk, uint8_t *pk)
+uint64_t *Hacl_FFDHE4096_new_ffdhe_precomp_p()
+{
+  uint32_t nLen = ((uint32_t)512U - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), nLen + nLen);
+  uint64_t *res = KRML_HOST_CALLOC(nLen + nLen, sizeof (uint64_t));
+  if (res == NULL)
+  {
+    return res;
+  }
+  uint64_t *res1 = res;
+  uint64_t *res2 = res1;
+  ffdhe_precomp_p(res2);
+  return res2;
+}
+
+/* SNIPPET_END: Hacl_FFDHE4096_new_ffdhe_precomp_p */
+
+/* SNIPPET_START: Hacl_FFDHE4096_ffdhe_secret_to_public_precomp */
+
+void Hacl_FFDHE4096_ffdhe_secret_to_public_precomp(uint64_t *p_r2_n, uint8_t *sk, uint8_t *pk)
 {
   uint32_t nLen = ((uint32_t)512U - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
   KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
@@ -633,45 +672,40 @@ void Hacl_FFDHE4096_ffdhe_secret_to_public(uint8_t *sk, uint8_t *pk)
   }
   Hacl_Bignum_Convert_bn_from_bytes_be_uint64((uint32_t)1U, &g, g_n);
   KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
-  uint64_t p_n[nLen];
-  memset(p_n, 0U, nLen * sizeof (uint64_t));
-  uint8_t p_s[512U] = { 0U };
-  const uint8_t *p = Hacl_Impl_FFDHE_Constants_ffdhe_p4096;
-  uint32_t len1 = Hacl_Impl_FFDHE_ffdhe_len(Spec_FFDHE_FFDHE4096);
-  for (uint32_t i = (uint32_t)0U; i < len1; i++)
-  {
-    uint8_t *os = p_s;
-    uint8_t x = p[i];
-    os[i] = x;
-  }
-  Hacl_Bignum_Convert_bn_from_bytes_be_uint64((uint32_t)512U, p_s, p_n);
-  KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
   uint64_t sk_n[nLen];
   memset(sk_n, 0U, nLen * sizeof (uint64_t));
   Hacl_Bignum_Convert_bn_from_bytes_be_uint64((uint32_t)512U, sk, sk_n);
-  ffdhe_compute_exp(p_n, sk_n, g_n, pk);
+  ffdhe_compute_exp(p_r2_n, sk_n, g_n, pk);
+}
+
+/* SNIPPET_END: Hacl_FFDHE4096_ffdhe_secret_to_public_precomp */
+
+/* SNIPPET_START: Hacl_FFDHE4096_ffdhe_secret_to_public */
+
+void Hacl_FFDHE4096_ffdhe_secret_to_public(uint8_t *sk, uint8_t *pk)
+{
+  uint32_t nLen = ((uint32_t)512U - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), nLen + nLen);
+  uint64_t p_r2_n[nLen + nLen];
+  memset(p_r2_n, 0U, (nLen + nLen) * sizeof (uint64_t));
+  ffdhe_precomp_p(p_r2_n);
+  Hacl_FFDHE4096_ffdhe_secret_to_public_precomp(p_r2_n, sk, pk);
 }
 
 /* SNIPPET_END: Hacl_FFDHE4096_ffdhe_secret_to_public */
 
-/* SNIPPET_START: Hacl_FFDHE4096_ffdhe_shared_secret */
+/* SNIPPET_START: Hacl_FFDHE4096_ffdhe_shared_secret_precomp */
 
-uint64_t Hacl_FFDHE4096_ffdhe_shared_secret(uint8_t *sk, uint8_t *pk, uint8_t *ss)
+uint64_t
+Hacl_FFDHE4096_ffdhe_shared_secret_precomp(
+  uint64_t *p_r2_n,
+  uint8_t *sk,
+  uint8_t *pk,
+  uint8_t *ss
+)
 {
   uint32_t nLen = ((uint32_t)512U - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
-  KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
-  uint64_t p_n[nLen];
-  memset(p_n, 0U, nLen * sizeof (uint64_t));
-  uint8_t p_s[512U] = { 0U };
-  const uint8_t *p = Hacl_Impl_FFDHE_Constants_ffdhe_p4096;
-  uint32_t len1 = Hacl_Impl_FFDHE_ffdhe_len(Spec_FFDHE_FFDHE4096);
-  for (uint32_t i = (uint32_t)0U; i < len1; i++)
-  {
-    uint8_t *os = p_s;
-    uint8_t x = p[i];
-    os[i] = x;
-  }
-  Hacl_Bignum_Convert_bn_from_bytes_be_uint64((uint32_t)512U, p_s, p_n);
+  uint64_t *p_n = p_r2_n;
   KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
   uint64_t sk_n[nLen];
   memset(sk_n, 0U, nLen * sizeof (uint64_t));
@@ -683,8 +717,23 @@ uint64_t Hacl_FFDHE4096_ffdhe_shared_secret(uint8_t *sk, uint8_t *pk, uint8_t *s
   uint64_t m = ffdhe_check_pk(pk_n, p_n);
   if (m == (uint64_t)0xFFFFFFFFFFFFFFFFU)
   {
-    ffdhe_compute_exp(p_n, sk_n, pk_n, ss);
+    ffdhe_compute_exp(p_r2_n, sk_n, pk_n, ss);
   }
+  return m;
+}
+
+/* SNIPPET_END: Hacl_FFDHE4096_ffdhe_shared_secret_precomp */
+
+/* SNIPPET_START: Hacl_FFDHE4096_ffdhe_shared_secret */
+
+uint64_t Hacl_FFDHE4096_ffdhe_shared_secret(uint8_t *sk, uint8_t *pk, uint8_t *ss)
+{
+  uint32_t nLen = ((uint32_t)512U - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), nLen + nLen);
+  uint64_t p_n[nLen + nLen];
+  memset(p_n, 0U, (nLen + nLen) * sizeof (uint64_t));
+  ffdhe_precomp_p(p_n);
+  uint64_t m = Hacl_FFDHE4096_ffdhe_shared_secret_precomp(p_n, sk, pk, ss);
   return m;
 }
 

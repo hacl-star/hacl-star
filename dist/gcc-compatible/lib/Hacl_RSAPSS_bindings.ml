@@ -14,6 +14,9 @@ module Bindings(F:Cstubs.FOREIGN) =
       foreign "Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u64"
         (uint32_t @->
            ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void))))
+    let hacl_Impl_RSAPSS_MGF_hash_len =
+      foreign "Hacl_Impl_RSAPSS_MGF_hash_len"
+        (spec_Hash_Definitions_hash_alg @-> (returning uint32_t))
     let hacl_Bignum_Exponentiation_bn_mod_exp_mont_ladder_precompr2_u64 =
       foreign
         "Hacl_Bignum_Exponentiation_bn_mod_exp_mont_ladder_precompr2_u64"
@@ -24,6 +27,27 @@ module Bindings(F:Cstubs.FOREIGN) =
                     ((ptr uint64_t) @->
                        ((ptr uint64_t) @->
                           ((ptr uint64_t) @-> (returning void))))))))
+    let hacl_Impl_RSAPSS_Keys_check_modulus_u64 =
+      foreign "Hacl_Impl_RSAPSS_Keys_check_modulus_u64"
+        (uint32_t @-> ((ptr uint64_t) @-> (returning uint64_t)))
+    let hacl_Impl_RSAPSS_Keys_check_exponent_u64 =
+      foreign "Hacl_Impl_RSAPSS_Keys_check_exponent_u64"
+        (uint32_t @-> ((ptr uint64_t) @-> (returning uint64_t)))
+    let hacl_Impl_RSAPSS_Padding_pss_encode =
+      foreign "Hacl_Impl_RSAPSS_Padding_pss_encode"
+        (spec_Hash_Definitions_hash_alg @->
+           (uint32_t @->
+              (ocaml_bytes @->
+                 (uint32_t @->
+                    (ocaml_bytes @->
+                       (uint32_t @-> (ocaml_bytes @-> (returning void))))))))
+    let hacl_Impl_RSAPSS_Padding_pss_verify =
+      foreign "Hacl_Impl_RSAPSS_Padding_pss_verify"
+        (spec_Hash_Definitions_hash_alg @->
+           (uint32_t @->
+              (uint32_t @->
+                 (ocaml_bytes @->
+                    (uint32_t @-> (ocaml_bytes @-> (returning bool)))))))
     let hacl_RSAPSS_rsapss_sign =
       foreign "Hacl_RSAPSS_rsapss_sign"
         (spec_Hash_Definitions_hash_alg @->

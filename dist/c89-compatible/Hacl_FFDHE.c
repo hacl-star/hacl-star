@@ -56,6 +56,72 @@ inline uint32_t Hacl_Impl_FFDHE_ffdhe_len(Spec_FFDHE_ffdhe_alg a)
   }
 }
 
+static inline void ffdhe_precomp_p(Spec_FFDHE_ffdhe_alg a, uint64_t *p_r2_n)
+{
+  uint32_t nLen = (Hacl_Impl_FFDHE_ffdhe_len(a) - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
+  uint64_t *p_n = p_r2_n;
+  uint64_t *r2_n = p_r2_n + nLen;
+  KRML_CHECK_SIZE(sizeof (uint8_t), Hacl_Impl_FFDHE_ffdhe_len(a));
+  {
+    uint8_t p_s[Hacl_Impl_FFDHE_ffdhe_len(a)];
+    memset(p_s, 0U, Hacl_Impl_FFDHE_ffdhe_len(a) * sizeof (uint8_t));
+    {
+      const uint8_t *p;
+      switch (a)
+      {
+        case Spec_FFDHE_FFDHE2048:
+          {
+            p = Hacl_Impl_FFDHE_Constants_ffdhe_p2048;
+            break;
+          }
+        case Spec_FFDHE_FFDHE3072:
+          {
+            p = Hacl_Impl_FFDHE_Constants_ffdhe_p3072;
+            break;
+          }
+        case Spec_FFDHE_FFDHE4096:
+          {
+            p = Hacl_Impl_FFDHE_Constants_ffdhe_p4096;
+            break;
+          }
+        case Spec_FFDHE_FFDHE6144:
+          {
+            p = Hacl_Impl_FFDHE_Constants_ffdhe_p6144;
+            break;
+          }
+        case Spec_FFDHE_FFDHE8192:
+          {
+            p = Hacl_Impl_FFDHE_Constants_ffdhe_p8192;
+            break;
+          }
+        default:
+          {
+            KRML_HOST_PRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+            KRML_HOST_EXIT(253U);
+          }
+      }
+      {
+        uint32_t len = Hacl_Impl_FFDHE_ffdhe_len(a);
+        {
+          uint32_t i;
+          for (i = (uint32_t)0U; i < len; i++)
+          {
+            uint8_t *os = p_s;
+            uint8_t x = p[i];
+            os[i] = x;
+          }
+        }
+        Hacl_Bignum_Convert_bn_from_bytes_be_uint64(Hacl_Impl_FFDHE_ffdhe_len(a), p_s, p_n);
+        Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u64((Hacl_Impl_FFDHE_ffdhe_len(a) - (uint32_t)1U)
+          / (uint32_t)8U
+          + (uint32_t)1U,
+          p_n,
+          r2_n);
+      }
+    }
+  }
+}
+
 static inline uint64_t ffdhe_check_pk(Spec_FFDHE_ffdhe_alg a, uint64_t *pk_n, uint64_t *p_n)
 {
   uint32_t nLen = (Hacl_Impl_FFDHE_ffdhe_len(a) - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
@@ -234,38 +300,30 @@ static inline uint64_t ffdhe_check_pk(Spec_FFDHE_ffdhe_alg a, uint64_t *pk_n, ui
 static inline void
 ffdhe_compute_exp(
   Spec_FFDHE_ffdhe_alg a,
-  uint64_t *p_n,
+  uint64_t *p_r2_n,
   uint64_t *sk_n,
   uint64_t *b_n,
   uint8_t *res
 )
 {
   uint32_t nLen = (Hacl_Impl_FFDHE_ffdhe_len(a) - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
+  uint64_t *p_n = p_r2_n;
+  uint64_t *r2_n = p_r2_n + nLen;
   KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
   {
-    uint64_t r2_n[nLen];
-    memset(r2_n, 0U, nLen * sizeof (uint64_t));
-    Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u64((Hacl_Impl_FFDHE_ffdhe_len(a) - (uint32_t)1U)
+    uint64_t res_n[nLen];
+    memset(res_n, 0U, nLen * sizeof (uint64_t));
+    Hacl_Bignum_Exponentiation_bn_mod_exp_mont_ladder_precompr2_u64((Hacl_Impl_FFDHE_ffdhe_len(a)
+      - (uint32_t)1U)
       / (uint32_t)8U
       + (uint32_t)1U,
       p_n,
-      r2_n);
-    KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
-    {
-      uint64_t res_n[nLen];
-      memset(res_n, 0U, nLen * sizeof (uint64_t));
-      Hacl_Bignum_Exponentiation_bn_mod_exp_mont_ladder_precompr2_u64((Hacl_Impl_FFDHE_ffdhe_len(a)
-        - (uint32_t)1U)
-        / (uint32_t)8U
-        + (uint32_t)1U,
-        p_n,
-        b_n,
-        (uint32_t)64U * nLen,
-        sk_n,
-        r2_n,
-        res_n);
-      Hacl_Bignum_Convert_bn_to_bytes_be_uint64(Hacl_Impl_FFDHE_ffdhe_len(a), res_n, res);
-    }
+      b_n,
+      (uint32_t)64U * nLen,
+      sk_n,
+      r2_n,
+      res_n);
+    Hacl_Bignum_Convert_bn_to_bytes_be_uint64(Hacl_Impl_FFDHE_ffdhe_len(a), res_n, res);
   }
 }
 
@@ -274,7 +332,32 @@ uint32_t Hacl_FFDHE_ffdhe_len(Spec_FFDHE_ffdhe_alg a)
   return Hacl_Impl_FFDHE_ffdhe_len(a);
 }
 
-void Hacl_FFDHE_ffdhe_secret_to_public(Spec_FFDHE_ffdhe_alg a, uint8_t *sk, uint8_t *pk)
+uint64_t *Hacl_FFDHE_new_ffdhe_precomp_p(Spec_FFDHE_ffdhe_alg a)
+{
+  uint32_t nLen = (Hacl_Impl_FFDHE_ffdhe_len(a) - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), nLen + nLen);
+  {
+    uint64_t *res = KRML_HOST_CALLOC(nLen + nLen, sizeof (uint64_t));
+    if (res == NULL)
+    {
+      return res;
+    }
+    {
+      uint64_t *res1 = res;
+      uint64_t *res2 = res1;
+      ffdhe_precomp_p(a, res2);
+      return res2;
+    }
+  }
+}
+
+void
+Hacl_FFDHE_ffdhe_secret_to_public_precomp(
+  Spec_FFDHE_ffdhe_alg a,
+  uint64_t *p_r2_n,
+  uint8_t *sk,
+  uint8_t *pk
+)
 {
   uint32_t len = Hacl_Impl_FFDHE_ffdhe_len(a);
   uint32_t nLen = (len - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
@@ -296,69 +379,58 @@ void Hacl_FFDHE_ffdhe_secret_to_public(Spec_FFDHE_ffdhe_alg a, uint8_t *sk, uint
       Hacl_Bignum_Convert_bn_from_bytes_be_uint64((uint32_t)1U, &g, g_n);
       KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
       {
-        uint64_t p_n[nLen];
-        memset(p_n, 0U, nLen * sizeof (uint64_t));
-        KRML_CHECK_SIZE(sizeof (uint8_t), len);
+        uint64_t sk_n[nLen];
+        memset(sk_n, 0U, nLen * sizeof (uint64_t));
+        Hacl_Bignum_Convert_bn_from_bytes_be_uint64(len, sk, sk_n);
+        ffdhe_compute_exp(a, p_r2_n, sk_n, g_n, pk);
+      }
+    }
+  }
+}
+
+void Hacl_FFDHE_ffdhe_secret_to_public(Spec_FFDHE_ffdhe_alg a, uint8_t *sk, uint8_t *pk)
+{
+  uint32_t len = Hacl_Impl_FFDHE_ffdhe_len(a);
+  uint32_t nLen = (len - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), nLen + nLen);
+  {
+    uint64_t p_r2_n[nLen + nLen];
+    memset(p_r2_n, 0U, (nLen + nLen) * sizeof (uint64_t));
+    ffdhe_precomp_p(a, p_r2_n);
+    Hacl_FFDHE_ffdhe_secret_to_public_precomp(a, p_r2_n, sk, pk);
+  }
+}
+
+uint64_t
+Hacl_FFDHE_ffdhe_shared_secret_precomp(
+  Spec_FFDHE_ffdhe_alg a,
+  uint64_t *p_r2_n,
+  uint8_t *sk,
+  uint8_t *pk,
+  uint8_t *ss
+)
+{
+  uint32_t len = Hacl_Impl_FFDHE_ffdhe_len(a);
+  uint32_t nLen = (len - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
+  uint64_t *p_n = p_r2_n;
+  KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
+  {
+    uint64_t sk_n[nLen];
+    memset(sk_n, 0U, nLen * sizeof (uint64_t));
+    KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
+    {
+      uint64_t pk_n[nLen];
+      memset(pk_n, 0U, nLen * sizeof (uint64_t));
+      {
+        uint64_t m;
+        Hacl_Bignum_Convert_bn_from_bytes_be_uint64(len, sk, sk_n);
+        Hacl_Bignum_Convert_bn_from_bytes_be_uint64(len, pk, pk_n);
+        m = ffdhe_check_pk(a, pk_n, p_n);
+        if (m == (uint64_t)0xFFFFFFFFFFFFFFFFU)
         {
-          uint8_t p_s[len];
-          memset(p_s, 0U, len * sizeof (uint8_t));
-          {
-            const uint8_t *p;
-            switch (a)
-            {
-              case Spec_FFDHE_FFDHE2048:
-                {
-                  p = Hacl_Impl_FFDHE_Constants_ffdhe_p2048;
-                  break;
-                }
-              case Spec_FFDHE_FFDHE3072:
-                {
-                  p = Hacl_Impl_FFDHE_Constants_ffdhe_p3072;
-                  break;
-                }
-              case Spec_FFDHE_FFDHE4096:
-                {
-                  p = Hacl_Impl_FFDHE_Constants_ffdhe_p4096;
-                  break;
-                }
-              case Spec_FFDHE_FFDHE6144:
-                {
-                  p = Hacl_Impl_FFDHE_Constants_ffdhe_p6144;
-                  break;
-                }
-              case Spec_FFDHE_FFDHE8192:
-                {
-                  p = Hacl_Impl_FFDHE_Constants_ffdhe_p8192;
-                  break;
-                }
-              default:
-                {
-                  KRML_HOST_PRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-                  KRML_HOST_EXIT(253U);
-                }
-            }
-            {
-              uint32_t len1 = Hacl_Impl_FFDHE_ffdhe_len(a);
-              {
-                uint32_t i;
-                for (i = (uint32_t)0U; i < len1; i++)
-                {
-                  uint8_t *os = p_s;
-                  uint8_t x = p[i];
-                  os[i] = x;
-                }
-              }
-              Hacl_Bignum_Convert_bn_from_bytes_be_uint64(len, p_s, p_n);
-              KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
-              {
-                uint64_t sk_n[nLen];
-                memset(sk_n, 0U, nLen * sizeof (uint64_t));
-                Hacl_Bignum_Convert_bn_from_bytes_be_uint64(len, sk, sk_n);
-                ffdhe_compute_exp(a, p_n, sk_n, g_n, pk);
-              }
-            }
-          }
+          ffdhe_compute_exp(a, p_r2_n, sk_n, pk_n, ss);
         }
+        return m;
       }
     }
   }
@@ -369,84 +441,15 @@ Hacl_FFDHE_ffdhe_shared_secret(Spec_FFDHE_ffdhe_alg a, uint8_t *sk, uint8_t *pk,
 {
   uint32_t len = Hacl_Impl_FFDHE_ffdhe_len(a);
   uint32_t nLen = (len - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
-  KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
+  KRML_CHECK_SIZE(sizeof (uint64_t), nLen + nLen);
   {
-    uint64_t p_n[nLen];
-    memset(p_n, 0U, nLen * sizeof (uint64_t));
-    KRML_CHECK_SIZE(sizeof (uint8_t), len);
+    uint64_t p_n[nLen + nLen];
+    memset(p_n, 0U, (nLen + nLen) * sizeof (uint64_t));
     {
-      uint8_t p_s[len];
-      memset(p_s, 0U, len * sizeof (uint8_t));
-      {
-        const uint8_t *p;
-        switch (a)
-        {
-          case Spec_FFDHE_FFDHE2048:
-            {
-              p = Hacl_Impl_FFDHE_Constants_ffdhe_p2048;
-              break;
-            }
-          case Spec_FFDHE_FFDHE3072:
-            {
-              p = Hacl_Impl_FFDHE_Constants_ffdhe_p3072;
-              break;
-            }
-          case Spec_FFDHE_FFDHE4096:
-            {
-              p = Hacl_Impl_FFDHE_Constants_ffdhe_p4096;
-              break;
-            }
-          case Spec_FFDHE_FFDHE6144:
-            {
-              p = Hacl_Impl_FFDHE_Constants_ffdhe_p6144;
-              break;
-            }
-          case Spec_FFDHE_FFDHE8192:
-            {
-              p = Hacl_Impl_FFDHE_Constants_ffdhe_p8192;
-              break;
-            }
-          default:
-            {
-              KRML_HOST_PRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-              KRML_HOST_EXIT(253U);
-            }
-        }
-        {
-          uint32_t len1 = Hacl_Impl_FFDHE_ffdhe_len(a);
-          {
-            uint32_t i;
-            for (i = (uint32_t)0U; i < len1; i++)
-            {
-              uint8_t *os = p_s;
-              uint8_t x = p[i];
-              os[i] = x;
-            }
-          }
-          Hacl_Bignum_Convert_bn_from_bytes_be_uint64(len, p_s, p_n);
-          KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
-          {
-            uint64_t sk_n[nLen];
-            memset(sk_n, 0U, nLen * sizeof (uint64_t));
-            KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
-            {
-              uint64_t pk_n[nLen];
-              memset(pk_n, 0U, nLen * sizeof (uint64_t));
-              {
-                uint64_t m;
-                Hacl_Bignum_Convert_bn_from_bytes_be_uint64(len, sk, sk_n);
-                Hacl_Bignum_Convert_bn_from_bytes_be_uint64(len, pk, pk_n);
-                m = ffdhe_check_pk(a, pk_n, p_n);
-                if (m == (uint64_t)0xFFFFFFFFFFFFFFFFU)
-                {
-                  ffdhe_compute_exp(a, p_n, sk_n, pk_n, ss);
-                }
-                return m;
-              }
-            }
-          }
-        }
-      }
+      uint64_t m;
+      ffdhe_precomp_p(a, p_n);
+      m = Hacl_FFDHE_ffdhe_shared_secret_precomp(a, p_n, sk, pk, ss);
+      return m;
     }
   }
 }

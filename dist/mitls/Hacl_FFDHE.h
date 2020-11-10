@@ -38,8 +38,8 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
-#include "Hacl_RSAPSS.h"
 #include "Hacl_Kremlib.h"
+#include "Hacl_RSAPSS.h"
 #include "Hacl_Spec.h"
 #include "Hacl_Impl_FFDHE_Constants.h"
 
@@ -47,7 +47,26 @@ uint32_t Hacl_Impl_FFDHE_ffdhe_len(Spec_FFDHE_ffdhe_alg a);
 
 uint32_t Hacl_FFDHE_ffdhe_len(Spec_FFDHE_ffdhe_alg a);
 
+uint64_t *Hacl_FFDHE_new_ffdhe_precomp_p(Spec_FFDHE_ffdhe_alg a);
+
+void
+Hacl_FFDHE_ffdhe_secret_to_public_precomp(
+  Spec_FFDHE_ffdhe_alg a,
+  uint64_t *p_r2_n,
+  uint8_t *sk,
+  uint8_t *pk
+);
+
 void Hacl_FFDHE_ffdhe_secret_to_public(Spec_FFDHE_ffdhe_alg a, uint8_t *sk, uint8_t *pk);
+
+uint64_t
+Hacl_FFDHE_ffdhe_shared_secret_precomp(
+  Spec_FFDHE_ffdhe_alg a,
+  uint64_t *p_r2_n,
+  uint8_t *sk,
+  uint8_t *pk,
+  uint8_t *ss
+);
 
 uint64_t
 Hacl_FFDHE_ffdhe_shared_secret(Spec_FFDHE_ffdhe_alg a, uint8_t *sk, uint8_t *pk, uint8_t *ss);
