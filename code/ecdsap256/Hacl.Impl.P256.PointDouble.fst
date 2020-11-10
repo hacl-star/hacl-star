@@ -289,27 +289,23 @@ val point_double_a_b_g: #c: curve
   -> delta: felem c 
   -> tempBuffer: lbuffer uint64 (getCoordinateLenU64 c *! 3ul) -> 
   Stack unit
-    (requires fun h -> 
-      let prime = getPrime c in 
-      live h p /\ live h alpha /\ live h beta /\ live h gamma /\ live h delta /\ live h tempBuffer /\ 
-      LowStar.Monotonic.Buffer.all_disjoint [loc p; loc alpha; loc beta; loc gamma; loc delta; loc tempBuffer] /\
-      point_x_as_nat c h p < prime /\ 
-      point_y_as_nat c h p < prime /\
-      point_z_as_nat c h p < prime
-    )
-    (ensures fun h0 _ h1 -> modifies (loc alpha |+| loc beta |+| loc gamma |+| loc delta |+| loc tempBuffer) h0 h1 /\
-      (
-	let len = getCoordinateLenU64 c in 
-	let prime = getPrime c in 
+  (requires fun h -> 
+    live h p /\ live h alpha /\ live h beta /\ live h gamma /\ live h delta /\ live h tempBuffer /\ 
+    LowStar.Monotonic.Buffer.all_disjoint [loc p; loc alpha; loc beta; loc gamma; loc delta; loc tempBuffer] /\
+    point_eval c h p
+  )
+    (ensures fun h0 _ h1 -> modifies (loc alpha |+| loc beta |+| loc gamma |+| loc delta |+| loc tempBuffer) h0 h1 /\ (
+    let len = getCoordinateLenU64 c in 
+    let prime = getPrime c in 
 	
-	let x = fromDomain_ #c (point_x_as_nat c h0 p) in 
-	let y = fromDomain_ #c (point_y_as_nat c h0 p) in 
-	let z = fromDomain_ #c (point_z_as_nat c h0 p) in 
+    let x = fromDomain_ #c (point_x_as_nat c h0 p) in 
+    let y = fromDomain_ #c (point_y_as_nat c h0 p) in 
+    let z = fromDomain_ #c (point_z_as_nat c h0 p) in 
 	
-	as_nat c h1 delta = toDomain_ #c (z * z % prime) /\
-	as_nat c h1 gamma = toDomain_ #c (y * y % prime) /\
-	as_nat c h1 beta = toDomain_ #c (x * fromDomain_ #c (as_nat c h1 gamma) % prime) /\
-	as_nat c h1 alpha = toDomain_ #c (3 * (x - fromDomain_ #c (as_nat c h1 delta)) * (x + fromDomain_ #c (as_nat c h1 delta)) % prime)
+    as_nat c h1 delta = toDomain_ #c (z * z % prime) /\
+    as_nat c h1 gamma = toDomain_ #c (y * y % prime) /\
+    as_nat c h1 beta = toDomain_ #c (x * fromDomain_ #c (as_nat c h1 gamma) % prime) /\
+    as_nat c h1 alpha = toDomain_ #c (3 * (x - fromDomain_ #c (as_nat c h1 delta)) * (x + fromDomain_ #c (as_nat c h1 delta)) % prime)
       )
     )
 
@@ -363,17 +359,14 @@ let point_double_a_b_g #c p alpha beta gamma delta tempBuffer =
 val point_double_x3: #c: curve -> x3: felem c -> alpha: felem c -> fourBeta: felem c 
   -> beta: felem c -> eightBeta: felem c ->
   Stack unit
-    (requires fun h ->
-      let prime = getPrime c in 
-      live h x3 /\ live h alpha /\ live h fourBeta /\ live h beta /\ live h eightBeta /\
-      LowStar.Monotonic.Buffer.all_disjoint [loc x3; loc alpha; loc fourBeta; loc beta; loc eightBeta] /\
-      as_nat c h alpha < prime /\
-      as_nat c h beta < prime)
-    (ensures fun h0 _ h1 -> modifies (loc x3 |+| loc fourBeta |+| loc eightBeta) h0 h1 /\
-      (
-	let prime = getPrime c in 
-	as_nat c h1 fourBeta = toDomain_ #c (4 * fromDomain_ #c (as_nat c h0 beta) % prime) /\
-	as_nat c h1 x3 = toDomain_ #c ((fromDomain_ #c (as_nat c h0 alpha) * fromDomain_ #c (as_nat c h0 alpha) - 8 * (fromDomain_ #c (as_nat c h0 beta))) % prime))) 
+  (requires fun h ->
+    live h x3 /\ live h alpha /\ live h fourBeta /\ live h beta /\ live h eightBeta /\
+    LowStar.Monotonic.Buffer.all_disjoint [loc x3; loc alpha; loc fourBeta; loc beta; loc eightBeta] /\ 
+    felem_eval c h alpha /\ felem_eval c h beta)
+  (ensures fun h0 _ h1 -> modifies (loc x3 |+| loc fourBeta |+| loc eightBeta) h0 h1 /\ (
+    let prime = getPrime c in 
+    as_nat c h1 fourBeta = toDomain_ #c (4 * fromDomain_ #c (as_nat c h0 beta) % prime) /\
+    as_nat c h1 x3 = toDomain_ #c ((fromDomain_ #c (as_nat c h0 alpha) * fromDomain_ #c (as_nat c h0 alpha) - 8 * (fromDomain_ #c (as_nat c h0 beta))) % prime))) 
 
 let point_double_x3 #c x3 alpha fourBeta beta eightBeta  = 
     let h0 = ST.get() in 
@@ -405,22 +398,14 @@ let point_double_x3 #c x3 alpha fourBeta beta eightBeta  =
 val point_double_z3: #c: curve -> z3: felem c -> pY: felem c -> pZ: felem c -> gamma: felem c 
   -> delta: felem c ->
   Stack unit 
-    (requires fun h -> live h z3 /\ live h pY /\ live h pZ /\ live h gamma /\ live h delta /\
-      eq_or_disjoint pZ z3 /\ disjoint z3 gamma /\ disjoint z3 delta /\ disjoint pY z3 /\
-      (
-	let prime = getPrime c in 
-	as_nat c h gamma < prime /\
-	as_nat c h delta < prime /\
-	as_nat c h pY < prime /\ 
-	as_nat c h pZ < prime))
-    (ensures fun h0 _ h1 -> modifies (loc z3) h0 h1 /\
-      (
-	let prime = getPrime c in 
-	let y = fromDomain_ #c (as_nat c h0 pY) in 
-	let z = fromDomain_ #c (as_nat c h0 pZ) in 
-	as_nat c h1 z3 = toDomain_ #c (((y + z) * (y + z) - fromDomain_ #c (as_nat c h0 gamma) - fromDomain_ #c (as_nat c h0 delta)) % prime)
-      )
-    )
+  (requires fun h -> live h z3 /\ live h pY /\ live h pZ /\ live h gamma /\ live h delta /\
+    eq_or_disjoint pZ z3 /\ disjoint z3 gamma /\ disjoint z3 delta /\ disjoint pY z3 /\
+    felem_eval c h gamma /\ felem_eval c h delta /\ felem_eval c h pY /\ felem_eval c h pZ)
+  (ensures fun h0 _ h1 -> modifies (loc z3) h0 h1 /\ (
+    let prime = getPrime c in 
+    let y = fromDomain_ #c (as_nat c h0 pY) in 
+    let z = fromDomain_ #c (as_nat c h0 pZ) in 
+    as_nat c h1 z3 = toDomain_ #c (((y + z) * (y + z) - fromDomain_ #c (as_nat c h0 gamma) - fromDomain_ #c (as_nat c h0 delta)) % prime)))
 
 
 let point_double_z3 #c z3 pY pZ gamma delta  = 
@@ -456,22 +441,18 @@ let point_double_z3 #c z3 pY pZ gamma delta  =
   }
 
 
-val point_double_y3: #c: curve -> y3: felem c -> x3: felem c -> alpha: felem c -> gamma: felem c -> eightGamma: felem c -> fourBeta: felem c ->
+val point_double_y3: #c: curve -> y3: felem c -> x3: felem c -> alpha: felem c -> gamma: felem c 
+  -> eightGamma: felem c -> fourBeta: felem c ->
   Stack unit 
   (requires fun h -> 
-    let prime = getPrime c in 
     live h y3 /\ live h x3 /\ live h alpha /\ live h gamma /\ live h eightGamma /\ 
     live h fourBeta /\
     LowStar.Monotonic.Buffer.all_disjoint [loc y3; loc x3; loc alpha; loc gamma; loc eightGamma; loc fourBeta] /\
-    as_nat c h x3 < prime /\
-    as_nat c h alpha < prime /\
-    as_nat c h gamma < prime /\
-    as_nat c h fourBeta < prime)
-  (ensures fun h0 _ h1 -> modifies (loc y3 |+| loc gamma |+| loc eightGamma) h0 h1 /\
-    (
-      let alphaD = fromDomain_ #c (as_nat c h0 alpha) in 
-      let gammaD = fromDomain_ #c (as_nat c h0 gamma) in 
-      as_nat c h1 y3 == toDomain_ #c ((alphaD *  (fromDomain_ #c (as_nat c h0 fourBeta) - fromDomain_ #c (as_nat c h0 x3)) - 8 * gammaD * gammaD) % getPrime c)))
+    felem_eval c h x3 /\ felem_eval c h alpha /\ felem_eval c h gamma /\ felem_eval c h fourBeta)
+  (ensures fun h0 _ h1 -> modifies (loc y3 |+| loc gamma |+| loc eightGamma) h0 h1 /\ (
+    let alphaD = fromDomain_ #c (as_nat c h0 alpha) in 
+    let gammaD = fromDomain_ #c (as_nat c h0 gamma) in 
+    as_nat c h1 y3 == toDomain_ #c ((alphaD *  (fromDomain_ #c (as_nat c h0 fourBeta) - fromDomain_ #c (as_nat c h0 x3)) - 8 * gammaD * gammaD) % getPrime c)))
 
 
 

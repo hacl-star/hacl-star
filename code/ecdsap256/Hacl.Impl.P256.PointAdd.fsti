@@ -14,14 +14,8 @@ open Hacl.Spec.P256.MontgomeryMultiplication
 
 #set-options "--z3rlimit 100"
 
-let point_eval (c: curve) (h:mem) (p:point c) = 
-  point_x_as_nat c h p < getPrime c /\
-  point_y_as_nat c h p < getPrime c /\
-  point_z_as_nat c h p < getPrime c 
-  
-
 val point_add: #c: curve -> p: point c -> q: point c -> result: point c 
-  -> tempBuffer: lbuffer uint64 (size 27 *! getCoordinateLenU64 c) -> 
+  -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) -> 
    Stack unit (requires fun h -> 
      live h p /\ live h q /\ live h result /\ live h tempBuffer /\ 
      

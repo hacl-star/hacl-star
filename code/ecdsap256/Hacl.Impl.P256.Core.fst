@@ -5,13 +5,10 @@ open FStar.HyperStack
 module ST = FStar.HyperStack.ST
 
 open Lib.IntTypes
-open Hacl.Impl.P256.Arithmetics
 
 open Lib.Buffer
 
-open Hacl.Lemmas.P256
 open Hacl.Spec.P256.Definition
-open Hacl.Spec.P256.MontgomeryMultiplication
 open Spec.P256
 open Hacl.Impl.SolinasReduction
 open Hacl.Impl.P.LowLevel 
@@ -236,12 +233,15 @@ let cswap #c bit p1 p2 =
 val normalisation_update: #c: curve -> z2x: felem c -> z3y: felem c -> p: point c 
   -> resultPoint: point c -> Stack unit 
   (requires fun h -> 
+  
     let prime = getPrime c in 
     let len = getCoordinateLenU64 c in 
   
     live h z2x /\ live h z3y /\ live h resultPoint /\ live h p /\ 
+    
     as_nat c h z2x < prime /\ as_nat c h z3y < prime /\
     as_nat c h (gsub p (size 2 *! len) len) < prime /\
+    
     disjoint z2x z3y /\ disjoint z2x resultPoint /\ disjoint z3y resultPoint)
   (ensures fun h0 _ h1 -> 
     let prime = getPrime c in 
@@ -276,6 +276,7 @@ let normalisation_update #c z2x z3y p resultPoint =
   fromDomain z3y resultY;
   uploadOneImpl #c resultZ;
   copy_conditional #c resultZ zeroBuffer bit;
+
   admit();
   pop_frame()
 
@@ -400,7 +401,7 @@ let scalar_bit #c #buf_type s n =
 
 
 val montgomery_ladder_step1: #c : curve ->  p: point c -> q: point c 
-  -> tempBuffer: lbuffer uint64 (size 27 *! getCoordinateLenU64 c) -> Stack unit
+  -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) -> Stack unit
   (requires fun h -> 
     let prime = getPrime c in 
     
@@ -462,7 +463,7 @@ let lemma_step i = ()
 
 
 val montgomery_ladder_step: #c: curve -> #buf_type: buftype-> 
-  p: point c -> q: point c -> tempBuffer: lbuffer uint64 (size 27 *! getCoordinateLenU64 c) -> 
+  p: point c -> q: point c -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) -> 
   scalar: lbuffer_t buf_type uint8 (getScalarLen c) -> 
   i:size_t{v i < getPower c} -> 
   Stack unit
@@ -529,7 +530,7 @@ let montgomery_ladder_step #c #buf_type r0 r1 tempBuffer scalar i =
 
 val montgomery_ladder: #c: curve -> #buf_type: buftype->  p: point c -> q: point c ->
   scalar: lbuffer_t buf_type uint8 (getScalarLen c) -> 
-  tempBuffer:  lbuffer uint64 (size 27 *! getCoordinateLenU64 c)  -> 
+  tempBuffer:  lbuffer uint64 (size 17 *! getCoordinateLenU64 c)  -> 
   Stack unit
   (requires fun h -> live h p /\ live h q /\ live h scalar /\  live h tempBuffer /\
     LowStar.Monotonic.Buffer.all_disjoint [loc p; loc q; loc tempBuffer; loc scalar] /\
@@ -661,7 +662,7 @@ let lemma_coord h3 q = ()
 inline_for_extraction
 val scalarMultiplication_t: #c: curve -> #t:buftype -> p: point c -> result: point c -> 
   scalar: lbuffer_t t uint8 (getScalarLen c) -> 
-  tempBuffer: lbuffer uint64 (size 30 *! getCoordinateLenU64 c) ->
+  tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) ->
   Stack unit
     (requires fun h -> 
       let len = getCoordinateLenU64 c in 
@@ -695,7 +696,7 @@ let scalarMultiplication_t #c #t p result scalar tempBuffer  =
   let len = getCoordinateLenU64 c in 
   let q = sub tempBuffer (size 0) (size 3 *! len) in 
   uploadZeroPoint #c q;
-  let buff = sub tempBuffer (size 3 *! len) (size 27 *! len) in 
+  let buff = sub tempBuffer (size 3 *! len) (size 17 *! len) in 
   pointToDomain p result;
     let h2 = ST.get() in 
   montgomery_ladder q result scalar buff;
@@ -809,7 +810,7 @@ let scalarMultiplicationWithoutNorm #c p result scalar tempBuffer =
   let len = getCoordinateLenU64 c in 
   let q = sub tempBuffer (size 0) (size 3 *! len) in 
   uploadZeroPoint #c q;
-  let buff = sub tempBuffer (size 3 *! len) (size 27 *! len) in 
+  let buff = sub tempBuffer (size 3 *! len) (size 17 *! len) in 
   pointToDomain p result;
     let h1 = ST.get() in 
     admit();
@@ -825,7 +826,7 @@ let secretToPublic #c result scalar tempBuffer =
     let basePoint = create (size 3 *! len) (u64 0) in 
   uploadBasePoint #c basePoint;
     let q = sub tempBuffer (size 0) (size 3 *! len) in 
-    let buff = sub tempBuffer (size 3 *! len) (size 27 *! len) in 
+    let buff = sub tempBuffer (size 3 *! len) (size 17 *! len) in 
   uploadZeroPoint #c q; 
   admit();
   let h1 = ST.get() in 
@@ -842,7 +843,7 @@ let secretToPublicWithoutNorm #c result scalar tempBuffer =
     let basePoint = create (size 3 *! len) (u64 0) in 
   uploadBasePoint #c basePoint;
       let q = sub tempBuffer (size 0) (size 3 *! len) in 
-      let buff = sub tempBuffer (size 3 *! len) (size 27 *! len) in 
+      let buff = sub tempBuffer (size 3 *! len) (size 17 *! len) in 
   uploadZeroPoint #c q; 
   admit();
       let h1 = ST.get() in 

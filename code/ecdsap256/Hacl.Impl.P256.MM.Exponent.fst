@@ -373,7 +373,7 @@ val _montgomery_ladder_power: #c: curve -> a: felem c -> b: felem c
 
   
 let _montgomery_ladder_power #c a b scalar = 
-  let scalarLen = getScalarLen c in 
+  let scalarLen = getScalarLenU64 c in 
   let h0 = ST.get() in 
   [@inline_let]
   let spec_exp h0  = _pow_step #c (as_seq h0 scalar) in 

@@ -564,3 +564,10 @@ val lemmaPrimeLowerBound: #c: curve -> Lemma (getPrime c > pow2 (getPower c - 1)
 let lemmaPrimeLowerBound #c = 
   assert_norm (getPrime P256 > pow2 (getPower P256 - 1));  
   assert_norm (getPrime P384 > pow2 (getPower P384 - 1))
+
+
+let point_eval (c: curve) (h:mem) (p:point c) = 
+  point_x_as_nat c h p < getPrime c /\
+  point_y_as_nat c h p < getPrime c /\
+  point_z_as_nat c h p < getPrime c 
+  

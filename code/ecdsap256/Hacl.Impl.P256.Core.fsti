@@ -179,7 +179,7 @@ val normX: #c: curve -> p: point c -> result: felem c -> tempBuffer: lbuffer uin
 inline_for_extraction noextract
 val scalarMultiplication: #c: curve -> #buf_type: buftype->  p: point c -> result: point c -> 
   scalar: lbuffer_t buf_type uint8 (getScalarLen c) -> 
-  tempBuffer: lbuffer uint64 (size 25 *! getCoordinateLenU64 c) ->
+  tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) ->
   Stack unit
     (requires fun h -> 
       let prime = getPrime c in 
@@ -208,7 +208,7 @@ val scalarMultiplication: #c: curve -> #buf_type: buftype->  p: point c -> resul
 
 val scalarMultiplicationWithoutNorm: #c: curve -> p: point c -> result: point c -> 
   scalar: lbuffer uint8 (getScalarLen c) -> 
-  tempBuffer: lbuffer uint64 (size 25 *! getCoordinateLenU64 c) ->
+  tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) ->
   Stack unit
     (requires fun h -> 
       let prime = getPrime c in 
@@ -238,7 +238,7 @@ val scalarMultiplicationWithoutNorm: #c: curve -> p: point c -> result: point c 
 
 
 val secretToPublic: #c: curve -> result: point c  -> scalar: lbuffer uint8 (getScalarLen c) 
-  -> tempBuffer: lbuffer uint64 (size 25 *! getCoordinateLenU64 c) ->
+  -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) ->
   Stack unit
     (requires fun h -> 
       live h result /\ live h scalar /\ live h tempBuffer /\ 
@@ -261,7 +261,7 @@ val secretToPublic: #c: curve -> result: point c  -> scalar: lbuffer uint8 (getS
   )
 
 val secretToPublicWithoutNorm: #c: curve -> result: point c -> scalar: lbuffer uint8 (getScalarLen c) -> 
- tempBuffer: lbuffer uint64 (size 25 *! getCoordinateLenU64 c) ->
+ tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) ->
   Stack unit
     (requires fun h -> 
       live h result /\ live h scalar /\ live h tempBuffer /\
