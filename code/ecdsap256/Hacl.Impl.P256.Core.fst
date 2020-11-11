@@ -310,47 +310,21 @@ let lemma_three_mul_nat a b c = ()
 
 *)
 
-let norm #c p resultPoint tempBuffer = 
+val lemma_norm: #c: curve -> pD : point_nat_prime -> r: point_nat_prime #c ->
+  Lemma (requires (
+    let prime = getPrime c in 
+    let xD, yD, zD = pD in 
+    let x3, y3, z3 = r in 
+    x3 == xD * (pow (zD * zD % prime) (prime - 2) % prime) % prime /\
+    y3 == yD * (pow ((zD * zD % prime) * zD % prime) (prime - 2) % prime) % prime/\
+    (if Spec.P256.isPointAtInfinity (xD, yD, zD) then z3 == 0 else z3 == 1)))
+  (ensures (let xN, yN, zN = _norm #c pD in r == (xN, yN, zN))) 
 
-  let len = getCoordinateLenU64 c in 
-
-  let xf = sub p (size 0) len in 
-  let yf = sub p len len in 
-  let zf = sub p (size 2 *! len) len in 
-  
-  let z2f = sub tempBuffer len len in 
-  let z3f = sub tempBuffer (size 2 *! len) len in
-
-    let h0 = ST.get() in 
-  montgomery_square_buffer #c zf z2f; 
-  montgomery_multiplication_buffer #c z2f zf z3f; 
-
-  exponent #c z2f z2f;
-  exponent #c z3f z3f; 
-  montgomery_multiplication_buffer #c xf z2f z2f;
-  montgomery_multiplication_buffer #c yf z3f z3f;
-
-    let h1 = ST.get() in 
-
-  normalisation_update z2f z3f p resultPoint; 
-
-
-    let h2 = ST.get() in 
-  
+let lemma_norm #c pD r = 
   let prime = getPrime c in 
 
-  let xD = fromDomain_ #c (point_x_as_nat c h0 p) in
-  let yD = fromDomain_ #c (point_y_as_nat c h0 p) in 
-  let zD = fromDomain_ #c (point_z_as_nat c h0 p) in 
-
-  let x3 = point_x_as_nat c h2 resultPoint in 
-  let y3 = point_y_as_nat c h2 resultPoint in 
-
-  lemma_two_mul_nat zD zD;
-  lemma_three_mul_nat zD zD zD;
-
-  assert(x3 == (xD * (pow (zD * zD % prime) (prime - 2) % prime) % prime));
-  assert(y3 == (yD * (pow ((zD * zD % prime) * zD % prime) (prime - 2) % prime) % prime));
+  let xD, yD, zD = pD in 
+  let x3, y3, z3 = r in 
 
   calc (==)
   {
@@ -374,30 +348,35 @@ let norm #c p resultPoint tempBuffer =
     yD * (modp_inv2_pow #c (zD * zD * zD)) % prime;
     (==) {_ by (canon())}
     modp_inv2_pow #c (zD * zD * zD) * yD % prime;
-  };
+  }
 
-  assert(x3 == modp_inv2_pow #c (zD * zD) * xD % prime);
-  assert(y3 == modp_inv2_pow #c (zD * zD * zD) * yD % prime);
 
-  assert(    
-    let x0 = point_x_as_nat c h1 p in 
-    let y0 = point_y_as_nat c h1 p in 
-    let z0 = point_z_as_nat c h1 p in 
+let norm #c p resultPoint tempBuffer = 
+  [@inline_let]
+  let len = getCoordinateLenU64 c in 
 
-    let z1 = point_z_as_nat c h2 resultPoint in 
-
-    x3 == fromDomain_ #c (as_nat c h1 z2f) /\ 
-    y3 == fromDomain_ #c (as_nat c h1 z3f) /\ (
-    if Spec.P256.isPointAtInfinity (fromDomain_ #c x0, fromDomain_ #c y0, fromDomain_ #c z0) 
-    then 
-      z1 == 0 
-    else 
-      z1 == 1));
+  let xf = sub p (size 0) len in 
+  let yf = sub p len len in 
+  let zf = sub p (size 2 *! len) len in 
   
+  let z2f = sub tempBuffer len len in 
+  let z3f = sub tempBuffer (size 2 *! len) len in
 
-  admit()
+    let h0 = ST.get() in 
+  montgomery_square_buffer #c zf z2f; 
+  montgomery_multiplication_buffer #c z2f zf z3f; 
 
+  exponent #c z2f z2f;
+  exponent #c z3f z3f; 
+  montgomery_multiplication_buffer #c xf z2f z2f;
+  montgomery_multiplication_buffer #c yf z3f z3f;
+  normalisation_update z2f z3f p resultPoint; 
 
+    let h1 = ST.get() in 
+
+  lemma_norm #c
+    (fromDomainPoint #c (point_prime_to_coordinates c (as_seq h0 p))) 
+    (point_prime_to_coordinates c (as_seq h1 resultPoint))
 
 
 
