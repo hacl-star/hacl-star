@@ -30,6 +30,7 @@ jobs:
     - name: 32-bit / compile-only
       os: linux
       install:
+        - sudo apt update -qq --yes && sudo apt install -qq --yes gcc-multilib
         - export TARGET=IA32
     - name: xcode 10 / full tests
       os: osx
