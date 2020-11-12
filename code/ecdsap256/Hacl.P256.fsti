@@ -402,22 +402,3 @@ val is_more_than_zero_less_than_order: x: lbuffer uint8 (size 32) -> Stack bool
       r <==> (scalar > 0 && scalar < prime_p256_order)
     )
   )
-
-
-
-
-[@ (Comment "   The input of the function is considered to be public,
-thus this code is not secret independent with respect to the operations done over the input.")] 
-
-val verifyQ: 
-  pubKey: lbuffer uint8 (size 64) ->
-  Stack bool
-    (requires fun h -> live h pubKey)
-    (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-      (
-  let publicKeyX = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))) in 
-  let publicKeyY = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 32) (size 32))) in
-  let pkJ = Spec.P256.toJacobianCoordinates (publicKeyX, publicKeyY) in 
-  r == verifyQValidCurvePointSpec pkJ
-      )
-    )
