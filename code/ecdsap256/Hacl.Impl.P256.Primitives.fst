@@ -390,3 +390,21 @@ let fromFormPoint i o =
 
   _fromForm pointX pointScalarX;
   _fromForm pointY pointScalarY
+
+
+
+val ecdsa_verification_point_operations: result: felem -> publicKey: lbuffer uint8 (size 64) -> 
+  u1: lbuffer uint8 (size 32) -> u2: lbuffer uint8 (size 32) ->
+  Stack bool 
+    (requires fun h -> True)
+    (ensures fun h0 _ h1 -> True)
+
+
+let ecdsa_verification_point_operations result publicKey u1 u2 = 
+  push_frame();
+    let tempBuffer = create (size 100) (u64 0) in 
+    let publicKeyAsFelem = create (size 12) (u64 0) in 
+    toFormPoint publicKey publicKeyAsFelem;
+    let r = Hacl.Impl.ECDSA.P256.Verification.Agile.ecdsa_verification_step5 result publicKeyAsFelem u1 u2 tempBuffer in 
+  pop_frame();
+    r
