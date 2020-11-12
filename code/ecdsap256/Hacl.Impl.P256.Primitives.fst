@@ -382,5 +382,11 @@ val fromFormPoint: i: point -> o: lbuffer uint8 (size 64) -> Stack unit
 
 
 let fromFormPoint i o = 
-  changeEndian resultBufferFelemY;
-  toUint8 resultBufferFelemX resultX
+  let pointX = sub i (size 0) (size 4) in 
+  let pointY = sub i (size 4) (size 4) in 
+
+  let pointScalarX = sub i (size 0) (size 32) in 
+  let pointScalarY = sub i (size 32) (size 32) in 
+
+  _fromForm pointX pointScalarX;
+  _fromForm pointY pointScalarY

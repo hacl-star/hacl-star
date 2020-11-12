@@ -69,6 +69,9 @@ val verifyQValidCurvePoint: pubKeyAsPoint:point
     modifies (loc tempBuffer) h0 h1 /\
     r == verifyQValidCurvePointSpec (point_prime_to_coordinates (as_seq h0 pubKeyAsPoint)))
 
+
+[@ (Comment "   The input of the function is considered to be public,
+thus this code is not secret independent with respect to the operations done over the input.")] 
 inline_for_extraction
 val verifyQ: 
   pubKey: lbuffer uint8 (size 64) ->
@@ -82,6 +85,7 @@ val verifyQ:
 	r == verifyQValidCurvePointSpec pkJ
       )
     )
+
 
 val isMoreThanZeroLessThanOrder: x: lbuffer uint8 (size 32) -> Stack bool
   (requires fun h -> live h x)
