@@ -157,10 +157,14 @@ val secretToPublicRaw:
     live h result /\ live h scalar /\ 
     disjoint result scalar)
   (ensures fun h0 r h1 ->
-    let pointX, pointY, flag = ecp256_dh_i (as_seq h0 scalar) in
-    modifies (loc result) h0 h1 /\
-    as_seq h1 (gsub result (size 0) (size 32)) == pointX /\
-    as_seq h1 (gsub result (size 32) (size 32)) == pointY)
+    modifies (loc result) h0 h1 /\ (
+    let (xN, yN, zN) = secret_to_public (as_seq h0 scalar)  in 
+
+    let scalarX = gsub result (size 0) (size 32) in 
+    let scalarY = gsub result (size 32) (size 32) in 
+
+    as_seq h1 scalarX == nat_to_bytes_be 32 xN /\
+    as_seq h1 scalarY == nat_to_bytes_be 32 yN))
 
 
 let secretToPublicRaw result scalar =
@@ -168,11 +172,9 @@ let secretToPublicRaw result scalar =
   let tempBuffer = create (size 100) (u64 0) in
   let resultBuffer = create (size 12) (u64 0) in
 
-  Hacl.Impl.P256.Core.secretToPublic resultBuffer scalar tempBuffer;
+  Hacl.Impl.P256.Core.secretToPublic resultBuffer scalar tempBuffer;  
   fromFormPoint resultBuffer result;
-
-  pop_frame();
-  admit()
+  pop_frame()
 
 
 val _scalarMult:
@@ -306,8 +308,8 @@ val scalarMultRaw:
       live h result /\ live h pubKey /\ live h scalar /\
       disjoint result pubKey /\ disjoint result scalar /\ (
       let x, y = gsub pubKey (size 0) (size 32), gsub pubKey (size 32) (size 32) in 
-      nat_from_bytes_be (as_seq h x) < prime /\
-      nat_from_bytes_be (as_seq h y) < prime))
+      nat_from_bytes_be (as_seq h x) < prime256 /\
+      nat_from_bytes_be (as_seq h y) < prime256))
     (ensures fun h0 _ h1 ->
       let pubKeyX = gsub pubKey (size 0) (size 32) in
       let pubKeyY = gsub pubKey (size 32) (size 32) in
@@ -327,11 +329,7 @@ let scalarMultRaw result pubKey scalar =
   let tempBuffer = create (size 100) (u64 0) in
   
   toFormPoint pubKey publicKeyAsFelem; 
-    let h1 = ST.get() in 
-    assume (as_nat h1 (gsub publicKeyAsFelem (size 0) (size 4)) < prime256);
-    assume (as_nat h1 (gsub publicKeyAsFelem (size 4) (size 4)) < prime256);
   scalarMultiplication publicKeyAsFelem resultBufferFelem scalar tempBuffer;
-    admit();
   fromFormPoint resultBufferFelem result;
 
   pop_frame();
