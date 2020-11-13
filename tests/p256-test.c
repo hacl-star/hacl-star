@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <stdbool.h>
+#include <assert.h>
 #include "test_helpers.h"
 
 #include <openssl/evp.h>
@@ -16,6 +17,7 @@
 #include <openssl/ec.h>
 
 #include "Hacl_P256.h"
+#include "Lib_RandomBuffer_System.h"
 
 
 uint8_t
@@ -100,8 +102,83 @@ bool testImplementationHacl()
 	bool flag = Hacl_P256_ecdsa_sign_p256_without_hash(result, 32, digest, prKey, nonce);
 	bool s0 = compare_and_print(32, result, siggen_vectors_low5);
 	bool s1 = compare_and_print(32, result + 32, siggen_vectors_low6);
-	return s0 && s1 && flag;
+
+    uint8_t* pubKey = (uint8_t*) malloc (sizeof (uint8_t) * 64);
+    bool s2 = Hacl_P256_ecp256dh_i(pubKey, prKey);
+    bool s3 = Hacl_P256_verify_q(pubKey);
+
+    uint8_t* r = (uint8_t*) malloc (sizeof (uint8_t) * 32);
+    uint8_t* s = (uint8_t*) malloc (sizeof (uint8_t) * 32);
+    memcpy(r, result, 32);
+    memcpy(s, result+32, 32);
+
+    bool s4 = Hacl_P256_ecdsa_verif_without_hash(32, digest, pubKey, r, s);
+	return s0 && s1 && s2 && s3 && s4 && flag;
 }
+
+void debug_print_buf(uint8_t* buf, size_t len) {
+    for (size_t i = 0; i < len; i++)
+        printf("%02x",buf[i]);
+    printf("\n");
+}
+
+struct Result {
+    clock_t clock;
+    cycles cycles;
+};
+
+struct Result benchmarkP256Verification(cycles a, cycles b, clock_t t1, clock_t t2)
+{
+    uint8_t* sk = (uint8_t*) malloc (sizeof (uint8_t) * 32);
+    memset(sk, 0x00, 32);
+    while (!Hacl_P256_is_more_than_zero_less_than_order(sk)) {
+        read_random_bytes(32, sk);
+    };
+
+    uint8_t* pk = (uint8_t*) malloc (sizeof (uint8_t) * 64);
+    assert(Hacl_P256_ecp256dh_i(pk, sk));
+    assert(Hacl_P256_verify_q(pk));
+
+    uint8_t* k = (uint8_t*) malloc (sizeof (uint8_t) * 32);
+    memset(k,0x00,32);
+    while (!Hacl_P256_is_more_than_zero_less_than_order(k)) {
+        read_random_bytes(32, k);
+    };
+
+    uint8_t* msg = (uint8_t*) malloc (sizeof (uint8_t) * 256);
+    read_random_bytes(256, msg);
+
+    uint8_t* sig = (uint8_t*) malloc (sizeof (uint8_t) * 64);
+    memset(sig, 0x00, 64);
+    assert(Hacl_P256_ecdsa_sign_p256_without_hash(sig, 256, msg, sk, k));
+
+    uint8_t* r = (uint8_t*) malloc (sizeof (uint8_t) * 32);
+    uint8_t* s = (uint8_t*) malloc (sizeof (uint8_t) * 32);
+    memcpy(r, sig, 32);
+    memcpy(s, sig+32, 32);
+
+	t1 = clock();
+  	a = cpucycles_begin();
+    bool result = Hacl_P256_ecdsa_verif_without_hash(256, msg, pk, r, s);
+	b = cpucycles_end();
+	t2 = clock();
+	clock_t tdiff = t2 - t1;
+	cycles cdiff = b - a;
+
+    assert(result);
+
+    free(sk);
+    free(pk);
+    free(k);
+    free(msg);
+    free(sig);
+    free(r);
+    free(s);
+
+    struct Result res = { tdiff, cdiff };
+    return res;
+}
+
 
 void handleErrors()
 {
@@ -116,15 +193,23 @@ int main()
 		return -1;
 	}
 
-
   	cycles a,b;
 	clock_t t1,t2;
+
+    struct Result total_res = { 0, 0 };
+
+  	for (int j = 0; j < ROUNDS; j++) {
+        struct Result res = benchmarkP256Verification(a, b, t1, t2);
+        total_res.clock += res.clock;
+        total_res.cycles += res.cycles;
+    }
+
 	uint8_t* result = (uint8_t*) malloc (sizeof (uint8_t) * 64);
 
 	uint64_t len = SIZE;
 	uint8_t plain[SIZE];
 	memset(plain,'P',SIZE);
-	
+
   	for (int j = 0; j < ROUNDS; j++)
 		Hacl_P256_ecdsa_sign_p256_without_hash(plain, 32, plain, prKey, nonce);
 
@@ -133,9 +218,9 @@ int main()
 
   	for (int j = 0; j < ROUNDS; j++)
 		Hacl_P256_ecdsa_sign_p256_without_hash(plain, 32, plain, prKey, nonce);
-	
+
 	b = cpucycles_end();
-	
+
 	t2 = clock();
 	clock_t tdiff1 = t2 - t1;
 	cycles cdiff1 = b - a;
@@ -157,7 +242,7 @@ int main()
 
 	for (int j = 0; j < ROUNDS; j++)
 	{
-		Hacl_P256_ecp256dh_r(pk, pk, scalar0); 
+		Hacl_P256_ecp256dh_r(pk, pk, scalar0);
 	    res ^= scalar0[0] ^ scalar0[31];
 	}
 
@@ -167,11 +252,14 @@ int main()
 	cycles cdiff3 = b - a;
 
 
-	
+
 	uint64_t count = ROUNDS * SIZE;
-	printf("Hacl ECDSA (without hashing) PERF: %d\n"); 
+	printf("Hacl ECDSA (without hashing) PERF: %d\n");
 	print_time(count,tdiff1,cdiff1);
 
-	printf("Hacl ECDH PERF: %d\n"); 
-	print_time(count,tdiff3,cdiff3);  
+	printf("Hacl ECDH PERF: %d\n");
+	print_time(count,tdiff3,cdiff3);
+
+    printf("Hacl_P256_ecdsa_verif_without_hash randomized\n");
+    print_time(count, total_res.clock, total_res.cycles);
 }
