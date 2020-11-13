@@ -37,15 +37,20 @@ let _toForm i o =
 
 
 val toFormPoint: i: lbuffer uint8 (size 64) -> result: point -> Stack unit 
-  (requires fun h -> live h i /\ live h result /\ disjoint i result)
+  (requires fun h -> live h i /\ live h result /\ disjoint i result /\
+    nat_from_bytes_be (as_seq h (gsub i (size 0) (size 32))) < prime256 /\
+    nat_from_bytes_be (as_seq h (gsub i (size 32) (size 32))) < prime256
+  
+  )
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-    (
-      let pointScalarXSeq = nat_from_bytes_be (as_seq h1 (gsub i (size 0) (size 32))) in 
-      let pointScalarYSeq = nat_from_bytes_be (as_seq h1 (gsub i (size 32) (size 32))) in 
-     
-      let x, y, z = point_x_as_nat h1 result, point_y_as_nat h1 result, point_z_as_nat h1 result in 
-      let pointJacX, pointJacY, pointJacZ = toJacobianCoordinates (pointScalarXSeq, pointScalarYSeq) in 
-      x == pointJacX /\ y == pointJacY /\ z == pointJacZ))
+    nat_from_bytes_be (as_seq h0 (gsub i (size 0) (size 32))) < prime256 /\
+    nat_from_bytes_be (as_seq h0 (gsub i (size 32) (size 32))) < prime256 /\ (
+    let pointScalarXSeq = nat_from_bytes_be (as_seq h0 (gsub i (size 0) (size 32))) in 
+    let pointScalarYSeq = nat_from_bytes_be (as_seq h0 (gsub i (size 32) (size 32))) in 
+    let x, y, z = point_x_as_nat h1 result, point_y_as_nat h1 result, point_z_as_nat h1 result in 
+    let pointJacX, pointJacY, pointJacZ = toJacobianCoordinates (pointScalarXSeq, pointScalarYSeq) in 
+    x == pointScalarXSeq /\ y == pointScalarYSeq  /\
+    x == pointJacX /\ y == pointJacY /\ z == 1 ))
 
       
 let toFormPoint i p = 
@@ -59,6 +64,48 @@ let toFormPoint i p =
   _toForm pointScalarX pointX;
   _toForm pointScalarY pointY;
   uploadOneImpl pointZ
+
+
+
+val _fromForm: i: felem -> o: lbuffer uint8 (size 32) -> Stack unit 
+  (requires fun h -> live h i /\ live h o /\ disjoint i o /\ as_nat h i < pow2 256)
+  (ensures fun h0 _ h1 -> modifies (loc i |+| loc o) h0 h1 /\  as_seq h1 o == nat_to_bytes_be 32  (as_nat h0 i))
+
+let _fromForm i o = 
+    let h0 = ST.get() in 
+  changeEndian i;
+  toUint8 i o;
+  
+  lemma_core_0 i h0;
+  lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h0 i);
+  changeEndian_le_be (as_nat h0 i)
+
+
+val fromFormPoint: i: point -> o: lbuffer uint8 (size 64) -> Stack unit
+  (requires fun h -> live h i /\ live h o /\ disjoint i o /\
+    as_nat h (gsub i (size 0) (size 4)) < prime256 /\
+    as_nat h (gsub i (size 4) (size 4)) < prime256 )
+  (ensures fun h0 _ h1 -> modifies (loc i |+| loc o) h0 h1 /\ (
+    let xCoordinate = gsub i (size 0) (size 4) in 
+    let yCoordinate = gsub i (size 4) (size 4) in 
+
+    let scalarX = gsub o (size 0) (size 32) in 
+    let scalarY = gsub o (size 32) (size 32) in 
+
+    as_seq h1 scalarX == nat_to_bytes_be 32 (as_nat h0 xCoordinate) /\
+    as_seq h1 scalarY == nat_to_bytes_be 32 (as_nat h0 yCoordinate)))
+
+
+let fromFormPoint i o = 
+  let pointX = sub i (size 0) (size 4) in 
+  let pointY = sub i (size 4) (size 4) in 
+
+  let pointScalarX = sub o (size 0) (size 32) in 
+  let pointScalarY = sub o (size 32) (size 32) in 
+
+  _fromForm pointX pointScalarX;
+  _fromForm pointY pointScalarY
+
 
 
 
@@ -82,29 +129,11 @@ let secretToPublic result scalar =
     push_frame();
   let tempBuffer = create (size 100) (u64 0) in
   let resultBuffer = create (size 12) (u64 0) in
-  let resultBufferX = sub resultBuffer (size 0) (size 4) in
-  let resultBufferY = sub resultBuffer (size 4) (size 4) in
-  let resultX = sub result (size 0) (size 32) in
-  let resultY = sub result (size 32) (size 32) in
-
+  
   secretToPublic resultBuffer scalar tempBuffer;
   let flag = isPointAtInfinityPrivate resultBuffer in
-
-  let h0 = ST.get() in
-
-  changeEndian resultBufferX;
-  changeEndian resultBufferY;
-
-  toUint8 resultBufferX resultX;
-  toUint8 resultBufferY resultY;
-
-  lemma_core_0 resultBufferX h0;
-  lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h0 resultBufferX);
-  changeEndian_le_be (as_nat h0 resultBufferX);
-
-  lemma_core_0 resultBufferY h0;
-  lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h0 resultBufferY);
-  changeEndian_le_be (as_nat h0 resultBufferY); 
+  fromFormPoint resultBuffer result;
+  
   pop_frame();
 
   let open Hacl.Impl.P256.LowLevel.RawCmp in 
@@ -138,26 +167,10 @@ let secretToPublicRaw result scalar =
   push_frame();
   let tempBuffer = create (size 100) (u64 0) in
   let resultBuffer = create (size 12) (u64 0) in
-  let resultBufferX = sub resultBuffer (size 0) (size 4) in
-  let resultBufferY = sub resultBuffer (size 4) (size 4) in
-  let resultX = sub result (size 0) (size 32) in
-  let resultY = sub result (size 32) (size 32) in
 
   Hacl.Impl.P256.Core.secretToPublic resultBuffer scalar tempBuffer;
-  let h0 = ST.get() in
-  changeEndian resultBufferX;
-  changeEndian resultBufferY;
+  fromFormPoint resultBuffer result;
 
-  toUint8 resultBufferX resultX;
-  toUint8 resultBufferY resultY;
-
-  lemma_core_0 resultBufferX h0;
-  lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h0 resultBufferX);
-  changeEndian_le_be (as_nat h0 resultBufferX);
-
-  lemma_core_0 resultBufferY h0;
-  lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h0 resultBufferY);
-  changeEndian_le_be (as_nat h0 resultBufferY); 
   pop_frame();
   admit()
 
@@ -190,7 +203,6 @@ val _scalarMult:
 
 let _scalarMult result pubKey scalar =
   push_frame();
-    let h0 =  ST.get() in 
   let tempBuffer = create (size 100) (u64 0) in
   let publicKeyCorrect = verifyQValidCurvePoint pubKey tempBuffer in
   if publicKeyCorrect then
@@ -241,7 +253,9 @@ val scalarMult:
   -> Stack bool
     (requires fun h ->
       live h result /\ live h pubKey /\ live h scalar /\
-      disjoint result pubKey /\ disjoint result scalar)
+      disjoint result pubKey /\ disjoint result scalar /\
+      nat_from_bytes_be (as_seq h (gsub pubKey (size 0) (size 32))) < prime256 /\
+      nat_from_bytes_be (as_seq h (gsub pubKey (size 32) (size 32))) < prime256)
     (ensures fun h0 r h1 ->
       let pubKeyX = gsub pubKey (size 0) (size 32) in
       let pubKeyY = gsub pubKey (size 32) (size 32) in
@@ -255,37 +269,30 @@ val scalarMult:
 
 let scalarMult result pubKey scalar =
   push_frame();
-  let h0 = ST.get() in
-  let resultBufferFelem = create (size 12) (u64 0) in
-  let resultBufferFelemX = sub resultBufferFelem (size 0) (size 4) in
-  let resultBufferFelemY = sub resultBufferFelem (size 4) (size 4) in
-  let resultX = sub result (size 0) (size 32) in
-  let resultY = sub result (size 32) (size 32) in
-
-  let publicKeyAsFelem = create (size 12) (u64 0) in
-  toFormPoint pubKey publicKeyAsFelem; 
-  let flag = _scalarMult resultBufferFelem publicKeyAsFelem scalar in
-
-  let h2 = ST.get() in
   
-  changeEndian resultBufferFelemX;
-  changeEndian resultBufferFelemY;
-  toUint8 resultBufferFelemX resultX;
-  toUint8 resultBufferFelemY resultY;
-
-  lemma_core_0 resultBufferFelemX h2;
-  lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h2 resultBufferFelemX);
-  changeEndian_le_be (as_nat h2 resultBufferFelemX);
-
-  lemma_core_0 resultBufferFelemY h2;
-  lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h2 resultBufferFelemY);
-  changeEndian_le_be (as_nat h2 resultBufferFelemY);
-
+  let resultBufferFelem = create (size 12) (u64 0) in
+  let publicKeyAsFelem = create (size 12) (u64 0) in
+  let tempBuffer = create (size 100) (u64 0) in
+  
+  toFormPoint pubKey publicKeyAsFelem; 
+  let publicKeyCorrect = verifyQValidCurvePoint publicKeyAsFelem tempBuffer in
+  
+  let flag = 
+    if publicKeyCorrect then
+      begin
+      scalarMultiplication publicKeyAsFelem resultBufferFelem scalar tempBuffer;
+      isPointAtInfinityPrivate resultBufferFelem 
+      end
+    else 
+      u64 18446744073709551615 in 
+      
+  (* This line is a bit suspicious *)
+  fromFormPoint resultBufferFelem result;
+  
   pop_frame();
   
   let open Hacl.Impl.P256.LowLevel.RawCmp in 
   unsafe_bool_of_u64  flag
-
 
 
 
@@ -314,77 +321,21 @@ val scalarMultRaw:
 let scalarMultRaw result pubKey scalar =
   push_frame();
   let h0 = ST.get() in
-  let resultBufferFelem = create (size 12) (u64 0) in
-  let resultBufferFelemX = sub resultBufferFelem (size 0) (size 4) in
-  let resultBufferFelemY = sub resultBufferFelem (size 4) (size 4) in
-  let resultX = sub result (size 0) (size 32) in
-  let resultY = sub result (size 32) (size 32) in
-
-  let publicKeyAsFelem = create (size 8) (u64 0) in
-  let publicKeyFelemX = sub publicKeyAsFelem (size 0) (size 4) in
-  let publicKeyFelemY = sub publicKeyAsFelem (size 4) (size 4) in
-  let pubKeyX = sub pubKey (size 0) (size 32) in
-  let pubKeyY = sub pubKey (size 32) (size 32) in
-
-  toUint64ChangeEndian pubKeyX publicKeyFelemX;
-  toUint64ChangeEndian pubKeyY publicKeyFelemY;
-
-  let h1 = ST.get() in
-  lemma_core_0 publicKeyFelemX h1;
-  changeEndianLemma (uints_from_bytes_be (as_seq h0 pubKeyX));
-  uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 pubKeyX);
-
-  lemma_core_0 publicKeyFelemY h1;
-  changeEndianLemma (uints_from_bytes_be (as_seq h0 pubKeyY));
-  uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 pubKeyY);
-
-  _scalarMult resultBufferFelem publicKeyAsFelem scalar;
-
-  let h2 = ST.get() in
   
-  changeEndian resultBufferFelemX;
-  changeEndian resultBufferFelemY;
-  toUint8 resultBufferFelemX resultX;
-  toUint8 resultBufferFelemY resultY;
-
-  lemma_core_0 resultBufferFelemX h2;
-  lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h2 resultBufferFelemX);
-  changeEndian_le_be (as_nat h2 resultBufferFelemX);
-
-  lemma_core_0 resultBufferFelemY h2;
-  lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h2 resultBufferFelemY);
-  changeEndian_le_be (as_nat h2 resultBufferFelemY);
+  let resultBufferFelem = create (size 12) (u64 0) in
+  let publicKeyAsFelem = create (size 12) (u64 0) in
+  let tempBuffer = create (size 100) (u64 0) in
+  
+  toFormPoint pubKey publicKeyAsFelem; 
+    let h1 = ST.get() in 
+    assume (as_nat h1 (gsub publicKeyAsFelem (size 0) (size 4)) < prime256);
+    assume (as_nat h1 (gsub publicKeyAsFelem (size 4) (size 4)) < prime256);
+  scalarMultiplication publicKeyAsFelem resultBufferFelem scalar tempBuffer;
+    admit();
+  fromFormPoint resultBufferFelem result;
 
   pop_frame();
   admit()
-
-
-
-
-
-val _fromForm: i: felem -> o: lbuffer uint8 (size 32) -> Stack unit 
-  (requires fun h -> True)
-  (ensures fun h0 _ h1 -> True)
-
-let _fromForm i o = 
-  changeEndian i;
-  toUint8 i o
-
-
-val fromFormPoint: i: point -> o: lbuffer uint8 (size 64) -> Stack unit
-  (requires fun h -> True)
-  (ensures fun h0 _ h1 -> True)
-
-
-let fromFormPoint i o = 
-  let pointX = sub i (size 0) (size 4) in 
-  let pointY = sub i (size 4) (size 4) in 
-
-  let pointScalarX = sub i (size 0) (size 32) in 
-  let pointScalarY = sub i (size 32) (size 32) in 
-
-  _fromForm pointX pointScalarX;
-  _fromForm pointY pointScalarY
 
 
 
