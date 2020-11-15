@@ -291,18 +291,37 @@ let scalarMultRaw result pubKey scalar =
 
 
 
-val ecdsa_verification_point_operations: result: felem -> publicKey: lbuffer uint8 (size 64) -> 
+val ecdsa_verification_point_operations: result: lbuffer uint8 (size 32) -> publicKey: lbuffer uint8 (size 64) -> 
   u1: lbuffer uint8 (size 32) -> u2: lbuffer uint8 (size 32) ->
   Stack bool 
-    (requires fun h -> True)
-    (ensures fun h0 _ h1 -> True)
+  (requires fun h -> live h result /\ live h publicKey /\ live h u1 /\ live h u2 /\
+    LowStar.Monotonic.Buffer.all_disjoint [loc result; loc publicKey; loc u1; loc u2] /\ (
+    let publicKeyX = nat_from_bytes_be (as_seq h (gsub publicKey (size 0) (size 32))) in
+    let publicKeyY = nat_from_bytes_be (as_seq h (gsub publicKey (size 32) (size 32))) in 
+    publicKeyX < prime256 /\ publicKeyY < prime256 ))
+  (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ (
+    let pointScalarXSeq = nat_from_bytes_be (as_seq h0 (gsub publicKey (size 0) (size 32))) in 
+    let pointScalarYSeq = nat_from_bytes_be (as_seq h0 (gsub publicKey (size 32) (size 32))) in 
+    let pubJac = toJacobianCoordinates (pointScalarXSeq, pointScalarYSeq) in 
+    let pointAtInfinity = (0, 0, 0) in
+    let u1D, _ = montgomery_ladder_spec (as_seq h0 u1) (pointAtInfinity, basePoint) in
+    let u2D, _ = montgomery_ladder_spec (as_seq h0 u2) (pointAtInfinity, pubJac) in
+    let sumD = if  _norm u1D =  _norm u2D then  _point_double u1D else  _point_add u1D u2D in 
+    let pointNorm = _norm sumD in
+    let (xResult, yResult, zResult) = pointNorm in
+    r == not (Spec.P256.isPointAtInfinity pointNorm) /\
+    as_seq h1 result == nat_to_bytes_be 32  (xResult % prime_p256_order)))
 
 
 let ecdsa_verification_point_operations result publicKey u1 u2 = 
   push_frame();
-    let tempBuffer = create (size 100) (u64 0) in 
+    let tempBuffer = create (size 100) (u64 0) in  
     let publicKeyAsFelem = create (size 12) (u64 0) in 
-    toFormPoint publicKey publicKeyAsFelem;
-    let r = Hacl.Impl.ECDSA.P256.Verification.Agile.ecdsa_verification_step5 result publicKeyAsFelem u1 u2 tempBuffer in 
+    let resultFelem = create (size 4) (u64 0) in 
+
+  toFormPoint publicKey publicKeyAsFelem;
+  let r = Hacl.Impl.ECDSA.P256.Verification.Agile.ecdsa_verification_step5 resultFelem publicKeyAsFelem u1 u2 tempBuffer in 
+  _fromForm resultFelem result;
+  
   pop_frame();
-    r
+  r
