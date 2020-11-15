@@ -39,18 +39,16 @@ let _toForm i o =
 val toFormPoint: i: lbuffer uint8 (size 64) -> result: point -> Stack unit 
   (requires fun h -> live h i /\ live h result /\ disjoint i result /\
     nat_from_bytes_be (as_seq h (gsub i (size 0) (size 32))) < prime256 /\
-    nat_from_bytes_be (as_seq h (gsub i (size 32) (size 32))) < prime256
-  
-  )
+    nat_from_bytes_be (as_seq h (gsub i (size 32) (size 32))) < prime256)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
     nat_from_bytes_be (as_seq h0 (gsub i (size 0) (size 32))) < prime256 /\
     nat_from_bytes_be (as_seq h0 (gsub i (size 32) (size 32))) < prime256 /\ (
     let pointScalarXSeq = nat_from_bytes_be (as_seq h0 (gsub i (size 0) (size 32))) in 
     let pointScalarYSeq = nat_from_bytes_be (as_seq h0 (gsub i (size 32) (size 32))) in 
-    let x, y, z = point_x_as_nat h1 result, point_y_as_nat h1 result, point_z_as_nat h1 result in 
+    let x, y, z = point_prime_to_coordinates (as_seq h1 result) in 
     let pointJacX, pointJacY, pointJacZ = toJacobianCoordinates (pointScalarXSeq, pointScalarYSeq) in 
-    x == pointScalarXSeq /\ y == pointScalarYSeq  /\
-    x == pointJacX /\ y == pointJacY /\ z == 1 ))
+    x == pointScalarXSeq /\ y == pointScalarYSeq /\ z == 1 /\
+    x == pointJacX /\ y == pointJacY /\ z == pointJacZ))
 
       
 let toFormPoint i p = 
@@ -140,7 +138,6 @@ let secretToPublic result scalar =
   unsafe_bool_of_u64  flag
 
 
-
 (*
   This function provides a raw implementation of the secrettopublic function. 
   It doesnot provide the verification that the point gotten at the result doesnot belong to infinity.
@@ -177,51 +174,6 @@ let secretToPublicRaw result scalar =
   pop_frame()
 
 
-val _scalarMult:
-    result: point 
-  -> pubKey: point
-  -> scalar: lbuffer uint8 (size 32) 
-  -> Stack uint64
-  (requires fun h -> 
-      live h result /\ live h pubKey /\ live h scalar /\ 
-      disjoint result pubKey /\ disjoint result scalar /\ disjoint pubKey scalar /\ (
-      as_nat h (gsub pubKey (size 0) (size 4)) < prime256 /\
-      as_nat h (gsub pubKey (size 4) (size 4)) < prime256 /\
-      as_nat h (gsub pubKey (size 8) (size 4)) == 1))
-  (ensures fun h0 r h1 ->  modifies (loc result |+| loc pubKey) h0 h1  /\ (
-    let x, y, z = as_nat h0 (gsub pubKey (size 0) (size 4)), as_nat h0 (gsub pubKey (size 4) (size 4)), as_nat h0 (gsub pubKey (size 8) (size 4)) in
-    let x3, y3, z3 = point_x_as_nat h1 result, point_y_as_nat h1 result, point_z_as_nat h1 result in
-    if not (verifyQValidCurvePointSpec (x, y, z)) then
-      uint_v r = maxint U64 /\ x3 == point_x_as_nat h0 result /\ y3 == point_y_as_nat h0 result /\ z3 == point_z_as_nat h0 result
-    else
-      x3 < prime256 /\ y3 < prime256 /\ z3 < prime256 /\ (
-      let xN, yN, zN = scalar_multiplication (as_seq h0 scalar) (x, y, z) in
-      xN == x3 /\ yN == y3 /\ zN == z3 /\ (
-      if isPointAtInfinity (xN, yN, zN) then
-	uint_v r = maxint U64
-      else
-	uint_v r = 0)))) 
-
-
-let _scalarMult result pubKey scalar =
-  push_frame();
-  let tempBuffer = create (size 100) (u64 0) in
-  let publicKeyCorrect = verifyQValidCurvePoint pubKey tempBuffer in
-  if publicKeyCorrect then
-    begin
-    scalarMultiplication pubKey result scalar tempBuffer;
-    let flag = isPointAtInfinityPrivate result in 
-    pop_frame(); 
-    flag
-    end
-  else
-    begin
-    pop_frame();
-    u64 18446744073709551615
-    end
-
-
-
 val _scalarMultRaw:
     result:point 
   -> pubKey: point 
@@ -234,7 +186,7 @@ val _scalarMultRaw:
     as_nat h (gsub pubKey (size 8) (size 4)) < prime256 ))
   (ensures fun h0 r h1 ->  modifies (loc result |+| loc pubKey) h0 h1  /\ (
     let x, y, z = as_nat h0 (gsub pubKey (size 0) (size 4)), as_nat h0 (gsub pubKey (size 4) (size 4)), as_nat h0 (gsub pubKey (size 8) (size 4)) in
-    let x3, y3, z3 = point_x_as_nat h1 result, point_y_as_nat h1 result, point_z_as_nat h1 result in
+    let x3, y3, z3 =point_prime_to_coordinates (as_seq h1 result) in
       x3 < prime256 /\ y3 < prime256 /\ z3 < prime256 /\ (
       let xN, yN, zN = scalar_multiplication (as_seq h0 scalar) (x, y, z) in
       xN == x3 /\ yN == y3 /\ zN == z3)))
@@ -310,30 +262,32 @@ val scalarMultRaw:
       let x, y = gsub pubKey (size 0) (size 32), gsub pubKey (size 32) (size 32) in 
       nat_from_bytes_be (as_seq h x) < prime256 /\
       nat_from_bytes_be (as_seq h y) < prime256))
-    (ensures fun h0 _ h1 ->
-      let pubKeyX = gsub pubKey (size 0) (size 32) in
-      let pubKeyY = gsub pubKey (size 32) (size 32) in
-      let pointX, pointY, flag =
-        ecp256_dh_r (as_seq h0 pubKeyX) (as_seq h0 pubKeyY) (as_seq h0 scalar) in
-      modifies (loc result) h0 h1 /\
-      as_seq h1 (gsub result (size 0) (size 32)) == pointX /\
-      as_seq h1 (gsub result (size 32) (size 32)) == pointY)
-
+    (ensures fun h0 _ h1 -> modifies (loc result |+| loc pubKey) h0 h1 /\ (
+      let pointScalarXSeq = nat_from_bytes_be (as_seq h0 (gsub pubKey (size 0) (size 32))) in 
+      let pointScalarYSeq = nat_from_bytes_be (as_seq h0 (gsub pubKey (size 32) (size 32))) in  
+      let pointJacX, pointJacY, pointJacZ = toJacobianCoordinates (pointScalarXSeq, pointScalarYSeq) in 
+      let (xN, yN, zN) = scalar_multiplication (as_seq h0 scalar) (pointJacX, pointJacY, pointJacZ ) in 
+      let scalarX = gsub result (size 0) (size 32) in 
+      let scalarY = gsub result (size 32) (size 32) in 
+  
+      as_seq h1 scalarX == nat_to_bytes_be 32 xN /\
+      as_seq h1 scalarY == nat_to_bytes_be 32 yN
+    )
+  )
 
 let scalarMultRaw result pubKey scalar =
   push_frame();
-  let h0 = ST.get() in
   
   let resultBufferFelem = create (size 12) (u64 0) in
   let publicKeyAsFelem = create (size 12) (u64 0) in
   let tempBuffer = create (size 100) (u64 0) in
-  
+    
   toFormPoint pubKey publicKeyAsFelem; 
+  (* with normalisation *)
   scalarMultiplication publicKeyAsFelem resultBufferFelem scalar tempBuffer;
   fromFormPoint resultBufferFelem result;
 
-  pop_frame();
-  admit()
+  pop_frame()
 
 
 
