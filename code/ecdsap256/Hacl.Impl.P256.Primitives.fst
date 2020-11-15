@@ -37,12 +37,8 @@ let _toForm i o =
 
 
 val toFormPoint: i: lbuffer uint8 (size 64) -> result: point -> Stack unit 
-  (requires fun h -> live h i /\ live h result /\ disjoint i result /\
-    nat_from_bytes_be (as_seq h (gsub i (size 0) (size 32))) < prime256 /\
-    nat_from_bytes_be (as_seq h (gsub i (size 32) (size 32))) < prime256)
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-    nat_from_bytes_be (as_seq h0 (gsub i (size 0) (size 32))) < prime256 /\
-    nat_from_bytes_be (as_seq h0 (gsub i (size 32) (size 32))) < prime256 /\ (
+  (requires fun h -> live h i /\ live h result /\ disjoint i result)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ (
     let pointScalarXSeq = nat_from_bytes_be (as_seq h0 (gsub i (size 0) (size 32))) in 
     let pointScalarYSeq = nat_from_bytes_be (as_seq h0 (gsub i (size 32) (size 32))) in 
     let x, y, z = point_prime_to_coordinates (as_seq h1 result) in 
@@ -62,7 +58,6 @@ let toFormPoint i p =
   _toForm pointScalarX pointX;
   _toForm pointScalarY pointY;
   uploadOneImpl pointZ
-
 
 
 val _fromForm: i: felem -> o: lbuffer uint8 (size 32) -> Stack unit 
@@ -207,9 +202,7 @@ val scalarMult:
   -> Stack bool
     (requires fun h ->
       live h result /\ live h pubKey /\ live h scalar /\
-      disjoint result pubKey /\ disjoint result scalar /\
-      nat_from_bytes_be (as_seq h (gsub pubKey (size 0) (size 32))) < prime256 /\
-      nat_from_bytes_be (as_seq h (gsub pubKey (size 32) (size 32))) < prime256)
+      disjoint result pubKey /\ disjoint result scalar)
     (ensures fun h0 r h1 ->
       let pubKeyX = gsub pubKey (size 0) (size 32) in
       let pubKeyY = gsub pubKey (size 32) (size 32) in
