@@ -286,30 +286,6 @@ let normalisation_update #c z2x z3y p resultPoint =
   pop_frame()
 
 
-
-val lemma_two_mul_nat: a: nat -> b: nat -> Lemma (a * b >= 0)
-
-let lemma_two_mul_nat a b = ()
-
-
-val lemma_three_mul_nat: a: nat -> b: nat -> c: nat -> Lemma (a * b * c >= 0)
-
-let lemma_three_mul_nat a b c = ()
-
-
-(* val norm: #c: curve -> p: point c -> resultPoint: point c -> 
-  tempBuffer: lbuffer uint64 (size 22 *! getCoordinateLenU64 c) -> Stack unit
-  (requires fun h -> 
-    live h p /\ live h resultPoint /\ live h tempBuffer /\ 
-    disjoint p tempBuffer /\ disjoint tempBuffer resultPoint /\ 
-    point_eval c h p) 
-  (ensures fun h0 _ h1 -> modifies (loc tempBuffer |+| loc resultPoint) h0 h1 /\ (
-    let resultPoint =  point_prime_to_coordinates c (as_seq h1 resultPoint) in 
-    let pointD = fromDomainPoint #c (point_prime_to_coordinates c (as_seq h0 p)) in 
-    let pointNorm = _norm #c pointD in pointNorm == resultPoint))
-
-*)
-
 val lemma_norm: #c: curve -> pD : point_nat_prime -> r: point_nat_prime #c ->
   Lemma (requires (
     let prime = getPrime c in 
@@ -381,6 +357,7 @@ let norm #c p resultPoint tempBuffer =
 
 
 let normX #c p result tempBuffer = 
+  [@inline_let]
   let len = getCoordinateLenU64 c in 
   
   let xf = sub p (size 0) len in 
@@ -396,7 +373,6 @@ let normX #c p result tempBuffer =
   montgomery_multiplication_buffer #c z2f xf z2f;
   fromDomain z2f result;
 
-  admit();
     let prime = getPrime c in 
     power_distributivity (fromDomain_ #c (as_nat c h0 zf) * fromDomain_ #c (as_nat c h0 zf)) (prime - 2) prime
 
@@ -516,19 +492,15 @@ val montgomery_ladder_step: #c: curve -> #buf_type: buftype->
 
 let montgomery_ladder_step #c #buf_type r0 r1 tempBuffer scalar i = 
     let h0 = ST.get() in 
-  let bit0 : size_t = getPowerU c -. i -. 1ul in 
+  let bit0 = getPowerU c -. i -. 1ul in 
   let bit = scalar_bit scalar bit0 in 
   cswap bit r0 r1; 
-    let h1 = ST.get() in
-    assert(as_nat c h0 r0 == as_nat c h1 r1); 
-    assume (point_eval c h1 r1 /\ point_eval c h1 r0);
   montgomery_ladder_step1 r0 r1 tempBuffer; 
-  admit();
   cswap bit r0 r1; 
   lemma_step #c i;
     admit()
 
-
+(* ___________________________________________________ *)
 val montgomery_ladder: #c: curve -> #buf_type: buftype->  p: point c -> q: point c ->
   scalar: lbuffer_t buf_type uint8 (getScalarLen c) -> 
   tempBuffer:  lbuffer uint64 (size 17 *! getCoordinateLenU64 c)  -> 

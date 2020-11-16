@@ -303,6 +303,20 @@ let felem_seq_as_nat (c: curve) (a: felem_seq c) : Tot nat  =
     uint_v a5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64
 
 
+noextract
+let point_primeF (c: curve) =  
+  p: point_seq c {
+    let len = uint_v (getCoordinateLenU64 c) in 
+    let prime = getPrime c in 
+
+    let x = Lib.Sequence.sub p 0 len in 
+    let y = Lib.Sequence.sub p len len in 
+    let z = Lib.Sequence.sub p (2 * len) len in 
+    
+    felem_seq_as_nat c x < prime /\ 
+    felem_seq_as_nat c y < prime /\ 
+    felem_seq_as_nat c z < prime} 
+
 
 let point_prime_to_coordinates (c: curve) (p:point_seq c) =
   let len = uint_v (getCoordinateLenU64 c) in 
@@ -421,21 +435,6 @@ open FStar.Mul
 
 noextract
 let felem_seq_prime (c: curve) = a: felem_seq c {felem_seq_as_nat c a < getPrime c}
-
-noextract
-let point_primeF (c: curve) =  
-  p: point_seq c {
-    let len = uint_v (getCoordinateLenU64 c) in 
-    let prime = getPrime c in 
-
-    let x = Lib.Sequence.sub p 0 len in 
-    let y = Lib.Sequence.sub p len len in 
-    let z = Lib.Sequence.sub p (2 * len) len in 
-    
-    felem_seq_as_nat c x < prime /\ 
-    felem_seq_as_nat c y < prime /\ 
-    felem_seq_as_nat c z < prime} 
-
 
 inline_for_extraction
 type point (c: curve) = lbuffer uint64 (getCoordinateLenU64 c *. 3ul)

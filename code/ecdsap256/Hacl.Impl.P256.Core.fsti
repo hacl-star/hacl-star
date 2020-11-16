@@ -67,8 +67,8 @@ val isPointAtInfinityPrivate: #c: curve -> p: point c -> Stack uint64
     (uint_v r == 0 \/ uint_v r == maxint U64) /\ (
     let xD, yD, zD = fromDomainPoint #c (point_prime_to_coordinates c (as_seq h0 p)) in 
     let x, y, z = point_prime_to_coordinates c (as_seq h0 p) in 
-    if Spec.P256.isPointAtInfinity (xD, yD, zD) then uint_v r = maxint U64 else uint_v r = 0 /\
-    (if Spec.P256.isPointAtInfinity (x, y, z) then uint_v r = maxint U64 else uint_v r = 0))))
+    if Spec.P256.isPointAtInfinity (xD, yD, zD) then uint_v r = maxint U64 else uint_v r = 0 /\ (
+    if Spec.P256.isPointAtInfinity (x, y, z) then uint_v r = maxint U64 else uint_v r = 0))))
 
 
 val norm: #c: curve -> p: point c -> resultPoint: point c -> 
@@ -84,7 +84,8 @@ val norm: #c: curve -> p: point c -> resultPoint: point c ->
     pointNorm == resultPoint))
 
 
-val normX: #c: curve -> p: point c -> result: felem c -> tempBuffer: lbuffer uint64 (size 22 *! getCoordinateLenU64 c) 
+val normX: #c: curve -> p: point c -> result: felem c 
+  -> tempBuffer: lbuffer uint64 (size 22 *! getCoordinateLenU64 c) 
   -> Stack unit
   (requires fun h -> 
     live h p /\ live h result /\ live h tempBuffer /\
@@ -98,35 +99,34 @@ val normX: #c: curve -> p: point c -> result: felem c -> tempBuffer: lbuffer uin
     let (xN, _, _) = _norm #c (pxD, pyD, pzD) in 
     as_nat c h1 result == xN))
 
+val lemma_sm: #c: curve -> p: point c -> h: mem -> Lemma
+  (requires (point_eval c h p))
+  (ensures (
+    let prime = getPrime c in 
+    let len = v (getCoordinateLenU64 c) in 
+    felem_seq_as_nat c (Lib.Sequence.sub (as_seq h p) 0 len) < prime /\
+    felem_seq_as_nat c (Lib.Sequence.sub (as_seq h p) len len) < prime /\
+    felem_seq_as_nat c (Lib.Sequence.sub (as_seq h p) (len * 2) len) < prime))
+
 
 inline_for_extraction noextract
-val scalarMultiplication: #c: curve -> #buf_type: buftype->  p: point c -> result: point c -> 
-  scalar: lbuffer_t buf_type uint8 (getScalarLen c) -> 
-  tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) ->
+val scalarMultiplication: #c: curve -> #buf_type: buftype->  p: point c -> result: point c 
+  -> scalar: lbuffer_t buf_type uint8 (getScalarLen c)
+  -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) ->
   Stack unit
-    (requires fun h -> 
-      let prime = getPrime c in 
-      let len = getCoordinateLenU64 c in 
-      live h p /\ live h result /\ live h scalar /\ live h tempBuffer /\
-      LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc scalar; loc result] /\
-      as_nat c h (gsub p (size 0) len) < prime /\ 
-      as_nat c h (gsub p len len) < prime /\
-      as_nat c h (gsub p (size 2 *! len) len) < prime
-    )
+  (requires fun h ->
+    live h p /\ live h result /\ live h scalar /\ live h tempBuffer /\
+    LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc scalar; loc result] /\ 
+    point_eval c h p)
   (ensures fun h0 _ h1 -> 
-    let prime = getPrime c in 
-    let len = getCoordinateLenU64 c in
-  
-    modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\
-    as_nat c h1 (gsub result (size 0) len) < prime /\ 
-    as_nat c h1 (gsub result len len) < prime /\
-    as_nat c h1 (gsub result (size 2 *! len) len) < prime /\
-    (
-      let x3, y3, z3 = point_x_as_nat c h1 result, point_y_as_nat c h1 result, point_z_as_nat c h1 result in 
-      let (xN, yN, zN) = scalar_multiplication #c (as_seq h0 scalar) (point_prime_to_coordinates c (as_seq h0 p)) in 
-      x3 == xN /\ y3 == yN /\ z3 == zN 
-  )
-) 
+    point_eval c h0 p /\ 
+    point_eval c h1 result /\
+    modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\ (
+    let x3, y3, z3 = point_x_as_nat c h1 result, point_y_as_nat c h1 result, point_z_as_nat c h1 result in 
+    lemma_sm #c p h0; 
+    let (xN, yN, zN) = scalar_multiplication #c (as_seq h0 scalar) (point_prime_to_coordinates c (as_seq h0 p)) in 
+    x3 == xN /\ y3 == yN /\ z3 == zN 
+  ))
 
 
 val scalarMultiplicationWithoutNorm: #c: curve -> p: point c -> result: point c -> 
