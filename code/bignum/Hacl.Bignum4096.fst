@@ -118,7 +118,7 @@ instance exp_inst: BE.exp t_limbs = {
 
 let new_precompr2 = BS.new_bn_precomp_r2_mod_n
 
-let mod_inv_prime = BI.bn_mod_inv_prime exp_inst
+let mod_inv_prime = BS.bn_mod_inv_prime_safe exp_inst
 
 let new_bn_from_bytes_be = BS.new_bn_from_bytes_be
 

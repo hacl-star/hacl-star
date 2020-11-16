@@ -20,13 +20,16 @@ module BM = Hacl.Bignum.Montgomery
 module BE = Hacl.Bignum.Exponentiation
 module BR = Hacl.Bignum.ModReduction
 module BC = Hacl.Bignum.Convert
+module BI = Hacl.Bignum.ModInv
 
+module SN = Hacl.Spec.Bignum
 module SL = Hacl.Spec.Bignum.Lib
 module SD = Hacl.Spec.Bignum.Definitions
 module SR = Hacl.Spec.Bignum.ModReduction
 module SE = Hacl.Spec.Bignum.Exponentiation
 module SM = Hacl.Spec.Bignum.Montgomery
 module SC = Hacl.Spec.Bignum.Convert
+module SI = Hacl.Spec.Bignum.ModInv
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -234,4 +237,54 @@ let bn_mod_exp_mont_ladder_safe #t k bn_check_mod_exp bn_mod_exp_mont_ladder n a
     SL.bn_low_bound_bits_lemma #t #(v len) (as_seq h0 n);
     SE.bn_mod_exp_mont_ladder_lemma (v len) (v nBits) (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b);
     assert (SE.bn_mod_exp_post (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b) (as_seq h1 res)) end;
+  BB.unsafe_bool_of_limb is_valid_m
+
+
+inline_for_extraction noextract
+let bn_mod_inv_prime_safe_st (t:limb_t) (len:BN.meta_len t) =
+    n:lbignum t len
+  -> a:lbignum t len
+  -> res:lbignum t len ->
+  Stack bool
+  (requires fun h -> FStar.Math.Euclid.is_prime (bn_v h n) /\
+    live h n /\ live h a /\ live h res /\
+    disjoint res n /\ disjoint res a /\ disjoint n a)
+  (ensures  fun h0 r h1 -> modifies (loc res) h0 h1 /\
+    r == (BB.unsafe_bool_of_limb (SM.bn_check_modulus (as_seq h0 n)) && 0 < bn_v h0 a && bn_v h0 a < bn_v h0 n) /\
+   (r ==> bn_v h1 res * bn_v h0 a % bn_v h0 n = 1))
+
+
+inline_for_extraction noextract
+val bn_mod_inv_prime_safe:
+    #t:limb_t
+  -> k:BE.exp t ->
+  bn_mod_inv_prime_safe_st t k.BE.mont.BM.bn.BN.len
+
+let bn_mod_inv_prime_safe #t k n a res =
+  [@inline_let] let len = k.BE.mont.BM.bn.BN.len in
+  let h0 = ST.get () in
+  let is_valid_n = k.BE.mont.BM.mont_check n in
+  let m2 = BN.bn_is_zero_mask len a in
+  SN.bn_is_zero_mask_lemma (as_seq h0 a);
+  let m2' = lognot m2 in
+  lognot_lemma m2;
+  let m3 = BN.bn_lt_mask len a n in
+  SN.bn_lt_mask_lemma (as_seq h0 a) (as_seq h0 n);
+  let is_valid_m = is_valid_n &. m2' &. m3 in
+  logand_ones (is_valid_n &. m2');
+  logand_zeros (is_valid_n &. m2');
+  logand_ones is_valid_n;
+  logand_zeros is_valid_n;
+
+  let nBits = size (bits t) *! BB.unsafe_size_from_limb (BL.bn_get_top_index len n) in
+  BI.bn_mod_inv_prime k nBits n a res;
+
+  let h1 = ST.get () in
+  mapT len res (logand is_valid_m) res;
+  let h2 = ST.get () in
+  SD.bn_mask_lemma (as_seq h1 res) is_valid_m;
+
+  if BB.unsafe_bool_of_limb is_valid_m then begin
+    SL.bn_low_bound_bits_lemma #t #(v len) (as_seq h0 n);
+    SI.bn_mod_inv_prime_lemma (v nBits) (as_seq h0 n) (as_seq h0 a) end;
   BB.unsafe_bool_of_limb is_valid_m

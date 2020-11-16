@@ -199,11 +199,13 @@ val new_precompr2: BS.new_bn_precomp_r2_mod_n_st t_limbs
   This function is *UNSAFE* and requires C clients to observe the precondition of
   bn_mod_inv_prime_lemma from Hacl.Spec.Bignum.ModInv.fst, which amounts to:
   • n is a prime
+
+  The function returns false if any of the following preconditions are violated, true otherwise.
   • n % 2 = 1
   • 1 < n
   • 0 < a
   • a < n "]
-val mod_inv_prime: BI.bn_mod_inv_prime_st t_limbs n_limbs
+val mod_inv_prime: BS.bn_mod_inv_prime_safe_st t_limbs n_limbs
 
 [@@ CPrologue
 "\n/********************/
