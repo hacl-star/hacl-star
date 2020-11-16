@@ -28,6 +28,27 @@ open Spec.Hash.Definitions
 open Hacl.Impl.ECDSA.P256.Signature.Agile
 open Hacl.Impl.ECDSA.P256.Verification.Agile
 
+open Hacl.Impl.P256.Primitives
+
+
+let toFormPoint i result = Hacl.Impl.P256.Primitives.toFormPoint i result
+
+
+let fromFormPoint i result = Hacl.Impl.P256.Primitives.fromFormPoint i result
+
+let secretToPublic result scalar = Hacl.Impl.P256.Primitives.secretToPublic result scalar
+
+let secretToPublicRaw result scalar = Hacl.Impl.P256.Primitives.secretToPublicRaw result scalar
+
+let scalarMult r p s = Hacl.Impl.P256.Primitives.scalarMult r p s
+
+let scalarMultRaw r p s = Hacl.Impl.P256.Primitives.scalarMultRaw r p s
+
+let ecdsa_verification_point_operations result publicKey u1 u2 = Hacl.Impl.P256.Primitives.ecdsa_verification_point_operations result publicKey u1 u2 
+
+
+
+
 
 let ecdsa_sign_p256_sha2 result mLen m privKey k = 
   ecdsa_signature (Hash SHA2_256) result mLen m privKey k

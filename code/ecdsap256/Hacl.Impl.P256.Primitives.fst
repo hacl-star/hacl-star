@@ -21,7 +21,7 @@ open Hacl.Impl.P256.Signature.Common
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
 
-
+inline_for_extraction noextract
 val _toForm: i:lbuffer uint8 (size 32) -> o:felem -> Stack unit
   (requires fun h -> live h i /\ live h o /\ disjoint i o)
   (ensures  fun h0 _ h1 ->
@@ -35,7 +35,7 @@ let _toForm i o =
   uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h0 i);
   lemma_core_0 o h1
 
-
+inline_for_extraction noextract
 val toFormPoint: i: lbuffer uint8 (size 64) -> result: point -> Stack unit 
   (requires fun h -> live h i /\ live h result /\ disjoint i result)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ (
@@ -60,6 +60,7 @@ let toFormPoint i p =
   uploadOneImpl pointZ
 
 
+inline_for_extraction noextract
 val _fromForm: i: felem -> o: lbuffer uint8 (size 32) -> Stack unit 
   (requires fun h -> live h i /\ live h o /\ disjoint i o /\ as_nat h i < pow2 256)
   (ensures fun h0 _ h1 -> modifies (loc i |+| loc o) h0 h1 /\  as_seq h1 o == nat_to_bytes_be 32  (as_nat h0 i))
@@ -74,6 +75,7 @@ let _fromForm i o =
   changeEndian_le_be (as_nat h0 i)
 
 
+inline_for_extraction noextract
 val fromFormPoint: i: point -> o: lbuffer uint8 (size 64) -> Stack unit
   (requires fun h -> live h i /\ live h o /\ disjoint i o /\
     as_nat h (gsub i (size 0) (size 4)) < prime256 /\
@@ -169,31 +171,6 @@ let secretToPublicRaw result scalar =
   pop_frame()
 
 
-val _scalarMultRaw:
-    result:point 
-  -> pubKey: point 
-  -> scalar: lbuffer uint8 (size 32) 
-  -> Stack unit (requires fun h -> 
-    live h result /\ live h pubKey /\ live h scalar /\ 
-    disjoint result pubKey /\ disjoint result scalar /\ disjoint pubKey scalar /\ (
-    as_nat h (gsub pubKey (size 0) (size 4)) < prime256 /\
-    as_nat h (gsub pubKey (size 4) (size 4)) < prime256 /\
-    as_nat h (gsub pubKey (size 8) (size 4)) < prime256 ))
-  (ensures fun h0 r h1 ->  modifies (loc result |+| loc pubKey) h0 h1  /\ (
-    let x, y, z = as_nat h0 (gsub pubKey (size 0) (size 4)), as_nat h0 (gsub pubKey (size 4) (size 4)), as_nat h0 (gsub pubKey (size 8) (size 4)) in
-    let x3, y3, z3 =point_prime_to_coordinates (as_seq h1 result) in
-      x3 < prime256 /\ y3 < prime256 /\ z3 < prime256 /\ (
-      let xN, yN, zN = scalar_multiplication (as_seq h0 scalar) (x, y, z) in
-      xN == x3 /\ yN == y3 /\ zN == z3)))
-
-
-let _scalarMultRaw result pubKey scalar =
-  push_frame();
-  let tempBuffer = create (size 100) (u64 0) in
-  scalarMultiplication pubKey result scalar tempBuffer;
-  pop_frame()
-
-
 inline_for_extraction noextract
 val scalarMult:
     result:lbuffer uint8 (size 64)
@@ -283,7 +260,7 @@ let scalarMultRaw result pubKey scalar =
   pop_frame()
 
 
-
+inline_for_extraction noextract
 val ecdsa_verification_point_operations: result: lbuffer uint8 (size 32) -> publicKey: lbuffer uint8 (size 64) -> 
   u1: lbuffer uint8 (size 32) -> u2: lbuffer uint8 (size 32) ->
   Stack bool 
