@@ -47,7 +47,13 @@ void Hacl_Bignum_Convert_bn_from_bytes_be_uint64(uint32_t len, uint8_t *b, uint6
 
 void Hacl_Bignum_Convert_bn_to_bytes_be_uint64(uint32_t len, uint64_t *b, uint8_t *res);
 
-void Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u64(uint32_t len, uint64_t *n, uint64_t *res);
+void
+Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u64(
+  uint32_t len,
+  uint32_t nBits,
+  uint64_t *n,
+  uint64_t *res
+);
 
 uint32_t Hacl_Impl_RSAPSS_MGF_hash_len(Spec_Hash_Definitions_hash_alg a);
 

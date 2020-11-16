@@ -255,12 +255,14 @@ Write `a ^ (-1) mod n` in `res`.
   This function is *UNSAFE* and requires C clients to observe the precondition of
   bn_mod_inv_prime_lemma from Hacl.Spec.Bignum.ModInv.fst, which amounts to:
   • n is a prime
+
+  The function returns false if any of the following preconditions are violated, true otherwise.
   • n % 2 = 1
   • 1 < n
   • 0 < a
   • a < n 
 */
-void Hacl_Bignum4096_mod_inv_prime(uint64_t *n, uint64_t *a, uint64_t *res);
+bool Hacl_Bignum4096_mod_inv_prime(uint64_t *n, uint64_t *a, uint64_t *res);
 
 
 /********************/

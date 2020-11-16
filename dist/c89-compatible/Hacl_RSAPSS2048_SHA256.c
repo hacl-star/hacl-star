@@ -24,6 +24,122 @@
 
 #include "Hacl_RSAPSS2048_SHA256.h"
 
+static void add_mod_n(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *res)
+{
+  uint64_t c2 = (uint64_t)0U;
+  uint32_t k0 = (uint32_t)32U;
+  uint64_t c0;
+  {
+    uint32_t i;
+    for (i = (uint32_t)0U; i < k0 / (uint32_t)4U; i++)
+    {
+      uint64_t t1 = a[(uint32_t)4U * i];
+      uint64_t t20 = b[(uint32_t)4U * i];
+      c2 = Lib_IntTypes_Intrinsics_add_carry_u64(c2, t1, t20, res + (uint32_t)4U * i);
+      {
+        uint64_t t10 = a[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t t21 = b[(uint32_t)4U * i + (uint32_t)1U];
+        c2 =
+          Lib_IntTypes_Intrinsics_add_carry_u64(c2,
+            t10,
+            t21,
+            res + (uint32_t)4U * i + (uint32_t)1U);
+        {
+          uint64_t t11 = a[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t22 = b[(uint32_t)4U * i + (uint32_t)2U];
+          c2 =
+            Lib_IntTypes_Intrinsics_add_carry_u64(c2,
+              t11,
+              t22,
+              res + (uint32_t)4U * i + (uint32_t)2U);
+          {
+            uint64_t t12 = a[(uint32_t)4U * i + (uint32_t)3U];
+            uint64_t t2 = b[(uint32_t)4U * i + (uint32_t)3U];
+            c2 =
+              Lib_IntTypes_Intrinsics_add_carry_u64(c2,
+                t12,
+                t2,
+                res + (uint32_t)4U * i + (uint32_t)3U);
+          }
+        }
+      }
+    }
+  }
+  {
+    uint32_t i;
+    for (i = k0; i < (uint32_t)32U; i++)
+    {
+      uint64_t t1 = a[i];
+      uint64_t t2 = b[i];
+      c2 = Lib_IntTypes_Intrinsics_add_carry_u64(c2, t1, t2, res + i);
+    }
+  }
+  c0 = c2;
+  {
+    uint64_t tmp[32U] = { 0U };
+    uint64_t c3 = (uint64_t)0U;
+    uint32_t k = (uint32_t)32U;
+    uint64_t c1;
+    uint64_t c;
+    {
+      uint32_t i;
+      for (i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
+      {
+        uint64_t t1 = res[(uint32_t)4U * i];
+        uint64_t t20 = n[(uint32_t)4U * i];
+        c3 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c3, t1, t20, tmp + (uint32_t)4U * i);
+        {
+          uint64_t t10 = res[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t21 = n[(uint32_t)4U * i + (uint32_t)1U];
+          c3 =
+            Lib_IntTypes_Intrinsics_sub_borrow_u64(c3,
+              t10,
+              t21,
+              tmp + (uint32_t)4U * i + (uint32_t)1U);
+          {
+            uint64_t t11 = res[(uint32_t)4U * i + (uint32_t)2U];
+            uint64_t t22 = n[(uint32_t)4U * i + (uint32_t)2U];
+            c3 =
+              Lib_IntTypes_Intrinsics_sub_borrow_u64(c3,
+                t11,
+                t22,
+                tmp + (uint32_t)4U * i + (uint32_t)2U);
+            {
+              uint64_t t12 = res[(uint32_t)4U * i + (uint32_t)3U];
+              uint64_t t2 = n[(uint32_t)4U * i + (uint32_t)3U];
+              c3 =
+                Lib_IntTypes_Intrinsics_sub_borrow_u64(c3,
+                  t12,
+                  t2,
+                  tmp + (uint32_t)4U * i + (uint32_t)3U);
+            }
+          }
+        }
+      }
+    }
+    {
+      uint32_t i;
+      for (i = k; i < (uint32_t)32U; i++)
+      {
+        uint64_t t1 = res[i];
+        uint64_t t2 = n[i];
+        c3 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c3, t1, t2, tmp + i);
+      }
+    }
+    c1 = c3;
+    c = c0 - c1;
+    {
+      uint32_t i;
+      for (i = (uint32_t)0U; i < (uint32_t)32U; i++)
+      {
+        uint64_t *os = res;
+        uint64_t x = (c & res[i]) | (~c & tmp[i]);
+        os[i] = x;
+      }
+    }
+  }
+}
+
 static void mul(uint64_t *a, uint64_t *b, uint64_t *res)
 {
   uint32_t resLen = (uint32_t)64U;
@@ -204,180 +320,18 @@ static void sqr(uint64_t *a, uint64_t *res)
   }
 }
 
-static void precomp(uint64_t *n, uint64_t *res)
+static void precomp(uint32_t nBits, uint64_t *n, uint64_t *res)
 {
-  uint64_t bn_zero[32U] = { 0U };
-  uint64_t mask0 = (uint64_t)0xFFFFFFFFFFFFFFFFU;
-  uint64_t mask10;
-  uint64_t res1;
-  uint64_t mask;
+  uint32_t i0;
+  uint32_t j;
+  uint32_t i;
+  memset(res, 0U, (uint32_t)32U * sizeof (uint64_t));
+  i0 = nBits / (uint32_t)64U;
+  j = nBits % (uint32_t)64U;
+  res[i0] = res[i0] | (uint64_t)1U << j;
+  for (i = (uint32_t)0U; i < (uint32_t)4096U - nBits; i++)
   {
-    uint32_t i;
-    for (i = (uint32_t)0U; i < (uint32_t)32U; i++)
-    {
-      uint64_t uu____0 = FStar_UInt64_eq_mask(n[i], bn_zero[i]);
-      mask0 = uu____0 & mask0;
-    }
-  }
-  mask10 = mask0;
-  res1 = mask10;
-  mask = res1;
-  {
-    uint64_t priv0 = (uint64_t)0U;
-    uint64_t ind;
-    uint64_t uu____1;
-    {
-      uint32_t i;
-      for (i = (uint32_t)0U; i < (uint32_t)32U; i++)
-      {
-        uint64_t mask1 = FStar_UInt64_eq_mask(n[i], (uint64_t)0U);
-        priv0 = (mask1 & priv0) | (~mask1 & (uint64_t)i);
-      }
-    }
-    ind = priv0;
-    uu____1 = n[(uint32_t)ind];
-    {
-      uint64_t priv = (uint64_t)0U;
-      uint64_t bs1;
-      uint64_t bs;
-      uint64_t bs0;
-      uint32_t b;
-      uint32_t i0;
-      uint32_t j;
-      uint32_t i1;
-      {
-        uint32_t i;
-        for (i = (uint32_t)0U; i < (uint32_t)64U; i++)
-        {
-          uint64_t bit_i = uu____1 >> i & (uint64_t)1U;
-          uint64_t mask1 = FStar_UInt64_eq_mask(bit_i, (uint64_t)1U);
-          priv = (mask1 & (uint64_t)i) | (~mask1 & priv);
-        }
-      }
-      bs1 = priv;
-      bs = (uint64_t)64U * ind + bs1;
-      bs0 = ~mask & bs;
-      b = (uint32_t)bs0;
-      memset(res, 0U, (uint32_t)32U * sizeof (uint64_t));
-      i0 = b / (uint32_t)64U;
-      j = b % (uint32_t)64U;
-      res[i0] = res[i0] | (uint64_t)1U << j;
-      for (i1 = (uint32_t)0U; i1 < (uint32_t)4096U - b; i1++)
-      {
-        uint64_t c2 = (uint64_t)0U;
-        uint32_t k0 = (uint32_t)32U;
-        uint64_t c0;
-        {
-          uint32_t i;
-          for (i = (uint32_t)0U; i < k0 / (uint32_t)4U; i++)
-          {
-            uint64_t t1 = res[(uint32_t)4U * i];
-            uint64_t t20 = res[(uint32_t)4U * i];
-            c2 = Lib_IntTypes_Intrinsics_add_carry_u64(c2, t1, t20, res + (uint32_t)4U * i);
-            {
-              uint64_t t10 = res[(uint32_t)4U * i + (uint32_t)1U];
-              uint64_t t21 = res[(uint32_t)4U * i + (uint32_t)1U];
-              c2 =
-                Lib_IntTypes_Intrinsics_add_carry_u64(c2,
-                  t10,
-                  t21,
-                  res + (uint32_t)4U * i + (uint32_t)1U);
-              {
-                uint64_t t11 = res[(uint32_t)4U * i + (uint32_t)2U];
-                uint64_t t22 = res[(uint32_t)4U * i + (uint32_t)2U];
-                c2 =
-                  Lib_IntTypes_Intrinsics_add_carry_u64(c2,
-                    t11,
-                    t22,
-                    res + (uint32_t)4U * i + (uint32_t)2U);
-                {
-                  uint64_t t12 = res[(uint32_t)4U * i + (uint32_t)3U];
-                  uint64_t t2 = res[(uint32_t)4U * i + (uint32_t)3U];
-                  c2 =
-                    Lib_IntTypes_Intrinsics_add_carry_u64(c2,
-                      t12,
-                      t2,
-                      res + (uint32_t)4U * i + (uint32_t)3U);
-                }
-              }
-            }
-          }
-        }
-        {
-          uint32_t i;
-          for (i = k0; i < (uint32_t)32U; i++)
-          {
-            uint64_t t1 = res[i];
-            uint64_t t2 = res[i];
-            c2 = Lib_IntTypes_Intrinsics_add_carry_u64(c2, t1, t2, res + i);
-          }
-        }
-        c0 = c2;
-        {
-          uint64_t tmp[32U] = { 0U };
-          uint64_t c3 = (uint64_t)0U;
-          uint32_t k = (uint32_t)32U;
-          uint64_t c1;
-          uint64_t c;
-          {
-            uint32_t i;
-            for (i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-            {
-              uint64_t t1 = res[(uint32_t)4U * i];
-              uint64_t t20 = n[(uint32_t)4U * i];
-              c3 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c3, t1, t20, tmp + (uint32_t)4U * i);
-              {
-                uint64_t t10 = res[(uint32_t)4U * i + (uint32_t)1U];
-                uint64_t t21 = n[(uint32_t)4U * i + (uint32_t)1U];
-                c3 =
-                  Lib_IntTypes_Intrinsics_sub_borrow_u64(c3,
-                    t10,
-                    t21,
-                    tmp + (uint32_t)4U * i + (uint32_t)1U);
-                {
-                  uint64_t t11 = res[(uint32_t)4U * i + (uint32_t)2U];
-                  uint64_t t22 = n[(uint32_t)4U * i + (uint32_t)2U];
-                  c3 =
-                    Lib_IntTypes_Intrinsics_sub_borrow_u64(c3,
-                      t11,
-                      t22,
-                      tmp + (uint32_t)4U * i + (uint32_t)2U);
-                  {
-                    uint64_t t12 = res[(uint32_t)4U * i + (uint32_t)3U];
-                    uint64_t t2 = n[(uint32_t)4U * i + (uint32_t)3U];
-                    c3 =
-                      Lib_IntTypes_Intrinsics_sub_borrow_u64(c3,
-                        t12,
-                        t2,
-                        tmp + (uint32_t)4U * i + (uint32_t)3U);
-                  }
-                }
-              }
-            }
-          }
-          {
-            uint32_t i;
-            for (i = k; i < (uint32_t)32U; i++)
-            {
-              uint64_t t1 = res[i];
-              uint64_t t2 = n[i];
-              c3 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c3, t1, t2, tmp + i);
-            }
-          }
-          c1 = c3;
-          c = c0 - c1;
-          {
-            uint32_t i;
-            for (i = (uint32_t)0U; i < (uint32_t)32U; i++)
-            {
-              uint64_t *os = res;
-              uint64_t x = (c & res[i]) | (~c & tmp[i]);
-              os[i] = x;
-            }
-          }
-        }
-      }
-    }
+    add_mod_n(n, res, res, res);
   }
 }
 
@@ -687,7 +641,7 @@ static inline bool load_pkey(uint32_t eBits, uint8_t *nb, uint8_t *eb, uint64_t 
   uint64_t m1;
   uint64_t m;
   Hacl_Bignum_Convert_bn_from_bytes_be_uint64(nbLen, nb, n);
-  precomp(n, r2);
+  precomp((uint32_t)2047U, n, r2);
   Hacl_Bignum_Convert_bn_from_bytes_be_uint64(ebLen, eb, e);
   m0 = Hacl_Impl_RSAPSS_Keys_check_modulus_u64((uint32_t)2048U, n);
   m1 = Hacl_Impl_RSAPSS_Keys_check_exponent_u64(eBits, e);

@@ -13,7 +13,8 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u64 =
       foreign "Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u64"
         (uint32_t @->
-           ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void))))
+           (uint32_t @->
+              ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void)))))
     let hacl_Impl_RSAPSS_MGF_hash_len =
       foreign "Hacl_Impl_RSAPSS_MGF_hash_len"
         (spec_Hash_Definitions_hash_alg @-> (returning uint32_t))

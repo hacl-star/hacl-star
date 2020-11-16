@@ -57,7 +57,13 @@ void Hacl_Bignum_Convert_bn_to_bytes_be_uint64(uint32_t len, uint64_t *b, uint8_
 
 /* SNIPPET_START: Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u64 */
 
-void Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u64(uint32_t len, uint64_t *n, uint64_t *res);
+void
+Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u64(
+  uint32_t len,
+  uint32_t nBits,
+  uint64_t *n,
+  uint64_t *res
+);
 
 /* SNIPPET_END: Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u64 */
 
