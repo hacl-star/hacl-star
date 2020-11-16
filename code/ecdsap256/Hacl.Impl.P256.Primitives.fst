@@ -35,7 +35,7 @@ let _toForm i o =
   uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h0 i);
   lemma_core_0 o h1
 
-inline_for_extraction noextract
+
 val toFormPoint: i: lbuffer uint8 (size 64) -> result: point -> Stack unit 
   (requires fun h -> live h i /\ live h result /\ disjoint i result)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ (
@@ -75,7 +75,6 @@ let _fromForm i o =
   changeEndian_le_be (as_nat h0 i)
 
 
-inline_for_extraction noextract
 val fromFormPoint: i: point -> o: lbuffer uint8 (size 64) -> Stack unit
   (requires fun h -> live h i /\ live h o /\ disjoint i o /\
     as_nat h (gsub i (size 0) (size 4)) < prime256 /\

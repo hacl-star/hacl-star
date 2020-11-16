@@ -59,6 +59,29 @@ Hacl_Impl_P256_Core_secretToPublic(uint64_t *result, uint8_t *scalar, uint64_t *
 */
 uint64_t Hacl_Impl_P256_DH__ecp256dh_r(uint64_t *result, uint64_t *pubKey, uint8_t *scalar);
 
+
+void Hacl_P256_toFormPoint(uint8_t *i, uint64_t *result);
+
+void Hacl_P256_fromFormPoint(uint64_t *i, uint8_t *result);
+
+bool Hacl_P256_secretToPublic(uint8_t *result, uint8_t *scalar);
+
+void Hacl_P256_secretToPublicRaw(uint8_t *result, uint8_t *scalar);
+
+bool Hacl_P256_scalarMult(uint8_t *r, uint8_t *p, uint8_t *s);
+
+void Hacl_P256_scalarMultRaw(uint8_t *r, uint8_t *p, uint8_t *s);
+
+bool
+Hacl_P256_ecdsa_verification_point_operations(
+  uint8_t *result,
+  uint8_t *publicKey,
+  uint8_t *u1,
+  uint8_t *u2
+);
+
+
+
 /*
  Input: result buffer: uint8[64], 
  m buffer: uint8 [mLen], 
