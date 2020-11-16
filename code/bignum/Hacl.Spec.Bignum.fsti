@@ -248,23 +248,6 @@ val bn_set_ith_bit_lemma:
   (requires bn_v b < pow2 i)
   (ensures  bn_v (bn_set_ith_bit b i) == bn_v b + pow2 i)
 
-
-val bn_get_num_bits:
-    #t:limb_t
-  -> #len:size_pos{bits t * len <= max_size_t}
-  -> b:lbignum t len ->
-  size_nat
-
-
-val bn_get_num_bits_lemma:
-    #t:limb_t
-  -> #len:size_pos{bits t * len <= max_size_t}
-  -> b:lbignum t len -> Lemma
-  (requires 0 < bn_v b)
-  (ensures (let bs = bn_get_num_bits b in
-    bs <= bits t * len /\ blocks (bs + 1) (bits t) <= len /\
-    pow2 bs <= bn_v b /\ bn_v b < pow2 (bs + 1)))
-
 ///
 ///  Conditional swap
 ///

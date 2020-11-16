@@ -475,23 +475,23 @@ let bn_mod_exp_mont_ladder_precompr2_lemma #t nLen n a bBits b r2 =
   BL.mod_exp_mont_ladder_swap_ll_lemma (bits t) nLen (bn_v n) d (v mu) (bn_v a) bBits (bn_v b)
 
 
-let bn_mod_exp #t nLen n a bBits b =
-  let r2 = bn_precomp_r2_mod_n n in
+let bn_mod_exp #t nLen nBits n a bBits b =
+  let r2 = bn_precomp_r2_mod_n nBits n in
   bn_mod_exp_precompr2 nLen n a bBits b r2
 
 
-let bn_mod_exp_lemma #t nLen n a bBits b =
-  let r2 = bn_precomp_r2_mod_n n in
-  bn_precomp_r2_mod_n_lemma n;
+let bn_mod_exp_lemma #t nLen nBits n a bBits b =
+  let r2 = bn_precomp_r2_mod_n nBits n in
+  bn_precomp_r2_mod_n_lemma nBits n;
   bn_mod_exp_precompr2_lemma nLen n a bBits b r2
 
 
-let bn_mod_exp_mont_ladder #t nLen n a bBits b =
-  let r2 = bn_precomp_r2_mod_n n in
+let bn_mod_exp_mont_ladder #t nLen nBits n a bBits b =
+  let r2 = bn_precomp_r2_mod_n nBits n in
   bn_mod_exp_mont_ladder_precompr2 nLen n a bBits b r2
 
 
-let bn_mod_exp_mont_ladder_lemma #t nLen n a bBits b =
-  let r2 = bn_precomp_r2_mod_n n in
-  bn_precomp_r2_mod_n_lemma n;
+let bn_mod_exp_mont_ladder_lemma #t nLen nBits n a bBits b =
+  let r2 = bn_precomp_r2_mod_n nBits n in
+  bn_precomp_r2_mod_n_lemma nBits n;
   bn_mod_exp_mont_ladder_precompr2_lemma nLen n a bBits b r2

@@ -121,7 +121,7 @@ let rsapss_pkey_pre #t modBits eBits pkey =
   let n  = sub pkey 0 nLen in
   let r2 = sub pkey nLen nLen in
   let e = sub pkey (nLen + nLen) eLen in
-  r2 == SM.bn_precomp_r2_mod_n n /\
+  r2 == SM.bn_precomp_r2_mod_n (modBits - 1) n /\
   bn_v n % 2 = 1 /\
   pow2 (modBits - 1) < bn_v n /\ bn_v n < pow2 modBits /\
   0 < bn_v e /\ bn_v e < pow2 eBits
@@ -440,7 +440,7 @@ let rsapss_sign_lemma #t a modBits eBits dBits skey sLen salt msgLen msg =
   assert (bn_v m < bn_v n);
   let s = bn_mod_exp_mont_ladder_precompr2 nLen n m dBits d r2 in
   Math.Lemmas.pow2_le_compat (bits * nLen) modBits;
-  SM.bn_precomp_r2_mod_n_lemma n;
+  SM.bn_precomp_r2_mod_n_lemma (modBits - 1) n;
   bn_mod_exp_mont_ladder_precompr2_lemma nLen n m dBits d r2;
 
   let m' = bn_mod_exp_precompr2 nLen n s eBits e r2 in
@@ -650,7 +650,7 @@ let rsapss_verify_lemma #t a modBits eBits pkey sLen sgnt msgLen msg =
   if BB.unsafe_bool_of_limb mask then begin
     let m = bn_mod_exp_precompr2 nLen n s eBits e r2 in
     Math.Lemmas.pow2_le_compat (bits * nLen) modBits;
-    SM.bn_precomp_r2_mod_n_lemma n;
+    SM.bn_precomp_r2_mod_n_lemma (modBits - 1) n;
     bn_mod_exp_precompr2_lemma nLen n s eBits e r2;
     blocks_bits_lemma t emBits;
     blocks_numb_lemma t emBits;
@@ -819,7 +819,7 @@ val rsapss_load_pkey:
 
 let rsapss_load_pkey #t modBits eBits nb eb =
   let n  = bn_from_bytes_be (blocks modBits 8) nb in
-  let r2 = SM.bn_precomp_r2_mod_n n in
+  let r2 = SM.bn_precomp_r2_mod_n (modBits - 1) n in
   let e  = bn_from_bytes_be (blocks eBits 8) eb in
   let pkey = (n @| r2) @| e in
 
@@ -850,7 +850,7 @@ let rsapss_load_pkey_lemma #t modBits eBits nb eb =
 
   let n  = bn_from_bytes_be #t nbLen nb in
   bn_from_bytes_be_lemma #t nbLen nb;
-  let r2 = SM.bn_precomp_r2_mod_n n in
+  let r2 = SM.bn_precomp_r2_mod_n (modBits - 1) n in
   let e  = bn_from_bytes_be #t ebLen eb in
   bn_from_bytes_be_lemma #t ebLen eb;
 

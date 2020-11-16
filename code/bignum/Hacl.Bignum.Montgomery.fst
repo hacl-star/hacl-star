@@ -36,20 +36,7 @@ let bn_check_modulus #t #len n =
   m
 
 
-inline_for_extraction noextract
-let bn_precomp_r2_mod_n_st1 (t:limb_t) (len:BN.meta_len t) =
-    nBits:size_t{v nBits / bits t < v len}
-  -> n:lbignum t len
-  -> res:lbignum t len ->
-  Stack unit
-  (requires fun h -> live h n /\ live h res /\ disjoint n res)
-  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_seq h1 res == S.bn_precomp_r2_mod_n_ (v nBits) (as_seq h0 n))
-
-
-inline_for_extraction noextract
-val bn_precomp_r2_mod_n_: #t:limb_t -> k:BN.bn t -> bn_precomp_r2_mod_n_st1 t k.BN.len
-let bn_precomp_r2_mod_n_ #t k nBits n res =
+let bn_precomp_r2_mod_n #t k nBits n res =
   [@inline_let] let len = k.BN.len in
   memset res (uint #t 0) len;
   BN.bn_set_ith_bit len res nBits;
@@ -63,25 +50,6 @@ let bn_precomp_r2_mod_n_ #t k nBits n res =
     Loops.unfold_repeati (2 * bits t * v len - v nBits) (spec h0) (as_seq h0 res) (v i);
     BN.add_mod_n n res res res
   )
-
-
-let bn_precomp_r2_mod_n #t k n res =
-  [@inline_let] let len = k.BN.len in
-  let h0 = ST.get () in
-  let mask = BN.bn_is_zero_mask len n in
-  SB.bn_is_zero_mask_lemma (as_seq h0 n);
-  let bs = BN.bn_get_num_bits len n in
-  let bs0 = (lognot mask) &. bs in
-  lognot_lemma mask;
-  logand_lemma (lognot mask) bs;
-  let b = Lib.RawIntTypes.(size_from_UInt32 (u32_to_UInt32 (to_u32 bs0))) in
-  assert (
-    if v mask = 0 then begin
-      SB.bn_get_num_bits_lemma (as_seq h0 n);
-      v bs0 / bits t < v len end
-    else
-      v bs0 / bits t < v len);
-  bn_precomp_r2_mod_n_ k b n res
 
 
 inline_for_extraction noextract

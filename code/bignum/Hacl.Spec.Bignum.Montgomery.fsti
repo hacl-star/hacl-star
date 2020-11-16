@@ -19,12 +19,15 @@ val bn_check_modulus: #t:limb_t -> #nLen:size_pos{2 * bits t * nLen <= max_size_
 val bn_precomp_r2_mod_n:
     #t:limb_t
   -> #nLen:size_pos{2 * bits t * nLen <= max_size_t}
+  -> nBits:size_nat{nBits / bits t < nLen}
   -> n:lbignum t nLen ->
   lbignum t nLen
 
-val bn_precomp_r2_mod_n_lemma: #t:limb_t -> #nLen:size_pos -> n:lbignum t nLen -> Lemma
-  (requires 1 < bn_v n /\ bn_v n % 2 = 1 /\ 2 * bits t * nLen <= max_size_t)
-  (ensures  bn_v (bn_precomp_r2_mod_n n) == pow2 (2 * bits t * nLen) % bn_v n)
+val bn_precomp_r2_mod_n_lemma: #t:limb_t -> #nLen:size_pos -> nBits:size_nat -> n:lbignum t nLen -> Lemma
+  (requires
+    1 < bn_v n /\ bn_v n % 2 = 1 /\ 2 * bits t * nLen <= max_size_t /\
+    pow2 nBits < bn_v n /\ nBits / bits t < nLen)
+  (ensures  bn_v (bn_precomp_r2_mod_n nBits n) == pow2 (2 * bits t * nLen) % bn_v n)
 
 
 ///  Conversion functions to/from the Montgomery domen and the Montgomery reduction

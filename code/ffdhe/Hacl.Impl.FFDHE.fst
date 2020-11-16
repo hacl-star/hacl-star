@@ -16,6 +16,7 @@ module B = LowStar.Buffer
 module S = Spec.FFDHE
 module LSeq = Lib.Sequence
 module BSeq = Lib.ByteSequence
+module Lemmas = Hacl.Spec.FFDHE.Lemmas
 
 module BN = Hacl.Bignum
 module BM = Hacl.Bignum.Montgomery
@@ -142,8 +143,9 @@ let ffdhe_precomp_p #t a len ke p_r2_n =
   SB.bn_from_bytes_be_lemma #t (v len) (as_seq h0 p_s);
   assert (bn_v h1 p_n == BSeq.nat_from_bytes_be (as_seq h0 p_s));
   S.ffdhe_p_lemma a;
-  ke.BE.mont.BM.precomp p_n r2_n;
-  SM.bn_precomp_r2_mod_n_lemma (as_seq h1 p_n);
+  Lemmas.ffdhe_p_bits_lemma a;
+  ke.BE.mont.BM.precomp (8ul *! len -! 1ul) p_n r2_n;
+  SM.bn_precomp_r2_mod_n_lemma (8 * v len - 1) (as_seq h1 p_n);
   pop_frame ()
 
 

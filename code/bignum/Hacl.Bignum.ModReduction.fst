@@ -74,7 +74,8 @@ let bn_mod_slow_precompr2 #t k n a r2 res =
 
 inline_for_extraction noextract
 let bn_mod_slow_st (t:limb_t) (len:BN.meta_len t) =
-    n:lbignum t len
+    nBits:size_t{v nBits / bits t < v len}
+  -> n:lbignum t len
   -> a:lbignum t (len +! len)
   -> res:lbignum t len ->
   Stack unit
@@ -82,7 +83,7 @@ let bn_mod_slow_st (t:limb_t) (len:BN.meta_len t) =
     live h n /\ live h a /\ live h res /\
     disjoint res n /\ disjoint res a)
   (ensures  fun h0 r h1 -> modifies (loc res) h0 h1 /\
-    as_seq h1 res == S.bn_mod_slow (as_seq h0 n) (as_seq h0 a))
+    as_seq h1 res == S.bn_mod_slow (v nBits) (as_seq h0 n) (as_seq h0 a))
 
 
 inline_for_extraction noextract
@@ -92,10 +93,10 @@ val bn_mod_slow:
   -> bn_mod_slow_precompr2:bn_mod_slow_precompr2_st t k.BM.bn.BN.len ->
   bn_mod_slow_st t k.BM.bn.BN.len
 
-let bn_mod_slow #t k bn_mod_slow_precompr2 n a res =
+let bn_mod_slow #t k bn_mod_slow_precompr2 nBits n a res =
   [@inline_let] let len = k.BM.bn.BN.len in
   push_frame ();
   let r2 = create len (uint #t #SEC 0) in
-  BM.precomp n r2;
+  BM.precomp nBits n r2;
   bn_mod_slow_precompr2 n a r2 res;
   pop_frame ()

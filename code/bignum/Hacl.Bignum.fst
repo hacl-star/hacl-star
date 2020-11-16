@@ -67,9 +67,6 @@ let bn_get_ith_bit #t len input ind =
 let bn_set_ith_bit #t len input ind =
   Hacl.Bignum.Lib.bn_set_ith_bit len input ind
 
-let bn_get_num_bits #t len b =
-  Hacl.Bignum.Lib.bn_get_num_bits len b
-
 (* conditional swap *)
 
 let cswap2 #t len bit b1 b2 =

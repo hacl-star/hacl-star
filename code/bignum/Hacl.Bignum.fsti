@@ -282,17 +282,6 @@ val bn_set_ith_bit: #t:limb_t -> len:size_t -> bn_set_ith_bit_st t len
 
 
 inline_for_extraction noextract
-val bn_get_num_bits:
-    #t:limb_t
-  -> len:size_t{0 < v len /\ bits t * v len <= max_size_t}
-  -> b:lbignum t len ->
-  Stack (limb t)
-  (requires fun h -> live h b)
-  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    v r == S.bn_get_num_bits (as_seq h0 b))
-
-
-inline_for_extraction noextract
 val cswap2:
     #t:limb_t
   -> len:size_t

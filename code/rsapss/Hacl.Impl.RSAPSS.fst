@@ -30,7 +30,7 @@ module RK = Hacl.Impl.RSAPSS.Keys
 #reset-options "--z3rlimit 150 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
-let modBits_t (t:limb_t) = modBits:size_t{1 < v modBits /\ 128 * SD.blocks (v modBits) (bits t) <= max_size_t}
+let modBits_t (t:limb_t) = modBits:size_t{1 < v modBits /\ 2 * bits t * SD.blocks (v modBits) (bits t) <= max_size_t}
 
 
 inline_for_extraction noextract

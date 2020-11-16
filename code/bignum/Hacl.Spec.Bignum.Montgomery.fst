@@ -59,66 +59,25 @@ let rec bn_mul_by_pow2 #t len n b k =
     Math.Lemmas.pow2_plus 1 (k - 1) end
 
 
-val bn_precomp_r2_mod_n_:
-    #t:limb_t
-  -> #nLen:size_pos{2 * bits t * nLen <= max_size_t}
-  -> nBits:size_nat{nBits / bits t < nLen }
-  -> n:lbignum t nLen ->
-  lbignum t nLen
-
-let bn_precomp_r2_mod_n_ #t #nLen nBits n =
+let bn_precomp_r2_mod_n #t #nLen nBits n =
   let c = create nLen (uint #t 0) in
-  let c0 = bn_set_ith_bit c nBits in // c0 == pow2 (nBits - 1)
-  // pow2 (128 * nLen) / pow2 (nBits - 1) == pow2 (128 * nLen + 1 - nBits)
+  let c0 = bn_set_ith_bit c nBits in // c0 == pow2 nBits
+  // pow2 (2 * bits t * nLen) / pow2 nBits == pow2 (2 * bits t * nLen - nBits)
 
   repeati (2 * bits t * nLen - nBits) (bn_lshift1_mod_n n) c0
 
 
-val bn_precomp_r2_mod_n_aux_lemma:
-    #t:limb_t
-  -> #nLen:size_pos
-  -> nBits:size_pos
-  -> n:lbignum t nLen -> Lemma
-  (requires
-    0 < bn_v n /\ pow2 nBits <= bn_v n /\ bn_v n % 2 = 1 /\
-    2 * bits t * nLen <= max_size_t /\ nBits / bits t < nLen)
-  (ensures  bn_v (bn_precomp_r2_mod_n_ nBits n) == pow2 (2 * bits t * nLen) % bn_v n)
-
-let bn_precomp_r2_mod_n_aux_lemma #t #nLen nBits n =
+let bn_precomp_r2_mod_n_lemma #t #nLen nBits n =
   let c = create nLen (uint #t 0) in
   let c0 = bn_set_ith_bit c nBits in
   bn_eval_zeroes #t nLen nLen;
   bn_set_ith_bit_lemma c nBits;
   assert (bn_v c0 == pow2 nBits);
   let res = repeati (2 * bits t * nLen - nBits) (bn_lshift1_mod_n n) c0 in
-  Math.Lemmas.pow2_multiplication_modulo_lemma_1 1 1 nBits;
-  assert (pow2 nBits % pow2 1 = 0);
   bn_mul_by_pow2 nLen n c0 (2 * bits t * nLen - nBits);
   assert (bn_v res == pow2 (2 * bits t * nLen - nBits) * pow2 nBits % bn_v n);
   Math.Lemmas.pow2_plus (2 * bits t * nLen - nBits) nBits;
   assert (bn_v res == pow2 (2 * bits t * nLen) % bn_v n)
-
-
-let bn_precomp_r2_mod_n #t #nLen n =
-  let mask = bn_is_zero_mask n in
-  bn_is_zero_mask_lemma n;
-  let bits =
-    if v mask = 0 then begin
-      bn_get_num_bits_lemma n;
-      bn_get_num_bits n end
-    else 0 in
-  bn_precomp_r2_mod_n_ bits n
-
-
-let bn_precomp_r2_mod_n_lemma #t #nLen n =
-  let mask = bn_is_zero_mask n in
-  bn_is_zero_mask_lemma n;
-  let bits =
-    if v mask = 0 then begin
-      bn_get_num_bits_lemma n;
-      bn_get_num_bits n end
-    else 0 in
-  bn_precomp_r2_mod_n_aux_lemma bits n
 
 ///
 ///  Low-level specification of Montgomery arithmetic

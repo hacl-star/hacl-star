@@ -107,6 +107,7 @@ val bn_mod_exp_mont_ladder_precompr2_lemma:
 val bn_mod_exp:
     #t:limb_t
   -> nLen:size_pos{2 * bits t * nLen <= max_size_t}
+  -> nBits:size_nat{nBits / bits t < nLen}
   -> n:lbignum t nLen
   -> a:lbignum t nLen
   -> bBits:size_pos
@@ -117,18 +118,20 @@ val bn_mod_exp:
 val bn_mod_exp_lemma:
     #t:limb_t
   -> nLen:size_pos{2 * bits t * nLen <= max_size_t}
+  -> nBits:size_nat{nBits / bits t < nLen}
   -> n:lbignum t nLen
   -> a:lbignum t nLen
   -> bBits:size_pos
   -> b:lbignum t (blocks bBits (bits t)) -> Lemma
-  (requires bn_mod_exp_pre n a bBits b)
-  (ensures  bn_mod_exp_post n a bBits b (bn_mod_exp nLen n a bBits b))
+  (requires bn_mod_exp_pre n a bBits b /\ pow2 nBits < bn_v n)
+  (ensures  bn_mod_exp_post n a bBits b (bn_mod_exp nLen nBits n a bBits b))
 
 
 // This function is constant-time on the exponent b
 val bn_mod_exp_mont_ladder:
     #t:limb_t
   -> nLen:size_pos{2 * bits t * nLen <= max_size_t}
+  -> nBits:size_nat{nBits / bits t < nLen}
   -> n:lbignum t nLen
   -> a:lbignum t nLen
   -> bBits:size_pos
@@ -139,9 +142,10 @@ val bn_mod_exp_mont_ladder:
 val bn_mod_exp_mont_ladder_lemma:
     #t:limb_t
   -> nLen:size_pos{2 * bits t * nLen <= max_size_t}
+  -> nBits:size_nat{nBits / bits t < nLen}
   -> n:lbignum t nLen
   -> a:lbignum t nLen
   -> bBits:size_pos
   -> b:lbignum t (blocks bBits (bits t)) -> Lemma
-  (requires bn_mod_exp_pre n a bBits b)
-  (ensures  bn_mod_exp_post n a bBits b (bn_mod_exp_mont_ladder nLen n a bBits b))
+  (requires bn_mod_exp_pre n a bBits b /\ pow2 nBits < bn_v n)
+  (ensures  bn_mod_exp_post n a bBits b (bn_mod_exp_mont_ladder nLen nBits n a bBits b))

@@ -93,6 +93,14 @@ let size_to_limb (#t:limb_t) (x:size_t) : limb t =
 
 
 inline_for_extraction noextract
+let unsafe_size_from_limb (#t:limb_t) (x:limb t{v x <= max_size_t}) : size_t =
+  let open Lib.RawIntTypes in
+  match t with
+  | U32 -> u32_to_UInt32 x
+  | U64 -> u32_to_UInt32 (to_u32 x)
+
+
+inline_for_extraction noextract
 val mask_select: #t:limb_t -> mask:limb t -> a:limb t -> b:limb t -> limb t
 let mask_select #t mask a b =
   (mask &. a) |. ((lognot mask) &. b)

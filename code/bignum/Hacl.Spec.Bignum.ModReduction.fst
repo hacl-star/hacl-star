@@ -93,24 +93,28 @@ let bn_mod_slow_precompr2_lemma #t #nLen n a r2 =
 val bn_mod_slow:
     #t:limb_t
   -> #nLen:size_pos{2 * bits t * nLen <= max_size_t}
+  -> nBits:size_nat{nBits / bits t < nLen}
   -> n:lbignum t nLen
   -> a:lbignum t (nLen + nLen) ->
   lbignum t nLen
 
-let bn_mod_slow #t #nLen n a =
-  let r2 = BM.bn_precomp_r2_mod_n n in
+let bn_mod_slow #t #nLen nBits n a =
+  let r2 = BM.bn_precomp_r2_mod_n nBits n in
   bn_mod_slow_precompr2 n a r2
 
 
 val bn_mod_slow_lemma:
     #t:limb_t
   -> #nLen:size_pos{2 * bits t * nLen <= max_size_t}
+  -> nBits:size_nat{nBits / bits t < nLen}
   -> n:lbignum t nLen
   -> a:lbignum t (nLen + nLen) -> Lemma
-  (requires 1 < bn_v n /\ bn_v n % 2 = 1 /\ bn_v a < bn_v n * bn_v n)
-  (ensures  bn_v (bn_mod_slow n a) == bn_v a % bn_v n)
+  (requires
+    1 < bn_v n /\ bn_v n % 2 = 1 /\ bn_v a < bn_v n * bn_v n /\
+    pow2 nBits < bn_v n)
+  (ensures  bn_v (bn_mod_slow nBits n a) == bn_v a % bn_v n)
 
-let bn_mod_slow_lemma #t #nLen n a =
-  let r2 = BM.bn_precomp_r2_mod_n n in
-  BM.bn_precomp_r2_mod_n_lemma n;
+let bn_mod_slow_lemma #t #nLen nBits n a =
+  let r2 = BM.bn_precomp_r2_mod_n nBits n in
+  BM.bn_precomp_r2_mod_n_lemma nBits n;
   bn_mod_slow_precompr2_lemma n a r2

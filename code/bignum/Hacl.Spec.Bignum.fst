@@ -136,12 +136,6 @@ let bn_set_ith_bit #t #len input ind =
 let bn_set_ith_bit_lemma #t #len input ind =
   Hacl.Spec.Bignum.Lib.bn_set_ith_bit_lemma input ind
 
-let bn_get_num_bits #t #len b =
-  Hacl.Spec.Bignum.Lib.bn_get_num_bits b
-
-let bn_get_num_bits_lemma #t #len b =
-  Hacl.Spec.Bignum.Lib.bn_get_num_bits_lemma b
-
 (* conditional swap *)
 
 let cswap2 #t #len bit b1 b2 =

@@ -33,13 +33,14 @@ val bn_check_modulus: #t:limb_t -> #len:BN.meta_len t -> bn_check_modulus_st t l
 
 inline_for_extraction noextract
 let bn_precomp_r2_mod_n_st (t:limb_t) (len:BN.meta_len t) =
-    n:lbignum t len
+    nBits:size_t{v nBits / bits t < v len}
+  -> n:lbignum t len
   -> res:lbignum t len ->
   Stack unit
   (requires fun h ->
     live h n /\ live h res /\ disjoint n res)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_seq h1 res == S.bn_precomp_r2_mod_n (as_seq h0 n))
+    as_seq h1 res == S.bn_precomp_r2_mod_n (v nBits) (as_seq h0 n))
 
 
 inline_for_extraction noextract

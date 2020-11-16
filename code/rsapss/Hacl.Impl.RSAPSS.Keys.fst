@@ -227,7 +227,7 @@ let rsapss_load_pkey #t ke modBits kc eBits nb eb pkey =
   let e  = sub pkey (nLen +! nLen) eLen in
 
   BN.bn_from_bytes_be nbLen nb n;
-  ke.BE.mont.BM.precomp n r2;
+  ke.BE.mont.BM.precomp (modBits -! 1ul) n r2;
   BN.bn_from_bytes_be ebLen eb e;
   let h1 = ST.get () in
   LSeq.lemma_concat3 (v nLen) (as_seq h1 n)

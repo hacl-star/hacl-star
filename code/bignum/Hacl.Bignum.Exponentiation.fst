@@ -226,20 +226,20 @@ let bn_mod_exp_mont_ladder_precompr2 #t k n a bBits b r2 res =
   pop_frame ()
 
 
-let bn_mod_exp #t k bn_mod_exp_precompr2 n a bBits b res =
+let bn_mod_exp #t k bn_mod_exp_precompr2 nBits n a bBits b res =
   [@inline_let] let len = k.BM.bn.BN.len in
   push_frame ();
   let r2 = create len (uint #t #SEC 0) in
-  BM.precomp n r2;
+  BM.precomp nBits n r2;
   bn_mod_exp_precompr2 n a bBits b r2 res;
   pop_frame ()
 
 
-let bn_mod_exp_mont_ladder #t k bn_mod_exp_mont_ladder_precompr2 n a bBits b res =
+let bn_mod_exp_mont_ladder #t k bn_mod_exp_mont_ladder_precompr2 nBits n a bBits b res =
   [@inline_let] let len = k.BM.bn.BN.len in
   push_frame ();
   let r2 = create len (uint #t #SEC 0) in
-  BM.precomp n r2;
+  BM.precomp nBits n r2;
   bn_mod_exp_mont_ladder_precompr2 n a bBits b r2 res;
   pop_frame ()
 
