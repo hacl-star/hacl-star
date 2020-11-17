@@ -621,7 +621,7 @@ static void point_add_and_double(uint64_t *q, uint64_t *p01_tmp1, uint128_t *tmp
   Hacl_Impl_Curve25519_Field51_fmul(z3, z3, x1, tmp2);
 }
 
-static void point_double(uint64_t *nq, uint64_t *tmp1, uint128_t *tmp2)
+static void point_double(uint64_t *nq, uint64_t *tmp1)
 {
   uint64_t *x2 = nq;
   uint64_t *z2 = nq + (uint32_t)5U;
@@ -697,9 +697,9 @@ static void montgomery_ladder(uint64_t *out, uint8_t *key, uint64_t *init)
   cswap20(sw, nq1, nq_p11);
   uint64_t *nq10 = p01_tmp1;
   uint64_t *tmp1 = p01_tmp1 + (uint32_t)20U;
-  point_double(nq10, tmp1, tmp2);
-  point_double(nq10, tmp1, tmp2);
-  point_double(nq10, tmp1, tmp2);
+  point_double(nq10, tmp1);
+  point_double(nq10, tmp1);
+  point_double(nq10, tmp1);
   memcpy(out, p0, (uint32_t)10U * sizeof (uint64_t));
 }
 
