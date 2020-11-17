@@ -43,50 +43,11 @@ extern "C" {
 #include "Hacl_Hash.h"
 #include "Hacl_Spec.h"
 
-/* SNIPPET_START: Hacl_Bignum_Convert_bn_from_bytes_be_uint64 */
-
-void Hacl_Bignum_Convert_bn_from_bytes_be_uint64(uint32_t len, uint8_t *b, uint64_t *res);
-
-/* SNIPPET_END: Hacl_Bignum_Convert_bn_from_bytes_be_uint64 */
-
-/* SNIPPET_START: Hacl_Bignum_Convert_bn_to_bytes_be_uint64 */
-
-void Hacl_Bignum_Convert_bn_to_bytes_be_uint64(uint32_t len, uint64_t *b, uint8_t *res);
-
-/* SNIPPET_END: Hacl_Bignum_Convert_bn_to_bytes_be_uint64 */
-
-/* SNIPPET_START: Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u64 */
-
-void
-Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u64(
-  uint32_t len,
-  uint32_t nBits,
-  uint64_t *n,
-  uint64_t *res
-);
-
-/* SNIPPET_END: Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u64 */
-
 /* SNIPPET_START: Hacl_Impl_RSAPSS_MGF_hash_len */
 
 uint32_t Hacl_Impl_RSAPSS_MGF_hash_len(Spec_Hash_Definitions_hash_alg a);
 
 /* SNIPPET_END: Hacl_Impl_RSAPSS_MGF_hash_len */
-
-/* SNIPPET_START: Hacl_Bignum_Exponentiation_bn_mod_exp_mont_ladder_precompr2_u64 */
-
-void
-Hacl_Bignum_Exponentiation_bn_mod_exp_mont_ladder_precompr2_u64(
-  uint32_t len,
-  uint64_t *n,
-  uint64_t *a,
-  uint32_t bBits,
-  uint64_t *b,
-  uint64_t *r2,
-  uint64_t *res
-);
-
-/* SNIPPET_END: Hacl_Bignum_Exponentiation_bn_mod_exp_mont_ladder_precompr2_u64 */
 
 /* SNIPPET_START: Hacl_Impl_RSAPSS_Keys_check_modulus_u64 */
 
