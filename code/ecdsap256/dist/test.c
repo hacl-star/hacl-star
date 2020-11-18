@@ -44,10 +44,8 @@ int main()
 
 
 
-	uint64_t count = ROUNDS * SIZE;
-	printf("Hacl DH_I PERF: %d\n"); 
-	print_time(count,tdiff1,cdiff1);
+	printf("Hacl DH_I PERF:\n"); 
 
-
+	printf("%" PRIu64 " ECDH/s\n",(double)ROUNDS/(((double)tdiff1 / CLOCKS_PER_SEC) * 1000000.0));
 
 }
