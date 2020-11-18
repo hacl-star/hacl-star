@@ -74,6 +74,17 @@ Hacl_Bignum_Convert_bn_to_bytes_be_uint64(uint32_t len, uint64_t *b, uint8_t *re
   memcpy(res, tmp + tmpLen - len, len * sizeof (uint8_t));
 }
 
+static inline uint64_t Hacl_Bignum_Lib_bn_get_top_index_u64(uint32_t len, uint64_t *b)
+{
+  uint64_t priv = (uint64_t)0U;
+  for (uint32_t i = (uint32_t)0U; i < len; i++)
+  {
+    uint64_t mask = FStar_UInt64_eq_mask(b[i], (uint64_t)0U);
+    priv = (mask & priv) | (~mask & (uint64_t)i);
+  }
+  return priv;
+}
+
 static inline void
 Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64(
   uint32_t aLen,

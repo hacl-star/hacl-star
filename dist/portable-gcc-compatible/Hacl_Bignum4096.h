@@ -272,18 +272,17 @@ Hacl_Bignum4096_mod_exp_mont_ladder(
 /* SNIPPET_START: Hacl_Bignum4096_new_precompr2 */
 
 /*
-Compute `2 ^ (128 * nLen) mod n`.
+Compute `2 ^ 8192 mod n`.
 
-  The argument n points to a bignum of size nLen of valid memory.
-  The function returns a heap-allocated bignum of size nLen, or NULL if:
+  The argument n points to a 4096-bit bignum of valid memory.
+  The function returns a heap-allocated 4096-bit bignum, or NULL if:
   • the allocation failed, or
-  • the amount of required memory would exceed 4GB, or
   • n % 2 = 1 && 1 < n does not hold
 
   If the return value is non-null, clients must eventually call free(3) on it to
   avoid memory leaks.
 */
-uint64_t *Hacl_Bignum4096_new_precompr2(uint32_t len, uint64_t *n);
+uint64_t *Hacl_Bignum4096_new_precompr2(uint64_t *n);
 
 /* SNIPPET_END: Hacl_Bignum4096_new_precompr2 */
 

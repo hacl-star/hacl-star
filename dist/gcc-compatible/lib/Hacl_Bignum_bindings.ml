@@ -8,6 +8,9 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Bignum_Convert_bn_to_bytes_be_uint64 =
       foreign "Hacl_Bignum_Convert_bn_to_bytes_be_uint64"
         (uint32_t @-> ((ptr uint64_t) @-> (ocaml_bytes @-> (returning void))))
+    let hacl_Bignum_Lib_bn_get_top_index_u64 =
+      foreign "Hacl_Bignum_Lib_bn_get_top_index_u64"
+        (uint32_t @-> ((ptr uint64_t) @-> (returning uint64_t)))
     let hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64 =
       foreign "Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64"
         (uint32_t @->
