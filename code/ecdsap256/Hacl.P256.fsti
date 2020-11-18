@@ -18,7 +18,7 @@ open Spec.DH
 open Spec.ECDSAP256.Definition
 open Hacl.Impl.P256.Compression
 open Spec.P256.MontgomeryMultiplication
-
+(* 
 
 [@ (Comment " Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. 
   \n Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
@@ -213,7 +213,7 @@ val ecdsa_verif_p256_sha512:
       let s = nat_from_bytes_be (as_seq h1 s) in
       modifies0 h0 h1 /\
       result == Spec.ECDSA.ecdsa_verification_agile (Spec.ECDSA.Hash SHA2_512) (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m)
-   )
+   ) 
 
 [@ (Comment " The input of the function is considered to be public, 
   thus this code is not secret independent with respect to the operations done over the input.
@@ -346,7 +346,7 @@ val compression_compressed_form: b: lbuffer uint8 (size 64) -> result: compresse
         x == xResult  
       )  
   )
-
+*)
 
 [@ (Comment " Input: result: uint8[64], \n scalar: uint8[32].
   \n Output: bool, where True stands for the correct key generation. 
@@ -391,7 +391,7 @@ val ecp256dh_r:
       as_seq h1 (gsub result (size 0) (size 32)) == pointX /\
       as_seq h1 (gsub result (size 32) (size 32)) == pointY)
 
-
+(*)
 [@ (Comment " Input: scalar: uint8[32].
   \n Output: bool, where true stands for the scalar to be more than 0 and less than order.")]
 val is_more_than_zero_less_than_order: x: lbuffer uint8 (size 32) -> Stack bool
@@ -402,3 +402,4 @@ val is_more_than_zero_less_than_order: x: lbuffer uint8 (size 32) -> Stack bool
       r <==> (scalar > 0 && scalar < prime_p256_order)
     )
   )
+ *)

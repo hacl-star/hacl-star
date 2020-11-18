@@ -39,6 +39,10 @@ dist/%.o: dist/Makefile.basic
 dist/Hacl_Test_ECDSA.exe: dist/Hacl_P256.o dist/Hacl_Test_ECDSA.o \
 	$(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a dist/libecdsa.a
 
+dist/test.exe: dist/Hacl_P256.o
+	$(CC) $(CFLAGS) -I $(OPENSSL_HOME)/include -I ../../dist/gcc64-only -I $(HACL_HOME)/tests \
+	$(HACL_HOME)/code/ecdsap256/dist/test.c  $^ \
+	-o ./dist/test.exe $@
 
 dist/p256-openssl-test.exe: dist/Hacl_P256.o
 	$(CC) $(CFLAGS) -I $(OPENSSL_HOME)/include -I ../../dist/gcc64-only  -I $(OPENSSL_HOME)/include/crypto -I $(OPENSSL_HOME)/crypto \
