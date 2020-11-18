@@ -42,10 +42,9 @@ int main()
 	clock_t tdiff1 = t2 - t1;
 	cycles cdiff1 = b - a;
 
-
-
-	printf("Hacl DH_I PERF:\n"); 
-
-	printf("%" PRIu64 " ECDH/s\n",(double)ROUNDS/(((double)tdiff1 / CLOCKS_PER_SEC) * 1000000.0));
+	double time = (((double)tdiff1) / CLOCKS_PER_SEC);
+	double nsigs = ((double)ROUNDS) / time;
+	printf("HACL P-256 ECDH PERF\n ");
+	printf("ECDH %8.2f mul/s\n",nsigs);
 
 }
