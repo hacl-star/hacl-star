@@ -14,7 +14,7 @@
 
 
 #define SIZE   32
-#define ROUNDS 1000000
+#define ROUNDS 100
 
 int main()
 {

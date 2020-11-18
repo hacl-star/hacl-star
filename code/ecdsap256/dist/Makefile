@@ -6,19 +6,6 @@ HACL_HOME=../..
 CC = gcc-9.1
 all: dist/Hacl_Test_ECDSA.exe
 
-test: all
-	dist/Hacl_Test_ECDSA.exe
-
-# Defines rules for producing .checked, .krml, .depend, etc.
-include ../../Makefile.local
-
-FSTAR_ROOTS += ../tests/Hacl.Test.ECDSA.fst
-
-#BASE_FLAGS+= -funroll-loops 4
-
-CFLAGS += -I ../../../lib/c -I . -march=native -mtune=native -O3
-export CFLAGS
-
 dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
 	$(KRML) $^ -o libecdsa.a $(BASE_FLAGS) $(P256_BUNDLE) \
 	  -tmpdir dist \
@@ -36,18 +23,10 @@ dist/libecdsa.a:dist/Hacl_P256.o
 dist/%.o: dist/Makefile.basic
 	$(MAKE) -C dist -f Makefile.basic $(notdir $@)
 
-dist/Hacl_Test_ECDSA.exe: dist/Hacl_P256.o dist/Hacl_Test_ECDSA.o \
-	$(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a dist/libecdsa.a
-
-dist/test.exe: dist/Hacl_P256.o
-	$(CC) $(CFLAGS) -I ../../dist/gcc64-only \
-	$(HACL_HOME)/code/ecdsap256/dist/test.c  $^ \
-	-o $(HACL_HOME)/code/ecdsap256/dist/test.exe  $@
-
-dist/p256-openssl-test.exe: dist/Hacl_P256.o
-	$(CC) $(CFLAGS) -I $(OPENSSL_HOME)/include -I ../../dist/gcc64-only  -I $(OPENSSL_HOME)/include/crypto -I $(OPENSSL_HOME)/crypto \
-	 $(HACL_HOME)/tests/p256-test.c $^ \
-	-o $@ $(OPENSSL_HOME)/libcrypto.a -lpthread -ldl
+test.exe: Hacl_P256.o
+	$(CC) $(CFLAGS) \
+	test.c  $^ \
+	-o test.exe
 
 %.exe:
 	$(CC) $(CFLAGS) -flto $^ -o $@
