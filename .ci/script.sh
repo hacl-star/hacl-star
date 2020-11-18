@@ -23,6 +23,15 @@ if [[ $ARM_CROSS_CI == "aarch64-none-linux-gnu" ]]; then
   exit 0
 fi
 
+if [[ $TARGET == "IA32" ]]; then
+  # Test 32-bit build; Tests don't work here yet.
+  pushd dist/gcc-compatible
+  ./configure -target ia32
+  make -j
+  popd
+  exit 0
+fi
+
 # For OSX... seems like the most reliable way to figure out which OpenSSL is
 # installed? We have both 1.1.1d and 1.1.1f and neither can be installed on the
 # other configuration.
