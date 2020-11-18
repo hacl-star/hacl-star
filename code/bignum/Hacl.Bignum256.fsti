@@ -57,20 +57,20 @@ Comment
   This functions returns the carry.
 
   The arguments a, b and res are meant to be 256-bit bignums, i.e. uint64_t[4]"]
-val add: a:lbignum t_limbs n_limbs -> b:lbignum t_limbs n_limbs -> BN.bn_add_eq_len_st a b
+val add: BN.bn_add_eq_len_st t_limbs n_limbs
 
 [@@ Comment "Write `a - b mod 2^256` in `res`.
 
   This functions returns the carry.
 
   The arguments a, b and res are meant to be 256-bit bignums, i.e. uint64_t[4]"]
-val sub: a:lbignum t_limbs n_limbs -> b:lbignum t_limbs n_limbs -> BN.bn_sub_eq_len_st a b
+val sub: BN.bn_sub_eq_len_st t_limbs n_limbs
 
 [@@ Comment "Write `a * b` in `res`.
 
   The arguments a and b are meant to be 256-bit bignums, i.e. uint64_t[4].
   The outparam res is meant to be a 512-bit bignum, i.e. uint64_t[8]."]
-val mul: a:lbignum t_limbs n_limbs -> b:lbignum t_limbs n_limbs -> BN.bn_karatsuba_mul_st a b
+val mul: a:lbignum t_limbs n_limbs -> BN.bn_karatsuba_mul_st t_limbs n_limbs a
 
 [@@ Comment "Write `a mod n` in `res`
 
@@ -176,17 +176,16 @@ val mod_exp_mont_ladder_precompr2: BE.bn_mod_exp_mont_ladder_precompr2_st t_limb
   mod_exp_mont_ladder_precompr2 are violated, true otherwise."]
 val mod_exp_mont_ladder: BS.bn_mod_exp_safe_st t_limbs n_limbs
 
-[@@ Comment "Compute `2 ^ (128 * nLen) mod n`.
+[@@ Comment "Compute `2 ^ 512 mod n`.
 
-  The argument n points to a bignum of size nLen of valid memory.
-  The function returns a heap-allocated bignum of size nLen, or NULL if:
+  The argument n points to a 256-bit bignum of valid memory.
+  The function returns a heap-allocated 256-bit bignum, or NULL if:
   • the allocation failed, or
-  • the amount of required memory would exceed 4GB, or
   • n % 2 = 1 && 1 < n does not hold
 
   If the return value is non-null, clients must eventually call free(3) on it to
   avoid memory leaks."]
-val new_precompr2: BS.new_bn_precomp_r2_mod_n_st t_limbs
+val new_precompr2: BS.new_bn_precomp_r2_mod_n_st t_limbs n_limbs
 
 [@@ Comment "Write `a ^ (-1) mod n` in `res`.
 

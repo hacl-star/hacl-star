@@ -94,16 +94,17 @@ let cswap2_st #t len bit b1 b2 =
 
 
 inline_for_extraction noextract
-val bn_get_top_index:
-    #t:limb_t
-  -> len:size_t{0 < v len}
-  -> b:lbignum t len ->
+let bn_get_top_index_st (t:limb_t) (len:size_t{0 < v len}) =
+  b:lbignum t len ->
   Stack (limb t)
   (requires fun h -> live h b)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
     v r == S.bn_get_top_index (as_seq h0 b))
 
-let bn_get_top_index #t len b =
+
+inline_for_extraction noextract
+val mk_bn_get_top_index: #t:limb_t -> len:size_t{0 < v len} -> bn_get_top_index_st t len
+let mk_bn_get_top_index #t len b =
   push_frame ();
   let priv = create 1ul (uint #t 0) in
 
@@ -130,3 +131,17 @@ let bn_get_top_index #t len b =
   let res = priv.(0ul) in
   pop_frame ();
   res
+
+
+[@CInline]
+let bn_get_top_index_u32 len: bn_get_top_index_st U32 len = mk_bn_get_top_index #U32 len
+[@CInline]
+let bn_get_top_index_u64 len: bn_get_top_index_st U64 len = mk_bn_get_top_index #U64 len
+
+
+inline_for_extraction noextract
+val bn_get_top_index: #t:_ -> len:_ -> bn_get_top_index_st t len
+let bn_get_top_index #t =
+  match t with
+  | U32 -> bn_get_top_index_u32
+  | U64 -> bn_get_top_index_u64

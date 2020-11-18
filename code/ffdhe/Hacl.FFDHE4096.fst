@@ -13,21 +13,21 @@ module BE = Hacl.Bignum.Exponentiation
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-let add (a b: BD.lbignum t_limbs n_limbs): BN.bn_add_eq_len_st a b =
-  BN.bn_add_eq_len n_limbs a b
+let add: BN.bn_add_eq_len_st t_limbs n_limbs =
+  BN.bn_add_eq_len n_limbs
 
-let sub (a b: BD.lbignum t_limbs n_limbs): BN.bn_sub_eq_len_st a b =
-  BN.bn_sub_eq_len n_limbs a b
+let sub: BN.bn_sub_eq_len_st t_limbs n_limbs =
+  BN.bn_sub_eq_len n_limbs
 
 let add_mod_n: BN.bn_add_mod_n_st t_limbs n_limbs =
- BN.bn_add_mod_n n_limbs
+  BN.bn_add_mod_n n_limbs
 
-let mul (a b: BD.lbignum t_limbs n_limbs): BN.bn_karatsuba_mul_st a b =
-  BN.bn_mul n_limbs a n_limbs b
+let mul (a:BD.lbignum t_limbs n_limbs) : BN.bn_karatsuba_mul_st t_limbs n_limbs a =
+  BN.bn_mul n_limbs n_limbs a
 
-let sqr (a: BD.lbignum t_limbs n_limbs): BN.bn_karatsuba_sqr_st a =
+let sqr (a:BD.lbignum t_limbs n_limbs) : BN.bn_karatsuba_sqr_st t_limbs n_limbs a =
   //BN.bn_sqr n_limbs a
-  BN.bn_mul n_limbs a n_limbs a
+  BN.bn_mul n_limbs n_limbs a a
 
 inline_for_extraction noextract
 instance bn_inst: BN.bn t_limbs = {
@@ -40,7 +40,7 @@ instance bn_inst: BN.bn t_limbs = {
 }
 
 
-let mont_check : BM.bn_check_modulus_st t_limbs n_limbs =
+let mont_check: BM.bn_check_modulus_st t_limbs n_limbs =
   BM.bn_check_modulus
 
 let precomp: BM.bn_precomp_r2_mod_n_st t_limbs n_limbs =

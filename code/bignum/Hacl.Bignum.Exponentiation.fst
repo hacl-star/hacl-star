@@ -61,7 +61,6 @@ let bn_mod_exp_loop_st (t:limb_t) (nLen:BN.meta_len t) =
 inline_for_extraction noextract
 val bn_mod_exp_loop: #t:limb_t -> k:BM.mont t -> bn_mod_exp_loop_st t k.BM.bn.BN.len
 let bn_mod_exp_loop #t k n nInv bBits bLen b aM accM =
-  [@inline_let] let len = k.BM.bn.BN.len in
   [@inline_let]
   let spec h0 = S.bn_mod_exp_f (as_seq h0 n) nInv (v bBits) (v bLen) (as_seq h0 b) in
   let h0 = ST.get () in

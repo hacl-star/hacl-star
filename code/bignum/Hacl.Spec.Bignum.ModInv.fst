@@ -12,7 +12,8 @@ open Hacl.Spec.Bignum
 module Fermat = FStar.Math.Fermat
 module Euclid = FStar.Math.Euclid
 module BE = Hacl.Spec.Bignum.Exponentiation
-
+module BM = Hacl.Spec.Bignum.Montgomery
+module BN = Hacl.Spec.Bignum
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -44,6 +45,30 @@ let mod_inv_prime_lemma n a =
     (==) { Fermat.fermat_alt n a }
     1;
     }
+
+//pow2 nBits < bn_v n /\ Euclid.is_prime (bn_v n) are still needed to be checked
+val bn_check_bn_mod_inv_prime:
+    #t:limb_t
+  -> #nLen:size_pos{2 * bits t * nLen <= max_size_t}
+  -> n:lbignum t nLen
+  -> a:lbignum t nLen ->
+  res:limb t{
+    let b = bn_v n % 2 = 1 && 1 < bn_v n && 0 < bn_v a && bn_v a < bn_v n in
+    v res == (if b then v (ones t SEC) else v (zeros t SEC))}
+
+let bn_check_bn_mod_inv_prime #t #nLen n a =
+  let m0 = BM.bn_check_modulus n in
+  let m1 = BN.bn_is_zero_mask a in
+  BN.bn_is_zero_mask_lemma a;
+  let m1' = lognot m1 in
+  lognot_lemma m1;
+  let m2 = BN.bn_lt_mask a n in
+  BN.bn_lt_mask_lemma a n;
+  logand_ones (m0 &. m1');
+  logand_zeros (m0 &. m1');
+  logand_ones m0;
+  logand_zeros m0;
+  m0 &. m1' &. m2
 
 
 val bn_mod_inv_prime:

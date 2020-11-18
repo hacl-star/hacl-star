@@ -113,7 +113,7 @@ let bn_to_mont #t k mont_reduction n nInv r2 a aM =
   push_frame ();
   let c = create (len +! len) (uint #t 0) in
   BN.mul a r2 c;
-  mont_reduction n nInv c aM; // aM = c % n
+  mont_reduction n nInv c aM;
   pop_frame ()
 
 
@@ -132,8 +132,8 @@ let bn_mont_mul #t k mont_reduction n nInv_u64 aM bM resM =
   let c = create (len +! len) (uint #t 0) in
   // In case you need to debug the type class projection, this is the explicit
   // syntax without referring to the implicitly-defined projector.
-  k.BN.mul aM bM c; // c = aM * bM
-  mont_reduction n nInv_u64 c resM; // resM = c % n
+  k.BN.mul aM bM c;
+  mont_reduction n nInv_u64 c resM;
   pop_frame ()
 
 
@@ -141,8 +141,8 @@ let bn_mont_sqr #t k mont_reduction n nInv_u64 aM resM =
   [@inline_let] let len = k.BN.len in
   push_frame ();
   let c = create (len +! len) (uint #t 0) in
-  k.BN.sqr aM c; // c = aM * aM
-  mont_reduction n nInv_u64 c resM; // resM = c % n
+  k.BN.sqr aM c;
+  mont_reduction n nInv_u64 c resM;
   pop_frame ()
 
 /// All of the functions above are inline_for_extraction noextract meaning that

@@ -24,7 +24,7 @@ bool mod_exp_bytes_be_precompr2(
   uint64_t *a = Hacl_Bignum4096_new_bn_from_bytes_be(512, aBytes);
   uint64_t *n = Hacl_Bignum4096_new_bn_from_bytes_be(512, nBytes);
   uint64_t *b = Hacl_Bignum4096_new_bn_from_bytes_be(bBytesLen, bBytes);
-  uint64_t *r2 = Hacl_Bignum4096_new_precompr2(64, n);
+  uint64_t *r2 = Hacl_Bignum4096_new_precompr2(n);
 
   Hacl_Bignum4096_mod_exp_precompr2(n, a, bBits, b, r2, res);
   Hacl_Bignum4096_bn_to_bytes_be(res, resBytes);

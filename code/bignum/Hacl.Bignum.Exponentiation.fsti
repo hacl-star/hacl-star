@@ -52,7 +52,6 @@ let bn_mod_exp_precompr2_st (t:limb_t) (len:BN.meta_len t) =
     S.bn_mod_exp_precompr2 (v len) (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b) (as_seq h0 r2))
 
 
-// This version is fully run-time.
 inline_for_extraction noextract
 val bn_mod_exp_precompr2: #t:limb_t -> k:BM.mont t -> bn_mod_exp_precompr2_st t k.BM.bn.BN.len
 
@@ -76,7 +75,6 @@ let bn_mod_exp_mont_ladder_precompr2_st (t:limb_t) (len:BN.meta_len t) =
     S.bn_mod_exp_mont_ladder_precompr2 (v len) (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b) (as_seq h0 r2))
 
 
-// This version is fully run-time.
 inline_for_extraction noextract
 val bn_mod_exp_mont_ladder_precompr2: #t:limb_t -> k:BM.mont t -> bn_mod_exp_mont_ladder_precompr2_st t k.BM.bn.BN.len
 
@@ -97,7 +95,6 @@ let bn_mod_exp_st (t:limb_t) (len:BN.meta_len t) =
     as_seq h1 res == S.bn_mod_exp (v len) (v nBits) (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b))
 
 
-// This version is fully run-time.
 // This function is *NOT* constant-time on the exponent b.
 inline_for_extraction noextract
 val bn_mod_exp:
@@ -122,7 +119,7 @@ let bn_mod_exp_mont_ladder_st (t:limb_t) (len:BN.meta_len t) =
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_seq h1 res == S.bn_mod_exp_mont_ladder (v len) (v nBits) (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b))
 
-// This version is fully run-time.
+
 // This function is constant-time on the exponent b.
 inline_for_extraction noextract
 val bn_mod_exp_mont_ladder:

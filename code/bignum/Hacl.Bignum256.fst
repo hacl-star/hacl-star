@@ -22,21 +22,21 @@ let _ = assert_norm (256ul = 64ul `FStar.UInt32.mul` 4ul)
 /// we normalize pure terms.
 
 
-let add (a b: lbignum t_limbs n_limbs) : BN.bn_add_eq_len_st a b =
-  BN.bn_add_eq_len n_limbs a b
+let add: BN.bn_add_eq_len_st t_limbs n_limbs =
+  BN.bn_add_eq_len n_limbs
 
-let sub (a b: lbignum t_limbs n_limbs) : BN.bn_sub_eq_len_st a b =
-  BN.bn_sub_eq_len n_limbs a b
+let sub: BN.bn_sub_eq_len_st t_limbs n_limbs =
+  BN.bn_sub_eq_len n_limbs
 
 let add_mod_n: BN.bn_add_mod_n_st t_limbs n_limbs =
- BN.bn_add_mod_n n_limbs
+  BN.bn_add_mod_n n_limbs
 
-let mul (a b: lbignum t_limbs n_limbs): BN.bn_karatsuba_mul_st a b =
-  BN.bn_mul n_limbs a n_limbs b
+let mul (a:lbignum t_limbs n_limbs) : BN.bn_karatsuba_mul_st t_limbs n_limbs a =
+  BN.bn_mul n_limbs n_limbs a
 
-let sqr (a: lbignum t_limbs n_limbs): BN.bn_karatsuba_sqr_st a =
+let sqr (a:lbignum t_limbs n_limbs) : BN.bn_karatsuba_sqr_st t_limbs n_limbs a =
   //BN.bn_sqr n_limbs a
-  BN.bn_mul n_limbs a n_limbs a
+  BN.bn_mul n_limbs n_limbs a a
 
 inline_for_extraction noextract
 instance bn_inst: BN.bn t_limbs = {
@@ -48,7 +48,7 @@ instance bn_inst: BN.bn t_limbs = {
   BN.sqr
 }
 
-let mont_check : BM.bn_check_modulus_st t_limbs n_limbs =
+let mont_check: BM.bn_check_modulus_st t_limbs n_limbs =
   BM.bn_check_modulus
 
 let precomp: BM.bn_precomp_r2_mod_n_st t_limbs n_limbs =
@@ -116,7 +116,7 @@ instance exp_inst: BE.exp t_limbs = {
   BE.ct_mod_exp = mod_exp_mont_ladder';
 }
 
-let new_precompr2 = BS.new_bn_precomp_r2_mod_n
+let new_precompr2 = BS.new_bn_precomp_r2_mod_n mont_inst
 
 let mod_inv_prime = BS.bn_mod_inv_prime_safe exp_inst
 
