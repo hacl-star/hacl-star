@@ -987,53 +987,15 @@ bool Hacl_Bignum4096_mod_inv_prime(uint64_t *n, uint64_t *a, uint64_t *res)
   uint64_t is_valid_m = (m0 & ~m1) & m2;
   uint32_t
   nBits = (uint32_t)64U * (uint32_t)Hacl_Bignum_Lib_bn_get_top_index_u64((uint32_t)64U, n);
-  uint64_t b2 = (uint64_t)2U;
   uint64_t n2[64U] = { 0U };
-  uint64_t *a0 = n;
-  uint64_t *res0 = n2;
-  uint64_t c0 = (uint64_t)0U;
-  uint32_t k0 = (uint32_t)0U;
-  for (uint32_t i = (uint32_t)0U; i < k0 / (uint32_t)4U; i++)
-  {
-    uint64_t t1 = a0[(uint32_t)4U * i];
-    uint64_t t20 = (&b2)[(uint32_t)4U * i];
-    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t1, t20, res0 + (uint32_t)4U * i);
-    uint64_t t10 = a0[(uint32_t)4U * i + (uint32_t)1U];
-    uint64_t t21 = (&b2)[(uint32_t)4U * i + (uint32_t)1U];
-    c0 =
-      Lib_IntTypes_Intrinsics_sub_borrow_u64(c0,
-        t10,
-        t21,
-        res0 + (uint32_t)4U * i + (uint32_t)1U);
-    uint64_t t11 = a0[(uint32_t)4U * i + (uint32_t)2U];
-    uint64_t t22 = (&b2)[(uint32_t)4U * i + (uint32_t)2U];
-    c0 =
-      Lib_IntTypes_Intrinsics_sub_borrow_u64(c0,
-        t11,
-        t22,
-        res0 + (uint32_t)4U * i + (uint32_t)2U);
-    uint64_t t12 = a0[(uint32_t)4U * i + (uint32_t)3U];
-    uint64_t t2 = (&b2)[(uint32_t)4U * i + (uint32_t)3U];
-    c0 =
-      Lib_IntTypes_Intrinsics_sub_borrow_u64(c0,
-        t12,
-        t2,
-        res0 + (uint32_t)4U * i + (uint32_t)3U);
-  }
-  for (uint32_t i = k0; i < (uint32_t)1U; i++)
-  {
-    uint64_t t1 = a0[i];
-    uint64_t t2 = (&b2)[i];
-    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t1, t2, res0 + i);
-  }
-  uint64_t c00 = c0;
+  uint64_t c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, n[0U], (uint64_t)2U, n2);
   uint64_t c1;
   if ((uint32_t)1U < (uint32_t)64U)
   {
     uint32_t rLen = (uint32_t)63U;
     uint64_t *a1 = n + (uint32_t)1U;
     uint64_t *res1 = n2 + (uint32_t)1U;
-    uint64_t c = c00;
+    uint64_t c = c0;
     uint32_t k = rLen / (uint32_t)4U * (uint32_t)4U;
     for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
     {
@@ -1068,7 +1030,7 @@ bool Hacl_Bignum4096_mod_inv_prime(uint64_t *n, uint64_t *a, uint64_t *res)
   }
   else
   {
-    c1 = c00;
+    c1 = c0;
   }
   mod_exp_(nBits, n, a, (uint32_t)4096U, n2, res);
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)

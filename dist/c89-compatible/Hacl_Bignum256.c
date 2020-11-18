@@ -1429,60 +1429,9 @@ bool Hacl_Bignum256_mod_inv_prime(uint64_t *n, uint64_t *a, uint64_t *res)
     is_valid_m = (m0 & ~m1) & m2;
     nBits = (uint32_t)64U * (uint32_t)Hacl_Bignum_Lib_bn_get_top_index_u64((uint32_t)4U, n);
     {
-      uint64_t b2 = (uint64_t)2U;
       uint64_t n2[4U] = { 0U };
-      uint64_t *a0 = n;
-      uint64_t *res0 = n2;
-      uint64_t c1 = (uint64_t)0U;
-      uint32_t k0 = (uint32_t)0U;
-      uint64_t c0;
-      uint64_t c2;
-      {
-        uint32_t i;
-        for (i = (uint32_t)0U; i < k0 / (uint32_t)4U; i++)
-        {
-          uint64_t t1 = a0[(uint32_t)4U * i];
-          uint64_t t20 = (&b2)[(uint32_t)4U * i];
-          c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t1, t20, res0 + (uint32_t)4U * i);
-          {
-            uint64_t t10 = a0[(uint32_t)4U * i + (uint32_t)1U];
-            uint64_t t21 = (&b2)[(uint32_t)4U * i + (uint32_t)1U];
-            c1 =
-              Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                t10,
-                t21,
-                res0 + (uint32_t)4U * i + (uint32_t)1U);
-            {
-              uint64_t t11 = a0[(uint32_t)4U * i + (uint32_t)2U];
-              uint64_t t22 = (&b2)[(uint32_t)4U * i + (uint32_t)2U];
-              c1 =
-                Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                  t11,
-                  t22,
-                  res0 + (uint32_t)4U * i + (uint32_t)2U);
-              {
-                uint64_t t12 = a0[(uint32_t)4U * i + (uint32_t)3U];
-                uint64_t t2 = (&b2)[(uint32_t)4U * i + (uint32_t)3U];
-                c1 =
-                  Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                    t12,
-                    t2,
-                    res0 + (uint32_t)4U * i + (uint32_t)3U);
-              }
-            }
-          }
-        }
-      }
-      {
-        uint32_t i;
-        for (i = k0; i < (uint32_t)1U; i++)
-        {
-          uint64_t t1 = a0[i];
-          uint64_t t2 = (&b2)[i];
-          c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t1, t2, res0 + i);
-        }
-      }
-      c0 = c1;
+      uint64_t c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, n[0U], (uint64_t)2U, n2);
+      uint64_t c1;
       if ((uint32_t)1U < (uint32_t)4U)
       {
         uint32_t rLen = (uint32_t)3U;
@@ -1532,12 +1481,12 @@ bool Hacl_Bignum256_mod_inv_prime(uint64_t *n, uint64_t *a, uint64_t *res)
         }
         {
           uint64_t c10 = c;
-          c2 = c10;
+          c1 = c10;
         }
       }
       else
       {
-        c2 = c0;
+        c1 = c0;
       }
       mod_exp_(nBits, n, a, (uint32_t)256U, n2, res);
       {

@@ -604,165 +604,106 @@ static inline uint64_t ffdhe_check_pk(uint64_t *pk_n, uint64_t *p_n)
     uint64_t p_n1[nLen];
     memset(p_n1, 0U, nLen * sizeof (uint64_t));
     {
-      uint64_t b1 = (uint64_t)0U;
-      uint64_t *a0;
-      uint64_t *res0;
-      b1 = (uint64_t)1U;
-      a0 = p_n;
-      res0 = p_n1;
+      uint64_t
+      c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, p_n[0U], (uint64_t)1U, p_n1);
+      uint64_t uu____0;
+      if ((uint32_t)1U < nLen)
       {
-        uint64_t c1 = (uint64_t)0U;
-        uint32_t k0 = (uint32_t)0U;
-        uint64_t c0;
-        uint64_t uu____0;
+        uint32_t rLen = nLen - (uint32_t)1U;
+        uint64_t *a1 = p_n + (uint32_t)1U;
+        uint64_t *res1 = p_n1 + (uint32_t)1U;
+        uint64_t c = c0;
+        uint32_t k = rLen / (uint32_t)4U * (uint32_t)4U;
         {
           uint32_t i;
-          for (i = (uint32_t)0U; i < k0 / (uint32_t)4U; i++)
+          for (i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
           {
-            uint64_t t1 = a0[(uint32_t)4U * i];
-            uint64_t t20 = (&b1)[(uint32_t)4U * i];
-            c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t1, t20, res0 + (uint32_t)4U * i);
+            uint64_t t1 = a1[(uint32_t)4U * i];
+            c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, (uint64_t)0U, res1 + (uint32_t)4U * i);
             {
-              uint64_t t10 = a0[(uint32_t)4U * i + (uint32_t)1U];
-              uint64_t t21 = (&b1)[(uint32_t)4U * i + (uint32_t)1U];
-              c1 =
-                Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                  t10,
-                  t21,
-                  res0 + (uint32_t)4U * i + (uint32_t)1U);
-              {
-                uint64_t t11 = a0[(uint32_t)4U * i + (uint32_t)2U];
-                uint64_t t22 = (&b1)[(uint32_t)4U * i + (uint32_t)2U];
-                c1 =
-                  Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                    t11,
-                    t22,
-                    res0 + (uint32_t)4U * i + (uint32_t)2U);
-                {
-                  uint64_t t12 = a0[(uint32_t)4U * i + (uint32_t)3U];
-                  uint64_t t2 = (&b1)[(uint32_t)4U * i + (uint32_t)3U];
-                  c1 =
-                    Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                      t12,
-                      t2,
-                      res0 + (uint32_t)4U * i + (uint32_t)3U);
-                }
-              }
-            }
-          }
-        }
-        {
-          uint32_t i;
-          for (i = k0; i < (uint32_t)1U; i++)
-          {
-            uint64_t t1 = a0[i];
-            uint64_t t2 = (&b1)[i];
-            c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t1, t2, res0 + i);
-          }
-        }
-        c0 = c1;
-        if ((uint32_t)1U < nLen)
-        {
-          uint32_t rLen = nLen - (uint32_t)1U;
-          uint64_t *a1 = p_n + (uint32_t)1U;
-          uint64_t *res1 = p_n1 + (uint32_t)1U;
-          uint64_t c = c0;
-          uint32_t k = rLen / (uint32_t)4U * (uint32_t)4U;
-          {
-            uint32_t i;
-            for (i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-            {
-              uint64_t t1 = a1[(uint32_t)4U * i];
+              uint64_t t10 = a1[(uint32_t)4U * i + (uint32_t)1U];
               c =
                 Lib_IntTypes_Intrinsics_sub_borrow_u64(c,
-                  t1,
+                  t10,
                   (uint64_t)0U,
-                  res1 + (uint32_t)4U * i);
+                  res1 + (uint32_t)4U * i + (uint32_t)1U);
               {
-                uint64_t t10 = a1[(uint32_t)4U * i + (uint32_t)1U];
+                uint64_t t11 = a1[(uint32_t)4U * i + (uint32_t)2U];
                 c =
                   Lib_IntTypes_Intrinsics_sub_borrow_u64(c,
-                    t10,
+                    t11,
                     (uint64_t)0U,
-                    res1 + (uint32_t)4U * i + (uint32_t)1U);
+                    res1 + (uint32_t)4U * i + (uint32_t)2U);
                 {
-                  uint64_t t11 = a1[(uint32_t)4U * i + (uint32_t)2U];
+                  uint64_t t12 = a1[(uint32_t)4U * i + (uint32_t)3U];
                   c =
                     Lib_IntTypes_Intrinsics_sub_borrow_u64(c,
-                      t11,
+                      t12,
                       (uint64_t)0U,
-                      res1 + (uint32_t)4U * i + (uint32_t)2U);
-                  {
-                    uint64_t t12 = a1[(uint32_t)4U * i + (uint32_t)3U];
-                    c =
-                      Lib_IntTypes_Intrinsics_sub_borrow_u64(c,
-                        t12,
-                        (uint64_t)0U,
-                        res1 + (uint32_t)4U * i + (uint32_t)3U);
-                  }
+                      res1 + (uint32_t)4U * i + (uint32_t)3U);
                 }
               }
             }
           }
+        }
+        {
+          uint32_t i;
+          for (i = k; i < rLen; i++)
           {
-            uint32_t i;
-            for (i = k; i < rLen; i++)
+            uint64_t t1 = a1[i];
+            c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, (uint64_t)0U, res1 + i);
+          }
+        }
+        {
+          uint64_t c1 = c;
+          uu____0 = c1;
+        }
+      }
+      else
+      {
+        uu____0 = c0;
+      }
+      KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
+      {
+        uint64_t b2[nLen];
+        memset(b2, 0U, nLen * sizeof (uint64_t));
+        {
+          uint32_t i = (uint32_t)0U;
+          uint32_t j = (uint32_t)0U;
+          b2[i] = b2[i] | (uint64_t)1U << j;
+          {
+            uint64_t acc0 = (uint64_t)0U;
+            uint64_t res;
+            uint64_t m0;
             {
-              uint64_t t1 = a1[i];
-              c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, (uint64_t)0U, res1 + i);
+              uint32_t i0;
+              for (i0 = (uint32_t)0U; i0 < nLen; i0++)
+              {
+                uint64_t beq = FStar_UInt64_eq_mask(b2[i0], pk_n[i0]);
+                uint64_t blt = ~FStar_UInt64_gte_mask(b2[i0], pk_n[i0]);
+                acc0 =
+                  (beq & acc0)
+                  | (~beq & ((blt & (uint64_t)0xFFFFFFFFFFFFFFFFU) | (~blt & (uint64_t)0U)));
+              }
             }
-          }
-          {
-            uint64_t c10 = c;
-            uu____0 = c10;
-          }
-        }
-        else
-        {
-          uu____0 = c0;
-        }
-        KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
-        {
-          uint64_t b2[nLen];
-          memset(b2, 0U, nLen * sizeof (uint64_t));
-          {
-            uint32_t i = (uint32_t)0U;
-            uint32_t j = (uint32_t)0U;
-            b2[i] = b2[i] | (uint64_t)1U << j;
+            res = acc0;
+            m0 = res;
             {
-              uint64_t acc0 = (uint64_t)0U;
-              uint64_t res;
-              uint64_t m0;
+              uint64_t acc = (uint64_t)0U;
+              uint64_t m1;
               {
                 uint32_t i0;
                 for (i0 = (uint32_t)0U; i0 < nLen; i0++)
                 {
-                  uint64_t beq = FStar_UInt64_eq_mask(b2[i0], pk_n[i0]);
-                  uint64_t blt = ~FStar_UInt64_gte_mask(b2[i0], pk_n[i0]);
-                  acc0 =
-                    (beq & acc0)
+                  uint64_t beq = FStar_UInt64_eq_mask(pk_n[i0], p_n1[i0]);
+                  uint64_t blt = ~FStar_UInt64_gte_mask(pk_n[i0], p_n1[i0]);
+                  acc =
+                    (beq & acc)
                     | (~beq & ((blt & (uint64_t)0xFFFFFFFFFFFFFFFFU) | (~blt & (uint64_t)0U)));
                 }
               }
-              res = acc0;
-              m0 = res;
-              {
-                uint64_t acc = (uint64_t)0U;
-                uint64_t m1;
-                {
-                  uint32_t i0;
-                  for (i0 = (uint32_t)0U; i0 < nLen; i0++)
-                  {
-                    uint64_t beq = FStar_UInt64_eq_mask(pk_n[i0], p_n1[i0]);
-                    uint64_t blt = ~FStar_UInt64_gte_mask(pk_n[i0], p_n1[i0]);
-                    acc =
-                      (beq & acc)
-                      | (~beq & ((blt & (uint64_t)0xFFFFFFFFFFFFFFFFU) | (~blt & (uint64_t)0U)));
-                  }
-                }
-                m1 = acc;
-                return m0 & m1;
-              }
+              m1 = acc;
+              return m0 & m1;
             }
           }
         }

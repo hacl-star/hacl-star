@@ -120,53 +120,15 @@ static inline uint64_t ffdhe_check_pk(Spec_FFDHE_ffdhe_alg a, uint64_t *pk_n, ui
   KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
   uint64_t *p_n1 = alloca(nLen * sizeof (uint64_t));
   memset(p_n1, 0U, nLen * sizeof (uint64_t));
-  uint64_t b1 = (uint64_t)0U;
-  b1 = (uint64_t)1U;
-  uint64_t *a0 = p_n;
-  uint64_t *res0 = p_n1;
-  uint64_t c0 = (uint64_t)0U;
-  uint32_t k0 = (uint32_t)0U;
-  for (uint32_t i = (uint32_t)0U; i < k0 / (uint32_t)4U; i++)
-  {
-    uint64_t t1 = a0[(uint32_t)4U * i];
-    uint64_t t20 = (&b1)[(uint32_t)4U * i];
-    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t1, t20, res0 + (uint32_t)4U * i);
-    uint64_t t10 = a0[(uint32_t)4U * i + (uint32_t)1U];
-    uint64_t t21 = (&b1)[(uint32_t)4U * i + (uint32_t)1U];
-    c0 =
-      Lib_IntTypes_Intrinsics_sub_borrow_u64(c0,
-        t10,
-        t21,
-        res0 + (uint32_t)4U * i + (uint32_t)1U);
-    uint64_t t11 = a0[(uint32_t)4U * i + (uint32_t)2U];
-    uint64_t t22 = (&b1)[(uint32_t)4U * i + (uint32_t)2U];
-    c0 =
-      Lib_IntTypes_Intrinsics_sub_borrow_u64(c0,
-        t11,
-        t22,
-        res0 + (uint32_t)4U * i + (uint32_t)2U);
-    uint64_t t12 = a0[(uint32_t)4U * i + (uint32_t)3U];
-    uint64_t t2 = (&b1)[(uint32_t)4U * i + (uint32_t)3U];
-    c0 =
-      Lib_IntTypes_Intrinsics_sub_borrow_u64(c0,
-        t12,
-        t2,
-        res0 + (uint32_t)4U * i + (uint32_t)3U);
-  }
-  for (uint32_t i = k0; i < (uint32_t)1U; i++)
-  {
-    uint64_t t1 = a0[i];
-    uint64_t t2 = (&b1)[i];
-    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t1, t2, res0 + i);
-  }
-  uint64_t c00 = c0;
+  uint64_t
+  c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, p_n[0U], (uint64_t)1U, p_n1);
   uint64_t uu____0;
   if ((uint32_t)1U < nLen)
   {
     uint32_t rLen = nLen - (uint32_t)1U;
     uint64_t *a1 = p_n + (uint32_t)1U;
     uint64_t *res1 = p_n1 + (uint32_t)1U;
-    uint64_t c = c00;
+    uint64_t c = c0;
     uint32_t k = rLen / (uint32_t)4U * (uint32_t)4U;
     for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
     {
@@ -201,7 +163,7 @@ static inline uint64_t ffdhe_check_pk(Spec_FFDHE_ffdhe_alg a, uint64_t *pk_n, ui
   }
   else
   {
-    uu____0 = c00;
+    uu____0 = c0;
   }
   KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
   uint64_t *b2 = alloca(nLen * sizeof (uint64_t));
