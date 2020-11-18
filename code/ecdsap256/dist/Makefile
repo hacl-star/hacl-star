@@ -4,6 +4,9 @@
 
 CC = gcc-9.1
 
+CFLAGS += -I . -march=native -mtune=native -O3
+export CFLAGS
+
 test.exe: Hacl_P256.o
 	$(CC) $(CFLAGS) \
 	test.c  $^ \
