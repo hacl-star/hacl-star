@@ -4,9 +4,6 @@
 
 CC = gcc-9.1
 
-dist/%.o: dist/Makefile.basic
-	$(MAKE) -C dist -f Makefile.basic $(notdir $@)
-
 test.exe: Hacl_P256.o
 	$(CC) $(CFLAGS) \
 	test.c  $^ \
