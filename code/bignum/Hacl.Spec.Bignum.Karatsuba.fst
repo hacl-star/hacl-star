@@ -237,15 +237,14 @@ let bn_middle_karatsuba_eval #t #aLen a0 a1 b0 b1 c2 t01 t23 =
 val bn_lshift_add:
     #t:limb_t
   -> #aLen:size_nat
-  -> #bLen:size_nat
   -> a:lbignum t aLen
-  -> b:lbignum t bLen
-  -> i:nat{i + bLen <= aLen} ->
+  -> b1:limb t
+  -> i:nat{i + 1 <= aLen} ->
   tuple2 (carry t) (lbignum t aLen)
 
-let bn_lshift_add #t #aLen #bLen a b i =
+let bn_lshift_add #t #aLen a b1 i =
   let r = sub a i (aLen - i) in
-  let c, r' = bn_add r b in
+  let c, r' = bn_add1 r b1 in
   let a' = update_sub a i (aLen - i) r' in
   c, a'
 
@@ -253,17 +252,16 @@ let bn_lshift_add #t #aLen #bLen a b i =
 val bn_lshift_add_lemma:
     #t:limb_t
   -> #aLen:size_nat
-  -> #bLen:size_nat
   -> a:lbignum t aLen
-  -> b:lbignum t bLen
-  -> i:nat{i + bLen <= aLen} ->
-  Lemma (let c, res = bn_lshift_add a b i in
-    bn_v res + v c * pow2 (bits t * aLen) == bn_v a + bn_v b * pow2 (bits t * i))
+  -> b1:limb t
+  -> i:nat{i + 1 <= aLen} ->
+  Lemma (let c, res = bn_lshift_add a b1 i in
+    bn_v res + v c * pow2 (bits t * aLen) == bn_v a + v b1 * pow2 (bits t * i))
 
-let bn_lshift_add_lemma #t #aLen #bLen a b i =
+let bn_lshift_add_lemma #t #aLen a b1 i =
   let pbits = bits t in
   let r = sub a i (aLen - i) in
-  let c, r' = bn_add r b in
+  let c, r' = bn_add1 r b1 in
   let a' = update_sub a i (aLen - i) r' in
   let p = pow2 (pbits * aLen) in
 
@@ -271,15 +269,15 @@ let bn_lshift_add_lemma #t #aLen #bLen a b i =
     bn_v a' + v c * p;
     (==) { bn_update_sub_eval a r' i }
     bn_v a - bn_v r * pow2 (pbits * i) + bn_v r' * pow2 (pbits * i) + v c * p;
-    (==) { bn_add_lemma r b }
-    bn_v a - bn_v r * pow2 (pbits * i) + (bn_v r + bn_v b - v c * pow2 (pbits * (aLen - i))) * pow2 (pbits * i) + v c * p;
-    (==) { Math.Lemmas.distributivity_add_left (bn_v r) (bn_v b - v c * pow2 (pbits * (aLen - i))) (pow2 (pbits * i)) }
-    bn_v a + (bn_v b - v c * pow2 (pbits * (aLen - i))) * pow2 (pbits * i) + v c * p;
-    (==) { Math.Lemmas.distributivity_sub_left  (bn_v b) (v c * pow2 (pbits * (aLen - i))) (pow2 (pbits * i)) }
-    bn_v a + bn_v b * pow2 (pbits * i) - (v c * pow2 (pbits * (aLen - i))) * pow2 (pbits * i) + v c * p;
+    (==) { bn_add1_lemma r b1 }
+    bn_v a - bn_v r * pow2 (pbits * i) + (bn_v r + v b1 - v c * pow2 (pbits * (aLen - i))) * pow2 (pbits * i) + v c * p;
+    (==) { Math.Lemmas.distributivity_add_left (bn_v r) (v b1 - v c * pow2 (pbits * (aLen - i))) (pow2 (pbits * i)) }
+    bn_v a + (v b1 - v c * pow2 (pbits * (aLen - i))) * pow2 (pbits * i) + v c * p;
+    (==) { Math.Lemmas.distributivity_sub_left (v b1) (v c * pow2 (pbits * (aLen - i))) (pow2 (pbits * i)) }
+    bn_v a + v b1 * pow2 (pbits * i) - (v c * pow2 (pbits * (aLen - i))) * pow2 (pbits * i) + v c * p;
     (==) { Math.Lemmas.paren_mul_right (v c) (pow2 (pbits * (aLen - i))) (pow2 (pbits * i));
            Math.Lemmas.pow2_plus (pbits * (aLen - i)) (pbits * i) }
-    bn_v a + bn_v b * pow2 (pbits * i);
+    bn_v a + v b1 * pow2 (pbits * i);
     }
 
 
@@ -351,7 +349,7 @@ let bn_karatsuba_res #t #aLen r01 r23 c5 t45 =
   // let res = update_sub res aLen2 aLen r12 in
 
   let c7 = c5 +. c6 in
-  let c8, res = bn_lshift_add res (create 1 c7) (aLen + aLen2) in
+  let c8, res = bn_lshift_add res c7 (aLen + aLen2) in
   // let r3 = sub res (aLen + aLen2) aLen2 in
   // let _, r3 = bn_add r3 (create 1 c7) in
   // let res = update_sub res (aLen + aLen2) aLen2 r3 in
@@ -402,13 +400,13 @@ let bn_karatsuba_res_lemma #t #aLen r01 r23 c5 t45 =
   let c6, res1 = bn_lshift_add_early_stop res0 t45 aLen2 in
 
   let c7 = c5 +. c6 in
-  let c8, res2 = bn_lshift_add res1 (create 1 c7) aLen3 in
+  let c8, res2 = bn_lshift_add res1 c7 aLen3 in
 
   calc (==) {
     bn_v res2 + v c8 * pow2 (pbits * aLen4);
-    (==) { bn_lshift_add_lemma res1 (create 1 c7) aLen3 }
-    bn_v res1 + bn_v (create 1 c7) * pow2 (pbits * aLen3);
-    (==) { bn_eval1 (create 1 c7); Math.Lemmas.small_mod (v c5 + v c6) (pow2 pbits) }
+    (==) { bn_lshift_add_lemma res1 c7 aLen3 }
+    bn_v res1 + v c7 * pow2 (pbits * aLen3);
+    (==) { Math.Lemmas.small_mod (v c5 + v c6) (pow2 pbits) }
     bn_v res1 + (v c5 + v c6) * pow2 (pbits * aLen3);
     (==) { bn_lshift_add_early_stop_lemma res0 t45 aLen2 }
     bn_v res0 + bn_v t45 * pow2 (pbits * aLen2) - v c6 * pow2 (pbits * aLen3) + (v c5 + v c6) * pow2 (pbits * aLen3);

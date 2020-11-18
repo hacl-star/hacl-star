@@ -18,6 +18,36 @@ module Loops = Lib.LoopCombinators
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
+val bn_add1:
+    #t:limb_t
+  -> aLen:size_t{0 < v aLen}
+  -> a:lbignum t aLen
+  -> b1:limb t
+  -> res:lbignum t aLen ->
+  Stack (carry t)
+  (requires fun h ->
+    live h a /\ live h res /\ eq_or_disjoint a res)
+  (ensures  fun h0 c_out h1 -> modifies (loc res) h0 h1 /\
+    (let c, r = S.bn_add1 (as_seq h0 a) b1 in
+    c_out == c /\ as_seq h1 res == r))
+
+
+inline_for_extraction noextract
+val bn_sub1:
+    #t:limb_t
+  -> aLen:size_t{0 < v aLen}
+  -> a:lbignum t aLen
+  -> b1:limb t
+  -> res:lbignum t aLen ->
+  Stack (carry t)
+  (requires fun h ->
+    live h a /\ live h res /\ eq_or_disjoint a res)
+  (ensures  fun h0 c_out h1 -> modifies (loc res) h0 h1 /\
+    (let c, r = S.bn_sub1 (as_seq h0 a) b1 in
+    c_out == c /\ as_seq h1 res == r))
+
+
+inline_for_extraction noextract
 let bn_add_eq_len_st (t:limb_t) (len:size_t) =
      a:lbignum t len
   -> b:lbignum t len

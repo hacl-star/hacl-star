@@ -20,7 +20,7 @@ module SL = Hacl.Spec.Lib
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
-val bn_sub1:
+val bn_sub_carry:
     #t:limb_t
   -> aLen:size_t
   -> a:lbignum t aLen
@@ -29,10 +29,10 @@ val bn_sub1:
   Stack (carry t)
   (requires fun h -> live h a /\ live h res /\ eq_or_disjoint a res)
   (ensures  fun h0 c_out h1 -> modifies (loc res) h0 h1 /\
-   (let c, r = S.bn_sub1 (as_seq h0 a) c_in in
+   (let c, r = S.bn_sub_carry (as_seq h0 a) c_in in
     c_out == c /\ as_seq h1 res == r))
 
-let bn_sub1 #t aLen a c_in res =
+let bn_sub_carry #t aLen a c_in res =
   push_frame ();
   let c = create 1ul c_in in
 
@@ -42,7 +42,7 @@ let bn_sub1 #t aLen a c_in res =
   let footprint (i:size_nat{i <= v aLen}) : GTot (l:B.loc{B.loc_disjoint l (loc res) /\
     B.address_liveness_insensitive_locs `B.loc_includes` l}) = loc c in
   [@inline_let]
-  let spec h = S.bn_sub1_f (as_seq h a) in
+  let spec h = S.bn_sub_carry_f (as_seq h a) in
 
   let h0 = ST.get () in
   fill_elems4 h0 aLen res refl footprint spec
@@ -127,16 +127,45 @@ let bn_sub #t aLen a bLen b res =
     let rLen = aLen -! bLen in
     let a1 = sub a bLen rLen in
     let res1 = sub res bLen rLen in
-    let c1 = bn_sub1 rLen a1 c0 res1 in
+    let c1 = bn_sub_carry rLen a1 c0 res1 in
     let h2 = ST.get () in
     LSeq.lemma_concat2 (v bLen) (as_seq h1 res0) (v rLen) (as_seq h2 res1) (as_seq h2 res);
     c1 end
   else c0
 
 
+inline_for_extraction noextract
+val bn_sub1:
+    #t:limb_t
+  -> aLen:size_t{0 < v aLen}
+  -> a:lbignum t aLen
+  -> b1:limb t
+  -> res:lbignum t aLen ->
+  Stack (carry t)
+  (requires fun h ->
+    live h a /\ live h res /\ eq_or_disjoint a res)
+  (ensures  fun h0 c_out h1 -> modifies (loc res) h0 h1 /\
+    (let c, r = S.bn_sub1 (as_seq h0 a) b1 in
+    c_out == c /\ as_seq h1 res == r))
+
+let bn_sub1 #t aLen a b1 res =
+  let c0 = subborrow_st (uint #t 0) a.(0ul) b1 (sub res 0ul 1ul) in
+  let h0 = ST.get () in
+  LSeq.eq_intro (LSeq.sub (as_seq h0 res) 0 1) (LSeq.create 1 (LSeq.index (as_seq h0 res) 0));
+
+  if 1ul <. aLen then begin
+    let rLen = aLen -! 1ul in
+    let a1 = sub a 1ul rLen in
+    let res1 = sub res 1ul rLen in
+    let c1 = bn_sub_carry rLen a1 c0 res1 in
+    let h = ST.get () in
+    LSeq.lemma_concat2 1 (LSeq.sub (as_seq h0 res) 0 1) (v rLen) (as_seq h res1) (as_seq h res);
+    c1 end
+  else c0
+
 
 inline_for_extraction noextract
-val bn_add1:
+val bn_add_carry:
     #t:limb_t
   -> aLen:size_t
   -> a:lbignum t aLen
@@ -145,10 +174,10 @@ val bn_add1:
   Stack (carry t)
   (requires fun h -> live h a /\ live h res /\ eq_or_disjoint a res)
   (ensures  fun h0 c_out h1 -> modifies (loc res) h0 h1 /\
-   (let c, r = S.bn_add1 (as_seq h0 a) c_in in
+   (let c, r = S.bn_add_carry (as_seq h0 a) c_in in
     c_out == c /\ as_seq h1 res == r))
 
-let bn_add1 #t aLen a c_in res =
+let bn_add_carry #t aLen a c_in res =
   push_frame ();
   let c = create 1ul c_in in
 
@@ -158,7 +187,7 @@ let bn_add1 #t aLen a c_in res =
   let footprint (i:size_nat{i <= v aLen}) : GTot (l:B.loc{B.loc_disjoint l (loc res) /\
     B.address_liveness_insensitive_locs `B.loc_includes` l}) = loc c in
   [@inline_let]
-  let spec h = S.bn_add1_f (as_seq h a) in
+  let spec h = S.bn_add_carry_f (as_seq h a) in
 
   let h0 = ST.get () in
   fill_elems4 h0 aLen res refl footprint spec
@@ -242,8 +271,38 @@ let bn_add #t aLen a bLen b res =
     let rLen = aLen -! bLen in
     let a1 = sub a bLen rLen in
     let res1 = sub res bLen rLen in
-    let c1 = bn_add1 rLen a1 c0 res1 in
+    let c1 = bn_add_carry rLen a1 c0 res1 in
     let h2 = ST.get () in
     LSeq.lemma_concat2 (v bLen) (as_seq h1 res0) (v rLen) (as_seq h2 res1) (as_seq h2 res);
+    c1 end
+  else c0
+
+
+inline_for_extraction noextract
+val bn_add1:
+    #t:limb_t
+  -> aLen:size_t{0 < v aLen}
+  -> a:lbignum t aLen
+  -> b1:limb t
+  -> res:lbignum t aLen ->
+  Stack (carry t)
+  (requires fun h ->
+    live h a /\ live h res /\ eq_or_disjoint a res)
+  (ensures  fun h0 c_out h1 -> modifies (loc res) h0 h1 /\
+    (let c, r = S.bn_add1 (as_seq h0 a) b1 in
+    c_out == c /\ as_seq h1 res == r))
+
+let bn_add1 #t aLen a b1 res =
+  let c0 = addcarry_st (uint #t 0) a.(0ul) b1 (sub res 0ul 1ul) in
+  let h0 = ST.get () in
+  LSeq.eq_intro (LSeq.sub (as_seq h0 res) 0 1) (LSeq.create 1 (LSeq.index (as_seq h0 res) 0));
+
+  if 1ul <. aLen then begin
+    let rLen = aLen -! 1ul in
+    let a1 = sub a 1ul rLen in
+    let res1 = sub res 1ul rLen in
+    let c1 = bn_add_carry rLen a1 c0 res1 in
+    let h = ST.get () in
+    LSeq.lemma_concat2 1 (LSeq.sub (as_seq h0 res) 0 1) (v rLen) (as_seq h res1) (as_seq h res);
     c1 end
   else c0

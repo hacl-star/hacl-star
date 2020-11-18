@@ -80,8 +80,7 @@ val bn_mod_inv_prime:
   lbignum t nLen
 
 let bn_mod_inv_prime #t #nLen nBits n a =
-  let b2 = create 1 (uint #t 2) in
-  let c, n2 = bn_sub n b2 in
+  let c, n2 = bn_sub1 n (uint #t 2) in
   BE.bn_mod_exp nLen nBits n a (bits t * nLen) n2
 
 
@@ -97,12 +96,8 @@ val bn_mod_inv_prime_lemma:
   (ensures  (bn_v (bn_mod_inv_prime nBits n a) * bn_v a % bn_v n = 1))
 
 let bn_mod_inv_prime_lemma #t #nLen nBits n a =
-  let b2 = create 1 (uint #t 2) in
-  bn_eval1 b2;
-  assert (bn_v b2 = 2);
-
-  let c, n2 = bn_sub n b2 in
-  bn_sub_lemma n b2;
+  let c, n2 = bn_sub1 n (uint #t 2) in
+  bn_sub1_lemma n (uint #t 2);
   assert (bn_v n2 - v c * pow2 (bits t * nLen) == bn_v n - 2);
   bn_eval_bound n2 nLen;
   bn_eval_bound n nLen;

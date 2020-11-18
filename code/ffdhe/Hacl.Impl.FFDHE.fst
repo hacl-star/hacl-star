@@ -346,18 +346,14 @@ let ffdhe_check_pk #t a len pk_n p_n =
   push_frame ();
   let nLen = blocks len (size (numbytes t)) in
   let p_n1 = create nLen (uint #t #SEC 0) in
-  let b1 = create 1ul (uint #t #SEC 0) in
-  b1.(0ul) <- uint #t 1;
   let h0 = ST.get () in
-  SD.bn_eval1 (as_seq h0 b1);
-  assert (bn_v h0 b1 == 1);
 
-  let _ = BN.bn_sub nLen p_n 1ul b1 p_n1 in
-  SB.bn_sub_lemma (as_seq h0 p_n) (as_seq h0 b1);
+  let _ = BN.bn_sub1 nLen p_n (uint #t 1) p_n1 in
+  SB.bn_sub1_lemma (as_seq h0 p_n) (uint #t 1);
   let h1 = ST.get () in
   S.ffdhe_p_lemma a;
   SD.bn_eval_bound (as_seq h1 p_n1) (v nLen);
-  assert (bn_v h1 p_n1 == bn_v h0 p_n - bn_v h0 b1);
+  assert (bn_v h1 p_n1 == bn_v h0 p_n - 1);
 
   let m0 = BN.bn_gt_pow2_mask nLen pk_n 0ul in
   SB.bn_gt_pow2_mask_lemma (as_seq h1 pk_n) 0;

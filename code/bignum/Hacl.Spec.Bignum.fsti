@@ -13,6 +13,40 @@ module BSeq = Lib.ByteSequence
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+val bn_add1:
+    #t:limb_t
+  -> #aLen:size_pos
+  -> a:lbignum t aLen
+  -> b1:limb t ->
+  carry t & lbignum t aLen
+
+
+val bn_add1_lemma:
+    #t:limb_t
+  -> #aLen:size_pos
+  -> a:lbignum t aLen
+  -> b1:limb t ->
+  Lemma (let (c, res) = bn_add1 a b1 in
+    v c * pow2 (bits t * aLen) + bn_v res == bn_v a + v b1)
+
+
+val bn_sub1:
+    #t:limb_t
+  -> #aLen:size_pos
+  -> a:lbignum t aLen
+  -> b1:limb t ->
+  carry t & lbignum t aLen
+
+
+val bn_sub1_lemma:
+    #t:limb_t
+  -> #aLen:size_pos
+  -> a:lbignum t aLen
+  -> b1:limb t ->
+  Lemma (let (c, res) = bn_sub1 a b1 in
+    bn_v res - v c * pow2 (bits t * aLen) == bn_v a - v b1)
+
+
 val bn_add:
     #t:limb_t
   -> #aLen:size_nat

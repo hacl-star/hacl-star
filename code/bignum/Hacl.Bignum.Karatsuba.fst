@@ -81,22 +81,21 @@ let bn_middle_karatsuba #t #aLen c0 c1 c2 t01 t23 tmp res =
 inline_for_extraction noextract
 val bn_lshift_add_in_place:
     #t:limb_t
-  -> #aLen:size_t
-  -> #bLen:size_t
+  -> #aLen:size_t{0 < v aLen}
   -> a:lbignum t aLen
-  -> b:lbignum t bLen
-  -> i:size_t{v i + v bLen <= v aLen} ->
+  -> b1:limb t
+  -> i:size_t{v i + 1 <= v aLen} ->
   Stack (carry t)
-  (requires fun h -> live h a /\ live h b /\ disjoint a b)
+  (requires fun h -> live h a)
   (ensures  fun h0 c h1 -> modifies (loc a) h0 h1 /\
-    (c, as_seq h1 a) == K.bn_lshift_add (as_seq h0 a) (as_seq h0 b) (v i))
+    (c, as_seq h1 a) == K.bn_lshift_add (as_seq h0 a) b1 (v i))
 
-let bn_lshift_add_in_place #t #aLen #bLen a b i =
+let bn_lshift_add_in_place #t #aLen a b1 i =
   let r = sub a i (aLen -! i) in
   let h0 = ST.get () in
   update_sub_f_carry h0 a i (aLen -! i)
-  (fun h -> Hacl.Spec.Bignum.Addition.bn_add (as_seq h0 r) (as_seq h0 b))
-  (fun _ -> bn_add (aLen -! i) r bLen b r)
+  (fun h -> Hacl.Spec.Bignum.Addition.bn_add1 (as_seq h0 r) b1)
+  (fun _ -> bn_add1 (aLen -! i) r b1 r)
 
 
 inline_for_extraction noextract
@@ -137,15 +136,11 @@ val bn_karatsuba_res:
     (c, as_seq h1 res) == K.bn_karatsuba_res (as_seq h0 r01) (as_seq h0 r23) c5 (as_seq h0 t45))
 
 let bn_karatsuba_res #t #aLen r01 r23 c5 t45 res =
-  push_frame ();
   let aLen2 = aLen /. 2ul in
-  [@inline_let]
-  let resLen = aLen +! aLen in
+  [@inline_let] let resLen = aLen +! aLen in
   let c6 = bn_lshift_add_early_stop_in_place res t45 aLen2 in
   let c7 = c5 +. c6 in
-  let c7 = create 1ul c7 in
   let c8 = bn_lshift_add_in_place res c7 (aLen +! aLen2) in
-  pop_frame ();
   c8
 
 

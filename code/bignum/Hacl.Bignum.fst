@@ -4,6 +4,12 @@ friend Hacl.Spec.Bignum
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+let bn_add1 #t aLen a b1 res =
+  Hacl.Bignum.Addition.bn_add1 aLen a b1 res
+
+let bn_sub1 #t aLen a b1 res =
+  Hacl.Bignum.Addition.bn_sub1 aLen a b1 res
+
 let bn_add_eq_len #t aLen a b res =
   Hacl.Bignum.Addition.bn_add_eq_len aLen a b res
 

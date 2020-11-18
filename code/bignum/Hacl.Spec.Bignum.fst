@@ -5,6 +5,18 @@ module Loops = Lib.LoopCombinators
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+let bn_add1 #t #aLen a b1 =
+  Hacl.Spec.Bignum.Addition.bn_add1 a b1
+
+let bn_add1_lemma #t #aLen a b1 =
+  Hacl.Spec.Bignum.Addition.bn_add1_lemma a b1
+
+let bn_sub1 #t #aLen a b1 =
+  Hacl.Spec.Bignum.Addition.bn_sub1 a b1
+
+let bn_sub1_lemma #t #aLen a b1 =
+  Hacl.Spec.Bignum.Addition.bn_sub1_lemma a b1
+
 let bn_add #t #aLen #bLen a b =
   Hacl.Spec.Bignum.Addition.bn_add a b
 

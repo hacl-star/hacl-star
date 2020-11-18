@@ -57,9 +57,8 @@ val bn_mod_inv_prime: #t:limb_t -> k:BE.exp t -> bn_mod_inv_prime_st t k.BE.mont
 let bn_mod_inv_prime #t k nBits n a res =
   [@inline_let] let len = k.BE.mont.BM.bn.BN.len in
   push_frame ();
-  let b2 = create 1ul (uint #t #SEC 2) in
   let n2 = create len (uint #t #SEC 0) in
-  let c = BN.bn_sub len n 1ul b2 n2 in
+  let c = BN.bn_sub1 len n (uint #t #SEC 2) n2 in
 
   k.BE.mod_exp nBits n a (size (bits t) *! len) n2 res;
   pop_frame ()
