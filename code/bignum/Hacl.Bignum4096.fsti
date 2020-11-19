@@ -128,21 +128,6 @@ val mod_exp_precompr2: BE.bn_mod_exp_precompr2_st t_limbs n_limbs
 
 [@@ Comment "Write `a ^ b mod n` in `res`.
 
-  The arguments a, n and the outparam res are meant to be 4096-bit bignums, i.e. uint64_t[64].
-  The argument b is a bignum of any size, and bBits is an upper bound on the
-  number of significant bits of b. A tighter bound results in faster execution
-  time. When in doubt, the number of bits for the bignum size is always a safe
-  default, e.g. if b is a 4096-bit bignum, bBits should be 4096.
-
-  The function is *NOT* constant-time on the argument b. See the
-  mod_exp_mont_ladder_* functions for constant-time variants.
-
-  The function returns false if any of the preconditions of mod_exp_precompr2 are
-  violated, true otherwise."]
-val mod_exp: BS.bn_mod_exp_safe_st t_limbs n_limbs
-
-[@@ Comment "Write `a ^ b mod n` in `res`.
-
   The arguments a, n, r2 and the outparam res are meant to be 4096-bit bignums, i.e. uint64_t[64].
   The argument r2 is a precomputed constant 2 ^ 8192 mod n obtained through Hacl_Bignum4096_new_precompr2.
   The argument b is a bignum of any size, and bBits is an upper bound on the
@@ -164,6 +149,21 @@ val mod_exp: BS.bn_mod_exp_safe_st t_limbs n_limbs
   Owing to the absence of run-time checks, and factoring out the precomputation
   r2, this function is notably faster than mod_exp_mont_ladder below."]
 val mod_exp_mont_ladder_precompr2: BE.bn_mod_exp_mont_ladder_precompr2_st t_limbs n_limbs
+
+[@@ Comment "Write `a ^ b mod n` in `res`.
+
+  The arguments a, n and the outparam res are meant to be 4096-bit bignums, i.e. uint64_t[64].
+  The argument b is a bignum of any size, and bBits is an upper bound on the
+  number of significant bits of b. A tighter bound results in faster execution
+  time. When in doubt, the number of bits for the bignum size is always a safe
+  default, e.g. if b is a 4096-bit bignum, bBits should be 4096.
+
+  The function is *NOT* constant-time on the argument b. See the
+  mod_exp_mont_ladder_* functions for constant-time variants.
+
+  The function returns false if any of the preconditions of mod_exp_precompr2 are
+  violated, true otherwise."]
+val mod_exp: BS.bn_mod_exp_safe_st t_limbs n_limbs
 
 [@@ Comment "Write `a ^ b mod n` in `res`.
 

@@ -141,17 +141,16 @@ inline_for_extraction noextract
 val bn_mod_slow_safe:
     #t:limb_t
   -> k:BM.mont t
-  -> bn_check_bn_mod:BR.bn_check_bn_mod_st t k.BM.bn.BN.len
-  -> bn_mod_slow:BR.bn_mod_slow_st t k.BM.bn.BN.len ->
+  -> bn_mod_precompr2:BR.bn_mod_slow_precompr2_st t k.BM.bn.BN.len ->
   bn_mod_slow_safe_st t k.BM.bn.BN.len
 
-let bn_mod_slow_safe #t k bn_check_bn_mod bn_mod_slow n a res =
+let bn_mod_slow_safe #t k bn_mod_precompr2 n a res =
   [@inline_let] let len = k.BM.bn.BN.len in
   let h0 = ST.get () in
-  let is_valid_m = bn_check_bn_mod n a in
+  let is_valid_m = BR.bn_check_bn_mod k n a in
   let nBits = size (bits t) *! BB.unsafe_size_from_limb (BL.bn_get_top_index len n) in
 
-  bn_mod_slow nBits n a res;
+  BR.bn_mod_slow k bn_mod_precompr2 nBits n a res;
   let h1 = ST.get () in
   mapT len res (logand is_valid_m) res;
   SD.bn_mask_lemma (as_seq h1 res) is_valid_m;
@@ -179,20 +178,14 @@ let bn_mod_exp_safe_st (t:limb_t) (len:BN.meta_len t) =
 
 
 inline_for_extraction noextract
-val bn_mod_exp_safe:
-    #t:limb_t
-  -> k:BM.mont t
-  -> bn_check_mod_exp:BE.bn_check_mod_exp_st t k.BM.bn.BN.len
-  -> bn_mod_exp:BE.bn_mod_exp_st t k.BM.bn.BN.len ->
-  bn_mod_exp_safe_st t k.BM.bn.BN.len
-
-let bn_mod_exp_safe #t k bn_check_mod_exp bn_mod_exp n a bBits b res =
-  [@inline_let] let len = k.BM.bn.BN.len in
+val bn_mod_exp_safe: #t:limb_t -> k:BE.exp t -> bn_mod_exp_safe_st t k.BE.mont.BM.bn.BN.len
+let bn_mod_exp_safe #t k n a bBits b res =
+  [@inline_let] let len = k.BE.mont.BM.bn.BN.len in
   let h0 = ST.get () in
-  let is_valid_m = bn_check_mod_exp n a bBits b in
+  let is_valid_m = k.BE.exp_check n a bBits b in
   let nBits = size (bits t) *! BB.unsafe_size_from_limb (BL.bn_get_top_index len n) in
 
-  bn_mod_exp nBits n a bBits b res;
+  k.BE.mod_exp nBits n a bBits b res;
   let h1 = ST.get () in
   mapT len res (logand is_valid_m) res;
   SD.bn_mask_lemma (as_seq h1 res) is_valid_m;
@@ -204,20 +197,14 @@ let bn_mod_exp_safe #t k bn_check_mod_exp bn_mod_exp n a bBits b res =
 
 
 inline_for_extraction noextract
-val bn_mod_exp_mont_ladder_safe:
-    #t:limb_t
-  -> k:BM.mont t
-  -> bn_check_mod_exp:BE.bn_check_mod_exp_st t k.BM.bn.BN.len
-  -> bn_mod_exp_mont_ladder:BE.bn_mod_exp_mont_ladder_st t k.BM.bn.BN.len ->
-  bn_mod_exp_safe_st t k.BM.bn.BN.len
-
-let bn_mod_exp_mont_ladder_safe #t k bn_check_mod_exp bn_mod_exp_mont_ladder n a bBits b res =
-  [@inline_let] let len = k.BM.bn.BN.len in
+val bn_mod_exp_mont_ladder_safe: #t:limb_t -> k:BE.exp t -> bn_mod_exp_safe_st t k.BE.mont.BM.bn.BN.len
+let bn_mod_exp_mont_ladder_safe #t k n a bBits b res =
+  [@inline_let] let len = k.BE.mont.BM.bn.BN.len in
   let h0 = ST.get () in
-  let is_valid_m = bn_check_mod_exp n a bBits b in
+  let is_valid_m = k.BE.exp_check n a bBits b in
   let nBits = size (bits t) *! BB.unsafe_size_from_limb (BL.bn_get_top_index len n) in
 
-  bn_mod_exp_mont_ladder nBits n a bBits b res;
+  k.BE.ct_mod_exp nBits n a bBits b res;
   let h1 = ST.get () in
   mapT len res (logand is_valid_m) res;
   SD.bn_mask_lemma (as_seq h1 res) is_valid_m;
