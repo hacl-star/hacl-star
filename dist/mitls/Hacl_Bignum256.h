@@ -156,24 +156,6 @@ Hacl_Bignum256_mod_exp_precompr2(
 /*
 Write `a ^ b mod n` in `res`.
 
-  The arguments a, n and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
-  The argument b is a bignum of any size, and bBits is an upper bound on the
-  number of significant bits of b. A tighter bound results in faster execution
-  time. When in doubt, the number of bits for the bignum size is always a safe
-  default, e.g. if b is a 4096-bit bignum, bBits should be 4096.
-
-  The function is *NOT* constant-time on the argument b. See the
-  mod_exp_mont_ladder_* functions for constant-time variants.
-
-  The function returns false if any of the preconditions of mod_exp_precompr2 are
-  violated, true otherwise.
-*/
-bool
-Hacl_Bignum256_mod_exp(uint64_t *n, uint64_t *a, uint32_t bBits, uint64_t *b, uint64_t *res);
-
-/*
-Write `a ^ b mod n` in `res`.
-
   The arguments a, n, r2 and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
   The argument r2 is a precomputed constant 2 ^ 512 mod n.
   The argument b is a bignum of any size, and bBits is an upper bound on the
@@ -204,6 +186,24 @@ Hacl_Bignum256_mod_exp_mont_ladder_precompr2(
   uint64_t *r2,
   uint64_t *res
 );
+
+/*
+Write `a ^ b mod n` in `res`.
+
+  The arguments a, n and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
+  The argument b is a bignum of any size, and bBits is an upper bound on the
+  number of significant bits of b. A tighter bound results in faster execution
+  time. When in doubt, the number of bits for the bignum size is always a safe
+  default, e.g. if b is a 4096-bit bignum, bBits should be 4096.
+
+  The function is *NOT* constant-time on the argument b. See the
+  mod_exp_mont_ladder_* functions for constant-time variants.
+
+  The function returns false if any of the preconditions of mod_exp_precompr2 are
+  violated, true otherwise.
+*/
+bool
+Hacl_Bignum256_mod_exp(uint64_t *n, uint64_t *a, uint32_t bBits, uint64_t *b, uint64_t *res);
 
 /*
 Write `a ^ b mod n` in `res`.

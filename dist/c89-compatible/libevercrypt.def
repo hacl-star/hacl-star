@@ -303,6 +303,7 @@ EXPORTS
   Hacl_IntTypes_Intrinsics_sub_borrow_u64
   Hacl_Bignum_Convert_bn_from_bytes_be_uint64
   Hacl_Bignum_Convert_bn_to_bytes_be_uint64
+  Hacl_Bignum_Base_mul_wide_add2_u64
   Hacl_Bignum_Lib_bn_get_top_index_u64
   Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64
   Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint64
@@ -396,8 +397,8 @@ EXPORTS
   Hacl_Bignum256_mod_precompr2
   Hacl_Bignum256_mod
   Hacl_Bignum256_mod_exp_precompr2
-  Hacl_Bignum256_mod_exp
   Hacl_Bignum256_mod_exp_mont_ladder_precompr2
+  Hacl_Bignum256_mod_exp
   Hacl_Bignum256_mod_exp_mont_ladder
   Hacl_Bignum256_new_precompr2
   Hacl_Bignum256_mod_inv_prime
@@ -410,8 +411,8 @@ EXPORTS
   Hacl_Bignum4096_mod_precompr2
   Hacl_Bignum4096_mod
   Hacl_Bignum4096_mod_exp_precompr2
-  Hacl_Bignum4096_mod_exp
   Hacl_Bignum4096_mod_exp_mont_ladder_precompr2
+  Hacl_Bignum4096_mod_exp
   Hacl_Bignum4096_mod_exp_mont_ladder
   Hacl_Bignum4096_new_precompr2
   Hacl_Bignum4096_mod_inv_prime
