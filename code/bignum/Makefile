@@ -15,11 +15,10 @@ export CFLAGS
 dist/libbignum.a: dist/Makefile.basic
 	$(MAKE) -C dist -f Makefile.basic
 
-BIGNUM4096_BUNDLE=-bundle Hacl.Bignum4096=Hacl.Bignum.*,Hacl.Bignum
-BIGNUM256_BUNDLE=-bundle Hacl.Bignum256=Hacl.Bignum.*,Hacl.Bignum
+BIGNUM_BUNDLE=-bundle Hacl.Bignum,Hacl.Bignum.*[rename=Hacl_Bignum] -static-header Hacl.Bignum,Hacl.Bignum.*
 
 dist/Makefile.basic: $(filter-out %prims.krml,$(ALL_KRML_FILES))
-	$(KRML) $^ -o libbignum.a $(BASE_FLAGS) $(BIGNUM4096_BUNDLE) $(BIGNUM256_BUNDLE) \
+	$(KRML) $^ -o libbignum.a $(BASE_FLAGS) $(BIGNUM_BUNDLE) \
 	-tmpdir dist \
 	-add-include '"lib_intrinsics.h"' \
 	-fbuiltin-uint128 \

@@ -19,10 +19,11 @@ dist/librsapss.a: dist/Makefile.basic
 	$(MAKE) -C dist -f Makefile.basic
 
 SHA2_BUNDLE=-bundle Hacl.Hash.SHA2=Hacl.Hash.*
-RSAPSS_BUNDLE=-bundle Hacl.RSAPSS=Hacl.Bignum.*,Hacl.Bignum,Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS[rename=Hacl_RSAPSS]
+BIGNUM_BUNDLE=-bundle Hacl.Bignum,Hacl.Bignum.*[rename=Hacl_Bignum] -static-header Hacl.Bignum,Hacl.Bignum.*
+RSAPSS_BUNDLE=-bundle Hacl.RSAPSS=Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS[rename=Hacl_RSAPSS]
 
 dist/Makefile.basic: $(filter-out %prims.krml,$(ALL_KRML_FILES))
-	$(KRML) $^ -o librsapss.a $(BASE_FLAGS) $(SHA2_BUNDLE) $(RSAPSS_BUNDLE) \
+	$(KRML) $^ -o librsapss.a $(BASE_FLAGS) $(SHA2_BUNDLE) $(BIGNUM_BUNDLE) $(RSAPSS_BUNDLE) \
 	-tmpdir dist \
 	-add-include '"lib_intrinsics.h"' \
 	-fbuiltin-uint128 \

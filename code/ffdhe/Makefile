@@ -15,10 +15,11 @@ export CFLAGS
 dist/libffdhe.a: dist/Makefile.basic
 	$(MAKE) -C dist -f Makefile.basic
 
-FFDHE_BUNDLE=-bundle Hacl.Impl.FFDHE.Constants -static-header Hacl.Impl.FFDHE.Constants -bundle Hacl.FFDHE=Hacl.Bignum.*,Hacl.Bignum,Hacl.Impl.FFDHE[rename=Hacl_FFDHE]
+BIGNUM_BUNDLE=-bundle Hacl.Bignum,Hacl.Bignum.*[rename=Hacl_Bignum] -static-header Hacl.Bignum,Hacl.Bignum.*
+FFDHE_BUNDLE=-bundle Hacl.Impl.FFDHE.Constants -static-header Hacl.Impl.FFDHE.Constants -bundle Hacl.FFDHE=Hacl.Impl.FFDHE[rename=Hacl_FFDHE]
 
 dist/Makefile.basic: $(filter-out %prims.krml,$(ALL_KRML_FILES))
-	$(KRML) $^ -o libffdhe.a $(BASE_FLAGS) $(FFDHE_BUNDLE) \
+	$(KRML) $^ -o libffdhe.a $(BASE_FLAGS) $(BIGNUM_BUNDLE) $(FFDHE_BUNDLE) \
 	-tmpdir dist \
 	-add-include '"lib_intrinsics.h"' \
 	-fbuiltin-uint128 \
