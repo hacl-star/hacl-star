@@ -220,7 +220,7 @@ val bn_eval_lt: #t:limb_t -> len:size_nat -> a:lbignum t len -> b:lbignum t len 
 
 let bn_eval_lt #t len a b k =
   let pbits = bits t in
-  
+
   calc (==) {
     eval_ len b k - eval_ len a k;
     (==) { bn_eval_unfold_i b k }
@@ -284,6 +284,28 @@ let bn_update_sub_eval #t #aLen #bLen a b i =
     bn_v (slice a 0 (i + bLen)) + pow2 (pbits * i) * bn_v b + pow2 (pbits * (i + bLen)) * bn_v (slice a (i + bLen) aLen);
     (==) { bn_eval_split_i a (i + bLen) }
     bn_v a + pow2 (pbits * i) * bn_v b;
+    }
+
+
+val bn_concat_lemma:
+    #t:limb_t
+  -> #aLen:size_nat
+  -> #bLen:size_nat{aLen + bLen <= max_size_t}
+  -> a:lbignum t aLen
+  -> b:lbignum t bLen ->
+  Lemma (bn_v (concat a b) == bn_v a + pow2 (bits t * aLen) * bn_v b)
+
+let bn_concat_lemma #t #aLen #bLen a b =
+  let pbits = bits t in
+  let res = concat a b in
+  calc (==) {
+    bn_v res;
+    (==) { bn_eval_split_i res aLen }
+    bn_v (slice res 0 aLen) + pow2 (pbits * aLen) * bn_v (slice res aLen (aLen + bLen));
+    (==) { eq_intro (slice res 0 aLen) a }
+    bn_v a + pow2 (pbits * aLen) * bn_v (slice res aLen (aLen + bLen));
+    (==) { eq_intro (slice res aLen (aLen + bLen)) b }
+    bn_v a + pow2 (pbits * aLen) * bn_v b;
     }
 
 

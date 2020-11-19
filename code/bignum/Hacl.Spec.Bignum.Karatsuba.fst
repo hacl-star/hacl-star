@@ -356,28 +356,6 @@ let bn_karatsuba_res #t #aLen r01 r23 c5 t45 =
   c8, res
 
 
-val bn_concat_lemma:
-    #t:limb_t
-  -> #aLen:size_nat
-  -> #bLen:size_nat{aLen + bLen <= max_size_t}
-  -> a:lbignum t aLen
-  -> b:lbignum t bLen ->
-  Lemma (bn_v (concat a b) == bn_v a + pow2 (bits t * aLen) * bn_v b)
-
-let bn_concat_lemma #t #aLen #bLen a b =
-  let pbits = bits t in
-  let res = concat a b in
-  calc (==) {
-    bn_v res;
-    (==) { bn_eval_split_i res aLen }
-    bn_v (slice res 0 aLen) + pow2 (pbits * aLen) * bn_v (slice res aLen (aLen + bLen));
-    (==) { eq_intro (slice res 0 aLen) a }
-    bn_v a + pow2 (pbits * aLen) * bn_v (slice res aLen (aLen + bLen));
-    (==) { eq_intro (slice res aLen (aLen + bLen)) b }
-    bn_v a + pow2 (pbits * aLen) * bn_v b;
-    }
-
-
 val bn_karatsuba_res_lemma:
     #t:limb_t
   -> #aLen:size_pos{2 * aLen <= max_size_t}

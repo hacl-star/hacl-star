@@ -250,9 +250,7 @@ let bn_add_concat_lemma #t #aLen #bLen a b c0 res0 =
   assert (v c1 * pow2 (pbits * (aLen - bLen)) + bn_v res1 == bn_v a1 + v c0);
 
   let res = concat #_ #bLen res0 res1 in
-  eq_intro (slice res 0 bLen) res0;
-  eq_intro (slice res bLen aLen) res1;
-  bn_eval_split_i res bLen;
+  bn_concat_lemma res0 res1;
   assert (bn_v res == bn_v #t #bLen res0 + pow2 (pbits * bLen) * bn_v res1);
   calc (==) {
     bn_v #t #bLen res0 + pow2 (pbits * bLen) * bn_v res1;
@@ -500,9 +498,7 @@ let bn_sub_concat_lemma #t #aLen #bLen a b c0 res0 =
   assert (bn_v res1 - v c1 * pow2 (pbits * (aLen - bLen)) == bn_v a1 - v c0);
 
   let res = concat #_ #bLen res0 res1 in
-  eq_intro (slice res 0 bLen) res0;
-  eq_intro (slice res bLen aLen) res1;
-  bn_eval_split_i res bLen;
+  bn_concat_lemma res0 res1;
   assert (bn_v res == bn_v #t #bLen res0 + pow2 (pbits * bLen) * bn_v res1);
   calc (==) {
     bn_v #t #bLen res0 + pow2 (pbits * bLen) * bn_v res1;
