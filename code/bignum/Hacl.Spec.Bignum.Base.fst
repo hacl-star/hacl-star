@@ -64,6 +64,46 @@ let mul_wide #t a b =
     to_u64 (res >>. 64ul), to_u64 res
 
 
+val lemma_mul_wide_add: #t:limb_t -> a:limb t -> b:limb t -> c:limb t -> d:limb t ->
+  Lemma (v a * v b + v c + v d < pow2 (2 * bits t))
+let lemma_mul_wide_add #t a b c d =
+  let n = pow2 (bits t) in
+  //assert (v a <= n - 1 /\ v b <= n - 1 /\ v c <= n - 1 /\ v d <= n - 1);
+  Math.Lemmas.lemma_mult_le_left (v a) (v b) (n - 1);
+  Math.Lemmas.lemma_mult_le_right (n - 1) (v a) (n - 1);
+  assert (v a * v b + v c + v d <= (n - 1) * (n - 1) + (n - 1) + (n - 1));
+  assert ((n - 1) * (n - 1) + (n - 1) + (n - 1) == n * n - 1)
+
+
+val mul_wide_add: #t:limb_t -> a:limb t -> b:limb t -> c:limb t -> d:limb t ->
+  Pure (tuple2 (limb t) (limb t))
+  (requires True)
+  (ensures  fun (hi, lo) -> v lo + v hi * pow2 (bits t) == v a * v b + v c + v d)
+
+let mul_wide_add #t a b c d =
+  lemma_mul_wide_add a b c d;
+  Math.Lemmas.small_mod (v a * v b + v c + v d) (pow2 (2 * bits t));
+  match t with
+  | U32 ->
+    let res = to_u64 a *! to_u64 b +! to_u64 c +! to_u64 d in
+    assert (v res == v a * v b + v c + v d);
+    let hi = to_u32 (res >>. 32ul) in
+    assert (v hi == v res / pow2 32);
+    let lo = to_u32 res in
+    assert (v lo == v res % pow2 32);
+    Math.Lemmas.euclidean_division_definition (v res) (pow2 32);
+    hi, lo
+  | U64 ->
+    let res = mul64_wide a b +! to_u128 c +! to_u128 d in
+    assert (v res == v a * v b + v c + v d);
+    let hi = to_u64 (res >>. 64ul) in
+    assert (v hi == v res / pow2 64);
+    let lo = to_u64 res in
+    assert (v lo == v res % pow2 64);
+    Math.Lemmas.euclidean_division_definition (v res) (pow2 64);
+    hi, lo
+
+
 inline_for_extraction noextract
 let mask_values (#t:limb_t) (x:limb t) =
   v x = v (zeros t SEC) \/ v x = v (ones t SEC)

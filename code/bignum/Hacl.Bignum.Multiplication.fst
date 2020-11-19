@@ -21,32 +21,6 @@ module Loops = Lib.LoopCombinators
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
-val mul_wide_add_st:
-    #t:limb_t
-  -> a:limb t
-  -> b:limb t
-  -> c_in:limb t
-  -> out:lbuffer (limb t) 1ul ->
-  Stack (limb t)
-  (requires fun h -> live h out)
-  (ensures  fun h0 c_out h1 -> modifies (loc out) h0 h1 /\
-    (c_out, LSeq.index (as_seq h1 out) 0) == S.mul_wide_add a b c_in (LSeq.index (as_seq h0 out) 0))
-
-let mul_wide_add_st #t a b c_in out =
-  let h0 = ST.get () in
-  S.lemma_mul_wide_add a b c_in (LSeq.index (as_seq h0 out) 0);
-  match t with
-  | U32 ->
-    let res = to_u64 a *! to_u64 b +! to_u64 c_in +! to_u64 out.(0ul) in
-    out.(0ul) <- to_u32 res;
-    to_u32 (res >>. 32ul)
-  | U64 ->
-    let res = mul64_wide a b +! to_u128 c_in +! to_u128 out.(0ul) in
-    out.(0ul) <- to_u64 res;
-    to_u64 (res >>. 64ul)
-
-
-inline_for_extraction noextract
 val bn_mul1_add_in_place:
     #t:limb_t
   -> aLen:size_t
@@ -104,26 +78,6 @@ let bn_mul1_lshift_add #t aLen a b_j resLen j res =
 
 
 inline_for_extraction noextract
-val bn_mul_:
-    #t:limb_t
-  -> aLen:size_t
-  -> a:lbignum t aLen
-  -> bLen:size_t{v aLen + v bLen <= max_size_t}
-  -> b:lbignum t bLen
-  -> j:size_t{v j < v bLen}
-  -> res:lbignum t (aLen +! bLen) ->
-  Stack unit
-  (requires fun h ->
-    live h a /\ live h b /\ live h res /\
-    disjoint res a /\ disjoint res b /\ eq_or_disjoint a b)
-  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_seq h1 res == S.bn_mul_ (as_seq h0 a) (as_seq h0 b) (v j) (as_seq h0 res))
-
-let bn_mul_ #t aLen a bLen b j res =
-  res.(aLen +! j) <- bn_mul1_lshift_add aLen a b.(j) (aLen +! bLen) j res
-
-
-inline_for_extraction noextract
 val bn_mul:
     #t:limb_t
   -> aLen:size_t
@@ -150,7 +104,7 @@ let bn_mul #t aLen a bLen b res =
   loop1 h0 bLen res spec
   (fun j ->
     Loops.unfold_repeati (v bLen) (spec h0) (as_seq h0 res) (v j);
-    bn_mul_ aLen a bLen b j res
+    res.(aLen +! j) <- bn_mul1_lshift_add aLen a b.(j) (aLen +! bLen) j res
   )
 
 
