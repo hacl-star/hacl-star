@@ -20,6 +20,42 @@ module Loops = Lib.LoopCombinators
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+
+inline_for_extraction noextract
+val bn_mul1:
+    #t:limb_t
+  -> aLen:size_t
+  -> a:lbignum t aLen
+  -> l:limb t
+  -> res:lbignum t aLen ->
+  Stack (limb t)
+  (requires fun h ->
+    live h a /\ live h res /\ disjoint res a)
+  (ensures  fun h0 c_out h1 -> modifies (loc res) h0 h1 /\
+    (c_out, as_seq h1 res) == S.bn_mul1 (as_seq h0 a) l)
+
+let bn_mul1 #t aLen a l res =
+  push_frame ();
+  let c = create 1ul (uint #t 0) in
+
+  [@inline_let]
+  let refl h i = LSeq.index (as_seq h c) 0 in
+  [@inline_let]
+  let footprint (i:size_nat{i <= v aLen}) : GTot (l:B.loc{B.loc_disjoint l (loc res) /\
+    B.address_liveness_insensitive_locs `B.loc_includes` l}) = loc c in
+  [@inline_let]
+  let spec h = S.bn_mul1_f (as_seq h a) l in
+
+  let h0 = ST.get () in
+  fill_elems4 h0 aLen res refl footprint spec
+  (fun i ->
+    c.(0ul) <- mul_wide_add_st a.(i) l c.(0ul) (sub res i 1ul)
+  );
+  let c = c.(0ul) in
+  pop_frame ();
+  c
+
+
 inline_for_extraction noextract
 val bn_mul1_add_in_place:
     #t:limb_t
@@ -48,7 +84,7 @@ let bn_mul1_add_in_place #t aLen a l res =
   let h0 = ST.get () in
   fill_elems4 h0 aLen res refl footprint spec
   (fun i ->
-    c.(0ul) <- mul_wide_add_st a.(i) l c.(0ul) (sub res i 1ul)
+    c.(0ul) <- mul_wide_add2_st a.(i) l c.(0ul) (sub res i 1ul)
   );
   let c = c.(0ul) in
   pop_frame ();

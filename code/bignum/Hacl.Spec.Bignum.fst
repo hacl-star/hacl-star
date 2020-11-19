@@ -75,6 +75,12 @@ let bn_add_mod_n_lemma #t #len n a b =
   bn_add_lemma a b;
   bn_reduce_once_lemma n c0 res0
 
+let bn_mul1 #t #aLen a b1 =
+  Hacl.Spec.Bignum.Multiplication.bn_mul1 a b1
+
+let bn_mul1_lemma #t #aLen a b1 =
+  Hacl.Spec.Bignum.Multiplication.bn_mul1_lemma a b1
+
 let bn_mul #t #aLen #bLen a b =
   Hacl.Spec.Bignum.Multiplication.bn_mul a b
 

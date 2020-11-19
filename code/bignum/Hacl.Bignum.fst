@@ -34,6 +34,9 @@ let bn_add_mod_n #t len n a b res =
   let c0 = bn_add_eq_len len a b res in
   bn_reduce_once len n c0 res
 
+let bn_mul1 #t aLen a l res =
+  Hacl.Bignum.Multiplication.bn_mul1 #t aLen a l res
+
 let bn_karatsuba_mul #t len a b res =
   let h0 = ST.get () in
   Hacl.Spec.Bignum.bn_karatsuba_mul_lemma (as_seq h0 a) (as_seq h0 b);

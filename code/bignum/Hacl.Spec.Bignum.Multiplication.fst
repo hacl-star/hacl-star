@@ -13,6 +13,30 @@ open Hacl.Spec.Lib
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+val bn_mul1_f:
+    #t:limb_t
+  -> #aLen:size_nat
+  -> a:lbignum t aLen
+  -> l:limb t
+  -> i:size_nat{i < aLen}
+  -> c:limb t ->
+  limb t & limb t // carry & out
+
+let bn_mul1_f #t #aLen a l i c =
+  mul_wide_add a.[i] l c
+
+
+val bn_mul1:
+    #t:limb_t
+  -> #aLen:size_nat
+  -> a:lbignum t aLen
+  -> l:limb t ->
+  limb t & lbignum t aLen
+
+let bn_mul1 #t #aLen a l =
+  generate_elems aLen aLen (bn_mul1_f a l) (uint #t 0)
+
+
 val bn_mul1_add_in_place_f:
     #t:limb_t
   -> #aLen:size_nat
@@ -24,7 +48,7 @@ val bn_mul1_add_in_place_f:
   limb t & limb t // carry & out
 
 let bn_mul1_add_in_place_f #t #aLen a l acc i c =
-  mul_wide_add a.[i] l c acc.[i]
+  mul_wide_add2 a.[i] l c acc.[i]
 
 
 val bn_mul1_add_in_place:
@@ -133,6 +157,99 @@ let bn_sqr #t #aLen a =
   res
 
 
+val bn_mul1_lemma_loop_step:
+     #t:limb_t
+  -> #aLen:size_nat
+  -> a:lbignum t aLen
+  -> l:limb t
+  -> i:pos{i <= aLen}
+  -> c1_res1:generate_elem_a (limb t) (limb t) aLen (i - 1) -> Lemma
+  (requires
+   (let (c1, res1) = c1_res1 in
+    v c1 * pow2 (bits t * (i - 1)) + bn_v #t #(i - 1) res1 == eval_ aLen a (i - 1) * v l))
+  (ensures
+   (let (c1, res1) = c1_res1 in
+    let (c, res) = generate_elem_f aLen (bn_mul1_f a l) (i - 1) (c1, res1) in
+    v c * pow2 (bits t * i) + bn_v #t #i res == eval_ aLen a i * v l))
+
+let bn_mul1_lemma_loop_step #t #aLen a l i (c1, res1) =
+  let pbits = bits t in
+  let b1 = pow2 (pbits * (i - 1)) in
+  let b2 = pow2 (pbits * i) in
+
+  let (c, res) = generate_elem_f aLen (bn_mul1_f a l) (i - 1) (c1, res1) in
+  let c, e = mul_wide_add a.[i - 1] l c1 in
+  assert (v e + v c * pow2 pbits == v a.[i - 1] * v l + v c1);
+
+  calc (==) {
+    v c * b2 + bn_v #t #i res;
+    (==) { bn_eval_snoc #t #(i - 1) res1 e }
+    v c * b2 + bn_v #t #(i - 1) res1 + v e * b1;
+    (==) { }
+    v c * b2 + eval_ aLen a (i - 1) * v l -(v e + v c * pow2 pbits - v a.[i - 1] * v l) * b1 + v e * b1;
+    (==) { Math.Lemmas.distributivity_add_left (v e) (v c * pow2 pbits - v a.[i - 1] * v l) b1 }
+    v c * b2 + eval_ aLen a (i - 1) * v l - (v c * pow2 pbits - v a.[i - 1] * v l) * b1;
+    (==) { Math.Lemmas.distributivity_sub_left (v c * pow2 pbits) (v a.[i - 1] * v l) b1 }
+    v c * b2 + eval_ aLen a (i - 1) * v l - v c * pow2 pbits * b1 + v a.[i - 1] * v l * b1;
+    (==) { Math.Lemmas.paren_mul_right (v c) (pow2 pbits) b1; Math.Lemmas.pow2_plus pbits (pbits * (i - 1)) }
+    eval_ aLen a (i - 1) * v l + v a.[i - 1] * v l * b1;
+    (==) { Math.Lemmas.paren_mul_right (v a.[i - 1]) (v l) b1 }
+    eval_ aLen a (i - 1) * v l + v a.[i - 1] * (b1 * v l);
+    (==) { Math.Lemmas.paren_mul_right (v a.[i - 1]) b1 (v l) }
+    eval_ aLen a (i - 1) * v l + v a.[i - 1] * b1 * v l;
+    (==) { Math.Lemmas.distributivity_add_left (eval_ aLen a (i - 1)) (v a.[i - 1] * b1) (v l) }
+    (eval_ aLen a (i - 1) + v a.[i - 1] * b1) * v l;
+    (==) { bn_eval_unfold_i a i }
+    eval_ aLen a i * v l;
+  };
+  assert (v c * b2 + bn_v #t #i res == eval_ aLen a i * v l)
+
+
+val bn_mul1_lemma_loop:
+     #t:limb_t
+  -> #aLen:size_nat
+  -> a:lbignum t aLen
+  -> l:limb t
+  -> i:nat{i <= aLen} ->
+  Lemma (let (c, res) : generate_elem_a (limb t) (limb t) aLen i = generate_elems aLen i (bn_mul1_f a l) (uint #t 0) in
+   v c * pow2 (bits t * i) + bn_v #t #i res == eval_ aLen a i * v l)
+
+let rec bn_mul1_lemma_loop #t #aLen a l i =
+  let pbits = bits t in
+  let (c, res) : generate_elem_a (limb t) (limb t) aLen i = generate_elems aLen i (bn_mul1_f a l) (uint #t 0) in
+  if i = 0 then begin
+    eq_generate_elems0 aLen i (bn_mul1_f a l) (uint #t 0);
+    assert (c == uint #t 0 /\ res == Seq.empty);
+    bn_eval0 #t #0 res;
+    assert_norm (pow2 0 = 1);
+    bn_eval0 a;
+    () end
+  else begin
+    let (c1, res1) : generate_elem_a (limb t) (limb t) aLen (i - 1) = generate_elems aLen (i - 1) (bn_mul1_f a l) (uint #t 0) in
+    generate_elems_unfold aLen i (bn_mul1_f a l) (uint #t 0) (i - 1);
+    assert (generate_elems aLen i (bn_mul1_f a l) (uint #t 0) ==
+      generate_elem_f aLen (bn_mul1_f a l) (i - 1) (generate_elems aLen (i - 1) (bn_mul1_f a l) (uint #t 0)));
+    assert ((c, res) == generate_elem_f aLen (bn_mul1_f a l) (i - 1) (c1, res1));
+    bn_mul1_lemma_loop a l (i - 1);
+    assert (v c1 * pow2 (pbits * (i - 1)) + bn_v #t #(i - 1) res1 == eval_ aLen a (i - 1) * v l);
+    bn_mul1_lemma_loop_step a l i (c1, res1);
+    assert (v c * pow2 (pbits * i) + bn_v #t #i res == eval_ aLen a i * v l);
+    () end
+
+
+val bn_mul1_lemma:
+    #t:limb_t
+  -> #aLen:size_nat
+  -> a:lbignum t aLen
+  -> l:limb t ->
+  Lemma (let (c, res) = bn_mul1 a l in
+   v c * pow2 (bits t * aLen) + bn_v res == bn_v a * v l)
+
+let bn_mul1_lemma #t #aLen a l =
+  let (c, res) = bn_mul1 a l in
+  bn_mul1_lemma_loop a l aLen
+
+
 #push-options "--z3rlimit 150"
 val bn_mul1_add_in_place_lemma_loop_step:
      #t:limb_t
@@ -156,7 +273,7 @@ let bn_mul1_add_in_place_lemma_loop_step #t #aLen a l acc i (c1, res1) =
   let b2 = pow2 (pbits * i) in
 
   let (c, res) = generate_elem_f aLen (bn_mul1_add_in_place_f a l acc) (i - 1) (c1, res1) in
-  let c, e = mul_wide_add a.[i - 1] l c1 acc.[i - 1] in
+  let c, e = mul_wide_add2 a.[i - 1] l c1 acc.[i - 1] in
   assert (v e + v c * pow2 pbits == v a.[i - 1] * v l + v c1 + v acc.[i - 1]);
 
   calc (==) {
