@@ -1287,14 +1287,6 @@ insert___uint8_t__uint32_t(MerkleTree_Low_Datastructures_hash_vec rv, uint8_t *v
 
 /* SNIPPET_END: insert___uint8_t__uint32_t */
 
-/* SNIPPET_START: copyable__uint32_t__uint8_t__tags */
-
-#define Cpy 0
-
-/* SNIPPET_END: copyable__uint32_t__uint8_t__tags */
-
-typedef uint8_t copyable__uint32_t__uint8_t__tags;
-
 /* SNIPPET_START: copyable__uint32_t__uint8_t_ */
 
 typedef void (*copyable__uint32_t__uint8_t_)(uint32_t x0, uint8_t *x1, uint8_t *x2);
