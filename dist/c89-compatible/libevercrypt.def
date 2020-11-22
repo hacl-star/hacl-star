@@ -191,6 +191,19 @@ EXPORTS
   Hacl_Salsa20_salsa20_decrypt
   Hacl_Salsa20_salsa20_key_block0
   Hacl_Salsa20_hsalsa20
+  Hacl_Bignum_Convert_bn_from_bytes_be_uint64
+  Hacl_Bignum_Convert_bn_to_bytes_be_uint64
+  Hacl_Bignum_Base_mul_wide_add_u64
+  Hacl_Bignum_Base_mul_wide_add2_u64
+  Hacl_Bignum_Lib_bn_get_top_index_u64
+  Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64
+  Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint64
+  Hacl_Bignum_bn_add_mod_n_u64
+  Hacl_Bignum_ModInvLimb_mod_inv_uint64
+  Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u64
+  Hacl_Bignum_Montgomery_bn_mont_reduction_u64
+  Hacl_Bignum_Exponentiation_bn_mod_exp_precompr2_u64
+  Hacl_Bignum_Exponentiation_bn_mod_exp_mont_ladder_precompr2_u64
   Hacl_Curve25519_64_Slow_scalarmult
   Hacl_Curve25519_64_Slow_secret_to_public
   Hacl_Curve25519_64_Slow_ecdh
@@ -301,18 +314,6 @@ EXPORTS
   Hacl_IntTypes_Intrinsics_add_carry_u64
   Hacl_IntTypes_Intrinsics_sub_borrow_u32
   Hacl_IntTypes_Intrinsics_sub_borrow_u64
-  Hacl_Bignum_Convert_bn_from_bytes_be_uint64
-  Hacl_Bignum_Convert_bn_to_bytes_be_uint64
-  Hacl_Bignum_Base_mul_wide_add2_u64
-  Hacl_Bignum_Lib_bn_get_top_index_u64
-  Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64
-  Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint64
-  Hacl_Bignum_bn_add_mod_n_u64
-  Hacl_Bignum_ModInvLimb_mod_inv_uint64
-  Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u64
-  Hacl_Bignum_Montgomery_bn_mont_reduction_u64
-  Hacl_Bignum_Exponentiation_bn_mod_exp_precompr2_u64
-  Hacl_Bignum_Exponentiation_bn_mod_exp_mont_ladder_precompr2_u64
   Hacl_Impl_RSAPSS_MGF_hash_len
   Hacl_Impl_RSAPSS_Keys_check_modulus_u64
   Hacl_Impl_RSAPSS_Keys_check_exponent_u64

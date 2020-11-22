@@ -21,6 +21,10 @@ module SD = Hacl.Spec.Bignum.Definitions
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+let u256 = lbuffer uint64 4ul
+let u512 = lbuffer uint64 8ul
+let u1024 = lbuffer uint64 16ul
+
 let felem = lbuffer uint64 4ul
 let felem2 = lbuffer uint64 8ul
 

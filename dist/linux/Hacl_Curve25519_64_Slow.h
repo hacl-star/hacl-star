@@ -29,6 +29,7 @@
 extern "C" {
 #endif
 
+#include "lib_intrinsics.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
@@ -36,6 +37,7 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
+#include "Hacl_Bignum_Hacl_Bignum.h"
 #include "Hacl_Kremlib.h"
 
 void Hacl_Curve25519_64_Slow_scalarmult(u8 *out, u8 *priv, u8 *pub);

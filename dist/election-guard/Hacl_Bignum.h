@@ -37,10 +37,12 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
+#include "Hacl_Kremlib.h"
 
+uint64_t
+Hacl_Bignum_Base_mul_wide_add2_u64(uint64_t a, uint64_t b, uint64_t c_in, uint64_t *out);
 
-void
-Hacl_Bignum_add_mod_n64(uint32_t len1, uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *res);
+uint64_t Hacl_Bignum_Lib_bn_get_top_index_u64(uint32_t len, uint64_t *b);
 
 uint64_t Hacl_Bignum_ModInvLimb_mod_inv_uint64(uint64_t n0);
 

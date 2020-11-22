@@ -30,6 +30,7 @@ extern "C" {
 #endif
 
 #include "evercrypt_targetconfig.h"
+#include "lib_intrinsics.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
@@ -38,6 +39,7 @@ extern "C" {
 
 
 #include "Hacl_Kremlib.h"
+#include "Hacl_Bignum.h"
 
 /* SNIPPET_START: Hacl_Curve25519_64_Slow_scalarmult */
 
