@@ -154,7 +154,7 @@ val bn_mul1:
   -> res:lbignum t aLen ->
   Stack (limb t)
   (requires fun h ->
-    live h a /\ live h res /\ disjoint res a)
+    live h a /\ live h res /\ eq_or_disjoint res a)
   (ensures  fun h0 c_out h1 -> modifies (loc res) h0 h1 /\
     (c_out, as_seq h1 res) == S.bn_mul1 (as_seq h0 a) l)
 
@@ -241,7 +241,7 @@ val bn_mul1_lshift_add_in_place:
   -> a:lbignum t aLen
   -> b:limb t
   -> resLen:size_t
-  -> j:size_t{v j + v aLen < v resLen}
+  -> j:size_t{v j + v aLen <= v resLen}
   -> res:lbignum t resLen ->
   Stack (limb t)
   (requires fun h -> live h a /\ live h res /\ disjoint res a)

@@ -287,6 +287,23 @@ let bn_update_sub_eval #t #aLen #bLen a b i =
     }
 
 
+val bn_upd_eval:
+    #t:limb_t
+  -> #aLen:size_nat
+  -> a:lbignum t aLen
+  -> b1:limb t
+  -> i:nat{i < aLen} ->
+  Lemma (bn_v (upd a i b1) == bn_v a - v a.[i] * pow2 (bits t * i) + v b1 * pow2 (bits t * i))
+
+let bn_upd_eval #t #aLen a b1 i =
+  let b = create 1 b1 in
+  bn_update_sub_eval a b i;
+  bn_eval1 (sub a i 1);
+  bn_eval1 b;
+  assert (bn_v (update_sub a i 1 b) == bn_v a - v a.[i] * pow2 (bits t * i) + v b1 * pow2 (bits t * i));
+  eq_intro (update_sub a i 1 b) (upd a i b1)
+
+
 val bn_concat_lemma:
     #t:limb_t
   -> #aLen:size_nat

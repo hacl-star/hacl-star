@@ -30,7 +30,7 @@ val bn_mul1:
   -> res:lbignum t aLen ->
   Stack (limb t)
   (requires fun h ->
-    live h a /\ live h res /\ disjoint res a)
+    live h a /\ live h res /\ eq_or_disjoint a res)
   (ensures  fun h0 c_out h1 -> modifies (loc res) h0 h1 /\
     (c_out, as_seq h1 res) == S.bn_mul1 (as_seq h0 a) l)
 
@@ -49,7 +49,9 @@ let bn_mul1 #t aLen a l res =
   let h0 = ST.get () in
   fill_elems4 h0 aLen res refl footprint spec
   (fun i ->
-    c.(0ul) <- mul_wide_add_st a.(i) l c.(0ul) (sub res i 1ul)
+    let h1 = ST.get () in
+    c.(0ul) <- mul_wide_add_st a.(i) l c.(0ul) (sub res i 1ul);
+    lemma_eq_disjoint aLen aLen 1ul res a c i h0 h1
   );
   let c = c.(0ul) in
   pop_frame ();
@@ -98,7 +100,7 @@ val bn_mul1_lshift_add:
   -> a:lbignum t aLen
   -> b_j:limb t
   -> resLen:size_t
-  -> j:size_t{v j + v aLen < v resLen}
+  -> j:size_t{v j + v aLen <= v resLen}
   -> res:lbignum t resLen ->
   Stack (limb t)
   (requires fun h -> live h a /\ live h res /\ disjoint res a)
