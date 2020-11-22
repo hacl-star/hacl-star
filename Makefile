@@ -777,8 +777,8 @@ dist/wasm/Makefile.basic: STREAMING_BUNDLE = -bundle Hacl.Streaming.*
 # And Merkle trees
 dist/wasm/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree,MerkleTree.*'
 dist/wasm/Makefile.basic: CTR_BUNDLE =
-dist/wasm/Makefile.basic: BIGNUM_BUNDLE =
-dist/wasm/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.RSAPSS,Hacl.Bignum.*,Hacl.Bignum,Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS,Hacl.Bignum4096,Hacl.Bignum256,Hacl.RSAPSS2048_SHA256
+dist/wasm/Makefile.basic: BIGNUM_BUNDLE = -bundle Hacl.Bignum.*,Hacl.Bignum
+dist/wasm/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.RSAPSS,Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS,Hacl.Bignum4096,Hacl.Bignum256,Hacl.RSAPSS2048_SHA256
 dist/wasm/Makefile.basic: FFDHE_BUNDLE = -bundle Hacl.FFDHE,Hacl.Impl.FFDHE.*,Hacl.Impl.FFDHE,Hacl.FFDHE4096
 dist/wasm/Makefile.basic: DEFAULT_FLAGS += -bundle 'EverCrypt,EverCrypt.*'
 
@@ -885,11 +885,10 @@ dist/linux/Makefile.basic: HAND_WRITTEN_H_FILES := $(filter-out %/evercrypt_targ
 dist/linux/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
 dist/linux/Makefile.basic: BASE_FLAGS := $(filter-out -fcurly-braces,$(BASE_FLAGS))
 dist/linux/Makefile.basic: STREAMING_BUNDLE = -bundle Hacl.Streaming.*
-dist/linux/Makefile.basic: BIGNUM_BUNDLE = -bundle Hacl.Bignum,Hacl.Bignum.*
-dist/linux/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.Bignum256,Hacl.Bignum4096,Hacl.Bignum,Hacl.Bignum.*,Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS,Hacl.RSAPSS,Hacl.RSAPSS2048_SHA256
+dist/linux/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.Bignum256,Hacl.Bignum4096,Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS,Hacl.RSAPSS,Hacl.RSAPSS2048_SHA256
 dist/linux/Makefile.basic: FFDHE_BUNDLE = -bundle Hacl.Impl.FFDHE.*,Hacl.Impl.FFDHE,Hacl.FFDHE,Hacl.FFDHE4096
 dist/linux/Makefile.basic: CURVE_BUNDLE = \
-  $(BIGNUM_BUNDLE) $(CURVE_BUNDLE_BASE) \
+  $(CURVE_BUNDLE_BASE) \
   -bundle Hacl.Curve25519_64_Local \
   -library Hacl.Impl.Curve25519.Field64.Vale \
   -no-prefix Hacl.Impl.Curve25519.Field64.Vale \
@@ -926,8 +925,9 @@ dist/ccf/Makefile.basic: HACL_OLD_FILES =
 dist/ccf/Makefile.basic: CURVE_BUNDLE_SLOW = -bundle Hacl.Curve25519_64_Slow
 dist/ccf/Makefile.basic: POLY_BUNDLE = -bundle Hacl.Streaming.Poly1305_128,Hacl.Streaming.Poly1305_256
 dist/ccf/Makefile.basic: P256_BUNDLE=-bundle Hacl.P256,Hacl.Impl.ECDSA.*,Hacl.Impl.SolinasReduction,Hacl.Impl.P256.*
-dist/ccf/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.Bignum256,Hacl.Bignum4096,Hacl.Bignum,Hacl.Bignum.*,Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS,Hacl.RSAPSS,Hacl.RSAPSS2048_SHA256
+dist/ccf/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.Bignum256,Hacl.Bignum4096,Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS,Hacl.RSAPSS,Hacl.RSAPSS2048_SHA256
 dist/ccf/Makefile.basic: FFDHE_BUNDLE = -bundle Hacl.Impl.FFDHE.*,Hacl.Impl.FFDHE,Hacl.FFDHE,Hacl.FFDHE4096
+dist/ccf/Makefile.basic: BIGNUM_BUNDLE = -bundle Hacl.Bignum.*,Hacl.Bignum
 dist/ccf/Makefile.basic: HPKE_BUNDLE = -bundle 'Hacl.HPKE.*'
 dist/ccf/Makefile.basic: BLAKE2_BUNDLE=-bundle Hacl.Impl.Blake2.Constants \
   -static-header Hacl.Impl.Blake2.Constants \
@@ -984,8 +984,9 @@ dist/mozilla/Makefile.basic: SHA3_BUNDLE = -bundle Hacl.SHA3
 dist/mozilla/Makefile.basic: HASH_BUNDLE = -bundle Hacl.Hash.*,Hacl.HKDF,Hacl.HMAC,Hacl.HMAC_DRBG
 dist/mozilla/Makefile.basic: HPKE_BUNDLE = -bundle 'Hacl.HPKE.*'
 dist/mozilla/Makefile.basic: P256_BUNDLE= -bundle Hacl.P256,Hacl.Impl.ECDSA.*,Hacl.Impl.SolinasReduction,Hacl.Impl.P256.*
-dist/mozilla/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.Bignum256,Hacl.Bignum4096,Hacl.Bignum,Hacl.Bignum.*,Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS,Hacl.RSAPSS,Hacl.RSAPSS2048_SHA256
+dist/mozilla/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.Bignum256,Hacl.Bignum4096,Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS,Hacl.RSAPSS,Hacl.RSAPSS2048_SHA256
 dist/mozilla/Makefile.basic: FFDHE_BUNDLE = -bundle Hacl.Impl.FFDHE.*,Hacl.Impl.FFDHE,Hacl.FFDHE,Hacl.FFDHE4096
+dist/mozilla/Makefile.basic: BIGNUM_BUNDLE = -bundle Hacl.Bignum.*,Hacl.Bignum
 dist/mozilla/Makefile.basic: STREAMING_BUNDLE = -bundle Hacl.Streaming.*
 dist/mozilla/Makefile.basic: FRODO_BUNDLE = -bundle Hacl.Frodo.*,Hacl.SHA3,Hacl.Keccak,Frodo.Params
 dist/mozilla/Makefile.basic: \
