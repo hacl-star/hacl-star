@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __Hacl_Curve25519_64_Slow_H
-#define __Hacl_Curve25519_64_Slow_H
+#ifndef __Hacl_Bignum_H
+#define __Hacl_Bignum_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -38,17 +38,25 @@ extern "C" {
 
 
 #include "Hacl_Kremlib.h"
-#include "Hacl_Bignum.h"
 
-void Hacl_Curve25519_64_Slow_scalarmult(u8 *out, u8 *priv, u8 *pub);
+static inline u64 Hacl_Bignum_Base_mul_wide_add_u64(u64 a, u64 b, u64 c_in, u64 *out)
+{
+  uint128_t res = (uint128_t)a * b + (uint128_t)c_in;
+  out[0U] = (uint64_t)res;
+  return (uint64_t)(res >> (u32)64U);
+}
 
-void Hacl_Curve25519_64_Slow_secret_to_public(u8 *pub, u8 *priv);
-
-bool Hacl_Curve25519_64_Slow_ecdh(u8 *out, u8 *priv, u8 *pub);
+static inline u64 Hacl_Bignum_Base_mul_wide_add2_u64(u64 a, u64 b, u64 c_in, u64 *out)
+{
+  uint128_t uu____0 = (uint128_t)out[0U];
+  uint128_t res = (uint128_t)a * b + (uint128_t)c_in + uu____0;
+  out[0U] = (uint64_t)res;
+  return (uint64_t)(res >> (u32)64U);
+}
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_Curve25519_64_Slow_H_DEFINED
+#define __Hacl_Bignum_H_DEFINED
 #endif
