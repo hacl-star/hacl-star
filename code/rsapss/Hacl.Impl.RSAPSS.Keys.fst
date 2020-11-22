@@ -143,11 +143,13 @@ class rsapss_checks (t:limb_t) = {
   check_exponent: rsapss_check_exponent_st t;
 }
 
-
+[@CInline]
 let check_num_bits_u32 : bn_check_num_bits_st U32 =
   bn_check_num_bits
+[@CInline]
 let check_modulus_u32 : rsapss_check_modulus_st U32 =
   rsapss_check_modulus check_num_bits_u32
+[@CInline]
 let check_exponent_u32 : rsapss_check_exponent_st U32 =
   rsapss_check_exponent check_num_bits_u32
 
@@ -160,11 +162,13 @@ let mk_runtime_rsapss_checks_uint32 = {
   check_exponent = check_exponent_u32;
 }
 
-
+[@CInline]
 let check_num_bits_u64 : bn_check_num_bits_st U64 =
   bn_check_num_bits
+[@CInline]
 let check_modulus_u64 : rsapss_check_modulus_st U64 =
   rsapss_check_modulus check_num_bits_u64
+[@CInline]
 let check_exponent_u64 : rsapss_check_exponent_st U64 =
   rsapss_check_exponent check_num_bits_u64
 

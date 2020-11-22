@@ -81,9 +81,11 @@ let bn_set_ith_bit #t len input ind =
 let cswap2 #t len bit b1 b2 =
   Hacl.Bignum.Lib.cswap2_st len bit b1 b2
 
-
+[@CInline]
 let bn_add_eq_len_u32 (len:size_t) : bn_add_eq_len_st U32 len = bn_add_eq_len len
+[@CInline]
 let bn_sub_eq_len_u32 (len:size_t) : bn_sub_eq_len_st U32 len = bn_sub_eq_len len
+[@CInline]
 let bn_add_mod_n_u32 (len:size_t{v len > 0}) : bn_add_mod_n_st U32 len = bn_add_mod_n len
 
 /// This is a default implementation that *will* generate code depending on
@@ -99,9 +101,11 @@ let mk_runtime_bn_u32 (len:meta_len U32) : bn U32 = {
   sqr = bn_karatsuba_sqr len;
 }
 
-
+[@CInline]
 let bn_add_eq_len_u64 (len:size_t) : bn_add_eq_len_st U64 len = bn_add_eq_len len
+[@CInline]
 let bn_sub_eq_len_u64 (len:size_t) : bn_sub_eq_len_st U64 len = bn_sub_eq_len len
+[@CInline]
 let bn_add_mod_n_u64 (len:size_t{v len > 0}) : bn_add_mod_n_st U64 len = bn_add_mod_n len
 
 inline_for_extraction noextract

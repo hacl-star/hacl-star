@@ -245,14 +245,19 @@ let bn_mod_exp_mont_ladder #t k bn_mod_exp_mont_ladder_precompr2 nBits n a bBits
 
 /// A fully runtime implementation of modular exponentiation.
 
+[@CInline]
 let bn_check_mod_exp_u32 (len:BN.meta_len U32) : bn_check_mod_exp_st U32 len =
   bn_check_mod_exp (BM.mk_runtime_mont len)
+[@CInline]
 let bn_mod_exp_precompr2_u32 (len:BN.meta_len U32) : bn_mod_exp_precompr2_st U32 len =
   bn_mod_exp_precompr2 (BM.mk_runtime_mont len)
+[@CInline]
 let bn_mod_exp_mont_ladder_precompr2_u32 (len: BN.meta_len U32) : bn_mod_exp_mont_ladder_precompr2_st U32 len =
   bn_mod_exp_mont_ladder_precompr2 (BM.mk_runtime_mont len)
+[@CInline]
 let bn_mod_exp_u32 (len:BN.meta_len U32) : bn_mod_exp_st U32 len =
   bn_mod_exp (BM.mk_runtime_mont len) (bn_mod_exp_precompr2_u32 len)
+[@CInline]
 let bn_mod_exp_mont_ladder_u32 (len:BN.meta_len U32) : bn_mod_exp_mont_ladder_st U32 len =
   bn_mod_exp_mont_ladder (BM.mk_runtime_mont len) (bn_mod_exp_mont_ladder_precompr2_u32 len)
 
@@ -266,15 +271,19 @@ let mk_runtime_exp_u32 (len: BN.meta_len U32) : exp U32 = {
   ct_mod_exp = bn_mod_exp_mont_ladder_u32 len;
   }
 
-
+[@CInline]
 let bn_check_mod_exp_u64 (len:BN.meta_len U64) : bn_check_mod_exp_st U64 len =
   bn_check_mod_exp (BM.mk_runtime_mont len)
+[@CInline]
 let bn_mod_exp_precompr2_u64 (len:BN.meta_len U64) : bn_mod_exp_precompr2_st U64 len =
   bn_mod_exp_precompr2 (BM.mk_runtime_mont len)
+[@CInline]
 let bn_mod_exp_mont_ladder_precompr2_u64 (len: BN.meta_len U64) : bn_mod_exp_mont_ladder_precompr2_st U64 len =
   bn_mod_exp_mont_ladder_precompr2 (BM.mk_runtime_mont len)
+[@CInline]
 let bn_mod_exp_u64 (len:BN.meta_len U64) : bn_mod_exp_st U64 len =
   bn_mod_exp (BM.mk_runtime_mont len) (bn_mod_exp_precompr2_u64 len)
+[@CInline]
 let bn_mod_exp_mont_ladder_u64 (len:BN.meta_len U64) : bn_mod_exp_mont_ladder_st U64 len =
   bn_mod_exp_mont_ladder (BM.mk_runtime_mont len) (bn_mod_exp_mont_ladder_precompr2_u64 len)
 

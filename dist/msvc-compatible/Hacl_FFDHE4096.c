@@ -24,7 +24,7 @@
 
 #include "Hacl_FFDHE4096.h"
 
-static void add_mod_n(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *res)
+static inline void add_mod_n(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *res)
 {
   uint64_t c0 = (uint64_t)0U;
   uint32_t k0 = (uint32_t)64U;
@@ -84,7 +84,7 @@ static void add_mod_n(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *res)
   }
 }
 
-static void mul(uint64_t *a, uint64_t *b, uint64_t *res)
+static inline void mul(uint64_t *a, uint64_t *b, uint64_t *res)
 {
   uint32_t resLen = (uint32_t)128U;
   memset(res, 0U, resLen * sizeof (uint64_t));
@@ -126,7 +126,7 @@ static void mul(uint64_t *a, uint64_t *b, uint64_t *res)
   }
 }
 
-static void sqr(uint64_t *a, uint64_t *res)
+static inline void sqr(uint64_t *a, uint64_t *res)
 {
   uint32_t resLen = (uint32_t)128U;
   memset(res, 0U, resLen * sizeof (uint64_t));
@@ -168,7 +168,7 @@ static void sqr(uint64_t *a, uint64_t *res)
   }
 }
 
-static void precomp(uint32_t nBits, uint64_t *n, uint64_t *res)
+static inline void precomp(uint32_t nBits, uint64_t *n, uint64_t *res)
 {
   memset(res, 0U, (uint32_t)64U * sizeof (uint64_t));
   uint32_t i = nBits / (uint32_t)64U;
@@ -180,7 +180,7 @@ static void precomp(uint32_t nBits, uint64_t *n, uint64_t *res)
   }
 }
 
-static void reduction(uint64_t *n, uint64_t nInv, uint64_t *c, uint64_t *res)
+static inline void reduction(uint64_t *n, uint64_t nInv, uint64_t *c, uint64_t *res)
 {
   uint64_t c0 = (uint64_t)0U;
   for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)64U; i0++)
@@ -264,7 +264,7 @@ static void reduction(uint64_t *n, uint64_t nInv, uint64_t *c, uint64_t *res)
   }
 }
 
-static void
+static inline void
 mod_exp_mont_ladder_precompr2(
   uint64_t *n,
   uint64_t *a,

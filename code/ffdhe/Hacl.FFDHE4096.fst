@@ -13,18 +13,23 @@ module BE = Hacl.Bignum.Exponentiation
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+[@CInline]
 let add: BN.bn_add_eq_len_st t_limbs n_limbs =
   BN.bn_add_eq_len n_limbs
 
+[@CInline]
 let sub: BN.bn_sub_eq_len_st t_limbs n_limbs =
   BN.bn_sub_eq_len n_limbs
 
+[@CInline]
 let add_mod_n: BN.bn_add_mod_n_st t_limbs n_limbs =
   BN.bn_add_mod_n n_limbs
 
+[@CInline]
 let mul (a:BD.lbignum t_limbs n_limbs) : BN.bn_karatsuba_mul_st t_limbs n_limbs a =
   BN.bn_mul n_limbs n_limbs a
 
+[@CInline]
 let sqr (a:BD.lbignum t_limbs n_limbs) : BN.bn_karatsuba_sqr_st t_limbs n_limbs a =
   //BN.bn_sqr n_limbs a
   BN.bn_mul n_limbs n_limbs a a
@@ -39,25 +44,31 @@ instance bn_inst: BN.bn t_limbs = {
   BN.sqr
 }
 
-
+[@CInline]
 let mont_check: BM.bn_check_modulus_st t_limbs n_limbs =
   BM.bn_check_modulus
 
+[@CInline]
 let precomp: BM.bn_precomp_r2_mod_n_st t_limbs n_limbs =
   BM.bn_precomp_r2_mod_n bn_inst
 
+[@CInline]
 let reduction: BM.bn_mont_reduction_st t_limbs n_limbs =
   BM.bn_mont_reduction bn_inst
 
+[@CInline]
 let to: BM.bn_to_mont_st t_limbs n_limbs =
   BM.bn_to_mont bn_inst reduction
 
+[@CInline]
 let from: BM.bn_from_mont_st t_limbs n_limbs =
   BM.bn_from_mont bn_inst reduction
 
+[@CInline]
 let mont_mul: BM.bn_mont_mul_st t_limbs n_limbs =
   BM.bn_mont_mul bn_inst reduction
 
+[@CInline]
 let mont_sqr: BM.bn_mont_sqr_st t_limbs n_limbs =
   BM.bn_mont_sqr bn_inst reduction
 
@@ -73,19 +84,23 @@ instance mont_inst: BM.mont t_limbs = {
   BM.sqr = mont_sqr;
 }
 
-
+[@CInline]
 let exp_check: BE.bn_check_mod_exp_st t_limbs n_limbs =
   BE.bn_check_mod_exp mont_inst
 
+[@CInline]
 let mod_exp_precompr2: BE.bn_mod_exp_precompr2_st t_limbs n_limbs =
   BE.bn_mod_exp_precompr2 mont_inst
 
+[@CInline]
 let mod_exp: BE.bn_mod_exp_st t_limbs n_limbs =
   BE.bn_mod_exp mont_inst mod_exp_precompr2
 
+[@CInline]
 let mod_exp_mont_ladder_precompr2: BE.bn_mod_exp_mont_ladder_precompr2_st t_limbs n_limbs =
   BE.bn_mod_exp_mont_ladder_precompr2 mont_inst
 
+[@CInline]
 let mod_exp_mont_ladder: BE.bn_mod_exp_mont_ladder_st t_limbs n_limbs =
   BE.bn_mod_exp_mont_ladder mont_inst mod_exp_mont_ladder_precompr2
 

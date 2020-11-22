@@ -150,19 +150,25 @@ let bn_mont_sqr #t k mont_reduction n nInv_u64 aM resM =
 /// ``len``. We provide a default implementation that actually keeps ``len`` at
 /// runtime, to offer a version of mod_exp where all the parameters are present
 /// at run-time.
-
+[@CInline]
 let bn_check_modulus_u32 (len: BN.meta_len U32) : bn_check_modulus_st U32 len =
   bn_check_modulus #U32 #len
+[@CInline]
 let bn_precomp_r2_mod_n_u32 (len:BN.meta_len U32) : bn_precomp_r2_mod_n_st U32 len =
   bn_precomp_r2_mod_n (BN.mk_runtime_bn U32 len)
+[@CInline]
 let bn_mont_reduction_u32 (len:BN.meta_len U32) : bn_mont_reduction_st U32 len =
   bn_mont_reduction (BN.mk_runtime_bn U32 len)
+[@CInline]
 let bn_to_mont_u32 (len: BN.meta_len U32) : bn_to_mont_st U32 len =
   bn_to_mont (BN.mk_runtime_bn U32 len) (bn_mont_reduction_u32 len)
+[@CInline]
 let bn_from_mont_u32 (len: BN.meta_len U32) : bn_from_mont_st U32 len =
   bn_from_mont (BN.mk_runtime_bn U32 len) (bn_mont_reduction_u32 len)
+[@CInline]
 let bn_mont_mul_u32 (len: BN.meta_len U32) : bn_mont_mul_st U32 len =
   bn_mont_mul (BN.mk_runtime_bn U32 len) (bn_mont_reduction_u32 len)
+[@CInline]
 let bn_mont_sqr_32 (len: BN.meta_len U32) : bn_mont_sqr_st U32 len =
   bn_mont_sqr (BN.mk_runtime_bn U32 len) (bn_mont_reduction_u32 len)
 
@@ -178,19 +184,25 @@ let mk_runtime_mont_u32 (len: BN.meta_len U32) : mont U32 = {
   sqr = bn_mont_sqr_32 len;
 }
 
-
+[@CInline]
 let bn_check_modulus_u64 (len: BN.meta_len U64) : bn_check_modulus_st U64 len =
   bn_check_modulus #U64 #len
+[@CInline]
 let bn_precomp_r2_mod_n_u64 (len:BN.meta_len U64) : bn_precomp_r2_mod_n_st U64 len =
   bn_precomp_r2_mod_n (BN.mk_runtime_bn U64 len)
+[@CInline]
 let bn_mont_reduction_u64 (len:BN.meta_len U64) : bn_mont_reduction_st U64 len =
   bn_mont_reduction (BN.mk_runtime_bn U64 len)
+[@CInline]
 let bn_to_mont_u64 (len: BN.meta_len U64) : bn_to_mont_st U64 len =
   bn_to_mont (BN.mk_runtime_bn U64 len) (bn_mont_reduction_u64 len)
+[@CInline]
 let bn_from_mont_u64 (len: BN.meta_len U64) : bn_from_mont_st U64 len =
   bn_from_mont (BN.mk_runtime_bn U64 len) (bn_mont_reduction_u64 len)
+[@CInline]
 let bn_mont_mul_u64 (len: BN.meta_len U64) : bn_mont_mul_st U64 len =
   bn_mont_mul (BN.mk_runtime_bn U64 len) (bn_mont_reduction_u64 len)
+[@CInline]
 let bn_mont_sqr_64 (len: BN.meta_len U64) : bn_mont_sqr_st U64 len =
   bn_mont_sqr (BN.mk_runtime_bn U64 len) (bn_mont_reduction_u64 len)
 

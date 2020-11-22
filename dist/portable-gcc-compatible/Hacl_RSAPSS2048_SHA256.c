@@ -26,7 +26,7 @@
 
 /* SNIPPET_START: add_mod_n */
 
-static void add_mod_n(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *res)
+static inline void add_mod_n(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *res)
 {
   uint64_t c0 = (uint64_t)0U;
   uint32_t k0 = (uint32_t)32U;
@@ -90,7 +90,7 @@ static void add_mod_n(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *res)
 
 /* SNIPPET_START: mul */
 
-static void mul(uint64_t *a, uint64_t *b, uint64_t *res)
+static inline void mul(uint64_t *a, uint64_t *b, uint64_t *res)
 {
   uint32_t resLen = (uint32_t)64U;
   memset(res, 0U, resLen * sizeof (uint64_t));
@@ -136,7 +136,7 @@ static void mul(uint64_t *a, uint64_t *b, uint64_t *res)
 
 /* SNIPPET_START: sqr */
 
-static void sqr(uint64_t *a, uint64_t *res)
+static inline void sqr(uint64_t *a, uint64_t *res)
 {
   uint32_t resLen = (uint32_t)64U;
   memset(res, 0U, resLen * sizeof (uint64_t));
@@ -182,7 +182,7 @@ static void sqr(uint64_t *a, uint64_t *res)
 
 /* SNIPPET_START: precomp */
 
-static void precomp(uint32_t nBits, uint64_t *n, uint64_t *res)
+static inline void precomp(uint32_t nBits, uint64_t *n, uint64_t *res)
 {
   memset(res, 0U, (uint32_t)32U * sizeof (uint64_t));
   uint32_t i = nBits / (uint32_t)64U;
@@ -198,7 +198,7 @@ static void precomp(uint32_t nBits, uint64_t *n, uint64_t *res)
 
 /* SNIPPET_START: reduction */
 
-static void reduction(uint64_t *n, uint64_t nInv, uint64_t *c, uint64_t *res)
+static inline void reduction(uint64_t *n, uint64_t nInv, uint64_t *c, uint64_t *res)
 {
   uint64_t c0 = (uint64_t)0U;
   for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)32U; i0++)
@@ -286,7 +286,7 @@ static void reduction(uint64_t *n, uint64_t nInv, uint64_t *c, uint64_t *res)
 
 /* SNIPPET_START: mod_exp_precompr2 */
 
-static void
+static inline void
 mod_exp_precompr2(
   uint64_t *n,
   uint64_t *a,
@@ -333,7 +333,7 @@ mod_exp_precompr2(
 
 /* SNIPPET_START: mod_exp_mont_ladder_precompr2 */
 
-static void
+static inline void
 mod_exp_mont_ladder_precompr2(
   uint64_t *n,
   uint64_t *a,

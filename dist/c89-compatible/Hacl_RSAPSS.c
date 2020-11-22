@@ -140,7 +140,7 @@ mgf_hash(
   }
 }
 
-static uint64_t check_num_bits_u64(uint32_t bs, uint64_t *b)
+static inline uint64_t check_num_bits_u64(uint32_t bs, uint64_t *b)
 {
   uint32_t bLen = (bs - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
   if (bs == (uint32_t)64U * bLen)
@@ -177,7 +177,7 @@ static uint64_t check_num_bits_u64(uint32_t bs, uint64_t *b)
   }
 }
 
-uint64_t Hacl_Impl_RSAPSS_Keys_check_modulus_u64(uint32_t modBits, uint64_t *n)
+inline uint64_t Hacl_Impl_RSAPSS_Keys_check_modulus_u64(uint32_t modBits, uint64_t *n)
 {
   uint32_t nLen = (modBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
   uint64_t bits0 = n[0U] & (uint64_t)1U;
@@ -215,7 +215,7 @@ uint64_t Hacl_Impl_RSAPSS_Keys_check_modulus_u64(uint32_t modBits, uint64_t *n)
   }
 }
 
-uint64_t Hacl_Impl_RSAPSS_Keys_check_exponent_u64(uint32_t eBits, uint64_t *e)
+inline uint64_t Hacl_Impl_RSAPSS_Keys_check_exponent_u64(uint32_t eBits, uint64_t *e)
 {
   uint32_t eLen = (eBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
   KRML_CHECK_SIZE(sizeof (uint64_t), eLen);

@@ -168,7 +168,7 @@ uint64_t Hacl_Bignum4096_sub(uint64_t *a, uint64_t *b, uint64_t *res)
   return c;
 }
 
-static void add_mod_n(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *res)
+static inline void add_mod_n(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *res)
 {
   uint64_t c2 = (uint64_t)0U;
   uint32_t k0 = (uint32_t)64U;
@@ -340,7 +340,7 @@ void Hacl_Bignum4096_mul(uint64_t *a, uint64_t *b, uint64_t *res)
   }
 }
 
-static void sqr(uint64_t *a, uint64_t *res)
+static inline void sqr(uint64_t *a, uint64_t *res)
 {
   uint32_t resLen = (uint32_t)128U;
   uint32_t i;
@@ -390,7 +390,7 @@ static void sqr(uint64_t *a, uint64_t *res)
   }
 }
 
-static uint64_t mont_check(uint64_t *n)
+static inline uint64_t mont_check(uint64_t *n)
 {
   uint64_t one[64U] = { 0U };
   uint64_t bit0;
@@ -416,7 +416,7 @@ static uint64_t mont_check(uint64_t *n)
   }
 }
 
-static void precomp(uint32_t nBits, uint64_t *n, uint64_t *res)
+static inline void precomp(uint32_t nBits, uint64_t *n, uint64_t *res)
 {
   uint32_t i0;
   uint32_t j;
@@ -431,7 +431,7 @@ static void precomp(uint32_t nBits, uint64_t *n, uint64_t *res)
   }
 }
 
-static void reduction(uint64_t *n, uint64_t nInv, uint64_t *c, uint64_t *res)
+static inline void reduction(uint64_t *n, uint64_t nInv, uint64_t *c, uint64_t *res)
 {
   uint64_t c0 = (uint64_t)0U;
   uint64_t uu____0;
@@ -756,7 +756,7 @@ bool Hacl_Bignum4096_mod(uint64_t *n, uint64_t *a, uint64_t *res)
   }
 }
 
-static uint64_t exp_check(uint64_t *n, uint64_t *a, uint32_t bBits, uint64_t *b)
+static inline uint64_t exp_check(uint64_t *n, uint64_t *a, uint32_t bBits, uint64_t *b)
 {
   uint64_t m0 = mont_check(n);
   uint32_t bLen = (bBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
@@ -1019,7 +1019,7 @@ Hacl_Bignum4096_mod_exp_mont_ladder_precompr2(
   }
 }
 
-static void
+static inline void
 mod_exp_(uint32_t nBits, uint64_t *n, uint64_t *a, uint32_t bBits, uint64_t *b, uint64_t *res)
 {
   uint64_t r2[64U] = { 0U };
@@ -1039,7 +1039,7 @@ mod_exp_(uint32_t nBits, uint64_t *n, uint64_t *a, uint32_t bBits, uint64_t *b, 
   Hacl_Bignum4096_mod_exp_precompr2(n, a, bBits, b, r2, res);
 }
 
-static void
+static inline void
 mod_exp_mont_ladder_(
   uint32_t nBits,
   uint64_t *n,
