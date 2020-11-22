@@ -44,6 +44,7 @@ let rsapss_check_pkey_len #t modBits eBits =
   nLen +! nLen <=. 0xfffffffful -. eLen
 
 
+#push-options "--z3rlimit 100"
 inline_for_extraction noextract
 val rsapss_check_skey_len:
     #t:limb_t
@@ -66,6 +67,7 @@ let rsapss_check_skey_len #t modBits eBits dBits =
   rsapss_check_pkey_len #t modBits eBits &&
   0ul <. dBits && dLen <=. 0xfffffffful /. bits &&
   2ul *! nLen <=. 0xfffffffful -! eLen -! dLen
+#pop-options
 
 
 inline_for_extraction noextract
