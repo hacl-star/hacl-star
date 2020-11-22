@@ -221,7 +221,8 @@ let rsapss_load_pkey #t ke modBits kc eBits nb eb pkey =
 
   let nLen = blocks modBits bits in
   let eLen = blocks eBits bits in
-
+  assert (v ((modBits -! 1ul) /. bits) < v nLen);
+  
   LS.blocks_bits_lemma t (v modBits);
   assert (v (blocks nbLen numb) == v nLen);
 

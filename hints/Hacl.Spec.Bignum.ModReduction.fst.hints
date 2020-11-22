@@ -1,5 +1,5 @@
 [
-  "zèºÄHÒÙvÑ~N\f{Œz÷",
+  "Ò|Áa˘fºﬂ≈\u0000\u0015\u001a®gƒƒ",
   [
     [
       "Hacl.Spec.Bignum.ModReduction.bn_check_bn_mod",
@@ -32,7 +32,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "ce970d03af5e50e3b914a88d5356a77d"
+      "5cc6a0d46199c0f5913d19929c8dbad4"
     ],
     [
       "Hacl.Spec.Bignum.ModReduction.bn_check_bn_mod",
@@ -65,7 +65,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "4afc952346a610e206586bc55c645399"
+      "fea845fc48026c4553d528b06d4452e1"
     ],
     [
       "Hacl.Spec.Bignum.ModReduction.bn_check_bn_mod",
@@ -112,7 +112,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "e88d395195f5ae99910957646161e1f4"
+      "92340a7cf07d47ce1600a3dd1f67f7ba"
     ],
     [
       "Hacl.Spec.Bignum.ModReduction.bn_mod_slow_precompr2",
@@ -145,7 +145,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "92e67afb3bd1770ec40e95e619b41ef2"
+      "05f24d1307d21b8624fbfbab466d8f3b"
     ],
     [
       "Hacl.Spec.Bignum.ModReduction.bn_mod_slow_precompr2",
@@ -178,7 +178,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "3da1eede7bd604ff474710650935c39d"
+      "45efc7b1a41d135991a697501d2169de"
     ],
     [
       "Hacl.Spec.Bignum.ModReduction.bn_mod_slow_precompr2",
@@ -211,7 +211,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "80c860ef1ff83aaf66c3cb0e47c5c19f"
+      "b752773fae8832eacbc33370db4ac7e9"
     ],
     [
       "Hacl.Spec.Bignum.ModReduction.bn_mod_slow_precompr2_lemma",
@@ -247,7 +247,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "03d3d345e7b478a3b6015c3d449f5c77"
+      "1ffb6b1183b9af8b4c44456bbddb9f7d"
     ],
     [
       "Hacl.Spec.Bignum.ModReduction.bn_mod_slow_precompr2_lemma",
@@ -280,7 +280,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "ac208ad163050347157e78740a74d7af"
+      "57f1ef5319bfef5bf3d2a38917f7d808"
     ],
     [
       "Hacl.Spec.Bignum.ModReduction.bn_mod_slow_precompr2_lemma",
@@ -326,7 +326,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "5af7845c90b39697d46162888719e890"
+      "21a46ff79b5f2835627dde0605c81999"
     ],
     [
       "Hacl.Spec.Bignum.ModReduction.bn_mod_slow",
@@ -359,7 +359,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "2d94aa0e12bfd8dee3031be26f084542"
+      "4c3224e7bb9b36b699d091b1031e878a"
     ],
     [
       "Hacl.Spec.Bignum.ModReduction.bn_mod_slow",
@@ -392,7 +392,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "50ca35578c89cf601f2aa796df6e08ec"
+      "83a5aad11cc8a0770db14ea448f7c93f"
     ],
     [
       "Hacl.Spec.Bignum.ModReduction.bn_mod_slow",
@@ -401,7 +401,7 @@
       0,
       [ "@query" ],
       0,
-      "bb7fa6782aef5cfb5b5d4c870a7a41f6"
+      "5cbed95a515c6367496f9f0c696a60e5"
     ],
     [
       "Hacl.Spec.Bignum.ModReduction.bn_mod_slow_lemma",
@@ -437,7 +437,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "7ca3407d0b2fdbb6d4233df808122a8e"
+      "ed9a9f208baf4aac073e1e61c03deeba"
     ],
     [
       "Hacl.Spec.Bignum.ModReduction.bn_mod_slow_lemma",
@@ -470,7 +470,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "de7df7f1fa1d7ee035101104015bfcc5"
+      "51e247ed4203823877a762cd27632edb"
     ],
     [
       "Hacl.Spec.Bignum.ModReduction.bn_mod_slow_lemma",
@@ -480,12 +480,14 @@
       [
         "@MaxIFuel_assumption", "@query",
         "equation_Hacl.Spec.Bignum.ModReduction.bn_mod_slow",
-        "equation_Prims.pos",
+        "equation_Prims.nat", "equation_Prims.pos", "int_inversion",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_8bfea23f1ac4519cc5286ee2c6bbe35a",
         "refinement_interpretation_Tm_refine_9a3e47960c8f13c0402e1a809c52535a"
       ],
       0,
-      "62f62c79abf7df341d25144719e34e25"
+      "960a7583526e6a2e032fef2007eb4fbb"
     ]
   ]
 ]
