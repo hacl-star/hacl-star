@@ -647,7 +647,8 @@ INTRINSIC_INT_FLAGS = \
   -add-include 'Hacl_RSAPSS:"lib_intrinsics.h"' \
   -add-include 'Hacl_RSAPSS2048_SHA256:"lib_intrinsics.h"' \
   -add-include 'Hacl_FFDHE:"lib_intrinsics.h"' \
-  -add-include 'Hacl_FFDHE4096:"lib_intrinsics.h"'
+  -add-include 'Hacl_FFDHE4096:"lib_intrinsics.h"' \
+  -add-include 'Hacl_Curve25519_64_Slow:"lib_intrinsics.h"'
 
 # Disables tests; overriden in Wasm where tests indicate what can be compiled.
 TEST_FLAGS = -bundle Test,Test.*,Hacl.Test.*
@@ -677,6 +678,7 @@ BUNDLE_FLAGS	=\
   $(SHA3_BUNDLE) \
   $(CHACHA20_BUNDLE) \
   $(SALSA20_BUNDLE) \
+  $(BIGNUM_BUNDLE) \
   $(CURVE_BUNDLE) \
   $(CHACHAPOLY_BUNDLE) \
   $(ED_BUNDLE) \
@@ -775,6 +777,7 @@ dist/wasm/Makefile.basic: STREAMING_BUNDLE = -bundle Hacl.Streaming.*
 # And Merkle trees
 dist/wasm/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree,MerkleTree.*'
 dist/wasm/Makefile.basic: CTR_BUNDLE =
+dist/wasm/Makefile.basic: BIGNUM_BUNDLE =
 dist/wasm/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.RSAPSS,Hacl.Bignum.*,Hacl.Bignum,Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS,Hacl.Bignum4096,Hacl.Bignum256,Hacl.RSAPSS2048_SHA256
 dist/wasm/Makefile.basic: FFDHE_BUNDLE = -bundle Hacl.FFDHE,Hacl.Impl.FFDHE.*,Hacl.Impl.FFDHE,Hacl.FFDHE4096
 dist/wasm/Makefile.basic: DEFAULT_FLAGS += -bundle 'EverCrypt,EverCrypt.*'
@@ -882,10 +885,11 @@ dist/linux/Makefile.basic: HAND_WRITTEN_H_FILES := $(filter-out %/evercrypt_targ
 dist/linux/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
 dist/linux/Makefile.basic: BASE_FLAGS := $(filter-out -fcurly-braces,$(BASE_FLAGS))
 dist/linux/Makefile.basic: STREAMING_BUNDLE = -bundle Hacl.Streaming.*
+dist/linux/Makefile.basic: BIGNUM_BUNDLE = -bundle Hacl.Bignum,Hacl.Bignum.*
 dist/linux/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.Bignum256,Hacl.Bignum4096,Hacl.Bignum,Hacl.Bignum.*,Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS,Hacl.RSAPSS,Hacl.RSAPSS2048_SHA256
 dist/linux/Makefile.basic: FFDHE_BUNDLE = -bundle Hacl.Impl.FFDHE.*,Hacl.Impl.FFDHE,Hacl.FFDHE,Hacl.FFDHE4096
 dist/linux/Makefile.basic: CURVE_BUNDLE = \
-  $(CURVE_BUNDLE_BASE) \
+  $(BIGNUM_BUNDLE) $(CURVE_BUNDLE_BASE) \
   -bundle Hacl.Curve25519_64_Local \
   -library Hacl.Impl.Curve25519.Field64.Vale \
   -no-prefix Hacl.Impl.Curve25519.Field64.Vale \
@@ -919,6 +923,7 @@ dist/ccf/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
 dist/ccf/Makefile.basic: HAND_WRITTEN_FILES := $(filter-out %/Lib_PrintBuffer.c %_vale_stubs.c,$(HAND_WRITTEN_FILES))
 dist/ccf/Makefile.basic: HAND_WRITTEN_H_FILES := $(filter-out %/libintvector.h %/lib_intrinsics.h,$(HAND_WRITTEN_H_FILES))
 dist/ccf/Makefile.basic: HACL_OLD_FILES =
+dist/ccf/Makefile.basic: CURVE_BUNDLE_SLOW = -bundle Hacl.Curve25519_64_Slow
 dist/ccf/Makefile.basic: POLY_BUNDLE = -bundle Hacl.Streaming.Poly1305_128,Hacl.Streaming.Poly1305_256
 dist/ccf/Makefile.basic: P256_BUNDLE=-bundle Hacl.P256,Hacl.Impl.ECDSA.*,Hacl.Impl.SolinasReduction,Hacl.Impl.P256.*
 dist/ccf/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.Bignum256,Hacl.Bignum4096,Hacl.Bignum,Hacl.Bignum.*,Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS,Hacl.RSAPSS,Hacl.RSAPSS2048_SHA256

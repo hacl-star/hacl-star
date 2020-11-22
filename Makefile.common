@@ -87,7 +87,7 @@ BASE_FLAGS = \
   -header $(HACL_HOME)/dist/LICENSE.txt
 
 CURVE_BUNDLE_SLOW= \
-  -bundle 'Hacl.Curve25519_64_Slow=Hacl.Impl.Curve25519.Field64.Hacl,Hacl.Spec.Curve25519,Hacl.Spec.Curve25519.\*'
+  -bundle 'Hacl.Curve25519_64_Slow=Hacl.Bignum.*,Hacl.Bignum,Hacl.Impl.Curve25519.Field64.Hacl,Hacl.Spec.Curve25519,Hacl.Spec.Curve25519.\*'
 CURVE_BUNDLE_BASE= \
   $(CURVE_BUNDLE_SLOW) \
   -bundle Hacl.Curve25519_51=Hacl.Impl.Curve25519.Field51 \
@@ -116,8 +116,9 @@ FRODO_BUNDLE=-bundle 'Hacl.Frodo.KEM=Frodo.Params,Hacl.Impl.Frodo.*,Hacl.Impl.Ma
 HPKE_BUNDLE=-bundle Hacl.HPKE.Interface.*
 STREAMING_BUNDLE=-bundle Hacl.Streaming.Interface,Hacl.Streaming.Lemmas
 INTTYPES_BUNDLE=-bundle Hacl.IntTypes.Intrinsics= -static-header Hacl.IntTypes.Intrinsics
-RSAPSS_BUNDLE=-bundle Hacl.Bignum,Hacl.Bignum.*[rename=Hacl_Bignum] -static-header Hacl.Bignum,Hacl.Bignum.* -bundle Hacl.RSAPSS=Hacl.Bignum.*,Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS[rename=Hacl_RSAPSS]
+RSAPSS_BUNDLE=-bundle Hacl.RSAPSS=Hacl.Bignum.*,Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS[rename=Hacl_RSAPSS]
 FFDHE_BUNDLE=-bundle Hacl.Impl.FFDHE.Constants -static-header Hacl.Impl.FFDHE.Constants -bundle Hacl.FFDHE=Hacl.Bignum.*,Hacl.Bignum,Hacl.Impl.FFDHE[rename=Hacl_FFDHE]
+BIGNUM_BUNDLE=-bundle Hacl.Bignum,Hacl.Bignum.*[rename=Hacl_Bignum] -static-header Hacl.Bignum,Hacl.Bignum.*
 
 # 3. OCaml
 
