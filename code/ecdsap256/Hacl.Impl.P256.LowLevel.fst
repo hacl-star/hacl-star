@@ -1631,10 +1631,19 @@ val uploadZeroImpl: f: felem -> Stack unit
   (ensures fun h0 _ h1 -> as_nat h1 f == 0 /\ modifies (loc f) h0 h1)
 
 let uploadZeroImpl f = 
-  upd f (size 0) (u64 0);
-  upd f (size 1) (u64 0);
-  upd f (size 2) (u64 0);
-  upd f (size 3) (u64 0)
+  let open Lib.Loops in 
+  let h0 = ST.get() in 
+  let len = 4ul in 
+  let inv h (i: nat {i <= uint_v len}) = live h f /\ modifies (loc f) h0 h /\
+    (forall (j: nat {j < i}). 
+      let elemUpdated = Lib.Sequence.index (as_seq h f) j in uint_v elemUpdated = 0) in 
+  for 0ul len inv (fun i -> 
+    upd f i (u64 0); 
+    let h = ST.get() in 
+    assert(
+      forall (j: nat {j < uint_v i}). 
+      let elemUpdated = Lib.Sequence.index (as_seq h f) j in uint_v elemUpdated = 0))
+
 
 val uploadOneImpl: f: felem -> Stack unit
   (requires fun h -> live h f)
