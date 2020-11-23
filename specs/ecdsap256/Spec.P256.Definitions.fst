@@ -69,8 +69,14 @@ let wide_as_nat4 f =
 noextract
 let point_nat = tuple3 nat nat nat
 
+let point_nat_affine = tuple2 nat nat
+
 noextract
 let point_nat_prime = (p: point_nat {let (a, b, c) = p in a < prime256 /\ b < prime256 /\ c < prime256})
+
+noextract 
+let point_affine = (p: point_nat_affine {let (a, b) = p in a < prime256 /\ b < prime256})
+
 
 
 noextract
