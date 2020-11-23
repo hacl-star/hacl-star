@@ -17,8 +17,63 @@ open FStar.Mul
 open Hacl.Impl.P256.LowLevel
 open Hacl.Impl.P256.PointAdd
 
+open Hacl.Impl.P256.MontgomeryMultiplication
+open Hacl.Impl.P256.LowLevel.PrimeSpecific
+
+open Spec.P256.MontgomeryMultiplication
 
 #set-options "--z3rlimit 100 --fuel 0 --ifuel 0"
+
+(* just changing argument order *)
+val montgomery_multiplication_buffer: result: felem -> a: felem -> b: felem ->  Stack unit
+  (requires (fun h -> live h a /\  as_nat h a < prime256 /\ live h b /\ live h result /\ as_nat h b < prime256)) 
+  (ensures (fun h0 _ h1 -> 
+    modifies (loc result) h0 h1 /\  
+    as_nat h1 result < prime256 /\
+    as_nat h1 result = (as_nat h0 a * as_nat h0 b * modp_inv2_prime (pow2 256) prime256) % prime256 /\
+    as_nat h1 result = toDomain_ (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 b) % prime256) /\
+    as_nat h1 result = toDomain_ (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 b)))
+  )
+
+let montgomery_multiplication_buffer result a b = 
+  Hacl.Impl.P256.MontgomeryMultiplication.montgomery_multiplication_buffer a b result
+
+val p256_add: out: felem -> arg1: felem -> arg2: felem -> Stack unit 
+  (requires (fun h0 ->  
+    live h0 arg1 /\ live h0 arg2 /\ live h0 out /\ 
+    eq_or_disjoint arg1 out /\ eq_or_disjoint arg2 out /\
+    as_nat h0 arg1 < prime256 /\ as_nat h0 arg2 < prime256))
+  (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\ 
+      as_nat h1 out == (as_nat h0 arg1 + as_nat h0 arg2) % prime256 /\
+      as_nat h1 out == toDomain_ ((fromDomain_ (as_nat h0 arg1) + fromDomain_ (as_nat h0 arg2)) % prime256)))
+
+let p256_add result a b = Hacl.Impl.P256.LowLevel.PrimeSpecific.p256_add a b result
+
+val p256_double: out: felem -> arg1: felem -> Stack unit 
+  (requires (fun h0 ->  live h0 arg1 /\ live h0 out /\ eq_or_disjoint arg1 out /\ as_nat h0 arg1 < prime256))
+  (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\ 
+    as_nat h1 out == (2 * as_nat h0 arg1) % prime256 /\ as_nat h1 out < prime256 /\
+    as_nat h1 out == toDomain_ (2 * fromDomain_ (as_nat h0 arg1) % prime256)
+  )
+)
+
+let p256_double result a =  Hacl.Impl.P256.LowLevel.PrimeSpecific.p256_double a result
+
+
+val p256_sub: out: felem -> arg1: felem -> arg2: felem -> Stack unit 
+  (requires 
+    (fun h0 -> live h0 out /\ live h0 arg1 /\ live h0 arg2 /\ 
+      eq_or_disjoint arg1 out /\ eq_or_disjoint arg2 out /\
+      as_nat h0 arg1 < prime256 /\ as_nat h0 arg2 < prime256))
+    (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\ 
+	as_nat h1 out == (as_nat h0 arg1 - as_nat h0 arg2) % prime256 /\
+	as_nat h1 out == toDomain_ ((fromDomain_ (as_nat h0 arg1) - fromDomain_ (as_nat h0 arg2)) % prime256)
+    )
+)    
+
+let p256_sub result a b = Hacl.Impl.P256.LowLevel.PrimeSpecific.p256_sub a b result
+
+
 
 
 inline_for_extraction
@@ -26,12 +81,10 @@ type pointAffine = lbuffer uint64 (size 8)
 
 val pointAffineIsNotZero: p: pointAffine -> Stack uint64
   (requires fun h -> live h p)
-  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ 
-    (
-      let x = gsub p (size 0) (size 4) in 
-      let y = gsub p (size 4) (size 4) in 
-      if as_nat h0 x = 0 || as_nat h0 y = 0 then uint_v r = pow2 64 - 1 else uint_v r == 0))
-  
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ (
+    let x = gsub p (size 0) (size 4) in 
+    let y = gsub p (size 4) (size 4) in 
+    if as_nat h0 x = 0 || as_nat h0 y = 0 then uint_v r = pow2 64 - 1 else uint_v r == 0))
 
 let pointAffineIsNotZero p = 
   let x = sub p (size 0) (size 4) in 
@@ -131,6 +184,52 @@ let copy_point_conditional out p maskPoint =
   copy_conditional xOut p_x mask;
   copy_conditional yOut p_y mask;
   copy_conditional_one_mm zOut mask
+
+
+val point_add_step0: result: point -> p: point -> q: pointAffine -> tempBuffer: lbuffer uint64 (size 20) -> Stack unit
+  (requires fun h -> live h result /\ live h p /\ live h q /\ live h tempBuffer /\ (
+    let x1 = gsub p (size 0) (size 4) in 
+    let y1 = gsub p (size 4) (size 4) in 
+    let z1 = gsub p (size 8) (size 4) in 
+
+    let x2 = gsub q (size 0) (size 4) in 
+    let y2 = gsub q (size 4) (size 4) in 
+
+    as_nat h x1 < prime256 /\
+    as_nat h y1 < prime256 /\
+    as_nat h z1 < prime256 /\
+
+    as_nat h x2 < prime256 /\
+    as_nat h y2 < prime256
+  
+  ))
+  (ensures fun h0 _ h1 -> True)
+
+
+let point_add_step0 result p q tempBuffer = 
+  let x1 = sub p (size 0) (size 4) in 
+  let y1 = sub p (size 4) (size 4) in 
+  let z1 = sub p (size 8) (size 4) in 
+
+  let x2 = sub q (size 0) (size 4) in 
+  let y2 = sub q (size 4) (size 4) in 
+
+  let t0 = sub tempBuffer (size 0) (size 4) in 
+  let t1 = sub tempBuffer (size 4) (size 4) in 
+  let t3 = sub tempBuffer (size 12) (size 4) in 
+  let t4 = sub tempBuffer (size 16) (size 4) in 
+
+  montgomery_multiplication_buffer t0 x1 x2;
+  montgomery_multiplication_buffer t1 y1 y2;
+  p256_add t3 x2 y2;  
+  p256_add t4 x1 y1;
+
+  montgomery_multiplication_buffer t3 t3 t4;
+  p256_add t4 t0 t1;
+  p256_sub t3 t3 t4;
+  p256_sub t4 y2 z1;
+  admit()
+
 
 
 (* we except that we already know the q point *)

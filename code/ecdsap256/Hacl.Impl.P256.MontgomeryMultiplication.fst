@@ -142,7 +142,11 @@ let montgomery_multiplication_buffer_by_one a result =
 
 
 val montgomery_multiplication_buffer: a: felem -> b: felem -> result: felem ->  Stack unit
-  (requires (fun h -> live h a /\ as_nat h a < prime256 /\ live h b /\ live h result /\ as_nat h b < prime256)) 
+  (requires (fun h -> live h a /\ 
+    as_nat h a < prime256 /\ 
+    live h b /\ 
+  live h result /\ 
+  as_nat h b < prime256)) 
   (ensures (fun h0 _ h1 -> 
     modifies (loc result) h0 h1 /\  
     as_nat h1 result < prime256 /\
