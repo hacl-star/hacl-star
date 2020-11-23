@@ -403,3 +403,8 @@ val is_more_than_zero_less_than_order: x: lbuffer uint8 (size 32) -> Stack bool
     )
   )
  *)
+
+
+ val pointAddMixed: result: point -> p: point -> q: pointAffine -> Stack unit 
+  (requires fun h -> live h result /\ live h p /\ live h q)
+  (ensures fun h0 _ h1 -> True)

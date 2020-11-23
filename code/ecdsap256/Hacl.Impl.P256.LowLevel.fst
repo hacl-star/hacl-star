@@ -137,7 +137,8 @@ let copy_conditional_u64 a b mask =
 val copy_conditional: out: felem -> x: felem -> mask: uint64{uint_v mask = 0 \/ uint_v mask = pow2 64 - 1} -> Stack unit 
   (requires fun h -> live h out /\ live h x)
   (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\ 
-    (if uint_v mask = 0 then as_seq h1 out == as_seq h0 out else as_seq h1 out == as_seq h0 x)
+    (if uint_v mask = 0 then as_seq h1 out == as_seq h0 out else as_seq h1 out == as_seq h0 x) /\
+    (if uint_v mask = 0 then as_nat h1 out == as_nat h0 out else as_nat h1 out == as_nat h0 x)
   ) 
 
 let copy_conditional out x mask = 
