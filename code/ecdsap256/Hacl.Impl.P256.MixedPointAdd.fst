@@ -186,8 +186,11 @@ let copy_point_conditional out p maskPoint =
   copy_conditional_one_mm zOut mask
 
 
+let prime = prime256 
+
 val point_add_step0: result: point -> p: point -> q: pointAffine -> tempBuffer: lbuffer uint64 (size 20) -> Stack unit
-  (requires fun h -> live h result /\ live h p /\ live h q /\ live h tempBuffer /\ (
+  (requires fun h -> live h result /\ live h p /\ live h q /\ live h tempBuffer /\
+    disjoint p tempBuffer /\ disjoint q tempBuffer /\ (
     let x1 = gsub p (size 0) (size 4) in 
     let y1 = gsub p (size 4) (size 4) in 
     let z1 = gsub p (size 8) (size 4) in 
@@ -200,10 +203,38 @@ val point_add_step0: result: point -> p: point -> q: pointAffine -> tempBuffer: 
     as_nat h z1 < prime256 /\
 
     as_nat h x2 < prime256 /\
-    as_nat h y2 < prime256
-  
-  ))
-  (ensures fun h0 _ h1 -> True)
+    as_nat h y2 < prime256 ))
+  (ensures fun h0 _ h1 -> modifies (loc tempBuffer) h0 h1 /\ (
+    let x1D = fromDomain_ (as_nat h0 (gsub p (size 0) (size 4))) in 
+    let x2D = fromDomain_ (as_nat h0 (gsub q (size 0) (size 4))) in 
+    let y1D = fromDomain_ (as_nat h0 (gsub p (size 4) (size 4))) in 
+    let y2D = fromDomain_ (as_nat h0 (gsub q (size 4) (size 4))) in 
+    let z1D = fromDomain_ (as_nat h0 (gsub p (size 8) (size 4))) in 
+
+    let t0 = gsub tempBuffer (size 0) (size 4) in 
+    let t1 = gsub tempBuffer (size 4) (size 4) in 
+    let t3 = gsub tempBuffer (size 12) (size 4) in 
+    let t4 = gsub tempBuffer (size 16) (size 4) in 
+
+    let t0_ = (x1D * x2D) % prime in 
+    let t1_ = (y1D * y2D) % prime in 
+    let t3_ = (x2D + y2D) % prime in 
+    let t4_ = (x1D + y1D) % prime in 
+
+    let t3_ = (t3_ * t4_) % prime in 
+    let t4_ = (t0_ + t1_) % prime in 
+    let t3_ = (t3_ - t4_) % prime in 
+    let t4_ = (y2D - z1D) % prime in 
+    
+    as_nat h1 t0 = toDomain_ t0_ /\
+    as_nat h1 t1 = toDomain_ t1_ /\
+    as_nat h1 t3 = toDomain_ t3_ /\
+    as_nat h1 t4 = toDomain_ t4_ /\
+    
+    as_nat h1 t0 < prime /\
+    as_nat h1 t1 < prime /\
+    as_nat h1 t3 < prime /\
+    as_nat h1 t4 < prime))
 
 
 let point_add_step0 result p q tempBuffer = 
@@ -223,12 +254,11 @@ let point_add_step0 result p q tempBuffer =
   montgomery_multiplication_buffer t1 y1 y2;
   p256_add t3 x2 y2;  
   p256_add t4 x1 y1;
-
+  
   montgomery_multiplication_buffer t3 t3 t4;
   p256_add t4 t0 t1;
   p256_sub t3 t3 t4;
-  p256_sub t4 y2 z1;
-  admit()
+  p256_sub t4 y2 z1
 
 
 

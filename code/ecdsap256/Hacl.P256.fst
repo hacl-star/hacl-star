@@ -88,4 +88,6 @@ let is_more_than_zero_less_than_order x =
 
 
 
- let pointAddMixed result p q =  Hacl.Impl.P256.MixedPointAdd.pointAddMixed result p q
+let pointAddMixed result p q =  Hacl.Impl.P256.MixedPointAdd.pointAddMixed result p q
+
+let do_lookup a scalar = Hacl.Impl.P256.Q.CR.do_lookup a scalar
