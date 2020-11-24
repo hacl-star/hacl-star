@@ -258,3 +258,22 @@ let p256_sub arg1 arg2 out =
     substractionInDomain (felem_seq_as_nat (as_seq h0 arg1)) (felem_seq_as_nat (as_seq h0 arg2));
     inDomain_mod_is_not_mod (fromDomain_ (felem_seq_as_nat (as_seq h0 arg1)) - fromDomain_ (felem_seq_as_nat (as_seq h0 arg2)))
 
+
+inline_for_extraction noextract
+val upload_p256_point_on_curve_constant: x: felem -> Stack unit
+  (requires fun h -> live h x)
+  (ensures fun h0 _ h1 -> modifies (loc x) h0 h1 /\ 
+    as_nat h1 x == toDomain_ Spec.P256.bCoordinateP256 /\
+    as_nat h1 x < prime256
+ )
+
+let upload_p256_point_on_curve_constant x = 
+  upd x (size 0) (u64 15608596021259845087);
+  upd x (size 1) (u64 12461466548982526096);
+  upd x (size 2) (u64 16546823903870267094);
+  upd x (size 3) (u64 15866188208926050356);
+  assert_norm (
+    15608596021259845087 + 12461466548982526096 * pow2 64 + 
+    16546823903870267094 * pow2 64 * pow2 64 + 
+    15866188208926050356 * pow2 64 * pow2 64 * pow2 64 == Spec.P256.bCoordinateP256 * pow2 256 % prime256)
+

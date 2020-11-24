@@ -261,6 +261,110 @@ let point_add_step0 result p q tempBuffer =
   p256_sub t4 y2 z1
 
 
+val point_add_step1: result: point -> p: point -> q: pointAffine -> tempBuffer: lbuffer uint64 (size 20) -> Stack unit
+  (requires fun h -> live h result /\ live h p /\ live h q /\ live h tempBuffer /\
+    disjoint p tempBuffer /\ disjoint q tempBuffer /\ eq_or_disjoint result p /\ disjoint result tempBuffer /\ (
+    let t1 = gsub tempBuffer (size 4) (size 4) in 
+    let t4 = gsub tempBuffer (size 16) (size 4) in  
+
+    let x1 = gsub p (size 0) (size 4) in 
+    let y1 = gsub p (size 4) (size 4) in 
+    let z1 = gsub p (size 8) (size 4) in 
+
+    let x2 = gsub q (size 0) (size 4) in 
+    let y2 = gsub q (size 4) (size 4) in 
+
+    as_nat h x1 < prime256 /\
+    as_nat h y1 < prime256 /\
+    as_nat h z1 < prime256 /\
+
+    as_nat h x2 < prime256 /\
+    as_nat h y2 < prime256 /\
+
+    as_nat h t1 < prime /\ 
+    as_nat h t4 < prime 
+  
+  ))
+  (ensures fun h0 _ h1 -> modifies (loc result |+| loc tempBuffer) h0 h1 /\ (
+    let x1D = fromDomain_ (as_nat h0 (gsub p (size 0) (size 4))) in 
+    let x2D = fromDomain_ (as_nat h0 (gsub q (size 0) (size 4))) in 
+    let y1D = fromDomain_ (as_nat h0 (gsub p (size 4) (size 4))) in 
+    let y2D = fromDomain_ (as_nat h0 (gsub q (size 4) (size 4))) in 
+    let z1D = fromDomain_ (as_nat h0 (gsub p (size 8) (size 4))) in 
+
+    let x3 = gsub result (size 0) (size 4) in 
+    let y3 = gsub result (size 4) (size 4) in 
+    let z3 = gsub result (size 8) (size 4) in 
+
+    let t0 = gsub tempBuffer (size 0) (size 4) in 
+    let t1 = gsub tempBuffer (size 4) (size 4) in 
+    let t3 = gsub tempBuffer (size 12) (size 4) in 
+    let t4 = gsub tempBuffer (size 16) (size 4) in 
+
+    let t1D = fromDomain_ (as_nat h0 t1) in 
+    let t4D = fromDomain_ (as_nat h0 t4) in 
+
+    let t4_ = (t4D + y1D) % prime in 
+    let y3_ = (x2D * z1D) % prime in
+    let y3_ = (y3_ + x1D) % prime in 
+    let z3_ = (Spec.P256.bCoordinateP256 * z1D) % prime in 
+
+    let x3_ = (y3_ - z3_) % prime in 
+    let z3_ = (x3_ + x3_) % prime in 
+    let x3_ = (x3_ + z3_)  % prime in 
+    let z3_ = (t1D - x3_) % prime in 
+    let x3_ = (t1D + x3_) % prime in 
+    let y3_ = (Spec.P256.bCoordinateP256 * y3_) % prime in 
+
+    as_nat h1 x3 = toDomain_ x3_
+   
+
+   
+   
+   
+   
+   
+   )
+  
+  
+  )
+
+let point_add_step1 result p q tempBuffer = 
+  let x1 = sub p (size 0) (size 4) in 
+  let y1 = sub p (size 4) (size 4) in 
+  let z1 = sub p (size 8) (size 4) in 
+
+  let x2 = sub q (size 0) (size 4) in 
+  let y2 = sub q (size 4) (size 4) in 
+
+  let t0 = sub tempBuffer (size 0) (size 4) in 
+  let t1 = sub tempBuffer (size 4) (size 4) in 
+  let t2 = sub tempBuffer (size 8) (size 4) in 
+  let t3 = sub tempBuffer (size 12) (size 4) in 
+  let t4 = sub tempBuffer (size 16) (size 4) in 
+
+  let x3 = sub result (size 0) (size 4) in 
+  let y3 = sub result (size 4) (size 4) in 
+  let z3 = sub result (size 8) (size 4) in 
+  Hacl.Impl.P256.LowLevel.PrimeSpecific.upload_p256_point_on_curve_constant t2;
+
+  p256_add t4 t4 y1; 
+  montgomery_multiplication_buffer y3 x2 z1; 
+  p256_add y3 y3 x1;
+  montgomery_multiplication_buffer z3 t2 z1; 
+
+  
+  p256_sub x3 y3 z3;
+  p256_add z3 x3 x3;
+  p256_add x3 x3 z3; 
+  p256_sub z3 t1 x3; 
+  p256_add x3 t1 x3; 
+  montgomery_multiplication_buffer y3 t2 y3
+
+
+
+  
+
 
 (* we except that we already know the q point *)
 val pointAddMixed: result: point -> p: point -> q: pointAffine -> Stack unit 
@@ -269,4 +373,9 @@ val pointAddMixed: result: point -> p: point -> q: pointAffine -> Stack unit
 
 
 let pointAddMixed result p q = 
-  copy_point_conditional result q p
+  push_frame();
+    let tempBuffer = create (size 20) (u64 0) in 
+    point_add_step0 result p q tempBuffer;
+    point_add_step1 result p q tempBuffer;
+    copy_point_conditional result q p;
+  pop_frame()

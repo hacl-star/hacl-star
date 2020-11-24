@@ -56,26 +56,6 @@ let y_2 y r =
   toDomain y r;
   montgomery_square_buffer r r
 
-
-inline_for_extraction noextract
-val upload_p256_point_on_curve_constant: x: felem -> Stack unit
-  (requires fun h -> live h x)
-  (ensures fun h0 _ h1 -> modifies (loc x) h0 h1 /\ 
-    as_nat h1 x == toDomain_ Spec.P256.bCoordinateP256 /\
-    as_nat h1 x < prime
- )
-
-let upload_p256_point_on_curve_constant x = 
-  upd x (size 0) (u64 15608596021259845087);
-  upd x (size 1) (u64 12461466548982526096);
-  upd x (size 2) (u64 16546823903870267094);
-  upd x (size 3) (u64 15866188208926050356);
-  assert_norm (
-    15608596021259845087 + 12461466548982526096 * pow2 64 + 
-    16546823903870267094 * pow2 64 * pow2 64 + 
-    15866188208926050356 * pow2 64 * pow2 64 * pow2 64 == Spec.P256.bCoordinateP256 * pow2 256 % prime)
-
-
 val lemma_xcube: x_: nat {x_ < prime} -> Lemma 
   (((x_ * x_ * x_ % prime) - (3 * x_ % prime)) % prime == (x_ * x_ * x_ - 3 * x_) % prime)
 
