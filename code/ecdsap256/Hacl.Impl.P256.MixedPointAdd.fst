@@ -316,18 +316,19 @@ val point_add_step1: result: point -> p: point -> q: pointAffine -> tempBuffer: 
     let x3_ = (t1D + x3_) % prime in 
     let y3_ = (Spec.P256.bCoordinateP256 * y3_) % prime in 
 
-    as_nat h1 x3 = toDomain_ x3_
-   
+    as_nat h1 x3 = toDomain_ x3_ /\ 
+    as_nat h1 y3 = toDomain_ y3_ /\
+    as_nat h1 z3 = toDomain_ z3_ /\
 
-   
-   
-   
-   
-   
-   )
-  
-  
-  )
+    as_nat h0 t0 = as_nat h1 t0 /\
+    as_nat h0 t1 = as_nat h1 t1 /\
+    as_nat h0 t3 = as_nat h1 t3 /\
+    as_nat h1 t4 = toDomain_ t4_ /\
+
+    as_nat h1 x3 < prime /\
+    as_nat h1 y3 < prime /\
+    as_nat h1 z3 < prime /\
+    as_nat h1 t4 < prime ))
 
 let point_add_step1 result p q tempBuffer = 
   let x1 = sub p (size 0) (size 4) in 
@@ -361,9 +362,6 @@ let point_add_step1 result p q tempBuffer =
   p256_add x3 t1 x3; 
   montgomery_multiplication_buffer y3 t2 y3
 
-
-
-  
 
 
 (* we except that we already know the q point *)
