@@ -25,6 +25,7 @@ open Spec.P256.MontgomeryMultiplication
 #set-options "--z3rlimit 100 --fuel 0 --ifuel 0"
 
 (* just changing argument order *)
+inline_for_extraction noextract
 val montgomery_multiplication_buffer: result: felem -> a: felem -> b: felem ->  Stack unit
   (requires (fun h -> live h a /\  as_nat h a < prime256 /\ live h b /\ live h result /\ as_nat h b < prime256)) 
   (ensures (fun h0 _ h1 -> 
@@ -38,6 +39,8 @@ val montgomery_multiplication_buffer: result: felem -> a: felem -> b: felem ->  
 let montgomery_multiplication_buffer result a b = 
   Hacl.Impl.P256.MontgomeryMultiplication.montgomery_multiplication_buffer a b result
 
+
+inline_for_extraction noextract
 val p256_add: out: felem -> arg1: felem -> arg2: felem -> Stack unit 
   (requires (fun h0 ->  
     live h0 arg1 /\ live h0 arg2 /\ live h0 out /\ 
@@ -49,6 +52,8 @@ val p256_add: out: felem -> arg1: felem -> arg2: felem -> Stack unit
 
 let p256_add result a b = Hacl.Impl.P256.LowLevel.PrimeSpecific.p256_add a b result
 
+
+inline_for_extraction noextract
 val p256_double: out: felem -> arg1: felem -> Stack unit 
   (requires (fun h0 ->  live h0 arg1 /\ live h0 out /\ eq_or_disjoint arg1 out /\ as_nat h0 arg1 < prime256))
   (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\ 
@@ -60,6 +65,7 @@ val p256_double: out: felem -> arg1: felem -> Stack unit
 let p256_double result a =  Hacl.Impl.P256.LowLevel.PrimeSpecific.p256_double a result
 
 
+inline_for_extraction noextract
 val p256_sub: out: felem -> arg1: felem -> arg2: felem -> Stack unit 
   (requires 
     (fun h0 -> live h0 out /\ live h0 arg1 /\ live h0 arg2 /\ 
@@ -399,7 +405,6 @@ val point_add_step2: result: point -> p: point -> q: pointAffine -> tempBuffer: 
     as_nat h t4 < prime))
   (ensures fun h0 _ h1 -> modifies (loc result |+| loc tempBuffer) h0 h1 /\ (
     let z1D = fromDomain_ (as_nat h0 (gsub p (size 8) (size 4))) in 
-
     let y3D = fromDomain_ (as_nat h0 (gsub result (size 4) (size 4))) in 
 
     let x3 = gsub result (size 0) (size 4) in 
@@ -473,12 +478,122 @@ let point_add_step2 result p q tempBuffer =
   p256_add t0 t1 t0;
   p256_sub t0 t0 t2;
   montgomery_multiplication_buffer t1 t4 y3
-  
 
 
-(* we except that we already know the q point *)
+val point_add_step3: result: point -> p: point -> q: pointAffine -> tempBuffer: lbuffer uint64 (size 20) -> Stack unit
+  (requires fun h -> live h result /\ live h p /\ live h q /\ live h tempBuffer /\
+    disjoint p tempBuffer /\ disjoint q tempBuffer /\ eq_or_disjoint result p /\ disjoint result tempBuffer /\ (
+    let t0 = gsub tempBuffer (size 0) (size 4) in 
+    let t1 = gsub tempBuffer (size 4) (size 4) in 
+    let t2 = gsub tempBuffer (size 8) (size 4) in 
+    let t3 = gsub tempBuffer (size 12) (size 4) in 
+    let t4 = gsub tempBuffer (size 16) (size 4) in  
+
+    let x1 = gsub p (size 0) (size 4) in 
+    let y1 = gsub p (size 4) (size 4) in 
+    let z1 = gsub p (size 8) (size 4) in 
+
+    let x2 = gsub q (size 0) (size 4) in 
+    let y2 = gsub q (size 4) (size 4) in 
+
+    let x3 = gsub result (size 0) (size 4) in 
+    let y3 = gsub result (size 4) (size 4) in 
+    let z3 = gsub result (size 8) (size 4) in 
+
+    as_nat h x1 < prime256 /\
+    as_nat h y1 < prime256 /\
+    as_nat h z1 < prime256 /\
+
+    as_nat h x2 < prime256 /\
+    as_nat h y2 < prime256 /\
+
+    as_nat h x3 < prime256 /\
+    as_nat h y3 < prime256 /\
+    as_nat h z3 < prime256 /\
+
+    as_nat h t0 < prime /\
+    as_nat h t1 < prime /\ 
+    as_nat h t2 < prime /\
+    as_nat h t3 < prime /\
+    as_nat h t4 < prime))
+  (ensures fun h0 _ h1 -> modifies (loc result |+| loc tempBuffer) h0 h1 /\ (
+    let x3 = gsub result (size 0) (size 4) in 
+    let y3 = gsub result (size 4) (size 4) in 
+    let z3 = gsub result (size 8) (size 4) in 
+
+    let x3D = fromDomain_ (as_nat h0 x3) in 
+    let y3D = fromDomain_ (as_nat h0 y3) in 
+    let z3D = fromDomain_ (as_nat h0 z3) in 
+
+    let t0 = gsub tempBuffer (size 0) (size 4) in 
+    let t1 = gsub tempBuffer (size 4) (size 4) in 
+    let t2 = gsub tempBuffer (size 8) (size 4) in 
+    let t3 = gsub tempBuffer (size 12) (size 4) in 
+    let t4 = gsub tempBuffer (size 16) (size 4) in   
+
+    let t0D = fromDomain_ (as_nat h0 t0) in 
+    let t1D = fromDomain_ (as_nat h0 t1) in 
+    let t3D = fromDomain_ (as_nat h0 t3) in 
+    let t4D = fromDomain_ (as_nat h0 t4) in 
+    
+
+    let t2_ = (t0D * y3D) % prime in
+    let y3_ = (x3D * z3D) % prime in 
+    let y3_ = (y3_ + t2_) % prime in 
+    let x3_ = (t3D * x3D) % prime in 
+
+    let x3_ = (x3_ - t1D) % prime in 
+    let z3_ = (t4D * z3D) % prime in 
+    let t1_ = (t3D * t0D) % prime in 
+    let z3_ = (z3_ * t1_) % prime in 
+
+    as_nat h1 t1 = toDomain_ t1_ /\
+    as_nat h1 t2 = toDomain_ t2_ /\
+   
+    as_nat h1 x3 = toDomain_ x3_ /\ 
+    as_nat h1 y3 = toDomain_ y3_ /\
+    as_nat h1 z3 = toDomain_ z3_ /\
+
+    as_nat h1 x3 < prime /\
+    as_nat h1 y3 < prime /\
+    as_nat h1 z3 < prime ))
+
+
+let point_add_step3 result p q tempBuffer = 
+  let x1 = sub p (size 0) (size 4) in 
+  let y1 = sub p (size 4) (size 4) in 
+  let z1 = sub p (size 8) (size 4) in 
+
+  let x2 = sub q (size 0) (size 4) in 
+  let y2 = sub q (size 4) (size 4) in 
+
+  let t0 = sub tempBuffer (size 0) (size 4) in 
+  let t1 = sub tempBuffer (size 4) (size 4) in 
+  let t2 = sub tempBuffer (size 8) (size 4) in 
+  let t3 = sub tempBuffer (size 12) (size 4) in 
+  let t4 = sub tempBuffer (size 16) (size 4) in 
+
+  let x3 = sub result (size 0) (size 4) in 
+  let y3 = sub result (size 4) (size 4) in 
+  let z3 = sub result (size 8) (size 4) in 
+
+  montgomery_multiplication_buffer t2 t0 y3;
+  montgomery_multiplication_buffer y3 x3 z3;
+  p256_add y3 y3 t2;
+  montgomery_multiplication_buffer x3 t3 x3;
+
+  p256_sub x3 x3 t1;
+  montgomery_multiplication_buffer z3 t4 z3;
+  montgomery_multiplication_buffer t1 t3 t0;
+  montgomery_multiplication_buffer z3 z3 t1
+
+
+
+
+(* we expect that we already know the q point *)
 val pointAddMixed: result: point -> p: point -> q: pointAffine -> Stack unit 
-  (requires fun h -> live h result /\ live h p /\ live h q)
+  (requires fun h -> live h result /\ live h p /\ live h q /\ eq_or_disjoint result p
+  )
   (ensures fun h0 _ h1 -> True)
 
 
@@ -488,5 +603,6 @@ let pointAddMixed result p q =
     point_add_step0 result p q tempBuffer;
     point_add_step1 result p q tempBuffer;
     point_add_step2 result p q tempBuffer;
+    point_add_step3 result p q tempBuffer;
     copy_point_conditional result q p;
   pop_frame()
