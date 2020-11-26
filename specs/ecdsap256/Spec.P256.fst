@@ -81,54 +81,55 @@ let point_add_mixed (p: point_nat_prime) (q: point_affine) : point_nat_prime =
   let (x1, y1, z1) = p in 
   let (x2, y2) = q in 
 
-  let t0 = x1 * x2 in 
-  let t1 = y1 * y2 in 
-  let t3 = x2 + y2 in 
-  let t4 = x1 + y1 in 
+  let t0 = (x1 * x2) % prime in 
+  let t1 = (y1 * y2) % prime in 
+  let t3 = (x2 + y2) % prime in 
+  let t4 = (x1 + y1) % prime in 
 
-  let t3 = t3 * t4 in 
-  let t4 = t0 + t1 in 
-  let t3 = t3 - t4 in 
-  let t4 = y2 - z1 in 
+  let t3 = (t3 * t4) % prime in 
+  let t4 = (t0 + t1) % prime in 
+  let t3 = (t3 - t4) % prime in 
+  let t4 = (y2 - z1) % prime in 
 
-  let t4 = t4 + y1 in 
-  let y3 = x2 * z1 in 
-  let y3 = y3 + x1 in (* +++ *)
-  let z3 = bCoordinateP256 * z1 in  (* curve *) 
+  let t4 = (t4 + y1) % prime in 
+  let y3 = (x2 * z1) % prime in 
+  let y3 = (y3 + x1) % prime in (* +++ *)
+  let z3 = (bCoordinateP256 * z1) % prime in  (* curve *) 
 
-  let x3 = y3 - z3 in 
-  let z3 = x3 + x3 in 
-  let x3 = x3 + z3 in 
-  let z3 = t1 - x3 in 
+  let x3 = (y3 - z3) % prime in 
+  let z3 = (x3 + x3) % prime in 
+  let x3 = (x3 + z3) % prime in 
+  let z3 = (t1 - x3) % prime in 
 
-  let x3 = t1 + x3 in 
-  let y3 = bCoordinateP256 * y3 in 
-  let t1 = z1 + z1 in 
-  let t2 = t1 + z1 in 
+  let x3 = (t1 + x3) % prime in 
+  let y3 = (bCoordinateP256 * y3) % prime in 
+  let t1 = (z1 + z1) % prime in 
+  let t2 = (t1 + z1) % prime in 
 
-  let y3 = y3 - t2 in 
-  let y3 = y3 - t0 in 
-  let t1 = y3 + y3 in 
-  let y3 = t1 + y3 in 
+  let y3 = (y3 - t2) % prime in 
+  let y3 = (y3 - t0) % prime in 
+  let t1 = (y3 + y3) % prime in 
+  let y3 = (t1 + y3) % prime in 
 
-  let t1 = t0 + t0 in 
-  let t0 = t1 + t0 in 
-  let t0 = t0 - t2 in 
-  let t1 = t4 * y3 in 
+  let t1 = (t0 + t0) % prime in 
+  let t0 = (t1 + t0) % prime in 
+  let t0 = (t0 - t2) % prime in 
+  let t1 = (t4 * y3) % prime in 
 
-  let t2 = t0 * y3 in 
-  let y3 = x3 * z3 in 
-  let y3 = y3 + t2 in  
-  let x3 = t3 * x3 in
+  let t2 = (t0 * y3) % prime in 
+  let y3 = (x3 * z3) % prime in 
+  let y3 = (y3 + t2) % prime in  
+  let x3 = (t3 * x3) % prime in
   
-  let x3 = x3 - t1 in 
-  let z3 = t4 * z3 in 
-  let t1 = t3 * t0 in 
-  let z3 = z3 * t1 in 
+  let x3 = (x3 - t1) % prime in 
+  let z3 = (t4 * z3) % prime in 
+  let t1 = (t3 * t0) % prime in 
+  let z3 = (z3 * t1) % prime in 
 
-  (* check for pai *)
-
-  (x3 % prime, y3 % prime, z3 % prime)
+  if z1 = 0 then 
+    (x1, y1, 1)
+  else
+    (x3, y3, z3)
 
 
 

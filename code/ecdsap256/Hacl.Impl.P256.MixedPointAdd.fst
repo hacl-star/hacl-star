@@ -101,16 +101,56 @@ let pointAffineIsNotZero p =
   logor xZero yZero
 
 
-val copy_conditional_one_mm: out: felem -> mask: uint64 -> Stack unit
-  (requires fun h -> as_nat h out < prime256 /\ live h out /\ (uint_v mask == 0 \/ uint_v mask = pow2 64 - 1))
+val cmovznz: out: felem -> x: felem -> y: felem -> mask: uint64 -> Stack unit
+  (requires fun h -> as_nat h x < prime256 /\ as_nat h y < prime256 /\
+    live h out /\ live h x /\ live h y /\ (uint_v mask == 0 \/ uint_v mask = pow2 64 - 1))
+  (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\ as_nat h1 out < prime256 /\ (
+    if v mask = 0
+      then as_nat h1 out == as_nat h0 x
+      else 
+	as_nat h1 out == as_nat h0 y))
+
+let cmovznz out x y mask = 
+  let h0 = ST.get() in 
+  
+  let out_0 = index out (size 0) in 
+  let out_1 = index out (size 1) in 
+  let out_2 = index out (size 2) in 
+  let out_3 = index out (size 3) in  
+
+  let mask = eq_mask mask (u64 0) in 
+  
+  let r0 = logor (logand x.(size 0) mask) (logand y.(size 0) (lognot mask)) in 
+  let r1 = logor (logand x.(size 1) mask) (logand y.(size 1) (lognot mask)) in 
+  let r2 = logor (logand x.(size 2) mask) (logand y.(size 2) (lognot mask)) in 
+  let r3 = logor (logand x.(size 3) mask) (logand y.(size 3) (lognot mask)) in 
+
+  upd out (size 0) r0;
+  upd out (size 1) r1;
+  upd out (size 2) r2;
+  upd out (size 3) r3;
+
+  let x = as_seq h0 x in 
+  let y = as_seq h0 y in 
+  cmovznz4_lemma mask (Seq.index y 0) (Seq.index x 0);
+  cmovznz4_lemma mask (Seq.index y 1) (Seq.index x 1);
+  cmovznz4_lemma mask (Seq.index y 2) (Seq.index x 2);
+  cmovznz4_lemma mask (Seq.index y 3) (Seq.index x 3)
+
+
+(*cmovzv to neq -> change order of argument *)
+val cmovznz_one_mm: out: felem -> x: felem -> mask: uint64 -> Stack unit
+  (requires fun h -> as_nat h x < prime256 /\ live h out /\ live h x /\ (uint_v mask == 0 \/ uint_v mask = pow2 64 - 1))
   (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     as_nat h1 out < prime256 /\ (
     if v mask = 0
-      then as_nat h1 out == as_nat h0 out
+      then as_nat h1 out == as_nat h0 x
       else 
 	as_nat h1 out == Spec.P256.MontgomeryMultiplication.toDomain_ 1  ))
 
-let copy_conditional_one_mm out mask = 
+let cmovznz_one_mm out y mask = 
+  let h0 = ST.get() in 
+  
   let out_0 = index out (size 0) in 
   let out_1 = index out (size 1) in 
   let out_2 = index out (size 2) in 
@@ -121,37 +161,38 @@ let copy_conditional_one_mm out mask =
   let x_2 = u64 18446744073709551615 in 
   let x_3 = u64 4294967294 in 
 
-  let r_0 = logxor out_0 (logand mask (logxor out_0 x_0)) in 
-  let r_1 = logxor out_1 (logand mask (logxor out_1 x_1)) in 
-  let r_2 = logxor out_2 (logand mask (logxor out_2 x_2)) in 
-  let r_3 = logxor out_3 (logand mask (logxor out_3 x_3)) in 
+  let mask = eq_mask mask (u64 0) in 
+  let r0 = logor (logand y.(size 0) mask) (logand x_0 (lognot mask)) in 
+  let r1 = logor (logand y.(size 1) mask) (logand x_1 (lognot mask)) in 
+  let r2 = logor (logand y.(size 2) mask) (logand x_2 (lognot mask)) in 
+  let r3 = logor (logand y.(size 3) mask) (logand x_3 (lognot mask)) in 
 
-  lemma_xor_copy_cond out_0 x_0 mask;
-  lemma_xor_copy_cond out_1 x_1 mask;
-  lemma_xor_copy_cond out_2 x_2 mask;
-  lemma_xor_copy_cond out_3 x_3 mask;
-
-  upd out (size 0) r_0;
-  upd out (size 1) r_1;
-  upd out (size 2) r_2;
-  upd out (size 3) r_3;
+  upd out (size 0) r0;
+  upd out (size 1) r1;
+  upd out (size 2) r2;
+  upd out (size 3) r3;
 
   Spec.P256.MontgomeryMultiplication.lemmaToDomain 1;
   assert_norm(pow2 256 % prime256 = uint_v x_0 + uint_v x_1 * pow2 64 + uint_v x_2 * pow2 128 + uint_v x_3 * pow2 192);
   assert_norm (pow2 64 * pow2 64 = pow2 128);
-  assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192)
+  assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192);
+  
+  let y = as_seq h0 y in 
+  cmovznz4_lemma mask x_0 (Seq.index y 0);
+  cmovznz4_lemma mask x_1 (Seq.index y 1);
+  cmovznz4_lemma mask x_2 (Seq.index y 2);
+  cmovznz4_lemma mask x_3 (Seq.index y 3)
 
 
-val copy_point_conditional: out: point -> p: pointAffine -> maskPoint: point -> Stack unit 
-  (requires fun h -> live h out /\ live h p /\ live h maskPoint /\ 
-    disjoint p out /\ disjoint p maskPoint /\ disjoint out maskPoint /\
+val copy_point_conditional: out: point -> p: point -> q: pointAffine -> maskPoint: point -> Stack unit 
+  (requires fun h -> live h out /\ live h p /\ live h q /\ live h maskPoint /\ disjoint p out /\ eq_or_disjoint q out /\
     (
-      let xOut = as_nat h (gsub out (size 0) (size 4)) in 
-      let yOut = as_nat h (gsub out (size 4) (size 4)) in 
-      let zOut = as_nat h (gsub out (size 8) (size 4)) in 
-      xOut < prime256 /\ yOut < prime256 /\ zOut < prime256 /\
-      as_nat h (gsub p (size 0) (size 4)) < prime256 /\ 
-      as_nat h (gsub p (size 4) (size 4)) < prime256
+      let pX = as_nat h (gsub p (size 0) (size 4)) in 
+      let pY = as_nat h (gsub p (size 4) (size 4)) in 
+      let pZ = as_nat h (gsub p (size 8) (size 4)) in 
+      pX < prime256 /\ pY < prime256 /\ pZ < prime256 /\
+      as_nat h (gsub q (size 0) (size 4)) < prime256 /\ 
+      as_nat h (gsub q (size 4) (size 4)) < prime256 
     )
   )
   (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\ (
@@ -163,33 +204,42 @@ val copy_point_conditional: out: point -> p: pointAffine -> maskPoint: point -> 
     as_nat h1 zOut < prime256 /\ (
     
     let mask = as_nat h0 (gsub maskPoint (size 8) (size 4)) in 
-    let x = gsub p (size 0) (size 4) in 
-    let y = gsub p (size 4) (size 4) in 
+    let xP = gsub p (size 0) (size 4) in 
+    let yP = gsub p (size 4) (size 4) in 
+    let zP = gsub p (size 8) (size 4) in 
+
+    let xQ = gsub q (size 0) (size 4) in 
+    let yQ = gsub q (size 4) (size 4) in 
 
     if mask = 0 then 
-      as_nat h1 xOut == as_nat h0 x /\ 
-      as_nat h1 yOut == as_nat h0 y /\ 
-      as_nat h1 zOut == Spec.P256.MontgomeryMultiplication.toDomain_ 1 
+      as_nat h1 xOut == as_nat h0 xP /\ 
+      as_nat h1 yOut == as_nat h0 yP /\ 
+      as_nat h1 zOut == as_nat h0 zP
     else 
-      as_nat h1 xOut == as_nat h0 xOut /\ 
-      as_nat h1 yOut == as_nat h0 yOut /\ 
-      as_nat h1 zOut == as_nat h0 zOut 
-    )))
+      as_nat h1 xOut == as_nat h0 xQ /\ 
+      as_nat h1 yOut == as_nat h0 yQ /\ 
+      as_nat h1 zOut == Spec.P256.MontgomeryMultiplication.toDomain_ 1
+    ))) 
 
-let copy_point_conditional out p maskPoint = 
+let copy_point_conditional out p q maskPoint = 
   let z = sub maskPoint (size 8) (size 4) in 
-  let mask = isZero_uint64_CT z in 
+  let mask = lognot (isZero_uint64_CT z) in 
+    lognot_lemma (isZero_uint64_CT z);
 
   let xOut = sub out (size 0) (size 4) in 
   let yOut = sub out (size 4) (size 4) in 
   let zOut = sub out (size 8) (size 4) in 
 
-  let p_x = sub p (size 0) (size 4) in 
-  let p_y = sub p (size 4) (size 4) in 
+  let pX = sub p (size 0) (size 4) in 
+  let pY = sub p (size 4) (size 4) in 
+  let pZ = sub p (size 8) (size 4) in 
 
-  copy_conditional xOut p_x mask;
-  copy_conditional yOut p_y mask;
-  copy_conditional_one_mm zOut mask
+  let qX = sub q (size 0) (size 4) in 
+  let qY = sub q (size 4) (size 4) in 
+
+  cmovznz4 mask pX qX xOut;
+  cmovznz4 mask pY qY yOut;
+  cmovznz_one_mm zOut pZ mask 
 
 
 let prime = prime256 
@@ -269,7 +319,7 @@ let point_add_step0 result p q tempBuffer =
 
 val point_add_step1: result: point -> p: point -> q: pointAffine -> tempBuffer: lbuffer uint64 (size 20) -> Stack unit
   (requires fun h -> live h result /\ live h p /\ live h q /\ live h tempBuffer /\
-    disjoint p tempBuffer /\ disjoint q tempBuffer /\ eq_or_disjoint result p /\ disjoint result tempBuffer /\ (
+    disjoint q result /\ disjoint p tempBuffer /\ disjoint q tempBuffer /\ eq_or_disjoint result p /\ disjoint result tempBuffer /\ (
     let t1 = gsub tempBuffer (size 4) (size 4) in 
     let t4 = gsub tempBuffer (size 16) (size 4) in  
 
@@ -304,6 +354,7 @@ val point_add_step1: result: point -> p: point -> q: pointAffine -> tempBuffer: 
 
     let t0 = gsub tempBuffer (size 0) (size 4) in 
     let t1 = gsub tempBuffer (size 4) (size 4) in 
+    let t2 = gsub tempBuffer (size 8) (size 4) in 
     let t3 = gsub tempBuffer (size 12) (size 4) in 
     let t4 = gsub tempBuffer (size 16) (size 4) in 
 
@@ -334,6 +385,7 @@ val point_add_step1: result: point -> p: point -> q: pointAffine -> tempBuffer: 
     as_nat h1 x3 < prime /\
     as_nat h1 y3 < prime /\
     as_nat h1 z3 < prime /\
+    
     as_nat h1 t4 < prime ))
 
 let point_add_step1 result p q tempBuffer = 
@@ -401,7 +453,6 @@ val point_add_step2: result: point -> p: point -> q: pointAffine -> tempBuffer: 
 
     as_nat h t0 < prime /\
     as_nat h t1 < prime /\ 
-    as_nat h t2 < prime /\
     as_nat h t4 < prime))
   (ensures fun h0 _ h1 -> modifies (loc result |+| loc tempBuffer) h0 h1 /\ (
     let z1D = fromDomain_ (as_nat h0 (gsub p (size 8) (size 4))) in 
@@ -588,21 +639,121 @@ let point_add_step3 result p q tempBuffer =
   montgomery_multiplication_buffer z3 z3 t1
 
 
-
+#push-options "--z3rlimit 200"
 
 (* we expect that we already know the q point *)
 val pointAddMixed: result: point -> p: point -> q: pointAffine -> Stack unit 
-  (requires fun h -> live h result /\ live h p /\ live h q /\ eq_or_disjoint result p
+  (requires fun h -> live h result /\ live h p /\ live h q /\ disjoint q result /\ disjoint result p /\ (
+    let x1 = gsub p (size 0) (size 4) in 
+    let y1 = gsub p (size 4) (size 4) in 
+    let z1 = gsub p (size 8) (size 4) in 
+
+    let x2 = gsub q (size 0) (size 4) in 
+    let y2 = gsub q (size 4) (size 4) in 
+
+    as_nat h x1 < prime256 /\
+    as_nat h y1 < prime256 /\
+    as_nat h z1 < prime256 /\
+
+    as_nat h x2 < prime256 /\
+    as_nat h y2 < prime256)
   )
-  (ensures fun h0 _ h1 -> True)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\    
+    as_nat h1 (gsub result (size 8) (size 4)) < prime /\ 
+    as_nat h1 (gsub result (size 0) (size 4)) < prime /\ 
+    as_nat h1 (gsub result (size 4) (size 4)) < prime /\ (
+    
+    let pX, pY, pZ = gsub p (size 0) (size 4), gsub p (size 4) (size 4), gsub p (size 8) (size 4) in 
+    let qX, qY = gsub q (size 0) (size 4), gsub q (size 4) (size 4) in 
+    let x3, y3, z3 = gsub result (size 0) (size 4), gsub result (size 4) (size 4), gsub result (size 8) (size 4) in 
+       
+    let pxD, pyD, pzD = fromDomain_ (as_nat h0 pX), fromDomain_ (as_nat h0 pY), fromDomain_ (as_nat h0 pZ) in 
+    let qxD, qyD = fromDomain_ (as_nat h0 qX), fromDomain_ (as_nat h0 qY) in 
+    let x3D, y3D, z3D = fromDomain_ (as_nat h1 x3), fromDomain_ (as_nat h1 y3), fromDomain_ (as_nat h1 z3) in
+      
+    let xN, yN, zN = Spec.P256.point_add_mixed (pxD, pyD, pzD) (qxD, qyD) in 
+    x3D == xN /\ y3D == yN /\ z3D == zN))
 
 
 let pointAddMixed result p q = 
   push_frame();
     let tempBuffer = create (size 20) (u64 0) in 
-    point_add_step0 result p q tempBuffer;
-    point_add_step1 result p q tempBuffer;
-    point_add_step2 result p q tempBuffer;
-    point_add_step3 result p q tempBuffer;
+      let h0 = ST.get() in 
+    point_add_step0 result p q tempBuffer; 
+    point_add_step1 result p q tempBuffer; 
+    point_add_step2 result p q tempBuffer; 
+
+      let h3 = ST.get() in 
+      
+      assert(
+
+      let x1D = fromDomain_ (as_nat h0 (gsub p (size 0) (size 4))) in 
+      let x2D = fromDomain_ (as_nat h0 (gsub q (size 0) (size 4))) in 
+      let y1D = fromDomain_ (as_nat h0 (gsub p (size 4) (size 4))) in 
+      let y2D = fromDomain_ (as_nat h0 (gsub q (size 4) (size 4))) in 
+      let z1D = fromDomain_ (as_nat h0 (gsub p (size 8) (size 4))) in 
+
+    let x3 = gsub result (size 0) (size 4) in 
+    let y3 = gsub result (size 4) (size 4) in 
+    let z3 = gsub result (size 8) (size 4) in 
+
+    let t0 = gsub tempBuffer (size 0) (size 4) in 
+    let t1 = gsub tempBuffer (size 4) (size 4) in 
+    let t2 = gsub tempBuffer (size 8) (size 4) in 
+    let t3 = gsub tempBuffer (size 12) (size 4) in 
+    let t4 = gsub tempBuffer (size 16) (size 4) in 
+
+    let t0_ = (x1D * x2D) % prime in 
+      let t1_ = (y1D * y2D) % prime in 
+      let t3_ = (x2D + y2D) % prime in 
+      let t4_ = (x1D + y1D) % prime in 
+
+      let t3_ = (t3_ * t4_) % prime in 
+      let t4_ = (t0_ + t1_) % prime in 
+      let t3_ = (t3_ - t4_) % prime in 
+      let t4_ = (y2D - z1D) % prime in 
+
+      let t4_ = (t4_ + y1D) % prime in 
+      let y3_ = (x2D * z1D) % prime in
+      let y3_ = (y3_ + x1D) % prime in 
+      let z3_ = (Spec.P256.bCoordinateP256 * z1D) % prime in 
+
+      let x3_ = (y3_ - z3_) % prime in 
+      let z3_ = (x3_ + x3_) % prime in 
+      let x3_ = (x3_ + z3_)  % prime in 
+      let z3_ = (t1_ - x3_) % prime in 
+      let x3_ = (t1_ + x3_) % prime in 
+      let y3_ = (Spec.P256.bCoordinateP256 * y3_) % prime in 
+
+    let t1_ = (z1D + z1D) % prime in 
+    let t2_ = (t1_ + z1D) % prime in 
+    let y3_ = (y3_ - t2_) % prime in 
+    let y3_ = (y3_ - t0_) % prime in 
+    let t1_ = (y3_ + y3_) % prime in 
+
+    let y3_ = (t1_ + y3_) % prime in 
+    let t1_ = (t0_ + t0_) % prime in 
+    let t0_ = (t1_ + t0_) % prime in 
+    let t0_ = (t0_ - t2_) % prime in 
+    let t1_ = (t4_ * y3_) % prime in 
+
+    as_nat h3 t0 = toDomain_ t0_ /\
+    as_nat h3 t1 = toDomain_ t1_ /\
+    as_nat h3 t2 = toDomain_ t2_ /\
+    as_nat h3 t3 = toDomain_ t3_ /\
+    as_nat h3 t4 = toDomain_ t4_ /\
+
+    as_nat h3 x3 = toDomain_ x3_ /\
+    as_nat h3 y3 = toDomain_ y3_ /\
+    as_nat h3 z3 = toDomain_ z3_);
+
+    point_add_step3 result p q tempBuffer; 
     copy_point_conditional result q p;
+      admit();
+    
+  Hacl.Impl.P256.Math.lemma_multiplication_not_mod_prime (as_nat h0 (gsub q (size 8) (size 4)));
+  admit();
+
   pop_frame()
+
+#pop-options
