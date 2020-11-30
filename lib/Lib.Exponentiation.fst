@@ -504,6 +504,26 @@ let rec exp_fw_lemma_loop #t k a bBits b l table_len table i =
     () end
 
 
+val exp_fw_rem_lemma:
+    #t:Type -> k:exp t
+  -> a:t
+  -> bBits:nat -> b:nat{b < pow2 bBits}
+  -> l:pos
+  -> table_len:size_nat{1 < table_len /\ table_len == pow2 l}
+  -> table:lseq t table_len
+  -> acc:t -> Lemma
+  (requires table == precomp_table k a table_len)
+  (ensures (let c = bBits % l in
+    exp_fw_rem k bBits b l table_len table acc == fmul (pow k acc (pow2 c)) (pow k a (b % pow2 c))))
+
+let exp_fw_rem_lemma #t k a bBits b l table_len table acc =
+  let c = bBits % l in
+  let bits_c = b % pow2 c in
+  Math.Lemmas.pow2_lt_compat l c;
+  exp_pow2_lemma k acc c;
+  precomp_table_lemma k a table_len
+
+
 let exp_fw_lemma #t k a bBits b l =
   let table_len = pow2 l in
   Math.Lemmas.pow2_le_compat l 1;
@@ -515,6 +535,7 @@ let exp_fw_lemma #t k a bBits b l =
   assert (acc == pow k a (b / pow2 (bBits % l)));
 
   let c = bBits % l in
+  exp_fw_rem_lemma #t k a bBits b l table_len table acc;
   let res = if c = 0 then acc else fmul (pow k acc (pow2 c)) (pow k a (b % pow2 c)) in
   if c = 0 then begin
     assert_norm (pow2 0 = 1);
