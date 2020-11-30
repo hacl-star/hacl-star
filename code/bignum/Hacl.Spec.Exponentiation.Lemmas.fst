@@ -2,10 +2,12 @@ module Hacl.Spec.Exponentiation.Lemmas
 
 open FStar.Mul
 open Lib.NatMod
+open Lib.Sequence
 
-module M = Hacl.Spec.Montgomery.Lemmas
 module Loops = Lib.LoopCombinators
 module LE = Lib.Exponentiation
+module LSeq = Lib.Sequence
+module M = Hacl.Spec.Montgomery.Lemmas
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -176,6 +178,116 @@ let mont_mod_exp_lemma n r d a b =
     pow a b % n;
     }
 
+(* Modular exponentiation with Montgomery arithmetic
+   using functions from Hacl.Spec.Montgomery.Lemmas *)
+
+let mont_pre (pbits:pos) (rLen:nat) (n:pos) (mu:nat) =
+  (1 + n * mu) % pow2 pbits == 0 /\
+  1 < n /\ n < pow2 (pbits * rLen) /\ n % 2 = 1
+
+val oneM_ll: pbits:pos -> rLen:pos -> n:pos -> mu:nat{mont_pre pbits rLen n mu} -> nat_mod n
+let oneM_ll pbits rLen n mu =
+  let d, k = M.eea_pow2_odd (pbits * rLen) n in
+  M.mont_preconditions_d pbits rLen n;
+  M.to_mont_lemma pbits rLen n d mu 1;
+  M.to_mont pbits rLen n mu 1
+
+val fmul_mont_ll: pbits:pos -> rLen:nat -> n:pos -> mu:nat{mont_pre pbits rLen n mu}
+  -> a:nat_mod n -> b:nat_mod n -> nat_mod n
+let fmul_mont_ll pbits rLen n mu a b =
+  let d, k = M.eea_pow2_odd (pbits * rLen) n in
+  M.mont_preconditions_d pbits rLen n;
+  M.mont_mul_lemma pbits rLen n d mu a b;
+  M.mont_mul pbits rLen n mu a b
+
+
+val lemma_one_mont_ll: pbits:pos -> rLen:nat -> n:pos -> mu:nat{mont_pre pbits rLen n mu} -> a:nat_mod n ->
+  Lemma (fmul_mont_ll pbits rLen n mu a (oneM_ll pbits rLen n mu) == a)
+let lemma_one_mont_ll pbits rLen n mu a =
+  let r = pow2 (pbits * rLen) in
+  let d, k = M.eea_pow2_odd (pbits * rLen) n in
+  M.mont_preconditions_d pbits rLen n;
+
+  let oneM = oneM_ll pbits rLen n mu in
+  M.to_mont_lemma pbits rLen n d mu 1;
+  assert (oneM == 1 * r % n);
+  M.mont_mul_lemma pbits rLen n d mu a oneM;
+  lemma_one_mont n r d a
+
+
+val lemma_fmul_assoc_mont_ll: pbits:pos -> rLen:nat -> n:pos -> mu:nat{mont_pre pbits rLen n mu}
+  -> a:nat_mod n -> b:nat_mod n -> c:nat_mod n ->
+  Lemma (fmul_mont_ll pbits rLen n mu (fmul_mont_ll pbits rLen n mu a b) c ==
+    fmul_mont_ll pbits rLen n mu a (fmul_mont_ll pbits rLen n mu b c))
+
+let lemma_fmul_assoc_mont_ll pbits rLen n mu a b c =
+  let r = pow2 (pbits * rLen) in
+  let d, k = M.eea_pow2_odd (pbits * rLen) n in
+  M.mont_preconditions_d pbits rLen n;
+
+  M.mont_mul_lemma pbits rLen n d mu a b;
+  M.mont_mul_lemma pbits rLen n d mu (fmul_mont_ll pbits rLen n mu a b) c;
+  M.mont_mul_lemma pbits rLen n d mu b c;
+  M.mont_mul_lemma pbits rLen n d mu a (fmul_mont_ll pbits rLen n mu b c);
+  lemma_fmul_assoc_mont n d a b c
+
+
+val lemma_fmul_comm_mont_ll: pbits:pos -> rLen:nat -> n:pos -> mu:nat{mont_pre pbits rLen n mu}
+  -> a:nat_mod n -> b:nat_mod n ->
+  Lemma (fmul_mont_ll pbits rLen n mu a b == fmul_mont_ll pbits rLen n mu b a)
+
+let lemma_fmul_comm_mont_ll pbits rLen n mu a b =
+  let r = pow2 (pbits * rLen) in
+  let d, k = M.eea_pow2_odd (pbits * rLen) n in
+  M.mont_preconditions_d pbits rLen n;
+
+  M.mont_mul_lemma pbits rLen n d mu a b;
+  M.mont_mul_lemma pbits rLen n d mu b a;
+  lemma_fmul_comm_mont n d a b
+
+
+let mk_nat_mont_group_ll (pbits:pos) (rLen:nat) (n:pos) (mu:nat{mont_pre pbits rLen n mu}) : LE.exp (nat_mod n) = {
+  LE.one = oneM_ll pbits rLen n mu;
+  LE.fmul = fmul_mont_ll pbits rLen n mu;
+  LE.lemma_one = lemma_one_mont_ll pbits rLen n mu;
+  LE.lemma_fmul_assoc = lemma_fmul_assoc_mont_ll pbits rLen n mu;
+  LE.lemma_fmul_comm = lemma_fmul_comm_mont_ll pbits rLen n mu;
+  }
+
+
+val pow_nat_mont_ll_is_pow_nat_mont:
+    pbits:pos -> rLen:pos
+  -> n:pos -> mu:nat
+  -> a:nat_mod n -> b:nat -> Lemma
+  (requires mont_pre pbits rLen n mu)
+  (ensures
+   (let r = pow2 (pbits * rLen) in
+    let d, k = M.eea_pow2_odd (pbits * rLen) n in
+    M.mont_preconditions_d pbits rLen n;
+
+    LE.pow (mk_nat_mont_group n r d) a b ==
+    LE.pow (mk_nat_mont_group_ll pbits rLen n mu) a b))
+
+let rec pow_nat_mont_ll_is_pow_nat_mont pbits rLen n mu a b =
+  let r = pow2 (pbits * rLen) in
+  let d, k = M.eea_pow2_odd (pbits * rLen) n in
+  M.mont_preconditions_d pbits rLen n;
+
+  let k0 = mk_nat_mont_group n r d in
+  let k1 = mk_nat_mont_group_ll pbits rLen n mu in
+
+  if b = 0 then begin
+    LE.lemma_pow0 k0 a;
+    LE.lemma_pow0 k1 a;
+    M.to_mont_lemma pbits rLen n d mu 1 end
+  else begin
+    LE.lemma_pow_unfold k0 a b;
+    LE.lemma_pow_unfold k1 a b;
+    //assert (LE.pow k1 a b == k1.LE.fmul a (LE.pow k1 a (b - 1)));
+    M.mont_mul_lemma pbits rLen n d mu a (LE.pow k1 a (b - 1));
+    pow_nat_mont_ll_is_pow_nat_mont pbits rLen n mu a (b - 1);
+    () end
+
 
 ///  A righ-to-left binary method with Montgomery arithmetic
 ///  using functions defined in Hacl.Spec.Montgomery.Lemmas
@@ -208,60 +320,44 @@ let mod_exp_mont_ll pbits rLen n mu a bBits b =
 
 val mod_exp_mont_ll_lemma_loop:
     pbits:pos -> rLen:nat
-  -> n:pos -> d:int -> mu:nat
+  -> n:pos -> mu:nat
   -> bBits:nat -> b:pos{b < pow2 bBits}
   -> i:nat{i <= bBits}
   -> aM0:nat_mod n -> accM0:nat_mod n -> Lemma
-  (requires
-    (1 + n * mu) % pow2 pbits == 0 /\
-    pow2 (pbits * rLen) * d % n == 1 /\
-    n < pow2 (pbits * rLen))
+  (requires mont_pre pbits rLen n mu)
   (ensures
-    (let r = pow2 (pbits * rLen) in
-     let k = mk_nat_mont_group n r d in
-     let aM1, accM1 = Loops.repeati i (mod_exp_mont_f_ll pbits rLen n mu bBits b) (aM0, accM0) in
-     let aM2, accM2 = Loops.repeati i (LE.exp_rl_f k bBits b) (aM0, accM0) in
-     aM1 == aM2 /\ accM1 == accM2))
+   (let k = mk_nat_mont_group_ll pbits rLen n mu in
+    let aM1, accM1 = Loops.repeati i (mod_exp_mont_f_ll pbits rLen n mu bBits b) (aM0, accM0) in
+    let aM2, accM2 = Loops.repeati i (LE.exp_rl_f k bBits b) (aM0, accM0) in
+    aM1 == aM2 /\ accM1 == accM2))
 
-let rec mod_exp_mont_ll_lemma_loop pbits rLen n d mu bBits b i aM0 accM0 =
-  let r = pow2 (pbits * rLen) in
-  let k = mk_nat_mont_group n r d in
-  let aM1, accM1 = Loops.repeati i (mod_exp_mont_f_ll pbits rLen n mu bBits b) (aM0, accM0) in
-  let aM2, accM2 = Loops.repeati i (LE.exp_rl_f k bBits b) (aM0, accM0) in
+let rec mod_exp_mont_ll_lemma_loop pbits rLen n mu bBits b i aM0 accM0 =
+  let k = mk_nat_mont_group_ll pbits rLen n mu in
 
   if i = 0 then begin
     Loops.eq_repeati0 i (mod_exp_mont_f_ll pbits rLen n mu bBits b) (aM0, accM0);
-    Loops.eq_repeati0 i (LE.exp_rl_f k bBits b) (aM0, accM0);
-    () end
+    Loops.eq_repeati0 i (LE.exp_rl_f k bBits b) (aM0, accM0) end
   else begin
-    let aM3, accM3 = Loops.repeati (i - 1) (mod_exp_mont_f_ll pbits rLen n mu bBits b) (aM0, accM0) in
-    let aM4, accM4 = Loops.repeati (i - 1) (LE.exp_rl_f k bBits b) (aM0, accM0) in
     Loops.unfold_repeati i (mod_exp_mont_f_ll pbits rLen n mu bBits b) (aM0, accM0) (i - 1);
     Loops.unfold_repeati i (LE.exp_rl_f k bBits b) (aM0, accM0) (i - 1);
-    mod_exp_mont_ll_lemma_loop pbits rLen n d mu bBits b (i - 1) aM0 accM0;
-    assert (aM3 == aM4 /\ accM3 == accM4);
-    Math.Lemmas.lemma_mult_lt_sqr aM3 aM3 n;
-    M.mont_reduction_lemma pbits rLen n d mu (aM3 * aM3);
-
-    Math.Lemmas.lemma_mult_lt_sqr accM3 aM3 n;
-    M.mont_reduction_lemma pbits rLen n d mu (accM3 * aM3);
-    () end
+    mod_exp_mont_ll_lemma_loop pbits rLen n mu bBits b (i - 1) aM0 accM0 end
 
 
-val mod_exp_mont_ll_lemma_eval:
+val mod_exp_mont_ll_lemma:
     pbits:pos -> rLen:nat
-  -> n:pos -> d:int -> mu:nat
+  -> n:pos -> mu:nat
   -> a:nat_mod n
   -> bBits:nat -> b:pos{b < pow2 bBits} -> Lemma
-  (requires
-    (1 + n * mu) % pow2 pbits == 0 /\
-    pow2 (pbits * rLen) * d % n == 1 /\
-    1 < n /\ n < pow2 (pbits * rLen))
-  (ensures mod_exp_mont_ll pbits rLen n mu a bBits b == pow a b % n)
+  (requires mont_pre pbits rLen n mu)
+  (ensures  mod_exp_mont_ll pbits rLen n mu a bBits b == pow_mod #n a b)
 
-let mod_exp_mont_ll_lemma_eval pbits rLen n d mu a bBits b =
+let mod_exp_mont_ll_lemma pbits rLen n mu a bBits b =
   let r = pow2 (pbits * rLen) in
-  let k = mk_nat_mont_group n r d in
+  let d, k = M.eea_pow2_odd (pbits * rLen) n in
+  M.mont_preconditions_d pbits rLen n;
+
+  let k0 = mk_nat_mont_group n r d in
+  let k1 = mk_nat_mont_group_ll pbits rLen n mu in
 
   let aM0 = M.to_mont pbits rLen n mu a in
   let accM0 = M.to_mont pbits rLen n mu 1 in
@@ -271,38 +367,14 @@ let mod_exp_mont_ll_lemma_eval pbits rLen n d mu a bBits b =
   assert (accM0 == 1 * r % n);
 
   let (aM1, accM1) = Loops.repeati bBits (mod_exp_mont_f_ll pbits rLen n mu bBits b) (aM0, accM0) in
-  mod_exp_mont_ll_lemma_loop pbits rLen n d mu bBits b bBits aM0 accM0;
-  LE.exp_rl_lemma k aM0 bBits b;
-  assert (accM1 == LE.pow k aM0 b);
-
+  mod_exp_mont_ll_lemma_loop pbits rLen n mu bBits b bBits aM0 accM0;
+  LE.exp_rl_lemma k1 aM0 bBits b;
+  //assert (accM1 == LE.pow k1 aM0 b);
+  pow_nat_mont_ll_is_pow_nat_mont pbits rLen n mu aM0 b;
+  //assert (accM1 == LE.pow k0 aM0 b);
   let res = M.from_mont pbits rLen n mu accM1 in
   M.from_mont_lemma pbits rLen n d mu accM1;
-  assert (res == accM1 * d % n);
-
-  calc (==) {
-    LE.pow k aM0 b * d % n;
-    (==) { pow_nat_mont_is_pow n r d aM0 b }
-    pow aM0 b * oneM n r * pow d b % n * d % n;
-    (==) { mont_mod_exp_lemma_before_to_mont n r d a b }
-    pow a b * oneM n r % n * d % n;
-    (==) { mont_mod_exp_lemma_after_to_mont n r d a b }
-    pow a b % n;
-    }
-
-
-val mod_exp_mont_ll_lemma:
-    pbits:pos -> rLen:nat
-  -> n:pos -> d:int -> mu:nat
-  -> a:nat_mod n
-  -> bBits:nat -> b:pos{b < pow2 bBits} -> Lemma
-  (requires
-    (1 + n * mu) % pow2 pbits == 0 /\
-    pow2 (pbits * rLen) * d % n == 1 /\
-    1 < n /\ n < pow2 (pbits * rLen))
-  (ensures mod_exp_mont_ll pbits rLen n mu a bBits b == pow_mod #n a b)
-
-let mod_exp_mont_ll_lemma pbits rLen n d mu a bBits b =
-  mod_exp_mont_ll_lemma_eval pbits rLen n d mu a bBits b;
+  mont_mod_exp_lemma n r d a b;
   lemma_pow_mod #n a b
 
 
@@ -334,73 +406,55 @@ let mod_exp_mont_ladder_swap_ll pbits rLen n mu a bBits b =
   let rM0 = M.to_mont pbits rLen n mu 1 in
   let rM1 = M.to_mont pbits rLen n mu a in
   let sw = 0 in
-  let (rM0', rM1', sw') = Loops.repeati bBits (mod_exp_mont_ladder_swap_f_ll pbits rLen n mu bBits b) (rM0, rM1, sw) in
+  let (rM0', rM1', sw') =
+    Loops.repeati bBits (mod_exp_mont_ladder_swap_f_ll pbits rLen n mu bBits b) (rM0, rM1, sw) in
   let rM0', rM1' = LE.cswap sw' rM0' rM1' in
   M.from_mont pbits rLen n mu rM0'
 
 
 val mod_exp_mont_lader_swap_ll_lemma_loop:
     pbits:pos -> rLen:nat
-  -> n:pos -> d:int -> mu:nat
+  -> n:pos -> mu:nat
   -> bBits:nat -> b:pos{b < pow2 bBits}
   -> i:nat{i <= bBits}
   -> rM0:nat_mod n -> rM1:nat_mod n -> sw0:nat -> Lemma
   (requires
-    (1 + n * mu) % pow2 pbits == 0 /\
-    pow2 (pbits * rLen) * d % n == 1 /\
-    n < pow2 (pbits * rLen) /\
+    mont_pre pbits rLen n mu /\
     sw0 == b / pow2 bBits % 2)
   (ensures
-    (let r = pow2 (pbits * rLen) in
-     let k = mk_nat_mont_group n r d in
-     let (rM0', rM1', sw') = Loops.repeati i (mod_exp_mont_ladder_swap_f_ll pbits rLen n mu bBits b) (rM0, rM1, sw0) in
+    (let k = mk_nat_mont_group_ll pbits rLen n mu in
+     let (rM0', rM1', sw') = Loops.repeati i
+       (mod_exp_mont_ladder_swap_f_ll pbits rLen n mu bBits b) (rM0, rM1, sw0) in
      let (rM0'', rM1'', sw'') = Loops.repeati i (LE.exp_mont_ladder_swap_f k bBits b) (rM0, rM1, sw0) in
      rM0' == rM0'' /\ rM1' == rM1'' /\ sw' == sw''))
 
-let rec mod_exp_mont_lader_swap_ll_lemma_loop pbits rLen n d mu bBits b i rM0 rM1 sw0 =
-  let r = pow2 (pbits * rLen) in
-  let k = mk_nat_mont_group n r d in
-  let (rM0', rM1', sw') = Loops.repeati i (mod_exp_mont_ladder_swap_f_ll pbits rLen n mu bBits b) (rM0, rM1, sw0) in
-  let (rM0'', rM1'', sw'') = Loops.repeati i (LE.exp_mont_ladder_swap_f k bBits b) (rM0, rM1, sw0) in
+let rec mod_exp_mont_lader_swap_ll_lemma_loop pbits rLen n mu bBits b i rM0 rM1 sw0 =
+  let k = mk_nat_mont_group_ll pbits rLen n mu in
 
   if i = 0 then begin
     Loops.eq_repeati0 i (mod_exp_mont_ladder_swap_f_ll pbits rLen n mu bBits b) (rM0, rM1, sw0);
-    Loops.eq_repeati0 i (LE.exp_mont_ladder_swap_f k bBits b) (rM0, rM1, sw0);
-    () end
+    Loops.eq_repeati0 i (LE.exp_mont_ladder_swap_f k bBits b) (rM0, rM1, sw0) end
   else begin
-    let (rM2, rM3, sw1) = Loops.repeati (i - 1) (mod_exp_mont_ladder_swap_f_ll pbits rLen n mu bBits b) (rM0, rM1, sw0) in
-    let (rM2', rM3', sw1') = Loops.repeati (i - 1) (LE.exp_mont_ladder_swap_f k bBits b) (rM0, rM1, sw0) in
     Loops.unfold_repeati i (mod_exp_mont_ladder_swap_f_ll pbits rLen n mu bBits b) (rM0, rM1, sw0) (i - 1);
     Loops.unfold_repeati i (LE.exp_mont_ladder_swap_f k bBits b) (rM0, rM1, sw0) (i - 1);
-    mod_exp_mont_lader_swap_ll_lemma_loop pbits rLen n d mu bBits b (i - 1) rM0 rM1 sw0;
-    assert (rM2 == rM2' /\ rM3 == rM3' /\ sw1 == sw1');
-
-    let bit = b / pow2 (bBits - i) % 2 in
-    let sw = (bit + sw1) % 2 in
-    let rM2, rM3 = LE.cswap sw rM2 rM3 in
-
-    Math.Lemmas.lemma_mult_lt_sqr rM2 rM2 n;
-    M.mont_reduction_lemma pbits rLen n d mu (rM2 * rM2);
-
-    Math.Lemmas.lemma_mult_lt_sqr rM3 rM2 n;
-    M.mont_reduction_lemma pbits rLen n d mu (rM3 * rM2);
-    () end
+    mod_exp_mont_lader_swap_ll_lemma_loop pbits rLen n mu bBits b (i - 1) rM0 rM1 sw0 end
 
 
-val mod_exp_mont_ladder_swap_ll_lemma_eval:
+val mod_exp_mont_ladder_swap_ll_lemma:
     pbits:pos -> rLen:nat
-  -> n:pos -> d:int -> mu:nat
+  -> n:pos -> mu:nat
   -> a:nat_mod n
   -> bBits:nat -> b:pos{b < pow2 bBits} -> Lemma
-  (requires
-    (1 + n * mu) % pow2 pbits == 0 /\
-    pow2 (pbits * rLen) * d % n == 1 /\
-    1 < n /\ n < pow2 (pbits * rLen))
-  (ensures mod_exp_mont_ladder_swap_ll pbits rLen n mu a bBits b == pow a b % n)
+  (requires mont_pre pbits rLen n mu)
+  (ensures  mod_exp_mont_ladder_swap_ll pbits rLen n mu a bBits b == pow_mod #n a b)
 
-let mod_exp_mont_ladder_swap_ll_lemma_eval pbits rLen n d mu a bBits b =
+let mod_exp_mont_ladder_swap_ll_lemma pbits rLen n mu a bBits b =
   let r = pow2 (pbits * rLen) in
-  let k = mk_nat_mont_group n r d in
+  let d, k = M.eea_pow2_odd (pbits * rLen) n in
+  M.mont_preconditions_d pbits rLen n;
+
+  let k0 = mk_nat_mont_group n r d in
+  let k1 = mk_nat_mont_group_ll pbits rLen n mu in
 
   let rM0 = M.to_mont pbits rLen n mu 1 in
   let rM1 = M.to_mont pbits rLen n mu a in
@@ -412,42 +466,394 @@ let mod_exp_mont_ladder_swap_ll_lemma_eval pbits rLen n d mu a bBits b =
   let sw0 = 0 in
   Math.Lemmas.small_div b (pow2 bBits);
   assert (sw0 == b / pow2 bBits % 2);
-  let (rM0', rM1', sw') = Loops.repeati bBits (mod_exp_mont_ladder_swap_f_ll pbits rLen n mu bBits b) (rM0, rM1, sw0) in
-  let (rM0'', rM1'', sw'') = Loops.repeati bBits (LE.exp_mont_ladder_swap_f k bBits b) (rM0, rM1, sw0) in
-  mod_exp_mont_lader_swap_ll_lemma_loop pbits rLen n d mu bBits b bBits rM0 rM1 sw0;
+  let (rM0', rM1', sw') = Loops.repeati bBits
+    (mod_exp_mont_ladder_swap_f_ll pbits rLen n mu bBits b) (rM0, rM1, sw0) in
+  let (rM0'', rM1'', sw'') = Loops.repeati bBits (LE.exp_mont_ladder_swap_f k1 bBits b) (rM0, rM1, sw0) in
+  mod_exp_mont_lader_swap_ll_lemma_loop pbits rLen n mu bBits b bBits rM0 rM1 sw0;
   assert (rM0' == rM0'' /\ rM1' == rM1'' /\ sw' == sw'');
 
   let rM0', rM1' = LE.cswap sw' rM0' rM1' in
-  LE.exp_mont_ladder_swap_lemma k rM1 bBits b;
-  LE.exp_mont_ladder_lemma k rM1 bBits b;
-  assert (rM0' == LE.pow k rM1 b);
+  LE.exp_mont_ladder_swap_lemma k1 rM1 bBits b;
+  LE.exp_mont_ladder_lemma k1 rM1 bBits b;
+  assert (rM0' == LE.pow k1 rM1 b);
+  pow_nat_mont_ll_is_pow_nat_mont pbits rLen n mu rM1 b;
+  assert (rM0' == LE.pow k0 rM1 b);
 
-  let res = M.from_mont pbits rLen n mu rM0' in
   M.from_mont_lemma pbits rLen n d mu rM0';
-  assert (res == rM0' * d % n);
+  mont_mod_exp_lemma n r d a b;
+  lemma_pow_mod #n a b
 
-  calc (==) {
-    LE.pow k rM1 b * d % n;
-    (==) { pow_nat_mont_is_pow n r d rM1 b }
-    pow rM1 b * oneM n r * pow d b % n * d % n;
-    (==) { mont_mod_exp_lemma_before_to_mont n r d a b }
-    pow a b * oneM n r % n * d % n;
-    (==) { mont_mod_exp_lemma_after_to_mont n r d a b }
-    pow a b % n;
-    }
+///  Fixed window exponentiation with a precomputed table and Montgomery arithmetic
+///  using functions defined in Hacl.Spec.Montgomery.Lemmas
+
+// res == pow acc (pow2 b)
+val mod_exp_mont_pow2: pbits:pos -> rLen:nat -> n:pos -> mu:nat -> a:nat -> b:nat -> nat
+let mod_exp_mont_pow2 pbits rLen n mu a b =
+  Loops.repeat b (M.mont_sqr pbits rLen n mu) a
 
 
-val mod_exp_mont_ladder_swap_ll_lemma:
+val mod_exp_mont_precomp_table_f:
     pbits:pos -> rLen:nat
-  -> n:pos -> d:int -> mu:nat
-  -> a:nat_mod n
-  -> bBits:nat -> b:pos{b < pow2 bBits} -> Lemma
-  (requires
-    (1 + n * mu) % pow2 pbits == 0 /\
-    pow2 (pbits * rLen) * d % n == 1 /\
-    1 < n /\ n < pow2 (pbits * rLen))
-  (ensures mod_exp_mont_ladder_swap_ll pbits rLen n mu a bBits b == pow_mod #n a b)
+  -> n:pos -> mu:nat
+  -> a:nat
+  -> table_len:Lib.IntTypes.size_nat{1 < table_len}
+  -> i:nat{i < table_len - 2}
+  -> table:lseq nat table_len ->
+  lseq nat table_len
 
-let mod_exp_mont_ladder_swap_ll_lemma pbits rLen n d mu a bBits b =
-  mod_exp_mont_ladder_swap_ll_lemma_eval pbits rLen n d mu a bBits b;
+let mod_exp_mont_precomp_table_f pbits rLen n mu a table_len i table =
+  table.[i + 2] <- M.mont_mul pbits rLen n mu table.[i + 1] a
+
+// table_len = pow2 l
+// table.[i] == pow a i
+val mod_exp_mont_precomp_table:
+    pbits:pos -> rLen:nat
+  -> n:pos -> mu:nat
+  -> table_len:Lib.IntTypes.size_nat{1 < table_len}
+  -> a:nat ->
+  lseq nat table_len
+
+let mod_exp_mont_precomp_table pbits rLen n mu table_len a =
+  let table = create table_len 0 in
+  let table = table.[0] <- M.to_mont pbits rLen n mu 1 in
+  let table = table.[1] <- a in
+
+  Loops.repeati (table_len - 2) (mod_exp_mont_precomp_table_f pbits rLen n mu a table_len) table
+
+
+val mod_exp_mont_precomp_f_ll:
+    pbits:pos -> rLen:nat
+  -> n:pos -> mu:nat
+  -> bBits:nat -> b:nat{b < pow2 bBits}
+  -> l:pos
+  -> table_len:Lib.IntTypes.size_nat{1 < table_len /\ table_len == pow2 l}
+  -> table:lseq nat table_len
+  -> i:nat{l * (i + 1) <= bBits} -> acc:nat ->
+  nat
+
+let mod_exp_mont_precomp_f_ll pbits rLen n mu bBits b l table_len table i acc =
+  let bits_l = b / pow2 (bBits - l * i - l) % table_len in
+  let acc_pow2l = mod_exp_mont_pow2 pbits rLen n mu acc l in // pow k acc (pow2 l)
+  let a_powbits_l = table.[bits_l] in //select_table // pow k a bits_l
+  M.mont_mul pbits rLen n mu acc_pow2l a_powbits_l
+
+
+val mod_exp_mont_precomp_rem_ll:
+    pbits:pos -> rLen:nat
+  -> n:pos -> mu:nat
+  -> bBits:nat -> b:nat{b < pow2 bBits}
+  -> l:pos
+  -> table_len:Lib.IntTypes.size_nat{1 < table_len /\ table_len == pow2 l}
+  -> table:lseq nat table_len -> accM:nat ->
+  nat
+
+let mod_exp_mont_precomp_rem_ll pbits rLen n mu bBits b l table_len table accM =
+  let c = bBits % l in
+  let bits_c = b % pow2 c in
+  let acc_pow2c = mod_exp_mont_pow2 pbits rLen n mu accM c in // pow k acc (pow2 c)
+  Math.Lemmas.pow2_lt_compat l c;
+  let a_powbits_c = table.[bits_c] in //select_table // pow k a bits_c
+  M.mont_mul pbits rLen n mu acc_pow2c a_powbits_c
+
+
+val mod_exp_mont_precomp_table_ll:
+    pbits:pos -> rLen:nat
+  -> n:pos -> mu:nat
+  -> aM:nat
+  -> bBits:nat -> b:nat{b < pow2 bBits}
+  -> l:pos{pow2 l <= Lib.IntTypes.max_size_t} ->
+  nat
+
+let mod_exp_mont_precomp_table_ll pbits rLen n mu aM bBits b l =
+  let oneM = M.to_mont pbits rLen n mu 1 in
+  let table_len = pow2 l in
+  Math.Lemmas.pow2_le_compat l 1;
+  let table = mod_exp_mont_precomp_table pbits rLen n mu table_len aM in
+  let accM = Loops.repeati (bBits / l) (mod_exp_mont_precomp_f_ll pbits rLen n mu bBits b l table_len table) oneM in
+  mod_exp_mont_precomp_rem_ll pbits rLen n mu bBits b l table_len table accM
+
+
+val mod_exp_mont_precomp_ll:
+    pbits:pos -> rLen:nat
+  -> n:pos -> mu:nat
+  -> a:nat -> bBits:nat -> b:nat{b < pow2 bBits}
+  -> l:pos{pow2 l <= Lib.IntTypes.max_size_t} ->
+  nat
+
+let mod_exp_mont_precomp_ll pbits rLen n mu a bBits b l =
+  let aM = M.to_mont pbits rLen n mu a in
+  let resM = mod_exp_mont_precomp_table_ll pbits rLen n mu aM bBits b l in
+  M.from_mont pbits rLen n mu resM
+
+
+val mod_exp_mont_pow2_loop_lemma:
+    pbits:pos -> rLen:nat
+  -> n:pos -> mu:nat
+  -> a:nat_mod n
+  -> b:nat -> Lemma
+  (requires mont_pre pbits rLen n mu)
+  (ensures (let k = mk_nat_mont_group_ll pbits rLen n mu in
+    mod_exp_mont_pow2 pbits rLen n mu a b == LE.exp_pow2 k a b))
+
+let rec mod_exp_mont_pow2_loop_lemma pbits rLen n mu a b =
+  let k = mk_nat_mont_group_ll pbits rLen n mu in
+
+  if b = 0 then begin
+    Loops.eq_repeat0 (LE.fsqr k) a;
+    Loops.eq_repeat0 (M.mont_sqr pbits rLen n mu) a end
+  else begin
+    Loops.unfold_repeat b (LE.fsqr k) a (b - 1);
+    Loops.unfold_repeat b (M.mont_sqr pbits rLen n mu) a (b - 1);
+    mod_exp_mont_pow2_loop_lemma pbits rLen n mu a (b - 1) end
+
+
+val mod_exp_mont_pow2_lemma:
+    pbits:pos -> rLen:nat
+  -> n:pos -> mu:nat
+  -> a:nat_mod n
+  -> b:nat -> Lemma
+  (requires mont_pre pbits rLen n mu)
+  (ensures (let k = mk_nat_mont_group_ll pbits rLen n mu in
+    let r = mod_exp_mont_pow2 pbits rLen n mu a b in
+    r == LE.pow k a (pow2 b) /\ r < n))
+
+let mod_exp_mont_pow2_lemma pbits rLen n mu a b =
+  let k = mk_nat_mont_group_ll pbits rLen n mu in
+  mod_exp_mont_pow2_loop_lemma pbits rLen n mu a b;
+  LE.exp_pow2_lemma k a b
+
+
+val mod_exp_mont_precomp_table_loop_lemma:
+    pbits:pos -> rLen:nat
+  -> n:pos -> mu:nat
+  -> table_len:Lib.IntTypes.size_nat{1 < table_len}
+  -> a:nat_mod n
+  -> t01:lseq nat table_len
+  -> t02:lseq (nat_mod n) table_len
+  -> j:nat{j <= table_len - 2} -> Lemma
+  (requires
+    mont_pre pbits rLen n mu /\
+    index t01 0 == index t02 0 /\
+    index t01 1 == index t02 1)
+  (ensures  (let k = mk_nat_mont_group_ll pbits rLen n mu in
+    let t1 : lseq nat table_len = Loops.repeati j (mod_exp_mont_precomp_table_f pbits rLen n mu a table_len) t01 in
+    let t2 : lseq (nat_mod n) table_len = Loops.repeati j (LE.precomp_table_f k a table_len) t02 in
+    (forall (i:nat{i < j + 2}). index t1 i == index t2 i)))
+
+let rec mod_exp_mont_precomp_table_loop_lemma pbits rLen n mu table_len a t01 t02 j =
+  let k = mk_nat_mont_group_ll pbits rLen n mu in
+  let t1 : lseq nat table_len = Loops.repeati j (mod_exp_mont_precomp_table_f pbits rLen n mu a table_len) t01 in
+  let t2 : lseq (nat_mod n) table_len = Loops.repeati j (LE.precomp_table_f k a table_len) t02 in
+
+  if j = 0 then begin
+    Loops.eq_repeati0 j (mod_exp_mont_precomp_table_f pbits rLen n mu a table_len) t01;
+    Loops.eq_repeati0 j (LE.precomp_table_f k a table_len) t02 end
+  else begin
+    let t3 : lseq nat table_len = Loops.repeati (j - 1) (mod_exp_mont_precomp_table_f pbits rLen n mu a table_len) t01 in
+    let t4 : lseq (nat_mod n) table_len = Loops.repeati (j - 1) (LE.precomp_table_f k a table_len) t02 in
+
+    Loops.unfold_repeati j (mod_exp_mont_precomp_table_f pbits rLen n mu a table_len) t01 (j - 1);
+    Loops.unfold_repeati j (LE.precomp_table_f k a table_len) t02 (j - 1);
+    mod_exp_mont_precomp_table_loop_lemma pbits rLen n mu table_len a t01 t02 (j - 1);
+    assert (forall (i:nat{i < j + 1}). index t3 i == index t4 i);
+    assert (forall (i:nat{i < j + 1}). index t1 i == index t2 i);
+    assert (index t1 (j + 1) == M.mont_mul pbits rLen n mu t3.[j] a);
+    assert (index t2 (j + 1) == k.LE.fmul t4.[j] a);
+    assert (M.mont_mul pbits rLen n mu t3.[j] a == k.LE.fmul t4.[j] a);
+    assert (forall (i:nat{i < j + 2}). index t1 i == index t2 i);
+    () end
+
+
+val mod_exp_mont_precomp_table_lemma:
+    pbits:pos -> rLen:nat
+  -> n:pos -> mu:nat
+  -> table_len:Lib.IntTypes.size_nat{1 < table_len}
+  -> a:nat_mod n
+  -> i:nat{i < table_len} -> Lemma
+  (requires mont_pre pbits rLen n mu)
+  (ensures
+   (let k = mk_nat_mont_group_ll pbits rLen n mu in
+    let res = mod_exp_mont_precomp_table pbits rLen n mu table_len a in
+    index res i == LE.pow k a i /\ index res i < n))
+
+let mod_exp_mont_precomp_table_lemma pbits rLen n mu table_len a i =
+  let k = mk_nat_mont_group_ll pbits rLen n mu in
+  let res = create table_len 0 in
+  let res = res.[0] <- k.LE.one in
+  let res = res.[1] <- a in
+
+  let table = create table_len 0 in
+  LE.precomp_table_lemma k a table_len table;
+  let table = table.[0] <- k.LE.one in
+  let table = table.[1] <- a in
+  mod_exp_mont_precomp_table_loop_lemma pbits rLen n mu table_len a res table (table_len - 2);
+  let table1 : lseq (nat_mod n) table_len = Loops.repeati (table_len - 2) (LE.precomp_table_f k a table_len) table in
+  assert (forall (i:nat{i < table_len}). index table1 i == LE.pow k a i);
+  let res1 : lseq nat table_len = Loops.repeati (table_len - 2) (mod_exp_mont_precomp_table_f pbits rLen n mu a table_len) res in
+  assert (forall (i:nat{i < table_len}). index res1 i == index table1 i)
+
+
+val mod_exp_mont_precomp_ll_f_lemma:
+    pbits:pos -> rLen:nat
+  -> n:pos -> mu:nat
+  -> aM:nat_mod n
+  -> bBits:nat -> b:nat{b < pow2 bBits}
+  -> l:pos
+  -> table_len:Lib.IntTypes.size_pos{1 < table_len /\ table_len == pow2 l}
+  -> table:lseq nat table_len
+  -> accM0:nat_mod n
+  -> i:nat{i < bBits / l} -> Lemma
+  (requires
+    mont_pre pbits rLen n mu /\
+    table == mod_exp_mont_precomp_table pbits rLen n mu table_len aM)
+  (ensures
+    (let k = mk_nat_mont_group_ll pbits rLen n mu in
+     mod_exp_mont_precomp_f_ll pbits rLen n mu bBits b l table_len table i accM0 ==
+     LE.exp_precomp_f k aM bBits b l i accM0))
+
+let mod_exp_mont_precomp_ll_f_lemma pbits rLen n mu aM bBits b l table_len table accM0 i =
+  let k = mk_nat_mont_group_ll pbits rLen n mu in
+  let accM1 = mod_exp_mont_precomp_f_ll pbits rLen n mu bBits b l table_len table i accM0 in
+  let lbits = b / pow2 (bBits - l * i - l) % table_len in
+  let acc_pow2l = mod_exp_mont_pow2 pbits rLen n mu accM0 l in // pow k acc (pow2 l)
+  mod_exp_mont_precomp_table_lemma pbits rLen n mu table_len aM lbits;
+  assert (index table lbits == LE.pow k aM lbits);
+  mod_exp_mont_pow2_lemma pbits rLen n mu accM0 l;
+  assert (mod_exp_mont_pow2 pbits rLen n mu accM0 l == LE.pow k accM0 (pow2 l));
+  assert (accM1 == M.mont_mul pbits rLen n mu (LE.pow k accM0 table_len) (LE.pow k aM lbits))
+
+
+val mod_exp_mont_precomp_ll_rem_lemma:
+    pbits:pos -> rLen:nat
+  -> n:pos -> mu:nat
+  -> aM:nat_mod n
+  -> bBits:nat -> b:nat{b < pow2 bBits}
+  -> l:pos
+  -> table_len:Lib.IntTypes.size_pos{1 < table_len /\ table_len == pow2 l}
+  -> table:lseq nat table_len
+  -> accM:nat_mod n -> Lemma
+  (requires
+    mont_pre pbits rLen n mu /\
+    table == mod_exp_mont_precomp_table pbits rLen n mu table_len aM)
+  (ensures
+    (let k = mk_nat_mont_group_ll pbits rLen n mu in let c = bBits % l in
+     let r = mod_exp_mont_precomp_rem_ll pbits rLen n mu bBits b l table_len table accM in
+     r == k.LE.fmul (LE.pow k accM (pow2 c)) (LE.pow k aM (b % pow2 c)) /\ r < n))
+
+let mod_exp_mont_precomp_ll_rem_lemma pbits rLen n mu aM bBits b l table_len table accM =
+  let k = mk_nat_mont_group_ll pbits rLen n mu in
+  let accM1 = mod_exp_mont_precomp_rem_ll pbits rLen n mu bBits b l table_len table accM in
+
+  let c = bBits % l in
+  let bits_c = b % pow2 c in
+  let acc_pow2c = mod_exp_mont_pow2 pbits rLen n mu accM c in // pow k acc (pow2 c)
+  Math.Lemmas.pow2_lt_compat l c;
+  let a_powbits_c = table.[bits_c] in //select_table // pow k a bits_c
+  mod_exp_mont_precomp_table_lemma pbits rLen n mu table_len aM bits_c;
+  mod_exp_mont_pow2_lemma pbits rLen n mu accM c
+
+
+#push-options "--z3rlimit 150"
+val mod_exp_mont_precomp_ll_loop_lemma:
+    pbits:pos -> rLen:nat
+  -> n:pos -> mu:nat
+  -> aM:nat_mod n
+  -> bBits:nat -> b:nat{b < pow2 bBits}
+  -> l:pos
+  -> table_len:Lib.IntTypes.size_pos{1 < table_len /\ table_len == pow2 l}
+  -> table:lseq nat table_len
+  -> accM0:nat_mod n
+  -> i:nat{i <= bBits / l} -> Lemma
+  (requires
+    mont_pre pbits rLen n mu /\
+    table == mod_exp_mont_precomp_table pbits rLen n mu table_len aM)
+  (ensures
+    (let k = mk_nat_mont_group_ll pbits rLen n mu in
+     let accM1 = Loops.repeati i (mod_exp_mont_precomp_f_ll pbits rLen n mu bBits b l table_len table) accM0 in
+     let accM2 : nat_mod n = Loops.repeati i (LE.exp_precomp_f k aM bBits b l) accM0 in
+     accM1 == accM2 /\ accM1 < n))
+
+let rec mod_exp_mont_precomp_ll_loop_lemma pbits rLen n mu aM bBits b l table_len table accM0 i =
+  Math.Lemmas.lemma_mult_le_left l i (bBits / l);
+  let k = mk_nat_mont_group_ll pbits rLen n mu in
+  //let accM1 = Loops.repeati i (mod_exp_mont_precomp_f_ll pbits rLen n mu bBits b l table_len table) accM0 in
+  //let accM2 : nat_mod n = Loops.repeati i (LE.exp_precomp_f k aM bBits b l) accM0 in
+
+  if i = 0 then begin
+    Loops.eq_repeati0 i (mod_exp_mont_precomp_f_ll pbits rLen n mu bBits b l table_len table) accM0;
+    Loops.eq_repeati0 i (LE.exp_precomp_f k aM bBits b l) accM0 end
+  else begin
+    mod_exp_mont_precomp_ll_loop_lemma pbits rLen n mu aM bBits b l table_len table accM0 (i - 1);
+    //let accM3 = Loops.repeati (i - 1) (mod_exp_mont_precomp_f_ll pbits rLen n mu bBits b l table_len table) accM0 in
+    let accM4 : nat_mod n = Loops.repeati (i - 1) (LE.exp_precomp_f k aM bBits b l) accM0 in
+    Loops.unfold_repeati i (LE.exp_precomp_f k aM bBits b l) accM0 (i - 1);
+    Loops.unfold_repeati i (mod_exp_mont_precomp_f_ll pbits rLen n mu bBits b l table_len table) accM0 (i - 1);
+    //assert (accM1 == mod_exp_mont_precomp_f_ll pbits rLen n mu bBits b l table_len table (i - 1) accM3);
+    //assert (accM2 == LE.exp_precomp_f k aM bBits b l (i - 1) accM4);
+    //assert (accM3 == accM4 /\ accM3 < n);
+    mod_exp_mont_precomp_ll_f_lemma pbits rLen n mu aM bBits b l table_len table accM4 (i - 1);
+    () end
+#pop-options
+
+
+val mod_exp_mont_precomp_table_ll_lemma:
+    pbits:pos -> rLen:pos
+  -> n:pos -> mu:nat
+  -> aM:nat_mod n
+  -> bBits:nat -> b:nat{b < pow2 bBits}
+  -> l:pos{pow2 l <= Lib.IntTypes.max_size_t} -> Lemma
+  (requires mont_pre pbits rLen n mu)
+  (ensures  (let k = mk_nat_mont_group_ll pbits rLen n mu in
+    let acc = LE.exp_precomp k aM bBits b l in let c = bBits % l in
+    let res_s = k.LE.fmul (LE.pow k acc (pow2 c)) (LE.pow k aM (b % pow2 c)) in
+    let res = mod_exp_mont_precomp_table_ll pbits rLen n mu aM bBits b l in
+    res == res_s /\ res < n /\ res_s == LE.pow k aM b))
+
+let mod_exp_mont_precomp_table_ll_lemma pbits rLen n mu aM bBits b l =
+  let r = pow2 (pbits * rLen) in
+  let d, k = M.eea_pow2_odd (pbits * rLen) n in
+  M.mont_preconditions_d pbits rLen n;
+
+  let k1 = mk_nat_mont_group_ll pbits rLen n mu in
+  let oneM = M.to_mont pbits rLen n mu 1 in
+  M.to_mont_lemma pbits rLen n d mu 1;
+  assert (oneM == 1 * r % n);
+
+  let table_len = pow2 l in
+  Math.Lemmas.pow2_le_compat l 1;
+  let table = mod_exp_mont_precomp_table pbits rLen n mu table_len aM in
+  let accM : nat = Loops.repeati (bBits / l) (mod_exp_mont_precomp_f_ll pbits rLen n mu bBits b l table_len table) oneM in
+  mod_exp_mont_precomp_ll_loop_lemma pbits rLen n mu aM bBits b l table_len table oneM (bBits / l);
+  mod_exp_mont_precomp_ll_rem_lemma pbits rLen n mu aM bBits b l table_len table accM;
+  LE.exp_precomp_lemma1 k1 aM bBits b l
+
+
+val mod_exp_mont_precomp_ll_lemma:
+    pbits:pos -> rLen:nat
+  -> n:pos -> mu:nat
+  -> a:nat_mod n
+  -> bBits:nat -> b:pos{b < pow2 bBits}
+  -> l:pos{pow2 l <= Lib.IntTypes.max_size_t} -> Lemma
+  (requires mont_pre pbits rLen n mu)
+  (ensures  mod_exp_mont_precomp_ll pbits rLen n mu a bBits b l == pow_mod #n a b)
+
+let mod_exp_mont_precomp_ll_lemma pbits rLen n mu a bBits b l =
+  let r = pow2 (pbits * rLen) in
+  let d, k = M.eea_pow2_odd (pbits * rLen) n in
+  M.mont_preconditions_d pbits rLen n;
+
+  let k0 = mk_nat_mont_group n r d in
+  let k1 = mk_nat_mont_group_ll pbits rLen n mu in
+
+  let aM = M.to_mont pbits rLen n mu a in
+  M.to_mont_lemma pbits rLen n d mu a;
+  assert (aM == a * r % n);
+
+  let resM = mod_exp_mont_precomp_table_ll pbits rLen n mu aM bBits b l in
+  mod_exp_mont_precomp_table_ll_lemma pbits rLen n mu aM bBits b l;
+  assert (resM == LE.pow k1 aM b);
+  pow_nat_mont_ll_is_pow_nat_mont pbits rLen n mu aM b;
+  let res = M.from_mont pbits rLen n mu resM in
+  M.from_mont_lemma pbits rLen n d mu resM;
+  mont_mod_exp_lemma n r d a b;
   lemma_pow_mod #n a b

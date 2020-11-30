@@ -1,6 +1,8 @@
 module Lib.Exponentiation
 
 open FStar.Mul
+open Lib.IntTypes
+open Lib.Sequence
 
 module Loops = Lib.LoopCombinators
 
@@ -382,11 +384,64 @@ let exp_mont_ladder_swap_lemma #t k a bBits b =
   exp_mont_ladder_swap_lemma_loop #t k a bBits b 0 bBits
 
 
+val exp_pow2_loop_lemma: #t:Type -> k:exp t -> a:t -> b:nat -> i:nat{i <= b} ->
+  Lemma (Loops.repeat i (fsqr k) a == pow k a (pow2 i))
+let rec exp_pow2_loop_lemma #t k a b i =
+  if i = 0 then begin
+    Loops.eq_repeat0 (fsqr k) a;
+    assert_norm (pow2 0 = 1);
+    lemma_pow1 k a end
+  else begin
+    Loops.unfold_repeat b (fsqr k) a (i - 1);
+    exp_pow2_loop_lemma k a b (i - 1);
+    lemma_pow_add k a (pow2 (i - 1)) (pow2 (i - 1));
+    Math.Lemmas.pow2_double_sum (i - 1);
+    () end
+
+let exp_pow2_lemma #t k a b = exp_pow2_loop_lemma k a b b
+
+val precomp_table_loop_lemma:
+    #t:Type -> k:exp t -> a:t
+  -> table_len:size_nat{1 < table_len}
+  -> table:lseq t table_len ->
+  Pure (lseq t table_len)
+  (requires True)
+  (ensures  fun res ->
+    res == precomp_table k a table_len table /\
+    (forall (i:nat{i < table_len}). index res i == pow k a i))
+
+let precomp_table_loop_lemma #t k a table_len table =
+  let table = table.[0] <- one in
+  let table = table.[1] <- a in
+  lemma_pow0 k a;
+  lemma_pow1 k a;
+  assert (table.[0] == pow k a 0);
+  assert (table.[1] == pow k a 1);
+
+  Loops.eq_repeati0 (table_len - 2) (precomp_table_f #t k a table_len) table;
+  Loops.repeati_inductive (table_len - 2)
+  (fun i table_i ->
+    table_i == Loops.repeati i (precomp_table_f #t k a table_len) table /\
+   (forall (i0:nat{i0 < i + 2}). index table_i i0 == pow k a i0))
+  (fun i table_i ->
+    let table_i1 = precomp_table_f #t k a table_len i table_i in
+    Loops.unfold_repeati (i + 1) (precomp_table_f #t k a table_len) table i;
+    //assert (table_i1 == Loops.repeati (i + 1) (precomp_table_f #t k a table_len) table);
+    //assert (table_i.[i + 1] == pow k a (i + 1));
+    lemma_pow_add k a (i + 1) 1;
+    //assert (table_i1.[i + 2] == pow k a (i + 2));
+    table_i1)
+  table
+
+let precomp_table_lemma #t k a table_len table =
+  let _ = precomp_table_loop_lemma #t k a table_len table in ()
+
+
 val exp_precomp_lemma_step:
     #t:Type -> k:exp t
   -> a:t
   -> bBits:nat -> b:nat{b < pow2 bBits}
-  -> l:pos{bBits % l = 0}
+  -> l:pos
   -> i:pos{l * i <= bBits}
   -> acc1:t -> Lemma
   (requires acc1 == pow k a (b / pow2 (bBits - l * (i - 1))))
@@ -416,7 +471,7 @@ val exp_precomp_lemma_loop:
     #t:Type -> k:exp t
   -> a:t
   -> bBits:nat -> b:nat{b < pow2 bBits}
-  -> l:pos{bBits % l = 0}
+  -> l:pos
   -> i:nat{l * i <= bBits} ->
   Lemma (let acc = Loops.repeati i (exp_precomp_f k a bBits b l) one in
     acc == pow k a (b / pow2 (bBits - l * i)))
@@ -446,3 +501,24 @@ let exp_precomp_lemma #t k a bBits b l =
   Math.Lemmas.div_exact_r bBits l;
   assert_norm (pow2 0 = 1);
   assert (acc == pow k a b)
+
+
+let exp_precomp_lemma1 #t k a bBits b l =
+  let acc = Loops.repeati (bBits / l) (exp_precomp_f k a bBits b l) one in
+  exp_precomp_lemma_loop k a bBits b l (bBits / l);
+  assert (acc == pow k a (b / pow2 (bBits - l * (bBits / l))));
+  Math.Lemmas.euclidean_division_definition bBits l;
+  assert (acc == pow k a (b / pow2 (bBits % l)));
+
+  let c = bBits % l in
+  calc (==) {
+    fmul (pow k acc (pow2 c)) (pow k a (b % pow2 c));
+    (==) {  }
+    fmul (pow k (pow k a (b / pow2 c)) (pow2 c)) (pow k a (b % pow2 c));
+    (==) { lemma_pow_mul k a (b / pow2 c) (pow2 c) }
+    fmul (pow k a (b / pow2 c * pow2 c)) (pow k a (b % pow2 c));
+    (==) { lemma_pow_add k a (b / pow2 c * pow2 c) (b % pow2 c) }
+    pow k a (b / pow2 c * pow2 c + b % pow2 c);
+    (==) { Math.Lemmas.euclidean_division_definition b (pow2 c) }
+    pow k a b;
+    }

@@ -203,6 +203,9 @@ let mont_mul pbits rLen n mu a b =
   let c = a * b in
   mont_reduction pbits rLen n mu c
 
+val mont_sqr: pbits:pos -> rLen:nat -> n:pos -> mu:nat -> a:nat -> nat
+let mont_sqr pbits rLen n mu a =
+  mont_mul pbits rLen n mu a a
 
 ///
 ///  Lemma (mont_reduction rLen n mu c == c * d % n)
@@ -265,9 +268,13 @@ let mont_reduction_lemma_step_mod_pbits pbits n mu c_i =
     (c_i + n * q_i) % pow2 pbits;
     (==) { Math.Lemmas.lemma_mod_plus_distr_r c_i (n * q_i) (pow2 pbits) }
     (c_i + n * q_i % pow2 pbits) % pow2 pbits;
+    (==) { }
+    (c_i + n * (mu * c_i % pow2 pbits) % pow2 pbits) % pow2 pbits;
     (==) { Math.Lemmas.lemma_mod_mul_distr_r n (mu * c_i) (pow2 pbits) }
     (c_i + n * (mu * c_i) % pow2 pbits) % pow2 pbits;
-    (==) { Math.Lemmas.paren_mul_right n mu c_i; Math.Lemmas.lemma_mod_plus_distr_r c_i (n * mu * c_i) (pow2 pbits) }
+    (==) { Math.Lemmas.lemma_mod_plus_distr_r c_i (n * (mu * c_i)) (pow2 pbits) }
+    (c_i + n * (mu * c_i)) % pow2 pbits;
+    (==) { Math.Lemmas.paren_mul_right n mu c_i }
     (c_i + n * mu * c_i) % pow2 pbits;
     (==) { Math.Lemmas.distributivity_add_left 1 (n * mu) c_i }
     ((1 + n * mu) * c_i) % pow2 pbits;
@@ -286,7 +293,7 @@ let mont_reduction_lemma_step_modr_aux pbits n q_i i res0 =
   let b1 = pow2 (pbits * (i - 1)) in
   Math.Lemmas.distributivity_sub_right pbits i 1;
   assert (pbits * i - pbits * (i - 1) == pbits);
-  
+
   calc (==) {
     (res0 / b1 * b1 + n * q_i * b1) % pow2 (pbits * i);
     (==) { Math.Lemmas.distributivity_add_left (res0 / b1) (n * q_i) b1 }
@@ -442,6 +449,17 @@ let mont_reduction_lemma pbits rLen n d mu c =
   assert (res2 % n == res1 % n);
   mont_mult_lemma_fits pbits rLen n mu c;
   Math.Lemmas.small_mod res2 n
+
+
+val mont_mul_lemma: pbits:pos -> rLen:nat -> n:pos -> d:int-> mu:nat -> a:nat -> b:nat -> Lemma
+  (requires
+    (1 + n * mu) % pow2 pbits == 0 /\ pow2 (pbits * rLen) * d % n == 1 /\
+    n < pow2 (pbits * rLen) /\ a < n /\ b < n)
+  (ensures  mont_reduction pbits rLen n mu (a * b) == a * b * d % n)
+
+let mont_mul_lemma pbits rLen n d mu a b =
+  assert (a * b < n * n);
+  mont_reduction_lemma pbits rLen n d mu (a * b)
 
 ///
 ///  Lemma (to_mont rLen n mu a == a * pow2 (64 * rLen) % n)
