@@ -402,15 +402,15 @@ let exp_pow2_lemma #t k a b = exp_pow2_loop_lemma k a b b
 
 val precomp_table_loop_lemma:
     #t:Type -> k:exp t -> a:t
-  -> table_len:size_nat{1 < table_len}
-  -> table:lseq t table_len ->
+  -> table_len:size_nat{1 < table_len} ->
   Pure (lseq t table_len)
   (requires True)
   (ensures  fun res ->
-    res == precomp_table k a table_len table /\
+    res == precomp_table k a table_len /\
     (forall (i:nat{i < table_len}). index res i == pow k a i))
 
-let precomp_table_loop_lemma #t k a table_len table =
+let precomp_table_loop_lemma #t k a table_len =
+  let table = create table_len one in
   let table = table.[0] <- one in
   let table = table.[1] <- a in
   lemma_pow0 k a;
@@ -433,22 +433,29 @@ let precomp_table_loop_lemma #t k a table_len table =
     table_i1)
   table
 
-let precomp_table_lemma #t k a table_len table =
-  let _ = precomp_table_loop_lemma #t k a table_len table in ()
+let precomp_table_lemma #t k a table_len =
+  let _ = precomp_table_loop_lemma #t k a table_len in ()
 
 
-val exp_precomp_lemma_step:
+val exp_fw_lemma_step:
     #t:Type -> k:exp t
   -> a:t
   -> bBits:nat -> b:nat{b < pow2 bBits}
   -> l:pos
+  -> table_len:size_nat{1 < table_len /\ table_len == pow2 l}
+  -> table:lseq t table_len
   -> i:pos{l * i <= bBits}
   -> acc1:t -> Lemma
-  (requires acc1 == pow k a (b / pow2 (bBits - l * (i - 1))))
-  (ensures  exp_precomp_f k a bBits b l (i - 1) acc1 == pow k a (b / pow2 (bBits - l * i)))
+  (requires
+    acc1 == pow k a (b / pow2 (bBits - l * (i - 1))) /\
+    table == precomp_table k a table_len)
+  (ensures
+    exp_fw_f k bBits b l table_len table (i - 1) acc1 == pow k a (b / pow2 (bBits - l * i)))
 
-let exp_precomp_lemma_step #t k a bBits b l i acc1 =
-  let acc = exp_precomp_f k a bBits b l (i - 1) acc1 in
+let exp_fw_lemma_step #t k a bBits b l table_len table i acc1 =
+  let acc = exp_fw_f k bBits b l table_len table (i - 1) acc1 in
+  exp_pow2_lemma k acc1 l;
+  precomp_table_lemma k a table_len;
   assert (acc == fmul (pow k acc1 (pow2 l)) (pow k a (b / pow2 (bBits - l * (i - 1) - l) % pow2 l)));
 
   let r1 = pow k a (b / pow2 (bBits - l * (i - 1)) * pow2 l) in
@@ -467,58 +474,60 @@ let exp_precomp_lemma_step #t k a bBits b l i acc1 =
     }
 
 
-val exp_precomp_lemma_loop:
+val exp_fw_lemma_loop:
     #t:Type -> k:exp t
   -> a:t
   -> bBits:nat -> b:nat{b < pow2 bBits}
   -> l:pos
-  -> i:nat{l * i <= bBits} ->
-  Lemma (let acc = Loops.repeati i (exp_precomp_f k a bBits b l) one in
-    acc == pow k a (b / pow2 (bBits - l * i)))
+  -> table_len:size_nat{1 < table_len /\ table_len == pow2 l}
+  -> table:lseq t table_len
+  -> i:nat{l * i <= bBits} -> Lemma
+  (requires table == precomp_table k a table_len)
+  (ensures  (let acc = Loops.repeati i (exp_fw_f k bBits b l table_len table) one in
+    acc == pow k a (b / pow2 (bBits - l * i))))
 
-let rec exp_precomp_lemma_loop #t k a bBits b l i =
-  let acc = Loops.repeati i (exp_precomp_f k a bBits b l) one in
+let rec exp_fw_lemma_loop #t k a bBits b l table_len table i =
+  let acc = Loops.repeati i (exp_fw_f k bBits b l table_len table) one in
   if i = 0 then begin
-    Loops.eq_repeati0 i (exp_precomp_f k a bBits b l) one;
+    Loops.eq_repeati0 i (exp_fw_f k bBits b l table_len table) one;
     Math.Lemmas.small_div b (pow2 bBits);
     lemma_pow0 k a;
     () end
   else begin
-    Loops.unfold_repeati i (exp_precomp_f k a bBits b l) one (i - 1);
-    let acc1 = Loops.repeati (i - 1) (exp_precomp_f k a bBits b l) one in
-    //assert (acc == exp_precomp_f k a bBits b l (i - 1) acc1);
-    exp_precomp_lemma_loop k a bBits b l (i - 1);
+    Loops.unfold_repeati i (exp_fw_f k bBits b l table_len table) one (i - 1);
+    let acc1 = Loops.repeati (i - 1) (exp_fw_f k bBits b l table_len table) one in
+    //assert (acc == exp_fw_f k bBits b l table_len table (i - 1) acc1);
+    exp_fw_lemma_loop k a bBits b l table_len table (i - 1);
     //assert (acc1 == pow k a (b / pow2 (bBits - l * (i - 1))));
-    exp_precomp_lemma_step #t k a bBits b l i acc1;
+    exp_fw_lemma_step k a bBits b l table_len table i acc1;
     //assert (acc == pow k a (b / pow2 (bBits - l * i)));
     () end
 
 
-let exp_precomp_lemma #t k a bBits b l =
-  let acc = Loops.repeati (bBits / l) (exp_precomp_f k a bBits b l) one in
-  exp_precomp_lemma_loop k a bBits b l (bBits / l);
-  assert (acc == pow k a (b / pow2 (bBits - l * (bBits / l))));
-  Math.Lemmas.div_exact_r bBits l;
-  assert_norm (pow2 0 = 1);
-  assert (acc == pow k a b)
-
-
-let exp_precomp_lemma1 #t k a bBits b l =
-  let acc = Loops.repeati (bBits / l) (exp_precomp_f k a bBits b l) one in
-  exp_precomp_lemma_loop k a bBits b l (bBits / l);
+let exp_fw_lemma #t k a bBits b l =
+  let table_len = pow2 l in
+  Math.Lemmas.pow2_le_compat l 1;
+  let table = precomp_table k a table_len in
+  let acc = Loops.repeati (bBits / l) (exp_fw_f k bBits b l table_len table) one in
+  exp_fw_lemma_loop k a bBits b l table_len table (bBits / l);
   assert (acc == pow k a (b / pow2 (bBits - l * (bBits / l))));
   Math.Lemmas.euclidean_division_definition bBits l;
   assert (acc == pow k a (b / pow2 (bBits % l)));
 
   let c = bBits % l in
-  calc (==) {
-    fmul (pow k acc (pow2 c)) (pow k a (b % pow2 c));
-    (==) {  }
-    fmul (pow k (pow k a (b / pow2 c)) (pow2 c)) (pow k a (b % pow2 c));
-    (==) { lemma_pow_mul k a (b / pow2 c) (pow2 c) }
-    fmul (pow k a (b / pow2 c * pow2 c)) (pow k a (b % pow2 c));
-    (==) { lemma_pow_add k a (b / pow2 c * pow2 c) (b % pow2 c) }
-    pow k a (b / pow2 c * pow2 c + b % pow2 c);
-    (==) { Math.Lemmas.euclidean_division_definition b (pow2 c) }
-    pow k a b;
-    }
+  let res = if c = 0 then acc else fmul (pow k acc (pow2 c)) (pow k a (b % pow2 c)) in
+  if c = 0 then begin
+    assert_norm (pow2 0 = 1);
+    assert (acc == pow k a b) end
+  else begin
+    calc (==) {
+      fmul (pow k acc (pow2 c)) (pow k a (b % pow2 c));
+      (==) {  }
+      fmul (pow k (pow k a (b / pow2 c)) (pow2 c)) (pow k a (b % pow2 c));
+      (==) { lemma_pow_mul k a (b / pow2 c) (pow2 c) }
+      fmul (pow k a (b / pow2 c * pow2 c)) (pow k a (b % pow2 c));
+      (==) { lemma_pow_add k a (b / pow2 c * pow2 c) (b % pow2 c) }
+      pow k a (b / pow2 c * pow2 c + b % pow2 c);
+      (==) { Math.Lemmas.euclidean_division_definition b (pow2 c) }
+      pow k a b;
+      }; () end

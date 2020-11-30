@@ -49,9 +49,7 @@ val lemma_pow_mul_base: #t:Type -> k:exp t -> a:t -> b:t -> n:nat ->
 
 
 //a right-to-left binary method
-let exp_rl_f (#t:Type) (k:exp t) (bBits:nat) (b:nat{b < pow2 bBits})
-  (i:nat{i < bBits}) ((a, acc) : tuple2 t t) : tuple2 t t
- =
+let exp_rl_f (#t:Type) (k:exp t) (bBits:nat) (b:nat{b < pow2 bBits}) (i:nat{i < bBits}) ((a, acc) : tuple2 t t) : tuple2 t t =
   let acc = if (b / pow2 i % 2 = 1) then fmul acc a else acc in
   let a = fmul a a in
   (a, acc)
@@ -113,9 +111,7 @@ val exp_mont_ladder_swap2_lemma: #t:Type -> k:exp t -> a:t -> bBits:nat -> b:nat
 
 
 // cswap -> step -> cswap -> step -> cswap -> ..
-let exp_mont_ladder_swap_f (#t:Type) (k:exp t) (bBits:nat) (b:nat{b < pow2 bBits})
-  (i:nat{i < bBits}) ((r0, r1, privbit) : tuple3 t t nat) : tuple3 t t nat
- =
+let exp_mont_ladder_swap_f (#t:Type) (k:exp t) (bBits:nat) (b:nat{b < pow2 bBits}) (i:nat{i < bBits}) ((r0, r1, privbit) : tuple3 t t nat) : tuple3 t t nat =
   let bit = b / pow2 (bBits - i - 1) % 2 in
   let sw = (bit + privbit) % 2 in
   let r0, r1 = cswap sw r0 r1 in
@@ -134,7 +130,7 @@ val exp_mont_ladder_swap_lemma: #t:Type -> k:exp t -> a:t -> bBits:nat -> b:nat{
   Lemma (exp_mont_ladder_swap k a bBits b == exp_mont_ladder k a bBits b)
 
 
-// precomp
+// a fixed window method
 let exp_pow2 (#t:Type) (k:exp t) (a:t) (b:nat) : t =
   Loops.repeat b (fsqr k) a
 
@@ -145,32 +141,33 @@ val exp_pow2_lemma: #t:Type -> k:exp t -> a:t -> b:nat ->
 let precomp_table_f (#t:Type) (k:exp t) (a:t) (table_len:size_nat{1 < table_len}) (i:nat{i < table_len - 2}) (table:lseq t table_len) : lseq t table_len =
   table.[i + 2] <- fmul table.[i + 1] a
 
-let precomp_table (#t:Type) (k:exp t) (a:t) (table_len:size_nat{1 < table_len}) (table:lseq t table_len) : lseq t table_len =
-  //let table = create table_len one in
+let precomp_table (#t:Type) (k:exp t) (a:t) (table_len:size_nat{1 < table_len}) : lseq t table_len =
+  let table = create table_len one in
   let table = table.[0] <- one in
   let table = table.[1] <- a in
 
   Loops.repeati (table_len - 2) (precomp_table_f #t k a table_len) table
 
-val precomp_table_lemma: #t:Type -> k:exp t -> a:t -> table_len:size_nat{1 < table_len} -> table:lseq t table_len ->
-  Lemma (let res = precomp_table k a table_len table in
+val precomp_table_lemma: #t:Type -> k:exp t -> a:t -> table_len:size_nat{1 < table_len} ->
+  Lemma (let res = precomp_table k a table_len in
     (forall (i:nat{i < table_len}). index res i == pow k a i))
 
 
-let exp_precomp_f (#t:Type) (k:exp t) (a:t) (bBits:nat) (b:nat{b < pow2 bBits}) (l:pos) (i:nat{l * (i + 1) <= bBits}) (acc:t) : t =
-  fmul (pow k acc (pow2 l)) (pow k a (b / pow2 (bBits - l * i - l) % pow2 l))
-  // let bits_l = b / pow2 (bBits - l * i - l) % pow2 l in
-  // let table_len = pow2 l in
-  // Math.Lemmas.pow2_le_compat l 1;
-  // let table = precomp_table k a table_len (create table_len one) in
-  // fmul (exp_pow2 k a l) table.[bits_l]
+// fmul (pow k acc (pow2 l)) (pow k a (b / pow2 (bBits - l * i - l) % pow2 l))
+let exp_fw_f (#t:Type) (k:exp t) (bBits:nat) (b:nat{b < pow2 bBits}) (l:pos)
+  (table_len:size_nat{1 < table_len /\ table_len == pow2 l}) (table:lseq t table_len) (i:nat{l * (i + 1) <= bBits}) (acc:t) : t
+ =
+  let bits_l = b / pow2 (bBits - l * i - l) % pow2 l in
+  fmul (exp_pow2 k acc l) table.[bits_l]
 
-let exp_precomp (#t:Type) (k:exp t) (a:t) (bBits:nat) (b:nat{b < pow2 bBits}) (l:pos) : t =
-  Loops.repeati (bBits / l) (exp_precomp_f k a bBits b l) one
+let exp_fw (#t:Type) (k:exp t) (a:t) (bBits:nat) (b:nat{b < pow2 bBits}) (l:pos{pow2 l <= max_size_t}) : t =
+  let table_len = pow2 l in
+  Math.Lemmas.pow2_le_compat l 1;
+  let table = precomp_table k a table_len in
+  let acc = Loops.repeati (bBits / l) (exp_fw_f k bBits b l table_len table) one in
+  let c = bBits % l in
+  let res = if c = 0 then acc else fmul (pow k acc (pow2 c)) (pow k a (b % pow2 c)) in
+  res
 
-val exp_precomp_lemma: #t:Type -> k:exp t -> a:t -> bBits:nat -> b:nat{b < pow2 bBits} -> l:pos{bBits % l = 0} ->
-  Lemma (exp_precomp k a bBits b l == pow k a b)
-
-val exp_precomp_lemma1: #t:Type -> k:exp t -> a:t -> bBits:nat -> b:nat{b < pow2 bBits} -> l:pos ->
-  Lemma (let acc = exp_precomp k a bBits b l in let c = bBits % l in
-    fmul (pow k acc (pow2 c)) (pow k a (b % pow2 c)) == pow k a b)
+val exp_fw_lemma: #t:Type -> k:exp t -> a:t -> bBits:nat -> b:nat{b < pow2 bBits} -> l:pos{pow2 l <= max_size_t} ->
+  Lemma (exp_fw k a bBits b l == pow k a b)
