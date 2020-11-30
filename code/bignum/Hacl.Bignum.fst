@@ -73,6 +73,9 @@ let bn_sub_mask #t len n a =
 let bn_get_ith_bit #t len input ind =
   Hacl.Bignum.Lib.bn_get_ith_bit len input ind
 
+let bn_get_bits #t len b i l =
+  Hacl.Bignum.Lib.bn_get_bits len b i l
+
 let bn_set_ith_bit #t len input ind =
   Hacl.Bignum.Lib.bn_set_ith_bit len input ind
 

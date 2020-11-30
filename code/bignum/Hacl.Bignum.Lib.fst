@@ -145,3 +145,42 @@ let bn_get_top_index #t =
   match t with
   | U32 -> bn_get_top_index_u32
   | U64 -> bn_get_top_index_u64
+
+
+inline_for_extraction noextract
+val bn_get_bits:
+    #t:limb_t
+  -> len:size_t
+  -> b:lbignum t len
+  -> i:size_t
+  -> l:size_t{v l <= bits t /\ (v i + v l - 1) / bits t < v len /\ v i + v l <= max_size_t} ->
+  Stack (limb t)
+  (requires fun h -> live h b)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+    r == S.bn_get_bits (as_seq h0 b) (v i) (v l))
+
+let bn_get_bits #t len b i l =
+  push_frame ();
+  let acc = create 1ul (uint #t 0) in
+
+  let h0 = ST.get () in
+  [@ inline_let]
+  let refl h i = LSeq.index (as_seq h acc) 0 in
+  [@ inline_let]
+  let spec h0 = S.bn_get_bits_f (as_seq h0 b) (v i) (v l) in
+
+  [@ inline_let]
+  let inv h (i:nat{i <= v l}) =
+    modifies1 acc h0 h /\
+    live h acc /\ live h b /\ disjoint acc b /\
+    refl h i == Loops.repeati i (spec h0) (refl h0 0) in
+
+  Loops.eq_repeati0 (v l) (spec h0) (refl h0 0);
+  Lib.Loops.for 0ul l inv
+  (fun j ->
+    Loops.unfold_repeati (v l) (spec h0) (refl h0 0) (v j);
+    let b_ij = bn_get_ith_bit len b (i +! j) in
+    acc.(0ul) <- acc.(0ul) +. (b_ij <<. j));
+  let res = acc.(0ul) in
+  pop_frame ();
+  res

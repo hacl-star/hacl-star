@@ -148,6 +148,12 @@ let bn_get_ith_bit #t #len input ind =
 let bn_get_ith_bit_lemma #t #len b ind =
   Hacl.Spec.Bignum.Lib.bn_get_ith_bit_lemma b ind
 
+let bn_get_bits #t #nLen n i l =
+  Hacl.Spec.Bignum.Lib.bn_get_bits #t #nLen n i l
+
+let bn_get_bits_lemma #t #nLen n i l =
+  Hacl.Spec.Bignum.Lib.bn_get_bits_lemma #t #nLen n i l
+
 let bn_set_ith_bit #t #len input ind =
   Hacl.Spec.Bignum.Lib.bn_set_ith_bit input ind
 

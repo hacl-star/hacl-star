@@ -283,6 +283,24 @@ val bn_get_ith_bit_lemma:
   Lemma (v (bn_get_ith_bit b i) == (bn_v b / pow2 i % 2))
 
 
+val bn_get_bits:
+    #t:limb_t
+  -> #nLen:size_nat
+  -> n:lbignum t nLen
+  -> i:size_nat
+  -> l:size_nat{l <= bits t /\ (i + l - 1) / bits t < nLen /\ i + l <= max_size_t} ->
+  limb t
+
+
+val bn_get_bits_lemma:
+    #t:limb_t
+  -> #nLen:size_nat
+  -> n:lbignum t nLen
+  -> i:size_nat
+  -> l:size_nat{l <= bits t /\ (i + l - 1) / bits t < nLen /\ i + l <= max_size_t} ->
+  Lemma (v (bn_get_bits n i l) == (bn_v n / pow2 i) % pow2 l)
+
+
 val bn_set_ith_bit:
     #t:limb_t
   -> #len:size_nat
