@@ -13,7 +13,7 @@ module ST = FStar.HyperStack.ST
 module S = Hacl.Spec.Bignum.ModInv
 
 module BN = Hacl.Bignum
-module BE = Hacl.Bignum.Exponentiation
+module BE = Hacl.Bignum.ExponentiationPrecomp
 module BM = Hacl.Bignum.Montgomery
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"

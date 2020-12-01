@@ -18,7 +18,7 @@ module LS = Hacl.Spec.RSAPSS
 module BM = Hacl.Bignum.Montgomery
 module BN = Hacl.Bignum
 module BB = Hacl.Spec.Bignum.Base
-module BE = Hacl.Bignum.Exponentiation
+module BE = Hacl.Bignum.ExponentiationPrecomp
 
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"

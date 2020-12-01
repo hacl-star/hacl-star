@@ -22,7 +22,7 @@ module BN = Hacl.Bignum
 module BM = Hacl.Bignum.Montgomery
 
 friend Hacl.Spec.Bignum.ExponentiationPrecomp
-
+friend Hacl.Bignum.Exponentiation
 
 #reset-options "--z3rlimit 150 --fuel 0 --ifuel 0"
 
@@ -449,3 +449,68 @@ let bn_mod_exp_fw_ct #t k bn_mod_exp_fw_precompr2_ct nBits n a bBits b l res =
   BM.precomp nBits n r2;
   bn_mod_exp_fw_precompr2_ct n a bBits b l r2 res;
   pop_frame ()
+
+
+[@CInline]
+let bn_mod_exp_fw_precompr2_u32 (len:BN.meta_len U32) : bn_mod_exp_fw_precompr2_st U32 len =
+  bn_mod_exp_fw_precompr2 (BM.mk_runtime_mont len)
+[@CInline]
+let bn_mod_exp_fw_precompr2_ct_u32 (len:BN.meta_len U32) : bn_mod_exp_fw_precompr2_st U32 len =
+  bn_mod_exp_fw_precompr2_ct (BM.mk_runtime_mont len)
+[@CInline]
+let bn_mod_exp_fw_u32 (len:BN.meta_len U32) : bn_mod_exp_fw_st U32 len =
+  bn_mod_exp_fw (BM.mk_runtime_mont len) (bn_mod_exp_fw_precompr2_u32 len)
+[@CInline]
+let bn_mod_exp_fw_ct_u32 (len:BN.meta_len U32) : bn_mod_exp_fw_st U32 len =
+  bn_mod_exp_fw_ct (BM.mk_runtime_mont len) (bn_mod_exp_fw_precompr2_ct_u32 len)
+
+inline_for_extraction noextract
+let mk_runtime_exp_u32 (len: BN.meta_len U32) : exp U32 = {
+  mont = BM.mk_runtime_mont len;
+  exp_check = BE.bn_check_mod_exp_u32 len;
+  mod_exp_precomp = BE.bn_mod_exp_precompr2_u32 len;
+  ct_mod_exp_precomp = BE.bn_mod_exp_mont_ladder_precompr2_u32 len;
+  mod_exp = BE.bn_mod_exp_u32 len;
+  ct_mod_exp = BE.bn_mod_exp_mont_ladder_u32 len;
+  mod_exp_fw_precomp = bn_mod_exp_fw_precompr2_u32 len;
+  ct_mod_exp_fw_precomp = bn_mod_exp_fw_precompr2_ct_u32 len;
+  mod_exp_fw = bn_mod_exp_fw_u32 len;
+  ct_mod_exp_fw = bn_mod_exp_fw_ct_u32 len;
+  }
+
+
+[@CInline]
+let bn_mod_exp_fw_precompr2_u64 (len:BN.meta_len U64) : bn_mod_exp_fw_precompr2_st U64 len =
+  bn_mod_exp_fw_precompr2 (BM.mk_runtime_mont len)
+[@CInline]
+let bn_mod_exp_fw_precompr2_ct_u64 (len:BN.meta_len U64) : bn_mod_exp_fw_precompr2_st U64 len =
+  bn_mod_exp_fw_precompr2_ct (BM.mk_runtime_mont len)
+[@CInline]
+let bn_mod_exp_fw_u64 (len:BN.meta_len U64) : bn_mod_exp_fw_st U64 len =
+  bn_mod_exp_fw (BM.mk_runtime_mont len) (bn_mod_exp_fw_precompr2_u64 len)
+[@CInline]
+let bn_mod_exp_fw_ct_u64 (len:BN.meta_len U64) : bn_mod_exp_fw_st U64 len =
+  bn_mod_exp_fw_ct (BM.mk_runtime_mont len) (bn_mod_exp_fw_precompr2_ct_u64 len)
+
+inline_for_extraction noextract
+let mk_runtime_exp_u64 (len: BN.meta_len U64) : exp U64 = {
+  mont = BM.mk_runtime_mont len;
+  exp_check = BE.bn_check_mod_exp_u64 len;
+  mod_exp_precomp = BE.bn_mod_exp_precompr2_u64 len;
+  ct_mod_exp_precomp = BE.bn_mod_exp_mont_ladder_precompr2_u64 len;
+  mod_exp = BE.bn_mod_exp_u64 len;
+  ct_mod_exp = BE.bn_mod_exp_mont_ladder_u64 len;
+  mod_exp_fw_precomp = bn_mod_exp_fw_precompr2_u64 len;
+  ct_mod_exp_fw_precomp = bn_mod_exp_fw_precompr2_ct_u64 len;
+  mod_exp_fw = bn_mod_exp_fw_u64 len;
+  ct_mod_exp_fw = bn_mod_exp_fw_ct_u64 len;
+  }
+
+
+let mk_runtime_exp (#t:limb_t) (len:BN.meta_len t) : exp t =
+  match t with
+  | U32 -> mk_runtime_exp_u32 len
+  | U64 -> mk_runtime_exp_u64 len
+
+let mk_runtime_exp_len_lemma #t len =
+  BM.mk_runtime_mont_len_lemma #t len

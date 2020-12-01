@@ -9,6 +9,7 @@ module Hash = Spec.Agile.Hash
 module RI = Hacl.Impl.RSAPSS
 module RK = Hacl.Impl.RSAPSS.Keys
 module BE = Hacl.Bignum.Exponentiation
+module BP = Hacl.Bignum.ExponentiationPrecomp
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -26,7 +27,7 @@ let a_hash = Hash.SHA2_256
 
 //a specialized version of bignum
 inline_for_extraction noextract
-val ke_2048: BE.exp t_limbs
+val ke_2048: BP.exp t_limbs
 
 
 val rsapss_sign: RI.rsapss_sign_st t_limbs ke_2048 a_hash modBits

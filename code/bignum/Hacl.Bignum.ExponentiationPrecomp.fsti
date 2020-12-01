@@ -12,6 +12,7 @@ open Hacl.Bignum.Definitions
 module S = Hacl.Spec.Bignum.ExponentiationPrecomp
 module BN = Hacl.Bignum
 module BM = Hacl.Bignum.Montgomery
+module BE = Hacl.Bignum.Exponentiation
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -78,3 +79,25 @@ val bn_mod_exp_fw_ct:
   -> k:BM.mont t
   -> bn_mod_exp_fw_precompr2_ct:bn_mod_exp_fw_precompr2_st t k.BM.bn.BN.len ->
   bn_mod_exp_fw_st t k.BM.bn.BN.len
+
+
+inline_for_extraction noextract
+class exp (t:limb_t) = {
+  mont: BM.mont t;
+  exp_check: BE.bn_check_mod_exp_st t mont.BM.bn.BN.len;
+  mod_exp_precomp: BE.bn_mod_exp_precompr2_st t mont.BM.bn.BN.len;
+  ct_mod_exp_precomp: BE.bn_mod_exp_mont_ladder_precompr2_st t mont.BM.bn.BN.len;
+  mod_exp : BE.bn_mod_exp_st t mont.BM.bn.BN.len;
+  ct_mod_exp : BE.bn_mod_exp_mont_ladder_st t mont.BM.bn.BN.len;
+  mod_exp_fw_precomp: bn_mod_exp_fw_precompr2_st t mont.BM.bn.BN.len;
+  ct_mod_exp_fw_precomp: bn_mod_exp_fw_precompr2_st t mont.BM.bn.BN.len;
+  mod_exp_fw: bn_mod_exp_fw_st t mont.BM.bn.BN.len;
+  ct_mod_exp_fw: bn_mod_exp_fw_st t mont.BM.bn.BN.len;
+}
+
+// A completely run-time-only instance where the functions above exist in the C code.
+inline_for_extraction noextract
+val mk_runtime_exp: #t:limb_t -> len:BN.meta_len t -> exp t
+
+val mk_runtime_exp_len_lemma: #t:limb_t -> len:BN.meta_len t ->
+  Lemma ((mk_runtime_exp #t len).mont.BM.bn.BN.len == len) [SMTPat (mk_runtime_exp #t len)]

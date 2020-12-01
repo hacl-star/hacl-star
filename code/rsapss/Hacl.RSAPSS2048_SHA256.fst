@@ -12,6 +12,7 @@ module RK = Hacl.Impl.RSAPSS.Keys
 module BN = Hacl.Bignum
 module BM = Hacl.Bignum.Montgomery
 module BE = Hacl.Bignum.Exponentiation
+module BP = Hacl.Bignum.ExponentiationPrecomp
 module BD = Hacl.Bignum.Definitions
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
@@ -109,14 +110,34 @@ let mod_exp_mont_ladder_precompr2: BE.bn_mod_exp_mont_ladder_precompr2_st t_limb
 let mod_exp_mont_ladder: BE.bn_mod_exp_mont_ladder_st t_limbs n_limbs =
   BE.bn_mod_exp_mont_ladder mont_inst mod_exp_mont_ladder_precompr2
 
+[@CInline]
+let mod_exp_fw_precompr2: BP.bn_mod_exp_fw_precompr2_st t_limbs n_limbs =
+  BP.bn_mod_exp_fw_precompr2 mont_inst
+
+[@CInline]
+let mod_exp_fw_precompr2_ct: BP.bn_mod_exp_fw_precompr2_st t_limbs n_limbs =
+  BP.bn_mod_exp_fw_precompr2_ct mont_inst
+
+[@CInline]
+let mod_exp_fw: BP.bn_mod_exp_fw_st t_limbs n_limbs =
+  BP.bn_mod_exp_fw mont_inst mod_exp_fw_precompr2
+
+[@CInline]
+let mod_exp_fw_ct: BP.bn_mod_exp_fw_st t_limbs n_limbs =
+  BP.bn_mod_exp_fw_ct mont_inst mod_exp_fw_precompr2_ct
+
 inline_for_extraction noextract
-instance ke_2048: BE.exp t_limbs = {
-  BE.mont = mont_inst;
-  BE.exp_check;
-  BE.mod_exp_precomp = mod_exp_precompr2;
-  BE.ct_mod_exp_precomp = mod_exp_mont_ladder_precompr2;
-  BE.mod_exp = mod_exp;
-  BE.ct_mod_exp = mod_exp_mont_ladder;
+instance ke_2048: BP.exp t_limbs = {
+  BP.mont = mont_inst;
+  BP.exp_check;
+  BP.mod_exp_precomp = mod_exp_precompr2;
+  BP.ct_mod_exp_precomp = mod_exp_mont_ladder_precompr2;
+  BP.mod_exp = mod_exp;
+  BP.ct_mod_exp = mod_exp_mont_ladder;
+  BP.mod_exp_fw_precomp = mod_exp_fw_precompr2;
+  BP.ct_mod_exp_fw_precomp = mod_exp_fw_precompr2_ct;
+  BP.mod_exp_fw = mod_exp_fw;
+  BP.ct_mod_exp_fw = mod_exp_fw_ct;
 }
 
 
