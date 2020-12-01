@@ -15,7 +15,7 @@ module BM = Hacl.Bignum.Montgomery
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-// This function is *NOT* constant-time on the exponent b.
+
 inline_for_extraction noextract
 let bn_mod_exp_fw_precompr2_st (t:limb_t) (len:BN.meta_len t) =
     n:lbignum t len
@@ -35,8 +35,14 @@ let bn_mod_exp_fw_precompr2_st (t:limb_t) (len:BN.meta_len t) =
     S.bn_mod_exp_fw_precompr2 (v len) (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b) (v l) (as_seq h0 r2))
 
 
+// This function is *NOT* constant-time on the exponent b.
 inline_for_extraction noextract
 val bn_mod_exp_fw_precompr2: #t:limb_t -> k:BM.mont t -> bn_mod_exp_fw_precompr2_st t k.BM.bn.BN.len
+
+
+// This function is constant-time on the exponent b.
+inline_for_extraction noextract
+val bn_mod_exp_fw_precompr2_ct: #t:limb_t -> k:BM.mont t -> bn_mod_exp_fw_precompr2_st t k.BM.bn.BN.len
 
 
 inline_for_extraction noextract
@@ -62,4 +68,13 @@ val bn_mod_exp_fw:
     #t:limb_t
   -> k:BM.mont t
   -> bn_mod_exp_fw_precompr2:bn_mod_exp_fw_precompr2_st t k.BM.bn.BN.len ->
+  bn_mod_exp_fw_st t k.BM.bn.BN.len
+
+
+// This function is constant-time on the exponent b.
+inline_for_extraction noextract
+val bn_mod_exp_fw_ct:
+    #t:limb_t
+  -> k:BM.mont t
+  -> bn_mod_exp_fw_precompr2_ct:bn_mod_exp_fw_precompr2_st t k.BM.bn.BN.len ->
   bn_mod_exp_fw_st t k.BM.bn.BN.len

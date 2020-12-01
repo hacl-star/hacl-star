@@ -17,6 +17,7 @@ module BE = Hacl.Spec.Bignum.Exponentiation
 module BM = Hacl.Spec.Bignum.Montgomery
 module BN = Hacl.Spec.Bignum
 module BI = Hacl.Spec.Bignum.ModInvLimb
+module BB = Hacl.Spec.Bignum.Base
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -66,6 +67,36 @@ let bn_mod_precomp_table_mont #t #nLen n mu table_len aM oneM =
   let table = update_sub table nLen nLen aM in
 
   Loops.repeati (table_len - 2) (bn_mod_precomp_table_mont_f n mu aM table_len) table
+
+
+val table_select_ct_f:
+    #t:limb_t
+  -> #nLen:size_pos
+  -> table_len:size_nat{1 < table_len /\ table_len * nLen <= max_size_t}
+  -> table:lbignum t (table_len * nLen)
+  -> i:limb t{v i < table_len}
+  -> j:size_nat{j < table_len - 1}
+  -> acc:lbignum t nLen ->
+  lbignum t nLen
+
+let table_select_ct_f #t #nLen table_len table i j acc =
+  let c = eq_mask i (BB.size_to_limb (size (j + 1))) in
+  Math.Lemmas.lemma_mult_le_right nLen (j + 2) table_len;
+  let res_j = sub table ((j + 1) * nLen) nLen in
+  map2 (BB.mask_select c) res_j acc
+
+
+val table_select_ct:
+    #t:limb_t
+  -> #nLen:size_pos
+  -> table_len:size_nat{1 < table_len /\ table_len * nLen <= max_size_t}
+  -> table:lbignum t (table_len * nLen)
+  -> i:limb t{v i < table_len} ->
+  lbignum t nLen
+
+let table_select_ct #t #nLen table_len table i =
+  let res0 : lbignum t nLen = sub table 0 nLen in
+  Loops.repeati (table_len - 1) (table_select_ct_f #t #nLen table_len table i) res0
 
 
 val bn_mod_exp_fw_mont_f:
@@ -283,6 +314,18 @@ let bn_mod_precomp_table_mont_lemma #t #nLen n mu table_len aM oneM i =
   assert (E.mont_pre (bits t) nLen (bn_v n) (v mu));
   E.mod_precomp_table_mont_lemma (bits t) nLen (bn_v n) (v mu) table_len (bn_v aM) i;
   assert (bn_v bi < bn_v n)
+
+
+val table_select_ct_lemma:
+    #t:limb_t
+  -> #nLen:size_pos
+  -> table_len:size_nat{1 < table_len /\ table_len * nLen <= max_size_t}
+  -> table:lbignum t (table_len * nLen)
+  -> i:limb t{v i < table_len} ->
+  Lemma (Math.Lemmas.lemma_mult_le_right nLen (v i + 1) table_len;
+    table_select_ct table_len table i == sub table (v i * nLen) nLen)
+
+let table_select_ct_lemma #t #nLen table_len table i = admit()
 
 
 val bn_mod_exp_fw_mont_f_lemma:

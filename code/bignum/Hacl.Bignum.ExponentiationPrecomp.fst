@@ -16,6 +16,7 @@ module Loops = Lib.LoopCombinators
 module S = Hacl.Spec.Bignum.ExponentiationPrecomp
 module SN = Hacl.Spec.Bignum
 module SM = Hacl.Spec.Bignum.Montgomery
+module BB = Hacl.Spec.Bignum.Base
 
 module BN = Hacl.Bignum
 module BM = Hacl.Bignum.Montgomery
@@ -132,6 +133,62 @@ let bn_mod_precomp_table_mont #t k n mu table_len aM oneM table =
 
 
 inline_for_extraction noextract
+let table_select_ct_f_st (t:limb_t) (len:BN.meta_len t) =
+    res_j:lbignum t len
+  -> i:limb t //{v i < v table_len}
+  -> j:size_t{v j + 1 <= max_size_t} //{v j < v table_len - 1}
+  -> acc:lbignum t len ->
+  Stack unit
+  (requires fun h ->
+    live h res_j /\ live h acc /\ disjoint acc res_j)
+  (ensures  fun h0 _ h1 -> modifies (loc acc) h0 h1 /\
+    (let c = eq_mask i (BB.size_to_limb (j +! 1ul)) in
+     as_seq h1 acc == LSeq.map2 (BB.mask_select c) (as_seq h0 res_j) (as_seq h0 acc)))
+
+
+inline_for_extraction noextract
+val table_select_ct_f: #t:limb_t -> len:BN.meta_len t -> table_select_ct_f_st t len
+let table_select_ct_f #t len res_j i j acc =
+  let c = eq_mask i (BB.size_to_limb (j +! 1ul)) in
+  map2T len acc (BB.mask_select c) res_j acc
+
+
+inline_for_extraction noextract
+let table_select_ct_st (t:limb_t) (len:BN.meta_len t) =
+    table_len:size_t{1 < v table_len /\ v table_len * v len <= max_size_t}
+  -> table:lbignum t (table_len *! len)
+  -> i:limb t{v i < v table_len /\ (v i + 1) * v len <= v table_len * v len}
+  -> res:lbignum t len ->
+  Stack unit
+  (requires fun h ->
+    live h table /\ live h res /\ disjoint table res)
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_seq h1 res == S.table_select_ct (v table_len) (as_seq h0 table) i /\
+    as_seq h1 res == LSeq.sub (as_seq h0 table) (v i * v len) (v len))
+
+
+inline_for_extraction noextract
+val table_select_ct: #t:limb_t -> len:BN.meta_len t -> table_select_ct_st t len
+let table_select_ct #t len table_len table i res =
+  copy res (sub table 0ul len);
+
+  [@inline_let]
+  let spec h0 = S.table_select_ct_f #t #(v len) (v table_len) (as_seq h0 table) i in
+
+  let h0 = ST.get () in
+  loop1 h0 (table_len -! 1ul) res spec
+  (fun j ->
+    Loops.unfold_repeati (v table_len - 1) (spec h0) (as_seq h0 res) (v j);
+    Math.Lemmas.lemma_mult_le_right (v len) (v j + 2) (v table_len);
+    let res_j = sub table ((j +! 1ul) *! len) len in
+    table_select_ct_f len res_j i j res
+  );
+  let h1 = ST.get () in
+  assert (as_seq h1 res == S.table_select_ct (v table_len) (as_seq h0 table) i);
+  S.table_select_ct_lemma #t #(v len) (v table_len) (as_seq h0 table) i
+
+
+inline_for_extraction noextract
 let bn_mod_exp_fw_mont_f_st (t:limb_t) (len:BN.meta_len t) =
     n:lbignum t len
   -> mu:limb t
@@ -156,6 +213,25 @@ let bn_mod_exp_fw_mont_f_st (t:limb_t) (len:BN.meta_len t) =
 inline_for_extraction noextract
 val bn_mod_exp_fw_mont_f: #t:limb_t -> k:BM.mont t -> bn_mod_exp_fw_mont_f_st t k.BM.bn.BN.len
 let bn_mod_exp_fw_mont_f #t k n mu bBits bLen b l table_len table i accM =
+  push_frame ();
+  bn_mod_exp_pow2_mont_in_place k n mu l accM;
+  let bits_l = BN.bn_get_bits bLen b (bBits -! l *! i -! l) l in
+  let h0 = ST.get () in
+  SN.bn_get_bits_lemma (as_seq h0 b) (v bBits - v l * v i - v l) (v l);
+  assert (v bits_l < v table_len);
+
+  [@inline_let] let len = k.BM.bn.BN.len in
+  let a_powbits_l = create len (uint #t #SEC 0) in
+  Math.Lemmas.lemma_mult_le_right (v len) (v bits_l + 1) (v table_len);
+  table_select_ct len table_len table bits_l a_powbits_l;
+
+  k.BM.mul n mu accM a_powbits_l accM;
+  pop_frame ()
+
+
+inline_for_extraction noextract
+val bn_mod_exp_fw_mont_raw_f: #t:limb_t -> k:BM.mont t -> bn_mod_exp_fw_mont_f_st t k.BM.bn.BN.len
+let bn_mod_exp_fw_mont_raw_f #t k n mu bBits bLen b l table_len table i accM =
   bn_mod_exp_pow2_mont_in_place k n mu l accM;
   let bits_l = BN.bn_get_bits bLen b (bBits -! l *! i -! l) l in
   let h0 = ST.get () in
@@ -194,6 +270,27 @@ let bn_mod_exp_fw_mont_rem_st (t:limb_t) (len:BN.meta_len t) =
 inline_for_extraction noextract
 val bn_mod_exp_fw_mont_rem: #t:limb_t -> k:BM.mont t -> bn_mod_exp_fw_mont_rem_st t k.BM.bn.BN.len
 let bn_mod_exp_fw_mont_rem #t k n mu bBits bLen b l table_len table accM =
+  push_frame ();
+  let c = bBits %. l in
+  assert (v c == v bBits % v l);
+  bn_mod_exp_pow2_mont_in_place k n mu c accM;
+  let bits_c = BN.bn_get_bits bLen b 0ul c in
+  let h0 = ST.get () in
+  SN.bn_get_bits_lemma (as_seq h0 b) 0 (v c);
+  Math.Lemmas.pow2_lt_compat (v l) (v c);
+  assert (v bits_c < v table_len);
+
+  [@inline_let] let len = k.BM.bn.BN.len in
+  let a_powbits_c = create len (uint #t #SEC 0) in
+  Math.Lemmas.lemma_mult_le_right (v len) (v bits_c + 1) (v table_len);
+  table_select_ct len table_len table bits_c a_powbits_c;
+  k.BM.mul n mu accM a_powbits_c accM;
+  pop_frame ()
+
+
+inline_for_extraction noextract
+val bn_mod_exp_fw_mont_raw_rem: #t:limb_t -> k:BM.mont t -> bn_mod_exp_fw_mont_rem_st t k.BM.bn.BN.len
+let bn_mod_exp_fw_mont_raw_rem #t k n mu bBits bLen b l table_len table accM =
   let c = bBits %. l in
   assert (v c == v bBits % v l);
   bn_mod_exp_pow2_mont_in_place k n mu c accM;
@@ -233,8 +330,13 @@ let bn_mod_exp_fw_mont_loop_st (t:limb_t) (len:BN.meta_len t) =
 
 
 inline_for_extraction noextract
-val bn_mod_exp_fw_mont_loop: #t:limb_t -> k:BM.mont t -> bn_mod_exp_fw_mont_loop_st t k.BM.bn.BN.len
-let bn_mod_exp_fw_mont_loop #t k n mu bBits bLen b l table_len table accM = admit();
+val bn_mod_exp_fw_mont_loop:
+    #t:limb_t
+  -> k:BM.mont t
+  -> bn_mod_exp_fw_mont_f: bn_mod_exp_fw_mont_f_st t k.BM.bn.BN.len ->
+  bn_mod_exp_fw_mont_loop_st t k.BM.bn.BN.len
+
+let bn_mod_exp_fw_mont_loop #t k bn_mod_exp_fw_mont_f n mu bBits bLen b l table_len table accM = admit();
   [@inline_let]
   let spec h0 = S.bn_mod_exp_fw_mont_f (as_seq h0 n) mu
       (v bBits) (v bLen) (as_seq h0 b) (v l) (v table_len) (as_seq h0 table) in
@@ -246,7 +348,7 @@ let bn_mod_exp_fw_mont_loop #t k n mu bBits bLen b l table_len table accM = admi
   loop1 h0 it accM spec
   (fun i ->
     Loops.unfold_repeati (v it) (spec h0) (as_seq h0 accM) (v i);
-    bn_mod_exp_fw_mont_f k n mu bBits bLen b l table_len table i accM
+    bn_mod_exp_fw_mont_f n mu bBits bLen b l table_len table i accM
   )
 
 
@@ -271,8 +373,14 @@ let bn_mod_exp_fw_mont_aux_st (t:limb_t) (len:BN.meta_len t) =
 
 
 inline_for_extraction noextract
-val bn_mod_exp_fw_mont_aux: #t:limb_t -> k:BM.mont t -> bn_mod_exp_fw_mont_aux_st t k.BM.bn.BN.len
-let bn_mod_exp_fw_mont_aux #t k n mu aM bBits b l r2 accM =
+val bn_mod_exp_fw_mont_aux:
+    #t:limb_t
+  -> k:BM.mont t
+  -> bn_mod_exp_fw_mont_f: bn_mod_exp_fw_mont_f_st t k.BM.bn.BN.len
+  -> bn_mod_exp_fw_mont_rem: bn_mod_exp_fw_mont_rem_st t k.BM.bn.BN.len ->
+  bn_mod_exp_fw_mont_aux_st t k.BM.bn.BN.len
+
+let bn_mod_exp_fw_mont_aux #t k bn_mod_exp_fw_mont_f bn_mod_exp_fw_mont_rem n mu aM bBits b l r2 accM =
   [@inline_let] let len = k.BM.bn.BN.len in
   let bLen = blocks bBits (size (bits t)) in
   push_frame ();
@@ -287,14 +395,22 @@ let bn_mod_exp_fw_mont_aux #t k n mu aM bBits b l r2 accM =
   let table = create (table_len *! len) (uint #t #SEC 0) in
   bn_mod_precomp_table_mont k n mu table_len aM accM table;
 
-  bn_mod_exp_fw_mont_loop #t k n mu bBits bLen b l table_len table accM;
+  bn_mod_exp_fw_mont_loop #t k bn_mod_exp_fw_mont_f n mu bBits bLen b l table_len table accM;
 
   if bBits %. l <>. 0ul then
-    bn_mod_exp_fw_mont_rem k n mu bBits bLen b l table_len table accM;
+    bn_mod_exp_fw_mont_rem n mu bBits bLen b l table_len table accM;
   pop_frame()
 
 
-let bn_mod_exp_fw_precompr2 #t k n a bBits b l r2 res =
+inline_for_extraction noextract
+val bn_mod_exp_fw_precompr2_:
+    #t:limb_t
+  -> k:BM.mont t
+  -> bn_mod_exp_fw_mont_f: bn_mod_exp_fw_mont_f_st t k.BM.bn.BN.len
+  -> bn_mod_exp_fw_mont_rem: bn_mod_exp_fw_mont_rem_st t k.BM.bn.BN.len ->
+  bn_mod_exp_fw_precompr2_st t k.BM.bn.BN.len
+
+let bn_mod_exp_fw_precompr2_ #t k bn_mod_exp_fw_mont_f bn_mod_exp_fw_mont_rem n a bBits b l r2 res =
   [@inline_let] let len = k.BM.bn.BN.len in
   push_frame ();
   let mu = BM.mod_inv_limb n.(0ul) in
@@ -302,9 +418,19 @@ let bn_mod_exp_fw_precompr2 #t k n a bBits b l r2 res =
   k.BM.to n mu r2 a aM;
 
   let resM = create len (uint #t #SEC 0) in
-  bn_mod_exp_fw_mont_aux #t k n mu aM bBits b l r2 resM;
+  bn_mod_exp_fw_mont_aux #t k bn_mod_exp_fw_mont_f bn_mod_exp_fw_mont_rem n mu aM bBits b l r2 resM;
   k.BM.from n mu resM res;
   pop_frame ()
+
+
+let bn_mod_exp_fw_precompr2 #t k n a bBits b l r2 res =
+  bn_mod_exp_fw_precompr2_ #t k
+    (bn_mod_exp_fw_mont_raw_f k) (bn_mod_exp_fw_mont_raw_rem k) n a bBits b l r2 res
+
+
+let bn_mod_exp_fw_precompr2_ct #t k n a bBits b l r2 res =
+  bn_mod_exp_fw_precompr2_ #t k
+    (bn_mod_exp_fw_mont_f k) (bn_mod_exp_fw_mont_rem k) n a bBits b l r2 res
 
 
 let bn_mod_exp_fw #t k bn_mod_exp_fw_precompr2 nBits n a bBits b l res =
@@ -313,4 +439,13 @@ let bn_mod_exp_fw #t k bn_mod_exp_fw_precompr2 nBits n a bBits b l res =
   let r2 = create len (uint #t #SEC 0) in
   BM.precomp nBits n r2;
   bn_mod_exp_fw_precompr2 n a bBits b l r2 res;
+  pop_frame ()
+
+
+let bn_mod_exp_fw_ct #t k bn_mod_exp_fw_precompr2_ct nBits n a bBits b l res =
+  [@inline_let] let len = k.BM.bn.BN.len in
+  push_frame ();
+  let r2 = create len (uint #t #SEC 0) in
+  BM.precomp nBits n r2;
+  bn_mod_exp_fw_precompr2_ct n a bBits b l r2 res;
   pop_frame ()
