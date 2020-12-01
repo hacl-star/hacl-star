@@ -777,7 +777,7 @@ val mod_exp_fw_mont_loop_lemma:
   -> aM:nat_mod n
   -> bBits:nat -> b:nat{b < pow2 bBits}
   -> l:pos
-  -> table_len:Lib.IntTypes.size_pos{1 < table_len /\ table_len == pow2 l}
+  -> table_len:Lib.IntTypes.size_nat{1 < table_len /\ table_len == pow2 l}
   -> accM0:nat_mod n
   -> j:nat{l * j <= bBits } -> Lemma
   (requires mont_pre pbits rLen n mu)
