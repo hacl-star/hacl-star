@@ -66,6 +66,8 @@ let toDomain value result =
 let fromDomain f result = 
   montgomery_multiplication_buffer_by_one f result  
 
+
+(* CHANGE TO UPLOAD Z = 1 *)
 let pointToDomain p result = 
     let p_x = sub p (size 0) (size 4) in 
     let p_y = sub p (size 4) (size 4) in 
@@ -76,8 +78,8 @@ let pointToDomain p result =
     let r_z = sub result (size 8) (size 4) in 
 
     toDomain p_x r_x;
-    toDomain p_y r_y;
-    toDomain p_z r_z
+    toDomain p_y r_y
+
 
 let pointFromDomain p result = 
     let p_x = sub p (size 0) (size 4) in 
@@ -435,6 +437,99 @@ let montgomery_ladder_step #buf_type r0 r1 tempBuffer scalar i =
     lemma_step i
 
 
+val getScalar: #buf_type: buftype -> scalar: lbuffer_t buf_type uint8 (size 32) -> i: size_t {v i < 64} -> 
+  Stack uint32 
+    (requires fun h -> True)
+    (ensures fun h0 _ h1 -> True)
+
+let getScalar #a scalar i = 
+  let half = logand i 0xful in 
+  let half = shift_right half 1ul in 
+  to_u32 (index scalar half)
+
+open Hacl.Impl.P256.Q.CR 
+open Hacl.Impl.P256.MixedPointAdd
+
+val ml_r2_step:  #buf_type: buftype ->
+  p: point -> tempBuffer: lbuffer uint64 (size 88) -> 
+  t: lbuffer uint64 (size 8 *! size 16) ->
+  scalar: lbuffer_t buf_type uint8 (size 32) -> 
+  i:size_t{v i < 256} -> 
+  Stack unit
+  (requires fun h -> live h p /\live h tempBuffer /\ live h scalar /\
+    LowStar.Monotonic.Buffer.all_disjoint [loc p;loc tempBuffer; loc scalar])
+  (ensures fun h0 _ h1 -> True)
+
+
+let ml_r2_step #buf_type p tempBuffer t scalar i = 
+  let i = 63ul -. i in 
+  let bits: uint32 = getScalar scalar i in 
+
+  let pointToAdd = sub t (bits *. size 12) (size 8) in 
+  
+  point_double p p tempBuffer;
+  point_double p p tempBuffer;
+  point_double p p tempBuffer;
+  point_double p p tempBuffer;
+  
+  point_double p p tempBuffer;
+  point_double p p tempBuffer;
+  point_double p p tempBuffer;
+  point_double p p tempBuffer;
+  
+  pointAddMixed p p pointToAdd tempBuffer
+
+
+
+val uploadBasePoint: p: point -> Stack unit 
+  (requires fun h -> live h p)
+  (ensures fun h0 _ h1 -> modifies (loc p) h0 h1 /\ 
+    as_nat h1 (gsub p (size 0) (size 4)) < prime256 /\ 
+    as_nat h1 (gsub p (size 4) (size 4)) < prime256 /\
+    as_nat h1 (gsub p (size 8) (size 4)) < prime256 /\
+      (
+	let x1 = as_nat h1 (gsub p (size 0) (size 4)) in 
+	let y1 = as_nat h1 (gsub p (size 4) (size 4)) in 
+	let z1 = as_nat h1 (gsub p (size 8) (size 4)) in 
+
+	let bpX = 0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296 in 
+	let bpY = 0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5 in 
+
+	fromDomain_ x1 == bpX /\ fromDomain_ y1 == bpY /\ fromDomain_ z1 ==  1
+    )
+)
+
+let uploadBasePoint p = 
+    let h0 = ST.get() in 
+  upd p (size 0) (u64 8784043285714375740);
+  upd p (size 1) (u64 8483257759279461889);
+  upd p (size 2) (u64 8789745728267363600);
+  upd p (size 3) (u64 1770019616739251654);
+  assert_norm (8784043285714375740 + pow2 64 * 8483257759279461889 + pow2 64 * pow2 64 * 8789745728267363600 + pow2 64 * pow2 64 * pow2 64 * 1770019616739251654 < prime256); 
+    assert_norm (8784043285714375740 + pow2 64 * 8483257759279461889 + pow2 64 * pow2 64 * 8789745728267363600 + pow2 64 * pow2 64 * pow2 64 * 1770019616739251654 = 11110593207902424140321080247206512405358633331993495164878354046817554469948); 
+  assert_norm(0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296 == fromDomain_ 11110593207902424140321080247206512405358633331993495164878354046817554469948);
+
+  upd p (size 4) (u64 15992936863339206154);
+  upd p (size 5) (u64 10037038012062884956);
+  upd p (size 6) (u64 15197544864945402661);
+  upd p (size 7) (u64 9615747158586711429);
+  assert_norm(15992936863339206154 + pow2 64 * 10037038012062884956 + pow2 64 * pow2 64 * 15197544864945402661 + pow2 64 * pow2 64 * pow2 64 * 9615747158586711429 < prime256);
+  assert_norm (15992936863339206154 + pow2 64 * 10037038012062884956 + pow2 64 * pow2 64 * 15197544864945402661 + pow2 64 * pow2 64 * pow2 64 * 9615747158586711429 = 60359023176204190920225817201443260813112970217682417638161152432929735267850);
+  assert_norm (0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5 == fromDomain_ 60359023176204190920225817201443260813112970217682417638161152432929735267850);
+  
+  
+  upd p (size 8) (u64 1);
+  upd p (size 9) (u64 18446744069414584320);
+  upd p (size 10) (u64 18446744073709551615);
+  upd p (size 11) (u64 4294967294);
+  assert_norm (1 + pow2 64 * 18446744069414584320 + pow2 64 * pow2 64 * 18446744073709551615 + pow2 64 * pow2 64 * pow2 64 * 4294967294 < prime256);
+  assert_norm (1 = fromDomain_ 26959946660873538059280334323183841250350249843923952699046031785985);
+  assert_norm (1 + pow2 64 * 18446744069414584320 + pow2 64 * pow2 64 * 18446744073709551615 + pow2 64 * pow2 64 * pow2 64 * 4294967294 = 26959946660873538059280334323183841250350249843923952699046031785985) 
+
+
+
+
+
 inline_for_extraction noextract
 val montgomery_ladder: #buf_type: buftype->  p: point -> q: point ->
   scalar: lbuffer_t buf_type uint8 (size 32) -> 
@@ -505,6 +600,58 @@ let montgomery_ladder #a p q scalar tempBuffer =
       Lib.LoopCombinators.unfold_repeati 256 (spec_ml h0) (acc h0) (uint_v i)
     )
 
+
+val montgomery_ladder_2:  #buf_type: buftype->  p: point -> 
+  scalar: lbuffer_t buf_type uint8 (size 32) -> 
+  tempBuffer:  lbuffer uint64 (size 88)  -> 
+  Stack unit
+  (requires fun h -> live h p /\  live h scalar /\  live h tempBuffer /\
+    LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc scalar] /\
+    as_nat h (gsub p (size 0) (size 4)) < prime /\ 
+    as_nat h (gsub p (size 4) (size 4)) < prime /\
+    as_nat h (gsub p (size 8) (size 4)) < prime )
+  (ensures fun h0 _ h1 -> modifies (loc p |+| loc tempBuffer) h0 h1 /\
+    (
+      as_nat h1 (gsub p (size 0) (size 4)) < prime /\ 
+      as_nat h1 (gsub p (size 4) (size 4)) < prime /\
+      as_nat h1 (gsub p (size 8) (size 4)) < prime
+ ))
+
+
+let montgomery_ladder_2  #a p scalar tempBuffer = 
+  push_frame();
+    let t = create (size 8 *! size 16) (u64 0) in 
+    uploadBasePoint (sub t (size 12) (size 12));
+    uploadBasePoint (sub t (size 24) (size 12));
+    uploadBasePoint (sub t (size 36) (size 12));
+    uploadBasePoint (sub t (size 48) (size 12));
+    uploadBasePoint (sub t (size 60) (size 12));
+    uploadBasePoint (sub t (size 72) (size 12));
+    uploadBasePoint (sub t (size 84) (size 12));
+    uploadBasePoint (sub t (size 96) (size 12));
+    uploadBasePoint (sub t (size 108) (size 12));
+
+
+  let h0 = ST.get() in 
+
+  [@inline_let]
+  let spec_ml h0 = _ml_step (as_seq h0 scalar) in 
+
+  [@inline_let] 
+  let acc (h:mem) : GTot (point_nat_prime) = (fromDomainPoint(point_prime_to_coordinates (as_seq h p)))  in 
+  
+  [@inline_let]
+  let inv h (i: nat {i <= 64}) = True in 
+
+  for 0ul 32ul inv 
+    (fun i -> let h2 = ST.get() in
+      ml_r2_step p tempBuffer t scalar i
+    )
+
+
+
+
+
 val zero_buffer: p: point -> 
   Stack unit
     (requires fun h -> live h p)
@@ -571,6 +718,33 @@ val lemma_coord: h3: mem -> q: point -> Lemma (
 let lemma_coord h3 q = ()
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 inline_for_extraction
 val scalarMultiplication_t: #t:buftype -> p: point -> result: point -> 
   scalar: lbuffer_t t uint8 (size 32) -> 
@@ -606,7 +780,7 @@ let scalarMultiplication_t #t p result scalar tempBuffer  =
   let buff = sub tempBuffer (size 12) (size 88) in 
   pointToDomain p result;
     let h2 = ST.get() in 
-  montgomery_ladder q result scalar buff;
+  montgomery_ladder_2 result scalar buff;
     let h3 = ST.get() in 
     lemma_point_to_domain h0 h2 p result;
     lemma_pif_to_domain h2 q;
@@ -625,50 +799,6 @@ let scalarMultiplication #buf_type p result scalar tempBuffer =
   |CONST -> scalarMultiplicationC p result scalar tempBuffer
 
 
-val uploadBasePoint: p: point -> Stack unit 
-  (requires fun h -> live h p)
-  (ensures fun h0 _ h1 -> modifies (loc p) h0 h1 /\ 
-    as_nat h1 (gsub p (size 0) (size 4)) < prime256 /\ 
-    as_nat h1 (gsub p (size 4) (size 4)) < prime256 /\
-    as_nat h1 (gsub p (size 8) (size 4)) < prime256 /\
-      (
-	let x1 = as_nat h1 (gsub p (size 0) (size 4)) in 
-	let y1 = as_nat h1 (gsub p (size 4) (size 4)) in 
-	let z1 = as_nat h1 (gsub p (size 8) (size 4)) in 
-
-	let bpX = 0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296 in 
-	let bpY = 0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5 in 
-
-	fromDomain_ x1 == bpX /\ fromDomain_ y1 == bpY /\ fromDomain_ z1 ==  1
-    )
-)
-
-let uploadBasePoint p = 
-    let h0 = ST.get() in 
-  upd p (size 0) (u64 8784043285714375740);
-  upd p (size 1) (u64 8483257759279461889);
-  upd p (size 2) (u64 8789745728267363600);
-  upd p (size 3) (u64 1770019616739251654);
-  assert_norm (8784043285714375740 + pow2 64 * 8483257759279461889 + pow2 64 * pow2 64 * 8789745728267363600 + pow2 64 * pow2 64 * pow2 64 * 1770019616739251654 < prime256); 
-    assert_norm (8784043285714375740 + pow2 64 * 8483257759279461889 + pow2 64 * pow2 64 * 8789745728267363600 + pow2 64 * pow2 64 * pow2 64 * 1770019616739251654 = 11110593207902424140321080247206512405358633331993495164878354046817554469948); 
-  assert_norm(0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296 == fromDomain_ 11110593207902424140321080247206512405358633331993495164878354046817554469948);
-
-  upd p (size 4) (u64 15992936863339206154);
-  upd p (size 5) (u64 10037038012062884956);
-  upd p (size 6) (u64 15197544864945402661);
-  upd p (size 7) (u64 9615747158586711429);
-  assert_norm(15992936863339206154 + pow2 64 * 10037038012062884956 + pow2 64 * pow2 64 * 15197544864945402661 + pow2 64 * pow2 64 * pow2 64 * 9615747158586711429 < prime256);
-  assert_norm (15992936863339206154 + pow2 64 * 10037038012062884956 + pow2 64 * pow2 64 * 15197544864945402661 + pow2 64 * pow2 64 * pow2 64 * 9615747158586711429 = 60359023176204190920225817201443260813112970217682417638161152432929735267850);
-  assert_norm (0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5 == fromDomain_ 60359023176204190920225817201443260813112970217682417638161152432929735267850);
-  
-  
-  upd p (size 8) (u64 1);
-  upd p (size 9) (u64 18446744069414584320);
-  upd p (size 10) (u64 18446744073709551615);
-  upd p (size 11) (u64 4294967294);
-  assert_norm (1 + pow2 64 * 18446744069414584320 + pow2 64 * pow2 64 * 18446744073709551615 + pow2 64 * pow2 64 * pow2 64 * 4294967294 < prime256);
-  assert_norm (1 = fromDomain_ 26959946660873538059280334323183841250350249843923952699046031785985);
-  assert_norm (1 + pow2 64 * 18446744069414584320 + pow2 64 * pow2 64 * 18446744073709551615 + pow2 64 * pow2 64 * pow2 64 * 4294967294 = 26959946660873538059280334323183841250350249843923952699046031785985) 
 
 
 
@@ -679,7 +809,7 @@ let scalarMultiplicationWithoutNorm p result scalar tempBuffer =
   let buff = sub tempBuffer (size 12) (size 88) in 
   pointToDomain p result;
     let h2 = ST.get() in 
-  montgomery_ladder q result scalar buff;
+  montgomery_ladder_2 result scalar buff;
   copy_point q result;  
     let h3 = ST.get() in 
     lemma_point_to_domain h0 h2 p result;
@@ -695,7 +825,7 @@ let secretToPublic result scalar tempBuffer =
     zero_buffer q; 
       let h1 = ST.get() in 
       lemma_pif_to_domain h1 q;
-    montgomery_ladder q basePoint scalar buff; 
+    montgomery_ladder_2 basePoint scalar buff; 
     norm q result buff;  
   pop_frame()
 
@@ -709,7 +839,7 @@ let secretToPublicWithoutNorm result scalar tempBuffer =
     zero_buffer q; 
       let h1 = ST.get() in 
       lemma_pif_to_domain h1 q; 
-    montgomery_ladder q basePoint scalar buff; 
+    montgomery_ladder_2 basePoint scalar buff; 
     copy_point q result;
   pop_frame()  
 

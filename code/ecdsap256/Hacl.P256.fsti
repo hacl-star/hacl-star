@@ -404,13 +404,3 @@ val is_more_than_zero_less_than_order: x: lbuffer uint8 (size 32) -> Stack bool
   )
  *)
 
-
- val pointAddMixed: result: lbuffer uint64 (size 12) -> p: lbuffer uint64 (size 12) -> q: lbuffer uint64 (size 8) -> Stack unit 
-  (requires fun h -> live h result /\ live h p /\ live h q)
-  (ensures fun h0 _ h1 -> True)
-
-
-
-val do_lookup: a: lbuffer uint64 (8ul *. 16ul) -> scalar: uint8 {v scalar < 16} -> Stack unit
-  (requires fun h -> True)
-  (ensures fun h0 _ h1 -> True)

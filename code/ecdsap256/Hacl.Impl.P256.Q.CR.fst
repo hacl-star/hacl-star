@@ -95,18 +95,3 @@ let do_lookup result a scalar =
   pop_frame()
 
 open Spec.P256.Definitions
-
-inline_for_extraction noextract 
-val ml_r2_step: #buf_type: buftype -> 
-  p: point -> q: point ->tempBuffer: lbuffer uint64 (size 88) -> 
-  scalar: lbuffer_t buf_type uint8 (size 32) -> 
-  i:size_t{v i < 256} -> 
-  Stack unit
-  (requires fun h -> live h p /\ live h q /\ live h tempBuffer /\ live h scalar /\
-    LowStar.Monotonic.Buffer.all_disjoint [loc p; loc q; loc tempBuffer; loc scalar])
-  (ensures fun h0 _ h1 -> True)
-
-(*
-let ml_r2_step #buf_type p q tempBuffer scalar i = 
-  let bit0 = (size 255) -. i in 
-  

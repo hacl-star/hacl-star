@@ -644,7 +644,8 @@ let point_add_step3 result p q tempBuffer =
 #push-options "--z3rlimit 300"
 
 (* we expect that we already know the q point *)
-val pointAddMixed: result: point -> p: point -> q: pointAffine -> Stack unit 
+(* Change the size f byffer *)
+val pointAddMixed: result: point -> p: point -> q: pointAffine -> tempBuffer: lbuffer uint64 (size 100) -> Stack unit 
   (requires fun h -> live h result /\ live h p /\ live h q /\ disjoint q result /\ disjoint result p /\ (
     let x1 = gsub p (size 0) (size 4) in 
     let y1 = gsub p (size 4) (size 4) in 
@@ -677,10 +678,10 @@ val pointAddMixed: result: point -> p: point -> q: pointAffine -> Stack unit
     x3D == xN /\ y3D == yN /\ z3D == zN))
 
 
-let pointAddMixed result p q = 
+let pointAddMixed result p q tempBuffer = 
   push_frame();
-    let tempBuffer = create (size 20) (u64 0) in 
-    let tempPoint = create (size 12) (u64 0) in 
+    let tempBuffer = sub tempBuffer (size 0) (u64 20) in 
+    let tempPoint = sub tempBuffer (size 20) (u64 12) in 
       let h0 = ST.get() in 
     point_add_step0 tempPoint p q tempBuffer; 
     point_add_step1 tempPoint p q tempBuffer; 
