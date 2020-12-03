@@ -20,7 +20,7 @@ open FStar.Mul
 open FStar.Calc
 open Vale.AES.OptPublic
 
-#reset-options "--use_two_phase_tc true"
+#reset-options
 
 let poly128 = p:poly{degree p < 128}
 
