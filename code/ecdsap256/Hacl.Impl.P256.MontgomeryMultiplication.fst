@@ -248,6 +248,7 @@ let montgomery_square_buffer a result =
 
 #reset-options "--z3rlimit 500" 
 
+inline_for_extraction noextract   
 val fsquarePowN: n: size_t -> a: felem -> Stack unit 
   (requires (fun h -> live h a /\ as_nat h a < prime256)) 
   (ensures (fun h0 _ h1 -> 
@@ -276,7 +277,7 @@ let fsquarePowN n a =
      inDomain_mod_is_not_mod (pow k (pow2 (v x + 1)))
   )
 
-
+inline_for_extraction noextract   
 val fsquarePowNminusOne: n: size_t -> a: felem -> tempBuffer: felem -> Stack unit 
   (requires (fun h -> live h a /\ live h tempBuffer /\ as_nat h a < prime256 /\ disjoint a tempBuffer)) 
   (ensures (fun h0 _ h1 -> 
@@ -424,44 +425,97 @@ val exponent: a: felem ->result: felem -> tempBuffer: lbuffer uint64 (size 20) -
     as_nat h1 result =  toDomain_ ((pow k (prime256-2)) % prime256)))
 
 
+(* just changing argument order *)
+inline_for_extraction noextract
+val montgomery_multiplication_buffer_: result: felem -> a: felem -> b: felem ->  Stack unit
+  (requires (fun h -> live h a /\  as_nat h a < prime256 /\ live h b /\ live h result /\ as_nat h b < prime256)) 
+  (ensures (fun h0 _ h1 -> 
+    modifies (loc result) h0 h1 /\  
+    as_nat h1 result < prime256 /\
+    as_nat h1 result = (as_nat h0 a * as_nat h0 b * modp_inv2_prime (pow2 256) prime256) % prime256 /\
+    as_nat h1 result = toDomain_ (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 b) % prime256) /\
+    as_nat h1 result = toDomain_ (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 b)))
+  )
+
+let montgomery_multiplication_buffer_ result a b = 
+  Hacl.Impl.P256.MontgomeryMultiplication.montgomery_multiplication_buffer a b result
+
+val montgomery_square_buffer_: result: felem -> a: felem ->   Stack unit
+  (requires (fun h -> live h a /\ as_nat h a < prime256 /\ live h result)) 
+  (ensures (fun h0 _ h1 -> 
+    modifies (loc result) h0 h1 /\  
+    as_nat h1 result < prime256 /\ 
+    as_nat h1 result = (as_nat h0 a * as_nat h0 a * modp_inv2_prime (pow2 256) prime256) % prime256 /\
+    as_nat h1 result = toDomain_ (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a) % prime256) /\
+    as_nat h1 result = toDomain_ (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a)))
+  )
+
+
+let montgomery_square_buffer_ result a = 
+  montgomery_square_buffer a result
+
+
+
 #reset-options " --z3rlimit 200"
-let exponent a result tempBuffer = 
+let exponent t result tempBuffer = 
   let h0 = ST.get () in 
-  let buffer_norm_1 = Lib.Buffer.sub  tempBuffer (size 0) (size 8) in 
-    let buffer_result1 = Lib.Buffer.sub tempBuffer (size 4) (size 4) in 
-  let buffer_result2 = Lib.Buffer.sub tempBuffer (size 8) (size 4) in 
-  let buffer_norm_3 = Lib.Buffer.sub tempBuffer (size 12) (size 8) in 
-    let buffer_result3 = Lib.Buffer.sub tempBuffer (size 16) (size 4) in 
+  
+  let inv (h0: HyperStack.mem) (h1: HyperStack.mem) (i: nat) : Type0 = True in 
+
+  let r0 = sub tempBuffer (size 0) (size 4) in 
+  let t1 = sub tempBuffer (size 4) (size 4) in 
+  let t2 = sub tempBuffer (size 8) (size 4) in 
+  let t3 = sub tempBuffer (size 12) (size 4) in 
+  let t4 = sub tempBuffer (size 16) (size 4) in 
+  let t5 = sub tempBuffer (size 20) (size 4) in 
+  let t6 = sub tempBuffer (size 24) (size 4) in 
+  let t7 = sub tempBuffer (size 28) (size 4) in 
+
+  montgomery_square_buffer_ r0 t;
+  montgomery_multiplication_buffer_ t2 r0 t;
+  montgomery_square_buffer_ r0 t2;
+  montgomery_square_buffer_ r0 r0;
+  montgomery_multiplication_buffer_ t6 r0 t2;
+  montgomery_square_buffer_ r0 t6;
+
+  for (size 0) 3ul (inv h0) (fun x -> montgomery_square_buffer_ r0 r0);
+
+  montgomery_multiplication_buffer_ t7 r0 t6;
+  montgomery_square_buffer_ r0 t7;
+  montgomery_square_buffer_ r0 r0;
+  montgomery_multiplication_buffer_ t1 r0 t2;
+  montgomery_square_buffer_ r0 t1;
+
+  for (size 0) 9ul (inv h0) (fun x -> montgomery_square_buffer_ r0 r0);
+
+  montgomery_multiplication_buffer_ t3 r0 t1;
+  montgomery_square_buffer_ r0 t3;
+
+  for (size 0) 9ul (inv h0) (fun x -> montgomery_square_buffer_ r0 r0);
+  
+  montgomery_multiplication_buffer_ t4 r0 t1;
+  montgomery_square_buffer_ r0 t4;
+  montgomery_square_buffer_ r0 r0;
+  montgomery_multiplication_buffer_ t5 r0 t2;
+  montgomery_square_buffer_ r0 t5;
+
+  for (size 0) 31ul (inv h0) (fun x -> montgomery_square_buffer_ r0 r0);
+
+  montgomery_multiplication_buffer_ r0 r0 t;
+
+  for (size 0) 128ul (inv h0) (fun x -> montgomery_square_buffer_ r0 r0);
+
+  montgomery_multiplication_buffer_ r0 r0 t5;
+
+  for (size 0) 32ul (inv h0) (fun x -> montgomery_square_buffer_ r0 r0);
+
+  montgomery_multiplication_buffer_ r0 r0 t5;
+
+  for (size 0) 30ul (inv h0) (fun x -> montgomery_square_buffer_ r0 r0);
+
+  montgomery_multiplication_buffer_ r0 r0 t4;
+
+  for (size 0) 2ul (inv h0) (fun x -> montgomery_square_buffer_ r0 r0);
+
+  montgomery_multiplication_buffer_ result r0 t
  
-  norm_part_one a buffer_norm_1;
-  norm_part_two a buffer_result2;
-  norm_part_three a buffer_norm_3;
-  
-    let h1 = ST.get() in 
-  montgomery_multiplication_buffer buffer_result1 buffer_result2 buffer_result1;
-    let h2 = ST.get() in 
-  montgomery_multiplication_buffer buffer_result1 buffer_result3 buffer_result1;
-    let h3 = ST.get() in 
-  montgomery_multiplication_buffer buffer_result1 a buffer_result1;
-    let h4 = ST.get() in 
-  copy result buffer_result1; 
-    let h5 = ST.get() in 
-  assert_norm ((pow2 32 - 1) * pow2 224 >= 0);
-  assert_norm (pow2 192 >= 0);
-  assert_norm ((pow2 94 - 1) * pow2 2 >= 0);
-
-  
-  let k = fromDomain_ (as_nat h0 a) in 
-  let power1 = pow k ((pow2 32 - 1) * pow2 224) in 
-  let power2 = pow k (pow2 192) in 
-  let power3 = pow k ((pow2 94 - 1) * pow2 2) in 
-  let power4 = pow k 1 in 
-
-  lemma_mul_nat power1 power2;
-
-  lemma_inDomainModulo power1 power2;
-  lemma_inDomainModulo (power1 * power2) power3;
-  inDomain_mod_is_not_mod (((power1 * power2 * power3) % prime256 * power4));
-  lemma_mod_mul_distr_l (power1 * power2 * power3) power4 prime256;
-  big_power k ((pow2 32 - 1) * pow2 224) (pow2 192) ((pow2 94 -1 ) * pow2 2) 1;
-  assert_norm(((pow2 32 - 1) * pow2 224 + pow2 192 + (pow2 94 -1 ) * pow2 2 + 1) = prime256 - 2)
