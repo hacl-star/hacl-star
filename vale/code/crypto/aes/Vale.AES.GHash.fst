@@ -5,7 +5,7 @@ open Vale.Math.Poly2.Words
 
 friend Vale.AES.OptPublic
 
-#reset-options "--use_two_phase_tc true"
+#reset-options
 
 let shift_gf128_key_1 (h:poly) : poly =
   shift_key_1 128 gf128_modulus_low_terms h
