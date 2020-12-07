@@ -254,6 +254,7 @@ let lemma_z3 x y z =
       ((y + z) * (y + z) - z * z - y * y) % prime;}
 
 
+inline_for_extraction noextract
 val point_double_a_b_g: p: point -> alpha: felem -> beta: felem -> gamma: felem -> delta: felem -> tempBuffer: lbuffer uint64 (size 12) -> 
   Stack unit
     (requires fun h -> 
@@ -316,6 +317,8 @@ let point_double_a_b_g p alpha beta gamma delta tempBuffer =
       (3 * (xD - dlt) * (xD + dlt)) % prime;
   }
 
+
+inline_for_extraction noextract
 val point_double_x3: x3: felem -> alpha: felem -> fourBeta: felem -> beta: felem -> eightBeta: felem ->
   Stack unit
     (requires fun h -> live h x3 /\ live h alpha /\ live h fourBeta /\ live h beta /\ live h eightBeta /\
@@ -346,7 +349,7 @@ let point_double_x3 x3 alpha fourBeta beta eightBeta  =
     toDomain_ ((fromDomain_ (as_nat h0 alpha) * fromDomain_ (as_nat h0 alpha) - 8 * fromDomain_ (as_nat h0 beta)) % prime256);
   }
 
-
+inline_for_extraction noextract
 val point_double_z3: z3: felem -> pY: felem -> pZ: felem -> gamma: felem -> delta: felem ->
   Stack unit 
     (requires fun h -> live h z3 /\ live h pY /\ live h pZ /\ live h gamma /\ live h delta /\
@@ -386,7 +389,7 @@ let point_double_z3 z3 pY pZ gamma delta  =
     toDomain_ (((pyD + pzD) * (pyD + pzD) - fromDomain_ (as_nat h0 gamma) - fromDomain_ (as_nat h0 delta)) % prime);
   }
 
-
+inline_for_extraction noextract
 val point_double_y3: y3: felem -> x3: felem -> alpha: felem -> gamma: felem -> eightGamma: felem -> fourBeta: felem ->
   Stack unit 
   (requires fun h -> live h y3 /\ live h x3 /\ live h alpha /\ live h gamma /\ live h eightGamma /\ live h fourBeta /\

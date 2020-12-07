@@ -29,6 +29,9 @@
 #include <string.h>
 #include "lib_intrinsics.h"
 
+
+#include "Hacl_Kremlib.h"
+
 /*
  Input: result: uint8[64], 
  scalar: uint8[32].

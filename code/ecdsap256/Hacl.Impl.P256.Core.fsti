@@ -24,13 +24,12 @@ open FStar.Math.Lemmas
 module B = LowStar.Buffer
 open FStar.Mul
 
-inline_for_extraction noextract 
+inline_for_extraction noextract
 val toDomain: value: felem -> result: felem ->  Stack unit 
   (requires fun h ->  as_nat h value < prime /\ live h value /\live h result /\ eq_or_disjoint value result)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat h1 result = toDomain_ (as_nat h0 value))
  
- 
-inline_for_extraction noextract
+inline_for_extraction noextract 
 val fromDomain: f: felem-> result: felem-> Stack unit 
   (requires fun h -> live h f /\ live h result /\ as_nat h f < prime)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
@@ -93,12 +92,12 @@ val isPointAtInfinityPrivate: p: point -> Stack uint64
     (
       (uint_v r == 0 \/ uint_v r == maxint U64) /\ 
       (
-	let x, y, z = fromDomainPoint(point_prime_to_coordinates (as_seq h0 p)) in 
-	if Spec.P256.isPointAtInfinity (x, y, z) then uint_v r = maxint U64 else uint_v r = 0
+  let x, y, z = fromDomainPoint(point_prime_to_coordinates (as_seq h0 p)) in 
+  if Spec.P256.isPointAtInfinity (x, y, z) then uint_v r = maxint U64 else uint_v r = 0
       ) /\
       (
-	let x, y, z = point_prime_to_coordinates (as_seq h0 p) in 
-	if Spec.P256.isPointAtInfinity (x, y, z) then uint_v r = maxint U64 else uint_v r = 0
+  let x, y, z = point_prime_to_coordinates (as_seq h0 p) in 
+  if Spec.P256.isPointAtInfinity (x, y, z) then uint_v r = maxint U64 else uint_v r = 0
       )
    )
   )
@@ -130,12 +129,12 @@ val normX: p: point -> result: felem -> tempBuffer: lbuffer uint64 (size 88) -> 
   (ensures fun h0 _ h1 -> 
       modifies (loc tempBuffer |+| loc result) h0 h1  /\
       (
-	let pxD = fromDomain_ (as_nat h0 (gsub p (size 0) (size 4))) in 
-	let pyD = fromDomain_ (as_nat h0 (gsub p (size 4) (size 4))) in 
-	let pzD = fromDomain_ (as_nat h0 (gsub p (size 8) (size 4))) in 
+  let pxD = fromDomain_ (as_nat h0 (gsub p (size 0) (size 4))) in 
+  let pyD = fromDomain_ (as_nat h0 (gsub p (size 4) (size 4))) in 
+  let pzD = fromDomain_ (as_nat h0 (gsub p (size 8) (size 4))) in 
       
-	let (xN, _, _) = _norm (pxD, pyD, pzD) in 
-	as_nat h1 result == xN
+  let (xN, _, _) = _norm (pxD, pyD, pzD) in 
+  as_nat h1 result == xN
       )
   )
 
@@ -225,6 +224,6 @@ val secretToPublicWithoutNorm: result: point -> scalar: lbuffer uint8 (size 32) 
       as_nat h1 (gsub result (size 4) (size 4)) < prime /\ 
       as_nat h1 (gsub result (size 8) (size 4)) < prime /\
       (
-	let p1 = fromDomainPoint(point_prime_to_coordinates (as_seq h1 result)) in 
-	let rN, _ = montgomery_ladder_spec (as_seq h0 scalar) ((0, 0, 0), basePoint) in 
-	rN == p1))  
+  let p1 = fromDomainPoint(point_prime_to_coordinates (as_seq h1 result)) in 
+  let rN, _ = montgomery_ladder_spec (as_seq h0 scalar) ((0, 0, 0), basePoint) in 
+  rN == p1))  

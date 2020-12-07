@@ -96,7 +96,7 @@ let montgomery_multiplication_round_twice t result =
       lemma_montgomery_mod_inverse_addition (wide_as_nat h0 t);
   pop_frame()
 
-
+inline_for_extraction noextract
 val montgomery_multiplication_buffer_by_one: a: felem -> result: felem ->  Stack unit
   (requires (fun h -> live h a /\ as_nat h a < prime256 /\ live h result)) 
   (ensures (fun h0 _ h1 -> 
@@ -440,6 +440,7 @@ val montgomery_multiplication_buffer_: result: felem -> a: felem -> b: felem -> 
 let montgomery_multiplication_buffer_ result a b = 
   Hacl.Impl.P256.MontgomeryMultiplication.montgomery_multiplication_buffer a b result
 
+inline_for_extraction noextract
 val montgomery_square_buffer_: result: felem -> a: felem ->   Stack unit
   (requires (fun h -> live h a /\ as_nat h a < prime256 /\ live h result)) 
   (ensures (fun h0 _ h1 -> 

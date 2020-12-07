@@ -119,6 +119,7 @@ let lemma_reduction1 a r =
     small_mod r prime256
 
 
+inline_for_extraction noextract
 val reduction_prime_2prime_impl: x: felem -> result: felem -> 
   Stack unit
     (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result)

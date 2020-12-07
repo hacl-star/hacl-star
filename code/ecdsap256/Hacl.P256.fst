@@ -28,7 +28,7 @@ open Spec.Hash.Definitions
 open Hacl.Impl.ECDSA.P256.Signature.Agile
 open Hacl.Impl.ECDSA.P256.Verification.Agile
 
-(* 
+(*)
 let ecdsa_sign_p256_sha2 result mLen m privKey k = 
   ecdsa_signature (Hash SHA2_256) result mLen m privKey k
 
@@ -82,4 +82,3 @@ let ecp256dh_r result pubKey scalar = Hacl.Impl.P256.DH.ecp256dh_r result pubKey
 (* 
 let is_more_than_zero_less_than_order x =
   Hacl.Impl.P256.Signature.Common.isMoreThanZeroLessThanOrder x
- *) 

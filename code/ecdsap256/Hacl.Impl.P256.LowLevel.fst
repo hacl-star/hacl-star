@@ -37,6 +37,7 @@ let eq1_u64 a =
   neq_mask a (u64 0)
 
 
+inline_for_extraction noextract
 val isZero_uint64_CT:  f: felem -> Stack uint64
   (requires fun h -> live h f)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\ (if as_nat h0 f = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0))
@@ -61,6 +62,7 @@ let isZero_uint64_CT f =
   r
 
 
+inline_for_extraction noextract
 val compare_felem: a: felem -> b: felem -> Stack uint64
   (requires fun h -> live h a /\ live h b) 
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\ (if as_nat h0 a = as_nat h0 b then uint_v r == pow2 64 - 1 else uint_v r = 0))
@@ -134,6 +136,9 @@ let copy_conditional_u64 a b mask =
   lemma_xor_copy_cond a b mask;
   logxor a (logand mask (logxor a b))
 
+
+
+inline_for_extraction noextract
 val copy_conditional: out: felem -> x: felem -> mask: uint64{uint_v mask = 0 \/ uint_v mask = pow2 64 - 1} -> Stack unit 
   (requires fun h -> live h out /\ live h x)
   (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\ 
@@ -173,6 +178,7 @@ let copy_conditional out x mask =
   lemma_eq_funct_ (as_seq h1 out) (as_seq h0 x)
 
 
+inline_for_extraction noextract
 val add4: x: felem -> y: felem -> result: felem -> 
   Stack uint64
     (requires fun h -> live h x /\ live h y /\ live h result /\ eq_or_disjoint x result /\ eq_or_disjoint y result)
@@ -204,6 +210,7 @@ let add4 x y result =
   cc3
 
 
+inline_for_extraction noextract
 val add4_with_carry: c: uint64 ->  x: felem -> y: felem -> result: felem -> 
   Stack uint64
     (requires fun h -> uint_v c <= 1 /\ live h x /\ live h y /\ live h result /\ eq_or_disjoint x result /\ 
@@ -235,6 +242,7 @@ let add4_with_carry c x y result =
     cc
 
 
+inline_for_extraction noextract
 val add8: x: widefelem -> y: widefelem -> result: widefelem -> Stack uint64 
   (requires fun h -> live h x /\ live h y /\ live h result /\ eq_or_disjoint x result /\ eq_or_disjoint y result)
   (ensures fun h0 c h1 -> modifies (loc result) h0 h1 /\ v c <= 1 /\ 
@@ -275,6 +283,7 @@ let add8 x y result =
   carry1
 
 
+inline_for_extraction noextract
 val add4_variables: x: felem -> cin: uint64 {uint_v cin <=1} ->  y0: uint64 -> y1: uint64 -> y2: uint64 -> y3: uint64 -> 
   result: felem -> 
   Stack uint64
@@ -306,6 +315,7 @@ let add4_variables x cin y0 y1 y2 y3 result =
     cc
 
 
+inline_for_extraction noextract
 val sub4_il: x: felem -> y: glbuffer uint64 (size 4) -> result: felem -> 
   Stack uint64
     (requires fun h -> live h x /\ live h y /\ live h result /\ disjoint x result /\ disjoint result y)
@@ -333,7 +343,7 @@ let sub4_il x y result =
     
     cc
 
-
+inline_for_extraction noextract
 val sub4: x: felem -> y:felem -> result: felem -> 
   Stack uint64
     (requires fun h -> live h x /\ live h y /\ live h result /\ eq_or_disjoint x result /\ eq_or_disjoint y result)
@@ -1514,6 +1524,9 @@ val lemma_shift_256: a: int -> b: int -> c: int -> d: int -> Lemma (
 let lemma_shift_256 a b c d = ()
 
 #restart-solver
+
+
+inline_for_extraction noextract
 val shift_256_impl: i: felem -> o: lbuffer uint64 (size 8) -> 
   Stack unit 
     (requires fun h -> live h i /\ live h o /\ disjoint i o)
@@ -1586,6 +1599,7 @@ let shortened_mul a b result =
     assert_norm( pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256)
    
 
+inline_for_extraction noextract
 val shift8: t: widefelem -> t1: widefelem -> Stack unit 
   (requires fun h -> live h t /\ live h t1 /\ eq_or_disjoint t t1)
   (ensures fun h0 _ h1 -> modifies (loc t1) h0 h1 /\ wide_as_nat h0 t / pow2 64 = wide_as_nat h1 t1)
@@ -1627,6 +1641,7 @@ let scalar_bit #buf_type s n =
   to_u64 ((s.(n /. 8ul) >>. (n %. 8ul)) &. u8 1)
 
 
+inline_for_extraction noextract
 val uploadZeroImpl: f: felem -> Stack unit 
   (requires fun h -> live h f)
   (ensures fun h0 _ h1 -> as_nat h1 f == 0 /\ modifies (loc f) h0 h1)
@@ -1646,6 +1661,7 @@ let uploadZeroImpl f =
       let elemUpdated = Lib.Sequence.index (as_seq h f) j in uint_v elemUpdated = 0))
 
 
+inline_for_extraction noextract
 val uploadOneImpl: f: felem -> Stack unit
   (requires fun h -> live h f)
   (ensures fun h0 _ h1 -> as_nat h1 f == 1 /\ modifies (loc f) h0 h1)
@@ -1668,6 +1684,7 @@ let toUint64 i o =
   Lib.ByteBuffer.uints_from_bytes_be o i
 
 
+inline_for_extraction noextract
 val toUint8: i: felem ->  o: lbuffer uint8 (32ul) -> Stack unit
   (requires fun h -> live h i /\ live h o /\ disjoint i o)
   (ensures fun h0 _ h1 -> 
@@ -1693,6 +1710,7 @@ let toUint8LE i o =
 open Lib.ByteBuffer
 
 
+inline_for_extraction noextract
 val changeEndian: i:felem -> Stack unit 
   (requires fun h -> live h i)
   (ensures  fun h0 _ h1 -> modifies1 i h0 h1 /\ 
@@ -1713,6 +1731,8 @@ let changeEndian i =
   upd i (size 2) one;
   upd i (size 3) zero
 
+
+inline_for_extraction noextract
 val toUint64ChangeEndian: i:lbuffer uint8 (size 32) -> o:felem -> Stack unit
   (requires fun h -> live h i /\ live h o /\ disjoint i o)
   (ensures  fun h0 _ h1 ->

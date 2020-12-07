@@ -18,8 +18,8 @@ open Spec.DH
 open Spec.ECDSAP256.Definition
 open Hacl.Impl.P256.Compression
 open Spec.P256.MontgomeryMultiplication
-(* 
-
+ 
+(*)
 [@ (Comment " Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. 
   \n Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
   \n The private key and the nonce are expected to be more than 0 and less than the curve order.")]
@@ -50,6 +50,7 @@ val ecdsa_sign_p256_sha2: result: lbuffer uint8 (size 64)
       flag == flagSpec 
     )    
   )
+
 
 
 [@ (Comment " Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. 
@@ -346,7 +347,8 @@ val compression_compressed_form: b: lbuffer uint8 (size 64) -> result: compresse
         x == xResult  
       )  
   )
-*)
+
+*) 
 
 [@ (Comment " Input: result: uint8[64], \n scalar: uint8[32].
   \n Output: bool, where True stands for the correct key generation. 

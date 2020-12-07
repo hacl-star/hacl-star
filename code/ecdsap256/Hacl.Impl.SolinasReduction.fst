@@ -90,7 +90,7 @@ let lemma_xor_zero l h =
   UInt.append_lemma b1 a2;
   logxor_spec l h
 
-
+inline_for_extraction noextract
 val store_high_low_u: high:uint32 -> low:uint32 -> r:uint64{v r = v high * pow2 32 + v low}
 
 let store_high_low_u high low =
