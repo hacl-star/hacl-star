@@ -510,6 +510,27 @@ let montgomery_ladder #a p q scalar tempBuffer =
       Lib.LoopCombinators.unfold_repeati 256 (spec_ml h0) (acc h0) (uint_v i)
     )
 
+
+
+let getScalar #a scalar i = 
+  push_frame(); 
+
+  let word = 
+    let half = logand i 0xful in 
+    let half = shift_right half 1ul in 
+  to_u32(index scalar half) in 
+
+  let open Hacl.Impl.P256.Q.PrimitivesMasking in 
+  let mask = to_u32 (cmovznz 0xf0 0x0f (logand i (u32 1)))  in  
+
+  let result:size_t = logand word mask in 
+
+
+  pop_frame();
+  result
+  
+
+
 inline_for_extraction noextract
 val zero_buffer: p: point -> 
   Stack unit
@@ -719,3 +740,43 @@ let secretToPublicWithoutNorm result scalar tempBuffer =
     montgomery_ladder q basePoint scalar buff; 
     copy_point q result;
   pop_frame()  
+
+
+(* 
+prime = 2**256 - 2**224 + 2**192 + 2**96 -1
+
+def norm(p):    
+    x, y, z = p
+    z2i = power_mod(z * z, -1, prime)
+    z3i = power_mod(z * z * z, -1, prime)
+    return ((x * z2i) % prime, (y * z3i) % prime, 1)
+
+def toD(x):
+    return x * power_mod (2 ** 256, 1, prime) % prime
+
+def fromD(x):
+    return x * power_mod (2 ** 256, prime - 2, prime) % prime
+
+def toFakeAffine(p):
+    x, y, z = p 
+    multiplier = power_mod (2 ** 256, prime - 2, prime) 
+    x = x * multiplier * multiplier % prime
+    y = y * multiplier * multiplier * multiplier % prime
+    return (x, y, 1)
+
+pX = 0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296
+pY = 0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5
+pZ = 1
+
+pxD = toD(pX)
+pyD = toD(pY)
+pzD = toD(pZ)
+
+pxD, pyD, pzD = toFakeAffine((pxD, pyD, pzD))
+
+print(hex(pxD), hex(pyD), hex(pzD))
+
+pxE, pyE, pzE = norm((fromD(pxD), fromD(pyD), fromD(pzD)))
+
+print((pxE == pX) and (pyE == pY))
+ *)

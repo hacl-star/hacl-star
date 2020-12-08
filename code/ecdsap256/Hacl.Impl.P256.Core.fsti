@@ -139,6 +139,11 @@ val normX: p: point -> result: felem -> tempBuffer: lbuffer uint64 (size 88) -> 
   )
 
 
+val getScalar: #buf_type: buftype -> scalar: lbuffer_t buf_type uint8 (size 32) -> i: size_t {v i < 64} -> 
+  Stack uint32 
+    (requires fun h -> True)
+    (ensures fun h0 _ h1 -> True)
+
 
 inline_for_extraction noextract
 val scalarMultiplication: #buf_type: buftype->  p: point -> result: point -> 

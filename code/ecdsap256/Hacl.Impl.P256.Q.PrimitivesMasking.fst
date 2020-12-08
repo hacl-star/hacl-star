@@ -60,3 +60,66 @@ let cmovznz4 out x y mask =
   cmovznz4_lemma mask (Seq.index y 1) (Seq.index x 1);
   cmovznz4_lemma mask (Seq.index y 2) (Seq.index x 2);
   cmovznz4_lemma mask (Seq.index y 3) (Seq.index x 3)
+
+
+
+
+assume val cswap8:  x: widefelem -> y: widefelem -> mask: uint64 -> Stack unit 
+  (requires fun h -> True)
+  (ensures fun h0 _ h1 -> True)
+
+
+
+assume val toUint64Widefelem: s: lbuffer uint8 (size 32) -> to: widefelem -> Stack unit 
+  (requires fun h -> True)
+  (ensures fun h0 _ h1 -> True)
+
+assume val toUInt8WideFelem: a: widefelem -> to: lbuffer uint8 (size 33) -> Stack unit 
+  (requires fun h -> True)
+  (ensures fun h0 _ h1 -> True)
+
+assume val uploadOrder: a: widefelem -> Stack unit
+  (requires fun h -> True)
+  (ensures fun h0 _ h1 -> True)
+
+
+assume val uploadTwoOrder: a: widefelem -> Stack unit 
+  (requires fun h -> True)
+  (ensures fun h0 _ h1 -> True)
+
+
+
+val brTu: s: lbuffer uint8 (size 32) -> newScalar: lbuffer uint8 (size 33) -> Stack unit 
+  (requires fun h -> True)
+  (ensures fun h0 _ h1 -> True)
+
+
+let brTu s newScalar = 
+  push_frame();
+    let bufferSAsUint64 = create (size 8) (u64 0) in 
+      toUint64Widefelem s bufferSAsUint64;
+      
+    let buffferWideOrderForMask = create (size 8) (u64 0) in 
+      uploadOrder buffferWideOrderForMask;
+
+    (* or add4 *)
+    add8 bufferSAsUint64 buffferWideOrderForMask buffferWideOrderForMask;
+    let mask = index buffferWideOrderForMask (size 5) in 
+    
+
+    let bufferWideOrder = create (size 8) (u64 0) in 
+    let bufferWide2Order = create (size 8) (u64 0) in 
+
+    uploadOrder bufferWideOrder;
+    uploadTwoOrder bufferWide2Order;
+
+    cswap8 bufferWideOrder bufferWide2Order mask;
+   
+    
+    add8 bufferSAsUint64 bufferWideOrder bufferSAsUint64;
+    toUInt8WideFelem bufferSAsUint64 newScalar;
+
+  pop_frame()
+
+    
+  

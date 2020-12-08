@@ -406,3 +406,9 @@ val is_more_than_zero_less_than_order: x: lbuffer uint8 (size 32) -> Stack bool
   )
  *)
 
+
+
+val getScalar: #buf_type: buftype -> scalar: lbuffer_t buf_type uint8 (size 32) -> i: size_t {v i < 64} -> 
+  Stack uint32 
+    (requires fun h -> True)
+    (ensures fun h0 _ h1 -> True)
