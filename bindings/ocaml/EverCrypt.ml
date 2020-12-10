@@ -74,7 +74,7 @@ module AEAD = struct
     | AES128_GCM -> spec_Agile_AEAD_alg_Spec_Agile_AEAD_AES128_GCM
     | AES256_GCM -> spec_Agile_AEAD_alg_Spec_Agile_AEAD_AES256_GCM
     | CHACHA20_POLY1305 -> spec_Agile_AEAD_alg_Spec_Agile_AEAD_CHACHA20_POLY1305
-  let init alg key : t result =
+  let init ~alg ~key : t result =
     Lazy.force at_exit_full_major;
     assert (C.size key = key_length alg);
     let st = allocate
@@ -85,7 +85,7 @@ module AEAD = struct
     match UInt8.to_int (everCrypt_AEAD_create_in (alg_definition alg) st (C.ctypes_buf key)) with
     | 0 -> Success (alg, st)
     | n -> error n
-  let encrypt (alg, st) iv ad pt ct tag : unit result =
+  let encrypt ~st:(alg, st) ~iv ~ad ~pt ~ct ~tag : unit result =
     (* EverCrypt.AEAD.encrypt_pre *)
     check_sizes alg iv tag;
     assert (C.disjoint ct tag);
@@ -98,17 +98,17 @@ module AEAD = struct
     get_result (everCrypt_AEAD_encrypt (!@st)
                   (C.ctypes_buf iv) (C.size_uint32 iv) (C.ctypes_buf ad) (C.size_uint32 ad)
                   (C.ctypes_buf pt) (C.size_uint32 pt) (C.ctypes_buf ct) (C.ctypes_buf tag))
-  let decrypt (alg, st) iv ad ct tag dt : unit result =
+  let decrypt ~st:(alg, st) ~iv ~ad ~ct ~tag ~pt : unit result =
     (* EverCrypt.AEAD.decrypt_st *)
     check_sizes alg iv tag;
-    assert (C.disjoint tag dt);
+    assert (C.disjoint tag pt);
     assert (C.disjoint tag ct);
     assert (C.disjoint tag ad);
     assert (C.disjoint ct ad);
-    assert (C.disjoint dt ad);
+    assert (C.disjoint pt ad);
     get_result (everCrypt_AEAD_decrypt (!@st)
                   (C.ctypes_buf iv) (C.size_uint32 iv) (C.ctypes_buf ad) (C.size_uint32 ad)
-                  (C.ctypes_buf ct) (C.size_uint32 ct) (C.ctypes_buf tag) (C.ctypes_buf dt))
+                  (C.ctypes_buf ct) (C.size_uint32 ct) (C.ctypes_buf tag) (C.ctypes_buf pt))
 end
 
 module Chacha20_Poly1305 : Chacha20_Poly1305 =

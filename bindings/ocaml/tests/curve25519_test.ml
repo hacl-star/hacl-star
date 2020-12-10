@@ -19,25 +19,33 @@ let tests = [
   }
 ]
 
-let test (v: Bytes.t curve25519_test) t scalarmult ecdh reqs =
+let basepoint = Bytes.init 32 (function 0 -> '\x09' | _ -> '\x00')
+
+let test (v: Bytes.t curve25519_test) t scalarmult ecdh secret_to_public reqs =
   let test_result = test_result (t ^ " " ^ v.name) in
   if supports reqs then begin
     let out_scalarmult = Test_utils.init_bytes 32 in
     let out_ecdh = Test_utils.init_bytes 32 in
 
-    scalarmult out_scalarmult v.scalar v.input;
-    if ecdh out_ecdh v.scalar v.input then
+    let pk = Test_utils.init_bytes 32 in
+    scalarmult ~scalar:v.scalar ~input:basepoint ~result:pk;
+    let pk2 = Test_utils.init_bytes 32 in
+    secret_to_public ~sk:v.scalar ~pk:pk2;
+    if not (Bytes.compare pk pk2 = 0) then
+      test_result Failure "secret_to_public failure";
+
+    scalarmult ~scalar:v.scalar ~input:v.input ~result:out_scalarmult;
+    if ecdh ~sk:v.scalar ~pk:v.input ~shared:out_ecdh then
       if Bytes.compare out_scalarmult v.expected = 0 && Bytes.compare out_ecdh v.expected = 0 then
         test_result Success ""
       else
-        test_result Failure "Shared scret mismatch"
+        test_result Failure "ECDH shared scret mismatch"
     else
-      test_result Failure ""
+      test_result Failure "ECDH failure"
   end else
     test_result Skipped "Required CPU feature not detected"
 
-(* TODO: tests for secret_to_public *)
 let _ =
-  List.iter (fun v -> test v "EverCrypt.Curve25519" EverCrypt.Curve25519.scalarmult EverCrypt.Curve25519.ecdh []) tests;
-  List.iter (fun v -> test v "Hacl.Curve25519_51" Hacl.Curve25519_51.scalarmult Hacl.Curve25519_51.ecdh []) tests;
-  List.iter (fun v -> test v "Hacl.Curve25519_64" Hacl.Curve25519_64.scalarmult Hacl.Curve25519_64.ecdh [BMI2; ADX]) tests
+  List.iter (fun v -> test v "EverCrypt.Curve25519" EverCrypt.Curve25519.scalarmult EverCrypt.Curve25519.ecdh EverCrypt.Curve25519.secret_to_public []) tests;
+  List.iter (fun v -> test v "Hacl.Curve25519_51" Hacl.Curve25519_51.scalarmult Hacl.Curve25519_51.ecdh Hacl.Curve25519_51.secret_to_public []) tests;
+  List.iter (fun v -> test v "Hacl.Curve25519_64" Hacl.Curve25519_64.scalarmult Hacl.Curve25519_64.ecdh Hacl.Curve25519_64.secret_to_public [BMI2; ADX]) tests

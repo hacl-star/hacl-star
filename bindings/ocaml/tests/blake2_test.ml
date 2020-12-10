@@ -28,7 +28,7 @@ let test (v: Bytes.t blake2_test) n hash reqs =
   if supports reqs then begin
     let output = Test_utils.init_bytes (Bytes.length v.expected) in
 
-    hash v.key v.plaintext output;
+    hash ?key:(Some v.key) ~pt:v.plaintext ~digest:output;
     if Bytes.compare output v.expected = 0 then
       test_result Success ""
     else

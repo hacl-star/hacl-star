@@ -38,18 +38,18 @@ let test_agile (v: Bytes.t aead_test) =
   let ct = Test_utils.init_bytes v.msg_len in
   let tag = Test_utils.init_bytes v.tag_len in
 
-  match init v.alg v.test_key with
+  match init ~alg:v.alg ~key:v.test_key with
   | Success st -> begin
-      match encrypt st v.test_iv v.test_ad v.test_pt ct tag with
+      match encrypt ~st ~iv:v.test_iv ~ad:v.test_ad ~pt:v.test_pt ~ct ~tag with
       | Success () -> begin
           if Bytes.compare tag v.test_tag = 0 && Bytes.compare ct v.test_ct = 0 then
             test_result Success "Encryption succeeded"
           else
             test_result Failure "Wrong ciphertext/mac";
-          let dt = Test_utils.init_bytes v.msg_len in
-          match decrypt st v.test_iv v.test_ad ct v.test_tag dt with
+          let pt = Test_utils.init_bytes v.msg_len in
+          match decrypt ~st ~iv:v.test_iv ~ad:v.test_ad ~ct ~tag:v.test_tag ~pt with
           | Success () ->
-            if Bytes.compare v.test_pt dt = 0 then
+            if Bytes.compare v.test_pt pt = 0 then
               test_result Success "Decryption succeeded"
             else
               test_result Failure "Decrypted and plaintext do not match"
@@ -67,15 +67,15 @@ let test_nonagile (v: Bytes.t aead_test) t encrypt decrypt reqs =
     let ct = Test_utils.init_bytes v.msg_len in
     let tag = Test_utils.init_bytes v.tag_len in
 
-    encrypt v.test_key v.test_iv v.test_ad v.test_pt ct tag;
+    encrypt ~key:v.test_key ~iv:v.test_iv ~ad:v.test_ad ~pt:v.test_pt ~ct ~tag;
     if Bytes.compare tag v.test_tag = 0 && Bytes.compare ct v.test_ct = 0 then
       test_result Success "Encryption succeeded"
     else
       test_result Failure
         (Printf.sprintf "Wrong ciphertext/mac %d %d \n" (Bytes.compare ct v.test_ct) (Bytes.compare tag v.test_tag));
-    let dt = Test_utils.init_bytes v.msg_len in
-    if decrypt v.test_key v.test_iv v.test_ad dt ct tag then
-      if Bytes.compare v.test_pt dt = 0 then
+    let pt = Test_utils.init_bytes v.msg_len in
+    if decrypt ~key:v.test_key ~iv:v.test_iv ~ad:v.test_ad ~ct ~tag ~pt then
+      if Bytes.compare v.test_pt pt = 0 then
         test_result Success "Decryption succeeded"
       else
         test_result Failure "Decrypted and plaintext do not match"

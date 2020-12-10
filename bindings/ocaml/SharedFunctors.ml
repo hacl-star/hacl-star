@@ -17,7 +17,7 @@ module Make_Chacha20_Poly1305_generic (C: Buffer)
     assert (C.size key = 32);
     assert (C.size iv = 12);
     assert (C.size tag = 16)
-  let encrypt key iv ad pt ct tag =
+  let encrypt ~key ~iv ~ad ~pt ~ct ~tag =
     check_reqs Impl.reqs;
     (* Hacl.Impl.Chacha20Poly1305.aead_encrypt_st *)
     check_sizes key iv tag;
@@ -29,7 +29,7 @@ module Make_Chacha20_Poly1305_generic (C: Buffer)
     assert (C.disjoint ad ct);
     Impl.encrypt (C.ctypes_buf key) (C.ctypes_buf iv) (C.size_uint32 ad) (C.ctypes_buf ad)
       (C.size_uint32 pt) (C.ctypes_buf pt) (C.ctypes_buf ct) (C.ctypes_buf tag)
-  let decrypt key iv ad pt ct tag =
+  let decrypt ~key ~iv ~ad ~ct ~tag ~pt =
     check_reqs Impl.reqs;
     (* Hacl.Impl.Chacha20Poly1305.aead_decrypt_st *)
     check_sizes key iv tag;
@@ -48,31 +48,31 @@ module Make_Curve25519_generic (C: Buffer)
   end)
 = struct
   type t = C.t
-  let secret_to_public pub priv =
+  let secret_to_public ~sk ~pk =
     check_reqs Impl.reqs;
     (* Hacl.Impl.Curve25519.Generic.secret_to_public_st *)
-    assert (C.disjoint pub priv);
-    assert (C.size pub = 32);
-    assert (C.size priv = 32);
-    Impl.secret_to_public (C.ctypes_buf pub) (C.ctypes_buf priv)
-  let scalarmult shared my_priv their_pub =
+    assert (C.disjoint pk sk);
+    assert (C.size pk = 32);
+    assert (C.size sk = 32);
+    Impl.secret_to_public (C.ctypes_buf pk) (C.ctypes_buf sk)
+  let scalarmult ~scalar ~input ~result =
     check_reqs Impl.reqs;
     (* Hacl.Impl.Curve25519.Generic.scalarmult_st *)
-    assert (C.disjoint shared my_priv);
-    assert (C.disjoint shared their_pub);
-    assert (C.size shared = 32);
-    assert (C.size my_priv = 32);
-    assert (C.size their_pub = 32);
-    Impl.scalarmult (C.ctypes_buf shared) (C.ctypes_buf my_priv) (C.ctypes_buf their_pub)
-  let ecdh shared my_priv their_pub =
+    assert (C.disjoint result scalar);
+    assert (C.disjoint result input);
+    assert (C.size result = 32);
+    assert (C.size scalar = 32);
+    assert (C.size input = 32);
+    Impl.scalarmult (C.ctypes_buf result) (C.ctypes_buf scalar) (C.ctypes_buf input)
+  let ecdh ~sk ~pk ~shared =
     check_reqs Impl.reqs;
     (* Hacl.Impl.Curve25519.Generic.ecdh_st *)
-    assert (C.disjoint shared my_priv);
-    assert (C.disjoint shared their_pub);
+    assert (C.disjoint shared sk);
+    assert (C.disjoint shared pk);
     assert (C.size shared = 32);
-    assert (C.size my_priv = 32);
-    assert (C.size their_pub = 32);
-    Impl.ecdh (C.ctypes_buf shared) (C.ctypes_buf my_priv) (C.ctypes_buf their_pub)
+    assert (C.size sk = 32);
+    assert (C.size pk = 32);
+    Impl.ecdh (C.ctypes_buf shared) (C.ctypes_buf sk) (C.ctypes_buf pk)
 end
 
 module Make_EdDSA_generic (C: Buffer)
@@ -85,36 +85,36 @@ module Make_EdDSA_generic (C: Buffer)
   end)
 = struct
   type t = C.t
-  let secret_to_public pub priv =
+  let secret_to_public ~sk ~pk =
     (* Hacl.Ed25519.secret_to_public *)
-    assert (C.size pub = 32);
-    assert (C.size priv = 32);
-    assert (C.disjoint pub priv);
-    Impl.secret_to_public (C.ctypes_buf pub) (C.ctypes_buf priv)
-  let sign signature priv msg =
+    assert (C.size pk = 32);
+    assert (C.size sk = 32);
+    assert (C.disjoint pk sk);
+    Impl.secret_to_public (C.ctypes_buf pk) (C.ctypes_buf sk)
+  let sign ~sk ~pt ~signature =
     (* Hacl.Ed25519.sign *)
-    assert (C.size priv = 32);
+    assert (C.size sk = 32);
     assert (C.size signature = 64);
-    assert Z.(of_int (C.size msg) + ~$64 <= max_size_t);
-    Impl.sign (C.ctypes_buf signature) (C.ctypes_buf priv) (C.size_uint32 msg) (C.ctypes_buf msg)
-  let verify pub msg signature =
+    assert Z.(of_int (C.size pt) + ~$64 <= max_size_t);
+    Impl.sign (C.ctypes_buf signature) (C.ctypes_buf sk) (C.size_uint32 pt) (C.ctypes_buf pt)
+  let verify ~pk ~pt ~signature =
     (* Hacl.Ed25519.verify *)
-    assert (C.size pub = 32);
+    assert (C.size pk = 32);
     assert (C.size signature = 64);
-    assert Z.(of_int (C.size msg) + ~$64 <= max_size_t);
-    Impl.verify (C.ctypes_buf pub) (C.size_uint32 msg) (C.ctypes_buf msg) (C.ctypes_buf signature)
-  let expand_keys ks priv =
+    assert Z.(of_int (C.size pt) + ~$64 <= max_size_t);
+    Impl.verify (C.ctypes_buf pk) (C.size_uint32 pt) (C.ctypes_buf pt) (C.ctypes_buf signature)
+  let expand_keys ~pk ~ks =
     (* Hacl.Ed25519.expand_keys *)
     assert (C.size ks = 96);
-    assert (C.size priv = 32);
-    assert (C.disjoint ks priv); (* VD: redundant for Bytes, since size is different *)
-    Impl.expand_keys (C.ctypes_buf ks) (C.ctypes_buf priv)
-  let sign_expanded signature ks msg =
+    assert (C.size pk = 32);
+    assert (C.disjoint ks pk); (* VD: redundant for Bytes, since size is different *)
+    Impl.expand_keys (C.ctypes_buf ks) (C.ctypes_buf pk)
+  let sign_expanded ~ks ~pt ~signature =
     (* Hacl.Ed25519.sign_expanded *)
     assert (C.size ks = 96);
     assert (C.size signature = 64);
-    assert Z.(of_int (C.size msg) + ~$64 <= max_size_t);
-    Impl.sign_expanded (C.ctypes_buf signature) (C.ctypes_buf ks) (C.size_uint32 msg) (C.ctypes_buf msg)
+    assert Z.(of_int (C.size pt) + ~$64 <= max_size_t);
+    Impl.sign_expanded (C.ctypes_buf signature) (C.ctypes_buf ks) (C.size_uint32 pt) (C.ctypes_buf pt)
 end
 
 module Make_HashFunction_generic (C: Buffer)
@@ -234,19 +234,19 @@ module Make_Blake2b_generic (C: Buffer)
      end)
 = struct
   type t = C.t
-  let hash key pt output =
+  let hash ?key:(key=C.empty) ~pt ~digest =
     check_reqs Impl.reqs;
-    (* Hacl.Impl.Blake2.Generic.blake2_t *)
-    assert (C.size output > 0 && C.size output <= 64);
+    (* Spec.Blake2.blake2b *)
+    assert (C.size digest > 0 && C.size digest <= 64);
     assert (C.size key <= 64);
     if C.size key = 0 then
       assert Z.(of_int (C.size pt) <= max_size_t)
     else
       assert Z.(of_int (C.size pt) + ~$1024 <= max_size_t);
     assert (C.disjoint key pt);
-    assert (C.disjoint key output);
-    assert (C.disjoint pt output);
-    Impl.blake2b (C.size_uint32 output) (C.ctypes_buf output) (C.size_uint32 pt) (C.ctypes_buf pt) (C.size_uint32 key) (C.ctypes_buf key)
+    assert (C.disjoint key digest);
+    assert (C.disjoint pt digest);
+    Impl.blake2b (C.size_uint32 digest) (C.ctypes_buf digest) (C.size_uint32 pt) (C.ctypes_buf pt) (C.size_uint32 key) (C.ctypes_buf key)
 end
 
 module Make_Blake2s_generic (C: Buffer)
@@ -256,19 +256,19 @@ module Make_Blake2s_generic (C: Buffer)
      end)
 = struct
   type t = C.t
-  let hash key pt output =
+  let hash ?(key=C.empty) ~pt ~digest =
     check_reqs Impl.reqs;
-    (* Hacl.Impl.Blake2.Generic.blake2_t *)
-    assert (C.size output > 0 && C.size output <= 32);
+    (* Spec.Blake2.blake2s *)
+    assert (C.size digest > 0 && C.size digest <= 32);
     assert (C.size key <= 32);
     if C.size key = 0 then
       assert Z.(of_int (C.size pt) <= max_size_t)
     else
       assert Z.(of_int (C.size pt) + ~$512 <= max_size_t);
     assert (C.disjoint key pt);
-    assert (C.disjoint key output);
-    assert (C.disjoint pt output);
-    Impl.blake2s (C.size_uint32 output) (C.ctypes_buf output) (C.size_uint32 pt) (C.ctypes_buf pt) (C.size_uint32 key) (C.ctypes_buf key)
+    assert (C.disjoint key digest);
+    assert (C.disjoint pt digest);
+    Impl.blake2s (C.size_uint32 digest) (C.ctypes_buf digest) (C.size_uint32 pt) (C.ctypes_buf pt) (C.size_uint32 key) (C.ctypes_buf key)
 end
 
 module Make_Chacha20_Poly1305 = Make_Chacha20_Poly1305_generic (CBytes)

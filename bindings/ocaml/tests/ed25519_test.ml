@@ -21,15 +21,20 @@ let tests = [
   }
 ]
 
-let test (v: Bytes.t ed25519_test) t sign verify =
+let test (v: Bytes.t ed25519_test) t sign verify secret_to_public =
   let test_result = test_result (t ^ " " ^ v.name) in
 
   let signature = Test_utils.init_bytes 64 in
 
-  sign signature v.sk v.msg;
+  let pk = Test_utils.init_bytes 32 in
+  secret_to_public ~sk:v.sk ~pk;
+  if not (Bytes.compare pk v.pk = 0) then
+    test_result Failure "secret_to_public failure";
+
+  sign ~sk:v.sk ~pt:v.msg ~signature;
   if Bytes.compare signature v.expected_sig = 0 then
     begin
-      if verify v.pk v.msg signature then
+      if verify ~pk:v.pk ~pt:v.msg ~signature then
         test_result Success ""
       else
         test_result Failure "verification"
@@ -37,7 +42,7 @@ let test (v: Bytes.t ed25519_test) t sign verify =
   else
     test_result Failure "signing"
 
-(* TODO: tests for secret_to_public, expand_keys, sign_expanded *)
+(* TODO: tests for expand_keys, sign_expanded *)
 let _ =
-  List.iter (fun v -> test v "Hacl.Ed25519" Hacl.Ed25519.sign Hacl.Ed25519.verify) tests;
-  List.iter (fun v -> test v "EverCrypt.Ed25519" EverCrypt.Ed25519.sign EverCrypt.Ed25519.verify) tests
+  List.iter (fun v -> test v "Hacl.Ed25519" Hacl.Ed25519.sign Hacl.Ed25519.verify Hacl.Ed25519.secret_to_public) tests;
+  List.iter (fun v -> test v "EverCrypt.Ed25519" EverCrypt.Ed25519.sign EverCrypt.Ed25519.verify EverCrypt.Ed25519.secret_to_public) tests
