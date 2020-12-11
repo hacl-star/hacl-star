@@ -86,7 +86,7 @@ let test_nonagile (v: Bytes.t aead_test) t encrypt decrypt reqs =
 let test_random () =
   let test_result = test_result "Lib.RandomBuffer" in
   let buf = Test_utils.init_bytes 256 in
-  if Hacl.RandomBuffer.randombytes buf then
+  if Hacl.RandomBuffer.randombytes ~out:buf then
     test_result Success ""
   else
     test_result Failure ""

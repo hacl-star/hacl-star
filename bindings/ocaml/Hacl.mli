@@ -6,11 +6,6 @@ type bytes = CBytes.t
 (** [bytes] is ultimately an alias for [Stdlib.Bytes.t], the type of buffers currently used
     throughout the library *)
 
-module RandomBuffer : sig
-  val randombytes : bytes -> bool
-end
-
-
 (** {1 AEAD} *)
 (** {2 Chacha20-Poly1305}
     Different implementations of Chacha20-Poly1305. A {{!EverCrypt.Chacha20_Poly1305}
@@ -210,3 +205,18 @@ end
 
 module HKDF_SHA2_256 : HKDF
 module HKDF_SHA2_512 : HKDF
+
+(** {1 Randomness (not verified)} *)
+
+module RandomBuffer : sig
+  val randombytes : out:bytes -> bool
+  (** [randombytes out] attempts to fill [out] with random bytes and returns true if successful. *)
+
+
+end
+(** A randomness function implemented with platform dependant code for Unix and Windows
+
+    The [randombytes] function is handwritten, unverified C code.
+    In Unix, it is implemented using the {{: https://man7.org/linux/man-pages/man2/getrandom.2.html} [getrandom]} syscall, with a fallback to [/dev/urandom].
+    In Windows, it is implemented using {{: https://docs.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-cryptgenrandom} [CryptGenRandom]}.
+*)

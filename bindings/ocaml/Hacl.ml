@@ -37,7 +37,7 @@ module Hacl_Curve25519_64 = Hacl_Curve25519_64_bindings.Bindings(Hacl_Curve25519
 #endif
 
 module RandomBuffer = struct
-  let randombytes buf = Lib_RandomBuffer_System.randombytes (C.ctypes_buf buf) (C.size_uint32 buf)
+  let randombytes ~out = Lib_RandomBuffer_System.randombytes (C.ctypes_buf out) (C.size_uint32 out)
 end
 
 module Chacha20_Poly1305_32 : Chacha20_Poly1305 =
