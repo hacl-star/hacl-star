@@ -3,6 +3,8 @@
 
 open SharedDefs
 
+type bytes = CBytes.t
+
 module Error : sig
   type error_code =
     | UnsupportedAlgorithm
@@ -29,17 +31,17 @@ module AEAD : sig
     | AES256_GCM
     | CHACHA20_POLY1305
 
-  val init : alg:alg -> key:CBytes.t -> t Error.result
+  val init : alg:alg -> key:bytes -> t Error.result
   (** [init alg key] tries to allocate the internal state for algorithm [alg] with [key]
       and returns a {!t} if successful or an {!Error.error_code} otherwise. *)
 
-  val encrypt : st:t -> iv:CBytes.t -> ad:CBytes.t -> pt:CBytes.t -> ct:CBytes.t -> tag:CBytes.t -> unit Error.result
+  val encrypt : st:t -> iv:bytes -> ad:bytes -> pt:bytes -> ct:bytes -> tag:bytes -> unit Error.result
   (** [encrypt st iv ad pt ct tag] takes a state [st], an initial value [iv], additional data
       [ad], and plaintext [pt], as well as output buffers [ct], which, if successful, will
       contain the encrypted [pt], and [tag], which will contain the authentication tag for
       the plaintext and the associated data. *)
 
-  val decrypt : st:t -> iv:CBytes.t -> ad:CBytes.t -> ct:CBytes.t -> tag:CBytes.t -> pt:CBytes.t -> unit Error.result
+  val decrypt : st:t -> iv:bytes -> ad:bytes -> ct:bytes -> tag:bytes -> pt:bytes -> unit Error.result
   (** [decrypt st iv ad ct tag pt] takes a state [st], the initial value [iv], additional
       data [ad], ciphertext [ct], and authentication tag [tag], as well as output buffer [pt],
       which, if sucessful, will contain the decrypted [ct]. *)
@@ -82,9 +84,9 @@ module Ed25519 : EdDSA
 module Hash : sig
   type t
   val init : HashDefs.alg -> t
-  val update : t -> CBytes.t -> unit
-  val finish : t -> CBytes.t -> unit
-  val hash : HashDefs.alg -> CBytes.t -> CBytes.t -> unit
+  val update : t -> bytes -> unit
+  val finish : t -> bytes -> unit
+  val hash : HashDefs.alg -> bytes -> bytes -> unit
 end
 
 (** {2 SHA-2} *)
@@ -99,7 +101,7 @@ module SHA2_256 : HashFunction
 
 module HMAC : sig
   val is_supported_alg : HashDefs.alg -> bool
-  val mac : HashDefs.alg -> CBytes.t -> CBytes.t -> CBytes.t -> unit
+  val mac : HashDefs.alg -> bytes -> bytes -> bytes -> unit
 end
 
 module HMAC_SHA2_256 : MAC
@@ -117,8 +119,8 @@ module Poly1305 : MAC
 (** {2 HKDF} *)
 
 module HKDF : sig
-  val expand : HashDefs.alg -> CBytes.t -> CBytes.t -> CBytes.t -> unit
-  val extract : HashDefs.alg -> CBytes.t -> CBytes.t -> CBytes.t -> unit
+  val expand : HashDefs.alg -> bytes -> bytes -> bytes -> unit
+  val extract : HashDefs.alg -> bytes -> bytes -> bytes -> unit
 end
 
 module HKDF_SHA2_256 : HKDF
@@ -131,8 +133,8 @@ module HKDF_SHA2_512 : HKDF
 
 module DRBG : sig
   type t
-  val instantiate : ?personalization_string: CBytes.t -> HashDefs.alg -> t option
-  val reseed : ?additional_input: CBytes.t -> t -> bool
-  val generate : ?additional_input: CBytes.t -> t -> CBytes.t -> bool
+  val instantiate : ?personalization_string: bytes -> HashDefs.alg -> t option
+  val reseed : ?additional_input: bytes -> t -> bool
+  val generate : ?additional_input: bytes -> t -> bytes -> bool
   val uninstantiate : t -> unit
 end

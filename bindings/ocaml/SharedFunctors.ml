@@ -12,7 +12,7 @@ module Make_Chacha20_Poly1305_generic (C: Buffer)
        val decrypt : C.buf -> C.buf -> uint32 -> C.buf -> uint32 -> C.buf -> C.buf -> C.buf -> uint32
      end)
 = struct
-  type t = C.t
+  type bytes = C.t
   let check_sizes key iv tag =
     assert (C.size key = 32);
     assert (C.size iv = 12);
@@ -47,7 +47,7 @@ module Make_Curve25519_generic (C: Buffer)
        val ecdh : C.buf -> C.buf -> C.buf -> bool
   end)
 = struct
-  type t = C.t
+  type bytes = C.t
   let secret_to_public ~sk ~pk =
     check_reqs Impl.reqs;
     (* Hacl.Impl.Curve25519.Generic.secret_to_public_st *)
@@ -84,7 +84,7 @@ module Make_EdDSA_generic (C: Buffer)
   val sign_expanded : C.buf -> C.buf -> uint32 -> C.buf -> unit
   end)
 = struct
-  type t = C.t
+  type bytes = C.t
   let secret_to_public ~sk ~pk =
     (* Hacl.Ed25519.secret_to_public *)
     assert (C.size pk = 32);
@@ -123,7 +123,7 @@ module Make_HashFunction_generic (C: Buffer)
        val hash : C.buf -> uint32 -> C.buf -> unit
      end)
 = struct
-  type t = C.t
+  type bytes = C.t
   let hash input output =
     HashDefs.check_max_input_len (C.size input);
     assert (C.disjoint input output);
@@ -137,7 +137,7 @@ module Make_Poly1305_generic (C: Buffer)
        val mac : C.buf -> uint32 -> C.buf -> C.buf -> unit
      end)
 = struct
-  type t = C.t
+  type bytes = C.t
   let mac dst key data =
     check_reqs Impl.reqs;
     (* Hacl.Impl.Poly1305.poly1305_mac_st *)
@@ -154,7 +154,7 @@ module Make_HMAC_generic (C: Buffer)
        val mac : C.buf -> C.buf -> uint32 -> C.buf -> uint32 -> unit
   end)
 = struct
-  type t = C.t
+  type bytes = C.t
   let mac dst key data =
     (* Hacl.HMAC.compute_st *)
     assert (HashDefs.digest_len Impl.hash_alg = C.size dst);
@@ -171,7 +171,7 @@ module Make_HKDF_generic (C: Buffer)
        val extract : C.buf -> C.buf -> uint32 -> C.buf -> uint32 -> unit
      end)
 = struct
-  type t = C.t
+  type bytes = C.t
   let expand okm prk info =
     (* Hacl.HKDF.expand_st *)
     assert (C.size okm <= 255 * HashDefs.digest_len Impl.hash_alg);
@@ -197,7 +197,7 @@ module Make_ECDSA_generic (C: Buffer)
        val verify : uint32 -> C.buf -> C.buf -> C.buf -> C.buf -> bool
      end)
 = struct
-  type t = C.t
+  type bytes = C.t
   let get_result r =
     if r = UInt64.zero then
       true
@@ -233,7 +233,7 @@ module Make_Blake2b_generic (C: Buffer)
        val blake2b : uint32 -> C.buf -> uint32 -> C.buf -> uint32 -> C.buf -> unit
      end)
 = struct
-  type t = C.t
+  type bytes = C.t
   let hash ?key:(key=C.empty) ~pt ~digest =
     check_reqs Impl.reqs;
     (* Spec.Blake2.blake2b *)
@@ -255,7 +255,7 @@ module Make_Blake2s_generic (C: Buffer)
        val blake2s : uint32 -> C.buf -> uint32 -> C.buf -> uint32 -> C.buf -> unit
      end)
 = struct
-  type t = C.t
+  type bytes = C.t
   let hash ?(key=C.empty) ~pt ~digest =
     check_reqs Impl.reqs;
     (* Spec.Blake2.blake2s *)

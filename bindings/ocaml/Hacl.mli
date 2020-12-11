@@ -2,8 +2,10 @@
 
 open SharedDefs
 
+type bytes = CBytes.t
+
 module RandomBuffer : sig
-  val randombytes : CBytes.t -> bool
+  val randombytes : bytes -> bool
 end
 
 
@@ -45,14 +47,14 @@ module Ed25519 : EdDSA
 (** {2 P-256} *)
 
 module P256 : sig
-  val compress_c : CBytes.t -> CBytes.t -> unit
-  val compress_n : CBytes.t -> CBytes.t -> unit
-  val decompress_c : CBytes.t -> CBytes.t -> bool
-  val decompress_n : CBytes.t -> CBytes.t -> bool
-  val dh_initiator : CBytes.t -> CBytes.t -> bool
-  val dh_responder : CBytes.t -> CBytes.t -> CBytes.t -> bool
-  val valid_sk : CBytes.t -> bool
-  val valid_pk : CBytes.t -> bool
+  val compress_c : bytes -> bytes -> unit
+  val compress_n : bytes -> bytes -> unit
+  val decompress_c : bytes -> bytes -> bool
+  val decompress_n : bytes -> bytes -> bool
+  val dh_initiator : bytes -> bytes -> bool
+  val dh_responder : bytes -> bytes -> bytes -> bool
+  val valid_sk : bytes -> bool
+  val valid_pk : bytes -> bool
   include ECDSA
   module SHA2_256 : ECDSA
   module SHA2_384 : ECDSA
@@ -75,9 +77,9 @@ module SHA3_256 : HashFunction
 module SHA3_384 : HashFunction
 module SHA3_512 : HashFunction
 module Keccak : sig
-  val keccak : int -> int -> int -> CBytes.t -> CBytes.t -> unit
-  val shake128 : CBytes.t -> CBytes.t -> unit
-  val shake256 : CBytes.t -> CBytes.t -> unit
+  val keccak : int -> int -> int -> bytes -> bytes -> unit
+  val shake128 : bytes -> bytes -> unit
+  val shake256 : bytes -> bytes -> unit
 end
 
 (** {2 BLAKE2}
@@ -120,22 +122,22 @@ module Poly1305_256 : MAC
 (** {1 NaCl } *)
 
 module NaCl : sig
-  val box_beforenm : CBytes.t -> CBytes.t -> CBytes.t -> bool
+  val box_beforenm : bytes -> bytes -> bytes -> bool
   module Easy : sig
-    val box : CBytes.t -> CBytes.t -> CBytes.t -> CBytes.t -> CBytes.t -> bool
-    val box_open : CBytes.t -> CBytes.t -> CBytes.t -> CBytes.t -> CBytes.t -> bool
-    val box_afternm : CBytes.t -> CBytes.t -> CBytes.t -> CBytes.t -> bool
-    val box_open_afternm : CBytes.t -> CBytes.t -> CBytes.t -> CBytes.t -> bool
-    val secretbox : CBytes.t -> CBytes.t -> CBytes.t -> CBytes.t -> bool
-    val secretbox_open : CBytes.t -> CBytes.t -> CBytes.t -> CBytes.t -> bool
+    val box : bytes -> bytes -> bytes -> bytes -> bytes -> bool
+    val box_open : bytes -> bytes -> bytes -> bytes -> bytes -> bool
+    val box_afternm : bytes -> bytes -> bytes -> bytes -> bool
+    val box_open_afternm : bytes -> bytes -> bytes -> bytes -> bool
+    val secretbox : bytes -> bytes -> bytes -> bytes -> bool
+    val secretbox_open : bytes -> bytes -> bytes -> bytes -> bool
   end
   module Detached : sig
-    val box : CBytes.t -> CBytes.t -> CBytes.t -> CBytes.t -> CBytes.t -> CBytes.t -> bool
-    val box_open : CBytes.t -> CBytes.t -> CBytes.t -> CBytes.t -> CBytes.t -> CBytes.t -> bool
-    val box_afternm : CBytes.t -> CBytes.t -> CBytes.t -> CBytes.t -> CBytes.t -> bool
-    val box_open_afternm : CBytes.t -> CBytes.t -> CBytes.t -> CBytes.t -> CBytes.t -> bool
-    val secretbox : CBytes.t -> CBytes.t -> CBytes.t -> CBytes.t -> CBytes.t -> bool
-    val secretbox_open : CBytes.t -> CBytes.t -> CBytes.t -> CBytes.t -> CBytes.t -> bool
+    val box : bytes -> bytes -> bytes -> bytes -> bytes -> bytes -> bool
+    val box_open : bytes -> bytes -> bytes -> bytes -> bytes -> bytes -> bool
+    val box_afternm : bytes -> bytes -> bytes -> bytes -> bytes -> bool
+    val box_open_afternm : bytes -> bytes -> bytes -> bytes -> bytes -> bool
+    val secretbox : bytes -> bytes -> bytes -> bytes -> bytes -> bool
+    val secretbox_open : bytes -> bytes -> bytes -> bytes -> bytes -> bool
   end
 end
 

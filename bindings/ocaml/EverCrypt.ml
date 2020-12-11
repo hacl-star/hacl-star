@@ -5,6 +5,8 @@ open SharedDefs
 open SharedFunctors
 module C = CBytes
 
+type bytes = CBytes.t
+
 module Hacl_Spec = Hacl_Spec_bindings.Bindings(Hacl_Spec_stubs)
 
 module EverCrypt_AEAD = EverCrypt_AEAD_bindings.Bindings(EverCrypt_AEAD_stubs)

@@ -4,14 +4,14 @@ open Unsigned
 module type Buffer = sig
   type t
   type buf
-  val empty: t
-  val size_uint32 : t -> uint32
-  val ctypes_buf : t -> buf
-  val size : t -> int
-  val equal : t -> t -> bool
-  val disjoint : t -> t -> bool
-  val sub : t -> int -> int -> t
-  val z_compare : t -> Z.t -> int
+  val empty: bytes
+  val size_uint32 : bytes -> uint32
+  val ctypes_buf : bytes -> buf
+  val size : bytes -> int
+  val equal : bytes -> bytes -> bool
+  val disjoint : bytes -> bytes -> bool
+  val sub : bytes -> int -> int -> bytes
+  val z_compare : bytes -> Z.t -> int
 end
 
 module CBytes : Buffer with type t = Bytes.t and type buf = Bytes.t Ctypes.ocaml = struct
@@ -87,15 +87,15 @@ module HashDefs = struct
 end
 
 module type Chacha20_Poly1305_generic = sig
-  type t
+  type bytes
 
-  val encrypt: key:t -> iv:t -> ad:t -> pt:t -> ct:t -> tag:t -> unit
+  val encrypt: key:bytes -> iv:bytes -> ad:bytes -> pt:bytes -> ct:bytes -> tag:bytes -> unit
   (** [encrypt key iv ad pt ct tag] takes a [key], an initial value [iv], additional data
       [ad], and plaintext [pt], as well as output buffers [ct], which, if successful, will
       contain the encrypted [pt], and [tag], which will contain the authentication tag for
       the plaintext and the associated data. *)
 
-  val decrypt: key:t -> iv:t -> ad:t -> ct:t -> tag:t -> pt:t -> bool
+  val decrypt: key:bytes -> iv:bytes -> ad:bytes -> ct:bytes -> tag:bytes -> pt:bytes -> bool
   (** [decrypt key iv ad ct tag pt] takes a [key], the initial value [iv], additional
       data [ad], ciphertext [ct], and authentication tag [tag], as well as output buffer [pt],
       which, if sucessful, will contain the decrypted [ct]. *)
@@ -107,17 +107,17 @@ module type Curve25519_generic = sig
     usage instructions.
 *)
 
-  type t
-  val secret_to_public : sk:t -> pk:t -> unit
+  type bytes
+  val secret_to_public : sk:bytes -> pk:bytes -> unit
   (** [secret_to_public sk pk] takes a 32-byte secret key [sk] and writes the corresponding
       32-byte ECDH public key in [pk]. Buffers [pk] and [sk] must be distinct. *)
 
-  val ecdh : sk:t -> pk:t -> shared:t -> bool
+  val ecdh : sk:bytes -> pk:bytes -> shared:bytes -> bool
   (** [ecdh sk pk shared] takes a 32-byte secret key [sk] and another party's 32-byte public
       key and writes the ECDH shared key in [shared]. Buffer [shared] must be distinct from
       [pk] and [sk]. *)
 
-  val scalarmult : scalar:t -> input:t -> result:t -> unit
+  val scalarmult : scalar:bytes -> input:bytes -> result:bytes -> unit
   (** [scalarmult scalar input result] performs X25519 scalar multiplication. All buffers
       are 32-byte long and must be distinct. *)
 
@@ -133,19 +133,19 @@ module type EdDSA_generic = sig
     - [pt]: <= {!max_size_t} - 64 bytes
 *)
 
-  type t
+  type bytes
 
   (** {3 EdDSA} *)
 
-  val secret_to_public : sk:t -> pk:t -> unit
+  val secret_to_public : sk:bytes -> pk:bytes -> unit
   (** [secret_to_public sk pk] takes a secret key [sk] and writes the corresponding
       public key in [pk]. Buffers [pk] and [sk] must be distinct. *)
 
-  val sign : sk:t -> pt:t -> signature:t -> unit
+  val sign : sk:bytes -> pt:bytes -> signature:bytes -> unit
   (** [sign sk pt signature] takes secret key [sk] and message [pt] and writes
       the Ed25519 signature in [signature]. *)
 
-  val verify : pk:t -> pt:t -> signature:t -> bool
+  val verify : pk:bytes -> pt:bytes -> signature:bytes -> bool
   (** [verify pk pt signature] takes public key [pk], message [pt] and verifies the
       Ed25519 signature, returning true if valid. *)
 
@@ -154,40 +154,40 @@ module type EdDSA_generic = sig
       The buffer [ks] containing the expanded secret key must be 96 bytes long.
 *)
 
-  val expand_keys : sk:t -> ks:t -> unit
+  val expand_keys : sk:bytes -> ks:bytes -> unit
   (** [expand_keys sk ks] takes secret key [sk] and writes the expanded secret key in [ks]. *)
 
-  val sign_expanded : ks:t -> pt:t -> signature:t -> unit
+  val sign_expanded : ks:bytes -> pt:bytes -> signature:bytes -> unit
   (** [sign_expanded ks pt signature] takes expanded secret key [ks] and message [pt] and writes
       the Ed25519 signature in [signature]. *)
 
 end
 
 module type HashFunction_generic = sig
-  type t
-  val hash : t -> t -> unit
+  type bytes
+  val hash : bytes -> bytes -> unit
 end
 
 module type MAC_generic = sig
-  type t
-  val mac : t -> t -> t -> unit
+  type bytes
+  val mac : bytes -> bytes -> bytes -> unit
 end
 
 module type HKDF_generic = sig
-  type t
-  val expand: t -> t -> t -> unit
-  val extract: t -> t -> t -> unit
+  type bytes
+  val expand: bytes -> bytes -> bytes -> unit
+  val extract: bytes -> bytes -> bytes -> unit
 end
 
 module type ECDSA_generic = sig
-  type t
-  val sign : t -> t -> t -> t -> bool
-  val verify : t -> t -> t -> bool
+  type bytes
+  val sign : bytes -> bytes -> bytes -> bytes -> bool
+  val verify : bytes -> bytes -> bytes -> bool
 end
 
 module type Blake2_generic = sig
-  type t
-  val hash : ?key:t -> pt:t -> digest:t -> unit
+  type bytes
+  val hash : ?key:bytes -> pt:bytes -> digest:bytes -> unit
   (* TODO: clarify size constraints for pt, I think I might have gotten this wrong *)
   (** [hash ?key ~pt ~digest] takes an optional [key] and writes the digest of [pt] in [digest].
       Buffers have the following size constraints:
@@ -197,11 +197,11 @@ module type Blake2_generic = sig
   *)
 end
 
-module type Chacha20_Poly1305 = Chacha20_Poly1305_generic with type t = CBytes.t
-module type Curve25519 = Curve25519_generic with type t = CBytes.t
-module type EdDSA = EdDSA_generic with type t = CBytes.t
-module type HashFunction = HashFunction_generic with type t = CBytes.t
-module type MAC = MAC_generic with type t = CBytes.t
-module type HKDF = HKDF_generic with type t = CBytes.t
-module type ECDSA = ECDSA_generic with type t = CBytes.t
-module type Blake2 = Blake2_generic with type t = CBytes.t
+module type Chacha20_Poly1305 = Chacha20_Poly1305_generic with type bytes = CBytes.t
+module type Curve25519 = Curve25519_generic with type bytes = CBytes.t
+module type EdDSA = EdDSA_generic with type bytes = CBytes.t
+module type HashFunction = HashFunction_generic with type bytes = CBytes.t
+module type MAC = MAC_generic with type bytes = CBytes.t
+module type HKDF = HKDF_generic with type bytes = CBytes.t
+module type ECDSA = ECDSA_generic with type bytes = CBytes.t
+module type Blake2 = Blake2_generic with type bytes = CBytes.t
