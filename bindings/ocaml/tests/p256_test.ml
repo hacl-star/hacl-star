@@ -47,16 +47,16 @@ let test (v: Bytes.t ecdsa_test) t sign verify =
   let signature = Test_utils.init_bytes 64 in
 
   let pk = Test_utils.init_bytes 64 in
-  assert (Hacl.P256.valid_sk v.sk);
-  let _ = Hacl.P256.dh_initiator pk v.sk in
-  assert (Hacl.P256.valid_pk pk);
+  assert (Hacl.P256.valid_sk ~sk:v.sk);
+  let _ = Hacl.P256.dh_initiator ~sk:v.sk ~pk in
+  assert (Hacl.P256.valid_pk ~pk);
   if Bytes.compare pk v.pk <> 0 then
     test_result Failure "Key generation";
 
-  assert (sign v.sk v.msg v.k signature);
+  assert (sign ~sk:v.sk ~pt:v.msg ~k:v.k ~signature);
   if Bytes.compare signature v.expected_sig = 0 then
     begin
-      if verify v.pk v.msg signature then
+      if verify ~pk:v.pk ~pt:v.msg ~signature then
         test_result Success ""
       else
         test_result Failure "Verification"
@@ -68,22 +68,22 @@ let test_p256_compression (v: Bytes.t compression_test) =
   let test_result = test_result ("P-256 compression: " ^ v.name) in
 
   let result = Test_utils.init_bytes 33 in
-  Hacl.P256.compress_c v.raw result;
+  Hacl.P256.raw_to_compressed ~p:v.raw ~result;
   if Bytes.compare result v.compressed <> 0 then
     test_result Failure "Hacl.P256.compress_c";
 
   let result = Test_utils.init_bytes 65 in
-  Hacl.P256.compress_n v.raw result;
+  Hacl.P256.raw_to_uncompressed ~p:v.raw ~result;
   if Bytes.compare result v.uncompressed <> 0 then
     test_result Failure "Hacl.P256.compress_n";
 
   let result = Test_utils.init_bytes 64 in
-  assert (Hacl.P256.decompress_c v.compressed result);
+  assert (Hacl.P256.compressed_to_raw ~p:v.compressed ~result);
   if Bytes.compare result v.raw <> 0 then
     test_result Failure "Hacl.P256.decompress_c";
 
   let result = Test_utils.init_bytes 64 in
-  assert (Hacl.P256.decompress_c v.compressed result);
+  assert (Hacl.P256.uncompressed_to_raw ~p:v.uncompressed ~result);
   if Bytes.compare result v.raw <> 0 then
     test_result Failure "Hacl.P256.decompress_n";
 

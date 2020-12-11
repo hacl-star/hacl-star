@@ -103,12 +103,12 @@ module Make_EdDSA_generic (C: Buffer)
     assert (C.size signature = 64);
     assert Z.(of_int (C.size pt) + ~$64 <= max_size_t);
     Impl.verify (C.ctypes_buf pk) (C.size_uint32 pt) (C.ctypes_buf pt) (C.ctypes_buf signature)
-  let expand_keys ~pk ~ks =
+  let expand_keys ~sk ~ks =
     (* Hacl.Ed25519.expand_keys *)
     assert (C.size ks = 96);
-    assert (C.size pk = 32);
-    assert (C.disjoint ks pk); (* VD: redundant for Bytes, since size is different *)
-    Impl.expand_keys (C.ctypes_buf ks) (C.ctypes_buf pk)
+    assert (C.size sk = 32);
+    assert (C.disjoint ks sk); (* VD: redundant for Bytes, since size is different *)
+    Impl.expand_keys (C.ctypes_buf ks) (C.ctypes_buf sk)
   let sign_expanded ~ks ~pt ~signature =
     (* Hacl.Ed25519.sign_expanded *)
     assert (C.size ks = 96);
@@ -207,23 +207,23 @@ module Make_ECDSA_generic (C: Buffer)
     else
       failwith "Unknown return value"
   let prime_p256_order = Z.of_string "115792089210356248762697446949407573529996955224135760342422259061068512044369"
-  let sign priv msg k signature =
+  let sign ~sk ~pt ~k ~signature =
     (* Hacl.Interface.P256.ECDSA.ecdsa_sign_p256_without_hash/sha2/sha384 *)
     assert (C.size signature = 64);
-    assert (C.size priv = 32);
+    assert (C.size sk = 32);
     assert (C.size k = 32);
-    assert (C.size msg >= Impl.min_msg_size);
-    assert (C.disjoint signature msg);
-    assert (C.z_compare priv prime_p256_order < 0);
+    assert (C.size pt >= Impl.min_msg_size);
+    assert (C.disjoint signature pt);
+    assert (C.z_compare sk prime_p256_order < 0);
     assert (C.z_compare k prime_p256_order < 0);
-    Impl.sign (C.ctypes_buf signature) (C.size_uint32 msg) (C.ctypes_buf msg) (C.ctypes_buf priv) (C.ctypes_buf k)
-  let verify pub msg signature =
+    Impl.sign (C.ctypes_buf signature) (C.size_uint32 pt) (C.ctypes_buf pt) (C.ctypes_buf sk) (C.ctypes_buf k)
+  let verify ~pk ~pt ~signature =
     (* Hacl.Interface.P256.ECDSA.ecdsa_verif_without_hash/sha2/sha384 *)
     assert (C.size signature = 64);
-    assert (C.size pub = 64);
-    assert (C.size msg >= Impl.min_msg_size);
+    assert (C.size pk = 64);
+    assert (C.size pt >= Impl.min_msg_size);
     let r, s = C.sub signature 0 32, C.sub signature 32 32 in
-    Impl.verify (C.size_uint32 msg) (C.ctypes_buf msg) (C.ctypes_buf pub) (C.ctypes_buf r) (C.ctypes_buf s)
+    Impl.verify (C.size_uint32 pt) (C.ctypes_buf pt) (C.ctypes_buf pk) (C.ctypes_buf r) (C.ctypes_buf s)
 end
 
 

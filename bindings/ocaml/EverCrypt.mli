@@ -1,9 +1,11 @@
 (** This module exposes the EverCrypt cryptographic provider, which offers
-    agile and multiplexing interfaces for HACL* primitives *)
+    agile and multiplexing interfaces for HACL* primitives. *)
 
 open SharedDefs
 
 type bytes = CBytes.t
+(** [bytes] is ultimately an alias for [Stdlib.Bytes.t], the type of buffers currently used
+    throughout the library *)
 
 module Error : sig
   type error_code =
@@ -67,7 +69,9 @@ end
 module Chacha20_Poly1305 : Chacha20_Poly1305
 (** Multiplexing interface for Chacha20-Poly1305 *)
 
-(** {1 ECDH, ECDSA, and EdDSA } *)
+(** {1 ECDH, ECDSA, and EdDSA }
+    Algorithms for digital signatures and key agreement *)
+
 (** {2 Curve25519} *)
 
 module Curve25519 : Curve25519
@@ -76,6 +80,8 @@ module Curve25519 : Curve25519
 (** {2 Ed25519} *)
 
 module Ed25519 : EdDSA
+(** This interface does not yet support multiplexing and is
+    identical to the one in {!Hacl.Ed25519} *)
 
 
 (** {1 Hashing } *)

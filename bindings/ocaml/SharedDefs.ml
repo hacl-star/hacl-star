@@ -13,6 +13,7 @@ module type Buffer = sig
   val sub : bytes -> int -> int -> bytes
   val z_compare : bytes -> Z.t -> int
 end
+(** Abstract representation of buffers *)
 
 module CBytes : Buffer with type t = Bytes.t and type buf = Bytes.t Ctypes.ocaml = struct
   type t = Bytes.t
@@ -26,6 +27,7 @@ module CBytes : Buffer with type t = Bytes.t and type buf = Bytes.t Ctypes.ocaml
   let sub = Bytes.sub
   let z_compare b z = Z.compare (Z.of_bits (Bytes.to_string b)) z
 end
+(** Representation of [Bytes.t] buffers *)
 
 (* VD: temporarely disable, eliminate dependency on bigstring *)
 (* module CBigstring : Buffer with type t = Bigstring.t and type buf = uint8 Ctypes_static.ptr = struct
@@ -114,7 +116,7 @@ module type Curve25519_generic = sig
 
   val ecdh : sk:bytes -> pk:bytes -> shared:bytes -> bool
   (** [ecdh sk pk shared] takes a 32-byte secret key [sk] and another party's 32-byte public
-      key and writes the ECDH shared key in [shared]. Buffer [shared] must be distinct from
+      key and writes the 32-byte ECDH shared key in [shared]. Buffer [shared] must be distinct from
       [pk] and [sk]. *)
 
   val scalarmult : scalar:bytes -> input:bytes -> result:bytes -> unit
@@ -180,9 +182,24 @@ module type HKDF_generic = sig
 end
 
 module type ECDSA_generic = sig
+  (** Buffers have the following size constraints:
+      - [pk]: 64 bytes, corresponding to the "raw" representation of an elliptic curve point (see {!section:points})
+      - [sk], [k]: 32 bytes
+      - [signature]: 64 bytes
+      - [pt]: no size requirement for variants using SHA-2 hashing (see {!section:ecdsa})
+  *)
+
   type bytes
-  val sign : bytes -> bytes -> bytes -> bytes -> bool
-  val verify : bytes -> bytes -> bytes -> bool
+
+  val sign : sk:bytes -> pt:bytes -> k:bytes -> signature:bytes -> bool
+  (** [sign sk pt k signature] attempts to sign the message [pt] with secret key [sk] and
+      signing secret [k]. If successful, the signature is written in [signature] and the
+      function returns true. *)
+
+  val verify : pk:bytes -> pt:bytes -> signature:bytes -> bool
+  (** [verify pk pt signature] checks the [signature] of [pt] using public key [pk] and returns
+  true if it is valid. *)
+
 end
 
 module type Blake2_generic = sig

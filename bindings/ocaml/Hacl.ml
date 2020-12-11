@@ -269,48 +269,48 @@ module NaCl = struct
 end
 
 module P256 = struct
-  let compress_c p out =
+  let raw_to_compressed ~p ~result =
     (* Hacl.P256.compression_compressed_form *)
     assert (C.size p = 64);
-    assert (C.size out = 33);
-    Hacl_P256.hacl_P256_compression_compressed_form (C.ctypes_buf p) (C.ctypes_buf out)
-  let compress_n p out =
+    assert (C.size result = 33);
+    Hacl_P256.hacl_P256_compression_compressed_form (C.ctypes_buf p) (C.ctypes_buf result)
+  let raw_to_uncompressed ~p ~result =
     (* Hacl.P256.compression_not_compressed_form *)
     assert (C.size p = 64);
-    assert (C.size out = 65);
-    Hacl_P256.hacl_P256_compression_not_compressed_form (C.ctypes_buf p) (C.ctypes_buf out)
-  let decompress_c p out =
+    assert (C.size result = 65);
+    Hacl_P256.hacl_P256_compression_not_compressed_form (C.ctypes_buf p) (C.ctypes_buf result)
+  let compressed_to_raw ~p ~result =
     (* Hacl.P256.decompression_compressed_form *)
     assert (C.size p = 33);
-    assert (C.size out = 64);
-    Hacl_P256.hacl_P256_decompression_compressed_form (C.ctypes_buf p) (C.ctypes_buf out)
-  let decompress_n p out =
+    assert (C.size result = 64);
+    Hacl_P256.hacl_P256_decompression_compressed_form (C.ctypes_buf p) (C.ctypes_buf result)
+  let uncompressed_to_raw ~p ~result =
     (* Hacl.P256.decompression_not_compressed_form *)
     assert (C.size p = 65);
-    assert (C.size out = 64);
-    Hacl_P256.hacl_P256_decompression_not_compressed_form (C.ctypes_buf p) (C.ctypes_buf out)
-  let dh_initiator result scalar =
+    assert (C.size result = 64);
+    Hacl_P256.hacl_P256_decompression_not_compressed_form (C.ctypes_buf p) (C.ctypes_buf result)
+  let dh_initiator ~sk ~pk =
     (* Hacl.P256.ecp256dh_i *)
-    assert (C.size result = 64);
-    assert (C.size scalar = 32);
-    assert (C.disjoint result scalar);
-    Hacl_P256.hacl_P256_ecp256dh_i (C.ctypes_buf result) (C.ctypes_buf scalar)
-  let dh_responder result pub scalar =
+    assert (C.size pk = 64);
+    assert (C.size sk = 32);
+    assert (C.disjoint pk sk);
+    Hacl_P256.hacl_P256_ecp256dh_i (C.ctypes_buf pk) (C.ctypes_buf sk)
+  let dh_responder ~sk ~pk ~shared =
     (* Hacl.P256.ecp256dh_r *)
-    assert (C.size result = 64);
-    assert (C.size pub = 64);
-    assert (C.size scalar = 32);
-    assert (C.disjoint result scalar);
-    assert (C.disjoint result pub);
-    Hacl_P256.hacl_P256_ecp256dh_r (C.ctypes_buf result) (C.ctypes_buf pub) (C.ctypes_buf scalar)
-  let valid_sk priv =
+    assert (C.size shared = 64);
+    assert (C.size pk = 64);
+    assert (C.size sk = 32);
+    assert (C.disjoint shared sk);
+    assert (C.disjoint shared pk);
+    Hacl_P256.hacl_P256_ecp256dh_r (C.ctypes_buf shared) (C.ctypes_buf pk) (C.ctypes_buf sk)
+  let valid_sk ~sk =
     (* Hacl.P256.is_more_than_zero_less_than_order *)
-    assert (C.size priv = 32);
-    Hacl_P256.hacl_P256_is_more_than_zero_less_than_order (C.ctypes_buf priv)
-  let valid_pk pub =
+    assert (C.size sk = 32);
+    Hacl_P256.hacl_P256_is_more_than_zero_less_than_order (C.ctypes_buf sk)
+  let valid_pk ~pk =
     (* Hacl.P256.verify_q *)
-    assert (C.size pub = 64);
-    Hacl_P256.hacl_P256_verify_q (C.ctypes_buf pub)
+    assert (C.size pk = 64);
+    Hacl_P256.hacl_P256_verify_q (C.ctypes_buf pk)
   module NoHash = Make_ECDSA (struct
       let min_msg_size = 32
       let sign = Hacl_P256.hacl_P256_ecdsa_sign_p256_without_hash
