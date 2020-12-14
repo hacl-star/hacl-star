@@ -524,6 +524,7 @@ let getScalar #a scalar i =
   let mask = to_u32 (cmovznz 0xf0 0x0f (logand i (u32 1)))  in  
 
   let result:size_t = logand word mask in 
+  brTu scalar scalar;
 
 
   pop_frame();

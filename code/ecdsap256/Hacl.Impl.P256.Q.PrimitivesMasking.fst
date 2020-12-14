@@ -64,62 +64,36 @@ let cmovznz4 out x y mask =
 
 
 
-assume val cswap8:  x: widefelem -> y: widefelem -> mask: uint64 -> Stack unit 
+val cswap8:  x: widefelem -> y: widefelem -> mask: uint64 -> Stack unit 
   (requires fun h -> True)
   (ensures fun h0 _ h1 -> True)
 
+let cswap8 p1 p2 bit = 
+  let open Lib.Sequence in 
+  let h0 = ST.get () in
+  let mask = bit in
 
+  [@ inline_let]
+  let inv h1 (i:nat{i <= 8}) = 
+    (forall (k:nat{k < i}).
+      if v bit = 1
+      then (as_seq h1 p1).[k] == (as_seq h0 p2).[k] /\ (as_seq h1 p2).[k] == (as_seq h0 p1).[k]
+      else (as_seq h1 p1).[k] == (as_seq h0 p1).[k] /\ (as_seq h1 p2).[k] == (as_seq h0 p2).[k]) /\
+    (forall (k:nat{i <= k /\ k < 12}).
+      (as_seq h1 p1).[k] == (as_seq h0 p1).[k] /\ (as_seq h1 p2).[k] == (as_seq h0 p2).[k]) /\
+    modifies (loc p1 |+| loc p2) h0 h1 in
+ 
+  Lib.Loops.for 0ul 8ul inv
+    (fun i ->
+      let dummy = mask &. (p1.(i) ^. p2.(i)) in
+      p1.(i) <- p1.(i) ^. dummy;
+      p2.(i) <- p2.(i) ^. dummy;
+      lemma_cswap2_step bit ((as_seq h0 p1).[v i]) ((as_seq h0 p2).[v i])
+    );
+  let h1 = ST.get () in
+  Lib.Sequence.eq_intro (as_seq h1 p1) (if v bit = 1 then as_seq h0 p2 else as_seq h0 p1);
+  Lib.Sequence.eq_intro (as_seq h1 p2) (if v bit = 1 then as_seq h0 p1 else as_seq h0 p2)
 
-assume val toUint64Widefelem: s: lbuffer uint8 (size 32) -> to: widefelem -> Stack unit 
-  (requires fun h -> True)
-  (ensures fun h0 _ h1 -> True)
-
-assume val toUInt8WideFelem: a: widefelem -> to: lbuffer uint8 (size 33) -> Stack unit 
-  (requires fun h -> True)
-  (ensures fun h0 _ h1 -> True)
-
-assume val uploadOrder: a: widefelem -> Stack unit
-  (requires fun h -> True)
-  (ensures fun h0 _ h1 -> True)
-
-
-assume val uploadTwoOrder: a: widefelem -> Stack unit 
-  (requires fun h -> True)
-  (ensures fun h0 _ h1 -> True)
-
-
-
-val brTu: s: lbuffer uint8 (size 32) -> newScalar: lbuffer uint8 (size 33) -> Stack unit 
-  (requires fun h -> True)
-  (ensures fun h0 _ h1 -> True)
-
-
-let brTu s newScalar = 
-  push_frame();
-    let bufferSAsUint64 = create (size 8) (u64 0) in 
-      toUint64Widefelem s bufferSAsUint64;
-      
-    let buffferWideOrderForMask = create (size 8) (u64 0) in 
-      uploadOrder buffferWideOrderForMask;
-
-    (* or add4 *)
-    add8 bufferSAsUint64 buffferWideOrderForMask buffferWideOrderForMask;
-    let mask = index buffferWideOrderForMask (size 5) in 
-    
-
-    let bufferWideOrder = create (size 8) (u64 0) in 
-    let bufferWide2Order = create (size 8) (u64 0) in 
-
-    uploadOrder bufferWideOrder;
-    uploadTwoOrder bufferWide2Order;
-
-    cswap8 bufferWideOrder bufferWide2Order mask;
-   
-    
-    add8 bufferSAsUint64 bufferWideOrder bufferSAsUint64;
-    toUInt8WideFelem bufferSAsUint64 newScalar;
-
-  pop_frame()
 
     
   

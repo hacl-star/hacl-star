@@ -1722,6 +1722,32 @@ let changeEndian i =
   upd i (size 3) zero
 
 
+val changeEndian8: i: widefelem -> Stack unit 
+  (requires fun h -> live h i)
+  (ensures fun h0 _ h1 -> True)
+
+let changeEndian8 i = 
+  let zero = index i (size 0) in 
+  let one = index i (size 1) in 
+  let two = index i (size 2) in 
+  let three = index i (size 3) in 
+  
+  let four = index i (size 4) in 
+  let five = index i (size 5) in 
+  let six = index i (size 6) in 
+  let seven = index i (size 7) in 
+
+  upd i (size 0) seven;
+  upd i (size 1) six;
+  upd i (size 2) five;
+  upd i (size 3) four;
+  
+  upd i (size 4) three;
+  upd i (size 5) two; 
+  upd i (size 6) one;
+  upd i (size 7) zero
+  
+
 inline_for_extraction noextract
 val toUint64ChangeEndian: i:lbuffer uint8 (size 32) -> o:felem -> Stack unit
   (requires fun h -> live h i /\ live h o /\ disjoint i o)
