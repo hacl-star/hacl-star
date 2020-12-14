@@ -66,78 +66,79 @@ module Ed25519 : EdDSA =
 
 module SHA2_224 : HashFunction =
   Make_HashFunction (struct
-    let hash_alg = Some HashDefs.SHA2_224
+    let hash_alg = Alg HashDefs.SHA2_224
     let hash = Hacl_Hash.hacl_Hash_SHA2_hash_224
 end)
 
 module SHA2_256 : HashFunction =
   Make_HashFunction (struct
-    let hash_alg = Some HashDefs.SHA2_256
+    let hash_alg = Alg HashDefs.SHA2_256
     let hash = Hacl_Hash.hacl_Hash_SHA2_hash_256
 end)
 
 module SHA2_384 : HashFunction =
   Make_HashFunction (struct
-    let hash_alg = Some HashDefs.SHA2_384
+    let hash_alg = Alg HashDefs.SHA2_384
     let hash = Hacl_Hash.hacl_Hash_SHA2_hash_384
 end)
 
 module SHA2_512 : HashFunction =
   Make_HashFunction (struct
-    let hash_alg = Some HashDefs.SHA2_512
+    let hash_alg = Alg HashDefs.SHA2_512
     let hash = Hacl_Hash.hacl_Hash_SHA2_hash_512
 end)
 
 module SHA3_224 : HashFunction =
   Make_HashFunction (struct
-    let hash_alg = None
+    let hash_alg = Len 28
     let hash input input_len output = Hacl_SHA3.hacl_SHA3_sha3_224 input_len input output
 end)
 
 module SHA3_256 : HashFunction =
   Make_HashFunction (struct
-    let hash_alg = None
+    let hash_alg = Len 32
     let hash input input_len output = Hacl_SHA3.hacl_SHA3_sha3_256 input_len input output
 end)
 
 module SHA3_384 : HashFunction =
   Make_HashFunction (struct
-    let hash_alg = None
+    let hash_alg = Len 48
     let hash input input_len output = Hacl_SHA3.hacl_SHA3_sha3_384 input_len input output
 end)
 
 module SHA3_512 : HashFunction =
   Make_HashFunction (struct
-    let hash_alg = None
+    let hash_alg = Len 64
     let hash input input_len output = Hacl_SHA3.hacl_SHA3_sha3_512 input_len input output
 end)
 
 module Keccak = struct
-  let keccak rate capacity suffix input output =
+  let shake128 ~pt ~digest =
+    (* Hacl.SHA3.shake128_hacl *)
+    assert (C.disjoint pt digest);
+    Hacl_SHA3.hacl_SHA3_shake128_hacl (C.size_uint32 pt) (C.ctypes_buf pt) (C.size_uint32 digest) (C.ctypes_buf digest)
+  let shake256 ~pt ~digest =
+    (* Hacl.SHA3.shake256_hacl *)
+    assert (C.disjoint pt digest);
+    Hacl_SHA3.hacl_SHA3_shake256_hacl (C.size_uint32 pt) (C.ctypes_buf pt) (C.size_uint32 digest) (C.ctypes_buf digest)
+  let keccak ~rate ~capacity ~suffix ~pt ~digest =
     (* Hacl.Impl.SHA3.keccak *)
     assert (rate mod 8 = 0 && rate / 8 > 0 && rate <= 1600);
     assert (capacity + rate = 1600);
-    assert (C.disjoint input output);
-    Hacl_SHA3.hacl_Impl_SHA3_keccak (UInt32.of_int rate) (UInt32.of_int capacity) (C.size_uint32 input) (C.ctypes_buf input) (UInt8.of_int suffix) (C.size_uint32 output) (C.ctypes_buf output)
-  let shake128 input output =
-    (* Hacl.SHA3.shake128_hacl *)
-    assert (C.disjoint input output);
-    Hacl_SHA3.hacl_SHA3_shake128_hacl (C.size_uint32 input) (C.ctypes_buf input) (C.size_uint32 output) (C.ctypes_buf output)
-  let shake256 input output =
-    (* Hacl.SHA3.shake256_hacl *)
-    assert (C.disjoint input output);
-    Hacl_SHA3.hacl_SHA3_shake256_hacl (C.size_uint32 input) (C.ctypes_buf input) (C.size_uint32 output) (C.ctypes_buf output)
+    assert (C.disjoint pt digest);
+    Hacl_SHA3.hacl_Impl_SHA3_keccak (UInt32.of_int rate) (UInt32.of_int capacity) (C.size_uint32 pt) (C.ctypes_buf pt) (UInt8.of_int suffix) (C.size_uint32 digest) (C.ctypes_buf digest)
+
 end
 
 module SHA1 : HashFunction =
   Make_HashFunction (struct
-    let hash_alg = Some HashDefs.(Legacy SHA1)
+    let hash_alg = Alg HashDefs.(Legacy SHA1)
     let hash = Hacl_Hash.hacl_Hash_SHA1_legacy_hash
 end) [@@deprecated]
 
 module MD5 : HashFunction =
   Make_HashFunction (struct
-    let hash_alg = Some HashDefs.(Legacy MD5)
+    let hash_alg = Alg HashDefs.(Legacy MD5)
     let hash = Hacl_Hash.hacl_Hash_MD5_legacy_hash
 end) [@@deprecated]
 

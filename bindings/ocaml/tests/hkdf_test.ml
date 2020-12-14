@@ -24,10 +24,10 @@ let test_agile (v: Bytes.t hkdf_test) =
   let okm = Test_utils.init_bytes (Bytes.length v.expected_okm) in
 
   if EverCrypt.HMAC.is_supported_alg v.alg then begin
-    EverCrypt.HKDF.extract v.alg prk v.salt v.ikm;
+    EverCrypt.HKDF.extract ~alg:v.alg ~salt:v.salt ~ikm:v.ikm ~prk;
     if Bytes.compare prk v.expected_prk <> 0 then
       test_result Failure "PRK mismatch";
-    EverCrypt.HKDF.expand v.alg okm v.expected_prk v.info;
+    EverCrypt.HKDF.expand ~alg:v.alg ~prk ~info:v.info ~okm;
     if Bytes.compare okm v.expected_okm <> 0 then
       test_result Failure "OKM mismatch";
     if Bytes.compare prk v.expected_prk = 0 && Bytes.compare okm v.expected_okm = 0 then
@@ -43,10 +43,10 @@ let test_nonagile (v: Bytes.t hkdf_test) t alg expand extract =
   let prk = Test_utils.init_bytes (Bytes.length v.expected_prk) in
   let okm = Test_utils.init_bytes (Bytes.length v.expected_okm) in
 
-  extract prk v.salt v.ikm;
+  extract ~salt:v.salt ~ikm:v.ikm ~prk;
   if Bytes.compare prk v.expected_prk <> 0 then
     test_result Failure "PRK mismatch";
-  expand okm v.expected_prk v.info;
+  expand ~prk ~info:v.info ~okm;
   if Bytes.compare okm v.expected_okm <> 0 then
     test_result Failure "OKM mismatch";
   if Bytes.compare prk v.expected_prk = 0 && Bytes.compare okm v.expected_okm = 0 then

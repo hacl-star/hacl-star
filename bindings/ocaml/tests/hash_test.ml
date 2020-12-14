@@ -122,53 +122,53 @@ let output_len = function
 let test_agile (v: Bytes.t hash_test) =
   let test_result = test_result ("Hash " ^ v.name)  in
   let alg = alg_definition v.alg in
-  let output = Test_utils.init_bytes (output_len v.alg) in
+  let digest = Test_utils.init_bytes (output_len v.alg) in
 
-  Hash.hash alg output v.plaintext;
-  if Bytes.compare output v.expected = 0 then
+  Hash.hash ~alg ~pt:v.plaintext ~digest;
+  if Bytes.compare digest v.expected = 0 then
     test_result Success "one-shot hash"
   else
     test_result Failure "one-shot hash";
 
-  let st = Hash.init (alg_definition v.alg) in
-  Hash.update st v.plaintext;
-  Hash.finish st output;
-  if Bytes.compare output v.expected = 0 then
+  let st = Hash.init ~alg:(alg_definition v.alg) in
+  Hash.update ~st ~pt:v.plaintext;
+  Hash.finish ~st ~digest;
+  if Bytes.compare digest v.expected = 0 then
     test_result Success "incremental hash"
   else
     test_result Failure "incremental hash"
 
 let test_nonagile (n: string) (v: Bytes.t hash_test) hash =
   let test_result = test_result (n ^ "." ^ v.name) in
-  let output = Test_utils.init_bytes (output_len v.alg) in
-  hash v.plaintext output;
-  if Bytes.compare output v.expected = 0 then
+  let digest = Test_utils.init_bytes (output_len v.alg) in
+  hash ~pt:v.plaintext ~digest;
+  if Bytes.compare digest v.expected = 0 then
     test_result Success ""
   else
     test_result Failure ""
 
 let test_keccak () =
   let v = test_sha3_256 in
-  let test_result = test_result "Keccak" in
-  let sha3_256 = Hacl.Keccak.keccak 1088 512 (Char.code '\x06') in
-  let output = Test_utils.init_bytes 32 in
-  sha3_256 v.plaintext output;
+  let test_result = test_result "Keccak/SHAKE" in
+  let sha3_256 = Hacl.Keccak.keccak ~rate:1088 ~capacity:512 ~suffix:(Char.code '\x06') in
+  let digest = Test_utils.init_bytes 32 in
+  sha3_256 ~pt:v.plaintext ~digest;
 
   let output_shake128 = Test_utils.init_bytes 16 in
-  Hacl.Keccak.shake128 v.plaintext output_shake128;
+  Hacl.Keccak.shake128 ~pt:v.plaintext ~digest:output_shake128;
 
-  let keccak_128 = Hacl.Keccak.keccak 1344 256 (Char.code '\x1f') in
+  let keccak_128 = Hacl.Keccak.keccak ~rate:1344 ~capacity:256 ~suffix:(Char.code '\x1f') in
   let output_keccak_128 = Test_utils.init_bytes 16 in
-  keccak_128 v.plaintext output_keccak_128;
+  keccak_128 ~pt:v.plaintext ~digest:output_keccak_128;
 
   let output_shake256 = Test_utils.init_bytes 32 in
-  Hacl.Keccak.shake256 v.plaintext output_shake256;
+  Hacl.Keccak.shake256 ~pt:v.plaintext ~digest:output_shake256;
 
-  let keccak_256 = Hacl.Keccak.keccak 1088 512 (Char.code '\x1f') in
+  let keccak_256 = Hacl.Keccak.keccak ~rate:1088 ~capacity:512 ~suffix:(Char.code '\x1f') in
   let output_keccak_256 = Test_utils.init_bytes 32 in
-  keccak_256 v.plaintext output_keccak_256;
+  keccak_256 ~pt:v.plaintext ~digest:output_keccak_256;
 
-  if Bytes.compare output v.expected = 0 &&
+  if Bytes.compare digest v.expected = 0 &&
      Bytes.compare output_shake128 output_keccak_128 = 0 &&
      Bytes.compare output_shake256 output_keccak_256 = 0 then
     test_result Success ""

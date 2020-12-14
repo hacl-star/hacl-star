@@ -53,7 +53,7 @@ module P256 : sig
       - [pt]: depends on which hash function is being used (see {!section:ecdsa})
   *)
 
-  (** {3:points Point representation and conversions}
+  (** {1:points Point representation and conversions}
       Elliptic curve points have 2 32-byte coordinates {i (x, y)} and can be represented in 3 ways:
       - "raw" form (64 bytes): the concatenation of the 2 coordinates
       - "compressed" form (33 bytes): the first byte is either [\x02] or [\x03], followed
@@ -77,7 +77,7 @@ module P256 : sig
     (** [uncompressed_to_raw p result] converts an "uncompressed" point [p] (65 bytes) to a "raw" point [result] (64 bytes).
         Returns true if successful. *)
 
-  (** {3 Point validation} *)
+  (** {1 Point validation} *)
 
   val valid_sk : sk:bytes -> bool
     (** [valid_sk sk] checks if the contents of [sk] (32 bytes) can be used as a secret key or as a signing secret.
@@ -86,7 +86,7 @@ module P256 : sig
   val valid_pk : pk:bytes -> bool
   (** [valid_pk pk] checks if the contents of [pk] (64 bytes) is a valid public key, as specified in {{: https://csrc.nist.gov/publications/detail/sp/800-56a/rev-3/final}NIST SP 800-56A}. *)
 
-  (** {3 ECDH}
+  (** {1 ECDH}
       ECDH key agreement protocol
   *)
 
@@ -100,7 +100,7 @@ module P256 : sig
       key and writes the 64-byte ECDH shared key in [shared]. Buffer [shared] must be distinct from
       [pk]. *)
 
-  (** {3:ecdsa ECDSA}
+  (** {1:ecdsa ECDSA}
       ECDSA signing and signature verification functions
 
       The [sign] and [verify] functions included in this module
@@ -122,24 +122,87 @@ end
 
 
 (** {1 Hashing } *)
-(** {2 SHA-2} *)
+(** {2 SHA-2}
+
+    Portable C implementations of SHA-2.
+    Multiplexing interfaces for {{!EverCrypt.SHA2_224}SHA-224} and {{!EverCrypt.SHA2_256}SHA-256} are also available.
+*)
 
 module SHA2_224 : HashFunction
-module SHA2_256 : HashFunction
-module SHA2_384 : HashFunction
-module SHA2_512 : HashFunction
+(** Direct hasing with SHA-224
 
-(** {2 SHA-3} *)
+The [digest] buffer must match the digest size of SHA-224, which is 28 bytes.
+*)
+
+module SHA2_256 : HashFunction
+(** Direct hashing with SHA-256
+
+The [digest] buffer must match the digest size of SHA-256, which is 32 bytes.
+*)
+
+
+module SHA2_384 : HashFunction
+(** Direct hashing with SHA-384
+
+The [digest] buffer must match the digest size of SHA-384, which is 48 bytes.
+*)
+
+
+module SHA2_512 : HashFunction
+(** Direct hashing with SHA-512
+
+The [digest] buffer must match the digest size of SHA-512, which is 64 bytes.
+*)
+
+
+
+(** {2 SHA-3}
+
+    Portable C implementations of SHA-3
+*)
 
 module SHA3_224 : HashFunction
+(** Direct hashing with SHA3-224
+
+The [digest] buffer must match the digest size of SHA3-224, which is 28 bytes.
+*)
+
 module SHA3_256 : HashFunction
+(** Direct hashing with SHA3-256
+
+The [digest] buffer must match the digest size of SHA3-256, which is 32 bytes.
+*)
+
 module SHA3_384 : HashFunction
+(** Direct hashing with SHA3-384
+
+The [digest] buffer must match the digest size of SHA3-384, which is 48 bytes.
+*)
+
 module SHA3_512 : HashFunction
+(** Direct hashing with SHA3-512
+
+The [digest] buffer must match the digest size of SHA3-512, which is 64 bytes.
+*)
+
 module Keccak : sig
-  val keccak : int -> int -> int -> bytes -> bytes -> unit
-  val shake128 : bytes -> bytes -> unit
-  val shake256 : bytes -> bytes -> unit
+  val shake128 : pt:bytes -> digest:bytes -> unit
+  (** [shake128 pt digest] hashes [pt] using SHAKE-128 and outputs the result in [digest]. *)
+
+  val shake256 : pt:bytes -> digest:bytes -> unit
+  (** [shake256 pt digest] hashes [pt] using SHAKE-256 and outputs the result in [digest]. *)
+
+  val keccak : rate:int -> capacity:int -> suffix:int -> pt:bytes -> digest:bytes -> unit
+    (** Direct access to the general Keccak function, of which all the SHA-3 and SHAKE functions
+        are {{:https://en.wikipedia.org/wiki/SHA-3#Instances}instances}. While the library
+        does run some sanity checks for the parameters, users should be extremely careful
+        if using the Keccak function directly. *)
 end
+(** SHAKE-128, SHAKE-256, and the general Keccak function
+
+    Contrary to other Keccak/SHA-3 variants, SHAKE-128 and SHAKE-256 produce digests of
+    any size. When calling these functions, it will correspond to the size of the [digest] buffer.
+*)
 
 (** {2 BLAKE2}
     The BLAKE2 hash function has 2 variants:
@@ -159,24 +222,52 @@ module Blake2s_32 : Blake2
 module Blake2s_128 : Blake2
 (** Vectorized BLAKE2s implementation, requiring {{!AutoConfig2.AVX} Intel AVX} *)
 
-(** {2 Legacy (deprecated)} *)
+(** {2 Legacy (deprecated)}
+Legacy algorithms, which are {b not suitable for cryptographic applications.} *)
 
 module MD5 : HashFunction [@@deprecated]
+(** Direct hashing with MD5
+
+{b This function should not be used for cryptographic applications! }
+
+The [digest] buffer must match the digest size of MD5, which is 16 bytes. *)
+
 module SHA1 : HashFunction [@@deprecated]
+(** Direct hashing with SHA-1
+
+{b This function should not be used for cryptographic applications! }
+
+The [digest] buffer must match the digest size of SHA-1, which is 20 bytes. *)
 
 
-(** {1 MACs} *)
+(** {1 MACs}
+Message authentication codes
+
+{{!mac}Multiplexing interfaces} for these algorithms are also available.
+*)
+
 (** {2 HMAC} *)
 
 module HMAC_SHA2_256 : MAC
+(** Portable C implementation of HMAC-SHA-256 *)
+
 module HMAC_SHA2_384 : MAC
+(** Portable C implementation of HMAC-SHA-384 *)
+
 module HMAC_SHA2_512 : MAC
+(** Portable C implementation of HMAC-SHA-512 *)
 
 (** {2 Poly1305} *)
 
 module Poly1305_32 : MAC
+(** Portable C implementation of Poly1305 *)
+
 module Poly1305_128 : MAC
+(** Vectorized C implementation of Poly1305 that runs on any platform that supports {{!AutoConfig2.AVX} Intel AVX} *)
+
 module Poly1305_256 : MAC
+(** Vectorized C implementation of Poly1305 that runs on any platform that supports {{!AutoConfig2.AVX2} Intel AVX2} *)
+
 
 (** {1 NaCl } *)
 

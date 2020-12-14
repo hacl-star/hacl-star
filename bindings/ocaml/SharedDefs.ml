@@ -46,7 +46,7 @@ end
 module Hacl_Hash = Hacl_Hash_bindings.Bindings(Hacl_Hash_stubs)
 module Hacl_Spec = Hacl_Spec_bindings.Bindings(Hacl_Spec_stubs)
 
-let max_size_t = Z.of_string "4294967296"
+let max_size_t = Z.of_string "4294967296" (* 2^32 *)
 
 module HashDefs = struct
   open Hacl_Spec
@@ -69,9 +69,7 @@ module HashDefs = struct
   let digest_len alg =
     UInt32.to_int (Hacl_Hash.hacl_Hash_Definitions_hash_len (alg_definition alg))
   let check_digest_len alg len =
-    match alg with
-    | Some alg -> assert (len = digest_len alg)
-    | None -> ()
+    assert (len = digest_len alg)
   let max_input_len = max_size_t
   let check_max_input_len len =
     assert Z.(of_int len < max_input_len)
@@ -132,12 +130,11 @@ module type EdDSA_generic = sig
     Buffers have the following size constraints:
     - [sk], [pk]: 32 bytes
     - [signature]: 64 bytes
-    - [pt]: <= {!max_size_t} - 64 bytes
 *)
 
   type bytes
 
-  (** {3 EdDSA} *)
+  (** {1 EdDSA} *)
 
   val secret_to_public : sk:bytes -> pk:bytes -> unit
   (** [secret_to_public sk pk] takes a secret key [sk] and writes the corresponding
@@ -151,7 +148,7 @@ module type EdDSA_generic = sig
   (** [verify pk pt signature] takes public key [pk], message [pt] and verifies the
       Ed25519 signature, returning true if valid. *)
 
-  (** {3 EdDSA Expanded Signing}
+  (** {1 EdDSA Expanded Signing}
 
       The buffer [ks] containing the expanded secret key must be 96 bytes long.
 *)
@@ -166,19 +163,42 @@ module type EdDSA_generic = sig
 end
 
 module type HashFunction_generic = sig
+
   type bytes
-  val hash : bytes -> bytes -> unit
+  val hash : pt:bytes -> digest:bytes -> unit
+  (** [hash pt digest] hashes [pt] and outputs the result in [digest]. *)
 end
 
 module type MAC_generic = sig
+  (** For Poly1305, buffers have the following size constraints:
+      - [key]: 32 bytes
+      - [tag]: 16 bytes
+
+      For HMAC, buffers have the following size constraints:
+      - [tag]: same as the digest size of the corresponding hash function (see {{!EverCrypt.Hash} here})
+*)
+
   type bytes
-  val mac : bytes -> bytes -> bytes -> unit
+  val mac : key:bytes -> msg:bytes -> tag:bytes -> unit
+  (** [mac key msg tag] computes the MAC of [msg] using key [key] and writes the result in [tag] *)
 end
 
 module type HKDF_generic = sig
+  (** Buffers have the following size constraints with respect to the digest size of the underlying
+      hash function, [digest_len]:
+      - [prk]: = [digest_len]
+      - [okm]: <= 255 * [digest_len]
+*)
+
   type bytes
-  val expand: bytes -> bytes -> bytes -> unit
-  val extract: bytes -> bytes -> bytes -> unit
+
+  val extract: salt:bytes -> ikm:bytes -> prk:bytes -> unit
+  (** [extract salt ikm prk] computes a pseudorandom key [prk] using input key material [ikm] and
+      salt [salt]. *)
+
+  val expand: prk:bytes -> info:bytes -> okm:bytes -> unit
+  (** [expand prk info okm] expands the pseudorandom key [prk], taking the info string [info] into
+      account, and writes the output key material in [okm]. *)
 end
 
 module type ECDSA_generic = sig
@@ -203,15 +223,15 @@ module type ECDSA_generic = sig
 end
 
 module type Blake2_generic = sig
+(** Buffers have the following size constraints:
+    - [key]: <= 64 bytes for BLAKE2b, <= 32 bytes for BLAKE2s
+    - [digest]: non-zero, <= 64 bytes for BLAKE2b, <= 32 bytes for BLAKE2s *)
+  (* TODO: review checks and write documentation for large  maximum buffer sizes *)
+
   type bytes
   val hash : ?key:bytes -> pt:bytes -> digest:bytes -> unit
-  (* TODO: clarify size constraints for pt, I think I might have gotten this wrong *)
-  (** [hash ?key ~pt ~digest] takes an optional [key] and writes the digest of [pt] in [digest].
-      Buffers have the following size constraints:
-      - [key]: <= 64 bytes for BLAKE2b, <= 32 bytes for BLAKE2s
-      - [pt]: <= {!max_size_t} if key is empty, otherwise <= [max_size_t] + 128 for BLAKE2b, <= [max_size_t] + 64 for BLAKE2s
-      - [digest]: non-zero, <= 64 bytes for BLAKE2b, <= 32 bytes for BLAKE2s
-  *)
+  (** [hash ?key ~pt ~digest] hashes [pt] and outputs the result in [digest].
+      An optional [key] argument can passed for keyed hashing. *)
 end
 
 module type Chacha20_Poly1305 = Chacha20_Poly1305_generic with type bytes = CBytes.t

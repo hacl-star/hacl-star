@@ -23,7 +23,7 @@ let test (v: Bytes.t poly1305_test) t mac reqs =
   if supports reqs then begin
     let tag = Test_utils.init_bytes 16 in
 
-    mac tag v.key v.msg;
+    mac ~key:v.key ~msg:v.msg ~tag;
 
     if Bytes.compare tag v.expected = 0 then
       test_result Success ""

@@ -65,7 +65,7 @@ let test_nonagile (v: Bytes.t hmac_test) t alg mac =
 
     let tag = Test_utils.init_bytes (Bytes.length v.expected) in
 
-    mac tag v.key v.data;
+    mac ~key:v.key ~msg:v.data ~tag;
     if Bytes.compare tag v.expected = 0 then
       test_result Success ""
     else
