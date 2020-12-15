@@ -29,7 +29,7 @@ module CBytes : Buffer with type t = Bytes.t and type buf = Bytes.t Ctypes.ocaml
 end
 (** Representation of [Bytes.t] buffers *)
 
-(* VD: temporarely disable, eliminate dependency on bigstring *)
+(* VD: temporarily disable, eliminate dependency on bigstring *)
 (* module CBigstring : Buffer with type t = Bigstring.t and type buf = uint8 Ctypes_static.ptr = struct
  *   open Ctypes
  *   type t = Bigstring.t
@@ -98,7 +98,7 @@ module type Chacha20_Poly1305_generic = sig
   val decrypt: key:bytes -> iv:bytes -> ad:bytes -> ct:bytes -> tag:bytes -> pt:bytes -> bool
   (** [decrypt key iv ad ct tag pt] takes a [key], the initial value [iv], additional
       data [ad], ciphertext [ct], and authentication tag [tag], as well as output buffer [pt],
-      which, if sucessful, will contain the decrypted [ct]. *)
+      which, if successful, will contain the decrypted [ct]. *)
 
 end
 

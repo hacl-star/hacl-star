@@ -46,7 +46,7 @@ module AEAD : sig
   val decrypt : st:t -> iv:bytes -> ad:bytes -> ct:bytes -> tag:bytes -> pt:bytes -> unit Error.result
   (** [decrypt st iv ad ct tag pt] takes a state [st], the initial value [iv], additional
       data [ad], ciphertext [ct], and authentication tag [tag], as well as output buffer [pt],
-      which, if sucessful, will contain the decrypted [ct]. *)
+      which, if successful, will contain the decrypted [ct]. *)
 
 end
 (** Agile, multiplexing AEAD interface exposing AES128-GCM, AES256-GCM, and Chacha20-Poly1305
@@ -130,7 +130,7 @@ end
     - SHA-384: 48 bytes
     - SHA-512: 64 bytes
 
-    {b The {{!SharedDefs.HashDefs.deprecated_alg}legacy algorithms} (marked [deprecated]) should NOT be used for cryptograhpic purposes. }
+    {b The {{!SharedDefs.HashDefs.deprecated_alg}legacy algorithms} (marked [deprecated]) should NOT be used for cryptographic purposes. }
     For these, the size of the digest is:
     - SHA-1: 20 bytes
     - MD5: 16 bytes
@@ -141,7 +141,7 @@ Multiplexing interfaces for SHA-224 and SHA-256 which use {{!AutoConfig2.SHAEXT}
 *)
 
 module SHA2_224 : HashFunction
-(** Direct hasing with SHA-224
+(** Direct hashing with SHA-224
 
 The [digest] buffer must match the digest size of SHA-224, which is 28 bytes.
 *)
@@ -209,7 +209,12 @@ module HKDF_SHA2_384 : HKDF
 module HKDF_SHA2_512 : HKDF
 (** Multiplexing interface for HKDF using SHA2-512 *)
 
-(** {1 DRBG} *)
+(** {1 DRBG}
+
+Deterministic random bit generator
+*)
+
+(** {2 HMAC-DRBG} *)
 
 module DRBG : sig
   type t

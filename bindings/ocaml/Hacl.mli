@@ -22,7 +22,7 @@ module Chacha20_Poly1305_256 : Chacha20_Poly1305
 (** 256-bit vectorized C implementation of Chacha20-Poly1305 that runs on any platform that supports {{!AutoConfig2.AVX2} Intel AVX2} *)
 
 (** {1 ECDH, EdDSA, and ECDSA} *)
-(** {2 Curve25519}
+(** {2:curve Curve25519}
     Different implementations of ECDH using Curve25519. A {{!EverCrypt.Curve25519}
     multiplexing interface} is also available.
 *)
@@ -129,7 +129,7 @@ end
 *)
 
 module SHA2_224 : HashFunction
-(** Direct hasing with SHA-224
+(** Direct hashing with SHA-224
 
 The [digest] buffer must match the digest size of SHA-224, which is 28 bytes.
 *)
@@ -272,30 +272,146 @@ module Poly1305_256 : MAC
 (** {1 NaCl } *)
 
 module NaCl : sig
-  val box_beforenm : bytes -> bytes -> bytes -> bool
+  val box_beforenm : pk:bytes -> sk:bytes -> ck:bytes -> bool
+  (** [box_beforenm pk sk ck] precomputes a 32-byte {{!section:curve}X25519 shared key} [ck] using one party's
+      32-byte public key [pk] and the other party's 32-byte secret key [sk]. The shared key
+      can then be used in the Box precomputation interface ([box_afternm] and [box_open_afternm] functions)
+      in both {!Easy} and {!Detached}.
+
+      This is useful when calling the functions repeatedly, as it avoids computing the
+      shared key on every function call.
+
+      Buffers [pk], [sk], and [ck] must be distinct.
+  *)
+
   module Easy : sig
-    val box : bytes -> bytes -> bytes -> bytes -> bytes -> bool
-    val box_open : bytes -> bytes -> bytes -> bytes -> bytes -> bool
-    val box_afternm : bytes -> bytes -> bytes -> bytes -> bool
-    val box_open_afternm : bytes -> bytes -> bytes -> bytes -> bool
-    val secretbox : bytes -> bytes -> bytes -> bytes -> bool
-    val secretbox_open : bytes -> bytes -> bytes -> bytes -> bool
+    (** {1 Box}
+        {2 One-shot interface} *)
+
+    val box : pt:bytes -> n:bytes -> pk:bytes -> sk:bytes -> ct:bytes -> bool
+    (** [box pt n pk sk ct] authenticates and encrypts plaintext [pt] using public key [pk],
+        secret key [sk], and nonce [n] and writes both the message authentication tag
+        and the ciphertext in [ct].
+        Returns true if successful. *)
+
+    val box_open : ct:bytes -> n:bytes -> pk:bytes -> sk:bytes -> pt:bytes -> bool
+    (** [box_open ct n pk sk pt] attempts to verify and decrypt ciphertext [ct] using public key [pk],
+        secret key [sk], and nonce [n] and if successful writes the plaintext in [pt]
+        and returns true. *)
+
+    (** {2 Precomputation interface }
+        The shared key [ck] is obtained using {!NaCl.box_beforenm}. *)
+
+    val box_afternm : pt:bytes -> n:bytes -> ck:bytes -> ct:bytes -> bool
+    (** [box_afternm pt n ck ct] authenticates and encrypts [pt] using shared key [ck] and
+        nonce [n] and writes both the message authentication tag and the ciphertext in [ct].
+        Returns true if successful. *)
+
+    val box_open_afternm : ct:bytes -> n:bytes -> ck:bytes -> pt:bytes -> bool
+    (** [box_open ct n pk sk pt] attempts to verify and decrypt ciphertext [ct] using
+        shared key [ck] and nonce [n] and if successful writes the plaintext in [pt]
+        and returns true. *)
+
+    (** {1 Secretbox} *)
+
+    val secretbox : pt:bytes -> n:bytes -> key:bytes -> ct:bytes -> bool
+    (** [secretbox pt n key ct] authenticates and encrypts plaintext [pt] using
+        secret key [key] and nonce [n] and writes both the message authentication tag
+        and the ciphertext in [ct].
+        Returns true if successful. *)
+
+    val secretbox_open : ct:bytes -> n:bytes -> key:bytes -> pt:bytes -> bool
+    (** [secretbox_open ct n key pt] attempts to verify and decrypt ciphertext [ct] using
+        secret key [key] and nonce [n] and if successful writes the plaintext in [pt]
+        and returns true. *)
+
   end
+  (** The {i easy} interface concatenates the ciphertext and the message authentication tag
+      into a single buffer.
+
+      Buffers have the following size requirements:
+      - [ct] must be 16 bytes longer than [pt] in order to also accommodate the message
+      authentication tag
+      - [pk], [sk], [ck]: 32 bytes
+      - [n]: 24 bytes
+*)
+
   module Detached : sig
-    val box : bytes -> bytes -> bytes -> bytes -> bytes -> bytes -> bool
-    val box_open : bytes -> bytes -> bytes -> bytes -> bytes -> bytes -> bool
-    val box_afternm : bytes -> bytes -> bytes -> bytes -> bytes -> bool
-    val box_open_afternm : bytes -> bytes -> bytes -> bytes -> bytes -> bool
-    val secretbox : bytes -> bytes -> bytes -> bytes -> bytes -> bool
-    val secretbox_open : bytes -> bytes -> bytes -> bytes -> bytes -> bool
+    (** {1 Box}
+        {2 One-shot interface} *)
+
+    val box : pt:bytes -> n:bytes -> pk:bytes -> sk:bytes -> ct:bytes -> tag:bytes -> bool
+    (** [box pt n pk sk ct tag] authenticates and encrypts plaintext [pt] using public key [pk],
+        secret key [sk], and nonce [n] and writes the ciphertext in [ct] and
+        the message authentication tag in [tag].
+        Returns true if successful. *)
+
+    val box_open : ct:bytes -> tag:bytes -> n:bytes -> pk:bytes -> sk:bytes -> pt:bytes -> bool
+    (** [box_open ct tag n pk sk pt] attempts to verify and decrypt ciphertext [ct] and
+        message authentication tag [tag] using public key [pk],
+        secret key [sk], and nonce [n] and if successful writes the plaintext in [pt]
+        and returns true. *)
+
+    (** {2 Precomputation interface }
+        The shared key [ck] is obtained using {!NaCl.box_beforenm}. *)
+
+    val box_afternm : pt:bytes -> n:bytes -> ck:bytes -> ct:bytes -> tag:bytes -> bool
+    (** [box_afternm pt n ck ct tag] authenticates and encrypts [pt] using shared key [ck] and
+        nonce [n] and writes the ciphertext in [ct] and the message authentication tag in [tag].
+        Returns true if successful. *)
+
+    val box_open_afternm : ct:bytes -> tag:bytes -> n:bytes -> ck:bytes -> pt:bytes -> bool
+    (** [box_open_afternm ct tag n ck pt] attempts to verify and decrypt ciphertext [ct] and
+        message authentication tag [tag] using
+        shared key [ck] and nonce [n] and if successful writes the plaintext in [pt]
+        and returns true. *)
+
+    (** {1 Secretbox} *)
+
+    val secretbox : pt:bytes -> n:bytes -> key:bytes -> ct:bytes -> tag:bytes -> bool
+    (** [secretbox pt n key ct tag] authenticates and encrypts plaintext [pt] using
+        secret key [key] and nonce [n] and writes the ciphertext in [ct]
+        and the message authentication tag in [tag].
+        Returns true if successful. *)
+
+    val secretbox_open : ct:bytes -> tag:bytes -> n:bytes -> key:bytes -> pt:bytes -> bool
+    (** [secretbox_open ct tag n key pt] attempts to verify and decrypt ciphertext [ct] and
+        message authentication tag [tag] using
+        secret key [key] and nonce [n] and if successful writes the plaintext in [pt]
+        and returns true. *)
+
   end
+  (** The {i detached} interface uses 2 separate buffers for the ciphertext and
+      the message authentication tag. This allows users to encrypt and decrypt data in-place,
+      by passing the same buffer for both plaintext and ciphertext.
+
+      Buffers have the following size requirements:
+      - [pt] and [ct] must have the same size
+      - [tag]: 16 bytes
+      - [pk], [sk], [ck]: 32 bytes
+      - [n]: 24 bytes
+*)
+
 end
+(** Box (public-key authenticated encryption) and Secretbox (secret-key authenticated encryption)
+
+    Portable C implementations offering both the {i easy} and {i detached} interfaces of Box and Secretbox.
+    For Box, the {i precomputation interface} is also supported.
+*)
 
 (** {1 Key derivation} *)
-(** {2 HKDF} *)
+(** {2 HKDF}
+    HMAC-based key derivation function
+
+    Portable implementations of HKDF.
+    {{!EverCrypt.HKDF} Agile and multiplexing interfaces} are also available.
+*)
 
 module HKDF_SHA2_256 : HKDF
+(** Portable C implementation of HKDF using SHA2-256 *)
+
 module HKDF_SHA2_512 : HKDF
+(** Portable C implementation of HKDF using SHA2-512 *)
 
 (** {1 Randomness (not verified)} *)
 
@@ -305,7 +421,7 @@ module RandomBuffer : sig
 
 
 end
-(** A randomness function implemented with platform dependant code for Unix and Windows
+(** A randomness function implemented with platform dependent code for Unix and Windows
 
     The [randombytes] function is handwritten, unverified C code.
     In Unix, it is implemented using the {{: https://man7.org/linux/man-pages/man2/getrandom.2.html} [getrandom]} syscall, with a fallback to [/dev/urandom].

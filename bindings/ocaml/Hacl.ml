@@ -209,63 +209,63 @@ module NaCl = struct
     assert (C.disjoint n pt);
     assert (C.disjoint n ct)
 
-  let box_beforenm k pk sk =
+  let box_beforenm ~pk ~sk ~ck =
     check_key_sizes pk sk;
-    assert (C.size k = 32);
-    assert (C.disjoint k pk);
-    assert (C.disjoint k sk);
-    get_result @@ hacl_NaCl_crypto_box_beforenm (C.ctypes_buf k) (C.ctypes_buf pk) (C.ctypes_buf sk)
+    assert (C.size ck = 32);
+    assert (C.disjoint ck pk);
+    assert (C.disjoint ck sk);
+    get_result @@ hacl_NaCl_crypto_box_beforenm (C.ctypes_buf ck) (C.ctypes_buf pk) (C.ctypes_buf sk)
   module Easy = struct
-    let box ct pt n pk sk =
+    let box ~pt ~n ~pk ~sk ~ct =
       check_key_sizes pk sk;
       check_easy pt ct n;
       get_result @@ hacl_NaCl_crypto_box_easy (C.ctypes_buf ct) (C.ctypes_buf pt) (C.size_uint32 pt) (C.ctypes_buf n) (C.ctypes_buf pk) (C.ctypes_buf sk)
-    let box_open pt ct n pk sk =
+    let box_open ~ct ~n ~pk ~sk ~pt =
       check_key_sizes pk sk;
       check_easy pt ct n;
       get_result @@ hacl_NaCl_crypto_box_open_easy (C.ctypes_buf pt) (C.ctypes_buf ct) (C.size_uint32 ct) (C.ctypes_buf n) (C.ctypes_buf pk) (C.ctypes_buf sk)
-    let box_afternm ct pt n k =
-      assert (C.size k = 32);
+    let box_afternm ~pt ~n ~ck ~ct =
+      assert (C.size ck = 32);
       check_easy pt ct n;
-      get_result @@ hacl_NaCl_crypto_box_easy_afternm (C.ctypes_buf ct) (C.ctypes_buf pt) (C.size_uint32 pt) (C.ctypes_buf n) (C.ctypes_buf k)
-    let box_open_afternm pt ct n k =
-      assert (C.size k = 32);
+      get_result @@ hacl_NaCl_crypto_box_easy_afternm (C.ctypes_buf ct) (C.ctypes_buf pt) (C.size_uint32 pt) (C.ctypes_buf n) (C.ctypes_buf ck)
+    let box_open_afternm ~ct ~n ~ck ~pt =
+      assert (C.size ck = 32);
       check_easy pt ct n;
-      get_result @@ hacl_NaCl_crypto_box_open_easy_afternm (C.ctypes_buf pt) (C.ctypes_buf ct) (C.size_uint32 ct) (C.ctypes_buf n) (C.ctypes_buf k)
-    let secretbox ct pt n k =
-      assert (C.size k = 32);
+      get_result @@ hacl_NaCl_crypto_box_open_easy_afternm (C.ctypes_buf pt) (C.ctypes_buf ct) (C.size_uint32 ct) (C.ctypes_buf n) (C.ctypes_buf ck)
+    let secretbox ~pt ~n ~key ~ct =
+      assert (C.size key = 32);
       check_easy pt ct n;
-      get_result @@ hacl_NaCl_crypto_secretbox_easy (C.ctypes_buf ct) (C.ctypes_buf pt) (C.size_uint32 pt) (C.ctypes_buf n) (C.ctypes_buf k)
-    let secretbox_open pt ct n k =
-      assert (C.size k = 32);
+      get_result @@ hacl_NaCl_crypto_secretbox_easy (C.ctypes_buf ct) (C.ctypes_buf pt) (C.size_uint32 pt) (C.ctypes_buf n) (C.ctypes_buf key)
+    let secretbox_open ~ct ~n ~key ~pt=
+      assert (C.size key = 32);
       check_easy pt ct n;
-      get_result @@ hacl_NaCl_crypto_secretbox_open_easy (C.ctypes_buf pt) (C.ctypes_buf ct) (C.size_uint32 ct) (C.ctypes_buf n) (C.ctypes_buf k)
+      get_result @@ hacl_NaCl_crypto_secretbox_open_easy (C.ctypes_buf pt) (C.ctypes_buf ct) (C.size_uint32 ct) (C.ctypes_buf n) (C.ctypes_buf key)
   end
   module Detached = struct
-    let box ct tag pt n pk sk =
+    let box ~pt ~n ~pk ~sk ~ct ~tag =
       check_key_sizes pk sk;
       check_detached pt ct tag n;
       get_result @@ hacl_NaCl_crypto_box_detached (C.ctypes_buf ct) (C.ctypes_buf tag) (C.ctypes_buf pt) (C.size_uint32 pt) (C.ctypes_buf n) (C.ctypes_buf pk) (C.ctypes_buf sk)
-    let box_open pt ct tag n pk sk =
+    let box_open ~ct ~tag ~n ~pk ~sk ~pt =
       check_key_sizes pk sk;
       check_detached pt ct tag n;
       get_result @@ hacl_NaCl_crypto_box_open_detached (C.ctypes_buf pt) (C.ctypes_buf ct) (C.ctypes_buf tag) (C.size_uint32 ct) (C.ctypes_buf n) (C.ctypes_buf pk) (C.ctypes_buf sk)
-    let box_afternm ct tag pt n k =
-      assert (C.size k = 32);
+    let box_afternm ~pt ~n ~ck ~ct ~tag =
+      assert (C.size ck = 32);
       check_detached pt ct tag n;
-      get_result @@ hacl_NaCl_crypto_box_detached_afternm (C.ctypes_buf ct) (C.ctypes_buf tag) (C.ctypes_buf pt) (C.size_uint32 pt) (C.ctypes_buf n) (C.ctypes_buf k)
-    let box_open_afternm pt ct tag n k =
-      assert (C.size k = 32);
+      get_result @@ hacl_NaCl_crypto_box_detached_afternm (C.ctypes_buf ct) (C.ctypes_buf tag) (C.ctypes_buf pt) (C.size_uint32 pt) (C.ctypes_buf n) (C.ctypes_buf ck)
+    let box_open_afternm ~ct ~tag ~n ~ck ~pt =
+      assert (C.size ck = 32);
       check_detached pt ct tag n;
-      get_result @@ hacl_NaCl_crypto_box_open_detached_afternm (C.ctypes_buf pt) (C.ctypes_buf ct) (C.ctypes_buf tag) (C.size_uint32 ct) (C.ctypes_buf n) (C.ctypes_buf k)
-    let secretbox ct tag pt n k =
-      assert (C.size k = 32);
+      get_result @@ hacl_NaCl_crypto_box_open_detached_afternm (C.ctypes_buf pt) (C.ctypes_buf ct) (C.ctypes_buf tag) (C.size_uint32 ct) (C.ctypes_buf n) (C.ctypes_buf ck)
+    let secretbox ~pt ~n ~key ~ct ~tag =
+      assert (C.size key = 32);
       check_detached pt ct tag n;
-      get_result @@ hacl_NaCl_crypto_secretbox_detached (C.ctypes_buf ct) (C.ctypes_buf tag) (C.ctypes_buf pt) (C.size_uint32 pt) (C.ctypes_buf n) (C.ctypes_buf k)
-    let secretbox_open pt ct tag n k =
-      assert (C.size k = 32);
+      get_result @@ hacl_NaCl_crypto_secretbox_detached (C.ctypes_buf ct) (C.ctypes_buf tag) (C.ctypes_buf pt) (C.size_uint32 pt) (C.ctypes_buf n) (C.ctypes_buf key)
+    let secretbox_open ~ct ~tag ~n ~key ~pt =
+      assert (C.size key = 32);
       check_detached pt ct tag n;
-      get_result @@ hacl_NaCl_crypto_secretbox_open_detached (C.ctypes_buf pt) (C.ctypes_buf ct) (C.ctypes_buf tag) (C.size_uint32 ct) (C.ctypes_buf n) (C.ctypes_buf k)
+      get_result @@ hacl_NaCl_crypto_secretbox_open_detached (C.ctypes_buf pt) (C.ctypes_buf ct) (C.ctypes_buf tag) (C.size_uint32 ct) (C.ctypes_buf n) (C.ctypes_buf key)
   end
 end
 
