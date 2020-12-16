@@ -58,12 +58,16 @@ module HashDefs = struct
     | SHA2_256
     | SHA2_384
     | SHA2_512
+    | Blake2b
+    | Blake2s
     | Legacy of deprecated_alg
   let alg_definition = function
     | SHA2_224 -> spec_Hash_Definitions_hash_alg_Spec_Hash_Definitions_SHA2_224
     | SHA2_256 -> spec_Hash_Definitions_hash_alg_Spec_Hash_Definitions_SHA2_256
     | SHA2_384 -> spec_Hash_Definitions_hash_alg_Spec_Hash_Definitions_SHA2_384
     | SHA2_512 -> spec_Hash_Definitions_hash_alg_Spec_Hash_Definitions_SHA2_512
+    | Blake2b -> spec_Hash_Definitions_hash_alg_Spec_Hash_Definitions_Blake2B
+    | Blake2s -> spec_Hash_Definitions_hash_alg_Spec_Hash_Definitions_Blake2S
     | Legacy SHA1 -> spec_Hash_Definitions_hash_alg_Spec_Hash_Definitions_SHA1
     | Legacy MD5 -> spec_Hash_Definitions_hash_alg_Spec_Hash_Definitions_MD5
   let digest_len alg =
@@ -80,6 +84,8 @@ module HashDefs = struct
     | SHA2_256 -> Z.pow (Z.of_int 2) 61
     | SHA2_384
     | SHA2_512 -> Z.pow (Z.of_int 2) 125
+    | Blake2b -> Z.pow (Z.of_int 2) 128
+    | Blake2s -> Z.pow (Z.of_int 2) 64
   let block_len alg =
     UInt32.to_int (Hacl_Hash.hacl_Hash_Definitions_block_len (alg_definition alg))
   let check_key_len alg len =

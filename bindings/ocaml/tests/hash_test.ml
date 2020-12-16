@@ -1,5 +1,6 @@
 open EverCrypt
 open SharedDefs
+open AutoConfig2
 
 open Test_utils
 
@@ -12,6 +13,8 @@ type alg =
   | SHA3_256
   | SHA3_384
   | SHA3_512
+  | Blake2b
+  | Blake2s
   | SHA1
   | MD5
 
@@ -82,6 +85,22 @@ let test_sha3_512 : Bytes.t hash_test =
     expected = Bytes.of_string "\xb7\x51\x85\x0b\x1a\x57\x16\x8a\x56\x93\xcd\x92\x4b\x6b\x09\x6e\x08\xf6\x21\x82\x74\x44\xf7\x0d\x88\x4f\x5d\x02\x40\xd2\x71\x2e\x10\xe1\x16\xe9\x19\x2a\xf3\xc9\x1a\x7e\xc5\x76\x47\xe3\x93\x40\x57\x34\x0b\x4c\xf4\x08\xd5\xa5\x65\x92\xf8\x27\x4e\xec\x53\xf0"
 }
 
+let test_blake2b : Bytes.t hash_test =
+  {
+    name = "Blake2b Test 1";
+    alg = Blake2b;
+    plaintext = Bytes.of_string "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f\x20\x21\x22\x23\x24\x25\x26\x27\x28\x29\x2a\x2b\x2c\x2d\x2e\x2f\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x3a\x3b\x3c\x3d\x3e\x3f\x40\x41\x42\x43\x44\x45\x46\x47\x48\x49\x4a\x4b\x4c\x4d\x4e\x4f\x50\x51\x52\x53\x54\x55\x56\x57\x58\x59\x5a\x5b\x5c\x5d\x5e\x5f";
+    expected = Bytes.of_string "\x1c\x07\x7e\x27\x9d\xe6\x54\x85\x23\x50\x2b\x6d\xf8\x00\xff\xda\xb5\xe2\xc3\xe9\x44\x2e\xb8\x38\xf5\x8c\x29\x5f\x3b\x14\x7c\xef\x9d\x70\x1c\x41\xc3\x21\x28\x3f\x00\xc7\x1a\xff\xa0\x61\x93\x10\x39\x91\x26\x29\x5b\x78\xdd\x4d\x1a\x74\x57\x2e\xf9\xed\x51\x35"
+  }
+
+let test_blake2s : Bytes.t hash_test =
+  {
+    name = "Blake2s Test 1";
+    alg = Blake2s;
+    plaintext = Bytes.of_string "\x61\x62\x63";
+    expected = Bytes.of_string "\x50\x8C\x5E\x8C\x32\x7C\x14\xE2\xE1\xA7\x2B\xA3\x4E\xEB\x45\x2F\x37\x45\x8B\x20\x9E\xD6\x3A\x29\x4D\x99\x9B\x4C\x86\x67\x59\x82"
+  }
+
 let test_sha1 : Bytes.t hash_test =
   {
     name = "SHA1 Test 1";
@@ -98,11 +117,35 @@ let test_md5 : Bytes.t hash_test =
     expected = Bytes.of_string "\xf9\x6b\x69\x7d\x7c\xb7\x93\x8d\x52\x5a\x2f\x31\xaa\xf1\x61\xd0"
 }
 
+type 'a blake2_keyed_test =
+  { name: string; plaintext: 'a; key: 'a; expected: 'a }
+
+let blake2b_keyed_tests = [
+  {
+    name = "Test 1";
+    plaintext = Bytes.of_string "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f\x20\x21\x22\x23\x24\x25\x26\x27\x28\x29\x2a\x2b";
+    key = Bytes.of_string "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f\x20\x21\x22\x23\x24\x25\x26\x27\x28\x29\x2a\x2b\x2c\x2d\x2e\x2f\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x3a\x3b\x3c\x3d\x3e\x3f";
+    expected = Bytes.of_string "\xc8\xf6\x8e\x69\x6e\xd2\x82\x42\xbf\x99\x7f\x5b\x3b\x34\x95\x95\x08\xe4\x2d\x61\x38\x10\xf1\xe2\xa4\x35\xc9\x6e\xd2\xff\x56\x0c\x70\x22\xf3\x61\xa9\x23\x4b\x98\x37\xfe\xee\x90\xbf\x47\x92\x2e\xe0\xfd\x5f\x8d\xdf\x82\x37\x18\xd8\x6d\x1e\x16\xc6\x09\x00\x71"
+  }
+]
+
+let blake2s_keyed_tests = [
+  {
+    name = "Test 1";
+    plaintext = Bytes.of_string "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f\x20\x21\x22\x23\x24\x25\x26\x27\x28\x29\x2a\x2b\x2c\x2d\x2e\x2f\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x3a\x3b\x3c\x3d\x3e";
+    key = Bytes.of_string "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f";
+    expected = Bytes.of_string "\xc6\x53\x82\x51\x3f\x07\x46\x0d\xa3\x98\x33\xcb\x66\x6c\x5e\xd8\x2e\x61\xb9\xe9\x98\xf4\xb0\xc4\x28\x7c\xee\x56\xc3\xcc\x9b\xcd"
+  }
+]
+
+
 let alg_definition = function
   | SHA2_224 -> HashDefs.SHA2_224
   | SHA2_256 -> HashDefs.SHA2_256
   | SHA2_384 -> HashDefs.SHA2_384
   | SHA2_512 -> HashDefs.SHA2_512
+  | Blake2b -> HashDefs.Blake2b
+  | Blake2s -> HashDefs.Blake2s
   | SHA1 -> HashDefs.Legacy HashDefs.SHA1
   | MD5 -> HashDefs.Legacy HashDefs.MD5
   | _ -> failwith "Algorithm not supported in agile Hashing API"
@@ -111,16 +154,18 @@ let output_len = function
   | SHA2_224
   | SHA3_224 -> 28
   | SHA2_256
-  | SHA3_256 -> 32
+  | SHA3_256
+  | Blake2s -> 32
   | SHA2_384
   | SHA3_384 -> 48
   | SHA2_512
-  | SHA3_512 -> 64
+  | SHA3_512
+  | Blake2b -> 64
   | SHA1 -> 20
   | MD5 -> 16
 
 let test_agile (v: Bytes.t hash_test) =
-  let test_result = test_result ("Hash " ^ v.name)  in
+  let test_result = test_result ("EverCrypt.Hash " ^ v.name)  in
   let alg = alg_definition v.alg in
   let digest = Test_utils.init_bytes (output_len v.alg) in
 
@@ -146,6 +191,20 @@ let test_nonagile (n: string) (v: Bytes.t hash_test) hash =
     test_result Success ""
   else
     test_result Failure ""
+
+let test_keyed_blake2 (v: Bytes.t blake2_keyed_test) n hash reqs =
+  let test_result = test_result (n ^ " " ^ v.name) in
+
+  if supports reqs then begin
+    let output = Test_utils.init_bytes (Bytes.length v.expected) in
+
+    hash ?key:(Some v.key) ~pt:v.plaintext ~digest:output;
+    if Bytes.compare output v.expected = 0 then
+      test_result Success ""
+    else
+      test_result Failure "Output mismatch"
+  end else
+    test_result Skipped "Required CPU feature not detected"
 
 let test_keccak () =
   let v = test_sha3_256 in
@@ -181,6 +240,8 @@ let _ =
   test_agile test_sha2_256;
   test_agile test_sha2_384;
   test_agile test_sha2_512;
+  test_agile test_blake2b;
+  test_agile test_blake2s;
 
   test_nonagile "Hacl" test_sha2_224 Hacl.SHA2_224.hash;
   test_nonagile "Hacl" test_sha2_256 Hacl.SHA2_256.hash;
@@ -200,5 +261,10 @@ let _ =
 
   test_nonagile "Hacl" test_sha1 Hacl.SHA1.hash;
   test_nonagile "Hacl" test_md5 Hacl.MD5.hash;
+
+  List.iter (fun v -> test_keyed_blake2 v "Blake2b_32" Hacl.Blake2b_32.hash []) blake2b_keyed_tests;
+  List.iter (fun v -> test_keyed_blake2 v "Blake2b_256" Hacl.Blake2b_256.hash [AVX2]) blake2b_keyed_tests;
+  List.iter (fun v -> test_keyed_blake2 v "Blake2s_32" Hacl.Blake2s_32.hash []) blake2s_keyed_tests;
+  List.iter (fun v -> test_keyed_blake2 v "Blake2s_128" Hacl.Blake2s_128.hash [AVX]) blake2s_keyed_tests;
 
   test_keccak ()
