@@ -23,7 +23,7 @@ let test_agile (v: Bytes.t hkdf_test) =
   let prk = Test_utils.init_bytes (Bytes.length v.expected_prk) in
   let okm = Test_utils.init_bytes (Bytes.length v.expected_okm) in
 
-  if EverCrypt.HMAC.is_supported_alg v.alg then begin
+  if EverCrypt.HMAC.is_supported_alg ~alg:v.alg then begin
     EverCrypt.HKDF.extract ~alg:v.alg ~salt:v.salt ~ikm:v.ikm ~prk;
     if Bytes.compare prk v.expected_prk <> 0 then
       test_result Failure "PRK mismatch";

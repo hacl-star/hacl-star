@@ -181,14 +181,15 @@ end)
 
 module HMAC = struct
   open EverCrypt_HMAC
-  let is_supported_alg alg = everCrypt_HMAC_is_supported_alg (HashDefs.alg_definition alg)
-  let mac alg dst key data =
+  let is_supported_alg ~alg =
+    everCrypt_HMAC_is_supported_alg (HashDefs.alg_definition alg)
+  let mac ~alg ~key ~msg ~tag=
     (* Hacl.HMAC.compute_st *)
-    assert (C.size dst = HashDefs.digest_len alg);
-    assert (C.disjoint data dst);
+    assert (C.size tag = HashDefs.digest_len alg);
+    assert (C.disjoint msg tag);
     HashDefs.check_key_len alg (C.size key);
-    HashDefs.check_key_len alg (C.size data);
-    everCrypt_HMAC_compute (HashDefs.alg_definition alg) (C.ctypes_buf dst) (C.ctypes_buf key) (C.size_uint32 key) (C.ctypes_buf data) (C.size_uint32 data)
+    HashDefs.check_key_len alg (C.size msg);
+    everCrypt_HMAC_compute (HashDefs.alg_definition alg) (C.ctypes_buf tag) (C.ctypes_buf key) (C.size_uint32 key) (C.ctypes_buf msg) (C.size_uint32 msg)
 end
 
 module HMAC_SHA2_256 : MAC =
@@ -261,7 +262,7 @@ module DRBG = struct
 
   type t = everCrypt_DRBG_state_s ptr
   let instantiate ?(personalization_string=Bytes.empty) alg =
-    if HMAC.is_supported_alg alg then
+    if HMAC.is_supported_alg ~alg then
       let st = everCrypt_DRBG_create (HashDefs.alg_definition alg) in
       if everCrypt_DRBG_instantiate st (C.ctypes_buf personalization_string) (C.size_uint32 personalization_string) then
         Some st

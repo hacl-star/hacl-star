@@ -49,8 +49,8 @@ let test_agile (v: Bytes.t hmac_test) =
 
   let tag = Test_utils.init_bytes (Bytes.length v.expected) in
 
-  if EverCrypt.HMAC.is_supported_alg v.alg then begin
-    EverCrypt.HMAC.mac v.alg tag v.key v.data;
+  if EverCrypt.HMAC.is_supported_alg ~alg:v.alg then begin
+    EverCrypt.HMAC.mac ~alg:v.alg ~key:v.key ~msg:v.data ~tag;
     if Bytes.compare tag v.expected = 0 then
       test_result Success ""
     else

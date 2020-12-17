@@ -13,8 +13,8 @@ type alg =
   | SHA3_256
   | SHA3_384
   | SHA3_512
-  | Blake2b
-  | Blake2s
+  | BLAKE2b
+  | BLAKE2s
   | SHA1
   | MD5
 
@@ -87,16 +87,16 @@ let test_sha3_512 : Bytes.t hash_test =
 
 let test_blake2b : Bytes.t hash_test =
   {
-    name = "Blake2b Test 1";
-    alg = Blake2b;
+    name = "BLAKE2b Test 1";
+    alg = BLAKE2b;
     plaintext = Bytes.of_string "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f\x20\x21\x22\x23\x24\x25\x26\x27\x28\x29\x2a\x2b\x2c\x2d\x2e\x2f\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x3a\x3b\x3c\x3d\x3e\x3f\x40\x41\x42\x43\x44\x45\x46\x47\x48\x49\x4a\x4b\x4c\x4d\x4e\x4f\x50\x51\x52\x53\x54\x55\x56\x57\x58\x59\x5a\x5b\x5c\x5d\x5e\x5f";
     expected = Bytes.of_string "\x1c\x07\x7e\x27\x9d\xe6\x54\x85\x23\x50\x2b\x6d\xf8\x00\xff\xda\xb5\xe2\xc3\xe9\x44\x2e\xb8\x38\xf5\x8c\x29\x5f\x3b\x14\x7c\xef\x9d\x70\x1c\x41\xc3\x21\x28\x3f\x00\xc7\x1a\xff\xa0\x61\x93\x10\x39\x91\x26\x29\x5b\x78\xdd\x4d\x1a\x74\x57\x2e\xf9\xed\x51\x35"
   }
 
 let test_blake2s : Bytes.t hash_test =
   {
-    name = "Blake2s Test 1";
-    alg = Blake2s;
+    name = "BLAKE2s Test 1";
+    alg = BLAKE2s;
     plaintext = Bytes.of_string "\x61\x62\x63";
     expected = Bytes.of_string "\x50\x8C\x5E\x8C\x32\x7C\x14\xE2\xE1\xA7\x2B\xA3\x4E\xEB\x45\x2F\x37\x45\x8B\x20\x9E\xD6\x3A\x29\x4D\x99\x9B\x4C\x86\x67\x59\x82"
   }
@@ -144,8 +144,8 @@ let alg_definition = function
   | SHA2_256 -> HashDefs.SHA2_256
   | SHA2_384 -> HashDefs.SHA2_384
   | SHA2_512 -> HashDefs.SHA2_512
-  | Blake2b -> HashDefs.Blake2b
-  | Blake2s -> HashDefs.Blake2s
+  | BLAKE2b -> HashDefs.BLAKE2b
+  | BLAKE2s -> HashDefs.BLAKE2s
   | SHA1 -> HashDefs.Legacy HashDefs.SHA1
   | MD5 -> HashDefs.Legacy HashDefs.MD5
   | _ -> failwith "Algorithm not supported in agile Hashing API"
@@ -155,12 +155,12 @@ let output_len = function
   | SHA3_224 -> 28
   | SHA2_256
   | SHA3_256
-  | Blake2s -> 32
+  | BLAKE2s -> 32
   | SHA2_384
   | SHA3_384 -> 48
   | SHA2_512
   | SHA3_512
-  | Blake2b -> 64
+  | BLAKE2b -> 64
   | SHA1 -> 20
   | MD5 -> 16
 
@@ -262,9 +262,9 @@ let _ =
   test_nonagile "Hacl" test_sha1 Hacl.SHA1.hash;
   test_nonagile "Hacl" test_md5 Hacl.MD5.hash;
 
-  List.iter (fun v -> test_keyed_blake2 v "Blake2b_32" Hacl.Blake2b_32.hash []) blake2b_keyed_tests;
-  List.iter (fun v -> test_keyed_blake2 v "Blake2b_256" Hacl.Blake2b_256.hash [AVX2]) blake2b_keyed_tests;
-  List.iter (fun v -> test_keyed_blake2 v "Blake2s_32" Hacl.Blake2s_32.hash []) blake2s_keyed_tests;
-  List.iter (fun v -> test_keyed_blake2 v "Blake2s_128" Hacl.Blake2s_128.hash [AVX]) blake2s_keyed_tests;
+  List.iter (fun v -> test_keyed_blake2 v "BLAKE2b_32" Hacl.Blake2b_32.hash []) blake2b_keyed_tests;
+  List.iter (fun v -> test_keyed_blake2 v "BLAKE2b_256" Hacl.Blake2b_256.hash [AVX2]) blake2b_keyed_tests;
+  List.iter (fun v -> test_keyed_blake2 v "BLAKE2s_32" Hacl.Blake2s_32.hash []) blake2s_keyed_tests;
+  List.iter (fun v -> test_keyed_blake2 v "BLAKE2s_128" Hacl.Blake2s_128.hash [AVX]) blake2s_keyed_tests;
 
   test_keccak ()

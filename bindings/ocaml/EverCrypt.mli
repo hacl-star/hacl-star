@@ -121,14 +121,20 @@ module Hash : sig
 
 end
 (** Agile, multiplexing hashing interface, exposing 4 variants of SHA-2
-    (SHA-224, SHA-256, SHA-384, SHA-512) and 2 legacy algorithms (SHA-1, MD5).
+    (SHA-224, SHA-256, SHA-384, SHA-512), BLAKE2, and 2 legacy algorithms (SHA-1, MD5).
     It offers both direct hashing and a streaming interface.
+
+    {i Note:} The agile BLAKE2 interface is NOT currently multiplexing and it only exposes the portable C
+    implementations of BLAKE2b and BLAKE2s. Optimised, platform-specific versions are aviailable
+    in {{!Hacl.blake2}Hacl}.
 
     For [digest], its size must match the size of the digest produced by the algorithm being used:
     - SHA-224: 28 bytes
     - SHA-256: 32 bytes
     - SHA-384: 48 bytes
     - SHA-512: 64 bytes
+    - BLAKE2b: <= 64 bytes
+    - BLAKE2s: <= 32 bytes
 
     {b The {{!SharedDefs.HashDefs.deprecated_alg}legacy algorithms} (marked [deprecated]) should NOT be used for cryptographic purposes. }
     For these, the size of the digest is:
@@ -163,10 +169,21 @@ Message authentication codes *)
 *)
 
 module HMAC : sig
-  val is_supported_alg : HashDefs.alg -> bool
-  val mac : HashDefs.alg -> bytes -> bytes -> bytes -> unit
+  val is_supported_alg : alg:HashDefs.alg -> bool
+  (** [is_supported_alg alg] returns true if the hashing algorithm [alg] is supported
+      in the agile HMAC interface. *)
+
+  val mac : alg:HashDefs.alg -> key:bytes -> msg:bytes -> tag:bytes -> unit
+  (** [mac alg key msg tag] computes the HMAC of [msg] based on hashing algorithm [alg]
+      using key [key] and writes the result in [tag] *)
 end
-(** Agile, multiplexing interface for HMAC *)
+(** Agile, multiplexing interface for HMAC
+
+The hashing algorithms currently supported are the same as for the {{!EverCrypt.Hash}agile hashing interface}:
+    - SHA-2 (SHA-224, SHA-256, SHA-384, SHA-512)
+    - BLAKE2 (BLAKE2b, BLAKE2s)
+*)
+
 
 (** Non-agile, multiplexing interfaces for each version of HMAC are also available. *)
 
@@ -186,7 +203,7 @@ module Poly1305 : MAC
 
 
 (** {1 Key derivation} *)
-(** {2 HKDF}
+(** {2:hkdf HKDF}
     HMAC-based key derivation function
 
     Portable HKDF implementations. They can use optimised assembly implementations for the
@@ -198,7 +215,10 @@ module HKDF : sig
   val extract : alg:HashDefs.alg -> salt:bytes -> ikm:bytes -> prk:bytes -> unit
   val expand : alg:HashDefs.alg -> prk:bytes -> info:bytes -> okm:bytes -> unit
 end
-(** Agile, multiplexing interface for HKDF *)
+(** Agile, multiplexing interface for HKDF
+
+    Supports the same hashing algorithms as {!EverCrypt.HMAC}.
+*)
 
 module HKDF_SHA2_256 : HKDF
 (** Multiplexing interface for HKDF using SHA2-256 *)

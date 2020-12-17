@@ -160,6 +160,18 @@ module HMAC_SHA2_512 : MAC =
     let mac = Hacl_HMAC.hacl_HMAC_compute_sha2_512
 end)
 
+module HMAC_BLAKE2b : MAC =
+  Make_HMAC (struct
+    let hash_alg = HashDefs.BLAKE2b
+    let mac = Hacl_HMAC.hacl_HMAC_compute_blake2b_32
+end)
+
+module HMAC_BLAKE2s : MAC =
+  Make_HMAC (struct
+    let hash_alg = HashDefs.BLAKE2s
+    let mac = Hacl_HMAC.hacl_HMAC_compute_blake2s_32
+end)
+
 module Poly1305_32 : MAC =
   Make_Poly1305 (struct
     let reqs = []
@@ -178,6 +190,20 @@ module HKDF_SHA2_512 : HKDF =
     let hash_alg = HashDefs.SHA2_512
     let expand = Hacl_HKDF.hacl_HKDF_expand_sha2_512
     let extract = Hacl_HKDF.hacl_HKDF_extract_sha2_512
+  end)
+
+module HKDF_BLAKE2b : HKDF =
+  Make_HKDF (struct
+    let hash_alg = HashDefs.BLAKE2b
+    let expand = Hacl_HKDF.hacl_HKDF_expand_blake2b_32
+    let extract = Hacl_HKDF.hacl_HKDF_extract_blake2b_32
+  end)
+
+module HKDF_BLAKE2s : HKDF =
+  Make_HKDF (struct
+    let hash_alg = HashDefs.BLAKE2s
+    let expand = Hacl_HKDF.hacl_HKDF_expand_blake2s_32
+    let extract = Hacl_HKDF.hacl_HKDF_extract_blake2s_32
   end)
 
 module NaCl = struct

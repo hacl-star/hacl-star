@@ -204,7 +204,7 @@ end
     any size. When calling these functions, it will correspond to the size of the [digest] buffer.
 *)
 
-(** {2 BLAKE2}
+(** {2:blake2 BLAKE2}
     The BLAKE2 hash function has 2 variants:
     - BLAKE2b, optimised for 64-bit architectures
     - BLAKE2s, optimised for 8- to 32-bit architectures
@@ -256,6 +256,13 @@ module HMAC_SHA2_384 : MAC
 
 module HMAC_SHA2_512 : MAC
 (** Portable C implementation of HMAC-SHA-512 *)
+
+module HMAC_BLAKE2b : MAC
+(** Portable C implementation of HMAC-BLAKE2b *)
+
+module HMAC_BLAKE2s : MAC
+(** Portable C implementation of HMAC-BLAKE2s *)
+
 
 (** {2 Poly1305} *)
 
@@ -404,7 +411,7 @@ end
     HMAC-based key derivation function
 
     Portable implementations of HKDF.
-    {{!EverCrypt.HKDF} Agile and multiplexing interfaces} are also available.
+    {{!EverCrypt.hkdf} Agile and multiplexing interfaces} are also available.
 *)
 
 module HKDF_SHA2_256 : HKDF
@@ -412,6 +419,12 @@ module HKDF_SHA2_256 : HKDF
 
 module HKDF_SHA2_512 : HKDF
 (** Portable C implementation of HKDF using SHA2-512 *)
+
+module HKDF_BLAKE2b : HKDF
+(** Portable C implementation of HKDF using BLAKE2b *)
+
+module HKDF_BLAKE2s : HKDF
+(** Portable C implementation of HKDF using BLAKE2s *)
 
 (** {1 Randomness (not verified)} *)
 
