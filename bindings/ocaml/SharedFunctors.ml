@@ -86,6 +86,7 @@ module Make_EdDSA_generic (C: Buffer)
   end)
 = struct
   type bytes = C.t
+  let max_size_t = pow2 32
   let secret_to_public ~sk ~pk =
     (* Hacl.Ed25519.secret_to_public *)
     assert (C.size pk = 32);
@@ -118,25 +119,37 @@ module Make_EdDSA_generic (C: Buffer)
     Impl.sign_expanded (C.ctypes_buf signature) (C.ctypes_buf ks) (C.size_uint32 pt) (C.ctypes_buf pt)
 end
 
-type hash_alg_or_digest_len =
-  | Alg of HashDefs.alg
-  | Len of int
+(* HashDefs only defines algorithms that are included in the EverCrypt agile hashing interface.
+   In addition to these, HACL* also includes SHA-3. We  extend the `hash_alg` type so we can
+   use the same functor for all hash functions. *)
+type all_hash_alg =
+  | Agile of HashDefs.alg
+  | SHA3_224
+  | SHA3_256
+  | SHA3_384
+  | SHA3_512
 
 module Make_HashFunction_generic (C: Buffer)
     (Impl : sig
-       val hash_alg : hash_alg_or_digest_len
+       val hash_alg : all_hash_alg
        val hash : C.buf -> uint32 -> C.buf -> unit
      end)
 = struct
   type bytes = C.t
+  let digest_len = function
+    | SHA3_224 -> 28
+    | SHA3_256 -> 32
+    | SHA3_384 -> 48
+    | SHA3_512 -> 64
+    | Agile alg -> HashDefs.digest_len alg
+  let check_max_input_len alg len =
+    match alg with
+    | Agile alg -> HashDefs.check_max_input_len alg len
+    | _ -> ()
   let hash ~pt ~digest =
-    HashDefs.check_max_input_len (C.size pt);
+    check_max_input_len Impl.hash_alg (C.size pt);
+    assert (C.size digest = digest_len Impl.hash_alg);
     assert (C.disjoint pt digest);
-    (match Impl.hash_alg with
-    | Alg alg ->
-        HashDefs.check_digest_len alg (C.size digest)
-    | Len len ->
-        assert (len = C.size digest));
     Impl.hash (C.ctypes_buf pt) (C.size_uint32 pt) (C.ctypes_buf digest)
 end
 
@@ -194,7 +207,7 @@ module Make_HKDF_generic (C: Buffer)
     assert (C.size okm <= 255 * HashDefs.digest_len Impl.hash_alg);
     assert (C.disjoint okm prk);
     assert (HashDefs.digest_len Impl.hash_alg <= C.size prk);
-    HashDefs.(check_max_input_len (digest_len Impl.hash_alg + block_len Impl.hash_alg + C.size info + 1));
+    HashDefs.(check_max_input_len Impl.hash_alg (digest_len Impl.hash_alg + block_len Impl.hash_alg + C.size info + 1));
     HashDefs.check_key_len Impl.hash_alg (C.size prk);
     Impl.expand (C.ctypes_buf okm) (C.ctypes_buf prk) (C.size_uint32 prk) (C.ctypes_buf info) (C.size_uint32 info) (C.size_uint32 okm)
 end
@@ -245,13 +258,13 @@ module Make_Blake2b_generic (C: Buffer)
   type bytes = C.t
   let hash ?key:(key=C.empty) ~pt ~digest =
     check_reqs Impl.reqs;
-    (* Spec.Blake2.blake2b *)
+    (* specs/Spec.Blake2.blake2b *)
     assert (C.size digest > 0 && C.size digest <= 64);
     assert (C.size key <= 64);
     if C.size key = 0 then
-      assert Z.(of_int (C.size pt) < Z.pow (Z.of_int 2) 128)
+      assert Z.(of_int (C.size pt) < pow2 128)
     else
-      assert Z.(of_int (C.size pt) + ~$128 < Z.pow (Z.of_int 2) 128);
+      assert Z.(of_int (C.size pt) + ~$128 < pow2 128);
     assert (C.disjoint key pt);
     assert (C.disjoint key digest);
     assert (C.disjoint pt digest);
@@ -267,13 +280,13 @@ module Make_Blake2s_generic (C: Buffer)
   type bytes = C.t
   let hash ?(key=C.empty) ~pt ~digest =
     check_reqs Impl.reqs;
-    (* Spec.Blake2.blake2s *)
+    (* specs/Spec.Blake2.blake2s *)
     assert (C.size digest > 0 && C.size digest <= 32);
     assert (C.size key <= 32);
     if C.size key = 0 then
-      assert Z.(of_int (C.size pt) < Z.pow (Z.of_int 2) 64)
+      assert Z.(of_int (C.size pt) < pow2 64)
     else
-      assert Z.(of_int (C.size pt) + ~$64 < Z.pow (Z.of_int 2) 64);
+      assert Z.(of_int (C.size pt) + ~$64 < pow2 64);
     assert (C.disjoint key pt);
     assert (C.disjoint key digest);
     assert (C.disjoint pt digest);

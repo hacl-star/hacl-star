@@ -135,15 +135,15 @@ module Hash = struct
     Gc.finalise everCrypt_Hash_Incremental_free st;
     (alg, incr_len, st)
   let update ~st:(alg, incr_len, t) ~pt =
-    check_max_input_len (C.size pt);
+    check_max_input_len alg (C.size pt);
     incr_len := Z.add !incr_len (Z.of_int (C.size pt));
-    assert (Z.lt !incr_len (incremental_input_len alg));
+    assert (Z.lt !incr_len (max_input_len alg));
     everCrypt_Hash_Incremental_update t (C.ctypes_buf pt) (C.size_uint32 pt)
   let finish ~st:(alg, _, t) ~digest =
     assert (C.size digest = digest_len alg);
     everCrypt_Hash_Incremental_finish t (C.ctypes_buf digest)
   let hash ~alg ~pt ~digest =
-    check_max_input_len (C.size pt);
+    check_max_input_len alg (C.size pt);
     assert (C.size digest = digest_len alg);
     assert (C.disjoint digest pt);
     everCrypt_Hash_hash (alg_definition alg) (C.ctypes_buf digest) (C.ctypes_buf pt) (C.size_uint32 pt)
@@ -151,13 +151,13 @@ end
 
 module SHA2_224 : HashFunction =
   Make_HashFunction (struct
-    let hash_alg = Alg HashDefs.SHA2_224
+    let hash_alg = Agile HashDefs.SHA2_224
     let hash = EverCrypt_Hash.everCrypt_Hash_hash_224
 end)
 
 module SHA2_256 : HashFunction =
   Make_HashFunction (struct
-    let hash_alg = Alg HashDefs.SHA2_256
+    let hash_alg = Agile HashDefs.SHA2_256
     let hash = EverCrypt_Hash.everCrypt_Hash_hash_256
 end)
 
@@ -213,7 +213,7 @@ module HKDF = struct
     assert (C.size okm <= 255 * HashDefs.digest_len alg);
     assert (C.disjoint okm prk);
     assert (HashDefs.digest_len alg <= C.size prk);
-    HashDefs.(check_max_input_len (digest_len alg + block_len alg + C.size info + 1));
+    HashDefs.(check_max_input_len alg (digest_len alg + block_len alg + C.size info + 1));
     HashDefs.check_key_len alg (C.size prk);
     everCrypt_HKDF_expand (HashDefs.alg_definition alg) (C.ctypes_buf okm) (C.ctypes_buf prk) (C.size_uint32 prk) (C.ctypes_buf info) (C.size_uint32 info) (C.size_uint32 okm)
 end

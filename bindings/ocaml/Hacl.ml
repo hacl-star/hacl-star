@@ -66,49 +66,49 @@ module Ed25519 : EdDSA =
 
 module SHA2_224 : HashFunction =
   Make_HashFunction (struct
-    let hash_alg = Alg HashDefs.SHA2_224
+    let hash_alg = Agile HashDefs.SHA2_224
     let hash = Hacl_Hash.hacl_Hash_SHA2_hash_224
 end)
 
 module SHA2_256 : HashFunction =
   Make_HashFunction (struct
-    let hash_alg = Alg HashDefs.SHA2_256
+    let hash_alg = Agile HashDefs.SHA2_256
     let hash = Hacl_Hash.hacl_Hash_SHA2_hash_256
 end)
 
 module SHA2_384 : HashFunction =
   Make_HashFunction (struct
-    let hash_alg = Alg HashDefs.SHA2_384
+    let hash_alg = Agile HashDefs.SHA2_384
     let hash = Hacl_Hash.hacl_Hash_SHA2_hash_384
 end)
 
 module SHA2_512 : HashFunction =
   Make_HashFunction (struct
-    let hash_alg = Alg HashDefs.SHA2_512
+    let hash_alg = Agile HashDefs.SHA2_512
     let hash = Hacl_Hash.hacl_Hash_SHA2_hash_512
 end)
 
 module SHA3_224 : HashFunction =
   Make_HashFunction (struct
-    let hash_alg = Len 28
+    let hash_alg = SHA3_224
     let hash input input_len output = Hacl_SHA3.hacl_SHA3_sha3_224 input_len input output
 end)
 
 module SHA3_256 : HashFunction =
   Make_HashFunction (struct
-    let hash_alg = Len 32
+    let hash_alg = SHA3_256
     let hash input input_len output = Hacl_SHA3.hacl_SHA3_sha3_256 input_len input output
 end)
 
 module SHA3_384 : HashFunction =
   Make_HashFunction (struct
-    let hash_alg = Len 48
+    let hash_alg = SHA3_384
     let hash input input_len output = Hacl_SHA3.hacl_SHA3_sha3_384 input_len input output
 end)
 
 module SHA3_512 : HashFunction =
   Make_HashFunction (struct
-    let hash_alg = Len 64
+    let hash_alg = SHA3_512
     let hash input input_len output = Hacl_SHA3.hacl_SHA3_sha3_512 input_len input output
 end)
 
@@ -132,13 +132,13 @@ end
 
 module SHA1 : HashFunction =
   Make_HashFunction (struct
-    let hash_alg = Alg HashDefs.(Legacy SHA1)
+    let hash_alg = Agile HashDefs.(Legacy SHA1)
     let hash = Hacl_Hash.hacl_Hash_SHA1_legacy_hash
 end) [@@deprecated]
 
 module MD5 : HashFunction =
   Make_HashFunction (struct
-    let hash_alg = Alg HashDefs.(Legacy MD5)
+    let hash_alg = Agile HashDefs.(Legacy MD5)
     let hash = Hacl_Hash.hacl_Hash_MD5_legacy_hash
 end) [@@deprecated]
 
