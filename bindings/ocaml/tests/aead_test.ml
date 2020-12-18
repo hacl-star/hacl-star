@@ -1,10 +1,11 @@
 open EverCrypt.Error
 open AutoConfig2
 
+open SharedDefs
 open Test_utils
 
 type 'a aead_test =
-  { alg: EverCrypt.AEAD.alg;
+  { alg: AEADDefs.alg;
     key_len: int; msg_len: int; iv_len: int ; ad_len: int; tag_len: int;
     test_key: 'a; test_iv: 'a; test_ad: 'a;
     test_pt: 'a; test_ct: 'a; test_tag: 'a
@@ -12,7 +13,7 @@ type 'a aead_test =
 
 (* TODO: add tests for AES128_GCM, AES256_GCM *)
 let chacha20poly1305_test =
-  { alg = EverCrypt.AEAD.CHACHA20_POLY1305; key_len = 32; msg_len = 114; iv_len = 12; ad_len = 12; tag_len = 16;
+  { alg = AEADDefs.CHACHA20_POLY1305; key_len = 32; msg_len = 114; iv_len = 12; ad_len = 12; tag_len = 16;
     test_key = Bytes.of_string "\x80\x81\x82\x83\x84\x85\x86\x87\x88\x89\x8a\x8b\x8c\x8d\x8e\x8f\x90\x91\x92\x93\x94\x95\x96\x97\x98\x99\x9a\x9b\x9c\x9d\x9e\x9f";
     test_iv = Bytes.of_string "\x07\x00\x00\x00\x40\x41\x42\x43\x44\x45\x46\x47";
     test_ad = Bytes.of_string "\x50\x51\x52\x53\xc0\xc1\xc2\xc3\xc4\xc5\xc6\xc7";

@@ -49,33 +49,11 @@ let at_exit_full_major = lazy (at_exit Gc.full_major)
 
 module AEAD = struct
   open Error
-  open Hacl_Spec
+  open SharedDefs.AEADDefs
   open EverCrypt_AEAD
 
-  type alg =
-    | AES128_GCM
-    | AES256_GCM
-    | CHACHA20_POLY1305
   type t = alg * (everCrypt_AEAD_state_s ptr) ptr
-  let key_length = function
-    | AES128_GCM -> 16
-    | AES256_GCM -> 32
-    | CHACHA20_POLY1305 -> 32
-  let tag_length = function
-    | AES128_GCM
-    | AES256_GCM
-    | CHACHA20_POLY1305 -> 16
-  let check_iv_length len = function
-    | AES128_GCM
-    | AES256_GCM -> len > 0
-    | CHACHA20_POLY1305 -> len = 12
-  let check_sizes alg iv tag =
-    assert (check_iv_length (C.size iv) alg);
-    assert (C.size tag = tag_length alg)
-  let alg_definition = function
-    | AES128_GCM -> spec_Agile_AEAD_alg_Spec_Agile_AEAD_AES128_GCM
-    | AES256_GCM -> spec_Agile_AEAD_alg_Spec_Agile_AEAD_AES256_GCM
-    | CHACHA20_POLY1305 -> spec_Agile_AEAD_alg_Spec_Agile_AEAD_CHACHA20_POLY1305
+
   let init ~alg ~key : t result =
     Lazy.force at_exit_full_major;
     assert (C.size key = key_length alg);
@@ -87,9 +65,11 @@ module AEAD = struct
     match UInt8.to_int (everCrypt_AEAD_create_in (alg_definition alg) st (C.ctypes_buf key)) with
     | 0 -> Success (alg, st)
     | n -> error n
+
   let encrypt ~st:(alg, st) ~iv ~ad ~pt ~ct ~tag : unit result =
-    (* EverCrypt.AEAD.encrypt_pre *)
-    check_sizes alg iv tag;
+    (* providers/EverCrypt.AEAD.encrypt_pre *)
+    check_sizes ~alg ~iv_len:(C.size iv) ~tag_len:(C.size tag)
+      ~ad_len:(C.size ad)~pt_len:(C.size pt) ~ct_len:(C.size ct);
     assert (C.disjoint ct tag);
     assert (C.disjoint iv ct);
     assert (C.disjoint iv tag);
@@ -100,9 +80,11 @@ module AEAD = struct
     get_result (everCrypt_AEAD_encrypt (!@st)
                   (C.ctypes_buf iv) (C.size_uint32 iv) (C.ctypes_buf ad) (C.size_uint32 ad)
                   (C.ctypes_buf pt) (C.size_uint32 pt) (C.ctypes_buf ct) (C.ctypes_buf tag))
+
   let decrypt ~st:(alg, st) ~iv ~ad ~ct ~tag ~pt : unit result =
     (* EverCrypt.AEAD.decrypt_st *)
-    check_sizes alg iv tag;
+    check_sizes ~alg ~iv_len:(C.size iv) ~tag_len:(C.size tag)
+      ~ad_len:(C.size ad)~pt_len:(C.size pt) ~ct_len:(C.size ct);
     assert (C.disjoint tag pt);
     assert (C.disjoint tag ct);
     assert (C.disjoint tag ad);

@@ -28,12 +28,8 @@ end
 
 module AEAD : sig
   type t
-  type alg =
-    | AES128_GCM
-    | AES256_GCM
-    | CHACHA20_POLY1305
 
-  val init : alg:alg -> key:bytes -> t Error.result
+  val init : alg:AEADDefs.alg -> key:bytes -> t Error.result
   (** [init alg key] tries to allocate the internal state for algorithm [alg] with [key]
       and returns a {!t} if successful or an {!Error.error_code} otherwise. *)
 

@@ -13,14 +13,13 @@ module Make_Chacha20_Poly1305_generic (C: Buffer)
      end)
 = struct
   type bytes = C.t
-  let check_sizes key iv tag =
-    assert (C.size key = 32);
-    assert (C.size iv = 12);
-    assert (C.size tag = 16)
+  open AEADDefs
+
   let encrypt ~key ~iv ~ad ~pt ~ct ~tag =
     check_reqs Impl.reqs;
-    (* Hacl.Impl.Chacha20Poly1305.aead_encrypt_st *)
-    check_sizes key iv tag;
+    (* code/chacha20poly1305/Hacl.Impl.Chacha20Poly1305.aead_encrypt_st *)
+    check_sizes ~alg:CHACHA20_POLY1305 ~iv_len:(C.size iv) ~tag_len:(C.size tag)
+      ~ad_len:(C.size ad)~pt_len:(C.size pt) ~ct_len:(C.size ct);
     assert (C.disjoint key ct);
     assert (C.disjoint iv ct);
     assert (C.disjoint key tag);
@@ -29,10 +28,12 @@ module Make_Chacha20_Poly1305_generic (C: Buffer)
     assert (C.disjoint ad ct);
     Impl.encrypt (C.ctypes_buf key) (C.ctypes_buf iv) (C.size_uint32 ad) (C.ctypes_buf ad)
       (C.size_uint32 pt) (C.ctypes_buf pt) (C.ctypes_buf ct) (C.ctypes_buf tag)
+
   let decrypt ~key ~iv ~ad ~ct ~tag ~pt =
     check_reqs Impl.reqs;
-    (* Hacl.Impl.Chacha20Poly1305.aead_decrypt_st *)
-    check_sizes key iv tag;
+    (* code/chacha20poly1305/Hacl.Impl.Chacha20Poly1305.aead_decrypt_st *)
+    check_sizes ~alg:CHACHA20_POLY1305 ~iv_len:(C.size iv) ~tag_len:(C.size tag)
+      ~ad_len:(C.size ad)~pt_len:(C.size pt) ~ct_len:(C.size ct);
     let result = Impl.decrypt (C.ctypes_buf key) (C.ctypes_buf iv) (C.size_uint32 ad) (C.ctypes_buf ad)
         (C.size_uint32 pt) (C.ctypes_buf pt) (C.ctypes_buf ct) (C.ctypes_buf tag)
     in

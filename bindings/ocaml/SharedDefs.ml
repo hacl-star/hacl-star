@@ -48,6 +48,47 @@ module Hacl_Spec = Hacl_Spec_bindings.Bindings(Hacl_Spec_stubs)
 
 let max_size_t = Z.of_string "4294967296" (* 2^32 *)
 
+let pow2 n = Z.pow (Z.of_int 2) n
+
+module AEADDefs = struct
+  open Hacl_Spec
+  type alg =
+    | AES128_GCM
+    | AES256_GCM
+    | CHACHA20_POLY1305
+  let alg_definition = function
+    | AES128_GCM -> spec_Agile_AEAD_alg_Spec_Agile_AEAD_AES128_GCM
+    | AES256_GCM -> spec_Agile_AEAD_alg_Spec_Agile_AEAD_AES256_GCM
+    | CHACHA20_POLY1305 -> spec_Agile_AEAD_alg_Spec_Agile_AEAD_CHACHA20_POLY1305
+  let key_length = function
+    (* specs/Spec.Agile.AEAD.key_length *)
+    | AES128_GCM -> 16
+    | AES256_GCM -> 32
+    | CHACHA20_POLY1305 -> 32
+  let tag_length = function
+    (* specs/Spec.Agile.AEAD.tag_length *)
+    | AES128_GCM
+    | AES256_GCM
+    | CHACHA20_POLY1305 -> 16
+  let check_iv_length len = function
+    (* specs/Spec.Agile.AEAD.iv_length *)
+    | AES128_GCM
+    | AES256_GCM -> len > 0 && Z.((of_int 8) * (of_int len) < pow2 64)
+    | CHACHA20_POLY1305 -> len = 12
+  let check_max_pt_length len = function
+    (* specs/Spec.Agile.AEAD.max_length *)
+    | AES128_GCM
+    | AES256_GCM -> Z.(of_int len < pow2 32)
+    | CHACHA20_POLY1305 -> Z.(of_int len < pow2 32 - of_int 16)
+  let check_sizes ~alg ~iv_len ~tag_len ~ad_len ~pt_len ~ct_len =
+    (* providers/EverCrypt.AEAD.encrypt_st *)
+    assert (check_iv_length iv_len alg);
+    assert (tag_len = tag_length alg);
+    assert (check_max_pt_length pt_len alg);
+    assert Z.(of_int ad_len <= pow2 31);
+    assert (pt_len = ct_len)
+end
+
 module HashDefs = struct
   open Hacl_Spec
   type deprecated_alg =
