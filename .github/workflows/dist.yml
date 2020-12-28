@@ -7,22 +7,25 @@ on:
     branches: [ master ]
   workflow_dispatch:
 
-defaults:
-  run:
-    shell: bash
-
 jobs:
-  dist-ci:
+  dist-ci-nix:
     strategy:
       fail-fast: false
       matrix:
         os:
           - macos-latest
           - ubuntu-latest
-          - windows-latest
     runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v2
       - name: Run CI script
         run: .ci/script.sh
+
+  dist-ci-win:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run CI script
+        run: .ci/script.bat
