@@ -1685,6 +1685,184 @@ static void point_add(uint64_t *p, uint64_t *q, uint64_t *result, uint64_t *temp
   memcpy(result + (uint32_t)8U, z3_out1, (uint32_t)4U * sizeof (uint64_t));
 }
 
+static uint64_t pointAffineIsNotZero(uint64_t *p)
+{
+  uint64_t *x = p;
+  uint64_t *y = p + (uint32_t)4U;
+  uint64_t a00 = x[0U];
+  uint64_t a10 = x[1U];
+  uint64_t a20 = x[2U];
+  uint64_t a30 = x[3U];
+  uint64_t r00 = FStar_UInt64_eq_mask(a00, (uint64_t)0U);
+  uint64_t r10 = FStar_UInt64_eq_mask(a10, (uint64_t)0U);
+  uint64_t r20 = FStar_UInt64_eq_mask(a20, (uint64_t)0U);
+  uint64_t r30 = FStar_UInt64_eq_mask(a30, (uint64_t)0U);
+  uint64_t r010 = r00 & r10;
+  uint64_t r230 = r20 & r30;
+  uint64_t xZero = r010 & r230;
+  uint64_t a0 = y[0U];
+  uint64_t a1 = y[1U];
+  uint64_t a2 = y[2U];
+  uint64_t a3 = y[3U];
+  uint64_t r0 = FStar_UInt64_eq_mask(a0, (uint64_t)0U);
+  uint64_t r1 = FStar_UInt64_eq_mask(a1, (uint64_t)0U);
+  uint64_t r2 = FStar_UInt64_eq_mask(a2, (uint64_t)0U);
+  uint64_t r3 = FStar_UInt64_eq_mask(a3, (uint64_t)0U);
+  uint64_t r01 = r0 & r1;
+  uint64_t r23 = r2 & r3;
+  uint64_t yZero = r01 & r23;
+  return xZero & yZero;
+}
+
+static void cmovznz_one_mm(uint64_t *out, uint64_t mask)
+{
+  uint64_t out_0 = out[0U];
+  uint64_t out_1 = out[1U];
+  uint64_t out_2 = out[2U];
+  uint64_t out_3 = out[3U];
+  uint64_t x_0 = (uint64_t)1U;
+  uint64_t x_1 = (uint64_t)18446744069414584320U;
+  uint64_t x_2 = (uint64_t)18446744073709551615U;
+  uint64_t x_3 = (uint64_t)4294967294U;
+  uint64_t r_0 = out_0 ^ (mask & (out_0 ^ x_0));
+  uint64_t r_1 = out_1 ^ (mask & (out_1 ^ x_1));
+  uint64_t r_2 = out_2 ^ (mask & (out_2 ^ x_2));
+  uint64_t r_3 = out_3 ^ (mask & (out_3 ^ x_3));
+  out[0U] = r_0;
+  out[1U] = r_1;
+  out[2U] = r_2;
+  out[3U] = r_3;
+}
+
+static void
+copy_point_conditional_affine_to_result(uint64_t *out, uint64_t *q, uint64_t *maskPoint)
+{
+  uint64_t *pZ = maskPoint + (uint32_t)8U;
+  uint64_t a0 = pZ[0U];
+  uint64_t a1 = pZ[1U];
+  uint64_t a2 = pZ[2U];
+  uint64_t a3 = pZ[3U];
+  uint64_t r0 = FStar_UInt64_eq_mask(a0, (uint64_t)0U);
+  uint64_t r1 = FStar_UInt64_eq_mask(a1, (uint64_t)0U);
+  uint64_t r2 = FStar_UInt64_eq_mask(a2, (uint64_t)0U);
+  uint64_t r3 = FStar_UInt64_eq_mask(a3, (uint64_t)0U);
+  uint64_t r01 = r0 & r1;
+  uint64_t r23 = r2 & r3;
+  uint64_t mask = r01 & r23;
+  uint64_t *xOut = out;
+  uint64_t *yOut = out + (uint32_t)4U;
+  uint64_t *zOut = out + (uint32_t)8U;
+  uint64_t *qX = q;
+  uint64_t *qY = q + (uint32_t)4U;
+  uint64_t out_0 = xOut[0U];
+  uint64_t out_10 = xOut[1U];
+  uint64_t out_20 = xOut[2U];
+  uint64_t out_30 = xOut[3U];
+  uint64_t x_00 = qX[0U];
+  uint64_t x_10 = qX[1U];
+  uint64_t x_20 = qX[2U];
+  uint64_t x_30 = qX[3U];
+  uint64_t r_00 = out_0 ^ (mask & (out_0 ^ x_00));
+  uint64_t r_10 = out_10 ^ (mask & (out_10 ^ x_10));
+  uint64_t r_20 = out_20 ^ (mask & (out_20 ^ x_20));
+  uint64_t r_30 = out_30 ^ (mask & (out_30 ^ x_30));
+  xOut[0U] = r_00;
+  xOut[1U] = r_10;
+  xOut[2U] = r_20;
+  xOut[3U] = r_30;
+  uint64_t out_00 = yOut[0U];
+  uint64_t out_1 = yOut[1U];
+  uint64_t out_2 = yOut[2U];
+  uint64_t out_3 = yOut[3U];
+  uint64_t x_0 = qY[0U];
+  uint64_t x_1 = qY[1U];
+  uint64_t x_2 = qY[2U];
+  uint64_t x_3 = qY[3U];
+  uint64_t r_0 = out_00 ^ (mask & (out_00 ^ x_0));
+  uint64_t r_1 = out_1 ^ (mask & (out_1 ^ x_1));
+  uint64_t r_2 = out_2 ^ (mask & (out_2 ^ x_2));
+  uint64_t r_3 = out_3 ^ (mask & (out_3 ^ x_3));
+  yOut[0U] = r_0;
+  yOut[1U] = r_1;
+  yOut[2U] = r_2;
+  yOut[3U] = r_3;
+  cmovznz_one_mm(zOut, mask);
+}
+
+static void
+copy_point_conditional0(uint64_t *result, uint64_t *x, uint64_t *p, uint64_t *maskPoint)
+{
+  uint64_t mask = pointAffineIsNotZero(maskPoint);
+  uint64_t *p_x = p;
+  uint64_t *p_y = p + (uint32_t)4U;
+  uint64_t *p_z = p + (uint32_t)8U;
+  uint64_t *x_x = x;
+  uint64_t *x_y = x + (uint32_t)4U;
+  uint64_t *x_z = x + (uint32_t)8U;
+  uint64_t *result_x = result;
+  uint64_t *result_y = result + (uint32_t)4U;
+  uint64_t *result_z = result + (uint32_t)8U;
+  cmovznz4(mask, x_x, p_x, result_x);
+  cmovznz4(mask, x_y, p_y, result_y);
+  cmovznz4(mask, x_z, p_z, result_z);
+}
+
+static void point_add_mixed(uint64_t *p, uint64_t *q, uint64_t *result, uint64_t *tempBuffer)
+{
+  uint64_t *tempBuffer28 = tempBuffer;
+  uint64_t *tempBuffer16 = tempBuffer;
+  uint64_t *u1 = tempBuffer + (uint32_t)28U;
+  uint64_t *u2 = tempBuffer + (uint32_t)32U;
+  uint64_t *s1 = tempBuffer + (uint32_t)36U;
+  uint64_t *s2 = tempBuffer + (uint32_t)40U;
+  uint64_t *h = tempBuffer + (uint32_t)44U;
+  uint64_t *r = tempBuffer + (uint32_t)48U;
+  uint64_t *uh = tempBuffer + (uint32_t)52U;
+  uint64_t *hCube = tempBuffer + (uint32_t)56U;
+  uint64_t *pX = p;
+  uint64_t *pY = p + (uint32_t)4U;
+  uint64_t *pZ = p + (uint32_t)8U;
+  uint64_t *qX = q;
+  uint64_t *qY = q + (uint32_t)4U;
+  uint64_t *z1Square = tempBuffer16 + (uint32_t)4U;
+  uint64_t *z1Cube = tempBuffer16 + (uint32_t)12U;
+  montgomery_square_buffer(pZ, z1Square);
+  montgomery_multiplication_buffer(z1Square, pZ, z1Cube);
+  memcpy(u1, pX, (uint32_t)4U * sizeof (uint64_t));
+  montgomery_multiplication_buffer(z1Square, qX, u2);
+  memcpy(s1, pY, (uint32_t)4U * sizeof (uint64_t));
+  montgomery_multiplication_buffer(z1Cube, qY, s2);
+  uint64_t *temp = tempBuffer16;
+  p256_sub(u2, u1, h);
+  p256_sub(s2, s1, r);
+  montgomery_square_buffer(h, temp);
+  montgomery_multiplication_buffer(temp, u1, uh);
+  montgomery_multiplication_buffer(temp, h, hCube);
+  uint64_t *pZ0 = p + (uint32_t)8U;
+  uint64_t *tempBuffer161 = tempBuffer28;
+  uint64_t *pointOut = tempBuffer28 + (uint32_t)16U;
+  uint64_t *xOut = tempBuffer28 + (uint32_t)16U;
+  uint64_t *yOut = tempBuffer28 + (uint32_t)20U;
+  uint64_t *zOut = tempBuffer28 + (uint32_t)24U;
+  uint64_t *rSquare = tempBuffer161;
+  uint64_t *rH = tempBuffer161 + (uint32_t)4U;
+  uint64_t *twoUh = tempBuffer161 + (uint32_t)8U;
+  montgomery_square_buffer(r, rSquare);
+  p256_sub(rSquare, hCube, rH);
+  p256_add(uh, uh, twoUh);
+  p256_sub(rH, twoUh, xOut);
+  uint64_t *s1hCube = tempBuffer161;
+  uint64_t *u1hx3 = tempBuffer161 + (uint32_t)4U;
+  uint64_t *ru1hx3 = tempBuffer161 + (uint32_t)8U;
+  montgomery_multiplication_buffer(s1, hCube, s1hCube);
+  p256_sub(uh, xOut, u1hx3);
+  montgomery_multiplication_buffer(u1hx3, r, ru1hx3);
+  p256_sub(ru1hx3, s1hCube, yOut);
+  montgomery_multiplication_buffer(pZ0, h, zOut);
+  copy_point_conditional_affine_to_result(pointOut, q, p);
+  copy_point_conditional0(result, pointOut, p, q);
+}
+
 static void pointToDomain(uint64_t *p, uint64_t *result)
 {
   uint64_t *p_x = p;
@@ -2492,6 +2670,26 @@ static uint32_t getScalar(Lib_Buffer_buftype a, void *scalar, uint32_t i)
 }
 
 static void
+montgomery_ladder_step_radix(
+  Lib_Buffer_buftype buf_type,
+  uint64_t *p,
+  uint64_t *tempBuffer,
+  uint64_t *t,
+  void *scalar,
+  uint32_t i
+)
+{
+  uint32_t i1 = (uint32_t)63U - i;
+  uint32_t bits = getScalar(buf_type, scalar, i1);
+  uint64_t *pointToAdd = t + bits * (uint32_t)12U;
+  point_double(p, p, tempBuffer);
+  point_double(p, p, tempBuffer);
+  point_double(p, p, tempBuffer);
+  point_double(p, p, tempBuffer);
+  point_add_mixed(p, pointToAdd, p, tempBuffer);
+}
+
+static void
 scalarMultiplicationL(uint64_t *p, uint64_t *result, uint8_t *scalar, uint64_t *tempBuffer)
 {
   uint64_t *q = tempBuffer;
@@ -2950,5 +3148,18 @@ bool Hacl_P256_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar)
 uint32_t Hacl_P256_getScalar(Lib_Buffer_buftype a, void *scalar, uint32_t i)
 {
   return getScalar(a, scalar, i);
+}
+
+void
+Hacl_P256_montgomery_ladder_step_radix(
+  Lib_Buffer_buftype a,
+  uint64_t *b,
+  uint64_t *c,
+  uint64_t *d,
+  void *e,
+  uint32_t f
+)
+{
+  montgomery_ladder_step_radix(a, b, c, d, e, f);
 }
 

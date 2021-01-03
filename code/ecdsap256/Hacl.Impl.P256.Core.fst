@@ -440,6 +440,8 @@ let montgomery_ladder_step #buf_type r0 r1 tempBuffer scalar i =
     lemma_step i
 
 
+
+
 inline_for_extraction noextract
 val montgomery_ladder: #buf_type: buftype->  p: point -> q: point ->
   scalar: lbuffer_t buf_type uint8 (size 32) -> 
@@ -532,6 +534,25 @@ let getScalar #a scalar i =
   pop_frame();
   result
   
+
+
+let montgomery_ladder_step_radix #buf_type p tempBuffer t scalar i = 
+  let i = 63ul -. i in 
+  let bits: uint32 = getScalar scalar i in 
+
+  let pointToAdd = sub t (bits *. size 12) (size 8) in 
+  
+  point_double p p tempBuffer;
+  point_double p p tempBuffer;
+  point_double p p tempBuffer;
+  point_double p p tempBuffer;
+
+  
+  Hacl.Impl.P256.MixedPointAdd.point_add_mixed p pointToAdd p tempBuffer
+
+
+
+
 
 
 inline_for_extraction noextract

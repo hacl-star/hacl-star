@@ -60,6 +60,16 @@ bool Hacl_P256_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
 
 uint32_t Hacl_P256_getScalar(Lib_Buffer_buftype a, void *scalar, uint32_t i);
 
+void
+Hacl_P256_montgomery_ladder_step_radix(
+  Lib_Buffer_buftype a,
+  uint64_t *b,
+  uint64_t *c,
+  uint64_t *d,
+  void *e,
+  uint32_t f
+);
+
 
 #define __Hacl_P256_H_DEFINED
 #endif

@@ -86,21 +86,20 @@ bool test_nist()
 
 int main()
 {
-	printf("%s\n", "Pre-testing");
 
 
-	uint8_t * scalar = (uint8_t *) malloc (sizeof (uint8_t) * 32);
-	uint8_t * scalarNew = (uint8_t *) malloc (sizeof (uint8_t) * 64);
+	static uint8_t expectedResult[32] = {
+	0x46, 0xfc, 0x62, 0x10, 0x64, 0x20, 0xff, 0x01, 0x2e, 0x54, 0xa4, 0x34, 0xfb, 0xdd, 0x2d, 0x25, 0xcc, 0xc5, 0x85, 0x20, 0x60, 0x56, 0x1e, 0x68, 0x04, 0x0d, 0xd7, 0x77, 0x89, 0x97, 0xbd, 0x7b 
 
-	// scalar[1] = 1;
-
-	scalar[15] = 1;
+	};
 
 
-	brTu(scalar, scalarNew);
 
-	compare_and_print(32, scalar, scalar);
-	compare_and_print(33, scalarNew, scalarNew);
+	for (int i = 0; i< 64; i++) {
+	uint32_t test = Hacl_P256_getScalar(Lib_Buffer_MUT, expectedResult, i);
+	printf("%x", test);
+};
+
 
 
 	// if (test_nist())
