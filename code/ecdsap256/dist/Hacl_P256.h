@@ -60,7 +60,6 @@ bool Hacl_P256_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
 
 uint32_t Hacl_P256_getScalar(Lib_Buffer_buftype a, void *scalar, uint32_t i);
 
-void brTu(uint8_t *s, uint8_t *newScalar);
 
 #define __Hacl_P256_H_DEFINED
 #endif

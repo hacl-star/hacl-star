@@ -14,7 +14,17 @@ open Spec.P256.Definitions
 open Spec.P256.Lemmas
 
 
-(** This is unused *)
+
+inline_for_extraction noextract
+val cmovznz01: a: uint64 -> b: uint64 -> mask: uint64 {uint_v mask = 0 \/ uint_v mask = 1} -> 
+  Tot (r: uint64 {if uint_v mask = 0 then uint_v r = uint_v a else uint_v r = uint_v b})
+
+let cmovznz01 a b mask = 
+  let mask = (u64 0) -. mask in 
+  lemma_xor_copy_cond a b mask;
+  logxor a (logand mask (logxor a b))
+
+
 inline_for_extraction noextract
 val cmovznz: a: uint64 -> b: uint64 -> mask: uint64 {uint_v mask = 0 \/ uint_v mask = pow2 64 - 1} -> 
   Tot (r: uint64 {if uint_v mask = 0 then uint_v r = uint_v a else uint_v r = uint_v b})

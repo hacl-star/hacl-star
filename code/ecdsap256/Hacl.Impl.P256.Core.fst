@@ -516,17 +516,19 @@ let getScalar #a scalar i =
   push_frame(); 
 
   let word = 
-    let half = logand i 0xful in 
-    let half = shift_right half 1ul in 
+    (* let half = logand i 0xful in  *)
+    let half = shift_right i 1ul in 
   to_u32(index scalar half) in 
 
   let open Hacl.Impl.P256.Q.PrimitivesMasking in 
-  let mask = to_u32 (cmovznz 0xf0 0x0f (logand i (u32 1)))  in  
+  let bitShift = logand i (u32 1) in 
 
-  let result:size_t = logand word mask in 
-  brTu scalar scalar;
+  let mask = to_u32 (cmovznz01 0xf0 0x0f bitShift) in  
+  let shiftMask = to_u32 (cmovznz01 0x4 0x0 bitShift) in
 
-
+  let result = logand word mask in 
+  let result = shift_right result shiftMask in 
+ 
   pop_frame();
   result
   

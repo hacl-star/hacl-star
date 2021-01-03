@@ -1160,209 +1160,6 @@ static void exponent(uint64_t *t, uint64_t *result, uint64_t *tempBuffer)
   montgomery_multiplication_buffer(r0, t, result);
 }
 
-static void cswap8(uint64_t *p1, uint64_t *p2, uint64_t bit)
-{
-  uint64_t mask = bit;
-  {
-    uint64_t dummy = mask & (p1[0U] ^ p2[0U]);
-    p1[0U] = p1[0U] ^ dummy;
-    p2[0U] = p2[0U] ^ dummy;
-  }
-  {
-    uint64_t dummy = mask & (p1[1U] ^ p2[1U]);
-    p1[1U] = p1[1U] ^ dummy;
-    p2[1U] = p2[1U] ^ dummy;
-  }
-  {
-    uint64_t dummy = mask & (p1[2U] ^ p2[2U]);
-    p1[2U] = p1[2U] ^ dummy;
-    p2[2U] = p2[2U] ^ dummy;
-  }
-  {
-    uint64_t dummy = mask & (p1[3U] ^ p2[3U]);
-    p1[3U] = p1[3U] ^ dummy;
-    p2[3U] = p2[3U] ^ dummy;
-  }
-  {
-    uint64_t dummy = mask & (p1[4U] ^ p2[4U]);
-    p1[4U] = p1[4U] ^ dummy;
-    p2[4U] = p2[4U] ^ dummy;
-  }
-  {
-    uint64_t dummy = mask & (p1[5U] ^ p2[5U]);
-    p1[5U] = p1[5U] ^ dummy;
-    p2[5U] = p2[5U] ^ dummy;
-  }
-  {
-    uint64_t dummy = mask & (p1[6U] ^ p2[6U]);
-    p1[6U] = p1[6U] ^ dummy;
-    p2[6U] = p2[6U] ^ dummy;
-  }
-  {
-    uint64_t dummy = mask & (p1[7U] ^ p2[7U]);
-    p1[7U] = p1[7U] ^ dummy;
-    p2[7U] = p2[7U] ^ dummy;
-  }
-}
-
-static void toUInt64Widefelem(uint8_t *i, uint64_t *o)
-{
-  uint64_t *o1 = o;
-  {
-    uint64_t *os = o1;
-    uint8_t *bj = i + (uint32_t)0U * (uint32_t)8U;
-    uint64_t u = load64_be(bj);
-    uint64_t r = u;
-    uint64_t x = r;
-    os[0U] = x;
-  }
-  {
-    uint64_t *os = o1;
-    uint8_t *bj = i + (uint32_t)1U * (uint32_t)8U;
-    uint64_t u = load64_be(bj);
-    uint64_t r = u;
-    uint64_t x = r;
-    os[1U] = x;
-  }
-  {
-    uint64_t *os = o1;
-    uint8_t *bj = i + (uint32_t)2U * (uint32_t)8U;
-    uint64_t u = load64_be(bj);
-    uint64_t r = u;
-    uint64_t x = r;
-    os[2U] = x;
-  }
-  {
-    uint64_t *os = o1;
-    uint8_t *bj = i + (uint32_t)3U * (uint32_t)8U;
-    uint64_t u = load64_be(bj);
-    uint64_t r = u;
-    uint64_t x = r;
-    os[3U] = x;
-  }
-  uint64_t zero = o1[0U];
-  uint64_t one = o1[1U];
-  uint64_t two = o1[2U];
-  uint64_t three = o1[3U];
-  o1[0U] = three;
-  o1[1U] = two;
-  o1[2U] = one;
-  o1[3U] = zero;
-}
-
-static void changeEndian5(uint64_t *i)
-{
-  uint64_t zero = i[0U];
-  uint64_t one = i[1U];
-  uint64_t two = i[2U];
-  uint64_t three = i[3U];
-  i[4U] = three;
-  i[5U] = two;
-  i[6U] = one;
-  i[7U] = zero;
-}
-
-static void toUInt8WideFelem(uint64_t *i, uint8_t *o)
-{
-  uint64_t *i1 = i + (uint32_t)4U;
-  changeEndian5(i);
-  uint8_t *o1 = o + (uint32_t)1U;
-  {
-    store64_be(o1 + (uint32_t)0U * (uint32_t)8U, i1[0U]);
-  }
-  {
-    store64_be(o1 + (uint32_t)1U * (uint32_t)8U, i1[1U]);
-  }
-  {
-    store64_be(o1 + (uint32_t)2U * (uint32_t)8U, i1[2U]);
-  }
-  {
-    store64_be(o1 + (uint32_t)3U * (uint32_t)8U, i1[3U]);
-  }
-}
-
-static void uploadOrder(uint64_t *a)
-{
-  a[0U] = (uint64_t)17562291160714782033U;
-  a[1U] = (uint64_t)13611842547513532036U;
-  a[2U] = (uint64_t)18446744073709551615U;
-  a[3U] = (uint64_t)18446744069414584320U;
-}
-
-static void uploadTwoOrder(uint64_t *a)
-{
-  a[0U] = (uint64_t)16677838247720012450U;
-  a[1U] = (uint64_t)8776941021317512457U;
-  a[2U] = (uint64_t)18446744073709551615U;
-  a[3U] = (uint64_t)18446744065119617025U;
-  a[4U] = (uint64_t)1U;
-}
-
-void brTu(uint8_t *s, uint8_t *newScalar)
-{
-  uint64_t bufferSAsUint64[8U] = { 0U };
-  toUInt64Widefelem(s, bufferSAsUint64);
-  uint64_t buffferWideOrderForMask[8U] = { 0U };
-  uploadOrder(buffferWideOrderForMask);
-  uint64_t *a00 = bufferSAsUint64;
-  uint64_t *a10 = bufferSAsUint64 + (uint32_t)4U;
-  uint64_t *b00 = buffferWideOrderForMask;
-  uint64_t *b10 = buffferWideOrderForMask + (uint32_t)4U;
-  uint64_t *c00 = buffferWideOrderForMask;
-  uint64_t *c10 = buffferWideOrderForMask + (uint32_t)4U;
-  uint64_t *r00 = c00;
-  uint64_t *r10 = c00 + (uint32_t)1U;
-  uint64_t *r20 = c00 + (uint32_t)2U;
-  uint64_t *r30 = c00 + (uint32_t)3U;
-  uint64_t cc00 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, a00[0U], b00[0U], r00);
-  uint64_t cc1 = Lib_IntTypes_Intrinsics_add_carry_u64(cc00, a00[1U], b00[1U], r10);
-  uint64_t cc2 = Lib_IntTypes_Intrinsics_add_carry_u64(cc1, a00[2U], b00[2U], r20);
-  uint64_t cc3 = Lib_IntTypes_Intrinsics_add_carry_u64(cc2, a00[3U], b00[3U], r30);
-  uint64_t carry0 = cc3;
-  uint64_t *r01 = c10;
-  uint64_t *r11 = c10 + (uint32_t)1U;
-  uint64_t *r21 = c10 + (uint32_t)2U;
-  uint64_t *r31 = c10 + (uint32_t)3U;
-  uint64_t cc4 = Lib_IntTypes_Intrinsics_add_carry_u64(carry0, a10[0U], b10[0U], r01);
-  uint64_t cc10 = Lib_IntTypes_Intrinsics_add_carry_u64(cc4, a10[1U], b10[1U], r11);
-  uint64_t cc20 = Lib_IntTypes_Intrinsics_add_carry_u64(cc10, a10[2U], b10[2U], r21);
-  uint64_t cc30 = Lib_IntTypes_Intrinsics_add_carry_u64(cc20, a10[3U], b10[3U], r31);
-  uint64_t carry1 = cc30;
-  uint64_t mask = (uint64_t)0xffffffffffffffffU + buffferWideOrderForMask[4U];
-  uint64_t bufferWideOrder[8U] = { 0U };
-  uploadOrder(bufferWideOrder);
-  uploadTwoOrder(buffferWideOrderForMask);
-  cswap8(bufferWideOrder, buffferWideOrderForMask, mask);
-  uint64_t *a0 = bufferSAsUint64;
-  uint64_t *a1 = bufferSAsUint64 + (uint32_t)4U;
-  uint64_t *b0 = bufferWideOrder;
-  uint64_t *b1 = bufferWideOrder + (uint32_t)4U;
-  uint64_t *c0 = bufferSAsUint64;
-  uint64_t *c1 = bufferSAsUint64 + (uint32_t)4U;
-  uint64_t *r02 = c0;
-  uint64_t *r12 = c0 + (uint32_t)1U;
-  uint64_t *r22 = c0 + (uint32_t)2U;
-  uint64_t *r32 = c0 + (uint32_t)3U;
-  uint64_t cc0 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, a0[0U], b0[0U], r02);
-  uint64_t cc11 = Lib_IntTypes_Intrinsics_add_carry_u64(cc0, a0[1U], b0[1U], r12);
-  uint64_t cc21 = Lib_IntTypes_Intrinsics_add_carry_u64(cc11, a0[2U], b0[2U], r22);
-  uint64_t cc31 = Lib_IntTypes_Intrinsics_add_carry_u64(cc21, a0[3U], b0[3U], r32);
-  uint64_t carry00 = cc31;
-  uint64_t *r0 = c1;
-  uint64_t *r1 = c1 + (uint32_t)1U;
-  uint64_t *r2 = c1 + (uint32_t)2U;
-  uint64_t *r3 = c1 + (uint32_t)3U;
-  uint64_t cc = Lib_IntTypes_Intrinsics_add_carry_u64(carry00, a1[0U], b1[0U], r0);
-  uint64_t cc12 = Lib_IntTypes_Intrinsics_add_carry_u64(cc, a1[1U], b1[1U], r1);
-  uint64_t cc22 = Lib_IntTypes_Intrinsics_add_carry_u64(cc12, a1[2U], b1[2U], r2);
-  uint64_t cc32 = Lib_IntTypes_Intrinsics_add_carry_u64(cc22, a1[3U], b1[3U], r3);
-  uint64_t carry10 = cc32;
-  uint8_t carry = (uint8_t)bufferSAsUint64[4U];
-  cswap8(bufferWideOrder, buffferWideOrderForMask, mask);
-  toUInt8WideFelem(bufferSAsUint64, newScalar);
-  newScalar[0U] = carry;
-}
-
 static void solinas_reduction_impl(uint64_t *i, uint64_t *o)
 {
   uint64_t tempBuffer[36U] = { 0U };
@@ -2653,24 +2450,23 @@ static void norm(uint64_t *p, uint64_t *resultPoint, uint64_t *tempBuffer)
 
 static uint32_t getScalar(Lib_Buffer_buftype a, void *scalar, uint32_t i)
 {
-  uint32_t half = i & (uint32_t)0xfU;
-  uint32_t half1 = half >> (uint32_t)1U;
+  uint32_t half = i >> (uint32_t)1U;
   uint8_t sw;
   switch (a)
   {
     case Lib_Buffer_MUT:
       {
-        sw = ((uint8_t *)scalar)[half1];
+        sw = ((uint8_t *)scalar)[half];
         break;
       }
     case Lib_Buffer_IMMUT:
       {
-        sw = ((uint8_t *)scalar)[half1];
+        sw = ((uint8_t *)scalar)[half];
         break;
       }
     case Lib_Buffer_CONST:
       {
-        sw = ((const uint8_t *)scalar)[half1];
+        sw = ((const uint8_t *)scalar)[half];
         break;
       }
     default:
@@ -2680,15 +2476,19 @@ static uint32_t getScalar(Lib_Buffer_buftype a, void *scalar, uint32_t i)
       }
   }
   uint32_t word = (uint32_t)sw;
+  uint32_t bitShift = i & (uint32_t)1U;
+  uint64_t mask10 = (uint64_t)0U - (uint64_t)bitShift;
   uint32_t
   mask =
     (uint32_t)((uint64_t)(krml_checked_int_t)0xf0
-    ^
-      ((uint64_t)(i & (uint32_t)1U)
-      & ((uint64_t)(krml_checked_int_t)0xf0 ^ (uint64_t)(krml_checked_int_t)0x0f)));
+    ^ (mask10 & ((uint64_t)(krml_checked_int_t)0xf0 ^ (uint64_t)(krml_checked_int_t)0x0f)));
+  uint64_t mask1 = (uint64_t)0U - (uint64_t)bitShift;
+  uint32_t
+  shiftMask =
+    (uint32_t)((uint64_t)(krml_checked_int_t)0x4
+    ^ (mask1 & ((uint64_t)(krml_checked_int_t)0x4 ^ (uint64_t)(krml_checked_int_t)0x0)));
   uint32_t result = word & mask;
-  brTu((uint8_t *)scalar, (uint8_t *)scalar);
-  return result;
+  return result >> shiftMask;
 }
 
 static void
