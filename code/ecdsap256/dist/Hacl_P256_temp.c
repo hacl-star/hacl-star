@@ -647,26 +647,33 @@ static void montgomery_multiplication_buffer_by_one(uint64_t *a, uint64_t *resul
 
 
 
-
-
-
-
-
-
+// #include <inttypes.h>
+// uint64_t t;
+// printf("%" PRIu64 "\n", t);
 
 
 static void fiat_secp256r1_addcarryx_u64(uint64_t *out1,
                                          fiat_secp256r1_uint1 *out2,
                                          fiat_secp256r1_uint1 arg1,
                                          uint64_t arg2, uint64_t arg3) {
-    fiat_secp256r1_uint128 x1;
-    uint64_t x2;
-    fiat_secp256r1_uint1 x3;
-    x1 = ((arg1 + (fiat_secp256r1_uint128)arg2) + arg3);
-    x2 = (uint64_t)(x1 & UINT64_C(0xffffffffffffffff));
-    x3 = (fiat_secp256r1_uint1)(x1 >> 64);
-    *out1 = x2;
-    *out2 = x3;
+    
+    
+    // fiat_secp256r1_uint1 arg1_ = arg1;
+    // uint64_t arg2_ = arg2;
+    // uint64_t arg3_ = arg3;
+
+
+
+    // fiat_secp256r1_uint128 x1;
+    // uint64_t x2;
+    // fiat_secp256r1_uint1 x3;
+    // x1 = ((arg1 + (fiat_secp256r1_uint128)arg2) + arg3);
+    // x2 = (uint64_t)(x1 & UINT64_C(0xffffffffffffffff));
+    // x3 = (fiat_secp256r1_uint1)(x1 >> 64);
+    // *out1 = x2;
+    // *out2 = x3;
+
+    *out2 = Lib_IntTypes_Intrinsics_add_carry_u64(arg1, arg2, arg3, out1);
 }
 
 /*
@@ -687,14 +694,18 @@ static void fiat_secp256r1_subborrowx_u64(uint64_t *out1,
                                           fiat_secp256r1_uint1 *out2,
                                           fiat_secp256r1_uint1 arg1,
                                           uint64_t arg2, uint64_t arg3) {
-    fiat_secp256r1_int128 x1;
-    fiat_secp256r1_int1 x2;
-    uint64_t x3;
-    x1 = ((arg2 - (fiat_secp256r1_int128)arg1) - arg3);
-    x2 = (fiat_secp256r1_int1)(x1 >> 64);
-    x3 = (uint64_t)(x1 & UINT64_C(0xffffffffffffffff));
-    *out1 = x3;
-    *out2 = (fiat_secp256r1_uint1)(0x0 - x2);
+    // fiat_secp256r1_int128 x1;
+    // fiat_secp256r1_int1 x2;
+    // uint64_t x3;
+    // x1 = ((arg2 - (fiat_secp256r1_int128)arg1) - arg3);
+    // x2 = (fiat_secp256r1_int1)(x1 >> 64);
+    // x3 = (uint64_t)(x1 & UINT64_C(0xffffffffffffffff));
+    // *out1 = x3;
+    // *out2 = (fiat_secp256r1_uint1)(0x0 - x2);
+
+
+    *out2 = Lib_IntTypes_Intrinsics_sub_borrow_u64(arg1, arg2, arg3, out1);
+
 }
 
 
@@ -1273,7 +1284,7 @@ static void mm_buffer_ours(uint64_t* a, uint64_t *b, uint64_t *result)
 static void montgomery_multiplication_buffer(uint64_t *a, uint64_t *b, uint64_t *result)
 {
   fiat_secp256r1_mul(result, a, b);
-  mm_buffer_ours(a, b, result);
+  // mm_buffer_ours(a, b, result);
 }
 
 static void montgomery_square_buffer(uint64_t *a, uint64_t *result)

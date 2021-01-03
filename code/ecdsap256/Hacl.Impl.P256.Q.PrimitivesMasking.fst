@@ -26,9 +26,8 @@ let cmovznz a b mask =
 
 
 val cmovznz4: out: felem -> x: felem -> y: felem -> mask: uint64 -> Stack unit
-  (requires fun h -> as_nat h x < prime256 /\ as_nat h y < prime256 /\
-    live h out /\ live h x /\ live h y /\ (uint_v mask == 0 \/ uint_v mask = pow2 64 - 1))
-  (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\ as_nat h1 out < prime256 /\ (
+  (requires fun h -> live h out /\ live h x /\ live h y /\ (uint_v mask == 0 \/ uint_v mask = pow2 64 - 1))
+  (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\ (
     if v mask = 0
       then as_nat h1 out == as_nat h0 x
       else 
@@ -97,3 +96,42 @@ let cswap8 p1 p2 bit =
 
     
   
+
+inline_for_extraction noextract
+val copy_conditional: out: felem -> x: felem -> mask: uint64{uint_v mask = 0 \/ uint_v mask = pow2 64 - 1} -> Stack unit 
+  (requires fun h -> live h out /\ live h x)
+  (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\ 
+    (if uint_v mask = 0 then as_seq h1 out == as_seq h0 out else as_seq h1 out == as_seq h0 x) /\
+    (if uint_v mask = 0 then as_nat h1 out == as_nat h0 out else as_nat h1 out == as_nat h0 x)
+  ) 
+
+let copy_conditional out x mask = 
+    let h0 = ST.get() in 
+  let out_0 = index out (size 0) in 
+  let out_1 = index out (size 1) in 
+  let out_2 = index out (size 2) in 
+  let out_3 = index out (size 3) in 
+
+  let x_0 = index x (size 0) in 
+  let x_1 = index x (size 1) in 
+  let x_2 = index x (size 2) in 
+  let x_3 = index x (size 3) in 
+
+  let r_0 = logxor out_0 (logand mask (logxor out_0 x_0)) in 
+  let r_1 = logxor out_1 (logand mask (logxor out_1 x_1)) in 
+  let r_2 = logxor out_2 (logand mask (logxor out_2 x_2)) in 
+  let r_3 = logxor out_3 (logand mask (logxor out_3 x_3)) in 
+
+  lemma_xor_copy_cond out_0 x_0 mask;
+  lemma_xor_copy_cond out_1 x_1 mask;
+  lemma_xor_copy_cond out_2 x_2 mask;
+  lemma_xor_copy_cond out_3 x_3 mask;
+
+  upd out (size 0) r_0;
+  upd out (size 1) r_1;
+  upd out (size 2) r_2;
+  upd out (size 3) r_3;
+    let h1 = ST.get() in 
+
+  lemma_eq_funct_ (as_seq h1 out) (as_seq h0 out);
+  lemma_eq_funct_ (as_seq h1 out) (as_seq h0 x)

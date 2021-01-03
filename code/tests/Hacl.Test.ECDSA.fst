@@ -13,7 +13,7 @@ module B = LowStar.Buffer
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
-
+(* 
 noextract
 let sigver_vectors256_tmp = List.Tot.map
   (fun x -> h x.msg, h x.qx, h x.qy, h x.r, h x.s, x.result)
@@ -492,3 +492,4 @@ let main () : St C.exit_code =
   C.EXIT_SUCCESS
 
 #pop-options
+ *)

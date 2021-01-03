@@ -31,6 +31,10 @@ let basePoint : point_nat_prime =
    1)
 
 
+
+let isPointAtInfinity (p:point_nat) =
+  let (_, _, z) = p in z = 0
+
 noextract
 let _point_double (p:point_nat_prime) : point_nat_prime =
   let x, y, z = p in
@@ -42,6 +46,7 @@ let _point_double (p:point_nat_prime) : point_nat_prime =
   let y3 = (alpha *  (4 * beta - x3) - 8 * gamma * gamma) % prime in 
   let z3 = ((y + z) * (y + z) - delta - gamma) % prime in 
   (x3, y3, z3)
+
 
 noextract
 let _point_add (p:point_nat_prime) (q:point_nat_prime) : point_nat_prime =
@@ -68,73 +73,49 @@ let _point_add (p:point_nat_prime) (q:point_nat_prime) : point_nat_prime =
   let x3 = (rr - hhh - 2 * u1 * hh) % prime256 in
   let y3 = (r * (u1 * hh - x3) - s1 * hhh) % prime256 in
   let z3 = (h * z1 * z2) % prime256 in
-  if z2 = 0 then
+  
+  if isPointAtInfinity q then
     (x1, y1, z1)
   else
-    if z1 = 0 then
+    if isPointAtInfinity p then
       (x2, y2, z2)
     else
       (x3, y3, z3)
 
 
+let isPointAtInfinityAffine (p:point_affine) =
+  let (x, y) = p in x = 0 && y = 0
+
+
 let point_add_mixed (p: point_nat_prime) (q: point_affine) : point_nat_prime = 
-  let (x1, y1, z1) = p in 
-  let (x2, y2) = q in 
-
-  let t0 = (x1 * x2) % prime in 
-  let t1 = (y1 * y2) % prime in 
-  let t3 = (x2 + y2) % prime in 
-  let t4 = (x1 + y1) % prime in 
-
-  let t3 = (t3 * t4) % prime in 
-  let t4 = (t0 + t1) % prime in 
-  let t3 = (t3 - t4) % prime in 
-  let t4 = (y2 - z1) % prime in 
-
-  let t4 = (t4 + y1) % prime in 
-  let y3 = (x2 * z1) % prime in 
-  let y3 = (y3 + x1) % prime in (* +++ *)
-  let z3 = (bCoordinateP256 * z1) % prime in  (* curve *) 
-
-  let x3 = (y3 - z3) % prime in 
-  let z3 = (x3 + x3) % prime in 
-  let x3 = (x3 + z3) % prime in 
-  let z3 = (t1 - x3) % prime in 
-
-  let x3 = (t1 + x3) % prime in 
-  let y3 = (bCoordinateP256 * y3) % prime in 
-  let t1 = (z1 + z1) % prime in 
-  let t2 = (t1 + z1) % prime in 
-
-  let y3 = (y3 - t2) % prime in 
-  let y3 = (y3 - t0) % prime in 
-  let t1 = (y3 + y3) % prime in 
-  let y3 = (t1 + y3) % prime in 
-
-  let t1 = (t0 + t0) % prime in 
-  let t0 = (t1 + t0) % prime in 
-  let t0 = (t0 - t2) % prime in 
-  let t1 = (t4 * y3) % prime in 
-
-  let t2 = (t0 * y3) % prime in 
-  let y3 = (x3 * z3) % prime in 
-  let y3 = (y3 + t2) % prime in  
-  let x3 = (t3 * x3) % prime in
+  let (x1, y1, z1) = p in
+  let (x2, y2) = q in
   
-  let x3 = (x3 - t1) % prime in 
-  let z3 = (t4 * z3) % prime in 
-  let t1 = (t3 * t0) % prime in 
-  let z3 = (z3 * t1) % prime in 
+  let z1z1 = z1 * z1 in
 
-  if z1 = 0 then 
-    (x1, y1, 1)
+  let u1 = x1 % prime256 in
+  let u2 = x2 * z1z1 % prime256 in
+
+  let s1 = y1 % prime256 in
+  let s2 = y2 * z1 * z1z1 % prime256 in
+
+  let h = (u2 - u1) % prime256 in
+  let r = (s2 - s1) % prime256 in
+
+  let rr = r * r in
+  let hh = h * h in
+  let hhh = h * h * h in
+
+  let x3 = (rr - hhh - 2 * u1 * hh) % prime256 in
+  let y3 = (r * (u1 * hh - x3) - s1 * hhh) % prime256 in
+  let z3 = (h * z1) % prime256 in
+  if isPointAtInfinityAffine q then
+    (x1, y1, z1)
   else
-    (x3, y3, z3)
-
-
-
-let isPointAtInfinity (p:point_nat) =
-  let (_, _, z) = p in z = 0
+    if isPointAtInfinity p then
+      (x2, y2, 1)
+    else
+      (x3, y3, z3)
 
 
 let _norm (p:point_nat_prime) : point_nat_prime =
