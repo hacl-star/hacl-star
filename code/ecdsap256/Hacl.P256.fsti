@@ -413,7 +413,7 @@ val getScalar: #buf_type: buftype -> scalar: lbuffer_t buf_type uint8 (size 32) 
     (requires fun h -> True)
     (ensures fun h0 _ h1 -> True)
 
-
+(* 
 val montgomery_ladder_step_radix:  #buf_type: buftype ->
   p: point -> tempBuffer: lbuffer uint64 (size 88) -> 
   t: lbuffer uint64 (size 8 *! size 16) ->
@@ -422,4 +422,4 @@ val montgomery_ladder_step_radix:  #buf_type: buftype ->
   Stack unit
   (requires fun h -> live h p /\live h tempBuffer /\ live h scalar /\
     LowStar.Monotonic.Buffer.all_disjoint [loc p;loc tempBuffer; loc scalar])
-  (ensures fun h0 _ h1 -> True)
+  (ensures fun h0 _ h1 -> True) *)

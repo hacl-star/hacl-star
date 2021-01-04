@@ -87,5 +87,6 @@ let is_more_than_zero_less_than_order x =
 
 let getScalar #a scalar i = Hacl.Impl.P256.Core.getScalar #a scalar i 
 
-
+(* 
 let montgomery_ladder_step_radix #a b c d e f = Hacl.Impl.P256.Core.montgomery_ladder_step_radix #a b c d e f
+ *)

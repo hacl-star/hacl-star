@@ -38,9 +38,10 @@ let eq1_u64 a =
 
 
 inline_for_extraction noextract
-val isZero_uint64_CT:  f: felem -> Stack uint64
+val isZero_uint64_CT: f: lbuffer_t MUT uint64 (size 4) -> Stack uint64
   (requires fun h -> live h f)
-  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ (if as_nat h0 f = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0))
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ 
+  (if as_nat h0 f = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0))
  
 let isZero_uint64_CT f = 
   let a0 = index f (size 0) in 
@@ -60,6 +61,34 @@ let isZero_uint64_CT f =
   let r = logand r01 r23 in 
     logand_lemma r01 r23;
   r
+
+
+(* todo: to the same type *)
+inline_for_extraction noextract
+val isZero_uint64_CT_global: f: glbuffer uint64 (size 4) -> Stack uint64
+  (requires fun h -> live h f)
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ 
+  (if as_nat_il h0 f = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0))
+ 
+let isZero_uint64_CT_global f = 
+  let a0 = index f (size 0) in 
+  let a1 = index f (size 1) in 
+  let a2 = index f (size 2) in 
+  let a3 = index f (size 3) in  
+  
+  let r0 = eq_mask a0 (u64 0) in 
+  let r1 = eq_mask a1 (u64 0) in 
+  let r2 = eq_mask a2 (u64 0) in 
+  let r3 = eq_mask a3 (u64 0) in 
+  
+  let r01 = logand r0 r1 in 
+     logand_lemma r0 r1; 
+  let r23 = logand r2 r3 in 
+     logand_lemma r2 r3;
+  let r = logand r01 r23 in 
+    logand_lemma r01 r23;
+  r
+
 
 
 inline_for_extraction noextract
