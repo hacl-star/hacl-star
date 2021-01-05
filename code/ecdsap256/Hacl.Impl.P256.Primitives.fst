@@ -174,7 +174,8 @@ let secretToPublicRaw m result scalar =
 
 inline_for_extraction noextract
 val scalarMult:
-    result:lbuffer uint8 (size 64)
+  m: montgomery_ladder_mode
+  -> result:lbuffer uint8 (size 64)
   -> pubKey:lbuffer uint8 (size 64)
   -> scalar:lbuffer uint8 (size 32)
   -> Stack bool
@@ -192,7 +193,7 @@ val scalarMult:
       as_seq h1 (gsub result (size 32) (size 32)) == pointY)
 
 
-let scalarMult result pubKey scalar =
+let scalarMult m result pubKey scalar =
   push_frame();
   
   let resultBufferFelem = create (size 12) (u64 0) in

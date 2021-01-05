@@ -8,5 +8,5 @@ open Hacl.Impl.P256.Primitives
 let ecp256dh_i m result scalar =
   secretToPublic m result scalar
 
-let ecp256dh_r result pubKey scalar =
-  scalarMult result pubKey scalar
+let ecp256dh_r m result pubKey scalar =
+  scalarMult m result pubKey scalar

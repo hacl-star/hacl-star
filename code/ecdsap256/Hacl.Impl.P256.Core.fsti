@@ -24,6 +24,7 @@ open FStar.Math.Lemmas
 module B = LowStar.Buffer
 open FStar.Mul
 
+
 inline_for_extraction noextract
 val toDomain: value: felem -> result: felem ->  Stack unit 
   (requires fun h ->  as_nat h value < prime /\ live h value /\live h result /\ eq_or_disjoint value result)
@@ -145,7 +146,7 @@ val getScalar: #buf_type: buftype -> scalar: lbuffer_t buf_type uint8 (size 32) 
     (ensures fun h0 _ h1 -> True)
 
 
-val montgomery_ladder_step_radix: 
+val montgomery_ladder_step_radix_precomputed: 
   p: point -> tempBuffer: lbuffer uint64 (size 88) -> 
   scalar:  lbuffer uint8 (size 32)-> 
   i:size_t{v i < 256} -> 
@@ -153,6 +154,18 @@ val montgomery_ladder_step_radix:
   (requires fun h -> live h p /\live h tempBuffer /\ live h scalar /\
     LowStar.Monotonic.Buffer.all_disjoint [loc p;loc tempBuffer; loc scalar])
   (ensures fun h0 _ h1 -> True)
+
+
+val montgomery_ladder_step_radix: 
+  p: point -> tempBuffer: lbuffer uint64 (size 88) -> 
+  precomputedTable: lbuffer uint64 (size 192) ->
+  scalar:  lbuffer uint8 (size 32) -> 
+  i:size_t{v i < 256} -> 
+  Stack unit
+  (requires fun h -> live h p /\live h tempBuffer /\ live h scalar /\
+    LowStar.Monotonic.Buffer.all_disjoint [loc p;loc tempBuffer; loc scalar])
+  (ensures fun h0 _ h1 -> True)
+
 
 
 
