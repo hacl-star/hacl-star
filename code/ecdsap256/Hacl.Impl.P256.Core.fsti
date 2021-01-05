@@ -208,8 +208,12 @@ val scalarMultiplicationWithoutNorm: p: point -> result: point ->
   )
 ) 
 
-
-val secretToPublic: result: point -> scalar: lbuffer uint8 (size 32) -> tempBuffer: lbuffer uint64 (size 100) ->
+inline_for_extraction noextract
+val secretToPublic: 
+   m: montgomery_ladder_mode 
+   -> result: point 
+   -> scalar: lbuffer uint8 (size 32) 
+   -> tempBuffer: lbuffer uint64 (size 100) ->
   Stack unit
     (requires fun h -> 
       live h result /\ live h scalar /\ live h tempBuffer /\ 
@@ -226,6 +230,7 @@ val secretToPublic: result: point -> scalar: lbuffer uint8 (size 32) -> tempBuff
       x3 == xN /\ y3 == yN /\ z3 == zN 
     )
   )
+
 
 val secretToPublicWithoutNorm: result: point -> scalar: lbuffer uint8 (size 32) -> 
  tempBuffer: lbuffer uint64 (size 100) ->

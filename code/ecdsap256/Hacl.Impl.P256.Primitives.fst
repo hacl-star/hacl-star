@@ -105,7 +105,8 @@ let fromFormPoint i o =
 
 inline_for_extraction noextract
 val secretToPublic:
-    result:lbuffer uint8 (size 64)
+  m: montgomery_ladder_mode
+  -> result:lbuffer uint8 (size 64)
   -> scalar:lbuffer uint8 (size 32)
   -> Stack bool
   (requires fun h ->
@@ -119,12 +120,12 @@ val secretToPublic:
     as_seq h1 (gsub result (size 32) (size 32)) == pointY)
     
 
-let secretToPublic result scalar = 
+let secretToPublic m result scalar = 
     push_frame();
   let tempBuffer = create (size 100) (u64 0) in
   let resultBuffer = create (size 12) (u64 0) in
   
-  secretToPublic resultBuffer scalar tempBuffer;
+  secretToPublic m resultBuffer scalar tempBuffer;
   let flag = isPointAtInfinityPrivate resultBuffer in
   fromFormPoint resultBuffer result;
   
@@ -143,7 +144,8 @@ let secretToPublic result scalar =
 
 inline_for_extraction noextract
 val secretToPublicRaw:
-    result:lbuffer uint8 (size 64)
+  m: montgomery_ladder_mode
+  ->  result:lbuffer uint8 (size 64)
   -> scalar:lbuffer uint8 (size 32)
   -> Stack unit
   (requires fun h ->
@@ -160,12 +162,12 @@ val secretToPublicRaw:
     as_seq h1 scalarY == nat_to_bytes_be 32 yN))
 
 
-let secretToPublicRaw result scalar =
+let secretToPublicRaw m result scalar =
   push_frame();
   let tempBuffer = create (size 100) (u64 0) in
   let resultBuffer = create (size 12) (u64 0) in
 
-  Hacl.Impl.P256.Core.secretToPublic resultBuffer scalar tempBuffer;  
+  Hacl.Impl.P256.Core.secretToPublic m resultBuffer scalar tempBuffer;  
   fromFormPoint resultBuffer result;
   pop_frame()
 

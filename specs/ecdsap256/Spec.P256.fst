@@ -31,6 +31,10 @@ let basePoint : point_nat_prime =
    1)
 
 
+type montgomery_ladder_mode = 
+  |Ladder
+  |Radix4
+
 
 let isPointAtInfinity (p:point_nat) =
   let (_, _, z) = p in z = 0

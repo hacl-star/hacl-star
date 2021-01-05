@@ -1012,9 +1012,28 @@ let scalarMultiplicationWithoutNorm p result scalar tempBuffer =
     let h3 = ST.get() in 
     lemma_point_to_domain h0 h2 p result;
     lemma_pif_to_domain h2 q
-    
 
-let secretToPublic result scalar tempBuffer = 
+
+let secretToPublic m result scalar tempBuffer =
+  let buff = sub tempBuffer (size 12) (size 88) in
+  begin
+  match m with 
+  |Ladder -> 
+    let basePoint = sub tempBuffer (size 0) (size 12) in 
+      uploadBasePoint basePoint;
+    montgomery_ladder result basePoint scalar buff
+  |Radix4 ->
+      montgomery_ladder_2 result scalar buff
+   end; 
+  (* zero_buffer result; *)
+    let h1 = ST.get() in 
+    lemma_pif_to_domain h1 basePoint;
+
+  norm result result buff
+
+
+(*
+let secretToPublic m result scalar tempBuffer = 
   push_frame(); 
        let basePoint = create (size 12) (u64 0) in 
     (* uploadBasePoint basePoint; *)
@@ -1023,10 +1042,10 @@ let secretToPublic result scalar tempBuffer =
     zero_buffer q; 
       let h1 = ST.get() in 
       lemma_pif_to_domain h1 q;
-    montgomery_ladder_2 q scalar buff; 
-    norm q result buff;  
+    montgomery_ladder_2 result scalar buff; 
+    norm result result buff;  
   pop_frame()
-
+*)
 
 let secretToPublicWithoutNorm result scalar tempBuffer = 
     push_frame(); 

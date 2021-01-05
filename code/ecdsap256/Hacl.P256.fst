@@ -75,7 +75,11 @@ let compression_compressed_form b result =
   Hacl.Impl.P256.Compression.compressionCompressedForm b result
 *) 
 
-let ecp256dh_i result scalar = Hacl.Impl.P256.DH.ecp256dh_i result scalar
+let ecp256dh_i_ladder result scalar = Hacl.Impl.P256.DH.ecp256dh_i Ladder result scalar
+
+let ecp256dh_i_radix4 result scalar = Hacl.Impl.P256.DH.ecp256dh_i Radix4 result scalar
+
+
 
 let ecp256dh_r result pubKey scalar = Hacl.Impl.P256.DH.ecp256dh_r result pubKey scalar
 
@@ -84,9 +88,3 @@ let is_more_than_zero_less_than_order x =
   Hacl.Impl.P256.Signature.Common.isMoreThanZeroLessThanOrder x
 
 *)
-
-let getScalar #a scalar i = Hacl.Impl.P256.Core.getScalar #a scalar i 
-
-(* 
-let montgomery_ladder_step_radix #a b c d e f = Hacl.Impl.P256.Core.montgomery_ladder_step_radix #a b c d e f
- *)

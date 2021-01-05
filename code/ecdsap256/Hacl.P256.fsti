@@ -350,11 +350,12 @@ val compression_compressed_form: b: lbuffer uint8 (size 64) -> result: compresse
 
 *) 
 
+
 [@ (Comment " Input: result: uint8[64], \n scalar: uint8[32].
   \n Output: bool, where True stands for the correct key generation. 
   \n False means that an error has occurred (possibly that the result respresents point at infinity). 
   ")]
-val ecp256dh_i:
+val ecp256dh_i_ladder:
     result:lbuffer uint8 (size 64)
   -> scalar:lbuffer uint8 (size 32)
   -> Stack bool
@@ -367,6 +368,31 @@ val ecp256dh_i:
     r == flag /\
     as_seq h1 (gsub result (size 0) (size 32)) == pointX /\
     as_seq h1 (gsub result (size 32) (size 32)) == pointY)
+
+
+
+[@ (Comment " Input: result: uint8[64], \n scalar: uint8[32].
+  \n Output: bool, where True stands for the correct key generation. 
+  \n False means that an error has occurred (possibly that the result respresents point at infinity). 
+  ")]
+val ecp256dh_i_radix4:
+    result:lbuffer uint8 (size 64)
+  -> scalar:lbuffer uint8 (size 32)
+  -> Stack bool
+  (requires fun h ->
+    live h result /\ live h scalar /\ 
+    disjoint result scalar)
+  (ensures fun h0 r h1 ->
+    let pointX, pointY, flag = ecp256_dh_i (as_seq h0 scalar) in
+    modifies (loc result) h0 h1 /\
+    r == flag /\
+    as_seq h1 (gsub result (size 0) (size 32)) == pointX /\
+    as_seq h1 (gsub result (size 32) (size 32)) == pointY)
+
+
+
+
+
 
 
 [@ (Comment " 
@@ -406,20 +432,3 @@ val is_more_than_zero_less_than_order: x: lbuffer uint8 (size 32) -> Stack bool
   )
  *)
 
-
-
-val getScalar: #buf_type: buftype -> scalar: lbuffer_t buf_type uint8 (size 32) -> i: size_t {v i < 64} -> 
-  Stack uint32 
-    (requires fun h -> True)
-    (ensures fun h0 _ h1 -> True)
-
-(* 
-val montgomery_ladder_step_radix:  #buf_type: buftype ->
-  p: point -> tempBuffer: lbuffer uint64 (size 88) -> 
-  t: lbuffer uint64 (size 8 *! size 16) ->
-  scalar: lbuffer_t buf_type uint8 (size 32) -> 
-  i:size_t{v i < 256} -> 
-  Stack unit
-  (requires fun h -> live h p /\live h tempBuffer /\ live h scalar /\
-    LowStar.Monotonic.Buffer.all_disjoint [loc p;loc tempBuffer; loc scalar])
-  (ensures fun h0 _ h1 -> True) *)

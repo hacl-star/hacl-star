@@ -9,12 +9,14 @@ open Lib.Buffer
 open Lib.ByteSequence
 
 open Spec.DH
+open Spec.P256
 open Spec.ECDSAP256.Definition
 
 
 inline_for_extraction noextract
 val ecp256dh_i:
-    result:lbuffer uint8 (size 64)
+  m: montgomery_ladder_mode
+  ->  result:lbuffer uint8 (size 64)
   -> scalar:lbuffer uint8 (size 32)
   -> Stack bool
   (requires fun h ->

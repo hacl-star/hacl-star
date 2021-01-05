@@ -60,10 +60,17 @@ bool test_nist()
 	
 	bool ok = true;
 
-	bool successDHI = Hacl_P256_ecp256dh_i(result, privateKey);
+	bool successDHI = Hacl_P256_ecp256dh_i_ladder(result, privateKey);
 	ok = ok && successDHI;
 	ok = ok && compare(32, result, expectedPublicKeyX);
 	ok = ok && compare(32, result + 32, expectedPublicKeyY);
+
+	bool successDHI_Radix = Hacl_P256_ecp256dh_i_radix4(result, privateKey);
+	ok = ok && successDHI_Radix;
+	ok = ok && compare(32, result, expectedPublicKeyX);
+	ok = ok && compare(32, result + 32, expectedPublicKeyY);
+
+
 
 
 	// compare_and_print(32, result, result);
@@ -111,13 +118,13 @@ int main()
 	memset(scalar,'P',SIZE);
 	
   	for (int j = 0; j < ROUNDS; j++)
-		Hacl_P256_ecp256dh_i(result, scalar);
+		Hacl_P256_ecp256dh_i_ladder(result, scalar);
 
 	t1 = clock();
   	a = cpucycles_begin();
 
   	for (int j = 0; j < ROUNDS; j++)
-		Hacl_P256_ecp256dh_i(result, scalar);
+		Hacl_P256_ecp256dh_i_ladder(result, scalar);
 	
 	b = cpucycles_end();
 	
@@ -127,8 +134,28 @@ int main()
 
 	double time = (((double)tdiff1) / CLOCKS_PER_SEC);
 	double nsigs = ((double)ROUNDS) / time;
-	printf("HACL P-256 ECDH PERF \n");
+	printf("HACL P-256 ECDH PERF/Ladder \n");
 	printf("ECDH %8.2f mul/s\n",nsigs);
+
+
+	t1 = clock();
+  	a = cpucycles_begin();
+
+  	for (int j = 0; j < ROUNDS; j++)
+		Hacl_P256_ecp256dh_i_radix4(result, scalar);
+	
+	b = cpucycles_end();
+	
+	t2 = clock();
+	clock_t tdiff2 = t2 - t1;
+	cycles cdiff2 = b - a;
+
+	double timeRadix = (((double)tdiff2) / CLOCKS_PER_SEC);
+	double nsigsRadix = ((double)ROUNDS) / timeRadix;
+	printf("HACL P-256 ECDH PERF/Radix4 \n");
+	printf("ECDH %8.2f mul/s\n",nsigsRadix);
+
+
 
 }
 
