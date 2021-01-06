@@ -1,10 +1,10 @@
 module Spec.Frodo.KEM.Encaps
 
+open FStar.Mul
+
 open Lib.IntTypes
 open Lib.Sequence
 open Lib.ByteSequence
-
-open FStar.Mul
 
 open Spec.Matrix
 open Spec.Frodo.Lemmas
@@ -13,107 +13,166 @@ open Spec.Frodo.Encode
 open Spec.Frodo.Pack
 open Spec.Frodo.Sample
 
-module Seq = Lib.Sequence
+module LSeq = Lib.Sequence
 module Matrix = Spec.Matrix
+module KG = Spec.Frodo.KEM.KeyGen
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.* +FStar.Pervasives'"
+#set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 val frodo_mul_add_sa_plus_e:
-    seed_a:lbytes bytes_seed_a
-  -> seed_e:lbytes crypto_bytes
-  -> sp_matrix:matrix params_nbar params_n
-  -> matrix params_nbar params_n
-let frodo_mul_add_sa_plus_e seed_a seed_e sp_matrix =
-  let a_matrix  = frodo_gen_matrix params_n bytes_seed_a seed_a in
-  let ep_matrix = frodo_sample_matrix params_nbar params_n crypto_bytes seed_e (u16 5) in
+    a:frodo_alg
+  -> gen_a:frodo_gen_a
+  -> seed_a:lbytes bytes_seed_a
+  -> sp_matrix:matrix params_nbar (params_n a)
+  -> ep_matrix:matrix params_nbar (params_n a)
+  -> matrix params_nbar (params_n a)
+
+let frodo_mul_add_sa_plus_e a gen_a seed_a sp_matrix ep_matrix =
+  let a_matrix  = frodo_gen_matrix gen_a (params_n a) seed_a in
   let b_matrix  = Matrix.add (Matrix.mul sp_matrix a_matrix) ep_matrix in
   b_matrix
 
+
+val crypto_kem_enc_ct_pack_c1:
+    a:frodo_alg
+  -> gen_a:frodo_gen_a
+  -> seed_a:lbytes bytes_seed_a
+  -> sp_matrix:matrix params_nbar (params_n a)
+  -> ep_matrix:matrix params_nbar (params_n a)
+  -> lbytes (ct1bytes_len a)
+
+let crypto_kem_enc_ct_pack_c1 a gen_a seed_a sp_matrix ep_matrix =
+  let bp_matrix = frodo_mul_add_sa_plus_e a gen_a seed_a sp_matrix ep_matrix in
+  let ct1 = frodo_pack (params_logq a) bp_matrix in
+  ct1
+
+
 val frodo_mul_add_sb_plus_e:
-    b:lbytes (params_logq * params_n * params_nbar / 8)
-  -> seed_e:lbytes crypto_bytes
-  -> sp_matrix:matrix params_nbar params_n
+    a:frodo_alg
+  -> b:lbytes (publicmatrixbytes_len a)
+  -> sp_matrix:matrix params_nbar (params_n a)
+  -> epp_matrix:matrix params_nbar params_nbar
   -> matrix params_nbar params_nbar
-let frodo_mul_add_sb_plus_e b seed_e sp_matrix =
-  let b_matrix = frodo_unpack #params_n #params_nbar params_logq b in
-  let epp_matrix = frodo_sample_matrix params_nbar params_nbar crypto_bytes seed_e (u16 6) in
+
+let frodo_mul_add_sb_plus_e a b sp_matrix epp_matrix =
+  let b_matrix = frodo_unpack #(params_n a) #params_nbar (params_logq a) b in
   let v_matrix = Matrix.add (Matrix.mul sp_matrix b_matrix) epp_matrix in
   v_matrix
 
+
 val frodo_mul_add_sb_plus_e_plus_mu:
-    b:lbytes (params_logq * params_n * params_nbar / 8)
-  -> seed_e:lbytes crypto_bytes
-  -> coins:lbytes bytes_mu
-  -> sp_matrix:matrix params_nbar params_n
+    a:frodo_alg
+  -> mu:lbytes (bytes_mu a)
+  -> b:lbytes (publicmatrixbytes_len a)
+  -> sp_matrix:matrix params_nbar (params_n a)
+  -> epp_matrix:matrix params_nbar params_nbar
   -> matrix params_nbar params_nbar
-let frodo_mul_add_sb_plus_e_plus_mu b seed_e coins sp_matrix =
-  let v_matrix  = frodo_mul_add_sb_plus_e b seed_e sp_matrix in
-  let mu_encode = frodo_key_encode params_extracted_bits coins in
+
+let frodo_mul_add_sb_plus_e_plus_mu a mu b sp_matrix epp_matrix =
+  let v_matrix  = frodo_mul_add_sb_plus_e a b sp_matrix epp_matrix in
+  let mu_encode = frodo_key_encode (params_logq a) (params_extracted_bits a) params_nbar mu in
   let v_matrix  = Matrix.add v_matrix mu_encode in
   v_matrix
 
-val crypto_kem_enc_ct_pack_c1:
-    seed_a:lbytes bytes_seed_a
-  -> seed_e:lbytes crypto_bytes
-  -> sp_matrix:matrix params_nbar params_n
-  -> lbytes (params_logq * params_nbar * params_n / 8)
-let crypto_kem_enc_ct_pack_c1 seed_a seed_e sp_matrix =
-  let bp_matrix = frodo_mul_add_sa_plus_e seed_a seed_e sp_matrix in
-  frodo_pack params_logq bp_matrix
 
 val crypto_kem_enc_ct_pack_c2:
-    seed_e:lbytes crypto_bytes
-  -> coins:lbytes bytes_mu
-  -> b:lbytes (params_logq * params_n * params_nbar / 8)
-  -> sp_matrix:matrix params_nbar params_n
-  -> lbytes (params_logq * params_nbar * params_nbar / 8)
-let crypto_kem_enc_ct_pack_c2 seed_e coins b sp_matrix =
-  let v_matrix = frodo_mul_add_sb_plus_e_plus_mu b seed_e coins sp_matrix in
-  frodo_pack params_logq v_matrix
+    a:frodo_alg
+  -> mu:lbytes (bytes_mu a)
+  -> b:lbytes (publicmatrixbytes_len a)
+  -> sp_matrix:matrix params_nbar (params_n a)
+  -> epp_matrix:matrix params_nbar params_nbar
+  -> lbytes (ct2bytes_len a)
+
+let crypto_kem_enc_ct_pack_c2 a mu b sp_matrix epp_matrix =
+  let v_matrix = frodo_mul_add_sb_plus_e_plus_mu a mu b sp_matrix epp_matrix in
+  let ct2 = frodo_pack (params_logq a) v_matrix in
+  ct2
+
+
+val get_sp_ep_epp_matrices:
+    a:frodo_alg
+  -> seed_se:lbytes (crypto_bytes a)
+  -> matrix params_nbar (params_n a) & matrix params_nbar (params_n a) & matrix params_nbar params_nbar
+
+let get_sp_ep_epp_matrices a seed_se =
+  let s_bytes_len = secretmatrixbytes_len a in
+  let r = KG.frodo_shake_r a (u8 0x96) seed_se (2 * s_bytes_len + 2 * params_nbar * params_nbar) in
+  let sp_matrix = frodo_sample_matrix a params_nbar (params_n a) (LSeq.sub r 0 s_bytes_len) in
+  let ep_matrix = frodo_sample_matrix a params_nbar (params_n a) (LSeq.sub r s_bytes_len s_bytes_len) in
+  let epp_matrix = frodo_sample_matrix a params_nbar params_nbar (LSeq.sub r (2 * s_bytes_len) (2 * params_nbar * params_nbar)) in
+  sp_matrix, ep_matrix, epp_matrix
+
 
 val crypto_kem_enc_ct:
-    pk:lbytes crypto_publickeybytes
-  -> g:lbytes (3 * crypto_bytes)
-  -> coins:lbytes bytes_mu
-  -> lbytes crypto_ciphertextbytes
-let crypto_kem_enc_ct pk g coins =
-  let seed_a = Seq.sub pk 0 bytes_seed_a in
-  let b = Seq.sub pk bytes_seed_a (crypto_publickeybytes - bytes_seed_a) in
-  let seed_e = Seq.sub g 0 crypto_bytes in
-  let d = Seq.sub g (2 * crypto_bytes) crypto_bytes in
-  let sp_matrix = frodo_sample_matrix params_nbar params_n crypto_bytes seed_e (u16 4) in
-  let c2 = crypto_kem_enc_ct_pack_c2 seed_e coins b sp_matrix in
-  let c1 = crypto_kem_enc_ct_pack_c1 seed_a seed_e sp_matrix in
-  expand_crypto_ciphertextbytes ();
-  let ct = concat (concat c1 c2) d in
+    a:frodo_alg
+  -> gen_a:frodo_gen_a
+  -> mu:lbytes (bytes_mu a)
+  -> pk:lbytes (crypto_publickeybytes a)
+  -> seed_se:lbytes (crypto_bytes a)
+  -> lbytes (crypto_ciphertextbytes a)
+
+let crypto_kem_enc_ct a gen_a mu pk seed_se =
+  expand_crypto_publickeybytes a;
+  let seed_a = LSeq.sub pk 0 bytes_seed_a in
+  let b = LSeq.sub pk bytes_seed_a (publicmatrixbytes_len a) in
+
+  let sp_matrix, ep_matrix, epp_matrix = get_sp_ep_epp_matrices a seed_se in
+  let c1 = crypto_kem_enc_ct_pack_c1 a gen_a seed_a sp_matrix ep_matrix in
+  let c2 = crypto_kem_enc_ct_pack_c2 a mu b sp_matrix epp_matrix in
+  expand_crypto_ciphertextbytes a;
+  let ct = concat c1 c2 in
   ct
 
+
 val crypto_kem_enc_ss:
-    g:lbytes (3 * crypto_bytes)
-  -> ct:lbytes crypto_ciphertextbytes
-  -> lbytes crypto_bytes
-let crypto_kem_enc_ss g ct =
-  expand_crypto_ciphertextbytes ();
-  let c12 = Seq.sub ct 0 (crypto_ciphertextbytes - crypto_bytes) in
-  let kd = Seq.sub g crypto_bytes (crypto_bytes + crypto_bytes) in
-  let ss_init = concat c12 kd in
-  frodo_prf_spec (crypto_ciphertextbytes + crypto_bytes) ss_init (u16 7) crypto_bytes
+    a:frodo_alg
+  -> k:lbytes (crypto_bytes a)
+  -> ct:lbytes (crypto_ciphertextbytes a)
+  -> lbytes (crypto_bytes a)
+
+let crypto_kem_enc_ss a k ct =
+  let shake_input_ss = concat ct k in
+  let ss = frodo_shake a (crypto_ciphertextbytes a + crypto_bytes a) shake_input_ss (crypto_bytes a) in
+  ss
+
+
+val crypto_kem_enc_seed_se_k:
+    a:frodo_alg
+  -> mu:lbytes (bytes_mu a)
+  -> pk:lbytes (crypto_publickeybytes a)
+  -> lbytes (2 * crypto_bytes a)
+
+let crypto_kem_enc_seed_se_k a mu pk =
+  let pkh = frodo_shake a (crypto_publickeybytes a) pk (bytes_pkhash a) in
+  let pkh_mu = concat pkh mu in
+  let seed_se_k = frodo_shake a (bytes_pkhash a + bytes_mu a) pkh_mu (2 * crypto_bytes a) in
+  seed_se_k
+
 
 val crypto_kem_enc_:
-    coins:lbytes bytes_mu
-  -> pk:lbytes crypto_publickeybytes
-  -> lbytes crypto_ciphertextbytes & lbytes crypto_bytes
-let crypto_kem_enc_ coins pk =
-  let pk_coins = concat pk coins in
-  let g = frodo_prf_spec (crypto_publickeybytes + bytes_mu) pk_coins (u16 3) (3 * crypto_bytes) in
-  let ct = crypto_kem_enc_ct pk g coins in
-  let ss = crypto_kem_enc_ss g ct in
+    a:frodo_alg
+  -> gen_a:frodo_gen_a
+  -> mu:lbytes (bytes_mu a)
+  -> pk:lbytes (crypto_publickeybytes a)
+  -> lbytes (crypto_ciphertextbytes a) & lbytes (crypto_bytes a)
+
+let crypto_kem_enc_ a gen_a mu pk =
+  let seed_se_k = crypto_kem_enc_seed_se_k a mu pk in
+  let seed_se = LSeq.sub seed_se_k 0 (crypto_bytes a) in
+  let k = LSeq.sub seed_se_k (crypto_bytes a) (crypto_bytes a) in
+
+  let ct = crypto_kem_enc_ct a gen_a mu pk seed_se in
+  let ss = crypto_kem_enc_ss a k ct in
   ct, ss
 
+
 val crypto_kem_enc:
-    state: Spec.Frodo.Random.state_t
-  -> pk:lbytes crypto_publickeybytes
-  -> lbytes crypto_ciphertextbytes & lbytes crypto_bytes
-let crypto_kem_enc state pk =
-  let coins, _ = Spec.Frodo.Random.randombytes_ state bytes_mu in
-  crypto_kem_enc_ coins pk
+    a:frodo_alg
+  -> gen_a:frodo_gen_a
+  -> state:Spec.Frodo.Random.state_t
+  -> pk:lbytes (crypto_publickeybytes a)
+  -> lbytes (crypto_ciphertextbytes a) & lbytes (crypto_bytes a)
+
+let crypto_kem_enc a gen_a state pk =
+  let mu, _ = Spec.Frodo.Random.randombytes_ state (bytes_mu a) in
+  crypto_kem_enc_ a gen_a mu pk
