@@ -294,19 +294,28 @@ EXPORTS
   Hacl_P256_ecp256dh_i
   Hacl_P256_ecp256dh_r
   Hacl_P256_is_more_than_zero_less_than_order
-  Hacl_Frodo_KEM_crypto_kem_keypair
-  Hacl_Frodo_KEM_crypto_kem_enc
-  Hacl_Frodo_KEM_crypto_kem_dec
+  Hacl_Keccak_shake128_4x
+  Hacl_Impl_Matrix_mod_pow2
+  Hacl_Impl_Matrix_matrix_add
+  Hacl_Impl_Matrix_matrix_sub
+  Hacl_Impl_Matrix_matrix_mul
+  Hacl_Impl_Matrix_matrix_mul_s
+  Hacl_Impl_Matrix_matrix_eq
+  Hacl_Impl_Matrix_matrix_to_lbytes
+  Hacl_Impl_Matrix_matrix_from_lbytes
+  Hacl_Impl_Frodo_Gen_frodo_gen_matrix_shake_4x
+  Hacl_Impl_Frodo_Params_frodo_gen_matrix
+  Hacl_Impl_Frodo_Sample_frodo_sample_matrix64
+  Hacl_Impl_Frodo_Sample_frodo_sample_matrix640
+  Hacl_Impl_Frodo_Sample_frodo_sample_matrix976
+  Hacl_Impl_Frodo_Sample_frodo_sample_matrix1344
+  randombytes_
+  Hacl_Impl_Frodo_Pack_frodo_pack
+  Hacl_Impl_Frodo_Pack_frodo_unpack
+  Hacl_Impl_Frodo_Encode_frodo_key_encode
+  Hacl_Impl_Frodo_Encode_frodo_key_decode
   Hacl_IntTypes_Intrinsics_add_carry_u64
   Hacl_IntTypes_Intrinsics_sub_borrow_u64
-  Hacl_Streaming_Blake2b_256_blake2b_256_no_key_create_in
-  Hacl_Streaming_Blake2b_256_blake2b_256_no_key_update
-  Hacl_Streaming_Blake2b_256_blake2b_256_no_key_finish
-  Hacl_Streaming_Blake2b_256_blake2b_256_no_key_free
-  Hacl_Streaming_Blake2b_256_blake2b_256_with_key_create_in
-  Hacl_Streaming_Blake2b_256_blake2b_256_with_key_update
-  Hacl_Streaming_Blake2b_256_blake2b_256_with_key_finish
-  Hacl_Streaming_Blake2b_256_blake2b_256_with_key_free
   Hacl_Streaming_SHA2_create_in_224
   LowStar_BufferOps_op_Bang_Star__Hacl_Streaming_Functor_state_s__uint32_t_____LowStar_Buffer_trivial_preorder_Hacl_Streaming_Functor_state_s__uint32_t___________LowStar_Buffer_trivial_preorder_Hacl_Streaming_Functor_state_s__uint32_t__________
   Hacl_Streaming_SHA2_init_224
@@ -329,6 +338,17 @@ EXPORTS
   Hacl_Streaming_SHA2_update_512
   Hacl_Streaming_SHA2_finish_512
   Hacl_Streaming_SHA2_free_512
+  Hacl_Streaming_Blake2b_256_blake2b_256_no_key_create_in
+  Hacl_Streaming_Blake2b_256_blake2b_256_no_key_update
+  Hacl_Streaming_Blake2b_256_blake2b_256_no_key_finish
+  Hacl_Streaming_Blake2b_256_blake2b_256_no_key_free
+  Hacl_Streaming_Blake2b_256_blake2b_256_with_key_create_in
+  Hacl_Streaming_Blake2b_256_blake2b_256_with_key_update
+  Hacl_Streaming_Blake2b_256_blake2b_256_with_key_finish
+  Hacl_Streaming_Blake2b_256_blake2b_256_with_key_free
+  Hacl_Frodo640_crypto_kem_keypair
+  Hacl_Frodo640_crypto_kem_enc
+  Hacl_Frodo640_crypto_kem_dec
   Hacl_Streaming_Blake2s_128_blake2s_128_no_key_create_in
   Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update
   Hacl_Streaming_Blake2s_128_blake2s_128_no_key_finish
@@ -382,6 +402,9 @@ EXPORTS
   Hacl_HPKE_Curve51_CP256_SHA512_setupBaseR
   Hacl_HPKE_Curve51_CP256_SHA512_sealBase
   Hacl_HPKE_Curve51_CP256_SHA512_openBase
+  Hacl_Frodo976_crypto_kem_keypair
+  Hacl_Frodo976_crypto_kem_enc
+  Hacl_Frodo976_crypto_kem_dec
   Hacl_HMAC_Blake2s_128_compute_blake2s_128
   Hacl_HKDF_Blake2s_128_expand_blake2s_128
   Hacl_HKDF_Blake2s_128_extract_blake2s_128
@@ -390,6 +413,9 @@ EXPORTS
   Hacl_Streaming_Poly1305_256_update
   Hacl_Streaming_Poly1305_256_finish
   Hacl_Streaming_Poly1305_256_free
+  Hacl_Frodo1344_crypto_kem_keypair
+  Hacl_Frodo1344_crypto_kem_enc
+  Hacl_Frodo1344_crypto_kem_dec
   Hacl_HPKE_Curve64_CP256_SHA512_setupBaseI
   Hacl_HPKE_Curve64_CP256_SHA512_setupBaseR
   Hacl_HPKE_Curve64_CP256_SHA512_sealBase
@@ -434,6 +460,9 @@ EXPORTS
   Hacl_HPKE_P256_CP32_SHA256_setupBaseR
   Hacl_HPKE_P256_CP32_SHA256_sealBase
   Hacl_HPKE_P256_CP32_SHA256_openBase
+  Hacl_Frodo64_crypto_kem_keypair
+  Hacl_Frodo64_crypto_kem_enc
+  Hacl_Frodo64_crypto_kem_dec
   Hacl_Streaming_SHA1_legacy_create_in_sha1
   Hacl_Streaming_SHA1_legacy_init_sha1
   Hacl_Streaming_SHA1_legacy_update_sha1

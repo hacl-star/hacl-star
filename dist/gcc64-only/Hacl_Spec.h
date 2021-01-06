@@ -87,6 +87,11 @@ Spec_Cipher_Expansion_cipher_alg_of_impl(Spec_Cipher_Expansion_impl i);
 
 typedef uint8_t Spec_Agile_AEAD_alg;
 
+#define Spec_Frodo_Params_SHAKE128 0
+#define Spec_Frodo_Params_AES128 1
+
+typedef uint8_t Spec_Frodo_Params_frodo_gen_a;
+
 #if defined(__cplusplus)
 }
 #endif

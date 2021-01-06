@@ -45,6 +45,8 @@ static inline uint64_t FStar_UInt64_eq_mask(uint64_t a, uint64_t b);
 
 static inline uint64_t FStar_UInt64_gte_mask(uint64_t a, uint64_t b);
 
+static inline uint16_t FStar_UInt16_eq_mask(uint16_t a, uint16_t b);
+
 static inline uint128_t FStar_UInt128_add(uint128_t a, uint128_t b);
 
 static inline uint128_t FStar_UInt128_add_mod(uint128_t a, uint128_t b);
