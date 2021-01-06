@@ -757,15 +757,14 @@ inline_for_extraction noextract
 val montgomery_ladder_2: #buf_type: buftype -> p: point -> 
   scalar: lbuffer_t buf_type uint8 (size 32) -> 
   tempBuffer:  lbuffer uint64 (size 88)  -> 
+  precomputedTable: lbuffer uint64 (size 192) ->
   Stack unit
   (requires fun h -> True )
   (ensures fun h0 _ h1 -> modifies (loc p |+| loc tempBuffer) h0 h1)
 
-let montgomery_ladder_2 #a p scalar tempBuffer =  
+let montgomery_ladder_2 #a p scalar tempBuffer precomputedTable =  
  let h0 = ST.get() in 
    push_frame();
-     let bufferPrecomputed = create (size 192) (u64 0) in 
-     generatePrecomputedTable bufferPrecomputed p tempBuffer;
 
      [@inline_let]
      let spec_ml h0 = _ml_step (as_seq h0 scalar) in 
@@ -778,7 +777,7 @@ let montgomery_ladder_2 #a p scalar tempBuffer =
 
      for 0ul 64ul inv 
        (fun i -> let h2 = ST.get() in
-	 montgomery_ladder_step_radix p tempBuffer bufferPrecomputed scalar i
+	 montgomery_ladder_step_radix p tempBuffer precomputedTable scalar i
        );
    pop_frame()
 
@@ -853,7 +852,10 @@ let lemma_coord h3 q = ()
 
 
 inline_for_extraction
-val scalarMultiplication_t: #t:buftype -> p: point -> result: point -> 
+val scalarMultiplication_t: #t:buftype ->
+  m: montgomery_ladder_mode ->
+
+   p: point -> result: point -> 
   scalar: lbuffer_t t uint8 (size 32) -> 
   tempBuffer: lbuffer uint64 (size 100) ->
   Stack unit
@@ -880,7 +882,7 @@ val scalarMultiplication_t: #t:buftype -> p: point -> result: point ->
 ) 
 
 
-let scalarMultiplication_t #t p result scalar tempBuffer  = 
+let scalarMultiplication_t #t m p result scalar tempBuffer  = 
 (*
     let h0 = ST.get() in 
   let q = sub tempBuffer (size 0) (size 12) in 
@@ -895,17 +897,29 @@ let scalarMultiplication_t #t p result scalar tempBuffer  =
   norm q result buff; 
     lemma_coord h3 q *)
 
+
+
     let h0 = ST.get() in 
   let q = sub tempBuffer (size 0) (size 12) in 
-  zero_buffer q;
+  (* zero_buffer q; *)
   let buff = sub tempBuffer (size 12) (size 88) in 
   pointToDomain p result;
     let h2 = ST.get() in 
-  montgomery_ladder_2 result scalar buff;
+
+    begin
+  match m with 
+  |Ladder ->
+     let bufferPrecomputed = create (size 192) (u64 0) in 
+     generatePrecomputedTable bufferPrecomputed result buff;
+     montgomery_ladder_2 q scalar buff bufferPrecomputed
+  |Radix4 ->
+      montgomery_ladder q result scalar buff
+  end;
+
     let h3 = ST.get() in 
     lemma_point_to_domain h0 h2 p result;
     lemma_pif_to_domain h2 q;
-  norm result result buff; 
+  norm q result buff; 
     lemma_coord h3 q
 
 
@@ -917,11 +931,11 @@ let scalarMultiplicationL = scalarMultiplication_t #MUT
 let scalarMultiplicationI = scalarMultiplication_t #IMMUT
 let scalarMultiplicationC = scalarMultiplication_t #CONST
 
-let scalarMultiplication #buf_type p result scalar tempBuffer = 
+let scalarMultiplication #buf_type m p result scalar tempBuffer = 
   match buf_type with 
-  |MUT -> scalarMultiplicationL p result scalar tempBuffer 
-  |IMMUT -> scalarMultiplicationI p result scalar tempBuffer
-  |CONST -> scalarMultiplicationC p result scalar tempBuffer
+  |MUT -> scalarMultiplicationL m p result scalar tempBuffer 
+  |IMMUT -> scalarMultiplicationI m p result scalar tempBuffer
+  |CONST -> scalarMultiplicationC m p result scalar tempBuffer
 
 
 inline_for_extraction noextract
@@ -1011,7 +1025,7 @@ let scalarMultiplicationWithoutNorm p result scalar tempBuffer =
   let buff = sub tempBuffer (size 12) (size 88) in 
   pointToDomain p result;
     let h2 = ST.get() in 
-  montgomery_ladder_2 result scalar buff;
+  montgomery_ladder_2_precomputed result scalar buff;
   copy_point q result;  
     let h3 = ST.get() in 
     lemma_point_to_domain h0 h2 p result;
@@ -1046,7 +1060,7 @@ let secretToPublicWithoutNorm result scalar tempBuffer =
     zero_buffer q; 
       let h1 = ST.get() in 
       lemma_pif_to_domain h1 q; 
-    montgomery_ladder_2 basePoint scalar buff; 
+    montgomery_ladder_2_precomputed basePoint scalar buff; 
     copy_point q result;
   pop_frame()  
 

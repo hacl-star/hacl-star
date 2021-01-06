@@ -81,7 +81,9 @@ let ecp256dh_i_radix4 result scalar = Hacl.Impl.P256.DH.ecp256dh_i Radix4 result
 
 
 
-let ecp256dh_r result pubKey scalar = Hacl.Impl.P256.DH.ecp256dh_r result pubKey scalar
+let ecp256dh_r_ladder result pubKey scalar = Hacl.Impl.P256.DH.ecp256dh_r Ladder result pubKey scalar
+
+let ecp256dh_r_radix4 result pubKey scalar = Hacl.Impl.P256.DH.ecp256dh_r Radix4 result pubKey scalar
 
 (* 
 let is_more_than_zero_less_than_order x =

@@ -2221,6 +2221,11 @@ static void pointToDomain(uint64_t *p, uint64_t *result)
   result[11U] = (uint64_t)4294967294U;
 }
 
+static void copy_point(uint64_t *p, uint64_t *result)
+{
+  memcpy(result, p, (uint32_t)12U * sizeof (uint64_t));
+}
+
 static uint64_t isPointAtInfinityPrivate(uint64_t *p)
 {
   uint64_t z0 = p[8U];
@@ -3044,7 +3049,12 @@ static uint32_t getScalar(Lib_Buffer_buftype a, void *scalar, uint32_t i)
 }
 
 static void
-montgomery_ladder_step_radix(uint64_t *p, uint64_t *tempBuffer, uint8_t *scalar, uint32_t i)
+montgomery_ladder_step_radix_precomputed(
+  uint64_t *p,
+  uint64_t *tempBuffer,
+  uint8_t *scalar,
+  uint32_t i
+)
 {
   uint32_t bits = getScalar(Lib_Buffer_MUT, (void *)scalar, i);
   const uint64_t *pointToAdd = points_radix_16 + bits * (uint32_t)8U;
@@ -3056,32 +3066,135 @@ montgomery_ladder_step_radix(uint64_t *p, uint64_t *tempBuffer, uint8_t *scalar,
 }
 
 static void
-scalarMultiplicationL(uint64_t *p, uint64_t *result, uint8_t *scalar, uint64_t *tempBuffer)
+montgomery_ladder_step_radix(
+  uint64_t *p,
+  uint64_t *tempBuffer,
+  uint64_t *precomputedTable,
+  uint8_t *scalar,
+  uint32_t i
+)
+{
+  uint32_t bits = getScalar(Lib_Buffer_MUT, (void *)scalar, i);
+  uint64_t *pointToAdd = precomputedTable + bits * (uint32_t)12U;
+  point_double(p, p, tempBuffer);
+  point_double(p, p, tempBuffer);
+  point_double(p, p, tempBuffer);
+  point_double(p, p, tempBuffer);
+  point_add(pointToAdd, p, p, tempBuffer);
+}
+
+static void uploadZeroPoint(uint64_t *p)
+{
+  uint64_t *uu____0 = p;
+  uint32_t len0 = (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < len0; i++)
+  {
+    uu____0[i] = (uint64_t)0U;
+  }
+  uint64_t *uu____1 = p + (uint32_t)4U;
+  uint32_t len1 = (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < len1; i++)
+  {
+    uu____1[i] = (uint64_t)0U;
+  }
+  uint64_t *uu____2 = p + (uint32_t)8U;
+  uint32_t len = (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < len; i++)
+  {
+    uu____2[i] = (uint64_t)0U;
+  }
+}
+
+static void generatePrecomputedTable(uint64_t *b, uint64_t *publicKey, uint64_t *tempBuffer)
+{
+  uint64_t *point0 = b;
+  uint64_t *point1 = b + (uint32_t)12U;
+  uint64_t *point2 = b + (uint32_t)24U;
+  uint64_t *point3 = b + (uint32_t)36U;
+  uint64_t *point4 = b + (uint32_t)48U;
+  uint64_t *point5 = b + (uint32_t)60U;
+  uint64_t *point6 = b + (uint32_t)72U;
+  uint64_t *point7 = b + (uint32_t)84U;
+  uint64_t *point8 = b + (uint32_t)96U;
+  uint64_t *point9 = b + (uint32_t)108U;
+  uint64_t *point10 = b + (uint32_t)120U;
+  uint64_t *point11 = b + (uint32_t)132U;
+  uint64_t *point12 = b + (uint32_t)144U;
+  uint64_t *point13 = b + (uint32_t)156U;
+  uint64_t *point14 = b + (uint32_t)168U;
+  uint64_t *point15 = b + (uint32_t)180U;
+  uploadZeroPoint(point0);
+  copy_point(publicKey, point1);
+  point_double(publicKey, point2, tempBuffer);
+  point_add(point2, point1, point3, tempBuffer);
+  point_double(point2, point4, tempBuffer);
+  point_add(point4, point1, point5, tempBuffer);
+  point_double(point3, point6, tempBuffer);
+  point_add(point6, point1, point7, tempBuffer);
+  point_double(point4, point8, tempBuffer);
+  point_add(point8, point1, point9, tempBuffer);
+  point_double(point5, point10, tempBuffer);
+  point_add(point10, point1, point11, tempBuffer);
+  point_double(point6, point12, tempBuffer);
+  point_add(point12, point1, point13, tempBuffer);
+  point_double(point7, point14, tempBuffer);
+  point_add(point14, point1, point15, tempBuffer);
+}
+
+static void
+scalarMultiplicationL(
+  Spec_P256_montgomery_ladder_mode m,
+  uint64_t *p,
+  uint64_t *result,
+  uint8_t *scalar,
+  uint64_t *tempBuffer
+)
 {
   uint64_t *q = tempBuffer;
-  q[0U] = (uint64_t)0U;
-  q[1U] = (uint64_t)0U;
-  q[2U] = (uint64_t)0U;
-  q[3U] = (uint64_t)0U;
-  q[4U] = (uint64_t)0U;
-  q[5U] = (uint64_t)0U;
-  q[6U] = (uint64_t)0U;
-  q[7U] = (uint64_t)0U;
-  q[8U] = (uint64_t)0U;
-  q[9U] = (uint64_t)0U;
-  q[10U] = (uint64_t)0U;
-  q[11U] = (uint64_t)0U;
   uint64_t *buff = tempBuffer + (uint32_t)12U;
   pointToDomain(p, result);
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
+  switch (m)
   {
-    montgomery_ladder_step_radix(result, buff, scalar, i);
+    case Spec_P256_Ladder:
+      {
+        uint64_t bufferPrecomputed[192U] = { 0U };
+        generatePrecomputedTable(bufferPrecomputed, result, buff);
+        for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
+        {
+          montgomery_ladder_step_radix(q, buff, bufferPrecomputed, scalar, i);
+        }
+        break;
+      }
+    case Spec_P256_Radix4:
+      {
+        for (uint32_t i = (uint32_t)0U; i < (uint32_t)256U; i++)
+        {
+          uint32_t bit0 = (uint32_t)255U - i;
+          uint64_t
+          bit =
+            (uint64_t)(scalar[(uint32_t)31U
+            - bit0 / (uint32_t)8U]
+            >> bit0 % (uint32_t)8U
+            & (uint8_t)1U);
+          cswap(bit, q, result);
+          point_add(q, result, result, buff);
+          point_double(q, q, buff);
+          cswap(bit, q, result);
+        }
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
   }
   norm(q, result, buff);
 }
 
 static void
 scalarMultiplicationC(
+  Spec_P256_montgomery_ladder_mode m,
   uint64_t *p,
   uint64_t *result,
   const uint8_t *scalar,
@@ -3089,23 +3202,43 @@ scalarMultiplicationC(
 )
 {
   uint64_t *q = tempBuffer;
-  q[0U] = (uint64_t)0U;
-  q[1U] = (uint64_t)0U;
-  q[2U] = (uint64_t)0U;
-  q[3U] = (uint64_t)0U;
-  q[4U] = (uint64_t)0U;
-  q[5U] = (uint64_t)0U;
-  q[6U] = (uint64_t)0U;
-  q[7U] = (uint64_t)0U;
-  q[8U] = (uint64_t)0U;
-  q[9U] = (uint64_t)0U;
-  q[10U] = (uint64_t)0U;
-  q[11U] = (uint64_t)0U;
   uint64_t *buff = tempBuffer + (uint32_t)12U;
   pointToDomain(p, result);
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
+  switch (m)
   {
-    montgomery_ladder_step_radix(result, buff, (uint8_t *)scalar, i);
+    case Spec_P256_Ladder:
+      {
+        uint64_t bufferPrecomputed[192U] = { 0U };
+        generatePrecomputedTable(bufferPrecomputed, result, buff);
+        for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
+        {
+          montgomery_ladder_step_radix(q, buff, bufferPrecomputed, (uint8_t *)scalar, i);
+        }
+        break;
+      }
+    case Spec_P256_Radix4:
+      {
+        for (uint32_t i = (uint32_t)0U; i < (uint32_t)256U; i++)
+        {
+          uint32_t bit0 = (uint32_t)255U - i;
+          uint64_t
+          bit =
+            (uint64_t)(scalar[(uint32_t)31U
+            - bit0 / (uint32_t)8U]
+            >> bit0 % (uint32_t)8U
+            & (uint8_t)1U);
+          cswap(bit, q, result);
+          point_add(q, result, result, buff);
+          point_double(q, q, buff);
+          cswap(bit, q, result);
+        }
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
   }
   norm(q, result, buff);
 }
@@ -3240,7 +3373,7 @@ static bool isOrderCorrect(uint64_t *p, uint64_t *tempBuffer)
   uint64_t multResult[12U] = { 0U };
   uint64_t pBuffer[12U] = { 0U };
   memcpy(pBuffer, p, (uint32_t)12U * sizeof (uint64_t));
-  scalarMultiplicationC(pBuffer, multResult, order_buffer, tempBuffer);
+  scalarMultiplicationC(Spec_P256_Radix4, pBuffer, multResult, order_buffer, tempBuffer);
   bool result = isPointAtInfinityPublic(multResult);
   return result;
 }
@@ -3462,7 +3595,7 @@ bool Hacl_P256_ecp256dh_i_radix4(uint8_t *result, uint8_t *scalar)
   uint64_t *buff = tempBuffer + (uint32_t)12U;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
   {
-    montgomery_ladder_step_radix(resultBuffer, buff, scalar, i);
+    montgomery_ladder_step_radix_precomputed(resultBuffer, buff, scalar, i);
   }
   norm(resultBuffer, resultBuffer, buff);
   uint64_t flag = isPointAtInfinityPrivate(resultBuffer);
@@ -3482,7 +3615,7 @@ bool Hacl_P256_ecp256dh_i_radix4(uint8_t *result, uint8_t *scalar)
  Output: bool, where True stands for the correct key generation. False value means that an error has occurred (possibly the provided public key was incorrect or the result represents point at infinity). 
   
 */
-bool Hacl_P256_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar)
+bool Hacl_P256_ecp256dh_r_ladder(uint8_t *result, uint8_t *pubKey, uint8_t *scalar)
 {
   uint64_t resultBufferFelem[12U] = { 0U };
   uint64_t publicKeyAsFelem[12U] = { 0U };
@@ -3492,7 +3625,48 @@ bool Hacl_P256_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar)
   uint64_t flag;
   if (publicKeyCorrect)
   {
-    scalarMultiplicationL(publicKeyAsFelem, resultBufferFelem, scalar, tempBuffer);
+    scalarMultiplicationL(Spec_P256_Ladder,
+      publicKeyAsFelem,
+      resultBufferFelem,
+      scalar,
+      tempBuffer);
+    flag = isPointAtInfinityPrivate(resultBufferFelem);
+  }
+  else
+  {
+    flag = (uint64_t)18446744073709551615U;
+  }
+  fromFormPoint(resultBufferFelem, result);
+  return flag == (uint64_t)0U;
+}
+
+/*
+ 
+   The pub(lic)_key input of the function is considered to be public, 
+  thus this code is not secret independent with respect to the operations done over this variable.
+  
+ Input: result: uint8[64], 
+ pub(lic)Key: uint8[64], 
+ scalar: uint8[32].
+  
+ Output: bool, where True stands for the correct key generation. False value means that an error has occurred (possibly the provided public key was incorrect or the result represents point at infinity). 
+  
+*/
+bool Hacl_P256_ecp256dh_r_radix4(uint8_t *result, uint8_t *pubKey, uint8_t *scalar)
+{
+  uint64_t resultBufferFelem[12U] = { 0U };
+  uint64_t publicKeyAsFelem[12U] = { 0U };
+  uint64_t tempBuffer[100U] = { 0U };
+  toFormPoint(pubKey, publicKeyAsFelem);
+  bool publicKeyCorrect = verifyQValidCurvePoint(publicKeyAsFelem, tempBuffer);
+  uint64_t flag;
+  if (publicKeyCorrect)
+  {
+    scalarMultiplicationL(Spec_P256_Radix4,
+      publicKeyAsFelem,
+      resultBufferFelem,
+      scalar,
+      tempBuffer);
     flag = isPointAtInfinityPrivate(resultBufferFelem);
   }
   else

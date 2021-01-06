@@ -189,7 +189,7 @@ let multByOrder result p tempBuffer =
   assert (disjoint p order_buffer);
   assert (disjoint result order_buffer);
   assert (disjoint tempBuffer order_buffer);
-  scalarMultiplication p result order_buffer tempBuffer
+  scalarMultiplication Radix4 p result order_buffer tempBuffer
 #pop-options
 
 inline_for_extraction noextract

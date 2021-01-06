@@ -206,7 +206,7 @@ let scalarMult m result pubKey scalar =
   let flag = 
     if publicKeyCorrect then
       begin
-      scalarMultiplication publicKeyAsFelem resultBufferFelem scalar tempBuffer;
+      scalarMultiplication m publicKeyAsFelem resultBufferFelem scalar tempBuffer;
       isPointAtInfinityPrivate resultBufferFelem 
       end
     else 
@@ -256,7 +256,7 @@ let scalarMultRaw result pubKey scalar =
     
   toFormPoint pubKey publicKeyAsFelem; 
   (* with normalisation *)
-  scalarMultiplication publicKeyAsFelem resultBufferFelem scalar tempBuffer;
+  scalarMultiplication Radix4 publicKeyAsFelem resultBufferFelem scalar tempBuffer;
   fromFormPoint resultBufferFelem result;
 
   pop_frame()

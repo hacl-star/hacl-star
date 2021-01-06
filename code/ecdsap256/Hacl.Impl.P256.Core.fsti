@@ -170,7 +170,8 @@ val montgomery_ladder_step_radix:
 
 
 inline_for_extraction noextract
-val scalarMultiplication: #buf_type: buftype->  p: point -> result: point -> 
+val scalarMultiplication: #buf_type: buftype-> m: montgomery_ladder_mode ->
+ p: point -> result: point -> 
   scalar: lbuffer_t buf_type uint8 (size 32) -> 
   tempBuffer: lbuffer uint64 (size 100) ->
   Stack unit
