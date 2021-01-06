@@ -660,6 +660,13 @@ let lognot_lemma #t #l a =
     Int.nth_lemma (FStar.Int.lognot #(bits t) (Int.zero (bits t))) (Int.ones (bits t));
     Int.nth_lemma (FStar.Int.lognot #(bits t) (Int.ones (bits t))) (Int.zero (bits t))
 
+let lognot_spec #t #l a =
+  match t with
+  | U1 ->
+    assert_norm(lognot (u1 0) == u1 1 /\ lognot (u1 1)  == u1 0);
+    assert_norm(lognot_v #U1 0 == 1 /\ lognot_v #U1 1 == 0)
+  | _ -> ()
+
 
 [@(strict_on_arguments [0])]
 let shift_right #t #l a b =
