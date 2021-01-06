@@ -669,8 +669,11 @@ val matrix_from_lbytes:
 [@"c_inline"]
 let matrix_from_lbytes #n1 #n2 b res =
   let h0 = ST.get () in
+  assert (v n1 * v n2 <= max_size_t);
   fill h0 (n1 *! n2) res
   (fun h -> M.matrix_from_lbytes_f (v n1) (v n2) (as_seq h0 b))
-  (fun i -> uint_from_bytes_le #U16 (sub b (2ul *! i) 2ul));
+  (fun i ->
+    assert (2 * v i + 2 <= 2 * v n1 * v n2);
+    uint_from_bytes_le #U16 (sub b (2ul *! i) 2ul));
   let h1 = ST.get () in
   M.extensionality (as_matrix h1 res) (M.matrix_from_lbytes (v n1) (v n2) (as_seq h0 b))
