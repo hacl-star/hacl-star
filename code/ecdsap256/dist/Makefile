@@ -4,6 +4,8 @@
 
 CC = gcc-9
 CFLAGS += -I . -march=native -mtune=native -O3
+CProfiling += -pg
+
 export CFLAGS
 
 test.exe: test.c Hacl_P256.o
@@ -11,3 +13,11 @@ test.exe: test.c Hacl_P256.o
 	$^ \
 	-o test.exe
 
+
+
+profile: test.c Hacl_P256.o
+	$(CC) $(CFLAGS) $(CProfiling) \
+	$^ \
+	-o test.exe	
+	./test.exe
+	gprof ./test.exe
