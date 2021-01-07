@@ -3558,7 +3558,15 @@ bool Hacl_P256_ecp256dh_i_radix4(uint8_t *result, uint8_t *scalar)
   uint64_t tempBuffer[100U] = { 0U };
   uint64_t resultBuffer[12U] = { 0U };
   uint64_t *buff = tempBuffer + (uint32_t)12U;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
+  uint32_t bits = getScalar(Lib_Buffer_MUT, (void *)scalar, (uint32_t)(krml_checked_int_t)0);
+  const uint64_t *pointToStart = points_radix_16 + bits * (uint32_t)8U;
+  uint64_t *pointToStart1 = const_to_lbuffer__uint64_t(pointToStart);
+  memcpy(resultBuffer, pointToStart1, (uint32_t)8U * sizeof (uint64_t));
+  resultBuffer[8U] = (uint64_t)1U;
+  resultBuffer[9U] = (uint64_t)0U;
+  resultBuffer[10U] = (uint64_t)0U;
+  resultBuffer[11U] = (uint64_t)0U;
+  for (uint32_t i = (uint32_t)1U; i < (uint32_t)64U; i++)
   {
     montgomery_ladder_step_radix_precomputed(resultBuffer, buff, scalar, i);
   }

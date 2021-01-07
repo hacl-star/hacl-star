@@ -698,19 +698,20 @@ let montgomery_ladder_2_precomputed #a p scalar tempBuffer =
   [@inline_let]
   let inv h (i: nat {i <= 64}) = True in 
 
-(* 
+ 
   let bits: uint32 = getScalar scalar 0 in 
   let pointToStart = sub points_radix_16 (bits *. size 8) (size 8) in 
+  let pointToStart = const_to_lbuffer pointToStart in 
 
-  copy pointToStart (gsub point (size 0) (size 8));
+  copy (sub p (size 0) (size 8)) pointToStart;
 
-  upd point (size 8) (u64 1);
-  upd point (size 9) (u64 0);
-  upd point (size 10) (u64 0);
-  upd point (size 11) (u64 0);
+  upd p (size 8) (u64 1);
+  upd p (size 9) (u64 0);
+  upd p (size 10) (u64 0);
+  upd p (size 11) (u64 0);
 
-*)
-  for 0ul 64ul inv 
+
+  for 1ul 64ul inv 
     (fun i -> let h2 = ST.get() in
       montgomery_ladder_step_radix_precomputed p tempBuffer scalar i
     )
