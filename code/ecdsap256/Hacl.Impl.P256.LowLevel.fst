@@ -391,7 +391,7 @@ let sub4 x y result =
     
   cc
 
-
+[@ CInline]
 val mul64: x: uint64 -> y: uint64 -> result: lbuffer uint64 (size 1) -> temp: lbuffer uint64 (size 1) ->
   Stack unit
     (requires fun h -> live h result /\ live h temp /\ disjoint result temp)
@@ -1410,7 +1410,7 @@ let sq3 f f4 result memory tempBuffer =
   lemma_320_1 (as_nat h7 result) (uint_v c4 + uint_v c3 + uint_v h_3) (uint_v f3) (as_nat h0 f) (as_nat h0 f4);
   c3 +! h_3 +! c4
 
-
+inline_for_extraction noextract
 val sq: f: felem -> out: widefelem -> Stack unit
     (requires fun h -> live h out /\ live h f /\ eq_or_disjoint f out)
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\ wide_as_nat h1 out = as_nat h0 f * as_nat h0 f)
@@ -1506,6 +1506,7 @@ let sq f out =
 
   pop_frame()
 
+inline_for_extraction noextract
 val cmovznz4: cin: uint64 -> x: felem -> y: felem -> result: felem ->
   Stack unit
     (requires fun h -> live h x /\ live h y /\ live h result /\ disjoint x result /\ eq_or_disjoint y result)

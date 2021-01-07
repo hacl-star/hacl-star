@@ -32,6 +32,7 @@ friend Hacl.Impl.P256.PointAdd
 
 #set-options "--z3rlimit 300 --fuel 0 --ifuel 0"
 
+inline_for_extraction noextract 
 val pointAffineIsNotZero: p: pointAffine -> Stack uint64
   (requires fun h -> live h p /\ (
     let x = as_nat_il h (gsub p (size 0) (size 4)) in 
@@ -49,14 +50,6 @@ let pointAffineIsNotZero p =
   let yZero = isZero_uint64_CT_global y in 
   logand_lemma xZero yZero;
   logand xZero yZero
-
-
-val pointJacobianIsNotZero: p: point -> Stack uint64
-  (requires fun h -> True)
-  (ensures fun h0 _ h1 -> True)
-
-
-let pointJacobianIsNotZero p = u64 0
 
 
 inline_for_extraction noextract 
@@ -153,6 +146,7 @@ let computeZ3_point_add_mixed z3 z1 h tempBuffer =
   montgomery_multiplication_buffer_by_one z1 z1z2;
   montgomery_multiplication_buffer z1z2 h z3
 
+inline_for_extraction noextract
 val cmovznz: out: felem -> x: felem -> y: felem -> mask: uint64 -> Stack unit
   (requires fun h -> as_nat h x < prime256 /\ as_nat h y < prime256 /\
     live h out /\ live h x /\ live h y /\ (uint_v mask == 0 \/ uint_v mask = pow2 64 - 1))
@@ -190,6 +184,7 @@ let cmovznz out x y mask =
   cmovznz4_lemma mask (Seq.index y 3) (Seq.index x 3)
 
 
+inline_for_extraction noextract
 val cmovznz_one_mm: out: felem -> mask: uint64 -> Stack unit
   (requires fun h ->
     as_nat h out < prime256 /\
@@ -234,7 +229,7 @@ let cmovznz_one_mm out mask =
   assert_norm (pow2 64 * pow2 64 = pow2 128);
   assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192)
 
-
+inline_for_extraction noextract 
 val copy_point_conditional_affine_to_result: out: point 
   -> q: pointAffine 
   -> maskPoint: point
@@ -303,7 +298,7 @@ let copy_point_conditional_affine_to_result out q maskPoint =
   lemma_multiplication_not_mod_prime (as_nat h0 pZ);
   lemmaFromDomain (as_nat h0 pZ)
 
-
+inline_for_extraction noextract 
 val copy_point_conditional_jac_to_result: out: point 
   -> q: point 
   -> maskPoint: pointAffine
@@ -365,7 +360,7 @@ let copy_point_conditional_jac_to_result out q maskPoint =
   Hacl.Impl.P256.Q.PrimitivesMasking.copy_conditional yOut qY mask;
   Hacl.Impl.P256.Q.PrimitivesMasking.copy_conditional zOut qZ mask
 
-
+inline_for_extraction noextract
 val copy_point_conditional: result: point -> x: point -> p: point -> maskPoint: pointAffine -> Stack unit
   (requires fun h -> live h result /\ live h p /\ live h maskPoint /\ live h x /\
     disjoint x result /\ eq_or_disjoint p result /\

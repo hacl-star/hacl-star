@@ -97,7 +97,7 @@ let pointFromDomain p result =
     fromDomain p_y r_y;
     fromDomain p_z r_z
 
-
+inline_for_extraction noextract
 val copy_point: p: point -> result: point -> Stack unit 
   (requires fun h -> live h p /\ live h result /\ disjoint p result) 
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_seq h1 result == as_seq h0 p)
@@ -716,7 +716,7 @@ let montgomery_ladder_2_precomputed #a p scalar tempBuffer =
       montgomery_ladder_step_radix_precomputed p tempBuffer scalar i
     )
 
-
+inline_for_extraction noextract
 val uploadZeroPoint: p: point -> Stack unit 
   (requires fun h -> True)
   (ensures fun h0 _ h1 -> True)
@@ -727,6 +727,7 @@ let uploadZeroPoint p =
   uploadZeroImpl (sub p (size 8) (size 4))
 
 
+[@ CInline]
 val generatePrecomputedTable: b: lbuffer uint64 (size 192) -> publicKey: point ->
   tempBuffer: lbuffer uint64 (size 88) -> Stack unit  
   (requires fun h -> True)

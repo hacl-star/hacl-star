@@ -214,6 +214,7 @@ let montgomery_multiplication_buffer_by_one a result =
   pop_frame()  
 
 
+ [@ CInline]
 val montgomery_multiplication_buffer: a: felem -> b: felem -> result: felem ->  Stack unit
   (requires (fun h -> live h a /\ 
     as_nat h a < prime256 /\ 
@@ -278,6 +279,7 @@ let montgomery_multiplication_buffer a b result =
   pop_frame()  
 
 
+ [@ CInline]
 val montgomery_square_buffer: a: felem -> result: felem ->  Stack unit
   (requires (fun h -> live h a /\ as_nat h a < prime256 /\ live h result)) 
   (ensures (fun h0 _ h1 -> 
@@ -507,6 +509,7 @@ val lemma_mul_nat: a: nat -> b: nat -> Lemma (a * b >= 0)
 let lemma_mul_nat a b = ()
 
 
+ [@ CInline]
 val exponent: a: felem ->result: felem -> tempBuffer: lbuffer uint64 (size 20) ->  Stack unit
   (requires fun h -> live h a /\ live h tempBuffer /\ live h result /\ disjoint tempBuffer result /\ 
   disjoint a tempBuffer /\ as_nat h a < prime256)

@@ -178,6 +178,7 @@ let lemma_t_computation2 t =
   assert_norm(18446744073709551615 + 4294967295 * pow2 64 + 18446744069414584321 * pow2 192 = prime256)
 
 
+[@ CInline]
 val p256_add: arg1: felem -> arg2: felem ->  out: felem -> Stack unit 
   (requires (fun h0 ->  
     live h0 arg1 /\ live h0 arg2 /\ live h0 out /\ 
@@ -203,6 +204,7 @@ let p256_add arg1 arg2 out =
     (* lemma_eq_funct (as_seq h2 out) (felem_add_seq (as_seq h0 arg1) (as_seq h0 arg2)) *)
 
 
+[@ CInline]
 val p256_double: arg1: felem ->  out: felem -> Stack unit 
   (requires (fun h0 ->  live h0 arg1 /\ live h0 out /\ eq_or_disjoint arg1 out /\ as_nat h0 arg1 < prime256))
   (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\ 
@@ -221,6 +223,7 @@ let p256_double arg1 out =
   inDomain_mod_is_not_mod (fromDomain_ (as_nat h0 arg1) + fromDomain_ (as_nat h0 arg1))
 
 
+ [@ CInline]
 val p256_sub: arg1: felem -> arg2: felem -> out: felem -> Stack unit 
   (requires 
     (fun h0 -> live h0 out /\ live h0 arg1 /\ live h0 arg2 /\ 

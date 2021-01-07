@@ -24,12 +24,13 @@ open FStar.Math.Lemmas
 module B = LowStar.Buffer
 open FStar.Mul
 
-
+[@ CInline]
 inline_for_extraction noextract
 val toDomain: value: felem -> result: felem ->  Stack unit 
   (requires fun h ->  as_nat h value < prime /\ live h value /\live h result /\ eq_or_disjoint value result)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat h1 result = toDomain_ (as_nat h0 value))
  
+[@ CInline]
 inline_for_extraction noextract 
 val fromDomain: f: felem-> result: felem-> Stack unit 
   (requires fun h -> live h f /\ live h result /\ as_nat h f < prime)
@@ -69,6 +70,8 @@ let point_z_as_nat (h: mem) (e: point) : GTot nat =
   as_nat4 (s0, s1, s2, s3)
 
 
+[@ CInline]
+inline_for_extraction noextract  
 val pointToDomain: p: point -> result: point -> Stack unit 
   (requires fun h -> live h p /\ live h result /\ eq_or_disjoint p result /\ 
     point_x_as_nat h p < prime /\ point_y_as_nat h p < prime /\ point_z_as_nat h p < prime)
@@ -78,6 +81,8 @@ val pointToDomain: p: point -> result: point -> Stack unit
     point_z_as_nat h1 result == toDomain_ (point_z_as_nat h0 p))
 
 
+[@ CInline]
+inline_for_extraction noextract  
 val pointFromDomain: p: point -> result: point-> Stack unit 
   (requires fun h -> live h p /\ live h result /\ eq_or_disjoint p result /\ 
   point_x_as_nat h p < prime /\ point_y_as_nat h p < prime /\ point_z_as_nat h p < prime)
@@ -87,6 +92,7 @@ val pointFromDomain: p: point -> result: point-> Stack unit
     point_z_as_nat h1 result == fromDomain_ (point_z_as_nat h0 p))
     
 
+[@ CInline]
 val isPointAtInfinityPrivate: p: point -> Stack uint64
   (requires fun h -> live h p /\ as_nat h (gsub p (size 8) (size 4)) < prime)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\      
@@ -103,6 +109,7 @@ val isPointAtInfinityPrivate: p: point -> Stack uint64
    )
   )
 
+[@ CInline]
 val norm: p: point -> resultPoint: point -> tempBuffer: lbuffer uint64 (size 88) -> Stack unit
   (requires fun h -> live h p /\ live h resultPoint /\ live h tempBuffer /\ disjoint p tempBuffer /\ disjoint tempBuffer resultPoint /\ 
     as_nat h (gsub p (size 0) (size 4)) < prime /\
@@ -120,6 +127,7 @@ val norm: p: point -> resultPoint: point -> tempBuffer: lbuffer uint64 (size 88)
   )
 
 
+[@ CInline]
 val normX: p: point -> result: felem -> tempBuffer: lbuffer uint64 (size 88) -> Stack unit
   (requires fun h -> live h p /\ live h result /\ live h tempBuffer /\
     LowStar.Monotonic.Buffer.all_disjoint [loc p; loc result; loc tempBuffer] /\ 
@@ -140,12 +148,16 @@ val normX: p: point -> result: felem -> tempBuffer: lbuffer uint64 (size 88) -> 
   )
 
 
+[@ CInline]
+inline_for_extraction noextract  
 val getScalar: #buf_type: buftype -> scalar: lbuffer_t buf_type uint8 (size 32) -> i: size_t {v i < 64} -> 
   Stack uint32 
     (requires fun h -> True)
     (ensures fun h0 _ h1 -> True)
 
 
+[@ CInline]
+inline_for_extraction noextract  
 val montgomery_ladder_step_radix_precomputed: 
   p: point -> tempBuffer: lbuffer uint64 (size 88) -> 
   scalar:  lbuffer uint8 (size 32)-> 
@@ -155,7 +167,8 @@ val montgomery_ladder_step_radix_precomputed:
     LowStar.Monotonic.Buffer.all_disjoint [loc p;loc tempBuffer; loc scalar])
   (ensures fun h0 _ h1 -> True)
 
-
+[@ CInline]
+inline_for_extraction noextract  
 val montgomery_ladder_step_radix: 
   p: point -> tempBuffer: lbuffer uint64 (size 88) -> 
   precomputedTable: lbuffer uint64 (size 192) ->
@@ -168,7 +181,7 @@ val montgomery_ladder_step_radix:
 
 
 
-
+[@ CInline]
 inline_for_extraction noextract
 val scalarMultiplication: #buf_type: buftype-> m: montgomery_ladder_mode ->
  p: point -> result: point -> 
@@ -195,7 +208,7 @@ val scalarMultiplication: #buf_type: buftype-> m: montgomery_ladder_mode ->
   )
 ) 
 
-
+[@ CInline]
 val scalarMultiplicationWithoutNorm: p: point -> result: point -> 
   scalar: lbuffer  uint8 (size 32) -> 
   tempBuffer: lbuffer uint64 (size 100) ->
@@ -222,6 +235,7 @@ val scalarMultiplicationWithoutNorm: p: point -> result: point ->
   )
 ) 
 
+[@ CInline]
 inline_for_extraction noextract
 val secretToPublic: 
    m: montgomery_ladder_mode 
