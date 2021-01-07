@@ -686,6 +686,9 @@ val montgomery_ladder_2_precomputed: #buf_type: buftype -> p: point ->
 let montgomery_ladder_2_precomputed #a p scalar tempBuffer =  
  let h0 = ST.get() in 
 
+
+
+
   [@inline_let]
   let spec_ml h0 = _ml_step (as_seq h0 scalar) in 
 
@@ -695,6 +698,18 @@ let montgomery_ladder_2_precomputed #a p scalar tempBuffer =
   [@inline_let]
   let inv h (i: nat {i <= 64}) = True in 
 
+(* 
+  let bits: uint32 = getScalar scalar 0 in 
+  let pointToStart = sub points_radix_16 (bits *. size 8) (size 8) in 
+
+  copy pointToStart (gsub point (size 0) (size 8));
+
+  upd point (size 8) (u64 1);
+  upd point (size 9) (u64 0);
+  upd point (size 10) (u64 0);
+  upd point (size 11) (u64 0);
+
+*)
   for 0ul 64ul inv 
     (fun i -> let h2 = ST.get() in
       montgomery_ladder_step_radix_precomputed p tempBuffer scalar i
