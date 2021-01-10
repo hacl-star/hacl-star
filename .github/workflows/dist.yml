@@ -2,7 +2,7 @@ name: Dist CI
 
 on:
   push:
-    branches: [ master, franziskus/dist-ci ]
+    branches: [ master ]
   pull_request:
     branches: [ master ]
   workflow_dispatch:
