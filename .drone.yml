@@ -9,7 +9,7 @@ steps:
 - name: test
   image: rust:latest
   commands:
-  - apt update -qq --yes && apt install -qq --yes software-properties-common
+  - apt update -qq --yes && apt install -qq --yes software-properties-common gnupg-agent
   - add-apt-repository -y ppa:avsm/ppa
   - apt update -qq --yes && apt install -qq --yes opam aspcud ocaml clang
   - opam init --yes --bare
@@ -30,6 +30,7 @@ steps:
 - name: test
   image: rust:latest
   commands:
+  - apt update -qq --yes && apt install -qq --yes software-properties-common gnupg-agent
   - add-apt-repository -y ppa:avsm/ppa
   - apt update -qq --yes && apt install -qq --yes opam aspcud ocaml clang
   - opam init --yes --bare
