@@ -29,8 +29,7 @@
 static inline void add_mod_n(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *res)
 {
   uint64_t c0 = (uint64_t)0U;
-  uint32_t k0 = (uint32_t)64U;
-  for (uint32_t i = (uint32_t)0U; i < k0 / (uint32_t)4U; i++)
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
   {
     uint64_t t1 = a[(uint32_t)4U * i];
     uint64_t t20 = b[(uint32_t)4U * i];
@@ -45,7 +44,7 @@ static inline void add_mod_n(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *re
     uint64_t t2 = b[(uint32_t)4U * i + (uint32_t)3U];
     c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t12, t2, res + (uint32_t)4U * i + (uint32_t)3U);
   }
-  for (uint32_t i = k0; i < (uint32_t)64U; i++)
+  for (uint32_t i = (uint32_t)64U; i < (uint32_t)64U; i++)
   {
     uint64_t t1 = a[i];
     uint64_t t2 = b[i];
@@ -54,8 +53,7 @@ static inline void add_mod_n(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *re
   uint64_t c00 = c0;
   uint64_t tmp[64U] = { 0U };
   uint64_t c = (uint64_t)0U;
-  uint32_t k = (uint32_t)64U;
-  for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
   {
     uint64_t t1 = res[(uint32_t)4U * i];
     uint64_t t20 = n[(uint32_t)4U * i];
@@ -70,7 +68,7 @@ static inline void add_mod_n(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *re
     uint64_t t2 = n[(uint32_t)4U * i + (uint32_t)3U];
     c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t12, t2, tmp + (uint32_t)4U * i + (uint32_t)3U);
   }
-  for (uint32_t i = k; i < (uint32_t)64U; i++)
+  for (uint32_t i = (uint32_t)64U; i < (uint32_t)64U; i++)
   {
     uint64_t t1 = res[i];
     uint64_t t2 = n[i];
@@ -99,8 +97,7 @@ static inline void mul(uint64_t *a, uint64_t *b, uint64_t *res)
     uint64_t uu____0 = b[i0];
     uint64_t *res_ = res + i0;
     uint64_t c = (uint64_t)0U;
-    uint32_t k = (uint32_t)64U;
-    for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
     {
       c =
         Hacl_Bignum_Base_mul_wide_add2_u64(a[(uint32_t)4U * i],
@@ -123,7 +120,7 @@ static inline void mul(uint64_t *a, uint64_t *b, uint64_t *res)
           c,
           res_ + (uint32_t)4U * i + (uint32_t)3U);
     }
-    for (uint32_t i = k; i < (uint32_t)64U; i++)
+    for (uint32_t i = (uint32_t)64U; i < (uint32_t)64U; i++)
     {
       c = Hacl_Bignum_Base_mul_wide_add2_u64(a[i], uu____0, c, res_ + i);
     }
@@ -145,8 +142,7 @@ static inline void sqr(uint64_t *a, uint64_t *res)
     uint64_t uu____0 = a[i0];
     uint64_t *res_ = res + i0;
     uint64_t c = (uint64_t)0U;
-    uint32_t k = (uint32_t)64U;
-    for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
     {
       c =
         Hacl_Bignum_Base_mul_wide_add2_u64(a[(uint32_t)4U * i],
@@ -169,7 +165,7 @@ static inline void sqr(uint64_t *a, uint64_t *res)
           c,
           res_ + (uint32_t)4U * i + (uint32_t)3U);
     }
-    for (uint32_t i = k; i < (uint32_t)64U; i++)
+    for (uint32_t i = (uint32_t)64U; i < (uint32_t)64U; i++)
     {
       c = Hacl_Bignum_Base_mul_wide_add2_u64(a[i], uu____0, c, res_ + i);
     }
@@ -206,8 +202,7 @@ static inline void reduction(uint64_t *n, uint64_t nInv, uint64_t *c, uint64_t *
     uint64_t qj = nInv * c[i0];
     uint64_t *res_ = c + i0;
     uint64_t c1 = (uint64_t)0U;
-    uint32_t k = (uint32_t)64U;
-    for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
     {
       c1 = Hacl_Bignum_Base_mul_wide_add2_u64(n[(uint32_t)4U * i], qj, c1, res_ + (uint32_t)4U * i);
       c1 =
@@ -226,7 +221,7 @@ static inline void reduction(uint64_t *n, uint64_t nInv, uint64_t *c, uint64_t *
           c1,
           res_ + (uint32_t)4U * i + (uint32_t)3U);
     }
-    for (uint32_t i = k; i < (uint32_t)64U; i++)
+    for (uint32_t i = (uint32_t)64U; i < (uint32_t)64U; i++)
     {
       c1 = Hacl_Bignum_Base_mul_wide_add2_u64(n[i], qj, c1, res_ + i);
     }
@@ -242,8 +237,7 @@ static inline void reduction(uint64_t *n, uint64_t nInv, uint64_t *c, uint64_t *
   uint64_t uu____0 = c0;
   uint64_t tmp[64U] = { 0U };
   uint64_t c1 = (uint64_t)0U;
-  uint32_t k = (uint32_t)64U;
-  for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
   {
     uint64_t t1 = res[(uint32_t)4U * i];
     uint64_t t20 = n[(uint32_t)4U * i];
@@ -266,7 +260,7 @@ static inline void reduction(uint64_t *n, uint64_t nInv, uint64_t *c, uint64_t *
     uint64_t t2 = n[(uint32_t)4U * i + (uint32_t)3U];
     c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t12, t2, tmp + (uint32_t)4U * i + (uint32_t)3U);
   }
-  for (uint32_t i = k; i < (uint32_t)64U; i++)
+  for (uint32_t i = (uint32_t)64U; i < (uint32_t)64U; i++)
   {
     uint64_t t1 = res[i];
     uint64_t t2 = n[i];
@@ -383,8 +377,7 @@ static inline uint64_t ffdhe_check_pk(uint64_t *pk_n, uint64_t *p_n)
     uint64_t *a1 = p_n + (uint32_t)1U;
     uint64_t *res1 = p_n1 + (uint32_t)1U;
     uint64_t c = c0;
-    uint32_t k = rLen / (uint32_t)4U * (uint32_t)4U;
-    for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
+    for (uint32_t i = (uint32_t)0U; i < rLen / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
     {
       uint64_t t1 = a1[(uint32_t)4U * i];
       c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, (uint64_t)0U, res1 + (uint32_t)4U * i);
@@ -407,7 +400,7 @@ static inline uint64_t ffdhe_check_pk(uint64_t *pk_n, uint64_t *p_n)
           (uint64_t)0U,
           res1 + (uint32_t)4U * i + (uint32_t)3U);
     }
-    for (uint32_t i = k; i < rLen; i++)
+    for (uint32_t i = rLen / (uint32_t)4U * (uint32_t)4U; i < rLen; i++)
     {
       uint64_t t1 = a1[i];
       c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, (uint64_t)0U, res1 + i);

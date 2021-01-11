@@ -140,10 +140,9 @@ static inline uint64_t ffdhe_check_pk(Spec_FFDHE_ffdhe_alg a, uint64_t *pk_n, ui
         uint64_t *a1 = p_n + (uint32_t)1U;
         uint64_t *res1 = p_n1 + (uint32_t)1U;
         uint64_t c = c0;
-        uint32_t k = rLen / (uint32_t)4U * (uint32_t)4U;
         {
           uint32_t i;
-          for (i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
+          for (i = (uint32_t)0U; i < rLen / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
           {
             uint64_t t1 = a1[(uint32_t)4U * i];
             c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, (uint64_t)0U, res1 + (uint32_t)4U * i);
@@ -175,7 +174,7 @@ static inline uint64_t ffdhe_check_pk(Spec_FFDHE_ffdhe_alg a, uint64_t *pk_n, ui
         }
         {
           uint32_t i;
-          for (i = k; i < rLen; i++)
+          for (i = rLen / (uint32_t)4U * (uint32_t)4U; i < rLen; i++)
           {
             uint64_t t1 = a1[i];
             c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, (uint64_t)0U, res1 + i);

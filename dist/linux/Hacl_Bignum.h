@@ -54,6 +54,45 @@ static inline u64 Hacl_Bignum_Base_mul_wide_add2_u64(u64 a, u64 b, u64 c_in, u64
   return (uint64_t)(res >> (u32)64U);
 }
 
+static inline u64 Hacl_Bignum_Addition_bn_add_eq_len_u64(u32 aLen, u64 *a, u64 *b, u64 *res)
+{
+  u64 c = (u64)0U;
+  {
+    u32 i;
+    for (i = (u32)0U; i < aLen / (u32)4U * (u32)4U / (u32)4U; i++)
+    {
+      u64 t1 = a[(u32)4U * i];
+      u64 t20 = b[(u32)4U * i];
+      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t20, res + (u32)4U * i);
+      {
+        u64 t10 = a[(u32)4U * i + (u32)1U];
+        u64 t21 = b[(u32)4U * i + (u32)1U];
+        c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t10, t21, res + (u32)4U * i + (u32)1U);
+        {
+          u64 t11 = a[(u32)4U * i + (u32)2U];
+          u64 t22 = b[(u32)4U * i + (u32)2U];
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t22, res + (u32)4U * i + (u32)2U);
+          {
+            u64 t12 = a[(u32)4U * i + (u32)3U];
+            u64 t2 = b[(u32)4U * i + (u32)3U];
+            c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t2, res + (u32)4U * i + (u32)3U);
+          }
+        }
+      }
+    }
+  }
+  {
+    u32 i;
+    for (i = aLen / (u32)4U * (u32)4U; i < aLen; i++)
+    {
+      u64 t1 = a[i];
+      u64 t2 = b[i];
+      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t2, res + i);
+    }
+  }
+  return c;
+}
+
 #if defined(__cplusplus)
 }
 #endif
