@@ -214,6 +214,8 @@ let bn_middle_karatsuba_eval #t #aLen a0 a1 b0 b1 c2 t01 t23 =
 
   if v c0 = v c1 then begin
     assert (bn_v a0 * bn_v b0 + bn_v a1 * bn_v b1 - bn_v t0 * bn_v t1 == bn_v a0 * bn_v b1 + bn_v a1 * bn_v b0);
+    assert (v c2 * pow2 (pbits * aLen) + bn_v t01 - bn_v t23 == bn_v a0 * bn_v b1 + bn_v a1 * bn_v b0);
+
     assert (v c == v c3' /\ bn_v res == bn_v t45);
     //assert (v c = (v c2 - v c3) % pow2 pb);
     bn_sub_lemma t01 t23;
@@ -221,15 +223,19 @@ let bn_middle_karatsuba_eval #t #aLen a0 a1 b0 b1 c2 t01 t23 =
     Math.Lemmas.distributivity_sub_left (v c2) (v c3) (pow2 (pbits * aLen));
     assert (bn_v res + (v c2 - v c3) * pow2 (pbits * aLen) == v c2 * pow2 (pbits * aLen) + bn_v t01 - bn_v t23);
     bn_middle_karatsuba_eval_aux a0 a1 b0 b1 res c2 c3;
+    Math.Lemmas.small_mod (v c2 - v c3) (pow2 pbits);
     assert (bn_v res + v c * pow2 (pbits * aLen) == v c2 * pow2 (pbits * aLen) + bn_v t01 - bn_v t23);
     () end
   else begin
     assert (bn_v a0 * bn_v b0 + bn_v a1 * bn_v b1 + bn_v t0 * bn_v t1 == bn_v a0 * bn_v b1 + bn_v a1 * bn_v b0);
+    assert (v c2 * pow2 (pbits * aLen) + bn_v t01 + bn_v t23 == bn_v a0 * bn_v b1 + bn_v a1 * bn_v b0);
+
     assert (v c == v c4' /\ bn_v res == bn_v t67);
     //assert (v c = v c2 + v c4);
     bn_add_lemma t01 t23;
     assert (bn_v res + v c4 * pow2 (pbits * aLen) == bn_v t01 + bn_v t23);
     Math.Lemmas.distributivity_add_left (v c2) (v c4) (pow2 (pbits * aLen));
+    Math.Lemmas.small_mod (v c2 + v c4) (pow2 pbits);
     assert (bn_v res + v c * pow2 (pbits * aLen) == v c2 * pow2 (pbits * aLen) + bn_v t01 + bn_v t23);
     () end
 
@@ -558,7 +564,6 @@ val bn_middle_karatsuba_sqr_lemma:
 let bn_middle_karatsuba_sqr_lemma #t #aLen c0 c2 t01 t23 =
   let (c, res) = bn_middle_karatsuba c0 c0 c2 t01 t23 in
   let c3, t45 = bn_sub t01 t23 in let c3' = c2 -. c3 in
-  let c4, t67 = bn_add t01 t23 in let c4' = c2 +. c4 in
   bn_middle_karatsuba_lemma c0 c0 c2 t01 t23;
   assert (v c == v c3' /\ bn_v res == bn_v t45);
   bn_eval_inj aLen t45 res

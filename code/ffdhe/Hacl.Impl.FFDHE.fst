@@ -20,7 +20,7 @@ module Lemmas = Hacl.Spec.FFDHE.Lemmas
 
 module BN = Hacl.Bignum
 module BM = Hacl.Bignum.Montgomery
-module BE = Hacl.Bignum.ExponentiationPrecomp
+module BE = Hacl.Bignum.Exponentiation
 module SB = Hacl.Spec.Bignum
 module SM = Hacl.Spec.Bignum.Montgomery
 module SE = Hacl.Spec.Bignum.Exponentiation

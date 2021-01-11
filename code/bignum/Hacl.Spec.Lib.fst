@@ -8,10 +8,6 @@ open Lib.Sequence
 module Loops = Lib.LoopCombinators
 module VecLemmas = Lib.Vec.Lemmas
 
-///
-///  TODO: move the following functions to Lib.Sequence?
-///
-
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 let generate_elem_a (t:Type0) (a:Type0) (max:nat) (i:nat{i <= max}) = a & s:seq t{length s == i}

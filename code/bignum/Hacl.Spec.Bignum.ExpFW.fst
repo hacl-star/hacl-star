@@ -1,4 +1,4 @@
-module Hacl.Spec.Bignum.ExponentiationPrecomp
+module Hacl.Spec.Bignum.ExpFW
 
 open FStar.Mul
 
@@ -13,7 +13,7 @@ module LSeq = Lib.Sequence
 module E = Hacl.Spec.Exponentiation.Lemmas
 module M = Hacl.Spec.Montgomery.Lemmas
 
-module BE = Hacl.Spec.Bignum.Exponentiation
+module EBM = Hacl.Spec.Bignum.ExpBM
 module BM = Hacl.Spec.Bignum.Montgomery
 module BN = Hacl.Spec.Bignum
 module BI = Hacl.Spec.Bignum.ModInvLimb
@@ -540,14 +540,3 @@ let bn_mod_exp_fw_precompr2_lemma #t nLen n a bBits b l r2 =
   M.mont_preconditions (bits t) nLen (bn_v n) (v mu);
   assert (E.mont_pre (bits t) nLen (bn_v n) (v mu));
   E.mod_exp_fw_mont_lemma (bits t) nLen (bn_v n) (v mu) (bn_v a) bBits (bn_v b) l
-
-
-let bn_mod_exp_fw #t nLen nBits n a bBits b l =
-  let r2 = BM.bn_precomp_r2_mod_n nBits n in
-  bn_mod_exp_fw_precompr2 #t nLen n a bBits b l r2
-
-
-let bn_mod_exp_fw_lemma #t nLen nBits n a bBits b l =
-  let r2 = BM.bn_precomp_r2_mod_n nBits n in
-  BM.bn_precomp_r2_mod_n_lemma nBits n;
-  bn_mod_exp_fw_precompr2_lemma #t nLen n a bBits b l r2

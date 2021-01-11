@@ -85,49 +85,29 @@ let cswap2 #t len bit b1 b2 =
   Hacl.Bignum.Lib.cswap2_st len bit b1 b2
 
 [@CInline]
-let bn_add_eq_len_u32 (len:size_t) : bn_add_eq_len_st U32 len = bn_add_eq_len len
-[@CInline]
-let bn_sub_eq_len_u32 (len:size_t) : bn_sub_eq_len_st U32 len = bn_sub_eq_len len
-[@CInline]
 let bn_add_mod_n_u32 (len:size_t{v len > 0}) : bn_add_mod_n_st U32 len = bn_add_mod_n len
-
-/// This is a default implementation that *will* generate code depending on
-/// `len` at run-time! Only use if you want to generate run-time generic
-/// functions!
-inline_for_extraction noextract
-let mk_runtime_bn_u32 (len:meta_len U32) : bn U32 = {
-  len = len;
-  add = bn_add_eq_len_u32 len;
-  sub = bn_sub_eq_len_u32 len;
-  add_mod_n = bn_add_mod_n_u32 len;
-  mul = bn_karatsuba_mul len;
-  sqr = bn_karatsuba_sqr len;
-}
-
-[@CInline]
-let bn_add_eq_len_u64 (len:size_t) : bn_add_eq_len_st U64 len = bn_add_eq_len len
-[@CInline]
-let bn_sub_eq_len_u64 (len:size_t) : bn_sub_eq_len_st U64 len = bn_sub_eq_len len
 [@CInline]
 let bn_add_mod_n_u64 (len:size_t{v len > 0}) : bn_add_mod_n_st U64 len = bn_add_mod_n len
 
 inline_for_extraction noextract
-let mk_runtime_bn_u64 (len:meta_len U64) : bn U64 = {
+let bn_add_mod_n_ (#t:limb_t) (len:size_t{v len > 0}) : bn_add_mod_n_st t len =
+  match t with
+  | U32 -> bn_add_mod_n_u32 len
+  | U64 -> bn_add_mod_n_u64 len
+
+/// This is a default implementation that *will* generate code depending on
+/// `len` at run-time! Only use if you want to generate run-time generic
+/// functions!
+let mk_runtime_bn (t:limb_t) (len:meta_len t) : bn t = {
   len = len;
-  add = bn_add_eq_len_u64 len;
-  sub = bn_sub_eq_len_u64 len;
-  add_mod_n = bn_add_mod_n_u64 len;
+  add = Hacl.Bignum.Addition.bn_add_eq_len_u len;
+  sub = Hacl.Bignum.Addition.bn_sub_eq_len_u len;
+  add_mod_n = bn_add_mod_n_ len;
   mul = bn_karatsuba_mul len;
   sqr = bn_karatsuba_sqr len;
 }
 
-let mk_runtime_bn (t:limb_t) (len:meta_len t) : bn t =
-  match t with
-  | U32 -> mk_runtime_bn_u32 len
-  | U64 -> mk_runtime_bn_u64 len
-
 let mk_runtime_bn_len_lemma t len = ()
-
 
 (* bignum comparison and test functions *)
 

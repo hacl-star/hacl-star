@@ -14,10 +14,6 @@ module Loops = Lib.LoopCombinators
 
 module S = Hacl.Spec.Lib
 
-///
-///  TODO: move the following functions to Lib.Buffer?
-///
-
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
@@ -126,7 +122,7 @@ let fill_blocks4 #t #a h0 n output refl footprint spec impl =
 inline_for_extraction noextract
 val fill_elems4: fill_elems_st
 let fill_elems4 #t #a h0 n output refl footprint spec impl =
-  let k = n /. 4ul *! 4ul in
+  [@inline_let] let k = n /. 4ul *! 4ul in
   let tmp = sub output 0ul k in
   fill_blocks4 #t #a h0 k tmp refl footprint spec (fun i -> impl i);
   let h1 = ST.get () in

@@ -17,7 +17,7 @@ module BL = Hacl.Bignum.Lib
 module BB = Hacl.Bignum.Base
 module BN = Hacl.Bignum
 module BM = Hacl.Bignum.Montgomery
-module BE = Hacl.Bignum.ExponentiationPrecomp
+module BE = Hacl.Bignum.Exponentiation
 module BR = Hacl.Bignum.ModReduction
 module BC = Hacl.Bignum.Convert
 module BI = Hacl.Bignum.ModInv
@@ -185,7 +185,7 @@ let bn_mod_exp_safe #t k n a bBits b res =
   let is_valid_m = k.BE.exp_check n a bBits b in
   let nBits = size (bits t) *! BB.unsafe_size_from_limb (BL.bn_get_top_index len n) in
 
-  k.BE.mod_exp nBits n a bBits b res;
+  BE.bn_mod_exp k.BE.mont k.BE.mod_exp_precomp nBits n a bBits b res;
   let h1 = ST.get () in
   mapT len res (logand is_valid_m) res;
   SD.bn_mask_lemma (as_seq h1 res) is_valid_m;
@@ -204,7 +204,7 @@ let bn_mod_exp_mont_ladder_safe #t k n a bBits b res =
   let is_valid_m = k.BE.exp_check n a bBits b in
   let nBits = size (bits t) *! BB.unsafe_size_from_limb (BL.bn_get_top_index len n) in
 
-  k.BE.ct_mod_exp nBits n a bBits b res;
+  BE.bn_mod_exp_mont_ladder k.BE.mont k.BE.ct_mod_exp_precomp nBits n a bBits b res;
   let h1 = ST.get () in
   mapT len res (logand is_valid_m) res;
   SD.bn_mask_lemma (as_seq h1 res) is_valid_m;

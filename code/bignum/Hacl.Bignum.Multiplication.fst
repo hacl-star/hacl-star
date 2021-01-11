@@ -20,7 +20,6 @@ module Loops = Lib.LoopCombinators
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-
 inline_for_extraction noextract
 val bn_mul1:
     #t:limb_t
@@ -116,9 +115,8 @@ let bn_mul1_lshift_add #t aLen a b_j resLen j res =
 
 
 inline_for_extraction noextract
-val bn_mul:
-    #t:limb_t
-  -> aLen:size_t
+let bn_mul_st (t:limb_t) =
+    aLen:size_t
   -> a:lbignum t aLen
   -> bLen:size_t{v aLen + v bLen <= max_size_t}
   -> b:lbignum t bLen
@@ -130,6 +128,8 @@ val bn_mul:
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_seq h1 res == S.bn_mul (as_seq h0 a) (as_seq h0 b))
 
+inline_for_extraction noextract
+val bn_mul: #t:limb_t -> bn_mul_st t
 let bn_mul #t aLen a bLen b res =
   let resLen = aLen +! bLen in
   memset res (uint #t 0) resLen;
@@ -144,6 +144,18 @@ let bn_mul #t aLen a bLen b res =
     Loops.unfold_repeati (v bLen) (spec h0) (as_seq h0 res) (v j);
     res.(aLen +! j) <- bn_mul1_lshift_add aLen a b.(j) (aLen +! bLen) j res
   )
+
+
+[@CInline]
+let bn_mul_u32 : bn_mul_st U32 = bn_mul
+[@CInline]
+let bn_mul_u64 : bn_mul_st U64 = bn_mul
+
+inline_for_extraction noextract
+let bn_mul_u (#t:limb_t) : bn_mul_st t =
+  match t with
+  | U32 -> bn_mul_u32
+  | U64 -> bn_mul_u64
 
 
 inline_for_extraction noextract
@@ -175,9 +187,8 @@ let bn_sqr_diag #t aLen a res =
 // This code is taken from BoringSSL
 // https://github.com/google/boringssl/blob/master/crypto/fipsmodule/bn/mul.c#L551
 inline_for_extraction noextract
-val bn_sqr:
-    #t:limb_t
-  -> aLen:size_t{0 < v aLen /\ v aLen + v aLen <= max_size_t}
+let bn_sqr_st (t:limb_t) =
+    aLen:size_t{0 < v aLen /\ v aLen + v aLen <= max_size_t}
   -> a:lbignum t aLen
   -> res:lbignum t (aLen +! aLen) ->
   Stack unit
@@ -185,6 +196,8 @@ val bn_sqr:
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_seq h1 res == S.bn_sqr (as_seq h0 a))
 
+inline_for_extraction noextract
+val bn_sqr: #t:limb_t -> bn_sqr_st t
 let bn_sqr #t aLen a res =
   push_frame ();
   let resLen = aLen +! aLen in
@@ -201,8 +214,20 @@ let bn_sqr #t aLen a res =
     res.(j +! j) <- bn_mul1_lshift_add j (sub a 0ul j) a.(j) resLen j res
   );
 
-  let _ = Hacl.Bignum.Addition.bn_add_eq_len resLen res res res in
+  let _ = Hacl.Bignum.Addition.bn_add_eq_len_u resLen res res res in
   let tmp = create resLen (uint #t 0) in
   bn_sqr_diag aLen a tmp;
-  let _ = Hacl.Bignum.Addition.bn_add_eq_len resLen res tmp res in
+  let _ = Hacl.Bignum.Addition.bn_add_eq_len_u resLen res tmp res in
   pop_frame ()
+
+
+[@CInline]
+let bn_sqr_u32 : bn_sqr_st U32 = bn_sqr
+[@CInline]
+let bn_sqr_u64 : bn_sqr_st U64 = bn_sqr
+
+inline_for_extraction noextract
+let bn_sqr_u (#t:limb_t) : bn_sqr_st t =
+  match t with
+  | U32 -> bn_sqr_u32
+  | U64 -> bn_sqr_u64

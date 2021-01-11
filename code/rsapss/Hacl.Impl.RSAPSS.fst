@@ -16,7 +16,7 @@ module SB = Hacl.Spec.Bignum
 module BB = Hacl.Spec.Bignum.Base
 module SD = Hacl.Spec.Bignum.Definitions
 module BN = Hacl.Bignum
-module BE = Hacl.Bignum.ExponentiationPrecomp
+module BE = Hacl.Bignum.Exponentiation
 module BM = Hacl.Bignum.Montgomery
 
 module S = Spec.RSAPSS

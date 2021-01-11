@@ -5,7 +5,6 @@ open Lib.IntTypes
 module S = Spec.FFDHE
 module DH = Hacl.Impl.FFDHE
 module BE = Hacl.Bignum.Exponentiation
-module BP = Hacl.Bignum.ExponentiationPrecomp
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -24,7 +23,7 @@ let len = normalize_term (DH.ffdhe_len a_ffdhe) //=512
 
 //a specialized version of bignum
 inline_for_extraction noextract
-val ke_4096 : BP.exp t_limbs
+val ke_4096 : BE.exp t_limbs
 
 
 val new_ffdhe_precomp_p: DH.new_ffdhe_precomp_p_st t_limbs a_ffdhe len ke_4096

@@ -44,8 +44,8 @@ val bn_sign_abs:
     (c, as_seq h1 res) == K.bn_sign_abs (as_seq h0 a) (as_seq h0 b))
 
 let bn_sign_abs #t #aLen a b tmp res =
-  let c0 = bn_sub_eq_len aLen a b tmp in
-  let c1 = bn_sub_eq_len aLen b a res in
+  let c0 = bn_sub_eq_len_u aLen a b tmp in
+  let c1 = bn_sub_eq_len_u aLen b a res in
   map2T aLen res (mask_select (uint #t 0 -. c0)) res tmp;
   c0
 
@@ -71,8 +71,8 @@ val bn_middle_karatsuba:
 
 let bn_middle_karatsuba #t #aLen c0 c1 c2 t01 t23 tmp res =
   let c_sign = c0 ^. c1 in
-  let c3 = bn_sub_eq_len aLen t01 t23 tmp in let c3 = c2 -. c3 in
-  let c4 = bn_add_eq_len aLen t01 t23 res in let c4 = c2 +. c4 in
+  let c3 = bn_sub_eq_len_u aLen t01 t23 tmp in let c3 = c2 -. c3 in
+  let c4 = bn_add_eq_len_u aLen t01 t23 res in let c4 = c2 +. c4 in
   let mask = uint #t 0 -. c_sign in
   map2T aLen res (mask_select mask) res tmp;
   mask_select mask c4 c3
@@ -116,7 +116,7 @@ let bn_lshift_add_early_stop_in_place #t #aLen #bLen a b i =
   let h0 = ST.get () in
   update_sub_f_carry h0 a i bLen
   (fun h -> Hacl.Spec.Bignum.Addition.bn_add (as_seq h0 r) (as_seq h0 b))
-  (fun _ -> bn_add_eq_len bLen r b r)
+  (fun _ -> bn_add_eq_len_u bLen r b r)
 
 
 inline_for_extraction noextract
@@ -175,7 +175,7 @@ let bn_karatsuba_last #t aLen c0 c1 tmp res =
   let t45 = sub tmp (2ul *! aLen) aLen in
   let t67 = sub tmp (3ul *! aLen) aLen in
 
-  let c2 = bn_add_eq_len aLen r01 r23 t01 in
+  let c2 = bn_add_eq_len_u aLen r01 r23 t01 in
   let c5 = bn_middle_karatsuba c0 c1 c2 t01 t23 t67 t45 in
   let c = bn_karatsuba_res r01 r23 c5 t45 res in
   c
@@ -213,7 +213,7 @@ let bn_karatsuba_mul_open #t (self: unit -> bn_karatsuba_mul_st t) len a b tmp r
   norm_spec [zeta; iota; primops; delta_only [`%K.bn_karatsuba_mul_]]
     (K.bn_karatsuba_mul_ (v len) (as_seq h0 a) (as_seq h0 b));
   if len <. bn_mul_threshold || len %. 2ul =. 1ul then
-    bn_mul len a len b res
+    bn_mul_u len a len b res
   else begin
     let len2 = len /. 2ul in
 
@@ -315,8 +315,8 @@ let bn_karatsuba_last_sqr #t aLen tmp res =
   let t23 = sub tmp aLen aLen in
   let t45 = sub tmp (2ul *! aLen) aLen in
 
-  let c2 = bn_add_eq_len aLen r01 r23 t01 in
-  let c3 = bn_sub_eq_len aLen t01 t23 t45 in
+  let c2 = bn_add_eq_len_u aLen r01 r23 t01 in
+  let c3 = bn_sub_eq_len_u aLen t01 t23 t45 in
   let c5 = c2 -. c3 in
   let c = bn_karatsuba_res r01 r23 c5 t45 res in
   c
@@ -343,7 +343,7 @@ let bn_karatsuba_sqr_open #t (self: unit -> bn_karatsuba_sqr_st t) len a tmp res
   norm_spec [zeta; iota; primops; delta_only [`%K.bn_karatsuba_sqr_]]
     (K.bn_karatsuba_sqr_ (v len) (as_seq h0 a));
   if len <. bn_mul_threshold || len %. 2ul =. 1ul then
-    bn_sqr len a res
+    bn_sqr_u len a res
   else begin
     let len2 = len /. 2ul in
 

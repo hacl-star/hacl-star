@@ -99,6 +99,17 @@ let bn_sub_eq_len #t aLen a b res =
   pop_frame ();
   res
 
+[@CInline]
+let bn_sub_eq_len_u32 (aLen:size_t) : bn_sub_eq_len_st U32 aLen = bn_sub_eq_len aLen
+[@CInline]
+let bn_sub_eq_len_u64 (aLen:size_t) : bn_sub_eq_len_st U64 aLen = bn_sub_eq_len aLen
+
+inline_for_extraction noextract
+let bn_sub_eq_len_u (#t:limb_t) (aLen:size_t) : bn_sub_eq_len_st t aLen =
+  match t with
+  | U32 -> bn_sub_eq_len_u32 aLen
+  | U64 -> bn_sub_eq_len_u64 aLen
+
 
 inline_for_extraction noextract
 val bn_sub:
@@ -243,6 +254,18 @@ let bn_add_eq_len #t aLen a b res =
   let res = c.(0ul) in
   pop_frame ();
   res
+
+
+[@CInline]
+let bn_add_eq_len_u32 (aLen:size_t) : bn_add_eq_len_st U32 aLen = bn_add_eq_len aLen
+[@CInline]
+let bn_add_eq_len_u64 (aLen:size_t) : bn_add_eq_len_st U64 aLen = bn_add_eq_len aLen
+
+inline_for_extraction noextract
+let bn_add_eq_len_u (#t:limb_t) (aLen:size_t) : bn_add_eq_len_st t aLen =
+  match t with
+  | U32 -> bn_add_eq_len_u32 aLen
+  | U64 -> bn_add_eq_len_u64 aLen
 
 
 inline_for_extraction noextract

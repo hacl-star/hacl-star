@@ -13,7 +13,7 @@ module ST = FStar.HyperStack.ST
 module S = Hacl.Spec.Bignum.ModInv
 
 module BN = Hacl.Bignum
-module BE = Hacl.Bignum.ExponentiationPrecomp
+module BE = Hacl.Bignum.Exponentiation
 module BM = Hacl.Bignum.Montgomery
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
@@ -60,5 +60,5 @@ let bn_mod_inv_prime #t k nBits n a res =
   let n2 = create len (uint #t #SEC 0) in
   let c = BN.bn_sub1 len n (uint #t #SEC 2) n2 in
 
-  k.BE.mod_exp nBits n a (size (bits t) *! len) n2 res;
+  BE.bn_mod_exp k.BE.mont k.BE.mod_exp_precomp nBits n a (size (bits t) *! len) n2 res;
   pop_frame ()

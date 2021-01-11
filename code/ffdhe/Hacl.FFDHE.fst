@@ -5,7 +5,7 @@ open Lib.IntTypes
 module S = Spec.FFDHE
 module DH = Hacl.Impl.FFDHE
 module BD = Hacl.Bignum.Definitions
-module BE = Hacl.Bignum.ExponentiationPrecomp
+module BE = Hacl.Bignum.Exponentiation
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 

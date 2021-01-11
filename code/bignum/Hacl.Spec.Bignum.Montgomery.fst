@@ -385,9 +385,4 @@ let bn_mont_mul_lemma #t #nLen n mu aM bM =
 
 
 let bn_mont_sqr_lemma #t #nLen n mu aM =
-  let c = BN.bn_mul aM aM in
-  BN.bn_mul_lemma aM aM;
-  assert (bn_v c == bn_v aM * bn_v aM);
-  Math.Lemmas.lemma_mult_lt_sqr (bn_v aM) (bn_v aM) (bn_v n);
-  assert (bn_v c < bn_v n * bn_v n);
-  bn_mont_reduction_lemma n mu c
+  bn_mont_mul_lemma #t #nLen n mu aM aM
