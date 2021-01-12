@@ -10,7 +10,7 @@ steps:
   image: rust:latest
   commands:
   - apt update -qq --yes && apt install -qq --yes opam aspcud ocaml clang
-  - opam init --yes --bare
+  - opam init --yes --bare --disable-sandboxing
   - opam switch create 4.09.1 --yes
   - eval $(opam config env)
   - opam install --yes cppo ctypes ctypes-foreign dune zarith
@@ -29,7 +29,7 @@ steps:
   image: rust:latest
   commands:
   - apt update -qq --yes && apt install -qq --yes opam aspcud ocaml clang
-  - opam init --yes --bare
+  - opam init --yes --bare --disable-sandboxing
   - opam switch create 4.09.1 --yes
   - eval $(opam config env)
   - opam install --yes cppo ctypes ctypes-foreign dune zarith
