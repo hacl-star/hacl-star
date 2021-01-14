@@ -35,6 +35,8 @@ open Lib.IntVector.Intrinsics
 
 open Spec.Hash.Definitions
 
+open Hacl.Impl.P256.Q.Comparision
+
 open FStar.Mul
 
 module H = Spec.Agile.Hash
@@ -269,7 +271,7 @@ let ecdsa_verification_step5_0 points pubKeyAsPoint u1 u2 tempBuffer =
   secretToPublicWithoutNorm pointU1G u1 tempBuffer;
   scalarMultiplicationWithoutNorm pubKeyAsPoint pointU2Q u2 tempBuffer
 
-
+(* 
 [@ (Comment "   The input of the function is considered to be public,
 thus this code is not secret independent with respect to the operations done over the input.")] 
 val compare_felem_bool: a: felem -> b: felem -> Stack bool
@@ -293,7 +295,7 @@ let compare_felem_bool a b  =
   eq_u64_nCT a_1 b_1 &&
   eq_u64_nCT a_2 b_2 &&
   eq_u64_nCT a_3 b_3
-
+ *)
 
 
 inline_for_extraction noextract
@@ -322,9 +324,9 @@ let compare_points_bool a b =
   let y1 = sub b (size 4) (size 4) in 
   let z1 = sub b (size 8) (size 4) in 
 
-  let xEqual = compare_felem_bool x0 x1 in
-  let yEqual = compare_felem_bool y0 y1 in 
-  let zEqual = compare_felem_bool z0 z1 in 
+  let xEqual = cmp_felem_felem_bool #Public #_ #_ x0 x1 in
+  let yEqual = cmp_felem_felem_bool #Public #_ #_ y0 y1 in 
+  let zEqual = cmp_felem_felem_bool #Public #_ #_ z0 z1 in 
   xEqual && yEqual && zEqual
 
 
@@ -608,7 +610,8 @@ let ecdsa_verification_ alg pubKey r s mLen m =
         end
       else
         begin
-        let result = compare_felem_bool xBuffer r in
+        (* let result = compare_felem_bool xBuffer r in *)
+        let result = cmp_felem_felem_bool #Public #_ #_ xBuffer r in 
         pop_frame();
         result
         end

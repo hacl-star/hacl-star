@@ -36,6 +36,8 @@ module Def = Spec.Hash.Definitions
 
 open Spec.Hash.Definitions
 
+open Hacl.Impl.P256.Q.Comparision
+
 
 #set-options "--z3rlimit 100 --ifuel 0 --fuel 0"
 
@@ -117,7 +119,10 @@ let ecdsa_signature_step45 x k tempBuffer =
     normX result x tempForNorm;
     reduction_prime_2prime_order x x;
   pop_frame();
-    isZero_uint64_CT x
+    (* isZero_uint64_CT x *)
+    eq_felem_0_u64 #Private x
+
+
 
 #pop-options
 
@@ -264,7 +269,8 @@ let ecdsa_signature_core alg r s mLen m privKeyAsFelem k =
   let step5Flag = ecdsa_signature_step45 r k tempBuffer in 
   assert_norm (pow2 32 < pow2 61);
   ecdsa_signature_step6 s kAsFelem hashAsFelem r privKeyAsFelem;  
-  let sIsZero = isZero_uint64_CT s in 
+  (* let sIsZero = isZero_uint64_CT s in  *)
+  let sIsZero = eq_felem_0_u64 #Private s in 
   logor_lemma step5Flag sIsZero;
   pop_frame(); 
   logor step5Flag sIsZero

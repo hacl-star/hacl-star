@@ -28,6 +28,8 @@ open FStar.Tactics.Canon
 
 open FStar.Math.Lemmas
 
+open Hacl.Impl.P256.Q.PrimitivesMasking
+
 friend Spec.P256.MontgomeryMultiplication
 open FStar.Mul
 

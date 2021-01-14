@@ -13,6 +13,7 @@ open Lib.Buffer
 
 
 open Hacl.Impl.P256.LowLevel
+open Hacl.Impl.P256.Q.PrimitivesMasking
 
 let pointLen = 8ul
 
@@ -37,8 +38,8 @@ let select r a b bit =
 
   let bitAsUInt64 = to_u64 bit in 
 
-  cmovznz4 bitAsUInt64 pX qX x;
-  cmovznz4 bitAsUInt64 pY qY y 
+  cmovznz4 x pX qX bitAsUInt64;
+  cmovznz4 y pY qY bitAsUInt64
 
 
 

@@ -23,6 +23,7 @@ open Spec.P256.Definitions
 open FStar.Math.Lemmas
 
 open FStar.Mul
+open Hacl.Impl.P256.Q.PrimitivesMasking
 
 #set-options "--z3rlimit 100 --ifuel 0 --fuel 0"
 
@@ -115,7 +116,7 @@ let computeYFromX x result sign =
 
     let h10 = ST.get() in 
 
-    cmovznz4 flag bCoordinateBuffer result result;
+    cmovznz4 result bCoordinateBuffer result flag;
 
     Spec.P256.Lemmas.lemma_core_0 result h10;
     Lib.ByteSequence.lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h10 result);

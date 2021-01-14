@@ -19,6 +19,8 @@ open FStar.Tactics.Canon
 open FStar.Mul
 open Lib.IntTypes.Intrinsics
 
+open Hacl.Impl.P256.Q.PrimitivesMasking
+
 #reset-options "--z3rlimit 200"
 
 inline_for_extraction noextract
@@ -245,7 +247,7 @@ let reduction_prime_2prime_with_carry x result  =
 	else if uint_v cin < uint_v c then uint_v carry = 1 
 	else uint_v carry = 0);
 
-    cmovznz4 carry tempBuffer x_ result;
+    cmovznz4 result tempBuffer x_ carry;
  pop_frame()   
 
 

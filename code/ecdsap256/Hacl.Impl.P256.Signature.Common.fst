@@ -30,6 +30,9 @@ open FStar.Mul
 open Hacl.Impl.P256.Arithmetics
 open Hacl.Impl.P256.LowLevel .RawCmp
 open Spec.P256.MontgomeryMultiplication
+
+open Hacl.Impl.P256.Q.Comparision
+
 friend Spec.P256.MontgomeryMultiplication
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
@@ -135,7 +138,7 @@ let isPointOnCurvePublic p =
     
     lemma_modular_multiplication_p256_2_d ((as_nat h0 y) * (as_nat h0 y) % prime) (let x_ = as_nat h0 x in (x_ * x_ * x_ - 3 * x_ + Spec.P256.bCoordinateP256) % prime);
     
-    let r = compare_felem y2Buffer xBuffer in 
+    let r = cmp_felem_felem_u64 #Private #_ #_ y2Buffer xBuffer in 
     let z = not (eq_0_u64 r) in 
   pop_frame();
      z
@@ -297,7 +300,8 @@ let isMoreThanZeroLessThanOrder x =
     recall_contents prime256order_buffer (Lib.Sequence.of_list p256_order_prime_list);
   let carry = sub4_il xAsFelem prime256order_buffer tempBuffer in
   let less = eq_mask carry (u64 1) in
-  let more = isZero_uint64_CT xAsFelem in 
+  (* let more = isZero_uint64_CT xAsFelem in  *)
+  let more = eq_felem_0_u64 #Private xAsFelem in 
   let notMore = lognot more in
     lognot_lemma more;
   let result = logand less notMore in
