@@ -19,7 +19,7 @@ val bn_mod_exp_fw_precompr2:
   -> a:lbignum t nLen
   -> bBits:size_pos
   -> b:lbignum t (blocks bBits (bits t))
-  -> l:size_pos{l <= bits t /\ pow2 l * nLen <= max_size_t}
+  -> l:size_pos{l < bits t /\ pow2 l * nLen <= max_size_t}
   -> r2:lbignum t nLen ->
   lbignum t nLen
 
@@ -31,7 +31,7 @@ val bn_mod_exp_fw_precompr2_lemma:
   -> a:lbignum t nLen
   -> bBits:size_pos
   -> b:lbignum t (blocks bBits (bits t))
-  -> l:size_pos{l <= bits t /\ pow2 l * nLen <= max_size_t}
+  -> l:size_pos{l < bits t /\ pow2 l * nLen <= max_size_t}
   -> r2:lbignum t nLen -> Lemma
   (requires
     EBM.bn_mod_exp_pre n a bBits b /\

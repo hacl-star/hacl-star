@@ -189,8 +189,8 @@ val oneM_ll: pbits:pos -> rLen:pos -> n:pos -> mu:nat{mont_pre pbits rLen n mu} 
 let oneM_ll pbits rLen n mu =
   let d, k = M.eea_pow2_odd (pbits * rLen) n in
   M.mont_preconditions_d pbits rLen n;
-  M.to_mont_lemma pbits rLen n d mu 1;
-  M.to_mont pbits rLen n mu 1
+  M.mont_one_lemma pbits rLen n d mu;
+  M.mont_one pbits rLen n mu
 
 val fmul_mont_ll: pbits:pos -> rLen:nat -> n:pos -> mu:nat{mont_pre pbits rLen n mu}
   -> a:nat_mod n -> b:nat_mod n -> nat_mod n
@@ -209,7 +209,7 @@ let lemma_one_mont_ll pbits rLen n mu a =
   M.mont_preconditions_d pbits rLen n;
 
   let oneM = oneM_ll pbits rLen n mu in
-  M.to_mont_lemma pbits rLen n d mu 1;
+  M.mont_one_lemma pbits rLen n d mu;
   assert (oneM == 1 * r % n);
   M.mont_mul_lemma pbits rLen n d mu a oneM;
   lemma_one_mont n r d a
@@ -354,7 +354,7 @@ val mod_exp_rl_mont:
 
 let mod_exp_rl_mont pbits rLen n mu a bBits b =
   let aM = M.to_mont pbits rLen n mu a in
-  let accM = M.to_mont pbits rLen n mu 1 in
+  let accM = M.mont_one pbits rLen n mu in
   let (aM, accM) = Loops.repeati bBits (mod_exp_rl_mont_f pbits rLen n mu bBits b) (aM, accM) in
   M.from_mont pbits rLen n mu accM
 
@@ -399,9 +399,9 @@ let mod_exp_rl_mont_lemma pbits rLen n mu a bBits b =
   let k1 = mk_nat_mont_group_ll pbits rLen n mu in
 
   let aM0 = M.to_mont pbits rLen n mu a in
-  let accM0 = M.to_mont pbits rLen n mu 1 in
+  let accM0 = M.mont_one pbits rLen n mu in
   M.to_mont_lemma pbits rLen n d mu a;
-  M.to_mont_lemma pbits rLen n d mu 1;
+  M.mont_one_lemma pbits rLen n d mu;
   assert (aM0 == a * r % n);
   assert (accM0 == 1 * r % n);
 
@@ -441,7 +441,7 @@ val mod_exp_mont_ladder_swap:
   nat
 
 let mod_exp_mont_ladder_swap pbits rLen n mu a bBits b =
-  let rM0 = M.to_mont pbits rLen n mu 1 in
+  let rM0 = M.mont_one pbits rLen n mu in
   let rM1 = M.to_mont pbits rLen n mu a in
   let sw = 0 in
   let (rM0', rM1', sw') =
@@ -492,9 +492,9 @@ let mod_exp_mont_ladder_swap_lemma pbits rLen n mu a bBits b =
   M.mont_preconditions_d pbits rLen n;
   let k1 = mk_nat_mont_group_ll pbits rLen n mu in
 
-  let rM0 = M.to_mont pbits rLen n mu 1 in
+  let rM0 = M.mont_one pbits rLen n mu in
   let rM1 = M.to_mont pbits rLen n mu a in
-  M.to_mont_lemma pbits rLen n d mu 1;
+  M.mont_one_lemma pbits rLen n d mu;
   M.to_mont_lemma pbits rLen n d mu a;
   assert (rM0 == oneM n r);
   assert (rM1 == a * r % n);
@@ -551,7 +551,7 @@ val mod_precomp_table_mont:
 
 let mod_precomp_table_mont pbits rLen n mu table_len a =
   let table = create table_len 0 in
-  let table = table.[0] <- M.to_mont pbits rLen n mu 1 in
+  let table = table.[0] <- M.mont_one pbits rLen n mu in
   let table = table.[1] <- a in
 
   Loops.repeati (table_len - 2) (mod_precomp_table_mont_f pbits rLen n mu a table_len) table
@@ -601,7 +601,7 @@ val mod_exp_fw_mont_:
   nat
 
 let mod_exp_fw_mont_ pbits rLen n mu aM bBits b l =
-  let oneM = M.to_mont pbits rLen n mu 1 in
+  let oneM = M.mont_one pbits rLen n mu in
   let table_len = pow2 l in
   Math.Lemmas.pow2_le_compat l 1;
   let table = mod_precomp_table_mont pbits rLen n mu table_len aM in
@@ -826,8 +826,8 @@ let mod_exp_fw_mont_aux_lemma pbits rLen n mu aM bBits b l =
   M.mont_preconditions_d pbits rLen n;
   let k1 = mk_nat_mont_group_ll pbits rLen n mu in
 
-  let oneM = M.to_mont pbits rLen n mu 1 in
-  M.to_mont_lemma pbits rLen n d mu 1;
+  let oneM = M.mont_one pbits rLen n mu in
+  M.mont_one_lemma pbits rLen n d mu;
   assert (oneM == 1 * r % n);
 
   Math.Lemmas.pow2_le_compat l 1;

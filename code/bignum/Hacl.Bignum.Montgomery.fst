@@ -226,3 +226,12 @@ let mk_runtime_mont (#t:limb_t) (len:BN.meta_len t) : mont t =
   | U64 -> mk_runtime_mont_u64 len
 
 let mk_runtime_mont_len_lemma #t len = ()
+
+
+let bn_mont_one #t k n mu r2 oneM =
+  [@inline_let] let len = k.bn.BN.len in
+  push_frame ();
+  let one = create len (uint #t #SEC 0) in
+  BN.bn_from_uint len (uint #t #SEC 1) one;
+  k.to n mu r2 one oneM;
+  pop_frame ()

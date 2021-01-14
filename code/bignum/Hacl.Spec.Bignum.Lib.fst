@@ -38,7 +38,33 @@ let bn_get_ith_bit #t #len input ind =
   limb_get_ith_bit input.[i] j
 
 
-#push-options "--z3rlimit 100"
+val bn_get_ith_bit_aux_lemma: #t:limb_t -> #len:size_nat -> b:lbignum t len -> ind:size_nat{ind / bits t < len} ->
+  Lemma (let i = ind / bits t in let j = ind % bits t in
+    v (b.[i] >>. size j) == (bn_v b / pow2 ind) % pow2 (bits t - j))
+
+let bn_get_ith_bit_aux_lemma #t #len b ind =
+  let pbits = bits t in
+  let i = ind / pbits in
+  let j = ind % pbits in
+  let res = b.[i] >>. size j in
+
+  calc (==) {
+    v b.[i] / pow2 j;
+    (==) { bn_eval_index b i }
+    (bn_v b / pow2 (pbits * i) % pow2 pbits) / pow2 j;
+    (==) { Math.Lemmas.pow2_modulo_division_lemma_1 (bn_v b / pow2 (pbits * i)) j pbits }
+    (bn_v b / pow2 (pbits * i) / pow2 j) % pow2 (pbits - j);
+    (==) { Math.Lemmas.division_multiplication_lemma (bn_v b) (pow2 (pbits * i)) (pow2 j) }
+    (bn_v b / (pow2 (pbits * i) * pow2 j)) % pow2 (pbits - j);
+    (==) { Math.Lemmas.pow2_plus (pbits * i) j }
+    (bn_v b / pow2 (pbits * i + j)) % pow2 (pbits - j);
+    (==) { Math.Lemmas.euclidean_div_axiom ind pbits }
+    (bn_v b / pow2 ind) % pow2 (pbits - j);
+    };
+
+  assert (v res == (bn_v b / pow2 ind) % pow2 (pbits - j))
+
+
 val bn_get_ith_bit_lemma: #t:limb_t -> #len:size_nat -> b:lbignum t len -> i:size_nat{i / bits t < len} ->
   Lemma (v (bn_get_ith_bit b i) == (bn_v b / pow2 i % 2))
 
@@ -51,22 +77,13 @@ let bn_get_ith_bit_lemma #t #len b ind =
 
   calc (==) {
     v b.[i] / pow2 j % 2;
-    (==) { bn_eval_index b i }
-    (bn_v b / pow2 (pbits * i) % pow2 (pbits)) / pow2 j % 2;
-    (==) { Math.Lemmas.pow2_modulo_division_lemma_1 (bn_v b / pow2 (pbits * i)) j (pbits) }
-    (bn_v b / pow2 (pbits * i) / pow2 j) % pow2 (pbits - j) % 2;
-    (==) { Math.Lemmas.division_multiplication_lemma (bn_v b) (pow2 (pbits * i)) (pow2 j) }
-    (bn_v b / (pow2 (pbits * i) * pow2 j)) % pow2 (pbits - j) % 2;
-    (==) { Math.Lemmas.pow2_plus (pbits * i) j }
-    (bn_v b / pow2 (pbits * i + j)) % pow2 (pbits - j) % 2;
-    (==) { Math.Lemmas.euclidean_div_axiom ind (pbits) }
+    (==) { bn_get_ith_bit_aux_lemma b ind }
     (bn_v b / pow2 ind) % pow2 (pbits - j) % 2;
     (==) { assert_norm (pow2 1 = 2);
            Math.Lemmas.pow2_modulo_modulo_lemma_1 (bn_v b / pow2 ind) 1 (pbits - j) }
     (bn_v b / pow2 ind) % 2;
     };
   assert (v res == bn_v b / pow2 ind % 2)
-#pop-options
 
 
 val bn_set_ith_bit: #t:limb_t -> #len:size_nat -> b:lbignum t len -> i:size_nat{i / bits t < len} -> lbignum t len
@@ -377,20 +394,109 @@ let bn_low_bound_bits_lemma #t #len b =
     Math.Lemmas.pow2_multiplication_modulo_lemma_1 1 1 (bn_low_bound_bits b)
 
 
-val bn_get_bits_f:
+val bn_get_bits_limb:
     #t:limb_t
   -> #nLen:size_nat
   -> n:lbignum t nLen
-  -> i:size_nat
-  -> l:size_nat{l <= bits t /\ i + l <= max_size_t}
-  -> j:nat{j < l /\ (i + j) / bits t < nLen}
-  -> acc:limb t ->
+  -> ind:size_nat{ind / bits t < nLen} ->
   limb t
 
-let bn_get_bits_f #t #nLen n i l j acc =
-  let n_ij = bn_get_ith_bit n (i + j) in
-  let acc = acc +. (n_ij <<. size j) in
-  acc
+let bn_get_bits_limb #t #nLen n ind =
+  let i = ind / bits t in
+  let j = ind % bits t in
+  let p1 = n.[i] >>. size j in
+  let p2 = if i + 1 < nLen && 0 < j then p1 |. (n.[i + 1] <<. (size (bits t - j))) else p1 in
+  p2
+
+
+val bn_get_bits_limb_aux_lemma:
+    #t:limb_t
+  -> #nLen:size_nat
+  -> n:lbignum t nLen
+  -> ind:size_nat{ind / bits t < nLen} ->
+  Lemma (
+    let pbits = bits t in
+    let i = ind / pbits in
+    let j = ind % pbits in
+    let p1 = n.[i] >>. size j in
+    bn_v n / pow2 ind % pow2 pbits == bn_v n / pow2 ((i + 1) * pbits) % pow2 pbits * pow2 (pbits - j) % pow2 pbits + v p1)
+
+let bn_get_bits_limb_aux_lemma #t #nLen n ind =
+  let pbits = bits t in
+  let i = ind / pbits in
+  let j = ind % pbits in
+  let p1 = n.[i] >>. size j in
+  let res = bn_v n / pow2 ind % pow2 pbits in
+
+  calc (==) {
+    bn_v n / pow2 ind % pow2 pbits;
+    (==) { Math.Lemmas.euclidean_division_definition res (pow2 (pbits - j)) }
+    res / pow2 (pbits - j) * pow2 (pbits - j) + res % pow2 (pbits - j);
+    (==) { Math.Lemmas.pow2_modulo_modulo_lemma_1 (bn_v n / pow2 ind) (pbits - j) pbits }
+    res / pow2 (pbits - j) * pow2 (pbits - j) + bn_v n / pow2 ind % pow2 (pbits - j);
+    (==) { bn_get_ith_bit_aux_lemma n ind }
+    res / pow2 (pbits - j) * pow2 (pbits - j) + v p1;
+    (==) { Math.Lemmas.pow2_modulo_division_lemma_1 (bn_v n / pow2 ind) (pbits - j) pbits }
+    bn_v n / pow2 ind / pow2 (pbits - j) % pow2 j * pow2 (pbits - j) + v p1;
+    (==) { Math.Lemmas.division_multiplication_lemma (bn_v n) (pow2 ind) (pow2 (pbits - j)) }
+    bn_v n / (pow2 ind * pow2 (pbits - j)) % pow2 j * pow2 (pbits - j) + v p1;
+    (==) { Math.Lemmas.pow2_plus ind (pbits - j) }
+    bn_v n / pow2 (ind + pbits - j) % pow2 j * pow2 (pbits - j) + v p1;
+    (==) { Math.Lemmas.euclidean_division_definition ind pbits }
+    bn_v n / pow2 (i * pbits + pbits) % pow2 j * pow2 (pbits - j) + v p1;
+    (==) { Math.Lemmas.pow2_multiplication_modulo_lemma_2 (bn_v n / pow2 (i * pbits + pbits)) pbits (pbits - j) }
+    bn_v n / pow2 (i * pbits + pbits) * pow2 (pbits - j) % pow2 pbits + v p1;
+    (==) { Math.Lemmas.distributivity_add_left i 1 pbits }
+    bn_v n / pow2 ((i + 1) * pbits) * pow2 (pbits - j) % pow2 pbits + v p1;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l (bn_v n / pow2 ((i + 1) * pbits)) (pow2 (pbits - j)) (pow2 pbits) }
+    bn_v n / pow2 ((i + 1) * pbits) % pow2 pbits * pow2 (pbits - j) % pow2 pbits + v p1;
+    }
+
+
+val bn_get_bits_limb_lemma:
+    #t:limb_t
+  -> #nLen:size_nat
+  -> n:lbignum t nLen
+  -> ind:size_nat{ind / bits t < nLen} ->
+  Lemma (v (bn_get_bits_limb n ind) == bn_v n / pow2 ind % pow2 (bits t))
+
+let bn_get_bits_limb_lemma #t #nLen n ind =
+  let pbits = bits t in
+  let i = ind / pbits in
+  let j = ind % pbits in
+  let p1 = n.[i] >>. size j in
+  let res = bn_v n / pow2 ind % pow2 pbits in
+  bn_get_ith_bit_aux_lemma n ind;
+  assert (v p1 == bn_v n / pow2 ind % pow2 (pbits - j));
+
+  if j = 0 then () else begin
+    bn_get_bits_limb_aux_lemma n ind;
+    if i + 1 < nLen then begin
+      let p2 = n.[i + 1] <<. (size (pbits - j)) in
+      calc (==) {
+	v p2 % pow2 (pbits - j);
+	(==) { }
+	v n.[i + 1] * pow2 (pbits - j) % pow2 pbits % pow2 (pbits - j);
+	(==) { Math.Lemmas.pow2_modulo_modulo_lemma_1 (v n.[i + 1] * pow2 (pbits - j)) (pbits - j) pbits }
+	v n.[i + 1] * pow2 (pbits - j) % pow2 (pbits - j);
+	(==) { Math.Lemmas.multiple_modulo_lemma (v n.[i + 1]) (pow2 (pbits - j)) }
+	0;
+	};
+      let p3 = p1 |. p2 in
+      logor_disjoint p1 p2 (pbits - j);
+      assert (v p3 == v p1 + v p2);
+      bn_eval_index n (i + 1);
+      assert (res == v p1 + v p2) end
+    else begin
+      bn_eval_bound n nLen;
+      assert (bn_v n < pow2 (nLen * pbits));
+      Math.Lemmas.lemma_div_lt_nat (bn_v n) (nLen * pbits) ((i + 1) * pbits);
+      Math.Lemmas.pow2_minus (nLen * pbits) ((i + 1) * pbits);
+      assert (bn_v n / pow2 ((i + 1) * pbits) < pow2 0);
+      assert_norm (pow2 0 = 1);
+      assert (res == v p1)
+    end
+  end
 
 
 val bn_get_bits:
@@ -398,80 +504,12 @@ val bn_get_bits:
   -> #nLen:size_nat
   -> n:lbignum t nLen
   -> i:size_nat
-  -> l:size_nat{l <= bits t /\ (i + l - 1) / bits t < nLen /\ i + l <= max_size_t} ->
+  -> l:size_nat{l < bits t /\ i / bits t < nLen} ->
   limb t
 
-let bn_get_bits #t #nLen n i l =
-  Loops.repeati l (bn_get_bits_f #t #nLen n i l) (uint #t 0)
-
-
-val bn_get_bits_loop_step_lemma:
-    #t:limb_t
-  -> #nLen:size_nat
-  -> n:lbignum t nLen
-  -> i:size_nat
-  -> l:size_nat{l <= bits t /\ i + l <= max_size_t}
-  -> j:pos{j <= l /\ (i + j - 1) / bits t < nLen}
-  -> acc0:limb t -> Lemma
-  (requires v acc0 == (bn_v n / pow2 i) % pow2 (j - 1))
-  (ensures  v (bn_get_bits_f #t #nLen n i l (j - 1) acc0) == (bn_v n / pow2 i) % pow2 j)
-
-let bn_get_bits_loop_step_lemma #t #nLen n i l j acc0 =
-  let pbits = pow2 (bits t) in
-  let acc = bn_get_bits_f #t #nLen n i l (j - 1) acc0 in
-  let n_ij = bn_get_ith_bit n (i + j - 1) in
-  assert (acc == acc0 +. (n_ij <<. size (j - 1)));
-  let b = bn_v n / pow2 i in
-  Math.Lemmas.pow2_le_compat (bits t) j;
-
-  calc (==) {
-    b % pow2 j;
-    (==) { Math.Lemmas.euclidean_division_definition (b % pow2 j) (pow2 (j - 1)) }
-    (b % pow2 j) / pow2 (j - 1) * pow2 (j - 1) + (b % pow2 j) % pow2 (j - 1);
-    (==) { Math.Lemmas.pow2_modulo_modulo_lemma_1 b (j - 1) j }
-    (b % pow2 j) / pow2 (j - 1) * pow2 (j - 1) + b % pow2 (j - 1);
-    (==) { Math.Lemmas.pow2_modulo_division_lemma_1 b (j - 1) j; assert_norm (pow2 1 = 2) }
-    (b / pow2 (j - 1)) % 2 * pow2 (j - 1) + b % pow2 (j - 1);
-    };
-
-  calc (==) {
-    v (acc0 +. (n_ij <<. size (j - 1)));
-    (==) { }
-    (v acc0 + (v n_ij * pow2 (j - 1)) % pbits) % pbits;
-    (==) { Math.Lemmas.lemma_mod_plus_distr_r (v acc0) (v n_ij * pow2 (j - 1)) pbits }
-    (v acc0 + v n_ij * pow2 (j - 1)) % pbits;
-    (==) { bn_get_ith_bit_lemma n (i + j - 1) }
-    (v acc0 + (bn_v n / pow2 (i + j - 1)) % 2 * pow2 (j - 1)) % pbits;
-    (==) { }
-    (b % pow2 (j - 1) + (bn_v n / pow2 (i + j - 1)) % 2 * pow2 (j - 1)) % pbits;
-    (==) { Math.Lemmas.pow2_plus i (j - 1); Math.Lemmas.division_multiplication_lemma (bn_v n) (pow2 i) (pow2 (j - 1)) }
-    (b % pow2 (j - 1) + (b / pow2 (j - 1)) % 2 * pow2 (j - 1)) % pbits;
-    (==) { }
-    (b % pow2 j) % pbits;
-    (==) { Math.Lemmas.pow2_modulo_modulo_lemma_2 b (bits t) j }
-    b % pow2 j;
-    }
-
-
-val bn_get_bits_loop_lemma:
-    #t:limb_t
-  -> #nLen:size_nat
-  -> n:lbignum t nLen
-  -> i:size_nat
-  -> l:size_nat{l <= bits t /\ (i + l - 1) / bits t < nLen /\ i + l <= max_size_t}
-  -> j:nat{j <= l} ->
-  Lemma (let r_i = Loops.repeati j (bn_get_bits_f #t #nLen n i l) (uint #t 0) in
-    v r_i == (bn_v n / pow2 i) % pow2 j)
-
-let rec bn_get_bits_loop_lemma #t #nLen n i l j =
-  let r_i = Loops.repeati j (bn_get_bits_f #t #nLen n i l) (uint #t 0) in
-  if j = 0 then
-    Loops.eq_repeati0 j (bn_get_bits_f #t #nLen n i l) (uint #t 0)
-  else begin
-    let r_i1 = Loops.repeati (j - 1) (bn_get_bits_f #t #nLen n i l) (uint #t 0) in
-    Loops.unfold_repeati j (bn_get_bits_f #t #nLen n i l) (uint #t 0) (j - 1);
-    bn_get_bits_loop_lemma #t #nLen n i l (j - 1);
-    bn_get_bits_loop_step_lemma #t #nLen n i l j r_i1 end
+let bn_get_bits #t #nLen n ind l =
+  let mask_l = (uint #t #SEC 1 <<. size l) -. uint #t 1 in
+  bn_get_bits_limb n ind &. mask_l
 
 
 val bn_get_bits_lemma:
@@ -479,8 +517,18 @@ val bn_get_bits_lemma:
   -> #nLen:size_nat
   -> n:lbignum t nLen
   -> i:size_nat
-  -> l:size_nat{l <= bits t /\ (i + l - 1) / bits t < nLen /\ i + l <= max_size_t} ->
-  Lemma (v (bn_get_bits n i l) == (bn_v n / pow2 i) % pow2 l)
+  -> l:size_nat{l < bits t /\ i / bits t < nLen} ->
+  Lemma (v (bn_get_bits n i l) == bn_v n / pow2 i % pow2 l)
 
-let bn_get_bits_lemma #t #nLen n i l =
-  bn_get_bits_loop_lemma #t #nLen n i l l
+let bn_get_bits_lemma #t #nLen n ind l =
+  let tmp = bn_get_bits_limb n ind in
+  let mask_l = (uint #t #SEC 1 <<. size l) -. uint #t 1 in
+  let tmp1 = tmp &. mask_l in
+  Math.Lemmas.pow2_lt_compat (bits t) l;
+  mod_mask_lemma tmp (size l);
+  assert (v (mod_mask #t #SEC (size l)) == v mask_l);
+  assert (v tmp1 == v tmp % pow2 l);
+  bn_get_bits_limb_lemma #t #nLen n ind;
+  assert (v tmp1 == bn_v n / pow2 ind % pow2 (bits t) % pow2 l);
+  Math.Lemmas.pow2_modulo_modulo_lemma_1 (bn_v n / pow2 ind) l (bits t);
+  assert (v tmp1 == bn_v n / pow2 ind % pow2 l)

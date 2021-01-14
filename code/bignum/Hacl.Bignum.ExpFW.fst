@@ -195,7 +195,7 @@ let bn_mod_exp_fw_mont_f_st (t:limb_t) (len:BN.meta_len t) =
   -> bBits:size_t{0 < v bBits}
   -> bLen:size_t{bLen == blocks bBits (size (bits t))}
   -> b:lbignum t bLen
-  -> l:size_t{v l <= bits t}
+  -> l:size_t{v l < bits t}
   -> table_len:size_t{1 < v table_len /\ v table_len * v len <= max_size_t /\ v table_len == pow2 (v l)}
   -> table:lbignum t (table_len *! len)
   -> i:size_t{v l * (v i + 1) <= v bBits}
@@ -253,7 +253,7 @@ let bn_mod_exp_fw_mont_rem_st (t:limb_t) (len:BN.meta_len t) =
   -> bBits:size_t{0 < v bBits}
   -> bLen:size_t{bLen == blocks bBits (size (bits t))}
   -> b:lbignum t bLen
-  -> l:size_t{0 < v l /\ v l <= bits t}
+  -> l:size_t{0 < v l /\ v l < bits t}
   -> table_len:size_t{1 < v table_len /\ v table_len * v len <= max_size_t /\ v table_len == pow2 (v l)}
   -> table:lbignum t (table_len *! len)
   -> accM:lbignum t len ->
@@ -315,7 +315,7 @@ let bn_mod_exp_fw_mont_loop_st (t:limb_t) (len:BN.meta_len t) =
   -> bBits:size_t{0 < v bBits}
   -> bLen:size_t{bLen == blocks bBits (size (bits t))}
   -> b:lbignum t bLen
-  -> l:size_t{0 < v l /\ v l <= bits t /\ pow2 (v l) * v len <= max_size_t}
+  -> l:size_t{0 < v l /\ v l < bits t /\ pow2 (v l) * v len <= max_size_t}
   -> table_len:size_t{1 < v table_len /\ v table_len * v len <= max_size_t /\ v table_len == pow2 (v l)}
   -> table:lbignum t (table_len *! len)
   -> accM:lbignum t len ->
@@ -384,9 +384,7 @@ let bn_mod_exp_fw_mont_aux #t k bn_mod_exp_fw_mont_f bn_mod_exp_fw_mont_rem n mu
   [@inline_let] let len = k.BM.bn.BN.len in
   let bLen = blocks bBits (size (bits t)) in
   push_frame ();
-  let acc = create len (uint #t #SEC 0) in
-  BN.bn_from_uint len (uint #t 1) acc;
-  k.BM.to n mu r2 acc accM;
+  BM.bn_mont_one k n mu r2 accM;
 
   let table_len = 1ul <<. l in
   assert (v table_len == pow2 (v l));

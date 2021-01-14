@@ -295,7 +295,7 @@ val bn_get_bits:
   -> len:size_t
   -> b:lbignum t len
   -> i:size_t
-  -> l:size_t{v l <= bits t /\ (v i + v l - 1) / bits t < v len /\ v i + v l <= max_size_t} ->
+  -> l:size_t{v l < bits t /\ v i / bits t < v len} ->
   Stack (limb t)
   (requires fun h -> live h b)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\

@@ -75,29 +75,7 @@ let bn_mod_exp_loop #t k n nInv bBits bLen b aM accM =
   )
 
 
-inline_for_extraction noextract
-let bn_mod_exp_mont_st (t:limb_t) (len:BN.meta_len t) =
-    n:lbignum t len
-  -> a:lbignum t len
-  -> acc:lbignum t len
-  -> bBits:size_t{v bBits > 0}
-  -> b:lbignum t (blocks bBits (size (bits t)))
-  -> r2:lbignum t len
-  -> res:lbignum t len ->
-  Stack unit
-  (requires fun h ->
-    live h n /\ live h a /\ live h b /\ live h res /\ live h acc /\ live h r2 /\
-    disjoint res a /\ disjoint res b /\ disjoint res n /\ disjoint res acc /\
-    disjoint a n /\ disjoint acc n /\ disjoint res r2 /\ disjoint r2 a /\
-    disjoint r2 acc /\ disjoint r2 n)
-  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_seq h1 res ==
-    S.bn_mod_exp_mont (v len) (as_seq h0 n) (as_seq h0 a) (as_seq h0 acc) (v bBits) (as_seq h0 b) (as_seq h0 r2))
-
-
-inline_for_extraction noextract
-val bn_mod_exp_mont: #t:limb_t -> k:BM.mont t -> bn_mod_exp_mont_st t k.BM.bn.BN.len
-let bn_mod_exp_mont #t k n a acc bBits b r2 res =
+let bn_mod_exp_precompr2 #t k n a bBits b r2 res =
   [@inline_let] let len = k.BM.bn.BN.len in
   push_frame ();
   let bLen = blocks bBits (size (bits t)) in
@@ -106,18 +84,9 @@ let bn_mod_exp_mont #t k n a acc bBits b r2 res =
   let aM   = create len (uint #t #SEC 0) in
   let accM = create len (uint #t #SEC 0) in
   BM.to n nInv r2 a aM;
-  BM.to n nInv r2 acc accM;
+  BM.bn_mont_one k n nInv r2 accM;
   bn_mod_exp_loop k n nInv bBits bLen b aM accM;
   BM.from n nInv accM res;
-  pop_frame ()
-
-
-let bn_mod_exp_precompr2 #t k n a bBits b r2 res =
-  [@inline_let] let len = k.BM.bn.BN.len in
-  push_frame ();
-  let acc  = create len (uint #t #SEC 0) in
-  BN.bn_from_uint len (uint #t #SEC 1) acc;
-  bn_mod_exp_mont k n a acc bBits b r2 res;
   pop_frame ()
 
 ///
@@ -175,30 +144,7 @@ let bn_mod_exp_mont_ladder_loop #t k n nInv bBits bLen b rM0 rM1 sw =
     (S.bn_mod_exp_mont_ladder_t t (v len) (v bBits)) (spec h0) (refl h0 0))
 
 
-inline_for_extraction noextract
-let bn_mod_exp_mont_ladder_st1 (t:limb_t) (len:BN.meta_len t) =
-    n:lbignum t len
-  -> a:lbignum t len
-  -> acc:lbignum t len
-  -> bBits:size_t{v bBits > 0}
-  -> b:lbignum t (blocks bBits (size (bits t)))
-  -> r2:lbignum t len
-  -> res:lbignum t len ->
-  Stack unit
-  (requires fun h ->
-    live h n /\ live h a /\ live h b /\ live h res /\ live h acc /\ live h r2 /\
-    disjoint res a /\ disjoint res b /\ disjoint res n /\ disjoint res acc /\
-    disjoint a n /\ disjoint acc n /\ disjoint r2 a /\ disjoint r2 res /\
-    disjoint r2 acc /\ disjoint r2 n)
-  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_seq h1 res ==
-      S.bn_mod_exp_mont_ladder_ (v len) (as_seq h0 n) (as_seq h0 a)
-	(as_seq h0 acc) (v bBits) (as_seq h0 b) (as_seq h0 r2))
-
-
-inline_for_extraction noextract
-val bn_mod_exp_mont_ladder_: #t:limb_t -> k:BM.mont t -> bn_mod_exp_mont_ladder_st1 t k.BM.bn.BN.len
-let bn_mod_exp_mont_ladder_ #t k n a one bBits b r2 res =
+let bn_mod_exp_mont_ladder_precompr2 #t k n a bBits b r2 res =
   [@inline_let] let len = k.BM.bn.BN.len in
   push_frame ();
   let bLen = blocks bBits (size (bits t)) in
@@ -207,19 +153,10 @@ let bn_mod_exp_mont_ladder_ #t k n a one bBits b r2 res =
   let rM0 = create len (uint #t #SEC 0) in
   let rM1 = create len (uint #t #SEC 0) in
   let sw  = create 1ul (uint #t #SEC 0) in
-  BM.to n nInv r2 one rM0;
+  BM.bn_mont_one k n nInv r2 rM0;
   BM.to n nInv r2 a rM1;
 
   bn_mod_exp_mont_ladder_loop k n nInv bBits bLen b rM0 rM1 sw;
   BN.cswap2 len sw.(0ul) rM0 rM1;
   BM.from n nInv rM0 res;
-  pop_frame ()
-
-
-let bn_mod_exp_mont_ladder_precompr2 #t k n a bBits b r2 res =
-  [@inline_let] let len = k.BM.bn.BN.len in
-  push_frame ();
-  let one  = create len (uint #t 0) in
-  BN.bn_from_uint len (uint #t 1) one;
-  bn_mod_exp_mont_ladder_ k n a one bBits b r2 res;
   pop_frame ()

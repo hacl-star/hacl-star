@@ -107,7 +107,7 @@ val bn_mod_exp_fw_mont_f:
   -> bBits:size_pos
   -> bLen:size_nat{bLen == blocks bBits (bits t)}
   -> b:lbignum t bLen
-  -> l:size_pos{l <= bits t}
+  -> l:size_pos{l < bits t}
   -> table_len:size_nat{1 < table_len /\ table_len * nLen <= max_size_t /\ table_len == pow2 l}
   -> table:lbignum t (table_len * nLen)
   -> i:nat{l * (i + 1) <= bBits}
@@ -134,7 +134,7 @@ val bn_mod_exp_fw_mont_rem:
   -> bBits:size_pos
   -> bLen:size_nat{bLen == blocks bBits (bits t)}
   -> b:lbignum t bLen
-  -> l:size_pos{l <= bits t}
+  -> l:size_pos{l < bits t}
   -> table_len:size_nat{1 < table_len /\ table_len * nLen <= max_size_t /\ table_len == pow2 l}
   -> table:lbignum t (table_len * nLen)
   -> accM:lbignum t nLen ->
@@ -160,14 +160,13 @@ val bn_mod_exp_fw_mont_:
   -> aM:lbignum t nLen
   -> bBits:size_pos
   -> b:lbignum t (blocks bBits (bits t))
-  -> l:size_pos{l <= bits t /\ pow2 l * nLen <= max_size_t}
+  -> l:size_pos{l < bits t /\ pow2 l * nLen <= max_size_t}
   -> r2:lbignum t nLen ->
   lbignum t nLen
 
 let bn_mod_exp_fw_mont_ #t #nLen n mu aM bBits b l r2 =
   let bLen = blocks bBits (bits t) in
-  let one = BN.bn_from_uint nLen (uint #t 1) in
-  let oneM = BM.bn_to_mont n mu r2 one in
+  let oneM = BM.bn_mont_one n mu r2 in
 
   let table_len = pow2 l in
   Math.Lemmas.pow2_le_compat l 1;
@@ -238,7 +237,7 @@ val bn_mod_precomp_table_mont_loop_lemma:
       assert (i * nLen + nLen <= table_len * nLen);
       let bi = sub t1 (i * nLen) nLen in bn_v bi == index t2 i))))
 
-let rec bn_mod_precomp_table_mont_loop_lemma #t #nLen n mu table_len aM t01 t02 j = admit()
+let bn_mod_precomp_table_mont_loop_lemma #t #nLen n mu table_len aM t01 t02 j = admit()
   // let t1: lbignum t (table_len * nLen) = Loops.repeati j (bn_mod_precomp_table_mont_f n mu aM table_len) t01 in
   // let t2: lseq nat table_len = Loops.repeati j (E.mod_precomp_table_mont_f (bits t) nLen (bn_v n) (v mu) (bn_v aM) table_len) t02 in
 
@@ -336,7 +335,7 @@ val bn_mod_exp_fw_mont_f_lemma:
   -> bBits:size_pos
   -> bLen:size_nat{bLen == blocks bBits (bits t)}
   -> b:lbignum t bLen
-  -> l:size_pos{l <= bits t}
+  -> l:size_pos{l < bits t}
   -> table_len:size_nat{1 < table_len /\ table_len * nLen <= max_size_t /\ table_len == pow2 l}
   -> oneM:lbignum t nLen
   -> aM:lbignum t nLen
@@ -385,7 +384,7 @@ val bn_mod_exp_fw_mont_rem_lemma:
   -> bBits:size_pos
   -> bLen:size_nat{bLen == blocks bBits (bits t)}
   -> b:lbignum t bLen
-  -> l:size_pos{l <= bits t}
+  -> l:size_pos{l < bits t}
   -> table_len:size_nat{1 < table_len /\ table_len * nLen <= max_size_t /\ table_len == pow2 l}
   -> oneM:lbignum t nLen
   -> aM:lbignum t nLen
@@ -437,7 +436,7 @@ let bn_mod_exp_fw_mont_rem_lemma #t #nLen n mu bBits bLen b l table_len oneM aM 
 //   -> aM:lbignum t nLen
 //   -> bBits:size_pos
 //   -> b:lbignum t (blocks bBits (bits t))
-//   -> l:size_pos{l <= bits t}
+//   -> l:size_pos{l < bits t}
 //   -> table_len:size_nat{1 < table_len /\ table_len * nLen <= max_size_t /\ table_len == pow2 l}
 //   -> oneM:lbignum t nLen
 //   -> accM0:lbignum t nLen
@@ -455,22 +454,22 @@ let bn_mod_exp_fw_mont_rem_lemma #t #nLen n mu bBits bLen b l table_len oneM aM 
 //     let accM2 = Loops.repeati j (E.mod_exp_fw_mont_f (bits t) nLen (bn_v n) (v mu) bBits (bn_v b) l table_len t2) (bn_v accM0) in
 //     bn_v accM1 == accM2 /\ bn_v accM1 < bn_v n))
 
-// let bn_mod_exp_fw_mont_loop_lemma #t #nLen n mu aM bBits b l table_len oneM accM0 j =
-  // let t1 = bn_mod_precomp_table_mont n mu table_len aM oneM in
-  // let t2 = E.mod_precomp_table_mont (bits t) nLen (bn_v n) (v mu) table_len (bn_v aM) in
-  // let bLen = blocks bBits (bits t) in
+// let rec bn_mod_exp_fw_mont_loop_lemma #t #nLen n mu aM bBits b l table_len oneM accM0 j =
+//   let t1 = bn_mod_precomp_table_mont n mu table_len aM oneM in
+//   let t2 = E.mod_precomp_table_mont (bits t) nLen (bn_v n) (v mu) table_len (bn_v aM) in
+//   let bLen = blocks bBits (bits t) in
 
-  // if j = 0 then begin
-  //   Loops.eq_repeati0 j (bn_mod_exp_fw_mont_f n mu bBits bLen b l table_len t1) accM0;
-  //   Loops.eq_repeati0 j (E.mod_exp_fw_mont_f (bits t) nLen (bn_v n) (v mu) bBits (bn_v b) l table_len t2) (bn_v accM0) end
-  // else begin
-  //   Math.Lemmas.lemma_mult_lt_left l (j - 1) j;
-  //   let accM4 = Loops.repeati (j - 1) (bn_mod_exp_fw_mont_f n mu bBits bLen b l table_len t1) accM0 in
-  //   Loops.unfold_repeati j (E.mod_exp_fw_mont_f (bits t) nLen (bn_v n) (v mu) bBits (bn_v b) l table_len t2) (bn_v accM0) (j - 1);
-  //   Loops.unfold_repeati j (bn_mod_exp_fw_mont_f n mu bBits bLen b l table_len t1) accM0 (j - 1);
-  //   bn_mod_exp_fw_mont_loop_lemma n mu aM bBits b l table_len oneM accM0 (j - 1);
-  //   bn_mod_exp_fw_mont_f_lemma n mu bBits bLen b l table_len oneM aM accM4 (j - 1);
-  //   () end
+//   if j = 0 then begin
+//     Loops.eq_repeati0 j (bn_mod_exp_fw_mont_f n mu bBits bLen b l table_len t1) accM0;
+//     Loops.eq_repeati0 j (E.mod_exp_fw_mont_f (bits t) nLen (bn_v n) (v mu) bBits (bn_v b) l table_len t2) (bn_v accM0) end
+//   else begin
+//     Math.Lemmas.lemma_mult_lt_left l (j - 1) j;
+//     let accM4 = Loops.repeati (j - 1) (bn_mod_exp_fw_mont_f n mu bBits bLen b l table_len t1) accM0 in
+//     Loops.unfold_repeati j (E.mod_exp_fw_mont_f (bits t) nLen (bn_v n) (v mu) bBits (bn_v b) l table_len t2) (bn_v accM0) (j - 1);
+//     Loops.unfold_repeati j (bn_mod_exp_fw_mont_f n mu bBits bLen b l table_len t1) accM0 (j - 1);
+//     bn_mod_exp_fw_mont_loop_lemma n mu aM bBits b l table_len oneM accM0 (j - 1);
+//     bn_mod_exp_fw_mont_f_lemma n mu bBits bLen b l table_len oneM aM accM4 (j - 1);
+//     () end
 
 
 val bn_mod_exp_fw_mont_aux_lemma:
@@ -481,7 +480,7 @@ val bn_mod_exp_fw_mont_aux_lemma:
   -> aM:lbignum t nLen
   -> bBits:size_pos
   -> b:lbignum t (blocks bBits (bits t))
-  -> l:size_pos{l <= bits t /\ pow2 l * nLen <= max_size_t}
+  -> l:size_pos{l < bits t /\ pow2 l * nLen <= max_size_t}
   -> r2:lbignum t nLen -> Lemma
   (requires
     BM.bn_mont_pre n mu /\ bn_v aM < bn_v n /\ bn_v b < pow2 bBits /\
@@ -493,17 +492,11 @@ val bn_mod_exp_fw_mont_aux_lemma:
 
 let bn_mod_exp_fw_mont_aux_lemma #t #nLen n mu aM bBits b l r2 =
   let bLen = blocks bBits (bits t) in
-  let one = BN.bn_from_uint nLen (uint #t 1) in
-  BN.bn_from_uint_lemma nLen (uint #t 1);
-  assert (bn_v one = 1);
-
-  let oneM = BM.bn_to_mont n mu r2 one in
-  BM.bn_to_mont_lemma n mu r2 one;
-  assert (bn_v oneM == M.to_mont (bits t) nLen (bn_v n) (v mu) (bn_v one) /\ bn_v oneM < bn_v n);
+  let oneM = BM.bn_mont_one n mu r2 in
+  BM.bn_mont_one_lemma n mu r2;
 
   let table_len = pow2 l in
   Math.Lemmas.pow2_le_compat l 1;
-  assert (1 < table_len /\ table_len * nLen <= max_size_t);
 
   let table = bn_mod_precomp_table_mont n mu table_len aM oneM in
   Math.Lemmas.multiply_fractions bBits l;
@@ -517,26 +510,19 @@ let bn_mod_exp_fw_mont_aux_lemma #t #nLen n mu aM bBits b l r2 =
 
 let bn_mod_exp_fw_precompr2_lemma #t nLen n a bBits b l r2 =
   let mu = BI.mod_inv_limb n.[0] in
-  bn_eval_index n 0;
-  assert (bn_v n % pow2 (bits t) == v n.[0]);
-  Math.Lemmas.pow2_modulo_modulo_lemma_1 (bn_v n) 2 (bits t);
-  assert (v n.[0] % 2 = 1); // since bn_v n % 2 = 1
-  BI.mod_inv_limb_lemma n.[0];
-  assert (BM.bn_mont_pre n mu);
+  BI.bn_mod_inv_limb_lemma n;
 
   let aM = BM.bn_to_mont n mu r2 a in
   BM.bn_to_mont_lemma n mu r2 a;
-  assert (bn_v aM == M.to_mont (bits t) nLen (bn_v n) (v mu) (bn_v a) /\ bn_v aM < bn_v n);
 
-  let resM = bn_mod_exp_fw_mont_ n mu aM bBits b l r2 in
+  let res1 = bn_mod_exp_fw_mont_ n mu aM bBits b l r2 in
+  let res2 = E.mod_exp_fw_mont_ (bits t) nLen (bn_v n) (v mu) (bn_v aM) bBits (bn_v b) l in
   bn_mod_exp_fw_mont_aux_lemma n mu aM bBits b l r2;
-  assert (bn_v resM == E.mod_exp_fw_mont_ (bits t) nLen (bn_v n) (v mu) (bn_v aM) bBits (bn_v b) l);
+  assert (bn_v res1 == res2 /\ bn_v res1 < bn_v n);
 
-  let res = BM.bn_from_mont n mu resM in
-  BM.bn_from_mont_lemma n mu resM;
-  assert (bn_v res == M.from_mont (bits t) nLen (bn_v n) (v mu) (bn_v resM) /\ bn_v res < bn_v n);
+  let res = BM.bn_from_mont n mu res1 in
+  BM.bn_from_mont_lemma n mu res1;
 
   bn_eval_bound n nLen;
   M.mont_preconditions (bits t) nLen (bn_v n) (v mu);
-  assert (E.mont_pre (bits t) nLen (bn_v n) (v mu));
   E.mod_exp_fw_mont_lemma (bits t) nLen (bn_v n) (v mu) (bn_v a) bBits (bn_v b) l

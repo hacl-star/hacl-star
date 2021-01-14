@@ -207,6 +207,10 @@ val mont_sqr: pbits:pos -> rLen:nat -> n:pos -> mu:nat -> a:nat -> nat
 let mont_sqr pbits rLen n mu a =
   mont_mul pbits rLen n mu a a
 
+val mont_one: pbits:pos -> rLen:nat -> n:pos -> mu:nat -> nat
+let mont_one pbits rLen n mu =
+  to_mont pbits rLen n mu 1
+
 ///
 ///  Lemma (mont_reduction rLen n mu c == c * d % n)
 ///
@@ -528,6 +532,16 @@ val from_mont_lemma: pbits:pos -> rLen:nat -> n:pos -> d:int -> mu:nat -> aM:nat
 
 let from_mont_lemma pbits rLen n d mu aM =
   mont_reduction_lemma pbits rLen n d mu aM
+
+
+val mont_one_lemma: pbits:pos -> rLen:nat -> n:pos -> d:int-> mu:nat -> Lemma
+  (requires
+    (1 + n * mu) % pow2 pbits == 0 /\ pow2 (pbits * rLen) * d % n == 1 /\
+    n < pow2 (pbits * rLen) /\ 1 < n)
+  (ensures mont_one pbits rLen n mu == 1 * pow2 (pbits * rLen) % n)
+
+let mont_one_lemma pbits rLen n d mu =
+  to_mont_lemma pbits rLen n d mu 1
 
 ///
 ///  Properties of Montgomery arithmetic

@@ -259,3 +259,14 @@ let mod_inv_limb_lemma #t n0 =
     0;
   };
   assert ((1 + v vb * v n0) % pow2 pbits == 0)
+
+
+let bn_mod_inv_limb_lemma #t #nLen n =
+  let n0 = Lib.Sequence.index n 0 in
+  let mu = mod_inv_limb n0 in
+  bn_eval_index n 0;
+  assert (bn_v n % pow2 (bits t) == v n0);
+  Math.Lemmas.pow2_modulo_modulo_lemma_1 (bn_v n) 2 (bits t);
+  assert (v n0 % 2 = 1); // since bn_v n % 2 = 1
+  mod_inv_limb_lemma n0;
+  assert ((1 + (bn_v n % pow2 (bits t)) * v mu) % pow2 (bits t) == 0)

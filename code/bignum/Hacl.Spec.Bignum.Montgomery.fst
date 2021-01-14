@@ -124,6 +124,10 @@ let bn_mont_sqr #t #nLen n mu aM =
   let c = BN.bn_mul aM aM in // c = aM * aM
   bn_mont_reduction n mu c // resM = c % n
 
+let bn_mont_one #t #nLen n mu r2 =
+  let one = BN.bn_from_uint nLen (uint #t 1) in
+  bn_to_mont n mu r2 one
+
 
 val eq_slice: #a:Type0 -> #len:size_nat -> b1:lseq a len -> b2:lseq a len -> i:nat -> j:nat{i <= j /\ j <= len} -> Lemma
   (requires slice b1 i len == slice b2 i len)
@@ -386,3 +390,10 @@ let bn_mont_mul_lemma #t #nLen n mu aM bM =
 
 let bn_mont_sqr_lemma #t #nLen n mu aM =
   bn_mont_mul_lemma #t #nLen n mu aM aM
+
+
+let bn_mont_one_lemma #t #nLen n mu r2 =
+  let one = BN.bn_from_uint nLen (uint #t 1) in
+  BN.bn_from_uint_lemma nLen (uint #t 1);
+  assert (bn_v one == 1);
+  bn_to_mont_lemma n mu r2 one

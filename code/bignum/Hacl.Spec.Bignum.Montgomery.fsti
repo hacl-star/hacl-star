@@ -83,6 +83,15 @@ val bn_mont_sqr:
   lbignum t nLen
 
 
+val bn_mont_one:
+    #t:limb_t
+  -> #nLen:size_pos{nLen + nLen <= max_size_t}
+  -> n:lbignum t nLen
+  -> mu:limb t
+  -> r2:lbignum t nLen ->
+  lbignum t nLen
+
+
 val bn_mont_reduction_lemma:
     #t:limb_t
   -> #nLen:size_pos{nLen + nLen <= max_size_t}
@@ -155,3 +164,18 @@ val bn_mont_sqr_lemma:
     (let res = bn_v (bn_mont_sqr n mu aM) in
     res == M.mont_mul (bits t) nLen (bn_v n) (v mu) (bn_v aM) (bn_v aM) /\
     res < bn_v n))
+
+
+val bn_mont_one_lemma:
+    #t:limb_t
+  -> #nLen:size_pos{nLen + nLen <= max_size_t}
+  -> n:lbignum t nLen
+  -> mu:limb t
+  -> r2:lbignum t nLen -> Lemma
+  (requires
+    bn_mont_pre n mu /\
+    bn_v r2 == pow2 (2 * bits t * nLen) % bn_v n)
+  (ensures
+    (let oneM = bn_v (bn_mont_one n mu r2) in
+    oneM == M.mont_one (bits t) nLen (bn_v n) (v mu) /\
+    oneM < bn_v n))

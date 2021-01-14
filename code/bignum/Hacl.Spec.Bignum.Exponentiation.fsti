@@ -69,7 +69,7 @@ val bn_mod_exp_fw:
   -> a:lbignum t nLen
   -> bBits:size_pos
   -> b:lbignum t (blocks bBits (bits t))
-  -> l:size_pos{l <= bits t /\ pow2 l * nLen <= max_size_t} ->
+  -> l:size_pos{l < bits t /\ pow2 l * nLen <= max_size_t} ->
   lbignum t nLen
 
 
@@ -81,6 +81,6 @@ val bn_mod_exp_fw_lemma:
   -> a:lbignum t nLen
   -> bBits:size_pos
   -> b:lbignum t (blocks bBits (bits t))
-  -> l:size_pos{l <= bits t /\ pow2 l * nLen <= max_size_t} -> Lemma
+  -> l:size_pos{l < bits t /\ pow2 l * nLen <= max_size_t} -> Lemma
   (requires bn_mod_exp_pre n a bBits b /\ pow2 nBits < bn_v n)
   (ensures  bn_mod_exp_post n a bBits b (bn_mod_exp_fw nLen nBits n a bBits b l))

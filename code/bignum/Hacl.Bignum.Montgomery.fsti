@@ -167,3 +167,21 @@ val mk_runtime_mont: #t:limb_t -> len:BN.meta_len t -> mont t
 
 val mk_runtime_mont_len_lemma: #t:limb_t -> len:BN.meta_len t ->
   Lemma ((mk_runtime_mont #t len).bn.BN.len == len) [SMTPat (mk_runtime_mont #t len)]
+
+
+inline_for_extraction noextract
+let bn_mont_one_st (t:limb_t) (nLen:BN.meta_len t) =
+    n:lbignum t nLen
+  -> mu:limb t
+  -> r2:lbignum t nLen
+  -> oneM:lbignum t nLen ->
+  Stack unit
+  (requires fun h ->
+    live h n /\ live h r2 /\ live h oneM /\
+    disjoint n r2 /\ disjoint n oneM /\ disjoint r2 oneM)
+  (ensures  fun h0 _ h1 -> modifies (loc oneM) h0 h1 /\
+    as_seq h1 oneM == S.bn_mont_one (as_seq h0 n) mu (as_seq h0 r2))
+
+
+inline_for_extraction noextract
+val bn_mont_one: #t:limb_t -> k:mont t -> bn_mont_one_st t k.bn.BN.len
