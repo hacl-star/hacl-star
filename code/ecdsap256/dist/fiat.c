@@ -3660,6 +3660,8 @@ static const pt_aff_t lut_cmb[27][16] = {
  */
 static void point_double(pt_prj_t *Q, const pt_prj_t *P) {
     /* temporary variables */
+     printf("%s", "?");
+
     fe_t t0, t1, t2, t3, t4;
     /* constants */
     const limb_t *b = const_b;
@@ -3718,6 +3720,10 @@ static void point_double(pt_prj_t *Q, const pt_prj_t *P) {
  */
 static void point_add_mixed(pt_prj_t *R, const pt_prj_t *Q, const pt_aff_t *P) {
     /* temporary variables */
+
+      printf("%s", ".");
+
+
     fe_t t0, t1, t2, t3, t4;
     /* constants */
     const limb_t *b = const_b;
@@ -3789,6 +3795,7 @@ static void point_add_mixed(pt_prj_t *R, const pt_prj_t *Q, const pt_aff_t *P) {
  */
 static void point_add_proj(pt_prj_t *R, const pt_prj_t *Q, const pt_prj_t *P) {
     /* temporary variables */
+    printf("%s\n", ".P");
     fe_t t0, t1, t2, t3, t4, t5;
     /* constants */
     const limb_t *b = const_b;
@@ -12038,6 +12045,7 @@ static const pt_aff_t lut_cmb[27][16] = {
  */
 static void point_double(pt_prj_t *Q, const pt_prj_t *P) {
     /* temporary variables */
+    printf("%s", "!");
     fe_t t0, t1, t2, t3, t4;
     /* constants */
     const limb_t *b = const_b;

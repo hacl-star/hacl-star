@@ -143,16 +143,13 @@ bool test_nist()
 	bool successDHI = Hacl_P256_ecp256dh_i_ladder(result, privateKey);
 	printf("\n");
 	ok = ok && successDHI;
-	ok = ok && compare_and_print(32, result, expectedPublicKeyX);
-	ok = ok && compare_and_print(32, result + 32, expectedPublicKeyY);
+	ok = ok && compare(32, result, expectedPublicKeyX);
+	ok = ok && compare(32, result + 32, expectedPublicKeyY);
 
-
-
-
-	// bool successDHI_Radix = Hacl_P256_ecp256dh_i_radix4(result, privateKey);
-	// ok = ok && successDHI_Radix;
-	// ok = ok && compare(32, result, expectedPublicKeyX);
-	// ok = ok && compare(32, result + 32, expectedPublicKeyY);
+	bool successDHI_Radix = Hacl_P256_ecp256dh_i_radix4(result, privateKey);
+	ok = ok && successDHI_Radix;
+	ok = ok && compare(32, result, expectedPublicKeyX);
+	ok = ok && compare(32, result + 32, expectedPublicKeyY);
 
 
 	// memcpy(pk, publicKeyX1,  32);
@@ -173,6 +170,7 @@ bool test_nist()
 	// ok = ok && compare(32, result, expectedPublicKeyX);
 	// ok = ok && compare(32, result + 32, expectedPublicKeyY);
 
+	printf("\n");
 
 	printf("%s\n", "---------------------------------------------------------------" );
 
@@ -190,9 +188,9 @@ bool test_nist()
 	MP_BE2LE(outy);
 
 
-
-	ok = ok && compare_and_print(32, outx, expectedPublicKeyX);
-	ok = ok && compare_and_print(32, outy, expectedPublicKeyY);
+	printf("\n");
+	ok = ok && compare(32, outx, expectedPublicKeyX);
+	ok = ok && compare(32, outy, expectedPublicKeyY);
 
 
 	free(result);
@@ -211,120 +209,120 @@ int main()
 	else
 		{
 			printf("%s\n", "Testing is failed \n ");
-			// return -1;
+			return -1;
 		}
 
-	return -1;
 
+		return -1;
 
-	// printf("\n");
+	printf("\n");
 
-	// cycles a,b;
-	// clock_t t1,t2;
-	// uint8_t* result = (uint8_t*) malloc (sizeof (uint8_t) * 32);
+	cycles a,b;
+	clock_t t1,t2;
+	uint8_t* result = (uint8_t*) malloc (sizeof (uint8_t) * 32);
 
-	// uint64_t len = SIZE;
+	uint64_t len = SIZE;
 
-	// uint8_t scalar[SIZE];
-	// memset(scalar,'P',SIZE);
+	uint8_t scalar[SIZE];
+	memset(scalar,'P',SIZE);
 	
- //  	for (int j = 0; j < ROUNDS; j++)
-	// 	Hacl_P256_ecp256dh_i_ladder(result, scalar);
+  	for (int j = 0; j < ROUNDS; j++)
+		Hacl_P256_ecp256dh_i_ladder(result, scalar);
 
-	// t1 = clock();
- //  	a = cpucycles_begin();
+	t1 = clock();
+  	a = cpucycles_begin();
 
- //  	for (int j = 0; j < ROUNDS; j++)
-	// 	Hacl_P256_ecp256dh_i_ladder(result, scalar);
+  	for (int j = 0; j < ROUNDS; j++)
+		Hacl_P256_ecp256dh_i_ladder(result, scalar);
 	
-	// b = cpucycles_end();
+	b = cpucycles_end();
 	
-	// t2 = clock();
-	// clock_t tdiff1 = t2 - t1;
-	// cycles cdiff1 = b - a;
+	t2 = clock();
+	clock_t tdiff1 = t2 - t1;
+	cycles cdiff1 = b - a;
 
-	// double time = (((double)tdiff1) / CLOCKS_PER_SEC);
-	// double nsigs = ((double)ROUNDS) / time;
-	// printf("HACL P-256 ECDH PERF/Ladder \n");
-	// printf("ECDH %8.2f mul/s\n",nsigs);
-
-
+	double time = (((double)tdiff1) / CLOCKS_PER_SEC);
+	double nsigs = ((double)ROUNDS) / time;
+	printf("HACL P-256 ECDH PERF/Ladder \n");
+	printf("ECDH %8.2f mul/s\n",nsigs);
 
 
 
 
 
- //  	for (int j = 0; j < ROUNDS; j++)
-	// 	Hacl_P256_ecp256dh_i_radix4(result, scalar);
 
-	// t1 = clock();
- //  	a = cpucycles_begin();
 
- //  	for (int j = 0; j < ROUNDS; j++)
-	// 	Hacl_P256_ecp256dh_i_radix4(result, scalar);
+  	for (int j = 0; j < ROUNDS; j++)
+		Hacl_P256_ecp256dh_i_radix4(result, scalar);
+
+	t1 = clock();
+  	a = cpucycles_begin();
+
+  	for (int j = 0; j < ROUNDS; j++)
+		Hacl_P256_ecp256dh_i_radix4(result, scalar);
 	
-	// b = cpucycles_end();
+	b = cpucycles_end();
 	
-	// t2 = clock();
-	// clock_t tdiff2 = t2 - t1;
-	// cycles cdiff2 = b - a;
+	t2 = clock();
+	clock_t tdiff2 = t2 - t1;
+	cycles cdiff2 = b - a;
 
-	// double timeRadix = (((double)tdiff2) / CLOCKS_PER_SEC);
-	// double nsigsRadix = ((double)ROUNDS) / timeRadix;
-	// printf("HACL P-256 ECDH PERF/Radix4 \n");
-	// printf("ECDH %8.2f mul/s\n",nsigsRadix);
-
-
-
-	// printf("%s\n", "-----------------------------------------------------");
+	double timeRadix = (((double)tdiff2) / CLOCKS_PER_SEC);
+	double nsigsRadix = ((double)ROUNDS) / timeRadix;
+	printf("HACL P-256 ECDH PERF/Radix4 \n");
+	printf("ECDH %8.2f mul/s\n",nsigsRadix);
 
 
- //  	for (int j = 0; j < ROUNDS; j++)
-	// 	Hacl_P256_ecp256dh_i(result, scalar);
 
-	// t1 = clock();
- //  	a = cpucycles_begin();
+	printf("%s\n", "-----------------------------------------------------");
 
- //  	for (int j = 0; j < ROUNDS; j++)
-	// 	Hacl_P256_ecp256dh_i(result, scalar);
+
+  	for (int j = 0; j < ROUNDS; j++)
+		Hacl_P256_ecp256dh_i(result, scalar);
+
+	t1 = clock();
+  	a = cpucycles_begin();
+
+  	for (int j = 0; j < ROUNDS; j++)
+		Hacl_P256_ecp256dh_i(result, scalar);
 	
-	// b = cpucycles_end();
+	b = cpucycles_end();
 	
-	// t2 = clock();
-	// clock_t tdiff3 = t2 - t1;
+	t2 = clock();
+	clock_t tdiff3 = t2 - t1;
 
-	// double timeFirstVersion = (((double)tdiff3) / CLOCKS_PER_SEC);
-	// double nsigsFirstVersion = ((double)ROUNDS) / timeFirstVersion;
-	// printf("HACL P-256 ECDH PERF - The initial version \n");
-	// printf("ECDH %8.2f mul/s\n",nsigsFirstVersion);
-
-
-
-	// printf("%s\n", "----------------------------------------------------");
+	double timeFirstVersion = (((double)tdiff3) / CLOCKS_PER_SEC);
+	double nsigsFirstVersion = ((double)ROUNDS) / timeFirstVersion;
+	printf("HACL P-256 ECDH PERF - The initial version \n");
+	printf("ECDH %8.2f mul/s\n",nsigsFirstVersion);
 
 
-	// uint8_t* outx = (uint8_t*) malloc (sizeof (uint8_t) * 32);
-	// uint8_t* outy = (uint8_t*) malloc (sizeof (uint8_t) * 32);
+
+	printf("%s\n", "----------------------------------------------------");
 
 
- //  	for (int j = 0; j < ROUNDS; j++)
-	// 	point_mul_g(outx, outy, scalar);
+	uint8_t* outx = (uint8_t*) malloc (sizeof (uint8_t) * 32);
+	uint8_t* outy = (uint8_t*) malloc (sizeof (uint8_t) * 32);
 
-	// t1 = clock();
- //  	a = cpucycles_begin();
 
- //  	for (int j = 0; j < ROUNDS; j++)
-	// 	point_mul_g(outx, outy, scalar);
+  	for (int j = 0; j < ROUNDS; j++)
+		point_mul_g(outx, outy, scalar);
+
+	t1 = clock();
+  	a = cpucycles_begin();
+
+  	for (int j = 0; j < ROUNDS; j++)
+		point_mul_g(outx, outy, scalar);
 	
-	// b = cpucycles_end();
+	b = cpucycles_end();
 	
-	// t2 = clock();
-	// clock_t tdiff4 = t2 - t1;
+	t2 = clock();
+	clock_t tdiff4 = t2 - t1;
 
-	// double timeFiat = (((double)tdiff4) / CLOCKS_PER_SEC);
-	// double nsigsFiat = ((double)ROUNDS) / timeFiat;
-	// printf("HACL P-256 ECDH PERF - EccKilla \n");
-	// printf("ECDH %8.2f mul/s\n",nsigsFiat);
+	double timeFiat = (((double)tdiff4) / CLOCKS_PER_SEC);
+	double nsigsFiat = ((double)ROUNDS) / timeFiat;
+	printf("HACL P-256 ECDH PERF - EccKilla \n");
+	printf("ECDH %8.2f mul/s\n",nsigsFiat);
 
 
 
