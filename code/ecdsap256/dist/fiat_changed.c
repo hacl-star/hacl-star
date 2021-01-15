@@ -4155,13 +4155,16 @@ static void fixed_smul_cmb(pt_aff_t *out, const unsigned char scalar[32]) {
 
         
         /* is_neg = (d < 0) ? 1 : 0 */
-        is_neg = (d >> (8 * sizeof(int) - 1)) & 1;
+        // is_neg = (d >> (8 * sizeof(int) - 1)) & 1;
+        is_neg = rnaf2[2 * (j * 2 + i) + 1];
         
         /* d = abs(d) */
-        d = (d ^ - is_neg) + is_neg;
+        // d = (d ^ - is_neg) + is_neg;
+        d = rnaf2[2 * (j * 2 + i)];
 
-                printf("%x  ", d);
-        printf("%x\n", rnaf2[2 * (j * 2 + i)]);
+
+                // printf("%x  ", d);
+        // printf("%x\n", rnaf2[2 * (j * 2 + i)]);
 
         d = (d - 1) >> 1;
         for (k = 0; k < DRADIX / 2; k++) {
