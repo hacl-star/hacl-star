@@ -585,7 +585,7 @@ Write `a ^ b mod n` in `res`.
   r2, this function is notably faster than mod_exp below.
 */
 void
-Hacl_Bignum256_mod_exp_precompr2(
+Hacl_Bignum256_mod_exp_raw_precompr2(
   uint64_t *n,
   uint64_t *a,
   uint32_t bBits,
@@ -594,18 +594,18 @@ Hacl_Bignum256_mod_exp_precompr2(
   uint64_t *res
 )
 {
-  uint64_t acc[4U] = { 0U };
-  memset(acc, 0U, (uint32_t)4U * sizeof (uint64_t));
-  acc[0U] = (uint64_t)1U;
   uint64_t nInv = Hacl_Bignum_ModInvLimb_mod_inv_uint64(n[0U]);
   uint64_t aM[4U] = { 0U };
   uint64_t accM[4U] = { 0U };
-  uint64_t c[8U] = { 0U };
-  Hacl_Bignum256_mul(a, r2, c);
-  reduction(n, nInv, c, aM);
   uint64_t c0[8U] = { 0U };
-  Hacl_Bignum256_mul(acc, r2, c0);
-  reduction(n, nInv, c0, accM);
+  Hacl_Bignum256_mul(a, r2, c0);
+  reduction(n, nInv, c0, aM);
+  uint64_t one[4U] = { 0U };
+  memset(one, 0U, (uint32_t)4U * sizeof (uint64_t));
+  one[0U] = (uint64_t)1U;
+  uint64_t c[8U] = { 0U };
+  Hacl_Bignum256_mul(one, r2, c);
+  reduction(n, nInv, c, accM);
   for (uint32_t i = (uint32_t)0U; i < bBits; i++)
   {
     uint32_t i1 = i / (uint32_t)64U;
@@ -652,7 +652,7 @@ Write `a ^ b mod n` in `res`.
   r2, this function is notably faster than mod_exp_mont_ladder below.
 */
 void
-Hacl_Bignum256_mod_exp_mont_ladder_precompr2(
+Hacl_Bignum256_mod_exp_ct_precompr2(
   uint64_t *n,
   uint64_t *a,
   uint32_t bBits,
@@ -661,13 +661,13 @@ Hacl_Bignum256_mod_exp_mont_ladder_precompr2(
   uint64_t *res
 )
 {
-  uint64_t one[4U] = { 0U };
-  memset(one, 0U, (uint32_t)4U * sizeof (uint64_t));
-  one[0U] = (uint64_t)1U;
   uint64_t nInv = Hacl_Bignum_ModInvLimb_mod_inv_uint64(n[0U]);
   uint64_t rM0[4U] = { 0U };
   uint64_t rM1[4U] = { 0U };
   uint64_t sw = (uint64_t)0U;
+  uint64_t one[4U] = { 0U };
+  memset(one, 0U, (uint32_t)4U * sizeof (uint64_t));
+  one[0U] = (uint64_t)1U;
   uint64_t c[8U] = { 0U };
   Hacl_Bignum256_mul(one, r2, c);
   reduction(n, nInv, c, rM0);
@@ -723,14 +723,20 @@ Write `a ^ b mod n` in `res`.
   violated, true otherwise.
 */
 bool
-Hacl_Bignum256_mod_exp(uint64_t *n, uint64_t *a, uint32_t bBits, uint64_t *b, uint64_t *res)
+Hacl_Bignum256_mod_exp_raw(
+  uint64_t *n,
+  uint64_t *a,
+  uint32_t bBits,
+  uint64_t *b,
+  uint64_t *res
+)
 {
   uint64_t is_valid_m = exp_check(n, a, bBits, b);
   uint32_t
   nBits = (uint32_t)64U * (uint32_t)Hacl_Bignum_Lib_bn_get_top_index_u64((uint32_t)4U, n);
   uint64_t r2[4U] = { 0U };
   precomp(nBits, n, r2);
-  Hacl_Bignum256_mod_exp_precompr2(n, a, bBits, b, r2, res);
+  Hacl_Bignum256_mod_exp_raw_precompr2(n, a, bBits, b, r2, res);
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
     uint64_t *os = res;
@@ -757,20 +763,14 @@ Write `a ^ b mod n` in `res`.
   mod_exp_mont_ladder_precompr2 are violated, true otherwise.
 */
 bool
-Hacl_Bignum256_mod_exp_mont_ladder(
-  uint64_t *n,
-  uint64_t *a,
-  uint32_t bBits,
-  uint64_t *b,
-  uint64_t *res
-)
+Hacl_Bignum256_mod_exp_ct(uint64_t *n, uint64_t *a, uint32_t bBits, uint64_t *b, uint64_t *res)
 {
   uint64_t is_valid_m = exp_check(n, a, bBits, b);
   uint32_t
   nBits = (uint32_t)64U * (uint32_t)Hacl_Bignum_Lib_bn_get_top_index_u64((uint32_t)4U, n);
   uint64_t r2[4U] = { 0U };
   precomp(nBits, n, r2);
-  Hacl_Bignum256_mod_exp_mont_ladder_precompr2(n, a, bBits, b, r2, res);
+  Hacl_Bignum256_mod_exp_ct_precompr2(n, a, bBits, b, r2, res);
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
     uint64_t *os = res;
@@ -847,7 +847,7 @@ Write `a ^ (-1) mod n` in `res`.
   • 0 < a
   • a < n 
 */
-bool Hacl_Bignum256_mod_inv_prime(uint64_t *n, uint64_t *a, uint64_t *res)
+bool Hacl_Bignum256_mod_inv_prime_raw(uint64_t *n, uint64_t *a, uint64_t *res)
 {
   uint64_t m0 = mont_check(n);
   uint64_t bn_zero[4U] = { 0U };
@@ -917,7 +917,7 @@ bool Hacl_Bignum256_mod_inv_prime(uint64_t *n, uint64_t *a, uint64_t *res)
   }
   uint64_t r2[4U] = { 0U };
   precomp(nBits, n, r2);
-  Hacl_Bignum256_mod_exp_precompr2(n, a, (uint32_t)256U, n2, r2, res);
+  Hacl_Bignum256_mod_exp_raw_precompr2(n, a, (uint32_t)256U, n2, r2, res);
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
     uint64_t *os = res;

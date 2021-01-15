@@ -207,8 +207,8 @@ EXPORTS
   Hacl_Bignum_ModInvLimb_mod_inv_uint64
   Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u64
   Hacl_Bignum_Montgomery_bn_mont_reduction_u64
-  Hacl_Bignum_Exponentiation_bn_mod_exp_precompr2_u64
-  Hacl_Bignum_Exponentiation_bn_mod_exp_mont_ladder_precompr2_u64
+  Hacl_Bignum_Exponentiation_bn_mod_exp_raw_precompr2_u64
+  Hacl_Bignum_Exponentiation_bn_mod_exp_fw_ct_precompr2_u64
   Hacl_Curve25519_64_Slow_scalarmult
   Hacl_Curve25519_64_Slow_secret_to_public
   Hacl_Curve25519_64_Slow_ecdh
@@ -478,12 +478,12 @@ EXPORTS
   Hacl_Bignum256_mul
   Hacl_Bignum256_mod_precompr2
   Hacl_Bignum256_mod
-  Hacl_Bignum256_mod_exp_precompr2
-  Hacl_Bignum256_mod_exp_mont_ladder_precompr2
-  Hacl_Bignum256_mod_exp
-  Hacl_Bignum256_mod_exp_mont_ladder
+  Hacl_Bignum256_mod_exp_raw_precompr2
+  Hacl_Bignum256_mod_exp_ct_precompr2
+  Hacl_Bignum256_mod_exp_raw
+  Hacl_Bignum256_mod_exp_ct
   Hacl_Bignum256_new_precompr2
-  Hacl_Bignum256_mod_inv_prime
+  Hacl_Bignum256_mod_inv_prime_raw
   Hacl_Bignum256_new_bn_from_bytes_be
   Hacl_Bignum256_bn_to_bytes_be
   Hacl_Bignum256_lt_mask
@@ -492,12 +492,12 @@ EXPORTS
   Hacl_Bignum4096_mul
   Hacl_Bignum4096_mod_precompr2
   Hacl_Bignum4096_mod
-  Hacl_Bignum4096_mod_exp_precompr2
-  Hacl_Bignum4096_mod_exp_mont_ladder_precompr2
-  Hacl_Bignum4096_mod_exp
-  Hacl_Bignum4096_mod_exp_mont_ladder
+  Hacl_Bignum4096_mod_exp_raw_precompr2
+  Hacl_Bignum4096_mod_exp_ct_precompr2
+  Hacl_Bignum4096_mod_exp_raw
+  Hacl_Bignum4096_mod_exp_ct
   Hacl_Bignum4096_new_precompr2
-  Hacl_Bignum4096_mod_inv_prime
+  Hacl_Bignum4096_mod_inv_prime_raw
   Hacl_Bignum4096_new_bn_from_bytes_be
   Hacl_Bignum4096_bn_to_bytes_be
   Hacl_Bignum4096_lt_mask

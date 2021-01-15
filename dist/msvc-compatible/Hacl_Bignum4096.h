@@ -147,7 +147,7 @@ Write `a ^ b mod n` in `res`.
   r2, this function is notably faster than mod_exp below.
 */
 void
-Hacl_Bignum4096_mod_exp_precompr2(
+Hacl_Bignum4096_mod_exp_raw_precompr2(
   uint64_t *n,
   uint64_t *a,
   uint32_t bBits,
@@ -181,7 +181,7 @@ Write `a ^ b mod n` in `res`.
   r2, this function is notably faster than mod_exp_mont_ladder below.
 */
 void
-Hacl_Bignum4096_mod_exp_mont_ladder_precompr2(
+Hacl_Bignum4096_mod_exp_ct_precompr2(
   uint64_t *n,
   uint64_t *a,
   uint32_t bBits,
@@ -206,7 +206,13 @@ Write `a ^ b mod n` in `res`.
   violated, true otherwise.
 */
 bool
-Hacl_Bignum4096_mod_exp(uint64_t *n, uint64_t *a, uint32_t bBits, uint64_t *b, uint64_t *res);
+Hacl_Bignum4096_mod_exp_raw(
+  uint64_t *n,
+  uint64_t *a,
+  uint32_t bBits,
+  uint64_t *b,
+  uint64_t *res
+);
 
 /*
 Write `a ^ b mod n` in `res`.
@@ -224,7 +230,7 @@ Write `a ^ b mod n` in `res`.
   mod_exp_mont_ladder_precompr2 are violated, true otherwise.
 */
 bool
-Hacl_Bignum4096_mod_exp_mont_ladder(
+Hacl_Bignum4096_mod_exp_ct(
   uint64_t *n,
   uint64_t *a,
   uint32_t bBits,
@@ -260,7 +266,7 @@ Write `a ^ (-1) mod n` in `res`.
   • 0 < a
   • a < n 
 */
-bool Hacl_Bignum4096_mod_inv_prime(uint64_t *n, uint64_t *a, uint64_t *res);
+bool Hacl_Bignum4096_mod_inv_prime_raw(uint64_t *n, uint64_t *a, uint64_t *res);
 
 
 /********************/

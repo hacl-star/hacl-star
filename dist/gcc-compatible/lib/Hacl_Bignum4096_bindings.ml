@@ -23,28 +23,28 @@ module Bindings(F:Cstubs.FOREIGN) =
       foreign "Hacl_Bignum4096_mod"
         ((ptr uint64_t) @->
            ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning bool))))
-    let hacl_Bignum4096_mod_exp_precompr2 =
-      foreign "Hacl_Bignum4096_mod_exp_precompr2"
+    let hacl_Bignum4096_mod_exp_raw_precompr2 =
+      foreign "Hacl_Bignum4096_mod_exp_raw_precompr2"
         ((ptr uint64_t) @->
            ((ptr uint64_t) @->
               (uint32_t @->
                  ((ptr uint64_t) @->
                     ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void)))))))
-    let hacl_Bignum4096_mod_exp_mont_ladder_precompr2 =
-      foreign "Hacl_Bignum4096_mod_exp_mont_ladder_precompr2"
+    let hacl_Bignum4096_mod_exp_ct_precompr2 =
+      foreign "Hacl_Bignum4096_mod_exp_ct_precompr2"
         ((ptr uint64_t) @->
            ((ptr uint64_t) @->
               (uint32_t @->
                  ((ptr uint64_t) @->
                     ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void)))))))
-    let hacl_Bignum4096_mod_exp =
-      foreign "Hacl_Bignum4096_mod_exp"
+    let hacl_Bignum4096_mod_exp_raw =
+      foreign "Hacl_Bignum4096_mod_exp_raw"
         ((ptr uint64_t) @->
            ((ptr uint64_t) @->
               (uint32_t @->
                  ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning bool))))))
-    let hacl_Bignum4096_mod_exp_mont_ladder =
-      foreign "Hacl_Bignum4096_mod_exp_mont_ladder"
+    let hacl_Bignum4096_mod_exp_ct =
+      foreign "Hacl_Bignum4096_mod_exp_ct"
         ((ptr uint64_t) @->
            ((ptr uint64_t) @->
               (uint32_t @->
@@ -52,8 +52,8 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Bignum4096_new_precompr2 =
       foreign "Hacl_Bignum4096_new_precompr2"
         ((ptr uint64_t) @-> (returning (ptr uint64_t)))
-    let hacl_Bignum4096_mod_inv_prime =
-      foreign "Hacl_Bignum4096_mod_inv_prime"
+    let hacl_Bignum4096_mod_inv_prime_raw =
+      foreign "Hacl_Bignum4096_mod_inv_prime_raw"
         ((ptr uint64_t) @->
            ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning bool))))
     let hacl_Bignum4096_new_bn_from_bytes_be =

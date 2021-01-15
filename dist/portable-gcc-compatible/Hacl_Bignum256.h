@@ -138,7 +138,7 @@ bool Hacl_Bignum256_mod(uint64_t *n, uint64_t *a, uint64_t *res);
 
 /* SNIPPET_END: Hacl_Bignum256_mod */
 
-/* SNIPPET_START: Hacl_Bignum256_mod_exp_precompr2 */
+/* SNIPPET_START: Hacl_Bignum256_mod_exp_raw_precompr2 */
 
 /*
 Write `a ^ b mod n` in `res`.
@@ -165,7 +165,7 @@ Write `a ^ b mod n` in `res`.
   r2, this function is notably faster than mod_exp below.
 */
 void
-Hacl_Bignum256_mod_exp_precompr2(
+Hacl_Bignum256_mod_exp_raw_precompr2(
   uint64_t *n,
   uint64_t *a,
   uint32_t bBits,
@@ -174,9 +174,9 @@ Hacl_Bignum256_mod_exp_precompr2(
   uint64_t *res
 );
 
-/* SNIPPET_END: Hacl_Bignum256_mod_exp_precompr2 */
+/* SNIPPET_END: Hacl_Bignum256_mod_exp_raw_precompr2 */
 
-/* SNIPPET_START: Hacl_Bignum256_mod_exp_mont_ladder_precompr2 */
+/* SNIPPET_START: Hacl_Bignum256_mod_exp_ct_precompr2 */
 
 /*
 Write `a ^ b mod n` in `res`.
@@ -203,7 +203,7 @@ Write `a ^ b mod n` in `res`.
   r2, this function is notably faster than mod_exp_mont_ladder below.
 */
 void
-Hacl_Bignum256_mod_exp_mont_ladder_precompr2(
+Hacl_Bignum256_mod_exp_ct_precompr2(
   uint64_t *n,
   uint64_t *a,
   uint32_t bBits,
@@ -212,9 +212,9 @@ Hacl_Bignum256_mod_exp_mont_ladder_precompr2(
   uint64_t *res
 );
 
-/* SNIPPET_END: Hacl_Bignum256_mod_exp_mont_ladder_precompr2 */
+/* SNIPPET_END: Hacl_Bignum256_mod_exp_ct_precompr2 */
 
-/* SNIPPET_START: Hacl_Bignum256_mod_exp */
+/* SNIPPET_START: Hacl_Bignum256_mod_exp_raw */
 
 /*
 Write `a ^ b mod n` in `res`.
@@ -232,11 +232,17 @@ Write `a ^ b mod n` in `res`.
   violated, true otherwise.
 */
 bool
-Hacl_Bignum256_mod_exp(uint64_t *n, uint64_t *a, uint32_t bBits, uint64_t *b, uint64_t *res);
+Hacl_Bignum256_mod_exp_raw(
+  uint64_t *n,
+  uint64_t *a,
+  uint32_t bBits,
+  uint64_t *b,
+  uint64_t *res
+);
 
-/* SNIPPET_END: Hacl_Bignum256_mod_exp */
+/* SNIPPET_END: Hacl_Bignum256_mod_exp_raw */
 
-/* SNIPPET_START: Hacl_Bignum256_mod_exp_mont_ladder */
+/* SNIPPET_START: Hacl_Bignum256_mod_exp_ct */
 
 /*
 Write `a ^ b mod n` in `res`.
@@ -254,15 +260,9 @@ Write `a ^ b mod n` in `res`.
   mod_exp_mont_ladder_precompr2 are violated, true otherwise.
 */
 bool
-Hacl_Bignum256_mod_exp_mont_ladder(
-  uint64_t *n,
-  uint64_t *a,
-  uint32_t bBits,
-  uint64_t *b,
-  uint64_t *res
-);
+Hacl_Bignum256_mod_exp_ct(uint64_t *n, uint64_t *a, uint32_t bBits, uint64_t *b, uint64_t *res);
 
-/* SNIPPET_END: Hacl_Bignum256_mod_exp_mont_ladder */
+/* SNIPPET_END: Hacl_Bignum256_mod_exp_ct */
 
 /* SNIPPET_START: Hacl_Bignum256_new_precompr2 */
 
@@ -281,7 +281,7 @@ uint64_t *Hacl_Bignum256_new_precompr2(uint64_t *n);
 
 /* SNIPPET_END: Hacl_Bignum256_new_precompr2 */
 
-/* SNIPPET_START: Hacl_Bignum256_mod_inv_prime */
+/* SNIPPET_START: Hacl_Bignum256_mod_inv_prime_raw */
 
 /*
 Write `a ^ (-1) mod n` in `res`.
@@ -298,9 +298,9 @@ Write `a ^ (-1) mod n` in `res`.
   • 0 < a
   • a < n 
 */
-bool Hacl_Bignum256_mod_inv_prime(uint64_t *n, uint64_t *a, uint64_t *res);
+bool Hacl_Bignum256_mod_inv_prime_raw(uint64_t *n, uint64_t *a, uint64_t *res);
 
-/* SNIPPET_END: Hacl_Bignum256_mod_inv_prime */
+/* SNIPPET_END: Hacl_Bignum256_mod_inv_prime_raw */
 
 /* SNIPPET_START: Hacl_Bignum256_new_bn_from_bytes_be */
 

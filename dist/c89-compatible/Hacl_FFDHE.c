@@ -254,7 +254,7 @@ ffdhe_compute_exp(
   {
     uint64_t res_n[nLen];
     memset(res_n, 0U, nLen * sizeof (uint64_t));
-    Hacl_Bignum_Exponentiation_bn_mod_exp_mont_ladder_precompr2_u64((Hacl_Impl_FFDHE_ffdhe_len(a)
+    Hacl_Bignum_Exponentiation_bn_mod_exp_fw_ct_precompr2_u64((Hacl_Impl_FFDHE_ffdhe_len(a)
       - (uint32_t)1U)
       / (uint32_t)8U
       + (uint32_t)1U,
@@ -262,6 +262,7 @@ ffdhe_compute_exp(
       b_n,
       (uint32_t)64U * nLen,
       sk_n,
+      (uint32_t)4U,
       r2_n,
       res_n);
     Hacl_Bignum_Convert_bn_to_bytes_be_uint64(Hacl_Impl_FFDHE_ffdhe_len(a), res_n, res);

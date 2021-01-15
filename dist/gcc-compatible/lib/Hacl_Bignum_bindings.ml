@@ -72,8 +72,8 @@ module Bindings(F:Cstubs.FOREIGN) =
            ((ptr uint64_t) @->
               (uint64_t @->
                  ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void))))))
-    let hacl_Bignum_Exponentiation_bn_mod_exp_precompr2_u64 =
-      foreign "Hacl_Bignum_Exponentiation_bn_mod_exp_precompr2_u64"
+    let hacl_Bignum_Exponentiation_bn_mod_exp_raw_precompr2_u64 =
+      foreign "Hacl_Bignum_Exponentiation_bn_mod_exp_raw_precompr2_u64"
         (uint32_t @->
            ((ptr uint64_t) @->
               ((ptr uint64_t) @->
@@ -81,14 +81,14 @@ module Bindings(F:Cstubs.FOREIGN) =
                     ((ptr uint64_t) @->
                        ((ptr uint64_t) @->
                           ((ptr uint64_t) @-> (returning void))))))))
-    let hacl_Bignum_Exponentiation_bn_mod_exp_mont_ladder_precompr2_u64 =
-      foreign
-        "Hacl_Bignum_Exponentiation_bn_mod_exp_mont_ladder_precompr2_u64"
+    let hacl_Bignum_Exponentiation_bn_mod_exp_fw_ct_precompr2_u64 =
+      foreign "Hacl_Bignum_Exponentiation_bn_mod_exp_fw_ct_precompr2_u64"
         (uint32_t @->
            ((ptr uint64_t) @->
               ((ptr uint64_t) @->
                  (uint32_t @->
                     ((ptr uint64_t) @->
-                       ((ptr uint64_t) @->
-                          ((ptr uint64_t) @-> (returning void))))))))
+                       (uint32_t @->
+                          ((ptr uint64_t) @->
+                             ((ptr uint64_t) @-> (returning void)))))))))
   end
