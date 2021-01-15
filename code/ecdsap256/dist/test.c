@@ -12,6 +12,7 @@
 
 #include "Hacl_P256.h"
 #include "Hacl_P256_first_version.h"
+#include "fiat.c"
 
 
 #define SIZE   32
@@ -63,8 +64,8 @@ bool test_nist()
 
 	bool successDHI = Hacl_P256_ecp256dh_i_ladder(result, privateKey);
 	ok = ok && successDHI;
-	ok = ok && compare_and_print(32, result, expectedPublicKeyX);
-	ok = ok && compare_and_print(32, result + 32, expectedPublicKeyY);
+	ok = ok && compare(32, result, expectedPublicKeyX);
+	ok = ok && compare(32, result + 32, expectedPublicKeyY);
 
 	bool successDHI_Radix = Hacl_P256_ecp256dh_i_radix4(result, privateKey);
 	ok = ok && successDHI_Radix;
@@ -87,7 +88,27 @@ bool test_nist()
 
 	bool successDHI_First = Hacl_P256_ecp256dh_i(result, privateKey);
 	ok = ok && successDHI_First;
-	ok = ok && compare_and_print(32, result, expectedPublicKeyX);
+	ok = ok && compare(32, result, expectedPublicKeyX);
+	ok = ok && compare(32, result + 32, expectedPublicKeyY);
+
+// 
+// static void point_mul_g(unsigned char outx[32], unsigned char outy[32],
+//                         const unsigned char scalar[32]) {
+
+
+	printf("%s\n", "External code testing");
+
+	uint8_t* outx = (uint8_t*) malloc (sizeof (uint8_t) * 32);
+	uint8_t* outy = (uint8_t*) malloc (sizeof (uint8_t) * 32);
+
+	point_mul_g(outx, outy, privateKey);
+	// ok = ok && success_Fiat_I;
+	
+	// ok = ok && compare_and_print(32, outx, expectedPublicKeyX);
+	// ok = ok && compare_and_print(32, outy, expectedPublicKeyY);
+
+	ok = compare_and_print(32, outx, expectedPublicKeyX);
+	ok = compare_and_print(32, outy, expectedPublicKeyY);
 
 
 
@@ -106,7 +127,7 @@ int main()
 	else
 		{
 			printf("%s\n", "Testing is failed \n ");
-			return -1;
+			// return -1;
 		}
 
 	printf("\n");
@@ -190,6 +211,33 @@ int main()
 	printf("HACL P-256 ECDH PERF - The initial version \n");
 	printf("ECDH %8.2f mul/s\n",nsigsFirstVersion);
 
+
+
+	printf("%s\n", "----------------------------------------------------");
+
+
+	uint8_t* outx = (uint8_t*) malloc (sizeof (uint8_t) * 32);
+	uint8_t* outy = (uint8_t*) malloc (sizeof (uint8_t) * 32);
+
+
+  	for (int j = 0; j < ROUNDS; j++)
+		point_mul_g(outx, outy, scalar);
+
+	t1 = clock();
+  	a = cpucycles_begin();
+
+  	for (int j = 0; j < ROUNDS; j++)
+		point_mul_g(outx, outy, scalar);
+	
+	b = cpucycles_end();
+	
+	t2 = clock();
+	clock_t tdiff4 = t2 - t1;
+
+	double timeFiat = (((double)tdiff4) / CLOCKS_PER_SEC);
+	double nsigsFiat = ((double)ROUNDS) / timeFiat;
+	printf("HACL P-256 ECDH PERF - EccKilla \n");
+	printf("ECDH %8.2f mul/s\n",nsigsFiat);
 
 
 
