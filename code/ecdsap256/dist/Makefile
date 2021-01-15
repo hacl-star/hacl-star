@@ -8,7 +8,7 @@ CProfiling += -pg
 
 export CFLAGS
 
-test.exe: test.c Hacl_P256.o
+test.exe: test.c Hacl_P256.o Hacl_P256_first_version.o Hacl_Hash.o
 	$(CC) $(CFLAGS) \
 	$^ \
 	-o test.exe

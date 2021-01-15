@@ -32,6 +32,12 @@
 
 
 
+extern krml_checked_int_t Prims_op_Subtraction(krml_checked_int_t x, krml_checked_int_t y);
+
+extern krml_checked_int_t Prims_pow2(krml_checked_int_t x0);
+
+extern uint64_t FStar_UInt64_uint_to_t(Prims_int x);
+
 static inline uint64_t FStar_UInt64_eq_mask(uint64_t a, uint64_t b);
 
 static inline uint128_t FStar_UInt128_add(uint128_t a, uint128_t b);
