@@ -37,9 +37,9 @@ let bn_mod_exp_fw_precompr2_st (t:limb_t) (len:BN.meta_len t) =
 
 // This function is *NOT* constant-time on the exponent b.
 inline_for_extraction noextract
-val bn_mod_exp_fw_precompr2: #t:limb_t -> k:BM.mont t -> bn_mod_exp_fw_precompr2_st t k.BM.bn.BN.len
+val bn_mod_exp_fw_raw_precompr2: #t:limb_t -> k:BM.mont t -> bn_mod_exp_fw_precompr2_st t k.BM.bn.BN.len
 
 
 // This function is constant-time on the exponent b.
 inline_for_extraction noextract
-val bn_mod_exp_fw_precompr2_ct: #t:limb_t -> k:BM.mont t -> bn_mod_exp_fw_precompr2_st t k.BM.bn.BN.len
+val bn_mod_exp_fw_ct_precompr2: #t:limb_t -> k:BM.mont t -> bn_mod_exp_fw_precompr2_st t k.BM.bn.BN.len

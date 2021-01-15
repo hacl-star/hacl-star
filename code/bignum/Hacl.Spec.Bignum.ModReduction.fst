@@ -66,11 +66,7 @@ val bn_mod_slow_precompr2_lemma:
 
 let bn_mod_slow_precompr2_lemma #t #nLen n a r2 =
   let mu = BI.mod_inv_limb n.[0] in
-  bn_eval_index n 0;
-  assert (bn_v n % pow2 (bits t) == v n.[0]);
-  Math.Lemmas.pow2_modulo_modulo_lemma_1 (bn_v n) 2 (bits t);
-  assert (v n.[0] % 2 = 1); // since bn_v n % 2 = 1
-  BI.mod_inv_limb_lemma n.[0];
+  BI.bn_mod_inv_limb_lemma n;
 
   let a_mod = BM.bn_mont_reduction n mu a in
   let res = BM.bn_to_mont n mu r2 a_mod in

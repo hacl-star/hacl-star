@@ -124,7 +124,7 @@ val mod: BS.bn_mod_slow_safe_st t_limbs n_limbs
 
   Owing to the absence of run-time checks, and factoring out the precomputation
   r2, this function is notably faster than mod_exp below."]
-val mod_exp_precompr2: BE.bn_mod_exp_precompr2_st t_limbs n_limbs
+val mod_exp_raw_precompr2: BE.bn_mod_exp_raw_precompr2_st t_limbs n_limbs
 
 [@@ Comment "Write `a ^ b mod n` in `res`.
 
@@ -148,7 +148,7 @@ val mod_exp_precompr2: BE.bn_mod_exp_precompr2_st t_limbs n_limbs
 
   Owing to the absence of run-time checks, and factoring out the precomputation
   r2, this function is notably faster than mod_exp_mont_ladder below."]
-val mod_exp_mont_ladder_precompr2: BE.bn_mod_exp_mont_ladder_precompr2_st t_limbs n_limbs
+val mod_exp_ct_precompr2: BE.bn_mod_exp_ct_precompr2_st t_limbs n_limbs
 
 [@@ Comment "Write `a ^ b mod n` in `res`.
 
@@ -163,7 +163,7 @@ val mod_exp_mont_ladder_precompr2: BE.bn_mod_exp_mont_ladder_precompr2_st t_limb
 
   The function returns false if any of the preconditions of mod_exp_precompr2 are
   violated, true otherwise."]
-val mod_exp: BS.bn_mod_exp_safe_st t_limbs n_limbs
+val mod_exp_raw: BS.bn_mod_exp_safe_st t_limbs n_limbs
 
 [@@ Comment "Write `a ^ b mod n` in `res`.
 
@@ -178,7 +178,7 @@ val mod_exp: BS.bn_mod_exp_safe_st t_limbs n_limbs
 
   The function returns false if any of the preconditions of
   mod_exp_mont_ladder_precompr2 are violated, true otherwise."]
-val mod_exp_mont_ladder: BS.bn_mod_exp_safe_st t_limbs n_limbs
+val mod_exp_ct: BS.bn_mod_exp_safe_st t_limbs n_limbs
 
 [@@ Comment "Compute `2 ^ 8192 mod n`.
 
@@ -204,7 +204,7 @@ val new_precompr2: BS.new_bn_precomp_r2_mod_n_st t_limbs n_limbs
   • 1 < n
   • 0 < a
   • a < n "]
-val mod_inv_prime: BS.bn_mod_inv_prime_safe_st t_limbs n_limbs
+val mod_inv_prime_raw: BS.bn_mod_inv_prime_safe_st t_limbs n_limbs
 
 [@@ CPrologue
 "\n/********************/

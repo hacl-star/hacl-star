@@ -53,12 +53,12 @@ let bn_mod_inv_prime_st (t:limb_t) (len:BN.meta_len t) =
 
 
 inline_for_extraction noextract
-val bn_mod_inv_prime: #t:limb_t -> k:BE.exp t -> bn_mod_inv_prime_st t k.BE.mont.BM.bn.BN.len
-let bn_mod_inv_prime #t k nBits n a res =
+val bn_mod_inv_prime_raw: #t:limb_t -> k:BE.exp t -> bn_mod_inv_prime_st t k.BE.mont.BM.bn.BN.len
+let bn_mod_inv_prime_raw #t k nBits n a res =
   [@inline_let] let len = k.BE.mont.BM.bn.BN.len in
   push_frame ();
   let n2 = create len (uint #t #SEC 0) in
   let c = BN.bn_sub1 len n (uint #t #SEC 2) n2 in
 
-  BE.bn_mod_exp k.BE.mont k.BE.mod_exp_precomp nBits n a (size (bits t) *! len) n2 res;
+  BE.bn_mod_exp_raw k.BE.mont k.BE.raw_mod_exp_precomp nBits n a (size (bits t) *! len) n2 res;
   pop_frame ()

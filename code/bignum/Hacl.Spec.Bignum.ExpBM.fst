@@ -8,8 +8,10 @@ open Lib.Sequence
 open Hacl.Spec.Bignum.Definitions
 
 module Loops = Lib.LoopCombinators
+
 module E = Hacl.Spec.Exponentiation.Lemmas
 module M = Hacl.Spec.Montgomery.Lemmas
+
 module BN = Hacl.Spec.Bignum
 module BM = Hacl.Spec.Bignum.Montgomery
 module BI = Hacl.Spec.Bignum.ModInvLimb
@@ -51,7 +53,7 @@ let bn_check_mod_exp #t #nLen n a bBits b =
   r
 
 
-val bn_mod_exp_f:
+val bn_mod_exp_raw_f:
     #t:limb_t
   -> #nLen:size_pos{nLen + nLen <= max_size_t}
   -> n:lbignum t nLen
@@ -63,24 +65,24 @@ val bn_mod_exp_f:
   -> aM_accM: tuple2 (lbignum t nLen) (lbignum t nLen) ->
   tuple2 (lbignum t nLen) (lbignum t nLen)
 
-let bn_mod_exp_f #t #nLen n mu bBits bLen b i (aM, accM) =
+let bn_mod_exp_raw_f #t #nLen n mu bBits bLen b i (aM, accM) =
   let is_bit_set = not (Hacl.Spec.Bignum.Base.unsafe_bool_of_limb0 (BN.bn_get_ith_bit b i)) in
   let accM = if is_bit_set then BM.bn_mont_mul n mu aM accM else accM in // acc = (acc * a) % n
   let aM = BM.bn_mont_sqr n mu aM in // a = (a * a) % n
   (aM, accM)
 
 
-let bn_mod_exp_precompr2 #t nLen n a bBits b r2 =
+let bn_mod_exp_raw_precompr2 #t nLen n a bBits b r2 =
   let bLen = blocks bBits (bits t) in
   let mu = BI.mod_inv_limb n.[0] in
 
   let aM = BM.bn_to_mont n mu r2 a in
   let accM = BM.bn_mont_one n mu r2 in
-  let (aM, accM) = Loops.repeati bBits (bn_mod_exp_f n mu bBits bLen b) (aM, accM) in
+  let (aM, accM) = Loops.repeati bBits (bn_mod_exp_raw_f n mu bBits bLen b) (aM, accM) in
   BM.bn_from_mont n mu accM
 
 
-val bn_mod_exp_f_lemma:
+val bn_mod_exp_raw_f_lemma:
     #t:limb_t
   -> #nLen:size_pos{nLen + nLen <= max_size_t}
   -> n:lbignum t nLen
@@ -96,13 +98,13 @@ val bn_mod_exp_f_lemma:
     0 < bn_v b /\ bn_v b < pow2 bBits /\
     bn_v aM0 < bn_v n /\ bn_v accM0 < bn_v n)
   (ensures
-   (let (aM1, accM1) = bn_mod_exp_f n mu bBits bLen b i (aM0, accM0) in
+   (let (aM1, accM1) = bn_mod_exp_raw_f n mu bBits bLen b i (aM0, accM0) in
     let (aM2, accM2) = E.mod_exp_rl_mont_f (bits t) nLen (bn_v n) (v mu) bBits (bn_v b) i (bn_v aM0, bn_v accM0) in
     bn_v aM1 == aM2 /\ bn_v accM1 == accM2 /\
     bn_v aM1 < bn_v n /\ bn_v accM1 < bn_v n))
 
-let bn_mod_exp_f_lemma #t #nLen n mu bBits bLen b i aM0 accM0 =
-  let (aM1, accM1) = bn_mod_exp_f n mu bBits bLen b i (aM0, accM0) in
+let bn_mod_exp_raw_f_lemma #t #nLen n mu bBits bLen b i aM0 accM0 =
+  let (aM1, accM1) = bn_mod_exp_raw_f n mu bBits bLen b i (aM0, accM0) in
   let (aM2, accM2) = E.mod_exp_rl_mont_f (bits t) nLen (bn_v n) (v mu) bBits (bn_v b) i (bn_v aM0, bn_v accM0) in
   BM.bn_mont_sqr_lemma n mu aM0;
   assert (bn_v aM1 == aM2);
@@ -111,7 +113,7 @@ let bn_mod_exp_f_lemma #t #nLen n mu bBits bLen b i aM0 accM0 =
   assert (bn_v accM1 == accM2)
 
 
-val bn_mod_exp_mont_loop_lemma:
+val bn_mod_exp_raw_loop_lemma:
     #t:limb_t
   -> #nLen:size_pos{nLen + nLen <= max_size_t}
   -> n:lbignum t nLen
@@ -127,33 +129,33 @@ val bn_mod_exp_mont_loop_lemma:
     0 < bn_v b /\ bn_v b < pow2 bBits /\
     bn_v aM0 < bn_v n /\ bn_v accM0 < bn_v n)
   (ensures
-   (let (aM1, accM1) = Loops.repeati i (bn_mod_exp_f n mu bBits bLen b) (aM0, accM0) in
+   (let (aM1, accM1) = Loops.repeati i (bn_mod_exp_raw_f n mu bBits bLen b) (aM0, accM0) in
     let (aM2, accM2) = Loops.repeati i (E.mod_exp_rl_mont_f (bits t) nLen (bn_v n) (v mu) bBits (bn_v b)) (bn_v aM0, bn_v accM0) in
     bn_v aM1 == aM2 /\ bn_v accM1 == accM2 /\
     bn_v aM1 < bn_v n /\ bn_v accM1 < bn_v n))
 
-let rec bn_mod_exp_mont_loop_lemma #t #nLen n mu bBits bLen b i aM0 accM0 =
-  let (aM1, accM1) = Loops.repeati i (bn_mod_exp_f n mu bBits bLen b) (aM0, accM0) in
+let rec bn_mod_exp_raw_loop_lemma #t #nLen n mu bBits bLen b i aM0 accM0 =
+  let (aM1, accM1) = Loops.repeati i (bn_mod_exp_raw_f n mu bBits bLen b) (aM0, accM0) in
   let (aM2, accM2) = Loops.repeati i (E.mod_exp_rl_mont_f (bits t) nLen (bn_v n) (v mu) bBits (bn_v b)) (bn_v aM0, bn_v accM0) in
 
   if i = 0 then begin
-    Loops.eq_repeati0 i (bn_mod_exp_f n mu bBits bLen b) (aM0, accM0);
+    Loops.eq_repeati0 i (bn_mod_exp_raw_f n mu bBits bLen b) (aM0, accM0);
     Loops.eq_repeati0 i (E.mod_exp_rl_mont_f (bits t) nLen (bn_v n) (v mu) bBits (bn_v b)) (bn_v aM0, bn_v accM0);
     () end
   else begin
-    Loops.unfold_repeati i (bn_mod_exp_f n mu bBits bLen b) (aM0, accM0) (i - 1);
+    Loops.unfold_repeati i (bn_mod_exp_raw_f n mu bBits bLen b) (aM0, accM0) (i - 1);
     Loops.unfold_repeati i (E.mod_exp_rl_mont_f (bits t) nLen (bn_v n) (v mu) bBits (bn_v b)) (bn_v aM0, bn_v accM0) (i - 1);
-    let (aM3, accM3) = Loops.repeati (i - 1) (bn_mod_exp_f n mu bBits bLen b) (aM0, accM0) in
+    let (aM3, accM3) = Loops.repeati (i - 1) (bn_mod_exp_raw_f n mu bBits bLen b) (aM0, accM0) in
     let (aM4, accM4) = Loops.repeati (i - 1) (E.mod_exp_rl_mont_f (bits t) nLen (bn_v n) (v mu) bBits (bn_v b)) (bn_v aM0, bn_v accM0) in
-    assert ((aM1, accM1) == bn_mod_exp_f n mu bBits bLen b (i - 1) (aM3, accM3));
+    assert ((aM1, accM1) == bn_mod_exp_raw_f n mu bBits bLen b (i - 1) (aM3, accM3));
     assert ((aM2, accM2) == E.mod_exp_rl_mont_f (bits t) nLen (bn_v n) (v mu) bBits (bn_v b) (i - 1) (aM4, accM4));
-    bn_mod_exp_mont_loop_lemma n mu bBits bLen b (i - 1) aM0 accM0;
+    bn_mod_exp_raw_loop_lemma n mu bBits bLen b (i - 1) aM0 accM0;
     assert (bn_v aM3 == aM4 /\ bn_v accM3 == accM4);
-    bn_mod_exp_f_lemma n mu bBits bLen b (i - 1) aM3 accM3;
+    bn_mod_exp_raw_f_lemma n mu bBits bLen b (i - 1) aM3 accM3;
     () end
 
 
-val bn_mod_exp_mont_lemma_aux:
+val bn_mod_exp_raw_lemma_aux:
     #t:limb_t
   -> nLen:size_pos{2 * bits t * nLen <= max_size_t}
   -> n:lbignum t nLen
@@ -167,11 +169,11 @@ val bn_mod_exp_mont_lemma_aux:
     bn_v r2 == pow2 (2 * bits t * nLen) % bn_v n)
   (ensures
    (let mu = BI.mod_inv_limb n.[0] in
-    let res1 = bn_mod_exp_precompr2 nLen n a bBits b r2 in
+    let res1 = bn_mod_exp_raw_precompr2 nLen n a bBits b r2 in
     let res2 = E.mod_exp_rl_mont (bits t) nLen (bn_v n) (v mu) (bn_v a) bBits (bn_v b) in
     bn_v res1 == res2 /\ bn_v res1 < bn_v n))
 
-let bn_mod_exp_mont_lemma_aux #t nLen n a bBits b r2 =
+let bn_mod_exp_raw_lemma_aux #t nLen n a bBits b r2 =
   let bLen = blocks bBits (bits t) in
   let mu = BI.mod_inv_limb n.[0] in
   BI.bn_mod_inv_limb_lemma n;
@@ -182,18 +184,18 @@ let bn_mod_exp_mont_lemma_aux #t nLen n a bBits b r2 =
   let accM0 = BM.bn_mont_one n mu r2 in
   BM.bn_mont_one_lemma n mu r2;
 
-  let (aM1, accM1) = Loops.repeati bBits (bn_mod_exp_f n mu bBits bLen b) (aM0, accM0) in
-  bn_mod_exp_mont_loop_lemma n mu bBits bLen b bBits aM0 accM0;
+  let (aM1, accM1) = Loops.repeati bBits (bn_mod_exp_raw_f n mu bBits bLen b) (aM0, accM0) in
+  bn_mod_exp_raw_loop_lemma n mu bBits bLen b bBits aM0 accM0;
 
   let res = BM.bn_from_mont n mu accM1 in
   BM.bn_from_mont_lemma n mu accM1
 
 
-let bn_mod_exp_precompr2_lemma #t nLen n a bBits b r2 =
+let bn_mod_exp_raw_precompr2_lemma #t nLen n a bBits b r2 =
   let mu = BI.mod_inv_limb n.[0] in
-  let res1 = bn_mod_exp_precompr2 nLen n a bBits b r2 in
+  let res1 = bn_mod_exp_raw_precompr2 nLen n a bBits b r2 in
   let res2 = E.mod_exp_rl_mont (bits t) nLen (bn_v n) (v mu) (bn_v a) bBits (bn_v b) in
-  bn_mod_exp_mont_lemma_aux nLen n a bBits b r2;
+  bn_mod_exp_raw_lemma_aux nLen n a bBits b r2;
   assert (bn_v res1 == res2 /\ bn_v res1 < bn_v n);
 
   BI.bn_mod_inv_limb_lemma n;
@@ -205,10 +207,10 @@ let bn_mod_exp_precompr2_lemma #t nLen n a bBits b r2 =
 ///  Montgomery ladder for exponentiation
 ///
 
-let bn_mod_exp_mont_ladder_t (t:limb_t) (nLen:size_pos) (bBits:size_pos) (i:nat{i <= bBits}) =
+let bn_mod_exp_ct_t (t:limb_t) (nLen:size_pos) (bBits:size_pos) (i:nat{i <= bBits}) =
   tuple3 (lbignum t nLen) (lbignum t nLen) (limb t)
 
-val bn_mod_exp_mont_ladder_f:
+val bn_mod_exp_ct_f:
     #t:limb_t
   -> #nLen:size_pos{nLen + nLen <= max_size_t}
   -> n:lbignum t nLen
@@ -220,7 +222,7 @@ val bn_mod_exp_mont_ladder_f:
   -> rM0_rM1_privbit: tuple3 (lbignum t nLen) (lbignum t nLen) (limb t) ->
   tuple3 (lbignum t nLen) (lbignum t nLen) (limb t)
 
-let bn_mod_exp_mont_ladder_f #t #nLen n mu bBits bLen b i (rM0, rM1, privbit) =
+let bn_mod_exp_ct_f #t #nLen n mu bBits bLen b i (rM0, rM1, privbit) =
   let bit = BN.bn_get_ith_bit b (bBits - i - 1) in
   let sw = bit ^. privbit in
   let rM0, rM1 = BN.cswap2 sw rM0 rM1 in
@@ -229,15 +231,15 @@ let bn_mod_exp_mont_ladder_f #t #nLen n mu bBits bLen b i (rM0, rM1, privbit) =
   (rM0', rM1', bit)
 
 
-let bn_mod_exp_mont_ladder_precompr2 #t nLen n a bBits b r2 =
+let bn_mod_exp_ct_precompr2 #t nLen n a bBits b r2 =
   let bLen = blocks bBits (bits t) in
   let mu = BI.mod_inv_limb n.[0] in
 
   let rM0 = BM.bn_mont_one n mu r2 in
   let rM1 = BM.bn_to_mont n mu r2 a in
   let sw = uint #t 0 in
-  let (rM0', rM1', sw') = Loops.repeat_gen bBits (bn_mod_exp_mont_ladder_t t nLen bBits)
-    (bn_mod_exp_mont_ladder_f n mu bBits bLen b) (rM0, rM1, sw) in
+  let (rM0', rM1', sw') = Loops.repeat_gen bBits (bn_mod_exp_ct_t t nLen bBits)
+    (bn_mod_exp_ct_f n mu bBits bLen b) (rM0, rM1, sw) in
   let (rM0', rM1') = BN.cswap2 sw' rM0' rM1' in
   BM.bn_from_mont n mu rM0'
 
@@ -262,7 +264,7 @@ let lemma_bit_xor_is_sum_mod2 #t a b =
     assert_norm (UInt64.logxor 1uL 1uL == 0uL)
 
 
-val bn_mod_exp_mont_ladder_f_lemma:
+val bn_mod_exp_ct_f_lemma:
     #t:limb_t
   -> #nLen:size_pos{nLen + nLen <= max_size_t}
   -> n:lbignum t nLen
@@ -279,14 +281,14 @@ val bn_mod_exp_mont_ladder_f_lemma:
     0 < bn_v b /\ bn_v b < pow2 bBits /\
     bn_v rM0 < bn_v n /\ bn_v rM1 < bn_v n /\ v sw <= 1)
   (ensures
-   (let (rM0', rM1', sw') = bn_mod_exp_mont_ladder_f n mu bBits bLen b i (rM0, rM1, sw) in
+   (let (rM0', rM1', sw') = bn_mod_exp_ct_f n mu bBits bLen b i (rM0, rM1, sw) in
     let (rM0'', rM1'', sw'') = E.mod_exp_mont_ladder_swap_f
       (bits t) nLen (bn_v n) (v mu) bBits (bn_v b) i (bn_v rM0, bn_v rM1, v sw) in
     bn_v rM0' == rM0'' /\ bn_v rM1' == rM1'' /\ v sw' == sw'' /\
     bn_v rM0' < bn_v n /\ bn_v rM1' < bn_v n /\ v sw' <= 1))
 
-let bn_mod_exp_mont_ladder_f_lemma #t #nLen n mu bBits bLen b i rM0 rM1 sw =
-  let (rM0', rM1', sw') = bn_mod_exp_mont_ladder_f n mu bBits bLen b i (rM0, rM1, sw) in
+let bn_mod_exp_ct_f_lemma #t #nLen n mu bBits bLen b i rM0 rM1 sw =
+  let (rM0', rM1', sw') = bn_mod_exp_ct_f n mu bBits bLen b i (rM0, rM1, sw) in
   let (rM0'', rM1'', sw'') = E.mod_exp_mont_ladder_swap_f
     (bits t) nLen (bn_v n) (v mu) bBits (bn_v b) i (bn_v rM0, bn_v rM1, v sw) in
   let bit = BN.bn_get_ith_bit b (bBits - i - 1) in
@@ -304,7 +306,7 @@ let bn_mod_exp_mont_ladder_f_lemma #t #nLen n mu bBits bLen b i rM0 rM1 sw =
   assert (bn_v rM0' == rM0'' /\ bn_v rM1' == rM1'' /\ v sw' == sw'')
 
 
-val bn_mod_exp_mont_ladder_loop_lemma:
+val bn_mod_exp_ct_loop_lemma:
     #t:limb_t
   -> #nLen:size_pos{nLen + nLen <= max_size_t}
   -> n:lbignum t nLen
@@ -321,40 +323,40 @@ val bn_mod_exp_mont_ladder_loop_lemma:
     0 < bn_v b /\ bn_v b < pow2 bBits /\
     bn_v rM0 < bn_v n /\ bn_v rM1 < bn_v n /\ v sw <= 1)
   (ensures
-   (let (rM0', rM1', sw') = Loops.repeat_gen i (bn_mod_exp_mont_ladder_t t nLen bBits)
-      (bn_mod_exp_mont_ladder_f n mu bBits bLen b) (rM0, rM1, sw) in
+   (let (rM0', rM1', sw') = Loops.repeat_gen i (bn_mod_exp_ct_t t nLen bBits)
+      (bn_mod_exp_ct_f n mu bBits bLen b) (rM0, rM1, sw) in
     let (rM0'', rM1'', sw'') = Loops.repeati i
       (E.mod_exp_mont_ladder_swap_f (bits t) nLen (bn_v n) (v mu) bBits (bn_v b)) (bn_v rM0, bn_v rM1, v sw) in
     bn_v rM0' == rM0'' /\ bn_v rM1' == rM1'' /\ v sw' == sw'' /\
     bn_v rM0' < bn_v n /\ bn_v rM1' < bn_v n /\ v sw' <= 1))
 
-let rec bn_mod_exp_mont_ladder_loop_lemma #t #nLen n mu bBits bLen b i rM0 rM1 sw =
-  let (rM0', rM1', sw') = Loops.repeat_gen i (bn_mod_exp_mont_ladder_t t nLen bBits)
-      (bn_mod_exp_mont_ladder_f n mu bBits bLen b) (rM0, rM1, sw) in
+let rec bn_mod_exp_ct_loop_lemma #t #nLen n mu bBits bLen b i rM0 rM1 sw =
+  let (rM0', rM1', sw') = Loops.repeat_gen i (bn_mod_exp_ct_t t nLen bBits)
+      (bn_mod_exp_ct_f n mu bBits bLen b) (rM0, rM1, sw) in
   let (rM0'', rM1'', sw'') = Loops.repeati i
     (E.mod_exp_mont_ladder_swap_f (bits t) nLen (bn_v n) (v mu) bBits (bn_v b)) (bn_v rM0, bn_v rM1, v sw) in
 
   if i = 0 then begin
-    Loops.eq_repeat_gen0 i (bn_mod_exp_mont_ladder_t t nLen bBits) (bn_mod_exp_mont_ladder_f n mu bBits bLen b) (rM0, rM1, sw);
+    Loops.eq_repeat_gen0 i (bn_mod_exp_ct_t t nLen bBits) (bn_mod_exp_ct_f n mu bBits bLen b) (rM0, rM1, sw);
     Loops.eq_repeati0 i (E.mod_exp_mont_ladder_swap_f (bits t) nLen (bn_v n) (v mu) bBits (bn_v b)) (bn_v rM0, bn_v rM1, v sw);
     () end
   else begin
-    Loops.unfold_repeat_gen i (bn_mod_exp_mont_ladder_t t nLen bBits) (bn_mod_exp_mont_ladder_f n mu bBits bLen b) (rM0, rM1, sw) (i - 1);
+    Loops.unfold_repeat_gen i (bn_mod_exp_ct_t t nLen bBits) (bn_mod_exp_ct_f n mu bBits bLen b) (rM0, rM1, sw) (i - 1);
     Loops.unfold_repeati i (E.mod_exp_mont_ladder_swap_f (bits t) nLen (bn_v n) (v mu) bBits (bn_v b)) (bn_v rM0, bn_v rM1, v sw) (i - 1);
 
-    let (rM2', rM3', sw1') = Loops.repeat_gen (i - 1) (bn_mod_exp_mont_ladder_t t nLen bBits)
-      (bn_mod_exp_mont_ladder_f n mu bBits bLen b) (rM0, rM1, sw) in
+    let (rM2', rM3', sw1') = Loops.repeat_gen (i - 1) (bn_mod_exp_ct_t t nLen bBits)
+      (bn_mod_exp_ct_f n mu bBits bLen b) (rM0, rM1, sw) in
     let (rM2'', rM3'', sw1'') = Loops.repeati (i - 1) (E.mod_exp_mont_ladder_swap_f (bits t) nLen (bn_v n) (v mu) bBits (bn_v b))
       (bn_v rM0, bn_v rM1, v sw) in
-    assert ((rM0', rM1', sw') == bn_mod_exp_mont_ladder_f n mu bBits bLen b (i - 1) (rM2', rM3', sw1'));
+    assert ((rM0', rM1', sw') == bn_mod_exp_ct_f n mu bBits bLen b (i - 1) (rM2', rM3', sw1'));
     assert ((rM0'', rM1'', sw'') == E.mod_exp_mont_ladder_swap_f (bits t) nLen (bn_v n) (v mu) bBits (bn_v b) (i - 1) (rM2'', rM3'', sw1''));
-    bn_mod_exp_mont_ladder_loop_lemma n mu bBits bLen b (i - 1) rM0 rM1 sw;
+    bn_mod_exp_ct_loop_lemma n mu bBits bLen b (i - 1) rM0 rM1 sw;
     assert (bn_v rM2' == rM2'' /\ bn_v rM3' == rM3'' /\ v sw1' == sw1'');
-    bn_mod_exp_mont_ladder_f_lemma n mu bBits bLen b (i - 1) rM2' rM3' sw1';
+    bn_mod_exp_ct_f_lemma n mu bBits bLen b (i - 1) rM2' rM3' sw1';
     () end
 
 
-val bn_mod_exp_mont_ladder_lemma_aux:
+val bn_mod_exp_ct_lemma_aux:
     #t:limb_t
   -> nLen:size_pos{2 * bits t * nLen <= max_size_t}
   -> n:lbignum t nLen
@@ -368,11 +370,11 @@ val bn_mod_exp_mont_ladder_lemma_aux:
     bn_v r2 == pow2 (2 * bits t * nLen) % bn_v n)
   (ensures
    (let mu = BI.mod_inv_limb n.[0] in
-    let res1 = bn_mod_exp_mont_ladder_precompr2 nLen n a bBits b r2 in
+    let res1 = bn_mod_exp_ct_precompr2 nLen n a bBits b r2 in
     let res2 = E.mod_exp_mont_ladder_swap (bits t) nLen (bn_v n) (v mu) (bn_v a) bBits (bn_v b) in
     bn_v res1 == res2 /\ bn_v res1 < bn_v n))
 
-let bn_mod_exp_mont_ladder_lemma_aux #t nLen n a bBits b r2 =
+let bn_mod_exp_ct_lemma_aux #t nLen n a bBits b r2 =
   let bLen = blocks bBits (bits t) in
   let mu = BI.mod_inv_limb n.[0] in
   BI.bn_mod_inv_limb_lemma n;
@@ -384,9 +386,9 @@ let bn_mod_exp_mont_ladder_lemma_aux #t nLen n a bBits b r2 =
   BM.bn_to_mont_lemma n mu r2 a;
 
   let sw = uint #t 0 in
-  let (rM0', rM1', sw') = Loops.repeat_gen bBits (bn_mod_exp_mont_ladder_t t nLen bBits)
-    (bn_mod_exp_mont_ladder_f n mu bBits bLen b) (rM0, rM1, sw) in
-  bn_mod_exp_mont_ladder_loop_lemma n mu bBits bLen b bBits rM0 rM1 sw;
+  let (rM0', rM1', sw') = Loops.repeat_gen bBits (bn_mod_exp_ct_t t nLen bBits)
+    (bn_mod_exp_ct_f n mu bBits bLen b) (rM0, rM1, sw) in
+  bn_mod_exp_ct_loop_lemma n mu bBits bLen b bBits rM0 rM1 sw;
 
   let (rM0'', rM1'') = BN.cswap2 sw' rM0' rM1' in
   BN.cswap2_lemma sw' rM0' rM1';
@@ -394,11 +396,11 @@ let bn_mod_exp_mont_ladder_lemma_aux #t nLen n a bBits b r2 =
   BM.bn_from_mont_lemma n mu rM0''
 
 
-let bn_mod_exp_mont_ladder_precompr2_lemma #t nLen n a bBits b r2 =
+let bn_mod_exp_ct_precompr2_lemma #t nLen n a bBits b r2 =
   let mu = BI.mod_inv_limb n.[0] in
-  let res1 = bn_mod_exp_mont_ladder_precompr2 nLen n a bBits b r2 in
+  let res1 = bn_mod_exp_ct_precompr2 nLen n a bBits b r2 in
   let res2 = E.mod_exp_mont_ladder_swap (bits t) nLen (bn_v n) (v mu) (bn_v a) bBits (bn_v b) in
-  bn_mod_exp_mont_ladder_lemma_aux nLen n a bBits b r2;
+  bn_mod_exp_ct_lemma_aux nLen n a bBits b r2;
   assert (bn_v res1 == res2 /\ bn_v res1 < bn_v n);
 
   BI.bn_mod_inv_limb_lemma n;

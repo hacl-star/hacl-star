@@ -11,6 +11,7 @@ open Hacl.Spec.Bignum
 
 module Fermat = FStar.Math.Fermat
 module Euclid = FStar.Math.Euclid
+
 module BE = Hacl.Spec.Bignum.Exponentiation
 module BM = Hacl.Spec.Bignum.Montgomery
 module BN = Hacl.Spec.Bignum
@@ -81,7 +82,7 @@ val bn_mod_inv_prime:
 
 let bn_mod_inv_prime #t #nLen nBits n a =
   let c, n2 = bn_sub1 n (uint #t 2) in
-  BE.bn_mod_exp nLen nBits n a (bits t * nLen) n2
+  BE.bn_mod_exp_raw nLen nBits n a (bits t * nLen) n2
 
 
 val bn_mod_inv_prime_lemma:
@@ -104,7 +105,7 @@ let bn_mod_inv_prime_lemma #t #nLen nBits n a =
   assert (v c = 0);
   assert (bn_v n2 == bn_v n - 2);
 
-  let res = BE.bn_mod_exp nLen nBits n a (bits t * nLen) n2 in
-  BE.bn_mod_exp_lemma nLen nBits n a (bits t * nLen) n2;
+  let res = BE.bn_mod_exp_raw nLen nBits n a (bits t * nLen) n2 in
+  BE.bn_mod_exp_raw_lemma nLen nBits n a (bits t * nLen) n2;
   assert (bn_v res == Lib.NatMod.pow_mod #(bn_v n) (bn_v a) (bn_v n2));
   mod_inv_prime_lemma (bn_v n) (bn_v a)

@@ -19,7 +19,7 @@ include Hacl.Bignum.ExpFW
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
-let bn_mod_exp_st (t:limb_t) (len:BN.meta_len t) =
+let bn_mod_exp_raw_st (t:limb_t) (len:BN.meta_len t) =
     nBits:size_t{v nBits / bits t < v len}
   -> n:lbignum t len
   -> a:lbignum t len
@@ -31,20 +31,20 @@ let bn_mod_exp_st (t:limb_t) (len:BN.meta_len t) =
     live h n /\ live h a /\ live h b /\ live h res /\
     disjoint res a /\ disjoint res b /\ disjoint res n /\ disjoint n a)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_seq h1 res == S.bn_mod_exp (v len) (v nBits) (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b))
+    as_seq h1 res == S.bn_mod_exp_raw (v len) (v nBits) (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b))
 
 
 // This function is *NOT* constant-time on the exponent b.
 inline_for_extraction noextract
-val bn_mod_exp:
+val bn_mod_exp_raw:
     #t:limb_t
   -> k:BM.mont t
-  -> bn_mod_exp_precompr2:bn_mod_exp_precompr2_st t k.BM.bn.BN.len ->
-  bn_mod_exp_st t k.BM.bn.BN.len
+  -> bn_mod_exp_raw_precompr2:bn_mod_exp_raw_precompr2_st t k.BM.bn.BN.len ->
+  bn_mod_exp_raw_st t k.BM.bn.BN.len
 
 
 inline_for_extraction noextract
-let bn_mod_exp_mont_ladder_st (t:limb_t) (len:BN.meta_len t) =
+let bn_mod_exp_ct_st (t:limb_t) (len:BN.meta_len t) =
     nBits:size_t{v nBits / bits t < v len}
   -> n:lbignum t len
   -> a:lbignum t len
@@ -56,16 +56,16 @@ let bn_mod_exp_mont_ladder_st (t:limb_t) (len:BN.meta_len t) =
     live h n /\ live h a /\ live h b /\ live h res /\
     disjoint res a /\ disjoint res b /\ disjoint res n /\ disjoint n a)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_seq h1 res == S.bn_mod_exp_mont_ladder (v len) (v nBits) (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b))
+    as_seq h1 res == S.bn_mod_exp_ct (v len) (v nBits) (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b))
 
 
 // This function is constant-time on the exponent b.
 inline_for_extraction noextract
-val bn_mod_exp_mont_ladder:
+val bn_mod_exp_ct:
     #t:limb_t
   -> k:BM.mont t
-  -> bn_mod_exp_mont_ladder_precompr2:bn_mod_exp_mont_ladder_precompr2_st t k.BM.bn.BN.len ->
-  bn_mod_exp_mont_ladder_st t k.BM.bn.BN.len
+  -> bn_mod_exp_ct_precompr2:bn_mod_exp_ct_precompr2_st t k.BM.bn.BN.len ->
+  bn_mod_exp_ct_st t k.BM.bn.BN.len
 
 
 inline_for_extraction noextract
@@ -87,10 +87,10 @@ let bn_mod_exp_fw_st (t:limb_t) (len:BN.meta_len t) =
 
 // This function is *NOT* constant-time on the exponent b.
 inline_for_extraction noextract
-val bn_mod_exp_fw:
+val bn_mod_exp_fw_raw:
     #t:limb_t
   -> k:BM.mont t
-  -> bn_mod_exp_fw_precompr2:bn_mod_exp_fw_precompr2_st t k.BM.bn.BN.len ->
+  -> bn_mod_exp_fw_raw_precompr2:bn_mod_exp_fw_precompr2_st t k.BM.bn.BN.len ->
   bn_mod_exp_fw_st t k.BM.bn.BN.len
 
 
@@ -99,7 +99,7 @@ inline_for_extraction noextract
 val bn_mod_exp_fw_ct:
     #t:limb_t
   -> k:BM.mont t
-  -> bn_mod_exp_fw_precompr2_ct:bn_mod_exp_fw_precompr2_st t k.BM.bn.BN.len ->
+  -> bn_mod_exp_fw_ct_precompr2:bn_mod_exp_fw_precompr2_st t k.BM.bn.BN.len ->
   bn_mod_exp_fw_st t k.BM.bn.BN.len
 
 
@@ -107,9 +107,9 @@ inline_for_extraction noextract
 class exp (t:limb_t) = {
   mont: BM.mont t;
   exp_check: bn_check_mod_exp_st t mont.BM.bn.BN.len;
-  mod_exp_precomp: bn_mod_exp_precompr2_st t mont.BM.bn.BN.len;
-  ct_mod_exp_precomp: bn_mod_exp_mont_ladder_precompr2_st t mont.BM.bn.BN.len;
-  mod_exp_fw_precomp: bn_mod_exp_fw_precompr2_st t mont.BM.bn.BN.len;
+  raw_mod_exp_precomp: bn_mod_exp_raw_precompr2_st t mont.BM.bn.BN.len;
+  ct_mod_exp_precomp: bn_mod_exp_ct_precompr2_st t mont.BM.bn.BN.len;
+  raw_mod_exp_fw_precomp: bn_mod_exp_fw_precompr2_st t mont.BM.bn.BN.len;
   ct_mod_exp_fw_precomp: bn_mod_exp_fw_precompr2_st t mont.BM.bn.BN.len;
 }
 

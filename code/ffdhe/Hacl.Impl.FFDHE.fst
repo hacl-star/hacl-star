@@ -239,9 +239,9 @@ let ffdhe_compute_exp #t a len ke p_r2_n sk_n b_n res =
   let h1 = ST.get () in
   S.ffdhe_p_lemma a;
   SD.bn_eval_bound #t (as_seq h1 sk_n) (v nLen);
-  ke.BE.ct_mod_exp_precomp p_n b_n (size (bits t) *! nLen) sk_n r2_n res_n; //b_n ^ sk_n % p_n
-  SE.bn_mod_exp_mont_ladder_precompr2_lemma (v nLen)
-    (as_seq h1 p_n) (as_seq h1 b_n) (bits t * v nLen) (as_seq h1 sk_n) (as_seq h1 r2_n);
+  ke.BE.ct_mod_exp_fw_precomp p_n b_n (size (bits t) *! nLen) sk_n 4ul r2_n res_n; //b_n ^ sk_n % p_n
+  SE.bn_mod_exp_fw_precompr2_lemma (v nLen)
+    (as_seq h1 p_n) (as_seq h1 b_n) (bits t * v nLen) (as_seq h1 sk_n) 4 (as_seq h1 r2_n);
 
   let h2 = ST.get () in
   BN.bn_to_bytes_be len res_n res;

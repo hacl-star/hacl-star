@@ -98,37 +98,37 @@ let mod = BS.bn_mod_slow_safe mont_inst mod_precompr2
 let exp_check: BE.bn_check_mod_exp_st t_limbs n_limbs =
   BE.bn_check_mod_exp mont_inst
 
-let mod_exp_precompr2: BE.bn_mod_exp_precompr2_st t_limbs n_limbs =
-  BE.bn_mod_exp_precompr2 mont_inst
+let mod_exp_raw_precompr2: BE.bn_mod_exp_raw_precompr2_st t_limbs n_limbs =
+  BE.bn_mod_exp_raw_precompr2 mont_inst
 
-let mod_exp_mont_ladder_precompr2: BE.bn_mod_exp_mont_ladder_precompr2_st t_limbs n_limbs =
-  BE.bn_mod_exp_mont_ladder_precompr2 mont_inst
-
-[@CInline]
-let mod_exp_fw_precompr2: BE.bn_mod_exp_fw_precompr2_st t_limbs n_limbs =
-  BE.bn_mod_exp_fw_precompr2 mont_inst
+let mod_exp_ct_precompr2: BE.bn_mod_exp_ct_precompr2_st t_limbs n_limbs =
+  BE.bn_mod_exp_ct_precompr2 mont_inst
 
 [@CInline]
-let mod_exp_fw_precompr2_ct: BE.bn_mod_exp_fw_precompr2_st t_limbs n_limbs =
-  BE.bn_mod_exp_fw_precompr2_ct mont_inst
+let mod_exp_fw_raw_precompr2: BE.bn_mod_exp_fw_precompr2_st t_limbs n_limbs =
+  BE.bn_mod_exp_fw_raw_precompr2 mont_inst
+
+[@CInline]
+let mod_exp_fw_ct_precompr2: BE.bn_mod_exp_fw_precompr2_st t_limbs n_limbs =
+  BE.bn_mod_exp_fw_ct_precompr2 mont_inst
 
 inline_for_extraction noextract
 instance exp_inst: BE.exp t_limbs = {
   BE.mont = mont_inst;
   BE.exp_check;
-  BE.mod_exp_precomp = mod_exp_precompr2;
-  BE.ct_mod_exp_precomp = mod_exp_mont_ladder_precompr2;
-  BE.mod_exp_fw_precomp = mod_exp_fw_precompr2;
-  BE.ct_mod_exp_fw_precomp = mod_exp_fw_precompr2_ct;
+  BE.raw_mod_exp_precomp = mod_exp_raw_precompr2;
+  BE.ct_mod_exp_precomp = mod_exp_ct_precompr2;
+  BE.raw_mod_exp_fw_precomp = mod_exp_fw_raw_precompr2;
+  BE.ct_mod_exp_fw_precomp = mod_exp_fw_ct_precompr2;
 }
 
-let mod_exp = BS.bn_mod_exp_safe exp_inst
+let mod_exp_raw = BS.bn_mod_exp_raw_safe exp_inst
 
-let mod_exp_mont_ladder = BS.bn_mod_exp_mont_ladder_safe exp_inst
+let mod_exp_ct = BS.bn_mod_exp_ct_safe exp_inst
 
 let new_precompr2 = BS.new_bn_precomp_r2_mod_n mont_inst
 
-let mod_inv_prime = BS.bn_mod_inv_prime_safe exp_inst
+let mod_inv_prime_raw = BS.bn_mod_inv_prime_raw_safe exp_inst
 
 let new_bn_from_bytes_be = BS.new_bn_from_bytes_be
 

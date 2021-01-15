@@ -7,15 +7,15 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Buffer
 
-module BN = Hacl.Bignum
-module BM = Hacl.Bignum.Montgomery
-
 open Hacl.Bignum.Definitions
 
 module ST = FStar.HyperStack.ST
-module S = Hacl.Spec.Bignum.ExpBM
 module LSeq = Lib.Sequence
 module Loops = Lib.LoopCombinators
+
+module S = Hacl.Spec.Bignum.ExpBM
+module BN = Hacl.Bignum
+module BM = Hacl.Bignum.Montgomery
 
 friend Hacl.Spec.Bignum.ExpBM
 
@@ -38,7 +38,7 @@ let bn_check_mod_exp #t k n a bBits b =
 
 
 inline_for_extraction noextract
-let bn_mod_exp_loop_st (t:limb_t) (nLen:BN.meta_len t) =
+let bn_mod_exp_raw_loop_st (t:limb_t) (nLen:BN.meta_len t) =
     n:lbignum t nLen
   -> nInv:limb t
   -> bBits:size_t{v bBits > 0}
@@ -54,15 +54,15 @@ let bn_mod_exp_loop_st (t:limb_t) (nLen:BN.meta_len t) =
   (ensures  fun h0 _ h1 -> modifies (loc aM |+| loc accM) h0 h1 /\
     (as_seq h1 aM, as_seq h1 accM) ==
       Loops.repeati (v bBits)
-	(S.bn_mod_exp_f (as_seq h0 n) nInv (v bBits) (v bLen) (as_seq h0 b))
+	(S.bn_mod_exp_raw_f (as_seq h0 n) nInv (v bBits) (v bLen) (as_seq h0 b))
       (as_seq h0 aM, as_seq h0 accM))
 
 
 inline_for_extraction noextract
-val bn_mod_exp_loop: #t:limb_t -> k:BM.mont t -> bn_mod_exp_loop_st t k.BM.bn.BN.len
-let bn_mod_exp_loop #t k n nInv bBits bLen b aM accM =
+val bn_mod_exp_raw_loop: #t:limb_t -> k:BM.mont t -> bn_mod_exp_raw_loop_st t k.BM.bn.BN.len
+let bn_mod_exp_raw_loop #t k n nInv bBits bLen b aM accM =
   [@inline_let]
-  let spec h0 = S.bn_mod_exp_f (as_seq h0 n) nInv (v bBits) (v bLen) (as_seq h0 b) in
+  let spec h0 = S.bn_mod_exp_raw_f (as_seq h0 n) nInv (v bBits) (v bLen) (as_seq h0 b) in
   let h0 = ST.get () in
   loop2 h0 bBits aM accM spec
   (fun i ->
@@ -75,7 +75,7 @@ let bn_mod_exp_loop #t k n nInv bBits bLen b aM accM =
   )
 
 
-let bn_mod_exp_precompr2 #t k n a bBits b r2 res =
+let bn_mod_exp_raw_precompr2 #t k n a bBits b r2 res =
   [@inline_let] let len = k.BM.bn.BN.len in
   push_frame ();
   let bLen = blocks bBits (size (bits t)) in
@@ -85,7 +85,7 @@ let bn_mod_exp_precompr2 #t k n a bBits b r2 res =
   let accM = create len (uint #t #SEC 0) in
   BM.to n nInv r2 a aM;
   BM.bn_mont_one k n nInv r2 accM;
-  bn_mod_exp_loop k n nInv bBits bLen b aM accM;
+  bn_mod_exp_raw_loop k n nInv bBits bLen b aM accM;
   BM.from n nInv accM res;
   pop_frame ()
 
@@ -94,7 +94,7 @@ let bn_mod_exp_precompr2 #t k n a bBits b r2 res =
 ///
 
 inline_for_extraction noextract
-let bn_mod_exp_mont_ladder_loop_st (t:limb_t) (len:BN.meta_len t) =
+let bn_mod_exp_ct_loop_st (t:limb_t) (len:BN.meta_len t) =
     n:lbignum t len
   -> nInv:limb t
   -> bBits:size_t{v bBits > 0}
@@ -111,27 +111,27 @@ let bn_mod_exp_mont_ladder_loop_st (t:limb_t) (len:BN.meta_len t) =
     disjoint sw rM0 /\ disjoint sw rM1 /\ disjoint sw b /\ disjoint sw n)
   (ensures  fun h0 _ h1 -> modifies (loc rM0 |+| loc rM1 |+| loc sw) h0 h1 /\
     (as_seq h1 rM0, as_seq h1 rM1, LSeq.index (as_seq h1 sw) 0) ==
-      Loops.repeat_gen (v bBits) (S.bn_mod_exp_mont_ladder_t t (v len) (v bBits))
-	(S.bn_mod_exp_mont_ladder_f (as_seq h0 n) nInv (v bBits) (v bLen) (as_seq h0 b))
+      Loops.repeat_gen (v bBits) (S.bn_mod_exp_ct_t t (v len) (v bBits))
+	(S.bn_mod_exp_ct_f (as_seq h0 n) nInv (v bBits) (v bLen) (as_seq h0 b))
       (as_seq h0 rM0, as_seq h0 rM1, LSeq.index (as_seq h0 sw) 0))
 
 
 inline_for_extraction noextract
-val bn_mod_exp_mont_ladder_loop: #t:limb_t -> k:BM.mont t -> bn_mod_exp_mont_ladder_loop_st t k.BM.bn.BN.len
-let bn_mod_exp_mont_ladder_loop #t k n nInv bBits bLen b rM0 rM1 sw =
+val bn_mod_exp_ct_loop: #t:limb_t -> k:BM.mont t -> bn_mod_exp_ct_loop_st t k.BM.bn.BN.len
+let bn_mod_exp_ct_loop #t k n nInv bBits bLen b rM0 rM1 sw =
   [@inline_let] let len = k.BM.bn.BN.len in
   [@inline_let]
-  let refl h i : GTot (S.bn_mod_exp_mont_ladder_t t (v len) (v bBits) i) =
+  let refl h i : GTot (S.bn_mod_exp_ct_t t (v len) (v bBits) i) =
     (as_seq h rM0, as_seq h rM1, LSeq.index (as_seq h sw) 0) in
   [@inline_let]
   let footprint i = loc rM0 |+| loc rM1 |+| loc sw in
   [@inline_let]
-  let spec h0 = S.bn_mod_exp_mont_ladder_f (as_seq h0 n) nInv (v bBits) (v bLen) (as_seq h0 b) in
+  let spec h0 = S.bn_mod_exp_ct_f (as_seq h0 n) nInv (v bBits) (v bLen) (as_seq h0 b) in
   let h0 = ST.get () in
-  loop h0 bBits (S.bn_mod_exp_mont_ladder_t t (v len) (v bBits)) refl footprint spec
+  loop h0 bBits (S.bn_mod_exp_ct_t t (v len) (v bBits)) refl footprint spec
   (fun i ->
     Loops.unfold_repeat_gen (v bBits)
-      (S.bn_mod_exp_mont_ladder_t t (v len) (v bBits)) (spec h0) (refl h0 0) (v i);
+      (S.bn_mod_exp_ct_t t (v len) (v bBits)) (spec h0) (refl h0 0) (v i);
     let bit = BN.bn_get_ith_bit bLen b (bBits -! i -! 1ul) in
     let sw1 = bit ^. sw.(0ul) in
     BN.cswap2 len sw1 rM0 rM1;
@@ -141,10 +141,10 @@ let bn_mod_exp_mont_ladder_loop #t k n nInv bBits bLen b rM0 rM1 sw =
   );
   let h1 = ST.get () in
   assert (refl h1 (v bBits) == Loops.repeat_gen (v bBits)
-    (S.bn_mod_exp_mont_ladder_t t (v len) (v bBits)) (spec h0) (refl h0 0))
+    (S.bn_mod_exp_ct_t t (v len) (v bBits)) (spec h0) (refl h0 0))
 
 
-let bn_mod_exp_mont_ladder_precompr2 #t k n a bBits b r2 res =
+let bn_mod_exp_ct_precompr2 #t k n a bBits b r2 res =
   [@inline_let] let len = k.BM.bn.BN.len in
   push_frame ();
   let bLen = blocks bBits (size (bits t)) in
@@ -156,7 +156,7 @@ let bn_mod_exp_mont_ladder_precompr2 #t k n a bBits b r2 res =
   BM.bn_mont_one k n nInv r2 rM0;
   BM.to n nInv r2 a rM1;
 
-  bn_mod_exp_mont_ladder_loop k n nInv bBits bLen b rM0 rM1 sw;
+  bn_mod_exp_ct_loop k n nInv bBits bLen b rM0 rM1 sw;
   BN.cswap2 len sw.(0ul) rM0 rM1;
   BM.from n nInv rM0 res;
   pop_frame ()

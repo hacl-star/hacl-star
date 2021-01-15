@@ -108,8 +108,8 @@ let bn_mod_exp_fw_mont_f_st (t:limb_t) (len:BN.meta_len t) =
 
 
 inline_for_extraction noextract
-val bn_mod_exp_fw_mont_f: #t:limb_t -> k:BM.mont t -> bn_mod_exp_fw_mont_f_st t k.BM.bn.BN.len
-let bn_mod_exp_fw_mont_f #t k n mu bBits bLen b l table_len table i accM =
+val bn_mod_exp_fw_mont_ct_f: #t:limb_t -> k:BM.mont t -> bn_mod_exp_fw_mont_f_st t k.BM.bn.BN.len
+let bn_mod_exp_fw_mont_ct_f #t k n mu bBits bLen b l table_len table i accM =
   [@inline_let] let len = k.BM.bn.BN.len in
   push_frame ();
   let bits_l = bn_get_bits_l bBits bLen b l i in
@@ -185,8 +185,8 @@ let bn_mod_exp_fw_mont_rem_st (t:limb_t) (len:BN.meta_len t) =
 
 
 inline_for_extraction noextract
-val bn_mod_exp_fw_mont_rem: #t:limb_t -> k:BM.mont t -> bn_mod_exp_fw_mont_rem_st t k.BM.bn.BN.len
-let bn_mod_exp_fw_mont_rem #t k n mu bBits bLen b l table_len table accM =
+val bn_mod_exp_fw_mont_rem_ct: #t:limb_t -> k:BM.mont t -> bn_mod_exp_fw_mont_rem_st t k.BM.bn.BN.len
+let bn_mod_exp_fw_mont_rem_ct #t k n mu bBits bLen b l table_len table accM =
   push_frame ();
   let c = bBits %. l in
   assert (v c == v bBits % v l);
@@ -203,8 +203,8 @@ let bn_mod_exp_fw_mont_rem #t k n mu bBits bLen b l table_len table accM =
 
 
 inline_for_extraction noextract
-val bn_mod_exp_fw_mont_raw_rem: #t:limb_t -> k:BM.mont t -> bn_mod_exp_fw_mont_rem_st t k.BM.bn.BN.len
-let bn_mod_exp_fw_mont_raw_rem #t k n mu bBits bLen b l table_len table accM =
+val bn_mod_exp_fw_mont_rem_raw: #t:limb_t -> k:BM.mont t -> bn_mod_exp_fw_mont_rem_st t k.BM.bn.BN.len
+let bn_mod_exp_fw_mont_rem_raw #t k n mu bBits bLen b l table_len table accM =
   let c = bBits %. l in
   assert (v c == v bBits % v l);
   bn_mod_exp_pow2_mont_in_place k n mu c accM;
@@ -335,11 +335,11 @@ let bn_mod_exp_fw_precompr2_ #t k bn_mod_exp_fw_mont_f bn_mod_exp_fw_mont_rem n 
   pop_frame ()
 
 
-let bn_mod_exp_fw_precompr2 #t k n a bBits b l r2 res =
+let bn_mod_exp_fw_raw_precompr2 #t k n a bBits b l r2 res =
   bn_mod_exp_fw_precompr2_ #t k
-    (bn_mod_exp_fw_mont_raw_f k) (bn_mod_exp_fw_mont_raw_rem k) n a bBits b l r2 res
+    (bn_mod_exp_fw_mont_raw_f k) (bn_mod_exp_fw_mont_rem_raw k) n a bBits b l r2 res
 
 
-let bn_mod_exp_fw_precompr2_ct #t k n a bBits b l r2 res =
+let bn_mod_exp_fw_ct_precompr2 #t k n a bBits b l r2 res =
   bn_mod_exp_fw_precompr2_ #t k
-    (bn_mod_exp_fw_mont_f k) (bn_mod_exp_fw_mont_rem k) n a bBits b l r2 res
+    (bn_mod_exp_fw_mont_ct_f k) (bn_mod_exp_fw_mont_rem_ct k) n a bBits b l r2 res

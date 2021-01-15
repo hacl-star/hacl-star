@@ -50,7 +50,7 @@ val bn_check_mod_exp:
 
 
 // This function is *NOT* constant-time on the exponent b
-val bn_mod_exp_precompr2:
+val bn_mod_exp_raw_precompr2:
     #t:limb_t
   -> nLen:size_pos{2 * bits t * nLen <= max_size_t}
   -> n:lbignum t nLen
@@ -61,7 +61,7 @@ val bn_mod_exp_precompr2:
   lbignum t nLen
 
 
-val bn_mod_exp_precompr2_lemma:
+val bn_mod_exp_raw_precompr2_lemma:
     #t:limb_t
   -> nLen:size_pos{2 * bits t * nLen <= max_size_t}
   -> n:lbignum t nLen
@@ -73,11 +73,11 @@ val bn_mod_exp_precompr2_lemma:
     bn_mod_exp_pre n a bBits b /\
     bn_v r2 == pow2 (2 * bits t * nLen) % bn_v n)
   (ensures
-    bn_mod_exp_post n a bBits b (bn_mod_exp_precompr2 nLen n a bBits b r2))
+    bn_mod_exp_post n a bBits b (bn_mod_exp_raw_precompr2 nLen n a bBits b r2))
 
 
 // This function is constant-time on the exponent b
-val bn_mod_exp_mont_ladder_precompr2:
+val bn_mod_exp_ct_precompr2:
     #t:limb_t
   -> nLen:size_pos{2 * bits t * nLen <= max_size_t}
   -> n:lbignum t nLen
@@ -88,7 +88,7 @@ val bn_mod_exp_mont_ladder_precompr2:
   lbignum t nLen
 
 
-val bn_mod_exp_mont_ladder_precompr2_lemma:
+val bn_mod_exp_ct_precompr2_lemma:
     #t:limb_t
   -> nLen:size_pos{2 * bits t * nLen <= max_size_t}
   -> n:lbignum t nLen
@@ -100,4 +100,4 @@ val bn_mod_exp_mont_ladder_precompr2_lemma:
     bn_mod_exp_pre n a bBits b /\
     bn_v r2 == pow2 (2 * bits t * nLen) % bn_v n)
   (ensures
-    bn_mod_exp_post n a bBits b (bn_mod_exp_mont_ladder_precompr2 nLen n a bBits b r2))
+    bn_mod_exp_post n a bBits b (bn_mod_exp_ct_precompr2 nLen n a bBits b r2))

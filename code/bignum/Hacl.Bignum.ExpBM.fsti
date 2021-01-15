@@ -35,7 +35,7 @@ val bn_check_mod_exp: #t:limb_t -> k:BM.mont t -> bn_check_mod_exp_st t k.BM.bn.
 
 // This function is *NOT* constant-time on the exponent b.
 inline_for_extraction noextract
-let bn_mod_exp_precompr2_st (t:limb_t) (len:BN.meta_len t) =
+let bn_mod_exp_raw_precompr2_st (t:limb_t) (len:BN.meta_len t) =
     n:lbignum t len
   -> a:lbignum t len
   -> bBits:size_t{v bBits > 0}
@@ -49,16 +49,16 @@ let bn_mod_exp_precompr2_st (t:limb_t) (len:BN.meta_len t) =
     disjoint res r2 /\ disjoint a r2 /\ disjoint n r2)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_seq h1 res ==
-    S.bn_mod_exp_precompr2 (v len) (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b) (as_seq h0 r2))
+    S.bn_mod_exp_raw_precompr2 (v len) (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b) (as_seq h0 r2))
 
 
 inline_for_extraction noextract
-val bn_mod_exp_precompr2: #t:limb_t -> k:BM.mont t -> bn_mod_exp_precompr2_st t k.BM.bn.BN.len
+val bn_mod_exp_raw_precompr2: #t:limb_t -> k:BM.mont t -> bn_mod_exp_raw_precompr2_st t k.BM.bn.BN.len
 
 
 // This function is constant-time on the exponent b.
 inline_for_extraction noextract
-let bn_mod_exp_mont_ladder_precompr2_st (t:limb_t) (len:BN.meta_len t) =
+let bn_mod_exp_ct_precompr2_st (t:limb_t) (len:BN.meta_len t) =
     n:lbignum t len
   -> a:lbignum t len
   -> bBits:size_t{v bBits > 0}
@@ -72,8 +72,8 @@ let bn_mod_exp_mont_ladder_precompr2_st (t:limb_t) (len:BN.meta_len t) =
     disjoint res r2 /\ disjoint a r2 /\ disjoint n r2)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_seq h1 res ==
-    S.bn_mod_exp_mont_ladder_precompr2 (v len) (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b) (as_seq h0 r2))
+    S.bn_mod_exp_ct_precompr2 (v len) (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b) (as_seq h0 r2))
 
 
 inline_for_extraction noextract
-val bn_mod_exp_mont_ladder_precompr2: #t:limb_t -> k:BM.mont t -> bn_mod_exp_mont_ladder_precompr2_st t k.BM.bn.BN.len
+val bn_mod_exp_ct_precompr2: #t:limb_t -> k:BM.mont t -> bn_mod_exp_ct_precompr2_st t k.BM.bn.BN.len

@@ -306,8 +306,8 @@ let rsapss_sign_bn #t modBits eBits dBits skey m =
   let d  = sub skey (nLen + nLen + eLen) dLen in
 
   let k = blocks modBits 8 in
-  let s = bn_mod_exp_mont_ladder_precompr2 nLen n m dBits d r2 in
-  let m' = bn_mod_exp_precompr2 nLen n s eBits e r2 in
+  let s = bn_mod_exp_fw_precompr2 nLen n m dBits d 4 r2 in
+  let m' = bn_mod_exp_raw_precompr2 nLen n s eBits e r2 in
   let eq_m = bn_eq_mask m m' in
   let s = map (logand eq_m) s in
   BB.unsafe_bool_of_limb eq_m, s
@@ -346,7 +346,6 @@ let rsapss_sign_msg_to_bn #t a modBits sLen salt msgLen msg =
 
 val rsapss_sign_compute_sgnt:
     #t:limb_t
-  -> a:Hash.algorithm{S.hash_is_supported a}
   -> modBits:size_nat
   -> eBits:size_nat
   -> dBits:size_nat{skey_len_pre t modBits eBits dBits}
@@ -354,7 +353,7 @@ val rsapss_sign_compute_sgnt:
   -> m:lbignum t (blocks modBits (bits t)) ->
   tuple2 bool (lseq uint8 (blocks modBits 8))
 
-let rsapss_sign_compute_sgnt #t a modBits eBits dBits skey m =
+let rsapss_sign_compute_sgnt #t modBits eBits dBits skey m =
   let bits = bits t in
   let numb = numbytes t in
   let nLen = blocks modBits bits in
@@ -386,7 +385,7 @@ val rsapss_sign_:
 
 let rsapss_sign_ #t a modBits eBits dBits skey sLen salt msgLen msg =
   let m = rsapss_sign_msg_to_bn #t a modBits sLen salt msgLen msg in
-  rsapss_sign_compute_sgnt #t a modBits eBits dBits skey m
+  rsapss_sign_compute_sgnt #t modBits eBits dBits skey m
 
 
 val rsapss_sign_lemma:
@@ -438,13 +437,13 @@ let rsapss_sign_lemma #t a modBits eBits dBits skey sLen salt msgLen msg =
   S.os2ip_lemma emBits em;
 
   assert (bn_v m < bn_v n);
-  let s = bn_mod_exp_mont_ladder_precompr2 nLen n m dBits d r2 in
+  let s = bn_mod_exp_fw_precompr2 nLen n m dBits d 4 r2 in
   Math.Lemmas.pow2_le_compat (bits * nLen) modBits;
   SM.bn_precomp_r2_mod_n_lemma (modBits - 1) n;
-  bn_mod_exp_mont_ladder_precompr2_lemma nLen n m dBits d r2;
+  bn_mod_exp_fw_precompr2_lemma nLen n m dBits d 4 r2;
 
-  let m' = bn_mod_exp_precompr2 nLen n s eBits e r2 in
-  bn_mod_exp_precompr2_lemma nLen n s eBits e r2;
+  let m' = bn_mod_exp_raw_precompr2 nLen n s eBits e r2 in
+  bn_mod_exp_raw_precompr2_lemma nLen n s eBits e r2;
 
   let eq_m = bn_eq_mask m m' in
   bn_eq_mask_lemma m m';
@@ -516,13 +515,9 @@ let rsapss_verify_bn #t modBits eBits pkey m_def s =
   let r2 = sub pkey nLen nLen in
   let e  = sub pkey (nLen + nLen) eLen in
 
-  let k = blocks modBits 8 in
-  let emBits = modBits - 1 in
-  let emLen = blocks emBits 8 in
-
   let mask = bn_lt_mask s n in
   if BB.unsafe_bool_of_limb mask then begin
-    let m = bn_mod_exp_precompr2 nLen n s eBits e r2 in
+    let m = bn_mod_exp_raw_precompr2 nLen n s eBits e r2 in
     if bn_lt_pow2 modBits m then (true, m)
     else false, m end
   else false, m_def
@@ -560,14 +555,13 @@ let rsapss_verify_bn_to_msg #t a modBits sLen msgLen msg m =
 
 val rsapss_verify_compute_msg:
     #t:limb_t
-  -> a:Hash.algorithm{S.hash_is_supported a}
   -> modBits:size_nat
   -> eBits:size_nat{pkey_len_pre t modBits eBits}
   -> pkey:lbignum t (2 * blocks modBits (bits t) + blocks eBits (bits t))
   -> sgnt:lseq uint8 (blocks modBits 8) ->
   tuple2 bool (lbignum t (blocks modBits (bits t)))
 
-let rsapss_verify_compute_msg #t a modBits eBits pkey sgnt =
+let rsapss_verify_compute_msg #t modBits eBits pkey sgnt =
   let bits = bits t in
   let numb = numbytes t in
   let nLen = blocks modBits bits in
@@ -598,7 +592,7 @@ val rsapss_verify_:
   (ensures  fun r -> True)
 
 let rsapss_verify_ #t a modBits eBits pkey sLen sgnt msgLen msg =
-  let (b, m) = rsapss_verify_compute_msg #t a modBits eBits pkey sgnt in
+  let (b, m) = rsapss_verify_compute_msg #t modBits eBits pkey sgnt in
   if b then
     rsapss_verify_bn_to_msg a modBits sLen msgLen msg m
   else
@@ -648,10 +642,10 @@ let rsapss_verify_lemma #t a modBits eBits pkey sLen sgnt msgLen msg =
 
   let res =
   if BB.unsafe_bool_of_limb mask then begin
-    let m = bn_mod_exp_precompr2 nLen n s eBits e r2 in
+    let m = bn_mod_exp_raw_precompr2 nLen n s eBits e r2 in
     Math.Lemmas.pow2_le_compat (bits * nLen) modBits;
     SM.bn_precomp_r2_mod_n_lemma (modBits - 1) n;
-    bn_mod_exp_precompr2_lemma nLen n s eBits e r2;
+    bn_mod_exp_raw_precompr2_lemma nLen n s eBits e r2;
     blocks_bits_lemma t emBits;
     blocks_numb_lemma t emBits;
     assert (blocks emLen numb == blocks emBits bits);

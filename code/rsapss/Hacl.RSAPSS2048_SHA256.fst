@@ -30,14 +30,11 @@ let add_mod_n: BN.bn_add_mod_n_st t_limbs n_limbs =
 
 [@CInline]
 let mul (a:BD.lbignum t_limbs n_limbs) : BN.bn_karatsuba_mul_st t_limbs n_limbs a =
-  //BN.bn_karatsuba_mul n_limbs a
-  BN.bn_mul n_limbs n_limbs a
+  BN.bn_karatsuba_mul n_limbs a
 
 [@CInline]
 let sqr (a:BD.lbignum t_limbs n_limbs) : BN.bn_karatsuba_sqr_st t_limbs n_limbs a =
-  //BN.bn_karatsuba_sqr n_limbs a
-  //BN.bn_sqr n_limbs a
-  BN.bn_mul n_limbs n_limbs a a
+  BN.bn_karatsuba_sqr n_limbs a
 
 inline_for_extraction noextract
 instance bn_inst: BN.bn t_limbs = {
@@ -94,29 +91,29 @@ let exp_check: BE.bn_check_mod_exp_st t_limbs n_limbs =
   BE.bn_check_mod_exp mont_inst
 
 [@CInline]
-let mod_exp_precompr2: BE.bn_mod_exp_precompr2_st t_limbs n_limbs =
-  BE.bn_mod_exp_precompr2 mont_inst
+let mod_exp_raw_precompr2: BE.bn_mod_exp_raw_precompr2_st t_limbs n_limbs =
+  BE.bn_mod_exp_raw_precompr2 mont_inst
 
 [@CInline]
-let mod_exp_mont_ladder_precompr2: BE.bn_mod_exp_mont_ladder_precompr2_st t_limbs n_limbs =
-  BE.bn_mod_exp_mont_ladder_precompr2 mont_inst
+let mod_exp_ct_precompr2: BE.bn_mod_exp_ct_precompr2_st t_limbs n_limbs =
+  BE.bn_mod_exp_ct_precompr2 mont_inst
 
 [@CInline]
-let mod_exp_fw_precompr2: BE.bn_mod_exp_fw_precompr2_st t_limbs n_limbs =
-  BE.bn_mod_exp_fw_precompr2 mont_inst
+let mod_exp_fw_raw_precompr2: BE.bn_mod_exp_fw_precompr2_st t_limbs n_limbs =
+  BE.bn_mod_exp_fw_raw_precompr2 mont_inst
 
 [@CInline]
-let mod_exp_fw_precompr2_ct: BE.bn_mod_exp_fw_precompr2_st t_limbs n_limbs =
-  BE.bn_mod_exp_fw_precompr2_ct mont_inst
+let mod_exp_fw_ct_precompr2: BE.bn_mod_exp_fw_precompr2_st t_limbs n_limbs =
+  BE.bn_mod_exp_fw_ct_precompr2 mont_inst
 
 inline_for_extraction noextract
 instance ke_2048: BE.exp t_limbs = {
   BE.mont = mont_inst;
   BE.exp_check;
-  BE.mod_exp_precomp = mod_exp_precompr2;
-  BE.ct_mod_exp_precomp = mod_exp_mont_ladder_precompr2;
-  BE.mod_exp_fw_precomp = mod_exp_fw_precompr2;
-  BE.ct_mod_exp_fw_precomp = mod_exp_fw_precompr2_ct;
+  BE.raw_mod_exp_precomp = mod_exp_raw_precompr2;
+  BE.ct_mod_exp_precomp = mod_exp_ct_precompr2;
+  BE.raw_mod_exp_fw_precomp = mod_exp_fw_raw_precompr2;
+  BE.ct_mod_exp_fw_precomp = mod_exp_fw_ct_precompr2;
 }
 
 

@@ -6,15 +6,14 @@ open Lib.IntTypes
 open Lib.Sequence
 
 open Hacl.Spec.Bignum.Definitions
+
 include Hacl.Spec.Bignum.ExpBM
 include Hacl.Spec.Bignum.ExpFW
-
-module BM = Hacl.Spec.Bignum.Montgomery
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 // This function is *NOT* constant-time on the exponent b
-val bn_mod_exp:
+val bn_mod_exp_raw:
     #t:limb_t
   -> nLen:size_pos{2 * bits t * nLen <= max_size_t}
   -> nBits:size_nat{nBits / bits t < nLen}
@@ -25,7 +24,7 @@ val bn_mod_exp:
   lbignum t nLen
 
 
-val bn_mod_exp_lemma:
+val bn_mod_exp_raw_lemma:
     #t:limb_t
   -> nLen:size_pos{2 * bits t * nLen <= max_size_t}
   -> nBits:size_nat{nBits / bits t < nLen}
@@ -34,11 +33,11 @@ val bn_mod_exp_lemma:
   -> bBits:size_pos
   -> b:lbignum t (blocks bBits (bits t)) -> Lemma
   (requires bn_mod_exp_pre n a bBits b /\ pow2 nBits < bn_v n)
-  (ensures  bn_mod_exp_post n a bBits b (bn_mod_exp nLen nBits n a bBits b))
+  (ensures  bn_mod_exp_post n a bBits b (bn_mod_exp_raw nLen nBits n a bBits b))
 
 
 // This function is constant-time on the exponent b
-val bn_mod_exp_mont_ladder:
+val bn_mod_exp_ct:
     #t:limb_t
   -> nLen:size_pos{2 * bits t * nLen <= max_size_t}
   -> nBits:size_nat{nBits / bits t < nLen}
@@ -49,7 +48,7 @@ val bn_mod_exp_mont_ladder:
   lbignum t nLen
 
 
-val bn_mod_exp_mont_ladder_lemma:
+val bn_mod_exp_ct_lemma:
     #t:limb_t
   -> nLen:size_pos{2 * bits t * nLen <= max_size_t}
   -> nBits:size_nat{nBits / bits t < nLen}
@@ -58,7 +57,7 @@ val bn_mod_exp_mont_ladder_lemma:
   -> bBits:size_pos
   -> b:lbignum t (blocks bBits (bits t)) -> Lemma
   (requires bn_mod_exp_pre n a bBits b /\ pow2 nBits < bn_v n)
-  (ensures  bn_mod_exp_post n a bBits b (bn_mod_exp_mont_ladder nLen nBits n a bBits b))
+  (ensures  bn_mod_exp_post n a bBits b (bn_mod_exp_ct nLen nBits n a bBits b))
 
 
 val bn_mod_exp_fw:
