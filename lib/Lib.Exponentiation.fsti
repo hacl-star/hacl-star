@@ -153,11 +153,18 @@ val precomp_table_lemma: #t:Type -> k:exp t -> a:t -> table_len:size_nat{1 < tab
     (forall (i:nat{i < table_len}). index res i == pow k a i))
 
 
+let get_bits_l (bBits:nat) (b:nat{b < pow2 bBits}) (l:pos) (i:nat{i < bBits / l}) : r:nat{r < pow2 l} =
+  Math.Lemmas.lemma_mult_le_left l (i + 1) (bBits / l);
+  assert (l * (i + 1) <= l * (bBits / l));
+  Math.Lemmas.multiply_fractions bBits l;
+  assert (l * (i + 1) <= bBits);
+  b / pow2 (bBits - l * i - l) % pow2 l
+
 // fmul (pow k acc (pow2 l)) (pow k a (b / pow2 (bBits - l * i - l) % pow2 l))
 let exp_fw_f (#t:Type) (k:exp t) (bBits:nat) (b:nat{b < pow2 bBits}) (l:pos)
-  (table_len:size_nat{1 < table_len /\ table_len == pow2 l}) (table:lseq t table_len) (i:nat{l * (i + 1) <= bBits}) (acc:t) : t
+  (table_len:size_nat{1 < table_len /\ table_len == pow2 l}) (table:lseq t table_len) (i:nat{i < bBits / l}) (acc:t) : t
  =
-  let bits_l = b / pow2 (bBits - l * i - l) % pow2 l in
+  let bits_l = get_bits_l bBits b l i in
   fmul (exp_pow2 k acc l) table.[bits_l]
 
 // fmul (pow k acc (pow2 c)) (pow k a (b % pow2 c))

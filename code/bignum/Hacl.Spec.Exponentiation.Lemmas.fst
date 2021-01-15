@@ -564,11 +564,11 @@ val mod_exp_fw_mont_f:
   -> l:pos
   -> table_len:Lib.IntTypes.size_nat{1 < table_len /\ table_len == pow2 l}
   -> table:lseq nat table_len
-  -> i:nat{l * (i + 1) <= bBits} -> acc:nat ->
+  -> i:nat{i < bBits / l} -> acc:nat ->
   nat
 
 let mod_exp_fw_mont_f pbits rLen n mu bBits b l table_len table i acc =
-  let bits_l = b / pow2 (bBits - l * i - l) % table_len in
+  let bits_l = LE.get_bits_l bBits b l i in
   let acc_pow2l = mod_exp_pow2_mont pbits rLen n mu acc l in // pow k acc (pow2 l)
   let a_powbits_l = table.[bits_l] in //select_table // pow k a bits_l
   M.mont_mul pbits rLen n mu acc_pow2l a_powbits_l
@@ -721,7 +721,7 @@ val mod_exp_fw_mont_f_lemma:
   -> l:pos
   -> table_len:Lib.IntTypes.size_nat{1 < table_len /\ table_len == pow2 l}
   -> accM:nat_mod n
-  -> i:nat{l * (i + 1) <= bBits} -> Lemma
+  -> i:nat{i < bBits / l} -> Lemma
   (requires mont_pre pbits rLen n mu)
   (ensures
    (let k = mk_nat_mont_group_ll pbits rLen n mu in
@@ -735,7 +735,7 @@ let mod_exp_fw_mont_f_lemma pbits rLen n mu aM bBits b l table_len accM i =
   let t1 = mod_precomp_table_mont pbits rLen n mu table_len aM in
   let t2 = LE.precomp_table k aM table_len in
 
-  let bits_l = b / pow2 (bBits - l * i - l) % table_len in
+  let bits_l = LE.get_bits_l bBits b l i in
   mod_precomp_table_mont_lemma pbits rLen n mu table_len aM bits_l;
   assert (index t1 bits_l == index t2 bits_l);
   mod_exp_pow2_mont_lemma pbits rLen n mu accM l
@@ -779,7 +779,7 @@ val mod_exp_fw_mont_loop_lemma:
   -> l:pos
   -> table_len:Lib.IntTypes.size_nat{1 < table_len /\ table_len == pow2 l}
   -> accM0:nat_mod n
-  -> j:nat{l * j <= bBits } -> Lemma
+  -> j:nat{j <= bBits / l} -> Lemma
   (requires mont_pre pbits rLen n mu)
   (ensures
    (let k = mk_nat_mont_group_ll pbits rLen n mu in
@@ -800,10 +800,12 @@ let rec mod_exp_fw_mont_loop_lemma pbits rLen n mu aM bBits b l table_len accM0 
     Loops.eq_repeati0 j (LE.exp_fw_f k bBits b l table_len t2) accM0 end
   else begin
     Math.Lemmas.lemma_mult_lt_left l (j - 1) j;
-    let accM4 = Loops.repeati (j - 1) (LE.exp_fw_f k bBits b l table_len t2) accM0 in
+    let accM3 = Loops.repeati (j - 1) (mod_exp_fw_mont_f pbits rLen n mu bBits b l table_len t1) accM0 in
+    let accM4 : nat_mod n = Loops.repeati (j - 1) (LE.exp_fw_f k bBits b l table_len t2) accM0 in
+    mod_exp_fw_mont_loop_lemma pbits rLen n mu aM bBits b l table_len accM0 (j - 1);
+    assert (accM3 == accM4 /\ accM3 < n);
     Loops.unfold_repeati j (LE.exp_fw_f k bBits b l table_len t2) accM0 (j - 1);
     Loops.unfold_repeati j (mod_exp_fw_mont_f pbits rLen n mu bBits b l table_len t1) accM0 (j - 1);
-    mod_exp_fw_mont_loop_lemma pbits rLen n mu aM bBits b l table_len accM0 (j - 1);
     mod_exp_fw_mont_f_lemma pbits rLen n mu aM bBits b l table_len accM4 (j - 1);
     () end
 

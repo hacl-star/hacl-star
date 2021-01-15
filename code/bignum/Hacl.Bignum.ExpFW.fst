@@ -12,6 +12,7 @@ open Hacl.Bignum.Definitions
 module ST = FStar.HyperStack.ST
 module LSeq = Lib.Sequence
 module Loops = Lib.LoopCombinators
+module B = LowStar.Buffer
 
 module S = Hacl.Spec.Bignum.ExpFW
 module SN = Hacl.Spec.Bignum
@@ -82,8 +83,7 @@ inline_for_extraction noextract
 val bn_mod_precomp_table_mont_f: #t:limb_t -> k:BM.mont t -> bn_mod_precomp_table_mont_f_st t k.BM.bn.BN.len
 let bn_mod_precomp_table_mont_f #t k n mu aM table_len i table =
   [@inline_let] let len : BN.meta_len t = k.BM.bn.BN.len in
-  Math.Lemmas.lemma_mult_lt_right (v len) (v i + 1) (v table_len);
-  Math.Lemmas.lemma_mult_lt_right (v len) (v i + 2) (v table_len);
+  Math.Lemmas.lemma_mult_le_right (v len) (v i + 3) (v table_len);
   let t1 = sub table ((i +! 1ul) *! len) len in
   let t2 = sub table ((i +! 2ul) *! len) len in
   let h0 = ST.get () in
@@ -140,7 +140,7 @@ let table_select_ct_f_st (t:limb_t) (len:BN.meta_len t) =
   -> acc:lbignum t len ->
   Stack unit
   (requires fun h ->
-    live h res_j /\ live h acc /\ disjoint acc res_j)
+    live h res_j /\ live h acc /\ eq_or_disjoint acc res_j)
   (ensures  fun h0 _ h1 -> modifies (loc acc) h0 h1 /\
     (let c = eq_mask i (BB.size_to_limb (j +! 1ul)) in
      as_seq h1 acc == LSeq.map2 (BB.mask_select c) (as_seq h0 res_j) (as_seq h0 acc)))
@@ -181,11 +181,35 @@ let table_select_ct #t len table_len table i res =
     Loops.unfold_repeati (v table_len - 1) (spec h0) (as_seq h0 res) (v j);
     Math.Lemmas.lemma_mult_le_right (v len) (v j + 2) (v table_len);
     let res_j = sub table ((j +! 1ul) *! len) len in
+    assert (B.loc_includes (loc (gsub table ((j +! 1ul) *! len) len)) (loc res_j));
     table_select_ct_f len res_j i j res
   );
   let h1 = ST.get () in
   assert (as_seq h1 res == S.table_select_ct (v table_len) (as_seq h0 table) i);
   S.table_select_ct_lemma #t #(v len) (v table_len) (as_seq h0 table) i
+
+
+inline_for_extraction noextract
+val bn_get_bits_l:
+    #t:limb_t
+  -> bBits:size_t{0 < v bBits}
+  -> bLen:size_t{bLen == blocks bBits (size (bits t))}
+  -> b:lbignum t bLen
+  -> l:size_t{0 < v l /\ v l < bits t}
+  -> i:size_t{v i < v bBits / v l} ->
+  Stack (limb t)
+  (requires fun h -> live h b)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\ v r < pow2 (v l) /\
+    r == S.bn_get_bits_l (v bBits) (v bLen) (as_seq h0 b) (v l) (v i))
+
+let bn_get_bits_l #t bBits bLen b l i =
+  Math.Lemmas.lemma_mult_le_left (v l) (v i + 1) (v bBits / v l);
+  assert (v l * (v i + 1) <= v l * (v bBits / v l));
+  Math.Lemmas.multiply_fractions (v bBits) (v l);
+  assert (v l * (v i + 1) <= v bBits);
+  let h0 = ST.get () in
+  SN.bn_get_bits_lemma (as_seq h0 b) (v bBits - v l * v i - v l) (v l);
+  BN.bn_get_bits bLen b (bBits -! l *! i -! l) l
 
 
 inline_for_extraction noextract
@@ -195,10 +219,10 @@ let bn_mod_exp_fw_mont_f_st (t:limb_t) (len:BN.meta_len t) =
   -> bBits:size_t{0 < v bBits}
   -> bLen:size_t{bLen == blocks bBits (size (bits t))}
   -> b:lbignum t bLen
-  -> l:size_t{v l < bits t}
+  -> l:size_t{0 < v l /\ v l < bits t}
   -> table_len:size_t{1 < v table_len /\ v table_len * v len <= max_size_t /\ v table_len == pow2 (v l)}
   -> table:lbignum t (table_len *! len)
-  -> i:size_t{v l * (v i + 1) <= v bBits}
+  -> i:size_t{v i < v bBits / v l}
   -> accM:lbignum t len ->
   Stack unit
   (requires fun h ->
@@ -213,14 +237,11 @@ let bn_mod_exp_fw_mont_f_st (t:limb_t) (len:BN.meta_len t) =
 inline_for_extraction noextract
 val bn_mod_exp_fw_mont_f: #t:limb_t -> k:BM.mont t -> bn_mod_exp_fw_mont_f_st t k.BM.bn.BN.len
 let bn_mod_exp_fw_mont_f #t k n mu bBits bLen b l table_len table i accM =
+  [@inline_let] let len = k.BM.bn.BN.len in
   push_frame ();
   bn_mod_exp_pow2_mont_in_place k n mu l accM;
-  let bits_l = BN.bn_get_bits bLen b (bBits -! l *! i -! l) l in
-  let h0 = ST.get () in
-  SN.bn_get_bits_lemma (as_seq h0 b) (v bBits - v l * v i - v l) (v l);
-  assert (v bits_l < v table_len);
+  let bits_l = bn_get_bits_l bBits bLen b l i in
 
-  [@inline_let] let len = k.BM.bn.BN.len in
   let a_powbits_l = create len (uint #t #SEC 0) in
   Math.Lemmas.lemma_mult_le_right (v len) (v bits_l + 1) (v table_len);
   table_select_ct len table_len table bits_l a_powbits_l;
@@ -232,15 +253,12 @@ let bn_mod_exp_fw_mont_f #t k n mu bBits bLen b l table_len table i accM =
 inline_for_extraction noextract
 val bn_mod_exp_fw_mont_raw_f: #t:limb_t -> k:BM.mont t -> bn_mod_exp_fw_mont_f_st t k.BM.bn.BN.len
 let bn_mod_exp_fw_mont_raw_f #t k n mu bBits bLen b l table_len table i accM =
+  [@inline_let] let len = k.BM.bn.BN.len in
   bn_mod_exp_pow2_mont_in_place k n mu l accM;
-  let bits_l = BN.bn_get_bits bLen b (bBits -! l *! i -! l) l in
-  let h0 = ST.get () in
-  SN.bn_get_bits_lemma (as_seq h0 b) (v bBits - v l * v i - v l) (v l);
-  assert (v bits_l < v table_len);
-
+  let bits_l = bn_get_bits_l bBits bLen b l i in
   let bits_l32 = Lib.RawIntTypes.(size_from_UInt32 (u32_to_UInt32 (to_u32 bits_l))) in
   assert (v bits_l32 == v bits_l);
-  [@inline_let] let len = k.BM.bn.BN.len in
+
   Math.Lemmas.lemma_mult_le_right (v len) (v bits_l32 + 1) (v table_len);
   let a_powbits_l = sub table (bits_l32 *! len) len in
   k.BM.mul n mu accM a_powbits_l accM
@@ -324,9 +342,10 @@ let bn_mod_exp_fw_mont_loop_st (t:limb_t) (len:BN.meta_len t) =
     live h n /\ live h b /\ live h accM /\ live h table /\
     disjoint accM b /\ disjoint accM n /\ disjoint accM table /\ disjoint n table)
   (ensures  fun h0 _ h1 -> modifies (loc accM) h0 h1 /\
+   (Math.Lemmas.multiply_fractions (v bBits) (v l);
     as_seq h1 accM ==
     Loops.repeati (v bBits / v l) (S.bn_mod_exp_fw_mont_f (as_seq h0 n) mu
-      (v bBits) (v bLen) (as_seq h0 b) (v l) (v table_len) (as_seq h0 table)) (as_seq h0 accM))
+      (v bBits) (v bLen) (as_seq h0 b) (v l) (v table_len) (as_seq h0 table)) (as_seq h0 accM)))
 
 
 inline_for_extraction noextract
@@ -337,13 +356,14 @@ val bn_mod_exp_fw_mont_loop:
   bn_mod_exp_fw_mont_loop_st t k.BM.bn.BN.len
 
 let bn_mod_exp_fw_mont_loop #t k bn_mod_exp_fw_mont_f n mu bBits bLen b l table_len table accM = admit();
+  Math.Lemmas.multiply_fractions (v bBits) (v l);
+  let it = bBits /. l in
+  assert (v it == v bBits / v l);
+
   [@inline_let]
   let spec h0 = S.bn_mod_exp_fw_mont_f (as_seq h0 n) mu
       (v bBits) (v bLen) (as_seq h0 b) (v l) (v table_len) (as_seq h0 table) in
   let h0 = ST.get () in
-  let it = bBits /. l in
-  assert (v it == v bBits / v l);
-  Math.Lemmas.multiply_fractions (v bBits) (v l);
 
   loop1 h0 it accM spec
   (fun i ->
@@ -395,6 +415,7 @@ let bn_mod_exp_fw_mont_aux #t k bn_mod_exp_fw_mont_f bn_mod_exp_fw_mont_rem n mu
 
   bn_mod_exp_fw_mont_loop #t k bn_mod_exp_fw_mont_f n mu bBits bLen b l table_len table accM;
 
+  assert (v (bBits %. l) == v bBits % v l);
   if bBits %. l <>. 0ul then
     bn_mod_exp_fw_mont_rem n mu bBits bLen b l table_len table accM;
   pop_frame()

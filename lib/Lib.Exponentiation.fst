@@ -444,7 +444,7 @@ val exp_fw_lemma_step:
   -> l:pos
   -> table_len:size_nat{1 < table_len /\ table_len == pow2 l}
   -> table:lseq t table_len
-  -> i:pos{l * i <= bBits}
+  -> i:pos{i <= bBits / l}
   -> acc1:t -> Lemma
   (requires
     acc1 == pow k a (b / pow2 (bBits - l * (i - 1))) /\
@@ -481,7 +481,7 @@ val exp_fw_lemma_loop:
   -> l:pos
   -> table_len:size_nat{1 < table_len /\ table_len == pow2 l}
   -> table:lseq t table_len
-  -> i:nat{l * i <= bBits} -> Lemma
+  -> i:nat{i <= bBits / l} -> Lemma
   (requires table == precomp_table k a table_len)
   (ensures  (let acc = Loops.repeati i (exp_fw_f k bBits b l table_len table) one in
     acc == pow k a (b / pow2 (bBits - l * i))))
