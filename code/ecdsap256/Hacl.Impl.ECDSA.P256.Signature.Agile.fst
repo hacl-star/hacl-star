@@ -113,7 +113,7 @@ val ecdsa_signature_step45:
       modifies (loc x |+| loc tempBuffer) h0 h1 /\ 
       as_nat c h1 x < prime_p256_order /\ 
       (
-	let (rxN, ryN, rzN), _ = montgomery_ladder_spec (as_seq h0 k) ((0,0,0), basePoint #P256) in 
+	let (rxN, ryN, rzN), _ = montgomery_ladder_spec #c (as_seq h0 k) ((0,0,0), basePoint #P256) in 
 	let (xN, _, _) = _norm #P256 (rxN, ryN, rzN) in 
 	as_nat c h1 x == xN % prime_p256_order /\ 
 	(
@@ -246,7 +246,7 @@ val ecdsa_signature_core: #c: curve -> alg: hash_alg_ecdsa
       let hashM = hashSpec P256 alg (v mLen) (as_seq h0 m) in 
       let cutHashM = Lib.Sequence.sub hashM 0 32 in 
       let z =  nat_from_bytes_be cutHashM % prime_p256_order in 
-      let (rxN, ryN, rzN), _ = montgomery_ladder_spec (as_seq h0 k) ((0,0,0), basePoint #P256) in 
+      let (rxN, ryN, rzN), _ = montgomery_ladder_spec #c (as_seq h0 k) ((0,0,0), basePoint #P256) in 
       let (xN, _, _) = _norm #P256 (rxN, ryN, rzN) in 
       
       let kFelem = nat_from_bytes_be (as_seq h0 k) in 

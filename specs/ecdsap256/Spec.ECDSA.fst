@@ -426,11 +426,11 @@ let ecdsa_verification_agile c alg publicKey r s mLen m =
       let u2 = nat_to_bytes_be (getCoordinateLen c) (pow s (order - 2) * r % order) in 
 
       let pointAtInfinity = (0, 0, 0) in
-      let u1D, _ = montgomery_ladder_spec u1 (pointAtInfinity, basePoint #c) in
-      let u2D, _ = montgomery_ladder_spec u2 (pointAtInfinity, publicJacobian) in
+      let u1D, _ = montgomery_ladder_spec #c u1 (pointAtInfinity, basePoint #c) in
+      let u2D, _ = montgomery_ladder_spec #c u2 (pointAtInfinity, publicJacobian) in
 
-      let sumPoints = _point_add u1D u2D in
-      let pointNorm = _norm sumPoints in
+      let sumPoints = _point_add #c u1D u2D in
+      let pointNorm = _norm #c sumPoints in
       let x, y, z = pointNorm in
       let x = x % order in 
       if Spec.P256.isPointAtInfinity pointNorm then false else x = r
@@ -451,8 +451,8 @@ let ecdsa_signature_agile c alg mLen m privateKey k =
   assert_norm (pow2 32 < pow2 61);
   assert_norm (pow2 32 < pow2 125);
   let order = getOrder #c in 
-  let r, _ = montgomery_ladder_spec k ((0,0,0), (basePoint #c)) in
-  let (xN, _, _) = _norm r in
+  let r, _ = montgomery_ladder_spec #c k ((0,0,0), (basePoint #c)) in
+  let (xN, _, _) = _norm #c r in
   let hashM = hashSpec c alg mLen m in 
   let z = nat_from_bytes_be hashM % order in
   let kFelem = nat_from_bytes_be k in

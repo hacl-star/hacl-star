@@ -286,7 +286,7 @@ let normalisation_update #c z2x z3y p resultPoint =
   pop_frame()
 
 
-val lemma_norm: #c: curve -> pD : point_nat_prime -> r: point_nat_prime #c ->
+val lemma_norm: #c: curve -> pD : point_nat_prime #c -> r: point_nat_prime #c ->
   Lemma (requires (
     let prime = getPrime c in 
     let xD, yD, zD = pD in 

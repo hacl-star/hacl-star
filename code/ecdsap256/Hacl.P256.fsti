@@ -418,7 +418,7 @@ val ecp384dh_i:
   ")]
 *)
 
-
+(* 
 val ecp256dh_r:
     result:lbuffer uint8 (size 64)
   -> pubKey:lbuffer uint8 (size 64)
@@ -439,3 +439,4 @@ val ecp256dh_r:
 
 
 
+ *)

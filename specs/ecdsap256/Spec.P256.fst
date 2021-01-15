@@ -24,6 +24,7 @@ let prime384: (a: pos {a > 3 && a < pow2 384}) =
   pow2 384 - pow2 128 - pow2 96 + pow2 32 - 1
 
 
+(* https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-4.pdf *)
 type curve = 
   |P256
   |P384
@@ -106,11 +107,37 @@ let getPrime curve =
   |P384 -> prime384
 
 
+
+type elem (n:pos) = x:nat{x < n}
+
+let fmul (#n:pos) (x:elem n) (y:elem n) : elem n = (x * y) % n
+
+
+val exp: #n: pos -> a: nat {a < n} -> b: pos -> Tot (r: nat{r < n}) (decreases b)
+
+let rec exp #n a b =
+  if b = 1 then a
+  else
+    if b % 2 = 0 then exp #n (fmul #n a a) (b / 2)
+    else fmul #n a (exp #n (fmul #n a a) (b / 2))
+
+
+noextract
+let min_one_prime (prime: pos {prime > 3}) (x: int) : Tot (r: int {r < prime}) =
+  let p = x % prime in 
+  exp #prime p (prime - 1)
+
+
+
 inline_for_extraction
-let getKo curve : uint64 = 
-  match curve with 
-  |P256 -> (u64 1)
-  |P384 -> (u64 4294967297)
+let getKo (c: curve) : (r: uint64 {v r = min_one_prime (pow2 64) (- getPrime c)}) = 
+  match c with 
+  |P256 -> 
+    assert_norm (min_one_prime (pow2 64) (- getPrime P256) == 1);
+    (u64 1)
+  |P384 -> 
+    assert_norm (min_one_prime (pow2 64) (- getPrime P384) == 4294967297);
+    (u64 4294967297)
 
 
 inline_for_extraction
@@ -139,10 +166,7 @@ let nat_prime #curve = n:nat{n < getPrime curve}
 
 let point_nat = tuple3 nat nat nat
 
-let point_nat_prime #curve = (p: point_nat 
-  {
-    let prime = getPrime curve in 
-    let (a, b, c) = p in a < prime /\ b < prime /\ c < prime})
+let point_nat_prime #curve = tuple3 (a: nat {a < getPrime curve}) (a: nat {a < getPrime curve}) (a: nat {a < getPrime curve}) 
 
 
 inline_for_extraction
@@ -156,10 +180,6 @@ let basePoint #curve : point_nat_prime #curve  =
   (0xaa87ca22be8b05378eb1c71ef320ad746e1d3b628ba79b9859f741e082542a385502f25dbf55296c3a545e3872760ab7,0x3617de4a96262c6f5d9e98bf9292dc29f8f41dbd289a147ce9da3113b5f0b8c00a60b1ce1d7e819d7a431d7c90ea0e5f, 1) 
 
 
-
-type elem (n:pos) = x:nat{x < n}
-
-let fmul (#n:pos) (x:elem n) (y:elem n) : elem n = (x * y) % n
 
 noextract
 val pow: a:nat -> b:nat -> nat
@@ -183,14 +203,6 @@ let rec pow_plus a b c =
 
 #pop-options
 
-val exp: #n: pos -> a: elem n -> b: pos -> Tot (elem n) (decreases b)
-
-let rec exp #n a b =
-  if b = 1 then a
-  else
-    if b % 2 = 0 then exp (fmul a a) (b / 2)
-    else fmul a (exp (fmul a a) (b / 2))
-
 
 noextract
 let modp_inv_prime (prime: pos {prime > 3}) (x: elem prime) : Tot (elem prime) =
@@ -209,11 +221,12 @@ let modp_inv2_pow #curve (x: nat) : Tot (elem (getPrime curve)) =
   pow x (prime - 2) % prime
 
 
-noextract
-let min_one_prime (prime: pos {prime > 3}) (x: int) : Tot (elem prime) =
-  let p = x % prime in 
-  exp #prime p (prime - 1)
-  
+(*    *   s = 4*x*y^2
+   *   m = 3*(x + z^2)*(x - z^2)
+   *   x' = m^2 - 2*s
+   *   y' = m*(s - x') - 8*y^4
+   *   z' = 2*y*z
+   * *)
 
 noextract
 let _point_double #curve (p:point_nat_prime #curve) : point_nat_prime #curve =
@@ -268,7 +281,7 @@ let isPointAtInfinity (p:point_nat) =
 
 #push-options "--fuel 1"
 
-let _norm #curve (p:point_nat_prime #curve) : point_nat_prime #curve =
+let _norm #curve (p:point_nat) : point_nat=
   let prime = getPrime curve in 
   let (x, y, z) = p in
   let z2 = z * z in
@@ -321,26 +334,26 @@ let _ml_step #c k i (p, q) =
     _ml_step0 p q
 
 
-val montgomery_ladder_spec: #c: curve -> scalar_bytes #c -> tuple2 (point_nat_prime #c) (point_nat_prime #c)-> tuple2 (point_nat_prime #c) (point_nat_prime #c)
+val montgomery_ladder_spec: #c: curve -> scalar_bytes #c -> tuple2 point_nat point_nat-> tuple2 point_nat point_nat
 
 let montgomery_ladder_spec k pq =
   Lib.LoopCombinators.repeati 256 (_ml_step k) pq
 
 
-val scalar_multiplication: #c: curve -> scalar_bytes #c -> point_nat_prime #c -> point_nat_prime #c
+val scalar_multiplication: #c: curve -> scalar_bytes #c -> point_nat_prime #c -> point_nat_prime #c 
 
-let scalar_multiplication k p =
+let scalar_multiplication #c k p =
   let pai = (0, 0, 0) in
   let q, f = montgomery_ladder_spec k (pai, p) in
-  _norm q
+  _norm #c q
 
 
-val secret_to_public: #c: curve -> scalar_bytes #c -> point_nat_prime #c
+val secret_to_public: #c: curve -> scalar_bytes #c -> point_nat
 
-let secret_to_public k =
+let secret_to_public #c k =
   let pai = (0, 0, 0) in
-  let q, f = montgomery_ladder_spec k (pai, basePoint) in
-  _norm q
+  let q, f = montgomery_ladder_spec #c k (pai, (basePoint #c)) in
+  _norm #c q
 
 
 let isPointOnCurve (#c: curve) (p: point_nat_prime #c) : bool = 

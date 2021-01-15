@@ -318,7 +318,7 @@ let point_primeF (c: curve) =
     felem_seq_as_nat c z < prime} 
 
 
-let point_prime_to_coordinates (c: curve) (p:point_seq c) =
+let point_prime_to_coordinates (c: curve) (p:point_seq c) : point_nat =
   let len = uint_v (getCoordinateLenU64 c) in 
   felem_seq_as_nat c (Lib.Sequence.sub p 0 len),
   felem_seq_as_nat c (Lib.Sequence.sub p len len),
