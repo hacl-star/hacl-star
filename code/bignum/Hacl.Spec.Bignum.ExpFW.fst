@@ -255,8 +255,7 @@ val bn_get_bits_c_lemma:
   -> b:lbignum t bLen
   -> l:size_pos{l < bits t} -> Lemma
   (requires bn_v b < pow2 bBits)
-  (ensures (let res = bn_get_bits_c bBits bLen b l in
-    v res == bn_v b % pow2 (bBits % l) /\ v res < pow2 l))
+  (ensures v (bn_get_bits_c bBits bLen b l) == LE.get_bits_c bBits (bn_v b) l)
 
 let bn_get_bits_c_lemma #t bBits bLen b l =
   let c = bBits % l in
@@ -293,8 +292,7 @@ val bn_mod_exp_fw_mont_rem_lemma:
 
 let bn_mod_exp_fw_mont_rem_lemma #t #nLen n mu bBits bLen b l table_len oneM aM accM =
   let t1 = PT.bn_mod_precomp_table_mont n mu table_len aM oneM in
-  let t2 = E.mod_precomp_table_mont (bits t) nLen (bn_v n) (v mu) table_len (bn_v aM) in
-
+  
   let c = bBits % l in
   let acc_pow2c = bn_mod_exp_pow2_mont n mu accM c in
   bn_mod_exp_pow2_mont_lemma n mu accM c;
@@ -308,7 +306,7 @@ let bn_mod_exp_fw_mont_rem_lemma #t #nLen n mu bBits bLen b l table_len oneM aM 
   let a_powbits_c = sub t1 (v bits_c * nLen) nLen in
   PT.bn_mod_precomp_table_mont_lemma n mu table_len aM oneM (v bits_c);
   assert (bn_v a_powbits_c < bn_v n);
-
+  
   let res = BM.bn_mont_mul n mu acc_pow2c a_powbits_c in
   BM.bn_mont_mul_lemma n mu acc_pow2c a_powbits_c
 

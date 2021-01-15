@@ -167,13 +167,18 @@ let exp_fw_f (#t:Type) (k:exp t) (bBits:nat) (b:nat{b < pow2 bBits}) (l:pos)
   let bits_l = get_bits_l bBits b l i in
   fmul (exp_pow2 k acc l) table.[bits_l]
 
+let get_bits_c (bBits:nat) (b:nat{b < pow2 bBits}) (l:pos) : r:nat{r < pow2 l} =
+  let c = bBits % l in
+  let bits_c = b % pow2 c in
+  Math.Lemmas.pow2_lt_compat l c;
+  bits_c
+
 // fmul (pow k acc (pow2 c)) (pow k a (b % pow2 c))
 let exp_fw_rem (#t:Type) (k:exp t) (bBits:nat) (b:nat{b < pow2 bBits}) (l:pos)
   (table_len:size_nat{1 < table_len /\ table_len == pow2 l}) (table:lseq t table_len) (acc:t) : t
  =
   let c = bBits % l in
-  let bits_c = b % pow2 c in
-  Math.Lemmas.pow2_lt_compat l c;
+  let bits_c = get_bits_c bBits b l in
   fmul (exp_pow2 k acc c) table.[bits_c]
 
 

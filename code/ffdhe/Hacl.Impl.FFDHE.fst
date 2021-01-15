@@ -220,6 +220,7 @@ let ffdhe_compute_exp_st (t:limb_t) (a:S.ffdhe_alg) (len:size_pos) (ke:BE.exp t)
     as_seq h1 res == BSeq.nat_to_bytes_be (v len) res_n))
 
 
+#push-options "--z3rlimit 100"
 inline_for_extraction noextract
 val ffdhe_compute_exp:
     #t:limb_t
@@ -237,9 +238,14 @@ let ffdhe_compute_exp #t a len ke p_r2_n sk_n b_n res =
   let res_n = create nLen (uint #t #SEC 0) in
 
   let h1 = ST.get () in
-  S.ffdhe_p_lemma a;
-  SD.bn_eval_bound #t (as_seq h1 sk_n) (v nLen);
+  S.ffdhe_p_lemma a;  
+  assert_norm (pow2 4 = 16);
+  assert_norm (pow2 10 = 1024);
+  Math.Lemmas.pow2_plus 4 10;
+  Math.Lemmas.pow2_lt_compat 32 14;
+  
   ke.BE.ct_mod_exp_fw_precomp p_n b_n (size (bits t) *! nLen) sk_n 4ul r2_n res_n; //b_n ^ sk_n % p_n
+  SD.bn_eval_bound #t (as_seq h1 sk_n) (v nLen);
   SE.bn_mod_exp_fw_precompr2_lemma (v nLen)
     (as_seq h1 p_n) (as_seq h1 b_n) (bits t * v nLen) (as_seq h1 sk_n) 4 (as_seq h1 r2_n);
 
@@ -247,6 +253,7 @@ let ffdhe_compute_exp #t a len ke p_r2_n sk_n b_n res =
   BN.bn_to_bytes_be len res_n res;
   SB.bn_to_bytes_be_lemma (v len) (as_seq h2 res_n);
   pop_frame ()
+#pop-options
 
 
 inline_for_extraction noextract

@@ -496,7 +496,7 @@ let get_ffdhe_params (a:ffdhe_alg) : ffdhe_params_t =
   | FFDHE8192 -> ffdhe_params_8192
 
 
-let ffdhe_len (a:ffdhe_alg) : size_pos =
+let ffdhe_len (a:ffdhe_alg) : x:size_pos{x <= 1024} =
   allow_inversion ffdhe_alg;
   match a with
   | FFDHE2048 -> 256
