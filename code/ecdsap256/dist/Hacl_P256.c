@@ -1746,6 +1746,7 @@ static void solinas_reduction_impl(uint64_t *i, uint64_t *o)
 
 static void point_double(uint64_t *p, uint64_t *result, uint64_t *tempBuffer)
 {
+  printf("%s", "?");
   uint64_t *pY = p + (uint32_t)4U;
   uint64_t *pZ = p + (uint32_t)8U;
   uint64_t *x3 = result;
@@ -1793,6 +1794,7 @@ static void point_double(uint64_t *p, uint64_t *result, uint64_t *tempBuffer)
 
 static void point_add(uint64_t *p, uint64_t *q, uint64_t *result, uint64_t *tempBuffer)
 {
+  printf("%s", "!");
   uint64_t *tempBuffer16 = tempBuffer;
   uint64_t *u1 = tempBuffer + (uint32_t)16U;
   uint64_t *u2 = tempBuffer + (uint32_t)20U;
@@ -1994,6 +1996,7 @@ static uint64_t *const_to_lbuffer__uint64_t(const uint64_t *b)
 static void
 point_add_mixed(uint64_t *p, const uint64_t *q, uint64_t *result, uint64_t *tempBuffer)
 {
+  printf("%s", ".");
   uint64_t *tempBuffer28 = tempBuffer;
   uint64_t *tempBuffer16 = tempBuffer;
   uint64_t *u1 = tempBuffer + (uint32_t)28U;
