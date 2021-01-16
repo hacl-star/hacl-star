@@ -90,3 +90,5 @@ let is_more_than_zero_less_than_order x =
   Hacl.Impl.P256.Signature.Common.isMoreThanZeroLessThanOrder x
 
 *)
+
+let scalar_rwnaf out scalar = Hacl.Impl.ScalarMultiplication.WNAF.scalar_rwnaf out scalar

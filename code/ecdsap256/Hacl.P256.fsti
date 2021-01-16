@@ -458,3 +458,10 @@ val is_more_than_zero_less_than_order: x: lbuffer uint8 (size 32) -> Stack bool
   )
  *)
 
+
+
+
+val scalar_rwnaf : out: lbuffer uint64 (size 104) -> scalar: lbuffer uint8 (size 32) -> 
+  Stack unit 
+    (requires fun h -> True)
+    (ensures fun h0 _ h1 -> True)

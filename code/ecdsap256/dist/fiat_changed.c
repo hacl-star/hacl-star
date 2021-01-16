@@ -3659,7 +3659,7 @@ static const pt_aff_t lut_cmb[27][16] = {
  */
 static void point_double(pt_prj_t *Q, const pt_prj_t *P) {
     /* temporary variables */
-     printf("%s", "?");
+     // printf("%s", "?");
 
     fe_t t0, t1, t2, t3, t4;
     /* constants */
@@ -3720,7 +3720,7 @@ static void point_double(pt_prj_t *Q, const pt_prj_t *P) {
 static void point_add_mixed(pt_prj_t *R, const pt_prj_t *Q, const pt_aff_t *P) {
     /* temporary variables */
 
-      printf("%s", ".");
+      // printf("%s", ".");
 
 
     fe_t t0, t1, t2, t3, t4;
@@ -3910,20 +3910,11 @@ static void scalar_rwnaf(int8_t out2[104], int8_t out[104], const unsigned char 
     int i;
     int8_t window, d;
 
-
-    // int8_t out2[104] = {0};
-
-    // for (int j = 0; j < 32; j++)
-    //     printf("%x ", in[j]);
-
-    // printf("\n");
-
-// 64 //32
     window = (in[0] & (DRADIX_WNAF - 1)) | 1;
 
 
     // printf("%x\n", window);
-    uint64_t digit[1U] = { 0U };
+    // uint64_t digit[1U] = { 0U };
 
     for (i = 0; i < 51; i++) {
         d = (window & (DRADIX_WNAF - 1)) - DRADIX;
@@ -3936,16 +3927,19 @@ static void scalar_rwnaf(int8_t out2[104], int8_t out[104], const unsigned char 
         uint64_t r = (uint64_t)0U;
         uint64_t r1 = (uint64_t) 0u;
 
-        uint64_t c = 0xffffffff + Lib_IntTypes_Intrinsics_sub_borrow_u64(0,(window & (DRADIX_WNAF - 1)), DRADIX, &r);
+        uint64_t c = Lib_IntTypes_Intrinsics_sub_borrow_u64(0,(window & (DRADIX_WNAF - 1)), DRADIX, &r);
         uint64_t c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(0, 0, r, &r1);
 
-        uint64_t r3 = (r & c) | (r1 & ~c);
+        uint64_t cAsFlag = 0xffffffff + c;
+        uint64_t r3 = (r & cAsFlag) | (r1 & ~cAsFlag);
         
         out2[2 * i] = r3;
         out2[2 * i + 1] = c;
 
+        // printf("%x\n", r3);
 
-        out[i] = d;
+
+        // out[i] = d;
         window = (window - d) >> RADIX;
         window += scalar_get_bit(in, (i + 1) * RADIX + 1) << 1;
         window += scalar_get_bit(in, (i + 1) * RADIX + 2) << 2;
@@ -3953,7 +3947,7 @@ static void scalar_rwnaf(int8_t out2[104], int8_t out[104], const unsigned char 
         window += scalar_get_bit(in, (i + 1) * RADIX + 4) << 4;
         window += scalar_get_bit(in, (i + 1) * RADIX + 5) << 5;
     }
-    out[51] = window;
+    // out[51] = window;
     out2[51 * 2] = window;
 
 
@@ -4127,7 +4121,7 @@ static void var_smul_rwnaf(pt_aff_t *out, const unsigned char scalar[32],
  */
 static void fixed_smul_cmb(pt_aff_t *out, const unsigned char scalar[32]) {
 
-    printf("%s\n", "Start of the function");
+    // printf("%s\n", "Start of the function");
 
 
     int i, j, k, d, diff, is_neg = 0;
@@ -4145,26 +4139,30 @@ static void fixed_smul_cmb(pt_aff_t *out, const unsigned char scalar[32]) {
     fe_copy(Q.Y, const_one);
     fe_set_zero(Q.Z);
 
-    printf("\n");
+    // printf("\n");
     i = 1;
 
     // for (j = 0; i != 1 && j < RADIX; j++) point_double(&Q, &Q);
     for (j = 0; j < 26; j++) {
-        d = rnaf[(j * 2 + i)];
-
+        // d = rnaf[(j * 2 + i)];
+        // // d = rnaf2[2 * (j * 2 + i)];
 
         
-        /* is_neg = (d < 0) ? 1 : 0 */
+        // /* is_neg = (d < 0) ? 1 : 0 */
         // is_neg = (d >> (8 * sizeof(int) - 1)) & 1;
-        is_neg = rnaf2[2 * (j * 2 + i) + 1];
+
         
-        /* d = abs(d) */
+        // // is_neg = rnaf2[2 * (j * 2 + i) + 1];
+        
+        // /* d = abs(d) */
         // d = (d ^ - is_neg) + is_neg;
+
+
+        
+
+
         d = rnaf2[2 * (j * 2 + i)];
-
-
-                // printf("%x  ", d);
-        // printf("%x\n", rnaf2[2 * (j * 2 + i)]);
+        is_neg = rnaf2[2 * (j * 2 + i) + 1];
 
         d = (d - 1) >> 1;
         for (k = 0; k < DRADIX / 2; k++) {
@@ -4181,11 +4179,17 @@ static void fixed_smul_cmb(pt_aff_t *out, const unsigned char scalar[32]) {
     i = 0;
         for (j = 0; j < RADIX; j++) point_double(&Q, &Q);
         for (j = 0; j < 26; j++) {
-            d = rnaf[j * 2 + i];
-            /* is_neg = (d < 0) ? 1 : 0 */
-            is_neg = (d >> (8 * sizeof(int) - 1)) & 1;
-            /* d = abs(d) */
-            d = (d ^ -is_neg) + is_neg;
+            // d = rnaf[j * 2 + i];
+            // /* is_neg = (d < 0) ? 1 : 0 */
+            // is_neg = (d >> (8 * sizeof(int) - 1)) & 1;
+            // /* d = abs(d) */
+            // d = (d ^ -is_neg) + is_neg;
+
+
+             d = rnaf2[2 * (j * 2)];
+            is_neg = rnaf2[2 * (j * 2) + 1];
+
+
             d = (d - 1) >> 1;
             for (k = 0; k < DRADIX / 2; k++) {
                 diff = (1 - (-(d ^ k) >> (8 * sizeof(int) - 1))) & 1;

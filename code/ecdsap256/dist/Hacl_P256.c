@@ -24,6 +24,19 @@
 
 #include "Hacl_P256.h"
 
+static void cmovznz4(uint64_t *out, uint64_t *x, uint64_t *y, uint64_t mask)
+{
+  uint64_t mask1 = FStar_UInt64_eq_mask(mask, (uint64_t)0U);
+  uint64_t r0 = (x[0U] & mask1) | (y[0U] & ~mask1);
+  uint64_t r1 = (x[1U] & mask1) | (y[1U] & ~mask1);
+  uint64_t r2 = (x[2U] & mask1) | (y[2U] & ~mask1);
+  uint64_t r3 = (x[3U] & mask1) | (y[3U] & ~mask1);
+  out[0U] = r0;
+  out[1U] = r1;
+  out[2U] = r2;
+  out[3U] = r3;
+}
+
 #define Public 0
 #define Private 1
 
@@ -284,19 +297,6 @@ cmp_felem_felem_u64(
   uint64_t r01 = r_0 & r_1;
   uint64_t r23 = r_2 & r_3;
   return r01 & r23;
-}
-
-static void cmovznz4(uint64_t *out, uint64_t *x, uint64_t *y, uint64_t mask)
-{
-  uint64_t mask1 = FStar_UInt64_eq_mask(mask, (uint64_t)0U);
-  uint64_t r0 = (x[0U] & mask1) | (y[0U] & ~mask1);
-  uint64_t r1 = (x[1U] & mask1) | (y[1U] & ~mask1);
-  uint64_t r2 = (x[2U] & mask1) | (y[2U] & ~mask1);
-  uint64_t r3 = (x[3U] & mask1) | (y[3U] & ~mask1);
-  out[0U] = r0;
-  out[1U] = r1;
-  out[2U] = r2;
-  out[3U] = r3;
 }
 
 static inline void mul64(uint64_t x, uint64_t y, uint64_t *result, uint64_t *temp)
@@ -1746,7 +1746,6 @@ static void solinas_reduction_impl(uint64_t *i, uint64_t *o)
 
 static void point_double(uint64_t *p, uint64_t *result, uint64_t *tempBuffer)
 {
-  printf("%s", "?");
   uint64_t *pY = p + (uint32_t)4U;
   uint64_t *pZ = p + (uint32_t)8U;
   uint64_t *x3 = result;
@@ -1794,7 +1793,6 @@ static void point_double(uint64_t *p, uint64_t *result, uint64_t *tempBuffer)
 
 static void point_add(uint64_t *p, uint64_t *q, uint64_t *result, uint64_t *tempBuffer)
 {
-  printf("%s", "!");
   uint64_t *tempBuffer16 = tempBuffer;
   uint64_t *u1 = tempBuffer + (uint32_t)16U;
   uint64_t *u2 = tempBuffer + (uint32_t)20U;
@@ -1996,7 +1994,6 @@ static uint64_t *const_to_lbuffer__uint64_t(const uint64_t *b)
 static void
 point_add_mixed(uint64_t *p, const uint64_t *q, uint64_t *result, uint64_t *tempBuffer)
 {
-  printf("%s", ".");
   uint64_t *tempBuffer28 = tempBuffer;
   uint64_t *tempBuffer16 = tempBuffer;
   uint64_t *u1 = tempBuffer + (uint32_t)28U;
@@ -3952,5 +3949,37 @@ bool Hacl_P256_ecp256dh_r_radix4(uint8_t *result, uint8_t *pubKey, uint8_t *scal
   }
   fromFormPoint(resultBufferFelem, result);
   return flag == (uint64_t)0U;
+}
+
+void Hacl_P256_scalar_rwnaf(uint64_t *out, uint8_t *scalar)
+{
+  uint64_t
+  window =
+    (uint64_t)1U
+    | ((uint64_t)scalar[0U] & (Hacl_Impl_ScalarMultiplication_WNAF_dradix_wnaf - (uint64_t)1U));
+  uint64_t d = (uint64_t)0U;
+  uint64_t r = (uint64_t)0U;
+  uint64_t r1 = (uint64_t)0U;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)51U; i++)
+  {
+    uint64_t wAsVariable = window;
+    uint64_t w = wAsVariable & (Hacl_Impl_ScalarMultiplication_WNAF_dradix_wnaf - (uint64_t)1U);
+    uint64_t
+    dToUpload =
+      (wAsVariable & (Hacl_Impl_ScalarMultiplication_WNAF_dradix_wnaf - (uint64_t)1U))
+      - Hacl_Impl_ScalarMultiplication_WNAF_dradix;
+    d = dToUpload;
+    uint64_t
+    c =
+      Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U,
+        w,
+        Hacl_Impl_ScalarMultiplication_WNAF_dradix,
+        &r);
+    uint64_t c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, (uint64_t)0U, r, &r1);
+    uint64_t cAsFlag = (uint64_t)0xffffffffU + c;
+    uint64_t r3 = (r & cAsFlag) | (r1 & ~cAsFlag);
+    out[(uint32_t)2U * i] = r3;
+    out[(uint32_t)2U * i + (uint32_t)(krml_checked_int_t)1] = c;
+  }
 }
 

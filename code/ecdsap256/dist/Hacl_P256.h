@@ -30,6 +30,7 @@
 #include "lib_intrinsics.h"
 
 
+#include "Hacl_Impl_ScalarMultiplication_WNAF.h"
 #include "Hacl_Kremlib.h"
 #include "Hacl_Spec.h"
 #include "Hacl_Lib.h"
@@ -83,6 +84,8 @@ bool Hacl_P256_ecp256dh_r_ladder(uint8_t *result, uint8_t *pubKey, uint8_t *scal
   
 */
 bool Hacl_P256_ecp256dh_r_radix4(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
+
+void Hacl_P256_scalar_rwnaf(uint64_t *out, uint8_t *scalar);
 
 
 #define __Hacl_P256_H_DEFINED

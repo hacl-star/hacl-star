@@ -12,7 +12,7 @@
 
 #include "Hacl_P256.h"
 #include "Hacl_P256_first_version.h"
-#include "fiat.c"
+#include "fiat_changed.c"
 
 
 
@@ -213,7 +213,7 @@ int main()
 		}
 
 
-		return -1;
+		// return -1;
 
 	printf("\n");
 

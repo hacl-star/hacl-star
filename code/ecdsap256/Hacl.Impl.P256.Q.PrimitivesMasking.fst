@@ -86,6 +86,12 @@ let cmovznz4 out x y mask =
   cmovznz4_lemma mask (Seq.index y 3) (Seq.index x 3)
 
 
+inline_for_extraction noextract
+val cmovznz2: uint64 -> uint64 -> mask: uint64 -> Tot (r: uint64)
+
+let cmovznz2 a b mask = 
+  logor (logand a mask) (logand b (lognot mask))
+
 
 
 inline_for_extraction noextract
