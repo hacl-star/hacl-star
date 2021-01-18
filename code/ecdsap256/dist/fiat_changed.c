@@ -3905,62 +3905,130 @@ static int scalar_get_bit(const unsigned char in[32], int idx) {
 
 #include "lib_intrinsics.h"
 
+static uint64_t Hacl_P256_scalar_bit_test(uint8_t *b, uint32_t c)
+{
+//     static int scalar_get_bit(const unsigned char in[32], int idx) {
+//     int widx, rshift;
+
+//     widx = idx >> 3;
+//     rshift = idx & 0x7;
+
+//     if (idx < 0 || widx >= 32) return 0;
+
+//     return (in[widx] >> rshift) & 0x1;
+// }
+
+
+  return (uint64_t)(b[c / (uint32_t)8U] >> c % (uint32_t)8U & (uint8_t)1U);
+}
+
 
 static void scalar_rwnaf(int8_t out2[104], int8_t out[104], const unsigned char in[32]) {
-    int i;
-    int8_t window, d;
-
-    window = (in[0] & (DRADIX_WNAF - 1)) | 1;
-
-
-    // printf("%x\n", window);
-    // uint64_t digit[1U] = { 0U };
-
-    for (i = 0; i < 51; i++) {
-        d = (window & (DRADIX_WNAF - 1)) - DRADIX;
-
-
-        // printf("%c%02X  ",(d < 0)?'-':' ',(d < 0)?- d : d );
-
-        // v r - v c * pow2 64 == v x - v y - v cin
-        
-        uint64_t r = (uint64_t)0U;
-        uint64_t r1 = (uint64_t) 0u;
-
-        uint64_t c = Lib_IntTypes_Intrinsics_sub_borrow_u64(0,(window & (DRADIX_WNAF - 1)), DRADIX, &r);
-        uint64_t c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(0, 0, r, &r1);
-
-        uint64_t cAsFlag = 0xffffffff + c;
-        uint64_t r3 = (r & cAsFlag) | (r1 & ~cAsFlag);
-        
-        out2[2 * i] = r3;
-        out2[2 * i + 1] = c;
-
-        // printf("%x\n", r3);
-
-
-        // out[i] = d;
-        window = (window - d) >> RADIX;
-        window += scalar_get_bit(in, (i + 1) * RADIX + 1) << 1;
-        window += scalar_get_bit(in, (i + 1) * RADIX + 2) << 2;
-        window += scalar_get_bit(in, (i + 1) * RADIX + 3) << 3;
-        window += scalar_get_bit(in, (i + 1) * RADIX + 4) << 4;
-        window += scalar_get_bit(in, (i + 1) * RADIX + 5) << 5;
-    }
-    // out[51] = window;
-    out2[51 * 2] = window;
-
-
-    // for (int j = 0; j < 52; j++)
-    //     printf("%c%02X  ",(out[j]<0)?'-':' ',(out[j]<0)?-out[j]:out[j]);
-
-    // printf("\n");
-
-    // for (int j = 0; j < 104; j++)
-    //     printf("%x  ", out2[j]);
-
-    // printf("\n");
+  uint8_t in0 = in[0U];
+  uint64_t windowStartValue = (uint64_t)1U | ((uint64_t)in0 & (uint64_t)63U);
+  uint64_t window = windowStartValue;
+  uint64_t r = (uint64_t)0U;
+  uint64_t r1 = (uint64_t)0U;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)51U; i++)
+  {
+    uint64_t wVar = window;
+    uint64_t w = wVar & (uint64_t)63U;
+    uint64_t d = (wVar & (uint64_t)63U) - (uint64_t)32U;
+    uint64_t c = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, w, (uint64_t)32U, &r);
+    uint64_t c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, (uint64_t)0U, r, &r1);
+    uint64_t cAsFlag = (uint64_t)0xffffffffU + c;
+    uint64_t r3 = (r & cAsFlag) | (r1 & ~cAsFlag);
+    out2[(uint32_t)2U * i] = r3;
+    out2[(uint32_t)2U * i + (uint32_t)1] = c;
+    uint64_t wStart = (wVar - d) >> (uint32_t)(uint64_t)5U;
+    uint64_t
+    w0 =
+      wStart
+      +
+        ((uint64_t)(in[(((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)1U)
+        / (uint32_t)8U]
+        >> (((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)1U) % (uint32_t)8U
+        & (uint8_t)1U)
+        << (uint32_t)1U);
+    uint64_t
+    w01 =
+      w0
+      +
+        ((uint64_t)(in[(((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)2U)
+        / (uint32_t)8U]
+        >> (((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)2U) % (uint32_t)8U
+        & (uint8_t)1U)
+        << (uint32_t)2U);
+    uint64_t
+    w02 =
+      w01
+      +
+        ((uint64_t)(in[(((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)3U)
+        / (uint32_t)8U]
+        >> (((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)3U) % (uint32_t)8U
+        & (uint8_t)1U)
+        << (uint32_t)3U);
+    uint64_t
+    w03 =
+      w02
+      +
+        ((uint64_t)(in[(((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)4U)
+        / (uint32_t)8U]
+        >> (((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)4U) % (uint32_t)8U
+        & (uint8_t)1U)
+        << (uint32_t)4U);
+    uint64_t
+    w04 =
+      w03
+      +
+        ((uint64_t)(in[(((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)5U)
+        / (uint32_t)8U]
+        >> (((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)5U) % (uint32_t)8U
+        & (uint8_t)1U)
+        << (uint32_t)5U);
+    window = w04;
+  }
+  out2[102U] = window;
 }
+
+
+
+
+// void Hacl_P256_scalar_rwnaf_test(uint64_t *out, uint8_t *scalar)
+// {
+//   uint8_t in0 = scalar[0U];
+//   uint64_t windowStartValue = (uint64_t)1U | ((uint64_t)in0 & (uint64_t)63U);
+//   uint64_t window = windowStartValue;
+//   uint64_t r = (uint64_t)0U;
+//   uint64_t r1 = (uint64_t)0U;
+//   for (uint32_t i = (uint32_t)0U; i < (uint32_t)51U; i++)
+//   {
+//     uint64_t wVar = window;
+//     uint64_t w = wVar & (uint64_t)63U;
+//     uint64_t d = (wVar & (uint64_t)63U) - (uint64_t)32U;
+//     uint64_t c = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, w, (uint64_t)32U, &r);
+//     uint64_t c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, (uint64_t)0U, r, &r1);
+//     uint64_t cAsFlag = (uint64_t)0xffffffffU + c;
+//     uint64_t r3 = (r & cAsFlag) | (r1 & ~cAsFlag);
+//     out[(uint32_t)2U * i] = r3;
+//     out[(uint32_t)2U * i + (uint32_t)1] = c;
+//     uint64_t wStart = (wVar - d) >> (uint32_t)(uint64_t)5U;
+//     uint64_t
+//     w04 =
+//       wStart
+//       +
+//         ((uint64_t)(scalar[(uint32_t)31U
+//         - (((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)5U) / (uint32_t)8U]
+//         >> (((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)5U) % (uint32_t)8U
+//         & (uint8_t)1U)
+//         << (uint32_t)5U);
+//     window = w04;
+//   }
+//   out[102U] = (uint64_t)&window;
+// }
+
+
+
 
 /*-
  * Compute "textbook" wnaf representation of a scalar.

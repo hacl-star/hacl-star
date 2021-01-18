@@ -3953,33 +3953,75 @@ bool Hacl_P256_ecp256dh_r_radix4(uint8_t *result, uint8_t *pubKey, uint8_t *scal
 
 void Hacl_P256_scalar_rwnaf(uint64_t *out, uint8_t *scalar)
 {
-  uint64_t
-  window =
-    (uint64_t)1U
-    | ((uint64_t)scalar[0U] & (Hacl_Impl_ScalarMultiplication_WNAF_dradix_wnaf - (uint64_t)1U));
-  uint64_t d = (uint64_t)0U;
+  uint8_t in0 = scalar[0U];
+  uint64_t windowStartValue = (uint64_t)1U | ((uint64_t)in0 & (uint64_t)63U);
+  uint64_t window = windowStartValue;
   uint64_t r = (uint64_t)0U;
   uint64_t r1 = (uint64_t)0U;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)51U; i++)
   {
-    uint64_t wAsVariable = window;
-    uint64_t w = wAsVariable & (Hacl_Impl_ScalarMultiplication_WNAF_dradix_wnaf - (uint64_t)1U);
-    uint64_t
-    dToUpload =
-      (wAsVariable & (Hacl_Impl_ScalarMultiplication_WNAF_dradix_wnaf - (uint64_t)1U))
-      - Hacl_Impl_ScalarMultiplication_WNAF_dradix;
-    d = dToUpload;
-    uint64_t
-    c =
-      Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U,
-        w,
-        Hacl_Impl_ScalarMultiplication_WNAF_dradix,
-        &r);
+    uint64_t wVar = window;
+    uint64_t w = wVar & (uint64_t)63U;
+    uint64_t d = (wVar & (uint64_t)63U) - (uint64_t)32U;
+    uint64_t c = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, w, (uint64_t)32U, &r);
     uint64_t c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, (uint64_t)0U, r, &r1);
     uint64_t cAsFlag = (uint64_t)0xffffffffU + c;
     uint64_t r3 = (r & cAsFlag) | (r1 & ~cAsFlag);
     out[(uint32_t)2U * i] = r3;
     out[(uint32_t)2U * i + (uint32_t)(krml_checked_int_t)1] = c;
+    uint64_t wStart = (wVar - d) >> (uint32_t)(uint64_t)5U;
+    uint64_t
+    w0 =
+      wStart
+      +
+        ((uint64_t)(scalar[(((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)1U)
+        / (uint32_t)8U]
+        >> (((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)1U) % (uint32_t)8U
+        & (uint8_t)1U)
+        << (uint32_t)1U);
+    uint64_t
+    w01 =
+      w0
+      +
+        ((uint64_t)(scalar[(((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)2U)
+        / (uint32_t)8U]
+        >> (((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)2U) % (uint32_t)8U
+        & (uint8_t)1U)
+        << (uint32_t)2U);
+    uint64_t
+    w02 =
+      w01
+      +
+        ((uint64_t)(scalar[(((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)3U)
+        / (uint32_t)8U]
+        >> (((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)3U) % (uint32_t)8U
+        & (uint8_t)1U)
+        << (uint32_t)3U);
+    uint64_t
+    w03 =
+      w02
+      +
+        ((uint64_t)(scalar[(((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)4U)
+        / (uint32_t)8U]
+        >> (((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)4U) % (uint32_t)8U
+        & (uint8_t)1U)
+        << (uint32_t)4U);
+    uint64_t
+    w04 =
+      w03
+      +
+        ((uint64_t)(scalar[(((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)5U)
+        / (uint32_t)8U]
+        >> (((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)5U) % (uint32_t)8U
+        & (uint8_t)1U)
+        << (uint32_t)5U);
+    window = w04;
   }
+  out[102U] = window;
+}
+
+uint64_t Hacl_P256_scalar_bit(uint8_t *b, uint32_t c)
+{
+  return (uint64_t)(b[c / (uint32_t)8U] >> c % (uint32_t)8U & (uint8_t)1U);
 }
 
