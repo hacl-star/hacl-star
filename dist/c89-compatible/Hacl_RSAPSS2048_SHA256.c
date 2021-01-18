@@ -413,8 +413,8 @@ mod_exp_fw_ct_precompr2(
                   uint32_t i2;
                   for (i2 = (uint32_t)0U; i2 < table_len - (uint32_t)1U; i2++)
                   {
-                    uint64_t *res_j = table + (i2 + (uint32_t)1U) * (uint32_t)32U;
                     uint64_t c = FStar_UInt64_eq_mask(bits_l, (uint64_t)(i2 + (uint32_t)1U));
+                    uint64_t *res_j = table + (i2 + (uint32_t)1U) * (uint32_t)32U;
                     {
                       uint32_t i;
                       for (i = (uint32_t)0U; i < (uint32_t)32U; i++)
@@ -479,8 +479,8 @@ mod_exp_fw_ct_precompr2(
                   uint32_t i1;
                   for (i1 = (uint32_t)0U; i1 < table_len - (uint32_t)1U; i1++)
                   {
-                    uint64_t *res_j = table + (i1 + (uint32_t)1U) * (uint32_t)32U;
                     uint64_t c1 = FStar_UInt64_eq_mask(bits_c0, (uint64_t)(i1 + (uint32_t)1U));
+                    uint64_t *res_j = table + (i1 + (uint32_t)1U) * (uint32_t)32U;
                     {
                       uint32_t i;
                       for (i = (uint32_t)0U; i < (uint32_t)32U; i++)

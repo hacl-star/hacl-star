@@ -407,7 +407,7 @@ static inline void reduction(uint64_t *n, uint64_t nInv, uint64_t *c, uint64_t *
 /* SNIPPET_START: Hacl_Bignum256_mod_precompr2 */
 
 /*
-Write `a mod n` in `res`
+Write `a mod n` in `res` if a < n * n.
 
   The argument a is meant to be a 512-bit bignum, i.e. uint64_t[8].
   The argument n, r2 and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
@@ -509,7 +509,7 @@ void Hacl_Bignum256_mod_precompr2(uint64_t *n, uint64_t *a, uint64_t *r2, uint64
 /* SNIPPET_START: Hacl_Bignum256_mod */
 
 /*
-Write `a mod n` in `res`
+Write `a mod n` in `res` if a < n * n.
 
   The argument a is meant to be a 512-bit bignum, i.e. uint64_t[8].
   The argument n and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
@@ -617,10 +617,10 @@ Write `a ^ b mod n` in `res`.
   default, e.g. if b is a 256-bit bignum, bBits should be 256.
 
   The function is *NOT* constant-time on the argument b. See the
-  mod_exp_mont_ladder_* functions for constant-time variants.
+  mod_exp_ct_* functions for constant-time variants.
 
   This function is *UNSAFE* and requires C clients to observe bn_mod_exp_pre
-  from Hacl.Spec.Bignum.Exponentiation.fsti, which amounts to:
+  from Hacl.Spec.Bignum.ExpBM.fsti, which amounts to:
   • n % 2 = 1
   • 1 < n
   • 0 < b
@@ -628,7 +628,7 @@ Write `a ^ b mod n` in `res`.
   • a < n
 
   Owing to the absence of run-time checks, and factoring out the precomputation
-  r2, this function is notably faster than mod_exp below.
+  r2, this function is notably faster than mod_exp_raw below.
 */
 void
 Hacl_Bignum256_mod_exp_raw_precompr2(
@@ -681,17 +681,17 @@ Hacl_Bignum256_mod_exp_raw_precompr2(
 Write `a ^ b mod n` in `res`.
 
   The arguments a, n, r2 and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
-  The argument r2 is a precomputed constant 2 ^ 512 mod n.
+  The argument r2 is a precomputed constant 2 ^ 512 mod n obtained through Hacl_Bignum256_new_precompr2.
   The argument b is a bignum of any size, and bBits is an upper bound on the
   number of significant bits of b. A tighter bound results in faster execution
   time. When in doubt, the number of bits for the bignum size is always a safe
   default, e.g. if b is a 256-bit bignum, bBits should be 256.
 
   This function is constant-time over its argument b, at the cost of a slower
-  execution time than mod_exp_precompr2.
+  execution time than mod_exp_raw_precompr2.
 
   This function is *UNSAFE* and requires C clients to observe bn_mod_exp_pre
-  from Hacl.Spec.Bignum.Exponentiation.fsti, which amounts to:
+  from Hacl.Spec.Bignum.ExpBM.fsti, which amounts to:
   • n % 2 = 1
   • 1 < n
   • 0 < b
@@ -699,7 +699,7 @@ Write `a ^ b mod n` in `res`.
   • a < n
 
   Owing to the absence of run-time checks, and factoring out the precomputation
-  r2, this function is notably faster than mod_exp_mont_ladder below.
+  r2, this function is notably faster than mod_exp_ct below.
 */
 void
 Hacl_Bignum256_mod_exp_ct_precompr2(
@@ -771,7 +771,7 @@ Write `a ^ b mod n` in `res`.
   default, e.g. if b is a 4096-bit bignum, bBits should be 4096.
 
   The function is *NOT* constant-time on the argument b. See the
-  mod_exp_mont_ladder_* functions for constant-time variants.
+  mod_exp_ct_* functions for constant-time variants.
 
   The function returns false if any of the preconditions of mod_exp_precompr2 are
   violated, true otherwise.
@@ -815,10 +815,10 @@ Write `a ^ b mod n` in `res`.
   default, e.g. if b is a 256-bit bignum, bBits should be 256.
 
   This function is constant-time over its argument b, at the cost of a slower
-  execution time than mod_exp.
+  execution time than mod_exp_raw.
 
   The function returns false if any of the preconditions of
-  mod_exp_mont_ladder_precompr2 are violated, true otherwise.
+  mod_exp_ct_precompr2 are violated, true otherwise.
 */
 bool
 Hacl_Bignum256_mod_exp_ct(uint64_t *n, uint64_t *a, uint32_t bBits, uint64_t *b, uint64_t *res)
