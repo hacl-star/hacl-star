@@ -112,10 +112,10 @@ val mod: BS.bn_mod_slow_safe_st t_limbs n_limbs
   default, e.g. if b is a 4096-bit bignum, bBits should be 4096.
 
   The function is *NOT* constant-time on the argument b. See the
-  mod_exp_mont_ladder_* functions for constant-time variants.
+  mod_exp_ct_* functions for constant-time variants.
 
   This function is *UNSAFE* and requires C clients to observe bn_mod_exp_pre
-  from Hacl.Spec.Bignum.Exponentiation.fsti, which amounts to:
+  from Hacl.Spec.Bignum.ExpBM.fsti, which amounts to:
   • n % 2 = 1
   • 1 < n
   • 0 < b
@@ -123,7 +123,7 @@ val mod: BS.bn_mod_slow_safe_st t_limbs n_limbs
   • a < n
 
   Owing to the absence of run-time checks, and factoring out the precomputation
-  r2, this function is notably faster than mod_exp below."]
+  r2, this function is notably faster than mod_exp_raw below."]
 val mod_exp_raw_precompr2: BE.bn_mod_exp_raw_precompr2_st t_limbs n_limbs
 
 [@@ Comment "Write `a ^ b mod n` in `res`.
@@ -136,10 +136,10 @@ val mod_exp_raw_precompr2: BE.bn_mod_exp_raw_precompr2_st t_limbs n_limbs
   default, e.g. if b is a 4096-bit bignum, bBits should be 4096.
 
   This function is constant-time over its argument b, at the cost of a slower
-  execution time than mod_exp_precompr2.
+  execution time than mod_exp_raw_precompr2.
 
   This function is *UNSAFE* and requires C clients to observe bn_mod_exp_pre
-  from Hacl.Spec.Bignum.Exponentiation.fsti, which amounts to:
+  from Hacl.Spec.Bignum.ExpBM.fsti, which amounts to:
   • n % 2 = 1
   • 1 < n
   • 0 < b
@@ -147,7 +147,7 @@ val mod_exp_raw_precompr2: BE.bn_mod_exp_raw_precompr2_st t_limbs n_limbs
   • a < n
 
   Owing to the absence of run-time checks, and factoring out the precomputation
-  r2, this function is notably faster than mod_exp_mont_ladder below."]
+  r2, this function is notably faster than mod_exp_ct below."]
 val mod_exp_ct_precompr2: BE.bn_mod_exp_ct_precompr2_st t_limbs n_limbs
 
 [@@ Comment "Write `a ^ b mod n` in `res`.
@@ -159,7 +159,7 @@ val mod_exp_ct_precompr2: BE.bn_mod_exp_ct_precompr2_st t_limbs n_limbs
   default, e.g. if b is a 4096-bit bignum, bBits should be 4096.
 
   The function is *NOT* constant-time on the argument b. See the
-  mod_exp_mont_ladder_* functions for constant-time variants.
+  mod_exp_ct_* functions for constant-time variants.
 
   The function returns false if any of the preconditions of mod_exp_precompr2 are
   violated, true otherwise."]
@@ -177,7 +177,7 @@ val mod_exp_raw: BS.bn_mod_exp_safe_st t_limbs n_limbs
   execution time than mod_exp.
 
   The function returns false if any of the preconditions of
-  mod_exp_mont_ladder_precompr2 are violated, true otherwise."]
+  mod_exp_ct_precompr2 are violated, true otherwise."]
 val mod_exp_ct: BS.bn_mod_exp_safe_st t_limbs n_limbs
 
 [@@ Comment "Compute `2 ^ 8192 mod n`.

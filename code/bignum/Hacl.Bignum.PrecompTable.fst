@@ -96,22 +96,25 @@ let bn_mod_precomp_table_mont #t k n mu table_len aM oneM table =
 
 inline_for_extraction noextract
 let table_select_ct_f_st (t:limb_t) (len:BN.meta_len t) =
-    res_j:lbignum t len
-  -> i:limb t //{v i < v table_len}
-  -> j:size_t{v j + 1 <= max_size_t} //{v j < v table_len - 1}
+    table_len:size_t{1 < v table_len /\ v table_len * v len <= max_size_t}
+  -> table:lbignum t (table_len *! len)
+  -> i:limb t{v i < v table_len}
+  -> j:size_t{v j < v table_len - 1}
   -> acc:lbignum t len ->
   Stack unit
   (requires fun h ->
-    live h res_j /\ live h acc /\ eq_or_disjoint acc res_j)
+    live h table /\ live h acc /\ disjoint acc table)
   (ensures  fun h0 _ h1 -> modifies (loc acc) h0 h1 /\
-    (let c = eq_mask i (BB.size_to_limb (j +! 1ul)) in
-     as_seq h1 acc == LSeq.map2 (BB.mask_select c) (as_seq h0 res_j) (as_seq h0 acc)))
+    as_seq h1 acc == S.table_select_ct_f (v table_len) (as_seq h0 table) i (v j) (as_seq h0 acc))
 
 
 inline_for_extraction noextract
 val table_select_ct_f: #t:limb_t -> len:BN.meta_len t -> table_select_ct_f_st t len
-let table_select_ct_f #t len res_j i j acc =
+let table_select_ct_f #t len table_len table i j acc =
   let c = eq_mask i (BB.size_to_limb (j +! 1ul)) in
+  Math.Lemmas.lemma_mult_le_right (v len) (v j + 2) (v table_len);
+  assert (v ((j +! 1ul) *! len) == (v j + 1) * v len);
+  let res_j = sub table ((j +! 1ul) *! len) len in
   map2T len acc (BB.mask_select c) res_j acc
 
 
@@ -141,10 +144,7 @@ let table_select_ct #t len table_len table i res =
   loop1 h0 (table_len -! 1ul) res spec
   (fun j ->
     Loops.unfold_repeati (v table_len - 1) (spec h0) (as_seq h0 res) (v j);
-    Math.Lemmas.lemma_mult_le_right (v len) (v j + 2) (v table_len);
-    let res_j = sub table ((j +! 1ul) *! len) len in
-    assert (B.loc_includes (loc (gsub table ((j +! 1ul) *! len) len)) (loc res_j));
-    table_select_ct_f len res_j i j res
+    table_select_ct_f len table_len table i j res
   );
   let h1 = ST.get () in
   assert (as_seq h1 res == S.table_select_ct (v table_len) (as_seq h0 table) i);
