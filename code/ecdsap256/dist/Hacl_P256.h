@@ -57,6 +57,17 @@ bool Hacl_P256_ecp256dh_i_ladder(uint8_t *result, uint8_t *scalar);
 bool Hacl_P256_ecp256dh_i_radix4(uint8_t *result, uint8_t *scalar);
 
 /*
+ Input: result: uint8[64], 
+ scalar: uint8[32].
+  
+ Output: bool, where True stands for the correct key generation. 
+  
+ False means that an error has occurred (possibly that the result respresents point at infinity). 
+  
+*/
+bool Hacl_P256_ecp256dh_i_cmb(uint8_t *result, uint8_t *scalar);
+
+/*
  
    The pub(lic)_key input of the function is considered to be public, 
   thus this code is not secret independent with respect to the operations done over this variable.

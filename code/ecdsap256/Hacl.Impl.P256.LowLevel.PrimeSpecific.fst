@@ -265,6 +265,15 @@ let p256_sub arg1 arg2 out =
     inDomain_mod_is_not_mod (fromDomain_ (felem_seq_as_nat (as_seq h0 arg1)) - fromDomain_ (felem_seq_as_nat (as_seq h0 arg2)))
 
 
+
+val p256_neg: arg1: felem -> out: felem -> Stack unit 
+  (requires fun h -> True)
+  (ensures fun h0 _ h1 -> True)
+
+let p256_neg arg1 out = ()
+
+
+
 inline_for_extraction noextract
 val upload_p256_point_on_curve_constant: x: felem -> Stack unit
   (requires fun h -> live h x)

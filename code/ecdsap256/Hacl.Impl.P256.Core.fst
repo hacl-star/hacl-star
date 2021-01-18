@@ -18,6 +18,7 @@ open Hacl.Impl.SolinasReduction
 open Hacl.Impl.P256.LowLevel 
 open Hacl.Impl.P256.LowLevel.PrimeSpecific
 open Hacl.Impl.P256.MontgomeryMultiplication
+open Hacl.Impl.ScalarMultiplication.WNAF
 open Hacl.Impl.P256.Math 
 
 open Hacl.Impl.P256.PointAdd
@@ -32,6 +33,7 @@ open Hacl.Impl.P256.Q.PrimitivesMasking
 
 friend Spec.P256.MontgomeryMultiplication
 open FStar.Mul
+
 
 val swap: p: point_prime -> q: point_prime -> Tot (r: tuple2 point_prime point_prime {let pNew, qNew = r in 
   pNew == q /\ qNew == p})
@@ -933,6 +935,8 @@ let scalarMultiplication_t #t m p result scalar tempBuffer  =
      montgomery_ladder_2 q scalar buff bufferPrecomputed
   |Radix4 ->
       montgomery_ladder q result scalar buff
+  |Comb ->
+      montgomery_ladder q result scalar buff
   end;
 
     let h3 = ST.get() in 
@@ -1061,6 +1065,8 @@ let secretToPublic m result scalar tempBuffer =
     montgomery_ladder result basePoint scalar buff
   |Radix4 ->
       montgomery_ladder_2_precomputed result scalar buff
+  |Comb -> 
+    scalar_multiplication_cmb result scalar buff
    end; 
   (* zero_buffer result; *)
     let h1 = ST.get() in 

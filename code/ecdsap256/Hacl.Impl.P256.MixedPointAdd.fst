@@ -37,7 +37,7 @@ open Hacl.Impl.P256.Q.PrimitivesMasking
 #set-options "--z3rlimit 300 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract 
-val pointAffineIsNotZero: p: pointAffine -> Stack uint64
+val pointAffineIsNotZero: #buf_type : buftype ->  p: lbuffer_t buf_type uint64 (size 8) -> Stack uint64
   (requires fun h -> live h p /\ (
     let x = as_nat_il h (gsub p (size 0) (size 4)) in 
     let y = as_nat_il h (gsub p (size 4) (size 4)) in 
@@ -62,8 +62,9 @@ let pointAffineIsNotZero p =
 
 
 inline_for_extraction noextract 
-val move_from_jacobian_coordinates_mixed: u1: felem -> u2: felem -> s1: felem -> s2: felem 
-  ->  p: point -> q: pointAffine -> tempBuffer16: lbuffer uint64 (size 16) -> 
+val move_from_jacobian_coordinates_mixed:  #buf_type : buftype -> 
+  u1: felem -> u2: felem -> s1: felem -> s2: felem 
+  ->  p: point -> q: lbuffer_t buf_type uint64 (size 8) -> tempBuffer16: lbuffer uint64 (size 16) -> 
   Stack unit (requires fun h -> live h u1 /\ live h u2 /\ live h s1 /\ live h s2 /\ live h p /\ live h q /\ live h tempBuffer16 /\
    LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer16; loc p; loc q; loc u1; loc u2; loc s1; loc s2] /\
     as_nat h (gsub p (size 8) (size 4)) < prime /\ 
@@ -239,8 +240,8 @@ let cmovznz_one_mm out mask =
   assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192)
 
 inline_for_extraction noextract 
-val copy_point_conditional_affine_to_result: out: point 
-  -> q: pointAffine 
+val copy_point_conditional_affine_to_result: #buf_type : buftype ->  out: point 
+  -> q: lbuffer_t buf_type uint64 (size 8)
   -> maskPoint: point
   -> Stack unit 
   (requires fun h -> live h out /\ live h q /\ live h maskPoint /\ disjoint q out /\ eq_or_disjoint out maskPoint /\
@@ -309,9 +310,9 @@ let copy_point_conditional_affine_to_result out q maskPoint =
   lemmaFromDomain (as_nat h0 pZ)
 
 inline_for_extraction noextract 
-val copy_point_conditional_jac_to_result: out: point 
+val copy_point_conditional_jac_to_result: #buf_type : buftype ->  out: point 
   -> q: point 
-  -> maskPoint: pointAffine
+  -> maskPoint: lbuffer_t buf_type uint64 (size 8)
   -> Stack unit 
   (requires fun h -> live h out /\ live h q /\  eq_or_disjoint q out /\    
     live h maskPoint /\ 
@@ -371,7 +372,7 @@ let copy_point_conditional_jac_to_result out q maskPoint =
   Hacl.Impl.P256.Q.PrimitivesMasking.copy_conditional zOut qZ mask
 
 inline_for_extraction noextract
-val copy_point_conditional: result: point -> x: point -> p: point -> maskPoint: pointAffine -> Stack unit
+val copy_point_conditional: #buf_type : buftype ->   result: point -> x: point -> p: point -> maskPoint: lbuffer_t buf_type uint64 (size 8) -> Stack unit
   (requires fun h -> live h result /\ live h p /\ live h maskPoint /\ live h x /\
     disjoint x result /\ eq_or_disjoint p result /\
     as_nat h (gsub p (size 0) (size 4)) < prime /\ 
@@ -434,7 +435,7 @@ let copy_point_conditional result x p maskPoint =
 
 
 inline_for_extraction noextract 
-val point_add_if_second_branch_impl_mixed: result: point -> p: point -> q: pointAffine 
+val point_add_if_second_branch_impl_mixed: #buf_type : buftype ->   result: point -> p: point -> q:  lbuffer_t buf_type uint64 (size 8)  
   -> u1: felem -> u2: felem -> s1: felem -> s2: felem -> r: felem -> h: felem -> uh: felem 
   -> hCube: felem -> tempBuffer28 : lbuffer uint64 (size 28) -> 
   Stack unit 
@@ -544,7 +545,7 @@ let point_add_if_second_branch_impl_mixed result p q u1 u2 s1 s2 r h uh hCube te
   assert_norm (modp_inv2 (pow2 256) % prime <> 0)
 
 
-let point_add_mixed p q result tempBuffer = 
+let point_add_mixed #buftype p q result tempBuffer = 
     let h0 = ST.get() in 
   
   let tempBuffer28 = sub tempBuffer (size 0) (size 28) in 

@@ -79,6 +79,9 @@ let ecp256dh_i_ladder result scalar = Hacl.Impl.P256.DH.ecp256dh_i Ladder result
 
 let ecp256dh_i_radix4 result scalar = Hacl.Impl.P256.DH.ecp256dh_i Radix4 result scalar
 
+let ecp256dh_i_cmb result scalar = Hacl.Impl.P256.DH.ecp256dh_i Comb result scalar
+
+
 
 
 let ecp256dh_r_ladder result pubKey scalar = Hacl.Impl.P256.DH.ecp256dh_r Ladder result pubKey scalar

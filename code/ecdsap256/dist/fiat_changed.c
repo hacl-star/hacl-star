@@ -4210,31 +4210,17 @@ static void fixed_smul_cmb(pt_aff_t *out, const unsigned char scalar[32]) {
     // printf("\n");
     i = 1;
 
-    // for (j = 0; i != 1 && j < RADIX; j++) point_double(&Q, &Q);
     for (j = 0; j < 26; j++) {
-        // d = rnaf[(j * 2 + i)];
-        // // d = rnaf2[2 * (j * 2 + i)];
 
-        
-        // /* is_neg = (d < 0) ? 1 : 0 */
-        // is_neg = (d >> (8 * sizeof(int) - 1)) & 1;
-
-        
-        // // is_neg = rnaf2[2 * (j * 2 + i) + 1];
-        
-        // /* d = abs(d) */
-        // d = (d ^ - is_neg) + is_neg;
-
-
-        
-
-
-        d = rnaf2[2 * (j * 2 + i)];
+        int d = rnaf2[2 * (j * 2 + i)];
         is_neg = rnaf2[2 * (j * 2 + i) + 1];
 
         d = (d - 1) >> 1;
-        for (k = 0; k < DRADIX / 2; k++) {
-            diff = (1 - (-(d ^ k) >> (8 * sizeof(int) - 1))) & 1;
+        for (k = 0; k < 16; k++) {
+
+            // dif = 1 if equal
+            diff = (1 - (-(d ^ k) >> 31)) & 1;
+           
             fiat_secp256r1_selectznz(lut.X, diff, lut.X, lut_cmb[j][k].X);
             fiat_secp256r1_selectznz(lut.Y, diff, lut.Y, lut_cmb[j][k].Y);
         }
@@ -4242,19 +4228,15 @@ static void fixed_smul_cmb(pt_aff_t *out, const unsigned char scalar[32]) {
         fiat_secp256r1_opp(out->Y, lut.Y);
         fiat_secp256r1_selectznz(lut.Y, is_neg, lut.Y, out->Y);
         point_add_mixed(&Q, &Q, &lut);
-        }
+    }
 
     i = 0;
-        for (j = 0; j < RADIX; j++) point_double(&Q, &Q);
+        for (j = 0; j < 5; j++) point_double(&Q, &Q);
+       
         for (j = 0; j < 26; j++) {
-            // d = rnaf[j * 2 + i];
-            // /* is_neg = (d < 0) ? 1 : 0 */
-            // is_neg = (d >> (8 * sizeof(int) - 1)) & 1;
-            // /* d = abs(d) */
-            // d = (d ^ -is_neg) + is_neg;
 
 
-             d = rnaf2[2 * (j * 2)];
+            d = rnaf2[2 * (j * 2)];
             is_neg = rnaf2[2 * (j * 2) + 1];
 
 

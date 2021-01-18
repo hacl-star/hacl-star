@@ -116,6 +116,15 @@ val global_to_comparable: glbuffer uint64 (size 4) -> Stack (lbuffer_t IMMUT uin
 let global_to_comparable f = (const_to_ilbuffer f) <: lbuffer_t IMMUT uint64 (size 4)
 
 
+val global_to_comparable_scalar: glbuffer uint8 (size 32) -> Stack (lbuffer_t IMMUT uint8 (size 32))
+  (requires fun h -> True)
+  (ensures fun h0 _ h1 -> True)
+
+let global_to_comparable_scalar f = (const_to_ilbuffer f) <: lbuffer_t IMMUT uint8 (size 32)
+
+
+
+
 val cmp_felem_felem_u64: #q:qualification -> #buf_type0: buftype -> #buf_type1: buftype -> 
   a: lbuffer_t buf_type0 uint64 (size 4) -> b: lbuffer_t buf_type1 uint64 (size 4) -> Stack uint64
   (requires fun h -> True)

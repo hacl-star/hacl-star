@@ -391,6 +391,28 @@ val ecp256dh_i_radix4:
 
 
 
+[@ (Comment " Input: result: uint8[64], \n scalar: uint8[32].
+  \n Output: bool, where True stands for the correct key generation. 
+  \n False means that an error has occurred (possibly that the result respresents point at infinity). 
+  ")]
+val ecp256dh_i_cmb:
+    result:lbuffer uint8 (size 64)
+  -> scalar:lbuffer uint8 (size 32)
+  -> Stack bool
+  (requires fun h ->
+    live h result /\ live h scalar /\ 
+    disjoint result scalar)
+  (ensures fun h0 r h1 ->
+    let pointX, pointY, flag = ecp256_dh_i (as_seq h0 scalar) in
+    modifies (loc result) h0 h1 /\
+    r == flag /\
+    as_seq h1 (gsub result (size 0) (size 32)) == pointX /\
+    as_seq h1 (gsub result (size 32) (size 32)) == pointY)
+
+
+
+
+
 [@ (Comment " 
    The pub(lic)_key input of the function is considered to be public, 
   thus this code is not secret independent with respect to the operations done over this variable.

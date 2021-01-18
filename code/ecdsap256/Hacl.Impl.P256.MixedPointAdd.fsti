@@ -14,11 +14,7 @@ open Spec.P256
 
 #set-options "--z3rlimit 150" 
 
-inline_for_extraction
-type pointAffine = glbuffer uint64 (size 8)
-
-
-val point_add_mixed: p: point -> q: pointAffine -> result: point -> tempBuffer: lbuffer uint64 (size 88) -> 
+val point_add_mixed: #buf_type: buftype -> p: point -> q: lbuffer_t buf_type uint64 (size 8) -> result: point -> tempBuffer: lbuffer uint64 (size 88) -> 
    Stack unit (requires fun h -> live h p /\ live h q /\ live h result /\ live h tempBuffer /\ 
    eq_or_disjoint p result /\
    disjoint p q /\ disjoint p tempBuffer /\ disjoint q tempBuffer /\ disjoint p result /\ disjoint result tempBuffer /\  
