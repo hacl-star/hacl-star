@@ -186,8 +186,9 @@ let loopK result d point j =
   Lib.Loops.for 0ul 16ul invK
     (fun k -> 
       let mask = eq_mask d (to_u64 j) in 
-      let lut_cmb_x = const_to_lbuffer (sub points_cmb (j *! size 16 +! k) (size 4)) in 
-      let lut_cmb_y = const_to_lbuffer (sub points_cmb (j *! size 16 +! k +! (size 4)) (size 4)) in 
+	eq_mask_lemma d (to_u64 j); 
+      let lut_cmb_x = const_to_lbuffer (sub points_cmb ((j *! size 16 +! k) *! 8) (size 4)) in 
+      let lut_cmb_y = const_to_lbuffer (sub points_cmb ((j *! size 16 +! k) *! 8 +! (size 4)) (size 4)) in 
 
       
 

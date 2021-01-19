@@ -2724,9 +2724,14 @@ static void loopK(uint64_t d, uint64_t *point, uint32_t j)
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
   {
     uint64_t mask = FStar_UInt64_eq_mask(d, (uint64_t)j);
-    uint64_t *lut_cmb_x = const_to_lbuffer__uint64_t(points_cmb + j * (uint32_t)16U + i);
     uint64_t
-    *lut_cmb_y = const_to_lbuffer__uint64_t(points_cmb + j * (uint32_t)16U + i + (uint32_t)4U);
+    *lut_cmb_x =
+      const_to_lbuffer__uint64_t(points_cmb
+        + (j * (uint32_t)16U + i) * (uint32_t)(krml_checked_int_t)8);
+    uint64_t
+    *lut_cmb_y =
+      const_to_lbuffer__uint64_t(points_cmb
+        + (j * (uint32_t)16U + i) * (uint32_t)(krml_checked_int_t)8 + (uint32_t)4U);
     uint64_t *uu____0 = point;
     uint64_t out_00 = uu____0[0U];
     uint64_t out_10 = uu____0[1U];
