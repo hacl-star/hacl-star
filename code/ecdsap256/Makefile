@@ -24,6 +24,7 @@ dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
 	  -tmpdir dist \
 	  -fbuiltin-uint128 \
 	  -funroll-loops 12 \
+	  -add-include '"wnaf.h"' \
 	  -add-include '"lib_intrinsics.h"' \
 	  -no-prefix 'Hacl.Test.ECDSA' \
 	  -skip-compilation

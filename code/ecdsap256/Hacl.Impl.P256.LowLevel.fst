@@ -243,6 +243,39 @@ let sub4 x y result =
     
   cc
 
+
+inline_for_extraction noextract
+val sub4_0: y:felem -> result: felem -> 
+  Stack uint64
+    (requires fun h -> live h y /\ live h result /\ eq_or_disjoint y result)
+    (ensures fun h0 c h1 -> modifies1 result h0 h1 /\ v c <= 1 /\ as_nat h1 result - v c * pow2 256 == 0 - as_nat h0 y)
+
+let sub4_0 y result = 
+  let h0 = ST.get() in 
+  
+  let r0 = sub result (size 0) (size 1) in 
+  let r1 = sub result (size 1) (size 1) in 
+  let r2 = sub result (size 2) (size 1) in 
+  let r3 = sub result (size 3) (size 1) in 
+      
+  let cc = sub_borrow_u64 (u64 0) (u64 0) y.(size 0) r0 in 
+  let cc = sub_borrow_u64 cc (u64 0) y.(size 1) r1 in 
+  let cc = sub_borrow_u64 cc (u64 0) y.(size 2) r2 in 
+  let cc = sub_borrow_u64 cc (u64 0) y.(size 3) r3 in 
+    
+    assert(let r1_0 = as_seq h0 r1 in let r0_ = as_seq h0 result in Seq.index r0_ 1 == Seq.index r1_0 0);
+    assert(let r2_0 = as_seq h0 r2 in let r0_ = as_seq h0 result in Seq.index r0_ 2 == Seq.index r2_0 0);
+    assert(let r3_0 = as_seq h0 r3 in let r0_ = as_seq h0 result in Seq.index r0_ 3 == Seq.index r3_0 0);
+
+    assert_norm (pow2 64 * pow2 64 = pow2 128);
+    assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192);
+    assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
+    
+  cc
+
+
+
+
 [@ CInline]
 val mul64: x: uint64 -> y: uint64 -> result: lbuffer uint64 (size 1) -> temp: lbuffer uint64 (size 1) ->
   Stack unit

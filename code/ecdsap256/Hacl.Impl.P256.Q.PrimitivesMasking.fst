@@ -12,6 +12,40 @@ open Spec.P256.Definitions
 open Spec.P256.Lemmas
 
 
+#set-options "--z3rlimit 300" 
+
+val cmovznz4: out: felem -> x: felem -> y: felem -> mask: uint64 -> Stack unit
+  (requires fun h -> live h out /\ live h x /\ live h y /\ (uint_v mask == 0 \/ uint_v mask = pow2 64 - 1))
+  (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\ (
+    if v mask = 0 then as_nat h1 out == as_nat h0 x else as_nat h1 out == as_nat h0 y))
+
+let cmovznz4 out x y mask = 
+  let h0 = ST.get() in 
+  
+  let out_0 = index out (size 0) in 
+  let out_1 = index out (size 1) in 
+  let out_2 = index out (size 2) in 
+  let out_3 = index out (size 3) in  
+
+  let mask = eq_mask mask (u64 0) in 
+  
+  let r0 = logor (logand x.(size 0) mask) (logand y.(size 0) (lognot mask)) in 
+  let r1 = logor (logand x.(size 1) mask) (logand y.(size 1) (lognot mask)) in 
+  let r2 = logor (logand x.(size 2) mask) (logand y.(size 2) (lognot mask)) in 
+  let r3 = logor (logand x.(size 3) mask) (logand y.(size 3) (lognot mask)) in 
+
+  upd out (size 0) r0;
+  upd out (size 1) r1;
+  upd out (size 2) r2;
+  upd out (size 3) r3;
+
+  let x = as_seq h0 x in 
+  let y = as_seq h0 y in 
+  cmovznz4_lemma mask (Seq.index y 0) (Seq.index x 0);
+  cmovznz4_lemma mask (Seq.index y 1) (Seq.index x 1);
+  cmovznz4_lemma mask (Seq.index y 2) (Seq.index x 2);
+  cmovznz4_lemma mask (Seq.index y 3) (Seq.index x 3)
+
 
 inline_for_extraction noextract
 val copy_conditional: out: felem -> x: felem -> mask: uint64{uint_v mask = 0 \/ uint_v mask = pow2 64 - 1} -> Stack unit 
@@ -53,37 +87,77 @@ let copy_conditional out x mask =
   lemma_eq_funct_ (as_seq h1 out) (as_seq h0 x)
 
 
-val cmovznz4: out: felem -> x: felem -> y: felem -> mask: uint64 -> Stack unit
-  (requires fun h -> live h out /\ live h x /\ live h y /\ (uint_v mask == 0 \/ uint_v mask = pow2 64 - 1))
-  (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\ (
-    if v mask = 0 then as_nat h1 out == as_nat h0 x else as_nat h1 out == as_nat h0 y))
+val copy_point_conditional_mask_u64_2:  result: point 
+  -> x: point -> mask: uint64 {uint_v mask == 0 \/ uint_v mask == pow2 64 - 1}  
+  -> Stack unit
+  (requires fun h -> live h result /\ live h x /\ disjoint result x)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1  /\ (
+    if uint_v mask = 0
+    then 
+      as_nat h1 (gsub result (size 0) (size 4)) == as_nat h0 (gsub result (size 0) (size 4)) /\
+      as_nat h1 (gsub result (size 4) (size 4)) == as_nat h0 (gsub result (size 4) (size 4)) /\
+      as_nat h1 (gsub result (size 8) (size 4)) == as_nat h0 (gsub result (size 8) (size 4)) 
+    else
+      as_nat h1 (gsub result (size 0) (size 4)) == as_nat h0 (gsub x (size 0) (size 4)) /\
+      as_nat h1 (gsub result (size 4) (size 4)) == as_nat h0 (gsub x (size 4) (size 4)) /\
+      as_nat h1 (gsub result (size 8) (size 4)) == as_nat h0 (gsub x (size 8) (size 4)))
+  )
 
-let cmovznz4 out x y mask = 
+
+
+let copy_point_conditional_mask_u64_2  result x mask = 
   let h0 = ST.get() in 
+
+  let x_x = sub x (size 0) (size 4) in 
+  let x_y = sub x (size 4) (size 4) in 
+  let x_z = sub x (size 8) (size 4) in 
+
+  let result_x = sub result (size 0) (size 4) in 
+  let result_y = sub result (size 4) (size 4) in 
+  let result_z = sub result (size 8) (size 4) in 
+
+  copy_conditional result_x x_x mask;
+  copy_conditional result_y x_y mask;
+  copy_conditional result_z x_z mask
+
+
+val copy_point_conditional_mask_u64_3: #buf_type: buftype -> result: point 
+  -> x: point -> y: point 
+  -> mask: uint64 {uint_v mask == 0 \/ uint_v mask == pow2 64 - 1}  
+  -> Stack unit
+  (requires fun h -> live h result /\ live h x /\ live h y /\ disjoint result x /\ disjoint result y)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1  /\ (
   
-  let out_0 = index out (size 0) in 
-  let out_1 = index out (size 1) in 
-  let out_2 = index out (size 2) in 
-  let out_3 = index out (size 3) in  
+  if uint_v mask = 0
+  then 
+    as_nat h1 (gsub result (size 0) (size 4)) == as_nat h0 (gsub x (size 0) (size 4)) /\
+    as_nat h1 (gsub result (size 4) (size 4)) == as_nat h0 (gsub x (size 4) (size 4)) /\
+    as_nat h1 (gsub result (size 8) (size 4)) == as_nat h0 (gsub x (size 8) (size 4)) 
+  else
+    as_nat h1 (gsub result (size 0) (size 4)) == as_nat h0 (gsub y (size 0) (size 4)) /\
+    as_nat h1 (gsub result (size 4) (size 4)) == as_nat h0 (gsub y (size 4) (size 4)) /\
+    as_nat h1 (gsub result (size 8) (size 4)) == as_nat h0 (gsub y (size 8) (size 4)))
+  )
 
-  let mask = eq_mask mask (u64 0) in 
-  
-  let r0 = logor (logand x.(size 0) mask) (logand y.(size 0) (lognot mask)) in 
-  let r1 = logor (logand x.(size 1) mask) (logand y.(size 1) (lognot mask)) in 
-  let r2 = logor (logand x.(size 2) mask) (logand y.(size 2) (lognot mask)) in 
-  let r3 = logor (logand x.(size 3) mask) (logand y.(size 3) (lognot mask)) in 
 
-  upd out (size 0) r0;
-  upd out (size 1) r1;
-  upd out (size 2) r2;
-  upd out (size 3) r3;
+let copy_point_conditional_mask_u64_3 #buf_type result x y mask = 
+  let h0 = ST.get() in 
 
-  let x = as_seq h0 x in 
-  let y = as_seq h0 y in 
-  cmovznz4_lemma mask (Seq.index y 0) (Seq.index x 0);
-  cmovznz4_lemma mask (Seq.index y 1) (Seq.index x 1);
-  cmovznz4_lemma mask (Seq.index y 2) (Seq.index x 2);
-  cmovznz4_lemma mask (Seq.index y 3) (Seq.index x 3)
+  let x_x = sub x (size 0) (size 4) in 
+  let x_y = sub x (size 4) (size 4) in 
+  let x_z = sub x (size 8) (size 4) in 
+
+  let y_x = sub y (size 0) (size 4) in 
+  let y_y = sub y (size 4) (size 4) in 
+  let y_z = sub y (size 8) (size 4) in 
+
+  let result_x = sub result (size 0) (size 4) in 
+  let result_y = sub result (size 4) (size 4) in 
+  let result_z = sub result (size 8) (size 4) in 
+
+  cmovznz4 result_x x_x y_x mask;
+  cmovznz4 result_y x_y y_y mask;
+  cmovznz4 result_z x_z y_z mask
 
 
 inline_for_extraction noextract
@@ -113,6 +187,31 @@ let cmovznz a b mask =
   logxor a (logand mask (logxor a b))
 
 
+val maskU8toU64: a: uint8 {v a = 0 \/ v a = pow2 8 - 1} ->
+  Tot (b: uint64 {v b = 0 \/ v b = pow2 64 -1 /\ ((v a == 0) ==> (v b == 0)) /\ ((v a == pow2 8 - 1) ==> (v b == pow2 64 - 1))})
+
+let maskU8toU64 a = 
+  let a0 = to_u64 a in 
+  let a1 = shift_right a0 (size 8) in 
+  let a2 = shift_right a0 (size 16) in 
+  let a3 = shift_right a0 (size 24) in 
+  
+  let a4 = shift_right a0 (size 32) in 
+  let a5 = shift_right a0 (size 40) in 
+  let a6 = shift_right a0 (size 48) in 
+  let a7 = shift_right a0 (size 56) in 
+
+  let a01 = logxor a0 a1 in 
+  let a23 = logxor a2 a3 in 
+  let a45 = logxor a4 a5 in 
+  let a67 = logxor a6 a7 in 
+
+  let a03 = logxor a01 a23 in 
+  let a47 = logxor a45 a67 in 
+
+  admit();
+  logxor a03 a47
+    
 
 
 val cswap8:  x: widefelem -> y: widefelem -> mask: uint64 -> Stack unit 

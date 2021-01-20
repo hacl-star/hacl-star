@@ -562,7 +562,7 @@ def printf(p):
 for i in range(16):
     pxD = i * G.xy()[0]
     pyD = i * G.xy()[1]
-    printf (toFakeAffine((pxD, pyD)))
+    printf (toFakeAffine((to D (pxD), toD (pyD))))
 
  *)
 

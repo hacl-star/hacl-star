@@ -1866,6 +1866,68 @@ static const limb_t const_b[4] = {
     UINT64_C(0xD89CDF6229C4BDDF), UINT64_C(0xACF005CD78843090),
     UINT64_C(0xE5A220ABF7212ED6), UINT64_C(0xDC30061D04874834)};
 
+
+// prime = 2**256 - 2**224 + 2**192 + 2**96 -1
+
+// def norm(p):    
+//     x, y, z = p
+//     z2i = power_mod(z * z, -1, prime)
+//     z3i = power_mod(z * z * z, -1, prime)
+//     return ((x * z2i) % prime, (y * z3i) % prime, 1)
+
+// def toD(x):
+//     return x * power_mod (2 ** 256, 1, prime) % prime
+
+// def fromD(x):
+//     return x * power_mod (2 ** 256, prime - 2, prime) % prime
+
+// def toFakeAffine(p):
+//     x, y = p 
+//     multiplier = power_mod (2 ** 256, prime - 2, prime) 
+//     x = x * multiplier * multiplier % prime
+//     y = y * multiplier * multiplier * multiplier % prime
+//     return (x, y)
+
+// def check(p):
+//     x, y = p 
+//     return (x, y)
+
+
+// p256 = 0xFFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF
+// a256 = p256 - 3
+// b256 = 0x5AC635D8AA3A93E7B3EBBD55769886BC651D06B0CC53B0F63BCE3C3E27D2604B
+// gx = 0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296
+// gy = 0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5
+// qq = 0xFFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551
+// FF = GF(p256)
+
+// EC = EllipticCurve([FF(a256), FF(b256)])
+
+// EC.set_order(qq)
+
+// G = EC(FF(gx), FF(gy))
+
+// def printf(p):
+//     x, y = p 
+//     for i in range(4):
+//         print("u64 " + str(hex((Integer(x) >> (i * 64)) % 2 ** 64)) + "; ")
+//     for i in range(4):
+//         print("u64 " + str (hex((Integer(y) >> (i * 64)) % 2 ** 64)) + "; ")
+    
+// for j in range(26):
+//     for i in range(1, 33, 2):
+//         print(i)
+//         start = 2 ** (10 * j)
+//         pxD = ((i * start) * G).xy()[0]
+//         pyD = ((i * start) * G).xy()[1]
+        
+//         pxD = toD(pxD)
+//         pyD = toD(pyD)
+//         printf (check((pxD, pyD)))
+
+
+
+        
 /* LUT for scalar multiplication by comb interleaving */
 static const pt_aff_t lut_cmb[27][16] = {
     {
@@ -6024,7 +6086,7 @@ static void fixed_smul_cmb(pt_aff_t *out, const unsigned char scalar[32]) {
             uint64_t *lut_cmb_x = lut_cmb_1 + 424;
             uint64_t *lut_cmb_y = lut_cmb_1 + 428;
 
-            printf("%d   %d   \n", j, k);
+            // printf("%d   %d   \n", j, k);
 
 
 
@@ -6034,7 +6096,7 @@ static void fixed_smul_cmb(pt_aff_t *out, const unsigned char scalar[32]) {
             printU(lut_cmb[j][k].Y, 4);
             printU(lut_cmb_y , 4);
            
-            return 0;
+            // return 0;
 
             fiat_secp256r1_selectznz(lut.X, diff, lut.X, lut_cmb[j][k].X);
             fiat_secp256r1_selectznz(lut.Y, diff, lut.Y, lut_cmb[j][k].Y);

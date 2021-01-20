@@ -371,8 +371,17 @@ let copy_point_conditional_jac_to_result out q maskPoint =
   Hacl.Impl.P256.Q.PrimitivesMasking.copy_conditional yOut qY mask;
   Hacl.Impl.P256.Q.PrimitivesMasking.copy_conditional zOut qZ mask
 
+
+
+
+
+
+(*TODO: Move away *)
+(*TODO: to check *)
+
+
 inline_for_extraction noextract
-val copy_point_conditional: #buf_type : buftype ->   result: point -> x: point -> p: point -> maskPoint: lbuffer_t buf_type uint64 (size 8) -> Stack unit
+val copy_point_conditional: #buf_type : buftype -> result: point -> x: point -> p: point -> maskPoint: lbuffer_t buf_type uint64 (size 8) -> Stack unit
   (requires fun h -> live h result /\ live h p /\ live h maskPoint /\ live h x /\
     disjoint x result /\ eq_or_disjoint p result /\
     as_nat h (gsub p (size 0) (size 4)) < prime /\ 
@@ -421,8 +430,8 @@ let copy_point_conditional result x p maskPoint =
   let result_z = sub result (size 8) (size 4) in 
 
   cmovznz4 p_x x_x result_x mask;
-  cmovznz4 p_y x_y  result_y mask;
-  cmovznz4 p_z x_z  result_z mask;
+  cmovznz4 p_y x_y result_y mask;
+  cmovznz4 p_z x_z result_z mask;
 
   let mX = as_nat_il h0 (gsub maskPoint (size 0) (size 4)) in 
   let mY = as_nat_il h0 (gsub maskPoint (size 4) (size 4)) in 
