@@ -3883,7 +3883,7 @@ static void precomp_wnaf(pt_prj_t precomp[DRADIX / 2], const pt_aff_t *P) {
 }
 
 /* fetch a scalar bit */
-static int scalar_get_bit(const unsigned char s[32], int n) {
+static int scalar_bit(const unsigned char s[32], int n) {
     // int widx, rshift;
 
     // widx = idx >> 3;
@@ -3907,24 +3907,62 @@ static int scalar_get_bit(const unsigned char s[32], int n) {
  * {\pm 1, \pm 3, \pm 5, \pm 7, \pm 9, ...}
  * i.e. signed odd digits with _no zeroes_ -- that makes it "regular".
  */
-static void scalar_rwnaf(int8_t out[52], const unsigned char in[32]) {
-    int i;
-    int8_t window, d;
-
-    window = (in[0] & (DRADIX_WNAF - 1)) | 1;
-    for (i = 0; i < 51; i++) {
-        d = (window & (DRADIX_WNAF - 1)) - DRADIX;
-        out[i] = d;
-        window = (window - d) >> RADIX;
-        window += scalar_get_bit(in, (i + 1) * RADIX + 1) << 1;
-        window += scalar_get_bit(in, (i + 1) * RADIX + 2) << 2;
-        window += scalar_get_bit(in, (i + 1) * RADIX + 3) << 3;
-        window += scalar_get_bit(in, (i + 1) * RADIX + 4) << 4;
-        window += scalar_get_bit(in, (i + 1) * RADIX + 5) << 5;
-
-    }
-    out[51] = window;
-
+static void scalar_rwnaf(int64_t out2[103], const unsigned char in[32]) {
+  uint8_t in0 = in[0];
+  uint64_t windowStartValue = (uint64_t)1U | ((uint64_t)in0 & (uint64_t)63U);
+  uint64_t window = windowStartValue;
+  uint64_t r = (uint64_t)0U;
+  uint64_t r1 = (uint64_t)0U;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)51U; i++)
+  {
+    uint64_t wVar = window;
+    uint64_t w = wVar & (uint64_t)63U;
+    uint64_t d = (wVar & (uint64_t)63U) - (uint64_t)32U;
+    uint64_t c = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, w, (uint64_t)32U, &r);
+    uint64_t c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, (uint64_t)0U, r, &r1);
+    uint64_t cAsFlag = (uint64_t)0xffffffffU + c;
+    uint64_t r3 = (r & cAsFlag) | (r1 & ~cAsFlag);
+    out2[(uint32_t)2U * i] = r3;
+    out2[(uint32_t)2U * i + (uint32_t)1] = c;
+    uint64_t wStart = (wVar - d) >> (uint32_t)(uint64_t)5U;
+    uint64_t
+    w0 =
+      wStart
+      +
+        (scalar_bit(in,
+          ((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)1U)
+        << (uint32_t)1U);
+    uint64_t
+    w01 =
+      w0
+      +
+        (scalar_bit(in,
+          ((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)2U)
+        << (uint32_t)2U);
+    uint64_t
+    w02 =
+      w01
+      +
+        (scalar_bit(in,
+          ((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)3U)
+        << (uint32_t)3U);
+    uint64_t
+    w03 =
+      w02
+      +
+        (scalar_bit(in,
+          ((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)4U)
+        << (uint32_t)4U);
+    uint64_t
+    w04 =
+      w03
+      +
+        (scalar_bit(in,
+          ((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)5U)
+        << (uint32_t)5U);
+    window = w04;
+  }
+  out2[102U] = window;
 }
 
 /*-
@@ -4025,7 +4063,7 @@ static void var_smul_rwnaf(pt_aff_t *out, const unsigned char scalar[32],
     pt_prj_t precomp[DRADIX / 2];
 
     precomp_wnaf(precomp, P);
-    scalar_rwnaf(rnaf, scalar);
+    // scalar_rwnaf(rnaf, scalar);
 
 #if defined(_MSC_VER)
 /* result still unsigned: yes we know */
@@ -4090,7 +4128,9 @@ static void fixed_smul_cmb(pt_aff_t *out, const unsigned char scalar[32]) {
     pt_prj_t Q = {0}, R = {0};
     pt_aff_t lut = {0};
 
-    scalar_rwnaf(rnaf, scalar);
+    uint64_t rnaf2[104U] = { 0U };
+
+    scalar_rwnaf(rnaf2, scalar);
 
     /* initalize accumulator to inf */
     fe_set_zero(Q.X);
@@ -4102,10 +4142,8 @@ static void fixed_smul_cmb(pt_aff_t *out, const unsigned char scalar[32]) {
   
         for (j = 0; j < 26; j++) {
 
-            d = rnaf[j * 2 + i];
-            is_neg = (d >> (8 * sizeof(int) - 1)) & 1;
-            d = (d ^ -is_neg) + is_neg;
-
+        d = rnaf2[2 * (j * 2 + i)];
+        is_neg = rnaf2[2 * (j * 2 + i) + 1];
             d = (d - 1) >> 1;
             for (k = 0; k < DRADIX / 2; k++) {
                 diff = (1 - (-(d ^ k) >> 31)) & 1;
@@ -4122,9 +4160,8 @@ static void fixed_smul_cmb(pt_aff_t *out, const unsigned char scalar[32]) {
                 for (j = 0; i != 1 && j < RADIX; j++) point_double(&Q, &Q);
         for (j = 0; j < 26; j++) {
 
-            d = rnaf[j * 2 + i];
-            is_neg = (d >> (8 * sizeof(int) - 1)) & 1;
-            d = (d ^ -is_neg) + is_neg;
+            d = rnaf2[2 * (j * 2)];
+            is_neg = rnaf2[2 * (j * 2) + 1];
             d = (d - 1) >> 1;
             for (k = 0; k < DRADIX / 2; k++) {
                 diff = (1 - (-(d ^ k) >> (8 * sizeof(int) - 1))) & 1;
@@ -12287,186 +12324,6 @@ static int scalar_get_bit(const unsigned char in[32], int idx) {
     if (idx < 0 || widx >= 32) return 0;
 
     return (in[widx] >> rshift) & 0x1;
-}
-
-/*-
- * Compute "regular" wnaf representation of a scalar.
- * See "Exponent Recoding and Regular Exponentiation Algorithms",
- * Tunstall et al., AfricaCrypt 2009, Alg 6.
- * It forces an odd scalar and outputs digits in
- * {\pm 1, \pm 3, \pm 5, \pm 7, \pm 9, ...}
- * i.e. signed odd digits with _no zeroes_ -- that makes it "regular".
- */
-static void scalar_rwnaf(int8_t out[52], const unsigned char in[32]) {
-    int i;
-    int8_t window, d;
-
-    window = (in[0] & (DRADIX_WNAF - 1)) | 1;
-    for (i = 0; i < 51; i++) {
-        d = (window & (DRADIX_WNAF - 1)) - DRADIX;
-        out[i] = d;
-        window = (window - d) >> RADIX;
-        window += scalar_get_bit(in, (i + 1) * RADIX + 1) << 1;
-        window += scalar_get_bit(in, (i + 1) * RADIX + 2) << 2;
-        window += scalar_get_bit(in, (i + 1) * RADIX + 3) << 3;
-        window += scalar_get_bit(in, (i + 1) * RADIX + 4) << 4;
-        window += scalar_get_bit(in, (i + 1) * RADIX + 5) << 5;
-    }
-    out[i] = window;
-}
-
-/*-
- * Compute "textbook" wnaf representation of a scalar.
- * NB: not constant time
- */
-static void scalar_wnaf(int8_t out[257], const unsigned char in[32]) {
-    int i;
-    int8_t window, d;
-
-    window = in[0] & (DRADIX_WNAF - 1);
-    for (i = 0; i < 257; i++) {
-        d = 0;
-        if ((window & 1) && ((d = window & (DRADIX_WNAF - 1)) & DRADIX))
-            d -= DRADIX_WNAF;
-        out[i] = d;
-        window = (window - d) >> 1;
-        window += scalar_get_bit(in, i + 1 + RADIX) << RADIX;
-    }
-}
-
-/*-
- * Simultaneous scalar multiplication: interleaved "textbook" wnaf.
- * NB: not constant time
- */
-static void var_smul_wnaf_two(pt_aff_t *out, const unsigned char a[32],
-                              const unsigned char b[32], const pt_aff_t *P) {
-    int i, d, is_neg, is_inf = 1, flipped = 0;
-    int8_t anaf[257] = {0};
-    int8_t bnaf[257] = {0};
-    pt_prj_t Q = {0};
-    pt_prj_t precomp[DRADIX / 2];
-
-    precomp_wnaf(precomp, P);
-    scalar_wnaf(anaf, a);
-    scalar_wnaf(bnaf, b);
-
-    for (i = 256; i >= 0; i--) {
-        if (!is_inf) point_double(&Q, &Q);
-        if ((d = bnaf[i])) {
-            if ((is_neg = d < 0) != flipped) {
-                fiat_secp256r1_opp(Q.Y, Q.Y);
-                flipped ^= 1;
-            }
-            d = (is_neg) ? (-d - 1) >> 1 : (d - 1) >> 1;
-            if (is_inf) {
-                /* initialize accumulator */
-                fe_copy(Q.X, &precomp[d].X);
-                fe_copy(Q.Y, &precomp[d].Y);
-                fe_copy(Q.Z, &precomp[d].Z);
-                is_inf = 0;
-            } else
-                point_add_proj(&Q, &Q, &precomp[d]);
-        }
-        if ((d = anaf[i])) {
-            if ((is_neg = d < 0) != flipped) {
-                fiat_secp256r1_opp(Q.Y, Q.Y);
-                flipped ^= 1;
-            }
-            d = (is_neg) ? (-d - 1) >> 1 : (d - 1) >> 1;
-            if (is_inf) {
-                /* initialize accumulator */
-                fe_copy(Q.X, &lut_cmb[0][d].X);
-                fe_copy(Q.Y, &lut_cmb[0][d].Y);
-                fe_copy(Q.Z, const_one);
-                is_inf = 0;
-            } else
-                point_add_mixed(&Q, &Q, &lut_cmb[0][d]);
-        }
-    }
-
-    if (is_inf) {
-        /* initialize accumulator to inf: all-zero scalars */
-        fe_set_zero(Q.X);
-        fe_copy(Q.Y, const_one);
-        fe_set_zero(Q.Z);
-    }
-
-    if (flipped) {
-        /* correct sign */
-        fiat_secp256r1_opp(Q.Y, Q.Y);
-    }
-
-    /* convert to affine -- NB depends on coordinate system */
-    fiat_secp256r1_inv(Q.Z, Q.Z);
-    fiat_secp256r1_mul(out->X, Q.X, Q.Z);
-    fiat_secp256r1_mul(out->Y, Q.Y, Q.Z);
-}
-
-/*-
- * Variable point scalar multiplication with "regular" wnaf.
- */
-static void var_smul_rwnaf(pt_aff_t *out, const unsigned char scalar[32],
-                           const pt_aff_t *P) {
-    int i, j, d, diff, is_neg;
-    int8_t rnaf[52] = {0};
-    pt_prj_t Q = {0}, lut = {0};
-    pt_prj_t precomp[DRADIX / 2];
-
-    precomp_wnaf(precomp, P);
-    scalar_rwnaf(rnaf, scalar);
-
-#if defined(_MSC_VER)
-/* result still unsigned: yes we know */
-#pragma warning(push)
-#pragma warning(disable : 4146)
-#endif
-
-    /* initialize accumulator to high digit */
-    d = (rnaf[51] - 1) >> 1;
-    for (j = 0; j < DRADIX / 2; j++) {
-        diff = (1 - (-(d ^ j) >> (8 * sizeof(int) - 1))) & 1;
-        fiat_secp256r1_selectznz(Q.X, diff, Q.X, precomp[j].X);
-        fiat_secp256r1_selectznz(Q.Y, diff, Q.Y, precomp[j].Y);
-        fiat_secp256r1_selectznz(Q.Z, diff, Q.Z, precomp[j].Z);
-    }
-
-    for (i = 50; i >= 0; i--) {
-        for (j = 0; j < RADIX; j++) point_double(&Q, &Q);
-        d = rnaf[i];
-        /* is_neg = (d < 0) ? 1 : 0 */
-        is_neg = (d >> (8 * sizeof(int) - 1)) & 1;
-        /* d = abs(d) */
-        d = (d ^ -is_neg) + is_neg;
-        d = (d - 1) >> 1;
-        for (j = 0; j < DRADIX / 2; j++) {
-            diff = (1 - (-(d ^ j) >> (8 * sizeof(int) - 1))) & 1;
-            fiat_secp256r1_selectznz(lut.X, diff, lut.X, precomp[j].X);
-            fiat_secp256r1_selectznz(lut.Y, diff, lut.Y, precomp[j].Y);
-            fiat_secp256r1_selectznz(lut.Z, diff, lut.Z, precomp[j].Z);
-        }
-        /* negate lut point if digit is negative */
-        fiat_secp256r1_opp(out->Y, lut.Y);
-        fiat_secp256r1_selectznz(lut.Y, is_neg, lut.Y, out->Y);
-        point_add_proj(&Q, &Q, &lut);
-    }
-
-#if defined(_MSC_VER)
-#pragma warning(pop)
-#endif
-
-    /* conditionally subtract P if the scalar was even */
-    fe_copy(lut.X, precomp[0].X);
-    fiat_secp256r1_opp(lut.Y, precomp[0].Y);
-    fe_copy(lut.Z, precomp[0].Z);
-    point_add_proj(&lut, &lut, &Q);
-    fiat_secp256r1_selectznz(Q.X, scalar[0] & 1, lut.X, Q.X);
-    fiat_secp256r1_selectznz(Q.Y, scalar[0] & 1, lut.Y, Q.Y);
-    fiat_secp256r1_selectznz(Q.Z, scalar[0] & 1, lut.Z, Q.Z);
-
-    /* convert to affine -- NB depends on coordinate system */
-    fiat_secp256r1_inv(Q.Z, Q.Z);
-    fiat_secp256r1_mul(out->X, Q.X, Q.Z);
-    fiat_secp256r1_mul(out->Y, Q.Y, Q.Z);
 }
 
 /*-
