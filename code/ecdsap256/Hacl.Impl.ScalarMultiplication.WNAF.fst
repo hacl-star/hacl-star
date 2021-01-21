@@ -23,14 +23,6 @@ open Hacl.Impl.P256.MixedPointAdd
 
 open Hacl.Impl.ScalarMultiplication.WNAF.Table.Ext
 
-(* 
-inline_for_extraction
-let points_cmb : x: glbuffer uint64 218ul {witnessed #uint64 #(size 216) x (Lib.Sequence.of_list cmb_list) /\ recallable x} =
-    createL_global cmb_list
-
-
- *)
-
 (* Originally lives in P256.Core *)
 (* this piece of code is taken from Hacl.Curve25519 *)
 (* changed Endian for Scalar Bit access *)
@@ -47,8 +39,7 @@ let scalar_bit s n =
   mod_mask_lemma ((Lib.Sequence.index (as_seq h0 s) (31 - v n / 8)) >>. (n %. 8ul)) 1ul;
   assert_norm (1 = pow2 1 - 1);
   assert (v (mod_mask #U8 #SEC 1ul) == v (u8 1)); 
-  to_u64 ((s.(n /. 8ul) >>. (n %. 8ul)) &. u8 1)
-
+  to_u64 ((s.(31ul -. n /. 8ul) >>. (n %. 8ul)) &. u8 1)
 
 
 inline_for_extraction noextract
@@ -68,7 +59,7 @@ val scalar_rwnaf : out: lbuffer uint64 (size 104) -> scalar: lbuffer uint8 (size
 let scalar_rwnaf out scalar = 
   push_frame();
 
-  let in0 = index scalar (size 0) in 
+  let in0 = index scalar (size 31) in 
   let windowStartValue =  (logor (u64 1) (logand (to_u64 in0) (dradix_wnaf -! (u64 1))))  in 
   
  let window = create (size 1) windowStartValue in 
@@ -94,7 +85,7 @@ let scalar_rwnaf out scalar =
       let c1 = sub_borrow_u64 (u64 0) (u64 0) (index r (size 0)) r1 in 
       
       let cAsFlag = (u64 0xffffffff) +! c in 
-      let r3 = cmovznz2 (index r (size 0)) (index r1 (size 0)) cAsFlag in 
+      let r3 = logand (cmovznz2 (index r (size 0)) (index r1 (size 0)) cAsFlag) (u64 0xff) in 
       
       upd out (size 2 *! i) r3;
       upd out (size 2 *! i +! 1) c;
@@ -122,7 +113,7 @@ inline_for_extraction
 type pointAffine = lbuffer uint64 (size 8)
 
 
-val loopK: result: pointAffine -> d: uint64 -> point: pointAffine -> j: size_t ->  Stack unit 
+val loopK: result: pointAffine -> d: uint64 -> point: pointAffine -> j: size_t -> Stack unit 
   (requires fun h -> True)
   (ensures fun h0 _ h1 -> True)
 
@@ -130,16 +121,18 @@ let loopK result d point j =
   let invK h (k: nat) = True in 
   Lib.Loops.for 0ul 16ul invK
     (fun k -> 
-      let mask = eq_mask d (to_u64 j) in 
-        eq_mask_lemma d (to_u64 j); 
+      let mask = eq_mask d (to_u64 k) in 
+        eq_mask_lemma d (to_u64 k); 
 
-        let b =   getUInt64 (u64 0) in
-        upd result (size 0) (index b (size 0))
-(*       let lut_cmb_x = const_to_lbuffer (sub points_cmb ((j *! size 16 +! k) *! 8) (size 4)) in 
-      let lut_cmb_y = const_to_lbuffer (sub points_cmb ((j *! size 16 +! k) *! 8 +! (size 4)) (size 4)) in 
+	(* 
+	let lut_cmb_x = const_to_lbuffer (sub points_cmb ((j *! size 16 +! k) *! 8) (size 4)) in 
+	let lut_cmb_y = const_to_lbuffer (sub points_cmb ((j *! size 16 +! k) *! 8 +! (size 4)) (size 4)) in *)
+	
+	let lut_cmb_x = getUInt64 ((j *! size 16 +! k) *! 8) in 
+	let lut_cmb_y = getUInt64 ((j *! size 16 +! k) *! 8 +! (size 4))  in
 
-      copy_conditional (sub point (size 0) (size 4)) lut_cmb_x mask;
-      copy_conditional (sub point (size 4) (size 4)) lut_cmb_y mask *)
+	copy_conditional (sub point (size 0) (size 4)) lut_cmb_x mask;
+	copy_conditional (sub point (size 4) (size 4)) lut_cmb_y mask 
     )
 
 
@@ -163,6 +156,16 @@ let conditional_substraction result p scalar tempBuffer =
 
   let i0 = index scalar (size 0) in 
   let mask = (u64 0) -. to_u64 (logand i0 (u8 1)) in 
+
+  let bpX = getUInt64 (size 0) in 
+  let bpY = getUInt64 (size 4) in 
+
+    copy bpMinusX bpX;
+    p256_neg bpY bpMinusY;
+
+  point_add_mixed p bpMinus tempPoint tempBuffer;
+
+  copy_point_conditional_mask_u64_2 result tempPoint mask;
 
 (*   let bpX = const_to_lbuffer (sub points_cmb (size 0) (size 4)) in
     copy bpMinusX bpX;
@@ -202,10 +205,8 @@ val scalar_multiplication_cmb:  #buf_type: buftype -> result: point ->
 let scalar_multiplication_cmb #buf_type result scalar tempBuffer = 
   push_frame();
     let rnaf2 = create (size 104) (u64 0) in 
-
-    (* point_at_infinity *)
-    let q = create (size 12) (u64 0) in 
     let lut:pointAffine = create (size 8) (u64 0) in 
+    let temp4 = sub tempBuffer (size 0) (size 4) in 
 
     scalar_rwnaf rnaf2 scalar;
 
@@ -215,43 +216,41 @@ let scalar_multiplication_cmb #buf_type result scalar tempBuffer =
 
     Lib.Loops.for 0ul 26ul invJ (fun j ->
       let d = index rnaf2 (size 2 *! (j *! (size 2) +! i)) in
-      let is_neg = index rnaf2 (size 2 *! (j *! (size 2) +! i) +! (size 1)) in 
+      let is_neg = (u64 0) -. (index rnaf2 (size 2 *! (j *! (size 2) +! i) +! (size 1))) in 
       let d = shift_right (d -! size 1) (size 1) in 
 
       loopK lut d lut j;
 
       let yLut = sub lut (size 4) (size 4) in 
-      let resultTemp = sub result (size 0) (size 4) in 
-      p256_neg yLut resultTemp;
+      p256_neg yLut temp4;
 
-      copy_conditional yLut resultTemp is_neg;
-      point_add_mixed q lut q tempBuffer
+      copy_conditional yLut temp4 is_neg;
+      point_add_mixed result lut result tempBuffer
     );
      
     let i = size 0 in 
 
     let invPointDouble h (j: nat) = True in 
     Lib.Loops.for 0ul radix invPointDouble 
-    (fun j -> point_double q q tempBuffer);
+    (fun j -> point_double result result tempBuffer);
 
     Lib.Loops.for 0ul 26ul invJ (fun j ->
       let d = index rnaf2 (size 2 *! (j *! (size 2) +! i)) in 
-      let is_neg = index rnaf2 (size 2 *! (j *! (size 2) +! i) +! (size 1)) in 
+      let is_neg = (u64 0) -. (index rnaf2 (size 2 *! (j *! (size 2) +! i) +! (size 1))) in 
       let d = shift_right (d -! size 1) (size 1) in 
 
       loopK lut d lut j;
 
     	let yLut = sub lut (size 4) (size 4) in 
-    	let resultTemp = sub result (size 0) (size 4) in 
-    	p256_neg yLut resultTemp;
+    	p256_neg yLut temp4;
 
 	
-    	copy_conditional yLut resultTemp is_neg;
-    	point_add_mixed q lut q tempBuffer
+    	copy_conditional yLut temp4  is_neg;
+    	point_add_mixed result lut result tempBuffer
     );
 
 
-    conditional_substraction q q scalar tempBuffer;
+    conditional_substraction result result scalar tempBuffer;
   
 
   pop_frame()

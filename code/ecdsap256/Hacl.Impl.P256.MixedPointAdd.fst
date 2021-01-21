@@ -429,9 +429,9 @@ let copy_point_conditional result x p maskPoint =
   let result_y = sub result (size 4) (size 4) in 
   let result_z = sub result (size 8) (size 4) in 
 
-  cmovznz4 p_x x_x result_x mask;
-  cmovznz4 p_y x_y result_y mask;
-  cmovznz4 p_z x_z result_z mask;
+  cmovznz4 result_x x_x p_x mask;
+  cmovznz4 result_y x_y p_y mask;
+  cmovznz4 result_z x_z p_z mask;
 
   let mX = as_nat_il h0 (gsub maskPoint (size 0) (size 4)) in 
   let mY = as_nat_il h0 (gsub maskPoint (size 4) (size 4)) in 

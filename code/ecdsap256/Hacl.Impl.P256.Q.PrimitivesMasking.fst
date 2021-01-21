@@ -47,7 +47,7 @@ let cmovznz4 out x y mask =
   cmovznz4_lemma mask (Seq.index y 3) (Seq.index x 3)
 
 
-inline_for_extraction noextract
+
 val copy_conditional: out: felem -> x: felem -> mask: uint64{uint_v mask = 0 \/ uint_v mask = pow2 64 - 1} -> Stack unit 
   (requires fun h -> live h out /\ live h x)
   (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\ 
