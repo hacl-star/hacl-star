@@ -12,7 +12,7 @@
 
 #include "Hacl_P256.h"
 #include "Hacl_P256_first_version.h"
-#include "fiat_changed.c"
+#include "fiat.c"
 
 
 
@@ -136,6 +136,12 @@ bool test_nist()
 
 	bool ok = true;
 
+	printf("%s\n", "---------------------------------------------------------------" );
+
+	printf("%s\n", "ECDH Initiator");
+
+
+
 	uint8_t* result = (uint8_t*) malloc (sizeof (uint8_t) * 64);
 	uint8_t* pk = (uint8_t*) malloc (sizeof (uint8_t) * 64);
 	
@@ -156,23 +162,29 @@ bool test_nist()
 	ok = ok && compare_and_print(32, result, expectedPublicKeyX);
 	ok = ok && compare_and_print(32, result + 32, expectedPublicKeyY);
 
-	// memcpy(pk, publicKeyX1,  32);
-	// memcpy(pk+32, publicKeyY1,  32);
+
+	printf("\n");
+
+	printf("%s\n", "---------------------------------------------------------------" );
+
+	printf("%s\n", "ECDH Responder");
+
+
+
+	memcpy(pk, publicKeyX1,  32);
+	memcpy(pk+32, publicKeyY1,  32);
 	   
-	// bool successDHR = Hacl_P256_ecp256dh_r_ladder(result, pk, privateKey);
-	// ok = ok && successDHR;
-	// ok = ok && compare(32, result, expectedResult);
+	bool successDHR = Hacl_P256_ecp256dh_r_ladder(result, pk, privateKey);
+	ok = ok && successDHR;
+	ok = ok && compare(32, result, expectedResult);
 
 
-	// bool successDHR_Radix = Hacl_P256_ecp256dh_r_radix4(result, pk, privateKey);
-	// ok = ok && successDHR_Radix;
-	// ok = ok && compare(32, result, expectedResult);
+	bool successDHR_Radix = Hacl_P256_ecp256dh_r_radix4(result, pk, privateKey);
+	ok = ok && successDHR_Radix;
+	ok = ok && compare(32, result, expectedResult);
 
 
-	// bool successDHI_First = Hacl_P256_ecp256dh_i(result, privateKey);
-	// ok = ok && successDHI_First;
-	// ok = ok && compare(32, result, expectedPublicKeyX);
-	// ok = ok && compare(32, result + 32, expectedPublicKeyY);
+
 
 
 	printf("\n");
@@ -185,19 +197,30 @@ bool test_nist()
 	uint8_t* outy = (uint8_t*) malloc (sizeof (uint8_t) * 32);
 
 
+	// MP_BE2LE(privateKey);
+
+	// point_mul_g(outx, outy, privateKey);
+
+	// MP_BE2LE(outx);
+	// MP_BE2LE(outy);
+
+	// ok = ok && compare_and_print(32, outx, expectedPublicKeyX);
+	// ok = ok && compare_and_print(32, outy, expectedPublicKeyY);
+
+
+
+
+	MP_BE2LE(publicKeyX1);
+	MP_BE2LE(publicKeyY1);
 	MP_BE2LE(privateKey);
 
-	point_mul_g(outx, outy, privateKey);
 
-	MP_BE2LE(privateKey);
+	point_mul(outx, outy, privateKey, publicKeyX1, publicKeyY1);
+
 	MP_BE2LE(outx);
 	MP_BE2LE(outy);
 
-
-	// printf("\n");
-	ok = ok && compare_and_print(32, outx, expectedPublicKeyX);
-	ok = ok && compare_and_print(32, outy, expectedPublicKeyY);
-
+	compare_and_print(32, outx, expectedResult);
 
 	free(result);
 	free(pk);
@@ -216,10 +239,10 @@ int main()
 	else
 		{
 			printf("%s\n", "Testing is failed \n ");
-			return -1;
+			// return -1;
 		}
 
-		return -1;
+		// return -1;
 
 
 	cycles a,b;
@@ -352,81 +375,84 @@ int main()
 	printf("EccKilla P-256 ECDH PERF \n");
 	printf("ECDH %8.2f mul/s\n",nsigsFiat);
 
-
-
-
-
-
-	// static uint8_t publicKeyX1[32] = {
-	// 0x70, 0x0c, 0x48, 0xf7, 0x7f, 0x56, 0x58, 0x4c, 0x5c, 0xc6, 0x32, 0xca, 0x65, 0x64, 0x0d, 0xb9, 0x1b, 0x6b, 0xac, 0xce, 0x3a, 0x4d, 0xf6, 0xb4, 0x2c, 0xe7, 0xcc, 0x83, 0x88, 0x33, 0xd2, 0x87 
-
-	// };
-	// static uint8_t publicKeyY1[32] = {
-	// 0xdb, 0x71, 0xe5, 0x09, 0xe3, 0xfd, 0x9b, 0x06, 0x0d, 0xdb, 0x20, 0xba, 0x5c, 0x51, 0xdc, 0xc5, 0x94, 0x8d, 0x46, 0xfb, 0xf6, 0x40, 0xdf, 0xe0, 0x44, 0x17, 0x82, 0xca, 0xb8, 0x5f, 0xa4, 0xac 
-
-	// };
-	// static uint8_t privateKey[32] = {
-	// 0x7d, 0x7d, 0xc5, 0xf7, 0x1e, 0xb2, 0x9d, 0xda, 0xf8, 0x0d, 0x62, 0x14, 0x63, 0x2e, 0xea, 0xe0, 0x3d, 0x90, 0x58, 0xaf, 0x1f, 0xb6, 0xd2, 0x2e, 0xd8, 0x0b, 0xad, 0xb6, 0x2b, 0xc1, 0xa5, 0x34 
-
-	// };
-	// static uint8_t expectedPublicKeyX[32] = {
-	// 0xea, 0xd2, 0x18, 0x59, 0x01, 0x19, 0xe8, 0x87, 0x6b, 0x29, 0x14, 0x6f, 0xf8, 0x9c, 0xa6, 0x17, 0x70, 0xc4, 0xed, 0xbb, 0xf9, 0x7d, 0x38, 0xce, 0x38, 0x5e, 0xd2, 0x81, 0xd8, 0xa6, 0xb2, 0x30 
-
-	// };
-	// static uint8_t expectedPublicKeyY[32] = {
-	// 0x28, 0xaf, 0x61, 0x28, 0x1f, 0xd3, 0x5e, 0x2f, 0xa7, 0x00, 0x25, 0x23, 0xac, 0xc8, 0x5a, 0x42, 0x9c, 0xb0, 0x6e, 0xe6, 0x64, 0x83, 0x25, 0x38, 0x9f, 0x59, 0xed, 0xfc, 0xe1, 0x40, 0x51, 0x41 
-
-	// };
-	// static uint8_t expectedResult[32] = {
-	// 0x46, 0xfc, 0x62, 0x10, 0x64, 0x20, 0xff, 0x01, 0x2e, 0x54, 0xa4, 0x34, 0xfb, 0xdd, 0x2d, 0x25, 0xcc, 0xc5, 0x85, 0x20, 0x60, 0x56, 0x1e, 0x68, 0x04, 0x0d, 0xd7, 0x77, 0x89, 0x97, 0xbd, 0x7b 
-
-	// };
-
-
-	// uint8_t* pk = (uint8_t*) malloc (sizeof (uint8_t) * 64);
 	
-	// memcpy(pk, publicKeyX1,  32);
-	// memcpy(pk+32, publicKeyY1,  32);
+	printf("%s\n", "----------------------------------------------------");
 
 
-	// t1 = clock();
- //  	a = cpucycles_begin();
+	static uint8_t publicKeyX1[32] = {
+	0x70, 0x0c, 0x48, 0xf7, 0x7f, 0x56, 0x58, 0x4c, 0x5c, 0xc6, 0x32, 0xca, 0x65, 0x64, 0x0d, 0xb9, 0x1b, 0x6b, 0xac, 0xce, 0x3a, 0x4d, 0xf6, 0xb4, 0x2c, 0xe7, 0xcc, 0x83, 0x88, 0x33, 0xd2, 0x87 
 
- //  	for (int j = 0; j < ROUNDS; j++)
-	// 	Hacl_P256_ecp256dh_r_ladder(result, pk, privateKey);
+	};
+	static uint8_t publicKeyY1[32] = {
+	0xdb, 0x71, 0xe5, 0x09, 0xe3, 0xfd, 0x9b, 0x06, 0x0d, 0xdb, 0x20, 0xba, 0x5c, 0x51, 0xdc, 0xc5, 0x94, 0x8d, 0x46, 0xfb, 0xf6, 0x40, 0xdf, 0xe0, 0x44, 0x17, 0x82, 0xca, 0xb8, 0x5f, 0xa4, 0xac 
+
+	};
+	static uint8_t privateKey[32] = {
+	0x7d, 0x7d, 0xc5, 0xf7, 0x1e, 0xb2, 0x9d, 0xda, 0xf8, 0x0d, 0x62, 0x14, 0x63, 0x2e, 0xea, 0xe0, 0x3d, 0x90, 0x58, 0xaf, 0x1f, 0xb6, 0xd2, 0x2e, 0xd8, 0x0b, 0xad, 0xb6, 0x2b, 0xc1, 0xa5, 0x34 
+
+	};
+	static uint8_t expectedPublicKeyX[32] = {
+	0xea, 0xd2, 0x18, 0x59, 0x01, 0x19, 0xe8, 0x87, 0x6b, 0x29, 0x14, 0x6f, 0xf8, 0x9c, 0xa6, 0x17, 0x70, 0xc4, 0xed, 0xbb, 0xf9, 0x7d, 0x38, 0xce, 0x38, 0x5e, 0xd2, 0x81, 0xd8, 0xa6, 0xb2, 0x30 
+
+	};
+	static uint8_t expectedPublicKeyY[32] = {
+	0x28, 0xaf, 0x61, 0x28, 0x1f, 0xd3, 0x5e, 0x2f, 0xa7, 0x00, 0x25, 0x23, 0xac, 0xc8, 0x5a, 0x42, 0x9c, 0xb0, 0x6e, 0xe6, 0x64, 0x83, 0x25, 0x38, 0x9f, 0x59, 0xed, 0xfc, 0xe1, 0x40, 0x51, 0x41 
+
+	};
+	static uint8_t expectedResult[32] = {
+	0x46, 0xfc, 0x62, 0x10, 0x64, 0x20, 0xff, 0x01, 0x2e, 0x54, 0xa4, 0x34, 0xfb, 0xdd, 0x2d, 0x25, 0xcc, 0xc5, 0x85, 0x20, 0x60, 0x56, 0x1e, 0x68, 0x04, 0x0d, 0xd7, 0x77, 0x89, 0x97, 0xbd, 0x7b 
+
+	};
+
+
+	uint8_t* pk = (uint8_t*) malloc (sizeof (uint8_t) * 64);
 	
-	// b = cpucycles_end();
+	memcpy(pk, publicKeyX1,  32);
+	memcpy(pk+32, publicKeyY1,  32);
+
+	  for (int j = 0; j < ROUNDS; j++)
+		Hacl_P256_ecp256dh_r_radix4(result, pk, privateKey);
+
+
+	t1 = clock();
+  	a = cpucycles_begin();
+
+  	for (int j = 0; j < ROUNDS; j++)
+		Hacl_P256_ecp256dh_r_radix4(result, pk, privateKey);
 	
-	// t2 = clock();
-	// clock_t tdiff3 = t2 - t1;
-	// cycles cdiff3 = b - a;
-
-	// double timeLadderR = (((double)tdiff3) / CLOCKS_PER_SEC);
-	// double nsigsLadderR = ((double)ROUNDS) / timeLadderR;
-	// printf("HACL P-256 ECDH R PERF/Ladder \n");
-	// printf("ECDH %8.2f mul/s\n",nsigsLadderR);
-
-
-
-
-
-	// t1 = clock();
- //  	a = cpucycles_begin();
-
- //  	for (int j = 0; j < ROUNDS; j++)
-	// 	Hacl_P256_ecp256dh_r_radix4(result, pk, privateKey);
+	b = cpucycles_end();
 	
-	// b = cpucycles_end();
+	t2 = clock();
+	clock_t tdiff6 = t2 - t1;
+
+	double timeLadderR = (((double)tdiff6) / CLOCKS_PER_SEC);
+	double nsigsLadderR = ((double)ROUNDS) / timeLadderR;
+	printf("HACL P-256 ECDH R PERF/ Radix4 \n");
+	printf("ECDH %8.2f mul/s\n",nsigsLadderR);
+
+
+
+
+
+
+  	for (int j = 0; j < ROUNDS; j++)
+		point_mul(outx, outy, privateKey, publicKeyX1, publicKeyY1);
+
+	t1 = clock();
+  	a = cpucycles_begin();
+
+  	for (int j = 0; j < ROUNDS; j++)
+		point_mul(outx, outy, privateKey, publicKeyX1, publicKeyY1);
 	
-	// t2 = clock();
-	// clock_t tdiff4 = t2 - t1;
-	// cycles cdiff4 = b - a;
+	b = cpucycles_end();
+	
+	t2 = clock();
+	clock_t tdiff7 = t2 - t1;
 
-	// double timeRadixR = (((double)tdiff4) / CLOCKS_PER_SEC);
-	// double nsigsRadixR = ((double)ROUNDS) / timeRadixR;
-	// printf("HACL P-256 ECDH R PERF/Radix4 \n");
-	// printf("ECDH %8.2f mul/s\n",nsigsRadixR);
-
+	double timeECCKillaR = (((double)tdiff7) / CLOCKS_PER_SEC);
+	double nsigsECCKillaR = ((double)ROUNDS) / timeECCKillaR;
+	printf("ECC Killa P-256 ECDH R PERF \n");
+	printf("ECDH %8.2f mul/s\n",nsigsECCKillaR);
 
 
 

@@ -3572,7 +3572,8 @@ scalarMultiplicationL(
       }
     case Spec_P256_Radix4:
       {
-        for (uint32_t i = (uint32_t)0U; i < (uint32_t)256U; i++)
+        // printf("%s\n", "I am herer");
+        for (uint32_t i = (uint32_t)0U; i < (uint32_t)64; i++)
         {
           uint32_t bit0 = (uint32_t)255U - i;
           uint64_t

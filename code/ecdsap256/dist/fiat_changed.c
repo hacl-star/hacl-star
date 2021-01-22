@@ -3795,7 +3795,7 @@ static void point_add_mixed(pt_prj_t *R, const pt_prj_t *Q, const pt_aff_t *P) {
  */
 static void point_add_proj(pt_prj_t *R, const pt_prj_t *Q, const pt_prj_t *P) {
     /* temporary variables */
-    printf("%s\n", ".P");
+    // printf("%s  ", ".P");
     fe_t t0, t1, t2, t3, t4, t5;
     /* constants */
     const limb_t *b = const_b;
@@ -3924,7 +3924,7 @@ static void scalar_rwnaf(int64_t out2[103], const unsigned char in[32]) {
     uint64_t cAsFlag = (uint64_t)0xffffffffU + c;
     uint64_t r3 = (r & cAsFlag) | (r1 & ~cAsFlag);
 
-    printf("%d  ", i);
+    // printf("%d  ", i);
 
 
     out2[(uint32_t)2U * i] = r3;
@@ -4068,13 +4068,9 @@ static void var_smul_rwnaf(pt_aff_t *out, const unsigned char scalar[32],
     pt_prj_t precomp[DRADIX / 2];
 
     precomp_wnaf(precomp, P);
-    // scalar_rwnaf(rnaf, scalar);
 
-#if defined(_MSC_VER)
-/* result still unsigned: yes we know */
-#pragma warning(push)
-#pragma warning(disable : 4146)
-#endif
+    
+    // scalar_rwnaf(rnaf, scalar);
 
     /* initialize accumulator to high digit */
     d = (rnaf[51] - 1) >> 1;
@@ -4104,10 +4100,6 @@ static void var_smul_rwnaf(pt_aff_t *out, const unsigned char scalar[32],
         fiat_secp256r1_selectznz(lut.Y, is_neg, lut.Y, out->Y);
         point_add_proj(&Q, &Q, &lut);
     }
-
-#if defined(_MSC_VER)
-#pragma warning(pop)
-#endif
 
     /* conditionally subtract P if the scalar was even */
     fe_copy(lut.X, precomp[0].X);
