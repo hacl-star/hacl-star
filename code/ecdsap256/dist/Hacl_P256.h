@@ -96,12 +96,6 @@ bool Hacl_P256_ecp256dh_r_ladder(uint8_t *result, uint8_t *pubKey, uint8_t *scal
 */
 bool Hacl_P256_ecp256dh_r_radix4(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
 
-void Hacl_P256_scalar_rwnaf(uint64_t *out, uint8_t *scalar);
-
-uint64_t Hacl_P256_scalar_bit(uint8_t *b, uint32_t c);
-
-void loopK(uint64_t d, uint32_t j);
-
 
 #define __Hacl_P256_H_DEFINED
 #endif

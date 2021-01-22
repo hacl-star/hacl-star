@@ -480,19 +480,3 @@ val is_more_than_zero_less_than_order: x: lbuffer uint8 (size 32) -> Stack bool
   )
  *)
 
-
-
-
-val scalar_rwnaf : out: lbuffer uint64 (size 104) -> scalar: lbuffer uint8 (size 32) -> 
-  Stack unit 
-    (requires fun h -> True)
-    (ensures fun h0 _ h1 -> True)
-
-
-
-val scalar_bit:
-    s:lbuffer_t MUT uint8 (size 32)
-  -> n:size_t{v n < 256}
-  -> Stack uint64
-    (requires fun h0 -> live h0 s)
-    (ensures  fun h0 r h1 -> h0 == h1 /\  v r <= 1)

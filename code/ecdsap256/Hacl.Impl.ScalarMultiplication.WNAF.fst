@@ -27,6 +27,17 @@ open Hacl.Impl.ScalarMultiplication.WNAF.Table.Ext
 (* this piece of code is taken from Hacl.Curve25519 *)
 (* changed Endian for Scalar Bit access *)
 
+
+(* 
+
+static uint64_t scalar_bit(uint8_t *s, uint32_t n)
+{
+  if (n / 8 == 32)
+    return 0;
+  return (uint64_t)(s[31 - (n / (uint32_t)8U)] >> n % (uint32_t)8U & (uint8_t)1U);
+}
+
+*)
 val scalar_bit:
     s:lbuffer_t MUT uint8 (size 32)
   -> n:size_t{v n < 256}
@@ -155,7 +166,7 @@ let conditional_substraction result p scalar tempBuffer =
   (* mask == 0 <==> scalar last bit == 0 *)
 
   let i0 = index scalar (size 0) in 
-  let mask = (u64 0) -. to_u64 (logand i0 (u8 1)) in 
+  let mask = ((u64 0) -. to_u64 (logand i0 (u8 1))) in 
 
   let bpX = getUInt64 (size 0) in 
   let bpY = getUInt64 (size 4) in 

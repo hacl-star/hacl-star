@@ -3660,7 +3660,7 @@ static const pt_aff_t lut_cmb[27][16] = {
  */
 static void point_double(pt_prj_t *Q, const pt_prj_t *P) {
     /* temporary variables */
-     printf("%s", "?");
+     // printf("%s", "?");
 
     fe_t t0, t1, t2, t3, t4;
     /* constants */
@@ -3721,7 +3721,7 @@ static void point_double(pt_prj_t *Q, const pt_prj_t *P) {
 static void point_add_mixed(pt_prj_t *R, const pt_prj_t *Q, const pt_aff_t *P) {
     /* temporary variables */
 
-      printf("%s", ".");
+      // printf("%s", ".");
 
 
     fe_t t0, t1, t2, t3, t4;
@@ -4119,6 +4119,16 @@ static void var_smul_rwnaf(pt_aff_t *out, const unsigned char scalar[32],
     fiat_secp256r1_mul(out->Y, Q.Y, Q.Z);
 }
 
+#include <inttypes.h>
+static void printUF(uint64_t* t, int len)
+{
+  for (int i = 0; i< len; i++) {
+    printf("%016llX ", t[i]);  
+  }
+  printf("\n");
+}
+
+
 /*-
  * Fixed scalar multiplication: comb with interleaving.
  */
@@ -4132,6 +4142,10 @@ static void fixed_smul_cmb(pt_aff_t *out, const unsigned char scalar[32]) {
 
     scalar_rwnaf(rnaf2, scalar);
 
+    // for (int k = 0; k < 103; k++)
+    //     printf("%02x ", rnaf2[k]);
+
+
     /* initalize accumulator to inf */
     fe_set_zero(Q.X);
     fe_copy(Q.Y, const_one);
@@ -4144,25 +4158,50 @@ static void fixed_smul_cmb(pt_aff_t *out, const unsigned char scalar[32]) {
 
         d = rnaf2[2 * (j * 2 + i)];
         is_neg = rnaf2[2 * (j * 2 + i) + 1];
+            
+            // printf("%x  ", j);
+            // printf("%x  ", d);
             d = (d - 1) >> 1;
+
             for (k = 0; k < DRADIX / 2; k++) {
+
+                // printf("%s %d \n", "k  = ", k);                
                 diff = (1 - (-(d ^ k) >> 31)) & 1;
-                fiat_secp256r1_selectznz(lut.X, diff, lut.X, lut_cmb[j][k].X);
-                fiat_secp256r1_selectznz(lut.Y, diff, lut.Y, lut_cmb[j][k].Y);
+                fiat_secp256r1_selectznz(lut.X, diff, lut.X, lut_cmb[j][d].X);
+                fiat_secp256r1_selectznz(lut.Y, diff, lut.Y, lut_cmb[j][d].Y);
+
+                // printUF(lut.X, 4);
+                // printUF(lut.Y, 4);
+
             }
+
+            // break;
+
             /* negate lut point if digit is negative */
             fiat_secp256r1_opp(out->Y, lut.Y);
             fiat_secp256r1_selectznz(lut.Y, is_neg, lut.Y, out->Y);
             point_add_mixed(&Q, &Q, &lut);
         }
+
+        printf("\n");
+
         i = 0;
 
-                for (j = 0; i != 1 && j < RADIX; j++) point_double(&Q, &Q);
-        for (j = 0; j < 26; j++) {
+        for (j = 0; i != 1 && j < RADIX; j++) point_double(&Q, &Q);
+        
 
+        for (j = 0; j < 26; j++) {
+            
+            
             d = rnaf2[2 * (j * 2)];
             is_neg = rnaf2[2 * (j * 2) + 1];
+
+            // printf("%x  ", j);
+            // printf("%x  ", d);
             d = (d - 1) >> 1;
+
+            // printf("%x  \n", d);
+
             for (k = 0; k < DRADIX / 2; k++) {
                 diff = (1 - (-(d ^ k) >> (8 * sizeof(int) - 1))) & 1;
                 fiat_secp256r1_selectznz(lut.X, diff, lut.X, lut_cmb[j][k].X);
@@ -12329,13 +12368,16 @@ static int scalar_get_bit(const unsigned char in[32], int idx) {
 /*-
  * Fixed scalar multiplication: comb with interleaving.
  */
-static void fixed_smul_cmb(pt_aff_t *out, const unsigned char scalar[32]) {
+static void asda(pt_aff_t *out, const unsigned char scalar[32]) {
     int i, j, k, d, diff, is_neg = 0;
     int8_t rnaf[52] = {0};
     pt_prj_t Q = {0}, R = {0};
     pt_aff_t lut = {0};
 
     scalar_rwnaf(rnaf, scalar);
+
+
+
 
     /* initalize accumulator to inf */
     fe_set_zero(Q.X);

@@ -3916,8 +3916,10 @@ static void scalar_rwnaf(int8_t out[52], const unsigned char in[32]) {
         window += scalar_get_bit(in, (i + 1) * RADIX + 3) << 3;
         window += scalar_get_bit(in, (i + 1) * RADIX + 4) << 4;
         window += scalar_get_bit(in, (i + 1) * RADIX + 5) << 5;
+
     }
     out[i] = window;
+
 }
 
 /*-
