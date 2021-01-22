@@ -117,11 +117,9 @@ bool test_nist()
 	};
 	
 
-	// static uint8_t privateKey[32] = {
-	// 0x7d, 0x7d, 0xc5, 0xf7, 0x1e, 0xb2, 0x9d, 0xda, 0xf8, 0x0d, 0x62, 0x14, 0x63, 0x2e, 0xea, 0xe0, 0x3d, 0x90, 0x58, 0xaf, 0x1f, 0xb6, 0xd2, 0x2e, 0xd8, 0x0b, 0xad, 0xb6, 0x2b, 0xc1, 0xa5, 0x34 };
+	static uint8_t privateKey[32] = {
+	0x7d, 0x7d, 0xc5, 0xf7, 0x1e, 0xb2, 0x9d, 0xda, 0xf8, 0x0d, 0x62, 0x14, 0x63, 0x2e, 0xea, 0xe0, 0x3d, 0x90, 0x58, 0xaf, 0x1f, 0xb6, 0xd2, 0x2e, 0xd8, 0x0b, 0xad, 0xb6, 0x2b, 0xc1, 0xa5, 0x34 };
 
-	static uint8_t privateKey[32] = {0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x1 
-	};
 
 	static uint8_t expectedPublicKeyX[32] = {
 	0xea, 0xd2, 0x18, 0x59, 0x01, 0x19, 0xe8, 0x87, 0x6b, 0x29, 0x14, 0x6f, 0xf8, 0x9c, 0xa6, 0x17, 0x70, 0xc4, 0xed, 0xbb, 0xf9, 0x7d, 0x38, 0xce, 0x38, 0x5e, 0xd2, 0x81, 0xd8, 0xa6, 0xb2, 0x30 
@@ -136,30 +134,27 @@ bool test_nist()
 
 	};
 
+	bool ok = true;
 
 	uint8_t* result = (uint8_t*) malloc (sizeof (uint8_t) * 64);
 	uint8_t* pk = (uint8_t*) malloc (sizeof (uint8_t) * 64);
 	
-	bool ok = true;
+	
+	bool successDHI = Hacl_P256_ecp256dh_i_ladder(result, privateKey);
+	printf("\n");
+	ok = ok && successDHI;
+	ok = ok && compare(32, result, expectedPublicKeyX);
+	ok = ok && compare(32, result + 32, expectedPublicKeyY);
 
-	// bool successDHI = Hacl_P256_ecp256dh_i_ladder(result, privateKey);
-	// printf("\n");
-	// ok = ok && successDHI;
-	// ok = ok && compare(32, result, expectedPublicKeyX);
-	// ok = ok && compare(32, result + 32, expectedPublicKeyY);
+	bool successDHI_Radix = Hacl_P256_ecp256dh_i_radix4(result, privateKey);
+	ok = ok && successDHI_Radix;
+	ok = ok && compare(32, result, expectedPublicKeyX);
+	ok = ok && compare(32, result + 32, expectedPublicKeyY);
 
-	// bool successDHI_Radix = Hacl_P256_ecp256dh_i_radix4(result, privateKey);
-	// ok = ok && successDHI_Radix;
-	// ok = ok && compare(32, result, expectedPublicKeyX);
-	// ok = ok && compare(32, result + 32, expectedPublicKeyY);
-
-
-	// printf("%s %d\n", "I expect to be failing here", ok);
 
 	bool successDHI_Comb = Hacl_P256_ecp256dh_i_cmb(result, privateKey);
-	compare_and_print(32, result, result);
-	compare_and_print(32, result + 32, result + 32);
-
+	ok = ok && compare_and_print(32, result, expectedPublicKeyX);
+	ok = ok && compare_and_print(32, result + 32, expectedPublicKeyY);
 
 	// memcpy(pk, publicKeyX1,  32);
 	// memcpy(pk+32, publicKeyY1,  32);
@@ -180,7 +175,7 @@ bool test_nist()
 	// ok = ok && compare(32, result + 32, expectedPublicKeyY);
 
 
-	// return ok;
+	return ok;
 
 	printf("\n");
 
@@ -196,17 +191,19 @@ bool test_nist()
 
 	point_mul_g(outx, outy, privateKey);
 
+	MP_BE2LE(privateKey);
 	MP_BE2LE(outx);
 	MP_BE2LE(outy);
 
 
-	printf("\n");
-	ok = ok && compare_and_print(32, outx, outx);
-	ok = ok && compare_and_print(32, outy, outy);
+	// printf("\n");
+	compare_and_print(32, outx, expectedPublicKeyX);
+	compare_and_print(32, outy, expectedPublicKeyY);
 
 
 	free(result);
 	free(pk);
+
 
 	return ok;
 }
@@ -224,9 +221,8 @@ int main()
 			return -1;
 		}
 
-		return -1;
+		// return -1;
 
-	printf("\n");
 
 	cycles a,b;
 	clock_t t1,t2;

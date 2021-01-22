@@ -165,8 +165,8 @@ let conditional_substraction result p scalar tempBuffer =
 
   (* mask == 0 <==> scalar last bit == 0 *)
 
-  let i0 = index scalar (size 0) in 
-  let mask = ((u64 0) -. to_u64 (logand i0 (u8 1))) in 
+  let i0 = index scalar (size 31) in 
+  let mask = lognot((u64 0) -. to_u64 (logand i0 (u8 1))) in 
 
   let bpX = getUInt64 (size 0) in 
   let bpY = getUInt64 (size 4) in 

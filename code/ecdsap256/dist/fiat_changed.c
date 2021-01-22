@@ -4183,7 +4183,7 @@ static void fixed_smul_cmb(pt_aff_t *out, const unsigned char scalar[32]) {
             point_add_mixed(&Q, &Q, &lut);
         }
 
-        printf("\n");
+        // printf("\n");
 
         i = 0;
 

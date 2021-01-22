@@ -2635,8 +2635,8 @@ conditional_substraction(uint64_t *result, uint64_t *p, uint8_t *scalar, uint64_
   uint64_t bpMinus[8U] = { 0U };
   uint64_t *bpMinusX = bpMinus;
   uint64_t *bpMinusY = bpMinus + (uint32_t)4U;
-  uint8_t i0 = scalar[0U];
-  uint64_t mask = (uint64_t)0U - (uint64_t)(i0 & (uint8_t)1U);
+  uint8_t i0 = scalar[31U];
+  uint64_t mask = ~((uint64_t)0U - (uint64_t)(i0 & (uint8_t)1U));
   uint64_t *bpX = Hacl_Impl_ScalarMultiplication_WNAF_Table_Ext_getUInt64((uint32_t)0U);
   uint64_t *bpY = Hacl_Impl_ScalarMultiplication_WNAF_Table_Ext_getUInt64((uint32_t)4U);
   memcpy(bpMinusX, bpX, (uint32_t)4U * sizeof (uint64_t));
