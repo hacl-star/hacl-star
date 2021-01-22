@@ -929,11 +929,11 @@ let scalarMultiplication_t #t m p result scalar tempBuffer  =
 
     begin
   match m with 
-  |Ladder ->
+  |Radix4 ->
      let bufferPrecomputed = create (size 192) (u64 0) in 
      generatePrecomputedTable bufferPrecomputed result buff;
      montgomery_ladder_2 q scalar buff bufferPrecomputed
-  |Radix4 ->
+  |Ladder ->
       montgomery_ladder q result scalar buff
   |Comb ->
       montgomery_ladder q result scalar buff
