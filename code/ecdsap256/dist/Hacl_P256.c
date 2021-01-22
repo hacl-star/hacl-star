@@ -3538,13 +3538,34 @@ scalarMultiplicationL(
   {
     case Spec_P256_Ladder:
       {
+        for (uint32_t i = (uint32_t)0U; i < (uint32_t)256; i++)
+        {
+          uint32_t bit0 = (uint32_t)255U - i;
+          uint64_t
+          bit =
+            (uint64_t)(scalar[(uint32_t)31U
+            - bit0 / (uint32_t)8U]
+            >> bit0 % (uint32_t)8U
+            & (uint8_t)1U);
+          cswap(bit, q, result);
+          point_add(q, result, result, buff);
+          point_double(q, q, buff);
+          cswap(bit, q, result);
+        }
+        break;
+      }
+    case Spec_P256_Radix4:
+      {
+        
         uint64_t init = (uint64_t)0U;
         for (uint32_t i = (uint32_t)0U; i < (uint32_t)192U; i++)
         {
           bufferPrecomputed[i] = init;
         }
         generatePrecomputedTable(bufferPrecomputed, result, buff);
-        for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
+        
+
+        for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++) 
         {
           uint32_t half = i >> (uint32_t)1U;
           uint32_t word = (uint32_t)scalar[half];
@@ -3567,25 +3588,6 @@ scalarMultiplicationL(
           point_double(q, q, buff);
           point_double(q, q, buff);
           point_add(pointToAdd, q, q, buff);
-        }
-        break;
-      }
-    case Spec_P256_Radix4:
-      {
-        // printf("%s\n", "I am herer");
-        for (uint32_t i = (uint32_t)0U; i < (uint32_t)64; i++)
-        {
-          uint32_t bit0 = (uint32_t)255U - i;
-          uint64_t
-          bit =
-            (uint64_t)(scalar[(uint32_t)31U
-            - bit0 / (uint32_t)8U]
-            >> bit0 % (uint32_t)8U
-            & (uint8_t)1U);
-          cswap(bit, q, result);
-          point_add(q, result, result, buff);
-          point_double(q, q, buff);
-          cswap(bit, q, result);
         }
         break;
       }

@@ -175,15 +175,12 @@ bool test_nist()
 	memcpy(pk+32, publicKeyY1,  32);
 	   
 	bool successDHR = Hacl_P256_ecp256dh_r_ladder(result, pk, privateKey);
-	ok = ok && successDHR;
-	ok = ok && compare(32, result, expectedResult);
+	// ok = ok && successDHR;
+	ok = ok && compare_and_print(32, result, expectedResult);
 
 
 	bool successDHR_Radix = Hacl_P256_ecp256dh_r_radix4(result, pk, privateKey);
-	ok = ok && successDHR_Radix;
-	ok = ok && compare(32, result, expectedResult);
-
-
+	ok = ok && compare_and_print(32, result, expectedResult);
 
 
 
