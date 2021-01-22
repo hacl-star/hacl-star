@@ -2542,6 +2542,11 @@ point_add_mixed(
   cmovznz4(result_z, x_z, p_z, mask0);
 }
 
+static void scalar_multiplication_cmb(Lib_Buffer_buftype buf_type)
+{
+  
+}
+
 static uint64_t scalar_bit(uint8_t *s, uint32_t n)
 {
   return (uint64_t)(s[(uint32_t)31U - n / (uint32_t)8U] >> n % (uint32_t)8U & (uint8_t)1U);
@@ -2624,11 +2629,11 @@ static void loopK(uint64_t d, uint64_t *point, uint32_t j)
     uint64_t mask = FStar_UInt64_eq_mask(d, (uint64_t)i);
     uint64_t
     *lut_cmb_x =
-      Hacl_Impl_ScalarMultiplication_WNAF_Table_Ext_getUInt64((j * (uint32_t)16U + i)
+      Hacl_Impl_ScalarMultiplication_RWNAF_Table_Ext_getUInt64((j * (uint32_t)16U + i)
         * (uint32_t)(krml_checked_int_t)8);
     uint64_t
     *lut_cmb_y =
-      Hacl_Impl_ScalarMultiplication_WNAF_Table_Ext_getUInt64((j * (uint32_t)16U + i)
+      Hacl_Impl_ScalarMultiplication_RWNAF_Table_Ext_getUInt64((j * (uint32_t)16U + i)
         * (uint32_t)(krml_checked_int_t)8
         + (uint32_t)4U);
     copy_conditional(point, lut_cmb_x, mask);
@@ -2645,15 +2650,15 @@ conditional_substraction(uint64_t *result, uint64_t *p, uint8_t *scalar, uint64_
   uint64_t *bpMinusY = bpMinus + (uint32_t)4U;
   uint8_t i0 = scalar[31U];
   uint64_t mask = ~((uint64_t)0U - (uint64_t)(i0 & (uint8_t)1U));
-  uint64_t *bpX = Hacl_Impl_ScalarMultiplication_WNAF_Table_Ext_getUInt64((uint32_t)0U);
-  uint64_t *bpY = Hacl_Impl_ScalarMultiplication_WNAF_Table_Ext_getUInt64((uint32_t)4U);
+  uint64_t *bpX = Hacl_Impl_ScalarMultiplication_RWNAF_Table_Ext_getUInt64((uint32_t)0U);
+  uint64_t *bpY = Hacl_Impl_ScalarMultiplication_RWNAF_Table_Ext_getUInt64((uint32_t)4U);
   memcpy(bpMinusX, bpX, (uint32_t)4U * sizeof (uint64_t));
   p256_neg(bpY, bpMinusY);
   point_add_mixed(Lib_Buffer_MUT, p, (void *)bpMinus, tempPoint, tempBuffer);
   copy_point_conditional_mask_u64_2(result, tempPoint, mask);
 }
 
-static void scalar_multiplication_cmb(uint64_t *result, void *scalar, uint64_t *tempBuffer)
+static void scalar_multiplication_cmb0(uint64_t *result, void *scalar, uint64_t *tempBuffer)
 {
   uint64_t rnaf2[104U] = { 0U };
   uint64_t lut[8U] = { 0U };
@@ -3536,36 +3541,15 @@ scalarMultiplicationL(
   uint64_t bufferPrecomputed[192U];
   switch (m)
   {
-    case Spec_P256_Ladder:
-      {
-        for (uint32_t i = (uint32_t)0U; i < (uint32_t)256; i++)
-        {
-          uint32_t bit0 = (uint32_t)255U - i;
-          uint64_t
-          bit =
-            (uint64_t)(scalar[(uint32_t)31U
-            - bit0 / (uint32_t)8U]
-            >> bit0 % (uint32_t)8U
-            & (uint8_t)1U);
-          cswap(bit, q, result);
-          point_add(q, result, result, buff);
-          point_double(q, q, buff);
-          cswap(bit, q, result);
-        }
-        break;
-      }
     case Spec_P256_Radix4:
       {
-        
         uint64_t init = (uint64_t)0U;
         for (uint32_t i = (uint32_t)0U; i < (uint32_t)192U; i++)
         {
           bufferPrecomputed[i] = init;
         }
         generatePrecomputedTable(bufferPrecomputed, result, buff);
-        
-
-        for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++) 
+        for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
         {
           uint32_t half = i >> (uint32_t)1U;
           uint32_t word = (uint32_t)scalar[half];
@@ -3591,7 +3575,7 @@ scalarMultiplicationL(
         }
         break;
       }
-    case Spec_P256_Comb:
+    case Spec_P256_Ladder:
       {
         for (uint32_t i = (uint32_t)0U; i < (uint32_t)256U; i++)
         {
@@ -3607,6 +3591,11 @@ scalarMultiplicationL(
           point_double(q, q, buff);
           cswap(bit, q, result);
         }
+        break;
+      }
+    case Spec_P256_Comb:
+      {
+        scalar_multiplication_cmb(Lib_Buffer_MUT);
         break;
       }
     default:
@@ -3660,7 +3649,7 @@ scalarMultiplicationC(
   uint64_t bufferPrecomputed[192U];
   switch (m)
   {
-    case Spec_P256_Ladder:
+    case Spec_P256_Radix4:
       {
         uint64_t init = (uint64_t)0U;
         for (uint32_t i = (uint32_t)0U; i < (uint32_t)192U; i++)
@@ -3694,7 +3683,7 @@ scalarMultiplicationC(
         }
         break;
       }
-    case Spec_P256_Radix4:
+    case Spec_P256_Ladder:
       {
         for (uint32_t i = (uint32_t)0U; i < (uint32_t)256U; i++)
         {
@@ -3714,20 +3703,7 @@ scalarMultiplicationC(
       }
     case Spec_P256_Comb:
       {
-        for (uint32_t i = (uint32_t)0U; i < (uint32_t)256U; i++)
-        {
-          uint32_t bit0 = (uint32_t)255U - i;
-          uint64_t
-          bit =
-            (uint64_t)(scalar[(uint32_t)31U
-            - bit0 / (uint32_t)8U]
-            >> bit0 % (uint32_t)8U
-            & (uint8_t)1U);
-          cswap(bit, q, result);
-          point_add(q, result, result, buff);
-          point_double(q, q, buff);
-          cswap(bit, q, result);
-        }
+        scalar_multiplication_cmb(Lib_Buffer_CONST);
         break;
       }
     default:
@@ -4147,7 +4123,7 @@ bool Hacl_P256_ecp256dh_i_cmb(uint8_t *result, uint8_t *scalar)
   uint64_t tempBuffer[100U] = { 0U };
   uint64_t resultBuffer[12U] = { 0U };
   uint64_t *buff = tempBuffer + (uint32_t)12U;
-  scalar_multiplication_cmb(resultBuffer, (void *)scalar, buff);
+  scalar_multiplication_cmb0(resultBuffer, (void *)scalar, buff);
   norm(resultBuffer, resultBuffer, buff);
   uint64_t flag = isPointAtInfinityPrivate(resultBuffer);
   fromFormPoint(resultBuffer, result);
@@ -4218,6 +4194,39 @@ bool Hacl_P256_ecp256dh_r_radix4(uint8_t *result, uint8_t *pubKey, uint8_t *scal
       resultBufferFelem,
       scalar,
       tempBuffer);
+    flag = isPointAtInfinityPrivate(resultBufferFelem);
+  }
+  else
+  {
+    flag = (uint64_t)18446744073709551615U;
+  }
+  fromFormPoint(resultBufferFelem, result);
+  return flag == (uint64_t)0U;
+}
+
+/*
+ 
+   The pub(lic)_key input of the function is considered to be public, 
+  thus this code is not secret independent with respect to the operations done over this variable.
+  
+ Input: result: uint8[64], 
+ pub(lic)Key: uint8[64], 
+ scalar: uint8[32].
+  
+ Output: bool, where True stands for the correct key generation. False value means that an error has occurred (possibly the provided public key was incorrect or the result represents point at infinity). 
+  
+*/
+bool Hacl_P256_ecp256dh_r_comb(uint8_t *result, uint8_t *pubKey, uint8_t *scalar)
+{
+  uint64_t resultBufferFelem[12U] = { 0U };
+  uint64_t publicKeyAsFelem[12U] = { 0U };
+  uint64_t tempBuffer[100U] = { 0U };
+  toFormPoint(pubKey, publicKeyAsFelem);
+  bool publicKeyCorrect = verifyQValidCurvePoint(publicKeyAsFelem, tempBuffer);
+  uint64_t flag;
+  if (publicKeyCorrect)
+  {
+    scalarMultiplicationL(Spec_P256_Comb, publicKeyAsFelem, resultBufferFelem, scalar, tempBuffer);
     flag = isPointAtInfinityPrivate(resultBufferFelem);
   }
   else

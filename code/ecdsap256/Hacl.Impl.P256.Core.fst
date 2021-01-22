@@ -18,7 +18,7 @@ open Hacl.Impl.SolinasReduction
 open Hacl.Impl.P256.LowLevel 
 open Hacl.Impl.P256.LowLevel.PrimeSpecific
 open Hacl.Impl.P256.MontgomeryMultiplication
-open Hacl.Impl.ScalarMultiplication.WNAF
+open Hacl.Impl.ScalarMultiplication.RWNAF
 open Hacl.Impl.P256.Math 
 
 open Hacl.Impl.P256.PointAdd
@@ -936,7 +936,7 @@ let scalarMultiplication_t #t m p result scalar tempBuffer  =
   |Ladder ->
       montgomery_ladder q result scalar buff
   |Comb ->
-      montgomery_ladder q result scalar buff
+    Hacl.Impl.ScalarMultiplication.WNAF.scalar_multiplication_cmb result scalar buff
   end;
 
     let h3 = ST.get() in 
@@ -1064,10 +1064,10 @@ let secretToPublic m result scalar tempBuffer =
       uploadBasePoint basePoint;
     montgomery_ladder result basePoint scalar buff
   |Radix4 ->
-      montgomery_ladder_2_precomputed result scalar buff
+    montgomery_ladder_2_precomputed result scalar buff
   |Comb -> 
-    scalar_multiplication_cmb result scalar buff
-   end; 
+    Hacl.Impl.ScalarMultiplication.RWNAF.scalar_multiplication_cmb result scalar buff
+  end; 
   (* zero_buffer result; *)
     let h1 = ST.get() in 
     lemma_pif_to_domain h1 basePoint;

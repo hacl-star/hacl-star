@@ -88,6 +88,9 @@ let ecp256dh_r_ladder result pubKey scalar = Hacl.Impl.P256.DH.ecp256dh_r Ladder
 
 let ecp256dh_r_radix4 result pubKey scalar = Hacl.Impl.P256.DH.ecp256dh_r Radix4 result pubKey scalar
 
+
+let ecp256dh_r_comb result pubKey scalar = Hacl.Impl.P256.DH.ecp256dh_r Comb result pubKey scalar
+
 (* 
 let is_more_than_zero_less_than_order x =
   Hacl.Impl.P256.Signature.Common.isMoreThanZeroLessThanOrder x

@@ -96,6 +96,20 @@ bool Hacl_P256_ecp256dh_r_ladder(uint8_t *result, uint8_t *pubKey, uint8_t *scal
 */
 bool Hacl_P256_ecp256dh_r_radix4(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
 
+/*
+ 
+   The pub(lic)_key input of the function is considered to be public, 
+  thus this code is not secret independent with respect to the operations done over this variable.
+  
+ Input: result: uint8[64], 
+ pub(lic)Key: uint8[64], 
+ scalar: uint8[32].
+  
+ Output: bool, where True stands for the correct key generation. False value means that an error has occurred (possibly the provided public key was incorrect or the result represents point at infinity). 
+  
+*/
+bool Hacl_P256_ecp256dh_r_comb(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
+
 
 #define __Hacl_P256_H_DEFINED
 #endif
