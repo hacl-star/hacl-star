@@ -175,8 +175,6 @@ bool test_nist()
 	// ok = ok && compare(32, result + 32, expectedPublicKeyY);
 
 
-	return ok;
-
 	printf("\n");
 
 	printf("%s\n", "---------------------------------------------------------------" );
@@ -197,8 +195,8 @@ bool test_nist()
 
 
 	// printf("\n");
-	compare_and_print(32, outx, expectedPublicKeyX);
-	compare_and_print(32, outy, expectedPublicKeyY);
+	ok = ok && compare_and_print(32, outx, expectedPublicKeyX);
+	ok = ok && compare_and_print(32, outy, expectedPublicKeyY);
 
 
 	free(result);
@@ -221,7 +219,7 @@ int main()
 			return -1;
 		}
 
-		// return -1;
+		return -1;
 
 
 	cycles a,b;
@@ -250,7 +248,7 @@ int main()
 
 	double time = (((double)tdiff1) / CLOCKS_PER_SEC);
 	double nsigs = ((double)ROUNDS) / time;
-	printf("HACL P-256 ECDH PERF/Ladder \n");
+	printf("HACL P-256 ECDH PERF/Hacl Ladder \n");
 	printf("ECDH %8.2f mul/s\n",nsigs);
 
 
@@ -276,7 +274,7 @@ int main()
 
 	double timeRadix = (((double)tdiff2) / CLOCKS_PER_SEC);
 	double nsigsRadix = ((double)ROUNDS) / timeRadix;
-	printf("HACL P-256 ECDH PERF/Radix4 \n");
+	printf("HACL P-256 ECDH PERF/Hacl Radix4 \n");
 	printf("ECDH %8.2f mul/s\n",nsigsRadix);
 
 
@@ -299,7 +297,7 @@ int main()
 
 	double timeComb = (((double)tdiff5) / CLOCKS_PER_SEC);
 	double nsigsComb= ((double)ROUNDS) / timeComb;
-	printf("HACL P-256 ECDH PERF/Comb \n");
+	printf("HACL P-256 ECDH PERF/Hacl Comb \n");
 	printf("ECDH %8.2f mul/s\n",nsigsComb);
 
 
@@ -323,7 +321,7 @@ int main()
 
 	double timeFirstVersion = (((double)tdiff3) / CLOCKS_PER_SEC);
 	double nsigsFirstVersion = ((double)ROUNDS) / timeFirstVersion;
-	printf("HACL P-256 ECDH PERF - The initial version \n");
+	printf("HACL P-256 ECDH PERF -Hacl The initial version \n");
 	printf("ECDH %8.2f mul/s\n",nsigsFirstVersion);
 
 
@@ -351,7 +349,7 @@ int main()
 
 	double timeFiat = (((double)tdiff4) / CLOCKS_PER_SEC);
 	double nsigsFiat = ((double)ROUNDS) / timeFiat;
-	printf("HACL P-256 ECDH PERF - EccKilla \n");
+	printf("EccKilla P-256 ECDH PERF \n");
 	printf("ECDH %8.2f mul/s\n",nsigsFiat);
 
 

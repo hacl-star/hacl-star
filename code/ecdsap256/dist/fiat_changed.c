@@ -3893,6 +3893,7 @@ static int scalar_bit(const unsigned char s[32], int n) {
 
     // return (in[widx] >> rshift) & 0x1;
 
+    // printf("n == %d\n", n);
 
     if (n / 8 == 32)
     return 0;
@@ -3922,6 +3923,10 @@ static void scalar_rwnaf(int64_t out2[103], const unsigned char in[32]) {
     uint64_t c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, (uint64_t)0U, r, &r1);
     uint64_t cAsFlag = (uint64_t)0xffffffffU + c;
     uint64_t r3 = (r & cAsFlag) | (r1 & ~cAsFlag);
+
+    printf("%d  ", i);
+
+
     out2[(uint32_t)2U * i] = r3;
     out2[(uint32_t)2U * i + (uint32_t)1] = c;
     uint64_t wStart = (wVar - d) >> (uint32_t)(uint64_t)5U;

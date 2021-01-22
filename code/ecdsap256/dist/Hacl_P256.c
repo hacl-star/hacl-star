@@ -2544,11 +2544,8 @@ point_add_mixed(
 
 static uint64_t scalar_bit(uint8_t *s, uint32_t n)
 {
-  if (n / 8 == 32)
-    return 0;
-  return (uint64_t)(s[31 - (n / (uint32_t)8U)] >> n % (uint32_t)8U & (uint8_t)1U);
+  return (uint64_t)(s[(uint32_t)31U - n / (uint32_t)8U] >> n % (uint32_t)8U & (uint8_t)1U);
 }
-
 
 static void scalar_rwnaf(uint64_t *out, uint8_t *scalar)
 {
@@ -2557,7 +2554,7 @@ static void scalar_rwnaf(uint64_t *out, uint8_t *scalar)
   uint64_t window = windowStartValue;
   uint64_t r = (uint64_t)0U;
   uint64_t r1 = (uint64_t)0U;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)51U; i++)
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)50U; i++)
   {
     uint64_t wVar = window;
     uint64_t w = wVar & (uint64_t)63U;
@@ -2606,7 +2603,18 @@ static void scalar_rwnaf(uint64_t *out, uint8_t *scalar)
         << (uint32_t)5U);
     window = w04;
   }
-  out[102U] = window;
+  uint32_t i = (uint32_t)50U;
+  uint64_t wVar = window;
+  uint64_t w = wVar & (uint64_t)63U;
+  uint64_t d = (wVar & (uint64_t)63U) - (uint64_t)32U;
+  uint64_t c = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, w, (uint64_t)32U, &r);
+  uint64_t c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, (uint64_t)0U, r, &r1);
+  uint64_t cAsFlag = (uint64_t)0xffffffffU + c;
+  uint64_t r3 = ((r & cAsFlag) | (r1 & ~cAsFlag)) & (uint64_t)0xffU;
+  out[(uint32_t)2U * i] = r3;
+  out[(uint32_t)2U * i + (uint32_t)(krml_checked_int_t)1] = c;
+  uint64_t wStart = (wVar - d) >> (uint32_t)(uint64_t)5U;
+  out[102U] = wStart;
 }
 
 static void loopK(uint64_t d, uint64_t *point, uint32_t j)

@@ -81,7 +81,7 @@ let scalar_rwnaf out scalar =
  let h0 = ST.get() in 
  let inv h1 (i:nat) = live h1 window /\ live h1 out in  
 
-  Lib.Loops.for 0ul 51ul inv
+  Lib.Loops.for 0ul 50ul inv
     (fun i ->
 
       let h0 = ST.get() in 
@@ -101,7 +101,6 @@ let scalar_rwnaf out scalar =
       upd out (size 2 *! i) r3;
       upd out (size 2 *! i +! 1) c;
 
-
       let wStart = shift_right (wVar -! d) radix in 
       let w0 = wStart +! (shift_left (scalar_bit scalar ((size 1 +! i) *! radix +! (size 1))) (size 1)) in 
       let w0 = w0 +! (shift_left (scalar_bit scalar ((size 1 +! i) *! radix +! (size 2))) (size 2)) in 
@@ -114,7 +113,25 @@ let scalar_rwnaf out scalar =
 
     );
 
-    upd out (size 102) (index window (size 0));
+ let i = 50ul in 
+
+      let wVar : uint64 = index window (size 0) in 
+      
+      let w = logand wVar  (dradix_wnaf -! (u64 1)) in 
+      
+      let d = logand wVar (dradix_wnaf -! (u64 1)) -! dradix in 
+
+      let c = sub_borrow_u64 (u64 0) w dradix r in 
+      let c1 = sub_borrow_u64 (u64 0) (u64 0) (index r (size 0)) r1 in 
+      
+      let cAsFlag = (u64 0xffffffff) +! c in 
+      let r3 = logand (cmovznz2 (index r (size 0)) (index r1 (size 0)) cAsFlag) (u64 0xff) in 
+      
+      upd out (size 2 *! i) r3;
+      upd out (size 2 *! i +! 1) c;
+
+      let wStart = shift_right (wVar -! d) radix in 
+     upd out (size 102) wStart; 
 
 pop_frame()
 
