@@ -67,9 +67,9 @@ let precomputePoints b publicKey tempBuffer =
   point_add point8 point15 point9 tempBuffer;
   point_add point9 point15 point10 tempBuffer;
   point_add point10 point15 point11 tempBuffer;
-  point_add point11 point15 point11 tempBuffer;
-  point_add point12 point15 point12 tempBuffer;
-  point_add point13 point15 point13 tempBuffer;
+  point_add point11 point15 point12 tempBuffer;
+  point_add point12 point15 point13 tempBuffer;
+  point_add point13 point15 point14 tempBuffer;
   point_add point14 point15 point15 tempBuffer
   
 
