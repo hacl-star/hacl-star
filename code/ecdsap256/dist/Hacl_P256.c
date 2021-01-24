@@ -2542,11 +2542,6 @@ point_add_mixed(
   cmovznz4(result_z, x_z, p_z, mask0);
 }
 
-static void scalar_multiplication_cmb(Lib_Buffer_buftype buf_type)
-{
-  
-}
-
 static uint64_t scalar_bit(uint8_t *s, uint32_t n)
 {
   return (uint64_t)(s[(uint32_t)31U - n / (uint32_t)8U] >> n % (uint32_t)8U & (uint8_t)1U);
@@ -2658,7 +2653,7 @@ conditional_substraction(uint64_t *result, uint64_t *p, uint8_t *scalar, uint64_
   copy_point_conditional_mask_u64_2(result, tempPoint, mask);
 }
 
-static void scalar_multiplication_cmb0(uint64_t *result, void *scalar, uint64_t *tempBuffer)
+static void scalar_multiplication_cmb(uint64_t *result, void *scalar, uint64_t *tempBuffer)
 {
   uint64_t rnaf2[104U] = { 0U };
   uint64_t lut[8U] = { 0U };
@@ -2693,6 +2688,112 @@ static void scalar_multiplication_cmb0(uint64_t *result, void *scalar, uint64_t 
     point_add_mixed(Lib_Buffer_MUT, result, (void *)lut, result, tempBuffer);
   }
   conditional_substraction(result, result, (uint8_t *)scalar, tempBuffer);
+}
+
+static void precomputePoints(uint64_t *b, uint64_t *publicKey, uint64_t *tempBuffer)
+{
+  uint64_t *point0 = b;
+  uint64_t *point1 = b + (uint32_t)12U;
+  uint64_t *point2 = b + (uint32_t)24U;
+  uint64_t *point3 = b + (uint32_t)36U;
+  uint64_t *point4 = b + (uint32_t)48U;
+  uint64_t *point5 = b + (uint32_t)60U;
+  uint64_t *point6 = b + (uint32_t)72U;
+  uint64_t *point7 = b + (uint32_t)84U;
+  uint64_t *point8 = b + (uint32_t)96U;
+  uint64_t *point9 = b + (uint32_t)108U;
+  uint64_t *point10 = b + (uint32_t)120U;
+  uint64_t *point11 = b + (uint32_t)132U;
+  uint64_t *point12 = b + (uint32_t)144U;
+  uint64_t *point13 = b + (uint32_t)156U;
+  uint64_t *point14 = b + (uint32_t)168U;
+  uint64_t *point15 = b + (uint32_t)180U;
+  memcpy(point0, publicKey, (uint32_t)12U * sizeof (uint64_t));
+  point_double(point0, point15, tempBuffer);
+  point_add(point0, point15, point1, tempBuffer);
+  point_add(point1, point15, point2, tempBuffer);
+  point_add(point2, point15, point3, tempBuffer);
+  point_add(point3, point15, point4, tempBuffer);
+  point_add(point4, point15, point5, tempBuffer);
+  point_add(point5, point15, point6, tempBuffer);
+  point_add(point6, point15, point7, tempBuffer);
+  point_add(point7, point15, point8, tempBuffer);
+  point_add(point8, point15, point9, tempBuffer);
+  point_add(point9, point15, point10, tempBuffer);
+  point_add(point10, point15, point11, tempBuffer);
+  point_add(point11, point15, point12, tempBuffer);
+  point_add(point12, point15, point13, tempBuffer);
+  point_add(point13, point15, point14, tempBuffer);
+  point_add(point14, point15, point15, tempBuffer);
+}
+
+static void loopK0(uint64_t *result, uint64_t d, uint64_t *precomputedPoints)
+{
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
+  {
+    uint64_t mask = FStar_UInt64_eq_mask(d, (uint64_t)i);
+    uint64_t *precomputedPoint = precomputedPoints + (uint32_t)12U * i;
+    copy_point_conditional_mask_u64_2(result, precomputedPoint, mask);
+  }
+}
+
+static void
+conditional_substraction0(
+  uint64_t *result,
+  uint64_t *p,
+  uint8_t *scalar,
+  uint64_t *precomputedPoints,
+  uint64_t *tempBuffer
+)
+{
+  uint64_t bpMinus[12U] = { 0U };
+  uint64_t *bpMinusY = bpMinus + (uint32_t)4U;
+  uint8_t i0 = scalar[31U];
+  uint64_t mask = ~((uint64_t)0U - (uint64_t)(i0 & (uint8_t)1U));
+  // memcpy(bpMinus, pk, (uint32_t)12U * sizeof (uint64_t));
+  p256_neg(bpMinusY, bpMinusY);
+  point_add(p, bpMinus, bpMinus, tempBuffer);
+  copy_point_conditional_mask_u64_2(result, bpMinus, mask);
+}
+
+
+static void
+scalar_multiplication_cmb0(uint64_t *result, void *scalar, uint64_t *pk, uint64_t *tempBuffer)
+{
+  uint64_t rnaf2[104U] = { 0U };
+  uint64_t lut[12U] = { 0U };
+  uint64_t *temp4 = tempBuffer;
+  uint64_t precomputedPoints[192U] = { 0U };
+
+  // printU(precomputedPoints, 192); 
+
+  scalar_rwnaf(rnaf2, (uint8_t *)scalar);
+  precomputePoints(precomputedPoints, pk, tempBuffer);
+
+  uint64_t d = (rnaf2[102U] - (uint64_t)1U) >> (uint32_t)1U;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
+  {
+    uint64_t mask = FStar_UInt64_eq_mask(d, (uint64_t)i);
+    uint64_t *precomputedPoint = precomputedPoints + (uint32_t)12U * i;
+    copy_point_conditional_mask_u64_2(result, precomputedPoint, mask);
+  }
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)51U; i++)
+  {
+    uint32_t i1 = (uint32_t)50U - i;
+    for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)(uint64_t)5U; i0++)
+    {
+      point_double(result, result, tempBuffer);
+    }
+    uint64_t d1 = rnaf2[(uint32_t)2U * i1];
+    uint64_t is_neg = rnaf2[(uint32_t)2U * i1 + (uint32_t)1U];
+    uint64_t d2 = (d1 - (uint64_t)(uint32_t)1U) >> (uint32_t)1U;
+    loopK0(lut, d2, precomputedPoints);
+    uint64_t *yLut = lut + (uint32_t)4U;
+    p256_neg(yLut, temp4);
+    copy_conditional(yLut, temp4, is_neg);
+    point_add(result, lut, result, tempBuffer);
+  }
+  // conditional_substraction0(result, result, (uint8_t *)scalar, pk, tempBuffer);
 }
 
 static inline uint64_t isPointAtInfinityPrivate(uint64_t *p)
@@ -3499,6 +3600,18 @@ generatePrecomputedTable(uint64_t *b, uint64_t *publicKey, uint64_t *tempBuffer)
   point_add(point14, point1, point15, tempBuffer);
 }
 
+
+#include <inttypes.h>
+void printU(uint64_t* t, int len)
+{
+  for (int i = 0; i< len; i++) {
+    printf("%016llX ", t[i]);  
+  }
+  printf("\n");
+}
+
+
+
 static void
 scalarMultiplicationL(
   Spec_P256_montgomery_ladder_mode m,
@@ -3595,7 +3708,7 @@ scalarMultiplicationL(
       }
     case Spec_P256_Comb:
       {
-        scalar_multiplication_cmb(Lib_Buffer_MUT);
+        scalar_multiplication_cmb0(q, (void *)scalar, result, buff);
         break;
       }
     default:
@@ -3703,7 +3816,7 @@ scalarMultiplicationC(
       }
     case Spec_P256_Comb:
       {
-        scalar_multiplication_cmb(Lib_Buffer_CONST);
+        scalar_multiplication_cmb0(q, (void *)scalar, result, buff);
         break;
       }
     default:
@@ -4123,7 +4236,7 @@ bool Hacl_P256_ecp256dh_i_cmb(uint8_t *result, uint8_t *scalar)
   uint64_t tempBuffer[100U] = { 0U };
   uint64_t resultBuffer[12U] = { 0U };
   uint64_t *buff = tempBuffer + (uint32_t)12U;
-  scalar_multiplication_cmb0(resultBuffer, (void *)scalar, buff);
+  scalar_multiplication_cmb(resultBuffer, (void *)scalar, buff);
   norm(resultBuffer, resultBuffer, buff);
   uint64_t flag = isPointAtInfinityPrivate(resultBuffer);
   fromFormPoint(resultBuffer, result);
@@ -4226,6 +4339,7 @@ bool Hacl_P256_ecp256dh_r_comb(uint8_t *result, uint8_t *pubKey, uint8_t *scalar
   uint64_t flag;
   if (publicKeyCorrect)
   {
+    printf("%s\n", "Here");
     scalarMultiplicationL(Spec_P256_Comb, publicKeyAsFelem, resultBufferFelem, scalar, tempBuffer);
     flag = isPointAtInfinityPrivate(resultBufferFelem);
   }
