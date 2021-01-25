@@ -131,44 +131,20 @@ static void fiat_secp256r1_addcarryx_u64(uint64_t *out1,
                                          fiat_secp256r1_uint1 *out2,
                                          fiat_secp256r1_uint1 arg1,
                                          uint64_t arg2, uint64_t arg3) {
-    fiat_secp256r1_uint128 x1;
-    uint64_t x2;
-    fiat_secp256r1_uint1 x3;
-    x1 = ((arg1 + (fiat_secp256r1_uint128)arg2) + arg3);
-    x2 = (uint64_t)(x1 & UINT64_C(0xffffffffffffffff));
-    x3 = (fiat_secp256r1_uint1)(x1 >> 64);
-    *out1 = x2;
-    *out2 = x3;
+    
+    
+    *out2 = Lib_IntTypes_Intrinsics_add_carry_u64(arg1, arg2, arg3, out1);
 }
 
-/*
- * The function fiat_secp256r1_subborrowx_u64 is a subtraction with borrow.
- * Postconditions:
- *   out1 = (-arg1 + arg2 + -arg3) mod 2^64
- *   out2 = -⌊(-arg1 + arg2 + -arg3) / 2^64⌋
- *
- * Input Bounds:
- *   arg1: [0x0 ~> 0x1]
- *   arg2: [0x0 ~> 0xffffffffffffffff]
- *   arg3: [0x0 ~> 0xffffffffffffffff]
- * Output Bounds:
- *   out1: [0x0 ~> 0xffffffffffffffff]
- *   out2: [0x0 ~> 0x1]
- */
 static void fiat_secp256r1_subborrowx_u64(uint64_t *out1,
                                           fiat_secp256r1_uint1 *out2,
                                           fiat_secp256r1_uint1 arg1,
                                           uint64_t arg2, uint64_t arg3) {
-    fiat_secp256r1_int128 x1;
-    fiat_secp256r1_int1 x2;
-    uint64_t x3;
-    x1 = ((arg2 - (fiat_secp256r1_int128)arg1) - arg3);
-    x2 = (fiat_secp256r1_int1)(x1 >> 64);
-    x3 = (uint64_t)(x1 & UINT64_C(0xffffffffffffffff));
-    *out1 = x3;
-    *out2 = (fiat_secp256r1_uint1)(0x0 - x2);
-}
 
+
+    *out2 = Lib_IntTypes_Intrinsics_sub_borrow_u64(arg1, arg2, arg3, out1);
+
+}
 /*
  * The function fiat_secp256r1_mulx_u64 is a multiplication, returning the full double-width result.
  * Postconditions:
@@ -12555,7 +12531,7 @@ static void point_mul_g(unsigned char outx[32], unsigned char outy[32],
  * where P = (inx, iny).
  * Everything is LE byte ordering.
  */
-static void point_mul(unsigned char outx[32], unsigned char outy[32],
+static void point_mul11(unsigned char outx[32], unsigned char outy[32],
                       const unsigned char scalar[32],
                       const unsigned char inx[32],
                       const unsigned char iny[32]) {
