@@ -2750,12 +2750,11 @@ conditional_substraction0(
   uint64_t *bpMinusY = bpMinus + (uint32_t)4U;
   uint8_t i0 = scalar[31U];
   uint64_t mask = ~((uint64_t)0U - (uint64_t)(i0 & (uint8_t)1U));
-  // memcpy(bpMinus, pk, (uint32_t)12U * sizeof (uint64_t));
+  memcpy(bpMinus, precomputedPoints, (uint32_t)12U * sizeof (uint64_t));
   p256_neg(bpMinusY, bpMinusY);
   point_add(p, bpMinus, bpMinus, tempBuffer);
   copy_point_conditional_mask_u64_2(result, bpMinus, mask);
 }
-
 
 static void
 scalar_multiplication_cmb0(uint64_t *result, void *scalar, uint64_t *pk, uint64_t *tempBuffer)
@@ -2764,12 +2763,8 @@ scalar_multiplication_cmb0(uint64_t *result, void *scalar, uint64_t *pk, uint64_
   uint64_t lut[12U] = { 0U };
   uint64_t *temp4 = tempBuffer;
   uint64_t precomputedPoints[192U] = { 0U };
-
-  // printU(precomputedPoints, 192); 
-
   scalar_rwnaf(rnaf2, (uint8_t *)scalar);
   precomputePoints(precomputedPoints, pk, tempBuffer);
-
   uint64_t d = (rnaf2[102U] - (uint64_t)1U) >> (uint32_t)1U;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
   {
@@ -2793,7 +2788,7 @@ scalar_multiplication_cmb0(uint64_t *result, void *scalar, uint64_t *pk, uint64_
     copy_conditional(yLut, temp4, is_neg);
     point_add(result, lut, result, tempBuffer);
   }
-  // conditional_substraction0(result, result, (uint8_t *)scalar, pk, tempBuffer);
+  conditional_substraction0(result, result, (uint8_t *)scalar, precomputedPoints, tempBuffer);
 }
 
 static inline uint64_t isPointAtInfinityPrivate(uint64_t *p)
@@ -3600,18 +3595,6 @@ generatePrecomputedTable(uint64_t *b, uint64_t *publicKey, uint64_t *tempBuffer)
   point_add(point14, point1, point15, tempBuffer);
 }
 
-
-#include <inttypes.h>
-void printU(uint64_t* t, int len)
-{
-  for (int i = 0; i< len; i++) {
-    printf("%016llX ", t[i]);  
-  }
-  printf("\n");
-}
-
-
-
 static void
 scalarMultiplicationL(
   Spec_P256_montgomery_ladder_mode m,
@@ -3720,143 +3703,6 @@ scalarMultiplicationL(
   norm(q, result, buff);
 }
 
-static void
-scalarMultiplicationC(
-  Spec_P256_montgomery_ladder_mode m,
-  uint64_t *p,
-  uint64_t *result,
-  const uint8_t *scalar,
-  uint64_t *tempBuffer
-)
-{
-  uint64_t *q = tempBuffer;
-  uint64_t *buff = tempBuffer + (uint32_t)12U;
-  uint64_t *p_x = p;
-  uint64_t *p_y = p + (uint32_t)4U;
-  uint64_t *r_x = result;
-  uint64_t *r_y = result + (uint32_t)4U;
-  uint64_t multBuffer[8U] = { 0U };
-  multBuffer[0U] = (uint64_t)0U;
-  multBuffer[1U] = (uint64_t)0U;
-  multBuffer[2U] = (uint64_t)0U;
-  multBuffer[3U] = (uint64_t)0U;
-  multBuffer[4U] = p_x[0U];
-  multBuffer[5U] = p_x[1U];
-  multBuffer[6U] = p_x[2U];
-  multBuffer[7U] = p_x[3U];
-  solinas_reduction_impl(multBuffer, r_x);
-  uint64_t multBuffer0[8U] = { 0U };
-  multBuffer0[0U] = (uint64_t)0U;
-  multBuffer0[1U] = (uint64_t)0U;
-  multBuffer0[2U] = (uint64_t)0U;
-  multBuffer0[3U] = (uint64_t)0U;
-  multBuffer0[4U] = p_y[0U];
-  multBuffer0[5U] = p_y[1U];
-  multBuffer0[6U] = p_y[2U];
-  multBuffer0[7U] = p_y[3U];
-  solinas_reduction_impl(multBuffer0, r_y);
-  result[8U] = (uint64_t)1U;
-  result[9U] = (uint64_t)18446744069414584320U;
-  result[10U] = (uint64_t)18446744073709551615U;
-  result[11U] = (uint64_t)4294967294U;
-  uint64_t bufferPrecomputed[192U];
-  switch (m)
-  {
-    case Spec_P256_Radix4:
-      {
-        uint64_t init = (uint64_t)0U;
-        for (uint32_t i = (uint32_t)0U; i < (uint32_t)192U; i++)
-        {
-          bufferPrecomputed[i] = init;
-        }
-        generatePrecomputedTable(bufferPrecomputed, result, buff);
-        for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
-        {
-          uint32_t half = i >> (uint32_t)1U;
-          uint32_t word = (uint32_t)((uint8_t *)scalar)[half];
-          uint32_t bitShift = i & (uint32_t)1U;
-          uint64_t mask10 = (uint64_t)0U - (uint64_t)bitShift;
-          uint32_t
-          mask =
-            (uint32_t)((uint64_t)(krml_checked_int_t)0xf0
-            ^ (mask10 & ((uint64_t)(krml_checked_int_t)0xf0 ^ (uint64_t)(krml_checked_int_t)0x0f)));
-          uint64_t mask1 = (uint64_t)0U - (uint64_t)bitShift;
-          uint32_t
-          shiftMask =
-            (uint32_t)((uint64_t)(krml_checked_int_t)0x4
-            ^ (mask1 & ((uint64_t)(krml_checked_int_t)0x4 ^ (uint64_t)(krml_checked_int_t)0x0)));
-          uint32_t result1 = word & mask;
-          uint32_t bits = result1 >> shiftMask;
-          uint64_t *pointToAdd = bufferPrecomputed + bits * (uint32_t)12U;
-          point_double(q, q, buff);
-          point_double(q, q, buff);
-          point_double(q, q, buff);
-          point_double(q, q, buff);
-          point_add(pointToAdd, q, q, buff);
-        }
-        break;
-      }
-    case Spec_P256_Ladder:
-      {
-        for (uint32_t i = (uint32_t)0U; i < (uint32_t)256U; i++)
-        {
-          uint32_t bit0 = (uint32_t)255U - i;
-          uint64_t
-          bit =
-            (uint64_t)(scalar[(uint32_t)31U
-            - bit0 / (uint32_t)8U]
-            >> bit0 % (uint32_t)8U
-            & (uint8_t)1U);
-          cswap(bit, q, result);
-          point_add(q, result, result, buff);
-          point_double(q, q, buff);
-          cswap(bit, q, result);
-        }
-        break;
-      }
-    case Spec_P256_Comb:
-      {
-        scalar_multiplication_cmb0(q, (void *)scalar, result, buff);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  norm(q, result, buff);
-}
-
-static const
-uint8_t
-order_buffer[32U] =
-  {
-    (uint8_t)255U, (uint8_t)255U, (uint8_t)255U, (uint8_t)255U, (uint8_t)0U, (uint8_t)0U,
-    (uint8_t)0U, (uint8_t)0U, (uint8_t)255U, (uint8_t)255U, (uint8_t)255U, (uint8_t)255U,
-    (uint8_t)255U, (uint8_t)255U, (uint8_t)255U, (uint8_t)255U, (uint8_t)188U, (uint8_t)230U,
-    (uint8_t)250U, (uint8_t)173U, (uint8_t)167U, (uint8_t)23U, (uint8_t)158U, (uint8_t)132U,
-    (uint8_t)243U, (uint8_t)185U, (uint8_t)202U, (uint8_t)194U, (uint8_t)252U, (uint8_t)99U,
-    (uint8_t)37U, (uint8_t)81U
-  };
-
-/*
-   The input of the function is considered to be public,
-thus this code is not secret independent with respect to the operations done over the input.
-*/
-static bool isPointAtInfinityPublic(uint64_t *p)
-{
-  uint64_t z0 = p[8U];
-  uint64_t z1 = p[9U];
-  uint64_t z2 = p[10U];
-  uint64_t z3 = p[11U];
-  bool z0_zero = z0 == (uint64_t)0U;
-  bool z1_zero = z1 == (uint64_t)0U;
-  bool z2_zero = z2 == (uint64_t)0U;
-  bool z3_zero = z3 == (uint64_t)0U;
-  return z0_zero && z1_zero && z2_zero && z3_zero;
-}
-
 /*
    The input of the function is considered to be public,
 thus this code is not secret independent with respect to the operations done over the input.
@@ -3945,30 +3791,11 @@ static bool isCoordinateValid(uint64_t *p)
    The input of the function is considered to be public,
 thus this code is not secret independent with respect to the operations done over the input.
 */
-static bool isOrderCorrect(uint64_t *p, uint64_t *tempBuffer)
-{
-  uint64_t multResult[12U] = { 0U };
-  uint64_t pBuffer[12U] = { 0U };
-  memcpy(pBuffer, p, (uint32_t)12U * sizeof (uint64_t));
-  scalarMultiplicationC(Spec_P256_Radix4, pBuffer, multResult, order_buffer, tempBuffer);
-  bool result = isPointAtInfinityPublic(multResult);
-  return result;
-}
-
-/*
-   The input of the function is considered to be public,
-thus this code is not secret independent with respect to the operations done over the input.
-*/
-static bool verifyQValidCurvePoint(uint64_t *pubKeyAsPoint, uint64_t *tempBuffer)
+static bool verifyQValidCurvePoint(uint64_t *pubKeyAsPoint)
 {
   bool coordinatesValid = isCoordinateValid(pubKeyAsPoint);
-  if (!coordinatesValid)
-  {
-    return false;
-  }
   bool belongsToCurve = isPointOnCurvePublic(pubKeyAsPoint);
-  bool orderCorrect = isOrderCorrect(pubKeyAsPoint, tempBuffer);
-  return coordinatesValid && belongsToCurve && orderCorrect;
+  return coordinatesValid && belongsToCurve;
 }
 
 static void toFormPoint(uint8_t *i, uint64_t *p)
@@ -4261,7 +4088,7 @@ bool Hacl_P256_ecp256dh_r_ladder(uint8_t *result, uint8_t *pubKey, uint8_t *scal
   uint64_t publicKeyAsFelem[12U] = { 0U };
   uint64_t tempBuffer[100U] = { 0U };
   toFormPoint(pubKey, publicKeyAsFelem);
-  bool publicKeyCorrect = verifyQValidCurvePoint(publicKeyAsFelem, tempBuffer);
+  bool publicKeyCorrect = verifyQValidCurvePoint(publicKeyAsFelem);
   uint64_t flag;
   if (publicKeyCorrect)
   {
@@ -4298,7 +4125,7 @@ bool Hacl_P256_ecp256dh_r_radix4(uint8_t *result, uint8_t *pubKey, uint8_t *scal
   uint64_t publicKeyAsFelem[12U] = { 0U };
   uint64_t tempBuffer[100U] = { 0U };
   toFormPoint(pubKey, publicKeyAsFelem);
-  bool publicKeyCorrect = verifyQValidCurvePoint(publicKeyAsFelem, tempBuffer);
+  bool publicKeyCorrect = verifyQValidCurvePoint(publicKeyAsFelem);
   uint64_t flag;
   if (publicKeyCorrect)
   {
@@ -4335,7 +4162,7 @@ bool Hacl_P256_ecp256dh_r_comb(uint8_t *result, uint8_t *pubKey, uint8_t *scalar
   uint64_t publicKeyAsFelem[12U] = { 0U };
   uint64_t tempBuffer[100U] = { 0U };
   toFormPoint(pubKey, publicKeyAsFelem);
-  bool publicKeyCorrect = verifyQValidCurvePoint(publicKeyAsFelem, tempBuffer);
+  bool publicKeyCorrect = verifyQValidCurvePoint(publicKeyAsFelem);
   uint64_t flag;
   if (publicKeyCorrect)
   {

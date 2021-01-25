@@ -148,21 +148,21 @@ bool test_nist()
 	uint8_t* pk = (uint8_t*) malloc (sizeof (uint8_t) * 64);
 	
 	
-	// bool successDHI = Hacl_P256_ecp256dh_i_ladder(result, privateKey);
-	// printf("\n");
-	// ok = ok && successDHI;
-	// ok = ok && compare(32, result, expectedPublicKeyX);
-	// ok = ok && compare(32, result + 32, expectedPublicKeyY);
+	bool successDHI = Hacl_P256_ecp256dh_i_ladder(result, privateKey);
+	printf("\n");
+	ok = ok && successDHI;
+	ok = ok && compare(32, result, expectedPublicKeyX);
+	ok = ok && compare(32, result + 32, expectedPublicKeyY);
 
-	// bool successDHI_Radix = Hacl_P256_ecp256dh_i_radix4(result, privateKey);
-	// ok = ok && successDHI_Radix;
-	// ok = ok && compare(32, result, expectedPublicKeyX);
-	// ok = ok && compare(32, result + 32, expectedPublicKeyY);
+	bool successDHI_Radix = Hacl_P256_ecp256dh_i_radix4(result, privateKey);
+	ok = ok && successDHI_Radix;
+	ok = ok && compare(32, result, expectedPublicKeyX);
+	ok = ok && compare(32, result + 32, expectedPublicKeyY);
 
 
-	// bool successDHI_Comb = Hacl_P256_ecp256dh_i_cmb(result, privateKey);
-	// ok = ok && compare_and_print(32, result, expectedPublicKeyX);
-	// ok = ok && compare_and_print(32, result + 32, expectedPublicKeyY);
+	bool successDHI_Comb = Hacl_P256_ecp256dh_i_cmb(result, privateKey);
+	ok = ok && compare_and_print(32, result, expectedPublicKeyX);
+	ok = ok && compare_and_print(32, result + 32, expectedPublicKeyY);
 
 
 	printf("\n");
@@ -176,12 +176,13 @@ bool test_nist()
 	memcpy(pk, publicKeyX1,  32);
 	memcpy(pk+32, publicKeyY1,  32);
 	   
-	// bool successDHR = Hacl_P256_ecp256dh_r_ladder(result, pk, privateKey);
-	// // ok = ok && successDHR;
-	// ok = ok && compare_and_print(32, result, expectedResult);
+	bool successDHR = Hacl_P256_ecp256dh_r_ladder(result, pk, privateKey);
+	ok = ok && successDHR;
+	ok = ok && compare_and_print(32, result, expectedResult);
 
 
 	bool successDHR_Radix = Hacl_P256_ecp256dh_r_radix4(result, pk, privateKey);
+	ok = ok && successDHR_Radix;
 	ok = ok && compare_and_print(32, result, expectedResult);
 
 	// bool successDHR_Comb = Hacl_P256_ecp256dh_r_comb(result, pk, privateKey);
@@ -198,36 +199,34 @@ bool test_nist()
 	uint8_t* outy = (uint8_t*) malloc (sizeof (uint8_t) * 32);
 
 
-	// MP_BE2LE(privateKey);
+	MP_BE2LE(privateKey);
 
-	// point_mul_g(outx, outy, privateKey);
+	point_mul_g(outx, outy, privateKey);
 
-	// MP_BE2LE(outx);
-	// MP_BE2LE(outy);
+	MP_BE2LE(outx);
+	MP_BE2LE(outy);
 
-	// ok = ok && compare_and_print(32, outx, expectedPublicKeyX);
-	// ok = ok && compare_and_print(32, outy, expectedPublicKeyY);
+	ok = ok && compare_and_print(32, outx, expectedPublicKeyX);
+	ok = ok && compare_and_print(32, outy, expectedPublicKeyY);
 
 
 
 
 	MP_BE2LE(publicKeyX1);
 	MP_BE2LE(publicKeyY1);
-	MP_BE2LE(privateKey);
-
 
 	point_mul(outx, outy, privateKey, publicKeyX1, publicKeyY1);
 
 	MP_BE2LE(outx);
 	MP_BE2LE(outy);
 
-	compare_and_print(32, outx, expectedResult);
+	ok = ok && compare_and_print(32, outx, expectedResult);
 
 	free(result);
 	free(pk);
 
 
-	return true	;
+	return ok;
 }
 
 int main()
@@ -240,7 +239,7 @@ int main()
 	else
 		{
 			printf("%s\n", "Testing is failed \n ");
-			// return -1;
+			return -1;
 		}
 
 		// return -1;
@@ -321,7 +320,7 @@ int main()
 
 	double timeComb = (((double)tdiff5) / CLOCKS_PER_SEC);
 	double nsigsComb= ((double)ROUNDS) / timeComb;
-	printf("HACL P-256 ECDH PERF/Hacl Comb \n");
+	printf("HACL P-256 ECDH [SecretToPublic] PERF Comb \n");
 	printf("ECDH %8.2f mul/s\n",nsigsComb);
 
 
@@ -345,7 +344,7 @@ int main()
 
 	double timeFirstVersion = (((double)tdiff3) / CLOCKS_PER_SEC);
 	double nsigsFirstVersion = ((double)ROUNDS) / timeFirstVersion;
-	printf("HACL P-256 ECDH PERF -Hacl The initial version \n");
+	printf("HACL P-256 ECDH PERF [SecretToPublic] Initial version \n");
 	printf("ECDH %8.2f mul/s\n",nsigsFirstVersion);
 
 
@@ -373,7 +372,7 @@ int main()
 
 	double timeFiat = (((double)tdiff4) / CLOCKS_PER_SEC);
 	double nsigsFiat = ((double)ROUNDS) / timeFiat;
-	printf("EccKilla P-256 ECDH PERF \n");
+	printf("EccKilla P-256 ECDH [SecretToPublic] PERF \n");
 	printf("ECDH %8.2f mul/s\n",nsigsFiat);
 
 	
@@ -428,35 +427,35 @@ int main()
 
 	double timeLadderR = (((double)tdiff6) / CLOCKS_PER_SEC);
 	double nsigsLadderR = ((double)ROUNDS) / timeLadderR;
-	printf("HACL P-256 ECDH R PERF/ Radix4 \n");
+	printf("HACL P-256 ECDH [Scalar Multiplication] PERF Radix4 \n");
 	printf("ECDH %8.2f mul/s\n",nsigsLadderR);
 
 
 
-	// pk = (uint8_t*) malloc (sizeof (uint8_t) * 64);
+	pk = (uint8_t*) malloc (sizeof (uint8_t) * 64);
 	
-	// memcpy(pk, publicKeyX1,  32);
-	// memcpy(pk+32, publicKeyY1,  32);
+	memcpy(pk, publicKeyX1,  32);
+	memcpy(pk+32, publicKeyY1,  32);
 
-	//   for (int j = 0; j < ROUNDS; j++)
-	// 	Hacl_P256_ecp256dh_r_comb(result, pk, privateKey);
+	  for (int j = 0; j < ROUNDS; j++)
+		Hacl_P256_ecp256dh_r_comb(result, pk, privateKey);
 
 
-	// t1 = clock();
- //  	a = cpucycles_begin();
+	t1 = clock();
+  	a = cpucycles_begin();
 
- //  	for (int j = 0; j < ROUNDS; j++)
-	// 	Hacl_P256_ecp256dh_r_comb(result, pk, privateKey);
+  	for (int j = 0; j < ROUNDS; j++)
+		Hacl_P256_ecp256dh_r_comb(result, pk, privateKey);
 	
-	// b = cpucycles_end();
+	b = cpucycles_end();
 	
-	// t2 = clock();
-	// clock_t tdiff_r_comb = t2 - t1;
+	t2 = clock();
+	clock_t tdiff_r_comb = t2 - t1;
 
-	// double timeRComb = (((double)tdiff_r_comb) / CLOCKS_PER_SEC);
-	// double nsigsRComb = ((double)ROUNDS) / timeRComb;
-	// printf("HACL P-256 ECDH R PERF/ Radix4 \n");
-	// printf("ECDH %8.2f mul/s\n",nsigsRComb);
+	double timeRComb = (((double)tdiff_r_comb) / CLOCKS_PER_SEC);
+	double nsigsRComb = ((double)ROUNDS) / timeRComb;
+	printf("HACL P-256 ECDH [Scalar Multiplication] PERF WNAF \n");
+	printf("ECDH %8.2f mul/s\n",nsigsRComb);
 
 
 
@@ -479,7 +478,7 @@ int main()
 
 	double timeECCKillaR = (((double)tdiff7) / CLOCKS_PER_SEC);
 	double nsigsECCKillaR = ((double)ROUNDS) / timeECCKillaR;
-	printf("ECC Killa P-256 ECDH R PERF \n");
+	printf("ECC Killa P-256 ECDH [Scalar Multiplication] PERF \n");
 	printf("ECDH %8.2f mul/s\n",nsigsECCKillaR);
 
 

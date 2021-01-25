@@ -4022,12 +4022,6 @@ static void var_smul_rwnaf(pt_aff_t *out, const unsigned char scalar[32],
     precomp_wnaf(precomp, P);
     scalar_rwnaf(rnaf, scalar);
 
-#if defined(_MSC_VER)
-/* result still unsigned: yes we know */
-#pragma warning(push)
-#pragma warning(disable : 4146)
-#endif
-
     /* initialize accumulator to high digit */
     d = (rnaf[51] - 1) >> 1;
     for (j = 0; j < DRADIX / 2; j++) {
@@ -4056,10 +4050,6 @@ static void var_smul_rwnaf(pt_aff_t *out, const unsigned char scalar[32],
         fiat_secp256r1_selectznz(lut.Y, is_neg, lut.Y, out->Y);
         point_add_proj(&Q, &Q, &lut);
     }
-
-#if defined(_MSC_VER)
-#pragma warning(pop)
-#endif
 
     /* conditionally subtract P if the scalar was even */
     fe_copy(lut.X, precomp[0].X);
