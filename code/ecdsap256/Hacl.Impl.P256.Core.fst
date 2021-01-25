@@ -936,7 +936,7 @@ let scalarMultiplication_t #t m p result scalar tempBuffer  =
   |Ladder ->
       montgomery_ladder q result scalar buff
   |Comb ->
-    Hacl.Impl.ScalarMultiplication.WNAF.scalar_multiplication_cmb result scalar buff
+    Hacl.Impl.ScalarMultiplication.WNAF.scalar_multiplication_cmb q scalar result buff
   end;
 
     let h3 = ST.get() in 

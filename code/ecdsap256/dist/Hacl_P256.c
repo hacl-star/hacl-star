@@ -4339,7 +4339,6 @@ bool Hacl_P256_ecp256dh_r_comb(uint8_t *result, uint8_t *pubKey, uint8_t *scalar
   uint64_t flag;
   if (publicKeyCorrect)
   {
-    printf("%s\n", "Here");
     scalarMultiplicationL(Spec_P256_Comb, publicKeyAsFelem, resultBufferFelem, scalar, tempBuffer);
     flag = isPointAtInfinityPrivate(resultBufferFelem);
   }
