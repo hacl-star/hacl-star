@@ -454,7 +454,7 @@ int main()
 
 	double timeRComb = (((double)tdiff_r_comb) / CLOCKS_PER_SEC);
 	double nsigsRComb = ((double)ROUNDS) / timeRComb;
-	printf("HACL P-256 ECDH [Scalar Multiplication] PERF WNAF \n NB: The computation (only of this piece of code) is incorrect, put just for comparision. I don't expect a huge change");
+	printf("HACL P-256 ECDH [Scalar Multiplication] PERF WNAF \n NB: The computation (only of this piece of code) is incorrect, put just for comparision. I don't expect a huge change \n");
 	printf("ECDH %8.2f mul/s\n",nsigsRComb);
 
 
