@@ -247,7 +247,7 @@ let reduction_prime_2prime_with_carry x result  =
 	else if uint_v cin < uint_v c then uint_v carry = 1 
 	else uint_v carry = 0);
 
-    cmovznz4 result tempBuffer x_ carry;
+    cmovznz4  tempBuffer x_ result carry;
  pop_frame()   
 
 
@@ -259,7 +259,7 @@ let reduction_prime_2prime_with_carry2 cin x result  =
         recall_contents prime256order_buffer (Lib.Sequence.of_list p256_order_prime_list);
     let c = Hacl.Impl.P256.LowLevel .sub4_il x prime256order_buffer tempBuffer in
     let carry = sub_borrow_u64 c cin (u64 0) tempBufferForSubborrow in 
-    cmovznz4 carry tempBuffer x result;
+    cmovznz4  tempBuffer x result carry;
  pop_frame()      
 
 
@@ -280,7 +280,7 @@ let reduction_prime_2prime_order x result  =
       let h1 = ST.get() in 
       assert(as_nat h1 tempBuffer = as_nat h0 x - prime_p256_order + uint_v c * pow2 256);
       assert(let x = as_nat h0 x in if x < prime_p256_order then uint_v c = 1 else uint_v c = 0);
-    cmovznz4 c tempBuffer x result; 
+    cmovznz4 result tempBuffer x c; 
     let h2 = ST.get() in 
       assert_norm (pow2 256 == pow2 64 * pow2 64 * pow2 64 * pow2 64);
     lemma_reduction1 (as_nat h0 x) (as_nat h2 result);

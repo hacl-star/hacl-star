@@ -1,0 +1,21 @@
+module Hacl.Impl.P256.MixedPointAdd
+
+open FStar.HyperStack.All
+open FStar.HyperStack
+module ST = FStar.HyperStack.ST
+
+open Lib.IntTypes
+open Lib.Buffer
+
+
+inline_for_extraction
+type pointAffine = lbuffer uint64 (size 8)
+
+
+val pointAffineIsNotZero: p: pointAffine -> Stack bool
+  (requires fun h -> live h p)
+  (ensures fun h0 _ h1 -> True)
+  
+
+let pointAffineIsNotZero p = 
+  

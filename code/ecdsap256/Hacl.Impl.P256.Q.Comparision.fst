@@ -42,7 +42,7 @@ let eq_u64_u64_u64 #q a b =
       let r = FStar.UInt64.(u64_to_UInt64 a =^ u64_to_UInt64 b) in 
       match r with 
       |true -> u64 0
-      |false -> u64 (maxint U64) end
+      |false -> u64 0xffffffffffffffff end
   |Private -> 
     eq_mask_lemma a b;
     eq_mask a b

@@ -1,0 +1,89 @@
+module Hacl.Impl.P256.Q.Comparision
+
+open FStar.HyperStack.All
+open FStar.HyperStack
+module ST = FStar.HyperStack.ST
+
+open Lib.IntTypes
+open Lib.Buffer
+
+open Spec.P256.Definitions
+
+
+
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
+
+type qualification = 
+  |Public
+  |Private
+
+let invert_qualif (a: qualification): Lemma
+  (requires True) 
+  (ensures (inversion qualification))
+  [SMTPat (qualification)] =
+  allow_inversion (qualification) 
+
+
+inline_for_extraction noextract
+val unsafe_bool_of_u64 (x: uint64 { v x == 0 \/ v x == pow2 64 - 1 }):
+  (b:bool { b <==> v x == 0 })
+
+let unsafe_bool_of_u64 x = 
+  let open Lib.RawIntTypes in
+  FStar.UInt64.(u64_to_UInt64 x =^ 0uL)
+
+
+val equal_u64_u64_u64: #q: qualification -> a: uint64 -> b: uint64 -> Tot uint64
+
+let equal_u64_u64_u64 #q a b = 
+  match q with 
+  |Public -> begin
+      let open Lib.RawIntTypes in
+      let r = FStar.UInt64.(u64_to_UInt64 a =^ u64_to_UInt64 b) in 
+      match r with 
+      |true -> u64 0
+      |false -> u64 (maxint U64) end
+  |Private -> 
+    eq_mask_lemma a b;
+    eq_mask a b
+
+
+val equal_u64_u64_bool: #q: qualification -> a: uint64 -> b: uint64 -> Tot bool
+
+let equal_u64_u64_bool #q a b = 
+  match q with 
+  |Public -> 
+    let open Lib.RawIntTypes in 
+    FStar.UInt64.(u64_to_UInt64 a =^ u64_to_UInt64 b) 
+  |Private -> 
+    eq_mask_lemma a b;
+    let r = eq_mask a b in 
+    unsafe_bool_of_u64 r
+    
+ 
+
+
+inline_for_extraction noextract
+val isZero_uint64_CT: f: lbuffer_t MUT uint64 (size 4) -> Stack uint64
+  (requires fun h -> live h f)
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ 
+  (if as_nat h0 f = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0))
+ 
+let isZero_uint64_CT f = 
+  let a0 = index f (size 0) in 
+  let a1 = index f (size 1) in 
+  let a2 = index f (size 2) in 
+  let a3 = index f (size 3) in 
+  
+  let r0 = eq_mask a0 (u64 0) in 
+  let r1 = eq_mask a1 (u64 0) in 
+  let r2 = eq_mask a2 (u64 0) in 
+  let r3 = eq_mask a3 (u64 0) in 
+  
+  let r01 = logand r0 r1 in 
+     logand_lemma r0 r1; 
+  let r23 = logand r2 r3 in 
+     logand_lemma r2 r3;
+  let r = logand r01 r23 in 
+    logand_lemma r01 r23;
+  r

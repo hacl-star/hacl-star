@@ -23,21 +23,10 @@ open Hacl.Impl.P256.MixedPointAdd
 
 open Hacl.Impl.ScalarMultiplication.RWNAF.Table.Ext
 
-(* Originally lives in P256.Core *)
-(* this piece of code is taken from Hacl.Curve25519 *)
-(* changed Endian for Scalar Bit access *)
 
+(*  https://www.usenix.org/system/files/conference/usenixsecurity18/sec18-alam.pdf
+ *)
 
-(* 
-
-static uint64_t scalar_bit(uint8_t *s, uint32_t n)
-{
-  if (n / 8 == 32)
-    return 0;
-  return (uint64_t)(s[31 - (n / (uint32_t)8U)] >> n % (uint32_t)8U & (uint8_t)1U);
-}
-
-*)
 val scalar_bit:
     s:lbuffer_t MUT uint8 (size 32)
   -> n:size_t{v n < 256}
