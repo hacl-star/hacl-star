@@ -1039,10 +1039,6 @@ insert___uint8_t__uint32_t(MerkleTree_Low_Datastructures_hash_vec rv, uint8_t *v
   return irv;
 }
 
-#define Cpy 0
-
-typedef uint8_t copyable__uint32_t__uint8_t__tags;
-
 typedef void (*copyable__uint32_t__uint8_t_)(uint32_t x0, uint8_t *x1, uint8_t *x2);
 
 static MerkleTree_Low_Datastructures_hash_vec

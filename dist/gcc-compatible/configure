@@ -100,6 +100,11 @@ detect_x64 () {
   [[ $target_arch == "x86_64" ]]
 }
 
+detect_x86 () {
+  [[ $target_arch == "i386" ]] || [[ $target_arch == "i686" ]] || \
+  [[ $target_arch == "i86pc" ]] || [[ $target_arch == "ia32" ]]
+}
+
 detect_arm () {
   # On Raspberry pi, uname -m is armv6l or armv7l so we need to cut!
   [[ $(echo $target_arch | cut -c 1-3) == "arm" ]] || \
@@ -245,12 +250,21 @@ if [ ! -z "$build_target" ]; then
     CC="$TOOLCHAIN/bin/aarch64-none-linux-gnu-gcc"
     echo "CC=$CC" >> Makefile.config
     # Using GCC here doesn't require setting anything else.
+  elif [[ "$build_target" == "ia32" ]]; then
+    # Cross compiling for 32-bit Intel (presumably from x64 Intel).
+    CROSS_TARGET="-m32"
+    CROSS_LDLAGS="-m32"
+    target_arch="ia32"
+    target_sys=$(uname)
+    target_abi="native"
+    echo "MARCH = ia32" >> Makefile.config
   else
     show_help
     exit 0
   fi
   CROSS_CFLAGS="$CROSS_TARGET $CROSS_SYSROOT $CROSS_INCLUDES"
   echo "CFLAGS += $CROSS_CFLAGS" >> Makefile.config
+  echo "LDFLAGS += $CROSS_LDLAGS" >> Makefile.config
 else
   target_arch=$(uname -m)
   target_sys=$(uname)
@@ -280,6 +294,18 @@ if detect_arm; then
     echo "#define IS_ARM_7 1" >> config.h
     echo "#define Lib_IntVector_Intrinsics_vec128 void *" >> config.h
   fi
+fi
+
+if detect_x86; then
+  echo "... detected x86 platform"
+  echo "... $build_target does not support 256-bit arithmetic"
+  echo "BLACKLIST += $(ls *CP256*.c *_256.c *_Vec256.c | xargs)" >> Makefile.config
+  echo "... $build_target does not support legacy vale stubs"
+  echo "BLACKLIST += evercrypt_vale_stubs.c" >> Makefile.config
+  echo "#define Lib_IntVector_Intrinsics_vec256 void *" >> config.h
+  echo "$CC $CROSS_CFLAGS cannot compile 128-bit vector arithmetic, disabling"
+  echo "BLACKLIST += $(ls *CP128*.c *_128.c *_Vec128.c | xargs)" >> Makefile.config
+  echo "#define Lib_IntVector_Intrinsics_vec128 void *" >> config.h
 fi
 
 if ! detect_x64; then

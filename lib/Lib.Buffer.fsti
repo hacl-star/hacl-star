@@ -313,7 +313,7 @@ let recallable (#t:buftype) (#a:Type0) (#len:size_t) (b:lbuffer_t t a len) =
   | MUT -> B.recallable (b <: buffer a)
   | CONST -> B.recallable (CB.as_mbuf (b <: cbuffer a))
 
-inline_for_extraction noextract
+inline_for_extraction 
 val recall:
     #t:buftype 
   -> #a:Type0
@@ -342,7 +342,7 @@ val create:
 #set-options "--max_fuel 1"
 
 (** Allocate a stack fixed-length mutable buffer initialized to a list *)
-inline_for_extraction noextract
+inline_for_extraction 
 val createL:
     #a:Type0
   -> init:list a{normalize (List.Tot.length init <= max_size_t)} ->
@@ -351,7 +351,7 @@ val createL:
     (ensures  fun h0 b h1 -> live h1 b /\ stack_allocated b h0 h1 (Seq.of_list init))
 
 (** Allocate a global fixed-length const immutable buffer initialized to value [init] *)
-inline_for_extraction noextract
+inline_for_extraction 
 val createL_global:
     #a:Type0
   -> init:list a{normalize (List.Tot.length init <= max_size_t)} ->
@@ -364,7 +364,7 @@ val createL_global:
 #set-options "--max_fuel 0"
 
 (** Recall the liveness and contents of a global immutable buffer *)
-inline_for_extraction noextract
+inline_for_extraction 
 val recall_contents:
     #a:Type0
   -> #len:size_t{v len <= max_size_t}
@@ -489,7 +489,7 @@ val concat3:
       as_seq h1 s == Seq.concat (Seq.concat (as_seq h0 s0) (as_seq h0 s1)) (as_seq h0 s2))
 
 (** Loop combinator with just memory safety specification *)
-inline_for_extraction noextract
+inline_for_extraction 
 val loop_nospec:
     #h0:mem
   -> #a:Type0
@@ -504,7 +504,7 @@ val loop_nospec:
     (ensures  fun _ _ h1 -> modifies1 buf h0 h1)
 
 (** Loop combinator with just memory safety specification *)
-inline_for_extraction noextract
+inline_for_extraction 
 val loop_nospec2:
     #h0:mem
   -> #a1:Type0
@@ -522,7 +522,7 @@ val loop_nospec2:
     (ensures  fun _ _ h1 -> modifies2 buf1 buf2 h0 h1)
 
 (** Loop combinator with just memory safety specification *)
-inline_for_extraction noextract
+inline_for_extraction 
 val loop_nospec3:
     #h0:mem
   -> #a1:Type0
@@ -543,7 +543,7 @@ val loop_nospec3:
     (ensures  fun _ _ h1 -> modifies3 buf1 buf2 buf3 h0 h1)
 
 (** Loop combinator with just memory safety specification *)
-inline_for_extraction noextract
+inline_for_extraction 
 val loop_range_nospec:
     #h0:mem
   -> #a:Type0
@@ -584,7 +584,7 @@ let loop_inv
 * - [spec] a specification of how the body of the loop modifies the state
 * - [impl] the body of the loop as a Stack function
 *)
-inline_for_extraction noextract
+inline_for_extraction 
 val loop:
     h0:mem
   -> n:size_t
@@ -614,7 +614,7 @@ let loop_refl_inv
   modifies footprint h0 h /\
   refl h == Loop.repeati i (spec h0) (refl h0)
 
-inline_for_extraction noextract
+inline_for_extraction 
 val loop_refl:
     h0:mem
   -> n:size_t
@@ -644,7 +644,7 @@ let loop1_inv
   as_seq h write == Loop.repeati i (spec h0) (as_seq h0 write)
 
 (** Loop combinator specialized to modifying a single buffer [write] *)
-inline_for_extraction noextract
+inline_for_extraction 
 val loop1:
     #b:Type
   -> #blen:size_t
@@ -680,7 +680,7 @@ let loop2_inv
    as_seq h write0 == s0 /\ as_seq h write1 == s1)
 
 (** Loop combinator specialized to modifying two buffers [write0] and [write1] *)
-inline_for_extraction noextract
+inline_for_extraction 
 val loop2:
     #b0:Type
   -> #blen0:size_t
@@ -710,7 +710,7 @@ val loop2:
 * [spec_inv] is used to propagate the post-condition of [impl] to the final memory
 * after popping the stack frame
 *)
-inline_for_extraction noextract
+inline_for_extraction 
 val salloc1_with_inv:
     #a:Type
   -> #res:Type
@@ -741,7 +741,7 @@ val salloc1_with_inv:
     (requires fun h0 -> h0 == h)
     (ensures  fun h0 r h1 -> modifies (Ghost.reveal footprint) h0 h1 /\ spec r h1)
 
-inline_for_extraction noextract
+inline_for_extraction 
 val salloc1:
     #a:Type
   -> #res:Type
@@ -770,7 +770,7 @@ val salloc1:
          spec r h2) ==> spec r h3))
     (ensures  fun h0 r h1 -> modifies (Ghost.reveal footprint) h0 h1 /\ spec r h1)
 
-inline_for_extraction noextract
+inline_for_extraction 
 val salloc_nospec:
     #a:Type
   -> #res:Type
@@ -790,7 +790,7 @@ val salloc_nospec:
     (requires fun h0 -> h0 == h)
     (ensures  fun h0 r h1 -> modifies (Ghost.reveal footprint) h0 h1)
 
-inline_for_extraction noextract
+inline_for_extraction 
 val loopi_blocks:
     #a:Type0
   -> #b:Type0
@@ -832,7 +832,7 @@ val loopi_blocks:
       as_seq h1 write ==
       Seq.repeati_blocks #a #(Seq.lseq b (v blen)) (v blocksize) (as_seq h0 inp) spec_f spec_l (as_seq h0 write))
 
-inline_for_extraction noextract
+inline_for_extraction 
 val loopi_blocks_nospec:
     #a:Type0
   -> #b:Type0
@@ -860,7 +860,7 @@ val loopi_blocks_nospec:
     (requires fun h -> live h inp /\ live h write /\ disjoint inp write)
     (ensures  fun h0 _ h1 -> modifies1 write h0 h1)
 
-inline_for_extraction noextract
+inline_for_extraction 
 val loop_blocks:
     #a:Type0
   -> #b:Type0
@@ -901,7 +901,7 @@ val loop_blocks:
 open FStar.Mul
 (*
 (** Fills a buffer block by block using a function with an accumulator *)
-inline_for_extraction noextract
+inline_for_extraction 
 val fill_blocks_:
     #t:Type0
   -> h0:mem
@@ -936,7 +936,7 @@ val fill_blocks_:
 #set-options "--z3rlimit 150"
 
 (** Fills a buffer block by block using a function with an accumulator *)
-inline_for_extraction noextract
+inline_for_extraction 
 val fill_blocks:
     #t:Type0
   -> h0:mem
@@ -968,7 +968,7 @@ val fill_blocks:
       as_seq #_ #t h1 output == o))
 
 (** Fills a buffer block by block using a function without an accumulator *)
-inline_for_extraction noextract
+inline_for_extraction 
 val fill_blocks_simple:
     #t:Type0
   -> h0:mem
@@ -1023,7 +1023,7 @@ val fill:
       modifies1 o h h' /\
       as_seq h' o == Seq.createi #a (v clen) (spec h0))
 
-inline_for_extraction noextract
+inline_for_extraction 
 let eq_or_disjoint
     (#t1:buftype)
     (#t2:buftype)
@@ -1106,7 +1106,7 @@ val mapi:
       modifies1 o h h1 /\
       as_seq h1 o == Seq.mapi (spec_f h0) (as_seq h i))
 
-inline_for_extraction noextract
+inline_for_extraction 
 val map_blocks_multi:
     #t:buftype
   -> #a:Type0
@@ -1132,7 +1132,7 @@ val map_blocks_multi:
     (ensures  fun _ _ h1 -> modifies1 output h0 h1 /\
 	as_seq h1 output == Seq.map_blocks_multi (v blocksize) (v nb) (v nb) (as_seq h0 inp) (spec_f h0))
 
-inline_for_extraction noextract
+inline_for_extraction 
 val map_blocks:
     #t:buftype
   -> #a:Type0

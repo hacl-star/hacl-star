@@ -34,7 +34,7 @@ let k_w      (a: sha2_alg) = m:S.seq (word a) {S.length m = size_k_w a}
 let block_w  (a: sha2_alg) = m:S.seq (word a) {S.length m = block_word_length}
 let counter = nat
 
-inline_for_extraction noextract
+inline_for_extraction 
 type ops = {
   c0: size_t; c1: size_t; c2: size_t;
   c3: size_t; c4: size_t; c5: size_t;
@@ -43,7 +43,7 @@ type ops = {
 }
 
 (* Definition of constants used in word functions *)
-inline_for_extraction noextract
+inline_for_extraction 
 let op224_256: ops = {
   c0 = 2ul; c1 = 13ul; c2 = 22ul;
   c3 = 6ul; c4 = 11ul; c5 = 25ul;
@@ -51,7 +51,7 @@ let op224_256: ops = {
   e3 = 17ul; e4 = 19ul; e5 = 10ul
 }
 
-inline_for_extraction noextract
+inline_for_extraction 
 let op384_512: ops = {
   c0 = 28ul; c1 = 34ul; c2 = 39ul;
   c3 = 14ul; c4 = 18ul; c5 = 41ul;

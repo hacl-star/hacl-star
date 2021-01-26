@@ -380,8 +380,8 @@ verify_options = [
   ('specs/*/*.fsti', BuildOptions(fstar_default_args())),
 
   # .fst/.fsti files default to this set of options
-  ('.fst', BuildOptions(fstar_default_args() + ' --use_two_phase_tc false')),
-  ('.fsti', BuildOptions(fstar_default_args() + ' --use_two_phase_tc false')),
+  ('.fst', BuildOptions(fstar_default_args())),
+  ('.fsti', BuildOptions(fstar_default_args())),
 
   ('code/arch/x64/X64.Leakage_Ins.fst', None),
   ('code/arch/x64/X64.Leakage_Ins_Xmm.fst', None),
@@ -401,7 +401,7 @@ verify_options = [
   ('obj/external/*.fst', BuildOptions('--cache_checked_modules --admit_smt_queries true')),
 
   # .vaf files default to this set of options when compiling .fst/.fsti
-  ('.vaf', BuildOptions(fstar_default_args() + ' --use_two_phase_tc false'))
+  ('.vaf', BuildOptions(fstar_default_args()))
 ]
 
 verify_options_dict = { k:v for (k,v) in verify_options}

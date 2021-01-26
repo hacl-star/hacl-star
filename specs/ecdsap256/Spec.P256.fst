@@ -23,7 +23,7 @@ let bCoordinateP256 : (a: nat {a < prime256}) =
   assert_norm (41058363725152142129326129780047268409114441015993725554835256314039467401291 < prime256);
   41058363725152142129326129780047268409114441015993725554835256314039467401291
 
-noextract
+
 let basePoint : point_nat_prime =
   assert_norm (0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296 < prime256);
   (0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296,
@@ -31,7 +31,7 @@ let basePoint : point_nat_prime =
    1)
 
 
-noextract
+
 let _point_double (p:point_nat_prime) : point_nat_prime =
   let x, y, z = p in
   let delta = z * z in 
@@ -43,7 +43,7 @@ let _point_double (p:point_nat_prime) : point_nat_prime =
   let z3 = ((y + z) * (y + z) - delta - gamma) % prime in 
   (x3, y3, z3)
 
-noextract
+
 let _point_add (p:point_nat_prime) (q:point_nat_prime) : point_nat_prime =
 
   let (x1, y1, z1) = p in

@@ -10,13 +10,13 @@ open Lib.Sequence
 open Lib.Buffer
 open FStar.Mul
 
-noextract
+
 let prime_p256_order: (a: pos{a < pow2 256}) =
   assert_norm (115792089210356248762697446949407573529996955224135760342422259061068512044369 < pow2 256);
   115792089210356248762697446949407573529996955224135760342422259061068512044369
 
 
-inline_for_extraction noextract
+inline_for_extraction 
 let p256_order_prime_list : x:list uint64{List.Tot.length x == 4 /\ 
   (
     let open FStar.Mul in 
@@ -40,12 +40,12 @@ inline_for_extraction
 let widefelem = lbuffer uint64 (size 8)
 
 
-inline_for_extraction noextract
+inline_for_extraction 
 let felem4 = tuple4 uint64 uint64 uint64 uint64
-inline_for_extraction noextract
+inline_for_extraction 
 let felem8 = tuple8 uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64
 
-noextract
+
 val as_nat4: f:felem4 -> GTot nat
 let as_nat4 f =
   let (s0, s1, s2, s3) = f in
@@ -53,7 +53,7 @@ let as_nat4 f =
   v s3 * pow2 64 * pow2 64 * pow2 64
 
 
-noextract
+
 val wide_as_nat4: f:felem8 -> GTot nat
 let wide_as_nat4 f =
   let (s0, s1, s2, s3, s4, s5, s6, s7) = f in
@@ -66,7 +66,7 @@ let wide_as_nat4 f =
 
 
 
-noextract
+
 let as_nat (h:mem) (e:felem) : GTot nat =
   let s = as_seq h e in
   let s0 = s.[0] in
@@ -76,7 +76,7 @@ let as_nat (h:mem) (e:felem) : GTot nat =
   as_nat4 (s0, s1, s2, s3)
 
 
-noextract
+
 let wide_as_nat (h:mem) (e:widefelem) : GTot nat =
   let s = as_seq h e in
   let s0 = s.[0] in
@@ -89,7 +89,7 @@ let wide_as_nat (h:mem) (e:widefelem) : GTot nat =
   let s7 = s.[7] in
   wide_as_nat4 (s0, s1, s2, s3, s4, s5, s6, s7)
 
-noextract
+
 let felem_seq_as_nat_8 (a: lseq uint64 8) : Tot nat = 
   let open FStar.Mul in 
   let a0 = Lib.Sequence.index a 0 in 
@@ -109,10 +109,10 @@ let felem_seq_as_nat_8 (a: lseq uint64 8) : Tot nat =
   uint_v a6 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 + 
   uint_v a7 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64
 
-noextract
+
 let felem_seq = lseq uint64 4
 
-noextract
+
 let felem_seq_as_nat (a: felem_seq) : Tot (n: nat {n < pow2 256})  = 
   let open FStar.Mul in 
   let a0 = Lib.Sequence.index a 0 in 

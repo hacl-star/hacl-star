@@ -6,7 +6,7 @@ open Lib.IntTypes
 
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
 
-noextract
+
 val is_hex_digit: Char.char -> bool
 let is_hex_digit = function
   | '0'
@@ -27,10 +27,10 @@ let is_hex_digit = function
   | 'f' | 'F' -> true
   | _ -> false
 
-noextract
+
 type hex_digit = c:Char.char{is_hex_digit c}
 
-noextract
+
 val int_of_hex: c:hex_digit -> int
 let int_of_hex = function
   | '0' -> 0
@@ -50,12 +50,12 @@ let int_of_hex = function
   | 'e' | 'E' -> 14
   | 'f' | 'F' -> 15
 
-noextract
+
 val byte_of_hex: a:hex_digit -> b:hex_digit -> int
 let byte_of_hex a b =
   FStar.Mul.(int_of_hex a * 16 + int_of_hex b)
 
-noextract unfold
+ unfold
 type hex_string =
   s:string{normalize (String.strlen s % 2 = 0) /\
            normalize (List.Tot.for_all is_hex_digit (String.list_of_string s))}

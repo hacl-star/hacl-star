@@ -331,37 +331,37 @@ let vec_shift_right_uint128_small2 v1 s = admit()
 (* Generic Permutations: Possible on Intel, but not on ARM.
    So we comment this out and only leave interleaving and rotate_lanes functions in the API *)
 (*
-inline_for_extraction noextract
+inline_for_extraction 
 val vec_permute2: #t:v_inttype -> v1:vec_t t 2
   -> i1:vec_index 2 -> i2:vec_index 2 ->
   vec_t t 2
 
-inline_for_extraction noextract
+inline_for_extraction 
 val vec_permute2_lemma: #t:v_inttype -> v1:vec_t t 2
   -> i1:vec_index 2 -> i2:vec_index 2 ->
   Lemma (ensures (vec_v (vec_permute2 v1 i1 i2) == create2 (vec_v v1).[v i1] (vec_v v1).[v i2]))
 	[SMTPat (vec_v (vec_permute2 v1 i1 i2))]
 
 
-inline_for_extraction noextract
+inline_for_extraction 
 val vec_permute4: #t:v_inttype -> v1:vec_t t 4
   -> i1:vec_index 4 -> i2:vec_index 4 -> i3:vec_index 4 -> i4:vec_index 4 ->
   vec_t t 4
 
-inline_for_extraction noextract
+inline_for_extraction 
 val vec_permute4_lemma: #t:v_inttype -> v1:vec_t t 4
   -> i1:vec_index 4 -> i2:vec_index 4 -> i3:vec_index 4 -> i4:vec_index 4 ->
   Lemma (ensures (vec_v (vec_permute4 v1 i1 i2 i3 i4) == create4 (vec_v v1).[v i1] (vec_v v1).[v i2] (vec_v v1).[v i3] (vec_v v1).[v i4]))
 	[SMTPat (vec_v (vec_permute4 v1 i1 i2 i3 i4))]
 	 
-inline_for_extraction noextract
+inline_for_extraction 
 val vec_permute8: #t:v_inttype -> v1:vec_t t 8
   -> i1:vec_index 8 -> i2:vec_index 8 -> i3:vec_index 8 -> i4:vec_index 8
   -> i5:vec_index 8 -> i6:vec_index 8 -> i7:vec_index 8 -> i8:vec_index 8 ->
   v2:vec_t t 8{vec_v v2 == create8 (vec_v v1).[v i1] (vec_v v1).[v i2] (vec_v v1).[v i3] (vec_v v1).[v i4]
                                    (vec_v v1).[v i5] (vec_v v1).[v i6] (vec_v v1).[v i7] (vec_v v1).[v i8]}
 
-inline_for_extraction noextract
+inline_for_extraction 
 val vec_permute16: #t:v_inttype -> v1:vec_t t 16
   -> i1:vec_index 16 -> i2:vec_index 16 -> i3:vec_index 16 -> i4:vec_index 16
   -> i5:vec_index 16 -> i6:vec_index 16 -> i7:vec_index 16 -> i8:vec_index 16
@@ -373,7 +373,7 @@ val vec_permute16: #t:v_inttype -> v1:vec_t t 16
                          vv1.[v i9] vv1.[v i10] vv1.[v i11] vv1.[v i12]
                          vv1.[v i13] vv1.[v i14] vv1.[v i15] vv1.[v i16]}
 
-inline_for_extraction noextract
+inline_for_extraction 
 val vec_permute32: #t:v_inttype -> v1:vec_t t 32
   -> i1:vec_index 16 -> i2:vec_index 16 -> i3:vec_index 16 -> i4:vec_index 16
   -> i5:vec_index 16 -> i6:vec_index 16 -> i7:vec_index 16 -> i8:vec_index 16
