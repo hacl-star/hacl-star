@@ -26,6 +26,9 @@
 
 #include <stdint.h>
 #include <string.h>
+
+#include "lib_intrinsics.h"
+
 #define LIMB_BITS 64
 #define LIMB_CNT 4
 /* Field elements */
