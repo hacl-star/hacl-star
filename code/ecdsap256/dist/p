@@ -1,0 +1,29 @@
+memory for point_add
+
+
+ 42.55      3.02     3.02                             montgomery_multiplication_buffer
+ 35.29      5.53     2.51                             montgomery_square_buffer
+  8.95      6.16     0.64                             p256_add
+  5.78      6.57     0.41                             point_add
+  4.51      6.89     0.32                             point_double
+  1.41      6.99     0.10                             Hacl_P256_ecp256dh_i_ladder
+  0.99      7.06     0.07                             copy_point_conditional
+  0.28      7.08     0.02                             Hacl_P256_ecp256dh_i_radix4
+  0.14      7.09     0.01                             exponent
+  0.07      7.10     0.01                             solinas_reduction_impl
+
+
+Current:
+
+ 43.80      3.14     3.14                             montgomery_multiplication_buffer
+ 35.14      5.65     2.52                             montgomery_square_buffer
+  8.10      6.23     0.58                             p256_add
+  5.03      6.59     0.36                             point_double
+  2.93      6.80     0.21                             point_add
+  1.82      6.93     0.13                             copy_point_conditional
+  1.68      7.05     0.12                             Hacl_P256_ecp256dh_i_radix4
+  1.12      7.13     0.08                             Hacl_P256_ecp256dh_i_ladder
+  0.14      7.14     0.01                             exponent
+  0.14      7.15     0.01                             solinas_reduction_impl
+  0.07      7.16     0.01                             test_nist
+
