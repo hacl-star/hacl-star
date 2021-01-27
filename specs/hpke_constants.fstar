@@ -1,45 +1,67 @@
-// generated: "RFCXXXX "
+// generated: "HPKE-07"
 inline_for_extraction
-let size_label_rfcXXXX: size_nat = 8
+let size_label_rfcXXXX: size_nat = 7
 let label_rfcXXXX_list : l:list uint8{List.Tot.length l == size_label_rfcXXXX} =
   [@inline_let]
-  let l = [u8 0x52; u8 0x46; u8 0x43; u8 0x58; u8 0x58; u8 0x58; u8 0x58; u8 0x20] in
+  let l = [u8 0x48; u8 0x50; u8 0x4b; u8 0x45; u8 0x2d; u8 0x30; u8 0x37] in
   assert_norm(List.Tot.length l == size_label_rfcXXXX);
   l
 let label_rfcXXXX : lbytes size_label_rfcXXXX = createL label_rfcXXXX_list
 
 
-// generated: "dh"
+// generated: "eae_prk"
 inline_for_extraction
-let size_label_dh: size_nat = 2
-let label_dh_list : l:list uint8{List.Tot.length l == size_label_dh} =
+let size_label_eae_prk: size_nat = 7
+let label_eae_prk_list : l:list uint8{List.Tot.length l == size_label_eae_prk} =
   [@inline_let]
-  let l = [u8 0x64; u8 0x68] in
-  assert_norm(List.Tot.length l == size_label_dh);
+  let l = [u8 0x65; u8 0x61; u8 0x65; u8 0x5f; u8 0x70; u8 0x72; u8 0x6b] in
+  assert_norm(List.Tot.length l == size_label_eae_prk);
   l
-let label_dh : lbytes size_label_dh = createL label_dh_list
+let label_eae_prk : lbytes size_label_eae_prk = createL label_eae_prk_list
 
 
-// generated: "prk"
+// generated: "KEM"
 inline_for_extraction
-let size_label_prk: size_nat = 3
-let label_prk_list : l:list uint8{List.Tot.length l == size_label_prk} =
+let size_label_KEM: size_nat = 3
+let label_KEM_list : l:list uint8{List.Tot.length l == size_label_KEM} =
   [@inline_let]
-  let l = [u8 0x70; u8 0x72; u8 0x6b] in
-  assert_norm(List.Tot.length l == size_label_prk);
+  let l = [u8 0x4b; u8 0x45; u8 0x4d] in
+  assert_norm(List.Tot.length l == size_label_KEM);
   l
-let label_prk : lbytes size_label_prk = createL label_prk_list
+let label_KEM : lbytes size_label_KEM = createL label_KEM_list
 
 
-// generated: "pskID_hash"
+// generated: "HPKE"
 inline_for_extraction
-let size_label_pskID_hash: size_nat = 10
-let label_pskID_hash_list : l:list uint8{List.Tot.length l == size_label_pskID_hash} =
+let size_label_HPKE: size_nat = 4
+let label_HPKE_list : l:list uint8{List.Tot.length l == size_label_HPKE} =
   [@inline_let]
-  let l = [u8 0x70; u8 0x73; u8 0x6b; u8 0x49; u8 0x44; u8 0x5f; u8 0x68; u8 0x61; u8 0x73; u8 0x68] in
-  assert_norm(List.Tot.length l == size_label_pskID_hash);
+  let l = [u8 0x48; u8 0x50; u8 0x4b; u8 0x45] in
+  assert_norm(List.Tot.length l == size_label_HPKE);
   l
-let label_pskID_hash : lbytes size_label_pskID_hash = createL label_pskID_hash_list
+let label_HPKE : lbytes size_label_HPKE = createL label_HPKE_list
+
+
+// generated: "shared_secret"
+inline_for_extraction
+let size_label_shared_secret: size_nat = 13
+let label_shared_secret_list : l:list uint8{List.Tot.length l == size_label_shared_secret} =
+  [@inline_let]
+  let l = [u8 0x73; u8 0x68; u8 0x61; u8 0x72; u8 0x65; u8 0x64; u8 0x5f; u8 0x73; u8 0x65; u8 0x63; u8 0x72; u8 0x65; u8 0x74] in
+  assert_norm(List.Tot.length l == size_label_shared_secret);
+  l
+let label_shared_secret : lbytes size_label_shared_secret = createL label_shared_secret_list
+
+
+// generated: "psk_id_hash"
+inline_for_extraction
+let size_label_psk_id_hash: size_nat = 11
+let label_psk_id_hash_list : l:list uint8{List.Tot.length l == size_label_psk_id_hash} =
+  [@inline_let]
+  let l = [u8 0x70; u8 0x73; u8 0x6b; u8 0x5f; u8 0x69; u8 0x64; u8 0x5f; u8 0x68; u8 0x61; u8 0x73; u8 0x68] in
+  assert_norm(List.Tot.length l == size_label_psk_id_hash);
+  l
+let label_psk_id_hash : lbytes size_label_psk_id_hash = createL label_psk_id_hash_list
 
 
 // generated: "info_hash"
@@ -51,17 +73,6 @@ let label_info_hash_list : l:list uint8{List.Tot.length l == size_label_info_has
   assert_norm(List.Tot.length l == size_label_info_hash);
   l
 let label_info_hash : lbytes size_label_info_hash = createL label_info_hash_list
-
-
-// generated: "psk_hash"
-inline_for_extraction
-let size_label_psk_hash: size_nat = 8
-let label_psk_hash_list : l:list uint8{List.Tot.length l == size_label_psk_hash} =
-  [@inline_let]
-  let l = [u8 0x70; u8 0x73; u8 0x6b; u8 0x5f; u8 0x68; u8 0x61; u8 0x73; u8 0x68] in
-  assert_norm(List.Tot.length l == size_label_psk_hash);
-  l
-let label_psk_hash : lbytes size_label_psk_hash = createL label_psk_hash_list
 
 
 // generated: "secret"
@@ -86,15 +97,15 @@ let label_key_list : l:list uint8{List.Tot.length l == size_label_key} =
 let label_key : lbytes size_label_key = createL label_key_list
 
 
-// generated: "nonce"
+// generated: "base_nonce"
 inline_for_extraction
-let size_label_nonce: size_nat = 5
-let label_nonce_list : l:list uint8{List.Tot.length l == size_label_nonce} =
+let size_label_base_nonce: size_nat = 10
+let label_base_nonce_list : l:list uint8{List.Tot.length l == size_label_base_nonce} =
   [@inline_let]
-  let l = [u8 0x6e; u8 0x6f; u8 0x6e; u8 0x63; u8 0x65] in
-  assert_norm(List.Tot.length l == size_label_nonce);
+  let l = [u8 0x62; u8 0x61; u8 0x73; u8 0x65; u8 0x5f; u8 0x6e; u8 0x6f; u8 0x6e; u8 0x63; u8 0x65] in
+  assert_norm(List.Tot.length l == size_label_base_nonce);
   l
-let label_nonce : lbytes size_label_nonce = createL label_nonce_list
+let label_base_nonce : lbytes size_label_base_nonce = createL label_base_nonce_list
 
 
 // generated: "exp"

@@ -36,7 +36,7 @@ let test{i} () =
   let res = test_setupPSK test{i}_ciphersuite test{i}_skEm test{i}_pkEm test{i}_skRm test{i}_pkRm test{i}_info test{i}_enc test{i}_zz test{i}_key_schedule_context test{i}_secret test{i}_key test{i}_nonce test{i}_exporterSecret test{i}_encryption0_nonce test{i}_encryption1_nonce in
 """
 
-test_template = """
+test_enc_template = """
   let seq0:HPKE.seq_aead_s test{i}_ciphersuite = 0 in
   let enc_res0 = test_encryption test{i}_ciphersuite test{i}_key test{i}_nonce test{i}_exporterSecret test{i}_encryption0_aad test{i}_encryption0_plaintext seq0 test{i}_encryption0_ciphertext test{i}_encryption0_nonce in
 
@@ -75,8 +75,10 @@ test_template = """
   assert_norm (9 < pow2 (8 * 12));
   let seq9:HPKE.seq_aead_s test{i}_ciphersuite = (seq8 + 1) in
   let enc_res9 = test_encryption test{i}_ciphersuite test{i}_key test{i}_nonce test{i}_exporterSecret test{i}_encryption9_aad test{i}_encryption9_plaintext 9 test{i}_encryption9_ciphertext test{i}_encryption9_nonce in
+"""
 
-  let exp_res0 = test_export test{i}_ciphersuite test{i}_key test{i}_nonce test{i}_exporterSecret test{i}_export0_exportContext test{i}_export0_len test{i}_export0_exportValue in
+test_exp_template = """
+let exp_res0 = test_export test{i}_ciphersuite test{i}_key test{i}_nonce test{i}_exporterSecret test{i}_export0_exportContext test{i}_export0_len test{i}_export0_exportValue in
 
   let exp_res1 = test_export test{i}_ciphersuite test{i}_key test{i}_nonce test{i}_exporterSecret test{i}_export1_exportContext test{i}_export1_len test{i}_export1_exportValue in
 
@@ -134,7 +136,7 @@ def format_ciphersuite(i, kem, kdf, aead):
     the_kem = kems[kem]
     the_kdf = kdfs[kdf]
     the_aead = aeads[aead]
-    return f"let test{i}_ciphersuite = {the_kem}, {the_aead}, {the_kdf}"
+    return f"let test{i}_ciphersuite: HPKE.ciphersuite = {the_kem}, {the_aead}, {the_kdf}"
 
 def format_len(i, key, content):
     return f"let test{i}_{key}:size_nat = {content}"
@@ -144,10 +146,11 @@ def format_case(i, case):
 
     try:
         if not case["mode"] == 0:
+            # We only support the Base mode at the moment
             raise KeyError
 
         out += format_mode(i, case["mode"]) + "\n"
-        out += format_ciphersuite(i, case["kemID"], case["kdfID"], case["aeadID"]) + "\n\n"
+        out += format_ciphersuite(i, case["kem_id"], case["kdf_id"], case["aead_id"]) + "\n\n"
 
         for key, value in case.items():
             if type(value) == str:
@@ -161,7 +164,7 @@ def format_case(i, case):
             for key, value in export.items():
                 if type(value) == str:
                     out += format_variable (i, f"export{j}_{key}", value) + "\n"
-            out += format_len(i, f"export{j}_len", export["exportLength"]) + "\n"
+            out += format_len(i, f"export{j}_len", export["L"]) + "\n"
 
         out += test_base_template.format(**locals())
         print(out)
@@ -174,7 +177,10 @@ with open('test-vectors.json', 'r') as tv_file:
 
 vectors = json.loads(data)
 
+#print(vectors[0]["mode"])
+#format_case(0, vectors[0])
+
 for i, case in enumerate(vectors):
-    format_case(i, case)
-    print()
+   format_case(i, case)
+   print()
 

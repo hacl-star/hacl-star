@@ -5,15 +5,16 @@
 # Variable name will be prefixed with "label_" (see template variable)
 
 labels = [
-    ("rfcXXXX", "RFCXXXX "),
-    "dh",
-    "prk",
-    "pskID_hash",
+    ("rfcXXXX", "HPKE-07"),
+    "eae_prk",
+    "KEM",
+    "HPKE",
+    "shared_secret",
+    "psk_id_hash",
     "info_hash",
-    "psk_hash",
     "secret",
     "key",
-    "nonce",
+    "base_nonce",
     "exp",
     "sec"
 ]

@@ -14,40 +14,45 @@ module HKDF = Spec.Agile.HKDF
 
 #set-options "--z3rlimit 20 --fuel 0 --ifuel 1"
 
-let is_valid_ciphersuite = function
-  | DH.DH_Curve25519, Hash.SHA2_256, AEAD.AES128_GCM,        Hash.SHA2_256
-  | DH.DH_Curve25519, Hash.SHA2_256, AEAD.AES128_GCM,        Hash.SHA2_384
-  | DH.DH_Curve25519, Hash.SHA2_256, AEAD.AES128_GCM,        Hash.SHA2_512
-  | DH.DH_Curve25519, Hash.SHA2_256, AEAD.AES256_GCM,        Hash.SHA2_256
-  | DH.DH_Curve25519, Hash.SHA2_256, AEAD.AES256_GCM,        Hash.SHA2_384
-  | DH.DH_Curve25519, Hash.SHA2_256, AEAD.AES256_GCM,        Hash.SHA2_512
-  | DH.DH_Curve25519, Hash.SHA2_256, AEAD.CHACHA20_POLY1305, Hash.SHA2_256
-  | DH.DH_Curve25519, Hash.SHA2_256, AEAD.CHACHA20_POLY1305, Hash.SHA2_384
-  | DH.DH_Curve25519, Hash.SHA2_256, AEAD.CHACHA20_POLY1305, Hash.SHA2_512
-  | DH.DH_P256,       Hash.SHA2_256, AEAD.AES128_GCM,        Hash.SHA2_256
-  | DH.DH_P256,       Hash.SHA2_256, AEAD.AES128_GCM,        Hash.SHA2_384
-  | DH.DH_P256,       Hash.SHA2_256, AEAD.AES128_GCM,        Hash.SHA2_512
-  | DH.DH_P256,       Hash.SHA2_256, AEAD.AES256_GCM,        Hash.SHA2_256
-  | DH.DH_P256,       Hash.SHA2_256, AEAD.AES256_GCM,        Hash.SHA2_384
-  | DH.DH_P256,       Hash.SHA2_256, AEAD.AES256_GCM,        Hash.SHA2_512
-  | DH.DH_P256,       Hash.SHA2_256, AEAD.CHACHA20_POLY1305, Hash.SHA2_256
-  | DH.DH_P256,       Hash.SHA2_256, AEAD.CHACHA20_POLY1305, Hash.SHA2_384
-  | DH.DH_P256,       Hash.SHA2_256, AEAD.CHACHA20_POLY1305, Hash.SHA2_512 -> true
-  | _,_,_,_ -> false
+let is_valid_kem = function
+  | DH.DH_Curve25519, Hash.SHA2_256
+  | DH.DH_P256,       Hash.SHA2_256 -> true
+  | _,_ -> false
 
-let ciphersuite = cs:(DH.algorithm & Hash.algorithm & AEAD.alg & Hash.algorithm){is_valid_ciphersuite cs}
+let is_valid_aead = function
+  | AEAD.AES128_GCM
+  | AEAD.AES256_GCM
+  | AEAD.CHACHA20_POLY1305 -> true
+  | _ -> false
+
+let is_valid_hash = function
+  | Hash.SHA2_256
+  | Hash.SHA2_384
+  | Hash.SHA2_512 -> true
+  | _ -> false
+
+let hash_algorithm = a:Hash.algorithm{is_valid_hash a}
+// TODO define the following two. KEM should be separated
+//let aead_algorithm = a:AEAD.alg{is_valid_aead a}
+//let dh_algorithm = a:DH.algorithm{is_valid_dh a}
+
+let is_valid_ciphersuite (cs:DH.algorithm & hash_algorithm & AEAD.alg & Hash.algorithm) : bool =
+  let kem_dh, kem_hash, aead, hash = cs in
+  (is_valid_kem (kem_dh, kem_hash)) && (is_valid_aead aead) && (is_valid_hash hash)
+
+let ciphersuite = cs:(DH.algorithm & hash_algorithm & AEAD.alg & Hash.algorithm){is_valid_ciphersuite cs}
 
 // TODO rename to dh_of_cs or kemdh or dhkem
 let curve_of_cs (cs:ciphersuite) : DH.algorithm =
   let (c,_,_,_) = cs in c
 
-let kem_hash_of_cs (cs:ciphersuite) : Hash.algorithm =
+let kem_hash_of_cs (cs:ciphersuite) : hash_algorithm =
   let (_,h,_,_) = cs in h
 
 let aead_of_cs (cs:ciphersuite) : AEAD.alg =
   let (_,_,a,_) = cs in a
 
-let hash_of_cs (cs:ciphersuite) : Hash.algorithm =
+let hash_of_cs (cs:ciphersuite) : hash_algorithm =
   let (_,_,_,h) = cs in h
 
 // TODO rename to AuthPSK
@@ -59,48 +64,70 @@ type mode =
 /// Constants
 
 (** Constants for HPKE labels *)
-// generated: "RFCXXXX "
+// generated: "HPKE-07"
 inline_for_extraction
-let size_label_rfcXXXX: size_nat = 8
+let size_label_rfcXXXX: size_nat = 7
 let label_rfcXXXX_list : l:list uint8{List.Tot.length l == size_label_rfcXXXX} =
   [@inline_let]
-  let l = [u8 0x52; u8 0x46; u8 0x43; u8 0x58; u8 0x58; u8 0x58; u8 0x58; u8 0x20] in
+  let l = [u8 0x48; u8 0x50; u8 0x4b; u8 0x45; u8 0x2d; u8 0x30; u8 0x37] in
   assert_norm(List.Tot.length l == size_label_rfcXXXX);
   l
 let label_rfcXXXX : lbytes size_label_rfcXXXX = createL label_rfcXXXX_list
 
 
-// generated: "dh"
+// generated: "eae_prk"
 inline_for_extraction
-let size_label_dh: size_nat = 2
-let label_dh_list : l:list uint8{List.Tot.length l == size_label_dh} =
+let size_label_eae_prk: size_nat = 7
+let label_eae_prk_list : l:list uint8{List.Tot.length l == size_label_eae_prk} =
   [@inline_let]
-  let l = [u8 0x64; u8 0x68] in
-  assert_norm(List.Tot.length l == size_label_dh);
+  let l = [u8 0x65; u8 0x61; u8 0x65; u8 0x5f; u8 0x70; u8 0x72; u8 0x6b] in
+  assert_norm(List.Tot.length l == size_label_eae_prk);
   l
-let label_dh : lbytes size_label_dh = createL label_dh_list
+let label_eae_prk : lbytes size_label_eae_prk = createL label_eae_prk_list
 
 
-// generated: "prk"
+// generated: "KEM"
 inline_for_extraction
-let size_label_prk: size_nat = 3
-let label_prk_list : l:list uint8{List.Tot.length l == size_label_prk} =
+let size_label_KEM: size_nat = 3
+let label_KEM_list : l:list uint8{List.Tot.length l == size_label_KEM} =
   [@inline_let]
-  let l = [u8 0x70; u8 0x72; u8 0x6b] in
-  assert_norm(List.Tot.length l == size_label_prk);
+  let l = [u8 0x4b; u8 0x45; u8 0x4d] in
+  assert_norm(List.Tot.length l == size_label_KEM);
   l
-let label_prk : lbytes size_label_prk = createL label_prk_list
+let label_KEM : lbytes size_label_KEM = createL label_KEM_list
 
 
-// generated: "pskID_hash"
+// generated: "HPKE"
 inline_for_extraction
-let size_label_pskID_hash: size_nat = 10
-let label_pskID_hash_list : l:list uint8{List.Tot.length l == size_label_pskID_hash} =
+let size_label_HPKE: size_nat = 4
+let label_HPKE_list : l:list uint8{List.Tot.length l == size_label_HPKE} =
   [@inline_let]
-  let l = [u8 0x70; u8 0x73; u8 0x6b; u8 0x49; u8 0x44; u8 0x5f; u8 0x68; u8 0x61; u8 0x73; u8 0x68] in
-  assert_norm(List.Tot.length l == size_label_pskID_hash);
+  let l = [u8 0x48; u8 0x50; u8 0x4b; u8 0x45] in
+  assert_norm(List.Tot.length l == size_label_HPKE);
   l
-let label_pskID_hash : lbytes size_label_pskID_hash = createL label_pskID_hash_list
+let label_HPKE : lbytes size_label_HPKE = createL label_HPKE_list
+
+
+// generated: "shared_secret"
+inline_for_extraction
+let size_label_shared_secret: size_nat = 13
+let label_shared_secret_list : l:list uint8{List.Tot.length l == size_label_shared_secret} =
+  [@inline_let]
+  let l = [u8 0x73; u8 0x68; u8 0x61; u8 0x72; u8 0x65; u8 0x64; u8 0x5f; u8 0x73; u8 0x65; u8 0x63; u8 0x72; u8 0x65; u8 0x74] in
+  assert_norm(List.Tot.length l == size_label_shared_secret);
+  l
+let label_shared_secret : lbytes size_label_shared_secret = createL label_shared_secret_list
+
+
+// generated: "psk_id_hash"
+inline_for_extraction
+let size_label_psk_id_hash: size_nat = 11
+let label_psk_id_hash_list : l:list uint8{List.Tot.length l == size_label_psk_id_hash} =
+  [@inline_let]
+  let l = [u8 0x70; u8 0x73; u8 0x6b; u8 0x5f; u8 0x69; u8 0x64; u8 0x5f; u8 0x68; u8 0x61; u8 0x73; u8 0x68] in
+  assert_norm(List.Tot.length l == size_label_psk_id_hash);
+  l
+let label_psk_id_hash : lbytes size_label_psk_id_hash = createL label_psk_id_hash_list
 
 
 // generated: "info_hash"
@@ -112,17 +139,6 @@ let label_info_hash_list : l:list uint8{List.Tot.length l == size_label_info_has
   assert_norm(List.Tot.length l == size_label_info_hash);
   l
 let label_info_hash : lbytes size_label_info_hash = createL label_info_hash_list
-
-
-// generated: "psk_hash"
-inline_for_extraction
-let size_label_psk_hash: size_nat = 8
-let label_psk_hash_list : l:list uint8{List.Tot.length l == size_label_psk_hash} =
-  [@inline_let]
-  let l = [u8 0x70; u8 0x73; u8 0x6b; u8 0x5f; u8 0x68; u8 0x61; u8 0x73; u8 0x68] in
-  assert_norm(List.Tot.length l == size_label_psk_hash);
-  l
-let label_psk_hash : lbytes size_label_psk_hash = createL label_psk_hash_list
 
 
 // generated: "secret"
@@ -147,15 +163,15 @@ let label_key_list : l:list uint8{List.Tot.length l == size_label_key} =
 let label_key : lbytes size_label_key = createL label_key_list
 
 
-// generated: "nonce"
+// generated: "base_nonce"
 inline_for_extraction
-let size_label_nonce: size_nat = 5
-let label_nonce_list : l:list uint8{List.Tot.length l == size_label_nonce} =
+let size_label_base_nonce: size_nat = 10
+let label_base_nonce_list : l:list uint8{List.Tot.length l == size_label_base_nonce} =
   [@inline_let]
-  let l = [u8 0x6e; u8 0x6f; u8 0x6e; u8 0x63; u8 0x65] in
-  assert_norm(List.Tot.length l == size_label_nonce);
+  let l = [u8 0x62; u8 0x61; u8 0x73; u8 0x65; u8 0x5f; u8 0x6e; u8 0x6f; u8 0x6e; u8 0x63; u8 0x65] in
+  assert_norm(List.Tot.length l == size_label_base_nonce);
   l
-let label_nonce : lbytes size_label_nonce = createL label_nonce_list
+let label_base_nonce : lbytes size_label_base_nonce = createL label_base_nonce_list
 
 
 // generated: "exp"
@@ -178,6 +194,7 @@ let label_sec_list : l:list uint8{List.Tot.length l == size_label_sec} =
   assert_norm(List.Tot.length l == size_label_sec);
   l
 let label_sec : lbytes size_label_sec = createL label_sec_list
+
 
 
 /// Constants sizes
@@ -215,37 +232,42 @@ let size_kdf (cs:ciphersuite): size_nat = Hash.size_hash (hash_of_cs cs)
 let max_seq (cs:ciphersuite): nat = pow2 (8*(size_aead_nonce cs)) - 1
 
 inline_for_extraction
-let size_cs_identifier: size_nat = 6
+let size_suite_id_kem: size_nat = size_label_KEM + 2
+
+inline_for_extraction
+let size_suite_id_hpke: size_nat = size_label_HPKE + 6
 
 inline_for_extraction
 let size_mode_identifier: size_nat = 1
 
-let size_ks_ctx (cs:ciphersuite): size_nat = size_cs_identifier + size_mode_identifier + 2*(size_kdf cs)
+let size_ks_ctx (cs:ciphersuite): size_nat = size_mode_identifier + 2*(size_kdf cs)
 
 // TODO
 (* let keysized (a:hash_alg) (l:nat) = *)
 (*   l <= max_input_length a /\ *)
 (*   l + block_length a < pow2 32 *)
 
-let labeled_extract_ikm_length_pred (a:Hash.algorithm) (ikm_length:nat) =
+let labeled_extract_ikm_length_pred (a:hash_algorithm) (ikm_length:nat) =
   HKDF.extract_ikm_length_pred a (Seq.length label_rfcXXXX + ikm_length)
 
 val labeled_extract:
-    a:Hash.algorithm
+    a:hash_algorithm
+  -> suite_id:bytes
   -> salt:bytes
   -> label:bytes
   -> ikm:bytes ->
   Pure (lbytes (Spec.Hash.Definitions.hash_length a))
     (requires
       Spec.Agile.HMAC.keysized a (Seq.length salt) /\
-      labeled_extract_ikm_length_pred a (Seq.length label + Seq.length ikm))
+      labeled_extract_ikm_length_pred a (Seq.length suite_id + Seq.length label + Seq.length ikm))
     (ensures fun _ -> True)
 
-let labeled_expand_info_length_pred (a:Hash.algorithm) (info_length:nat) =
+let labeled_expand_info_length_pred (a:hash_algorithm) (info_length:nat) =
   HKDF.expand_info_length_pred a (2 + Seq.length label_rfcXXXX + info_length)
 
 val labeled_expand:
-    a:Hash.algorithm
+    a:hash_algorithm
+  -> suite_id:bytes
   -> prk:bytes
   -> label:bytes
   -> info:bytes
@@ -254,29 +276,31 @@ val labeled_expand:
     (requires
       Spec.Hash.Definitions.hash_length a <= Seq.length prk /\
       Spec.Agile.HMAC.keysized a (Seq.length prk) /\
-      labeled_expand_info_length_pred a (Seq.length label + Seq.length info) /\
+      labeled_expand_info_length_pred a (Seq.length suite_id + Seq.length label + Seq.length info) /\
       HKDF.expand_output_length_pred a l)
     (ensures fun _ -> True)
 
 let pow2_61_1 : _:unit{pow2 61 - 1 == 2305843009213693951} = assert_norm(pow2 61 - 1 == 2305843009213693951)
 let pow2_125_1 : _:unit{pow2 125 - 1 == 42535295865117307932921825928971026431} = assert_norm(pow2 125 - 1 == 42535295865117307932921825928971026431)
 
-let hash_max_input_length (a:Hash.algorithm) =
+// TODO maybe functional equivalence should be proven with Spec.Hash.Definitions.max_input_length
+// TODO this could be restricted to hash_algorithms valid in HPKE
+let hash_max_input_length (a:hash_algorithm) =
   match a with
   | Hash.MD5 | Hash.SHA1
   | Hash.SHA2_224 | Hash.SHA2_256 -> 2305843009213693951 // pow2 61 - 1
   | Hash.SHA2_384 | Hash.SHA2_512 -> 42535295865117307932921825928971026431 // pow2 125 - 1
 
-let labeled_extract_max_length_ikm (a:Hash.algorithm) (size_local_label:size_nat) =
-  hash_max_input_length a - size_label_rfcXXXX - size_local_label - Spec.Hash.Definitions.block_length a
+let labeled_extract_max_length_ikm (a:hash_algorithm) (size_suite_id:size_nat) (size_local_label:size_nat) =
+  hash_max_input_length a - size_label_rfcXXXX - size_suite_id - size_local_label - Spec.Hash.Definitions.block_length a
 
-let labeled_expand_max_length_info (a:Hash.algorithm) (size_local_label:size_nat) =
-  hash_max_input_length a - Spec.Hash.Definitions.hash_length a - 2 - size_label_rfcXXXX - size_local_label - 1 - Spec.Hash.Definitions.block_length a
+let labeled_expand_max_length_info (a:hash_algorithm) (size_suite_id:size_nat) (size_local_label:size_nat) =
+  hash_max_input_length a - Spec.Hash.Definitions.hash_length a - 2 - size_label_rfcXXXX - size_suite_id - size_local_label - 1 - Spec.Hash.Definitions.block_length a
 
-let max_length_psk (a:Hash.algorithm) = labeled_extract_max_length_ikm a size_label_psk_hash
-let max_length_pskID (a:Hash.algorithm) = labeled_extract_max_length_ikm a size_label_pskID_hash
-let max_length_info (a:Hash.algorithm) = labeled_extract_max_length_ikm a size_label_info_hash
-let max_length_exp_ctx (a:Hash.algorithm) = labeled_expand_max_length_info a size_label_sec
+let max_length_psk (a:hash_algorithm) = labeled_extract_max_length_ikm a size_suite_id_hpke size_label_secret
+let max_length_psk_id (a:hash_algorithm) = labeled_extract_max_length_ikm a size_suite_id_hpke size_label_psk_id_hash
+let max_length_info (a:hash_algorithm) = labeled_extract_max_length_ikm a size_suite_id_hpke size_label_info_hash
+let max_length_exp_ctx (a:hash_algorithm) = labeled_expand_max_length_info a size_suite_id_hpke size_label_sec
 
 
 /// Types
@@ -289,30 +313,29 @@ type nonce_aead_s (cs:ciphersuite) = lbytes (size_aead_nonce cs)
 type seq_aead_s (cs:ciphersuite) = n:nat{n <= max_seq cs}
 type exporter_secret_s (cs:ciphersuite) = lbytes (size_kdf cs)
 (* let max_length_psk: size_nat = 65535 *)
-(* let max_length_pskID: size_nat = 65535 *)
+(* let max_length_psk_id: size_nat = 65535 *)
 (* let max_length_info: size_nat = 65535 *)
 (* let max_length_exp_ctx: size_nat = 65535 *)
 // could we use normalization or smth else to compute the maximum bounds for each cs?
 (* type psk_s (cs:ciphersuite) = b:bytes{labeled_extract_ikm_length_pred (hash_of_cs cs) (size_label_psk_hash + Seq.length b)} *)
-(* type pskID_s (cs:ciphersuite) = b:bytes{labeled_extract_ikm_length_pred (hash_of_cs cs) (size_label_pskID_hash + Seq.length b)} *)
+(* type psk_id_s (cs:ciphersuite) = b:bytes{labeled_extract_ikm_length_pred (hash_of_cs cs) (size_label_psk_id_hash + Seq.length b)} *)
 (* type info_s (cs:ciphersuite) = b:bytes{labeled_extract_ikm_length_pred (hash_of_cs cs) (size_label_info_hash + Seq.length b)} *)
 (* type exp_ctx_s (cs:ciphersuite) = b:bytes{labeled_expand_info_length_pred (hash_of_cs cs) (size_label_sec + Seq.length b)} *)
-type psk_s (cs:ciphersuite) =     b:bytes{Seq.length b >= 1 /\ Seq.length b <= max_length_psk (hash_of_cs cs)}
-type pskID_s (cs:ciphersuite) =   b:bytes{Seq.length b >= 1 /\ Seq.length b <= max_length_pskID (hash_of_cs cs)}
+type psk_s (cs:ciphersuite) =     b:bytes{Seq.length b >= 32 /\ Seq.length b <= max_length_psk (hash_of_cs cs)}
+type psk_id_s (cs:ciphersuite) =   b:bytes{Seq.length b >= 1 /\ Seq.length b <= max_length_psk_id (hash_of_cs cs)}
 type info_s (cs:ciphersuite) =    b:bytes{Seq.length b <= max_length_info (hash_of_cs cs)}
 type exp_ctx_s (cs:ciphersuite) = b:bytes{Seq.length b <= max_length_exp_ctx (hash_of_cs cs)}
-// TODO can we use lbytes here?
 (* type psk_s (cs:ciphersuite) = b:bytes{Seq.length b <= max_length_psk} *)
-(* type pskID_s (cs:ciphersuite) = b:bytes{Seq.length b <= max_length_pskID} *)
+(* type psk_id_s (cs:ciphersuite) = b:bytes{Seq.length b <= max_length_psk_id} *)
 (* type info_s (cs:ciphersuite) = b:bytes{Seq.length b <= max_length_info} *)
 (* type exp_ctx_s (cs:ciphersuite) = b:bytes{Seq.length b <= max_length_exp_ctx} *)
 
-val unmarshal:
+val deserialize:
     cs:ciphersuite // TODO could this be an implicit parameter?
   -> pk:key_dh_public_s cs ->
   Tot (DH.serialized_point (curve_of_cs cs))
 
-val marshal:
+val serialize:
     cs:ciphersuite
   -> pk:DH.serialized_point (curve_of_cs cs) ->
   Tot (key_dh_public_s cs)
@@ -395,7 +418,7 @@ val setupPSKS:
   -> pkR:DH.serialized_point (curve_of_cs cs)
   -> info:info_s cs
   -> psk:psk_s cs
-  -> pskID:pskID_s cs ->
+  -> psk_id:psk_id_s cs ->
   Tot (option (key_dh_public_s cs & encryption_context cs))
 
 val setupPSKR:
@@ -404,7 +427,7 @@ val setupPSKR:
   -> skR:key_dh_secret_s cs
   -> info:info_s cs
   -> psk:psk_s cs
-  -> pskID:pskID_s cs ->
+  -> psk_id:psk_id_s cs ->
   Tot (option (encryption_context cs))
 
 val sealPSK:
@@ -415,7 +438,7 @@ val sealPSK:
   -> aad:AEAD.ad (aead_of_cs cs)
   -> pt:AEAD.plain (aead_of_cs cs)
   -> psk:psk_s cs
-  -> pskID:pskID_s cs ->
+  -> psk_id:psk_id_s cs ->
   Tot (option (key_dh_public_s cs & AEAD.encrypted #(aead_of_cs cs) pt))
 
 val openPSK:
@@ -426,7 +449,7 @@ val openPSK:
   -> aad:AEAD.ad (aead_of_cs cs)
   -> ct:AEAD.cipher (aead_of_cs cs)
   -> psk:psk_s cs
-  -> pskID:pskID_s cs ->
+  -> psk_id:psk_id_s cs ->
   Tot (option (AEAD.decrypted #(aead_of_cs cs) ct))
 
 val setupAuthS:
@@ -471,7 +494,7 @@ val setupAuthPSKS:
   -> pkR:DH.serialized_point (curve_of_cs cs)
   -> info:info_s cs
   -> psk:psk_s cs
-  -> pskID:pskID_s cs
+  -> psk_id:psk_id_s cs
   -> skS:key_dh_secret_s cs ->
   Tot (option (key_dh_public_s cs & encryption_context cs))
 
@@ -481,7 +504,7 @@ val setupAuthPSKR:
   -> skR:key_dh_secret_s cs
   -> info:info_s cs
   -> psk:psk_s cs
-  -> pskID:pskID_s cs
+  -> psk_id:psk_id_s cs
   -> pkS:DH.serialized_point (curve_of_cs cs) ->
   Tot (option (encryption_context cs))
 
@@ -493,7 +516,7 @@ val sealAuthPSK:
   -> aad:AEAD.ad (aead_of_cs cs)
   -> pt:AEAD.plain (aead_of_cs cs)
   -> psk:psk_s cs
-  -> pskID:pskID_s cs
+  -> psk_id:psk_id_s cs
   -> skS:key_dh_secret_s cs ->
   Tot (option (key_dh_public_s cs & AEAD.encrypted #(aead_of_cs cs) pt))
 
@@ -505,7 +528,7 @@ val openAuthPSK:
   -> aad:AEAD.ad (aead_of_cs cs)
   -> ct:AEAD.cipher (aead_of_cs cs)
   -> psk:psk_s cs
-  -> pskID:pskID_s cs
+  -> psk_id:psk_id_s cs
   -> pkS:DH.serialized_point (curve_of_cs cs) ->
   Tot (option (AEAD.decrypted #(aead_of_cs cs) ct))
 
