@@ -30,7 +30,13 @@ open Hacl.Impl.ECDSA.P256.Verification.Agile
 
 
 let ecdsa_sign_p256_sha2_ladder result mLen m privKey k = 
-  ecdsa_signature (Hash SHA2_256) result mLen m privKey k
+  ecdsa_signature Ladder (Hash SHA2_256) result mLen m privKey k
+
+
+let ecdsa_sign_p256_sha2_comb result mLen m privKey k = 
+  ecdsa_signature Comb (Hash SHA2_256) result mLen m privKey k
+ 
+
 (*)
 let ecdsa_sign_p256_sha384 result mLen m privKey k = 
   ecdsa_signature (Hash SHA2_384) result mLen m privKey k
@@ -45,7 +51,11 @@ let ecdsa_sign_p256_sha512 result mLen m privKey k =
 *)
 
 let ecdsa_verif_p256_sha2_ladder mLen m pubKey r s = 
-  ecdsa_verification (Hash SHA2_256) pubKey r s mLen m
+  ecdsa_verification Ladder Ladder (Hash SHA2_256) pubKey r s mLen m
+
+
+let ecdsa_verif_p256_sha2_comb_radix mLen m pubKey r s = 
+  ecdsa_verification Comb Radix4 (Hash SHA2_256) pubKey r s mLen m
 
 (*)
 let ecdsa_verif_p256_sha384 mLen m pubKey r s = 

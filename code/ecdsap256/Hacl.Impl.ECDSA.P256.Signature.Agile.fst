@@ -90,7 +90,9 @@ let ecdsa_signature_step12 alg mLen m result =
 #push-options "--ifuel 1"
 
 inline_for_extraction
-val ecdsa_signature_step45: x: felem 
+val ecdsa_signature_step45: 
+   m: montgomery_ladder_mode ->
+  x: felem 
   -> k: lbuffer uint8 (size 32) 
   -> tempBuffer: lbuffer uint64 (size 100) 
   -> Stack uint64
@@ -111,11 +113,11 @@ val ecdsa_signature_step45: x: felem
       )
     )
 
-let ecdsa_signature_step45 x k tempBuffer = 
+let ecdsa_signature_step45 m x k tempBuffer = 
   push_frame();
     let result = create (size 12) (u64 0) in 
     let tempForNorm = sub tempBuffer (size 0) (size 88) in 
-    secretToPublicWithoutNorm result k tempBuffer; 
+    secretToPublicWithoutNorm m result k tempBuffer; 
     normX result x tempForNorm;
     reduction_prime_2prime_order x x;
   pop_frame();
@@ -212,7 +214,9 @@ let ecdsa_signature_step6 result kFelem z r da =
 
 #push-options "--ifuel 1"
 
-val ecdsa_signature_core: alg: hash_alg_ecdsa
+val ecdsa_signature_core: 
+     mode: montgomery_ladder_mode 
+  -> alg: hash_alg_ecdsa
   -> r: felem 
   -> s: felem
   -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length alg}
@@ -254,7 +258,7 @@ val ecdsa_signature_core: alg: hash_alg_ecdsa
   )
 
 
-let ecdsa_signature_core alg r s mLen m privKeyAsFelem k = 
+let ecdsa_signature_core mode alg r s mLen m privKeyAsFelem k = 
   push_frame();
   let h0 = ST.get() in 
   let hashAsFelem = create (size 4) (u64 0) in     
@@ -266,7 +270,7 @@ let ecdsa_signature_core alg r s mLen m privKeyAsFelem k =
   lemma_core_0 kAsFelem h1;
   Spec.ECDSA.changeEndianLemma (uints_from_bytes_be (as_seq h0 k));
   uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h0 k);
-  let step5Flag = ecdsa_signature_step45 r k tempBuffer in 
+  let step5Flag = ecdsa_signature_step45 mode r k tempBuffer in 
   assert_norm (pow2 32 < pow2 61);
   ecdsa_signature_step6 s kAsFelem hashAsFelem r privKeyAsFelem;  
   (* let sIsZero = isZero_uint64_CT s in  *)
@@ -278,7 +282,10 @@ let ecdsa_signature_core alg r s mLen m privKeyAsFelem k =
 #pop-options
 
 inline_for_extraction noextract
-val ecdsa_signature: alg: hash_alg_ecdsa 
+val ecdsa_signature: 
+ mode: montgomery_ladder_mode -> 
+
+  alg: hash_alg_ecdsa 
   -> result: lbuffer uint8 (size 64) 
   -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length alg}
   -> m: lbuffer uint8 mLen 
@@ -306,7 +313,7 @@ val ecdsa_signature: alg: hash_alg_ecdsa
   )
 
 
-let ecdsa_signature alg result mLen m privKey k = 
+let ecdsa_signature mode alg result mLen m privKey k = 
   push_frame();
   let h0 = ST.get() in 
   assert_norm (pow2 32 < pow2 61); 
@@ -321,7 +328,7 @@ let ecdsa_signature alg result mLen m privKey k =
   lemma_core_0 privKeyAsFelem h1;
   Spec.ECDSA.changeEndianLemma (uints_from_bytes_be (as_seq h0 privKey));
   uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 privKey);    
-  let flag = ecdsa_signature_core alg r s mLen m privKeyAsFelem k in 
+  let flag = ecdsa_signature_core mode alg r s mLen m privKeyAsFelem k in 
 
   let h2 = ST.get() in 
   

@@ -225,6 +225,8 @@ let ecdsa_verification_step4 bufferU1 bufferU2 r s hash =
 
 inline_for_extraction noextract
 val ecdsa_verification_step5_0:
+  m0: montgomery_ladder_mode ->
+  m1: montgomery_ladder_mode ->
     points:lbuffer uint64 (size 24)
   -> pubKeyAsPoint: point
   -> u1: lbuffer uint8 (size 32)
@@ -265,11 +267,11 @@ val ecdsa_verification_step5_0:
     )
   )
 
-let ecdsa_verification_step5_0 points pubKeyAsPoint u1 u2 tempBuffer =
+let ecdsa_verification_step5_0 m0 m1 points pubKeyAsPoint u1 u2 tempBuffer =
   let pointU1G = sub points (size 0) (size 12) in
   let pointU2Q = sub points (size 12) (size 12) in
-  secretToPublicWithoutNorm pointU1G u1 tempBuffer;
-  scalarMultiplicationWithoutNorm pubKeyAsPoint pointU2Q u2 tempBuffer
+  secretToPublicWithoutNorm m0 pointU1G u1 tempBuffer;
+  scalarMultiplicationWithoutNorm m1 pubKeyAsPoint pointU2Q u2 tempBuffer
 
 (* 
 [@ (Comment "   The input of the function is considered to be public,
@@ -371,6 +373,8 @@ let ecdsa_verification_step5_1 points =
 
 inline_for_extraction noextract
 val ecdsa_verification_step5_2:
+  m0: montgomery_ladder_mode ->
+  m1: montgomery_ladder_mode ->
     pointSum: point
   -> pubKeyAsPoint: point
   -> u1: lbuffer uint8 (size 32)
@@ -410,11 +414,11 @@ val ecdsa_verification_step5_2:
    )
 
 
-let ecdsa_verification_step5_2 pointSum pubKeyAsPoint u1 u2 tempBuffer =
+let ecdsa_verification_step5_2 m0 m1 pointSum pubKeyAsPoint u1 u2 tempBuffer =
   push_frame();
   let points = create (size 24) (u64 0) in 
   let buff = sub tempBuffer (size 12) (size 88) in
-  ecdsa_verification_step5_0 points pubKeyAsPoint u1 u2 tempBuffer;
+  ecdsa_verification_step5_0 m0 m1 points pubKeyAsPoint u1 u2 tempBuffer;
   let pointU1G = sub points (size 0) (size 12) in
   let pointU2Q = sub points (size 12) (size 12) in 
 
@@ -430,6 +434,8 @@ let ecdsa_verification_step5_2 pointSum pubKeyAsPoint u1 u2 tempBuffer =
 
 inline_for_extraction noextract
 val ecdsa_verification_step5:
+  m0: montgomery_ladder_mode ->
+  m1: montgomery_ladder_mode ->
     x:felem
   -> pubKeyAsPoint: point
   -> u1: lbuffer uint8 (size 32)
@@ -469,10 +475,10 @@ val ecdsa_verification_step5:
     )
   )
 
-let ecdsa_verification_step5 x pubKeyAsPoint u1 u2 tempBuffer =
+let ecdsa_verification_step5 m0 m1 x pubKeyAsPoint u1 u2 tempBuffer =
   push_frame();
   let pointSum = create (size 12) (u64 0) in
-  ecdsa_verification_step5_2 pointSum pubKeyAsPoint u1 u2 tempBuffer;
+  ecdsa_verification_step5_2 m0 m1 pointSum pubKeyAsPoint u1 u2 tempBuffer;
   let resultIsPAI = isPointAtInfinityPublic pointSum in
   let xCoordinateSum = sub pointSum (size 0) (size 4) in
   copy x xCoordinateSum;
@@ -483,6 +489,8 @@ let ecdsa_verification_step5 x pubKeyAsPoint u1 u2 tempBuffer =
 
 inline_for_extraction
 val ecdsa_verification_core:
+  m0: montgomery_ladder_mode ->
+  m1: montgomery_ladder_mode ->
   alg:hash_alg_ecdsa
   -> publicKeyPoint:point
   -> hashAsFelem:felem
@@ -543,7 +551,7 @@ val ecdsa_verification_core:
       )
   )
 
-let ecdsa_verification_core alg publicKeyBuffer hashAsFelem r s mLen m xBuffer tempBuffer =
+let ecdsa_verification_core m0 m1 alg publicKeyBuffer hashAsFelem r s mLen m xBuffer tempBuffer =
   assert_norm (pow2 32 < pow2 61 - 1);
   assert_norm (pow2 32 < pow2 125);
   push_frame();
@@ -552,14 +560,18 @@ let ecdsa_verification_core alg publicKeyBuffer hashAsFelem r s mLen m xBuffer t
   let bufferU2 = sub tempBufferU8 (size 32) (size 32) in
   ecdsa_verification_step23 alg mLen m hashAsFelem;
   ecdsa_verification_step4  bufferU1 bufferU2 r s hashAsFelem;
-  let r = ecdsa_verification_step5 xBuffer publicKeyBuffer bufferU1 bufferU2 tempBuffer in
+  let r = ecdsa_verification_step5 m0 m1 xBuffer publicKeyBuffer bufferU1 bufferU2 tempBuffer in
   pop_frame();
   r
 
 
 [@ (Comment "   The input of the function is considered to be public,
 thus this code is not secret independent with respect to the operations done over the input.")] 
-val ecdsa_verification_:alg:hash_alg_ecdsa
+val ecdsa_verification_:
+  m0: montgomery_ladder_mode ->
+  m1: montgomery_ladder_mode ->
+
+  alg:hash_alg_ecdsa
   -> pubKey:lbuffer uint64 (size 8)
   -> r:lbuffer uint64 (size 4)
   -> s: lbuffer uint64 (size 4)
@@ -577,7 +589,7 @@ val ecdsa_verification_:alg:hash_alg_ecdsa
       modifies0 h0 h1 /\
       result == Spec.ECDSA.ecdsa_verification_agile alg (pubKeyX, pubKeyY) r s (v mLen) (as_seq h0 m))
 
-let ecdsa_verification_ alg pubKey r s mLen m =
+let ecdsa_verification_ m0 m1 alg pubKey r s mLen m =
   assert_norm (pow2 32 < pow2 61);
   assert_norm (pow2 32 < pow2 125);
   push_frame();
@@ -602,7 +614,7 @@ let ecdsa_verification_ alg pubKey r s mLen m =
       false
       end
     else
-      let state = ecdsa_verification_core alg publicKeyBuffer hashAsFelem r s mLen m xBuffer tempBuffer in
+      let state = ecdsa_verification_core m0 m1 alg publicKeyBuffer hashAsFelem r s mLen m xBuffer tempBuffer in
       if state = false then
         begin
         pop_frame();
@@ -619,6 +631,8 @@ let ecdsa_verification_ alg pubKey r s mLen m =
 
 inline_for_extraction
 val ecdsa_verification:
+  m0: montgomery_ladder_mode ->
+  m1: montgomery_ladder_mode ->
   alg:hash_alg_ecdsa
   -> pubKey:lbuffer uint8 (size 64)
   -> r:lbuffer uint8 (size 32)
@@ -637,7 +651,7 @@ val ecdsa_verification:
       modifies0 h0 h1 /\
       result == Spec.ECDSA.ecdsa_verification_agile alg (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m))
 
-let ecdsa_verification alg pubKey r s mLen m =
+let ecdsa_verification m0 m1 alg pubKey r s mLen m =
   assert_norm (pow2 32 < pow2 61);
   assert_norm (pow2 32 < pow2 125);
   push_frame();
@@ -667,7 +681,7 @@ let ecdsa_verification alg pubKey r s mLen m =
     lemma_core_0 sAsFelem h1;
     uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 s);
 
-  let result = ecdsa_verification_ alg publicKeyAsFelem rAsFelem sAsFelem mLen m in 
+  let result = ecdsa_verification_ m0 m1 alg publicKeyAsFelem rAsFelem sAsFelem mLen m in 
   pop_frame();
 
     changeEndianLemma (uints_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))));

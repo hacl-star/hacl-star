@@ -257,13 +257,13 @@ bool test_ecdsa()
 	memcpy(pk + 32, pky_0, 32);
 
 
-	// bool verificationSuccessful = Hacl_P256_ecdsa_verif_p256_sha2(mLen0, msg_0, pk, r_0, s_0);	
-	// if (verificationSuccessful)	
-	// 	ok = true;
-	// else
-	// 	ok = false;
+	bool verificationSuccessful = Hacl_P256_ecdsa_verif_p256_sha2_comb_radix(mLen0, msg_0, pk, r_0, s_0);	
+	if (verificationSuccessful)	
+		ok = true;
+	else
+		ok = false;
 
-	return true;
+	return ok;
 
 
 }
@@ -291,7 +291,7 @@ int main()
 		}
 
 
-		// return -1;
+	// return -1;
 
 
 	cycles a,b;
@@ -632,13 +632,13 @@ int main()
 	bool verificationSuccessful = true;
 
   	for (int j = 0; j < ROUNDS; j++)
-		verificationSuccessful = Hacl_P256_ecdsa_verif_p256_sha2_ladder(mLen0, msg_0, pk_ecdsa, r_0, s_0);	
+		verificationSuccessful = Hacl_P256_ecdsa_verif_p256_sha2_comb_radix(mLen0, msg_0, pk_ecdsa, r_0, s_0);	
 
 	t1 = clock();
   	a = cpucycles_begin();
 
   	for (int j = 0; j < ROUNDS; j++)
-		verificationSuccessful = Hacl_P256_ecdsa_verif_p256_sha2_ladder(mLen0, msg_0, pk_ecdsa, r_0, s_0);
+		verificationSuccessful = Hacl_P256_ecdsa_verif_p256_sha2_comb_radix(mLen0, msg_0, pk_ecdsa, r_0, s_0);
 	
 	b = cpucycles_end();
 	
@@ -661,13 +661,13 @@ int main()
 	bool signSuccessful = true;
 
   	for (int j = 0; j < ROUNDS; j++)
-		signSuccessful = Hacl_P256_ecdsa_sign_p256_sha2_ladder(result_ecdsa, mLen0, msg_0,  r_0, s_0);	
+		signSuccessful = Hacl_P256_ecdsa_sign_p256_sha2_comb(result_ecdsa, mLen0, msg_0,  r_0, s_0);	
 
 	t1 = clock();
   	a = cpucycles_begin();
 
   	for (int j = 0; j < ROUNDS; j++)
-		signSuccessful = Hacl_P256_ecdsa_sign_p256_sha2_ladder(result_ecdsa, mLen0, msg_0, r_0, s_0);
+		signSuccessful = Hacl_P256_ecdsa_sign_p256_sha2_comb(result_ecdsa, mLen0, msg_0, r_0, s_0);
 	
 	b = cpucycles_end();
 	

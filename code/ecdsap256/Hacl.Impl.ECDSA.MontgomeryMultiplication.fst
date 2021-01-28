@@ -247,7 +247,9 @@ let reduction_prime_2prime_with_carry x result  =
 	else if uint_v cin < uint_v c then uint_v carry = 1 
 	else uint_v carry = 0);
 
-    cmovznz4  tempBuffer x_ result carry;
+  (*CHANGED *)
+    cmovznz4  result tempBuffer x_ ((u64 0) -. carry);
+    admit();
  pop_frame()   
 
 

@@ -209,7 +209,7 @@ val scalarMultiplication: #buf_type: buftype-> m: montgomery_ladder_mode ->
 ) 
 
 [@ CInline]
-val scalarMultiplicationWithoutNorm: p: point -> result: point -> 
+val scalarMultiplicationWithoutNorm: m: montgomery_ladder_mode -> p: point -> result: point -> 
   scalar: lbuffer  uint8 (size 32) -> 
   tempBuffer: lbuffer uint64 (size 100) ->
   Stack unit
@@ -260,7 +260,7 @@ val secretToPublic:
   )
 
 
-val secretToPublicWithoutNorm: result: point -> scalar: lbuffer uint8 (size 32) -> 
+val secretToPublicWithoutNorm: m: montgomery_ladder_mode -> result: point -> scalar: lbuffer uint8 (size 32) -> 
  tempBuffer: lbuffer uint64 (size 100) ->
   Stack unit
     (requires fun h -> 

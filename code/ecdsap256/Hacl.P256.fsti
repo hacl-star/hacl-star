@@ -51,6 +51,39 @@ val ecdsa_sign_p256_sha2_ladder: result: lbuffer uint8 (size 64)
     )    
   )
 
+
+[@ (Comment " Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. 
+  \n Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
+  \n The private key and the nonce are expected to be more than 0 and less than the curve order.")]
+val ecdsa_sign_p256_sha2_comb: result: lbuffer uint8 (size 64) 
+  -> mLen: size_t 
+  -> m: lbuffer uint8 mLen 
+  -> privKey: lbuffer uint8 (size 32) 
+  -> k: lbuffer uint8 (size 32) -> 
+  Stack bool
+  (requires fun h -> 
+    live h result /\ live h m /\ live h privKey /\ live h k /\
+    disjoint result m /\
+    disjoint result privKey /\
+    disjoint result k /\
+    nat_from_bytes_be (as_seq h privKey) > 0 /\
+    nat_from_bytes_be (as_seq h k) > 0 /\
+    nat_from_bytes_be (as_seq h privKey) < prime_p256_order /\
+    nat_from_bytes_be (as_seq h k) < prime_p256_order
+  )
+  (ensures fun h0 flag h1 -> 
+    modifies (loc result) h0 h1 /\
+     (assert_norm (pow2 32 < pow2 61);
+      let resultR = gsub result (size 0) (size 32) in 
+      let resultS = gsub result (size 32) (size 32) in 
+      let r, s, flagSpec = Spec.ECDSA.ecdsa_signature_agile (Spec.ECDSA.Hash SHA2_256) (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in 
+      as_seq h1 resultR == nat_to_bytes_be 32 r /\
+      as_seq h1 resultS == nat_to_bytes_be 32 s /\
+      flag == flagSpec 
+    )    
+  )
+
+
 (* 
 
 [@ (Comment " Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. 
@@ -169,6 +202,31 @@ val ecdsa_verif_p256_sha2_ladder:
       modifies0 h0 h1 /\
       result == Spec.ECDSA.ecdsa_verification_agile (Spec.ECDSA.Hash SHA2_256) (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m)
     )
+
+
+[@ (Comment " The input of the function is considered to be public, 
+  thus this code is not secret independent with respect to the operations done over the input.
+  \n Input: m buffer: uint8 [mLen], \n pub(lic)Key: uint8[64], \n r: uint8[32], \n s: uint8[32]. 
+  \n Output: bool, where true stands for the correct signature verification. ")]
+val ecdsa_verif_p256_sha2_comb_radix:
+    mLen: size_t
+  -> m: lbuffer uint8 mLen
+  -> pubKey: lbuffer uint8 (size 64)
+  -> r: lbuffer uint8 (size 32)
+  -> s: lbuffer uint8 (size 32) ->
+   Stack bool
+    (requires fun h -> live h pubKey /\ live h r /\ live h s /\ live h m)
+    (ensures fun h0 result h1 ->
+      assert_norm (pow2 32 < pow2 61); 
+      let publicKeyX = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))) in
+      let publicKeyY = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 32) (size 32))) in
+      let r = nat_from_bytes_be (as_seq h1 r) in
+      let s = nat_from_bytes_be (as_seq h1 s) in
+      modifies0 h0 h1 /\
+      result == Spec.ECDSA.ecdsa_verification_agile (Spec.ECDSA.Hash SHA2_256) (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m)
+    )
+
+
 
 (* 
 [@ (Comment "  The input of the function is considered to be public, 

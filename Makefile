@@ -1073,7 +1073,7 @@ dist/test/c/%.c: $(ALL_KRML_FILES)
 
 dist/test/c/Test.c: KRML_EXTRA=-add-include '"kremlin/internal/compat.h"'
 
-dist/test/c/Hacl_Test_ECDSA.c: KRML_EXTRA=-drop Lib.IntTypes.Intrinsics -add-include '"lib_intrinsics.h"'
+dist/test/c/Hacl_Test_ECDSA.c: KRML_EXTRA=-drop Lib.IntTypes.Intrinsics -drop Hacl.Impl.ScalarMultiplication.RWNAF.Table.Ext -add-include '"lib_intrinsics.h" -add-include '"wnaf.h"'
 
 ###################################################################################
 # C Compilation (recursive make invocation relying on KreMLin-generated Makefile) #

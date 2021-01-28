@@ -1041,18 +1041,28 @@ let secretToPublicWithoutNorm result scalar tempBuffer =
 
 
 
-let scalarMultiplicationWithoutNorm p result scalar tempBuffer = 
-  let h0 = ST.get() in 
+let scalarMultiplicationWithoutNorm m p result scalar tempBuffer = 
+    let h0 = ST.get() in 
   let q = sub tempBuffer (size 0) (size 12) in 
-  zero_buffer q;
+  (* zero_buffer q; *)
   let buff = sub tempBuffer (size 12) (size 88) in 
   pointToDomain p result;
     let h2 = ST.get() in 
-  montgomery_ladder_2_precomputed result scalar buff;
-  copy_point q result;  
-    let h3 = ST.get() in 
-    lemma_point_to_domain h0 h2 p result;
-    lemma_pif_to_domain h2 q
+
+    begin
+  match m with 
+  |Radix4 ->
+     let bufferPrecomputed = create (size 192) (u64 0) in 
+     generatePrecomputedTable bufferPrecomputed result buff;
+     montgomery_ladder_2 q scalar buff bufferPrecomputed
+  |Ladder ->
+      montgomery_ladder q result scalar buff
+  |Comb ->
+    Hacl.Impl.ScalarMultiplication.WNAF.scalar_multiplication_cmb q scalar result buff
+  end;
+
+  copy_point q result 
+
 
 
 let secretToPublic m result scalar tempBuffer =
@@ -1076,18 +1086,28 @@ let secretToPublic m result scalar tempBuffer =
 
 
 
-let secretToPublicWithoutNorm result scalar tempBuffer = 
-    push_frame(); 
-      let basePoint = create (size 12) (u64 0) in 
-    uploadBasePoint basePoint;
-      let q = sub tempBuffer (size 0) (size 12) in 
-      let buff = sub tempBuffer (size 12) (size 88) in 
-    zero_buffer q; 
-      let h1 = ST.get() in 
-      lemma_pif_to_domain h1 q; 
-    montgomery_ladder_2_precomputed basePoint scalar buff; 
-    copy_point q result;
-  pop_frame()  
+let secretToPublicWithoutNorm m result scalar tempBuffer = 
+  let buff = sub tempBuffer (size 12) (size 88) in
+  begin
+  match m with 
+  |Ladder -> 
+    let basePoint = create (size 12) (u64 0) in 
+      uploadBasePoint basePoint;
+      admit();
+    montgomery_ladder result basePoint scalar buff;
+    admit()
+    (* ;copy_point basePoint result *)
+  |Radix4 ->
+    admit();
+    montgomery_ladder_2_precomputed result scalar buff
+  |_ -> 
+    admit();
+    Hacl.Impl.ScalarMultiplication.RWNAF.scalar_multiplication_cmb result scalar buff
+  end; 
+    admit();
+    let h1 = ST.get() in 
+    lemma_pif_to_domain h1 basePoint
+
 
 
 (* 

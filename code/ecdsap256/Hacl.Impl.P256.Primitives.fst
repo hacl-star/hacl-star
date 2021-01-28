@@ -224,6 +224,7 @@ let scalarMult m result pubKey scalar =
 
 inline_for_extraction noextract
 val scalarMultRaw:
+  m: montgomery_ladder_mode ->
     result:lbuffer uint8 (size 64)
   -> pubKey:lbuffer uint8 (size 64)
   -> scalar:lbuffer uint8 (size 32)
@@ -247,7 +248,7 @@ val scalarMultRaw:
     )
   )
 
-let scalarMultRaw result pubKey scalar =
+let scalarMultRaw m result pubKey scalar =
   push_frame();
   
   let resultBufferFelem = create (size 12) (u64 0) in
@@ -256,14 +257,17 @@ let scalarMultRaw result pubKey scalar =
     
   toFormPoint pubKey publicKeyAsFelem; 
   (* with normalisation *)
-  scalarMultiplication Radix4 publicKeyAsFelem resultBufferFelem scalar tempBuffer;
+  scalarMultiplication m publicKeyAsFelem resultBufferFelem scalar tempBuffer;
   fromFormPoint resultBufferFelem result;
 
   pop_frame()
 
 
 inline_for_extraction noextract
-val ecdsa_verification_point_operations: result: lbuffer uint8 (size 32) -> publicKey: lbuffer uint8 (size 64) -> 
+val ecdsa_verification_point_operations:   
+  m0: montgomery_ladder_mode ->
+  m1: montgomery_ladder_mode ->
+  result: lbuffer uint8 (size 32) -> publicKey: lbuffer uint8 (size 64) -> 
   u1: lbuffer uint8 (size 32) -> u2: lbuffer uint8 (size 32) ->
   Stack bool 
   (requires fun h -> live h result /\ live h publicKey /\ live h u1 /\ live h u2 /\
@@ -285,14 +289,14 @@ val ecdsa_verification_point_operations: result: lbuffer uint8 (size 32) -> publ
     as_seq h1 result == nat_to_bytes_be 32  (xResult % prime_p256_order)))
 
 
-let ecdsa_verification_point_operations result publicKey u1 u2 = 
+let ecdsa_verification_point_operations m0 m1 result publicKey u1 u2 = 
   push_frame();
     let tempBuffer = create (size 100) (u64 0) in  
     let publicKeyAsFelem = create (size 12) (u64 0) in 
     let resultFelem = create (size 4) (u64 0) in 
 
   toFormPoint publicKey publicKeyAsFelem;
-  let r = Hacl.Impl.ECDSA.P256.Verification.Agile.ecdsa_verification_step5 resultFelem publicKeyAsFelem u1 u2 tempBuffer in 
+  let r = Hacl.Impl.ECDSA.P256.Verification.Agile.ecdsa_verification_step5 m0 m1 resultFelem publicKeyAsFelem u1 u2 tempBuffer in 
   _fromForm resultFelem result;
   
   pop_frame();
