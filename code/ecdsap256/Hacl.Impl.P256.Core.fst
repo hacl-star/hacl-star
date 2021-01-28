@@ -654,7 +654,22 @@ let getScalar #a scalar i =
 let montgomery_ladder_step_radix_precomputed p tempBuffer scalar i =  
   let bits: uint32 = getScalar scalar (i) in 
 
-  let pointToAdd = sub points_radix_16 (bits *. size 8) (size 8) in 
+  let pointToAdd = create (size 8) (u64 0) in 
+
+  let invK h (k: nat) = True in 
+  Lib.Loops.for 0ul 16ul invK
+  (fun k -> 
+      let mask = eq_mask (to_u64 bits) (to_u64 k) in 
+      (* eq_mask_lemma d (to_u64 k);  *)
+	
+      let lut_cmb_x = Hacl.Impl.P256.Q.Comparision.global_to_comparable (sub points_radix_16 (k *! 8) (size 4)) in 
+      let lut_cmb_y = Hacl.Impl.P256.Q.Comparision.global_to_comparable (sub points_radix_16 (k *! 8 +! (size 4)) (size 4)) in 
+
+      copy_conditional (sub pointToAdd (size 0) (size 4)) lut_cmb_x mask;
+      copy_conditional (sub pointToAdd (size 4) (size 4)) lut_cmb_y mask); 
+
+
+ (*  let pointToAdd = sub points_radix_16 (bits *. size 8) (size 8) in *)
   
   point_double p p tempBuffer;
   point_double p p tempBuffer;
@@ -668,7 +683,25 @@ let montgomery_ladder_step_radix_precomputed p tempBuffer scalar i =
 let montgomery_ladder_step_radix p tempBuffer precomputedTable scalar i =  
   let bits = getScalar scalar i in 
 
-  let pointToAdd = sub precomputedTable (bits *. size 12) (size 12) in 
+  let pointToAdd = create (size 12) (u64 0) in 
+
+  let invK h (k: nat) = True in 
+  Lib.Loops.for 0ul 16ul invK
+  (fun k -> 
+      let mask = eq_mask (to_u64 bits) (to_u64 k) in 
+      (* eq_mask_lemma d (to_u64 k);  *)
+	
+      let lut_cmb_x = sub precomputedTable (k *! 12) (size 4) in 
+      let lut_cmb_y = sub precomputedTable (k *! 12 +! (size 4)) (size 4) in
+      let lut_cmb_z = sub precomputedTable (k *! 12 +! (size 8)) (size 4) in 
+
+      copy_conditional (sub pointToAdd (size 0) (size 4)) lut_cmb_x mask;
+      copy_conditional (sub pointToAdd (size 4) (size 4)) lut_cmb_y mask;
+      copy_conditional (sub pointToAdd (size 8) (size 4)) lut_cmb_z mask
+      
+      
+      ); 
+      
   
   point_double p p tempBuffer;
   point_double p p tempBuffer;

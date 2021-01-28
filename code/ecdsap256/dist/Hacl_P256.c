@@ -3960,14 +3960,14 @@ scalarMultiplicationL(
           bufferPrecomputed[i] = init;
         }
         generatePrecomputedTable(bufferPrecomputed, result, buff);
-        for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
+        for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)64U; i0++)
         {
-          uint32_t half = i >> (uint32_t)1U;
+          uint32_t half = i0 >> (uint32_t)1U;
           uint32_t word = (uint32_t)scalar[half];
-          uint32_t bitShift = i & (uint32_t)1U;
+          uint32_t bitShift = i0 & (uint32_t)1U;
           uint64_t mask10 = (uint64_t)0U - (uint64_t)bitShift;
           uint32_t
-          mask =
+          mask0 =
             (uint32_t)((uint64_t)(krml_checked_int_t)0xf0
             ^ (mask10 & ((uint64_t)(krml_checked_int_t)0xf0 ^ (uint64_t)(krml_checked_int_t)0x0f)));
           uint64_t mask1 = (uint64_t)0U - (uint64_t)bitShift;
@@ -3975,9 +3975,21 @@ scalarMultiplicationL(
           shiftMask =
             (uint32_t)((uint64_t)(krml_checked_int_t)0x4
             ^ (mask1 & ((uint64_t)(krml_checked_int_t)0x4 ^ (uint64_t)(krml_checked_int_t)0x0)));
-          uint32_t result1 = word & mask;
+          uint32_t result1 = word & mask0;
           uint32_t bits = result1 >> shiftMask;
-          uint64_t *pointToAdd = bufferPrecomputed + bits * (uint32_t)12U;
+          uint64_t pointToAdd[12U] = { 0U };
+          for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
+          {
+            uint64_t mask = FStar_UInt64_eq_mask((uint64_t)bits, (uint64_t)i);
+            uint64_t *lut_cmb_x = bufferPrecomputed + i * (uint32_t)(krml_checked_int_t)12;
+            uint64_t
+            *lut_cmb_y = bufferPrecomputed + i * (uint32_t)(krml_checked_int_t)12 + (uint32_t)4U;
+            uint64_t
+            *lut_cmb_z = bufferPrecomputed + i * (uint32_t)(krml_checked_int_t)12 + (uint32_t)8U;
+            copy_conditional(pointToAdd, lut_cmb_x, mask);
+            copy_conditional(pointToAdd + (uint32_t)4U, lut_cmb_y, mask);
+            copy_conditional(pointToAdd + (uint32_t)8U, lut_cmb_z, mask);
+          }
           point_double(q, q, buff);
           point_double(q, q, buff);
           point_double(q, q, buff);
@@ -4068,14 +4080,14 @@ scalarMultiplicationWithoutNorm(
           bufferPrecomputed[i] = init;
         }
         generatePrecomputedTable(bufferPrecomputed, result, buff);
-        for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
+        for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)64U; i0++)
         {
-          uint32_t half = i >> (uint32_t)1U;
+          uint32_t half = i0 >> (uint32_t)1U;
           uint32_t word = (uint32_t)scalar[half];
-          uint32_t bitShift = i & (uint32_t)1U;
+          uint32_t bitShift = i0 & (uint32_t)1U;
           uint64_t mask10 = (uint64_t)0U - (uint64_t)bitShift;
           uint32_t
-          mask =
+          mask0 =
             (uint32_t)((uint64_t)(krml_checked_int_t)0xf0
             ^ (mask10 & ((uint64_t)(krml_checked_int_t)0xf0 ^ (uint64_t)(krml_checked_int_t)0x0f)));
           uint64_t mask1 = (uint64_t)0U - (uint64_t)bitShift;
@@ -4083,9 +4095,21 @@ scalarMultiplicationWithoutNorm(
           shiftMask =
             (uint32_t)((uint64_t)(krml_checked_int_t)0x4
             ^ (mask1 & ((uint64_t)(krml_checked_int_t)0x4 ^ (uint64_t)(krml_checked_int_t)0x0)));
-          uint32_t result1 = word & mask;
+          uint32_t result1 = word & mask0;
           uint32_t bits = result1 >> shiftMask;
-          uint64_t *pointToAdd = bufferPrecomputed + bits * (uint32_t)12U;
+          uint64_t pointToAdd[12U] = { 0U };
+          for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
+          {
+            uint64_t mask = FStar_UInt64_eq_mask((uint64_t)bits, (uint64_t)i);
+            uint64_t *lut_cmb_x = bufferPrecomputed + i * (uint32_t)(krml_checked_int_t)12;
+            uint64_t
+            *lut_cmb_y = bufferPrecomputed + i * (uint32_t)(krml_checked_int_t)12 + (uint32_t)4U;
+            uint64_t
+            *lut_cmb_z = bufferPrecomputed + i * (uint32_t)(krml_checked_int_t)12 + (uint32_t)8U;
+            copy_conditional(pointToAdd, lut_cmb_x, mask);
+            copy_conditional(pointToAdd + (uint32_t)4U, lut_cmb_y, mask);
+            copy_conditional(pointToAdd + (uint32_t)8U, lut_cmb_z, mask);
+          }
           point_double(q, q, buff);
           point_double(q, q, buff);
           point_double(q, q, buff);
@@ -4175,7 +4199,7 @@ secretToPublicWithoutNorm(
         uint32_t bitShift0 = (uint32_t)(krml_checked_int_t)0 & (uint32_t)1U;
         uint64_t mask10 = (uint64_t)0U - (uint64_t)bitShift0;
         uint32_t
-        mask =
+        mask0 =
           (uint32_t)((uint64_t)(krml_checked_int_t)0xf0
           ^ (mask10 & ((uint64_t)(krml_checked_int_t)0xf0 ^ (uint64_t)(krml_checked_int_t)0x0f)));
         uint64_t mask11 = (uint64_t)0U - (uint64_t)bitShift0;
@@ -4183,7 +4207,7 @@ secretToPublicWithoutNorm(
         shiftMask =
           (uint32_t)((uint64_t)(krml_checked_int_t)0x4
           ^ (mask11 & ((uint64_t)(krml_checked_int_t)0x4 ^ (uint64_t)(krml_checked_int_t)0x0)));
-        uint32_t result10 = word & mask;
+        uint32_t result10 = word & mask0;
         uint32_t bits = result10 >> shiftMask;
         const uint64_t *pointToStart = points_radix_16 + bits * (uint32_t)8U;
         uint64_t *pointToStart1 = const_to_lbuffer__uint64_t(pointToStart);
@@ -4192,14 +4216,14 @@ secretToPublicWithoutNorm(
         result[9U] = (uint64_t)0U;
         result[10U] = (uint64_t)0U;
         result[11U] = (uint64_t)0U;
-        for (uint32_t i = (uint32_t)1U; i < (uint32_t)64U; i++)
+        for (uint32_t i0 = (uint32_t)1U; i0 < (uint32_t)64U; i0++)
         {
-          uint32_t half = i >> (uint32_t)1U;
+          uint32_t half = i0 >> (uint32_t)1U;
           uint32_t word0 = (uint32_t)scalar[half];
-          uint32_t bitShift = i & (uint32_t)1U;
+          uint32_t bitShift = i0 & (uint32_t)1U;
           uint64_t mask12 = (uint64_t)0U - (uint64_t)bitShift;
           uint32_t
-          mask0 =
+          mask2 =
             (uint32_t)((uint64_t)(krml_checked_int_t)0xf0
             ^ (mask12 & ((uint64_t)(krml_checked_int_t)0xf0 ^ (uint64_t)(krml_checked_int_t)0x0f)));
           uint64_t mask1 = (uint64_t)0U - (uint64_t)bitShift;
@@ -4207,14 +4231,26 @@ secretToPublicWithoutNorm(
           shiftMask0 =
             (uint32_t)((uint64_t)(krml_checked_int_t)0x4
             ^ (mask1 & ((uint64_t)(krml_checked_int_t)0x4 ^ (uint64_t)(krml_checked_int_t)0x0)));
-          uint32_t result1 = word0 & mask0;
+          uint32_t result1 = word0 & mask2;
           uint32_t bits1 = result1 >> shiftMask0;
-          const uint64_t *pointToAdd = points_radix_16 + bits1 * (uint32_t)8U;
+          uint64_t pointToAdd[8U] = { 0U };
+          for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
+          {
+            uint64_t mask = FStar_UInt64_eq_mask((uint64_t)bits1, (uint64_t)i);
+            uint64_t
+            *lut_cmb_x = global_to_comparable(points_radix_16 + i * (uint32_t)(krml_checked_int_t)8);
+            uint64_t
+            *lut_cmb_y =
+              global_to_comparable(points_radix_16
+                + i * (uint32_t)(krml_checked_int_t)8 + (uint32_t)4U);
+            copy_conditional(pointToAdd, lut_cmb_x, mask);
+            copy_conditional(pointToAdd + (uint32_t)4U, lut_cmb_y, mask);
+          }
           point_double(result, result, buff);
           point_double(result, result, buff);
           point_double(result, result, buff);
           point_double(result, result, buff);
-          point_add_mixed(Lib_Buffer_CONST, result, (void *)pointToAdd, result, buff);
+          point_add_mixed(Lib_Buffer_MUT, result, (void *)pointToAdd, result, buff);
         }
         break;
       }
@@ -6141,7 +6177,7 @@ bool Hacl_P256_ecp256dh_i_radix4(uint8_t *result, uint8_t *scalar)
   uint32_t bitShift0 = (uint32_t)(krml_checked_int_t)0 & (uint32_t)1U;
   uint64_t mask10 = (uint64_t)0U - (uint64_t)bitShift0;
   uint32_t
-  mask =
+  mask0 =
     (uint32_t)((uint64_t)(krml_checked_int_t)0xf0
     ^ (mask10 & ((uint64_t)(krml_checked_int_t)0xf0 ^ (uint64_t)(krml_checked_int_t)0x0f)));
   uint64_t mask11 = (uint64_t)0U - (uint64_t)bitShift0;
@@ -6149,7 +6185,7 @@ bool Hacl_P256_ecp256dh_i_radix4(uint8_t *result, uint8_t *scalar)
   shiftMask =
     (uint32_t)((uint64_t)(krml_checked_int_t)0x4
     ^ (mask11 & ((uint64_t)(krml_checked_int_t)0x4 ^ (uint64_t)(krml_checked_int_t)0x0)));
-  uint32_t result10 = word & mask;
+  uint32_t result10 = word & mask0;
   uint32_t bits = result10 >> shiftMask;
   const uint64_t *pointToStart = points_radix_16 + bits * (uint32_t)8U;
   uint64_t *pointToStart1 = const_to_lbuffer__uint64_t(pointToStart);
@@ -6158,14 +6194,14 @@ bool Hacl_P256_ecp256dh_i_radix4(uint8_t *result, uint8_t *scalar)
   resultBuffer[9U] = (uint64_t)0U;
   resultBuffer[10U] = (uint64_t)0U;
   resultBuffer[11U] = (uint64_t)0U;
-  for (uint32_t i = (uint32_t)1U; i < (uint32_t)64U; i++)
+  for (uint32_t i0 = (uint32_t)1U; i0 < (uint32_t)64U; i0++)
   {
-    uint32_t half = i >> (uint32_t)1U;
+    uint32_t half = i0 >> (uint32_t)1U;
     uint32_t word0 = (uint32_t)scalar[half];
-    uint32_t bitShift = i & (uint32_t)1U;
+    uint32_t bitShift = i0 & (uint32_t)1U;
     uint64_t mask12 = (uint64_t)0U - (uint64_t)bitShift;
     uint32_t
-    mask0 =
+    mask2 =
       (uint32_t)((uint64_t)(krml_checked_int_t)0xf0
       ^ (mask12 & ((uint64_t)(krml_checked_int_t)0xf0 ^ (uint64_t)(krml_checked_int_t)0x0f)));
     uint64_t mask1 = (uint64_t)0U - (uint64_t)bitShift;
@@ -6173,14 +6209,25 @@ bool Hacl_P256_ecp256dh_i_radix4(uint8_t *result, uint8_t *scalar)
     shiftMask0 =
       (uint32_t)((uint64_t)(krml_checked_int_t)0x4
       ^ (mask1 & ((uint64_t)(krml_checked_int_t)0x4 ^ (uint64_t)(krml_checked_int_t)0x0)));
-    uint32_t result1 = word0 & mask0;
+    uint32_t result1 = word0 & mask2;
     uint32_t bits1 = result1 >> shiftMask0;
-    const uint64_t *pointToAdd = points_radix_16 + bits1 * (uint32_t)8U;
+    uint64_t pointToAdd[8U] = { 0U };
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
+    {
+      uint64_t mask = FStar_UInt64_eq_mask((uint64_t)bits1, (uint64_t)i);
+      uint64_t
+      *lut_cmb_x = global_to_comparable(points_radix_16 + i * (uint32_t)(krml_checked_int_t)8);
+      uint64_t
+      *lut_cmb_y =
+        global_to_comparable(points_radix_16 + i * (uint32_t)(krml_checked_int_t)8 + (uint32_t)4U);
+      copy_conditional(pointToAdd, lut_cmb_x, mask);
+      copy_conditional(pointToAdd + (uint32_t)4U, lut_cmb_y, mask);
+    }
     point_double(resultBuffer, resultBuffer, buff);
     point_double(resultBuffer, resultBuffer, buff);
     point_double(resultBuffer, resultBuffer, buff);
     point_double(resultBuffer, resultBuffer, buff);
-    point_add_mixed(Lib_Buffer_CONST, resultBuffer, (void *)pointToAdd, resultBuffer, buff);
+    point_add_mixed(Lib_Buffer_MUT, resultBuffer, (void *)pointToAdd, resultBuffer, buff);
   }
   norm(resultBuffer, resultBuffer, buff);
   uint64_t flag = isPointAtInfinityPrivate(resultBuffer);
