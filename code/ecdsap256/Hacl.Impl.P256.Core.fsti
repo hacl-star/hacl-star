@@ -149,39 +149,6 @@ val normX: p: point -> result: felem -> tempBuffer: lbuffer uint64 (size 88) -> 
 
 
 [@ CInline]
-inline_for_extraction noextract  
-val getScalar: #buf_type: buftype -> scalar: lbuffer_t buf_type uint8 (size 32) -> i: size_t {v i < 64} -> 
-  Stack uint32 
-    (requires fun h -> True)
-    (ensures fun h0 _ h1 -> True)
-
-
-[@ CInline]
-inline_for_extraction noextract  
-val montgomery_ladder_step_radix_precomputed: 
-  p: point -> tempBuffer: lbuffer uint64 (size 88) -> 
-  scalar:  lbuffer uint8 (size 32)-> 
-  i:size_t{v i < 256} -> 
-  Stack unit
-  (requires fun h -> live h p /\live h tempBuffer /\ live h scalar /\
-    LowStar.Monotonic.Buffer.all_disjoint [loc p;loc tempBuffer; loc scalar])
-  (ensures fun h0 _ h1 -> True)
-
-[@ CInline]
-inline_for_extraction noextract  
-val montgomery_ladder_step_radix: 
-  p: point -> tempBuffer: lbuffer uint64 (size 88) -> 
-  precomputedTable: lbuffer uint64 (size 192) ->
-  scalar:  lbuffer uint8 (size 32) -> 
-  i:size_t{v i < 256} -> 
-  Stack unit
-  (requires fun h -> live h p /\live h tempBuffer /\ live h scalar /\
-    LowStar.Monotonic.Buffer.all_disjoint [loc p;loc tempBuffer; loc scalar])
-  (ensures fun h0 _ h1 -> True)
-
-
-
-[@ CInline]
 inline_for_extraction noextract
 val scalarMultiplication: #buf_type: buftype-> m: montgomery_ladder_mode ->
  p: point -> result: point -> 

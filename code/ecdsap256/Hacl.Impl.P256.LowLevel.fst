@@ -1680,3 +1680,13 @@ val toUint64ChangeEndian: i:lbuffer uint8 (size 32) -> o:felem -> Stack unit
 let toUint64ChangeEndian i o = 
   Lib.ByteBuffer.uints_from_bytes_be o i;
   changeEndian o
+
+
+
+inline_for_extraction noextract
+val copy_point: p: point -> result: point -> Stack unit 
+  (requires fun h -> live h p /\ live h result /\ disjoint p result) 
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_seq h1 result == as_seq h0 p)
+
+let copy_point p result = copy result p
+ 

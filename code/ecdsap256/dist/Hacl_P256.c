@@ -2701,17 +2701,106 @@ static void scalar_multiplication_cmb(uint64_t *result, void *scalar, uint64_t *
   conditional_substraction(result, result, (uint8_t *)scalar, tempBuffer);
 }
 
-static inline uint64_t isPointAtInfinityPrivate(uint64_t *p)
+static const
+uint64_t
+points_radix_16[128U] =
+  {
+    (uint64_t)0x0U, (uint64_t)0x0U, (uint64_t)0x0U, (uint64_t)0x0U, (uint64_t)0x0U, (uint64_t)0x0U,
+    (uint64_t)0x0U, (uint64_t)0x0U, (uint64_t)0x1fb38ab1388ad777U, (uint64_t)0x1dfee06615fa309dU,
+    (uint64_t)0xfcac986c3afea4a7U, (uint64_t)0xdf65c2da29fb821aU, (uint64_t)0xeff44e23f63f8f6dU,
+    (uint64_t)0xaa02cd3ed4b681a4U, (uint64_t)0xdd5fda3363818af8U, (uint64_t)0xfc53bc2629fbf0b3U,
+    (uint64_t)0x12631d721b91beeaU, (uint64_t)0x5f73f2d3a11a09f8U, (uint64_t)0xac41f54484d5fcd8U,
+    (uint64_t)0x86578e5c56025df4U, (uint64_t)0x577c956b15ed6b5aU, (uint64_t)0xb59c5f77982d848U,
+    (uint64_t)0xb7c5e2c190fcdcc2U, (uint64_t)0x7d64d13ef1c91ffdU, (uint64_t)0xd40c2d6273f9d9f1U,
+    (uint64_t)0x4dc6f628063ef17cU, (uint64_t)0x498e81df7ab17aa5U, (uint64_t)0xabb2a5026f17173cU,
+    (uint64_t)0x4a3d7527f6739ef3U, (uint64_t)0xd941003268184c91U, (uint64_t)0xd2d458b8d401508bU,
+    (uint64_t)0xb7437ab810ac5451U, (uint64_t)0x5256d9bdab491252U, (uint64_t)0x972d326eb1084c12U,
+    (uint64_t)0xc3e96455e2ec3bfaU, (uint64_t)0xb75c723b549a10ffU, (uint64_t)0x9d9185f9f8a18961U,
+    (uint64_t)0x2200a07b8589ba82U, (uint64_t)0x637b9d96fd4e9f5eU, (uint64_t)0xce75bfb2575e6cfaU,
+    (uint64_t)0x7dd4477db8b77c7dU, (uint64_t)0x80818a776e5503b0U, (uint64_t)0x6fc7d58fb59581dU,
+    (uint64_t)0xd899fb87efe43022U, (uint64_t)0x23b9912111694135U, (uint64_t)0x7e5de7bac33fa1c8U,
+    (uint64_t)0xb3b83722a70e7d43U, (uint64_t)0xf06cfecbfb9bb38fU, (uint64_t)0xaa39277dfa93656U,
+    (uint64_t)0x3dabb6cce67c5201U, (uint64_t)0x473ffb8bf1f94677U, (uint64_t)0xb9f0b93637453e56U,
+    (uint64_t)0x8fce12ec20958fb2U, (uint64_t)0xcc16d74ff7786061U, (uint64_t)0x3678438a8235d096U,
+    (uint64_t)0xe39ea044f06b43f6U, (uint64_t)0xbb40bdb5775c9950U, (uint64_t)0xd244a74cdc703cddU,
+    (uint64_t)0x83dc1b8a6105dd53U, (uint64_t)0x38d9d50d49ef0437U, (uint64_t)0x58be44eba6096472U,
+    (uint64_t)0x960afaec386fa5c5U, (uint64_t)0x1440032e000134b9U, (uint64_t)0x601e721454d6ba96U,
+    (uint64_t)0x79ec42228671b9b6U, (uint64_t)0xfdc00dc48df9e25cU, (uint64_t)0x44500833d71d2e77U,
+    (uint64_t)0x2bda4c3c0bc103d5U, (uint64_t)0x51528408aa925d53U, (uint64_t)0xefcb55b9c2f3a37dU,
+    (uint64_t)0x9f28f6bb9846c915U, (uint64_t)0xe1547ce1d8340e55U, (uint64_t)0x97e310c1995b3ed2U,
+    (uint64_t)0xed861937196256e6U, (uint64_t)0x1c6762abff2c65f2U, (uint64_t)0x268345e0978fceddU,
+    (uint64_t)0x35ca2e572b784881U, (uint64_t)0x28ac888da0acd1b7U, (uint64_t)0x305640dc06a41bafU,
+    (uint64_t)0x997c6fd2cb671bfbU, (uint64_t)0xf40d9eaf4a31e15aU, (uint64_t)0x8991dd7d54cfe03aU,
+    (uint64_t)0x4889a3463a8deb0cU, (uint64_t)0x4cbf48092cd0a1faU, (uint64_t)0xc6965c4fbe18fb8cU,
+    (uint64_t)0x1d499d0cb216fa84U, (uint64_t)0x8d5fe52c705dd3ebU, (uint64_t)0x812b268f84313b34U,
+    (uint64_t)0x313b58808261591aU, (uint64_t)0xc2c322508f53d933U, (uint64_t)0xa49ef3f95094ed1bU,
+    (uint64_t)0x13e326786e98c63U, (uint64_t)0x34be8167cd460429U, (uint64_t)0x698a328099a6b31U,
+    (uint64_t)0xb9be3ba51b0c922dU, (uint64_t)0xe59cca03f7674edU, (uint64_t)0x4fbf7e505d3aca7cU,
+    (uint64_t)0x2f4f8ba62020715U, (uint64_t)0x840502262ac1ec42U, (uint64_t)0xb8e0532775197de7U,
+    (uint64_t)0x9142a358cf4e9b4bU, (uint64_t)0xc86a3c567e5d8626U, (uint64_t)0xd4051282b4a7992aU,
+    (uint64_t)0xe7573c5999e3974eU, (uint64_t)0xd814a606da7bd76bU, (uint64_t)0x15604730f38cb788U,
+    (uint64_t)0xbd195f868fbdd6c4U, (uint64_t)0xdb96f5b00a51d3f7U, (uint64_t)0xe1385c8a9b507feaU,
+    (uint64_t)0x878e27813ee7310U, (uint64_t)0x6d7d8b12aea7e096U, (uint64_t)0x54978ad11e2f5ccaU,
+    (uint64_t)0x49fffd6c3c4d07d4U, (uint64_t)0x703638f71fab7a5dU, (uint64_t)0xbed6e367fcc73960U,
+    (uint64_t)0x215e161835a61d75U, (uint64_t)0xe52288a5e87a660bU, (uint64_t)0xf1d127ee3c802cb5U,
+    (uint64_t)0xccde3c6aafc46044U, (uint64_t)0xdc11c08ef14cff32U, (uint64_t)0x29216f9ceca46668U,
+    (uint64_t)0x22e584a3b2891c5eU, (uint64_t)0xe6deecd7810f6d87U, (uint64_t)0x6aff4b94a55659a3U,
+    (uint64_t)0x12b59bb6d2e9f876U, (uint64_t)0x27ed01943aa02eabU, (uint64_t)0x8d6d420841f57075U,
+    (uint64_t)0xe7b47285ef60a461U
+  };
+
+static inline void
+generatePrecomputedTable(uint64_t *b, uint64_t *publicKey, uint64_t *tempBuffer)
 {
-  uint64_t z0 = p[8U];
-  uint64_t z1 = p[9U];
-  uint64_t z2 = p[10U];
-  uint64_t z3 = p[11U];
-  uint64_t z0_zero = FStar_UInt64_eq_mask(z0, (uint64_t)0U);
-  uint64_t z1_zero = FStar_UInt64_eq_mask(z1, (uint64_t)0U);
-  uint64_t z2_zero = FStar_UInt64_eq_mask(z2, (uint64_t)0U);
-  uint64_t z3_zero = FStar_UInt64_eq_mask(z3, (uint64_t)0U);
-  return (z0_zero & z1_zero) & (z2_zero & z3_zero);
+  uint64_t *point0 = b;
+  uint64_t *point1 = b + (uint32_t)12U;
+  uint64_t *point2 = b + (uint32_t)24U;
+  uint64_t *point3 = b + (uint32_t)36U;
+  uint64_t *point4 = b + (uint32_t)48U;
+  uint64_t *point5 = b + (uint32_t)60U;
+  uint64_t *point6 = b + (uint32_t)72U;
+  uint64_t *point7 = b + (uint32_t)84U;
+  uint64_t *point8 = b + (uint32_t)96U;
+  uint64_t *point9 = b + (uint32_t)108U;
+  uint64_t *point10 = b + (uint32_t)120U;
+  uint64_t *point11 = b + (uint32_t)132U;
+  uint64_t *point12 = b + (uint32_t)144U;
+  uint64_t *point13 = b + (uint32_t)156U;
+  uint64_t *point14 = b + (uint32_t)168U;
+  uint64_t *point15 = b + (uint32_t)180U;
+  uint64_t *uu____0 = point0;
+  uint32_t len0 = (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < len0; i++)
+  {
+    uu____0[i] = (uint64_t)0U;
+  }
+  uint64_t *uu____1 = point0 + (uint32_t)4U;
+  uint32_t len1 = (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < len1; i++)
+  {
+    uu____1[i] = (uint64_t)0U;
+  }
+  uint64_t *uu____2 = point0 + (uint32_t)8U;
+  uint32_t len = (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < len; i++)
+  {
+    uu____2[i] = (uint64_t)0U;
+  }
+  memcpy(point1, publicKey, (uint32_t)12U * sizeof (uint64_t));
+  point_double(publicKey, point2, tempBuffer);
+  point_add(point2, point1, point3, tempBuffer);
+  point_double(point2, point4, tempBuffer);
+  point_add(point4, point1, point5, tempBuffer);
+  point_double(point3, point6, tempBuffer);
+  point_add(point6, point1, point7, tempBuffer);
+  point_double(point4, point8, tempBuffer);
+  point_add(point8, point1, point9, tempBuffer);
+  point_double(point5, point10, tempBuffer);
+  point_add(point10, point1, point11, tempBuffer);
+  point_double(point6, point12, tempBuffer);
+  point_add(point12, point1, point13, tempBuffer);
+  point_double(point7, point14, tempBuffer);
+  point_add(point14, point1, point15, tempBuffer);
 }
 
 static inline void cswap(uint64_t bit, uint64_t *p1, uint64_t *p2)
@@ -2777,6 +2866,19 @@ static inline void cswap(uint64_t bit, uint64_t *p1, uint64_t *p2)
     p1[11U] = p1[11U] ^ dummy;
     p2[11U] = p2[11U] ^ dummy;
   }
+}
+
+static inline uint64_t isPointAtInfinityPrivate(uint64_t *p)
+{
+  uint64_t z0 = p[8U];
+  uint64_t z1 = p[9U];
+  uint64_t z2 = p[10U];
+  uint64_t z3 = p[11U];
+  uint64_t z0_zero = FStar_UInt64_eq_mask(z0, (uint64_t)0U);
+  uint64_t z1_zero = FStar_UInt64_eq_mask(z1, (uint64_t)0U);
+  uint64_t z2_zero = FStar_UInt64_eq_mask(z2, (uint64_t)0U);
+  uint64_t z3_zero = FStar_UInt64_eq_mask(z3, (uint64_t)0U);
+  return (z0_zero & z1_zero) & (z2_zero & z3_zero);
 }
 
 static inline void norm(uint64_t *p, uint64_t *resultPoint, uint64_t *tempBuffer)
@@ -3707,108 +3809,6 @@ static inline void normX(uint64_t *p, uint64_t *result, uint64_t *tempBuffer)
   cmovznz4(result, tempBuffer1, x_, carry);
 }
 
-static const
-uint64_t
-points_radix_16[128U] =
-  {
-    (uint64_t)0x0U, (uint64_t)0x0U, (uint64_t)0x0U, (uint64_t)0x0U, (uint64_t)0x0U, (uint64_t)0x0U,
-    (uint64_t)0x0U, (uint64_t)0x0U, (uint64_t)0x1fb38ab1388ad777U, (uint64_t)0x1dfee06615fa309dU,
-    (uint64_t)0xfcac986c3afea4a7U, (uint64_t)0xdf65c2da29fb821aU, (uint64_t)0xeff44e23f63f8f6dU,
-    (uint64_t)0xaa02cd3ed4b681a4U, (uint64_t)0xdd5fda3363818af8U, (uint64_t)0xfc53bc2629fbf0b3U,
-    (uint64_t)0x12631d721b91beeaU, (uint64_t)0x5f73f2d3a11a09f8U, (uint64_t)0xac41f54484d5fcd8U,
-    (uint64_t)0x86578e5c56025df4U, (uint64_t)0x577c956b15ed6b5aU, (uint64_t)0xb59c5f77982d848U,
-    (uint64_t)0xb7c5e2c190fcdcc2U, (uint64_t)0x7d64d13ef1c91ffdU, (uint64_t)0xd40c2d6273f9d9f1U,
-    (uint64_t)0x4dc6f628063ef17cU, (uint64_t)0x498e81df7ab17aa5U, (uint64_t)0xabb2a5026f17173cU,
-    (uint64_t)0x4a3d7527f6739ef3U, (uint64_t)0xd941003268184c91U, (uint64_t)0xd2d458b8d401508bU,
-    (uint64_t)0xb7437ab810ac5451U, (uint64_t)0x5256d9bdab491252U, (uint64_t)0x972d326eb1084c12U,
-    (uint64_t)0xc3e96455e2ec3bfaU, (uint64_t)0xb75c723b549a10ffU, (uint64_t)0x9d9185f9f8a18961U,
-    (uint64_t)0x2200a07b8589ba82U, (uint64_t)0x637b9d96fd4e9f5eU, (uint64_t)0xce75bfb2575e6cfaU,
-    (uint64_t)0x7dd4477db8b77c7dU, (uint64_t)0x80818a776e5503b0U, (uint64_t)0x6fc7d58fb59581dU,
-    (uint64_t)0xd899fb87efe43022U, (uint64_t)0x23b9912111694135U, (uint64_t)0x7e5de7bac33fa1c8U,
-    (uint64_t)0xb3b83722a70e7d43U, (uint64_t)0xf06cfecbfb9bb38fU, (uint64_t)0xaa39277dfa93656U,
-    (uint64_t)0x3dabb6cce67c5201U, (uint64_t)0x473ffb8bf1f94677U, (uint64_t)0xb9f0b93637453e56U,
-    (uint64_t)0x8fce12ec20958fb2U, (uint64_t)0xcc16d74ff7786061U, (uint64_t)0x3678438a8235d096U,
-    (uint64_t)0xe39ea044f06b43f6U, (uint64_t)0xbb40bdb5775c9950U, (uint64_t)0xd244a74cdc703cddU,
-    (uint64_t)0x83dc1b8a6105dd53U, (uint64_t)0x38d9d50d49ef0437U, (uint64_t)0x58be44eba6096472U,
-    (uint64_t)0x960afaec386fa5c5U, (uint64_t)0x1440032e000134b9U, (uint64_t)0x601e721454d6ba96U,
-    (uint64_t)0x79ec42228671b9b6U, (uint64_t)0xfdc00dc48df9e25cU, (uint64_t)0x44500833d71d2e77U,
-    (uint64_t)0x2bda4c3c0bc103d5U, (uint64_t)0x51528408aa925d53U, (uint64_t)0xefcb55b9c2f3a37dU,
-    (uint64_t)0x9f28f6bb9846c915U, (uint64_t)0xe1547ce1d8340e55U, (uint64_t)0x97e310c1995b3ed2U,
-    (uint64_t)0xed861937196256e6U, (uint64_t)0x1c6762abff2c65f2U, (uint64_t)0x268345e0978fceddU,
-    (uint64_t)0x35ca2e572b784881U, (uint64_t)0x28ac888da0acd1b7U, (uint64_t)0x305640dc06a41bafU,
-    (uint64_t)0x997c6fd2cb671bfbU, (uint64_t)0xf40d9eaf4a31e15aU, (uint64_t)0x8991dd7d54cfe03aU,
-    (uint64_t)0x4889a3463a8deb0cU, (uint64_t)0x4cbf48092cd0a1faU, (uint64_t)0xc6965c4fbe18fb8cU,
-    (uint64_t)0x1d499d0cb216fa84U, (uint64_t)0x8d5fe52c705dd3ebU, (uint64_t)0x812b268f84313b34U,
-    (uint64_t)0x313b58808261591aU, (uint64_t)0xc2c322508f53d933U, (uint64_t)0xa49ef3f95094ed1bU,
-    (uint64_t)0x13e326786e98c63U, (uint64_t)0x34be8167cd460429U, (uint64_t)0x698a328099a6b31U,
-    (uint64_t)0xb9be3ba51b0c922dU, (uint64_t)0xe59cca03f7674edU, (uint64_t)0x4fbf7e505d3aca7cU,
-    (uint64_t)0x2f4f8ba62020715U, (uint64_t)0x840502262ac1ec42U, (uint64_t)0xb8e0532775197de7U,
-    (uint64_t)0x9142a358cf4e9b4bU, (uint64_t)0xc86a3c567e5d8626U, (uint64_t)0xd4051282b4a7992aU,
-    (uint64_t)0xe7573c5999e3974eU, (uint64_t)0xd814a606da7bd76bU, (uint64_t)0x15604730f38cb788U,
-    (uint64_t)0xbd195f868fbdd6c4U, (uint64_t)0xdb96f5b00a51d3f7U, (uint64_t)0xe1385c8a9b507feaU,
-    (uint64_t)0x878e27813ee7310U, (uint64_t)0x6d7d8b12aea7e096U, (uint64_t)0x54978ad11e2f5ccaU,
-    (uint64_t)0x49fffd6c3c4d07d4U, (uint64_t)0x703638f71fab7a5dU, (uint64_t)0xbed6e367fcc73960U,
-    (uint64_t)0x215e161835a61d75U, (uint64_t)0xe52288a5e87a660bU, (uint64_t)0xf1d127ee3c802cb5U,
-    (uint64_t)0xccde3c6aafc46044U, (uint64_t)0xdc11c08ef14cff32U, (uint64_t)0x29216f9ceca46668U,
-    (uint64_t)0x22e584a3b2891c5eU, (uint64_t)0xe6deecd7810f6d87U, (uint64_t)0x6aff4b94a55659a3U,
-    (uint64_t)0x12b59bb6d2e9f876U, (uint64_t)0x27ed01943aa02eabU, (uint64_t)0x8d6d420841f57075U,
-    (uint64_t)0xe7b47285ef60a461U
-  };
-
-static inline void
-generatePrecomputedTable(uint64_t *b, uint64_t *publicKey, uint64_t *tempBuffer)
-{
-  uint64_t *point0 = b;
-  uint64_t *point1 = b + (uint32_t)12U;
-  uint64_t *point2 = b + (uint32_t)24U;
-  uint64_t *point3 = b + (uint32_t)36U;
-  uint64_t *point4 = b + (uint32_t)48U;
-  uint64_t *point5 = b + (uint32_t)60U;
-  uint64_t *point6 = b + (uint32_t)72U;
-  uint64_t *point7 = b + (uint32_t)84U;
-  uint64_t *point8 = b + (uint32_t)96U;
-  uint64_t *point9 = b + (uint32_t)108U;
-  uint64_t *point10 = b + (uint32_t)120U;
-  uint64_t *point11 = b + (uint32_t)132U;
-  uint64_t *point12 = b + (uint32_t)144U;
-  uint64_t *point13 = b + (uint32_t)156U;
-  uint64_t *point14 = b + (uint32_t)168U;
-  uint64_t *point15 = b + (uint32_t)180U;
-  uint64_t *uu____0 = point0;
-  uint32_t len0 = (uint32_t)4U;
-  for (uint32_t i = (uint32_t)0U; i < len0; i++)
-  {
-    uu____0[i] = (uint64_t)0U;
-  }
-  uint64_t *uu____1 = point0 + (uint32_t)4U;
-  uint32_t len1 = (uint32_t)4U;
-  for (uint32_t i = (uint32_t)0U; i < len1; i++)
-  {
-    uu____1[i] = (uint64_t)0U;
-  }
-  uint64_t *uu____2 = point0 + (uint32_t)8U;
-  uint32_t len = (uint32_t)4U;
-  for (uint32_t i = (uint32_t)0U; i < len; i++)
-  {
-    uu____2[i] = (uint64_t)0U;
-  }
-  memcpy(point1, publicKey, (uint32_t)12U * sizeof (uint64_t));
-  point_double(publicKey, point2, tempBuffer);
-  point_add(point2, point1, point3, tempBuffer);
-  point_double(point2, point4, tempBuffer);
-  point_add(point4, point1, point5, tempBuffer);
-  point_double(point3, point6, tempBuffer);
-  point_add(point6, point1, point7, tempBuffer);
-  point_double(point4, point8, tempBuffer);
-  point_add(point8, point1, point9, tempBuffer);
-  point_double(point5, point10, tempBuffer);
-  point_add(point10, point1, point11, tempBuffer);
-  point_double(point6, point12, tempBuffer);
-  point_add(point12, point1, point13, tempBuffer);
-  point_double(point7, point14, tempBuffer);
-  point_add(point14, point1, point15, tempBuffer);
-}
-
 static void
 scalarMultiplicationL(
   Spec_P256_montgomery_ladder_mode m,
@@ -3881,7 +3881,7 @@ scalarMultiplicationL(
         {
           uint32_t half = i0 >> (uint32_t)1U;
           uint32_t word = (uint32_t)scalar[half];
-          uint32_t bitShift = i0 & (uint32_t)1U;
+          uint32_t bitShift = i0 & (uint32_t)(uint64_t)1U;
           uint64_t mask10 = (uint64_t)0U - (uint64_t)bitShift;
           uint32_t
           mask0 =
@@ -3990,7 +3990,7 @@ scalarMultiplicationWithoutNorm(
         {
           uint32_t half = i0 >> (uint32_t)1U;
           uint32_t word = (uint32_t)scalar[half];
-          uint32_t bitShift = i0 & (uint32_t)1U;
+          uint32_t bitShift = i0 & (uint32_t)(uint64_t)1U;
           uint64_t mask10 = (uint64_t)0U - (uint64_t)bitShift;
           uint32_t
           mask0 =
@@ -4073,7 +4073,7 @@ secretToPublicWithoutNorm(
       {
         uint32_t half0 = (uint32_t)(krml_checked_int_t)0 >> (uint32_t)1U;
         uint32_t word = (uint32_t)scalar[half0];
-        uint32_t bitShift0 = (uint32_t)(krml_checked_int_t)0 & (uint32_t)1U;
+        uint32_t bitShift0 = (uint32_t)(krml_checked_int_t)0 & (uint32_t)(uint64_t)1U;
         uint64_t mask10 = (uint64_t)0U - (uint64_t)bitShift0;
         uint32_t
         mask0 =
@@ -4097,7 +4097,7 @@ secretToPublicWithoutNorm(
         {
           uint32_t half = i0 >> (uint32_t)1U;
           uint32_t word0 = (uint32_t)scalar[half];
-          uint32_t bitShift = i0 & (uint32_t)1U;
+          uint32_t bitShift = i0 & (uint32_t)(uint64_t)1U;
           uint64_t mask12 = (uint64_t)0U - (uint64_t)bitShift;
           uint32_t
           mask2 =
@@ -6051,7 +6051,7 @@ bool Hacl_P256_ecp256dh_i_radix4(uint8_t *result, uint8_t *scalar)
   uint64_t *buff = tempBuffer + (uint32_t)12U;
   uint32_t half0 = (uint32_t)(krml_checked_int_t)0 >> (uint32_t)1U;
   uint32_t word = (uint32_t)scalar[half0];
-  uint32_t bitShift0 = (uint32_t)(krml_checked_int_t)0 & (uint32_t)1U;
+  uint32_t bitShift0 = (uint32_t)(krml_checked_int_t)0 & (uint32_t)(uint64_t)1U;
   uint64_t mask10 = (uint64_t)0U - (uint64_t)bitShift0;
   uint32_t
   mask0 =
@@ -6075,7 +6075,7 @@ bool Hacl_P256_ecp256dh_i_radix4(uint8_t *result, uint8_t *scalar)
   {
     uint32_t half = i0 >> (uint32_t)1U;
     uint32_t word0 = (uint32_t)scalar[half];
-    uint32_t bitShift = i0 & (uint32_t)1U;
+    uint32_t bitShift = i0 & (uint32_t)(uint64_t)1U;
     uint64_t mask12 = (uint64_t)0U - (uint64_t)bitShift;
     uint32_t
     mask2 =
