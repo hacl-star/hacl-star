@@ -537,33 +537,33 @@ int main()
 
 
 
-	pk = (uint8_t*) malloc (sizeof (uint8_t) * 64);
+	// pk = (uint8_t*) malloc (sizeof (uint8_t) * 64);
 	
-	memcpy(pk, publicKeyX1,  32);
-	memcpy(pk+32, publicKeyY1,  32);
+	// memcpy(pk, publicKeyX1,  32);
+	// memcpy(pk+32, publicKeyY1,  32);
 
-	  for (int j = 0; j < ROUNDS; j++)
-		Hacl_P256_ecp256dh_r_comb(result, pk, privateKey);
+	//   for (int j = 0; j < ROUNDS; j++)
+	// 	Hacl_P256_ecp256dh_r_comb(result, pk, privateKey);
 
 
-	t1 = clock();
-  	a = cpucycles_begin();
+	// t1 = clock();
+ //  	a = cpucycles_begin();
 
-  	for (int j = 0; j < ROUNDS; j++)
-		Hacl_P256_ecp256dh_r_comb(result, pk, privateKey);
+ //  	for (int j = 0; j < ROUNDS; j++)
+	// 	Hacl_P256_ecp256dh_r_comb(result, pk, privateKey);
 	
-	b = cpucycles_end();
+	// b = cpucycles_end();
 	
-	t2 = clock();
-	clock_t tdiff_r_comb = t2 - t1;
+	// t2 = clock();
+	// clock_t tdiff_r_comb = t2 - t1;
 
-	double timeRComb = (((double)tdiff_r_comb) / CLOCKS_PER_SEC);
-	double nsigsRComb = ((double)ROUNDS) / timeRComb;
-	printf("HACL P-256 ECDH [Scalar Multiplication] PERF WNAF \n NB: The computation (only of this piece of code) is incorrect, put just for comparision. I don't expect a huge change \n");
-	printf("ECDH %8.2f mul/s\n",nsigsRComb);
+	// double timeRComb = (((double)tdiff_r_comb) / CLOCKS_PER_SEC);
+	// double nsigsRComb = ((double)ROUNDS) / timeRComb;
+	// printf("HACL P-256 ECDH [Scalar Multiplication] PERF WNAF \n NB: The computation (only of this piece of code) is incorrect, put just for comparision. I don't expect a huge change \n");
+	// printf("ECDH %8.2f mul/s\n",nsigsRComb);
 
-	cycles cdiff8 = b - a;
-  	printf("cycles per function call:  %" PRIu64 " \n \n",(uint64_t)cdiff8/ROUNDS);
+	// cycles cdiff8 = b - a;
+ //  	printf("cycles per function call:  %" PRIu64 " \n \n",(uint64_t)cdiff8/ROUNDS);
 
 
 

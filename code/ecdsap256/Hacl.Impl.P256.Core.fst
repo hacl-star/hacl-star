@@ -35,8 +35,8 @@ friend Spec.P256.MontgomeryMultiplication
 open FStar.Mul
 
 
-val swap: p: point_prime -> q: point_prime -> Tot (r: tuple2 point_prime point_prime {let pNew, qNew = r in 
-  pNew == q /\ qNew == p})
+val swap: p: point_prime -> q: point_prime -> 
+  Tot (r: tuple2 point_prime point_prime {let pNew, qNew = r in pNew == q /\ qNew == p})
 
 let swap p q = (q, p)
 
@@ -962,14 +962,12 @@ let scalarMultiplication_t #t m p result scalar tempBuffer  =
 
     begin
   match m with 
-  |Radix4 ->
+  |Ladder ->
+      montgomery_ladder q result scalar buff
+  |_ ->
      let bufferPrecomputed = create (size 192) (u64 0) in 
      generatePrecomputedTable bufferPrecomputed result buff;
      montgomery_ladder_2 q scalar buff bufferPrecomputed
-  |Ladder ->
-      montgomery_ladder q result scalar buff
-  |Comb ->
-    Hacl.Impl.ScalarMultiplication.WNAF.scalar_multiplication_cmb q scalar result buff
   end;
 
     let h3 = ST.get() in 
@@ -1041,57 +1039,21 @@ let uploadBasePoint p =
   assert_norm (1 + pow2 64 * 18446744069414584320 + pow2 64 * pow2 64 * 18446744073709551615 + pow2 64 * pow2 64 * pow2 64 * 4294967294 = 26959946660873538059280334323183841250350249843923952699046031785985) 
 
 
-(*
-let scalarMultiplicationWithoutNorm p result scalar tempBuffer = 
-  let h0 = ST.get() in 
-  let q = sub tempBuffer (size 0) (size 12) in 
-  zero_buffer q;
-  let buff = sub tempBuffer (size 12) (size 88) in 
-  pointToDomain p result;
-    let h2 = ST.get() in 
-  montgomery_ladder q result scalar buff;
-  copy_point q result;  
-    let h3 = ST.get() in 
-    lemma_point_to_domain h0 h2 p result;
-    lemma_pif_to_domain h2 q
-    
-
-let secretToPublicWithoutNorm result scalar tempBuffer = 
-    push_frame(); 
-      let basePoint = create (size 12) (u64 0) in 
-    uploadBasePoint basePoint;
-      let q = sub tempBuffer (size 0) (size 12) in 
-      let buff = sub tempBuffer (size 12) (size 88) in 
-    zero_buffer q; 
-      let h1 = ST.get() in 
-      lemma_pif_to_domain h1 q; 
-    montgomery_ladder q basePoint scalar buff; 
-    copy_point q result;
-  pop_frame()  
-
-*)
-
-
-
-
 let scalarMultiplicationWithoutNorm m p result scalar tempBuffer = 
     let h0 = ST.get() in 
   let q = sub tempBuffer (size 0) (size 12) in 
-  (* zero_buffer q; *)
   let buff = sub tempBuffer (size 12) (size 88) in 
   pointToDomain p result;
     let h2 = ST.get() in 
 
     begin
   match m with 
-  |Radix4 ->
+  |Ladder ->
+      montgomery_ladder q result scalar buff
+  |_ ->
      let bufferPrecomputed = create (size 192) (u64 0) in 
      generatePrecomputedTable bufferPrecomputed result buff;
      montgomery_ladder_2 q scalar buff bufferPrecomputed
-  |Ladder ->
-      montgomery_ladder q result scalar buff
-  |Comb ->
-    Hacl.Impl.ScalarMultiplication.WNAF.scalar_multiplication_cmb q scalar result buff
   end;
 
   copy_point q result 
@@ -1111,7 +1073,6 @@ let secretToPublic m result scalar tempBuffer =
   |Comb -> 
     Hacl.Impl.ScalarMultiplication.RWNAF.scalar_multiplication_cmb result scalar buff
   end; 
-  (* zero_buffer result; *)
     let h1 = ST.get() in 
     lemma_pif_to_domain h1 basePoint;
 

@@ -2701,107 +2701,6 @@ static void scalar_multiplication_cmb(uint64_t *result, void *scalar, uint64_t *
   conditional_substraction(result, result, (uint8_t *)scalar, tempBuffer);
 }
 
-static void precomputePoints(uint64_t *b, uint64_t *publicKey, uint64_t *tempBuffer)
-{
-  uint64_t *point0 = b;
-  uint64_t *point1 = b + (uint32_t)12U;
-  uint64_t *point2 = b + (uint32_t)24U;
-  uint64_t *point3 = b + (uint32_t)36U;
-  uint64_t *point4 = b + (uint32_t)48U;
-  uint64_t *point5 = b + (uint32_t)60U;
-  uint64_t *point6 = b + (uint32_t)72U;
-  uint64_t *point7 = b + (uint32_t)84U;
-  uint64_t *point8 = b + (uint32_t)96U;
-  uint64_t *point9 = b + (uint32_t)108U;
-  uint64_t *point10 = b + (uint32_t)120U;
-  uint64_t *point11 = b + (uint32_t)132U;
-  uint64_t *point12 = b + (uint32_t)144U;
-  uint64_t *point13 = b + (uint32_t)156U;
-  uint64_t *point14 = b + (uint32_t)168U;
-  uint64_t *point15 = b + (uint32_t)180U;
-  memcpy(point0, publicKey, (uint32_t)12U * sizeof (uint64_t));
-  point_double(point0, point15, tempBuffer);
-  point_add(point0, point15, point1, tempBuffer);
-  point_add(point1, point15, point2, tempBuffer);
-  point_add(point2, point15, point3, tempBuffer);
-  point_add(point3, point15, point4, tempBuffer);
-  point_add(point4, point15, point5, tempBuffer);
-  point_add(point5, point15, point6, tempBuffer);
-  point_add(point6, point15, point7, tempBuffer);
-  point_add(point7, point15, point8, tempBuffer);
-  point_add(point8, point15, point9, tempBuffer);
-  point_add(point9, point15, point10, tempBuffer);
-  point_add(point10, point15, point11, tempBuffer);
-  point_add(point11, point15, point12, tempBuffer);
-  point_add(point12, point15, point13, tempBuffer);
-  point_add(point13, point15, point14, tempBuffer);
-  point_add(point14, point15, point15, tempBuffer);
-}
-
-static void loopK0(uint64_t *result, uint64_t d, uint64_t *precomputedPoints)
-{
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
-  {
-    uint64_t mask = FStar_UInt64_eq_mask(d, (uint64_t)i);
-    uint64_t *precomputedPoint = precomputedPoints + (uint32_t)12U * i;
-    copy_point_conditional_mask_u64_2(result, precomputedPoint, mask);
-  }
-}
-
-static void
-conditional_substraction0(
-  uint64_t *result,
-  uint64_t *p,
-  uint8_t *scalar,
-  uint64_t *precomputedPoints,
-  uint64_t *tempBuffer
-)
-{
-  uint64_t bpMinus[12U] = { 0U };
-  uint64_t *bpMinusY = bpMinus + (uint32_t)4U;
-  uint8_t i0 = scalar[31U];
-  uint64_t mask = ~((uint64_t)0U - (uint64_t)(i0 & (uint8_t)1U));
-  memcpy(bpMinus, precomputedPoints, (uint32_t)12U * sizeof (uint64_t));
-  p256_neg(bpMinusY, bpMinusY);
-  point_add(p, bpMinus, bpMinus, tempBuffer);
-  copy_point_conditional_mask_u64_2(result, bpMinus, mask);
-}
-
-static void
-scalar_multiplication_cmb0(uint64_t *result, void *scalar, uint64_t *pk, uint64_t *tempBuffer)
-{
-  uint64_t rnaf2[104U] = { 0U };
-  uint64_t lut[12U] = { 0U };
-  uint64_t *temp4 = tempBuffer;
-  uint64_t precomputedPoints[192U] = { 0U };
-  scalar_rwnaf(rnaf2, (uint8_t *)scalar);
-  precomputePoints(precomputedPoints, pk, tempBuffer);
-  uint64_t d = (rnaf2[102U] - (uint64_t)1U) >> (uint32_t)1U;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
-  {
-    uint64_t mask = FStar_UInt64_eq_mask(d, (uint64_t)i);
-    uint64_t *precomputedPoint = precomputedPoints + (uint32_t)12U * i;
-    copy_point_conditional_mask_u64_2(result, precomputedPoint, mask);
-  }
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)51U; i++)
-  {
-    uint32_t i1 = (uint32_t)50U - i;
-    for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)(uint64_t)5U; i0++)
-    {
-      point_double(result, result, tempBuffer);
-    }
-    uint64_t d1 = rnaf2[(uint32_t)2U * i1];
-    uint64_t is_neg = rnaf2[(uint32_t)2U * i1 + (uint32_t)1U];
-    uint64_t d2 = (d1 - (uint64_t)(uint32_t)1U) >> (uint32_t)1U;
-    loopK0(lut, d2, precomputedPoints);
-    uint64_t *yLut = lut + (uint32_t)4U;
-    p256_neg(yLut, temp4);
-    copy_conditional(yLut, temp4, is_neg);
-    point_add(result, lut, result, tempBuffer);
-  }
-  conditional_substraction0(result, result, (uint8_t *)scalar, precomputedPoints, tempBuffer);
-}
-
 static inline uint64_t isPointAtInfinityPrivate(uint64_t *p)
 {
   uint64_t z0 = p[8U];
@@ -3952,7 +3851,25 @@ scalarMultiplicationL(
   uint64_t bufferPrecomputed[192U];
   switch (m)
   {
-    case Spec_P256_Radix4:
+    case Spec_P256_Ladder:
+      {
+        for (uint32_t i = (uint32_t)0U; i < (uint32_t)256U; i++)
+        {
+          uint32_t bit0 = (uint32_t)255U - i;
+          uint64_t
+          bit =
+            (uint64_t)(scalar[(uint32_t)31U
+            - bit0 / (uint32_t)8U]
+            >> bit0 % (uint32_t)8U
+            & (uint8_t)1U);
+          cswap(bit, q, result);
+          point_add(q, result, result, buff);
+          point_double(q, q, buff);
+          cswap(bit, q, result);
+        }
+        break;
+      }
+    default:
       {
         uint64_t init = (uint64_t)0U;
         for (uint32_t i = (uint32_t)0U; i < (uint32_t)192U; i++)
@@ -3996,35 +3913,6 @@ scalarMultiplicationL(
           point_double(q, q, buff);
           point_add(pointToAdd, q, q, buff);
         }
-        break;
-      }
-    case Spec_P256_Ladder:
-      {
-        for (uint32_t i = (uint32_t)0U; i < (uint32_t)256U; i++)
-        {
-          uint32_t bit0 = (uint32_t)255U - i;
-          uint64_t
-          bit =
-            (uint64_t)(scalar[(uint32_t)31U
-            - bit0 / (uint32_t)8U]
-            >> bit0 % (uint32_t)8U
-            & (uint8_t)1U);
-          cswap(bit, q, result);
-          point_add(q, result, result, buff);
-          point_double(q, q, buff);
-          cswap(bit, q, result);
-        }
-        break;
-      }
-    case Spec_P256_Comb:
-      {
-        scalar_multiplication_cmb0(q, (void *)scalar, result, buff);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
       }
   }
   norm(q, result, buff);
@@ -4072,7 +3960,25 @@ scalarMultiplicationWithoutNorm(
   uint64_t bufferPrecomputed[192U];
   switch (m)
   {
-    case Spec_P256_Radix4:
+    case Spec_P256_Ladder:
+      {
+        for (uint32_t i = (uint32_t)0U; i < (uint32_t)256U; i++)
+        {
+          uint32_t bit0 = (uint32_t)255U - i;
+          uint64_t
+          bit =
+            (uint64_t)(scalar[(uint32_t)31U
+            - bit0 / (uint32_t)8U]
+            >> bit0 % (uint32_t)8U
+            & (uint8_t)1U);
+          cswap(bit, q, result);
+          point_add(q, result, result, buff);
+          point_double(q, q, buff);
+          cswap(bit, q, result);
+        }
+        break;
+      }
+    default:
       {
         uint64_t init = (uint64_t)0U;
         for (uint32_t i = (uint32_t)0U; i < (uint32_t)192U; i++)
@@ -4116,35 +4022,6 @@ scalarMultiplicationWithoutNorm(
           point_double(q, q, buff);
           point_add(pointToAdd, q, q, buff);
         }
-        break;
-      }
-    case Spec_P256_Ladder:
-      {
-        for (uint32_t i = (uint32_t)0U; i < (uint32_t)256U; i++)
-        {
-          uint32_t bit0 = (uint32_t)255U - i;
-          uint64_t
-          bit =
-            (uint64_t)(scalar[(uint32_t)31U
-            - bit0 / (uint32_t)8U]
-            >> bit0 % (uint32_t)8U
-            & (uint8_t)1U);
-          cswap(bit, q, result);
-          point_add(q, result, result, buff);
-          point_double(q, q, buff);
-          cswap(bit, q, result);
-        }
-        break;
-      }
-    case Spec_P256_Comb:
-      {
-        scalar_multiplication_cmb0(q, (void *)scalar, result, buff);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
       }
   }
   memcpy(result, q, (uint32_t)12U * sizeof (uint64_t));
