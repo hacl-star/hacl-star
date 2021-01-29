@@ -329,7 +329,7 @@ let generatePrecomputedTable b publicKey tempBuffer =
   uploadZeroPoint point0;
   copy_point publicKey point1;
   point_double publicKey point2 tempBuffer;
-  point_add point2 point1 point3 tempBuffer;
+  Hacl.Impl.P256.MixedPointAdd.point_add_mixed point2 point1 point3 tempBuffer;
   point_double point2 point4 tempBuffer;
   point_add point4 point1 point5 tempBuffer;
   point_double point3 point6 tempBuffer;
@@ -367,7 +367,13 @@ let montgomery_ladder_2 #a p scalar tempBuffer precomputedTable =
      [@inline_let]
      let inv h (i: nat {i <= 64}) = True in 
 
-     for 0ul 64ul inv 
+
+  let bits: uint32 = getScalar scalar 0 in 
+  let pointToStart = sub precomputedTable  (bits *. size 12) (size 12) in 
+
+  copy (sub p (size 0) (size 12)) pointToStart;
+  
+     for 1ul 64ul inv 
        (fun i -> let h2 = ST.get() in
 	 montgomery_ladder_step_radix p tempBuffer precomputedTable scalar i
        );
