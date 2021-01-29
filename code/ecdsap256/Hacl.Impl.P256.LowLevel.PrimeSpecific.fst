@@ -248,7 +248,9 @@ let p256_sub arg1 arg2 out =
   let t2 = u64 0 in 
   let t3 = t -. (t <<. (size 32)) in 
     modulo_addition_lemma  (as_nat h0 arg1 - as_nat h0 arg2) prime256 1;
-  let c = add4_variables out (u64 0)  t0 t1 t2 t3 out in 
+  add4_variables_void out (u64 0)  t0 t1 t2 t3 out;
+
+
     let h2 = ST.get() in 
       assert(
       if as_nat h0 arg1 - as_nat h0 arg2 >= 0 then 
@@ -286,7 +288,7 @@ let p256_neg arg2 out =
   let t2 = u64 0 in 
   let t3 = t -. (t <<. (size 32)) in 
     modulo_addition_lemma  (0 - as_nat h0 arg2) prime256 1;
-  let c = add4_variables out (u64 0)  t0 t1 t2 t3 out in 
+  add4_variables_void out (u64 0)  t0 t1 t2 t3 out;
     let h2 = ST.get() in 
       assert(
       if 0 - as_nat h0 arg2 >= 0 then 

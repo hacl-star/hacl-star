@@ -300,15 +300,6 @@ let montgomery_ladder_2_precomputed #a p scalar tempBuffer =
       montgomery_ladder_step_radix_precomputed p tempBuffer scalar i
     )
 
-inline_for_extraction noextract
-val uploadZeroPoint: p: point -> Stack unit 
-  (requires fun h -> True)
-  (ensures fun h0 _ h1 -> True)
-
-let uploadZeroPoint p = 
-  uploadZeroImpl (sub p (size 0) (size 4));
-  uploadZeroImpl (sub p (size 4) (size 4));
-  uploadZeroImpl (sub p (size 8) (size 4))
 
 
 [@ CInline]

@@ -30,7 +30,7 @@ val add8_without_carry1:  t: widefelem -> t1: widefelem -> result: widefelem  ->
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\  wide_as_nat h1 result = wide_as_nat h0 t + wide_as_nat h0 t1)
 
 let add8_without_carry1 t t1 result  = 
-  let _ = add8 t t1 result in 
+  add8_void t t1 result;
     assert_norm (pow2 320 + prime_p256_order * prime_p256_order < pow2 512)
 
 
@@ -359,8 +359,7 @@ let montgomery_multiplication_ecdsa_module a b result =
     let t = create (size 8) (u64 0) in 
     let round2 = create (size 8) (u64 0) in 
     let round4 = create (size 8) (u64 0) in  
-    let prime_p256_orderBuffer = create (size 4) (u64 0) in 
-
+    
     let k0 = upload_k0() in 
 
       let h0 = ST.get() in     

@@ -234,37 +234,6 @@ let normX p result tempBuffer =
 
 
 
-
-
-inline_for_extraction noextract
-val zero_buffer: p: point -> 
-  Stack unit
-    (requires fun h -> live h p)
-    (ensures fun h0 _ h1 ->     
-      modifies (loc p) h0 h1 /\
-      (
-  let k = Lib.Sequence.create 12 (u64 0) in 
-  as_nat h1 (gsub p (size 0) (size 4)) == 0 /\ 
-  as_nat h1 (gsub p (size 4) (size 4)) == 0 /\
-  as_nat h1 (gsub p (size 8) (size 4)) == 0 
-    )
-  )
-
-let zero_buffer p = 
-  upd p (size 0) (u64 0);
-  upd p (size 1) (u64 0);
-  upd p (size 2) (u64 0);
-  upd p (size 3) (u64 0);
-  upd p (size 4) (u64 0);
-  upd p (size 5) (u64 0);
-  upd p (size 6) (u64 0);
-  upd p (size 7) (u64 0);
-  upd p (size 8) (u64 0);
-  upd p (size 9) (u64 0);
-  upd p (size 10) (u64 0);
-  upd p (size 11) (u64 0)
-
-
 val lemma_point_to_domain: h0: mem -> h1: mem ->  p: point -> result: point ->  Lemma
    (requires (point_x_as_nat h0 p < prime /\ point_y_as_nat h0 p < prime /\ point_z_as_nat h0 p < prime /\
        point_x_as_nat h1 result == toDomain_ (point_x_as_nat h0 p) /\
@@ -335,25 +304,8 @@ val scalarMultiplication_t: #t:buftype ->
 
 
 let scalarMultiplication_t #t m p result scalar tempBuffer  = 
-(*
     let h0 = ST.get() in 
   let q = sub tempBuffer (size 0) (size 12) in 
-  zero_buffer q;
-  let buff = sub tempBuffer (size 12) (size 88) in 
-  pointToDomain p result;
-    let h2 = ST.get() in 
-  montgomery_ladder q result scalar buff;
-    let h3 = ST.get() in 
-    lemma_point_to_domain h0 h2 p result;
-    lemma_pif_to_domain h2 q;
-  norm q result buff; 
-    lemma_coord h3 q *)
-
-
-
-    let h0 = ST.get() in 
-  let q = sub tempBuffer (size 0) (size 12) in 
-  (* zero_buffer q; *)
   let buff = sub tempBuffer (size 12) (size 88) in 
   pointToDomain p result;
     let h2 = ST.get() in 

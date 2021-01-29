@@ -1026,7 +1026,6 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt \
 	  -tmpdir $(dir $@) -skip-compilation \
 	  $(filter %.krml,$^) \
 	  -silent \
-	  -ccopt -Wno-unused \
 	  -warn-error @2@4-6@15@18@21+22 \
 	  -fparentheses \
 	  -fextern-c \

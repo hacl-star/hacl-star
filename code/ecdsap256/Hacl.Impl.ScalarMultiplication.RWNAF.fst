@@ -82,7 +82,7 @@ let scalar_rwnaf out scalar =
       let d = logand wVar (dradix_wnaf -! (u64 1)) -! dradix in 
 
       let c = sub_borrow_u64 (u64 0) w dradix r in 
-      let c1 = sub_borrow_u64 (u64 0) (u64 0) (index r (size 0)) r1 in 
+      sub_borrow_u64_void (u64 0) (u64 0) (index r (size 0)) r1;
       
       let cAsFlag = (u64 0xffffffff) +! c in 
       let r3 = logand (cmovznz2 (index r (size 0)) (index r1 (size 0)) cAsFlag) (u64 0xff) in 
@@ -111,7 +111,7 @@ let scalar_rwnaf out scalar =
       let d = logand wVar (dradix_wnaf -! (u64 1)) -! dradix in 
 
       let c = sub_borrow_u64 (u64 0) w dradix r in 
-      let c1 = sub_borrow_u64 (u64 0) (u64 0) (index r (size 0)) r1 in 
+      sub_borrow_u64_void (u64 0) (u64 0) (index r (size 0)) r1;
       
       let cAsFlag = (u64 0xffffffff) +! c in 
       let r3 = logand (cmovznz2 (index r (size 0)) (index r1 (size 0)) cAsFlag) (u64 0xff) in 
