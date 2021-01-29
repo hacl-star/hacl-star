@@ -3825,27 +3825,44 @@ scalarMultiplicationL(
           bufferPrecomputed[i] = init;
         }
         generatePrecomputedTable(bufferPrecomputed, result, buff);
-        for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)64U; i0++)
+        uint32_t half0 = (uint32_t)(krml_checked_int_t)0 >> (uint32_t)1U;
+        uint32_t word = (uint32_t)scalar[half0];
+        uint32_t bitShift0 = (uint32_t)(krml_checked_int_t)0 & (uint32_t)(uint64_t)1U;
+        uint64_t mask10 = (uint64_t)0U - (uint64_t)bitShift0;
+        uint32_t
+        mask0 =
+          (uint32_t)((uint64_t)(krml_checked_int_t)0xf0
+          ^ (mask10 & ((uint64_t)(krml_checked_int_t)0xf0 ^ (uint64_t)(krml_checked_int_t)0x0f)));
+        uint64_t mask11 = (uint64_t)0U - (uint64_t)bitShift0;
+        uint32_t
+        shiftMask =
+          (uint32_t)((uint64_t)(krml_checked_int_t)0x4
+          ^ (mask11 & ((uint64_t)(krml_checked_int_t)0x4 ^ (uint64_t)(krml_checked_int_t)0x0)));
+        uint32_t result10 = word & mask0;
+        uint32_t bits = result10 >> shiftMask;
+        uint64_t *pointToStart = bufferPrecomputed + bits * (uint32_t)12U;
+        memcpy(q, pointToStart, (uint32_t)12U * sizeof (uint64_t));
+        for (uint32_t i0 = (uint32_t)1U; i0 < (uint32_t)64U; i0++)
         {
           uint32_t half = i0 >> (uint32_t)1U;
-          uint32_t word = (uint32_t)scalar[half];
+          uint32_t word0 = (uint32_t)scalar[half];
           uint32_t bitShift = i0 & (uint32_t)(uint64_t)1U;
-          uint64_t mask10 = (uint64_t)0U - (uint64_t)bitShift;
+          uint64_t mask12 = (uint64_t)0U - (uint64_t)bitShift;
           uint32_t
-          mask0 =
+          mask2 =
             (uint32_t)((uint64_t)(krml_checked_int_t)0xf0
-            ^ (mask10 & ((uint64_t)(krml_checked_int_t)0xf0 ^ (uint64_t)(krml_checked_int_t)0x0f)));
+            ^ (mask12 & ((uint64_t)(krml_checked_int_t)0xf0 ^ (uint64_t)(krml_checked_int_t)0x0f)));
           uint64_t mask1 = (uint64_t)0U - (uint64_t)bitShift;
           uint32_t
-          shiftMask =
+          shiftMask0 =
             (uint32_t)((uint64_t)(krml_checked_int_t)0x4
             ^ (mask1 & ((uint64_t)(krml_checked_int_t)0x4 ^ (uint64_t)(krml_checked_int_t)0x0)));
-          uint32_t result1 = word & mask0;
-          uint32_t bits = result1 >> shiftMask;
+          uint32_t result1 = word0 & mask2;
+          uint32_t bits1 = result1 >> shiftMask0;
           uint64_t pointToAdd[12U] = { 0U };
           for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
           {
-            uint64_t mask = FStar_UInt64_eq_mask((uint64_t)bits, (uint64_t)i);
+            uint64_t mask = FStar_UInt64_eq_mask((uint64_t)bits1, (uint64_t)i);
             uint64_t *lut_cmb_x = bufferPrecomputed + i * (uint32_t)(krml_checked_int_t)12;
             uint64_t
             *lut_cmb_y = bufferPrecomputed + i * (uint32_t)(krml_checked_int_t)12 + (uint32_t)4U;
@@ -3934,27 +3951,44 @@ scalarMultiplicationWithoutNorm(
           bufferPrecomputed[i] = init;
         }
         generatePrecomputedTable(bufferPrecomputed, result, buff);
-        for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)64U; i0++)
+        uint32_t half0 = (uint32_t)(krml_checked_int_t)0 >> (uint32_t)1U;
+        uint32_t word = (uint32_t)scalar[half0];
+        uint32_t bitShift0 = (uint32_t)(krml_checked_int_t)0 & (uint32_t)(uint64_t)1U;
+        uint64_t mask10 = (uint64_t)0U - (uint64_t)bitShift0;
+        uint32_t
+        mask0 =
+          (uint32_t)((uint64_t)(krml_checked_int_t)0xf0
+          ^ (mask10 & ((uint64_t)(krml_checked_int_t)0xf0 ^ (uint64_t)(krml_checked_int_t)0x0f)));
+        uint64_t mask11 = (uint64_t)0U - (uint64_t)bitShift0;
+        uint32_t
+        shiftMask =
+          (uint32_t)((uint64_t)(krml_checked_int_t)0x4
+          ^ (mask11 & ((uint64_t)(krml_checked_int_t)0x4 ^ (uint64_t)(krml_checked_int_t)0x0)));
+        uint32_t result10 = word & mask0;
+        uint32_t bits = result10 >> shiftMask;
+        uint64_t *pointToStart = bufferPrecomputed + bits * (uint32_t)12U;
+        memcpy(q, pointToStart, (uint32_t)12U * sizeof (uint64_t));
+        for (uint32_t i0 = (uint32_t)1U; i0 < (uint32_t)64U; i0++)
         {
           uint32_t half = i0 >> (uint32_t)1U;
-          uint32_t word = (uint32_t)scalar[half];
+          uint32_t word0 = (uint32_t)scalar[half];
           uint32_t bitShift = i0 & (uint32_t)(uint64_t)1U;
-          uint64_t mask10 = (uint64_t)0U - (uint64_t)bitShift;
+          uint64_t mask12 = (uint64_t)0U - (uint64_t)bitShift;
           uint32_t
-          mask0 =
+          mask2 =
             (uint32_t)((uint64_t)(krml_checked_int_t)0xf0
-            ^ (mask10 & ((uint64_t)(krml_checked_int_t)0xf0 ^ (uint64_t)(krml_checked_int_t)0x0f)));
+            ^ (mask12 & ((uint64_t)(krml_checked_int_t)0xf0 ^ (uint64_t)(krml_checked_int_t)0x0f)));
           uint64_t mask1 = (uint64_t)0U - (uint64_t)bitShift;
           uint32_t
-          shiftMask =
+          shiftMask0 =
             (uint32_t)((uint64_t)(krml_checked_int_t)0x4
             ^ (mask1 & ((uint64_t)(krml_checked_int_t)0x4 ^ (uint64_t)(krml_checked_int_t)0x0)));
-          uint32_t result1 = word & mask0;
-          uint32_t bits = result1 >> shiftMask;
+          uint32_t result1 = word0 & mask2;
+          uint32_t bits1 = result1 >> shiftMask0;
           uint64_t pointToAdd[12U] = { 0U };
           for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
           {
-            uint64_t mask = FStar_UInt64_eq_mask((uint64_t)bits, (uint64_t)i);
+            uint64_t mask = FStar_UInt64_eq_mask((uint64_t)bits1, (uint64_t)i);
             uint64_t *lut_cmb_x = bufferPrecomputed + i * (uint32_t)(krml_checked_int_t)12;
             uint64_t
             *lut_cmb_y = bufferPrecomputed + i * (uint32_t)(krml_checked_int_t)12 + (uint32_t)4U;

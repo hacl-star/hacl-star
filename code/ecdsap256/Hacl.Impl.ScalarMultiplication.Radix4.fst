@@ -329,7 +329,7 @@ let generatePrecomputedTable b publicKey tempBuffer =
   uploadZeroPoint point0;
   copy_point publicKey point1;
   point_double publicKey point2 tempBuffer;
-  Hacl.Impl.P256.MixedPointAdd.point_add_mixed point2 point1 point3 tempBuffer;
+  point_add point2 point1 point3 tempBuffer;
   point_double point2 point4 tempBuffer;
   point_add point4 point1 point5 tempBuffer;
   point_double point3 point6 tempBuffer;
