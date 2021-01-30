@@ -10,18 +10,6 @@ module BI = Hacl.Bignum.ModInv
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-let _ = assert_norm (4096ul = 64ul `FStar.UInt32.mul` 64ul)
-
-/// A note about the style of normalization used in this file. Normally,
-/// bn_sub_eq_len and others would be marked as inline_for_extraction. However,
-/// we want to keep a copy of the functions that take the nLen parameter at
-/// runtime, meaning we can't blindly mark everything as inline_for_extraction,
-/// otherwise the copy of the code that a runtime-parametric over the length
-/// would be horrendous. So instead we do the inline_by_extraction "by hand" via
-/// a call to `norm`. Note that these are all partial applications, meaning that
-/// we normalize pure terms.
-
-
 let add: BN.bn_add_eq_len_st t_limbs n_limbs =
   BN.bn_add_eq_len n_limbs
 

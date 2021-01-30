@@ -11,8 +11,6 @@ module BS = Hacl.Bignum.SafeAPI
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-let _ = assert_norm (4096ul = 64ul `FStar.UInt32.mul` 64ul)
-
 inline_for_extraction noextract
 let t_limbs: Hacl.Bignum.Definitions.limb_t = Lib.IntTypes.U64
 
@@ -26,6 +24,8 @@ let n_bytes = n_limbs `FStar.UInt32.mul` 8ul
 // important for bn_to_bytes_be which takes a number of bytes, not a number of
 // limbs. (It would be nice to fix this.)
 let _ = assert_norm (Hacl.Bignum.Definitions.blocks n_bytes 8ul = n_limbs)
+
+let _ = assert_norm (4096ul = Lib.IntTypes.(size (bits t_limbs)) `FStar.UInt32.mul` n_limbs)
 
 inline_for_extraction noextract
 let lbignum = Hacl.Bignum.Definitions.lbignum
@@ -234,4 +234,4 @@ val bn_to_bytes_be: Hacl.Bignum.Convert.bn_to_bytes_be_st t_limbs n_bytes
 /***************/\n";
 Comment
 "Returns 2 ^ 64 - 1 if and only if argument a is strictly less than the argument b, otherwise returns 0."]
-val lt_mask: Hacl.Bignum.bn_lt_mask_st t_limbs n_limbs
+val lt_mask: BN.bn_lt_mask_st t_limbs n_limbs
