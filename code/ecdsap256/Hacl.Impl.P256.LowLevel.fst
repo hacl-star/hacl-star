@@ -120,12 +120,13 @@ let add4_with_carry c x y result =
     
     cc
 
+#push-options "--z3rlimit 500"
 
 inline_for_extraction noextract
 val add4_with_carry_void: c: uint64 ->  x: felem -> y: felem -> result: felem -> 
   Stack unit
     (requires fun h -> uint_v c <= 1 /\ live h x /\ live h y /\ live h result /\ eq_or_disjoint x result /\ 
-      eq_or_disjoint y result)
+      eq_or_disjoint y result /\ as_nat h x + as_nat h y + uint_v c < pow2 256)
     (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
       as_nat h1 result == as_nat h0 x + as_nat h0 y + uint_v c)   
 
@@ -137,20 +138,51 @@ let add4_with_carry_void c x y result =
     let r2 = sub result (size 2) (size 1) in 
     let r3 = sub result (size 3) (size 1) in 
     
-    let cc = add_carry_u64 c x.(0ul) y.(0ul) r0 in 
-    let cc = add_carry_u64 cc x.(1ul) y.(1ul) r1 in 
-    let cc = add_carry_u64 cc x.(2ul) y.(2ul) r2 in 
-    add_carry_u64_void cc x.(3ul) y.(3ul) r3;
+      let h0 = ST.get() in 
+    let cc0 = add_carry_u64 c x.(0ul) y.(0ul) r0 in 
+    let cc1 = add_carry_u64 cc0 x.(1ul) y.(1ul) r1 in 
+    let cc2 = add_carry_u64 cc1 x.(2ul) y.(2ul) r2 in 
+
+
+    assert_norm (pow2 64 * pow2 64 = pow2 128);
+    assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192);
+    assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
     
-      assert(let r1_0 = as_seq h0 r1 in let r0_ = as_seq h0 result in Seq.index r0_ 1 == Seq.index r1_0 0);
-      assert(let r2_0 = as_seq h0 r2 in let r0_ = as_seq h0 result in Seq.index r0_ 2 == Seq.index r2_0 0);
-      assert(let r3_0 = as_seq h0 r3 in let r0_ = as_seq h0 result in Seq.index r0_ 3 == Seq.index r3_0 0);
+    assert(let r1_0 = as_seq h0 r1 in let r0_ = as_seq h0 result in Seq.index r0_ 1 == Seq.index r1_0 0);
+    assert(let r2_0 = as_seq h0 r2 in let r0_ = as_seq h0 result in Seq.index r0_ 2 == Seq.index r2_0 0);
+    assert(let r3_0 = as_seq h0 r3 in let r0_ = as_seq h0 result in Seq.index r0_ 3 == Seq.index r3_0 0); 
 
-      assert_norm (pow2 64 * pow2 64 = pow2 128);
-      assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192);
-      assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256)
+    add_carry_u64_void cc2 x.(3ul) y.(3ul) r3;
+    
+    
+    let h1 = ST.get() in 
+
+    let x0 = Lib.Sequence.index (as_seq h0 x) 0 in 
+    let x1 = Lib.Sequence.index (as_seq h0 x) 1 in 
+    let x2 = Lib.Sequence.index (as_seq h0 x) 2 in 
+    let x3 = Lib.Sequence.index (as_seq h0 x) 3 in 
+
+    let y0 = Lib.Sequence.index (as_seq h0 y) 0 in 
+    let y1 = Lib.Sequence.index (as_seq h0 y) 1 in 
+    let y2 = Lib.Sequence.index (as_seq h0 y) 2 in 
+    let y3 = Lib.Sequence.index (as_seq h0 y) 3 in 
 
 
+    let r0 = Lib.Sequence.index (as_seq h1 r0) 0 in 
+    let r1 = Lib.Sequence.index (as_seq h1 r1) 0 in 
+    let r2 = Lib.Sequence.index (as_seq h1 r2) 0 in 
+    let r3 = Lib.Sequence.index (as_seq h1 r3) 0 in 
+
+    small_mod (v x3 + v y3 + v cc2) (pow2 64);
+    
+    calc (==) {
+    v c + v x3 * pow2 192 + v y3 * pow2 192 + v x2 * pow2 128 + v y2 * pow2 128 + v x1 * pow2 64 + v y1 * pow2 64 + v x0 + v y0;
+    (==) {}
+    v c + as_nat h0 x + as_nat h0 y;};
+
+    calc (==) {uint_v r0 + v r1 * pow2 64 + v r2 * pow2 128 + v r3 * pow2 192; (==) {} as_nat h1 result;}
+
+#pop-options
 
 inline_for_extraction noextract
 val add8: x: widefelem -> y: widefelem -> result: widefelem -> Stack uint64 
@@ -188,7 +220,8 @@ let add8 x y result =
 
 inline_for_extraction noextract
 val add8_void: x: widefelem -> y: widefelem -> result: widefelem -> Stack unit 
-  (requires fun h -> live h x /\ live h y /\ live h result /\ eq_or_disjoint x result /\ eq_or_disjoint y result)
+  (requires fun h -> live h x /\ live h y /\ live h result /\ eq_or_disjoint x result /\ eq_or_disjoint y result /\
+    wide_as_nat h x + wide_as_nat h y < pow2 512 - pow2 256)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\  
     wide_as_nat h1 result == wide_as_nat h0 x + wide_as_nat h0 y)
 
@@ -205,6 +238,7 @@ let add8_void x y result =
   let c0 = sub result (size 0) (size 4) in 
   let c1 = sub result (size 4) (size 4) in 
   let carry0 = add4 a0 b0 c0 in
+  assert_norm (pow2 256 * pow2 256 = pow2 512);
   add4_with_carry_void carry0 a1 b1 c1;
     
   let h1 = ST.get() in 
@@ -256,9 +290,9 @@ inline_for_extraction noextract
 val add4_variables_void: x: felem -> cin: uint64 {uint_v cin <=1} ->  y0: uint64 -> y1: uint64 -> y2: uint64 -> y3: uint64 -> 
   result: felem -> 
   Stack unit
-    (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result)
+    (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result )
     (ensures fun h0 c h1 -> modifies (loc result) h0 h1  /\  
-      as_nat h1 result == as_nat h0 x + uint_v y0 + uint_v y1 * pow2 64 + uint_v y2 * pow2 128 + uint_v y3 * pow2 192 + uint_v cin)   
+      as_nat h1 result == (as_nat h0 x + uint_v y0 + uint_v y1 * pow2 64 + uint_v y2 * pow2 128 + uint_v y3 * pow2 192 + uint_v cin) % pow2 256)   
 
 let add4_variables_void x cin y0 y1 y2 y3 result = 
   let h0 = ST.get() in 
@@ -271,19 +305,24 @@ let add4_variables_void x cin y0 y1 y2 y3 result =
   let cc = add_carry_u64 cin x.(0ul) y0 r0 in 
   let cc = add_carry_u64 cc x.(1ul) y1 r1 in 
   let cc = add_carry_u64 cc x.(2ul) y2 r2 in 
-  add_carry_u64_void cc x.(3ul) y3 r3;    
-
+  add_carry_u64_void cc x.(3ul) y3 r3;
+  
     assert_norm (pow2 64 * pow2 64 = pow2 128);
     assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192);
     assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
     
     assert(let r1_0 = as_seq h0 r1 in let r0_ = as_seq h0 result in Seq.index r0_ 1 == Seq.index r1_0 0);
     assert(let r2_0 = as_seq h0 r2 in let r0_ = as_seq h0 result in Seq.index r0_ 2 == Seq.index r2_0 0);
-    assert(let r3_0 = as_seq h0 r3 in let r0_ = as_seq h0 result in Seq.index r0_ 3 == Seq.index r3_0 0)
+    assert(let r3_0 = as_seq h0 r3 in let r0_ = as_seq h0 result in Seq.index r0_ 3 == Seq.index r3_0 0);
 
+    let h1 = ST.get() in 
 
-
-
+    let x0 = Lib.Sequence.index (as_seq h0 x) 0 in 
+    let x1 = Lib.Sequence.index (as_seq h0 x) 1 in 
+    let x2 = Lib.Sequence.index (as_seq h0 x) 2 in 
+    let x3 = Lib.Sequence.index (as_seq h0 x) 3 in 
+    
+  admit()
 
 
 

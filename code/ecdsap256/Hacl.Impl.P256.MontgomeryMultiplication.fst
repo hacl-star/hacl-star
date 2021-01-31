@@ -26,13 +26,12 @@ inline_for_extraction noextract
 val add8_without_carry1: t: widefelem -> t1: widefelem -> result: widefelem  -> Stack unit
   (requires fun h -> 
     live h t /\ live h t1 /\ live h result /\ eq_or_disjoint t1 result /\ 
-    eq_or_disjoint t result /\ wide_as_nat h t1 < pow2 320 /\ wide_as_nat h t < prime256 * prime256
-  )
+    eq_or_disjoint t result /\ wide_as_nat h t1 < pow2 320 /\ wide_as_nat h t < prime256 * prime256)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ wide_as_nat h1 result = wide_as_nat h0 t + wide_as_nat h0 t1)
 
-let add8_without_carry1 t t1 result  = 
-  add8_void t t1 result;
-    assert_norm (pow2 320 + prime256 * prime256 < pow2 512)
+let add8_without_carry1 t t1 result =
+  assert_norm (pow2 320 + prime256 * prime256 < pow2 512 - pow2 256);
+  add8_void t t1 result
 
 (* inline_for_extraction
 val montgomery_multiplication_round: t: widefelem -> round: widefelem -> Stack unit 

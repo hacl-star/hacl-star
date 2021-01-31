@@ -248,7 +248,8 @@ let p256_sub arg1 arg2 out =
   let t2 = u64 0 in 
   let t3 = t -. (t <<. (size 32)) in 
     modulo_addition_lemma  (as_nat h0 arg1 - as_nat h0 arg2) prime256 1;
-  add4_variables_void out (u64 0)  t0 t1 t2 t3 out;
+  add4_variables_void out (u64 0) t0 t1 t2 t3 out;
+    admit();
 
 
     let h2 = ST.get() in 
