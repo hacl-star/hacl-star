@@ -225,17 +225,16 @@ let p256_double arg1 out =
   inDomain_mod_is_not_mod (fromDomain_ (as_nat h0 arg1) + fromDomain_ (as_nat h0 arg1))
 
 
- [@ CInline]
-val p256_sub: arg1: felem -> arg2: felem -> out: felem -> Stack unit 
-  (requires 
-    (fun h0 -> live h0 out /\ live h0 arg1 /\ live h0 arg2 /\ 
-      eq_or_disjoint arg1 out /\ eq_or_disjoint arg2 out /\
-      as_nat h0 arg1 < prime256 /\ as_nat h0 arg2 < prime256))
-    (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\ 
-	as_nat h1 out == (as_nat h0 arg1 - as_nat h0 arg2) % prime256 /\
-	as_nat h1 out == toDomain_ ((fromDomain_ (as_nat h0 arg1) - fromDomain_ (as_nat h0 arg2)) % prime256)
-    )
-)    
+[@ CInline]
+val p256_sub: arg1: felem -> arg2: felem -> out: felem -> 
+  Stack unit 
+  (requires (fun h0 -> live h0 out /\ live h0 arg1 /\ live h0 arg2 /\ 
+    eq_or_disjoint arg1 out /\ eq_or_disjoint arg2 out /\
+    as_nat h0 arg1 < prime256 /\ as_nat h0 arg2 < prime256))
+  (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\ 
+    as_nat h1 out == (as_nat h0 arg1 - as_nat h0 arg2) % prime256 /\
+    as_nat h1 out == toDomain_ ((fromDomain_ (as_nat h0 arg1) - fromDomain_ (as_nat h0 arg2)) % prime256))
+  )    
 
 let p256_sub arg1 arg2 out = 
     assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
@@ -248,9 +247,11 @@ let p256_sub arg1 arg2 out =
   let t2 = u64 0 in 
   let t3 = t -. (t <<. (size 32)) in 
     modulo_addition_lemma  (as_nat h0 arg1 - as_nat h0 arg2) prime256 1;
-  add4_variables_void out (u64 0) t0 t1 t2 t3 out;
-    admit();
+    add4_variables_void out (u64 0) t0 t1 t2 t3 out;
+  let h2 = ST.get() in 
 
+  small_mod (as_nat h2 out) (pow2 256);
+  small_mod (as_nat h1 out) (pow2 256);
 
     let h2 = ST.get() in 
       assert(
@@ -278,10 +279,10 @@ val p256_neg: arg2: felem -> out: felem -> Stack unit
 )    
 
 let p256_neg arg2 out =     
-
   assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
     let h0 = ST.get() in 
   let t = sub4_0 arg2 out in 
+
     let h1 = ST.get() in 
     lemma_t_computation2 t;
   let t0 = (u64 0) -. t in 
@@ -290,6 +291,11 @@ let p256_neg arg2 out =
   let t3 = t -. (t <<. (size 32)) in 
     modulo_addition_lemma  (0 - as_nat h0 arg2) prime256 1;
   add4_variables_void out (u64 0)  t0 t1 t2 t3 out;
+    let h2 = ST.get() in 
+  
+  small_mod (as_nat h2 out) (pow2 256);
+  small_mod (as_nat h1 out) (pow2 256);
+
     let h2 = ST.get() in 
       assert(
       if 0 - as_nat h0 arg2 >= 0 then 
@@ -304,7 +310,6 @@ let p256_neg arg2 out =
 	  end);
     substractionInDomain 0 (felem_seq_as_nat (as_seq h0 arg2));
     inDomain_mod_is_not_mod (fromDomain_ 0 - fromDomain_ (felem_seq_as_nat (as_seq h0 arg2)))
-
 
 
 

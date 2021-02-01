@@ -285,6 +285,7 @@ let add4_variables x cin y0 y1 y2 y3 result =
      
   cc
 
+#push-options "--z3rlimit 500"
 
 inline_for_extraction noextract
 val add4_variables_void: x: felem -> cin: uint64 {uint_v cin <=1} ->  y0: uint64 -> y1: uint64 -> y2: uint64 -> y3: uint64 -> 
@@ -302,10 +303,10 @@ let add4_variables_void x cin y0 y1 y2 y3 result =
   let r2 = sub result (size 2) (size 1) in 
   let r3 = sub result (size 3) (size 1) in 
 
-  let cc = add_carry_u64 cin x.(0ul) y0 r0 in 
-  let cc = add_carry_u64 cc x.(1ul) y1 r1 in 
-  let cc = add_carry_u64 cc x.(2ul) y2 r2 in 
-  add_carry_u64_void cc x.(3ul) y3 r3;
+  let cc0 = add_carry_u64 cin x.(0ul) y0 r0 in 
+  let cc1 = add_carry_u64 cc0 x.(1ul) y1 r1 in 
+  let cc2 = add_carry_u64 cc1 x.(2ul) y2 r2 in 
+  add_carry_u64_void cc2 x.(3ul) y3 r3;
   
     assert_norm (pow2 64 * pow2 64 = pow2 128);
     assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192);
@@ -321,10 +322,43 @@ let add4_variables_void x cin y0 y1 y2 y3 result =
     let x1 = Lib.Sequence.index (as_seq h0 x) 1 in 
     let x2 = Lib.Sequence.index (as_seq h0 x) 2 in 
     let x3 = Lib.Sequence.index (as_seq h0 x) 3 in 
-    
-  admit()
 
 
+    let r0 = Lib.Sequence.index (as_seq h1 r0) 0 in 
+    let r1 = Lib.Sequence.index (as_seq h1 r1) 0 in 
+    let r2 = Lib.Sequence.index (as_seq h1 r2) 0 in 
+    let r3 = Lib.Sequence.index (as_seq h1 r3) 0 in 
+
+
+  calc (==) {((v x3 + v y3 + v cc2) % pow2 64 * pow2 192) % pow2 256;
+  (==) {lemma_mod_mul_distr_l ((v x3 + v y3 + v cc2) % pow2 64) (pow2 192) (pow2 256)}
+  ((v x3 + v y3 + v cc2) % pow2 64 % pow2 256 * pow2 192) % pow2 256;
+  (==) {pow2_modulo_modulo_lemma_2 (v x3 + v y3 + v cc2) 256 64}
+  ((v x3 + v y3 + v cc2) % pow2 256 * pow2 192) % pow2 256;
+  (==) {lemma_mod_mul_distr_l (v x3 + v y3 + v cc2) (pow2 192) (pow2 256)}
+  ((v x3 + v y3 + v cc2) * pow2 192) % pow2 256;
+  };
+
+
+  calc (==) {
+  (v x0 + v y0 + v cin +  v x1 * pow2 64 + v y1 * pow2 64 +  v x2 * pow2 128 + v y2 * pow2 128 + (v x3 + v y3 + v cc2) % pow2 64 * pow2 192 - v cc2 * pow2 192) % pow2 256;
+  (==) {}
+  (v x0 + v y0 + v cin +  v x1 * pow2 64 + v y1 * pow2 64 +  v x2 * pow2 128 + v y2 * pow2 128 - v cc2 * pow2 192 + (v x3 + v y3 + v cc2) % pow2 64 * pow2 192 ) % pow2 256;
+  (==) {lemma_mod_add_distr (v x0 + v y0 + v cin +  v x1 * pow2 64 + v y1 * pow2 64 +  v x2 * pow2 128 + v y2 * pow2 128 - v cc2 * pow2 192) ((v x3 + v y3 + v cc2) % pow2 64 * pow2 192) (pow2 256)}
+  (v x0 + v y0 + v cin +  v x1 * pow2 64 + v y1 * pow2 64 +  v x2 * pow2 128 + v y2 * pow2 128 + ((v x3 + v y3 + v cc2) % pow2 64 * pow2 192) % pow2 256 - v cc2 * pow2 192) % pow2 256;
+  (==) {}
+  (v x0 + v y0 + v cin +  v x1 * pow2 64 + v y1 * pow2 64 +  v x2 * pow2 128 + v y2 * pow2 128  - v cc2 * pow2 192 + ((v x3 + v y3 + v cc2) * pow2 192) % pow2 256) % pow2 256; 
+  (==) {lemma_mod_add_distr (v x0 + v y0 + v cin + v x1 * pow2 64 + v y1 * pow2 64 +  v x2 * pow2 128 + v y2 * pow2 128 - v cc2 * pow2 192) ((v x3 + v y3 + v cc2) * pow2 192) (pow2 256)}
+  (v x0 + v y0 + v cin +  v x1 * pow2 64 + v y1 * pow2 64 +  v x2 * pow2 128 + v y2 * pow2 128 - v cc2 * pow2 192 + (v x3 + v y3 + v cc2) * pow2 192 ) % pow2 256;
+  (==) {}
+  (v x0 + v y0 + v cin +  v x1 * pow2 64 + v y1 * pow2 64 +  v x2 * pow2 128 + v y2 * pow2 128 + v x3 * pow2 192 + v y3 * pow2 192) % pow2 256;
+  (==) {}
+  (as_nat h0 x +  uint_v y0 + uint_v y1 * pow2 64 + uint_v y2 * pow2 128 + uint_v y3 * pow2 192 + uint_v cin) % pow2 256; };
+
+  
+  small_mod (v r0 + v r1 * pow2 64 + v r2 * pow2 128  + v r3 * pow2 192) (pow2 256)
+
+#pop-options
 
 inline_for_extraction noextract
 val sub4_il: x: felem -> y: glbuffer uint64 (size 4) -> result: felem -> 
