@@ -31,8 +31,7 @@ val lemma_label_bool (r:range) (msg:string) (b:bool) : Lemma
   [SMTPat (label r msg b)]
 
 // wrap "precedes" and LexCons to avoid issues with label (precedes ...)
-let precedes_wrap (a:lex_t) (b:lex_t) : GTot Type0 = precedes a b
-let lexCons (#a:Type) (h:a) (t:lex_t) : lex_t = LexCons h t
+let precedes_wrap (#a:Type) (x y:a) : GTot Type0 = precedes x y
 
 [@va_qattr]
 let rec mods_contains1 (allowed:mods_t) (found:mod_t) : bool =
