@@ -309,10 +309,10 @@ let rec lemma_apply_peephole_to_code (p:peephole) (c:code)
       lemma_apply_peephole_to_code_while p c s fuel
     )
 
-and lemma_apply_peephole_to_code_while (p:peephole) (c:code{While? c})
+and lemma_apply_peephole_to_code_while (p:peephole) (c:code)
     (s:machine_state) (fuel:nat) :
   Lemma
-    (requires (not (erroring_option_state (machine_eval_code c fuel s))))
+    (requires not (erroring_option_state (machine_eval_code c fuel s)) /\ While? c)
     (ensures (
         equiv_option_states
           (machine_eval_code c fuel s)
@@ -368,6 +368,7 @@ and lemma_apply_peephole_to_code_while (p:peephole) (c:code{While? c})
         )
     )
   )
+
 
 /// Now, for the pièce de résistance, functions that give you
 /// something you can directly use as transformers!

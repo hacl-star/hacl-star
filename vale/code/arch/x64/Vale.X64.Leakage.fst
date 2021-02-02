@@ -185,18 +185,20 @@ val check_if_block_consumes_fixed_time (block:S.codes) (ts:analysis_taints) : To
   (decreases %[block])
 val check_if_code_consumes_fixed_time (code:S.code) (ts:analysis_taints) : Tot (bool & analysis_taints)
   (decreases %[code; count_publics ts; 1])
-val check_if_loop_consumes_fixed_time (code:S.code{While? code}) (ts:analysis_taints) : Tot (bool & analysis_taints)
+val check_if_loop_consumes_fixed_time (code:S.code) (ts:analysis_taints)
+  : Pure (bool & analysis_taints) (requires While? code) (ensures fun _ -> True)
   (decreases %[code; count_publics ts; 0])
 
 #set-options "--z3refresh --z3rlimit 600"
-let rec check_if_block_consumes_fixed_time (block:S.codes) (ts:analysis_taints) : bool & analysis_taints =
+
+let rec check_if_block_consumes_fixed_time block ts =
   match block with
   | [] -> true, ts
   | hd::tl -> let fixedTime, ts_int = check_if_code_consumes_fixed_time hd ts in
     if (not fixedTime) then fixedTime, ts_int
     else check_if_block_consumes_fixed_time tl ts_int
 
-and check_if_code_consumes_fixed_time (code:S.code) (ts:analysis_taints) : bool & analysis_taints =
+and check_if_code_consumes_fixed_time code ts =
   match code with
   | Ins ins ->  let b, ts = check_if_ins_consumes_fixed_time ins ts in b, ts
 
@@ -224,7 +226,7 @@ and check_if_code_consumes_fixed_time (code:S.code) (ts:analysis_taints) : bool 
 
   | While cond body -> check_if_loop_consumes_fixed_time code ts
 
-and check_if_loop_consumes_fixed_time c (ts:analysis_taints) : (bool & analysis_taints) =
+and check_if_loop_consumes_fixed_time c ts =
   let ts = normalize_taints ts in
   let While pred body = c in
   let o1 = operand_taint 0 (S.get_fst_ocmp pred) ts in
@@ -249,6 +251,7 @@ and check_if_loop_consumes_fixed_time c (ts:analysis_taints) : (bool & analysis_
       monotone_decreases_count ts combined_ts;
       check_if_loop_consumes_fixed_time c combined_ts
     )
+
 
 val monotone_ok_eval: (code:S.code) -> (fuel:nat) -> (s:S.machine_state) -> Lemma
  (requires True)
@@ -340,13 +343,14 @@ val lemma_block_explicit_leakage_free: (ts:analysis_taints) -> (codes:S.codes) -
     (b2t b ==> isConstantTimeGivenStates (Block codes) fuel ts.lts s1 s2 /\ isExplicitLeakageFreeGivenStates (Block codes) fuel ts.lts ts'.lts s1 s2)))
   (decreases %[fuel; codes; 2])
 
-val lemma_loop_explicit_leakage_free: (ts:analysis_taints) -> (code:S.code{While? code}) -> (s1:S.machine_state) -> (s2:S.machine_state) -> (fuel:nat) -> Lemma
-  (requires True)
+val lemma_loop_explicit_leakage_free: (ts:analysis_taints) -> (code:S.code) -> (s1:S.machine_state) -> (s2:S.machine_state) -> (fuel:nat) -> Lemma
+  (requires While? code)
   (ensures (let b, ts' = check_if_loop_consumes_fixed_time code ts in
     (b2t b ==> isConstantTimeGivenStates code fuel ts.lts s1 s2 /\ isExplicitLeakageFreeGivenStates code fuel ts.lts ts'.lts s1 s2)))
   (decreases %[fuel; code; 0])
 
 #reset-options "--initial_ifuel 2 --max_ifuel 2 --initial_fuel 1 --max_fuel 2 --z3rlimit 300"
+
 let rec lemma_code_explicit_leakage_free ts code s1 s2 fuel = match code with
   | Ins ins -> lemma_ins_leakage_free ts ins
   | Block block -> lemma_block_explicit_leakage_free ts block s1 s2 fuel
@@ -429,6 +433,7 @@ and lemma_loop_explicit_leakage_free ts code s1 s2 fuel =
     isExplicit_monotone2 ts_aux ts combined_ts code (fuel - 1) st1 st2;
     assert (b2t b_fin ==> constTimeInvariant ts.lts s1 s2 /\ st1.S.ms_ok /\ st2.S.ms_ok ==> constTimeInvariant ts'.lts st1 st2)
   )
+
 
 val lemma_code_leakage_free: (ts:analysis_taints) -> (code:S.code) -> Lemma
  (let b, ts' = check_if_code_consumes_fixed_time code ts in

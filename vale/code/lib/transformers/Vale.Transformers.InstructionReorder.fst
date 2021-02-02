@@ -1136,6 +1136,7 @@ let lemma_instruction_exchange (i1 i2 : ins) (s1 s2 : machine_state) :
 /// Not-ok states lead to erroring states upon execution
 
 #push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
+
 let rec lemma_not_ok_propagate_code (c:code) (fuel:nat) (s:machine_state) :
   Lemma
     (requires (not s.ms_ok))
@@ -1164,9 +1165,9 @@ and lemma_not_ok_propagate_codes (l:codes) (fuel:nat) (s:machine_state) :
     | None -> ()
     | Some s -> lemma_not_ok_propagate_codes xs fuel s
 
-and lemma_not_ok_propagate_while (c:code{While? c}) (fuel:nat) (s:machine_state) :
+and lemma_not_ok_propagate_while (c:code) (fuel:nat) (s:machine_state) :
   Lemma
-    (requires (not s.ms_ok))
+    (requires not s.ms_ok /\ While? c)
     (ensures (erroring_option_state (machine_eval_code c fuel s)))
     (decreases %[fuel; c; 0]) =
   if fuel = 0 then () else (
@@ -1176,6 +1177,7 @@ and lemma_not_ok_propagate_while (c:code{While? c}) (fuel:nat) (s:machine_state)
       lemma_not_ok_propagate_code body (fuel - 1) s
     )
   )
+
 #pop-options
 
 /// Given that we have bounded instructions, we can compute bounds on
@@ -2151,6 +2153,7 @@ and purge_empty_codes (cs:codes) : codes =
     )
 
 #push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 0 --initial_ifuel 0"
+
 let rec lemma_purge_empty_code (c:code) (fuel:nat) (s:machine_state) :
   Lemma
     (ensures (machine_eval_code c fuel s == machine_eval_code (purge_empty_code c) fuel s))
@@ -2182,8 +2185,9 @@ and lemma_purge_empty_codes (cs:codes) (fuel:nat) (s:machine_state) :
         lemma_purge_empty_codes xs fuel s'
     )
 
-and lemma_purge_empty_while (c:code{While? c}) (fuel:nat) (s0:machine_state) :
+and lemma_purge_empty_while (c:code) (fuel:nat) (s0:machine_state) :
   Lemma
+    (requires While? c)
     (ensures (machine_eval_code c fuel s0 == machine_eval_code (purge_empty_code c) fuel s0))
     (decreases %[fuel; c; 0]) =
   if fuel = 0 then () else (
