@@ -680,7 +680,6 @@ BUNDLE_FLAGS	=\
   $(CTR_BUNDLE) \
   $(P256_BUNDLE) \
   $(FRODO_BUNDLE) \
-  $(HPKE_BUNDLE) \
   $(STREAMING_BUNDLE) \
   $(INTTYPES_BUNDLE) \
   $(LEGACY_BUNDLE)
@@ -741,12 +740,6 @@ dist/wasm/Makefile.basic: CURVE_BUNDLE = \
   -bundle 'Hacl.Curve25519_64' \
   -bundle 'Hacl.Curve25519_64_Local'
 
-# Most HPKE variants don't work in Wasm, since they are either using Curve64,
-# P256 or vectorized chacha-poly, none of which are available in Wasm.
-dist/wasm/Makefile.basic: HPKE_BUNDLE += \
-  -bundle Hacl.HPKE.Curve51_CP32_SHA256= \
-  -bundle Hacl.HPKE.Curve51_CP32_SHA512= \
-  -bundle 'Hacl.HPKE.*'
 
 # Disabling vectorized stuff
 dist/wasm/Makefile.basic: CHACHA20_BUNDLE += \
@@ -863,7 +856,6 @@ dist/linux/Makefile.basic: DEFAULT_FLAGS += \
   -fc89-scope -fbuiltin-uint128 -flinux-ints
 dist/linux/Makefile.basic: CTR_BUNDLE =
 dist/linux/Makefile.basic: E_HASH_BUNDLE =
-dist/linux/Makefile.basic: HPKE_BUNDLE = -bundle 'Hacl.HPKE.*'
 dist/linux/Makefile.basic: DEFAULT_FLAGS += -bundle 'EverCrypt,EverCrypt.*'
 dist/linux/Makefile.basic: VALE_ASMS := $(filter-out $(HACL_HOME)/secure_api/%,$(VALE_ASMS))
 dist/linux/Makefile.basic: HAND_WRITTEN_FILES := $(filter-out providers/evercrypt/c/%,$(HAND_WRITTEN_FILES))
@@ -908,7 +900,6 @@ dist/ccf/Makefile.basic: HAND_WRITTEN_H_FILES := $(filter-out %/libintvector.h %
 dist/ccf/Makefile.basic: HACL_OLD_FILES =
 dist/ccf/Makefile.basic: POLY_BUNDLE = -bundle Hacl.Streaming.Poly1305_128,Hacl.Streaming.Poly1305_256
 dist/ccf/Makefile.basic: P256_BUNDLE=-bundle Hacl.P256,Hacl.Impl.ECDSA.*,Hacl.Impl.SolinasReduction,Hacl.Impl.P256.*
-dist/ccf/Makefile.basic: HPKE_BUNDLE = -bundle 'Hacl.HPKE.*'
 dist/ccf/Makefile.basic: BLAKE2_BUNDLE=-bundle Hacl.Impl.Blake2.Constants \
   -static-header Hacl.Impl.Blake2.Constants \
   -bundle Hacl.HKDF.Blake2b_256,Hacl.HMAC.Blake2b_256,Hacl.Blake2b_256,Hacl.Hash.Blake2b_256,Hacl.Streaming.Blake2b_256 \
@@ -938,7 +929,6 @@ dist/mozilla/Makefile.basic: CTR_BUNDLE =
 dist/mozilla/Makefile.basic: BLAKE2_BUNDLE = -bundle Hacl.Impl.Blake2.*,Hacl.Blake2b_256,Hacl.Blake2s_128,Hacl.Blake2b_32,Hacl.Streaming.Blake2s_128,Hacl.Streaming.Blake2b_256,Hacl.Blake2s_32,Hacl.HMAC.Blake2b_256,Hacl.HMAC.Blake2s_128,Hacl.HKDF.Blake2b_256,Hacl.HKDF.Blake2s_128
 dist/mozilla/Makefile.basic: SHA3_BUNDLE = -bundle Hacl.SHA3
 dist/mozilla/Makefile.basic: HASH_BUNDLE = -bundle Hacl.Hash.*,Hacl.HKDF,Hacl.HMAC,Hacl.HMAC_DRBG
-dist/mozilla/Makefile.basic: HPKE_BUNDLE = -bundle 'Hacl.HPKE.*'
 dist/mozilla/Makefile.basic: P256_BUNDLE= -bundle Hacl.P256,Hacl.Impl.ECDSA.*,Hacl.Impl.SolinasReduction,Hacl.Impl.P256.*
 dist/mozilla/Makefile.basic: STREAMING_BUNDLE = -bundle Hacl.Streaming.*
 dist/mozilla/Makefile.basic: FRODO_BUNDLE = -bundle Hacl.Frodo.*,Hacl.SHA3,Hacl.Keccak,Frodo.Params
