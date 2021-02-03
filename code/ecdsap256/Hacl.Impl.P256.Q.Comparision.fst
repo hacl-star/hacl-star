@@ -46,13 +46,14 @@ let eq_int #t #l a b =
   match l with 
   |PUB -> begin
     let r = eq #t a b in 
+      eq_lemma #t a b;
     match r with 
     |true -> uint #t #l 0
     |false -> uint #t #l (maxint t)
     end
   |SEC -> 
-    eq_mask_lemma #t a b;
-    eq_mask #t a b
+    neq_mask_lemma #t a b;
+    neq_mask #t a b
     
 
 (* [@(strict_on_arguments [0])]
@@ -68,8 +69,8 @@ let eq_bool #t #l a b =
   |PUB -> 
     eq #t a b
   |SEC -> 
-    eq_mask_lemma #t a b;
-    let r = eq_mask a b in 
+    neq_mask_lemma #t a b;
+    let r = neq_mask a b in 
     unsafe_bool_of_u64 #t r
 
 
