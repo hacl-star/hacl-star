@@ -38,6 +38,10 @@ extern "C" {
 
 
 
+static inline u32 FStar_UInt32_eq_mask(u32 a, u32 b);
+
+static inline u32 FStar_UInt32_gte_mask(u32 a, u32 b);
+
 static inline u8 FStar_UInt8_eq_mask(u8 a, u8 b);
 
 static inline u64 FStar_UInt64_eq_mask(u64 a, u64 b);

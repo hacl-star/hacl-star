@@ -5,7 +5,7 @@ open Lib.IntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 
-#set-options "--z3rlimit 50 --max_fuel 1"
+#set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 val lemma_nat_from_uints64_le_4: b:lseq uint64 4 -> Lemma
   (nat_from_intseq_le b == v b.[0] + v b.[1] * pow2 64 +
