@@ -34,7 +34,7 @@ let p256_order_prime_list : x:list uint64{List.Tot.length x == 4 /\
   x  
 
 
-inline_for_extraction
+
 let felem = lbuffer uint64 (size 4)
 inline_for_extraction 
 let widefelem = lbuffer uint64 (size 8)

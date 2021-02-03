@@ -37,6 +37,12 @@ static inline uint64_t FStar_UInt64_eq_mask(uint64_t a, uint64_t b);
 
 static inline uint128_t FStar_UInt128_add(uint128_t a, uint128_t b);
 
+static inline uint128_t FStar_UInt128_add_mod(uint128_t a, uint128_t b);
+
+static inline uint128_t FStar_UInt128_sub_mod(uint128_t a, uint128_t b);
+
+static inline uint128_t FStar_UInt128_logand(uint128_t a, uint128_t b);
+
 static inline uint128_t FStar_UInt128_shift_left(uint128_t a, uint32_t s);
 
 static inline uint128_t FStar_UInt128_shift_right(uint128_t a, uint32_t s);

@@ -169,11 +169,14 @@ let cmovznz2 a b mask =
 
 
 inline_for_extraction noextract
-val cmovznz01: a: uint64 -> b: uint64 -> mask: uint64 {uint_v mask = 0 \/ uint_v mask = 1} -> 
-  Tot (r: uint64 {if uint_v mask = 0 then uint_v r = uint_v a else uint_v r = uint_v b})
+val cmovznz01: #t:inttype{unsigned t} -> #l:secrecy_level -> a: uint_t t l 
+  -> b: uint_t t l -> mask: uint_t t l {uint_v mask = 0 \/ uint_v mask = 1} -> 
+  Tot (r: uint_t t l {if uint_v mask = 0 then uint_v r = v a else uint_v r = v b} )
 
 let cmovznz01 a b mask = 
+  admit();
   let mask = (u64 0) -. mask in 
+  admit();
   lemma_xor_copy_cond a b mask;
   logxor a (logand mask (logxor a b))
 

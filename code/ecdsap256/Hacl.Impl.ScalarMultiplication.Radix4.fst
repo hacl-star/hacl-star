@@ -20,9 +20,9 @@ open Hacl.Impl.P256.PointAdd
 open Hacl.Impl.P256.PointDouble
 
 open FStar.Mul
+open  FStar.Math.Lemmas
 
 open Hacl.Impl.P256.Q.PrimitivesMasking
-
 
 
 (* prime = 2**256 - 2**224 + 2**192 + 2**96 -1
@@ -75,13 +75,17 @@ for i in range(16):
 
  *)
 
+
+#set-options " --z3rlimit 400"
+
+
 inline_for_extraction noextract
-let points_radix_16_list : x:list uint64{List.Tot.length x == 128} =
+let points_radix_16_list : x:list uint64 {List.Tot.length x == 128} =
   let open FStar.Mul in 
   [@inline_let]
   let x = [ 
     u64 0x0; u64 0x0; u64 0x0; u64 0x0; 
-    u64 0x0; u64 0x0; u64 0x0; u64 0x0; 
+   u64 0x0; u64 0x0; u64 0x0; u64 0x0; 
 
     u64 0x1fb38ab1388ad777; u64 0x1dfee06615fa309d; u64 0xfcac986c3afea4a7; u64 0xdf65c2da29fb821a; 
     u64 0xeff44e23f63f8f6d; u64 0xaa02cd3ed4b681a4; u64 0xdd5fda3363818af8; u64 0xfc53bc2629fbf0b3; 
@@ -126,9 +130,121 @@ let points_radix_16_list : x:list uint64{List.Tot.length x == 128} =
     u64 0xe52288a5e87a660b; u64 0xf1d127ee3c802cb5; u64 0xccde3c6aafc46044; u64 0xdc11c08ef14cff32; 
 
     u64 0x29216f9ceca46668; u64 0x22e584a3b2891c5e; u64 0xe6deecd7810f6d87; u64 0x6aff4b94a55659a3; 
-   u64 0x12b59bb6d2e9f876; u64 0x27ed01943aa02eab; u64 0x8d6d420841f57075; u64 0xe7b47285ef60a461;  
-  ] in x
+   u64 0x12b59bb6d2e9f876; u64 0x27ed01943aa02eab; u64 0x8d6d420841f57075; u64 0xe7b47285ef60a461;   
+  ] in 
+  
+    assert_norm(List.Tot.length x == 128);
+    x
 
+
+val lemma_points_precomputed: unit -> 
+  Lemma 
+    (ensures (
+      let l0 = v (List.Tot.index points_radix_16_list 0) in 
+      let l1 = v (List.Tot.index points_radix_16_list 1) in 
+      let l2 = v (List.Tot.index points_radix_16_list 2) in
+      let l3 = v (List.Tot.index points_radix_16_list 3) in
+
+      let l4 = v (List.Tot.index points_radix_16_list 4) in
+      let l5 = v (List.Tot.index points_radix_16_list 5) in
+      let l6 = v (List.Tot.index points_radix_16_list 6) in
+      let l7 = v (List.Tot.index points_radix_16_list 7) in
+
+      let p0x = l0 + l1 * pow2 64 + l2 * pow2 128 + l3 * pow2 192 in 
+
+      let x = 0 in 
+      let multiplier = modp_inv2_pow (pow2 256) in 
+      fromDomain_ p0x == fromDomain_ (x * multiplier)
+
+
+
+     ))
+
+
+let lemma_points_precomputed () = 
+  admit();
+  let x = 0 in 
+
+  let l0 = v (List.Tot.index points_radix_16_list 0) in 
+  let l1 = v (List.Tot.index points_radix_16_list 1) in 
+  let l2 = v (List.Tot.index points_radix_16_list 2) in
+  let l3 = v (List.Tot.index points_radix_16_list 3) in
+
+  let p0x = l0 + l1 * pow2 64 + l2 * pow2 128 + l3 * pow2 192 in 
+  let multiplier = modp_inv2 (pow2 256) in 
+  let p0xD = p0x * multiplier in 
+
+  lemmaFromDomain (x * multiplier);
+  small_mod 0 (pow2 256);
+  admit()
+
+
+val lemma_points_precomputed1: unit -> 
+  Lemma 
+    (ensures (
+      let l0 = v (List.Tot.index points_radix_16_list 8) in 
+      let l1 = v (List.Tot.index points_radix_16_list 9) in 
+      let l2 = v (List.Tot.index points_radix_16_list 10) in
+      let l3 = v (List.Tot.index points_radix_16_list 11) in
+
+      let l4 = v (List.Tot.index points_radix_16_list 12) in
+      let l5 = v (List.Tot.index points_radix_16_list 13) in
+      let l6 = v (List.Tot.index points_radix_16_list 14) in
+      let l7 = v (List.Tot.index points_radix_16_list 15) in
+
+      let p0X = l0 + l1 * pow2 64 + l2 * pow2 128 + l3 * pow2 192 in 
+      let p0Y = l4 + l5 * pow2 64 + l6 * pow2 128 + l7 * pow2 192 in 
+  
+      let pointAsAffineX = 0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296 in 
+      let pointAsAffineY = 0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5 in 
+      let pointAsAffineZ = 1 in 
+
+      let multiplier = modp_inv2 (pow2 256) in 
+      let pointOriginalX = (toDomain_ pointAsAffineX) * multiplier * multiplier % prime in 
+      let pointOriginalY = (toDomain_ pointAsAffineY) * multiplier * multiplier * multiplier % prime in 
+
+      let normedX, normedY, normedZ = _norm (fromDomain_ pointOriginalX, fromDomain_ pointOriginalY, fromDomain_ 1) in 
+
+      p0X == pointOriginalX /\ p0Y == pointOriginalY (* /\ 
+
+      pointAsAffineX == normedX /\ pointAsAffineY == normedY /\ pointAsAffineZ == normedZ*)
+
+
+
+     ))
+
+
+let lemma_points_precomputed1 () = 
+  let l0 = v (List.Tot.index points_radix_16_list 8) in 
+  let l1 = v (List.Tot.index points_radix_16_list 9) in 
+  let l2 = v (List.Tot.index points_radix_16_list 10) in
+  let l3 = v (List.Tot.index points_radix_16_list 11) in
+
+  let l4 = v (List.Tot.index points_radix_16_list 12) in
+  let l5 = v (List.Tot.index points_radix_16_list 13) in
+  let l6 = v (List.Tot.index points_radix_16_list 14) in
+  let l7 = v (List.Tot.index points_radix_16_list 15) in
+
+  let p0X = l0 + l1 * pow2 64 + l2 * pow2 128 + l3 * pow2 192 in 
+  let p0Y = l4 + l5 * pow2 64 + l6 * pow2 128 + l7 * pow2 192 in 
+  
+  let pointAsAffineX = 0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296 in 
+  let pointAsAffineY = 0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5 in 
+  let pointAsAffineZ = 1 in 
+
+  let multiplier = modp_inv2 (pow2 256) in 
+  let pointOriginalX = (toDomain_ pointAsAffineX) * multiplier * multiplier % prime in 
+  let pointOriginalY = (toDomain_ pointAsAffineY) * multiplier * multiplier * multiplier % prime in 
+
+  let normedX, normedY, normedZ = _norm (fromDomain_ pointOriginalX, fromDomain_ pointOriginalY, fromDomain_ 1) in 
+
+  lemmaToDomain pointAsAffineX;
+  lemmaToDomain pointAsAffineY;
+  
+  assert_norm(p0X == 0xdf65c2da29fb821afcac986c3afea4a71dfee06615fa309d1fb38ab1388ad777);
+  assert_norm(p0Y == 0xfc53bc2629fbf0b3dd5fda3363818af8aa02cd3ed4b681a4eff44e23f63f8f6d);
+  assert_norm((pointAsAffineX * pow2 256) % prime256 * multiplier * multiplier % prime == 0xdf65c2da29fb821afcac986c3afea4a71dfee06615fa309d1fb38ab1388ad777);
+  assert_norm((pointAsAffineY * pow2 256) % prime256 * multiplier * multiplier * multiplier % prime == 0xfc53bc2629fbf0b3dd5fda3363818af8aa02cd3ed4b681a4eff44e23f63f8f6d)
 
 
 
@@ -138,35 +254,51 @@ let points_radix_16 : x: glbuffer uint64 128ul {witnessed #uint64 #(size 128) x 
 
 
 
+(* The function takes 4 bits per call, scalar[4 * i : 4 * i + 4] *)
+
 [@ CInline]
 inline_for_extraction noextract  
 val getScalar: #buf_type: buftype -> scalar: lbuffer_t buf_type uint8 (size 32) -> i: size_t {v i < 64} -> 
   Stack uint32 
-    (requires fun h -> True)
+    (requires fun h -> live h scalar)
     (ensures fun h0 _ h1 -> True)
 
 let getScalar #a scalar i = 
-  push_frame(); 
-
-  let word = 
-    (* let half = logand i 0xful in  *)
-    let half = shift_right i 1ul in 
-  to_u32 (index scalar half) in 
-
   let open Hacl.Impl.P256.Q.PrimitivesMasking in 
-  let bitShift = logand i (u64 1) in 
-    assume (uint_v bitShift == 0 \/ uint_v bitShift == 1);
-
-  let mask = to_u32 (cmovznz01  0xf0 0x0f  bitShift) in  
-  let shiftMask = to_u32 (cmovznz01  0x4 0x0 bitShift) in
-
-  let result = logand word mask in 
-  let result = shift_right result shiftMask in 
- 
-  pop_frame();
-  result
+    let h0 = ST.get() in 
   
+  let half = shift_right i 1ul in 
+    shift_right_lemma i 1ul;
+  let word = to_u32 (index scalar half) in 
 
+  assert(uint_v half == uint_v i / 2);
+  assert(uint_v word == uint_v (Lib.Sequence.index (as_seq h0 scalar) (uint_v i / 2)));
+
+  let bitShift : size_t = logand i (size 1) in 
+    logand_mask i (size 1) 1; 
+
+  assert(v bitShift == v i % 2);
+
+  let bitShiftAsPrivate = size_to_uint32 bitShift in 
+
+  assert(v bitShiftAsPrivate = v i % 2);
+
+  let mask : uint32 = cmovznz01 (u32 0xf0) (u32 0x0f) bitShiftAsPrivate in  
+    assert(if v i % 2 = 0 then v mask == 0xf0 else v mask = 0x0f);
+  let shiftMask = cmovznz01 (size 0x4) (size 0x0) bitShift in
+    assert(if v i % 2 = 0 then v shiftMask = 4 else v shiftMask = 0);
+
+  let result : uint32 = logand word mask in 
+(*     assert(if v i % 2 = 0 then v result == v (logand word mask)
+      else 
+	v result == v (logand 
+    
+    
+    
+    ); *)
+  let result : uint32 = shift_right result shiftMask in 
+ 
+  result
 
 
 [@ CInline]

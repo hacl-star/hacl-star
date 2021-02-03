@@ -28,9 +28,9 @@ val fromDomainPoint: a: tuple3 nat nat nat -> Tot (r: tuple3 nat nat nat
 noextract
 val toDomain_: a: int -> Tot nat
 
-val lemmaFromDomain: a: int -> Lemma (fromDomain_ (a) == a * modp_inv2 (pow2 256) % prime256)
+val lemmaFromDomain: a: int -> Lemma (fromDomain_ a == a * modp_inv2 (pow2 256) % prime256)
 
-val lemmaToDomain: a: int -> Lemma (toDomain_(a) == a * (pow2 256) % prime256)
+val lemmaToDomain: a: int -> Lemma (toDomain_ a == a * (pow2 256) % prime256)
 
 val lemmaToDomainAndBackIsTheSame: a: nat {a < prime256} -> Lemma (fromDomain_ (toDomain_ a) == a)
   [SMTPat (fromDomain_ (toDomain_ a))]

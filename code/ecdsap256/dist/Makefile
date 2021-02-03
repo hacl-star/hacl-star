@@ -3,12 +3,12 @@
 # test, a Low* test, or just a binary archive (like libcurve.a).
 
 CC = gcc-9
-CFLAGS += -I . -march=native -mtune=native -O3 -Wunused-variable
+CFLAGS += -I . -march=native -mtune=native -O2 -Wunused-variable
 CProfiling += -pg
 
 export CFLAGS
 
-test.exe: test.c fiat.o Hacl_P256.o  Hacl_Hash.o
+test.exe: test.c fiat_changed.o Hacl_P256.o  Hacl_Hash.o
 	$(CC) $(CFLAGS) \
 	$^ \
 	-o test.exe
