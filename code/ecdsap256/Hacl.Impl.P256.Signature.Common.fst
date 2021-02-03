@@ -138,7 +138,7 @@ let isPointOnCurvePublic p =
     
     lemma_modular_multiplication_p256_2_d ((as_nat h0 y) * (as_nat h0 y) % prime) (let x_ = as_nat h0 x in (x_ * x_ * x_ - 3 * x_ + Spec.P256.bCoordinateP256) % prime);
     
-    let r = cmp_felem_felem_u64 #Private #_ #_ y2Buffer xBuffer in 
+    let r = cmp_felem_felem_u64 #_ #_ y2Buffer xBuffer in 
     let z = not (eq_0_u64 r) in 
   pop_frame();
      z
@@ -299,7 +299,7 @@ let isMoreThanZeroLessThanOrder x =
   let carry = sub4_il xAsFelem prime256order_buffer tempBuffer in
   let less = eq_mask carry (u64 1) in
   (* let more = isZero_uint64_CT xAsFelem in  *)
-  let more = eq_felem_0_u64 #Private xAsFelem in 
+  let more = eq_felem_0_u64  xAsFelem in 
   let notMore = lognot more in
     lognot_lemma more;
   let result = logand less notMore in

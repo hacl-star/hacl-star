@@ -63,7 +63,7 @@ val copy_point_conditional: x3_out: felem -> y3_out: felem -> z3_out: felem -> p
 let copy_point_conditional x3_out y3_out z3_out p maskPoint = 
   let z = sub maskPoint (size 8) (size 4) in 
   (* let mask = isZero_uint64_CT z in  *)
-  let mask = eq_felem_0_u64 #Private z in 
+  let mask = eq_felem_0_u64 z in 
 
   let p_x = sub p (size 0) (size 4) in 
   let p_y = sub p (size 4) (size 4) in 

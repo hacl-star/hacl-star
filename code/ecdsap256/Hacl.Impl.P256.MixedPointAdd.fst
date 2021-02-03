@@ -54,8 +54,8 @@ let pointAffineIsNotZero p =
 (*   let xZero = isZero_uint64_CT_global x in 
   let yZero = isZero_uint64_CT_global y in  *)
 
-  let xZero = eq_felem_0_u64 #Private (global_to_comparable x) in 
-  let yZero = eq_felem_0_u64 #Private (global_to_comparable y) in 
+  let xZero = eq_felem_0_u64 (global_to_comparable x) in 
+  let yZero = eq_felem_0_u64 (global_to_comparable y) in 
 
   logand_lemma xZero yZero;
   logand xZero yZero
@@ -287,7 +287,7 @@ let copy_point_conditional_affine_to_result out q maskPoint =
   
   let pZ = sub maskPoint (size 8) (size 4) in 
   (* let mask = isZero_uint64_CT pZ in  *)
-  let mask = eq_felem_0_u64 #Private pZ in 
+  let mask = eq_felem_0_u64  pZ in 
 
   let xOut = sub out (size 0) (size 4) in 
   let yOut = sub out (size 4) (size 4) in 

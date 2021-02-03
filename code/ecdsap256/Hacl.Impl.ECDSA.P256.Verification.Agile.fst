@@ -326,9 +326,9 @@ let compare_points_bool a b =
   let y1 = sub b (size 4) (size 4) in 
   let z1 = sub b (size 8) (size 4) in 
 
-  let xEqual = cmp_felem_felem_bool #Public #_ #_ x0 x1 in
-  let yEqual = cmp_felem_felem_bool #Public #_ #_ y0 y1 in 
-  let zEqual = cmp_felem_felem_bool #Public #_ #_ z0 z1 in 
+  let xEqual = cmp_felem_felem_bool #_ #_ x0 x1 in
+  let yEqual = cmp_felem_felem_bool #_ #_ y0 y1 in 
+  let zEqual = cmp_felem_felem_bool #_ #_ z0 z1 in 
   xEqual && yEqual && zEqual
 
 
@@ -623,7 +623,7 @@ let ecdsa_verification_ m0 m1 alg pubKey r s mLen m =
       else
         begin
         (* let result = compare_felem_bool xBuffer r in *)
-        let result = cmp_felem_felem_bool #Public #_ #_ xBuffer r in 
+        let result = cmp_felem_felem_bool #_ #_ xBuffer r in 
         pop_frame();
         result
         end

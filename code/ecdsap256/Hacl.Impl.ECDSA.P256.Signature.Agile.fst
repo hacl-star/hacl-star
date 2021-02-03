@@ -122,7 +122,7 @@ let ecdsa_signature_step45 m x k tempBuffer =
     reduction_prime_2prime_order x x;
   pop_frame();
     (* isZero_uint64_CT x *)
-    eq_felem_0_u64 #Private x
+    eq_felem_0_u64  x
 
 
 
@@ -274,7 +274,7 @@ let ecdsa_signature_core mode alg r s mLen m privKeyAsFelem k =
   assert_norm (pow2 32 < pow2 61);
   ecdsa_signature_step6 s kAsFelem hashAsFelem r privKeyAsFelem;  
   (* let sIsZero = isZero_uint64_CT s in  *)
-  let sIsZero = eq_felem_0_u64 #Private s in 
+  let sIsZero = eq_felem_0_u64  s in 
   logor_lemma step5Flag sIsZero;
   pop_frame(); 
   logor step5Flag sIsZero
