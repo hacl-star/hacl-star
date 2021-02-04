@@ -40,7 +40,6 @@ extern "C" {
 
 #include "Hacl_Kremlib.h"
 #include "Vale.h"
-#include "Vale_Inline.h"
 
 /* SNIPPET_START: Hacl_Curve25519_64_scalarmult */
 

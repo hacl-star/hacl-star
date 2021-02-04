@@ -39,6 +39,18 @@ extern "C" {
 
 
 
+/* SNIPPET_START: FStar_UInt32_eq_mask */
+
+static inline uint32_t FStar_UInt32_eq_mask(uint32_t a, uint32_t b);
+
+/* SNIPPET_END: FStar_UInt32_eq_mask */
+
+/* SNIPPET_START: FStar_UInt32_gte_mask */
+
+static inline uint32_t FStar_UInt32_gte_mask(uint32_t a, uint32_t b);
+
+/* SNIPPET_END: FStar_UInt32_gte_mask */
+
 /* SNIPPET_START: FStar_UInt8_eq_mask */
 
 static inline uint8_t FStar_UInt8_eq_mask(uint8_t a, uint8_t b);

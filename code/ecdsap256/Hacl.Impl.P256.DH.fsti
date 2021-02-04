@@ -10,7 +10,7 @@ open Lib.ByteSequence
 
 open Spec.DH
 open Spec.ECDSAP256.Definition
-
+open Hacl.Impl.P256.Definition
 
 inline_for_extraction noextract
 val ecp256dh_i:

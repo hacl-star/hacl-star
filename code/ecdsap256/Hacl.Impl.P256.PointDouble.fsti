@@ -6,6 +6,7 @@ module ST = FStar.HyperStack.ST
 
 open Lib.IntTypes
 open Hacl.Impl.P256.Arithmetics
+open Hacl.Impl.P256.Definition
 
 open Lib.Buffer
 

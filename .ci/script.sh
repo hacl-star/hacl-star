@@ -43,7 +43,7 @@ pushd dist/gcc-compatible
 make -j
 popd
 
-if [[ "$(uname -m | cut -c 1-7)" == "aarch64" ]]; then
+if [[ "$(uname -m | cut -c 1-7)" == "aarch64" || "$(uname -m | cut -c 1-3)" == "arm" ]]; then
   make -C tests arm -j
 else
   make -C tests -j test
