@@ -15,8 +15,9 @@ module HKDF = Spec.Agile.HKDF
 #set-options "--z3rlimit 20 --fuel 0 --ifuel 1"
 
 let is_valid_kem = function
-  | DH.DH_Curve25519, Hash.SHA2_256
-  | DH.DH_P256,       Hash.SHA2_256 -> true
+  | DH.DH_Curve25519, Hash.SHA2_256 -> true
+// TODO re-enable P256 as soon as build issue is fixed there
+//  | DH.DH_P256,       Hash.SHA2_256 -> true
   | _,_ -> false
 
 let is_valid_aead = function
@@ -216,7 +217,8 @@ let size_dh_key (cs:ciphersuite): size_nat = DH.size_key (curve_of_cs cs)
 inline_for_extraction
 let size_dh_public (cs:ciphersuite): size_nat = match curve_of_cs cs with
   | DH.DH_Curve25519 -> DH.size_public DH.DH_Curve25519
-  | DH.DH_P256 -> DH.size_public DH.DH_P256 + 1 // Need the additional byte for representation
+// TODO re-enable P256 when build issues are fixed
+//  | DH.DH_P256 -> DH.size_public DH.DH_P256 + 1 // Need the additional byte for representation
 // TODO shouldn't the extra byte be handled inside the P256 module?
 
 inline_for_extraction

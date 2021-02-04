@@ -26,7 +26,8 @@ let pow2_35_less_than_pow2_125 : _:unit{pow2 32 * pow2 3 <= pow2 125 - 1} = asse
 val id_kem: cs:ciphersuite -> Tot (lbytes 2)
 let id_kem cs = let kem_dh, kem_hash, _, _ = cs in
   match kem_dh, kem_hash with
-  | DH.DH_P256, Hash.SHA2_256 -> create 1 (u8 0) @| create 1 (u8 16)
+// TODO re-enable P256 when build issues are fixed
+//  | DH.DH_P256, Hash.SHA2_256 -> create 1 (u8 0) @| create 1 (u8 16)
   | DH.DH_Curve25519, Hash.SHA2_256 -> create 1 (u8 0) @| create 1 (u8 32)
 
 val id_kdf: cs:ciphersuite -> Tot (lbytes 2)
@@ -108,13 +109,15 @@ let extract_and_expand cs dh kem_context =
 let deserialize cs pk = match curve_of_cs cs with
   | DH.DH_Curve25519 -> pk
   // Extract the point coordinates by removing the first representation byte
-  | DH.DH_P256 -> sub pk 1 64
+// TODO re-enable P256 when build issues are fixed
+//  | DH.DH_P256 -> sub pk 1 64
 
 
 let serialize cs pk = match curve_of_cs cs with
   | DH.DH_Curve25519 -> pk
   // Add the first representation byte to the point coordinates
-  | DH.DH_P256 -> create 1 (u8 4) @| pk
+// TODO re-enable P256 when build issues are fixed
+//  | DH.DH_P256 -> create 1 (u8 4) @| pk
 
 
 
