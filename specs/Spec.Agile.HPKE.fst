@@ -26,8 +26,7 @@ let pow2_35_less_than_pow2_125 : _:unit{pow2 32 * pow2 3 <= pow2 125 - 1} = asse
 val id_kem: cs:ciphersuite -> Tot (lbytes 2)
 let id_kem cs = let kem_dh, kem_hash, _, _ = cs in
   match kem_dh, kem_hash with
-// TODO re-enable P256 when build issues are fixed
-//  | DH.DH_P256, Hash.SHA2_256 -> create 1 (u8 0) @| create 1 (u8 16)
+  | DH.DH_P256, Hash.SHA2_256 -> create 1 (u8 0) @| create 1 (u8 16)
   | DH.DH_Curve25519, Hash.SHA2_256 -> create 1 (u8 0) @| create 1 (u8 32)
 
 val id_kdf: cs:ciphersuite -> Tot (lbytes 2)
@@ -109,15 +108,13 @@ let extract_and_expand cs dh kem_context =
 let deserialize cs pk = match curve_of_cs cs with
   | DH.DH_Curve25519 -> pk
   // Extract the point coordinates by removing the first representation byte
-// TODO re-enable P256 when build issues are fixed
-//  | DH.DH_P256 -> sub pk 1 64
+  | DH.DH_P256 -> sub pk 1 64
 
 
 let serialize cs pk = match curve_of_cs cs with
   | DH.DH_Curve25519 -> pk
   // Add the first representation byte to the point coordinates
-// TODO re-enable P256 when build issues are fixed
-//  | DH.DH_P256 -> create 1 (u8 4) @| pk
+  | DH.DH_P256 -> create 1 (u8 4) @| pk
 
 
 
@@ -178,7 +175,7 @@ val auth_encap:
   -> skS:key_dh_secret_s cs ->
   Tot (option (key_kem_s cs & key_dh_public_s cs))
 
-#set-options "--z3rlimit 150 --fuel 0 --ifuel 2"
+#set-options "--z3rlimit 200 --fuel 0 --ifuel 2"
 let auth_encap cs skE pkR skS =
   match DH.secret_to_public (curve_of_cs cs) skE with
   | None -> None
@@ -214,7 +211,7 @@ val auth_decap:
   -> pkS: DH.serialized_point (curve_of_cs cs) ->
   Tot (option (key_kem_s cs))
 
-#set-options "--z3rlimit 150 --fuel 0 --ifuel 2"
+#set-options "--z3rlimit 250 --fuel 0 --ifuel 2"
 let auth_decap cs enc skR pkS =
   let pkE = deserialize cs enc in
   match DH.dh (curve_of_cs cs) skR pkE with
@@ -233,9 +230,11 @@ let auth_decap cs enc skR pkS =
         let pkSm = serialize cs pkS in
         let kem_context:lbytes (3*size_dh_public cs) = concat enc (concat pkRm pkSm) in
         assert (Seq.length enc + Seq.length pkRm + Seq.length pkSm = Seq.length kem_context);
-        assert (extract_and_expand_ctx_pred cs (Seq.length kem_context));
+        assert (labeled_expand_info_length_pred (kem_hash_of_cs cs) (size_suite_id_kem + Seq.length label_shared_secret + Seq.length kem_context));
+//        assert (extract_and_expand_ctx_pred cs (Seq.length kem_context));
         assert (Seq.length dh = 2*size_dh_public cs);
-        assert (extract_and_expand_dh_pred cs (Seq.length dh));
+//        assume (extract_and_expand_dh_pred cs (Seq.length dh));
+        assert (labeled_extract_ikm_length_pred (kem_hash_of_cs cs) (size_suite_id_kem + Seq.length label_eae_prk + Seq.length dh));
         let shared_secret = extract_and_expand cs dh kem_context in
         Some (shared_secret)
 
