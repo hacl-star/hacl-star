@@ -15,6 +15,7 @@ module ST = FStar.HyperStack.ST
 module LSeq = Lib.Sequence
 module B = LowStar.Buffer
 module S = Hacl.Spec.Bignum.Multiplication
+module SS = Hacl.Spec.Bignum.Squaring
 module Loops = Lib.LoopCombinators
 
 
@@ -168,13 +169,13 @@ val bn_sqr_diag:
   (requires fun h -> live h a /\ live h res /\ disjoint res a /\
     as_seq h res == LSeq.create (v aLen + v aLen) (uint #t 0))
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_seq h1 res == S.bn_sqr_diag (as_seq h0 a))
+    as_seq h1 res == SS.bn_sqr_diag (as_seq h0 a))
 
 let bn_sqr_diag #t aLen a res =
   let h0 = ST.get () in
 
   [@inline_let]
-  let spec h = S.bn_sqr_diag_f (as_seq h a) in
+  let spec h = SS.bn_sqr_diag_f (as_seq h a) in
 
   loop1 h0 aLen res spec
   (fun i ->
@@ -194,7 +195,7 @@ let bn_sqr_st (t:limb_t) =
   Stack unit
   (requires fun h -> live h a /\ live h res /\ disjoint res a)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_seq h1 res == S.bn_sqr (as_seq h0 a))
+    as_seq h1 res == SS.bn_sqr (as_seq h0 a))
 
 inline_for_extraction noextract
 val bn_sqr: #t:limb_t -> bn_sqr_st t
@@ -206,7 +207,7 @@ let bn_sqr #t aLen a res =
   LSeq.eq_intro (LSeq.sub (as_seq h0 res) 0 (v resLen)) (as_seq h0 res);
 
   [@inline_let]
-  let spec h = S.bn_sqr_f (as_seq h a) in
+  let spec h = SS.bn_sqr_f (as_seq h a) in
 
   loop1 h0 aLen res spec
   (fun j ->
