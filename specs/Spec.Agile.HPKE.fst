@@ -151,7 +151,7 @@ val decap:
   -> skR: key_dh_secret_s cs ->
   Tot (option (key_kem_s cs))
 
-#set-options "--z3rlimit 150 --fuel 0 --ifuel 2"
+#set-options "--z3rlimit 200 --fuel 0 --ifuel 2"
 let decap cs enc skR =
   let pkE = deserialize cs enc in
   match DH.dh (curve_of_cs cs) skR pkE with
@@ -226,7 +226,6 @@ let auth_decap cs enc skR pkS =
       let esm = serialize cs es in
       let ssm = serialize cs ss in
       let dh = concat esm ssm in
-      let enc = serialize cs pkE in
       match DH.secret_to_public (curve_of_cs cs) skR with
       | None -> None
       | Some pkR ->
