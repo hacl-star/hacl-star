@@ -1630,14 +1630,18 @@ let mod64 a =
   r
 
 
+(* we require such a postcondition because the 5 out of 8 parts of the word would be re-written *)
 inline_for_extraction noextract
 val shortened_mul: a: glbuffer uint64 (size 4) -> b: uint64 -> result: widefelem -> Stack unit
-  (requires fun h -> live h a /\ live h result /\ wide_as_nat h result = 0)
+  (requires fun h -> live h a /\ live h result /\ wide_as_nat h result < pow2 320)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
     as_nat_il h0 a * uint_v b = wide_as_nat h1 result /\ 
-    wide_as_nat h1 result < pow2 320)
+    wide_as_nat h1 result < pow2 320
+  )
 
 let shortened_mul a b result = 
+    assert_norm( pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
+    assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 == pow2 320);
   let result04 = sub result (size 0) (size 4) in 
   let result48 = sub result (size 4) (size 4) in 
   let c = mul1_il a b result04 in 
@@ -1646,9 +1650,8 @@ let shortened_mul a b result =
   
     assert(Lib.Sequence.index (as_seq h0 result) 5 == Lib.Sequence.index (as_seq h0 result48) 1);
     assert(Lib.Sequence.index (as_seq h0 result) 6 == Lib.Sequence.index (as_seq h0 result48) 2);
-    assert(Lib.Sequence.index (as_seq h0 result) 7 == Lib.Sequence.index (as_seq h0 result48) 3);
+    assert(Lib.Sequence.index (as_seq h0 result) 7 == Lib.Sequence.index (as_seq h0 result48) 3)
 
-    assert_norm( pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256)
    
 
 inline_for_extraction noextract

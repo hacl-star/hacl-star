@@ -55,33 +55,24 @@ let montgomery_multiplication_round t round =
 inline_for_extraction
 val montgomery_multiplication_round: t: widefelem -> round: widefelem 
   -> t2: lbuffer uint64 (size 8) 
-  -> t3: lbuffer uint64 (size 8) ->
-
-
-  Stack unit 
-  
-
-  (requires fun h -> live h t /\ live h round /\ wide_as_nat h t < prime256 * prime256)
-  (ensures fun h0 _ h1 -> modifies (loc round)  h0 h1 /\
+  -> t3: lbuffer uint64 (size 8) -> 
+  Stack unit (requires fun h -> live h t /\ live h round /\ live h t2 /\ live h t3 /\
+    disjoint t round /\ disjoint t t2 /\ disjoint t t3 /\
+    disjoint round t2 /\ disjoint round t3 /\ disjoint t2 t3 /\
+    wide_as_nat h t2 < pow2 320 /\
+    wide_as_nat h t < prime256 * prime256)
+  (ensures fun h0 _ h1 -> modifies (loc round |+| loc t2 |+| loc t3)  h0 h1 /\
+    wide_as_nat h1 t2 < pow2 320 /\
     wide_as_nat h1 round = (wide_as_nat h0 t + prime256 * (wide_as_nat h0 t % pow2 64)) / pow2 64
   )
 
 let montgomery_multiplication_round t round t2 t3 =
-  push_frame(); 
-    let h0 = ST.get() in 
-(*     let t2 = create (size 8) (u64 0) in 
-    let t3 = create (size 8) (u64 0) in  *)
+  let h0 = ST.get() in 
     let t1 = mod64 t in 
-      recall_contents prime256_buffer (Lib.Sequence.of_list p256_prime_list); 
-    shortened_mul prime256_buffer t1 t2;
-    add8_without_carry1 t t2 t3;
-    shift8 t3 round;
-  pop_frame()  
-
-
-
-
-
+    recall_contents prime256_buffer (Lib.Sequence.of_list p256_prime_list); 
+  shortened_mul prime256_buffer t1 t2;
+  add8_without_carry1 t t2 t3;
+  shift8 t3 round
 
 
 val montgomery_multiplication_one_round_proof: 

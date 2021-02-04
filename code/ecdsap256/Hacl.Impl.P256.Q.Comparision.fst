@@ -176,7 +176,8 @@ let cmp_felem_felem_u64  a b =
 
 val cmp_felem_felem_bool: a: felem -> b: felem -> Stack bool
   (requires fun h -> live h a /\ live h b)
-  (ensures fun h0 _ h1 -> True)
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ 
+  (r <==>  as_nat h0 a = as_nat h0 b))
 
 
 let cmp_felem_felem_bool a b = 
