@@ -138,10 +138,10 @@ let isPointOnCurvePublic p =
     
     lemma_modular_multiplication_p256_2_d ((as_nat h0 y) * (as_nat h0 y) % prime) (let x_ = as_nat h0 x in (x_ * x_ * x_ - 3 * x_ + Spec.P256.bCoordinateP256) % prime);
     
-    let r = cmp_felem_felem_u64 #_ #_ y2Buffer xBuffer in 
-    let z = not (eq_0_u64 r) in 
+    let r = cmp_felem_felem_bool y2Buffer xBuffer in 
+    (* let z = not (eq_0_u64 r) in  *)
   pop_frame();
-     z
+     r
 
 
 val isCoordinateValid: p: point -> Stack bool 
