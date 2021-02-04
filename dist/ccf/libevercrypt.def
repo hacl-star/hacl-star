@@ -1,8 +1,8 @@
 LIBRARY libevercrypt
 
 EXPORTS
-  Spec_Cipher_Expansion_cipher_alg_of_impl
   LowStar_Vector_new_capacity
+  Spec_Cipher_Expansion_cipher_alg_of_impl
   Hacl_Blake2b_32_blake2b
   Hacl_Blake2s_32_blake2s
   Hacl_HMAC_DRBG_min_length
@@ -167,9 +167,6 @@ EXPORTS
   Hacl_Salsa20_salsa20_decrypt
   Hacl_Salsa20_salsa20_key_block0
   Hacl_Salsa20_hsalsa20
-  Hacl_Curve25519_64_Slow_scalarmult
-  Hacl_Curve25519_64_Slow_secret_to_public
-  Hacl_Curve25519_64_Slow_ecdh
   Hacl_Curve25519_64_scalarmult
   Hacl_Curve25519_64_secret_to_public
   Hacl_Curve25519_64_ecdh
@@ -296,7 +293,9 @@ EXPORTS
   EverCrypt_CTR_init
   EverCrypt_CTR_update_block
   EverCrypt_CTR_free
+  Hacl_IntTypes_Intrinsics_add_carry_u32
   Hacl_IntTypes_Intrinsics_add_carry_u64
+  Hacl_IntTypes_Intrinsics_sub_borrow_u32
   Hacl_IntTypes_Intrinsics_sub_borrow_u64
   EverCrypt_Ed25519_sign
   EverCrypt_Ed25519_verify

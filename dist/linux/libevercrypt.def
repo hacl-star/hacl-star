@@ -102,6 +102,9 @@ EXPORTS
   Hacl_Salsa20_salsa20_decrypt
   Hacl_Salsa20_salsa20_key_block0
   Hacl_Salsa20_hsalsa20
+  Hacl_Bignum_Base_mul_wide_add_u64
+  Hacl_Bignum_Base_mul_wide_add2_u64
+  Hacl_Bignum_Addition_bn_add_eq_len_u64
   Hacl_Curve25519_64_Slow_scalarmult
   Hacl_Curve25519_64_Slow_secret_to_public
   Hacl_Curve25519_64_Slow_ecdh
@@ -198,7 +201,9 @@ EXPORTS
   Hacl_Impl_Frodo_Pack_frodo_unpack
   Hacl_Impl_Frodo_Encode_frodo_key_encode
   Hacl_Impl_Frodo_Encode_frodo_key_decode
+  Hacl_IntTypes_Intrinsics_add_carry_u32
   Hacl_IntTypes_Intrinsics_add_carry_u64
+  Hacl_IntTypes_Intrinsics_sub_borrow_u32
   Hacl_IntTypes_Intrinsics_sub_borrow_u64
   Hacl_Frodo640_crypto_kem_keypair
   Hacl_Frodo640_crypto_kem_enc
