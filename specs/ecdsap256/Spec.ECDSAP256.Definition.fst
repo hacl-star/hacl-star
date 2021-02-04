@@ -3,11 +3,11 @@ module Spec.ECDSAP256.Definition
 open Lib.IntTypes
 open FStar.Math.Lemmas
 open FStar.Math.Lib
-
+(*
 open FStar.HyperStack
-open FStar.HyperStack.All
+open FStar.HyperStack.All *)
 open Lib.Sequence
-open Lib.Buffer
+(*open Lib.Buffer *)
 open FStar.Mul
 
 
@@ -34,12 +34,6 @@ let p256_order_prime_list : x:list uint64{List.Tot.length x == 4 /\
   x  
 
 
-inline_for_extraction
-let felem = lbuffer uint64 (size 4)
-inline_for_extraction 
-let widefelem = lbuffer uint64 (size 8)
-
-
 inline_for_extraction 
 let felem4 = tuple4 uint64 uint64 uint64 uint64
 inline_for_extraction 
@@ -64,30 +58,6 @@ let wide_as_nat4 f =
   v s6 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
   v s7 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64
 
-
-
-
-let as_nat (h:mem) (e:felem) : GTot nat =
-  let s = as_seq h e in
-  let s0 = s.[0] in
-  let s1 = s.[1] in
-  let s2 = s.[2] in
-  let s3 = s.[3] in
-  as_nat4 (s0, s1, s2, s3)
-
-
-
-let wide_as_nat (h:mem) (e:widefelem) : GTot nat =
-  let s = as_seq h e in
-  let s0 = s.[0] in
-  let s1 = s.[1] in
-  let s2 = s.[2] in
-  let s3 = s.[3] in
-  let s4 = s.[4] in
-  let s5 = s.[5] in
-  let s6 = s.[6] in
-  let s7 = s.[7] in
-  wide_as_nat4 (s0, s1, s2, s3, s4, s5, s6, s7)
 
 
 let felem_seq_as_nat_8 (a: lseq uint64 8) : Tot nat = 
