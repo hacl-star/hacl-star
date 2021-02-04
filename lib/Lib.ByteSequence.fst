@@ -278,9 +278,6 @@ let rec index_nat_to_intseq_be #t #l len n i =
     end
 
 
-let nat_to_bytes_be = nat_to_intseq_be_ #U8
-let nat_to_bytes_le = nat_to_intseq_le_ #U8
-
 let uint_to_bytes_le #t #l n =
   nat_to_bytes_le (numbytes t) (v n)
 
@@ -796,3 +793,42 @@ let lemma_uint_from_to_bytes_be_preserves_value #t #l s =
   lemma_reveal_uint_to_bytes_be #t #l s;
   assert(s' == nat_to_bytes_be #l (length s') (nat_from_bytes_be s));
   lemma_nat_from_to_bytes_be_preserves_value #l s (length s)
+
+let rec nat_from_intseq_be_public_to_secret #t len b =
+  if len = 1 then begin
+    nat_from_intseq_be_lemma0 b;
+    nat_from_intseq_be_lemma0 (map secret b) end
+  else begin
+    let b_secret = map secret b in
+    let b1 = slice b 1 len in
+    let b1_secret = slice b_secret 1 len in
+    nat_from_intseq_be_public_to_secret #t (len - 1) b1;
+    //assert (nat_from_intseq_be b1 == nat_from_intseq_be (map secret b1));
+    nat_from_intseq_be_slice_lemma b 1;
+    nat_from_intseq_be_lemma0 (slice b 0 1);
+    //assert (nat_from_intseq_be b == nat_from_intseq_be b1 + pow2 ((len - 1) * bits t) * v b.[0]);
+    nat_from_intseq_be_slice_lemma b_secret 1;
+    nat_from_intseq_be_lemma0 (slice b_secret 0 1);
+    //assert (nat_from_intseq_be b_secret == nat_from_intseq_be b1_secret + pow2 ((len - 1) * bits t) * v b_secret.[0]);
+    //assert (v b.[0] == v b_secret.[0]);
+    eq_intro (slice (map secret b) 1 len) (map secret (slice b 1 len));
+    () end
+
+
+let rec nat_from_intseq_le_public_to_secret #t len b =
+  if len = 1 then begin
+    nat_from_intseq_le_lemma0 b;
+    nat_from_intseq_le_lemma0 (map secret b) end
+  else begin
+    let b_secret = map secret b in
+    let b1 = slice b 1 len in
+    let b1_secret = slice b_secret 1 len in
+    nat_from_intseq_le_public_to_secret #t (len - 1) b1;
+    //assert (nat_from_intseq_le b1 == nat_from_intseq_le (map secret b1));
+    nat_from_intseq_le_slice_lemma b 1;
+    nat_from_intseq_le_lemma0 (slice b 0 1);
+    //assert (nat_from_intseq_le b == nat_from_intseq_le (slice b 0 1) + pow2 (bits t) * nat_from_intseq_le (slice b 1 len));
+    nat_from_intseq_le_slice_lemma b_secret 1;
+    nat_from_intseq_le_lemma0 (slice b_secret 0 1);
+    eq_intro (slice (map secret b) 1 len) (map secret (slice b 1 len));
+    () end

@@ -74,6 +74,18 @@ Spec_ECDSA_hash_alg_ecdsa;
 
 /* SNIPPET_END: Spec_ECDSA_hash_alg_ecdsa */
 
+/* SNIPPET_START: Spec_FFDHE_ffdhe_alg */
+
+#define Spec_FFDHE_FFDHE2048 0
+#define Spec_FFDHE_FFDHE3072 1
+#define Spec_FFDHE_FFDHE4096 2
+#define Spec_FFDHE_FFDHE6144 3
+#define Spec_FFDHE_FFDHE8192 4
+
+/* SNIPPET_END: Spec_FFDHE_ffdhe_alg */
+
+typedef uint8_t Spec_FFDHE_ffdhe_alg;
+
 /* SNIPPET_START: Spec_Agile_Cipher_cipher_alg */
 
 #define Spec_Agile_Cipher_AES128 0

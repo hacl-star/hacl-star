@@ -62,6 +62,14 @@ typedef struct Spec_ECDSA_hash_alg_ecdsa_s
 }
 Spec_ECDSA_hash_alg_ecdsa;
 
+#define Spec_FFDHE_FFDHE2048 0
+#define Spec_FFDHE_FFDHE3072 1
+#define Spec_FFDHE_FFDHE4096 2
+#define Spec_FFDHE_FFDHE6144 3
+#define Spec_FFDHE_FFDHE8192 4
+
+typedef uint8_t Spec_FFDHE_ffdhe_alg;
+
 #define Spec_Agile_Cipher_AES128 0
 #define Spec_Agile_Cipher_AES256 1
 #define Spec_Agile_Cipher_CHACHA20 2

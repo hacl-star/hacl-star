@@ -22,6 +22,16 @@ static inline bool compare_and_print(size_t len, uint8_t* comp, uint8_t* exp) {
   return ok;
 }
 
+static inline bool compare(size_t len, uint8_t* comp, uint8_t* exp) {
+  bool ok = true;
+  for (size_t i = 0; i < len; i++)
+    ok = ok & (exp[i] == comp[i]);
+  if (ok)
+    printf("Success!\n");
+  else
+    printf("**FAILED**\n");
+  return ok;
+}
 
 #if defined(__x86_64__) || defined(_M_X64)
 typedef uint64_t cycles;
