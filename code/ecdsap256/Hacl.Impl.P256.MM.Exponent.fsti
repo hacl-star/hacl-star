@@ -11,6 +11,7 @@ open FStar.Math.Lemmas
 open Hacl.Impl.P256.Math 
 
 open Hacl.Impl.P256.LowLevel 
+open Hacl.Impl.P256.Definition
 open FStar.Tactics
 open FStar.Tactics.Canon 
 

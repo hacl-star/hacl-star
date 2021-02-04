@@ -20,6 +20,7 @@ open Spec.P256
 
 open Lib.Loops
 open FStar.Math.Lemmas
+open Hacl.Impl.P256.Definition
 
 module B = LowStar.Buffer
 open FStar.Mul
