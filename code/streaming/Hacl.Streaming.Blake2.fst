@@ -716,6 +716,16 @@ let mk_update_last a m update_last no_key key_size i acc prevlen last last_len =
   (**)   update_last_s (U32.v key_size) () (s_v h0 acc) (U64.v prevlen) (B.as_seq h0 last))
 #pop-options
 
+let blocks_state_len (a : alg) (m : valid_m_spec a) :
+  Tot (x:U32.t{
+    U32.v x > 0 /\
+    U32.v x % U32.v (block_len a) = 0
+  }) = 
+  match m with
+  | M32 -> block_len a
+  | M128 -> U32.(4ul *^ block_len a)
+  | M256 -> U32.(8ul *^ block_len a)
+
 #push-options "--ifuel 1 --z3cliopt smt.arith.nl=false"
 inline_for_extraction noextract
 let blake2 (a : alg) (m : valid_m_spec a)
@@ -734,6 +744,7 @@ let blake2 (a : alg) (m : valid_m_spec a)
     (fun () -> max_input_length a (Spec.max_key a)) (* max_input_length *)
     (fun () -> output_len a) (* output_len *)
     (fun () -> block_len a) (* block_len *)
+    (fun () -> blocks_state_len a m) (* blocks_state_len *)
     
     (fun () k -> init_s #a #(U32.v key_size) () k) (* init_s *)
     (fun () acc prevlen input -> update_multi_s (U32.v key_size) () acc prevlen input) (* update_multi_s *)

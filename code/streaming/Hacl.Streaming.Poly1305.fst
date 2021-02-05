@@ -411,6 +411,11 @@ let poly1305 (fs : field_spec) : I.block unit =
     (fun () -> pow2 32 - 1)
     (fun () -> 16ul)
     (fun () -> 16ul)
+    (fun () ->
+      match fs with
+      | M32 -> 16ul
+      | M128 -> 64ul
+      | M256 -> 128ul)
 
     (fun () -> Spec.Poly1305.poly1305_init)
     (fun () acc prevlen data -> update_multi acc data)
