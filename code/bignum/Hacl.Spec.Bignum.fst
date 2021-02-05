@@ -94,10 +94,10 @@ let bn_karatsuba_mul_lemma #t #aLen a b =
   Hacl.Spec.Bignum.Karatsuba.bn_karatsuba_mul_lemma a b
 
 let bn_sqr #t #aLen a =
-  Hacl.Spec.Bignum.Multiplication.bn_sqr a
+  Hacl.Spec.Bignum.Squaring.bn_sqr a
 
 let bn_sqr_lemma #t #aLen a =
-  Hacl.Spec.Bignum.Multiplication.bn_sqr_lemma a
+  Hacl.Spec.Bignum.Squaring.bn_sqr_lemma a
 
 let bn_karatsuba_sqr #t #aLen a =
   Hacl.Spec.Bignum.Karatsuba.bn_karatsuba_sqr a
