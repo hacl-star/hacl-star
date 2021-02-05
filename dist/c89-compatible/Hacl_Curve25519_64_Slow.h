@@ -38,6 +38,7 @@ extern "C" {
 
 
 #include "Hacl_Kremlib.h"
+#include "Hacl_Bignum.h"
 
 void Hacl_Curve25519_64_Slow_scalarmult(uint8_t *out, uint8_t *priv, uint8_t *pub);
 

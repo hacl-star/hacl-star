@@ -86,12 +86,12 @@ val index_nat_to_intseq_be:
            uint #t #l (n / pow2 (bits t * i) % pow2 (bits t)))
 
 inline_for_extraction
-val nat_to_bytes_be: #l:secrecy_level -> len:nat -> n:nat{n < pow2 (8 * len)}
-  -> b:bytes_l l{length b == len /\ n == nat_from_intseq_be #U8 b}
+let nat_to_bytes_be (#l:secrecy_level) (len:nat) (n:nat{n < pow2 (8 * len)}) : b:bytes_l l{length b == len /\ n == nat_from_intseq_be #U8 b} =
+  nat_to_intseq_be #U8 #l len n
 
 inline_for_extraction
-val nat_to_bytes_le: #l:secrecy_level -> len:nat -> n:nat{n < pow2 (8 * len)}
-  -> b:bytes_l l{length b == len /\ n == nat_from_intseq_le #U8 b}
+let nat_to_bytes_le (#l:secrecy_level) (len:nat) (n:nat{n < pow2 (8 * len)}) : b:bytes_l l{length b == len /\ n == nat_from_intseq_le #U8 b} =
+  nat_to_intseq_le #U8 #l len n
 
 inline_for_extraction
 val uint_to_bytes_le: #t:inttype{unsigned t} -> #l:secrecy_level -> uint_t t l -> lbytes_l l (numbytes t)
@@ -268,3 +268,11 @@ val lemma_uint_from_to_bytes_be_preserves_value :
   #l : secrecy_level ->
   s : lbytes_l l (numbytes t) ->
   Lemma(uint_to_bytes_be #t #l (uint_from_bytes_be #t #l s) `equal` s)
+
+val nat_from_intseq_be_public_to_secret:
+  #t:inttype{unsigned t} -> len:size_pos{len * bits t < pow2 32} -> b:lseq (uint_t t PUB) len ->
+  Lemma (nat_from_intseq_be b == nat_from_intseq_be (map secret b))
+
+val nat_from_intseq_le_public_to_secret:
+  #t:inttype{unsigned t} -> len:size_pos{len * bits t < pow2 32} -> b:lseq (uint_t t PUB) len ->
+  Lemma (nat_from_intseq_le b == nat_from_intseq_le (map secret b))

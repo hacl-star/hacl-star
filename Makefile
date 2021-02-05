@@ -104,7 +104,7 @@ all-unstaged: compile-gcc-compatible compile-msvc-compatible compile-gcc64-only 
   compile-evercrypt-external-headers compile-c89-compatible compile-ccf \
   compile-portable-gcc-compatible compile-mozilla dist/linux/Makefile.basic \
   dist/wasm/package.json dist/merkle-tree/Makefile.basic compile-mitls \
-  obj/libhaclml.cmxa
+  obj/libhaclml.cmxa compile-election-guard
 
 # Automatic staging.
 %-staged: .last_vale_version
@@ -640,7 +640,8 @@ TARGET_H_INCLUDE = -add-include '"kremlin/internal/target.h"'
 INTRINSIC_FLAGS = -add-include '"libintvector.h"'
 # Disabled for distributions that don't include code based on intrinsics.
 INTRINSIC_INT_FLAGS = \
-  -add-include 'Hacl_P256:"lib_intrinsics.h"'
+  -add-include 'Hacl_P256:"lib_intrinsics.h"' \
+  -add-include 'Hacl_Bignum:"lib_intrinsics.h"'
 
 # Disables tests; overriden in Wasm where tests indicate what can be compiled.
 TEST_FLAGS = -bundle Test,Test.*,Hacl.Test.*
@@ -670,6 +671,7 @@ BUNDLE_FLAGS	=\
   $(SHA3_BUNDLE) \
   $(CHACHA20_BUNDLE) \
   $(SALSA20_BUNDLE) \
+  $(BIGNUM_BUNDLE) \
   $(CURVE_BUNDLE) \
   $(CHACHAPOLY_BUNDLE) \
   $(ED_BUNDLE) \
@@ -683,6 +685,8 @@ BUNDLE_FLAGS	=\
   $(HPKE_BUNDLE) \
   $(STREAMING_BUNDLE) \
   $(INTTYPES_BUNDLE) \
+  $(RSAPSS_BUNDLE) \
+  $(FFDHE_BUNDLE) \
   $(LEGACY_BUNDLE)
 
 DEFAULT_FLAGS = \
@@ -766,6 +770,9 @@ dist/wasm/Makefile.basic: STREAMING_BUNDLE = -bundle Hacl.Streaming.*
 # And Merkle trees
 dist/wasm/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree,MerkleTree.*'
 dist/wasm/Makefile.basic: CTR_BUNDLE =
+dist/wasm/Makefile.basic: BIGNUM_BUNDLE = -bundle Hacl.Bignum.*,Hacl.Bignum,Hacl.Bignum4096,Hacl.Bignum256
+dist/wasm/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.RSAPSS,Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS,Hacl.RSAPSS2048_SHA256
+dist/wasm/Makefile.basic: FFDHE_BUNDLE = -bundle Hacl.FFDHE,Hacl.Impl.FFDHE.*,Hacl.Impl.FFDHE,Hacl.FFDHE4096
 dist/wasm/Makefile.basic: DEFAULT_FLAGS += -bundle 'EverCrypt,EverCrypt.*'
 
 dist/wasm/package.json: dist/wasm/Makefile.basic $(wildcard bindings/js/*.js) bindings/js/README.md $(wildcard bindings/js/*.json) bindings/js/.npmignore
@@ -871,6 +878,8 @@ dist/linux/Makefile.basic: HAND_WRITTEN_H_FILES := $(filter-out %/evercrypt_targ
 dist/linux/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
 dist/linux/Makefile.basic: BASE_FLAGS := $(filter-out -fcurly-braces,$(BASE_FLAGS))
 dist/linux/Makefile.basic: STREAMING_BUNDLE = -bundle Hacl.Streaming.*
+dist/linux/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.Bignum256,Hacl.Bignum4096,Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS,Hacl.RSAPSS,Hacl.RSAPSS2048_SHA256
+dist/linux/Makefile.basic: FFDHE_BUNDLE = -bundle Hacl.Impl.FFDHE.*,Hacl.Impl.FFDHE,Hacl.FFDHE,Hacl.FFDHE4096
 dist/linux/Makefile.basic: CURVE_BUNDLE = \
   $(CURVE_BUNDLE_BASE) \
   -bundle Hacl.Curve25519_64_Local \
@@ -906,14 +915,42 @@ dist/ccf/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
 dist/ccf/Makefile.basic: HAND_WRITTEN_FILES := $(filter-out %/Lib_PrintBuffer.c %_vale_stubs.c,$(HAND_WRITTEN_FILES))
 dist/ccf/Makefile.basic: HAND_WRITTEN_H_FILES := $(filter-out %/libintvector.h %/lib_intrinsics.h,$(HAND_WRITTEN_H_FILES))
 dist/ccf/Makefile.basic: HACL_OLD_FILES =
+dist/ccf/Makefile.basic: CURVE_BUNDLE_SLOW = -bundle Hacl.Curve25519_64_Slow
 dist/ccf/Makefile.basic: POLY_BUNDLE = -bundle Hacl.Streaming.Poly1305_128,Hacl.Streaming.Poly1305_256
 dist/ccf/Makefile.basic: P256_BUNDLE=-bundle Hacl.P256,Hacl.Impl.ECDSA.*,Hacl.Impl.SolinasReduction,Hacl.Impl.P256.*
+dist/ccf/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS,Hacl.RSAPSS,Hacl.RSAPSS2048_SHA256
+dist/ccf/Makefile.basic: FFDHE_BUNDLE = -bundle Hacl.Impl.FFDHE.*,Hacl.Impl.FFDHE,Hacl.FFDHE,Hacl.FFDHE4096
+dist/ccf/Makefile.basic: BIGNUM_BUNDLE = -bundle Hacl.Bignum256,Hacl.Bignum4096,Hacl.Bignum.*,Hacl.Bignum
 dist/ccf/Makefile.basic: HPKE_BUNDLE = -bundle 'Hacl.HPKE.*'
 dist/ccf/Makefile.basic: BLAKE2_BUNDLE=-bundle Hacl.Impl.Blake2.Constants \
   -static-header Hacl.Impl.Blake2.Constants \
   -bundle Hacl.HKDF.Blake2b_256,Hacl.HMAC.Blake2b_256,Hacl.Blake2b_256,Hacl.Hash.Blake2b_256,Hacl.Streaming.Blake2b_256 \
   -bundle Hacl.HKDF.Blake2s_128,Hacl.HMAC.Blake2s_128,Hacl.Blake2s_128,Hacl.Hash.Blake2s_128,Hacl.Streaming.Blake2s_256 \
   -bundle 'Hacl.Impl.Blake2.\*'
+
+# Election Guard distribution
+# ---------------------------
+#
+# Trying something new, i.e. only listing the things we care about (since
+# there's so few of them)
+dist/election-guard/Makefile.basic: BUNDLE_FLAGS = \
+  -bundle Hacl.Hash.* \
+  -bundle Hacl.HMAC \
+  -bundle Hacl.Streaming.SHA2= \
+  -bundle Hacl.Bignum256= \
+  -bundle Hacl.Bignum4096= \
+  -bundle Hacl.Bignum,Hacl.Bignum.*[rename=Hacl_Bignum] \
+  -bundle Hacl.HMAC_DRBG= \
+  $(INTTYPES_BUNDLE)
+dist/election-guard/Makefile.basic: INTRINSIC_FLAGS =
+dist/election-guard/Makefile.basic: VALE_ASMS =
+dist/election-guard/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
+dist/election-guard/Makefile.basic: HACL_OLD_FILES =
+dist/election-guard/Makefile.basic: HAND_WRITTEN_FILES := $(filter-out %/evercrypt_vale_stubs.c %/Lib_PrintBuffer.c,$(HAND_WRITTEN_FILES))
+dist/election-guard/Makefile.basic: HAND_WRITTEN_LIB_FLAGS = -bundle Lib.RandomBuffer.System= -bundle Lib.Memzero0=
+dist/election-guard/Makefile.basic: DEFAULT_FLAGS += \
+  -bundle '\*[rename=Should_not_be_here]' \
+  -falloca -ftail-calls
 
 # Mozilla distribution
 # --------------------
@@ -940,6 +977,9 @@ dist/mozilla/Makefile.basic: SHA3_BUNDLE = -bundle Hacl.SHA3
 dist/mozilla/Makefile.basic: HASH_BUNDLE = -bundle Hacl.Hash.*,Hacl.HKDF,Hacl.HMAC,Hacl.HMAC_DRBG
 dist/mozilla/Makefile.basic: HPKE_BUNDLE = -bundle 'Hacl.HPKE.*'
 dist/mozilla/Makefile.basic: P256_BUNDLE= -bundle Hacl.P256,Hacl.Impl.ECDSA.*,Hacl.Impl.SolinasReduction,Hacl.Impl.P256.*
+dist/mozilla/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS,Hacl.RSAPSS,Hacl.RSAPSS2048_SHA256
+dist/mozilla/Makefile.basic: FFDHE_BUNDLE = -bundle Hacl.Impl.FFDHE.*,Hacl.Impl.FFDHE,Hacl.FFDHE,Hacl.FFDHE4096
+dist/mozilla/Makefile.basic: BIGNUM_BUNDLE = -bundle Hacl.Bignum256,Hacl.Bignum4096,Hacl.Bignum.*,Hacl.Bignum
 dist/mozilla/Makefile.basic: STREAMING_BUNDLE = -bundle Hacl.Streaming.*
 dist/mozilla/Makefile.basic: FRODO_BUNDLE = -bundle Hacl.Frodo.*,Hacl.SHA3,Hacl.Keccak,Frodo.Params
 dist/mozilla/Makefile.basic: \
