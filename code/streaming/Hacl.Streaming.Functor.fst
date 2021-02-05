@@ -171,10 +171,13 @@ let footprint_s #index (c: block index) (i: index) (h: HS.mem) s =
 /// Invariants
 /// ==========
 
+#push-options "--z3cliopt smt.arith.nl=false"
 let invariant_s #index (c: block index) (i: index) h s =
   let State block_state buf_ total_len seen key = s in
   let seen = G.reveal seen in
   let blocks, rest = split_at_last c i seen in
+  (**) Math.Lemmas.modulo_lemma 0 (U32.v (Block?.block_len c i));
+  (**) assert(0 % U32.v (Block?.block_len c i) = 0);
   (**) Math.Lemmas.modulo_lemma 0 (U32.v (Block?.blocks_state_len c i));
   (**) assert(0 % U32.v (Block?.blocks_state_len c i) = 0);
 
@@ -192,6 +195,7 @@ let invariant_s #index (c: block index) (i: index) h s =
   // Note the double equals here, we now no longer know that this is a sequence.  
   c.state.v i h block_state == c.update_multi_s i (c.init_s i (optional_reveal h key)) 0 blocks /\
   S.equal (S.slice (B.as_seq h buf_) 0 (Seq.length rest)) rest
+#pop-options
 
 let freeable_s (#index: Type0) (c: block index) (i: index) (h: HS.mem) (s: state_s' c i): Type0 =
   let State block_state buf_ total_len seen key = s in
@@ -345,6 +349,7 @@ let create_in #index c i t t' k r =
 
   p
 
+#push-options "--z3rlimit 100"
 let alloca #index c i t t' k =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
@@ -440,7 +445,9 @@ let alloca #index c i t t' k =
   (**) assert(ST.same_refs_in_non_tip_regions h0 h8);
 
   p
+#pop-options
 
+#push-options "--z3cliopt smt.arith.nl=false"
 let init #index c i t t' k s =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
@@ -457,8 +464,8 @@ let init #index c i t t' k s =
   (**) let h2 = ST.get () in
   (**) optional_frame #_ #i #c.km #c.key (c.state.footprint #i h1 block_state) k' h1 h2;
   (**) c.key.frame_invariant (c.state.footprint #i h1 block_state) k h1 h2;
-  (**) Math.Lemmas.modulo_lemma 0 (U32.v (Block?.blocks_state_len c i));
-  (**) assert(0 % UInt32.v (Block?.blocks_state_len c i) = 0);
+  (**) Math.Lemmas.modulo_lemma 0 (U32.v (Block?.block_len c i));
+  (**) assert(0 % UInt32.v (Block?.block_len c i) = 0);
   (**) c.update_multi_zero i (c.state.v i h2 block_state) 0;
   (**) split_at_last_empty c i;
 
@@ -509,6 +516,7 @@ let init #index c i t t' k s =
   (**) );
   (**) assert (invariant_s c i h3 (B.get h3 s 0));
   (**) assert(preserves_freeable c i s h1 h3)
+#pop-options
 
 /// Some helpers to minimize modulo-reasoning
 /// =========================================
@@ -677,7 +685,7 @@ val update_small:
 
 /// SH: The proof obligations for update_small have problem succeeding in command
 /// line mode: hence the restart-solver instruction, the crazy rlimit and the
-/// intermediate lemma. . Interestingly (and frustratingly), the proof succeeds
+/// intermediate lemma. Interestingly (and frustratingly), the proof succeeds
 /// quite quickly locally on command-line with this rlimit, but fails with a lower
 /// one. Besides, the lemma is needed only for the CI regression.
 let split_at_last_rest_eq (#index : Type0) (c: block index)
@@ -703,7 +711,7 @@ let split_at_last_rest_eq (#index : Type0) (c: block index)
 // This rlimit is a bit crazy, but this proof is not stable. It usually
 // goes through fast, but a high rlimit is a security against regression failures.
 #restart-solver
-#push-options "--z3rlimit 800 --z3cliopt smt.arith.nl=false"
+#push-options "--z3rlimit 1000 --z3cliopt smt.arith.nl=false"
 let update_small #index c i t t' p data len =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
