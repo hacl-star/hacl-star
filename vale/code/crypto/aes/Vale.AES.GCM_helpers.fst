@@ -278,6 +278,7 @@ let lemma_pad_to_32_bits (s s'':seq4 nat8) (n:nat) : Lemma
   assert (n == 4 ==> x % pow2 (8 * n) == x % 0x100000000);
   ()
 
+#reset-options "--z3rlimit 50"
 let lemma_mod_n_8_lower1 (q:quad32) (n:nat) : Lemma
   (requires n <= 4)
   (ensures lo64 q % pow2 (8 * n) == q.lo0 % pow2 (8 * n))
@@ -291,7 +292,9 @@ let lemma_mod_n_8_lower1 (q:quad32) (n:nat) : Lemma
   assert_norm (f 3);
   assert_norm (f 4);
   ()
+#reset-options
 
+#reset-options "--z3rlimit 100"
 let lemma_mod_n_8_lower2_helper (q:quad32) (n:nat) : Lemma
   (requires n <= 2)
   (ensures lo64 q % pow2 (8 * (4 + n)) == q.lo0 + 0x100000000 * (q.lo1 % pow2 (8 * n)))
@@ -303,7 +306,9 @@ let lemma_mod_n_8_lower2_helper (q:quad32) (n:nat) : Lemma
   assert_norm (f 1);
   assert_norm (f 0);
   ()
+#reset-options
 
+#reset-options "--z3rlimit 100"
 let lemma_mod_n_8_lower2 (q:quad32) (n:nat) : Lemma
   (requires n <= 4)
   (ensures lo64 q % pow2 (8 * (4 + n)) == q.lo0 + 0x100000000 * (q.lo1 % pow2 (8 * n)))
@@ -315,6 +320,7 @@ let lemma_mod_n_8_lower2 (q:quad32) (n:nat) : Lemma
   assert_norm (f 4);
   assert_norm (f 3);
   ()
+#reset-options
 
 let lemma_mod_n_8_upper1 (q:quad32) (n:nat) : Lemma
   (requires n <= 4)
@@ -433,6 +439,7 @@ let lemma_four_zero (_:unit) : Lemma
   assert_norm (four_to_nat 8 (seq_to_four_LE s) == four_to_nat_unfold 8 (seq_to_four_LE s));
   ()
 
+#reset-options "--z3rlimit 100"
 let pad_to_128_bits_lower (q:quad32) (num_bytes:int) =
   let n = num_bytes in
   let new_lo = (lo64 q) % pow2 (n * 8) in
@@ -481,7 +488,9 @@ let pad_to_128_bits_lower (q:quad32) (num_bytes:int) =
   assert (equal s8_12'' zero_4);
   assert (equal s12_16'' zero_4);
   ()
+#reset-options
 
+#reset-options "--z3rlimit 100"
 let pad_to_128_bits_upper (q:quad32) (num_bytes:int) =
   let n = num_bytes in
   let new_hi = (hi64 q) % pow2 ((n - 8) * 8) in
@@ -528,3 +537,4 @@ let pad_to_128_bits_upper (q:quad32) (num_bytes:int) =
   let zero_4 : seq nat8 = create 4 0 in
   assert (n < 12 ==> equal s12_16'' zero_4);
   ()
+#reset-options
