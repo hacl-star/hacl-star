@@ -53,6 +53,24 @@ let uint32 = Lib.IntTypes.uint32
 noextract
 let bytes = S.seq uint8
 
+// TODO: move to F*
+val mod_trans_lem (a : nat) (b c : pos) :
+  Lemma (requires (a % b = 0 /\ b % c = 0))
+  (ensures (a % c = 0))
+
+#push-options "--z3rlimit 100"
+let mod_trans_lem a b c =
+  Math.Lemmas.lemma_div_mod a b;
+  Math.Lemmas.lemma_div_mod b c;
+  Math.Lemmas.lemma_div_mod a c;
+  assert(a = b * (a / b));
+  assert(b = c * (b / c));
+  assert(a = (c * (b / c)) * (a / (c * (b / c))));
+  assert(a = c * (((b / c)) * (a / (c * (b / c)))));
+  Math.Lemmas.cancel_mul_mod (((b / c)) * (a / (c * (b / c)))) c;
+  assert(a % c = 0)
+#pop-options
+
 /// Returns the number of blocks to process
 #push-options "--z3cliopt smt.arith.nl=false"
 noextract
@@ -60,7 +78,7 @@ let split_at_last_num_blocks #index (c: block index) (i: index) (b: nat):
   Pure nat
     (requires True)
     (ensures (fun n ->
-      let l = U32.v (c.block_len i) in
+      let l = U32.v (c.blocks_state_len i) in
       let blocks = n * l in
       let rest = b - blocks in
       rest <= l /\
@@ -71,9 +89,18 @@ let split_at_last_num_blocks #index (c: block index) (i: index) (b: nat):
       ((rest > 0 /\ rest < l) <==>  b % l <> 0) /\
       (rest = (b % l) <==> (blocks = (b / l) * l)) /\
        blocks % l = 0 /\
+       blocks % U32.v (c.block_len i) = 0 /\
       (blocks / l) * l = blocks))
 =
-  fst (Lib.UpdateMulti.split_at_last_lazy_nb_rem (U32.v (c.block_len i)) b)
+  let n = fst (Lib.UpdateMulti.split_at_last_lazy_nb_rem (U32.v (c.blocks_state_len i)) b) in
+  // Proving that: blocks % U32.v (c.block_len i) = 0
+  begin
+  (**) let l = U32.v (c.blocks_state_len i) in
+  (**) let blocks = n * l in
+  (**) Math.Lemmas.nat_times_nat_is_nat n l;
+  (**) mod_trans_lem blocks l (U32.v (c.block_len i))
+  end;
+  n
 #pop-options
 
 #push-options "--z3cliopt smt.arith.nl=false"
@@ -82,7 +109,7 @@ let split_at_last #index (c: block index) (i: index) (b: bytes):
   Pure (bytes & bytes)
     (requires True)
     (ensures (fun (blocks, rest) ->
-      let l = U32.v (c.block_len i) in
+      let l = U32.v (c.blocks_state_len i) in
       S.length rest <= l /\
       (S.length rest % l = S.length b % l) /\
       (S.length rest = S.length b % l \/ S.length rest = l) /\
@@ -94,11 +121,18 @@ let split_at_last #index (c: block index) (i: index) (b: bytes):
         (S.length blocks = (S.length b / l) * l)) /\
       S.equal (S.append blocks rest) b /\
       S.length blocks % l = 0 /\
+      S.length blocks % U32.v (c.block_len i) = 0 /\
       (S.length blocks / l) * l = S.length blocks
   ))
 =
-  let l = U32.v (c.block_len i) in
-  Lib.UpdateMulti.split_at_last_lazy l b
+  let l = U32.v (c.blocks_state_len i) in
+  let blocks, rest = Lib.UpdateMulti.split_at_last_lazy l b in
+  begin
+  (**) let l = U32.v (c.blocks_state_len i) in
+  (**) let blocks = S.length blocks in
+  (**) mod_trans_lem blocks l (U32.v (c.block_len i))
+  end;
+  blocks, rest
 #pop-options
 
 /// The following lemmas characterize [split_at_last] with conditions which are easy to
@@ -113,10 +147,10 @@ let split_at_last_num_blocks_spec #index (c: block index) (i: index)
                                   (b n rest: nat):
   Lemma
   (requires (
-    let l = U32.v (c.block_len i) in
+    let l = U32.v (c.blocks_state_len i) in
     (rest <= l /\ (rest = 0 ==> b = 0) /\ b = n * l + rest)))
   (ensures (n = split_at_last_num_blocks c i b)) =
-  let l = U32.v (c.block_len i) in
+  let l = U32.v (c.blocks_state_len i) in
   Lib.UpdateMulti.Lemmas.split_at_last_lazy_nb_rem_spec l b n rest
 #pop-options
 
@@ -127,14 +161,14 @@ let split_at_last_spec #index (c: block index) (i: index)
                               (b blocks rest: bytes):
   Lemma
   (requires (
-    let l = U32.v (c.block_len i) in
+    let l = U32.v (c.blocks_state_len i) in
     (S.length blocks % l = 0 /\
      S.length rest <= l /\
      (S.length rest = 0 ==> S.length b = 0) /\
      b `Seq.equal` Seq.append blocks rest)))
   (ensures (
      (blocks, rest) == split_at_last c i b)) =
-  let l = U32.v (c.block_len i) in
+  let l = U32.v (c.blocks_state_len i) in
   Lib.UpdateMulti.Lemmas.split_at_last_lazy_spec l b blocks rest
 #pop-options
 
@@ -146,7 +180,7 @@ let split_at_last_empty #index (c: block index) (i: index): Lemma
     let blocks, rest = split_at_last c i S.empty in
     S.equal blocks S.empty /\ S.equal rest S.empty))
 =
-  FStar.Math.Lemmas.multiple_division_lemma 0 (U32.v (c.block_len i))
+  FStar.Math.Lemmas.multiple_division_lemma 0 (U32.v (c.blocks_state_len i))
 #pop-options
 
 /// "Small" case: not enough data to obtain strictly more than a complete block,
@@ -166,7 +200,7 @@ let split_at_last_empty #index (c: block index) (i: index): Lemma
 let split_at_last_small_strict #index (c: block index) (i: index) (b: bytes) (d: bytes): Lemma
   (requires (
     let _, rest = split_at_last c i b in
-    S.length rest + S.length d < U32.v (c.block_len i)))
+    S.length rest + S.length d < U32.v (c.blocks_state_len i)))
   (ensures (
     let blocks, rest = split_at_last c i b in
     let blocks', rest' = split_at_last c i (S.append b d) in
@@ -174,7 +208,7 @@ let split_at_last_small_strict #index (c: block index) (i: index) (b: bytes) (d:
 =
   let blocks, rest = split_at_last c i b in
   let blocks', rest' = split_at_last c i (S.append b d) in
-  let l = U32.v (c.block_len i) in
+  let l = U32.v (c.blocks_state_len i) in
   split_at_last_spec c i (S.append b d) blocks (S.append rest d)
 
 /// "Small" case: subcase 2: exactly enough data to obtain a complete block, and the
@@ -185,7 +219,7 @@ let split_at_last_small_exact_empty_internal #index (c: block index) (i: index) 
   Lemma
   (requires (
     let _, rest = split_at_last c i b in
-    S.length rest + S.length d = U32.v (c.block_len i) /\
+    S.length rest + S.length d = U32.v (c.blocks_state_len i) /\
     S.length rest = 0))
   (ensures (
     let blocks, rest = split_at_last c i b in
@@ -208,7 +242,7 @@ let split_at_last_small_exact_empty_data #index (c: block index) (i: index) (b: 
   Lemma
   (requires (
     let _, rest = split_at_last c i b in
-    S.length rest + S.length d = U32.v (c.block_len i) /\
+    S.length rest + S.length d = U32.v (c.blocks_state_len i) /\
     S.length d = 0))
   (ensures (
     let blocks, rest = split_at_last c i b in
@@ -228,7 +262,7 @@ let split_at_last_small_exact_empty_data #index (c: block index) (i: index) (b: 
 let split_at_last_small_exact #index (c: block index) (i: index) (b: bytes) (d: bytes): Lemma
   (requires (
     let _, rest = split_at_last c i b in
-    S.length rest + S.length d = U32.v (c.block_len i) /\
+    S.length rest + S.length d = U32.v (c.blocks_state_len i) /\
     S.length rest > 0 /\ S.length d > 0))
   (ensures (
     let blocks, rest = split_at_last c i b in
@@ -237,7 +271,7 @@ let split_at_last_small_exact #index (c: block index) (i: index) (b: bytes) (d: 
 =
   let blocks, rest = split_at_last c i b in
   let blocks', rest' = split_at_last c i (S.append b d) in
-  let l = U32.v (c.block_len i) in
+  let l = U32.v (c.blocks_state_len i) in
   let n = S.length blocks / l in
 
   assert(S.length blocks % l = 0); (* comes from the spec of [split_at_last] *)
@@ -252,7 +286,7 @@ let split_at_last_small_exact #index (c: block index) (i: index) (b: bytes) (d: 
 let split_at_last_small #index (c: block index) (i: index) (b: bytes) (d: bytes): Lemma
   (requires (
     let _, rest = split_at_last c i b in
-    S.length rest + S.length d <= U32.v (c.block_len i)))
+    S.length rest + S.length d <= U32.v (c.blocks_state_len i)))
   (ensures (
     let blocks, rest = split_at_last c i b in
     let blocks', rest' = split_at_last c i (S.append b d) in
@@ -260,7 +294,7 @@ let split_at_last_small #index (c: block index) (i: index) (b: bytes) (d: bytes)
 =
   let blocks, rest = split_at_last c i b in
   let blocks', rest' = split_at_last c i (S.append b d) in
-  let l = U32.v (c.block_len i) in
+  let l = U32.v (c.blocks_state_len i) in
   
   if S.length rest + S.length d < l then
     split_at_last_small_strict c i b d
@@ -284,7 +318,7 @@ let split_at_last_small #index (c: block index) (i: index) (b: bytes) (d: bytes)
 let split_at_last_blocks #index (c: block index) (i: index) (b: bytes) (d: bytes): Lemma
   (requires (
     let blocks, rest = split_at_last c i b in
-    (S.length rest = 0 \/ S.length rest = U32.v (c.block_len i)) /\
+    (S.length rest = 0 \/ S.length rest = U32.v (c.blocks_state_len i)) /\
     S.length d > 0))
   (ensures (
     let blocks, rest = split_at_last c i b in
@@ -298,7 +332,7 @@ let split_at_last_blocks #index (c: block index) (i: index) (b: bytes) (d: bytes
   let blocks'', rest'' = split_at_last c i (S.append b d) in
   let b' = S.append blocks rest in
   let d' = S.append blocks' rest' in
-  let l = U32.v (c.block_len i) in
+  let l = U32.v (c.blocks_state_len i) in
 
   (* We prove the non-trivial requirements of [split_at_last_spec] *)
   assert(S.length b % l = 0);
@@ -317,4 +351,54 @@ let split_at_last_blocks #index (c: block index) (i: index) (b: bytes) (d: bytes
 
   (* End of proof *)
   split_at_last_spec c i (S.append b d) (S.append b blocks') rest'
+#pop-options
+
+/// Update last:
+/// We need to pay attention to the fact that update_last may only be able to take
+/// a block as input (and not more). This means that if the internal buffer is longer
+/// than a block (because we use a vectorized implementation) we need to:
+/// - process as many blocks as possible with update_multi
+/// - call update_last on the remaining block
+/// Also note that until now we used split_at_last to slice by using a length
+/// equal to a multiple of blocks.
+/// However, Hacl.Streaming.Interface.spec_is_incremental uses split_at_last
+/// with a slice length of exactly one block.
+
+#push-options "--z3rlimit 100 --z3cliopt smt.arith.nl=false"
+let split_at_last_finish #index (c: block index) (i: index) (b: bytes) : Lemma
+  (requires (True))
+  (ensures (
+    let blocks, rest = split_at_last c i b in
+    // Pay attention here: we use c.block_len and not c.blocks_state_len
+    let bl = U32.v (c.block_len i) in
+    let blocks', rest' = Lib.UpdateMulti.split_at_last_lazy bl rest in
+    let blocks'', rest'' = Lib.UpdateMulti.split_at_last_lazy bl b in
+    S.equal blocks'' (S.append blocks blocks') /\
+    S.equal rest' rest''))
+=
+  let blocks, rest = split_at_last c i b in
+  // Pay attention here: we use c.block_len and not c.blocks_state_len
+  let bl = U32.v (c.block_len i) in
+  let nbl = U32.v (c.blocks_state_len i) in
+  let blocks', rest' = Lib.UpdateMulti.split_at_last_lazy bl rest in
+//  let blocks'', rest'' = Lib.UpdateMulti.split_at_last_lazy bl b in
+
+  let processed' = S.append blocks blocks' in
+
+  // Condition 1: S.length processed' % bl = 0
+  mod_trans_lem (S.length blocks) nbl bl;
+  assert(S.length blocks % bl = 0);
+  assert(S.length blocks' % bl = 0);
+  Math.Lemmas.modulo_distributivity (S.length blocks) (S.length blocks') bl;
+  assert(S.length processed' = S.length blocks + S.length blocks');
+  Math.Lemmas.modulo_lemma 0 bl;
+  assert(0 % bl = 0);
+  assert(S.length processed' % bl = 0);
+
+  // Conditions 2 and 3
+  assert(S.length rest' <= bl);
+  assert(S.length rest' = 0 ==> S.length processed' = 0);
+
+  // Characterization lemma
+  Lib.UpdateMulti.Lemmas.split_at_last_lazy_spec bl b processed' rest'
 #pop-options
