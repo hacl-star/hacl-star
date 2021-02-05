@@ -2,6 +2,15 @@ open Ctypes
 module Bindings(F:Cstubs.FOREIGN) =
   struct
     open F
+    module Hacl_Spec_applied = (Hacl_Spec_bindings.Bindings)(Hacl_Spec_stubs)
+    open Hacl_Spec_applied
+    module Hacl_Impl_Blake2_applied =
+      (Hacl_Impl_Blake2_bindings.Bindings)(Hacl_Impl_Blake2_stubs)
+    open Hacl_Impl_Blake2_applied
+    let hacl_Streaming_Blake2_blocks_state_len =
+      foreign "Hacl_Streaming_Blake2_blocks_state_len"
+        (spec_Blake2_alg @->
+           (hacl_Impl_Blake2_Core_m_spec @-> (returning uint32_t)))
     type k____uint32_t___uint32_t_ = [ `k____uint32_t___uint32_t_ ] structure
     let (k____uint32_t___uint32_t_ :
       [ `k____uint32_t___uint32_t_ ] structure typ) =

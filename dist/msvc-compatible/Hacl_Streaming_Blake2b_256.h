@@ -37,7 +37,10 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
+#include "Hacl_Streaming_Blake2.h"
 #include "Hacl_Kremlib.h"
+#include "Hacl_Spec.h"
+#include "Hacl_Impl_Blake2.h"
 #include "Hacl_Blake2b_256.h"
 
 typedef struct K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256__s

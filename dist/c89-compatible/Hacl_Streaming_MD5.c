@@ -270,10 +270,24 @@ Hacl_Streaming_MD5_legacy_finish_md5(
   {
     uint8_t *buf_1 = buf_;
     uint32_t tmp_block_state[4U] = { 0U };
-    uint64_t prev_len;
+    uint32_t ite;
+    uint8_t *buf_last;
+    uint8_t *buf_multi;
+    uint64_t prev_len_last;
     memcpy(tmp_block_state, block_state, (uint32_t)4U * sizeof (uint32_t));
-    prev_len = total_len - (uint64_t)r;
-    Hacl_Hash_MD5_legacy_update_last(tmp_block_state, prev_len, buf_1, r);
+    if (r % (uint32_t)64U == (uint32_t)0U && r > (uint32_t)0U)
+    {
+      ite = (uint32_t)64U;
+    }
+    else
+    {
+      ite = r % (uint32_t)64U;
+    }
+    buf_last = buf_1 + r - ite;
+    buf_multi = buf_1;
+    Hacl_Hash_MD5_legacy_update_multi(tmp_block_state, buf_multi, (uint32_t)0U);
+    prev_len_last = total_len - (uint64_t)r;
+    Hacl_Hash_MD5_legacy_update_last(tmp_block_state, prev_len_last, buf_last, r);
     Hacl_Hash_Core_MD5_legacy_finish(tmp_block_state, dst);
   }
 }

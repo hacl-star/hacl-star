@@ -37,8 +37,11 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
+#include "Hacl_Streaming_Blake2.h"
 #include "Hacl_Kremlib.h"
 #include "Hacl_Blake2s_128.h"
+#include "Hacl_Spec.h"
+#include "Hacl_Impl_Blake2.h"
 
 /* SNIPPET_START: K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128_ */
 

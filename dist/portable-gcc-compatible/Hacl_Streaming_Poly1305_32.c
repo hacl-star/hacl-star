@@ -286,7 +286,19 @@ Hacl_Streaming_Poly1305_32_finish(
   uint64_t r1[25U] = { 0U };
   uint64_t *tmp_block_state = r1;
   memcpy(tmp_block_state, block_state, (uint32_t)25U * sizeof (uint64_t));
-  Hacl_Poly1305_32_poly1305_update(tmp_block_state, r, buf_1);
+  uint32_t ite;
+  if (r % (uint32_t)16U == (uint32_t)0U && r > (uint32_t)0U)
+  {
+    ite = (uint32_t)16U;
+  }
+  else
+  {
+    ite = r % (uint32_t)16U;
+  }
+  uint8_t *buf_last = buf_1 + r - ite;
+  uint8_t *buf_multi = buf_1;
+  Hacl_Poly1305_32_poly1305_update(tmp_block_state, (uint32_t)0U, buf_multi);
+  Hacl_Poly1305_32_poly1305_update(tmp_block_state, r, buf_last);
   uint64_t tmp[25U] = { 0U };
   memcpy(tmp, tmp_block_state, (uint32_t)25U * sizeof (uint64_t));
   Hacl_Poly1305_32_poly1305_finish(dst, k_, tmp);
