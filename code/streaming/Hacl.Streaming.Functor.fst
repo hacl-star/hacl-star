@@ -1060,12 +1060,24 @@ let mk_finish #index c i t t' p dst =
   // Process as many blocks as possible (but leave at least one block for update_last)
   let prev_len = U64.(total_len `sub` FStar.Int.Cast.uint32_to_uint64 r) in
   // The data length to give to update_last
+  [@inline_let]
   let r_last = rest_finish c i r in
   // The data length to process with update_multi before calling update_last
+  [@inline_let]
   let r_multi = U32.(r -^ r_last) in
   // Split the buffer according to the computed lengths
   let buf_last = B.sub buf_ r_multi (Ghost.hide r_last) in
   let buf_multi = B.sub buf_ 0ul r_multi in
+
+  [@inline_let]
+  let state_is_block = c.block_len i = c.blocks_state_len i in
+  assert(state_is_block ==> U32.v r_multi = 0);
+  assert(state_is_block ==> r_last = r);
+
+  // This will get simplified and will allow some simplifications in the generated code.
+  // In particular, it should allow to simplify a bit update_multi
+  [@inline_let] let r_multi = if state_is_block then 0ul else r_multi in
+  [@inline_let] let r_last = if state_is_block then r else r_last in
 
   c.update_multi (G.hide i) tmp_block_state prev_len buf_multi r_multi;
 
@@ -1133,7 +1145,6 @@ let mk_finish #index c i t t' p dst =
   Math.Lemmas.modulo_lemma 0 (U32.v (c.block_len i));
   assert(U64.v prev_len_last % U32.v (c.block_len i) = 0)
   end;
-//  c.update_last (G.hide i) tmp_block_state prev_len buf_ r;
   c.update_last (G.hide i) tmp_block_state prev_len_last buf_last r_last;
 
   let h5 = ST.get () in
