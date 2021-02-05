@@ -39,8 +39,9 @@ let id_kdf cs = let _, _, _, h = cs in
 val id_aead: cs:ciphersuite -> Tot (lbytes 2)
 let id_aead cs = let _, _, a, _ = cs in
   match a with
-  | AEAD.AES128_GCM -> create 1 (u8 0) @| create 1 (u8 1)
-  | AEAD.AES256_GCM -> create 1 (u8 0) @| create 1 (u8 2)
+// TODO AES disabled due to Vale build
+//  | AEAD.AES128_GCM -> create 1 (u8 0) @| create 1 (u8 1)
+//  | AEAD.AES256_GCM -> create 1 (u8 0) @| create 1 (u8 2)
   | AEAD.CHACHA20_POLY1305 -> create 1 (u8 0) @| create 1 (u8 3)
 
 val suite_id_kem: cs:ciphersuite -> Tot (lbytes size_suite_id_kem)

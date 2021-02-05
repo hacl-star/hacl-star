@@ -20,8 +20,9 @@ let is_valid_kem = function
   | _,_ -> false
 
 let is_valid_aead = function
-  | AEAD.AES128_GCM
-  | AEAD.AES256_GCM
+// TODO AES disabled due to Vale build
+//  | AEAD.AES128_GCM
+//  | AEAD.AES256_GCM
   | AEAD.CHACHA20_POLY1305 -> true
   | _ -> false
 
