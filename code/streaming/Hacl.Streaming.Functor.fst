@@ -1013,8 +1013,6 @@ let update #index c i t t' p data len =
   end
 #pop-options
 
-module Helpers = FStar.InteractiveHelpers
-
 #restart-solver
 #push-options "--z3rlimit 200"
 let mk_finish #index c i t t' p dst =
