@@ -10,6 +10,7 @@
 #include <time.h>
 
 #include "Hacl_Streaming_Poly1305_256.h"
+#include "EverCrypt_AutoConfig2.h"
 
 #include "test_helpers.h"
 #include "poly1305_vectors.h"
@@ -27,32 +28,37 @@ int main() {
     uint8_t tag[16] = {};
     poly1305_test_vector *v = vectors;
 
-    poly1305_state *s = Hacl_Streaming_Poly1305_256_create_in(v->key);
-    Hacl_Streaming_Poly1305_256_update(s, v->input, 8);
-    Hacl_Streaming_Poly1305_256_update(s, v->input+8, 6);
-    Hacl_Streaming_Poly1305_256_update(s, v->input+14, v->input_len - 14);
-    Hacl_Streaming_Poly1305_256_finish(s, tag);
-    ok &= compare_and_print(16, tag, v->tag);
+    if (EverCrypt_AutoConfig2_has_avx2()) {
+      poly1305_state *s = Hacl_Streaming_Poly1305_256_create_in(v->key);
+      Hacl_Streaming_Poly1305_256_update(s, v->input, 8);
+      Hacl_Streaming_Poly1305_256_update(s, v->input+8, 6);
+      Hacl_Streaming_Poly1305_256_update(s, v->input+14, v->input_len - 14);
+      Hacl_Streaming_Poly1305_256_finish(s, tag);
+      ok &= compare_and_print(16, tag, v->tag);
 
-    v++;
-    Hacl_Streaming_Poly1305_256_init(v->key, s);
-    Hacl_Streaming_Poly1305_256_update(s, NULL, 0);
-    Hacl_Streaming_Poly1305_256_update(s, v->input, v->input_len);
-    Hacl_Streaming_Poly1305_256_finish(s, tag);
-    ok &= compare_and_print(16, tag, v->tag);
+      v++;
+      Hacl_Streaming_Poly1305_256_init(v->key, s);
+      Hacl_Streaming_Poly1305_256_update(s, NULL, 0);
+      Hacl_Streaming_Poly1305_256_update(s, v->input, v->input_len);
+      Hacl_Streaming_Poly1305_256_finish(s, tag);
+      ok &= compare_and_print(16, tag, v->tag);
 
-    v++;
-    Hacl_Streaming_Poly1305_256_init(v->key, s);
-    Hacl_Streaming_Poly1305_256_update(s, NULL, 0);
-    Hacl_Streaming_Poly1305_256_update(s, v->input, 8);
-    Hacl_Streaming_Poly1305_256_update(s, v->input+8, 8);
-    Hacl_Streaming_Poly1305_256_update(s, v->input+16, 16);
-    Hacl_Streaming_Poly1305_256_update(s, v->input+32, 8);
-    Hacl_Streaming_Poly1305_256_update(s, v->input+40, v->input_len - 40);
-    Hacl_Streaming_Poly1305_256_finish(s, tag);
-    ok &= compare_and_print(16, tag, v->tag);
+      v++;
+      Hacl_Streaming_Poly1305_256_init(v->key, s);
+      Hacl_Streaming_Poly1305_256_update(s, NULL, 0);
+      Hacl_Streaming_Poly1305_256_update(s, v->input, 8);
+      Hacl_Streaming_Poly1305_256_update(s, v->input+8, 8);
+      Hacl_Streaming_Poly1305_256_update(s, v->input+16, 16);
+      Hacl_Streaming_Poly1305_256_update(s, v->input+32, 8);
+      Hacl_Streaming_Poly1305_256_update(s, v->input+40, v->input_len - 40);
+      Hacl_Streaming_Poly1305_256_finish(s, tag);
+      ok &= compare_and_print(16, tag, v->tag);
 
-    Hacl_Streaming_Poly1305_256_free(s);
+      Hacl_Streaming_Poly1305_256_free(s);
+    }
+    else {
+        printf("Poly1305 (256-bit) streaming: no AVX2 support: ignoring tests\n");
+    }
 
     if (ok)
         return EXIT_SUCCESS;

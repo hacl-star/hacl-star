@@ -9,6 +9,7 @@
 #include <stdbool.h>
 #include <time.h>
 
+#include "EverCrypt_AutoConfig2.h"
 #include "Hacl_Streaming_Blake2b_256.h"
 
 #include "test_helpers.h"
@@ -28,29 +29,34 @@ int main() {
     uint8_t tag[64] = {};
     blake2_test_vector *v = vectors2b;
 
-    // At creation time, no_key/with_key only impacts the way the state is initialized.
-    // We can thus reuse the state for all the tests.
-    blake2_state *s = Hacl_Streaming_Blake2b_256_blake2b_256_with_key_create_in(64, v->key);
-    Hacl_Streaming_Blake2b_256_blake2b_256_with_key_update(32, s, NULL, 0);
-    Hacl_Streaming_Blake2b_256_blake2b_256_with_key_update(32, s, v->input, 8);
-    Hacl_Streaming_Blake2b_256_blake2b_256_with_key_update(32, s, v->input+8, 8);
-    Hacl_Streaming_Blake2b_256_blake2b_256_with_key_update(32, s, v->input+16, 16);
-    Hacl_Streaming_Blake2b_256_blake2b_256_with_key_update(32, s, v->input+32, v->input_len-32);
-    Hacl_Streaming_Blake2b_256_blake2b_256_with_key_finish(32, s, tag);
-    ok &= compare_and_print(64, tag, v->expected);
-    
-    v++;
-    Hacl_Streaming_Blake2b_256_blake2b_256_with_key_init(64, v->key, s);
-    Hacl_Streaming_Blake2b_256_blake2b_256_with_key_update(64, s, NULL, 0);
-    Hacl_Streaming_Blake2b_256_blake2b_256_with_key_update(64, s, v->input, 8);
-    Hacl_Streaming_Blake2b_256_blake2b_256_with_key_update(64, s, v->input+8, 8);
-    Hacl_Streaming_Blake2b_256_blake2b_256_with_key_update(64, s, v->input+16, 16);
-    Hacl_Streaming_Blake2b_256_blake2b_256_with_key_update(64, s, v->input+32, 32);
-    Hacl_Streaming_Blake2b_256_blake2b_256_with_key_update(32, s, v->input+64, v->input_len-64);
-    Hacl_Streaming_Blake2b_256_blake2b_256_with_key_finish(64, s, tag);
-    ok &= compare_and_print(64, tag, v->expected);
+    if (EverCrypt_AutoConfig2_has_avx2()) {
+      // At creation time, no_key/with_key only impacts the way the state is initialized.
+      // We can thus reuse the state for all the tests.
+      blake2_state *s = Hacl_Streaming_Blake2b_256_blake2b_256_with_key_create_in(64, v->key);
+      Hacl_Streaming_Blake2b_256_blake2b_256_with_key_update(32, s, NULL, 0);
+      Hacl_Streaming_Blake2b_256_blake2b_256_with_key_update(32, s, v->input, 8);
+      Hacl_Streaming_Blake2b_256_blake2b_256_with_key_update(32, s, v->input+8, 8);
+      Hacl_Streaming_Blake2b_256_blake2b_256_with_key_update(32, s, v->input+16, 16);
+      Hacl_Streaming_Blake2b_256_blake2b_256_with_key_update(32, s, v->input+32, v->input_len-32);
+      Hacl_Streaming_Blake2b_256_blake2b_256_with_key_finish(32, s, tag);
+      ok &= compare_and_print(64, tag, v->expected);
 
-    Hacl_Streaming_Blake2b_256_blake2b_256_with_key_free(64, s);
+      v++;
+      Hacl_Streaming_Blake2b_256_blake2b_256_with_key_init(64, v->key, s);
+      Hacl_Streaming_Blake2b_256_blake2b_256_with_key_update(64, s, NULL, 0);
+      Hacl_Streaming_Blake2b_256_blake2b_256_with_key_update(64, s, v->input, 8);
+      Hacl_Streaming_Blake2b_256_blake2b_256_with_key_update(64, s, v->input+8, 8);
+      Hacl_Streaming_Blake2b_256_blake2b_256_with_key_update(64, s, v->input+16, 16);
+      Hacl_Streaming_Blake2b_256_blake2b_256_with_key_update(64, s, v->input+32, 32);
+      Hacl_Streaming_Blake2b_256_blake2b_256_with_key_update(32, s, v->input+64, v->input_len-64);
+      Hacl_Streaming_Blake2b_256_blake2b_256_with_key_finish(64, s, tag);
+      ok &= compare_and_print(64, tag, v->expected);
+
+      Hacl_Streaming_Blake2b_256_blake2b_256_with_key_free(64, s);
+    }
+    else {
+        printf("Blake2b (256-bit) streaming: no AVX2 support: ignoring tests\n");
+    }
 
     if (ok)
         return EXIT_SUCCESS;
