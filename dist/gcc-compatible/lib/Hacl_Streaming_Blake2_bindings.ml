@@ -47,6 +47,10 @@ module Bindings(F:Cstubs.FOREIGN) =
            (returning
               (ptr
                  hacl_Streaming_Functor_state_s__K____uint32_t___uint32_t____)))
+    let hacl_Streaming_Blake2_blake2s_32_no_key_init =
+      foreign "Hacl_Streaming_Blake2_blake2s_32_no_key_init"
+        ((ptr hacl_Streaming_Functor_state_s__K____uint32_t___uint32_t____)
+           @-> (returning void))
     let hacl_Streaming_Blake2_blake2s_32_no_key_update =
       foreign "Hacl_Streaming_Blake2_blake2s_32_no_key_update"
         ((ptr hacl_Streaming_Functor_state_s__K____uint32_t___uint32_t____)
@@ -95,6 +99,10 @@ module Bindings(F:Cstubs.FOREIGN) =
            (returning
               (ptr
                  hacl_Streaming_Functor_state_s__K____uint64_t___uint64_t____)))
+    let hacl_Streaming_Blake2_blake2b_32_no_key_init =
+      foreign "Hacl_Streaming_Blake2_blake2b_32_no_key_init"
+        ((ptr hacl_Streaming_Functor_state_s__K____uint64_t___uint64_t____)
+           @-> (returning void))
     let hacl_Streaming_Blake2_blake2b_32_no_key_update =
       foreign "Hacl_Streaming_Blake2_blake2b_32_no_key_update"
         ((ptr hacl_Streaming_Functor_state_s__K____uint64_t___uint64_t____)
@@ -114,6 +122,13 @@ module Bindings(F:Cstubs.FOREIGN) =
               (returning
                  (ptr
                     hacl_Streaming_Functor_state_s__K____uint32_t___uint32_t____))))
+    let hacl_Streaming_Blake2_blake2s_32_with_key_init =
+      foreign "Hacl_Streaming_Blake2_blake2s_32_with_key_init"
+        (uint32_t @->
+           (ocaml_bytes @->
+              ((ptr
+                  hacl_Streaming_Functor_state_s__K____uint32_t___uint32_t____)
+                 @-> (returning void))))
     let hacl_Streaming_Blake2_blake2s_32_with_key_update =
       foreign "Hacl_Streaming_Blake2_blake2s_32_with_key_update"
         (uint32_t @->
@@ -136,6 +151,13 @@ module Bindings(F:Cstubs.FOREIGN) =
               (returning
                  (ptr
                     hacl_Streaming_Functor_state_s__K____uint64_t___uint64_t____))))
+    let hacl_Streaming_Blake2_blake2b_32_with_key_init =
+      foreign "Hacl_Streaming_Blake2_blake2b_32_with_key_init"
+        (uint32_t @->
+           (ocaml_bytes @->
+              ((ptr
+                  hacl_Streaming_Functor_state_s__K____uint64_t___uint64_t____)
+                 @-> (returning void))))
     let hacl_Streaming_Blake2_blake2b_32_with_key_update =
       foreign "Hacl_Streaming_Blake2_blake2b_32_with_key_update"
         (uint32_t @->

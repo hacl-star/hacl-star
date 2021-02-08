@@ -90,6 +90,35 @@ Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVe
 }
 
 /*
+  (Re-)initialization function when there is no key
+*/
+void
+Hacl_Streaming_Blake2b_256_blake2b_256_no_key_init(
+  Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
+  *s
+)
+{
+  Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
+  scrut = *s;
+  uint8_t *buf = scrut.buf;
+  K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_
+  block_state = scrut.block_state;
+  Hacl_Blake2b_256_blake2b_init(block_state.fst,
+    block_state.snd,
+    (uint32_t)0U,
+    NULL,
+    (uint32_t)64U);
+  {
+    Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
+    lit;
+    lit.block_state = block_state;
+    lit.buf = buf;
+    lit.total_len = (uint64_t)0U;
+    s[0U] = lit;
+  }
+}
+
+/*
   Update function when there is no key
 */
 void
@@ -781,6 +810,33 @@ Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVe
         }
       }
     }
+  }
+}
+
+/*
+  (Re-)initialization function when using a (potentially null) key
+*/
+void
+Hacl_Streaming_Blake2b_256_blake2b_256_with_key_init(
+  uint32_t key_size,
+  uint8_t *k,
+  Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
+  *s
+)
+{
+  Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
+  scrut = *s;
+  uint8_t *buf = scrut.buf;
+  K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_
+  block_state = scrut.block_state;
+  Hacl_Blake2b_256_blake2b_init(block_state.fst, block_state.snd, key_size, k, (uint32_t)64U);
+  {
+    Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
+    lit;
+    lit.block_state = block_state;
+    lit.buf = buf;
+    lit.total_len = (uint64_t)0U;
+    s[0U] = lit;
   }
 }
 

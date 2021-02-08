@@ -821,7 +821,7 @@ let blake2s_32_no_key_create_in =
 [@ (Comment "  (Re-)initialization function when there is no key")]
 let blake2s_32_no_key_init =
   F.init (blake2s_32 true 0ul) () (s Spec.Blake2S M32)
-              (optional_key_blake2s true 0ul)
+         (optional_key_blake2s true 0ul)
 
 [@ (Comment "  Update function when there is no key")]
 let blake2s_32_no_key_update =

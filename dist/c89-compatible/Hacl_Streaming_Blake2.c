@@ -147,6 +147,31 @@ Hacl_Streaming_Functor_state_s__K____uint32_t___uint32_t____
 }
 
 /*
+  (Re-)initialization function when there is no key
+*/
+void
+Hacl_Streaming_Blake2_blake2s_32_no_key_init(
+  Hacl_Streaming_Functor_state_s__K____uint32_t___uint32_t____ *s1
+)
+{
+  Hacl_Streaming_Functor_state_s__K____uint32_t___uint32_t____ scrut = *s1;
+  uint8_t *buf = scrut.buf;
+  K____uint32_t___uint32_t_ block_state = scrut.block_state;
+  Hacl_Blake2s_32_blake2s_init(block_state.fst,
+    block_state.snd,
+    (uint32_t)0U,
+    NULL,
+    (uint32_t)32U);
+  {
+    Hacl_Streaming_Functor_state_s__K____uint32_t___uint32_t____ lit;
+    lit.block_state = block_state;
+    lit.buf = buf;
+    lit.total_len = (uint64_t)0U;
+    s1[0U] = lit;
+  }
+}
+
+/*
   Update function when there is no key
 */
 void
@@ -793,6 +818,31 @@ Hacl_Streaming_Functor_state_s__K____uint64_t___uint64_t____
 }
 
 /*
+  (Re)-initialization function when there is no key
+*/
+void
+Hacl_Streaming_Blake2_blake2b_32_no_key_init(
+  Hacl_Streaming_Functor_state_s__K____uint64_t___uint64_t____ *s1
+)
+{
+  Hacl_Streaming_Functor_state_s__K____uint64_t___uint64_t____ scrut = *s1;
+  uint8_t *buf = scrut.buf;
+  K____uint64_t___uint64_t_ block_state = scrut.block_state;
+  Hacl_Blake2b_32_blake2b_init(block_state.fst,
+    block_state.snd,
+    (uint32_t)0U,
+    NULL,
+    (uint32_t)64U);
+  {
+    Hacl_Streaming_Functor_state_s__K____uint64_t___uint64_t____ lit;
+    lit.block_state = block_state;
+    lit.buf = buf;
+    lit.total_len = (uint64_t)0U;
+    s1[0U] = lit;
+  }
+}
+
+/*
   Update function when there is no key
 */
 void
@@ -1431,6 +1481,29 @@ Hacl_Streaming_Functor_state_s__K____uint32_t___uint32_t____
         return p;
       }
     }
+  }
+}
+
+/*
+  (Re-)initialization function when using a (potentially null) key
+*/
+void
+Hacl_Streaming_Blake2_blake2s_32_with_key_init(
+  uint32_t key_size,
+  uint8_t *k1,
+  Hacl_Streaming_Functor_state_s__K____uint32_t___uint32_t____ *s1
+)
+{
+  Hacl_Streaming_Functor_state_s__K____uint32_t___uint32_t____ scrut = *s1;
+  uint8_t *buf = scrut.buf;
+  K____uint32_t___uint32_t_ block_state = scrut.block_state;
+  Hacl_Blake2s_32_blake2s_init(block_state.fst, block_state.snd, key_size, k1, (uint32_t)32U);
+  {
+    Hacl_Streaming_Functor_state_s__K____uint32_t___uint32_t____ lit;
+    lit.block_state = block_state;
+    lit.buf = buf;
+    lit.total_len = (uint64_t)0U;
+    s1[0U] = lit;
   }
 }
 
@@ -2076,6 +2149,29 @@ Hacl_Streaming_Functor_state_s__K____uint64_t___uint64_t____
         return p;
       }
     }
+  }
+}
+
+/*
+  (Re-)initialization function when using a (potentially null) key
+*/
+void
+Hacl_Streaming_Blake2_blake2b_32_with_key_init(
+  uint32_t key_size,
+  uint8_t *k1,
+  Hacl_Streaming_Functor_state_s__K____uint64_t___uint64_t____ *s1
+)
+{
+  Hacl_Streaming_Functor_state_s__K____uint64_t___uint64_t____ scrut = *s1;
+  uint8_t *buf = scrut.buf;
+  K____uint64_t___uint64_t_ block_state = scrut.block_state;
+  Hacl_Blake2b_32_blake2b_init(block_state.fst, block_state.snd, key_size, k1, (uint32_t)64U);
+  {
+    Hacl_Streaming_Functor_state_s__K____uint64_t___uint64_t____ lit;
+    lit.block_state = block_state;
+    lit.buf = buf;
+    lit.total_len = (uint64_t)0U;
+    s1[0U] = lit;
   }
 }
 

@@ -66,6 +66,15 @@ Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec128___Lib_IntVe
 *Hacl_Streaming_Blake2s_128_blake2s_128_no_key_create_in();
 
 /*
+  (Re-)initialization function when there is no key
+*/
+void
+Hacl_Streaming_Blake2s_128_blake2s_128_no_key_init(
+  Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128____
+  *s
+);
+
+/*
   Update function when there is no key
 */
 void
@@ -100,6 +109,17 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_free(
 */
 Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128____
 *Hacl_Streaming_Blake2s_128_blake2s_128_with_key_create_in(uint32_t key_size, uint8_t *k);
+
+/*
+  (Re-)initialization function when using a (potentially null) key
+*/
+void
+Hacl_Streaming_Blake2s_128_blake2s_128_with_key_init(
+  uint32_t key_size,
+  uint8_t *k,
+  Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128____
+  *s
+);
 
 /*
   Update function when using a (potentially null) key

@@ -66,6 +66,15 @@ Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVe
 *Hacl_Streaming_Blake2b_256_blake2b_256_no_key_create_in();
 
 /*
+  (Re-)initialization function when there is no key
+*/
+void
+Hacl_Streaming_Blake2b_256_blake2b_256_no_key_init(
+  Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
+  *s
+);
+
+/*
   Update function when there is no key
 */
 void
@@ -100,6 +109,17 @@ Hacl_Streaming_Blake2b_256_blake2b_256_no_key_free(
 */
 Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
 *Hacl_Streaming_Blake2b_256_blake2b_256_with_key_create_in(uint32_t key_size, uint8_t *k);
+
+/*
+  (Re-)initialization function when using a (potentially null) key
+*/
+void
+Hacl_Streaming_Blake2b_256_blake2b_256_with_key_init(
+  uint32_t key_size,
+  uint8_t *k,
+  Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
+  *s
+);
 
 /*
   Update function when using a (potentially null) key

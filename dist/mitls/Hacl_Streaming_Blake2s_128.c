@@ -68,6 +68,35 @@ Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec128___Lib_IntVe
 }
 
 /*
+  (Re-)initialization function when there is no key
+*/
+void
+Hacl_Streaming_Blake2s_128_blake2s_128_no_key_init(
+  Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128____
+  *s
+)
+{
+  Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128____
+  scrut = *s;
+  uint8_t *buf = scrut.buf;
+  K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128_
+  block_state = scrut.block_state;
+  Hacl_Blake2s_128_blake2s_init(block_state.fst,
+    block_state.snd,
+    (uint32_t)0U,
+    NULL,
+    (uint32_t)32U);
+  s[0U] =
+    (
+      (Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128____){
+        .block_state = block_state,
+        .buf = buf,
+        .total_len = (uint64_t)0U
+      }
+    );
+}
+
+/*
   Update function when there is no key
 */
 void
@@ -677,6 +706,33 @@ Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec128___Lib_IntVe
   p[0U] = s;
   Hacl_Blake2s_128_blake2s_init(block_state.fst, block_state.snd, key_size, k, (uint32_t)32U);
   return p;
+}
+
+/*
+  (Re-)initialization function when using a (potentially null) key
+*/
+void
+Hacl_Streaming_Blake2s_128_blake2s_128_with_key_init(
+  uint32_t key_size,
+  uint8_t *k,
+  Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128____
+  *s
+)
+{
+  Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128____
+  scrut = *s;
+  uint8_t *buf = scrut.buf;
+  K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128_
+  block_state = scrut.block_state;
+  Hacl_Blake2s_128_blake2s_init(block_state.fst, block_state.snd, key_size, k, (uint32_t)32U);
+  s[0U] =
+    (
+      (Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128____){
+        .block_state = block_state,
+        .buf = buf,
+        .total_len = (uint64_t)0U
+      }
+    );
 }
 
 /*
