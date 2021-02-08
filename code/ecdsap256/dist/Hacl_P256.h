@@ -32,87 +32,8 @@
 
 
 #include "Hacl_Kremlib.h"
-#include "Hacl_Hash_SHA2.h"
 #include "Hacl_Spec.h"
 #include "Hacl_Lib.h"
-
-/*
- Input: result buffer: uint8[64], 
- m buffer: uint8 [mLen], 
- priv(ate)Key: uint8[32], 
- k (nonce): uint32[32]. 
-  
- Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
-  
- The private key and the nonce are expected to be more than 0 and less than the curve order.
-*/
-bool
-Hacl_P256_ecdsa_sign_p256_sha2_ladder(
-  uint8_t *result,
-  uint32_t mLen,
-  uint8_t *m,
-  uint8_t *privKey,
-  uint8_t *k
-);
-
-/*
- Input: result buffer: uint8[64], 
- m buffer: uint8 [mLen], 
- priv(ate)Key: uint8[32], 
- k (nonce): uint32[32]. 
-  
- Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
-  
- The private key and the nonce are expected to be more than 0 and less than the curve order.
-*/
-bool
-Hacl_P256_ecdsa_sign_p256_sha2_comb(
-  uint8_t *result,
-  uint32_t mLen,
-  uint8_t *m,
-  uint8_t *privKey,
-  uint8_t *k
-);
-
-/*
- The input of the function is considered to be public, 
-  thus this code is not secret independent with respect to the operations done over the input.
-  
- Input: m buffer: uint8 [mLen], 
- pub(lic)Key: uint8[64], 
- r: uint8[32], 
- s: uint8[32]. 
-  
- Output: bool, where true stands for the correct signature verification. 
-*/
-bool
-Hacl_P256_ecdsa_verif_p256_sha2_ladder(
-  uint32_t mLen,
-  uint8_t *m,
-  uint8_t *pubKey,
-  uint8_t *r,
-  uint8_t *s
-);
-
-/*
- The input of the function is considered to be public, 
-  thus this code is not secret independent with respect to the operations done over the input.
-  
- Input: m buffer: uint8 [mLen], 
- pub(lic)Key: uint8[64], 
- r: uint8[32], 
- s: uint8[32]. 
-  
- Output: bool, where true stands for the correct signature verification. 
-*/
-bool
-Hacl_P256_ecdsa_verif_p256_sha2_comb_radix(
-  uint32_t mLen,
-  uint8_t *m,
-  uint8_t *pubKey,
-  uint8_t *r,
-  uint8_t *s
-);
 
 /*
  Input: result: uint8[64], 
@@ -188,6 +109,15 @@ bool Hacl_P256_ecp256dh_r_radix4(uint8_t *result, uint8_t *pubKey, uint8_t *scal
   
 */
 bool Hacl_P256_ecp256dh_r_comb(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
+
+bool Hacl_P256_points_op(uint8_t *result, uint8_t *publicKey, uint8_t *u1, uint8_t *u2);
+
+/*
+ Input: scalar: uint8[32].
+  
+ Output: bool, where true stands for the scalar to be more than 0 and less than order.
+*/
+bool Hacl_P256_is_more_than_zero_less_than_order(uint8_t *x);
 
 
 #define __Hacl_P256_H_DEFINED
