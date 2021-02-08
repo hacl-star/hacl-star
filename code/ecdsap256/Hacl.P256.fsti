@@ -19,6 +19,7 @@ open Spec.ECDSAP256.Definition
 open Hacl.Impl.P256.Compression
 open Spec.P256.MontgomeryMultiplication
  
+(*
 
 [@ (Comment " Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. 
   \n Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
@@ -83,8 +84,6 @@ val ecdsa_sign_p256_sha2_comb: result: lbuffer uint8 (size 64)
     )    
   )
 
-
-(* 
 
 [@ (Comment " Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. 
   \n Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
@@ -179,7 +178,7 @@ val ecdsa_sign_p256_without_hash: result: lbuffer uint8 (size 64)
       flag == flagSpec 
     )    
   )
- *)
+
 
 [@ (Comment " The input of the function is considered to be public, 
   thus this code is not secret independent with respect to the operations done over the input.
@@ -295,9 +294,10 @@ val ecdsa_verif_without_hash:
       let s = nat_from_bytes_be (as_seq h1 s) in
       modifies0 h0 h1 /\
       result == Spec.ECDSA.ecdsa_verification_agile Spec.ECDSA.NoHash (publicKeyX, publicKeyY) r s (v mLen)  (as_seq h0 m)
-   ) *)
-
-(* 
+   )
+   
+*)    
+    
 [@ (Comment " Public key verification function. 
   \n  The input of the function is considered to be public, 
   thus this code is not secret independent with respect to the operations done over the input.
@@ -546,9 +546,32 @@ val ecp256dh_r_comb:
       as_seq h1 (gsub result (size 32) (size 32)) == pointY)
 
 
+val points_op:   
+  result: lbuffer uint8 (size 32) 
+  -> publicKey: lbuffer uint8 (size 64) 
+  -> u1: lbuffer uint8 (size 32) 
+  -> u2: lbuffer uint8 (size 32) ->
+  Stack bool 
+  (requires fun h -> live h result /\ live h publicKey /\ live h u1 /\ live h u2 /\
+    LowStar.Monotonic.Buffer.all_disjoint [loc result; loc publicKey; loc u1; loc u2] /\ (
+    let publicKeyX = nat_from_bytes_be (as_seq h (gsub publicKey (size 0) (size 32))) in
+    let publicKeyY = nat_from_bytes_be (as_seq h (gsub publicKey (size 32) (size 32))) in 
+    publicKeyX < prime256 /\ publicKeyY < prime256 ))
+  (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ (
+    let pointScalarXSeq = nat_from_bytes_be (as_seq h0 (gsub publicKey (size 0) (size 32))) in 
+    let pointScalarYSeq = nat_from_bytes_be (as_seq h0 (gsub publicKey (size 32) (size 32))) in 
+    let pubJac = toJacobianCoordinates (pointScalarXSeq, pointScalarYSeq) in 
+    let pointAtInfinity = (0, 0, 0) in
+    let u1D, _ = montgomery_ladder_spec (as_seq h0 u1) (pointAtInfinity, basePoint) in
+    let u2D, _ = montgomery_ladder_spec (as_seq h0 u2) (pointAtInfinity, pubJac) in
+    let sumD = if  _norm u1D =  _norm u2D then  _point_double u1D else  _point_add u1D u2D in 
+    let pointNorm = _norm sumD in
+    let (xResult, yResult, zResult) = pointNorm in
+    r == not (Spec.P256.isPointAtInfinity pointNorm) /\
+    as_seq h1 result == nat_to_bytes_be 32  (xResult % prime_p256_order)))
 
 
-(*)
+
 [@ (Comment " Input: scalar: uint8[32].
   \n Output: bool, where true stands for the scalar to be more than 0 and less than order.")]
 val is_more_than_zero_less_than_order: x: lbuffer uint8 (size 32) -> Stack bool
@@ -559,5 +582,5 @@ val is_more_than_zero_less_than_order: x: lbuffer uint8 (size 32) -> Stack bool
       r <==> (scalar > 0 && scalar < prime_p256_order)
     )
   )
- *)
+
 
