@@ -15,6 +15,8 @@ module S = Hacl.Spec.Bignum.ModInv
 module BN = Hacl.Bignum
 module BE = Hacl.Bignum.Exponentiation
 module BM = Hacl.Bignum.Montgomery
+module SN = Hacl.Spec.Bignum
+module SD = Hacl.Spec.Bignum.Definitions
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -47,7 +49,8 @@ let bn_mod_inv_prime_st (t:limb_t) (len:BN.meta_len t) =
   Stack unit
   (requires fun h ->
     live h n /\ live h a /\ live h res /\
-    disjoint res n /\ disjoint res a /\ disjoint n a)
+    disjoint res n /\ disjoint res a /\ disjoint n a /\
+    S.bn_mod_inv_prime_pre (v nBits) (as_seq h n) (as_seq h a))
   (ensures  fun h0 r h1 -> modifies (loc res) h0 h1 /\
     as_seq h1 res == S.bn_mod_inv_prime (v nBits) (as_seq h0 n) (as_seq h0 a))
 
@@ -59,6 +62,10 @@ let bn_mod_inv_prime_raw #t k nBits n a res =
   push_frame ();
   let n2 = create len (uint #t #SEC 0) in
   let c = BN.bn_sub1 len n (uint #t #SEC 2) n2 in
-
+  let h0 = ST.get () in
+  SN.bn_sub1_lemma (as_seq h0 n) (uint #t #SEC 2);
+  SD.bn_eval_bound (as_seq h0 n2) (v len);
+  SD.bn_eval_bound (as_seq h0 n) (v len);
+  
   BE.bn_mod_exp_raw k.BE.mont k.BE.raw_mod_exp_precomp nBits n a (size (bits t) *! len) n2 res;
   pop_frame ()

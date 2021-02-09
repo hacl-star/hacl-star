@@ -72,31 +72,30 @@ let bn_check_bn_mod_inv_prime #t #nLen n a =
   m0 &. m1' &. m2
 
 
+let bn_mod_inv_prime_pre
+  (#t:limb_t)
+  (#nLen:size_pos{2 * bits t * nLen <= max_size_t})
+  (nBits:size_nat{nBits / bits t < nLen})
+  (n:lbignum t nLen)
+  (a:lbignum t nLen)
+ =
+  bn_v n % 2 = 1 /\ 1 < bn_v n /\ pow2 nBits < bn_v n /\
+  0 < bn_v a /\ bn_v a < bn_v n /\ Euclid.is_prime (bn_v n)
+
+
 val bn_mod_inv_prime:
     #t:limb_t
   -> #nLen:size_pos{2 * bits t * nLen <= max_size_t}
   -> nBits:size_nat{nBits / bits t < nLen}
   -> n:lbignum t nLen
   -> a:lbignum t nLen ->
-  lbignum t nLen
+  Pure (lbignum t nLen)
+  (requires
+    bn_mod_inv_prime_pre nBits n a)
+  (ensures fun res ->
+    bn_v res * bn_v a % bn_v n = 1)
 
 let bn_mod_inv_prime #t #nLen nBits n a =
-  let c, n2 = bn_sub1 n (uint #t 2) in
-  BE.bn_mod_exp_raw nLen nBits n a (bits t * nLen) n2
-
-
-val bn_mod_inv_prime_lemma:
-    #t:limb_t
-  -> #nLen:size_pos{2 * bits t * nLen <= max_size_t}
-  -> nBits:size_nat{nBits / bits t < nLen}
-  -> n:lbignum t nLen
-  -> a:lbignum t nLen -> Lemma
-  (requires
-    bn_v n % 2 = 1 /\ 1 < bn_v n /\ pow2 nBits < bn_v n /\
-    0 < bn_v a /\ bn_v a < bn_v n /\ Euclid.is_prime (bn_v n))
-  (ensures  (bn_v (bn_mod_inv_prime nBits n a) * bn_v a % bn_v n = 1))
-
-let bn_mod_inv_prime_lemma #t #nLen nBits n a =
   let c, n2 = bn_sub1 n (uint #t 2) in
   bn_sub1_lemma n (uint #t 2);
   assert (bn_v n2 - v c * pow2 (bits t * nLen) == bn_v n - 2);
@@ -106,6 +105,6 @@ let bn_mod_inv_prime_lemma #t #nLen nBits n a =
   assert (bn_v n2 == bn_v n - 2);
 
   let res = BE.bn_mod_exp_raw nLen nBits n a (bits t * nLen) n2 in
-  BE.bn_mod_exp_raw_lemma nLen nBits n a (bits t * nLen) n2;
   assert (bn_v res == Lib.NatMod.pow_mod #(bn_v n) (bn_v a) (bn_v n2));
-  mod_inv_prime_lemma (bn_v n) (bn_v a)
+  mod_inv_prime_lemma (bn_v n) (bn_v a);
+  res
