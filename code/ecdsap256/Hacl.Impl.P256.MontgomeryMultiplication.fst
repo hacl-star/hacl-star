@@ -338,6 +338,25 @@ val montgomery_square_buffer_: result: felem -> a: felem ->   Stack unit
 let montgomery_square_buffer_ result a = 
   montgomery_square_buffer a result
 
+open FStar.Tactics 
+open FStar.Tactics.Canon 
+
+val lemma_6_powers: tD: nat -> Lemma ((tD * tD % prime256 * tD % prime256) * (tD * tD % prime256 * tD % prime256) % prime256 
+  == pow tD 6 % prime256)
+
+let lemma_6_powers tD =     
+    calc (==) {(tD * tD % prime256 * tD % prime256) * (tD * tD % prime256 * tD % prime256) % prime256; 
+      (==) {lemma_mod_mul_distr_l (tD * tD) tD prime256}
+    (tD * tD * tD % prime256) * (tD * tD * tD % prime256) % prime256;
+      (==) {lemma_mod_mul_distr_l (tD * tD * tD) (tD * tD * tD % prime256) prime256}
+    tD * tD * tD * (tD * tD * tD % prime256) % prime256;  
+      (==) {lemma_mod_mul_distr_r (tD * tD * tD) (tD * tD * tD) prime256}
+    tD * tD * tD * (tD * tD * tD) % prime256; 
+      (==) {assert_by_tactic (tD * tD * tD * (tD * tD * tD) == tD * tD * tD * tD * tD * tD) canon}
+    tD * tD * tD * tD * tD * tD % prime256; 
+      (==) {(* ... *)}
+    pow tD 6 % prime256;};admit()
+
 
 inline_for_extraction noextract
 val fsquarePowN: n: size_t -> a: felem -> Stack unit 
@@ -376,21 +395,80 @@ val exponent_0: t: felem -> t0: felem -> t1: felem -> t2: felem -> t6: felem -> 
     (ensures fun h0 _ h1 -> True)
   
 let exponent_0 t t0 t1 t2 t6 t7 = 
+
   let h0 = ST.get() in 
   montgomery_square_buffer_ t0 t; 
+    let h1 = ST.get () in 
   montgomery_multiplication_buffer_ t2 t0 t; 
-  montgomery_square_buffer_ t0 t2;
-  montgomery_square_buffer_ t0 t0;
-  montgomery_multiplication_buffer_ t6 t0 t2;
-  montgomery_square_buffer_ t0 t6;
+    let h2 = ST.get() in 
 
-  fsquarePowN (size 3) t0;
+  montgomery_square_buffer_ t0 t2; 
+    let h3 = ST.get() in 
+
+  montgomery_square_buffer_ t0 t0;
+    let h4 = ST.get() in 
+
+  montgomery_multiplication_buffer_ t6 t0 t2;
+    let h5 = ST.get() in 
+
+  montgomery_square_buffer_ t0 t6;
+    let h6 = ST.get() in 
+    assert(as_nat h6 t0 = toDomain_ (fromDomain_ (as_nat h5 t6) * fromDomain_ (as_nat h5 t6) % prime256));
+
+  fsquarePowN (size 3) t0; 
+    let h7 = ST.get() in 
+    assert(as_nat h7 t0 = toDomain_ (pow (fromDomain_ (as_nat h6 t0)) 8));
 
   montgomery_multiplication_buffer_ t7 t0 t6;
+    let h8 = ST.get() in 
+    assert(as_nat h8 t7 = toDomain_ (fromDomain_ (as_nat h7 t0) * fromDomain_ (as_nat h7 t6) % prime256));
+
   montgomery_square_buffer_ t0 t7;
+    let h9 = ST.get() in 
+    assert(as_nat h9 t0 = toDomain_ (fromDomain_ (as_nat h8 t7) * fromDomain_ (as_nat h8 t7) % prime256));
+
   montgomery_square_buffer_ t0 t0;
+    let h10 = ST.get() in 
+    assert(as_nat h10 t0 = toDomain_ (fromDomain_ (as_nat h9 t0) * fromDomain_ (as_nat h9 t0) % prime256));
+
   montgomery_multiplication_buffer_ t1 t0 t2;
-  montgomery_square_buffer_ t0 t1
+    let h11 = ST.get() in 
+
+  montgomery_square_buffer_ t0 t1;
+    let h12 = ST.get() in 
+
+    let tD = fromDomain_ (as_nat h0 t) in 
+    
+    calc (==) {(tD * tD % prime256 * tD % prime256) * (tD * tD % prime256 * tD % prime256) % prime256; 
+      (==) {lemma_6_powers tD} pow tD 6 % prime256;};
+
+    calc (==) {(pow tD 6 % prime256 * (pow tD 6 % prime256) % prime256) * (tD * tD % prime256 * tD % prime256) % prime256;
+      (==) {lemma_mod_mul_distr_l (pow tD 6) (pow tD 6 % prime256) prime256}
+    (pow tD 6 * (pow tD 6 % prime256) % prime256) * (tD * tD % prime256 * tD % prime256) % prime256;
+      (==) {lemma_mod_mul_distr_r (pow tD 6) (pow tD 6) prime256}
+    (pow tD 6 * (pow tD 6) % prime256) * (tD * tD % prime256 * tD % prime256) % prime256;  
+      (==) {assert_by_tactic (pow tD 6 * (pow tD 6) == pow tD 6 * pow tD 6) canon}
+    (pow tD 6 * pow tD 6 % prime256) * (tD * tD % prime256 * tD % prime256) % prime256;   
+      (==) {pow_plus tD 6 6}
+    (pow tD 12 % prime256) * (tD * tD % prime256 * tD % prime256) % prime256; 
+      (==) {lemma_mod_mul_distr_l (pow tD 12) (tD * tD % prime256 * tD % prime256) prime256}
+    pow tD 12 * (tD * tD % prime256 * tD % prime256) % prime256; 
+      (==) {lemma_mod_mul_distr_l (tD * tD) tD prime256}
+    pow tD 12 * (tD * tD * tD % prime256) % prime256; 
+      (==) {lemma_mod_mul_distr_r (pow tD 12) (tD * tD * tD) prime256}
+    pow tD 12 * (pow tD 1 * pow tD 1 * pow tD 1) % prime256;   
+      (==) {assert_by_tactic (pow tD 12 * (pow tD 1 * pow tD 1 * pow tD 1) == pow tD 12 * pow tD 1 * pow tD 1 * pow tD 1) canon}
+    pow tD 12 * pow tD 1 * pow tD 1 * pow tD 1 % prime256;   
+
+    };
+
+  assert(as_nat h2 t2 = toDomain_ (tD * tD % prime256 * tD % prime256));
+  assert(as_nat h4 t0 = toDomain_ (pow tD 6 % prime256 * (pow tD 6 % prime256) % prime256));
+  assert(as_nat h5 t6 = toDomain_ ((pow tD 6 % prime256 * (pow tD 6 % prime256) % prime256) * (tD * tD % prime256 * tD % prime256) % prime256));
+
+
+    assert(as_nat h12 t1 = toDomain_ (fromDomain_ (as_nat h10 t0) * fromDomain_ (as_nat h10 t2) % prime256));
+    assert(as_nat h12 t0 = toDomain_ (fromDomain_ (as_nat h11 t1) * fromDomain_ (as_nat h11 t1) % prime256))
 
 
 inline_for_extraction noextract
