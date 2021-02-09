@@ -339,12 +339,128 @@ let montgomery_square_buffer_ result a =
   montgomery_square_buffer a result
 
 
+inline_for_extraction noextract
+val fsquarePowN: n: size_t -> a: felem -> Stack unit 
+  (requires (fun h -> live h a /\ as_nat h a < prime256)) 
+  (ensures (fun h0 _ h1 -> modifies (loc a) h0 h1 /\  as_nat h1 a < prime256 /\ 
+    (let k = fromDomain_(as_nat h0 a) in as_nat h1 a = toDomain_ (pow k (pow2 (v n)))))
+  )
+
+let fsquarePowN n a = 
+  let h0 = ST.get() in  
+    lemmaFromDomainToDomain (as_nat h0 a); 
+    assert_norm (pow2 0 == 1); 
+    let inv (h0: HyperStack.mem) (h1: HyperStack.mem) (i: nat) : Type0 =
+      let k = fromDomain_ (as_nat h0 a) in 
+      as_nat h1 a = toDomain_ (pow k (pow2 i)) /\
+      as_nat h1 a < prime256 /\ live h1 a /\ modifies1 a h0 h1  in 
+      power_one (fromDomain_ (as_nat h0 a)); 
+  for (size 0) n (inv h0) (fun x -> let h0_ = ST.get() in 
+    montgomery_square_buffer a a; 
+      let k = fromDomain_ (as_nat h0 a) in  
+      inDomain_mod_is_not_mod (fromDomain_ (as_nat h0_ a) * fromDomain_ (as_nat h0_ a)); 
+      lemmaFromDomainToDomainModuloPrime (let k = fromDomain_ (as_nat h0 a) in pow k (pow2 (v x)));
+      modulo_distributivity_mult (pow k (pow2 (v x))) (pow k (pow2 (v x))) prime256; 
+      pow_plus k  (pow2 (v x)) (pow2 (v x )); 
+      pow2_double_sum (v x);
+      inDomain_mod_is_not_mod (pow k (pow2 (v x + 1)))
+    )
+
+
+inline_for_extraction noextract
+val exponent_0: t: felem -> t0: felem -> t1: felem -> t2: felem -> t6: felem -> t7: felem -> 
+  Stack unit 
+    (requires fun h -> live h t /\ live h t0 /\ live h t1 /\ live h t2 /\ live h t6 /\ live h t7 /\ 
+      LowStar.Monotonic.Buffer.all_disjoint [loc t; loc t0; loc t1; loc t2; loc t6; loc t7] /\
+      as_nat h t < prime256)
+    (ensures fun h0 _ h1 -> True)
+  
+let exponent_0 t t0 t1 t2 t6 t7 = 
+  let h0 = ST.get() in 
+  montgomery_square_buffer_ t0 t; 
+  montgomery_multiplication_buffer_ t2 t0 t; 
+  montgomery_square_buffer_ t0 t2;
+  montgomery_square_buffer_ t0 t0;
+  montgomery_multiplication_buffer_ t6 t0 t2;
+  montgomery_square_buffer_ t0 t6;
+
+  fsquarePowN (size 3) t0;
+
+  montgomery_multiplication_buffer_ t7 t0 t6;
+  montgomery_square_buffer_ t0 t7;
+  montgomery_square_buffer_ t0 t0;
+  montgomery_multiplication_buffer_ t1 t0 t2;
+  montgomery_square_buffer_ t0 t1
+
+
+inline_for_extraction noextract
+val exponent_1: t: felem -> t0: felem -> t1: felem -> t2: felem -> t3: felem -> t4: felem -> t5: felem ->
+  Stack unit 
+    (requires fun h -> live h t /\ live h t0 /\ live h t1 /\ live h t2 /\ live h t3 /\ live h t4 /\ live h t5 /\
+      LowStar.Monotonic.Buffer.all_disjoint [loc t; loc t0; loc t1; loc t2; loc t3; loc t4; loc t5] /\
+      as_nat h t < prime256 /\ as_nat h t0 < prime256 /\ as_nat h t1 < prime256 /\ as_nat h t2 < prime256
+    )
+    (ensures fun h0 _ h1 -> True)
+    
+let exponent_1 t t0 t1 t2 t3 t4 t5 = 
+  (*for (size 0) 9ul (inv h0) (fun x -> montgomery_square_buffer_ t0 t0); *)
+  fsquarePowN (size 9) t0;
+
+  montgomery_multiplication_buffer_ t3 t0 t1;
+  montgomery_square_buffer_ t0 t3;
+
+  (* for (size 0) 9ul (inv h0) (fun x -> montgomery_square_buffer_ t0 t0); *)
+  fsquarePowN (size 9) t0;
+  
+  montgomery_multiplication_buffer_ t4 t0 t1;
+  montgomery_square_buffer_ t0 t4;
+  montgomery_square_buffer_ t0 t0;
+  montgomery_multiplication_buffer_ t5 t0 t2;
+  montgomery_square_buffer_ t0 t5;
+
+  (*for (size 0) 31ul (inv h0) (fun x -> montgomery_square_buffer_ t0 t0); *)
+  fsquarePowN (size 31) t0;
+
+  montgomery_multiplication_buffer_ t0 t0 t;
+
+  (*for (size 0) 128ul (inv h0) (fun x -> montgomery_square_buffer_ t0 t0); *)
+  fsquarePowN (size 128) t0;
+
+  montgomery_multiplication_buffer_ t0 t0 t5
+
+
+inline_for_extraction noextract
+val exponent_2: t: felem -> t0: felem -> t4: felem -> t5: felem -> result: felem ->
+  Stack unit 
+    (requires fun h -> True)
+    (ensures fun h0 _ h1 -> True)
+   
+let exponent_2 t t0 t4 t5 result = 
+  fsquarePowN (size 32) t0;
+  (* for (size 0) 32ul (inv h0) (fun x -> montgomery_square_buffer_ t0 t0); *)
+
+  montgomery_multiplication_buffer_ t0 t0 t5; 
+
+  (* for (size 0) 30ul (inv h0) (fun x -> montgomery_square_buffer_ t0 t0); *)
+  fsquarePowN (size 30) t0;
+
+  montgomery_multiplication_buffer_ t0 t0 t4;
+
+  (* for (size 0) 2ul (inv h0) (fun x -> montgomery_square_buffer_ t0 t0); *)
+  fsquarePowN (size 2) t0;
+
+  montgomery_multiplication_buffer_ result t0 t
+ 
+
+
+
+
 let exponent t result tempBuffer = 
   let h0 = ST.get () in 
   
   let inv (h0: HyperStack.mem) (h1: HyperStack.mem) (i: nat) : Type0 = True in 
 
-  let r0 = sub tempBuffer (size 0) (size 4) in 
+  let t0 = sub tempBuffer (size 0) (size 4) in 
   let t1 = sub tempBuffer (size 4) (size 4) in 
   let t2 = sub tempBuffer (size 8) (size 4) in 
   let t3 = sub tempBuffer (size 12) (size 4) in 
@@ -353,51 +469,7 @@ let exponent t result tempBuffer =
   let t6 = sub tempBuffer (size 24) (size 4) in 
   let t7 = sub tempBuffer (size 28) (size 4) in 
 
-  montgomery_square_buffer_ r0 t;
-  montgomery_multiplication_buffer_ t2 r0 t;
-  montgomery_square_buffer_ r0 t2;
-  montgomery_square_buffer_ r0 r0;
-  montgomery_multiplication_buffer_ t6 r0 t2;
-  montgomery_square_buffer_ r0 t6;
+  exponent_0 t t0 t1 t2 t6 t7;
+  exponent_1 t t0 t1 t2 t3 t4 t5;
+  exponent_2 t t0 t4 t5 result
 
-  for (size 0) 3ul (inv h0) (fun x -> montgomery_square_buffer_ r0 r0);
-
-  montgomery_multiplication_buffer_ t7 r0 t6;
-  montgomery_square_buffer_ r0 t7;
-  montgomery_square_buffer_ r0 r0;
-  montgomery_multiplication_buffer_ t1 r0 t2;
-  montgomery_square_buffer_ r0 t1;
-
-  for (size 0) 9ul (inv h0) (fun x -> montgomery_square_buffer_ r0 r0);
-
-  montgomery_multiplication_buffer_ t3 r0 t1;
-  montgomery_square_buffer_ r0 t3;
-
-  for (size 0) 9ul (inv h0) (fun x -> montgomery_square_buffer_ r0 r0);
-  
-  montgomery_multiplication_buffer_ t4 r0 t1;
-  montgomery_square_buffer_ r0 t4;
-  montgomery_square_buffer_ r0 r0;
-  montgomery_multiplication_buffer_ t5 r0 t2;
-  montgomery_square_buffer_ r0 t5;
-
-  for (size 0) 31ul (inv h0) (fun x -> montgomery_square_buffer_ r0 r0);
-
-  montgomery_multiplication_buffer_ r0 r0 t;
-
-  for (size 0) 128ul (inv h0) (fun x -> montgomery_square_buffer_ r0 r0);
-
-  montgomery_multiplication_buffer_ r0 r0 t5;
-
-  for (size 0) 32ul (inv h0) (fun x -> montgomery_square_buffer_ r0 r0);
-
-  montgomery_multiplication_buffer_ r0 r0 t5;
-
-  for (size 0) 30ul (inv h0) (fun x -> montgomery_square_buffer_ r0 r0);
-
-  montgomery_multiplication_buffer_ r0 r0 t4;
-
-  for (size 0) 2ul (inv h0) (fun x -> montgomery_square_buffer_ r0 r0);
-
-  montgomery_multiplication_buffer_ result r0 t
- 

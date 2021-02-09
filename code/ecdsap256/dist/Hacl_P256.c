@@ -24,33 +24,7 @@
 
 #include "Hacl_P256.h"
 
-static uint64_t cmp_felem_felem_u64(uint64_t *a, uint64_t *b)
-{
-  uint64_t a_0 = a[0U];
-  uint64_t a_1 = a[1U];
-  uint64_t a_2 = a[2U];
-  uint64_t a_3 = a[3U];
-  uint64_t b_0 = b[0U];
-  uint64_t b_1 = b[1U];
-  uint64_t b_2 = b[2U];
-  uint64_t b_3 = b[3U];
-  uint64_t r_0 = ~~FStar_UInt64_eq_mask(a_0, b_0);
-  uint64_t r_1 = ~~FStar_UInt64_eq_mask(a_1, b_1);
-  uint64_t r_2 = ~~FStar_UInt64_eq_mask(a_2, b_2);
-  uint64_t r_3 = ~~FStar_UInt64_eq_mask(a_3, b_3);
-  uint64_t r01 = r_0 & r_1;
-  uint64_t r23 = r_2 & r_3;
-  uint64_t r = r01 & r23;
-  return ~r;
-}
-
-static bool cmp_felem_felem_bool(uint64_t *a, uint64_t *b)
-{
-  uint64_t f = cmp_felem_felem_u64(a, b);
-  return f == (uint64_t)0U;
-}
-
-static void cmovznz4(uint64_t *out, uint64_t *x, uint64_t *y, uint64_t mask)
+static inline void cmovznz4(uint64_t *out, uint64_t *x, uint64_t *y, uint64_t mask)
 {
   uint64_t mask1 = FStar_UInt64_eq_mask(mask, (uint64_t)0U);
   uint64_t r0 = (x[0U] & mask1) | (y[0U] & ~mask1);
@@ -63,7 +37,7 @@ static void cmovznz4(uint64_t *out, uint64_t *x, uint64_t *y, uint64_t mask)
   out[3U] = r3;
 }
 
-static void copy_conditional(uint64_t *out, uint64_t *x, uint64_t mask)
+static inline void copy_conditional(uint64_t *out, uint64_t *x, uint64_t mask)
 {
   uint64_t out_0 = out[0U];
   uint64_t out_1 = out[1U];
@@ -81,19 +55,6 @@ static void copy_conditional(uint64_t *out, uint64_t *x, uint64_t mask)
   out[1U] = r_1;
   out[2U] = r_2;
   out[3U] = r_3;
-}
-
-static void copy_point_conditional_mask_u64_2(uint64_t *result, uint64_t *x, uint64_t mask)
-{
-  uint64_t *x_x = x;
-  uint64_t *x_y = x + (uint32_t)4U;
-  uint64_t *x_z = x + (uint32_t)8U;
-  uint64_t *result_x = result;
-  uint64_t *result_y = result + (uint32_t)4U;
-  uint64_t *result_z = result + (uint32_t)8U;
-  copy_conditional(result_x, x_x, mask);
-  copy_conditional(result_y, x_y, mask);
-  copy_conditional(result_z, x_z, mask);
 }
 
 static inline void mul64(uint64_t x, uint64_t y, uint64_t *result, uint64_t *temp)
@@ -133,10 +94,15 @@ static inline void p256_add(uint64_t *arg1, uint64_t *arg2, uint64_t *out)
   uint64_t *r2 = tempBuffer + (uint32_t)2U;
   uint64_t *r3 = tempBuffer + (uint32_t)3U;
   uint64_t
-  cc = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, out[0U], prime256_buffer[0U], r0);
-  uint64_t cc10 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc, out[1U], prime256_buffer[1U], r1);
-  uint64_t cc20 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc10, out[2U], prime256_buffer[2U], r2);
-  uint64_t cc30 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc20, out[3U], prime256_buffer[3U], r3);
+  cc =
+    Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U,
+      out[0U],
+      (uint64_t)0xffffffffffffffffU,
+      r0);
+  uint64_t cc10 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc, out[1U], (uint64_t)0xffffffffU, r1);
+  uint64_t cc20 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc10, out[2U], (uint64_t)0U, r2);
+  uint64_t
+  cc30 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc20, out[3U], (uint64_t)0xffffffff00000001U, r3);
   uint64_t c = cc30;
   uint64_t
   carry = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t, (uint64_t)0U, &tempBufferForSubborrow);
@@ -161,10 +127,15 @@ static inline void p256_double(uint64_t *arg1, uint64_t *out)
   uint64_t *r2 = tempBuffer + (uint32_t)2U;
   uint64_t *r3 = tempBuffer + (uint32_t)3U;
   uint64_t
-  cc = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, out[0U], prime256_buffer[0U], r0);
-  uint64_t cc10 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc, out[1U], prime256_buffer[1U], r1);
-  uint64_t cc20 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc10, out[2U], prime256_buffer[2U], r2);
-  uint64_t cc30 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc20, out[3U], prime256_buffer[3U], r3);
+  cc =
+    Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U,
+      out[0U],
+      (uint64_t)0xffffffffffffffffU,
+      r0);
+  uint64_t cc10 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc, out[1U], (uint64_t)0xffffffffU, r1);
+  uint64_t cc20 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc10, out[2U], (uint64_t)0U, r2);
+  uint64_t
+  cc30 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc20, out[3U], (uint64_t)0xffffffff00000001U, r3);
   uint64_t c = cc30;
   uint64_t
   carry = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t, (uint64_t)0U, &tempBufferForSubborrow);
@@ -225,10 +196,12 @@ static void p256_neg(uint64_t *arg2, uint64_t *out)
 static inline void montgomery_multiplication_buffer(uint64_t *a, uint64_t *b, uint64_t *result)
 {
   uint64_t t[8U] = { 0U };
-  uint64_t round2[8U] = { 0U };
-  uint64_t f0 = a[0U];
+  uint64_t round[8U] = { 0U };
+  uint64_t t1[8U] = { 0U };
+  uint64_t t2[8U] = { 0U };
+  uint64_t f00 = a[0U];
   uint64_t f10 = a[1U];
-  uint64_t f20 = a[2U];
+  uint64_t f2 = a[2U];
   uint64_t f30 = a[3U];
   uint64_t *b00 = t;
   uint64_t temp2 = (uint64_t)0U;
@@ -240,17 +213,17 @@ static inline void montgomery_multiplication_buffer(uint64_t *a, uint64_t *b, ui
   uint64_t *o20 = b00 + (uint32_t)2U;
   uint64_t *o30 = b00 + (uint32_t)3U;
   uint64_t f020 = b[0U];
-  mul64(f020, f0, o00, &temp2);
+  mul64(f020, f00, o00, &temp2);
   uint64_t h0 = temp2;
-  mul64(f110, f0, o10, &temp2);
+  mul64(f110, f00, o10, &temp2);
   uint64_t l0 = o10[0U];
   uint64_t c10 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l0, h0, o10);
   uint64_t h1 = temp2;
-  mul64(f210, f0, o20, &temp2);
+  mul64(f210, f00, o20, &temp2);
   uint64_t l1 = o20[0U];
   uint64_t c2 = Lib_IntTypes_Intrinsics_add_carry_u64(c10, l1, h1, o20);
   uint64_t h2 = temp2;
-  mul64(f310, f0, o30, &temp2);
+  mul64(f310, f00, o30, &temp2);
   uint64_t l2 = o30[0U];
   uint64_t c3 = Lib_IntTypes_Intrinsics_add_carry_u64(c2, l2, h2, o30);
   uint64_t temp00 = temp2;
@@ -304,17 +277,17 @@ static inline void montgomery_multiplication_buffer(uint64_t *a, uint64_t *b, ui
   uint64_t *o22 = temp4 + (uint32_t)2U;
   uint64_t *o32 = temp4 + (uint32_t)3U;
   uint64_t f022 = b[0U];
-  mul64(f022, f20, o02, &temp11);
+  mul64(f022, f2, o02, &temp11);
   uint64_t h6 = temp11;
-  mul64(f112, f20, o12, &temp11);
+  mul64(f112, f2, o12, &temp11);
   uint64_t l6 = o12[0U];
   uint64_t c110 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l6, h6, o12);
   uint64_t h7 = temp11;
-  mul64(f212, f20, o22, &temp11);
+  mul64(f212, f2, o22, &temp11);
   uint64_t l7 = o22[0U];
   uint64_t c21 = Lib_IntTypes_Intrinsics_add_carry_u64(c110, l7, h7, o22);
   uint64_t h8 = temp11;
-  mul64(f312, f20, o32, &temp11);
+  mul64(f312, f2, o32, &temp11);
   uint64_t l8 = o32[0U];
   uint64_t c32 = Lib_IntTypes_Intrinsics_add_carry_u64(c21, l8, h8, o32);
   uint64_t temp02 = temp11;
@@ -367,35 +340,30 @@ static inline void montgomery_multiplication_buffer(uint64_t *a, uint64_t *b, ui
   uint64_t c311 = cc31;
   uint64_t c34 = c5 + c311;
   t[7U] = c34;
-  uint64_t t1[8U] = { 0U };
-  uint64_t t2[8U] = { 0U };
   uint64_t t11 = t[0U];
-  uint64_t *result040 = t2;
   uint64_t temp6 = (uint64_t)0U;
-  uint64_t f12 = prime256_buffer[1U];
-  uint64_t f22 = prime256_buffer[2U];
-  uint64_t f32 = prime256_buffer[3U];
-  uint64_t *o04 = result040;
-  uint64_t *o14 = result040 + (uint32_t)1U;
-  uint64_t *o24 = result040 + (uint32_t)2U;
-  uint64_t *o34 = result040 + (uint32_t)3U;
-  uint64_t f010 = prime256_buffer[0U];
-  mul64(f010, t11, o04, &temp6);
+  uint64_t f01 = (uint64_t)0xffffffffffffffffU;
+  uint64_t f12 = (uint64_t)0xffffffffU;
+  uint64_t f32 = (uint64_t)0xffffffff00000001U;
+  uint64_t *o04 = t2;
+  uint64_t *o14 = t2 + (uint32_t)1U;
+  uint64_t *o24 = t2 + (uint32_t)2U;
+  uint64_t *o34 = t2 + (uint32_t)3U;
+  mul64(f01, t11, o04, &temp6);
   uint64_t h12 = temp6;
   mul64(f12, t11, o14, &temp6);
   uint64_t l12 = o14[0U];
   uint64_t c13 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l12, h12, o14);
   uint64_t h13 = temp6;
-  mul64(f22, t11, o24, &temp6);
-  uint64_t l13 = o24[0U];
-  uint64_t c23 = Lib_IntTypes_Intrinsics_add_carry_u64(c13, l13, h13, o24);
-  uint64_t h14 = temp6;
+  temp6 = (uint64_t)0U;
+  o24[0U] = (uint64_t)0U;
+  Lib_IntTypes_Intrinsics_add_carry_u64_void(c13, (uint64_t)0U, h13, o24);
+  uint64_t h40 = temp6;
   mul64(f32, t11, o34, &temp6);
-  uint64_t l14 = o34[0U];
-  uint64_t c35 = Lib_IntTypes_Intrinsics_add_carry_u64(c23, l14, h14, o34);
+  uint64_t l13 = o34[0U];
+  uint64_t c35 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l13, h40, o34);
   uint64_t temp04 = temp6;
-  uint64_t c6 = c35 + temp04;
-  t2[4U] = c6;
+  t2[4U] = c35 + temp04;
   uint64_t *a0 = t;
   uint64_t *a10 = t + (uint32_t)4U;
   uint64_t *b01 = t2;
@@ -435,38 +403,35 @@ static inline void montgomery_multiplication_buffer(uint64_t *a, uint64_t *b, ui
   t1[6U] = t70;
   t1[7U] = (uint64_t)0U;
   uint64_t t110 = t1[0U];
-  uint64_t *result041 = t2;
   uint64_t temp7 = (uint64_t)0U;
-  uint64_t f13 = prime256_buffer[1U];
-  uint64_t f23 = prime256_buffer[2U];
-  uint64_t f33 = prime256_buffer[3U];
-  uint64_t *o05 = result041;
-  uint64_t *o15 = result041 + (uint32_t)1U;
-  uint64_t *o25 = result041 + (uint32_t)2U;
-  uint64_t *o35 = result041 + (uint32_t)3U;
-  uint64_t f011 = prime256_buffer[0U];
-  mul64(f011, t110, o05, &temp7);
-  uint64_t h15 = temp7;
+  uint64_t f03 = (uint64_t)0xffffffffffffffffU;
+  uint64_t f13 = (uint64_t)0xffffffffU;
+  uint64_t f33 = (uint64_t)0xffffffff00000001U;
+  uint64_t *o05 = t2;
+  uint64_t *o15 = t2 + (uint32_t)1U;
+  uint64_t *o25 = t2 + (uint32_t)2U;
+  uint64_t *o35 = t2 + (uint32_t)3U;
+  mul64(f03, t110, o05, &temp7);
+  uint64_t h14 = temp7;
   mul64(f13, t110, o15, &temp7);
-  uint64_t l15 = o15[0U];
-  uint64_t c15 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l15, h15, o15);
-  uint64_t h16 = temp7;
-  mul64(f23, t110, o25, &temp7);
-  uint64_t l16 = o25[0U];
-  uint64_t c24 = Lib_IntTypes_Intrinsics_add_carry_u64(c15, l16, h16, o25);
-  uint64_t h17 = temp7;
+  uint64_t l14 = o15[0U];
+  uint64_t c15 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l14, h14, o15);
+  uint64_t h15 = temp7;
+  temp7 = (uint64_t)0U;
+  o25[0U] = (uint64_t)0U;
+  Lib_IntTypes_Intrinsics_add_carry_u64_void(c15, (uint64_t)0U, h15, o25);
+  uint64_t h41 = temp7;
   mul64(f33, t110, o35, &temp7);
-  uint64_t l17 = o35[0U];
-  uint64_t c36 = Lib_IntTypes_Intrinsics_add_carry_u64(c24, l17, h17, o35);
+  uint64_t l15 = o35[0U];
+  uint64_t c36 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l15, h41, o35);
   uint64_t temp05 = temp7;
-  uint64_t c7 = c36 + temp05;
-  t2[4U] = c7;
+  t2[4U] = c36 + temp05;
   uint64_t *a00 = t1;
   uint64_t *a11 = t1 + (uint32_t)4U;
   uint64_t *b02 = t2;
   uint64_t *b12 = t2 + (uint32_t)4U;
-  uint64_t *c02 = round2;
-  uint64_t *c16 = round2 + (uint32_t)4U;
+  uint64_t *c02 = round;
+  uint64_t *c16 = round + (uint32_t)4U;
   uint64_t *r05 = c02;
   uint64_t *r15 = c02 + (uint32_t)1U;
   uint64_t *r25 = c02 + (uint32_t)2U;
@@ -484,50 +449,47 @@ static inline void montgomery_multiplication_buffer(uint64_t *a, uint64_t *b, ui
   uint64_t cc15 = Lib_IntTypes_Intrinsics_add_carry_u64(cc06, a11[1U], b12[1U], r16);
   uint64_t cc25 = Lib_IntTypes_Intrinsics_add_carry_u64(cc15, a11[2U], b12[2U], r26);
   Lib_IntTypes_Intrinsics_add_carry_u64_void(cc25, a11[3U], b12[3U], r36);
-  uint64_t t120 = round2[1U];
-  uint64_t t211 = round2[2U];
-  uint64_t t31 = round2[3U];
-  uint64_t t41 = round2[4U];
-  uint64_t t51 = round2[5U];
-  uint64_t t61 = round2[6U];
-  uint64_t t71 = round2[7U];
-  round2[0U] = t120;
-  round2[1U] = t211;
-  round2[2U] = t31;
-  round2[3U] = t41;
-  round2[4U] = t51;
-  round2[5U] = t61;
-  round2[6U] = t71;
-  round2[7U] = (uint64_t)0U;
-  uint64_t t111 = round2[0U];
-  uint64_t *result042 = t2;
+  uint64_t t120 = round[1U];
+  uint64_t t211 = round[2U];
+  uint64_t t31 = round[3U];
+  uint64_t t41 = round[4U];
+  uint64_t t51 = round[5U];
+  uint64_t t61 = round[6U];
+  uint64_t t71 = round[7U];
+  round[0U] = t120;
+  round[1U] = t211;
+  round[2U] = t31;
+  round[3U] = t41;
+  round[4U] = t51;
+  round[5U] = t61;
+  round[6U] = t71;
+  round[7U] = (uint64_t)0U;
+  uint64_t t111 = round[0U];
   uint64_t temp8 = (uint64_t)0U;
-  uint64_t f14 = prime256_buffer[1U];
-  uint64_t f24 = prime256_buffer[2U];
-  uint64_t f34 = prime256_buffer[3U];
-  uint64_t *o06 = result042;
-  uint64_t *o16 = result042 + (uint32_t)1U;
-  uint64_t *o26 = result042 + (uint32_t)2U;
-  uint64_t *o36 = result042 + (uint32_t)3U;
-  uint64_t f012 = prime256_buffer[0U];
-  mul64(f012, t111, o06, &temp8);
-  uint64_t h18 = temp8;
+  uint64_t f04 = (uint64_t)0xffffffffffffffffU;
+  uint64_t f14 = (uint64_t)0xffffffffU;
+  uint64_t f34 = (uint64_t)0xffffffff00000001U;
+  uint64_t *o06 = t2;
+  uint64_t *o16 = t2 + (uint32_t)1U;
+  uint64_t *o26 = t2 + (uint32_t)2U;
+  uint64_t *o36 = t2 + (uint32_t)3U;
+  mul64(f04, t111, o06, &temp8);
+  uint64_t h16 = temp8;
   mul64(f14, t111, o16, &temp8);
-  uint64_t l18 = o16[0U];
-  uint64_t c17 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l18, h18, o16);
-  uint64_t h19 = temp8;
-  mul64(f24, t111, o26, &temp8);
-  uint64_t l19 = o26[0U];
-  uint64_t c25 = Lib_IntTypes_Intrinsics_add_carry_u64(c17, l19, h19, o26);
-  uint64_t h20 = temp8;
+  uint64_t l16 = o16[0U];
+  uint64_t c17 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l16, h16, o16);
+  uint64_t h17 = temp8;
+  temp8 = (uint64_t)0U;
+  o26[0U] = (uint64_t)0U;
+  Lib_IntTypes_Intrinsics_add_carry_u64_void(c17, (uint64_t)0U, h17, o26);
+  uint64_t h42 = temp8;
   mul64(f34, t111, o36, &temp8);
-  uint64_t l20 = o36[0U];
-  uint64_t c37 = Lib_IntTypes_Intrinsics_add_carry_u64(c25, l20, h20, o36);
+  uint64_t l17 = o36[0U];
+  uint64_t c37 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l17, h42, o36);
   uint64_t temp06 = temp8;
-  uint64_t c8 = c37 + temp06;
-  t2[4U] = c8;
-  uint64_t *a01 = round2;
-  uint64_t *a12 = round2 + (uint32_t)4U;
+  t2[4U] = c37 + temp06;
+  uint64_t *a01 = round;
+  uint64_t *a12 = round + (uint32_t)4U;
   uint64_t *b03 = t2;
   uint64_t *b13 = t2 + (uint32_t)4U;
   uint64_t *c03 = t1;
@@ -565,38 +527,35 @@ static inline void montgomery_multiplication_buffer(uint64_t *a, uint64_t *b, ui
   t1[6U] = t72;
   t1[7U] = (uint64_t)0U;
   uint64_t t112 = t1[0U];
-  uint64_t *result04 = t2;
   uint64_t temp = (uint64_t)0U;
-  uint64_t f1 = prime256_buffer[1U];
-  uint64_t f2 = prime256_buffer[2U];
-  uint64_t f3 = prime256_buffer[3U];
-  uint64_t *o0 = result04;
-  uint64_t *o1 = result04 + (uint32_t)1U;
-  uint64_t *o2 = result04 + (uint32_t)2U;
-  uint64_t *o3 = result04 + (uint32_t)3U;
-  uint64_t f01 = prime256_buffer[0U];
-  mul64(f01, t112, o0, &temp);
-  uint64_t h21 = temp;
+  uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+  uint64_t f1 = (uint64_t)0xffffffffU;
+  uint64_t f3 = (uint64_t)0xffffffff00000001U;
+  uint64_t *o0 = t2;
+  uint64_t *o1 = t2 + (uint32_t)1U;
+  uint64_t *o2 = t2 + (uint32_t)2U;
+  uint64_t *o3 = t2 + (uint32_t)3U;
+  mul64(f0, t112, o0, &temp);
+  uint64_t h18 = temp;
   mul64(f1, t112, o1, &temp);
-  uint64_t l21 = o1[0U];
-  uint64_t c19 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l21, h21, o1);
-  uint64_t h22 = temp;
-  mul64(f2, t112, o2, &temp);
-  uint64_t l22 = o2[0U];
-  uint64_t c26 = Lib_IntTypes_Intrinsics_add_carry_u64(c19, l22, h22, o2);
+  uint64_t l18 = o1[0U];
+  uint64_t c19 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l18, h18, o1);
   uint64_t h = temp;
+  temp = (uint64_t)0U;
+  o2[0U] = (uint64_t)0U;
+  Lib_IntTypes_Intrinsics_add_carry_u64_void(c19, (uint64_t)0U, h, o2);
+  uint64_t h43 = temp;
   mul64(f3, t112, o3, &temp);
   uint64_t l = o3[0U];
-  uint64_t c38 = Lib_IntTypes_Intrinsics_add_carry_u64(c26, l, h, o3);
+  uint64_t c38 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h43, o3);
   uint64_t temp0 = temp;
-  uint64_t c9 = c38 + temp0;
-  t2[4U] = c9;
+  t2[4U] = c38 + temp0;
   uint64_t *a02 = t1;
   uint64_t *a1 = t1 + (uint32_t)4U;
   uint64_t *b0 = t2;
   uint64_t *b1 = t2 + (uint32_t)4U;
-  uint64_t *c0 = round2;
-  uint64_t *c1 = round2 + (uint32_t)4U;
+  uint64_t *c0 = round;
+  uint64_t *c1 = round + (uint32_t)4U;
   uint64_t *r09 = c0;
   uint64_t *r19 = c0 + (uint32_t)1U;
   uint64_t *r29 = c0 + (uint32_t)2U;
@@ -614,51 +573,56 @@ static inline void montgomery_multiplication_buffer(uint64_t *a, uint64_t *b, ui
   uint64_t cc19 = Lib_IntTypes_Intrinsics_add_carry_u64(cc0, a1[1U], b1[1U], r110);
   uint64_t cc29 = Lib_IntTypes_Intrinsics_add_carry_u64(cc19, a1[2U], b1[2U], r210);
   Lib_IntTypes_Intrinsics_add_carry_u64_void(cc29, a1[3U], b1[3U], r310);
-  uint64_t t122 = round2[1U];
-  uint64_t t21 = round2[2U];
-  uint64_t t3 = round2[3U];
-  uint64_t t4 = round2[4U];
-  uint64_t t5 = round2[5U];
-  uint64_t t6 = round2[6U];
-  uint64_t t7 = round2[7U];
-  round2[0U] = t122;
-  round2[1U] = t21;
-  round2[2U] = t3;
-  round2[3U] = t4;
-  round2[4U] = t5;
-  round2[5U] = t6;
-  round2[6U] = t7;
-  round2[7U] = (uint64_t)0U;
+  uint64_t t122 = round[1U];
+  uint64_t t21 = round[2U];
+  uint64_t t3 = round[3U];
+  uint64_t t4 = round[4U];
+  uint64_t t5 = round[5U];
+  uint64_t t6 = round[6U];
+  uint64_t t7 = round[7U];
+  round[0U] = t122;
+  round[1U] = t21;
+  round[2U] = t3;
+  round[3U] = t4;
+  round[4U] = t5;
+  round[5U] = t6;
+  round[6U] = t7;
+  round[7U] = (uint64_t)0U;
   uint64_t tempBuffer[4U] = { 0U };
   uint64_t tempBufferForSubborrow = (uint64_t)0U;
-  uint64_t cin = round2[4U];
-  uint64_t *x_ = round2;
+  uint64_t cin = round[4U];
+  uint64_t *x_ = round;
   uint64_t *r0 = tempBuffer;
   uint64_t *r1 = tempBuffer + (uint32_t)1U;
   uint64_t *r2 = tempBuffer + (uint32_t)2U;
   uint64_t *r3 = tempBuffer + (uint32_t)3U;
   uint64_t
-  cc = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, x_[0U], prime256_buffer[0U], r0);
-  uint64_t cc110 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc, x_[1U], prime256_buffer[1U], r1);
+  cc =
+    Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U,
+      x_[0U],
+      (uint64_t)0xffffffffffffffffU,
+      r0);
+  uint64_t cc110 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc, x_[1U], (uint64_t)0xffffffffU, r1);
+  uint64_t cc210 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc110, x_[2U], (uint64_t)0U, r2);
   uint64_t
-  cc210 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc110, x_[2U], prime256_buffer[2U], r2);
-  uint64_t cc36 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc210, x_[3U], prime256_buffer[3U], r3);
-  uint64_t c27 = cc36;
+  cc36 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc210, x_[3U], (uint64_t)0xffffffff00000001U, r3);
+  uint64_t c6 = cc36;
   uint64_t
-  carry = Lib_IntTypes_Intrinsics_sub_borrow_u64(c27, cin, (uint64_t)0U, &tempBufferForSubborrow);
+  carry = Lib_IntTypes_Intrinsics_sub_borrow_u64(c6, cin, (uint64_t)0U, &tempBufferForSubborrow);
   cmovznz4(result, tempBuffer, x_, carry);
 }
 
 static inline void montgomery_square_buffer(uint64_t *a, uint64_t *result)
 {
   uint64_t t[8U] = { 0U };
-  uint64_t round2[8U] = { 0U };
-  uint64_t round4[8U] = { 0U };
+  uint64_t t1[8U] = { 0U };
+  uint64_t t2[8U] = { 0U };
+  uint64_t round[8U] = { 0U };
   uint64_t wb[17U] = { 0U };
   uint64_t *tb = wb;
   uint64_t *memory = wb + (uint32_t)5U;
   uint64_t *b00 = t;
-  uint64_t f010 = a[0U];
+  uint64_t f01 = a[0U];
   uint64_t f310 = a[3U];
   uint64_t *o30 = b00 + (uint32_t)3U;
   uint64_t *temp1 = tb;
@@ -682,7 +646,7 @@ static inline void montgomery_square_buffer(uint64_t *a, uint64_t *result)
   memory[3U] = temp1[0U];
   uint64_t c2 = Lib_IntTypes_Intrinsics_add_carry_u64(c10, l10, h_10, o20);
   uint64_t h_20 = temp1[0U];
-  mul64(f010, f310, o30, temp1);
+  mul64(f01, f310, o30, temp1);
   uint64_t l3 = o30[0U];
   memory[4U] = l3;
   memory[5U] = temp1[0U];
@@ -805,36 +769,30 @@ static inline void montgomery_square_buffer(uint64_t *a, uint64_t *result)
   uint64_t c41 = cc31;
   uint64_t c32 = c310 + h_3 + c41;
   t[7U] = c32;
-  uint64_t t1[8U] = { 0U };
-  uint64_t t2[8U] = { 0U };
-  uint64_t t3[8U] = { 0U };
   uint64_t t11 = t[0U];
-  uint64_t *result040 = t2;
   uint64_t temp5 = (uint64_t)0U;
-  uint64_t f10 = prime256_buffer[1U];
-  uint64_t f20 = prime256_buffer[2U];
-  uint64_t f30 = prime256_buffer[3U];
-  uint64_t *o04 = result040;
-  uint64_t *o14 = result040 + (uint32_t)1U;
-  uint64_t *o24 = result040 + (uint32_t)2U;
-  uint64_t *o34 = result040 + (uint32_t)3U;
-  uint64_t f011 = prime256_buffer[0U];
-  mul64(f011, t11, o04, &temp5);
+  uint64_t f00 = (uint64_t)0xffffffffffffffffU;
+  uint64_t f10 = (uint64_t)0xffffffffU;
+  uint64_t f30 = (uint64_t)0xffffffff00000001U;
+  uint64_t *o04 = t2;
+  uint64_t *o14 = t2 + (uint32_t)1U;
+  uint64_t *o24 = t2 + (uint32_t)2U;
+  uint64_t *o34 = t2 + (uint32_t)3U;
+  mul64(f00, t11, o04, &temp5);
   uint64_t h1 = temp5;
   mul64(f10, t11, o14, &temp5);
   uint64_t l7 = o14[0U];
   uint64_t c13 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l7, h1, o14);
   uint64_t h2 = temp5;
-  mul64(f20, t11, o24, &temp5);
-  uint64_t l8 = o24[0U];
-  uint64_t c23 = Lib_IntTypes_Intrinsics_add_carry_u64(c13, l8, h2, o24);
-  uint64_t h3 = temp5;
+  temp5 = (uint64_t)0U;
+  o24[0U] = (uint64_t)0U;
+  Lib_IntTypes_Intrinsics_add_carry_u64_void(c13, (uint64_t)0U, h2, o24);
+  uint64_t h40 = temp5;
   mul64(f30, t11, o34, &temp5);
-  uint64_t l9 = o34[0U];
-  uint64_t c33 = Lib_IntTypes_Intrinsics_add_carry_u64(c23, l9, h3, o34);
+  uint64_t l8 = o34[0U];
+  uint64_t c33 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l8, h40, o34);
   uint64_t temp01 = temp5;
-  uint64_t c = c33 + temp01;
-  t2[4U] = c;
+  t2[4U] = c33 + temp01;
   uint64_t *a0 = t;
   uint64_t *a10 = t + (uint32_t)4U;
   uint64_t *b01 = t2;
@@ -860,52 +818,49 @@ static inline void montgomery_square_buffer(uint64_t *a, uint64_t *result)
   Lib_IntTypes_Intrinsics_add_carry_u64_void(cc23, a10[3U], b11[3U], r34);
   uint64_t t12 = t1[1U];
   uint64_t t210 = t1[2U];
-  uint64_t t310 = t1[3U];
+  uint64_t t30 = t1[3U];
   uint64_t t40 = t1[4U];
   uint64_t t50 = t1[5U];
   uint64_t t60 = t1[6U];
   uint64_t t70 = t1[7U];
   t1[0U] = t12;
   t1[1U] = t210;
-  t1[2U] = t310;
+  t1[2U] = t30;
   t1[3U] = t40;
   t1[4U] = t50;
   t1[5U] = t60;
   t1[6U] = t70;
   t1[7U] = (uint64_t)0U;
   uint64_t t110 = t1[0U];
-  uint64_t *result041 = t2;
   uint64_t temp6 = (uint64_t)0U;
-  uint64_t f13 = prime256_buffer[1U];
-  uint64_t f23 = prime256_buffer[2U];
-  uint64_t f32 = prime256_buffer[3U];
-  uint64_t *o05 = result041;
-  uint64_t *o15 = result041 + (uint32_t)1U;
-  uint64_t *o25 = result041 + (uint32_t)2U;
-  uint64_t *o35 = result041 + (uint32_t)3U;
-  uint64_t f012 = prime256_buffer[0U];
-  mul64(f012, t110, o05, &temp6);
-  uint64_t h6 = temp6;
+  uint64_t f03 = (uint64_t)0xffffffffffffffffU;
+  uint64_t f13 = (uint64_t)0xffffffffU;
+  uint64_t f32 = (uint64_t)0xffffffff00000001U;
+  uint64_t *o05 = t2;
+  uint64_t *o15 = t2 + (uint32_t)1U;
+  uint64_t *o25 = t2 + (uint32_t)2U;
+  uint64_t *o35 = t2 + (uint32_t)3U;
+  mul64(f03, t110, o05, &temp6);
+  uint64_t h3 = temp6;
   mul64(f13, t110, o15, &temp6);
-  uint64_t l13 = o15[0U];
-  uint64_t c15 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l13, h6, o15);
-  uint64_t h7 = temp6;
-  mul64(f23, t110, o25, &temp6);
-  uint64_t l14 = o25[0U];
-  uint64_t c24 = Lib_IntTypes_Intrinsics_add_carry_u64(c15, l14, h7, o25);
-  uint64_t h8 = temp6;
+  uint64_t l9 = o15[0U];
+  uint64_t c15 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l9, h3, o15);
+  uint64_t h6 = temp6;
+  temp6 = (uint64_t)0U;
+  o25[0U] = (uint64_t)0U;
+  Lib_IntTypes_Intrinsics_add_carry_u64_void(c15, (uint64_t)0U, h6, o25);
+  uint64_t h41 = temp6;
   mul64(f32, t110, o35, &temp6);
-  uint64_t l15 = o35[0U];
-  uint64_t c34 = Lib_IntTypes_Intrinsics_add_carry_u64(c24, l15, h8, o35);
+  uint64_t l13 = o35[0U];
+  uint64_t c34 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l13, h41, o35);
   uint64_t temp02 = temp6;
-  uint64_t c5 = c34 + temp02;
-  t2[4U] = c5;
+  t2[4U] = c34 + temp02;
   uint64_t *a00 = t1;
   uint64_t *a11 = t1 + (uint32_t)4U;
   uint64_t *b02 = t2;
   uint64_t *b12 = t2 + (uint32_t)4U;
-  uint64_t *c02 = round2;
-  uint64_t *c16 = round2 + (uint32_t)4U;
+  uint64_t *c02 = round;
+  uint64_t *c16 = round + (uint32_t)4U;
   uint64_t *r05 = c02;
   uint64_t *r15 = c02 + (uint32_t)1U;
   uint64_t *r25 = c02 + (uint32_t)2U;
@@ -923,50 +878,47 @@ static inline void montgomery_square_buffer(uint64_t *a, uint64_t *result)
   uint64_t cc15 = Lib_IntTypes_Intrinsics_add_carry_u64(cc06, a11[1U], b12[1U], r16);
   uint64_t cc25 = Lib_IntTypes_Intrinsics_add_carry_u64(cc15, a11[2U], b12[2U], r26);
   Lib_IntTypes_Intrinsics_add_carry_u64_void(cc25, a11[3U], b12[3U], r36);
-  uint64_t t120 = round2[1U];
-  uint64_t t211 = round2[2U];
-  uint64_t t311 = round2[3U];
-  uint64_t t41 = round2[4U];
-  uint64_t t51 = round2[5U];
-  uint64_t t61 = round2[6U];
-  uint64_t t71 = round2[7U];
-  round2[0U] = t120;
-  round2[1U] = t211;
-  round2[2U] = t311;
-  round2[3U] = t41;
-  round2[4U] = t51;
-  round2[5U] = t61;
-  round2[6U] = t71;
-  round2[7U] = (uint64_t)0U;
-  uint64_t t111 = round2[0U];
-  uint64_t *result042 = t2;
+  uint64_t t120 = round[1U];
+  uint64_t t211 = round[2U];
+  uint64_t t31 = round[3U];
+  uint64_t t41 = round[4U];
+  uint64_t t51 = round[5U];
+  uint64_t t61 = round[6U];
+  uint64_t t71 = round[7U];
+  round[0U] = t120;
+  round[1U] = t211;
+  round[2U] = t31;
+  round[3U] = t41;
+  round[4U] = t51;
+  round[5U] = t61;
+  round[6U] = t71;
+  round[7U] = (uint64_t)0U;
+  uint64_t t111 = round[0U];
   uint64_t temp7 = (uint64_t)0U;
-  uint64_t f14 = prime256_buffer[1U];
-  uint64_t f24 = prime256_buffer[2U];
-  uint64_t f33 = prime256_buffer[3U];
-  uint64_t *o06 = result042;
-  uint64_t *o16 = result042 + (uint32_t)1U;
-  uint64_t *o26 = result042 + (uint32_t)2U;
-  uint64_t *o36 = result042 + (uint32_t)3U;
-  uint64_t f013 = prime256_buffer[0U];
-  mul64(f013, t111, o06, &temp7);
-  uint64_t h9 = temp7;
+  uint64_t f04 = (uint64_t)0xffffffffffffffffU;
+  uint64_t f14 = (uint64_t)0xffffffffU;
+  uint64_t f33 = (uint64_t)0xffffffff00000001U;
+  uint64_t *o06 = t2;
+  uint64_t *o16 = t2 + (uint32_t)1U;
+  uint64_t *o26 = t2 + (uint32_t)2U;
+  uint64_t *o36 = t2 + (uint32_t)3U;
+  mul64(f04, t111, o06, &temp7);
+  uint64_t h7 = temp7;
   mul64(f14, t111, o16, &temp7);
-  uint64_t l16 = o16[0U];
-  uint64_t c17 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l16, h9, o16);
-  uint64_t h10 = temp7;
-  mul64(f24, t111, o26, &temp7);
-  uint64_t l17 = o26[0U];
-  uint64_t c25 = Lib_IntTypes_Intrinsics_add_carry_u64(c17, l17, h10, o26);
-  uint64_t h11 = temp7;
+  uint64_t l14 = o16[0U];
+  uint64_t c17 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l14, h7, o16);
+  uint64_t h8 = temp7;
+  temp7 = (uint64_t)0U;
+  o26[0U] = (uint64_t)0U;
+  Lib_IntTypes_Intrinsics_add_carry_u64_void(c17, (uint64_t)0U, h8, o26);
+  uint64_t h42 = temp7;
   mul64(f33, t111, o36, &temp7);
-  uint64_t l18 = o36[0U];
-  uint64_t c35 = Lib_IntTypes_Intrinsics_add_carry_u64(c25, l18, h11, o36);
+  uint64_t l15 = o36[0U];
+  uint64_t c35 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l15, h42, o36);
   uint64_t temp03 = temp7;
-  uint64_t c6 = c35 + temp03;
-  t2[4U] = c6;
-  uint64_t *a01 = round2;
-  uint64_t *a12 = round2 + (uint32_t)4U;
+  t2[4U] = c35 + temp03;
+  uint64_t *a01 = round;
+  uint64_t *a12 = round + (uint32_t)4U;
   uint64_t *b03 = t2;
   uint64_t *b13 = t2 + (uint32_t)4U;
   uint64_t *c03 = t1;
@@ -990,52 +942,49 @@ static inline void montgomery_square_buffer(uint64_t *a, uint64_t *result)
   Lib_IntTypes_Intrinsics_add_carry_u64_void(cc27, a12[3U], b13[3U], r38);
   uint64_t t121 = t1[1U];
   uint64_t t212 = t1[2U];
-  uint64_t t312 = t1[3U];
+  uint64_t t32 = t1[3U];
   uint64_t t42 = t1[4U];
   uint64_t t52 = t1[5U];
   uint64_t t62 = t1[6U];
   uint64_t t72 = t1[7U];
   t1[0U] = t121;
   t1[1U] = t212;
-  t1[2U] = t312;
+  t1[2U] = t32;
   t1[3U] = t42;
   t1[4U] = t52;
   t1[5U] = t62;
   t1[6U] = t72;
   t1[7U] = (uint64_t)0U;
   uint64_t t112 = t1[0U];
-  uint64_t *result04 = t2;
   uint64_t temp = (uint64_t)0U;
-  uint64_t f1 = prime256_buffer[1U];
-  uint64_t f2 = prime256_buffer[2U];
-  uint64_t f3 = prime256_buffer[3U];
-  uint64_t *o0 = result04;
-  uint64_t *o1 = result04 + (uint32_t)1U;
-  uint64_t *o2 = result04 + (uint32_t)2U;
-  uint64_t *o3 = result04 + (uint32_t)3U;
-  uint64_t f01 = prime256_buffer[0U];
-  mul64(f01, t112, o0, &temp);
-  uint64_t h12 = temp;
+  uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+  uint64_t f1 = (uint64_t)0xffffffffU;
+  uint64_t f3 = (uint64_t)0xffffffff00000001U;
+  uint64_t *o0 = t2;
+  uint64_t *o1 = t2 + (uint32_t)1U;
+  uint64_t *o2 = t2 + (uint32_t)2U;
+  uint64_t *o3 = t2 + (uint32_t)3U;
+  mul64(f0, t112, o0, &temp);
+  uint64_t h9 = temp;
   mul64(f1, t112, o1, &temp);
-  uint64_t l19 = o1[0U];
-  uint64_t c19 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l19, h12, o1);
-  uint64_t h13 = temp;
-  mul64(f2, t112, o2, &temp);
-  uint64_t l22 = o2[0U];
-  uint64_t c26 = Lib_IntTypes_Intrinsics_add_carry_u64(c19, l22, h13, o2);
+  uint64_t l16 = o1[0U];
+  uint64_t c19 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l16, h9, o1);
   uint64_t h = temp;
+  temp = (uint64_t)0U;
+  o2[0U] = (uint64_t)0U;
+  Lib_IntTypes_Intrinsics_add_carry_u64_void(c19, (uint64_t)0U, h, o2);
+  uint64_t h43 = temp;
   mul64(f3, t112, o3, &temp);
   uint64_t l = o3[0U];
-  uint64_t c36 = Lib_IntTypes_Intrinsics_add_carry_u64(c26, l, h, o3);
+  uint64_t c36 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h43, o3);
   uint64_t temp0 = temp;
-  uint64_t c7 = c36 + temp0;
-  t2[4U] = c7;
+  t2[4U] = c36 + temp0;
   uint64_t *a02 = t1;
   uint64_t *a1 = t1 + (uint32_t)4U;
   uint64_t *b0 = t2;
   uint64_t *b1 = t2 + (uint32_t)4U;
-  uint64_t *c0 = round4;
-  uint64_t *c1 = round4 + (uint32_t)4U;
+  uint64_t *c0 = round;
+  uint64_t *c1 = round + (uint32_t)4U;
   uint64_t *r09 = c0;
   uint64_t *r19 = c0 + (uint32_t)1U;
   uint64_t *r29 = c0 + (uint32_t)2U;
@@ -1053,44 +1002,48 @@ static inline void montgomery_square_buffer(uint64_t *a, uint64_t *result)
   uint64_t cc19 = Lib_IntTypes_Intrinsics_add_carry_u64(cc0, a1[1U], b1[1U], r110);
   uint64_t cc29 = Lib_IntTypes_Intrinsics_add_carry_u64(cc19, a1[2U], b1[2U], r210);
   Lib_IntTypes_Intrinsics_add_carry_u64_void(cc29, a1[3U], b1[3U], r310);
-  uint64_t t122 = round4[1U];
-  uint64_t t21 = round4[2U];
-  uint64_t t31 = round4[3U];
-  uint64_t t4 = round4[4U];
-  uint64_t t5 = round4[5U];
-  uint64_t t6 = round4[6U];
-  uint64_t t7 = round4[7U];
-  round4[0U] = t122;
-  round4[1U] = t21;
-  round4[2U] = t31;
-  round4[3U] = t4;
-  round4[4U] = t5;
-  round4[5U] = t6;
-  round4[6U] = t7;
-  round4[7U] = (uint64_t)0U;
+  uint64_t t122 = round[1U];
+  uint64_t t21 = round[2U];
+  uint64_t t3 = round[3U];
+  uint64_t t4 = round[4U];
+  uint64_t t5 = round[5U];
+  uint64_t t6 = round[6U];
+  uint64_t t7 = round[7U];
+  round[0U] = t122;
+  round[1U] = t21;
+  round[2U] = t3;
+  round[3U] = t4;
+  round[4U] = t5;
+  round[5U] = t6;
+  round[6U] = t7;
+  round[7U] = (uint64_t)0U;
   uint64_t tempBuffer[4U] = { 0U };
   uint64_t tempBufferForSubborrow = (uint64_t)0U;
-  uint64_t cin = round4[4U];
-  uint64_t *x_ = round4;
+  uint64_t cin = round[4U];
+  uint64_t *x_ = round;
   uint64_t *r0 = tempBuffer;
   uint64_t *r1 = tempBuffer + (uint32_t)1U;
   uint64_t *r2 = tempBuffer + (uint32_t)2U;
   uint64_t *r3 = tempBuffer + (uint32_t)3U;
   uint64_t
-  cc = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, x_[0U], prime256_buffer[0U], r0);
-  uint64_t cc110 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc, x_[1U], prime256_buffer[1U], r1);
+  cc =
+    Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U,
+      x_[0U],
+      (uint64_t)0xffffffffffffffffU,
+      r0);
+  uint64_t cc110 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc, x_[1U], (uint64_t)0xffffffffU, r1);
+  uint64_t cc210 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc110, x_[2U], (uint64_t)0U, r2);
   uint64_t
-  cc210 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc110, x_[2U], prime256_buffer[2U], r2);
-  uint64_t cc36 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc210, x_[3U], prime256_buffer[3U], r3);
-  uint64_t c8 = cc36;
+  cc36 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc210, x_[3U], (uint64_t)0xffffffff00000001U, r3);
+  uint64_t c = cc36;
   uint64_t
-  carry = Lib_IntTypes_Intrinsics_sub_borrow_u64(c8, cin, (uint64_t)0U, &tempBufferForSubborrow);
+  carry = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, cin, (uint64_t)0U, &tempBufferForSubborrow);
   cmovznz4(result, tempBuffer, x_, carry);
 }
 
 static inline void exponent(uint64_t *t, uint64_t *result, uint64_t *tempBuffer)
 {
-  uint64_t *r0 = tempBuffer;
+  uint64_t *t0 = tempBuffer;
   uint64_t *t1 = tempBuffer + (uint32_t)4U;
   uint64_t *t2 = tempBuffer + (uint32_t)8U;
   uint64_t *t3 = tempBuffer + (uint32_t)12U;
@@ -1098,114 +1051,114 @@ static inline void exponent(uint64_t *t, uint64_t *result, uint64_t *tempBuffer)
   uint64_t *t5 = tempBuffer + (uint32_t)20U;
   uint64_t *t6 = tempBuffer + (uint32_t)24U;
   uint64_t *t7 = tempBuffer + (uint32_t)28U;
-  montgomery_square_buffer(t, r0);
-  montgomery_multiplication_buffer(r0, t, t2);
-  montgomery_square_buffer(t2, r0);
-  montgomery_square_buffer(r0, r0);
-  montgomery_multiplication_buffer(r0, t2, t6);
-  montgomery_square_buffer(t6, r0);
+  montgomery_square_buffer(t, t0);
+  montgomery_multiplication_buffer(t0, t, t2);
+  montgomery_square_buffer(t2, t0);
+  montgomery_square_buffer(t0, t0);
+  montgomery_multiplication_buffer(t0, t2, t6);
+  montgomery_square_buffer(t6, t0);
   {
-    montgomery_square_buffer(r0, r0);
+    montgomery_square_buffer(t0, t0);
   }
   {
-    montgomery_square_buffer(r0, r0);
+    montgomery_square_buffer(t0, t0);
   }
   {
-    montgomery_square_buffer(r0, r0);
+    montgomery_square_buffer(t0, t0);
   }
-  montgomery_multiplication_buffer(r0, t6, t7);
-  montgomery_square_buffer(t7, r0);
-  montgomery_square_buffer(r0, r0);
-  montgomery_multiplication_buffer(r0, t2, t1);
-  montgomery_square_buffer(t1, r0);
+  montgomery_multiplication_buffer(t0, t6, t7);
+  montgomery_square_buffer(t7, t0);
+  montgomery_square_buffer(t0, t0);
+  montgomery_multiplication_buffer(t0, t2, t1);
+  montgomery_square_buffer(t1, t0);
   {
-    montgomery_square_buffer(r0, r0);
-  }
-  {
-    montgomery_square_buffer(r0, r0);
+    montgomery_square_buffer(t0, t0);
   }
   {
-    montgomery_square_buffer(r0, r0);
+    montgomery_square_buffer(t0, t0);
   }
   {
-    montgomery_square_buffer(r0, r0);
+    montgomery_square_buffer(t0, t0);
   }
   {
-    montgomery_square_buffer(r0, r0);
+    montgomery_square_buffer(t0, t0);
   }
   {
-    montgomery_square_buffer(r0, r0);
+    montgomery_square_buffer(t0, t0);
   }
   {
-    montgomery_square_buffer(r0, r0);
+    montgomery_square_buffer(t0, t0);
   }
   {
-    montgomery_square_buffer(r0, r0);
+    montgomery_square_buffer(t0, t0);
   }
   {
-    montgomery_square_buffer(r0, r0);
-  }
-  montgomery_multiplication_buffer(r0, t1, t3);
-  montgomery_square_buffer(t3, r0);
-  {
-    montgomery_square_buffer(r0, r0);
+    montgomery_square_buffer(t0, t0);
   }
   {
-    montgomery_square_buffer(r0, r0);
+    montgomery_square_buffer(t0, t0);
+  }
+  montgomery_multiplication_buffer(t0, t1, t3);
+  montgomery_square_buffer(t3, t0);
+  {
+    montgomery_square_buffer(t0, t0);
   }
   {
-    montgomery_square_buffer(r0, r0);
+    montgomery_square_buffer(t0, t0);
   }
   {
-    montgomery_square_buffer(r0, r0);
+    montgomery_square_buffer(t0, t0);
   }
   {
-    montgomery_square_buffer(r0, r0);
+    montgomery_square_buffer(t0, t0);
   }
   {
-    montgomery_square_buffer(r0, r0);
+    montgomery_square_buffer(t0, t0);
   }
   {
-    montgomery_square_buffer(r0, r0);
+    montgomery_square_buffer(t0, t0);
   }
   {
-    montgomery_square_buffer(r0, r0);
+    montgomery_square_buffer(t0, t0);
   }
   {
-    montgomery_square_buffer(r0, r0);
+    montgomery_square_buffer(t0, t0);
   }
-  montgomery_multiplication_buffer(r0, t1, t4);
-  montgomery_square_buffer(t4, r0);
-  montgomery_square_buffer(r0, r0);
-  montgomery_multiplication_buffer(r0, t2, t5);
-  montgomery_square_buffer(t5, r0);
+  {
+    montgomery_square_buffer(t0, t0);
+  }
+  montgomery_multiplication_buffer(t0, t1, t4);
+  montgomery_square_buffer(t4, t0);
+  montgomery_square_buffer(t0, t0);
+  montgomery_multiplication_buffer(t0, t2, t5);
+  montgomery_square_buffer(t5, t0);
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)31U; i++)
   {
-    montgomery_square_buffer(r0, r0);
+    montgomery_square_buffer(t0, t0);
   }
-  montgomery_multiplication_buffer(r0, t, r0);
+  montgomery_multiplication_buffer(t0, t, t0);
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)128U; i++)
   {
-    montgomery_square_buffer(r0, r0);
+    montgomery_square_buffer(t0, t0);
   }
-  montgomery_multiplication_buffer(r0, t5, r0);
+  montgomery_multiplication_buffer(t0, t5, t0);
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)32U; i++)
   {
-    montgomery_square_buffer(r0, r0);
+    montgomery_square_buffer(t0, t0);
   }
-  montgomery_multiplication_buffer(r0, t5, r0);
+  montgomery_multiplication_buffer(t0, t5, t0);
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)30U; i++)
   {
-    montgomery_square_buffer(r0, r0);
+    montgomery_square_buffer(t0, t0);
   }
-  montgomery_multiplication_buffer(r0, t4, r0);
+  montgomery_multiplication_buffer(t0, t4, t0);
   {
-    montgomery_square_buffer(r0, r0);
+    montgomery_square_buffer(t0, t0);
   }
   {
-    montgomery_square_buffer(r0, r0);
+    montgomery_square_buffer(t0, t0);
   }
-  montgomery_multiplication_buffer(r0, t, result);
+  montgomery_multiplication_buffer(t0, t, result);
 }
 
 static void solinas_reduction_impl(uint64_t *i, uint64_t *o)
@@ -1270,10 +1223,16 @@ static void solinas_reduction_impl(uint64_t *i, uint64_t *o)
   uint64_t *r20 = tempBuffer1 + (uint32_t)2U;
   uint64_t *r30 = tempBuffer1 + (uint32_t)3U;
   uint64_t
-  cc0 = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, t01[0U], prime256_buffer[0U], r00);
-  uint64_t cc1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc0, t01[1U], prime256_buffer[1U], r10);
-  uint64_t cc2 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc1, t01[2U], prime256_buffer[2U], r20);
-  uint64_t cc3 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc2, t01[3U], prime256_buffer[3U], r30);
+  cc0 =
+    Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U,
+      t01[0U],
+      (uint64_t)0xffffffffffffffffU,
+      r00);
+  uint64_t
+  cc1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc0, t01[1U], (uint64_t)0xffffffffU, r10);
+  uint64_t cc2 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc1, t01[2U], (uint64_t)0U, r20);
+  uint64_t
+  cc3 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc2, t01[3U], (uint64_t)0xffffffff00000001U, r30);
   uint64_t c = cc3;
   cmovznz4(t01, tempBuffer1, t01, c);
   uint64_t b00 = (uint64_t)0U;
@@ -1299,13 +1258,20 @@ static void solinas_reduction_impl(uint64_t *i, uint64_t *o)
   uint64_t *r21 = tempBuffer10 + (uint32_t)2U;
   uint64_t *r31 = tempBuffer10 + (uint32_t)3U;
   uint64_t
-  cc4 = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, t110[0U], prime256_buffer[0U], r01);
+  cc4 =
+    Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U,
+      t110[0U],
+      (uint64_t)0xffffffffffffffffU,
+      r01);
   uint64_t
-  cc10 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc4, t110[1U], prime256_buffer[1U], r11);
+  cc10 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc4, t110[1U], (uint64_t)0xffffffffU, r11);
+  uint64_t cc20 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc10, t110[2U], (uint64_t)0U, r21);
   uint64_t
-  cc20 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc10, t110[2U], prime256_buffer[2U], r21);
-  uint64_t
-  cc30 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc20, t110[3U], prime256_buffer[3U], r31);
+  cc30 =
+    Lib_IntTypes_Intrinsics_sub_borrow_u64(cc20,
+      t110[3U],
+      (uint64_t)0xffffffff00000001U,
+      r31);
   uint64_t c16 = cc30;
   cmovznz4(t110, tempBuffer10, t110, c16);
   uint64_t b01 = (uint64_t)0U;
@@ -1348,13 +1314,20 @@ static void solinas_reduction_impl(uint64_t *i, uint64_t *o)
   uint64_t *r22 = tempBuffer11 + (uint32_t)2U;
   uint64_t *r32 = tempBuffer11 + (uint32_t)3U;
   uint64_t
-  cc5 = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, t310[0U], prime256_buffer[0U], r02);
+  cc5 =
+    Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U,
+      t310[0U],
+      (uint64_t)0xffffffffffffffffU,
+      r02);
   uint64_t
-  cc11 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc5, t310[1U], prime256_buffer[1U], r12);
+  cc11 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc5, t310[1U], (uint64_t)0xffffffffU, r12);
+  uint64_t cc21 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc11, t310[2U], (uint64_t)0U, r22);
   uint64_t
-  cc21 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc11, t310[2U], prime256_buffer[2U], r22);
-  uint64_t
-  cc31 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc21, t310[3U], prime256_buffer[3U], r32);
+  cc31 =
+    Lib_IntTypes_Intrinsics_sub_borrow_u64(cc21,
+      t310[3U],
+      (uint64_t)0xffffffff00000001U,
+      r32);
   uint64_t c17 = cc31;
   cmovznz4(t310, tempBuffer11, t310, c17);
   uint64_t as_uint64_high23 = (uint64_t)c10;
@@ -1383,13 +1356,20 @@ static void solinas_reduction_impl(uint64_t *i, uint64_t *o)
   uint64_t *r23 = tempBuffer12 + (uint32_t)2U;
   uint64_t *r33 = tempBuffer12 + (uint32_t)3U;
   uint64_t
-  cc6 = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, t410[0U], prime256_buffer[0U], r03);
+  cc6 =
+    Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U,
+      t410[0U],
+      (uint64_t)0xffffffffffffffffU,
+      r03);
   uint64_t
-  cc12 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc6, t410[1U], prime256_buffer[1U], r13);
+  cc12 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc6, t410[1U], (uint64_t)0xffffffffU, r13);
+  uint64_t cc22 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc12, t410[2U], (uint64_t)0U, r23);
   uint64_t
-  cc22 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc12, t410[2U], prime256_buffer[2U], r23);
-  uint64_t
-  cc32 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc22, t410[3U], prime256_buffer[3U], r33);
+  cc32 =
+    Lib_IntTypes_Intrinsics_sub_borrow_u64(cc22,
+      t410[3U],
+      (uint64_t)0xffffffff00000001U,
+      r33);
   uint64_t c18 = cc32;
   cmovznz4(t410, tempBuffer12, t410, c18);
   uint64_t as_uint64_high27 = (uint64_t)c12;
@@ -1415,13 +1395,20 @@ static void solinas_reduction_impl(uint64_t *i, uint64_t *o)
   uint64_t *r24 = tempBuffer13 + (uint32_t)2U;
   uint64_t *r34 = tempBuffer13 + (uint32_t)3U;
   uint64_t
-  cc7 = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, t510[0U], prime256_buffer[0U], r04);
+  cc7 =
+    Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U,
+      t510[0U],
+      (uint64_t)0xffffffffffffffffU,
+      r04);
   uint64_t
-  cc13 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc7, t510[1U], prime256_buffer[1U], r14);
+  cc13 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc7, t510[1U], (uint64_t)0xffffffffU, r14);
+  uint64_t cc23 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc13, t510[2U], (uint64_t)0U, r24);
   uint64_t
-  cc23 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc13, t510[2U], prime256_buffer[2U], r24);
-  uint64_t
-  cc33 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc23, t510[3U], prime256_buffer[3U], r34);
+  cc33 =
+    Lib_IntTypes_Intrinsics_sub_borrow_u64(cc23,
+      t510[3U],
+      (uint64_t)0xffffffff00000001U,
+      r34);
   uint64_t c19 = cc33;
   cmovznz4(t510, tempBuffer13, t510, c19);
   uint64_t as_uint64_high30 = (uint64_t)c13;
@@ -1447,13 +1434,20 @@ static void solinas_reduction_impl(uint64_t *i, uint64_t *o)
   uint64_t *r25 = tempBuffer14 + (uint32_t)2U;
   uint64_t *r35 = tempBuffer14 + (uint32_t)3U;
   uint64_t
-  cc8 = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, t610[0U], prime256_buffer[0U], r05);
+  cc8 =
+    Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U,
+      t610[0U],
+      (uint64_t)0xffffffffffffffffU,
+      r05);
   uint64_t
-  cc14 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc8, t610[1U], prime256_buffer[1U], r15);
+  cc14 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc8, t610[1U], (uint64_t)0xffffffffU, r15);
+  uint64_t cc24 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc14, t610[2U], (uint64_t)0U, r25);
   uint64_t
-  cc24 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc14, t610[2U], prime256_buffer[2U], r25);
-  uint64_t
-  cc34 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc24, t610[3U], prime256_buffer[3U], r35);
+  cc34 =
+    Lib_IntTypes_Intrinsics_sub_borrow_u64(cc24,
+      t610[3U],
+      (uint64_t)0xffffffff00000001U,
+      r35);
   uint64_t c20 = cc34;
   cmovznz4(t610, tempBuffer14, t610, c20);
   uint64_t as_uint64_high33 = (uint64_t)c14;
@@ -1482,13 +1476,20 @@ static void solinas_reduction_impl(uint64_t *i, uint64_t *o)
   uint64_t *r26 = tempBuffer15 + (uint32_t)2U;
   uint64_t *r36 = tempBuffer15 + (uint32_t)3U;
   uint64_t
-  cc9 = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, t710[0U], prime256_buffer[0U], r06);
+  cc9 =
+    Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U,
+      t710[0U],
+      (uint64_t)0xffffffffffffffffU,
+      r06);
   uint64_t
-  cc15 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc9, t710[1U], prime256_buffer[1U], r16);
+  cc15 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc9, t710[1U], (uint64_t)0xffffffffU, r16);
+  uint64_t cc25 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc15, t710[2U], (uint64_t)0U, r26);
   uint64_t
-  cc25 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc15, t710[2U], prime256_buffer[2U], r26);
-  uint64_t
-  cc35 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc25, t710[3U], prime256_buffer[3U], r36);
+  cc35 =
+    Lib_IntTypes_Intrinsics_sub_borrow_u64(cc25,
+      t710[3U],
+      (uint64_t)0xffffffff00000001U,
+      r36);
   uint64_t c21 = cc35;
   cmovznz4(t710, tempBuffer15, t710, c21);
   uint64_t as_uint64_high37 = (uint64_t)c15;
@@ -1517,12 +1518,20 @@ static void solinas_reduction_impl(uint64_t *i, uint64_t *o)
   uint64_t *r2 = tempBuffer16 + (uint32_t)2U;
   uint64_t *r3 = tempBuffer16 + (uint32_t)3U;
   uint64_t
-  cc = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, t810[0U], prime256_buffer[0U], r0);
-  uint64_t cc16 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc, t810[1U], prime256_buffer[1U], r1);
+  cc =
+    Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U,
+      t810[0U],
+      (uint64_t)0xffffffffffffffffU,
+      r0);
   uint64_t
-  cc26 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc16, t810[2U], prime256_buffer[2U], r2);
+  cc16 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc, t810[1U], (uint64_t)0xffffffffU, r1);
+  uint64_t cc26 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc16, t810[2U], (uint64_t)0U, r2);
   uint64_t
-  cc36 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc26, t810[3U], prime256_buffer[3U], r3);
+  cc36 =
+    Lib_IntTypes_Intrinsics_sub_borrow_u64(cc26,
+      t810[3U],
+      (uint64_t)0xffffffff00000001U,
+      r3);
   uint64_t c22 = cc36;
   cmovznz4(t810, tempBuffer16, t810, c22);
   uint64_t *t010 = tempBuffer;
@@ -1657,10 +1666,10 @@ static void point_add(uint64_t *p, uint64_t *q, uint64_t *result, uint64_t *temp
   uint64_t a10 = z[1U];
   uint64_t a20 = z[2U];
   uint64_t a30 = z[3U];
-  uint64_t r00 = ~~FStar_UInt64_eq_mask(a00, (uint64_t)0U);
-  uint64_t r10 = ~~FStar_UInt64_eq_mask(a10, (uint64_t)0U);
-  uint64_t r20 = ~~FStar_UInt64_eq_mask(a20, (uint64_t)0U);
-  uint64_t r30 = ~~FStar_UInt64_eq_mask(a30, (uint64_t)0U);
+  uint64_t r00 = FStar_UInt64_eq_mask(a00, (uint64_t)0U);
+  uint64_t r10 = FStar_UInt64_eq_mask(a10, (uint64_t)0U);
+  uint64_t r20 = FStar_UInt64_eq_mask(a20, (uint64_t)0U);
+  uint64_t r30 = FStar_UInt64_eq_mask(a30, (uint64_t)0U);
   uint64_t r010 = r00 & r10;
   uint64_t r230 = r20 & r30;
   uint64_t mask = r010 & r230;
@@ -1675,10 +1684,10 @@ static void point_add(uint64_t *p, uint64_t *q, uint64_t *result, uint64_t *temp
   uint64_t a1 = z0[1U];
   uint64_t a2 = z0[2U];
   uint64_t a3 = z0[3U];
-  uint64_t r0 = ~~FStar_UInt64_eq_mask(a0, (uint64_t)0U);
-  uint64_t r1 = ~~FStar_UInt64_eq_mask(a1, (uint64_t)0U);
-  uint64_t r2 = ~~FStar_UInt64_eq_mask(a2, (uint64_t)0U);
-  uint64_t r3 = ~~FStar_UInt64_eq_mask(a3, (uint64_t)0U);
+  uint64_t r0 = FStar_UInt64_eq_mask(a0, (uint64_t)0U);
+  uint64_t r1 = FStar_UInt64_eq_mask(a1, (uint64_t)0U);
+  uint64_t r2 = FStar_UInt64_eq_mask(a2, (uint64_t)0U);
+  uint64_t r3 = FStar_UInt64_eq_mask(a3, (uint64_t)0U);
   uint64_t r01 = r0 & r1;
   uint64_t r23 = r2 & r3;
   uint64_t mask0 = r01 & r23;
@@ -1837,32 +1846,29 @@ point_add_mixed(
   uint64_t t2[8U] = { 0U };
   memcpy(t_low, pZ0, (uint32_t)4U * sizeof (uint64_t));
   uint64_t t11 = t[0U];
-  uint64_t *result040 = t2;
   uint64_t temp2 = (uint64_t)0U;
-  uint64_t f10 = prime256_buffer[1U];
-  uint64_t f20 = prime256_buffer[2U];
-  uint64_t f30 = prime256_buffer[3U];
-  uint64_t *o00 = result040;
-  uint64_t *o10 = result040 + (uint32_t)1U;
-  uint64_t *o20 = result040 + (uint32_t)2U;
-  uint64_t *o30 = result040 + (uint32_t)3U;
-  uint64_t f010 = prime256_buffer[0U];
-  mul64(f010, t11, o00, &temp2);
-  uint64_t h2 = temp2;
+  uint64_t f00 = (uint64_t)0xffffffffffffffffU;
+  uint64_t f10 = (uint64_t)0xffffffffU;
+  uint64_t f30 = (uint64_t)0xffffffff00000001U;
+  uint64_t *o00 = t2;
+  uint64_t *o10 = t2 + (uint32_t)1U;
+  uint64_t *o20 = t2 + (uint32_t)2U;
+  uint64_t *o30 = t2 + (uint32_t)3U;
+  mul64(f00, t11, o00, &temp2);
+  uint64_t h20 = temp2;
   mul64(f10, t11, o10, &temp2);
   uint64_t l0 = o10[0U];
-  uint64_t c10 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l0, h2, o10);
+  uint64_t c10 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l0, h20, o10);
   uint64_t h30 = temp2;
-  mul64(f20, t11, o20, &temp2);
-  uint64_t l1 = o20[0U];
-  uint64_t c2 = Lib_IntTypes_Intrinsics_add_carry_u64(c10, l1, h30, o20);
-  uint64_t h40 = temp2;
+  temp2 = (uint64_t)0U;
+  o20[0U] = (uint64_t)0U;
+  Lib_IntTypes_Intrinsics_add_carry_u64_void(c10, (uint64_t)0U, h30, o20);
+  uint64_t h4 = temp2;
   mul64(f30, t11, o30, &temp2);
-  uint64_t l2 = o30[0U];
-  uint64_t c3 = Lib_IntTypes_Intrinsics_add_carry_u64(c2, l2, h40, o30);
+  uint64_t l1 = o30[0U];
+  uint64_t c3 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l1, h4, o30);
   uint64_t temp00 = temp2;
-  uint64_t c = c3 + temp00;
-  t2[4U] = c;
+  t2[4U] = c3 + temp00;
   uint64_t *a00 = t;
   uint64_t *a10 = t + (uint32_t)4U;
   uint64_t *b00 = t2;
@@ -1902,32 +1908,29 @@ point_add_mixed(
   t1[6U] = t70;
   t1[7U] = (uint64_t)0U;
   uint64_t t110 = t1[0U];
-  uint64_t *result041 = t2;
   uint64_t temp3 = (uint64_t)0U;
-  uint64_t f11 = prime256_buffer[1U];
-  uint64_t f21 = prime256_buffer[2U];
-  uint64_t f31 = prime256_buffer[3U];
-  uint64_t *o01 = result041;
-  uint64_t *o11 = result041 + (uint32_t)1U;
-  uint64_t *o21 = result041 + (uint32_t)2U;
-  uint64_t *o31 = result041 + (uint32_t)3U;
-  uint64_t f011 = prime256_buffer[0U];
-  mul64(f011, t110, o01, &temp3);
-  uint64_t h20 = temp3;
+  uint64_t f01 = (uint64_t)0xffffffffffffffffU;
+  uint64_t f11 = (uint64_t)0xffffffffU;
+  uint64_t f31 = (uint64_t)0xffffffff00000001U;
+  uint64_t *o01 = t2;
+  uint64_t *o11 = t2 + (uint32_t)1U;
+  uint64_t *o21 = t2 + (uint32_t)2U;
+  uint64_t *o31 = t2 + (uint32_t)3U;
+  mul64(f01, t110, o01, &temp3);
+  uint64_t h2 = temp3;
   mul64(f11, t110, o11, &temp3);
-  uint64_t l3 = o11[0U];
-  uint64_t c12 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l3, h20, o11);
+  uint64_t l2 = o11[0U];
+  uint64_t c12 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l2, h2, o11);
   uint64_t h31 = temp3;
-  mul64(f21, t110, o21, &temp3);
-  uint64_t l4 = o21[0U];
-  uint64_t c20 = Lib_IntTypes_Intrinsics_add_carry_u64(c12, l4, h31, o21);
-  uint64_t h41 = temp3;
+  temp3 = (uint64_t)0U;
+  o21[0U] = (uint64_t)0U;
+  Lib_IntTypes_Intrinsics_add_carry_u64_void(c12, (uint64_t)0U, h31, o21);
+  uint64_t h40 = temp3;
   mul64(f31, t110, o31, &temp3);
-  uint64_t l5 = o31[0U];
-  uint64_t c30 = Lib_IntTypes_Intrinsics_add_carry_u64(c20, l5, h41, o31);
+  uint64_t l3 = o31[0U];
+  uint64_t c30 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l3, h40, o31);
   uint64_t temp01 = temp3;
-  uint64_t c4 = c30 + temp01;
-  t2[4U] = c4;
+  t2[4U] = c30 + temp01;
   uint64_t *a01 = t1;
   uint64_t *a11 = t1 + (uint32_t)4U;
   uint64_t *b01 = t2;
@@ -1967,32 +1970,29 @@ point_add_mixed(
   round[6U] = t71;
   round[7U] = (uint64_t)0U;
   uint64_t t111 = round[0U];
-  uint64_t *result042 = t2;
   uint64_t temp4 = (uint64_t)0U;
-  uint64_t f12 = prime256_buffer[1U];
-  uint64_t f22 = prime256_buffer[2U];
-  uint64_t f32 = prime256_buffer[3U];
-  uint64_t *o02 = result042;
-  uint64_t *o12 = result042 + (uint32_t)1U;
-  uint64_t *o22 = result042 + (uint32_t)2U;
-  uint64_t *o32 = result042 + (uint32_t)3U;
-  uint64_t f012 = prime256_buffer[0U];
-  mul64(f012, t111, o02, &temp4);
+  uint64_t f02 = (uint64_t)0xffffffffffffffffU;
+  uint64_t f12 = (uint64_t)0xffffffffU;
+  uint64_t f32 = (uint64_t)0xffffffff00000001U;
+  uint64_t *o02 = t2;
+  uint64_t *o12 = t2 + (uint32_t)1U;
+  uint64_t *o22 = t2 + (uint32_t)2U;
+  uint64_t *o32 = t2 + (uint32_t)3U;
+  mul64(f02, t111, o02, &temp4);
   uint64_t h32 = temp4;
   mul64(f12, t111, o12, &temp4);
-  uint64_t l6 = o12[0U];
-  uint64_t c14 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l6, h32, o12);
+  uint64_t l4 = o12[0U];
+  uint64_t c14 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l4, h32, o12);
   uint64_t h33 = temp4;
-  mul64(f22, t111, o22, &temp4);
-  uint64_t l7 = o22[0U];
-  uint64_t c21 = Lib_IntTypes_Intrinsics_add_carry_u64(c14, l7, h33, o22);
-  uint64_t h42 = temp4;
+  temp4 = (uint64_t)0U;
+  o22[0U] = (uint64_t)0U;
+  Lib_IntTypes_Intrinsics_add_carry_u64_void(c14, (uint64_t)0U, h33, o22);
+  uint64_t h41 = temp4;
   mul64(f32, t111, o32, &temp4);
-  uint64_t l8 = o32[0U];
-  uint64_t c31 = Lib_IntTypes_Intrinsics_add_carry_u64(c21, l8, h42, o32);
+  uint64_t l5 = o32[0U];
+  uint64_t c31 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l5, h41, o32);
   uint64_t temp02 = temp4;
-  uint64_t c5 = c31 + temp02;
-  t2[4U] = c5;
+  t2[4U] = c31 + temp02;
   uint64_t *a02 = round;
   uint64_t *a12 = round + (uint32_t)4U;
   uint64_t *b02 = t2;
@@ -2032,32 +2032,29 @@ point_add_mixed(
   t1[6U] = t72;
   t1[7U] = (uint64_t)0U;
   uint64_t t112 = t1[0U];
-  uint64_t *result04 = t2;
   uint64_t temp = (uint64_t)0U;
-  uint64_t f1 = prime256_buffer[1U];
-  uint64_t f2 = prime256_buffer[2U];
-  uint64_t f3 = prime256_buffer[3U];
-  uint64_t *o0 = result04;
-  uint64_t *o1 = result04 + (uint32_t)1U;
-  uint64_t *o2 = result04 + (uint32_t)2U;
-  uint64_t *o3 = result04 + (uint32_t)3U;
-  uint64_t f01 = prime256_buffer[0U];
-  mul64(f01, t112, o0, &temp);
+  uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+  uint64_t f1 = (uint64_t)0xffffffffU;
+  uint64_t f3 = (uint64_t)0xffffffff00000001U;
+  uint64_t *o0 = t2;
+  uint64_t *o1 = t2 + (uint32_t)1U;
+  uint64_t *o2 = t2 + (uint32_t)2U;
+  uint64_t *o3 = t2 + (uint32_t)3U;
+  mul64(f0, t112, o0, &temp);
   uint64_t h34 = temp;
   mul64(f1, t112, o1, &temp);
-  uint64_t l9 = o1[0U];
-  uint64_t c16 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l9, h34, o1);
+  uint64_t l6 = o1[0U];
+  uint64_t c16 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l6, h34, o1);
   uint64_t h3 = temp;
-  mul64(f2, t112, o2, &temp);
-  uint64_t l10 = o2[0U];
-  uint64_t c22 = Lib_IntTypes_Intrinsics_add_carry_u64(c16, l10, h3, o2);
-  uint64_t h4 = temp;
+  temp = (uint64_t)0U;
+  o2[0U] = (uint64_t)0U;
+  Lib_IntTypes_Intrinsics_add_carry_u64_void(c16, (uint64_t)0U, h3, o2);
+  uint64_t h42 = temp;
   mul64(f3, t112, o3, &temp);
   uint64_t l = o3[0U];
-  uint64_t c32 = Lib_IntTypes_Intrinsics_add_carry_u64(c22, l, h4, o3);
+  uint64_t c32 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h42, o3);
   uint64_t temp0 = temp;
-  uint64_t c6 = c32 + temp0;
-  t2[4U] = c6;
+  t2[4U] = c32 + temp0;
   uint64_t *a03 = t1;
   uint64_t *a13 = t1 + (uint32_t)4U;
   uint64_t *b0 = t2;
@@ -2105,13 +2102,18 @@ point_add_mixed(
   uint64_t *r29 = tempBuffer1 + (uint32_t)2U;
   uint64_t *r38 = tempBuffer1 + (uint32_t)3U;
   uint64_t
-  cc = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, x_[0U], prime256_buffer[0U], r09);
-  uint64_t cc17 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc, x_[1U], prime256_buffer[1U], r18);
-  uint64_t cc27 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc17, x_[2U], prime256_buffer[2U], r29);
-  uint64_t cc33 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc27, x_[3U], prime256_buffer[3U], r38);
-  uint64_t c7 = cc33;
+  cc =
+    Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U,
+      x_[0U],
+      (uint64_t)0xffffffffffffffffU,
+      r09);
+  uint64_t cc17 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc, x_[1U], (uint64_t)0xffffffffU, r18);
+  uint64_t cc27 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc17, x_[2U], (uint64_t)0U, r29);
   uint64_t
-  carry = Lib_IntTypes_Intrinsics_sub_borrow_u64(c7, cin, (uint64_t)0U, &tempBufferForSubborrow);
+  cc33 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc27, x_[3U], (uint64_t)0xffffffff00000001U, r38);
+  uint64_t c = cc33;
+  uint64_t
+  carry = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, cin, (uint64_t)0U, &tempBufferForSubborrow);
   cmovznz4(z1z2, tempBuffer1, x_, carry);
   montgomery_multiplication_buffer(z1z2, h, zOut);
   uint64_t *pZ1 = p + (uint32_t)8U;
@@ -2119,10 +2121,10 @@ point_add_mixed(
   uint64_t a14 = pZ1[1U];
   uint64_t a20 = pZ1[2U];
   uint64_t a30 = pZ1[3U];
-  uint64_t r010 = ~~FStar_UInt64_eq_mask(a04, (uint64_t)0U);
-  uint64_t r19 = ~~FStar_UInt64_eq_mask(a14, (uint64_t)0U);
-  uint64_t r210 = ~~FStar_UInt64_eq_mask(a20, (uint64_t)0U);
-  uint64_t r39 = ~~FStar_UInt64_eq_mask(a30, (uint64_t)0U);
+  uint64_t r010 = FStar_UInt64_eq_mask(a04, (uint64_t)0U);
+  uint64_t r19 = FStar_UInt64_eq_mask(a14, (uint64_t)0U);
+  uint64_t r210 = FStar_UInt64_eq_mask(a20, (uint64_t)0U);
+  uint64_t r39 = FStar_UInt64_eq_mask(a30, (uint64_t)0U);
   uint64_t r011 = r010 & r19;
   uint64_t r230 = r210 & r39;
   uint64_t mask = r011 & r230;
@@ -2250,10 +2252,10 @@ point_add_mixed(
   uint64_t a15 = uu____0[1U];
   uint64_t a21 = uu____0[2U];
   uint64_t a31 = uu____0[3U];
-  uint64_t r012 = ~~FStar_UInt64_eq_mask(a05, (uint64_t)0U);
-  uint64_t r110 = ~~FStar_UInt64_eq_mask(a15, (uint64_t)0U);
-  uint64_t r211 = ~~FStar_UInt64_eq_mask(a21, (uint64_t)0U);
-  uint64_t r310 = ~~FStar_UInt64_eq_mask(a31, (uint64_t)0U);
+  uint64_t r012 = FStar_UInt64_eq_mask(a05, (uint64_t)0U);
+  uint64_t r110 = FStar_UInt64_eq_mask(a15, (uint64_t)0U);
+  uint64_t r211 = FStar_UInt64_eq_mask(a21, (uint64_t)0U);
+  uint64_t r310 = FStar_UInt64_eq_mask(a31, (uint64_t)0U);
   uint64_t r013 = r012 & r110;
   uint64_t r231 = r211 & r310;
   uint64_t xZero = r013 & r231;
@@ -2262,10 +2264,10 @@ point_add_mixed(
   uint64_t a1 = uu____1[1U];
   uint64_t a2 = uu____1[2U];
   uint64_t a3 = uu____1[3U];
-  uint64_t r0 = ~~FStar_UInt64_eq_mask(a0, (uint64_t)0U);
-  uint64_t r1 = ~~FStar_UInt64_eq_mask(a1, (uint64_t)0U);
-  uint64_t r2 = ~~FStar_UInt64_eq_mask(a2, (uint64_t)0U);
-  uint64_t r3 = ~~FStar_UInt64_eq_mask(a3, (uint64_t)0U);
+  uint64_t r0 = FStar_UInt64_eq_mask(a0, (uint64_t)0U);
+  uint64_t r1 = FStar_UInt64_eq_mask(a1, (uint64_t)0U);
+  uint64_t r2 = FStar_UInt64_eq_mask(a2, (uint64_t)0U);
+  uint64_t r3 = FStar_UInt64_eq_mask(a3, (uint64_t)0U);
   uint64_t r01 = r0 & r1;
   uint64_t r23 = r2 & r3;
   uint64_t yZero = r01 & r23;
@@ -2392,7 +2394,15 @@ conditional_substraction(uint64_t *result, uint64_t *p, uint8_t *scalar, uint64_
   memcpy(bpMinusX, bpX, (uint32_t)4U * sizeof (uint64_t));
   p256_neg(bpY, bpMinusY);
   point_add_mixed(Lib_Buffer_MUT, p, (void *)bpMinus, tempPoint, tempBuffer);
-  copy_point_conditional_mask_u64_2(result, tempPoint, mask);
+  uint64_t *x_x = tempPoint;
+  uint64_t *x_y = tempPoint + (uint32_t)4U;
+  uint64_t *x_z = tempPoint + (uint32_t)8U;
+  uint64_t *result_x = result;
+  uint64_t *result_y = result + (uint32_t)4U;
+  uint64_t *result_z = result + (uint32_t)8U;
+  copy_conditional(result_x, x_x, mask);
+  copy_conditional(result_y, x_y, mask);
+  copy_conditional(result_z, x_z, mask);
 }
 
 static void scalar_multiplication_cmb(uint64_t *result, void *scalar, uint64_t *tempBuffer)
@@ -2638,32 +2648,29 @@ static inline void norm(uint64_t *p, uint64_t *resultPoint, uint64_t *tempBuffer
   uint64_t t20[8U] = { 0U };
   memcpy(t_low0, z2f, (uint32_t)4U * sizeof (uint64_t));
   uint64_t t110 = t[0U];
-  uint64_t *result040 = t20;
   uint64_t temp1 = (uint64_t)0U;
-  uint64_t f10 = prime256_buffer[1U];
-  uint64_t f20 = prime256_buffer[2U];
-  uint64_t f30 = prime256_buffer[3U];
-  uint64_t *o00 = result040;
-  uint64_t *o10 = result040 + (uint32_t)1U;
-  uint64_t *o20 = result040 + (uint32_t)2U;
-  uint64_t *o30 = result040 + (uint32_t)3U;
-  uint64_t f010 = prime256_buffer[0U];
-  mul64(f010, t110, o00, &temp1);
+  uint64_t f00 = (uint64_t)0xffffffffffffffffU;
+  uint64_t f10 = (uint64_t)0xffffffffU;
+  uint64_t f30 = (uint64_t)0xffffffff00000001U;
+  uint64_t *o00 = t20;
+  uint64_t *o10 = t20 + (uint32_t)1U;
+  uint64_t *o20 = t20 + (uint32_t)2U;
+  uint64_t *o30 = t20 + (uint32_t)3U;
+  mul64(f00, t110, o00, &temp1);
   uint64_t h0 = temp1;
   mul64(f10, t110, o10, &temp1);
   uint64_t l0 = o10[0U];
   uint64_t c10 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l0, h0, o10);
   uint64_t h1 = temp1;
-  mul64(f20, t110, o20, &temp1);
-  uint64_t l1 = o20[0U];
-  uint64_t c2 = Lib_IntTypes_Intrinsics_add_carry_u64(c10, l1, h1, o20);
-  uint64_t h2 = temp1;
+  temp1 = (uint64_t)0U;
+  o20[0U] = (uint64_t)0U;
+  Lib_IntTypes_Intrinsics_add_carry_u64_void(c10, (uint64_t)0U, h1, o20);
+  uint64_t h5 = temp1;
   mul64(f30, t110, o30, &temp1);
-  uint64_t l2 = o30[0U];
-  uint64_t c3 = Lib_IntTypes_Intrinsics_add_carry_u64(c2, l2, h2, o30);
+  uint64_t l1 = o30[0U];
+  uint64_t c3 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l1, h5, o30);
   uint64_t temp00 = temp1;
-  uint64_t c = c3 + temp00;
-  t20[4U] = c;
+  t20[4U] = c3 + temp00;
   uint64_t *a0 = t;
   uint64_t *a10 = t + (uint32_t)4U;
   uint64_t *b00 = t20;
@@ -2703,32 +2710,29 @@ static inline void norm(uint64_t *p, uint64_t *resultPoint, uint64_t *tempBuffer
   t10[6U] = t70;
   t10[7U] = (uint64_t)0U;
   uint64_t t111 = t10[0U];
-  uint64_t *result041 = t20;
   uint64_t temp2 = (uint64_t)0U;
-  uint64_t f11 = prime256_buffer[1U];
-  uint64_t f21 = prime256_buffer[2U];
-  uint64_t f31 = prime256_buffer[3U];
-  uint64_t *o01 = result041;
-  uint64_t *o11 = result041 + (uint32_t)1U;
-  uint64_t *o21 = result041 + (uint32_t)2U;
-  uint64_t *o31 = result041 + (uint32_t)3U;
-  uint64_t f011 = prime256_buffer[0U];
-  mul64(f011, t111, o01, &temp2);
-  uint64_t h3 = temp2;
+  uint64_t f01 = (uint64_t)0xffffffffffffffffU;
+  uint64_t f11 = (uint64_t)0xffffffffU;
+  uint64_t f31 = (uint64_t)0xffffffff00000001U;
+  uint64_t *o01 = t20;
+  uint64_t *o11 = t20 + (uint32_t)1U;
+  uint64_t *o21 = t20 + (uint32_t)2U;
+  uint64_t *o31 = t20 + (uint32_t)3U;
+  mul64(f01, t111, o01, &temp2);
+  uint64_t h2 = temp2;
   mul64(f11, t111, o11, &temp2);
-  uint64_t l3 = o11[0U];
-  uint64_t c12 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l3, h3, o11);
-  uint64_t h4 = temp2;
-  mul64(f21, t111, o21, &temp2);
-  uint64_t l4 = o21[0U];
-  uint64_t c20 = Lib_IntTypes_Intrinsics_add_carry_u64(c12, l4, h4, o21);
-  uint64_t h5 = temp2;
+  uint64_t l2 = o11[0U];
+  uint64_t c12 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l2, h2, o11);
+  uint64_t h3 = temp2;
+  temp2 = (uint64_t)0U;
+  o21[0U] = (uint64_t)0U;
+  Lib_IntTypes_Intrinsics_add_carry_u64_void(c12, (uint64_t)0U, h3, o21);
+  uint64_t h50 = temp2;
   mul64(f31, t111, o31, &temp2);
-  uint64_t l5 = o31[0U];
-  uint64_t c30 = Lib_IntTypes_Intrinsics_add_carry_u64(c20, l5, h5, o31);
+  uint64_t l3 = o31[0U];
+  uint64_t c30 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l3, h50, o31);
   uint64_t temp01 = temp2;
-  uint64_t c4 = c30 + temp01;
-  t20[4U] = c4;
+  t20[4U] = c30 + temp01;
   uint64_t *a00 = t10;
   uint64_t *a11 = t10 + (uint32_t)4U;
   uint64_t *b01 = t20;
@@ -2768,32 +2772,29 @@ static inline void norm(uint64_t *p, uint64_t *resultPoint, uint64_t *tempBuffer
   round0[6U] = t71;
   round0[7U] = (uint64_t)0U;
   uint64_t t112 = round0[0U];
-  uint64_t *result042 = t20;
   uint64_t temp3 = (uint64_t)0U;
-  uint64_t f12 = prime256_buffer[1U];
-  uint64_t f22 = prime256_buffer[2U];
-  uint64_t f32 = prime256_buffer[3U];
-  uint64_t *o02 = result042;
-  uint64_t *o12 = result042 + (uint32_t)1U;
-  uint64_t *o22 = result042 + (uint32_t)2U;
-  uint64_t *o32 = result042 + (uint32_t)3U;
-  uint64_t f012 = prime256_buffer[0U];
-  mul64(f012, t112, o02, &temp3);
-  uint64_t h6 = temp3;
+  uint64_t f02 = (uint64_t)0xffffffffffffffffU;
+  uint64_t f12 = (uint64_t)0xffffffffU;
+  uint64_t f32 = (uint64_t)0xffffffff00000001U;
+  uint64_t *o02 = t20;
+  uint64_t *o12 = t20 + (uint32_t)1U;
+  uint64_t *o22 = t20 + (uint32_t)2U;
+  uint64_t *o32 = t20 + (uint32_t)3U;
+  mul64(f02, t112, o02, &temp3);
+  uint64_t h4 = temp3;
   mul64(f12, t112, o12, &temp3);
-  uint64_t l6 = o12[0U];
-  uint64_t c14 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l6, h6, o12);
-  uint64_t h7 = temp3;
-  mul64(f22, t112, o22, &temp3);
-  uint64_t l7 = o22[0U];
-  uint64_t c21 = Lib_IntTypes_Intrinsics_add_carry_u64(c14, l7, h7, o22);
-  uint64_t h8 = temp3;
+  uint64_t l4 = o12[0U];
+  uint64_t c14 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l4, h4, o12);
+  uint64_t h6 = temp3;
+  temp3 = (uint64_t)0U;
+  o22[0U] = (uint64_t)0U;
+  Lib_IntTypes_Intrinsics_add_carry_u64_void(c14, (uint64_t)0U, h6, o22);
+  uint64_t h51 = temp3;
   mul64(f32, t112, o32, &temp3);
-  uint64_t l8 = o32[0U];
-  uint64_t c31 = Lib_IntTypes_Intrinsics_add_carry_u64(c21, l8, h8, o32);
+  uint64_t l5 = o32[0U];
+  uint64_t c31 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l5, h51, o32);
   uint64_t temp02 = temp3;
-  uint64_t c5 = c31 + temp02;
-  t20[4U] = c5;
+  t20[4U] = c31 + temp02;
   uint64_t *a01 = round0;
   uint64_t *a12 = round0 + (uint32_t)4U;
   uint64_t *b02 = t20;
@@ -2833,32 +2834,29 @@ static inline void norm(uint64_t *p, uint64_t *resultPoint, uint64_t *tempBuffer
   t10[6U] = t72;
   t10[7U] = (uint64_t)0U;
   uint64_t t113 = t10[0U];
-  uint64_t *result043 = t20;
   uint64_t temp4 = (uint64_t)0U;
-  uint64_t f13 = prime256_buffer[1U];
-  uint64_t f23 = prime256_buffer[2U];
-  uint64_t f33 = prime256_buffer[3U];
-  uint64_t *o03 = result043;
-  uint64_t *o13 = result043 + (uint32_t)1U;
-  uint64_t *o23 = result043 + (uint32_t)2U;
-  uint64_t *o33 = result043 + (uint32_t)3U;
-  uint64_t f013 = prime256_buffer[0U];
-  mul64(f013, t113, o03, &temp4);
-  uint64_t h9 = temp4;
+  uint64_t f03 = (uint64_t)0xffffffffffffffffU;
+  uint64_t f13 = (uint64_t)0xffffffffU;
+  uint64_t f33 = (uint64_t)0xffffffff00000001U;
+  uint64_t *o03 = t20;
+  uint64_t *o13 = t20 + (uint32_t)1U;
+  uint64_t *o23 = t20 + (uint32_t)2U;
+  uint64_t *o33 = t20 + (uint32_t)3U;
+  mul64(f03, t113, o03, &temp4);
+  uint64_t h7 = temp4;
   mul64(f13, t113, o13, &temp4);
-  uint64_t l9 = o13[0U];
-  uint64_t c16 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l9, h9, o13);
-  uint64_t h10 = temp4;
-  mul64(f23, t113, o23, &temp4);
-  uint64_t l10 = o23[0U];
-  uint64_t c22 = Lib_IntTypes_Intrinsics_add_carry_u64(c16, l10, h10, o23);
-  uint64_t h11 = temp4;
+  uint64_t l6 = o13[0U];
+  uint64_t c16 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l6, h7, o13);
+  uint64_t h8 = temp4;
+  temp4 = (uint64_t)0U;
+  o23[0U] = (uint64_t)0U;
+  Lib_IntTypes_Intrinsics_add_carry_u64_void(c16, (uint64_t)0U, h8, o23);
+  uint64_t h52 = temp4;
   mul64(f33, t113, o33, &temp4);
-  uint64_t l11 = o33[0U];
-  uint64_t c32 = Lib_IntTypes_Intrinsics_add_carry_u64(c22, l11, h11, o33);
+  uint64_t l7 = o33[0U];
+  uint64_t c32 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l7, h52, o33);
   uint64_t temp03 = temp4;
-  uint64_t c6 = c32 + temp03;
-  t20[4U] = c6;
+  t20[4U] = c32 + temp03;
   uint64_t *a02 = t10;
   uint64_t *a13 = t10 + (uint32_t)4U;
   uint64_t *b03 = t20;
@@ -2906,19 +2904,23 @@ static inline void norm(uint64_t *p, uint64_t *resultPoint, uint64_t *tempBuffer
   uint64_t *r28 = tempBuffer1 + (uint32_t)2U;
   uint64_t *r38 = tempBuffer1 + (uint32_t)3U;
   uint64_t
-  cc4 = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, x_0[0U], prime256_buffer[0U], r08);
-  uint64_t cc17 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc4, x_0[1U], prime256_buffer[1U], r18);
+  cc4 =
+    Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U,
+      x_0[0U],
+      (uint64_t)0xffffffffffffffffU,
+      r08);
   uint64_t
-  cc27 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc17, x_0[2U], prime256_buffer[2U], r28);
+  cc17 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc4, x_0[1U], (uint64_t)0xffffffffU, r18);
+  uint64_t cc27 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc17, x_0[2U], (uint64_t)0U, r28);
   uint64_t
-  cc33 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc27, x_0[3U], prime256_buffer[3U], r38);
-  uint64_t c7 = cc33;
+  cc33 =
+    Lib_IntTypes_Intrinsics_sub_borrow_u64(cc27,
+      x_0[3U],
+      (uint64_t)0xffffffff00000001U,
+      r38);
+  uint64_t c = cc33;
   uint64_t
-  carry =
-    Lib_IntTypes_Intrinsics_sub_borrow_u64(c7,
-      cin0,
-      (uint64_t)0U,
-      &tempBufferForSubborrow0);
+  carry = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, cin0, (uint64_t)0U, &tempBufferForSubborrow0);
   cmovznz4(resultX, tempBuffer1, x_0, carry);
   uint64_t t0[8U] = { 0U };
   uint64_t *t_low = t0;
@@ -2927,32 +2929,29 @@ static inline void norm(uint64_t *p, uint64_t *resultPoint, uint64_t *tempBuffer
   uint64_t t2[8U] = { 0U };
   memcpy(t_low, z3f, (uint32_t)4U * sizeof (uint64_t));
   uint64_t t11 = t0[0U];
-  uint64_t *result044 = t2;
   uint64_t temp5 = (uint64_t)0U;
-  uint64_t f14 = prime256_buffer[1U];
-  uint64_t f24 = prime256_buffer[2U];
-  uint64_t f34 = prime256_buffer[3U];
-  uint64_t *o04 = result044;
-  uint64_t *o14 = result044 + (uint32_t)1U;
-  uint64_t *o24 = result044 + (uint32_t)2U;
-  uint64_t *o34 = result044 + (uint32_t)3U;
-  uint64_t f014 = prime256_buffer[0U];
-  mul64(f014, t11, o04, &temp5);
-  uint64_t h12 = temp5;
+  uint64_t f04 = (uint64_t)0xffffffffffffffffU;
+  uint64_t f14 = (uint64_t)0xffffffffU;
+  uint64_t f34 = (uint64_t)0xffffffff00000001U;
+  uint64_t *o04 = t2;
+  uint64_t *o14 = t2 + (uint32_t)1U;
+  uint64_t *o24 = t2 + (uint32_t)2U;
+  uint64_t *o34 = t2 + (uint32_t)3U;
+  mul64(f04, t11, o04, &temp5);
+  uint64_t h9 = temp5;
   mul64(f14, t11, o14, &temp5);
-  uint64_t l12 = o14[0U];
-  uint64_t c18 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l12, h12, o14);
-  uint64_t h13 = temp5;
-  mul64(f24, t11, o24, &temp5);
-  uint64_t l13 = o24[0U];
-  uint64_t c23 = Lib_IntTypes_Intrinsics_add_carry_u64(c18, l13, h13, o24);
-  uint64_t h14 = temp5;
+  uint64_t l8 = o14[0U];
+  uint64_t c18 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l8, h9, o14);
+  uint64_t h10 = temp5;
+  temp5 = (uint64_t)0U;
+  o24[0U] = (uint64_t)0U;
+  Lib_IntTypes_Intrinsics_add_carry_u64_void(c18, (uint64_t)0U, h10, o24);
+  uint64_t h53 = temp5;
   mul64(f34, t11, o34, &temp5);
-  uint64_t l14 = o34[0U];
-  uint64_t c33 = Lib_IntTypes_Intrinsics_add_carry_u64(c23, l14, h14, o34);
+  uint64_t l9 = o34[0U];
+  uint64_t c33 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l9, h53, o34);
   uint64_t temp04 = temp5;
-  uint64_t c8 = c33 + temp04;
-  t2[4U] = c8;
+  t2[4U] = c33 + temp04;
   uint64_t *a03 = t0;
   uint64_t *a14 = t0 + (uint32_t)4U;
   uint64_t *b04 = t2;
@@ -2992,32 +2991,29 @@ static inline void norm(uint64_t *p, uint64_t *resultPoint, uint64_t *tempBuffer
   t1[6U] = t74;
   t1[7U] = (uint64_t)0U;
   uint64_t t114 = t1[0U];
-  uint64_t *result045 = t2;
   uint64_t temp6 = (uint64_t)0U;
-  uint64_t f15 = prime256_buffer[1U];
-  uint64_t f25 = prime256_buffer[2U];
-  uint64_t f35 = prime256_buffer[3U];
-  uint64_t *o05 = result045;
-  uint64_t *o15 = result045 + (uint32_t)1U;
-  uint64_t *o25 = result045 + (uint32_t)2U;
-  uint64_t *o35 = result045 + (uint32_t)3U;
-  uint64_t f015 = prime256_buffer[0U];
-  mul64(f015, t114, o05, &temp6);
-  uint64_t h15 = temp6;
+  uint64_t f05 = (uint64_t)0xffffffffffffffffU;
+  uint64_t f15 = (uint64_t)0xffffffffU;
+  uint64_t f35 = (uint64_t)0xffffffff00000001U;
+  uint64_t *o05 = t2;
+  uint64_t *o15 = t2 + (uint32_t)1U;
+  uint64_t *o25 = t2 + (uint32_t)2U;
+  uint64_t *o35 = t2 + (uint32_t)3U;
+  mul64(f05, t114, o05, &temp6);
+  uint64_t h11 = temp6;
   mul64(f15, t114, o15, &temp6);
-  uint64_t l15 = o15[0U];
-  uint64_t c110 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l15, h15, o15);
-  uint64_t h16 = temp6;
-  mul64(f25, t114, o25, &temp6);
-  uint64_t l16 = o25[0U];
-  uint64_t c24 = Lib_IntTypes_Intrinsics_add_carry_u64(c110, l16, h16, o25);
-  uint64_t h17 = temp6;
+  uint64_t l10 = o15[0U];
+  uint64_t c110 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l10, h11, o15);
+  uint64_t h12 = temp6;
+  temp6 = (uint64_t)0U;
+  o25[0U] = (uint64_t)0U;
+  Lib_IntTypes_Intrinsics_add_carry_u64_void(c110, (uint64_t)0U, h12, o25);
+  uint64_t h54 = temp6;
   mul64(f35, t114, o35, &temp6);
-  uint64_t l17 = o35[0U];
-  uint64_t c34 = Lib_IntTypes_Intrinsics_add_carry_u64(c24, l17, h17, o35);
+  uint64_t l11 = o35[0U];
+  uint64_t c34 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l11, h54, o35);
   uint64_t temp05 = temp6;
-  uint64_t c9 = c34 + temp05;
-  t2[4U] = c9;
+  t2[4U] = c34 + temp05;
   uint64_t *a04 = t1;
   uint64_t *a15 = t1 + (uint32_t)4U;
   uint64_t *b05 = t2;
@@ -3057,32 +3053,29 @@ static inline void norm(uint64_t *p, uint64_t *resultPoint, uint64_t *tempBuffer
   round[6U] = t75;
   round[7U] = (uint64_t)0U;
   uint64_t t115 = round[0U];
-  uint64_t *result046 = t2;
   uint64_t temp7 = (uint64_t)0U;
-  uint64_t f16 = prime256_buffer[1U];
-  uint64_t f26 = prime256_buffer[2U];
-  uint64_t f36 = prime256_buffer[3U];
-  uint64_t *o06 = result046;
-  uint64_t *o16 = result046 + (uint32_t)1U;
-  uint64_t *o26 = result046 + (uint32_t)2U;
-  uint64_t *o36 = result046 + (uint32_t)3U;
-  uint64_t f016 = prime256_buffer[0U];
-  mul64(f016, t115, o06, &temp7);
-  uint64_t h18 = temp7;
+  uint64_t f06 = (uint64_t)0xffffffffffffffffU;
+  uint64_t f16 = (uint64_t)0xffffffffU;
+  uint64_t f36 = (uint64_t)0xffffffff00000001U;
+  uint64_t *o06 = t2;
+  uint64_t *o16 = t2 + (uint32_t)1U;
+  uint64_t *o26 = t2 + (uint32_t)2U;
+  uint64_t *o36 = t2 + (uint32_t)3U;
+  mul64(f06, t115, o06, &temp7);
+  uint64_t h13 = temp7;
   mul64(f16, t115, o16, &temp7);
-  uint64_t l18 = o16[0U];
-  uint64_t c112 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l18, h18, o16);
-  uint64_t h19 = temp7;
-  mul64(f26, t115, o26, &temp7);
-  uint64_t l19 = o26[0U];
-  uint64_t c25 = Lib_IntTypes_Intrinsics_add_carry_u64(c112, l19, h19, o26);
-  uint64_t h20 = temp7;
+  uint64_t l12 = o16[0U];
+  uint64_t c112 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l12, h13, o16);
+  uint64_t h14 = temp7;
+  temp7 = (uint64_t)0U;
+  o26[0U] = (uint64_t)0U;
+  Lib_IntTypes_Intrinsics_add_carry_u64_void(c112, (uint64_t)0U, h14, o26);
+  uint64_t h55 = temp7;
   mul64(f36, t115, o36, &temp7);
-  uint64_t l20 = o36[0U];
-  uint64_t c35 = Lib_IntTypes_Intrinsics_add_carry_u64(c25, l20, h20, o36);
+  uint64_t l13 = o36[0U];
+  uint64_t c35 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l13, h55, o36);
   uint64_t temp06 = temp7;
-  uint64_t c26 = c35 + temp06;
-  t2[4U] = c26;
+  t2[4U] = c35 + temp06;
   uint64_t *a05 = round;
   uint64_t *a16 = round + (uint32_t)4U;
   uint64_t *b06 = t2;
@@ -3122,32 +3115,29 @@ static inline void norm(uint64_t *p, uint64_t *resultPoint, uint64_t *tempBuffer
   t1[6U] = t76;
   t1[7U] = (uint64_t)0U;
   uint64_t t116 = t1[0U];
-  uint64_t *result04 = t2;
   uint64_t temp = (uint64_t)0U;
-  uint64_t f1 = prime256_buffer[1U];
-  uint64_t f2 = prime256_buffer[2U];
-  uint64_t f3 = prime256_buffer[3U];
-  uint64_t *o0 = result04;
-  uint64_t *o1 = result04 + (uint32_t)1U;
-  uint64_t *o2 = result04 + (uint32_t)2U;
-  uint64_t *o3 = result04 + (uint32_t)3U;
-  uint64_t f01 = prime256_buffer[0U];
-  mul64(f01, t116, o0, &temp);
-  uint64_t h21 = temp;
+  uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+  uint64_t f1 = (uint64_t)0xffffffffU;
+  uint64_t f3 = (uint64_t)0xffffffff00000001U;
+  uint64_t *o0 = t2;
+  uint64_t *o1 = t2 + (uint32_t)1U;
+  uint64_t *o2 = t2 + (uint32_t)2U;
+  uint64_t *o3 = t2 + (uint32_t)3U;
+  mul64(f0, t116, o0, &temp);
+  uint64_t h15 = temp;
   mul64(f1, t116, o1, &temp);
-  uint64_t l21 = o1[0U];
-  uint64_t c114 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l21, h21, o1);
-  uint64_t h22 = temp;
-  mul64(f2, t116, o2, &temp);
-  uint64_t l22 = o2[0U];
-  uint64_t c27 = Lib_IntTypes_Intrinsics_add_carry_u64(c114, l22, h22, o2);
+  uint64_t l14 = o1[0U];
+  uint64_t c114 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l14, h15, o1);
   uint64_t h = temp;
+  temp = (uint64_t)0U;
+  o2[0U] = (uint64_t)0U;
+  Lib_IntTypes_Intrinsics_add_carry_u64_void(c114, (uint64_t)0U, h, o2);
+  uint64_t h56 = temp;
   mul64(f3, t116, o3, &temp);
   uint64_t l = o3[0U];
-  uint64_t c36 = Lib_IntTypes_Intrinsics_add_carry_u64(c27, l, h, o3);
+  uint64_t c36 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h56, o3);
   uint64_t temp0 = temp;
-  uint64_t c28 = c36 + temp0;
-  t2[4U] = c28;
+  t2[4U] = c36 + temp0;
   uint64_t *a06 = t1;
   uint64_t *a1 = t1 + (uint32_t)4U;
   uint64_t *b0 = t2;
@@ -3195,18 +3185,18 @@ static inline void norm(uint64_t *p, uint64_t *resultPoint, uint64_t *tempBuffer
   uint64_t *r2 = tempBuffer10 + (uint32_t)2U;
   uint64_t *r3 = tempBuffer10 + (uint32_t)3U;
   uint64_t
-  cc = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, x_[0U], prime256_buffer[0U], r0);
-  uint64_t cc116 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc, x_[1U], prime256_buffer[1U], r1);
+  cc =
+    Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U,
+      x_[0U],
+      (uint64_t)0xffffffffffffffffU,
+      r0);
+  uint64_t cc116 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc, x_[1U], (uint64_t)0xffffffffU, r1);
+  uint64_t cc216 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc116, x_[2U], (uint64_t)0U, r2);
   uint64_t
-  cc216 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc116, x_[2U], prime256_buffer[2U], r2);
-  uint64_t cc38 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc216, x_[3U], prime256_buffer[3U], r3);
-  uint64_t c29 = cc38;
+  cc38 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc216, x_[3U], (uint64_t)0xffffffff00000001U, r3);
+  uint64_t c2 = cc38;
   uint64_t
-  carry1 =
-    Lib_IntTypes_Intrinsics_sub_borrow_u64(c29,
-      cin,
-      (uint64_t)0U,
-      &tempBufferForSubborrow);
+  carry1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c2, cin, (uint64_t)0U, &tempBufferForSubborrow);
   cmovznz4(resultY, tempBuffer10, x_, carry1);
   resultZ[0U] = (uint64_t)1U;
   resultZ[1U] = (uint64_t)0U;
@@ -3638,7 +3628,23 @@ static bool isPointOnCurvePublic(uint64_t *p)
   p256_constant[2U] = (uint64_t)16546823903870267094U;
   p256_constant[3U] = (uint64_t)15866188208926050356U;
   p256_add(xBuffer, p256_constant, xBuffer);
-  bool r = cmp_felem_felem_bool(y2Buffer, xBuffer);
+  uint64_t a_0 = y2Buffer[0U];
+  uint64_t a_1 = y2Buffer[1U];
+  uint64_t a_2 = y2Buffer[2U];
+  uint64_t a_3 = y2Buffer[3U];
+  uint64_t b_0 = xBuffer[0U];
+  uint64_t b_1 = xBuffer[1U];
+  uint64_t b_2 = xBuffer[2U];
+  uint64_t b_3 = xBuffer[3U];
+  uint64_t r_0 = FStar_UInt64_eq_mask(a_0, b_0);
+  uint64_t r_1 = FStar_UInt64_eq_mask(a_1, b_1);
+  uint64_t r_2 = FStar_UInt64_eq_mask(a_2, b_2);
+  uint64_t r_3 = FStar_UInt64_eq_mask(a_3, b_3);
+  uint64_t r01 = r_0 & r_1;
+  uint64_t r23 = r_2 & r_3;
+  uint64_t r1 = r01 & r23;
+  uint64_t f = ~r1;
+  bool r = f == (uint64_t)0U;
   return r;
 }
 
@@ -3749,10 +3755,10 @@ static bool isMoreThanZeroLessThanOrder(uint8_t *x)
   uint64_t a1 = xAsFelem[1U];
   uint64_t a2 = xAsFelem[2U];
   uint64_t a3 = xAsFelem[3U];
-  uint64_t r0 = ~~FStar_UInt64_eq_mask(a0, (uint64_t)0U);
-  uint64_t r1 = ~~FStar_UInt64_eq_mask(a1, (uint64_t)0U);
-  uint64_t r2 = ~~FStar_UInt64_eq_mask(a2, (uint64_t)0U);
-  uint64_t r3 = ~~FStar_UInt64_eq_mask(a3, (uint64_t)0U);
+  uint64_t r0 = FStar_UInt64_eq_mask(a0, (uint64_t)0U);
+  uint64_t r1 = FStar_UInt64_eq_mask(a1, (uint64_t)0U);
+  uint64_t r2 = FStar_UInt64_eq_mask(a2, (uint64_t)0U);
+  uint64_t r3 = FStar_UInt64_eq_mask(a3, (uint64_t)0U);
   uint64_t r01 = r0 & r1;
   uint64_t r23 = r2 & r3;
   uint64_t more = r01 & r23;
@@ -4172,9 +4178,57 @@ bool Hacl_P256_points_op(uint8_t *result, uint8_t *publicKey, uint8_t *u1, uint8
   uint64_t *x1 = result1Norm;
   uint64_t *y1 = result1Norm + (uint32_t)4U;
   uint64_t *z1 = result1Norm + (uint32_t)8U;
-  bool xEqual = cmp_felem_felem_bool(x0, x1);
-  bool yEqual = cmp_felem_felem_bool(y0, y1);
-  bool zEqual = cmp_felem_felem_bool(z0, z1);
+  uint64_t a_00 = x0[0U];
+  uint64_t a_10 = x0[1U];
+  uint64_t a_20 = x0[2U];
+  uint64_t a_30 = x0[3U];
+  uint64_t b_00 = x1[0U];
+  uint64_t b_10 = x1[1U];
+  uint64_t b_20 = x1[2U];
+  uint64_t b_30 = x1[3U];
+  uint64_t r_00 = FStar_UInt64_eq_mask(a_00, b_00);
+  uint64_t r_10 = FStar_UInt64_eq_mask(a_10, b_10);
+  uint64_t r_20 = FStar_UInt64_eq_mask(a_20, b_20);
+  uint64_t r_30 = FStar_UInt64_eq_mask(a_30, b_30);
+  uint64_t r010 = r_00 & r_10;
+  uint64_t r230 = r_20 & r_30;
+  uint64_t r1 = r010 & r230;
+  uint64_t f = ~r1;
+  bool xEqual = f == (uint64_t)0U;
+  uint64_t a_01 = y0[0U];
+  uint64_t a_11 = y0[1U];
+  uint64_t a_21 = y0[2U];
+  uint64_t a_31 = y0[3U];
+  uint64_t b_01 = y1[0U];
+  uint64_t b_11 = y1[1U];
+  uint64_t b_21 = y1[2U];
+  uint64_t b_31 = y1[3U];
+  uint64_t r_01 = FStar_UInt64_eq_mask(a_01, b_01);
+  uint64_t r_11 = FStar_UInt64_eq_mask(a_11, b_11);
+  uint64_t r_21 = FStar_UInt64_eq_mask(a_21, b_21);
+  uint64_t r_31 = FStar_UInt64_eq_mask(a_31, b_31);
+  uint64_t r011 = r_01 & r_11;
+  uint64_t r231 = r_21 & r_31;
+  uint64_t r10 = r011 & r231;
+  uint64_t f0 = ~r10;
+  bool yEqual = f0 == (uint64_t)0U;
+  uint64_t a_0 = z0[0U];
+  uint64_t a_1 = z0[1U];
+  uint64_t a_2 = z0[2U];
+  uint64_t a_3 = z0[3U];
+  uint64_t b_0 = z1[0U];
+  uint64_t b_1 = z1[1U];
+  uint64_t b_2 = z1[2U];
+  uint64_t b_3 = z1[3U];
+  uint64_t r_0 = FStar_UInt64_eq_mask(a_0, b_0);
+  uint64_t r_1 = FStar_UInt64_eq_mask(a_1, b_1);
+  uint64_t r_2 = FStar_UInt64_eq_mask(a_2, b_2);
+  uint64_t r_3 = FStar_UInt64_eq_mask(a_3, b_3);
+  uint64_t r01 = r_0 & r_1;
+  uint64_t r23 = r_2 & r_3;
+  uint64_t r11 = r01 & r23;
+  uint64_t f1 = ~r11;
+  bool zEqual = f1 == (uint64_t)0U;
   bool equalX1 = xEqual && yEqual && zEqual;
   bool equalX = equalX1;
   if (equalX)
@@ -4223,3 +4277,4 @@ bool Hacl_P256_is_more_than_zero_less_than_order(uint8_t *x)
 {
   return isMoreThanZeroLessThanOrder(x);
 }
+
