@@ -45,7 +45,7 @@ let reduction_prime256_2prime256_with_carry_impl cin x result =
     let tempBuffer = create (size 4) (u64 0) in 
     let tempBufferForSubborrow = create (size 1) (u64 0) in
     recall_contents prime256_buffer (Lib.Sequence.of_list p256_prime_list);
-    let c = sub4_il x prime256_buffer tempBuffer in
+    let c = sub4_il_prime x tempBuffer in
   let h0 = ST.get() in 
       assert(uint_v c <= 1);
       assert(if uint_v c = 0 then as_nat h0 x >= prime256 else as_nat h0 x < prime256);
@@ -86,7 +86,7 @@ let reduction_prime256_2prime256_8_with_carry_impl x result =
     let cin = Lib.Buffer.index x (size 4) in 
     let x_ = Lib.Buffer.sub x (size 0) (size 4) in 
       recall_contents prime256_buffer (Lib.Sequence.of_list p256_prime_list); 
-    let c = Hacl.Impl.P256.LowLevel .sub4_il x_ prime256_buffer tempBuffer in 
+    let c = sub4_il_prime x_ tempBuffer in 
     let carry = sub_borrow_u64 c cin (u64 0) tempBufferForSubborrow in 
     cmovznz4 result tempBuffer x_ carry; 
       let h4 = ST.get() in 
@@ -133,7 +133,7 @@ let reduction_prime_2prime_impl x result =
   let tempBuffer = create (size 4) (u64 0) in 
     recall_contents prime256_buffer (Lib.Sequence.of_list p256_prime_list);
         let h0 = ST.get() in 
-    let c = sub4_il x prime256_buffer tempBuffer in 
+    let c = sub4_il_prime x tempBuffer in 
     cmovznz4 result tempBuffer x c;
       let h2 = ST.get() in 
     lemma_reduction1 (as_nat h0 x) (as_nat h2 result);

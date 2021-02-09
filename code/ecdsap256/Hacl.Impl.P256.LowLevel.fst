@@ -388,6 +388,31 @@ let sub4_il x y result =
     cc
 
 
+
+inline_for_extraction noextract
+val sub4_il_prime: x: felem -> result: felem -> 
+  Stack uint64
+    (requires fun h -> live h x /\ live h result /\ disjoint x result)
+    (ensures fun h0 c h1 -> modifies1 result h0 h1 /\ v c <= 1)
+
+let sub4_il_prime x result = 
+    let r0 = sub result (size 0) (size 1) in 
+    let r1 = sub result (size 1) (size 1) in 
+    let r2 = sub result (size 2) (size 1) in 
+    let r3 = sub result (size 3) (size 1) in 
+
+    let cc = sub_borrow_u64 (u64 0) x.(size 0) (u64 0xffffffffffffffff) r0 in 
+    let cc = sub_borrow_u64 cc x.(size 1) (u64 0xffffffff) r1 in 
+    let cc = sub_borrow_u64 cc x.(size 2) (u64 0) r2 in 
+    let cc = sub_borrow_u64 cc x.(size 3) (u64 0xffffffff00000001) r3 in 
+
+      assert_norm (pow2 64 * pow2 64 = pow2 128);
+      assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192);
+      assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
+    
+    cc
+
+
 inline_for_extraction noextract
 val sub4: x: felem -> y:felem -> result: felem -> 
   Stack uint64
