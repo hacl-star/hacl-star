@@ -723,8 +723,9 @@ let blocks_state_len (a : alg) (m : valid_m_spec a) :
   }) = 
   match m with
   | M32 -> block_len a
-  | M128 -> U32.(4ul *^ block_len a)
-  | M256 -> U32.(8ul *^ block_len a)
+  // The vectorized implementations actually only process one block at a time
+  | M128 -> block_len a
+  | M256 -> block_len a
 
 #push-options "--ifuel 1 --z3cliopt smt.arith.nl=false"
 inline_for_extraction noextract
