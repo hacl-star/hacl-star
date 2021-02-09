@@ -16,6 +16,11 @@ let blake2b_256 (no_key : bool) (key_size : key_size_t Spec.Blake2B no_key) =
   blake2 Spec.Blake2B M256 Blake2b256.blake2b_init Blake2b256.blake2b_update_multi
          Blake2b256.blake2b_update_last Blake2b256.blake2b_finish no_key key_size 
 
+/// Type abbreviations
+let blake2b_256_block_state = s Spec.Blake2B M256
+// The key parameters have no importance for the extracted state definitions
+let blake2b_256_state = F.state_s (blake2b_256 true 0ul) () (s Spec.Blake2B M256) (optional_key_blake2s true 0ul)
+
 /// No key
 inline_for_extraction noextract
 let blake2b_256_no_key_alloca =

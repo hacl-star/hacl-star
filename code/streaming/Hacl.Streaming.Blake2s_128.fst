@@ -16,6 +16,11 @@ let blake2s_128 (no_key : bool) (key_size : key_size_t Spec.Blake2S no_key) =
   blake2 Spec.Blake2S M128 Blake2s128.blake2s_init Blake2s128.blake2s_update_multi
          Blake2s128.blake2s_update_last Blake2s128.blake2s_finish no_key key_size 
 
+/// Type abbreviations
+let blake2s_128_block_state = s Spec.Blake2S M128
+// The key parameters have no importance for the extracted state definitions
+let blake2s_128_state = F.state_s (blake2s_128 true 0ul) () (s Spec.Blake2S M128) (optional_key_blake2s true 0ul)
+
 /// No key
 inline_for_extraction noextract
 let blake2s_128_no_key_alloca =
