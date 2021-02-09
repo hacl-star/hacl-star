@@ -26,7 +26,7 @@ open Lib.IntTypes
 /// A definition whose sole purpose is to align the .fsti with the .fst
 noextract let _align = ()
 
-#push-options "--z3rlimit 100 --ifuel 1"
+#push-options "--z3rlimit 150 --ifuel 1"
 let mt_sha256_compress src1 src2 dst =
   let hash_size = 32ul in
   let hash_alg = Spec.Hash.Definitions.SHA2_256 in
