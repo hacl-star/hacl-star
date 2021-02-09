@@ -49,7 +49,7 @@ val montgomery_multiplication_round: t: widefelem -> round: widefelem -> t2: lbu
 let montgomery_multiplication_round t round t2  =
     let t1 = mod64 t in 
     recall_contents prime256_buffer (Lib.Sequence.of_list p256_prime_list); 
-  shortened_mul prime256_buffer t1 t2;
+  shortened_mul_prime t1 t2;
   add8_without_carry1 t t2 round;
   shift8 round round
 

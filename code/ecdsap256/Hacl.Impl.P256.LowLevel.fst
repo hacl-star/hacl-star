@@ -1652,6 +1652,65 @@ let shortened_mul a b result =
     assert(Lib.Sequence.index (as_seq h0 result) 6 == Lib.Sequence.index (as_seq h0 result48) 2);
     assert(Lib.Sequence.index (as_seq h0 result) 7 == Lib.Sequence.index (as_seq h0 result48) 3)
 
+inline_for_extraction noextract
+val shortened_mul_prime: b: uint64 -> result: widefelem -> Stack unit
+  (requires fun h -> live h result /\ wide_as_nat h result < pow2 320)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
+    wide_as_nat h1 result < pow2 320
+  )
+
+let shortened_mul_prime u result = 
+    assert_norm( pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
+    assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 == pow2 320);
+  let result04 = sub result (size 0) (size 4) in 
+  let result48 = sub result (size 4) (size 4) in 
+  
+    assert_norm (pow2 64 * pow2 64 = pow2 128);
+    assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192);
+
+  let temp = create (size 1) (u64 0) in 
+
+  let f0 = (u64 0xffffffffffffffff) in 
+  let f1 = (u64 0xffffffff) in 
+  (* let f2 = index f (size 2) in *)
+  let f3 = (u64 0xffffffff00000001) in 
+    
+  let o0 = sub result (size 0) (size 1) in 
+  let o1 = sub result (size 1) (size 1) in 
+  let o2 = sub result (size 2) (size 1) in 
+  let o3 = sub result (size 3) (size 1) in 
+    
+    let h0 = ST.get() in 
+ (* mult64_0il f u o0 temp; *)
+  mul64 f0 u o0 temp;
+
+
+    let h1 = ST.get() in 
+  let c1 = mult64_c f1 u (u64 0) o1 temp in 
+    let h2 = ST.get() in 
+  let h = index temp (size 0) in 
+
+  upd temp (size 0) (u64 0);
+  upd o2 (size 0) (u64 0);
+  
+  add_carry_u64_void c1 (u64 0) h o2;
+    let h3 = ST.get() in 
+  let c3 = mult64_c f3 u (u64 0) o3 temp in 
+    let h4 = ST.get() in 
+  let temp0 = index temp (size 0) in 
+    (* lemma_low_level0 (uint_v(Seq.index (as_seq h1 o0) 0)) (uint_v (Seq.index (as_seq h2 o1) 0)) (uint_v (Seq.index (as_seq h3 o2) 0)) (uint_v (Seq.index (as_seq h4 o3) 0)) (uint_v f0) (uint_v f1) (uint_v f2) (uint_v f3) (uint_v u) (uint_v (Seq.index (as_seq h2 temp) 0)) (uint_v c1) (uint_v c2) (uint_v c3) (uint_v (Seq.index (as_seq h3 temp) 0)) (uint_v temp0);  
+    
+  mul_lemma_4 (as_nat_il h0 f) (uint_v u) (pow2 256 - 1) (pow2 64 - 1);
+  assert_norm((pow2 256 - 1) * (pow2 64 - 1) == pow2 320 - pow2 256 - pow2 64 + 1);
+  assert_norm((pow2 320 - pow2 256) / pow2 256 == pow2 64 - 1);
+
+*)
+  upd result (size 4) (c3 +! temp0);
+  
+    assert(Lib.Sequence.index (as_seq h0 result) 5 == Lib.Sequence.index (as_seq h0 result48) 1);
+    assert(Lib.Sequence.index (as_seq h0 result) 6 == Lib.Sequence.index (as_seq h0 result48) 2);
+    assert(Lib.Sequence.index (as_seq h0 result) 7 == Lib.Sequence.index (as_seq h0 result48) 3)
+
    
 
 inline_for_extraction noextract
