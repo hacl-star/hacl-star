@@ -4223,4 +4223,3 @@ bool Hacl_P256_is_more_than_zero_less_than_order(uint8_t *x)
 {
   return isMoreThanZeroLessThanOrder(x);
 }
-

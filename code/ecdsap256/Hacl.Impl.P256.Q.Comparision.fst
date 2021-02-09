@@ -70,8 +70,17 @@ val neq_int: #t:inttype{unsigned t /\ ~(U128? t) /\ ~(S128? t) }
   -> Tot (r: uint_t t l {if uint_v a = uint_v b then uint_v r == ones_v t else uint_v r == 0})
   
 let neq_int #t #l a b = 
-  lognot_lemma (eq_int a b);
-  lognot (eq_int  a b)
+  match l with 
+  |PUB -> begin
+    let r = eq #t a b in 
+      eq_lemma #t a b;
+    match r with 
+    |true -> uint #t #l (maxint t)
+    |false -> uint #t #l 0
+    end
+  |SEC -> 
+    eq_mask_lemma #t a b;
+    eq_mask #t a b
 
 
 inline_for_extraction
@@ -122,21 +131,21 @@ let eq_felem_0_u64  f =
   r
 
 
-inline_for_extraction
+inline_for_extraction noextract
 val global_to_comparable: glbuffer uint64 (size 4) -> Stack (lbuffer_t IMMUT uint64 (size 4))
   (requires fun h -> True)
   (ensures fun h0 _ h1 -> True)
 
 let global_to_comparable f = (const_to_ilbuffer f) <: lbuffer_t IMMUT uint64 (size 4)
 
-inline_for_extraction
+inline_for_extraction noextract
 val global_to_comparable_scalar: glbuffer uint8 (size 32) -> Stack (lbuffer_t IMMUT uint8 (size 32))
   (requires fun h -> True)
   (ensures fun h0 _ h1 -> True)
 
 let global_to_comparable_scalar f = (const_to_ilbuffer f) <: lbuffer_t IMMUT uint8 (size 32)
 
-
+inline_for_extraction noextract
 val cmp_felem_felem_u64: a: felem -> b: felem -> Stack uint64
   (requires fun h -> live h a /\ live h b)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\ 
@@ -173,7 +182,7 @@ let cmp_felem_felem_u64  a b =
   lognot r
 
 
-
+inline_for_extraction noextract
 val cmp_felem_felem_bool: a: felem -> b: felem -> Stack bool
   (requires fun h -> live h a /\ live h b)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\ 

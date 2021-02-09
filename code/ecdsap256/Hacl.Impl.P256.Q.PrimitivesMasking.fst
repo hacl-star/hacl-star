@@ -87,6 +87,7 @@ let copy_conditional out x mask =
   lemma_eq_funct_ (as_seq h1 out) (as_seq h0 x)
 
 
+inline_for_extraction noextract
 val copy_point_conditional_mask_u64_2:  result: point 
   -> x: point -> mask: uint64 {uint_v mask == 0 \/ uint_v mask == pow2 64 - 1}  
   -> Stack unit
@@ -121,6 +122,7 @@ let copy_point_conditional_mask_u64_2  result x mask =
   copy_conditional result_z x_z mask
 
 
+inline_for_extraction noextract
 val copy_point_conditional_mask_u64_3: #buf_type: buftype -> result: point 
   -> x: point -> y: point 
   -> mask: uint64 {uint_v mask == 0 \/ uint_v mask == pow2 64 - 1}  
