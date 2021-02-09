@@ -804,7 +804,7 @@ inline_for_extraction noextract
 let optional_key_blake2b (no_key : bool) (key_size : key_size_t Spec.Blake2B no_key) =
   (I.optional_key () I.Erased (k Spec.Blake2B no_key key_size))
 
-/// Type abbreviations - makes Kremlin use beautiful names in the generated code
+/// Type abbreviations - makes Kremlin use pretty names in the generated code
 
 let blake2s_32_block_state = s Spec.Blake2S M32
 let blake2b_32_block_state = s Spec.Blake2B M32
