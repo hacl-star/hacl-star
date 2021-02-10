@@ -14,7 +14,7 @@
 #include "test_helpers.h"
 #include "blake2_vectors.h"
 
-typedef struct Hacl_Streaming_Functor_state_s__K____uint32_t___uint32_t_____s blake2_state;
+typedef struct Hacl_Streaming_Blake2_blake2s_32_state_s blake2_state;
 
 int main() {
     bool ok = true;
