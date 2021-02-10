@@ -175,7 +175,7 @@ let lexp_fw_st (a_t:inttype_a) (len:size_t{v len > 0}) (ctx_len:size_t) (k:lexp 
   -> bBits:size_t{0 < v bBits /\ (v bBits - 1) / bits a_t < v bLen}
   -> b:lbuffer (uint_t a_t SEC) bLen
   -> acc:lbuffer (uint_t a_t SEC) len
-  -> w:size_t{0 < v w /\ v w < bits a_t /\ pow2 (v w) * v len <= max_size_t /\ v w < 32} ->
+  -> l:size_t{0 < v l /\ v l < bits a_t /\ pow2 (v l) * v len <= max_size_t /\ v l < 32} ->
   Stack unit
   (requires fun h ->
     live h a /\ live h b /\ live h acc /\ live h ctx /\
@@ -188,7 +188,7 @@ let lexp_fw_st (a_t:inttype_a) (len:size_t{v len > 0}) (ctx_len:size_t) (k:lexp 
   (ensures  fun h0 _ h1 -> modifies (loc acc) h0 h1 /\
     k.to.linv (as_seq h1 acc) /\
     k.to.refl (as_seq h1 acc) ==
-    S.exp_fw #k.to.a_spec k.to.exp (k.to.refl (as_seq h0 a)) (v bBits) (BD.bn_v h0 b) (v w))
+    S.exp_fw #k.to.a_spec k.to.exp (k.to.refl (as_seq h0 a)) (v bBits) (BD.bn_v h0 b) (v l))
 
 
 inline_for_extraction noextract

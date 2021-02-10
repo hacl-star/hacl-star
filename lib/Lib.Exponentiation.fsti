@@ -1,7 +1,6 @@
 module Lib.Exponentiation
 
 open FStar.Mul
-open Lib.IntTypes
 
 module Loops = Lib.LoopCombinators
 
@@ -164,11 +163,10 @@ let exp_fw_rem (#t:Type) (k:exp t) (a:t) (bBits:nat) (b:nat{b < pow2 bBits}) (l:
   fmul (exp_pow2 k acc c) (pow k a bits_c)
 
 
-let exp_fw (#t:Type) (k:exp t) (a:t) (bBits:nat) (b:nat{b < pow2 bBits}) (l:pos{pow2 l <= max_size_t}) : t =
-  Math.Lemmas.pow2_le_compat l 1;
+let exp_fw (#t:Type) (k:exp t) (a:t) (bBits:nat) (b:nat{b < pow2 bBits}) (l:pos) : t =
   let acc = Loops.repeati (bBits / l) (exp_fw_f k a bBits b l) one in
   let res = if bBits % l = 0 then acc else exp_fw_rem k a bBits b l acc in
   res
 
-val exp_fw_lemma: #t:Type -> k:exp t -> a:t -> bBits:nat -> b:nat{b < pow2 bBits} -> l:pos{pow2 l <= max_size_t} ->
+val exp_fw_lemma: #t:Type -> k:exp t -> a:t -> bBits:nat -> b:nat{b < pow2 bBits} -> l:pos ->
   Lemma (exp_fw k a bBits b l == pow k a b)

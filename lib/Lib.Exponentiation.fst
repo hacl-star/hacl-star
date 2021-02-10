@@ -1,7 +1,6 @@
 module Lib.Exponentiation
 
 open FStar.Mul
-open Lib.IntTypes
 
 module Loops = Lib.LoopCombinators
 
@@ -477,9 +476,6 @@ let exp_fw_rem_lemma #t k a bBits b l acc =
 
 
 let exp_fw_lemma #t k a bBits b l =
-  let table_len = pow2 l in
-  Math.Lemmas.pow2_le_compat l 1;
-
   let acc = Loops.repeati (bBits / l) (exp_fw_f k a bBits b l) one in
   exp_fw_lemma_loop k a bBits b l (bBits / l);
   assert (acc == pow k a (b / pow2 (bBits - l * (bBits / l))));
