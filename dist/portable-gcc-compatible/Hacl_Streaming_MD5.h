@@ -40,15 +40,21 @@ extern "C" {
 #include "Hacl_Streaming_SHA2.h"
 #include "Hacl_Hash.h"
 
+/* SNIPPET_START: Hacl_Streaming_MD5_state_md5 */
+
+typedef Hacl_Streaming_SHA2_state_sha2_224 Hacl_Streaming_MD5_state_md5;
+
+/* SNIPPET_END: Hacl_Streaming_MD5_state_md5 */
+
 /* SNIPPET_START: Hacl_Streaming_MD5_legacy_create_in_md5 */
 
-Hacl_Streaming_Functor_state_s___uint32_t____ *Hacl_Streaming_MD5_legacy_create_in_md5();
+Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_MD5_legacy_create_in_md5();
 
 /* SNIPPET_END: Hacl_Streaming_MD5_legacy_create_in_md5 */
 
 /* SNIPPET_START: Hacl_Streaming_MD5_legacy_init_md5 */
 
-void Hacl_Streaming_MD5_legacy_init_md5(Hacl_Streaming_Functor_state_s___uint32_t____ *s);
+void Hacl_Streaming_MD5_legacy_init_md5(Hacl_Streaming_SHA2_state_sha2_224 *s);
 
 /* SNIPPET_END: Hacl_Streaming_MD5_legacy_init_md5 */
 
@@ -56,7 +62,7 @@ void Hacl_Streaming_MD5_legacy_init_md5(Hacl_Streaming_Functor_state_s___uint32_
 
 void
 Hacl_Streaming_MD5_legacy_update_md5(
-  Hacl_Streaming_Functor_state_s___uint32_t____ *p,
+  Hacl_Streaming_SHA2_state_sha2_224 *p,
   uint8_t *data,
   uint32_t len
 );
@@ -65,17 +71,13 @@ Hacl_Streaming_MD5_legacy_update_md5(
 
 /* SNIPPET_START: Hacl_Streaming_MD5_legacy_finish_md5 */
 
-void
-Hacl_Streaming_MD5_legacy_finish_md5(
-  Hacl_Streaming_Functor_state_s___uint32_t____ *p,
-  uint8_t *dst
-);
+void Hacl_Streaming_MD5_legacy_finish_md5(Hacl_Streaming_SHA2_state_sha2_224 *p, uint8_t *dst);
 
 /* SNIPPET_END: Hacl_Streaming_MD5_legacy_finish_md5 */
 
 /* SNIPPET_START: Hacl_Streaming_MD5_legacy_free_md5 */
 
-void Hacl_Streaming_MD5_legacy_free_md5(Hacl_Streaming_Functor_state_s___uint32_t____ *s);
+void Hacl_Streaming_MD5_legacy_free_md5(Hacl_Streaming_SHA2_state_sha2_224 *s);
 
 /* SNIPPET_END: Hacl_Streaming_MD5_legacy_free_md5 */
 
