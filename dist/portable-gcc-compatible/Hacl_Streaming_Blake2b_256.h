@@ -43,36 +43,35 @@ extern "C" {
 #include "Hacl_Impl_Blake2.h"
 #include "Hacl_Blake2b_256.h"
 
-/* SNIPPET_START: K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_ */
+/* SNIPPET_START: Hacl_Streaming_Blake2b_256_blake2b_256_block_state */
 
-typedef struct K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256__s
+typedef struct Hacl_Streaming_Blake2b_256_blake2b_256_block_state_s
 {
   Lib_IntVector_Intrinsics_vec256 *fst;
   Lib_IntVector_Intrinsics_vec256 *snd;
 }
-K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_;
+Hacl_Streaming_Blake2b_256_blake2b_256_block_state;
 
-/* SNIPPET_END: K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_ */
+/* SNIPPET_END: Hacl_Streaming_Blake2b_256_blake2b_256_block_state */
 
-/* SNIPPET_START: Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____ */
+/* SNIPPET_START: Hacl_Streaming_Blake2b_256_blake2b_256_state */
 
-typedef struct
-Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_____s
+typedef struct Hacl_Streaming_Blake2b_256_blake2b_256_state_s
 {
-  K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_ block_state;
+  Hacl_Streaming_Blake2b_256_blake2b_256_block_state block_state;
   uint8_t *buf;
   uint64_t total_len;
 }
-Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____;
+Hacl_Streaming_Blake2b_256_blake2b_256_state;
 
-/* SNIPPET_END: Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____ */
+/* SNIPPET_END: Hacl_Streaming_Blake2b_256_blake2b_256_state */
 
 /* SNIPPET_START: Hacl_Streaming_Blake2b_256_blake2b_256_no_key_create_in */
 
 /*
   State allocation function when there is no key
 */
-Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
+Hacl_Streaming_Blake2b_256_blake2b_256_state
 *Hacl_Streaming_Blake2b_256_blake2b_256_no_key_create_in();
 
 /* SNIPPET_END: Hacl_Streaming_Blake2b_256_blake2b_256_no_key_create_in */
@@ -84,8 +83,7 @@ Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVe
 */
 void
 Hacl_Streaming_Blake2b_256_blake2b_256_no_key_init(
-  Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-  *s
+  Hacl_Streaming_Blake2b_256_blake2b_256_state *s
 );
 
 /* SNIPPET_END: Hacl_Streaming_Blake2b_256_blake2b_256_no_key_init */
@@ -97,8 +95,7 @@ Hacl_Streaming_Blake2b_256_blake2b_256_no_key_init(
 */
 void
 Hacl_Streaming_Blake2b_256_blake2b_256_no_key_update(
-  Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-  *p,
+  Hacl_Streaming_Blake2b_256_blake2b_256_state *p,
   uint8_t *data,
   uint32_t len
 );
@@ -112,8 +109,7 @@ Hacl_Streaming_Blake2b_256_blake2b_256_no_key_update(
 */
 void
 Hacl_Streaming_Blake2b_256_blake2b_256_no_key_finish(
-  Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-  *p,
+  Hacl_Streaming_Blake2b_256_blake2b_256_state *p,
   uint8_t *dst
 );
 
@@ -126,8 +122,7 @@ Hacl_Streaming_Blake2b_256_blake2b_256_no_key_finish(
 */
 void
 Hacl_Streaming_Blake2b_256_blake2b_256_no_key_free(
-  Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-  *s
+  Hacl_Streaming_Blake2b_256_blake2b_256_state *s
 );
 
 /* SNIPPET_END: Hacl_Streaming_Blake2b_256_blake2b_256_no_key_free */
@@ -137,7 +132,7 @@ Hacl_Streaming_Blake2b_256_blake2b_256_no_key_free(
 /*
   State allocation function when using a (potentially null) key
 */
-Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
+Hacl_Streaming_Blake2b_256_blake2b_256_state
 *Hacl_Streaming_Blake2b_256_blake2b_256_with_key_create_in(uint32_t key_size, uint8_t *k);
 
 /* SNIPPET_END: Hacl_Streaming_Blake2b_256_blake2b_256_with_key_create_in */
@@ -151,8 +146,7 @@ void
 Hacl_Streaming_Blake2b_256_blake2b_256_with_key_init(
   uint32_t key_size,
   uint8_t *k,
-  Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-  *s
+  Hacl_Streaming_Blake2b_256_blake2b_256_state *s
 );
 
 /* SNIPPET_END: Hacl_Streaming_Blake2b_256_blake2b_256_with_key_init */
@@ -165,8 +159,7 @@ Hacl_Streaming_Blake2b_256_blake2b_256_with_key_init(
 void
 Hacl_Streaming_Blake2b_256_blake2b_256_with_key_update(
   uint32_t key_size,
-  Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-  *p,
+  Hacl_Streaming_Blake2b_256_blake2b_256_state *p,
   uint8_t *data,
   uint32_t len
 );
@@ -181,8 +174,7 @@ Hacl_Streaming_Blake2b_256_blake2b_256_with_key_update(
 void
 Hacl_Streaming_Blake2b_256_blake2b_256_with_key_finish(
   uint32_t key_size,
-  Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-  *p,
+  Hacl_Streaming_Blake2b_256_blake2b_256_state *p,
   uint8_t *dst
 );
 
@@ -196,8 +188,7 @@ Hacl_Streaming_Blake2b_256_blake2b_256_with_key_finish(
 void
 Hacl_Streaming_Blake2b_256_blake2b_256_with_key_free(
   uint32_t key_size,
-  Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-  *s
+  Hacl_Streaming_Blake2b_256_blake2b_256_state *s
 );
 
 /* SNIPPET_END: Hacl_Streaming_Blake2b_256_blake2b_256_with_key_free */

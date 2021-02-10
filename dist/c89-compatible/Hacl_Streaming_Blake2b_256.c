@@ -27,7 +27,7 @@
 /*
   State allocation function when there is no key
 */
-Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
+Hacl_Streaming_Blake2b_256_blake2b_256_state
 *Hacl_Streaming_Blake2b_256_blake2b_256_no_key_create_in()
 {
   KRML_CHECK_SIZE(sizeof (uint8_t),
@@ -54,27 +54,20 @@ Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVe
           b[_i] = Lib_IntVector_Intrinsics_vec256_zero;
       }
       {
-        K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_ lit;
-        K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_ block_state;
+        Hacl_Streaming_Blake2b_256_blake2b_256_block_state lit;
+        Hacl_Streaming_Blake2b_256_blake2b_256_block_state block_state;
         lit.fst = wv;
         lit.snd = b;
         block_state = lit;
         {
-          Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-          s;
+          Hacl_Streaming_Blake2b_256_blake2b_256_state s;
           s.block_state = block_state;
           s.buf = buf;
           s.total_len = (uint64_t)0U;
-          KRML_CHECK_SIZE(sizeof (
-              Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-            ),
-            (uint32_t)1U);
+          KRML_CHECK_SIZE(sizeof (Hacl_Streaming_Blake2b_256_blake2b_256_state), (uint32_t)1U);
           {
-            Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-            *p =
-              KRML_HOST_MALLOC(sizeof (
-                  Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-                ));
+            Hacl_Streaming_Blake2b_256_blake2b_256_state
+            *p = KRML_HOST_MALLOC(sizeof (Hacl_Streaming_Blake2b_256_blake2b_256_state));
             p[0U] = s;
             Hacl_Blake2b_256_blake2b_init(block_state.fst,
               block_state.snd,
@@ -94,23 +87,19 @@ Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVe
 */
 void
 Hacl_Streaming_Blake2b_256_blake2b_256_no_key_init(
-  Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-  *s
+  Hacl_Streaming_Blake2b_256_blake2b_256_state *s
 )
 {
-  Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-  scrut = *s;
+  Hacl_Streaming_Blake2b_256_blake2b_256_state scrut = *s;
   uint8_t *buf = scrut.buf;
-  K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_
-  block_state = scrut.block_state;
+  Hacl_Streaming_Blake2b_256_blake2b_256_block_state block_state = scrut.block_state;
   Hacl_Blake2b_256_blake2b_init(block_state.fst,
     block_state.snd,
     (uint32_t)0U,
     NULL,
     (uint32_t)64U);
   {
-    Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-    lit;
+    Hacl_Streaming_Blake2b_256_blake2b_256_state lit;
     lit.block_state = block_state;
     lit.buf = buf;
     lit.total_len = (uint64_t)0U;
@@ -123,14 +112,12 @@ Hacl_Streaming_Blake2b_256_blake2b_256_no_key_init(
 */
 void
 Hacl_Streaming_Blake2b_256_blake2b_256_no_key_update(
-  Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-  *p,
+  Hacl_Streaming_Blake2b_256_blake2b_256_state *p,
   uint8_t *data,
   uint32_t len
 )
 {
-  Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-  s = *p;
+  Hacl_Streaming_Blake2b_256_blake2b_256_state s = *p;
   uint64_t total_len = s.total_len;
   uint32_t sz;
   if
@@ -159,10 +146,8 @@ Hacl_Streaming_Blake2b_256_blake2b_256_no_key_update(
     <= Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B, Hacl_Impl_Blake2_Core_M256) - sz
   )
   {
-    Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-    s1 = *p;
-    K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_
-    block_state1 = s1.block_state;
+    Hacl_Streaming_Blake2b_256_blake2b_256_state s1 = *p;
+    Hacl_Streaming_Blake2b_256_blake2b_256_block_state block_state1 = s1.block_state;
     uint8_t *buf = s1.buf;
     uint64_t total_len1 = s1.total_len;
     uint32_t sz1;
@@ -192,8 +177,7 @@ Hacl_Streaming_Blake2b_256_blake2b_256_no_key_update(
       memcpy(buf2, data, len * sizeof (uint8_t));
       total_len2 = total_len1 + (uint64_t)len;
       {
-        Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-        lit;
+        Hacl_Streaming_Blake2b_256_blake2b_256_state lit;
         lit.block_state = block_state1;
         lit.buf = buf;
         lit.total_len = total_len2;
@@ -204,10 +188,8 @@ Hacl_Streaming_Blake2b_256_blake2b_256_no_key_update(
   }
   if (sz == (uint32_t)0U)
   {
-    Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-    s1 = *p;
-    K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_
-    block_state1 = s1.block_state;
+    Hacl_Streaming_Blake2b_256_blake2b_256_state s1 = *p;
+    Hacl_Streaming_Blake2b_256_blake2b_256_block_state block_state1 = s1.block_state;
     uint8_t *buf = s1.buf;
     uint64_t total_len1 = s1.total_len;
     uint32_t sz1;
@@ -315,8 +297,7 @@ Hacl_Streaming_Blake2b_256_blake2b_256_no_key_update(
       dst = buf;
       memcpy(dst, data2, data2_len * sizeof (uint8_t));
       {
-        Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-        lit;
+        Hacl_Streaming_Blake2b_256_blake2b_256_state lit;
         lit.block_state = block_state1;
         lit.buf = buf;
         lit.total_len = total_len1 + (uint64_t)len;
@@ -333,10 +314,8 @@ Hacl_Streaming_Blake2b_256_blake2b_256_no_key_update(
       - sz;
     uint8_t *data1 = data;
     uint8_t *data2 = data + diff;
-    Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-    s10 = *p;
-    K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_
-    block_state10 = s10.block_state;
+    Hacl_Streaming_Blake2b_256_blake2b_256_state s10 = *p;
+    Hacl_Streaming_Blake2b_256_blake2b_256_block_state block_state10 = s10.block_state;
     uint8_t *buf0 = s10.buf;
     uint64_t total_len10 = s10.total_len;
     uint32_t sz10;
@@ -366,11 +345,9 @@ Hacl_Streaming_Blake2b_256_blake2b_256_no_key_update(
       memcpy(buf2, data1, diff * sizeof (uint8_t));
       total_len2 = total_len10 + (uint64_t)diff;
       {
-        Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-        lit;
-        Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-        s1;
-        K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_ block_state1;
+        Hacl_Streaming_Blake2b_256_blake2b_256_state lit;
+        Hacl_Streaming_Blake2b_256_blake2b_256_state s1;
+        Hacl_Streaming_Blake2b_256_blake2b_256_block_state block_state1;
         uint8_t *buf;
         uint64_t total_len1;
         uint32_t sz1;
@@ -487,8 +464,7 @@ Hacl_Streaming_Blake2b_256_blake2b_256_no_key_update(
         dst = buf;
         memcpy(dst, data21, data2_len * sizeof (uint8_t));
         {
-          Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-          lit0;
+          Hacl_Streaming_Blake2b_256_blake2b_256_state lit0;
           lit0.block_state = block_state1;
           lit0.buf = buf;
           lit0.total_len = total_len1 + (uint64_t)(len - diff);
@@ -504,15 +480,12 @@ Hacl_Streaming_Blake2b_256_blake2b_256_no_key_update(
 */
 void
 Hacl_Streaming_Blake2b_256_blake2b_256_no_key_finish(
-  Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-  *p,
+  Hacl_Streaming_Blake2b_256_blake2b_256_state *p,
   uint8_t *dst
 )
 {
-  Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-  scrut = *p;
-  K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_
-  block_state = scrut.block_state;
+  Hacl_Streaming_Blake2b_256_blake2b_256_state scrut = *p;
+  Hacl_Streaming_Blake2b_256_blake2b_256_block_state block_state = scrut.block_state;
   uint8_t *buf_ = scrut.buf;
   uint64_t total_len = scrut.total_len;
   uint32_t r;
@@ -555,8 +528,8 @@ Hacl_Streaming_Blake2b_256_blake2b_256_no_key_finish(
             b[_i] = Lib_IntVector_Intrinsics_vec256_zero;
         }
         {
-          K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_ lit;
-          K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_ tmp_block_state;
+          Hacl_Streaming_Blake2b_256_blake2b_256_block_state lit;
+          Hacl_Streaming_Blake2b_256_blake2b_256_block_state tmp_block_state;
           Lib_IntVector_Intrinsics_vec256 *src_b;
           Lib_IntVector_Intrinsics_vec256 *dst_b;
           uint64_t prev_len;
@@ -731,15 +704,12 @@ Hacl_Streaming_Blake2b_256_blake2b_256_no_key_finish(
 */
 void
 Hacl_Streaming_Blake2b_256_blake2b_256_no_key_free(
-  Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-  *s
+  Hacl_Streaming_Blake2b_256_blake2b_256_state *s
 )
 {
-  Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-  scrut = *s;
+  Hacl_Streaming_Blake2b_256_blake2b_256_state scrut = *s;
   uint8_t *buf = scrut.buf;
-  K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_
-  block_state = scrut.block_state;
+  Hacl_Streaming_Blake2b_256_blake2b_256_block_state block_state = scrut.block_state;
   Lib_IntVector_Intrinsics_vec256 *wv = block_state.fst;
   Lib_IntVector_Intrinsics_vec256 *b = block_state.snd;
   KRML_HOST_FREE(wv);
@@ -751,7 +721,7 @@ Hacl_Streaming_Blake2b_256_blake2b_256_no_key_free(
 /*
   State allocation function when using a (potentially null) key
 */
-Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
+Hacl_Streaming_Blake2b_256_blake2b_256_state
 *Hacl_Streaming_Blake2b_256_blake2b_256_with_key_create_in(uint32_t key_size, uint8_t *k)
 {
   KRML_CHECK_SIZE(sizeof (uint8_t),
@@ -778,27 +748,20 @@ Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVe
           b[_i] = Lib_IntVector_Intrinsics_vec256_zero;
       }
       {
-        K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_ lit;
-        K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_ block_state;
+        Hacl_Streaming_Blake2b_256_blake2b_256_block_state lit;
+        Hacl_Streaming_Blake2b_256_blake2b_256_block_state block_state;
         lit.fst = wv;
         lit.snd = b;
         block_state = lit;
         {
-          Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-          s;
+          Hacl_Streaming_Blake2b_256_blake2b_256_state s;
           s.block_state = block_state;
           s.buf = buf;
           s.total_len = (uint64_t)0U;
-          KRML_CHECK_SIZE(sizeof (
-              Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-            ),
-            (uint32_t)1U);
+          KRML_CHECK_SIZE(sizeof (Hacl_Streaming_Blake2b_256_blake2b_256_state), (uint32_t)1U);
           {
-            Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-            *p =
-              KRML_HOST_MALLOC(sizeof (
-                  Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-                ));
+            Hacl_Streaming_Blake2b_256_blake2b_256_state
+            *p = KRML_HOST_MALLOC(sizeof (Hacl_Streaming_Blake2b_256_blake2b_256_state));
             p[0U] = s;
             Hacl_Blake2b_256_blake2b_init(block_state.fst,
               block_state.snd,
@@ -820,19 +783,15 @@ void
 Hacl_Streaming_Blake2b_256_blake2b_256_with_key_init(
   uint32_t key_size,
   uint8_t *k,
-  Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-  *s
+  Hacl_Streaming_Blake2b_256_blake2b_256_state *s
 )
 {
-  Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-  scrut = *s;
+  Hacl_Streaming_Blake2b_256_blake2b_256_state scrut = *s;
   uint8_t *buf = scrut.buf;
-  K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_
-  block_state = scrut.block_state;
+  Hacl_Streaming_Blake2b_256_blake2b_256_block_state block_state = scrut.block_state;
   Hacl_Blake2b_256_blake2b_init(block_state.fst, block_state.snd, key_size, k, (uint32_t)64U);
   {
-    Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-    lit;
+    Hacl_Streaming_Blake2b_256_blake2b_256_state lit;
     lit.block_state = block_state;
     lit.buf = buf;
     lit.total_len = (uint64_t)0U;
@@ -846,14 +805,12 @@ Hacl_Streaming_Blake2b_256_blake2b_256_with_key_init(
 void
 Hacl_Streaming_Blake2b_256_blake2b_256_with_key_update(
   uint32_t key_size,
-  Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-  *p,
+  Hacl_Streaming_Blake2b_256_blake2b_256_state *p,
   uint8_t *data,
   uint32_t len
 )
 {
-  Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-  s = *p;
+  Hacl_Streaming_Blake2b_256_blake2b_256_state s = *p;
   uint64_t total_len = s.total_len;
   uint32_t sz;
   if
@@ -882,10 +839,8 @@ Hacl_Streaming_Blake2b_256_blake2b_256_with_key_update(
     <= Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2B, Hacl_Impl_Blake2_Core_M256) - sz
   )
   {
-    Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-    s1 = *p;
-    K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_
-    block_state1 = s1.block_state;
+    Hacl_Streaming_Blake2b_256_blake2b_256_state s1 = *p;
+    Hacl_Streaming_Blake2b_256_blake2b_256_block_state block_state1 = s1.block_state;
     uint8_t *buf = s1.buf;
     uint64_t total_len1 = s1.total_len;
     uint32_t sz1;
@@ -915,8 +870,7 @@ Hacl_Streaming_Blake2b_256_blake2b_256_with_key_update(
       memcpy(buf2, data, len * sizeof (uint8_t));
       total_len2 = total_len1 + (uint64_t)len;
       {
-        Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-        lit;
+        Hacl_Streaming_Blake2b_256_blake2b_256_state lit;
         lit.block_state = block_state1;
         lit.buf = buf;
         lit.total_len = total_len2;
@@ -927,10 +881,8 @@ Hacl_Streaming_Blake2b_256_blake2b_256_with_key_update(
   }
   if (sz == (uint32_t)0U)
   {
-    Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-    s1 = *p;
-    K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_
-    block_state1 = s1.block_state;
+    Hacl_Streaming_Blake2b_256_blake2b_256_state s1 = *p;
+    Hacl_Streaming_Blake2b_256_blake2b_256_block_state block_state1 = s1.block_state;
     uint8_t *buf = s1.buf;
     uint64_t total_len1 = s1.total_len;
     uint32_t sz1;
@@ -1038,8 +990,7 @@ Hacl_Streaming_Blake2b_256_blake2b_256_with_key_update(
       dst = buf;
       memcpy(dst, data2, data2_len * sizeof (uint8_t));
       {
-        Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-        lit;
+        Hacl_Streaming_Blake2b_256_blake2b_256_state lit;
         lit.block_state = block_state1;
         lit.buf = buf;
         lit.total_len = total_len1 + (uint64_t)len;
@@ -1056,10 +1007,8 @@ Hacl_Streaming_Blake2b_256_blake2b_256_with_key_update(
       - sz;
     uint8_t *data1 = data;
     uint8_t *data2 = data + diff;
-    Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-    s10 = *p;
-    K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_
-    block_state10 = s10.block_state;
+    Hacl_Streaming_Blake2b_256_blake2b_256_state s10 = *p;
+    Hacl_Streaming_Blake2b_256_blake2b_256_block_state block_state10 = s10.block_state;
     uint8_t *buf0 = s10.buf;
     uint64_t total_len10 = s10.total_len;
     uint32_t sz10;
@@ -1089,11 +1038,9 @@ Hacl_Streaming_Blake2b_256_blake2b_256_with_key_update(
       memcpy(buf2, data1, diff * sizeof (uint8_t));
       total_len2 = total_len10 + (uint64_t)diff;
       {
-        Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-        lit;
-        Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-        s1;
-        K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_ block_state1;
+        Hacl_Streaming_Blake2b_256_blake2b_256_state lit;
+        Hacl_Streaming_Blake2b_256_blake2b_256_state s1;
+        Hacl_Streaming_Blake2b_256_blake2b_256_block_state block_state1;
         uint8_t *buf;
         uint64_t total_len1;
         uint32_t sz1;
@@ -1210,8 +1157,7 @@ Hacl_Streaming_Blake2b_256_blake2b_256_with_key_update(
         dst = buf;
         memcpy(dst, data21, data2_len * sizeof (uint8_t));
         {
-          Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-          lit0;
+          Hacl_Streaming_Blake2b_256_blake2b_256_state lit0;
           lit0.block_state = block_state1;
           lit0.buf = buf;
           lit0.total_len = total_len1 + (uint64_t)(len - diff);
@@ -1228,15 +1174,12 @@ Hacl_Streaming_Blake2b_256_blake2b_256_with_key_update(
 void
 Hacl_Streaming_Blake2b_256_blake2b_256_with_key_finish(
   uint32_t key_size,
-  Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-  *p,
+  Hacl_Streaming_Blake2b_256_blake2b_256_state *p,
   uint8_t *dst
 )
 {
-  Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-  scrut = *p;
-  K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_
-  block_state = scrut.block_state;
+  Hacl_Streaming_Blake2b_256_blake2b_256_state scrut = *p;
+  Hacl_Streaming_Blake2b_256_blake2b_256_block_state block_state = scrut.block_state;
   uint8_t *buf_ = scrut.buf;
   uint64_t total_len = scrut.total_len;
   uint32_t r;
@@ -1279,8 +1222,8 @@ Hacl_Streaming_Blake2b_256_blake2b_256_with_key_finish(
             b[_i] = Lib_IntVector_Intrinsics_vec256_zero;
         }
         {
-          K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_ lit;
-          K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_ tmp_block_state;
+          Hacl_Streaming_Blake2b_256_blake2b_256_block_state lit;
+          Hacl_Streaming_Blake2b_256_blake2b_256_block_state tmp_block_state;
           Lib_IntVector_Intrinsics_vec256 *src_b;
           Lib_IntVector_Intrinsics_vec256 *dst_b;
           uint64_t prev_len;
@@ -1456,15 +1399,12 @@ Hacl_Streaming_Blake2b_256_blake2b_256_with_key_finish(
 void
 Hacl_Streaming_Blake2b_256_blake2b_256_with_key_free(
   uint32_t key_size,
-  Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-  *s
+  Hacl_Streaming_Blake2b_256_blake2b_256_state *s
 )
 {
-  Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256____
-  scrut = *s;
+  Hacl_Streaming_Blake2b_256_blake2b_256_state scrut = *s;
   uint8_t *buf = scrut.buf;
-  K____Lib_IntVector_Intrinsics_vec256___Lib_IntVector_Intrinsics_vec256_
-  block_state = scrut.block_state;
+  Hacl_Streaming_Blake2b_256_blake2b_256_block_state block_state = scrut.block_state;
   Lib_IntVector_Intrinsics_vec256 *wv = block_state.fst;
   Lib_IntVector_Intrinsics_vec256 *b = block_state.snd;
   KRML_HOST_FREE(wv);

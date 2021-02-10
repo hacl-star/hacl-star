@@ -24,29 +24,29 @@
 
 #include "Hacl_Streaming_SHA1.h"
 
-Hacl_Streaming_Functor_state_s___uint32_t____ *Hacl_Streaming_SHA1_legacy_create_in_sha1()
+Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_SHA1_legacy_create_in_sha1()
 {
   uint8_t *buf = KRML_HOST_CALLOC((uint32_t)64U, sizeof (uint8_t));
   uint32_t *block_state = KRML_HOST_CALLOC((uint32_t)5U, sizeof (uint32_t));
-  Hacl_Streaming_Functor_state_s___uint32_t____
+  Hacl_Streaming_SHA2_state_sha2_224
   s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
-  KRML_CHECK_SIZE(sizeof (Hacl_Streaming_Functor_state_s___uint32_t____), (uint32_t)1U);
-  Hacl_Streaming_Functor_state_s___uint32_t____
-  *p = KRML_HOST_MALLOC(sizeof (Hacl_Streaming_Functor_state_s___uint32_t____));
+  KRML_CHECK_SIZE(sizeof (Hacl_Streaming_SHA2_state_sha2_224), (uint32_t)1U);
+  Hacl_Streaming_SHA2_state_sha2_224
+  *p = KRML_HOST_MALLOC(sizeof (Hacl_Streaming_SHA2_state_sha2_224));
   p[0U] = s;
   Hacl_Hash_Core_SHA1_legacy_init(block_state);
   return p;
 }
 
-void Hacl_Streaming_SHA1_legacy_init_sha1(Hacl_Streaming_Functor_state_s___uint32_t____ *s)
+void Hacl_Streaming_SHA1_legacy_init_sha1(Hacl_Streaming_SHA2_state_sha2_224 *s)
 {
-  Hacl_Streaming_Functor_state_s___uint32_t____ scrut = *s;
+  Hacl_Streaming_SHA2_state_sha2_224 scrut = *s;
   uint8_t *buf = scrut.buf;
   uint32_t *block_state = scrut.block_state;
   Hacl_Hash_Core_SHA1_legacy_init(block_state);
   s[0U] =
     (
-      (Hacl_Streaming_Functor_state_s___uint32_t____){
+      (Hacl_Streaming_SHA2_state_sha2_224){
         .block_state = block_state,
         .buf = buf,
         .total_len = (uint64_t)0U
@@ -56,12 +56,12 @@ void Hacl_Streaming_SHA1_legacy_init_sha1(Hacl_Streaming_Functor_state_s___uint3
 
 void
 Hacl_Streaming_SHA1_legacy_update_sha1(
-  Hacl_Streaming_Functor_state_s___uint32_t____ *p,
+  Hacl_Streaming_SHA2_state_sha2_224 *p,
   uint8_t *data,
   uint32_t len
 )
 {
-  Hacl_Streaming_Functor_state_s___uint32_t____ s = *p;
+  Hacl_Streaming_SHA2_state_sha2_224 s = *p;
   uint64_t total_len = s.total_len;
   uint32_t sz;
   if (total_len % (uint64_t)(uint32_t)64U == (uint64_t)0U && total_len > (uint64_t)0U)
@@ -74,7 +74,7 @@ Hacl_Streaming_SHA1_legacy_update_sha1(
   }
   if (len <= (uint32_t)64U - sz)
   {
-    Hacl_Streaming_Functor_state_s___uint32_t____ s1 = *p;
+    Hacl_Streaming_SHA2_state_sha2_224 s1 = *p;
     uint32_t *block_state1 = s1.block_state;
     uint8_t *buf = s1.buf;
     uint64_t total_len1 = s1.total_len;
@@ -93,7 +93,7 @@ Hacl_Streaming_SHA1_legacy_update_sha1(
     *p
     =
       (
-        (Hacl_Streaming_Functor_state_s___uint32_t____){
+        (Hacl_Streaming_SHA2_state_sha2_224){
           .block_state = block_state1,
           .buf = buf,
           .total_len = total_len2
@@ -103,7 +103,7 @@ Hacl_Streaming_SHA1_legacy_update_sha1(
   }
   if (sz == (uint32_t)0U)
   {
-    Hacl_Streaming_Functor_state_s___uint32_t____ s1 = *p;
+    Hacl_Streaming_SHA2_state_sha2_224 s1 = *p;
     uint32_t *block_state1 = s1.block_state;
     uint8_t *buf = s1.buf;
     uint64_t total_len1 = s1.total_len;
@@ -140,7 +140,7 @@ Hacl_Streaming_SHA1_legacy_update_sha1(
     *p
     =
       (
-        (Hacl_Streaming_Functor_state_s___uint32_t____){
+        (Hacl_Streaming_SHA2_state_sha2_224){
           .block_state = block_state1,
           .buf = buf,
           .total_len = total_len1 + (uint64_t)len
@@ -151,7 +151,7 @@ Hacl_Streaming_SHA1_legacy_update_sha1(
   uint32_t diff = (uint32_t)64U - sz;
   uint8_t *data1 = data;
   uint8_t *data2 = data + diff;
-  Hacl_Streaming_Functor_state_s___uint32_t____ s1 = *p;
+  Hacl_Streaming_SHA2_state_sha2_224 s1 = *p;
   uint32_t *block_state10 = s1.block_state;
   uint8_t *buf0 = s1.buf;
   uint64_t total_len10 = s1.total_len;
@@ -170,13 +170,13 @@ Hacl_Streaming_SHA1_legacy_update_sha1(
   *p
   =
     (
-      (Hacl_Streaming_Functor_state_s___uint32_t____){
+      (Hacl_Streaming_SHA2_state_sha2_224){
         .block_state = block_state10,
         .buf = buf0,
         .total_len = total_len2
       }
     );
-  Hacl_Streaming_Functor_state_s___uint32_t____ s10 = *p;
+  Hacl_Streaming_SHA2_state_sha2_224 s10 = *p;
   uint32_t *block_state1 = s10.block_state;
   uint8_t *buf = s10.buf;
   uint64_t total_len1 = s10.total_len;
@@ -219,7 +219,7 @@ Hacl_Streaming_SHA1_legacy_update_sha1(
   *p
   =
     (
-      (Hacl_Streaming_Functor_state_s___uint32_t____){
+      (Hacl_Streaming_SHA2_state_sha2_224){
         .block_state = block_state1,
         .buf = buf,
         .total_len = total_len1 + (uint64_t)(len - diff)
@@ -228,12 +228,9 @@ Hacl_Streaming_SHA1_legacy_update_sha1(
 }
 
 void
-Hacl_Streaming_SHA1_legacy_finish_sha1(
-  Hacl_Streaming_Functor_state_s___uint32_t____ *p,
-  uint8_t *dst
-)
+Hacl_Streaming_SHA1_legacy_finish_sha1(Hacl_Streaming_SHA2_state_sha2_224 *p, uint8_t *dst)
 {
-  Hacl_Streaming_Functor_state_s___uint32_t____ scrut = *p;
+  Hacl_Streaming_SHA2_state_sha2_224 scrut = *p;
   uint32_t *block_state = scrut.block_state;
   uint8_t *buf_ = scrut.buf;
   uint64_t total_len = scrut.total_len;
@@ -266,9 +263,9 @@ Hacl_Streaming_SHA1_legacy_finish_sha1(
   Hacl_Hash_Core_SHA1_legacy_finish(tmp_block_state, dst);
 }
 
-void Hacl_Streaming_SHA1_legacy_free_sha1(Hacl_Streaming_Functor_state_s___uint32_t____ *s)
+void Hacl_Streaming_SHA1_legacy_free_sha1(Hacl_Streaming_SHA2_state_sha2_224 *s)
 {
-  Hacl_Streaming_Functor_state_s___uint32_t____ scrut = *s;
+  Hacl_Streaming_SHA2_state_sha2_224 scrut = *s;
   uint8_t *buf = scrut.buf;
   uint32_t *block_state = scrut.block_state;
   KRML_HOST_FREE(block_state);
