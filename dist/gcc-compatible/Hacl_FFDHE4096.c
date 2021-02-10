@@ -88,12 +88,6 @@ static inline void mul(uint64_t *a, uint64_t *b, uint64_t *res)
   Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64((uint32_t)64U, a, b, tmp, res);
 }
 
-static inline void sqr(uint64_t *a, uint64_t *res)
-{
-  uint64_t tmp[256U] = { 0U };
-  Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint64((uint32_t)64U, a, tmp, res);
-}
-
 static inline void precomp(uint32_t nBits, uint64_t *n, uint64_t *res)
 {
   memset(res, 0U, (uint32_t)64U * sizeof (uint64_t));
@@ -189,6 +183,23 @@ static inline void reduction(uint64_t *n, uint64_t nInv, uint64_t *c, uint64_t *
 }
 
 static inline void
+mont_mul(uint64_t *n, uint64_t nInv_u64, uint64_t *aM, uint64_t *bM, uint64_t *resM)
+{
+  uint64_t c[128U] = { 0U };
+  uint64_t tmp[256U] = { 0U };
+  Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64((uint32_t)64U, aM, bM, tmp, c);
+  reduction(n, nInv_u64, c, resM);
+}
+
+static inline void mont_sqr(uint64_t *n, uint64_t nInv_u64, uint64_t *aM, uint64_t *resM)
+{
+  uint64_t c[128U] = { 0U };
+  uint64_t tmp[256U] = { 0U };
+  Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint64((uint32_t)64U, aM, tmp, c);
+  reduction(n, nInv_u64, c, resM);
+}
+
+static inline void
 mod_exp_fw_ct_precompr2(
   uint64_t *n,
   uint64_t *a,
@@ -199,35 +210,33 @@ mod_exp_fw_ct_precompr2(
   uint64_t *res
 )
 {
-  uint64_t mu = Hacl_Bignum_ModInvLimb_mod_inv_uint64(n[0U]);
+  uint32_t bLen = (bBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
+  uint64_t nInv = Hacl_Bignum_ModInvLimb_mod_inv_uint64(n[0U]);
   uint64_t aM[64U] = { 0U };
+  uint64_t accM[64U] = { 0U };
   uint64_t c0[128U] = { 0U };
   mul(a, r2, c0);
-  reduction(n, mu, c0, aM);
-  uint64_t resM[64U] = { 0U };
-  uint32_t bLen = (bBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
+  reduction(n, nInv, c0, aM);
   uint64_t one[64U] = { 0U };
   memset(one, 0U, (uint32_t)64U * sizeof (uint64_t));
   one[0U] = (uint64_t)1U;
   uint64_t c2[128U] = { 0U };
   mul(one, r2, c2);
-  reduction(n, mu, c2, resM);
+  reduction(n, nInv, c2, accM);
   uint32_t table_len = (uint32_t)1U << l;
   KRML_CHECK_SIZE(sizeof (uint64_t), table_len * (uint32_t)64U);
   uint64_t table[table_len * (uint32_t)64U];
   memset(table, 0U, table_len * (uint32_t)64U * sizeof (uint64_t));
-  memcpy(table, resM, (uint32_t)64U * sizeof (uint64_t));
-  memcpy(table + (uint32_t)64U, aM, (uint32_t)64U * sizeof (uint64_t));
+  memcpy(table, accM, (uint32_t)64U * sizeof (uint64_t));
+  uint64_t *t1 = table + (uint32_t)64U;
+  memcpy(t1, aM, (uint32_t)64U * sizeof (uint64_t));
   for (uint32_t i = (uint32_t)0U; i < table_len - (uint32_t)2U; i++)
   {
-    uint64_t *t1 = table + (i + (uint32_t)1U) * (uint32_t)64U;
+    uint64_t *t11 = table + (i + (uint32_t)1U) * (uint32_t)64U;
     uint64_t *t2 = table + (i + (uint32_t)2U) * (uint32_t)64U;
-    uint64_t c[128U] = { 0U };
-    mul(t1, aM, c);
-    reduction(n, mu, c, t2);
+    mont_mul(n, nInv, t11, aM, t2);
   }
-  uint32_t it = bBits / l;
-  for (uint32_t i0 = (uint32_t)0U; i0 < it; i0++)
+  for (uint32_t i0 = (uint32_t)0U; i0 < bBits / l; i0++)
   {
     uint64_t mask_l = ((uint64_t)1U << l) - (uint64_t)1U;
     uint32_t i1 = (bBits - l * i0 - l) / (uint32_t)64U;
@@ -243,38 +252,28 @@ mod_exp_fw_ct_precompr2(
       ite = p1;
     }
     uint64_t bits_l = ite & mask_l;
-    uint64_t a_powbits_l[64U] = { 0U };
-    memcpy(a_powbits_l, table, (uint32_t)64U * sizeof (uint64_t));
+    uint64_t a_bits_l[64U] = { 0U };
+    memcpy(a_bits_l, table, (uint32_t)64U * sizeof (uint64_t));
     for (uint32_t i2 = (uint32_t)0U; i2 < table_len - (uint32_t)1U; i2++)
     {
       uint64_t c = FStar_UInt64_eq_mask(bits_l, (uint64_t)(i2 + (uint32_t)1U));
       uint64_t *res_j = table + (i2 + (uint32_t)1U) * (uint32_t)64U;
       for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
       {
-        uint64_t *os = a_powbits_l;
-        uint64_t x = (c & res_j[i]) | (~c & a_powbits_l[i]);
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[i]) | (~c & a_bits_l[i]);
         os[i] = x;
       }
     }
     for (uint32_t i = (uint32_t)0U; i < l; i++)
     {
-      uint64_t c[128U] = { 0U };
-      sqr(resM, c);
-      reduction(n, mu, c, resM);
+      mont_sqr(n, nInv, accM, accM);
     }
-    uint64_t c[128U] = { 0U };
-    mul(resM, a_powbits_l, c);
-    reduction(n, mu, c, resM);
+    mont_mul(n, nInv, accM, a_bits_l, accM);
   }
   if (!(bBits % l == (uint32_t)0U))
   {
     uint32_t c = bBits % l;
-    for (uint32_t i = (uint32_t)0U; i < c; i++)
-    {
-      uint64_t c1[128U] = { 0U };
-      sqr(resM, c1);
-      reduction(n, mu, c1, resM);
-    }
     uint32_t c10 = bBits % l;
     uint64_t mask_l = ((uint64_t)1U << c10) - (uint64_t)1U;
     uint32_t i0 = (uint32_t)0U;
@@ -291,26 +290,28 @@ mod_exp_fw_ct_precompr2(
     }
     uint64_t bits_c = ite & mask_l;
     uint64_t bits_c0 = bits_c;
-    uint64_t a_powbits_c[64U] = { 0U };
-    memcpy(a_powbits_c, table, (uint32_t)64U * sizeof (uint64_t));
+    uint64_t a_bits_c[64U] = { 0U };
+    memcpy(a_bits_c, table, (uint32_t)64U * sizeof (uint64_t));
     for (uint32_t i1 = (uint32_t)0U; i1 < table_len - (uint32_t)1U; i1++)
     {
       uint64_t c1 = FStar_UInt64_eq_mask(bits_c0, (uint64_t)(i1 + (uint32_t)1U));
       uint64_t *res_j = table + (i1 + (uint32_t)1U) * (uint32_t)64U;
       for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
       {
-        uint64_t *os = a_powbits_c;
-        uint64_t x = (c1 & res_j[i]) | (~c1 & a_powbits_c[i]);
+        uint64_t *os = a_bits_c;
+        uint64_t x = (c1 & res_j[i]) | (~c1 & a_bits_c[i]);
         os[i] = x;
       }
     }
-    uint64_t c1[128U] = { 0U };
-    mul(resM, a_powbits_c, c1);
-    reduction(n, mu, c1, resM);
+    for (uint32_t i = (uint32_t)0U; i < c; i++)
+    {
+      mont_sqr(n, nInv, accM, accM);
+    }
+    mont_mul(n, nInv, accM, a_bits_c, accM);
   }
   uint64_t tmp[128U] = { 0U };
-  memcpy(tmp, resM, (uint32_t)64U * sizeof (uint64_t));
-  reduction(n, mu, tmp, res);
+  memcpy(tmp, accM, (uint32_t)64U * sizeof (uint64_t));
+  reduction(n, nInv, tmp, res);
 }
 
 static inline void ffdhe_precomp_p(uint64_t *p_r2_n)

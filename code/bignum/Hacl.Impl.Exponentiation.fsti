@@ -19,7 +19,7 @@ module BD = Hacl.Bignum.Definitions
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-unfold
+inline_for_extraction noextract
 let inttype_a = t:inttype{t = U32 \/ t = U64}
 
 inline_for_extraction noextract
