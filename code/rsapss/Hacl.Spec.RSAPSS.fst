@@ -292,7 +292,13 @@ val rsapss_sign_bn:
   -> dBits:size_nat{skey_len_pre t modBits eBits dBits}
   -> skey:lbignum t (2 * blocks modBits (bits t) + blocks eBits (bits t) + blocks dBits (bits t))
   -> m:lbignum t (blocks modBits (bits t)) ->
-  tuple2 bool (lbignum t (blocks modBits (bits t)))
+  Pure (tuple2 bool (lbignum t (blocks modBits (bits t))))
+  (requires
+   (let nLen = blocks modBits (bits t) in
+    let n  = sub skey 0 nLen in
+    rsapss_skey_pre modBits eBits dBits skey /\
+    bn_v m < bn_v n))
+  (ensures fun res -> True)
 
 let rsapss_sign_bn #t modBits eBits dBits skey m =
   let bits = bits t in
@@ -306,7 +312,9 @@ let rsapss_sign_bn #t modBits eBits dBits skey m =
   let d  = sub skey (nLen + nLen + eLen) dLen in
 
   let k = blocks modBits 8 in
-  let s = bn_mod_exp_fw_precompr2 nLen n m dBits d 4 r2 in
+  Math.Lemmas.pow2_le_compat (bits * nLen) modBits;
+  SM.bn_precomp_r2_mod_n_lemma (modBits - 1) n;
+  let s = bn_mod_exp_fw_precompr2 nLen 4 n m dBits d r2 in
   let m' = bn_mod_exp_raw_precompr2 nLen n s eBits e r2 in
   let eq_m = bn_eq_mask m m' in
   let s = map (logand eq_m) s in
@@ -323,7 +331,7 @@ val rsapss_sign_msg_to_bn:
   -> msg:seq uint8{length msg == msgLen} ->
   Pure (lbignum t (blocks modBits (bits t)))
   (requires rsapss_sign_pre a modBits sLen salt msgLen msg)
-  (ensures  fun res -> True)
+  (ensures  fun res -> bn_v res < pow2 (modBits - 1))
 
 let rsapss_sign_msg_to_bn #t a modBits sLen salt msgLen msg =
   let bits = bits t in
@@ -341,6 +349,10 @@ let rsapss_sign_msg_to_bn #t a modBits sLen salt msgLen msg =
   let emNat = bn_from_bytes_be #t emLen em in
   let m = create nLen (uint #t 0) in
   let m = update_sub m 0 (blocks emLen numb) emNat in
+  bn_eval_update_sub (blocks emLen numb) emNat nLen;
+  assert (bn_v m == bn_v emNat);
+  bn_from_bytes_be_lemma #t emLen em;
+  S.os2ip_lemma emBits em;
   m
 
 
@@ -351,7 +363,13 @@ val rsapss_sign_compute_sgnt:
   -> dBits:size_nat{skey_len_pre t modBits eBits dBits}
   -> skey:lbignum t (2 * blocks modBits (bits t) + blocks eBits (bits t) + blocks dBits (bits t))
   -> m:lbignum t (blocks modBits (bits t)) ->
-  tuple2 bool (lseq uint8 (blocks modBits 8))
+  Pure (tuple2 bool (lseq uint8 (blocks modBits 8)))
+  (requires
+   (let nLen = blocks modBits (bits t) in
+    let n  = sub skey 0 nLen in
+    rsapss_skey_pre modBits eBits dBits skey /\
+    bn_v m < bn_v n))
+  (ensures fun res -> True)
 
 let rsapss_sign_compute_sgnt #t modBits eBits dBits skey m =
   let bits = bits t in
@@ -380,8 +398,11 @@ val rsapss_sign_:
   -> msgLen:nat
   -> msg:seq uint8{length msg == msgLen} ->
   Pure (tuple2 bool (lseq uint8 (blocks modBits 8)))
-  (requires rsapss_sign_pre a modBits sLen salt msgLen msg)
-  (ensures  fun res -> True)
+  (requires
+    rsapss_skey_pre modBits eBits dBits skey /\
+    rsapss_sign_pre a modBits sLen salt msgLen msg)
+  (ensures fun res -> True)
+
 
 let rsapss_sign_ #t a modBits eBits dBits skey sLen salt msgLen msg =
   let m = rsapss_sign_msg_to_bn #t a modBits sLen salt msgLen msg in
@@ -437,13 +458,10 @@ let rsapss_sign_lemma #t a modBits eBits dBits skey sLen salt msgLen msg =
   S.os2ip_lemma emBits em;
 
   assert (bn_v m < bn_v n);
-  let s = bn_mod_exp_fw_precompr2 nLen n m dBits d 4 r2 in
   Math.Lemmas.pow2_le_compat (bits * nLen) modBits;
   SM.bn_precomp_r2_mod_n_lemma (modBits - 1) n;
-  bn_mod_exp_fw_precompr2_lemma nLen n m dBits d 4 r2;
-
+  let s = bn_mod_exp_fw_precompr2 nLen 4 n m dBits d r2 in
   let m' = bn_mod_exp_raw_precompr2 nLen n s eBits e r2 in
-  bn_mod_exp_raw_precompr2_lemma nLen n s eBits e r2;
 
   let eq_m = bn_eq_mask m m' in
   bn_eq_mask_lemma m m';
@@ -503,7 +521,9 @@ val rsapss_verify_bn:
   -> pkey:lbignum t (2 * blocks modBits (bits t) + blocks eBits (bits t))
   -> m_def:lbignum t (blocks modBits (bits t))
   -> s:lbignum t (blocks modBits (bits t)) ->
-  tuple2 bool (lbignum t (blocks modBits (bits t)))
+  Pure (tuple2 bool (lbignum t (blocks modBits (bits t))))
+  (requires rsapss_pkey_pre modBits eBits pkey)
+  (ensures fun res -> True)
 
 let rsapss_verify_bn #t modBits eBits pkey m_def s =
   let bits = bits t in
@@ -516,7 +536,12 @@ let rsapss_verify_bn #t modBits eBits pkey m_def s =
   let e  = sub pkey (nLen + nLen) eLen in
 
   let mask = bn_lt_mask s n in
+  bn_lt_mask_lemma s n;
+
   if BB.unsafe_bool_of_limb mask then begin
+    Math.Lemmas.pow2_le_compat (bits * nLen) modBits;
+    SM.bn_precomp_r2_mod_n_lemma (modBits - 1) n;
+
     let m = bn_mod_exp_raw_precompr2 nLen n s eBits e r2 in
     if bn_lt_pow2 modBits m then (true, m)
     else false, m end
@@ -559,7 +584,9 @@ val rsapss_verify_compute_msg:
   -> eBits:size_nat{pkey_len_pre t modBits eBits}
   -> pkey:lbignum t (2 * blocks modBits (bits t) + blocks eBits (bits t))
   -> sgnt:lseq uint8 (blocks modBits 8) ->
-  tuple2 bool (lbignum t (blocks modBits (bits t)))
+  Pure (tuple2 bool (lbignum t (blocks modBits (bits t))))
+  (requires rsapss_pkey_pre modBits eBits pkey)
+  (ensures  fun res -> True)
 
 let rsapss_verify_compute_msg #t modBits eBits pkey sgnt =
   let bits = bits t in
@@ -588,7 +615,9 @@ val rsapss_verify_:
   -> msgLen:nat
   -> msg:seq uint8{length msg == msgLen} ->
   Pure bool
-  (requires rsapss_verify_pre a sLen msgLen msg)
+  (requires
+    rsapss_pkey_pre modBits eBits pkey /\
+    rsapss_verify_pre a sLen msgLen msg)
   (ensures  fun r -> True)
 
 let rsapss_verify_ #t a modBits eBits pkey sLen sgnt msgLen msg =
@@ -642,10 +671,10 @@ let rsapss_verify_lemma #t a modBits eBits pkey sLen sgnt msgLen msg =
 
   let res =
   if BB.unsafe_bool_of_limb mask then begin
-    let m = bn_mod_exp_raw_precompr2 nLen n s eBits e r2 in
     Math.Lemmas.pow2_le_compat (bits * nLen) modBits;
     SM.bn_precomp_r2_mod_n_lemma (modBits - 1) n;
-    bn_mod_exp_raw_precompr2_lemma nLen n s eBits e r2;
+    let m = bn_mod_exp_raw_precompr2 nLen n s eBits e r2 in
+
     blocks_bits_lemma t emBits;
     blocks_numb_lemma t emBits;
     assert (blocks emLen numb == blocks emBits bits);
