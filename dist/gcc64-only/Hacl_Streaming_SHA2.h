@@ -40,85 +40,85 @@ extern "C" {
 #include "Hacl_Kremlib.h"
 #include "Hacl_Hash.h"
 
-typedef struct Hacl_Streaming_Functor_state_s___uint32_t_____s
+typedef struct Hacl_Streaming_SHA2_state_sha2_224_s
 {
   uint32_t *block_state;
   uint8_t *buf;
   uint64_t total_len;
 }
-Hacl_Streaming_Functor_state_s___uint32_t____;
+Hacl_Streaming_SHA2_state_sha2_224;
 
-Hacl_Streaming_Functor_state_s___uint32_t____ *Hacl_Streaming_SHA2_create_in_224();
+typedef Hacl_Streaming_SHA2_state_sha2_224 Hacl_Streaming_SHA2_state_sha2_256;
 
-void Hacl_Streaming_SHA2_init_224(Hacl_Streaming_Functor_state_s___uint32_t____ *s);
-
-void
-Hacl_Streaming_SHA2_update_224(
-  Hacl_Streaming_Functor_state_s___uint32_t____ *p,
-  uint8_t *data,
-  uint32_t len
-);
-
-void
-Hacl_Streaming_SHA2_finish_224(Hacl_Streaming_Functor_state_s___uint32_t____ *p, uint8_t *dst);
-
-void Hacl_Streaming_SHA2_free_224(Hacl_Streaming_Functor_state_s___uint32_t____ *s);
-
-Hacl_Streaming_Functor_state_s___uint32_t____ *Hacl_Streaming_SHA2_create_in_256();
-
-void Hacl_Streaming_SHA2_init_256(Hacl_Streaming_Functor_state_s___uint32_t____ *s);
-
-void
-Hacl_Streaming_SHA2_update_256(
-  Hacl_Streaming_Functor_state_s___uint32_t____ *p,
-  uint8_t *data,
-  uint32_t len
-);
-
-void
-Hacl_Streaming_SHA2_finish_256(Hacl_Streaming_Functor_state_s___uint32_t____ *p, uint8_t *dst);
-
-void Hacl_Streaming_SHA2_free_256(Hacl_Streaming_Functor_state_s___uint32_t____ *s);
-
-typedef struct Hacl_Streaming_Functor_state_s___uint64_t_____s
+typedef struct Hacl_Streaming_SHA2_state_sha2_384_s
 {
   uint64_t *block_state;
   uint8_t *buf;
   uint64_t total_len;
 }
-Hacl_Streaming_Functor_state_s___uint64_t____;
+Hacl_Streaming_SHA2_state_sha2_384;
 
-Hacl_Streaming_Functor_state_s___uint64_t____ *Hacl_Streaming_SHA2_create_in_384();
+typedef Hacl_Streaming_SHA2_state_sha2_384 Hacl_Streaming_SHA2_state_sha2_512;
 
-void Hacl_Streaming_SHA2_init_384(Hacl_Streaming_Functor_state_s___uint64_t____ *s);
+Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_SHA2_create_in_224();
+
+void Hacl_Streaming_SHA2_init_224(Hacl_Streaming_SHA2_state_sha2_224 *s);
+
+void
+Hacl_Streaming_SHA2_update_224(
+  Hacl_Streaming_SHA2_state_sha2_224 *p,
+  uint8_t *data,
+  uint32_t len
+);
+
+void Hacl_Streaming_SHA2_finish_224(Hacl_Streaming_SHA2_state_sha2_224 *p, uint8_t *dst);
+
+void Hacl_Streaming_SHA2_free_224(Hacl_Streaming_SHA2_state_sha2_224 *s);
+
+Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_SHA2_create_in_256();
+
+void Hacl_Streaming_SHA2_init_256(Hacl_Streaming_SHA2_state_sha2_224 *s);
+
+void
+Hacl_Streaming_SHA2_update_256(
+  Hacl_Streaming_SHA2_state_sha2_224 *p,
+  uint8_t *data,
+  uint32_t len
+);
+
+void Hacl_Streaming_SHA2_finish_256(Hacl_Streaming_SHA2_state_sha2_224 *p, uint8_t *dst);
+
+void Hacl_Streaming_SHA2_free_256(Hacl_Streaming_SHA2_state_sha2_224 *s);
+
+Hacl_Streaming_SHA2_state_sha2_384 *Hacl_Streaming_SHA2_create_in_384();
+
+void Hacl_Streaming_SHA2_init_384(Hacl_Streaming_SHA2_state_sha2_384 *s);
 
 void
 Hacl_Streaming_SHA2_update_384(
-  Hacl_Streaming_Functor_state_s___uint64_t____ *p,
+  Hacl_Streaming_SHA2_state_sha2_384 *p,
   uint8_t *data,
   uint32_t len
 );
 
-void
-Hacl_Streaming_SHA2_finish_384(Hacl_Streaming_Functor_state_s___uint64_t____ *p, uint8_t *dst);
+void Hacl_Streaming_SHA2_finish_384(Hacl_Streaming_SHA2_state_sha2_384 *p, uint8_t *dst);
 
-void Hacl_Streaming_SHA2_free_384(Hacl_Streaming_Functor_state_s___uint64_t____ *s);
+void Hacl_Streaming_SHA2_free_384(Hacl_Streaming_SHA2_state_sha2_384 *s);
 
-Hacl_Streaming_Functor_state_s___uint64_t____ *Hacl_Streaming_SHA2_create_in_512();
+Hacl_Streaming_SHA2_state_sha2_384 *Hacl_Streaming_SHA2_create_in_512();
 
-void Hacl_Streaming_SHA2_init_512(Hacl_Streaming_Functor_state_s___uint64_t____ *s);
+void Hacl_Streaming_SHA2_init_512(Hacl_Streaming_SHA2_state_sha2_384 *s);
 
 void
 Hacl_Streaming_SHA2_update_512(
-  Hacl_Streaming_Functor_state_s___uint64_t____ *p,
+  Hacl_Streaming_SHA2_state_sha2_384 *p,
   uint8_t *data,
   uint32_t len
 );
 
-void
-Hacl_Streaming_SHA2_finish_512(Hacl_Streaming_Functor_state_s___uint64_t____ *p, uint8_t *dst);
+void Hacl_Streaming_SHA2_finish_512(Hacl_Streaming_SHA2_state_sha2_384 *p, uint8_t *dst);
 
-void Hacl_Streaming_SHA2_free_512(Hacl_Streaming_Functor_state_s___uint64_t____ *s);
+void Hacl_Streaming_SHA2_free_512(Hacl_Streaming_SHA2_state_sha2_384 *s);
 
 #if defined(__cplusplus)
 }

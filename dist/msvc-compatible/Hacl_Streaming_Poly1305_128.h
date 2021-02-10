@@ -39,41 +39,35 @@ extern "C" {
 
 #include "Hacl_Poly1305_128.h"
 
-typedef struct Hacl_Streaming_Functor_state_s___Lib_IntVector_Intrinsics_vec128___uint8_t__s
+typedef struct Hacl_Streaming_Poly1305_128_poly1305_128_state_s
 {
   Lib_IntVector_Intrinsics_vec128 *block_state;
   uint8_t *buf;
   uint64_t total_len;
   uint8_t *p_key;
 }
-Hacl_Streaming_Functor_state_s___Lib_IntVector_Intrinsics_vec128___uint8_t_;
+Hacl_Streaming_Poly1305_128_poly1305_128_state;
 
-Hacl_Streaming_Functor_state_s___Lib_IntVector_Intrinsics_vec128___uint8_t_
+Hacl_Streaming_Poly1305_128_poly1305_128_state
 *Hacl_Streaming_Poly1305_128_create_in(uint8_t *k);
 
 void
-Hacl_Streaming_Poly1305_128_init(
-  uint8_t *k,
-  Hacl_Streaming_Functor_state_s___Lib_IntVector_Intrinsics_vec128___uint8_t_ *s
-);
+Hacl_Streaming_Poly1305_128_init(uint8_t *k, Hacl_Streaming_Poly1305_128_poly1305_128_state *s);
 
 void
 Hacl_Streaming_Poly1305_128_update(
-  Hacl_Streaming_Functor_state_s___Lib_IntVector_Intrinsics_vec128___uint8_t_ *p,
+  Hacl_Streaming_Poly1305_128_poly1305_128_state *p,
   uint8_t *data,
   uint32_t len
 );
 
 void
 Hacl_Streaming_Poly1305_128_finish(
-  Hacl_Streaming_Functor_state_s___Lib_IntVector_Intrinsics_vec128___uint8_t_ *p,
+  Hacl_Streaming_Poly1305_128_poly1305_128_state *p,
   uint8_t *dst
 );
 
-void
-Hacl_Streaming_Poly1305_128_free(
-  Hacl_Streaming_Functor_state_s___Lib_IntVector_Intrinsics_vec128___uint8_t_ *s
-);
+void Hacl_Streaming_Poly1305_128_free(Hacl_Streaming_Poly1305_128_poly1305_128_state *s);
 
 #if defined(__cplusplus)
 }

@@ -75,6 +75,7 @@ let evercrypt_hash : block hash_alg =
     Hacl.Streaming.MD.max_input_length64
     hash_len
     block_len
+    block_len // No vectorization
 
     (fun a _ -> fst (Spec.Agile.Hash.init a))
     (fun a s prevlen input -> fst (Spec.Agile.Hash.update_multi a (mk_words_state s prevlen) input))

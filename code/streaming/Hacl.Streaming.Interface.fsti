@@ -251,6 +251,10 @@ type block (index: Type0) =
   max_input_length: (index -> x:nat { 0 < x /\ x < pow2 64 }) ->
   output_len: (index -> x:U32.t { U32.v x > 0 }) ->
   block_len: (index -> x:U32.t { U32.v x > 0 }) ->
+  // The size of data to process at a time. Must be a multiple of block_len.
+  // Controls the size of the internal buffer.
+  blocks_state_len: (i:index ->
+    x:U32.t { U32.v x > 0 /\ U32.v x % U32.v (block_len i) = 0 }) ->
 
   /// An init/update/update_last/finish specification. The long refinements were
   /// previously defined as blocks / small / output.

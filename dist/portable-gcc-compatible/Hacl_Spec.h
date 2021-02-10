@@ -39,6 +39,15 @@ extern "C" {
 
 
 
+/* SNIPPET_START: Spec_Blake2_alg */
+
+#define Spec_Blake2_Blake2S 0
+#define Spec_Blake2_Blake2B 1
+
+/* SNIPPET_END: Spec_Blake2_alg */
+
+typedef uint8_t Spec_Blake2_alg;
+
 /* SNIPPET_START: Spec_Hash_Definitions_hash_alg */
 
 #define Spec_Hash_Definitions_SHA2_224 0
