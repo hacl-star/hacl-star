@@ -9,7 +9,7 @@ open FStar.HyperStack.All
 open Lib.RandomSequence
 module R = Lib.RandomSequence
 
-/// WARNING: This function is DEPRECATED. Use ``random_crypto`` instead.
+[@@ deprecated "random_crypto" ]
 val randombytes:
     buf: buffer uint8
   -> len: size_t{v len == length buf} ->
@@ -31,7 +31,7 @@ val crypto_random:
   (requires (fun h0 ->
     live h0 buf /\
     disjoint buf entropy_p))
-  (ensures (fun h0 ok h1 ->
+  (ensures (fun h0 () h1 ->
     modifies2 buf entropy_p h0 h1 /\
     begin
     let e0_v = B.deref h0 (entropy_p <: B.buffer (Ghost.erased entropy)) in
