@@ -427,27 +427,28 @@ val table_select_ct:
     as_seq h1 res == LSeq.sub (as_seq h0 table) (v i * v len) (v len)))
 
 let table_select_ct #a_t len table_len table i res =
+  let h0 = ST.get () in
   copy res (sub table 0ul len);
 
-  let h0 = ST.get () in
-  assert (as_seq h0 res == LSeq.sub (as_seq h0 table) 0 (v len));
+  let h1 = ST.get () in
+  assert (as_seq h1 res == LSeq.sub (as_seq h0 table) 0 (v len));
   Math.Lemmas.lemma_mult_le_right (v len) (v i + 1) (v table_len);
 
   [@ inline_let]
   let inv h (j:nat{j <= v table_len - 1}) =
     modifies (loc res) h0 h /\
     as_seq h res ==
-    (if j >= v i then LSeq.sub (as_seq h0 table) (v i * v len) (v len) else as_seq h0 res) in
+    (if j >= v i then LSeq.sub (as_seq h0 table) (v i * v len) (v len) else as_seq h1 res) in
 
   Lib.Loops.for 0ul (table_len -! 1ul) inv
   (fun j ->
-    let h1 = ST.get () in
-    assert (inv h1 (v j));
-    table_select_ct_f len table_len table i j res;
     let h2 = ST.get () in
-    assert (as_seq h2 res ==
-      (if v i = v j + 1 then LSeq.sub (as_seq h0 table) (v i * v len) (v len) else as_seq h1 res));
-    assert (inv h2 (v j + 1))
+    assert (inv h2 (v j));
+    table_select_ct_f len table_len table i j res;
+    let h3 = ST.get () in
+    assert (as_seq h3 res ==
+      (if v i = v j + 1 then LSeq.sub (as_seq h0 table) (v i * v len) (v len) else as_seq h2 res));
+    assert (inv h3 (v j + 1))
     )
 
 //////////////////////////////////////////////////////////
@@ -565,20 +566,21 @@ val lexp_fw_raw_f:
   -> k:lexp a_t len ctx_len ->
   lexp_fw_f_st a_t len ctx_len k
 
-#push-options "--z3rlimit 150"
 let lexp_fw_raw_f #a_t len ctx_len k ctx a bLen bBits b l table_len table i acc =
-  let h0 = ST.get () in
   let bits_l = bn_get_bits_l bLen bBits b l i in
   let bits_l32 = Lib.RawIntTypes.(size_from_UInt32 (u32_to_UInt32 (to_u32 bits_l))) in
   assert (v bits_l32 == v bits_l /\ v bits_l < v table_len);
 
   Math.Lemmas.lemma_mult_le_right (v len) (v bits_l + 1) (v table_len);
   assert (v (bits_l32 *! len) == v bits_l32 * v len);
+  let h0 = ST.get () in
   let a_bits_l = sub table (bits_l32 *! len) len in
+  let h1 = ST.get () in
   assert (precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h0 table) (v bits_l));
+  assert (k.to.refl (as_seq h1 a_bits_l) == S.pow k.to.exp (k.to.refl (as_seq h0 a)) (v bits_l));
 
   lexp_fw_pow_fmul len ctx_len k ctx l a_bits_l acc
-#pop-options
+
 
 
 inline_for_extraction noextract
@@ -591,16 +593,17 @@ val lexp_fw_ct_f:
 
 let lexp_fw_ct_f #a_t len ctx_len k ctx a bLen bBits b l table_len table i acc =
   push_frame ();
-  let h0 = ST.get () in
   let bits_l = bn_get_bits_l bLen bBits b l i in
   assert (v bits_l < v table_len);
 
   let a_bits_l = create len (uint #a_t #SEC 0) in
   Math.Lemmas.lemma_mult_le_right (v len) (v bits_l + 1) (v table_len);
+  let h0 = ST.get () in
   table_select_ct len table_len table bits_l a_bits_l;
   let h1 = ST.get () in
   assert (as_seq h1 a_bits_l == LSeq.sub (as_seq h0 table) (v bits_l * v len) (v len));
   assert (precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h0 table) (v bits_l));
+  assert (k.to.refl (as_seq h1 a_bits_l) == S.pow k.to.exp (k.to.refl (as_seq h0 a)) (v bits_l));
 
   lexp_fw_pow_fmul len ctx_len k ctx l a_bits_l acc;
   pop_frame ()
@@ -644,17 +647,19 @@ val lexp_fw_raw_rem:
   lexp_fw_rem_st a_t len ctx_len k
 
 let lexp_fw_raw_rem #a_t len ctx_len k ctx a bLen bBits b l table_len table acc =
-  let h0 = ST.get () in
   let c = bBits %. l in
   assert (v c == v bBits % v l);
   let bits_c = bn_get_bits_c bLen bBits b l in
   let bits_c32 = Lib.RawIntTypes.(size_from_UInt32 (u32_to_UInt32 (to_u32 bits_c))) in
   assert (v bits_c32 == v bits_c /\ v bits_c < v table_len);
 
-  Math.Lemmas.lemma_mult_le_right (v len) (v bits_c32 + 1) (v table_len);
   assert (v (bits_c32 *! len) == v bits_c32 * v len);
-  assert (precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h0 table) (v bits_c));
+  Math.Lemmas.lemma_mult_le_right (v len) (v bits_c32 + 1) (v table_len);
+  let h0 = ST.get () in
   let a_bits_c = sub table (bits_c32 *! len) len in
+  let h1 = ST.get () in
+  assert (precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h0 table) (v bits_c));
+  assert (k.to.refl (as_seq h1 a_bits_c) == S.pow k.to.exp (k.to.refl (as_seq h0 a)) (v bits_c));
 
   lexp_fw_pow_fmul len ctx_len k ctx c a_bits_c acc
 
@@ -669,18 +674,19 @@ val lexp_fw_ct_rem:
 
 let lexp_fw_ct_rem #a_t len ctx_len k ctx a bLen bBits b l table_len table acc =
   push_frame ();
-  let h0 = ST.get () in
   let c = bBits %. l in
   assert (v c == v bBits % v l);
   let bits_c = bn_get_bits_c bLen bBits b l in
   assert (v bits_c < v table_len);
 
   let a_bits_c = create len (uint #a_t #SEC 0) in
+  Math.Lemmas.lemma_mult_le_right (v len) (v bits_c + 1) (v table_len);
+  let h0 = ST.get () in
   table_select_ct len table_len table bits_c a_bits_c;
   let h1 = ST.get () in
-  Math.Lemmas.lemma_mult_le_right (v len) (v bits_c + 1) (v table_len);
   assert (as_seq h1 a_bits_c == LSeq.sub (as_seq h0 table) (v bits_c * v len) (v len));
   assert (precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h0 table) (v bits_c));
+  assert (k.to.refl (as_seq h1 a_bits_c) == S.pow k.to.exp (k.to.refl (as_seq h0 a)) (v bits_c));
 
   lexp_fw_pow_fmul #a_t len ctx_len k ctx c a_bits_c acc;
   pop_frame ()
