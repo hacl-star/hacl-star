@@ -49,7 +49,8 @@ let bn_sub_carry #t aLen a c_in res =
   (fun i ->
     let h1 = ST.get () in
     let t1 = a.(i) in
-    c.(0ul) <- subborrow_st c.(0ul) t1 (uint #t 0) (sub res i 1ul);
+    let res_i = sub res i 1ul in
+    c.(0ul) <- subborrow_st c.(0ul) t1 (uint #t 0) res_i;
     lemma_eq_disjoint aLen aLen 1ul res a c i h0 h1
   );
   let res = c.(0ul) in
@@ -91,7 +92,8 @@ let bn_sub_eq_len #t aLen a b res =
     let h1 = ST.get () in
     let t1 = a.(i) in
     let t2 = b.(i) in
-    c.(0ul) <- subborrow_st c.(0ul) t1 t2 (sub res i 1ul);
+    let res_i = sub res i 1ul in
+    c.(0ul) <- subborrow_st c.(0ul) t1 t2 res_i;
     lemma_eq_disjoint aLen aLen 1ul res a c i h0 h1;
     lemma_eq_disjoint aLen aLen 1ul res b c i h0 h1
   );
@@ -205,7 +207,8 @@ let bn_add_carry #t aLen a c_in res =
   (fun i ->
     let h1 = ST.get () in
     let t1 = a.(i) in
-    c.(0ul) <- addcarry_st c.(0ul) t1 (uint #t 0) (sub res i 1ul);
+    let res_i = sub res i 1ul in
+    c.(0ul) <- addcarry_st c.(0ul) t1 (uint #t 0) res_i;
     lemma_eq_disjoint aLen aLen 1ul res a c i h0 h1
   );
   let res = c.(0ul) in
@@ -247,7 +250,8 @@ let bn_add_eq_len #t aLen a b res =
     let h1 = ST.get () in
     let t1 = a.(i) in
     let t2 = b.(i) in
-    c.(0ul) <- addcarry_st c.(0ul) t1 t2 (sub res i 1ul);
+    let res_i = sub res i 1ul in
+    c.(0ul) <- addcarry_st c.(0ul) t1 t2 res_i;
     lemma_eq_disjoint aLen aLen 1ul res a c i h0 h1;
     lemma_eq_disjoint aLen aLen 1ul res b c i h0 h1
   );

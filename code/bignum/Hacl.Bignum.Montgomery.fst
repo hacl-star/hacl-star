@@ -74,7 +74,9 @@ let bn_mont_reduction_f #t len n nInv j c res =
   // Keeping the inline_for_extraction version here.
   let c1 = BN.bn_mul1_lshift_add_in_place len n qj (len +! len) j res in
   let h0 = ST.get () in
-  c.(0ul) <- addcarry_st c.(0ul) c1 res.(len +! j) (sub res (len +! j) 1ul);
+  let resb = sub res (len +! j) 1ul in
+  let res_j = res.(len +! j) in
+  c.(0ul) <- addcarry_st c.(0ul) c1 res_j resb;
   let h1 = ST.get () in
   let tmp = sub res (len +! j) 1ul in
   B.modifies_buffer_elim (B.gsub #(limb t) res 0ul (len +! j)) (loc c |+| loc tmp) h0 h1;

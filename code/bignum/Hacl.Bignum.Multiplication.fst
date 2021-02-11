@@ -50,7 +50,9 @@ let bn_mul1 #t aLen a l res =
   fill_elems4 h0 aLen res refl footprint spec
   (fun i ->
     let h1 = ST.get () in
-    c.(0ul) <- mul_wide_add_st a.(i) l c.(0ul) (sub res i 1ul);
+    let a_i = a.(i) in
+    let res_i = sub res i 1ul in
+    c.(0ul) <- mul_wide_add_st a_i l c.(0ul) res_i;
     lemma_eq_disjoint aLen aLen 1ul res a c i h0 h1
   );
   let c = c.(0ul) in
@@ -86,7 +88,9 @@ let bn_mul1_add_in_place #t aLen a l res =
   let h0 = ST.get () in
   fill_elems4 h0 aLen res refl footprint spec
   (fun i ->
-    c.(0ul) <- mul_wide_add2_st a.(i) l c.(0ul) (sub res i 1ul)
+    let a_i = a.(i) in
+    let res_i = sub res i 1ul in
+    c.(0ul) <- mul_wide_add2_st a_i l c.(0ul) res_i
   );
   let c = c.(0ul) in
   pop_frame ();
@@ -108,11 +112,11 @@ val bn_mul1_lshift_add:
     (c, as_seq h1 res) == S.bn_mul1_lshift_add (as_seq h0 a) b_j (v j) (as_seq h0 res))
 
 let bn_mul1_lshift_add #t aLen a b_j resLen j res =
-  let res' = sub res j aLen in
+  let res_j = sub res j aLen in
   let h0 = ST.get () in
   update_sub_f_carry h0 res j aLen
-  (fun h -> S.bn_mul1_add_in_place (as_seq h0 a) b_j (as_seq h0 res'))
-  (fun _ -> bn_mul1_add_in_place aLen a b_j res')
+  (fun h -> S.bn_mul1_add_in_place (as_seq h0 a) b_j (as_seq h0 res_j))
+  (fun _ -> bn_mul1_add_in_place aLen a b_j res_j)
 
 
 inline_for_extraction noextract
@@ -143,7 +147,8 @@ let bn_mul #t aLen a bLen b res =
   loop1 h0 bLen res spec
   (fun j ->
     Loops.unfold_repeati (v bLen) (spec h0) (as_seq h0 res) (v j);
-    res.(aLen +! j) <- bn_mul1_lshift_add aLen a b.(j) (aLen +! bLen) j res
+    let bj = b.(j) in
+    res.(aLen +! j) <- bn_mul1_lshift_add aLen a bj (aLen +! bLen) j res
   )
 
 
@@ -212,7 +217,9 @@ let bn_sqr #t aLen a res =
   loop1 h0 aLen res spec
   (fun j ->
     Loops.unfold_repeati (v aLen) (spec h0) (as_seq h0 res) (v j);
-    res.(j +! j) <- bn_mul1_lshift_add j (sub a 0ul j) a.(j) resLen j res
+    let ab = sub a 0ul j in
+    let a_j = a.(j) in
+    res.(j +! j) <- bn_mul1_lshift_add j ab a_j resLen j res
   );
 
   let _ = Hacl.Bignum.Addition.bn_add_eq_len_u resLen res res res in
