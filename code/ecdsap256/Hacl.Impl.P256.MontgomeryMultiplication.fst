@@ -617,24 +617,57 @@ let lemma_exp_1_3 t0D t1D =
 
 
 val lemma_exp_1_4: t0D: nat -> t1D: nat -> t2D: nat -> Lemma (
-  pow t0D (pow2 76) * pow t1D (pow2 44) * t2D % prime256 * (pow t0D (pow2 76) * pow t1D (pow2 44) * t2D % prime256) % prime256 ==
-  pow t0D (pow2 152) * pow t1D (pow2 88) * pow t2D 2 % prime256)
+  pow t0D (pow2 21) * pow t1D (pow2 12 + 4) % prime256 * t2D % prime256 ==
+  pow t0D (pow2 21) * pow t1D (pow2 12 + 4) * pow t2D 1 % prime256)
 
-let lemma_exp_1_4 t0D t1D t2D = admit()
+let lemma_exp_1_4 t0D t1D t2D =
+  let pow2_21 = pow2 21 in 
+
+  calc (==) {pow t0D (pow2_21) * pow t1D (pow2 12 + 4) % prime256 * t2D % prime256;
+    (==) {lemma_mod_mul_distr_l (pow t0D pow2_21 * pow t1D (pow2 12 + 4)) t2D prime256}
+  pow t0D (pow2_21) * pow t1D (pow2 12 + 4) * t2D % prime256;
+  }
+
+val lemma_exp_1_5: t0D: nat -> t1D: nat -> t2D: nat -> Lemma (
+  (pow t0D (pow2 21) * pow t1D (pow2 12 + 4) * pow t2D 1 % prime256 * (pow t0D (pow2 21) * pow t1D (pow2 12 + 4) * pow t2D 1 % prime256) % prime256 == 
+  pow t0D (pow2 22) * pow t1D (pow2 13 + 8) * pow t2D 2 % prime256))
+
+let lemma_exp_1_5 t0D t1D t2D = 
+  let pow2_21 = pow2 21 in 
+  let pow2_22 = pow2 22 in 
+
+  let a = pow t0D pow2_21 in 
+  let b = pow t1D (pow2 12 + 4) in 
+  let c = pow t2D 1 in 
+
+  calc (==) {a * b * c % prime256 * (a * b * c % prime256) % prime256;
+    (==) {lemma_mod_mul_distr_l (a * b * c) (a * b * c % prime256) prime256}
+  a * b * c * (a * b * c % prime256) % prime256;
+    (==) {lemma_mod_mul_distr_r (a * b * c) (a * b * c) prime256}
+  a * b * c * (a * b * c) % prime256;
+    (==) {assert_by_tactic (a * b * c * (a * b * c) % prime256 == (a * a) * (b * b) * (c * c) % prime256) canon}
+  (a * a) * (b * b) * (c * c) % prime256;
+    (==) {pow_plus t0D pow2_21 pow2_21; pow_plus t1D (pow2 12 + 4) (pow2 12 + 4); pow_plus t2D 1 1}
+  pow t0D (2 * pow2_21) * pow t1D (2 * pow2 12 + 8) * pow t2D 2 % prime256;  
+    (==) {pow2_double_sum 21; pow2_double_sum 12}
+  pow t0D pow2_22 * pow t1D (pow2 13 + 8) * pow t2D 2 % prime256;   
+  }
 
 
-val lemma_exp_1_5: t0D : nat -> t1D: nat -> t2D: nat -> Lemma (
-  pow (pow t0D (pow2 152) * pow t1D (pow2 88) * pow t2D 2 % prime256) (pow2 31) % prime256 == 
+
+val lemma_exp_1_6: t0D : nat -> t1D: nat -> t2D: nat -> Lemma (
+  pow (pow t0D (pow2 22) * pow t1D (pow2 13 + 8) * pow t2D 2 % prime256) (pow2 31) % prime256 == 
   pow t0D (pow2 183) * pow t1D (pow2 119) * pow t2D 32 % prime256)
 
-let lemma_exp_1_5 t0D t1D t2D = admit()
+let lemma_exp_1_6 t0D t1D t2D = admit()
 
+(*
 val lemma_exp_1_6: tD: nat -> t0D: nat -> t1D: nat -> t2D: nat -> Lemma (
   pow t0D (pow2 183) * pow t1D (pow2 119) * pow t2D 32 % prime256 * tD % prime256 ==
   pow tD 1 * pow t0D (pow2 183) * pow t1D (pow2 119) * pow t2D 32  % prime256)
 
 let lemma_exp_1_6 tD t0D t1D t2D = admit()
-
+*)
 
 inline_for_extraction noextract
 val exponent_1: t: felem -> t0: felem -> t1: felem -> t2: felem -> t3: felem -> t4: felem -> t5: felem -> Stack unit 
@@ -708,6 +741,13 @@ let exponent_1 t t0 t1 t2 t3 t4 t5 =
     (==) {lemma_exp_1_3 t0D t1D} 
   pow t0D (pow2_21) * pow t1D (pow2 12 + 4) % prime256;}; 
 
+  (* h8 *)
+  lemma_exp_1_4 t0D t1D t2D;
+  
+  (* h9 *)
+  lemma_exp_1_5 t0D t1D t2D;
+
+  (* h10 *) 
 
   assert(as_nat h1 t0 = toDomain_ (pow t0D (pow2 9) % prime256)); 
   assert(as_nat h2 t3 = toDomain_ (pow t0D (pow2 9) % prime256 * pow t1D 1 % prime256)); 
@@ -715,11 +755,11 @@ let exponent_1 t t0 t1 t2 t3 t4 t5 =
   assert(as_nat h4 t0 = toDomain_ (pow t0D (pow2_19) * pow t1D (pow2 10) % prime256)); 
   assert(as_nat h5 t4 = toDomain_ (pow t0D (pow2_19) * pow t1D (pow2 10 + 1) % prime256)); 
   assert(as_nat h6 t0 = toDomain_ (pow t0D (pow2_20) * pow t1D (pow2 11 + 2) % prime256)); 
-  assert(as_nat h7 t0 = toDomain_ ( pow t0D (pow2 21) * pow t1D (pow2 12 + 4) % prime256));  admit();
- (* assert(as_nat h8 t5 = toDomain_ (pow t0D (pow2_76) * pow t1D (pow2_44) * t2D % prime256));
-  (*assert(as_nat h9 t0 = toDomain_ (pow t0D (pow2 152) * pow t1D (pow2 88) * pow t2D 2 % prime256)); *)
-  assert(as_nat h10 t0 = toDomain_ (pow t0D (pow2 183) * pow t1D (pow2 119) * pow t2D 32 % prime256));
-  assert(as_nat h11 t0 = toDomain_ (pow tD 1 * pow t0D (pow2 183) * pow t1D (pow2 119) * pow t2D 32 % prime256));
+  assert(as_nat h7 t0 = toDomain_ (pow t0D (pow2 21) * pow t1D (pow2 12 + 4) % prime256));  
+  assert(as_nat h8 t5 = toDomain_ (pow t0D (pow2 21) * pow t1D (pow2 12 + 4) * pow t2D 1 % prime256));
+  assert(as_nat h9 t0 = toDomain_ (pow t0D (pow2 22) * pow t1D (pow2 13 + 8) * pow t2D 2 % prime256)); 
+  assert(as_nat h10 t0 = toDomain_ (pow (pow t0D (pow2 22) * pow t1D (pow2 13 + 8) * pow t2D 2 % prime256) (pow2 31) % prime256));
+ (* assert(as_nat h11 t0 = toDomain_ (pow tD 1 * pow t0D (pow2 183) * pow t1D (pow2 119) * pow t2D 32 % prime256));
   assert(as_nat h12 t0 = toDomain_ (pow (fromDomain_ (as_nat h11 t0)) (pow2 128) % prime256));
   assert(as_nat h13 t0 = toDomain_ (fromDomain_ (as_nat h12 t0) * fromDomain_ (as_nat h8 t5) % prime256)); *)
 
@@ -730,9 +770,9 @@ let exponent_1 t t0 t1 t2 t3 t4 t5 =
     (==) {lemma_mod_mul_distr_l (pow t0D (pow2_76) * pow t1D (pow2_44)) t2D prime256}
     pow t0D pow2_76 * pow t1D pow2_44 * t2D % prime256;}; *)
 
-  lemma_exp_1_4 t0D t1D t2D;
-  lemma_exp_1_5 t0D t1D t2D;
-  lemma_exp_1_6 tD t0D t1D t2D;
+
+
+  (* lemma_exp_1_6 tD t0D t1D t2D; *)
   
   admit()
 
