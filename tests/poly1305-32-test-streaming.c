@@ -14,7 +14,7 @@
 #include "test_helpers.h"
 #include "poly1305_vectors.h"
 
-typedef struct Hacl_Streaming_Functor_state_s___uint64_t___uint8_t__s poly1305_state;
+typedef struct Hacl_Streaming_Poly1305_32_poly1305_32_state_s poly1305_state;
 
 int main() {
   bool ok = true;

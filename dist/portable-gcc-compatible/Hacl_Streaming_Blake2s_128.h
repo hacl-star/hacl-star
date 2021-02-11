@@ -37,42 +37,56 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
+#include "Hacl_Streaming_Blake2.h"
 #include "Hacl_Kremlib.h"
 #include "Hacl_Blake2s_128.h"
+#include "Hacl_Spec.h"
+#include "Hacl_Impl_Blake2.h"
 
-/* SNIPPET_START: K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128_ */
+/* SNIPPET_START: Hacl_Streaming_Blake2s_128_blake2s_128_block_state */
 
-typedef struct K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128__s
+typedef struct Hacl_Streaming_Blake2s_128_blake2s_128_block_state_s
 {
   Lib_IntVector_Intrinsics_vec128 *fst;
   Lib_IntVector_Intrinsics_vec128 *snd;
 }
-K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128_;
+Hacl_Streaming_Blake2s_128_blake2s_128_block_state;
 
-/* SNIPPET_END: K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128_ */
+/* SNIPPET_END: Hacl_Streaming_Blake2s_128_blake2s_128_block_state */
 
-/* SNIPPET_START: Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128____ */
+/* SNIPPET_START: Hacl_Streaming_Blake2s_128_blake2s_128_state */
 
-typedef struct
-Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128_____s
+typedef struct Hacl_Streaming_Blake2s_128_blake2s_128_state_s
 {
-  K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128_ block_state;
+  Hacl_Streaming_Blake2s_128_blake2s_128_block_state block_state;
   uint8_t *buf;
   uint64_t total_len;
 }
-Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128____;
+Hacl_Streaming_Blake2s_128_blake2s_128_state;
 
-/* SNIPPET_END: Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128____ */
+/* SNIPPET_END: Hacl_Streaming_Blake2s_128_blake2s_128_state */
 
 /* SNIPPET_START: Hacl_Streaming_Blake2s_128_blake2s_128_no_key_create_in */
 
 /*
   State allocation function when there is no key
 */
-Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128____
+Hacl_Streaming_Blake2s_128_blake2s_128_state
 *Hacl_Streaming_Blake2s_128_blake2s_128_no_key_create_in();
 
 /* SNIPPET_END: Hacl_Streaming_Blake2s_128_blake2s_128_no_key_create_in */
+
+/* SNIPPET_START: Hacl_Streaming_Blake2s_128_blake2s_128_no_key_init */
+
+/*
+  (Re-)initialization function when there is no key
+*/
+void
+Hacl_Streaming_Blake2s_128_blake2s_128_no_key_init(
+  Hacl_Streaming_Blake2s_128_blake2s_128_state *s
+);
+
+/* SNIPPET_END: Hacl_Streaming_Blake2s_128_blake2s_128_no_key_init */
 
 /* SNIPPET_START: Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update */
 
@@ -81,8 +95,7 @@ Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec128___Lib_IntVe
 */
 void
 Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update(
-  Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128____
-  *p,
+  Hacl_Streaming_Blake2s_128_blake2s_128_state *p,
   uint8_t *data,
   uint32_t len
 );
@@ -96,8 +109,7 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update(
 */
 void
 Hacl_Streaming_Blake2s_128_blake2s_128_no_key_finish(
-  Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128____
-  *p,
+  Hacl_Streaming_Blake2s_128_blake2s_128_state *p,
   uint8_t *dst
 );
 
@@ -110,8 +122,7 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_finish(
 */
 void
 Hacl_Streaming_Blake2s_128_blake2s_128_no_key_free(
-  Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128____
-  *s
+  Hacl_Streaming_Blake2s_128_blake2s_128_state *s
 );
 
 /* SNIPPET_END: Hacl_Streaming_Blake2s_128_blake2s_128_no_key_free */
@@ -121,10 +132,24 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_free(
 /*
   State allocation function when using a (potentially null) key
 */
-Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128____
+Hacl_Streaming_Blake2s_128_blake2s_128_state
 *Hacl_Streaming_Blake2s_128_blake2s_128_with_key_create_in(uint32_t key_size, uint8_t *k);
 
 /* SNIPPET_END: Hacl_Streaming_Blake2s_128_blake2s_128_with_key_create_in */
+
+/* SNIPPET_START: Hacl_Streaming_Blake2s_128_blake2s_128_with_key_init */
+
+/*
+  (Re-)initialization function when using a (potentially null) key
+*/
+void
+Hacl_Streaming_Blake2s_128_blake2s_128_with_key_init(
+  uint32_t key_size,
+  uint8_t *k,
+  Hacl_Streaming_Blake2s_128_blake2s_128_state *s
+);
+
+/* SNIPPET_END: Hacl_Streaming_Blake2s_128_blake2s_128_with_key_init */
 
 /* SNIPPET_START: Hacl_Streaming_Blake2s_128_blake2s_128_with_key_update */
 
@@ -134,8 +159,7 @@ Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec128___Lib_IntVe
 void
 Hacl_Streaming_Blake2s_128_blake2s_128_with_key_update(
   uint32_t key_size,
-  Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128____
-  *p,
+  Hacl_Streaming_Blake2s_128_blake2s_128_state *p,
   uint8_t *data,
   uint32_t len
 );
@@ -150,8 +174,7 @@ Hacl_Streaming_Blake2s_128_blake2s_128_with_key_update(
 void
 Hacl_Streaming_Blake2s_128_blake2s_128_with_key_finish(
   uint32_t key_size,
-  Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128____
-  *p,
+  Hacl_Streaming_Blake2s_128_blake2s_128_state *p,
   uint8_t *dst
 );
 
@@ -165,8 +188,7 @@ Hacl_Streaming_Blake2s_128_blake2s_128_with_key_finish(
 void
 Hacl_Streaming_Blake2s_128_blake2s_128_with_key_free(
   uint32_t key_size,
-  Hacl_Streaming_Functor_state_s__K____Lib_IntVector_Intrinsics_vec128___Lib_IntVector_Intrinsics_vec128____
-  *s
+  Hacl_Streaming_Blake2s_128_blake2s_128_state *s
 );
 
 /* SNIPPET_END: Hacl_Streaming_Blake2s_128_blake2s_128_with_key_free */
