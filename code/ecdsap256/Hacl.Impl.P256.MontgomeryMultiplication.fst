@@ -342,88 +342,6 @@ val montgomery_square_buffer_: result: felem -> a: felem -> Stack unit
 let montgomery_square_buffer_ result a = 
   montgomery_square_buffer a result
 
-open FStar.Tactics 
-open FStar.Tactics.Canon 
-
-
-val lemma_pow_sum: tD : nat -> a: nat -> b: nat -> Lemma 
-  (pow tD a % prime256 * (pow tD b % prime256) % prime256 == pow tD (a + b) % prime256)
-
-let lemma_pow_sum tD a b = 
-  calc (==) {pow tD a % prime256 * (pow tD b % prime256) % prime256;
-    (==) {lemma_mod_mul_distr_l (pow tD a) (pow tD b % prime256) prime256}
-  pow tD a * (pow tD b % prime256) % prime256;
-    (==) {lemma_mod_mul_distr_r (pow tD a) (pow tD b) prime256}
-  pow tD a * (pow tD b) % prime256;
-    (==) {assert_by_tactic (pow tD a * (pow tD b) == pow tD a * pow tD b) canon}
-  pow tD a * pow tD b % prime256;
-    (==) {pow_plus tD a b}
-  pow tD (a + b) % prime256;}
-
-
-val lemma_pow_sum2: t0D : nat -> t1D: nat -> a0: nat -> a1: nat -> b0: nat -> b1: nat -> Lemma (
-  pow t0D a0 % prime256 * pow t1D b0 % prime256 * (pow t0D a1 % prime256 * pow t1D b1 % prime256) % prime256 == 
-  pow t0D (a0 + a1) * pow t1D (b0 + b1) % prime256)
-
-let lemma_pow_sum2 t0D t1D a0 a1 b0 b1 = 
-  calc (==) {pow t0D a0 % prime256 * pow t1D b0 % prime256 * (pow t0D a1 % prime256 * pow t1D b1 % prime256) % prime256;
-  (==)  {lemma_mod_mul_distr_l (pow t0D a0) (pow t1D b0) prime256; lemma_mod_mul_distr_l (pow t0D a1) (pow t1D b1) prime256}
-    pow t0D a0 * pow t1D b0 % prime256 * (pow t0D a1 * pow t1D b1 % prime256) % prime256; 
-  (==) {lemma_mod_mul_distr_l (pow t0D a0 * pow t1D b0) (pow t0D a1 * pow t1D b1 % prime256) prime256}
-    pow t0D a0 * pow t1D b0 * (pow t0D a1 * pow t1D b1 % prime256) % prime256; 
-  (==) {lemma_mod_mul_distr_r (pow t0D a0 * pow t1D b0) (pow t0D a1 * pow t1D b1) prime256}
-    pow t0D a0 * pow t1D b0 * (pow t0D a1 * pow t1D b1) % prime256; 
-  (==) {assert_by_tactic (pow t0D a0 * pow t1D b0 * (pow t0D a1 * pow t1D b1) == pow t0D a0 * pow t0D a1 * (pow t1D b0 * pow t1D b1)) canon}
-    pow t0D a0 * pow t0D a1 * (pow t1D b0 * pow t1D b1) % prime256; 
-  (==) {pow_plus t0D a0 a1; pow_plus t1D b0 b1}
-    pow t0D (a0 + a1) * pow t1D (b0 + b1) % prime256;}
-
-
- val lemma_6_powers: tD: nat -> 
-  Lemma ((tD * tD % prime256 * tD % prime256) * (tD * tD % prime256 * tD % prime256) % prime256 == 
-    pow tD 6 % prime256)
-
-let lemma_6_powers tD =     
-    calc (==) {(tD * tD % prime256 * tD % prime256) * (tD * tD % prime256 * tD % prime256) % prime256; 
-      (==) {lemma_mod_mul_distr_l (tD * tD) tD prime256}
-    (tD * tD * tD % prime256) * (tD * tD * tD % prime256) % prime256;
-      (==) {lemma_mod_mul_distr_l (tD * tD * tD) (tD * tD * tD % prime256) prime256}
-    tD * tD * tD * (tD * tD * tD % prime256) % prime256;  
-      (==) {lemma_mod_mul_distr_r (tD * tD * tD) (tD * tD * tD) prime256}
-    tD * tD * tD * (tD * tD * tD) % prime256; 
-      (==) {assert_by_tactic (tD * tD * tD * (tD * tD * tD) == (tD * tD) * (tD * tD) * (tD * tD)) canon}
-    (tD * tD) * (tD * tD) * (tD * tD) % prime256; 
-      (==) {pow_plus tD 1 1}
-   pow tD 2 * pow tD 2 * pow tD 2 % prime256;
-     (==) {pow_plus tD 2 2}
-   pow tD 4 * pow tD 2 % prime256;
-     (==) {pow_plus tD 4 2} 
-   pow tD 6 % prime256;}
-
-
-val lemma_15_powers: tD: nat -> 
-  Lemma ((pow tD 6 % prime256 * (pow tD 6 % prime256) % prime256) * (tD * tD % prime256 * tD % prime256) % prime256 == 
-    pow tD 15 % prime256)
-
-let lemma_15_powers tD = 
-    calc (==) {(pow tD 6 % prime256 * (pow tD 6 % prime256) % prime256) * (tD * tD % prime256 * tD % prime256) % prime256;
-      (==) {lemma_pow_sum tD 6 6}
-    (pow tD 12 % prime256) * (tD * tD % prime256 * tD % prime256) % prime256; 
-      (==) {lemma_mod_mul_distr_l (pow tD 12) (tD * tD % prime256 * tD % prime256) prime256}
-    pow tD 12 * (tD * tD % prime256 * tD % prime256) % prime256; 
-      (==) {lemma_mod_mul_distr_l (tD * tD) tD prime256}
-    pow tD 12 * (tD * tD * tD % prime256) % prime256; 
-      (==) {lemma_mod_mul_distr_r (pow tD 12) (tD * tD * tD) prime256}
-    pow tD 12 * (pow tD 1 * pow tD 1 * pow tD 1) % prime256;   
-      (==) {assert_by_tactic (pow tD 12 * (pow tD 1 * pow tD 1 * pow tD 1) == pow tD 12 * (pow tD 1 * pow tD 1) * pow tD 1) canon}
-    pow tD 12 * (pow tD 1 * pow tD 1) * pow tD 1 % prime256;   
-      (==) {pow_plus tD 1 1}
-    pow tD 12 * pow tD 2 * pow tD 1 % prime256;
-      (==) {pow_plus tD 12 2}
-    pow tD 14 * pow tD 1 % prime256;
-      (==) {pow_plus tD 14 1}
-    pow tD 15 % prime256;}
-
 
 inline_for_extraction noextract
 val fsquarePowN: n: size_t -> a: felem -> Stack unit 
@@ -613,7 +531,13 @@ let exponent_1 t t0 t1 t2 t3 t4 t5 =
   (* h10 *) 
   lemma_exp_1_6 t0D t1D t2D;
 
+  (* h11 *)
   lemma_mod_mul_distr_l (pow t0D (pow2 53) * pow t1D (pow2 44 + pow2 34) * pow t2D (pow2 32)) tD prime256;
+  (* h12*) 
+  lemma_exp_1_7 tD t0D t1D t2D;
+
+  (* h13  *)
+  lemma_exp_1_8 tD t0D t1D t2D;
 
   assert(as_nat h1 t0 =  toDomain_ (pow t0D (pow2 9) % prime256)); 
   assert(as_nat h2 t3 =  toDomain_ (pow t0D (pow2 9) % prime256 * pow t1D 1 % prime256)); 
@@ -627,22 +551,10 @@ let exponent_1 t t0 t1 t2 t3 t4 t5 =
   assert(as_nat h10 t0 = toDomain_ (pow t0D (pow2 53) * pow t1D (pow2 44 + pow2 34) * pow t2D (pow2 32) % prime256));
   assert(as_nat h11 t0 = toDomain_ (pow t0D (pow2 53) * pow t1D (pow2 44 + pow2 34) * pow t2D (pow2 32) * tD % prime256));
   
-  assert(as_nat h12 t0 = toDomain_ (pow (pow t0D (pow2 53) * pow t1D (pow2 44 + pow2 34) * pow t2D (pow2 32) * tD % prime256) (pow2 128) % prime256));
-  (* 
-  assert(as_nat h13 t0 = toDomain_ (fromDomain_ (as_nat h12 t0) * fromDomain_ (as_nat h8 t5) % prime256)); *)
+  assert(as_nat h12 t0 = toDomain_ (pow t0D (pow2 181) * pow t1D (pow2 172 + pow2 162) * pow t2D (pow2 160) * pow tD (pow2 128) % prime256));
 
-
-  admit();
-  (*
-  calc (==) {pow t0D (pow2_76) * pow t1D (pow2_44) % prime256 * t2D % prime256; 
-    (==) {lemma_mod_mul_distr_l (pow t0D (pow2_76) * pow t1D (pow2_44)) t2D prime256}
-    pow t0D pow2_76 * pow t1D pow2_44 * t2D % prime256;}; *)
-
-
-
-  (* lemma_exp_1_6 tD t0D t1D t2D; *)
+  assert(as_nat h13 t0 = toDomain_ (fromDomain_ (as_nat h12 t0) * fromDomain_ (as_nat h8 t5) % prime256))
   
-  admit()
 
 
 

@@ -11,6 +11,88 @@ open FStar.Tactics.Canon
 
 #set-options "--z3rlimit 300"
 
+
+
+val lemma_pow_sum: tD : nat -> a: nat -> b: nat -> Lemma 
+  (pow tD a % prime256 * (pow tD b % prime256) % prime256 == pow tD (a + b) % prime256)
+
+let lemma_pow_sum tD a b = 
+  calc (==) {pow tD a % prime256 * (pow tD b % prime256) % prime256;
+    (==) {lemma_mod_mul_distr_l (pow tD a) (pow tD b % prime256) prime256}
+  pow tD a * (pow tD b % prime256) % prime256;
+    (==) {lemma_mod_mul_distr_r (pow tD a) (pow tD b) prime256}
+  pow tD a * (pow tD b) % prime256;
+    (==) {assert_by_tactic (pow tD a * (pow tD b) == pow tD a * pow tD b) canon}
+  pow tD a * pow tD b % prime256;
+    (==) {pow_plus tD a b}
+  pow tD (a + b) % prime256;}
+
+
+val lemma_pow_sum2: t0D : nat -> t1D: nat -> a0: nat -> a1: nat -> b0: nat -> b1: nat -> Lemma (
+  pow t0D a0 % prime256 * pow t1D b0 % prime256 * (pow t0D a1 % prime256 * pow t1D b1 % prime256) % prime256 == 
+  pow t0D (a0 + a1) * pow t1D (b0 + b1) % prime256)
+
+let lemma_pow_sum2 t0D t1D a0 a1 b0 b1 = 
+  calc (==) {pow t0D a0 % prime256 * pow t1D b0 % prime256 * (pow t0D a1 % prime256 * pow t1D b1 % prime256) % prime256;
+  (==)  {lemma_mod_mul_distr_l (pow t0D a0) (pow t1D b0) prime256; lemma_mod_mul_distr_l (pow t0D a1) (pow t1D b1) prime256}
+    pow t0D a0 * pow t1D b0 % prime256 * (pow t0D a1 * pow t1D b1 % prime256) % prime256; 
+  (==) {lemma_mod_mul_distr_l (pow t0D a0 * pow t1D b0) (pow t0D a1 * pow t1D b1 % prime256) prime256}
+    pow t0D a0 * pow t1D b0 * (pow t0D a1 * pow t1D b1 % prime256) % prime256; 
+  (==) {lemma_mod_mul_distr_r (pow t0D a0 * pow t1D b0) (pow t0D a1 * pow t1D b1) prime256}
+    pow t0D a0 * pow t1D b0 * (pow t0D a1 * pow t1D b1) % prime256; 
+  (==) {assert_by_tactic (pow t0D a0 * pow t1D b0 * (pow t0D a1 * pow t1D b1) == pow t0D a0 * pow t0D a1 * (pow t1D b0 * pow t1D b1)) canon}
+    pow t0D a0 * pow t0D a1 * (pow t1D b0 * pow t1D b1) % prime256; 
+  (==) {pow_plus t0D a0 a1; pow_plus t1D b0 b1}
+    pow t0D (a0 + a1) * pow t1D (b0 + b1) % prime256;}
+
+
+ val lemma_6_powers: tD: nat -> 
+  Lemma ((tD * tD % prime256 * tD % prime256) * (tD * tD % prime256 * tD % prime256) % prime256 == 
+    pow tD 6 % prime256)
+
+let lemma_6_powers tD =     
+    calc (==) {(tD * tD % prime256 * tD % prime256) * (tD * tD % prime256 * tD % prime256) % prime256; 
+      (==) {lemma_mod_mul_distr_l (tD * tD) tD prime256}
+    (tD * tD * tD % prime256) * (tD * tD * tD % prime256) % prime256;
+      (==) {lemma_mod_mul_distr_l (tD * tD * tD) (tD * tD * tD % prime256) prime256}
+    tD * tD * tD * (tD * tD * tD % prime256) % prime256;  
+      (==) {lemma_mod_mul_distr_r (tD * tD * tD) (tD * tD * tD) prime256}
+    tD * tD * tD * (tD * tD * tD) % prime256; 
+      (==) {assert_by_tactic (tD * tD * tD * (tD * tD * tD) == (tD * tD) * (tD * tD) * (tD * tD)) canon}
+    (tD * tD) * (tD * tD) * (tD * tD) % prime256; 
+      (==) {pow_plus tD 1 1}
+   pow tD 2 * pow tD 2 * pow tD 2 % prime256;
+     (==) {pow_plus tD 2 2}
+   pow tD 4 * pow tD 2 % prime256;
+     (==) {pow_plus tD 4 2} 
+   pow tD 6 % prime256;}
+
+
+val lemma_15_powers: tD: nat -> 
+  Lemma ((pow tD 6 % prime256 * (pow tD 6 % prime256) % prime256) * (tD * tD % prime256 * tD % prime256) % prime256 == 
+    pow tD 15 % prime256)
+
+let lemma_15_powers tD = 
+    calc (==) {(pow tD 6 % prime256 * (pow tD 6 % prime256) % prime256) * (tD * tD % prime256 * tD % prime256) % prime256;
+      (==) {lemma_pow_sum tD 6 6}
+    (pow tD 12 % prime256) * (tD * tD % prime256 * tD % prime256) % prime256; 
+      (==) {lemma_mod_mul_distr_l (pow tD 12) (tD * tD % prime256 * tD % prime256) prime256}
+    pow tD 12 * (tD * tD % prime256 * tD % prime256) % prime256; 
+      (==) {lemma_mod_mul_distr_l (tD * tD) tD prime256}
+    pow tD 12 * (tD * tD * tD % prime256) % prime256; 
+      (==) {lemma_mod_mul_distr_r (pow tD 12) (tD * tD * tD) prime256}
+    pow tD 12 * (pow tD 1 * pow tD 1 * pow tD 1) % prime256;   
+      (==) {assert_by_tactic (pow tD 12 * (pow tD 1 * pow tD 1 * pow tD 1) == pow tD 12 * (pow tD 1 * pow tD 1) * pow tD 1) canon}
+    pow tD 12 * (pow tD 1 * pow tD 1) * pow tD 1 % prime256;   
+      (==) {pow_plus tD 1 1}
+    pow tD 12 * pow tD 2 * pow tD 1 % prime256;
+      (==) {pow_plus tD 12 2}
+    pow tD 14 * pow tD 1 % prime256;
+      (==) {pow_plus tD 14 1}
+    pow tD 15 % prime256;}
+
+
+
 val lemma_exp_1_0: t0D: nat -> t1D: nat -> Lemma
   (pow (pow t0D (pow2 10) * pow t1D 2 % prime256) (pow2 9) % prime256 = 
   pow t0D (pow2 19) * pow t1D (pow2 10) % prime256)
@@ -268,3 +350,41 @@ let lemma_exp_1_7 tD t0D t1D t2D =
    pow (pow t2D (pow2 32)) (pow2_128); 
    (==) {power_mult t2D (pow2 32) (pow2_128)}
    pow t2D (pow2_160);}
+
+
+val lemma_exp_1_8: tD: nat -> t0D: nat -> t1D: nat -> t2D: nat -> Lemma (
+  pow t0D (pow2 181) * pow t1D (pow2 172 + pow2 162) * pow t2D (pow2 160) * pow tD (pow2 128) % prime256 * 
+    (pow t0D (pow2 21) * pow t1D (pow2 12 + 4) * pow t2D 1 % prime256) % prime256 == 
+    pow t0D (pow2 181 + pow2 21) * pow t1D (pow2 172 + pow2 162 + pow2 12 + 4) * pow t2D (pow2 160 + 1) * pow tD (pow2 128) % prime256)
+
+let lemma_exp_1_8 tD t0D t1D t2D =
+  let pow2_181 = pow2 181 in 
+  let pow2_172 = pow2 172 in 
+  let pow2_162 = pow2 162 in 
+  let pow2_160 = pow2 160 in 
+  let pow2_128 = pow2 128 in 
+
+  let pow2_21 = pow2 21 in 
+
+  let a = pow t0D (pow2 181) in
+  let b = pow t1D (pow2 172 + pow2 162) in 
+  let c = pow t2D (pow2 160) in 
+  let d = pow tD (pow2 128) in 
+
+  let e = pow t0D (pow2 21) in 
+  let f = pow t1D (pow2 12 + 4) in 
+  let g = pow t2D 1 in 
+
+  calc (==) {a * b * c * d % prime256 * (e * f * g % prime256) % prime256;
+    (==) {lemma_mod_mul_distr_l (a * b * c * d) (e * f * g % prime256) prime256}
+    a * b * c * d * (e * f * g % prime256) % prime256;
+    (==) {lemma_mod_mul_distr_r (a * b * c * d) (e * f * g) prime256}
+    a * b * c * d * (e * f * g) % prime256;
+    (==) {assert_by_tactic (a * b * c * d * (e * f * g) == a * e * (b * f) * (c * g) * d) canon}
+    a * e * (b * f) * (c * g) * d % prime256;
+    (==) {}
+    (pow t0D pow2_181 * pow t0D pow2_21) * 
+    (pow t1D (pow2_172 + pow2_162) * pow t1D (pow2 12 + 4)) * 
+    (pow t2D (pow2_160) * pow t2D 1) * pow tD pow2_128 % prime256;
+    (==) {pow_plus t0D pow2_181 pow2_21; pow_plus t1D (pow2_172 + pow2_162) (pow2 12 + 4); pow_plus t2D pow2_160 1}
+    pow t0D (pow2_181 + pow2_21) * pow t1D (pow2_172 + pow2_162 + pow2 12 + 4) * pow t2D (pow2_160 + 1) * pow tD pow2_128 % prime256;}
