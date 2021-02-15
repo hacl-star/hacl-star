@@ -306,14 +306,6 @@ val lemma_mul_nat: a: nat -> b: nat -> Lemma (a * b >= 0)
 let lemma_mul_nat a b = ()
 
 
- [@ CInline]
-val exponent: a: felem ->result: felem -> tempBuffer: lbuffer uint64 (size 20) -> Stack unit
-  (requires fun h -> live h a /\ live h tempBuffer /\ live h result /\ disjoint tempBuffer result /\ 
-    disjoint a tempBuffer /\ as_nat h a < prime256)
-  (ensures fun h0 _ h1 -> modifies2 result tempBuffer h0 h1 /\ (let k = fromDomain_ (as_nat h0 a) in 
-    as_nat h1 result =  toDomain_ ((pow k (prime256-2)) % prime256)))
-
-
 (* Changing argument order *)
 inline_for_extraction noextract
 val montgomery_multiplication_buffer_: result: felem -> a: felem -> b: felem -> Stack unit
@@ -383,7 +375,8 @@ val exponent_0: t: felem -> t0: felem -> t1: felem -> t2: felem -> t6: felem -> 
   (ensures fun h0 _ h1 -> modifies (loc t0 |+| loc t1 |+| loc t2 |+| loc t6 |+| loc t7) h0 h1 /\ (
     let tD = fromDomain_ (as_nat h0 t) in 
     as_nat h1 t2 = toDomain_ (pow tD 3 % prime256) /\ as_nat h1 t1 = toDomain_ (pow tD 1023 % prime256) /\ 
-    as_nat h1 t0 = toDomain_ (pow tD 2046 % prime256))
+    as_nat h1 t0 = toDomain_ (pow tD 2046 % prime256)) /\
+    as_nat h1 t0 < prime256 /\ as_nat h1 t1 < prime256 /\ as_nat h1 t2 < prime256
   )
 
 
@@ -462,7 +455,8 @@ val exponent_1: t: felem -> t0: felem -> t1: felem -> t2: felem -> t3: felem -> 
     let tD = fromDomain_ (as_nat h0 t) in 
     as_nat h1 t0 == toDomain_ (pow t0D (pow2 181 + pow2 21) * pow t1D (pow2 172 + pow2 162 + pow2 12 + 4) * pow t2D (pow2 160 + 1) * pow tD (pow2 128) % prime256) /\
     as_nat h1 t4 == toDomain_ (pow t0D (pow2 19) * pow t1D (pow2 10 + 1) % prime256) /\
-    as_nat h1 t5 == toDomain_ (pow t0D (pow2 21) * pow t1D (pow2 12 + 4) * pow t2D 1 % prime256))
+    as_nat h1 t5 == toDomain_ (pow t0D (pow2 21) * pow t1D (pow2 12 + 4) * pow t2D 1 % prime256)) /\
+    as_nat h1 t0 < prime256 /\ as_nat h1 t4 < prime256 /\ as_nat h1 t5 < prime256
   )
 
 let exponent_1 t t0 t1 t2 t3 t4 t5 = 
@@ -545,13 +539,14 @@ val exponent_2: t: felem -> t0: felem -> t4: felem -> t5: felem -> result: felem
   Stack unit 
   (requires fun h -> live h t /\ live h t0 /\ live h t4 /\ live h t5 /\ live h result /\
     as_nat h t < prime256 /\ as_nat h t0 < prime256 /\ as_nat h t4 < prime256 /\ as_nat h t5 < prime256 /\
-    LowStar.Monotonic.Buffer.all_disjoint [loc t; loc t0;  loc t4; loc t5;  loc result])
+    LowStar.Monotonic.Buffer.all_disjoint [loc t; loc t0;  loc t4; loc t5])
   (ensures fun h0 _ h1 -> modifies (loc t0 |+| loc t4 |+| loc t5 |+| loc result) h0 h1 /\ (
     let t0D = fromDomain_ (as_nat h0 t0) in 
     let t5D = fromDomain_ (as_nat h0 t5) in 
     let t4D = fromDomain_ (as_nat h0 t4) in 
     let tD = fromDomain_ (as_nat h0 t) in 
-    as_nat h1 result = toDomain_ (pow t0D (pow2 64) * pow t5D (pow2 32) * pow t4D (pow2 2) * tD % prime256))
+    as_nat h1 result = toDomain_ (pow t0D (pow2 64) * pow t5D (pow2 32) * pow t4D (pow2 2) * tD % prime256)) /\ 
+    as_nat h1 result < prime256
   )
 
 let exponent_2 t t0 t4 t5 result = 
@@ -561,7 +556,7 @@ let exponent_2 t t0 t4 t5 result =
   fsquarePowN (size 30) t0;
   montgomery_multiplication_buffer_ t0 t0 t4;
   fsquarePowN (size 2) t0;
-  montgomery_multiplication_buffer_ result t0 t;
+  montgomery_multiplication_buffer_ result t0 t; 
 
   let tD =  fromDomain_ (as_nat h0 t) in 
   let t0D = fromDomain_ (as_nat h0 t0) in 
@@ -590,12 +585,17 @@ let exponent_2 t t0 t4 t5 result =
   pow t0D pow2_64 * pow t5D pow2_32 * pow t4D (pow2 2) * tD % prime256;}
 
 
+[@ CInline]
+val exponent: a: felem ->result: felem -> tempBuffer: lbuffer uint64 (size 32) -> Stack unit
+  (requires fun h -> live h a /\ live h tempBuffer /\ live h result /\ disjoint tempBuffer result /\ 
+    disjoint a tempBuffer /\ as_nat h a < prime256)
+  (ensures fun h0 _ h1 -> modifies2 result tempBuffer h0 h1 /\ (
+    let k = fromDomain_ (as_nat h0 a) in 
+    as_nat h1 result =  toDomain_ ((pow k (prime256 - 2)) % prime256)))
 
 
 let exponent t result tempBuffer = 
   let h0 = ST.get () in 
-  
-  let inv (h0: HyperStack.mem) (h1: HyperStack.mem) (i: nat) : Type0 = True in 
 
   let t0 = sub tempBuffer (size 0) (size 4) in 
   let t1 = sub tempBuffer (size 4) (size 4) in 
@@ -607,6 +607,40 @@ let exponent t result tempBuffer =
   let t7 = sub tempBuffer (size 28) (size 4) in 
 
   exponent_0 t t0 t1 t2 t6 t7;
-  exponent_1 t t0 t1 t2 t3 t4 t5;
-  exponent_2 t t0 t4 t5 result
+    let h1 = ST.get() in 
+  exponent_1 t t0 t1 t2 t3 t4 t5; 
+    let h2 = ST.get() in 
+  exponent_2 t t0 t4 t5 result;
+    let h3 = ST.get() in 
 
+  let tD = fromDomain_ (as_nat h0 t) in 
+(*
+  assert( 
+    as_nat h1 t2 = toDomain_ (pow tD 3 % prime256) /\ 
+    as_nat h1 t1 = toDomain_ (pow tD 1023 % prime256) /\ 
+    as_nat h1 t0 = toDomain_ (pow tD 2046 % prime256));
+*)
+
+  lemma_exp_1 tD; 
+  lemma_exp_2 tD;
+  lemma_exp_3 tD;
+  
+  assert(
+    let t0D = pow tD 2046 % prime256 in 
+    let t1D = pow tD 1023 % prime256 in 
+    let t2D = pow tD 3 % prime256 in 
+    as_nat h2 t0 == toDomain_ (pow tD (3 * (pow2 160 + 1) + 2046 * (pow2 181 + pow2 21) + 1023 * (pow2 172 + pow2 162 + pow2 12 + 4) + pow2 128) % prime256) /\
+    as_nat h2 t4 == toDomain_ (pow tD (1023 * (pow2 10 + 1) + 2046 * pow2 19) % prime256) /\
+    as_nat h2 t5 == toDomain_ (pow tD (3 + 2046 * pow2 21 + 1023 * (pow2 12 + 4)) % prime256));
+
+  assert(
+    let t0D = fromDomain_ (as_nat h2 t0) in 
+    let t5D = fromDomain_ (as_nat h2 t5) in 
+    let t4D = fromDomain_ (as_nat h2 t4) in 
+    as_nat h3 result = toDomain_ (pow t0D (pow2 64) * pow t5D (pow2 32) * pow t4D (pow2 2) * tD % prime256));
+   
+
+
+  admit()
+
+ 
