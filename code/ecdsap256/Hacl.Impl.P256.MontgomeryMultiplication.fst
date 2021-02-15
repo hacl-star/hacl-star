@@ -591,7 +591,7 @@ val exponent: a: felem ->result: felem -> tempBuffer: lbuffer uint64 (size 32) -
     disjoint a tempBuffer /\ as_nat h a < prime256)
   (ensures fun h0 _ h1 -> modifies2 result tempBuffer h0 h1 /\ (
     let k = fromDomain_ (as_nat h0 a) in 
-    as_nat h1 result =  toDomain_ ((pow k (prime256 - 2)) % prime256)))
+    as_nat h1 result =  toDomain_ (pow k (prime256 - 2) % prime256)))
 
 
 let exponent t result tempBuffer = 
@@ -624,23 +624,26 @@ let exponent t result tempBuffer =
   lemma_exp_1 tD; 
   lemma_exp_2 tD;
   lemma_exp_3 tD;
-  
+  lemma_exp_4 tD
+
+(*
   assert(
-    let t0D = pow tD 2046 % prime256 in 
-    let t1D = pow tD 1023 % prime256 in 
-    let t2D = pow tD 3 % prime256 in 
     as_nat h2 t0 == toDomain_ (pow tD (3 * (pow2 160 + 1) + 2046 * (pow2 181 + pow2 21) + 1023 * (pow2 172 + pow2 162 + pow2 12 + 4) + pow2 128) % prime256) /\
     as_nat h2 t4 == toDomain_ (pow tD (1023 * (pow2 10 + 1) + 2046 * pow2 19) % prime256) /\
     as_nat h2 t5 == toDomain_ (pow tD (3 + 2046 * pow2 21 + 1023 * (pow2 12 + 4)) % prime256));
 
   assert(
-    let t0D = fromDomain_ (as_nat h2 t0) in 
-    let t5D = fromDomain_ (as_nat h2 t5) in 
-    let t4D = fromDomain_ (as_nat h2 t4) in 
-    as_nat h3 result = toDomain_ (pow t0D (pow2 64) * pow t5D (pow2 32) * pow t4D (pow2 2) * tD % prime256));
+    let t0D = pow tD (3 * (pow2 160 + 1) + 2046 * (pow2 181 + pow2 21) + 1023 * (pow2 172 + pow2 162 + pow2 12 + 4) + pow2 128) % prime256 in 
+    let t5D = pow tD (3 + 2046 * pow2 21 + 1023 * (pow2 12 + 4)) % prime256 in 
+    let t4D = pow tD (1023 * (pow2 10 + 1) + 2046 * pow2 19) % prime256  in 
+    as_nat h3 result = toDomain_ (
+      pow (pow tD (3 * (pow2 160 + 1) + 2046 * (pow2 181 + pow2 21) + 1023 * (pow2 172 + pow2 162 + pow2 12 + 4) + pow2 128) % prime256) (pow2 64) * 
+      pow (pow tD (3 + 2046 * pow2 21 + 1023 * (pow2 12 + 4)) % prime256) (pow2 32) * 
+      pow (pow tD (1023 * (pow2 10 + 1) + 2046 * pow2 19) % prime256) (pow2 2) * tD % prime256));
    
 
 
   admit()
 
  
+ *)
