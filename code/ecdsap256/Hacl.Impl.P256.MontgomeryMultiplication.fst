@@ -543,25 +543,51 @@ let exponent_1 t t0 t1 t2 t3 t4 t5 =
 inline_for_extraction noextract
 val exponent_2: t: felem -> t0: felem -> t4: felem -> t5: felem -> result: felem ->
   Stack unit 
-    (requires fun h -> True)
-    (ensures fun h0 _ h1 -> True)
-   
+  (requires fun h -> live h t /\ live h t0 /\ live h t4 /\ live h t5 /\ live h result /\
+    as_nat h t < prime256 /\ as_nat h t0 < prime256 /\ as_nat h t4 < prime256 /\ as_nat h t5 < prime256 /\
+    LowStar.Monotonic.Buffer.all_disjoint [loc t; loc t0;  loc t4; loc t5;  loc result])
+  (ensures fun h0 _ h1 -> modifies (loc t0 |+| loc t4 |+| loc t5 |+| loc result) h0 h1 /\ (
+    let t0D = fromDomain_ (as_nat h0 t0) in 
+    let t5D = fromDomain_ (as_nat h0 t5) in 
+    let t4D = fromDomain_ (as_nat h0 t4) in 
+    let tD = fromDomain_ (as_nat h0 t) in 
+    as_nat h1 result = toDomain_ (pow t0D (pow2 64) * pow t5D (pow2 32) * pow t4D (pow2 2) * tD % prime256))
+  )
+
 let exponent_2 t t0 t4 t5 result = 
+    let h0 = ST.get() in 
   fsquarePowN (size 32) t0;
-  (* for (size 0) 32ul (inv h0) (fun x -> montgomery_square_buffer_ t0 t0); *)
-
   montgomery_multiplication_buffer_ t0 t0 t5; 
-
-  (* for (size 0) 30ul (inv h0) (fun x -> montgomery_square_buffer_ t0 t0); *)
   fsquarePowN (size 30) t0;
-
   montgomery_multiplication_buffer_ t0 t0 t4;
-
-  (* for (size 0) 2ul (inv h0) (fun x -> montgomery_square_buffer_ t0 t0); *)
   fsquarePowN (size 2) t0;
+  montgomery_multiplication_buffer_ result t0 t;
 
-  montgomery_multiplication_buffer_ result t0 t
- 
+  let tD =  fromDomain_ (as_nat h0 t) in 
+  let t0D = fromDomain_ (as_nat h0 t0) in 
+  let t5D = fromDomain_ (as_nat h0 t5) in 
+  let t4D = fromDomain_ (as_nat h0 t4) in 
+
+  let pow2_30 = pow2 30 in 
+  let pow2_32 = pow2 32 in 
+  let pow2_62 = pow2 62 in 
+  let pow2_64 = pow2 64 in 
+  
+  calc (==) {pow t0D pow2_32 % prime256 * t5D % prime256;
+    (==) {lemma_mod_mul_distr_l (pow t0D pow2_32) t5D prime256}
+  pow t0D pow2_32 * t5D % prime256;};
+
+  lemma_exp_2_0 t0D t5D;
+
+  calc (==) {pow t0D pow2_62 * pow t5D pow2_30 % prime256 * t4D % prime256;
+    (==) {lemma_mod_mul_distr_l (pow t0D pow2_62 * pow t5D pow2_30) t4D prime256}
+  pow t0D pow2_62 * pow t5D pow2_30 * t4D % prime256;};
+
+  lemma_exp_2_1 t0D t4D t5D;
+
+  calc (==) {pow t0D pow2_64 * pow t5D pow2_32 * pow t4D (pow2 2) % prime256 * tD % prime256;
+    (==) {lemma_mod_mul_distr_l (pow t0D pow2_64 * pow t5D pow2_32 * pow t4D (pow2 2)) tD prime256}
+  pow t0D pow2_64 * pow t5D pow2_32 * pow t4D (pow2 2) * tD % prime256;}
 
 
 

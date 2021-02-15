@@ -388,3 +388,49 @@ let lemma_exp_1_8 tD t0D t1D t2D =
     (pow t2D (pow2_160) * pow t2D 1) * pow tD pow2_128 % prime256;
     (==) {pow_plus t0D pow2_181 pow2_21; pow_plus t1D (pow2_172 + pow2_162) (pow2 12 + 4); pow_plus t2D pow2_160 1}
     pow t0D (pow2_181 + pow2_21) * pow t1D (pow2_172 + pow2_162 + pow2 12 + 4) * pow t2D (pow2_160 + 1) * pow tD pow2_128 % prime256;}
+
+
+val lemma_exp_2_0: t0D: nat -> t5D: nat -> Lemma (
+  pow (pow t0D (pow2 32) * t5D % prime256) (pow2 30) % prime256 == pow t0D (pow2 62) * pow t5D (pow2 30) % prime256)
+
+let lemma_exp_2_0 t0D t5D = 
+  let pow2_32 = pow2 32 in 
+  let pow2_30 = pow2 30 in 
+  let pow2_62 = pow2 62 in 
+
+  calc (==) {pow (pow t0D pow2_32 * t5D % prime256) pow2_30 % prime256;
+    (==) {power_distributivity (pow t0D pow2_32 * t5D) pow2_30 prime256}
+  pow (pow t0D pow2_32 * t5D) pow2_30 % prime256;
+    (==) {power_distributivity_2 (pow t0D pow2_32) t5D pow2_30}
+  pow (pow t0D pow2_32) pow2_30 * pow t5D pow2_30 % prime256;
+    (==) {power_mult t0D pow2_32 pow2_30}
+  pow t0D (pow2_32 * pow2_30) * pow t5D pow2_30 % prime256;
+    (==) {pow2_plus 32 30}
+  pow t0D pow2_62 * pow t5D pow2_30 % prime256;}
+
+
+val lemma_exp_2_1: t0D: nat -> t4D: nat -> t5D: nat -> Lemma (
+  pow (pow t0D (pow2 62) * pow t5D (pow2 30) * t4D % prime256) (pow2 2) % prime256 ==  
+  pow t0D (pow2 64) * pow t5D (pow2 32) * pow t4D (pow2 2) % prime256)
+
+let lemma_exp_2_1 t0D t4D t5D = 
+  let pow2_62 = pow2 62 in 
+    let pow2_64 = pow2 64 in 
+  let pow2_30 = pow2 30 in 
+    let pow2_32 = pow2 32 in 
+
+  calc (==) {pow (pow t0D pow2_62 * pow t5D pow2_30 * t4D % prime256) (pow2 2) % prime256;
+    (==) {power_distributivity (pow t0D pow2_62 * pow t5D pow2_30 * t4D) (pow2 2) prime256}
+  pow (pow t0D pow2_62 * pow t5D pow2_30 * t4D) (pow2 2) % prime256;
+    (==) {assert_by_tactic (pow t0D pow2_62 * pow t5D pow2_30 * t4D == pow t0D pow2_62 * (pow t5D pow2_30 * t4D)) canon}
+  pow (pow t0D pow2_62 * (pow t5D pow2_30 * t4D)) (pow2 2) % prime256;   
+    (==) {power_distributivity_2 (pow t0D pow2_62) (pow t5D pow2_30 * t4D) (pow2 2)}
+  pow (pow t0D pow2_62) (pow2 2) * pow (pow t5D pow2_30 * t4D) (pow2 2) % prime256;
+    (==) {power_distributivity_2 (pow t5D pow2_30) t4D (pow2 2)}
+   pow (pow t0D pow2_62) (pow2 2) * (pow (pow t5D pow2_30) (pow2 2) * pow t4D (pow2 2)) % prime256;  
+    (==) {power_mult t0D pow2_62 (pow2 2); power_mult t5D (pow2_30) (pow2 2)}
+  pow t0D (pow2_62 * pow2 2) * (pow t5D (pow2_30 * pow2 2) * pow t4D (pow2 2)) % prime256;  
+    (==) {pow2_plus 62 2; pow2_plus 30 2}
+  pow t0D pow2_64 * (pow t5D pow2_32 * pow t4D (pow2 2)) % prime256;    
+    (==) {assert_by_tactic (pow t0D pow2_64 * (pow t5D pow2_32 * pow t4D (pow2 2)) == pow t0D pow2_64 * pow t5D pow2_32 * pow t4D (pow2 2)) canon}
+  pow t0D pow2_64 * pow t5D pow2_32 * pow t4D (pow2 2) % prime256;}
