@@ -455,40 +455,31 @@ val exponent_1: t: felem -> t0: felem -> t1: felem -> t2: felem -> t3: felem -> 
   (requires fun h -> live h t /\ live h t0 /\ live h t1 /\ live h t2 /\ live h t3 /\ live h t4 /\ live h t5 /\
     LowStar.Monotonic.Buffer.all_disjoint [loc t; loc t0; loc t1; loc t2; loc t3; loc t4; loc t5] /\
     as_nat h t < prime256 /\ as_nat h t0 < prime256 /\ as_nat h t1 < prime256 /\ as_nat h t2 < prime256)
-    
-   
-  (ensures fun h0 _ h1 -> True)
-
+  (ensures fun h0 _ h1 -> modifies (loc t0 |+| loc t1 |+| loc t2 |+| loc t3 |+| loc t4 |+| loc t5) h0 h1 /\ (
+    let t0D = fromDomain_ (as_nat h0 t0) in 
+    let t1D = fromDomain_ (as_nat h0 t1) in 
+    let t2D = fromDomain_ (as_nat h0 t2) in 
+    let tD = fromDomain_ (as_nat h0 t) in 
+    as_nat h1 t0 == toDomain_ (pow t0D (pow2 181 + pow2 21) * pow t1D (pow2 172 + pow2 162 + pow2 12 + 4) * pow t2D (pow2 160 + 1) * pow tD (pow2 128) % prime256) /\
+    as_nat h1 t4 == toDomain_ (pow t0D (pow2 19) * pow t1D (pow2 10 + 1) % prime256) /\
+    as_nat h1 t5 == toDomain_ (pow t0D (pow2 21) * pow t1D (pow2 12 + 4) * pow t2D 1 % prime256))
+  )
 
 let exponent_1 t t0 t1 t2 t3 t4 t5 = 
     let h0 = ST.get() in 
   fsquarePowN (size 9) t0;
-    let h1 = ST.get() in 
-
   montgomery_multiplication_buffer_ t3 t0 t1;
-    let h2 = ST.get() in 
   montgomery_square_buffer_ t0 t3;
-    let h3 = ST.get() in 
   fsquarePowN (size 9) t0;
-    let h4 = ST.get() in 
   montgomery_multiplication_buffer_ t4 t0 t1;
-    let h5 = ST.get() in     
   montgomery_square_buffer_ t0 t4;
-    let h6 = ST.get() in 
   montgomery_square_buffer_ t0 t0;
-    let h7 = ST.get() in 
   montgomery_multiplication_buffer_ t5 t0 t2;
-    let h8 = ST.get() in 
   montgomery_square_buffer_ t0 t5;
-    let h9 = ST.get() in 
   fsquarePowN (size 31) t0;
-    let h10 = ST.get() in 
   montgomery_multiplication_buffer_ t0 t0 t;
-    let h11 = ST.get() in 
   fsquarePowN (size 128) t0;
-    let h12 = ST.get() in 
   montgomery_multiplication_buffer_ t0 t0 t5;
-    let h13 = ST.get() in 
 
   let tD = fromDomain_ (as_nat h0 t) in let t0D = fromDomain_ (as_nat h0 t0) in 
   let t1D = fromDomain_ (as_nat h0 t1) in let t2D = fromDomain_ (as_nat h0 t2) in 
@@ -500,28 +491,19 @@ let exponent_1 t t0 t1 t2 t3 t4 t5 =
     (==) {pow2_double_mult 9}
   pow t0D (pow2 10) * pow t1D 2 % prime256;};
 
-  let pow2_19 = pow2 19 in let pow2_20 = pow2 20 in 
-  let pow2_21 = pow2 21 in let pow2_76 = pow2 76 in let pow2_88 = pow2 88 in let pow2_152 = pow2 152 in 
+  (* let pow2_19 = pow2 19 in let pow2_20 = pow2 20 in 
+  let pow2_21 = pow2 21 in let pow2_76 = pow2 76 in let pow2_88 = pow2 88 in let pow2_152 = pow2 152 in  *)
 
   (*h4 *)
-  calc (==) {pow (pow t0D (pow2 10) * pow t1D 2 % prime256) (pow2 9) % prime256;
-    (==) {lemma_exp_1_0 t0D t1D} pow t0D (pow2_19) * pow t1D (pow2 10) % prime256;};
+  lemma_exp_1_0 t0D t1D; 
 
   (* h5 *)
-  calc (==) {pow t0D (pow2_19) * pow t1D (pow2 10) % prime256 * pow t1D 1 % prime256;
-    (==) {lemma_exp_1_1 t0D t1D} pow t0D (pow2_19) * pow t1D (pow2 10 + 1) % prime256;};
-
-  (*h6 *)
-  calc (==) {pow t0D (pow2_19) * pow t1D (pow2 10 + 1) % prime256 * (pow t0D (pow2_19) * pow t1D (pow2 10 + 1) % prime256) % prime256;
-    (==) {lemma_exp_1_2 t0D t1D} pow t0D (pow2_20) * pow t1D (pow2 11 + 2) % prime256;};
-
+  lemma_exp_1_1 t0D t1D;
+  
+  (* h6 *)
+  lemma_exp_1_2 t0D t1D;
   (* h7 *)
-  calc (==) {
-    (pow t0D (pow2_20) * pow t1D (pow2 11 + 2) % prime256) * 
-    (pow t0D (pow2_20) * pow t1D (pow2 11 + 2) % prime256) % prime256; 
-    (==) {lemma_exp_1_3 t0D t1D} 
-  pow t0D (pow2_21) * pow t1D (pow2 12 + 4) % prime256;}; 
-
+  lemma_exp_1_3 t0D t1D;
   (* h8 *)
   lemma_exp_1_4 t0D t1D t2D;
   
@@ -537,8 +519,8 @@ let exponent_1 t t0 t1 t2 t3 t4 t5 =
   lemma_exp_1_7 tD t0D t1D t2D;
 
   (* h13  *)
-  lemma_exp_1_8 tD t0D t1D t2D;
-
+  lemma_exp_1_8 tD t0D t1D t2D (*;
+  
   assert(as_nat h1 t0 =  toDomain_ (pow t0D (pow2 9) % prime256)); 
   assert(as_nat h2 t3 =  toDomain_ (pow t0D (pow2 9) % prime256 * pow t1D 1 % prime256)); 
   assert(as_nat h3 t0 =  toDomain_ (pow t0D (pow2 10) * pow t1D 2 % prime256));  
@@ -553,7 +535,7 @@ let exponent_1 t t0 t1 t2 t3 t4 t5 =
   
   assert(as_nat h12 t0 = toDomain_ (pow t0D (pow2 181) * pow t1D (pow2 172 + pow2 162) * pow t2D (pow2 160) * pow tD (pow2 128) % prime256));
 
-  assert(as_nat h13 t0 = toDomain_ (fromDomain_ (as_nat h12 t0) * fromDomain_ (as_nat h8 t5) % prime256))
+  assert(as_nat h13 t0 = toDomain_ (pow t0D (pow2 181 + pow2 21) * pow t1D (pow2 172 + pow2 162 + pow2 12 + 4) * pow t2D (pow2 160 + 1) * pow tD (pow2 128) % prime256)) *)
   
 
 
