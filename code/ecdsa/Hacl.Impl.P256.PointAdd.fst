@@ -22,7 +22,8 @@ open Hacl.Spec.P256.MontgomeryMultiplication
 open FStar.Mul
 
 
-#set-options "--z3rlimit 500 --ifuel 0 --fuel 0"  
+#set-options "--z3rlimit 300 --ifuel 0 --fuel 0"  
+
 
 val getXYZ: #c: curve -> lbuffer uint64 (size 5 *! getCoordinateLenU64 c) -> GTot (tuple3 (felem c) (felem c) (felem c))
   
@@ -382,7 +383,6 @@ let compute_common_params_point_add #c t12 =
   let hCube = sub t12 (size 11 *! len) len in 
 
   _compute_common_params_point_add #c h r uh hCube u1 u2 s1 s2 t4
-
 
 
 let x3Invariant (#c: curve) (h0: mem) (h1: mem) (x3: felem c) (r: felem c) (hCube: felem c) (uh: felem c) = 

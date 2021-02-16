@@ -23,7 +23,7 @@ open Lib.Loops
 open Hacl.Spec.P256.MontgomeryMultiplication
 
 
-#set-options "--z3rlimit 200 --fuel  0 --ifuel 0"
+#set-options "--z3rlimit 200 --fuel 0 --ifuel 0"
 
 
 val montgomery_multiplication_round_: #c: curve -> t: widefelem c -> t2: widefelem c -> 
@@ -240,12 +240,7 @@ let lemma_reduce_mod_ecdsa_prime #c t k0 =
   let prime = getPrime c in 
 
   assert_norm(exp #(pow2 64) ((- getPrime P384) % pow2 64) ( pow2 64) == 1);
-
-
   admit()
-
-  
-
 
 
 (*

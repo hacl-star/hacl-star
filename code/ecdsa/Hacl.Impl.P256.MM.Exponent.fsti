@@ -12,7 +12,7 @@ open Hacl.Spec.P256.Definition
 open Spec.P256
 
 
-val exponent: #c: curve -> a: felem c -> result: felem c
+val exponent: #c: curve -> a: felem c -> result: felem c -> tempBuffer: lbuffer uint64 (getCoordinateLenU64 c *. 8ul) 
   -> Stack unit
     (requires fun h -> 
       live h a /\ live h result /\ as_nat c h a < getPrime c)

@@ -26,7 +26,7 @@ open FStar.Mul
 #set-options "--z3rlimit 50" 
 
 inline_for_extraction noextract 
-val toDomain: #c: curve -> value: felem c -> result: felem c ->  Stack unit 
+val toDomain: #c: curve -> value: felem c -> result: felem c -> Stack unit 
   (requires fun h ->  
     felem_eval c h value /\ live h value /\live h result /\ eq_or_disjoint value result)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
@@ -141,7 +141,7 @@ val scalarMultiplicationWithoutNorm: #c: curve -> p: point c -> result: point c 
 
 
 val secretToPublic: #c: curve -> result: point c  -> scalar: lbuffer uint8 (getScalarLen c) 
-  -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) ->
+  -> tempBuffer: lbuffer uint64 (size 25 *! getCoordinateLenU64 c) ->
   Stack unit
     (requires fun h -> 
       live h result /\ live h scalar /\ live h tempBuffer /\ 
