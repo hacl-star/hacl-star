@@ -13,19 +13,6 @@ open Hacl.Spec.P256.MontgomeryMultiplication
 
 #set-options "--z3rlimit 100"
 
-val lemma_point_eval: c: curve -> h0: mem -> h1: mem -> p: point c -> Lemma
-  (requires (point_eval c h0 p /\ as_seq h0 p == as_seq h1 p))
-  (ensures (point_eval c h1 p))
-
-
-val lemma_coord_eval: c: curve -> h0: mem -> h1 : mem -> p: point c -> 
-  Lemma 
-    (requires (as_seq h1 p == as_seq h0 p))
-    (ensures (
-      point_x_as_nat c h0 p == point_x_as_nat c h1 p /\
-      point_y_as_nat c h0 p == point_y_as_nat c h1 p /\
-      point_z_as_nat c h0 p == point_z_as_nat c h1 p))  
-
 
 val point_add: #c: curve -> p: point c -> q: point c -> result: point c 
   -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) -> 
