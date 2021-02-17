@@ -104,7 +104,7 @@ ifneq (,$(wildcard lib_gen))
 
 .PRECIOUS: %.cmx
 
-OCAMLOPT=ocamlfind opt -package ctypes,ctypes.foreign,ctypes.stubs -linkpkg -I lib
+OCAMLOPT=ocamlfind opt -package ctypes,ctypes.foreign,ctypes.stubs -linkpkg -thread -I lib
 OCAMLDEP=ocamlfind dep -I lib -slash
 
 OCAMLC=ocamlfind c -g -package ctypes,ctypes.foreign,ctypes.stubs -linkpkg -I lib
