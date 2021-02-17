@@ -106,7 +106,8 @@ let bn_mont_reduction #t k n nInv c res =
   // Easy to specialize, but such a small function that it's not worth it (per
   // Marina's advice).
   BN.bn_rshift (len +! len) c len res;
-  BN.bn_reduce_once len n c0.(0ul) res;
+  let c0 = c0.(0ul) in
+  BN.bn_reduce_once len n c0 res;
   pop_frame ()
 
 

@@ -222,10 +222,10 @@ let bn_sqr #t aLen a res =
     res.(j +! j) <- bn_mul1_lshift_add j ab a_j resLen j res
   );
 
-  let _ = Hacl.Bignum.Addition.bn_add_eq_len_u resLen res res res in
+  let c0 = Hacl.Bignum.Addition.bn_add_eq_len_u resLen res res res in
   let tmp = create resLen (uint #t 0) in
   bn_sqr_diag aLen a tmp;
-  let _ = Hacl.Bignum.Addition.bn_add_eq_len_u resLen res tmp res in
+  let c1 = Hacl.Bignum.Addition.bn_add_eq_len_u resLen res tmp res in
   pop_frame ()
 
 

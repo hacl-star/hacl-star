@@ -82,7 +82,9 @@ let mgf_hash_f a len i mgfseed_counter block =
   let h0 = ST.get () in
   update_sub_f h0 mgfseed_counter len 4ul
     (fun h -> BSeq.nat_to_intseq_be 4 (v i))
-    (fun _ -> counter_to_bytes i (sub mgfseed_counter len 4ul));
+    (fun _ ->
+      let c = sub mgfseed_counter len 4ul in
+      counter_to_bytes i c);
   hash a block (len +! 4ul) mgfseed_counter
 
 
@@ -115,6 +117,8 @@ let mgf_hash a len mgfseed maskLen res =
     (fun h i -> as_seq h mgfseed_counter)
     (fun _ -> loc mgfseed_counter)
     (fun h0 -> S.mgf_hash_f a (v len))
-    (fun i -> mgf_hash_f a len i mgfseed_counter (sub acc (i *! hLen) hLen));
+    (fun i ->
+      let acc_i = sub acc (i *! hLen) hLen in
+      mgf_hash_f a len i mgfseed_counter acc_i);
   copy res (sub acc 0ul maskLen);
   pop_frame ()

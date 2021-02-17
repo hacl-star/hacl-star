@@ -142,7 +142,8 @@ let lexp_mont_ladder_swap #a_t len ctx_len k ctx a bLen bBits b acc =
     k.lsqr ctx acc acc; // a = (a * a) % n
     sw.(0ul) <- bit
   );
-  cswap2 len ctx_len k sw.(0ul) acc a;
+  let sw0 = sw.(0ul) in
+  cswap2 len ctx_len k sw0 acc a;
   pop_frame ()
 
 

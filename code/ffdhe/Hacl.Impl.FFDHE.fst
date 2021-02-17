@@ -354,7 +354,7 @@ let ffdhe_check_pk #t a len pk_n p_n =
   let p_n1 = create nLen (uint #t #SEC 0) in
   let h0 = ST.get () in
 
-  let _ = BN.bn_sub1 nLen p_n (uint #t 1) p_n1 in
+  let c = BN.bn_sub1 nLen p_n (uint #t 1) p_n1 in
   SB.bn_sub1_lemma (as_seq h0 p_n) (uint #t 1);
   let h1 = ST.get () in
   S.ffdhe_p_lemma a;
