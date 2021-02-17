@@ -16,7 +16,7 @@ open Hacl.Lemmas.P256
 open Spec.ECDSA
 open Hacl.Spec.ECDSA.Definition
 
-open Hacl.Impl.P.LowLevel
+open Hacl.Impl.EC.LowLevel
 open Hacl.Impl.P256.MontgomeryMultiplication
 open Hacl.Impl.ECDSA.MontgomeryMultiplication
 
@@ -151,7 +151,7 @@ let xcube_minus_x #c x r =
   multByThree #c xToDomainBuffer minusThreeXBuffer;
   felem_sub #c r minusThreeXBuffer r;
   upload_b_constant #c b_constant;
-  Hacl.Impl.P.LowLevel.felem_add #c r b_constant r;
+  Hacl.Impl.EC.LowLevel.felem_add #c r b_constant r;
   pop_frame(); 
 
     let x_ = as_nat c h0 x in 

@@ -11,7 +11,7 @@ open Lib.Buffer
 
 open Spec.P256
 open Hacl.Spec.P256.Definition
-open Hacl.Impl.P.LowLevel
+open Hacl.Impl.EC.LowLevel
 
 open FStar.Mul
 

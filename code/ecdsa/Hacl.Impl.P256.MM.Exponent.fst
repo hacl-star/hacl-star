@@ -10,7 +10,7 @@ open Lib.Buffer
 
 open FStar.Math.Lemmas
 
-open Hacl.Impl.P.LowLevel 
+open Hacl.Impl.EC.LowLevel 
 
 open FStar.Mul
 

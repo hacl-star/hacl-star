@@ -15,7 +15,7 @@ open Spec.DH
 open Hacl.Spec.ECDSA.Definition
 open Hacl.Lemmas.P256
 
-open Hacl.Impl.P.LowLevel 
+open Hacl.Impl.EC.LowLevel 
 open Hacl.Impl.P256.Core
 open Hacl.Impl.P256.Signature.Common
 

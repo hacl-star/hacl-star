@@ -11,7 +11,7 @@ open Hacl.Lemmas.P256
 
 open Hacl.Spec.P256.Definition
 open Hacl.Spec.ECDSA.Definition
-open Hacl.Impl.P.LowLevel 
+open Hacl.Impl.EC.LowLevel 
 open Hacl.Impl.P256.Core
 open Hacl.Spec.P256.MontgomeryMultiplication
 open Hacl.Impl.ECDSA.MontgomeryMultiplication
@@ -192,8 +192,8 @@ let ecdsa_verification_step4 #c bufferU1 bufferU2 r s hash =
     multPowerPartial s inverseS r u2;
   
   let h1 = ST.get() in 
-    Hacl.Impl.P.LowLevel.changeEndian #c u1;
-    Hacl.Impl.P.LowLevel.changeEndian #c u2;
+    Hacl.Impl.EC.LowLevel.changeEndian #c u1;
+    Hacl.Impl.EC.LowLevel.changeEndian #c u2;
     toUint8 #c u1 bufferU1;
     toUint8 #c u2 bufferU2;
   

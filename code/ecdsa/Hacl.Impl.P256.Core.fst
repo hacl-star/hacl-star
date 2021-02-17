@@ -11,7 +11,7 @@ open Lib.Buffer
 open Hacl.Spec.P256.Definition
 open Spec.P256
 open Hacl.Impl.EC.Reduction
-open Hacl.Impl.P.LowLevel 
+open Hacl.Impl.EC.LowLevel 
 open Hacl.Impl.P256.MontgomeryMultiplication
 open Hacl.Impl.P256.MM.Exponent
 open Hacl.Impl.P256.Math 

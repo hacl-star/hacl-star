@@ -23,7 +23,7 @@ open Hacl.Spec.ECDSA.Definition
 
 open Hacl.Spec.ECDSA.Definition
 
-open Hacl.Impl.P.LowLevel 
+open Hacl.Impl.EC.LowLevel 
 
 open Hacl.Impl.P256.Core
 

@@ -11,7 +11,7 @@ open FStar.Math.Lemmas
 
 open Hacl.Lemmas.P256
 open Hacl.Spec.ECDSA.Definition
-open Hacl.Impl.P.LowLevel 
+open Hacl.Impl.EC.LowLevel 
 open Hacl.Impl.P256.MontgomeryMultiplication
 
 open FStar.Tactics

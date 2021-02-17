@@ -7,7 +7,7 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Impl.P.LowLevel 
+open Hacl.Impl.EC.LowLevel 
 
 open Hacl.Impl.P256.Core
 open Hacl.Impl.P256.MM.Exponent
@@ -254,7 +254,7 @@ let decompressionCompressedForm #c b result =
 	      else
 		as_nat c h3 t1 = (0 - sqRootWithoutSign) % prime256);
     
-	  Hacl.Impl.P.LowLevel.changeEndian #c t1;
+	  Hacl.Impl.EC.LowLevel.changeEndian #c t1;
 	  toUint8 #c t1 (sub result (getCoordinateLenU c) (getCoordinateLenU c)); 
 	   let h5 = ST.get() in 
 	   assert(as_seq h5 (gsub result (size 32) (size 32)) == Lib.ByteSequence.uints_to_bytes_be (changeEndian #c (as_seq h3 t1)));

@@ -9,7 +9,7 @@ open Hacl.Impl.P256.Arithmetics
 
 open Lib.Buffer
 
-open Hacl.Impl.P.LowLevel
+open Hacl.Impl.EC.LowLevel
 open Hacl.Impl.P256.MontgomeryMultiplication
 open Spec.P256
 
