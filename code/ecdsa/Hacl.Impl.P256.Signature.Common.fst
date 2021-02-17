@@ -347,8 +347,8 @@ let verifyQValidCurvePoint pubKeyAsPoint tempBuffer =
   let coordinatesValid = isCoordinateValid pubKeyAsPoint in 
   if not coordinatesValid then false else 
     let belongsToCurve = isPointOnCurvePublic pubKeyAsPoint in 
-    let orderCorrect = isOrderCorrect pubKeyAsPoint tempBuffer in 
-    coordinatesValid && belongsToCurve && orderCorrect
+    (* let orderCorrect = isOrderCorrect pubKeyAsPoint tempBuffer in  *)
+    coordinatesValid && belongsToCurve (* && orderCorrect *)
 
 
 let verifyQ #c pubKey = 
