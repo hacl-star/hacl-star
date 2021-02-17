@@ -29,6 +29,9 @@ let hacl_sha1 = hacl_md SHA1
 inline_for_extraction noextract
 let state_t_sha1 = state_t SHA1
 
+/// Type abbreviation - for pretty code generation
+let state_sha1 = F.state_s hacl_sha1 () (state_t_sha1.s ()) (G.erased unit)
+
 noextract
 let legacy_alloca_sha1 = F.alloca hacl_sha1 () (state_t_sha1.s ()) (G.erased unit)
 let legacy_create_in_sha1 = F.create_in hacl_sha1 () (state_t_sha1.s ()) (G.erased unit)

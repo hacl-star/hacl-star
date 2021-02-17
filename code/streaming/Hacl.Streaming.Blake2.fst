@@ -716,6 +716,17 @@ let mk_update_last a m update_last no_key key_size i acc prevlen last last_len =
   (**)   update_last_s (U32.v key_size) () (s_v h0 acc) (U64.v prevlen) (B.as_seq h0 last))
 #pop-options
 
+let blocks_state_len (a : alg) (m : valid_m_spec a) :
+  Tot (x:U32.t{
+    U32.v x > 0 /\
+    U32.v x % U32.v (block_len a) = 0
+  }) = 
+  match m with
+  | M32 -> block_len a
+  // The vectorized implementations actually only process one block at a time
+  | M128 -> block_len a
+  | M256 -> block_len a
+
 #push-options "--ifuel 1 --z3cliopt smt.arith.nl=false"
 inline_for_extraction noextract
 let blake2 (a : alg) (m : valid_m_spec a)
@@ -734,6 +745,7 @@ let blake2 (a : alg) (m : valid_m_spec a)
     (fun () -> max_input_length a (Spec.max_key a)) (* max_input_length *)
     (fun () -> output_len a) (* output_len *)
     (fun () -> block_len a) (* block_len *)
+    (fun () -> blocks_state_len a m) (* blocks_state_len *)
     
     (fun () k -> init_s #a #(U32.v key_size) () k) (* init_s *)
     (fun () acc prevlen input -> update_multi_s (U32.v key_size) () acc prevlen input) (* update_multi_s *)
@@ -772,9 +784,7 @@ let blake2 (a : alg) (m : valid_m_spec a)
       finish (output_len a) dst h)
 #pop-options
 
-/// We can't instantiate the hash functions generically because the normalization
-/// then performed by Kremlin explodes. In order to make things smoother, we
-/// introduce intermediate, specialized definitions.
+/// Introducing intermediate definitions for the instantiation
 
 inline_for_extraction noextract
 let blake2s_32 (no_key : bool) (key_size : key_size_t Spec.Blake2S no_key) =
@@ -794,45 +804,13 @@ inline_for_extraction noextract
 let optional_key_blake2b (no_key : bool) (key_size : key_size_t Spec.Blake2B no_key) =
   (I.optional_key () I.Erased (k Spec.Blake2B no_key key_size))
 
-inline_for_extraction noextract
-let mk_blake2s_32_create_in (no_key : bool) (key_size : key_size_t Spec.Blake2S no_key) =
-  F.create_in (blake2s_32 no_key key_size) () (s Spec.Blake2S M32)
-              (optional_key_blake2s no_key key_size)
+/// Type abbreviations - makes Kremlin use pretty names in the generated code
 
-inline_for_extraction noextract
-let mk_blake2s_32_update (no_key : bool) (key_size : key_size_t Spec.Blake2S no_key) =
-  F.update (blake2s_32 no_key key_size) (G.hide ()) (s Spec.Blake2S M32)
-           (optional_key_blake2s no_key key_size)
-
-inline_for_extraction noextract
-let mk_blake2s_32_finish (no_key : bool) (key_size : key_size_t Spec.Blake2S no_key) =
-  F.mk_finish (blake2s_32 no_key key_size) () (s Spec.Blake2S M32)
-              (optional_key_blake2s no_key key_size)
-
-inline_for_extraction noextract
-let mk_blake2s_32_free (no_key : bool) (key_size : key_size_t Spec.Blake2S no_key) =
-  F.free (blake2s_32 no_key key_size) (G.hide ()) (s Spec.Blake2S M32)
-         (optional_key_blake2s no_key key_size)
-
-inline_for_extraction noextract
-let mk_blake2b_32_create_in (no_key : bool) (key_size : key_size_t Spec.Blake2B no_key) =
-  F.create_in (blake2b_32 no_key key_size) () (s Spec.Blake2B M32)
-              (optional_key_blake2b no_key key_size)
-
-inline_for_extraction noextract
-let mk_blake2b_32_update (no_key : bool) (key_size : key_size_t Spec.Blake2B no_key) =
-  F.update (blake2b_32 no_key key_size) (G.hide ()) (s Spec.Blake2B M32)
-           (optional_key_blake2b no_key key_size)
-
-inline_for_extraction noextract
-let mk_blake2b_32_finish (no_key : bool) (key_size : key_size_t Spec.Blake2B no_key) =
-  F.mk_finish (blake2b_32 no_key key_size) () (s Spec.Blake2B M32)
-              (optional_key_blake2b no_key key_size)
-
-inline_for_extraction noextract
-let mk_blake2b_32_free (no_key : bool) (key_size : key_size_t Spec.Blake2B no_key) =
-  F.free (blake2b_32 no_key key_size) (G.hide ()) (s Spec.Blake2B M32)
-         (optional_key_blake2b no_key key_size)
+let blake2s_32_block_state = s Spec.Blake2S M32
+let blake2b_32_block_state = s Spec.Blake2B M32
+// The key parameters have no importance for the extracted state definitions
+let blake2s_32_state = F.state_s (blake2s_32 true 0ul) () (s Spec.Blake2S M32) (optional_key_blake2s true 0ul)
+let blake2b_32_state = F.state_s (blake2b_32 true 0ul) () (s Spec.Blake2B M32) (optional_key_blake2b true 0ul)
 
 /// The incremental hash functions instantiations. Note that we can't write a
 /// generic one, because the normalization then performed by Kremlin explodes.
@@ -848,6 +826,11 @@ let blake2s_32_no_key_alloca =
 let blake2s_32_no_key_create_in =
   F.create_in (blake2s_32 true 0ul) () (s Spec.Blake2S M32)
               (optional_key_blake2s true 0ul)
+
+[@ (Comment "  (Re-)initialization function when there is no key")]
+let blake2s_32_no_key_init =
+  F.init (blake2s_32 true 0ul) () (s Spec.Blake2S M32)
+         (optional_key_blake2s true 0ul)
 
 [@ (Comment "  Update function when there is no key")]
 let blake2s_32_no_key_update =
@@ -873,6 +856,11 @@ let blake2b_32_no_key_alloca =
 [@ (Comment "  State allocation function when there is no key")]
 let blake2b_32_no_key_create_in =
   F.create_in (blake2b_32 true 0ul) () (s Spec.Blake2B M32)
+              (optional_key_blake2b true 0ul)
+
+[@ (Comment "  (Re)-initialization function when there is no key")]
+let blake2b_32_no_key_init =
+  F.init (blake2b_32 true 0ul) () (s Spec.Blake2B M32)
               (optional_key_blake2b true 0ul)
 
 [@ (Comment "  Update function when there is no key")]
@@ -903,6 +891,11 @@ let blake2s_32_with_key_create_in (key_size : key_size_t Spec.Blake2S false) =
   F.create_in (blake2s_32 false key_size) () (s Spec.Blake2S M32)
               (optional_key_blake2s false key_size)
 
+[@ (Comment "  (Re-)initialization function when using a (potentially null) key")]
+let blake2s_32_with_key_init (key_size : key_size_t Spec.Blake2S false) =
+  F.init (blake2s_32 false key_size) () (s Spec.Blake2S M32)
+              (optional_key_blake2s false key_size)
+
 [@ (Comment "  Update function when using a (potentially null) key")]
 let blake2s_32_with_key_update (key_size : key_size_t Spec.Blake2S false) =
   F.update (blake2s_32 false key_size) (G.hide ()) (s Spec.Blake2S M32)
@@ -926,6 +919,11 @@ let blake2b_32_with_key_alloca (key_size : key_size_t Spec.Blake2B false) =
 [@ (Comment "  State allocation function when using a (potentially null) key")]
 let blake2b_32_with_key_create_in (key_size : key_size_t Spec.Blake2B false) =
   F.create_in (blake2b_32 false key_size) () (s Spec.Blake2B M32)
+              (optional_key_blake2b false key_size)
+
+[@ (Comment "  (Re-)initialization function when using a (potentially null) key")]
+let blake2b_32_with_key_init (key_size : key_size_t Spec.Blake2B false) =
+  F.init (blake2b_32 false key_size) () (s Spec.Blake2B M32)
               (optional_key_blake2b false key_size)
 
 [@ (Comment "  Update function when using a (potentially null) key")]

@@ -155,7 +155,7 @@ val bn_get_bits_limb:
   -> ind:size_t{v ind / bits t < v len} ->
   Stack (limb t)
   (requires fun h -> live h n)
-  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+  (ensures  fun h0 r h1 -> h0 == h1 /\
     r == S.bn_get_bits_limb (as_seq h0 n) (v ind))
 
 let bn_get_bits_limb #t len n ind =
@@ -181,7 +181,7 @@ val bn_get_bits:
   -> l:size_t{v l < bits t /\ v i / bits t < v len} ->
   Stack (limb t)
   (requires fun h -> live h b)
-  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+  (ensures  fun h0 r h1 -> h0 == h1 /\
     r == S.bn_get_bits (as_seq h0 b) (v i) (v l))
 
 let bn_get_bits #t len b i l =

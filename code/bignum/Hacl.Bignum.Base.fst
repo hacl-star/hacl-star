@@ -106,9 +106,9 @@ let mul_wide_add2_t (t:limb_t) =
 val mul_wide_add2_u32: mul_wide_add2_t U32
 [@CInline]
 let mul_wide_add2_u32 a b c_in out =
-  let h0 = ST.get () in
-  lemma_mul_wide_add a b c_in (LSeq.index (as_seq h0 out) 0);
-  let res = to_u64 a *! to_u64 b +! to_u64 c_in +! to_u64 out.(0ul) in
+  let out0 = out.(0ul) in
+  lemma_mul_wide_add a b c_in out0;
+  let res = to_u64 a *! to_u64 b +! to_u64 c_in +! to_u64 out0 in
   out.(0ul) <- to_u32 res;
   to_u32 (res >>. 32ul)
 
@@ -116,9 +116,9 @@ let mul_wide_add2_u32 a b c_in out =
 val mul_wide_add2_u64: mul_wide_add2_t U64
 [@CInline]
 let mul_wide_add2_u64 a b c_in out =
-  let h0 = ST.get () in
-  lemma_mul_wide_add a b c_in (LSeq.index (as_seq h0 out) 0);
-  let res = mul64_wide a b +! to_u128 c_in +! to_u128 out.(0ul) in
+  let out0 = out.(0ul) in
+  lemma_mul_wide_add a b c_in out0;
+  let res = mul64_wide a b +! to_u128 c_in +! to_u128 out0 in
   out.(0ul) <- to_u64 res;
   to_u64 (res >>. 64ul)
 

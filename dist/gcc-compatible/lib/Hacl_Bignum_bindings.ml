@@ -72,6 +72,19 @@ module Bindings(F:Cstubs.FOREIGN) =
            ((ptr uint64_t) @->
               (uint64_t @->
                  ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void))))))
+    let hacl_Bignum_Montgomery_bn_mont_mul_u64 =
+      foreign "Hacl_Bignum_Montgomery_bn_mont_mul_u64"
+        (uint32_t @->
+           ((ptr uint64_t) @->
+              (uint64_t @->
+                 ((ptr uint64_t) @->
+                    ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void)))))))
+    let hacl_Bignum_Montgomery_bn_mont_sqr_u64 =
+      foreign "Hacl_Bignum_Montgomery_bn_mont_sqr_u64"
+        (uint32_t @->
+           ((ptr uint64_t) @->
+              (uint64_t @->
+                 ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void))))))
     let hacl_Bignum_Exponentiation_bn_mod_exp_raw_precompr2_u64 =
       foreign "Hacl_Bignum_Exponentiation_bn_mod_exp_raw_precompr2_u64"
         (uint32_t @->
