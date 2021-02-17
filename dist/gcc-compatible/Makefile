@@ -23,6 +23,10 @@
 # By default, this Makefile relies on the local checkout of kremlib
 KREMLIN_HOME ?= ../kremlin
 
+ifeq (,$(wildcard $(KREMLIN_HOME)/include/kremlib.h))
+	$(error Incorrect KREMLIN_HOME)
+endif
+
 -include Makefile.config
 
 # 1. The usual pseudo auto-configuration
