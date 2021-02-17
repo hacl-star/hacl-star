@@ -25,7 +25,7 @@ open Spec.ECDSA
 open Hacl.Impl.P256.Compression
 open Spec.Hash.Definitions
 
-open Hacl.Impl.ECDSA.P256.Signature.Agile
+open Hacl.Impl.ECDSA.Signature
 open Hacl.Impl.ECDSA.P256.Verification.Agile
 
 (* 
