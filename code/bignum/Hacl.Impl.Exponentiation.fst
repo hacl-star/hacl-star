@@ -223,6 +223,7 @@ let lprecomp_table_fmul #a_t len ctx_len k ctx a i ti res =
   S.lemma_pow1 k.to.exp (k.to.refl (as_seq h0 a))
 
 
+#push-options "--z3rlimit 150"
 inline_for_extraction noextract
 val precomp_table_inv_lemma_j:
     #a_t:inttype_a
@@ -260,6 +261,7 @@ let precomp_table_inv_lemma_j #a_t len ctx_len k a table_len table1 table2 i j =
   Classical.forall_intro aux;
   LSeq.eq_intro bj1 bj2;
   assert (precomp_table_inv len ctx_len k a table_len table2 j)
+#pop-options
 
 
 inline_for_extraction noextract
@@ -639,6 +641,7 @@ let lexp_fw_rem_st (a_t:inttype_a) (len:size_t{v len > 0}) (ctx_len:size_t) (k:l
       (v bBits) (BD.bn_v h0 b) (v l) (k.to.refl (as_seq h0 acc)))
 
 
+#push-options "--z3rlimit 150"
 inline_for_extraction noextract
 val lexp_fw_raw_rem:
     #a_t:inttype_a
@@ -691,6 +694,7 @@ let lexp_fw_ct_rem #a_t len ctx_len k ctx a bLen bBits b l table_len table acc =
 
   lexp_fw_pow_fmul #a_t len ctx_len k ctx c a_bits_c acc;
   pop_frame ()
+#pop-options
 
 
 inline_for_extraction noextract
