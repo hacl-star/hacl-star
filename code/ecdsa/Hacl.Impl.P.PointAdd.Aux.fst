@@ -19,7 +19,7 @@ open FStar.Tactics.Canon
 
 open FStar.Math.Lemmas
 
-open Hacl.Spec.P256.MontgomeryMultiplication
+open Hacl.Spec.P.MontgomeryMultiplication
 open FStar.Mul
 
 open  Hacl.Spec.P256.Definition

@@ -20,7 +20,7 @@ open Spec.ECDSA.Lemmas
 open Hacl.Impl.EC.LowLevel
 
 open Lib.Loops
-open Hacl.Spec.P256.MontgomeryMultiplication
+open Hacl.Spec.P.MontgomeryMultiplication
 
 
 #set-options "--z3rlimit 200 --fuel 0 --ifuel 0"

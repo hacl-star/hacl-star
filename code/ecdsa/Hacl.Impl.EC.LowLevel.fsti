@@ -10,7 +10,7 @@ open Lib.Buffer
 open Hacl.Spec.P256.Definition
 open Spec.P256
 open FStar.Mul
-open Hacl.Spec.P256.MontgomeryMultiplication
+open Hacl.Spec.P.MontgomeryMultiplication
 
 
 #set-options "--z3rlimit 100"

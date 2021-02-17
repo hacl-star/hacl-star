@@ -20,7 +20,7 @@ open FStar.Math.Lemmas
 open  Hacl.Spec.P256.Definition
 
 
-open Hacl.Spec.P256.MontgomeryMultiplication
+open Hacl.Spec.P.MontgomeryMultiplication
 open FStar.Mul
 
 open Hacl.Impl.P.PointAdd.Aux

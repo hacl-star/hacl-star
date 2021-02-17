@@ -94,8 +94,8 @@ let cmovznz4 #c  cin x y r =
 
 let add_bn #c x y result =
   match c with
-  |P256 -> add4 x y result
-  |P384 -> add6 x y result
+  |P256 -> bn_add_eq_len (size 4) x y result
+  |P384 -> bn_add_eq_len (size 6) x y result
 
 let add_long_bn #c x y result = 
   match c with 

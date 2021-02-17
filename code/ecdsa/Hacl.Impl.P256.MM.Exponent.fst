@@ -17,15 +17,15 @@ open FStar.Mul
 open Lib.Loops
 
 open Hacl.Impl.P256.MontgomeryMultiplication
-open Hacl.Spec.P256.MontgomeryMultiplication
+open Hacl.Spec.P.MontgomeryMultiplication
 
 open Hacl.Spec.P256.Definition
 open Hacl.Lemmas.P256
 open Spec.ECDSA.Lemmas
 open Spec.P256
-open Hacl.Spec.P256.MontgomeryMultiplication
+open Hacl.Spec.P.MontgomeryMultiplication
 
-friend Hacl.Spec.P256.MontgomeryMultiplication
+friend Hacl.Spec.P.MontgomeryMultiplication
 
 open Hacl.Impl.P256.MontgomeryMultiplication.Exponent
 

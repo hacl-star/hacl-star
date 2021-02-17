@@ -796,31 +796,12 @@ static void cmovznz4(Spec_P256_curve c, uint64_t cin, uint64_t *x, uint64_t *y, 
 
 static uint64_t add_bn(Spec_P256_curve c, uint64_t *x, uint64_t *y, uint64_t *result)
 {
-  uint32_t len;
-  switch (c)
-  {
-    case Spec_P256_P256:
-      {
-        len = (uint32_t)4U;
-        break;
-      }
-    case Spec_P256_P384:
-      {
-        len = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
   switch (c)
   {
     case Spec_P256_P256:
       {
         uint64_t c1 = (uint64_t)0U;
-        uint32_t k = len / (uint32_t)4U * (uint32_t)4U;
+        uint32_t k = (uint32_t)4U;
         for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
         {
           uint64_t t1 = x[(uint32_t)4U * i];
@@ -848,7 +829,7 @@ static uint64_t add_bn(Spec_P256_curve c, uint64_t *x, uint64_t *y, uint64_t *re
               t2,
               result + (uint32_t)4U * i + (uint32_t)3U);
         }
-        for (uint32_t i = k; i < len; i++)
+        for (uint32_t i = k; i < (uint32_t)4U; i++)
         {
           uint64_t t1 = x[i];
           uint64_t t2 = y[i];
@@ -859,7 +840,7 @@ static uint64_t add_bn(Spec_P256_curve c, uint64_t *x, uint64_t *y, uint64_t *re
     case Spec_P256_P384:
       {
         uint64_t c1 = (uint64_t)0U;
-        uint32_t k = len / (uint32_t)4U * (uint32_t)4U;
+        uint32_t k = (uint32_t)4U;
         for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
         {
           uint64_t t1 = x[(uint32_t)4U * i];
@@ -887,7 +868,7 @@ static uint64_t add_bn(Spec_P256_curve c, uint64_t *x, uint64_t *y, uint64_t *re
               t2,
               result + (uint32_t)4U * i + (uint32_t)3U);
         }
-        for (uint32_t i = k; i < len; i++)
+        for (uint32_t i = k; i < (uint32_t)6U; i++)
         {
           uint64_t t1 = x[i];
           uint64_t t2 = y[i];

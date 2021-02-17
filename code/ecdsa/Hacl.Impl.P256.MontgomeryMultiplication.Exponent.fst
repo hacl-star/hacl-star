@@ -23,7 +23,7 @@ open Hacl.Impl.P256.MM.Lemmas
 open Hacl.Impl.P256.MontgomeryMultiplication
 
 
-open Hacl.Spec.P256.MontgomeryMultiplication
+open Hacl.Spec.P.MontgomeryMultiplication
 
 #set-options "--z3rlimit 100 --ifuel 0 --fuel 0"
 
