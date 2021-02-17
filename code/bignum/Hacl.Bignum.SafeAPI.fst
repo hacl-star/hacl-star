@@ -170,7 +170,7 @@ let bn_mod_exp_safe_st (t:limb_t) (len:BN.meta_len t) =
   -> res:lbignum t len ->
   Stack bool
   (requires fun h ->
-    live h n /\ live h a /\ live h b /\ live h res /\
+    live h n /\ live h a /\ live h b /\ live h res /\ disjoint n b /\
     disjoint res a /\ disjoint res b /\ disjoint res n /\ disjoint n a)
   (ensures  fun h0 r h1 -> modifies (loc res) h0 h1 /\
     r == BB.unsafe_bool_of_limb (SE.bn_check_mod_exp (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b)) /\
@@ -185,14 +185,13 @@ let bn_mod_exp_raw_safe #t k n a bBits b res =
   let is_valid_m = k.BE.exp_check n a bBits b in
   let nBits = size (bits t) *! BB.unsafe_size_from_limb (BL.bn_get_top_index len n) in
 
-  BE.bn_mod_exp_raw k.BE.mont k.BE.raw_mod_exp_precomp nBits n a bBits b res;
+  if BB.unsafe_bool_of_limb is_valid_m then begin
+    SL.bn_low_bound_bits_lemma #t #(v len) (as_seq h0 n);
+    BE.bn_mod_exp_raw k.BE.mont k.BE.raw_mod_exp_precomp nBits n a bBits b res end;
+
   let h1 = ST.get () in
   mapT len res (logand is_valid_m) res;
   SD.bn_mask_lemma (as_seq h1 res) is_valid_m;
-
-  if BB.unsafe_bool_of_limb is_valid_m then begin
-    SL.bn_low_bound_bits_lemma #t #(v len) (as_seq h0 n);
-    SE.bn_mod_exp_raw_lemma (v len) (v nBits) (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b) end;
   BB.unsafe_bool_of_limb is_valid_m
 
 
@@ -204,15 +203,13 @@ let bn_mod_exp_ct_safe #t k n a bBits b res =
   let is_valid_m = k.BE.exp_check n a bBits b in
   let nBits = size (bits t) *! BB.unsafe_size_from_limb (BL.bn_get_top_index len n) in
 
-  BE.bn_mod_exp_ct k.BE.mont k.BE.ct_mod_exp_precomp nBits n a bBits b res;
+  if BB.unsafe_bool_of_limb is_valid_m then begin
+    SL.bn_low_bound_bits_lemma #t #(v len) (as_seq h0 n);
+    BE.bn_mod_exp_ct k.BE.mont k.BE.ct_mod_exp_precomp nBits n a bBits b res end;
+
   let h1 = ST.get () in
   mapT len res (logand is_valid_m) res;
   SD.bn_mask_lemma (as_seq h1 res) is_valid_m;
-
-  if BB.unsafe_bool_of_limb is_valid_m then begin
-    SL.bn_low_bound_bits_lemma #t #(v len) (as_seq h0 n);
-    SE.bn_mod_exp_ct_lemma (v len) (v nBits) (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b);
-    assert (SE.bn_mod_exp_post (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b) (as_seq h1 res)) end;
   BB.unsafe_bool_of_limb is_valid_m
 
 
@@ -238,12 +235,11 @@ let bn_mod_inv_prime_raw_safe #t k n a res =
   let is_valid_m = BI.bn_check_bn_mod_inv_prime #t k n a in
   let nBits = size (bits t) *! BB.unsafe_size_from_limb (BL.bn_get_top_index len n) in
 
-  BI.bn_mod_inv_prime_raw k nBits n a res;
+  if BB.unsafe_bool_of_limb is_valid_m then begin
+    SL.bn_low_bound_bits_lemma #t #(v len) (as_seq h0 n);
+    BI.bn_mod_inv_prime_raw k nBits n a res end;
+
   let h1 = ST.get () in
   mapT len res (logand is_valid_m) res;
   SD.bn_mask_lemma (as_seq h1 res) is_valid_m;
-
-  if BB.unsafe_bool_of_limb is_valid_m then begin
-    SL.bn_low_bound_bits_lemma #t #(v len) (as_seq h0 n);
-    SI.bn_mod_inv_prime_lemma (v nBits) (as_seq h0 n) (as_seq h0 a) end;
   BB.unsafe_bool_of_limb is_valid_m

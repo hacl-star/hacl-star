@@ -114,9 +114,11 @@ val bn_lshift_add_early_stop_in_place:
 let bn_lshift_add_early_stop_in_place #t #aLen #bLen a b i =
   let r = sub a i bLen in
   let h0 = ST.get () in
-  update_sub_f_carry h0 a i bLen
-  (fun h -> Hacl.Spec.Bignum.Addition.bn_add (as_seq h0 r) (as_seq h0 b))
-  (fun _ -> bn_add_eq_len_u bLen r b r)
+  let c =
+    update_sub_f_carry h0 a i bLen
+    (fun h -> Hacl.Spec.Bignum.Addition.bn_add (as_seq h0 r) (as_seq h0 b))
+    (fun _ -> bn_add_eq_len_u bLen r b r) in
+  c
 
 
 inline_for_extraction noextract

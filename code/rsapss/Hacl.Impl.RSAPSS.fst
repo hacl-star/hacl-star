@@ -15,6 +15,8 @@ module Hash = Spec.Agile.Hash
 module SB = Hacl.Spec.Bignum
 module BB = Hacl.Spec.Bignum.Base
 module SD = Hacl.Spec.Bignum.Definitions
+module SM = Hacl.Spec.Bignum.Montgomery
+
 module BN = Hacl.Bignum
 module BE = Hacl.Bignum.Exponentiation
 module BM = Hacl.Bignum.Montgomery
@@ -46,7 +48,9 @@ let rsapss_sign_bn_st (t:limb_t) (ke:BE.exp t) (modBits:modBits_t t) =
   (requires fun h -> len == ke.BE.mont.BM.bn.BN.len /\
     live h skey /\ live h m /\ live h s /\ live h m' /\
     disjoint s m /\ disjoint s skey /\ disjoint m skey /\
-    disjoint m m' /\ disjoint m' s /\ disjoint m' skey)
+    disjoint m m' /\ disjoint m' s /\ disjoint m' skey /\
+    LS.rsapss_skey_pre (v modBits) (v eBits) (v dBits) (as_seq h skey) /\
+    bn_v h m < bn_v h (gsub skey 0ul len))
   (ensures  fun h0 r h1 -> modifies (loc s |+| loc m') h0 h1 /\
     (r, as_seq h1 s) == LS.rsapss_sign_bn (v modBits) (v eBits) (v dBits) (as_seq h0 skey) (as_seq h0 m))
 
@@ -64,6 +68,9 @@ let rsapss_sign_bn #t ke modBits eBits dBits skey m m' s =
   let e  = sub skey (nLen +! nLen) eLen in
   let d  = sub skey (nLen +! nLen +! eLen) dLen in
 
+  Math.Lemmas.pow2_le_compat (bits * v nLen) (v modBits);
+  let h = ST.get () in
+  SM.bn_precomp_r2_mod_n_lemma (v modBits - 1) (as_seq h n);
   ke.BE.ct_mod_exp_fw_precomp n m dBits d 4ul r2 s;
   ke.BE.raw_mod_exp_precomp n s eBits e r2 m';
   let eq_m = BN.bn_eq_mask nLen m m' in
@@ -132,7 +139,9 @@ let rsapss_sign_compute_sgnt_st (t:limb_t) (ke:BE.exp t) (modBits:modBits_t t) =
   Stack bool
   (requires fun h -> len == ke.BE.mont.BM.bn.BN.len /\
     live h sgnt /\ live h skey /\ live h m /\
-    disjoint sgnt skey /\ disjoint m sgnt /\ disjoint m skey)
+    disjoint sgnt skey /\ disjoint m sgnt /\ disjoint m skey /\
+    LS.rsapss_skey_pre (v modBits) (v eBits) (v dBits) (as_seq h skey) /\
+    bn_v h m < bn_v h (gsub skey 0ul len))
   (ensures  fun h0 eq_m h1 -> modifies (loc sgnt) h0 h1 /\
     (eq_m, as_seq h1 sgnt) == LS.rsapss_sign_compute_sgnt (v modBits) (v eBits) (v dBits) (as_seq h0 skey) (as_seq h0 m))
 
@@ -181,6 +190,7 @@ let rsapss_sign_st1 (t:limb_t) (ke:BE.exp t) (a:Hash.algorithm{S.hash_is_support
     disjoint sgnt salt /\ disjoint sgnt msg /\ disjoint sgnt salt /\ disjoint sgnt skey /\
     disjoint salt msg /\
 
+    LS.rsapss_skey_pre (v modBits) (v eBits) (v dBits) (as_seq h skey) /\
     LS.rsapss_sign_pre a (v modBits) (v sLen) (as_seq h salt) (v msgLen) (as_seq h msg))
   (ensures  fun h0 eq_m h1 -> modifies (loc sgnt) h0 h1 /\
     (eq_m, as_seq h1 sgnt) == LS.rsapss_sign_ a (v modBits) (v eBits) (v dBits)
@@ -281,7 +291,8 @@ let rsapss_verify_bn_st (t:limb_t) (ke:BE.exp t) (modBits:modBits_t t) =
   Stack bool
   (requires fun h -> len == ke.BE.mont.BM.bn.BN.len /\
     live h pkey /\ live h m_def /\ live h s /\
-    disjoint m_def pkey /\ disjoint m_def s /\ disjoint s pkey)
+    disjoint m_def pkey /\ disjoint m_def s /\ disjoint s pkey /\
+    LS.rsapss_pkey_pre (v modBits) (v eBits) (as_seq h pkey))
   (ensures  fun h0 r h1 -> modifies (loc m_def) h0 h1 /\
     (r, as_seq h1 m_def) == LS.rsapss_verify_bn (v modBits) (v eBits) (as_seq h0 pkey) (as_seq h0 m_def) (as_seq h0 s))
 
@@ -298,8 +309,14 @@ let rsapss_verify_bn #t ke modBits eBits pkey m_def s =
   let e  = sub pkey (nLen +! nLen) eLen in
 
   let mask = BN.bn_lt_mask nLen s n in
+  let h = ST.get () in
+  SB.bn_lt_mask_lemma (as_seq h s) (as_seq h n);
+
   let res =
     if BB.unsafe_bool_of_limb mask then begin
+      Math.Lemmas.pow2_le_compat (v bits * v nLen) (v modBits);
+      SM.bn_precomp_r2_mod_n_lemma (v modBits - 1) (as_seq h n);
+
       ke.BE.raw_mod_exp_precomp n s eBits e r2 m_def;
       if bn_lt_pow2 modBits m_def then true
       else false end
@@ -364,7 +381,8 @@ let rsapss_verify_compute_msg_st (t:limb_t) (ke:BE.exp t) (modBits:modBits_t t) 
   (requires fun h -> len == ke.BE.mont.BM.bn.BN.len /\
     live h sgnt /\ live h pkey /\ live h m /\
     disjoint m sgnt /\ disjoint m pkey /\
-    as_seq h m == LSeq.create (v len) (uint #t 0))
+    as_seq h m == LSeq.create (v len) (uint #t 0) /\
+    LS.rsapss_pkey_pre (v modBits) (v eBits) (as_seq h pkey))
   (ensures  fun h0 r h1 -> modifies (loc m) h0 h1 /\
     (r, as_seq h1 m) == LS.rsapss_verify_compute_msg (v modBits) (v eBits) (as_seq h0 pkey) (as_seq h0 sgnt))
 
@@ -409,6 +427,7 @@ let rsapss_verify_st1 (t:limb_t) (ke:BE.exp t) (a:Hash.algorithm{S.hash_is_suppo
     live h msg /\ live h sgnt /\ live h pkey /\
     disjoint msg sgnt /\ disjoint msg pkey /\
 
+    LS.rsapss_pkey_pre (v modBits) (v eBits) (as_seq h pkey) /\
     LS.rsapss_verify_pre a (v sLen) (v msgLen) (as_seq h msg))
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
     r == LS.rsapss_verify_ a (v modBits) (v eBits) (as_seq h0 pkey)

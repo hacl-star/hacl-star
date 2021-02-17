@@ -111,7 +111,7 @@ val mod: BS.bn_mod_slow_safe_st t_limbs n_limbs
   mod_exp_ct_* functions for constant-time variants.
 
   This function is *UNSAFE* and requires C clients to observe bn_mod_exp_pre
-  from Hacl.Spec.Bignum.ExpBM.fsti, which amounts to:
+  from Hacl.Spec.Bignum.Exponentiation.fsti, which amounts to:
   • n % 2 = 1
   • 1 < n
   • 0 < b
@@ -135,7 +135,7 @@ val mod_exp_raw_precompr2: BE.bn_mod_exp_raw_precompr2_st t_limbs n_limbs
   execution time than mod_exp_raw_precompr2.
 
   This function is *UNSAFE* and requires C clients to observe bn_mod_exp_pre
-  from Hacl.Spec.Bignum.ExpBM.fsti, which amounts to:
+  from Hacl.Spec.Bignum.Exponentiation.fsti, which amounts to:
   • n % 2 = 1
   • 1 < n
   • 0 < b
@@ -191,8 +191,8 @@ val new_precompr2: BS.new_bn_precomp_r2_mod_n_st t_limbs n_limbs
 
   The arguments a, n and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
 
-  This function is *UNSAFE* and requires C clients to observe the precondition of
-  bn_mod_inv_prime_lemma from Hacl.Spec.Bignum.ModInv.fst, which amounts to:
+  This function is *UNSAFE* and requires C clients to observe bn_mod_inv_prime_pre
+  from Hacl.Spec.Bignum.ModInv.fst, which amounts to:
   • n is a prime
 
   The function returns false if any of the following preconditions are violated, true otherwise.
