@@ -146,7 +146,7 @@ static inline void reduction(uint64_t *n, uint64_t nInv, uint64_t *c, uint64_t *
     c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, c10, res_j, resb);
   }
   memcpy(res, c + (uint32_t)64U, (uint32_t)64U * sizeof (uint64_t));
-  uint64_t uu____0 = c0;
+  uint64_t c01 = c0;
   uint64_t tmp[64U] = { 0U };
   uint64_t c1 = (uint64_t)0U;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
@@ -176,7 +176,7 @@ static inline void reduction(uint64_t *n, uint64_t nInv, uint64_t *c, uint64_t *
     c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t1, t2, res_i);
   }
   uint64_t c10 = c1;
-  uint64_t c2 = uu____0 - c10;
+  uint64_t c2 = c01 - c10;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
   {
     uint64_t *os = res;
@@ -343,7 +343,7 @@ static inline uint64_t ffdhe_check_pk(uint64_t *pk_n, uint64_t *p_n)
   memset(p_n1, 0U, nLen * sizeof (uint64_t));
   uint64_t
   c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, p_n[0U], (uint64_t)1U, p_n1);
-  uint64_t uu____0;
+  uint64_t c1;
   if ((uint32_t)1U < nLen)
   {
     uint32_t rLen = nLen - (uint32_t)1U;
@@ -371,12 +371,12 @@ static inline uint64_t ffdhe_check_pk(uint64_t *pk_n, uint64_t *p_n)
       uint64_t *res_i = res1 + i;
       c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, (uint64_t)0U, res_i);
     }
-    uint64_t c1 = c;
-    uu____0 = c1;
+    uint64_t c10 = c;
+    c1 = c10;
   }
   else
   {
-    uu____0 = c0;
+    c1 = c0;
   }
   KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
   uint64_t b2[nLen];

@@ -146,7 +146,7 @@ static inline void reduction(uint64_t *n, uint64_t nInv, uint64_t *c, uint64_t *
     c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, c10, res_j, resb);
   }
   memcpy(res, c + (uint32_t)32U, (uint32_t)32U * sizeof (uint64_t));
-  uint64_t uu____0 = c0;
+  uint64_t c01 = c0;
   uint64_t tmp[32U] = { 0U };
   uint64_t c1 = (uint64_t)0U;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
@@ -176,7 +176,7 @@ static inline void reduction(uint64_t *n, uint64_t nInv, uint64_t *c, uint64_t *
     c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t1, t2, res_i);
   }
   uint64_t c10 = c1;
-  uint64_t c2 = uu____0 - c10;
+  uint64_t c2 = c01 - c10;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)32U; i++)
   {
     uint64_t *os = res;
