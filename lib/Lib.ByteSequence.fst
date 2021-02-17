@@ -75,6 +75,35 @@ let lbytes_eq #len b1 b2 =
 
 /// END constant-time sequence equality
 
+let mask_select #t mask a b =
+  b ^. (mask &. (a ^. b))
+
+let mask_select_lemma #t mask a b =
+  let t1 = mask &. (a ^. b) in
+  let t2 = b ^. t1 in
+  logand_lemma mask (a ^.b);
+  if v mask = 0 then begin
+    assert (v t1 == 0);
+    logxor_lemma b t1;
+    assert (v t2 = v b);
+    () end
+  else begin
+    assert (v t1 == v (a ^. b));
+    logxor_lemma b a;
+    assert (v t2 = v a);
+    () end
+
+let seq_mask_select #t #len a b mask =
+  let res = map2 (mask_select mask) a b in
+
+  let lemma_aux (i:nat{i < len}) : Lemma (v res.[i] == (if v mask = 0 then v b.[i] else v a.[i])) =
+    mask_select_lemma mask a.[i] b.[i] in
+
+  Classical.forall_intro lemma_aux;
+  if v mask = 0 then eq_intro res b else eq_intro res a;
+  res
+
+
 val nat_from_intseq_be_:
     #t:inttype{unsigned t} -> #l:secrecy_level
   -> b:seq (uint_t t l)

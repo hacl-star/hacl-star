@@ -38,10 +38,10 @@ extern "C" {
 
 
 #include "EverCrypt_HMAC.h"
+#include "Lib_Memzero0.h"
 #include "Lib_RandomBuffer_System.h"
 #include "Hacl_Spec.h"
 #include "Hacl_HMAC_DRBG.h"
-#include "Hacl_Lib.h"
 
 /* SNIPPET_START: EverCrypt_DRBG_supported_alg */
 

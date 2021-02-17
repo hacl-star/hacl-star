@@ -39,6 +39,13 @@ module Bindings(F:Cstubs.FOREIGN) =
       Unsigned.UInt8.of_int 1
     let spec_Agile_Cipher_cipher_alg_Spec_Agile_Cipher_CHACHA20 =
       Unsigned.UInt8.of_int 2
+    type spec_Frodo_Params_frodo_gen_a = Unsigned.UInt8.t
+    let spec_Frodo_Params_frodo_gen_a =
+      typedef uint8_t "Spec_Frodo_Params_frodo_gen_a"
+    let spec_Frodo_Params_frodo_gen_a_Spec_Frodo_Params_SHAKE128 =
+      Unsigned.UInt8.of_int 0
+    let spec_Frodo_Params_frodo_gen_a_Spec_Frodo_Params_AES128 =
+      Unsigned.UInt8.of_int 1
     type spec_FFDHE_ffdhe_alg = Unsigned.UInt8.t
     let spec_FFDHE_ffdhe_alg = typedef uint8_t "Spec_FFDHE_ffdhe_alg"
     let spec_FFDHE_ffdhe_alg_Spec_FFDHE_FFDHE2048 = Unsigned.UInt8.of_int 0
