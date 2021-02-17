@@ -1,4 +1,4 @@
-module Hacl.Impl.SolinasReduction
+module Hacl.Impl.EC.Reduction
 
 open FStar.HyperStack.All
 open FStar.HyperStack
@@ -17,7 +17,7 @@ open Hacl.Spec.P256.Definition
 open FStar.Mul
 
 
-val solinas_reduction_impl: #c: curve 
+val reduction: #c: curve 
   -> i: lbuffer uint64 (getCoordinateLenU64 c *. 2ul) 
   -> o: lbuffer uint64 (getCoordinateLenU64 c) -> 
   Stack unit

@@ -1,4 +1,4 @@
-module Hacl.Impl.SolinasReduction
+module Hacl.Impl.SolinasReduction.P256
 
 open FStar.HyperStack.All
 open FStar.HyperStack
@@ -11,9 +11,10 @@ open Lib.Buffer
 
 open Hacl.SolinasReduction.Lemmas
 open Spec.P256
-open Hacl.Impl.P.LowLevel
+open Hacl.Impl.EC.LowLevel
 
 open Hacl.Impl.SolinasReduction.P384
+open Hacl.Impl.SolinasReduction.P256
 
 open Hacl.Spec.P256.Definition
 open FStar.Mul
@@ -21,7 +22,7 @@ open FStar.Mul
 module BV = FStar.BitVector
 module Seq = FStar.Seq
 
-#reset-options "--fuel 0 --ifuel 0 --z3rlimit 50"
+
 
 inline_for_extraction noextract
 val get_high_part: a:uint64 -> r:uint32{uint_v r == uint_v a / pow2 32}
@@ -709,18 +710,3 @@ let solinas_reduction_impl_p256 i o =
   pop_frame()
 
 
-val solinas_reduction_impl_p384: i: lbuffer uint64 (getCoordinateLenU64 P384 *. 2ul) 
-  -> o: lbuffer uint64 (getCoordinateLenU64 P384) -> 
-  Stack unit
-    (requires fun h -> live h i /\ live h o /\ disjoint i o)
-    (ensures fun h0 _ h1 -> modifies1 o h0 h1 /\ wide_as_nat P384 h0 i % (getPrime P384) == as_nat P384 h1 o)
-
-
-let solinas_reduction_impl_p384 i o = 
-  solinasReduction384Impl i o
-
-
-let solinas_reduction_impl #c i o =
-  match c with 
-    |P256 -> solinas_reduction_impl_p256 i o 
-    |P384 -> solinas_reduction_impl_p384 i o

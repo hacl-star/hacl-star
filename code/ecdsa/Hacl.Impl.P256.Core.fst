@@ -10,7 +10,7 @@ open Lib.Buffer
 
 open Hacl.Spec.P256.Definition
 open Spec.P256
-open Hacl.Impl.SolinasReduction
+open Hacl.Impl.EC.Reduction
 open Hacl.Impl.P.LowLevel 
 open Hacl.Impl.P256.MontgomeryMultiplication
 open Hacl.Impl.P256.MM.Exponent
@@ -58,7 +58,7 @@ let toDomain #c value result =
     let len = getCoordinateLenU64 c in 
     let multBuffer = create (size 2 *! len) (u64 0) in 
     shiftLeftWord value multBuffer;
-    solinas_reduction_impl multBuffer result;
+    reduction multBuffer result;
   pop_frame()  
 
 

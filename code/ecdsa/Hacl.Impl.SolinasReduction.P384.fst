@@ -1392,7 +1392,7 @@ let lemma_opened i =
   }
 
 
-let solinasReduction384Impl i o =
+let solinas_reduction_impl_p384 i o =
   push_frame();
     let h0 = ST.get() in
     let tempBuffer = create (size 60) (u64 0) in
