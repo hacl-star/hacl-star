@@ -17,6 +17,7 @@ open Hacl.Impl.P256.MM.Exponent
 open Hacl.Impl.P256.Math 
 
 open Hacl.Impl.P256.PointAdd
+open Hacl.Impl.P.PointAdd.Aux
 open Hacl.Impl.P256.PointDouble
 
 open FStar.Tactics 
@@ -443,7 +444,7 @@ let montgomery_ladder_step1 #c r0 r1 tempBuffer =
     let h0 = ST.get() in 
   point_add r0 r1 r1 tempBuffer;
     let h1 = ST.get() in 
-    Hacl.Impl.P256.PointAdd.lemma_point_eval c h0 h1 r0;
+    lemma_point_eval c h0 h1 r0;
     lemma_coord_eval c h0 h1 r0;
   point_double r0 r0 tempBuffer;
     let h2 = ST.get() in 
@@ -676,7 +677,7 @@ let scalarMultiplication_t #c #t p result scalar tempBuffer  =
   let len = getCoordinateLenU64 c in 
   let q = sub tempBuffer (size 0) (size 3 *! len) in 
   uploadZeroPoint #c q;
-  let buff = sub tempBuffer (size 3 *! len) (size 17 *! len) in 
+  let buff = sub tempBuffer (size 3 *! len) (size 22 *! len) in 
   pointToDomain p result;
     let h2 = ST.get() in 
   montgomery_ladder q result scalar buff;
@@ -790,7 +791,7 @@ let scalarMultiplicationWithoutNorm #c p result scalar tempBuffer =
   let len = getCoordinateLenU64 c in 
   let q = sub tempBuffer (size 0) (size 3 *! len) in 
   uploadZeroPoint #c q;
-  let buff = sub tempBuffer (size 3 *! len) (size 17 *! len) in 
+  let buff = sub tempBuffer (size 3 *! len) (size 22 *! len) in 
   pointToDomain p result;
     let h1 = ST.get() in 
     admit();
@@ -823,7 +824,7 @@ let secretToPublicWithoutNorm #c result scalar tempBuffer =
     let basePoint = create (size 3 *! len) (u64 0) in 
   uploadBasePoint #c basePoint;
       let q = sub tempBuffer (size 0) (size 3 *! len) in 
-      let buff = sub tempBuffer (size 3 *! len) (size 17 *! len) in 
+      let buff = sub tempBuffer (size 3 *! len) (size 22 *! len) in 
   uploadZeroPoint #c q; 
   admit();
       let h1 = ST.get() in 

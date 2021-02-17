@@ -103,7 +103,7 @@ let _ecp256dh_r #c result pubKey scalar =
   push_frame();
   admit();
   let len = getCoordinateLenU64 c in 
-  let tempBuffer = create (size 20 *! len) (u64 0) in
+  let tempBuffer = create (size 25 *! len) (u64 0) in
   let publicKeyBuffer = create (size 3 *! len) (u64 0) in
   bufferToJac #c pubKey publicKeyBuffer;
   let publicKeyCorrect = verifyQValidCurvePoint #c publicKeyBuffer tempBuffer in
