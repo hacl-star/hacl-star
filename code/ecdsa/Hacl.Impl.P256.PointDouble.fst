@@ -26,7 +26,7 @@ open FStar.Math.Lemmas
 friend Hacl.Spec.P.MontgomeryMultiplication
 open FStar.Mul
 
-open Hacl.Impl.P256.PointDouble.Aux
+open Hacl.Impl.P.PointDouble.Aux
 
 
 #set-options "--z3rlimit 300 --ifuel 0 --fuel 0" 

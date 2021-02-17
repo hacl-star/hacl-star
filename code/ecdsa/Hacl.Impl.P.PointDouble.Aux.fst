@@ -1,4 +1,4 @@
-module Hacl.Impl.P256.PointDouble.Aux
+module Hacl.Impl.P.PointDouble.Aux
 
 open FStar.HyperStack.All
 open FStar.HyperStack
@@ -23,7 +23,6 @@ open FStar.Tactics.Canon
 
 open FStar.Math.Lemmas
 
-friend Hacl.Spec.P.MontgomeryMultiplication
 open FStar.Mul
 
 
