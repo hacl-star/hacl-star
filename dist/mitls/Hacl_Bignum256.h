@@ -132,7 +132,7 @@ Write `a ^ b mod n` in `res`.
   mod_exp_ct_* functions for constant-time variants.
 
   This function is *UNSAFE* and requires C clients to observe bn_mod_exp_pre
-  from Hacl.Spec.Bignum.ExpBM.fsti, which amounts to:
+  from Hacl.Spec.Bignum.Exponentiation.fsti, which amounts to:
   • n % 2 = 1
   • 1 < n
   • 0 < b
@@ -166,7 +166,7 @@ Write `a ^ b mod n` in `res`.
   execution time than mod_exp_raw_precompr2.
 
   This function is *UNSAFE* and requires C clients to observe bn_mod_exp_pre
-  from Hacl.Spec.Bignum.ExpBM.fsti, which amounts to:
+  from Hacl.Spec.Bignum.Exponentiation.fsti, which amounts to:
   • n % 2 = 1
   • 1 < n
   • 0 < b
@@ -246,8 +246,8 @@ Write `a ^ (-1) mod n` in `res`.
 
   The arguments a, n and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
 
-  This function is *UNSAFE* and requires C clients to observe the precondition of
-  bn_mod_inv_prime_lemma from Hacl.Spec.Bignum.ModInv.fst, which amounts to:
+  This function is *UNSAFE* and requires C clients to observe bn_mod_inv_prime_pre
+  from Hacl.Spec.Bignum.ModInv.fst, which amounts to:
   • n is a prime
 
   The function returns false if any of the following preconditions are violated, true otherwise.
