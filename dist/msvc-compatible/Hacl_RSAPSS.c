@@ -117,13 +117,13 @@ mgf_hash(
   memset(acc, 0U, accLen * sizeof (uint8_t));
   for (uint32_t i = (uint32_t)0U; i < n; i++)
   {
-    uint8_t *uu____0 = acc + i * hLen;
-    uint8_t *uu____1 = mgfseed_counter + len;
-    uu____1[0U] = (uint8_t)(i >> (uint32_t)24U);
-    uu____1[1U] = (uint8_t)(i >> (uint32_t)16U);
-    uu____1[2U] = (uint8_t)(i >> (uint32_t)8U);
-    uu____1[3U] = (uint8_t)i;
-    hash(a, uu____0, len + (uint32_t)4U, mgfseed_counter);
+    uint8_t *acc_i = acc + i * hLen;
+    uint8_t *c = mgfseed_counter + len;
+    c[0U] = (uint8_t)(i >> (uint32_t)24U);
+    c[1U] = (uint8_t)(i >> (uint32_t)16U);
+    c[2U] = (uint8_t)(i >> (uint32_t)8U);
+    c[3U] = (uint8_t)i;
+    hash(a, acc_i, len + (uint32_t)4U, mgfseed_counter);
   }
   memcpy(res, acc, maskLen * sizeof (uint8_t));
 }
