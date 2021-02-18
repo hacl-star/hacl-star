@@ -23,11 +23,12 @@
 # By default, this Makefile relies on the local checkout of kremlib
 KREMLIN_HOME ?= ../kremlin
 
+.PHONY: $(HACL_HOME)/dist/evercrypt-external-headers/Makefile.config
+$(HACL_HOME)/dist/evercrypt-external-headers/Makefile.config:
+
 .PHONY: Makefile.config
 Makefile.config:
-	cp ../configure . && ./configure
-#	./configure
-
+	if [ -f lib_intrinsics.h ]; then cp ../configure . && ./configure; fi;
 
 -include Makefile.config
 
