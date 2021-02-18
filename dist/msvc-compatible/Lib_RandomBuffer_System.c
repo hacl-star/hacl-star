@@ -52,6 +52,11 @@ bool read_random_bytes(uint32_t len, uint8_t *buf) {
 
 #endif
 
+// WARNING: this function is deprecated
 bool Lib_RandomBuffer_System_randombytes(uint8_t *x, uint32_t len) {
   return read_random_bytes(len, x);
+}
+
+void Lib_RandomBuffer_System_crypto_random(uint8_t *x, uint32_t len) {
+    while(!read_random_bytes(len, x)) {}
 }
