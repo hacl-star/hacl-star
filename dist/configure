@@ -3,11 +3,11 @@
 set -o pipefail
 set -e
 
-if ! [ -f lib_intrinsics.h ]; then
-  echo "This script is intended to be run from dist/foo."
-  exit 1
-fi
-
+# TODO: evercrypt-external-headers
+#if ! [ -f lib_intrinsics.h ]; then
+#  echo "This script is intended to be run from dist/foo."
+#  exit 1
+#fi
 
 if [[ $CC == "" ]]; then
   CC=cc
@@ -277,6 +277,27 @@ if [[ $target_arch == "aarch64" ]]; then
   echo "MARCH = aarch64" >> Makefile.config
 fi
 
+supports_128=false
+supports_256=false
+supports_vale=false
+supports_inline_asm=false
+# TODO: broken intrinsics
+
+if detect_arm; then
+  echo "... detected ARM platform"
+  if detect_arm_cc; then
+    echo "... $build_target supports 128-bit arithmetic"
+    supports_128=true
+    echo "... $CC $CROSS_CFLAGS can cross-compile to ARM64 with SIMD"
+    echo "CFLAGS_128 = -march=armv8-a+simd" >> Makefile.config
+    echo "#define IS_ARM_8 1" >> config.h
+    # TODO: inline_asm?
+  else
+    echo "#define IS_ARM_7 1" >> config.h
+  fi
+fi
+
+: '
 if detect_arm; then
   echo "... detected ARM platform"
   echo "... $build_target does not support 256-bit arithmetic"
@@ -294,8 +315,14 @@ if detect_arm; then
     echo "#define IS_ARM_7 1" >> config.h
     echo "#define Lib_IntVector_Intrinsics_vec128 void *" >> config.h
   fi
+fi'
+
+if detect_x86; then
+  # Just print information: none of the above build options are supported on x86
+  echo "... detected x86 platform"
 fi
 
+: '
 if detect_x86; then
   echo "... detected x86 platform"
   echo "... $build_target does not support 256-bit arithmetic"
@@ -306,8 +333,41 @@ if detect_x86; then
   echo "$CC $CROSS_CFLAGS cannot compile 128-bit vector arithmetic, disabling"
   echo "BLACKLIST += $(ls *CP128*.c *_128.c *_Vec128.c | xargs)" >> Makefile.config
   echo "#define Lib_IntVector_Intrinsics_vec128 void *" >> config.h
+fi'
+
+if detect_x64; then
+  echo "... detected x64 platform"
+  echo "$build_target supports 128-bit and 256-bit arithmetic"
+  supports_128=true
+  supports_256=true
+  echo "CFLAGS_128 = -mavx" >> Makefile.config
+  echo "CFLAGS_256 = -mavx -mavx2" >> Makefile.config
+  echo "$build_target supports legacy vale stubs"
+  supports_vale=true
+  if detect_broken_xcode; then
+    echo "found broken XCode version, known to refuse to compile our inline ASM, disabling "
+#    echo "#define BROKEN_INLINE_ASM 1" >> config.h
+  else
+    echo "... not using known buggy Apple LLVM build"
+    echo "$build_target supports our inline ASM"
+    supports_inline_asm=true
+  fi
+  if ! check_no_bug81300; then
+    echo "found broken GCC < 5.5 with bug 81300, disabling subborrow + addcarry"
+    echo "#define BROKEN_INTRINSICS 1" >> config.h
+  else
+    echo "... using a non-buggy GCC"
+  fi
+else
+  # TODO: not sure about that one
+  echo "$build_target does not support x64 assembly, disabling Curve64"
+  echo "BLACKLIST += Hacl_Curve25519_64.c $(ls Hacl_HPKE_Curve64_*.c | xargs)" >> Makefile.config
+  echo "$build_target does not support _addcarry_u64, using a C implementation"
+  echo "#define BROKEN_INTRINSICS 1" >> config.h
+  echo "#define IS_NOT_X64 1" >> config.h
 fi
 
+: '
 if ! detect_x64; then
   echo "$build_target does not support x64 assembly, disabling Curve64"
   echo "BLACKLIST += Hacl_Curve25519_64.c $(ls Hacl_HPKE_Curve64_*.c | xargs)" >> Makefile.config
@@ -327,6 +387,27 @@ else
   else
     echo "... using a non-buggy GCC"
   fi
+fi'
+
+if [ $supports_128 == false ]; then
+  echo "$CC $CROSS_CFLAGS cannot compile 128-bit vector arithmetic, disabling"
+  echo "BLACKLIST += $(ls *CP128*.c *_128.c *_Vec128.c | xargs)" >> Makefile.config
+  echo "#define Lib_IntVector_Intrinsics_vec128 void *" >> config.h
+fi
+
+if [ $supports_256 == false ]; then
+  echo "... $build_target does not support 256-bit arithmetic"
+  echo "BLACKLIST += $(ls *CP256*.c *_256.c *_Vec256.c | xargs)" >> Makefile.config
+  echo "#define Lib_IntVector_Intrinsics_vec256 void *" >> config.h
+fi
+
+if [ $supports_vale == false ]; then
+  echo "... $build_target does not support legacy vale stubs"
+  echo "BLACKLIST += evercrypt_vale_stubs.c" >> Makefile.config
+fi
+
+if [ $supports_inline_asm == false ]; then
+    echo "#define BROKEN_INLINE_ASM 1" >> config.h
 fi
 
 if ! detect_uint128; then
