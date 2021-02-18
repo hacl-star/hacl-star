@@ -290,7 +290,6 @@ if detect_arm; then
     echo "... $CC $CROSS_CFLAGS can cross-compile to ARM64 with SIMD"
     echo "CFLAGS_128 = -march=armv8-a+simd" >> Makefile.config
     echo "#define IS_ARM_8 1" >> config.h
-    # TODO: inline_asm?
   else
     echo "#define IS_ARM_7 1" >> config.h
   fi
@@ -353,7 +352,7 @@ if detect_x64; then
   fi
   if ! check_no_bug81300; then
     echo "found broken GCC < 5.5 with bug 81300, disabling subborrow + addcarry"
-    echo "#define BROKEN_INTRINSICS 1" >> config.h
+    echo "#define BROKEN_INTRINSICS 1" >> config.h # TODO: supports_intrinsics
   else
     echo "... using a non-buggy GCC"
   fi
